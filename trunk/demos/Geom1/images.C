@@ -9,13 +9,16 @@
 
 // vars: ZQueen* scenes
 // libs: Geom1
+
+#include <glass_defines.h>
+#include <gl_defines.h>
+
+void images()
 {
   if(Gled::theOne->GetSaturn() == 0) {
     gROOT->Macro("sun.C");
   }
   Gled::theOne->AssertLibSet("Geom1");
-
-#include <gl_defines.h>
 
   Scene* images  = new Scene("Images");
   scenes->CheckIn(images);
@@ -23,51 +26,40 @@
 
   // Images
 
-  ZImage* image1 = new ZImage("GledLogo");
-  scenes->CheckIn(image1);
-  images->Add(image1);
+  CREATE_ADD_GLASS(image1, ZImage, images, "GledLogo", 0);
   image1->SetFile("gledlogo.png");
   image1->Load();
   image1->SetEnvMode(GL_MODULATE);
   image1->SetLoadAdEnlight(true);
 
-  ZImage* image2 = new ZImage("Orchid");
-  scenes->CheckIn(image2);
-  images->Add(image2);
+  CREATE_ADD_GLASS(image2, ZImage, images, "Orchid", 0);
   image2->SetFile("orchid.jpeg");
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
-  ZImage* image3 = new ZImage("HeightField");
-  scenes->CheckIn(image3);
+  CREATE_ADD_GLASS(image3, ZImage, images, "HeightField", 0);
   images->Add(image3);
   image3->SetFile("terrain_128.png");
   image3->Load();
   image3->SetLoadAdEnlight(true);
 
-  ZImage* image4 = new ZImage("Earth map");
+  CREATE_ADD_GLASS(image4, ZImage, images, "Earth map", 0);
   image4->SetMagFilter(GL_LINEAR);
   image4->SetEnvMode(GL_MODULATE);
-  scenes->CheckIn(image4);
-  images->Add(image4);
   image4->SetFile("earth.png");
   image4->Load();
   image4->SetLoadAdEnlight(true);
 
-  ZImage* image5 = new ZImage("Moon map");
+  CREATE_ADD_GLASS(image5, ZImage, images, "Moon map", 0);
   image5->SetMagFilter(GL_LINEAR);
   image5->SetEnvMode(GL_MODULATE);
-  scenes->CheckIn(image5);
-  images->Add(image5);
   image5->SetFile("moon.jpeg");
   image5->Load();
   image5->SetLoadAdEnlight(true);
 
-  ZImage* image6 = new ZImage("Checker");
+  CREATE_ADD_GLASS(image6, ZImage, images, "Checker", 0);
   image6->SetMagFilter(GL_LINEAR);
   image6->SetEnvMode(GL_MODULATE);
-  scenes->CheckIn(image6);
-  images->Add(image6);
   image6->SetFile("checker_8.png");
   image6->Load();
   image6->SetLoadAdEnlight(true);
