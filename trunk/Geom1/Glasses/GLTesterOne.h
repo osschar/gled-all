@@ -13,7 +13,6 @@
 #include <TH1F.h>
 
 class GLTesterOne : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(GLTesterOne);
 
 public:

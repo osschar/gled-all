@@ -11,7 +11,6 @@
 #include <Glasses/GTSurf.h>
 
 class GTSRetriangulator : public ZGlass {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(GTSRetriangulator);
 
 public:

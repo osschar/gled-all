@@ -17,7 +17,6 @@ class TubeTvor;
 
 class WSSeed : public ZNode {
 
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(WSSeed);
 
 private:

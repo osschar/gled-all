@@ -13,7 +13,6 @@
 #include <TRandom.h>
 
 class Amphitheatre : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Amphitheatre);
 
 private:

@@ -14,7 +14,6 @@
 #include <Stones/ZColor.h>
 
 class Spheror : public ZNode, public WarmAmoebaMaster {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Spheror);
 
 private:
