@@ -8,6 +8,12 @@ package Gled_Installer;
 
 use Carp;
 
+sub filter_files {
+  # This one filters-out hidden files.
+  my @out = grep { $_ !~ m/^\./ } @_;
+  return @out;
+}
+
 sub install_dirs {
   my $dest_dir   = shift;
   my $source_dir = shift;
@@ -23,8 +29,9 @@ sub install_dirs {
     }
     my @files = readdir D;
     closedir D;
+    @files = grep (-f "$source_dir/$d/$_", @files);
+    @files = filter_files(@files);
     @files = map  ("$source_dir/$d/$_", @files);
-    @files = grep {-f $_} @files;
 
     if($#files < 0) {
       # print "Gled_Installer::install_dirs $source_dir/$d empty ... skipping\n";
@@ -55,8 +62,9 @@ sub uninstall_dirs {
     }
     my @files = readdir D;
     closedir D;
-
     @files = grep (-f "$source_dir/$d/$_", @files);
+    @files = filter_files(@files);
+
     if($#files < 0) {
       # print "Gled_Installer::uninstall_dirs $source_dir/$d empty ... skipping\n";
       next;
