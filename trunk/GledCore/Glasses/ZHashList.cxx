@@ -131,9 +131,39 @@ Bool_t ZHashList::Has(ZGlass* g)
 
 /**************************************************************************/
 
-Int_t ZHashList::RebuildList(An_ID_Demangler* idd)
+ZGlass* ZHashList::After(ZGlass* g)
 {
-  Int_t ret = ZList::RebuildList(idd);
+  ZGlass* ret = 0;
+  mListMutex.Lock();
+  Glass2LIter_i i = mItHash.find(g);
+  if(i != mItHash.end()) {
+    lpZGlass_i j(i->second); ++j;
+    if(j != mGlasses.end())
+      ret = *j;
+  }
+  mListMutex.Unlock();
+  return ret;
+}
+
+ZGlass* ZHashList::Before(ZGlass* g)
+{
+  ZGlass* ret = 0;
+  mListMutex.Lock();
+  Glass2LIter_i i = mItHash.find(g);
+  if(i != mItHash.end()) {
+    lpZGlass_i j(i->second);
+    if(j != mGlasses.begin())
+      ret = *(--j);
+  }
+  mListMutex.Unlock();
+  return ret;
+}
+
+/**************************************************************************/
+
+Int_t ZHashList::RebuildListRefs(An_ID_Demangler* idd)
+{
+  Int_t ret = ZList::RebuildListRefs(idd);
   mItHash.clear();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     mItHash[*i] = i;
