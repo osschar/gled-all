@@ -46,8 +46,8 @@ MTW_View::~MTW_View() {
 
 /**************************************************************************/
 
-static float MaxAlignGrow = 1.1;
-static float MaxJoinGrow  = 1.4;
+static float MaxAlignGrow = 1.2;
+static float MaxJoinGrow  = 2;
 
 void MTW_View::BuildVerticalView(int cell_w)
 {
