@@ -75,7 +75,7 @@ exported into GlassViewNS::MemberInfo structure. Perhaps the other way
 around would be smarter ... 
 
 And ... the update should go via MTW_View, where locking is performed!!!
-Now it isn't (for ValOut and BoolOut)
+Now it is not (for ValOut and BoolOut)
 
 =back
 
@@ -168,6 +168,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}($valuestr) );
     e->Send(*_m);
+    $S->{Methodbase}_Update(o);
   } else {
     mIdol->Set$S->{Methodbase}($valuestr);
   }
@@ -192,6 +193,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}($valuestr) );
     e->Send(*_m);
+    $S->{Methodbase}_Update(o);
   } else {
     mIdol->Set$S->{Methodbase}($valuestr);
   }
@@ -487,6 +489,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(o->GetTrueVal()) );
     e->Send(*_m);
+    $S->{Methodbase}_Update(o);
   } else {
     mIdol->Set$S->{Methodbase}(o->GetTrueVal());
   }
@@ -558,6 +561,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set3Pos(o->x(),o->y(),o->z()) );
     e->Send(*_m);
+    $S->{Methodbase}_Update(o);
   } else {
     mIdol->Set3Pos(o->x(),o->y(),o->z());
   }
@@ -605,6 +609,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_SetRotByAngles(o->phi(),o->theta(),o->eta()) );
     e->Send(*_m);
+    $S->{Methodbase}_Update(o);
   } else {
     mIdol->SetRotByAngles(o->phi(),o->theta(),o->eta());
   }
@@ -653,6 +658,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(o->r,o->g,o->b,o->a) );
     e->Send(*_m);
+    $S->{Methodbase}_Update(o);
   } else {
     mIdol->Set$S->{Methodbase}(o->r,o->g,o->b,o->a);
     o->redraw();
