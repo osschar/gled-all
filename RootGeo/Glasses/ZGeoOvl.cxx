@@ -7,7 +7,6 @@
 //__________________________________________________________________________
 // ZGeoOvl
 //
-//
 
 #include "ZGeoOvl.h"
 
@@ -43,7 +42,6 @@ void ZGeoOvl::SetRnrSelf(Bool_t rnrself)
 void ZGeoOvl::Dump()
 {
   const char *nn1, *nn2;
-  
   if (mIsExtr) {
     nn1 = GetName();
     nn2 = 0;
@@ -56,3 +54,29 @@ void ZGeoOvl::Dump()
   }
   printf("Extr:%d IsShown:%d Node1:%s Node2:%s Mother:%s %f\n", mIsExtr?1:0, GetRnrSelf(), nn1, nn2, GetParent()->GetTitle(),  mOverlap);
 }
+
+
+/******************************************************/
+// restore user data by readin mother node
+void ZGeoOvl::Restore(TGeoVolume* vol)
+{
+  TGeoNode* tn;
+  ZGeoNode *zn;
+
+  if(mIsExtr){
+    tn = vol->FindNode(GetTitle());
+    SetTNode(tn);
+    AssertUserData();
+  }else {
+    zn = (ZGeoNode*)First();
+    tn = vol->FindNode(zn->GetTitle());
+    zn->SetTNode(tn);
+    zn->AssertUserData();
+
+    zn = (ZGeoNode*)Last();
+    tn = vol->FindNode(zn->GetTitle());
+    zn->SetTNode(tn);
+    zn->AssertUserData();
+  }
+}
+

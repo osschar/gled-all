@@ -18,9 +18,7 @@ void ZGeoNode_GL_Rnr::_init()
 void ZGeoNode_GL_Rnr::Draw(RnrDriver* rd)
 {
   ZGeoNode& N(*mZGeoNode);
-  if(N.mVol == 0) return;
-
-  GeoUserData *ud = dynamic_cast<GeoUserData*>(N.mVol->GetField());
+  GeoUserData *ud = dynamic_cast<GeoUserData*>(N.GetVolumeField());
   if ( ud == 0 ) return;
 
   TGLFaceSet* fs = ud->fFaceSet;

@@ -7,20 +7,25 @@
 //__________________________________________________________________________
 // ZGeoNode
 //
+// A ZGeoNode serves for representation of root TGeoNode
+// object in Gled framework. 
 //
-
 #include "ZGeoNode.h"
 #include "ZGeoNode.c7"
 // #include <Glasses/ZNode.cxx>
 #include <Glasses/ZQueen.h>
+#include <Stones/ZComet.h>
 
+#include <TFile.h>
 #include <TBuffer3D.h>
 #include <TGeoNode.h>
 #include <TColor.h>
 
-typedef list<ZNode*>           lpZNode_t;
-typedef list<ZNode*>::iterator lpZNode_i;
 
+typedef list<ZNode*>              lpZNode_t;
+typedef list<ZNode*>::iterator    lpZNode_i;
+typedef list<ZGeoNode*>           lpZGNode_t;
+typedef list<ZGeoNode*>::iterator lpZGNode_i;
 
 ClassImp(ZGeoNode)
 
@@ -28,11 +33,11 @@ ClassImp(ZGeoNode)
   void ZGeoNode::_init()
 {
   // !!!! Set all links to 0 !!!! 
-  mVol       = 0;
+  mTNode     = 0;
   mNNodes    = 0;
   mNodeAlpha = 1;
+  mDefFile   = "ZGeoNodes.root";
   bRnrSelf = true;
-
 }
 
 
@@ -73,7 +78,7 @@ void ZGeoNode::RnrOffForDaughters()
 
 /***********************************************************************/
 void ZGeoNode::RnrOnRec()
-{ 
+{
   lpZNode_t dts; 
   ZNode::CopyByGlass<ZNode*>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
@@ -112,7 +117,7 @@ void ZGeoNode::setup_ztrans(ZNode* zn, TGeoMatrix* gm)
 /************************************************************************/
 void ZGeoNode::setup_color(Float_t alpha)
 {
-  Int_t ci = ((mVol->GetLineColor() % 8) - 1) * 4;
+  Int_t ci = ((mTNode->GetColour() % 8) - 1) * 4;
   if(ci < 0) ci = 0;
   TColor* c = gROOT->GetColor(ci);
   if (c) {
@@ -123,15 +128,18 @@ void ZGeoNode::setup_color(Float_t alpha)
 }
 
 /**************************************************************************/
-ZGeoNode* ZGeoNode::InsertNode(TGeoNode* geon, ZNode* holder, 
+ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder, 
 			       Bool_t rnr, const Text_t* title)
 {
+  // Creates ZGeoNode object from exported TGeoNode and adds it 
+  // to mGlasses list.
+
   TGeoVolume* v = geon->GetVolume();
   ZGeoNode *nn = new ZGeoNode(geon->GetName(), title);
     
-
+  nn->mTNode = geon;
   setup_ztrans(nn, geon->GetMatrix());
-  nn->SetVol(v);
+  nn->mTNodeName = geon->GetName();
   string m = v->GetMaterial()->GetName();
   int j = m.find_first_of("$");
   m = m.substr(0,j);
@@ -140,11 +148,9 @@ ZGeoNode* ZGeoNode::InsertNode(TGeoNode* geon, ZNode* holder,
   mQueen->CheckIn(nn);
   holder->Add(nn);
   nn->bRnrSelf = rnr;
-  
-  GeoUserData* userdata = new GeoUserData(true, 0);
-  nn->CreateFaceset(userdata);
+  nn->AssertUserData();
   nn->setup_color(mNodeAlpha);
-
+  
   // printf("%-16s %-6s  [%p]\n", geon->GetName(), title,  v);
   return nn;
 }
@@ -152,14 +158,16 @@ ZGeoNode* ZGeoNode::InsertNode(TGeoNode* geon, ZNode* holder,
 /**************************************************************************/
 void ZGeoNode::ImportNodes()
 {
+  // Reads mTGeoNode and creates  
+  // representative ZGeoNode node. 
+
   static const string _eh("ZGeoNode::ImportNodes ");
+  if(mTNode == 0)
+    throw(_eh + "mTNode not set.");
 
-  if(mVol == 0)
-    throw(_eh + "volume not set.");
+  clear_this_list();
 
-  ClearThisList();
-
-  TIter next_node(mVol->GetNodes());
+  TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
   while(geon = (TGeoNode*)next_node()) {
     const char* vname = "<no-vol>";
@@ -174,23 +182,25 @@ void ZGeoNode::ImportNodes()
       }
     }
 
-    InsertNode(geon, this, true,  GForm("%s::%s", vname, sname));
+    insert_node(geon, this, true,  GForm("%s::%s", vname, sname));
   }
 }
-
-
 
 /**************************************************************************/
 void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
 {
+  // Imports mTGeoNode and groups the created nodes by given regular expression.
+
   static const string _eh("ZGeoNode::ImportByRegExp ");
+  if(mTNode == 0)
+    throw(_eh + "mTNode not set.");
 
   // split target into list of node names
   lStr_t node_names;
   GledNS::split_string(target, node_names, '/');
-  ZGeoNode* holder = LocateNodeByPath(node_names);
+  ZGeoNode* holder = set_holder(node_names);
 
-  TIter next_node(mVol->GetNodes());
+  TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
 
   while(geon = (TGeoNode*)next_node()) {
@@ -212,20 +222,23 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
       }
     }
 
-    InsertNode(geon, holder, false,  GForm("%s::%s", vname.Data(), sname.Data()));
+    insert_node(geon, holder, false,  GForm("%s::%s", vname.Data(), sname.Data()));
   }
 }
 
 /**************************************************************************/
 void ZGeoNode::ImportNodesWCollect() 
 {
+  // Import mTGeoNode and groups the nodes by 
+  // mother volume name.
+
   static const string _eh("ZGeoNode::ImportNodesWCollect ");
-  if(mVol == 0)
-    throw(_eh + "volume not set.");
+  if(mTNode == 0)
+    throw(_eh + "mTNode not set.");
   
-  ClearThisList();
+  clear_this_list();
   map<string, ZNode*> nmap;
-  TIter next_node(mVol->GetNodes());
+  TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
   while(geon = (TGeoNode*)next_node()) {
     const char* vname = "<no-vol>";
@@ -252,7 +265,7 @@ void ZGeoNode::ImportNodesWCollect()
       holder = i->second;
     }
     
-    InsertNode(geon, holder, false,  GForm("%s::%s", vname, sname));
+    insert_node(geon, holder, false,  GForm("%s::%s", vname, sname));
   }
 }
 
@@ -261,8 +274,8 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
 {  
   static const string _eh("ZGeoNode::ImportUnimported ");
 
-  if(mVol == 0)
-    throw(_eh + "volume not set.");
+  if(mTNode == 0)
+    throw(_eh + "mTNode not set.");
    
   ZGeoNode* holder = dynamic_cast<ZGeoNode*>(GetElementByName(target));
   if ( holder == 0 ){
@@ -272,7 +285,7 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
     Add(holder);
   }
  
-  TIter next_node(mVol->GetNodes());
+  TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
 
   while(geon = (TGeoNode*)next_node()) {
@@ -289,18 +302,178 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
 
       GeoUserData* ud = dynamic_cast<GeoUserData*> (v->GetField());     
       if (ud == 0) {
-        InsertNode(geon, holder, false, GForm("%s::%s", vname, sname));
+        insert_node(geon, holder, false, GForm("%s::%s", vname, sname));
       }
       
       if (ud && ((ud->bIsImported) == false)) {
-        InsertNode(geon, holder, false, GForm("%s::%s", vname, sname));
+        insert_node(geon, holder, false, GForm("%s::%s", vname, sname));
       }
     } 
   }
 }
 
+
+
+
 /**************************************************************************/
-ZGeoNode* ZGeoNode::LocateNodeByPath(lStr_t& node_names)
+void ZGeoNode::AssertUserData()
+{ 
+  // Creates TGLFaceSet object rendered by ZGeoNode_GL_Rnr
+  // and saves it in TGeoVolume.  
+
+  TGeoVolume* v = GetVolume();
+  if( v ) {
+    GeoUserData* userdata = dynamic_cast<GeoUserData*>(v->GetField());
+
+    if (v->GetField() == 0) {
+      userdata = new GeoUserData();
+      v->SetField(userdata);
+    }
+
+    if (userdata->fFaceSet == 0) {    
+      TGeoVolume* vol = GetVolume();
+      TBuffer3D*  buff = GetVolume()->GetShape()->MakeBuffer3D();
+      Float_t colorRGB[3] = {1, 0, 0};
+      TGLFaceSet* fs = new TGLFaceSet(*buff, colorRGB, mSaturnID, vol);
+      userdata->fFaceSet = fs;
+      vol->SetField(userdata);
+    }
+  }
+}
+
+/***************************************************************************/
+void ZGeoNode::clear_this_list() 
+{
+  ZGeoNode* next; 
+  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
+    next = dynamic_cast<ZGeoNode*> (*i);
+    if ( next->GetVolume()) next->GetVolume()->SetField(0);
+  }
+  ClearList();
+}
+
+/************************************************************************/
+void ZGeoNode::SaveToFile(const Text_t* file)
+{
+  static const string _eh("ZGeoNode::SaveToFile ");
+  
+  if(file == 0) file = mDefFile.Data();
+  ISdebug(1, _eh + "loading from '" + file + "'.");
+
+  ZComet c("ZGeoNodes");
+  lpZGlass_i i, end;
+  BeginIteration(i, end);
+  while(i != end) {
+    c.AddTopLevel(*i, false, true, -1);
+    ++i;
+  }
+  EndIteration();
+
+  TFile f(file, "RECREATE");
+  c.Write();
+  f.Close();
+}
+
+
+/**************************************************************************/
+void ZGeoNode::LoadFromFile(const Text_t* file)
+{
+  static const string _eh("ZGeoNode::LoadFromFile ");
+
+  if(file == 0) file = mDefFile.Data();
+  ISdebug(1, _eh + "loading from '" + file + "'.");
+
+  clear_this_list();
+  TFile f(file, "READ");
+  auto_ptr<ZComet> c( dynamic_cast<ZComet*>(f.Get("ZGeoNodes")) );
+  f.Close();
+  if(c.get() == 0) {
+    // This check should be more elaborate ... but need common infrastructure
+    // anyway.
+    throw(_eh + "could not read 'ZGeoNodes' from file '" + file + "'.");
+  }
+  mQueen->AdoptComet(this, 0, c.get());
+}
+
+/**************************************************************************/
+TGeoNode* ZGeoNode::get_tnode_search_point()
+{
+  static const string _eh("ZGeoNode::GetTNodeSearchPoint");
+
+  ZGeoNode* p = dynamic_cast<ZGeoNode*>(GetParent());
+  if(p && p->GetTNode() != 0) {
+    return p->GetTNode();
+  } else {
+    // printf("GetTNodeSearchPoint searching from TOP node \n");
+    if(!gGeoManager) {
+      ISerr(GForm("%s gGeoManager not set.", _eh.c_str()) );
+      return 0;
+    }
+    return gGeoManager->GetTopNode();
+  }
+}
+
+  /**************************************************************************/
+void ZGeoNode::Restore()
+{
+  static const string _eh("ZGeoNode::Restore");
+  ISdebug(1, GForm("%s", _eh.c_str()));
+  // printf("restoring node %s:%p \n", GetName(), this);
+  if (! mTNodeName.IsNull()) {
+    // search TGeoVolume to set it to zgeonode
+    TGeoNode* sp =  get_tnode_search_point();
+    if(sp && locate_tnode(this, sp)){
+      // !!!! check if userdata created
+      // printf("createing Faceset reading TGeoNode %s \n", GetTNode()->GetName());
+      AssertUserData();
+    }
+  }
+  lpZGlass_i i, end;
+  BeginIteration(i, end);
+  ZGeoNode* nn;
+  while(i != end) {
+    if(nn = dynamic_cast<ZGeoNode*>(*i)) {
+      nn->Restore();
+    }
+    ++i;
+  }
+  EndIteration();
+}
+
+
+  /*************************************************************************/
+void ZGeoNode::delete_list(){
+  static const string _eh("ZGeoNode::ClearList ");
+  if(mSize == 0) return;
+
+  
+  ISdebug(1, GForm("%slocking list '%s'.", _eh.c_str(), GetName()));
+  mListMutex.Lock();
+
+
+  lpZGlass_t foo;
+  foo.swap(mGlasses);
+  clear_list();
+  StampListClear();
+  mListMutex.Unlock();
+
+
+  ISdebug(1, GForm("unlocked list '%s'.", _eh.c_str(), GetName()));
+
+  ZGeoNode* zn;
+  for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
+    if(zn = dynamic_cast<ZGeoNode*>(*i)) {
+      (*i)->DecRefCount(this);
+      zn->delete_list();
+    }
+  }
+
+
+  ISdebug(1, GForm("%sfinished for '%s'.", _eh.c_str(), GetName()));
+}
+
+/**************************************************************************/
+ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
 {
   if(node_names.empty()) return this;
 
@@ -314,30 +487,36 @@ ZGeoNode* ZGeoNode::LocateNodeByPath(lStr_t& node_names)
   }
   
   node_names.pop_front();
-  return next->LocateNodeByPath(node_names);
+  return next->set_holder(node_names);
 }
 
+  /************************************************************************/
+Bool_t ZGeoNode::locate_tnode( ZGeoNode* zn, TGeoNode* cur_node)
+{  
+  // Searches TGeoNode from cur_node whith name zn->mTNodeName
+  // and sets the mTNode value to zn. The function is needed when
+  // restoring geometry from *.root files.
+ 
+  TGeoVolume* vol = cur_node->GetVolume();
 
-
-/**************************************************************************/
-void ZGeoNode::CreateFaceset(GeoUserData* userdata)
-{ 
-  if( userdata && (userdata->fFaceSet == 0) && (mVol != 0)) {
-    TBuffer3D*  buff = mVol->GetShape()->MakeBuffer3D();
-    Float_t colorRGB[3] = {1, 0, 0};
-    TGLFaceSet* fs = new TGLFaceSet(*buff, colorRGB, mSaturnID, mVol);
-    userdata->fFaceSet = fs;
-    mVol->SetField(userdata);
+  TGeoNode* n = 0;
+  if(vol->GetNodes()) {
+    n = vol->FindNode(zn->GetTNodeName());
+    if(n) {
+      zn->SetTNode(n);
+      return true;
+    }
   }
+
+  {
+    TIter next_node(cur_node->GetVolume()->GetNodes());
+    while (n = (TGeoNode*)next_node()) {
+      if (locate_tnode(zn, n)){
+	return true;
+      }
+    }
+  }
+
+  return false;
 }
 
-/***************************************************************************/
-void ZGeoNode::ClearThisList() 
-{
-  ZGeoNode* next; 
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    next = dynamic_cast<ZGeoNode*> (*i);
-    if ( next->mVol) next->mVol->SetField(0);
-  }
-  ClearList();
-}
