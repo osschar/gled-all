@@ -77,7 +77,7 @@ void images()
   base_plane->SetUnitSquare(16);
   scenes->CheckIn(base_plane);
   images->Add(base_plane);
-  base_plane->SetColor(0.5, 0.5, 0.8);
+  base_plane->SetColor(0.7, 0.7, 0.7);
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
