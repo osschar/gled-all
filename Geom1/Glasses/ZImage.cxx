@@ -80,15 +80,22 @@ GMutex ZImage::sILMutex(GMutex::recursive);
 
 void ZImage::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mIL_Name = 0;
   mW = mH = 0;
+  mMagFilter = mMinFilter = GL_NEAREST;
+  mEnvMode = GL_DECAL;
   bLoaded = false;
   bLoadAdEnlight = false;
 }
 
 ZImage::~ZImage() {
   delete_image();
+}
+
+void ZImage::AdEnlightenment()
+{
+  ZGlass::AdEnlightenment();
+  if(bLoaded && bLoadAdEnlight) Load();
 }
 
 /**************************************************************************/
@@ -117,6 +124,13 @@ void ZImage::Load()
   mStampReqTexture = Stamp(LibID(), ClassID());
 
  end:
+  sILMutex.Unlock();
+}
+
+void ZImage::Unload()
+{
+  sILMutex.Lock();
+  delete_image();
   sILMutex.Unlock();
 }
 

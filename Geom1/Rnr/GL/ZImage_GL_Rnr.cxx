@@ -27,12 +27,9 @@ void ZImage_GL_Rnr::init_texture()
   if(mImage->bLoaded == true) {
     if(mTexture == 0) {
       glGenTextures(1, &mTexture);
-      //cout << "ZImage_GL_Rnr::init_texture for "<< mGlass->GetName() <<
-      //" TexName " << mTexture << endl;
     }
 
     // load texture ... silly defaults ... work to do.
-    // note that loading anything that is not 24bit RGB will crash gled
     // also ... should do resizing ... or sth ...
 
     glBindTexture(GL_TEXTURE_2D, mTexture);
@@ -40,8 +37,8 @@ void ZImage_GL_Rnr::init_texture()
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mImage->mMagFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mImage->mMinFilter);
 
     ZImage::sILMutex.Lock();
     mImage->bind();
@@ -70,7 +67,8 @@ void ZImage_GL_Rnr::PreDraw(RnrDriver* rd)
   }
   if(mTexture) {
     glBindTexture(GL_TEXTURE_2D, mTexture);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL); 
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mImage->mEnvMode); 
+    glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, mImage->mEnvColor());
   }
 }
 
