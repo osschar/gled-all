@@ -16,6 +16,7 @@ class ShellInfo;
 #include "FTW.h"
 class FTW_Leaf;
 class FTW_Nest;
+class MCW_View;
 
 class TSocket;
 
@@ -55,7 +56,7 @@ protected:
   hpImg2pSShell_t mImg2SShell;
   Int_t           mSubShellCount;
 
-  FTW_SubShell* spawn_subshell(OptoStructs::ZGlassImg* img);
+  FTW_SubShell* spawn_subshell(OptoStructs::ZGlassImg* img, bool show_p=true);
   void          kill_subshell(OptoStructs::ZGlassImg* img);
 
   void set_canvased_subshell(OptoStructs::ZGlassImg* img);
@@ -124,7 +125,10 @@ public:
   void SpawnMTW_View(OptoStructs::ZGlassImg* img, int x, int y, float xf=0, float yf=0);
   void DitchMTW_View(OptoStructs::ZGlassImg* img);
   void RemoveMTW_Views();
-  void SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
+
+  MCW_View* MakeMCW_View (OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
+  MCW_View* SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi,
+			  bool show_p=true);
 
   void RegisterROARWindow(Fl_Window* w)   { mRedrawOnAnyRay.push_back(w); }
   void UnregisterROARWindow(Fl_Window* w) { mRedrawOnAnyRay.remove(w); }

@@ -73,7 +73,6 @@ FTW_Shell* FTW_Shell::Create_FTW_Shell(TSocket* sock,
   Fl::unlock();
 
   shell->InstallFdHandler();
-
   return shell;
 }
 
@@ -245,18 +244,18 @@ void FTW_Shell::_bootstrap()
 
 void FTW_Shell::_bootstrap_subshells()
 {
-  // Default SubShell.
-  if(mShellInfo->GetDefSubShell() != 0) {
-    OS::ZGlassImg* dssi = DemanglePtr(mShellInfo->GetDefSubShell());
-    set_canvased_subshell(dssi);
-  }
-
   // SubShells list.
   OS::ZGlassImg* sshells = DemanglePtr(mShellInfo->GetSubShells());
 
   OS::lpZGlassImg_t* imgs = sshells->GetElementImgs();
   for(OS::lpZGlassImg_i i=imgs->begin(); i!=imgs->end(); ++i) {
-    spawn_subshell(*i);
+    spawn_subshell(*i, (*i)->fGlass != mShellInfo->GetDefSubShell());
+  }
+
+  // Default SubShell.
+  if(mShellInfo->GetDefSubShell() != 0) {
+    OS::ZGlassImg* dssi = DemanglePtr(mShellInfo->GetDefSubShell());
+    set_canvased_subshell(dssi);
   }
 }
 
@@ -343,7 +342,7 @@ void FTW_Shell::RemoveSubShell(OptoStructs::ZGlassImg* img)
 
 // View cretors
 
-FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img)
+FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
 {
   static const string _eh("FTW_Shell::spawn_subshell ");
 
@@ -376,7 +375,7 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img)
     return 0;
   }
 
-  fss->GetWindow()->show();
+  if(show_p) fss->GetWindow()->show();
   return fss;
 }
 
@@ -396,15 +395,18 @@ void FTW_Shell::kill_subshell(OS::ZGlassImg* img)
 
 void FTW_Shell::set_canvased_subshell(OptoStructs::ZGlassImg* img)
 {
+  static const string _eh("FTW_Shell::set_canvased_subshell ");
+
   Fl_Window* new_canvas = 0;
   if(img == 0) {
     new_canvas = mEmptyCanvas;
   } else {
     hpImg2pSShell_i i = mImg2SShell.find(img);
-    FTW_SubShell* fss = (i != mImg2SShell.end()) ? i->second :
-      spawn_subshell(img);
-    if(fss == 0) return;
-    new_canvas = fss->GetWindow();
+    if(i == mImg2SShell.end()) {
+      Message(_eh + img->fGlass->Identify() + " not found.", MT_wrn);
+      return;
+    }
+    new_canvas = i->second->GetWindow();
   }
   if(new_canvas == mCurCanvas) return;
 
@@ -736,9 +738,11 @@ void FTW_Shell::RemoveMTW_Views()
   mMTW_Views.clear();
 }
 
-void FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
+/**************************************************************************/
+
+MCW_View* FTW_Shell::MakeMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
 {
-  static string _eh("FTW_Shell::SpawnMCW_View ");
+  static string _eh("FTW_Shell::MakeMCW_View ");
 
   MCW_View* mcw = new MCW_View(this);
   try {
@@ -747,12 +751,27 @@ void FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
   catch(string exc) {
     delete mcw;
     Fl_Group::current(0);
-    throw(_eh + "parsing failed: " + exc);
+    Message(_eh + "parsing failed: " + exc, MT_err);
+    return 0;
   }
-  mcw->SetABG(img->fGlass, mShellInfo->GetBeta(), mShellInfo->GetGamma());
-  adopt_window(mcw);
-  mcw->hotspot(mcw);
-  mcw->show();
+  return mcw;
+}
+
+MCW_View* FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi,
+				   bool show_p)
+{
+  static string _eh("FTW_Shell::SpawnMCW_View ");
+
+  MCW_View* mcw = MakeMCW_View(img, cmi);
+  if(mcw) {
+    mcw->SetABG(img->fGlass, mShellInfo->GetBeta(), mShellInfo->GetGamma());
+    adopt_window(mcw);
+    if(show_p) {
+      mcw->hotspot(mcw);
+      mcw->show();
+    }
+  }
+  return mcw;
 }
 
 /**************************************************************************/
