@@ -31,16 +31,24 @@
   ODECrawler* ode_c = new ODECrawler();
   scenes->CheckIn(ode_c);
   moon_scene->Add(ode_c);
+  ode_c->SetAcc(1e-12);
+  ode_c->SetStoreMax(2000);
 
   Moonraker* moon = new Moonraker();
   scenes->CheckIn(moon);
   moon_scene->Add(moon);
   moon->SetDMoon(6);
-  moon->SetV0(0.952);
+  moon->SetT1(0.25);
+  moon->SetTheta(3.5); moon->SetPhi(1.7);
+  moon->SetV0(0.9148);
 
   // Set links.
   ode_c->SetODEMaster(moon);
   moon->SetODECrawler(ode_c);
 
   ode_c->Start();
+
+
+  // Spawn GUI
+  gROOT->ProcessLine(".x eye.C");
 }
