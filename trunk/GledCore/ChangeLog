@@ -1,3 +1,72 @@
+2005-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/FTW_SubShell.cxx:
+	* Eye/FTW_SubShell.h:
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	* Eye/MCW_View.cxx:
+	* Eye/MCW_View.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* Glasses/EyeInfo.h:
+	* Glasses/NestInfo.cxx:
+	* Glasses/NestInfo.h:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	* Glasses/SubShellInfo.cxx:
+	* Glasses/SubShellInfo.h:
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	Restructuring of Eye / Shell / SubShell (Nest, Pupil) relations.
+	NestInfo and PupilInfo subclass SubShellInfo.
+	ShellInfo is now ZNameMap (to hold various config data) and has a
+	link to default subshell and to a list of subshells (asymmetry in
+	Nests/Pupils has been removed).
+	FTW_Shell subclasses Eye; thus it gains control over ZGlassImg
+	creation and network traffic. ShellInfo can not inherit from
+	EyeInfo as EyeInfo objects are instantiated by SunQueen at
+	SunAbsolute and Shell would thus lose its local nature.
+	Pupil and FTW_Nest now subclass (among other things) FTW_SubShell.
+	FTW_Shell can swallow any sub-shell within its main canvas.
+
+	This allowed for some other improvements and code cleanup.	
+	
+	* GledView/user_init.cxx:
+	Added creation of box-type for rendering menus.
+
+	* glass.list:
+	New glass SubShellInfo.
+
+	* macros/eye.C:
+	Fixed creation of default Shell.
+
+	* Glasses/SaturnInfo.h:
+	Minimal fix of class-view layout.
+
+	* Glasses/ZGlass.cxx:
+	Made SetGuard look like auto-generated Set methods for links.
+
+	* Glasses/ZQueen.cxx:
+	Added check for MIR-activity of target in
+	Instantiate/IncarnateWAttach.
+
 2005-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* RnrBase/A_Rnr.h:

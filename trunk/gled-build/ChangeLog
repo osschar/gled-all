@@ -1,3 +1,9 @@
+2005-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	In set methods protect lenses with GLensReadHolder.
+	Bugfix: regexp for unsigned types (range control) was fooed.
+
 2005-02-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/gled_glue_gen.pl:
