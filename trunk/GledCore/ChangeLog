@@ -1,3 +1,238 @@
+2004-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Text.cxx:
+	* Glasses/Text.h:
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/Text_GL_Rnr.h:
+	New files; GL text support.
+	
+	* Glasses/ZEunuch.cxx:
+	* Glasses/ZEunuch.h:
+	* Glasses/ZFireKing.cxx:
+	* Glasses/ZFireKing.h:
+	* Glasses/ZFireQueen.cxx:
+	* Glasses/ZFireQueen.h:
+	New files; place-holders for the coming re-implementation of queen
+	dependency management and mirroring.
+	
+	* Glasses/ZGlBlending.cxx:
+	* Glasses/ZGlBlending.h:
+	* Glasses/ZGlLightModel.cxx:
+	* Glasses/ZGlLightModel.h:
+	* Glasses/ZGlMaterial.cxx:
+	* Glasses/ZGlMaterial.h:
+	* Glasses/ZGlStateBase.cxx:
+	* Glasses/ZGlStateBase.h:
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.h:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.h:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.cxx:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.h:
+	New files; GL state modificators.
+
+	* Stones/ZColorMark.cxx:
+	* Stones/ZColorMark.h:
+	New files; ZColor with a float for gradients (see Geom1::ZRibbon).
+
+	
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	Added thread cancelation support. See Eventor::Cancel() and
+	Mountain::Cancel().
+	
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Many improvements.
+	New thread: delayed mir shooter (at given time).
+	New thread: ray shooter (allows beter handling of Rays).
+	Rewrite of UnfoldMIR(): proper exception handling and reporting.
+	
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Support for removal of lenses.
+	
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Ant.cxx:
+	* Eye/FTW_Ant.h:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	Support for measuring of label widths and minor GUI improvements.
+	
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Infrastructure for picking menus, GL text support and display of
+	fps.
+	
+	* Glasses/EyeInfo.h:
+	* Glasses/ZMirEmittingEntity.h:
+	New virtual member SaturnInfo* HostingSaturn().
+	
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+	New methods Message() and Error() to properly report MIR failures
+	(and other stuff) from executions on other Saturns.
+	
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Reverse references, referencing control, new/cleaner locking
+	mechanism.
+	
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	New referencing/unreferencing/clearing mechanisms.
+	
+	* Glasses/ZKing.cxx:
+	* Glasses/ZKing.h:
+	BlessMIR() now performs mild context checks, modifications for
+	future queen management.	
+	
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	New locking, transition to ROOT vec/mat classes.
+	
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Many major improvements.
+	Support for delition of lenses.
+	Better check-in/out implementation.
+	Better ZComet handling and unpacking.
+	Introduction of zero-ref-count policy.
+	New member BroadcastMIRToNonRulingReflections(); simplifies
+	maintainance of coherent queen-state. Methods, that need to be
+	executed also on non-active reflections (dependencies, mandatory 
+	status) now use this facility.
+	Better ray handling and control.
+	New locking.
+	
+	* Gled/GCondition.cxx:
+	* Gled/GCondition.h:
+	Member TimedWait() renamed to TimedWaitMS(), new member
+	TimedWaitMus().
+
+	* Gled/GMutex.cxx:
+	* Gled/GMutex.h:
+	New class GMutexHolder. Usefull for locking with automatic
+	variables in view of exceptions.
+	
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Moved ZMirEmittingEntity* owner from member data to TLS for proper
+	access control.
+	
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Added relational and equality operators.
+	
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Now using TSystem::Getenv().
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Renaming of methods stem Glass to Lens where appropriate. Addition
+	of some global functions.
+
+	* Gled/GledTypes.h:
+	Addition of An_ID_Demangler virtual base and removal of index
+	types for ex ZVector, ZMatrix classes.
+	
+	* Net/Ray.cxx:
+	Beautification of debug output.
+	
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Added support for automatic creation of GL display lists on per
+	lens level.
+	
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Support for a default GL font.
+
+	* Stones/ZColor.h:
+	Added to_ubyte() member.
+
+	* Stones/ZComet.cxx:
+	* Stones/ZComet.h:
+	* Stones/ZMIR.cxx:
+	* Stones/ZMIR.h:
+	Now use An_ID_Demangler; some minor additions.
+
+	* Stones/Z3Mark.cxx:
+	* Stones/Z3Mark.h:
+	* Stones/Z3Point.cxx:
+	* Stones/Z3Point.h:
+	* Stones/ZMark.cxx:
+	* Stones/ZMark.h:
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Transition to pure ROOT vector/matrix classes.
+	
+	* catalog.patch: 
+	* glass.list:
+	Extensions with new glasses, fixes.
+	
+	* macros/eye.C:
+	New check before opening a default pupil.
+	
+	* perllib/GLED_Widgets.pm:
+	Extension of PhonyEnum. Now the class understands enums declared
+	in glasses.
+
+	* gled.cxx:
+	* saturn.cxx:
+	Added initialization of ROOT thread system.
+
+	* FL/Fl_TransCtrl.cxx:
+	* FL/Fl_TransCtrl.h:
+	Fix of box-type and suppresion of widget update when new value is
+	the same as the one shown.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	* Glasses/Box.cxx:
+	* Glasses/Box.h:
+	* Glasses/PerfMeterOperator.h:
+	* Glasses/PerfMeterTarget.cxx:
+	* Glasses/PipeEventor.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Glasses/Sphere.h:
+	* Glasses/ZCometBag.cxx:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.h:
+	* Glasses/ZMirFilter.h:
+	* Glasses/ZSunQueen.cxx:
+	* Glasses/ZSunQueen.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* Tvor/TubeTvor.h:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/SphereTrings.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+
 2004-01-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW.cxx:
@@ -15,7 +250,7 @@
 	a) pushing elements to the end of the list or b) setting links.
 	Camera can be attached to an object in the scene that is connected
 	to PupilInfo in question. Node that the default camera is looking
-	at and the reference object for 'up' direction can also be
+	at and the reference object for "up" direction can also be
 	specified.
 	
 	* Gled/GledNS.cxx:
