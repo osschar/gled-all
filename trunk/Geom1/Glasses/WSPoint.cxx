@@ -21,7 +21,9 @@ ClassImp(WSPoint)
 
 void WSPoint::_init()
 {
-  mW = 0.1; mS = 0; mT = 1; bDrawAxen = false;
+  mW = 0.1; mS = 0; mT = 1;
+  mTwist = 0; mStretch = 1;
+  bDrawAxen = false;
 }
 
 namespace {

@@ -9,6 +9,9 @@
 
 #include <Glasses/ZNode.h>
 #include <Stones/ZColor.h>
+
+#include <Glasses/ZImage.h>
+
 class WSPoint;
 class TubeTvor;
 
@@ -22,20 +25,28 @@ private:
   void InitSlide(WSPoint* f);
   void Ring(WSPoint* f, Real_t t);
 
-  ZVector	hPnt;	//! Used in Triangulation
+  ZVector	hPnt;	//! Coord-sys; used during Triangulation
   ZVector	hAxe;	//!
   ZVector	hUp;	//!
   ZVector	hAw;	//!
+  Real_t	hTexU;	//! Texture coords; used during Triangulation
+  Real_t	hTexV;	//!
 
 protected:
   Int_t		mTLevel;	// X{GST} 7 Value(-range=>[2,1000,1,1],-join=>1)
   Int_t		mPLevel;	// X{GST} 7 Value(-range=>[2,1000,1,1])
 
+  Bool_t	bRenormLen;	// X{GST} 7 Bool(-join=>1)
+  Real_t	mLength;	// X{GST} 7 Value(-range=>[0,1000,1,100])
+
   ZColor	mColor;		// X{PGS} 7 ColorButt(-join=>1)
   Int_t		mLineW;		// X{GST} 7 Value(-range=>[1,20,1,1],-join=>1)
   bool		bFat;		// X{GST} 7 Bool()
 
+  ZImage*	mTexture;	// X{GST} L{} RnrBits{2,0,4,0, 0,0,0,0}
+
   TubeTvor*	pTuber;		//!
+  Bool_t	bTextured;	//!
 
 public:
   WSSeed(Text_t* n="WSSeed", Text_t* t=0) :

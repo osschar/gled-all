@@ -23,7 +23,8 @@ ClassImp(WSSeed)
 void WSSeed::_init()
 {
   mTLevel = 10; mPLevel = 10;
-  mLineW = 3; bFat = true;
+  bRenormLen = false; mLength = 1;
+  mLineW = 2; bFat = true;
   pTuber = new TubeTvor;
 }
 
@@ -39,10 +40,20 @@ void WSSeed::Triangulate()
     return;
   }
 
-  pTuber->Init(0, mTLevel*(size - 1) + 1, mPLevel);
+  bTextured = (mTexture != 0);
+  pTuber->Init(0, mTLevel*(size - 1) + 1, mPLevel, false, bTextured);
 
-  list<WSPoint*>::iterator a, b = points.begin();
+  list<WSPoint*>::iterator a, b;
+  Real_t len_fac = 1;
+  if(bRenormLen) {
+    Real_t len = 0;
+    b = points.begin();
+    while((a=b++, b) != points.end()) len += (*a)->mStretch;
+    len_fac = mLength/len;
+  }
+
   bool first = true;
+  b = points.begin();
   while((a=b++, b) != points.end()) {
     (*a)->Coff(*b);
     if(first) {
@@ -52,6 +63,8 @@ void WSSeed::Triangulate()
     Real_t delta = 1.0/mTLevel, max = 1 - delta/2;
     for(Real_t t=0; t<max; t+=delta) {
       Ring(*a, t);
+      hTexU += delta * (*a)->mTwist;
+      hTexV += delta * (*a)->mStretch * len_fac;
     }
   }
   Ring(*(--a), 1);
@@ -64,6 +77,7 @@ void WSSeed::InitSlide(WSPoint* f)
     hUp(i) = t(i, 2u);
     hAw(i) = t(i, 3u);
   }
+  hTexU = hTexV = 0;
 }
 
 void WSSeed::Ring(WSPoint* f, Real_t t)
@@ -88,7 +102,7 @@ void WSSeed::Ring(WSPoint* f, Real_t t)
 
   pTuber->NewRing(mPLevel, true);
   Real_t phi = 0, step = 2*TMath::Pi()/mPLevel;
-  Real_t R[3], N[3];
+  Real_t R[3], N[3], T[2];
   for(int j=0; j<mPLevel; j++, phi-=step) {
     Real_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
     for(UCIndex_t i=1; i<=3; ++i) {
@@ -96,7 +110,8 @@ void WSSeed::Ring(WSPoint* f, Real_t t)
       N[i-1] = -dws*oneAxe(i) + dwc*(cp*hUp(i) + sp*hAw(i));
     }
     // perhaps should invert normals for w<0
-    pTuber->NewVert(R, N, 0);
+    T[0] = hTexU - phi/TMath::TwoPi(); T[1] = hTexV;
+    pTuber->NewVert(R, N, 0, T);
   }
   { // last one
     phi = -2*TMath::Pi();
@@ -106,7 +121,8 @@ void WSSeed::Ring(WSPoint* f, Real_t t)
       N[i-1] = -dws*oneAxe(i) + dwc*(cp*hUp(i) + sp*hAw(i));
     }
     // perhaps should invert normals for w<0
-    pTuber->NewVert(R, N, 0);
+    T[0] = hTexU + 1; T[1] = hTexV;
+    pTuber->NewVert(R, N, 0, T);
   }
 
 }
