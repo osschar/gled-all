@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -119,7 +119,7 @@ void Eye::show() { mShell->show(); }
 
 /**************************************************************************/
 
-OptoStructs::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
+OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
 {
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
   if(i != mGlass2ImgHash.end()) return i->second;
@@ -128,12 +128,41 @@ OptoStructs::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
   return gi;
 }
 
+void Eye::RemoveImage(OS::ZGlassImg* img)
+{
+  OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fGlass);
+  if(i == mGlass2ImgHash.end()) {
+    cout <<"Eye::RemoveImage not in hash\n";
+    return;
+  }
+  if(i->second != img) {
+    cout <<"Eye::RemoveImage non-matching images\n";
+    return;
+  }
+  mGlass2ImgHash.erase(i);
+  delete img;
+}
+
+/**************************************************************************/
+
+void Eye::InvalidateRnrs(OS::ZGlassImg* img, bool invalidate_links_p)
+{
+  for(OS::lpA_View_i i=img->fFullViews.begin(); i!=img->fFullViews.end(); ++i)
+    (*i)->InvalidateRnrScheme();
+  if(invalidate_links_p) {
+    for(OS::lpA_View_i i=img->fLinkViews.begin(); i!=img->fLinkViews.end(); ++i)
+      (*i)->InvalidateRnrScheme();
+  }
+}
+
 /**************************************************************************/
 // SatSocket bussines
 /**************************************************************************/
 
 Int_t Eye::Manage(int fd)
 {
+  static const string _eh("Eye::Manage ");
+
   TMessage *m;
   UInt_t length;
   Int_t  count = 0, len;
@@ -147,7 +176,7 @@ Int_t Eye::Manage(int fd)
       if(errno == EWOULDBLOCK) {
 	break;
       }
-      perror("Eye::Manage Prefetch got error that is not EWOULDBLOCK");
+      ISerr(_eh + "prefetch got error that is not EWOULDBLOCK.");
       break;
     }
 
@@ -155,12 +184,12 @@ Int_t Eye::Manage(int fd)
     len = mSatSocket->Recv(m);
 
     if(len == -1) {
-      ISerr("Eye::Manage: Recv error");
+      ISerr(_eh + "Recv error.");
       delete m; return -1;
     }
 
     if(len == 0) {
-      ISerr("Eye::Manage Saturn closed connection ... unregistring");
+      ISerr(_eh + "Saturn closed connection ... unregistring fd handler.");
       Fl::remove_fd(mSatSocket->GetDescriptor());
       delete m; return -2;
     }
@@ -168,14 +197,14 @@ Int_t Eye::Manage(int fd)
     if(m->What() == kMESS_STRING) {
       TString str;
       *m >> str;
-      ISmess(GForm("Eye::Manage got message string: %s", str.Data()));
+      ISmess(_eh + "got message string: " + str.Data());
       delete m;
       continue;
     }
 
     if(!m || m->What() != GledNS::MT_Ray) {
-      ISerr(GForm("Eye::Manage: Recv failed or non MT_Ray' len=%d,what=%d. "
-		  "Dis-synchronization possible.", len, m->What()));
+      ISerr(GForm("%s Recv failed or non MT_Ray' len=%d,what=%d. "
+		  "Dis-synchronization possible.", _eh.c_str(), len, m->What()));
       delete m;
       return -3;
     }
@@ -207,8 +236,7 @@ Int_t Eye::Manage(int fd)
     OS::ZGlassImg* b = mRay.fBeta  ? DemanglePtr(mRay.fBeta)  : 0;
     OS::ZGlassImg* g = mRay.fGamma ? DemanglePtr(mRay.fGamma) : 0;
 
-    bool invalidate_rnrs = false, invalidate_link_parent_rnrs = false;
-
+    a->fGlass->ReadLock();
     switch(mRay.fEvent) {
     case Ray::RQN_change: {
       for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
@@ -222,11 +250,10 @@ Int_t Eye::Manage(int fd)
       break;
     }
     case Ray::RQN_link_change: {
-      // alpha; call treereps
       for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
 	(*i)->Absorb_LinkChange(mRay.fLibID, mRay.fClassID);
       }
-      invalidate_rnrs = true;
+      InvalidateRnrs(a);
       break;
     }
     case Ray::RQN_list_add: {
@@ -236,69 +263,55 @@ Int_t Eye::Manage(int fd)
       for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
 	(*i)->Absorb_ListAdd(b, g);
       }
-      invalidate_rnrs = true;
-      invalidate_link_parent_rnrs = true;
-      /*
-	for(lpPupil_i i=a->fPupils.begin(); i!=a->fPupils.end(); ++i) {
-	(*i)->redraw();
-	}
-      */
+      InvalidateRnrs(a, true);
       break;
     }
     case Ray::RQN_list_remove: {
       // alpha zlist, beta departee
-      // call treereps, pupils
+      // full-views
       assert(b);
       for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
 	(*i)->Absorb_ListRemove(b);
       }
-      invalidate_rnrs = true;
-      invalidate_link_parent_rnrs = true;
+      InvalidateRnrs(a, true);
       break;
     }
     case Ray::RQN_list_rebuild: {
       // alpha zlist
-      // call treereps, pupils
-      // !! should check if some views drop to null (or one) !!!
-      // !!!! wait a sec ... no destruction mechanism for Img, DefView
+      // full-views
       for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
 	(*i)->Absorb_ListRebuild();
       }
-      invalidate_rnrs = true;
-      invalidate_link_parent_rnrs = true;
+      InvalidateRnrs(a, true);
       break;
     }
     case Ray::RQN_birth: {
-      // alpha ... demangle from Saturn
-      // !!! call birth_hook if defed
+      // This point never reached !!!!
+      // Should check for this RQN before (if birth_callback enabled).
       break;
     }
     case Ray::RQN_death: {
-      // alpha the dustbiter; wipe/repair treereps, mixers and pupils
-      
-      // Assert all views closed
-      // !!!!
+      // alpha the dustbiter
+      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
+	(*i)->Absorb_Delete();
+      }
+      for(OS::lpA_View_i i=a->fLinkViews.begin(); i!=a->fLinkViews.end(); ++i) {
+	(*i)->Absorb_Delete();
+      }
+      InvalidateRnrs(a, true);
+      RemoveImage(a);
       break;
     }
 
     case Ray::RQN_apocalypse: {
-      // server shutting down
+      // server shutting down ... Saturn actually never sends this.
       break;
     }
     default: {
       assert(0);
     }
     } // end switch
-
-    // Invalidate alpha's renderer
-    if(invalidate_rnrs) {
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i)
-	(*i)->InvalidateRnrScheme();
-    }
-    if(invalidate_link_parent_rnrs) {
-      for(OS::lpA_View_i i=a->fLinkViews.begin(); i!=a->fLinkViews.end(); ++i)
-	(*i)->InvalidateRnrScheme();
-    }
+    a->fGlass->ReadUnlock();
 
     delete m;
   }
@@ -306,7 +319,7 @@ Int_t Eye::Manage(int fd)
   for(lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
     (*w)->redraw();
 
-  ISdebug(6, GForm("Eye::Manage got %d Ray(s) in this gulp", count));
+  ISdebug(6, GForm("%s got %d Ray(s) in this gulp", _eh.c_str(), count));
   return count;
 }
 
