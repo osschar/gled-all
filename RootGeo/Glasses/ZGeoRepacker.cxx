@@ -31,14 +31,19 @@ void ZGeoRepacker::RepackGeometry()
 {
   mSrcGeo = gGeoManager; // Perhaps should import it independently.
 
+  gGeoManager = 0;
   mNeoGeo = new TGeoManager("Simplix", "Driplix");
-  
+  gGeoManager = mSrcGeo;
+
   repack_geometry(mRoot, 0);
 
+  gGeoManager = mNeoGeo;
   mNeoGeo->CloseGeometry();
   mNeoGeo->Export(mOutFile.Data(), "Xilpmis");
   delete mNeoGeo;
   mNeoGeo = 0;
+
+  gGeoManager = mSrcGeo;
 }
 
 /**************************************************************************/
