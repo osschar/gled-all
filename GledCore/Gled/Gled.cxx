@@ -277,14 +277,13 @@ void Gled::SpawnSaturn()
 
   CheckAuthDir();
 
-  if(mSaturnInfo->GetUseAuth()) { // !!!! this is silly ... useauth only relevant for SunAbsolute
-    GKeyRSA::init_ssl();
-    // Assert files
-    if(GetPrivKeyFile(mSaturnInfo->mLogin) == 0) {
-      cerr << _eh <<"can not open server private key\n";
-      exit(1);
-    }
-  }
+  // Initialize authentication
+  GKeyRSA::init_ssl();
+  // Warn for missing RSA-key files
+  if(GetPrivKeyFile(mSaturnInfo->mLogin, false) == 0)
+    ISwarn(_eh + "private key for Saturn identity not found");
+  if(GetPrivKeyFile(mDefEyeIdentity, false) == 0)
+    ISwarn(_eh + "private key for default Eye identity not found");
 
   mSaturn = new Saturn;
   try {
@@ -313,25 +312,37 @@ void Gled::CheckAuthDir() {
   }
 }
 
-const char* Gled::PubKeyFile(TString& id) {
+const char* Gled::PubKeyFile(TString& id)
+{
   return GForm("%s/public_keys/%s", mAuthDir.Data(), id.Data());
 }
 
-const char* Gled::PrivKeyFile(TString& id) {
+const char* Gled::PrivKeyFile(TString& id)
+{
   return GForm("%s/private_keys/%s", mAuthDir.Data(), id.Data());
 }
 
-const char* Gled::GetPubKeyFile(TString& id) {
+const char* Gled::GetPubKeyFile(TString& id, Bool_t use_exc)
+{
   const char* ret = PubKeyFile(id);
-  if(gSystem->AccessPathName(ret, kReadPermission))
-    throw(string("Gled::GetPubKeyFile can not access file:") + ret);
+  if(gSystem->AccessPathName(ret, kReadPermission)) {
+    if(use_exc)
+      throw(string("Gled::GetPubKeyFile can not access file:") + ret);
+    else
+      ret = 0;
+  }
   return ret;
 }
 
-const char* Gled::GetPrivKeyFile(TString& id) {
+const char* Gled::GetPrivKeyFile(TString& id, Bool_t use_exc)
+{
   const char* ret = PrivKeyFile(id);
-  if(gSystem->AccessPathName(ret, kReadPermission))
-    throw(string("Gled::GetPrivKeyFile can not access file:") + ret);
+  if(gSystem->AccessPathName(ret, kReadPermission)) {
+    if(use_exc)
+      throw(string("Gled::GetPrivKeyFile can not access file:") + ret);
+    else
+      ret = 0;
+  }
   return ret;
 }
 
