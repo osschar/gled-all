@@ -8,9 +8,10 @@
 #define GledCore_ZFireQueen_H
 
 #include <Glasses/ZQueen.h>
+class ZEunuch;
 
 class ZFireQueen : public ZQueen {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZFireQueen);
 
 private:
@@ -19,11 +20,16 @@ private:
 protected:
   ZHashList*	mEunuchs;	// X{GS} L{}
 
+  virtual void bootstrap();
+
 public:
   ZFireQueen(const Text_t* n="ZFireQueen", const Text_t* t=0) :
-    ZQueen(n,t) { _init(); }
+    ZQueen(n, t) { _init(); }
+  ZFireQueen(ID_t span, const Text_t* n="ZFireQueen", const Text_t* t=0) :
+    ZQueen(span, n, t) { _init(); }
 
-  virtual void AdEnlightenment();
+  // ID & Lens management
+  virtual ZGlass* DemangleID(ID_t id);
 
 #include "ZFireQueen.h7"
   ClassDef(ZFireQueen, 1)
