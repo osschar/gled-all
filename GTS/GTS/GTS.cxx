@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -82,6 +82,18 @@ GTS::Surface* GTS::Surface::Load(const TString& gtl)
   ms->surface = s;
   return ms;
 }
+
+/**************************************************************************/
+
+void GTS::Surface::Replace(GtsSurface* new_surf)
+{
+  if(surface) {
+    gts_object_destroy (GTS_OBJECT (surface));
+  }
+  surface = new_surf;
+}
+
+/**************************************************************************/
 
 void GTS::Surface::Invert()
 {
