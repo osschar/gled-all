@@ -1,9 +1,8 @@
 // $Header$
 
-// Spheres: a bunch of spheres with a rotator
+// alice_geom: prototype of ALICE detector visualization
 //
-// vars: ZQueen* scenes
-// libs: Geom1
+// libs: Geom1, RootGeo
 
 #include <glass_defines.h>
 class ZGeoNode;
@@ -11,65 +10,45 @@ class GeoUserData;
 
 ZGeoNode* volt = 0;
 
-void alice_geom(Bool_t impwcol=false)
+const Text_t* default_layout =
+  "ZGlass(Name[7]):"
+  "ZGeoNode(RnrSelf[4],RnrOnForDaughters[4],RnrOffForDaughters[4],"
+  "Color[4],ImportNodes[5],NNodes[4],Mat[8])";
+
+#include "common_foos.C"
+
+/**************************************************************************/
+// main
+/**************************************************************************/
+
+void alice_geom(Int_t import_mode=0)
 {
-  gSystem->IgnoreSignal(kSigSegmentationViolation, true);
+  // import_mode: controls how top-level volumes are grouped in the list
+  //    = 0: import by regexp (hand-written)
+  //    = 1: import by common volume-name-prefix (automatic)
+  //
+  // usage: aligled <options> -- <gled-options> 'alice_geom(1)'
 
-  {
-    if(Gled::theOne->GetSaturn() == 0) {
-      Gled::theOne->SpawnSun();
-    }
-
-    Saturn* sun = Gled::theOne->GetSaturn();
-    if(sun == 0) {
-      printf("Sun is not spawned ...\n");
-      return;
-    }
-
-    ZSunQueen* sun_queen  = sun->GetSunQueen();
-    ZQueen*    fire_queen = sun->GetFireQueen();
-
-    if(sun->GetSaturnInfo()->GetUseAuth())
-      gROOT->Macro("std_auth.C");
-
-    ZQueen* scenes = new ZQueen(16*10000, "Scenes", "Goddess of Ver");
-    Gled::theOne->GetSaturn()->GetSunKing()->Enthrone(scenes);
-    scenes->SetMandatory(true);
-  }
+  if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
 
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
 
-  Gled::theOne->AddMTWLayout
-    ("RootGeo/ZGeoNode",
-     "ZGlass(Name,Title):"
-     "ZGeoNode(RnrSelf[4],RnrOnForDaughters[4],RnrOffForDaughters[4],"
-     "Color[4],ImportNodes[5],NNodes[4])"
-    );
+  Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
 
-  Scene* rscene = new Scene("Alice Detector");
-  scenes->CheckIn(rscene);
-  scenes->Add(rscene);
-  rscene->SetUseOM(true);
+  //--------------------------------------------------------------
 
-  ZNode* origin = new ZNode("Origin");
-  Lamp* lamp = new Lamp("Lamp");
-  lamp->SetDiffuse(1, 1, 1);
-  lamp->SetAmbient(0.3, 0.3, 0.3);
-  lamp->SetScale(1);
-  lamp->MoveLF(3, 100); lamp->RotateLF(3,1, TMath::Pi()/2);
-  
-  scenes->CheckIn(origin); rscene->Add(origin);
-  scenes->CheckIn(lamp);   origin->Add(lamp);
-  
-  rscene->GetGlobLamps()->Add(lamp);
-  
   printf("Importing geometry ...\n");
   TGeoManager::Import("alice_all.root");
   printf("Done importing geometry.\n");
 
+  //--------------------------------------------------------------
 
-  ZGeoNode* znode =  new ZGeoNode("MasterVolume");
+  Scene* rscene = create_basic_scene();
+
+  //--------------------------------------------------------------
+
+  ZGeoNode* znode = new ZGeoNode("MasterVolume");
   volt = znode;
   znode->SetVol(gGeoManager->GetMasterVolume());
   //znode->SetVol(gGeoManager->GetNode(188)->GetVolume());
@@ -80,56 +59,78 @@ void alice_geom(Bool_t impwcol=false)
   GeoUserData* ud == new  GeoUserData();
   znode->CreateFaceset(ud);
   znode->SetRnrSelf(false);
-  import_dparts();
- {
-    Eventor* el = new Eventor("Dynamo2");
-    el->SetBeatsToDo(-1); el->SetInterBeatMS(100); el->SetStampInterval(10);
-    scenes->CheckIn(el);  rscene->Add(el);
-    Mover* mv = new Mover("S1 Rotator");
-    mv->SetNode(origin); mv->SetRi(1); mv->SetRj(3); mv->SetRa(0.005);
-    scenes->CheckIn(mv); el->Add(mv);
-    // el->Start();
+
+  switch(import_mode) {
+  case  0: { import_by_regexp(); break; }
+  case  1:
+  default: { import_with_collect(); break; }
   }
 
-  // gROOT->Macro("eye.C");
+  //--------------------------------------------------------------
+
+  // Spawn GUI
   {
-  Text_t* eye_name="Eye";
-  Text_t* shell_name="Shell";
-  Text_t* pupil_name="Pupil";
+    Text_t* eye_name   = "Eye";
+    Text_t* shell_name = "Shell";
+    Text_t* pupil_name = "Pupil";
 
-  ShellInfo* shell = new ShellInfo(shell_name);
-  fire_queen->CheckIn(shell); fire_queen->Add(shell);
-  shell->ImportKings();	  // Get all Kings as top level objects
+    CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
+    shell->Add(rscene);
+    // shell->ImportKings();	  // Get all Kings as top level objects
 
-  shell->SetLayout(
-     "ZGlass(Name[7]):"
-     "ZGeoNode(RnrSelf[4],RnrOnForDaughters[4],RnrOffForDaughters[4],"
-     "Color[4],ImportNodes[5],NNodes[4],Mat[8])");
-  shell->SetLeafLayout(NestInfo::LL_Custom);
+    shell->SetLayout(default_layout);
+    shell->SetLeafLayout(NestInfo::LL_Custom);
 
-  if(pupil_name) {
-    PupilInfo* pupil = new PupilInfo(pupil_name);
+    CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), pupil_name, "");
     pupil->SetFOV(80);
     pupil->SetCHSize(0.0);
     pupil->SetBlend(1);
-    fire_queen->CheckIn(pupil);
-    shell->GetPupils()->Add(pupil);
-    if(scenes->First())
-    pupil->Add(scenes->First());
+    pupil->Add(rscene);
+    pupil->SetCameraBase((ZNode*)rscene->GetElementByName("Camera Base"));
+
+    Gled::theOne->SpawnEye(shell, eye_name);
   }
 
-  Gled::theOne->SpawnEye(shell, eye_name);
- }
 }
 
-void import_dparts() {
-  printf("Import by geometry \n");
-  volt->ImportByRegExp("ITS", TRegexp("^ITS"));
+/**************************************************************************/
+// Functions
+/**************************************************************************/
+
+#define DECLARE_CAST(_var_, _type_, _val_) \
+  _type_* _var_ = dynamic_cast<_type_*>(_val_)
+
+ZGeoNode* rnr_self_on(ZGeoNode* root, const Text_t* path)
+{
+  DECLARE_CAST(x, ZGeoNode, root->FindLensByPath(path));
+  if(x) x->SetRnrSelf(true);
+  return x;
+}
+
+ZGeoNode* import_nodes(ZGeoNode* root, const Text_t* path)
+{
+  DECLARE_CAST(x, ZGeoNode, root->FindLensByPath(path));
+  if(x) x->ImportNodes();
+  return x;
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+void import_by_regexp()
+{
+  // This demonstrates use of ZGeoNode::ImportByRegexp().
+  // Relies on volume-naming conventions.
+
+  printf("Import by regexp\n");
+
+  volt->ImportByRegExp("ITSV", TRegexp("^ITS"));
   volt->ImportByRegExp("TPC", TRegexp("^TPC"));
 
   volt->ImportByRegExp("PHOS", TRegexp("^PHOS"));
   volt->ImportByRegExp("RICH", TRegexp("^RICH"));
-  // volt->ImportByRegExp("TOF", TRegexp("^TOF"));
+
+  volt->ImportByRegExp("EPM", TRegexp("^EPM"));
 
   volt->ImportByRegExp("ZDC", TRegexp("^ZDC"));
   volt->ImportByRegExp("ZEM", TRegexp("^ZEB"));
@@ -148,17 +149,57 @@ void import_dparts() {
   volt->ImportByRegExp("S/SCF3", TRegexp("^S[CF]3"));
   volt->ImportByRegExp("S/SCF4", TRegexp("^S[CF]4"));
 
-  volt->ImportByRegExp("EPM", TRegexp("^EPM"));
-
-  volt->ImportByRegExp("Hall", TRegexp("^H"));
-
   volt->ImportByRegExp("L3", TRegexp("^L3"));
-
-  volt->ImportByRegExp("Hall", TRegexp("^H"));
-
 
   volt->ImportByRegExp("B-Stuffe", TRegexp("^B"));
 
-  // volt->ImportByRegExp("", TRegexp("^"));
-  volt->ImportUnimported("REST");
+  volt->ImportByRegExp("Hall", TRegexp("^H"));
+
+  volt->ImportUnimported("Remaining top-levels");
+
+  //--------------------------------------------------------------
+
+  select_some_dets();
+
+  for(int i=1; i<=4; ++i) rnr_self_on(volt, GForm("EPM/EPM%d_1", i));
+}
+
+/**************************************************************************/
+
+void import_with_collect()
+{
+  // This demonstrates use of ZGeoNode::ImportNodesWCollect().
+  // Top-level volumes are grouped by common head of their name.
+
+  printf("Import nodes with collect\n");
+
+  volt->ImportNodesWCollect();
+
+  //--------------------------------------------------------------
+
+  select_some_dets();
+
+  for(int i=1; i<=4; ++i) rnr_self_on(volt, GForm("EPM%d/EPM%d_1", i, i));
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+void select_some_dets ()
+{
+  import_nodes(volt, "ITSV/ITSV_1");
+
+  ZGeoNode* tpc1 = import_nodes(volt, "TPC/TPC_1");
+  if(tpc1) {
+    tpc1->RnrOffForDaughters();
+    DECLARE_CAST(tpcgas, ZGeoNode, tpc1->FindLensByPath("TDGN_1"));
+    if(tpcgas) {
+      tpcgas->SetColor(0.3, 0.7, 0.5, 0.75);
+      tpcgas->SetRnrSelf(true);
+    }
+  }
+
+  for(int i=1; i<=5; ++i) rnr_self_on(volt, GForm("PHOS/PHOS_%d", i));
+
+  for(int i=1; i<=7; ++i) rnr_self_on(volt, GForm("RICH/RICH_%d", i));
 }
