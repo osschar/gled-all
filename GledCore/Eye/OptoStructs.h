@@ -39,9 +39,9 @@ namespace OptoStructs {
   /**************************************************************************/
 
   struct ZGlassImg {
-    Eye*			fEye;
-    ZGlass*			fGlass;
-    GledViewNS::ClassInfo*	fClassInfo;
+    Eye*		fEye;
+    ZGlass*		fGlass;
+    GledNS::ClassInfo*	fClassInfo;
 
     bool		fIsList;
     ZGlassView*		fDefView;
@@ -55,8 +55,8 @@ namespace OptoStructs {
     ZGlassImg(Eye* e, ZGlass* g);
     ~ZGlassImg();
 
-    void CheckInFullView(A_View* v)   { fFullViews.push_back(v); }
-    void CheckOutFullView(A_View* v)  { fFullViews.remove(v); }
+    void CheckInFullView(A_View* v)  { fFullViews.push_back(v); }
+    void CheckOutFullView(A_View* v) { fFullViews.remove(v); }
     void CheckInLinkView(A_View* v)  { fLinkViews.push_back(v); }
     void CheckOutLinkView(A_View* v) { fLinkViews.remove(v); }
 
@@ -74,12 +74,11 @@ namespace OptoStructs {
   /**************************************************************************/
 
   struct ZLinkDatum {
-    GledViewNS::LinkMemberInfo*	fLinkInfo;
+    GledNS::LinkMemberInfo*	fLinkInfo;
     ZGlassImg*			fOwnerImg;
     ZGlass*& 			fLinkRef;
 
-    ZLinkDatum(GledViewNS::LinkMemberInfo* lmi, 
-	       ZGlassImg* i, ZGlass*& lr) :
+    ZLinkDatum(GledNS::LinkMemberInfo* lmi, ZGlassImg* i, ZGlass*& lr) :
       fLinkInfo(lmi), fOwnerImg(i), fLinkRef(lr) {}
   };
 
@@ -123,7 +122,7 @@ namespace OptoStructs {
     virtual void CopyListViews(lpA_GlassView_t& v) {}
 
     virtual const GledViewNS::RnrCtrl& GetRnrCtrl()
-    { return fImg->fClassInfo->fDefRnrCtrl; }
+    { return fImg->fClassInfo->fViewPart->fDefRnrCtrl; }
 
     virtual const GledViewNS::RnrBits& GetRnrBits()
     { return GetRnrCtrl().fRnrBits; }
@@ -209,7 +208,7 @@ namespace OptoStructs {
     virtual A_Rnr*       GetRnr()  { return fToImg->fDefRnr; }
     
     virtual const GledViewNS::RnrBits& GetRnrBits() {
-      return fLinkDatum->fLinkInfo->fDefRnrBits;
+      return fLinkDatum->fLinkInfo->fViewPart->fDefRnrBits;
     }
 
     virtual void InvalidateRnrScheme() { fMasterView->InvalidateRnrScheme(); }

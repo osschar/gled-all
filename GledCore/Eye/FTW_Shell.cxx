@@ -31,6 +31,7 @@
 
 #include <memory>
 
+namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace OS = OptoStructs;
 using namespace FTW;
@@ -185,7 +186,7 @@ void FTW_Shell::X_SetBeta(FTW::Locator& loc)
   if(!loc.has_contents())	throw(_eh + "locator has no contents");
 
   auto_ptr<ZMIR> mir (mShellInfo->S_SetBeta(loc.get_glass()));
-  fImg->fEye->Send(mir->Message);
+  fImg->fEye->Send(*mir);
 }
 
 void FTW_Shell::X_SetGamma(FTW::Locator& loc)
@@ -195,7 +196,7 @@ void FTW_Shell::X_SetGamma(FTW::Locator& loc)
   if(!loc.has_contents())	throw(_eh + "locator has no contents");
 
   auto_ptr<ZMIR> mir (mShellInfo->S_SetGamma(loc.get_glass()));
-  fImg->fEye->Send(mir->Message);
+  fImg->fEye->Send(*mir);
 }
 
 /**************************************************************************/
@@ -209,9 +210,9 @@ void FTW_Shell::X_SetLink(FTW::Locator& target)
   if(!target.is_link)		throw(_eh + "target is not a link");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
 
-  auto_ptr<ZMIR> mir (mSource->generate_MIR_header(target.get_leaf_glass()));
-  (target.ant->fLinkDatum->fLinkInfo->fooCCCreator)(mir->Message);
-  fImg->fEye->Send(mir->Message);
+  GNS::MethodInfo* mi = target.ant->fLinkDatum->fLinkInfo->fSetMethod;
+  auto_ptr<ZMIR> mir (mSource->generate_MIR(mi, target.get_leaf_glass()));
+  fImg->fEye->Send(*mir);
 }
 
 void FTW_Shell::X_ClearLink(FTW::Locator& target)
@@ -221,9 +222,9 @@ void FTW_Shell::X_ClearLink(FTW::Locator& target)
 
   if(!target.is_link) throw(_eh + "target is not a link");
 
-    ZMIR mir(target.get_leaf_id(), 0);
-    (target.ant->fLinkDatum->fLinkInfo->fooCCCreator)(mir.Message);
-    fImg->fEye->Send(mir.Message);
+  ZMIR mir(target.get_leaf_id(), 0);
+  target.ant->fLinkDatum->fLinkInfo->fSetMethod->ImprintMir(mir);
+  fImg->fEye->Send(mir);
 }
 
 /**************************************************************************/
@@ -249,15 +250,11 @@ void FTW_Shell::X_Push(FTW::Locator& target)
   if(!target.is_list())		throw(_eh + "target is not a list");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
 
-  auto_ptr<ZMIR> mir (mSource->generate_MIR_header(target.get_glass()));
-  GVNS::ContextMethodInfo* cmi = 
-    target.get_class_info()->FindContextMethodInfo("Add");
-  if(cmi) {
-    (cmi->fooCCCreator)(mir->Message);
-    fImg->fEye->Send(*mir);
-  } else {
-    throw(string(_eh + "Add" + _meth_no_cat));
-  }
+  GNS::MethodInfo* cmi = target.get_class_info()->FindMethodInfo("Add", true);
+  if(!cmi) throw(string(_eh + "Add" + _meth_no_cat));
+
+  auto_ptr<ZMIR> mir (mSource->generate_MIR(cmi, target.get_glass()));
+  fImg->fEye->Send(*mir);
 }
 
 void FTW_Shell::X_Unshift(FTW::Locator& target)
@@ -267,15 +264,12 @@ void FTW_Shell::X_Unshift(FTW::Locator& target)
   if(!target.is_list())		throw(_eh + "target is not a list");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
 
-  auto_ptr<ZMIR> mir (mSource->generate_MIR_header(target.get_glass()));
-  GVNS::ContextMethodInfo* cmi = 
-    target.get_class_info()->FindContextMethodInfo("AddFirst");
-  if(cmi) {
-    (cmi->fooCCCreator)(mir->Message);
-    fImg->fEye->Send(*mir);
-  } else {
-    throw(string(_eh + "AddFirst" +  _meth_no_cat));
-  }
+  GNS::MethodInfo* cmi =
+    target.get_class_info()->FindMethodInfo("AddFirst", true);
+  if(!cmi) throw(string(_eh + "AddFirst" +  _meth_no_cat));
+
+  auto_ptr<ZMIR> mir (mSource->generate_MIR(cmi, target.get_glass()));
+  fImg->fEye->Send(*mir);
 }
 
 void FTW_Shell::X_Insert(FTW::Locator& target)
@@ -291,15 +285,12 @@ void FTW_Shell::X_Insert(FTW::Locator& target)
   }
   ZList*  l = dynamic_cast<ZList*>(parent_leaf->fImg->fGlass);
   assert(l);
-  auto_ptr<ZMIR> mir (mSource->generate_MIR_header(l, target.get_glass()));
-  GVNS::ContextMethodInfo* cmi = parent_leaf->fImg->fClassInfo->
-    FindContextMethodInfo("AddBefore");
-  if(cmi) {
-    (cmi->fooCCCreator)(mir->Message);
-    fImg->fEye->Send(*mir);
-  } else {
-    throw(string(_eh + "AddBefore" + _meth_no_cat));
-  }
+
+  GNS::MethodInfo* cmi = parent_leaf->fImg->fClassInfo->
+    FindMethodInfo("AddBefore", true);
+  if(!cmi) throw(string(_eh + "AddBefore" + _meth_no_cat));
+  auto_ptr<ZMIR> mir (mSource->generate_MIR(cmi, l, target.get_glass()));
+  fImg->fEye->Send(*mir);
 }
 
 /**************************************************************************/
@@ -315,10 +306,10 @@ void FTW_Shell::X_Pop(FTW::Locator& target)
   ZGlass* g = l->Last();
   if(g==0) return;
   auto_ptr<ZMIR> mir( new ZMIR(l->GetSaturnID(), g->GetSaturnID()) );
-  GVNS::ContextMethodInfo* cmi = 
-    target.get_class_info()->FindContextMethodInfo("RemoveLast");
+  GNS::MethodInfo* cmi = 
+    target.get_class_info()->FindMethodInfo("RemoveLast", true);
   if(cmi) {
-    (cmi->fooCCCreator)(mir->Message);
+    cmi->ImprintMir(*mir);
     fImg->fEye->Send(*mir);
   } else {
     throw(string(_eh + "RemoveLast" + _meth_no_cat));
@@ -336,10 +327,10 @@ void FTW_Shell::X_Shift(FTW::Locator& target)
   ZGlass* g = l->First();
   if(g==0) return;
   auto_ptr<ZMIR> mir( new ZMIR(l->GetSaturnID(), g->GetSaturnID()) );
-  GVNS::ContextMethodInfo* cmi = 
-    target.get_class_info()->FindContextMethodInfo("Remove");
+  GNS::MethodInfo* cmi = 
+    target.get_class_info()->FindMethodInfo("Remove", true);
   if(cmi) {
-    (cmi->fooCCCreator)(mir->Message);
+    cmi->ImprintMir(*mir);
     fImg->fEye->Send(*mir);
   } else {
     throw(string(_eh + "Remove" + _meth_no_cat));
@@ -363,10 +354,10 @@ void FTW_Shell::X_Remove(FTW::Locator& target)
   ZList*  l = dynamic_cast<ZList*>(parent_leaf->fImg->fGlass);
   auto_ptr<ZMIR> mir( new ZMIR(l->GetSaturnID(), target.get_contents()) );
 
-  GVNS::ContextMethodInfo* cmi = parent_leaf->fImg->fClassInfo->
-    FindContextMethodInfo(f>0.5 ? "RemoveLast" : "Remove");
+  GNS::MethodInfo* cmi = parent_leaf->fImg->fClassInfo->
+    FindMethodInfo((f>0.5 ? "RemoveLast" : "Remove"), true);
   if(cmi) {
-    (cmi->fooCCCreator)(mir->Message);
+    cmi->ImprintMir(*mir);
     fImg->fEye->Send(*mir);
   } else {
     throw(string(_eh + "Remove" + _meth_no_cat));
@@ -391,7 +382,7 @@ void FTW_Shell::Y_SendMessage(const char* msg)
 
 /**************************************************************************/
 
-void FTW_Shell::ExecContextCall(FTW::Locator& alpha, GVNS::ContextMethodInfo* cmi)
+void FTW_Shell::ExecContextCall(FTW::Locator& alpha, GNS::MethodInfo* cmi)
 {
   static string _eh("FTW_Shell::ExecContextCall ");
 
@@ -412,22 +403,22 @@ void FTW_Shell::ExecContextCall(FTW::Locator& alpha, GVNS::ContextMethodInfo* cm
     }
     g = gamma->GetSaturnID();
   }
-  if(!cmi->fFreeArgs.empty()) {
+  if(!cmi->fArgs.empty()) {
     throw(_eh + cmi->fName + " requires additional args ... not coded");
   }
   // bitch for other arguments ... or code the damned val sucker (jona?)
   //   attach values as defaults to somewhere?
   // could do confirm / re-get context ... but need a MIR Send Window
   auto_ptr<ZMIR> mir( new ZMIR(a, b, g) );
-  (cmi->fooCCCreator)(mir->Message);
+  cmi->ImprintMir(*mir);
   fImg->fEye->Send(*mir);
 }
 
 void FTW_Shell::ExportToInterpreter(FTW::Locator& loc, const char* varname)
 {
-  GVNS::ClassInfo* ci = loc.get_class_info();
-  gROOT->ProcessLine(GForm("%s* %s = (%s*)%p;", ci->fClassName.c_str(), varname,
-			  ci->fClassName.c_str(), loc.get_glass()));
+  GNS::ClassInfo* ci = loc.get_class_info();
+  gROOT->ProcessLine(GForm("%s* %s = (%s*)%p;", ci->fName.c_str(), varname,
+			  ci->fName.c_str(), loc.get_glass()));
 }
 
 /**************************************************************************/
@@ -458,11 +449,11 @@ void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img)
 
 namespace {
   struct mir_call_data {
-    FTW_Shell* 		     shell;
-    FTW::Locator&            loc;
-    GVNS::ContextMethodInfo* cmi;
-    mir_call_data(FTW_Shell* s, FTW::Locator& l, GVNS::ContextMethodInfo* c) :
-      shell(s), loc(l), cmi(c) {}
+    FTW_Shell* 		shell;
+    FTW::Locator&       loc;
+    GNS::MethodInfo*	mi;
+    mir_call_data(FTW_Shell* s, FTW::Locator& l, GNS::MethodInfo* m) :
+      shell(s), loc(l), mi(m) {}
   };
 
   /**************************************************************************/
@@ -496,7 +487,7 @@ namespace {
 
   void mir_call_cb(Fl_Widget* w, mir_call_data* ud) {
     try {
-      ud->shell->ExecContextCall(ud->loc, ud->cmi);
+      ud->shell->ExecContextCall(ud->loc, ud->mi);
     }
     catch(string exc) {
       ud->shell->Message(exc.c_str(), FTW_Shell::MT_err);
@@ -524,16 +515,18 @@ void FTW_Shell::LocatorMenu(FTW::Locator& loc, int x, int y)
     menu.add("Export to CINT", 0, (Fl_Callback*)glass_export_cb, &lccd.back(), FL_MENU_DIVIDER);
 
     { // Context foos ... obtained from ClassInfo
-      GVNS::ClassInfo* ci = loc.get_class_info();
+      GNS::ClassInfo* ci = loc.get_class_info();
       while(ci) {
-	for(GVNS::lpContextMethodInfo_i cmi=ci->fCMIlist.begin(); cmi!=ci->fCMIlist.end(); ++cmi) {
-	  lccd.push_back(mir_call_data(this, loc, *cmi));
-	  menu.add(GForm("Methods/%s/%s (%d,%d)",
-			 ci->fClassName.c_str(), (*cmi)->fName.c_str(),
-			 (*cmi)->fContextArgs.size(), (*cmi)->fFreeArgs.size()),
-		   0, (Fl_Callback*)mir_call_cb, &lccd.back(), 0);
+	for(GNS::lpMethodInfo_i cmi=ci->fMethodList.begin();
+	    cmi!=ci->fMethodList.end(); ++cmi)
+	  {
+	    lccd.push_back(mir_call_data(this, loc, *cmi));
+	    menu.add(GForm("Methods/%s/%s (%d,%d)",
+			   ci->fName.c_str(), (*cmi)->fName.c_str(),
+			   (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
+		     0, (Fl_Callback*)mir_call_cb, &lccd.back(), 0);
 
-	}
+	  }
 	ci = ci->GetParentCI();
       };
 

@@ -13,8 +13,8 @@
 #include <iterator>
 
 namespace GledViewNS {
-  hLid2LSInfo_t	Lid2LSInfo;
   set<string>	RnrNames;
+  int no_symbol_label;
 } // GledViewNS
 
 namespace GVNS = GledViewNS;
@@ -71,19 +71,25 @@ Int_t GledViewNS::InitSoSet(const string& lib_set)
 
 void GledViewNS::BootstrapViewSet(LID_t lid, const string& libset)
 {
-  hLid2LSInfo_i i = Lid2LSInfo.find(lid);
-  if(i != Lid2LSInfo.end()) {
+  GledNS::LibSetInfo* gns_lsi = GledNS::FindLibSetInfo(lid);
+  if(gns_lsi == 0) {
+    ISerr(GForm("GledViewNS::BootstrapViewSet %s(id=%u) not loaded ...",
+		libset.c_str(), lid));
+    return;
+  }
+  if(gns_lsi->fViewPart != 0) {
     ISwarn(GForm("GledViewNS::BootstrapViewSet %s(id=%u) already loaded ...",
 		 libset.c_str(), lid));
     return;
   }
   ISmess(GForm("GledViewNS::BootstrapViewSet installing %s(id=%u) ...",
 	       libset.c_str(), lid));
-  Lid2LSInfo.insert(pair<LID_t, LibSetInfo>(lid, LibSetInfo(lid,libset)));
+
+  gns_lsi->fViewPart = new LibSetInfo();
   // Init deps as well ... loaded by link-time dependence
-  char** dep = GledNS::Lid2pLSI[lid]->fDeps;
+  char** dep = gns_lsi->fDeps;
   while(*dep) {
-    if(GledNS::Name2Lid.find(*dep) == GledNS::Name2Lid.end()) {
+    if(GledNS::IsLoaded(*dep) == false) {
       Int_t ini = InitSoSet(*dep);
       if(ini) {
 	ISerr("GledViewNS::BootstrapViewSet aborting");
@@ -96,6 +102,9 @@ void GledViewNS::BootstrapViewSet(LID_t lid, const string& libset)
 
 void GledViewNS::BootstrapClassInfo(ClassInfo* c_info)
 {
+  // This actually does nothing now ...
+  // The glass's bootstrap method needs to know master ClassInfo anyway.
+  /*
   FID_t& fid = c_info->fFid;
   hLid2LSInfo_i i = Lid2LSInfo.find(fid.lid);
   if(i == Lid2LSInfo.end()) {
@@ -110,24 +119,25 @@ void GledViewNS::BootstrapClassInfo(ClassInfo* c_info)
     return;
   }
   i->second.Cid2pCI[fid.cid] = c_info;
+  */
 }
 
 void GledViewNS::BootstrapRnrSet(const string& libset, LID_t lid,
-			    const string& rnr, A_Rnr_Creator_foo rfoo)
+				 const string& rnr, A_Rnr_Creator_foo rfoo)
 {
-  hLid2LSInfo_i i = Lid2LSInfo.find(lid);
-  if(i == Lid2LSInfo.end()) {
+  GledNS::LibSetInfo* gns_lsi = GledNS::FindLibSetInfo(lid);
+  if(gns_lsi == 0) {
     ISwarn(GForm("GledViewNS::BootstrapRnrSet LibSet %s(lid=%u) not loaded ...",
 		 libset.c_str(), lid));
     return;
   }
-  hRnr2RCFoo_i j = i->second.Rnr2RCFoo.find(rnr);
-  if(j != i->second.Rnr2RCFoo.end()) {
+  hRnr2RCFoo_i j = gns_lsi->fViewPart->Rnr2RCFoo.find(rnr);
+  if(j != gns_lsi->fViewPart->Rnr2RCFoo.end()) {
     ISwarn(GForm("GledViewNS::BootstrapRnrSet RnrCreator for rnr=%s, LibSet=%s (lid=%u) already present ...",
 		 rnr.c_str(), libset.c_str(), lid));
     return;
   }
-  i->second.Rnr2RCFoo[rnr] = rfoo;
+  gns_lsi->fViewPart->Rnr2RCFoo[rnr] = rfoo;
 }
 
 /**************************************************************************/
@@ -165,10 +175,12 @@ string GledViewNS::FabricateRnrInitFoo(const string& libset, const string& rnr)
 
 void GledViewNS::AssertRenderers()
 {
-  for(hLid2LSInfo_i lvrc=Lid2LSInfo.begin(); lvrc!=Lid2LSInfo.end(); ++lvrc) {
-    string libset = lvrc->second.fName;
+  GledNS::lpLSI_t ls_list;
+  GledNS::ProduceLibSetInfoList(ls_list);
+  for(GledNS::lpLSI_i lsi=ls_list.begin(); lsi!=ls_list.end(); ++lsi) {
+    string libset = (*lsi)->fName;
     for(set<string>::iterator rnr=RnrNames.begin(); rnr!=RnrNames.end(); ++rnr) {
-      if(lvrc->second.Rnr2RCFoo.find(*rnr) == lvrc->second.Rnr2RCFoo.end()) {
+      if((*lsi)->fViewPart->Rnr2RCFoo.find(*rnr) == (*lsi)->fViewPart->Rnr2RCFoo.end()) {
 	string cmd = FabricateRnrInitFoo(libset, *rnr);
 	long* p2foo = (long*) G__findsym( cmd.c_str() );
 	if(!p2foo) {
@@ -202,32 +214,6 @@ void GledViewNS::AddRenderer(const string& rnr)
 }
 
 /**************************************************************************/
-// Inquiries
-/**************************************************************************/
-
-GledViewNS::LibSetInfo* GledViewNS::FindLibSetInfo(LID_t lid)
-{
-  hLid2LSInfo_i i = Lid2LSInfo.find(lid);
-  if(i == GledViewNS::Lid2LSInfo.end()) {
-    ISerr(GForm("GledViewNS::FindLibSetInfo can't demangle lib id=%u", lid));
-    return 0;
-  }
-  return &(i->second);
-}
-
-GledViewNS::ClassInfo* GledViewNS::FindClassInfo(FID_t fid)
-{
-  if(fid.is_null()) return 0;
-  hLid2LSInfo_i i = Lid2LSInfo.find(fid.lid);
-  if(i == GledViewNS::Lid2LSInfo.end()) {
-    ISerr(GForm("GledViewNS::FindClassInfo can't demangle lib id=%u", fid.lid));
-    return 0;
-  }
-  return i->second.FindClassInfo(fid.cid);
-}
-
-
-/**************************************************************************/
 /**************************************************************************/
 // Services
 /**************************************************************************/
@@ -235,13 +221,13 @@ GledViewNS::ClassInfo* GledViewNS::FindClassInfo(FID_t fid)
 
 A_Rnr* GledViewNS::SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid)
 {
-  hLid2LSInfo_i i = Lid2LSInfo.find(lid);
-  if(i == GledViewNS::Lid2LSInfo.end()) {
+  GledNS::LibSetInfo* gns_lsi = GledNS::FindLibSetInfo(lid);
+  if(gns_lsi == 0) {
     ISerr(GForm("GledViewNS::SpawnRnr can't demangle lib id=%u", lid));
     return 0;
   }
-  hRnr2RCFoo_i j = i->second.Rnr2RCFoo.find(rnr);
-  if(j == i->second.Rnr2RCFoo.end()) {
+  hRnr2RCFoo_i j = gns_lsi->fViewPart->Rnr2RCFoo.find(rnr);
+  if(j == gns_lsi->fViewPart->Rnr2RCFoo.end()) {
     ISerr(GForm("GledViewNS::SpawnRnr can't find Rnr Constructor for %s",
 		rnr.c_str()));
     return 0;
@@ -255,110 +241,33 @@ A_Rnr* GledViewNS::SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid)
 /**************************************************************************/
 /**************************************************************************/
 
-/**************************************************************************/
-// GledViewNS::LibSetInfo
-/**************************************************************************/
+namespace {
+  struct infobase_name_eq : public unary_function<GledNS::InfoBase*, bool> {
+    string name;
+    infobase_name_eq(const string& s) : name(s) {}
+    bool operator()(const GledNS::InfoBase* ib) {
+      return ib->fName == name; }
+  };
+}
 
-GledViewNS::ClassInfo*
-GledViewNS::LibSetInfo::FindClassInfo(CID_t cid)
+
+GledViewNS::WeedInfo*
+GledViewNS::ClassInfo::FindWeedInfo(const string& name, bool recurse, GledNS::ClassInfo* true_class)
 {
-  hCid2pCI_i i = Cid2pCI.find(cid);
-  if(i == Cid2pCI.end()) {
-    ISerr(GForm("GledViewNS::LibSetInfo::FindClassInfo can't demangle class cid=%u",
-		cid));
-    return 0;
+  lpWeedInfo_i i = find_if(fWeedList.begin(), fWeedList.end(),
+			   infobase_name_eq(name));
+  if(i != fWeedList.end()) return *i;
+  if(recurse) {
+    GledNS::ClassInfo* p = true_class->GetParentCI();
+    if(p) return p->fViewPart->FindWeedInfo(name, recurse, true_class);
   }
-  return i->second;
+  return 0;
 }
 
-GledViewNS::ClassInfo*
-GledViewNS::LibSetInfo::FirstClassInfo()
-{
-  hCid2pCI_i i = Cid2pCI.begin();
-  if(i == Cid2pCI.end()) {
-    ISerr("GledViewNS::LibSetInfo::FirstClassInfo no classes found");
-    return 0;
-  }
-  return i->second;
-}
-
-/**************************************************************************/
-// GledViewNS::ClassInfo
-/**************************************************************************/
-
-GledViewNS::lpMemberInfo_t*
-GledViewNS::ClassInfo::ProduceFullMemberInfoList()
-{
-  // Recursive up call towards the base (ZGlass)
-  lpMemberInfo_t* ret;
-  ClassInfo* p = GetParentCI();
-  if(p) ret = p->ProduceFullMemberInfoList();
-  else	ret = new lpMemberInfo_t;
-  copy(fMIlist.begin(), fMIlist.end(), back_inserter(*ret));
-  return ret;
-}
-
-GledViewNS::lpLinkMemberInfo_t*
-GledViewNS::ClassInfo::ProduceFullLinkMemberInfoList()
-{
-  // Recursive up call towards the base (ZGlass)
-  lpLinkMemberInfo_t* ret;
-  ClassInfo* p = GetParentCI();
-  if(p) ret = p->ProduceFullLinkMemberInfoList();
-  else	ret = new lpLinkMemberInfo_t;
-  copy(fLMIlist.begin(), fLMIlist.end(), back_inserter(*ret));
-  return ret;
-}
-
-GledViewNS::MemberInfo* GledViewNS::ClassInfo::FindMemberInfo(const string& s)
-{
-  // !!!! should recurse into parent
-  mName2pMemberInfo_i i = fMImap.find(s);
-  if(i == fMImap.end()) {
-    ISerr(GForm("GledViewNS::ClassInfo::FindMemberInfo can't demangle name %s",
-		s.c_str()));
-    return 0;
-  }
-  return i->second;
-}
-
-struct cmi_name_eq : public unary_function<GVNS::ContextMethodInfo*, bool> {
-  string name;
-  cmi_name_eq(const string& s) : name(s) {}
-  bool operator()(const GVNS::ContextMethodInfo* cmi) {
-    return cmi->fName == name; }
-};
-
-GledViewNS::ContextMethodInfo*
-GledViewNS::ClassInfo::FindContextMethodInfo(const string& func_name)
-{
-  lpContextMethodInfo_i i = find_if(fCMIlist.begin(), fCMIlist.end(),
-				    cmi_name_eq(func_name));
-  if(i==fCMIlist.end()) {
-    ClassInfo* p = GetParentCI();
-    if(p) return p->FindContextMethodInfo(func_name);
-    else  return 0;
-  } else {
-    return *i;
-  }
-}
-
-/**************************************************************************/
-
-GledViewNS::ClassInfo* GledViewNS::ClassInfo::GetParentCI()
-{
-  if(!fParentCI && !fParentName.empty()) {
-    FID_t fid = GledNS::FindClass(fParentName);
-    fParentCI = const_cast<ClassInfo*>(GledViewNS::FindClassInfo(fid));
-  }
-  return fParentCI;
-}
-
-GledViewNS::ClassInfo* GledViewNS::ClassInfo::GetRendererCI()
+GledNS::ClassInfo* GledViewNS::ClassInfo::GetRendererCI()
 {
   if(!fRendererCI && !fRendererGlass.empty()) {
-    FID_t fid = GledNS::FindClass(fRendererGlass);
-    fRendererCI = const_cast<ClassInfo*>(GledViewNS::FindClassInfo(fid));
+    fRendererCI = GledNS::FindClassInfo(fRendererGlass);
   }
   return fRendererCI;
 }

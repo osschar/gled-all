@@ -19,22 +19,23 @@
 #include <memory>
 
 using namespace OptoStructs;
-namespace GV = GledViewNS;
+namespace GNS  = GledNS;
+namespace GVNS = GledViewNS;
 
 /**************************************************************************/
 // ZGlassImg
 /**************************************************************************/
 
 ZGlassImg::ZGlassImg(Eye* e, ZGlass* g) : fEye(e), fGlass(g) {
-  fClassInfo = GledViewNS::FindClassInfo(FID_t(g->ZibID(), g->ZlassID()));
+  fClassInfo = GNS::FindClassInfo(FID_t(g->ZibID(), g->ZlassID()));
   fIsList = dynamic_cast<ZList*>(g) ? true : false;
   fDefView = 0; fDefRnr = 0;
   fFullMTW_View = 0;
 
   lppZGlass_t links; g->CopyLinkRefs(links);
-  auto_ptr<GV::lpLinkMemberInfo_t> membs( fClassInfo->ProduceFullLinkMemberInfoList() );
+  auto_ptr<GNS::lpLinkMemberInfo_t> membs( fClassInfo->ProduceFullLinkMemberInfoList() );
   assert(links.size() == membs->size());
-  GV::lpLinkMemberInfo_i li = membs->begin();
+  GNS::lpLinkMemberInfo_i li = membs->begin();
   for(lppZGlass_i l=links.begin(); l!=links.end(); ++l, ++li) {
     fLinkData.push_back(ZLinkDatum(*li, this, **l));
   }
@@ -74,7 +75,7 @@ A_GlassView::~A_GlassView() {
 
 void A_GlassView::SpawnRnr(const string& rnr)
 {
-  fRnr = fImg->fClassInfo->SpawnRnr(rnr, fImg->fGlass);
+  fRnr = fImg->fClassInfo->fViewPart->SpawnRnr(rnr, fImg->fGlass);
 }
 
 void A_GlassView::InvalidateRnrScheme()

@@ -85,7 +85,7 @@ namespace FTW {
     ID_t		    get_contents(); // should be get_id
     ZGlass*		    get_glass();
     OptoStructs::ZGlassImg* get_image();
-    GledViewNS::ClassInfo*  get_class_info();
+    GledNS::ClassInfo*	    get_class_info();
 
     ZGlass*		    get_leaf_glass();
     ID_t		    get_leaf_id();
@@ -305,7 +305,7 @@ namespace FTW {
     virtual Fl_Color get_active_modcol() { return source_modcol; }
 
     bool has_contents();
-    ZMIR* generate_MIR_header(ZGlass* alpha, ZGlass* gamma=0);
+    ZMIR* generate_MIR(GledNS::MethodInfo* mi, ZGlass* alpha, ZGlass* gamma=0);
   };
 
   /**************************************************************************/
