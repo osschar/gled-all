@@ -104,9 +104,13 @@ for $ls (@{$resolver->{LibSetList}}) {
   for $d (@dirs) {
     my @classes;
     open C, "find $ls/$d -name \\*.h | xargs grep -h ClassDef |";
+
+    # !!!! Should sort glasses by ClassID and others alphabetically !!!!
+
     while($_ = <C>) {
       chomp;
       my $cnt = m/ClassDef\((\w+)\s*,\s*(\d+)\)/;
+      # !!!! Several classes per header file NOT supported !!!!
       unless($cnt) {
 	print "SAFR: $_\n";
 	next;
