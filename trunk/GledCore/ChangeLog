@@ -1,3 +1,180 @@
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	A_Rnr was made a sub-class of A_View. Now renderes produce their
+	own RnrSchemes (the default method in A_Rnr still does what
+	RnrDriver did before) and have direct access to the Eye, which
+	simplifies storage of, and access to, default lens renderers. As
+	all A_Views, A_Rnrs now receive Rays and can update their own
+	RnrSchemes when appropriate.
+	
+	This allows for purer (and much more powerfull) implementation of
+	rendering process.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Major clean-up: restructuring of rendering support.
+
+	A_GlassView, ZGlassView and ZListView classes have been removed:
+	they were only used by RnrDriver to obtain default
+	renderers. Before i was hoping to provide per-pupil customization
+	of rendering process via A_GlassView descendants. Now this can be
+	achieved by extension of RnrDriver (hopefully).
+
+	Extended ZLinkDatum to hold fToGlass and fToImg. ZLinkView has
+	been retained as a base-class for cases where update of
+	link-related data is expensive (used by FTW_Ant).
+
+	A_View now automatically checks itself in/out of
+	ZGlassImg; SetImg() is provided for cases when one wants to change
+	the observed lens (used by some widgets).
+
+	ZGlassImg: removed link-views and default view, added
+	default-rnr. Also added methods Pre/PostAbsorption(Ray&) which are
+	called by the Eye and can be used to prepare and cache additional
+	ray-processing data that is eye-local.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Rnr invalidation now done by rnrs themselves; each ray is also
+	delivered to lens-image (to update link/list representation).
+
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	Removed check-ins/outs for A_Views; use A_View::SetImg(). Fixed a
+	bug in display of status line during drag-n-drop.
+
+	* Eye/FTW_Ant.cxx:
+	* Eye/FTW_Ant.h:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Reflecting changes in optical systems.
+
+	* RnrBase/RnrScheme.cxx:
+	* RnrBase/RnrScheme.h:
+	Removed file: code moved to A_Rnr.
+
+	* RnrBase/A_Rnr.cxx:
+	* RnrBase/A_Rnr.h:
+	A_Rnr now subclasses A_View (and can thus absorb rays); RnrScheme
+	creatiion is now steered by a virtual method
+	A_Rnr::CreateRnrScheme. Implementation of RnrScheme has been moved
+	here.
+
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Creation of RnrScheme is now the task of A_Rnr (RnrDriver still
+	provides lens/image to rnr demangling (or instantiation) and some
+	service methods for filling RnrSchemes); implemented RnrMod stacks
+	hashed by FID_t: these allow low-level renderers to set-up and
+	retrieve configuration data via TObject*.
+
+	* Gled/GledTypes.h:
+	Added hash function for FID_t, made some FID_t methods const.
+
+	* GledView/GledViewNS.h:
+	Simplification of RnrCtrl: removed bRnrSelf and bRnrLinks.
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Added link mRnrMod and flags for control of self/element
+	rendering (bRnrSelf, bRnrElements, bModSelf, bModElements). Added
+	templated method GrepParentByGlass.
+
+	* Glasses/ZRnrModList.cxx:
+	* Glasses/ZRnrModList.h:
+	* Rnr/GL/ZRnrModList_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModList_GL_Rnr.h:
+	New glass: on Pre/PostDraw calls Pre/PostDraw of all
+	elements. Needed for setting up several modificators to a ZNode.
+
+	* glass.list:
+	New entry for ZRnrModList; ZNodeLink uses own rnr.
+
+	* Rnr/GL/ZNodeLink_GL_Rnr.cxx:
+	* Rnr/GL/ZNodeLink_GL_Rnr.h:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.h:
+	Override A_Rnr::CreateRnrScheme to produce configurable rendering.
+	
+	* Rnr/GL/GlobalLamps_GL_Rnr.cxx:
+	* Rnr/GL/GlobalLamps_GL_Rnr.h:
+	* Rnr/GL/LampLink_GL_Rnr.cxx:
+	* Rnr/GL/LampLink_GL_Rnr.h:
+	Use RnrDriver to obtain Lamp renderers.
+
+	* Glasses/Scene.cxx:
+	* Glasses/Scene.h:
+	Removed mRnrMods link: now available from ZNode.
+
+	* Net/Ray.h:
+	Added quantum numbers RQN_list_begin and RQN_list_end to
+	facilitate handling of list changes in A_Views.
+
+	* Glasses/AList.h:
+	* Glasses/Box.h:
+	* Glasses/Camera.h:
+	* Glasses/EyeInfo.h:
+	* Glasses/GledMonitor.h:
+	* Glasses/GlobalLamps.h:
+	* Glasses/Lamp.h:
+	* Glasses/LampLink.h:
+	* Glasses/NestInfo.h:
+	* Glasses/PerfMeterOperator.h:
+	* Glasses/PerfMeterTarget.h:
+	* Glasses/PipeEventor.h:
+	* Glasses/PupilInfo.h:
+	* Glasses/SaturnInfo.h:
+	* Glasses/SaturnObserver.h:
+	* Glasses/ScreenDumper.h:
+	* Glasses/ScreenText.h:
+	* Glasses/ShellInfo.h:
+	* Glasses/Sphere.h:
+	* Glasses/Text.h:
+	* Glasses/ZCometBag.h:
+	* Glasses/ZDeque.h:
+	* Glasses/ZEunuch.h:
+	* Glasses/ZFilterAggregator.h:
+	* Glasses/ZFireKing.h:
+	* Glasses/ZFireQueen.h:
+	* Glasses/ZGlBlending.h:
+	* Glasses/ZGlLightModel.h:
+	* Glasses/ZGlMaterial.h:
+	* Glasses/ZGlStateBase.h:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZGod.h:
+	* Glasses/ZGroupIdentity.h:
+	* Glasses/ZHashList.h:
+	* Glasses/ZIdentity.h:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.h:
+	* Glasses/ZKing.h:
+	* Glasses/ZList.h:
+	* Glasses/ZMEESelfFilter.h:
+	* Glasses/ZMethodTagPreFilter.h:
+	* Glasses/ZMirEmittingEntity.h:
+	* Glasses/ZMirFilter.h:
+	* Glasses/ZNameMap.h:
+	* Glasses/ZNodeLink.cxx:
+	* Glasses/ZNodeLink.h:
+	* Glasses/ZQueen.h:
+	* Glasses/ZRlFont.h:
+	* Glasses/ZRlNameRnrCtrl.h:
+	* Glasses/ZSubTree.h:
+	* Glasses/ZSunQueen.h:
+	Clean-up of RnrCtrl constructors; in most cases they are not
+	needed anymore.
+
 2005-02-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_View.cxx:
