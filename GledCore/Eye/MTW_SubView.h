@@ -77,11 +77,12 @@ public:
   void RemoveUpdateTimer();
   static void UpdateFromTimer_s(MTW_SubView* v);
 
-  void BuildFromList(GledViewNS::lpWeedInfo_t& l);
+  void BuildFromList(GledViewNS::lpWeedInfo_t& l, bool show_links);
   void UpdateVerticalStats(MTW_Vertical_Stats& vs, int cell_w);
   int  ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w);
 
   OptoStructs::ZLinkDatum* GrepLinkDatum(const string& link_fqn);
+  MTW_View* GetView() { return mView; }
 
   static const int MinLabelWidth;
 
