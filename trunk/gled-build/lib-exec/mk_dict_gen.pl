@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # $Header$
 
-# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,7 +19,19 @@ my $dict = $config->{DICT_DIR};
 while($_=shift) {
   ($cname) = m!/(\w+).h$!;
   # $cname is now base name ... also class name
+
   print "Messing $_ $cname, suff=",$CATALOG->{Classes}{$cname}{PragmaSuff},"\n";
+
+  my $pragma_suff;
+  if(exists $CATALOG->{Classes}{$cname}{PragmaSuff}) {
+    $pragma_suff = $CATALOG->{Classes}{$cname}{PragmaSuff};
+  } else {
+    if(exists $resolver->{GlassName2GlassSpecs}{$cname}) {
+      $pragma_suff = "!";
+    } else {
+      $pragma_suff = "+";
+    }
+  }
 
   $token = ($cname =~ m/NS$/) ? 'namespace' : 'class';
   #$token = 'class';
@@ -30,7 +42,7 @@ while($_=shift) {
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-#pragma link C++ ${token} ${cname}$CATALOG->{Classes}{$cname}{PragmaSuff};
+#pragma link C++ ${token} ${cname}${pragma_suff};
 $CATALOG->{Classes}{$cname}{Pragmas}
 #endif
 END
