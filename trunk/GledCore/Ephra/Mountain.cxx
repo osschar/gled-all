@@ -87,7 +87,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
     // suspended threads.
     // Time difference is wrong, but this shouldn't matter for multixen.
     op_arg->fBeatStart.SetNow();
-    op_arg->fBeatStart -= 1000 * di->fEventor->GetInterBeatMS() / 2;
+    op_arg->fBeatStart -= (Long_t)(1000 * di->fEventor->GetInterBeatMS() / 2);
     goto suspend_exit_check;
   }
 
