@@ -13,6 +13,8 @@
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_Window.H>
 
+class ZList;
+
 class FTW_Shell;
 class Fl_Menu_Button;
 class Fl_Menu_Item;
@@ -163,6 +165,45 @@ namespace FltkGledStuff {
 
     virtual int handle(int ev);
   };
+
+  /**************************************************************************/
+  // LensChoiceMenuBox
+  /**************************************************************************/
+  // A_View of Source.
+
+  class LensChoiceMenuBox : public OptoStructs::A_View, public Fl_Box
+  {
+  protected:
+    OptoStructs::ZGlassImg*  mAlphaImg;
+
+    string                   mSrcLinkName;
+    OptoStructs::ZLinkDatum* mSrcLinkDatum;
+    FID_t                    mSrcFid;
+
+    GledNS::MethodInfo*      mMInfo;
+
+    ZList* get_src_list();
+
+  public:
+    LensChoiceMenuBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
+
+    virtual void AbsorbRay(Ray& ray);
+
+    void EmitMir(ZGlass* beta);
+
+    void SetSrcImg(OptoStructs::ZGlassImg* i)
+    { mSrcLinkDatum = 0; SetImg(i); }
+    void SetSrcLinkName(const char* n)
+    { mSrcLinkDatum = 0; mSrcLinkName = n ? n : ""; }
+    void SetSrcFid(FID_t fid)
+    { mSrcFid = fid; }
+
+    void SetMethodInfo(GledNS::MethodInfo* mi) { mMInfo = mi; }
+
+    virtual int handle(int ev);
+
+  };
+
 }
 
 #endif

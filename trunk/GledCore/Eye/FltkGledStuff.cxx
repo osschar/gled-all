@@ -10,6 +10,7 @@
 
 #include "MCW_View.h"
 
+#include <Glasses/ZList.h>
 #include <Net/Ray.h>
 #include <Stones/ZMIR.h>
 
@@ -360,6 +361,7 @@ void FGS::LinkNameBox::Clear()
 /**************************************************************************/
 // MenuBox
 /**************************************************************************/
+
 void FGS::MenuBox::_init()
 {
   box((Fl_Boxtype)GVNS::menubar_box);
@@ -414,5 +416,99 @@ int FGS::MenuBox::handle(int ev)
     return fMenuButton->handle(ev);
   }
 
+  return 0;
+}
+
+/**************************************************************************/
+// LensChoiceMenuBox
+/**************************************************************************/
+
+FGS::LensChoiceMenuBox::LensChoiceMenuBox(OS::ZGlassImg* i,
+				     int x, int y, int w, int h, const char* t) :
+  A_View(0), Fl_Box(x,y,w,h,t),
+  mAlphaImg(i), mSrcLinkDatum(0), mMInfo(0)
+{
+  align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+}
+
+void FGS::LensChoiceMenuBox::AbsorbRay(Ray& ray)
+{
+  if(ray.fRQN == RayNS::RQN_death) {
+    SetSrcImg(0);
+    return;
+  }
+}
+
+void FGS::LensChoiceMenuBox::EmitMir(ZGlass* beta)
+{
+  static const string _eh("LensChoiceMenuBox::EmitMir ");
+
+  FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+  auto_ptr<ZMIR> mir( new ZMIR(mAlphaImg->fGlass->GetSaturnID(),
+			       beta->GetSaturnID()) );
+  mMInfo->ImprintMir(*mir);
+  mMInfo->FixMirBits(*mir, shell->GetSaturnInfo());
+  shell->Send(*mir);
+}
+
+/**************************************************************************/
+
+namespace {
+  void lcmb_select_cb(Fl_Menu_Button* m, ZGlass* ud)
+  { ((FGS::LensChoiceMenuBox*)m->user_data())->EmitMir(ud); }
+}
+
+int FGS::LensChoiceMenuBox::handle(int ev)
+{
+  static const string _eh("FGS::LensChoiceMenuBox::handle ");
+
+  if(ev == FL_PUSH && Fl::event_button() == 1) {
+    if(mMInfo == 0) return 0;
+
+    ZList* zlist = get_src_list();
+    if(zlist == 0) return 0;
+
+    FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+
+    Fl_Menu_Button m(x(), y(), w(), h() - Fl::box_dh(box()));
+    m.parent(parent());
+    m.user_data(this);
+    m.textsize(shell->cell_fontsize());
+
+    lpZGlass_t l; zlist->Copy(l);
+    for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
+      if(GledNS::IsA(*i, mSrcFid)) {
+	m.add((*i)->GetName(), 0, (Fl_Callback*)lcmb_select_cb, *i);
+      }
+    }
+
+    m.popup();
+    return 1;
+  }
+
+  return Fl_Box::handle(ev);
+}
+
+/**************************************************************************/
+
+ZList* FGS::LensChoiceMenuBox::get_src_list()
+{
+  if(fImg == 0) return 0;
+
+  OS::ZGlassImg* list_img = 0;
+
+  if(mSrcLinkName.length()) {
+    if(mSrcLinkDatum == 0) {
+      mSrcLinkDatum = fImg->GetLinkDatum(mSrcLinkName);
+      if(mSrcLinkDatum == 0) {
+	mSrcLinkName = "";
+	return 0;
+      }
+    }
+    list_img = mSrcLinkDatum->GetToImg();
+  } else {
+    list_img = fImg;
+  }
+  if(list_img && list_img->fIsList) return (ZList*)list_img->fGlass;
   return 0;
 }
