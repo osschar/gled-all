@@ -14,7 +14,7 @@ public:
   virtual void ODEDerivatives(const Double_t x, const ZVectorD& y, ZVectorD& d) = 0;
   virtual void ODEStart(ZVectorD& v, Double_t& x1, Double_t& x2) = 0;
 
-  ClassDef(ODECrawlerMaster,0)
+  ClassDef(ODECrawlerMaster,1)
 };
 
 class ODECrawler : public Eventor {
