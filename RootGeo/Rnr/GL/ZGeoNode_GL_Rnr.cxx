@@ -22,8 +22,7 @@ void ZGeoNode_GL_Rnr::Draw(RnrDriver* rd)
   if ( ud == 0 ) return;
 
   TGLFaceSet* fs = ud->fFaceSet;
-
-  if(!N.bRnrSelf || fs == 0) return;
+  if(fs == 0) return;
 
   if (N.mColor[3] < 1) {
     glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
