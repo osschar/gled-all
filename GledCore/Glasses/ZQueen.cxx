@@ -474,7 +474,11 @@ ID_t ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(attach_to->GetQueen() != this)
-    throw(_eh + "can only attach to my own subjects");
+    throw(_eh + "can only attach to my own subjects.");
+
+  if(attach_to->GetMIRActive() == false)
+    throw(_eh + "attach_to is not MIR active.");
+
 
   ZGlass* lens = GledNS::ConstructLens(FID_t(new_lid, new_cid));
   if(lens == 0) throw(_eh + "failed lens instantiation");
@@ -527,6 +531,10 @@ ID_t ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
 
   assert(bRuling);
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
+
+  if(attach_to->GetMIRActive() == false)
+    throw(_eh + "attach_to is not MIR active.");
+
 
   ZGlass* lens = GledNS::StreamLens(*mir);
   if(lens == 0) throw(_eh + "lens unstreaming failed.");
