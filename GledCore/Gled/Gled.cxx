@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -78,7 +78,7 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
     gSystem->ClosePipe(p);
   }
 
-  mAuthDir = GForm("%s/.gled/auth", getenv("HOME"));
+  mAuthDir = GForm("%s/.gled/auth", gSystem->Getenv("HOME"));
   mDefEyeIdentity = "guest";
 
   // Parse command-line options
@@ -408,7 +408,7 @@ Int_t Gled::LoadLibSet(LID_t lid)
     return 0;
   } else {
     Text_t buf[80];
-    FILE* f = fopen(GForm("%s/lib/.%u", getenv("GLEDSYS"), lid), "r");
+    FILE* f = fopen(GForm("%s/lib/.%u", gSystem->Getenv("GLEDSYS"), lid), "r");
     if(f == 0) {
       ISerr(GForm("Gled::LoadLibSet lid %u can not be demangled", lid));
       return -1;
