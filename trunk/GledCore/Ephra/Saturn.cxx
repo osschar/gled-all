@@ -209,6 +209,9 @@ Saturn::~Saturn() {
 
 string Saturn::HandleClientSideSaturnHandshake(TSocket*& socket)
 {
+  // Handles handshake with a Saturn on a newly opened socket.
+  // Returns greeting string.
+
   TInetAddress ia = socket->GetInetAddress();
   if(!socket->IsValid()) {
     delete socket; socket = 0;
@@ -228,6 +231,11 @@ string Saturn::HandleClientSideSaturnHandshake(TSocket*& socket)
 
 TMessage* Saturn::HandleClientSideMeeConnection(TSocket* socket, ZMirEmittingEntity* mee)
 {
+  // Sends request for instantiation of mee via socket.
+  // If authentication is required it is handled via
+  // ZSunQueen::HandleClientSideAuthentication(). The required identity
+  // is deduced from the TString ZMirEmittingEntity::mLogin.
+
   static const string _eh(""); // caller should prefix the exception
 
   { // Send the desired Identity & Mee
@@ -273,6 +281,8 @@ TMessage* Saturn::HandleClientSideMeeConnection(TSocket* socket, ZMirEmittingEnt
 
 void Saturn::Create(SaturnInfo* si)
 {
+  // Spawns SunAbsolute and starts internal Saturn threads.
+
   mSunInfo = mSaturnInfo = si;
   mSaturnInfo->hSocket = 0; // No masters above me
   bSunAbsolute = true;
@@ -309,6 +319,17 @@ void Saturn::Create(SaturnInfo* si)
 
 SaturnInfo* Saturn::Connect(SaturnInfo* si)
 {
+  // Connects to a higher Saturn, as specified by si->MasterName and
+  // si->MasterPort. Does the following:
+  // 1) handles handshake & protocol info exchange
+  // 2) queries first free id to establish beginning of local sun-space
+  // 3) authenticates to sun.absolute and receives higher kings, sun.queen
+  //    and the authorized SaturnInfo structure
+  // 4) starts MirShooting thread and server thread
+  // 5) issues requests for mirroring of mandatory queens
+  // The calling thread is given the identity of the return SaturnInfo, which
+  // is also assigned to mSaturnInfo member.
+
   static string _eh("Saturn::Connect ");
 
   bSunAbsolute = false;
@@ -417,6 +438,7 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
       }
     }
   }
+  
 
   return mSaturnInfo;
 }
@@ -431,6 +453,8 @@ void Saturn::AllowMoons()
 
 void Saturn::Shutdown()
 {
+  // Performs shutdown of connected objects and threads.
+
   // first should dump moons, eyez ...
 
   mChaItOss->Shutdown();

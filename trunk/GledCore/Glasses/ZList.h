@@ -66,6 +66,7 @@ public:
 
   ZGlass* First();
   ZGlass* Last();
+  virtual ZGlass* GetElementByName(const Text_t* name);
   virtual ZGlass* GetElementByName(const string& name);
 
   void         SetElementFID(FID_t fid);
