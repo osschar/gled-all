@@ -11,15 +11,12 @@
 #include <Glasses/GlobalLamps.h>
 
 class Scene : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Scene);
-
 private:
   void _init();
 
 protected:
-  GlobalLamps*		mGlobLamps; // X{gS} L{} RnrBits{3,0,7,0}
-  ZList*		mStateMods; // X{gS} L{} RnrBits{0,0,0,0, 3,0,7,0}
+  GlobalLamps*		mGlobLamps; // X{gS} L{} RnrBits{3,0,6,0}
 
 public:
   Scene(const Text_t* n="Scene", const Text_t* t=0) : ZNode(n,t) { _init(); }
