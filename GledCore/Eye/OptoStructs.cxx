@@ -6,6 +6,7 @@
 
 #include <Glasses/ZGlass.h>
 #include <Glasses/ZList.h>
+#include <Net/Ray.h>
 
 #include "OptoStructs.h"
 #include "Eye.h"
@@ -127,7 +128,14 @@ void ZGlassView::CopyLinkViews(lpZLinkView_t& v)
 
 /**************************************************************************/
 
-void ZGlassView::Absorb_LinkChange(LID_t lid, CID_t cid) {
+
+void ZGlassView::AbsorbRay(Ray& ray)
+{
+  // No parental absorber!
+
+  if(ray.fRQN != RayNS::RQN_link_change)
+    return;
+
   for(lpZLinkView_i l=fLinkViews.begin(); l!=fLinkViews.end(); ++l) {
     if((*l)->NeedsUpdate()) (*l)->Update();
   }
@@ -169,26 +177,39 @@ void ZListView::CopyListViews(lpA_GlassView_t& v)
 
 /**************************************************************************/
 
-void ZListView::Absorb_ListAdd(ZGlassImg* newdude, ZGlassImg* before) {
-  lpZGlassImg_i i = before ?
-    find(fDaughterImgs.begin(), fDaughterImgs.end(), before) :
-    fDaughterImgs.end();
-  fDaughterImgs.insert(i, newdude);
-}
+void ZListView::AbsorbRay(Ray& ray)
+{
+  using namespace RayNS;
+  switch(ray.fRQN) {
 
-void ZListView::Absorb_ListRemove(ZGlassImg* exdude) {
-  fDaughterImgs.remove(exdude);
-}
+  case RQN_list_add: {
+    lpZGlassImg_i i = ray.fGammaImg ?
+      find(fDaughterImgs.begin(), fDaughterImgs.end(), ray.fGammaImg) :
+      fDaughterImgs.end();
+    fDaughterImgs.insert(i, ray.fBetaImg);
+    return;
+  }
 
-void ZListView::Absorb_ListRebuild() {
-  fDaughterImgs.clear();
-  build_daughters();
-}
+  case RQN_list_remove: {
+    fDaughterImgs.remove(ray.fBetaImg);
+    return;
+  }
 
-void ZListView::Absorb_ListClear() {
-  fDaughterImgs.clear();
-}
+  case RQN_list_rebuild: {
+    fDaughterImgs.clear();
+    build_daughters();
+    return;
+  }
 
+  case RQN_list_clear: {
+    fDaughterImgs.clear();
+    return;
+  }
+
+  } // end switch ray.fRQN
+
+  ZGlassView::AbsorbRay(ray);
+}
 /**************************************************************************/
 
 void ZListView::AssertListRnrs(const string& rnr) {

@@ -68,8 +68,7 @@ public:
   // virtual const GledViewNS::RnrCtrl& GetRnrCtrl(), AssertRnr
   // invalidate rnr_scheme
 
-  virtual void Absorb_Change(LID_t lid, CID_t cid);
-  virtual void Absorb_LinkChange(LID_t lid, CID_t cid);
+  virtual void AbsorbRay(Ray& ray);
 
   // upon klicking on ReGen renderer just delete it (and mark change)
   //void ShowLinks();

@@ -8,7 +8,9 @@
 #include "FTW_Ant.h"
 #include "FTW_Branch.h"
 #include "FTW_Nest.h"
+#include "FltkGledStuff.h"
 #include <Glasses/ZGlass.h>
+#include <Net/Ray.h>
 
 #include "MTW_View.h"
 #include "MTW_Layout.h"
@@ -16,7 +18,8 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
 
-namespace OS = OptoStructs;
+namespace OS  = OptoStructs;
+namespace FGS = FltkGledStuff;
 
 /**************************************************************************/
 
@@ -140,20 +143,31 @@ void FTW_Leaf::CopyLinkViews(OS::lpZLinkView_t& v)
 }
 
 /**************************************************************************/
+void FTW_Leaf::AbsorbRay(Ray& ray)
+{
+  // No parental absorber!
 
-void FTW_Leaf::Absorb_Change(LID_t lid, CID_t cid) {
-  assert(mIter==-1);
-  if((lid==1 && cid==1) || (lid==0 && cid==0)) {
-    label_namebox();
-  }
-}
+  using namespace RayNS;
+  switch(ray.fRQN) {
 
-void FTW_Leaf::Absorb_LinkChange(LID_t lid, CID_t cid) {
-  assert(mIter==-1);
-  for(int c=0; c<wAntPack->children(); ++c) {
-    FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    if(a->NeedsUpdate()) a->Update();
+  case RQN_change: {
+    assert(mIter==-1);
+    if(ray.IsBasic()) {
+      label_namebox();
+    }
+    return;
   }
+
+  case RQN_link_change: {
+    assert(mIter==-1);
+    for(int c=0; c<wAntPack->children(); ++c) {
+      FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
+      if(a->NeedsUpdate()) a->Update();
+    }
+    return;
+  }
+
+  } // end switch ray.fRQN
 }
 
 /**************************************************************************/
@@ -298,7 +312,7 @@ void FTW_Leaf::resize_weeds() {
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>(wAntPack->child(c));
     int name_w = ant_w ? ant_w :
-      FTW::swm_label_width(a->fLinkDatum->fLinkInfo->fName, cell_w);
+      FGS::swm_label_width(a->fLinkDatum->fLinkInfo->fName, cell_w);
     a->resize_weeds(name_w, 2, 1);
   }
   wAntPack->size(1,1);
