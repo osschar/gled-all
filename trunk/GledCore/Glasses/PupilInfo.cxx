@@ -6,6 +6,7 @@
 
 #include "PupilInfo.h"
 #include "PupilInfo.c7"
+#include "ZQueen.h"
 
 ClassImp(PupilInfo)
 
@@ -17,14 +18,22 @@ void PupilInfo::_init()
   mUpRefAxis = 3;
 
   mMaxDepth = 100;
+
+  mWidth = 640; mHeight = 480;
+
   mClearColor.rgba(0,0,0);
-  mFOV = 90; mNearClip = 0.1; mFarClip = 500;
+  mFOV = 90; mNearClip = 0.01; mFarClip = 120;
   bLiMo2Side = false;
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
   bBlend = false;
-  mMSRotFac = -600; mMSMoveFac = -200;
-  mCHSize = 0.03;
-  bShowRPS = true;
+  mMSRotFac = -600; mMSMoveFac = -200; mAccelExp = 0.5;
+
+  mCHSize = 0.03;   mTextSize = 12;
+
+  bShowRPS = true; bRnrNames = false; bRnrTiles = true;
+  mNameOffset = 0.99;
+  mTextCol.rgba(1, 1, 1); mTileCol.rgba(0, 0, 0.3);
+
   mBuffSize = 4096; mPickW = 5; mPickH = 5;
 }
 
@@ -100,4 +109,37 @@ ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
   }
   mListMutex.Unlock();
   return 0;
+}
+
+/**************************************************************************/
+
+void PupilInfo::EmitDumpImageRay(const Text_t* filename)
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, LibID(), ClassID()));
+    if(filename != 0) {
+      TString fn(filename);
+      TBuffer cbuff(TBuffer::kWrite);
+      fn.Streamer(cbuff);
+      ray->SetCustomBuffer(cbuff);
+    }
+    mQueen->EmitRay(ray);
+  }
+}
+
+void PupilInfo::EmitImmediateRedrawRay()
+{
+  EmitDumpImageRay(0);
+}
+
+/**************************************************************************/
+
+void PupilInfo::EmitResizeRay()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_user_2, mTimeStamp, LibID(), ClassID()));
+    mQueen->EmitRay(ray);
+  }
 }
