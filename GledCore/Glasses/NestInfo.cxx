@@ -10,6 +10,8 @@
 //
 
 #include "NestInfo.h"
+#include "NestInfo.c7"
+
 #include <Ephra/Saturn.h>
 #include <Glasses/ZGod.h>
 #include <Glasses/ZQueen.h>
@@ -38,6 +40,16 @@ void NestInfo::AdEnlightenment()
 
 /**************************************************************************/
 
+void NestInfo::EnactLayout()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, LibID(), ClassID()));
+    mQueen->EmitRay(ray);
+  }
+
+}
+
 void NestInfo::ImportKings()
 {
   lpZGlass_t kings; mSaturn->GetGod()->Copy(kings);
@@ -46,5 +58,3 @@ void NestInfo::ImportKings()
 }
 
 /**************************************************************************/
-
-#include "NestInfo.c7"
