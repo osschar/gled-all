@@ -54,22 +54,48 @@ namespace FltkGledStuff {
   int swm_string_width(string& str, int cell_w);
 
   /**************************************************************************/
+  // LensNameBox
+  /**************************************************************************/
 
-  class LensNameBox : public OptoStructs::A_View, public Fl_Box {
+  class LensNameBox : public OptoStructs::A_View, public Fl_Box
+  {
+  protected:
+    string mToName;
+
   public:
     FID_t	fFID;
 
-    LensNameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h);
+    LensNameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
 
     virtual void AbsorbRay(Ray& ray);
 
+    virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
+
     void ChangeImage(OptoStructs::ZGlassImg* new_img);
 
-    virtual void auto_label();
+    void auto_label();
+
+    virtual void draw();
     virtual int  handle(int ev);
 
-    FGS_LABEL_HOLDING_WEED
     FGS_TOOLTIP_HOLDING_WEED
+  };
+
+  /**************************************************************************/
+  // LinkNameBox
+  /**************************************************************************/
+
+  class LinkNameBox : public OptoStructs::ZLinkView, public LensNameBox
+  {
+  protected:
+    string mToName;
+
+  public:
+    LinkNameBox(OptoStructs::ZLinkDatum* ld, int x, int y, int w, int h, const char* t=0);
+
+    virtual void Update();
+
+    virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
   };
 
 }

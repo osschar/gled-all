@@ -4,12 +4,16 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_MTW_View_H
-#define Gled_MTW_View_H
+#ifndef GledCore_MTW_View_H
+#define GledCore_MTW_View_H
 
 #include <Gled/GledTypes.h>
 #include "OptoStructs.h"
+#include "FTW_Shell.h"
+
+#include <FL/Fl_Window.H>
 #include <FL/Fl_Pack.H>
+#include <FL/Fl_SWM.H>
 
 class MTW_SubView; class MTW_Layout;
 class ZGlass;
@@ -20,24 +24,38 @@ typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
 
 class Fl_SWM_Manager;
 
-class MTW_View : public OptoStructs::A_View, public Fl_Pack {
+class MTW_View : public OptoStructs::A_View,
+		 public FTW_Shell_Client,
+		 public Fl_Pack, public Fl_SWM_Client
+{
 private:
+  void _init();
+
+protected:
+  void auto_label();
+  string m_label;
+
   ZGlass*		mGlass;
   lpMTW_SubView_t	mSubViews;
+
   int			mWidth;		// X{G}
   int			mHeight;	// X{G}
   int			mSkipH;		// X{Gs}
 
   bool			bShown;
+
+  Fl_Window*		mWindow;	// X{gs}
   
   // Some alignment flags, collapses per mid-class
 
 public:
-  MTW_View(OptoStructs::ZGlassImg* img); // View within an eye
-  MTW_View(ZGlass* glass);  		 // Direct view
+  // View created from FTW_Shell:
+  MTW_View(OptoStructs::ZGlassImg* img, FTW_Shell* shell);
+  // Direct view for non enlightened lenses:
+  MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr);
   ~MTW_View();
 
-  void BuildVerticalView(int cell_w);
+  void BuildVerticalView();
   void BuildByLayout(MTW_Layout* layout);
 
   virtual void AbsorbRay(Ray& ray);
@@ -45,13 +63,10 @@ public:
 
   virtual void InvalidateRnrScheme() {}
 
-  // void Retitle(); !! belongs to covering window !!
-  void UpdateViews(FID_t fid);
+  void UpdateDataWeeds(FID_t fid);
+  void UpdateLinkWeeds(FID_t fid);
 
-  static Fl_Window* ConstructVerticalWindow(OptoStructs::ZGlassImg* img,
-					    Fl_SWM_Manager* swm_mgr=0);
-  static Fl_Window* ConstructVerticalWindow(ZGlass* glass,
-					    Fl_SWM_Manager* swm_mgr=0);
+  void ShowWindow();
 
   virtual int handle(int ev);
 

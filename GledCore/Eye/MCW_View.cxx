@@ -96,7 +96,7 @@ MCW_View::CtxArg::CtxArg(string& typ, string& base_typ,
 {  
   FGS::LensNameBox* b = new FGS::LensNameBox(0, 0, 0, 14, 1);
   b->box(FL_ENGRAVED_BOX);
-  b->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+  // b->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   b->fFID = GNS::FindClassID(base_typ);
 
   Fl_Button* but = new Fl_Button(0, 0, 4, 1, "Clr");

@@ -11,6 +11,8 @@
 #include "MCW_View.h"
 
 #include <Net/Ray.h>
+#include <Stones/ZMIR.h>
+
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
 
@@ -57,12 +59,13 @@ int FGS::swm_label_width(string& str, int cell_w)
 int FGS::swm_string_width(string& str, int cell_w)
 { return swm_generick_width(str, cell_w, 0.2); }
 
+
 /**************************************************************************/
 // FGS::LensNameBox
 /**************************************************************************/
 
-FGS::LensNameBox::LensNameBox(OS::ZGlassImg* i, int x, int y, int w, int h) :
-  OS::A_View(0), Fl_Box(x,y,w,h)
+FGS::LensNameBox::LensNameBox(OS::ZGlassImg* i, int x, int y, int w, int h, const char* t) :
+  OS::A_View(0), Fl_Box(x,y,w,h,t)
 {
   labeltype((Fl_Labeltype)GVNS::no_symbol_label);
   color(fl_rgb_color(224,224,224));
@@ -82,11 +85,18 @@ void FGS::LensNameBox::AbsorbRay(Ray& ray)
   }
 }
 
+/**************************************************************************/
+
+void FGS::LensNameBox::ImagePasted(OS::ZGlassImg* new_img)
+{
+  ChangeImage(new_img);
+}
+
 void FGS::LensNameBox::ChangeImage(OS::ZGlassImg* new_img)
 {
   static const string _eh("FGS::LensNameBox::ChangeImage ");
 
-  if(new_img && !GNS::IsA(new_img->fGlass, fFID)) {
+  if(new_img && !fFID.is_null() && !GNS::IsA(new_img->fGlass, fFID)) {
     FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
     shell->Message
       (GForm("%sargument '%s::%s' is not of required type '%s'.", _eh.c_str(),
@@ -107,14 +117,25 @@ void FGS::LensNameBox::auto_label()
   if(fImg) {
     GNS::ClassInfo*   ci = fImg->fClassInfo;
     GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(ci->fFid.lid);
-    set_label(fImg->fGlass->GetName());
+    mToName = fImg->fGlass->GetName();
     set_tooltip(GForm("%s::%s [%d]", lsi->fName.c_str(), ci->fName.c_str(),
 		      fImg->fGlass->GetSaturnID()));
   } else {
-    set_label("<null>");
+    mToName = "<null>";
     set_tooltip(0);
   }
   redraw();
+}
+/**************************************************************************/
+
+void FGS::LensNameBox::draw()
+{
+  draw_box();
+  draw_label();
+  fl_color(FL_BLACK);
+  fl_push_clip(x()+3, y(), w()-6, h());
+  fl_draw(mToName.c_str(), x()+3, y(), w()-6, h(), FL_ALIGN_LEFT, 0, 0);
+  fl_pop_clip();
 }
 
 int FGS::LensNameBox::handle(int ev)
@@ -123,12 +144,20 @@ int FGS::LensNameBox::handle(int ev)
 
   switch(ev) {
 
-  case FL_PUSH:
+  case FL_PUSH: {
+    FTW_Shell *shell = grep_shell(parent());
+    if(shell == 0) return 0;
     switch (Fl::event_button()) {
     case 1: return 1;
     case 2: Fl::paste(*this); return 1;
+    case 3:
+      if(fImg) {
+	shell->ImageMenu(fImg, Fl::event_x_root(), Fl::event_y_root());
+      }
+      return 1;
     }
     break;
+  }
 
   case FL_DRAG: {
     if(Fl::event_state(FL_BUTTON1)) {
@@ -145,7 +174,19 @@ int FGS::LensNameBox::handle(int ev)
     break;
   }
 
+  case FL_RELEASE:
+    if(fImg && Fl::event_button() == 1 && Fl::event_inside(this) &&
+       Fl::event_clicks() == 1) 
+      {
+	Fl::event_clicks(0);
+	FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+	shell->SpawnMTW_View(fImg);
+      }
+    return 1;
+
   case FL_DND_ENTER: {
+    FTW_Shell *shell = grep_shell(parent());
+    if(shell == 0) return 0;
     // could check if valid type, change cursor
     return 1;
   }
@@ -160,12 +201,43 @@ int FGS::LensNameBox::handle(int ev)
   }
 
   case FL_PASTE: {
-    FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+    FTW_Shell *shell = grep_shell(parent());
+    if(shell == 0) return 0;
     ID_t source_id = shell->GetSource()->get_contents();
-    ChangeImage(shell->GetEye()->DemangleID(source_id));
+    ImagePasted(shell->GetEye()->DemangleID(source_id));
     return 1;
   }
   } // end switch(ev)
 
   return Fl_Box::handle(ev);
+}
+
+/**************************************************************************/
+// LinkNameBox
+/**************************************************************************/
+
+FGS::LinkNameBox::LinkNameBox(OS::ZLinkDatum* ld, int x, int y, int w, int h, const char* t) :
+  OS::ZLinkView(ld), LensNameBox(ld->GetToImg(),x,y,w,h,t)
+{
+  Update();
+}
+
+/**************************************************************************/
+
+void FGS::LinkNameBox::Update()
+{
+  ZLinkView::Update();
+  ChangeImage(GetToImg());
+}
+
+/**************************************************************************/
+
+void FGS::LinkNameBox::ImagePasted(OptoStructs::ZGlassImg* new_img)
+{
+  static const string _eh("LinkNameBox::ImagePasted ");
+
+  FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+  GNS::MethodInfo* mi = GetLinkInfo()->fSetMethod;
+  auto_ptr<ZMIR> mir (shell->GetSource()->generate_MIR(mi, fLinkDatum->fImg->fGlass));
+  fLinkDatum->fImg->fEye->Send(*mir);
 }

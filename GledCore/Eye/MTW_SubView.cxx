@@ -19,6 +19,7 @@
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace FGS  = FltkGledStuff;
+namespace OS   = OptoStructs;
 
 /**************************************************************************/
 
@@ -41,10 +42,40 @@ MTW_SubView::~MTW_SubView() {
 
 /**************************************************************************/
 
+Fl_Widget* MTW_SubView::CreateWeed(GVNS::WeedInfo* wi)
+{
+  Fl_Widget* w = (wi->fooWCreator)(this);
+  if(w == 0) return 0;
+  if(wi->bIsLinkWeed) {
+    mLinkWeeds.push_back( MTW_Weed(w, wi) );
+    w->box(FL_UP_BOX);
+    w->color(fl_rgb_color(220, 230, 240));
+  } else {
+    mDataWeeds.push_back( MTW_Weed(w, wi) );
+  }
+  mWeeds.push_back( MTW_Weed(w, wi) );
+  return w;
+}
+
+/**************************************************************************/
+
 void MTW_SubView::Update()
 {
+  UpdateDataWeeds();
+  UpdateLinkWeeds();
+}
+
+void MTW_SubView::UpdateDataWeeds()
+{
   RemoveUpdateTimer();
-  for(lMTW_Weed_i i=mWeeds.begin(); i!=mWeeds.end(); ++i) {
+  for(lMTW_Weed_i i=mDataWeeds.begin(); i!=mDataWeeds.end(); ++i) {
+    (i->fWeedInfo->fooWUpdate)(i->fWeed, this);
+  }
+}
+
+void MTW_SubView::UpdateLinkWeeds()
+{
+  for(lMTW_Weed_i i=mLinkWeeds.begin(); i!=mLinkWeeds.end(); ++i) {
     (i->fWeedInfo->fooWUpdate)(i->fWeed, this);
   }
 }
@@ -69,7 +100,7 @@ void MTW_SubView::UpdateFromTimer_s(MTW_SubView* v)
 {
   // cout << "Timer update !!!\n";
   v->mView->fImg->fGlass->ReadLock();
-  v->Update();
+  v->UpdateDataWeeds();
   v->mView->fImg->fGlass->ReadUnlock();
 }
 
@@ -78,8 +109,7 @@ void MTW_SubView::UpdateFromTimer_s(MTW_SubView* v)
 void MTW_SubView::BuildFromList(GVNS::lpWeedInfo_t& l)
 {
   for(GVNS::lpWeedInfo_i i=l.begin(); i!=l.end(); ++i) {
-    Fl_Widget* w = ((*i)->fooWCreator)(this);
-    mWeeds.push_back( MTW_Weed(w, *i) );
+    CreateWeed(*i);
     // cout <<" MTW_SubView::BuildFromList() adding member "<< (*i)->fName << endl; 
   }
   end();
@@ -200,6 +230,19 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
   } // for weeds
   size(lim.full, y);
   return y;
+}
+
+/**************************************************************************/
+
+OS::ZLinkDatum* MTW_SubView::GrepLinkDatum(const string& link_fqn)
+{
+  if(mView->fImg != 0) {
+    OS::lZLinkDatum_t& lds = mView->fImg->fLinkData;
+    for(OS::lZLinkDatum_i i=lds.begin(); i!=lds.end(); ++i)
+      if(i->GetLinkInfo()->FullName() == link_fqn)
+	return &(*i);
+  }
+  return 0;
 }
 
 /**************************************************************************/

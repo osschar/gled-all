@@ -416,11 +416,14 @@ FTW_Nest* FTW_Shell::SpawnNest(OS::ZGlassImg* img)
 void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img)
 {
   if(img->fFullMTW_View == 0) {
-    img->fFullMTW_View = MTW_View::ConstructVerticalWindow(img, this);
-    adopt_window(img->fFullMTW_View);
+    Fl_Window* w = new Fl_Window(0,0);
+    img->fFullMTW_View = new MTW_View(img, this);
+    w->end();
+    img->fFullMTW_View->BuildVerticalView();
+    adopt_window(w);
     mMTW_Views.insert(img);
   }
-  img->fFullMTW_View->show();
+  img->fFullMTW_View->ShowWindow();
 }
 
 void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)
@@ -611,6 +614,20 @@ void FTW_Shell::LocatorMenu(FTW::Locator& loc, int x, int y)
     
     menu.popup();
   }
+}
+
+void FTW_Shell::ImageMenu(OS::ZGlassImg* img, int x, int y)
+{
+  assert(img);
+
+  Fl_Menu_Button menu(x, y, 0, 0, 0);
+  menu.textsize(cell_fontsize());
+
+  mir_call_data_list mcdl;
+
+  FillImageMenu(img, menu, mcdl, "");
+    
+  menu.popup();
 }
 
 /**************************************************************************/
