@@ -54,7 +54,7 @@ void RnrDriver::PrepareRnrElements(OS::A_GlassView* gv, vlRnrElement_t& rev)
 
   const GVNS::RnrBits& top_rb = gv->GetRnrBits();
   // Low level renderer for gv
-  if(top_rb.SelfOnDirect()) {
+  if(gv->GetRnrCtrl().fRnrSelf && top_rb.SelfOnDirect()) {
     AssertGlassRnr(gv);
     fill_rnrelem_vec(gv, top_rb, rev, false, false);
   }
@@ -67,8 +67,8 @@ void RnrDriver::PrepareRnrElements(OS::A_GlassView* gv, vlRnrElement_t& rev)
 	const GVNS::RnrBits& rb	 = (*linkv)->GetRnrBits();
 	OS::A_GlassView* to_view = (*linkv)->GetView();
 
-	if(rb.SelfOnDirect()) {
-	  AssertGlassRnr(to_view);
+	if(rb.SelfOn()) {
+	  if(rb.SelfOnDirect()) AssertGlassRnr(to_view);
 	  fill_rnrelem_vec(to_view, rb, rev, false, true);
 	}
 
@@ -96,7 +96,7 @@ void RnrDriver::PrepareRnrElements(OS::A_GlassView* gv, vlRnrElement_t& rev)
 void RnrDriver::Render(OS::A_GlassView* gv)
 {
 
-  UChar_t max_rnr_level = gv->GetRnrCtrl().fMaxLvl;
+  UChar_t max_rnr_level = 7;
   if(max_rnr_level == 0) return;
   if(mMaxDepth <= 0) return;
   --mMaxDepth;
@@ -115,7 +115,7 @@ void RnrDriver::Render(OS::A_GlassView* gv)
       if(re->fView) {
 	//***
 	//cout <<"RnrDriver::Render Rendering "
-        //<< re->fView->fImg->fGlass->GetName() <<endl;
+	//<< re->fView->fImg->fGlass->GetName() <<endl;
 	Render(re->fView);
       } else {
 	re->fRnr->GetGlass()->ReadLock();
@@ -140,15 +140,15 @@ void RnrDriver::fill_rnrelem_vec(OS::A_GlassView* gv, const GVNS::RnrBits& bits,
     OS::lpA_GlassView_t el_views; gv->CopyListViews(el_views);
     if(bits.fList[0]) {
       for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[0]].push_back(RnrElement(gv->GetRnr(mRnrName), &A_Rnr::PreDraw));
+	rev[bits.fList[0]].push_back(RnrElement((*v)->GetRnr(mRnrName), &A_Rnr::PreDraw));
     }
     if(bits.fList[1]) {
       for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[1]].push_back(RnrElement(gv->GetRnr(mRnrName), &A_Rnr::Draw));
+	rev[bits.fList[1]].push_back(RnrElement((*v)->GetRnr(mRnrName), &A_Rnr::Draw));
     }
     if(bits.fList[2]) {
       for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[2]].push_back(RnrElement(gv->GetRnr(mRnrName), &A_Rnr::PostDraw));
+	rev[bits.fList[2]].push_back(RnrElement((*v)->GetRnr(mRnrName), &A_Rnr::PostDraw));
     }
     if(full_descent && bits.fList[3]) {
       for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)

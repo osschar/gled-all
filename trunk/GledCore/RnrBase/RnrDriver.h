@@ -12,6 +12,7 @@
 #include <Eye/OptoStructs.h>
 #include <GledView/GledViewNS.h>
 #include <GledView/GLTextNS.h>
+#include <Stones/ZColor.h>
 
 #include <stack>
 
@@ -30,12 +31,24 @@ protected:
   bool		bDryRun;	// X{Gs} Don't render, create Rnrs
 
   int		mMaxDepth;	// X{Gs} Max render level
-  lpZGlass_t	mPMStack;	// X{G}  Position Matrix Name Stack
+  lpZGlass_t	mPMStack;	// X{G}  Position Matrix Node Stack
 
   int		mMaxLamps;	// X{G}
   A_Rnr**	mLamps;
   
   bool		bRnrPureGlasses; // X{Gs}
+  bool		bRnrNames;	 // X{Gs}
+  bool		bRnrTiles;	 // X{Gs}
+  bool		bRnrFrames;	 // X{Gs}
+  Float_t	mNameOffset;	 // X{Gs}
+
+  Int_t		mTextSize;	 // X{Gs}
+  ZColor	mTextCol;	 // X{r}
+  ZColor	mTileCol;	 // X{r}
+  string	mTilePos;	 // X{rGs}
+
+  int		mWidth;		 // X{Gs}
+  int		mHeight;	 // X{Gs}
 
   void fill_rnrelem_vec(OptoStructs::A_GlassView* gv,
 			const GledViewNS::RnrBits& bits,
@@ -51,6 +64,7 @@ public:
     mMaxLamps = 8;
     mLamps = new A_Rnr*[mMaxLamps];
     bRnrPureGlasses = false;
+    bRnrNames = false; bRnrTiles = false;
     fTexFont = 0;
   }
   virtual ~RnrDriver() { delete [] mLamps; }
@@ -67,7 +81,9 @@ public:
   // Position Matrix Name Stack
   void PushPM(ZGlass* g) { mPMStack.push_back(g); }
   void PopPM() 		 { mPMStack.pop_back(); }
-  ZGlass* TopPM() 	 { return mPMStack.back(); }
+  ZGlass* TopPM() 	 { return mPMStack.empty() ? 0 : mPMStack.back(); }
+  int  SizePM()          { return mPMStack.size(); }
+  void ClearPM()         { mPMStack.clear(); }
 
   A_Rnr** GetLamps() { return mLamps; }
   void InitLamps();
