@@ -20,7 +20,7 @@ typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
 
 class Fl_SWM_Manager;
 
-class MTW_View : public OptoStructs::A_GlassView, public Fl_Pack {
+class MTW_View : public OptoStructs::A_View, public Fl_Pack {
 private:
   ZGlass*		mGlass;
   lpMTW_SubView_t	mSubViews;

@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_FTW_Ant
-#define Gled_FTW_Ant
+#ifndef GledCore_FTW_Ant
+#define GledCore_FTW_Ant
 
 #include <Eye/OptoStructs.h>
 #include "FTW.h"
@@ -35,19 +35,19 @@ protected:
   void modify_box_color(Fl_Color mod, bool on_p);
 
 public:
-  FTW_Ant(OptoStructs::ZGlassImg* from, OptoStructs::ZLinkDatum* ld, FTW_Leaf* p);
+  FTW_Ant(OptoStructs::ZLinkDatum* ld, FTW_Leaf* p);
   virtual ~FTW_Ant();
 
   virtual void Update();
 
-  virtual OptoStructs::A_GlassView* GetView();
-  // virtual const GledViewNS::RnrBits& GetRnrBits();
-
   void CollExp();
   void ListExpander(); // link + list members
 
-  bool IsSet()  { return (fToImg!=0); }
-  bool IsList() { return (fToImg && fToImg->fIsList); }
+  bool IsSet()  { return (fToGlass != 0); }
+  bool IsList() {
+    OptoStructs::ZGlassImg* to_img = GetToImg();
+    return (to_img && to_img->fIsList);
+  }
 
 #include "FTW_Ant.h7"
 }; // endclass FTW_Ant

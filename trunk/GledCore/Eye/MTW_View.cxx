@@ -22,7 +22,7 @@ namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;
 
 MTW_View::MTW_View(OS::ZGlassImg* img) :
-  OS::A_GlassView(img), Fl_Pack(0,0,0,0,0)
+  OS::A_View(img), Fl_Pack(0,0,0,0,0)
 {
   // end() called from BuildVerticalView() or BuildByLayout()
 
@@ -32,7 +32,7 @@ MTW_View::MTW_View(OS::ZGlassImg* img) :
 }
 
 MTW_View::MTW_View(ZGlass* glass) :
-  OS::A_GlassView(0), Fl_Pack(0,0,0,0,0)
+  OS::A_View(0), Fl_Pack(0,0,0,0,0)
 {
   // end() called from BuildVerticalView() or BuildByLayout()
 
@@ -152,13 +152,13 @@ void MTW_View::UpdateViews(FID_t fid)
 namespace {
 
   class MTW_View_Window : public Fl_Window, public Fl_SWM_Client,
-			  public OS::A_GlassView
+			  public OS::A_View
   {
   protected:
     string m_title_label;
   public:
     MTW_View_Window(OS::ZGlassImg* img, int x, int y, const char* t=0) :
-      Fl_Window(x,y,t), A_GlassView(img) {}
+      Fl_Window(x,y,t), A_View(img) {}
 
     ~MTW_View_Window() {}
 

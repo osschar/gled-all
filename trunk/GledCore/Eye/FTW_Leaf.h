@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_FTW_Leaf_H
-#define Gled_FTW_Leaf_H
+#ifndef GledCore_FTW_Leaf_H
+#define GledCore_FTW_Leaf_H
 
 #include "OptoStructs.h"
 #include "FTW.h"
@@ -16,12 +16,15 @@ class Fl_Box; class Fl_Button;
 
 #define FL_DARK_RED fl_color_cube(2,0,0)
 
-class FTW_Leaf : public Fl_Pack, public OptoStructs::A_GlassView {
+class FTW_Leaf : public Fl_Pack, public OptoStructs::A_View
+{
   friend class FTW_Shell;
   friend class FTW_Nest;
   friend class FTW::Locator;
+
 private:
   Int_t			mIter;
+
 protected:
   FTW_Nest*		mNest;	 // X{g}
   FTW_Leaf*		mParent; // X{g}
@@ -63,19 +66,9 @@ public:
 	   bool is_list_member, bool is_link_desc);
   virtual ~FTW_Leaf();
 
-  virtual void AssertDependantViews();
-  virtual void CopyLinkViews(OptoStructs::lpZLinkView_t& v);
-  // virtual const GledViewNS::RnrCtrl& GetRnrCtrl(), AssertRnr
-  // invalidate rnr_scheme
-
   virtual void AbsorbRay(Ray& ray);
 
-  // upon klicking on ReGen renderer just delete it (and mark change)
-  //void ShowLinks();
-  //void ShowRnrCtrl();
-  //void ShowMixer();
-
-  // general foonctionality, partially overridden in FTW_Branch
+  // General foonctionality, partially overridden in FTW_Branch.
   virtual void ExpandList() {}
   virtual void CollapseList() {}
 
