@@ -6,7 +6,8 @@ void Rect_GL_Rnr::Draw(RnrDriver* rd)
 {
   if(mRect->mWidth <= 0) return;
 
-  glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_LIGHTING_BIT);
+  glPushAttrib(GL_LINE_BIT     | GL_COLOR_BUFFER_BIT |
+	       GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT  );
   glPushMatrix();
   glDisable(GL_LIGHTING);
   glScalef(mRect->mULen, mRect->mVLen, 1);
@@ -14,7 +15,12 @@ void Rect_GL_Rnr::Draw(RnrDriver* rd)
   // Strips
   glLineWidth(mRect->mWidth);
   glColor4fv(mRect->mColor());
-  glNormal3f(0,0,1);
+  if(mRect->mColor.a() < 1) {
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+    glDepthMask(GL_FALSE);
+  }
   if(mRect->mUStrips) {
     Float_t step=1.0/mRect->mUStrips, u=-0.5;
     glBegin(GL_LINES);
