@@ -4,11 +4,12 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Gled_H
-#define Gled_Gled_H
+#ifndef GledCore_Gled_H
+#define GledCore_Gled_H
 
 // Includes
 #include <Gled/GledTypes.h>
+#include <Gled/GMutex.h>
 
 class Saturn;
 class SaturnInfo;
@@ -35,15 +36,21 @@ protected:
 
   SaturnInfo*	mSaturnInfo;	// X{G}
   Saturn*	mSaturn;	// X{G}
-  bool		bIsSun;		// X{G}
+  Bool_t	bIsSun;		// X{G}
 
-  bool		bQuit;		// X{G}
-  bool		bShowSplash;	// X{G}
-  bool		bAutoSpawn;	// X{G}
-  bool		bAllowMoons;	// X{G}
+  Bool_t	bQuit;		// X{G}
+  Bool_t	bShowSplash;	// X{G}
+  Bool_t	bAutoSpawn;	// X{G}
+  Bool_t	bAllowMoons;	// X{G}
 
-  bool		bRunRint;	// X{G}
-  bool		bRintRunning;	// X{G}
+  Bool_t	bRunRint;	// X{G}
+  Bool_t	bRintRunning;	// X{G}
+
+  GMutex	mLoggingMutex;
+  TString	mLogFileName;
+  FILE*		mLogFile;
+  TString	mOutFileName;
+  FILE*		mOutFile;
 
   TString	mAuthDir;	 // X{GS}
   TString	mDefEyeIdentity; // X{GS}
@@ -51,9 +58,13 @@ protected:
   GCondition*	mExitCondVar;
 
 public:
-  Gled(list<char*>& args);
-  virtual ~Gled();
+  Gled();
+  virtual void ParseArguments(list<char*>& args);
+  virtual void InitLogging();
   virtual void InitGledCore();
+
+  virtual void StopLogging();
+  virtual ~Gled();
 
   void SetExitCondVar(GCondition* cond) { mExitCondVar = cond; }
 
@@ -67,7 +78,7 @@ public:
   const char* GetPubKeyFile(TString& id, Bool_t use_exc=true);
   const char* GetPrivKeyFile(TString& id, Bool_t use_exc=true);
 
-  bool IsIdentityInGroup(const char* id, const char* group);
+  Bool_t IsIdentityInGroup(const char* id, const char* group);
 
   void WaitUntillQueensLoaded();
   void AllowMoonConnections();
@@ -86,8 +97,9 @@ public:
   virtual void warning(const char* s);
   virtual void error(const char* s);
 
-  virtual void SpawnEye(const char* name, const char* title=0);
-  virtual void SpawnEye(ShellInfo* si, const char* name, const char* title=0) {}
+  virtual EyeInfo* SpawnEye(const char* name, const char* title=0);
+  virtual EyeInfo* SpawnEye(ShellInfo* si, const char* name, const char* title=0)
+  { return 0; }
 
   static void* TRint_runner_tl(TRint* gint);
   static void* Gled_runner_tl(Gled* gled);

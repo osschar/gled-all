@@ -19,9 +19,6 @@
 #include <TInterpreter.h>
 #include <Getline.h>
 
-#include <FL/x.H>
-#include <FL/Fl.H>
-
 #include <X11/Xlib.h>
 
 #include <stdio.h>
@@ -60,8 +57,10 @@ int main(int argc, char **argv)
   gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
 
   // Spawn Gled
-  gled = new GledGUI(args);
+  gled = new GledGUI();
+  gled->ParseArguments(args);
   if(gled->GetQuit()) exit(0);
+  gled->InitLogging();
 
   // Prepare remaining args for ROOT, weed out remaining options
   int   rargc = 1;
@@ -87,15 +86,15 @@ int main(int argc, char **argv)
   gint->SetPrompt("gled[%d] ");
   printf("Use context menu in Nest to import lenses as CINT variables.\n");
 
-  // Init GledCore libset
-  gled->InitGledCore();
-
   // Run GUI
   GThread gled_thread((GThread_foo)Gled::Gled_runner_tl, gled, false);
   if( gled_thread.Spawn() ) {
     perror("gled.cxx can't create Gled thread");
     exit(1);
   }  
+
+  // Init GledCore libset
+  gled->InitGledCore();
 
   // Spawn saturn
   if(gled->GetAutoSpawn()) {
@@ -134,9 +133,8 @@ int main(int argc, char **argv)
   app_thread.Join();
 
   delete gint;
-  Fl::lock();
+  gled->StopLogging();
   delete gled;
-  Fl::unlock();
 
   exit(0);
 }
