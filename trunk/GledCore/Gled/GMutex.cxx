@@ -6,6 +6,7 @@
 
 #include "GMutex.h"
 #include <Gled/GledTypes.h>
+#include <Glasses/ZGlass.h>
 #include <errno.h>
 
 ClassImp(GMutex)
@@ -64,3 +65,17 @@ GMutex::Lock_e GMutex::Unlock()
   default:	return bad_init;
   }
 }
+
+/**************************************************************************/
+
+GLensReadHolder::GLensReadHolder(ZGlass* lens) : mLens(lens)
+{ mLens->ReadLock(); }
+
+GLensReadHolder::~GLensReadHolder()
+{ mLens->ReadUnlock(); }
+
+GLensWriteHolder::GLensWriteHolder(ZGlass* lens) : mLens(lens)
+{ mLens->WriteLock(); }
+
+GLensWriteHolder::~GLensWriteHolder()
+{ mLens->WriteUnlock(); }
