@@ -1,3 +1,49 @@
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* gled.cxx:
+	* saturn.cxx:
+
+	Changed user-thread code to be POSIX compliant (used LinuxThreads
+	specifics before).
+
+	In particular SigUSR1 and SigUSR2 are used to suspend/restart
+	signal-safe threads. TRint is stopped by thread cancellation.
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	* Eye/Eye.cxx:
+
+	Restructuring of protocol for new server connections.
+
+	Now have a static Int_t Saturn::s_Gled_Protocol_Version.  The
+	connecting client now sends messages with well defined types to
+	initiate server response.
+	
+	* Glasses/ZGlass.h: mExecMutex and mRefCountMutex are now
+	mutable. Needed for const Get methods when locking is required.
+
+	* Rnr/GL/TubeTvor_GL_Rnr.cxx:
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+
+	Added support for texture coordinates.
+	
+	* Gled/GSelector.h: Changed default mutex init to fast (was
+	resursive) for consistency.
+
+	* Glasses/Eventor.cxx:
+	* Glasses/EyeInfo.cxx:
+	* Glasses/ZNode.cxx:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* GledView/GledGUI.cxx:
+
+	Minimal code clean-up.
+	
 2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW.cxx:
