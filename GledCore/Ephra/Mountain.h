@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Mountain_H
-#define Gled_Mountain_H
+#ifndef GledCore_Mountain_H
+#define GledCore_Mountain_H
 
 #include <Glasses/Eventor.h>
 #include <Gled/GThread.h>
@@ -32,7 +32,11 @@ struct DancerInfo {
   DancerInfo(ZMirEmittingEntity* o, GThread* t, Eventor* e, Mountain* m) :
     fOwner(o), fThread(t), fEventor(e), fMountain(m), fOpArg(0),
     fSuspended(false), fSleeping(false),
-    fShouldSuspend(false), fShouldExit(false) {}
+    fShouldSuspend(false), fShouldExit(false)
+  {}
+
+  ~DancerInfo()
+  { delete fThread; }
 };
 
 #ifndef __CINT__
@@ -67,6 +71,7 @@ public:
   void Resume(Eventor* e);
   void Cancel(Eventor* e);
 
+  DancerInfo* UnregisterThread(Eventor* e);
   void WipeThread(Eventor* e);
 
   // Suspension mechanism
