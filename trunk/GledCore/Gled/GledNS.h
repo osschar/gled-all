@@ -182,6 +182,7 @@ namespace GledNS {
   // Inquiries
 
   LibSetInfo* FindLibSetInfo(LID_t lid);
+  LibSetInfo* FindLibSetInfo(const string& lib_set);
   void	      ProduceLibSetInfoList(lpLSI_t& li_list);
   ClassInfo*  FindClassInfo(FID_t fid);
   ClassInfo*  FindClassInfo(const string& name);
