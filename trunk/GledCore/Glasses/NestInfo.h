@@ -22,6 +22,9 @@ private:
   void _init();
 
 protected:
+  Bool_t	bShowSelf;      // X{GS} 7 Bool(-join=>1)
+  Int_t		mMaxChildExp;	// X{GS} 7 Value(-range=>[0,1000,1])
+
   LeafLayout_e  mLeafLayout;    // X{GS} 7 PhonyEnum()
   TString       mLayout;        // X{GS} 7 Textor()
 

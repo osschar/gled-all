@@ -26,6 +26,9 @@ void NestInfo::_init()
   mCtorLibset = "GledCore";
   mCtorName   = "FTW_Nest";
 
+  bShowSelf   = false;
+  mMaxChildExp   = 1;
+
   mLeafLayout = LL_Ants;
 }
 
