@@ -21,4 +21,7 @@
 *.jpeg		-k 'b'
 *.jpg		-k 'b'
 *.png		-k 'b'
+*.eps		-k 'b'
+*.fig		-k 'b'
+*.dia		-k 'b'
 *.gts		-k 'b'
