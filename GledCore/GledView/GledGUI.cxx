@@ -34,7 +34,12 @@
 /**************************************************************************/
 
 namespace {
-  void* tf_MessageLoop(GledGUI* gui) { gui->MessageLoop(); return 0; }
+
+  void* tf_MessageLoop(GledGUI* gui) {
+    gui->MessageLoop();
+    GThread::Exit();
+    return 0;
+  }
 
   void quit_cb(Fl_Widget* o, void* ud) { GledGUI::theOne->Exit(); }
 
@@ -202,6 +207,7 @@ void GledGUI::Exit()
   // ... !!!
   bGUIup = false;
   Gled::Exit();
+  
   Fl::lock();
   Fl::awake();
   Fl::unlock();

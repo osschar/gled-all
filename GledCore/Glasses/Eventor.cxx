@@ -266,8 +266,8 @@ void Eventor::SetHost(SaturnInfo* host)
   if(mHost) mHost->DecRefCount();
   mHost = host;
   if(mHost) mHost->IncRefCount();
-  mExecMutex.Unlock();
   StampLink(LibID(), ClassID());
+  mExecMutex.Unlock();
 }
 
 /*

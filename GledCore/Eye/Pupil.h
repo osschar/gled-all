@@ -12,12 +12,9 @@
 #include <Glasses/Camera.h>
 
 #include <Eye/OptoStructs.h>
-//class Eye;
+
 class PupilInfo;
 class FTW_Leaf;
-//class ZNodeMixer;
-//#include <Eye/GLoodge.h>
-//#include <FL/ForestView.h>
 
 #include <RnrBase/RnrDriver.h>
 
@@ -28,10 +25,8 @@ class FTW_Leaf;
 // !!!! Need locator
 
 class Pupil : public Fl_Gl_Window {
+
 private:
-  //Eye*		mEye;
-  //ForestView*	mForestView;
-  //GLoodge*	mGLoodge;
   PupilInfo*	mInfo;
   FTW_Leaf*	mLeaf;
   OptoStructs::ZGlassView* mRoot;
@@ -51,7 +46,6 @@ private:
   void		Label();
 
 public:
-  //Pupil(PupilInfo* info, FTW_Leaf* leaf, int w=640, int h=480, const char* l="Pupil");
   Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, int w=640, int h=480);
   virtual ~Pupil();
 

@@ -166,6 +166,7 @@ Int_t ZNode::SetRotByDegrees(Real_t a1, Real_t a2, Real_t a3)
 {
   Real_t f = TMath::Pi()/180;
   SetRotByAngles(f*a1, f*a2, f*a3);
+  return 1;
 }
 
 /**************************************************************************/
