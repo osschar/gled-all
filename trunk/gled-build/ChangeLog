@@ -1,5 +1,8 @@
 2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* make/make_base.inc: File lib/.[libset_id] was not removed on
+	uninstall.
+
 	* configure:
 	* configure.rc:
 
@@ -10,7 +13,7 @@
 	* MANIFEST:
 
 	Corrected for the new build procedure.
-	
+
 	* build_libsets:
 	* mecca:
 	* mecca.rc:
