@@ -21,7 +21,7 @@
 class TGeoMatrix;
 
 class ZGeoNode : public ZNode {
-  // 7777 RnrCtrl("true, true, RnrBits(2,4,6,0, 0,0,0,3)")
+  // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,3))
   MAC_RNR_FRIENDS(ZGeoNode);
   friend class ZGeoOvlMgr;
 
@@ -51,8 +51,6 @@ class ZGeoNode : public ZNode {
   virtual void Restore();                  // X{Ed} 7 MButt()
 
  protected:
-  Bool_t	        bRnrSelf;   // X{G} 7 Bool()
-
   void setup_ztrans(ZNode* zn, TGeoMatrix* gm);
   void setup_color(Float_t alpha);
   TGeoNode* get_tnode_search_point();
@@ -71,7 +69,6 @@ class ZGeoNode : public ZNode {
   virtual void RnrOffForDaughters();               // X{ED} 7 MButt()
   virtual void RnrOnRec();                         // X{ED} 7 MButt(-join=>1)   
   virtual void RnrOffRec();                        // X{ED} 7 MButt() 
-  virtual void SetRnrSelf(Bool_t rnrself);         // X{E}
 
   // Manual Get/Set-methods
   void SetTNode(TGeoNode* n)
