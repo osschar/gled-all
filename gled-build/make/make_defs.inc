@@ -44,8 +44,8 @@ GLLIB	  = -lGL -lGLU
 FLLIB	  = -lfltk -lfltk_gl -lfltk-mt
 
 ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lCint -lGraf -lGraf3d -lGpad \
-		-lHist -lHistPainter -lMatrix \
-                -lPostscript -lProof -lRint -lTree # -lNew
+		-lHist -lHistPainter -lMatrix -lPhysics \
+                -lPostscript  -lRint -lTree # -lProof -lNew
 ROOTGLIBS = -lGui -lGX11
 
 GUILIBS	= -L/usr/X11R6/lib -lX11 -lXext -lXpm ${FLLIB} ${GLLIB}
