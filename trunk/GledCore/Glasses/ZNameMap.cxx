@@ -36,13 +36,20 @@ void ZNameMap::clear_list()
 
 /**************************************************************************/
 
-void ZNameMap::remove_references_to(ZGlass* lens)
+Int_t ZNameMap::remove_references_to(ZGlass* lens)
 {
-  ZGlass::remove_references_to(lens);
-
-  if(Has(lens)) {
-    Remove(lens);
+  Int_t n = ZGlass::remove_references_to(lens);
+  mListMutex.Lock();
+  Name2LIter_i i = mItMap.find(lens->GetName());
+  if(i != mItMap.end()) {
+    mGlasses.erase(i->second); --mSize;
+    mItMap.erase(i);
+    StampListRemove(lens);
+    lens->unregister_name_change_cb(this);
+    ++n;
   }
+  mListMutex.Unlock();
+  return n;
 }
 
 /**************************************************************************/
@@ -111,7 +118,7 @@ void ZNameMap::Remove(ZGlass* g)
     StampListRemove(g);
     mListMutex.Unlock();
     g->DecRefCount(this);
-    g->register_name_change_cb(this);
+    g->unregister_name_change_cb(this);
   } else {
     // Try also "remove by glass ptr"
     UInt_t old_size = mSize;

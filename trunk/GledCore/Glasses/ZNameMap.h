@@ -24,7 +24,7 @@ protected:
 
   virtual void clear_list();
 
-  virtual void remove_references_to(ZGlass* lens);
+  virtual Int_t remove_references_to(ZGlass* lens);
 
   lpZGlass_i insert(ZGlass* g, const string& name);
 

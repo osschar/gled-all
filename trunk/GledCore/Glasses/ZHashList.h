@@ -23,7 +23,7 @@ protected:
 
   virtual void clear_list();
 
-  virtual void remove_references_to(ZGlass* lens);
+  virtual Int_t remove_references_to(ZGlass* lens);
 
   bool	bNerdyListOps;	// X{GS} 7 Bool()
 

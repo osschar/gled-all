@@ -35,13 +35,20 @@ void ZHashList::clear_list()
 
 /**************************************************************************/
 
-void ZHashList::remove_references_to(ZGlass* lens)
+Int_t ZHashList::remove_references_to(ZGlass* lens)
 {
-  ZGlass::remove_references_to(lens);
-
-  if(Has(lens)) {
-    Remove(lens);
+  Int_t n = ZGlass::remove_references_to(lens);
+  mListMutex.Lock();
+  Glass2LIter_i i = mItHash.find(lens);
+  if(i != mItHash.end()) {
+    mGlasses.erase(i->second); --mSize;
+    mItHash.erase(i);
+    StampListRemove(lens);
+    ++n;
   }
+  mListMutex.Unlock();
+
+  return n;
 }
 
 /**************************************************************************/
