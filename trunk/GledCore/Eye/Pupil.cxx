@@ -7,6 +7,7 @@
 #include "Pupil.h"
 #include "Eye.h"
 #include "FTW_Shell.h"
+#include "MTW_View.h"
 
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
@@ -115,7 +116,9 @@ void Pupil::dump_image()
 
 Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, int w, int h) :
   Fl_Gl_Window(w,h), OS::A_View(infoimg),
-  mInfo(0), mRoot(zgv)
+  mInfo(0), mRoot(zgv),
+  mCameraView(0), mCameraViewWin(0),
+  mCamBase(0)
 {
   if(fImg) {
     fImg->CheckInFullView(this);
@@ -129,23 +132,26 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, int w, int h) :
   size_range(0, 0, 4096, 4096);
 
   mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
-  mBase = 0;
+
   mCamera = new Camera;
-  if(mInfo->GetCameraBase() == 0) {
+
+  mCamBase = mInfo->GetCameraBase();
+  if(mCamBase == 0) {
     mCamera->RotateLF(1, 2, TMath::Pi()/2);
     mCamera->MoveLF(1, -5);
     mCamera->MoveLF(3, 2);
     mCamera->RotateLF(3, 1, 30*TMath::DegToRad());
-    // mCamera->mParent = base;
+    // CamBaseTrans remains identity.
+  } else {
+    // Camera remains identity.
+    auto_ptr<ZTrans> t( mInfo->ToPupilFrame(mCamBase) );
+    if(t.get() != 0) mCamBaseTrans = *t;
   }
-
-  // pInfo = new PupilInfo();
-  // pInfo->SetStampCallback((znode_stamp_f)PupilStamp, this);
+  mCamAbsTrans  = mCamBaseTrans;
+  mCamAbsTrans *= mCamera->RefTrans();
 
   mTexFont = 0;
 
-  bJustCamera = true;
-  bFollowBase = false;
   bFullScreen = false;
 
   bDumpImage  = false;
@@ -223,114 +229,159 @@ void Pupil::SetProjection2()
 		 mInfo->GetNearClip(),  mInfo->GetFarClip());
 }
 
-void Pupil::SetCameraView()
+void Pupil::SetAbsRelCamera()
 {
-  ZTrans z;
+  static const string _eh("Pupil::SetCameraView ");
+
   ZNode* cam_base = mInfo->GetCameraBase();
-  if(cam_base) {
-    auto_ptr<ZTrans> t( mInfo->ToPupilFrame(cam_base) );
-    if(t.get() != 0) {
-      z *= *t;
-    } else {
-      printf("Pupil::SetCameraView cam_base is not connected ... ignoring.\n");
+  if(mCamBase != cam_base) {
+    if(mCamBase != 0) {
+      mCamera->SetTrans( mCamBaseTrans * mCamera->RefTrans() );
     }
-    z *= mCamera->GetTrans();
-  } else {
-    z = mCamera->GetTrans();
+    mCamBase = 0;
+    mCamBaseTrans.UnitTrans();
+    if(cam_base != 0) {
+      auto_ptr<ZTrans> t( mInfo->ToPupilFrame(cam_base) );
+      if(t.get() != 0) {
+	mCamBase = cam_base;
+	mCamBaseTrans = *t;
+	t->Invert();
+	mCamera->SetTrans( *t * mCamera->RefTrans() );
+      }
+    }
   }
+
+
+  // Begin set-up of CamAbsTrans in 'z'
+  ZTrans z;
+  if(mCamBase) {
+    auto_ptr<ZTrans> t( mInfo->ToPupilFrame(mCamBase) );
+    if(t.get() != 0) {
+      mCamBaseTrans = *t;
+      z = *t;
+    } else {
+      mCamBaseTrans.UnitTrans();
+      cout << _eh << "CameraBase is not connected ... ignoring.\n";
+    }
+    z *= mCamera->RefTrans();
+  } else {
+    z = mCamera->RefTrans();
+  }
+
+  // Here 'z' should be (optionally) unscaled. ?
+  // Dump that ... think.
+
+  TVector3 c_pos( z.GetBaseVec3(4) );
+  TVector3 x_vec( z.GetBaseVec3(1) ); // Forward vector
+  TVector3 z_vec( z.GetBaseVec3(3) ); // Up vector
+  TVector3 y_vec;                     // Deduced from x and z vecs at the end.
+  bool abs_cam_changed = false;
+  bool look_at_p       = false;
 
   ZNode* look_at = mInfo->GetLookAt();
-  if(look_at) {
+  if(look_at != 0) {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(look_at) );
     if(t.get() != 0) {
-      TVector3 cam_pos(   z(1,4),    z(2,4),    z(3,4));
-      TVector3 obj_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
-      TVector3 delta = obj_pos - cam_pos;
-      delta.SetMag(1);
-      
-      TVector3 up(0, 0, 0); // take absolute z for up reference
-      bool done = false;
-      ZNode* up_ref = mInfo->GetUpReference();
-      if(up_ref != 0) {
-	auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
-	if(t.get() != 0) {
-	  Int_t c = mInfo->GetUpRefAxis();
-	  up.SetXYZ((*t)(1u,c), (*t)(2u,c), (*t)(3u,c));
-	  done = true;
-	} else {
-	  printf("Pupil::SetCameraView up_ref not connected ... ignoring.\n");
-	}
+      TVector3 o_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
+      x_vec = (o_pos - c_pos);
+      Float_t min_dist = mInfo->GetLookAtMinDist();
+      if(min_dist != 0) {
+	Float_t dist = x_vec.Mag();
+	if(dist < min_dist)
+	  c_pos = o_pos - min_dist/dist*x_vec;
       }
-      if(!done) {
-	int idx = mInfo->GetUpRefAxis();
-	if(idx > 0) up(idx-1) = 1;
-      }
-
-      Double_t dp = up.Dot(delta);
-      // should have: if(dp < eps) ... but then need pos history
-      up -= dp*delta;
-      gluLookAt(z(1u,4u), z(2u,4u), z(3u,4u),
-		(*t)(1u,4u), (*t)(2u,4u), (*t)(3u,4u),
-		up.x(), up.y(), up.z());
-
-      return;
+      abs_cam_changed = true;
+      look_at_p       = true;
     } else {
-      printf("Pupil::SetCameraView look_at is not connected ... ignoring.\n");
+      cout << _eh << "LookAt is not connected ... ignoring.\n";
     }
   }
-  gluLookAt(z(1,4), z(2,4), z(3,4),
+
+  ZNode* up_ref = mInfo->GetUpReference();
+  if(up_ref != 0) {
+    auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
+    if(t.get() != 0) {
+      z_vec = t->GetBaseVec3( mInfo->GetUpRefAxis() );
+      abs_cam_changed = true;
+    } else {
+      cout << _eh << "UpReference not connected ... ignoring.\n";
+    }
+  }
+
+  // Ortonormalize the vectors.
+  if(abs_cam_changed) {
+    if(x_vec.Mag2() == 0) {
+      x_vec = mCamAbsTrans.GetBaseVec3(1);
+    }
+    x_vec = x_vec.Unit();
+    z_vec = z_vec.Unit();
+
+    Double_t xz_dp  = z_vec.Dot(x_vec);
+    Double_t max_dp = TMath::Cos(TMath::DegToRad()*mInfo->GetUpRefMinAngle());
+    // printf("dp=%f max_dp=%f min_angle=%f\n", xz_dp, max_dp, mInfo->GetUpRefMinAngle());
+    if(TMath::Abs(xz_dp) > max_dp) {
+      if(mInfo->GetUpRefLockDir() && look_at_p == false) {
+	Double_t sgn_mdp = TMath::Sign(max_dp, xz_dp);
+	// x_vec += 2*(sgn_mdp - xz_dp)*z_vec;
+	TVector3 ortog = (x_vec - xz_dp*z_vec).Unit();
+	x_vec  = sgn_mdp*z_vec + TMath::Sqrt(1 - max_dp*max_dp)*ortog;
+	x_vec  = x_vec.Unit();
+	xz_dp  = z_vec.Dot(x_vec);
+	z_vec -= xz_dp*x_vec;
+	z_vec  = z_vec.Unit();
+      } else {
+	z_vec  = mCamAbsTrans.GetBaseVec3(3);
+	xz_dp  = z_vec.Dot(x_vec);
+	z_vec -= xz_dp*x_vec;
+	z_vec  = z_vec.Unit();
+      }
+    } else {
+      z_vec -= xz_dp*x_vec;
+      z_vec  = z_vec.Unit();
+    }
+  }
+  y_vec = z_vec.Cross(x_vec);
+
+  // Construct absolute CamAbsTrans,
+  mCamAbsTrans.UnitTrans();
+  mCamAbsTrans.SetBaseVec3(1, x_vec);
+  mCamAbsTrans.SetBaseVec3(2, y_vec);
+  mCamAbsTrans.SetBaseVec3(3, z_vec);
+  mCamAbsTrans.SetBaseVec3(4, c_pos);
+
+  // Multiply-out the CamBaseTrans to get true camera for local controls.
+  if(mCamBase != 0) {
+    ZTrans t = mCamBaseTrans;
+    t.Invert();
+    mCamera->SetTrans(t*mCamAbsTrans);
+  } else {
+    mCamera->SetTrans(mCamAbsTrans);
+  }
+
+}
+
+void Pupil::SetCameraView()
+{
+  ZTrans& z( mCamAbsTrans );
+  gluLookAt(z(1,4),        z(2,4),        z(3,4),
 	    z(1,4)+z(1,1), z(2,4)+z(2,1), z(3,4)+z(3,1),
-	    z(1,3), z(2,3), z(3,3));
+	    z(1,3),        z(2,3),        z(3,3));
+    /*
+  gluLookAt(c_pos.x(), c_pos.y(), c_pos.z(),
+	    x_vec.x(), x_vec.y(), x_vec.z(),
+	    z_vec.x(), z_vec.y(), z_vec.z());	    
+    */
 }
 
 /**************************************************************************/
 
-/*
-void Pupil::Rebase(ZNode* newbase, bool keeppos)
-{
-  if(!newbase) return;
-  if(bFollowBase) { 
-    if(keeppos) {
-      ZTrans* t = ZNode::BtoA(newbase, mBase);
-      *t *= mCamera->RefTrans();
-      mCamera->RefTrans() = *t;
-      delete t;
-    }
-    mCamera->mParent = newbase;
-  }
-  mBase = newbase; Label();
-}
-*/
-
-void Pupil::XtachCamera()
-{
-  // Transforms camera Base<-> MotherCS based on state of bFollowBase.
-  // Does not check current affiliation of mCamera ... probably should.
-
-  /*
-  bFollowBase = !bFollowBase; 
-  ZTrans* t;
-  if(bFollowBase) {
-    t = ZNode::BtoA(mBase, mForestView->GetMother());
-    mCamera->mParent = mBase;
-  } else {
-    t = ZNode::BtoA(mForestView->GetMother(), mBase);
-    mCamera->mParent = mForestView->GetMother();
-  }
-  *t *= *mCamera;
-  (ZTrans&)(*mCamera) = *t;
-  delete t;
-  */
-}
-
-void Pupil::JumpCameraAt(ZGlass* lens)
+void Pupil::TurnCamTowards(ZGlass* lens, Float_t max_dist)
 {
   // Warps camera towards lens.
-  // Case when if camera is attached to some lens IS NOT coded !!!
 
   ZNode* node = dynamic_cast<ZNode*>(lens);
   if(node == 0) return;
-  auto_ptr<ZTrans> t( mInfo->ToPupilFrame(node) );
+  auto_ptr<ZTrans> t( mInfo->ToCameraFrame(node) );
   if(t.get() == 0) return;
 
   TVector3 x = t->GetPosVec3() - mCamera->RefTrans().GetBaseVec3(4);
@@ -338,15 +389,17 @@ void Pupil::JumpCameraAt(ZGlass* lens)
   x = x.Unit();
   TVector3 y = mCamera->RefTrans().GetBaseVec3(2);
   y -= (y.Dot(x))*x;
-  y = y.Unit();
+  y  = y.Unit();
+
+  Float_t to_move = 0;
+  if(dist > max_dist) to_move = dist - max_dist;
 
   // Now reuse t to hold new camera transformation.
   t->SetBaseVec3(1, x);
   t->SetBaseVec3(2, y);
   t->SetBaseVec3(3, x.Cross(y));
   t->SetBaseVec3(4, mCamera->RefTrans().GetBaseVec3(4));
-  t->MoveLF(1, dist - mInfo->GetMSMoveFac() * 
-	    TMath::Power(10, mInfo->GetMoveOM() + 2) );
+  t->MoveLF(1, to_move);
   mCamera->SetTrans(*t);
 
   // cout << "CameraTrans:\n" << *t;
@@ -399,9 +452,18 @@ namespace {
       mir_call_data_img(i, 0, 0), pupil(p) {}
   };
 
-  void jump_to_cb(Fl_Widget* w, pick_menu_data* ud)
+  void cam_towards_cb(Fl_Widget* w, pick_menu_data* ud)
+  { ud->pupil->TurnCamTowards(ud->img->fGlass, ud->pupil->default_distance()); }
+
+  void cam_at_cb(Fl_Widget* w, pick_menu_data* ud)
+  { ud->pupil->TurnCamTowards(ud->img->fGlass, 0); }
+  
+  void copy_to_clipboard_cb(Fl_Widget* w, pick_menu_data* ud)
   {
-    ud->pupil->JumpCameraAt(ud->img->fGlass);
+    FTW_Shell* shell = ud->pupil->GetRoot()->fImg->fEye->GetShell();
+    shell->X_SetSource(ud->img->fGlass->GetSaturnID());
+    const char* idstr = GForm("%u", ud->img->fGlass->GetSaturnID());
+    Fl::copy(idstr, strlen(idstr), 0);
   }
 
   void fill_pick_menu(Pupil* pup, OS::ZGlassImg* img, Fl_Menu_Button& menu,
@@ -409,8 +471,12 @@ namespace {
   {
     mcdl.push_back(new pick_menu_data(pup, img));
 
-    menu.add(GForm("%sJumpTo", prefix.c_str()),
-	     0, (Fl_Callback*)jump_to_cb, mcdl.back(), FL_MENU_DIVIDER);
+    menu.add(GForm("%sJump Towards", prefix.c_str()),
+	     0, (Fl_Callback*)cam_towards_cb, mcdl.back(), 0);
+    menu.add(GForm("%sJump At", prefix.c_str()),
+	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), 0);
+    menu.add(GForm("%sSet as Source", prefix.c_str()),
+	     0, (Fl_Callback*)copy_to_clipboard_cb, mcdl.back(), 0);
  
   }
 }
@@ -519,14 +585,16 @@ void Pupil::Pick()
       ++loc;
 
       shell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
-      fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
 
       // iterate through the list of parents
+      menu.add(GForm("%sParents", gdi->name.c_str()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
       for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
 	string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
 	shell->FillImageMenu(*pi, menu, mcdl, entry);
 	fill_pick_menu(this, *pi, menu, mcdl, entry);
       }
+
+      fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
     }
 
     menu.popup();
@@ -561,6 +629,7 @@ void Pupil::draw()
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+  SetAbsRelCamera();
   SetCameraView();
 
   { // clear
@@ -661,10 +730,7 @@ void Pupil::draw()
 
   GLfloat ch_size = mInfo->GetCHSize();
   glLineWidth(1);
-  if(bJustCamera)	glColor3f(1,0,0);
-  else
-    if(bFollowBase)	glColor3f(0.8,0.8,0.8);
-    else		glColor3f(0.4,0.4,0.4);
+  glColor3f(1,0,0);
   glBegin(GL_LINES); {
     glVertex2f(ch_size, 0);	glVertex2f(ch_size/3,0);
     glVertex2f(-ch_size/3, 0);	glVertex2f(-ch_size,0);
@@ -674,7 +740,7 @@ void Pupil::draw()
 
 
   if(mInfo->GetShowRPS() == true && mDriver->fTexFont) {
-    const string text( GForm("%.1frps", 1/rnr_time.ToDouble() <? 999.9) );
+    const string text(GForm("%.1frps", TMath::Min(1/rnr_time.ToDouble(), 999.9)));
     GLTextNS::RnrTextAt(mDriver, text, 2, 0, 1e-3, mInfo->PtrTextCol(), 0);
   }
 
@@ -809,6 +875,17 @@ int Pupil::handle(int ev)
       mRoot->fImg->fEye->GetShell()->SpawnMTW_View(mRoot->fImg);
       return 1;
 
+    case FL_F+2:
+      if(mCameraViewWin == 0) {
+	Fl_SWM_Manager* swm = mRoot->fImg->fEye->GetShell();
+	mCameraViewWin = MTW_View::ConstructVerticalWindow(mCamera, swm);
+	swm->adopt_window(mCameraViewWin);
+	mCameraView = (MTW_View*) mCameraViewWin->child(0);
+	mCamera->SetStamp_CB((zglass_stamp_f)camera_stamp_cb, this);
+      }
+      mCameraViewWin->show();
+      return 1;
+
       /*
 	case FL_Tab:
 	bJustCamera = !bJustCamera; redraw();
@@ -879,3 +956,17 @@ void Pupil::draw_overlay()
   glPopMatrix();
 }
 */
+
+/**************************************************************************/
+/**************************************************************************/
+
+void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
+{
+  pup->mCameraView->UpdateViews(FID_t(0,0));
+  pup->redraw();
+}
+
+float Pupil::default_distance()
+{
+  return mInfo->GetMSMoveFac() * TMath::Power(10, mInfo->GetMoveOM() + 2);
+}
