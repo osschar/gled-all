@@ -220,7 +220,9 @@ void Pupil::AbsorbRay(Ray& ray)
   }
 
   case PupilInfo::PRQN_resize_window: {
-    size(mInfo->GetWidth(), mInfo->GetHeight());
+    if(parent() == 0) {
+      size(mInfo->GetWidth(), mInfo->GetHeight());
+    }
     break;
   }
 
@@ -247,14 +249,14 @@ void Pupil::SetProjection2()
 {
   switch(mInfo->GetProjMode()) {
   case PupilInfo::P_Perspective: {
-    gluPerspective(mInfo->GetFOV(), (double)w()/h(),
+    gluPerspective(mInfo->GetZFov(), mInfo->GetYFac()*w()/h(),
 		   mInfo->GetNearClip(),  mInfo->GetFarClip());
     break;
   }
   case PupilInfo::P_Orthographic: {
-    float yh = mInfo->GetYSize()/2;
-    float xh = yh*w()/h()*mInfo->GetHFac();
-    glOrtho(-xh, xh, -yh, yh, mInfo->GetNearClip(),  mInfo->GetFarClip());
+    float yh = mInfo->GetZSize()/2;
+    float xh = yh*w()/h()*mInfo->GetYFac();
+    glOrtho(-xh, xh, -yh, yh, mInfo->GetNearClip(), mInfo->GetFarClip());
   }
   }
 }
@@ -755,7 +757,7 @@ int Pupil::handle(int ev)
   }
 
   int x = Fl::event_x(); int y = Fl::event_y();
-  //printf("PupilEvent %d (%d, %d)\n", ev, x, y);
+  // printf("PupilEvent %d (%d, %d)\n", ev, x, y);
 
   switch(ev) {
 
@@ -780,6 +782,7 @@ int Pupil::handle(int ev)
     if(Fl::event_button() == 3) {
       Pick(true);
     }
+    
     return 1;
   }
   case FL_DRAG: {
@@ -861,6 +864,18 @@ int Pupil::handle(int ev)
       chg=1;
     }
     if(chg) redraw();
+    return 1;
+  }
+
+  case FL_MOUSEWHEEL: {
+    if(Fl::event_dy() != 0) {
+      Float_t delta = Fl::event_dy();
+      if(Fl::event_state(FL_CTRL)) delta *= 0.2;
+      else if(Fl::event_state(FL_SHIFT)) delta *= 5;
+      auto_ptr<ZMIR> mir( mInfo->S_Zoom(delta) );
+      mShell->Send(*mir);
+    }
+    return 1;
   }
 
   case FL_KEYBOARD: {
