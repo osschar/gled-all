@@ -10,15 +10,15 @@
 #include <Glasses/ZGeoNode.h>
 
 class ZGeoOvl : public ZGeoNode {
+
   // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,3))
   MAC_RNR_FRIENDS(ZGeoOvl);
-
   friend class ZGeoOvlMgr;
 
- private:
+private:
   void _init();
 
- protected:
+protected:
   Bool_t    mIsExtr;    // X{G}  
   Double_t  mOverlap;   // X{GS}  7 ValOut()
   Int_t     mPM_N;      // X{GS} 
@@ -26,15 +26,17 @@ class ZGeoOvl : public ZGeoNode {
   ZColor    mPM_Col;    // X{GSP}
   Bool_t    mRnrMark;   // X{GS}   7 Bool()
 
- public:
-  ZGeoOvl(const Text_t* n="ZGeoOvl", const Text_t* t=0) : ZGeoNode(n,t) { _init(); }
-  virtual void SetRnrSelf(Bool_t rnrself);   //X{E} 
-  virtual void Dump();
+public:
+  ZGeoOvl(const Text_t* n="ZGeoOvl", const Text_t* t=0) : ZGeoNode(n,t)
+  { _init(); }
+
   virtual void Restore(TGeoVolume* vol);
+
+  void DumpOvl(); //! X{E} 7 MButt()
 
 #include "ZGeoOvl.h7"
   ClassDef(ZGeoOvl, 1)
-    }; // endclass ZGeoOvl
+}; // endclass ZGeoOvl
 
 GlassIODef(ZGeoOvl);
 
