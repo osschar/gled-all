@@ -1,3 +1,17 @@
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Rect.cxx:
+	Formatting changes.
+
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	Disabled default usage of display lists; made mColor request
+	re-triangulation (needed when using display lists). I know this
+	sounds somewhat silly.
+
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Use 'glBlendFunc(GL_SRC_ALPHA, GL_ZERO)' if transparent. 
+
 2005-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
