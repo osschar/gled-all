@@ -236,7 +236,8 @@ ZGlass* ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   }
   catch(string exc) {
     // should delete/checkout g?
-    throw(_eh + "attachment failed: " + exc);
+    // throw(_eh + "attachment failed: " + exc); // !!! no good until delete works
+    ISwarn(_eh + "attachment failed: " + exc);
   }
   if(g->mRefCount <= 0) {
     // attach failed ... hmmmph?
