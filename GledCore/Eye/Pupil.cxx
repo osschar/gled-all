@@ -243,8 +243,8 @@ void Pupil::SetCameraView()
   if(look_at) {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(look_at) );
     if(t.get() != 0) {
-      TVector3 cam_pos(z(1u,4u), z(2u,4u), z(3u,4u));
-      TVector3 obj_pos((*t)(1u,4u), (*t)(2u,4u), (*t)(3u,4u));
+      TVector3 cam_pos(   z(1,4),    z(2,4),    z(3,4));
+      TVector3 obj_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
       TVector3 delta = obj_pos - cam_pos;
       delta.SetMag(1);
       
@@ -323,6 +323,31 @@ void Pupil::XtachCamera()
   */
 }
 
+void Pupil::JumpCameraAt(ZGlass* lens)
+{
+  ZNode* node = dynamic_cast<ZNode*>(lens);
+  if(node == 0) return;
+  auto_ptr<ZTrans> t( mInfo->ToPupilFrame(node) );
+  if(t.get() == 0) return;
+
+  TVector3 x = t->GetPosVec3() - mCamera->RefTrans().GetBaseVec3(4);
+  Double_t dist = x.Mag();
+  x = x.Unit();
+  TVector3 y = mCamera->RefTrans().GetBaseVec3(2);
+  y -= (y.Dot(x))*x;
+    
+  // Now reuse t to hold new camera transformation.
+  t->SetBaseVec3(1, x);
+  t->SetBaseVec3(2, y);
+  t->SetBaseVec3(3, x.Cross(y));
+  t->SetBaseVec3(4, mCamera->RefTrans().GetBaseVec3(4));
+  t->MoveLF(1, dist - mInfo->GetMSMoveFac() * 
+	    TMath::Power(10, mInfo->GetMoveOM() + 2) );
+  mCamera->SetTrans(*t);
+
+  redraw();
+}
+
 /**************************************************************************/
 
 void Pupil::FullScreen()
@@ -359,6 +384,30 @@ void Pupil::Render()
 /**************************************************************************/
 // Picking
 /**************************************************************************/
+
+namespace {
+  struct pick_menu_data : public FTW_Shell::mir_call_data_img {
+    Pupil* pupil;
+
+    pick_menu_data(Pupil* p, OS::ZGlassImg* i) :
+      mir_call_data_img(i, 0, 0), pupil(p) {}
+  };
+
+  void jump_to_cb(Fl_Widget* w, pick_menu_data* ud)
+  {
+    ud->pupil->JumpCameraAt(ud->img->fGlass);
+  }
+
+  void fill_pick_menu(Pupil* pup, OS::ZGlassImg* img, Fl_Menu_Button& menu,
+		      FTW_Shell::mir_call_data_list& mcdl, const string& prefix)
+  {
+    mcdl.push_back(new pick_menu_data(pup, img));
+
+    menu.add(GForm("%sJumpTo", prefix.c_str()),
+	     0, (Fl_Callback*)jump_to_cb, mcdl.back(), FL_MENU_DIVIDER);
+ 
+  }
+}
 
 void Pupil::Pick()
 {
@@ -464,11 +513,13 @@ void Pupil::Pick()
       ++loc;
 
       shell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
+      fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
 
       // iterate through the list of parents
       for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
 	string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
 	shell->FillImageMenu(*pi, menu, mcdl, entry);
+	fill_pick_menu(this, *pi, menu, mcdl, entry);
       }
     }
 
@@ -631,6 +682,13 @@ void Pupil::draw()
 
 }
 
+/**************************************************************************/
+
+namespace {
+  const Float_t defMSMoveFac = 200;
+  const Float_t defMSRotFac  = 600;
+}
+
 int Pupil::handle(int ev)
 {
   if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
@@ -674,22 +732,24 @@ int Pupil::handle(int ev)
 
     bool chg = 0;
     int dx = x - mMouseX, dy = y - mMouseY;
+    // Invert dx/dy from "screen" to "camera" coordinates.
+    dx = -dx; dy = -dy;
     mMouseX = x; mMouseY = y;
-    // Fwd/Bck
+    Float_t move_fac = mInfo->GetMSMoveFac() *
+                       TMath::Power(10, mInfo->GetMoveOM());
+    Float_t rot_fac  = mInfo->GetMSRotFac() * TMath::TwoPi() / 1000;
     if(Fl::event_state(FL_BUTTON1)) { 
       if(!Fl::event_state(FL_CTRL)) {
-	mCamera->MoveLF(1, dy*TMath::Power(abs(dy), mInfo->GetAccelExp()) /
-			   mInfo->GetMSMoveFac());
+	mCamera->MoveLF(1, dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp()));
 	//sprintf(x, "1,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
 	//mEye->Send(move_cmd, x, target, beta);
       } else {
-	mCamera->MoveLF(3, dy*TMath::Power(abs(dy), mInfo->GetAccelExp()) /
-			   mInfo->GetMSMoveFac());
+	mCamera->MoveLF(3, dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp()));
 	//sprintf(x, "2,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
 	//mEye->Send(move_cmd, x, target, beta);      
       }
-      mCamera->MoveLF(2, dx*TMath::Power(abs(dx), mInfo->GetAccelExp()) /
-		         mInfo->GetMSMoveFac());
+      mCamera->MoveLF(2, dx*move_fac*TMath::Power(abs(dx), mInfo->GetAccelExp()));
+
       //sprintf(x, "3,%g", -dx*abs(dx)/mInfo->GetMSMoveFac());
       //mEye->Send(move_cmd, x, target, beta);
       chg = 1;
@@ -709,18 +769,18 @@ int Pupil::handle(int ev)
     // cout << mMouseX << " " << mMouseY << " " << dx << " " << dy << endl;
     if(Fl::event_state(FL_BUTTON2) && dy!=0) {
       if(!Fl::event_state(FL_CTRL)) {
-	mCamera->RotateLF(1,3,dy/mInfo->GetMSRotFac());
+	mCamera->RotateLF(1,3,dy*rot_fac);
       } else {
-	mCamera->RotateLF(1,3,-dy/mInfo->GetMSRotFac());
+	mCamera->RotateLF(1,3,-dy*rot_fac);
       }
       chg=1;
     }
     if(Fl::event_state(FL_BUTTON2) && dx!=0) {
       if(!Fl::event_state(FL_CTRL)) {
-	mCamera->RotateLF(1,2,dx/mInfo->GetMSRotFac());
+	mCamera->RotateLF(1, 2, dx*rot_fac);
 	//sprintf(foo,"3,1,%8g", dx/mInfo->GetMSRotFac());
       } else {
-	mCamera->RotateLF(2,3,-dx/mInfo->GetMSRotFac());
+	mCamera->RotateLF(2, 3, -dx*rot_fac);
 	//sprintf(foo,"2,3,%8g", -dx/mInfo->GetMSRotFac());
       }
       //mEye->Send(rotate_cmd, foo, target, beta);
