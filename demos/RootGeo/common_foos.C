@@ -48,7 +48,44 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(xzplane, Rect, rscene, "X-Z Plane", "");
   xzplane->SetRotByDegrees(180, 0, -90);
   xzplane->SetUnitSquare(20);
-  xzplane->SetColor(0.4, 1, 0.45, 0.4);
+  xzplane->SetColor(0.4, 1, 0.45, 0.65);
 
   return rscene;
 }
+
+/**************************************************************************/
+
+void spawn_default_gui(Scene* rscene)
+{
+  const Text_t* default_layout =
+    "ZNode(RnrSelf[5],RnrElements[5],"
+    "RnrOnForDaughters[5],RnrOffForDaughters[5]):"
+    "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[7])";
+
+  Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
+  gROOT->LoadMacro("eye.C");
+  register_GledCore_layouts();
+
+  Text_t* eye_name   = "Eye";
+  Text_t* shell_name = "Shell";
+  Text_t* pupil_name = "Pupil";
+
+  CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
+
+  CREATE_ATT_GLASS(nest, NestInfo, shell, SetDefSubShell, "Nest", 0);
+  nest->Add(rscene);
+  nest->SetLayout(default_layout);
+  nest->SetLeafLayout(NestInfo::LL_Custom);
+
+  CREATE_ATT_GLASS(pupil, PupilInfo, shell, AddSubShell, pupil_name, "");
+  pupil->SetFOV(80);
+  pupil->SetCHSize(0.03);
+  pupil->SetBlend(1);
+  pupil->Add(rscene);
+  pupil->SetCameraBase((ZNode*)rscene->GetElementByName("Camera Base"));
+  pupil->SetUpReference(rscene);
+  pupil->SetUpRefAxis(2);
+
+  Gled::theOne->SpawnEye(0, shell, "GledCore", "FTW_Shell");
+}
+
