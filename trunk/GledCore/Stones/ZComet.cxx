@@ -43,7 +43,7 @@ void ZComet::_init()
   mType = CT_CometBag;
   mExtDemangler = 0;
 
-  bWarnOn = true; bVerbose = true;
+  bWarnOn = false; bVerbose = false;
   mQueen = 0; mKing = 0;
 }
 
@@ -109,11 +109,11 @@ ZGlass* ZComet::DemangleID(ID_t id)
   if(mExtDemangler != 0) {
     ZGlass* l = mExtDemangler->DemangleID(id);
     if(l == 0 && bVerbose) 
-      ISmess(GForm("%sid %u not found neither in this comet nor saturn.", _eh.c_str(), id));
+      ISmess(_eh + GForm("id %u not found (comet, ext-demangler).", id));
     return l;
   } else {
     if(bVerbose)
-      ISmess(GForm("%sid %u not found in this comet.", _eh.c_str(), id));
+      ISmess(_eh + GForm("id %u not found (comet).", id));
     return 0;
   } 
 }
@@ -133,6 +133,8 @@ void ZComet::AssignQueen(ZQueen* queen)
 
 Int_t ZComet::RebuildGraph()
 {
+  static const string _eh("ZComet::RebuildGraph ");
+
   if(bGraphRebuilt) return 0;
   Int_t ret = 0;
 
@@ -142,8 +144,8 @@ Int_t ZComet::RebuildGraph()
     if(Int_t m = g->RebuildLinkRefs(this)) {
       ret += m;
       if(bWarnOn)
-	ISwarn(GForm("ZComet::RebuildGraph(links) %d missed lens(es) in '%s'.",
-		     m, g->GetName()));
+	ISwarn(_eh + GForm("(links) %d missed lens(es) in '%s'.",
+			   m, g->GetName()));
     }
     ZList* l = dynamic_cast<ZList*>(g);
     if(l) {
@@ -151,8 +153,8 @@ Int_t ZComet::RebuildGraph()
       if(m>0) {
 	ret += m;
 	if(bWarnOn)
-	  ISwarn(GForm("ZComet::RebuildGraph(list) %d missed lens(es) in '%s'.",
-		       m, g->GetName()));
+	  ISwarn(_eh + GForm("(list) %d missed lens(es) in '%s'.",
+			     m, g->GetName()));
       }
     }
   }
@@ -163,8 +165,7 @@ Int_t ZComet::RebuildGraph()
     ZGlass* g = i->second;
     if(g->GetRefCount()==0) {
       if(find(mTopLevels.begin(), mTopLevels.end(), g) == mTopLevels.end()) {
-	ISdebug(D_STREAM, GForm("ZComet::RebuildGraph '%s' is an orphan.",
-				g->GetName()));
+	ISdebug(D_STREAM, _eh + GForm("'%s' is an orphan.", g->GetName()));
 	mOrphans.push_back(g);
       }
     }
@@ -191,15 +192,14 @@ void ZComet::Streamer(TBuffer& b)
     if(mType == CT_Queen) {
       mQueen = dynamic_cast<ZQueen*>(DemangleID((ID_t)mQueen));
       if(mQueen==0) {
-	ISerr(GForm("%s(Queen) couldn't demangle QueenID %u",
-		    _eh.c_str(), (ID_t)(mQueen)));
+	ISerr(_eh + GForm("(Queen) couldn't demangle QueenID %u.",
+			  (ID_t)(mQueen)));
       }
     }
     if(mType == CT_King) {
       mKing = dynamic_cast<ZKing*>(DemangleID((ID_t)mKing));
       if(mKing==0) {
-	ISerr(GForm("%s(King) couldn't demangle KingID %u",
-		    _eh.c_str(), (ID_t)(mKing)));
+	ISerr(_eh + GForm("(King) couldn't demangle KingID %u.", (ID_t)mKing));
       }
     }
     // Reconstruct TopLevels
@@ -209,8 +209,7 @@ void ZComet::Streamer(TBuffer& b)
 	*i = j->second;
       } else {
 	if(bWarnOn)
-	  ISwarn(GForm("%s(top_levels) missing ID %u",
-		       _eh.c_str(), (ID_t)(*i)));
+	  ISwarn(_eh + GForm("(top_levels) missing ID %u.", (ID_t)(*i)));
       }
     }
   }
@@ -219,6 +218,9 @@ void ZComet::Streamer(TBuffer& b)
 void ZComet::StreamHeader(TBuffer& b)
 {
   // Streams Type, Size, Libsets, TopLevels|Queen|King
+
+  static const string _eh("ZComet::StreamHeader ");
+
   if(b.IsReading()) {
     /*** Reading ***/
     bGraphRebuilt = false;
@@ -232,15 +234,15 @@ void ZComet::StreamHeader(TBuffer& b)
       LID_t lid; b >> lid;
       mLibSets.insert(lid);
       if(!GledNS::IsLoaded(lid)) {
-	ISwarn(GForm("ZComet::Streamer attempting to load LibSet w/ id=%u", lid));
+	ISmess(_eh + GForm("attempting to load LibSet w/ id=%u.", lid));
 	int ret = Gled::theOne->LoadLibSet(lid);
 	if(ret != 0) {
-	  ISerr(GForm("ZComet::Streamer failed to load LibSet w/ id=%u", lid));
+	  ISerr(_eh + GForm("failed to load LibSet w/ id=%u.", lid));
 	  bFail = true;
 	}
       }
     }
-    if(bFail) throw(string("LibSets missing"));
+    if(bFail) throw(string("LibSets missing."));
 
     switch(mType) {
     case CT_CometBag:
@@ -279,13 +281,13 @@ void ZComet::StreamContents(TBuffer& b)
   if(b.IsReading()) {
     UInt_t size;
     b >> size;
-    ISdebug(D_STREAM, GForm("%sreading %u glasses", _eh.c_str(), size));
+    ISdebug(D_STREAM, _eh + GForm("reading %u glasses.", size));
     for(UInt_t i=0; i<size; ++i) {
       ZGlass *g = GledNS::StreamLens(b);
       if(g) {
 	ID_t id = g->GetSaturnID();
 	mIDMap[id] = g;
-	ISdebug(D_STREAM+1, GForm("%sread lesn %s[%s] addr=%p",	_eh.c_str(),
+	ISdebug(D_STREAM+1, _eh + GForm("read lens %s[%s] addr=%p.",
 				  g->GetName(), g->ClassName(), (void*)g));
       } else {
 	ISdebug(D_STREAM, _eh + "lens creation failed.");
@@ -294,11 +296,10 @@ void ZComet::StreamContents(TBuffer& b)
   } else {
     UInt_t size = (UInt_t)(mIDMap.size());
     b << size;
-    ISdebug(D_STREAM, GForm("%swriting %u glasses", _eh.c_str(), size));
+    ISdebug(D_STREAM, _eh + GForm("writing %u glasses.", size));
     if(size > 0) {
       for(mID2pZGlass_i i=mIDMap.begin(); i!=mIDMap.end(); i++) {
-	ISdebug(D_STREAM+1, GForm("%swriting %s", _eh.c_str(),
-				  (i->second)->GetName()));
+	ISdebug(D_STREAM+1, _eh + GForm("writing %s", (i->second)->GetName()));
 	GledNS::StreamLens(b, i->second);
       }
     }
