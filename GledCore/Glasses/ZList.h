@@ -17,7 +17,7 @@ typedef void (*zlist_stampclear_f)(ZList*, void*);
 
 class ZList : public ZGlass {
 
-  // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   // **** Custom Streamer ****
   MAC_RNR_FRIENDS(ZList);
 
@@ -115,8 +115,8 @@ public:
   void SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg);
   void SetStampListClear_CB(zlist_stampclear_f foo, void* arg);
 
-  virtual Int_t RebuildAll(An_ID_Demangler* idd);
-  virtual Int_t RebuildList(An_ID_Demangler* idd);
+  virtual Int_t RebuildAllRefs(An_ID_Demangler* idd);
+  virtual Int_t RebuildListRefs(An_ID_Demangler* idd);
 
 #include "ZList.h7"
   ClassDef(ZList, 1)
