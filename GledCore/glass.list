@@ -28,6 +28,7 @@ ZSubTree	97	Glasses/ZSubTree
 # Thread related glasses
 Operator	128	Glasses/Operator
 Eventor		129	Glasses/Eventor
+PipeEventor	130	Glasses/PipeEventor
 
 # Basic scene & geometry elements
 Scene		160	Glasses/Scene		ZNode
@@ -40,3 +41,7 @@ Box		166	Glasses/Box		.
 
 # Node/Cluster Monitoring
 GledMonitor	192	Glasses/GledMonitor
+
+# Performance investigators
+PerfMeterTarget		224	Glasses/PerfMeterTarget
+PerfMeterOperator	225	Glasses/PerfMeterOperator
