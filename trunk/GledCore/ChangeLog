@@ -1,3 +1,10 @@
+2003-11-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled.cxx:
+	* saturn.cxx:
+
+	Fixed initialization order. TRint is now instantiated ASAP.
+
 2003-11-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW.cxx:
@@ -24,14 +31,14 @@
 	identities. Changes to reflect ZIdentity change.
 
 	* Gled/Gled.cxx:
-	* Gled/Gled.h:   Improved key handling and checking.
+	* Gled/Gled.h:   Improved RSA key handling and checking.
 	
 	* Glasses/EyeInfo.h: Added tag MEE::Self to Message() and Error().
 	* Glasses/ZKing.cxx: Improved BlessMIR().
 	* Glasses/ZMirEmittingEntity.cxx: Minor improvement.
 	* Glasses/ZQueen.cxx: Lens instantiation consistency fix.
 	* GledView/GledGUI.cxx:	Added -font command line option.
-	* macros/std_auth.C: Added guest registration.
+	* macros/std_auth.C: Added guest registration and set-up.
 
 
 2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
@@ -47,12 +54,17 @@
 	-----------------------------------------
 
 	MIRs can now be executed synchronously and can return arbitrary
-	data stream.
+	data stream. MIRs with result request should only be sent from
+	threads, as synchronous execution blocks the calling thread until
+	the result (or error) is available. Also, locking an object for
+	the duration of a sync MIR is a bad idea and can lead to
+	deadlocks.
 
 	Flares just wait.
 	
-	Beams can also request Beam Result: sync beam execution with
-	returned result (arbitrary data stream in TBuffer).
+	Beams can also request Beam Result. It is simply a TBuffer
+	containing an arbitrary datagram (usually streamed ROOT
+	objects). Of course, the caller must know the return data format.
 	
 	* Glasses/SaturnObserver.cxx:
 	* Glasses/SaturnObserver.h: New glass, demo for beam-shooting.
