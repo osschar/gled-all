@@ -18,7 +18,9 @@ protected:
   CLASSNAME*	mCLASSNAME;
 
 public:
-  CLASSNAME_GL_Rnr(CLASSNAME* idol) : BASENAME_GL_Rnr(idol), mCLASSNAME(idol) {}
+  CLASSNAME_GL_Rnr(CLASSNAME* idol) :
+    BASENAME_GL_Rnr(idol), mCLASSNAME(idol)
+  { _init(); }
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

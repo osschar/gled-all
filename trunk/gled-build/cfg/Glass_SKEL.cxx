@@ -10,7 +10,6 @@
 //
 
 #include "CLASSNAME.h"
-
 #include "CLASSNAME.c7"
 
 ClassImp(CLASSNAME)
@@ -19,7 +18,7 @@ ClassImp(CLASSNAME)
 
 void CLASSNAME::_init()
 {
-  // !!!! Set all links to 0 !!!!
+  // *** Set all links to 0 ***
 }
 
 /**************************************************************************/
