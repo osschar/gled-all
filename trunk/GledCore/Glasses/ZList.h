@@ -101,6 +101,8 @@ public:
   void         ClearList();                   	     // X{E}
   virtual void ClearAllReferences();
 
+  void         RemoveLensesViaQueen(Bool_t recurse=false);
+
   virtual Int_t  Size() { return mSize; }
   virtual Bool_t IsEmpty() { return mSize==0; }
   virtual Bool_t Has(ZGlass* g);
