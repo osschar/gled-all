@@ -249,7 +249,7 @@ Int_t Eye::Manage(int fd)
 	break;
       }
       ray.Read(*m);
-      // cout << mRay << endl;
+      // cout << _eh << ray << endl;
 
       ++ray_count;
       OS::ZGlassImg* a = ray.fAlphaImg = alpha_it->second;

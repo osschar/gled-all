@@ -1792,7 +1792,7 @@ void Saturn::BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons)
 
   static string _eh("Saturn::BroadcastMIR() ");
 
-  ISdebug(8, GForm("%s entered ...", _eh.c_str()));
+  ISdebug(9, GForm("%s entered.", _eh.c_str()));
 
   if(moons.empty()) return;
   bool was_reading = mir.IsReading();
@@ -1819,15 +1819,13 @@ void Saturn::BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons)
   // Broadcasts MIR to reflecting Moons specified in socks.
   // Specifically sets each SaturnInfo to be the recipient.
 
-  static string _eh("Saturn::BroadcastMIR() ");
-
-  ISdebug(8, GForm("%s entered ...", _eh.c_str()));
+  static string _eh("Saturn::BroadcastMIR ");
 
   if(moons.empty()) return;
   bool was_reading = mir.IsReading();
   if(was_reading) mir.Forward();
   mMoonLock.Lock();
-  ISdebug(9, GForm("Saturn::BroadcastMIR sending to %d moon(s)s", moons.size()));
+  ISdebug(10, _eh + GForm("sending to %d moon(s).", moons.size()));
   lpSaturnInfo_i i = moons.begin();
   while(i != moons.end()) {
     if((*i)->hSocket) {
@@ -1866,16 +1864,18 @@ void Saturn::ray_emitter()
 
     mEyeLock.Lock();
     if( ! mEyes.empty()) {
+      // cout << _eh << *ray << endl;
+
       TMessage msg(GledNS::MT_Ray);
       ray->Write(msg);
-      ISdebug(8, GForm("%snotifying %d eye(s).", _eh.c_str(), mEyes.size()));
+      ISdebug(10, _eh + GForm("notifying %d eye(s).", mEyes.size()));
       Int_t len = msg.Length() - 4;
       lpEyeInfo_i i = mEyes.begin();
       while(i != mEyes.end()) {
 	Int_t ret = (*i)->hSocket->Send(msg);
 	if(ret != len) {
-	  ISerr(GForm("%ssent too little: Eye=%s, len=%3d, ret=%3d.",
-		      _eh.c_str(), (*i)->GetName(), len, ret));
+	  ISerr(_eh + GForm("sent too little: Eye=%s, len=%3d, ret=%3d.",
+			    (*i)->GetName(), len, ret));
 	}
 	lpEyeInfo_i j = i++;
 	if(ret < 0) {
