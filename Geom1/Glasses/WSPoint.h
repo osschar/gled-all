@@ -21,9 +21,13 @@ private:
   ZMatrix	mCoffs;
 
 protected:
-  Real_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,100])
-  Real_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,100])
-  Real_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,100])
+  Real_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
+  Real_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
+  Real_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6)
+
+  Real_t	mTwist;		// X{GS} 7 Value(-range=>[-100,100,1,100], -join=>1)
+  Real_t	mStretch;	// X{GS} 7 Value(-range=>[-100,100,1,100])
+
   bool		bDrawAxen;	// 	   X{GS} 7 Bool()
 
 public:
