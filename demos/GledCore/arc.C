@@ -18,7 +18,7 @@ void boxer(Int_t n, Box* p, ZQueen* m, Float_t phi, Float_t bf, Float_t cf)
   boxer(n-1, t, m, phi, bf, cf);
 }
 
-void arc()
+void arc(Int_t Npil = 5)
 {
   if(Gled::theOne->GetSaturn() == 0) {
     gROOT->Macro("sun.C");
@@ -31,33 +31,52 @@ void arc()
   Box* pi_box = new Box("First box", "Base of pillar");
   pi_box->SetA(1); pi_box->SetB(1); pi_box->SetC(3);
   scenes->CheckIn(pi_box);
-  // not added to the scene!
+  // Not added to the scene directly but linked from a loop below.
 
   boxer(4, pi_box, scenes, 22.5*TMath::Pi()/180, 0.98, 0.8);
 
-  Box* base_box = new Box("Base box");
-  base_box->RotateLF(1, 2, TMath::Pi()/4);
-  base_box->SetABC(12, 12, 1);
-  base_box->SetColor(0.9, 0.8, 1);
-  scenes->CheckIn(base_box);
-  arcs->Add(base_box);
 
-  for(int i=0; i<4; ++i) {
+  ZNode* base_node = new ZNode("Base Node");
+  scenes->CheckIn(base_node);
+  arcs->Add(base_node);
+
+  Cylinder* bc = new Cylinder("Base Cylinder");
+  bc->RotateLF(1, 2, TMath::Pi()/2);
+  bc->SetHeight(1);
+  bc->SetROutBase(12); bc->SetROutTop(10);
+  bc->SetColor(0.9, 0.8, 1);
+  bc->SetLodPhi(Npil);
+  scenes->CheckIn(bc);
+  arcs->Add(bc);
+
+  for(int i=0; i<Npil; ++i) {
     ZNodeLink* l = new ZNodeLink(GForm("Link%d", i+1));
-    l->RotateLF(1,2, i*TMath::Pi()/2);
+    l->RotateLF(1,2, i*TMath::TwoPi()/Npil);
     l->MoveLF(1, -4.6);
     l->MoveLF(3, 1.6);
     scenes->CheckIn(l);
-    base_box->Add(l);
+    base_node->Add(l);
     l->SetLens(pi_box);
   }
 
-  Box* b = new Box("Top box");
+  Cylinder* tc = new Cylinder("Top Stone");
+  tc->MoveLF(3, 6.9);
+  tc->RotateLF(1, 2, -TMath::Pi()/2);
+  tc->SetHeight(1.2);
+  tc->SetRInBase(0.1); tc->SetRInTop(0.3);
+  tc->SetROutBase(1);  tc->SetROutTop(1.2);
+  tc->SetColor(0.45, 0.45, 1);
+  tc->SetLodZ(3);
+  tc->SetLodPhi(Npil);
+  scenes->CheckIn(tc);
+  base_node->Add(tc);
+
+  Box* b = new Box("Table");
   b->SetABC(1.1, 1.1, 1);
-  b->MoveLF(3, 6.9);
-  b->SetColor(0.6, 0.2, 0.2);
+  b->MoveLF(3, 1);
+  b->SetColor(0.6, 0.1, 0.3);
   scenes->CheckIn(b);
-  base_box->Add(b);
+  base_node->Add(b);
 
   Lamp* lamp = new Lamp("Lamp");
   lamp->SetScale(1);
@@ -68,5 +87,10 @@ void arc()
 
 
   // Spawn GUI
-  gROOT->ProcessLine(".x eye.C");
+  gROOT->Macro("eye.C");
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(arcs);
+    pupil->SetUpRefAxis(3);
+  }
 }
