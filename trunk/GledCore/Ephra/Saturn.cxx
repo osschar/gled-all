@@ -556,18 +556,26 @@ void Saturn::Shutdown()
 
   // first should dump moons, eyez ...
 
+  static const string _eh("Saturn::Shutdown ");
+
+  ISmess(_eh + "commencing.");
+
+  ISmess(_eh + "stopping ChaItOss (thread manager).");
   mChaItOss->Shutdown();
 
-  ISmess("Saturn::Shutdown stopping server");
+  ISmess(_eh + "stopping MIR shooters.");
   stop_shooters();
+  ISmess(_eh + "stopping server thread.");
   stop_server();
 
-  // Services shut down
+  ISmess(_eh + "stopping services.");
   if(pZHistoManager) {
     pZHistoManager->Write();
     pZHistoManager->Close();
     delete pZHistoManager; pZHistoManager = 0;
   }
+
+  ISmess(_eh + "done.");
 
 }
 
@@ -1843,7 +1851,7 @@ void Saturn::ray_emitter()
     if( ! mEyes.empty()) {
       TMessage msg(GledNS::MT_Ray);
       ray->Write(msg);
-        ISdebug(8, GForm("%snotifying %d eye(s).", _eh.c_str(), mEyes.size()));
+      ISdebug(8, GForm("%snotifying %d eye(s).", _eh.c_str(), mEyes.size()));
       Int_t len = msg.Length() - 4;
       lpEyeInfo_i i = mEyes.begin();
       while(i != mEyes.end()) {
