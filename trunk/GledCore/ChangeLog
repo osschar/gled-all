@@ -1,3 +1,42 @@
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_Layout.cxx:
+	* Eye/MTW_Layout.h:
+	Custom layout: improved handling of widths; added tooltips for
+	narrow labels.
+	
+	* Eye/FTW_Nest.cxx:
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	External (via GledViewNS) interface for adding custom layouts that
+	show-up on "View/Predef Custom" menu entry in FTW_Nest. For
+	examples see demos/Geom1/WS_demo.C or demos/McParticulator/test.C.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Added full-screen mode (bound to <f>).
+	
+	* Stones/ZColor.h:
+	Added operator+=().
+	
+	* perllib/GLED_Widgets.pm:
+	New weed StoneOutput. See GTS/Glasses/GTSurf for example.
+
+	* gled.cxx:
+	* saturn.cxx:
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* Gled/GledNS.cxx:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* GledView/user_init.cxx:
+	Clean-up of GledCore catalog bootstrap.
+
+	* Eye/OptoStructs.cxx:
+	* Glasses/ZGlBlending.h:
+	* Glasses/ZQueen.h:
+	Minor beautifications.
+
 2004-06-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_View.cxx:
