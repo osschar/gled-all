@@ -479,9 +479,19 @@ void* Gled::TRint_runner_tl(TRint* gint)
   GThread::setup_tsd(Gled::theOne->mSaturnInfo);
 
   Gled::theOne->bRintRunning = true;
-  gint->TApplication::Run(true);
-  Gled::theOne->bRintRunning = false;
-  cout << "Gint terminated ...\n";
+  while(Gled::theOne->bRintRunning) {
+    // !!! Attempt to catch exceptions from root.
+    // !!! Does not work.
+    try {
+      gint->TApplication::Run(true);
+      Gled::theOne->bRintRunning = false;
+      cout << "Gint terminated ...\n";
+    }
+    catch(string exc) {
+      cout <<"TRint runner caught exception: "<< exc << endl;
+      cout <<"TRint runner reentering event loop ...\n";
+    }
+  }
 
   if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
   GThread::Exit();
