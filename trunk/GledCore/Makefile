@@ -14,7 +14,7 @@ DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView Eye FL RnrBase
 VIEW_FL_DIRS	= FL
 
-CPPFLAGS	=
+CPPFLAGS	=-I/usr/kerberos/include
 BASE_LD_LIBS	=-lssl
 
 MAINSRCS := saturn.cxx gled.cxx
