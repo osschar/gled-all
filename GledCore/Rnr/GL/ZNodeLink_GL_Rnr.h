@@ -4,27 +4,23 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZNode_GL_Rnr
-#define Gled_ZNode_GL_Rnr
+#ifndef GledCore_ZNodeLink_GL_RNR_H
+#define GledCore_ZNodeLink_GL_RNR_H
 
-#include <Glasses/ZNode.h>
-#include <Rnr/GL/ZGlass_GL_Rnr.h>
-class RnrDriver;
+#include <Glasses/ZNodeLink.h>
+#include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class ZNode_GL_Rnr : public ZGlass_GL_Rnr {
+class ZNodeLink_GL_Rnr : public ZNode_GL_Rnr {
+private:
   void _init();
-  void _setup_rnrmod();
+  void _setup_lens();
 protected:
-  ZNode*	mNode;
-  TimeStamp_t	mStampTrans;
-  float		mGL_Mat[16];
-
-  void build_GL_mat();
-
-  OptoStructs::ZLinkDatum* mRnrModLD;
+  ZNodeLink*	           mZNodeLink;
+  OptoStructs::ZLinkDatum* mLensLD;
 
 public:
-  ZNode_GL_Rnr(ZNode* n) : ZGlass_GL_Rnr(n), mNode(n), mStampTrans(0)
+  ZNodeLink_GL_Rnr(ZNodeLink* idol) :
+    ZNode_GL_Rnr(idol), mZNodeLink(idol)
   { _init(); }
 
   virtual void SetImg(OptoStructs::ZGlassImg* newimg);
@@ -34,6 +30,6 @@ public:
   virtual void PreDraw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
 
-}; // endclass ZNode_GL_Rnr
+}; // endclass ZNodeLink_GL_Rnr
 
 #endif
