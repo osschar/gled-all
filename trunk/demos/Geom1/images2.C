@@ -1,8 +1,8 @@
 // $Header$
 
-// simple scene with images and RectTerrain
-// like images.C but with severeal queens
-//
+// Simple scene with images and RectTerrain.
+// Like images.C but with severeal queens (test of queen dependencies).
+// Requires manual dragging of SunKing/GeomQueen/Images into the PupilInfo.
 
 // vars: ZQueen* scenes
 // libs: Geom1
@@ -119,9 +119,10 @@ void images2()
   images->Add(terrain);
   terrain->SetFromImage(image3);
   terrain->SetDx(0.05); terrain->SetDy(0.05);
-  terrain->SetZScale(0.5);
+  terrain->SetUseScale(true);
+  terrain->SetScales(1,1,0.5);
   terrain->SetMinCol(1,0,0); terrain->SetMaxCol(0,1,1);
-  terrain->ToCenter();
+  terrain->SetOriginMode(RectTerrain::OM_Center);
   terrain->Set3Pos(0, -3, 0.01);
 
 
