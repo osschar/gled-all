@@ -8,6 +8,8 @@ SMorph		16	Glasses/SMorph		.
 Board		17	Glasses/Board		.
 RectTerrain	18	Glasses/RectTerrain	.
 
+RelParticle	32	Glasses/RelParticle
+
 WSSeed		64	Glasses/WSSeed		.
 WSPoint		65	Glasses/WSPoint		.
 
