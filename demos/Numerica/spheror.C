@@ -18,7 +18,7 @@
 
   Spheror* spheror = new Spheror("Single Spheror");
   scenes->CheckIn(spheror); sph_scene->Add(spheror);
-  spheror->Set3Pos(0, 0, 5);
+  spheror->Set3Pos(0, 0, 2.5);
   spheror->SetNVert(30); spheror->SetBeautyP(true);
   spheror->Install();
   spheror->SelfInit();
@@ -26,4 +26,8 @@
   MultiSpheror* multi_spheror = new MultiSpheror("Grid Spheror");
   scenes->CheckIn(multi_spheror); sph_scene->Add(multi_spheror);
   multi_spheror->Init();
+
+
+  // Spawn GUI
+  gROOT->ProcessLine(".x eye.C");
 }
