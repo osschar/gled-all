@@ -34,8 +34,10 @@ void MTW_View::_init()
 
 void MTW_View::auto_label()
 {
-  m_label = mGlass ? mGlass->GetName() : "<no-glass>";
-  if(mWindow) mWindow->label(m_label.c_str());
+  if(mWindow) {
+    m_label = mGlass ? mGlass->GetName() : "<no-glass>";
+    mWindow->label(m_label.c_str());
+  }
 }
 
 /**************************************************************************/
@@ -59,7 +61,10 @@ MTW_View::MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
 }
 
 MTW_View::~MTW_View() {
-  delete mWindow;
+  if(mWindow) {
+    mWindow->remove(*this);
+    delete mWindow;
+  }
 }
 
 /**************************************************************************/

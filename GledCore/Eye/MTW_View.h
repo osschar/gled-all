@@ -38,10 +38,6 @@ protected:
   ZGlass*		mGlass;
   lpMTW_SubView_t	mSubViews;
 
-  int			mWidth;		// X{G}
-  int			mHeight;	// X{G}
-  int			mSkipH;		// X{Gs}
-
   bool			bShown;
 
   Fl_Window*		mWindow;	// X{gs}
