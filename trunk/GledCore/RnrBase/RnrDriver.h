@@ -4,12 +4,10 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_RnrDriver
-#define Gled_RnrDriver
+#ifndef GledCore_RnrDriver
+#define GledCore_RnrDriver
 
 #include "A_Rnr.h"
-#include "RnrScheme.h"
-#include <Eye/OptoStructs.h>
 #include <GledView/GledViewNS.h>
 #include <GledView/GLTextNS.h>
 #include <Stones/ZColor.h>
@@ -50,10 +48,16 @@ protected:
   int		mWidth;		 // X{gs}
   int		mHeight;	 // X{gs}
 
-  void fill_rnrelem_vec(OptoStructs::A_GlassView* gv,
-			const GledViewNS::RnrBits& bits,
-			vlRnrElement_t& rev,
-			bool as_list, bool full_descent);
+  struct RnrMod {
+    TObject*        def;
+    stack<TObject*> stack;
+    RnrMod() : def(0) {}
+  };
+
+  typedef hash_map<FID_t, RnrMod>           hRnrMod_t;
+  typedef hash_map<FID_t, RnrMod>::iterator hRnrMod_i;
+
+  hRnrMod_t     mRnrMods;
 
 public:
   GLTextNS::TexFont* fTexFont;
@@ -69,13 +73,17 @@ public:
   }
   virtual ~RnrDriver() { delete [] mLamps; }
 
-  virtual void AssertGlassRnr(OptoStructs::A_GlassView* gv);
-  virtual void AssertListRnrs(OptoStructs::A_GlassView* lv);
+  void FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
+		     const GledViewNS::RnrBits& bits);
+  void FillRnrScheme(RnrScheme* rs, OptoStructs::lpZGlassImg_t* imgs,
+		     const GledViewNS::RnrBits& bits);
 
-  virtual void PrepareRnrElements(OptoStructs::A_GlassView* gv,
-				  vlRnrElement_t& rev);
+  virtual A_Rnr* GetLensRnr(ZGlass*lens);
+  virtual A_Rnr* AssertDefRnr(OptoStructs::ZGlassImg* img);
+  virtual A_Rnr* GetRnr(OptoStructs::ZGlassImg* img)
+  { return img->fDefRnr ? img->fDefRnr : AssertDefRnr(img); }
 
-  virtual void Render(OptoStructs::A_GlassView* gv);
+  virtual void Render(A_Rnr* img);
 
   // Interface for Rnrs
   // Position Matrix Name Stack
@@ -90,7 +98,19 @@ public:
   int  GetLamp(A_Rnr* l_rnr);
   void ReturnLamp(int lamp);
 
-  A_Rnr* GetDefRnr(ZGlass* g);
+  //----------------------------------------------------------------
+
+  void     SetDefRnrMod(FID_t fid, TObject* ud);
+  TObject* GetDefRnrMod(FID_t fid);
+  void     PushRnrMod(FID_t fid, TObject* ud);
+  TObject* PopRnrMod(FID_t fid);
+  TObject* TopRnrMod(FID_t fid);
+  TObject* GetRnrMod(FID_t fid);
+
+  void  RemoveRnrModEntry(FID_t fid);
+
+  template <class TT>
+  TT GetRnrMod(FID_t fid) { return dynamic_cast<TT>(GetRnrMod(fid)); }
 
 #include "RnrDriver.h7"
 }; // endclass RnrDriver

@@ -15,112 +15,100 @@
 #include <Eye/Eye.h>
 #include <Glasses/ZGlass.h>
 
-namespace OS = OptoStructs;
+namespace OS   = OptoStructs;
 namespace GVNS = GledViewNS;
 
-void RnrDriver::AssertGlassRnr(OS::A_GlassView* gv)
+/**************************************************************************/
+
+void RnrDriver::FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
+		   const GledViewNS::RnrBits& bits)
 {
-  gv->AssertRnr(mRnrName);
-  /* This mostly false ...
-  if(gv->fRnrCtrl->fUseOwnRnr) {
-    if(gv->fRnr == 0) {
-      ZGlass* d = gv->fImg->fGlass;
-      gv->fRnr = GledViewNS::SpawnRnr(mRnrName, d, d->ZibID(), d->ZlassID());
-    }
-  } else {
-    if(gv->fImg->HasRnr() == false) {
-      gv->fImg->SetRnr(GledViewNS::SpawnRnr(mRnrName, d, d->ZibID(), d->ZlassID()));
-    }
+  vlRnrElement_t& rev = rs->fScheme;
+  if(bits.fSelf[0]) {
+    rev[bits.fSelf[0]].push_back(RnrElement(rnr, &A_Rnr::PreDraw));
   }
-  */
+  if(bits.fSelf[1]) {
+    rev[bits.fSelf[1]].push_back(RnrElement(rnr, &A_Rnr::Draw));
+  }
+  if(bits.fSelf[2]) {
+    rev[bits.fSelf[2]].push_back(RnrElement(rnr, &A_Rnr::PostDraw));
+  }
+  if(bits.fSelf[3]) {
+    rev[bits.fSelf[3]].push_back(RnrElement(rnr, 0));
+  }
 }
 
-void RnrDriver::AssertListRnrs(OS::A_GlassView* lv)
+void RnrDriver::FillRnrScheme(RnrScheme* rs, OS::lpZGlassImg_t* imgs,
+		   const GledViewNS::RnrBits& bits)
 {
-  // use virtual First/Last foonctions from listview to obtain
-  // appropriate GlassViews (or its sub-classes as in FTW_Leaf).
-  // Need locks for multithread viewer ... terribly easy to deadlock
-
-  // if bUseOwnRnrs .... !!!
-  lv->AssertListRnrs(mRnrName);
+  vlRnrElement_t& rev = rs->fScheme;
+  if(bits.fList[0]) {
+    for(OS::lpZGlassImg_i img=imgs->begin(); img!=imgs->end(); ++img)
+      rev[bits.fList[0]].push_back(RnrElement(GetRnr(*img), &A_Rnr::PreDraw));
+  }
+  if(bits.fList[1]) {
+    for(OS::lpZGlassImg_i img=imgs->begin(); img!=imgs->end(); ++img)
+      rev[bits.fList[1]].push_back(RnrElement(GetRnr(*img), &A_Rnr::Draw));
+  }
+  if(bits.fList[2]) {
+    for(OS::lpZGlassImg_i img=imgs->begin(); img!=imgs->end(); ++img)
+      rev[bits.fList[2]].push_back(RnrElement(GetRnr(*img), &A_Rnr::PostDraw));
+  }
+  if(bits.fList[3]) {
+    for(OS::lpZGlassImg_i img=imgs->begin(); img!=imgs->end(); ++img)
+      rev[bits.fList[3]].push_back(RnrElement(GetRnr(*img), 0));
+  }
 }
 
 /**************************************************************************/
-
-void RnrDriver::PrepareRnrElements(OS::A_GlassView* gv, vlRnrElement_t& rev)
-{
-  // First all dependant views
-  gv->AssertDependantViews();
-
-  const GVNS::RnrBits& top_rb = gv->GetRnrBits();
-  // Low level renderer for gv
-  if(gv->GetRnrCtrl().fRnrSelf && top_rb.SelfOnDirect()) {
-    AssertGlassRnr(gv);
-    fill_rnrelem_vec(gv, top_rb, rev, false, false);
-  }
-
-  // Low level renderers for links of gv
-  if(gv->GetRnrCtrl().fRnrLinks) {
-    OS::lpZLinkView_t links; gv->CopyLinkViews(links);
-    for(OS::lpZLinkView_i linkv=links.begin(); linkv!=links.end(); ++linkv) {
-      if((*linkv)->fToImg) {
-	const GVNS::RnrBits& rb	 = (*linkv)->GetRnrBits();
-	OS::A_GlassView* to_view = (*linkv)->GetView();
-
-	if(rb.SelfOn()) {
-	  if(rb.SelfOnDirect()) AssertGlassRnr(to_view);
-	  fill_rnrelem_vec(to_view, rb, rev, false, true);
-	}
-
-	if((*linkv)->fToImg->fIsList && rb.ListOn()) {
-	  to_view->AssertDependantViews();
-	  if(rb.ListOnDirect()) AssertListRnrs(to_view);
-	  fill_rnrelem_vec(to_view, rb, rev, true, true);
-	}
-      }
-    }
-  }
-
-  // Low level renderers for list members of gv
-  if(gv->fImg->fIsList && top_rb.ListOn()) {
-    if(top_rb.ListOnDirect()) {
-      AssertListRnrs(gv);
-    }
-    fill_rnrelem_vec(gv, top_rb, rev, true, true);
-  }
-  
-}
-
 /**************************************************************************/
 
-void RnrDriver::Render(OS::A_GlassView* gv)
+A_Rnr* RnrDriver::GetLensRnr(ZGlass* lens)
 {
+  // This one could be extended to use internal/stack-dependant
+  // resolution and thus support multiple renderers.
 
-  UChar_t max_rnr_level = 7;
-  if(max_rnr_level == 0) return;
+  OS::ZGlassImg* img = mEye->DemanglePtr(lens);
+  if(img) return AssertDefRnr(img);
+  return 0;
+}
+
+A_Rnr* RnrDriver::AssertDefRnr(OS::ZGlassImg* img)
+{
+  // This one is somewhat tricky: A_Rnr is A_View, but constructed
+  // with 0 image. Thus we set it an check0in the new rnr.
+
+  if(img->fDefRnr == 0) {
+    img->fDefRnr = img->fClassInfo->fViewPart->SpawnRnr(mRnrName, img->fGlass);
+    if(img->fDefRnr) {
+      img->fDefRnr->SetImg(img);
+    }
+  }
+  return img->fDefRnr;
+}
+
+void RnrDriver::Render(A_Rnr* rnr)
+{
+  static const string _eh("RnrDriver::Render ");
+
   if(mMaxDepth <= 0) return;
   --mMaxDepth;
-  
-  if(gv->fRnrScheme == 0) {
-    gv->fRnrScheme = new RnrScheme(max_rnr_level + 1);
-    //***
-    //cout <<"RnrDriver::Render making RnrScheme for "
-    //<< gv->fImg->fGlass->GetName() <<endl;
-    PrepareRnrElements(gv, gv->fRnrScheme->fScheme);
+
+  if(rnr->mRnrScheme == 0) {
+    rnr->mRnrScheme = new RnrScheme;
+    rnr->CreateRnrScheme(this);
   }
-    
-  for(UChar_t rl=1; rl<=max_rnr_level; ++rl) {
-    lRnrElement_t& re_list = gv->fRnrScheme->fScheme[rl];
+
+  for(UChar_t rl=1; rl<=A_Rnr::sMaxRnrLevel; ++rl) {
+    lRnrElement_t& re_list = rnr->mRnrScheme->fScheme[rl];
     for(lRnrElement_i re=re_list.begin(); re!=re_list.end(); ++re) {
-      if(re->fView) {
-	//***
-	//cout <<"RnrDriver::Render Rendering "
-	//<< re->fView->fImg->fGlass->GetName() <<endl;
-	Render(re->fView);
+      if(re->fRnrFoo == 0) {
+	// cout << _eh + "Descending to " << re->fRnr->fImg->fGlass->GetName() <<endl;
+	Render(re->fRnr);
       } else {
-	re->fRnr->GetGlass()->ReadLock();
+	re->fRnr->fImg->fGlass->ReadLock();
 	((re->fRnr)->*(re->fRnrFoo))(this);
-	re->fRnr->GetGlass()->ReadUnlock();
+	re->fRnr->fImg->fGlass->ReadUnlock();
       }
     }
   }
@@ -129,50 +117,6 @@ void RnrDriver::Render(OS::A_GlassView* gv)
 }
 
 /**************************************************************************/
-
-
-void RnrDriver::fill_rnrelem_vec(OS::A_GlassView* gv, const GVNS::RnrBits& bits,
-				 vlRnrElement_t& rev,
-				 bool as_list, bool full_descent)
-{
-  if(as_list) {
-
-    OS::lpA_GlassView_t el_views; gv->CopyListViews(el_views);
-    if(bits.fList[0]) {
-      for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[0]].push_back(RnrElement((*v)->GetRnr(mRnrName), &A_Rnr::PreDraw));
-    }
-    if(bits.fList[1]) {
-      for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[1]].push_back(RnrElement((*v)->GetRnr(mRnrName), &A_Rnr::Draw));
-    }
-    if(bits.fList[2]) {
-      for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[2]].push_back(RnrElement((*v)->GetRnr(mRnrName), &A_Rnr::PostDraw));
-    }
-    if(full_descent && bits.fList[3]) {
-      for(OS::lpA_GlassView_i v=el_views.begin(); v!=el_views.end(); ++v)
-	rev[bits.fList[3]].push_back(RnrElement(*v));
-    }
-
-  } else {
-
-    if(bits.fSelf[0]) {
-      rev[bits.fSelf[0]].push_back(RnrElement(gv->GetRnr(mRnrName), &A_Rnr::PreDraw));
-    }
-    if(bits.fSelf[1]) {
-      rev[bits.fSelf[1]].push_back(RnrElement(gv->GetRnr(mRnrName), &A_Rnr::Draw));
-    }
-    if(bits.fSelf[2]) {
-      rev[bits.fSelf[2]].push_back(RnrElement(gv->GetRnr(mRnrName), &A_Rnr::PostDraw));
-    }
-    if(full_descent && bits.fSelf[3]) {
-      rev[bits.fSelf[3]].push_back(RnrElement(gv));
-    }
-
-  }
-}
-
 /**************************************************************************/
 /**************************************************************************/
 
@@ -197,13 +141,81 @@ void RnrDriver::ReturnLamp(int lamp)
 }
 
 /**************************************************************************/
+// RnrMods interface
+/**************************************************************************/
 
-A_Rnr* RnrDriver::GetDefRnr(ZGlass* g)
+void RnrDriver::SetDefRnrMod(FID_t fid, TObject* ud)
 {
-  OS::ZGlassImg* img = mEye->DemanglePtr(g);
-  img->AssertDefView();
-  img->fDefView->AssertRnr(mRnrName);
-  return img->fDefView->GetRnr(mRnrName);
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end()) {
+    i->second.def = ud;
+  } else {
+    mRnrMods[fid].def = ud;
+  }
+}
+
+TObject* RnrDriver::GetDefRnrMod(FID_t fid)
+{
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end()) {
+    return i->second.def;
+  } else {
+    return 0;
+  }
+}
+
+void RnrDriver::PushRnrMod(FID_t fid, TObject* ud)
+{
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end()) {
+    i->second.stack.push(ud);
+  } else {
+    mRnrMods[fid].stack.push(ud);
+  }
+}
+
+TObject* RnrDriver::PopRnrMod(FID_t fid)
+{
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end() && ! i->second.stack.empty()) {
+    TObject* r = i->second.stack.top();
+    i->second.stack.pop();
+    return r;
+  } else {
+    return 0;
+  }
+}
+
+TObject* RnrDriver::TopRnrMod(FID_t fid)
+{
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end() && ! i->second.stack.empty()) {
+    return i->second.stack.top();
+  } else {
+    return 0;
+  }
+}
+
+TObject* RnrDriver::GetRnrMod(FID_t fid)
+{
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end()) {
+    if(i->second.stack.empty()) {
+      return i->second.def;
+    } else {
+      return i->second.stack.top();
+    }
+  } else {
+    return 0;
+  }
+}
+
+void RnrDriver::RemoveRnrModEntry(FID_t fid)
+{
+  hRnrMod_i i = mRnrMods.find(fid);
+  if(i != mRnrMods.end()) {
+    mRnrMods.erase(i);
+  }
 }
 
 /**************************************************************************/
