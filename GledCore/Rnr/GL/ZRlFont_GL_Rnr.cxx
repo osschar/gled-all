@@ -13,9 +13,6 @@
 
 void ZRlFont_GL_Rnr::_init()
 {
-  // A_Rnr
-  bOnePerRnrDriver = true;
-
   mFont = 0;
   LoadFont();
 }
@@ -34,7 +31,7 @@ void ZRlFont_GL_Rnr::AbsorbRay(Ray& ray)
 void ZRlFont_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   if(mFont) {
-    PARENT::PreDraw(rd);
+    ConsiderRebuildDL(rd);
     rd->PushRnrMod(ZRlFont::FID(), mRnrMod);
   }
 }
@@ -42,6 +39,7 @@ void ZRlFont_GL_Rnr::PreDraw(RnrDriver* rd)
 void ZRlFont_GL_Rnr::Draw(RnrDriver* rd)
 {
   if(mFont) {
+    ConsiderRebuildDL(rd);
     rd->SetDefRnrMod(ZRlFont::FID(), mRnrMod);
   }
 }
