@@ -413,7 +413,7 @@ FTW_Nest* FTW_Shell::SpawnNest(OS::ZGlassImg* img)
   return nest;
 }
 
-void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img)
+void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool show_p)
 {
   if(img->fFullMTW_View == 0) {
     Fl_Window* w = new Fl_Window(0,0);
@@ -423,7 +423,29 @@ void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img)
     adopt_window(w);
     mMTW_Views.insert(img);
   }
-  img->fFullMTW_View->ShowWindow();
+  if(show_p) {
+    img->fFullMTW_View->ShowWindow();
+  }
+}
+
+void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, int x, int y, float xf, float yf)
+{
+  SpawnMTW_View(img, false);
+  Fl_Window* win = img->fFullMTW_View->GetWindow();
+  int w = win->w(), h = win->h();
+  x += int(xf*w);
+  y += int(yf*h);
+  // border
+  int left=4, top=20, right=4, bot=4;
+  x -= left; y -= top; w += left+right; h += top+bot;
+  // fix overshoot
+  if(x < 0) x = 0;
+  else if(x + w > Fl::w()) x = Fl::w() - w;
+  if(y < 0) y = 0;
+  else if(y + h > Fl::h()) y = Fl::h() - h;
+  x += left; y += top;
+  win->position(x, y);
+  win->show();
 }
 
 void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)

@@ -89,7 +89,8 @@ public:
   void ExportToInterpreter(OptoStructs::ZGlassImg* img, const char* varname);
 
   FTW_Nest* SpawnNest(OptoStructs::ZGlassImg* img);
-  void	    SpawnMTW_View(OptoStructs::ZGlassImg* img);
+  void      SpawnMTW_View(OptoStructs::ZGlassImg* img, bool show_p=true);
+  void	    SpawnMTW_View(OptoStructs::ZGlassImg* img, int x, int y, float xf=0, float yf=0);
   void	    DitchMTW_View(OptoStructs::ZGlassImg* img);
   void      RemoveMTW_Views();
   void      SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
