@@ -5,7 +5,6 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZImage_GL_Rnr.h"
-#include <FL/gl.h>
 
 /**************************************************************************/
 

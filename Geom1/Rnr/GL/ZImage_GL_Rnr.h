@@ -10,7 +10,7 @@
 #include <Glasses/ZImage.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 class ZImage_GL_Rnr : public ZGlass_GL_Rnr {
 private:
@@ -24,7 +24,7 @@ protected:
   void init_texture();
 
 public:
-  ZImage_GL_Rnr(ZImage* idol) : ZGlass_GL_Rnr(idol), mImage(idol) {}
+  ZImage_GL_Rnr(ZImage* idol) : ZGlass_GL_Rnr(idol), mImage(idol) { _init(); }
   virtual ~ZImage_GL_Rnr();
 
   virtual void PreDraw(RnrDriver* rd);
