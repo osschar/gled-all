@@ -1,3 +1,9 @@
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-htmldoc-create:
+	* macros/gled_html_doc.C:
+	Now also generates class hierarchy and class index.
+	
 2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
