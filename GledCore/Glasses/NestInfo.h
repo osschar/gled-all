@@ -22,7 +22,8 @@ protected:
   Bool_t	bSpawnPupils;	// X{GS} 7 Bool()
 
 public:
-  NestInfo(const Text_t* n="NestInfo", const Text_t* t=0) : ZList(n,t) { _init(); }
+  NestInfo(const Text_t* n="NestInfo", const Text_t* t=0) :
+    ZList(n,t) { _init(); }
 
   virtual void AdEnlightenment();
 
