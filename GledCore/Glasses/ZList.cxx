@@ -80,15 +80,14 @@ void ZList::clear_list()
 
 /**************************************************************************/
 
-void ZList::remove_references_to(ZGlass* lens)
+Int_t ZList::remove_references_to(ZGlass* lens)
 {
-  ZGlass::remove_references_to(lens);
+  Int_t nl = ZGlass::remove_references_to(lens);
 
   int n = 0;
   mListMutex.Lock();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     if(*i == lens) {
-      (*i)->DecRefCount(this);
       lpZGlass_i j = i; --i;
       mGlasses.erase(j);
       ++n;
@@ -99,6 +98,8 @@ void ZList::remove_references_to(ZGlass* lens)
     if(n == 1) StampListRemove(lens);
     else       StampListRebuild();
   }
+
+  return nl + n;
 }
 
 
@@ -242,17 +243,17 @@ void ZList::ClearList()
   if(mSize == 0) return;
 
   lpZGlass_t foo;
-  ISdebug(1, GForm("%slocking list '%s'.", _eh.c_str(), GetName()));
+  ISdebug(1, _eh + GForm("locking list '%s'.", GetName()));
   mListMutex.Lock();
   foo.swap(mGlasses);
   clear_list();
   StampListClear();
   mListMutex.Unlock();
-  ISdebug(1, GForm("unlocked list '%s'.", _eh.c_str(), GetName()));
+  ISdebug(1, _eh + GForm("unlocked list '%s'.", GetName()));
   for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
     (*i)->DecRefCount(this);
   }
-  ISdebug(1, GForm("%sfinished for '%s'.", _eh.c_str(), GetName()));
+  ISdebug(1, _eh + GForm("sfinished for '%s'.", GetName()));
 }
 
 void ZList::ClearAllReferences()
