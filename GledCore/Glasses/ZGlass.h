@@ -99,9 +99,9 @@ public:
   virtual void SetStamps(TimeStamp_t s)
   { mTimeStamp = mStampReqTring = s; }
 
-  TimeStamp_t Stamp(LID_t lid, CID_t cid);
+  virtual TimeStamp_t Stamp(LID_t lid, CID_t cid);
   TimeStamp_t Stamp() { return Stamp(0, 0); }
-  TimeStamp_t StampLink(LID_t lid, CID_t cid);
+  virtual TimeStamp_t StampLink(LID_t lid, CID_t cid);
   TimeStamp_t StampLink() { return StampLink(0, 0); }
 
   void SetStamp_CB(zglass_stamp_f foo, void* arg);
