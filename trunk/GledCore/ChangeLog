@@ -1,3 +1,74 @@
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	* Glasses/Operator.cxx:
+	* Glasses/Operator.h:
+
+	Improved timing of thread execution by using GTime.
+	
+	* Gled/GCondition.cxx:
+	* Gled/GCondition.h:
+
+	Fixed variable naming in TimedWait(UInt_t wait_ms) to properly
+	reflect that argument is expected in miliseconds.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+
+	New class. Time in micro-second precision.
+	
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	* Net/Ray.cxx:
+	* Net/Ray.h:
+	
+	New implementation of stamping mechanism. Lenses now Stamp
+	themselves via their ZQueen. Each queen can block emission of
+	stamps for all hers subjects. Each lens has its own TimeStamp.
+	There is no central timestamp on Saturn anymore.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+
+	Brought in accordance with the new stamping model.
+	
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+
+	Changed Saturn socket to non-blocking mode.
+	There are problems with receiving ROOT messages (Rays) in
+	non-blocking mode when incoming buffer is filled-up.
+	
+	* Gled/GledMirDefs.h: Added #include <memory>.
+
+	* Gled/GledTypes.h: Use ROOT types for core typedefs of Gled.
+	
+	* perllib/GLED_Widgets.pm: New option -seqvals for
+	Widgets::PhonyEnum.  See Glasses/PerfMeterOperator.h.
+	
+	* Glasses/PipeEventor.h:
+	* Glasses/PipeEventor.cxx:
+	* Glasses/PipeEventor.h:
+	* Glasses/PerfMeterTarget.cxx:
+	* Glasses/PerfMeterTarget.h:
+	* Glasses/PerfMeterOperator.cxx:
+	* Glasses/PerfMeterOperator.h:
+	* glass.list:
+
+	New glasses.
+	PipeEventor: Spawns a command via gSystem->PipeOpen() in write
+	mode.
+	PerfMeters: Allow timing of MIR processing infrastructure.
+	
 2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Mountain.cxx:
