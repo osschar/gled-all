@@ -112,4 +112,9 @@ void WS_demo()
   tube2->Connect();
 
   gROOT->ProcessLine(".x eye.C");
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(wsdemo);
+    pupil->SetUpRefAxis(3);
+  }
 }

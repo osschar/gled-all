@@ -79,7 +79,10 @@
 
   // Spawn GUI
   gROOT->ProcessLine(".x eye.C");
-
-
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(rot_lamps);
+    pupil->SetUpRefAxis(3);
+  }
   dynamo->Start();
 }

@@ -90,7 +90,11 @@ void spheres()
   
   // Spawn GUI
   gROOT->ProcessLine(".x eye.C");
-
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(spheres);
+    pupil->SetUpRefAxis(3);
+  }
 
   etor->Start();
 }

@@ -165,8 +165,8 @@ void images()
   // Spawn GUI
   gROOT->Macro("eye.C");
   if(pupil) {
-    // Uncomment to fix camera 'up' direction to 'z' axis.
-    // pupil->SetUpReference(images);
-    // pupil->SetUpRefAxis(3);
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(images);
+    pupil->SetUpRefAxis(3);
   }
 }
