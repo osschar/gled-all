@@ -1,5 +1,7 @@
 # $Header$
 
+# NOTE: Linking of nested classes, enums and typedefs IS enabled by default.
+
 $PATCH = {
 
 "Gled" => {
@@ -13,7 +15,6 @@ $PATCH = {
 "AList" => {
   'PragmaSuff' => "!-",
   'VirtualBase' => 1,
-  'Pragmas' => "#pragma link C++ class AList::ElRep;\n",
 },
 
 "ZDeque" => {
@@ -42,8 +43,13 @@ $PATCH = {
   "#pragma link C++ class GMutexHolder;\n"     .
   "#pragma link C++ class GMutexAntiHolder;\n" .
   "#pragma link C++ class GLensReadHolder;\n"  .
-  "#pragma link C++ class GLensWriteHolder;\n"
-	
+  "#pragma link C++ class GLensWriteHolder;\n"	
 },
+
+"GThread" => 
+{
+ 'Pragmas' =>
+  "#pragma link C++ class GThreadKeepAlive;\n"
+}
 
 };
