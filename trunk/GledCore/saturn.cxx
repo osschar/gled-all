@@ -29,20 +29,8 @@ VoidFuncPtr_t initfuncs[] = { 0 };
 
 TRint*		gint;
 Gled*		gled;
-bool		gint_off = true;
 
-/**************************************************************************/
-
-void* RunRint(void* x) {
-  gint_off = false;
-  gint->TApplication::Run(true);
-  gint_off = true;
-
-  cout << "Gint terminated ...\n";
-  if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
-  GThread::Exit();
-  return 0;
-}
+TROOT root("Root", "ROOT of GLED", initfuncs);
 
 /**************************************************************************/
 
@@ -50,7 +38,6 @@ int main(int argc, char **argv)
 {
   list<char*> args; for(int i=1; i<argc; ++i) args.push_back(argv[i]);
 
-  TROOT root("Root", "ROOT of GLED", initfuncs);
   GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
   GledNS::InitFD(0, GledNS::GledRoot);
   gROOT->Time(0);
@@ -110,7 +97,7 @@ int main(int argc, char **argv)
 
 
   // Run TRint
-  GThread app_thread(RunRint, 0, false);
+  GThread app_thread((GThread_foo)Gled::TRint_runner_tl, gint, false);
   if(gled->GetRunRint()) {
     if( app_thread.Spawn() ) {
       perror("saturn.cxx can't create Rint thread");
@@ -120,7 +107,7 @@ int main(int argc, char **argv)
 
   gled_exit.Wait();
   gled_exit.Unlock();
-  if(!gint_off) {
+  if(gled->GetRintRunning()) {
     app_thread.Cancel();
     gint->Terminate(0);
   } else {
