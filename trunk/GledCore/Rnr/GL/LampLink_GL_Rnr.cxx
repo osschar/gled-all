@@ -14,11 +14,12 @@
 
 void LampLink_GL_Rnr::Draw(RnrDriver* rd)
 {
+  static const string _eh("LampLink_GL_Rnr::Draw ");
+
   Lamp* lamp = mLampLink->mLamp;
-  if(lamp == 0) return;
-  Lamp_GL_Rnr* lamp_rnr = dynamic_cast<Lamp_GL_Rnr*>(rd->GetDefRnr(lamp));
+  Lamp_GL_Rnr* lamp_rnr = dynamic_cast<Lamp_GL_Rnr*>(rd->GetLensRnr(lamp));
   if(lamp_rnr==0) {
-    cout <<"LampLink_GL_Rnr::Draw got 0 lamp rnr\n";
+    cout << _eh <<"got 0 lamp rnr.\n";
     return;
   }
 
@@ -27,7 +28,7 @@ void LampLink_GL_Rnr::Draw(RnrDriver* rd)
   } else if(lamp_rnr->GetLampID() == -1 && mLampLink->bTurnOn) {
     ZNode* top = dynamic_cast<ZNode*>(rd->TopPM());
     if(top == 0) {
-      cout <<"LampLink_GL_Rnr::Draw top lens is not ZNode\n";
+      cout << _eh <<"top lens is not ZNode.\n";
       return;
     }
     ZTrans* tr = lamp->ToNode(top);
@@ -35,7 +36,7 @@ void LampLink_GL_Rnr::Draw(RnrDriver* rd)
       lamp_rnr->LampOn(rd, tr);
       delete tr;
     } else {
-      cout <<"LampLink_GL_Rnr::Draw no route from lamp to top\n";
+      cout << _eh <<"no route from lamp to top.\n";
     }
   }
 }

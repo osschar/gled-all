@@ -20,11 +20,13 @@ void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
   // traced back (via Parents) to current position matrix owner.
   // In principle should store list of 
 
+  static const string _eh("GlobalLamps_GL_Rnr::PreDraw ");
+
   ZGlass_GL_Rnr::PreDraw(rd);
 
   ZNode* top = dynamic_cast<ZNode*>(rd->TopPM());
   if(top == 0) {
-    cout <<"GlobalLamps_GL_Rnr::PreDraw top lens is not ZNode\n";
+    cout << _eh <<"top lens is not ZNode.\n";
     return;
   }
 
@@ -36,16 +38,16 @@ void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
     // cout <<"GlobalLamps_GL_Rnr::PreDraw lamp="<< (*l)->GetName() <<endl;
     ZTrans* tr = (*l)->ToNode(top);
     if(tr) {
-      Lamp_GL_Rnr* lrnr = dynamic_cast<Lamp_GL_Rnr*>(rd->GetDefRnr(*l));
+      Lamp_GL_Rnr* lrnr = dynamic_cast<Lamp_GL_Rnr*>(rd->GetLensRnr(*l));
       if(lrnr==0) {
-	cout <<"GlobalLamps_GL_Rnr::PreDraw got 0 lamp rnr\n";
+	cout << _eh <<"got 0 lamp rnr.\n";
 	continue;
       }
       if(lrnr->LampOn(rd, tr) == 0)
 	mLampsOn.push_back(lrnr);
       delete tr;
     } else {
-      cout <<"GlobalLamps_GL_Rnr::PreDraw no route from lamp to top\n";
+      cout << _eh <<"no route from lamp to top.\n";
     }
   }
 }
