@@ -1,3 +1,33 @@
+2005-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Added a virtual base class ImageConsumer. Fixed memory leak in
+	image destruction.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Added handling of ImageConsumers; notify them upon death of an
+	image so they can remove corresponding data.
+
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	RnrDriver is now a sub-class of OptoStructs::ImageConsumer. This
+	allows proper destruction of renderers local to the driver.
+
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.h:
+	Cleaned-up RnrMod management; new changes coming soon.
+
+	* perllib/GLED_Widgets.pm:
+	Filor: added handling of '-pat' option to specify default
+	file-name matching pattern.
+
+	* Glasses/ZRlFont.h:
+	Added default pattern '*.txf' to Filor weed for mFontName.
+
 2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Leaf.cxx:
