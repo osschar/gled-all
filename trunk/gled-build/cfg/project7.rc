@@ -11,4 +11,4 @@ infile		=s	main		INFILE		undef
 7file		=s	main		OUT7FILE	'skip'
 
 locksetmets	!	.		LOCK_SET_METHS	1
-lockgetmets	!	.		LOCK_GET_METHS	1
+lockgetmets	!	.		LOCK_GET_METHS	0
