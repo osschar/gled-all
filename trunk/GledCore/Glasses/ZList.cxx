@@ -28,10 +28,12 @@
 
 
 #include "ZList.h"
+#include "ZList.c7"
+
 #include <Glasses/ZQueen.h>
 #include <Net/Ray.h>
 #include <Stones/ZComet.h>
-#include <TBuffer.h>
+#include <Gled/GledNS.h>
 
 #include <algorithm>
 #include <iterator>
@@ -43,17 +45,31 @@ ClassImp(ZList)
 void ZList::_init()
 {
   mSize = 0;
+  mLid  = 0; mCid  = 0;
   mStampListAdd_CB = 0;		mStampListAdd_CBarg = 0;
   mStampListRemove_CB = 0;	mStampListRemove_CBarg = 0;
+  mStampListRebuild_CB = 0;	mStampListRebuild_CBarg = 0;
 }
 
 /**************************************************************************/
 
-void ZList::UnrefAll() {
+void ZList::unref_all() {
   mListMutex.Lock();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i)
-    (*i)->DecRefCount();
+    (*i)->DecRefCount(this);
   mListMutex.Unlock();
+}
+
+void ZList::new_element_check(ZGlass* g)
+{
+  if(g == 0) {
+    throw(string("ZList::new_element_check called with null ZGlass*"));
+  }
+  if(mLid && mCid) {
+    if(!GledNS::IsA(g, FID_t(mLid, mCid))) {
+      throw(string("ZList::new_element_check lens of wrong FID_t"));
+    }
+  }
 }
 
 /**************************************************************************/
@@ -95,35 +111,64 @@ ZGlass* ZList::GetByName(const Text_t* name)
   return ret;
 }
 
+ZGlass* ZList::Query(const Text_t* path)
+{
+  string p(path);
+  return Query(p);
+}
+
+ZGlass* ZList::Query(const string& path)
+{
+  lStr_t names;
+  GledNS::split_string(path, names, '/');
+  ZGlass* g = this;
+  for(lStr_i i=names.begin(); i!=names.end(); ++i) {
+    if(i->size() == 0) continue;
+    ZList* l = dynamic_cast<ZList*>(g);
+    g = (l != 0) ? l->GetByName(i->c_str()) : 0;
+  }
+  return g;
+}
+
 /**************************************************************************/
+/**************************************************************************/
+
+void ZList::SetElementFID(FID_t fid)
+{
+  mLid = fid.lid; mCid = fid.cid;
+  Stamp(LibID(), ClassID());
+}
 
 void ZList::Add(ZGlass* g)
 {
+  new_element_check(g);
   mListMutex.Lock();
   mGlasses.push_back(g); ++mSize;
   StampListAdd(g, 0);
   mListMutex.Unlock();
-  g->IncRefCount();
+  g->IncRefCount(this);
 }
 
 void ZList::AddBefore(ZGlass* g, ZGlass* before)
 {
+  new_element_check(g);
   mListMutex.Lock();
   lpZGlass_i i = find(mGlasses.begin(), mGlasses.end(), before);
   mGlasses.insert(i, g); ++mSize;
   StampListAdd(g, before);
   mListMutex.Unlock();
-  g->IncRefCount();
+  g->IncRefCount(this);
 }
 
 void ZList::AddFirst(ZGlass* g)
 {
+  new_element_check(g);
   mListMutex.Lock();
   ZGlass* b4 = mSize > 0 ? mGlasses.front() : 0;
   mGlasses.push_front(g); ++mSize;
   StampListAdd(g, b4);
   mListMutex.Unlock();
-  g->IncRefCount();
+  g->IncRefCount(this);
 }
 
 void ZList::Remove(ZGlass* g)
@@ -137,7 +182,7 @@ void ZList::Remove(ZGlass* g)
     StampListRemove(g);
   }
   mListMutex.Unlock();
-  if(succ) g->DecRefCount();
+  if(succ) g->DecRefCount(this);
 }
 
 void ZList::RemoveLast(ZGlass* g)
@@ -155,12 +200,20 @@ void ZList::RemoveLast(ZGlass* g)
     }
   } while(i!=mGlasses.begin());
   mListMutex.Unlock();
-  if(succ) g->DecRefCount();
+  if(succ) g->DecRefCount(this);
+}
+
+void ZList::Clear()
+{
+  unref_all();
+  mGlasses.clear();
+  mSize = 0;
+  StampListRebuild();
 }
 
 /**************************************************************************/
 
-bool ZList::Has(ZGlass* g)
+Bool_t ZList::Has(ZGlass* g)
 {
   mListMutex.Lock();
   lpZGlass_i i = find(mGlasses.begin(), mGlasses.end(), g);
@@ -254,7 +307,7 @@ Int_t ZList::RebuildList(ZComet* c)
     ZGlass* g = c->FindID(*i);
     if(g) {
       mGlasses.push_back(g);
-      g->IncRefCount();
+      g->IncRefCount(this);
     } else {
       ++ret;
     }
@@ -264,5 +317,3 @@ Int_t ZList::RebuildList(ZComet* c)
 }
 
 /**************************************************************************/
-
-#include "ZList.c7"
