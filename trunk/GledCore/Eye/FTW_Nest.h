@@ -154,8 +154,6 @@ public:
 
   void ReverseAnts();
 
-  void RemoveTransients();
-
   /**************************************************************************/
 
   Fl_Color LeafName_Color(FTW_Leaf* leaf);

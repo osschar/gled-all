@@ -418,6 +418,7 @@ void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img)
   if(img->fFullMTW_View == 0) {
     img->fFullMTW_View = MTW_View::ConstructVerticalWindow(img, this);
     adopt_window(img->fFullMTW_View);
+    mMTW_Views.insert(img);
   }
   img->fFullMTW_View->show();
 }
@@ -427,7 +428,19 @@ void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)
   if(img->fFullMTW_View != 0) {
     delete img->fFullMTW_View;
     img->fFullMTW_View = 0;
+    mMTW_Views.erase(mMTW_Views.find(img));
   }
+}
+
+void FTW_Shell::RemoveMTW_Views()
+{
+  set<OptoStructs::ZGlassImg*>::iterator i = mMTW_Views.begin();
+  while(i != mMTW_Views.end()) {
+    delete (*i)->fFullMTW_View;
+    (*i)->fFullMTW_View = 0;
+    ++i;
+  }
+  mMTW_Views.clear();
 }
 
 void FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
