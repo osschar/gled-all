@@ -618,7 +618,7 @@ void Pupil::draw()
 
   if(mInfo->GetShowRPS() == true && mDriver->fTexFont) {
     const string text( GForm("%.1frps", 1/rnr_time.ToDouble() <? 999.9) );
-    GLTextNS::RnrTextAt(mDriver, text, 2, 0, 0, mInfo->PtrTextCol(), 0);
+    GLTextNS::RnrTextAt(mDriver, text, 2, 0, 1e-3, mInfo->PtrTextCol(), 0);
   }
 
   glMatrixMode(GL_PROJECTION);

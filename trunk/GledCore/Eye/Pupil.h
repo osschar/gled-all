@@ -20,7 +20,6 @@ class PupilInfo;
 #include <FL/gl.h>
 #include <FL/Fl_Gl_Window.H>
 
-// !!!! Pupil should be A_View of its PupilInfo
 // !!!! Need locator support
 
 class Pupil : public Fl_Gl_Window, public OptoStructs::A_View
