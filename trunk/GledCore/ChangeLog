@@ -120,6 +120,11 @@
 	Added quantum numbers RQN_list_begin and RQN_list_end to
 	facilitate handling of list changes in A_Views.
 
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Stamp() optionally takes eye_bits to be set to ray. Removed
+	RnrCtrl pragma.
+
 	* Glasses/AList.h:
 	* Glasses/Box.h:
 	* Glasses/Camera.h:
@@ -150,8 +155,6 @@
 	* Glasses/ZGlLightModel.h:
 	* Glasses/ZGlMaterial.h:
 	* Glasses/ZGlStateBase.h:
-	* Glasses/ZGlass.cxx:
-	* Glasses/ZGlass.h:
 	* Glasses/ZGod.h:
 	* Glasses/ZGroupIdentity.h:
 	* Glasses/ZHashList.h:
