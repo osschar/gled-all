@@ -359,6 +359,59 @@ for $f (@{$resolver->{LibSetList}}) {
 }
 
 ########################################################################
+# Create Environment Files
+########################################################################
+
+{
+  my @exts = split(/:/, $config->{EXTERNAL});
+  my $extbin, $extlib, $extman;
+  $extbin = join(':', (map { "$_/bin"} @exts));
+  $extlib = join(':', (map { "$_/lib"} @exts));
+  $extman = join(':', (map { "$_/man"} @exts));
+
+  open SH, ">$config->{ENVSETUPSTEM}.sh";
+  print SH <<"FNORD";
+# This is environment for *this* gled build
+# Use as: . $config->{ENVSETUPSTEM}.sh
+# Can be run from anywhere
+
+export ROOTSYS=$ENV{ROOTSYS}
+export GLEDSYS=$ENV{GLEDSYS}
+
+PATH=\$PATH:\$ROOTSYS/bin:$extbin:\$GLEDSYS/bin
+LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$ROOTSYS/lib:$extlib:\$GLEDSYS/lib
+MANPATH=\$MANPATH:$extman
+
+export PATH LD_LIBRARY_PATH MANPATH
+FNORD
+  close SH;
+
+  open CSH, ">$config->{ENVSETUPSTEM}.csh";
+  print CSH <<"FNORD";
+# This is environment for *this* gled build
+# Use as: . $config->{ENVSETUPSTEM}.csh
+# Can be run from anywhere
+
+setenv ROOTSYS $ENV{ROOTSYS}
+setenv GLEDSYS $ENV{GLEDSYS}
+
+setenv PATH \${PATH}:\${ROOTSYS}/bin:$extbin:\${GLEDSYS}/bin
+if ( \$?LD_LIBRARY_PATH ) then
+  setenv LD_LIBRARY_PATH \${LD_LIBRARY_PATH}:\${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
+else
+  setenv LD_LIBRARY_PATH \${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
+endif
+if ( \$?MANPATH ) then 
+  setenv MANPATH \${MANPATH}:$extman
+else
+  setenv MANPATH $extman
+endif
+FNORD
+  close CSH;
+}
+
+
+########################################################################
 # Create Makefile
 ########################################################################
 
@@ -369,8 +422,9 @@ for $f (@{$resolver->{LibSetList}}) {
   print M "\n";
 
   print M "SUBDIRS := ", join(' ', @{$resolver->{LibSetList}}), "\n";
-  print M "BUILD_FILES := $CFGFILE Makefile \\\n";
-  print M "  make/make_config.inc make/make_rnr.inc include/config.h\n";
+  print M "BUILD_FILES := Makefile $CFGFILE \\\n";
+  print M "\t$config->{ENVSETUPSTEM}.sh $config->{ENVSETUPSTEM}.csh \\\n";
+  print M "\tmake/make_config.inc make/make_rnr.inc include/config.h\n";
   print M "\n";
 
   print M "all:\n\n";
