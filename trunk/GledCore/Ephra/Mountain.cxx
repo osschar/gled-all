@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -164,7 +164,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
       di->fOpArg->fSuspendidor.Unlock();
     }
 
-    GTime since_start(GTime::Now);
+    GTime since_start(GTime::I_Now);
     since_start -= op_arg->fBeatStart;
 
     Int_t sleep_time = di->fEventor->GetInterBeatMS() - since_start.ToMiliSec();
@@ -174,7 +174,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
       } else {
 	di->fOpArg->fSuspendidor.Lock();
 	di->fSleeping = true;
-	int timed_out = di->fOpArg->fSuspendidor.TimedWait(sleep_time);
+	int timed_out = di->fOpArg->fSuspendidor.TimedWaitMS(sleep_time);
 	di->fSleeping = false;
 	di->fOpArg->fSuspendidor.Unlock();
 	if(!timed_out) {
@@ -249,7 +249,7 @@ void Mountain::Stop(Eventor* e)
   hEv2DI_i i = hOnStage.find(e);
   if(i == hOnStage.end() || i->second==0) {
     hStageLock.Unlock();
-    ISerr(GForm("Mountain::GimmeSilence ... can't find thread of %s",
+    ISerr(GForm("Mountain::Stop ... can't find thread of %s",
 		e->GetName()));
     return;
   }
@@ -313,6 +313,22 @@ void Mountain::Resume(Eventor* e)
   di->fOpArg->fSuspendidor.Unlock();
 }
 
+void Mountain::Cancel(Eventor* e)
+{
+  hStageLock.Lock();
+  hEv2DI_i i = hOnStage.find(e);
+  if(i == hOnStage.end() || i->second==0) {
+    hStageLock.Unlock();
+    ISerr(GForm("Mountain::Cancel ... can't find thread of %s",
+		e->GetName()));
+    return;
+  }
+  DancerInfo* di = i->second;
+  hStageLock.Unlock();
+
+  di->fThread->Cancel();
+}
+
 /**************************************************************************/
 
 void Mountain::WipeThread(Eventor* e)
@@ -353,7 +369,7 @@ Int_t Mountain::SuspendAll()
     return 0;
   }
   do {
-    int ws = hSuspendCond.TimedWait(5);
+    int ws = hSuspendCond.TimedWaitMS(5);
     if(ws==0) hSuspendCount++;
     hStageLock.Lock(); n = hOnStage.size(); hStageLock.Unlock();
     if(ws && hSuspendCount < n) {
@@ -415,13 +431,20 @@ void Mountain::Shutdown()
   }
   hStageLock.Unlock();
 
+  int  count = 0;
   while(1) {
     gSystem->Sleep(100);
     hStageLock.Lock();
     int n = hOnStage.size();
+    if(n > 0 && count > 10) {
+      for(hEv2DI_i i=hOnStage.begin(); i!=hOnStage.end(); ++i) {
+	i->second->fThread->Cancel();
+      }
+    }
     hStageLock.Unlock();
     if(n == 0) break;
     ISmess(GForm("Mountain::Shutdown waiting for %d threads", n));
+    ++count;
   }
   ISmess("Mountain::Shutdown all threads stopped");
 }

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -71,7 +71,8 @@ public:
   virtual void	Stop();		// X{E} 7 MButt()
   virtual void	Suspend();	// X{E} 7 MButt(-join=>1)
   virtual void	Resume();	// X{E} 7 MButt()
-  virtual void	Reset();	// X{E} 7 MButt()
+  virtual void	Reset();	// X{E} 7 MButt(-join=>1)
+  virtual void	Cancel();	// X{E} 7 MButt()
 
   void SetHost(SaturnInfo* host);
 
