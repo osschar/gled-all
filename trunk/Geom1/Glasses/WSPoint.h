@@ -11,7 +11,7 @@
 
 class WSPoint : public ZNode {
 
-  // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(WSPoint);
   MAC_RNR_FRIENDS(WSSeed);
   friend class WSSeed;
@@ -21,17 +21,18 @@ private:
   TMatrixF	mCoffs;
 
 protected:
-  Float_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
-  Float_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
-  Float_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6)
+  Float_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
+  Float_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
+  Float_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6)
 
-  Float_t	mTwist;		// X{GS} 7 Value(-range=>[-100,100,1,100], -join=>1)
-  Float_t	mStretch;	// X{GS} 7 Value(-range=>[-100,100,1,100])
+  Float_t	mTwist;		// X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Float_t	mStretch;	// X{GS} 7 Value(-range=>[-100,100,1,1000])
 
-  bool		bDrawAxen;	// 	   X{GS} 7 Bool()
+  bool		bDrawAxen;	// X{GS} 7 Bool()
 
 public:
-  WSPoint(Text_t* n="WSPoint", Text_t* t=0) : ZNode(n,t), mCoffs(5,4) { _init(); }
+  WSPoint(const Text_t* n="WSPoint", const Text_t* t=0) : 
+    ZNode(n,t), mCoffs(5,4) { _init(); }
 
   void Coff(const WSPoint* f);
 
