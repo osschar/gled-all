@@ -14,7 +14,7 @@
 class ZGlass;
 class Eye;
 class A_Rnr; class RnrScheme;
-class Fl_Window;
+class MTW_View;
 
 namespace OptoStructs {
 
@@ -49,7 +49,7 @@ namespace OptoStructs {
 
     A_Rnr*		fDefRnr;
 
-    Fl_Window*		fFullMTW_View;
+    MTW_View*		fFullMTW_View;
     lpA_View_t		fViews;
 
     ZGlassImg(Eye* e, ZGlass* g);
