@@ -12,7 +12,7 @@
 #include <Stones/ZTrans.h>
 
 class ZNode : public ZList {
-  // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZNode);
 
 private:
@@ -29,7 +29,9 @@ protected:
 
   // 777 Trans_Rot_Ctrl(Methodbase=>'Rot', Methodname=>'Rot',Transname=>'Trans')
 
-  Bool_t	bUseScale;	// X{GS}  7 Bool()
+  Bool_t	bUseScale;	// X{GS}  7 Bool(-join=>1)
+  Bool_t	bUseOM;		// X{GS}  7 Bool(-join=>1)
+  Float_t	mOM;		// X{GS}  7 Value(-range=>[-32, 32, 1,1000])
   Float_t	mSx;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
   Float_t	mSy;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
   Float_t	mSz;		// X{GS}  7 Value(-range=>[0,1000, 1,1000])
@@ -53,24 +55,38 @@ public:
 
   // Overrides for ZTrans stuff that needs stamping
   Int_t	Level();
+
   Int_t MoveLF(Int_t vi, Float_t amount);		// X{E}
+  Int_t Move3(Float_t x, Float_t y, Float_t z);         // X{E}
   Int_t RotateLF(Int_t i1, Int_t i2, Float_t amount);	// X{E}
+
   Int_t Move(ZNode* ref, Int_t vi, Float_t amount);	// X{E} C{1}
   Int_t Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Float_t amount);// X{E} C{1}
-  Int_t SetTrans(ZTrans& t);	// X{E}
+  Int_t SetTrans(const ZTrans& t);	// X{E}
   Int_t MultBy(ZTrans& t);	// X{E}
 
   Int_t Set3Pos(Float_t x, Float_t y, Float_t z);		  // X{E}
   Int_t SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);  // X{E}
   Int_t SetRotByDegrees(Float_t a1, Float_t a2, Float_t a3); // X{E}
 
-  void SetS(Float_t xx);  			// X{E}
+  void SetS(Float_t xx);                           // X{E}
   void SetScales(Float_t x, Float_t y, Float_t z); // X{E}
-  void MultS(Float_t s);                         // X{E}
+  void MultS(Float_t s);                           // X{E}
+
+  void SetOMofDaughters(Float_t om, Bool_t enforce_to_all=false); // X{ED}
 
   ZTrans* ToMFR(int depth=0);
   ZTrans* ToNode(ZNode* top, int depth=0);
-  static ZTrans* BtoA(ZNode* a, ZNode* b);
+  static ZTrans* BtoA(ZNode* a, ZNode* b, ZNode* top=0);
+
+  void FillParentList(list<ZNode*>& plist);
+  static ZNode* FindCommonParent(ZNode* a, ZNode* b);
+
+  // Stamps
+  void MarkStampReqTrans()
+  { mStampReqTrans = ++mTimeStamp; }
+  void StampReqTrans()
+  { mStampReqTrans = Stamp(LibID(), ClassID()); }
 
   // Clump
   void Spit() const;
@@ -80,9 +96,6 @@ public:
 }; // endclass ZNode
 
 GlassIODef(ZNode);
-
-typedef list<ZNode*>		lpZNode_t;
-typedef list<ZNode*>::iterator	lpZNode_i;
 
 #endif
 

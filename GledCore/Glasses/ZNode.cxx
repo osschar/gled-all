@@ -5,12 +5,13 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZNode.h"
-#include <Stones/ZMIR.h>
-#include <Stones/ZComet.h>
-#include <Ephra/Saturn.h>
+#include "ZNode.c7"
 #include <Stones/ZComet.h>
 
 #include <ctype.h>
+
+typedef list<ZNode*>           lpZNode_t;
+typedef list<ZNode*>::iterator lpZNode_i;
 
 ClassImp(ZNode)
 
@@ -22,6 +23,8 @@ namespace {
 void ZNode::_init()
 {
   bUseScale = false;
+  bUseOM    = false;
+  mOM = 0;
   mSx = mSy = mSz = 1;
   mParent = 0; bKeepParent = true;
 
@@ -100,6 +103,13 @@ Int_t ZNode::MoveLF(int vi, Float_t amount)
   return 1;
 }
 
+Int_t ZNode::Move3(Float_t x, Float_t y, Float_t z)
+{
+  mTrans.Move3(x,y,z);
+  mStampReqTrans = Stamp(LibID(), ClassID());
+  return 1;
+}
+
 Int_t ZNode::RotateLF(Int_t i1, Int_t i2, Float_t amount)
 {
   if(i1<0 || i1>3 || i2<0 || i2>3) return 0;
@@ -107,6 +117,8 @@ Int_t ZNode::RotateLF(Int_t i1, Int_t i2, Float_t amount)
   mStampReqTrans = Stamp(LibID(), ClassID());
   return 1;
 }
+
+/**************************************************************************/
 
 Int_t ZNode::Move(ZNode* ref, Int_t vi, Float_t amount)
 {
@@ -140,7 +152,7 @@ Int_t ZNode::Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Float_t amount)
   return 1;
 }
 
-Int_t ZNode::SetTrans(ZTrans& t)
+Int_t ZNode::SetTrans(const ZTrans& t)
 {
   mTrans.SetTrans(t);
   mStampReqTrans = Stamp(LibID(), ClassID());
@@ -203,6 +215,25 @@ void ZNode::MultS(Float_t s)
 
 /**************************************************************************/
 
+void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
+{
+  // If enforce_to_all also changes OM of children w/ parent != this.
+  
+  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    ZNode* d = *i;
+    d->ReadLock();
+    if(enforce_to_all || d->mParent == this) {
+      d->WriteLock();
+      d->SetOM(om);
+      d->WriteUnlock();
+    }
+    d->ReadUnlock();
+  }
+}
+
+/**************************************************************************/
+
 ZTrans* ZNode::ToMFR(int depth)
 {
   if(depth > ZNodeTransSearchMaxDepth) {
@@ -215,14 +246,21 @@ ZTrans* ZNode::ToMFR(int depth)
   if(p == 0) {
     ReadLock();
     x = new ZTrans(mTrans);
-    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
+    if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
     ReadUnlock();
   } else {
     x = p->ToMFR(++depth);
     if(x == 0) return 0;
     ReadLock();
     *x *= mTrans;
-    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
+    if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
+      if(bUseOM && p->bUseOM) {
+	Float_t dom =  mOM - p->mOM;
+	if(dom != 0) {
+	  Float_t s = TMath::Power(10, dom);
+	  x->Scale3(s, s, s);
+	}
+      }
     ReadUnlock();
   }
   return x;
@@ -242,14 +280,21 @@ ZTrans* ZNode::ToNode(ZNode* top, int depth)
   if(p == top) {
     ReadLock();
     x = new ZTrans(mTrans);
-    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
+    if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
     ReadUnlock();
   } else {
     x = p->ToNode(top, ++depth);
     if(x) {
       ReadLock();
       *x *= mTrans;
-      if(bUseScale) { x->Scale(mSx, mSy, mSz); }
+      if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
+      if(bUseOM && p->bUseOM) {
+	Float_t dom =  mOM - p->mOM;
+	if(dom != 0) {
+	  Float_t s = TMath::Power(10, dom);
+	  x->Scale3(s, s, s);
+	}
+      }
       ReadUnlock();
     }
   }
@@ -258,14 +303,49 @@ ZTrans* ZNode::ToNode(ZNode* top, int depth)
 
 /**************************************************************************/
 
-ZTrans* ZNode::BtoA(ZNode* a, ZNode* b)
+ZTrans* ZNode::BtoA(ZNode* a, ZNode* b, ZNode* top)
 {
-  ZTrans* at = a->ToMFR(); if(at == 0) { return 0; }
+  if(top == 0) {
+    top = FindCommonParent(a,b);
+    if(top == 0) return 0;
+  }
+  ZTrans* at = a->ToNode(top); if(at == 0) { return 0; }
   at->Invert();
-  ZTrans* bt = b->ToMFR(); if(bt == 0) { delete at; return 0; }
+  ZTrans* bt = b->ToNode(top); if(bt == 0) { delete at; return 0; }
   *at *= *bt;
   delete bt;
   return at;
+}
+
+/**************************************************************************/
+
+void ZNode::FillParentList(list<ZNode*>& plist)
+{
+  ZNode* p = mParent;
+  if(p) {
+    plist.push_back(p);
+    p->FillParentList(plist);
+  }
+}
+
+ZNode* ZNode::FindCommonParent(ZNode* a, ZNode* b)
+{
+  if(a == 0 || b == 0) return 0;
+  if(a == b) return a;
+
+  // !! This far from optimal, methinks.
+
+  lpZNode_t l[2];
+  l[0].push_back(a); a->FillParentList(l[0]);
+  l[1].push_back(b); b->FillParentList(l[1]);
+  int x = 0, y = 1;
+  do {    
+    lpZNode_i i = find(l[y].begin(), l[y].end(), l[x].front());
+    if(i != l[y].end()) return l[x].front();
+    l[x].pop_front();
+    y = x; x = 1 - x;
+  } while(!l[0].empty() && !l[1].empty());
+  return 0;
 }
 
 /**************************************************************************/
@@ -279,20 +359,6 @@ void ZNode::Spit() const
 
 /**************************************************************************/
 
-#include <TBuffer.h>
-
-// Example of NodeLists() method
-// lpZList_t*
-// ZSth::NodeLists() {
-//   // Returns list of ZList pointers ... needed by ZBush
-//   // Assume we have a member ZList mTubes ... than you should:
-//   l = ZNode::NodeLists();
-//   l->push_back(&mTubes);
-//   return l;
-// }
-
-/**************************************************************************/
-
 ostream& operator<<(ostream& s, const ZNode& n) {
   const ZTrans& t = n.RefTrans();
   for(Int_t i=0; i<=3; i++) {
@@ -302,5 +368,3 @@ ostream& operator<<(ostream& s, const ZNode& n) {
   }
   return s;
 }
-
-#include "ZNode.c7"
