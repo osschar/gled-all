@@ -48,12 +48,18 @@ void check_overlaps(Float_t epsilon=1)
   ZGeoOvlMgr* ovl = new ZGeoOvlMgr("Overlap Mgr");
   scenes->CheckIn(ovl);
   rscene->Add(ovl);  
-  ovl->SetGeoManager(gGeoManager);
   ovl->RecalculateOvl();
   ovl->SetUseOM(1);
   ovl->SetOM(-2);
-
   ovl->RnrOnRec();
+
+  // create an empty node to test save/load from file 
+  ZGeoNode* em_node = new ZGeoNode("Empty Node");
+  em_node->SetOM(-2.5);
+  em_node->Set3Pos(6.5, 0, 0);
+  em_node->SetUseOM(true);
+  scenes->CheckIn(em_node);
+  rscene->Add(em_node);
 
   //--------------------------------------------------------------
 
@@ -72,10 +78,13 @@ void check_overlaps(Float_t epsilon=1)
     shell->SetLeafLayout(NestInfo::LL_Custom);
 
     CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), pupil_name, "");
-    pupil->SetFOV(60);
+    pupil->SetFOV(80);
+    pupil->SetCHSize(0.03);
     pupil->SetBlend(1);
     pupil->Add(rscene);
     pupil->SetCameraBase((ZNode*)rscene->GetElementByName("Camera Base"));
+    pupil->SetUpReference(rscene);
+    pupil->SetUpRefAxis(2);
 
     Gled::theOne->SpawnEye(shell, eye_name);
   }

@@ -50,15 +50,21 @@ void alice_geom(Int_t import_mode=0)
 
   ZGeoNode* znode = new ZGeoNode("MasterVolume");
   volt = znode;
-  znode->SetVol(gGeoManager->GetMasterVolume());
-  //znode->SetVol(gGeoManager->GetNode(188)->GetVolume());
+  znode->SetTNode(gGeoManager->GetTopNode());
   znode->SetOM(-2);
   znode->SetUseOM(true);
   scenes->CheckIn(znode);
   rscene->Add(znode);
-  GeoUserData* ud == new  GeoUserData();
-  znode->CreateFaceset(ud);
+  znode->AssertUserData();
   znode->SetRnrSelf(false);
+
+  // create an empty node to test save/load from file 
+  ZGeoNode* em_node = new ZGeoNode("Empty Node");
+  em_node->SetOM(-2.5);
+  em_node->Set3Pos(6.5, 0, 0);
+  em_node->SetUseOM(true);
+  scenes->CheckIn(em_node);
+  rscene->Add(em_node);
 
   switch(import_mode) {
   case  0: { import_by_regexp(); break; }
@@ -83,10 +89,12 @@ void alice_geom(Int_t import_mode=0)
 
     CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), pupil_name, "");
     pupil->SetFOV(80);
-    pupil->SetCHSize(0.0);
+    pupil->SetCHSize(0.03);
     pupil->SetBlend(1);
     pupil->Add(rscene);
     pupil->SetCameraBase((ZNode*)rscene->GetElementByName("Camera Base"));
+    pupil->SetUpReference(rscene);
+    pupil->SetUpRefAxis(2);
 
     Gled::theOne->SpawnEye(shell, eye_name);
   }
@@ -133,7 +141,7 @@ void import_by_regexp()
   volt->ImportByRegExp("EPM", TRegexp("^EPM"));
 
   volt->ImportByRegExp("ZDC", TRegexp("^ZDC"));
-  volt->ImportByRegExp("ZEM", TRegexp("^ZEB"));
+  volt->ImportByRegExp("ZEM", TRegexp("^ZEM"));
   volt->ImportByRegExp("FMD", TRegexp("^FMD"));
 
   volt->ImportByRegExp("S/S01", TRegexp("^S01"));
