@@ -141,6 +141,7 @@ void ZGeoNode::ImportNodes()
 
     insert_node(geon, this, true,  GForm("%s::%s", vname, sname));
   }
+  bRnrSelf=false;
 }
 
 /**************************************************************************/
@@ -182,6 +183,7 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
 
     insert_node(geon, holder, false,  GForm("%s::%s", vname.Data(), sname.Data()));
   }
+  bRnrSelf=false;
 }
 
 /**************************************************************************/
@@ -227,6 +229,7 @@ void ZGeoNode::ImportNodesWCollect()
     
     insert_node(geon, holder, false,  GForm("%s::%s", vname, sname));
   }
+  bRnrSelf=false;
 }
 
 /**************************************************************************/
@@ -270,6 +273,7 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
       }
     } 
   }
+  bRnrSelf=false;
 }
 
 /**************************************************************************/
