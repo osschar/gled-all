@@ -242,7 +242,7 @@ float FTW_Branch::LeafPosition(FTW_Leaf* leaf)
 /**************************************************************************/
 
 void FTW_Branch::label_namebox() {
-  int s = ((ZList*)(fImg->fGlass))->Size();
+  int s = mLeoim.size();
   if(s) {
     wName->set_label(GForm("%s [%d]", fImg->fGlass->GetName(), s));
   } else {
