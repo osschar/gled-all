@@ -1,3 +1,22 @@
+2005-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	Bugfix in Source_Selector generate_MIR.
+
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	Added Clear method and a menu callback to invoke it.
+
+	* Eye/MTW_View.cxx:
+	Bugfix in BuildVerticalView: mShell undefined for stand-alone
+	lenses (segv during query for fancy/showdefaults setting).
+
+	* Eye/Pupil.cxx:
+	Moved delarations of picking menu to inner scope.
+
+	* Glasses/ShellInfo.cxx:
+	bShowLinksInClassView true by default.
+
 2005-02-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ShellInfo.cxx:
