@@ -1,14 +1,16 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZQueen_H
-#define Gled_ZQueen_H
+#ifndef GledCore_ZQueen_H
+#define GledCore_ZQueen_H
 
 #include <Glasses/ZNameMap.h>
 #include <Glasses/SaturnInfo.h>
+
+#include <Gled/GTime.h>
 
 class ZKing; class ZQueen;
 class ZComet;
@@ -17,9 +19,12 @@ class Ray;
 typedef set<ZQueen*>		spZQueen_t;
 typedef set<ZQueen*>::iterator	spZQueen_i;
 
-class ZQueen : public ZNameMap {
+class ZQueen : public ZNameMap, public An_ID_Demangler
+{
+
   // 7777 RnrCtrl("false, 0, RnrBits()")
-  MAC_RNR_FRIENDS(ZQuuen);
+  MAC_RNR_FRIENDS(ZQueen);
+
   friend class ZKing;
   friend class Saturn;
 
@@ -30,75 +35,156 @@ public:
 		    AM_QueenThenLens, AM_LensThenQueen };
   enum Align_e    { A_Good=0, A_Evil };
 
+  enum QueenState_e { QS_Sleeping, QS_Awakening,
+		      QS_Dreaming, QS_Nightmare,
+		      QS_AwaitingSceptre, QS_Ruling,
+		      QS_RelinquishingSceptre };
+
+  enum ZeroRCPolicy_e { ZRCP_Delete, ZRCP_ToOrphanage };
+
+  class LensDetails {
+  public:
+    enum        LensState_e    { LS_Undef, LS_Alive, LS_Purged, LS_Dead };
+    ZGlass*	mLens;
+    LensState_e mState;
+    GTime	mCreationTime;
+    GTime	mDeletionTime;
+
+    LensDetails(ZGlass* l, LensState_e ls=LS_Alive) :
+      mLens(l), mState(ls), mCreationTime(GTime::I_Now) {}
+  };
+
 private:
   void _init();
 
 protected:
+
   ZKing*	mKing;		  //! X{G}
 
-  Bool_t	bMandatory;	  //  X{GS} 7 BoolOut(-join=>1)
-  Bool_t	bRuling;	  //! X{GS} 7 BoolOut()
-  Bool_t	bAwaitingSceptre; //! X{GS} 7 BoolOut()
+  Bool_t	bMandatory;	  //  X{GS} 7 Bool(-join=>1)
+  Bool_t	bFollowDeps;	  //  X{GS} 7 Bool() Used by fire-space queens
 
-  ID_t		mIDSpan;	// X{G} 7 ValOut()
-  ID_t		mMinID;		// X{G} 7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10, -join=>1)
-  ID_t		mMaxID;		// X{G} 7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
-  ID_t		mMaxUsedID;	//!
-  sID_t		mFreeIDs;	//!
+  Bool_t	bRuling;	  //! X{GS} 7 BoolOut(-join=>1)
+  Bool_t	bAwaitingSceptre; //! X{GS} 7 BoolOut()
+  QueenState_e	mState;	          //! X{GS} 7 PhonyEnum(-const=>1)
+
+  ID_t		mMinID;		// X{G} 7 ValOut(-range=>[0,MAX_ID], -width=>8, -join=>1)
+  ID_t		mMaxID;		// X{G} 7 ValOut(-range=>[0,MAX_ID], -width=>8)
+  ID_t		mIDSpan;	// X{G} 7 ValOut(-join=>1)
+  ID_t		mIDsUsed;	// X{G} 7 ValOut()
+  ID_t		mIDsPurged;	// X{G} 7 ValOut(-join=>1)
+  ID_t		mIDsFree;	// X{G} 7 ValOut()
+
+  typedef map<ID_t, LensDetails*>		QueenIDMap_t;
+  typedef map<ID_t, LensDetails*>::iterator	QueenIDMap_i;
+
+  QueenIDMap_t  mIDMap;		//!
+
+  ID_t		mCreationID;	//  Creation point ID
+  lID_t		mPurgatory;	//  List of released but still reserved ids
+
+  UShort_t	mAvgPurgLen;	// X{GS} 7 Value(-range=>[1,65000,1], -width=>5, -join=>1)
+  Float_t	mSgmPurgLen;	// X{GS} 7 Value(-range=>[0,1,1,100], -width=>5)
+  UInt_t	mPurgedMS;	// X{GS} 7 Value(-range=>[100,1e6,10], -width=>7, -join=>1)
+  UInt_t	mDeletedMS;	// X{GS} 7 Value(-range=>[100,1e6,10], -width=>7)
+
+  ZeroRCPolicy_e mZeroRCPolicy; // X{GS} 7 PhonyEnum()
 
   Bool_t	bStamping;	// X{GS} 7 Bool()
 
-  UChar_t	mAuthMode;  // X{GS} 7 PhonyEnum(-seqvals=>[Null,Queen,Lens,QueenThenLens,LensThenQueen], -width=>10)
-  UChar_t	mAlignment; // X{GS} 7 PhonyEnum(-seqvals=>[Good, Evil], -width=>6)
-  UChar_t	mMapNoneTo; // X{GS} 7 PhonyEnum(-vals=>[ZMirFilter::R_Allow,Allow,ZMirFilter::R_Deny,Deny], -width=>8)
+  UChar_t	mAuthMode;      // X{GS} 7 PhonyEnum(-type=>AuthMode_e, -width=>10)
+  UChar_t	mAlignment;     // X{GS} 7 PhonyEnum(-type=>Align_e, -width=>6)
+  UChar_t	mMapNoneTo;     // X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e,
+                                //                   -names=>[R_Allow,R_Deny], -width=>8)
 
-  ZMirFilter*	mProtector; // X{GS} L{}
+  ZMirFilter*	mProtector;     // X{GS} L{}
 
-  ZHashList*	mDeps;		//  X{GS} L{}
-  ZHashList*	mOrphans;	//  X{GS} L{}
+  ZHashList*	mDeps;          //  X{GS} L{}
+  ZHashList*	mOrphans;       //  X{GS} L{}
 
   lpSaturnInfo_t mReflectors;	//!
 
-  virtual void Bootstrap();
-  virtual void BlessMIR(ZMIR& mir) throw(string);
+  // Mutexen
+  GMutex mSubjectWriteMutex;    //!
+  GMutex mSubjectRefCntMutex;   //!
+
+
+  virtual void bootstrap();
+  virtual void embrace_of_life(ZComet& comet);
+ 
+  bool                 has_free_ids(ID_t n_needed);
+  ID_t                 next_free_id(QueenIDMap_i i);
+  ID_t                 assign_id(ZGlass* lens);
+  virtual LensDetails* produce_lens_details(ID_t id, ZGlass* lens);
+  void                 release_purgatory(ID_t n_needed);
+  void                 release_moon_purgatory(ID_t n_to_release); // X{E}
 
   virtual ZGlass* instantiate(LID_t lid, CID_t cid,
 		    const Text_t* name=0, const Text_t* title=0); // X{E}
 
+  // reflector handling; called by Saturn
+  void add_reflector(SaturnInfo* moon);
+  void remove_reflector(SaturnInfo* moon);
+
+
 public:
+
   ZQueen(const Text_t* n="ZQueen", const Text_t* t=0) :
-    ZNameMap(n,t), mIDSpan(0), mMinID(0), mMaxID(0), mMaxUsedID(0)
+    ZNameMap(n,t), mIDSpan(0),
+    mSubjectWriteMutex(GMutex::recursive),
+    mSubjectRefCntMutex(GMutex::recursive)
   { _init(); }
+
   ZQueen(ID_t span, const Text_t* n="ZQueen", const Text_t* t=0) :
-    ZNameMap(n,t), mIDSpan(span), mMinID(0), mMaxID(0), mMaxUsedID(0)
+    ZNameMap(n,t), mIDSpan(span),
+    mSubjectWriteMutex(GMutex::recursive),
+    mSubjectRefCntMutex(GMutex::recursive)
   { _init(); }
+
+  // Subject Write/RefCnt locks.
+  void SubjectWriteLock()    { mSubjectWriteMutex.Lock(); }
+  void SubjectWriteUnlock()  { mSubjectWriteMutex.Unlock(); }
+  void SubjectRefCntLock()   { mSubjectRefCntMutex.Lock(); }
+  void SubjectRefCntUnlock() { mSubjectRefCntMutex.Unlock(); }
+
+  // ID & Lens management
+  virtual ZGlass* DemangleID(ID_t id);
+  ID_t CheckIn(ZGlass* lens);
+
+
+  // MIR blessing
+  virtual void BlessMIR(ZMIR& mir);
+  virtual void DepCheckMIR(ZMIR& mir);
+
+  // Instantiation methods
+  ID_t InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
+			  LID_t att_lid, CID_t att_cid, MID_t att_mid,
+			  LID_t new_lid, CID_t new_cid,
+			  const Text_t* name=0, const Text_t* title=0
+			  ); // X{E} C{2} T{ZQueen::Instantiate}
+  ID_t IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
+			LID_t att_lid, CID_t att_cid, MID_t att_mid
+			); // X{E} C{2} T{ZQueen::Instantiate}
+
+  // instantiate URL
+
+  // Lens deletion
+  void PutLensToPurgatory(ZGlass* lens); // X{E} C{1}
+  void PutLensToVoid(ID_t lens_id);      // X{E}
+  void RemoveLens(ZGlass* lens);         // X{E} C{1}
+
+  // ZeroRefCount and management of Orphans
+  void ZeroRefCount(ZGlass* lens);
+  void CleanOrphanage();           // X{E} 7 MButt()
+
+  // Mandatory queens are pushed to all lower Saturns
+  // being processed ...
+  // void SetMandatory(Bool_t mandp);
 
   // Dependencies
-  //void AddDependency(ZQueen* new_dep); // X{E} C{1}
+  void AddDependency(ZQueen* new_dep);  // X{E} C{1}
   //void RemoveDependency(ZQueen* dep); // X{E} C{1}
-  // Reflectors
-  //void AddLocReflector(SaturnInfo* moon); // X{E} C{1}
-  //void RemoveLocReflector(SaturnInfo* moon); // X{E} C{1}
-  // Orphans
-  void ZeroRefCount(ZGlass* glass);
-  void CleanOrphanage(); 		// X{E} 7 MButt()
-
-  ID_t ReserveID();
-  ID_t CheckIn(ZGlass* glass);
-  void CheckOut(ZGlass* glass);
-  //void CheckInWithAttach(ZGlass* glass);
-
-  //void Adopt(ZGlass* glass);
-  //void Adopt(ZList* target, ZStarInfo* starinfo); // X{E} C{2}
-
-  ZGlass* InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
-	     LID_t att_lid, CID_t att_cid, MID_t att_mid,
-	     LID_t new_lid, CID_t new_cid,
-	     const Text_t* name=0, const Text_t* title=0); //
-  // X{E} C{2} T{ZQueen::Instantiate}
-
-  ZGlass* IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma); // X{E} C{2}
-  // instantiate URL
+  Bool_t DependsOn(ZQueen* some_queen);
 
   // Reflections ... operated by Kings
   virtual void CreateReflection(TBuffer& buf);
@@ -110,15 +196,15 @@ public:
   void Adopt(ZComet* comet);
   virtual void UnfoldFrom(ZComet& comet);
 
-  // reflector handling
-  void add_reflector(SaturnInfo* moon);
-  void remove_reflector(SaturnInfo* moon);
+  // Maintenance of non-ruling queen reflections
+  void BroadcastMIRToNonRulingReflections(ZMIR& mir);
+  void BasicQueenChange(ZMIR& mir);
 
   // lens stamping
-  void EmitRay(Ray& ray);
+  void EmitRay(Ray& ray, bool force=false);
 
   // tmp
-  void ListAll();		 // X{E} 7 MButt()
+  void ListAll();		 //! X{E} 7 MButt()
 
 #include "ZQueen.h7"
   ClassDef(ZQueen, 1)
