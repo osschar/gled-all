@@ -45,6 +45,7 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
 
   mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
 
+  mBase = 0;
   mCamera = new Camera;
   // mCamera->mParent = base;
   mCamera->MoveLF(1, -5);
@@ -141,8 +142,8 @@ void Pupil::XtachCamera()
 
 void Pupil::Render()
 {
-  // Calls to rnr driver to perform actual rendering
-  // Used by draw() and Pick()
+  // Calls rnr driver to perform actual rendering.
+  // Used by draw() and Pick().
 
   mDriver->SetMaxDepth(mInfo->GetMaxDepth());
   mDriver->InitLamps();
