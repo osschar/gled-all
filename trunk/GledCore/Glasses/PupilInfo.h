@@ -8,6 +8,8 @@
 #define Gled_PupilInfo_H
 
 #include <Glasses/ZList.h>
+#include <Glasses/ZNode.h>
+
 #include <Stones/ZColor.h>
 
 #include <GL/gl.h>
@@ -18,6 +20,11 @@ class PupilInfo : public ZList {
 
 protected:
   void		_init();
+
+  ZNode*	mCameraBase;	// X{GE} L{}
+  ZNode*	mLookAt;	// X{GE} L{}
+  ZNode*	mUpReference;	// X{GE} L{}
+  UChar_t	mUpRefAxis;	// X{GS} 7 Value(-range=>[1,3,1,1])
 
   Int_t		mMaxDepth;	// X{GS} 7 Value(-range=>[1,1000,1,1])
 
@@ -42,6 +49,12 @@ protected:
 
 public:
   PupilInfo(Text_t* n="PupilInfo", Text_t* t=0) : ZList(n,t) { _init(); }
+
+  void SetCameraBase(ZNode* camerabase);
+  void SetLookAt(ZNode* lookat);
+  void SetUpReference(ZNode* upreference);
+
+  ZTrans* ToPupilFrame(ZNode* node);
 
   // virtuals
 

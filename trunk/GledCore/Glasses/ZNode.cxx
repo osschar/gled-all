@@ -14,14 +14,18 @@
 
 ClassImp(ZNode)
 
-// Matrix Prototype
-static TMatrix ZNodeMatrixProto(4,4);
+namespace {
+  // Limit max search depth for 
+  int ZNodeTransSearchMaxDepth = 100;
+}
 
 void ZNode::_init()
 {
   bUseScale = false;
   mSx = mSy = mSz = 1;
   mParent = 0; bKeepParent = true;
+
+  // SetElementFID(ZNode::FID()); // Forces ZNode children only
 }
 
 /**************************************************************************/
@@ -199,8 +203,13 @@ void ZNode::MultS(Real_t s)
 
 /**************************************************************************/
 
-ZTrans* ZNode::ToMFR()
+ZTrans* ZNode::ToMFR(int depth)
 {
+  if(depth > ZNodeTransSearchMaxDepth) {
+    ISerr("ZNode::ToMFR max search depth exceeded.");
+    return 0;
+  }
+
   ZNode *p = mParent;
   ZTrans* x;
   if(p == 0) {
@@ -209,7 +218,7 @@ ZTrans* ZNode::ToMFR()
     if(bUseScale) { x->Scale(mSx, mSy, mSz); }
     mExecMutex.Unlock();
   } else {
-    x = p->ToMFR();
+    x = p->ToMFR(++depth); if(x == 0) return 0;
     mExecMutex.Lock();
     *x *= mTrans;
     if(bUseScale) { x->Scale(mSx, mSy, mSz); }
@@ -218,8 +227,13 @@ ZTrans* ZNode::ToMFR()
   return x;
 }
 
-ZTrans* ZNode::ToNode(ZNode* top)
+ZTrans* ZNode::ToNode(ZNode* top, int depth)
 {
+  if(depth > ZNodeTransSearchMaxDepth)  {
+    ISerr("ZNode::ToNode max search depth exceeded.");
+    return 0;
+  }
+
   ZNode *p = mParent;
   if(p == 0) return 0;
 
@@ -230,10 +244,10 @@ ZTrans* ZNode::ToNode(ZNode* top)
     if(bUseScale) { x->Scale(mSx, mSy, mSz); }
     mExecMutex.Unlock();
   } else {
-    x = p->ToNode(top);
+    x = p->ToNode(top, ++depth);
     if(x) {
       mExecMutex.Lock();
-      *x *= mTrans;
+      *x *= mTrans; if(x == 0) return 0;
       if(bUseScale) { x->Scale(mSx, mSy, mSz); }
       mExecMutex.Unlock();
     }
@@ -245,8 +259,9 @@ ZTrans* ZNode::ToNode(ZNode* top)
 
 ZTrans* ZNode::BtoA(ZNode* a, ZNode* b)
 {
-  ZTrans* at = a->ToMFR(); at->Invert();
-  ZTrans* bt = b->ToMFR();
+  ZTrans* at = a->ToMFR(); if(at == 0) { return 0; }
+  at->Invert();
+  ZTrans* bt = b->ToMFR(); if(bt == 0) { delete at; return 0; }
   *at *= *bt;
   delete bt;
   return at;

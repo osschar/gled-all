@@ -51,6 +51,8 @@ public:
 
   void SetProjection1();
   void SetProjection2();
+  void SetCameraView();
+
   // void Rebase(ZNode* newbase, bool keeppos=true);
   void XtachCamera();
 

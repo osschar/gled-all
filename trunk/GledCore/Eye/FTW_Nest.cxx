@@ -772,18 +772,18 @@ int FTW_Nest::handle(int ev)
 	// case 'x': ExchangePointAndMark(); break;
 
 	/*
-      case 's': mShell->X_SetLink(*mTargetLoc); break;
-      case 'c': mShell->X_ClearLink(*mTargetLoc); break;
+	  case 's': mShell->X_SetLink(*mTargetLoc); break;
+	  case 'c': mShell->X_ClearLink(*mTargetLoc); break;
 
-      case 'y': mShell->X_Yank(*mTargetLoc); break;
+	  case 'y': mShell->X_Yank(*mTargetLoc); break;
 
-      case 'p': mShell->X_Push(*mTargetLoc); break;
-      case 'u': mShell->X_Unshift(*mTargetLoc); break;
-      case 'i': mShell->X_Insert(*mTargetLoc); break;
+	  case 'p': mShell->X_Push(*mTargetLoc); break;
+	  case 'u': mShell->X_Unshift(*mTargetLoc); break;
+	  case 'i': mShell->X_Insert(*mTargetLoc); break;
 
-      case 'o': mShell->X_Pop(*mTargetLoc); break;
-      case 'h': mShell->X_Shift(*mTargetLoc); break;
-      case 'e': mShell->X_Remove(*mTargetLoc); break;
+	  case 'o': mShell->X_Pop(*mTargetLoc); break;
+	  case 'h': mShell->X_Shift(*mTargetLoc); break;
+	  case 'e': mShell->X_Remove(*mTargetLoc); break;
 	*/
 
       default: ret = 0;

@@ -36,8 +36,8 @@ protected:
   FTW_Nest*	 mNest;		// X{G}
   Fl_OutputPack* wOutPack;
 
-  FTW::Source_Selector*	mSource;
-  FTW::Sink_Selector*	mSink;
+  FTW::Source_Selector*	mSource; // X{G}
+  FTW::Sink_Selector*	mSink;   // X{G}
 
   void label_shell();
 
