@@ -9,10 +9,12 @@
 
 #include <Glasses/ZList.h>
 #include <Glasses/ZNode.h>
+#include <Net/Ray.h>
 
 #include <Stones/ZColor.h>
 
 #include <GL/gl.h>
+
 
 class PupilInfo : public ZList {
   // 7777 RnrCtrl(1)
@@ -20,6 +22,12 @@ class PupilInfo : public ZList {
 
 public:
   enum Projection_e { P_Perspective, P_Orthographic };
+
+  enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
+		      PRQN_dump_image,
+		      PRQN_resize_window,
+		      PRQN_camera_home
+  };
 
 protected:
   void		_init();
@@ -85,6 +93,8 @@ public:
   void SetWidth(Int_t w)  { mWidth = w; EmitResizeRay(); }
   void SetHeight(Int_t h) { mHeight = h; EmitResizeRay(); }
   void EmitResizeRay(); // X{E} 7 MButt()
+
+  void EmitCameraHomeRay(); // X{E} 7 MButt()
 
   ZTrans* ToPupilFrame(ZNode* node);
   ZTrans* ToCameraFrame(ZNode* node);
