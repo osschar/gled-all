@@ -89,6 +89,7 @@ public:
   bool operator!=(FID_t r) const { return (lid != r.lid || cid != r.cid); }
   bool is_null()  const { return lid == 0 && cid == 0; }
   bool is_basic() const { return is_null() || (lid == 1 && cid == 1); }
+  void clear() { lid = 0; cid = 0; }
 };
 
 namespace __gnu_cxx {
