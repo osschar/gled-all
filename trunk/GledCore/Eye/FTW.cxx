@@ -206,16 +206,16 @@ void FTW::LocatorConsumer::clear_base()
 /**************************************************************************/
 
 FTW::NameButton::NameButton(Loc_e l, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h,t), m_loc(l)
-{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); }
+  : Fl_Button(x,y,w,h), m_loc(l)
+{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 FTW::NameButton::NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h,t), m_loc(L_Leaf)
-{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); }
+  : Fl_Button(x,y,w,h), m_loc(L_Leaf)
+{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 FTW::NameButton::NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h,t), m_loc(L_Ant)
-{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); }
+  : Fl_Button(x,y,w,h), m_loc(L_Ant)
+{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 /**************************************************************************/
 // protected methods
@@ -238,8 +238,14 @@ FTW_Ant* FTW::NameButton::get_ant()
   }
 }
 
+void FTW::NameButton::set_label(const char* l)
+{
+  m_name = (l != 0) ? l : "";
+  label(m_name.c_str());
+  redraw_label();
+}
+
 /**************************************************************************/
-// public ...
 
 int FTW::NameButton::handle(int ev)
 {

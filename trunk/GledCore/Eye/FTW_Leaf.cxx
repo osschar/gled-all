@@ -52,10 +52,14 @@ FTW_Leaf::Construct(FTW_Nest* nest, FTW_Leaf* parent,
 		    OS::ZGlassImg* img,
 		    bool is_list_member, bool is_link_desc)
 {
+  FTW_Leaf* l;
   if(img->fIsList)
-    return new FTW_Branch(nest, parent, img, is_list_member, is_link_desc);
+    l = new FTW_Branch(nest, parent, img, is_list_member, is_link_desc);
   else
-    return new FTW_Leaf(nest, parent, img, is_list_member, is_link_desc);
+    l = new FTW_Leaf(nest, parent, img, is_list_member, is_link_desc);
+  l->label_weeds();
+  l->label_namebox();
+  return l;
 }
 
 FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
@@ -70,7 +74,6 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   mLevel = mParent ? mParent->GetLevel() + 1 : 0;
 
   type(FL_HORIZONTAL);
-  //box(FL_THIN_UP_BOX);
 
   wFrontPack = new Fl_Pack(0,0,1,1); wFrontPack->type(FL_HORIZONTAL);
   wIndentBox = new Fl_Box(0,0,1,1);
@@ -101,14 +104,13 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   }
   wAntPack->end();
 
+  wTailBox = new Fl_Box((Fl_Boxtype)FL_FLAT_BOX,0,0,1,1,0);
+
   wCustomView = 0;
 
   end();
   if(mNest->GetAntsReversed()) reverse_ants();
   resize_weeds();
-  label_namebox();
-  label_weeds();
-  resizable(0);
 }
 
 FTW_Leaf::~FTW_Leaf() {
@@ -296,6 +298,7 @@ void FTW_Leaf::resize_weeds() {
     a->resize_weeds(mNest->GetCtrl()->GetWAnt(), 2, 1);
   }
   wAntPack->size(1,1);
+  wTailBox->size(FTW_Nest::max_W*cw, ch);
 
   mNest->get_swm_manager()->prepare_group(wFrontPack);
   mNest->get_swm_manager()->prepare_group(wAntPack);
@@ -304,8 +307,7 @@ void FTW_Leaf::resize_weeds() {
 }
 
 void FTW_Leaf::label_namebox() {
-  wName->label(fImg->fGlass->GetName());
-  wName->redraw_label();
+  wName->set_label(fImg->fGlass->GetName());
 }
 
 void FTW_Leaf::label_weeds() {
@@ -339,13 +341,12 @@ void FTW_Leaf::modify_box_color(Fl_Color mod, bool on_p) {
 void FTW_Leaf::create_custom_view(MTW_Layout* layout) {
   int n = layout->CountSubViews(fImg->fGlass);
   if(n > 0) {
-    Fl_Group::current(this);
     MTW_View* v = new MTW_View(fImg);
     v->BuildByLayout(layout);
     mNest->get_swm_manager()->prepare_group(v);
     wCustomView = v;
     v->hide();
-    Fl_Group::current(0);
+    insert(*wCustomView, wTailBox);
   }
 }
 

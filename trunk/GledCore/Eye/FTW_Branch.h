@@ -21,7 +21,9 @@ protected:
   bool			bLeavesCreated;
   bool			bListExpanded;	// mLeafs shown
 
+  virtual void label_namebox();
   virtual void label_weeds();
+
 public:
   FTW_Branch(FTW_Nest* nest, FTW_Leaf* parent,
 	     OptoStructs::ZGlassImg* img,

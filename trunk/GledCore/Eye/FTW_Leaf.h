@@ -38,10 +38,11 @@ protected:
   Fl_Pack*		wAntPack;
 
   MTW_View*		wCustomView;
+  Fl_Box*		wTailBox;
   // Rnr Ctrl weedget
 
   void resize_weeds();
-  void label_namebox();
+  virtual void label_namebox();
   virtual void label_weeds();
   void recolor_name();
   void modify_box_color(Fl_Color mod, bool on_p);
