@@ -52,8 +52,6 @@ void alice_geom(Int_t import_mode=0)
   em_node->SetTNode(gGeoManager->GetTopNode());
   em_node->SetOM(-2.5);
   em_node->Set3Pos(6.5, 0, 0);
-  em_node->SetUseOM(true);
-  em_node->SetRnrSelf(false);
 
   // create an empty OvlMgr.
   CREATE_ADD_GLASS(em_ovlm, ZGeoOvlMgr, rscene, "A GeoOvlMgr", "");
@@ -61,15 +59,8 @@ void alice_geom(Int_t import_mode=0)
   em_ovlm->Set3Pos(-6.5, 0, 0);
   em_ovlm->SetUseOM(true);
 
-  switch(import_mode) {
-  case  0: { 
-    import_by_regexp(znode); 
-    select_some_dets(znode);
-    break; 
-  }
-  case  1:
-  default: { import_with_collect(znode); break; }
-  }
+  import_by_regexp(znode); 
+  select_some_dets(znode);
 
   //--------------------------------------------------------------
 
@@ -77,7 +68,7 @@ void alice_geom(Int_t import_mode=0)
   {
     const Text_t* default_layout =
       "ZNode(RnrSelf[5],RnrElements[5]):"
-      "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Mat[8])";
+      "ZGeoNode(RnrOnForDaughters[5],RnrOffForDaughters[5],Color[4],ImportNodes[4],NNodes[4],Mat[8])";
 
     Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
     gROOT->LoadMacro("eye.C");
@@ -114,10 +105,21 @@ void alice_geom(Int_t import_mode=0)
 #define DECLARE_CAST(_var_, _type_, _val_) \
   _type_* _var_ = dynamic_cast<_type_*>(_val_)
 
-ZGeoNode* rnr_self_on(ZGeoNode* root, const Text_t* path)
+ZGeoNode* rnr_self(ZGeoNode* root, const Text_t* path, Bool_t rnr)
 {
   DECLARE_CAST(x, ZGeoNode, root->FindLensByPath(path));
-  if(x) x->SetRnrSelf(true);
+  if(x) {
+    x->SetRnrSelf(rnr);
+  }
+  return x;
+}
+
+ZGeoNode* rnr_elements(ZGeoNode* root, const Text_t* path, Bool_t rnr)
+{
+  DECLARE_CAST(x, ZGeoNode, root->FindLensByPath(path));
+  if(x) {
+    x->SetRnrElements(rnr);
+  }
   return x;
 }
 
@@ -129,8 +131,6 @@ ZGeoNode* import_nodes(ZGeoNode* root, const Text_t* path)
 }
 
 /**************************************************************************/
-/**************************************************************************/
-
 void import_by_regexp(ZGeoNode* volt)
 {
   // This demonstrates use of ZGeoNode::ImportByRegexp().
@@ -138,39 +138,21 @@ void import_by_regexp(ZGeoNode* volt)
 
   printf("Import by regexp\n");
 
-  volt->ImportByRegExp("Hall", TRegexp("^H"));
-  volt->ImportByRegExp("L3", TRegexp("^L3"));
-
   volt->ImportByRegExp("PHOS", TRegexp("^PHOS"));
   volt->ImportByRegExp("RICH", TRegexp("^RICH"));
-
   volt->ImportByRegExp("ITSV", TRegexp("^ITS"));
-  volt->ImportByRegExp("TPC", TRegexp("^TPC"));
+  volt->ImportByRegExp("TPC", TRegexp("^TPC")); 
 
-  volt->ImportByRegExp("EPM", TRegexp("^EPM"));
-
-  volt->ImportByRegExp("ZDC", TRegexp("^ZDC"));
-  volt->ImportByRegExp("ZEM", TRegexp("^ZEM"));
-  volt->ImportByRegExp("FMD", TRegexp("^FMD"));
-  volt->ImportByRegExp("DDIP", TRegexp("^DDIP"));
-
-  volt->ImportByRegExp("S/S01", TRegexp("^S01"));
-  volt->ImportByRegExp("S/S03", TRegexp("^S02"));
-  volt->ImportByRegExp("S/S03", TRegexp("^S03"));
-  volt->ImportByRegExp("S/S04", TRegexp("^S04"));
-  volt->ImportByRegExp("S/S07", TRegexp("^S07"));
-  volt->ImportByRegExp("S/S08", TRegexp("^S08"));
-  volt->ImportByRegExp("S/S09", TRegexp("^S09"));
-  volt->ImportByRegExp("S/S10", TRegexp("^S10"));
-  volt->ImportByRegExp("S/SCF1", TRegexp("^S[CF]1"));
-  volt->ImportByRegExp("S/SCF2", TRegexp("^S[CF]2"));
-  volt->ImportByRegExp("S/SCF3", TRegexp("^S[CF]3"));
-  volt->ImportByRegExp("S/SCF4", TRegexp("^S[CF]4"));
-
-  volt->ImportByRegExp("TRD&TOF", TRegexp("^B"));
+  // import, but not show
+  volt->ImportByRegExp("TRD&TOF", TRegexp("^B")); rnr_elements(volt, "TRD&TOF", false);
+  volt->ImportByRegExp("EPM", TRegexp("^EPM")); rnr_elements(volt, "EPM", false);
+  volt->ImportByRegExp("ZDC", TRegexp("^ZDC")); rnr_elements(volt, "ZDC", false);
+  volt->ImportByRegExp("ZEM", TRegexp("^ZEM")); rnr_elements(volt, "ZEM", false);
+  volt->ImportByRegExp("FMD", TRegexp("^FMD")); rnr_elements(volt, "FMD", false);
+  volt->ImportByRegExp("Hall", TRegexp("^H"));  rnr_elements(volt, "Hall", false);
 
   printf("call Import unimported \n");
-  volt->ImportUnimported("Remaining top-levels");
+  volt->ImportUnimported("Remaining top-levels"); rnr_elements(volt, "Remaining top-levels", false);
   printf("END call Import unimported \n");
 }
 
@@ -182,7 +164,6 @@ void import_with_collect(ZGeoNode* volt)
   // Top-level volumes are grouped by common head of their name.
 
   printf("Import nodes with collect\n");
-
   volt->ImportNodesWCollect();
 }
 
@@ -195,7 +176,7 @@ void select_some_dets(ZGeoNode* volt)
 
   ZGeoNode* tpc1 = import_nodes(volt, "TPC/TPC_1");
   if(tpc1) {
-    tpc1->SetRnrElements(false);
+    tpc1->RnrOffForDaughters();
     DECLARE_CAST(tpcgas, ZGeoNode, tpc1->FindLensByPath("TDGN_1"));
     if(tpcgas) {
       tpcgas->SetColor(0.3, 0.7, 0.5, 0.75);
@@ -203,7 +184,6 @@ void select_some_dets(ZGeoNode* volt)
     }
   }
 
-  for(int i=1; i<=5; ++i) rnr_self_on(volt, GForm("PHOS/PHOS_%d", i));
-
-  for(int i=1; i<=7; ++i) rnr_self_on(volt, GForm("RICH/RICH_%d", i));
+  for(int i=1; i<=5; ++i) rnr_self(volt, GForm("PHOS/PHOS_%d", i), true);
+  for(int i=1; i<=7; ++i) rnr_self(volt, GForm("RICH/RICH_%d", i),true);
 }
