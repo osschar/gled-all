@@ -94,6 +94,7 @@ default:	${ALL_LIBS} ${LIBSET_TARGETS}
 		${MAKE} install
 
 base_lib:	${BASE_LIB_NAME}
+	@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
 
 view_lib:	${VIEW_LIB_NAME}
 
@@ -160,11 +161,10 @@ distclean:
 	${MAKE} clean
 	${MAKE} libset_distclean
 	@rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}
-	@rm -rf ${ALL_LIBS} ${VIEW_FL_SECS} \
-		${BLESSED_H7} ${BLESSED_C7} lib/lib* catalog.auto \
+	@rm -rf ${VIEW_FL_SECS} ${BLESSED_H7} ${BLESSED_C7}
+	@rm -rf lib/.${LIB_SET_ID} lib/lib* catalog.auto \
 		make_bless.inc make_p7.inc make_view.inc make_dict.inc \
-		make_depend.inc core \
-		htmldoc
+		make_depend.inc htmldoc
 #	some .h7, .c7 may still be lurking around ... ditch 'em
 	find . -name '*.h7' -or -name '*.c7' | xargs rm -f
 
