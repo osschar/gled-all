@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-// OK ... this just spawns Gled and CINT
-// Should also parse command line options ...
+// saturn ... non-GUI gled (just spawns Gled and CINT)
+//	      usefull for pure servers / proxies or computing clients
 
 #include <Gled/GledTypes.h>
 #include <Gled/GledNS.h>
@@ -16,6 +16,7 @@
 #include <TROOT.h>
 #include <TSystem.h>
 #include <TRint.h>
+#include <TInterpreter.h>
 #include <Getline.h>
 
 #include <stdio.h>
@@ -39,6 +40,7 @@ void* RunRint(void* x) {
 
   cout << "Gint terminated ...\n";
   if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
+  GThread::Exit();
   return 0;
 }
 
@@ -55,6 +57,8 @@ int main(int argc, char **argv)
   // gROOT->SetStyle("Plain");
   gROOT->SetMacroPath(GForm(".:%s/.gled:%s/macros",
 			    getenv("HOME"), getenv("GLEDSYS")));
+  gInterpreter->AddIncludePath(GForm("%s/.gled", getenv("HOME")));
+  gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
 
   // Spawn Gled
   gled = new Gled(args);
@@ -117,8 +121,8 @@ int main(int argc, char **argv)
   gled_exit.Wait();
   gled_exit.Unlock();
   if(!gint_off) {
+    app_thread.Cancel();
     gint->Terminate(0);
-    app_thread.Kill(GThread::SigUSR1);
   } else {
     Getlinem(kCleanUp, 0);
   }

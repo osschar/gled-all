@@ -15,6 +15,7 @@
 #include <TROOT.h>
 #include <TSystem.h>
 #include <TRint.h>
+#include <TInterpreter.h>
 #include <Getline.h>
 
 #include <FL/x.H>
@@ -42,11 +43,13 @@ void* RunRint(void* x) {
   gint_off = true;
   cout << "Gint terminated ...\n";
   if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
+  GThread::Exit();
   return 0;
 }
 
 void* RunGled(void* x) {
   gled->Run();
+  GThread::Exit();
   return 0;
 }
 
@@ -68,6 +71,8 @@ int main(int argc, char **argv)
   // gROOT->SetStyle("Plain");
   gROOT->SetMacroPath(GForm(".:%s/.gled:%s/macros",
 			    getenv("HOME"), getenv("GLEDSYS")));
+  gInterpreter->AddIncludePath(GForm("%s/.gled", getenv("HOME")));
+  gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
 
   // Spawn Gled
   gled = new GledGUI(args);
@@ -134,7 +139,7 @@ int main(int argc, char **argv)
 
   gled_thread.Join();
   if(!gint_off) {
-    app_thread.Kill(GThread::SigUSR1);
+    app_thread.Cancel();
     gint->Terminate(0);
   } else {
     Getlinem(kCleanUp, 0);

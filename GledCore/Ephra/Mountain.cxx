@@ -30,17 +30,39 @@ void Mountain::DancerCooler(DancerInfo* di)
 
 /**************************************************************************/
 
+namespace {
+  void sh_DancerSuspender(int sig) {
+    int recsig;
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, GThread::SigUSR2);
+    sigwait(&set, &recsig);
+  }
+}
+
 void* Mountain::DancerBeat(DancerInfo* di)
 {
   GThread::SetCancelState(GThread::CS_Enable);
   GThread::SetCancelType(GThread::CT_Async);
   //GThread::SetCancelType(GThread::CT_Deferred);
 
-  sigset_t set, oldset;
-  sigemptyset(&set);
-  sigaddset(&set, GThread::SigCONT);
-  sigaddset(&set, GThread::SigSTOP);
-  pthread_sigmask(SIG_SETMASK, &set, &oldset);
+  { // Signal handle init; only used for SignalSafe threads
+    sigset_t set;
+
+    sigemptyset(&set);
+    sigaddset(&set, GThread::SigUSR1);
+    pthread_sigmask(SIG_UNBLOCK, &set, 0);
+
+    sigemptyset(&set);
+    sigaddset(&set, GThread::SigUSR2);
+    pthread_sigmask(SIG_BLOCK, &set, 0);
+
+    struct sigaction sac;
+    sac.sa_handler = sh_DancerSuspender;
+    sigemptyset(&sac.sa_mask);
+    sac.sa_flags = 0;
+    sigaction(SIGUSR1, &sac, 0);
+  }
 
   di->fStartTime = gSystem->Now();
   Operator::Arg* op_arg = di->fEventor->PreDance();
@@ -128,7 +150,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
       di->fSuspended = true;
       if(op_arg->fSignalSafe) {
 	di->fOpArg->fSuspendidor.Unlock();
-	di->fThread->Kill(GThread::SigSTOP);
+	di->fThread->Kill(GThread::SigUSR1);
       } else {
 	di->fOpArg->fSuspendidor.Wait();
 	di->fOpArg->fSuspendidor.Unlock();
@@ -182,7 +204,7 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
     return;
   }
 
-  GThread* t = new GThread((thread_f)DancerBeat);
+  GThread* t = new GThread((thread_f)DancerBeat, 0, true);
   DancerInfo* di = new DancerInfo(t, e, this);
   t->SetArg((void*)di);
   hOnStage[e] = di;
@@ -192,6 +214,29 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
   t->SetEndArg((void*)di);
   if(suspend_immediately) di->fShouldSuspend = true;
   t->Spawn();
+}
+
+/**************************************************************************/
+
+void Mountain::stop_thread(DancerInfo* di)
+{
+  di->fOpArg->fSuspendidor.Lock();
+  if(di->fOpArg->fSignalSafe) {
+    if(di->fSuspended) {
+      di->fShouldExit = true;
+      di->fThread->Kill(GThread::SigUSR2);
+    } else {
+      di->fOpArg->fSignalodor.Lock();
+      di->fThread->Cancel();
+      di->fOpArg->fSignalodor.Unlock();
+    }
+  } else {
+    di->fShouldExit = true;
+    if(di->fSuspended || di->fSleeping) {
+      di->fOpArg->fSuspendidor.Signal();
+    }
+  }
+  di->fOpArg->fSuspendidor.Unlock();
 }
 
 void Mountain::Stop(Eventor* e)
@@ -207,23 +252,7 @@ void Mountain::Stop(Eventor* e)
   DancerInfo* di = i->second;
   hStageLock.Unlock();
 
-  di->fOpArg->fSuspendidor.Lock();
-  if(di->fOpArg->fSignalSafe) {
-    if(di->fSuspended) {
-      di->fShouldExit = true;
-      di->fThread->Kill(GThread::SigCONT);
-    } else {
-      di->fOpArg->fSignalodor.Lock();
-      di->fThread->Cancel();
-      di->fOpArg->fSignalodor.Unlock();
-    }
-  } else {
-    di->fShouldExit = true;
-    if(di->fSuspended || di->fSleeping) {
-      di->fOpArg->fSuspendidor.Signal();
-    }
-  }
-  di->fOpArg->fSuspendidor.Unlock();
+  stop_thread(di);
 }
 
 void Mountain::Suspend(Eventor* e)
@@ -242,7 +271,7 @@ void Mountain::Suspend(Eventor* e)
   di->fOpArg->fSuspendidor.Lock();
   if(di->fOpArg->fSignalSafe) {
     di->fOpArg->fSignalodor.Lock();
-    di->fThread->Kill(GThread::SigSTOP);
+    di->fThread->Kill(GThread::SigUSR1);
     di->fOpArg->fSignalodor.Unlock();
     di->fEventor->OnSuspend(di->fOpArg);
     di->fSuspended = true;
@@ -273,7 +302,7 @@ void Mountain::Resume(Eventor* e)
   di->fShouldSuspend = false;
   di->fEventor->OnResume(di->fOpArg);
   if(di->fOpArg->fSignalSafe) {
-    di->fThread->Kill(GThread::SigCONT);
+    di->fThread->Kill(GThread::SigUSR2);
   } else {
     di->fOpArg->fSuspendidor.Signal();
   }
@@ -346,7 +375,7 @@ void Mountain::ResumeAll()
       ISmess(GForm("Mountain::RestartAll restarting thread of %s",
 		   i->second->fEventor->GetName()));
       i->second->fSuspended = false;
-      i->second->fThread->Kill(GThread::SigCONT);
+      i->second->fThread->Kill(GThread::SigUSR2);
     }
   }
   hStageLock.Unlock();
@@ -362,6 +391,33 @@ void Mountain::ConsiderSuspend(DancerInfo* di)
     ISmess(GForm("Mountain::ConsiderSuspend suspending thread of %s",
 		 di->fEventor->GetName()));
     di->fSuspended = true;
-    di->fThread->Kill(GThread::SigSTOP);
+    di->fThread->Kill(GThread::SigUSR1);
   }
+}
+
+/**************************************************************************/
+
+void Mountain::Shutdown()
+{
+  // Called from Saturn on shutdown. Kills all threads.
+
+  hStageLock.Lock();
+  if(hOnStage.size() == 0) {
+    hStageLock.Unlock();
+    return;
+  }
+  for(hEv2DI_i i=hOnStage.begin(); i!=hOnStage.end(); ++i) {
+    stop_thread(i->second);
+  }
+  hStageLock.Unlock();
+
+  while(1) {
+    gSystem->Sleep(100);
+    hStageLock.Lock();
+    int n = hOnStage.size();
+    hStageLock.Unlock();
+    if(n == 0) break;
+    ISmess(GForm("Mountain::Shutdown waiting for %d threads", n));
+  }
+  ISmess("Mountain::Shutdown all threads stopped");
 }
