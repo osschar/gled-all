@@ -8,7 +8,6 @@
 #define GledCore_ZGroupIdentity_H
 
 #include <Glasses/ZIdentity.h>
-#include <Glasses/ZNameMap.h>
 
 class ZGroupIdentity : public ZIdentity {
   // 7777 RnrCtrl("false, 0, RnrBits()")
@@ -20,16 +19,13 @@ private:
   void _init();
 
 protected:
-  ZNameMap*	mActiveMMEs;	// X{GS} L{}
 
 public:
   ZGroupIdentity(const Text_t* n="ZGroupIdentity", const Text_t* t=0) :
     ZIdentity(n,t) { _init(); }
 
-  virtual void AdEnlightenment();
-
 #include "ZGroupIdentity.h7"
-  ClassDef(ZGroupIdentity, 1)
+  ClassDef(ZGroupIdentity, 1) // Representation of a group identity
 }; // endclass ZGroupIdentity
 
 GlassIODef(ZGroupIdentity);

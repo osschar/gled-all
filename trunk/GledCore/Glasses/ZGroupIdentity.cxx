@@ -7,31 +7,17 @@
 //__________________________________________________________________________
 // ZGroupIdentity
 //
-//
+// A glass representation of a group identity.
+// So far it doesn't do anything special.
 
 #include "ZGroupIdentity.h"
 #include "ZGroupIdentity.c7"
-#include <Glasses/ZQueen.h>
 
 ClassImp(ZGroupIdentity)
 
 /**************************************************************************/
 
 void ZGroupIdentity::_init()
-{
-  mActiveMMEs = 0;
-}
-
-/**************************************************************************/
-
-void ZGroupIdentity::AdEnlightenment()
-{
-  PARENT_GLASS::AdEnlightenment();
-  if(mActiveMMEs == 0) {
-    mActiveMMEs = new ZNameMap("ActiveMMEs", GForm("ActiveMMEs of %s", GetName()));
-    mQueen->CheckIn(mActiveMMEs);
-    // !!!! set to Fid of MME
-  }
-}
+{}
 
 /**************************************************************************/
