@@ -557,7 +557,6 @@ void ZQueen::PutLensToPurgatory(ZGlass* lens)
   // Stops all detached threads via Saturn::Freeze().
   // Removes all references to a lens and sends Rays with RQN_death.
   // Then emits MIR to PutLensToVoid(lens).
-  // Called in a *detached thread*.
 
   static const string _eh("ZQueen::PutLensToPurgatory ");
 
@@ -637,11 +636,13 @@ void ZQueen::PutLensToPurgatory(ZGlass* lens)
   mPurgatory.push_back(lens->mSaturnID);
   --mIDsUsed; ++mIDsPurged;
 
-  SaturnInfo* si = mSaturn->GetSaturnInfo();
-  GTime ref_time(GTime::I_Now);
-  auto_ptr<ZMIR> void_mir( S_PutLensToVoid(lens->mSaturnID) );
-  ref_time += 1000l*mPurgedMS;
-  mSaturn->delayed_shoot_mir(void_mir, si, ref_time);
+  if(mKing->GetLightType() != ZKing::LT_Moon) {
+    SaturnInfo* si = mSaturn->GetSaturnInfo();
+    GTime ref_time(GTime::I_Now);
+    auto_ptr<ZMIR> void_mir( S_PutLensToVoid(lens->mSaturnID) );
+    ref_time += 1000l*mPurgedMS;
+    mSaturn->delayed_shoot_mir(void_mir, si, ref_time);
+  }
 
   Stamp(FID());
 }
@@ -652,7 +653,6 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
   // Endarks the lens.
   // Clears up internal structures.
   // Deletes the lens.
-  // Called in a *detached thread*.
 
   static const string _eh("ZQueen::PutLensToVoid ");
 
@@ -878,7 +878,7 @@ void ZQueen::InvokeReflection(TBuffer& buf)
 
   c.AssignQueen(this);
   c.SetExtDemangler(this);
-  c.bVerbose = false;
+  c.bWarnOn = true;
 
   { // remove and delete comet's Deps, wipe it from comet's queen
     ID_t cdep_id = (ID_t)c.mQueen->GetDeps();
@@ -946,6 +946,7 @@ void ZQueen::AdoptComet(ZList* top_dest, ZList* orphan_dest, ZComet* comet)
   // Or at least that their queen depends on me.
   //    But then should do further authorization!
 
+  comet->AssignQueen(this);
   comet->RebuildGraph();
   WriteLock();  
   UInt_t free = mIDSpan - (mIDMap.size() + mPurgatory.size());

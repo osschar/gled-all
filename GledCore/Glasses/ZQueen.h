@@ -170,8 +170,8 @@ public:
   // instantiate URL
 
   // Lens deletion
-  void PutLensToPurgatory(ZGlass* lens); // X{ED} C{1}
-  void PutLensToVoid(ID_t lens_id);      // X{ED}
+  void PutLensToPurgatory(ZGlass* lens); // X{E} C{1}
+  void PutLensToVoid(ID_t lens_id);      // X{E}
   void RemoveLens(ZGlass* lens);         // X{E} C{1}
 
   // ZeroRefCount and management of Orphans
