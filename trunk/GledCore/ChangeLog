@@ -1,3 +1,28 @@
+2005-02-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_View.cxx:
+	Increased width-growth factor for joining widgets to 2.
+
+	* Glasses/Scene.cxx:
+	* Glasses/Scene.h:
+	Added link to ZList where one can put GL modificators to set
+	default rendering style for the scene (calls Pre/Post draw on all
+	list members).
+
+	* Glasses/ZGlBlending.cxx:
+	* Glasses/ZGlBlending.h:
+	Added support for BlendEquation and BlendConstColor.
+
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.h:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.h:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.cxx:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.h:
+	Separated GL-state-setup so that the renderers can also be used as
+	state modificators via PreDraw/PostDraw. Appropriate GL attribute
+	groups are pushed and popped.
+
 2005-02-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Mountain.cxx:
