@@ -1,4 +1,7 @@
-// Initialization of top level script variables for Moon.
+// $Header$
+
+// Top-level script that starts a Moon (client) connected to the Sun
+// specified with -master argument of gled.
 // Also spawns an eye.
 // Preferably run as: gled -m <master> -r moon.C
 
