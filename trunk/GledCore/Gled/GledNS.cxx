@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -15,6 +15,8 @@
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TSystem.h>
+#include <TVirtualMutex.h>
+
 #include <stack>
 
 int		G_DEBUG = 0;
@@ -210,16 +212,16 @@ string GledNS::FabricateUserInitFoo(const string& libset)
 
 /**************************************************************************/
 
-ZGlass* GledNS::ConstructGlass(LID_t lid, CID_t cid)
+ZGlass* GledNS::ConstructLens(LID_t lid, CID_t cid)
 {
   LibSetInfo* lsi = FindLibSetInfo(lid);
   if(lsi == 0) {
-    ISerr(GForm("GledNS::ConstructGlass lib set %u not found", lid));
+    ISerr(GForm("GledNS::ConstructLens lib set %u not found", lid));
     return 0;
   }
   ZGlass* g = (lsi->fLC_Foo)(cid);
   if(g == 0) {
-    ISerr(GForm("GledNS::ConstructGlass default ctor for lid,cid:%u,%u returned 0", lid, cid));
+    ISerr(GForm("GledNS::ConstructLens default ctor for lid,cid:%u,%u returned 0", lid, cid));
     return 0;
   }
   return g;
@@ -234,25 +236,29 @@ bool GledNS::IsA(ZGlass* glass, FID_t fid)
 
 /**************************************************************************/
 
-void GledNS::StreamGlass(TBuffer& b, ZGlass* glass)
+void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 {
   // Writes glass, prefixed by Lid/Cid to the buffer.
 
   assert(b.IsWriting());
-  b << glass->ZibID() << glass->ZlassID();
-  glass->Streamer(b);
+  b << lens->ZibID() << lens->ZlassID();
+  R__LOCKGUARD(gCINTMutex);
+  lens->Streamer(b);
 }
 
-ZGlass* GledNS::StreamGlass(TBuffer& b)
+ZGlass* GledNS::StreamLens(TBuffer& b)
 {
   // Reads lid/cid of the glass, instantiates it and streams it out.
 
   assert(b.IsReading());
   LID_t lid; CID_t cid;
   b >> lid >> cid;
-  ZGlass *g = ConstructGlass(lid, cid);
-  if(g) g->Streamer(b);
-  return g;
+  ZGlass *lens = ConstructLens(lid, cid);
+  if(lens) {
+    R__LOCKGUARD(gCINTMutex);
+    lens->Streamer(b);
+  }
+  return lens;
 }
 
 /**************************************************************************/
@@ -314,12 +320,17 @@ GledNS::ClassInfo* GledNS::FindClassInfo(const string& name)
 // GledNS::MethodInfo
 /**************************************************************************/
 
-void GledNS::MethodInfo::ImprintMir(ZMIR& mir)
+void GledNS::MethodInfo::ImprintMir(ZMIR& mir) const
 {
   mir.SetLCM_Ids(fClassInfo->fFid.lid, fClassInfo->fFid.cid, fMid);
 }
 
-void GledNS::MethodInfo::StreamIds(TBuffer& b)
+void GledNS::MethodInfo::BeamofyIfLocal(ZMIR& mir, SaturnInfo* sat) const
+{
+  if(bLocal) mir.SetRecipient(sat);
+}
+
+void GledNS::MethodInfo::StreamIds(TBuffer& b) const
 {
   assert(b.IsWriting());
   b << fClassInfo->fFid.lid << fClassInfo->fFid.cid << fMid;

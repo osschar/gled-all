@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -10,6 +10,7 @@
 #include <Gled/GledTypes.h>
 
 class Saturn;
+class SaturnInfo;
 class ZMIR;
 class GMutex;
 
@@ -36,8 +37,9 @@ namespace GledNS {
 
   struct InfoBase {
     string		fName;
+
     InfoBase(const string& s) : fName(s) {}
-    bool operator==(const string& s) { return (fName == s); }
+    bool operator==(const string& s) const { return (fName == s); }
   };
 
   struct MethodInfo : public InfoBase {
@@ -45,13 +47,15 @@ namespace GledNS {
     lStr_t		fContextArgs; //
     lStr_t		fArgs;
     lStr_t		fTags;
+    bool		bLocal;
     ClassInfo*		fClassInfo;
 
     GledViewNS::MethodInfo* fViewPart;
 
     MethodInfo(const string& s, MID_t m) : InfoBase(s), fMid(m), fViewPart(0) {}
-    void ImprintMir(ZMIR& mir);
-    void StreamIds(TBuffer& b);
+    void ImprintMir(ZMIR& mir) const;
+    void BeamofyIfLocal(ZMIR& mir, SaturnInfo* sat) const;
+    void StreamIds(TBuffer& b) const;
   };
 
 
@@ -234,11 +238,23 @@ namespace GledNS {
   string FabricateInitFoo(const string& libset);
   string FabricateUserInitFoo(const string& libset);
 
-  ZGlass* ConstructGlass(LID_t lid, CID_t cid);
+  ZGlass* ConstructLens(LID_t lid, CID_t cid);
   bool	  IsA(ZGlass* glass, FID_t fid);
 
-  void    StreamGlass(TBuffer& b, ZGlass* glass);
-  ZGlass* StreamGlass(TBuffer& b);
+  void    StreamLens(TBuffer& b, ZGlass* lens);
+  ZGlass* StreamLens(TBuffer& b);
+
+  template <class GLASS>
+  GLASS StreamLensByGlass(TBuffer& b) {
+    ZGlass* lens = StreamLens(b);
+    if(lens) { 
+      GLASS ret = dynamic_cast<GLASS>(lens);
+      if(ret == 0) delete lens;
+      return ret;
+    } else {
+      return 0;
+    }
+  }
 
 
   /**************************************************************************/
