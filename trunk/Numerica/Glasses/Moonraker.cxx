@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -53,11 +53,11 @@ namespace {
 }
 
 void
-Moonraker::ODEDerivatives(const Double_t x, const ZVectorD& y, ZVectorD& d)
+Moonraker::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d)
 {
-  ZVectorD pos(y,0,2);
+  TVectorD pos(y.GetSub(0,2));
   ZVec3D moon = MoonPos(x);
-  ZVectorD md(pos);
+  TVectorD md(pos);
   for(UInt_t i=0; i<3; i++) { md(i) -= moon(i); }
   Double_t r0 = p223(pos.Norm2Sqr());
   Double_t r1 = p223(md.Norm2Sqr());
@@ -68,17 +68,17 @@ Moonraker::ODEDerivatives(const Double_t x, const ZVectorD& y, ZVectorD& d)
 }
 
 void
-Moonraker::ODEStart(ZVectorD& v, Double_t& x1, Double_t& x2)
+Moonraker::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
 {
-  v(0u) = TMath::Cos(2*TMath::Pi()*mT + mLon*TMath::Pi()/180);
-  v(1u) = TMath::Sin(2*TMath::Pi()*mT + mLon*TMath::Pi()/180);
-  v(2u) = TMath::Sin(mLat*TMath::Pi()/180);
+  v(0) = TMath::Cos(2*TMath::Pi()*mT + mLon*TMath::Pi()/180);
+  v(1) = TMath::Sin(2*TMath::Pi()*mT + mLon*TMath::Pi()/180);
+  v(2) = TMath::Sin(mLat*TMath::Pi()/180);
 
-  ZVector z(3);
-  for(UCIndex_t i=0; i<3; i++) z(i) = mV0*hEscapeVelocity*v(i);
+  TVectorF z(3);
+  for(Int_t i=0; i<3; i++) z(i) = mV0*hEscapeVelocity*v(i);
   ZTrans t; t.SetRotByAngles(mPhi*TMath::Pi()/180, mTheta*TMath::Pi()/180, 0);
   t.Rot3Vec(z);
-  for(UCIndex_t i=0; i<3; i++) v(i+3u) = z(i);
+  for(Int_t i=0; i<3; i++) v(i + 3) = z(i);
 
   x1 = mT; x2 = mT+mDuration;
 }

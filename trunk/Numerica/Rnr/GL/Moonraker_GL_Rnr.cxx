@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -40,8 +40,8 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
   // Trajectory
   if(mMoonraker->mODECrawler && mMoonraker->mODECrawler->GetStored()) {
     UInt_t M = mMoonraker->mODECrawler->GetStored();
-    ZVector *x = mMoonraker->mODECrawler->GetXStored();
-    ZVector *y = mMoonraker->mODECrawler->GetYStored();
+    TVectorF *x = mMoonraker->mODECrawler->GetXStored();
+    TVectorF *y = mMoonraker->mODECrawler->GetYStored();
 
     // Shell at mT
     if(mMoonraker->mT>=(*x)(0u) && mMoonraker->mT<=(*x)(M-1)) {
@@ -52,10 +52,10 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
 	if(m==l) m++; if(m==h) m--;
 	if((*x)(m) <= mMoonraker->mT) l = m; else h = m;
       }
-      Real_t f = (mMoonraker->mT-(*x)(l))/((*x)(h)-(*x)(l)); // assume linear
+      Float_t f = (mMoonraker->mT-(*x)(l))/((*x)(h)-(*x)(l)); // assume linear
       glColor4fv(mMoonraker->mSColor());
       glPushMatrix();
-      ZVector p(y[h]); p -= y[l]; p *= f; p += y[l];
+      TVectorF p(y[h]); p -= y[l]; p *= f; p += y[l];
       glTranslatef(p(0u), p(1u), p(2u));
       gluSphere(mQuadric, mMoonraker->mRShell, mMoonraker->mLOD, mMoonraker->mLOD);
       glPopMatrix();
@@ -66,9 +66,9 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
     glLineWidth(mMoonraker->mTWidth);
     glColor4fv(mMoonraker->mTColor());
     glBegin(GL_LINE_STRIP);
-    for(UCIndex_t i=0; i<M; i++) {
+    for(Int_t i=0; i<M; i++) {
       //printf("\t%u\t%f\t%f\t%f\t%f\n", i, (*x)(i), (y[i])(0u), (y[i])(1u), (y[i])(2u));
-      glVertex3fv(y[i].GetArray());
+      glVertex3fv(y[i].GetMatrixArray());
     }
     glEnd();
   }
