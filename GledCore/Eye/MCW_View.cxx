@@ -25,39 +25,37 @@ namespace FGS = FltkGledStuff;
 // Argument/type-name parsing foos
 /**************************************************************************/
 
-namespace {
-
-  void split_arg(const string& arg, string& type, string& name, string& def)
-  {
-    string::size_type ei = arg.find('=');
-    if(ei != string::npos) {
-      string::size_type tei = ei+1; while(isspace(arg[tei])) ++tei;
-      def = string(arg, tei, arg.length()-tei);
-    } else {
-      ei = arg.length();
-    }
-    --ei;
-    while(isspace(arg[ei])) --ei;
-    string::size_type ti = ei;
-    while(isalnum(arg[ti]) || arg[ti] == '_') --ti;
-    name = string(arg, ti+1, ei-ti);
-    while(isspace(arg[ti])) --ti;
-    type = string(arg, 0, ti+1);
+void MCW_View::split_argument(const string& arg,
+			      string& type, string& name, string& def)
+{
+  string::size_type ei = arg.find('=');
+  if(ei != string::npos) {
+    string::size_type tei = ei+1; while(isspace(arg[tei])) ++tei;
+    def = string(arg, tei, arg.length()-tei);
+  } else {
+    ei = arg.length();
   }
+  --ei;
+  while(isspace(arg[ei])) --ei;
+  string::size_type ti = ei;
+  while(isalnum(arg[ti]) || arg[ti] == '_') --ti;
+  name = string(arg, ti+1, ei-ti);
+  while(isspace(arg[ti])) --ti;
+  type = string(arg, 0, ti+1);
+}
 
-  void unrefptrconst_type(string& type)
-  {
-    string::size_type i;
-    while((i = type.find_first_of("*&")) != string::npos) {
-      type.replace(i, 1, " ");
-    }
-    type.insert(0, " ");
-    while((i = type.find(" const ")) != string::npos) {
-      type.replace(i+1, 5, "");
-    }
-    while((i = type.find(" ")) != string::npos) {
-      type.replace(i, 1, "");
-    }
+void MCW_View::unrefptrconst_type(string& type)
+{
+  string::size_type i;
+  while((i = type.find_first_of("*&")) != string::npos) {
+    type.replace(i, 1, " ");
+  }
+  type.insert(0, " ");
+  while((i = type.find(" const ")) != string::npos) {
+    type.replace(i+1, 5, "");
+  }
+  while((i = type.find(" ")) != string::npos) {
+    type.replace(i, 1, "");
   }
 }
 
@@ -189,9 +187,9 @@ MCW_View::VarArg::VarArg(string& typ, string& base_typ,
   case 2: {
     Fl_Input* w = new Fl_Input(0, 0, at.weed_w, 1);
     // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
-    if(!defval.empty()) {
+    if(!defval.empty() && defval[0] == '"' && defval[defval.length()-1] == '"') {
       string def(defval);
-      def.replace(0, 1, ""); def.replace(def.size()-1, 1, "");
+      def.replace(0, 1, ""); def.replace(def.length()-1, 1, "");
       w->value(def.c_str());
     }
     break;
@@ -292,7 +290,7 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(string)
   hctx++;
 
   for(lStr_i m=mMInfo->fContextArgs.begin(); m!=mMInfo->fContextArgs.end(); ++m) {
-    split_arg(*m, t, n, d);
+    split_argument(*m, t, n, d);
     bt = t;
     unrefptrconst_type(bt);
     // printf("Ctx '%s' -> '%s' [%s] '%s' '%s'\n", m->c_str(),
@@ -306,7 +304,7 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(string)
   mVarPack = new Fl_Pack(0,hctx,0,0);
   mVarPack->type(FL_VERTICAL);
   for(lStr_i m=mMInfo->fArgs.begin(); m!=mMInfo->fArgs.end(); ++m) {
-    split_arg(*m, t, n, d);
+    split_argument(*m, t, n, d);
     bt = t;
     unrefptrconst_type(bt);
     // printf("Var '%s' -> '%s' [%s] '%s' '%s'\n", m->c_str(),
@@ -368,6 +366,15 @@ void MCW_View::SetABG(ZGlass* alpha, ZGlass* beta, ZGlass* gamma)
   for(int c=0; c<mCtxPack->children() && c<3; ++c) {
     CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(c) );
     if(a)   a->SetImage(mShell->DemanglePtr(xx[c]));
+  }
+}
+
+void MCW_View::SetABG(ID_t alpha, ID_t beta, ID_t gamma)
+{
+  ID_t xx[] = { alpha, beta, gamma };
+  for(int c=0; c<mCtxPack->children() && c<3; ++c) {
+    CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(c) );
+    if(a)   a->SetImage(mShell->DemangleID(xx[c]));
   }
 }
 
