@@ -1,16 +1,18 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Pupil.h"
 #include "Eye.h"
 #include "FTW_Leaf.h"
+#include "FTW_Shell.h"
 
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
 #include <Gled/GledNS.h>
+#include <Ephra/Saturn.h>
 
 #include <TVirtualX.h>
 #include <TGX11.h>
@@ -33,8 +35,9 @@ void PupilStamp(ZNode* n, Pupil* p) { p->valid(0); p->redraw(); }
 
 void Pupil::Label()
 {
-  sprintf(mLabel, "Pupil [%s]", mBase->GetName());
+  snprintf(mLabel, 127, "Pupil [%s]", mBase->GetName());
   label(mLabel);
+  redraw();
 }
 
 Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
@@ -43,8 +46,6 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
 {
   end();
   label(GForm("pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle()));
-
-  mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
 
   mBase = 0;
   mCamera = new Camera;
@@ -73,6 +74,8 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
   XUnlockDisplay(fl_display);
   XSync(rd, False);
   XUnlockDisplay(rd);
+
+  mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
 }
 
 Pupil::~Pupil() {
@@ -127,7 +130,7 @@ void Pupil::SetCameraView()
       if(up_ref != 0) {
 	auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
 	if(t.get() != 0) {
-	  UCIndex_t c = mInfo->GetUpRefAxis();
+	  Int_t c = mInfo->GetUpRefAxis();
 	  up.SetXYZ((*t)(1u,c), (*t)(2u,c), (*t)(3u,c));
 	  done = true;
 	} else {
@@ -200,9 +203,6 @@ void Pupil::XtachCamera()
 // Render & Pick
 /**************************************************************************/
 
-#include <Ephra/Saturn.h>
-
-
 void Pupil::Render()
 {
   // Calls rnr driver to perform actual rendering.
@@ -219,19 +219,46 @@ void Pupil::Render()
   }
 }
 
-namespace {
-  struct pick_data {
-    Pupil*  p;
-    ZGlass* g;
-    pick_data(Pupil* _p, ZGlass* _g) : p(_p), g(_g) {}
-  };
+/**************************************************************************/
+// Picking
+/**************************************************************************/
 
-  void pick_cb(Fl_Widget* w, pick_data* d) {
-    // d->p->Rebase(d->g);
+void Pupil::fltk_pick_callback(Fl_Widget* w, pick_data* pd)
+{
+  pd->pupil->pick_callback(w, pd);
+}
+
+void Pupil::pick_callback(Fl_Widget* w, pick_data* pd)
+{
+  switch(pd->operation) {
+  case p_open_view: {
+    Eye* eye = GetRoot()->fImg->fEye;
+    eye->GetShell()->SpawnMTW_View(eye->DemanglePtr(pd->lens));
+    break;
+  }
+  case p_null:
+  default:
+    break;
   }
 }
 
-void Pupil::Pick(bool showparents)
+namespace {
+
+  void make_menu(Fl_Menu_Button& menu, list<Pupil::pick_data>& pdl,
+		 const string& prefix,
+		 Pupil* pupil, ZGlass* lens)
+  {
+    // Make a menu for lens. Called from Pupil::Pick().
+    // Presently rather empty and non-configurable.
+
+    pdl.push_back( Pupil::pick_data(pupil, lens, Pupil::p_open_view) );
+    menu.add(GForm("%s/Open view ...", prefix.c_str()), 0,
+	     (Fl_Callback*)Pupil::fltk_pick_callback, &pdl.back(), FL_MENU_DIVIDER);
+  }
+
+}
+
+void Pupil::Pick()
 {
   // RedBook snatch
   GLsizei bs = mInfo->GetBuffSize();
@@ -262,6 +289,8 @@ void Pupil::Pick(bool showparents)
 
   if(n>0) {
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+    menu.textsize(mRoot->fImg->fEye->GetShell()->cell_fontsize());
+
     GLuint* x = b;
     list<pick_data> pdl;
     for(int i=0; i<n; i++) {
@@ -283,23 +312,19 @@ void Pupil::Pick(bool showparents)
       ZGlass* glass = mRoot->fImg->fEye->GetSaturn()->DemangleID(id);
       if(!glass) continue;
       const char* name = glass->GetName();
-      if(showparents) {
-	pdl.push_back( pick_data(this, glass) );
-	menu.add(name, 0, (Fl_Callback*)pick_cb, &pdl.back(), FL_SUBMENU);
-	for(int j=m-2; j>=0; --j) {
-	  UInt_t p_id = x[j];
-	  ZGlass* parent = mRoot->fImg->fEye->GetSaturn()->DemangleID(p_id);
-	  if(!parent) continue;
-	  pdl.push_back( pick_data(this, parent) );
-	  menu.add(GForm("%s/%s", name, parent->GetName()), 0,
-		   (Fl_Callback*)pick_cb, &pdl.back());
-	}
-	
-      } else {
-	pdl.push_back( pick_data(this, glass) );
-	menu.add(name, 0, (Fl_Callback*)pick_cb, &pdl.back());
+
+      pdl.push_back( pick_data(this, glass) );
+      menu.add(name, 0, (Fl_Callback*)fltk_pick_callback, &pdl.back(), FL_SUBMENU);
+      make_menu(menu, pdl, string(name), this, glass);
+      for(int j=m-2; j>=0; --j) {
+	UInt_t p_id = x[j];
+	ZGlass* parent = mRoot->fImg->fEye->GetSaturn()->DemangleID(p_id);
+	if(!parent) continue;
+	make_menu(menu, pdl,
+		  string(GForm("%s/Parents/%s", name, parent->GetName())),
+		  this, parent);
       }
-      
+
       x += m;
     }
     const Fl_Menu_Item* mi = menu.popup();
@@ -314,7 +339,21 @@ void Pupil::Pick(bool showparents)
 
 void Pupil::draw()
 {
-  TTime start_time = gSystem->Now();
+  if(mDriver->fTexFont == 0) {
+    GLTextNS::TexFont *txf;
+    const char* font = "fontdefault.txf";
+    const char* file = GForm("%s/lib/%s", gSystem->Getenv("GLEDSYS"), font);
+    txf = GLTextNS::txfLoadFont(file);
+    if(txf != 0) {
+      GLTextNS::txfEstablishTexture(txf, 0, GL_TRUE);
+      mDriver->fTexFont = txf;
+    } else {
+      fprintf(stderr, "Problem loading font %s from file %s ; error: %s.\n",
+              font, file, GLTextNS::txfErrorString());
+    }
+  }
+
+  GTime start_time(GTime::I_Now);
 
   //if (!valid()) {
   glMatrixMode(GL_PROJECTION);
@@ -346,7 +385,7 @@ void Pupil::draw()
   glEnable(GL_LIGHT0);
 
   GLfloat mat_diffuse[] = { 0.5, 0.2, 0.6, 1.0 };
-  GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 5.0 };
+  GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
   GLfloat mat_shininess[] = { 200.0 };
 
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
@@ -377,16 +416,20 @@ void Pupil::draw()
     printf("GL error: %s\n", gluErrorString(gl_err));
   }
 
-  glDisable(GL_BLEND);
+  GTime stop_time(GTime::I_Now);
+  GTime rnr_time = stop_time - start_time;
 
   // Overlay simulation ... couldn't get draw_overlay working
+  glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
+
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   //SetProjection1();
   glLoadIdentity();
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glScalef(1, (float)w()/h(), 1);
@@ -416,15 +459,40 @@ void Pupil::draw()
     }
   */
 
+  if(mDriver->fTexFont) { // TexFont test
+    GLTextNS::TexFont *txf = mDriver->fTexFont;
+
+    int step = txf->max_ascent + txf->max_descent;
+
+    glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
+
+    glLoadIdentity();
+    glTranslatef(-1, -1, 0.0);
+    glScalef(2.0/w(), 2.0/h(), 1);
+    glTranslatef(0, h() - txf->max_ascent, 0);
+    glColor3f(0,1,1);
+
+    GLTextNS::txfBindFontTexture(txf);
+  
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glPolygonMode(GL_FRONT, GL_FILL);
+
+    // int width, ascent, descent;
+    // GLTextNS::txfGetStringMetrics(txf, text, len, &width, &ascent, &descent);
+    const char* text = GForm("rps %.1f", 1/rnr_time.ToDouble() <? 999.9);
+    GLTextNS::txfRenderString(txf, text, strlen(text));
+
+    glPopAttrib();
+  }
+
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
+
   //glFinish();
   //glFlush();
   //glXWaitGL();
-
-  TTime stop_time = gSystem->Now();
-  TTime rnr_time = stop_time - start_time;
-  // cout <<"Pupil::Draw took "<< (unsigned long)rnr_time <<"ms\n";
 }
 
 int Pupil::handle(int ev)
@@ -442,7 +510,7 @@ int Pupil::handle(int ev)
   case FL_PUSH: {
     mMouseX = x; mMouseY = y; // reset the drag location
     if(Fl::event_button() == 3) {
-      Pick(!Fl::event_state(FL_SHIFT));
+      Pick();
     }
     return 1;
   }
