@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -27,6 +27,7 @@
 
 namespace ZGlassBits {
   UShort_t kFixedName = 0x1;
+  UShort_t kDying     = 0x2;
 }
 
 /**************************************************************************/
@@ -40,7 +41,7 @@ void ZGlass::_init()
   mSaturn = 0; mQueen = 0; mMir = 0;
   mGlassBits = 0; mSaturnID=0;
   mGuard = 0;
-  bMIRActive = true;
+  bMIRActive = true; bAcceptRefs = true;
   mRefCount = mMoonRefCount = mSunRefCount = mFireRefCount = 0; 
   mTimeStamp = mStampReqTring = 0;
   pSetYNameCBs = 0;
@@ -49,27 +50,118 @@ void ZGlass::_init()
 
 /**************************************************************************/
 
+void ZGlass::reference_all() {
+  lppZGlass_t link_refs;
+  CopyLinkRefs(link_refs);
+  for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
+    if(**i) {
+      try {
+	(**i)->IncRefCount(this);
+      }
+      catch(string exc) {
+	**i = 0;
+      }
+    }
+  }
+}
+
+void ZGlass::unreference_all() {
+  lppZGlass_t link_refs;
+  CopyLinkRefs(link_refs);
+  for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
+    if(**i) {
+      (**i)->DecRefCount(this);
+    }
+  }
+}
+
+/**************************************************************************/
+
+void ZGlass::remove_references_to(ZGlass* lens)
+{
+  // Removes all references to *lens*.
+  // Heavily virtual ... lists overrirde it but also call the ZGlass version
+  // for unreferencing of links.
+  // Calls DecRefCount and emits Rays.
+
+  lppZGlass_t link_refs;
+  CopyLinkRefs(link_refs);
+  int n = 0;
+  for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
+    if(**i == lens) {
+      (**i)->DecRefCount(this);
+      **i = 0;
+      ++n;
+    }
+  }
+  if(n) StampLink();
+}
+
+/**************************************************************************/
+
+string ZGlass::Identify() const
+{
+  return string(GForm("'%s'[%d]", mName.Data(), mSaturnID));
+}
+
+/**************************************************************************/
+
+void ZGlass::WriteLock()
+{
+  if(mQueen) mQueen->SubjectWriteLock();
+  ReadLock();
+}
+
+void ZGlass::WriteUnlock()
+{
+  ReadUnlock();
+  if(mQueen) mQueen->SubjectWriteUnlock();
+}
+
+
+/**************************************************************************/
+
+void ZGlass::assert_MIR_presence(const string& header, int what)
+{
+  if(mMir == 0) {
+    throw(header + "must be called via a MIR.");
+  }
+  if((what & MC_IsFlare) && mMir->HasRecipient()) {
+    throw(header + "must be called via a flared MIR.");
+  }
+  if((what & MC_IsBeam) && !mMir->HasRecipient()) {
+    throw(header + "must be called via a beamed MIR.");
+  }
+  if((what & MC_HasResultReq) && !mMir->HasResultReq()) {
+    throw(header + "must be called with result request set.");
+  }
+}
+
+/**************************************************************************/
+// YNameChangeCB
+
 typedef set<ZGlass::YNameChangeCB*>		spYNameChangeCB_t;	
 typedef set<ZGlass::YNameChangeCB*>::iterator	spYNameChangeCB_i;	
 
 void ZGlass::register_name_change_cb(ZGlass::YNameChangeCB* rec)
 {
   if(mGlassBits & ZGlassBits::kFixedName) return;
-  mRefCountMutex.Lock();
+  ReadLock();
   if(pSetYNameCBs == 0)
     pSetYNameCBs = new set<YNameChangeCB*>;
   pSetYNameCBs->insert(rec);
-  mRefCountMutex.Unlock();
+  ReadUnlock();
 }
 
 void ZGlass::unregister_name_change_cb(ZGlass::YNameChangeCB* rec)
 {
-  mRefCountMutex.Lock();
+  ReadLock();
   if(pSetYNameCBs != 0)
     pSetYNameCBs->erase(rec);
-  mRefCountMutex.Unlock();
+  ReadUnlock();
 }
 
+/**************************************************************************/
 
 void ZGlass::SetName(const Text_t* n)
 {
@@ -78,41 +170,47 @@ void ZGlass::SetName(const Text_t* n)
     throw(string("ZGlass::SetName lens has FixedName bit set"));
   }
   string name(n);
-  mExecMutex.Lock();
-  mRefCountMutex.Lock();
+  WriteLock();
   if(pSetYNameCBs != 0) {
     for(set<YNameChangeCB*>::iterator i=pSetYNameCBs->begin(); i!=pSetYNameCBs->end(); ++i) {
       (*i)->y_name_change_cb(this, name);
     }
   }
-  mRefCountMutex.Unlock();
   mName = name.c_str();
   Stamp(LibID(), ClassID());
-  mExecMutex.Unlock();
+  WriteUnlock();
+  if(mMir && mQueen == this && ! mMir->HasRecipient()) {
+    mQueen->BasicQueenChange(*mMir);
+  }
 }
 
-void ZGlass::SetNameTitle(const Text_t* n, const Text_t* t)
+void ZGlass::SetTitle(const Text_t* t)
 {
-  SetName(n);
-  SetTitle(t);
+  WriteLock();
+  mTitle = t;
+  Stamp(LibID(), ClassID());
+  WriteUnlock();
+  if(mMir && mQueen == this && ! mMir->HasRecipient()) {
+    mQueen->BasicQueenChange(*mMir);
+  }
 }
+
+/**************************************************************************/
 
 ZMirFilter* ZGlass::GetGuard() const
 {
-  mExecMutex.Lock();
+  ReadLock();
   ZMirFilter* _ret = mGuard;
-  mExecMutex.Unlock();
+  ReadLock();
   return _ret;
 }
 
 void ZGlass::SetGuard(ZMirFilter* guard)
 {
-  mExecMutex.Lock();
-  if(mGuard) mGuard->DecRefCount(this);
-  mGuard = guard;
-  StampLink(LibID(), ClassID());
-  if(mGuard) mGuard->IncRefCount(this);
-  mExecMutex.Unlock();
+  WriteLock();
+  try { set_link_or_die((ZGlass*&)mGuard, guard, LibID(), ClassID()); }
+  catch(...) { WriteUnlock(); throw; }
+  WriteUnlock();
 }
 
 /**************************************************************************/
@@ -121,6 +219,26 @@ ZGlass::~ZGlass()
 {
   // !!!!! Should unref all links; check zlist, too
   delete pSetYNameCBs;
+}
+
+/**************************************************************************/
+
+void ZGlass::UpdateGlassView()
+{
+  if(mQueen) {
+    Ray r(Ray::RQN_change, mTimeStamp, this, LibID(), ClassID());
+    mQueen->EmitRay(r, true);
+  }
+  if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
+}
+
+void ZGlass::UpdateAllViews()
+{
+  if(mQueen) {
+    Ray r(Ray::RQN_change, mTimeStamp, this, LID_t(0), CID_t(0));
+    mQueen->EmitRay(r, true);
+  }
+  if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 }
 
 /**************************************************************************/
@@ -142,39 +260,102 @@ bool ZGlass::IsSunOrFireSpace()
 
 /**************************************************************************/
 
-Short_t ZGlass::IncRefCount(const ZGlass* from)
+Short_t ZGlass::IncRefCount(ZGlass* from)
 {
-  if(from->mQueen) {
-    mRefCountMutex.Lock();
-    ++mRefCount;
-    switch(from->mQueen->GetKing()->GetLightType()) {
-    case ZKing::LT_Moon:++mMoonRefCount; break;
-    case ZKing::LT_Sun:	++mSunRefCount;  break;
-    case ZKing::LT_Fire:++mFireRefCount; break;
-    default: ISerr("ZGlass::IncRefCount King in undefined state");
+  // Called to notify *this* that *from* desires to reference it.
+  // Throws an exception if the reference is not allowed by *this*
+  // lens or its queen.
+
+  static const string _eh("ZGlass::IncRefCount ");
+
+  if(mQueen && from->mQueen) {
+    mQueen->SubjectRefCntLock();
+    // !!! Here ask queen if it's OK
+    if(!bAcceptRefs) {
+      mQueen->SubjectRefCntUnlock();
+      throw(_eh + "lens not accepting references.");
     }
-    mRefCountMutex.Unlock();
-    Stamp(LibID(), ClassID());
+    switch(from->mQueen->GetKing()->GetLightType()) {
+    case ZKing::LT_Moon:
+      ++mMoonRefCount; ++mRefCount; mReverseRefs.push_front(from);
+      break;
+    case ZKing::LT_Sun:
+      ++mSunRefCount; ++mRefCount; mReverseRefs.push_back(from);
+      break;
+    case ZKing::LT_Fire:
+      ++mFireRefCount; ++mRefCount; mReverseRefs.push_back(from);
+      break;
+    default:
+      mQueen->SubjectRefCntUnlock();
+      throw(_eh + "King in undefined state. Ignoring.");
+    }
+    mQueen->SubjectRefCntUnlock();
+    // Stamp(LibID(), ClassID());
   }
   return mRefCount;
 }
 
-Short_t ZGlass::DecRefCount(const ZGlass* from)
+Short_t ZGlass::DecRefCount(ZGlass* from)
 {
-  if(from->mQueen) {
-    mRefCountMutex.Lock();
-    --mRefCount;
+  // Called to notify *this* that it is no longer referenced by lens from.
+
+  if(mQueen && from->mQueen) {
+    mQueen->SubjectRefCntLock();
     switch(from->mQueen->GetKing()->GetLightType()) {
-    case ZKing::LT_Moon:--mMoonRefCount; break;
-    case ZKing::LT_Sun:	--mSunRefCount;  break;
-    case ZKing::LT_Fire:--mFireRefCount; break;
-    default: ISerr("ZGlass::IncRefCount King in undefined state");
+    case ZKing::LT_Moon: {
+      lpZGlass_i i = find(mReverseRefs.begin(), mReverseRefs.end(), from);
+      if(i != mReverseRefs.end()) {
+	--mMoonRefCount; --mRefCount;
+	mReverseRefs.erase(i);
+      }
+      break;
     }
-    if(mRefCount==0 && mQueen) mQueen->ZeroRefCount(this);
-    mRefCountMutex.Unlock();
-    Stamp(LibID(), ClassID());
+    case ZKing::LT_Sun: {
+      lpZGlass_ri i = find(mReverseRefs.rbegin(), mReverseRefs.rend(), from);
+      if(i != mReverseRefs.rend()) {
+	--mSunRefCount; --mRefCount;
+	mReverseRefs.erase((++i).base());
+      }
+      break;
+    }
+    case ZKing::LT_Fire: {
+      lpZGlass_ri i = find(mReverseRefs.rbegin(), mReverseRefs.rend(), from);
+      if(i != mReverseRefs.rend()) {
+	--mFireRefCount; --mRefCount;
+	mReverseRefs.erase((++i).base());
+      }
+      break;
+    }
+    default:
+      ISerr("ZGlass::IncRefCount King in undefined state");
+    }
+    if(mRefCount == 0 && mQueen) mQueen->ZeroRefCount(this);
+    mQueen->SubjectRefCntUnlock();
+    // Stamp(LibID(), ClassID());
   }
   return mRefCount;
+}
+
+/**************************************************************************/
+
+void ZGlass::ClearLinks()
+{
+  lppZGlass_t link_refs;
+  CopyLinkRefs(link_refs);
+  int n = 0;
+  for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
+    if(**i) {
+      (**i)->DecRefCount(this);
+      **i = 0;
+      ++n;
+    }
+  }
+  if(n) StampLink();
+}
+
+void ZGlass::ClearAllReferences()
+{
+  ClearLinks();
 }
 
 /**************************************************************************/
@@ -286,29 +467,7 @@ void ZGlass::SetStampLink_CB(zglass_stamp_f foo, void* arg)
 
 /**************************************************************************/
 
-void ZGlass::AssertMIRPresence(const string& header, int what)
+Int_t ZGlass::RebuildAll(An_ID_Demangler* idd)
 {
-  if(mMir == 0) {
-    throw(header + "should be called with mMir set");
-  }
-  if((what & MC_IsBeam) && !mMir->HasRecipient()) {
-    throw(header + "should be called via a beamed mir");
-  }
-  if((what & MC_HasResultReq) && !mMir->HasResultReq()) {
-    throw(header + "should be called with result request set");
-  }
-}
-
-/**************************************************************************/
-
-void ZGlass::Test_p7_linkspecs()
-{
-  lLinkSpec_t ls; CopyLinkSpecs(ls); lLinkSpec_i l = ls.begin();
-  lppZGlass_t gs; CopyLinkRefs(gs); lppZGlass_i g = gs.begin();
-  while(l != ls.end()) {
-    printf("%s::%s %p %p\n", l->fClassName.c_str(), l->fLinkName.c_str(),
-	   &(l->fLinkRef), *g);
-    ++l; ++g;
-  }
-  
+  return RebuildLinks(idd);
 }
