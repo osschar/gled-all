@@ -52,7 +52,7 @@ class ZGeoNode : public ZNode {
 
  protected:
   Bool_t	        bRnrSelf;   // X{G} 7 Bool()
-  void clear_this_list();
+
   void setup_ztrans(ZNode* zn, TGeoMatrix* gm);
   void setup_color(Float_t alpha);
   TGeoNode* get_tnode_search_point();

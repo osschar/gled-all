@@ -176,7 +176,7 @@ void ZGeoNode::ImportNodes()
 
   _assert_tnode(_eh);
 
-  clear_this_list();
+  ClearList();
 
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
@@ -215,7 +215,7 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
 
-  while(geon = (TGeoNode*)next_node()) {
+  while((geon = (TGeoNode*)next_node())) {
     TString vname = "<no-vol>";
     TString sname = "<no-shp>";
 
@@ -248,11 +248,11 @@ void ZGeoNode::ImportNodesWCollect()
 
   _assert_tnode(_eh);
   
-  clear_this_list();
+  ClearList();
   map<string, ZNode*> nmap;
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
-  while(geon = (TGeoNode*)next_node()) {
+  while((geon = (TGeoNode*)next_node())) {
     const char* vname = "<no-vol>";
     const char* sname = "<no-shp>";
 
@@ -299,7 +299,7 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
 
-  while(geon = (TGeoNode*)next_node()) {
+  while((geon = (TGeoNode*)next_node())) {
     const char* vname = "<no-vol>";
     const char* sname = "<no-shp>";
 
@@ -353,17 +353,7 @@ void ZGeoNode::AssertUserData()
 }
 
 /***************************************************************************/
-void ZGeoNode::clear_this_list() 
-{
-  ZGeoNode* next; 
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    next = dynamic_cast<ZGeoNode*> (*i);
-    if ( next->GetVolume()) next->GetVolume()->SetField(0);
-  }
-  ClearList();
-}
 
-/************************************************************************/
 void ZGeoNode::SaveToFile(const Text_t* file)
 {
   static const string _eh("ZGeoNode::SaveToFile ");
@@ -394,7 +384,7 @@ void ZGeoNode::LoadFromFile(const Text_t* file)
   if(file == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "loading from '" + file + "'.");
 
-  clear_this_list();
+  ClearList();
   TFile f(file, "READ");
   auto_ptr<ZComet> c( dynamic_cast<ZComet*>(f.Get("ZGeoNodes")) );
   f.Close();
@@ -443,7 +433,7 @@ void ZGeoNode::Restore()
   BeginIteration(i, end);
   ZGeoNode* nn;
   while(i != end) {
-    if(nn = dynamic_cast<ZGeoNode*>(*i)) {
+    if((nn = dynamic_cast<ZGeoNode*>(*i))) {
       nn->Restore();
     }
     ++i;
@@ -452,15 +442,15 @@ void ZGeoNode::Restore()
 }
 
 
-  /*************************************************************************/
-void ZGeoNode::delete_list(){
-  static const string _eh("ZGeoNode::ClearList ");
-  if(mSize == 0) return;
+/*************************************************************************/
 
+void ZGeoNode::delete_list(){
+  static const string _eh("ZGeoNode::delete_list ");
+
+  if(mSize == 0) return;
   
   ISdebug(1, GForm("%slocking list '%s'.", _eh.c_str(), GetName()));
   mListMutex.Lock();
-
 
   lpZGlass_t foo;
   foo.swap(mGlasses);
@@ -468,17 +458,15 @@ void ZGeoNode::delete_list(){
   StampListClear();
   mListMutex.Unlock();
 
-
   ISdebug(1, GForm("unlocked list '%s'.", _eh.c_str(), GetName()));
 
   ZGeoNode* zn;
   for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
-    if(zn = dynamic_cast<ZGeoNode*>(*i)) {
+    if((zn = dynamic_cast<ZGeoNode*>(*i))) {
       (*i)->DecRefCount(this);
       zn->delete_list();
     }
   }
-
 
   ISdebug(1, GForm("%sfinished for '%s'.", _eh.c_str(), GetName()));
 }
@@ -521,7 +509,7 @@ Bool_t ZGeoNode::locate_tnode( ZGeoNode* zn, TGeoNode* cur_node)
 
   {
     TIter next_node(cur_node->GetVolume()->GetNodes());
-    while (n = (TGeoNode*)next_node()) {
+    while((n = (TGeoNode*)next_node())) {
       if (locate_tnode(zn, n)){
 	return true;
       }
