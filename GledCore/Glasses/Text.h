@@ -36,8 +36,6 @@ protected:
   ZColor	mFGCol;		// X{PGST} 7 ColorButt(-join=>1)
   ZColor	mBGCol;		// X{PGST} 7 ColorButt()
 
-  Bool_t	bUseDispList;	// X{GS}   7 Bool()
-
 public:
   Text(const Text_t* n="Text", const Text_t* t=0) : ZNode(n,t) { _init(); }
 

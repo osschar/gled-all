@@ -21,6 +21,8 @@ void Text::_init()
   // !!!! Set all links to 0 !!!!
   mFont = 0;
 
+  // Override settings from ZGlass
+  bUseDispList = true;
   // Override settings from ZNode
   bUseScale = true;
 
@@ -32,8 +34,6 @@ void Text::_init()
   bBorder    = true;
   mXBorder   = 0.1;     mYBorder   = 0.1;
   mFGCol.rgba(1,1,1,1); mBGCol.rgba(0,0,0,1);
-
-  bUseDispList = false;
 }
 
 /**************************************************************************/
