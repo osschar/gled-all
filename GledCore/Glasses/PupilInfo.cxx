@@ -26,7 +26,7 @@ void PupilInfo::_init()
   bLiMo2Side = false;
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
   bBlend = false;
-  mMSRotFac = -600; mMSMoveFac = -200; mAccelExp = 0.5;
+  mMSRotFac = 1; mMSMoveFac = 2; mMoveOM = -2; mAccelExp = 0.5;
 
   mCHSize = 0.03;   mTextSize = 12;
 
