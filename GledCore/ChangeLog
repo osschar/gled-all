@@ -1,5 +1,20 @@
 2005-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Eye/FTW_Branch.cxx:
+	Another bug in clear_list handling. Probably wasn't consistent
+	previous time.
+
+	* Eye/FltkGledStuff.cxx:
+	Only grep for shell when needed; bombed during window destruction.
+
+	* Eye/Pupil.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added custom ray type camera_home; declared all PupilInfo's custom
+	ray-types in an enum.
+
+2005-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Ephra/Saturn.cxx:
 	* Eye/Eye.cxx:
 	Minor clean-up.
