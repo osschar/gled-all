@@ -204,7 +204,7 @@ string GledNS::FabricateInitFoo(const string& libset)
 
 string GledNS::FabricateUserInitFoo(const string& libset)
 {
-  // Returns name of void* pointing to init_foo
+  // Returns name of void* pointing to user_init_foo
 
   string foo = libset + "_GLED_user_init";
   return foo;

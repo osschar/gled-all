@@ -12,8 +12,6 @@
 #include <GledView/GledViewNS.h>
 #include <Eye/Eye.h>
 
-#include <glue/GledCore_View_LibSet.h>
-
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
@@ -32,6 +30,9 @@
 
 // #include <GL/glx.h>
 #include <X11/Xlib.h>
+
+extern void *GledCore_GLED_init_View;
+extern void *GledCore_GLED_user_init_View;
 
 /**************************************************************************/
 // callback handlers
@@ -150,8 +151,6 @@ GledGUI::GledGUI(list<char*>& args) :
 
   }
 
-  libGledCore_GLED_init_View();
-
   GledViewNS::no_symbol_label = FL_FREE_LABELTYPE;
   Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
   if(font) {
@@ -232,6 +231,9 @@ GledGUI::GledGUI(list<char*>& args) :
   set_swm_hotspot_cb(swm_butt);
 
   Fl_Tooltip::size(swm_manager->cell_fontsize() - 1);
+  Fl_Tooltip::enable();	// enable tooltips
+
+  Fl::visible_focus(0); // no focus for buttons ETC
 
   show();
 }
@@ -239,6 +241,14 @@ GledGUI::GledGUI(list<char*>& args) :
 GledGUI::~GledGUI()
 {
   delete swm_manager;
+}
+
+void GledGUI::InitGledCore()
+{
+  Gled::InitGledCore();
+  ((void(*)())GledCore_GLED_init_View)();
+  ((void(*)())GledCore_GLED_user_init_View)();
+  GledViewNS::AssertRenderers();
 }
 
 /**************************************************************************/
@@ -250,8 +260,7 @@ void GledGUI::Run()
 
   ISmess("GledGUI::Run starting GUI");
   Fl::lock();		// init thread support
-  Fl::visible_focus(0); // no focus for buttons ETC
-  Fl_Tooltip::enable();	// enable tooltips
+
   mMessenger = new GThread((GThread_foo)MessageLoop_tl, this, false);
   mMessenger->Spawn();
   bGUIup = true;
@@ -428,4 +437,17 @@ int GledGUI::handle(int ev)
     return 1;
   }
   return Fl_Window::handle(ev);
+}
+
+/**************************************************************************/
+// Misc
+/**************************************************************************/
+
+void GledGUI::AddMTWLayout(const char* name, const char* layout)
+{
+  if(name == 0 || layout == 0) {
+    ISerr(GForm("GledGUI::AddMTWLayout got zero argument; ignoring."));
+    return;
+  }
+  GledViewNS::mtw_layouts.push_back(GledViewNS::MTW_Layout_Spec(name, layout));
 }

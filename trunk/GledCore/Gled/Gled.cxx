@@ -15,14 +15,14 @@
 #include <Glasses/SaturnInfo.h>
 #include <Glasses/ShellInfo.h>
 
-#include <glue/GledCore_LibSet.h>
-
 #include <TSystem.h>
 #include <TROOT.h>
 #include <TRint.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
 #include <TSystemDirectory.h>
+
+extern void *GledCore_GLED_init;
 
 ClassImp(Gled)
 
@@ -221,12 +221,15 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
       GLED_VERSION_STRING, GLED_BUILD_DATE_STRING, 35 - len, "" );
     printf("Bootstraping ...\n");
   }
-
-  libGledCore_GLED_init();
 }
 
 Gled::~Gled() {
   delete mSaturn;
+}
+
+void Gled::InitGledCore()
+{
+  ((void(*)())GledCore_GLED_init)();
 }
 
 /**************************************************************************/
