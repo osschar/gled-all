@@ -267,7 +267,7 @@ void ZGeoNode::SaveToFile(const Text_t* file)
 {
   static const string _eh("ZGeoNode::SaveToFile ");
   
-  if(file == 0) file = mDefFile.Data();
+  if(file == 0 || strcmp(file,"") == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "loading from '" + file + "'.");
 
   ZComet c("ZGeoNodes");
@@ -288,7 +288,7 @@ void ZGeoNode::LoadFromFile(const Text_t* file)
 {
   static const string _eh("ZGeoNode::LoadFromFile ");
 
-  if(file == 0) file = mDefFile.Data();
+  if(file == 0 || strcmp(file,"") == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "loading from '" + file + "'.");
 
   RemoveLensesViaQueen(true);
@@ -379,7 +379,7 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
   string m = v->GetMaterial()->GetName();
   int j = m.find_first_of("$");
   m = m.substr(0,j);
-  nn->SetMat(m.c_str());
+  nn->SetMaterial(m.c_str());
   nn->mNNodes = geon->GetNdaughters();
   mQueen->CheckIn(nn);
   holder->Add(nn);
