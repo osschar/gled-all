@@ -92,7 +92,8 @@ ZMIR::ZMIR(ZGlass* a, ZGlass* b, ZGlass* g) :
 
 ZMIR::ZMIR(TMessage*& m) :
   TMessage(m->Buffer(), m->BufferSize()),
-  Direction(D_Unknown), SuppressFlareBroadcast(false)
+  Direction(D_Unknown),
+  SuppressFlareBroadcast(false), RequiresResult(false)
 {
   m->DetachBuffer(); delete m; m = 0;
   _init();
@@ -290,6 +291,15 @@ void ZMIR::SetResultReq(SaturnInfo* r_recipient, UInt_t r_handle)
   MirBits |= MB_HasResultReq;
   ResultRecipientID = r_recipient->GetSaturnID();
   ResultReqHandle   = r_handle;
+}
+
+void ZMIR::SetDetachedExe(bool multix)
+{
+    assert(IsWriting());
+
+    MirBits |= (multix) ? MB_DetachedExe | MB_MultixDetachedExe :
+                          MB_DetachedExe;
+    
 }
 
 /**************************************************************************/
