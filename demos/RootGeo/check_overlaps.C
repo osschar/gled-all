@@ -8,12 +8,6 @@
 class ZGeoNode;
 class GeoUserData;
 
-ZGeoNode* volt = 0;
-
-const Text_t* default_layout =
-  "ZGeoNode(RnrSelf[3],RnrOnRec[5],RnrOffRec[4],"
-  "Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[4])";
-
 #include "common_foos.C"
 
 /**************************************************************************/
@@ -31,8 +25,6 @@ void check_overlaps(Float_t epsilon=1)
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
 
-  Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
-
   //--------------------------------------------------------------
 
   printf("Importing geometry ...\n");
@@ -48,6 +40,7 @@ void check_overlaps(Float_t epsilon=1)
   ZGeoOvlMgr* ovl = new ZGeoOvlMgr("Overlap Mgr");
   scenes->CheckIn(ovl);
   rscene->Add(ovl);  
+  ovl->SetResol(epsilon);
   ovl->RecalculateOvl();
   ovl->SetUseOM(1);
   ovl->SetOM(-2);
@@ -65,6 +58,14 @@ void check_overlaps(Float_t epsilon=1)
 
   // Spawn GUI
   {
+    const Text_t* default_layout =
+      "ZGeoNode(RnrSelf[4],RnrOnRec[5],RnrOffRec[5],"
+      "Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[4])";
+
+    Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
+    gROOT->LoadMacro("eye.C");
+    register_GledCore_layouts();
+
     Text_t* eye_name   = "Eye";
     Text_t* shell_name = "Shell";
     Text_t* pupil_name = "Pupil";
