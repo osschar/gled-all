@@ -432,14 +432,9 @@ void Pupil::Render()
   // Used by draw() and Pick().
 
   mDriver->SetMaxDepth(mInfo->GetMaxDepth());
-  mDriver->InitLamps();
+  mDriver->BeginRender();
   mDriver->Render(mDriver->GetRnr(fImg));
-  for(int l=0; l<mDriver->GetMaxLamps(); ++l) {
-    if(mDriver->GetLamps()[l] != 0) {
-      // cout <<"Pupil cleaning-up a dirty lamp ...\n";
-      (mDriver->GetLamps()[l])->CleanUp(mDriver);
-    }
-  }
+  mDriver->EndRender();
 }
 
 /**************************************************************************/
