@@ -78,7 +78,7 @@ void spawn_default_gui(Scene* rscene)
   nest->SetLeafLayout(NestInfo::LL_Custom);
 
   CREATE_ATT_GLASS(pupil, PupilInfo, shell, AddSubShell, pupil_name, "");
-  pupil->SetFOV(80);
+  pupil->SetZFov(80);
   pupil->SetCHSize(0.03);
   pupil->SetBlend(1);
   pupil->Add(rscene);
