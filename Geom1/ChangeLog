@@ -1,3 +1,7 @@
+2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx: Proper Stamping for Load/Unload methods.
+
 2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SMorph.cxx:
