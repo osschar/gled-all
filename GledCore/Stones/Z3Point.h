@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -10,16 +10,16 @@
 // Includes
 class Z3Mark;
 class ZTrans;
-#include <Stones/ZVector.h>
-#include <Stones/ZMatrix.h>
+#include <TVectorF.h>
+#include <TMatrixF.h>
 
 class Z3Point {
 private:
   void _init(const Z3Mark& m, bool Ss_are_sigmas=false);
 
 protected:
-  ZVector	mR;
-  ZMatrix	mW;
+  TVectorF	mR;
+  TMatrixF	mW;
 
 public:
   Z3Point();
@@ -29,17 +29,13 @@ public:
   // Here could take advantage of diagonal structure of W
   virtual ~Z3Point() {}
 
-  Real_t& R(Int_t i) { return mR(i); }
-  Real_t& W(Int_t i, Int_t j) { return mW(i,j); }
-  Real_t& R(UCIndex_t i) { return mR(i); }
-  Real_t& W(UCIndex_t i, UCIndex_t j) { return mW(i,j); }
+  Float_t& R(Int_t i) { return mR(i); }
+  Float_t& W(Int_t i, Int_t j) { return mW(i,j); }
   // const
-  const ZVector& R() const { return mR; }
-  const TMatrix& W() const { return mW; }
-  Real_t R(Int_t i) const { return mR(i); }
-  Real_t W(Int_t i, Int_t j) const { return mW(i,j); }
-  Real_t R(UCIndex_t i) const { return mR(i); }
-  Real_t W(UCIndex_t i, UCIndex_t j) const { return mW(i,j); }
+  const TVectorF& R() const { return mR; }
+  const TMatrixF& W() const { return mW; }
+  Float_t R(Int_t i) const { return mR(i); }
+  Float_t W(Int_t i, Int_t j) const { return mW(i,j); }
   
   void Transform(const ZTrans& t);
 
@@ -47,11 +43,5 @@ public:
 }; // endclass Z3Point
 
 ostream& operator<<(ostream& s, const Z3Point& p);
-
-#include <vector>
-typedef	vector<Z3Point>			v3Point_t;
-typedef	vector<Z3Point>::iterator	v3Point_i;
-typedef	vector<Z3Point*>		vp3Point_t;
-typedef	vector<Z3Point*>::iterator	vp3Point_i;
 
 #endif

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -10,17 +10,17 @@
 // Includes
 class ZNode;
 class ZMark;
-class ZVector;
+class TVectorF;
 
-#include <Stones/ZMatrix.h>
+#include <TMatrixF.h>
 #include <TMath.h>
 
-// Should rewrite this using ZVector (now that i have GetArray)
+// Should rewrite this using TVectorF (now that i have GetArray)
 struct ZVec3 {
-  Real_t v[3];
+  Float_t v[3];
   ZVec3() { v[0] = v[1] = v[2] = 0; }
-  ZVec3(Real_t x, Real_t y, Real_t z) { v[0]=x; v[1]=y; v[2]=z; }
-  Real_t& operator()(Int_t i) { return v[i]; }
+  ZVec3(Float_t x, Float_t y, Float_t z) { v[0]=x; v[1]=y; v[2]=z; }
+  Float_t& operator()(Int_t i) { return v[i]; }
 };
 
 struct ZVec3D {
@@ -34,52 +34,54 @@ struct ZVec3D {
 // ZTrans -- 3D transformation in generalised coordinates
 /**************************************************************************/
 
-class ZTrans : public ZMatrix {
+class ZTrans : public TMatrixF {
 
-  mutable Real_t	mA1;   //!
-  mutable Real_t	mA2;   //!
-  mutable Real_t	mA3;   //!
+  mutable Float_t	mA1;   //!
+  mutable Float_t	mA2;   //!
+  mutable Float_t	mA3;   //!
   mutable Bool_t	bAsOK; //!
 
-  void _init() { bAsOK = false; }
+  void _init();
 
 public:
   ZTrans();
-  ZTrans(const ZMatrix& m);
+  ZTrans(const TMatrixF& m);
   ZTrans(const ZTrans& z);
   ZTrans(const ZNode* n);
   virtual ~ZTrans() {}
 
   // more like define ... to use insted of (*this)
-  ZTrans& ZT() { return *this; }
+  const ZTrans& ZT() const { return *this; }
+  ZTrans&       ZT()       { return *this; }
 
-  Int_t Set3Pos(Real_t x, Real_t y, Real_t z);
-  Int_t SetPos(const ZVector& v);
+  Int_t Set3Pos(Float_t x, Float_t y, Float_t z);
+  Int_t SetPos(const TVectorF& v);
   Int_t SetPos(const ZTrans& t);
-  ZVec3 Get3Pos() const { return ZVec3(At(1u,4u), At(2u,4u), At(3u,4u)); }
+  ZVec3 Get3Pos() const
+  { return ZVec3((*this)(1,4), (*this)(2,4), (*this)(3,4)); }
 
-  ZVector* GetZVector() const;
-  ZVector* GetBaseV(UInt_t b) const;
+  TVectorF* GetZVector() const;
+  TVectorF* GetBaseV(UInt_t b) const;
 
-  void SetRot(UCIndex_t i, UCIndex_t j, Real_t f);
+  void SetRot(Int_t i, Int_t j, Float_t f);
   void SetTrans(ZTrans& t);
-  void SetBaseV(UInt_t i, Real_t x, Real_t y, Real_t z);
+  void SetBaseV(UInt_t i, Float_t x, Float_t y, Float_t z);
 
   // Space-Time Position
   // Move in LocalFrame; ai=1(fwd,bck), 2(up/down), 3(r/l)
-  Int_t MoveLF(UCIndex_t ai, Real_t amount=1);
+  Int_t MoveLF(Int_t ai, Float_t amount=1);
   // Rotate in LocalFrame; i1, i2 ... generator indices
-  Int_t RotateLF(UCIndex_t i1, UCIndex_t i2, Real_t amount=0.02);
+  Int_t RotateLF(Int_t i1, Int_t i2, Float_t amount=0.02);
   // Now in some other frame ... 
-  Int_t Move(ZTrans* a, UCIndex_t ai, Real_t amount=1);
-  Int_t Rotate(ZTrans* a, UCIndex_t i1, UCIndex_t i2, Real_t amount=0.02);
-  Int_t SetRotByAngles(Real_t a1, Real_t a2, Real_t a3);
-  void  Scale(Real_t sx, Real_t sy, Real_t sz);
+  Int_t Move(ZTrans* a, Int_t ai, Float_t amount=1);
+  Int_t Rotate(ZTrans* a, Int_t i1, Int_t i2, Float_t amount=0.02);
+  Int_t SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);
+  void  Scale(Float_t sx, Float_t sy, Float_t sz);
   ZVec3 Get3Rot() const;
 
   // Stuff to do w/ 3Vecs ...
-  ZVector& Mult3Vec(ZVector& v) const;
-  ZVector& Rot3Vec(ZVector& v) const;
+  TVectorF& Mult3Vec(TVectorF& v) const;
+  TVectorF& Rot3Vec(TVectorF& v) const;
 
   void Transpose();
   void Invert();
