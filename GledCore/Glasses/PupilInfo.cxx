@@ -88,17 +88,15 @@ void PupilInfo::SetUpReference(ZNode* upreference)
 
 ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
 {
-  mListMutex.Lock();
+  GMutexHolder lst_lck(mListMutex);
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     ZNode* pup_elm = dynamic_cast<ZNode*>(*i);
     if(pup_elm) {
       if(pup_elm == node) {
-	mListMutex.Unlock();
 	return new ZTrans(pup_elm->RefTrans());
       } else {
 	ZTrans* t = node->ToNode(pup_elm);
 	if(t != 0) {
-	  mListMutex.Unlock();
 	  ZTrans* ret = new ZTrans(pup_elm->RefTrans());
 	  *ret *= *t;
 	  delete t;
@@ -107,7 +105,6 @@ ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
       }
     }
   }
-  mListMutex.Unlock();
   return 0;
 }
 
