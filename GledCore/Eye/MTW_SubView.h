@@ -67,6 +67,8 @@ public:
   void UpdateVerticalStats(MTW_Vertical_Stats& vs);
   int  ResizeByVerticalStats(MTW_Vertical_Stats& vs);
 
+  static const int MinLabelWidth;
+
 }; // endclass MTW_SubView
 
 #endif
