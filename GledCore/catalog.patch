@@ -10,14 +10,24 @@ $PATCH = {
   'Pragmas' => "#pragma link C++ function GForm;\n"
 },
 
+"AList" => {
+  'PragmaSuff' => "!-",
+  'VirtualBase' => 1,
+  'Pragmas' => "#pragma link C++ class AList::ElRep;\n",
+},
+
+"ZDeque" => {
+  'PragmaSuff' => "!-",
+},
+
 "ZList" => {
   'PragmaSuff' => "!-",
 # The following line left as documentation.
-# 'C7_DoNot_Gen' => { 'RebuildLinks' => 1 }
+# 'C7_DoNot_Gen' => { 'RebuildLinkRefs' => 1 }
 },
 
 "ZMirEmittingEntity" => {
-  'VirtualBase' => 1	
+  'VirtualBase' => 1
 },
 
 "ZMIR"=> {
@@ -28,7 +38,12 @@ $PATCH = {
 
 "GMutex" => 
 {
- 'Pragmas' => "#pragma link C++ class GMutexHolder;\n" 
+ 'Pragmas' =>
+  "#pragma link C++ class GMutexHolder;\n"     .
+  "#pragma link C++ class GMutexAntiHolder;\n" .
+  "#pragma link C++ class GLensReadHolder;\n"  .
+  "#pragma link C++ class GLensWriteHolder;\n"
+	
 },
 
 };
