@@ -35,8 +35,13 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
     build_GL_mat();
     mStampTrans = mNode->mTimeStamp;
   }
+  glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
   glPushMatrix();
   glMultMatrixf(mGL_Mat);
+  if(mNode->bUseScale) {
+    glEnable(GL_NORMALIZE);
+    glScalef(mNode->mSx, mNode->mSy, mNode->mSz);
+  }
   rd->PushPM(mNode);
 }
 
@@ -44,6 +49,7 @@ void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   rd->PopPM();
   glPopMatrix();
+  glPopAttrib();
   ZGlass_GL_Rnr::PostDraw(rd);
 }
 
