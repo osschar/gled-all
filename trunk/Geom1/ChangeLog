@@ -1,3 +1,33 @@
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	
+	Allow texturing and follow-up on TubeTvor changes.
+
+	SMorph can now be textured by a ZImage holding mercator
+	projection of surface image.
+
+	* Glasses/WSSeed.cxx: Follow-up on TubeTvor changes.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+
+	Addition of glTexEnv and GL_TEXTURE_MAG/MIN_FILTER parameters.
+
+	The image can now apply in Decal, Replace, Modulate and Blend
+	modes (was always Decal before). GL_TEXTURE_ENV_COLOR can also be
+	specified for Blend mode.
+
+	GL_TEXTURE_MAG/MIN_FILTER can now be Nearest or Linear (was always
+	Nearest before).
+	
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+
+	Minor code clean-up.
+
 2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Mover.cxx: The Operate() method did not invoke
