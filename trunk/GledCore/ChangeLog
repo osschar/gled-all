@@ -1,3 +1,277 @@
+2004-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	==================================================
+	Check-in of major changes from 1.2.3 towards 1.2.4
+	==================================================
+
+	Changes that influence several groups of files:
+	===============================================
+	
+	[RD7] RnrDriver now uses exactly 7 rnr levels
+	---------------------------------------------
+	This allowed for a simplification in declaration of RnrCtrl in a
+	glass header. Most glasses are affected by this; the files with
+	*only* this change are not listed in in this entry.
+
+	[AbsorbRay] New method of Ray delivery via A_View::AbsorbRay(Ray&)
+	------------------------------------------------------------------
+	Affects most View classes. Offers a more flexible way of Ray
+	delivery and allows for a cleanar interface on the Eye side.
+
+	[FTW2FGS] Migration of some code from FTW to FltkGledStuff namespace
+	--------------------------------------------------------------------
+	Functions to measure label widths and grep for parents have been
+	taken out from FTW namespace. Originally FTW was meant as
+	collection of widgets needed for FTW_* classes.
+	
+	Changes by file:
+	================
+	
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Saturn now supports detached MIR execution. Reworked all MIR
+	entry points to use auto_ptr. Some minor improvements in MIR and
+	Ray handling.
+
+	* Net/Ray.cxx:
+	* Net/Ray.h:
+	Preparations for new AList implementation, addition of custom
+	buffers and user_rays.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	[AbsorbRay], new method of Message/Error delivery, forced exit
+	from Manage loop and a fix in Image removal.
+	
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	[AbsorbRay] + [FTW2FGS].
+	
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	New files; namespace encapsulating gled specific fltk related
+	functions [FTW2FGS].
+
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	[AbsorbRay].
+	
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	[AbsorbRay] + [FTW2FGS].
+	
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	[AbsorbRay] + handling of MCW widgets.
+	
+	* Eye/MTW_Layout.cxx:
+	[FTW2FGS].
+	
+	* Eye/MTW_SubView.cxx:
+	[FTW2FGS] + fix of width calculation for -join option.
+		
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	[AbsorbRay], image dumping and some clean-up.
+
+	* Eye/MCW_View.cxx:
+	* Eye/MCW_View.h:
+	New files; implementation of MethodCallWidget. Supports context
+	arguments and basic types masked via root typedefs.
+	
+	* Glasses/ScreenDumper.cxx:
+	* Glasses/ScreenDumper.h:
+	New files; assists dumping of a Pupil to a tga file.
+
+	* Glasses/ZRlFont.cxx:
+	* Glasses/ZRlFont.h:
+	* Glasses/ZRlNameRnrCtrl.cxx:
+	* Glasses/ZRlNameRnrCtrl.h:
+	* Rnr/GL/Scene_GL_Rnr.cxx:
+	* Rnr/GL/Scene_GL_Rnr.h:
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.h:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.h:
+	* lib/fontdefault.txf:
+	* lib/fonthelvetica34.txf:
+	New files; preliminary support for multiple GL fonts and
+	management of name-tag rendering.
+
+	* Glasses/AList.cxx:
+	* Glasses/AList.h:
+	* Glasses/ZDeque.cxx:
+	* Glasses/ZDeque.h:
+	New files; preparation for new container implementation.
+	
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	* Glasses/Operator.h:
+	Added Int_t fEventID to Operator::Arg.
+	
+	* Glasses/EyeInfo.cxx:
+	* Glasses/EyeInfo.h:
+	[RD7], new mechanism for TextMessage delivery to Eyes.
+	
+	* Glasses/Lamp.cxx:
+	* Glasses/Lamp.h:
+	[RD7], new defaults for Diffuse (white) and Specular (grey20).
+	
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	[RD7], new members controlling width/height of the window, rendering of
+	name tags methods for emission of Rays triggering image dumps.
+	
+	* Glasses/Text.cxx:
+	* Glasses/Text.h:
+	New members: link to ZRlFont, bCenter; [RD7].
+	
+	* Glasses/ZCometBag.cxx:
+	* Glasses/ZCometBag.h:
+	[RD7], attempt at an interface to specify root file and internal
+	path.
+
+	* Glasses/ZFireQueen.cxx:
+	* Glasses/ZFireQueen.h:
+	Implemented virtual DemangleID(ID_t) without dependency check (as
+	proper to FireQueen) to allow ZComet unstreaming.
+	
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	ZMIR* now in GThread TSD, clearer naming for ZGlass::Rebuild*
+	methods, Ray emission more flexible.
+	
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:
+	Clearer naming for ZGlass::Rebuild* methods, implementation of virtual
+	After/Before methods.
+	
+	* Glasses/ZKing.cxx:
+	* Glasses/ZKing.h:
+	MIR passing via auto_ptr.
+	
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	Clearer naming for ZGlass::Rebuild* methods, Ray emission more flexible.
+	
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	Clearer naming for ZGlass::Rebuild* methods.
+	
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Order-of-magintude implementation, better methods to traverse
+	parental hierarchy; [RD7].
+	
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Improvement of lens deletion, Ray emission control, ZComet
+	adoption; [RD7].
+
+	* Glasses/ZSunQueen.cxx:
+	* Glasses/ZSunQueen.h:
+	MIR passing via auto_ptr, [RD7].
+	
+	* Stones/SEvTaskState.cxx:
+	* Stones/SEvTaskState.h:
+	* Rnr/GL/SEvTaskState_GL_Rnr.cxx:
+	* Rnr/GL/SEvTaskState_GL_Rnr.h:
+	New files; representation of a task composed from several
+	events to be processed.
+	
+	* Gled/MIR_Priest.h:
+	New file; abstract base for ZQueen and ZKing.
+	
+	* Gled/GMutex.cxx:
+	* Gled/GMutex.h:
+	New classes GLensReadHolder and GLensWriteHolder.
+	
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	GThread now stores ZMIR as TSD. ReturnAddress and ReturnHandle not
+	needed anymore.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Systematization of operator+=, added Sleep methods.
+
+	* Ephra/Mountain.cxx:
+	Follow-ups to GTime changes.
+	
+	* Gled/GledMirDefs.h:
+	MIR passing via auto_ptr.
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	MethodInfo catalog extended for detached MIR exec, sanitization of
+	message ids, new utility function split_string().
+	
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	Clean-up original code so that it only uses gl-1.2 functionality,
+	new methods for rendering text in pixel coordinates.
+
+	* GledView/GledGUI.cxx:
+	Errors now delivered to console and to the main gled window.
+	
+	* GledView/GledViewNS.h:
+	[RD7].
+	
+	* GledView/user_init.cxx:
+	Added OM control for ZNode custom view.
+	
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+	Now renders a tethraedron if Lamp::bDrawLamp is true.
+	
+	* Rnr/GL/SphereTrings.cxx:
+	* Rnr/GL/SphereTrings.h:
+	Added index arrays (much faster), clean-up.
+	
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	Centering of text, clean-up.
+	
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Added options bUseNameStack and bSuppressNameLabel.
+	
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	Added OM handling, new name-tag rendering code (using GLTextNS).
+	
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Stuff to steer name-tag rendering, [RD7].
+	
+	* Stones/ZComet.cxx:
+	Clearer naming for ZGlass::Rebuild* methods.
+	
+	* Stones/ZMIR.cxx:
+	* Stones/ZMIR.h:
+	Extension of MirBits to support detached MIR execution.
+	
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Added interface to set/get base vectors from/to TVector3;
+	new functions to perform un-scaling and Gram-Schmidt
+	orthonormalization.
+
+	* catalog.patch:
+	Changes for GMutex holders and forthcoming list implementation.
+	
+	* glass.list:
+	New glasses: ScreenDumper, ZRlNameRnrCtrl, ZRlFont; preliminary
+	entries for AList, ZDeque.
+		
+	* Gled/GSelector.cxx:
+	* Tvor/TubeTvor.h:
+	* perllib/GLED_Widgets.pm:
+	Minor changes / clean-ups.
+	
 2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_Layout.cxx:
