@@ -14,6 +14,7 @@
 
 namespace GledViewNS {
   set<string>	RnrNames;
+  list<MTW_Layout_Spec> mtw_layouts;
   int no_symbol_label;
 } // GledViewNS
 

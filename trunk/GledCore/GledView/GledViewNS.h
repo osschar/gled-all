@@ -154,7 +154,18 @@ namespace GledViewNS {
 
   A_Rnr* SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid);
 
-  //
+  // Predefined MTW_Layout manager
+
+  struct MTW_Layout_Spec {
+    string fName;
+    string fLayout;
+
+    MTW_Layout_Spec(const char* n, const char* l) : fName(n), fLayout(l) {}
+  };
+  
+  extern list<MTW_Layout_Spec> mtw_layouts;
+
+  // GUI magick
 
   extern int no_symbol_label;
 

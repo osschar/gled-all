@@ -85,10 +85,10 @@ namespace {
       GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
       GNS::MethodInfo* mi = ci->FindMethodInfo("Add", false);
       auto_ptr<ZMIR> mir(q->S_InstantiateWAttach(shell->GetShellInfo()->GetNests(), 0,
-			 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
-			 fid.lid, fid.cid,
-			 GForm("Nest %d", shell->GetShellInfo()->GetNests()->Size()+1),
-			 GForm("shell: %s", shell->GetShellInfo()->GetName())));
+						 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
+						 fid.lid, fid.cid,
+						 GForm("Nest %d", shell->GetShellInfo()->GetNests()->Size()+1),
+						 GForm("shell: %s", shell->GetShellInfo()->GetName())));
       nest->fImg->fEye->Send(*mir);
       break;
     }
@@ -98,10 +98,10 @@ namespace {
       GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
       GNS::MethodInfo* mi = ci->FindMethodInfo("Add", false);
       auto_ptr<ZMIR> mir(q->S_InstantiateWAttach(nest->GetNestInfo()->GetPupils(), 0,
-			 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
-			 fid.lid, fid.cid,
-			 GForm("Pupil %d", nest->GetNestInfo()->GetPupils()->Size()+1),
-			 GForm("nest: %s", nest->GetNestInfo()->GetName())));
+						 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
+						 fid.lid, fid.cid,
+						 GForm("Pupil %d", nest->GetNestInfo()->GetPupils()->Size()+1),
+						 GForm("nest: %s", nest->GetNestInfo()->GetName())));
       nest->fImg->fEye->Send(*mir);
       break;
     }
@@ -132,15 +132,13 @@ namespace {
       Fl_Menu_Button mb(Fl::event_x_root(), Fl::event_y_root(), 0,0,0);
       mb.textsize(nest->get_swm_manager()->cell_fontsize());
 
-      mb.add("ZGlass", 0, 0, (void*)
-	     "ZGlass(Name[20],Title[20],RefCount[6])");
-      mb.add("ZNode", 0, 0, (void*)
-	     "ZNode(Pos,Rot)");
-      mb.add("Eventor", 0, 0, (void*)
-	     "Eventor(Running[4],Performing[4],Start[4],Stop[4])");
-      mb.add("Saturn monitor", 0, 0, (void*)
-	      "SaturnInfo(LAvg1,LAvg5,LAvg15,Memory,MFree,Swap,SFree,CU_Total[6],CU_User[6])");
+      namespace GVNS = GledViewNS;
 
+      for(list<GVNS::MTW_Layout_Spec>::iterator i = GVNS::mtw_layouts.begin();
+	  i!= GVNS::mtw_layouts.end(); ++i)
+	{
+	  mb.add(i->fName.c_str(), 0, 0, (void*) i->fLayout.c_str());
+	}
       const Fl_Menu_Item* cv = mb.popup();
       if(cv) {
 	nest->EnactLayout((char*)(cv->user_data()));
@@ -564,7 +562,7 @@ void FTW_Nest::EnactLayout(const char* layout)
 {
   if(layout) { pLayout->GetLaySpecs()->value(layout); pLayout->GetLaySpecs()->redraw(); }
   try {
-    pLayout->Parse();
+    pLayout->Parse(swm_manager->cell_w());
   }
   catch(string exc) {
     cout <<"FTW_Contents_Nest::EnactLayout parse failed: " << exc <<endl;
