@@ -1,7 +1,7 @@
 // $Header$
 
-#ifndef Geom1_GLTextNS_H
-#define Geom1_GLTextNS_H
+#ifndef GledCore_GLTextNS_H
+#define GledCore_GLTextNS_H
 
 // The following implementation is based on TexFont API,
 // implementation and accompanying programs by Mark J. Kilgard.
@@ -16,6 +16,7 @@
 #include <GL/gl.h>
 
 class RnrDriver;
+class ZColor;
 
 namespace GLTextNS {
 
@@ -119,6 +120,10 @@ namespace GLTextNS {
 			 BoxSpecs& bs, float zoffset=0);
 
   extern void RnrTextPoly(RnrDriver* rd, const string& text);
+
+  extern void RnrTextAt(RnrDriver* rd, const string& text,
+			int x, int yrow, float z,
+			const ZColor* front_col, const ZColor* back_col=0);
 }
 
 #endif
