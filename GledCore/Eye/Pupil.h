@@ -12,7 +12,7 @@
 #include <Glasses/Camera.h>
 
 #include <Eye/OptoStructs.h>
-
+#include "FTW_Shell.h"
 class PupilInfo;
 class MTW_View;
 
@@ -21,9 +21,10 @@ class MTW_View;
 #include <FL/gl.h>
 #include <FL/Fl_Gl_Window.H>
 
-// !!!! Need locator support
 
-class Pupil : public Fl_Gl_Window, public OptoStructs::A_View
+class Pupil : public OptoStructs::A_View,
+	      public FTW_Shell_Client,
+	      public Fl_Gl_Window
 {
 
 protected:
@@ -57,7 +58,8 @@ protected:
   void		dump_image();
 
 public:
-  Pupil(OptoStructs::ZGlassImg* infoimg, OptoStructs::ZGlassView* zgv, int w=0, int h=0);
+  Pupil(OptoStructs::ZGlassImg* infoimg, OptoStructs::ZGlassView* zgv,
+	FTW_Shell* shell, int w=0, int h=0);
   virtual ~Pupil();
 
   virtual void AbsorbRay(Ray& ray);

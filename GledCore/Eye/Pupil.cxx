@@ -6,7 +6,6 @@
 
 #include "Pupil.h"
 #include "Eye.h"
-#include "FTW_Shell.h"
 #include "MTW_View.h"
 
 #include <Glasses/Camera.h>
@@ -114,8 +113,10 @@ void Pupil::dump_image()
 
 /**************************************************************************/
 
-Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, int w, int h) :
-  Fl_Gl_Window(w,h), OS::A_View(infoimg),
+Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv,
+	     FTW_Shell* shell, int w, int h) :
+  OS::A_View(infoimg), FTW_Shell_Client(shell),
+  Fl_Gl_Window(w,h),
   mInfo(0), mRoot(zgv),
   mCameraView(0), mCameraViewWin(0),
   mCamBase(0)
@@ -460,8 +461,7 @@ namespace {
   
   void copy_to_clipboard_cb(Fl_Widget* w, pick_menu_data* ud)
   {
-    FTW_Shell* shell = ud->pupil->GetRoot()->fImg->fEye->GetShell();
-    shell->X_SetSource(ud->img->fGlass->GetSaturnID());
+    ud->pupil->GetShell()->X_SetSource(ud->img->fGlass->GetSaturnID());
     const char* idstr = GForm("%u", ud->img->fGlass->GetSaturnID());
     Fl::copy(idstr, strlen(idstr), 0);
   }
@@ -511,10 +511,8 @@ void Pupil::Pick()
   GLint n = glRenderMode(GL_RENDER);
 
   if (n > 0) {
-    FTW_Shell* shell = mRoot->fImg->fEye->GetShell();
-
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
-    menu.textsize(shell->cell_fontsize());
+    menu.textsize(mShell->cell_fontsize());
 
     FTW_Shell::mir_call_data_list mcdl;
     list<glass_data> gdl;
@@ -584,13 +582,13 @@ void Pupil::Pick()
       }
       ++loc;
 
-      shell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
+      mShell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
 
       // iterate through the list of parents
       menu.add(GForm("%sParents", gdi->name.c_str()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
       for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
 	string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
-	shell->FillImageMenu(*pi, menu, mcdl, entry);
+	mShell->FillImageMenu(*pi, menu, mcdl, entry);
 	fill_pick_menu(this, *pi, menu, mcdl, entry);
       }
 
@@ -872,12 +870,12 @@ int Pupil::handle(int ev)
       return 1;
 
     case FL_F+1:
-      mRoot->fImg->fEye->GetShell()->SpawnMTW_View(mRoot->fImg);
+      mShell->SpawnMTW_View(mRoot->fImg);
       return 1;
 
     case FL_F+2:
       if(mCameraViewWin == 0) {
-	Fl_SWM_Manager* swm = mRoot->fImg->fEye->GetShell();
+	Fl_SWM_Manager* swm = mShell;
 	mCameraViewWin = MTW_View::ConstructVerticalWindow(mCamera, swm);
 	swm->adopt_window(mCameraViewWin);
 	mCameraView = (MTW_View*) mCameraViewWin->child(0);

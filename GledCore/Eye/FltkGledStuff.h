@@ -12,6 +12,8 @@
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_Window.H>
 
+class FTW_Shell;
+
 // Use this one in a public part of a Fl_Widget descendant
 
 #define FGS_LABEL_HOLDING_WEED \
@@ -41,6 +43,9 @@ namespace FltkGledStuff {
     }
     return ret;
   }
+
+  FTW_Shell* grep_shell(Fl_Widget *w);
+  FTW_Shell* grep_shell_or_die(Fl_Widget *w, const string& _eh);
 
   /**************************************************************************/
 

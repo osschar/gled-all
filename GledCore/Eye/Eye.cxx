@@ -257,8 +257,8 @@ Int_t Eye::Manage(int fd)
       // Read-lock alpha
       GLensReadHolder(a->fGlass);
       
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->AbsorbRay(ray);
+      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ) {
+	OS::A_View* v = *i; ++i; v->AbsorbRay(ray);
       }
 
       if(ray.IsBasicChange() || ray.fRQN==RayNS::RQN_death) {
