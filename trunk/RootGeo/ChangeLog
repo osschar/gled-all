@@ -1,0 +1,9 @@
+2005-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	* Glasses/ZGeoOvlMgr.cxx:
+	* Glasses/ZGeoOvlMgr.h:
+	Use ZList::RemoveLensesViaQueen() to recursively remove sub-nodes
+	before importing or loading. All these methods now execute in a
+	detached thread.
