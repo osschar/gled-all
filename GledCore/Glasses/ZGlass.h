@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -17,7 +17,7 @@
 
 #define GlassIODef(_gls_) \
 inline TBuffer &operator>>(TBuffer& b, _gls_*& g) { \
-  ID_t id; b >> id; g = (_gls_*)(UInt_t(id)); \
+  ID_t id; b >> id; g = (_gls_*)(id); \
   ISdebug(D_STREAM, GForm("Read _gls_ with id of %u", id)); return b; } \
 inline TBuffer &operator<<(TBuffer& b, const _gls_ *g) { \
   if(g) { b << g->GetSaturnID(); ISdebug(D_STREAM, GForm("Writing id of %s, id=%u", g->GetName(), g->GetSaturnID())); } \
@@ -33,6 +33,7 @@ inline TBuffer &operator<<(TBuffer& b, const _gls_ *g) { \
 
 namespace ZGlassBits {
   extern UShort_t kFixedName;
+  extern UShort_t kDying;
 }
 
 /**************************************************************************/
@@ -51,6 +52,7 @@ class ZGlass : public TObject {
   MAC_RNR_FRIENDS(ZGlass);
   friend class Saturn;
   friend class ZQueen;
+  friend class ZComet;
 
 private:
   void		_init();
@@ -62,23 +64,58 @@ protected:
 
   UShort_t	mGlassBits;	//
   TString	mName;		//  X{GE} 7 Textor()
-  TString	mTitle;		//  X{GS} 7 Textor()
+  TString	mTitle;		//  X{GE} 7 Textor()
   ID_t		mSaturnID;	//  X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],
                                 //                 -width=>10)
   ZMirFilter*	mGuard;		//  X{E} L{}
 
   Bool_t	bMIRActive;	//  X{GS} 7 BoolOut(-join=>1)
-  Short_t	mRefCount;	//! X{G}  7 ValOut(-width=>4)
-  Short_t	mMoonRefCount;	//!
-  Short_t	mSunRefCount;	//!
-  Short_t	mFireRefCount;	//!
+  Bool_t	bAcceptRefs;	//  X{GS} 7 BoolOut()
 
-  // Locks, TimeStaps and CallBacks
-  mutable GMutex	 mExecMutex;	   //! X{r} Used by Saturn::executor, Eye, rnrs
-  mutable GMutex	 mRefCountMutex;   //! X{r} Used only for linking to/from obj
+  lpZGlass_t	mReverseRefs;	//! lenses that reference *this*
+  UShort_t	mRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
+  UShort_t	mMoonRefCount;	//! X{G}  7 ValOut(-width=>4)
+  UShort_t	mSunRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
+  UShort_t	mFireRefCount;	//! X{G}  7 ValOut(-width=>4)
 
+  void set_link_or_die(ZGlass*& link, ZGlass* new_val, LID_t lid, CID_t cid);
+
+  virtual void reference_all();
+  virtual void unreference_all();
+
+  virtual void remove_references_to(ZGlass* lens);
+
+  // Mutexen
+  mutable GMutex mReadMutex;    //!
+ public:
+  void ReadLock()   const { mReadMutex.Lock(); }
+  void ReadUnlock() const { mReadMutex.Unlock(); }
+  void WriteLock();
+  void WriteUnlock();
+
+ protected:
+
+  // Handlers of lens-state change notfications ... called from Saturn/Queen
+  virtual void AdEnlightenment() {}	// called by Saturn on Enlight
+  virtual void AdEndarkenment() {}	// called by Saturn on Endark
+  virtual void AdUnfoldment() {}	// called by Queen after comet unpacking
+
+  // MIR stuff
+  enum MirComponents_e { MC_Any=0,
+			 MC_IsFlare=1, MC_IsBeam=2,
+			 MC_HasResultReq=4 };
+
+  void assert_MIR_presence(const string& header, int what=0);
+
+  // TimeStaps
   TimeStamp_t	 mTimeStamp;	   //! X{GS} TimeStamp of last change
   TimeStamp_t	 mStampReqTring;   //! X{GS} TimeStamp of last change that requires retriangulation
+
+  // Plain callbacks
+  zglass_stamp_f mStamp_CB;	   //! called if non-null
+  void*		 mStamp_CBarg;     //!  and the user data
+  zglass_stamp_f mStampLink_CB;	   //! called if non-null
+  void*		 mStampLink_CBarg; //!  and the user data
 
   // Name change callback
 public:
@@ -92,35 +129,23 @@ public:
 
   void register_name_change_cb(YNameChangeCB* rec);
   void unregister_name_change_cb(YNameChangeCB* rec);
-protected:
 #endif
 
-  // Plain callbacks
-  zglass_stamp_f mStamp_CB;	   //! called if non-null
-  void*		 mStamp_CBarg;     //!  and the user data
-  zglass_stamp_f mStampLink_CB;	   //! called if non-null
-  void*		 mStampLink_CBarg; //!  and the user data
-
-  // En(light|dark)enment ... called from Saturn upon light switch
-  virtual void AdEnlightenment() {}	// called by Saturn on Enlight
-  virtual void AdEndarkenment() {}	// called by Saturn on Endark
-
-  virtual void AdUnfoldment() {}	// called by Queen after comet unpacking
-
-  enum MirComponents_e { MC_IsBeam=1, MC_HasResultReq };
-  void AssertMIRPresence(const string& header, int what=0);
-
 public:
+
   ZGlass(const Text_t* n="ZGlass", const Text_t* t=0) :
-    mName(n), mTitle(t),
-    mExecMutex(GMutex::recursive),
-    mRefCountMutex(GMutex::recursive)
+    mName(n), mTitle(t), mReadMutex(GMutex::recursive)
   { _init(); }
 
   virtual ~ZGlass();
 
+  void UpdateGlassView();       //! X{E} 7 MButt(-join=>1)
+  void UpdateAllViews();        //! X{E} 7 MButt()
+
+  string Identify() const;
+
   void SetName(const Text_t* n);
-  void SetNameTitle(const Text_t* n, const Text_t* t); // X{E}
+  void SetTitle(const Text_t* t);
   ZMirFilter* GetGuard() const;
   void SetGuard(ZMirFilter* guard);
 
@@ -129,8 +154,13 @@ public:
   bool IsSunOrFireSpace();
 
   // RefCount
-  Short_t IncRefCount(const ZGlass* from);
-  Short_t DecRefCount(const ZGlass* from);
+  Short_t IncRefCount(ZGlass* from);
+  Short_t DecRefCount(ZGlass* from);
+  // here also need ReRef(from, old_queen, new_queen) or sth.
+
+  // Link handling
+  void         ClearLinks();
+  virtual void ClearAllReferences();
 
   // Queries
   virtual ZGlass* GetLinkByName(const Text_t* link_name);
@@ -154,14 +184,35 @@ public:
   void SetStamp_CB(zglass_stamp_f foo, void* arg);
   void SetStampLink_CB(zglass_stamp_f foo, void* arg);
 
-  void Test_p7_linkspecs();
+  virtual Int_t RebuildAll(An_ID_Demangler* idd);
 
 #include "ZGlass.h7"
   ClassDef(ZGlass, 1)
- }; // endclass ZGlass
+}; // endclass ZGlass
 
 GlassIODef(ZGlass);
 
 #include <Glasses/ZMirFilter.h>
+
+/**************************************************************************/
+// Hairy Inlines
+/**************************************************************************/
+
+inline
+void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val,
+			     LID_t lid, CID_t cid)
+{
+  if(link == new_val) return;
+  if(link) link->DecRefCount(this);
+  if(new_val) {
+    try { new_val->IncRefCount(this); }
+    catch(...) {
+      if(link) { link = 0; StampLink(lid, cid); }
+      throw;
+    }
+  }
+  link = new_val;
+  StampLink(lid, cid);
+}
 
 #endif
