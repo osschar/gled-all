@@ -89,7 +89,7 @@ ${VIEW_LIB_NAME}: ${VIEW_LIB_OBJS}
 ##########################################################################
 
 ALL_SRCS = ${BLESSED_SRCS} ${BASE_SRCS} ${DICT_AUTO_SRCS}
-ALL_HDRS = ${BASE_HDRS} ${VIEW_HDRS} ${RNR_HDRS}
+ALL_HDRS = ${BASE_HDRS}
 ALL_OBJS = ${BASE_LIB_OBJS}
 ALL_LIBS = base_lib
 
