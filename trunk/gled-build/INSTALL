@@ -2,6 +2,7 @@ INSTALL - Gled Build
 ====================
 
 This is just a short overview. See http://www.gled.org/ for details.
+In particular http://www.gled.org/docs/html/gledimp.html.
 
 Tested platforms
 ----------------
@@ -50,10 +51,7 @@ store it somewhere. Still, you should source (or .) it.
 
 Then, in principle, do:
 
-1) edit build_libsets; it must contain names of all libsets to be built.
-   Gled base distribution contains GledCore, Geom1 and Numerica libsets.
-
-2) check/edit defaults in configure.rc, or use command-line options.
+1) check/edit defaults in configure.rc, or use command-line options.
    Options can be given as --<opt1>=<val1> or -<opt1> <val1>, option
    names can be abbreviated.
    The most relevant options are:
@@ -62,7 +60,10 @@ Then, in principle, do:
       -uld  <str>    user ld-flags
       -debug         implies -DDEBUG and -g (otherwise -O)
       -external      ':' separated list of directories to include/link from;
-	             each <dir> implies -I<dir>/include and -L<dir>/lib
+                     each <dir> implies -I<dir>/include and -L<dir>/lib
+      -libsets       ':' separated dir list or
+                     <auto>, <auto-prompt> selects all capitalized dirs or
+                     <file:[filename]> a file with one libset per line
 
    Run: ./configure <whatever options you need>
 
@@ -83,10 +84,8 @@ Then, in principle, do:
       --reconf is enough if you just want to add/remove some libsets
       to/from build.
 
-3) Run: ./mecca
+3) Run: make
 
-   mecca is a sub-make executor. Use "mecca -t <target>" to invoke
-   non-default target (say clean, distclean, etc).
    The default target builds all libraries and executables and
    installs them into $GLEDSYS/lib and bin directories.
 
