@@ -146,7 +146,7 @@ void MTW_Layout::Parse() throw (string)
 	throw string("member '"+mmb_name+"' not found for class '"+cls_name+"'");
       }
       int w = atoi(width_arg.c_str());
-      if(w == 0) w = mi->fWidth >? (mi->fName.size());
+      if(w == 0) w = mi->fWidth >? (int)(mi->fName.size());
       cls.fMembers.push_back(Member(mi, w));
       cls.fFullW += w;
     }
@@ -173,14 +173,14 @@ Fl_Group* MTW_Layout::CreateLabelGroup()
   for(lClass_i c=mClasses.begin(); c!=mClasses.end(); ++c) {
     Fl_Box* b = new Fl_Box(x, 0, c->fFullW, 1, c->fClassInfo->fClassName.c_str());
     b->box(FL_EMBOSSED_BOX);
-    if(c->fClassInfo->fClassName.size() >= c->fFullW)
+    if((int)(c->fClassInfo->fClassName.size()) >= c->fFullW)
       b->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
     else
       b->align(FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
     for(lMember_i m=c->fMembers.begin(); m!=c->fMembers.end(); ++m) {
       Fl_Box* b = new Fl_Box(x, 1, m->fW, 1, m->fMemberInfo->fName.c_str());
       b->box(FL_EMBOSSED_BOX);
-      if(m->fMemberInfo->fName.size() >= m->fW)
+      if((int)(m->fMemberInfo->fName.size()) >= m->fW)
 	b->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
       else
 	b->align(FL_ALIGN_INSIDE|FL_ALIGN_CLIP);

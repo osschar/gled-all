@@ -150,13 +150,22 @@ void MTW_View::UpdateViews(LID_t lid, CID_t cid)
 /**************************************************************************/
 /**************************************************************************/
 
+namespace {
+
+  class MTW_View_Window : public Fl_Window, public Fl_SWM_Client {
+  public:
+    MTW_View_Window(int x, int y, const char* t=0) : Fl_Window(x,y,t) {}
+  };
+
+}
+
 Fl_Window* MTW_View::ConstructVerticalWindow(OS::ZGlassImg* img)
 {
   // Akhem ... should be some fl_window subclass, knowing of
   // mtw_view so that it can be wiped.
   // Also some controls &| collapsors would be usefull.
 
-  Fl_Window* w = new Fl_Window(0,0,GForm("%s[%s]", img->fGlass->GetName(),
+  Fl_Window* w = new MTW_View_Window(0,0,GForm("%s[%s]", img->fGlass->GetName(),
 					img->fClassInfo->fClassName.c_str()));
   MTW_View* v = new MTW_View(img);
   v->BuildVerticalView();
@@ -167,7 +176,7 @@ Fl_Window* MTW_View::ConstructVerticalWindow(OS::ZGlassImg* img)
 
 Fl_Window* MTW_View::ConstructVerticalWindow(ZGlass* glass)
 {
-  Fl_Window* w = new Fl_Window(0,0,glass->GetName());
+  Fl_Window* w = new MTW_View_Window(0,0,glass->GetName());
   MTW_View* v = new MTW_View(glass);
   v->BuildVerticalView();
   w->end();

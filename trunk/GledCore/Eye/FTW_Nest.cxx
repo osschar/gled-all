@@ -20,6 +20,7 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Input.H>
+#include <FL/Fl_Output.H>
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_ask.H>
 
@@ -112,21 +113,22 @@ namespace {
 
     switch(int(what)) {
 
-    case 1: {
+    case 1: { // Toggle Link / Custom view
       if(nest->GetLinksShown()) nest->CustomView();
       else	      		nest->LinksView();
       break;
     }
 
-    case 2: {
+    case 2: { // Open Edit Layout Window
       Fl_Window* w = nest->GetLayout();
       w->hotspot(w);
       w->show();
       break;
     }
 
-    case 3: {
+    case 3: { // Offer some predefined custom layouts; should be pluggable from outside, history !!
       Fl_Menu_Button mb(Fl::event_x_root(), Fl::event_y_root(), 0,0,0);
+      mb.textsize(nest->get_swm_manager()->cell_fontsize());
 
       mb.add("ZGlass", 0, 0, (void*)
 	     "ZGlass(Name[20],Title[20],RefCount[6])");
@@ -142,6 +144,12 @@ namespace {
 	nest->EnactLayout((char*)(cv->user_data()));
 	if(nest->GetLinksShown()) nest->CustomView();
       }
+      break;
+    }
+
+    case 4: { // Reverse order of ants for all leafs
+      nest->ReverseAnts();
+      break;
     }
 
     } // end switch
@@ -170,9 +178,10 @@ Fl_Menu_Item FTW_Nest::s_New_Menu[] = {
 };
 
 Fl_Menu_Item FTW_Nest::s_View_Menu[] = {
-  { "Link / Custom", FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
-  { "Edit Custom",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
-  { "Predef Custom", FL_CTRL + 'c', (Fl_Callback*) view_menu_cb, (void*)3 },
+  { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
+  { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
+  { "Predef Custom ...", FL_CTRL + 'c', (Fl_Callback*) view_menu_cb, (void*)3, FL_MENU_DIVIDER },
+  { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE }, 
   {0}
 };
 
@@ -180,10 +189,10 @@ Fl_Menu_Item FTW_Nest::s_Set_Menu[] = {
   { "Point as Source",	FL_F + 1,            (Fl_Callback*) set_menu_cb, (void*)1 },
   { "Point as Sink",	FL_F + 2,            (Fl_Callback*) set_menu_cb, (void*)2 },
   { "Mark as Source",	FL_SHIFT + FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)3 },
-  { "Mark as Sink",	FL_SHIFT + FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)4,
-      FL_MENU_DIVIDER },
+  { "Mark as Sink",	FL_SHIFT + FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)4, FL_MENU_DIVIDER },
   { "Exchange Point and Mark",	'x',            (Fl_Callback*) set_menu_cb, (void*)16 },
-  { "Exchange Source and Sink",	FL_SHIFT + 'x', (Fl_Callback*) set_menu_cb, (void*)17 }
+  { "Exchange Source and Sink",	FL_SHIFT + 'x', (Fl_Callback*) set_menu_cb, (void*)17 },
+  {0}
 };
 
 Fl_Menu_Item FTW_Nest::s_Action_Menu[] = {
@@ -225,7 +234,7 @@ void FTW_Nest::_build(int w, int h)
     Fl_Group::current(this);
   }
 
-  wMainPack = new Fl_Pack(0, 0, w, h);
+  wMainPack = new Fl_Pack(0, 0, w, h-1); // 1 is for InfoBar
   wMainPack->type(FL_VERTICAL);
 
   // Menu group
@@ -269,6 +278,7 @@ void FTW_Nest::_build(int w, int h)
   wCustomLabels = 0;
   bLinksShown = true;
   bCustomWeedsCreated = false;
+  bAntsReversed = false;
   {
     wMidPack = new Fl_Pack(0,2,1,2); wMidPack->type(FL_HORIZONTAL);
 
@@ -328,6 +338,7 @@ void FTW_Nest::_build(int w, int h)
   }
 
   wMainPack->end();
+  wInfoBar = new Fl_Output(0,h-1,w,1);
   end();
 
   wMainPack->resizable(mScroll);
@@ -682,6 +693,22 @@ void FTW_Nest::UnregisterLocatorConsumer(FTW::LocatorConsumer* lcon)
 }
 
 /**************************************************************************/
+
+void FTW_Nest::SetInfoBar(const char* info)
+{
+  wInfoBar->value(info);
+}
+
+void FTW_Nest::ReverseAnts()
+{
+  for(int c=0; c<mPack->children(); ++c) {
+    FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
+    l->reverse_ants();
+  }
+  bAntsReversed = !bAntsReversed;
+}
+
+/**************************************************************************/
 // Name / Collapsor coloration
 /**************************************************************************/
 
@@ -709,7 +736,7 @@ int FTW_Nest::handle(int ev)
     iconize();
     return 1;
   }
-  if(ev == FL_ENTER) { Fl::focus(this); }
+  if(ev == FL_ENTER || ev == FL_PUSH) { Fl::focus(this); }
   if(ev == FL_FOCUS) return 1;
 
   int ret = 0;

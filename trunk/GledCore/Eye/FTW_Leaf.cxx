@@ -104,6 +104,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   wCustomView = 0;
 
   end();
+  if(mNest->GetAntsReversed()) reverse_ants();
   resize_weeds();
   label_namebox();
   label_weeds();
@@ -165,8 +166,10 @@ void FTW_Leaf::ExpandLink(FTW_Ant* ant) {
     ant->mLeaf->wIndentBox->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT);
     ant->mLeaf->wIndentBox->labelsize(ant->mLeaf->wIndentBox->labelsize() - 4);
     FTW_Leaf* after = 0;
-    for(int c=0; c<wAntPack->children(); ++c) {
-      FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
+    bool reverse = mNest->GetAntsReversed();
+    int  n_children = wAntPack->children();
+    for(int c=0; c<n_children; ++c) {
+      FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(reverse ? n_children-c-1 : c) );
       if(a == ant) break;
       if(a->bExpanded) after = a->mLeaf;
     }
@@ -189,8 +192,10 @@ void FTW_Leaf::CollapseLink(FTW_Ant* ant) {
 }
 
 void FTW_Leaf::ExpandLinks() {
-  for(int c=0; c<wAntPack->children(); ++c) {
-    FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
+  bool reverse = mNest->GetAntsReversed();
+  int  n_children = wAntPack->children();
+  for(int c=0; c<n_children; ++c) {
+    FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(reverse ? n_children-c-1  : c) );
     if(a->fToImg && ! a->bExpanded) ExpandLink(a);
   }
   label_weeds();
@@ -362,5 +367,18 @@ void FTW_Leaf::wipe_custom_view() {
   }
 }
 
+/**************************************************************************/
 
-
+void FTW_Leaf::reverse_ants() {
+  if(wAntPack->children() > 1) {
+    FTW_Ant** a = (FTW_Ant**) wAntPack->array();
+    FTW_Ant** b = a + (wAntPack->children() - 1);
+    FTW_Ant* c;
+    while(b > a) {
+      c = *a; *a = *b; *b = c;
+      ++a; --b;
+    }
+    wAntPack->init_sizes();
+    wAntPack->redraw();
+  }
+}

@@ -51,6 +51,8 @@ protected:
   void hide_custom_view();
   void wipe_custom_view();
 
+  void reverse_ants();
+
 public:
   static FTW_Leaf* Construct(FTW_Nest* nest, FTW_Leaf* parent,
 			     OptoStructs::ZGlassImg* img,

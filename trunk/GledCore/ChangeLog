@@ -1,14 +1,37 @@
+2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/MTW_Layout.cxx:
+	* Eye/MTW_View.cxx:
+
+	Added InfoBar to FTW_Nest (it displays some information about
+	Leaf/Ant below mouse).
+	
+	Some minor additions (option to reverse order of ants,
+	separator between glass groups in Creator class menu).
+
+	Fixed some Fl_SWM related problems (ColorChooser, size of
+	predefined custom views menu).
+
 2003-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.h:
 	* Glasses/ZList.cxx:
-	* Glasses/ZList.h: Virtualized Stamping methods.
+	* Glasses/ZList.h:
+
+	Virtualized Stamping methods.
 
 	* Gled/GMutex.h:
-	* Tvor/TubeTvor.h: Minor changes.
+	* Tvor/TubeTvor.h:
+
+	Minor changes.
 
 2003-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
-	* Saturn.cxx (Repository): Fixed initialization order of variables in
+	* Saturn.cxx: Fixed initialization order of variables in
 	arrival_of_kings().
 
