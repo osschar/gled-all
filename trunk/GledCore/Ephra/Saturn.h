@@ -128,7 +128,6 @@ public:
   virtual ~Saturn();
 
   void	      Create(SaturnInfo* si);
-  ID_t	      QueryFFID(SaturnInfo* si);
   SaturnInfo* Connect(SaturnInfo* si);
   void	      AllowMoons();
   void	      Shutdown();
@@ -142,7 +141,7 @@ public:
   SaturnInfo* FindRouteTo(SaturnInfo* target);
 
   void	AcceptWrapper();
-  void	Accept() throw(string);
+  void	Accept(TSocket* newsocket) throw(string);
   Int_t	Manage(TSocket* sock) throw(string);
 
   void	PostMIR(ZMIR& mir);
@@ -160,6 +159,8 @@ public:
 
   // Saturn services
   ZHistoManager* GetZHistoManager();
+
+  static const Int_t s_Gled_Protocol_Version;
 
 #include "Saturn.h7"
   ClassDef(Saturn, 0)

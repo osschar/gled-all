@@ -43,20 +43,28 @@ namespace {
 Eye::Eye(UInt_t port, ID_t shell_id, const char* name, const char* title,
 	 const Fl_SWM_Manager* swm_copy) : mMsg(0)
 {
+  static string _eh("Eye::Connect ");
+
   mSatSocket = new TSocket("localhost", port);
-  {
-    int ml; char buf[128];
-    ml = mSatSocket->Recv(buf, 128);
-    if(ml == -1) {
-      ISerr("Eye::Connect Greeting failed; len=-1");
-      goto fail;
-    }
-    ISmess(GForm("Eye::Connect %s", buf));
-    mSatSocket->Send("Eye");  
+  if(!mSatSocket->IsValid()) {
+    delete mSatSocket;
+    throw(_eh + GForm("opening socket to %localhost:%d failed.", port));
   }
-  {
+
+  { // Receive greeting
+    int ml; char buf[256];
+    ml = mSatSocket->RecvRaw(buf, 255, kDontBlock);
+    if(ml <= 0) {
+      delete mSatSocket;
+      throw(_eh + GForm("handshake failed; len=%d", ml));
+    }
+    buf[ml] = 0;
+    ISmess(_eh + buf);
+  }
+  // No protocol exchange ... 
+  { // Send the desired EyeInfo
+    TMessage m(GledNS::MT_EyeConnect);
     EyeInfo ei(name, title);
-    TMessage m;
     GledNS::StreamGlass(m, &ei);
     mSatSocket->Send(m);
   }
@@ -129,20 +137,31 @@ Int_t Eye::Manage(int fd)
   TMessage *m;
   int count=0, len;
   while((len = mSatSocket->Recv(m)) != -4) { // -4 means "would block"
+
     if(len == -1) {
       ISerr("Eye::Manage: Recv error");
-      delete m; return 1;
+      delete m; return -1;
     }
+
     if(len == 0) {
       ISerr("Eye::Manage Saturn closed connection ... unregistring");
       Fl::remove_fd(mSatSocket->GetDescriptor());
-      delete m; return 2;
+      delete m; return -2;
     }
-    // if(m->What() == kMESS_STRING) for server commands missing
+
+    if(m->What() == kMESS_STRING) {
+      TString str;
+      *m >> str;
+      ISmess(GForm("Eye::Manage got message string: %s", str.Data()));
+      delete m;
+      continue;
+    }
+
     if(!m || m->What() != GledNS::MT_Ray) {
-      ISerr(GForm("Eye::Manage: Recv failed or non MT_Ray' len=%d"
-		  "\t dis-synchronization possible", len));
-      delete m; return 3;
+      ISerr(GForm("Eye::Manage: Recv failed or non MT_Ray' len=%d,what=%d. "
+		  "Dis-synchronization possible.", len, m->What()));
+      delete m;
+      return -3;
     }
 
     mRay.Streamer(*m);
@@ -269,7 +288,7 @@ Int_t Eye::Manage(int fd)
     (*w)->redraw();
 
   ISdebug(9, GForm("Eye::Manage got %d Ray(s) in this gulp", count));
-  return 1;
+  return count;
 }
 
 void Eye::Send(TMessage* m) { mSatSocket->Send(*m); }
