@@ -134,7 +134,7 @@ namespace FTW {
 
     virtual void AbsorbRay(Ray& ray);
 
-    void ChangeImage(OptoStructs::ZGlassImg* new_img, bool keep_label=false);
+    void ChangeImage(OptoStructs::ZGlassImg* new_img);
   };
 
   /**************************************************************************/
@@ -211,13 +211,10 @@ namespace FTW {
 			   public Fl_Group
   {
   public:
-    enum LS_Type_e { LST_Undef=0, LST_Point, LST_Mark, LST_Own };
+    enum LS_Type_e { LST_Undef=0, LST_Point, LST_Mark };
 
   protected:
     LS_Type_e	m_type;
-    FTW_Nest*	m_pref_nest;
-    //Locator	m_locator;
-    //Locator*	m_base; from LocatorConsumer
     bool	b_colored;
 
     Fl_Button*	wTop;
@@ -251,7 +248,7 @@ namespace FTW {
 
   class Direct_Selector : public Bot_Selector, public Fl_Group {
   protected:
-    Fl_Button*		wTop;
+    Fl_Button*                  wTop;
     FltkGledStuff::LensNameBox*	wNameBox;
 
   public:
@@ -260,8 +257,8 @@ namespace FTW {
     virtual void activate  ();
     virtual void deactivate();
 
-    ID_t get_id();
-    void set_id(ID_t id);
+    OptoStructs::ZGlassImg* get_img();
+    void set_img(OptoStructs::ZGlassImg* img);
   };
 
   /**************************************************************************/
@@ -312,7 +309,10 @@ namespace FTW {
     friend class FTW_Shell;
   protected:
     Locator_Selector*	wLoc_Sel;
+    Direct_Selector*	wDir_Sel;
     Null_Selector*	wNull_Sel;
+
+    Bot_Selector*	wCurrent;
 
     // ListOpsSelector*	wListOpsSel;
 
@@ -337,50 +337,6 @@ namespace FTW {
     
     };
   */
-
-  /**************************************************************************/
-  /**************************************************************************/
-  // Active Views
-  /**************************************************************************/
-  /**************************************************************************/
-
-  class PupilAm : public OptoStructs::A_View
-  {
-  public:
-    typedef map<OptoStructs::ZGlassImg*, Pupil*>	   mpImg2pPupil_t;
-    typedef map<OptoStructs::ZGlassImg*, Pupil*>::iterator mpImg2pPupil_i;
-
-  protected:
-    FTW_Nest*		mNest;
-    mpImg2pPupil_t	mImg2PupilMap;
-
-    void spawn_pupil(OptoStructs::ZGlassImg* img);
-
-  public:
-    PupilAm(FTW_Nest* n, OptoStructs::ZGlassImg* img);
-    virtual ~PupilAm();
-
-    virtual void AbsorbRay(Ray& ray);
-  };
-
-  class NestAm : public OptoStructs::A_View
-  {
-  public:
-    typedef map<OptoStructs::ZGlassImg*, FTW_Nest*>	      mpImg2pNest_t;
-    typedef map<OptoStructs::ZGlassImg*, FTW_Nest*>::iterator mpImg2pNest_i;
-
-  protected:
-    FTW_Shell*		mShell;
-    mpImg2pNest_t	mImg2NestMap;
-
-    void spawn_nest(OptoStructs::ZGlassImg* img);
-
-  public:
-    NestAm(FTW_Shell* s, OptoStructs::ZGlassImg* img);
-    virtual ~NestAm();
-
-    virtual void AbsorbRay(Ray& ray);
-  };
 
 } // namespace FTW
 

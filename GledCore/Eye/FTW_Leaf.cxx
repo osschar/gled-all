@@ -8,6 +8,7 @@
 #include "FTW_Ant.h"
 #include "FTW_Branch.h"
 #include "FTW_Nest.h"
+#include "FTW_Shell.h"
 #include "FltkGledStuff.h"
 #include <Glasses/ZGlass.h>
 #include <Net/Ray.h>
@@ -103,7 +104,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
 
   wAntPack = new Fl_Pack(0,0,1,1); wAntPack->type(FL_HORIZONTAL);
   for(OS::lZLinkDatum_i l=fImg->fLinkData.begin(); l!=fImg->fLinkData.end(); ++l) {
-    FTW_Ant* a = new FTW_Ant(&(*l), this);
+    new FTW_Ant(&(*l), this);
   }
   wAntPack->end();
 

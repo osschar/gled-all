@@ -165,6 +165,7 @@ namespace GledViewNS {
   // GUI magick
 
   extern int no_symbol_label;
+  extern int menubar_box;
 
 } // GledViewNS
 

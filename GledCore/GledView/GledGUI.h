@@ -48,7 +48,7 @@ protected:
 
   Int_t	          mNumShells;
 
-  Fl_SWM_Manager* mSwmManager;
+  Fl_SWM_Manager* mSwmManager;  // X{g}
 
   void build_gui();
 
@@ -75,10 +75,12 @@ public:
 
   virtual Bool_t HasGUILibs() const { return true; }
 
-  virtual EyeInfo* SpawnEye(ShellInfo* si, const char* name, const char* title=0);
+  virtual EyeInfo* SpawnEye(EyeInfo* ei, ZGlass* ud,
+			    const char* libset, const char* eyector);
 
-  TCanvas* NewCanvas(const Text_t* name, const Text_t* title,
-		     int w, int h, int npx, int npy);
+  virtual TCanvas*
+  NewCanvas(const Text_t* name="Canvas", const Text_t* title=0,
+	    int w=640, int h=480, int npx=1, int npy=1);
 
   virtual int handle(int ev);
 

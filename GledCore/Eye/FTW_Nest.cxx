@@ -5,12 +5,14 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include <Glasses/NestInfo.h>
+#include <Glasses/ShellInfo.h>
 
 #include <Glasses/ZQueen.h>
 #include <Gled/GledNS.h>
 #include <Stones/ZMIR.h>
 
 #include "Eye.h"
+#include "FTW_Shell.h"
 #include "FTW_Nest.h"
 #include "FTW_Leaf.h"
 #include "FTW_Ant.h"
@@ -25,22 +27,43 @@
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_ask.H>
 
-
-
 namespace OS   = OptoStructs;
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace FGS  = FltkGledStuff;
 
 /**************************************************************************/
+// creator foo
+/**************************************************************************/
 
-  const int FTW_Nest::def_W = 64;
-  const int FTW_Nest::def_H = 30;
+FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
+{
+  FTW_Nest* nest = new FTW_Nest(sh, img);
+  
+  nest->SetSWM(sh, true);
+  FTW_Leaf* top_leaf = FTW_Leaf::Construct(nest, 0, img, false, false);
+  nest->InsertLeaf(top_leaf);
+  // top_leaf->SetLevel(-1);
+  // top_leaf->hide();
+  top_leaf->ExpandList();
+  nest->finalize_build();
 
-  const int FTW_Nest::min_W = 30;
-  const int FTW_Nest::max_W = 240;
-  const int FTW_Nest::min_H = 6;
-  const int FTW_Nest::max_H = 120;
+  return nest;
+}
+
+void *SubShellCreator_GledCore_FTW_Nest = (void*)FTW_Nest::Create_FTW_Nest;
+
+/**************************************************************************/
+
+const int FTW_Nest::def_W = 64;
+const int FTW_Nest::def_H = 30;
+
+const int FTW_Nest::min_W = 30;
+const int FTW_Nest::max_W = 240;
+const int FTW_Nest::min_H = 6;
+const int FTW_Nest::max_H = 120;
+
+/**************************************************************************/
 
 namespace {
 
@@ -75,45 +98,9 @@ namespace {
 
   // *** Menu callbacks ***
 
-  void new_menu_cb(Fl_Menu_Button* b, void* what) {
-    FTW_Nest*   nest = FGS::grep_parent<FTW_Nest*>(b);
-    FTW_Shell* shell = nest->GetShell();
-    ZQueen* q = shell->GetShellInfo()->GetQueen();
-
-    switch(int(what)) {
-
-    case 1: { // Nest
-      FID_t fid = GledNS::FindClassID("NestInfo");
-      GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
-      GNS::MethodInfo* mi = ci->FindMethodInfo("Add", false);
-      auto_ptr<ZMIR> mir(q->S_InstantiateWAttach(shell->GetShellInfo()->GetNests(), 0,
-						 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
-						 fid.lid, fid.cid,
-						 GForm("Nest %d", shell->GetShellInfo()->GetNests()->Size()+1),
-						 GForm("shell: %s", shell->GetShellInfo()->GetName())));
-      nest->fImg->fEye->Send(*mir);
-      break;
-    }
-
-    case 2: { // Pupil
-      FID_t fid = GledNS::FindClassID("PupilInfo");
-      GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
-      GNS::MethodInfo* mi = ci->FindMethodInfo("Add", false);
-      auto_ptr<ZMIR> mir(q->S_InstantiateWAttach(nest->GetNestInfo()->GetPupils(), 0,
-						 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
-						 fid.lid, fid.cid,
-						 GForm("Pupil %d", nest->GetNestInfo()->GetPupils()->Size()+1),
-						 GForm("nest: %s", nest->GetNestInfo()->GetName())));
-      nest->fImg->fEye->Send(*mir);
-      break;
-    }
-
-    } // switch
-  }
-
   void view_menu_cb(Fl_Menu_Button* b, void* what) {
     FTW_Nest*   nest = FGS::grep_parent<FTW_Nest*>(b);
-    const Fl_Menu_Item* mi = b->mvalue();
+    // const Fl_Menu_Item* mi = b->mvalue();
 
     switch(int(what)) {
 
@@ -181,45 +168,39 @@ namespace {
     }
   }
 
+  Fl_Menu_Item s_View_Menu[] = {
+    { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
+    { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
+    { "Predef Custom ...", FL_CTRL + 'c', (Fl_Callback*) view_menu_cb, (void*)3, FL_MENU_DIVIDER },
+    { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER }, 
+    { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5 },
+    {0}
+  };
+
+  Fl_Menu_Item s_Set_Menu[] = {
+    { "Point as Source",	FL_F + 1,            (Fl_Callback*) set_menu_cb, (void*)1 },
+    { "Point as Sink",	FL_F + 2,            (Fl_Callback*) set_menu_cb, (void*)2 },
+    { "Mark as Source",	FL_SHIFT + FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)3 },
+    { "Mark as Sink",	FL_SHIFT + FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)4, FL_MENU_DIVIDER },
+    { "Exchange Point and Mark",	'x',            (Fl_Callback*) set_menu_cb, (void*)16 },
+    { "Exchange Source and Sink",	FL_SHIFT + 'x', (Fl_Callback*) set_menu_cb, (void*)17 },
+    {0}
+  };
+
+  Fl_Menu_Item s_Action_Menu[] = {
+    { "Set Link",		's', (Fl_Callback*) action_menu_cb, (void*)1 },
+    { "Clear Link",	'c', (Fl_Callback*) action_menu_cb, (void*)2 },
+    { "Yank",		'y', (Fl_Callback*) action_menu_cb, (void*)3 },
+    { "Push",		'p', (Fl_Callback*) action_menu_cb, (void*)4 },
+    { "Unshift",		'u', (Fl_Callback*) action_menu_cb, (void*)5 },
+    { "Insert",		'i', (Fl_Callback*) action_menu_cb, (void*)6 },
+    { "Pop",		'o', (Fl_Callback*) action_menu_cb, (void*)7 },
+    { "Shift",		'h', (Fl_Callback*) action_menu_cb, (void*)8 },
+    { "Remove",		'e', (Fl_Callback*) action_menu_cb, (void*)9 },
+    {0}
+  };
+
 }
-
-Fl_Menu_Item FTW_Nest::s_New_Menu[] = {
-  { "Nest",  0, (Fl_Callback*) new_menu_cb, (void*)1 },
-  { "Pupil", 0, (Fl_Callback*) new_menu_cb, (void*)2 },
-  {0}
-};
-
-Fl_Menu_Item FTW_Nest::s_View_Menu[] = {
-  { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
-  { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
-  { "Predef Custom ...", FL_CTRL + 'c', (Fl_Callback*) view_menu_cb, (void*)3, FL_MENU_DIVIDER },
-  { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER }, 
-  { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5 },
-  {0}
-};
-
-Fl_Menu_Item FTW_Nest::s_Set_Menu[] = {
-  { "Point as Source",	FL_F + 1,            (Fl_Callback*) set_menu_cb, (void*)1 },
-  { "Point as Sink",	FL_F + 2,            (Fl_Callback*) set_menu_cb, (void*)2 },
-  { "Mark as Source",	FL_SHIFT + FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)3 },
-  { "Mark as Sink",	FL_SHIFT + FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)4, FL_MENU_DIVIDER },
-  { "Exchange Point and Mark",	'x',            (Fl_Callback*) set_menu_cb, (void*)16 },
-  { "Exchange Source and Sink",	FL_SHIFT + 'x', (Fl_Callback*) set_menu_cb, (void*)17 },
-  {0}
-};
-
-Fl_Menu_Item FTW_Nest::s_Action_Menu[] = {
-  { "Set Link",		's', (Fl_Callback*) action_menu_cb, (void*)1 },
-  { "Clear Link",	'c', (Fl_Callback*) action_menu_cb, (void*)2 },
-  { "Yank",		'y', (Fl_Callback*) action_menu_cb, (void*)3 },
-  { "Push",		'p', (Fl_Callback*) action_menu_cb, (void*)4 },
-  { "Unshift",		'u', (Fl_Callback*) action_menu_cb, (void*)5 },
-  { "Insert",		'i', (Fl_Callback*) action_menu_cb, (void*)6 },
-  { "Pop",		'o', (Fl_Callback*) action_menu_cb, (void*)7 },
-  { "Shift",		'h', (Fl_Callback*) action_menu_cb, (void*)8 },
-  { "Remove",		'e', (Fl_Callback*) action_menu_cb, (void*)9 },
-  {0}
-};
 
 /**************************************************************************/
 /**************************************************************************/
@@ -232,21 +213,15 @@ void FTW_Nest::_build(int w, int h)
   mNestInfo = dynamic_cast<NestInfo*>(fImg->fGlass);
   assert(mNestInfo);
 
-  OS::ZGlassImg* pupils_img = fImg->fEye->DemanglePtr(mNestInfo->GetPupils());
-  pPupilAm = new FTW::PupilAm(this, pupils_img);
-
   mTargetLoc = &mPoint; mTargetType = TT_Point;
 
   { // Create helpers
-    Fl_Group::current(0);
-
     pCtrl   = new FTW_Nest_Ctrl(this);
     pLayout = new MTW_Layout(this);
-
-    Fl_Group::current(this);
   }
 
-  wMainPack = new Fl_Pack(0, 0, w, h-1); // 1 is for InfoBar
+  begin();
+  wMainPack = new Fl_Pack(0, 0, w, h);
   wMainPack->type(FL_VERTICAL);
 
   // Menu group
@@ -255,35 +230,22 @@ void FTW_Nest::_build(int w, int h)
     wMenuPack->type(FL_HORIZONTAL);
 
 
-    {
-      Fl_Group* groo = new Fl_Group(0,0,2,2);
-      Fl_Button* b_swm = new Fl_Button(0, 0, 2, 1, "@#3>>");
-      b_swm->labeltype(FL_SYMBOL_LABEL);
-      set_swm_hotspot_cb(b_swm);
+    Fl_Button* b_ctr = new Fl_Button(0,0,2,2, "@#||");
+    b_ctr->box((Fl_Boxtype)GVNS::menubar_box);
+    b_ctr->down_box((Fl_Boxtype)GVNS::menubar_box);
+    b_ctr->labeltype(FL_SYMBOL_LABEL);
+    pCtrl->set_show_cb(b_ctr);
 
-      Fl_Button* b_ctr = new Fl_Button(0,1,2,1, "@#||");
-      b_ctr->labeltype(FL_SYMBOL_LABEL);
-      pCtrl->set_show_cb(b_ctr);
-      groo->end();
-    }
+    new FGS::MenuBox(s_View_Menu,   4, 2, "View");
+    new FGS::MenuBox(s_Set_Menu,    4, 2, "Set");
+    new FGS::MenuBox(s_Action_Menu, 5, 2, "Action");
 
-    Fl_Menu_Button* but_new = new Fl_Menu_Button(0,0,6,2, "New");
-    but_new->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-    but_new->menu(s_New_Menu);
-
-    Fl_Menu_Button* but_view = new Fl_Menu_Button(0,0,6,2, "View");
-    but_view->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-    but_view->menu(s_View_Menu);
-
-    Fl_Menu_Button* but_set = new Fl_Menu_Button(0,0,6,2, "Set");
-    but_set->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-    but_set->menu(s_Set_Menu);
-
-    Fl_Menu_Button* but_action = new Fl_Menu_Button(0,0,6,2, "Action");
-    but_action->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-    but_action->menu(s_Action_Menu);
+    FGS::LensRepNameBox* self = new FGS::LensRepNameBox(fImg, 0, 0, max_W, 2);
+    self->box((Fl_Boxtype)GVNS::menubar_box);
+    self->color(fl_rgb_color(220,200,200));
 
     wMenuPack->end();
+    wMenuPack->resizable(0);
   }
 
   // Mid-pack: view-ctrl & custom weed titles
@@ -321,6 +283,7 @@ void FTW_Nest::_build(int w, int h)
       but->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
 
       wTargetPack->end();
+      wTargetPack->resizable(0);
     }
 
     wSepBox = new Fl_Box(FTW::separator_box,0,0,1,2,0);
@@ -331,11 +294,12 @@ void FTW_Nest::_build(int w, int h)
     wCustomTitle->box(FL_EMBOSSED_BOX);
 
     wMidPack->end();
+    wMidPack->resizable(0);
   } // end MidPack
 
   // Scroll pack
   {
-    mScroll = new Fl_Scroll(0, 0, w, 1);
+    mScroll = new Fl_Scroll(0, 0, w, h-5);
     mScroll->type(Fl_Scroll::VERTICAL_ALWAYS);
     mScroll->scrollbar.resize(w-2, 0, 2, 1);
     mScroll->hscrollbar.resize(0,0, w-2, 1);
@@ -349,8 +313,8 @@ void FTW_Nest::_build(int w, int h)
     swm_size_range = new SWM_Size_Range(min_W, min_H, max_W, max_H);
   }
 
-  wMainPack->end();
   wInfoBar = new Fl_Output(0,h-1,w,1);
+  wMainPack->end();
   end();
 
   wMainPack->resizable(mScroll);
@@ -362,36 +326,39 @@ void FTW_Nest::_build(int w, int h)
 void FTW_Nest::finalize_build()
 {
   if(mNestInfo->GetLeafLayout() == NestInfo::LL_Custom) {
-      EnactLayout(mNestInfo->GetLayout());
-      CustomView();
+    EnactLayout(mNestInfo->GetLayout());
+    CustomView();
   }
 }
 
 /**************************************************************************/
 
 FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
+  FTW_SubShell(sh),
   OS::A_View(img),
-  FTW_Shell_Client(sh),
   Fl_Window(w, h),
   mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
+  end();
+  mWindow = this;
   _build(w, h);
 }
 
 FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h) :
+  FTW_SubShell(sh),
   OS::A_View(img),
-  FTW_Shell_Client(sh),
   Fl_Window(x, y, w, h),
   mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
+  end();
+  mWindow = this;
   _build(w, h);
 }
 
 FTW_Nest::~FTW_Nest() {
   // !!!! here should clear all locator consumers with destroy_base()!!!!
-  delete pPupilAm;
   delete pCtrl;
   delete pLayout;
 }
@@ -402,6 +369,22 @@ void FTW_Nest::AbsorbRay(Ray& ray)
 {
   if(ray.IsBasicChange()) {
     label_nest();
+    return;
+  }
+
+  if(ray.fFID == NestInfo::FID()) {
+    if(ray.fRQN == RayNS::RQN_user_1) {
+      switch (mNestInfo->GetLeafLayout()) {
+      case NestInfo::LL_Ants:
+	LinksView();
+	break;
+      case NestInfo::LL_Custom:
+	EnactLayout(mNestInfo->GetLayout());
+	CustomView();
+	break;
+      }
+    }
+    return;
   }
 }
 
@@ -594,16 +577,6 @@ void FTW_Nest::EnactLayout(const char* layout)
     show_custom_weeds();
     mScroll->redraw();
   }
-}
-
-void FTW_Nest::ShowRnrCtrls()
-{
-
-}
-
-void FTW_Nest::HideRnrCtrls()
-{
-
 }
 
 /**************************************************************************/
@@ -822,6 +795,26 @@ int FTW_Nest::handle(int ev)
   if(ret == 0) ret = Fl_Window::handle(ev);
 
   return ret;
+}
+
+void FTW_Nest::resize(int x, int y, int w, int h)
+{
+  // printf("Nest::resize %d %d %d %d inres=%d p=%p\n",
+  //   x,y,w,h,mShell->in_rescale_p(),parent());
+
+  if(mShell->in_rescale_p() || parent() == 0) {
+    Fl_Window::resize(x,y,w,h);
+    return;
+  }
+
+  int dw = w - this->w(), dh = h - this->h();
+  wMainPack->resizable(0);
+  
+  Fl_Window::resize(x,y,w,h);
+
+  mScroll->Fl_Widget::resize(mScroll->x(), mScroll->y(),
+			     mScroll->w()+dw, mScroll->h()+dh);
+  wMainPack->resizable(mScroll);
 }
 
 /**************************************************************************/

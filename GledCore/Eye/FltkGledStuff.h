@@ -9,10 +9,12 @@
 
 #include "OptoStructs.h"
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Button.H>
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_Window.H>
 
 class FTW_Shell;
+class Fl_Menu_Item;
 
 // Use this one in a public part of a Fl_Widget descendant
 
@@ -27,6 +29,11 @@ protected: \
   string _fgs_tooltip; \
 public: \
   void set_tooltip(const char* l) { _fgs_tooltip = (l != 0) ? l : ""; tooltip(_fgs_tooltip.c_str()); }
+
+// Somewhat obscure casting tool.
+
+#define FGS_DECLARE_CAST(_var_, _src_, _typ_) \
+  _typ_* _var_ = dynamic_cast<_typ_*>(_src_)
 
 
 /**************************************************************************/
@@ -52,6 +59,22 @@ namespace FltkGledStuff {
   int swm_generick_width(string& str, int cell_w, float extra);
   int swm_label_width(string& str, int cell_w);
   int swm_string_width(string& str, int cell_w);
+
+  /**************************************************************************/
+  // PackEntryCollapsor
+  /**************************************************************************/
+
+  class PackEntryCollapsor : public Fl_Group {
+  public:
+    Fl_Widget*   mColWid;
+    Fl_Button*   fBut;
+    Fl_Box*      fBox;
+
+    PackEntryCollapsor(const char* t);
+
+    int collexp(bool resize_p=true);
+    static void cb_collexp(Fl_Button* w, PackEntryCollapsor* x) {x->collexp();}
+  };
 
   /**************************************************************************/
   // LensNameBox
@@ -83,6 +106,18 @@ namespace FltkGledStuff {
   };
 
   /**************************************************************************/
+  // LensRepNameBox
+  /**************************************************************************/
+
+  class LensRepNameBox : public LensNameBox
+  {
+  public:
+    LensRepNameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
+
+    virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
+  };
+
+  /**************************************************************************/
   // LinkNameBox
   /**************************************************************************/
 
@@ -100,6 +135,29 @@ namespace FltkGledStuff {
     virtual void Clear();
   };
 
+
+  /**************************************************************************/
+  /**************************************************************************/
+  /**************************************************************************/
+
+  /**************************************************************************/
+  // MenuBox
+  /**************************************************************************/
+
+  class MenuBox : public Fl_Button {
+  private:
+    void _init();
+  protected:
+    Fl_Menu_Item* fMenuItem;
+  public:
+    MenuBox(int x, int y, int w, int h, const char* t=0);
+    MenuBox(Fl_Menu_Item* mi, int w, int h, const char* t=0);
+
+    Fl_Menu_Item* menu_item()        { return fMenuItem; }
+    void menu_item(Fl_Menu_Item* mi) { fMenuItem = mi; }
+
+    virtual int handle(int ev);
+  };
 }
 
 #endif

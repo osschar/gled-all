@@ -12,7 +12,7 @@
 #include <Glasses/Camera.h>
 
 #include <Eye/OptoStructs.h>
-#include "FTW_Shell.h"
+#include "FTW_SubShell.h"
 class PupilInfo;
 class MTW_View;
 
@@ -22,10 +22,12 @@ class MTW_View;
 #include <FL/Fl_Gl_Window.H>
 
 
-class Pupil : public OptoStructs::A_View,
-	      public FTW_Shell_Client,
+class Pupil : public FTW_SubShell,
+	      public OptoStructs::A_View,
 	      public Fl_Gl_Window
 {
+private:
+  static Fl_Gl_Window* gl_ctx_holder;
 
 protected:
 
@@ -53,7 +55,11 @@ protected:
   void		dump_image();
 
 public:
-  Pupil(OptoStructs::ZGlassImg* infoimg, FTW_Shell* shell, int w=0, int h=0);
+
+  static Pupil* Create_Pupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
+
+
+  Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int w=0, int h=0);
   virtual ~Pupil();
 
   virtual void AbsorbRay(Ray& ray);

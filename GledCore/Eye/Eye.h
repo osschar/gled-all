@@ -25,47 +25,46 @@ class TMessage;
 
 
 class Eye {
+
 protected:
-  typedef list<Fl_Window*>		lpFl_Window_t;
-  typedef list<Fl_Window*>::iterator	lpFl_Window_i;
-
-
   OptoStructs::hpZGlass2pZGlassImg_t	mGlass2ImgHash;
 
   Saturn*	mSaturn;	// X{g}
   SaturnInfo*	mSaturnInfo;	// X{g}
   ZQueen*	mQueen;		// X{g}
   EyeInfo*	mEyeInfo;	// X{g}
-  FTW_Shell*	mShell;		// X{g}
 
   TSocket*	mSatSocket;
 
-  lpFl_Window_t mRedrawOnAnyRay;
   bool		bBreakManageLoop;
 
 public:
-  Eye(UInt_t port, TString identity, ID_t shell_id,
-      const char* name="Eye", const char* title=0,
-      const Fl_SWM_Manager* swm_copy=0);
-  ~Eye();
+  Eye(TSocket* sock, EyeInfo* ei);
+  virtual ~Eye();
 
-  void show();
+  virtual void InstallFdHandler() = 0;
 
   // Basic ZGlassImg functionality
-  OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
-  OptoStructs::ZGlassImg* DemangleID(ID_t id);
-  void RemoveImage(OptoStructs::ZGlassImg* img);
+  virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
+  virtual OptoStructs::ZGlassImg* DemangleID(ID_t id);
+  virtual void RemoveImage(OptoStructs::ZGlassImg* img);
+
+  enum MType_e { MT_std=0, MT_err, MT_wrn, MT_msg };
+  virtual void Message(const char* msg, MType_e t=MT_std) {}
+  virtual void Message(const string& msg, MType_e t=MT_std) {}
 
   // Socketing
   Int_t	Manage(int fd);
+  virtual void PostManage(int ray_count) {}
 
   void Send(TMessage* m);
   void Send(ZMIR& c);
 
   void CloseEye();
 
-  void RegisterROARWindow(Fl_Window* w) { mRedrawOnAnyRay.push_back(w); }
   void BreakManageLoop() { bBreakManageLoop = true; }
+
+  static void EyeFdMonitor(int fd, void* arg);
 
 #include "Eye.h7"
 }; // endclass Eye

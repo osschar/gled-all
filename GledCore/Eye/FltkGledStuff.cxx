@@ -28,8 +28,9 @@ namespace GVNS = GledViewNS;
 
 FTW_Shell* FGS::grep_shell(Fl_Widget *w)
 {
-  FTW_Shell_Client* c = grep_parent<FTW_Shell_Client*>(w);
-  return c ? c->GetShell() : 0;
+  FTW_SubShell* c = grep_parent<FTW_SubShell*>(w);
+  if(c) return c->GetShell();
+  return grep_parent<FTW_Shell*>(w);
 }
 
 FTW_Shell* FGS::grep_shell_or_die(Fl_Widget *w, const string& _eh)
@@ -60,6 +61,69 @@ int FGS::swm_label_width(string& str, int cell_w)
 int FGS::swm_string_width(string& str, int cell_w)
 { return swm_generick_width(str, cell_w, 0.2); }
 
+/**************************************************************************/
+// PackEntryCollapsor
+/**************************************************************************/
+
+// Collapses/expands next widget in the group (hopefully vertical Fl_Pack).
+// Does not work very well with resizable windows.
+
+FGS::PackEntryCollapsor::PackEntryCollapsor(const char* t) :
+  Fl_Group(0,0,4,1), mColWid(0)
+{
+  fBut = new Fl_Button(0,0,2,1, "@#>");
+  fBut->labeltype(FL_SYMBOL_LABEL);
+  fBut->callback((Fl_Callback*)cb_collexp, this);
+  fBut->color(fl_rgb_color(200,220,200));
+
+  fBox = new Fl_Box(2,0,2,1, t);
+  fBox->box(FL_EMBOSSED_BOX);
+  if(fBox->labelfont() < FL_BOLD)
+    fBox->labelfont(fBox->labelfont() + FL_BOLD);
+  fBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+  fBox->color(fl_rgb_color(200,220,200));
+
+  end();
+  resizable(fBox);
+}
+
+int FGS::PackEntryCollapsor::collexp(bool resize_p)
+{
+  Fl_Group* pg = parent(); if(pg == 0) return 0;
+
+  if(mColWid == 0) {
+    int i = pg->find(this);
+    if(i >= pg->children() - 1) return 0;
+    mColWid = pg->child(i+1);
+  }
+
+  int dh = 0;
+  if(mColWid->visible()) {
+    mColWid->hide();
+    fBut->label("@#>[]");
+    dh = -mColWid->h();
+  } else {
+    mColWid->show();
+    fBut->label("@#>");
+    dh = mColWid->h();
+  }
+  
+  if(resize_p) {
+    pg->init_sizes();
+    pg->redraw();
+    Fl_Window* win = dynamic_cast<Fl_Window*>(pg->parent());
+    if(win) {
+      Fl_Widget* res = pg->resizable();
+      pg->resizable(0);
+      win->position(win->x(), win->y() + dh/2);
+      win->size(pg->w(), pg->h()+dh);
+      win->redraw();
+      pg->resizable(res);
+    }
+  }
+
+  return dh;
+}
 
 /**************************************************************************/
 // FGS::LensNameBox
@@ -133,11 +197,14 @@ void FGS::LensNameBox::draw()
 {
   draw_box();
   draw_label();
+
+  int X = x() + Fl::box_dx(box()) + 3, Y = y() + Fl::box_dy(box());
+  int W = w() - Fl::box_dw(box()) - 3, H = h() - Fl::box_dh(box());
   fl_color(FL_BLACK);
   fl_font(labelfont(), labelsize());
-  fl_push_clip(x()+3, y(), w()-6, h());
-  fl_draw(mToName.c_str(), x()+3, y(), w()-6, h(), FL_ALIGN_LEFT, 0, 0);
-  fl_pop_clip();
+  fl_push_clip(X, Y, W, H);
+  fl_draw(mToName.c_str(), X, Y, W, H, FL_ALIGN_LEFT, 0, 0);
+  fl_pop_clip();	
 }
 
 /**************************************************************************/
@@ -164,7 +231,8 @@ int FGS::LensNameBox::handle(int ev)
 	menu.textsize(shell->cell_fontsize());
 	FTW_Shell::mir_call_data_list mcdl;
 	menu.add("Clear", 0, (Fl_Callback*)clear_cb, this, FL_MENU_DIVIDER);
-	shell->FillImageMenu(fImg, menu, mcdl, "");
+	shell->FillLensMenu(fImg, menu, mcdl, "");
+	shell->FillShellVarsMenu(fImg, menu, mcdl, "");
 
 	menu.popup();
       }
@@ -179,7 +247,7 @@ int FGS::LensNameBox::handle(int ev)
 	FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
 	ID_t id          = fImg->fGlass->GetSaturnID();
 	const char* text = GForm("%u", id);
-	shell->X_SetSource(id);
+	shell->X_SetSource(fImg);
 	Fl::copy(text, strlen(text), 0);
 	Fl::dnd();
       }
@@ -218,12 +286,32 @@ int FGS::LensNameBox::handle(int ev)
     FTW_Shell *shell = grep_shell(parent());
     if(shell == 0) return 0;
     ID_t source_id = shell->GetSource()->get_contents();
-    ImagePasted(shell->GetEye()->DemangleID(source_id));
+    ImagePasted(shell->DemangleID(source_id));
     return 1;
   }
   } // end switch(ev)
 
   return Fl_Box::handle(ev);
+}
+
+/**************************************************************************/
+// LensRepNameBox
+/**************************************************************************/
+
+FGS::LensRepNameBox::LensRepNameBox(OS::ZGlassImg* i, int x, int y, int w, int h, const char* t) :
+  LensNameBox(i,x,y,w,h,t)
+{}
+
+void FGS::LensRepNameBox::ImagePasted(OS::ZGlassImg* new_img)
+{
+  FTW_Shell *shell = grep_shell(parent());
+  if(shell->GetSource()->has_contents()) {
+    GNS::MethodInfo* cmi = fImg->fClassInfo->FindMethodInfo("Add", true);
+    if(cmi) {
+      auto_ptr<ZMIR> mir (shell->GetSource()->generate_MIR(cmi, fImg->fGlass));
+      shell->Send(*mir);
+    }
+  }
 }
 
 /**************************************************************************/
@@ -262,4 +350,43 @@ void FGS::LinkNameBox::Clear()
   ZMIR mir(fLinkDatum->fImg->fGlass->GetSaturnID(), 0);
   GetLinkInfo()->fSetMethod->ImprintMir(mir);
   fLinkDatum->fImg->fEye->Send(mir);
+}
+
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+/**************************************************************************/
+// MenuBox
+/**************************************************************************/
+void FGS::MenuBox::_init()
+{
+  box((Fl_Boxtype)GVNS::menubar_box);
+  align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+}
+
+FGS::MenuBox::MenuBox(int x, int y, int w, int h, const char* t) :
+  Fl_Button(x,y,w,h,t), fMenuItem(0)
+{ _init(); }
+
+FGS::MenuBox::MenuBox(Fl_Menu_Item* mi, int w, int h, const char* t) :
+  Fl_Button(0,0,w,h,t), fMenuItem(mi)
+{ _init(); }
+
+int FGS::MenuBox::handle(int ev)
+{
+  static const string _eh("FGS::MenuBox::handle ");
+
+  if(ev == FL_PUSH && Fl::event_button() == 1) {
+    FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+    Fl_Menu_Button menu(x(), y(), w(), h() - Fl::box_dh(box()));
+    menu.parent(parent());
+    menu.menu(fMenuItem);
+    menu.textsize(shell->cell_fontsize());
+    menu.box(FL_BORDER_BOX);
+    menu.popup();
+    return 1;
+  }
+  return 0;
 }

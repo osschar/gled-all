@@ -7,6 +7,7 @@
 #include "Pupil.h"
 #include "Eye.h"
 #include "MTW_View.h"
+#include "FTW_Shell.h"
 
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
@@ -30,6 +31,37 @@
 #include <math.h>
 
 namespace OS = OptoStructs;
+
+/**************************************************************************/
+// creator foo
+/**************************************************************************/
+
+Fl_Gl_Window* Pupil::gl_ctx_holder = 0;
+
+namespace {
+  class pupils_gl_ctx_holder : public Fl_Gl_Window {
+  public:
+    pupils_gl_ctx_holder() :
+      Fl_Gl_Window(0, 0, 1, 1, "GL context holder")
+    { clear_border(); }
+    virtual void draw() {}
+  };
+}
+
+Pupil* Pupil::Create_Pupil(FTW_Shell* sh, OS::ZGlassImg* img)
+{
+  if(gl_ctx_holder == 0) {
+    gl_ctx_holder = new pupils_gl_ctx_holder;
+    gl_ctx_holder->end();
+    gl_ctx_holder->show();
+    // gl_ctx_holder->iconize();
+  }
+
+  Pupil* p = new Pupil(sh, img);
+  return p;
+}
+
+void *SubShellCreator_GledCore_Pupil = (void*)Pupil::Create_Pupil;
 
 /**************************************************************************/
 
@@ -114,9 +146,10 @@ void Pupil::dump_image()
 
 /**************************************************************************/
 
-Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
-  OS::A_View(infoimg), FTW_Shell_Client(shell),
-  Fl_Gl_Window(w,h),
+Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
+  FTW_SubShell(shell),
+  OS::A_View(infoimg),
+  Fl_Gl_Window(w,h), 
   mInfo(0),
   mCameraView(0),
   mCamBase(0)
@@ -150,31 +183,16 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
   mCamAbsTrans *= mCamera->RefTrans();
 
   bFullScreen = false;
-
   bDumpImage  = false;
 
-  // Hmmph ... the locking doesn't seem to be needed any more.
-  /*
-    Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
-    XLockDisplay(rd);
-    XSync(rd, False);
-    XLockDisplay(fl_display);
-    XSync(fl_display, False);
-  */
-
   size(mInfo->GetWidth(), mInfo->GetHeight());
-  show();
 
-  /*
-    XSync(fl_display, False);
-    XUnlockDisplay(fl_display);
-    XSync(rd, False);
-    XUnlockDisplay(rd);
-  */
+  mWindow = this;
+  mShell->RegisterROARWindow(this);
 }
 
 Pupil::~Pupil() {
-  // Notify Shell !!!
+  mShell->UnregisterROARWindow(this);
   delete mCamera;
 }
 
@@ -457,7 +475,7 @@ namespace {
   
   void copy_to_clipboard_cb(Fl_Widget* w, pick_menu_data* ud)
   {
-    ud->pupil->GetShell()->X_SetSource(ud->img->fGlass->GetSaturnID());
+    ud->pupil->GetShell()->X_SetSource(ud->img);
     const char* idstr = GForm("%u", ud->img->fGlass->GetSaturnID());
     Fl::copy(idstr, strlen(idstr), 0);
   }
@@ -470,10 +488,7 @@ namespace {
     menu.add(GForm("%sJump Towards", prefix.c_str()),
 	     0, (Fl_Callback*)cam_towards_cb, mcdl.back(), 0);
     menu.add(GForm("%sJump At", prefix.c_str()),
-	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), 0);
-    menu.add(GForm("%sSet as Source", prefix.c_str()),
-	     0, (Fl_Callback*)copy_to_clipboard_cb, mcdl.back(), 0);
- 
+	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), FL_MENU_DIVIDER); 
   }
 }
 
@@ -582,17 +597,19 @@ OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
 	}
 	++loc;
 
-	mShell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
+	fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
+	mShell->FillLensMenu(gdi->img, menu, mcdl, gdi->name);
+	mShell->FillShellVarsMenu(gdi->img, menu, mcdl, gdi->name);
 
 	// iterate through the list of parents
 	menu.add(GForm("%sParents", gdi->name.c_str()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
 	for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
 	  string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
-	  mShell->FillImageMenu(*pi, menu, mcdl, entry);
 	  fill_pick_menu(this, *pi, menu, mcdl, entry);
+	  mShell->FillLensMenu(*pi, menu, mcdl, entry);
+	  mShell->FillShellVarsMenu(*pi, menu, mcdl, entry);
 	}
 
-	fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
       }
 
       menu.popup();
@@ -615,11 +632,11 @@ void Pupil::draw()
 
   GTime start_time(GTime::I_Now);
 
-  // if (!valid()) {
+  // if (!valid()) {}
+
   glMatrixMode(GL_PROJECTION);
   SetProjection1();
   SetProjection2();
-  // }
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();

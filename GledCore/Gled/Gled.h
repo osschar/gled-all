@@ -99,8 +99,14 @@ public:
 
   virtual Bool_t HasGUILibs() const { return false; }
 
-  virtual EyeInfo* SpawnEye(const char* name, const char* title=0);
-  virtual EyeInfo* SpawnEye(ShellInfo* si, const char* name, const char* title=0)
+  virtual EyeInfo* SpawnEye(const char* libset, const char* eyector);
+  virtual EyeInfo* SpawnEye(EyeInfo* ei, ZGlass* ud,
+			    const char* libset, const char* eyector)
+  { return 0; }
+
+  virtual TCanvas*
+  NewCanvas(const Text_t* name="Canvas", const Text_t* title=0,
+	    int w=640, int h=480, int npx=1, int npy=1)
   { return 0; }
 
   static void* TRint_runner_tl(TRint* gint);

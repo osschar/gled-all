@@ -304,9 +304,9 @@ int FTW::NameButton::handle(int ev)
     }
 
     case 3: {
-      Locator loc(leaf->GetNest(), leaf, ant);
       FTW_Shell *shell = leaf->GetNest()->GetShell();
-      shell->LocatorMenu(loc, Fl::event_x_root(), Fl::event_y_root());
+      Locator loc(leaf->GetNest(), leaf, ant);
+      shell->FullMenu(loc.get_image(), Fl::event_x_root(), Fl::event_y_root());
       return 1;
     }
     } // end switch
@@ -333,7 +333,7 @@ int FTW::NameButton::handle(int ev)
 	}
 	if(text) {
 	  Locator loc(leaf->GetNest(), leaf, ant);
-	  leaf->GetNest()->GetShell()->X_SetSource(loc.get_contents());
+	  leaf->GetNest()->GetShell()->X_SetSource(loc.get_image());
 	  Fl::copy(text, strlen(text), 0);
 	  Fl::dnd();
 	}
@@ -437,15 +437,15 @@ void FTW::NameBox::AbsorbRay(Ray& ray)
   }
 }
 
-void FTW::NameBox::ChangeImage(OS::ZGlassImg* new_img, bool keep_label)
+void FTW::NameBox::ChangeImage(OS::ZGlassImg* new_img)
 {
   SetImg(new_img);
   if(fImg) {
     activate();
-    label(fImg->fGlass->GetName());
+    copy_label(fImg->fGlass->GetName());
   } else {
-    if(keep_label) deactivate();
-    else       	   label(0);
+    deactivate();
+    label("<null>");
   }
   redraw();
 }
@@ -637,7 +637,7 @@ namespace {
 
 FTW::Locator_Selector::Locator_Selector(Top_Selector* ts, Top_Selector::Type_e t) :
   Bot_Selector(ts, t), Fl_Group(0,0,18,2),
-  m_type(LST_Undef), m_pref_nest(m_top->get_shell()->GetNest()), b_colored(false)
+  m_type(LST_Undef), b_colored(false)
 {
   wTop = new Fl_Light_Button(0,0,6,2,"Nest  ");
   wTop->type(0); wTop->when(FL_WHEN_RELEASE);
@@ -646,14 +646,12 @@ FTW::Locator_Selector::Locator_Selector(Top_Selector* ts, Top_Selector::Type_e t
   wTop->labelfont(FL_HELVETICA_BOLD);
 
   wNestName = new NameBox((OS::ZGlassImg*)0,6,0,12,1);
-  wNestName->label(m_pref_nest->fImg->fGlass->GetName());
   wNestName->deactivate();
 
   wType = new Fl_Choice(10,1,8,1, "Type:");
   wType->add("Undef", 0, (Fl_Callback*)loc_sel_type_change_cb, (void*)LST_Undef);
   wType->add("Point", 0, (Fl_Callback*)loc_sel_type_change_cb, (void*)LST_Point);
   wType->add("Mark",  0, (Fl_Callback*)loc_sel_type_change_cb, (void*)LST_Mark);
-  wType->add("Own",   0, (Fl_Callback*)loc_sel_type_change_cb, (void*)LST_Own);
 
   end();
 
@@ -666,10 +664,12 @@ void FTW::Locator_Selector::set_type(LS_Type_e type)
 {
   switch(type) {
   case LST_Point:
-    set_base((m_base ? m_base->nest : m_pref_nest)->RefPoint());
+    if(m_base) set_base(m_base->nest->RefPoint());
+    else       clear_base();
     break;
   case LST_Mark:
-    set_base((m_base ? m_base->nest : m_pref_nest)->RefMark());
+    if(m_base) set_base(m_base->nest->RefMark());
+    else       clear_base();
     break;
   default:
     clear_base();
@@ -684,12 +684,11 @@ void FTW::Locator_Selector::set_base(Locator& loc) {
   }
 
   LocatorConsumer::set_base(loc);
-  m_pref_nest = loc.nest;
 
   wNestName->ChangeImage(m_base->nest->fImg);
   if(m_base->nest->IsPoint(loc))      wType->value(LST_Point);
   else if(m_base->nest->IsMark (loc)) wType->value(LST_Mark);
-  else wType->value(LST_Own);
+  else wType->value(LST_Undef);
   redraw();
 }
 
@@ -700,14 +699,14 @@ void FTW::Locator_Selector::clear_base() {
 
   LocatorConsumer::clear_base();
 
-  wNestName->ChangeImage(0, true);
+  wNestName->ChangeImage(0);
   wType->value(LST_Undef);
   redraw();
 }
 
 void FTW::Locator_Selector::destroy_base() {
   clear_base();
-  wNestName->ChangeImage(0, false);
+  wNestName->ChangeImage(0);
 }
 
 void FTW::Locator_Selector::locator_change(Locator& loc) {
@@ -780,15 +779,13 @@ void FTW::Direct_Selector::deactivate() {
   redraw();
 }
 
-ID_t FTW::Direct_Selector::get_id()
+OS::ZGlassImg* FTW::Direct_Selector::get_img()
 {
-  if(wNameBox->fImg) return wNameBox->fImg->fGlass->GetSaturnID();
-  return 0;
+  return wNameBox->fImg;
 }
 
-void FTW::Direct_Selector::set_id(ID_t id)
+void FTW::Direct_Selector::set_img(OS::ZGlassImg* img)
 {
-  OS::ZGlassImg* img = m_top->get_shell()->GetEye()->DemangleID(id);
   wNameBox->ChangeImage(img);
 }
 
@@ -841,15 +838,10 @@ FTW::Source_Selector::Source_Selector(FTW_Shell* s, int x, int y, int dw, const 
   b->color(background_color + get_active_modcol());
 
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
-
   wLoc_Sel = new Locator_Selector(this, T_Locator);
-
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
-
   wInst_Sel = new Inst_Selector(this, T_Inst);
-
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
-
   wDir_Sel = new Direct_Selector(this, T_Direct);
 
   end();
@@ -860,6 +852,7 @@ FTW::Source_Selector::Source_Selector(FTW_Shell* s, int x, int y, int dw, const 
 
 void FTW::Source_Selector::set_type(Type_e t)
 {
+  static const string _eh("Source_Selector::set_type ");
 
   Bot_Selector* cur = 0;
   switch(t) {
@@ -867,7 +860,7 @@ void FTW::Source_Selector::set_type(Type_e t)
   case Top_Selector::T_Inst:    cur = wInst_Sel; break;
   case Top_Selector::T_Direct:  cur = wDir_Sel;  break;
   default:
-    cerr <<"FTW::Source_Selector::set_type wrong type "<< t <<endl;
+    cerr << _eh << "unknown type "<< t <<endl;
     return;
   }
 
@@ -892,7 +885,7 @@ bool FTW::Source_Selector::has_contents()
     return true;
 
   case Top_Selector::T_Direct:
-    return wDir_Sel->get_id() != 0;
+    return wDir_Sel->get_img() != 0;
 
   default:
     return false;
@@ -912,7 +905,7 @@ ID_t FTW::Source_Selector::get_contents()
     return 0;
 
   case Top_Selector::T_Direct:
-    return wDir_Sel->get_id();
+    return wDir_Sel->get_img()->fGlass->GetSaturnID();
 
   default:
     return 0;
@@ -946,7 +939,7 @@ ZMIR* FTW::Source_Selector::generate_MIR(GNS::MethodInfo* mi,
 
   case Top_Selector::T_Direct: {
     ID_t a = alpha->GetSaturnID();
-    ID_t b = wDir_Sel->get_id();
+    ID_t b = wDir_Sel->get_img()->fGlass->GetSaturnID();
     ID_t g = gamma ? gamma->GetSaturnID() : 0;
     ZMIR* mir = new ZMIR(a, b, g);
     mi->ImprintMir(*mir);
@@ -979,14 +972,11 @@ FTW::Sink_Selector::Sink_Selector(FTW_Shell* s, int x, int y, int dw, const char
   b->color(background_color + get_active_modcol());
 
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
-
   wLoc_Sel = new Locator_Selector(this, T_Locator);
-
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
-
   wNull_Sel = new Null_Selector(this, T_DevNull);
-
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
+  wDir_Sel = new Direct_Selector(this, T_Direct);
 
   //wListOpsSel = new ListOpsSelector(ListOpsSelector::T_Sink);
   //wOnListOpRem = new Fl_Button(0,0,8,2, "On ListOps remove");
@@ -994,29 +984,27 @@ FTW::Sink_Selector::Sink_Selector(FTW_Shell* s, int x, int y, int dw, const char
 
   end();
 
+  wCurrent = 0;
   set_type(Top_Selector::T_DevNull);
 }
 
 void FTW::Sink_Selector::set_type(Type_e t)
 {
+  static const string _eh("Sink_Selector::set_type ");
+
+  Bot_Selector* cur = 0;
   switch(t) {
-
-  case Top_Selector::T_Locator:
-    wNull_Sel->deactivate();
-    wLoc_Sel->activate();
-    break;
-
-  case Top_Selector::T_DevNull:
-    wLoc_Sel->deactivate();
-    wNull_Sel->activate();
-    break;
-
+  case Top_Selector::T_Locator: cur = wLoc_Sel;  break;
+  case Top_Selector::T_DevNull: cur = wNull_Sel; break;
+  case Top_Selector::T_Direct:  cur = wDir_Sel;  break;
   default:
-    cerr <<"FTW::Sink_Selector::set_type wrong type "<< t <<endl;
+    cerr << _eh << "unknown type "<< t <<endl;
     return;
-
   }
 
+  if(wCurrent != 0) { wCurrent->deactivate(); }
+  wCurrent = cur;
+  wCurrent->activate();
   m_cur_type = t;
 }
 
@@ -1050,102 +1038,28 @@ void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
     break;
   }
 
+  case Top_Selector::T_Direct: {
+    OS::ZGlassImg* aimg = wDir_Sel->get_img();
+    if(aimg == 0) return;
+    if(!aimg->fIsList) throw(_eh + "sink is not a list");
+
+    ID_t a = aimg->fGlass->GetSaturnID();
+    ID_t b = beta->GetSaturnID();
+    //ID_t g = gamma ? gamma->GetSaturnID() : 0;
+    auto_ptr<ZMIR> mir(new ZMIR(a, b));
+    GNS::MethodInfo* cmi = 
+      aimg->fClassInfo->FindMethodInfo("Add", true);
+    if(cmi) {
+      cmi->ImprintMir(*mir);
+      aimg->fEye->Send(*mir);
+    } else {
+      throw(string(_eh + "Add" + " method not found in catalog"));
+    }
+    break;
+  }
+
   case Top_Selector::T_DevNull:
   default:
     break;
-  }
-}
-
-/**************************************************************************/
-/**************************************************************************/
-// Active Views
-/**************************************************************************/
-/**************************************************************************/
-
-#include "Pupil.h"
-#include <Glasses/PupilInfo.h>
-#include "Eye.h"
-
-/**************************************************************************/
-// Pupil Am
-/**************************************************************************/
-
-void FTW::PupilAm::spawn_pupil(OS::ZGlassImg* img)
-{
-  PupilInfo* pi = dynamic_cast<PupilInfo*>( img->fGlass );
-  if(pi && mImg2PupilMap.find(img) == mImg2PupilMap.end()) {
-    Pupil* poop = new Pupil(img, mNest->GetShell());
-    fImg->fEye->RegisterROARWindow(poop);
-    mImg2PupilMap[img] = poop;
-  }
-}
-
-/**************************************************************************/
-
-FTW::PupilAm::PupilAm(FTW_Nest* n, OS::ZGlassImg* img) :
-  OS::A_View(img), mNest(n)
-{
-  if(mNest->GetNestInfo()->GetSpawnPupils()) {
-    ZList* l = dynamic_cast<ZList*>(fImg->fGlass);
-    lpZGlass_t d; l->Copy(d);
-    for(lpZGlass_i i=d.begin(); i!=d.end(); ++i) {
-      spawn_pupil( fImg->fEye->DemanglePtr(*i) );
-    }
-  }
-}
-
-FTW::PupilAm::~PupilAm()
-{
-  // should close Pupils !!!!?? or get command from nest?
-}
-
-/**************************************************************************/
-
-void FTW::PupilAm::AbsorbRay(Ray& ray)
-{
-  if(ray.fRQN == RayNS::RQN_list_add && mNest->GetNestInfo()->GetSpawnPupils()) {
-    spawn_pupil(ray.fBetaImg);
-  }
-}
-
-/**************************************************************************/
-// Nest Am
-/**************************************************************************/
-
-void FTW::NestAm::spawn_nest(OS::ZGlassImg* img)
-{
-  NestInfo* ni = dynamic_cast<NestInfo*>( img->fGlass );
-  if(ni && mImg2NestMap.find(img) == mImg2NestMap.end()) {
-    FTW_Nest* nest = mShell->SpawnNest(img);
-    mImg2NestMap[img] = nest;
-    nest->show();
-  }
-}
-
-/**************************************************************************/
-
-FTW::NestAm::NestAm(FTW_Shell* s, OS::ZGlassImg* img) :
-  OS::A_View(img), mShell(s)
-{
-  if(mShell->GetShellInfo()->GetSpawnNests()) {
-    ZList* l = dynamic_cast<ZList*>(fImg->fGlass);
-    lpZGlass_t d; l->Copy(d);
-    for(lpZGlass_i i=d.begin(); i!=d.end(); ++i) {
-      spawn_nest( fImg->fEye->DemanglePtr(*i) );
-    }
-  }
-}
-
-FTW::NestAm::~NestAm()
-{
-  // should close Nests !!!!?? or get command from nest?
-}
-
-/**************************************************************************/
-
-void FTW::NestAm::AbsorbRay(Ray& ray)
-{
-  if(ray.fRQN == RayNS::RQN_list_add && mShell->GetShellInfo()->GetSpawnNests()) {
-    spawn_nest(ray.fBetaImg);
   }
 }

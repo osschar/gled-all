@@ -258,8 +258,9 @@ void MCW_View::VarArg::StreamData(TBuffer& b)
 /**************************************************************************/
 
 MCW_View::MCW_View(FTW_Shell* shell) : 
-  FTW_Shell_Client(shell), Fl_Window(0,0,0)
+  FTW_SubShell(shell), Fl_Window(0,0,0)
 {
+  mWindow = this;
   // Watch out ... end() is not called ... all done in ParseMethodInfo.
   bSendOnChange = 0;
 }
@@ -366,7 +367,7 @@ void MCW_View::SetABG(ZGlass* alpha, ZGlass* beta, ZGlass* gamma)
   ZGlass* xx[] = { alpha, beta, gamma };
   for(int c=0; c<mCtxPack->children() && c<3; ++c) {
     CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(c) );
-    if(a)   a->SetImage(mShell->GetEye()->DemanglePtr(xx[c]));
+    if(a)   a->SetImage(mShell->DemanglePtr(xx[c]));
   }
 }
 
@@ -389,14 +390,14 @@ void MCW_View::Send()
 
   auto_ptr<ZMIR> mir( new ZMIR(ctx[0], ctx[1], ctx[2]) );
   mMInfo->ImprintMir(*mir);
-  mMInfo->FixMirBits(*mir, mShell->GetEye()->GetSaturnInfo());
+  mMInfo->FixMirBits(*mir, mShell->GetSaturnInfo());
 
   for(int i=0; i<mVarPack->children(); ++i) {
     VarArg* va = (VarArg*)(mVarPack->child(i));
     va->StreamData(*mir);
   }
 
-  mShell->GetEye()->Send(*mir);
+  mShell->Send(*mir);
 }
 
 void MCW_View::ChangeCallback()

@@ -10,13 +10,13 @@
 #include <Gled/GledTypes.h>
 #include <Gled/GledNS.h>
 #include "OptoStructs.h"
-#include "FTW_Shell.h"
+#include "FTW_SubShell.h"
 
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_SWM.H>
 
-class MCW_View : public FTW_Shell_Client,
+class MCW_View : public FTW_SubShell,
 		 public Fl_Window, public Fl_SWM_Client
 {
 

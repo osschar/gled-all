@@ -571,14 +571,14 @@ void Gled::error(const char* s) {
 
 /**************************************************************************/
 
-EyeInfo* Gled::SpawnEye(const char* name, const char* title)
+EyeInfo* Gled::SpawnEye(const char* libset, const char* eyector)
 {
   if(mSaturn == 0) {
     ISerr("Gled::SpawnEye Saturn has not been spawned");
     return 0;
   }
 
-  return SpawnEye(0, name, title);
+  return SpawnEye(0, 0, libset, eyector);
 }
 
 /**************************************************************************/

@@ -11,7 +11,7 @@
 class NestInfo;
 
 #include "OptoStructs.h"
-#include "FTW_Shell.h"
+#include "FTW_SubShell.h"
 #include "FTW.h"
 #include "MTW_Layout.h"
 class FTW_Leaf;
@@ -45,9 +45,9 @@ public:
 // FTW_Nest
 /**************************************************************************/
 
-class FTW_Nest : public OptoStructs::A_View,
-		 public FTW_Shell_Client,
-		 public Fl_Window, public Fl_SWM_Client
+class FTW_Nest : public FTW_SubShell,
+                 public OptoStructs::A_View,
+                 public Fl_Window, public Fl_SWM_Client
 {
   friend class FTW_Shell;
 
@@ -63,7 +63,6 @@ private:
 
 protected:
   NestInfo*	 mNestInfo;	// X{g}
-  FTW::PupilAm*	 pPupilAm;
 
   int		 mW;
   FTW_Nest_Ctrl* pCtrl;		// X{g}
@@ -102,6 +101,9 @@ protected:
   void label_nest();
 
 public:
+
+  static FTW_Nest* Create_FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
+
   FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w=64, int h=30);
   FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h);
   ~FTW_Nest();
@@ -133,8 +135,6 @@ public:
   void LinksView();
   void CustomView();
   void EnactLayout(const char* layout=0);
-  void ShowRnrCtrls();
-  void HideRnrCtrls();
 
   /**************************************************************************/
 
@@ -159,14 +159,10 @@ public:
   Fl_Color LeafName_Color(FTW_Leaf* leaf);
   Fl_Color AntName_Color(FTW_Ant* ant);
 
-  virtual int handle(int ev);
+  virtual int  handle(int ev);
+  virtual void resize(int x, int y, int w, int h);
 
   /**************************************************************************/
-
-  static Fl_Menu_Item	s_New_Menu[];
-  static Fl_Menu_Item	s_View_Menu[];
-  static Fl_Menu_Item	s_Set_Menu[];
-  static Fl_Menu_Item	s_Action_Menu[];
 
   static const int def_W;
   static const int def_H;

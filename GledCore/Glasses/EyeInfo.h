@@ -12,13 +12,17 @@
 #include <Glasses/SaturnInfo.h>
 
 class Saturn;
-
+class Eye;
 class TSocket;
 
 class EyeInfo : public ZMirEmittingEntity {
   MAC_RNR_FRIENDS(EyeInfo);
   friend class ZKing; friend class ZQueen; friend class ZSunQueen;
   friend class Saturn;
+
+public:
+  typedef Eye*	(*EyeCreator_foo)(TSocket*, EyeInfo*, ZGlass*);
+
 private:
   TSocket*	hSocket;	//!
 

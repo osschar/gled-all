@@ -8,12 +8,16 @@
 #define GledCore_FTW_Shell_H
 
 #include <Gled/GledTypes.h>
-#include <Glasses/ShellInfo.h>
-#include "OptoStructs.h"
+class SubShellInfo;
+class ShellInfo;
+
+#include "Eye.h"
+#include "FTW_SubShell.h"
 #include "FTW.h"
 class FTW_Leaf;
 class FTW_Nest;
-class FTW_Shell;
+
+class TSocket;
 
 #include <FL/Fl_SWM.H>
 #include <FL/Fl_Window.H>
@@ -24,33 +28,49 @@ class Fl_Menu_Button;
 
 /**************************************************************************/
 
-class FTW_Shell_Client {
- protected:
-  FTW_Shell*	mShell;
- public:
-  FTW_Shell_Client(FTW_Shell* s=0) : mShell(s) {}
-  virtual FTW_Shell* GetShell() { return mShell; }
-};
-
-/**************************************************************************/
-
-class FTW_Shell : public OptoStructs::A_View,
-		  public FTW_Shell_Client,
+class FTW_Shell : public Eye,
+		  public OptoStructs::A_View,
 		  public Fl_Window,
 		  public Fl_SWM_Manager, public Fl_SWM_Client
 {
 public:
-  enum		MType_e { MT_std=0, MT_err, MT_wrn, MT_msg };
   struct mir_call_data_list;
 
+  typedef FTW_SubShell*	(*SubShellCreator_foo)(FTW_Shell*, OptoStructs::ZGlassImg*);
+
+private:
+  void _bootstrap();
+  void _bootstrap_subshells();
+
 protected:
-  Eye*		mEye;		 // X{g}
   ShellInfo*	mShellInfo;	 // X{g}
 
-  FTW::NestAm*	 pNestAm;
+  // Standalone full-class views (MTW_Views) ... transients.
+  set<OptoStructs::ZGlassImg*> mMTW_Views;
 
+  // SubShells created via custom-gui interface (Pupils and Nests).
+  typedef hash_map<OptoStructs::ZGlassImg*, FTW_SubShell*>	    hpImg2pSShell_t;
+  typedef hash_map<OptoStructs::ZGlassImg*, FTW_SubShell*>::iterator hpImg2pSShell_i;
+
+  hpImg2pSShell_t mImg2SShell;
+  Int_t           mSubShellCount;
+
+  FTW_SubShell* spawn_subshell(OptoStructs::ZGlassImg* img);
+  void          kill_subshell(OptoStructs::ZGlassImg* img);
+
+  void set_canvased_subshell(OptoStructs::ZGlassImg* img);
+
+  // Windows that get redrawn on every Ray ... pupils, in principle.
+  typedef list<Fl_Window*>		lpFl_Window_t;
+  typedef list<Fl_Window*>::iterator	lpFl_Window_i;
+
+  lpFl_Window_t mRedrawOnAnyRay;
+
+  // Widgets.
   Fl_Pack*	 wMainPack;
-  FTW_Nest*	 mNest;		 // X{g}
+  Fl_Pack*       wMenuPack;
+  Fl_Window*     mEmptyCanvas;   // X{g}
+  Fl_Window*     mCurCanvas;     // X{g}
   Fl_OutputPack* wOutPack;
 
   FTW::Source_Selector*	mSource; // X{g}
@@ -58,21 +78,33 @@ protected:
 
   void label_shell();
 
-  set<OptoStructs::ZGlassImg*> mMTW_Views;
-
 public:
-  FTW_Shell(OptoStructs::ZGlassImg* img, const Fl_SWM_Manager* swm_copy);
+
+  static FTW_Shell* Create_FTW_Shell(TSocket*, EyeInfo*, ZGlass*);
+
+  FTW_Shell(TSocket* sock, EyeInfo* ei, const Fl_SWM_Manager* swm_copy);
   virtual ~FTW_Shell();
 
+  // Eye
+  virtual void InstallFdHandler();
+  virtual void PostManage(int ray_count);
+
+  // A_View
   virtual void AbsorbRay(Ray& ray);
 
+  // FTW_Shell
+
+  void SpawnSubShell(SubShellInfo* ssi, bool markup=false);
+  void RemoveSubShell(OptoStructs::ZGlassImg* img);
+
   void X_SetSource(FTW::Locator& loc);
-  void X_SetSource(ID_t id);
+  void X_SetSource(OptoStructs::ZGlassImg* img);
   void X_SetSink(FTW::Locator& loc);
+  void X_SetSink(OptoStructs::ZGlassImg* img);
   void X_ExchangeSourceAndSink();
 
-  void X_SetBeta(FTW::Locator& loc);
-  void X_SetGamma(FTW::Locator& loc);
+  void X_SetBeta(OptoStructs::ZGlassImg* img);
+  void X_SetGamma(OptoStructs::ZGlassImg* img);
 
   void X_SetLink(FTW::Locator& target);
   void X_ClearLink(FTW::Locator& target);
@@ -88,22 +120,24 @@ public:
 
   void ExportToInterpreter(OptoStructs::ZGlassImg* img, const char* varname);
 
-  FTW_Nest* SpawnNest(OptoStructs::ZGlassImg* img);
-  void      SpawnMTW_View(OptoStructs::ZGlassImg* img, bool show_p=true);
-  void	    SpawnMTW_View(OptoStructs::ZGlassImg* img, int x, int y, float xf=0, float yf=0);
-  void	    DitchMTW_View(OptoStructs::ZGlassImg* img);
-  void      RemoveMTW_Views();
-  void      SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
+  void SpawnMTW_View(OptoStructs::ZGlassImg* img, bool show_p=true);
+  void SpawnMTW_View(OptoStructs::ZGlassImg* img, int x, int y, float xf=0, float yf=0);
+  void DitchMTW_View(OptoStructs::ZGlassImg* img);
+  void RemoveMTW_Views();
+  void SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
 
-  void FillLocatorMenu(FTW::Locator& loc, Fl_Menu_Button& menu,
+  void RegisterROARWindow(Fl_Window* w)   { mRedrawOnAnyRay.push_back(w); }
+  void UnregisterROARWindow(Fl_Window* w) { mRedrawOnAnyRay.remove(w); }
+
+  void FillShellVarsMenu(OptoStructs::ZGlassImg* img, Fl_Menu_Button& menu,
 		       mir_call_data_list& mcdl, const string& prefix);
-  void FillImageMenu(OptoStructs::ZGlassImg* img, Fl_Menu_Button& menu,
+  void FillLensMenu(OptoStructs::ZGlassImg* img, Fl_Menu_Button& menu,
 		     mir_call_data_list& mcdl, const string& prefix);
-  void LocatorMenu(FTW::Locator& loc, int x, int y);
-  void ImageMenu(OptoStructs::ZGlassImg* img, int x, int y);
+  void FullMenu(OptoStructs::ZGlassImg* img, int x, int y);
+  void LensMenu(OptoStructs::ZGlassImg* img, int x, int y);
 
-  void Message(const char* msg, MType_e t=MT_std);
-  void Message(const string& msg, MType_e t=MT_std);
+  virtual void Message(const char* msg, Eye::MType_e t=MT_std);
+  virtual void Message(const string& msg, Eye::MType_e t=MT_std);
 
   int handle(int ev);
 
