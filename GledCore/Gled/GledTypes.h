@@ -65,8 +65,8 @@ struct LinkSpec {
 typedef list<LinkSpec>			lLinkSpec_t;
 typedef list<LinkSpec>::iterator	lLinkSpec_i;
 
-typedef unsigned long	TimeStamp_t;
-typedef unsigned int	UCIndex_t;	// Unckecked Index for ZVec/Mat
+typedef ULong_t		TimeStamp_t;
+typedef UInt_t		UCIndex_t;	// Unckecked Index for ZVec/Mat
 typedef Int_t		xxIndex_t;	// debug index type
 
 typedef	list<ID_t>		lID_t;
