@@ -10,7 +10,6 @@ AList			5	Glasses/AList
 ZDeque			6	Glasses/ZDeque
 ZNode			16	Glasses/ZNode		.
 ZNodeLink		17	Glasses/ZNodeLink	.
-ZRnrModList		18	Glasses/ZRnrModList	.
 
 # God & Rulers
 ZGod			32	Glasses/ZGod
@@ -61,12 +60,13 @@ ScreenDumper		168	Glasses/ScreenDumper
 ScreenText		169	Glasses/ScreenText	.
 
 # GL State Modifiers
-ZGlStateBase		178	Glasses/ZGlStateBase
-ZGlLightModel		179	Glasses/ZGlLightModel	.
-ZGlMaterial		180	Glasses/ZGlMaterial	.
-ZGlBlending		181	Glasses/ZGlBlending	.
-ZRlNameRnrCtrl		182	Glasses/ZRlNameRnrCtrl	.
-ZRlFont			183	Glasses/ZRlFont		.
+ZRnrModBase		178	Glasses/ZRnrModBase	.
+ZRnrModList		179	Glasses/ZRnrModList	.
+ZGlLightModel		180	Glasses/ZGlLightModel	.
+ZGlMaterial		181	Glasses/ZGlMaterial	.
+ZGlBlending		182	Glasses/ZGlBlending	.
+ZRlNameRnrCtrl		183	Glasses/ZRlNameRnrCtrl	.
+ZRlFont			184	Glasses/ZRlFont		.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
