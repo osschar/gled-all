@@ -107,17 +107,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 # Shorthands for keys in comment field
 %X_TO_KEY = ( 'X' => 'Xport', 'L' => 'Link', 'C' => 'Ctx', 'T' => 'Tags' );
 
-# Recognized fields for Xporter
-# g/s get/set, r ref, p ptr, t/T trans/tring, e provide just remote exec Set
-# These not used any more ... a god, we really need a proper parser soon.
-$Xport_FIELDS = "[gGsStTrRpPeEdD]";
-
-# l ~ link to list
-$Link_FIELDS = "[lL]";
-
-# e ~ export
-$Method_FIELDS = "[eE]";
-
+# Basic types (streamed via operator <</>>)
 @SimpleTypes = 
   ( "char", "Char_t", "unsigned char", "UChar_t", "short", "Short_t",
     "unsigned short", "UShort_t", "long", "Int_t", "unsigned long",
@@ -442,7 +432,7 @@ while($c !~ m!\G\s*$!osgc) {
 
     # Go for Key{Value} construts ... assert Xport exists before parsing on
     print "Trying for $varname: $comment\n" if $DEBUG;;
-    if($comment =~ m!X|(?:Xport)\{.*\}!o) {
+    if($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o) {
       my $member = {};
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
       
@@ -535,7 +525,7 @@ while($c !~ m!\G\s*$!osgc) {
     }
     if($methodname eq $CLASSNAME && not $VirtualBase) {
       # Here was constructor-glue.
-    } elsif($comment =~ m!X|(?:Xport)\{$Method_FIELDS+\}!o) {
+    } elsif($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o) {
       my $member = {};
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
 
@@ -652,14 +642,11 @@ for $r (@Members) {
       my $h = $GetSetMap{$r->{Type}};
       $type = "$h->{GetType}";
       $val = "$r->{Varname}$h->{GetMeth}";
-      $constret = 'const ' if $1 eq 'G';
-      #print H7 "const " if $const and  $h->{GetType} =~ /&$/;
-      #print H7 "$h->{GetType}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}$h->{GetMeth}; }\n";
+      $constret = 'const ' if ($1 eq 'G'and  $h->{GetType} =~ /&|\*$/);
     } else {
       $type = "$r->{Type}";
       $val = "$r->{Varname}";
-      $constret = 'const ' if ($1 eq 'G' and  $h->{GetType} =~ /&|\*$/);
-      #print H7 "$r->{Type}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}; }\n";
+      $constret = 'const ' if ($1 eq 'G' and  $r->{Type} =~ /&|\*$/);
     }
     if($IsGlass && $LOCK_GET_METHS) {
       $pre = "ReadLock(); ";
