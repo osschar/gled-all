@@ -68,6 +68,12 @@ int main(int argc, char **argv)
   }
   args.clear();
 
+  // Spawn TRint
+  if(gled->GetShowSplash())
+    cout <<"Staring ROOT command-line interpreter ...\n";
+  gint = new TRint("TRint", &rargc, rargv);
+  gint->SetPrompt("saturn[%d] ");
+
   // Prepare gled exit condition & Spawn saturn
   GCondition gled_exit;
   gled_exit.Lock();
@@ -75,12 +81,6 @@ int main(int argc, char **argv)
   if(gled->GetAutoSpawn()) {
     gled->SpawnSunOrSaturn();  
   }
-
-  // Spawn TRint
-  if(gled->GetShowSplash())
-    cout <<"Staring ROOT command-line interpreter ...\n";
-  gint = new TRint("TRint", &rargc, rargv);
-  gint->SetPrompt("saturn[%d] ");
 
   // Process macros;
   // -q added to options, so it exits after macro processing

@@ -76,6 +76,13 @@ int main(int argc, char **argv)
   }
   args.clear();
 
+  // Spawn TRint
+  if(gled->GetShowSplash())
+    cout <<"Staring ROOT command-line interpreter ...\n";
+  gint = new TRint("TRint", &rargc, rargv);
+  gint->SetPrompt("gled[%d] ");
+  printf("Use context menu in Nest to import lenses as CINT variables.\n");
+
   // Run GUI
   GThread gled_thread((GThread_foo)Gled::Gled_runner_tl, gled, false);
   if( gled_thread.Spawn() ) {
@@ -87,14 +94,6 @@ int main(int argc, char **argv)
   if(gled->GetAutoSpawn()) {
     gled->SpawnSunOrSaturn();
   }
-
-  // Spawn TRint
-  if(gled->GetShowSplash())
-    cout <<"Staring ROOT command-line interpreter ...\n";
-  gint = new TRint("TRint", &rargc, rargv);
-  gint->SetPrompt("gled[%d] ");
-
-  printf("Use context menu in Nest to import lenses as CINT variables.\n");
 
   // Process macros;
   // -q added to options, so it exits after macro processing
