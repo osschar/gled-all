@@ -1,3 +1,48 @@
+2005-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Rewrite of reverse-reference handling to use hash_map instead of a
+	list. When almost done I realized that hash_multiset would be the
+	right choice ... well ... next time.
+	Method remove_references_to() now returns number of removed refs.
+	
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	Method remove_references_to() now returns number of removed refs.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Support for (recursive) removal of lists. RemoveLens(ZGlass* lens)
+	spawns a dedicated thread that inspects the directory structure
+	and emits flares to collapse complete sub-directories in a single
+	method PutListElementsToPurgatory(ZList* list). It's also viewer
+	friendly. Removal of 128*1024 ZNodes takes 20sec (with one eye
+	connected).
+
+	Lenses with non-zero EyeRefCount are now turned into zombies and
+	deleted later.
+	
+	Made stamping of ID-space changes (number of free/taken IDs) 
+	optional (controled by Bool_t bStampIdOps).
+	
+	* Gled/GledTypes.h:
+	Added typedefs for hash_map<ZGlass*, Int_t>.
+
+	* macros/sun.C:
+	Increased capacity of default queen Scenes to 256*1024.
+
+	* Ephra/Saturn.cxx:
+	* Eye/Eye.cxx:
+	Sanitization of messages and debug output.
+
+	* Eye/FTW_Branch.cxx:
+	Use Leoim list size for display of ZList size.
+
 2005-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Branch.cxx:
