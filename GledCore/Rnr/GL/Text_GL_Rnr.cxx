@@ -5,29 +5,34 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Text_GL_Rnr.h"
-#include <RnrBase/RnrDriver.h>
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/ZRlFont_GL_Rnr.h>
 #include <FL/gl.h>
+
+#define PARENT ZNode_GL_Rnr
 
 /**************************************************************************/
 
 void Text_GL_Rnr::_init()
-{}
+{
+  mFontRM = 0;
+}
 
 /**************************************************************************/
 
 void Text_GL_Rnr::Draw(RnrDriver* rd)
 {
-  if(mText->bUseDispList) {
-    ZGlass_GL_Rnr::Draw(rd);
-  } else {
-    Render(rd);
+  RNRDRIVER_GET_RNRMOD(font, rd, ZRlFont);
+  if(font != mFontRM || font->bRebuildDL) {
+    bRebuildDL = true;
+    mFontRM    = font;
   }
+  PARENT::Draw(rd);
 }
 
 void Text_GL_Rnr::Render(RnrDriver* rd)
 {
-  GLTextNS::TexFont *txf = rd->GetTexFont();
+  RNRDRIVER_CAST_RNRMOD_RNR(font, mFontRM, ZRlFont);
+  GLTextNS::TexFont *txf = font_rnr->GetFont();
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 
