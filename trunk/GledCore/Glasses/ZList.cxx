@@ -235,20 +235,22 @@ void ZList::RemoveLast(ZGlass* g)
 
 void ZList::ClearList()
 {
+  static const string _eh("ZList::ClearList ");
+
   if(mSize == 0) return;
 
   lpZGlass_t foo;
-  ISdebug(1, "ZList::ClearList locking list.");
+  ISdebug(1, GForm("%slocking list '%s'.", _eh.c_str(), GetName()));
   mListMutex.Lock();
   foo.swap(mGlasses);
   clear_list();
   StampListClear();
   mListMutex.Unlock();
-  ISdebug(1, "ZList::ClearList unlocked list.");
+  ISdebug(1, GForm("unlocked list '%s'.", _eh.c_str(), GetName()));
   for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
     (*i)->DecRefCount(this);
   }
-  ISdebug(1, "ZList::ClearList finished.");
+  ISdebug(1, GForm("%sfinished for '%s'.", _eh.c_str(), GetName()));
 }
 
 void ZList::ClearAllReferences()
@@ -277,9 +279,12 @@ Bool_t ZList::Has(ZGlass* g)
 TimeStamp_t ZList::StampListAdd(ZGlass* g, ZGlass* b4)
 {
   ++mTimeStamp;
-  if(mQueen) {
-    Ray r(Ray::RQN_list_add, mTimeStamp, this, g, b4);
-    mQueen->EmitRay(r);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_list_add, mTimeStamp, Ray::EB_StructuralChange));
+    ray->SetBeta(g);
+    ray->SetGamma(b4);
+    mQueen->EmitRay(ray);
   }
   if(mStampListAdd_CB)
     mStampListAdd_CB(this, g, b4, mStampListAdd_CBarg);
@@ -290,9 +295,11 @@ TimeStamp_t ZList::StampListAdd(ZGlass* g, ZGlass* b4)
 TimeStamp_t ZList::StampListRemove(ZGlass* g)
 {
   ++mTimeStamp;
-  if(mQueen) {
-    Ray r(Ray::RQN_list_remove, mTimeStamp, this, g);
-    mQueen->EmitRay(r);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_list_remove, mTimeStamp, Ray::EB_StructuralChange));
+    ray->SetBeta(g);
+    mQueen->EmitRay(ray);
   }
   if(mStampListRemove_CB)
     mStampListRemove_CB(this, g, mStampListRemove_CBarg);
@@ -303,9 +310,10 @@ TimeStamp_t ZList::StampListRemove(ZGlass* g)
 TimeStamp_t ZList::StampListRebuild()
 {
   ++mTimeStamp;
-  if(mQueen) {
-    Ray r(Ray::RQN_list_rebuild, mTimeStamp, this);
-    mQueen->EmitRay(r);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_list_rebuild, mTimeStamp, Ray::EB_StructuralChange));
+    mQueen->EmitRay(ray);
   }
   if(mStampListRebuild_CB)
     mStampListRebuild_CB(this, mStampListRebuild_CBarg);
@@ -316,9 +324,10 @@ TimeStamp_t ZList::StampListRebuild()
 TimeStamp_t ZList::StampListClear()
 {
   ++mTimeStamp;
-  if(mQueen) {
-    Ray r(Ray::RQN_list_clear, mTimeStamp, this);
-    mQueen->EmitRay(r);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_list_clear, mTimeStamp, Ray::EB_StructuralChange));
+    mQueen->EmitRay(ray);
   }
   if(mStampListClear_CB)
     mStampListClear_CB(this, mStampListClear_CBarg);
@@ -379,12 +388,12 @@ void ZList::Streamer(TBuffer &b)
 
 /**************************************************************************/
 
-Int_t ZList::RebuildAll(An_ID_Demangler* idd)
+Int_t ZList::RebuildAllRefs(An_ID_Demangler* idd)
 {
-  return RebuildLinks(idd) + RebuildList(idd);
+  return RebuildLinkRefs(idd) + RebuildListRefs(idd);
 }
 
-Int_t ZList::RebuildList(An_ID_Demangler* idd)
+Int_t ZList::RebuildListRefs(An_ID_Demangler* idd)
 {
   Int_t ret = 0;
   mGlasses.clear(); mSize = 0;
