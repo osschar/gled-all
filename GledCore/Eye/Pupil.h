@@ -68,7 +68,7 @@ public:
   void FullScreen();
 
   void Render();
-  void Pick();
+  OptoStructs::ZGlassImg* Pick(bool make_menu_p=false);
 
   virtual void draw();
   // virtual void draw_overlay();
