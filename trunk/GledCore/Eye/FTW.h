@@ -11,6 +11,8 @@
 class FTW_Shell; class FTW_Nest;
 class FTW_Leaf;  class FTW_Ant;
 
+#include "FltkGledStuff.h"
+
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Pack.H>
@@ -114,18 +116,13 @@ namespace FTW {
 
     void set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant, const char* prefix="");
 
-    string	m_name;
-
-    bool	b_dnd_tried;
-
   public:
     NameButton(Loc_e l, int x, int y, int w, int h, const char* t=0);
 
     NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t=0);
     NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t=0);
 
-    void set_label(const char* l);
-
+    void set_label(const char* t) { if(t) copy_label(t); else label(0); }
     int handle(int ev);
   };
 
@@ -149,7 +146,7 @@ namespace FTW {
 
   class Top_Selector {
   public:
-    enum Type_e { T_Undef=-1, T_Locator, T_Inst, T_DevNull, T_DND };
+    enum Type_e { T_Undef=-1, T_Locator, T_Inst, T_Direct, T_DevNull };
 
   protected:
     FTW_Shell*	m_shell;
@@ -212,7 +209,7 @@ namespace FTW {
   /**************************************************************************/
 
   class Locator_Selector : public Bot_Selector, public LocatorConsumer,
-		       public Fl_Group
+			   public Fl_Group
   {
   public:
     enum LS_Type_e { LST_Undef=0, LST_Point, LST_Mark, LST_Own };
@@ -253,22 +250,22 @@ namespace FTW {
 
   /**************************************************************************/
 
-  /*
-    class ListOpsSelector : public Fl_Group {
-    public:
-    enum Type_e { T_Source, T_Sink };
+  class Direct_Selector : public Bot_Selector, public Fl_Group {
+  protected:
+    Fl_Button*		wTop;
+    FltkGledStuff::LensNameBox*	wNameBox;
 
-    protected:
-    Type_e	m_type;
+  public:
+    Direct_Selector(Top_Selector* ts, Top_Selector::Type_e t);
 
-    public:
-    ListOpsSelector(Type_e s);
-    };
-  */
+    virtual void activate  ();
+    virtual void deactivate();
+
+    ID_t get_id();
+    void set_id(ID_t id);
+  };
 
   /**************************************************************************/
-
-  // /dev/null selector
 
   class Null_Selector : public Bot_Selector, public Fl_Group {
   protected:
@@ -281,7 +278,6 @@ namespace FTW {
     virtual void activate  ();
     virtual void deactivate();
     virtual int handle(int ev);
-
   };
 
   /**************************************************************************/
@@ -292,6 +288,9 @@ namespace FTW {
   protected:
     Locator_Selector*	wLoc_Sel;
     Inst_Selector*	wInst_Sel;
+    Direct_Selector*	wDir_Sel;
+
+    Bot_Selector*	wCurrent;
 
     //    ListOpsSelector*	wListOpsSel;
     
