@@ -84,6 +84,7 @@ class MCW_View : public FTW_SubShell,
 
   void ParseMethodInfo(GledNS::MethodInfo* mi) throw(string);
   void SetABG(ZGlass* alpha, ZGlass* beta=0, ZGlass* gamma=0);
+  void SetABG(ID_t alpha, ID_t beta=0, ID_t gamma=0);
 
   void Send();
   void ChangeCallback();
@@ -96,7 +97,12 @@ class MCW_View : public FTW_SubShell,
   static void s_Exit_cb(Fl_Widget* w, MCW_View* ud)     { delete ud; };
   static void s_SendExit_cb(Fl_Widget* w, MCW_View* ud) { ud->Send(); delete ud; };
 
-#include "MCW_View.h7"
+  //----------------------------------------------------------------
+
+  static void split_argument(const string& arg,
+			     string& type, string& name, string& def);
+  static void unrefptrconst_type(string& type);
+
 }; // endclass MCW_View
 
 #endif
