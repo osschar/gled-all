@@ -12,6 +12,8 @@
 #include <pthread.h>
 #endif
 
+class ZGlass;
+
 /**************************************************************************/
 // GMutex
 /**************************************************************************/
@@ -43,7 +45,7 @@ public:
 
 
 /**************************************************************************/
-// GMutexHolder
+// GMutexHolder / AntiHolder
 /**************************************************************************/
 
 class GMutexHolder {
@@ -53,6 +55,40 @@ class GMutexHolder {
   virtual ~GMutexHolder()             { mMutex.Unlock(); }
 
   ClassDef(GMutexHolder, 0)
+};
+
+// Usability of AntiHolder limited to cases when you're sure
+// the mutex is locked exactly once.
+
+class GMutexAntiHolder {
+  GMutex& mMutex;
+ public:
+  GMutexAntiHolder(GMutex& m) : mMutex(m) { mMutex.Unlock();   }
+  virtual ~GMutexAntiHolder()             { mMutex.Lock(); }
+
+  ClassDef(GMutexAntiHolder, 0)
+};
+
+/**************************************************************************/
+// GLensRead/WriteHolders
+/**************************************************************************/
+
+class GLensReadHolder {
+  ZGlass* mLens;
+ public:
+  GLensReadHolder(ZGlass* lens); 
+  virtual ~GLensReadHolder();
+
+  ClassDef(GLensReadHolder, 0)
+};
+
+class GLensWriteHolder {
+  ZGlass* mLens;
+ public:
+  GLensWriteHolder(ZGlass* lens); 
+  virtual ~GLensWriteHolder();
+
+  ClassDef(GLensWriteHolder, 0)
 };
 
 #endif
