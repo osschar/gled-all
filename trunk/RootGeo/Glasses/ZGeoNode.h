@@ -36,7 +36,7 @@ protected:
   TString               mTNodeName; // X{GS}          
   Int_t			mNNodes;    // X{G}   7 ValOut(-join=>1);
   Float_t		mNodeAlpha; // X{GS}  7 Value(-range=>[0,1,1,1000])
-  TString               mMat;       // X{GS}  7 Textor(-join=>1)
+  TString               mMaterial;  // X{GS}  7 Textor(-join=>1)
   ZColor		mColor;     // X{GSP} 7 ColorButt()
   TString		mDefFile;   // X{GS} 7 Filor()
 
@@ -65,9 +65,11 @@ public:
   void ImportNodesWCollect();              // X{Ed} 7 MButt()
 
   // Persistence.
-  void SaveToFile(const Text_t* file=0);   // X{E}  7 MButt(-join=>1)
-  void LoadFromFile(const Text_t* file=0); // X{Ed} 7 MButt()
+  void SaveToFile(const Text_t* file=0);   // X{E}  7 MCWButt(-join=>1)
+  void LoadFromFile(const Text_t* file=0); // X{Ed} 7 MCWButt()
   virtual void Restore();                  // X{Ed} 7 MButt()
+
+  //--------------------------------
 
   // Manual Get/Set-methods
   void SetTNode(TGeoNode* n)
