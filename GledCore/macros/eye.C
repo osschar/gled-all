@@ -14,7 +14,8 @@ void eye(const Text_t* eye_name="Eye of Ra",
     PupilInfo* pupil = new PupilInfo(pupil_name);
     fire_queen->CheckIn(pupil);
     shell->GetPupils()->Add(pupil);
-    pupil->Add(scenes->First());
+    if(scenes->First())
+      pupil->Add(scenes->First());
   }
 
   Gled::theOne->SpawnEye(shell, eye_name);
