@@ -10,7 +10,7 @@
 //
 
 #include "ZFireQueen.h"
-
+#include "ZEunuch.h"
 #include "ZFireQueen.c7"
 
 ClassImp(ZFireQueen)
@@ -19,22 +19,25 @@ ClassImp(ZFireQueen)
 
 void ZFireQueen::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mEunuchs = 0;
 }
 
 /**************************************************************************/
 
-void ZFireQueen::AdEnlightenment()
+void ZFireQueen::bootstrap()
 {
-  PARENT_GLASS::AdEnlightenment();
-  if(mEunuchs == 0) {
-    ZHashList* l = new ZHashList("Eunuchs");
-    //l->SetElementFID(ZEunuch()::FID());
-    mQueen->CheckIn(l);
-    SetEunuchs(l);
-  }
+  PARENT_GLASS::bootstrap();
+
+  ZHashList* l = new ZHashList("Eunuchs");
+  l->SetElementFID(ZEunuch::FID());
+  CheckIn(l); SetEunuchs(l); l->SetMIRActive(false);
 }
 
-
 /**************************************************************************/
+
+ZGlass* ZFireQueen::DemangleID(ID_t id){
+  // This should serve to properly demangle external references for comets.
+  // FireQueens ignore dependencies.
+
+  return mSaturn->DemangleID(id);
+}
