@@ -100,24 +100,25 @@ void ZGlass::unreference_all() {
 
 /**************************************************************************/
 
-void ZGlass::remove_references_to(ZGlass* lens)
+Int_t ZGlass::remove_references_to(ZGlass* lens)
 {
   // Removes all references to *lens*.
-  // Heavily virtual ... lists overrirde it but also call the ZGlass version
+  // Virtual ... lists overrirde it but also call the ZGlass version
   // for unreferencing of links.
-  // Calls DecRefCount and emits Rays.
+  // Emits Rays, but does NOT call DecRefCount: this is done by wrapper
+  // RemoveReferencesTo() (and sometimes by ZQueen during lens delition).
 
   lppZGlass_t link_refs;
   CopyLinkRefs(link_refs);
-  int n = 0;
+  Int_t n = 0;
   for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
     if(**i == lens) {
-      (**i)->DecRefCount(this);
       **i = 0;
       ++n;
     }
   }
   if(n) StampLink();
+  return n;
 }
 
 /**************************************************************************/
@@ -329,59 +330,54 @@ Short_t ZGlass::IncRefCount(ZGlass* from)
       throw(_eh + "lens not accepting references.");
     }
     switch(from->mQueen->GetKing()->GetLightType()) {
-    case ZKing::LT_Moon:
-      ++mMoonRefCount; ++mRefCount; mReverseRefs.push_front(from);
-      break;
-    case ZKing::LT_Sun:
-      ++mSunRefCount; ++mRefCount; mReverseRefs.push_back(from);
-      break;
+    case ZKing::LT_Moon: ++mMoonRefCount; break;
+    case ZKing::LT_Sun:  ++mSunRefCount;  break;
     case ZKing::LT_Fire:
-      ++mFireRefCount; ++mRefCount; mReverseRefs.push_back(from);
-      break;
-    default:
-      mQueen->SubjectRefCntUnlock();
-      throw(_eh + "King in undefined state. Ignoring.");
+    default:		 ++mFireRefCount; break;
     }
+    ++mRefCount;
+    ++mReverseRefs[from];
     mQueen->SubjectRefCntUnlock();
     // Stamp(FID());
   }
   return mRefCount;
 }
 
-Short_t ZGlass::DecRefCount(ZGlass* from)
+void ZGlass::dec_ref_count(hpZGlass2Int_i& i, UShort_t n)
+{
+  switch(i->first->mQueen->GetKing()->GetLightType()) {
+  case ZKing::LT_Moon: mMoonRefCount -= n; break;
+  case ZKing::LT_Sun:  mSunRefCount  -= n; break;
+  case ZKing::LT_Fire:
+  default:	       mFireRefCount -= n; break;
+  }
+  mRefCount -= n;
+  i->second -= n;
+}
+
+Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
 {
   // Called to notify *this* that it is no longer referenced by lens from.
 
+  static const string _eh("ZGlass::DecRefCount ");
+
   if(mQueen && from->mQueen) {
     mQueen->SubjectRefCntLock();
-    switch(from->mQueen->GetKing()->GetLightType()) {
-    case ZKing::LT_Moon: {
-      lpZGlass_i i = find(mReverseRefs.begin(), mReverseRefs.end(), from);
-      if(i != mReverseRefs.end()) {
-	--mMoonRefCount; --mRefCount;
-	mReverseRefs.erase(i);
-      }
-      break;
+    
+    hpZGlass2Int_i i = mReverseRefs.find(from);
+    if(i == mReverseRefs.end()) {
+      mQueen->SubjectRefCntUnlock();
+      ISerr(_eh + Identify() + " not referenced by " + from->Identify() + ".");
     }
-    case ZKing::LT_Sun: {
-      lpZGlass_ri i = find(mReverseRefs.rbegin(), mReverseRefs.rend(), from);
-      if(i != mReverseRefs.rend()) {
-	--mSunRefCount; --mRefCount;
-	mReverseRefs.erase((++i).base());
-      }
-      break;
+    if(n > i->second) {
+      ISwarn(_eh + GForm("%s, called by %s: mismatch %d > %d.", Identify().c_str(),
+			 from->Identify().c_str(), n, i->second));
+      n = i->second;
     }
-    case ZKing::LT_Fire: {
-      lpZGlass_ri i = find(mReverseRefs.rbegin(), mReverseRefs.rend(), from);
-      if(i != mReverseRefs.rend()) {
-	--mFireRefCount; --mRefCount;
-	mReverseRefs.erase((++i).base());
-      }
-      break;
-    }
-    default:
-      ISerr("ZGlass::IncRefCount King in undefined state");
-    }
+
+    dec_ref_count(i, n);
+
+    if(i->second <= 0) mReverseRefs.erase(i);
     if(mRefCount == 0 && mQueen) mQueen->ZeroRefCount(this);
     mQueen->SubjectRefCntUnlock();
     // Stamp(FID());
@@ -419,6 +415,13 @@ void ZGlass::ClearLinks()
 void ZGlass::ClearAllReferences()
 {
   ClearLinks();
+}
+
+Int_t ZGlass::RemoveReferencesTo(ZGlass* lens)
+{
+  Int_t n = remove_references_to(lens);
+  if(n) lens->DecRefCount(this, n);
+  return n;
 }
 
 /**************************************************************************/

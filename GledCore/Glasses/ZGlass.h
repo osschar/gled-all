@@ -86,7 +86,10 @@ protected:
   Bool_t	bMIRActive;	//  X{GS} 7 BoolOut(-join=>1)
   Bool_t	bAcceptRefs;	//  X{GS} 7 BoolOut()
 
-  lpZGlass_t	mReverseRefs;	//! lenses that reference *this*
+#ifndef __CINT__
+  hpZGlass2Int_t mReverseRefs;  //! lenses that reference *this*
+  void dec_ref_count(hpZGlass2Int_i& i, UShort_t n);
+#endif
   UShort_t	mRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
   UShort_t	mMoonRefCount;	//! X{G}  7 ValOut(-width=>4)
   UShort_t	mSunRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
@@ -98,7 +101,7 @@ protected:
   virtual void reference_all();
   virtual void unreference_all();
 
-  virtual void remove_references_to(ZGlass* lens);
+  virtual Int_t remove_references_to(ZGlass* lens);
 
   // Mutexen
   mutable GMutex mReadMutex;    //!
@@ -174,7 +177,7 @@ public:
 
   // RefCount
   Short_t IncRefCount(ZGlass* from);
-  Short_t DecRefCount(ZGlass* from);
+  Short_t DecRefCount(ZGlass* from, UShort_t n=1);
   // here also need ReRef(from, old_queen, new_queen) or sth.
   Short_t IncEyeRefCount();
   Short_t DecEyeRefCount();
@@ -182,6 +185,7 @@ public:
   // Link handling
   void         ClearLinks();
   virtual void ClearAllReferences();
+  Int_t        RemoveReferencesTo(ZGlass* lens);
 
   // Queries
   virtual ZGlass* GetLinkByName(const Text_t* link_name);
@@ -212,7 +216,7 @@ public:
 
 #include "ZGlass.h7"
   ClassDef(ZGlass, 1) // Base class of Gled enabled classes.
-    }; // endclass ZGlass
+}; // endclass ZGlass
 
 GlassIODef(ZGlass);
 
