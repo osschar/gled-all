@@ -21,7 +21,7 @@
 	* Rnr/GL/Cylinder_GL_Rnr.cxx:
 	* Rnr/GL/Cylinder_GL_Rnr.h:
 	* glass.list:
-	New glass Cylinder. A generic interface to gluCylinder.
+	From Alja: new glass Cylinder. A generic interface to gluCylinder.
 
 2005-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
