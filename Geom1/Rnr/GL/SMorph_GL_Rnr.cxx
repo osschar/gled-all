@@ -7,7 +7,7 @@
 #include "SMorph_GL_Rnr.h"
 #include <Rnr/GL/TubeTvor_GL_Rnr.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 void SMorph_GL_Rnr::Draw(RnrDriver* rd)
 {

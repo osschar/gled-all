@@ -8,5 +8,8 @@ SMorph		16	Glasses/SMorph		.
 Board		17	Glasses/Board		.
 RectTerrain	18	Glasses/RectTerrain	.
 
+WSSeed		64	Glasses/WSSeed		.
+WSPoint		65	Glasses/WSPoint		.
+
 Mover		128	Glasses/Mover
 Sleeper		129	Glasses/Sleeper

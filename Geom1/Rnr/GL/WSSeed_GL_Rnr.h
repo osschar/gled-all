@@ -4,24 +4,27 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Geom1_SMorph_GL_Rnr_H
-#define Geom1_SMorph_GL_Rnr_H
+#ifndef Geom1_WSSeed_GL_RNR_H
+#define Geom1_WSSeed_GL_RNR_H
 
-#include <Glasses/SMorph.h>
+#include <Glasses/WSSeed.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class SMorph_GL_Rnr : public ZNode_GL_Rnr {
+class WSSeed_GL_Rnr : public ZNode_GL_Rnr {
 private:
+  void _init();
 
 protected:
-  SMorph*	mSMorph;
+  WSSeed*	mWSSeed;
+
+  void vert(WSPoint* f, Real_t t);
 
 public:
-  SMorph_GL_Rnr(SMorph* m) : ZNode_GL_Rnr(m), mSMorph(m) {}
+  WSSeed_GL_Rnr(WSSeed* idol) : ZNode_GL_Rnr(idol), mWSSeed(idol) {}
 
   virtual void Draw(RnrDriver* rd);
   virtual void Triangulate();
 
-}; // endclass SMorph_GL_Rnr
+}; // endclass WSSeed_GL_Rnr
 
 #endif
