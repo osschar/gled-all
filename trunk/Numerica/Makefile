@@ -20,7 +20,5 @@ include ${GLEDSYS}/make/make_base.inc
 
 # user targets go here; enumerate them in LIBSET_TARGETS
 
-.PHONY:	libset_clean libset_distclean
-# this is user-definable ... must clean all local stuff
-libset_clean:
-libset_distclean:
+clean::
+distclean::
