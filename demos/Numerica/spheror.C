@@ -29,5 +29,10 @@
 
 
   // Spawn GUI
-  gROOT->ProcessLine(".x eye.C");
+  gROOT->Macro("eye.C");
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(sph_scene);
+    pupil->SetUpRefAxis(3);
+  }
 }
