@@ -55,7 +55,7 @@ protected:
 
   // Node info
 
-  TString	mCPU_Model;	// X{GS} 7 TextOut(-join=>1)
+  TString	mCPU_Model;	// X{GS} 7 TextOut()
   UShort_t	mCPU_Freq;	// X{GS} 7 ValOut(-width=>4, -join=>1)
   UShort_t	mCPU_Num;	// X{GS} 7 ValOut(-width=>4)
 
