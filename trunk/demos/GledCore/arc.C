@@ -49,7 +49,7 @@ void arc()
     l->MoveLF(3, 1.6);
     scenes->CheckIn(l);
     base_box->Add(l);
-    l->SetGlass(pi_box);
+    l->SetLens(pi_box);
   }
 
   Box* b = new Box("Top box");
