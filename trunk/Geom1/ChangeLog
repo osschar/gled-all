@@ -1,3 +1,75 @@
+2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+        ==================================================
+        Check-in of major changes from 1.2.3 towards 1.2.4
+        ==================================================
+
+	Changes that influence several groups of files:
+        ===============================================
+        
+        [RD7] RnrDriver now uses exactly 7 rnr levels
+        ---------------------------------------------
+        This allowed for a simplification in declaration of RnrCtrl in a
+        glass header. Most glasses are affected by this; the files with
+        *only* this change are not listed in in this entry.
+
+	* FL/Fl_LorentzVector.cxx:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	Changed variable ordering to be in accordance with TLorentzVector
+	(x,y,z,t).
+	
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Amphitheatre.h:
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/Amphitheatre_GL_Rnr.h:
+	New files: implementation of amphitheatre for placing of ZNode
+	descendants. Includes methods for automatic placement of assigned
+	nodes with traveling towards the nearest free chair.
+	
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	Selection of arbitrary texture coordinate limits (offers
+	subviews and repeated tiling).
+
+	* Glasses/MultiBoard.cxx:
+	* Glasses/MultiBoard.h:
+	New files; sub class of Board with a list of ZImages and Next/Prev
+	methods. Useful for slide shows.
+	
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	Selection of arbitrary texture coordinate limits (offers
+	subviews and repeated tiling).
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Texture animation, methods for obtaining transformation matrix at
+	a given time.
+	
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	New files; subclass of WSSeed for connecting two nodes (supports
+	animated connect and traveling of spheres along the path).
+	
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+	Can specify internal GL image format, support for shadowing (load
+	on demand, usefull for textures that are stored in GL anyway).
+	
+	* glass.list:
+	New glasses: Amphitheatre, MultiBoard, WSTube.
+	
+	* Glasses/Mover.h:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Minor beautifications.
+	
 2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Rect.h:
