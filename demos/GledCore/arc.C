@@ -36,7 +36,9 @@ void arc()
   boxer(4, pi_box, scenes, 22.5*TMath::Pi()/180, 0.98, 0.8);
 
   Box* base_box = new Box("Base box");
+  base_box->RotateLF(1, 2, TMath::Pi()/4);
   base_box->SetABC(12, 12, 1);
+  base_box->SetColor(0.9, 0.8, 1);
   scenes->CheckIn(base_box);
   arcs->Add(base_box);
 
@@ -58,11 +60,13 @@ void arc()
   base_box->Add(b);
 
   Lamp* lamp = new Lamp("Lamp");
+  lamp->SetScale(1);
   lamp->SetDiffuse(0.8, 0.8, 0.8);
-  lamp->Set3Pos(5, 5, 10); lamp->RotateLF(1,2, TMath::Pi());
+  lamp->Set3Pos(5, -5, 10); lamp->RotateLF(1,2, TMath::Pi());
   scenes->CheckIn(lamp); arcs->Add(lamp);
   arcs->GetGlobLamps()->Add(lamp);
-  ZNode* n = new Sphere(0.5, "Sph");
-  scenes->CheckIn(n); lamp->Add(n);
 
+
+  // Spawn GUI
+  gROOT->ProcessLine(".x eye.C");
 }
