@@ -9,6 +9,7 @@
 #include <Ephra/Saturn.h>
 
 #include <FL/gl.h>
+#include <GL/glu.h>
 
 /**************************************************************************/
 // Basic GL Drawing
@@ -38,15 +39,34 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
   glPushAttrib(GL_TRANSFORM_BIT);
   glPushMatrix();
   glMultMatrixf(mGL_Mat);
-  if(mNode->bUseScale) {
-    glEnable(GL_NORMALIZE);
-    glScalef(mNode->mSx, mNode->mSy, mNode->mSz);
+  { // Scaling stuff
+    bool norm_p = false;
+    if(mNode->bUseScale) {
+      glScalef(mNode->mSx, mNode->mSy, mNode->mSz);
+      norm_p = true;
+    }
+    ZNode* pn = mNode->mParent;
+    if(mNode->bUseOM && pn && (ZGlass*)pn==rd->TopPM() && pn->bUseOM) {
+      Float_t dom =  mNode->mOM - pn->mOM;
+      if(dom != 0) {
+	Double_t s = TMath::Power(10, dom);
+	glScaled(s, s, s);
+	norm_p = true;
+      }
+    }
+    if(norm_p) glEnable(GL_NORMALIZE);
   }
   rd->PushPM(mNode);
 }
 
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
+  if(rd->GetRnrNames() == true && bSuppressNameLabel == false && mNode->mName != "") {
+    string name( mNode->GetName() );
+    GLTextNS::BoxSpecs boxs; boxs.pos = rd->RefTilePos();
+    GLTextNS::RnrTextBar(rd, name, boxs, rd->GetNameOffset());
+  }
+
   rd->PopPM();
   glPopMatrix();
   glPopAttrib();
