@@ -204,7 +204,7 @@ fnord
 }
 
 sub make_met_widget_cb {
-# missing handling of arguments ... perhaps should export Node to Cint, or sth
+# missing handling of arguments
   my $S = shift;
   return <<"fnord";
 void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
@@ -593,7 +593,7 @@ sub make_weed_update {
 }
 
 ########################################################################
-# no args ...
+# no args ... 
 package GLED::Widgets::MButt; @ISA = ('GLED::Widgets');
 
 sub new {
@@ -610,6 +610,50 @@ sub new {
 }
 
 sub make_cxx_cb { my $S = shift; $S->make_met_widget_cb(); }
+sub make_weed_update {
+  my $S = shift;
+  $S->make_weed_update_A().
+  $S->make_weed_update_B();
+}
+
+########################################################################
+# no args ... 
+package GLED::Widgets::MCWButt; @ISA = ('GLED::Widgets');
+
+sub new {
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget} = "MCW_Button";
+  $S->{Include} = "Eye/MCW_Button.h";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "true";
+  $S->{CanResizeP}   = "true";
+  $S->{-width}  = 4 unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  return $S;
+}
+
+sub make_widget {
+  my $S = shift;
+  return <<"fnord";
+Fl_Widget* ${::CLASSNAME}View::$S->{Methodbase}_Creator() {
+  static MCW_Button::Data $S->{Methodbase}_butt_data;
+  if($S->{Methodbase}_butt_data.fLabel.length() == 0) {
+    $S->{Widget}::FillData(${::CLASSNAME}::GlassInfo()->FindMethodInfo($S->{TOP}{ID}),
+                            \"$S->{Methodbase}\", $S->{Methodbase}_butt_data);
+  }
+  $S->{Widget}* o = new $S->{Widget}(mView->fImg, $S->{Methodbase}_butt_data,
+                                     0,0,0,0);
+  return o;
+}\n
+fnord
+}
+
+sub make_cxx_cb {
+  my $S = shift;
+  return "void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {}\n";
+}
+
 sub make_weed_update {
   my $S = shift;
   $S->make_weed_update_A().
