@@ -28,6 +28,14 @@ void load_group_identities(ZSunQueen* sq)
   gSystem->ChangeDirectory(owd.Data());
 }
 
+void setup_guest_handling(ZSunQueen* sq)
+{
+  ZIdentity* sat_guest = sq->GetOrImportIdentity("venus");
+  sq->SetSaturnGuestId(sat_guest);
+  ZIdentity* eye_guest = sq->GetOrImportIdentity("guest");
+  sq->SetEyeGuestId(eye_guest);  
+}
+
 void std_auth()
 {
   // Query basic elements
@@ -38,7 +46,9 @@ void std_auth()
   // Load-up standard identities and all available groups
   load_std_identities(sun_queen);
   load_group_identities(sun_queen);
-  
+
+  setup_guest_handling(sun_queen);
+
   CREATE_GLASS(eyed_saturns, ZHashList, sun_queen,
 	       "EyedSaturns", "Saturns that accept Eye connections");
   idlists->Add(eyed_saturns);
