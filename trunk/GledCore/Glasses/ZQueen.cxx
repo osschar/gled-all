@@ -750,8 +750,11 @@ void ZQueen::RemoveLens(ZGlass* lens)
   if(lens == this)
     throw(_eh + "attempt to delete ZQueen " + Identify() + ".");
 
-  if(lens->mGlassBits & ZGlassBits::kDying)
-    throw(_eh + "lens already dying.");
+  if(lens->mGlassBits & ZGlassBits::kDying) {
+    // throw(_eh + "lens already dying.");
+    ISwarn(_eh + "queen:" + Identify() +" lens:" + lens->Identify() +" already dying.");
+    return;
+  }
 
   ZMIR* mir = GThread::get_mir();
   if(mir && mir->IsFlare())
