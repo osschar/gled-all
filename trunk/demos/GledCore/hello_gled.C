@@ -58,7 +58,12 @@
   mover2->SetRi(3); mover2->SetRj(1); mover2->SetRa(0.01745/2);
   scenes->CheckIn(mover2); dynamo->Add(mover2);
 
-  dynamo->Start();
-
   gROOT->Macro("eye.C");	// spawn an eye with a pupil on first scene
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(hello_gled);
+    pupil->SetUpRefAxis(3);
+  }
+
+  dynamo->Start();
 }
