@@ -9,7 +9,8 @@ ZNameMap		4	Glasses/ZNameMap
 AList			5	Glasses/AList
 ZDeque			6	Glasses/ZDeque
 ZNode			16	Glasses/ZNode		.
-ZNodeLink		17	Glasses/ZNodeLink	ZNode
+ZNodeLink		17	Glasses/ZNodeLink	.
+ZRnrModList		18	Glasses/ZRnrModList	.
 
 # God & Rulers
 ZGod			32	Glasses/ZGod
