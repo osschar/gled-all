@@ -38,16 +38,30 @@ namespace FGS  = FltkGledStuff;
 
 FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
 {
+  static const string _eh("FTW_Nest::Create_FTW_Nest ");
+
+  NestInfo* ni = dynamic_cast<NestInfo*>(img->fGlass);
+  if(ni == 0) throw(_eh + "user-data is not ShellInfo.");
+
   FTW_Nest* nest = new FTW_Nest(sh, img);
   
   nest->SetSWM(sh, true);
   FTW_Leaf* top_leaf = FTW_Leaf::Construct(nest, 0, img, false, false);
   nest->InsertLeaf(top_leaf);
-  // top_leaf->SetLevel(-1);
-  // top_leaf->hide();
+  if(ni->GetShowSelf() == false) {
+    top_leaf->SetLevel(-1);
+    top_leaf->hide();
+  }
   top_leaf->ExpandList();
-  nest->finalize_build();
+  if(ni->GetMaxChildExp() > 0) {
+    list<FTW_Leaf*> leaves; top_leaf->CopyListLeaves(leaves);
+    if(leaves.size() <= ni->GetMaxChildExp()) {
+      for(list<FTW_Leaf*>::iterator l=leaves.begin(); l!=leaves.end(); ++l)
+	(*l)->ExpandList();
+    }
+  }
 
+  nest->finalize_build();
   return nest;
 }
 
