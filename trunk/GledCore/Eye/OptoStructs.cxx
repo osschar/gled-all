@@ -10,8 +10,6 @@
 #include "OptoStructs.h"
 #include "Eye.h"
 
-#include <FL/Fl_Window.H>
-
 using namespace OptoStructs;
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
@@ -34,7 +32,6 @@ ZGlassImg::ZGlassImg(Eye* e, ZGlass* g) : fEye(e), fGlass(g) {
 }
 
 ZGlassImg::~ZGlassImg() {
-  delete fFullMTW_View;
   while(!fViews.empty()) {
     // The destructor of A_View removes itself from the fViews list.
     delete fViews.back();
