@@ -86,8 +86,8 @@ public:
   void FillParentList(list<ZNode*>& plist);
   static ZNode* FindCommonParent(ZNode* a, ZNode* b);
   template <class GLASS>
-  GLASS GrepParentByGlass() const {
-    const ZNode* p = mParent;
+  GLASS GrepParentByGlass() {
+    ZNode* p = mParent;
     if(p == 0) return 0;
     GLASS g = dynamic_cast<GLASS>(p); if(g) return g;
     return p->GrepParentByGlass<GLASS>();
