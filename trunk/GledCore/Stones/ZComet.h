@@ -1,11 +1,11 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZComet_H
-#define Gled_ZComet_H
+#ifndef GledCore_ZComet_H
+#define GledCore_ZComet_H
 
 #include <Gled/GledTypes.h>
 #include <TNamed.h>
@@ -17,7 +17,8 @@ class ZKing; class ZQueen;
 class ZList;
 class TBuffer;
 
-class ZComet : public TNamed {
+class ZComet : public TNamed, public An_ID_Demangler
+{
   // **** Custom Streamer ****
 public:
   enum CometType_e { CT_CometBag=0, CT_Queen, CT_King };
@@ -33,10 +34,10 @@ public:
   mID2pZGlass_t mIDMap;
 #endif
 
-  CometType_e	mType;
+  CometType_e	mType;		// X{G}
 
-  Saturn*	mSaturn;
-  bool		bUseSaturn;
+  An_ID_Demangler* mExtDemangler; // X{GS}
+
   bool		bWarnOn;	// X{GS}
   bool		bVerbose;	// X{GS}
 
@@ -56,12 +57,12 @@ public:
   Int_t AddGlass(ZGlass* g, Bool_t do_links=false, Bool_t do_lists=false,
 		 Int_t depth=0);
 
-  ZGlass* FindID(ID_t id);
+  // An_ID_Demangler; also affected by mExtDemangler
+  virtual ZGlass* DemangleID(ID_t id);
 
-  //Int_t SaturnShot();
-  //Int_t BeamDown(const Text_t* keyname);
+  // void ReplaceIDEntry(ID_t id, ZGlass* lens);
 
-  void  UseSaturn(Saturn* sat);
+  void  AssignQueen(ZQueen* queen);
   Int_t	RebuildGraph();
 
   void StreamHeader(TBuffer& b);

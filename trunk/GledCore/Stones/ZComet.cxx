@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -43,7 +43,9 @@ ClassImp(ZComet)
 void ZComet::_init()
 {
   mType = CT_CometBag;
-  mSaturn = 0; bUseSaturn = false; bWarnOn = true; bVerbose = true;
+  mExtDemangler = 0;
+
+  bWarnOn = true; bVerbose = true;
   mQueen = 0; mKing = 0;
 }
 
@@ -98,86 +100,44 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
 
 /**************************************************************************/
 
-ZGlass* ZComet::FindID(ID_t id)
+ZGlass* ZComet::DemangleID(ID_t id)
 {
+  static const string _eh("ZComet::DemangleID ");
+
   if(id == 0) return 0;
   mID2pZGlass_i i;
-  if((i = mIDMap.find(id)) == mIDMap.end()) {
-    if(bUseSaturn) {
-      ZGlass* g = mSaturn->DemangleID(id);
-      if(g) return g;
-      else {
-	if(bVerbose)
-	  ISmess(GForm("ZComet::FindID id %u not in this comet nor saturn", id));
-	return 0;
-      }
-    } else {
-      if(bVerbose)
-	ISmess(GForm("ZComet::FindID id %u not in this comet", id));
-      return 0;
-    }
-  }
-  return i->second;
+  if((i = mIDMap.find(id)) != mIDMap.end()) 
+    return i->second;
+
+  if(mExtDemangler != 0) {
+    ZGlass* l = mExtDemangler->DemangleID(id);
+    if(l == 0 && bVerbose) 
+      ISmess(GForm("%sid %u not in this comet nor saturn", _eh.c_str(), id));
+    return l;
+  } else {
+    if(bVerbose)
+      ISmess(GForm("%sid %u not in this comet", _eh.c_str(), id));
+    return 0;
+  } 
 }
 
 /**************************************************************************/
-/*
-Int_t ZComet::BeamDown(const Text_t* keyname)
+
+void ZComet::AssignQueen(ZQueen* queen)
 {
-  if(! gDirectory->IsWritable()) {
-    ISerr(GForm("ZComet::Write directory"<< gDirectory->GetName() <<"not writable"));
-    return 1;
+  // Sets the ZGlass::mQueen pointer to queen for all elements of the comet.
+  // This should be called prior to RebuildGraph if it is desired that
+  // reference counts are properly increased.
+
+  for(mID2pZGlass_i i=mIDMap.begin(); i!=mIDMap.end(); i++) {
+    i->second->mQueen = queen;
   }
-  Write(keyname);
-  return 0;
-}
-*/
-/**************************************************************************/
-
-void ZComet::UseSaturn(Saturn* sat)
-{
-  // Puts Comet into `extended' find mode. If certain ID is not found inside the
-  // comet it is searched for in Saturn.
-  // Used for activation of Kings and Queens.
-
-  mSaturn = sat;
-  bUseSaturn = true;
 }
 
 Int_t ZComet::RebuildGraph()
 {
   if(bGraphRebuilt) return 0;
   Int_t ret = 0;
-
-  // Rebuild kings/queens
-  if(mType == CT_Queen) {
-    mQueen = dynamic_cast<ZQueen*>(FindID((ID_t)mQueen));
-    if(mQueen==0) {
-      ISerr(GForm("ZComet::RebuildGraph(Queen) couldn't demangle QueenID %u",
-		  (ID_t)(mQueen)));
-      ++ret;
-    }
-  }
-  if(mType == CT_King) {
-    mKing = dynamic_cast<ZKing*>(FindID((ID_t)mKing));
-    if(mKing==0) {
-      ISerr(GForm("ZComet::RebuildGraph(King) couldn't demangle KingID %u",
-		  (ID_t)(mKing)));
-      ++ret;
-    }
-  }
-
-  // Reconstruct TopLevels
-  for(lpZGlass_i i=mTopLevels.begin(); i!=mTopLevels.end(); ++i) {
-    mID2pZGlass_i j = mIDMap.find((ID_t)(*i));
-    if(j != mIDMap.end()) {
-      *i = j->second;
-    } else {
-      if(bWarnOn)
-	ISwarn(GForm("ZComet::RebuildGraph(top_levels) missing ID %u",
-		     (ID_t)(*i)));
-    }
-  }
 
   // First pass: rebuild and count missed links & list members
   for(mID2pZGlass_i i=mIDMap.begin(); i!=mIDMap.end(); i++) {
@@ -224,8 +184,39 @@ Int_t ZComet::RebuildGraph()
 
 void ZComet::Streamer(TBuffer& b)
 {
+  static const string _eh("ZComet::Streamer ");
+
   StreamHeader(b);
   StreamContents(b);
+
+  if(b.IsReading()) {
+    // Rebuild kings/queens
+    if(mType == CT_Queen) {
+      mQueen = dynamic_cast<ZQueen*>(DemangleID((ID_t)mQueen));
+      if(mQueen==0) {
+	ISerr(GForm("%s(Queen) couldn't demangle QueenID %u",
+		    _eh.c_str(), (ID_t)(mQueen)));
+      }
+    }
+    if(mType == CT_King) {
+      mKing = dynamic_cast<ZKing*>(DemangleID((ID_t)mKing));
+      if(mKing==0) {
+	ISerr(GForm("%s(King) couldn't demangle KingID %u",
+		    _eh.c_str(), (ID_t)(mKing)));
+      }
+    }
+    // Reconstruct TopLevels
+    for(lpZGlass_i i=mTopLevels.begin(); i!=mTopLevels.end(); ++i) {
+      mID2pZGlass_i j = mIDMap.find((ID_t)(*i));
+      if(j != mIDMap.end()) {
+	*i = j->second;
+      } else {
+	if(bWarnOn)
+	  ISwarn(GForm("%s(top_levels) missing ID %u",
+		       _eh.c_str(), (ID_t)(*i)));
+      }
+    }
+  }
 }
 
 void ZComet::StreamHeader(TBuffer& b)
@@ -236,7 +227,7 @@ void ZComet::StreamHeader(TBuffer& b)
     bGraphRebuilt = false;
     mLibSets.clear(); mTopLevels.clear(); mOrphans.clear();
 
-    UInt_t t; b >> t; mType =CometType_e(t);
+    UInt_t t; b >> t; mType = CometType_e(t);
 
     UInt_t cnt; b >> cnt;
     bFail = false;
@@ -265,6 +256,7 @@ void ZComet::StreamHeader(TBuffer& b)
     case CT_Queen: b >> mQueen; break;
     case CT_King:  b >> mKing;  break;
     }
+
   } else {
     /*** Writing ***/
     b << (UInt_t) mType;
@@ -290,7 +282,7 @@ void ZComet::StreamContents(TBuffer& b)
     b >> size;
     ISdebug(D_STREAM, GForm("ZComet::Streamer reading %u glasses", size));
     for(UInt_t i=0; i<size; ++i) {
-      ZGlass *g = GledNS::StreamGlass(b);
+      ZGlass *g = GledNS::StreamLens(b);
       if(g) {
 	ID_t id = g->GetSaturnID();
 	mIDMap[id] = g;
@@ -309,7 +301,7 @@ void ZComet::StreamContents(TBuffer& b)
       for(mID2pZGlass_i i=mIDMap.begin(); i!=mIDMap.end(); i++) {
 	ISdebug(D_STREAM+1, GForm("ZComet::Streamer writing %s",
 				(i->second)->GetName()));
-	GledNS::StreamGlass(b, i->second);
+	GledNS::StreamLens(b, i->second);
       }
     }
   }

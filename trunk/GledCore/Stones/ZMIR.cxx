@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -17,7 +17,6 @@
 // to prevent broadcasting of the MIR to moons.
 
 #include "ZMIR.h"
-#include <Ephra/Saturn.h>
 #include <Glasses/SaturnInfo.h>
 #include <Gled/GledNS.h>
 #include <TMessage.h>
@@ -65,7 +64,7 @@ void ZMIR::_init() {
  
 ZMIR::ZMIR(ID_t a, ID_t b, ID_t g) :
   TMessage(GledNS::MT_Flare),
-  Direction(D_Unknown),
+  Direction(D_Unknown), SuppressFlareBroadcast(false),
   MirBits(0), CallerID(0),
   RecipientID(0), ResultRecipientID(0), ResultReqHandle(0),
   AlphaID(a), BetaID(b), GammaID(g)
@@ -73,6 +72,21 @@ ZMIR::ZMIR(ID_t a, ID_t b, ID_t g) :
   _init();
   fTrueBuffer = 0;
   SetBufferOffset(Max_Header_Length);
+}
+
+ZMIR::ZMIR(ZGlass* a, ZGlass* b, ZGlass* g) :
+  TMessage(GledNS::MT_Flare),
+  Direction(D_Unknown), SuppressFlareBroadcast(false),
+  MirBits(0), CallerID(0),
+  RecipientID(0), ResultRecipientID(0), ResultReqHandle(0),
+  Alpha(a), Beta(b), Gamma(g)
+{
+  AlphaID = a ? a->GetSaturnID() : 0;
+  BetaID  = b ? b->GetSaturnID() : 0;
+  GammaID = g ? g->GetSaturnID() : 0;
+  fTrueBuffer = 0;
+  SetBufferOffset(Max_Header_Length);
+  Caller = 0; Recipient = ResultRecipient = 0;
 }
 
 
@@ -177,7 +191,7 @@ namespace {
   const string demangle_eh("ZMIR::Demangle failed for ");
 }
 
-void ZMIR::Demangle(Saturn* s) throw(string)
+void ZMIR::Demangle(An_ID_Demangler* s) throw(string)
 {
   Caller = dynamic_cast<ZMirEmittingEntity*>(s->DemangleID(CallerID));
   if(!Caller) throw(demangle_eh + GForm("Caller(id=%d)",CallerID));
@@ -196,7 +210,7 @@ void ZMIR::Demangle(Saturn* s) throw(string)
   }
 }
 
-void ZMIR::DemangleRecipient(Saturn* s) throw(string)
+void ZMIR::DemangleRecipient(An_ID_Demangler* s) throw(string)
 {
   if(MirBits & MB_HasRecipient) {
     Recipient = dynamic_cast<SaturnInfo*>(s->DemangleID(RecipientID));
@@ -204,7 +218,7 @@ void ZMIR::DemangleRecipient(Saturn* s) throw(string)
   }
 }
 
-void ZMIR::DemangleResultRecipient(Saturn* s) throw(string)
+void ZMIR::DemangleResultRecipient(An_ID_Demangler* s) throw(string)
 {
   if(MirBits & MB_HasResultReq) {
     ResultRecipient = dynamic_cast<SaturnInfo*>(s->DemangleID(ResultRecipientID));

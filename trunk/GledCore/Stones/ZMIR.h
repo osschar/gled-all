@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -9,7 +9,6 @@
 
 #include <Gled/GledTypes.h>
 
-class Saturn;
 class ZMirEmittingEntity;
 class SaturnInfo;
 
@@ -70,11 +69,14 @@ public:
   ZGlass*		Gamma;		 //!
 
   ZMIR(ID_t a=0, ID_t b=0, ID_t g=0);
+  ZMIR(ZGlass* a, ZGlass* b=0, ZGlass* g=0);
   ZMIR(TMessage*& m);
   virtual ~ZMIR();
 
   Bool_t HasRecipient()	{ return (MirBits & MB_HasRecipient); }
   Bool_t HasResultReq()	{ return (MirBits & MB_HasResultReq); }
+  Bool_t IsFlare()      { return !HasRecipient(); }
+  Bool_t IsBeam()       { return HasRecipient(); }
 
   Int_t HeaderLength();
   Int_t RoutingHeaderLength();
@@ -86,9 +88,9 @@ public:
 
   // virtual void Reset(); // restore buff from true buf;
 
-  void Demangle(Saturn* s) throw(string);
-  void DemangleRecipient(Saturn* s) throw(string);
-  void DemangleResultRecipient(Saturn* s) throw(string);
+  void Demangle(An_ID_Demangler* s) throw(string);
+  void DemangleRecipient(An_ID_Demangler* s) throw(string);
+  void DemangleResultRecipient(An_ID_Demangler* s) throw(string);
 
   void SetLCM_Ids(LID_t l, CID_t c, MID_t m) { Lid=l; Cid=c; Mid=m; }
   void SetCaller(ZMirEmittingEntity* caller);
