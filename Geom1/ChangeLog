@@ -1,3 +1,12 @@
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Rect.h:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Width 0 now prevents rendering.
+
+	* Makefile:
+	Minor beautification.
+	
 2004-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
