@@ -10,12 +10,14 @@
 // Includes
 class ZNode;
 class ZMark;
-class TVectorF;
 
+#include <TVector3.h>
+#include <TVectorF.h>
 #include <TMatrixF.h>
 #include <TMath.h>
 
-// Should rewrite this using TVectorF (now that i have GetArray)
+// Should use TVector3!
+
 struct ZVec3 {
   Float_t v[3];
   ZVec3() { v[0] = v[1] = v[2] = 0; }
@@ -43,16 +45,16 @@ class ZTrans : public TMatrixF {
 
   void _init();
 
+protected:
+  Float_t norm3_column(Int_t col);
+  Float_t orto3_column(Int_t col, Int_t ref);
+
 public:
   ZTrans();
   ZTrans(const TMatrixF& m);
   ZTrans(const ZTrans& z);
   ZTrans(const ZNode* n);
   virtual ~ZTrans() {}
-
-  // more like define ... to use insted of (*this)
-  const ZTrans& ZT() const { return *this; }
-  ZTrans&       ZT()       { return *this; }
 
   Int_t Set3Pos(Float_t x, Float_t y, Float_t z);
   Int_t SetPos(const TVectorF& v);
@@ -61,30 +63,46 @@ public:
   { return ZVec3((*this)(1,4), (*this)(2,4), (*this)(3,4)); }
 
   TVectorF* GetZVector() const;
-  TVectorF* GetBaseV(UInt_t b) const;
+  TVectorF* GetBaseV(Int_t b) const;
+  TVector3  GetBaseVec3(Int_t b) const;
+  TVector3  GetPosVec3() const           { return GetBaseVec3(4); }
 
   void SetRot(Int_t i, Int_t j, Float_t f);
-  void SetTrans(ZTrans& t);
-  void SetBaseV(UInt_t i, Float_t x, Float_t y, Float_t z);
+  void SetTrans(const ZTrans& t);
+  void SetBaseV(Int_t i, Float_t x, Float_t y, Float_t z);
+  void SetBaseVec3(Int_t i, const TVector3& v);
 
   // Space-Time Position
   // Move in LocalFrame; ai=1(fwd,bck), 2(up/down), 3(r/l)
   Int_t MoveLF(Int_t ai, Float_t amount=1);
+  Int_t Move3(Float_t x, Float_t y, Float_t z);
   // Rotate in LocalFrame; i1, i2 ... generator indices
   Int_t RotateLF(Int_t i1, Int_t i2, Float_t amount=0.02);
+
   // Now in some other frame ... 
   Int_t Move(ZTrans* a, Int_t ai, Float_t amount=1);
   Int_t Rotate(ZTrans* a, Int_t i1, Int_t i2, Float_t amount=0.02);
   Int_t SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);
-  void  Scale(Float_t sx, Float_t sy, Float_t sz);
   ZVec3 Get3Rot() const;
+
+  void     Scale3(Float_t sx, Float_t sy, Float_t sz);
+  void     GetScale3(Float_t& sx, Float_t& sy, Float_t& sz);
+  void     Unscale3(Float_t& sx, Float_t& sy, Float_t& sz);
+  Float_t  Unscale3();
 
   // Stuff to do w/ 3Vecs ...
   TVectorF& Mult3Vec(TVectorF& v) const;
   TVectorF& Rot3Vec(TVectorF& v) const;
 
-  void Transpose();
-  void Invert();
+  void OrtoNorm3();
+
+  void Invert() { TMatrixF::InvertFast(); bAsOK = false; }
+
+  Float_t operator()(Int_t rown, Int_t coln) const
+  { return (fElements[rown*fNcols + coln]); }
+
+  Float_t& operator()(Int_t rown, Int_t coln)
+  { return (fElements[rown*fNcols + coln]); }
 
   static ZTrans UnitTrans;
 
