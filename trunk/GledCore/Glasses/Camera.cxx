@@ -5,9 +5,14 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include <Glasses/Camera.h>
+#include "Camera.c7"
 
 ClassImp(Camera)
 
-void Camera::Home() { mTrans.UnitMatrix(); }
+/**************************************************************************/
 
-#include "Camera.c7"
+void Camera::Home()
+{ 
+  mTrans.UnitTrans();
+  Stamp(FID());
+}
