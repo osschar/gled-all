@@ -1,3 +1,24 @@
+2005-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	Consistent messages during MEE connection/disconnection.
+	
+	* Glasses/AList.h:
+	Fully-quantified ClassDef(AList::ElRep); html-doc generators had
+	some trouble otherwise.
+	
+	* Gled/Gled.h:
+	* GledView/GledGUI.h:
+	* macros/eye.C:
+	eye.C exits immediately if Gled::theOne->HasGUILibs() is false
+	(HasGUILibs being a new virtual method in Gled).
+
+	* macros/moon.C:
+	A cast to ZQueen was missing.
+
+	* Makefile:
+	Reintroduced -I/usr/kerberos/include to CPPFLAGS.
+
 2004-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Branch.cxx:
