@@ -30,7 +30,7 @@ FLUID   	= fluid
 LOCALINCL = -I${GLEDSYS}/include -I. $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
 INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I/usr/X11R6/include
 CPPFLAGS += -D_REENTRANT -D_GNU_SOURCE ${INCL} ${USER_CPP_FLAGS}
-CXXFLAGS  = -Wall -fPIC ${USER_CXX_FLAGS}
+CXXFLAGS  = -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${USER_LD_FLAGS}
 
 # Pain ... X4 comes with somewhat broken makedepend ... perhaps fixed ??
@@ -45,7 +45,7 @@ FLLIB	  = -lfltk -lfltk_gl -lfltk-mt
 
 ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lCint -lGraf -lGraf3d -lGpad \
 		-lHist -lHistPainter -lMatrix \
-                -lPostscript -lProof -lRint -lTree
+                -lPostscript -lProof -lRint -lTree # -lNew
 ROOTGLIBS = -lGui -lGX11
 
 GUILIBS	= -L/usr/X11R6/lib -lX11 -lXext -lXpm ${FLLIB} ${GLLIB}
