@@ -4,6 +4,13 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+//__________________________________________________________________________
+// PupilInfo
+//
+// Configuration data for GL viewer.
+//
+// Emits custom Rays: user_1 -> dump image, user_2 -> resize window
+
 #include "PupilInfo.h"
 #include "PupilInfo.c7"
 #include "ZQueen.h"
@@ -12,10 +19,15 @@ ClassImp(PupilInfo)
 
 void PupilInfo::_init()
 {
-  mCameraBase = 0;
-  mLookAt = 0;
-  mUpReference = 0;
-  mUpRefAxis = 3;
+  mCameraBase    = 0;
+
+  mLookAt        = 0;
+  mLookAtMinDist = 0.1;
+
+  mUpReference   = 0;
+  mUpRefAxis     = 3;
+  bUpRefLockDir  = true;
+  mUpRefMinAngle = 10;
 
   mMaxDepth = 100;
 
@@ -88,6 +100,12 @@ void PupilInfo::SetUpReference(ZNode* upreference)
 
 ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
 {
+  // Returns transformation from node->pupil reference frame.
+
+  // This should use parental-list, like similar stuff in ZNode.
+
+  if(node == 0) return 0;
+
   GMutexHolder lst_lck(mListMutex);
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     ZNode* pup_elm = dynamic_cast<ZNode*>(*i);
@@ -106,6 +124,29 @@ ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
     }
   }
   return 0;
+}
+
+ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
+{
+  // Returns transformation from node->camera reference frame.
+  // Camera's matrix is not multiplied in the result (as it is not known).
+
+  ZTrans* n2p = ToPupilFrame(node);
+  if(n2p == 0) return 0;
+  
+  ZNode* cam_base = mCameraBase;
+  if(cam_base) {
+    ZTrans* c2p = ToPupilFrame(cam_base);
+    if(c2p == 0) {
+      delete n2p;
+      return 0;
+    }
+    c2p->Invert();
+    *c2p *= *n2p;
+    delete n2p;
+    return c2p;
+  }
+  return n2p;
 }
 
 /**************************************************************************/
