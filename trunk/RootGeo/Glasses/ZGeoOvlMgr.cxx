@@ -321,7 +321,7 @@ ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t,
     string m = v->GetMaterial()->GetName();
     int j = m.find_first_of("$");
     m = m.substr(0,j);
-    nn->SetMat(m.c_str());
+    nn->SetMaterial(m.c_str());
     nn->AssertUserData();
   }
 
