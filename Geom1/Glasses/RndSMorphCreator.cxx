@@ -41,7 +41,7 @@ Double_t RndSMorphCreator::rnd(Double_t k, Double_t n)
 
 void RndSMorphCreator::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
-  static const string _eh("Mover::Operate ");
+  static const string _eh("RndSMorphCreator::Operate ");
 
   Operator::PreOperate(op_arg);
   if(mTarget) {

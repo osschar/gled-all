@@ -13,7 +13,7 @@
 #include <TRandom.h>
 
 class RndSMorphCreator : public Operator {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(RndSMorphCreator);
 
 private:
@@ -26,7 +26,6 @@ protected:
   Bool_t	bGetResult;	// X{GS} 7 Bool()
 
   TRandom	mRnd;		//!
-
   Double_t rnd(Double_t k=1, Double_t n=0);
 
 public:
