@@ -140,7 +140,7 @@ Int_t ZNode::Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Float_t amount)
   if(ref==0) return RotateLF(ii1, ii2, amount);
   if(ii1<0 || ii1>3 || ii2<0 || ii1>3) return 0;
   if(ref == this) {
-    // Get explosion from m^-1 * m
+    // Get segv from m^-1 * m
     mTrans.RotateLF((Int_t)ii1, (Int_t)ii2, amount);
   } else {
     ZTrans* a = BtoA(mParent, ref);
@@ -278,26 +278,27 @@ ZTrans* ZNode::ToNode(ZNode* top, int depth)
 
   ZTrans* x;
   if(p == top) {
-    ReadLock();
+    GLensReadHolder rd_lck(this);
     x = new ZTrans(mTrans);
-    if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
-    ReadUnlock();
   } else {
     x = p->ToNode(top, ++depth);
     if(x) {
-      ReadLock();
+      GLensReadHolder rd_lck(this);
       *x *= mTrans;
-      if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
-      if(bUseOM && p->bUseOM) {
-	Float_t dom =  mOM - p->mOM;
-	if(dom != 0) {
-	  Float_t s = TMath::Power(10, dom);
-	  x->Scale3(s, s, s);
-	}
-      }
-      ReadUnlock();
+    } else {
+      return 0;
     }
   }
+
+  if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
+  if(bUseOM && p->bUseOM) {
+    Float_t dom =  mOM - p->mOM;
+    if(dom != 0) {
+      Float_t s = TMath::Power(10, dom);
+      x->Scale3(s, s, s);
+    }
+  }
+
   return x;
 }
 
