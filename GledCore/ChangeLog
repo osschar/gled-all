@@ -1,5 +1,22 @@
 2005-01-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Eye/Eye.cxx:
+	* Eye/FTW.cxx:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	* Eye/MCW_View.cxx:
+	* Eye/MCW_View.h:
+	* Eye/OptoStructs.cxx:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Added class FTW_Shell_Client for consistent access to parent shell.
+
+2005-01-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Eye/FTW_Branch.cxx:
 	* Glasses/ZHashList.cxx:
 	* Glasses/ZHashList.h:
