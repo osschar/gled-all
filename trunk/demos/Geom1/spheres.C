@@ -24,8 +24,12 @@
   lamp->MoveLF(3, 20); lamp->RotateLF(3,1, TMath::Pi()/2);
   scenes->CheckIn(lamp); spheres->Add(lamp);
   spheres->GetGlobLamps()->Add(lamp);
-  ZNode* n = new Sphere(1.5, "Sph");
-  scenes->CheckIn(n); lamp->Add(n);
+
+  Sphere* top_sphere = new Sphere("Mother Sphere");
+  top_sphere->SetRadius(25);
+  top_sphere->SetLOD(50);
+  top_sphere->SetColor(1,1,1);
+  scenes->CheckIn(top_sphere); spheres->Add(top_sphere);
 
   {
     float x = 0; float phi = 3.14 / 6;
@@ -36,7 +40,7 @@
       s->MoveLF(1,x - 20); s->RotateLF(2,3,(i-1)*phi);
       s->SetRadius(i);
       s->SetColor(1,1,1);
-      scenes->CheckIn(s); spheres->Add(s);
+      scenes->CheckIn(s); top_sphere->Add(s);
       float y = i + 1;
       for(int j=1; j<=3; ++j) {
 	Sphere* ss = new Sphere(Form("Sphere_%d_%d",i,j));
@@ -51,13 +55,19 @@
     }
   }
 
-  {
-    Eventor* e = new Eventor("Dynamo");
-    e->SetBeatsToDo(-1); e->SetInterBeatMS(10); e->SetStampInterval(10);
-    scenes->CheckIn(e); spheres->Add(e);
-    Mover* mv = new Mover("S1 Rotator");
-    mv->SetNode(sss[0]); mv->SetRi(1); mv->SetRj(3); mv->SetRa(0.005);
-    scenes->CheckIn(mv); e->Add(mv);
-  }
+  Eventor* etor = new Eventor("Dynamo");
+  etor->SetBeatsToDo(-1); etor->SetInterBeatMS(25); etor->SetStampInterval(10);
+  scenes->CheckIn(etor); spheres->Add(etor);
 
+  Mover* mv = new Mover("S1 Rotator");
+  mv->SetNode(top_sphere); mv->SetRi(1); mv->SetRj(2); mv->SetRa(0.005);
+  scenes->CheckIn(mv);
+  etor->Add(mv);
+
+  
+  // Spawn GUI
+  gROOT->ProcessLine(".x eye.C");
+
+
+  etor->Start();
 }
