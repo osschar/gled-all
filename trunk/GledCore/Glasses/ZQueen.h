@@ -66,7 +66,7 @@ protected:
 
   Bool_t	bRuling;	  //! X{GS} 7 BoolOut(-join=>1)
   Bool_t	bAwaitingSceptre; //! X{GS} 7 BoolOut()
-  QueenState_e	mState;	          //! X{GS} 7 PhonyEnum(-const=>1)
+  QueenState_e	mState;	          //! X{GS} 7 PhonyEnum(-const=>1, -width=>12)
 
   ID_t		mMinID;		// X{G} 7 ValOut(-range=>[0,MAX_ID], -width=>8, -join=>1)
   ID_t		mMaxID;		// X{G} 7 ValOut(-range=>[0,MAX_ID], -width=>8)
@@ -92,15 +92,15 @@ protected:
 
   Bool_t	bStamping;	// X{GS} 7 Bool()
 
-  UChar_t	mAuthMode;      // X{GS} 7 PhonyEnum(-type=>AuthMode_e, -width=>10)
-  UChar_t	mAlignment;     // X{GS} 7 PhonyEnum(-type=>Align_e, -width=>6)
+  UChar_t	mAuthMode;      // X{GS} 7 PhonyEnum(-type=>AuthMode_e, -width=>12)
+  UChar_t	mAlignment;     // X{GS} 7 PhonyEnum(-type=>Align_e)
   UChar_t	mMapNoneTo;     // X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e,
-                                //                   -names=>[R_Allow,R_Deny], -width=>8)
+                                //                   -names=>[R_Allow,R_Deny])
 
   ZMirFilter*	mProtector;     // X{GS} L{}
 
-  ZHashList*	mDeps;          //  X{GS} L{}
-  ZHashList*	mOrphans;       //  X{GS} L{}
+  ZHashList*	mDeps;          // X{GS} L{}
+  ZHashList*	mOrphans;       // X{GS} L{}
 
   lpSaturnInfo_t mReflectors;	//!
 
@@ -213,11 +213,12 @@ public:
 GlassIODef(ZQueen);
 
 // Attempt at server exec + broadcast
-
+#ifndef __CINT__
 #define CALL_AND_BROADCAST(_lens_, _method_, ...) \
   _lens_->_method_(__VA_ARGS__); \
   { auto_ptr<ZMIR> mir(_lens_->S_##_method_(__VA_ARGS__)); \
     mSaturn->markup_posted_mir(*mir); \
     mSaturn->BroadcastMIR(*mir, mReflectors); }
+#endif
 
 #endif

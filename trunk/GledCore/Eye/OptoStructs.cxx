@@ -83,6 +83,7 @@ A_GlassView::~A_GlassView() {
 
 void A_GlassView::SpawnRnr(const string& rnr)
 {
+  // cout <<"A_GlassView::SpawnRnr called for "<< fImg->fGlass->GetName() <<endl;
   fRnr = fImg->fClassInfo->fViewPart->SpawnRnr(rnr, fImg->fGlass);
 }
 
