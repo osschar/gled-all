@@ -50,14 +50,6 @@ void ZGeoNode::_assert_tnode(const string& _eh, bool _ggeo_fallbackp)
 
 /**************************************************************************/
 
-void ZGeoNode::SetRnrSelf(Bool_t rnrself) 
-{
-  bRnrSelf = rnrself;
-  Stamp(FID());
-}
-
-/**************************************************************************/
-
 void ZGeoNode::RnrOnForDaughters()
 {
   lpZGeoNode_t dts; 
@@ -87,6 +79,7 @@ void ZGeoNode::RnrOnRec()
   lpZGeoNode_t dts; 
   CopyByGlass<ZGeoNode*>(dts);
   for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
     (*i)->RnrOnRec();
   }
   GLensReadHolder _rlck(this);
@@ -98,6 +91,7 @@ void ZGeoNode::RnrOffRec()
   lpZGeoNode_t dts; 
   CopyByGlass<ZGeoNode*>(dts);
   for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
     (*i)->RnrOffRec();
   }
   GLensReadHolder _rlck(this);
