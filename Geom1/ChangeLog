@@ -1,3 +1,14 @@
+2005-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GLTesterOne.cxx:
+	* Glasses/GLTesterOne.h:
+	* Rnr/GL/GLTesterOne_GL_Rnr.cxx:
+	* Rnr/GL/GLTesterOne_GL_Rnr.h:
+	New files: speed tests for some GL operations.
+
+	* glass.list:
+	New entry for GLTesterOne.
+
 2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Amphitheatre.h:
