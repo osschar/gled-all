@@ -30,9 +30,11 @@ class ZMIR : public TMessage {
 public:
   enum Direction_e { D_Unknown=0, D_Up, D_Down };
 
-  enum MIR_Bits_e { MB_HeaderWritten = 1,
-		    MB_HasRecipient  = 2,
-		    MB_HasResultReq  = 4 };
+  enum MIR_Bits_e { MB_HeaderWritten      = 1,
+		    MB_HasRecipient       = 2,
+		    MB_HasResultReq       = 4,
+                    MB_DetachedExe        = 8,
+                    MB_MultixDetachedExe  = 16 };
 
 private:
   void _init();
@@ -41,8 +43,9 @@ protected:
   char         *fTrueBuffer;	//!
 
 public:
-  Direction_e	Direction;	//!
+  Direction_e	Direction;	        //!
   Bool_t	SuppressFlareBroadcast; //!
+  Bool_t	RequiresResult;         //!
 
   UChar_t	MirBits;
   ID_t		CallerID;
@@ -77,6 +80,8 @@ public:
   Bool_t HasResultReq()	{ return (MirBits & MB_HasResultReq); }
   Bool_t IsFlare()      { return !HasRecipient(); }
   Bool_t IsBeam()       { return HasRecipient(); }
+  Bool_t ShouldExeDetached()   { return (MirBits & MB_DetachedExe); }
+  Bool_t IsDetachedExeMultix() { return (MirBits & MB_MultixDetachedExe); }
 
   Int_t HeaderLength();
   Int_t RoutingHeaderLength();
@@ -97,6 +102,7 @@ public:
   void SetRecipient(SaturnInfo* recipient);
   void ClearRecipient();
   void SetResultReq(SaturnInfo* r_recipient, UInt_t r_handle);
+  void SetDetachedExe(bool multix=false);
 
   void CopyToBuffer(TBuffer& b);
   void AppendBuffer(TBuffer& b);
