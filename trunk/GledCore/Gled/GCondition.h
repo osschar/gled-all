@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -20,14 +20,16 @@ private:
 #endif
 public:
   GCondition(Init_e e=fast);
-  ~GCondition();
+  virtual ~GCondition();
 
   Int_t	Wait();
-  Int_t TimedWait(UInt_t wait_ms);
+  Int_t TimedWaitMS(UInt_t wait_ms);
+  Int_t TimedWaitMuS(UInt_t wait_mus);
   Int_t	Signal();
   Int_t Broadcast();
 
 #include "GCondition.h7"
+  ClassDef(GCondition,0)
 }; // endclass GCondition
 
 #endif
