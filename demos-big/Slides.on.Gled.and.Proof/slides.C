@@ -89,7 +89,6 @@ void slides(Bool_t start_hunt_p=true)
   pupil->SetWidth(1024);
   pupil->SetHeight(600);
   pupil->SetClearColor(0.06, 0.07, 0.06);
-  pupil->SetTileCol(0.3, 0, 0.3, 0.5);
 
   pupil->SetCameraBase(cam_base);
   pupil->SetUpReference(ss);
