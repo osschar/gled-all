@@ -138,10 +138,8 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   if(rd->GetRnrNames() == true && bSuppressNameLabel == false && mNode->mName != "") {
-    RNRDRIVER_GET_RNRMOD(nrc, rd, ZRlNameRnrCtrl);
     string name( mNode->GetName() );
-    GLTextNS::BoxSpecs boxs; boxs.pos = nrc->RefTilePos();
-    GLTextNS::RnrTextBar(rd, name, boxs, nrc->GetNameOffset());
+    GLTextNS::RnrTextBar(rd, name);
   }
 
   rd->PopPM();
