@@ -38,7 +38,6 @@ class ZGeoNode : public ZNode {
   Float_t		mNodeAlpha; // X{GS}  7 Value(-range=>[0,1,1,1000])
   TString               mMat;       // X{GS}  7 Textor(-join=>1)
   ZColor		mColor;     // X{GSP} 7 ColorButt()
-
   TString		mDefFile;   // X{GS} 7 Filor()
 
  public:
@@ -65,10 +64,6 @@ class ZGeoNode : public ZNode {
   void ImportUnimported(const Text_t* target="TheRest"); 
   void AssertUserData();
    
-  virtual void RnrOnForDaughters();                // X{ED} 7 MButt(-join=>1)
-  virtual void RnrOffForDaughters();               // X{ED} 7 MButt()
-  virtual void RnrOnRec();                         // X{ED} 7 MButt(-join=>1)   
-  virtual void RnrOffRec();                        // X{ED} 7 MButt() 
 
   // Manual Get/Set-methods
   void SetTNode(TGeoNode* n)
