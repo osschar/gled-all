@@ -9,6 +9,7 @@
 #include "FTW_Shell.h"
 #include "FltkGledStuff.h"
 #include "Eye.h"
+#include <Stones/ZMIR.h>
 
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Light_Button.H>

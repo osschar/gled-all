@@ -4,15 +4,14 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_OptoStructs
-#define Gled_OptoStructs
+#ifndef GledCore_OptoStructs_H
+#define GledCore_OptoStructs_H
 
-#include <Glasses/ZGlass.h>
 #include <GledView/GledViewNS.h>
+#include <Net/Ray.h>
 
 class ZGlass;
 class Eye;
-class Ray;
 class A_Rnr; class RnrScheme;
 class Fl_Window;
 

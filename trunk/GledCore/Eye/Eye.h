@@ -4,33 +4,32 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Eye_H
-#define Gled_Eye_H
+#ifndef GledCore_Eye_H
+#define GledCore_Eye_H
 
 #include <Glasses/ZGlass.h>
-class ZQueen;
-class SaturnInfo; class EyeInfo;
-
-#include <Net/Ray.h>
-#include <Stones/ZMIR.h>
-class ShellInfo;
-
 #include "OptoStructs.h"
+
+class ZQueen;
+class SaturnInfo;
+class EyeInfo;
+class ShellInfo;
+class ZMIR;
+
 class FTW_Shell;
+class Fl_SWM_Manager;
+class Fl_Window;
 
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Tile.H>
-#include <FL/Fl_SWM.H>
+class TSocket;
+class TMessage;
 
-#include <TMonitor.h>
-#include <TSocket.h>
-#include <TMessage.h>
-
-typedef list<Fl_Window*>		lpFl_Window_t;
-typedef list<Fl_Window*>::iterator	lpFl_Window_i;
 
 class Eye {
 protected:
+  typedef list<Fl_Window*>		lpFl_Window_t;
+  typedef list<Fl_Window*>::iterator	lpFl_Window_i;
+
+
   OptoStructs::hpZGlass2pZGlassImg_t	mGlass2ImgHash;
 
   Saturn*	mSaturn;	// X{G}
