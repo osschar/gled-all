@@ -35,13 +35,6 @@ namespace GledNS {
   hName2Lid_t	Name2Lid;
   hName2Fid_t	Name2Fid;
 
-  /*
-  hLid2EDFoo_t	Lid2EDFoo;
-  hLid2ECFoo_t	Lid2ECFoo;
-  hLid2DCFoo_t	Lid2DCFoo;
-  hLid2Deps_t	Lid2Deps;
-  hLid2Name_t	Lid2Name;
-  */
 } // namespace GledNS
 
 // FDmutex will disappear once threads are ok in root

@@ -21,7 +21,7 @@ class TFile;
 namespace GledNS {
 
   /**************************************************************************/
-  // Old fashioned hashes of E_Exec foos and Constructors
+  // Libset / LibID, ClassID / LibName, ClassName lookup structures
   /**************************************************************************/
 
   // Demangler/Constructor functions
@@ -41,40 +41,15 @@ namespace GledNS {
   };
 
 #ifndef __CINT__
+
   typedef hash_map<LID_t, LibSetInfo*>			hLid2pLSI_t;
   typedef hash_map<LID_t, LibSetInfo*>::iterator	hLid2pLSI_i;
 
-  /*
-  typedef hash_map<LID_t, E_DEMANGLE_FOO>		hLid2EDFoo_t;
-  typedef hash_map<LID_t, E_DEMANGLE_FOO>::iterator	hLid2EDFoo_i;
-  typedef hash_map<LID_t, E_CONSTRUCT_FOO>		hLid2ECFoo_t;
-  typedef hash_map<LID_t, E_CONSTRUCT_FOO>::iterator	hLid2ECFoo_i;
-  typedef hash_map<LID_t, DEF_CONSTRUCT_FOO>		hLid2DCFoo_t;
-  typedef hash_map<LID_t, DEF_CONSTRUCT_FOO>::iterator	hLid2DCFoo_i;
-  */
-
   extern hLid2pLSI_t	Lid2pLSI;
-
-  /*
-  extern hLid2EDFoo_t	Lid2EDFoo;
-  extern hLid2ECFoo_t	Lid2ECFoo;
-  extern hLid2DCFoo_t	Lid2DCFoo;
-  */
 
   /**************************************************************************/
   // Hashes of Dependencies and various ID/Name demanglers
   /**************************************************************************/
-
-  /*
-  typedef hash_map<LID_t, char**>		hLid2Deps_t;
-  typedef hash_map<LID_t, char**>::iterator	hLid2Deps_i;
-
-  typedef hash_map<LID_t, string>		hLid2Name_t;
-  typedef hash_map<LID_t, string>::iterator	hLid2Name_i;
-
-  extern hLid2Deps_t	Lid2Deps;
-  extern hLid2Name_t	Lid2Name;
-  */
 
   typedef hash_map<string, LID_t>		hName2Lid_t;
   typedef hash_map<string, LID_t>::iterator	hName2Lid_i;
@@ -83,6 +58,7 @@ namespace GledNS {
 
   extern hName2Lid_t	Name2Lid;
   extern hName2Fid_t	Name2Fid;
+
 #endif
 
   extern TDirectory* GledRoot;
@@ -93,10 +69,15 @@ namespace GledNS {
 
   // Message Types
   enum MessageTypes_e {
-    MT_Ray   = 12345, // Saturn -> Eye
-    MT_Beam  = 12346, // Directed MIR
-    MT_Flare = 12347, // Broadcasted MIR
-    MT_God   = 12348
+    MT_Ray   = 12345,		// Saturn -> Eye
+    MT_Beam,			// Directed MIR
+    MT_Flare,			// Broadcasted MIR
+    MT_God,			// 
+    MT_GledProtocol,		// 
+    MT_ProtocolMismatch,	// 
+    MT_QueryFFID,		// 
+    MT_EyeConnect,		// 
+    MT_SaturnConnect		// 
   };
 
   Int_t LoadSoSet(const string& lib_set);

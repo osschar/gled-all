@@ -65,7 +65,22 @@ namespace {
   void* tl_SaturnFdSucker(Saturn *s) {
     GThread::SetCancelState(GThread::CS_Enable);
     GThread::SetCancelType(GThread::CT_Deferred);
-    signal(SIGUSR2, sh_SaturnFdSucker);
+
+    { // Signals init;
+      // return from select on USR2 to allow additins of new socket fd's
+      sigset_t set;
+
+      sigemptyset(&set);
+      sigaddset(&set, GThread::SigUSR2);
+      pthread_sigmask(SIG_UNBLOCK, &set, 0);
+
+      struct sigaction sac;
+      sac.sa_handler = sh_SaturnFdSucker;
+      sigemptyset(&sac.sa_mask);
+      sac.sa_flags = 0;
+      sigaction(SIGUSR2, &sac, 0);
+    }
+
     _server_startup_cond.Lock();
     _server_startup_cond.Signal();
     _server_startup_cond.Unlock();
@@ -83,7 +98,7 @@ namespace {
   void* tl_SaturnAcceptor(void *arg) {
     ((Saturn*)arg)->AcceptWrapper();
     delete GThread::Self();
-    GThread::Exit(0);
+    GThread::Exit();
     return 0;
   }
 
@@ -96,7 +111,7 @@ namespace {
     arg->sat->RouteMIR(*arg->mir);
     delete arg->mir;
     delete arg;
-    GThread::Exit(0);
+    GThread::Exit();
     return 0;
   }
 
@@ -105,6 +120,12 @@ namespace {
 /**************************************************************************/
 
 ClassImp(Saturn)
+
+/**************************************************************************/
+// Static members
+/**************************************************************************/
+
+const Int_t Saturn::s_Gled_Protocol_Version = 1;
 
 /**************************************************************************/
 // Con/De/Structor
@@ -118,6 +139,7 @@ Saturn::Saturn() :
   mServerLock(GMutex::recursive),
   mRulingLock(GMutex::recursive),
   mPendingConnection(GMutex::recursive),
+  mSelector(GMutex::recursive),
   mSaturnInfo(0),
   mQueenLoadNum(0), mQueenLoadCnd(GMutex::recursive),
   mMsg(GledNS::MT_Ray)
@@ -168,48 +190,80 @@ void Saturn::Create(SaturnInfo* si)
   if(start_server()) { exit(1); }
 }
 
-ID_t Saturn::QueryFFID(SaturnInfo* si)
-{
-  // Query FirstFreeID
-
-  TSocket s(si->GetMasterName(), si->GetMasterPort());
-  // !!!!! check
-  int ml; char buf[128];
-  ml = s.Recv(buf, 128);
-  if(ml == -1) {
-    ISerr("Saturn::QueryFFID failed");
-    return 0;
-  }
-  ISmess(GForm("Saturn::QueryFFID: %s", buf));
-  s.Send("FFIDQuery");
-  TMessage* mp;
-  s.Recv(mp);
-  ID_t id; *mp >> id;
-  delete mp;
-  return id;
-}
-
 SaturnInfo* Saturn::Connect(SaturnInfo* si)
 {
   static string _eh("Saturn::Connect ");
 
-  si->mKingID = QueryFFID(si);
-  if(si->mKingID == 0) throw(_eh + "failed FFID query");
-  fix_fire_king_id(si);
-
   TSocket* sock = new TSocket(si->GetMasterName(), si->GetMasterPort());
-  // !!!!! check
-  {
-    int ml; char buf[128];
-    ml = sock->Recv(buf, 128);
-    if(ml == -1) {
-      throw(_eh + "handshake failed");
-    }
-    ISmess(GForm("Saturn::Connect %s", buf));
-    sock->Send("Moon");
+  if(!sock->IsValid()) {
+    delete sock;
+    throw(_eh + GForm("opening socket to %s:%d failed.",
+		      si->GetMasterName(), si->GetMasterPort()));
   }
+
+  { // Receive greeting
+    int ml; char buf[256];
+    ml = sock->RecvRaw(buf, 255, kDontBlock);
+    if(ml <= 0) {
+      delete sock;
+      throw(_eh + GForm("handshake failed; len=%d", ml));
+    }
+    buf[ml] = 0;
+    ISmess(_eh + buf);
+  }
+  { // Exchange protocol info
+    TMessage m(GledNS::MT_GledProtocol);
+    m << s_Gled_Protocol_Version;
+    sock->Send(m);
+    TMessage* r;
+    int rl = sock->Recv(r);
+    if(rl <= 0) {
+      delete sock;
+      throw(_eh + GForm("protocol exchange failed; len=%d",rl));
+    }
+
+    if(r->What() == GledNS::MT_GledProtocol) {
+      Int_t sproto; *r >> sproto;
+      ISmess(GForm("Saturn::Connect server protocol=%d", sproto));
+    } else if(r->What() == GledNS::MT_ProtocolMismatch) {
+      Int_t sproto; *r >> sproto;
+      delete sock; delete r;
+      throw(_eh + GForm("protocol mismatch: server=%d, client=%d",
+			sproto, s_Gled_Protocol_Version));
+    } else {
+      Int_t mt = r->What();
+      delete sock; delete r;
+      throw(_eh + GForm("unknown message type %d", mt));
+    }
+  }
+
+  { // QueryFFId
+    TMessage m(GledNS::MT_QueryFFID);
+    sock->Send(m);
+    TMessage* r;
+    int rl = sock->Recv(r);
+    if(rl <= 0) {
+      delete sock;
+      throw(_eh + "handshake failed (3)");
+    }
+
+    if(r->What() == GledNS::MT_QueryFFID) {
+      ID_t ffid; *r >> ffid;
+      ISmess(GForm("Saturn::Connect got first free id=%d", ffid));
+
+      si->mKingID = ffid;
+      if(si->mKingID == 0) throw(_eh + "failed FFID query");
+      fix_fire_king_id(si);
+
+    } else {
+      Int_t mt = r->What();
+      delete sock; delete r;
+      throw(_eh + GForm("unknown message type %d", mt));
+    }
+  }
+
   { // Send the desired SatInfo
-    TMessage m;
+    TMessage m(GledNS::MT_SaturnConnect);
     GledNS::StreamGlass(m, si);
     sock->Send(m);
   }
@@ -217,12 +271,14 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     TMessage* m;
     Int_t l = sock->Recv(m);
     if(l <= 0) {
+      delete sock;
       throw(_eh + "receiving God failed ... dying");
     }
     if(m->What() == GledNS::MT_God) {
       arrival_of_kings(m);
     } else if(m->What() == kMESS_STRING) {
       TString s; *m >> s;
+      delete sock;
       throw(_eh + "connection refused: " + s.Data());
     } else {
       assert(666==777);
@@ -266,16 +322,15 @@ void Saturn::AllowMoons()
   // On start-up the moons are not allowed to connect (only Eyes).
   // AllowMoons() allows moons connections from now on.
 
-  // Locking locked-up moon start-up at this point..
-
-  //mServerLock.Lock();
   bAllowMoons = true;
-  //mServerLock.Unlock();
 }
 
 void Saturn::Shutdown()
 {
-  // first should stop eventors, dump moons, eyez ...
+  // first should dump moons, eyez ...
+
+  mChaItOss->Shutdown();
+
   ISmess("Saturn::Shutdown stopping server");
   stop_server();  
 
@@ -430,18 +485,26 @@ void Saturn::AcceptWrapper()
 {
   // Exception catching wrapper for Accept().
 
-  mServerLock.Lock();
+  TSocket* newsocket = mServerSocket->Accept();
+  if(!newsocket) {
+    cout <<"Saturn::AcceptWrapper Accept socket failed\n";
+    return;
+  }
+  ISdebug(0, GForm("Saturn::AcceptWrapper Connection from: %s",
+		   newsocket->GetInetAddress().GetHostName()));
+
+  // mServerLock.Lock();
   try {
-    Accept();
+    Accept(newsocket);
   }
   catch(string exc) {
     // Perhaps should report to someone
-    cout <<"Saturn::AcceptWrapper caught: "<< exc <<endl;
+    ISerr(GForm("Saturn::AcceptWrapper exception: %s", exc.c_str()));
   }
-  mServerLock.Unlock();
+  // mServerLock.Unlock();
 }
 
-void Saturn::Accept() throw(string)
+void Saturn::Accept(TSocket* newsocket) throw(string)
 {
   // Accepts connection from an Eye/Moon or handles FirstFreeID query.
   // Locks/Suspends all executions upon
@@ -452,184 +515,262 @@ void Saturn::Accept() throw(string)
 
   static string _eh("Saturn::Accept ");
 
-  TSocket* newsocket = mServerSocket->Accept();
-  if(!newsocket) {
-    throw(_eh + "failed.");
-  }
-  ISdebug(0, GForm("Saturn::Accept Connection from: %s",
-		   newsocket->GetInetAddress().GetHostName()));
 
-  // Here should talk to the guy ... 
-  newsocket->Send(GForm("This is %s , Saturn version %d",
-		       mSaturnInfo->GetName(), Class_Version()));
-  // Now check what it is ... Eye | Moon | FFIDQuery
-  char s[128];
-  int l = newsocket->Recv(s,126);
-  s[l+1] = 0;
-  if(strcmp("Eye", s) == 0) {
+  // Initial handshake
+  char msgbuf[256];
+  int  len = snprintf(msgbuf, 256,
+		      "This is Saturn \"%s\", Gled version %s (%s). Hello ...",
+		      mSaturnInfo->GetName(), GLED_VERSION_STRING, GLED_BUILD_DATE_STRING);
+  if(len > 255) len = 255;
+  newsocket->SendRaw(msgbuf, len);
+
+  GSelector sel;
+  sel.fRead[newsocket->GetDescriptor()] = (void*)newsocket;
+  sel.fTimeOut = 20; // close connection after 20s of inactivity
+
+  bool loop_done  = false;
+  bool loop_error = false;
+  string loop_error_msg;
+
+  while(!loop_done) {
+
+    if(loop_error) {
+      delete newsocket;
+      throw(_eh + loop_error_msg);
+    }
+
+    int ret = sel.Select();
+
+    if(ret <= 0) {
+      // do clean-up
+      // make descriptive message
+      string err_msg = (ret == 0) ? "connection timeout" : "select error";
+
+      delete newsocket;
+      throw(_eh + err_msg);
+    }
+
+    TMessage* msg;
+    int len = newsocket->Recv(msg);
+    if(len <= 0) {
+      delete newsocket;
+      if(len == 0) {
+	ISdebug(0, "Saturn::Accept other side closed connection");
+	return;
+      } else {
+	throw(_eh + GForm("error receiving message (len=%d)", len));
+      }
+    }
+
+    switch (msg->What()) {
+
+    ////////////////////////////////////////
+    // GledProtocol
+    ////////////////////////////////////////
+    case GledNS::MT_GledProtocol: {
+      Int_t client_proto;
+      *msg >> client_proto;
+      bool compatible_p = (client_proto == s_Gled_Protocol_Version);
+      TMessage reply(compatible_p ? GledNS::MT_GledProtocol :
+		     GledNS::MT_ProtocolMismatch);
+      reply << s_Gled_Protocol_Version;
+      newsocket->Send(reply);
+      if(!compatible_p) {
+	loop_error = true;
+	loop_error_msg = "incompatible protocols";
+      }
+      break;
+    }
+
+    ////////////////////////////////////////
+    // Query FirstFreeID
+    ////////////////////////////////////////
+    case GledNS::MT_QueryFFID: {
+      ISdebug(0, "Saturn::Accept FirstFreeIDQuery: reporting");
+
+      ID_t wkid = mFireKing->GetSaturnID();
+      TMessage m(GledNS::MT_QueryFFID);
+      m << wkid;
+      newsocket->Send(m);
+      break;
+    }
+
     ////////////////////////////////////////
     // Eye
     ////////////////////////////////////////
-    ISdebug(0, "Saturn::Accept Eye ...");
+    case GledNS::MT_EyeConnect: { 
+      ISdebug(0, "Saturn::Accept Eye ...");
 
-    TMessage *info;
-    newsocket->Recv(info); // This is Saturn Info, prefixed by lid,cid
-    EyeInfo* ei = dynamic_cast<EyeInfo*>(GledNS::StreamGlass(*info));
-    assert(ei!=0);
-    delete info;
+      EyeInfo* ei = dynamic_cast<EyeInfo*>(GledNS::StreamGlass(*msg));
+      if(ei == 0) {
+	loop_error = true;
+	loop_error_msg = _eh + "EyeConnect not followed by an EyeInfo";
+	break;
+      }
 
-    // Probably should do checks on many things
-    ISdebug(0, GForm("Saturn::Accept EyeName %s", ei->GetName()));
+      // Probably should do checks on many things
+      ISdebug(0, GForm("Saturn::Accept EyeName %s", ei->GetName()));
 
-    // Create Yar for execution on the SunQueen
-    ZMIR* mir = mSunQueen->S_IncarnateEye(mSaturnInfo);
-    GledNS::StreamGlass(*mir->Message, ei);
-    mir->SetCaller(mSaturnInfo);
-    mir->SetRecipient(mSunQueen->mSunInfo);
+      // Create MIR  for execution on the SunQueen
+      ZMIR* mir = mSunQueen->S_IncarnateEye(mSaturnInfo);
+      GledNS::StreamGlass(*mir->Message, ei);
+      mir->SetCaller(mSaturnInfo);
+      mir->SetRecipient(mSunQueen->mSunInfo);
 
-    // Route MIR in an alternate thread. Mir is deleted there.
-    sat_mir* foo = new sat_mir(this, mir);
-    GThread bar((thread_f)(tl_MIRRouter), foo, false);
-    mPendingConnection.Lock();
-    mPendingEye = 0;
-    mPendingSocket = newsocket;
-    bar.Spawn();
-    ISdebug(0, "Saturn::Accept Waiting for EyeInfo instantiation");
-    mPendingConnection.Wait(); // !!!! Should be timed wait, see above.
-    bar.Join(); // sat_mir structure should have result I can check
-    // Also ... the master must send me a beam, teling me it failed.
-    // Otherwise it must be a network problem
-    assert(mPendingEye!=0);
-    ISdebug(0, "Saturn::Accept EyeInfo received");
+      mServerLock.Lock();
 
-    {
-      TMessage m(kMESS_ANY);
-      m << (UInt_t)this << mPendingEye->GetSaturnID();
-      newsocket->Send(m);
-    }
+      // Route MIR in an alternate thread. Mir is deleted there.
+      sat_mir* foo = new sat_mir(this, mir);
+      GThread bar((thread_f)(tl_MIRRouter), foo, false);
+      mPendingConnection.Lock();
+      mPendingEye = 0;
+      mPendingSocket = newsocket;
+      bar.Spawn();
+      ISdebug(0, "Saturn::Accept Waiting for EyeInfo instantiation");
+      mPendingConnection.Wait(); // !!!! Should be timed wait, see above.
+      bar.Join(); // sat_mir structure should have result I can check
+      // Also ... the master must send me a beam, teling me it failed.
+      // Otherwise it must be a network problem
+      assert(mPendingEye!=0);
+      ISdebug(0, "Saturn::Accept EyeInfo received");
 
-    mEyeLock.Lock();
-    mSelector.Lock();
-    mSelector.fRead[newsocket->GetDescriptor()] = (void*)newsocket;
-    mServerThread->Kill(GThread::SigUSR2);
-    mSelector.Unlock();
-    mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
-			  (newsocket, SocketInfo(SocketInfo::OS_Eye,
-						 mPendingEye)));
-    mEyes.push_back(mPendingEye);
-    mEyeLock.Unlock();
+      {
+	TMessage m(kMESS_ANY);
+	m << (UInt_t)this << mPendingEye->GetSaturnID();
+	newsocket->Send(m);
+      }
 
-    mPendingConnection.Unlock();
+      mEyeLock.Lock();
+      mSelector.Lock();
+      mSelector.fRead[newsocket->GetDescriptor()] = (void*)newsocket;
+      mServerThread->Kill(GThread::SigUSR2);
+      mSelector.Unlock();
+      mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
+			    (newsocket, SocketInfo(SocketInfo::OS_Eye,
+						   mPendingEye)));
+      mEyes.push_back(mPendingEye);
+      mEyeLock.Unlock();
 
-  } else if(strcmp("Moon", s) == 0) {
+      mPendingConnection.Unlock();
+
+      mServerLock.Unlock();
+
+      loop_done = true;
+      break;
+    } 
+
     ////////////////////////////////////////
     // Moon
     ////////////////////////////////////////
-    ISdebug(2, "Saturn::Accept Moon ...");
+    case GledNS::MT_SaturnConnect: {
+      ISdebug(2, "Saturn::Accept Moon ...");
 
-    if(!bAllowMoons) {
-      TMessage m(kMESS_STRING);
-      TString s("Not accepting moons (yet)");
-      m << s;
-      newsocket->Send(m);
-      ISdebug(0, GForm("Saturn::Accept denying moon Connection from: %s",
-		       newsocket->GetInetAddress().GetHostName()));
-      newsocket->Close();
-      return;
-    }
+      if(!bAllowMoons) {
+	newsocket->Send("Not accepting moons (yet)");
+	loop_error = true;
+	loop_error_msg = _eh +
+	  GForm("Saturn::Accept denying moon Connection from: %s",
+		newsocket->GetInetAddress().GetHostName());
+	break;
+      }
 
-    TMessage *info;
-    newsocket->Recv(info); // This is Saturn Info, prefixed by lid,cid
-    SaturnInfo* si = dynamic_cast<SaturnInfo*>(GledNS::StreamGlass(*info));
-    assert(si!=0);
-    delete info;
+      SaturnInfo* si = dynamic_cast<SaturnInfo*>(GledNS::StreamGlass(*msg));
+      if(si == 0) {
+	loop_error = true;
+	loop_error_msg = _eh + "SaturnConnect not followed by a SaturnInfo";
+	break;
+      }
 
-    // Probably should do checks on many things
-    ISdebug(0, GForm("Saturn::Accept MoonName %s", si->GetName()));
+      // Probably should do checks on many things
+      ISdebug(0, GForm("Saturn::Accept MoonName %s", si->GetName()));
 
-    // Create Yar for execution on the SunQueen
-    ZMIR* mir = mSunQueen->S_IncarnateMoon(mSaturnInfo);
-    GledNS::StreamGlass(*mir->Message, si);
-    mir->SetCaller(mSaturnInfo);
-    mir->SetRecipient(mSunQueen->mSunInfo);
+      // Create MIR for execution on the SunQueen
+      ZMIR* mir = mSunQueen->S_IncarnateMoon(mSaturnInfo);
+      GledNS::StreamGlass(*mir->Message, si);
+      mir->SetCaller(mSaturnInfo);
+      mir->SetRecipient(mSunQueen->mSunInfo);
 
-    // Route MIR in an alternate thread.
-    // Should have a mechanism for failure. Like timed wait or could
-    // create the thread in non-detached mode and join it ... or sth.
-    // No go ... if this is not SunAbsolute the request must make a trip
-    // to the Sun.
-    // Should work as long as there are no network/streaming errors.
-    sat_mir* foo = new sat_mir(this, mir);
-    GThread bar((thread_f)(tl_MIRRouter), foo, false);
-    mPendingConnection.Lock();
-    mPendingMoon = 0;
-    mPendingSocket = newsocket;
-    bar.Spawn();
-    ISdebug(0, "Saturn::Accept Waiting for SaturnInfo instantiation");
-    mPendingConnection.Wait(); // !!!! Should be timed wait, see above.
-    bar.Join(); // sat_mir structure should have result I can check
-    // Also ... the master could send me a beam, teling me it failed.
-    assert(mPendingMoon!=0);
-    ISdebug(0, "Saturn::Accept SaturnInfo received");
-    {
-      lpZGlass_t kings; mGod->Copy(kings); kings.pop_back();
-      TMessage m(GledNS::MT_God);
-      m << mPendingMoon;
-      m << (UInt_t) kings.size();
-      mRulingLock.Lock();
-      bool first = true;
-      for(lpZGlass_i i=kings.begin(); i!=kings.end(); ++i) {
-	ZKing* k = dynamic_cast<ZKing*>(*i);
-	assert(k!=0);
-	ZComet* s = k->MakeComet();
-	s->Streamer(m);
-	delete s;
-	if(first) { // Stream also SunQueen
-	  s = mSunQueen->MakeComet();
+      mServerLock.Lock();
+
+      // Route MIR in an alternate thread.
+      // Should have a mechanism for failure. Like timed wait or could
+      // create the thread in non-detached mode and join it ... or sth.
+      // No go ... if this is not SunAbsolute the request must make a trip
+      // to the Sun.
+      // Should work as long as there are no network/streaming errors.
+      sat_mir* foo = new sat_mir(this, mir);
+      GThread bar((thread_f)(tl_MIRRouter), foo, false);
+      mPendingConnection.Lock();
+      mPendingMoon = 0;
+      mPendingSocket = newsocket;
+      bar.Spawn();
+      ISdebug(0, "Saturn::Accept Waiting for SaturnInfo instantiation");
+      mPendingConnection.Wait(); // !!!! Should be timed wait, see above.
+      bar.Join(); // sat_mir structure should have result I can check
+      // Also ... the master could send me a beam, teling me it failed.
+      assert(mPendingMoon!=0);
+      ISdebug(0, "Saturn::Accept SaturnInfo received");
+      {
+	lpZGlass_t kings; mGod->Copy(kings); kings.pop_back();
+	TMessage m(GledNS::MT_God);
+	m << mPendingMoon;
+	m << (UInt_t) kings.size();
+	mRulingLock.Lock();
+	bool first = true;
+	for(lpZGlass_i i=kings.begin(); i!=kings.end(); ++i) {
+	  ZKing* k = dynamic_cast<ZKing*>(*i);
+	  assert(k!=0);
+	  ZComet* s = k->MakeComet();
 	  s->Streamer(m);
 	  delete s;
-	  first = false;
+	  if(first) { // Stream also SunQueen
+	    s = mSunQueen->MakeComet();
+	    s->Streamer(m);
+	    delete s;
+	    first = false;
+	  }
 	}
+	mRulingLock.Unlock();
+	newsocket->Send(m);
       }
-      mRulingLock.Unlock();
-      newsocket->Send(m);
+
+      mMoonLock.Lock();
+      mSelector.Lock();
+      mSelector.fRead[newsocket->GetDescriptor()] = (void*)newsocket;
+      mServerThread->Kill(GThread::SigUSR2);
+      mSelector.Unlock();
+      mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
+			    (newsocket, SocketInfo(SocketInfo::OS_Moon,
+						   mPendingMoon)));
+      mMoons.push_back(mPendingMoon);
+      mSunQueen->add_reflector(mPendingMoon);
+      mPendingMoon->hQueens.insert(mSunQueen);
+      mMoonLock.Unlock();
+
+      mPendingConnection.Unlock();
+
+      mServerLock.Unlock();
+
+      loop_done = true;
+      break;
     }
 
-    mMoonLock.Lock();
-    mSelector.Lock();
-    mSelector.fRead[newsocket->GetDescriptor()] = (void*)newsocket;
-    mServerThread->Kill(GThread::SigUSR2);
-    mSelector.Unlock();
-    mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
-			  (newsocket, SocketInfo(SocketInfo::OS_Moon,
-						 mPendingMoon)));
-    mMoons.push_back(mPendingMoon);
-    mSunQueen->add_reflector(mPendingMoon);
-    mPendingMoon->hQueens.insert(mSunQueen);
-    mMoonLock.Unlock();
-
-    mPendingConnection.Unlock();
-
-  } else if(strcmp("FFIDQuery", s)==0) {
-    ////////////////////////////////////////
-    // FirstFreeIDQuery
-    ////////////////////////////////////////
-    ISdebug(0, "Saturn::Accept FirstFreeIDQuery: reporting/closing");
-
-    ID_t wkid = mFireKing->GetSaturnID();
-    TMessage m; m << wkid;
-    newsocket->Send(m);
-    delete newsocket;
-    return;
-  } else {
     ////////////////////////////////////////
     // Unknown
     ////////////////////////////////////////
-    ISdebug(0, "Saturn::Accept got shit ... closing connection");
+    default: {
+      ISdebug(0, "Saturn::Accept got unknown message ... closing connection");
+      loop_error = true;
+      loop_error_msg = _eh + GForm("unknown message type %d", msg->What());
+      break;
+    }
 
-    delete newsocket;
-    throw(string("Saturn::Accept can't handle stuff like ") + s);
-  }
+    } // end switch message type
+
+    delete msg;
+
+  } // end top-loop
+
   //newsocket->SetOption(kNoBlock, 1);
 }
 
@@ -1094,17 +1235,17 @@ int Saturn::stop_server()
 {
   if(mSaturnInfo == 0) return 0;
 
-  if(mServerSocket) {
-    mServerSocket->Close();
-    delete mServerSocket;
-    mServerSocket = 0;
-  }
-
   if(mServerThread) {
     mServerThread->Cancel();
     mServerThread->Join();
     delete mServerThread;
     mServerThread = 0;
+  }
+
+  if(mServerSocket) {
+    mServerSocket->Close();
+    delete mServerSocket;
+    mServerSocket = 0;
   }
 
   // Need some locking here ?!!
