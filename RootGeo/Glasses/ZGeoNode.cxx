@@ -48,58 +48,6 @@ void ZGeoNode::_assert_tnode(const string& _eh, bool _ggeo_fallbackp)
       throw(_eh + "top-node can not be resolved.");
 }
 
-/**************************************************************************/
-
-void ZGeoNode::RnrOnForDaughters()
-{
-  lpZGeoNode_t dts; 
-  CopyByGlass<ZGeoNode*>(dts);
-  
-  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    GLensReadHolder _rlck(*i);
-    (*i)->SetRnrSelf(true);
-  }
-}
-
-void ZGeoNode::RnrOffForDaughters()
-{ 
-  lpZGeoNode_t dts; 
-  CopyByGlass<ZGeoNode*>(dts);
-  
-  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    GLensReadHolder _rlck(*i);
-    (*i)->SetRnrSelf(false);
-  }
-}
-
-/**************************************************************************/
-
-void ZGeoNode::RnrOnRec()
-{
-  lpZGeoNode_t dts; 
-  CopyByGlass<ZGeoNode*>(dts);
-  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    GLensReadHolder _rlck(*i);
-    (*i)->RnrOnRec();
-  }
-  GLensReadHolder _rlck(this);
-  SetRnrSelf(true);   
-}
-
-void ZGeoNode::RnrOffRec()
-{ 
-  lpZGeoNode_t dts; 
-  CopyByGlass<ZGeoNode*>(dts);
-  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    GLensReadHolder _rlck(*i);
-    (*i)->RnrOffRec();
-  }
-  GLensReadHolder _rlck(this);
-  SetRnrSelf(false);   
-}
-
-/**************************************************************************/
-
 void ZGeoNode::setup_ztrans(ZNode* zn, TGeoMatrix* gm)
 {
   const Double_t* rm = gm->GetRotationMatrix();
