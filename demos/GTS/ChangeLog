@@ -1,3 +1,9 @@
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_surfs.C:
+	Added torus and hyperboloid shapes to the scene; added colors to
+	surfaces and some rnr controls.
+
 2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* cone.gts:
