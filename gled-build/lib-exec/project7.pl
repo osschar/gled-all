@@ -832,8 +832,7 @@ unless($CLASSNAME eq $BASECLASS) {
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  my $glass_var = ($r->{Type} eq "${BASECLASS}*") ?
-    "$r->{Varname}" : "(ZGlass*)$r->{Varname}";
+  my $glass_var = "*(ZGlass**)(&$r->{Varname})";
   print C7 "  link_rep_list.push_back( ".
     "ZGlass::LinkRep($glass_var, sap_$r->{Methodbase}_lmi) );\n";
 }
