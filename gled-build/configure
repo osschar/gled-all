@@ -113,12 +113,19 @@ if($config->{RECONFIGURE} == 0) {
   # include/config.h
   # bluntly include stuff for gcc; will need compiler option ...
   open CH, ">include/config.h";
+
   print CH "#ifndef GLED_CONFIGURE_H\n";
   print CH "#define GLED_CONFIGURE_H\n\n";
   print CH "#include \"gcc-config.h\"\n\n";
+
+  print CH "#define GLED_VERSION_STRING    \"$config->{BUILD_VERSION}\"\n";
+  print CH "#define GLED_BUILD_DATE_STRING \"$config->{BUILD_DATE}\"\n";
+  print CH "\n";
+
   $ch_line = "#define MAC_RNR_FRIENDS(_xx_) ";
   $ch_line .= join('; ', map(" friend class _xx_ ## _${_}_Rnr", @Rnrs));
-  print CH $ch_line."\n";
+  print CH $ch_line."\n\n";
+
   print CH "#endif\n";
   close CH;
 
