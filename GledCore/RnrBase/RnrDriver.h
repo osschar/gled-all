@@ -43,8 +43,8 @@ protected:
   Float_t	mNameOffset;	 // X{Gs}
 
   Int_t		mTextSize;	 // X{Gs}
-  ZColor	mTextCol;	 // X{r}
-  ZColor	mTileCol;	 // X{r}
+  ZColor	mTextCol;	 // X{pr}
+  ZColor	mTileCol;	 // X{pr}
   string	mTilePos;	 // X{rGs}
 
   int		mWidth;		 // X{Gs}
