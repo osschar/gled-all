@@ -10,11 +10,12 @@
 #include <Glasses/ZHashList.h>
 #include <Glasses/SaturnInfo.h>
 #include <Glasses/ZMirFilter.h>
+#include <Gled/MIR_Priest.h>
 class ZQueen;
 
-class ZKing : public ZHashList
+class ZKing : public ZHashList, public MIR_Priest
 {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZKing);
 
   friend class Saturn;
@@ -35,7 +36,7 @@ protected:
 
   UChar_t	mMapNoneTo;     // X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny], -width=>8)
 
-  virtual void BlessMIR(ZMIR& mir) throw(string);
+  virtual void BlessMIR(ZMIR& mir);
 
 public:
   ZKing(const Text_t* n="ZKing", const Text_t* t=0) :

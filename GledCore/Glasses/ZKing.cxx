@@ -52,12 +52,13 @@ void ZKing::AdEnlightenment()
   // Create a dummy queen for reference counting and emitting Rays.
   mQueen = new ZQueen(GForm("Concubine of %s", GetName()));
   mQueen->mSaturn = mSaturn;
+  mQueen->mZeroRCPolicy = ZQueen::ZRCP_Ignore;
   mQueen->mKing = this;
 }
 
 /**************************************************************************/
 
-void ZKing::BlessMIR(ZMIR& mir) throw(string)
+void ZKing::BlessMIR(ZMIR& mir)
 {
   // Performs dependenciy check of context arguments and access
   // authorization.
@@ -166,9 +167,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
 
   static string _eh("ZKing::reflect_queen() ");
 
-  if(mMir == 0) {
-    throw(_eh + "should be called with mMir set");
-  }
+  assert_MIR_presence(_eh);
 
   if(moon == mSaturn->GetSaturnInfo()) {
     // Request came from self ... must beam it upwards, if necessary.
@@ -194,7 +193,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
     auto_ptr<ZMIR> mir(S_reflect_queen(queen_to_mirror, moon));
     mir->SetCaller(mSaturn->GetSaturnInfo());
     mir->SetRecipient(moon->GetMaster());
-    mSaturn->PostMIR(*mir);
+    mSaturn->PostMIR(mir);
 
   } else {
     // Request should be coming from direct moon.
@@ -216,7 +215,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
       ISdebug(0, GForm("%s Sending queen '%s' to moon '%s'; length=%d",
 		       _eh.c_str(), queen_to_mirror->GetName(),
 		       moon->GetName(), mir->Length()));
-      mSaturn->PostMIR(*mir);
+      mSaturn->PostMIR(mir);
       moon->hQueens.insert(queen_to_mirror);
 
     } else if(queen_to_mirror->GetAwaitingSceptre()) {
@@ -233,7 +232,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
 					 mSaturn->GetSaturnInfo()));
       mir->SetCaller(mSaturn->GetSaturnInfo());
       mir->SetRecipient(mSaturn->GetSaturnInfo()->GetMaster());
-      mSaturn->PostMIR(*mir);
+      mSaturn->PostMIR(mir);
 
     }
 
@@ -251,11 +250,13 @@ void ZKing::activate_queen(ZQueen* queen)
 
   static string _eh("ZKing::activate_queen() ");
 
+  ZMIR* mir = assert_MIR_presence(_eh);
+
   if(!queen->GetAwaitingSceptre()) {
     throw(_eh + "queen " + queen->GetName() + " is NOT awaiting sceptre");
   }
 
-  queen->InvokeReflection(*mMir);
+  queen->InvokeReflection(*mir);
   queen->SetAwaitingSceptre(false);
 
   ISmess(GForm("%s queen '%s' arrived for king '%s'",
@@ -268,7 +269,7 @@ void ZKing::activate_queen(ZQueen* queen)
 
   // Broadcast beams
   if(!queen->mReflectors.empty()) {
-    mSaturn->BroadcastBeamMIR(*mMir, queen->mReflectors);
+    mSaturn->BroadcastBeamMIR(*mir, queen->mReflectors);
     for(lpSaturnInfo_i r=queen->mReflectors.begin(); r!=queen->mReflectors.end(); ++r) {
       (*r)->hQueens.insert(queen);
     }
@@ -285,9 +286,9 @@ void ZKing::receive_eunuch()
   // Receives an eunuch.
 
   static string _eh("ZKing::receive_eunuch ");
-  assert_MIR_presence(_eh, ZGlass::MC_IsBeam);
+  ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsBeam);
 
-  ZEunuch* e = GledNS::StreamLensByGlass<ZEunuch*>(*mMir);
+  ZEunuch* e = GledNS::StreamLensByGlass<ZEunuch*>(*mir);
   if(e == 0)
     throw(_eh + "MIR not followed by an eunuch.");
   
