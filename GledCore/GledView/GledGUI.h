@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -27,14 +27,14 @@ private:
 
 protected:
   struct Message {
-    const char*	fMsg;
+    string	fMsg;
     Fl_Color	fCol;
     Message(const char* m, Fl_Color c=(Fl_Color)0) : fMsg(m), fCol(c) {}
   };
   typedef list<Message>		lMessage_t;
 
-  Fl_OutputPack* wOutPack;
-  bool		 bGUIup;
+  Fl_OutputPack*  wOutPack;
+  bool		  bGUIup;
 
   Fl_Value_Input* wDebugLevel;	// X{G}
   Fl_Input*	  wLibSetName;	// X{G}

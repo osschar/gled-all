@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -41,6 +41,7 @@ void ZSunQueen::_init()
 {
   mSunInfo = 0;
   mSaturnGuestId = mEyeGuestId = 0;
+  bMandatory = true;
 }
 
 /**************************************************************************/
@@ -50,9 +51,9 @@ ZSunQueen::~ZSunQueen()
 
 /**************************************************************************/
 
-void ZSunQueen::Bootstrap()
+void ZSunQueen::bootstrap()
 {
-  PARENT_GLASS::Bootstrap();
+  PARENT_GLASS::bootstrap();
 
   ZNameMap* auth = new ZNameMap("Auth", "Authentication and Authorization");
   CheckIn(auth); Add(auth);
@@ -96,17 +97,6 @@ void ZSunQueen::AdEnlightenment()
 
 /**************************************************************************/
 
-void ZSunQueen::UnfoldFrom(ZComet& comet)
-{
-  ZSunQueen* sq = dynamic_cast<ZSunQueen*>(comet.mQueen);
-  assert(comet.mType == ZComet::CT_Queen && sq != 0);
-
-  mSunInfo = sq->mSunInfo;
-  ZQueen::UnfoldFrom(comet);
-}
-
-/**************************************************************************/
-
 ID_t ZSunQueen::incarnate_moon(SaturnInfo* parent, SaturnInfo* moon)
 {
   ID_t id = CheckIn(moon);
@@ -120,9 +110,9 @@ void ZSunQueen::IncarnateMoon(SaturnInfo* parent)
 {
   static const string _eh("ZSunQueen::IncarnateMoon ");
 
-  AssertMIRPresence(_eh);
+  assert_MIR_presence(_eh);
 
-  SaturnInfo* si = dynamic_cast<SaturnInfo*>(GledNS::StreamGlass(*mMir));
+  SaturnInfo* si = GledNS::StreamLensByGlass<SaturnInfo*>(*mMir);
   if(si == 0) {
     throw(_eh + "did not receive a lens of glass SaturnInfo");
   }
@@ -141,9 +131,9 @@ void ZSunQueen::IncarnateEye(SaturnInfo* parent)
 {
   static const string _eh("ZSunQueen::IncarnateEye ");
 
-  AssertMIRPresence(_eh);
+  assert_MIR_presence(_eh);
 
-  EyeInfo* ei = dynamic_cast<EyeInfo*>(GledNS::StreamGlass(*mMir));
+  EyeInfo* ei = GledNS::StreamLensByGlass<EyeInfo*>(*mMir);
   if(ei == 0) {
     throw(_eh + "did not receive a lens of glass EyeInfo");
   }
@@ -156,11 +146,12 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
   // If sent as MT_Beam interprets it as request to shut down
   // connection to the moon with notification sent to SunQueen.
 
-  assert(mMir != 0);
+  static string _eh("ZSunQueen::CremateMoon ");
+  ZGlass::assert_MIR_presence(_eh);
 
   if(moon->GetMaster() == mSaturn->GetSaturnInfo()) {
     if(moon->hSocket != 0) {
-      ISmess(GForm("ZSunQueen::CremateMoon socket still present ... closing it"));
+      ISmess(_eh + "socket still present ... closing it");
       if(mMir->What() == GledNS::MT_Beam) {
 	mSaturn->wipe_moon(moon, true);
 	return;
@@ -237,7 +228,7 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
     throw(_eh + "unknown type of mee");
   }
   auto_ptr<ZMIR> mir( mir_ptr );
-  GledNS::StreamGlass(*mir, mee);
+  GledNS::StreamLens(*mir, mee);
   mir->SetRecipient(mSunInfo);
   delete mee;
 
@@ -332,14 +323,14 @@ void ZSunQueen::initiate_mee_connection()
 
   static const string _eh("ZSunQueen::initiate_mee_connection ");
 
-  AssertMIRPresence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
+  assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
   SaturnInfo* req = dynamic_cast<SaturnInfo*>(mMir->Caller);
   if(req == 0)
     throw(_eh + "caller not a Saturn");
 
   ZMirEmittingEntity* mee =
-    dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamGlass(*mMir));
+    dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamLens(*mMir));
   if(mee == 0)
     throw(_eh + "did not receive a lens of glass ZMirEmittingEntity");
 
@@ -504,14 +495,14 @@ ID_t ZSunQueen::incarnate_mee(UInt_t conn_id)
   if(GledNS::IsA(ncd->fNewMEE, SaturnInfo::FID())) {
     SaturnInfo* si = (SaturnInfo*)ncd->fNewMEE;
     si->bUseAuth = mSunInfo->bUseAuth;
-    GledNS::StreamGlass(streamed_mee, si);
+    GledNS::StreamLens(streamed_mee, si);
 
     id   = incarnate_moon(ncd->fRequestor, si);
     mirp = S_IncarnateMoon(ncd->fRequestor);
   }
   else if(GledNS::IsA(ncd->fNewMEE, EyeInfo::FID())) {
     EyeInfo* ei = (EyeInfo*)ncd->fNewMEE;
-    GledNS::StreamGlass(streamed_mee, ei);
+    GledNS::StreamLens(streamed_mee, ei);
 
     id   = incarnate_eye(ncd->fRequestor, ei);
     mirp = S_IncarnateEye(ncd->fRequestor);
@@ -582,7 +573,7 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
 {
   static string _eh("ZSunQueen::AttachIdentity ");
 
-  AssertMIRPresence(_eh);
+  assert_MIR_presence(_eh);
   if(id == 0)
     throw(_eh + "null identity");
   if(mMir->Caller->HasIdentity(id))
@@ -614,7 +605,7 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
 {
   static string _eh("ZSunQueen::DetachIdentity ");
 
-  AssertMIRPresence(_eh);
+  assert_MIR_presence(_eh);
   if(id == 0)
     throw(_eh + "null identity");
   if(!mMir->Caller->HasIdentity(id))
@@ -652,7 +643,7 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
   static const string _eh("ZSunQueen::detach_all_identities ");
 
   ZIdentity* id;
-  mee->mExecMutex.Lock();
+  mee->WriteLock();
   if((id = mee->mPrimaryIdentity) != 0) {
     mee->SetPrimaryIdentity(0);
     id->mActiveMMEs->Remove(mee);
@@ -666,7 +657,7 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
       ++i;
     }
     mee->mActiveIdentities->EndIteration();
-    mee->mActiveIdentities->Clear();
+    mee->mActiveIdentities->ClearList();
   }
 
   SaturnInfo* si = dynamic_cast<SaturnInfo*>(mee);
@@ -678,7 +669,7 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
       detach_all_identities((ZMirEmittingEntity*)*i);
     }
   }
-  mee->mExecMutex.Unlock();
+  mee->WriteUnlock();
 }
 
 /**************************************************************************/

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,19 +19,20 @@ class SMorph : public ZNode {
   MAC_RNR_FRIENDS(SMorph);
 
 private:
-  void		Messofy(Real_t ct, Real_t st, Real_t phi);
-  void		_init(Real_t r);
+  void		Messofy(Float_t ct, Float_t st, Float_t phi);
+  void		_init(Float_t r);
 
 protected:
   Int_t		mTLevel;	// X{GST} 7 Value(-range=>[2,100, 1], -join=>1)
   Int_t		mPLevel;	// X{GST} 7 Value(-range=>[3,100, 1])
 
-  Real_t	mTx;		// X{GST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
-  Real_t	mCx;		// X{GST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
-  Real_t	mRz;		// X{GST} 7 Value(-range=>[-10,10, 1,100])
+  Float_t	mTx;		// X{GST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
+  Float_t	mCx;		// X{GST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
+  Float_t	mRz;		// X{GST} 7 Value(-range=>[-10,10, 1,100])
   Bool_t	bOpenTop;	// X{GST} 7 Bool(-join=>1)
   Bool_t	bOpenBot;	// X{GST} 7 Bool()
   Bool_t	bEquiSurf;	// X{GST} 7 Bool()
+  Bool_t	bUseDispList;	// X{GST} 7 Bool()
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
   ZImage*	mTexture;	// X{GST} L{} RnrBits{2,0,4,0, 0,0,0,0}
@@ -42,7 +43,7 @@ protected:
 public:
   SMorph(const Text_t* n="SMorph", const Text_t* t=0) : ZNode(n,t)
   { _init(1); }
-  SMorph(Real_t r, const Text_t* n="SMorph", const Text_t* t=0) : ZNode(n,t)
+  SMorph(Float_t r, const Text_t* n="SMorph", const Text_t* t=0) : ZNode(n,t)
   { _init(r); }
   virtual ~SMorph();
 

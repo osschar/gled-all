@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -18,15 +18,15 @@ class WSPoint : public ZNode {
 
 private:
   void _init();
-  ZMatrix	mCoffs;
+  TMatrixF	mCoffs;
 
 protected:
-  Real_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
-  Real_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
-  Real_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6)
+  Float_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
+  Float_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6, -join=>1)
+  Float_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,100], -width=>6)
 
-  Real_t	mTwist;		// X{GS} 7 Value(-range=>[-100,100,1,100], -join=>1)
-  Real_t	mStretch;	// X{GS} 7 Value(-range=>[-100,100,1,100])
+  Float_t	mTwist;		// X{GS} 7 Value(-range=>[-100,100,1,100], -join=>1)
+  Float_t	mStretch;	// X{GS} 7 Value(-range=>[-100,100,1,100])
 
   bool		bDrawAxen;	// 	   X{GS} 7 Bool()
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -44,9 +44,9 @@ void WSSeed::Triangulate()
   pTuber->Init(0, mTLevel*(size - 1) + 1, mPLevel, false, bTextured);
 
   list<WSPoint*>::iterator a, b;
-  Real_t len_fac = 1;
+  Float_t len_fac = 1;
   if(bRenormLen) {
-    Real_t len = 0;
+    Float_t len = 0;
     b = points.begin();
     while((a=b++, b) != points.end()) len += (*a)->mStretch;
     len_fac = mLength/len;
@@ -60,8 +60,8 @@ void WSSeed::Triangulate()
       first = false;
       InitSlide(*a);
     }
-    Real_t delta = 1.0/mTLevel, max = 1 - delta/2;
-    for(Real_t t=0; t<max; t+=delta) {
+    Float_t delta = 1.0/mTLevel, max = 1 - delta/2;
+    for(Float_t t=0; t<max; t+=delta) {
       Ring(*a, t);
       hTexU += delta * (*a)->mTwist;
       hTexV += delta * (*a)->mStretch * len_fac;
@@ -73,39 +73,52 @@ void WSSeed::Triangulate()
 void WSSeed::InitSlide(WSPoint* f)
 {
   const ZTrans& t = f->RefTrans();
-  for(UCIndex_t i=0; i<5; ++i) {
+  for(Int_t i=0; i<5; ++i) {
     hUp(i) = t(i, 2u);
     hAw(i) = t(i, 3u);
   }
   hTexU = hTexV = 0;
 }
 
-void WSSeed::Ring(WSPoint* f, Real_t t)
+namespace {
+  double orto_norm(TVectorF& v, const TVectorF& x, int M) {
+    double dp = 0;
+    for(Int_t i=0; i<M; ++i) dp   += v(i)*x(i);
+    for(Int_t i=0; i<M; ++i) v(i) -= x(i)*dp;
+    double ni = 1/TMath::Sqrt(v.Norm2Sqr()); 
+    for(Int_t i=0; i<M; ++i) v(i) *= ni;
+    return dp;
+  }
+}
+
+void WSSeed::Ring(WSPoint* f, Float_t t)
 {
-  Real_t t2 = t*t;
-  Real_t t3 = t2*t;
-  for(UCIndex_t i=1; i<=3; i++) {
+  Float_t t2 = t*t;
+  Float_t t3 = t2*t;
+  for(Int_t i=1; i<=3; i++) {
     hPnt(i) = f->mCoffs(i,0u) + f->mCoffs(i,1u)*t +
       f->mCoffs(i,2u)*t2 + f->mCoffs(i,3u)*t3;
     hAxe(i) = f->mCoffs(i,1u) + 2*f->mCoffs(i,2u)*t +
       3*f->mCoffs(i,3u)*t2;
   }
-  Real_t w = f->mCoffs(4u,0u) + f->mCoffs(4u,1u)*t +
+  Float_t w = f->mCoffs(4u,0u) + f->mCoffs(4u,1u)*t +
     f->mCoffs(4u,2u)*t2 + f->mCoffs(4u,3u)*t3;
-  Real_t dwdt = TMath::ATan(f->mCoffs(4u,1u) + 2*f->mCoffs(4u,2u)*t +
+  Float_t dwdt = TMath::ATan(f->mCoffs(4u,1u) + 2*f->mCoffs(4u,2u)*t +
 			    3*f->mCoffs(4u,3u)*t2);
-  Real_t dwc = TMath::Cos(dwdt);
-  Real_t dws = TMath::Sin(dwdt);
-  ZVector oneAxe(hAxe); oneAxe.Norm(4);
-  hUp.OrtoNorm(oneAxe, 4);
-  hAw.OrtoNorm(oneAxe, 4); hAw.OrtoNorm(hUp, 4);
+  Float_t dwc = TMath::Cos(dwdt);
+  Float_t dws = TMath::Sin(dwdt);
+  TVectorF oneAxe(hAxe);
+  oneAxe *= 1/TMath::Sqrt(oneAxe.Norm2Sqr());
+  orto_norm(hUp, oneAxe, 4);
+  orto_norm(hAw, oneAxe, 4);
+  orto_norm(hAw, hUp, 4);
 
   pTuber->NewRing(mPLevel, true);
-  Real_t phi = 0, step = 2*TMath::Pi()/mPLevel;
-  Real_t R[3], N[3], T[2];
+  Float_t phi = 0, step = 2*TMath::Pi()/mPLevel;
+  Float_t R[3], N[3], T[2];
   for(int j=0; j<mPLevel; j++, phi-=step) {
-    Real_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
-    for(UCIndex_t i=1; i<=3; ++i) {
+    Float_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
+    for(Int_t i=1; i<=3; ++i) {
       R[i-1] = hPnt(i) + cp*w*hUp(i) + sp*w*hAw(i);
       N[i-1] = -dws*oneAxe(i) + dwc*(cp*hUp(i) + sp*hAw(i));
     }
@@ -115,8 +128,8 @@ void WSSeed::Ring(WSPoint* f, Real_t t)
   }
   { // last one
     phi = -2*TMath::Pi();
-    Real_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
-    for(UCIndex_t i=1; i<=3; ++i) {
+    Float_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
+    for(Int_t i=1; i<=3; ++i) {
       R[i-1] = hPnt(i) + cp*w*hUp(i) + sp*w*hAw(i);
       N[i-1] = -dws*oneAxe(i) + dwc*(cp*hUp(i) + sp*hAw(i));
     }

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -13,8 +13,6 @@ struct RingInfo {
   Int_t		fIndex;
   Int_t		fNVert;
   bool		fDrawP;
-  //ZVector	mOrigin;	// -> v bistvu kar ZTrans ... or sth
-  //ZVector	mAxis;		// skupaj s tem ...
 
   RingInfo(Int_t i, Int_t n, bool dp) : fIndex(i), fNVert(n), fDrawP(dp) {}
 };
@@ -22,9 +20,6 @@ struct RingInfo {
 typedef vector<RingInfo>		vRingInfo_t;
 typedef vector<RingInfo>::iterator	vRingInfo_i;
 
-// od mojstra dobim ZVector, pa jih zbasem v array, katerega velikost
-// poznam in si oznacim, pri katerem indexu se zacne ring.
-// in morda se ... koliko je dolg ... in center in normalo ...
 
 class TubeTvor {
   friend class TubeTvor_GL_Rnr;

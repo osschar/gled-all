@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -29,17 +29,17 @@ protected:
   Int_t		mMaxDepth;	// X{GS} 7 Value(-range=>[1,1000,1,1])
 
   ZColor	mClearColor;	// X{PGS} 7 ColorButt(-join=>1)
-  Real_t	mFOV;		// X{GS} 7 Value(-range=>[1,180,1,1])
-  Real_t	mNearClip;	// X{GS} 7 Value(-range=>[0,1000,1,10],-join=>1)
-  Real_t	mFarClip;	// X{GS} 7 Value(-range=>[0,1000,1,10])
+  Float_t	mFOV;		// X{GS} 7 Value(-range=>[1,180,1,1])
+  Float_t	mNearClip;	// X{GS} 7 Value(-range=>[0,1000,1,100],-join=>1)
+  Float_t	mFarClip;	// X{GS} 7 Value(-range=>[0,1000,1,100])
 
   Int_t		mFrontMode;	// X{GS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>8,-join=>1)
   Int_t		mBackMode;	// X{GS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>8)
   Bool_t	bLiMo2Side;	// X{GS} 7 Bool(-join=>1)
   Bool_t	bBlend;		// X{GS} 7 Bool()
 
-  Real_t	mMSRotFac;	// X{GS} 7 Value(-range=>[-1000,1000,1,10],-join=>1)
-  Real_t	mMSMoveFac;	// X{GS} 7 Value(-range=>[-1000,1000,1,10])
+  Float_t	mMSRotFac;	// X{GS} 7 Value(-range=>[-1000,1000,1,10],-join=>1)
+  Float_t	mMSMoveFac;	// X{GS} 7 Value(-range=>[-1000,1000,1,10])
 
   Float_t	mCHSize;	// X{GS} 7 Value(-range=>[0,1,1,100])
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -297,9 +297,7 @@ void GledGUI::SetDebugLevel(Int_t d) {
 /**************************************************************************/
 
 // GUI controlled by separate thread driven by GledGUI::Run method
-// It spawns another thread that does MessageLoop.
-// mechanisms ... and probably notify another thread to actually
-// deliver messages to gui. Here we assume all will be OK ...
+// It spawns another thread that does MessageLoop:
 
 void GledGUI::MessageLoop()
 {
@@ -312,7 +310,7 @@ void GledGUI::MessageLoop()
       mMsgCond.Lock();
       while(mMsgQueue.begin() != mMsgQueue.end()) {
 	Message& msg = mMsgQueue.front();
-	wOutPack->add_line(msg.fMsg, msg.fCol);
+	wOutPack->add_line(msg.fMsg.c_str(), msg.fCol);
 	mMsgQueue.pop_front();
       }
       wOutPack->redraw();

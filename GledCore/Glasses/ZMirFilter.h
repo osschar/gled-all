@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -20,7 +20,7 @@ private:
   void _init();
 
 protected:
-  UChar_t	mMapNoneTo;	// X{GS} 7 PhonyEnum(-vals=>[ZMirFilter::R_None,None,ZMirFilter::R_Allow,Allow,ZMirFilter::R_Deny,Deny],-width=>6)
+  UChar_t	mMapNoneTo;	// X{GS} 7 PhonyEnum(-type=>Result_e, -width=>6)
 
 public:
   ZMirFilter(const Text_t* n="ZMirFilter", const Text_t* t=0) : ZGlass(n,t)

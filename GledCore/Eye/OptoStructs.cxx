@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -29,7 +29,7 @@ namespace GVNS = GledViewNS;
 ZGlassImg::ZGlassImg(Eye* e, ZGlass* g) : fEye(e), fGlass(g) {
   fClassInfo = GNS::FindClassInfo(FID_t(g->ZibID(), g->ZlassID()));
   fIsList = dynamic_cast<ZList*>(g) ? true : false;
-  fDefView = 0; fDefRnr = 0;
+  fDefView = 0;
   fFullMTW_View = 0;
 
   lppZGlass_t links; g->CopyLinkRefs(links);
@@ -42,15 +42,22 @@ ZGlassImg::ZGlassImg(Eye* e, ZGlass* g) : fEye(e), fGlass(g) {
 }
 
 ZGlassImg::~ZGlassImg() {
-  delete fDefRnr;
-  delete fDefView;
-  // ??? should wipe all A_Views
-  // !!! note that the full MTW_View will be deleted along !!!
   delete fFullMTW_View;
+  // LinkViews should be empty ...
+  if(!fLinkViews.empty()) {
+    cout <<"ZGlassImg::~ZGlassImg links are NOT empty ... problems anticipated\n";
+  }
+  while(!fFullViews.empty()) {
+    delete fFullViews.back();
+    // The destructor of A_GlassView removes itself from the fFullViews list.
+    // The same *must* hold for "manually" added A_View's. User's responsibility.
+  }
+  // delete fDefView; // this one removed in the above while
 }
 
 void ZGlassImg::CreateDefView() {
   fDefView = fIsList ? new ZListView(this) : new ZGlassView(this);
+  // cout <<"ZGlassImg::CreateDefView() for "<< fGlass->GetName() << " "<< fDefView <<endl;
 }
 
 void ZGlassImg::AssertDefView() {
@@ -67,6 +74,7 @@ A_GlassView::A_GlassView(ZGlassImg* i) : A_View(i) {
 }
 
 A_GlassView::~A_GlassView() {
+  // cout <<"A_GlassView::~A_GlassView of "<< fImg->fGlass->GetName() << endl;
   if(fImg) fImg->CheckOutFullView(this);
   delete fRnr; delete fRnrScheme;
 }
@@ -80,7 +88,7 @@ void A_GlassView::SpawnRnr(const string& rnr)
 
 void A_GlassView::InvalidateRnrScheme()
 {
-  //cout <<"A_GlassView::InvalidateRnrScheme called for "<< fImg->fGlass->GetName() <<endl;
+  // cout <<"A_GlassView::InvalidateRnrScheme called for "<< fImg->fGlass->GetName() <<endl;
   if(fRnrScheme) { delete fRnrScheme; fRnrScheme = 0; }
 }
 
@@ -95,6 +103,7 @@ ZGlassView::ZGlassView(ZGlassImg* img) : A_GlassView(img) {
 }
 
 ZGlassView::~ZGlassView() {
+  // cout <<"ZGlassView::~ZGlassView of "<< fImg->fGlass->GetName() << endl;
   for(lpZLinkView_i l=fLinkViews.begin(); l!=fLinkViews.end(); ++l) {
     delete *l;
   }
@@ -118,11 +127,9 @@ void ZGlassView::CopyLinkViews(lpZLinkView_t& v)
 /**************************************************************************/
 
 void ZGlassView::Absorb_LinkChange(LID_t lid, CID_t cid) {
-  fImg->fGlass->RefExecMutex().Lock();
   for(lpZLinkView_i l=fLinkViews.begin(); l!=fLinkViews.end(); ++l) {
     if((*l)->NeedsUpdate()) (*l)->Update();
   }
-  fImg->fGlass->RefExecMutex().Unlock();
 }
 
 /**************************************************************************/

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,7 +19,7 @@ private:
 
 protected:
   ZHashList*	mIdentities;	// X{GS} L{}
-  UChar_t	mOnMatch;	// X{GS} 7 PhonyEnum(-vals=>[ZMirFilter::R_Allow,Allow,ZMirFilter::R_Deny,Deny],-width=>6)
+  UChar_t	mOnMatch;	// X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny],-width=>6)
 
 public:
   ZIdentityListFilter(const Text_t* n="ZIdentityListFilter", const Text_t* t=0) :

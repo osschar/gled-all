@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -68,17 +68,17 @@ void SphereTrings::DrawAndDisableGL(int i)
 void SphereTrings::RenderEidos(ZTrans& t, EidosControl& ec)
 {
   // first assume z as ka boo
-  Real_t dtheta = TMath::Pi()/(ec.GetNTheta() + 1);
-  Real_t dphi = 2*TMath::Pi()/(ec.GetNPhi() + 1);
-  auto_ptr<ZVector> x = t.GetBase(1);
-  auto_ptr<ZVector> y = t.GetBase(2);
-  auto_ptr<ZVector> z = t.GetBase(3);
+  Float_t dtheta = TMath::Pi()/(ec.GetNTheta() + 1);
+  Float_t dphi = 2*TMath::Pi()/(ec.GetNPhi() + 1);
+  auto_ptr<TVectorF> x = t.GetBase(1);
+  auto_ptr<TVectorF> y = t.GetBase(2);
+  auto_ptr<TVectorF> z = t.GetBase(3);
   ec.StartTube();
   ec.VertAdd(a); ec.EndLayer();
   for(UInt_t i=0; i<=ec.GetNTheta(); i++) {
-    Real_t theta = dtheta*i;
-    Real_t s_theta = TMath::Cos(theta);
-    ZVector a = TMath::Cos(theta) * (*z);
+    Float_t theta = dtheta*i;
+    Float_t s_theta = TMath::Cos(theta);
+    TVectorF a = TMath::Cos(theta) * (*z);
     for(UInt_t j=0; j<=ec.GetNPhi(); j++) {
       phi = sphi*i;
       ec.VertAdd(a + s_theta*(TMath::Cos(phi)*(x) + TMath::Sin(phi)*(*y)));

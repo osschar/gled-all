@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -25,7 +25,7 @@ private:
 protected:
   void send_beam_or_flare(ZMIR& m);
 
-  Int_t			mTest;		// X{GS} 7 PhonyEnum(-seqvals=>[Void, Null, IncCount, SetVector], -join=>1);
+  TestType_e		mTest;		// X{GS} 7 PhonyEnum(-join=>1);
   Bool_t		bUseBeams;	// X{GS} 7 Bool()
 
   Int_t			mVecSize;	// X{GS} 7 Value(-range=>[1,1000000,1,1])

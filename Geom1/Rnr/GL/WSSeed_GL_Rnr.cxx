@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -12,11 +12,11 @@
 
 /**************************************************************************/
 
-void WSSeed_GL_Rnr::vert(WSPoint* f, Real_t t)
+void WSSeed_GL_Rnr::vert(WSPoint* f, Float_t t)
 {
-  Real_t x[3];
-  Real_t t2 = t*t;
-  Real_t t3 = t2*t;
+  Float_t x[3];
+  Float_t t2 = t*t;
+  Float_t t3 = t2*t;
   for(UInt_t i=1; i<=3; i++)
     x[i-1] = f->mCoffs(i,0u) + f->mCoffs(i,1u)*t +
              f->mCoffs(i,2u)*t2 + f->mCoffs(i,3u)*t3;
@@ -25,7 +25,7 @@ void WSSeed_GL_Rnr::vert(WSPoint* f, Real_t t)
 
 /**************************************************************************/
 
-void WSSeed_GL_Rnr::Draw(RnrDriver* rd)
+void WSSeed_GL_Rnr::Render(RnrDriver* rd)
 {
   // Self rendering missing. But ... self parameters also missing.
 
@@ -43,9 +43,9 @@ void WSSeed_GL_Rnr::Draw(RnrDriver* rd)
       list<WSPoint*>::iterator b;
       while((b = a, ++b) != points.end()) {
 	(*a)->Coff(*b);
-	Real_t delta = 1.0/mWSSeed->mTLevel, max = 1 - delta/2;
+	Float_t delta = 1.0/mWSSeed->mTLevel, max = 1 - delta/2;
 	glBegin(GL_LINE_STRIP);
-	for(Real_t t=0; t<max; t+=delta) {
+	for(Float_t t=0; t<max; t+=delta) {
 	  vert(*a, t);
 	}
 	vert(*a, 1);
@@ -58,8 +58,8 @@ void WSSeed_GL_Rnr::Draw(RnrDriver* rd)
   glPopAttrib();
 }
 
-void WSSeed_GL_Rnr::Triangulate()
+void WSSeed_GL_Rnr::Triangulate(RnrDriver* rd)
 {
-  ZNode_GL_Rnr::Triangulate();
+  ZNode_GL_Rnr::Triangulate(rd);
   mWSSeed->Triangulate();
 }

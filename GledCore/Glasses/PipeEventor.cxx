@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -73,7 +73,7 @@ void PipeEventor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
   mSendCond.Lock();
   try {
     feed_commands();
-    mSendCond.TimedWait(mWaitTimeMS);
+    mSendCond.TimedWaitMS(mWaitTimeMS);
     feed_commands();
   }
   catch (Operator::Exception exc) {

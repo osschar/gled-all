@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -8,6 +8,8 @@
 #define Gled_OptoStructs
 
 #include <GledView/GledViewNS.h>
+
+#include <Glasses/ZGlass.h>
 
 class ZGlass;
 class Eye;
@@ -45,7 +47,6 @@ namespace OptoStructs {
 
     bool		fIsList;
     ZGlassView*		fDefView;
-    A_Rnr*		fDefRnr; // !!!! is this used anywhere ????
     lZLinkDatum_t	fLinkData;
 
     Fl_Window*		fFullMTW_View;
@@ -70,7 +71,7 @@ namespace OptoStructs {
   typedef hash_map<ZGlass*, ZGlassImg*>::iterator hpZGlass2pZGlassImg_i;
 
   /**************************************************************************/
-  // ZLinkDatum: information provided for links of each Glass 
+  // ZLinkDatum: information provided for links of each lens
   /**************************************************************************/
 
   struct ZLinkDatum {
@@ -90,6 +91,7 @@ namespace OptoStructs {
     ZGlassImg*	fImg;
 
     A_View(ZGlassImg* i) : fImg(i) {}
+    virtual ~A_View() {}
 
     virtual void Absorb_Change(LID_t lid, CID_t cid) {}
     virtual void Absorb_LinkChange(LID_t lid, CID_t cid) {}
@@ -173,7 +175,7 @@ namespace OptoStructs {
     void build_daughters();
 
     ZListView(ZGlassImg* img);
-
+    virtual ~ZListView() {}
     virtual void AssertDependantViews();
     virtual void CopyListViews(lpA_GlassView_t& v);
 
@@ -205,7 +207,8 @@ namespace OptoStructs {
     virtual void Update();
 
     virtual A_GlassView* GetView() { return fToImg->fDefView; }
-    virtual A_Rnr*       GetRnr()  { return fToImg->fDefRnr; }
+    // The following method never used
+    // virtual A_Rnr*       GetRnr()  { return fToImg->->fDefView->fRnr; }
     
     virtual const GledViewNS::RnrBits& GetRnrBits() {
       return fLinkDatum->fLinkInfo->fViewPart->fDefRnrBits;

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -56,7 +56,7 @@ void ZCometBag::AddFirst(ZGlass* g)
 ZComet* ZCometBag::MakeComet()
 {
   ZComet* comet = new ZComet(GetName(), GForm("Comet[CometBag] of %s", GetName()));
-  mExecMutex.Lock();
+  WriteLock();
 
   // !!!! See ZComet, about correct streaming struct
   if(bSmartZNodes) comet->mIgnoredLinks.insert("ZNode::Parent");
@@ -67,7 +67,7 @@ ZComet* ZCometBag::MakeComet()
     comet->AddTopLevel(t->GetRoot(), t->GetFollowLinks(), t->GetFollowLists(),
 		      t->GetDepth());
   }
-  mExecMutex.Unlock();
+  WriteUnlock();
   return comet;
 }
 
