@@ -19,10 +19,11 @@ namespace SphereTrings {
   extern GLsizei  IndexSize[5];
   extern GLenum   GLmode[5];
 
+  void Render(int i, bool flat_p);
+
   void EnableGL(int i);
   void DrawAndDisableGL(int i);
 
-  //void RenderEidos(ZTrans& t);
 } // namespace SphereTrings
 
 #endif
