@@ -12,6 +12,8 @@ void ZImage_GL_Rnr::_init()
 {
   mStampTexture = 0;
   mTexture = 0;
+  // From ZGlass_GL_Rnr:
+  bUseNameStack = false;
 }
 
 ZImage_GL_Rnr::~ZImage_GL_Rnr()
@@ -21,7 +23,7 @@ ZImage_GL_Rnr::~ZImage_GL_Rnr()
 
 /**************************************************************************/
 
-void ZImage_GL_Rnr::init_texture()
+void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 {
   if(mImage->bLoaded == true) {
     if(mTexture == 0) {
@@ -41,8 +43,9 @@ void ZImage_GL_Rnr::init_texture()
 
     ZImage::sILMutex.Lock();
     mImage->bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, mImage->mW, mImage->mH, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, mImage->mIntFmt, mImage->mW, mImage->mH, 0,
 		 mImage->gl_format(), mImage->gl_type(), mImage->data());
+    mImage->unbind();
     ZImage::sILMutex.Unlock();
 
   } else {
@@ -59,21 +62,18 @@ void ZImage_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   ZGlass_GL_Rnr::PreDraw(rd);
   glPushAttrib(GL_TEXTURE_BIT);
-  glEnable(GL_TEXTURE_2D);
-  if(mImage->mStampReqTexture > mStampTexture) {
-    init_texture();
-    mStampTexture = mImage->mTimeStamp;
-  }
   if(mTexture) {
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, mTexture);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mImage->mEnvMode); 
     glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, mImage->mEnvColor());
+  } else {
+    glDisable(GL_TEXTURE_2D);
   }
 }
 
 void ZImage_GL_Rnr::Draw(RnrDriver* rd)
-{
-}
+{}
 
 void ZImage_GL_Rnr::PostDraw(RnrDriver* rd)
 {
