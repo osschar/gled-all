@@ -22,7 +22,7 @@ private:
 protected:
   // Light model
   ZGlStateBase::GlStateOp_e
-                mLigtModelOp;     // X{GS}  7 PhonyEnum()
+                mLightModelOp;     // X{GS}  7 PhonyEnum()
   ZColor	mLiMoAmbient;     // X{PGS} 7 ColorButt(-join=>1)
   Int_t		mLiMoColorCtrl;	  // X{GS}  7 PhonyEnum(-width=>10, -vals=>[GL_SINGLE_COLOR,Single, GL_SEPARATE_SPECULAR_COLOR,SeparateSpecular]);
   Bool_t	bLiMoLocViewer;	  // X{GS}  7 Bool(-join=>1)

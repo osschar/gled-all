@@ -19,7 +19,7 @@ ClassImp(ZGlLightModel)
 
 void ZGlLightModel::_init()
 {
-  mLigtModelOp   = GSO_Nop;
+  mLightModelOp   = GSO_Nop;
   mLiMoAmbient.rgba(0.2, 0.2, 0.2);
   mLiMoColorCtrl = GL_SINGLE_COLOR;
   bLiMoLocViewer = false;
