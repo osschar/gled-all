@@ -16,9 +16,9 @@
   { auto_ptr<ZMIR> mir(_lens_->S_##_method_(__VA_ARGS__)); \
     _lens_->GetSaturn()->PostMIR(*mir); }
 
-#define SP_MIR_BEAM(_caller_, _rec_, _lens_, _method_, ...) \
+#define SP_MIR_BEAM(_rec_, _lens_, _method_, ...) \
   { auto_ptr<ZMIR> mir(_lens_->S_##_method_(__VA_ARGS__)); \
-    mir->SetCaller(_caller_); mir->SetRecipient(_rec_); \
+    mir->SetRecipient(_rec_); \
     _lens_->GetSaturn()->PostMIR(*mir); }
 
 #define SP_MIR_SATURN(_sat_, _lens_, _method_, ...) \
