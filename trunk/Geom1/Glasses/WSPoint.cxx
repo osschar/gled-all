@@ -69,7 +69,7 @@ TimeStamp_t WSPoint::Stamp(LID_t lid, CID_t cid)
     mStampReqTring = t;
 
     WSSeed* seed = dynamic_cast<WSSeed*>(mParent);
-    if(seed) seed->SetStampReqTring(t);
+    if(seed) seed->MarkStampReqTring();
   }
 
   return t;

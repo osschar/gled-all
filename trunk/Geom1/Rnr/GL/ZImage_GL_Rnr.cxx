@@ -62,7 +62,7 @@ void ZImage_GL_Rnr::PreDraw(RnrDriver* rd)
   glEnable(GL_TEXTURE_2D);
   if(mImage->mStampReqTexture > mStampTexture) {
     init_texture();
-    mStampTexture = mImage->mStampReqTexture;
+    mStampTexture = mImage->mTimeStamp;
   }
   if(mTexture) {
     glBindTexture(GL_TEXTURE_2D, mTexture);
