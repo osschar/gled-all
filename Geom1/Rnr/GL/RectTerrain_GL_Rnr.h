@@ -12,7 +12,7 @@ protected:
 
   void MkBox(Int_t i, Int_t j);
   void MkVN(Int_t i, Int_t j);
-  ZColor MkCol(Float_t z);
+  void MkCol(Float_t z);
 
   void check(double,double,GLdouble*,GLdouble*,GLint*);
 
@@ -28,7 +28,7 @@ public:
 
 /**************************************************************************/
 
-inline ZColor RectTerrain_GL_Rnr::MkCol(Float_t z)
+inline void RectTerrain_GL_Rnr::MkCol(Float_t z)
 {
   if(mTerrain->mColSep) {
     Float_t c = (z - mTerrain->mMinZ) * mTerrain->mColSep /
@@ -37,7 +37,6 @@ inline ZColor RectTerrain_GL_Rnr::MkCol(Float_t z)
     if(mTerrain->mRibbon) {
       glColor4fv(mTerrain->mRibbon->MarkToCol(c)());
     } else {
-      Float_t c1 = c - (int)c, c2 = 1 - c1;
       ZColor col( (1 - c)*mTerrain->mMinCol + c*mTerrain->mMaxCol );
       glColor4fv(col());
     }
