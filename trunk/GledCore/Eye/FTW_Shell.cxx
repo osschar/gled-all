@@ -533,18 +533,20 @@ void FTW_Shell::FillLocatorMenu(FTW::Locator& loc, Fl_Menu_Button& menu,
 void FTW_Shell::FillImageMenu(OS::ZGlassImg* img, Fl_Menu_Button& menu,
 			      mir_call_data_list& mcdl, const string& prefix)
 {
+  const char* p1   = "Methods";
+
   mcdl.push_back(new mir_call_data_img(img, this, 0));
 
-  menu.add(GForm("%sOpen class view", prefix.c_str()),
+  menu.add(GForm("%sOpen class view ...", prefix.c_str()),
 	   0, (Fl_Callback*)open_full_view_cb, mcdl.back());
-  menu.add(GForm("%sOpen in Nest", prefix.c_str()),
+  menu.add(GForm("%sOpen in Nest ...", prefix.c_str()),
 	   0, (Fl_Callback*)open_nest_cb, mcdl.back());
   menu.add(GForm("%sExport to CINT ...", prefix.c_str()),
 	   0, (Fl_Callback*)glass_export_cb, mcdl.back(), FL_MENU_DIVIDER);
 
+  menu.add(GForm("%s%s", prefix.c_str(), p1), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
   { // Methods ... obtained from ClassInfo
     GNS::ClassInfo* ci = img->fClassInfo;
-    const char* p1   = "Methods";
     const char* pset = "Set methods";
     while(ci) {
       string s2(GForm("%s (%d,%d)", ci->fName.c_str(), ci->fFid.lid, ci->fFid.cid));
