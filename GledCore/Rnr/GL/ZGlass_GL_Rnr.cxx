@@ -16,7 +16,7 @@ void ZGlass_GL_Rnr::PreDraw(RnrDriver* rd)
   // mGlass->ExecMutex.Lock();
   glPushName(mGlass->mSaturnID);
 
-  if(mGlass->mStampReqTring > mStampTring || mStampTring==0)
+  if(mGlass->mStampReqTring > mStampTring)
     Triangulate();
 }
 
@@ -41,5 +41,5 @@ void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 void ZGlass_GL_Rnr::Triangulate()
 {
   // Do whatever ... mark sth for the Rnr itself to regenerate the DL
-  mStampTring = mGlass->GetSaturn()->GetStamp();
+  mStampTring = mGlass->mTimeStamp;
 }
