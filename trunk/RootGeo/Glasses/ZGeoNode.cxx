@@ -347,6 +347,7 @@ void ZGeoNode::AssertUserData()
       Float_t colorRGB[3] = {1, 0, 0};
       TGLFaceSet* fs = new TGLFaceSet(*buff, colorRGB, mSaturnID, vol);
       userdata->fFaceSet = fs;
+      userdata->bIsImported = true;
       vol->SetField(userdata);
     }
   }
