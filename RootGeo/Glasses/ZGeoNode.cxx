@@ -36,7 +36,6 @@ void ZGeoNode::_init()
   mNNodes    = 0;
   mNodeAlpha = 1;
   mDefFile   = "ZGeoNodes.root";
-  bRnrSelf = true;
 }
 
 void ZGeoNode::_assert_tnode(const string& _eh, bool _ggeo_fallbackp)
@@ -71,11 +70,33 @@ void ZGeoNode::setup_color(Float_t alpha)
     SetColor(1, 0, 0, alpha);
   }
 }
+/**************************************************************************/
 
+void ZGeoNode::RnrOnForDaughters()
+{
+  lpZGeoNode_t dts; 
+  CopyByGlass<ZGeoNode*>(dts);
+  
+  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrSelf(true);
+  }
+}
+
+void ZGeoNode::RnrOffForDaughters()
+{ 
+  lpZGeoNode_t dts; 
+  CopyByGlass<ZGeoNode*>(dts);
+  
+  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrSelf(false);
+  }
+}
 /**************************************************************************/
 
 ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder, 
-			       Bool_t rnr, const Text_t* title)
+			        const Text_t* title)
 {
   // Creates ZGeoNode object from exported TGeoNode and adds it 
   // to mGlasses list.
@@ -90,10 +111,9 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
   int j = m.find_first_of("$");
   m = m.substr(0,j);
   nn->SetMat(m.c_str());
-  nn->mNNodes = v && v->GetNodes() ? v->GetNodes()->GetSize() : 0;
+  nn->mNNodes = geon->GetNdaughters();
   mQueen->CheckIn(nn);
   holder->Add(nn);
-  nn->bRnrSelf = rnr;
   nn->AssertUserData();
   nn->setup_color(mNodeAlpha);
   
@@ -112,20 +132,18 @@ void ZGeoNode::AssignGGeoTopNode()
 /**************************************************************************/
 // Importers
 /**************************************************************************/
-
 void ZGeoNode::ImportNodes()
 {
   // Reads mTGeoNode and creates  
   // representative ZGeoNode node. 
-
-  static const string _eh("ZGeoNode::ImportNodes ");
-
-  _assert_tnode(_eh);
-
-  RemoveLensesViaQueen(true);
+  Int_t ni=0;
 
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
+  static const string _eh("ZGeoNode::ImportNodes ");
+  _assert_tnode(_eh);
+  RemoveLensesViaQueen(true);
+
   while((geon = (TGeoNode*)next_node())) {
     const char* vname = "<no-vol>";
     const char* sname = "<no-shp>";
@@ -138,56 +156,13 @@ void ZGeoNode::ImportNodes()
 	sname = s->GetName();
       }
     }
-
-    insert_node(geon, this, true,  GForm("%s::%s", vname, sname));
+    insert_node(geon, this, GForm("%s::%s", vname, sname));
+    ni++;
   }
-  bRnrSelf=false;
+  if(ni)SetRnrSelf(false);
 }
 
 /**************************************************************************/
-
-void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
-{
-  // Imports mTGeoNode and groups the created nodes by given regular expression.
-
-  static const string _eh("ZGeoNode::ImportByRegExp ");
-
-  _assert_tnode(_eh);
-
-  // split target into list of node names
-  lStr_t node_names;
-  GledNS::split_string(target, node_names, '/');
-  ZGeoNode* holder = set_holder(node_names);
-
-  TIter next_node(mTNode->GetNodes());
-  TGeoNode* geon;
-
-  while((geon = (TGeoNode*)next_node())) {
-    TString vname = "<no-vol>";
-    TString sname = "<no-shp>";
-
-    TGeoVolume* v = geon->GetVolume();
-    if(v) {      
-      vname = v->GetName();
-      
-      // add only nodes with volume names maching filter
-      if (!vname.Contains(filter)){
-	continue;
-      }
-      
-      TGeoShape* s = v->GetShape();
-      if(s) {
-	sname = s->GetName();
-      }
-    }
-
-    insert_node(geon, holder, false,  GForm("%s::%s", vname.Data(), sname.Data()));
-  }
-  bRnrSelf=false;
-}
-
-/**************************************************************************/
-
 void ZGeoNode::ImportNodesWCollect() 
 {
   // Import mTGeoNode and groups the nodes by 
@@ -202,6 +177,7 @@ void ZGeoNode::ImportNodesWCollect()
   map<string, ZNode*> nmap;
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
+  Int_t ni=0;
   while((geon = (TGeoNode*)next_node())) {
     const char* vname = "<no-vol>";
     const char* sname = "<no-shp>";
@@ -226,20 +202,58 @@ void ZGeoNode::ImportNodesWCollect()
     } else {
       holder = i->second;
     }
-    
-    insert_node(geon, holder, false,  GForm("%s::%s", vname, sname));
+    insert_node(geon, holder, GForm("%s::%s", vname, sname));
+    ni++;
   }
-  bRnrSelf=false;
+  if(ni) SetRnrSelf(false);
 }
 
 /**************************************************************************/
+void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
+{ 
+  // Imports mTGeoNode and groups the created nodes by given regular expression.
+  static const string _eh("ZGeoNode::ImportByRegExp ");
 
+  _assert_tnode(_eh);
+
+  // split target into list of node names
+  lStr_t node_names;
+  GledNS::split_string(target, node_names, '/');
+  ZGeoNode* holder = set_holder(node_names);
+  TIter next_node(mTNode->GetNodes());
+  TGeoNode* geon;
+  Int_t ni=0;
+  while((geon = (TGeoNode*)next_node())) {
+    TString vname = "<no-vol>";
+    TString sname = "<no-shp>";
+
+    TGeoVolume* v = geon->GetVolume();
+    if(v) {      
+      vname = v->GetName();
+      
+      // add only nodes with volume names maching filter
+      if (!vname.Contains(filter)){
+	continue;
+      }
+      
+      TGeoShape* s = v->GetShape();
+      if(s) {
+	sname = s->GetName();
+      }
+    }
+    insert_node(geon, holder, GForm("%s::%s", vname.Data(), sname.Data()));
+    ni++;
+  }
+  if(ni) SetRnrSelf(false);
+}
+
+/**************************************************************************/
 void ZGeoNode::ImportUnimported(const Text_t* target)
 {  
   static const string _eh("ZGeoNode::ImportUnimported ");
 
   _assert_tnode(_eh);
-   
+  Int_t ni=0;
   ZGeoNode* holder = dynamic_cast<ZGeoNode*>(GetElementByName(target));
   if ( holder == 0 ){
     // printf("create holder node %s \n", target);
@@ -265,15 +279,16 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
 
       GeoUserData* ud = dynamic_cast<GeoUserData*> (v->GetField());     
       if (ud == 0) {
-        insert_node(geon, holder, false, GForm("%s::%s", vname, sname));
+        insert_node(geon, holder, GForm("%s::%s", vname, sname));
       }
       
       if (ud && ((ud->bIsImported) == false)) {
-        insert_node(geon, holder, false, GForm("%s::%s", vname, sname));
+        insert_node(geon, holder, GForm("%s::%s", vname, sname));
       }
+      ni++;
     } 
   }
-  bRnrSelf=false;
+  if(ni)SetRnrSelf(false);
 }
 
 /**************************************************************************/
@@ -374,6 +389,12 @@ void ZGeoNode::Restore()
 }
 
 /**************************************************************************/
+void  ZGeoNode::Collapse()
+{
+  RemoveLensesViaQueen(true);
+  SetRnrSelf(true);
+}
+/**************************************************************************/
 
 TGeoNode* ZGeoNode::get_tnode_search_point()
 {
@@ -438,7 +459,6 @@ Bool_t ZGeoNode::locate_tnode( ZGeoNode* zn, TGeoNode* cur_node)
       }
     }
   }
-
   return false;
 }
 
