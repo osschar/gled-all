@@ -1084,7 +1084,7 @@ void FTW::PupilAm::spawn_pupil(OS::ZGlassImg* img)
   PupilInfo* pi = dynamic_cast<PupilInfo*>( img->fGlass );
   if(pi && mImg2PupilMap.find(img) == mImg2PupilMap.end()) {
     img->AssertDefView();
-    Pupil* poop = new Pupil(img, img->fDefView);
+    Pupil* poop = new Pupil(img, img->fDefView, mNest->GetShell());
     fImg->fEye->RegisterROARWindow(poop);
     mImg2PupilMap[img] = poop;
   }

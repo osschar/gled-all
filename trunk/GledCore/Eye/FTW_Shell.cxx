@@ -69,6 +69,7 @@ namespace {
 
 FTW_Shell::FTW_Shell(OS::ZGlassImg* img, const Fl_SWM_Manager* swm_copy) :
   OS::A_View(img),
+  FTW_Shell_Client(this),
   Fl_Window(def_W, 6 + 1 + 20 + 1 + 8 + 1 + 1),
   Fl_SWM_Manager(swm_copy), Fl_SWM_Client()
 {

@@ -13,6 +13,7 @@
 #include "FTW.h"
 class FTW_Leaf;
 class FTW_Nest;
+class FTW_Shell;
 
 #include <FL/Fl_SWM.H>
 #include <FL/Fl_Window.H>
@@ -21,7 +22,20 @@ class FTW_Nest;
 class Fl_OutputPack;
 class Fl_Menu_Button;
 
+/**************************************************************************/
+
+class FTW_Shell_Client {
+ protected:
+  FTW_Shell*	mShell;
+ public:
+  FTW_Shell_Client(FTW_Shell* s=0) : mShell(s) {}
+  virtual FTW_Shell* GetShell() { return mShell; }
+};
+
+/**************************************************************************/
+
 class FTW_Shell : public OptoStructs::A_View,
+		  public FTW_Shell_Client,
 		  public Fl_Window,
 		  public Fl_SWM_Manager, public Fl_SWM_Client
 {

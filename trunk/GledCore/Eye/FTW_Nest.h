@@ -11,11 +11,11 @@
 class NestInfo;
 
 #include "OptoStructs.h"
+#include "FTW_Shell.h"
 #include "FTW.h"
 #include "MTW_Layout.h"
 class FTW_Leaf;
 class FTW_Nest;
-class FTW_Shell;
 
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Scroll.H>
@@ -46,6 +46,7 @@ public:
 /**************************************************************************/
 
 class FTW_Nest : public OptoStructs::A_View,
+		 public FTW_Shell_Client,
 		 public Fl_Window, public Fl_SWM_Client
 {
   friend class FTW_Shell;
@@ -65,7 +66,6 @@ protected:
   FTW::PupilAm*	 pPupilAm;
 
   int		 mW;
-  FTW_Shell*	 mShell;	// X{g}
   FTW_Nest_Ctrl* pCtrl;		// X{g}
 
   FTW::Locator	 mPoint;	// X{r}

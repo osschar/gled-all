@@ -12,7 +12,6 @@
 
 #include "Eye.h"
 #include "FTW_Nest.h"
-#include "FTW_Shell.h"
 #include "FTW_Leaf.h"
 #include "FTW_Ant.h"
 #include "MTW_View.h"
@@ -372,16 +371,20 @@ void FTW_Nest::finalize_build()
 /**************************************************************************/
 
 FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
-  OS::A_View(img), Fl_Window(w, h), mW(w),
-  mShell(sh),
+  OS::A_View(img),
+  FTW_Shell_Client(sh),
+  Fl_Window(w, h),
+  mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
   _build(w, h);
 }
 
 FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h) :
-  OS::A_View(img), Fl_Window(x, y, w, h), mW(w),
-  mShell(sh),
+  OS::A_View(img),
+  FTW_Shell_Client(sh),
+  Fl_Window(x, y, w, h),
+  mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
   _build(w, h);

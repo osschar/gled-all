@@ -53,7 +53,7 @@ ZGlassImg::~ZGlassImg() {
   delete fFullMTW_View;
   // LinkViews should be empty ...
   if(!fLinkViews.empty()) {
-    cout <<"ZGlassImg::~ZGlassImg links are NOT empty ... problems anticipated\n";
+    cout <<"ZGlassImg::~ZGlassImg link-views are NOT empty ... problems anticipated.\n";
   }
   while(!fFullViews.empty()) {
     delete fFullViews.back();

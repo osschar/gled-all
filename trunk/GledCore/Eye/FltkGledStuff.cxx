@@ -23,6 +23,21 @@ namespace GVNS = GledViewNS;
 // Fl helpers
 /**************************************************************************/
 
+FTW_Shell* FGS::grep_shell(Fl_Widget *w)
+{
+  FTW_Shell_Client* c = grep_parent<FTW_Shell_Client*>(w);
+  return c ? c->GetShell() : 0;
+}
+
+FTW_Shell* FGS::grep_shell_or_die(Fl_Widget *w, const string& _eh)
+{
+  FTW_Shell* s = grep_shell(w);
+  if(s == 0) throw(_eh + "can not reach FTW_Shell.");
+  return s;
+}
+
+/**************************************************************************/
+
 int FGS::swm_generick_width(string& str, int cell_w, float extra)
 {
   if(cell_w) {
@@ -63,14 +78,24 @@ FGS::LensNameBox::~LensNameBox()
 
 void FGS::LensNameBox::AbsorbRay(Ray& ray)
 {
-  if(ray.IsBasicChange()) auto_label();
+  using namespace RayNS;
+  if(ray.IsBasicChange()) {
+    auto_label(); return;
+  }
+  if(ray.fRQN == RQN_death) {
+    ChangeImage(0);
+    return;
+  }
 }
 
 void FGS::LensNameBox::ChangeImage(OS::ZGlassImg* new_img)
 {
+  static const string _eh("FGS::LensNameBox::ChangeImage ");
+
   if(new_img && !GNS::IsA(new_img->fGlass, fFID)) {
-    new_img->fEye->GetShell()->Message
-      (GForm("FGS::LensNameBox::ChangeImage argument '%s::%s' is not of required type '%s'.",
+    FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+    shell->Message
+      (GForm("%sargument '%s::%s' is not of required type '%s'.", _eh.c_str(),
 	     new_img->fClassInfo->fName.c_str(), new_img->fGlass->GetName(),
 	     GNS::FindClassInfo(fFID)->fName.c_str())
       );
@@ -104,13 +129,7 @@ int FGS::LensNameBox::handle(int ev)
 {
   static const string _eh("FGS::LensNameBox::handle ");
 
-  FTW_Shell* shell = 0;
-  // !!! This shell acquiring procedure sux badly.
-  shell = grep_parent<FTW_Shell*>(this);
-  if(shell == 0) {
-    MCW_View* mcw = grep_parent<MCW_View*>(this);
-    if(mcw) shell = mcw->GetShell();
-  }
+  FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
 
   switch(ev) {
 
@@ -124,8 +143,6 @@ int FGS::LensNameBox::handle(int ev)
   case FL_DRAG: {
     if(Fl::event_state(FL_BUTTON1)) {
       if( ! Fl::event_inside(this) && fImg != 0 ) {
-	if(shell == 0) throw(_eh + "can not reach FTW_Shell.");
-
 	ID_t id          = fImg->fGlass->GetSaturnID();
 	const char* text = GForm("%u", id);
 	shell->X_SetSource(id);
@@ -152,14 +169,8 @@ int FGS::LensNameBox::handle(int ev)
   }
 
   case FL_PASTE: {
-    try {
-      if(shell == 0) throw(_eh + "can not reach FTW_Shell.");
-      ID_t source_id = shell->GetSource()->get_contents();
-      ChangeImage(shell->GetEye()->DemangleID(source_id));
-    }
-    catch(string exc) {
-      shell->Message(exc.c_str(), FTW_Shell::MT_err);
-    }
+    ID_t source_id = shell->GetSource()->get_contents();
+    ChangeImage(shell->GetEye()->DemangleID(source_id));
     return 1;
   }
   } // end switch(ev)
