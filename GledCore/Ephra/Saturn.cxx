@@ -2209,8 +2209,8 @@ void Saturn::arrival_of_kings(TMessage* m)
   ISmess(GForm("Saturn::arrival_of_kings %d king(s), len=%d",
 	       nk, m->BufferSize()));
   for(UInt_t i=0; i<nk; ++i) {
-    ZComet c; c.Streamer(*m);
-    c.bWarnOn = false; c.bVerbose = false;
+    ZComet c;
+    c.Streamer(*m);
     c.RebuildGraph();
     ZKing* k = c.GetKing();
     assert(k!=0);
@@ -2238,7 +2238,6 @@ void Saturn::arrival_of_kings(TMessage* m)
 
       //ZComet t; t.Streamer(*m);
       //t.SetExtDemangler(this);
-      //t.bWarnOn = false; t.bVerbose = false;
       //t.RebuildGraph();
       //mSunQueen->UnfoldFrom(t);
       mSunQueen->InvokeReflection(*m);

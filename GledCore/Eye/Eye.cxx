@@ -139,13 +139,15 @@ OS::ZGlassImg* Eye::DemangleID(ID_t id)
 
 void Eye::RemoveImage(OS::ZGlassImg* img)
 {
+  static const string _eh("Eye::RemoveImage ");
+
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fGlass);
   if(i == mGlass2ImgHash.end()) {
-    cout <<"Eye::RemoveImage not in hash\n";
+    cout << _eh + "lens of passed image not found in hash.\n";
     return;
   }
   if(i->second != img) {
-    cout <<"Eye::RemoveImage non-matching images\n";
+    cout << _eh + " non-matching images.\n";
     return;
   }
   {
