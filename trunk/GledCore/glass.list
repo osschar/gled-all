@@ -9,11 +9,16 @@ ZNameMap		4	Glasses/ZNameMap
 ZNode			16	Glasses/ZNode		.
 ZNodeLink		17	Glasses/ZNodeLink	ZNode
 
-# God, Rulers & MirFilters
+# God & Rulers
 ZGod			32	Glasses/ZGod
 ZKing			33	Glasses/ZKing
 ZQueen			34	Glasses/ZQueen
 ZSunQueen		35	Glasses/ZSunQueen
+ZFireKing		36	Glasses/ZFireKing
+ZFireQueen		37	Glasses/ZFireQueen
+ZEunuch			38	Glasses/ZEunuch
+
+# MirFilters
 ZMirFilter		48	Glasses/ZMirFilter
 ZIdentityFilter		49	Glasses/ZIdentityFilter
 ZIdentityListFilter	50	Glasses/ZIdentityListFilter
@@ -48,6 +53,13 @@ GlobalLamps		163	Glasses/GlobalLamps	.
 LampLink		164	Glasses/LampLink	.
 Sphere			165	Glasses/Sphere		.
 Box			166	Glasses/Box		.
+Text			167	Glasses/Text		.
+
+# GL State Modifiers
+ZGlStateBase		178	Glasses/ZGlStateBase
+ZGlLightModel		179	Glasses/ZGlLightModel	.
+ZGlMaterial		180	Glasses/ZGlMaterial	.
+ZGlBlending		181	Glasses/ZGlBlending	.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
