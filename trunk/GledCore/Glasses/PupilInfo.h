@@ -51,13 +51,13 @@ protected:
   Bool_t	bShowRPS;	// X{GS} 7 Bool(-join=>1)
   Bool_t	bRnrNames;	// X{GS} 7 Bool(-join=>1)
   Bool_t	bRnrTiles;	// X{GS} 7 Bool()
-  Float_t	mNameOffset;	// X{GS} 7 Value(-range=>[0,1,1,10000])
+  Float_t	mNameOffset;	// X{GS} 7 Value(-range=>[0,2,1,10000])
   ZColor	mTextCol;	// X{PGS} 7 ColorButt(-join=>1)
   ZColor	mTileCol;	// X{PGS} 7 ColorButt()
 
   UInt_t	mBuffSize;	// X{GS} 7 Value(-range=>[0,65535,1,1])
-  Int_t		mPickW;		// X{GS} 7 Value(-range=>[0,100,1,1],-join=>1)
-  Int_t		mPickH;		// X{GS} 7 Value(-range=>[0,100,1,1])
+  Int_t		mPickR;		// X{GS} 7 Value(-range=>[0,100,1,1],-join=>1)
+  UChar_t       mPickDisp;      // X{GS} 7 PhonyEnum(-vals=>[0,Default, 1,"Z-distance", 2,"Z-percentage"], -width=>9)
 
 public:
   PupilInfo(Text_t* n="PupilInfo", Text_t* t=0) : ZList(n,t) { _init(); }
