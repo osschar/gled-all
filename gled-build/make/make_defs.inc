@@ -8,6 +8,7 @@ BUILD_CONFIG	= ${GLEDSYS}/build_config
 
 # CXX, CC taken from environment
 LD		= ${CXX}
+SHELL		= /bin/sh
 
 libexecdir 	= ${GLEDSYS}/lib-exec
 MKDEP		= makedepend
