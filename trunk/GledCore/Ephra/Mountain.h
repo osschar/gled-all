@@ -56,6 +56,8 @@ protected:
 #endif
   Saturn*		mSaturn;	// X{g}
 
+  void stop_thread(DancerInfo* di);
+
 public:
   Mountain(Saturn* s) : hStageLock(GMutex::recursive), mSaturn(s)
   { bInSuspend = false; }
@@ -73,6 +75,9 @@ public:
   Int_t SuspendAll();
   void 	ResumeAll();
   void 	ConsiderSuspend(DancerInfo* di);
+
+  // Shutdown ... kill all threads
+  void Shutdown();
 
   static void  DancerCooler(DancerInfo* di);
   static void* DancerBeat(DancerInfo* di);
