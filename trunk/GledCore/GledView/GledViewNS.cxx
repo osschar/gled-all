@@ -89,10 +89,15 @@ void GledViewNS::BootstrapViewSet(LID_t lid, const string& libset)
   // Init deps as well ... loaded by link-time dependence
   char** dep = gns_lsi->fDeps;
   while(*dep) {
-    if(GledNS::IsLoaded(*dep) == false) {
+    GledNS::LibSetInfo* dlsi = GledNS::FindLibSetInfo(*dep);
+    if(dlsi == 0) {
+      ISerr("GledViewNS::BootstrapViewSet dependent libset not initialised. Aborting.");
+      return;
+    }
+    if(dlsi->fViewPart == 0) {
       Int_t ini = InitSoSet(*dep);
       if(ini) {
-	ISerr("GledViewNS::BootstrapViewSet aborting");
+	ISerr("GledViewNS::BootstrapViewSet initialisation of dependency failed. Aborting.");
 	return;
       }
     }
