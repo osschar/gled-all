@@ -290,6 +290,22 @@ void GledGUI::InitGledCore()
   ((void(*)())GledCore_GLED_init_View)();
   ((void(*)())GledCore_GLED_user_init_View)();
   GledViewNS::AssertRenderers();
+
+  /*
+  printf("SAFR1.\n");
+  void * l = dlopen("libGledCore_View.so", RTLD_NOW);
+  printf("SAFR2 %p.\n", l);
+  void * s = dlsym(l, "EyeCreator_GledCore_FTW_Shell");
+  printf("SAFR3 %p.\n", s);
+  s = dlsym(RTLD_DEFAULT, "EyeCreator_GledCore_FTW_Shell");
+  printf("SAFR3 %p.\n", s);
+  int dlclose(void *handle);
+  printf("SAFR4.\n");
+  */
+  //GledNS::LoadSo(GledViewNS::FabricateViewLibName("GledCore"));
+  //int i = gSystem->Load("libGledCore_View.so",
+  //		"EyeCreator_GledCore_FTW_Shell", 1);
+  //printf("SAFR: %d.\n", i);
 }
 
 /**************************************************************************/
@@ -409,8 +425,6 @@ void GledGUI::error(const char* s) {
 /**************************************************************************/
 /**************************************************************************/
 
-#include <G__ci.h>
-
 EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 			   const char* libset, const char* eyector)
 {
@@ -440,7 +454,7 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
   }
 
   string foo_name = GForm("EyeCreator_%s_%s", libset, eyector);
-  long* p2foo = (long*) G__findsym( foo_name.c_str() );
+  long* p2foo = (long*) GledNS::FindSymbol(foo_name);
   if(!p2foo) {
     ISerr(_eh +"can't find symbol '"+ foo_name +"'.");
     return 0;
