@@ -11,7 +11,7 @@
 //
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Need member-lid, member-cid limiters for Add methods
+// Need member-lid, member-cid limiters for Add methods. DONE
 // This should also be used for Links to Lists ...
 // there can specify member-lid, member-cid of list, that can be assigned.
 // have: ZList*   mOperators; L{list<Operator>}, p7 translates that to 1, 8 (eg)
@@ -106,12 +106,14 @@ void ZList::remove_references_to(ZGlass* lens)
 
 void ZList::new_element_check(ZGlass* g)
 {
+  static const string _eh("ZList::new_element_check ");
+
   if(g == 0) {
-    throw(string("ZList::new_element_check called with null ZGlass*"));
+    throw(_eh + "called with null ZGlass*.");
   }
   if(mLid && mCid) {
     if(!GledNS::IsA(g, FID_t(mLid, mCid))) {
-      throw(string("ZList::new_element_check lens of wrong FID_t"));
+      throw(_eh + "lens of wrong FID_t.");
     }
   }
 }
@@ -270,6 +272,24 @@ Bool_t ZList::Has(ZGlass* g)
   return ret;
 }
 
+/**************************************************************************/
+
+void ZList::SortByName()
+{
+  GMutexHolder llck(mListMutex);
+  if(mSize < 2) return;
+  multimap<string, ZGlass*> nmap;
+  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
+    nmap.insert(pair<string, ZGlass*>((*i)->GetName(), *i));
+  }
+  mGlasses.clear();
+  for(multimap<string, ZGlass*>::iterator i=nmap.begin(); i!=nmap.end(); ++i) {
+    mGlasses.push_back(i->second);
+  }
+  StampListRebuild();
+}
+
+/**************************************************************************/
 /**************************************************************************/
 
 // !! The analogous calls in ZGlass have lid/cid counterparts.

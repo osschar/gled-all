@@ -25,7 +25,7 @@ void FTW_Branch::build_leoim()
   ZList* l = dynamic_cast<ZList*>(fImg->fGlass);
   lpZGlass_t d; l->Copy(d);
   for(lpZGlass_i i=d.begin(); i!=d.end(); ++i) {
-    mLeoim.push_back(Leaf_o_Img( fImg->fEye->DemanglePtr((*i)) ));
+    mLeoim.push_back(Leaf_o_Img(fImg->fEye->DemanglePtr(*i)));
   }  
 }
 
@@ -133,7 +133,8 @@ void FTW_Branch::AbsorbRay(Ray& ray)
   case RQN_list_rebuild: {
     bool was_expanded = bListExpanded;
     if(bListExpanded)  CollapseList();
-    if(bLeavesCreated) wipe_leoim();
+    wipe_leoim();
+    bLeavesCreated = false;
     build_leoim();
     if(was_expanded)   ExpandList();
     label_namebox();

@@ -46,6 +46,16 @@ void ZHashList::remove_references_to(ZGlass* lens)
 
 /**************************************************************************/
 
+void ZHashList::rebuild_hash()
+{
+  mItHash.clear();
+  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
+    mItHash[*i] = i;
+  }
+}
+
+/**************************************************************************/
+
 void ZHashList::Add(ZGlass* g)
 {
   new_element_check(g);
@@ -161,13 +171,19 @@ ZGlass* ZHashList::Before(ZGlass* g)
 
 /**************************************************************************/
 
+void ZHashList::SortByName()
+{
+  GMutexHolder llck(mListMutex);
+  ZList::SortByName();
+  rebuild_hash();
+}
+
+/**************************************************************************/
+
 Int_t ZHashList::RebuildListRefs(An_ID_Demangler* idd)
 {
   Int_t ret = ZList::RebuildListRefs(idd);
-  mItHash.clear();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    mItHash[*i] = i;
-  }
+  rebuild_hash();
   return ret;
 }
 

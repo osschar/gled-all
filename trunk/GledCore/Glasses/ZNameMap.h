@@ -42,6 +42,8 @@ public:
   virtual void Remove(ZGlass* g);		     // X{E} C{1}
   virtual void RemoveLast(ZGlass* g);		     // X{E} C{1}
 
+  virtual void SortByName() {}                       // X{E}
+
   void RecreateMap();
 
   virtual Int_t RebuildListRefs(An_ID_Demangler* idd);

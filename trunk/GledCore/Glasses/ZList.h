@@ -105,6 +105,8 @@ public:
   virtual Bool_t IsEmpty() { return mSize==0; }
   virtual Bool_t Has(ZGlass* g);
 
+  virtual void   SortByName();                       // X{ED} 7 MButt()
+
   virtual TimeStamp_t	StampListAdd(ZGlass* g, ZGlass* b4);
   virtual TimeStamp_t	StampListRemove(ZGlass* g);
   virtual TimeStamp_t	StampListRebuild();
