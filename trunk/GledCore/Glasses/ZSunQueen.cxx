@@ -110,9 +110,9 @@ void ZSunQueen::IncarnateMoon(SaturnInfo* parent)
 {
   static const string _eh("ZSunQueen::IncarnateMoon ");
 
-  assert_MIR_presence(_eh);
+  ZMIR* mir = assert_MIR_presence(_eh);
 
-  SaturnInfo* si = GledNS::StreamLensByGlass<SaturnInfo*>(*mMir);
+  SaturnInfo* si = GledNS::StreamLensByGlass<SaturnInfo*>(*mir);
   if(si == 0) {
     throw(_eh + "did not receive a lens of glass SaturnInfo");
   }
@@ -131,9 +131,9 @@ void ZSunQueen::IncarnateEye(SaturnInfo* parent)
 {
   static const string _eh("ZSunQueen::IncarnateEye ");
 
-  assert_MIR_presence(_eh);
+  ZMIR* mir = assert_MIR_presence(_eh);
 
-  EyeInfo* ei = GledNS::StreamLensByGlass<EyeInfo*>(*mMir);
+  EyeInfo* ei = GledNS::StreamLensByGlass<EyeInfo*>(*mir);
   if(ei == 0) {
     throw(_eh + "did not receive a lens of glass EyeInfo");
   }
@@ -147,12 +147,12 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
   // connection to the moon with notification sent to SunQueen.
 
   static string _eh("ZSunQueen::CremateMoon ");
-  ZGlass::assert_MIR_presence(_eh);
+  ZMIR* mir = ZGlass::assert_MIR_presence(_eh);
 
   if(moon->GetMaster() == mSaturn->GetSaturnInfo()) {
     if(moon->hSocket != 0) {
       ISmess(_eh + "socket still present ... closing it");
-      if(mMir->What() == GledNS::MT_Beam) {
+      if(mir->What() == GledNS::MT_Beam) {
 	mSaturn->wipe_moon(moon, true);
 	return;
       } else {
@@ -162,9 +162,9 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
   }
 
   if(mSaturn->GetSunAbsolute()) {
-    mMir->ClearRecipient();
-    mMir->SetCaller(mSunInfo);
-    mSaturn->BroadcastMIR(*mMir, mSaturn->mMoons);
+    mir->ClearRecipient();
+    mir->SetCaller(mSunInfo);
+    mSaturn->BroadcastMIR(*mir, mSaturn->mMoons);
   }
 
   detach_all_identities(moon);
@@ -175,12 +175,14 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
 
 void ZSunQueen::CremateEye(EyeInfo* eye)
 {
-  assert(mMir != 0);
+  static const string _eh("ZSunQueen::CremateEye ");
+
+  ZMIR* mir = ZGlass::assert_MIR_presence(_eh);
 
   if(eye->GetMaster() == mSaturn->GetSaturnInfo()) {
     if(eye->hSocket != 0) {
-      ISmess(GForm("ZSunQueen::CremateEye socket still present ... closing it"));
-      if(mMir->What() == GledNS::MT_Beam) {
+      ISmess(_eh + "socket still present ... closing it.");
+      if(mir->What() == GledNS::MT_Beam) {
 	mSaturn->wipe_eye(eye, true);
 	return;
       } else {
@@ -190,9 +192,9 @@ void ZSunQueen::CremateEye(EyeInfo* eye)
   }
 
   if(mSaturn->GetSunAbsolute()) {
-    mMir->ClearRecipient();
-    mMir->SetCaller(mSunInfo);
-    mSaturn->BroadcastMIR(*mMir, mSaturn->mMoons);
+    mir->ClearRecipient();
+    mir->SetCaller(mSunInfo);
+    mSaturn->BroadcastMIR(*mir, mSaturn->mMoons);
   }
 
   detach_all_identities(eye);
@@ -323,14 +325,14 @@ void ZSunQueen::initiate_mee_connection()
 
   static const string _eh("ZSunQueen::initiate_mee_connection ");
 
-  assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
+  ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
-  SaturnInfo* req = dynamic_cast<SaturnInfo*>(mMir->Caller);
+  SaturnInfo* req = dynamic_cast<SaturnInfo*>(mir->Caller);
   if(req == 0)
     throw(_eh + "caller not a Saturn");
 
   ZMirEmittingEntity* mee =
-    dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamLens(*mMir));
+    dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamLens(*mir));
   if(mee == 0)
     throw(_eh + "did not receive a lens of glass ZMirEmittingEntity");
 
@@ -573,27 +575,28 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
 {
   static string _eh("ZSunQueen::AttachIdentity ");
 
-  assert_MIR_presence(_eh);
+  ZMIR* mir = assert_MIR_presence(_eh);
+
   if(id == 0)
     throw(_eh + "null identity");
-  if(mMir->Caller->HasIdentity(id))
-    throw(_eh + GForm("%s already has %s", mMir->Caller->GetName(), id->GetName()));
+  if(mir->Caller->HasIdentity(id))
+    throw(_eh + GForm("%s already has %s", mir->Caller->GetName(), id->GetName()));
 
   ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(id);
   if(gid == 0)
     throw(_eh + "for now only handles group identities");
 
   lpZGlass_t mee_ids;
-  mee_ids.push_back(mMir->Caller->mPrimaryIdentity);
-  mMir->Caller->mActiveIdentities->Copy(mee_ids);
+  mee_ids.push_back(mir->Caller->mPrimaryIdentity);
+  mir->Caller->mActiveIdentities->Copy(mee_ids);
   for(lpZGlass_i i=mee_ids.begin(); i!=mee_ids.end(); ++i) {
 
     if(Gled::theOne->IsIdentityInGroup((*i)->GetName(), id->GetName())) {
 
-      CALL_AND_BROADCAST(mMir->Caller->mActiveIdentities, Add, id);
-      CALL_AND_BROADCAST(id->mActiveMMEs, Add, mMir->Caller);
+      CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Add, id);
+      CALL_AND_BROADCAST(id->mActiveMMEs, Add, mir->Caller);
 
-      mMir->SuppressFlareBroadcast = true;
+      mir->SuppressFlareBroadcast = true;
       return;
     }
 
@@ -605,22 +608,22 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
 {
   static string _eh("ZSunQueen::DetachIdentity ");
 
-  assert_MIR_presence(_eh);
+  ZMIR* mir = assert_MIR_presence(_eh);
   if(id == 0)
     throw(_eh + "null identity");
-  if(!mMir->Caller->HasIdentity(id))
-    throw(_eh + GForm("%s does not posses identity %s", mMir->Caller->GetName(), id->GetName()));
-  if(mMir->Caller->mPrimaryIdentity == id)
-    throw(_eh + GForm("primary identity %s can not be detached from %s",id->GetName(), mMir->Caller->GetName()));
+  if(!mir->Caller->HasIdentity(id))
+    throw(_eh + GForm("%s does not posses identity %s", mir->Caller->GetName(), id->GetName()));
+  if(mir->Caller->mPrimaryIdentity == id)
+    throw(_eh + GForm("primary identity %s can not be detached from %s",id->GetName(), mir->Caller->GetName()));
 
   ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(id);
   if(gid == 0)
     throw(_eh + "for now only handles group identities");
 
-  CALL_AND_BROADCAST(mMir->Caller->mActiveIdentities, Remove, id);
-  CALL_AND_BROADCAST(id->mActiveMMEs, Remove, mMir->Caller);    
+  CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Remove, id);
+  CALL_AND_BROADCAST(id->mActiveMMEs, Remove, mir->Caller);    
 
-  mMir->SuppressFlareBroadcast = true;
+  mir->SuppressFlareBroadcast = true;
 }
 
 /**************************************************************************/
