@@ -265,20 +265,4 @@ Int_t ZList::RebuildList(ZComet* c)
 
 /**************************************************************************/
 
-/*
-void ZList::Reorganize_Rebuild()
-{
-  // Test of Ray::Rebuild_links
-  
-  ZGlass* x = mGlasses.front();
-  ZGlass* y = mGlasses.back();
-  mGlasses.pop_front();
-  mGlasses.pop_back();
-  mGlasses.push_back(x);
-  mGlasses.push_front(y);
-
-  StampListRebuild();
-}
-*/
-
 #include "ZList.c7"

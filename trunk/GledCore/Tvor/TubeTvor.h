@@ -46,7 +46,6 @@ public:
   void Init(bool colp, Int_t npoles, Int_t nrings, Int_t nphi);
   void NewRing(Int_t n, bool dp);
   void NewVert(float *v, float *n, float *c);
-  void Render();
 }; // endclass GL_TubeTvor
 
 inline void

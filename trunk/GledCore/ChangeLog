@@ -1,3 +1,12 @@
+2003-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h: Virtualized Stamping methods.
+
+	* Gled/GMutex.h:
+	* Tvor/TubeTvor.h: Minor changes.
+
 2003-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Saturn.cxx (Repository): Fixed initialization order of variables in

@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef _GMutex_
-#define _GMutex_
+#ifndef GledCore_GMutex_H
+#define GledCore_GMutex_H
 
 // Includes
 #ifndef __CINT__
@@ -13,22 +13,27 @@
 #endif
 
 class GMutex {
+
 protected:
 #ifndef __CINT__
   pthread_mutex_t	mMut;	// X{P}
   pthread_mutexattr_t	mAttr;	// X{P}
 #endif
+
 public:
   enum Init_e { fast, recursive, error_checking };
   enum Lock_e { ok=0, bad_init, deadlock, busy, perm_fail };
+
   GMutex(Init_e e=fast);
   ~GMutex();
-#ifndef __CINT__
-#include "GMutex.h7"
-#endif
+
   Lock_e Lock();
   Lock_e TryLock();
   Lock_e Unlock();
+
+#ifndef __CINT__
+#include "GMutex.h7"
+#endif
 }; // endclass GMutex
 
 #endif

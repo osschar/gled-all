@@ -66,17 +66,15 @@ public:
   bool	IsEmpty() { return mSize==0; }
   virtual bool	Has(ZGlass* g);
 
-  TimeStamp_t	StampListAdd(ZGlass* g, ZGlass* b4);
-  TimeStamp_t	StampListRemove(ZGlass* g);
-  TimeStamp_t	StampListRebuild();
+  virtual TimeStamp_t	StampListAdd(ZGlass* g, ZGlass* b4);
+  virtual TimeStamp_t	StampListRemove(ZGlass* g);
+  virtual TimeStamp_t	StampListRebuild();
 
   void SetStampListAdd_CB(zlist_stampadd_f foo, void* arg);
   void SetStampListRemove_CB(zlist_stampremove_f foo, void* arg);
   void SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg);
 
   virtual Int_t RebuildList(ZComet* c);
-
-  // void makalooka(); // X{E} 7 MButt()
 
 #include "ZList.h7"
   ClassDef(ZList, 1)
