@@ -129,8 +129,6 @@ int FGS::LensNameBox::handle(int ev)
 {
   static const string _eh("FGS::LensNameBox::handle ");
 
-  FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
-
   switch(ev) {
 
   case FL_PUSH:
@@ -143,6 +141,7 @@ int FGS::LensNameBox::handle(int ev)
   case FL_DRAG: {
     if(Fl::event_state(FL_BUTTON1)) {
       if( ! Fl::event_inside(this) && fImg != 0 ) {
+	FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
 	ID_t id          = fImg->fGlass->GetSaturnID();
 	const char* text = GForm("%u", id);
 	shell->X_SetSource(id);
@@ -169,6 +168,7 @@ int FGS::LensNameBox::handle(int ev)
   }
 
   case FL_PASTE: {
+    FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
     ID_t source_id = shell->GetSource()->get_contents();
     ChangeImage(shell->GetEye()->DemangleID(source_id));
     return 1;
