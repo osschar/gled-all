@@ -55,9 +55,9 @@ void iso_surfs()
   CREATE_ADD_GLASS(mat,   ZGlMaterial, starw, "Material1", 0);
   CREATE_ADD_GLASS(blend, ZGlBlending, starw, "Blending1", 0);
   CREATE_ADD_GLASS(limo,  ZGlLightModel, starw, "LightModel1", 0);
-  limo->SetLightModelOp(ZGlStateBase::GSO_On);
+  limo->SetLightModelOp(ZRnrModBase::O_On);
   limo->SetLiMoTwoSide(true);
-  limo->SetShadeModelOp(ZGlStateBase::GSO_On);
+  limo->SetShadeModelOp(ZRnrModBase::O_On);
 
   CREATE_ADD_GLASS(maker3, GTSIsoMaker, starw, "Iso Maker 3", 0);
   CREATE_ADD_GLASS(surf3, GTSurf, starw, "Hyperboloid", 0);
@@ -74,7 +74,12 @@ void iso_surfs()
   CREATE_ADD_GLASS(retring, GTSRetriangulator, starw, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
   retring->SetTarget(surf2);
 
-  gROOT->ProcessLine(".x eye.C");
+  gROOT->Macro("eye.C");
+  if(pupil) {
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(starw);
+    pupil->SetUpRefAxis(3);
+  }
 
   { // Torus rotator
     Eventor* e = new Eventor("Dynamo");
