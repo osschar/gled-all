@@ -12,8 +12,8 @@
 #include "GLTextNS.h"
 
 #include <RnrBase/RnrDriver.h>
-#include <Glasses/ZRlFont.h>
-#include <Glasses/ZRlNameRnrCtrl.h>
+#include <Rnr/GL/ZRlFont_GL_Rnr.h>
+#include <Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -630,6 +630,14 @@ GLTextNS::TextLineData::TextLineData(TexFont *txf, string line) : text(line)
   hfull   = ascent + descent;
 }
 
+void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text)
+{
+  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+  BoxSpecs boxs;
+  boxs.pos = nrc_lens->RefTilePos();
+  RnrTextBar(rd, text, boxs, nrc_lens->GetNameOffset());
+}
+
 void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 			  BoxSpecs& bs, float zoffset)
 {
@@ -642,9 +650,9 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   typedef list<TextLineData>           lTLD_t;
   typedef list<TextLineData>::iterator lTLD_i;
 
-  TexFont *txf = rd->GetTexFont();
-  RNRDRIVER_GET_RNRMOD(font, rd, ZRlFont);
-  RNRDRIVER_GET_RNRMOD(nrc, rd, ZRlNameRnrCtrl);
+  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+  RNRDRIVER_GET_RNRMOD_BOTH(font, rd, ZRlFont);
+  TexFont *txf = font_rnr->GetFont();
 
   lStr_t lines;
   lTLD_t tlds;
@@ -667,7 +675,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   width   = max_width + bs.lm + bs.rm;
   float halfw = float(width)/2, halfh = float(height)/2;
 
-  float tsize = float(font->GetSize());
+  float tsize = float(font_lens->GetSize());
   float scale = tsize / ascent;
 
   // printf("%d = %d + %d; %f %f\n", descent+ascent, ascent, descent, tsize, scale);
@@ -708,8 +716,8 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   glDisable(GL_LIGHTING);
   glScalef(scale, scale, 1);
 
-  if(nrc->GetRnrTiles()) {
-    glColor4fv(nrc->RefTileCol()());
+  if(nrc_lens->GetRnrTiles()) {
+    glColor4fv(nrc_lens->RefTileCol()());
     glBegin(GL_QUADS);
     glVertex2i(0, -height); glVertex2i(width, -height);
     glVertex2i(width, 0);   glVertex2i(0, 0);
@@ -717,7 +725,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   }
 
   glTranslatef(0, 0, -1e-6);
-  glColor4fv(nrc->RefTextCol()());
+  glColor4fv(nrc_lens->RefTextCol()());
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -726,7 +734,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
   //glPolygonOffset(0, -20); // TRY THIS AGAIN, had problems w/ glOrtho far/near stuffe!!
 
-  if(nrc->GetRnrFrames()) {
+  if(nrc_lens->GetRnrFrames()) {
     glLineWidth(1);
     glBegin(GL_LINE_LOOP);
     glVertex2i(0, -height); glVertex2i(width, -height);
@@ -767,8 +775,9 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
 void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 {
-  TexFont *txf = rd->GetTexFont();
-  RNRDRIVER_GET_RNRMOD(nrc, rd, ZRlNameRnrCtrl);
+  RNRDRIVER_GET_RNRMOD_RNR(font, rd, ZRlFont);
+  TexFont *txf = font_rnr->GetFont();
+  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 
@@ -796,7 +805,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
   float x1 = (float)width/h_box + 0.1;
   float y0 = -0.1 - float(descent)/(h_box);
   float y1 =  0.1 + float(ascent)/(h_box);
-  glColor4fv(nrc->RefTileCol()());
+  glColor4fv(nrc_lens->RefTileCol()());
   glBegin(GL_QUADS);
   glVertex2f(x0, y0);
   glVertex2f(x1, y0);
@@ -807,7 +816,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 
   glPolygonOffset(-2, -2);
 
-  glColor4fv(nrc->RefTextCol()());
+  glColor4fv(nrc_lens->RefTextCol()());
   glPushMatrix();
   glScalef(scale, scale, 1);
   glEnable(GL_TEXTURE_2D);
@@ -831,8 +840,8 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   // If front_col == 0 renders uses white pen.
   // If back_col  != 0 renders a square of that color behind the text.
 
-  TexFont *txf = rd->GetTexFont();
-  RNRDRIVER_GET_RNRMOD(font, rd, ZRlFont);
+  RNRDRIVER_GET_RNRMOD_BOTH(font, rd, ZRlFont);
+  TexFont *txf = font_rnr->GetFont();
 
   glPushAttrib(GL_TEXTURE_BIT      |
 	       GL_LIGHTING_BIT     |
@@ -853,7 +862,7 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   descent = txf->max_descent;
 
   int   h_box = ascent + descent;
-  float scale = float(font->GetSize()) / ascent;
+  float scale = float(font_lens->GetSize()) / ascent;
 
   glPushMatrix();
   glLoadIdentity();
