@@ -45,9 +45,7 @@ public:
   FTW_Shell(OptoStructs::ZGlassImg* img, const Fl_SWM_Manager* swm_copy);
   virtual ~FTW_Shell();
 
-  virtual void Absorb_Change(LID_t lid, CID_t cid);
-  // virtual void Absorb_LinkChange(LID_t lid, CID_t cid) {}
-  // virtual void Absorb_Delete() {}
+  virtual void AbsorbRay(Ray& ray);
 
   void X_SetSource(FTW::Locator& loc);
   void X_SetSink(FTW::Locator& loc);
@@ -68,12 +66,12 @@ public:
 
   void Y_SendMessage(const char* msg);
 
-  void ExecContextCall(FTW::Locator& alpha, GledNS::MethodInfo* cmi);
   void ExportToInterpreter(FTW::Locator& loc, const char* varname);
 
   FTW_Nest* SpawnNest(OptoStructs::ZGlassImg* img);
   void	    SpawnMTW_View(OptoStructs::ZGlassImg* img);
   void	    DitchMTW_View(OptoStructs::ZGlassImg* img);
+  void      SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
 
   void LocatorMenu(FTW::Locator& loc, int x, int y);
 
