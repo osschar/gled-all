@@ -4,10 +4,9 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_GledViewNS_H
-#define Gled_GledViewNS_H
+#ifndef GledCore_GledViewNS_H
+#define GledCore_GledViewNS_H
 
-#include <Gled/GledTypes.h>
 #include <Gled/GledNS.h>
 
 class ZGlass;
@@ -69,6 +68,8 @@ namespace GledViewNS {
       fRnrSelf(rs), fRnrLinks(rl), fRnrBits(2,4,6,0, 0,0,0,5) {}
     RnrCtrl(bool rs, bool rl, const RnrBits& rb) :
       fRnrSelf(rs), fRnrLinks(rl), fRnrBits(rb) {}
+    RnrCtrl(const RnrBits& rb) :
+      fRnrSelf(true), fRnrLinks(true), fRnrBits(rb) {}
   };
 
   // Low level: weed info
