@@ -7,28 +7,11 @@
 #ifndef GTS_GTS_H
 #define GTS_GTS_H
 
-#include <TString.h>
-
 #ifndef __CINT__
 
-namespace GTS {
-
+namespace GTS
+{
 #include <gts.h>
-
-  class Surface {
-  public:
-    GtsSurface* surface;
-    
-    Surface() : surface(0) {}
-    ~Surface();
-
-    static Surface* Load(const TString& grl);
-
-    void Replace(GtsSurface* new_surf);
-
-    void Invert();
-  };
-
 }
 
 #endif
