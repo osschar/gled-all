@@ -1,3 +1,34 @@
+2005-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Eye/Eye.cxx:
+	Minor clean-up.
+
+	* Eye/FTW_Shell.cxx:
+	Spawn MCW_View under mouse location.
+
+	* Eye/MCW_View.h:
+	Removed mShell, it's available from FTW_Shell_Client.
+
+	* Eye/Pupil.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Implemented orthographic projection, added corresponding controls.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Added missing call to ZComet::AssignQueen in AdoptComet; lens
+	removal uses main MIR execution thread again. There were problems
+	on non-nptl kernels when spawning a bit more threads (~300 did the
+	job).
+
+	* Stones/ZComet.cxx:
+	Changed default value of bWarnOn and bVerbose to false; clean-up
+	of reporting.
+
+	* macros/sun.C:
+	Increased default size of queen Scenes to 128*1024.
+
 2005-01-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Eye.cxx:
