@@ -60,9 +60,4 @@ void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 /**************************************************************************/
 
 void ZGlass_GL_Rnr::Render(RnrDriver* rd)
-{
-  if(rd->GetRnrPureGlasses()) {
-    SphereTrings::EnableGL(0);
-    SphereTrings::DrawAndDisableGL(0);
-  }
-}
+{}
