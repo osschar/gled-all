@@ -1,3 +1,15 @@
+2005-02-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* make/make_defs.inc:
+	Add local libset to cpp-includes instead of using '-I.'. This
+	makes handling of cpp-flags somewhat more transparent (but really
+	needed for the new target in make/make_base.inc).
+
+	* make/make_base.inc:
+	Added target echo_cppflags. This can be used for compilation of
+	scripts (see demos/Geom1/rt_functions).
+
 2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
