@@ -90,18 +90,11 @@ protected:
   lpEyeInfo_t		mEyes;
   TServerSocket*	mServerSocket;
 
-  // ID, Stamp ... missing ReID ReStamp for obscene values
-  ID_t			mLastID;
-  TimeStamp_t		mStamp;		// current timestamp X{G}
-  
   // Threads
   GThread*		mServerThread;
   
-  TMessage		mMsg;
   // Saturn services ... preliminary
   ZHistoManager*	pZHistoManager;
-  // Quite stupid stuff
-  char			xCommand[512];
 
   int	start_server();
   int	stop_server();
@@ -152,8 +145,8 @@ public:
   void	BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons);
   void	BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons);
 
-  TimeStamp_t	Shine(Ray& r);
-  void		SingleRay(EyeInfo* eye, Ray& r);
+  void	Shine(Ray& r);
+  void	SingleRay(EyeInfo* eye, Ray& r);
 
   Bool_t IsMoon(SaturnInfo* si);
 

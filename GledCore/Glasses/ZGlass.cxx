@@ -85,26 +85,26 @@ Short_t ZGlass::DecRefCount()
 
 TimeStamp_t ZGlass::Stamp(LID_t lid, CID_t cid)
 {
-  if(mSaturn) {
-    Ray r(Ray::RQN_change, this, lid, cid);
-    mTimeStamp = mSaturn->Shine(r);
-    return mTimeStamp;
-  } else {
-    if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
-    return 0;
+  ++mTimeStamp;
+  if(mQueen) {
+    Ray r(Ray::RQN_change, mTimeStamp, this, lid, cid);
+    mQueen->EmitRay(r);
   }
+  if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
+
+  return mTimeStamp;
 }
 
 TimeStamp_t ZGlass::StampLink(LID_t lid, CID_t cid)
 {
-  if(mSaturn) {
-    Ray r(Ray::RQN_link_change, this, lid, cid);
-    mTimeStamp = mSaturn->Shine(r);
-    return mTimeStamp;
-  } else {
-    if(mStampLink_CB) mStampLink_CB(this, mStampLink_CBarg);
-    return 0;
+  ++mTimeStamp;
+  if(mQueen) {
+    Ray r(Ray::RQN_link_change, mTimeStamp, this, lid, cid);
+    mQueen->EmitRay(r);
   }
+  if(mStampLink_CB) mStampLink_CB(this, mStampLink_CBarg);
+
+  return mTimeStamp;
 }
 
 void ZGlass::SetStamp_CB(zglass_stamp_f foo, void* arg)

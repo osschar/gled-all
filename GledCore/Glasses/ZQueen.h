@@ -12,6 +12,7 @@
 
 class ZKing; class ZQueen;
 class ZComet;
+class Ray;
 
 typedef set<ZQueen*>		spZQueen_t;
 typedef set<ZQueen*>::iterator	spZQueen_i;
@@ -31,14 +32,16 @@ protected:
   ZKing*	mKing;		//! X{G}
 
   Bool_t	bMandatory;	  //  X{GS} 7 BoolOut(-join=>1)
-  Bool_t	bRuling;	  //! X{GS} 7 BoolOut(-join=>1)
+  Bool_t	bRuling;	  //! X{GS} 7 BoolOut()
   Bool_t	bAwaitingSceptre; //! X{GS} 7 BoolOut()
 
-  ID_t		mIDSpan;	// X{G} ValOut()
-  ID_t		mMinID;		// X{G} ValOut(-range=>[0,MAX_ID,1,0], -width=>10, -join=>1)
-  ID_t		mMaxID;		// X{G} ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
+  ID_t		mIDSpan;	// X{G} 7 ValOut()
+  ID_t		mMinID;		// X{G} 7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10, -join=>1)
+  ID_t		mMaxID;		// X{G} 7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
   ID_t		mMaxUsedID;	//!
   sID_t		mFreeIDs;	//!
+
+  Bool_t	bStamping;	// X{GS} 7 Bool()
 
   ZHashList*	mDeps;		//  X{GS} L{l}
   ZHashList*	mOrphans;	//  X{GS} L{l}
@@ -92,6 +95,9 @@ public:
   // reflector handling
   void add_reflector(SaturnInfo* moon);
   void remove_reflector(SaturnInfo* moon);
+
+  // lens stamping
+  void EmitRay(Ray& ray);
 
   // tmp
   void ListAll();		 // X{E} 7 MButt()

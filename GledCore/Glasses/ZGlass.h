@@ -65,9 +65,9 @@ protected:
   TimeStamp_t	 mStampReqTring;   //! X{GS} TimeStamp of last change that requires retriangulation
 
   // Plain callbacks
-  zglass_stamp_f mStamp_CB;	   //! called if !Saturn and defined ...
+  zglass_stamp_f mStamp_CB;	   //! called if non-null
   void*		 mStamp_CBarg;     //!  and the user data
-  zglass_stamp_f mStampLink_CB;	   //! called if !Saturn and defined ...
+  zglass_stamp_f mStampLink_CB;	   //! called if non-null
   void*		 mStampLink_CBarg; //!  and the user data
 
   // En(light|dark)enment ... called from Saturn upon light switch
@@ -103,6 +103,9 @@ public:
   TimeStamp_t Stamp() { return Stamp(0, 0); }
   virtual TimeStamp_t StampLink(LID_t lid, CID_t cid);
   TimeStamp_t StampLink() { return StampLink(0, 0); }
+
+  virtual void MarkStampReqTring()
+  { mStampReqTring = ++mTimeStamp; }
 
   void SetStamp_CB(zglass_stamp_f foo, void* arg);
   void SetStampLink_CB(zglass_stamp_f foo, void* arg);
