@@ -46,7 +46,7 @@ public:
 
 
 #include "ZGlLightModel.h7"
-  ClassDef(ZGlLightModel, 1)
+  ClassDef(ZGlLightModel, 1) // Control of GL light & shade model, polygon mode and face culling
 }; // endclass ZGlLightModel
 
 GlassIODef(ZGlLightModel);
