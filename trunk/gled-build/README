@@ -1,0 +1,38 @@
+README - Gled Build
+===================
+
+Gled is a framework for sharing object collections in a hierarchic
+server-client model.
+
+Gled is realeased under GNU GPL version 2. See LICENSE.
+
+For building and installation instructions see INSTALL.
+
+A brief description of files in this directory is in file MANIFEST.
+
+This is a top-level Gled directory. It serves as a container for
+libsets (in principle large compilation units) and provides:
+
+ a) a compilation environment (in terms of parsers and code generators)
+
+ b) run-time environment (by installing libraries, binaries or
+    perl-scripts from local libsets into appropriate locations).
+
+Libset names are typically capitalized as "This" or GledCore or Geom1.
+The actual implementation of core Gled system is in the GledCore libset,
+which contains two executables:
+ * gled    standard executable with gui,
+ * saturn  command interface only; useful for pure servers and proxies.
+
+For a trivial demo type:
+
+gled hello_gled.C
+
+To navigate in GL window (pupil) use left/middle mouse buttons. Control key
+modifies behaviour and is really usefull. <Home> will return you to the origin.
+
+To connect to an already running gled, use:
+
+gled -r -m <host-to-connect-to> moon.C
+
+For more information see http://www.gled.org/.

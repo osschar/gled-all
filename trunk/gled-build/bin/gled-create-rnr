@@ -1,0 +1,59 @@
+#!/usr/bin/perl
+
+# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
+
+use lib "$ENV{GLEDSYS}/perllib";
+use ParseConfig;
+
+$def_cfg = "$ENV{GLEDSYS}/cfg/gled-create-rnr.rc";
+
+my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg, -useenv=>1);
+$cfg_parser->parse();
+
+if($CLASSNAME eq "CLASSNAME" or $BASENAME eq "BASENAME") {
+  print "usage: gled-create-rnr -c <classname> -b <baseclass> <other-options>\n";
+  print "Options:\n";
+  print `cat $def_cfg`;
+  print "if dir = <std>, the new glass rnr is put into ./Rnr/<\$RNR> directory\n";
+  print "if libset = <std>, the libset is deduced from name of .\n";
+  print "<std> options for dir and libset assume you are in top libset directory\n";
+  exit 1;
+}
+
+$SKELBASE = "$ENV{GLEDSYS}/cfg/Rnr_${RNR}_SKEL" if($SKELBASE eq '<std>');
+$OUTDIR = "Rnr/GL" if($OUTDIR eq "<std>");
+unless(-d $OUTDIR) { 
+  system("mkdir -p $OUTDIR");
+  die "Directory $OUTDIR does not exist and cannot be created" if $?;
+}
+if($LIBSETNAME eq "<std>") {
+  my $a = `pwd`; chomp $a;
+  $a =~ m!([^/]*?)/?$!;
+  $LIBSETNAME = $1;
+}
+
+{
+  my $ex_sla = $/; undef $/;
+  open H, "${SKELBASE}.${SUF_H}" or die "can't open ${SKELBASE}.${SUF_H}";
+  $skel_h = <H>; close H;
+  open C, "${SKELBASE}.${SUF_C}" or die "can't open ${SKELBASE}.${SUF_C}";
+  $skel_cxx = <C>; close C;
+  $/ = $ex_sla;
+}
+
+for $f ($skel_h, $skel_cxx) {
+  $f =~ s/LIBSETNAME/$LIBSETNAME/g;
+  $f =~ s/CLASSNAME/$CLASSNAME/g;
+  $f =~ s/BASENAME/$BASENAME/g;
+}
+
+open H, ">${OUTDIR}/${CLASSNAME}_GL_Rnr.${SUF_H}" or
+  die "can't open ${OUTDIR}/${CLASSNAME}.${SUF_H}";
+print H $skel_h; close H;
+open H, ">${OUTDIR}/${CLASSNAME}_GL_Rnr.${SUF_C}" or
+  die "can't open ${OUTDIR}/${CLASSNAME}.${SUF_C}";
+print H $skel_cxx; close H;

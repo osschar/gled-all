@@ -1,0 +1,37 @@
+# $Header$
+
+# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+# p7 handler producing raw weedget classes
+
+# Project abandoned right after starting.
+# See Histo.p7 for an example of a working handler (don't really know how much
+# longer it will be operational).
+# Please note that the implementation of automagick weedgets and their creation
+# (p7 and View glue) is preliminary.
+
+package Gled::Weed;
+
+$PID = "Gled::Weed";
+
+sub new {
+  shift @_; my $S={@_};
+  $S->{Hitems} = [];  # Histogram items; stores Hinfo_hash refs
+  $S->{Hgroups} = {}; # Histogram groups; stores group=>[Hinfo_hash refs]
+  $S->{Htypes} = {};  # Histogram types ... for includes ... * is stripped
+  return bless($S);
+}
+
+sub desc {
+  my $S = shift;
+  "$PID produces raw weedget classes\n";
+}
+
+sub parse {
+  my ($S, $t, $c) = @_;
+
+
+
+}

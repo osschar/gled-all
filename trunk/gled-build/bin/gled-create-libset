@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+# $Header$
+
+# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+my $lsname = shift;
+my $lsid = shift;
+
+if(not(defined $lsname and defined $lsid)) {
+  my ($cmd) = $0 =~ m!([^/]+)$!;
+  print STDERR "usage: $cmd <lib-set name> <lib-set id>\n";
+  exit 1;
+}
+
+die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
+
+chdir "$ENV{GLEDSYS}";
+die "$lsname exists" if -e $lsname;
+
+mkdir $lsname, 0755;
+chdir $lsname;
+for $d ($lsname, "Glasses", "Stones", "lib", "bin", "macros",
+	"cfg", "lib-exec")
+  {
+    mkdir $d, 0755;
+  }
+
+open G, ">glass.list";
+print G <<"fnord";
+# glass		class	location		rnr-class
+# name		id				[]~ZGlass, [.]~own rnr, [<glass>]
+#
+#ZGlass		1	Glasses/ZGlass		.
+#ZList		2	Glasses/ZList
+#ZNode		3	Glasses/ZNode		.
+#ZNodeLink	4	Glasses/ZNodeLink	ZNode
+fnord
+close G;
+
+open M, ">Makefile";
+print M <<"fnord";
+# \$Header\$
+LIB_SET_NAME	:= $lsname
+LIB_SET_ID	:= $lsid
+REQUIRES_LIB_SETS := GledCore # add
+
+# Nice, friendly woozies that don't need special treatment
+BLESSED_DIRS	:= Glasses
+BASE_DIRS	:= Stones $lsname 
+
+DICT_DIRS	:= Glasses Stones $lsname
+
+VIEW_DIRS	:=
+# files from ${VIEW_FL_DIRS}/*.fl are processed by fluid
+VIEW_FL_DIRS	:=
+
+##### Targets #####
+
+LIBSET_TARGETS := # define additional targets (libraires built by default)
+
+include \${GLEDSYS}/make/make_base.inc
+
+# user targets go here; enumerate them in LIBSET_TARGETS
+
+.PHONY:	libset_clean libset_distclean
+# clean and distclean defined in make_base.inc
+# libset_ versions are user-definable ... must clean all local stuff
+libset_clean:
+libset_distclean:
+fnord
+close M;
