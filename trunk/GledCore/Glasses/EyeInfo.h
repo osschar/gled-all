@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -29,6 +29,7 @@ protected:
 public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);
 
+  virtual SaturnInfo* HostingSaturn() { return mMaster; }
   virtual void Message(const Text_t* s); // X{E} T{MEE::Self}
   virtual void Error(const Text_t* s);   // X{E} T{MEE::Self}
 

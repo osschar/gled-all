@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -10,6 +10,8 @@
 #include <Glasses/ZGlass.h>
 #include <Glasses/ZIdentity.h>
 #include <Glasses/ZHashList.h>
+
+class SaturnInfo;
 
 class ZMirEmittingEntity : public ZGlass {
   // 7777 RnrCtrl("false, 0, RnrBits()")
@@ -31,6 +33,7 @@ public:
 
   virtual void AdEnlightenment();
 
+  virtual SaturnInfo* HostingSaturn() = 0;
   virtual void Message(const Text_t* s) {} // X{E}
   virtual void Error(const Text_t* s)   {} // X{E}
 
