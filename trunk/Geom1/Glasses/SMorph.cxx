@@ -24,6 +24,9 @@ void SMorph::_init(Float_t r)
   bUseDispList = false;
 
   mTexture = 0;
+  mTexX0 = mTexY0 = 0;
+  mTexXC = mTexYC = 1;
+  mTexYOff = 0;
 
   pTuber = new TubeTvor;
   bTextured = false;
@@ -45,8 +48,9 @@ void SMorph::Messofy(Float_t ct, Float_t st, Float_t phi)
 
   float T[2];
   if(bTextured) {
-    T[0] = phi / (2*TMath::Pi());
-    T[1] = TMath::ACos(ct)/TMath::Pi();
+    T[0] = mTexX0 + mTexXC * phi / (2*TMath::Pi());
+    T[1] = mTexY0 + mTexYC * TMath::ACos(ct) / TMath::Pi();
+    if(mTexYOff != 0) T[0] += Int_t(T[1])*mTexYOff;
   }
 
   pTuber->NewVert(R, R, 0, T);
