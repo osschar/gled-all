@@ -1,3 +1,29 @@
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* glass.list:
+	* Glasses/RelParticle.cxx:
+	* Glasses/RelParticle.h:
+	* FL/Fl_LorentzVector.cxx:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+
+	New files; wrappers for TLorentzVector.
+	
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h: 
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	
+	Simplified due to scaling support in ZNode. 
+	
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+
+	Weaver symbols can now be textured.
+	
+	* Makefile: Introduced double-colon rules for standard targets.
+
 2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Mover.cxx: Include clean-up.
