@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_FTW_Nest_H
-#define Gled_FTW_Nest_H
+#ifndef GledCore_FTW_Nest_H
+#define GledCore_FTW_Nest_H
 
 #include <Gled/GledTypes.h>
 class NestInfo;
@@ -58,6 +58,7 @@ private:
   typedef map<FTW::Locator*, list<FTW::LocatorConsumer*> >::iterator	mpLoc2pLCon_i;
 
   void _build(int w, int h);
+  void finalize_build();
 
 protected:
   NestInfo*	 mNestInfo;	// X{G}

@@ -136,6 +136,7 @@ FTW_Shell::FTW_Shell(OS::ZGlassImg* img, const Fl_SWM_Manager* swm_copy) :
   mNest->InsertLeaf(top_leaf);
   top_leaf->ExpandList();
 
+  mNest->finalize_build();
   label_shell();
 }
 
@@ -403,6 +404,7 @@ FTW_Nest* FTW_Shell::SpawnNest(OS::ZGlassImg* img)
   FTW_Leaf* top_leaf = FTW_Leaf::Construct(nest, 0, img, false, false);
   nest->InsertLeaf(top_leaf);
   top_leaf->ExpandList();
+  nest->finalize_build();
   return nest;
 }
 
