@@ -4,14 +4,14 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_LampLink_H
-#define Gled_LampLink_H
+#ifndef GledCore_LampLink_H
+#define GledCore_LampLink_H
 
 #include <Glasses/ZGlass.h>
 #include <Glasses/Lamp.h>
 
 class LampLink : public ZGlass {
-  // 7777 RnrCtrl("true, false, RnrBits(0,4,0,0)")
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(LampLink);
 
 private:

@@ -11,7 +11,6 @@
 #include <Glasses/PupilInfo.h>
 
 class ScreenDumper : public Operator {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ScreenDumper);
 
 private:

@@ -10,7 +10,6 @@
 #include <Glasses/ZHashList.h>
 
 class ZGod : public ZHashList {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZGod);
 private:
 protected:

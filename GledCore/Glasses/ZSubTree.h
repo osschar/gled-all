@@ -10,7 +10,6 @@
 #include <Glasses/ZGlass.h>
 
 class ZSubTree : public ZGlass {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZSubTree);
 private:
   void _init();

@@ -10,7 +10,6 @@
 #include <Glasses/ZGlass.h>
 
 class ZRlFont : public ZGlass {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZRlFont);
 
 private:

@@ -10,7 +10,6 @@
 #include <Glasses/AList.h>
 
 class ZDeque : public AList {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZDeque);
 
 private:

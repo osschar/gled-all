@@ -23,7 +23,6 @@ typedef set<ZQueen*>::iterator	spZQueen_i;
 class ZQueen : public ZNameMap, public An_ID_Demangler, public MIR_Priest
 {
 
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZQueen);
 
   friend class ZKing;

@@ -18,7 +18,6 @@ class Saturn;
 class TSocket;
 
 class SaturnInfo : public ZMirEmittingEntity {
-// 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(SaturnInfo);
 
   friend class ZKing; friend class ZSunQueen; friend class ZQueen;

@@ -13,7 +13,6 @@
 class SaturnInfo;
 
 class PerfMeterOperator : public Operator {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(PerfMeterOperator);
 
 public:

@@ -496,14 +496,12 @@ ZGlass* ZGlass::FindLensByPath(const string& url)
 
 /**************************************************************************/
 
-// All stamp functions should be *inline*!!
-
-TimeStamp_t ZGlass::Stamp(FID_t fid)
+TimeStamp_t ZGlass::Stamp(FID_t fid, UChar_t eye_bits)
 {
   ++mTimeStamp;
   if(mQueen && mQueen->GetStamping() && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, fid));
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, fid, eye_bits));
     mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);

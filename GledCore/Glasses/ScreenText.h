@@ -11,7 +11,6 @@
 #include <Stones/ZColor.h>
 
 class ScreenText : public ZGlass {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ScreenText);
 
 private:

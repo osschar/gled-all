@@ -15,7 +15,6 @@
 /**************************************************************************/
 
 class AList : public ZGlass {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(AList);
 
  public:
