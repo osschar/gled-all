@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+# $Header$
+
+# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+# Manages compilation and installation of a whole build
+# Input: as defined by mecca.rc (grog ParseConfig.pm)
+
+use lib "$ENV{GLEDSYS}/perllib";
+use ParseConfig;
+use Gled_ConfCat_Parser;
+
+########################################################################
+
+sub system_or_die {
+  my $cmd = shift;
+  system "$cmd" and die "$cmd died";
+}
+
+########################################################################
+
+$CFGFILE = "build_config";
+
+my $cfg_parser = new ParseConfig(-defcfg=>"$ENV{GLEDSYS}/mecca.rc", -useenv=>1);
+$cfg_parser->parse();
+
+Gled_ConfCat_Parser::import_build_config();
+
+my @make_list;
+if($LIBSET eq "<all>") { @make_list = @{$resolver->{LibSetList}}; }
+else { @make_list = split(':', $LIBSET); }
+
+for $l (@make_list) {
+  print "Descending into $l\n";
+  system_or_die("make -C $l $MAKEOPTS $TARGET");
+}
+
+if($TARGET eq 'all' or $TARGET eq 'install') {
+
+}
+
+if($TARGET eq 'distclean') {
+
+  for $ls (@{$resolver->{BaseLibSetList}}) {
+    system_or_die("make -C $ls uninstall build_uninstall");
+  }
+
+  unlink ("$CFGFILE",
+	  "make/make_config.inc", "make/make_rnr.inc", "include/config.h");
+  `rm -rf htmldoc core*`;
+
+}
