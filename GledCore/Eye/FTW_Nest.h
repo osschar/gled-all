@@ -105,12 +105,7 @@ public:
   FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h);
   ~FTW_Nest();
 
-  virtual void Absorb_Change(LID_t lid, CID_t cid);
-  // virtual void Absorb_LinkChange(LID_t lid, CID_t cid) {}
-  //virtual void Absorb_ListAdd(OptoStructs::ZGlassImg* newimg, OptoStructs::ZGlassImg* before);
-  //virtual void Absorb_ListRemove(OptoStructs::ZGlassImg* eximg);
-  //virtual void Absorb_ListRebuild();
-  //virtual void Absorb_Delete() {}
+  virtual void AbsorbRay(Ray& ray);
 
   virtual void Rewidth();
   virtual void AdInsertio(FTW_Leaf* newleaf);

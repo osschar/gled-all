@@ -10,7 +10,7 @@
 #include "FTW_Nest.h"
 #include "FTW_Leaf.h"
 #include "FTW_Ant.h"
-#include "OptoStructs.h"
+#include "FltkGledStuff.h"
 #include "Eye.h"
 #include <GledView/GledViewNS.h>
 
@@ -22,14 +22,12 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Menu_Button.H>
-#include <FL/fl_draw.H>
 #include <FL/fl_ask.H>
-
-
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;
+namespace FGS  = FltkGledStuff;
 
 Fl_Color FTW::background_color = (Fl_Color)0xbfbfbf00;
 Fl_Color FTW::separator_color  = (Fl_Color)0xb2b28000;
@@ -39,28 +37,6 @@ Fl_Color FTW::source_modcol = (Fl_Color)0x00400000;
 Fl_Color FTW::sink_modcol   = (Fl_Color)0x00004000;
 
 Fl_Boxtype FTW::separator_box  = FL_BORDER_BOX;
-
-/**************************************************************************/
-// Fl helpers
-/**************************************************************************/
-  int FTW::swm_generick_width(string& str, int cell_w, float extra)
-  {
-    if(cell_w) {
-      int w=0, h=0;
-      fl_measure(str.c_str(), w, h);
-      float f = float(w)/cell_w + extra;
-      w = int(f);
-      return w + ((f-w < 0.1) ? 0 : 1);
-    } else {
-      return str.size();
-    }
-  }
-
-  int FTW::swm_label_width(string& str, int cell_w)
-  { return swm_generick_width(str, cell_w, 1.2); }
-
-  int FTW::swm_string_width(string& str, int cell_w)
-  { return swm_generick_width(str, cell_w, 0.2); }
 
 /**************************************************************************/
 // Locator
@@ -273,7 +249,7 @@ void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 				      lens->GetName(), lens->GetTitle()));
   } else {
     OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
-    const char *glass = "null", *name = "", *title = "";
+    const char *glass = "<null>", *name = "", *title = "";
     if(ant->fToImg) {
       glass = ant->fToImg->fClassInfo->fName.c_str();
       name  = ant->fToGlass->GetName();
@@ -417,6 +393,11 @@ int FTW::NameButton::handle(int ev)
     return (Fl::belowmouse() == this) ? 1 : 0;
   }
 
+  case FL_DND_LEAVE: {
+    set_nests_info_bar(leaf, ant);
+    return 1;
+  }
+
   case FL_PASTE: {
     try {
       ID_t source_id = leaf->GetNest()->GetShell()->GetSource()->get_contents();
@@ -436,7 +417,6 @@ int FTW::NameButton::handle(int ev)
     }
     catch(string exc) {
       leaf->GetNest()->GetShell()->Message(exc.c_str(), FTW_Shell::MT_err);
-      fl_beep(FL_BEEP_ERROR);
     }
     return 1;
   }
@@ -469,9 +449,9 @@ FTW::NameBox::~NameBox()
 
 /**************************************************************************/
 
-void FTW::NameBox::Absorb_Change(LID_t lid, CID_t cid)
+void FTW::NameBox::AbsorbRay(Ray& ray)
 {
-  if((lid==1 && cid==1) || (lid==0 && cid==0)) {
+  if(ray.IsBasicChange()) {
     label(fImg->fGlass->GetName());
     redraw();
   }
@@ -689,7 +669,7 @@ int FTW::Inst_Selector::handle(int ev) {
 
 namespace {
   void loc_sel_type_change_cb(Fl_Choice* c, FTW::Locator_Selector::LS_Type_e t) {
-    FTW::Locator_Selector* npm = FTW::grep_parent<FTW::Locator_Selector*>(c);
+    FTW::Locator_Selector* npm = FGS::grep_parent<FTW::Locator_Selector*>(c);
     npm->set_type(t);
   }
 }
@@ -1082,7 +1062,7 @@ void FTW::PupilAm::spawn_pupil(OS::ZGlassImg* img)
   PupilInfo* pi = dynamic_cast<PupilInfo*>( img->fGlass );
   if(pi && mImg2PupilMap.find(img) == mImg2PupilMap.end()) {
     img->AssertDefView();
-    Pupil* poop = new Pupil(pi, img->fDefView);
+    Pupil* poop = new Pupil(img, img->fDefView);
     fImg->fEye->RegisterROARWindow(poop);
     mImg2PupilMap[img] = poop;
   }
@@ -1114,10 +1094,10 @@ FTW::PupilAm::~PupilAm()
 
 /**************************************************************************/
 
-void FTW::PupilAm::Absorb_ListAdd(OS::ZGlassImg* newimg, OS::ZGlassImg* before)
+void FTW::PupilAm::AbsorbRay(Ray& ray)
 {
-  if(mNest->GetNestInfo()->GetSpawnPupils()) {
-    spawn_pupil(newimg);
+  if(ray.fRQN == RayNS::RQN_list_add && mNest->GetNestInfo()->GetSpawnPupils()) {
+    spawn_pupil(ray.fBetaImg);
   }
 }
 
@@ -1161,9 +1141,9 @@ FTW::NestAm::~NestAm()
 
 /**************************************************************************/
 
-void FTW::NestAm::Absorb_ListAdd(OS::ZGlassImg* newimg, OS::ZGlassImg* before)
+void FTW::NestAm::AbsorbRay(Ray& ray)
 {
-  if(mShell->GetShellInfo()->GetSpawnNests()) {
-    spawn_nest(newimg);
+  if(ray.fRQN == RayNS::RQN_list_add && mShell->GetShellInfo()->GetSpawnNests()) {
+    spawn_nest(ray.fBetaImg);
   }
 }

@@ -15,6 +15,7 @@
 #include "FTW_Leaf.h"
 #include "FTW_Ant.h"
 #include "MTW_View.h"
+#include "FltkGledStuff.h"
 
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
@@ -26,9 +27,10 @@
 
 
 
-namespace OS = OptoStructs;
+namespace OS   = OptoStructs;
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
+namespace FGS  = FltkGledStuff;
 
 /**************************************************************************/
 
@@ -43,7 +45,7 @@ namespace GVNS = GledViewNS;
 namespace {
 
   void action_menu_cb(Fl_Menu_Button* b, void* what) {
-    FTW_Nest*   nest  = FTW::grep_parent<FTW_Nest*>(b);
+    FTW_Nest*   nest  = FGS::grep_parent<FTW_Nest*>(b);
     FTW_Shell* shell  = nest->GetShell();
     FTW::Locator& tgt = *nest->RefTargetLoc();
     try {
@@ -67,14 +69,14 @@ namespace {
   }
 
   void target_type_change_cb(Fl_Widget* w, FTW_Nest::TargetType_e type) {
-    FTW_Nest* n = FTW::grep_parent<FTW_Nest*>(w);
+    FTW_Nest* n = FGS::grep_parent<FTW_Nest*>(w);
     if(n) n->TargetTypeChange(type);
   }
 
   // *** Menu callbacks ***
 
   void new_menu_cb(Fl_Menu_Button* b, void* what) {
-    FTW_Nest*   nest = FTW::grep_parent<FTW_Nest*>(b);
+    FTW_Nest*   nest = FGS::grep_parent<FTW_Nest*>(b);
     FTW_Shell* shell = nest->GetShell();
     ZQueen* q = shell->GetShellInfo()->GetQueen();
 
@@ -110,7 +112,7 @@ namespace {
   }
 
   void view_menu_cb(Fl_Menu_Button* b, void* what) {
-    FTW_Nest*   nest = FTW::grep_parent<FTW_Nest*>(b);
+    FTW_Nest*   nest = FGS::grep_parent<FTW_Nest*>(b);
     const Fl_Menu_Item* mi = b->mvalue();
 
     switch(int(what)) {
@@ -161,7 +163,7 @@ namespace {
   }
 
   void set_menu_cb(Fl_Menu_Button* b, void* what) {
-    FTW_Nest*   nest  = FTW::grep_parent<FTW_Nest*>(b);
+    FTW_Nest*   nest  = FGS::grep_parent<FTW_Nest*>(b);
     FTW_Shell* shell  = nest->GetShell();
     switch(int(what)) {
     case 1: shell->X_SetSource(nest->RefPoint()); break;
@@ -381,9 +383,9 @@ FTW_Nest::~FTW_Nest() {
 
 /**************************************************************************/
 
-void FTW_Nest::Absorb_Change(LID_t lid, CID_t cid)
+void FTW_Nest::AbsorbRay(Ray& ray)
 {
-  if((lid==1 && cid==1) || (lid==0 && cid==0)) {
+  if(ray.IsBasicChange()) {
     label_nest();
   }
 }
