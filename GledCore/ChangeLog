@@ -1,3 +1,14 @@
+2004-06-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_View.cxx:
+	Fixed a bug resulting (after some time) in a corrupt window title.
+
+	* Eye/Pupil.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Display of RPS now optional (PupilInfo::bShowRPS), weed formatting
+	changes.
+	
 2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Eye.cxx:
