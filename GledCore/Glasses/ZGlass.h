@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZGlass_H
-#define Gled_ZGlass_H
+#ifndef GledCore_ZGlass_H
+#define GledCore_ZGlass_H
 
 #include <Gled/GledTypes.h>
 #include <Gled/GMutex.h>
@@ -43,12 +43,13 @@ class ZMIR;
 class ZQueen;
 class ZMirFilter;
 class ZComet;
+class GThread;
 class TBuffer;	class TMessage;
 
 typedef void (*zglass_stamp_f)(ZGlass*, void*);
 
 class ZGlass : public TObject {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZGlass);
   friend class Saturn;
   friend class ZQueen;
@@ -60,11 +61,10 @@ private:
 protected:
   Saturn*	mSaturn;	//! X{G}
   ZQueen*	mQueen;		//! X{G}
-  ZMIR*		mMir;		//! X{G}
 
   UShort_t	mGlassBits;	//
-  TString	mName;		//  X{GE} 7 Textor()
-  TString	mTitle;		//  X{GE} 7 Textor()
+  TString	mName;		//  X{RGE} 7 Textor()
+  TString	mTitle;		//  X{RGE} 7 Textor()
   ID_t		mSaturnID;	//  X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],
                                 //                 -width=>10)
   ZMirFilter*	mGuard;		//  X{E} L{}
@@ -77,6 +77,7 @@ protected:
   UShort_t	mMoonRefCount;	//! X{G}  7 ValOut(-width=>4)
   UShort_t	mSunRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
   UShort_t	mFireRefCount;	//! X{G}  7 ValOut(-width=>4)
+  UShort_t	mEyeRefCount;	//!
 
   void set_link_or_die(ZGlass*& link, ZGlass* new_val, LID_t lid, CID_t cid);
 
@@ -94,6 +95,8 @@ protected:
   void WriteUnlock();
 
  protected:
+  // Detached MIR threads. Stopped by Saturn on CheckOut.
+  list<GThread*> mDetachedMIRThreads; //!
 
   // Handlers of lens-state change notfications ... called from Saturn/Queen
   virtual void AdEnlightenment() {}	// called by Saturn on Enlight
@@ -105,7 +108,9 @@ protected:
 			 MC_IsFlare=1, MC_IsBeam=2,
 			 MC_HasResultReq=4 };
 
-  void assert_MIR_presence(const string& header, int what=0);
+  ZMIR* get_MIR();
+  ZMIR* assert_MIR_presence(const string& header, int what=0);
+  ZMIR* suggest_MIR_presence(const string& header, int what=0);
 
   // TimeStaps
   TimeStamp_t	 mTimeStamp;	   //! X{GS} TimeStamp of last change
@@ -157,6 +162,8 @@ public:
   Short_t IncRefCount(ZGlass* from);
   Short_t DecRefCount(ZGlass* from);
   // here also need ReRef(from, old_queen, new_queen) or sth.
+  Short_t IncEyeRefCount();
+  Short_t DecEyeRefCount();
 
   // Link handling
   void         ClearLinks();
@@ -184,35 +191,14 @@ public:
   void SetStamp_CB(zglass_stamp_f foo, void* arg);
   void SetStampLink_CB(zglass_stamp_f foo, void* arg);
 
-  virtual Int_t RebuildAll(An_ID_Demangler* idd);
+  virtual Int_t RebuildAllRefs(An_ID_Demangler* idd);
 
 #include "ZGlass.h7"
-  ClassDef(ZGlass, 1)
+  ClassDef(ZGlass, 1) // Base class of Gled enabled classes.
 }; // endclass ZGlass
 
 GlassIODef(ZGlass);
 
 #include <Glasses/ZMirFilter.h>
-
-/**************************************************************************/
-// Hairy Inlines
-/**************************************************************************/
-
-inline
-void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val,
-			     LID_t lid, CID_t cid)
-{
-  if(link == new_val) return;
-  if(link) link->DecRefCount(this);
-  if(new_val) {
-    try { new_val->IncRefCount(this); }
-    catch(...) {
-      if(link) { link = 0; StampLink(lid, cid); }
-      throw;
-    }
-  }
-  link = new_val;
-  StampLink(lid, cid);
-}
 
 #endif
