@@ -1,3 +1,23 @@
+2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure.rc:
+	Updated BUILD_VERSION to 1.2.4-cvs.
+	
+	* cfg/project7.rc:
+	Change the default to NOT lock in Set-methods.
+
+	* lib-exec/project7.pl:
+	Added support for detached MIR execution flag in member comment
+	and catalog.
+	
+	* cfg/Glass_SKEL.cxx:
+	* cfg/Glass_SKEL.h:
+	* cfg/Rnr_GL_SKEL.h:
+	Minor beautifications.
+
+	* bin/gled-htmldoc-create:
+	Added some warning comments.
+	
 2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* bin/gled-htmldoc-create:
@@ -31,17 +51,14 @@
 2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
-
 	Libset dependencies are now stored into the configuration data.
 	
 	* lib-exec/project7.pl:
-
 	Reflect changes in struct LinkSpec; now supports loading of libset
 	specific widget classes from GLED_<libset>_Widgets.pm.
 	
 	* make/make_base.inc:
 	* bin/gled-create-libset:
-
 	Introduced double-colon rules for standard targets.
 
 2003-11-17  Matevz Tadel  <matevz.tadel@ijs.si>
@@ -53,7 +70,6 @@
 	* lib-exec/mk_dict_gen.pl:
 	* macros/gled_html_doc.C:
 	* make/make_base.inc:
-
 	Creation of basic infrastructure for generation of HTML class
 	documentation. The gled-htmldoc-create command creates a CINT
 	script to generate html docs via ROOT THtml class and generates
@@ -65,13 +81,11 @@
 	* bin/gled-create-rnr:
 	* bin/gled-create-stone:
 	* cfg/Glass_SKEL.cxx:
-	
 	Beautification.
 	
 	* cfg/project7.rc:
 	* lib-exec/gled_glue_gen.pl:
 	* lib-exec/project7.pl:
-
 	Updated for new format of ZMIR and glass catalogs.
 
 
@@ -79,7 +93,6 @@
 
 	* configure:
 	* configure.rc:
-
 	configure now produces build_env [c]sh scripts with given
 	environment settings. The name is configurable.
 	
@@ -117,19 +130,16 @@
 
 	* configure:
 	* configure.rc:
-
 	New option 'libset' to specify libsets to build; creates Makefile.
 	The build procedure is now more like what people expect.
 
 	* INSTALL:
 	* MANIFEST:
-
 	Corrected for the new build procedure.
 
 	* build_libsets:
 	* mecca:
 	* mecca.rc:
-
 	Removed files.
 
 
@@ -137,7 +147,6 @@
 
 	* cfg/project7.rc:
 	* lib-exec/project7.pl:
-
 	New options determining locking of lenses in Get/Set methods.
 
 	Until now Set methods always locked the lens and Get methods
@@ -146,7 +155,6 @@
 
 	* configure:
 	* configure.rc:
-
 	Added options: buildversion and builddate.
 	They are exported via #defines in include/config.h, e.g.
 	#define GLED_VERSION_STRING    "1.2.0-cvs"
