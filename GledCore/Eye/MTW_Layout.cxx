@@ -101,7 +101,7 @@ void MTW_Layout::Parse(int cell_w) throw (string)
 	throw string("member '"+mmb_name+"' not found for class '"+cls_name+"'");
       }
       int w = atoi(width_arg.c_str());
-      if(w == 0) w = mi->fWidth >? FGS::swm_label_width(*m, cell_w);
+      if(w == 0) w = TMath::Max(mi->fWidth, FGS::swm_label_width(*m, cell_w));
       cls.fMembers.push_back(Member(mi, w));
       cls.fFullW += w;
     }
