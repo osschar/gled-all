@@ -49,6 +49,7 @@ void ZList::_init()
   mStampListAdd_CB = 0;		mStampListAdd_CBarg = 0;
   mStampListRemove_CB = 0;	mStampListRemove_CBarg = 0;
   mStampListRebuild_CB = 0;	mStampListRebuild_CBarg = 0;
+  mStampListClear_CB = 0;	mStampListClear_CBarg = 0;
 }
 
 /**************************************************************************/
@@ -241,7 +242,7 @@ void ZList::ClearList()
   mListMutex.Lock();
   foo.swap(mGlasses);
   clear_list();
-  StampListRebuild();
+  StampListClear();
   mListMutex.Unlock();
   ISdebug(1, "ZList::ClearList unlocked list.");
   for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
@@ -312,6 +313,21 @@ TimeStamp_t ZList::StampListRebuild()
   return mTimeStamp;
 }
 
+TimeStamp_t ZList::StampListClear()
+{
+  ++mTimeStamp;
+  if(mQueen) {
+    Ray r(Ray::RQN_list_clear, mTimeStamp, this);
+    mQueen->EmitRay(r);
+  }
+  if(mStampListClear_CB)
+    mStampListClear_CB(this, mStampListClear_CBarg);
+
+  return mTimeStamp;
+}
+
+/**************************************************************************/
+
 void ZList::SetStampListAdd_CB(zlist_stampadd_f foo, void* arg)
 {
   mStampListAdd_CB = foo; mStampListAdd_CBarg = arg;
@@ -323,6 +339,10 @@ void ZList::SetStampListRemove_CB(zlist_stampremove_f foo, void* arg)
 void ZList::SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg)
 {
   mStampListRebuild_CB = foo; mStampListRebuild_CBarg = arg;
+}
+void ZList::SetStampListClear_CB(zlist_stampclear_f foo, void* arg)
+{
+  mStampListClear_CB = foo; mStampListClear_CBarg = arg;
 }
 
 /**************************************************************************/

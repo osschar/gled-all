@@ -184,6 +184,10 @@ void ZListView::Absorb_ListRebuild() {
   build_daughters();
 }
 
+void ZListView::Absorb_ListClear() {
+  fDaughterImgs.clear();
+}
+
 /**************************************************************************/
 
 void ZListView::AssertListRnrs(const string& rnr) {

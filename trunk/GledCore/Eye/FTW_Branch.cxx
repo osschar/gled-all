@@ -127,6 +127,15 @@ void FTW_Branch::Absorb_ListRebuild()
   label_namebox();
 }
 
+void FTW_Branch::Absorb_ListClear()
+{
+  bool was_expanded = bListExpanded;
+  if(bListExpanded) CollapseList();
+  wipe_leoim();
+  if(was_expanded) ExpandList();
+  label_namebox();
+}
+
 /**************************************************************************/
 
 void FTW_Branch::AssertListRnrs(const string& rnr) {

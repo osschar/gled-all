@@ -285,6 +285,15 @@ Int_t Eye::Manage(int fd)
       InvalidateRnrs(a, true);
       break;
     }
+    case Ray::RQN_list_clear: {
+      // alpha zlist
+      // full-views
+      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
+	(*i)->Absorb_ListClear();
+      }
+      InvalidateRnrs(a, true);
+      break;
+    }
     case Ray::RQN_birth: {
       // This point never reached !!!!
       // Should check for this RQN before (if birth_callback enabled).
