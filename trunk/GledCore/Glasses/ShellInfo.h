@@ -23,7 +23,8 @@ protected:
 
   Bool_t	bSpawnNests;	// X{GS} 7 Bool()
 public:
-  ShellInfo(Text_t* n="ShellInfo", Text_t* t=0) : NestInfo(n,t) { _init(); }
+  ShellInfo(const Text_t* n="ShellInfo", const Text_t* t=0) :
+    NestInfo(n,t) { _init(); }
 
   virtual void AdEnlightenment();
 
