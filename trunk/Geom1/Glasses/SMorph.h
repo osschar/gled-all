@@ -25,15 +25,12 @@ private:
 protected:
   Int_t		mTLevel;	// X{GST} 7 Value(-range=>[2,100, 1], -join=>1)
   Int_t		mPLevel;	// X{GST} 7 Value(-range=>[3,100, 1])
-  Real_t	mSx;		// X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
-  Real_t	mSy;		// X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
-  Real_t	mSz;		// X{GS}  7 Value(-range=>[0,100, 1,100])
+
   Real_t	mTx;		// X{GST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
   Real_t	mCx;		// X{GST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
   Real_t	mRz;		// X{GST} 7 Value(-range=>[-10,10, 1,100])
   Bool_t	bOpenTop;	// X{GST} 7 Bool(-join=>1)
   Bool_t	bOpenBot;	// X{GST} 7 Bool()
-  Bool_t	bNormalize;	// X{GS}  7 Bool(-join=>1)
   Bool_t	bEquiSurf;	// X{GST} 7 Bool()
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
@@ -48,10 +45,6 @@ public:
   SMorph(Real_t r, const Text_t* n="SMorph", const Text_t* t=0) : ZNode(n,t)
   { _init(r); }
   virtual ~SMorph();
-
-  void SetS(Real_t xx) { mSx = mSy = mSz = xx; Stamp(LibID(), ClassID()); } // X{e}
-  void MultS(Real_t s) { mSx*=s; mSy*=s; mSz*=s; Stamp(LibID(), ClassID()); }
-  void SetSs(Real_t x, Real_t y, Real_t z) { mSx=x; mSy=y; mSz=z; Stamp(LibID(), ClassID()); }
 
   // virtuals
   virtual void Triangulate();
