@@ -9,6 +9,12 @@
 //
 // Configuration data for GL viewer.
 //
+// Camera orientation: x-forward, y-left, z-up. This should help understand
+// viewing angle/size specification variables: mZFov, mYFac, mZSize, mXDist.
+// ZFov & YFac used in perspective mode, mZSise & mYFac in orthographic mode.
+// mXDist is used as a 'typical distance of objects' when changing from one
+// mode to the other.
+//
 // Emits custom Rays: user_1 -> dump image, user_2 -> resize window
 
 #include "PupilInfo.h"
@@ -40,9 +46,9 @@ void PupilInfo::_init()
   mClearColor.rgba(0,0,0);
 
   mProjMode = P_Perspective;
-  mFOV = 90;
-  mNearClip = 0.01; mFarClip = 120;
-  mYSize = 10; mHFac = 1;
+  mZFov     = 90;   mZSize   = 20;
+  mYFac     = 1;    mXDist   = 10;
+  mNearClip = 0.01; mFarClip = 100;
 
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
   bLiMo2Side = false;
@@ -100,6 +106,24 @@ void PupilInfo::SetUpReference(ZNode* upreference)
   }
 
   set_link_or_die((ZGlass*&)mUpReference, upreference, FID());
+}
+
+/**************************************************************************/
+
+void PupilInfo::Zoom(Float_t delta)
+{ 
+  switch(mProjMode) {
+  case P_Perspective: {
+    mZFov += 5*delta;
+    mZSize = 2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2);
+    break;
+  }
+  case P_Orthographic: {
+    mZSize += 0.5*delta;
+    mZFov   = 2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist);
+  }
+  }
+  Stamp(FID());
 }
 
 /**************************************************************************/

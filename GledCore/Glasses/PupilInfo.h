@@ -50,11 +50,12 @@ protected:
   ZColor	mClearColor;	// X{PRGS} 7 ColorButt()
 
   Projection_e	mProjMode;	// X{GS} 7 PhonyEnum()
-  Float_t	mFOV;		// X{gS} 7 Value(-range=>[1,180,1,10], -join=>1)
-  Float_t	mNearClip;	// X{gS} 7 Value(-width=>5, -range=>[0,1000,1,1000],-join=>1)
-  Float_t	mFarClip;	// X{gS} 7 Value(-width=>5, -range=>[0,1000,1,1000])
-  Float_t	mYSize;		// X{gS} 7 Value(-range=>[1e-3,1000,1,1000], -join=>1)
-  Float_t	mHFac;		// X{gS} 7 Value(-range=>[1e-3,100, 1,1000])
+  Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1,180,1,100], -join=>1)
+  Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
+  Float_t	mYFac;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000], -join=>1)
+  Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
+  Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
+  Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
 
   Int_t		mFrontMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6,-join=>1)
   Int_t		mBackMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6)
@@ -86,6 +87,8 @@ public:
   void SetCameraBase(ZNode* camerabase);
   void SetLookAt(ZNode* lookat);
   void SetUpReference(ZNode* upreference);
+
+  void Zoom(Float_t delta); // X{E}
 
   void EmitDumpImageRay(const Text_t* filename="screenshot.tga"); // X{E} 7 MButt()
   void EmitImmediateRedrawRay();                                  // X{E} 7 MButt()
