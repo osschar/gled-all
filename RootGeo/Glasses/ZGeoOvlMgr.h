@@ -20,7 +20,6 @@ typedef list<TGeoNode*>::reverse_iterator        lgn_ri;
 
 
 class ZGeoOvlMgr : public ZGeoNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZGeoOvlMgr);
 
 private:
