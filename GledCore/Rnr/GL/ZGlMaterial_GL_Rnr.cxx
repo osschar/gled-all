@@ -16,7 +16,7 @@ void ZGlMaterial_GL_Rnr::_init()
 
 void ZGlMaterial_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // Ignore ZGlass::PreDraw
+  // Ignore ZRnrModBase::PreDraw
   glPushAttrib(GL_LIGHTING_BIT);
   SetupGL();
 }
@@ -28,7 +28,7 @@ void ZGlMaterial_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlMaterial_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  // Ignore ZGlass::PostDraw
+  // Ignore ZRnrModBase::PostDraw
   glPopAttrib();
 }
 
@@ -38,7 +38,7 @@ void ZGlMaterial_GL_Rnr::SetupGL()
 {
   ZGlMaterial& x = *mZGlMaterial;
 
-  if(x.mMatOp == ZGlStateBase::GSO_On) {
+  if(x.mMatOp == ZRnrModBase::O_On) {
     glMaterialf(x.mFace, GL_SHININESS, x.mShininess);
     glMaterialfv(x.mFace, GL_AMBIENT, x.mAmbient());
     glMaterialfv(x.mFace, GL_DIFFUSE, x.mDiffuse());
@@ -47,14 +47,14 @@ void ZGlMaterial_GL_Rnr::SetupGL()
   }
 
   switch(x.mModeOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glColorMaterial(x.mModeFace, x.mModeColor);
     glEnable(GL_COLOR_MATERIAL);
     break;
-  case ZGlStateBase::GSO_Off:
+  case ZRnrModBase::O_Off:
     glDisable(GL_COLOR_MATERIAL);
     break;
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }

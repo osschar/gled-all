@@ -16,7 +16,7 @@ void ZGlLightModel_GL_Rnr::_init()
 
 void ZGlLightModel_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // Ignore ZGlass::PreDraw
+  // Ignore ZRnrModBase::PreDraw
   glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT);
   SetupGL();
 }
@@ -28,7 +28,7 @@ void ZGlLightModel_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlLightModel_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  // Ignore ZGlass::PostDraw
+  // Ignore ZRnrModBase::PostDraw
   glPopAttrib();
 }
 
@@ -39,43 +39,43 @@ void ZGlLightModel_GL_Rnr::SetupGL()
   ZGlLightModel& x = *mZGlLightModel;
 
   switch(x.mLightModelOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glEnable(GL_LIGHTING);
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, x.mLiMoAmbient());
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL, x.mLiMoColorCtrl);
     glLightModeli (GL_LIGHT_MODEL_LOCAL_VIEWER, x.bLiMoLocViewer);
     glLightModeli (GL_LIGHT_MODEL_TWO_SIDE, x.bLiMoTwoSide);
     break;
-  case ZGlStateBase::GSO_Off:
+  case ZRnrModBase::O_Off:
     glDisable(GL_LIGHTING);
     break;
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }
 
   switch(x.mShadeModelOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glShadeModel(x.mShadeModel);
     glFrontFace(x.mFrontFace);
     glPolygonMode(GL_FRONT, x.mFrontMode);
     glPolygonMode(GL_BACK,  x.mBackMode);
     break;
-  case ZGlStateBase::GSO_Off:
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Off:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }
 
   switch(x.mFaceCullOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glCullFace(x.mFaceCullMode);
     glEnable(GL_CULL_FACE);
     break;
-  case ZGlStateBase::GSO_Off:
+  case ZRnrModBase::O_Off:
     glDisable(GL_CULL_FACE);
     break;
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }
