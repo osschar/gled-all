@@ -22,9 +22,14 @@ protected:
   void		_init();
 
   ZNode*	mCameraBase;	// X{GE} L{}
+
   ZNode*	mLookAt;	// X{GE} L{}
+  Float_t	mLookAtMinDist; // X{GS} 7 Value(-range=>[0,1000,1,1000])
+
   ZNode*	mUpReference;	// X{GE} L{}
-  UChar_t	mUpRefAxis;	// X{GS} 7 Value(-range=>[1,3,1,1])
+  UChar_t	mUpRefAxis;	// X{GS} 7 Value(-range=>[1,3,1,1], -join=>1)
+  Bool_t	bUpRefLockDir;	// X{GS} 7 Bool()
+  Float_t	mUpRefMinAngle;	// X{GS} 7 Value(-range=>[0,40,1,100])
 
   Int_t		mMaxDepth;	// X{GS} 7 Value(-range=>[1,1000,1,1])
 
@@ -75,6 +80,7 @@ public:
   void EmitResizeRay(); // X{E} 7 MButt()
 
   ZTrans* ToPupilFrame(ZNode* node);
+  ZTrans* ToCameraFrame(ZNode* node);
 
   // virtuals
 
