@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -22,14 +22,16 @@ class FTW_Leaf;
 #include <FL/Fl_Gl_Window.H>
 
 // !!!! Pupil should be A_View of its PupilInfo
-// !!!! Need locator
+// !!!! Need locator support
 
-class Pupil : public Fl_Gl_Window {
+class Pupil : public Fl_Gl_Window
+{
 
-private:
+protected:
+
   PupilInfo*	mInfo;
   FTW_Leaf*	mLeaf;
-  OptoStructs::ZGlassView* mRoot;
+  OptoStructs::ZGlassView* mRoot;  // X{G}
 
   RnrDriver*	mDriver;
 
@@ -57,13 +59,38 @@ public:
   void XtachCamera();
 
   void Render();
-  void Pick(bool showparents=false);
+  void Pick();
 
   virtual void draw();
   virtual void draw_overlay();
   virtual int  handle(int ev);
 
-}; // enclass Pupil
+  ////////////////////////////////////////////////////////////////
+  // Picking stuff
+  ////////////////////////////////////////////////////////////////
+
+  enum pick_e { p_null=0, p_open_view,
+		p_user_1=0x100, p_user_2, p_user_3, p_user_4, p_user_5
+  };
+
+  struct pick_data {
+    Pupil*  pupil;
+    ZGlass* lens;
+    pick_e  operation;
+    void*   user_data;
+
+    pick_data(Pupil* p, ZGlass* l, pick_e o=p_null, void* ud=0) :
+      pupil(p), lens(l), operation(o), user_data(ud) {}
+  };
+
+protected:
+  virtual void pick_callback(Fl_Widget* w, pick_data* pd);
+
+public:
+  static void fltk_pick_callback(Fl_Widget* w, pick_data* pd);
+
+#include "Pupil.h7"
+}; // endclass Pupil
 
 typedef list<Pupil*>		lpPupil_t;
 typedef list<Pupil*>::iterator	lpPupil_i;
