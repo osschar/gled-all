@@ -18,8 +18,6 @@ private:
 
 protected:
   ZGeoNode*	mZGeoNode;
-  Bool_t	bRnrSelf;       // X{GS} 7 Bool(-join=>1)
-
 
 public:
   ZGeoNode_GL_Rnr(ZGeoNode* idol) : ZNode_GL_Rnr(idol), mZGeoNode(idol) { _init(); }
