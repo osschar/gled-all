@@ -61,6 +61,22 @@ the weed can be resized (some weeds are fixed size and would react badly to resi
 minimal width of the weed. If labeled on the inside this is the minimal width WITHOUT
 the label: it is taken into account upon construction.
 
+=item B<< -join=>1 >>
+
+when putting the widget into a full-lens-view attempt to join the widget
+on previous line.
+
+=item B<< -const=>1 >>
+
+THIS IS NOT IMPLEMENTED ... but would be nice in one form or another. 
+
+make widget read-only. Done on code generation level; nothing is
+exported into GlassViewNS::MemberInfo structure. Perhaps the other way
+around would be smarter ... 
+
+And ... the update should go via MTW_View, where locking is performed!!!
+Now it isn't (for ValOut and BoolOut)
+
 =back
 
 =cut
@@ -73,7 +89,8 @@ sub new {
   my $S = {@_};
   bless($S, $class);
 
-  $S->{-join} = "false" unless exists $S->{-join};
+  $S->{-join}  = "false" unless exists $S->{-join};
+  $S->{-const} = "false" unless exists $S->{-join};
   return $S;
 }
 
@@ -445,8 +462,17 @@ sub new {
 sub make_widget {
   my $S = shift;
   my $r = $S->make_widget_A();
-  for($i=0; $i<$#{$S->{-vals}}; $i+=2) {
-    $r .= "\to->Bruh($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
+
+  if($#{$S->{-vals}} >= 0 && ($#{$S->{-vals}} % 2) == 1) {
+    for($i=0; $i<$#{$S->{-vals}}; $i+=2) {
+      $r .= "\to->Bruh($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
+    }
+  } elsif($#{$S->{-seqvals}} >= 0) {
+    for($i=0; $i<=$#{$S->{-seqvals}}; ++$i) {
+      $r .= "\to->Bruh($i, \"$S->{-seqvals}[$i]\");\n";
+    }
+  } else {
+    die "GLED::Widgets::PhonyEnum bad syntax";
   }
   $r .= $S->make_widget_B();
   $r;
