@@ -80,7 +80,7 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
     if(strcmp(*i, "-h")==0 || strcmp(*i, "-help")==0 ||
        strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
       {
-	cout <<
+	printf(
 	  "Arguments: [options] [dir] [file(s)]\n"
 	  "			dir   ~ cd to dir prior to exec of files\n"
 	  "			files ~ ROOT macro scripts to process\n"
@@ -94,7 +94,7 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
 	  "  -n[ame]	<str>	name of Saturn\n"
 	  "  -t[itle]	<str>	title of Saturn\n"
 	  "  -l			no splash info\n"
-	  "  -norint		do not run TRint (useful for batch saturns)\n";
+	  "  -norint		do not run TRint (useful for batch saturns)\n");
 	bQuit = true;
 	return;
       }
@@ -168,13 +168,15 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
   }
 
   if(bShowSplash) {
-    cout <<
+    int len = strlen(GLED_VERSION_STRING) + strlen(GLED_BUILD_DATE_STRING) + 4;
+    printf(
       "+----------------------------------------------------------+\n"
-      "| This is Gled, version 1.1.9                              |\n"
+      "| This is Gled, version %s, %s %*s |\n"
       "| Gled is free software, released under GNU GPL version 2. |\n"
       "| For further information visit http://www.gled.org/       |\n"
-      "+----------------------------------------------------------+\n"
-      "Bootstraping ...\n";
+      "+----------------------------------------------------------+\n",
+      GLED_VERSION_STRING, GLED_BUILD_DATE_STRING, 35 - len, "" );
+    printf("Bootstraping ...\n");
   }
 
   libGledCore_GLED_init();
