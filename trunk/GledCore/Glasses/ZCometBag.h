@@ -13,18 +13,25 @@ class ZSubTree;
 class ZComet;
 
 class ZCometBag : public ZHashList {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZCometBag);
+
 private:
   void _init();
 
 protected:
   Bool_t	bSmartZNodes;	// X{GS} 7 Bool()
   Int_t		mDepth;		// X{GS} 7 Value(-range=>[-1,100,1,1])
-  Bool_t	bFollowLinks;	// X{GS} 7 Bool()
+  Bool_t	bFollowLinks;	// X{GS} 7 Bool(-join=>1)
   Bool_t	bFollowLists;	// X{GS} 7 Bool()
 
+  // I don't know ... need something better.
+  // A really good stone supporting root TFile::Open(<anything>) stuff.
+  TString	mFile;		// X{GS} 7 Filor()
+  TString	mPath;		// X{GS} 7 Textor()
+
   ZSubTree* make_sub_tree_rep(ZGlass* g);
+
 public:
   ZCometBag(const Text_t* n="ZCometBag", const Text_t* t=0) : ZHashList(n,t) { _init(); }
 

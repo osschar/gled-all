@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZCometBag.h"
+#include "ZCometBag.c7"
 #include <Glasses/ZSubTree.h>
 #include <Glasses/ZQueen.h>
 #include <Stones/ZComet.h>
@@ -72,5 +73,3 @@ ZComet* ZCometBag::MakeComet()
 }
 
 /**************************************************************************/
-
-#include "ZCometBag.c7"
