@@ -343,8 +343,6 @@ void FTW_Shell::RemoveSubShell(OptoStructs::ZGlassImg* img)
 
 // View cretors
 
-#include <G__ci.h>
-
 FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img)
 {
   static const string _eh("FTW_Shell::spawn_subshell ");
@@ -361,7 +359,7 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img)
   
   string foo_name(GForm("SubShellCreator_%s_%s",
 			ssinfo->GetCtorLibset(), ssinfo->GetCtorName()));
-  long* p2foo = (long*) G__findsym( foo_name.c_str() );
+  long* p2foo = (long*) GledNS::FindSymbol(foo_name);
   if(!p2foo) {
     Message(_eh +"can't find symbol '"+ foo_name +"'.", MT_wrn);
     return 0;
