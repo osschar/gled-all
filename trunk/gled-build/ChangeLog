@@ -1,3 +1,17 @@
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* configure.rc:
+
+	configure now produces build_env [c]sh scripts with given
+	environment settings. The name is configurable.
+	
+	* lib-exec/project7.pl: Set methods can optionally take the
+	argument as const reference. See GledCore::PerfMeterTarget.
+	
+	* make/make_defs.inc: Added option -pipe to CXXFLAGS.
+
+
 2003-07-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_base.inc: Hidden libset_id files are also needed in
@@ -5,6 +19,7 @@
 
 	* lib-exec/project7.pl: Fixed pointer-to-pointer exports for links
 	to work on gcc-3.3.
+
 
 2003-07-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
