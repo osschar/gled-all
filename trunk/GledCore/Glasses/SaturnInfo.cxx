@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -46,6 +46,17 @@ SaturnInfo::~SaturnInfo()
 {}
 
 /**************************************************************************/
+
+void SaturnInfo::Message(const Text_t* s)
+{
+  ISmess(string("Received message: ") + s);
+}
+
+void SaturnInfo::Error(const Text_t* s)
+{
+  ISerr(string("Received error: ") + s);
+}
+
 /**************************************************************************/
 
 void SaturnInfo::create_lists()
@@ -142,7 +153,7 @@ void SaturnInfo::ReceiveBeamResult(UInt_t req_handle)
 
   static const string _eh("SaturnInfo::ReceiveBeamResult ");
 
-  AssertMIRPresence(_eh);
+  assert_MIR_presence(_eh);
 
   mSaturn->handle_mir_result(req_handle, mMir);
 }
@@ -155,7 +166,7 @@ void SaturnInfo::TellAverages()
 
   static const string _eh("SaturnInfo::TellAverages ");
 
-  AssertMIRPresence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
+  assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
   UInt_t  j[4];
   Float_t l[3] = {0,0,0};

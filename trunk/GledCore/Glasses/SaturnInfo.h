@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -32,7 +32,9 @@ private:
   typedef set<ZQueen*>			spZQueen_t;
   typedef set<ZQueen*>::iterator	spZQueen_i;
 
-  spZQueen_t	hQueens;	//!
+  spZQueen_t	hQueens;	//! Queens mirrored to Saturn represented
+				//  by this SaturnInfo (only used for moons of
+				//  local Saturn)
 
 protected:
 
@@ -85,6 +87,10 @@ public:
 
   SaturnInfo(const Text_t* n="SaturnInfo", const Text_t* t=0);
   virtual ~SaturnInfo();
+
+  virtual SaturnInfo* HostingSaturn() { return this; }
+  virtual void Message(const Text_t* s); // X{E}
+  virtual void Error(const Text_t* s);   // X{E}
 
   void AddMoon(SaturnInfo* moon); // X{E} C{1}
   void AddEye(EyeInfo* eye);	  // X{E} C{1}
