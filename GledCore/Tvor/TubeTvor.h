@@ -22,9 +22,9 @@ typedef vector<RingInfo>::iterator	vRingInfo_i;
 
 
 class TubeTvor {
-  friend class TubeTvor_GL_Rnr;
 
-private:
+public:
+
   Int_t		mPVI;
   Int_t		mNP;
   Int_t		mI;
@@ -36,7 +36,8 @@ private:
   bool		bColP;
   bool		bTexP;
 
-public:
+  //----------------------
+
   TubeTvor();
   ~TubeTvor();
 

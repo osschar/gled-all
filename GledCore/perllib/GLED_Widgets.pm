@@ -536,8 +536,8 @@ sub make_widget {
 
   } else {
     my $E = $S->enum_details();
-    my $labp = defined $S->{-labels} and ref($S->{-labels}) eq "ARRAY";
-    my $namp = defined $S->{-names}  and ref($S->{-names})  eq "ARRAY";
+    my $labp = (defined $S->{-labels} and ref($S->{-labels}) eq "ARRAY");
+    my $namp = (defined $S->{-names}  and ref($S->{-names})  eq "ARRAY");
     for $h (@{$E->{EnumInfo}}) {
       my $add = 0;
       if($labp or $namp) {
