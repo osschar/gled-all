@@ -97,6 +97,8 @@ public:
   virtual void warning(const char* s);
   virtual void error(const char* s);
 
+  virtual Bool_t HasGUILibs() const { return false; }
+
   virtual EyeInfo* SpawnEye(const char* name, const char* title=0);
   virtual EyeInfo* SpawnEye(ShellInfo* si, const char* name, const char* title=0)
   { return 0; }
