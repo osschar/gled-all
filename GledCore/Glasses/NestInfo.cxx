@@ -29,6 +29,9 @@ void NestInfo::_init()
   bShowSelf   = false;
   mMaxChildExp   = 1;
 
+  mWName   = 30; mWAnt    = 0;
+  mWIndent = 2;  mWSepBox = 1;
+
   mLeafLayout = LL_Ants;
 }
 
@@ -51,3 +54,12 @@ void NestInfo::ImportKings()
 }
 
 /**************************************************************************/
+
+void NestInfo::EmitRewidthRay()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_rewidth, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
+}

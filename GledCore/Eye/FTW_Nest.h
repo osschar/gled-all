@@ -26,22 +26,6 @@ class Fl_Input; class Fl_Output; class Fl_Menu_Item;
 class Fl_Box;
 
 /**************************************************************************/
-
-class FTW_Nest_Ctrl : public Fl_Window, public Fl_SWM_Client {
-public:
-  Fl_Value_Input*	weeds[4];
-
-  FTW_Nest_Ctrl(FTW_Nest* nest);
-  void set_show_cb(Fl_Widget* w);
-  void set_vals(int* v);
-
-  Int_t GetWName()   { return (Int_t)(weeds[0]->value()); }
-  Int_t GetWAnt()    { return (Int_t)(weeds[1]->value()); }
-  Int_t GetWIndent() { return (Int_t)(weeds[2]->value()); }
-  Int_t GetWSepBox() { return (Int_t)(weeds[3]->value()); }
-};
-
-/**************************************************************************/
 // FTW_Nest
 /**************************************************************************/
 
@@ -59,13 +43,12 @@ private:
   typedef map<FTW::Locator*, list<FTW::LocatorConsumer*> >::iterator	mpLoc2pLCon_i;
 
   void _build(int w, int h);
-  void finalize_build();
+  void _finalize_build();
 
 protected:
   NestInfo*	 mNestInfo;	// X{g}
 
   int		 mW;
-  FTW_Nest_Ctrl* pCtrl;		// X{g}
 
   FTW::Locator	 mPoint;	// X{r}
   FTW::Locator	 mMark;		// X{r}

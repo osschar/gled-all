@@ -41,7 +41,7 @@ FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
   static const string _eh("FTW_Nest::Create_FTW_Nest ");
 
   NestInfo* ni = dynamic_cast<NestInfo*>(img->fGlass);
-  if(ni == 0) throw(_eh + "user-data is not ShellInfo.");
+  if(ni == 0) throw(_eh + "user-data is not NestInfo.");
 
   FTW_Nest* nest = new FTW_Nest(sh, img);
   
@@ -61,7 +61,7 @@ FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
     }
   }
 
-  nest->finalize_build();
+  nest->_finalize_build();
   return nest;
 }
 
@@ -230,7 +230,6 @@ void FTW_Nest::_build(int w, int h)
   mTargetLoc = &mPoint; mTargetType = TT_Point;
 
   { // Create helpers
-    pCtrl   = new FTW_Nest_Ctrl(this);
     pLayout = new MTW_Layout(this);
   }
 
@@ -242,13 +241,6 @@ void FTW_Nest::_build(int w, int h)
   {
     wMenuPack = new Fl_Pack(0, 0, w, 2);
     wMenuPack->type(FL_HORIZONTAL);
-
-
-    Fl_Button* b_ctr = new Fl_Button(0,0,2,2, "@#||");
-    b_ctr->box((Fl_Boxtype)GVNS::menubar_box);
-    b_ctr->down_box((Fl_Boxtype)GVNS::menubar_box);
-    b_ctr->labeltype(FL_SYMBOL_LABEL);
-    pCtrl->set_show_cb(b_ctr);
 
     new FGS::MenuBox(s_View_Menu,   4, 2, "View");
     new FGS::MenuBox(s_Set_Menu,    4, 2, "Set");
@@ -337,7 +329,7 @@ void FTW_Nest::_build(int w, int h)
   label_nest();
 }
 
-void FTW_Nest::finalize_build()
+void FTW_Nest::_finalize_build()
 {
   if(mNestInfo->GetLeafLayout() == NestInfo::LL_Custom) {
     EnactLayout(mNestInfo->GetLayout());
@@ -373,7 +365,6 @@ FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int
 
 FTW_Nest::~FTW_Nest() {
   // !!!! here should clear all locator consumers with destroy_base()!!!!
-  delete pCtrl;
   delete pLayout;
 }
 
@@ -387,17 +378,24 @@ void FTW_Nest::AbsorbRay(Ray& ray)
   }
 
   if(ray.fFID == NestInfo::FID()) {
-    if(ray.fRQN == RayNS::RQN_user_1) {
-      switch (mNestInfo->GetLeafLayout()) {
-      case NestInfo::LL_Ants:
-	LinksView();
-	break;
-      case NestInfo::LL_Custom:
-	EnactLayout(mNestInfo->GetLayout());
-	CustomView();
+    switch (ray.fRQN)
+      {
+      case NestInfo::PRQN_layout_change: {
+	switch (mNestInfo->GetLeafLayout()) {
+	case NestInfo::LL_Ants:
+	  LinksView();
+	  break;
+	case NestInfo::LL_Custom:
+	  EnactLayout(mNestInfo->GetLayout());
+	  CustomView();
+	  break;
+	}
 	break;
       }
-    }
+      case NestInfo::PRQN_rewidth:
+	Rewidth();
+	break;
+      }
     return;
   }
 }
@@ -415,13 +413,13 @@ void FTW_Nest::Rewidth()
   int cw = swm_manager->cell_w();
   int ch = swm_manager->cell_h();
 
-  int gw1 = (pCtrl->GetWName() - 7) / 3;
-  int gw2 = pCtrl->GetWName() - 7 - 2*gw1;
+  int gw1 = (mNestInfo->GetWName() - 7) / 3;
+  int gw2 = mNestInfo->GetWName() - 7 - 2*gw1;
   wTargetPack->child(2)->size(gw1*cw, 2*ch);
   wTargetPack->child(3)->size(gw1*cw, 2*ch);
   wTargetPack->child(4)->size(gw2*cw, 2*ch);
 
-  wSepBox->size(pCtrl->GetWSepBox()*cw, 2*ch);
+  wSepBox->size(mNestInfo->GetWSepBox()*cw, 2*ch);
 
   wMidPack->redraw();
 }
@@ -439,7 +437,6 @@ void FTW_Nest::AdInsertio(FTW_Leaf* newleaf)
 void FTW_Nest::SetSWM(Fl_SWM_Manager* swm, bool self_p)
 {
   if(self_p) swm->adopt_window(this);
-  swm->adopt_window(pCtrl);
   swm->adopt_window(pLayout);
   Rewidth();
 }
@@ -893,70 +890,4 @@ void FTW_Nest::label_nest()
   redraw();
 }
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
-/**************************************************************************/
-// FTW_Nest_Ctrl
-/**************************************************************************/
-
-namespace {
-
-  char* var_names[] = { "Name", "Ant", "Indent", "SepBox" };
-  int var_defs[] = { 30, 0, 2, 1 };
-
-  void ftwnc_setdef_cb(Fl_Button* b, FTW_Nest_Ctrl* n) {
-    for(int i=0; i<4; ++i) {
-      var_defs[i] = int(n->weeds[i]->value());
-    }
-  }
-
-  void ftwnc_hide_cb(Fl_Button* b, FTW_Nest_Ctrl* n) { n->hide(); }
-
-  void ftwnc_show_cb(Fl_Button* b, FTW_Nest_Ctrl* n) {
-    n->hotspot(n); n->show();
-  }
-
-  void ftwnc_change_cb(Fl_Button* b, FTW_Nest* nest) { nest->Rewidth(); }
-
-}
-
-/**************************************************************************/
-
-FTW_Nest_Ctrl::FTW_Nest_Ctrl(FTW_Nest* nest) :
-  Fl_Window(24, 3, "FTW_Nest_Ctrl")
-{
-  for(int i=0; i<4; ++i) {
-    weeds[i] = new Fl_Value_Input(i*6, 1, 6, 1, var_names[i]);
-    weeds[i]->value(var_defs[i]);
-    weeds[i]->align(FL_ALIGN_TOP);
-    weeds[i]->callback((Fl_Callback*)ftwnc_change_cb, nest);
-  }
-  weeds[0]->range(18,50); weeds[0]->step(1);
-  weeds[1]->range( 0,40); weeds[1]->step(1);
-  weeds[2]->range( 0,10); weeds[2]->step(1);
-  weeds[3]->range( 0,5);  weeds[3]->step(1);
-
-  Fl_Button* b;
-  b = new Fl_Button(0,2,12,1, "Set Default");
-  b->callback((Fl_Callback*) ftwnc_setdef_cb, this);
-  b = new Fl_Button(12,2,12,1, "Hide");
-  b->callback((Fl_Callback*) ftwnc_hide_cb, this);
-
-  end();
-}
-
-void FTW_Nest_Ctrl::set_show_cb(Fl_Widget* w)
-{
-  w->callback((Fl_Callback*) ftwnc_show_cb, this);
-}
-
-void FTW_Nest_Ctrl::set_vals(int* v)
-{
-  for(int i=0; i<4; ++i) weeds[i]->value(v[i]);
-}
-
-/**************************************************************************/
-/**************************************************************************/
 /**************************************************************************/

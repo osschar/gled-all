@@ -11,6 +11,7 @@
 #include "FTW_Shell.h"
 #include "FltkGledStuff.h"
 #include <Glasses/ZGlass.h>
+#include <Glasses/NestInfo.h>
 #include <Net/Ray.h>
 
 #include "MTW_View.h"
@@ -278,21 +279,22 @@ FTW_Ant* FTW_Leaf::LastAnt() {
 // Main weeds + antz
 
 void FTW_Leaf::resize_weeds() {
-  int indent_skip = mLevel*mNest->GetCtrl()->GetWIndent();
+  NestInfo* ni = mNest->GetNestInfo();
+  int indent_skip = mLevel*ni->GetWIndent();
   int cw = mNest->get_swm_manager()->cell_w();
   int ch = mNest->get_swm_manager()->cell_h();
 
-  if(indent_skip + 4 > mNest->GetCtrl()->GetWName())
-    indent_skip = mNest->GetCtrl()->GetWName() - 4;
+  if(indent_skip + 4 > ni->GetWName())
+    indent_skip = ni->GetWName() - 4;
 
   wIndentBox->size(indent_skip, 1);
   wExpander->size(2, 1);
   wListExpander->size(2, 1);
-  wName->size((mNest->GetCtrl()->GetWName() - indent_skip - 4), 1);
-  wSepBox->size(mNest->GetCtrl()->GetWSepBox(), 1);
+  wName->size((ni->GetWName() - indent_skip - 4), 1);
+  wSepBox->size(ni->GetWSepBox(), 1);
   wFrontPack->size(1,1);
   
-  int ant_w  = mNest->GetCtrl()->GetWAnt();
+  int ant_w  = ni->GetWAnt();
   int cell_w = mNest->get_swm_manager()->cell_w();
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>(wAntPack->child(c));
