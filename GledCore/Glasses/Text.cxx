@@ -20,6 +20,7 @@ ClassImp(Text)
 void Text::_init()
 {
   // !!!! Set all links to 0 !!!!
+  mFont = 0;
 
   // Override settings from ZNode
   bUseScale = true;
@@ -27,7 +28,8 @@ void Text::_init()
   bAlpha     = false;   bBlend     = true;
   bPolyOffFG = true;    bPolyOffBG = true;
   mPOFac     = -2;      mPOUni     = -2;
-  bAbsSize   = true;    bFillBack  = false;
+  bAbsSize   = true;    bCenter    = true;
+  bFillBack  = false;
   bBorder    = true;
   mXBorder   = 0.1;     mYBorder   = 0.1;
   mFGCol.rgba(1,1,1,1); mBGCol.rgba(0,0,0,1);
