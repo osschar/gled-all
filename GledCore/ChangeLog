@@ -1,3 +1,19 @@
+2005-02-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	Added members bFancyClassView and bShowLinksInClassView.
+
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	Added class titles with collapsors to class-view; its general
+	layout is now guided by ShellInfo members.
+
+	* Eye/Pupil.cxx:
+	Pupil now raises-on-click.
+
 2005-02-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Shell.cxx:
