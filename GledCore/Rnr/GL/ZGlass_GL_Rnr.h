@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZGlass_GL_Rnr
-#define Gled_ZGlass_GL_Rnr
+#ifndef GledCore_ZGlass_GL_Rnr_H
+#define GledCore_ZGlass_GL_Rnr_H
 
 #include <Glasses/ZGlass.h>
 #include <RnrBase/A_Rnr.h>
@@ -20,6 +20,8 @@ protected:
   TimeStamp_t	mStampTring;
   GLuint	mDispList;
   bool		bRebuildDL;
+  bool          bUseNameStack;
+  bool		bSuppressNameLabel;
 
 public:
   ZGlass_GL_Rnr(ZGlass* d=0);
