@@ -364,29 +364,55 @@ void FGS::MenuBox::_init()
 {
   box((Fl_Boxtype)GVNS::menubar_box);
   align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+  menu_item(fMenuItem);
 }
 
 FGS::MenuBox::MenuBox(int x, int y, int w, int h, const char* t) :
-  Fl_Button(x,y,w,h,t), fMenuItem(0)
+  Fl_Button(x,y,w,h,t), fMenuItem(0), fMenuButton(0)
 { _init(); }
 
 FGS::MenuBox::MenuBox(Fl_Menu_Item* mi, int w, int h, const char* t) :
-  Fl_Button(0,0,w,h,t), fMenuItem(mi)
+  Fl_Button(0,0,w,h,t), fMenuItem(mi), fMenuButton(0)
 { _init(); }
+
+FGS::MenuBox::~MenuBox()
+{
+  delete fMenuButton;
+}
+
+/**************************************************************************/
+
+void FGS::MenuBox::menu_item(Fl_Menu_Item* mi)
+{
+  delete fMenuButton;
+  fMenuButton = 0;
+  fMenuItem = mi;
+  if(fMenuItem) {
+    fMenuButton = new Fl_Menu_Button(0,0,0,0);
+    fMenuButton->hide();
+    fMenuButton->parent(parent());
+    fMenuButton->menu(fMenuItem);
+    fMenuButton->box(FL_BORDER_BOX);
+  }
+}
 
 int FGS::MenuBox::handle(int ev)
 {
   static const string _eh("FGS::MenuBox::handle ");
 
+  if(fMenuButton == 0) return 0;
+
   if(ev == FL_PUSH && Fl::event_button() == 1) {
     FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
-    Fl_Menu_Button menu(x(), y(), w(), h() - Fl::box_dh(box()));
-    menu.parent(parent());
-    menu.menu(fMenuItem);
-    menu.textsize(shell->cell_fontsize());
-    menu.box(FL_BORDER_BOX);
-    menu.popup();
+    fMenuButton->resize(x(), y(), w(), h() - Fl::box_dh(box()));
+    fMenuButton->textsize(shell->cell_fontsize());
+    fMenuButton->popup();
     return 1;
   }
+
+  if(ev == FL_SHORTCUT) {
+    return fMenuButton->handle(ev);
+  }
+
   return 0;
 }
