@@ -29,23 +29,103 @@
 #include <GL/glx.h>
 #include <math.h>
 
+namespace OS = OptoStructs;
+
 /**************************************************************************/
 
-void PupilStamp(ZNode* n, Pupil* p) { p->valid(0); p->redraw(); }
+namespace {
 
-void Pupil::Label()
+  short ss(short s) {
+    short r; char* c = (char*)&s, *b = (char*)&r;;
+    b[0] = c[1]; b[1] = c[0];
+    return r;
+  }
+
+  struct tga_header
+  {
+    typedef unsigned char byte;
+
+    byte  identsize;          // size of ID field that follows 18 byte header (0 usually)
+    byte  colourmaptype;      // type of colour map 0=none, 1=has palette
+    byte  imagetype;          // type of image 0=none,1=indexed,2=rgb,3=grey,+8=rle packed
+
+    short colourmapstart;     // first colour map entry in palette
+    short colourmaplength;    // number of colours in palette
+    byte  colourmapbits;      // number of bits per palette entry 15,16,24,32
+
+    short xstart;             // image x origin
+    short ystart;             // image y origin
+    short width;              // image width in pixels
+    short height;             // image height in pixels
+    byte  bits;               // image bits per pixel 8,16,24,32
+    byte  descriptor;         // image descriptor bits (vh flip bits)
+    
+    // pixel data follows header
+    
+    tga_header(short w, short h) {
+      memset(this, 0, sizeof(tga_header));
+      imagetype = 2;
+      width = w; height = h; bits = 24;
+    }
+    void dump(FILE* fp) {
+      TBuffer b(TBuffer::kWrite);
+      b << identsize << colourmaptype << imagetype;
+      b << ss(colourmapstart) << ss(colourmaplength) << colourmapbits;
+      b << ss(xstart) << ss(ystart) << ss(width) << ss(height);
+      b << bits << descriptor;
+      fwrite(b.Buffer(), 1, b.Length(), fp);
+    }
+  }; 
+}
+
+/**************************************************************************/
+
+void Pupil::label_window()
 {
-  snprintf(mLabel, 127, "pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
-  label(mLabel);
+  mLabel = GForm("pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
+  label(mLabel.c_str());
   redraw();
 }
 
-Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
-	     int w, int h) :
-  Fl_Gl_Window(w,h), mInfo(info), mRoot(zgv) // mLeaf(leaf)
+/**************************************************************************/
+
+void Pupil::dump_image()
 {
+  printf("Pupil::draw dumping '%s'\n", mImageName.Data());
+
+  FILE* img = fopen(mImageName.Data(), "w");
+  if(img == 0) {
+    printf("Pupil::draw can't open screenshot file '%s'.\n", mImageName.Data());
+    return;
+  }
+
+  tga_header header(w(), h());
+  header.dump(img);
+  
+  unsigned char* xx = new unsigned char[w()*h()*3];
+  glReadBuffer(GL_BACK);
+  glPixelStorei(GL_PACK_ALIGNMENT,1); 
+  glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
+  fwrite(xx, 3, w()*h(), img);
+  delete [] xx;
+
+  fclose(img);
+}
+
+/**************************************************************************/
+
+Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, // FTW_Leaf* leaf,
+	     int w, int h) :
+  Fl_Gl_Window(w,h), OS::A_View(infoimg),
+  mInfo(0), mRoot(zgv) // mLeaf(leaf)
+{
+  if(fImg) {
+    fImg->CheckInFullView(this);
+    mInfo = dynamic_cast<PupilInfo*>(fImg->fGlass);
+  }
+
   end();
-  Label();
+  label_window();
   mode(FL_RGB | FL_DOUBLE | FL_DEPTH);
   resizable(this);
   size_range(0, 0, 4096, 4096);
@@ -53,18 +133,24 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
   mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
   mBase = 0;
   mCamera = new Camera;
-  // mCamera->mParent = base;
-  mCamera->MoveLF(1, -5);
+  if(mInfo->GetCameraBase() == 0) {
+    mCamera->RotateLF(3, 1, TMath::Pi()/2);
+    mCamera->MoveLF(1, -5);
+    // mCamera->mParent = base;
+  }
 
   // pInfo = new PupilInfo();
   // pInfo->SetStampCallback((znode_stamp_f)PupilStamp, this);
+
+  mTexFont = 0;
 
   bJustCamera = true;
   bFollowBase = false;
   bFullScreen = false;
 
-  // Hmmph ... the locking doesn't seem to be needed any more.
+  bDumpImage  = false;
 
+  // Hmmph ... the locking doesn't seem to be needed any more.
   /*
   Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
   XLockDisplay(rd);
@@ -72,8 +158,11 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
   XLockDisplay(fl_display);
   XSync(fl_display, False);
   */
+
+  _firstp = true;
+  size(mInfo->GetWidth()+1, mInfo->GetHeight()+1);
   show();
-  //redraw_overlay();
+
   /*
   XSync(fl_display, False);
   XUnlockDisplay(fl_display);
@@ -85,6 +174,37 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
 Pupil::~Pupil() {
   // notify eye ... Shell, that is ... !!!!
   delete mCamera;
+  if(fImg) fImg->CheckOutFullView(this);
+}
+
+/**************************************************************************/
+
+void Pupil::AbsorbRay(Ray& ray)
+{
+  using namespace RayNS;
+
+  if(ray.fLibID != PupilInfo::LibID() || ray.fClassID != PupilInfo::ClassID())
+    return;
+
+  switch(ray.fRQN) { 
+  case RQN_user_1: {
+    if(ray.fRayBits & Ray::RB_CustomBuffer) {
+      mImageName.Streamer(*ray.fCustomBuffer);
+      ray.ResetCustomBuffer();
+      if(mImageName != "") {
+	bDumpImage = true;
+      }
+    }
+    fImg->fEye->BreakManageLoop();
+    break;
+  }
+
+  case RQN_user_2: {
+    size(mInfo->GetWidth(), mInfo->GetHeight());
+  }
+
+    // need case for link change (or rebase camera in draw()).
+  }
 }
 
 /**************************************************************************/
@@ -310,6 +430,7 @@ void Pupil::Pick()
 
     GLuint* x = b;
     list<pick_data> pdl;
+    map<UInt_t,int> entry_map;
     for(int i=0; i<n; i++) {
       GLuint m = *x; x++;
 
@@ -318,24 +439,24 @@ void Pupil::Pick()
 	continue;
       }
  
-      float zmin = (float) *x/0x7fffffff; x++;
-      float zmax = (float) *x/0x7fffffff; x++;
-
-      // i know there is a single entry (see ZGlass Pre/PostDraw ... glPush/PopName)
-      // `for' is just in case some joker fiddles the ZNode
-      // This joker has just been me ...
+      // float zmin = (float) *x/0x7fffffff;
+      x++;
+      // float zmax = (float) *x/0x7fffffff;
+      x++;
 
       UInt_t id = x[m-1];
-      ZGlass* glass = mRoot->fImg->fEye->GetSaturn()->DemangleID(id);
+      ZGlass* glass = mRoot->fImg->fEye->DemangleID(id)->fGlass;
       if(!glass) continue;
-      const char* name = glass->GetName();
-
+      const char* name = entry_map[id] ?
+	GForm("%s/<selection hit %d>", glass->GetName(), entry_map[id] + 1) :
+	GForm("%s", glass->GetName());
+      ++entry_map[id];
       pdl.push_back( pick_data(this, glass) );
       menu.add(name, 0, (Fl_Callback*)fltk_pick_callback, &pdl.back(), FL_SUBMENU);
       make_menu(menu, pdl, string(name), this, glass);
       for(int j=m-2; j>=0; --j) {
 	UInt_t p_id = x[j];
-	ZGlass* parent = mRoot->fImg->fEye->GetSaturn()->DemangleID(p_id);
+	ZGlass* parent = mRoot->fImg->fEye->DemangleID(p_id)->fGlass;
 	if(!parent) continue;
 	make_menu(menu, pdl,
 		  string(GForm("%s/Parents/%s", name, parent->GetName())),
@@ -344,7 +465,9 @@ void Pupil::Pick()
 
       x += m;
     }
-    const Fl_Menu_Item* mi = menu.popup();
+    // const Fl_Menu_Item* mi =
+    menu.popup();
+
     // pdl going out of scope
   } // if(n>0)
   delete [] b;
@@ -356,28 +479,22 @@ void Pupil::Pick()
 
 void Pupil::draw()
 {
-  if(mDriver->fTexFont == 0) {
-    GLTextNS::TexFont *txf;
-    const char* font = "fontdefault.txf";
-    const char* file = GForm("%s/lib/%s", gSystem->Getenv("GLEDSYS"), font);
-    txf = GLTextNS::txfLoadFont(file);
-    if(txf != 0) {
-      GLTextNS::txfEstablishTexture(txf, 0, GL_TRUE);
-      mDriver->fTexFont = txf;
-    } else {
-      fprintf(stderr, "Problem loading font %s from file %s ; error: %s.\n",
-              font, file, GLTextNS::txfErrorString());
-    }
+  // The following kludge somewhat cures the problem with
+  // non present default font!
+  if(_firstp) {
+    size(mInfo->GetWidth(), mInfo->GetHeight());
+    _firstp = false;
+    // printf("%d,%d : %d,%d\n", x(), y(), w(), h());
+    return;
   }
 
   GTime start_time(GTime::I_Now);
 
-  //if (!valid()) {
+  // if (!valid()) {
   glMatrixMode(GL_PROJECTION);
   SetProjection1();
   SetProjection2();
-  //valid(1);
-  //}
+  // }
 
   { // clear
     const ZColor c = mInfo->GetClearColor();
@@ -401,9 +518,8 @@ void Pupil::draw()
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
   glEnable(GL_LIGHT0);
 
-
-  static const GLfloat mat_diffuse[]   = { 0.8, 0.8, 0.8, 1.0 };
-  static const GLfloat mat_specular[]  = { 1.0, 1.0, 1.0, 1.0 };
+  static const GLfloat mat_diffuse[]   = { 1.0, 1.0, 1.0, 1.0 };
+  static const GLfloat mat_specular[]  = { 0.2, 0.2, 0.2, 1.0 };
   static const GLfloat mat_shininess[] = { 60.0 };
 
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
@@ -422,11 +538,45 @@ void Pupil::draw()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
+  // This is stoopid. Need a Stone to encapsulate this. Or a Glass.
+  // See ZRlRnrNameCtrl. Should have a stack of those in RnrDriver, or sth.
+  mDriver->SetTextSize(mInfo->GetTextSize());
+  mDriver->SetRnrNames(mInfo->GetRnrNames());
+  mDriver->SetRnrTiles(mInfo->GetRnrTiles());
+  mDriver->SetRnrFrames(mInfo->GetRnrTiles()); // !!!
+  mDriver->SetNameOffset(mInfo->GetNameOffset());
+  mDriver->RefTextCol() = mInfo->GetTextCol();
+  mDriver->RefTileCol() = mInfo->GetTileCol();
+  mDriver->SetTilePos("tl");
+
+  if(mTexFont == 0) {
+    const char* font = "fontdefault.txf";
+    const char* file = GForm("%s/lib/%s", gSystem->Getenv("GLEDSYS"), font);
+    mTexFont = GLTextNS::txfLoadFont(file);
+    if(mTexFont != 0) {
+      GLTextNS::txfEstablishTexture(mTexFont, 0, GL_TRUE);
+    } else {
+      fprintf(stderr, "Problem loading font %s from file %s ; error: %s.\n",
+              font, file, GLTextNS::txfErrorString());
+    }
+  }
+  if(mTexFont) {
+    mDriver->fTexFont = mTexFont;
+  }
+
+  mDriver->SetWidth(w());
+  mDriver->SetHeight(h());
+
   Render();
+
+  if(mDriver->SizePM() > 0) {
+    printf("Pupil::draw position stack not empty (%d).\n", mDriver->SizePM());
+    mDriver->ClearPM();
+  }
 
   GLenum gl_err = glGetError();
   if(gl_err) {
-    printf("GL error: %s\n", gluErrorString(gl_err));
+    printf("Pupil::draw GL error: %s.\n", gluErrorString(gl_err));
   }
 
   GTime stop_time(GTime::I_Now);
@@ -440,7 +590,6 @@ void Pupil::draw()
 
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-  //SetProjection1();
   glLoadIdentity();
 
   glMatrixMode(GL_MODELVIEW);
@@ -448,7 +597,7 @@ void Pupil::draw()
   glScalef(1, (float)w()/h(), 1);
 
   GLfloat ch_size = mInfo->GetCHSize();
-  glLineWidth(2);
+  glLineWidth(1);
   if(bJustCamera)	glColor3f(1,0,0);
   else
     if(bFollowBase)	glColor3f(0.8,0.8,0.8);
@@ -473,39 +622,63 @@ void Pupil::draw()
   */
 
   if(mInfo->GetShowRPS() == true && mDriver->fTexFont) {
-    GLTextNS::TexFont *txf = mDriver->fTexFont;
+    // Render rps using GLTextNS.
+    /* 
+       GLTextNS::TexFont *txf = mDriver->fTexFont;
 
-    int step = txf->max_ascent + txf->max_descent;
+       int step = txf->max_ascent + txf->max_descent;
 
-    glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
+       glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 
-    glLoadIdentity();
-    glTranslatef(-1, -1, 0.0);
-    glScalef(2.0/w(), 2.0/h(), 1);
-    glTranslatef(0, h() - txf->max_ascent, 0);
-    glColor3f(0,1,1);
+       glLoadIdentity();
+       glTranslatef(-1, -1, 0.0);
+       glScalef(2.0/w(), 2.0/h(), 1);
+       glTranslatef(0, h() - txf->max_ascent, 0);
+       glColor3f(0,1,1);
 
-    GLTextNS::txfBindFontTexture(txf);
+       GLTextNS::txfBindFontTexture(txf);
   
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPolygonMode(GL_FRONT, GL_FILL);
+       glEnable(GL_TEXTURE_2D);
+       glEnable(GL_BLEND);
+       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+       glPolygonMode(GL_FRONT, GL_FILL);
 
-    // int width, ascent, descent;
-    // GLTextNS::txfGetStringMetrics(txf, text, len, &width, &ascent, &descent);
-    const char* text = GForm("rps %.1f", 1/rnr_time.ToDouble() <? 999.9);
-    GLTextNS::txfRenderString(txf, text, strlen(text));
+       // int width, ascent, descent;
+       // GLTextNS::txfGetStringMetrics(txf, text, len, &width, &ascent, &descent);
+       const char* text = GForm("rps %.1f", 1/rnr_time.ToDouble() <? 999.9);
+       GLTextNS::txfRenderString(txf, text, strlen(text));
 
-    glPopAttrib();
+       glPopAttrib();
+    */
+
+
+    // Render rps using fltk's gl_draw.
+    {
+      int fsize = mDriver->GetTextSize();
+      glLoadIdentity();
+      gl_font(FL_HELVETICA_BOLD, fsize);
+      int desc = gl_descent();
+      // int cellh = fsize + desc;
+      glTranslatef(-1, -1, 0.0);
+      glScalef(2.0/w(), 2.0/h(), 1);
+      const char* text = GForm("%.1frps", 1/rnr_time.ToDouble() <? 999.9);
+      // int tw = TMath::Ceil(gl_width(text));
+      int x = 0, y = h() - fsize;
+      // glColor3f(1, 1, 0.7);
+      // gl_rectf(x, y-desc, tw, cellh);
+      glColor4fv(mDriver->RefTextCol()());
+      gl_draw(text, x, y);
+    }
   }
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
 
-  //glFinish();
-  //glFlush();
-  //glXWaitGL();
+  if(bDumpImage) {
+    bDumpImage = false;
+    dump_image();
+  }
+
 }
 
 int Pupil::handle(int ev)
@@ -528,7 +701,7 @@ int Pupil::handle(int ev)
     return 1;
   }
   case FL_DRAG: {
-    ZNode* target = mCamera;
+    // ZNode* target = mCamera;
     /*
       if(bJustCamera) {
       target = mCamera;
@@ -554,17 +727,19 @@ int Pupil::handle(int ev)
     mMouseX = x; mMouseY = y;
     // Fwd/Bck
     if(Fl::event_state(FL_BUTTON1)) { 
-      char x[64];
       if(!Fl::event_state(FL_CTRL)) {
-	mCamera->MoveLF(1, dy*abs(dy)/mInfo->GetMSMoveFac());
+	mCamera->MoveLF(1, dy*TMath::Power(abs(dy), mInfo->GetAccelExp()) /
+			   mInfo->GetMSMoveFac());
 	//sprintf(x, "1,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
 	//mEye->Send(move_cmd, x, target, beta);
       } else {
-	mCamera->MoveLF(2, dy*abs(dy)/mInfo->GetMSMoveFac());
+	mCamera->MoveLF(2, dy*TMath::Power(abs(dy), mInfo->GetAccelExp()) /
+			   mInfo->GetMSMoveFac());
 	//sprintf(x, "2,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
 	//mEye->Send(move_cmd, x, target, beta);      
       }
-      mCamera->MoveLF(3, -dx*abs(dx)/mInfo->GetMSMoveFac());
+      mCamera->MoveLF(3, -dx*TMath::Power(abs(dx), mInfo->GetAccelExp()) /
+		         mInfo->GetMSMoveFac());
       //sprintf(x, "3,%g", -dx*abs(dx)/mInfo->GetMSMoveFac());
       //mEye->Send(move_cmd, x, target, beta);
       chg = 1;
@@ -583,7 +758,6 @@ int Pupil::handle(int ev)
 
     // cout << mMouseX << " " << mMouseY << " " << dx << " " << dy << endl;
     if(Fl::event_state(FL_BUTTON2) && dy!=0) {
-      char foo[16];
       if(!Fl::event_state(FL_CTRL)) {
 	mCamera->RotateLF(1,2,dy/mInfo->GetMSRotFac());
       } else {
@@ -592,7 +766,6 @@ int Pupil::handle(int ev)
       chg=1;
     }
     if(Fl::event_state(FL_BUTTON2) && dx!=0) {
-      char foo[16];
       if(!Fl::event_state(FL_CTRL)) {
 	mCamera->RotateLF(3,1,dx/mInfo->GetMSRotFac());
 	//sprintf(foo,"3,1,%8g", dx/mInfo->GetMSRotFac());
@@ -614,6 +787,10 @@ int Pupil::handle(int ev)
 
     case 'f':
       FullScreen(); redraw();
+      return 1;
+
+    case FL_F+1:
+      mRoot->fImg->fEye->GetShell()->SpawnMTW_View(mRoot->fImg);
       return 1;
 
       /*
@@ -664,6 +841,7 @@ int Pupil::handle(int ev)
   return 0;
 }
 
+/*
 void Pupil::draw_overlay()
 {
   // Safr ... this works not; redraw_overlay commented out in ctor.
@@ -687,3 +865,4 @@ void Pupil::draw_overlay()
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
 }
+*/
