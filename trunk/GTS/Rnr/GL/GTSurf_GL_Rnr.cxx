@@ -42,7 +42,7 @@ void GTSurf_GL_Rnr::Render(RnrDriver* rd)
     glScalef(mGTSurf->mScale, mGTSurf->mScale, mGTSurf->mScale);
     glEnable(GL_NORMALIZE);
     glBegin(GL_TRIANGLES);
-    GTS::gts_surface_foreach_face(mGTSurf->pSurf->surface, (GTS::GtsFunc)face_drawer, 0);
+    GTS::gts_surface_foreach_face(mGTSurf->pSurf, (GTS::GtsFunc)face_drawer, 0);
     glEnd();
     glPopMatrix();
   }
