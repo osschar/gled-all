@@ -1,3 +1,12 @@
+2005-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_Layout.cxx:
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_View.cxx:
+	* Eye/Pupil.cxx:
+	* GledView/GLTextNS.cxx:
+	Replaced all accurances of '>?' and '<?' with TMath::Max/Min.
+
 2005-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:
