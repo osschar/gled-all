@@ -12,7 +12,6 @@
 #include <Stones/ZTrans.h>
 
 class ZNode : public ZList {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZNode);
 
 private:
@@ -36,12 +35,17 @@ protected:
   Float_t	mSy;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
   Float_t	mSz;		// X{GS}  7 Value(-range=>[0,1000, 1,1000])
 
+  ZNode*	mParent;	// X{gS} L{l} Structural parent
   Bool_t	bKeepParent;	// X{GS} 7 Bool()
 
-  ZNode*	mParent;	// X{gS} L{l} Structural parent
+  // RnrBits of RnrMod calculated on the fly.
+  ZGlass*	mRnrMod;	// X{gS} L{}
+  Bool_t	bRnrSelf;	// X{GSx} 7 Bool(-join=>1)
+  Bool_t	bRnrElements;	// X{GSx} 7 Bool()
+  Bool_t	bModSelf;	// X{GSx} 7 Bool(-join=>1)
+  Bool_t	bModElements;	// X{GSx} 7 Bool()
 
 public:
-  // Constructors
   ZNode(const Text_t* n="ZNode", const Text_t* t=0) : ZList(n, t) {_init();}
 
   // ZGlass virtuals
@@ -81,6 +85,13 @@ public:
 
   void FillParentList(list<ZNode*>& plist);
   static ZNode* FindCommonParent(ZNode* a, ZNode* b);
+  template <class GLASS>
+  GLASS GrepParentByGlass() const {
+    const ZNode* p = mParent;
+    if(p == 0) return 0;
+    GLASS g = dynamic_cast<GLASS>(p); if(g) return g;
+    return p->GrepParentByGlass<GLASS>();
+  }
 
   // Stamps
   void MarkStampReqTrans()

@@ -27,6 +27,8 @@ void ZNode::_init()
   mOM = 0;
   mSx = mSy = mSz = 1;
   mParent = 0; bKeepParent = true;
+  mRnrMod = 0;
+  bRnrSelf = bRnrElements = bModSelf = bModElements = true;
 
   // SetElementFID(ZNode::FID()); // Forces ZNode children only
 }
