@@ -28,7 +28,7 @@ GLED_UNINSTALL	= ${libexecdir}/gled_uninstall.pl
 FLUID   	= fluid
 
 # Flags
-LOCALINCL = -I${GLEDSYS}/include -I. $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
+LOCALINCL = -I${GLEDSYS}/include $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
 INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I${X11INCDIR}
 CPPFLAGS += -D_REENTRANT -D_GNU_SOURCE ${USER_CPP_FLAGS} ${INCL}
 CXXFLAGS  = -Wall -fPIC -pipe ${USER_CXX_FLAGS}
