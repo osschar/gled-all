@@ -79,7 +79,7 @@ Bool_t ZGeoOvlMgr::locate_first_from_top(TGeoNode* cur_node, TGeoVolume* vol,
 
   TGeoNode* n;
   TIter next_node(cur_node->GetVolume()->GetNodes());
-  while (n = (TGeoNode*)next_node()) {
+  while ((n = (TGeoNode*)next_node())) {
     bool found = locate_first_from_top(n, vol, zn, result);
     if( found ) {
       result.push_back(cur_node);
@@ -158,7 +158,7 @@ void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node)
 
   // go through the list of overlaps  locate each node in 
   // absolute coordinates
-  while(ovl = (TGeoOverlap*)next_node()) {
+  while((ovl = (TGeoOverlap*)next_node())) {
     TGeoVolume* motherv = ovl->GetVolume();
     const char* mname = motherv->GetName(); 
     // printf ("Importing %s %s Extr(%d).\n", mname, ovl->GetName(), ovl->IsExtrusion());
@@ -176,7 +176,6 @@ void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node)
 
       mt = setup_absolute_matrix(top_node,motherv, ovlm);
       ovlm->setup_color(mNodeAlpha);
-      ovlm->SetRnrSelf(false);
       ovlm->SetTitle(mt.c_str()); 
       ovlm->AssertUserData();
       nmap[mname] = ovlm;
@@ -201,11 +200,11 @@ void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node)
       mn = GForm("overlap%d",ovlm->Size());
       ovln = create_standalone_node(mn, "holder");
       // create the overlaping nodes
-      insert_node(ovl->GetNode(0), ovln, false,  GForm("%s",ovl->GetNode(0)->GetName()));
+      insert_node(ovl->GetNode(0), ovln, true,  GForm("%s",ovl->GetNode(0)->GetName()));
       // string tname = mt + '/' + ovl->GetNode(0)->GetName();
       // ovln->First()->SetTitle(tname.c_str());
       
-      insert_node(ovl->GetNode(1), ovln, false,  GForm("%s",ovl->GetNode(1)->GetName() ));
+      insert_node(ovl->GetNode(1), ovln, true,  GForm("%s",ovl->GetNode(1)->GetName() ));
       // tname = mt + '/' + ovl->GetNode(1)->GetName();
       // ovln->Last()->SetTitle(tname.c_str());
     }
@@ -214,7 +213,6 @@ void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node)
     ovln->SetPM_N(pm->GetLastPoint());
     ovln->SetPM_p(pm->GetP());
     ovln->mPM_Col = mPM_Col;
-    ovln->mRnrMark = false;
     ovln->mOverlap = ovl->GetOverlap();
     ovlm->SetColor(mMotherCol.r(), mMotherCol.g(),mMotherCol.b(),mMotherCol.a());
     setup_zcolor(ovln);
@@ -261,7 +259,6 @@ ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t, TG
   }
 
   mQueen->CheckIn(nn);
-  nn->bRnrSelf = false;
   return nn;
 }
 
@@ -292,7 +289,7 @@ void ZGeoOvlMgr::Restore()
   ZGeoNode* mn;
 
   while(i != end) {
-    if(mn = dynamic_cast<ZGeoNode*>(*i)) {
+    if((mn = dynamic_cast<ZGeoNode*>(*i))) {
       string path = mn->GetTitle();
       path = path.substr(1, path.length() -1);
 
