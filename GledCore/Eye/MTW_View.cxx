@@ -155,6 +155,8 @@ namespace {
   class MTW_View_Window : public Fl_Window, public Fl_SWM_Client,
 			  public OS::A_GlassView
   {
+  protected:
+    string m_title_label;
   public:
     MTW_View_Window(OS::ZGlassImg* img, int x, int y, const char* t=0) :
       Fl_Window(x,y,t), A_GlassView(img) {}
@@ -163,8 +165,9 @@ namespace {
 
     void auto_label() { 
       if(fImg) {
-	label(GForm("%s[%s]", fImg->fGlass->GetName(),
-		    fImg->fClassInfo->fName.c_str()));
+	m_title_label = GForm("%s[%s]", fImg->fGlass->GetName(),
+			      fImg->fClassInfo->fName.c_str());
+	label(m_title_label.c_str());
       }
     }
 
