@@ -94,6 +94,7 @@ print "LibID $LibID, ClassID $ClassID, VirtualBase $VirtualBase\n" if $DEBUG;
 
 # Recognized fields for Xporter
 # g/s get/set, r ref, p ptr, t/T trans/tring, e provide just remote exec Set
+# These not used any more ... a god, we really need a proper parser soon.
 $Xport_FIELDS = "[gGsStTrRpPeE]";
 
 # l ~ link to list
@@ -125,6 +126,23 @@ sub SlurpComments {
     $ret .= $1;
   }
   return $ret;
+}
+
+sub hashofy_string {
+  # chomps string into hashref, e.g. (output by Dumper):
+  # "pepe, woofko, lojz=>7" -> { 'pepe' => 1, 'woofko' => 1, 'lojz' => '7' };
+
+  my $l = shift;
+  my @l = split(/\s*,\s*/, $l);
+  my $r = {};
+  for $e (@l) {
+    if( $e =~ m/(.+)\s*=>\s*(.+)/ ) {
+      $r->{$1} = $2;
+    } else {
+      $r->{$e} = 1;
+    }
+  }
+  return $r;
 }
 
 ########################################################################
@@ -161,9 +179,9 @@ sub MunchArgs {
     $sa->[2] = $sa->[1]; $sa->[2] =~ s/=.*//;
     # Push in TString to char* translation
     # ???? Is this obsoleted by GetSetMap ????
-    if($sa->[3] eq 'TString') {
-      $sa->[3] = 'char*'; $sa->[2] .= '.Data()';
-    }
+    #if($sa->[3] eq 'TString') {
+    #  $sa->[3] = 'char*'; $sa->[2] .= '.Data()';
+    #}
     $sa->[5] = $sa->[2];
     push @$r, $sa;
   }
@@ -338,7 +356,7 @@ while($c !~ m!\G$!osgc) {
   # Data members
   ##############
   if($c =~ m!\G\s*(?:mutable\s+)?
-             ((?:const\s+)?[\w:]+\*?)\s+  # type
+             ((?:const\s+)?[\w:]+\*?\&?)\s+  # type
              (\*?\w+)\s*;                 # varname
             !mgcx)
   {
@@ -353,20 +371,37 @@ while($c !~ m!\G$!osgc) {
 
     # Go for Key{Value} construts ... assert Xport exists before parsing on
     print "Trying for $varname: $comment\n" if $DEBUG;;
-    if($comment =~ m!X|(?:Xport)\{$Xport_FIELDS+\}!o) {
-      my $argstr = &SetArgs($type, lc($methodbase));
-      my $member = { Type=>$type, Methodbase=>$methodbase, Varname=>$varname,
-		     ArgStr=>$argstr, Args=>&MunchArgs($argstr) };
+    if($comment =~ m!X|(?:Xport)\{.*\}!o) {
+      my $member = {};
+      
+      # Parse out instr{args} constructs
       print "  partitions: " if $DEBUG;;
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
 	my $key = $1;
 	my $val = $2;
 	$key = $X_TO_KEY{$key} if exists $X_TO_KEY{$key};
 	$member->{$key} = $val;
-	# It is pushed after check for range is done
-	print "$key:$val " if $DEBUG;
+
+	print "  $key:$val => " if $DEBUG;
+	while($val =~ m!(\w)\[([^\]]*)\]!g) {
+	  my $arg = lc($1);
+	  my $hash = hashofy_string($2);
+	  $member->{$key}{$arg} = $hash;
+	  print "$1 -> $2 |" if $DEBUG;
+	}
+	print "\n"if $DEBUG;
+
       }
-      print "\n" if $DEBUG;
+    
+      my $settype = $type;
+      $settype .= "&" if $member->{Xport}{s}{ref};
+      my $argstr = &SetArgs($settype, lc($methodbase));
+
+      $member->{Type} = $type;
+      $member->{Methodbase} = $methodbase;
+      $member->{Varname} = $varname;
+      $member->{ArgStr} = $argstr;
+      $member->{Args} = &MunchArgs($argstr);
 
       # Go for widget/view
       if($comment =~ m!7\s+(\w+\([^)]*\))!o) {
