@@ -29,6 +29,12 @@ void PupilInfo::_init()
   mCtorLibset = "GledCore";
   mCtorName   = "Pupil";
 
+  // Basic config.
+  mMaxRnrDepth = 100;
+  mWidth = 640; mHeight = 480;
+  mClearColor.rgba(0,0,0);
+
+  // CameraInfo.
   mCameraBase    = 0;
 
   mLookAt        = 0;
@@ -39,21 +45,17 @@ void PupilInfo::_init()
   bUpRefLockDir  = true;
   mUpRefMinAngle = 10;
 
-  mMaxDepth = 100;
-
-  mWidth = 640; mHeight = 480;
-
-  mClearColor.rgba(0,0,0);
-
   mProjMode = P_Perspective;
   mZFov     = 90;   mZSize   = 20;
   mYFac     = 1;    mXDist   = 10;
   mNearClip = 0.01; mFarClip = 100;
 
+  // Basic rendering options.
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
   bLiMo2Side = false;
   bBlend     = false;
 
+  // User interaction and feedback.
   mMSRotFac = 1; mMSMoveFac = 2; mMoveOM = -2; mAccelExp = 0.5;
 
   mCHSize = 0.03;
@@ -110,20 +112,59 @@ void PupilInfo::SetUpReference(ZNode* upreference)
 
 /**************************************************************************/
 
+void PupilInfo::ImportCameraInfo(CameraInfo* cam_info)
+{
+  // Imports camera info data.
+
+  // cat cbase.defs | perl -e 'undef $/; $l=<STDIN>; @x=split(/\s*=[^;]+\s*;\s*/, $l); for $d (@x) { $m=$d; $m=~s/^m|b//; print "  $d = cam_info->Get$m();\n";}'
+  // + hand fixes for links/enums.
+
+  static const string _eh("PupilInfo::ImportCameraInfo ");
+
+  if(cam_info == 0) throw(_eh + "called with cam_info=0.");
+
+  if(cam_info->GetFixCameraBase()) {
+    SetCameraBase(cam_info->GetCameraBase());
+  }
+  if(cam_info->GetFixLookAt()) {
+    SetLookAt(cam_info->GetLookAt());
+    mLookAtMinDist = cam_info->GetLookAtMinDist();
+  }
+  if(cam_info->GetFixUpReference()) {
+    SetUpReference(cam_info->GetUpReference());
+    mUpRefAxis = cam_info->GetUpRefAxis();
+    bUpRefLockDir = cam_info->GetUpRefLockDir();
+    mUpRefMinAngle = cam_info->GetUpRefMinAngle();
+  }
+  mProjMode = (Projection_e) cam_info->GetProjMode();
+  mZFov = cam_info->GetZFov();
+  mZSize = cam_info->GetZSize();
+  mYFac = cam_info->GetYFac();
+  mXDist = cam_info->GetXDist();
+  mNearClip = cam_info->GetNearClip();
+  mFarClip = cam_info->GetFarClip();
+
+  Stamp(FID());
+
+  if(cam_info->GetFixCameraBase())
+    EmitCameraHomeRay();
+}
+
+/**************************************************************************/
+
 void PupilInfo::Zoom(Float_t delta)
 { 
   switch(mProjMode) {
   case P_Perspective: {
-    mZFov += 5*delta;
-    mZSize = 2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2);
+    SetZFov (mZFov + 5*delta);
+    SetZSize(2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2));
     break;
   }
   case P_Orthographic: {
-    mZSize += 0.5*delta;
-    mZFov   = 2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist);
+    SetZSize(mZSize += 0.5*delta);
+    SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
   }
   }
-  Stamp(FID());
 }
 
 /**************************************************************************/
