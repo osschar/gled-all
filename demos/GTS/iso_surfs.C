@@ -74,13 +74,16 @@ void iso_surfs()
   maker3->SetValue(-0.05);
   maker3->MakeSurface();
 
-  { // Station rotator
+  CREATE_ADD_GLASS(retring, GTSRetriangulator, starw, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
+  retring->SetTarget(surf2);
+
+  { // Torus rotator
     Eventor* e = new Eventor("Dynamo");
     e->SetBeatsToDo(-1); e->SetInterBeatMS(40); e->SetStampInterval(10);
     scenes->CheckIn(e); starw->Add(e);
     Mover* mv = new Mover("S1 Rotator");
     mv->SetNode(surf2); mv->SetRi(2); mv->SetRj(3); mv->SetRa(0.01);
     scenes->CheckIn(mv); e->Add(mv);
+    e->Start();
   }
-  e->Start();
 }
