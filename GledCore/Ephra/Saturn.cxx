@@ -450,21 +450,21 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     int rl = sock->Recv(r);
     if(rl <= 0) {
       delete sock;
-      throw(_eh + GForm("protocol exchange failed; len=%d",rl));
+      throw(_eh + GForm("protocol exchange failed; len=%d.",rl));
     }
 
     if(r->What() == GledNS::MT_GledProtocol) {
       Int_t sproto; *r >> sproto;
-      ISmess(GForm("Saturn::Connect server protocol=%d", sproto));
+      ISmess(_eh + GForm("server protocol=%d.", sproto));
     } else if(r->What() == GledNS::MT_ProtocolMismatch) {
       Int_t sproto; *r >> sproto;
       delete sock; delete r;
-      throw(_eh + GForm("protocol mismatch: server=%d, client=%d",
+      throw(_eh + GForm("protocol mismatch: server=%d, client=%d.",
 			sproto, s_Gled_Protocol_Version));
     } else {
       Int_t mt = r->What();
       delete sock; delete r;
-      throw(_eh + GForm("unknown message type %d", mt));
+      throw(_eh + GForm("unknown message type %d.", mt));
     }
   }
 
@@ -475,21 +475,21 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     int rl = sock->Recv(r);
     if(rl <= 0) {
       delete sock;
-      throw(_eh + "handshake failed (3)");
+      throw(_eh + "handshake failed (3).");
     }
 
     if(r->What() == GledNS::MT_QueryFFID) {
       ID_t ffid; *r >> ffid;
-      ISmess(GForm("Saturn::Connect got first free id=%d", ffid));
+      ISmess(_eh + GForm("got first free id=%d.", ffid));
 
       si->mKingID = ffid;
-      if(si->mKingID == 0) throw(_eh + "failed FFID query");
+      if(si->mKingID == 0) throw(_eh + "failed FFID query.");
       fix_fire_king_id(si);
 
     } else {
       Int_t mt = r->What();
       delete sock; delete r;
-      throw(_eh + GForm("unknown message type %d", mt));
+      throw(_eh + GForm("unknown message type %d.", mt));
     }
   }
 
@@ -847,11 +847,9 @@ void Saturn::AcceptWrapper(TSocket* newsocket)
   static string _eh("Saturn::AcceptWrapper ");
 
   if(!newsocket) {
-    ISerr(_eh + "Accept socket failed");
+    ISerr(_eh + "Accept socket failed.");
     return;
   }
-  ISdebug(0, GForm("%sConnection from: %s", _eh.c_str(),
-		   newsocket->GetInetAddress().GetHostName()));
 
   try {
     Accept(newsocket);
@@ -872,6 +870,9 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
   // Handles one connection at a time.
 
   static string _eh("Saturn::Accept ");
+
+  ISdebug(0, _eh + GForm("Connection from '%s'.",
+		   newsocket->GetInetAddress().GetHostName()));
 
   // Initial handshake
   char msgbuf[256];
@@ -901,7 +902,7 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
     if(ret <= 0) {
       // do clean-up
       // make descriptive message
-      string err_msg = (ret == 0) ? "connection timeout" : "select error";
+      string err_msg = (ret == 0) ? "connection timeout." : "select error.";
 
       delete newsocket;
       throw(_eh + err_msg);
@@ -912,10 +913,10 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
     if(len <= 0) {
       delete newsocket;
       if(len == 0) {
-	ISdebug(0, "Saturn::Accept other side closed connection");
+	ISdebug(0, _eh +"other side closed connection.");
 	return;
       } else {
-	throw(_eh + GForm("error receiving message (len=%d)", len));
+	throw(_eh + GForm("error receiving message (len=%d).", len));
       }
     }
 
@@ -931,13 +932,13 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
       newsocket->Send(reply);
       if(!compatible_p) {
 	loop_error = true;
-	loop_error_msg = "incompatible protocols";
+	loop_error_msg = "incompatible protocols.";
       }
       break;
     }
 
     case GledNS::MT_QueryFFID: {
-      ISdebug(0, "Saturn::Accept FirstFreeIDQuery: reporting");
+      ISdebug(0, _eh + "FirstFreeIDQuery: reporting.");
 
       ID_t wkid = mFireKing->GetSaturnID();
       TMessage m(GledNS::MT_QueryFFID);
@@ -947,15 +948,18 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
     }
 
     case GledNS::MT_MEE_Connect: {
-      ISdebug(0, "Saturn::Accept MEE_Connect ...");
+      ISdebug(0, _eh + "MEE_Connect ...");
 
       ZMirEmittingEntity* mee;
       mee = dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamLens(*msg));
       if(mee == 0) {
 	loop_error = true;
-	loop_error_msg = "MEE_Connect not followed by a MirEmittingEntity";
+	loop_error_msg = "MEE_Connect not followed by a MirEmittingEntity.";
 	break;
       }
+      ISmess(_eh + GForm("MEE_Connect (type='%s', name='%s', host='%s').",
+			 mee->IsA()->GetName(), mee->GetName(),
+			 newsocket->GetInetAddress().GetHostName()));
       try {
 	mSunQueen->handle_mee_connection(mee, newsocket);
       }
@@ -973,7 +977,7 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
     }
 
     case GledNS::MT_MEE_Authenticate: {
-      ISdebug(0, "Saturn::Accept MEE_Authenticate ...");
+      ISdebug(0, _eh + "MEE_Authenticate ...");
 
       UInt_t conn_id;
       *msg >> conn_id;
@@ -992,7 +996,7 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
 
       // Unknown
     default: {
-      ISdebug(0, "Saturn::Accept got unknown message ... closing connection");
+      ISdebug(0, _eh + "got unknown message ... closing connection.");
       loop_error = true;
       loop_error_msg = _eh + GForm("unknown message type %d", msg->What());
       break;
@@ -1009,6 +1013,8 @@ void Saturn::Accept(TSocket* newsocket) throw(string)
 
 void Saturn::finalize_moon_connection(SaturnInfo* si)
 {
+  static const string _eh("Saturn::finalize_moon_connection ");
+
   {
     TMessage m(GledNS::MT_MEE_ConnectionGranted);
     lpZGlass_t kings; mGod->Copy(kings); kings.pop_back();
@@ -1044,10 +1050,16 @@ void Saturn::finalize_moon_connection(SaturnInfo* si)
   mSunQueen->add_reflector(si);
   si->hQueens.insert(mSunQueen);
   mMoonLock.Unlock();
+
+  ISmess(_eh + GForm("(type='%s', name='%s', host='%s').",
+		     si->IsA()->GetName(), si->GetName(),
+		     si->hSocket->GetInetAddress().GetHostName()));
 }
 
 void Saturn::finalize_eye_connection(EyeInfo* ei)
 {
+  static const string _eh("Saturn::finalize_eye_connection ");
+
   {
     TMessage m(GledNS::MT_MEE_ConnectionGranted);
     m << (UInt_t)this << ei->GetSaturnID();
@@ -1060,10 +1072,15 @@ void Saturn::finalize_eye_connection(EyeInfo* ei)
   mServerThread->Kill(GThread::SigUSR2);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
-	(ei->hSocket, SocketInfo(SocketInfo::OS_Eye, ei)));
+			(ei->hSocket, SocketInfo(SocketInfo::OS_Eye, ei)));
   mEyes.push_back(ei);
   bAcceptsRays = true;
   mEyeLock.Unlock();
+
+  ISmess(_eh + GForm("(type='%s', name='%s', host='%s').",
+		     ei->IsA()->GetName(), ei->GetName(),
+		     ei->hSocket->GetInetAddress().GetHostName()));
+
 }
 
 
