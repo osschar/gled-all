@@ -12,7 +12,9 @@ use lib "$ENV{GLEDSYS}/perllib";
 use Gled_ConfCat_Parser;
 
 Gled_ConfCat_Parser::import_build_config();
-Gled_ConfCat_Parser::parse_catalog("../");
+Gled_ConfCat_Parser::parse_catalog();
+
+my $dict = $config->{DICT_DIR};
 
 while($_=shift) {
   ($cname) = m!/(\w+).h$!;
@@ -22,7 +24,7 @@ while($_=shift) {
   $token = ($cname =~ m/NS$/) ? 'namespace' : 'class';
   #$token = 'class';
 
-  open( FOO, ">${cname}_LinkDef.h");
+  open( FOO, ">$dict/${cname}_LinkDef.h");
   print FOO <<"END";
 #ifdef __CINT__
 #pragma link off all globals;
@@ -36,9 +38,9 @@ END
   my $cintopts = $CATALOG->{Classes}{$cname}{CINT_Opts};
   # when do i need the -p option ... what includes ...
   # on general ... il ne faudrait pas savoir de gl dans les .h datoquoques
-  $exe = "rootcint -f $cname.cc -c $cintopts " .
-         "-I.. $ENV{CPPFLAGS} -I$ENV{ROOTSYS}/include " .
-	 "../$_ ${cname}_LinkDef.h";
+  $exe = "rootcint -f $dict/$cname.cc -c $cintopts " .
+         "-I. $ENV{CPPFLAGS} -I$ENV{ROOTSYS}/include " .
+	 "$_ $dict/${cname}_LinkDef.h";
   print $exe."\n";
   `$exe`;
   exit($_) if($?)
