@@ -33,25 +33,8 @@ VoidFuncPtr_t initfuncs[] = { InitGui, 0 };
 
 TRint*		gint;
 GledGUI*	gled;
-bool		gint_off = false;
 
-/**************************************************************************/
-
-void* RunRint(void* x) {
-  gint->TApplication::Run(true);
-
-  gint_off = true;
-  cout << "Gint terminated ...\n";
-  if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
-  GThread::Exit();
-  return 0;
-}
-
-void* RunGled(void* x) {
-  gled->Run();
-  GThread::Exit();
-  return 0;
-}
+TROOT root("Root", "ROOT of GLED", initfuncs);
 
 /**************************************************************************/
 
@@ -62,9 +45,7 @@ int main(int argc, char **argv)
   if(XInitThreads() == 0) {
     cerr << "XThreads not enabled ... might get into a mess ...\n";
   }
-  //fl_open_display();
 
-  TROOT root("Root", "ROOT of GLED", initfuncs);
   GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
   GledNS::InitFD(0, GledNS::GledRoot);
   gROOT->Time(0);
@@ -96,7 +77,7 @@ int main(int argc, char **argv)
   args.clear();
 
   // Run GUI
-  GThread gled_thread(RunGled, 0, false);
+  GThread gled_thread((GThread_foo)Gled::Gled_runner_tl, gled, false);
   if( gled_thread.Spawn() ) {
     perror("gled.cxx can't create Gled thread");
     exit(1);
@@ -129,7 +110,7 @@ int main(int argc, char **argv)
     gled->AllowMoonConnections();
 
   // Run TRint
-  GThread app_thread(RunRint, 0, false);
+  GThread app_thread((GThread_foo)Gled::TRint_runner_tl, gint, false);
   if(gled->GetRunRint()) {
     if( app_thread.Spawn() ) {
       perror("gled.cxx can't create Rint thread");
@@ -138,7 +119,7 @@ int main(int argc, char **argv)
   }
 
   gled_thread.Join();
-  if(!gint_off) {
+  if(gled->GetRintRunning()) {
     app_thread.Cancel();
     gint->Terminate(0);
   } else {
