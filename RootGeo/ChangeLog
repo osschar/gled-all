@@ -1,3 +1,9 @@
+2005-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoRepacker.cxx:
+	Kludge to allow two simultaneous TGeoManager was moved from ROOT
+	code to this class.
+
 2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoNode.cxx:
