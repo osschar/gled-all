@@ -338,7 +338,8 @@ void Pupil::JumpCameraAt(ZGlass* lens)
   x = x.Unit();
   TVector3 y = mCamera->RefTrans().GetBaseVec3(2);
   y -= (y.Dot(x))*x;
-    
+  y = y.Unit();
+
   // Now reuse t to hold new camera transformation.
   t->SetBaseVec3(1, x);
   t->SetBaseVec3(2, y);
