@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -99,11 +99,11 @@ void FTW_Ant::ListExpander() {
 /**************************************************************************/
 /**************************************************************************/
 
-void FTW_Ant::resize_weeds(int full_w, int butt_w, int h) {
+void FTW_Ant::resize_weeds(int name_w, int butt_w, int h) {
   wExpander->resize(0, 0, butt_w, h);
   wListExpander->resize(butt_w, 0, butt_w, h);
-  wName->resize(2*butt_w, 0, full_w-2*butt_w, h);
-  Fl_Widget::resize(0,0,full_w, h);
+  wName->resize(2*butt_w, 0, name_w, h);
+  Fl_Widget::resize(0, 0, 2*butt_w + name_w, h);
 }
 
 void FTW_Ant::label_weeds() {

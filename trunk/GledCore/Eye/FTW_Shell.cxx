@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -223,7 +223,9 @@ void FTW_Shell::X_ClearLink(FTW::Locator& target)
   if(!target.is_link) throw(_eh + "target is not a link");
 
   ZMIR mir(target.get_leaf_id(), 0);
-  target.ant->fLinkDatum->fLinkInfo->fSetMethod->ImprintMir(mir);
+  GNS::MethodInfo* mi = target.ant->fLinkDatum->fLinkInfo->fSetMethod;
+  mi->ImprintMir(mir);
+  mi->BeamofyIfLocal(mir, mEye->GetSaturn()->GetSaturnInfo());
   fImg->fEye->Send(mir);
 }
 
@@ -411,6 +413,7 @@ void FTW_Shell::ExecContextCall(FTW::Locator& alpha, GNS::MethodInfo* cmi)
   // could do confirm / re-get context ... but need a MIR Send Window
   auto_ptr<ZMIR> mir( new ZMIR(a, b, g) );
   cmi->ImprintMir(*mir);
+  cmi->BeamofyIfLocal(*mir, mEye->GetSaturn()->GetSaturnInfo());
   fImg->fEye->Send(*mir);
 }
 
@@ -437,10 +440,18 @@ FTW_Nest* FTW_Shell::SpawnNest(OS::ZGlassImg* img)
 void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img)
 {
   if(img->fFullMTW_View == 0) {
-    img->fFullMTW_View = MTW_View::ConstructVerticalWindow(img);
+    img->fFullMTW_View = MTW_View::ConstructVerticalWindow(img, this);
     adopt_window(img->fFullMTW_View);
   }
   img->fFullMTW_View->show();
+}
+
+void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)
+{
+  if(img->fFullMTW_View != 0) {
+    delete img->fFullMTW_View;
+    img->fFullMTW_View = 0;
+  }
 }
 
 /**************************************************************************/

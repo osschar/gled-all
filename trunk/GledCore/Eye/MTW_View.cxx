@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -15,10 +15,11 @@
 #include <GledView/GledViewNS.h>
 #include <FL/Fl_Valuator.H>
 #include <FL/Fl_Box.H>
+#include <FL/fl_draw.H>
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
-namespace OS = OptoStructs;
+namespace OS   = OptoStructs;
 
 MTW_View::MTW_View(OS::ZGlassImg* img) :
   OS::A_GlassView(img), Fl_Pack(0,0,0,0,0)
@@ -46,9 +47,9 @@ MTW_View::~MTW_View() {
 /**************************************************************************/
 
 static float MaxAlignGrow = 1.1;
-static float MaxJoinGrow  = 1.2;
+static float MaxJoinGrow  = 1.4;
 
-void MTW_View::BuildVerticalView()
+void MTW_View::BuildVerticalView(int cell_w)
 {
   // Builds complete view of a given object
   // Weedgets are stacked vertically and resized to maximal width
@@ -65,7 +66,7 @@ void MTW_View::BuildVerticalView()
     MTW_SubView* sv = (ci->fViewPart->fooSVCreator)(ci, this, mGlass);
     assert(sv);
     sv->BuildFromList(ci->fViewPart->fWeedList);
-    sv->UpdateVerticalStats(mtw_vs);
+    sv->UpdateVerticalStats(mtw_vs, cell_w);
     mSubViews.push_front(sv);
     ci = ci->GetParentCI();
   } while(ci);
@@ -75,7 +76,7 @@ void MTW_View::BuildVerticalView()
   // mtw_vs.Dump();
   int h = 0;
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
-    h += (*sv)->ResizeByVerticalStats(mtw_vs);
+    h += (*sv)->ResizeByVerticalStats(mtw_vs, cell_w);
     add(*sv);
   }
   Fl_Group::current(this);
@@ -126,7 +127,6 @@ void MTW_View::Absorb_Change(LID_t lid, CID_t cid)
   if(bShown) {
     FID_t fid(lid,cid);
     bool update_all = (lid==0 && cid==0);
-    fImg->fGlass->RefExecMutex().Lock();
     for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
       if(update_all) {
 	(*sv)->Update();
@@ -137,7 +137,6 @@ void MTW_View::Absorb_Change(LID_t lid, CID_t cid)
 	}
       }
     }
-    fImg->fGlass->RefExecMutex().Unlock();
   }
 }
 
@@ -153,33 +152,62 @@ void MTW_View::UpdateViews(LID_t lid, CID_t cid)
 
 namespace {
 
-  class MTW_View_Window : public Fl_Window, public Fl_SWM_Client {
+  class MTW_View_Window : public Fl_Window, public Fl_SWM_Client,
+			  public OS::A_GlassView
+  {
   public:
-    MTW_View_Window(int x, int y, const char* t=0) : Fl_Window(x,y,t) {}
+    MTW_View_Window(OS::ZGlassImg* img, int x, int y, const char* t=0) :
+      Fl_Window(x,y,t), A_GlassView(img) {}
+
+    ~MTW_View_Window() {}
+
+    void auto_label() { 
+      if(fImg) {
+	label(GForm("%s[%s]", fImg->fGlass->GetName(),
+		    fImg->fClassInfo->fName.c_str()));
+      }
+    }
+
+    virtual void AssertDependantViews() {}
+    virtual void Absorb_Change(LID_t lid, CID_t cid) {
+      FID_t fid(lid, cid);
+      if(fid.is_basic()) { auto_label(); redraw(); }
+    }
   };
 
 }
 
-Fl_Window* MTW_View::ConstructVerticalWindow(OS::ZGlassImg* img)
+Fl_Window* MTW_View::ConstructVerticalWindow(OS::ZGlassImg* img,
+					     Fl_SWM_Manager* swm_mgr)
 {
-  // Akhem ... should be some fl_window subclass, knowing of
-  // mtw_view so that it can be wiped.
-  // Also some controls &| collapsors would be usefull.
+  // Some controls &| collapsors would be usefull.
 
-  Fl_Window* w = new MTW_View_Window(0,0,GForm("%s[%s]", img->fGlass->GetName(),
-					img->fClassInfo->fName.c_str()));
+  MTW_View_Window* w = new MTW_View_Window(img, 0, 0, 0);
+  w->auto_label();
+
   MTW_View* v = new MTW_View(img);
-  v->BuildVerticalView();
+  int cell_w = 0;
+  if(swm_mgr) {
+    fl_font(fl_font(), swm_mgr->cell_fontsize());
+    cell_w = swm_mgr->cell_w();
+  }
+  v->BuildVerticalView(cell_w);
   w->end();
   w->size(v->w(), v->h());
   return w;
 }
 
-Fl_Window* MTW_View::ConstructVerticalWindow(ZGlass* glass)
+Fl_Window* MTW_View::ConstructVerticalWindow(ZGlass* glass,
+					     Fl_SWM_Manager* swm_mgr)
 {
-  Fl_Window* w = new MTW_View_Window(0,0,glass->GetName());
+  Fl_Window* w = new MTW_View_Window(0, 0, 0, glass->GetName());
   MTW_View* v = new MTW_View(glass);
-  v->BuildVerticalView();
+  int cell_w = 0;
+  if(swm_mgr) {
+    fl_font(fl_font(), swm_mgr->cell_fontsize());
+    cell_w = swm_mgr->cell_w();
+  }
+  v->BuildVerticalView(cell_w);
   w->end();
   w->size(v->w(), v->h());
   return w;

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -293,9 +293,13 @@ void FTW_Leaf::resize_weeds() {
   wSepBox->size(mNest->GetCtrl()->GetWSepBox(), 1);
   wFrontPack->size(1,1);
   
+  int ant_w  = mNest->GetCtrl()->GetWAnt();
+  int cell_w = mNest->get_swm_manager()->cell_w();
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>(wAntPack->child(c));
-    a->resize_weeds(mNest->GetCtrl()->GetWAnt(), 2, 1);
+    int name_w = ant_w ? ant_w :
+      FTW::swm_label_width(a->fLinkDatum->fLinkInfo->fName, cell_w);
+    a->resize_weeds(name_w, 2, 1);
   }
   wAntPack->size(1,1);
   wTailBox->size(FTW_Nest::max_W*cw, ch);

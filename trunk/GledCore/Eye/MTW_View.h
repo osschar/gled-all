@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,6 +19,8 @@ class Eye;
 typedef list<MTW_SubView*>		lpMTW_SubView_t;
 typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
 
+class Fl_SWM_Manager;
+
 class MTW_View : public OptoStructs::A_GlassView, public Fl_Pack {
 private:
   ZGlass*		mGlass;
@@ -36,7 +38,7 @@ public:
   MTW_View(ZGlass* glass);  		 // Direct view
   ~MTW_View();
 
-  void BuildVerticalView();
+  void BuildVerticalView(int cell_w);
   void BuildByLayout(MTW_Layout* layout);
 
   virtual void Absorb_Change(LID_t lid, CID_t cid);
@@ -47,8 +49,10 @@ public:
   // void Retitle(); !! belongs to covering window !!
   void UpdateViews(LID_t lid=0, CID_t cid=0);
 
-  static Fl_Window* ConstructVerticalWindow(OptoStructs::ZGlassImg* img);
-  static Fl_Window* ConstructVerticalWindow(ZGlass* glass);
+  static Fl_Window* ConstructVerticalWindow(OptoStructs::ZGlassImg* img,
+					    Fl_SWM_Manager* swm_mgr=0);
+  static Fl_Window* ConstructVerticalWindow(ZGlass* glass,
+					    Fl_SWM_Manager* swm_mgr=0);
 
   virtual int handle(int ev);
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -154,6 +154,11 @@ namespace {
       break;
     }
 
+    case 5: { // Remove stand-alone MTV_Views (Transients)
+      nest->RemoveTransients();
+      break;
+    }
+
     } // end switch
   }
 
@@ -183,7 +188,8 @@ Fl_Menu_Item FTW_Nest::s_View_Menu[] = {
   { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
   { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
   { "Predef Custom ...", FL_CTRL + 'c', (Fl_Callback*) view_menu_cb, (void*)3, FL_MENU_DIVIDER },
-  { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE }, 
+  { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER }, 
+  { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5 },
   {0}
 };
 
@@ -710,6 +716,15 @@ void FTW_Nest::ReverseAnts()
   bAntsReversed = !bAntsReversed;
 }
 
+void FTW_Nest::RemoveTransients()
+{
+  for(int c=0; c<mPack->children(); ++c) {
+    FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
+    if(l && l->fImg && l->fImg->fFullMTW_View)
+      mShell->DitchMTW_View(l->fImg);
+  }
+}
+
 /**************************************************************************/
 // Name / Collapsor coloration
 /**************************************************************************/
@@ -876,7 +891,7 @@ void FTW_Nest::label_nest()
 namespace {
 
   char* var_names[] = { "Name", "Ant", "Indent", "SepBox" };
-  int var_defs[] = { 30, 12, 2, 1 };
+  int var_defs[] = { 30, 0, 2, 1 };
 
   void ftwnc_setdef_cb(Fl_Button* b, FTW_Nest_Ctrl* n) {
     for(int i=0; i<4; ++i) {
@@ -906,7 +921,7 @@ FTW_Nest_Ctrl::FTW_Nest_Ctrl(FTW_Nest* nest) :
     weeds[i]->callback((Fl_Callback*)ftwnc_change_cb, nest);
   }
   weeds[0]->range(18,50); weeds[0]->step(1);
-  weeds[1]->range( 6,40); weeds[1]->step(1);
+  weeds[1]->range( 0,40); weeds[1]->step(1);
   weeds[2]->range( 0,10); weeds[2]->step(1);
   weeds[3]->range( 0,5);  weeds[3]->step(1);
 

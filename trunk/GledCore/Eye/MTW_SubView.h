@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -39,7 +39,7 @@ struct MTW_Weed {
 
   MTW_Weed(Fl_Widget* wee, GledViewNS::WeedInfo* wi) :
     fWeed(wee), fWeedInfo(wi) {}
-  MTW_Widths GetWidths();
+  MTW_Widths GetWidths(int cell_w);
 };
 
 typedef list<MTW_Weed>			lMTW_Weed_t;
@@ -63,9 +63,13 @@ public:
 
   void Update();
 
+  void SetUpdateTimer();
+  void RemoveUpdateTimer();
+  static void UpdateFromTimer_s(MTW_SubView* v);
+
   void BuildFromList(GledViewNS::lpWeedInfo_t& l);
-  void UpdateVerticalStats(MTW_Vertical_Stats& vs);
-  int  ResizeByVerticalStats(MTW_Vertical_Stats& vs);
+  void UpdateVerticalStats(MTW_Vertical_Stats& vs, int cell_w);
+  int  ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w);
 
   static const int MinLabelWidth;
 
