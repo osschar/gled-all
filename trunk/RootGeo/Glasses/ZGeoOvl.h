@@ -10,7 +10,7 @@
 #include <Glasses/ZGeoNode.h>
 
 class ZGeoOvl : public ZGeoNode {
-  // 7777 RnrCtrl("true, true, RnrBits(2,4,6,0, 0,0,0,3)")
+  // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,3))
   MAC_RNR_FRIENDS(ZGeoOvl);
 
   friend class ZGeoOvlMgr;
