@@ -1,3 +1,11 @@
+2005-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	* images.C:
+	* rot_lamps.C:
+	* spheres.C:
+	Set pupils UpRefAxis.
+
 2005-02-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lucidabright34.txf:
