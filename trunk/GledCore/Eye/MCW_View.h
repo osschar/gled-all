@@ -68,7 +68,6 @@ class MCW_View : public FTW_Shell_Client,
  protected:
   string		mTitle;
 
-  FTW_Shell*		mShell;   // X{g}
   GledNS::MethodInfo*	mMInfo;
 
   Fl_Pack*		mPack;
