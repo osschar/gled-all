@@ -95,20 +95,20 @@ void FTW::Locator::revert() {
 // Call **has_contents()** before calling any of the following!
 
 ID_t FTW::Locator::get_contents() {
-  return ant ? ant->fToImg->fGlass->GetSaturnID() : leaf->fImg->fGlass->GetSaturnID();
+  return ant ? ant->fToGlass->GetSaturnID() : leaf->fImg->fGlass->GetSaturnID();
 }
 
 ZGlass* FTW::Locator::get_glass()
-{ return ant ? ant->fToImg->fGlass : leaf->fImg->fGlass; }
+{ return ant ? ant->fToGlass : leaf->fImg->fGlass; }
 
 OS::ZGlassImg* FTW::Locator::get_image()
-{ return ant ? ant->fToImg : leaf->fImg; }
+{ return ant ? ant->GetToImg() : leaf->fImg; }
 
 //ID_t FTW::Locator::get_id()
 //{ return ant ? ant->fToImg->fGlass->GetSaturnID() : leaf->fImg->fGlass->GetSaturnID(); }
 
 GNS::ClassInfo* FTW::Locator::get_class_info()
-{ return ant ? ant->fToImg->fClassInfo : leaf->fImg->fClassInfo; }
+{ return ant ? ant->GetToImg()->fClassInfo : leaf->fImg->fClassInfo; }
 
 
 ZGlass* FTW::Locator::get_leaf_glass()
@@ -250,8 +250,8 @@ void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
   } else {
     OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
     const char *glass = "<null>", *name = "", *title = "";
-    if(ant->fToImg) {
-      glass = ant->fToImg->fClassInfo->fName.c_str();
+    if(ant->GetToImg()) {
+      glass = ant->GetToImg()->fClassInfo->fName.c_str();
       name  = ant->fToGlass->GetName();
       title = ant->fToGlass->GetTitle();
     }
@@ -259,8 +259,8 @@ void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 				      prefix,
 				      ci->fName.c_str(),
 				      lens->GetName(),
-				      ld->fLinkInfo->fType.c_str(),
-				      ld->fLinkInfo->fName.c_str(),
+				      ld->GetLinkInfo()->fType.c_str(),
+				      ld->GetLinkInfo()->fName.c_str(),
 				      glass, name, title));
   }
 
@@ -328,8 +328,8 @@ int FTW::NameButton::handle(int ev)
 	if(ant == 0) {
 	  text = GForm("%u", leaf->fImg->fGlass->GetSaturnID());
 	} else {
-	  if(ant->fToImg)
-	    text = GForm("%u", ant->fToImg->fGlass->GetSaturnID());
+	  if(ant->GetToImg())
+	    text = GForm("%u", ant->GetToImg()->fGlass->GetSaturnID());
 	}
 	if(text) {
 	  Locator loc(leaf->GetNest(), leaf, ant);
@@ -356,8 +356,8 @@ int FTW::NameButton::handle(int ev)
 	  shell->SpawnMTW_View(leaf->fImg);
 	  leaf->GetNest()->RefPoint().revert();
 	  Fl::event_clicks(0);
-	} else if(m_loc == L_Ant && ant->fToImg != 0) {
-	  shell->SpawnMTW_View(ant->fToImg);
+	} else if(m_loc == L_Ant && ant->GetToImg() != 0) {
+	  shell->SpawnMTW_View(ant->GetToImg());
 	  leaf->GetNest()->RefPoint().revert();
 	  Fl::event_clicks(0);
 	}
@@ -374,9 +374,9 @@ int FTW::NameButton::handle(int ev)
 
   case FL_DND_ENTER: {
     if(ant == 0) {
-      set_nests_info_bar(leaf, ant, "dnd pushing to list: ");
+      set_nests_info_bar(leaf, ant, "Dnd - Push to list: ");
     } else {
-      set_nests_info_bar(leaf, ant, "dnd setting link: ");
+      set_nests_info_bar(leaf, ant, "Dnd - Set link: ");
     }
     return 1;
   }
@@ -386,7 +386,6 @@ int FTW::NameButton::handle(int ev)
   }
 
   case FL_DND_LEAVE: {
-    set_nests_info_bar(leaf, ant);
     return 1;
   }
 
@@ -424,14 +423,8 @@ FTW::NameBox::NameBox(OS::ZGlassImg* i, int x, int y, int w, int h) :
   box(FL_EMBOSSED_BOX);
   labeltype((Fl_Labeltype)GVNS::no_symbol_label); 
   if(fImg) {
-    fImg->CheckInFullView(this);
     label(fImg->fGlass->GetName());
   }
-}
-
-FTW::NameBox::~NameBox()
-{
-  if(fImg) fImg->CheckOutFullView(this);
 }
 
 /**************************************************************************/
@@ -446,10 +439,8 @@ void FTW::NameBox::AbsorbRay(Ray& ray)
 
 void FTW::NameBox::ChangeImage(OS::ZGlassImg* new_img, bool keep_label)
 {
-  if(fImg) fImg->CheckOutFullView(this);
-  fImg = new_img;
+  SetImg(new_img);
   if(fImg) {
-    fImg->CheckInFullView(this);
     activate();
     label(fImg->fGlass->GetName());
   } else {
@@ -1083,8 +1074,7 @@ void FTW::PupilAm::spawn_pupil(OS::ZGlassImg* img)
 {
   PupilInfo* pi = dynamic_cast<PupilInfo*>( img->fGlass );
   if(pi && mImg2PupilMap.find(img) == mImg2PupilMap.end()) {
-    img->AssertDefView();
-    Pupil* poop = new Pupil(img, img->fDefView, mNest->GetShell());
+    Pupil* poop = new Pupil(img, mNest->GetShell());
     fImg->fEye->RegisterROARWindow(poop);
     mImg2PupilMap[img] = poop;
   }
@@ -1095,10 +1085,6 @@ void FTW::PupilAm::spawn_pupil(OS::ZGlassImg* img)
 FTW::PupilAm::PupilAm(FTW_Nest* n, OS::ZGlassImg* img) :
   OS::A_View(img), mNest(n)
 {
-  if(fImg) {
-    fImg->CheckInFullView(this);
-  }
-
   if(mNest->GetNestInfo()->GetSpawnPupils()) {
     ZList* l = dynamic_cast<ZList*>(fImg->fGlass);
     lpZGlass_t d; l->Copy(d);
@@ -1111,7 +1097,6 @@ FTW::PupilAm::PupilAm(FTW_Nest* n, OS::ZGlassImg* img) :
 FTW::PupilAm::~PupilAm()
 {
   // should close Pupils !!!!?? or get command from nest?
-  if(fImg) fImg->CheckOutFullView(this);
 }
 
 /**************************************************************************/
@@ -1142,10 +1127,6 @@ void FTW::NestAm::spawn_nest(OS::ZGlassImg* img)
 FTW::NestAm::NestAm(FTW_Shell* s, OS::ZGlassImg* img) :
   OS::A_View(img), mShell(s)
 {
-  if(fImg) {
-    fImg->CheckInFullView(this);
-  }
-
   if(mShell->GetShellInfo()->GetSpawnNests()) {
     ZList* l = dynamic_cast<ZList*>(fImg->fGlass);
     lpZGlass_t d; l->Copy(d);
@@ -1158,7 +1139,6 @@ FTW::NestAm::NestAm(FTW_Shell* s, OS::ZGlassImg* img) :
 FTW::NestAm::~NestAm()
 {
   // should close Nests !!!!?? or get command from nest?
-  if(fImg) fImg->CheckOutFullView(this);
 }
 
 /**************************************************************************/
