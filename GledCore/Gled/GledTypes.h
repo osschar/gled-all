@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -38,17 +38,20 @@ typedef set<string>::iterator		sStr_i;
 /**************************************************************************/
 
 class ZGlass;
-typedef list<ZGlass*>			lpZGlass_t;
-typedef list<ZGlass*>::iterator		lpZGlass_i;
-typedef list<ZGlass*>::const_iterator	lpZGlass_ci;
-typedef list<ZGlass*>::reverse_iterator	lpZGlass_ri;
-typedef list<ZGlass**>			lppZGlass_t;
-typedef list<ZGlass**>::iterator	lppZGlass_i;
+typedef list<ZGlass*>				lpZGlass_t;
+typedef list<ZGlass*>::iterator			lpZGlass_i;
+typedef list<ZGlass*>::const_iterator		lpZGlass_ci;
+typedef list<ZGlass*>::reverse_iterator		lpZGlass_ri;
+typedef list<ZGlass*>::const_reverse_iterator	lpZGlass_cri;
+typedef list<ZGlass**>				lppZGlass_t;
+typedef list<ZGlass**>::iterator		lppZGlass_i;
 
 typedef UInt_t		ID_t;
 typedef UShort_t	LID_t;
 typedef UShort_t	CID_t;
 typedef UShort_t	MID_t;
+
+class An_ID_Demangler { public: virtual ZGlass* DemangleID(ID_t) = 0; };
 
 // FID_t : Full lib/class ID
 
@@ -57,8 +60,9 @@ struct FID_t {
   CID_t	cid;
 
   FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
-  bool operator==(FID_t& r) { return (lid==r.lid && cid==r.cid); }
-  bool is_null() { return lid==0 && cid==0; }
+  bool operator==(FID_t r) { return (lid==r.lid && cid==r.cid); }
+  bool is_null()  { return lid==0 && cid==0; }
+  bool is_basic() { return is_null() || (lid==1 && cid==1); }
 };
 
 // LinkSpec : specification of a link returned by p7-generated members
@@ -78,8 +82,6 @@ typedef list<LinkSpec>::iterator		lLinkSpec_i;
 typedef list<LinkSpec>::reverse_iterator	lLinkSpec_ri;
 
 typedef ULong_t		TimeStamp_t;
-typedef UInt_t		UCIndex_t;	// Unckecked Index for ZVec/Mat
-typedef Int_t		xxIndex_t;	// debug index type
 
 typedef	list<ID_t>		lID_t;
 typedef	list<ID_t>::iterator	lID_i;
