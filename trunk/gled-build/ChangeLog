@@ -1,3 +1,8 @@
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Consolidated usage of const modifiers for Get-methods.
+
 2005-01-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
