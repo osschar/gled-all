@@ -41,9 +41,10 @@ protected:
   Bool_t	bLiMo2Side;	// X{GS} 7 Bool(-join=>1)
   Bool_t	bBlend;		// X{GS} 7 Bool()
 
-  Float_t	mMSRotFac;	// X{GS} 7 Value(-range=>[-10000,10000,10],-width=>5,-join=>1)
-  Float_t	mMSMoveFac;	// X{GS} 7 Value(-range=>[-10000,10000,10],-width=>5,-join=>1)
-  Float_t	mAccelExp;	// X{GS} 7 Value(-range=>[-10,10,1,1000],-width=>5)
+  Float_t	mMSRotFac;	// X{GS} 7 Value(-range=>[-1000,1000,1,100])
+  Float_t	mMSMoveFac;	// X{GS} 7 Value(-range=>[-1000,1000,1,100])
+  Float_t	mMoveOM;	// X{GS} 7 Value(-range=>[-30,30,1,100])
+  Float_t	mAccelExp;	// X{GS} 7 Value(-range=>[-10,10,1,1000])
 
   Float_t	mCHSize;	// X{GS} 7 Value(-range=>[0,1,1,100], -width=>4,-join=>1)
   Int_t		mTextSize;	// X{GS} 7 Value(-range=>[0,100,1,1])
