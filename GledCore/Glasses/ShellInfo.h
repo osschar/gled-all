@@ -20,7 +20,11 @@ protected:
   ZGlass*	mBeta;		// X{gS} L{}
   ZGlass*	mGamma;		// X{gS} L{}
 
-  Bool_t	bSpawnNests;	// X{gS} 7 Bool()
+  Bool_t	bSpawnNests;           // X{GS} 7 Bool()
+
+  Bool_t	bFancyClassView;       // X{GS} 7 Bool()
+  Bool_t	bShowLinksInClassView; // X{GS} 7 Bool()
+
 public:
   ShellInfo(const Text_t* n="ShellInfo", const Text_t* t=0) :
     NestInfo(n,t) { _init(); }

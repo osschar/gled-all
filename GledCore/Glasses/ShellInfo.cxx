@@ -17,6 +17,9 @@ void ShellInfo::_init()
   mNests = 0;
   mBeta = mGamma = 0;
   bSpawnNests = true;
+
+  bFancyClassView       = true;
+  bShowLinksInClassView = false;
 }
 
 /**************************************************************************/
