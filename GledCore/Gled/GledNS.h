@@ -48,13 +48,18 @@ namespace GledNS {
     lStr_t		fArgs;
     lStr_t		fTags;
     bool		bLocal;
+    bool		bDetachedExe;
+    bool		bMultixDetachedExe;
     ClassInfo*		fClassInfo;
 
     GledViewNS::MethodInfo* fViewPart;
 
-    MethodInfo(const string& s, MID_t m) : InfoBase(s), fMid(m), fViewPart(0) {}
+    MethodInfo(const string& s, MID_t m) :
+      InfoBase(s), fMid(m),
+      bDetachedExe(false), bMultixDetachedExe(false),
+      fViewPart(0) {}
     void ImprintMir(ZMIR& mir) const;
-    void BeamofyIfLocal(ZMIR& mir, SaturnInfo* sat) const;
+    void FixMirBits(ZMIR& mir, SaturnInfo* sat) const;
     void StreamIds(TBuffer& b) const;
   };
 
@@ -203,11 +208,12 @@ namespace GledNS {
 
   // Message Types
   enum MessageTypes_e {
-    MT_Ray   = 12345,		// Saturn -> Eye
-    MT_Beam,			// Directed MIR
+    // MIR types
+    MT_Beam            = 12000, // Directed MIR
     MT_Flare,			// Broadcasted MIR
 
-    MT_GledProtocol,		//
+    // Saturn, Eye -> Saturn communication
+    MT_GledProtocol    = 12010, //
     MT_ProtocolMismatch,	//
     MT_QueryFFID,		//
     MT_MEE_Connect,		//
@@ -219,6 +225,11 @@ namespace GledNS {
 
     MT_Auth_Challenge,		// challenge + pub key of SunAbsolute
     MT_Auth_ChallengeResponse,	// challenge response
+
+    // Saturn -> Eye communication
+    MT_Ray             = 12050,	// Lens changes
+    MT_TextMessage,             // Messages, Errors, Exceptions
+    MT_EyeCommand               // Commands for the Eye
   };
 
   Int_t LoadSoSet(const string& lib_set);
@@ -240,6 +251,9 @@ namespace GledNS {
 
   ZGlass* ConstructLens(LID_t lid, CID_t cid);
   bool	  IsA(ZGlass* glass, FID_t fid);
+
+  void    LockCINT();
+  void    UnlockCINT();
 
   void    StreamLens(TBuffer& b, ZGlass* lens);
   ZGlass* StreamLens(TBuffer& b);
@@ -265,6 +279,7 @@ namespace GledNS {
 
   int  split_string(Str_ci start, Str_ci end, lStr_t& l, char c=0);
   int  split_string(const string& s, lStr_t& l, char c=0);
+  int  split_string(const string& s, lStr_t& l, string ptr);
   void deparen_string(const string& in, string& n, string& a,
 		      const string& ops="([{", bool no_parens_ok=false)
     throw(string);
