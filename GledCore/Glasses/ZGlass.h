@@ -59,8 +59,8 @@ protected:
   Short_t	mRefCount;	//! X{G}  7 ValOut(-width=>4)
 
   // Locks, TimeStaps and CallBacks
-  GMutex	 mExecMutex;	   //! X{r} Used by Saturn::executor, Eye, rnrs
-  GMutex	 mRefCountMutex;   //! X{r} Used only for linking to/from obj
+  mutable GMutex	 mExecMutex;	   //! X{r} Used by Saturn::executor, Eye, rnrs
+  mutable GMutex	 mRefCountMutex;   //! X{r} Used only for linking to/from obj
   TimeStamp_t	 mTimeStamp;	   //! X{GS} TimeStamp of last change
   TimeStamp_t	 mStampReqTring;   //! X{GS} TimeStamp of last change that requires retriangulation
 
