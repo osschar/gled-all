@@ -28,7 +28,7 @@ void ZNameMap::_init()
 
 /**************************************************************************/
 
-ZGlass* ZNameMap::GetByName(const Text_t* name)
+ZGlass* ZNameMap::GetElementByName(const string& name)
 {
   mListMutex.Lock();
   Name2LIter_i i = mItMap.find(name);

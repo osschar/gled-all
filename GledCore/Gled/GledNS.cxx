@@ -447,23 +447,23 @@ GledNS::ClassInfo* GledNS::LibSetInfo::FirstClassInfo()
 /**************************************************************************/
 /**************************************************************************/
 
-  int GledNS::split_string(Str_ci start, Str_ci end, lStr_t& l, char c)
-  {
-    int cnt=0;
-    string g;
-    for(Str_ci i=start; i!=end; ++i) {
-      if(c==0 && isspace(*i) && g.size()>0) {
-	++cnt; l.push_back(g); g.erase(); continue;
-      }
-      if(isspace(*i)) continue;
-      if(*i==c) {
-	++cnt; l.push_back(g); g.erase(); continue;
-      }
-      g += *i;
+int GledNS::split_string(Str_ci start, Str_ci end, lStr_t& l, char c)
+{
+  int cnt=0;
+  string g;
+  for(Str_ci i=start; i!=end; ++i) {
+    if(c==0 && isspace(*i) && g.size()>0) {
+      ++cnt; l.push_back(g); g.erase(); continue;
     }
-    if(g.size()>0) { ++cnt; l.push_back(g); }
-    return cnt;
+    if(isspace(*i)) continue;
+    if(*i==c) {
+      ++cnt; l.push_back(g); g.erase(); continue;
+    }
+    g += *i;
   }
+  if(g.size()>0) { ++cnt; l.push_back(g); }
+  return cnt;
+}
 
 int GledNS::split_string(const string& s, lStr_t& l, char c)
 {
@@ -497,6 +497,68 @@ void GledNS::deparen_string(const string& in, string& n, string& a,
   a = in.substr(op_pos+1, cp_pos-op_pos-1);
   if(n.size()==0) throw string("missing name");
   if(a.size()==0) throw string("no args for " + n);
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+int GledNS::tokenize_url(const string& url, list<url_token>& l)
+{
+  string::size_type i = 0;
+  const string::size_type end = url.length();
+  url_token::type_e type = url_token::list_sel;
+  url_token::type_e next_type;
+  string part;
+  int count = 0;
+
+  while(i < end) {
+    string::size_type j = url.find_first_of("/-\\", i);
+    if(j == string::npos) j = end;
+    if(j > i) {
+      part += url.substr(i, j-i);
+      i = j;
+    }
+    bool terminal = false;
+    char c = url[i];
+
+    if(c == '\\') {
+      if(++i < end) part += url[i];
+      if(++i < end) continue;
+
+      terminal = true;
+      next_type = url_token::null;
+    } else {
+      // is a terminal?
+      switch (c) {
+      case 0:
+	terminal = true;
+	next_type = url_token::null;
+	break;
+      case '/':
+	terminal = true;
+	next_type = url_token::list_sel;
+	++i;
+	break;
+      case '-':
+	if(url[i+1] =='>') {
+	  terminal = true;
+	  next_type = url_token::link_sel;
+	  i += 2;
+	}
+	break;
+      } // switch
+    }
+    if(terminal) {
+      if(part.length() > 0) {
+	// cout <<"tokenize_url making token " << part <<","<< (int)type <<endl;
+	l.push_back(url_token(part, type));
+	++count;
+	part = ""; 
+      }
+      type = next_type;
+    }
+  }
+  return count;
 }
 
 /**************************************************************************/
