@@ -19,6 +19,8 @@
 #include "Eye.h"
 #include "Pupil.h"
 
+#include "MCW_View.h"
+
 #include <FL/Fl_OutputPack.H>
 
 #include <FL/Fl.H>
@@ -145,9 +147,9 @@ FTW_Shell::~FTW_Shell()
 
 /**************************************************************************/
 
-void FTW_Shell::Absorb_Change(LID_t lid, CID_t cid)
+void FTW_Shell::AbsorbRay(Ray& ray)
 {
-  if((lid==1 && cid==1) || (lid==0 && cid==0)) {
+  if(ray.IsBasicChange()) {
     label_shell();
   }
 }
@@ -225,7 +227,7 @@ void FTW_Shell::X_ClearLink(FTW::Locator& target)
   ZMIR mir(target.get_leaf_id(), 0);
   GNS::MethodInfo* mi = target.ant->fLinkDatum->fLinkInfo->fSetMethod;
   mi->ImprintMir(mir);
-  mi->BeamofyIfLocal(mir, mEye->GetSaturn()->GetSaturnInfo());
+  mi->FixMirBits(mir, mEye->GetSaturn()->GetSaturnInfo());
   fImg->fEye->Send(mir);
 }
 
@@ -384,39 +386,6 @@ void FTW_Shell::Y_SendMessage(const char* msg)
 
 /**************************************************************************/
 
-void FTW_Shell::ExecContextCall(FTW::Locator& alpha, GNS::MethodInfo* cmi)
-{
-  static string _eh("FTW_Shell::ExecContextCall ");
-
-  ID_t a=alpha.leaf->fImg->fGlass->GetSaturnID(), b=0, g=0;
-  lStr_i mir_arg = cmi->fContextArgs.begin();
-  if(cmi->fContextArgs.size() > 0) {
-    ZGlass* beta = mShellInfo->GetBeta();
-    if(beta == 0) {
-      throw(_eh + cmi->fName +" requires beta ("+ *mir_arg +")");
-    }
-    b = beta->GetSaturnID();
-  }
-  ++mir_arg;
-  if(cmi->fContextArgs.size() > 1) {
-    ZGlass* gamma = mShellInfo->GetGamma();
-    if(gamma == 0) {
-      throw(_eh + cmi->fName +" requires gamma ("+ *mir_arg +")");
-    }
-    g = gamma->GetSaturnID();
-  }
-  if(!cmi->fArgs.empty()) {
-    throw(_eh + cmi->fName + " requires additional args ... not coded");
-  }
-  // bitch for other arguments ... or code the damned val sucker (jona?)
-  //   attach values as defaults to somewhere?
-  // could do confirm / re-get context ... but need a MIR Send Window
-  auto_ptr<ZMIR> mir( new ZMIR(a, b, g) );
-  cmi->ImprintMir(*mir);
-  cmi->BeamofyIfLocal(*mir, mEye->GetSaturn()->GetSaturnInfo());
-  fImg->fEye->Send(*mir);
-}
-
 void FTW_Shell::ExportToInterpreter(FTW::Locator& loc, const char* varname)
 {
   GNS::ClassInfo* ci = loc.get_class_info();
@@ -452,6 +421,24 @@ void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)
     delete img->fFullMTW_View;
     img->fFullMTW_View = 0;
   }
+}
+
+void FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
+{
+  static string _eh("FTW_Shell::SpawnMCW_View ");
+
+  MCW_View* mcw = new MCW_View(this);
+  try {
+    mcw->ParseMethodInfo(cmi);
+  }
+  catch(string exc) {
+    delete mcw;
+    Fl_Group::current(0);
+    throw(_eh + "parsing failed: " + exc);
+  }
+  mcw->SetABG(img->fGlass, mShellInfo->GetBeta(), mShellInfo->GetGamma());
+  adopt_window(mcw);
+  mcw->show();
 }
 
 /**************************************************************************/
@@ -490,15 +477,34 @@ namespace {
 
   /**************************************************************************/
 
+  void open_nest_cb(Fl_Widget* w, mir_call_data* ud) {
+    FTW_Shell* shell = ud->shell;
+    ZQueen*    queen = shell->GetShellInfo()->GetQueen();
+
+    NestInfo ni(GForm("Nest %d",   shell->GetShellInfo()->GetNests()->Size()+1),
+		GForm("shell: %s", shell->GetShellInfo()->GetName()));
+    ni.Add(ud->loc.get_glass());
+
+    GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
+    GNS::MethodInfo* mi = ci->FindMethodInfo("Add", true);
+    auto_ptr<ZMIR> incarnator
+      ( queen->S_IncarnateWAttach(shell->GetShellInfo()->GetNests(), 
+				  0, ci->fFid.lid, ci->fFid.cid, mi->fMid)
+      );
+    GNS::StreamLens(*incarnator, &ni);
+    shell->GetEye()->Send(*incarnator);
+  }
+
+
   void glass_export_cb(Fl_Widget* w, mir_call_data* ud) {
     const char* var = fl_input("Varname for %s:", "foo", ud->loc.get_image()->fGlass->GetName());
     if(var)
       ud->shell->ExportToInterpreter(ud->loc, var);
   }
 
-  void mir_call_cb(Fl_Widget* w, mir_call_data* ud) {
+  void spawn_mcw_cb(Fl_Widget* w, mir_call_data* ud) {
     try {
-      ud->shell->ExecContextCall(ud->loc, ud->mi);
+      ud->shell->SpawnMCW_View(ud->loc.get_image(), ud->mi);
     }
     catch(string exc) {
       ud->shell->Message(exc.c_str(), FTW_Shell::MT_err);
@@ -523,20 +529,32 @@ void FTW_Shell::LocatorMenu(FTW::Locator& loc, int x, int y)
     menu.add("Set as Beta", 0, (Fl_Callback*)set_beta_cb, &lccd.back());
     menu.add("Set as Gamma",   0, (Fl_Callback*)set_gamma_cb, &lccd.back(), FL_MENU_DIVIDER);
 
+    menu.add("Open in Nest ...", 0, (Fl_Callback*)open_nest_cb, &lccd.back());
     menu.add("Export to CINT", 0, (Fl_Callback*)glass_export_cb, &lccd.back(), FL_MENU_DIVIDER);
 
-    { // Context foos ... obtained from ClassInfo
+    { // Methods ... obtained from ClassInfo
       GNS::ClassInfo* ci = loc.get_class_info();
+      const char* p1   = "Methods";
+      const char* pset = "Set methods";
       while(ci) {
+	string s2(GForm("%s (%d,%d)", ci->fName.c_str(), ci->fFid.lid, ci->fFid.cid));
+	const char* p2 = s2.c_str();
 	for(GNS::lpMethodInfo_i cmi=ci->fMethodList.begin();
 	    cmi!=ci->fMethodList.end(); ++cmi)
 	  {
 	    lccd.push_back(mir_call_data(this, loc, *cmi));
-	    menu.add(GForm("Methods/%s/%s (%d,%d)",
-			   ci->fName.c_str(), (*cmi)->fName.c_str(),
-			   (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
-		     0, (Fl_Callback*)mir_call_cb, &lccd.back(), 0);
-
+	    string& mn( (*cmi)->fName );
+	    if(mn.length() >= 4 && mn.compare(0, 3, "Set") == 0 && isupper(mn[3])) {
+	      menu.add(GForm("%s/%s/%s/%s (%d; %d,%d)", p1, p2, pset,
+			     (*cmi)->fName.c_str(), (*cmi)->fMid,
+			     (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
+		       0, (Fl_Callback*)spawn_mcw_cb, &lccd.back(), 0);
+	    } else {
+	      menu.add(GForm("%s/%s/%s (%d; %d,%d)", p1, p2,
+			     (*cmi)->fName.c_str(), (*cmi)->fMid,
+			     (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
+		       0, (Fl_Callback*)spawn_mcw_cb, &lccd.back(), 0);
+	    }
 	  }
 	ci = ci->GetParentCI();
       };
@@ -555,7 +573,7 @@ void FTW_Shell::Message(const char* msg, MType_e t)
   switch(t) {
   case MT_std: c = (Fl_Color)0; break;
   case MT_err: c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
-  case MT_wrn: c = FL_YELLOW; fl_beep(FL_BEEP_ERROR); break;
+  case MT_wrn: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
   case MT_msg: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
   }
   wOutPack->add_line(msg, c);
