@@ -1,0 +1,8 @@
+2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* common_foos.C:
+	Added function spawn_default_gui.
+
+	* alice_geom.C:
+	* check_overlaps.C:
+	Use spawn_default_gui function.
