@@ -1,3 +1,16 @@
+2005-03-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	New method Zoom; renamed viewing-rectangle specification variables
+	and added 'typical object distance'. With it one can calculate
+	view height (orthographic mode) from vertical FOV (perspective
+	mode) and vice versa.
+
+	* Eye/Pupil.cxx:
+	Follow up on changes in PupilInfo; mousewheel events now call
+	PupilInfo::Zoom(). Shift increases the step, control decreases it.
+
 2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Branch.cxx:
