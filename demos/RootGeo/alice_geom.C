@@ -47,11 +47,16 @@ void alice_geom(Int_t import_mode=0)
   rscene->Add(znode);
   znode->SetRnrSelf(false);
 
+  import_by_regexp(znode); 
+  select_some_dets(znode);
+
   // create an empty node to test save/load from file 
   CREATE_ADD_GLASS(em_node, ZGeoNode, rscene, "A GeoNode", "");
   em_node->SetTNode(gGeoManager->GetTopNode());
   em_node->SetOM(-2.5);
+  em_node->SetUseOM(true);
   em_node->Set3Pos(6.5, 0, 0);
+  em_node->SetDefFile("EvDisp.root");
 
   // create an empty OvlMgr.
   CREATE_ADD_GLASS(em_ovlm, ZGeoOvlMgr, rscene, "A GeoOvlMgr", "");
@@ -59,8 +64,9 @@ void alice_geom(Int_t import_mode=0)
   em_ovlm->Set3Pos(-6.5, 0, 0);
   em_ovlm->SetUseOM(true);
 
-  import_by_regexp(znode); 
-  select_some_dets(znode);
+  // Geo repacker
+  CREATE_ADD_GLASS(repack, ZGeoRepacker, rscene, "GeoRepacker", "");
+  repack->SetRoot(znode);
 
   //--------------------------------------------------------------
 
@@ -106,7 +112,7 @@ void import_by_regexp(ZGeoNode* volt)
   // This demonstrates use of ZGeoNode::ImportByRegexp().
   // Relies on volume-naming conventions.
 
-  printf("Import by regexp\n");
+  printf("Import by regexp ...\n");
 
   volt->ImportByRegExp("PHOS", "^PHOS");
   volt->ImportByRegExp("RICH", "^RICH");
@@ -114,17 +120,17 @@ void import_by_regexp(ZGeoNode* volt)
   volt->ImportByRegExp("TPC",  "^TPC"); 
 
   // import, but not show
-  volt->ImportByRegExp("TRD&TOF", "^B"); rnr_elements(volt, "TRD&TOF", false);
+  volt->ImportByRegExp("TRD TOF", "^B"); rnr_elements(volt, "TRD TOF", false);
   volt->ImportByRegExp("EPM", "^EPM");   rnr_elements(volt, "EPM", false);
   volt->ImportByRegExp("ZDC", "^ZDC");   rnr_elements(volt, "ZDC", false);
   volt->ImportByRegExp("ZEM", "^ZEM");   rnr_elements(volt, "ZEM", false);
   volt->ImportByRegExp("FMD", "^FMD");   rnr_elements(volt, "FMD", false);
+
   volt->ImportByRegExp("Hall", "^H");    rnr_elements(volt, "Hall", false);
 
-  printf("Importing unimported top-levels ...\n");
+  printf("Importing remaining top-levels ...\n");
   volt->ImportUnimported("Remaining top-levels");
   rnr_elements(volt, "Remaining top-levels", false);
-  printf("Done importing unimported top-levels.\n");
 }
 
 /**************************************************************************/
