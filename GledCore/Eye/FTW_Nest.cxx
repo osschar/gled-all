@@ -154,13 +154,13 @@ namespace {
       break;
     }
 
-    case 4: { // Reverse order of ants for all leafs
+    case 4: { // Reverse order of ants for all leafs.
       nest->ReverseAnts();
       break;
     }
 
-    case 5: { // Remove stand-alone MTV_Views (Transients)
-      nest->RemoveTransients();
+    case 5: { // Remove stand-alone MTV_Views.
+      nest->GetShell()->RemoveMTW_Views();
       break;
     }
 
@@ -729,15 +729,6 @@ void FTW_Nest::ReverseAnts()
     l->reverse_ants();
   }
   bAntsReversed = !bAntsReversed;
-}
-
-void FTW_Nest::RemoveTransients()
-{
-  for(int c=0; c<mPack->children(); ++c) {
-    FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
-    if(l && l->fImg && l->fImg->fFullMTW_View)
-      mShell->DitchMTW_View(l->fImg);
-  }
 }
 
 /**************************************************************************/

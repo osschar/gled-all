@@ -58,6 +58,8 @@ protected:
 
   void label_shell();
 
+  set<OptoStructs::ZGlassImg*> mMTW_Views;
+
 public:
   FTW_Shell(OptoStructs::ZGlassImg* img, const Fl_SWM_Manager* swm_copy);
   virtual ~FTW_Shell();
@@ -89,6 +91,7 @@ public:
   FTW_Nest* SpawnNest(OptoStructs::ZGlassImg* img);
   void	    SpawnMTW_View(OptoStructs::ZGlassImg* img);
   void	    DitchMTW_View(OptoStructs::ZGlassImg* img);
+  void      RemoveMTW_Views();
   void      SpawnMCW_View(OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);
 
   void FillLocatorMenu(FTW::Locator& loc, Fl_Menu_Button& menu,
