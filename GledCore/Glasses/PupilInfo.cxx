@@ -34,10 +34,16 @@ void PupilInfo::_init()
   mWidth = 640; mHeight = 480;
 
   mClearColor.rgba(0,0,0);
-  mFOV = 90; mNearClip = 0.01; mFarClip = 120;
-  bLiMo2Side = false;
+
+  mProjMode = P_Perspective;
+  mFOV = 90;
+  mNearClip = 0.01; mFarClip = 120;
+  mYSize = 10; mHFac = 1;
+
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
-  bBlend = false;
+  bLiMo2Side = false;
+  bBlend     = false;
+
   mMSRotFac = 1; mMSMoveFac = 2; mMoveOM = -2; mAccelExp = 0.5;
 
   mCHSize = 0.03;   mTextSize = 12;
