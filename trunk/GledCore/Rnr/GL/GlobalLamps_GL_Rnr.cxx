@@ -14,6 +14,13 @@ namespace OS = OptoStructs;
 
 /**************************************************************************/
 
+void GlobalLamps_GL_Rnr::_init()
+{
+  bUseNameStack = false;
+}
+
+/**************************************************************************/
+
 void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   // Turn on all list members of glass Lamp that can be
