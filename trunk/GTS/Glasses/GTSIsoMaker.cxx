@@ -93,11 +93,7 @@ void GTSIsoMaker::MakeSurface()
     break;
   }
   // No locking. Data-model for GTS sux badly anyway ...
-  if(mTarget->pSurf == 0) {
-    mTarget->pSurf = new Surface;
-  }
-  mTarget->pSurf->Replace(s);
-  mTarget->mStampReqTring = mTarget->Stamp();
+  mTarget->Replace(s);
 }
 
 /**************************************************************************/
