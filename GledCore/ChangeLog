@@ -64,7 +64,8 @@
 	* macros/eye.C:
 	* macros/moon.C:
 	* macros/sun.C:
-
+	Exported declarations of some variables, consolidation.
+	
 	* perllib/GLED_Widgets.pm:
 	Added FL_WHEN_ENTER_KEY to when() of Textor, tooltip for Filor.
 	
