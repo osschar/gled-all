@@ -1,3 +1,17 @@
+2005-02-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	Write-lock eventor during all all callbacks to Eventor processing
+	methods (Operator::Operate is NOT locked). Split WipeThread to two
+	functions so OnExit is called when the thread is already
+	unregistered from the stage (but eventor write-lock is acquired
+	first).
+
+	* Eye/OptoStructs.cxx:
+	Bugfix: ZListView::AbsorbRay RQN_list_remove removed ALL
+	occurrences of the lens, not just one.
+
 2005-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZQueen.cxx:
