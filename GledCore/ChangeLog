@@ -1,3 +1,91 @@
+2005-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* RnrBase/A_Rnr.h:
+	Added member bool bOnePerRnrDriver; signals to rnr-driver to hold
+	its own instance of the rnr (used by some ZRnrModBase
+	descendants).
+
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Extenison of RnrMod infrastructure. Added member UInt_t mRnrCount
+	(used to identify one rendering) and methods
+	Begin/EndRender. Support for having own renderers
+	(based on bool A_Rnr::bOnePerRnrDriver). Font-support entirely
+	moved to ZRlFont.
+
+	* Glasses/ZGlStateBase.cxx:
+	* Glasses/ZGlStateBase.h:
+	* Glasses/ZRnrModBase.cxx:
+	* Glasses/ZRnrModBase.h:
+	Renamed ZGlStateBase to ZRnrModBase.
+
+	* Rnr/GL/ZRnrModBase_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.h:
+	New file.
+	
+	* glass.list:
+	Renamed ZGlStateBase to ZRnrModBase; ZRnrModBase has its own rnr now.
+
+	* Eye/Pupil.cxx:
+	Moved pre/post rendering light control to
+	RnrDriver::Begin/EndRender.
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	New member Bool_t bUseDispList. Provides support for control of
+	rendering via GL display-lists.
+
+	* Glasses/Text.cxx:
+	* Glasses/Text.h:
+	Removed member bUseDispList (now in ZGlass).
+
+	* Glasses/ZGlBlending.cxx:
+	* Glasses/ZGlBlending.h:
+	* Glasses/ZGlLightModel.cxx:
+	* Glasses/ZGlLightModel.h:
+	* Glasses/ZGlMaterial.cxx:
+	* Glasses/ZGlMaterial.h:
+	* Glasses/ZRlFont.cxx:
+	* Glasses/ZRlFont.h:
+	* Glasses/ZRlNameRnrCtrl.cxx:
+	* Glasses/ZRlNameRnrCtrl.h:
+	Now sub-classed from ZRnrModBase.
+
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	Use new rnr-mod infrastrucure; added wrapper RnrTextBar(rnrdriver,
+	text) that takes default box/zoffset from rnr-mods.
+
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	Changed management of default font in sync with changes elsewhere.
+	
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/Text_GL_Rnr.h:
+	Changed font retrieval; now properly regenerates display lists
+	whenever the font (obtained from RnrMods) changes.
+
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.h:
+	Now sub-classed from ZRnrModBase_GL_Rnr; shows also how to enforce
+	rebuild of display-lists of clients to RnrMods (see also
+	Text_GL_Rnr).
+	
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.h:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.h:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.cxx:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.h:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.h:
+	Now sub-classed from ZRnrModBase_GL_Rnr.
+
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	Removed retrieval of ZRlNameRnrCtrl rnr-mod; now done in GLTextNS.
+	
+	* Eye/FTW.cxx:
+	Fixed compilation warnings.
+
 2005-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_View.cxx:
