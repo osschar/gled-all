@@ -1,0 +1,15 @@
+# $Header$
+
+$PATCH = {
+"Gled" => { 'Pragmas' => "#pragma link C++ global Gled::theOne;\n" },
+
+"GledNS" => { 'Pragmas' => "#pragma link C++ function GForm;\n" },
+
+"ZList" => {
+  'PragmaSuff' => "!-"
+#  'C7_DoNot_Gen' => { 'RebuildLinks' => 1 }
+},
+
+"ZMIR"		=> { 'PragmaSuff' => "-" },
+"ZComet"	=> { 'PragmaSuff' => "-" }
+};

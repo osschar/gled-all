@@ -1,0 +1,15 @@
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	* checker_2.png:
+	* checker_4.png:
+	* checker_8.png:
+	* checker_8a.png:
+	* earth.png:
+	* moon.jpeg:
+
+	New files.
+
+	* images.C: Added demos for: a) textured SMorph and b) texturing
+	parameters in ZImage.
+
