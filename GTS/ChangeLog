@@ -1,3 +1,30 @@
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Moved all stuff to GTSurf; now just imports gts under namespace GTS.
+	
+	* Glasses/GTSIsoMaker.cxx:
+	
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	New glass: coarsening and refinement of GTS surfaces.
+	
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added statistics display (using stone SGTSRange); new methods
+	Replace() and Save(). Moved in Load/Invert code from GTS/GTS.cxx.
+	
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Reflections of changes in GTSurf.
+		
+	* Stones/SGTSRange.cxx:
+	* Stones/SGTSRange.h:
+	New Stone: range with mean and sigma.
+	
+	* glass.list:
+	New glass GTSRetriangulator.
+
 2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSIsoMaker.cxx:
