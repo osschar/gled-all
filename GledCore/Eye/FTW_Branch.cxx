@@ -97,6 +97,7 @@ void FTW_Branch::Absorb_ListAdd(OS::ZGlassImg* newimg, OS::ZGlassImg* before)
     if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
     else	        mNest->InsertLeaf(leaf, i->leaf);
   }
+  label_namebox();
 }
 
 void FTW_Branch::Absorb_ListRemove(OS::ZGlassImg* eximg)
@@ -113,6 +114,7 @@ void FTW_Branch::Absorb_ListRemove(OS::ZGlassImg* eximg)
     delete i->leaf;
   }
   mLeoim.erase(i);
+  label_namebox();
 }
 
 void FTW_Branch::Absorb_ListRebuild()
@@ -122,6 +124,7 @@ void FTW_Branch::Absorb_ListRebuild()
   wipe_leoim();
   build_leoim();
   if(was_expanded) ExpandList();
+  label_namebox();
 }
 
 /**************************************************************************/
@@ -208,6 +211,15 @@ float FTW_Branch::LeafPosition(FTW_Leaf* leaf)
 // protected
 /**************************************************************************/
 /**************************************************************************/
+
+void FTW_Branch::label_namebox() {
+  int s = ((ZList*)(fImg->fGlass))->Size();
+  if(s) {
+    wName->set_label(GForm("%s [%d]", fImg->fGlass->GetName(), s));
+  } else {
+    wName->set_label(GForm("%s []", fImg->fGlass->GetName()));
+  }
+}
 
 void FTW_Branch::label_weeds() {
   if(bListExpanded) {

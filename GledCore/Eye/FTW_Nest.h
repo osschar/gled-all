@@ -172,6 +172,14 @@ public:
   static Fl_Menu_Item	s_Set_Menu[];
   static Fl_Menu_Item	s_Action_Menu[];
 
+  static const int def_W;
+  static const int def_H;
+
+  static const int min_W;
+  static const int max_W;
+  static const int min_H;
+  static const int max_H;
+
 #include "FTW_Nest.h7"
 }; // endclass FTW_Nest
 

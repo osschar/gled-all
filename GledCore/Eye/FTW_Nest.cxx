@@ -32,14 +32,15 @@ namespace GVNS = GledViewNS;
 
 /**************************************************************************/
 
-namespace {
-  int def_W = 64;
-  int def_H = 30;
+  const int FTW_Nest::def_W = 64;
+  const int FTW_Nest::def_H = 30;
 
-  int min_W = 30;
-  int max_W = 240;
-  int min_H = 6;
-  int max_H = 120;
+  const int FTW_Nest::min_W = 30;
+  const int FTW_Nest::max_W = 240;
+  const int FTW_Nest::min_H = 6;
+  const int FTW_Nest::max_H = 120;
+
+namespace {
 
   void action_menu_cb(Fl_Menu_Button* b, void* what) {
     FTW_Nest*   nest  = FTW::grep_parent<FTW_Nest*>(b);

@@ -122,11 +122,15 @@ namespace FTW {
     FTW_Leaf*	get_leaf();
     FTW_Ant*	get_ant();
 
+    string	m_name;
+
   public:
     NameButton(Loc_e l, int x, int y, int w, int h, const char* t=0);
 
     NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t=0);
     NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t=0);
+
+    void set_label(const char* l);
 
     int handle(int ev);
   };
