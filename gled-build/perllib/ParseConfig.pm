@@ -1,4 +1,4 @@
-# Copyright (C) 1999-2004, Matevz Tadel.
+# Copyright (C) 1999-2005, Matevz Tadel.
 # Released under The Artistic License, 1997.
 
 package ParseConfig;
