@@ -118,7 +118,7 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
   OS::A_View(infoimg), FTW_Shell_Client(shell),
   Fl_Gl_Window(w,h),
   mInfo(0),
-  mCameraView(0), mCameraViewWin(0),
+  mCameraView(0),
   mCamBase(0)
 {
   mInfo = dynamic_cast<PupilInfo*>(fImg->fGlass);
@@ -843,14 +843,15 @@ int Pupil::handle(int ev)
       return 1;
 
     case FL_F+2:
-      if(mCameraViewWin == 0) {
-	Fl_SWM_Manager* swm = mShell;
-	mCameraViewWin = MTW_View::ConstructVerticalWindow(mCamera, swm);
-	swm->adopt_window(mCameraViewWin);
-	mCameraView = (MTW_View*) mCameraViewWin->child(0);
+      if(mCameraView == 0) {
+	Fl_Window* w = new Fl_Window(0,0);
+	mCameraView = new MTW_View(mCamera, mShell);
+	w->end();
+	mCameraView->BuildVerticalView();
+	mShell->adopt_window(w);
 	mCamera->SetStamp_CB((zglass_stamp_f)camera_stamp_cb, this);
       }
-      mCameraViewWin->show();
+      mCameraView->ShowWindow();
       return 1;
 
       /*
@@ -929,7 +930,7 @@ int Pupil::handle(int ev)
 
 void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
 {
-  pup->mCameraView->UpdateViews(FID_t(0,0));
+  pup->mCameraView->UpdateDataWeeds(FID_t(0,0));
   pup->redraw();
 }
 
