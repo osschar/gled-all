@@ -134,8 +134,10 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, // FTW_Leaf* leaf,
   mBase = 0;
   mCamera = new Camera;
   if(mInfo->GetCameraBase() == 0) {
-    mCamera->RotateLF(3, 1, TMath::Pi()/2);
+    mCamera->RotateLF(1, 2, TMath::Pi()/2);
     mCamera->MoveLF(1, -5);
+    mCamera->MoveLF(3, 2);
+    mCamera->RotateLF(3, 1, 30*TMath::DegToRad());
     // mCamera->mParent = base;
   }
 
@@ -278,9 +280,9 @@ void Pupil::SetCameraView()
       printf("Pupil::SetCameraView look_at is not connected ... ignoring.\n");
     }
   }
-  gluLookAt(z(1u,4u), z(2u,4u), z(3u,4u),
-	    z(1u,4u)+z(1u,1u), z(2u,4u)+z(2u,1u), z(3u,4u)+z(3u,1u),
-	    z(1u,2u), z(2u,2u), z(3u,2u));
+  gluLookAt(z(1,4), z(2,4), z(3,4),
+	    z(1,4)+z(1,1), z(2,4)+z(2,1), z(3,4)+z(3,1),
+	    z(1,3), z(2,3), z(3,3));
 }
 
 /**************************************************************************/
@@ -410,7 +412,7 @@ void Pupil::Pick()
   glPushMatrix();
   glLoadIdentity();
   gluPickMatrix((GLdouble) mMouseX, (GLdouble)(vp[3] - mMouseY),
-		mInfo->GetPickW(), mInfo->GetPickH(), vp);
+		mInfo->GetPickR(), mInfo->GetPickR(), vp);
   SetProjection2();
 
   glMatrixMode(GL_MODELVIEW);
@@ -424,52 +426,97 @@ void Pupil::Pick()
 
   GLint n = glRenderMode(GL_RENDER);
 
-  if(n>0) {
+  if (n > 0) {
+
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
     menu.textsize(mRoot->fImg->fEye->GetShell()->cell_fontsize());
 
     GLuint* x = b;
     list<pick_data> pdl;
-    map<UInt_t,int> entry_map;
+    list<glass_data> gdl;
+
+    // create a list of picked lenses sorted by z buffer
     for(int i=0; i<n; i++) {
       GLuint m = *x; x++;
 
       if(x - b + 2 + m > mInfo->GetBuffSize()) {
-	cout <<"Pupil::Pick overflow of selection buffer, ignoring that entry\n";
-	continue;
+        cout <<"Pupil::Pick overflow of selection buffer, ignoring that entry\n";
+        continue;
       }
- 
-      // float zmin = (float) *x/0x7fffffff;
+
+      float zmin = (float) *x/0x7fffffff;
       x++;
       // float zmax = (float) *x/0x7fffffff;
       x++;
 
       UInt_t id = x[m-1];
-      ZGlass* glass = mRoot->fImg->fEye->DemangleID(id)->fGlass;
-      if(!glass) continue;
-      const char* name = entry_map[id] ?
-	GForm("%s/<selection hit %d>", glass->GetName(), entry_map[id] + 1) :
-	GForm("%s", glass->GetName());
-      ++entry_map[id];
-      pdl.push_back( pick_data(this, glass) );
-      menu.add(name, 0, (Fl_Callback*)fltk_pick_callback, &pdl.back(), FL_SUBMENU);
-      make_menu(menu, pdl, string(name), this, glass);
-      for(int j=m-2; j>=0; --j) {
-	UInt_t p_id = x[j];
-	ZGlass* parent = mRoot->fImg->fEye->DemangleID(p_id)->fGlass;
-	if(!parent) continue;
-	make_menu(menu, pdl,
-		  string(GForm("%s/Parents/%s", name, parent->GetName())),
-		  this, parent);
+
+      OS::ZGlassImg* root_img = mRoot->fImg->fEye->DemangleID(id);
+      if(!root_img) {
+        printf("Pupil::Pick root_img null for id=%d.\n", id);
+        continue;
       }
 
+      ZGlass* lens = root_img->fGlass;
+      if(!lens) continue;
+     
+      glass_data gd(lens, zmin, lens->GetName());;
+      
+      // fill gd.parents list with contents of the pisck record
+      for(int j=m-2; j>=0; --j) {
+        UInt_t p_id = x[j];
+        OS::ZGlassImg* img = mRoot->fImg->fEye->DemangleID(p_id);
+        if(!img) {
+          printf("Pupil::Pick parent img null for id=%d.\n", p_id);
+          continue;
+        }
+        ZGlass* parent = img->fGlass;
+        if(!parent) continue;
+        gd.parents.push_back(parent);
+      }
+      
+      list<glass_data>::iterator ins_pos = gdl.begin();
+      while(ins_pos != gdl.end() && ins_pos->z < gd.z) {
+        ++ins_pos;
+      }
+      gdl.insert(ins_pos, gd);  
       x += m;
     }
-    // const Fl_Menu_Item* mi =
+
+    // create menu entries
+    int loc = 1;
+    for( list<glass_data>::iterator gdi = gdl.begin(); gdi!=gdl.end(); ++gdi) {
+      if(mInfo->GetPickDisp() != 0) {    
+        Float_t near = mInfo->GetNearClip();
+        Float_t far  = mInfo->GetFarClip();
+        Float_t zdist = near*far/(far - gdi->z/2*(far - near));
+        if(mInfo->GetPickDisp() == 1)
+          gdi->name = GForm("%2d. (%6.3f)  %s",  loc, zdist, gdi->name.c_str()); 
+        else
+          gdi->name = GForm("%2d. (%6.3f%%)  %s", loc, 100*(zdist/far), gdi->name.c_str()); 
+      } else {
+        gdi->name = GForm("%2d. %s", loc, gdi->name.c_str());
+      }
+      ++loc;
+      pdl.push_back( pick_data(this, gdi->lens) );
+      menu.add(gdi->name.c_str(), 0, (Fl_Callback*)fltk_pick_callback,
+	       &pdl.back(), FL_SUBMENU);
+      make_menu(menu, pdl, string(gdi->name), this, gdi->lens);
+       
+      // iterate through the list of parents
+      for(lpZGlass_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
+        ZGlass* pfl = *pi;
+        pdl.push_back( pick_data(this, pfl,  Pupil::p_open_view) );
+        make_menu(menu, pdl,
+                  string(GForm("%s/Parents/%s", gdi->name.c_str(), pfl->GetName())),
+                  this, pfl);
+      }
+    }
+
     menu.popup();
 
-    // pdl going out of scope
   } // if(n>0)
+
   delete [] b;
 }
 
@@ -496,15 +543,15 @@ void Pupil::draw()
   SetProjection2();
   // }
 
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  SetCameraView();
+
   { // clear
     const ZColor c = mInfo->GetClearColor();
     glClearColor(c.r(), c.g(), c.b(), c.a());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  SetCameraView();
 
   // Should move this shit somewhere ... and hope other shit cleans up ... naaah
   // i think i would better leave it here a bit longer
@@ -609,66 +656,10 @@ void Pupil::draw()
     glVertex2f(0, -ch_size/3);	glVertex2f(0,-ch_size);
   } glEnd();
 
-  /*
-    glPointSize(4);
-    if(mMir[0] > 0) {
-    Float_t col[3] = {0,0,0}; col[ mMir[0]-1 ] = 1; glColor3fv(col);
-    glBegin(GL_POINTS); glVertex2f(-ch_size, ch_size); glEnd();
-    }
-    if(mMir[1] > 0) {
-    Float_t col[3] = {0,0,0}; col[ mMir[1]-1 ] = 1; glColor3fv(col);
-    glBegin(GL_POINTS); glVertex2f(ch_size, ch_size); glEnd();
-    }
-  */
 
   if(mInfo->GetShowRPS() == true && mDriver->fTexFont) {
-    // Render rps using GLTextNS.
-    /* 
-       GLTextNS::TexFont *txf = mDriver->fTexFont;
-
-       int step = txf->max_ascent + txf->max_descent;
-
-       glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
-
-       glLoadIdentity();
-       glTranslatef(-1, -1, 0.0);
-       glScalef(2.0/w(), 2.0/h(), 1);
-       glTranslatef(0, h() - txf->max_ascent, 0);
-       glColor3f(0,1,1);
-
-       GLTextNS::txfBindFontTexture(txf);
-  
-       glEnable(GL_TEXTURE_2D);
-       glEnable(GL_BLEND);
-       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-       glPolygonMode(GL_FRONT, GL_FILL);
-
-       // int width, ascent, descent;
-       // GLTextNS::txfGetStringMetrics(txf, text, len, &width, &ascent, &descent);
-       const char* text = GForm("rps %.1f", 1/rnr_time.ToDouble() <? 999.9);
-       GLTextNS::txfRenderString(txf, text, strlen(text));
-
-       glPopAttrib();
-    */
-
-
-    // Render rps using fltk's gl_draw.
-    {
-      int fsize = mDriver->GetTextSize();
-      glLoadIdentity();
-      gl_font(FL_HELVETICA_BOLD, fsize);
-      int desc = gl_descent();
-      // int cellh = fsize + desc;
-      glTranslatef(-1, -1, 0.0);
-      glScalef(2.0/w(), 2.0/h(), 1);
-      const char* text = GForm("%.1frps", 1/rnr_time.ToDouble() <? 999.9);
-      // int tw = TMath::Ceil(gl_width(text));
-      int x = 0, y = h() - fsize;
-      // glColor3f(1, 1, 0.7);
-      // gl_rectf(x, y-desc, tw, cellh);
-      glColor4fv(mDriver->RefTextCol()());
-      gl_draw(text, x, y);
-    }
+    const string text( GForm("%.1frps", 1/rnr_time.ToDouble() <? 999.9) );
+    GLTextNS::RnrTextAt(mDriver, text, 2, 0, 0, mInfo->PtrTextCol(), 0);
   }
 
   glMatrixMode(GL_PROJECTION);
@@ -733,12 +724,12 @@ int Pupil::handle(int ev)
 	//sprintf(x, "1,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
 	//mEye->Send(move_cmd, x, target, beta);
       } else {
-	mCamera->MoveLF(2, dy*TMath::Power(abs(dy), mInfo->GetAccelExp()) /
+	mCamera->MoveLF(3, dy*TMath::Power(abs(dy), mInfo->GetAccelExp()) /
 			   mInfo->GetMSMoveFac());
 	//sprintf(x, "2,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
 	//mEye->Send(move_cmd, x, target, beta);      
       }
-      mCamera->MoveLF(3, -dx*TMath::Power(abs(dx), mInfo->GetAccelExp()) /
+      mCamera->MoveLF(2, dx*TMath::Power(abs(dx), mInfo->GetAccelExp()) /
 		         mInfo->GetMSMoveFac());
       //sprintf(x, "3,%g", -dx*abs(dx)/mInfo->GetMSMoveFac());
       //mEye->Send(move_cmd, x, target, beta);
@@ -759,15 +750,15 @@ int Pupil::handle(int ev)
     // cout << mMouseX << " " << mMouseY << " " << dx << " " << dy << endl;
     if(Fl::event_state(FL_BUTTON2) && dy!=0) {
       if(!Fl::event_state(FL_CTRL)) {
-	mCamera->RotateLF(1,2,dy/mInfo->GetMSRotFac());
+	mCamera->RotateLF(1,3,dy/mInfo->GetMSRotFac());
       } else {
-	mCamera->RotateLF(1,2,-dy/mInfo->GetMSRotFac());
+	mCamera->RotateLF(1,3,-dy/mInfo->GetMSRotFac());
       }
       chg=1;
     }
     if(Fl::event_state(FL_BUTTON2) && dx!=0) {
       if(!Fl::event_state(FL_CTRL)) {
-	mCamera->RotateLF(3,1,dx/mInfo->GetMSRotFac());
+	mCamera->RotateLF(1,2,dx/mInfo->GetMSRotFac());
 	//sprintf(foo,"3,1,%8g", dx/mInfo->GetMSRotFac());
       } else {
 	mCamera->RotateLF(2,3,-dx/mInfo->GetMSRotFac());
