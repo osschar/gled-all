@@ -11,6 +11,7 @@
 // In fact should do this somwhere in routing code ... but anyway ...
 
 #include "PerfMeterOperator.h"
+#include "PerfMeterOperator.c7"
 
 ClassImp(PerfMeterOperator)
 
@@ -77,9 +78,8 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception
 void PerfMeterOperator::send_beam_or_flare(auto_ptr<ZMIR>& m)
 {
   if(bUseBeams) {
-    m->SetRecipient(mBeamHost);
+    SaturnInfo *rec = mBeamHost ? mBeamHost : mSaturn->GetSaturnInfo();
+    m->SetRecipient(rec);
   }
   mSaturn->PostMIR(m);
 }
-
-#include "PerfMeterOperator.c7"
