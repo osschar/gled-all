@@ -16,9 +16,6 @@
 //________________________________________________________________________
 
 #include "Mover.h"
-#include <Gled/GledMirDefs.h>
-
-#include <memory>
 
 ClassImp(Mover)
 
