@@ -14,13 +14,13 @@ namespace {
   void master_cb(Fl_Widget* o, Fl_Widget* m)
   { m->do_callback(); }
 
-  char *sub_labels[] = { "t", "x", "y", "z" };
+  char *sub_labels[] = { "x", "y", "z", "t" };
 }
 
 /**************************************************************************/
 // Fl_LorentzVector
 
-Fl_LorentzVector::Fl_LorentzVector(int x, int y, int w,int h, const char* l) :
+Fl_LorentzVector::Fl_LorentzVector(int x, int y, int w, int h, const char* l) :
   Fl_Group(x,y,w,h,l)
 {
   if(w<4) w = 4; // at least labels; expect resize
