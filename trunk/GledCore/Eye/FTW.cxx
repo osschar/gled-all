@@ -491,7 +491,7 @@ namespace {
       datas.push_back( Inst_SelID(ud->fidsel, (*lsi)->fLid) );
       menu.add((*lsi)->fName.c_str(), 0, (Fl_Callback*)lid_sel_cb, &datas.back());
     }
-    const Fl_Menu_Item* mi = menu.popup();
+    menu.popup();
   }
 
   void fidsel_cid_cb(Fl_Button* b, Inst_SelID* ud) {
@@ -517,7 +517,7 @@ namespace {
       int flags = (k != res.end() && k->first - j->first > 1) ? FL_MENU_DIVIDER : 0;
       menu.add(j->second.c_str(), 0, (Fl_Callback*)cid_sel_cb, &datas.back(), flags);
     }
-    const Fl_Menu_Item* mi = menu.popup();    
+    menu.popup();    
 
   }
 
