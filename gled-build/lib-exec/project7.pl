@@ -358,11 +358,11 @@ while($c !~ m!\G\s*$!osgc) {
   # print "Enterring at ", pos $c, ", len ", length $c, "\n" if $DEBUG;
   # Check for 7777 instructions
   if($c =~ m!\G\s*//\s*
-             7777\s*([^\n]*?)\s*\n
+             7777\s*(\w+)\s*\(\s*([^\n]*)\s*\)
             !omgcx)
   {
-    print "evaling \"$1\"\n" if $DEBUG;
-    eval($1) or die;
+    print "evaling \"$1\" arg = \"$2\"\n" if $DEBUG;
+    eval("$1(\"$2\");") or die;
     next;
   }
   # Check for 777 widgets (Explicit)
@@ -675,7 +675,11 @@ for $r (@Members) {
       if(exists $r->{Link}) {
 	if($stamp) { $stamp .= "  mTimeStamp;\n"; } # Stamped in ZGlass::set_link_or_die
       } else {
-	$stamp .= "  Stamp(FID());\n";
+	if($r->{Xport} =~ m/x/) {
+	  $stamp .= "  Stamp(FID(), 0x1);\n";
+	} else {
+	  $stamp .= "  Stamp(FID());\n";
+	}
       }
     }
 
