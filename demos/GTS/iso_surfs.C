@@ -1,6 +1,6 @@
 // $Header$
 
-// simple scene with some GTS models; more available from http://gts.sf.net/
+// A simple scene demonstrating GTSIsoMaker.
 
 // vars: ZQueen* scenes
 // libs: Geom1 GTS
@@ -28,35 +28,59 @@ void iso_surfs()
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
-  l->Set3Pos(-10, 0, 0);
-  l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
+  l->Set3Pos(-2, -6, 6);
+  l->RotateLF(1,2, TMath::Pi());
   scenes->CheckIn(l); starw->Add(l);
   starw->GetGlobLamps()->Add(l);
   ZNode* n = new Sphere(0.5, "Sph");
   scenes->CheckIn(n); l->Add(n);
 
-  CREATE_ADD_GLASS(maker, GTSIsoMaker, starw, "Iso Maker", 0);
-
-  CREATE_ADD_GLASS(mat1,   ZGlMaterial, starw, "Material1", 0);
-  CREATE_ADD_GLASS(blend1, ZGlBlending, starw, "Blending1", 0);
-  CREATE_ADD_GLASS(limo1,  ZGlLightModel, starw, "LightModel1", 0);
-
   // GTS models
 
-  CREATE_ADD_GLASS(surf1, GTSurf, starw, "Surf1", 0);
-  maker->SetTarget(surf1);
-  maker->SetFormula("x^2 + y^2 + z^2");
-  maker->SetValue(0.6);
+  CREATE_ADD_GLASS(maker1, GTSIsoMaker, starw, "Iso Maker 1", 0);
+  CREATE_ADD_GLASS(surf1, GTSurf, starw, "Clipped Sphere", 0);
+  surf1->Set3Pos(0,3,0);
+  surf1->SetColor(1,0.8,0.2);
+  maker1->SetTarget(surf1);
+  maker1->SetFormula("x^2 + y^2 + z^2");
+  maker1->SetValue(1.2);
+  maker1->MakeSurface();
 
-  maker->MakeSurface();
+  CREATE_ADD_GLASS(maker2, GTSIsoMaker, starw, "Iso Maker 2", 0);
+  CREATE_ADD_GLASS(surf2, GTSurf, starw, "Torus", 0);
+  surf2->SetRotByDegrees(0,30,-30);
+  surf2->SetColor(0.2,1,0.8);
+  maker2->SetTarget(surf2);
+  maker2->SetFormula("(0.8 - sqrt(x^2 + y^2))^2 + z^2");
+  maker2->SetValue(0.04);
+  maker2->MakeSurface();
+
+  CREATE_ADD_GLASS(mat,   ZGlMaterial, starw, "Material1", 0);
+  CREATE_ADD_GLASS(blend, ZGlBlending, starw, "Blending1", 0);
+  CREATE_ADD_GLASS(limo,  ZGlLightModel, starw, "LightModel1", 0);
+  limo->SetLightModelOp(ZGlStateBase::GSO_On);
+  limo->SetLiMoTwoSide(true);
+  limo->SetShadeModelOp(ZGlStateBase::GSO_On);
+
+  CREATE_ADD_GLASS(maker3, GTSIsoMaker, starw, "Iso Maker 3", 0);
+  CREATE_ADD_GLASS(surf3, GTSurf, starw, "Hyperboloid", 0);
+  surf3->Set3Pos(0,-3,0);
+  surf3->SetRotByDegrees(0,-30,0);
+  surf3->SetS(1.5);
+  surf3->SetUseScale(true);
+  surf3->SetColor(0.8,0.2,1);
+  maker3->SetTarget(surf3);
+  maker3->SetFormula("(x^2+y^2) - z^2/0.75");
+  maker3->SetValue(-0.05);
+  maker3->MakeSurface();
 
   { // Station rotator
     Eventor* e = new Eventor("Dynamo");
     e->SetBeatsToDo(-1); e->SetInterBeatMS(40); e->SetStampInterval(10);
     scenes->CheckIn(e); starw->Add(e);
     Mover* mv = new Mover("S1 Rotator");
-    mv->SetNode(surf1); mv->SetRi(1); mv->SetRj(2); mv->SetRa(0.005);
+    mv->SetNode(surf2); mv->SetRi(2); mv->SetRj(3); mv->SetRa(0.01);
     scenes->CheckIn(mv); e->Add(mv);
   }
-  // e->Start();
+  e->Start();
 }
