@@ -6,7 +6,7 @@
 
 #include "Lamp_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
-//#include <Stones/ZTrans.h>
+#include <Rnr/GL/SphereTrings.h>
 
 #include <FL/gl.h>
 
@@ -20,11 +20,18 @@
 void Lamp_GL_Rnr::Draw(RnrDriver* rd)
 {
   if(mLampID == -1)
-    if(mLamp->bOnIfOff) LampOn(rd);
-  else
-    if(mLamp->bOffIfOn) LampOff(rd);
+    if(mLamp->bOnIfOff)      LampOn(rd);
+    else if(mLamp->bOffIfOn) LampOff(rd);
     
   if(mLampID != -1 && mLamp->bDrawLamp) {
+    glColor4fv(mLamp->mDiffuse());
+    glPushMatrix();
+    glRotatef(TMath::Pi(), 0, 0, 1);
+    glScalef(1, 0.5, 0.5);
+    SphereTrings::EnableGL(0);
+    SphereTrings::DrawAndDisableGL(0);
+    glPopMatrix();
+
     // Here should render lamp as geometric object.
   }
 }
