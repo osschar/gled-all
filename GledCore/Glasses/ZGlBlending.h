@@ -42,7 +42,7 @@ protected:
   Int_t		mFogMode;     // X{GS}  7 PhonyEnum(-width=>6, -vals=>[GL_EXP,Exp, GL_EXP2,Exp2, GL_LINEAR,Linear], -join=>1)
   Int_t		mFogHint;     // X{GS}  7 PhonyEnum(-width=>6, -vals=>[GL_NICEST,Nicest, GL_FASTEST,Fastest, GL_DONT_CARE,DontCare])
   ZColor	mFogColor;    // X{PGS} 7 ColorButt(-join=>1)
-  Float_t	mFogDensity;  // X{GS}  7 Value(-range=>[0,1000,1,100])
+  Float_t	mFogDensity;  // X{GS}  7 Value(-range=>[0,1000,1,1000])
   Float_t	mFogBeg;      // X{GS}  7 Value(-range=>[-1000,1000,1,100], -join=>1)
   Float_t	mFogEnd;      // X{GS}  7 Value(-range=>[-1000,1000,1,100])
 
