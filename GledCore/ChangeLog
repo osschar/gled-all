@@ -1,3 +1,13 @@
+2005-01-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Branch.cxx:
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZNameMap.h:
+	Implemented ZList::SortByName(). 
+
 2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.h:
