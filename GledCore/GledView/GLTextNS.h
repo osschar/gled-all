@@ -117,6 +117,8 @@ namespace GLTextNS {
     TextLineData(TexFont *txf, string line);
   };
 
+  extern void RnrTextBar(RnrDriver* rd, const string& text);
+
   extern void RnrTextBar(RnrDriver* rd, const string& text,
 			 BoxSpecs& bs, float zoffset=0);
 
