@@ -1,3 +1,85 @@
+2004-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	Improved logging of shutdown process.
+	
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* gled.cxx:
+	* saturn.cxx:
+	Support logging and output to files; new command line options.
+	See gledimp or 'gled --help' for details.
+	
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_Shell.cxx:
+	From Alja : modularize FTW_Nest construction to allow for state
+	slurping from NestInfo.
+	
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	From Alja: sort pick hits by depth; different display modes.
+	Also removed some obsolete code.
+	
+	* Glasses/NestInfo.cxx:
+	* Glasses/NestInfo.h:
+	From Alja: added layout specifications members to allow a FTW_Nest
+	to be spawned with a specified custom layout.
+		
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	From Alja: added picking display modes, substituted PickW and
+	PickH with PickR(adius).
+
+	* Glasses/PerfMeterOperator.cxx:
+	Added protection against undefined mBeamHost in send_beam_or_flare().
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Improved interface for temporary disabling thread cancellation;
+	new helper class GThreadKeepAlive.
+	
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	New function RnrTextAt(...): render some text in screen
+	coordinates. Useful for reporting in full-screen mode.
+	
+	* GledView/GledViewNS.h:
+	Added RnrCtrl(const RnrBits& rb) ctor.
+	
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+	Fixes for self rendering.
+	
+	* RnrBase/RnrDriver.h:
+	Added ptr export for colors.
+	
+	* catalog.patch:
+	Pragmas for helper classes.
+
+	* GledView/user_init.cxx:
+	Removed registration of custom MTW layouts.
+	
+	* macros/eye.C:
+	* macros/moon.C:
+	* macros/sun.C:
+
+	* perllib/GLED_Widgets.pm:
+	Added FL_WHEN_ENTER_KEY to when() of Textor, tooltip for Filor.
+	
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	* Eye/MCW_View.cxx:
+	* Eye/OptoStructs.h:
+	Clean-up of includes.
+	
+	* Stones/ZColor.h:
+	Const-correctness changes.
+	
+	* Gled/GledNS.h:
+	Formatting changes.
+	
 2004-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	==================================================
