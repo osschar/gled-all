@@ -74,6 +74,7 @@ namespace GledViewNS {
   };
 
   struct WeedInfo : public GledNS::InfoBase {
+    bool		bIsLinkWeed;
     Int_t		fWidth;
     Int_t		fHeight;
     bool		bLabel;
