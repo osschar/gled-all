@@ -14,6 +14,7 @@
 
 #include "WSPoint.h"
 #include "WSSeed.h"
+#include "WSPoint.c7"
 
 ClassImp(WSPoint)
 
@@ -34,24 +35,24 @@ void WSPoint::Coff(const WSPoint* f)
 {
   const ZTrans& a = RefTrans();
   const ZTrans& b = f->RefTrans();
-  Float_t d = sqrt(sqr(a(1u,4u)-b(1u,4u)) +
-		  sqr(a(2u,4u)-b(2u,4u)) +
-		  sqr(a(3u,4u)-b(3u,4u)));
+  Float_t d = sqrt(sqr(a(1,4) - b(1,4)) +
+		   sqr(a(2,4) - b(2,4)) +
+		   sqr(a(3,4) - b(3,4)));
   Float_t T1 = mT*d, T2 = f->mT*d;
   for(Int_t i=1; i<=3; i++) {
-    Float_t A = T2*b(i, 1u) - 2*(b(i, 4u) - a(i, 4u)) + T1*a(i, 1u);
-    mCoffs(i,0u) = a(i,4u);
-    mCoffs(i,1u) = T1*a(i,1u);
-    mCoffs(i,2u) = (b(i, 4u) - a(i, 4u)) - T1*a(i, 1u) - A;
-    mCoffs(i,3u) = A;
+    Float_t A = T2*b(i, 1) - 2*(b(i, 4) - a(i, 4)) + T1*a(i, 1);
+    mCoffs(i,0) = a(i, 4);
+    mCoffs(i,1) = T1*a(i, 1);
+    mCoffs(i,2) = (b(i, 4) - a(i, 4)) - T1*a(i, 1) - A;
+    mCoffs(i,3) = A;
   }
   // Widths
   {
     Float_t A = f->mS - 2*(f->mW - mW) + mS;
-    mCoffs(4u,0u) = mW;
-    mCoffs(4u,1u) = mS;
-    mCoffs(4u,2u) = (f->mW - mW) - mS - A;
-    mCoffs(4u,3u) = A;
+    mCoffs(4,0) = mW;
+    mCoffs(4,1) = mS;
+    mCoffs(4,2) = (f->mW - mW) - mS - A;
+    mCoffs(4,3) = A;
   }
 }
 
@@ -63,10 +64,10 @@ TimeStamp_t WSPoint::Stamp(LID_t lid, CID_t cid)
   // Not optimal as it forces re-computation of Coffs for all WSPoints
   // in the symbol.
 
-  TimeStamp_t t = ZNode::Stamp(lid, cid);
-  if(lid==0 && cid == 0 ||
-     lid==ZNode::LibID() && cid==ZNode::ClassID() ||
-     lid==LibID() && cid==ClassID())
+  TimeStamp_t t = PARENT_GLASS::Stamp(lid, cid);
+  if(lid == 0              && cid == 0 ||
+     lid == ZNode::LibID() && cid == PARENT_GLASS::ClassID() ||
+     lid == LibID()        && cid == ClassID())
   {
     mStampReqTring = t;
 
@@ -76,5 +77,3 @@ TimeStamp_t WSPoint::Stamp(LID_t lid, CID_t cid)
 
   return t;
 }
-
-#include "WSPoint.c7"
