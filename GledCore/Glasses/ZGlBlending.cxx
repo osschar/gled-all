@@ -20,9 +20,11 @@ ClassImp(ZGlBlending)
 void ZGlBlending::_init()
 {
   // !!!! Set all links to 0 !!!!
-  mBlendOp = GSO_Nop;
-  mBSrcFac = GL_SRC_ALPHA;
-  mBDstFac = GL_ONE_MINUS_SRC_ALPHA;
+  mBlendOp   = GSO_Nop;
+  mBSrcFac   = GL_SRC_ALPHA;
+  mBDstFac   = GL_ONE_MINUS_SRC_ALPHA;
+  mBEquation = GL_FUNC_ADD;
+  mBConstCol.rgba(0.5, 0.5, 0.5, 0.5);
 
   mAntiAliasOp = GSO_Nop;
   bPointSmooth = true;

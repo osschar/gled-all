@@ -21,19 +21,22 @@ private:
 
 protected:
   // Blend mode
+  // missing support for glBlendFuncSeparate
   ZGlStateBase::GlStateOp_e
                 mBlendOp;     // X{GS}  7 PhonyEnum()
-  Int_t		mBSrcFac;     // X{GS}  7 PhonyEnum(-width=>12, -vals=>[GL_ZERO,Zero, GL_ONE,One, GL_DST_COLOR,DstColor, GL_ONE_MINUS_DST_COLOR,OMDstColor, GL_SRC_ALPHA,SrcAlpha, GL_ONE_MINUS_SRC_ALPHA,OMSrcAlpha, GL_DST_ALPHA,DstAplha, GL_ONE_MINUS_DST_ALPHA,OMDstAlpha, GL_SRC_ALPHA_SATURATE,SrcAlphaSaturate, GL_CONSTANT_COLOR,ConstColor, GL_ONE_MINUS_CONSTANT_COLOR,OMConstCol, GL_CONSTANT_ALPHA,ConstAlpha, GL_ONE_MINUS_CONSTANT_ALPHA,OMConstAlpha], -join=>1)
+  Int_t		mBSrcFac;     // X{GS}  7 PhonyEnum(-width=>11, -vals=>[GL_ZERO,Zero, GL_ONE,One, GL_DST_COLOR,DstColor, GL_ONE_MINUS_DST_COLOR,OMDstColor, GL_SRC_ALPHA,SrcAlpha, GL_ONE_MINUS_SRC_ALPHA,OMSrcAlpha, GL_DST_ALPHA,DstAplha, GL_ONE_MINUS_DST_ALPHA,OMDstAlpha, GL_SRC_ALPHA_SATURATE,SrcAlphaSaturate, GL_CONSTANT_COLOR,ConstColor, GL_ONE_MINUS_CONSTANT_COLOR,OMConstCol, GL_CONSTANT_ALPHA,ConstAlpha, GL_ONE_MINUS_CONSTANT_ALPHA,OMConstAlpha], -join=>1)
   Int_t		mBDstFac;     // X{GS}  7 PhonyEnum(-width=>10, -vals=>[GL_ZERO,Zero, GL_ONE,One, GL_SRC_COLOR,SrcColor, GL_ONE_MINUS_SRC_COLOR,OMSrcColor, GL_SRC_ALPHA,SrcAlpha, GL_ONE_MINUS_SRC_ALPHA,OMSrcAlpha, GL_DST_ALPHA,DstAplha, GL_ONE_MINUS_DST_ALPHA,OMDstAlpha, GL_CONSTANT_COLOR,ConstColor, GL_ONE_MINUS_CONSTANT_COLOR,OMConstCol, GL_CONSTANT_ALPHA,ConstAlpha, GL_ONE_MINUS_CONSTANT_ALPHA,OMConstAlpha])
+  Int_t		mBEquation;   // X{GS}  7 PhonyEnum(-width=>10, -vals=>[GL_FUNC_ADD,Add, GL_FUNC_SUBTRACT,Sub, GL_FUNC_REVERSE_SUBTRACT,ReverseSub, GL_MIN,Min, GL_MAX,Max], -join=>1)
+  ZColor	mBConstCol;   // X{PGS} 7 ColorButt()
 
   // Antialiasing points, lines
   ZGlStateBase::GlStateOp_e
                 mAntiAliasOp; // X{GS}  7 PhonyEnum()
-  Bool_t	bPointSmooth; // X{GS}  7 Bool()
-  Float_t	mPointSize;   // X{GS}  7 Value(-width=>6, -range=>[0.01,100,1,100], join=>1)
+  Bool_t	bPointSmooth; // X{GS}  7 Bool(-join=>1)
+  Float_t	mPointSize;   // X{GS}  7 Value(-width=>5, -range=>[0.01,100,1,100], -join=>1)
   Int_t		mPointHint;   // X{GS}  7 PhonyEnum(-width=>6, -vals=>[GL_NICEST,Nicest, GL_FASTEST,Fastest, GL_DONT_CARE,DontCare])
-  Bool_t	bLineSmooth;  // X{GS}  7 Bool()
-  Float_t	mLineWidth;   // X{GS}  7 Value(-width=>6, -range=>[0.01,10,1,100], join=>1)
+  Bool_t	bLineSmooth;  // X{GS}  7 Bool(-join=>1)
+  Float_t	mLineWidth;   // X{GS}  7 Value(-width=>4, -range=>[0.01,10,1,100], -join=>1)
   Int_t		mLineHint;    // X{GS}  7 PhonyEnum(-width=>6, -vals=>[GL_NICEST,Nicest, GL_FASTEST,Fastest, GL_DONT_CARE,DontCare])
 
   // Fog
@@ -51,7 +54,7 @@ public:
 
 
 #include "ZGlBlending.h7"
-  ClassDef(ZGlBlending, 1)
+  ClassDef(ZGlBlending, 1) // Control of GL blending, anti-aliasing of points & lines and fog
 }; // endclass ZGlBlending
 
 GlassIODef(ZGlBlending);
