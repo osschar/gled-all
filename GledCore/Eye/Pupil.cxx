@@ -11,6 +11,7 @@
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
 #include <Gled/GledNS.h>
+#include <GledView/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
 #include <TVirtualX.h>
@@ -148,8 +149,6 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
   mCamAbsTrans  = mCamBaseTrans;
   mCamAbsTrans *= mCamera->RefTrans();
 
-  mTexFont = 0;
-
   bFullScreen = false;
 
   bDumpImage  = false;
@@ -163,8 +162,7 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
     XSync(fl_display, False);
   */
 
-  _firstp = true;
-  size(mInfo->GetWidth()+1, mInfo->GetHeight()+1);
+  size(mInfo->GetWidth(), mInfo->GetHeight());
   show();
 
   /*
@@ -176,7 +174,7 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
 }
 
 Pupil::~Pupil() {
-  // notify eye ... Shell, that is ... !!!!
+  // Notify Shell !!!
   delete mCamera;
 }
 
@@ -611,14 +609,7 @@ void Pupil::Pick()
 
 void Pupil::draw()
 {
-  // The following kludge somewhat cures the problem with
-  // non present default font!
-  if(_firstp) {
-    size(mInfo->GetWidth(), mInfo->GetHeight());
-    _firstp = false;
-    // printf("%d,%d : %d,%d\n", x(), y(), w(), h());
-    return;
-  }
+  static const string _eh("Pupil::draw ");
 
   GTime start_time(GTime::I_Now);
 
@@ -634,7 +625,7 @@ void Pupil::draw()
   SetCameraView();
 
   { // clear
-    const ZColor c = mInfo->GetClearColor();
+    const ZColor& c = mInfo->RefClearColor();
     glClearColor(c.r(), c.g(), c.b(), c.a());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
@@ -671,45 +662,19 @@ void Pupil::draw()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
-  // This is stoopid. Need a Stone to encapsulate this. Or a Glass.
-  // See ZRlRnrNameCtrl. Should have a stack of those in RnrDriver, or sth.
-  mDriver->SetTextSize(mInfo->GetTextSize());
-  mDriver->SetRnrNames(mInfo->GetRnrNames());
-  mDriver->SetRnrTiles(mInfo->GetRnrTiles());
-  mDriver->SetRnrFrames(mInfo->GetRnrTiles()); // !!!
-  mDriver->SetNameOffset(mInfo->GetNameOffset());
-  mDriver->RefTextCol() = mInfo->GetTextCol();
-  mDriver->RefTileCol() = mInfo->GetTileCol();
-  mDriver->SetTilePos("tl");
-
-  if(mTexFont == 0) {
-    const char* font = "fontdefault.txf";
-    const char* file = GForm("%s/lib/%s", gSystem->Getenv("GLEDSYS"), font);
-    mTexFont = GLTextNS::txfLoadFont(file);
-    if(mTexFont != 0) {
-      GLTextNS::txfEstablishTexture(mTexFont, 0, GL_TRUE);
-    } else {
-      fprintf(stderr, "Problem loading font %s from file %s ; error: %s.\n",
-	      font, file, GLTextNS::txfErrorString());
-    }
-  }
-  if(mTexFont) {
-    mDriver->fTexFont = mTexFont;
-  }
-
   mDriver->SetWidth(w());
   mDriver->SetHeight(h());
 
   Render();
 
   if(mDriver->SizePM() > 0) {
-    printf("Pupil::draw position stack not empty (%d).\n", mDriver->SizePM());
+    printf("%sposition stack not empty (%d).\n", _eh.c_str(), mDriver->SizePM());
     mDriver->ClearPM();
   }
 
   GLenum gl_err = glGetError();
   if(gl_err) {
-    printf("Pupil::draw GL error: %s.\n", gluErrorString(gl_err));
+    printf("%sGL error: %s.\n", _eh.c_str(), gluErrorString(gl_err));
   }
 
   GTime stop_time(GTime::I_Now);
@@ -740,9 +705,10 @@ void Pupil::draw()
   } glEnd();
 
 
-  if(mInfo->GetShowRPS() == true && mDriver->fTexFont) {
+  if(mInfo->GetShowRPS() == true) {
     const string text(GForm("%.1frps", TMath::Min(1/rnr_time.ToDouble(), 999.9)));
-    GLTextNS::RnrTextAt(mDriver, text, 2, 0, 1e-3, mInfo->PtrTextCol(), 0);
+    ZColor col = ZColor(1,1,1) - mInfo->RefClearColor();
+    GLTextNS::RnrTextAt(mDriver, text, 2, 0, 1e-3, &col, 0);
   }
 
   glMatrixMode(GL_PROJECTION);

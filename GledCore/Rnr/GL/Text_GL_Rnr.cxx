@@ -6,6 +6,7 @@
 
 #include "Text_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
+#include <GledView/GLTextNS.h>
 #include <FL/gl.h>
 
 /**************************************************************************/
@@ -17,14 +18,16 @@ void Text_GL_Rnr::_init()
 
 void Text_GL_Rnr::Draw(RnrDriver* rd)
 {
-  if(rd->fTexFont) { // TexFont test
+  if(mText->bUseDispList) {
     ZGlass_GL_Rnr::Draw(rd);
+  } else {
+    Render(rd);
   }
 }
 
 void Text_GL_Rnr::Render(RnrDriver* rd)
 {
-  GLTextNS::TexFont *txf = rd->fTexFont;
+  GLTextNS::TexFont *txf = rd->GetTexFont();
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 

@@ -12,6 +12,8 @@
 #include "GLTextNS.h"
 
 #include <RnrBase/RnrDriver.h>
+#include <Glasses/ZRlFont.h>
+#include <Glasses/ZRlNameRnrCtrl.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -32,19 +34,19 @@ namespace GLTextNS {
   int useLuminanceAlpha = 1;
 
   /* byte swap a 32-bit value */
-#define SWAPL(x, n) { \
-                 n = ((char *) (x))[0];\
-                 ((char *) (x))[0] = ((char *) (x))[3];\
-                 ((char *) (x))[3] = n;\
-                 n = ((char *) (x))[1];\
-                 ((char *) (x))[1] = ((char *) (x))[2];\
-                 ((char *) (x))[2] = n; }
+#define SWAPL(x, n) {				\
+    n = ((char *) (x))[0];			\
+    ((char *) (x))[0] = ((char *) (x))[3];	\
+    ((char *) (x))[3] = n;			\
+    n = ((char *) (x))[1];			\
+    ((char *) (x))[1] = ((char *) (x))[2];	\
+    ((char *) (x))[2] = n; }
 
   /* byte swap a short */
-#define SWAPS(x, n) { \
-                 n = ((char *) (x))[0];\
-                 ((char *) (x))[0] = ((char *) (x))[1];\
-                 ((char *) (x))[1] = n; }
+#define SWAPS(x, n) {				\
+    n = ((char *) (x))[0];			\
+    ((char *) (x))[0] = ((char *) (x))[1];	\
+    ((char *) (x))[1] = n; }
 
   /**************************************************************************/
 
@@ -345,38 +347,6 @@ namespace GLTextNS {
     }
     glBindTexture(GL_TEXTURE_2D, txf->texobj);
 
-#if 1
-    /* XXX Indigo2 IMPACT in IRIX 5.3 and 6.2 does not support the GL_INTENSITY
-       internal texture format. Sigh. Win32 non-GLX users should disable this
-       code. */
-    if (useLuminanceAlpha == 0) {
-      char *vendor, *renderer, *version;
-
-      renderer = (char *) glGetString(GL_RENDERER);
-      vendor = (char *) glGetString(GL_VENDOR);
-      if (!strcmp(vendor, "SGI") && !strncmp(renderer, "IMPACT", 6)) {
-	version = (char *) glGetString(GL_VERSION);
-	if (!strcmp(version, "1.0 Irix 6.2") ||
-	    !strcmp(version, "1.0 Irix 5.3")) {
-	  unsigned char *latex;
-	  int width = txf->tex_width;
-	  int height = txf->tex_height;
-	  int i;
-
-	  useLuminanceAlpha = 1;
-	  latex = (unsigned char *) calloc(width * height * 2, 1);
-	  /* XXX unprotected alloc. */
-	  for (i = 0; i < height * width; i++) {
-	    latex[i * 2] = txf->teximage[i];
-	    latex[i * 2 + 1] = txf->teximage[i];
-	  }
-	  free(txf->teximage);
-	  txf->teximage = latex;
-	}
-      }
-    }
-#endif
-
     if (useLuminanceAlpha) {
       if (setupMipmaps) {
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_LUMINANCE_ALPHA,
@@ -388,9 +358,6 @@ namespace GLTextNS {
 		     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, txf->teximage);
       }
     } else {
-#if defined(GL_VERSION_1_1) || defined(GL_EXT_texture)
-      /* Use GL_INTENSITY4 as internal texture format since we want to use as
-	 little texture memory as possible. */
       if (setupMipmaps) {
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_INTENSITY4,
 			  txf->tex_width, txf->tex_height,
@@ -400,10 +367,6 @@ namespace GLTextNS {
 		     txf->tex_width, txf->tex_height, 0,
 		     GL_LUMINANCE, GL_UNSIGNED_BYTE, txf->teximage);
       }
-#else
-      abort();            /* Should not get here without EXT_texture or OpenGL
-			     1.1. */
-#endif
     }
 
     // MT: tried changing MIN/MAG filters ... bad idea.
@@ -422,8 +385,9 @@ namespace GLTextNS {
 
   void txfUnloadFont(TexFont * txf)
   {
-    // !!!! Should also free texture object.
-    // But will have to clean-up code for GL 1.2 anyway.
+    if (txf->texobj) {
+      glDeleteTextures(1, &txf->texobj);
+    }
     if (txf->teximage) {
       free(txf->teximage);
     }
@@ -678,7 +642,9 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   typedef list<TextLineData>           lTLD_t;
   typedef list<TextLineData>::iterator lTLD_i;
 
-  TexFont *txf = rd->fTexFont;
+  TexFont *txf = rd->GetTexFont();
+  RNRDRIVER_GET_RNRMOD(font, rd, ZRlFont);
+  RNRDRIVER_GET_RNRMOD(nrc, rd, ZRlNameRnrCtrl);
 
   lStr_t lines;
   lTLD_t tlds;
@@ -701,7 +667,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   width   = max_width + bs.lm + bs.rm;
   float halfw = float(width)/2, halfh = float(height)/2;
 
-  float tsize = float(rd->GetTextSize());
+  float tsize = float(font->GetSize());
   float scale = tsize / ascent;
 
   // printf("%d = %d + %d; %f %f\n", descent+ascent, ascent, descent, tsize, scale);
@@ -742,8 +708,8 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   glDisable(GL_LIGHTING);
   glScalef(scale, scale, 1);
 
-  if(rd->GetRnrTiles()) {
-    glColor4fv(rd->RefTileCol()());
+  if(nrc->GetRnrTiles()) {
+    glColor4fv(nrc->RefTileCol()());
     glBegin(GL_QUADS);
     glVertex2i(0, -height); glVertex2i(width, -height);
     glVertex2i(width, 0);   glVertex2i(0, 0);
@@ -751,7 +717,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   }
 
   glTranslatef(0, 0, -1e-6);
-  glColor4fv(rd->RefTextCol()());
+  glColor4fv(nrc->RefTextCol()());
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -760,7 +726,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
   //glPolygonOffset(0, -20); // TRY THIS AGAIN, had problems w/ glOrtho far/near stuffe!!
 
-  if(rd->GetRnrFrames()) {
+  if(nrc->GetRnrFrames()) {
     glLineWidth(1);
     glBegin(GL_LINE_LOOP);
     glVertex2i(0, -height); glVertex2i(width, -height);
@@ -801,7 +767,8 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
 void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 {
-  TexFont *txf = rd->fTexFont;
+  TexFont *txf = rd->GetTexFont();
+  RNRDRIVER_GET_RNRMOD(nrc, rd, ZRlNameRnrCtrl);
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 
@@ -829,7 +796,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
   float x1 = (float)width/h_box + 0.1;
   float y0 = -0.1 - float(descent)/(h_box);
   float y1 =  0.1 + float(ascent)/(h_box);
-  glColor4fv(rd->RefTileCol()());
+  glColor4fv(nrc->RefTileCol()());
   glBegin(GL_QUADS);
   glVertex2f(x0, y0);
   glVertex2f(x1, y0);
@@ -840,7 +807,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 
   glPolygonOffset(-2, -2);
 
-  glColor4fv(rd->RefTextCol()());
+  glColor4fv(nrc->RefTextCol()());
   glPushMatrix();
   glScalef(scale, scale, 1);
   glEnable(GL_TEXTURE_2D);
@@ -864,8 +831,8 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   // If front_col == 0 renders uses white pen.
   // If back_col  != 0 renders a square of that color behind the text.
 
-  TexFont *txf = rd->fTexFont;
-  if(txf == 0) return;
+  TexFont *txf = rd->GetTexFont();
+  RNRDRIVER_GET_RNRMOD(font, rd, ZRlFont);
 
   glPushAttrib(GL_TEXTURE_BIT      |
 	       GL_LIGHTING_BIT     |
@@ -886,7 +853,7 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   descent = txf->max_descent;
 
   int   h_box = ascent + descent;
-  float scale = float(rd->GetTextSize()) / ascent;
+  float scale = float(font->GetSize()) / ascent;
 
   glPushMatrix();
   glLoadIdentity();

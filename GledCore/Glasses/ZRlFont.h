@@ -8,20 +8,28 @@
 #define GledCore_ZRlFont_H
 
 #include <Glasses/ZGlass.h>
+#include <Net/Ray.h>
 
 class ZRlFont : public ZGlass {
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZRlFont);
 
 private:
+  enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
+		      PRQN_font_change
+  };
+
   void _init();
 
 protected:
-  TString	mFontName;    // X{GS}  7 Textor()
+  TString	mFontFile;    // X{GE} 7 Filor()
+  Int_t         mSize;        // X{GS} 7 Value(-range=>[1,512,1])
 
 public:
   ZRlFont(const Text_t* n="ZRlFont", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
 
+  void SetFontFile(const Text_t* f);
 
 #include "ZRlFont.h7"
   ClassDef(ZRlFont, 1)

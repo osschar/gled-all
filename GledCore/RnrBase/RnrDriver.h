@@ -4,15 +4,18 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef GledCore_RnrDriver
-#define GledCore_RnrDriver
+#ifndef GledCore_RnrDriver_H
+#define GledCore_RnrDriver_H
 
 #include "A_Rnr.h"
 #include <GledView/GledViewNS.h>
-#include <GledView/GLTextNS.h>
 #include <Stones/ZColor.h>
 
 #include <stack>
+
+namespace GLTextNS {
+  class TexFont;
+};
 
 /**************************************************************************/
 // Rnr driver
@@ -34,42 +37,35 @@ protected:
   int		mMaxLamps;	// X{g}
   A_Rnr**	mLamps;
   
-  bool		bRnrPureGlasses; // X{gs}
-  bool		bRnrNames;	 // X{gs}
-  bool		bRnrTiles;	 // X{gs}
-  bool		bRnrFrames;	 // X{gs}
-  Float_t	mNameOffset;	 // X{gs}
-
-  Int_t		mTextSize;	 // X{gs}
-  ZColor	mTextCol;	 // X{pr}
-  ZColor	mTileCol;	 // X{pr}
-  string	mTilePos;	 // X{rGs}
+  bool	             bRnrNames;	 // X{gs}
+  GLTextNS::TexFont* mTexFont;   // X{gs}
 
   int		mWidth;		 // X{gs}
   int		mHeight;	 // X{gs}
 
   struct RnrMod {
     TObject*        def;
+    TObject*        def_autogen;
     stack<TObject*> stack;
-    RnrMod() : def(0) {}
+    RnrMod() : def(0), def_autogen(0) {}
   };
 
   typedef hash_map<FID_t, RnrMod>           hRnrMod_t;
   typedef hash_map<FID_t, RnrMod>::iterator hRnrMod_i;
 
   hRnrMod_t     mRnrMods;
+  hRnrMod_i	mRMI;
+  FID_t		mRMFid;
+  bool          find_rnrmod(FID_t fid);
 
 public:
-  GLTextNS::TexFont* fTexFont;
-
   RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r) {
     bUseOwnRnrs = false; bDryRun = false;
     mMaxDepth = 100;
     mMaxLamps = 8;
-    mLamps = new A_Rnr*[mMaxLamps];
-    bRnrPureGlasses = false;
-    bRnrNames = false; bRnrTiles = false;
-    fTexFont = 0;
+    mLamps = new (A_Rnr*)[mMaxLamps];
+    mTexFont = 0;
+    bRnrNames = false;
   }
   virtual ~RnrDriver() { delete [] mLamps; }
 
@@ -107,12 +103,28 @@ public:
   TObject* TopRnrMod(FID_t fid);
   TObject* GetRnrMod(FID_t fid);
 
-  void  RemoveRnrModEntry(FID_t fid);
-
-  template <class TT>
-  TT GetRnrMod(FID_t fid) { return dynamic_cast<TT>(GetRnrMod(fid)); }
+  void RemoveRnrModEntry(FID_t fid);
+  void CleanUpRnrModDefaults();
 
 #include "RnrDriver.h7"
 }; // endclass RnrDriver
+
+/**************************************************************************/
+
+#define RNRDRIVER_GET_RNRMOD(_var_, _rd_, _typ_) \
+  _typ_* _var_ = (_typ_*) (_rd_->GetRnrMod(_typ_::FID()))
+
+/**************************************************************************/
+
+inline bool RnrDriver::find_rnrmod(FID_t fid)
+{
+  if(fid == mRMFid) return true;
+  mRMI = mRnrMods.find(fid);
+  if(mRMI == mRnrMods.end()) {
+    mRMFid.clear(); return false;
+  } else {
+    mRMFid = fid;   return true;
+  }
+}
 
 #endif

@@ -16,15 +16,16 @@ private:
   void _init();
 
 protected:
-  ZRlNameRnrCtrl*	mZRlNameRnrCtrl;
-  GLTextNS::TexFont*	mFont;
+  bool            bExState;
+  ZRlNameRnrCtrl* mZRlNameRnrCtrl;
 
 public:
-  ZRlNameRnrCtrl_GL_Rnr(ZRlNameRnrCtrl* idol) : ZGlass_GL_Rnr(idol), mZRlNameRnrCtrl(idol) { _init(); }
+  ZRlNameRnrCtrl_GL_Rnr(ZRlNameRnrCtrl* idol) :
+    ZGlass_GL_Rnr(idol), mZRlNameRnrCtrl(idol) { _init(); }
 
-  // virtual void PreDraw(RnrDriver* rd);
+  virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  // virtual void PostDraw(RnrDriver* rd);
+  virtual void PostDraw(RnrDriver* rd);
 
 }; // endclass ZRlNameRnrCtrl_GL_Rnr
 

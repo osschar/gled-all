@@ -11,6 +11,7 @@
 #include <Stones/ZColor.h>
 
 class ZRlNameRnrCtrl : public ZGlStateBase {
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZRlNameRnrCtrl);
 
 private:
@@ -18,20 +19,18 @@ private:
 
 protected:
   ZGlStateBase::GlStateOp_e
-                mNameRnrOp;   // X{GS}  7 PhonyEnum()
-  TString	mFontName;    // X{GS}  7 Textor()
-  Bool_t	bRnrTiles;    // X{GS}  7 Bool(-join=>1)
-  Bool_t	bRnrFrames;   // X{GS}  7 Bool()
-  Float_t	mNameOffset;  // X{GS}  7 Value(-range=>[0,1,1,10000])
-  Int_t		mTextSize;    // X{GS}  7 Value(-range=>[0,100,1,1])
-  ZColor	mTextCol;     // X{PGS} 7 ColorButt(-join=>1)
-  ZColor	mTileCol;     // X{PGS} 7 ColorButt()
-  TString	mTilePos;     // X{GS}  7 Textor()
+                mNameRnrOp;   // X{GS}   7 PhonyEnum()
+
+  Bool_t	bRnrTiles;    // X{GS}   7 Bool(-join=>1)
+  Bool_t	bRnrFrames;   // X{GS}   7 Bool()
+  Float_t	mNameOffset;  // X{GS}   7 Value(-range=>[0,1,1,10000])
+  ZColor	mTextCol;     // X{PRGS} 7 ColorButt(-join=>1)
+  ZColor	mTileCol;     // X{PRGS} 7 ColorButt()
+  TString	mTilePos;     // X{RGS}  7 Textor()
 
 public:
   ZRlNameRnrCtrl(const Text_t* n="ZRlNameRnrCtrl", const Text_t* t=0) :
     ZGlStateBase(n,t) { _init(); }
-
 
 #include "ZRlNameRnrCtrl.h7"
   ClassDef(ZRlNameRnrCtrl, 1)

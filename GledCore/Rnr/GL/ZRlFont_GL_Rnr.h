@@ -18,16 +18,22 @@ private:
 protected:
   ZRlFont*		mZRlFont;
   GLTextNS::TexFont*	mFont;
-  GLTextNS::TexFont*	mFontBuf;
+  GLTextNS::TexFont*	mExFont;
 
 public:
-  ZRlFont_GL_Rnr(ZRlFont* idol) : ZGlass_GL_Rnr(idol), mZRlFont(idol) { _init(); }
+  ZRlFont_GL_Rnr(ZRlFont* idol) :
+    ZGlass_GL_Rnr(idol), mZRlFont(idol) { _init(); }
 
-  virtual void BindFont(RnrDriver* rd);
+  virtual void AbsorbRay(Ray& ray);
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
+
+  bool LoadFont();
+
+  // Interface for PupilInfo_GL_Rnr
+  void MakeDefault(RnrDriver* rd);
 
 }; // endclass ZRlFont_GL_Rnr
 

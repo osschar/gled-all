@@ -12,12 +12,14 @@
 
 class PupilInfo_GL_Rnr : public ZGlass_GL_Rnr {
 private:
+  void _init();
 
 protected:
-  PupilInfo*	mPupilInfo;
+  PupilInfo*	     mPupilInfo;
 
 public:
-  PupilInfo_GL_Rnr(PupilInfo* idol) : ZGlass_GL_Rnr(idol), mPupilInfo(idol) {}
+  PupilInfo_GL_Rnr(PupilInfo* idol) : ZGlass_GL_Rnr(idol), mPupilInfo(idol)
+  { _init();}
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

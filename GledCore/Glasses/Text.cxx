@@ -10,7 +10,6 @@
 //
 
 #include "Text.h"
-
 #include "Text.c7"
 
 ClassImp(Text)
@@ -33,9 +32,8 @@ void Text::_init()
   bBorder    = true;
   mXBorder   = 0.1;     mYBorder   = 0.1;
   mFGCol.rgba(1,1,1,1); mBGCol.rgba(0,0,0,1);
+
+  bUseDispList = false;
 }
-
-/**************************************************************************/
-
 
 /**************************************************************************/

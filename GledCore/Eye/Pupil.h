@@ -28,7 +28,6 @@ class Pupil : public OptoStructs::A_View,
 {
 
 protected:
-  bool		_firstp;
 
   PupilInfo*	mInfo;
 
@@ -46,8 +45,6 @@ protected:
 
   string	mLabel;		
   void		label_window();
-
-  GLTextNS::TexFont* mTexFont;
 
   bool		bFullScreen;
   int		mFSx, mFSy, mFSw, mFSh;

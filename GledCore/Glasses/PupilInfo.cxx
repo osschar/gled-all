@@ -13,7 +13,7 @@
 
 #include "PupilInfo.h"
 #include "PupilInfo.c7"
-#include "ZQueen.h"
+#include <Glasses/ZQueen.h>
 
 ClassImp(PupilInfo)
 
@@ -46,11 +46,9 @@ void PupilInfo::_init()
 
   mMSRotFac = 1; mMSMoveFac = 2; mMoveOM = -2; mAccelExp = 0.5;
 
-  mCHSize = 0.03;   mTextSize = 12;
+  mCHSize = 0.03;
 
-  bShowRPS = true; bRnrNames = false; bRnrTiles = true;
-  mNameOffset = 0.99;
-  mTextCol.rgba(1, 1, 1); mTileCol.rgba(0, 0, 0.3);
+  bShowRPS = true; bRnrNames = false;
 
   mBuffSize = 4096; mPickR = 5; mPickDisp = 0;
 }
@@ -59,47 +57,42 @@ void PupilInfo::_init()
 
 void PupilInfo::SetCameraBase(ZNode* camerabase)
 {
+  static const string _eh("PupilInfo::SetCameraBase ");
+
   if(camerabase != 0) {
     ZTrans* t = ToPupilFrame(camerabase);
     if(t == 0)
-      throw(string("PupilInfo::SetCameraBase camera not connected into pupil contents."));
+      throw(_eh + "camera not connected into pupil contents.");
     delete t;
   }
-
-  WriteLock();
-  try { set_link_or_die((ZGlass*&)mCameraBase, camerabase, FID()); }
-  catch(...) { WriteUnlock(); throw; }
-  WriteUnlock();
+  set_link_or_die((ZGlass*&)mCameraBase, camerabase, FID());
 }
 
 void PupilInfo::SetLookAt(ZNode* lookat)
 {
+  static const string _eh("PupilInfo::SetLookAt ");
+
   if(lookat != 0) {
     ZTrans* t = ToPupilFrame(lookat);
     if(t == 0)
-      throw(string("PupilInfo::SetLookat camera not connected into pupil contents."));
+      throw(_eh + "camera not connected into pupil contents.");
     delete t;
   }
-
-  WriteLock();
-  try { set_link_or_die((ZGlass*&)mLookAt, lookat, FID()); }
-  catch(...) { WriteUnlock(); throw; }
-  WriteUnlock();
+  set_link_or_die((ZGlass*&)mLookAt, lookat, FID());
 }
 
 void PupilInfo::SetUpReference(ZNode* upreference)
 {
+  static const string _eh("PupilInfo::SetUpReference ");
+
   if(upreference != 0) {
     ZTrans* t = ToPupilFrame(upreference);
     if(t == 0)
-      throw(string("PupilInfo::SetUpReference camera not connected into pupil contents."));
+      throw("camera not connected into pupil contents.");
     delete t;
   }
 
-  WriteLock();
-  try { set_link_or_die((ZGlass*&)mUpReference, upreference, FID()); }
-  catch(...) { WriteUnlock(); throw; }
-  WriteUnlock();
+  set_link_or_die((ZGlass*&)mUpReference, upreference, FID());
 }
 
 /**************************************************************************/
