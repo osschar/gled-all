@@ -10,6 +10,7 @@
 #include <Glasses/ZNameMap.h>
 #include <Glasses/SaturnInfo.h>
 
+#include <Gled/MIR_Priest.h>
 #include <Gled/GTime.h>
 
 class ZKing; class ZQueen;
@@ -19,10 +20,10 @@ class Ray;
 typedef set<ZQueen*>		spZQueen_t;
 typedef set<ZQueen*>::iterator	spZQueen_i;
 
-class ZQueen : public ZNameMap, public An_ID_Demangler
+class ZQueen : public ZNameMap, public An_ID_Demangler, public MIR_Priest
 {
 
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZQueen);
 
   friend class ZKing;
@@ -40,7 +41,7 @@ public:
 		      QS_AwaitingSceptre, QS_Ruling,
 		      QS_RelinquishingSceptre };
 
-  enum ZeroRCPolicy_e { ZRCP_Delete, ZRCP_ToOrphanage };
+  enum ZeroRCPolicy_e { ZRCP_Delete, ZRCP_ToOrphanage, ZRCP_Ignore };
 
   class LensDetails {
   public:
@@ -169,8 +170,8 @@ public:
   // instantiate URL
 
   // Lens deletion
-  void PutLensToPurgatory(ZGlass* lens); // X{E} C{1}
-  void PutLensToVoid(ID_t lens_id);      // X{E}
+  void PutLensToPurgatory(ZGlass* lens); // X{ED} C{1}
+  void PutLensToVoid(ID_t lens_id);      // X{ED}
   void RemoveLens(ZGlass* lens);         // X{E} C{1}
 
   // ZeroRefCount and management of Orphans
@@ -193,7 +194,7 @@ public:
 
   // Comet operations
   ZComet* MakeComet();
-  void Adopt(ZComet* comet);
+  void AdoptComet(ZList* top_dest, ZList* orphan_dest, ZComet* comet); // X{E} C{2}
   virtual void UnfoldFrom(ZComet& comet);
 
   // Maintenance of non-ruling queen reflections
@@ -201,7 +202,7 @@ public:
   void BasicQueenChange(ZMIR& mir);
 
   // lens stamping
-  void EmitRay(Ray& ray, bool force=false);
+  void EmitRay(auto_ptr<Ray>& ray);
 
   // tmp
   void ListAll();		 //! X{E} 7 MButt()

@@ -23,10 +23,9 @@
 //________________________________________________________________________
 
 #include "ZQueen.h"
+#include <Stones/ZComet.h>
 #include "ZQueen.c7"
 #include "ZKing.h"
-#include <Stones/ZMIR.h>
-#include <Stones/ZComet.h>
 #include <Ephra/Saturn.h>
 #include <Gled/GledNS.h>
 
@@ -115,8 +114,8 @@ void ZQueen::embrace_of_life(ZComet& comet)
     qb.SetReadMode(); qb.SetBufferOffset(0);
     ZHashList* ex_deps = mDeps;
     Streamer(qb);
-    RebuildLinks(&comet);
-    RebuildList(&comet);
+    RebuildLinkRefs(&comet);
+    RebuildListRefs(&comet);
     mDeps = ex_deps;
   }
 }
@@ -448,12 +447,10 @@ ID_t ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   static string _eh("ZQueen::InstantiateWAttach ");
 
   assert(bRuling);
-  assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
+  ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(attach_to->GetQueen() != this)
     throw(_eh + "can only attach to my own subjects");
-  if(mMir == 0)
-    throw(_eh + "must be called via MIR");
 
   ZGlass* lens = GledNS::ConstructLens(new_lid, new_cid);
   if(lens == 0) throw(_eh + "failed lens instantiation");
@@ -468,9 +465,9 @@ ID_t ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   if(name)  lens->SetName(name);
   if(title) lens->SetTitle(title);
 
-  ZMIR att_mir(attach_to, lens, attach_gamma);
-  att_mir.SetLCM_Ids(att_lid, att_cid, att_mid);
-  att_mir.SetCaller(mMir->Caller);
+  auto_ptr<ZMIR> att_mir( new ZMIR(attach_to, lens, attach_gamma) );
+  att_mir->SetLCM_Ids(att_lid, att_cid, att_mid);
+  att_mir->SetCaller(mir->Caller);
   try {
     // Should Bless? Yess ... but before lens construction ... then fix beta.
     // Or ... in this case ... could Request blessing by another queen.
@@ -485,7 +482,7 @@ ID_t ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
     ZeroRefCount(lens);
   }
 
-  if(mMir->HasResultReq()) {
+  if(mir->HasResultReq()) {
     TBuffer b(TBuffer::kWrite);
     b << lens->mSaturnID;
     mSaturn->ShootMIRResult(b);
@@ -505,13 +502,14 @@ ID_t ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   static string _eh("ZQueen::IncarnateWAttach ");
 
   assert(bRuling);
-  assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
+  ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
-  ZGlass* lens = GledNS::StreamLens(*mMir);
+  ZGlass* lens = GledNS::StreamLens(*mir);
   if(lens == 0) throw(_eh + "lens unstreaming failed.");
-  { // Rebuild links/list
+
+  { // Rebuild link/list refs
     lens->mQueen = this;
-    int n_failed = lens->RebuildAll(this);
+    int n_failed = lens->RebuildAllRefs(this);
     if(n_failed > 0) {
       ISwarn(_eh + GForm("missed %d referenced lenses.", n_failed));
     }
@@ -526,12 +524,11 @@ ID_t ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
     throw(_eh + exc);
   }
 
-  // overwrite the Mir ... not too good.
-  mMir->Alpha = attach_to;
-  mMir->Beta  = lens;
-  mMir->Lid = att_lid; mMir->Cid = att_cid; mMir->Mid = att_mid;
+  auto_ptr<ZMIR> att_mir( new ZMIR(attach_to, lens, attach_gamma) );
+  att_mir->SetLCM_Ids(att_lid, att_cid, att_mid);
+  att_mir->SetCaller(mir->Caller);
   try {
-    mSaturn->ExecMIR(*mMir);
+    mSaturn->ExecMIR(att_mir);
   }
   catch(string exc) {
     // Attach failed ...
@@ -542,7 +539,7 @@ ID_t ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
     ZeroRefCount(lens);
   }
 
-  if(mMir->HasResultReq()) {
+  if(mir->HasResultReq()) {
     TBuffer b(TBuffer::kWrite);
     b << lens->mSaturnID;
     mSaturn->ShootMIRResult(b);
@@ -558,7 +555,10 @@ ID_t ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
 void ZQueen::PutLensToPurgatory(ZGlass* lens)
 {
   // First step in the process of a lens removal.
+  // Stops all detached threads via Saturn::Freeze().
   // Removes all references to a lens and sends Rays with RQN_death.
+  // Then emits MIR to PutLensToVoid(lens).
+  // Called in a *detached thread*.
 
   static const string _eh("ZQueen::PutLensToPurgatory ");
 
@@ -567,63 +567,94 @@ void ZQueen::PutLensToPurgatory(ZGlass* lens)
   if(lens->mQueen != this)
     throw(_eh + "lens " + lens->Identify() + " is not my subject.");
 
-  QueenIDMap_i map_it = mIDMap.find(lens->mSaturnID);
-  if(map_it == mIDMap.end())
-    throw(_eh + "lens " + lens->Identify() + " not found in my subject list.");
-  if(map_it->second->mState != LensDetails::LS_Alive)
-    throw(_eh + "lens " + lens->Identify() + " has already been put to death-bed.");
+  QueenIDMap_i map_it;
 
-  // Remove all references to the lens.
-  // Note that ruling lock is held, as this is called via a MIR and *this*
-  // is a queen.
-  SubjectRefCntLock();
-  if(mKing->GetLightType() == ZKing::LT_Moon) {
-    lens->SetAcceptRefs(false);
-    lens->mGlassBits |= ZGlassBits::kDying;
+  { // Check lens state consistency.
+    GMutexHolder refcnt_lck(mSubjectRefCntMutex);
+
+    map_it = mIDMap.find(lens->mSaturnID);
+    if(map_it == mIDMap.end())
+      throw(_eh + "lens " + lens->Identify() + " not found in my subject list.");
+    if(map_it->second->mState != LensDetails::LS_Alive)
+      throw(_eh + "lens " + lens->Identify() + " has already been put to death-bed.");
   }
-  SubjectRefCntUnlock();
 
-  lens->ReadLock();
-  lens->ClearAllReferences();
-  lens->ReadUnlock();
+  { // Stop threads.
+    mSaturn->Freeze(lens);
+  }
+
+  GMutexHolder rule_lck(mSaturn->mRulingLock);
+  GLensWriteHolder qwr_lck(this);
+
+  {
+    ISdebug(2, _eh + "blocking new refs to " + lens->Identify() + ".");
+    GMutexHolder refcnt_lck(mSubjectRefCntMutex);
+    if(mKing->GetLightType() == ZKing::LT_Moon) {
+      lens->SetAcceptRefs(false);
+      lens->mGlassBits |= ZGlassBits::kDying;
+    }
+  }
+
+  {
+    ISdebug(2, _eh + "removing all refs from " + lens->Identify() + ".");
+    GLensReadHolder rdlck(lens);
+    lens->ClearAllReferences();
+  }
 
   // printf("%s %s RC=%d, MRC=%d, SRC=%d, FRC=%d\n", _eh.c_str(), lens->Identify().c_str(),
   //        lens->mRefCount, lens->mMoonRefCount, lens->mSunRefCount, lens->mFireRefCount);
-  set<ZGlass*> done_set;
-  SubjectRefCntLock();
-  while( ! lens->mReverseRefs.empty() ) {
-    ZGlass* ref = lens->mReverseRefs.front();
-    if(done_set.find(ref) != done_set.end()) {
-      ISwarn(_eh + "remaining reference from " + ref->Identify() +
-	     " to " + lens->Identify() + ".");
-      lens->mReverseRefs.pop_front();
-      continue;
+
+  { // Remove all references to lens.
+    GMutexHolder refcnt_lck(mSubjectRefCntMutex);
+
+    ISdebug(2, _eh + "removing all refs to " + lens->Identify() + ".");
+    set<ZGlass*> done_set;
+    while( ! lens->mReverseRefs.empty() ) {
+      ZGlass* ref = lens->mReverseRefs.front();
+      if(done_set.find(ref) != done_set.end()) {
+	ISwarn(_eh + "remaining reference from " + ref->Identify() +
+	       " to " + lens->Identify() + ".");
+	lens->mReverseRefs.pop_front();
+	continue;
+      }
+      GLensWriteHolder reflens_wrlck();
+      ref->remove_references_to(lens); // calls DecRefCount()
     }
-    ref->WriteLock();
-    ref->remove_references_to(lens); // calls DecRefCount()
-    ref->WriteUnlock();
+    if(lens->mRefCount != 0) {
+      ISerr(_eh + "ref-count not zero after enforced reverse refs removal.");
+      ISerr(GForm("%s %s  RC=%d, MRC=%d, SRC=%d, FRC=%d\n",
+		  _eh.c_str(), lens->Identify().c_str(),
+		  lens->mRefCount, lens->mMoonRefCount,
+		  lens->mSunRefCount, lens->mFireRefCount));
+    }
   }
-  if(lens->mRefCount != 0) {
-    ISerr(_eh + "ref-count not zero after enforced reverse refs removal.");
-    ISerr(GForm("%s %s  RC=%d, MRC=%d, SRC=%d, FRC=%d\n",
-		_eh.c_str(), lens->Identify().c_str(),
-		lens->mRefCount, lens->mMoonRefCount,
-		lens->mSunRefCount, lens->mFireRefCount));
-  }
-  SubjectRefCntUnlock();
 
   // Emit the death Ray.
-  Ray death_ray(Ray::RQN_death, ++(lens->mTimeStamp), lens);
+  auto_ptr<Ray> death_ray
+    (Ray::PtrCtor(lens, RayNS::RQN_death, ++(lens->mTimeStamp), Ray::EB_StructuralChange));
   mSaturn->Shine(death_ray);
 
   map_it->second->mState = LensDetails::LS_Purged;
   mPurgatory.push_back(lens->mSaturnID);
   --mIDsUsed; ++mIDsPurged;
+
+  SaturnInfo* si = mSaturn->GetSaturnInfo();
+  GTime ref_time(GTime::I_Now);
+  auto_ptr<ZMIR> void_mir( S_PutLensToVoid(lens->mSaturnID) );
+  ref_time += 1000l*mPurgedMS;
+  mSaturn->delayed_shoot_mir(void_mir, si, ref_time);
+
   Stamp(LibID(), ClassID());
 }
 
 void ZQueen::PutLensToVoid(ID_t lens_id)
 {
+  // Final step in lens removal.
+  // Endarks the lens.
+  // Clears up internal structures.
+  // Deletes the lens.
+  // Called in a *detached thread*.
+
   static const string _eh("ZQueen::PutLensToVoid ");
 
   assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
@@ -634,10 +665,10 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
     // we connected between PutLensToPurgatory() and PutLensToVoid()
     // calls. Could check timing.
     if(mKing->GetLightType() == ZKing::LT_Moon) {
+      GMutexHolder refcnt_lck(mSubjectRefCntMutex);
       QueenIDMap_i i = mIDMap.find(lens_id);
       if(i == mIDMap.end()) {
-	ISerr(_eh + "LensDetails of " + lens->Identify() +
-	      " (expected as purged) not found in queen's ID map.");
+	ISerr(_eh + GForm("LensDetails for id=%d (expected as purged) not found in queen's ID map.", lens_id));
 	return;
       }
       assert(i->second->mLens == 0);
@@ -646,18 +677,19 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
       i->second->mDeletionTime.SetNow();
       return;
     } else {
-      throw(_eh + "lens " + lens->Identify() + " not elightened.");
+      throw(_eh + GForm("lens id=%d not elightened.", lens_id));
     }
   }
+
   if(lens->mQueen != this)
     throw(_eh + "lens " + lens->Identify() + " is not my subject.");
 
-  if(lens->mQueen != this) {
-    throw(_eh + "lens does not belong to this queen.");
-  }
-
   // printf("%s %s RC=%d, MRC=%d, SRC=%d, FRC=%d\n", _eh.c_str(), lens->Identify().c_str(),
   //	    lens->mRefCount, lens->mMoonRefCount, lens->mSunRefCount, lens->mFireRefCount);
+
+  GMutexHolder ruling_lck(mSaturn->mRulingLock);
+  GLensWriteHolder queenwrite_lck(this);
+  GMutexHolder refcnt_lck(mSubjectRefCntMutex);
 
   QueenIDMap_i i = mIDMap.find(lens_id);
   if(i == mIDMap.end()) {
@@ -669,13 +701,28 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
   if(i->second->mLens != lens) {
     ISwarn(_eh + "Saturn's and Queen's lens pointers do not mach ... expect trouble.");
   }
-  try {
-    mSaturn->Endark(lens);
+  ISdebug(2, _eh + "endarking lens " + lens->Identify() + ".");
+  {
+    GMutex::Lock_e lockp = lens->mReadMutex.TryLock();
+    if(lockp != GMutex::ok) {
+      ISwarn(_eh + GForm("failed acquiring ReadLock on '%s'. Proceeding anyway.",
+			 lens->GetName()));
+    }
+    try {
+      mSaturn->Endark(lens);
+    }
+    catch(string exc) {
+      if(lockp == GMutex::ok) lens->mReadMutex.Unlock();
+      throw(_eh + "endarkenment failed: " + exc + " Doing nothing.");
+    }
+    if(lockp == GMutex::ok) lens->mReadMutex.Unlock();
   }
-  catch(string exc) {
-    throw(_eh + "endarkenment failed: " + exc + "Doing nothing.");
+  // !!!! Check for remaing images on eyes ... check improper, no locking.
+  if(lens->mEyeRefCount != 0) {
+    printf("SAFR ... eye refcount is %d!\n", lens->mEyeRefCount);
   }
-  lens->mQueen = 0;
+  
+  ISdebug(2, _eh + GForm("final removal of lens '%s'[%d].", lens->GetName(), i->first));
   i->second->mLens = 0;
   i->second->mState = LensDetails::LS_Dead;
   i->second->mDeletionTime.SetNow();
@@ -707,8 +754,9 @@ void ZQueen::RemoveLens(ZGlass* lens)
   if(lens->mGlassBits & ZGlassBits::kDying)
     throw(_eh + "lens already dying.");
 
-  if(mMir && mMir->IsFlare())
-    mMir->SuppressFlareBroadcast = true;
+  ZMIR* mir = GThread::get_mir();
+  if(mir && mir->IsFlare())
+    mir->SuppressFlareBroadcast = true;
 
   SubjectRefCntLock();
   lens->SetAcceptRefs(false);
@@ -716,13 +764,8 @@ void ZQueen::RemoveLens(ZGlass* lens)
   SubjectRefCntUnlock();
 
   SaturnInfo* si = mSaturn->GetSaturnInfo();
-  auto_ptr<ZMIR> mir1( S_PutLensToPurgatory(lens) );
-  GTime ref_time(GTime::I_Now);
-  ref_time += 1000000; // Delay for one second
-  mSaturn->delayed_shoot_mir(mir1, si, ref_time);
-  
-  auto_ptr<ZMIR> mir2( S_PutLensToVoid(lens->mSaturnID) );
-  mSaturn->delayed_shoot_mir(mir2, si, ref_time + 1000l*mPurgedMS);
+  auto_ptr<ZMIR> purg_mir( S_PutLensToPurgatory(lens) );
+  mSaturn->ShootMIR(purg_mir);
 }
 
 /**************************************************************************/
@@ -748,6 +791,8 @@ void ZQueen::ZeroRefCount(ZGlass* lens)
     mOrphans->Add(lens);
     break;
   }
+  case ZRCP_Ignore:
+    break;
   }
 }
 
@@ -775,16 +820,18 @@ void ZQueen::CleanOrphanage()
 // SetMandatory
 /**************************************************************************/
 /*
+  // This must be heavily changed ... must emit eunuchs etc.
+
   void ZQueen::SetMandatory(Bool_t mandp)
   {
   static string _eh("ZQueen::SetMandatory");
-  assert_MIR_presence(_eh);
+  ZMIR* mir = assert_MIR_presence(_eh);
 
   if(mandp == bMandatory) return;
 
   if(mandp) {
   if(bRuling) {
-  // mSaturn->BroadcastMIR(*mMir, mReflectors);
+  // mSaturn->BroadcastMIR(*mir, mReflectors);
       
   } else {
 
@@ -843,8 +890,8 @@ void ZQueen::InvokeReflection(TBuffer& buf)
     c.mIDMap.erase(mSaturnID);
   }
   { // Rebuild the comet queen itself, assign stuff to *this* and delete it
-    c.mQueen->RebuildLinks(&c);
-    c.mQueen->RebuildList(&c);
+    c.mQueen->RebuildLinkRefs(&c);
+    c.mQueen->RebuildListRefs(&c);
     embrace_of_life(c);
     delete c.mQueen;
   }
@@ -885,10 +932,17 @@ ZComet* ZQueen::MakeComet()
   return comet;
 }
 
-void ZQueen::Adopt(ZComet* comet)
+void ZQueen::AdoptComet(ZList* top_dest, ZList* orphan_dest, ZComet* comet)
 {
   // Adopts a Comet of type ST_CometBag.
   // External references of a Comet are ignored.
+
+  if(top_dest == 0)       top_dest = this;
+  if(orphan_dest == 0) orphan_dest = mOrphans;
+
+  // Should assert that top_dest & orphan_dest are my subjects.
+  // Or at least that their queen depends on me.
+  //    But then should do further authorization!
 
   comet->RebuildGraph();
   WriteLock();  
@@ -898,9 +952,9 @@ void ZQueen::Adopt(ZComet* comet)
     for(mID2pZGlass_i i=comet->mIDMap.begin(); i!=comet->mIDMap.end(); ++i)
       CheckIn(i->second);
     for(lpZGlass_i i=comet->mTopLevels.begin(); i!=comet->mTopLevels.end(); ++i)
-      Add(*i);
+      top_dest->Add(*i);
     for(lpZGlass_i i=comet->mOrphans.begin(); i!=comet->mOrphans.end(); ++i)
-      mOrphans->Add(*i);
+      orphan_dest->Add(*i);
   } else {
     WriteUnlock();
     throw(string("ZQueen::Adopt(comet=") + comet->GetName() + ") ID shortage");
@@ -1011,11 +1065,9 @@ void ZQueen::BasicQueenChange(ZMIR& mir)
 // Stamping
 /**************************************************************************/
 
-void ZQueen::EmitRay(Ray& ray, bool force)
+void ZQueen::EmitRay(auto_ptr<Ray>& ray)
 {
-  if(bStamping || force || ray.fEvent != Ray::RQN_change) {
-    mSaturn->Shine(ray);
-  }
+  mSaturn->Shine(ray);
 }
 
 /**************************************************************************/
