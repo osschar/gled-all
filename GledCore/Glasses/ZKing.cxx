@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -9,8 +9,8 @@
 //
 // A King controls top level chunks of ID space. A sun-space of each Saturn
 // is ruled over by a King.
-// Each fire-space of each Saturn is also ruled by a King. Flag
-// bFireKing tells if the king is a ruler of fire.
+// King creates a dummy queen (set to mQueen) for proper ref-counting.
+// Fire-space of each Saturn is ruled by a ZFireKing.
 //
 // BlessMIR() method is much less restrictive than the Queen version
 // as Kings provide services for managing dependencies and mirroring
@@ -21,14 +21,10 @@
 
 #include "ZKing.h"
 #include <Glasses/ZQueen.h>
+#include "ZKing.c7"
+#include <Glasses/ZEunuch.h>
 #include <Glasses/SaturnInfo.h>
-#include <Ephra/Saturn.h>
-#include <Gled/GledNS.h>
-
-#include <Stones/ZMIR.h>
 #include <Stones/ZComet.h>
-
-
 
 ClassImp(ZKing)
 
@@ -38,18 +34,51 @@ void ZKing::_init()
 {
   mSaturnInfo = 0;
   mLightType = LT_Undef;
-  bFireKing = false;
   mMapNoneTo = ZMirFilter::R_Allow;
+}
+
+/**************************************************************************/
+
+ZKing::~ZKing()
+{
+  delete mQueen;
+}
+
+/**************************************************************************/
+
+void ZKing::AdEnlightenment()
+{
+  PARENT_GLASS::AdEnlightenment();
+  // Create a dummy queen for reference counting and emitting Rays.
+  mQueen = new ZQueen(GForm("Concubine of %s", GetName()));
+  mQueen->mSaturn = mSaturn;
+  mQueen->mKing = this;
 }
 
 /**************************************************************************/
 
 void ZKing::BlessMIR(ZMIR& mir) throw(string)
 {
-  // Should check that non-zero beta/gamma belong to this or a higher
-  // object-space.
+  // Performs dependenciy check of context arguments and access
+  // authorization.
 
-  static string _eh("ZKing::BlessMIR() ");
+  static string _eh("ZKing::BlessMIR ");
+
+  // Dependency check
+  // Mild version ... just assert args in moon or sun space.
+  // Further could restrict args to queens + lenses of mandatory queens.
+  if(mir.Beta) {
+    if(mir.BetaID > mMaxID) {
+      throw(_eh + GForm("beta '%s', id=%d: dependency check failed.",
+			mir.Beta->GetName(), mir.BetaID));
+    }
+  }
+  if(mir.Gamma) {
+    if(mir.GammaID > mMaxID) {
+      throw(_eh + GForm("gamma '%s', id=%d: dependency check failed.",
+			    mir.Gamma->GetName(), mir.GammaID));
+    }
+  }
 
   // Authorization
 
@@ -84,20 +113,10 @@ void ZKing::Enthrone(ZQueen* queen)
   queen->mMinID = mMaxUsedID + 1;
   mMaxUsedID += queen->mIDSpan;
   queen->mMaxID = mMaxUsedID;
-  queen->mMaxUsedID = queen->mMinID - 1;
-  queen->Bootstrap();
+  queen->bootstrap();
   Add(queen);
 
-  if(bFireKing) {
-    queen->SetAuthMode(ZQueen::AM_None);
-  }
-
-  // The first queen is mQueen. Used for emitting Rays.
-  if(mQueen == 0)
-    mQueen = queen;
-
-  // should broadmoon via streaming ... or whatever.
-  // perhaps solve at sun level. More like a helper for whore queens.
+  // !!!! should broadcast to all moons
 }
 
 void ZKing::StarToQueen(ZComet* comet, ID_t span)
@@ -118,7 +137,7 @@ ZComet* ZKing::MakeComet()
   comet->mType = ZComet::CT_King;
   comet->mKing = this;
 
-  mExecMutex.Lock();
+  ReadLock();
   comet->AddGlass(this);
   lpZGlass_t queens; Copy(queens);
   for(lpZGlass_i i=queens.begin(); i!=queens.end(); ++i) {
@@ -127,46 +146,13 @@ ZComet* ZKing::MakeComet()
     comet->AddGlass(q);
     comet->AddGlass(q->GetDeps());
   }
-  mExecMutex.Unlock();
+  ReadUnlock();
 
   return comet;
 }
 
 /**************************************************************************/
 // Mirroring of Queens
-/**************************************************************************/
-
-void ZKing::ReflectQueen(ZQueen* queen_to_mirror)
-{
-  // Entry point for initiation of queen mirroring on user request.
-  // Should be directed at FireKing, who performs the task
-  // on behalf of Saturn.
-  // (would be more proper to have MirrorQueen or MirrorPrincess in fire-space)
-
-  static string _eh("ZKing::ReflectQueen() ");
-
-  // Should assert queen exists etc ...
-
-  if(!bFireKing) throw(_eh + "should be directed at FireKing");
-  ZKing* boss = queen_to_mirror->GetKing();
-  if(boss->GetMinID() > mSaturn->GetKing()->GetMinID()) {
-    throw(_eh + "queen should be in above object-space");
-  }
-
-  auto_ptr<ZMIR> mir(boss->S_reflect_queen(queen_to_mirror, mSaturn->GetSaturnInfo()));
-  mir->SetRecipient(mSaturn->GetSaturnInfo());
-  mSaturn->PostMIR(*mir);
-
-  // assert queen in `above' space and not yet ruling, neither awaiting sceptre.
-  // pass control to reflect_queen, which also checks dependencies and
-  // generates appropriate beams for the master Saturn.
-}
-
-void ZKing::UnreflectQueen(ZQueen* queen_to_leave)
-{
-  // Ignore gloriously. Deps first.
-}
-
 /**************************************************************************/
 
 void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
@@ -195,6 +181,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
     }
 
     // Here should check dependencies etc.
+    // or perhaps later prior to streaming
 
     mSaturn->RefQueenLoadCnd().Lock();
     mSaturn->SetQueenLoadNum(mSaturn->GetQueenLoadNum() + 1);
@@ -219,14 +206,14 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
 
     if(queen_to_mirror->GetRuling()) {
 
-      queen_to_mirror->mExecMutex.Lock();
+      queen_to_mirror->WriteLock();
       auto_ptr<ZMIR> mir(this->S_activate_queen(queen_to_mirror));
       mir->SetCaller(mSaturn->GetSaturnInfo());
       mir->SetRecipient(moon);
       queen_to_mirror->CreateReflection(*mir);
       queen_to_mirror->add_reflector(moon);
-      queen_to_mirror->mExecMutex.Unlock();
-      ISdebug(0, GForm("%s Sending queen %s to moon %s; length is=%d",
+      queen_to_mirror->WriteUnlock();
+      ISdebug(0, GForm("%s Sending queen '%s' to moon '%s'; length=%d",
 		       _eh.c_str(), queen_to_mirror->GetName(),
 		       moon->GetName(), mir->Length()));
       mSaturn->PostMIR(*mir);
@@ -293,7 +280,19 @@ void ZKing::unreflect_queen(ZQueen* queen_to_leave, SaturnInfo* moon)
   // Ignore gloriously. Deps first.
 }
 
+void ZKing::receive_eunuch()
+{
+  // Receives an eunuch.
+
+  static string _eh("ZKing::receive_eunuch ");
+  assert_MIR_presence(_eh, ZGlass::MC_IsBeam);
+
+  ZEunuch* e = GledNS::StreamLensByGlass<ZEunuch*>(*mMir);
+  if(e == 0)
+    throw(_eh + "MIR not followed by an eunuch.");
+  
+  
+}
+
 
 /**************************************************************************/
-
-#include "ZKing.c7"
