@@ -1,3 +1,11 @@
+2005-02-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Board.h:
+	* Glasses/SMorph.h:
+	* Glasses/WSSeed.h:
+	Fixed RnrBits of links to textures in accordance with new rnr
+	order.
+
 2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Amphitheatre.h:
