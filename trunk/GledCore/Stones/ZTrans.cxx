@@ -13,6 +13,8 @@ ClassImp(ZTrans)
 static const ZMatrix ZTransMatrixProto(5,5);
 ZTrans ZTrans::UnitTrans;
 
+/**************************************************************************/
+
 ZTrans::ZTrans() : ZMatrix(TMatrix::kUnit, ZTransMatrixProto) { _init(); }
 
 ZTrans::ZTrans(const ZMatrix& m) : ZMatrix(m) { _init(); }
@@ -238,6 +240,7 @@ void ZTrans::Invert()
 }
 
 /**************************************************************************/
+
 #include <iomanip>
 
 ostream& operator<<(ostream& s, const ZVec3& v) {
