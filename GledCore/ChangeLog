@@ -1,3 +1,13 @@
+2005-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	Moved FTW_Nest::RemoveTransients to FTW_Shell::RemoveMTW_Views;
+	added a set of Images with opened MTW_Views to FTW_Shell. Now
+	remove transients from Nest's menu really erases ALL transients.
+
 2005-02-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Pupil.cxx:
