@@ -1,3 +1,8 @@
+2003-07-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl: Fixed pointer-to-pointer exports for links
+	to work on gcc-3.3.
+
 2003-07-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* bin/gled-create-libset: Creates all default directories and adds
