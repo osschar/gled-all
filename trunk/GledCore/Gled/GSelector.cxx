@@ -39,17 +39,16 @@ Int_t GSelector::Select()
   }
   Unlock();
 
-  struct timeval* timeout;
-  if(fTimeOut < 0) timeout = 0;
-  else {
-    timeout = new struct timeval;
-    timeout->tv_sec = (__time_t) fTimeOut;
-    timeout->tv_usec = (__time_t)(1000000*(fTimeOut - timeout->tv_sec));
-  }
-
   errno = 0;
-  int ret = select(Mfd+1, &read, &write, &except, timeout);
-  delete timeout;
+  int ret;
+  if(fTimeOut <= 0) {
+    ret = select(Mfd+1, &read, &write, &except, 0);
+  } else {
+    struct timeval timeout;
+    timeout.tv_sec = (__time_t) fTimeOut;
+    timeout.tv_usec = (__time_t)(1000000*(fTimeOut - timeout.tv_sec));
+    ret = select(Mfd+1, &read, &write, &except, &timeout);
+  }
 
   if(ret==-1) {
     switch(errno) {
