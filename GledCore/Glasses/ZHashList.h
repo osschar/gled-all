@@ -27,6 +27,8 @@ protected:
 
   bool	bNerdyListOps;	// X{GS} 7 Bool()
 
+  virtual void rebuild_hash();
+
 public:
   ZHashList(const Text_t* n="ZHashList", const Text_t* t=0) : ZList(n,t)
   { _init(); }
@@ -41,6 +43,8 @@ public:
 
   ZGlass* After(ZGlass* g);
   ZGlass* Before(ZGlass* g);
+
+  virtual void   SortByName();                       // X{ED}
 
   virtual Int_t RebuildListRefs(An_ID_Demangler* idd);
 
