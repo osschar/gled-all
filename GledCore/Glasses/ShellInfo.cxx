@@ -52,9 +52,9 @@ SubShellInfo* ShellInfo::MakeDefSubShell()
 {
   NestInfo* nest = new NestInfo("Browser Nest", "Default SubShell");
   mQueen->CheckIn(nest);
-  SetDefSubShell(nest);
-  AddSubShell(nest);
   nest->ImportKings();
+  AddSubShell(nest);
+  SetDefSubShell(nest);
   return nest;
 }
 
@@ -87,6 +87,9 @@ void ShellInfo::RemoveSubShell(SubShellInfo* sub_shell)
 void ShellInfo::SetDefSubShell(SubShellInfo* ss)
 {
   static const string _eh("ShellInfo::SetDefSubShell ");
+  if(!mSubShells->Has(ss)) {
+    AddSubShell(ss);
+  }
   set_link_or_die((ZGlass*&)mDefSubShell, ss, FID());
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
