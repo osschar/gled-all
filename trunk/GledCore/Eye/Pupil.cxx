@@ -159,11 +159,11 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv,
 
   // Hmmph ... the locking doesn't seem to be needed any more.
   /*
-  Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
-  XLockDisplay(rd);
-  XSync(rd, False);
-  XLockDisplay(fl_display);
-  XSync(fl_display, False);
+    Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
+    XLockDisplay(rd);
+    XSync(rd, False);
+    XLockDisplay(fl_display);
+    XSync(fl_display, False);
   */
 
   _firstp = true;
@@ -171,10 +171,10 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv,
   show();
 
   /*
-  XSync(fl_display, False);
-  XUnlockDisplay(fl_display);
-  XSync(rd, False);
-  XUnlockDisplay(rd);
+    XSync(fl_display, False);
+    XUnlockDisplay(fl_display);
+    XSync(rd, False);
+    XUnlockDisplay(rd);
   */
 }
 
@@ -226,8 +226,18 @@ void Pupil::SetProjection1()
 
 void Pupil::SetProjection2()
 {
-  gluPerspective(mInfo->GetFOV(), (double)w()/h(),
-		 mInfo->GetNearClip(),  mInfo->GetFarClip());
+  switch(mInfo->GetProjMode()) {
+  case PupilInfo::P_Perspective: {
+    gluPerspective(mInfo->GetFOV(), (double)w()/h(),
+		   mInfo->GetNearClip(),  mInfo->GetFarClip());
+    break;
+  }
+  case PupilInfo::P_Orthographic: {
+    float yh = mInfo->GetYSize()/2;
+    float xh = yh*w()/h()*mInfo->GetHFac();
+    glOrtho(-xh, xh, -yh, yh, mInfo->GetNearClip(),  mInfo->GetFarClip());
+  }
+  }
 }
 
 void Pupil::SetAbsRelCamera()
@@ -252,8 +262,7 @@ void Pupil::SetAbsRelCamera()
     }
   }
 
-
-  // Begin set-up of CamAbsTrans in 'z'
+  // Begin set-up of CamAbsTrans in 'z'.
   ZTrans z;
   if(mCamBase) {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(mCamBase) );
@@ -269,9 +278,7 @@ void Pupil::SetAbsRelCamera()
     z = mCamera->RefTrans();
   }
 
-  // Here 'z' should be (optionally) unscaled. ?
-  // Dump that ... think.
-
+  // Construct fwd/up vectors ... consider LookAt and UpReference.
   TVector3 c_pos( z.GetBaseVec3(4) );
   TVector3 x_vec( z.GetBaseVec3(1) ); // Forward vector
   TVector3 z_vec( z.GetBaseVec3(3) ); // Up vector
@@ -319,11 +326,9 @@ void Pupil::SetAbsRelCamera()
 
     Double_t xz_dp  = z_vec.Dot(x_vec);
     Double_t max_dp = TMath::Cos(TMath::DegToRad()*mInfo->GetUpRefMinAngle());
-    // printf("dp=%f max_dp=%f min_angle=%f\n", xz_dp, max_dp, mInfo->GetUpRefMinAngle());
     if(TMath::Abs(xz_dp) > max_dp) {
       if(mInfo->GetUpRefLockDir() && look_at_p == false) {
 	Double_t sgn_mdp = TMath::Sign(max_dp, xz_dp);
-	// x_vec += 2*(sgn_mdp - xz_dp)*z_vec;
 	TVector3 ortog = (x_vec - xz_dp*z_vec).Unit();
 	x_vec  = sgn_mdp*z_vec + TMath::Sqrt(1 - max_dp*max_dp)*ortog;
 	x_vec  = x_vec.Unit();
@@ -367,11 +372,6 @@ void Pupil::SetCameraView()
   gluLookAt(z(1,4),        z(2,4),        z(3,4),
 	    z(1,4)+z(1,1), z(2,4)+z(2,1), z(3,4)+z(3,1),
 	    z(1,3),        z(2,3),        z(3,3));
-    /*
-  gluLookAt(c_pos.x(), c_pos.y(), c_pos.z(),
-	    x_vec.x(), x_vec.y(), x_vec.z(),
-	    z_vec.x(), z_vec.y(), z_vec.z());	    
-    */
 }
 
 /**************************************************************************/
@@ -523,8 +523,8 @@ void Pupil::Pick()
       GLuint m = *x; x++;
 
       if(x - b + 2 + m > mInfo->GetBuffSize()) {
-        cout <<"Pupil::Pick overflow of selection buffer, ignoring that entry\n";
-        continue;
+	cout <<"Pupil::Pick overflow of selection buffer, ignoring that entry\n";
+	continue;
       }
 
       float zmin = (float) *x/0x7fffffff;
@@ -536,8 +536,8 @@ void Pupil::Pick()
 
       OS::ZGlassImg* root_img = mRoot->fImg->fEye->DemangleID(id);
       if(!root_img) {
-        printf("Pupil::Pick root_img null for id=%d.\n", id);
-        continue;
+	printf("Pupil::Pick root_img null for id=%d.\n", id);
+	continue;
       }
 
       ZGlass* lens = root_img->fGlass;
@@ -547,20 +547,20 @@ void Pupil::Pick()
       
       // fill gd.parents list with contents of the pick record
       for(int j=m-2; j>=0; --j) {
-        UInt_t p_id = x[j];
-        OS::ZGlassImg* img = mRoot->fImg->fEye->DemangleID(p_id);
-        if(!img) {
-          printf("Pupil::Pick parent img null for id=%d.\n", p_id);
-          continue;
-        }
-        // ZGlass* parent = img->fGlass;
-        // if(!parent) continue; // MT: this should NEVER happen.
-        gd.parents.push_back(img);
+	UInt_t p_id = x[j];
+	OS::ZGlassImg* img = mRoot->fImg->fEye->DemangleID(p_id);
+	if(!img) {
+	  printf("Pupil::Pick parent img null for id=%d.\n", p_id);
+	  continue;
+	}
+	// ZGlass* parent = img->fGlass;
+	// if(!parent) continue; // MT: this should NEVER happen.
+	gd.parents.push_back(img);
       }
       
       list<glass_data>::iterator ins_pos = gdl.begin();
       while(ins_pos != gdl.end() && ins_pos->z < gd.z) {
-        ++ins_pos;
+	++ins_pos;
       }
       gdl.insert(ins_pos, gd);  
       x += m;
@@ -570,15 +570,15 @@ void Pupil::Pick()
     int loc = 1;
     for( list<glass_data>::iterator gdi = gdl.begin(); gdi!=gdl.end(); ++gdi) {
       if(mInfo->GetPickDisp() != 0) {    
-        Float_t near = mInfo->GetNearClip();
-        Float_t far  = mInfo->GetFarClip();
-        Float_t zdist = near*far/(far - gdi->z/2*(far - near));
-        if(mInfo->GetPickDisp() == 1)
-          gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.c_str()); 
-        else
-          gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.c_str()); 
+	Float_t near = mInfo->GetNearClip();
+	Float_t far  = mInfo->GetFarClip();
+	Float_t zdist = near*far/(far - gdi->z/2*(far - near));
+	if(mInfo->GetPickDisp() == 1)
+	  gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.c_str()); 
+	else
+	  gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.c_str()); 
       } else {
-        gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
+	gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
       }
       ++loc;
 
@@ -687,7 +687,7 @@ void Pupil::draw()
       GLTextNS::txfEstablishTexture(mTexFont, 0, GL_TRUE);
     } else {
       fprintf(stderr, "Problem loading font %s from file %s ; error: %s.\n",
-              font, file, GLTextNS::txfErrorString());
+	      font, file, GLTextNS::txfErrorString());
     }
   }
   if(mTexFont) {
@@ -806,7 +806,7 @@ int Pupil::handle(int ev)
     dx = -dx; dy = -dy;
     mMouseX = x; mMouseY = y;
     Float_t move_fac = mInfo->GetMSMoveFac() *
-                       TMath::Power(10, mInfo->GetMoveOM());
+      TMath::Power(10, mInfo->GetMoveOM());
     Float_t rot_fac  = mInfo->GetMSRotFac() * TMath::TwoPi() / 1000;
     if(Fl::event_state(FL_BUTTON1)) { 
       if(!Fl::event_state(FL_CTRL)) {
@@ -930,8 +930,8 @@ int Pupil::handle(int ev)
 }
 
 /*
-void Pupil::draw_overlay()
-{
+  void Pupil::draw_overlay()
+  {
   // Safr ... this works not; redraw_overlay commented out in ctor.
 
   glMatrixMode(GL_PROJECTION);
@@ -947,12 +947,12 @@ void Pupil::draw_overlay()
 
   gl_color(FL_GREEN);
   glBegin(GL_LINES); {
-    glVertex3f(-0.5, -5, -5);	glVertex3f(0.5, 5, 5);
+  glVertex3f(-0.5, -5, -5);	glVertex3f(0.5, 5, 5);
   } glEnd();
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
-}
+  }
 */
 
 /**************************************************************************/

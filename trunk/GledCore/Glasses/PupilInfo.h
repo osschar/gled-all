@@ -18,6 +18,9 @@ class PupilInfo : public ZList {
   // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(PupilInfo);
 
+public:
+  enum Projection_e { P_Perspective, P_Orthographic };
+
 protected:
   void		_init();
 
@@ -37,9 +40,13 @@ protected:
   Int_t		mHeight;        // X{gE} 7 Value(-range=>[0,4096,1])
 
   ZColor	mClearColor;	// X{PGS} 7 ColorButt(-join=>1)
-  Float_t	mFOV;		// X{gS} 7 Value(-range=>[1,180,1,1])
+
+  Projection_e	mProjMode;	// X{GS} 7 PhonyEnum(-join=>1)
+  Float_t	mFOV;		// X{gS} 7 Value(-range=>[1,180,1,10])
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>5, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>5, -range=>[0,1000,1,1000])
+  Float_t	mYSize;		// X{gS} 7 Value(-range=>[1e-3,1000,1,1000], -join=>1)
+  Float_t	mHFac;		// X{gS} 7 Value(-range=>[1e-3,100, 1,1000])
 
   Int_t		mFrontMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6,-join=>1)
   Int_t		mBackMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6)
