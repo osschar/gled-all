@@ -1,3 +1,19 @@
+2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-create-glass:
+	* bin/gled-create-rnr:
+	* bin/gled-create-stone:
+	* cfg/Glass_SKEL.cxx:
+	
+	Beautification.
+	
+	* cfg/project7.rc:
+	* lib-exec/gled_glue_gen.pl:
+	* lib-exec/project7.pl:
+
+	Updated for new format of ZMIR and glass catalogs.
+
+
 2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
