@@ -66,6 +66,8 @@ typedef map<ID_t, ZGlass*>			mID2pZGlass_t;
 typedef map<ID_t, ZGlass*>::iterator		mID2pZGlass_i;
 typedef hash_map<ID_t, ZGlass*>			hID2pZGlass_t;
 typedef hash_map<ID_t, ZGlass*>::iterator	hID2pZGlass_i;
+typedef hash_map<ZGlass*, Int_t>		hpZGlass2Int_t;
+typedef hash_map<ZGlass*, Int_t>::iterator	hpZGlass2Int_i;
 typedef hash_map<ID_t, ID_t>			IdiOm_t;
 typedef hash_map<ID_t, ID_t>::iterator		IdiOm_i;
 
