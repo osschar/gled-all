@@ -264,6 +264,21 @@ void ZList::ClearAllReferences()
 
 /**************************************************************************/
 
+void ZList::RemoveLensesViaQueen(Bool_t recurse)
+{
+  // Sends MIR to queen and waits for result.
+  // This should be called from a detached thread.
+
+  if(IsEmpty()) return;
+
+  auto_ptr<ZMIR> mir( mQueen->S_RemoveLenses(this, recurse) );
+  auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(mir) );
+  if(res->HasException())
+    throw(string(res->Exception.Data()));
+}
+
+/**************************************************************************/
+
 Bool_t ZList::Has(ZGlass* g)
 {
   mListMutex.Lock();
