@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Saturn_H
-#define Gled_Saturn_H
+#ifndef GledCore_Saturn_H
+#define GledCore_Saturn_H
 
 #include <Gled/GledTypes.h>
 #include <Glasses/ZGlass.h>
@@ -13,7 +13,9 @@
 #include <Glasses/EyeInfo.h>
 #include <Stones/ZMIR.h>
 
-class ZGod; class ZKing; class ZFireKing; class ZSunQueen; class ZQueen;
+class ZGod;
+class ZKing; class ZFireKing;
+class ZSunQueen; class ZQueen; class ZFireQueen;
 
 #include <Gled/GMutex.h>
 #include <Gled/GSelector.h>
@@ -78,7 +80,7 @@ protected:
   ZSunQueen*		mSunQueen;	// X{G}
   ZKing*		mKing;		// X{G}
   ZFireKing*		mFireKing;	// X{G}
-  ZQueen*		mFireQueen;	// X{G}
+  ZFireQueen*		mFireQueen;	// X{G}
   SaturnInfo*		mSunInfo;	// X{G}
   SaturnInfo*		mSaturnInfo;	// X{G}
   bool			bSunAbsolute;	// X{G}
@@ -117,6 +119,7 @@ protected:
 
   void Enlight(ZGlass* glass, ID_t) throw(string);
   void Reflect(ZGlass* glass) throw(string);
+  void Freeze(ZGlass* glass) throw(string);
   void Endark(ZGlass* glass) throw(string);
 
   Int_t	SockSuck();	// Called constantly from ServerThread
@@ -140,6 +143,9 @@ public:
   SaturnInfo* Connect(SaturnInfo* si);
   void	      AllowMoons();
   void	      Shutdown();
+
+  void        LockMIRShooters(bool wait_until_queue_empty=false);
+  void        UnlockMIRShooters();
 
   virtual ZGlass* DemangleID(ID_t id);
 
@@ -183,6 +189,7 @@ protected:
 
   GThread*		mMIRShootingThread;
   GCondition		mMIRShootingCnd;
+  GMutex		mMIRShooterRoutingLock;
   list<ZMIR*>		mMIRShootingQueue;
 
   GThread*		mDelayedMIRShootingThread;
@@ -190,7 +197,7 @@ protected:
   mTime2MIR_t		mDelayedMIRShootingQueue;
 
   void     markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller=0);
-  void     post_mir(ZMIR& mir, ZMirEmittingEntity* caller=0);
+  void     post_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller=0);
   void     shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
 		     bool use_own_thread=false);
   void     delayed_shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
@@ -199,11 +206,11 @@ protected:
   void     mir_shooter();
   void     delayed_mir_shooter();
 
-  void     generick_shoot_mir_result(const Text_t* exc, TBuffer* buf);
+  void     generick_shoot_mir_result(ZMIR& mir, const Text_t* exc, TBuffer* buf);
 
 public:
 
-  void     PostMIR(ZMIR& mir);
+  void     PostMIR(auto_ptr<ZMIR>& mir);
 
   void     ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
   void     DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time);
@@ -217,9 +224,11 @@ protected:
   void report_mir_pre_demangling_error(ZMIR& mir, string error);
   void report_mir_post_demangling_error(ZMIR& mir, string error);
 
-  void RouteMIR(ZMIR& mir)  throw();
-  void UnfoldMIR(ZMIR& mir) throw();
-  void ExecMIR(ZMIR& mir);
+  void RouteMIR(auto_ptr<ZMIR>& mir)  throw();
+  void UnfoldMIR(auto_ptr<ZMIR>& mir) throw();
+  void ExecMIR(auto_ptr<ZMIR>& mir, bool lockp=true);
+  void ExecDetachedMIR(auto_ptr<ZMIR>& mir);
+
   void ForwardMIR(ZMIR& mir, SaturnInfo* route);
   void BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons);
   void BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons);
@@ -230,18 +239,20 @@ protected:
   /**************************************************************************/
 
  protected:
+  Bool_t		bAcceptsRays;
 
   GThread*		mRayEmittingThread;
   GCondition		mRayEmittingCnd;
-  list<Ray>		mRayEmittingQueue;
+  list<Ray*>		mRayEmittingQueue;
 
   void ray_emitter();
 
  public:
 
-  void	Shine(Ray& r);
-  void	SingleRay(EyeInfo* eye, Ray& r);
+  Bool_t AcceptsRays() const { return bAcceptsRays; }
 
+  void   Shine(auto_ptr<Ray>& ray);
+  void   DeliverTextMessage(EyeInfo* eye, TextMessage& tm);
 
   /**************************************************************************/
   // Internal thread structures and functions
@@ -261,8 +272,9 @@ private:
     Saturn*		sat;
     ZMIR*		mir;
     bool		delete_mir;
-    mir_router_ti(Saturn* s, ZMIR* m, bool d=false) :
-      sat(s), mir(m), delete_mir(d) {}
+    GThread*		self;
+    mir_router_ti(Saturn* s, ZMIR* m, bool d=true) :
+      sat(s), mir(m), delete_mir(d), self(0) {}
   };
 
   // Thread functions
@@ -270,6 +282,9 @@ private:
   static void* tl_SaturnFdSucker(Saturn *s);
   static void* tl_SaturnAcceptor(new_connection_ti *ss);
   static void* tl_MIR_Router(mir_router_ti* arg);
+  static void* tl_MIR_DetachedExecutor(mir_router_ti* arg);
+  static void  tl_MIR_DetachedCleanUp(mir_router_ti* arg);
+
   static void* tl_MIR_Shooter(Saturn* s);
   static void* tl_Delayed_MIR_Shooter(Saturn* s);
   static void* tl_Ray_Emitter(Saturn* s);
