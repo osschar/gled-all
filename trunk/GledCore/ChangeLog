@@ -1,3 +1,25 @@
+2004-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Branch.cxx:
+	Usage of bLeavesCreated was not consistent. For expanded branches:
+	after clear_list new ftw_leaves were not created.
+	
+	* Eye/FTW_Shell.cxx:
+	Consolidation of menu-fillers.
+	
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Menu consolidation, new method JumpTo (also a menu entry) and
+	improved mouse precision specification.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Support for improved mouse precision specification.
+
+	* Glasses/ZQueen.cxx:
+	In RemoveLens: if lens is already being removed warn instead of
+	throwing an exception.
+
 2004-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Pupil.cxx:
