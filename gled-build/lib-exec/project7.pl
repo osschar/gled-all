@@ -98,8 +98,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 		 GetMeth=>'.Data()',
 		 SetArgs=>'const Text_t* s'
 	       },
-  'ZColor'  => { GetType=>'ZColor&',
-		 SetMeth=>'.rgba(r,g,b,a)',
+  'ZColor'  => { SetMeth=>'.rgba(r,g,b,a)',
 		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1'
 	       }
 );
@@ -156,8 +155,8 @@ sub hashofy_string {
 sub SetArgs {
   my $t = shift;
   my $a = shift;
-  if(exists $GetSetMap{$t} and exists $GetSetMap{$t}->{SetArgs}) {
-    return $GetSetMap{$t}->{SetArgs};
+  if(exists $GetSetMap{$t}{SetArgs}) {
+    return $GetSetMap{$t}{SetArgs};
   } else {
     return "$t $a";
   }
@@ -636,17 +635,18 @@ if($IsGlass) {
 for $r (@Members) {
   # Get methods
   if( $r->{Xport} =~ m/(g|G)/ ) {
-    my ($const, $type, $val, $constret, $pre, $post);
-    $const = ' const' if $1 eq 'G'; # and not($IsGlass && $LOCK_GET_METHS); 
-    if(exists $GetSetMap{$r->{Type}}) {
+    my ($type, $val, $constret, $const, $pre, $post);
+    if(exists $GetSetMap{$r->{Type}}{GetType}) {
       my $h = $GetSetMap{$r->{Type}};
       $type = "$h->{GetType}";
       $val = "$r->{Varname}$h->{GetMeth}";
-      $constret = 'const ' if ($1 eq 'G'and  $h->{GetType} =~ /&|\*$/);
     } else {
       $type = "$r->{Type}";
       $val = "$r->{Varname}";
-      $constret = 'const ' if ($1 eq 'G' and  $r->{Type} =~ /&|\*$/);
+    }
+    if($1 eq 'G' and not exists $r->{Link}) {
+      $const    = ' const';
+      $constret = 'const ' if $type =~ /(?:&|\*)$/;
     }
     if($IsGlass && $LOCK_GET_METHS) {
       $pre = "ReadLock(); ";
@@ -687,7 +687,7 @@ for $r (@Members) {
 fnord
     } else {
       $setit  = "  $r->{Varname}";
-      $setit .= ((exists $GetSetMap{$r->{Type}} and exists $GetSetMap{$r->{Type}}->{SetMeth}) ?
+      $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
 		 $GetSetMap{$r->{Type}}->{SetMeth} :
 		 " = $r->{Args}[0][2]") . ";\n";
     }
