@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -15,6 +15,7 @@
 
 #include <TROOT.h>
 #include <TSystem.h>
+#include <TThread.h>
 #include <TRint.h>
 #include <TInterpreter.h>
 #include <Getline.h>
@@ -42,6 +43,8 @@ int main(int argc, char **argv)
   GledNS::InitFD(0, GledNS::GledRoot);
   gROOT->Time(0);
   // gROOT->SetStyle("Plain");
+  gSystem->Load("libThread");
+  TThread init_root_threads;
   gROOT->SetMacroPath(GForm(".:%s/.gled:%s/macros",
 			    getenv("HOME"), getenv("GLEDSYS")));
   gInterpreter->AddIncludePath(GForm("%s/.gled", getenv("HOME")));
