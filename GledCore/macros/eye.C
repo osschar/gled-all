@@ -4,13 +4,15 @@
 //
 // assumes: ZQueen* scenes; ZQueen* fire_queen (as declared by sun.C)
 
-EyeInfo*   eye   = 0;
-ShellInfo* shell = 0;
-PupilInfo* pupil = 0;
+EyeInfo*       eye          = 0;
+ShellInfo*     shell        = 0;
+SubShellInfo*  def_subshell = 0;
+PupilInfo*     pupil        = 0;
 
 void eye(const Text_t* eye_name="Eye of Ra",
 	 const Text_t* shell_name="Example Shell",
-	 const Text_t* pupil_name="Example Pupil")
+	 const Text_t* pupil_name="Example Pupil",
+	 const Text_t* scene_name=0)
 {
   if(Gled::theOne->HasGUILibs() == false) {
     printf("eye.C::eye skipping Eye and ShellInfo instantiation (no GUI libraries).\n");
@@ -18,19 +20,27 @@ void eye(const Text_t* eye_name="Eye of Ra",
 
   register_GledCore_layouts();
 
+  EyeInfo* pre_ei = new EyeInfo(eye_name);
+
   shell = new ShellInfo(shell_name);
-  fire_queen->CheckIn(shell); fire_queen->Add(shell);
-  shell->ImportKings();	  // Get all Kings as top level objects
+  fire_queen->CheckIn(shell);
+  fire_queen->Add(shell);
+  def_subshell = shell->MakeDefSubShell();
 
   if(pupil_name) {
     pupil = new PupilInfo(pupil_name);
     fire_queen->CheckIn(pupil);
-    shell->GetPupils()->Add(pupil);
-    if(scenes->First())
-      pupil->Add(scenes->First());
+    shell->GetSubShells()->Add(pupil);
+    ZGlass* sc = 0;
+    if(scene_name != 0) sc = scenes->GetElementByName(scene_name);
+    if(sc == 0)         sc = scenes->First();
+    if(sc != 0)
+      pupil->Add(sc);
   }
+  
+  //shell->SetDefSubShell(pupil);
 
-  eye = Gled::theOne->SpawnEye(shell, eye_name);
+  eye = Gled::theOne->SpawnEye(pre_ei, shell, "GledCore", "FTW_Shell");
 }
 
 /**************************************************************************/
