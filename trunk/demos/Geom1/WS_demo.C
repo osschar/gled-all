@@ -16,6 +16,8 @@ void WS_demo()
   }
   Gled::theOne->AssertLibSet("Geom1");
 
+  Gled::theOne->AddMTWLayout("WS_Demo/ZNode:WS_Point","ZNode(Pos[18],Rot[18]):WSPoint(*)");
+
   Lamp  *l;
 
   Scene* wsdemo  = new Scene("WeaverSymbol Demo Scene");
