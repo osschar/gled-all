@@ -1,3 +1,39 @@
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Eye.cxx:
+	* Eye/FTW_Shell.cxx:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	* Eye/OptoStructs.cxx:
+	* Eye/Pupil.cxx:
+	* Glasses/Box.cxx:
+	* Glasses/Eventor.cxx:
+	* Glasses/NestInfo.cxx:
+	* Glasses/PerfMeterTarget.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	* Glasses/ZSunQueen.cxx:
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	* Gled/GledTypes.h:
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	* Net/Ray.cxx:
+	* Net/Ray.h:
+	* Stones/ZComet.cxx:
+	* catalog.patch:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+	
 2004-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Shell.cxx:
