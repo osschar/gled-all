@@ -18,6 +18,7 @@ class A_Rnr : public OptoStructs::A_View {
 
 protected:
   RnrScheme* mRnrScheme;
+  bool       bOnePerRnrDriver;
 
 public:
   void crs_links(RnrDriver* rd, RnrScheme* sch);
@@ -25,7 +26,8 @@ public:
   void crs_elements(RnrDriver* rd, RnrScheme* sch);
 
 public:
-  A_Rnr() : OptoStructs::A_View(0), mRnrScheme(0) {}
+  A_Rnr() : OptoStructs::A_View(0), mRnrScheme(0), bOnePerRnrDriver(false)
+  {}
 
   virtual void AbsorbRay(Ray& ray);
 
