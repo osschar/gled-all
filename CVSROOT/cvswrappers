@@ -21,7 +21,17 @@
 *.jpeg		-k 'b'
 *.jpg		-k 'b'
 *.png		-k 'b'
+*.gif		-k 'b'
+*.tga		-k 'b'
+*.xbm		-k 'b'
+*.xpm		-k 'b'
+
 *.eps		-k 'b'
 *.fig		-k 'b'
 *.dia		-k 'b'
+
 *.gts		-k 'b'
+
+*.txf		-k 'b'
+
+*.root		-k 'b'
