@@ -198,7 +198,9 @@ void ZListView::AbsorbRay(Ray& ray)
   }
 
   case RQN_list_remove: {
-    fDaughterImgs.remove(ray.fBetaImg);
+    lpZGlassImg_i i = find(fDaughterImgs.begin(), fDaughterImgs.end(), ray.fBetaImg);
+    if(i != fDaughterImgs.end())
+      fDaughterImgs.erase(i);
     return;
   }
 
