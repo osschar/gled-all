@@ -19,6 +19,12 @@
 
 #include <stack>
 
+#include <G__ci.h> // CINT's G__ global functions.
+#include <dlfcn.h> // Needed for FindSymbol, CINT's version does not
+		   // work until the first library is actually loaded.
+
+/**************************************************************************/
+
 int		G_DEBUG = 0;
 
 struct FD_pair {
@@ -65,29 +71,6 @@ void GledNS::PopFD()
 }
 
 /**************************************************************************/
-
-//template<class C>
-// void GledNS::Beam(TBuffer* b, C c) { *b << c; }
-// void GledNS::Beam(TBuffer* b, Saturn s) {}
-// template<class C>
-// void GledNS::Qeam(TBuffer* b, C& c) { *b >> c; }
-
-// template<class C>
-// void GledNS::Beam(TBuffer* b, C* c) { *b << *c; }
-// void GledNS::Beam(TBuffer* b, Text_t* c) { b->WriteArray(c, strlen(c+1)); }
-// template<class C>
-// void GledNS::Qeamp(TBuffer* b, C*& c) { c=new C; *b >> *c; }
-
-// void GledNS::Qeamp(TBuffer* b, Text_t*& c) { b->ReadArray(c); }
-
-// void GledNS::Beam(TBuffer* b, ZNode* c) { *b << c->GetSaturnID(); }
-// void GledNS::Qeam(TBuffer* b, ZNode* c, ZNode* caller) {
-//   if(!caller) { c=0; return; }
-//   ID_t x; *b >> x; c = caller->GetSaturn()->DemangleID(x);
-// }
-
-/**************************************************************************/
-#include <G__ci.h>
 
 Int_t GledNS::LoadSoSet(const string& lib_set)
 {
@@ -139,6 +122,14 @@ Int_t GledNS::LoadSo(const string& full_lib_name)
   }
   return ret;
 }
+
+
+void* GledNS::FindSymbol(const string& sym)
+{
+  return dlsym(RTLD_DEFAULT, sym.c_str());
+}
+
+/**************************************************************************/
 
 void GledNS::BootstrapSoSet(LibSetInfo* lsi)
 {
