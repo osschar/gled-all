@@ -37,11 +37,6 @@ Scene* create_basic_scene()
   cam_base->RotateLF(3, 1, 22*TMath::DegToRad());
   cam_base->SetRadius(0.01);
 
-  CREATE_ADD_GLASS(xzplane, Rect, rscene, "X-Z Plane", "");
-  xzplane->SetRotByDegrees(180, 0, -90);
-  xzplane->SetUnitSquare(20);
-  xzplane->SetColor(0.4, 1, 0.45, 0.4);
-
   CREATE_ADD_GLASS(pointmod, ZGlBlending, rscene, "Point modificator", 0);
   pointmod->SetAntiAliasOp(1);
   pointmod->SetPointSize(10);
@@ -49,6 +44,11 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(lightmod, ZGlLightModel, rscene, "Light model", 0);
   lightmod->SetShadeModelOp(1);
   lightmod->SetFaceCullOp(1);
+
+  CREATE_ADD_GLASS(xzplane, Rect, rscene, "X-Z Plane", "");
+  xzplane->SetRotByDegrees(180, 0, -90);
+  xzplane->SetUnitSquare(20);
+  xzplane->SetColor(0.4, 1, 0.45, 0.4);
 
   return rscene;
 }
