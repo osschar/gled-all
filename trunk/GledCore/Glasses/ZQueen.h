@@ -132,7 +132,7 @@ protected:
 
   void put_lens_to_purgatory(ZGlass* lens);
   void remove_lens(ZGlass* lens);
-  void remove_lenses(ZList* list, Bool_t recurse);
+  void remove_lenses(ZList* list, Bool_t recurse, Bool_t syncmode);
 
 public:
 
@@ -176,11 +176,11 @@ public:
   // instantiate URL
 
   // Lens deletion
-  void PutLensToPurgatory(ZGlass* lens);                // X{E} C{1}
-  void PutListElementsToPurgatory(ZList* list);         // X{E} C{1}
+  void PutLensToPurgatory(ZGlass* lens);                // X{E}  C{1}
+  void PutListElementsToPurgatory(ZList* list);         // X{E}  C{1}
   void PutLensToVoid(ID_t lens_id);                     // X{E}
-  void RemoveLens(ZGlass* lens);                        // X{E} C{1}
-  void RemoveLenses(ZList* list, Bool_t recurse=false); // X{E} C{1}
+  void RemoveLens(ZGlass* lens);                        // X{E}  C{1}
+  void RemoveLenses(ZList* list, Bool_t recurse=false); // X{Ed} C{1}
 
   // ZeroRefCount and management of Orphans
   void ZeroRefCount(ZGlass* lens);
@@ -214,20 +214,6 @@ public:
 
   // tmp
   void ListAll();		 //! X{E} 7 MButt()
-
-  // Thread functions
-
-  struct lens_remover_ti {
-    ZMirEmittingEntity* mee;
-    ZQueen* 	queen;
-    ZList*	list;
-    bool	recurse;
-
-    lens_remover_ti(ZMirEmittingEntity* m, ZQueen* q, ZList* l, bool r) :
-      mee(m), queen(q), list(l), recurse(r) {}
-  };
-
-  static void* tl_LensRemover(lens_remover_ti* arg);
 
 #include "ZQueen.h7"
   ClassDef(ZQueen, 1)
