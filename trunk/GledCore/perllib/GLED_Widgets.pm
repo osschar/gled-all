@@ -450,6 +450,7 @@ sub make_widget {
   return $S->make_widget_A() .
     "\to->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
     "\to->tooltip(\"R-button opens file selector\");\n" .
+    (defined $S->{-pat} ? "\to->pattern(\"$S->{-pat}\");\n" : "" ) .
     $S->make_widget_B();
 }
 
