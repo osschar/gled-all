@@ -44,7 +44,6 @@ void check_overlaps(Float_t epsilon=1)
   ovl->RecalculateOvl();
   ovl->SetUseOM(1);
   ovl->SetOM(-2);
-  ovl->RnrOnRec();
 
   // create an empty node to test save/load from file 
   ZGeoNode* em_node = new ZGeoNode("Empty Node");
@@ -59,8 +58,8 @@ void check_overlaps(Float_t epsilon=1)
   // Spawn GUI
   {
     const Text_t* default_layout =
-      "ZGeoNode(RnrSelf[4],RnrOnRec[5],RnrOffRec[5],"
-      "Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[4])";
+      "ZNode(RnrSelf[4],RnrElements[5]):"
+      "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[7])";
 
     Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
     gROOT->LoadMacro("eye.C");
