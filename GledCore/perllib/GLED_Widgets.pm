@@ -471,10 +471,19 @@ sub new {
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "false";
   $S->{CanResizeP}   = "true";
-  $S->{-width} = 16 unless exists $S->{-width};
+  $S->{-width} =  0 unless exists $S->{-width};
   $S->{-height} = 1 unless exists $S->{-height};
 
+  $S->{calced_width} = 0;
+
   return $S;
+}
+
+sub check_calced_width {
+  my $S   = shift;
+  my $str = shift;
+  my $w = length $str;
+  $S->{calced_width} = $w if $w > $S->{calced_width};
 }
 
 sub enum_details {
@@ -516,11 +525,13 @@ sub make_widget {
       if ($#{$S->{-vals}} + 1) % 2 != 0;
     for($i=0; $i<$#{$S->{-vals}}; $i+=2) {
       $r .= "  o->Bruh($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
+      $S->check_calced_width($S->{-vals}[$i+1]);
     }
 
   } elsif(defined $S->{-seqvals}) {
     for($i=0; $i<=$#{$S->{-seqvals}}; ++$i) {
       $r .= "  o->Bruh($i, \"$S->{-seqvals}[$i]\");\n";
+      $S->check_calced_width($S->{-seqvals}[$i]);
     }
 
   } else {
@@ -535,10 +546,16 @@ sub make_widget {
       } else {
 	$add = 1;
       }
-      $r .= "  o->Bruh($E->{EnumSrcClass}::$h->{name}, \"$h->{label}\");\n" if $add;
+      if($add) {
+	$r .= "  o->Bruh($E->{EnumSrcClass}::$h->{name}, \"$h->{label}\");\n";
+	$S->check_calced_width($h->{label});
+      }
     }
   }
   $r .= $S->make_widget_B();
+
+  $S->{-width} = $S->{calced_width} + 2 if $S->{-width} == 0;
+
   $r;
 }
 
@@ -742,6 +759,46 @@ qq(  const ZColor* _col = mIdol->Ptr$S->{Methodbase}();
   w->set_rgba(_col->r(),_col->g(),_col->b(),_col->a());
 ).
 $S->make_weed_update_B();
+}
+
+########################################################################
+
+package GLED::Widgets::StoneOutput; @ISA = ('GLED::Widgets');
+
+sub new {
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget} =  "Fl_Output";
+  $S->{Include} = "FL/Fl_Output.H";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = "true";
+  $S->{-width} =  12 unless exists $S->{-width};
+  $S->{-height} = 1  unless exists $S->{-height};
+  return $S;
+}
+
+sub make_widget {
+  my $S=shift;
+  return $S->make_widget_A() .
+	 $S->make_widget_B();
+}
+
+sub make_cxx_cb {
+  my $S = shift;
+return <<"fnord";
+void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {}
+
+fnord
+}
+
+sub make_weed_update {
+  my $S = shift;
+  return $S->make_weed_update_A() .
+    "  w->value(GForm(\"$S->{Fmt}\", " . 
+      join(', ', map { "mIdol->Ref$S->{Methodbase}().Get$_()" } @{$S->{Args}}) .
+	"));\n" .
+  $S->make_weed_update_B();
 }
 
 ########################################################################
