@@ -49,11 +49,13 @@
   n1->SetColor(0.48, 0.78, 0.58);
   n1->SetTLevel(16); n1->SetPLevel(16);
   scenes->CheckIn(n1); rot_lamps->Add(n1);
-  Sphere* n2 = new Sphere(); n2->MoveLF(1,5); n2->SetRadius(0.5);
+  Sphere* n2 = new Sphere(); n2->MoveLF(1,1); n2->SetRadius(0.5);
   n2->SetColor(1,0.3,0.3);
+  n2->SetLOD(20);
   scenes->CheckIn(n2); n1->Add(n2);
-  Sphere* n3 = new Sphere(); n3->MoveLF(2,2); n3->SetRadius(0.5);
+  Sphere* n3 = new Sphere(); n3->MoveLF(2,1); n3->SetRadius(0.5);
   n3->SetColor(0,1,1);
+  n3->SetLOD(20);
   scenes->CheckIn(n3); n1->Add(n3);
 
   // Eventor and a Mover
@@ -68,4 +70,6 @@
   mm->SetNode(lamp_base);
   mm->SetRi(1); mm->SetRj(2); mm->SetRa(0.01745);
   scenes->CheckIn(mm); dynamo->Add(mm);
+
+  dynamo->Start();
 }
