@@ -9,7 +9,10 @@
 
 #include <math.h>
 
-MTW_SubView::MTW_SubView(GledViewNS::ClassInfo* ci, MTW_View* v) :
+namespace GNS  = GledNS;
+namespace GVNS = GledViewNS;
+
+MTW_SubView::MTW_SubView(GNS::ClassInfo* ci, MTW_View* v) :
   Fl_RelGroup(0,0,0,0,0), mClassInfo(ci), mView(v)
 {
   // end() called from BuildFromList()
@@ -26,15 +29,15 @@ MTW_SubView::~MTW_SubView() {
 void MTW_SubView::Update()
 {
   for(lMTW_Weed_i i=mWeeds.begin(); i!=mWeeds.end(); ++i) {
-    (i->fMemberInfo->fooWUpdate)(i->fWeed, this);
+    (i->fWeedInfo->fooWUpdate)(i->fWeed, this);
   }
 }
 
 /**************************************************************************/
 
-void MTW_SubView::BuildFromList(GledViewNS::lpMemberInfo_t& l)
+void MTW_SubView::BuildFromList(GVNS::lpWeedInfo_t& l)
 {
-  for(GledViewNS::lpMemberInfo_i i=l.begin(); i!=l.end(); ++i) {
+  for(GVNS::lpWeedInfo_i i=l.begin(); i!=l.end(); ++i) {
     Fl_Widget* w = ((*i)->fooWCreator)(this);
     mWeeds.push_back( MTW_Weed(w, *i) );
     // cout <<" MTW_SubView::BuildFromList() adding member "<< (*i)->fName << endl; 
@@ -49,13 +52,13 @@ void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs)
   bool in_join = false;
   int  join_w  = 0;
   for(lMTW_Weed_i i=mWeeds.begin(); i!=mWeeds.end(); ++i) {
-    GledViewNS::MemberInfo& mi = *i->fMemberInfo;
+    GVNS::WeedInfo& mi = *i->fWeedInfo;
     int full_w = 0, lab_w = 0, weed_w = mi.fWidth;
     if(mi.bLabel) {
       if(mi.bLabelInside) {
-	weed_w += mi.fName.size();
+	weed_w += i->fWeedInfo->fName.size();
       } else {
-	lab_w = mi.fName.size();
+	lab_w = i->fWeedInfo->fName.size();
 	vs.fMaxOutsideLabeledW = vs.fMaxOutsideLabeledW >? weed_w;
 	vs.fMaxLabelW          = vs.fMaxLabelW          >? lab_w;
       }
@@ -85,13 +88,13 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
     // Harvest the joiners
     lMTW_Weed_i j = i; ++j;
     int n_join = 1;
-    int max_h  = i->fMemberInfo->fHeight;;
+    int max_h  = i->fWeedInfo->fHeight;;
     {
       lMTW_Weed_i ii = i; 
-      while(j != mWeeds.end() && ii->fMemberInfo->bJoinNext) {
+      while(j != mWeeds.end() && ii->fWeedInfo->bJoinNext) {
 	MTW_Widths z = j->GetWidths();
 	if(z.full + w.full > lim.full) break;
-	max_h = max_h >? j->fMemberInfo->fHeight;
+	max_h = max_h >? j->fWeedInfo->fHeight;
 	w += z; ii = j++; ++n_join;
       }
     }
@@ -101,7 +104,7 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
       int  align = FL_ALIGN_LEFT;
       bool flip_align = (n_join==2 && vs.bRightLabelPair);
       while(i != j) {
-	GledViewNS::MemberInfo& mi = *i->fMemberInfo;
+	GVNS::WeedInfo& mi = *i->fWeedInfo;
 	int ideal = int( roundf(float(lim.full - taken)/n_join) );
 	MTW_Widths z = i->GetWidths();
 	int dw = ideal - z.full;
@@ -127,7 +130,7 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
 	if(flip_align) align = FL_ALIGN_RIGHT;
       }
     } else {	  // Set a single weed
-      GledViewNS::MemberInfo& mi = *i->fMemberInfo;
+      GVNS::WeedInfo& mi = *i->fWeedInfo;
       int free = lim.full - w.full;
       if(mi.bLabel && !mi.bLabelInside && w.label<lim.label) {
 	int dl = lim.label - w.label;
@@ -161,13 +164,13 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
 MTW_Widths MTW_Weed::GetWidths()
 {
   MTW_Widths ret;
-  ret.weed = fMemberInfo->fWidth;
-  if(fMemberInfo->bLabel) {
-    if(fMemberInfo->bLabelInside) {
-      ret.weed += fMemberInfo->fName.size();
+  ret.weed = fWeedInfo->fWidth;
+  if(fWeedInfo->bLabel) {
+    if(fWeedInfo->bLabelInside) {
+      ret.weed += fWeedInfo->fName.size();
       ret.label = 0;
     } else {
-      ret.label = fMemberInfo->fName.size();
+      ret.label = fWeedInfo->fName.size();
     }
   }
   ret.full = ret.weed + ret.label;

@@ -19,17 +19,17 @@ class MTW_Layout : public Fl_Window, public Fl_SWM_Client {
 
 protected:
   struct Member {
-    GledViewNS::MemberInfo*	fMemberInfo;
+    GledViewNS::WeedInfo*	fWeedInfo;
     int				fW;
-    Member(GledViewNS::MemberInfo* mi, int w=0) : fMemberInfo(mi), fW(w) {}
+    Member(GledViewNS::WeedInfo* wi, int w=0) : fWeedInfo(wi), fW(w) {}
   };
   typedef list<Member>			lMember_t;
   typedef list<Member>::iterator	lMember_i;
   struct Class {
-    GledViewNS::ClassInfo*	fClassInfo;
+    GledNS::ClassInfo*		fClassInfo;
     lMember_t			fMembers;
     int				fFullW;
-    Class(GledViewNS::ClassInfo* ci) : fClassInfo(ci), fFullW(0) {}
+    Class(GledNS::ClassInfo* ci) : fClassInfo(ci), fFullW(0) {}
   };
   typedef list<Class>			lClass_t;
   typedef list<Class>::iterator		lClass_i;

@@ -27,6 +27,7 @@
 #include <memory>
 
 namespace OS = OptoStructs;
+namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 
 /**************************************************************************/
@@ -79,27 +80,27 @@ namespace {
     switch(int(what)) {
 
     case 1: { // Nest
-      FID_t fid = GledNS::FindClass("NestInfo");
+      FID_t fid = GledNS::FindClassID("NestInfo");
+      GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
+      GNS::MethodInfo* mi = ci->FindMethodInfo("Add", false);
       auto_ptr<ZMIR> mir(q->S_InstantiateWAttach(shell->GetShellInfo()->GetNests(), 0,
-						 fid.lid, fid.cid,
-						 GForm("Nest %d", shell->GetShellInfo()->GetNests()->Size()+1),
-						 GForm("shell: %s", shell->GetShellInfo()->GetName())));
-      GVNS::ClassInfo*	ci = GVNS::FindClassInfo(GledNS::FindClass("ZList"));
-      GVNS::ContextMethodInfo* cmi = ci->FindContextMethodInfo("Add");
-      (cmi->fooCCCreator)(mir->Message);
+			 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
+			 fid.lid, fid.cid,
+			 GForm("Nest %d", shell->GetShellInfo()->GetNests()->Size()+1),
+			 GForm("shell: %s", shell->GetShellInfo()->GetName())));
       nest->fImg->fEye->Send(*mir);
       break;
     }
 
     case 2: { // Pupil
-      FID_t fid = GledNS::FindClass("PupilInfo");
+      FID_t fid = GledNS::FindClassID("PupilInfo");
+      GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
+      GNS::MethodInfo* mi = ci->FindMethodInfo("Add", false);
       auto_ptr<ZMIR> mir(q->S_InstantiateWAttach(nest->GetNestInfo()->GetPupils(), 0,
-						 fid.lid, fid.cid,
-						 GForm("Pupil %d", nest->GetNestInfo()->GetPupils()->Size()+1),
-						 GForm("nest: %s", nest->GetNestInfo()->GetName())));
-      GVNS::ClassInfo*	ci = GVNS::FindClassInfo(GledNS::FindClass("ZList"));
-      GVNS::ContextMethodInfo* cmi = ci->FindContextMethodInfo("Add");
-      (cmi->fooCCCreator)(mir->Message);
+			 mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
+			 fid.lid, fid.cid,
+			 GForm("Pupil %d", nest->GetNestInfo()->GetPupils()->Size()+1),
+			 GForm("nest: %s", nest->GetNestInfo()->GetName())));
       nest->fImg->fEye->Send(*mir);
       break;
     }

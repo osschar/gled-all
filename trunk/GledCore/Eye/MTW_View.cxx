@@ -16,7 +16,8 @@
 #include <FL/Fl_Valuator.H>
 #include <FL/Fl_Box.H>
 
-namespace GV = GledViewNS;
+namespace GNS  = GledNS;
+namespace GVNS = GledViewNS;
 namespace OS = OptoStructs;
 
 MTW_View::MTW_View(OS::ZGlassImg* img) :
@@ -55,15 +56,15 @@ void MTW_View::BuildVerticalView()
   // !! And GledViewNS creators even more so ...
   
   type(FL_VERTICAL);
-  GV::ClassInfo* ci = GV::FindClassInfo(mGlass->ZID());
+  GNS::ClassInfo* ci = GNS::FindClassInfo(mGlass->ZID());
   MTW_Vertical_Stats mtw_vs;
 
   Fl_Group::current(0); // Must reverse order of insertion ...
   while(ci) {
     //cout <<"MTW_View::BuildVerticalView() ci="<< ci->fClassName <<endl;
-    MTW_SubView* sv = (ci->fooSVCreator)(ci, this, mGlass);
+    MTW_SubView* sv = (ci->fViewPart->fooSVCreator)(ci, this, mGlass);
     assert(sv);
-    sv->BuildFromList(ci->fMIlist);
+    sv->BuildFromList(ci->fViewPart->fWeedList);
     sv->UpdateVerticalStats(mtw_vs);
     mSubViews.push_front(sv);
     ci = ci->GetParentCI();
@@ -88,16 +89,16 @@ void MTW_View::BuildByLayout(MTW_Layout* layout)
 {
   type(FL_HORIZONTAL);
   for(MTW_Layout::lClass_i c=layout->mClasses.begin(); c!=layout->mClasses.end(); ++c) {
-    if(GledNS::IsA(mGlass, c->fClassInfo->fFid)) {
-      MTW_SubView* sv = (c->fClassInfo->fooSVCreator)(c->fClassInfo, this, mGlass);
+    if(GNS::IsA(mGlass, c->fClassInfo->fFid)) {
+      MTW_SubView* sv = (c->fClassInfo->fViewPart->fooSVCreator)(c->fClassInfo, this, mGlass);
       int x = 0, maxh=0;
       for(MTW_Layout::lMember_i m=c->fMembers.begin(); m!=c->fMembers.end(); ++m) {
-	Fl_Widget* w = (m->fMemberInfo->fooWCreator)(sv);
-	w->resize(x, 0, m->fW, m->fMemberInfo->fHeight);
+	Fl_Widget* w = (m->fWeedInfo->fooWCreator)(sv);
+	w->resize(x, 0, m->fW, m->fWeedInfo->fHeight);
 	w->label(0);
 	x += m->fW;
-	maxh = maxh >? m->fMemberInfo->fHeight;
-	sv->mWeeds.push_back( MTW_Weed(w, m->fMemberInfo) );
+	maxh = maxh >? m->fWeedInfo->fHeight;
+	sv->mWeeds.push_back( MTW_Weed(w, m->fWeedInfo) );
       }
       sv->end();
       sv->resize(0,0,x,maxh);
@@ -166,7 +167,7 @@ Fl_Window* MTW_View::ConstructVerticalWindow(OS::ZGlassImg* img)
   // Also some controls &| collapsors would be usefull.
 
   Fl_Window* w = new MTW_View_Window(0,0,GForm("%s[%s]", img->fGlass->GetName(),
-					img->fClassInfo->fClassName.c_str()));
+					img->fClassInfo->fName.c_str()));
   MTW_View* v = new MTW_View(img);
   v->BuildVerticalView();
   w->end();

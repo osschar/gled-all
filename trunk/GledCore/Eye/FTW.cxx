@@ -26,6 +26,7 @@
 
 #include <memory>
 
+namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;
 
@@ -107,7 +108,7 @@ OS::ZGlassImg* FTW::Locator::get_image()
 //ID_t FTW::Locator::get_id()
 //{ return ant ? ant->fToImg->fGlass->GetSaturnID() : leaf->fImg->fGlass->GetSaturnID(); }
 
-GledViewNS::ClassInfo* FTW::Locator::get_class_info()
+GNS::ClassInfo* FTW::Locator::get_class_info()
 { return ant ? ant->fToImg->fClassInfo : leaf->fImg->fClassInfo; }
 
 
@@ -206,15 +207,15 @@ void FTW::LocatorConsumer::clear_base()
 
 FTW::NameButton::NameButton(Loc_e l, int x, int y, int w, int h, const char* t)
   : Fl_Button(x,y,w,h,t), m_loc(l)
-{}
+{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); }
 
 FTW::NameButton::NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t)
   : Fl_Button(x,y,w,h,t), m_loc(L_Leaf)
-{}
+{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); }
 
 FTW::NameButton::NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t)
   : Fl_Button(x,y,w,h,t), m_loc(L_Ant)
-{}
+{ labeltype((Fl_Labeltype)GVNS::no_symbol_label); }
 
 /**************************************************************************/
 // protected methods
@@ -242,8 +243,6 @@ FTW_Ant* FTW::NameButton::get_ant()
 
 int FTW::NameButton::handle(int ev)
 {
-  //if(m_loc == L_undef) return Fl_MC_Widget<Fl_Button>::handle(ev);
-
   static int x, y, dx, dy;
   FTW_Leaf* leaf = get_leaf();
   FTW_Ant*  ant  = get_ant();
@@ -253,22 +252,22 @@ int FTW::NameButton::handle(int ev)
   case FL_ENTER: {
     if(leaf) {
       leaf->GetNest()->RefBelowMouse().set(leaf, ant);
-      GledViewNS::ClassInfo* ci = leaf->fImg->fClassInfo;
+      GledNS::ClassInfo* ci = leaf->fImg->fClassInfo;
       ZGlass* lens = leaf->fImg->fGlass;
       if(ant == 0) {
 	leaf->GetNest()->SetInfoBar(GForm("%s (\"%s\",\"%s\")",
-					  ci->fClassName.c_str(),
+					  ci->fName.c_str(),
 					  lens->GetName(), lens->GetTitle()));
       } else {
 	OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
 	const char *glass = "null", *name = "", *title = "";
 	if(ant->fToImg) {
-	  glass = ant->fToImg->fClassInfo->fClassName.c_str();
+	  glass = ant->fToImg->fClassInfo->fName.c_str();
 	  name  = ant->fToGlass->GetName();
 	  title = ant->fToGlass->GetTitle();
 	}
 	leaf->GetNest()->SetInfoBar(GForm("%s (\"%s\") [%s %s] -> %s (\"%s\",\"%s\")",
-					  ci->fClassName.c_str(),
+					  ci->fName.c_str(),
 					  lens->GetName(),
 					  ld->fLinkInfo->fType.c_str(),
 					  ld->fLinkInfo->fName.c_str(),
@@ -356,6 +355,7 @@ FTW::NameBox::NameBox(OS::ZGlassImg* i, int x, int y, int w, int h) :
 {
   align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   box(FL_EMBOSSED_BOX);
+  labeltype((Fl_Labeltype)GVNS::no_symbol_label); 
   if(fImg) {
     fImg->CheckInFullView(this);
     label(fImg->fGlass->GetName());
@@ -392,6 +392,23 @@ void FTW::NameBox::ChangeImage(OS::ZGlassImg* new_img, bool keep_label)
   redraw();
 }
 
+/*
+void FTW::NameBox::Label(const char* name)
+{
+  if(name == 0) {
+    label(0);
+  } else {
+    string l(name);
+    string::size_type i = 0;
+    while((i=l.find('@',i)) != string::npos) {
+      l.insert(i, 1, '@');
+      i+=2;
+    }
+    label(l.c_str());
+  }
+}
+*/
+
 /**************************************************************************/
 /**************************************************************************/
 // Selectors
@@ -421,11 +438,30 @@ namespace {
   }
 
   void fidsel_lid_cb(Fl_Button* b, Inst_SelID* ud) {
-    map<UInt_t, string> res;
-    for(GVNS::hLid2LSInfo_i i = GVNS::Lid2LSInfo.begin();
-	i != GVNS::Lid2LSInfo.end(); ++i)
+    GNS::lpLSI_t ls_list;
+    GNS::ProduceLibSetInfoList(ls_list);
+
+    Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+    Fl_SWM_Manager* mgr = Fl_SWM_Manager::search_manager(b);
+    if(mgr) menu.textsize(mgr->cell_fontsize());
+    list<Inst_SelID> datas;
+
+    for(GNS::lpLSI_i lsi=ls_list.begin(); lsi!=ls_list.end(); ++lsi) {
+      datas.push_back( Inst_SelID(ud->fidsel, (*lsi)->fLid) );
+      menu.add((*lsi)->fName.c_str(), 0, (Fl_Callback*)lid_sel_cb, &datas.back());
+    }
+    const Fl_Menu_Item* mi = menu.popup();
+  }
+
+  void fidsel_cid_cb(Fl_Button* b, Inst_SelID* ud) {
+    GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(ud->fidsel->get_lid());
+    if(lsi == 0) return; // !!!! scream
+
+    map<CID_t, string> res;
+    for(GNS::hCid2pCI_i j = lsi->Cid2CInfo.begin();
+	j != lsi->Cid2CInfo.end(); ++j)
       {
-	res[i->second.fLid] = i->second.fName;
+	res[j->second->fFid.cid] = j->second->fName;
       }
 
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
@@ -433,38 +469,15 @@ namespace {
     if(mgr) menu.textsize(mgr->cell_fontsize());
 
     list<Inst_SelID> datas;
-    for(map<UInt_t, string>::iterator i = res.begin(); i!=res.end(); ++i) {
-      datas.push_back( Inst_SelID(ud->fidsel, i->first) );
-      menu.add(i->second.c_str(), 0, (Fl_Callback*)lid_sel_cb, &datas.back());
+    for(map<CID_t, string>::iterator j=res.begin(); j!=res.end(); ++j) {
+      datas.push_back( Inst_SelID(ud->fidsel, j->first) );
+      // Insert separators at ClassId breaks
+      map<CID_t, string>::iterator k = j; ++k;
+      int flags = (k != res.end() && k->first - j->first > 1) ? FL_MENU_DIVIDER : 0;
+      menu.add(j->second.c_str(), 0, (Fl_Callback*)cid_sel_cb, &datas.back(), flags);
     }
-    const Fl_Menu_Item* mi = menu.popup();
-  }
+    const Fl_Menu_Item* mi = menu.popup();    
 
-  void fidsel_cid_cb(Fl_Button* b, Inst_SelID* ud) {
-    GVNS::hLid2LSInfo_i i = GVNS::Lid2LSInfo.find(ud->fidsel->get_lid());
-    if(i != GVNS::Lid2LSInfo.end()) {
-      map<UInt_t, string> res;
-      GVNS::LibSetInfo& lsi = i->second;
-      for(GVNS::hCid2pCI_i j = lsi.Cid2pCI.begin();
-	  j != lsi.Cid2pCI.end(); ++j)
-	{
-	  res[j->second->fFid.cid] = j->second->fClassName;
-	}
-
-      Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
-      Fl_SWM_Manager* mgr = Fl_SWM_Manager::search_manager(b);
-      if(mgr) menu.textsize(mgr->cell_fontsize());
-
-      list<Inst_SelID> datas;
-      for(map<UInt_t, string>::iterator j=res.begin(); j!=res.end(); ++j) {
-	datas.push_back( Inst_SelID(ud->fidsel, j->first) );
-	// Insert separators at ClassId breaks
-	map<UInt_t, string>::iterator k = j; ++k;
-	int flags = (k != res.end() && k->first - j->first > 1) ? FL_MENU_DIVIDER : 0;
-	menu.add(j->second.c_str(), 0, (Fl_Callback*)cid_sel_cb, &datas.back(), flags);
-      }
-      const Fl_Menu_Item* mi = menu.popup();    
-    }
   }
 
   void parent_fid_cb(Fl_Button* b, FTW::Inst_Selector* is) {
@@ -515,25 +528,25 @@ FTW::Inst_Selector::~Inst_Selector() {
 }
 
 void FTW::Inst_Selector::set_lid(UInt_t l) {
-  GVNS::hLid2LSInfo_i i = GVNS::Lid2LSInfo.find(l);
-  if(i != GVNS::Lid2LSInfo.end()) {
+  GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(l);
+  if(lsi != 0) {
     ((Inst_SelID*)wLid->user_data())->id = l;
-    wLid->label( i->second.fName.c_str() );
+    wLid->label( lsi->fName.c_str() );
     wLid->redraw();
   }
 }
 
 void FTW::Inst_Selector::set_cid(UInt_t c) {
-  GVNS::ClassInfo* ci;
+  GNS::ClassInfo* ci;
   if(c) {
-    ci = GVNS::FindClassInfo(FID_t(get_lid(), c));
+    ci = GNS::FindClassInfo(FID_t(get_lid(), c));
   } else {
-    ci = GVNS::FindLibSetInfo(get_lid())->FirstClassInfo();
+    ci = GNS::FindLibSetInfo(get_lid())->FirstClassInfo();
   }
     
   if(ci) {
     ((Inst_SelID*)wCid->user_data())->id = ci->fFid.cid;
-    wCid->label( ci->fClassName.c_str() );
+    wCid->label( ci->fName.c_str() );
     wCid->redraw();
   }
 }
@@ -808,7 +821,8 @@ bool FTW::Source_Selector::has_contents()
 
 /**************************************************************************/
 
-ZMIR* FTW::Source_Selector::generate_MIR_header(ZGlass* alpha, ZGlass* gamma)
+ZMIR* FTW::Source_Selector::generate_MIR(GNS::MethodInfo* mi,
+					 ZGlass* alpha, ZGlass* gamma)
 {
   switch (m_cur_type) {
 
@@ -816,14 +830,18 @@ ZMIR* FTW::Source_Selector::generate_MIR_header(ZGlass* alpha, ZGlass* gamma)
     ID_t a = alpha->GetSaturnID();
     ID_t b = wLoc_Sel->get_locator()->get_contents();
     ID_t g = gamma ? gamma->GetSaturnID() : 0;
-    return new ZMIR(a, b, g);
+    ZMIR* mir = new ZMIR(a, b, g);
+    mi->ImprintMir(*mir);
+    return mir;
   }
 
   case Top_Selector::T_Inst: {
     // !!!! Need fixed queen option in Instantiator
     ZQueen* q = alpha->GetQueen();
     if(q==0) throw(string("Creator: target has no Queen"));
-    return  q->S_InstantiateWAttach(alpha, gamma, wInst_Sel->get_lid(), wInst_Sel->get_cid());
+    return q->S_InstantiateWAttach(alpha, gamma,
+	       mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
+	       wInst_Sel->get_lid(), wInst_Sel->get_cid());
   }
 
   default: {
@@ -911,10 +929,10 @@ void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
     ID_t b = beta->GetSaturnID();
     //ID_t g = gamma ? gamma->GetSaturnID() : 0;
     auto_ptr<ZMIR> mir(new ZMIR(a, b));
-    GVNS::ContextMethodInfo* cmi = 
-      target->get_class_info()->FindContextMethodInfo("Add");
+    GNS::MethodInfo* cmi = 
+      target->get_class_info()->FindMethodInfo("Add", true);
     if(cmi) {
-      (cmi->fooCCCreator)(mir->Message);
+      cmi->ImprintMir(*mir);
       target->leaf->fImg->fEye->Send(*mir);
     } else {
       throw(string(_eh + "Add" + " method not found in catalog"));

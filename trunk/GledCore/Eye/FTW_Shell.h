@@ -69,7 +69,7 @@ public:
 
   void Y_SendMessage(const char* msg);
 
-  void ExecContextCall(FTW::Locator& alpha, GledViewNS::ContextMethodInfo* cmi);
+  void ExecContextCall(FTW::Locator& alpha, GledNS::MethodInfo* cmi);
   void ExportToInterpreter(FTW::Locator& loc, const char* varname);
 
   FTW_Nest* SpawnNest(OptoStructs::ZGlassImg* img);

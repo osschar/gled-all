@@ -8,6 +8,7 @@
 #define Gled_GledViewNS_H
 
 #include <Gled/GledTypes.h>
+#include <Gled/GledNS.h>
 
 class ZGlass;
 class ZMIR;
@@ -68,9 +69,15 @@ namespace GledViewNS {
   typedef void		(*WeedUpdate_foo)     (Fl_Widget*, MTW_SubView*);
   typedef void		(*CtxCallCreator_foo) (TBuffer*);
 
-  struct MemberInfo {
-    string		fName;
-    string		fType;
+  struct MethodInfo {};		// Null so far
+
+  struct DataMemberInfo {};	// Null so far
+
+  struct LinkMemberInfo {
+    RnrBits		fDefRnrBits;
+  };
+
+  struct WeedInfo : public GledNS::InfoBase {
     Int_t		fWidth;
     Int_t		fHeight;
     bool		bLabel;
@@ -80,72 +87,29 @@ namespace GledViewNS {
     WeedCreator_foo	fooWCreator;
     WeedCallback_foo	fooWCallback;
     WeedUpdate_foo	fooWUpdate;
+
+    WeedInfo(const string& s) : InfoBase(s) {}
   };
 
-  typedef map<string, MemberInfo*>		mName2pMemberInfo_t;
-  typedef map<string, MemberInfo*>::iterator	mName2pMemberInfo_i;
-  typedef list<MemberInfo*>			lpMemberInfo_t;
-  typedef list<MemberInfo*>::iterator		lpMemberInfo_i;
-
-  struct ContextMethodInfo {
-    string		fName;
-    lStr_t		fContextArgs;
-    lStr_t		fFreeArgs;
-    string		fFreeTemplate;
-    CtxCallCreator_foo	fooCCCreator;
-
-    bool operator==(const string& s) { return (fName == s); }
-  };
-
-  typedef list<ContextMethodInfo*>		lpContextMethodInfo_t;
-  typedef list<ContextMethodInfo*>::iterator	lpContextMethodInfo_i;
-
-  struct LinkMemberInfo {
-    string		fName;
-    string		fType;
-    bool		bIsLinkToList;
-    RnrBits		fDefRnrBits;
-    CtxCallCreator_foo	fooCCCreator;
-  };
-
-  typedef list<LinkMemberInfo*>			lpLinkMemberInfo_t;
-  typedef list<LinkMemberInfo*>::iterator	lpLinkMemberInfo_i;
-
-  //typedef hash_map<CID_t, mName2pMemberInfo_t*>		hCid2pMImap_t;
-  //typedef hash_map<CID_t, mName2pMemberInfo_t*>::iterator	hCid2pMImap_i;
-  //typedef hash_map<CID_t, lpMemberInfo_t*>			hCid2pMIlist_t;
-  //typedef hash_map<CID_t, lpMemberInfo_t*>::iterator		hCid2pMIlist_i;
+  typedef list<WeedInfo*>		lpWeedInfo_t;
+  typedef list<WeedInfo*>::iterator	lpWeedInfo_i;
 
   // Intermediate level: ClassInfo, RnrCreator and SubView info
 
-  struct ClassInfo;
-  typedef MTW_SubView*	(*SubViewCreator_foo)(ClassInfo* ci, MTW_View* v, ZGlass* g);
+  typedef MTW_SubView*	(*SubViewCreator_foo)(GledNS::ClassInfo* ci, MTW_View* v, ZGlass* g);
 
   struct ClassInfo {
-    FID_t			fFid;
-    string			fClassName;
     SubViewCreator_foo		fooSVCreator;
-    mName2pMemberInfo_t		fMImap;
-    lpMemberInfo_t		fMIlist;
-    lpContextMethodInfo_t	fCMIlist;
-    lpLinkMemberInfo_t		fLMIlist;
-    string			fParentName;
     string			fRendererGlass;
     RnrCtrl			fDefRnrCtrl;
-    ClassInfo*			fRendererCI;
-    ClassInfo*			fParentCI;
+    GledNS::ClassInfo*		fRendererCI;
 
-    ClassInfo(FID_t f) : fFid(f) {} // all defed by p7
+    lpWeedInfo_t		fWeedList;
 
-    lpMemberInfo_t&     GetMemberInfoList()     { return fMIlist; }
-    lpMemberInfo_t*	ProduceFullMemberInfoList();
-    lpLinkMemberInfo_t& GetLinkMemberInfoList() { return fLMIlist; }
-    lpLinkMemberInfo_t*	ProduceFullLinkMemberInfoList();
-    MemberInfo*		FindMemberInfo(const string& mmb);
-    ContextMethodInfo*	FindContextMethodInfo(const string& func_name);
+    //----------------------------------------------------------------
 
-    ClassInfo*		GetParentCI();
-    ClassInfo*		GetRendererCI();
+    WeedInfo*		FindWeedInfo(const string& name, bool recurse, GledNS::ClassInfo* true_class);
+    GledNS::ClassInfo*	GetRendererCI();
     A_Rnr*		SpawnRnr(const string& rnr, ZGlass* g);
   };
 
@@ -153,30 +117,17 @@ namespace GledViewNS {
 
   typedef hash_map<string, A_Rnr_Creator_foo*>		 hRnr2RCFoo_t;
   typedef hash_map<string, A_Rnr_Creator_foo*>::iterator hRnr2RCFoo_i;
-  typedef hash_map<CID_t, ClassInfo*>			 hCid2pCI_t;
-  typedef hash_map<CID_t, ClassInfo*>::iterator		 hCid2pCI_i;
 
   // High level: per LibSet information
 
   struct LibSetInfo {
-    LID_t		fLid;
-    string		fName;
-    hCid2pCI_t		Cid2pCI;
     hRnr2RCFoo_t	Rnr2RCFoo;
-  
-    LibSetInfo(LID_t lid, const string& s) : fLid(lid), fName(s) {}
-    ClassInfo* FindClassInfo(CID_t cid);
-    ClassInfo* FirstClassInfo();
   };
-
-  typedef hash_map<LID_t, LibSetInfo>		hLid2LSInfo_t;
-  typedef hash_map<LID_t, LibSetInfo>::iterator	hLid2LSInfo_i;
 
   /**************************************************************************/
   // Variables
   /**************************************************************************/
 
-  extern hLid2LSInfo_t	Lid2LSInfo;
   extern set<string>	RnrNames;
 
   /**************************************************************************/
@@ -199,14 +150,14 @@ namespace GledViewNS {
   void AssertRenderers();
   void AddRenderer(const string& rnr);
   
-  // Inquiries
-
-  LibSetInfo* FindLibSetInfo(LID_t lid);
-  ClassInfo*  FindClassInfo(FID_t fid);
-
   // Services
 
   A_Rnr* SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid);
+
+  //
+
+  extern int no_symbol_label;
+
 } // GledViewNS
 
 #endif

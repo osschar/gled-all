@@ -8,6 +8,7 @@
 #define Gled_MTW_SubView
 
 #include <Gled/GledTypes.h>
+#include <Gled/GledNS.h>
 #include <GledView/GledViewNS.h>
 #include <FL/Fl_RelGroup.H>
 
@@ -34,10 +35,10 @@ struct MTW_Vertical_Stats {
 
 struct MTW_Weed {
   Fl_Widget*			fWeed;
-  GledViewNS::MemberInfo*	fMemberInfo;
+  GledViewNS::WeedInfo*		fWeedInfo;
 
-  MTW_Weed(Fl_Widget* wee, GledViewNS::MemberInfo* mi) :
-    fWeed(wee), fMemberInfo(mi) {}
+  MTW_Weed(Fl_Widget* wee, GledViewNS::WeedInfo* wi) :
+    fWeed(wee), fWeedInfo(wi) {}
   MTW_Widths GetWidths();
 };
 
@@ -52,17 +53,17 @@ class MTW_SubView : public Fl_RelGroup {
   friend class MTW_View;
 
 protected:
-  GledViewNS::ClassInfo*	mClassInfo;
-  MTW_View*			mView;	// Access to ZGlassImg, Eye
-  lMTW_Weed_t			mWeeds;
+  GledNS::ClassInfo*	mClassInfo;
+  MTW_View*		mView;	// Access to ZGlassImg, Eye
+  lMTW_Weed_t		mWeeds;
 
 public:
-  MTW_SubView(GledViewNS::ClassInfo* ci, MTW_View* v);
+  MTW_SubView(GledNS::ClassInfo* ci, MTW_View* v);
   virtual ~MTW_SubView();
 
   void Update();
 
-  void BuildFromList(GledViewNS::lpMemberInfo_t& l);
+  void BuildFromList(GledViewNS::lpWeedInfo_t& l);
   void UpdateVerticalStats(MTW_Vertical_Stats& vs);
   int  ResizeByVerticalStats(MTW_Vertical_Stats& vs);
 
