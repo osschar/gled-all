@@ -1,3 +1,15 @@
+2005-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	Added members bCollZGlass and bCollZList controlling inital
+	collapse state of ZGlass and ZList sub-views.
+
+	* Eye/MTW_View.cxx:
+	Added top-bar for class-view (provides drag-out and right-mouse
+	context menu); honour collapse status for ZGlass/ZLink as set in
+	ShellInfo.
+
 2005-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW.cxx:
