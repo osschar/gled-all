@@ -4,65 +4,191 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Ray_H
-#define Gled_Ray_H
+#ifndef GledCore_Ray_H
+#define GledCore_Ray_H
 
 // Includes
 #include <Gled/GledTypes.h>
 #include <TString.h>
 
-// for birth: creation request ID ??
+namespace OptoStructs {
+  class ZGlassImg;
+}
 
-struct Ray {
-  enum RayQN_e { RQN_change=0,
-		 RQN_link_change,
-		 RQN_list_add, RQN_list_remove, RQN_list_rebuild, RQN_list_clear,
-		 RQN_birth, RQN_death,
-		 RQN_message, RQN_error,
-		 RQN_apocalypse
+/**************************************************************************/
+
+namespace RayNS {
+
+ enum RayQN_e {
+    RQN_death,
+    RQN_change,
+    RQN_link_change,
+    RQN_list_add, RQN_list_remove,
+    RQN_push_front, RQN_pop_front, RQN_push_back, RQN_pop_back,
+    RQN_insert,
+    RQN_set_by_idx,
+    RQN_list_rebuild, RQN_list_clear,
+    // Non-used; after that individual glasses/views can do anything.
+    RQN_first_non_used,
+    RQN_user_1, RQN_user_2, RQN_user_3, RQN_user_4, RQN_user_5
   };
 
-  RayQN_e	fEvent;		// for Streaming casted into unsigned char
-  TimeStamp_t	fStamp;
-  ZGlass*	fCaller;
+  void PutPTR(TBuffer& b, ZGlass*& p);
+  void GetPTR(TBuffer& b, ZGlass*& p);
+}
+
+
+/**************************************************************************/
+/**************************************************************************/
+// Ray
+/**************************************************************************/
+
+class Ray {
+public:
+
+  enum EyeBits_e {
+    EB_StructuralChange = 0x1
+  };
+
+  enum RayBits_e {
+    RB_Beta         = 0x1,
+    RB_Gamma        = 0x2,
+    RB_BetaId       = 0x4,
+    RB_GammaId      = 0x8,
+    RB_BetaLabel    = 0x10,
+    RB_GammaLabel   = 0x20,
+    RB_CustomBuffer = 0x40
+  };
+
+private:
+  Bool_t	bRead;
+
+public:
   ZGlass*	fAlpha;
+
+  UChar_t	fRQN;		// ray quantum number
+  UChar_t	fEyeBits;
+  TimeStamp_t	fStamp;		// timestamp of alpaha
+  LID_t		fLibID;		// rlass of origin, libset
+  CID_t		fClassID;	// ----- " " -----, glass
+  UChar_t	fRayBits;	//
+
+  // Optional part
   ZGlass*	fBeta;
   ZGlass*	fGamma;
-  LID_t		fLibID;
-  CID_t		fClassID;
-  TString	fMessage;
+  Int_t		fBetaId;
+  Int_t		fGammaId;
+  TString	fBetaLabel;
+  TString      	fGammaLabel;
 
-  Ray() {}
+  Int_t		fCustomLen;
+  TBuffer*	fCustomBuffer;
 
-  Ray(RayQN_e e, TimeStamp_t t, ZGlass* a, ZGlass* b=0, ZGlass* g=0) :
-    fEvent(e), fStamp(t), fAlpha(a), fBeta(b), fGamma(g), fLibID(0), fClassID(0) {}
+  // Images part ... used on Eye for demangled a,b,g
+  OptoStructs::ZGlassImg* fAlphaImg;
+  OptoStructs::ZGlassImg* fBetaImg;
+  OptoStructs::ZGlassImg* fGammaImg;
+  
+  //----------------------------------------------------------------------
 
-  Ray(RayQN_e e, TimeStamp_t t, ZGlass* a, LID_t lid, CID_t cid, ZGlass* b=0, ZGlass* g=0) :
-    fEvent(e), fStamp(t), fAlpha(a), fBeta(b), fGamma(g), fLibID(lid), fClassID(cid) {}
+  ~Ray();
 
-  Ray(RayQN_e e, ZGlass* c, const Text_t* msg) :
-    fEvent(e), fStamp(0), fCaller(c), fMessage(msg) {}
+  /************************************************************************/
+  // Writer side
+  /************************************************************************/
 
-  Ray(RayQN_e e, ZGlass* c, TString& msg) :
-    fEvent(e), fStamp(0), fCaller(c), fMessage(msg) {}
+  Ray(ZGlass* a, UChar_t rqn, TimeStamp_t t, LID_t l=0, CID_t c=0, UChar_t eb=0) :
+    bRead(false),
+    fAlpha(a), fRQN(rqn), fEyeBits(eb), fStamp(t), fLibID(l), fClassID(c),
+    fRayBits(0)
+  {}
+  static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, LID_t l, CID_t c, UChar_t eb=0)
+  { return new Ray(a, rqn, t, l, c, eb); }
+  static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, UChar_t eb)
+  { return new Ray(a, rqn, t, 0, 0, eb); }
 
-  void ListAdd(ZGlass* a, ZGlass* b, ZGlass* g)
-  { fEvent=RQN_list_add; fAlpha=a; fBeta=b; fGamma=g; }
-  void ListRemove(ZGlass* a, ZGlass* b)
-  { fEvent=RQN_list_remove; fAlpha=a; fBeta=b; }
-  void ListRebuild(ZGlass* a)
-  { fEvent=RQN_list_rebuild; fAlpha=a; }
+  void Write(TBuffer& b);
 
-  bool IsBasic() { return ( (fLibID==0 && fClassID==0) || (fLibID==1 && fClassID==1) ); }
+  void SetBeta(ZGlass* b)
+  { fBeta = b; fRayBits |= RB_Beta; }
+  void SetBeta(Int_t bid)
+  { fBetaId = bid; fRayBits |= RB_BetaId; }
+  void SetBeta(TString& blbl)
+  { fBetaLabel = blbl; fRayBits |= RB_BetaLabel; }
+  void SetBeta(ZGlass* b, Int_t bid)
+  { SetBeta(b); SetBeta(bid); }
+  void SetBeta(ZGlass* b, Int_t bid, TString& blbl)
+  { SetBeta(b); SetBeta(bid); SetBeta(blbl); }
 
-  void Streamer(TBuffer &buf);
-  void PutSLC(TBuffer &buf);
-  void GetSLC(TBuffer &buf);
+  void SetGamma(ZGlass* g)
+  { fGamma = g; fRayBits |= RB_Gamma; }
+  void SetGamma(Int_t gid)
+  { fGammaId = gid; fRayBits |= RB_GammaId; }
+  void SetGamma(TString& glbl)
+  { fGammaLabel = glbl; fRayBits |= RB_GammaLabel; }
+  void SetGamma(ZGlass* g, Int_t gid)
+  { SetGamma(g); SetGamma(gid); }
+  void SetGamma(ZGlass* g, Int_t gid, TString& glbl)
+  { SetGamma(g); SetGamma(gid); SetGamma(glbl); }
+
+  void SetCustomBuffer(TBuffer& b);
+
+  /************************************************************************/
+  // Reader side
+  /************************************************************************/
+
+  Ray(TBuffer& b) : bRead(true), fRayBits(0) { RayNS::GetPTR(b, fAlpha); }
+
+  void Read(TBuffer& b);
+
+  bool HasBeta()  { return fRayBits & RB_Beta; }
+  bool HasGamma() { return fRayBits & RB_Gamma; }
+
+  void ResetCustomBuffer();
+
+  //----------------------------------------------------------------------
+
+  bool IsBasic()       { return (fLibID==0 && fClassID==0) || (fLibID==1 && fClassID==1); }
+  bool IsBasicChange() { return fRQN == RayNS::RQN_change && IsBasic(); }
 
   const char* EventName() const;
   void Dump(ostream& s) const;
 };
 
 ostream& operator<<(ostream& s, const Ray& n);
+
+
+/**************************************************************************/
+/**************************************************************************/
+// TextMessage
+/**************************************************************************/
+
+struct TextMessage {
+  enum Type_e { TM_Message, TM_Error };
+
+  ZGlass*		fCaller;
+  Type_e		fType;          // Streamed as UShort_t
+  TString		fMessage;
+
+  TextMessage() {}
+  TextMessage(ZGlass* c, Type_e t, const TString& s) :
+    fCaller(c), fType(t), fMessage(s) {}
+  TextMessage(ZGlass* c, Type_e t, const char* s) :
+    fCaller(c), fType(t), fMessage(s) {}
+  TextMessage(ZGlass* c, Type_e t, const string& s) :
+    fCaller(c), fType(t), fMessage(s.c_str()) {}
+
+  void Streamer(TBuffer& buf);
+};
+
+/**************************************************************************/
+
+struct EyeCommand {
+  enum Command_e { EC_Apocalypse };
+
+  Command_e		fCommand;
+
+  EyeCommand(Command_e c) : fCommand(c) {}
+};
 
 #endif
