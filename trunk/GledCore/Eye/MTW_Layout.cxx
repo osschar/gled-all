@@ -6,7 +6,7 @@
 
 #include "MTW_Layout.h"
 #include "FTW_Nest.h"
-#include "FTW.h"
+#include "FltkGledStuff.h"
 #include <Gled/GledNS.h>
 #include <Glasses/ZGlass.h>
 
@@ -17,6 +17,7 @@
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
+namespace FGS  = FltkGledStuff;
 
 /**************************************************************************/
 
@@ -100,7 +101,7 @@ void MTW_Layout::Parse(int cell_w) throw (string)
 	throw string("member '"+mmb_name+"' not found for class '"+cls_name+"'");
       }
       int w = atoi(width_arg.c_str());
-      if(w == 0) w = mi->fWidth >? FTW::swm_label_width(*m, cell_w);
+      if(w == 0) w = mi->fWidth >? FGS::swm_label_width(*m, cell_w);
       cls.fMembers.push_back(Member(mi, w));
       cls.fFullW += w;
     }
