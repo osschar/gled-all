@@ -1,3 +1,8 @@
+2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx: The Operate() method did not invoke
+	Pre/PostOperate methods.
+
 2003-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSPoint.cxx:
@@ -8,8 +13,12 @@
 	* Rnr/GL/WSPoint_GL_Rnr.h:
 	* Rnr/GL/WSSeed_GL_Rnr.cxx:
 	* Rnr/GL/WSSeed_GL_Rnr.h:
-	* glass.list: Added new glasses WSSeed and WSPoint
+	* glass.list:
+
+	Added new glasses WSSeed and WSPoint
 
 	* Rnr/GL/SMorph_GL_Rnr.cxx:
-	* Rnr/GL/SMorph_GL_Rnr.h: Minor changes
+	* Rnr/GL/SMorph_GL_Rnr.h:
+
+	Minor changes
 
