@@ -57,6 +57,7 @@ Sphere			165	Glasses/Sphere		.
 Box			166	Glasses/Box		.
 Text			167	Glasses/Text		.
 ScreenDumper		168	Glasses/ScreenDumper
+ScreenText		169	Glasses/ScreenText	.
 
 # GL State Modifiers
 ZGlStateBase		178	Glasses/ZGlStateBase
