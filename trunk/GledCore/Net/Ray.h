@@ -23,11 +23,13 @@ namespace RayNS {
     RQN_death,
     RQN_change,
     RQN_link_change,
+    RQN_list_begin,
     RQN_list_add, RQN_list_remove,
     RQN_push_front, RQN_pop_front, RQN_push_back, RQN_pop_back,
     RQN_insert,
     RQN_set_by_idx,
     RQN_list_rebuild, RQN_list_clear,
+    RQN_list_end,
     // Non-used; after that individual glasses/views can do anything.
     RQN_user_0 = 64,
     RQN_user_1, RQN_user_2, RQN_user_3, RQN_user_4, RQN_user_5
