@@ -15,7 +15,7 @@ debug		!	.	DEBUG		0
 external	=s	.	EXTERNAL	""
 
 ### build configuration ###
-buildversion	=s	.	BUILD_VERSION	"1.2.1-cvs"
+buildversion	=s	.	BUILD_VERSION	"1.2.2-cvs"
 builddate	=s	.	BUILD_DATE	{ my $d=`date +%F`; chomp $d; $d; }
 rnr		=s	.	RENDERERS	"GL"
 
