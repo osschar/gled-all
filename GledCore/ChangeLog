@@ -1,3 +1,39 @@
+2003-11-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+
+	Added reporting of ZList sizes in the FTW::NameButton.
+	
+	* Glasses/ZGroupIdentity.cxx:
+	* Glasses/ZGroupIdentity.h:
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZIdentity.h:
+
+	Moved link to list of active MMEs (mActiveMMEs) from
+	ZGroupIdentity to ZIdentity.
+		
+	* Glasses/ZSunQueen.cxx:
+	* Glasses/ZSunQueen.h: Added links to Saturn & Eye guest
+	identities. Changes to reflect ZIdentity change.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:   Improved key handling and checking.
+	
+	* Glasses/EyeInfo.h: Added tag MEE::Self to Message() and Error().
+	* Glasses/ZKing.cxx: Improved BlessMIR().
+	* Glasses/ZMirEmittingEntity.cxx: Minor improvement.
+	* Glasses/ZQueen.cxx: Lens instantiation consistency fix.
+	* GledView/GledGUI.cxx:	Added -font command line option.
+	* macros/std_auth.C: Added guest registration.
+
+
 2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	==================================================
