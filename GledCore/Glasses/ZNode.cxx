@@ -19,6 +19,8 @@ static TMatrix ZNodeMatrixProto(4,4);
 
 void ZNode::_init()
 {
+  bUseScale = false;
+  mSx = mSy = mSz = 1;
   mParent = 0; bKeepParent = true;
 }
 
@@ -171,29 +173,70 @@ Int_t ZNode::SetRotByDegrees(Real_t a1, Real_t a2, Real_t a3)
 
 /**************************************************************************/
 
+void ZNode::SetS(Real_t xx)
+{
+  mExecMutex.Lock();
+  mSx = mSy = mSz = xx;
+  mStampReqTrans = Stamp(LibID(), ClassID());
+  mExecMutex.Unlock();
+}
+
+void ZNode::SetScales(Real_t x, Real_t y, Real_t z)
+{
+  mExecMutex.Lock();
+  mSx=x; mSy=y; mSz=z;
+  mStampReqTrans = Stamp(LibID(), ClassID());
+  mExecMutex.Unlock();
+}
+
+void ZNode::MultS(Real_t s)
+{
+  mExecMutex.Lock();
+  mSx*=s; mSy*=s; mSz*=s;
+  mStampReqTrans = Stamp(LibID(), ClassID());
+  mExecMutex.Unlock();
+}
+
+/**************************************************************************/
+
 ZTrans* ZNode::ToMFR()
 {
-  if(mParent == 0) {
-    return new ZTrans(mTrans);
-  } else {
+  ZNode *p = mParent;
+  ZTrans* x;
+  if(p == 0) {
     mExecMutex.Lock();
-    ZTrans* x = mParent->ToMFR();
-    *x *= mTrans;
+    x = new ZTrans(mTrans);
+    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
     mExecMutex.Unlock();
-    return x;
+  } else {
+    x = p->ToMFR();
+    mExecMutex.Lock();
+    *x *= mTrans;
+    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
+    mExecMutex.Unlock();
   }
+  return x;
 }
 
 ZTrans* ZNode::ToNode(ZNode* top)
 {
-  if(mParent == 0)   return 0;
-  if(mParent == top) return new ZTrans(mTrans);
+  ZNode *p = mParent;
+  if(p == 0) return 0;
 
-  ZTrans* x = mParent->ToNode(top);
-  if(x) {
+  ZTrans* x;
+  if(p == top) {
     mExecMutex.Lock();
-    *x *= mTrans;
+    x = new ZTrans(mTrans);
+    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
     mExecMutex.Unlock();
+  } else {
+    x = p->ToNode(top);
+    if(x) {
+      mExecMutex.Lock();
+      *x *= mTrans;
+      if(bUseScale) { x->Scale(mSx, mSy, mSz); }
+      mExecMutex.Unlock();
+    }
   }
   return x;
 }

@@ -31,9 +31,14 @@ protected:
 
   // 777 Trans_Rot_Ctrl(Methodbase=>'Rot', Methodname=>'Rot',Transname=>'Trans')
 
-  ZNode*	mParent;	// X{gS} L{l} Structural parent
+  Bool_t	bUseScale;	// X{GS}  7 Bool()
+  Real_t	mSx;		// X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
+  Real_t	mSy;		// X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
+  Real_t	mSz;		// X{GS}  7 Value(-range=>[0,100, 1,100])
 
   Bool_t	bKeepParent;	// X{GS} 7 Bool()
+
+  ZNode*	mParent;	// X{gS} L{l} Structural parent
 
 public:
   // Constructors
@@ -57,16 +62,20 @@ public:
   Int_t SetTrans(ZTrans& t);	// X{E}
   Int_t MultBy(ZTrans& t);	// X{E}
 
-  Int_t Set3Pos(Real_t x, Real_t y, Real_t z);		// X{E}
-  Int_t SetRotByAngles(Real_t a1, Real_t a2, Real_t a3); // X{E}
+  Int_t Set3Pos(Real_t x, Real_t y, Real_t z);		  // X{E}
+  Int_t SetRotByAngles(Real_t a1, Real_t a2, Real_t a3);  // X{E}
   Int_t SetRotByDegrees(Real_t a1, Real_t a2, Real_t a3); // X{E}
+
+  void SetS(Real_t xx);  			// X{E}
+  void SetScales(Real_t x, Real_t y, Real_t z); // X{E}
+  void MultS(Real_t s);                         // X{E}
 
   ZTrans* ToMFR();
   ZTrans* ToNode(ZNode* top);
   static ZTrans* BtoA(ZNode* a, ZNode* b);
 
-  // Clickotations
-  void Spit() const;	// X{E}
+  // Clump
+  void Spit() const;
 
 #include "ZNode.h7"
   ClassDef(ZNode, 1)

@@ -157,6 +157,15 @@ Int_t ZTrans::SetRotByAngles(Real_t a1, Real_t a2, Real_t a3)
   return 1;
 }
 
+void ZTrans::Scale(Real_t sx, Real_t sy, Real_t sz)
+{
+  for(UCIndex_t i=1; i<=3; ++i) {
+    At(i,1u) *= sx;
+    At(i,2u) *= sy;
+    At(i,3u) *= sz;
+  }
+}
+
 ZVec3 ZTrans::Get3Rot() const
 {
   if(!bAsOK) {

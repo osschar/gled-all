@@ -74,6 +74,7 @@ public:
   Int_t Move(ZTrans* a, UCIndex_t ai, Real_t amount=1);
   Int_t Rotate(ZTrans* a, UCIndex_t i1, UCIndex_t i2, Real_t amount=0.02);
   Int_t SetRotByAngles(Real_t a1, Real_t a2, Real_t a3);
+  void  Scale(Real_t sx, Real_t sy, Real_t sz);
   ZVec3 Get3Rot() const;
 
   // Stuff to do w/ 3Vecs ...
