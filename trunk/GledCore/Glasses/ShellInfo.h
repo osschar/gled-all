@@ -10,7 +10,6 @@
 #include <Glasses/NestInfo.h>
 
 class ShellInfo : public NestInfo {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ShellInfo);
 
 private:

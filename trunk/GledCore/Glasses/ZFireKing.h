@@ -11,7 +11,6 @@
 class ZQueen;
 
 class ZFireKing : public ZKing {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZFireKing);
 
 private:

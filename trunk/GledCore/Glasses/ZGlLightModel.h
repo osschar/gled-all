@@ -13,7 +13,7 @@
 #include <GL/gl.h>
 
 class ZGlLightModel : public ZGlStateBase {
-  // 7777 RnrCtrl("true, true, RnrBits(0,4,0,0)")
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZGlLightModel);
 
 private:

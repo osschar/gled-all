@@ -10,7 +10,6 @@
 #include <Glasses/ZIdentity.h>
 
 class ZGroupIdentity : public ZIdentity {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZGroupIdentity);
 
   friend class ZSunQueen;

@@ -14,7 +14,6 @@
 
 class GledMonitor : public Operator, public ZHisto
 {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(GledMonitor);
 
 private:
@@ -26,7 +25,7 @@ private:
 protected:
   Bool_t	bFillHistos;	// X{GS} 7 Bool()
 
-  // 7777 InstallHandler("GLED::Histo");
+  // 7777 InstallHandler(GLED::Histo);
 
   TH1F*		h1LAvg1;  // X{gs} H7_LAvg("%m","%m for %c", 100, 0, 10)
   TH1F*		h1LAvg5;  // X{gs} H7_LAvg("%m","%m for %c", 100, 0, 10)

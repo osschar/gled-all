@@ -10,7 +10,6 @@
 #include <Glasses/Operator.h>
 
 class SaturnObserver : public Operator {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(SaturnObserver);
 
 private:

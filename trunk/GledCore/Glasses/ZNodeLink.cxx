@@ -5,6 +5,6 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZNodeLink.h"
-ClassImp(ZNodeLink)
-
 #include "ZNodeLink.c7"
+
+ClassImp(ZNodeLink)

@@ -11,7 +11,6 @@
 #include <Stones/ZColor.h>
 
 class ZRlNameRnrCtrl : public ZGlStateBase {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZRlNameRnrCtrl);
 
 private:

@@ -11,7 +11,6 @@
 
 class ZNameMap : public ZList, public ZGlass::YNameChangeCB
 {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZNameMap);
 
 private:

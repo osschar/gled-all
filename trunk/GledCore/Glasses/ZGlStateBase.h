@@ -10,7 +10,6 @@
 #include <Glasses/ZGlass.h>
 
 class ZGlStateBase : public ZGlass {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZGlStateBase);
 
  public:

@@ -10,7 +10,6 @@
 #include <Glasses/ZList.h>
 
 class ZHashList : public ZList {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZHashList);
 
 private:

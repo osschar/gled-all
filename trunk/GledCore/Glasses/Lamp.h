@@ -11,7 +11,6 @@
 #include <Glasses/ZNode.h>
 
 class Lamp : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Lamp);
 private:
   void	_init();

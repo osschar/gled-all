@@ -10,7 +10,6 @@
 #include <Glasses/ZList.h>
 
 class NestInfo : public ZList {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(NestInfo);
 
 public:

@@ -13,7 +13,7 @@
 #include <GL/gl.h>
 
 class ZGlBlending : public ZGlStateBase {
-  // 7777 RnrCtrl("true, true, RnrBits(0,4,0,0)")
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZGlBlending);
 
 private:

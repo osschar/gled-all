@@ -51,7 +51,6 @@ namespace GledNS {
 typedef void (*zglass_stamp_f)(ZGlass*, void*);
 
 class ZGlass : public TObject {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZGlass);
   friend class Saturn;
   friend class ZQueen;
@@ -198,7 +197,7 @@ public:
   virtual void SetStamps(TimeStamp_t s)
   { mTimeStamp = mStampReqTring = s; }
 
-  virtual TimeStamp_t Stamp(FID_t fid);
+  virtual TimeStamp_t Stamp(FID_t fid, UChar_t eye_bits=0);
   TimeStamp_t Stamp()     { return Stamp(FID_t(0,0)); }
   TimeStamp_t StampVFID() { return Stamp(VFID()); }
 

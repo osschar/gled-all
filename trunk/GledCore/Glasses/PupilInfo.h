@@ -17,7 +17,6 @@
 
 
 class PupilInfo : public ZList {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(PupilInfo);
 
 public:

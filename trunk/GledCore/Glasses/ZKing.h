@@ -15,7 +15,6 @@ class ZQueen;
 
 class ZKing : public ZHashList, public MIR_Priest
 {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZKing);
 
   friend class Saturn;

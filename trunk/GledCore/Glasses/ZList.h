@@ -17,7 +17,6 @@ typedef void (*zlist_stampclear_f)(ZList*, void*);
 
 class ZList : public ZGlass {
 
-  // 7777 RnrCtrl(1)
   // **** Custom Streamer ****
   MAC_RNR_FRIENDS(ZList);
 

@@ -4,18 +4,18 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZNodeLink_H
-#define Gled_ZNodeLink_H
+#ifndef GledCore_ZNodeLink_H
+#define GledCore_ZNodeLink_H
 
 #include <Glasses/ZNode.h>
 
 class ZNodeLink : public ZNode {
-  // 7777 RnrCtrl("true, true, RnrBits(2,0,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(RnrBits(2,0,6,0, 0,0,0,5))
   MAC_RNR_FRIENDS(ZNodeLink);
 private:
-  void		_init() 	{ mGlass = 0; }
+  void		_init() 	{ mLens = 0; }
 protected:
-  ZGlass*	mGlass;		// X{gS} L{} RnrBits{0,0,0,4}
+  ZGlass*	mLens;		// X{gS} L{} RnrBits{0,4,0,0, 0,0,0,5}
 public:
   ZNodeLink(Text_t* n="ZNodeLink", Text_t* t=0) : ZNode(n,t) {_init();}
 #include "ZNodeLink.h7"
