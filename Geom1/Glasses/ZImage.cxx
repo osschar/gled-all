@@ -121,7 +121,7 @@ void ZImage::SetUseShadowing(Bool_t useshadowing)
     }
   }
   bUseShadowing = useshadowing;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void ZImage::Load()
@@ -152,7 +152,7 @@ void ZImage::Load()
   if(bUseShadowing) shadow();
 
  end:
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
   sILMutex.Unlock();
 }
 
@@ -161,7 +161,7 @@ void ZImage::Unload()
   sILMutex.Lock();
   delete_image();
   bLoaded = false; bShadowed = false;
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
   sILMutex.Unlock();
 }
 

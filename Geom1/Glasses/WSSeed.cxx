@@ -62,13 +62,13 @@ WSSeed::~WSSeed() { delete pTuber; }
 void WSSeed::SetTexUOffset(Float_t texu)
 {
   mTexUOffset = texu;
-  mStampReqTex = Stamp(LibID(), ClassID());
+  mStampReqTex = Stamp(FID());
 }
 
 void WSSeed::SetTexVOffset(Float_t texv)
 {
   mTexVOffset = texv;
-  mStampReqTex = Stamp(LibID(), ClassID());
+  mStampReqTex = Stamp(FID());
 }
 
 /**************************************************************************/
@@ -151,14 +151,14 @@ void WSSeed::TexAnimStart()
   {
     GLensWriteHolder wlck(this);
     bTexAnimOn = true;
-    Stamp(LibID(), ClassID());
+    Stamp(FID());
   }
   while(bTexAnimOn) {
     {
       GLensWriteHolder wlck(this);
       mTexUOffset = mTexUOffset + mDtexU;
       mTexVOffset = mTexVOffset + mDtexV;
-      mStampReqTex = Stamp(LibID(), ClassID());
+      mStampReqTex = Stamp(FID());
     }
     GThread::TestCancel();
     gSystem->Sleep(mTASleepMS);
@@ -170,7 +170,7 @@ void WSSeed::TexAnimStop()
 {
   if(!bTexAnimOn) return;
   bTexAnimOn = false;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 /**************************************************************************/

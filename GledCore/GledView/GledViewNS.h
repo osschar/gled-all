@@ -162,7 +162,7 @@ namespace GledViewNS {
   
   // Services
 
-  A_Rnr* SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid);
+  A_Rnr* SpawnRnr(const string& rnr, ZGlass* d, FID_t fid);
 
   // Predefined MTW_Layout manager
 

@@ -120,7 +120,7 @@ protected:
   void                 release_purgatory(ID_t n_needed);
   void                 release_moon_purgatory(ID_t n_to_release); // X{E}
 
-  virtual ZGlass* instantiate(LID_t lid, CID_t cid,
+  virtual ZGlass* instantiate(FID_t fid,
 		    const Text_t* name=0, const Text_t* title=0); // X{E}
 
   // reflector handling; called by Saturn

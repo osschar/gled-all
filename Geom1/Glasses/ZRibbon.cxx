@@ -70,7 +70,7 @@ void ZRibbon::LoadPOV()
   printf("ZRibbon::LoadPOV loaded %d marks from '%s'.\n",
 	 mColMarks.size(), mPOVFile.Data());
 
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/

@@ -183,7 +183,7 @@ void Pupil::AbsorbRay(Ray& ray)
 {
   using namespace RayNS;
 
-  if(ray.fLibID != PupilInfo::LibID() || ray.fClassID != PupilInfo::ClassID())
+  if( ray.fFID != PupilInfo::FID() )
     return;
 
   switch(ray.fRQN) { 

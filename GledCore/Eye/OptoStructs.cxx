@@ -28,17 +28,24 @@ namespace GVNS = GledViewNS;
 /**************************************************************************/
 
 ZGlassImg::ZGlassImg(Eye* e, ZGlass* g) : fEye(e), fGlass(g) {
-  fClassInfo = GNS::FindClassInfo(FID_t(g->ZibID(), g->ZlassID()));
+  fClassInfo = g->VGlassInfo();
   fIsList = dynamic_cast<ZList*>(g) ? true : false;
   fDefView = 0;
   fFullMTW_View = 0;
 
+  /*
   lppZGlass_t links; g->CopyLinkRefs(links);
   auto_ptr<GNS::lpLinkMemberInfo_t> membs( fClassInfo->ProduceFullLinkMemberInfoList() );
   assert(links.size() == membs->size());
   GNS::lpLinkMemberInfo_i li = membs->begin();
   for(lppZGlass_i l=links.begin(); l!=links.end(); ++l, ++li) {
     fLinkData.push_back(ZLinkDatum(*li, this, **l));
+  }
+  */
+  
+  ZGlass::lLinkRep_t lreps; g->CopyLinkReps(lreps);
+  for(ZGlass::lLinkRep_i i = lreps.begin(); i != lreps.end(); ++i) {
+    fLinkData.push_back(ZLinkDatum(i->fLinkInfo, this, i->fLinkRef));
   }
 }
 

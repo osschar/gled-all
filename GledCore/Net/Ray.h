@@ -69,8 +69,7 @@ public:
   UChar_t	fRQN;		// ray quantum number
   UChar_t	fEyeBits;
   TimeStamp_t	fStamp;		// timestamp of alpaha
-  LID_t		fLibID;		// rlass of origin, libset
-  CID_t		fClassID;	// ----- " " -----, glass
+  FID_t		fFID;		// libset/glass of origin
   UChar_t	fRayBits;	//
 
   // Optional part
@@ -97,15 +96,15 @@ public:
   // Writer side
   /************************************************************************/
 
-  Ray(ZGlass* a, UChar_t rqn, TimeStamp_t t, LID_t l=0, CID_t c=0, UChar_t eb=0) :
+  Ray(ZGlass* a, UChar_t rqn, TimeStamp_t t, FID_t fid=FID_t(0,0), UChar_t eb=0) :
     bRead(false),
-    fAlpha(a), fRQN(rqn), fEyeBits(eb), fStamp(t), fLibID(l), fClassID(c),
+    fAlpha(a), fRQN(rqn), fEyeBits(eb), fStamp(t), fFID(fid),
     fRayBits(0)
   {}
-  static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, LID_t l, CID_t c, UChar_t eb=0)
-  { return new Ray(a, rqn, t, l, c, eb); }
+  static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, FID_t fid, UChar_t eb=0)
+  { return new Ray(a, rqn, t, fid, eb); }
   static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, UChar_t eb)
-  { return new Ray(a, rqn, t, 0, 0, eb); }
+  { return new Ray(a, rqn, t, FID_t(0,0), eb); }
 
   void Write(TBuffer& b);
 
@@ -148,7 +147,7 @@ public:
 
   //----------------------------------------------------------------------
 
-  bool IsBasic()       { return (fLibID==0 && fClassID==0) || (fLibID==1 && fClassID==1); }
+  bool IsBasic()       { return fFID.is_basic(); }
   bool IsBasicChange() { return fRQN == RayNS::RQN_change && IsBasic(); }
 
   const char* EventName() const;

@@ -55,20 +55,19 @@ void ZGlass::_init()
 /**************************************************************************/
 
 // inline /// used to be in the header ... gave segvs with cint
-void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val,
-			     LID_t lid, CID_t cid)
+void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid)
 {
   if(link == new_val) return;
   if(link) link->DecRefCount(this);
   if(new_val) {
     try { new_val->IncRefCount(this); }
     catch(...) {
-      if(link) { link = 0; StampLink(lid, cid); }
+      if(link) { link = 0; StampLink(fid); }
       throw;
     }
   }
   link = new_val;
-  StampLink(lid, cid);
+  StampLink(fid);
 }
 
 
@@ -216,7 +215,7 @@ void ZGlass::unregister_name_change_cb(ZGlass::YNameChangeCB* rec)
 void ZGlass::SetName(const Text_t* n)
 {
   if(mGlassBits & ZGlassBits::kFixedName) {
-    Stamp(LibID(), ClassID());
+    Stamp(FID());
     throw(string("ZGlass::SetName lens has FixedName bit set"));
   }
   string name(n);
@@ -227,7 +226,7 @@ void ZGlass::SetName(const Text_t* n)
     }
   }
   mName = name.c_str();
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
   WriteUnlock();
   if(mQueen == this) {
     ZMIR* mir = get_MIR();
@@ -239,7 +238,7 @@ void ZGlass::SetTitle(const Text_t* t)
 {
   WriteLock();
   mTitle = t;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
   WriteUnlock();
   if(mQueen == this) {
     ZMIR* mir = get_MIR();
@@ -260,7 +259,7 @@ ZMirFilter* ZGlass::GetGuard() const
 void ZGlass::SetGuard(ZMirFilter* guard)
 {
   WriteLock();
-  try { set_link_or_die((ZGlass*&)mGuard, guard, LibID(), ClassID()); }
+  try { set_link_or_die((ZGlass*&)mGuard, guard, FID()); }
   catch(...) { WriteUnlock(); throw; }
   WriteUnlock();
 }
@@ -279,7 +278,7 @@ void ZGlass::UpdateGlassView()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, LibID(), ClassID()));
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
@@ -289,7 +288,7 @@ void ZGlass::UpdateAllViews()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, LID_t(0), CID_t(0)));
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, FID_t(0,0)));
     mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
@@ -344,7 +343,7 @@ Short_t ZGlass::IncRefCount(ZGlass* from)
       throw(_eh + "King in undefined state. Ignoring.");
     }
     mQueen->SubjectRefCntUnlock();
-    // Stamp(LibID(), ClassID());
+    // Stamp(FID());
   }
   return mRefCount;
 }
@@ -385,7 +384,7 @@ Short_t ZGlass::DecRefCount(ZGlass* from)
     }
     if(mRefCount == 0 && mQueen) mQueen->ZeroRefCount(this);
     mQueen->SubjectRefCntUnlock();
-    // Stamp(LibID(), ClassID());
+    // Stamp(FID());
   }
   return mRefCount;
 }
@@ -438,9 +437,9 @@ ZGlass* ZGlass::GetLinkByName(const string& link_name)
   // Should go in reverse direction !!!!
   // Locking doesn't make much sense.
 
-  lLinkSpec_t ls; CopyLinkSpecs(ls);
-  for(lLinkSpec_i i=ls.begin(); i!=ls.end(); ++i) {
-    if(link_name == i->fLinkName || link_name == i->full_name())
+  lLinkRep_t lr; CopyLinkReps(lr);
+  for(lLinkRep_i i=lr.begin(); i!=lr.end(); ++i) {
+    if(link_name == i->fLinkInfo->fName || link_name == i->fLinkInfo->FullName())
       return i->fLinkRef;
   }
   throw(string(GForm("ZGlass::GetLinkByName link '%s' does not exist in '%s' (id=%u)",
@@ -496,12 +495,12 @@ ZGlass* ZGlass::FindLensByPath(const string& url)
 
 // All stamp functions should be *inline*!!
 
-TimeStamp_t ZGlass::Stamp(LID_t lid, CID_t cid)
+TimeStamp_t ZGlass::Stamp(FID_t fid)
 {
   ++mTimeStamp;
   if(mQueen && mQueen->GetStamping() && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, lid, cid));
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, fid));
     mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
@@ -509,12 +508,12 @@ TimeStamp_t ZGlass::Stamp(LID_t lid, CID_t cid)
   return mTimeStamp;
 }
 
-TimeStamp_t ZGlass::StampLink(LID_t lid, CID_t cid)
+TimeStamp_t ZGlass::StampLink(FID_t fid)
 {
   ++mTimeStamp;
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_link_change, mTimeStamp, lid, cid,
+      (Ray::PtrCtor(this, RayNS::RQN_link_change, mTimeStamp, fid,
 		    Ray::EB_StructuralChange));
     mQueen->EmitRay(ray);
   }

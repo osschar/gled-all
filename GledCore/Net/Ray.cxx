@@ -50,7 +50,7 @@ void Ray::Write(TBuffer& b)
   using namespace RayNS;
   PutPTR(b, fAlpha);
   b << fRQN << fEyeBits;
-  b << fStamp << fLibID << fClassID;
+  b << fStamp << fFID;
   b << fRayBits;
   if(fRayBits & RB_Beta)       PutPTR(b, fBeta);
   if(fRayBits & RB_Gamma)      PutPTR(b, fGamma);
@@ -81,7 +81,7 @@ void Ray::Read(TBuffer& b)
 {
   using namespace RayNS;
   b >> fRQN >> fEyeBits;
-  b >> fStamp >> fLibID >> fClassID;
+  b >> fStamp >> fFID;
   b >> fRayBits;
   if(fRayBits & RB_Beta)       GetPTR(b, fBeta);  else fBeta  = 0;
   if(fRayBits & RB_Gamma)      GetPTR(b, fGamma); else fGamma = 0;
@@ -124,7 +124,7 @@ const char* Ray::EventName() const
 
 void Ray::Dump(ostream& s) const {
   s << EventName() <<" "<< fStamp << " ";
-  s << fAlpha->GetSaturnID() <<", ("<< fLibID <<","<< fClassID <<")";
+  s << fAlpha->GetSaturnID() <<", ("<< fFID.lid <<","<< fFID.cid <<")";
 }
 
 ostream& operator<<(ostream& s, const Ray& r) {

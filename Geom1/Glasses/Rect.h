@@ -29,9 +29,9 @@ public:
   Rect(Text_t* n="Rect", Text_t* t=0) : ZNode(n,t) { _init(); }
 
   void SetUV(Float_t u, Float_t v)
-  { mULen = u; mVLen = v; Stamp(LibID(), ClassID()); }
+  { mULen = u; mVLen = v; Stamp(FID()); }
   void SetUnitSquare(UShort_t size)
-  { mULen = mVLen = size; mUStrips = mVStrips = size; Stamp(LibID(), ClassID()); }
+  { mULen = mVLen = size; mUStrips = mVStrips = size; Stamp(FID()); }
 
 #include "Rect.h7"
   ClassDef(Rect, 1)

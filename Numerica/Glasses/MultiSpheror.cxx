@@ -89,7 +89,7 @@ void MultiSpheror::Init()
     mQueen->CheckIn(s); s->Install(); Add(s);
     // Could get first ... and torture it further ...
   }
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void MultiSpheror::ClaimCPUs()
@@ -124,7 +124,7 @@ void MultiSpheror::ClaimCPUs()
 	}
 	SP_MIR(spheror->GetAmoeba(), SetHost, si);
 	SP_MIR(spheror->GetAmoeba(), Start);
-	++mNDone; Stamp(LibID(), ClassID());
+	++mNDone; Stamp(FID());
 	lpZGlass_i xx = mGlasses.end();
 	spheror = NextOf<Spheror*>(spheri, xx);
       }

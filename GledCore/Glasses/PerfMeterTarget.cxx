@@ -38,7 +38,7 @@ void PerfMeterTarget::IncCount()
 {
   WriteLock();
   ++mCount;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
   WriteUnlock();
 }
 

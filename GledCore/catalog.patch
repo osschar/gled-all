@@ -15,6 +15,7 @@ $PATCH = {
 "AList" => {
   'PragmaSuff' => "!-",
   'VirtualBase' => 1,
+  'Pragmas' => "#pragma link C++ class AList::ElRep;\n"
 },
 
 "ZDeque" => {

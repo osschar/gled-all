@@ -68,7 +68,7 @@ void GTSurf::ReplaceSurface(GTS::GtsSurface* new_surf)
     gts_object_destroy (GTS_OBJECT (pSurf));
   }
   pSurf = new_surf;
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 GTS::GtsSurface* GTSurf::CopySurface()
@@ -159,7 +159,7 @@ void GTSurf::CalcStats()
     copy_stats(mEdgeLength,  stats.edge_length);
     copy_stats(mEdgeAngle,   stats.edge_angle);
   }
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void GTSurf::PrintStats()
@@ -177,7 +177,7 @@ void GTSurf::Invert()
 
   if(pSurf) {
     gts_surface_foreach_face(pSurf, (GtsFunc)face_inverter, 0);
-    mStampReqTring = Stamp(LibID(), ClassID());
+    mStampReqTring = Stamp(FID());
   }
 }
 

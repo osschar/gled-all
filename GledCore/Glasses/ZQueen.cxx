@@ -106,7 +106,7 @@ void ZQueen::embrace_of_life(ZComet& comet)
   // Copies Links and List contents, no ref-counting is performed.
 
   ZQueen* queen = comet.mQueen;
-  assert(ZID() == queen->ZID());
+  assert(VFID() == queen->VFID());
 
   { // Re-stream the queen and read it back into *this*
     TBuffer qb(TBuffer::kWrite);
@@ -173,7 +173,7 @@ ID_t ZQueen::assign_id(ZGlass* lens)
   QueenIDMap_i ins_pos = poo.first;
   ++mIDsUsed; --mIDsFree;
   mCreationID = mIDsFree ? next_free_id(ins_pos) : 0;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 
   return this_id;
 }
@@ -244,7 +244,7 @@ void ZQueen::release_moon_purgatory(ID_t n_to_release)
     ++n_done;
   }
   ISmess(_eh + Identify() + GForm(" cleared %d entries.", n_done));
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 /**************************************************************************/
@@ -421,10 +421,9 @@ Bool_t ZQueen::DependsOn(ZQueen* some_queen)
 // Instantiators
 /**************************************************************************/
 
-ZGlass* ZQueen::instantiate(LID_t lid, CID_t cid,
-			    const Text_t* name, const Text_t* title)
+ZGlass* ZQueen::instantiate(FID_t fid, const Text_t* name, const Text_t* title)
 {
-  ZGlass* g = GledNS::ConstructLens(lid, cid);
+  ZGlass* g = GledNS::ConstructLens(fid);
   if(g == 0) throw(string("ZQueen::instantiate failed lens instantiation"));
   if(name)  g->mName  = name;
   if(title) g->mTitle = title;
@@ -452,7 +451,7 @@ ID_t ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   if(attach_to->GetQueen() != this)
     throw(_eh + "can only attach to my own subjects");
 
-  ZGlass* lens = GledNS::ConstructLens(new_lid, new_cid);
+  ZGlass* lens = GledNS::ConstructLens(FID_t(new_lid, new_cid));
   if(lens == 0) throw(_eh + "failed lens instantiation");
 
   try {
@@ -644,7 +643,7 @@ void ZQueen::PutLensToPurgatory(ZGlass* lens)
   ref_time += 1000l*mPurgedMS;
   mSaturn->delayed_shoot_mir(void_mir, si, ref_time);
 
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void ZQueen::PutLensToVoid(ID_t lens_id)
@@ -731,7 +730,7 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
   if(mKing->GetLightType() != ZKing::LT_Moon) {
     release_purgatory(0);
   }
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void ZQueen::RemoveLens(ZGlass* lens)
@@ -840,7 +839,7 @@ void ZQueen::CleanOrphanage()
   } else {
   bMandatory = false;
   }
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
   }
 */
 
@@ -1053,7 +1052,7 @@ void ZQueen::BasicQueenChange(ZMIR& mir)
 
   if(mir.Alpha != this)  throw(_eh + "alpha is not *this* queen.");
   if(mir.HasRecipient()) throw(_eh + "MIR is a beam, should be flare.");
-  if(mir.Lid != ZGlass::LibID() || mir.Cid != ZGlass::ClassID())
+  if( FID_t(mir.Lid, mir.Cid) != ZGlass::FID() )
     throw(_eh + "FID does not correspond to ZGlass.");
   if(mir.Mid != ZGlass::Mid_SetName() && mir.Mid != ZGlass::Mid_SetTitle())
     throw(_eh + "MID does not correspond to SetName or SetTitle.");
@@ -1082,7 +1081,8 @@ void ZQueen::ListAll()
   for(QueenIDMap_i i=mIDMap.begin(); i!=mIDMap.end(); ++i) {
     ZGlass* l = i->second->mLens;
     if(l != 0) {
-      cout <<"ID="<< i->first <<": "<< l->GetName() <<"["<< l->ZlassName() <<"]\n";
+      cout <<"ID="<< i->first <<": "<< l->GetName() <<
+	"["<< l->VGlassInfo()->fName <<"]\n";
     } else {
       cout <<"ID="<< i->first <<": <reserved>\n";
     }

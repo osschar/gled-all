@@ -122,8 +122,12 @@ OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
   if(glass == 0) return 0;
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
   if(i != mGlass2ImgHash.end()) return i->second;
-  glass->IncEyeRefCount();
-  OS::ZGlassImg* gi = new OS::ZGlassImg(this, glass);
+  OS::ZGlassImg* gi;
+  {
+    GLensReadHolder rlck(glass);
+    glass->IncEyeRefCount();
+    gi = new OS::ZGlassImg(this, glass);
+  }
   mGlass2ImgHash[glass] = gi;
   return gi;
 }
@@ -144,7 +148,10 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
     cout <<"Eye::RemoveImage non-matching images\n";
     return;
   }
-  i->first->DecEyeRefCount();
+  {
+    GLensReadHolder rlck(i->first);
+    i->first->DecEyeRefCount();
+  }
   mGlass2ImgHash.erase(i);
   delete img;
 }

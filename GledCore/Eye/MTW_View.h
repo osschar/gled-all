@@ -46,7 +46,7 @@ public:
   virtual void InvalidateRnrScheme() {}
 
   // void Retitle(); !! belongs to covering window !!
-  void UpdateViews(LID_t lid=0, CID_t cid=0);
+  void UpdateViews(FID_t fid);
 
   static Fl_Window* ConstructVerticalWindow(OptoStructs::ZGlassImg* img,
 					    Fl_SWM_Manager* swm_mgr=0);

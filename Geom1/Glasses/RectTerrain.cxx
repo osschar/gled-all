@@ -106,7 +106,7 @@ void RectTerrain::ApplyBorderCondition()
 
   } // end switch mBCond
 
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/
@@ -152,7 +152,7 @@ void RectTerrain::SetFromImage(ZImage* image)
     mMaxZ = -zoffset * zfac; mMinZ = (1 - zoffset) * zfac;
   }
 
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 void RectTerrain::SetFromHisto(TH2* histo)
@@ -187,7 +187,7 @@ void RectTerrain::SetFromHisto(TH2* histo)
     mMaxZ = -zoffset * zfac; mMinZ = (1 - zoffset) * zfac;
   }
 
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/
@@ -205,7 +205,7 @@ void RectTerrain::Smooth(Float_t fac)
 		 ) * normfac;
     }
   }
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 void RectTerrain::RecalcMinMax()
@@ -218,14 +218,14 @@ void RectTerrain::RecalcMinMax()
     }
   }
   mMaxZ *= (1 + sMaxEpsilon);
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/
 
 void RectTerrain::ReTring()
 {
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 #include <TRandom.h>

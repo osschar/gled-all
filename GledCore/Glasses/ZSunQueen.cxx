@@ -550,15 +550,13 @@ ZIdentity* ZSunQueen::GetOrImportIdentity(const char* ident)
     return identity;
 
   identity = (ZIdentity*)
-    CALL_AND_BROADCAST(this, instantiate,
-		       fid.lid, fid.cid,
+    CALL_AND_BROADCAST(this, instantiate, fid,
 		       ident,
 		       GForm("Base identity for %s", ident));
   CALL_AND_BROADCAST(id_dir, Add, identity);
 
   ZIdentityFilter* id_filter = (ZIdentityFilter*)
-    CALL_AND_BROADCAST(this, instantiate,
-		       ZIdentityFilter::LibID(), ZIdentityFilter::ClassID(),
+    CALL_AND_BROADCAST(this, instantiate, ZIdentityFilter::FID(),
 		       GForm("Allow %s", ident),
 		       GForm("Identity filter for %s", ident));
 

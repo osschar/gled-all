@@ -86,7 +86,7 @@ public:
   void MarkStampReqTrans()
   { mStampReqTrans = ++mTimeStamp; }
   void StampReqTrans()
-  { mStampReqTrans = Stamp(LibID(), ClassID()); }
+  { mStampReqTrans = Stamp(FID()); }
 
   // Clump
   void Spit() const;

@@ -85,7 +85,7 @@ void Spheror::SetState(const TVectorF& x)
     mNV = mState.GetNrows()/2;
   }
   mState = x;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 /**************************************************************************/

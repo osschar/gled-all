@@ -212,16 +212,16 @@ string GledNS::FabricateUserInitFoo(const string& libset)
 
 /**************************************************************************/
 
-ZGlass* GledNS::ConstructLens(LID_t lid, CID_t cid)
+ZGlass* GledNS::ConstructLens(FID_t fid)
 {
-  LibSetInfo* lsi = FindLibSetInfo(lid);
+  LibSetInfo* lsi = FindLibSetInfo(fid.lid);
   if(lsi == 0) {
-    ISerr(GForm("GledNS::ConstructLens lib set %u not found", lid));
+    ISerr(GForm("GledNS::ConstructLens lib set %u not found", fid.lid));
     return 0;
   }
-  ZGlass* g = (lsi->fLC_Foo)(cid);
+  ZGlass* g = (lsi->fLC_Foo)(fid.cid);
   if(g == 0) {
-    ISerr(GForm("GledNS::ConstructLens default ctor for lid,cid:%u,%u returned 0", lid, cid));
+    ISerr(GForm("GledNS::ConstructLens default ctor for FID_t(%u,%u) returned 0", fid.lid, fid.cid));
     return 0;
   }
   return g;
@@ -247,7 +247,7 @@ void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
   // Writes glass, prefixed by Lid/Cid to the buffer.
 
   assert(b.IsWriting());
-  b << lens->ZibID() << lens->ZlassID();
+  b << lens->VFID();
   R__LOCKGUARD(gCINTMutex);
   lens->Streamer(b);
 }
@@ -257,9 +257,9 @@ ZGlass* GledNS::StreamLens(TBuffer& b)
   // Reads lid/cid of the glass, instantiates it and streams it out.
 
   assert(b.IsReading());
-  LID_t lid; CID_t cid;
-  b >> lid >> cid;
-  ZGlass *lens = ConstructLens(lid, cid);
+  FID_t fid;
+  b >> fid;
+  ZGlass *lens = ConstructLens(fid);
   if(lens) {
     R__LOCKGUARD(gCINTMutex);
     lens->Streamer(b);
@@ -341,6 +341,15 @@ void GledNS::MethodInfo::StreamIds(TBuffer& b) const
 {
   assert(b.IsWriting());
   b << fClassInfo->fFid.lid << fClassInfo->fFid.cid << fMid;
+}
+
+/**************************************************************************/
+// GledNS::LinkMemberInfo
+/**************************************************************************/
+
+string GledNS::LinkMemberInfo::FullName()
+{
+  return fClassInfo->fName + "::" + fName;
 }
 
 /**************************************************************************/
@@ -432,6 +441,12 @@ GledNS::ClassInfo::FindLinkMemberInfo(const string& s, bool recurse)
 }
 
 /**************************************************************************/
+
+GledNS::LibSetInfo* GledNS::ClassInfo::GetLibSetInfo()
+{
+  if(!fLibSetInfo) fLibSetInfo = FindLibSetInfo(fFid.lid);
+  return fLibSetInfo;
+}
 
 GledNS::ClassInfo* GledNS::ClassInfo::GetParentCI()
 {
