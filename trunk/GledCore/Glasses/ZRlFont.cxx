@@ -32,5 +32,5 @@ void ZRlFont::SetFontFile(const Text_t* f)
       (Ray::PtrCtor(this, PRQN_font_change, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
-  Stamp(FID());
+  mStampReqTring = Stamp(FID());
 }

@@ -7,10 +7,10 @@
 #ifndef GledCore_ZRlNameRnrCtrl_H
 #define GledCore_ZRlNameRnrCtrl_H
 
-#include <Glasses/ZGlStateBase.h>
+#include <Glasses/ZRnrModBase.h>
 #include <Stones/ZColor.h>
 
-class ZRlNameRnrCtrl : public ZGlStateBase {
+class ZRlNameRnrCtrl : public ZRnrModBase {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZRlNameRnrCtrl);
 
@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  ZGlStateBase::GlStateOp_e
+  ZRnrModBase::Operation_e
                 mNameRnrOp;   // X{GS}   7 PhonyEnum()
 
   Bool_t	bRnrTiles;    // X{GS}   7 Bool(-join=>1)
@@ -30,7 +30,7 @@ protected:
 
 public:
   ZRlNameRnrCtrl(const Text_t* n="ZRlNameRnrCtrl", const Text_t* t=0) :
-    ZGlStateBase(n,t) { _init(); }
+    ZRnrModBase(n,t) { _init(); }
 
 #include "ZRlNameRnrCtrl.h7"
   ClassDef(ZRlNameRnrCtrl, 1)
