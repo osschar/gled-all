@@ -34,10 +34,11 @@ protected:
   Bool_t	bContinuous;	//  X{GS} 7 Bool(-join=>1)
   Bool_t	bUseDynCast;	//  X{GS} 7 Bool()
 
-  // Thread status
+  // Thread running status
   Bool_t	bRunning;	//  X{GS} 7 BoolOut(-join=>1)
   Bool_t	bSuspended;	//  X{GS} 7 BoolOut()
-  Bool_t	bPerforming;	//! X{GS} 7 BoolOut()
+  Bool_t	bPerforming;	//! X{GS} 7 BoolOut(-join=>1)
+  Bool_t	bXMultix;	//  X{GS} 7 BoolOut()
 
   virtual void AdEndarkenment();
   virtual void AdUnfoldment();
@@ -73,7 +74,6 @@ public:
   virtual void	Reset();	// X{E} 7 MButt()
 
   void SetHost(SaturnInfo* host);
-  //void SetHost(ZGlass* host);
 
 #include "Eventor.h7"
   ClassDef(Eventor, 1)
