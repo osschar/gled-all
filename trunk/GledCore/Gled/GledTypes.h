@@ -85,11 +85,19 @@ public:
   CID_t	cid;
 
   FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
-  bool operator==(FID_t r) { return (lid == r.lid && cid == r.cid); }
-  bool operator!=(FID_t r) { return (lid != r.lid || cid != r.cid); }
-  bool is_null()  { return lid == 0 && cid == 0; }
-  bool is_basic() { return is_null() || (lid == 1 && cid == 1); }
+  bool operator==(FID_t r) const { return (lid == r.lid && cid == r.cid); }
+  bool operator!=(FID_t r) const { return (lid != r.lid || cid != r.cid); }
+  bool is_null()  const { return lid == 0 && cid == 0; }
+  bool is_basic() const { return is_null() || (lid == 1 && cid == 1); }
 };
+
+namespace __gnu_cxx {
+  template<>
+  struct hash<FID_t> {
+    size_t operator()(const FID_t& fid) const
+    { size_t i = fid.lid; i <<= 16; i |= fid.cid; return i; }
+  };
+}
 
 inline TBuffer &operator>>(TBuffer& b, FID_t& fid)
 { b >> fid.lid >> fid.cid; return b; }
