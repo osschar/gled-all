@@ -10,7 +10,6 @@
 #include <Glasses/BASENAME.h>
 
 class CLASSNAME : public BASENAME {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(CLASSNAME);
 
 private:
