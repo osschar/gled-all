@@ -55,37 +55,5 @@ void check_overlaps(Float_t epsilon=1)
 
   //--------------------------------------------------------------
 
-  // Spawn GUI
-  {
-    const Text_t* default_layout =
-      "ZNode(RnrSelf[4],RnrElements[5]):"
-      "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[7])";
-
-    Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
-    gROOT->LoadMacro("eye.C");
-    register_GledCore_layouts();
-
-    Text_t* eye_name   = "Eye";
-    Text_t* shell_name = "Shell";
-    Text_t* pupil_name = "Pupil";
-
-    ShellInfo* shell = new ShellInfo(shell_name);
-    fire_queen->CheckIn(shell); fire_queen->Add(shell);
-    shell->Add(rscene);
-    //shell->ImportKings();	  // Get all Kings as top level objects
-
-    shell->SetLayout(default_layout);
-    shell->SetLeafLayout(NestInfo::LL_Custom);
-
-    CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), pupil_name, "");
-    pupil->SetFOV(80);
-    pupil->SetCHSize(0.03);
-    pupil->SetBlend(1);
-    pupil->Add(rscene);
-    pupil->SetCameraBase((ZNode*)rscene->GetElementByName("Camera Base"));
-    pupil->SetUpReference(rscene);
-    pupil->SetUpRefAxis(2);
-
-    Gled::theOne->SpawnEye(shell, eye_name);
-  }
+  spawn_default_gui(rscene);
 }
