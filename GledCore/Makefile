@@ -14,26 +14,33 @@ DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView Eye FL RnrBase
 VIEW_FL_DIRS	= FL
 
-CPPFLAGS	=-I/usr/kerberos/include
+CPPFLAGS	=
 BASE_LD_LIBS	=-lssl
 
 MAINSRCS := saturn.cxx gled.cxx
 MAINOBJS := $(MAINSRCS:.cxx=.o)
-MAINEXES := $(addprefix bin/, $(MAINSRCS:.cxx=))
+MAINEXES := bin/saturn bin/gled
 
-LIBSET_TARGETS := ${MAINEXES}
+LIBSET_TARGETS := local_targets
 
 include ${GLEDSYS}/make/make_base.inc
 
-bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
-	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
-	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
-	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
+local_targets:: bin/saturn
+ifndef SKIP_VIEW_LIBS
+local_targets:: bin/gled
+endif
+
+gled_core_targets: ${LOCAL_TARGETS}
 
 bin/saturn: saturn.o ${BASE_LIB_NAME}
 	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
 	-Llib -l${LIB_SET_NAME} \
 	${ROOTLIBS} ${SYSLIBS}
+
+bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
+	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
+	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
+	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
 
 clean::
 	@rm -f ${MAINOBJS}
