@@ -22,20 +22,11 @@ ClassImp(NestInfo)
 
 void NestInfo::_init()
 {
-  mPupils = 0;
-  bSpawnPupils = true;
-}
+  // Override from SubShellInfo:
+  mCtorLibset = "GledCore";
+  mCtorName   = "FTW_Nest";
 
-/**************************************************************************/
-
-void NestInfo::AdEnlightenment()
-{
-  ZList::AdEnlightenment();
-  if(mPupils == 0) {
-    ZList* l = new ZList("PupilInfos", GForm("Pupils of %s", GetName()));
-    mQueen->CheckIn(l);
-    SetPupils(l);
-  }
+  mLeafLayout = LL_Ants;
 }
 
 /**************************************************************************/
@@ -47,7 +38,6 @@ void NestInfo::EnactLayout()
       (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
-
 }
 
 void NestInfo::ImportKings()

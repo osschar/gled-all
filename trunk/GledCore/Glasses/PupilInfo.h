@@ -7,7 +7,7 @@
 #ifndef GledCore_PupilInfo_H
 #define GledCore_PupilInfo_H
 
-#include <Glasses/ZList.h>
+#include <Glasses/SubShellInfo.h>
 #include <Glasses/ZNode.h>
 #include <Net/Ray.h>
 
@@ -16,21 +16,19 @@
 #include <GL/gl.h>
 
 
-class PupilInfo : public ZList {
+class PupilInfo : public SubShellInfo {
   MAC_RNR_FRIENDS(PupilInfo);
   friend class Pupil;
 
 public:
   enum Projection_e { P_Perspective, P_Orthographic };
-
-private:
-
   enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
 		      PRQN_dump_image,
 		      PRQN_resize_window,
 		      PRQN_camera_home
   };
 
+private:
   void		_init();
 
 protected:
@@ -83,7 +81,7 @@ protected:
   Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
 
 public:
-  PupilInfo(Text_t* n="PupilInfo", Text_t* t=0) : ZList(n,t) { _init(); }
+  PupilInfo(Text_t* n="PupilInfo", Text_t* t=0) : SubShellInfo(n,t) { _init(); }
 
   void SetCameraBase(ZNode* camerabase);
   void SetLookAt(ZNode* lookat);

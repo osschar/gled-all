@@ -56,7 +56,7 @@ namespace {
   { Gled::theOne->LoadLibSet(GledGUI::theOne->GetLibSetName()->value()); }
 
   void spawneye_cb(Fl_Widget* o, void* ud)
-  { Gled::theOne->SpawnEye(GledGUI::theOne->GetEyeName()->value()); }
+  { Gled::theOne->SpawnEye("GledCore", GledGUI::theOne->GetEyeName()->value()); }
 
   void keeppos_cb(Fl_Button* o, Fl_OutputPack* ud)
   { ud->keep_pos(o->value()); }
@@ -122,6 +122,7 @@ void GledGUI::build_gui()
     wEyeName = new Fl_Input(0,1,12,1);
     wEyeName->callback((Fl_Callback*)spawneye_cb);
     wEyeName->when(FL_WHEN_ENTER_KEY|FL_WHEN_NOT_CHANGED);
+    wEyeName->value("FTW_Shell");
     groo->end();
   }
   Fl_Button* keep_pos_flip;
@@ -210,7 +211,7 @@ void GledGUI::ParseArguments(list<char*>& args)
 
     else if(strcmp(*i, "-swm")==0) {
       next_arg_or_die(args, i);
-      int num = sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
+      sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
       args.erase(start, ++i);
     }
 
@@ -408,47 +409,56 @@ void GledGUI::error(const char* s) {
 /**************************************************************************/
 /**************************************************************************/
 
-EyeInfo* GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
+#include <G__ci.h>
+
+EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
+			   const char* libset, const char* eyector)
 {
   // Wrapper for eye spawning from CINT.
-  // I really forgot why XLockDisplay is here. It sure
-  // helped once (note that ROOT has different display than fltk/gled_gui).
-  // Fl locks are just.
 
-  string eye_name(name);
-  if(eye_name == "") {
-    eye_name = GForm("%s@%s", mDefEyeIdentity.Data(), gSystem->HostName());
+  static const string _eh("GledGUI::SpawnEye ");
+
+  bool wipe_ei = false;
+
+  string eye_name = GForm("%s@%s", mDefEyeIdentity.Data(), gSystem->HostName());
+
+  if(ei == 0) {
+    ei = new EyeInfo(eye_name.c_str());
+    wipe_ei = true;
   }
+  if(strlen(ei->GetLogin()) == 0)
+    ei->SetLogin(mDefEyeIdentity);
 
-  Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
-  XLockDisplay(rd);
-
-  if(si == 0) {
+  if(ud==0 && strcmp(libset,"GledCore")==0 && strcmp(eyector,"FTW_Shell")==0) {
     ZFireQueen* fq = mSaturn->GetFireQueen();
-    si = new ShellInfo(GForm("Shell[%d] of %s", ++mNumShells, eye_name.c_str()),
-		       "created by Gled::SpawnEye");
+    ShellInfo* si = new ShellInfo
+      (GForm("Shell[%d] of %s", ++mNumShells, eye_name.c_str()),
+             "Created by GledGUI");
     fq->CheckIn(si); fq->Add(si);
-    si->ImportKings();
+    si->MakeDefSubShell();
+    ud = si;
   }
 
-  Eye* e;
+  string foo_name = GForm("EyeCreator_%s_%s", libset, eyector);
+  long* p2foo = (long*) G__findsym( foo_name.c_str() );
+  if(!p2foo) {
+    ISerr(_eh +"can't find symbol '"+ foo_name +"'.");
+    return 0;
+  }
+  EyeInfo::EyeCreator_foo ec_foo = (EyeInfo::EyeCreator_foo)(*p2foo);
+
+
+  TSocket* sock = new TSocket("localhost", mSaturnInfo->GetServerPort());
+  Eye* e = 0;
   try {
-    e = new Eye(mSaturn->GetSaturnInfo()->GetServerPort(),
-		mDefEyeIdentity, si->GetSaturnID(),
-		eye_name.c_str(), title, mSwmManager);
-  } catch(string exc) {
-    e = 0;
-    ISerr(GForm("GledGUI::SpawnEye(%s) caugt exeception: %s", name, exc.c_str()));
+    e = ec_foo(sock, ei, ud);
+  }
+  catch(string exc) {
+    delete sock;
+    ISerr(_eh + "Eye creation failed: '" + exc + "'.");
   }
 
-  if(e) {
-    Fl::lock();
-    e->show();
-    Fl::awake();
-    Fl::unlock();
-  }
-
-  XUnlockDisplay(rd);
+  if(wipe_ei) delete ei;
 
   return e ? e->GetEyeInfo() : 0;
 }

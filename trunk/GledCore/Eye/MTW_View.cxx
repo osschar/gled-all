@@ -8,7 +8,9 @@
 #include "MTW_View.h"
 #include "MTW_SubView.h"
 #include "MTW_Layout.h"
+#include "FTW_Shell.h"
 #include <Glasses/ZGlass.h>
+#include <Glasses/ShellInfo.h>
 #include <Stones/ZMIR.h>
 #include <Eye/Eye.h>
 #include <Gled/GledNS.h>
@@ -22,6 +24,7 @@
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;
+namespace FGS  = FltkGledStuff;
 
 /**************************************************************************/
 // Internal classes / data
@@ -31,9 +34,6 @@ namespace {
 
   float MaxAlignGrow = 1.2;
   float MaxJoinGrow  = 2;
-
-  class SubView_Header;
-  void cb_coll(Fl_Button* w, SubView_Header* svh);
 
   class View_SelfRep : public Fl_Box {
   public:
@@ -58,7 +58,7 @@ namespace {
 	    Fl::paste(*this);
 	  }
 	  if(Fl::event_button() == 3) {
-	    shell->ImageMenu(fView->fImg, Fl::event_x_root(), Fl::event_y_root());
+	    shell->FullMenu(fView->fImg, Fl::event_x_root(), Fl::event_y_root());
 	  }
 	  return 1;
 	}
@@ -67,7 +67,7 @@ namespace {
 	  if(Fl::event_state(FL_BUTTON1) && ! Fl::event_inside(this)) {
 	    ID_t id          = fView->fImg->fGlass->GetSaturnID();
 	    const char* text = GForm("%u", id);
-	    shell->X_SetSource(id);
+	    shell->X_SetSource(fView->fImg);
 	    Fl::copy(text, strlen(text), 0);
 	    Fl::dnd();
 	    return 1;
@@ -100,39 +100,6 @@ namespace {
     }
   };
 
-  class SubView_Header : public Fl_Group {
-  public:
-    Fl_Button*   fBut;
-    MTW_SubView* fSubView;
-
-    SubView_Header(MTW_SubView* sv, int w, const char* t) :
-      Fl_Group(0,0,w,1), fSubView(sv)
-    {
-      fBut = new Fl_Button(0,0,2,1, "@#>");
-      fBut->labeltype(FL_SYMBOL_LABEL);
-      fBut->callback((Fl_Callback*)cb_coll, this);
-      fBut->color(fl_rgb_color(200,220,200));
-
-      Fl_Box* b = new Fl_Box(2,0,w-2,1, t);
-      b->box(FL_EMBOSSED_BOX);
-      if(b->labelfont() < FL_BOLD) b->labelfont(b->labelfont() + FL_BOLD);
-      b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-      b->color(fl_rgb_color(200,220,200));
-    }
-
-    void collapse() { fSubView->hide(); fBut->label("@#>[]"); }
-    void expand()   { fSubView->show(); fBut->label("@#>"); }
-  };
-
-  void cb_coll(Fl_Button* w, SubView_Header* svh) {
-    if(svh->fSubView->visible()) {
-      svh->collapse();
-      svh->fSubView->GetView()->ReHeight(-svh->fSubView->h());
-    } else {
-      svh->expand();
-      svh->fSubView->GetView()->ReHeight(svh->fSubView->h());
-    }
-  }
 }
 
 /**************************************************************************/
@@ -169,7 +136,7 @@ void MTW_View::auto_label()
 
 MTW_View::MTW_View(OS::ZGlassImg* img, FTW_Shell* shell) :
   OS::A_View(img),
-  FTW_Shell_Client(shell),
+  FTW_SubShell(shell),
   Fl_Pack(0,0,0,0), Fl_SWM_Client(shell)
 {
   mGlass = fImg->fGlass;
@@ -178,7 +145,7 @@ MTW_View::MTW_View(OS::ZGlassImg* img, FTW_Shell* shell) :
 
 MTW_View::MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
   OS::A_View(0),
-  FTW_Shell_Client(0),
+  FTW_SubShell(0),
   Fl_Pack(0,0,0,0), Fl_SWM_Client(swm_mgr)
 {
   mGlass = glass;
@@ -233,8 +200,7 @@ void MTW_View::BuildVerticalView()
   // Append one entry per c++ class; optionally insert class-header.
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
     if(fancy_p) {
-      add( new SubView_Header(*sv, mtw_vs.fUse.full,
-			      (*sv)->mClassInfo->fName.c_str()) );
+      add( new FGS::PackEntryCollapsor((*sv)->mClassInfo->fName.c_str()));
       ++h;
     }
     h += (*sv)->ResizeByVerticalStats(mtw_vs, cell_w);
@@ -244,18 +210,12 @@ void MTW_View::BuildVerticalView()
   // Potentially collapse ZGlass/ZList SubViews.
   if(fancy_p) {
     if(mShell->GetShellInfo()->GetCollZGlass()) {
-      SubView_Header *svh = dynamic_cast<SubView_Header*>(child(1));
-      if(svh) {
-	svh->collapse();
-	h -= svh->fSubView->h();
-      }
+      FGS_DECLARE_CAST(pec, child(1), FGS::PackEntryCollapsor);
+      if(pec) h += pec->collexp(false);
     }
     if(mShell->GetShellInfo()->GetCollZList() && children() > 5 ) {
-      SubView_Header *svh = dynamic_cast<SubView_Header*>(child(3));
-      if(svh && GNS::IsA(mGlass, ZList::FID())) {
-	svh->collapse();
-	h -= svh->fSubView->h();
-      }
+      FGS_DECLARE_CAST(pec, child(3), FGS::PackEntryCollapsor);
+      if(pec) h += pec->collexp(false);
     }
   }
 
@@ -352,19 +312,6 @@ void MTW_View::UpdateLinkWeeds(FID_t fid)
 void MTW_View::ShowWindow()
 {
   if(mWindow) mWindow->show();
-}
-
-void MTW_View::ReHeight(int dh)
-{
-  // Called from callbacks.
-
-  init_sizes();
-  redraw();
-  if(mWindow) {
-    mWindow->position(mWindow->x(), mWindow->y() + dh/2);
-    mWindow->size(w(), h()+dh);
-    mWindow->redraw();
-  }
 }
 
 /**************************************************************************/

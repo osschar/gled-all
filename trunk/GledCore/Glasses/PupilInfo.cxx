@@ -19,6 +19,10 @@ ClassImp(PupilInfo)
 
 void PupilInfo::_init()
 {
+  // Override from SubShellInfo:
+  mCtorLibset = "GledCore";
+  mCtorName   = "Pupil";
+
   mCameraBase    = 0;
 
   mLookAt        = 0;

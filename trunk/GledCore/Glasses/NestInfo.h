@@ -7,9 +7,9 @@
 #ifndef GledCore_NestInfo_H
 #define GledCore_NestInfo_H
 
-#include <Glasses/ZList.h>
+#include <Glasses/SubShellInfo.h>
 
-class NestInfo : public ZList {
+class NestInfo : public SubShellInfo {
   MAC_RNR_FRIENDS(NestInfo);
 
 public:
@@ -22,24 +22,18 @@ private:
   void _init();
 
 protected:
-  ZList*	mPupils;	// X{gS} L{l}
-
-  Bool_t	bSpawnPupils;	// X{GS} 7 Bool()
-
   LeafLayout_e  mLeafLayout;    // X{GS} 7 PhonyEnum()
   TString       mLayout;        // X{GS} 7 Textor()
 
 public:
   NestInfo(const Text_t* n="NestInfo", const Text_t* t=0) :
-    ZList(n,t) { _init(); }
-
-  virtual void AdEnlightenment();
+    SubShellInfo(n,t) { _init(); }
 
   void EnactLayout(); // X{E} 7 MButt()
   void ImportKings(); // X{E} 7 MButt()
 
 #include "NestInfo.h7"
-  ClassDef(NestInfo, 1)
+  ClassDef(NestInfo, 1) // Glass representation of GUI browser 'FTW_Nest'.
 }; // endclass NestInfo
 
 GlassIODef(NestInfo);

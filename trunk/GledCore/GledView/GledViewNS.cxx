@@ -15,7 +15,8 @@
 namespace GledViewNS {
   set<string>	RnrNames;
   list<MTW_Layout_Spec> mtw_layouts;
-  int no_symbol_label;
+  int no_symbol_label = 0;
+  int menubar_box     = 0;
 } // GledViewNS
 
 namespace GVNS = GledViewNS;

@@ -9,7 +9,7 @@
 
 #include <Gled/GledTypes.h>
 #include "OptoStructs.h"
-#include "FTW_Shell.h"
+#include "FTW_SubShell.h"
 
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Pack.H>
@@ -25,7 +25,7 @@ typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
 class Fl_SWM_Manager;
 
 class MTW_View : public OptoStructs::A_View,
-		 public FTW_Shell_Client,
+		 public FTW_SubShell,
 		 public Fl_Pack, public Fl_SWM_Client
 {
 private:
@@ -63,7 +63,6 @@ public:
   void UpdateLinkWeeds(FID_t fid);
 
   void ShowWindow();
-  void ReHeight(int dh);
 
   virtual int handle(int ev);
 
