@@ -1,3 +1,41 @@
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FltkGledStuff.cxx:
+	New Source selector Direct, now used for dnd; middle mouse now
+	pastes shell's source (can be used as a complement to dnd).
+
+	* Eye/FTW_Branch.cxx:
+	Fixed buggy logick for adding new elements w/ respect to Collapse
+	status.
+	
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	New method X_SetSource(ID_t) to support use of Direct lens Source.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Complete rewrite of camera positioning.
+	Some new features in ick menu: Camera JumpTowards and JumpAt,
+	SetAsSource (set shell's direct source).
+
+	* Glasses/Camera.cxx:
+	* Glasses/Camera.h:
+	Home didn't call Stamp.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added members mLookAtMinDist and mUpRefMinAngle to provide better
+	control over camera behaviour.
+
+	* Net/Ray.h:
+	User ray quantum numbers now easier to address.
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	New method UnitTrans() to reset the transformation to identity.
+
 2005-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_Layout.cxx:
@@ -5,7 +43,7 @@
 	* Eye/MTW_View.cxx:
 	* Eye/Pupil.cxx:
 	* GledView/GLTextNS.cxx:
-	Replaced all accurances of '>?' and '<?' with TMath::Max/Min.
+	Replaced all accurances of >? and <? with TMath::Max/Min.
 
 2005-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
