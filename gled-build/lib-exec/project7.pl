@@ -677,9 +677,8 @@ for $r (@Members) {
   if( $r->{Xport} =~ m/(s|S)/ ) {
     # This shit should be split into if link / otherwise
     my ($pre, $setit, $post, $stamp);
-    if($IsGlass) {
-      $pre  .= "  WriteLock();\n"   if $LOCK_SET_METHS;
-      $post .= "  WriteUnlock();\n" if $LOCK_SET_METHS;
+    if($IsGlass and $LOCK_SET_METHS) {
+      $pre  .= "  GLensReadHolder _wrlck(this);\n";
     }
     if( $r->{Xport} =~ m/(S|E)/ and $IsGlass) {
       $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
@@ -702,20 +701,18 @@ for $r (@Members) {
       my $rr = $r->{Range};
       print H7 "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
       print H7 "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
-	unless(grep(/$r->{Type}/, @UnsignedTypes) and $rr->[0] == 0);
+	unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
     }
     if(exists $r->{Link}) {
-      $setit = <<"fnord";
-  try { set_link_or_die((ZGlass*&)$r->{Varname}, $r->{Args}[0][2], FID()); }
-  catch(...) { WriteUnlock(); throw; }
-fnord
+      $setit = 
+	"  set_link_or_die((ZGlass*&)$r->{Varname}, $r->{Args}[0][2], FID());\n";
     } else {
       $setit  = "  $r->{Varname}";
       $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
 		 $GetSetMap{$r->{Type}}->{SetMeth} :
 		 " = $r->{Args}[0][2]") . ";\n";
     }
-    print H7 "${pre}${setit}${stamp}${post}}\n";
+    print H7 "  ${pre}${setit}${stamp}${post}}\n";
   }
 
   if( $r->{Xport} =~ m/(r|R)/ ) {
