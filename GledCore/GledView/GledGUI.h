@@ -49,6 +49,7 @@ protected:
 public:
   GledGUI(list<char*>& args);
   virtual ~GledGUI();
+  virtual void InitGledCore();
 
   virtual void Run();
   virtual void Exit();
@@ -72,6 +73,10 @@ public:
   virtual int handle(int ev);
 
   static GledGUI* theOne;
+
+  // Misc
+
+  virtual void AddMTWLayout(const char* name, const char* layout);
 
 #include "GledGUI.h7"
 }; // endclass GledGUI

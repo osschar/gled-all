@@ -53,6 +53,7 @@ protected:
 public:
   Gled(list<char*>& args);
   virtual ~Gled();
+  virtual void InitGledCore();
 
   void SetExitCondVar(GCondition* cond) { mExitCondVar = cond; }
 
@@ -92,6 +93,10 @@ public:
   static void* Gled_runner_tl(Gled* gled);
 
   static Gled* theOne;
+
+  // Misc
+
+  virtual void AddMTWLayout(const char* name, const char* layout) {}
 
 #include "Gled.h7"
   ClassDef(Gled, 0)

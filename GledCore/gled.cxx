@@ -87,6 +87,9 @@ int main(int argc, char **argv)
   gint->SetPrompt("gled[%d] ");
   printf("Use context menu in Nest to import lenses as CINT variables.\n");
 
+  // Init GledCore libset
+  gled->InitGledCore();
+
   // Run GUI
   GThread gled_thread((GThread_foo)Gled::Gled_runner_tl, gled, false);
   if( gled_thread.Spawn() ) {

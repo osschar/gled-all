@@ -77,6 +77,9 @@ int main(int argc, char **argv)
   gint = new TRint("TRint", &rargc, rargv);
   gint->SetPrompt("saturn[%d] ");
 
+  // Init GledCore libset
+  gled->InitGledCore();
+
   // Prepare gled exit condition & Spawn saturn
   GCondition gled_exit;
   gled_exit.Lock();
