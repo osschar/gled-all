@@ -11,18 +11,9 @@
 
 void SMorph_GL_Rnr::Draw(RnrDriver* rd)
 {
-  glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
-
-  glPushMatrix(); // Scaling!
-  if(mSMorph->bNormalize) glEnable(GL_NORMALIZE);
+  glPushAttrib(GL_CURRENT_BIT);
   glColor4fv(mSMorph->mColor());
-  glScalef(mSMorph->mSx, mSMorph->mSy, mSMorph->mSz);
-
   if(mSMorph->pTuber) TubeTvor_GL_Rnr::Render(mSMorph->pTuber);
-
-  if(mSMorph->bNormalize) glDisable(GL_NORMALIZE);
-
-  glPopMatrix();
   glPopAttrib();
 }
 

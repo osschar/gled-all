@@ -13,11 +13,14 @@ ClassImp(SMorph)
 
 void SMorph::_init(Real_t r)
 {
-  mTLevel = 2; mPLevel = 3;
+  // Override settings from ZNode
+  bUseScale = true;
   mSx = mSy = mSz = r;
+
+  mTLevel = 2; mPLevel = 3;
   mTx = mCx = mRz = 0;
 
-  bOpenTop = bOpenBot = bNormalize = bEquiSurf = false;
+  bOpenTop = bOpenBot = bEquiSurf = false;
 
   mTexture = 0;
 
