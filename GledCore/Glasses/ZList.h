@@ -20,12 +20,17 @@ class ZList : public ZGlass {
   MAC_RNR_FRIENDS(ZList);
   friend class Saturn;
   friend class ZQueen;
+
 private:
   lID_t		mIDs;	 // Temporary store for Streaming
   void	       _init();
+
 protected:
   UInt_t		mSize;
   lpZGlass_t		mGlasses;
+
+  LID_t			mLid;			// X{GS} 7 Value(-join=>1)
+  CID_t			mCid;			// X{GS} 7 Value()
 
   GMutex	 	mListMutex;	   	//!
   zlist_stampadd_f	mStampListAdd_CB;    	//! called if non-null
@@ -35,13 +40,20 @@ protected:
   zlist_stamprebuild_f	mStampListRebuild_CB;    //! called if non-null
   void*			mStampListRebuild_CBarg; //!
 
+  void unref_all();
+  virtual void new_element_check(ZGlass* g);
+
 public:
   ZList(const Text_t* n="ZList", const Text_t* t=0) :
     ZGlass(n,t), mListMutex(GMutex::recursive) { _init(); }
   virtual ~ZList() {}
-  virtual void UnrefAll();
 
-  void Copy(lpZGlass_t& dest);
+  void BeginIteration(lpZGlass_i& beg, lpZGlass_i& end)
+  { mListMutex.Lock(); beg = mGlasses.begin(); end = mGlasses.end(); }
+  void EndIteration()
+  { mListMutex.Unlock(); }
+
+  virtual void Copy(lpZGlass_t& dest);
   template <class GLASS>
   void CopyByGlass(list<GLASS>& dest) {
     mListMutex.Lock();
@@ -54,17 +66,21 @@ public:
 
   ZGlass* First();
   ZGlass* Last();
-  ZGlass* GetByName(const Text_t* name);
+  virtual ZGlass* GetByName(const Text_t* name);
+  ZGlass* Query(const Text_t* path);
+  ZGlass* Query(const string& path);
 
+  void         SetElementFID(FID_t fid);
   virtual void Add(ZGlass* g);			     // X{E} C{1}
   virtual void AddBefore(ZGlass* g, ZGlass* before); // X{E} C{2}
   virtual void AddFirst(ZGlass* g);		     // X{E} C{1}
   virtual void Remove(ZGlass* g);		     // X{E} C{1}
   virtual void RemoveLast(ZGlass* g);		     // X{E} C{1}
+  virtual void Clear();				     // X{E}
 
-  Int_t	Size() { return mSize; }
-  bool	IsEmpty() { return mSize==0; }
-  virtual bool	Has(ZGlass* g);
+  virtual Int_t  Size() { return mSize; }
+  virtual Bool_t IsEmpty() { return mSize==0; }
+  virtual Bool_t Has(ZGlass* g);
 
   virtual TimeStamp_t	StampListAdd(ZGlass* g, ZGlass* b4);
   virtual TimeStamp_t	StampListRemove(ZGlass* g);

@@ -4,10 +4,18 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+//__________________________________________________________________________
+// ZHashList
+//
+//
+
 #include "ZHashList.h"
+#include "ZHashList.c7"
 
 typedef hash_map<ZGlass*, lpZGlass_i>		Glass2LIter_t;
 typedef hash_map<ZGlass*, lpZGlass_i>::iterator	Glass2LIter_i;
+
+ClassImp(ZHashList)
 
 void ZHashList::_init()
 {
@@ -18,13 +26,14 @@ void ZHashList::_init()
 
 void ZHashList::Add(ZGlass* g)
 {
+  new_element_check(g);
   if(!Has(g)) {
     mListMutex.Lock();
     mGlasses.push_back(g); ++mSize;
     mItHash[g] = --mGlasses.end();
     StampListAdd(g, 0);
     mListMutex.Unlock();
-    g->IncRefCount();
+    g->IncRefCount(this);
   } else {
     if(bNerdyListOps)
       throw(string("ZHashList::Add element already in the list"));
@@ -33,6 +42,7 @@ void ZHashList::Add(ZGlass* g)
 
 void ZHashList::AddBefore(ZGlass* g, ZGlass* before)
 {
+  new_element_check(g);
   if(!Has(g)) {
     mListMutex.Lock();
     Glass2LIter_i h = mItHash.find(before);
@@ -41,7 +51,7 @@ void ZHashList::AddBefore(ZGlass* g, ZGlass* before)
     mItHash[g] = --i;
     StampListAdd(g, before);
     mListMutex.Unlock();
-    g->IncRefCount();
+    g->IncRefCount(this);
   } else {
     if(bNerdyListOps)
       throw(string("ZHashList::AddBefore element already in the list"));
@@ -50,6 +60,7 @@ void ZHashList::AddBefore(ZGlass* g, ZGlass* before)
 
 void ZHashList::AddFirst(ZGlass* g)
 {
+  new_element_check(g);
   if(!Has(g)) {
     mListMutex.Lock();
     ZGlass* b4 = mSize > 0 ? mGlasses.front() : 0;
@@ -57,7 +68,7 @@ void ZHashList::AddFirst(ZGlass* g)
     mItHash[g] = mGlasses.begin();
     StampListAdd(g, b4);
     mListMutex.Unlock();
-    g->IncRefCount();
+    g->IncRefCount(this);
   } else {
     if(bNerdyListOps)
       throw(string("ZHashList::AddFirst element already in the list"));
@@ -72,22 +83,28 @@ void ZHashList::Remove(ZGlass* g)
     mGlasses.erase(i->second); --mSize;
     mItHash.erase(i);
     StampListRemove(g);
-    g->DecRefCount();
+    g->DecRefCount(this);
   } else {
-    if(bNerdyListOps)
+    if(bNerdyListOps) {
+      mListMutex.Unlock();
       throw(string("ZHashList::Remove element not in the list"));
+    }
   }
   mListMutex.Unlock();
 }
 
 void ZHashList::RemoveLast(ZGlass* g)
+{ Remove(g); }
+
+void ZHashList::Clear()
 {
-  Remove(g);
+  PARENT_GLASS::Clear();
+  mItHash.clear();
 }
 
 /**************************************************************************/
 
-bool ZHashList::Has(ZGlass* g)
+Bool_t ZHashList::Has(ZGlass* g)
 {
   mListMutex.Lock();
   Glass2LIter_i i = mItHash.find(g);
@@ -109,6 +126,3 @@ Int_t ZHashList::RebuildList(ZComet* c)
 }
 
 /**************************************************************************/
-
-#include "ZHashList.c7"
-ClassImp(ZHashList)

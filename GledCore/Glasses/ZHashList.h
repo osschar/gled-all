@@ -30,8 +30,9 @@ public:
   virtual void AddFirst(ZGlass* g);		     // X{E} C{1}
   virtual void Remove(ZGlass* g);		     // X{E} C{1}
   virtual void RemoveLast(ZGlass* g);		     // X{E} C{1}
+  virtual void Clear();				     // X{E}
 
-  virtual bool	Has(ZGlass* g);
+  virtual Bool_t Has(ZGlass* g);
 
   virtual Int_t RebuildList(ZComet* c);
 
