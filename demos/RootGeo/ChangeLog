@@ -1,3 +1,22 @@
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* common_foos.C:
+	Added camera bases and infos to the scene; spawn gui-pupil instead
+	of raw pupil in default gui.
+
+	* alice_geom.C:
+	Added ZGeoRepacker to the scene; some minor fixes.
+
+	* alice_simple.C:
+	New file: scene with a simplified ALICE geometry for event
+	visualization.
+
+	* simple_geo.root:
+	New file: simplified alice geometry.
+
+	* EvDisp.root:
+	New file: gled-view of a simple geometry.
+
 2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* common_foos.C:
