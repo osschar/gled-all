@@ -4,6 +4,7 @@
 confdebug	!	.	CONFDEBUG	0
 reconfigure	!	.	RECONFIGURE	0
 help		!	.	HELP		0
+envsetupstem	=s	.	ENVSETUPSTEM	"build_env"
 
 ### compile/link options ###
 ucpp		=s	.	USER_CPP_FLAGS	""
