@@ -5,11 +5,6 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Eye.h"
-//#include <Eye/Pupil.h>
-//#include <Eye/GLoodge.h>
-#include "FTW_Leaf.h"
-#include "FTW_Nest.h"
-#include "FTW_Shell.h"
 
 #include <Gled/GledNS.h>
 #include <Glasses/ZGod.h>
@@ -23,6 +18,10 @@
 #include <Ephra/Saturn.h>
 #include <Ephra/Forest.h>
 #include <Ephra/Mountain.h>
+
+#include "FTW_Shell.h"
+
+#include <FL/Fl_SWM.H>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
