@@ -1,11 +1,18 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "MTW_SubView.h"
+#include "MTW_View.h"
+#include "FTW.h"
+
+#include <Glasses/ZGlass.h>
+
 #include <FL/Fl_Widget.H>
+#include <FL/Fl.H>
+#include <FL/fl_draw.H>
 
 #include <math.h>
 
@@ -34,9 +41,34 @@ MTW_SubView::~MTW_SubView() {
 
 void MTW_SubView::Update()
 {
+  RemoveUpdateTimer();
   for(lMTW_Weed_i i=mWeeds.begin(); i!=mWeeds.end(); ++i) {
     (i->fWeedInfo->fooWUpdate)(i->fWeed, this);
   }
+}
+
+/**************************************************************************/
+
+void MTW_SubView::SetUpdateTimer()
+{
+  // cout << "Setting update timer\n";
+  Fl::remove_timeout((Fl_Timeout_Handler)UpdateFromTimer_s, this);
+  Fl::add_timeout(1, (Fl_Timeout_Handler)UpdateFromTimer_s, this);
+}
+
+void MTW_SubView::RemoveUpdateTimer()
+{
+  // cout << "Removing update timer\n";
+  Fl::remove_timeout((Fl_Timeout_Handler)UpdateFromTimer_s, this);
+}
+
+// static
+void MTW_SubView::UpdateFromTimer_s(MTW_SubView* v)
+{
+  // cout << "Timer update !!!\n";
+  v->mView->fImg->fGlass->ReadLock();
+  v->Update();
+  v->mView->fImg->fGlass->ReadUnlock();
 }
 
 /**************************************************************************/
@@ -53,7 +85,7 @@ void MTW_SubView::BuildFromList(GVNS::lpWeedInfo_t& l)
 
 /**************************************************************************/
 
-void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs)
+void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
 {
   bool in_join = false;
   int  join_w  = 0;
@@ -62,9 +94,9 @@ void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs)
     int full_w = 0, lab_w = 0, weed_w = mi.fWidth;
     if(mi.bLabel) {
       if(mi.bLabelInside) {
-	weed_w += i->fWeedInfo->fName.size();
+	weed_w += FTW::swm_string_width(i->fWeedInfo->fName, cell_w);
       } else {
-	lab_w = i->fWeedInfo->fName.size() >? MinLabelWidth;
+	lab_w = FTW::swm_label_width(i->fWeedInfo->fName, cell_w) >? MinLabelWidth;
 	vs.fMaxOutsideLabeledW = vs.fMaxOutsideLabeledW >? weed_w;
 	vs.fMaxLabelW          = vs.fMaxLabelW          >? lab_w;
       }
@@ -85,20 +117,20 @@ void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs)
   }
 }
 
-int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
+int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
 {
   int y = 0; // current pos
   MTW_Widths& lim = vs.fUse;
   for(lMTW_Weed_i i=mWeeds.begin(); i!=mWeeds.end(); ) {
-    MTW_Widths w = i->GetWidths();
+    MTW_Widths w = i->GetWidths(cell_w);
     // Harvest the joiners
     lMTW_Weed_i j = i; ++j;
     int n_join = 1;
-    int max_h  = i->fWeedInfo->fHeight;;
+    int max_h  = i->fWeedInfo->fHeight;
     {
       lMTW_Weed_i ii = i; 
       while(j != mWeeds.end() && ii->fWeedInfo->bJoinNext) {
-	MTW_Widths z = j->GetWidths();
+	MTW_Widths z = j->GetWidths(cell_w);
 	if(z.full + w.full > lim.full) break;
 	max_h = max_h >? j->fWeedInfo->fHeight;
 	w += z; ii = j++; ++n_join;
@@ -112,7 +144,7 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
       while(i != j) {
 	GVNS::WeedInfo& mi = *i->fWeedInfo;
 	int ideal = int( roundf(float(lim.full - taken)/n_join) );
-	MTW_Widths z = i->GetWidths();
+	MTW_Widths z = i->GetWidths(cell_w);
 	int dw = ideal - z.full;
 	if(dw > 0) {
 	  if(mi.bLabel && !mi.bLabelInside) {
@@ -167,16 +199,16 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs)
 // MTW_Weed
 /**************************************************************************/
 
-MTW_Widths MTW_Weed::GetWidths()
+MTW_Widths MTW_Weed::GetWidths(int cell_w)
 {
   MTW_Widths ret;
   ret.weed = fWeedInfo->fWidth;
   if(fWeedInfo->bLabel) {
     if(fWeedInfo->bLabelInside) {
-      ret.weed += fWeedInfo->fName.size();
+      ret.weed += FTW::swm_string_width(fWeedInfo->fName, cell_w);
       ret.label = 0;
     } else {
-      ret.label = fWeedInfo->fName.size();
+      ret.label = FTW::swm_label_width(fWeedInfo->fName, cell_w);
     }
   }
   ret.full = ret.weed + ret.label;

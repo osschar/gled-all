@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -39,6 +39,28 @@ Fl_Color FTW::source_modcol = (Fl_Color)0x00400000;
 Fl_Color FTW::sink_modcol   = (Fl_Color)0x00004000;
 
 Fl_Boxtype FTW::separator_box  = FL_BORDER_BOX;
+
+/**************************************************************************/
+// Fl helpers
+/**************************************************************************/
+  int FTW::swm_generick_width(string& str, int cell_w, float extra)
+  {
+    if(cell_w) {
+      int w=0, h=0;
+      fl_measure(str.c_str(), w, h);
+      float f = float(w)/cell_w + extra;
+      w = int(f);
+      return w + ((f-w < 0.1) ? 0 : 1);
+    } else {
+      return str.size();
+    }
+  }
+
+  int FTW::swm_label_width(string& str, int cell_w)
+  { return swm_generick_width(str, cell_w, 1.2); }
+
+  int FTW::swm_string_width(string& str, int cell_w)
+  { return swm_generick_width(str, cell_w, 0.2); }
 
 /**************************************************************************/
 // Locator

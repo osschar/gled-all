@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -110,7 +110,7 @@ void FTW_Branch::Absorb_ListRemove(OS::ZGlassImg* eximg)
     return;
   }
   if(bLeavesCreated) {
-    mNest->RemoveLeaf(i->leaf);
+    // mNest->RemoveLeaf(i->leaf); // Called in Leaf dtor.
     delete i->leaf;
   }
   mLeoim.erase(i);

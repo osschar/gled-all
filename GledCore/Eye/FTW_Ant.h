@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -29,7 +29,7 @@ protected:
   Fl_Button*		wListExpander;
   FTW::NameButton*	wName;
 
-  void resize_weeds(int full_w, int butt_w, int h);
+  void resize_weeds(int name_w, int butt_w, int h);
   void label_weeds();
   void recolor_name();
   void modify_box_color(Fl_Color mod, bool on_p);

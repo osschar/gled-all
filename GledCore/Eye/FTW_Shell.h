@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -46,7 +46,6 @@ public:
   virtual ~FTW_Shell();
 
   virtual void Absorb_Change(LID_t lid, CID_t cid);
-  // !!!! change window label !!!!
   // virtual void Absorb_LinkChange(LID_t lid, CID_t cid) {}
   // virtual void Absorb_Delete() {}
 
@@ -74,6 +73,7 @@ public:
 
   FTW_Nest* SpawnNest(OptoStructs::ZGlassImg* img);
   void	    SpawnMTW_View(OptoStructs::ZGlassImg* img);
+  void	    DitchMTW_View(OptoStructs::ZGlassImg* img);
 
   void LocatorMenu(FTW::Locator& loc, int x, int y);
 
