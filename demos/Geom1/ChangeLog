@@ -1,3 +1,12 @@
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:	Demonstrates also texturing of Weaver symbols.
+
+	* gluon.png:
+	* photon.png:
+
+	New textures for WS_demo.C.
+
 2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* images.C: Now uses macros from glass_defines.h for lens construction.

@@ -1,3 +1,19 @@
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+
+	Libset dependencies are now stored into the configuration data.
+	
+	* lib-exec/project7.pl:
+
+	Reflect changes in struct LinkSpec; now supports loading of libset
+	specific widget classes from GLED_<libset>_Widgets.pm.
+	
+	* make/make_base.inc:
+	* bin/gled-create-libset:
+
+	Introduced double-colon rules for standard targets.
+
 2003-11-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* bin/gled-htmldoc-create:
