@@ -1,3 +1,42 @@
+2005-02-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	* Eye/MCW_View.cxx:
+	* Eye/MCW_View.h:
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	MTW_View and supporting infrastructure updated to allow mixing of
+	data members and links. Eventually should furhter extend the code
+	to also allow reuse of FTW_Ants within a FTW_Leaf (and thus
+	support link collapse/expand in FTW_Nest).
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	ZGlassImg::fFullMTW_View now a pointer to MTW_View; no need to
+	delete it anymore.
+
+	* Eye/MTW_Layout.cxx:
+	Fixed compilation warning.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	CameraView creation changed in accordance with MTW_View changes.
+
+	* GledView/GledViewNS.h:
+	Added 'bool WeedInfo::bIsLinkWeed'.
+
+	* perllib/GLED_Widgets.pm:
+	Added weed-class 'Link'.
+
+	* Glasses/ZList.h:
+	Added 'X{Ed}' pragma for RemoveLensesViaQueen().
+
 2005-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Nest.cxx:
