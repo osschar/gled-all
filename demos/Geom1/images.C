@@ -109,13 +109,13 @@ void images()
   terrain->Set3Pos(0, -3, 0.01);
 
 
-  SMorph* n1 = new SMorph("Earth"); n1->SetS(2); n1->SetNormalize(true);
+  SMorph* n1 = new SMorph("Earth"); n1->SetS(2);
   n1->SetTLevel(20); n1->SetPLevel(20);
   n1->SetTexture(image4);
   n1->Set3Pos(-6, -6, 0); n1->SetRotByAngles(0, TMath::Pi()/2, 0);
   scenes->CheckIn(n1); images->Add(n1);
 
-  SMorph* n2 = new SMorph("Moon"); n2->SetS(2); n2->SetNormalize(true);
+  SMorph* n2 = new SMorph("Moon"); n2->SetS(2);
   n2->SetTLevel(20); n2->SetPLevel(20);
   n2->SetTexture(image5);
   n2->Set3Pos( 6, -6, 0); n2->SetRotByAngles(0, TMath::Pi()/2, 0);
@@ -126,7 +126,6 @@ void images()
     morphs[i] = new SMorph(Form("Morph %d", i+1));
     morphs[i]->SetTLevel(20); morphs[i]->SetPLevel(20);
     morphs[i]->SetS(2);
-    morphs[i]->SetNormalize(true);
     morphs[i]->SetTexture(image6);
     morphs[i]->Set3Pos(-6+6*i, 7, 0);
     scenes->CheckIn(morphs[i]); images->Add(morphs[i]);

@@ -45,7 +45,7 @@
   scenes->CheckIn(n);
   l->Add(n);
 
-  SMorph* n1 = new SMorph(); n1->SetSs(5, 2, 1); n1->SetNormalize(true);
+  SMorph* n1 = new SMorph(); n1->SetSs(5, 2, 1);
   n1->SetColor(0.48, 0.78, 0.58);
   n1->SetTLevel(16); n1->SetPLevel(16);
   scenes->CheckIn(n1); rot_lamps->Add(n1);
