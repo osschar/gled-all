@@ -447,6 +447,7 @@ void FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
   }
   mcw->SetABG(img->fGlass, mShellInfo->GetBeta(), mShellInfo->GetGamma());
   adopt_window(mcw);
+  mcw->hotspot(mcw);
   mcw->show();
 }
 
