@@ -34,15 +34,15 @@ protected:
   OptoStructs::hpZGlass2pZGlassImg_t	mGlass2ImgHash;
 
   Saturn*	mSaturn;	// X{G}
+  SaturnInfo*	mSaturnInfo;	// X{G}
   ZQueen*	mQueen;		// X{G}
   EyeInfo*	mEyeInfo;	// X{G}
   FTW_Shell*	mShell;		// X{G}
 
   TSocket*	mSatSocket;
 
-  Ray		mRay;		// so far a single one needed
-
   lpFl_Window_t mRedrawOnAnyRay;
+  bool		bBreakManageLoop;
 
 public:
   Eye(UInt_t port, TString identity, ID_t shell_id,
@@ -54,11 +54,11 @@ public:
 
   // Basic ZGlassImg functionality
   OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
+  OptoStructs::ZGlassImg* DemangleID(ID_t id);
   void RemoveImage(OptoStructs::ZGlassImg* img);
 
   // Rnr Invalidation
-  void InvalidateRnrs(OptoStructs::ZGlassImg* img, 
-		      bool invalidate_links_p = false);
+  void InvalidateRnrs(OptoStructs::ZGlassImg* img);
 
   // Socketing
   Int_t	Manage(int fd);
@@ -69,6 +69,7 @@ public:
   void CloseEye();
 
   void RegisterROARWindow(Fl_Window* w) { mRedrawOnAnyRay.push_back(w); }
+  void BreakManageLoop() { bBreakManageLoop = true; }
 
 #include "Eye.h7"
 }; // endclass Eye
