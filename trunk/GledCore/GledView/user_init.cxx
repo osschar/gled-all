@@ -8,7 +8,7 @@ void libGledCore_GLED_user_init_View()
   Gled& g = *Gled::theOne;
 
   g.AddMTWLayout("GledCore/ZGlass",         "ZGlass(Name[20],Title[20],RefCount[6])");
-  g.AddMTWLayout("GledCore/ZNode",          "ZNode(Pos,Rot,UseScale[3],Sx,Sy,Sz,KeepParent[3])");
+  g.AddMTWLayout("GledCore/ZNode",          "ZNode(Pos[18],Rot[18],UseOM[4],OM[5],UseScale[4],Sx[5],Sy[5],Sz[5],KeepParent[4])");
   g.AddMTWLayout("GledCore/ZQueen Basic state",         
                                             "ZQueen(State,MinID,MaxID,IDSpan,IDsUsed,IDsPurged,IDsFree,AvgPurgLen,SgmPurgLen,PurgedMS,DeletedMS,ZeroRCPolicy)");
   g.AddMTWLayout("GledCore/ZQueen Authorization",         
