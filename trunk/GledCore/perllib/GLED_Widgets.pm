@@ -91,6 +91,7 @@ sub new {
 
   $S->{-join}  = 0 unless exists $S->{-join};
   $S->{-const} = 0 unless exists $S->{-const};
+  $S->{IsLinkWeed} = "false";
   return $S;
 }
 
@@ -131,7 +132,6 @@ sub make_range {
 # like o->type(FL_HOR_FILL_SLIDER);
 
 ########################################################################
-# cb_base foos
 
 ######################
 sub make_header_ccbu {
@@ -158,6 +158,8 @@ sub make_header_ccbu {
 
 fnord
 }
+
+########################################################################
 
 sub make_var_widget_cb {
   my $S = shift;
@@ -800,6 +802,58 @@ sub make_weed_update {
       join(', ', map { "mIdol->Ref$S->{Methodbase}().Get$_()" } @{$S->{Args}}) .
 	"));\n" .
   $S->make_weed_update_B();
+}
+
+########################################################################
+
+package GLED::Widgets::Link; @ISA = ('GLED::Widgets');
+
+sub new {
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{IsLinkWeed} = "true";
+  $S->{Widget} = "FltkGledStuff::LinkNameBox";
+  $S->{Include} = "Eye/FltkGledStuff.h";
+  # $S->{CastTo} = "int"; # internal representation of value() for button
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = "true";
+  $S->{-width} = 12 unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  return $S;
+}
+
+sub make_widget {
+  my $S = shift;
+  my $fqn = "${::CLASSNAME}::$S->{Methodbase}";
+  my $link_type = $S->{Type};
+
+  $link_type =~ s/\*//;
+
+  return <<"fnord"
+Fl_Widget* ${::CLASSNAME}View::$S->{Methodbase}_Creator() {
+  OptoStructs::ZLinkDatum* ld = GrepLinkDatum(\"$fqn\");
+  if(ld == 0) return 0;
+  $S->{Widget}* o = new $S->{Widget}(ld, 0,0,0,0,\"$S->{Methodbase}\");
+  o->fFID = GledNS::FindClassID(\"$link_type\");
+  return o;
+}\n
+fnord
+}
+
+sub make_cxx_cb {
+  my $S = shift;
+  return <<"fnord";
+void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o)
+{}\n
+fnord
+}
+
+sub make_weed_update {
+  my $S = shift;
+  my $x = "  if(w->NeedsUpdate()) w->Update();\n";
+
+  return $S->make_weed_update_A() . $x . $S->make_weed_update_B();
 }
 
 ########################################################################
