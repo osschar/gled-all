@@ -70,6 +70,7 @@ namespace FltkGledStuff {
     virtual void AbsorbRay(Ray& ray);
 
     virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
+    virtual void Clear() { ChangeImage(0); }
 
     void ChangeImage(OptoStructs::ZGlassImg* new_img);
 
@@ -96,6 +97,7 @@ namespace FltkGledStuff {
     virtual void Update();
 
     virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
+    virtual void Clear();
   };
 
 }
