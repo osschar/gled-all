@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_GledNS_H
-#define Gled_GledNS_H
+#ifndef GledCore_GledNS_H
+#define GledCore_GledNS_H
 
 #include <Gled/GledTypes.h>
 
