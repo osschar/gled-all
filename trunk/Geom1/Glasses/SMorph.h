@@ -31,7 +31,7 @@ protected:
   Bool_t	bOpenTop;	// X{gST} 7 Bool(-join=>1)
   Bool_t	bOpenBot;	// X{gST} 7 Bool()
   Bool_t	bEquiSurf;	// X{gST} 7 Bool()
-  ZColor	mColor;		// X{PGS} 7 ColorButt()
+  ZColor	mColor;		// X{PGST} 7 ColorButt()
 
   ZImage*	mTexture;	// X{gST} L{} RnrBits{4,0,5,0}
   Float_t	mTexX0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
