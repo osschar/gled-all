@@ -251,9 +251,8 @@ namespace GledNS {
   Int_t LoadSoSet(const string& lib_set);
   Int_t InitSoSet(const string& lib_set);
   Int_t LoadSo(const string& full_lib_name);
+  void* FindSymbol(const string& sym);
 
-  //void	BootstrapSoSet(const string& name, LID_t id, E_DEMANGLE_FOO efoo,
-  //	       E_CONSTRUCT_FOO ec_foo, DEF_CONSTRUCT_FOO dc_foo,char** deps);
   void	BootstrapSoSet(LibSetInfo* lsi);
 
   bool	IsLoaded(const string& lib_set);
