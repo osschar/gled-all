@@ -1,3 +1,22 @@
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.h:
+	* Glasses/Board.h:
+	* Glasses/GLTesterOne.h:
+	* Glasses/MultiBoard.h:
+	* Glasses/Rect.h:
+	* Glasses/RectTerrain.h:
+	* Glasses/RelParticle.h:
+	* Glasses/RndSMorphCreator.h:
+	* Glasses/SMorph.h:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.h:
+	* Glasses/WSTube.h:
+	* Glasses/ZImage.h:
+	* Glasses/ZRibbon.h:
+	Clean-up of RnrCtrl constructors; in most cases they are not
+	needed anymore.
+
 2005-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GLTesterOne.cxx:
