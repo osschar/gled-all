@@ -14,7 +14,8 @@ DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView Eye FL RnrBase
 VIEW_FL_DIRS	= FL
 
-LD_SURPLUS	= # appended to link command for BASE_LIB
+CPPFLAGS	=-I/usr/kerberos/include
+BASE_LD_LIBS	=-lssl
 
 MAINSRCS := saturn.cxx gled.cxx
 MAINOBJS := $(MAINSRCS:.cxx=.o)

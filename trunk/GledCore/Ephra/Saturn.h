@@ -9,9 +9,11 @@
 
 #include <Gled/GledTypes.h>
 #include <Glasses/ZGlass.h>
-class ZGod; class ZKing; class ZSunQueen; class ZQueen;
 #include <Glasses/SaturnInfo.h>
 #include <Glasses/EyeInfo.h>
+#include <Stones/ZMIR.h>
+
+class ZGod; class ZKing; class ZSunQueen; class ZQueen;
 
 #include <Gled/GMutex.h>
 #include <Gled/GSelector.h>
@@ -33,7 +35,10 @@ typedef list<TSocket*>			lpSocket_t;
 typedef list<TSocket*>::iterator	lpSocket_i;
 
 class Saturn : public TObject {
+  friend class Gled;
+  friend class ZKing;
   friend class ZQueen; friend class ZSunQueen;
+  friend class SaturnInfo;
 
 public:
   struct SocketInfo {
@@ -57,14 +62,9 @@ protected:
   GMutex		mEyeLock;	// sending to eyes
   GMutex		mMoonLock;	// sending to moons
   GMutex		mMasterLock;	// sending to master
-  GMutex		mServerLock;	// accept
   GMutex		mRulingLock;	// Exec in kings & queens
 
-  GCondition		mPendingConnection; // Accept awaits instantiation of Info object
-  SaturnInfo*		mPendingMoon;
-  EyeInfo*		mPendingEye;
-  TSocket*		mPendingSocket;
-  bool			bAllowMoons;
+  bool			bAllowMoons;	// X{G}
 
   GSelector		mSelector;	// fd select wrapper for sockets
 
@@ -74,6 +74,7 @@ protected:
   ZKing*		mKing;		// X{G}
   ZKing*		mFireKing;	// X{G}
   ZQueen*		mFireQueen;	// X{G}
+  SaturnInfo*		mSunInfo;	// X{G}
   SaturnInfo*		mSaturnInfo;	// X{G}
   bool			bSunAbsolute;	// X{G}
 
@@ -90,14 +91,16 @@ protected:
   lpEyeInfo_t		mEyes;
   TServerSocket*	mServerSocket;
 
-  // Threads
+  // Server Thread
   GThread*		mServerThread;
-  
+
   // Saturn services ... preliminary
   ZHistoManager*	pZHistoManager;
 
   int	start_server();
   int	stop_server();
+  int	start_mir_shooter();
+  int	stop_mir_shooter();
 
   void  socket_closed(TSocket* sock);
   void	wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p);
@@ -107,18 +110,26 @@ protected:
   void	create_kings(const char* king, const char* whore_king);
   void	arrival_of_kings(TMessage* m);
 
-  void  new_moon_ready(SaturnInfo* moon);
-  void  new_moon_lost();
-  void	new_eye_ready(EyeInfo* eye);
-  void  new_eye_lost();
-
   void Enlight(ZGlass* glass, ID_t) throw(string);
   void Reflect(ZGlass* glass) throw(string);
   void Endark(ZGlass* glass) throw(string);
 
+  Int_t	SockSuck();	// Called constantly from ServerThread
+  SaturnInfo* FindRouteTo(SaturnInfo* target);
+
+  void AcceptWrapper(TSocket* newsocket);
+  void Accept(TSocket* newsocket) throw(string);
+  void finalize_moon_connection(SaturnInfo* si);
+  void finalize_eye_connection(EyeInfo* ei);
+
+  Int_t	Manage(TSocket* sock) throw(string);
+
 public:
   Saturn();
   virtual ~Saturn();
+
+  static string    HandleClientSideSaturnHandshake(TSocket*& socket);
+  static TMessage* HandleClientSideMeeConnection(TSocket* socket, ZMirEmittingEntity* mee);
 
   void	      Create(SaturnInfo* si);
   SaturnInfo* Connect(SaturnInfo* si);
@@ -130,21 +141,6 @@ public:
   Int_t Freeze();
   Int_t UnFreeze();
 
-  Int_t	SockSuck();	// Called constantly from ServerThread
-  SaturnInfo* FindRouteTo(SaturnInfo* target);
-
-  void	AcceptWrapper();
-  void	Accept(TSocket* newsocket) throw(string);
-  Int_t	Manage(TSocket* sock) throw(string);
-
-  void	PostMIR(ZMIR& mir);
-  void	RouteMIR(ZMIR& mir);
-  void	UnfoldMIR(ZMIR& mir);
-  void	ExecMIR(ZMIR& mir) throw(string);
-  void	ForwardMIR(ZMIR& mir, SaturnInfo* route);
-  void	BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons);
-  void	BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons);
-
   void	Shine(Ray& r);
   void	SingleRay(EyeInfo* eye, Ray& r);
 
@@ -155,6 +151,94 @@ public:
 
   static const Int_t s_Gled_Protocol_Version;
 
+  /**************************************************************************/
+  // MIR and MIR Result Request handling
+  /**************************************************************************/
+
+protected:
+
+  // MIR Result Request registration and storage
+  struct mir_rr_info {
+    GCondition*  cond;
+    ZMIR_RR*     mir_rr;
+    mir_rr_info(GCondition* c) : cond(c), mir_rr(0) {}
+  };
+
+#ifndef __CINT__
+  typedef hash_map<UInt_t, mir_rr_info>			hReqHandle2MirRRInfo_t;
+  typedef hash_map<UInt_t, mir_rr_info>::iterator	hReqHandle2MirRRInfo_i;
+
+  hReqHandle2MirRRInfo_t 	mBeamReqHandles;
+#endif
+
+  GMutex		mBeamReqHandleMutex;
+  UInt_t		mLastBeamReqHandle;			
+
+  UInt_t    register_mir_result_request(GCondition* cond);
+  ZMIR_RR*  query_mir_result(UInt_t req_handle);
+  void	    handle_mir_result(UInt_t req_handle, ZMIR* mirp);
+
+  GThread*		mMIRShootingThread;
+  GCondition		mMIRShootingCnd;
+  list<ZMIR*>		mMIRShootingQueue;
+
+  void     shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
+		     bool use_own_thread=false);
+  void     markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller=0);
+  void     shoot_mir_from_queue();
+
+  void     generick_shoot_mir_result(const Text_t* exc, TBuffer* buf);
+
+public:
+
+  void     PostMIR(ZMIR& mir);
+
+  void     ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
+  ZMIR_RR* ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
+
+  void     ShootMIRResult(TBuffer& buf);
+
+  // Internal MIR handling
+
+protected:
+  void	RouteMIR(ZMIR& mir);
+  void	UnfoldMIR(ZMIR& mir);
+  void	ExecMIR(ZMIR& mir) throw(string);
+  void	ForwardMIR(ZMIR& mir, SaturnInfo* route);
+  void	BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons);
+  void	BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons);
+
+  
+  /**************************************************************************/
+  // Internal thread structures and functions
+  /**************************************************************************/
+
+private:
+
+  // ThreadInfo structures (passed via void* to threads)
+
+  struct new_connection_ti {
+    Saturn*		sat;
+    TSocket*		sock;
+    new_connection_ti(Saturn* s, TSocket* so) : sat(s), sock(so) {}
+  };
+
+  struct mir_router_ti {
+    Saturn*		sat;
+    ZMIR*		mir;
+    bool		delete_mir;
+    mir_router_ti(Saturn* s, ZMIR* m, bool d=false) :
+      sat(s), mir(m), delete_mir(d) {}
+  };
+
+  // Thread functions
+
+  static void* tl_SaturnFdSucker(Saturn *s);
+  static void* tl_SaturnAcceptor(new_connection_ti *ss);
+  static void* tl_MIR_Router(mir_router_ti* arg);
+  static void* tl_MIR_Shooter(Saturn* s);
+
+public:
 #include "Saturn.h7"
   ClassDef(Saturn, 0)
 }; // endclass Saturn

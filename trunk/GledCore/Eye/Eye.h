@@ -34,19 +34,19 @@ protected:
   OptoStructs::hpZGlass2pZGlassImg_t	mGlass2ImgHash;
 
   Saturn*	mSaturn;	// X{G}
-  ZQueen*	mQueen;
+  ZQueen*	mQueen;		// X{G}
   EyeInfo*	mEyeInfo;	// X{G}
-
   FTW_Shell*	mShell;		// X{G}
 
   TSocket*	mSatSocket;
-  TMessage	mMsg;
+
   Ray		mRay;		// so far a single one needed
 
   lpFl_Window_t mRedrawOnAnyRay;
 
 public:
-  Eye(UInt_t port, ID_t shell_id, const char* name="Eye", const char* title=0,
+  Eye(UInt_t port, TString identity, ID_t shell_id,
+      const char* name="Eye", const char* title=0,
       const Fl_SWM_Manager* swm_copy=0);
   ~Eye();
 

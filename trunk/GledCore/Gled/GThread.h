@@ -12,10 +12,19 @@
 #include <map>
 
 typedef unsigned long int pthread_t;
-typedef void*   (*thread_f)(void*);
-typedef void (*thread_cu_f)(void*);
+typedef unsigned int pthread_key_t;
+typedef void*   (*GThread_foo)(void*);
+typedef void (*GThread_cu_foo)(void*);
+
+class SaturnInfo;
+class ZMirEmittingEntity;
 
 class GThread {
+
+  friend class Gled;
+  friend class Saturn;
+  friend class Mountain;
+
 public:
   enum CState { CS_Enable, CS_Disable };
   enum CType  { CT_Async, CT_Deferred };
@@ -31,22 +40,47 @@ private:
   static 	map<pthread_t, GThread*>	sIdMap;
   static	GMutex				sIDLock;
 
-  pthread_t	mId;		// X{G}
-  thread_f	mStartFoo;	// X{Gs}
-  void*		mArg;		// X{Gs}
-  thread_cu_f	mEndFoo;	// X{Gs}
-  void*		mEndArg;	// X{Gs}
-  bool		bDetached;	// X{Gs}
-  // !!!! hmmph ... need void* user_data !!!!
+  pthread_t	 mId;		// X{G}
+  GThread_foo	 mStartFoo;	// X{Gs}
+  void*		 mArg;		// X{Gs}
+  GThread_cu_foo mEndFoo;	// X{Gs}
+  void*		 mEndArg;	// X{Gs}
+  bool		 bRunning;	// X{G}
+  bool		 bDetached;	// X{G}
+
+  ZMirEmittingEntity*	mOwner;	// X{G}
+
+  static GThread* wrap_and_register_self(ZMirEmittingEntity* owner);
+
+  static void                init_tsd();
+  static void                setup_tsd(ZMirEmittingEntity* owner);
+  static void                cleanup_tsd();
+  static GThread*            get_self();
+  static void                set_owner(ZMirEmittingEntity* owner);
+  static ZMirEmittingEntity* get_owner();
+  static void                set_return_address(SaturnInfo* ra);
+  static SaturnInfo*         get_return_address();
+  static void                set_return_handle(UInt_t);
+  static UInt_t              get_return_handle();
+
+  static pthread_key_t TSD_Self;
+  static pthread_key_t TSD_Owner;
+  static pthread_key_t TSD_ReturnAddress;
+  static pthread_key_t TSD_ReturnHandle;
+
+  // Need protected SetOwner, that also stores it into TSD.
+  // And the appropriate static Get, that avoids hash look-up.
 
 public:
-  GThread(thread_f f, void* a=0, bool d=false);
+  GThread(GThread_foo f, void* a=0, bool d=false);
   ~GThread();
 
   int	Spawn();
   int	Join(void** tret=0);
   int	Kill(Signal signal=SigSTOP);
   int	Cancel();
+  int   Detach();
+
   static void SetCancelState(CState s);
   static void SetCancelType(CType t);
   static void TestCancel();
@@ -55,6 +89,7 @@ public:
   //static void CleanUpPush(thread_cu_f f, void* a);
   
   static GThread* Self();
+  static unsigned long RawSelf();
 
 #include "GThread.h7"
 }; // endclass GThread

@@ -8,6 +8,8 @@
 #include <Gled/GledNS.h>
 #include <Gled/GMutex.h>
 #include <Gled/GCondition.h>
+#include <Gled/GThread.h>
+#include <Gled/GKeyRSA.h>
 #include <Ephra/Saturn.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/SaturnInfo.h>
@@ -17,8 +19,10 @@
 
 #include <TSystem.h>
 #include <TROOT.h>
+#include <TRint.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
+#include <TSystemDirectory.h>
 
 ClassImp(Gled)
 
@@ -45,18 +49,21 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
 				bShowSplash(true), 
 				bAutoSpawn(false),
 				bAllowMoons(true),
-				bRunRint(true)
+				bRunRint(true),
+				bRintRunning(false)
 {
   if(theOne) {
     cerr <<"Gled::Gled trying to instantiate another object ...\n";
     exit(1);
   }
   theOne = this;
+  GThread::init_tsd();
 
-  // Set-up SaturnInfo
+  // Set-up SaturnInfo, set defaults
 
   mSaturnInfo = new SaturnInfo;
   mSaturnInfo->SetHostName(gSystem->HostName());
+  mSaturnInfo->SetUseAuth(true);
 
   FILE* p = gSystem->OpenPipe("GledNodeReport.pl cpuinfo meminfo", "r");
   if(p != 0) {
@@ -70,6 +77,9 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
     mSaturnInfo->SetSwap(swp);
     gSystem->ClosePipe(p);
   }
+
+  mAuthDir = GForm("%s/.gled/auth", getenv("HOME"));
+  mDefEyeIdentity = "guest";
 
   // Parse command-line options
 
@@ -85,16 +95,24 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
 	  "			dir   ~ cd to dir prior to exec of files\n"
 	  "			files ~ ROOT macro scripts to process\n"
 	  "Gled options:\n"
+	  "-------------\n"
 	  "  -r[un]		spawn Saturn/Sun immediately\n"
 	  "			Saturn if -master is specified, Sun otherwise\n"
 	  "  -nomoons		do not accept moon connections\n"
 	  "  -s[ssize]	<num>	specify size of sun-space (can be eg. 2e20)\n"
 	  "  -p[ort]	<num>	specify server port (def 9061)\n"
-	  "  -m[aster] <host>:<port> master Saturn address (def port 9061)\n"
+	  "  -m[aster] <host>[:<port>] master Saturn address (def port 9061)\n"
 	  "  -n[ame]	<str>	name of Saturn\n"
 	  "  -t[itle]	<str>	title of Saturn\n"
 	  "  -l			no splash info\n"
-	  "  -norint		do not run TRint (useful for batch saturns)\n");
+	  "  -norint		do not run TRint (useful for batch saturns)\n"
+	  "\n"
+	  "Authentication options:\n"
+	  "  -noauth		do not use authentication\n"
+	  "  -authdir	<str>	directory containing auth data (def ~/.gled/auth)\n"
+	  "  -saturnid	<str>	identity of the Saturn (def 'sun.absolute' or 'saturn')\n"
+	  "  -eyeid	<str>	default identity of Eyes (def 'guest')\n"
+	  );
 	bQuit = true;
 	return;
       }
@@ -161,6 +179,31 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
       args.erase(start, ++i);
     }
 
+    // Authentication options
+
+    else if(strcmp(*i, "-noauth")==0) {
+      mSaturnInfo->SetUseAuth(false);
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-authdir")==0) {
+      next_arg_or_die(args, i);
+      mAuthDir = *i;
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-saturnid")==0) {
+      next_arg_or_die(args, i);
+      mSaturnInfo->SetLogin(*i);;
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-eyeid")==0) {
+      next_arg_or_die(args, i);
+      mDefEyeIdentity = *i;
+      args.erase(start, ++i);
+    }
+
     else {
       ++i;
     }
@@ -183,7 +226,7 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
 }
 
 Gled::~Gled() {
-  // Wipe saturn !!!!
+  delete mSaturn;
 }
 
 /**************************************************************************/
@@ -199,9 +242,24 @@ void Gled::SpawnSunOrSaturn() {
 
 void Gled::SpawnSun()
 {
+  static string _eh("Gled::SpawnSun ");
+
   if(mSaturn) return;
   if(strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
     mSaturnInfo->SetName(GForm("Sun at %s", gSystem->HostName()));
+  if(strcmp(mSaturnInfo->GetLogin(), "") == 0)
+    mSaturnInfo->SetLogin("sun.absolute");
+
+  CheckAuthDir();
+
+  if(mSaturnInfo->GetUseAuth()) {
+    GKeyRSA::init_ssl();
+    if(GetPrivKeyFile(mSaturnInfo->mLogin) == 0) {
+      cerr << _eh << "can not open server private key\n";
+      exit(1);
+    }
+  }
+
   mSaturn = new Saturn;
   mSaturn->Create(mSaturnInfo);
   bIsSun = true;
@@ -209,9 +267,25 @@ void Gled::SpawnSun()
 
 void Gled::SpawnSaturn()
 {
+  static string _eh("Gled::SpawnSaturn ");
+
   if(mSaturn) return;
   if(strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
     mSaturnInfo->SetName(GForm("Saturn at %s", gSystem->HostName()));
+  if(strcmp(mSaturnInfo->GetLogin(), "") == 0)
+    mSaturnInfo->SetLogin("saturn");
+
+  CheckAuthDir();
+
+  if(mSaturnInfo->GetUseAuth()) { // !!!! this is silly ... useauth only relevant for SunAbsolute
+    GKeyRSA::init_ssl();
+    // Assert files
+    if(GetPrivKeyFile(mSaturnInfo->mLogin) == 0) {
+      cerr << _eh <<"can not open server private key\n";
+      exit(1);
+    }
+  }
+
   mSaturn = new Saturn;
   try {
     SaturnInfo* si = mSaturn->Connect(mSaturnInfo);
@@ -219,15 +293,55 @@ void Gled::SpawnSaturn()
       delete mSaturnInfo;
       mSaturnInfo = si;
     } else {
-      cerr <<"Gled::SpawnSaturn failed ... dying\n";
+      cerr << _eh <<"failed ... dying\n";
       exit(1);
     }
     WaitUntillQueensLoaded();
   }
   catch(string exc) {
-    cerr <<"Gled::SpawnSaturn failed ... dying at:\n  "<< exc <<endl;
+    cerr << _eh <<" failed ... dying at:\n  "<< exc <<endl;
     exit(1);
   }
+}
+
+/**************************************************************************/
+
+void Gled::CheckAuthDir() {
+  if(gSystem->AccessPathName(mAuthDir.Data(), kReadPermission)) {
+    printf(GForm("Gled::SpawnSaturn: auth dir '%s' not accessible\n", mAuthDir.Data()));
+    printf("Gled::SpawnSaturn: use gled-auth-init command to create one\n");
+  }
+}
+
+const char* Gled::PubKeyFile(TString& id) {
+  return GForm("%s/public_keys/%s", mAuthDir.Data(), id.Data());
+}
+
+const char* Gled::PrivKeyFile(TString& id) {
+  return GForm("%s/private_keys/%s", mAuthDir.Data(), id.Data());
+}
+
+const char* Gled::GetPubKeyFile(TString& id) {
+  const char* ret = PubKeyFile(id);
+  if(gSystem->AccessPathName(ret, kReadPermission))
+    throw(string("Gled::GetPubKeyFile can not access file:") + ret);
+  return ret;
+}
+
+const char* Gled::GetPrivKeyFile(TString& id) {
+  const char* ret = PrivKeyFile(id);
+  if(gSystem->AccessPathName(ret, kReadPermission))
+    throw(string("Gled::GetPrivKeyFile can not access file:") + ret);
+  return ret;
+}
+
+/**************************************************************************/
+
+bool Gled::IsIdentityInGroup(const char* id, const char* group)
+{
+  //printf("Gled::IsIdentityInGroup checking if %s in group %s\n", id, group);
+  return (gSystem->Exec(GForm("grep -q %s %s/groups/%s",
+			      id, mAuthDir.Data(), group)) == 0) ? true : false;;
 }
 
 /**************************************************************************/
@@ -340,11 +454,38 @@ void Gled::SpawnEye(const char* name, const char* title)
     return;
   }
 
-  ZQueen* fq = mSaturn->GetFireQueen();
-  ShellInfo *si = new ShellInfo("Generick Shell", "created by Gled::SpawnEye");
-  fq->CheckIn(si); fq->Add(si);
-  si->ImportKings();
-  SpawnEye(si, name, title);
+  SpawnEye(0, name, title);
+}
+
+/**************************************************************************/
+// Thread foos
+/**************************************************************************/
+
+void* Gled::TRint_runner_tl(TRint* gint)
+{
+  // Runs the ROOT application. Ownership set to mSaturnInfo.
+
+  GThread::setup_tsd(Gled::theOne->mSaturnInfo);
+
+  Gled::theOne->bRintRunning = true;
+  gint->TApplication::Run(true);
+  Gled::theOne->bRintRunning = false;
+  cout << "Gint terminated ...\n";
+
+  if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
+  GThread::Exit();
+  return 0;
+}
+
+void* Gled::Gled_runner_tl(Gled* gled)
+{
+  // Runs Gled UI. Only spawned from gled.cxx.
+
+  GThread::setup_tsd(Gled::theOne->mSaturnInfo);
+
+  gled->Run();
+  GThread::Exit();
+  return 0;
 }
 
 /**************************************************************************/

@@ -37,7 +37,9 @@ ClassImp(ZKing)
 void ZKing::_init()
 {
   mSaturnInfo = 0;
+  mLightType = LT_Undef;
   bFireKing = false;
+  mMapNoneTo = ZMirFilter::R_Allow;
 }
 
 /**************************************************************************/
@@ -47,7 +49,14 @@ void ZKing::BlessMIR(ZMIR& mir) throw(string)
   // Should check that non-zero beta/gamma belong to this or a higher
   // object-space.
 
-  // !!!!
+  static string _eh("ZKing::BlessMIR() ");
+
+  UChar_t result = (mGuard != 0) ? mGuard->FilterMIR(mir) : ZMirFilter::R_None;
+  if( result == ZMirFilter::R_Deny ||
+     (result == ZMirFilter::R_None && mMapNoneTo == ZMirFilter::R_Deny))
+    {
+      throw(_eh + "access denied");
+    }
 }
 
 /**************************************************************************/
@@ -66,6 +75,10 @@ void ZKing::Enthrone(ZQueen* queen)
   queen->mMaxUsedID = queen->mMinID - 1;
   queen->Bootstrap();
   Add(queen);
+
+  if(bFireKing) {
+    queen->SetAuthMode(ZQueen::AM_None);
+  }
 
   // should broadmoon via streaming ... or whatever.
   // perhaps solve at sun level. More like a helper for whore queens.
@@ -126,8 +139,7 @@ void ZKing::ReflectQueen(ZQueen* queen_to_mirror)
 
   auto_ptr<ZMIR> mir(boss->S_reflect_queen(queen_to_mirror, mSaturn->GetSaturnInfo()));
   mir->SetRecipient(mSaturn->GetSaturnInfo());
-  mir->SetCaller(mSaturn->GetSaturnInfo()); // Will be set by thread
-  mSaturn->PostMIR(*mir);
+  mSaturn->ShootMIR(mir);
 
   // assert queen in `above' space and not yet ruling, neither awaiting sceptre.
   // pass control to reflect_queen, which also checks dependencies and
@@ -152,8 +164,8 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
 
   static string _eh("ZKing::reflect_queen() ");
 
-  if(mMir == 0 || mMir->Message == 0) {
-    throw(_eh + "should be called with Ctx & Message set");
+  if(mMir == 0) {
+    throw(_eh + "should be called with mMir set");
   }
 
   if(moon == mSaturn->GetSaturnInfo()) {
@@ -195,12 +207,12 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
       auto_ptr<ZMIR> mir(this->S_activate_queen(queen_to_mirror));
       mir->SetCaller(mSaturn->GetSaturnInfo());
       mir->SetRecipient(moon);
-      queen_to_mirror->CreateReflection(*mir->Message);
+      queen_to_mirror->CreateReflection(*mir);
       queen_to_mirror->add_reflector(moon);
       queen_to_mirror->mExecMutex.Unlock();
       ISdebug(0, GForm("%s Sending queen %s to moon %s; length is=%d",
 		       _eh.c_str(), queen_to_mirror->GetName(),
-		       moon->GetName(), mir->Message->Length()));
+		       moon->GetName(), mir->Length()));
       mSaturn->PostMIR(*mir);
       moon->hQueens.insert(queen_to_mirror);
 
@@ -240,7 +252,7 @@ void ZKing::activate_queen(ZQueen* queen)
     throw(_eh + "queen " + queen->GetName() + " is NOT awaiting sceptre");
   }
 
-  queen->InvokeReflection(*mMir->Message);
+  queen->InvokeReflection(*mMir);
   queen->SetAwaitingSceptre(false);
 
   mSaturn->RefQueenLoadCnd().Lock();

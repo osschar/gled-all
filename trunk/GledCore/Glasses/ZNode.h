@@ -27,9 +27,9 @@ protected:
 
   // Position and Rotation widgets
 
-  // 777 Trans_Pos_Ctrl(Methodbase=>'Pos', Transname=>'Trans')
+  // 777 Trans_Pos_Ctrl(Methodbase=>'Pos', Methodname=>'Pos', Transname=>'Trans')
 
-  // 777 Trans_Rot_Ctrl(Methodbase=>'Rot', Transname=>'Trans')
+  // 777 Trans_Rot_Ctrl(Methodbase=>'Rot', Methodname=>'Rot',Transname=>'Trans')
 
   ZNode*	mParent;	// X{gS} L{l} Structural parent
 

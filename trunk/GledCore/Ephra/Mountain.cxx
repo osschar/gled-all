@@ -67,6 +67,10 @@ void* Mountain::DancerBeat(DancerInfo* di)
     sigaction(SIGUSR1, &sac, 0);
   }
 
+  { // Initialize thread ownership
+    GThread::setup_tsd(di->fOwner);
+  }
+
   Operator::Arg* op_arg = di->fEventor->PreDance();
   if(op_arg == 0) GThread::Exit();
 
@@ -203,13 +207,14 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
     return;
   }
 
-  GThread* t = new GThread((thread_f)DancerBeat, 0, true);
-  DancerInfo* di = new DancerInfo(t, e, this);
+  ZMirEmittingEntity* o = GThread::get_owner();
+  GThread* t = new GThread((GThread_foo)DancerBeat, 0, true);
+  DancerInfo* di = new DancerInfo(o, t, e, this);
   t->SetArg((void*)di);
   hOnStage[e] = di;
   hStageLock.Unlock();
 
-  t->SetEndFoo((thread_cu_f)DancerCooler);
+  t->SetEndFoo((GThread_cu_foo)DancerCooler);
   t->SetEndArg((void*)di);
   if(suspend_immediately) di->fShouldSuspend = true;
   t->Spawn();

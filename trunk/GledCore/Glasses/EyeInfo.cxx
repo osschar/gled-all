@@ -11,7 +11,9 @@
 
 ClassImp(EyeInfo)
 
-EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) : ZGlass(n,t) {
+EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) : 
+  ZMirEmittingEntity(n,t)
+{
   hSocket = 0; mMaster = 0;
 }
 

@@ -25,6 +25,7 @@ class Fl_Window;
 class Fl_Tile;
 class Fl_Browser;
 
+class TRint;
 class TCanvas;
 
 class Gled {
@@ -40,7 +41,12 @@ protected:
   bool		bShowSplash;	// X{G}
   bool		bAutoSpawn;	// X{G}
   bool		bAllowMoons;	// X{G}
+
   bool		bRunRint;	// X{G}
+  bool		bRintRunning;	// X{G}
+
+  TString	mAuthDir;	 // X{GS}
+  TString	mDefEyeIdentity; // X{GS}
 
   GCondition*	mExitCondVar;
 
@@ -53,9 +59,18 @@ public:
   void SpawnSun();
   void SpawnSaturn();
 
+  void        CheckAuthDir();
+  const char* PubKeyFile(TString& id);
+  const char* PrivKeyFile(TString& id);
+  const char* GetPubKeyFile(TString& id);
+  const char* GetPrivKeyFile(TString& id);
+
+  bool IsIdentityInGroup(const char* id, const char* group);
+
   void WaitUntillQueensLoaded();
   void AllowMoonConnections();
 
+  virtual void Run() {}
   virtual void Exit();
 
   virtual Int_t LoadLibSet(const Text_t* lib_set);
@@ -71,6 +86,9 @@ public:
 
   virtual void SpawnEye(const char* name, const char* title=0);
   virtual void SpawnEye(ShellInfo* si, const char* name, const char* title=0) {}
+
+  static void* TRint_runner_tl(TRint* gint);
+  static void* Gled_runner_tl(Gled* gled);
 
   static Gled* theOne;
 

@@ -10,6 +10,6 @@ $PATCH = {
 #  'C7_DoNot_Gen' => { 'RebuildLinks' => 1 }
 },
 
-"ZMIR"		=> { 'PragmaSuff' => "-" },
+"ZMIR"		=> { 'Pragmas' => "#pragma link C++ class ZMIR_Result_Report;\n" },
 "ZComet"	=> { 'PragmaSuff' => "-" }
 };

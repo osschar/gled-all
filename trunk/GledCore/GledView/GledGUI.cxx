@@ -7,6 +7,7 @@
 #include "GledGUI.h"
 #include <Ephra/Saturn.h>
 #include <Glasses/ShellInfo.h>
+#include <Glasses/ZQueen.h>
 #include <Gled/GledNS.h>
 #include <GledView/GledViewNS.h>
 #include <Eye/Eye.h>
@@ -20,8 +21,11 @@
 #include <FL/Fl_OutputPack.H>
 #include <FL/Fl_Tooltip.H>
 #include <FL/x.H>
+#include <FL/fl_draw.H>
+#include <FL/Fl_Image.H>
 
 #include <TROOT.h>
+#include <TSystem.h>
 #include <TVirtualX.h>
 #include <TGX11.h>
 #include <TCanvas.h>
@@ -35,7 +39,7 @@
 
 namespace {
 
-  void* tf_MessageLoop(GledGUI* gui) {
+  void* MessageLoop_tl(GledGUI* gui) {
     gui->MessageLoop();
     GThread::Exit();
     return 0;
@@ -54,6 +58,31 @@ namespace {
 
   void keeppos_cb(Fl_Button* o, Fl_OutputPack* ud)
   { ud->keep_pos(o->value()); }
+
+}
+
+/**************************************************************************/
+// GLED_LABEL_TYPE
+/**************************************************************************/
+
+namespace {
+  void fl_nosymbol_label(const Fl_Label* o, int X, int Y, int W, int H, Fl_Align align)
+  {
+    fl_font(o->font, o->size);
+    fl_color((Fl_Color)o->color);
+    fl_draw(o->value, X, Y, W, H, align, o->image, 0);
+  }
+
+  void
+  fl_nosymbol_measure(const Fl_Label* o, int& W, int& H) {
+    fl_font(o->font, o->size);
+    fl_measure(o->value, W, H, 0);
+    if (o->image) {
+      if (o->image->w() > W) W = o->image->w();
+      H += o->image->h();
+    }
+  }
+
 }
 
 /**************************************************************************/
@@ -68,7 +97,8 @@ GledGUI::GledGUI(list<char*>& args) :
   Gled(args),
   Fl_Window(60, 30, "Gled"),
   bGUIup(false),
-  mMsgCond(GMutex::recursive)
+  mMsgCond(GMutex::recursive),
+  mNumShells(0)
 {
   if(theOne) {
     cerr <<"GledGUI::GledGUI trying to instantiate another object ...\n";
@@ -85,13 +115,12 @@ GledGUI::GledGUI(list<char*>& args) :
     if(strcmp(*i, "-h")==0 || strcmp(*i, "-help")==0 ||
        strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
       {
-	cout <<
+	cout << "\n"
 	  "GledGUI options:\n"
+	  "----------------\n"
 	  "  -swm	fs:dh:dw	specify font-size, vert-space and char width\n"
 	  "			default 12:6:0 (dw~0 means measure font)\n"
-	  "  -rnr <r1>:<r2>:...	specify which rendering libraries to load\n"
-	  "			default GL\n";
-
+	  "  -rnr <r1>:<r2>:...	specify which rendering libraries to load (def GL)\n";
 	return;
       }
 
@@ -114,6 +143,8 @@ GledGUI::GledGUI(list<char*>& args) :
   }
 
   libGledCore_GLED_init_View();
+  GledViewNS::no_symbol_label = FL_FREE_LABELTYPE;
+  Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
 
   if(rnr_string) {
     while(rnr_string && *rnr_string!=0) {
@@ -200,6 +231,26 @@ GledGUI::~GledGUI()
 
 /**************************************************************************/
 
+void GledGUI::Run()
+{
+  // Runs in dedicated thread spawned from gled.cxx.
+  // ALL gui (also for eyes and therefore for pupils) runs through this loop.
+
+  ISmess("GledGUI::Run starting GUI");
+  Fl::lock();		// init thread support
+  Fl::visible_focus(0); // no focus for buttons ETC
+  Fl_Tooltip::enable();	// enable tooltips
+  mMessenger = new GThread((GThread_foo)MessageLoop_tl, this, false);
+  mMessenger->Spawn();
+  bGUIup = true;
+  while(!bQuit) Fl::wait();
+  mMessenger->Cancel();
+  mMessenger->Join();
+  delete mMessenger; mMessenger = 0;
+  Fl::unlock();
+  ISmess("GledGUI::Run exiting GUI event loop");
+}
+
 void GledGUI::Exit()
 {
   // Shutdown Eyes, GUI ... then Gled
@@ -211,26 +262,6 @@ void GledGUI::Exit()
   Fl::lock();
   Fl::awake();
   Fl::unlock();
-}
-
-void GledGUI::Run()
-{
-  // Runs in dedicated thread spawned from gled.cxx.
-  // ALL gui (also for eyes and therefore for pupils) runs through this loop.
-
-  ISmess("GledGUI::Run starting GUI");
-  Fl::lock();		// init thread support
-  Fl::visible_focus(0); // no focus for buttons ETC
-  Fl_Tooltip::enable();	// enable tooltips
-  mMessenger = new GThread((thread_f)tf_MessageLoop, this, false);
-  mMessenger->Spawn();
-  bGUIup = true;
-  while(!bQuit) Fl::wait();
-  mMessenger->Cancel();
-  mMessenger->Join();
-  delete mMessenger; mMessenger = 0;
-  Fl::unlock();
-  ISmess("GledGUI::Run exiting GUI event loop");
 }
 
 /**************************************************************************/
@@ -319,16 +350,38 @@ void GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
   // helped once (note that ROOT has different display than fltk/gled_gui).
   // Fl locks are just.
 
+  string eye_name(name);
+  if(eye_name == "") {
+    eye_name = GForm("%s@%s", mDefEyeIdentity.Data(), gSystem->HostName());
+  }
+
   Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
   XLockDisplay(rd);
 
-  Eye* e = new Eye(mSaturn->GetSaturnInfo()->GetServerPort(), si->GetSaturnID(),
-		   name, title, swm_manager);
+  if(si == 0) {
+    ZQueen* fq = mSaturn->GetFireQueen();
+    si = new ShellInfo(GForm("Shell[%d] of %s", ++mNumShells, eye_name.c_str()),
+		       "created by Gled::SpawnEye");
+    fq->CheckIn(si); fq->Add(si);
+    si->ImportKings();
+  }
 
-  Fl::lock();
-  e->show();
-  Fl::awake();
-  Fl::unlock();
+  Eye* e;
+  try {
+    e = new Eye(mSaturn->GetSaturnInfo()->GetServerPort(),
+		mDefEyeIdentity, si->GetSaturnID(),
+		eye_name.c_str(), title, swm_manager);
+  } catch(string exc) {
+    e = 0;
+    ISerr(GForm("GledGUI::SpawnEye(%s) caugt exeception: %s", name, exc.c_str()));
+  }
+
+  if(e) {
+    Fl::lock();
+    e->show();
+    Fl::awake();
+    Fl::unlock();
+  }
 
   XUnlockDisplay(rd);
 }

@@ -1,3 +1,4 @@
+// $Header$
 // Generick initialization of top level script variables for Sun.
 // Creates ZQueen("Scenes").
 // Can be called from other scripts, as a command-line option or from
@@ -18,7 +19,11 @@
   ZSunQueen* sun_queen  = sun->GetSunQueen();
   ZQueen*    fire_queen = sun->GetFireQueen();
 
+  if(sun->GetSaturnInfo()->GetUseAuth())
+    gROOT->Macro("std_auth.C");
+
   ZQueen* scenes = new ZQueen(16*1024, "Scenes", "Goddess of Ver");
   Gled::theOne->GetSaturn()->GetSunKing()->Enthrone(scenes);
   scenes->SetMandatory(true);
+
 }

@@ -11,7 +11,10 @@
 // Covering structure for streaming/routing of MIRs.
 // Message type defaults to MT_Flare.
 // By calling SetRecipient the message type is transmuted to MT_Beam.
+//
 // Direction is used for determination of routing/exec action in the Saturn.
+// SuppressFlareBroadcast can be set during MIR execution on the sun-saturn
+// to prevent broadcasting of the MIR to moons.
 
 #include "ZMIR.h"
 #include <Ephra/Saturn.h>
@@ -19,157 +22,294 @@
 #include <Gled/GledNS.h>
 #include <TMessage.h>
 
+
+/**************************************************************************/
+// ZMIR
+/**************************************************************************/
+
 ClassImp(ZMIR)
 
 /**************************************************************************/
 
+namespace {
+
+  const Int_t ROOT_Header_Length = 2*sizeof(UInt_t); // len + type
+
+  const Int_t Routing_Header_Min_Length = ROOT_Header_Length +
+  sizeof(UChar_t) + sizeof(ID_t) + sizeof(ID_t); // MirBits, Caller, A
+
+  const Int_t Fixed_Header_Length = ROOT_Header_Length +
+    sizeof(UChar_t) + 4*sizeof(ID_t) +               // MirBits, Caller, A,B,G
+    sizeof(LID_t) + sizeof(CID_t) + sizeof(MID_t);   // full method identity
+
+  const Int_t MirBits_Length	= sizeof(UChar_t);
+  const Int_t Caller_Length     = sizeof(ID_t);
+  const Int_t Recipient_Length  = sizeof(ID_t);
+  const Int_t ResultReq_Length  = sizeof(ID_t) + sizeof(UInt_t);
+  const Int_t Max_Header_Length = Fixed_Header_Length + Recipient_Length + ResultReq_Length;
+
+  const Int_t Caller_Offset    = ROOT_Header_Length + MirBits_Length;
+  const Int_t Recipient_Offset = Caller_Offset      + Caller_Length;
+  const Int_t ResultReq_Offset = Recipient_Offset   + Recipient_Length;
+};
+
+/**************************************************************************/
+
 void ZMIR::_init() {
-  Caller = 0; Recipient = 0;
+  // Set demangled info to null
+  Caller = 0; Recipient = ResultRecipient = 0;
   Alpha = Beta = Gamma = 0;
 }
 
 /**************************************************************************/
-
-ZMIR::ZMIR(ID_t a, ID_t b, ID_t g, ID_t c) :
-  CallerID(c), RecipientID(0), AlphaID(a), BetaID(b), GammaID(g),
-  Message(0), Direction(D_Unknown)
+ 
+ZMIR::ZMIR(ID_t a, ID_t b, ID_t g) :
+  TMessage(GledNS::MT_Flare),
+  Direction(D_Unknown),
+  MirBits(0), CallerID(0),
+  RecipientID(0), ResultRecipientID(0), ResultReqHandle(0),
+  AlphaID(a), BetaID(b), GammaID(g)
 {
   _init();
-  Message = new TMessage(GledNS::MT_Flare);
-  Streamer(*Message);
+  fTrueBuffer = 0;
+  SetBufferOffset(Max_Header_Length);
 }
 
 
-ZMIR::ZMIR(TMessage* m) :
-  Message(m), Direction(D_Unknown)
+ZMIR::ZMIR(TMessage*& m) :
+  TMessage(m->Buffer(), m->BufferSize()),
+  Direction(D_Unknown), SuppressFlareBroadcast(false)
 {
+  m->DetachBuffer(); delete m; m = 0;
   _init();
-  assert(Message->IsReading());
-  Streamer(*m);
+  fTrueBuffer = 0;
 }
 
 ZMIR::~ZMIR() {
-  delete Message;
+  if(fTrueBuffer) fBuffer = fTrueBuffer;
 }
 
 /**************************************************************************/
+
+Int_t ZMIR::HeaderLength()
+{
+  Int_t r = Fixed_Header_Length;
+  if(MirBits & MB_HasRecipient) r += sizeof(ID_t);
+  if(MirBits & MB_HasResultReq) r += ResultReq_Length;
+  return r;
+}
+
+Int_t ZMIR::RoutingHeaderLength()
+{
+  Int_t r = Routing_Header_Min_Length;
+  if(MirBits & MB_HasRecipient) r += sizeof(ID_t);
+  if(MirBits & MB_HasResultReq) r += ResultReq_Length;
+  return r;
+}
+
+void ZMIR::WriteHeader()
+{
+  // Writes a complete MIR header, including the message type. If
+  // Recipient and ResultReq fields are not used, the position of
+  // fBuffer is displaced for the appropriate amount.
+  // Also ... sets fBufSize to the current buffer position.
+  // Do not add further data after this method has been called!
+
+  if(IsWriting()) {
+    if(MirBits & MB_HeaderWritten) return;
+    MirBits |= MB_HeaderWritten;
+
+    fTrueBuffer = fBuffer;
+    fBuffer += Max_Header_Length - HeaderLength();
+
+    fBufSize  = Length();
+    SetBufferOffset(sizeof(UInt_t));
+
+    TBuffer& b = *this;
+    b << What() << MirBits << CallerID;
+    if(MirBits & MB_HasRecipient) b << RecipientID;
+    if(MirBits & MB_HasResultReq) b << ResultRecipientID << ResultReqHandle;
+    b << AlphaID << BetaID << GammaID;
+    b << Lid << Cid << Mid;
+
+    SetBufferOffset(fBufSize);
+  }
+}
+
+void ZMIR::ReadRoutingHeader()
+{
+  assert(IsReading()); // or sth ...
+  TBuffer& b = *this;
+  b >> MirBits >> CallerID;
+  if(MirBits & MB_HasRecipient) b >> RecipientID;
+  if(MirBits & MB_HasResultReq) b >> ResultRecipientID >> ResultReqHandle;
+  b >> AlphaID;
+}
+
+void ZMIR::ReadExecHeader()
+{
+  assert(IsReading()); // or sth else ...
+  //if(!IsReading()) { ZGlass* p=0; p->GetName(); }
+  TBuffer& b = *this;
+  b >> BetaID >> GammaID;
+  b >> Lid >> Cid >> Mid;
+}
+
+void ZMIR::RewindToData()
+{
+  // Sets Read mode and position to just after the Context header.
+
+  SetReadMode();
+  SetBufferOffset(HeaderLength());
+}
+
+void ZMIR::RewindToExecHeader()
+{
+  // Sets Read mode and position to just after the Context header.
+
+  SetReadMode();
+  SetBufferOffset(RoutingHeaderLength());
+}
+
+/**************************************************************************/
+
+namespace {
+  const string demangle_eh("ZMIR::Demangle failed for ");
+}
 
 void ZMIR::Demangle(Saturn* s) throw(string)
 {
-  string eb("ZMIR::Demangle failed for ");
-  Alpha = s->DemangleID(AlphaID);
-  if(!Alpha) throw(eb + "Alpha");
+  Caller = dynamic_cast<ZMirEmittingEntity*>(s->DemangleID(CallerID));
+  if(!Caller) throw(demangle_eh + GForm("Caller(id=%d)",CallerID));
 
+  // Recipient & Result recipient separated. Called by Saturn when appropriate.
+
+  Alpha = s->DemangleID(AlphaID);
+  if(!Alpha) throw(demangle_eh + "Alpha");
   if(BetaID) {
     Beta = s->DemangleID(BetaID);
-    if(!Beta) throw(eb + "Beta");
-  } else {
-    Beta = 0;
+    if(!Beta) throw(demangle_eh + "Beta");
   }
   if(GammaID) {
     Gamma = s->DemangleID(GammaID);
-    if(!Gamma) throw(eb + "Gamma");
-  } else {
-    Gamma = 0;
+    if(!Gamma) throw(demangle_eh + "Gamma");
   }
-  if(CallerID) {
-    Caller = s->DemangleID(CallerID);
-    if(!Caller) throw(eb + "Caller");
-  } else {
-    Caller = 0;
-  }
-  if(RecipientID) {
+}
+
+void ZMIR::DemangleRecipient(Saturn* s) throw(string)
+{
+  if(MirBits & MB_HasRecipient) {
     Recipient = dynamic_cast<SaturnInfo*>(s->DemangleID(RecipientID));
-    if(!Recipient) throw(eb + "Recipient");
-  } else {
-    Recipient = 0;
+    if(!Recipient) throw(demangle_eh + "Recipient");
+  }
+}
+
+void ZMIR::DemangleResultRecipient(Saturn* s) throw(string)
+{
+  if(MirBits & MB_HasResultReq) {
+    ResultRecipient = dynamic_cast<SaturnInfo*>(s->DemangleID(ResultRecipientID));
+    if(!ResultRecipient) throw(demangle_eh + "ResultRecipient");
   }
 }
 
 /**************************************************************************/
 
-void ZMIR::Rewind()
+void ZMIR::SetCaller(ZMirEmittingEntity* caller)
 {
-  // Sets Read mode and position to the beginning of the buffer.
-  Message->SetReadMode();
-  Message->SetBufferOffset(2*sizeof(UInt_t));
-}
-
-void ZMIR::RewindToMIR()
-{
-  // Sets Read mode and position to just after the Context header.
-  Message->SetReadMode();
-  Message->SetBufferOffset(2*sizeof(UInt_t) + 5*sizeof(ID_t) + sizeof(Int_t));
-}
-
-void ZMIR::SetCaller(ZGlass* caller)
-{
-  assert(Message!=0);
-  if(Message->IsWriting()) {
-    Caller = caller;
+  Caller = caller;
+  if(IsWriting()) {
     CallerID = caller ? caller->GetSaturnID() : 0;
-    Int_t pos = Message->Length();
-    Message->SetBufferOffset(2*sizeof(UInt_t));
-    *Message << CallerID;
-    Message->SetBufferOffset(pos);
   } else {
+    // Called by Saturn to set Caller identity for MIRs coming from
+    // Eyes and being posted by threads.
     CallerID = caller ? caller->GetSaturnID() : 0;
-    Int_t pos = Message->Length();
-    Message->SetBufferOffset(2*sizeof(UInt_t));
-    Message->SetWriteMode();
-    *Message << CallerID;
-    Message->SetBufferOffset(pos);
-    Message->SetReadMode();
+    Int_t pos = Length();
+    SetBufferOffset(Caller_Offset);
+    *this << CallerID;
+    SetBufferOffset(pos);
   }
+  
 }
 
 void ZMIR::SetRecipient(SaturnInfo* recipient)
 {
-  assert(Message!=0);
+  // Can be called for MIR in write mode or for MIR in read mode
+  // if it is already a Beam.
 
-  Message->SetWhat(GledNS::MT_Beam);
-  Recipient = recipient;
   RecipientID = recipient->GetSaturnID();
-  Int_t pos = Message->Length();
-  Message->SetBufferOffset(2*sizeof(UInt_t) + sizeof(ID_t));
-  *Message << RecipientID;
-  Message->SetBufferOffset(pos);
+  if(IsReading()) {
+    assert(MirBits | MB_HasRecipient);
+    Recipient = recipient;
+    Int_t pos = Length();
+    SetBufferOffset(Recipient_Offset);
+    *this << RecipientID;
+    SetBufferOffset(pos);
+  } else {
+    MirBits |= MB_HasRecipient;
+    SetWhat(GledNS::MT_Beam);
+  }
 }
 
 void ZMIR::ClearRecipient()
 {
-  assert(Message!=0);
+  // Can only be called for MIRs in read mode. MIR is transmuted into Flare,
+  // but the HasRecipient flag stays on.
 
-  Message->SetWhat(GledNS::MT_Flare);
-  Recipient = 0;
+  assert(IsReading() && (MirBits | MB_HasRecipient));
   RecipientID = 0;
-  Int_t pos = Message->Length();
-  Message->SetBufferOffset(2*sizeof(UInt_t) + sizeof(ID_t));
-  *Message << ID_t(0);
-  Message->SetBufferOffset(pos);
+  Recipient   = 0;
+
+  SetWhat(GledNS::MT_Flare);
+  Int_t pos = Length();
+  SetBufferOffset(Recipient_Offset);
+  *this << RecipientID;
+  SetBufferOffset(pos);
 }
 
-/**************************************************************************/
-
-void ZMIR::Streamer(TBuffer &R__b)
+void ZMIR::SetResultReq(SaturnInfo* r_recipient, UInt_t r_handle)
 {
-   // Stream an object of class ZMIR.
+  // Sets result request information of the MIR.
+  // Beam results can also carry arbitrary streamed information.
 
-   if (R__b.IsReading()) {
-      R__b >> CallerID;
-      R__b >> RecipientID;
-      R__b >> AlphaID;
-      R__b >> BetaID;
-      R__b >> GammaID;
-      R__b >> UserFlags;
-   } else {
-      R__b << CallerID;
-      R__b << RecipientID;
-      R__b << AlphaID;
-      R__b << BetaID;
-      R__b << GammaID;
-      R__b << UserFlags;
-   }
+  assert(IsWriting());
+
+  MirBits |= MB_HasResultReq;
+  ResultRecipientID = r_recipient->GetSaturnID();
+  ResultReqHandle   = r_handle;
 }
 
 /**************************************************************************/
+
+void ZMIR::CopyToBuffer(TBuffer& b)
+{
+  // Copies contents of Message from current position until end.
+
+  b.WriteFastArray(fBufCur, fBufSize - Length());
+}
+
+void ZMIR::AppendBuffer(TBuffer& b)
+{
+  // Appends contents of b to the MIR.
+
+  WriteFastArray(b.Buffer(), b.Length());
+}
+
+/**************************************************************************/
+// ZMIR_Result_Report
+/**************************************************************************/
+
+//______________________________________________________________________
+// ZMIR_Result_Report
+//
+
+ClassImp(ZMIR_Result_Report)
+
+const char* ZMIR_Result_Report::GenError(bool report_buffer)
+{
+  if(report_buffer) {
+    int buflen = HasResult() ? BufferSize() : -1;
+    return GForm("ZMIR_RR(buflen=%d, exc=\"%s\")", buflen, Exception.Data());
+  } else {
+    return GForm("ZMIR_RR(exc=\"%s\")", Exception.Data());
+  }
+}

@@ -15,7 +15,7 @@
 //
 // As queens are always at least partially exposed, MIRs with alpa=queen
 // are always broadcasted to all Moons. Exported methods that should
-// not be called for an unactive queen are prefixed with if-not-ruling-return.
+// not be called for an inactive queen are prefixed with if-not-ruling-return.
 //________________________________________________________________________
 
 #include "ZQueen.h"
@@ -32,6 +32,12 @@ void ZQueen::_init()
 {
   bMandatory = bRuling = bAwaitingSceptre = false;
   bStamping = true;
+
+  mAuthMode = AM_LensThenQueen;
+  mAlignment = A_Good;
+  mMapNoneTo = ZMirFilter::R_Deny;
+  mProtector = 0;
+
   mDeps = 0; mOrphans = 0;
 }
 
@@ -71,42 +77,85 @@ void ZQueen::BlessMIR(ZMIR& mir) throw(string)
 
   static string _eh("ZQueen::BlessMIR() ");
 
-  if(!bRuling && mir.Alpha != this) {
+  if(!bRuling && mir.Alpha != this)
     throw(_eh + "spooky ... not ruling, but alpha demangled");
-  }
   
-  if(!mir.Alpha->GetMIRActive()) {
+  if(!mir.Alpha->GetMIRActive())
     throw(_eh + "alpha [" + mir.Alpha->GetName() + "] not MIR active");
+
+  // !!!! Mising dependency check
+
+  /**************************************************************************/
+
+  // Authorization
+
+  // Allow everything if UseAuth is false
+  if(mSaturn->GetSaturnInfo()->GetUseAuth() == false) {
+    return;
   }
+
+  // Always allow SunAbsolute access
+  if(mir.Caller->HasIdentity(mSaturn->mSunInfo->GetPrimaryIdentity())) {
+    return;
+  }
+
+  UChar_t result = ZMirFilter::R_None;
+  if(mAuthMode != AM_None) {
+    ZMirFilter* fs[2] = { 0, 0 };
+    switch(mAuthMode) {
+    case AM_Queen: fs[0] = mProtector; break;
+    case AM_Lens:  fs[0] = mir.Alpha->mGuard; break;
+    case AM_QueenThenLens: fs[0] = mProtector; fs[1] = mir.Alpha->mGuard; break;
+    case AM_LensThenQueen: fs[0] = mir.Alpha->mGuard; fs[1] = mProtector; break;
+    }
+    for(int i=0; i<2; ++i) {
+      if(fs[i] != 0) {
+	result |= fs[i]->FilterMIR(mir);
+	if(mAlignment == A_Good && result & ZMirFilter::R_Allow) return;
+	if(mAlignment == A_Evil && result & ZMirFilter::R_Deny)  break;
+      }
+    }
+  }
+  if( result & ZMirFilter::R_Deny ||
+     (result == ZMirFilter::R_None && mMapNoneTo == ZMirFilter::R_Deny))
+    {
+      throw(_eh + "access denied");
+    }
 }
 
 /**************************************************************************/
 
-void ZQueen::CheckIn(ZGlass* glass) throw(string)
+ID_t ZQueen::ReserveID()
 {
   mExecMutex.Lock();
-  ID_t new_id;
+  ID_t new_id = 0;
   if(mMaxUsedID < mMaxID) {
-    new_id = mMaxUsedID + 1;
+    new_id = ++mMaxUsedID;
   } else {
-    mExecMutex.Unlock();
-    throw(string("ZQueen::CheckIn no free ids ... partially coded though"));
+    // Here need some traversal over Saturn->hash-lookup.
+    // If i would keep numbers of actually used ids (and some ranges)
+    // this could be partially optimal.
   }
+  mExecMutex.Unlock();
+  if(new_id == 0)
+    throw(string("ZQueen::ReserveID no free ids ... partially coded though"));
+  return new_id;
+}
 
-  ID_t prev_max_id = mMaxUsedID;
+ID_t ZQueen::CheckIn(ZGlass* glass)
+{
+  ID_t new_id = 0;
   try {
+    new_id =  ReserveID();
     glass->mQueen = this;
     glass->SetStamps(1);
-    mMaxUsedID = new_id > mMaxUsedID ? new_id : mMaxUsedID;
     mSaturn->Enlight(glass, new_id);
   }
   catch(string s) {
     ISerr(GForm("ZQueen::CheckIn enlightenment failed: %s", s.c_str()));
     glass->mQueen = 0;
-    mMaxUsedID = prev_max_id;
   }
-
-  mExecMutex.Unlock();
+  return new_id;
 }
 
 void ZQueen::CheckOut(ZGlass* glass)
@@ -118,6 +167,7 @@ void ZQueen::CheckOut(ZGlass* glass)
   // Perform with special message type that is only execed on level lower;
   // that call should then decide what to send furter (remove or migrate)
   // Which means there is a need for DumpQueen
+
   mExecMutex.Lock();
   ID_t ex_id = glass->mSaturnID;
 
@@ -137,8 +187,24 @@ void ZQueen::CheckOut(ZGlass* glass)
 // Instantiators
 /**************************************************************************/
 
+ZGlass* ZQueen::instantiate(LID_t lid, CID_t cid,
+                            const Text_t* name, const Text_t* title)
+{
+  ZGlass* g = GledNS::ConstructGlass(lid, cid);
+  if(g == 0) throw(string("ZQueen::instantiate failed lens instantiation"));
+  if(name)  g->mName  = name;
+  if(title) g->mTitle = title;
+  CheckIn(g);
+  return g;
+}
+
+namespace {
+  int _mefid_size = sizeof(LID_t) + sizeof(CID_t) + sizeof(MID_t);
+}
+
 ZGlass* ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
-		   UInt_t lid, UInt_t cid,
+		   LID_t att_lid, CID_t att_cid, MID_t att_mid,
+		   LID_t new_lid, CID_t new_cid,
 		   const Text_t* name, const Text_t* title)
 {
   // Instantiates a glass of FID(lid, cid) and attaches it to attach_to
@@ -155,17 +221,16 @@ ZGlass* ZQueen::InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
   if(mMir == 0)
     throw(_eh + "must be called via MIR");
 
-  if(mMir->Message->Length() == mMir->Message->BufferSize())
-    throw(_eh + "not followed by another MIR");
-
-  ZGlass* g = GledNS::ConstructGlass(lid, cid);
+  ZGlass* g = GledNS::ConstructGlass(new_lid, new_cid);
   if(g == 0) throw(_eh + "failed lens instantiation");
 
   CheckIn(g);
   if(name)  g->SetNameTitle(name, title);
 
+  // overwrite the Mir ... not too good.
   mMir->Alpha = attach_to;
   mMir->Beta  = g;
+  mMir->Lid = att_lid; mMir->Cid = att_cid; mMir->Mid = att_mid;
   try {
     mSaturn->ExecMIR(*mMir);
   }
@@ -187,13 +252,14 @@ ZGlass* ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma)
   // same manner as the above method.
   // Links MUST NOT be set as they will not be rebuilt.
   // !!!! Probably should set them to zero prior to CheckIn.
+  // !!!!! This half-cooked anyway ... no mefid stuff.
 
   static string _eh("ZQueen::IncarnateWAttach ");
 
   if(!bRuling) return 0;
   if(mMir == 0) throw(_eh + "must be called via MIR");
 
-  ZGlass* g = GledNS::StreamGlass(*mMir->Message);
+  ZGlass* g = GledNS::StreamGlass(*mMir);
   if(g == 0) throw(_eh + "failed unstreaming lens");
 
   CheckIn(g);
@@ -341,26 +407,32 @@ void ZQueen::UnfoldFrom(ZComet& comet)
 
   assert(comet.mType == ZComet::CT_Queen && comet.mQueen != 0);
 
+  mExecMutex.Lock();
+
   ID_t last_id = mMinID + 1;
   { // Reflect all lenses
-    mID2pZGlass_i i= comet.mIDMap.begin(); ++i; ++i; // Skip queen and deps.
-    mExecMutex.Lock();
+    mID2pZGlass_i i = comet.mIDMap.begin();
+    ++i; ++i; // Skip queen and deps; order created by ZQueen::Bootstrap()
     while(i != comet.mIDMap.end()) {
       i->second->mQueen = this;
+      i->second->SetStamps(1);
       mSaturn->Reflect(i->second);
       while(i->first > ++last_id) mFreeIDs.insert(last_id);
       ++i;
     }
   }
   mMaxUsedID = last_id;
+  mGuard     = comet.mQueen->mGuard;
+  mProtector = comet.mQueen->mProtector;
   mOrphans   = comet.mQueen->mOrphans;
 
   lpZGlass_t subs; comet.mQueen->Copy(subs);
   mGlasses.clear();
-  mItHash.clear();
+  mItMap.clear();
+  mSize = 0;
   for(lpZGlass_i s=subs.begin(); s!=subs.end(); ++s) {
-    mGlasses.push_back(*s);
-    mItHash[*s] = --mGlasses.end();
+    mGlasses.push_back(*s); ++mSize;
+    mItMap[(*s)->GetName()] = --mGlasses.end();
   }
 
   bRuling = true;
