@@ -1,6 +1,8 @@
-// eye.C
+// $Header$
+
+// Spawn a standard GUI.
 //
-// assumes: ZQueen* scenes; ZQueen* fire_queen;
+// assumes: ZQueen* scenes; ZQueen* fire_queen (as declared by sun.C)
 
 EyeInfo*   eye   = 0;
 ShellInfo* shell = 0;
