@@ -1,3 +1,9 @@
+2005-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_View.cxx:
+	Top-bar in class-view now accepts paste events and dnd: the pasted
+	lens is appended to the end of the list.
+
 2005-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ShellInfo.cxx:
