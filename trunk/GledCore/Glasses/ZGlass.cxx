@@ -7,21 +7,21 @@
 //______________________________________________________________________
 // ZGlass
 //
-// Base of Gled enabled classes.
+// Base class of Gled enabled classes.
 // Provides infrastructure for integration with the Gled system.
 //
-// mGlassBits: collection of flags that allow (optimised) handling of lenses.
+// mGlassBits: collection of flags that allow (memory optimised)
+// handling of lenses.
 
 #include "ZGlass.h"
 #include "ZGlass.c7"
 
-#include <Ephra/Saturn.h>
 #include <Glasses/ZList.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZMirFilter.h>
-#include <Stones/ZMIR.h>
 #include <Stones/ZComet.h>
+#include <Gled/GThread.h>
 
 /**************************************************************************/
 
@@ -38,15 +38,39 @@ ClassImp(ZGlass)
 
 void ZGlass::_init()
 {
-  mSaturn = 0; mQueen = 0; mMir = 0;
+  mSaturn = 0; mQueen = 0;
   mGlassBits = 0; mSaturnID=0;
   mGuard = 0;
   bMIRActive = true; bAcceptRefs = true;
-  mRefCount = mMoonRefCount = mSunRefCount = mFireRefCount = 0; 
+  mRefCount = mMoonRefCount = mSunRefCount = mFireRefCount = mEyeRefCount = 0; 
   mTimeStamp = mStampReqTring = 0;
   pSetYNameCBs = 0;
-  mStamp_CB=mStampLink_CB=0; mStamp_CBarg=mStampLink_CBarg=0;
+  mStamp_CB = mStampLink_CB = 0; mStamp_CBarg = mStampLink_CBarg = 0;
 }
+
+/**************************************************************************/
+
+/**************************************************************************/
+// Hairy Inlines
+/**************************************************************************/
+
+// inline /// used to be in the header ... gave segvs with cint
+void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val,
+			     LID_t lid, CID_t cid)
+{
+  if(link == new_val) return;
+  if(link) link->DecRefCount(this);
+  if(new_val) {
+    try { new_val->IncRefCount(this); }
+    catch(...) {
+      if(link) { link = 0; StampLink(lid, cid); }
+      throw;
+    }
+  }
+  link = new_val;
+  StampLink(lid, cid);
+}
+
 
 /**************************************************************************/
 
@@ -121,20 +145,46 @@ void ZGlass::WriteUnlock()
 
 /**************************************************************************/
 
-void ZGlass::assert_MIR_presence(const string& header, int what)
+ZMIR* ZGlass::get_MIR()
 {
-  if(mMir == 0) {
+  return GThread::get_mir();
+}
+
+ZMIR* ZGlass::assert_MIR_presence(const string& header, int what)
+{
+  ZMIR* mir = GThread::get_mir();
+  if(mir == 0) {
     throw(header + "must be called via a MIR.");
   }
-  if((what & MC_IsFlare) && mMir->HasRecipient()) {
+  if((what & MC_IsFlare) && mir->HasRecipient()) {
     throw(header + "must be called via a flared MIR.");
   }
-  if((what & MC_IsBeam) && !mMir->HasRecipient()) {
+  if((what & MC_IsBeam) && !mir->HasRecipient()) {
     throw(header + "must be called via a beamed MIR.");
   }
-  if((what & MC_HasResultReq) && !mMir->HasResultReq()) {
-    throw(header + "must be called with result request set.");
+  if((what & MC_HasResultReq) && !mir->HasResultReq()) {
+    throw(header + "must be called with a result request set.");
   }
+  return mir;
+}
+
+ZMIR* ZGlass::suggest_MIR_presence(const string& header, int what)
+{
+  ZMIR* mir = GThread::get_mir();
+  if(mir == 0) {
+    ISwarn(header + "should be called via a MIR.");
+    return 0;
+  }
+  if((what & MC_IsFlare) && mir->HasRecipient()) {
+    ISwarn(header + "should be called via a flared MIR.");
+  }
+  if((what & MC_IsBeam) && !mir->HasRecipient()) {
+    ISwarn(header + "should be called via a beamed MIR.");
+  }
+  if((what & MC_HasResultReq) && !mir->HasResultReq()) {
+    ISwarn(header + "should be called with a result request set.");
+  }
+  return mir;
 }
 
 /**************************************************************************/
@@ -179,8 +229,9 @@ void ZGlass::SetName(const Text_t* n)
   mName = name.c_str();
   Stamp(LibID(), ClassID());
   WriteUnlock();
-  if(mMir && mQueen == this && ! mMir->HasRecipient()) {
-    mQueen->BasicQueenChange(*mMir);
+  if(mQueen == this) {
+    ZMIR* mir = get_MIR();
+    if(mir && ! mir->HasRecipient()) mQueen->BasicQueenChange(*mir);
   }
 }
 
@@ -190,8 +241,9 @@ void ZGlass::SetTitle(const Text_t* t)
   mTitle = t;
   Stamp(LibID(), ClassID());
   WriteUnlock();
-  if(mMir && mQueen == this && ! mMir->HasRecipient()) {
-    mQueen->BasicQueenChange(*mMir);
+  if(mQueen == this) {
+    ZMIR* mir = get_MIR();
+    if(mir && ! mir->HasRecipient()) mQueen->BasicQueenChange(*mir);
   }
 }
 
@@ -225,18 +277,20 @@ ZGlass::~ZGlass()
 
 void ZGlass::UpdateGlassView()
 {
-  if(mQueen) {
-    Ray r(Ray::RQN_change, mTimeStamp, this, LibID(), ClassID());
-    mQueen->EmitRay(r, true);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, LibID(), ClassID()));
+    mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 }
 
 void ZGlass::UpdateAllViews()
 {
-  if(mQueen) {
-    Ray r(Ray::RQN_change, mTimeStamp, this, LID_t(0), CID_t(0));
-    mQueen->EmitRay(r, true);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, LID_t(0), CID_t(0)));
+    mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 }
@@ -334,6 +388,16 @@ Short_t ZGlass::DecRefCount(ZGlass* from)
     // Stamp(LibID(), ClassID());
   }
   return mRefCount;
+}
+
+Short_t ZGlass::IncEyeRefCount()
+{
+  return ++mEyeRefCount;
+}
+
+Short_t ZGlass::DecEyeRefCount()
+{
+  return --mEyeRefCount;
 }
 
 /**************************************************************************/
@@ -435,9 +499,10 @@ ZGlass* ZGlass::FindLensByPath(const string& url)
 TimeStamp_t ZGlass::Stamp(LID_t lid, CID_t cid)
 {
   ++mTimeStamp;
-  if(mQueen) {
-    Ray r(Ray::RQN_change, mTimeStamp, this, lid, cid);
-    mQueen->EmitRay(r);
+  if(mQueen && mQueen->GetStamping() && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, lid, cid));
+    mQueen->EmitRay(ray);
   }
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 
@@ -447,9 +512,11 @@ TimeStamp_t ZGlass::Stamp(LID_t lid, CID_t cid)
 TimeStamp_t ZGlass::StampLink(LID_t lid, CID_t cid)
 {
   ++mTimeStamp;
-  if(mQueen) {
-    Ray r(Ray::RQN_link_change, mTimeStamp, this, lid, cid);
-    mQueen->EmitRay(r);
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_link_change, mTimeStamp, lid, cid,
+		    Ray::EB_StructuralChange));
+    mQueen->EmitRay(ray);
   }
   if(mStampLink_CB) mStampLink_CB(this, mStampLink_CBarg);
 
@@ -467,7 +534,7 @@ void ZGlass::SetStampLink_CB(zglass_stamp_f foo, void* arg)
 
 /**************************************************************************/
 
-Int_t ZGlass::RebuildAll(An_ID_Demangler* idd)
+Int_t ZGlass::RebuildAllRefs(An_ID_Demangler* idd)
 {
-  return RebuildLinks(idd);
+  return RebuildLinkRefs(idd);
 }
