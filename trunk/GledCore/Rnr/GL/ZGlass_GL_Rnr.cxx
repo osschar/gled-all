@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -9,37 +9,58 @@
 #include <Rnr/GL/SphereTrings.h>
 #include <Ephra/Saturn.h>
 
-#include <FL/gl.h>
+/**************************************************************************/
+
+ZGlass_GL_Rnr::ZGlass_GL_Rnr(ZGlass* d) : A_Rnr(), mGlass(d)
+{
+  mStampTring = 0;
+  mDispList   = glGenLists(1);
+  bRebuildDL  = true;
+}
+
+ZGlass_GL_Rnr::~ZGlass_GL_Rnr()
+{
+  glDeleteLists(mDispList, 1);
+}
+
+/**************************************************************************/
 
 void ZGlass_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // mGlass->ExecMutex.Lock();
   glPushName(mGlass->mSaturnID);
 
-  if(mGlass->mStampReqTring > mStampTring)
-    Triangulate();
+  if(mGlass->mStampReqTring > mStampTring) {
+    Triangulate(rd);
+    mStampTring = mGlass->mTimeStamp;
+    bRebuildDL  = true;
+  }
 }
 
 void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 {
-  // cout <<"Rendering "<< mGlass->GetName() <<endl;
-  // Should bracket the code with:
-  if(rd->GetRnrPureGlasses()) {
-    SphereTrings::EnableGL(0);
-    SphereTrings::DrawAndDisableGL(0);
+  // cout <<"ZGlass_GL_Rnr::Draw rendering '"<< mGlass->GetName() <<"'.\n";
+
+  if(bRebuildDL) {
+    glNewList(mDispList, GL_COMPILE_AND_EXECUTE);
+    Render(rd);
+    glEndList();
+    bRebuildDL = false;
+  } else {
+    glCallList(mDispList);
   }
-  // } 
-  // Make sure to do so in your GL_Rnrs or the picking won't work
 }
 
 void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   glPopName();
-  // mGlass->ExecMutex.Unlock();
 }
 
-void ZGlass_GL_Rnr::Triangulate()
+/**************************************************************************/
+
+void ZGlass_GL_Rnr::Render(RnrDriver* rd)
 {
-  // Do whatever ... mark sth for the Rnr itself to regenerate the DL
-  mStampTring = mGlass->mTimeStamp;
+  if(rd->GetRnrPureGlasses()) {
+    SphereTrings::EnableGL(0);
+    SphereTrings::DrawAndDisableGL(0);
+  }
 }
