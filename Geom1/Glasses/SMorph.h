@@ -34,7 +34,7 @@ protected:
   Bool_t	bUseDispList;	// X{gST} 7 Bool()
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
-  ZImage*	mTexture;	// X{gST} L{} RnrBits{3,0,6,0}
+  ZImage*	mTexture;	// X{gST} L{} RnrBits{4,0,5,0}
   Float_t	mTexX0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
   Float_t	mTexY0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000])
   Float_t	mTexXC;         // X{gST} 7 Value(-range=>[0,1e3,1,1000], -join=>1)
