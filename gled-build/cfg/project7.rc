@@ -10,5 +10,5 @@ infile		=s	main		INFILE		undef
 3file		=s	main		OUT3FILE	'skip'
 5file		=s	main		OUT5FILE	'skip'
 7file		=s	main		OUT7FILE	'skip'
-locksetmets	!	.		LOCK_SET_METHS	1
+locksetmets	!	.		LOCK_SET_METHS	0
 lockgetmets	!	.		LOCK_GET_METHS	0
