@@ -325,6 +325,9 @@ void Pupil::XtachCamera()
 
 void Pupil::JumpCameraAt(ZGlass* lens)
 {
+  // Warps camera towards lens.
+  // Case when if camera is attached to some lens IS NOT coded !!!
+
   ZNode* node = dynamic_cast<ZNode*>(lens);
   if(node == 0) return;
   auto_ptr<ZTrans> t( mInfo->ToPupilFrame(node) );
@@ -344,6 +347,8 @@ void Pupil::JumpCameraAt(ZGlass* lens)
   t->MoveLF(1, dist - mInfo->GetMSMoveFac() * 
 	    TMath::Power(10, mInfo->GetMoveOM() + 2) );
   mCamera->SetTrans(*t);
+
+  // cout << "CameraTrans:\n" << *t;
 
   redraw();
 }
