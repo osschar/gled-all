@@ -26,6 +26,8 @@ public:
     bool	fContinuous;
     bool	fUseDynCast;
 
+    Int_t	fEventID;
+
     GCondition	fSuspendidor;	// Suspender for *not* signal-safe evtors
     GMutex	fSignalodor;	// Lock for signal-safe evtors
 
@@ -56,8 +58,8 @@ private:
   void _init();
 
 protected:
-  bool		bOpActive;	//  X{GS} 7 Bool()
-  bool		bOpRecurse;	//  X{GS} 7 Bool()
+  Bool_t	bOpActive;	//  X{GS} 7 Bool(-join=>1)
+  Bool_t	bOpRecurse;	//  X{GS} 7 Bool()
 
 public:
   Operator(const Text_t* n="Operator", const Text_t* t=0) :

@@ -90,10 +90,14 @@ Operator::Arg* Eventor::PreDance(Operator::Arg* op_arg)
   // of the thread. No other methods are called.
 
   if(op_arg == 0) op_arg = new Operator::Arg;
+
   op_arg->fMultix	= bMultix;
   op_arg->fSignalSafe	= bSignalSafe;
   op_arg->fContinuous	= bContinuous;
   op_arg->fUseDynCast	= bUseDynCast;
+
+  op_arg->fEventID = 0;
+
   return op_arg;
 }
 
@@ -111,6 +115,8 @@ void Eventor::PreBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   // Eventor::PreBeat() is called from Mountain::OperatorBeat() prior to
   // calling Operate.
+
+  op_arg->fEventID = mLocBeatsDone + 1;
 }
 
 void Eventor::PostBeat(Operator::Arg* op_arg) throw(Operator::Exception)
