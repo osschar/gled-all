@@ -6,7 +6,7 @@
 
 #include "MTW_SubView.h"
 #include "MTW_View.h"
-#include "FTW.h"
+#include "FltkGledStuff.h"
 
 #include <Glasses/ZGlass.h>
 
@@ -18,6 +18,7 @@
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
+namespace FGS  = FltkGledStuff;
 
 /**************************************************************************/
 
@@ -35,6 +36,7 @@ MTW_SubView::MTW_SubView(GNS::ClassInfo* ci, MTW_View* v) :
 
 MTW_SubView::~MTW_SubView() {
   // weeds deleted by Fl_Group
+  RemoveUpdateTimer();
 }
 
 /**************************************************************************/
@@ -94,9 +96,9 @@ void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
     int full_w = 0, lab_w = 0, weed_w = mi.fWidth;
     if(mi.bLabel) {
       if(mi.bLabelInside) {
-	weed_w += FTW::swm_string_width(i->fWeedInfo->fName, cell_w);
+	weed_w += FGS::swm_string_width(i->fWeedInfo->fName, cell_w);
       } else {
-	lab_w = FTW::swm_label_width(i->fWeedInfo->fName, cell_w) >? MinLabelWidth;
+	lab_w = FGS::swm_label_width(i->fWeedInfo->fName, cell_w) >? MinLabelWidth;
 	vs.fMaxOutsideLabeledW = vs.fMaxOutsideLabeledW >? weed_w;
 	vs.fMaxLabelW          = vs.fMaxLabelW          >? lab_w;
       }
@@ -139,13 +141,21 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
     
     if(n_join > 1) { // Set multiple weeds
       int  taken = 0;
+      int  spare = lim.full - w.full;
       int  align = FL_ALIGN_LEFT;
       bool flip_align = (n_join==2 && vs.bRightLabelPair);
+      int  n_join_org = n_join;
       while(i != j) {
 	GVNS::WeedInfo& mi = *i->fWeedInfo;
-	int ideal = int( roundf(float(lim.full - taken)/n_join) );
 	MTW_Widths z = i->GetWidths(cell_w);
-	int dw = ideal - z.full;
+	int dw;
+	if(n_join_org == 2) {
+	  int ideal = int( roundf(((float)(lim.full - taken))/n_join) );
+	  dw = (ideal - z.full < spare) ? ideal - z.full : spare;
+	} else {
+	  dw = spare / n_join;
+	}
+	spare -= dw;
 	if(dw > 0) {
 	  if(mi.bLabel && !mi.bLabelInside) {
 	    int dl = mi.bCanResize ? int( roundf(0.25*dw) ) : dw;
@@ -205,10 +215,10 @@ MTW_Widths MTW_Weed::GetWidths(int cell_w)
   ret.weed = fWeedInfo->fWidth;
   if(fWeedInfo->bLabel) {
     if(fWeedInfo->bLabelInside) {
-      ret.weed += FTW::swm_string_width(fWeedInfo->fName, cell_w);
+      ret.weed += FGS::swm_string_width(fWeedInfo->fName, cell_w);
       ret.label = 0;
     } else {
-      ret.label = FTW::swm_label_width(fWeedInfo->fName, cell_w);
+      ret.label = FGS::swm_label_width(fWeedInfo->fName, cell_w);
     }
   }
   ret.full = ret.weed + ret.label;
