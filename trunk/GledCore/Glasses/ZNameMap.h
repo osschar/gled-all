@@ -11,7 +11,7 @@
 
 class ZNameMap : public ZList, public ZGlass::YNameChangeCB
 {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZNameMap);
 
 private:
@@ -44,7 +44,7 @@ public:
 
   void RecreateMap();
 
-  virtual Int_t RebuildList(An_ID_Demangler* idd);
+  virtual Int_t RebuildListRefs(An_ID_Demangler* idd);
 
   virtual void y_name_change_cb(ZGlass* g, const string& new_name);
 

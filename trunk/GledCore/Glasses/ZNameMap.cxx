@@ -151,9 +151,9 @@ void ZNameMap::RecreateMap()
 
 /**************************************************************************/
 
-Int_t ZNameMap::RebuildList(An_ID_Demangler* idd)
+Int_t ZNameMap::RebuildListRefs(An_ID_Demangler* idd)
 {
-  Int_t ret = ZList::RebuildList(idd);
+  Int_t ret = ZList::RebuildListRefs(idd);
   mItMap.clear();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     mItMap.insert(Name2LIter_p((*i)->GetName(), i));
