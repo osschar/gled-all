@@ -12,6 +12,12 @@
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 
+/**************************************************************************/
+
+const int MTW_SubView::MinLabelWidth = 3;
+
+/**************************************************************************/
+
 MTW_SubView::MTW_SubView(GNS::ClassInfo* ci, MTW_View* v) :
   Fl_RelGroup(0,0,0,0,0), mClassInfo(ci), mView(v)
 {
@@ -58,7 +64,7 @@ void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs)
       if(mi.bLabelInside) {
 	weed_w += i->fWeedInfo->fName.size();
       } else {
-	lab_w = i->fWeedInfo->fName.size();
+	lab_w = i->fWeedInfo->fName.size() >? MinLabelWidth;
 	vs.fMaxOutsideLabeledW = vs.fMaxOutsideLabeledW >? weed_w;
 	vs.fMaxLabelW          = vs.fMaxLabelW          >? lab_w;
       }
