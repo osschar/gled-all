@@ -10,6 +10,8 @@
 #include <Stones/ZMIR.h>
 #include <Ephra/Saturn.h>
 
+#include <memory>
+
 #define SP_MIR(_lens_, _method_, ...) \
   { auto_ptr<ZMIR> mir(_lens_->S_##_method_(__VA_ARGS__)); \
     _lens_->GetSaturn()->PostMIR(*mir); }
