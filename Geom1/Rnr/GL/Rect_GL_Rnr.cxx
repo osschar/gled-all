@@ -4,6 +4,8 @@
 
 void Rect_GL_Rnr::Draw(RnrDriver* rd)
 {
+  if(mRect->mWidth <= 0) return;
+
   glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_LIGHTING_BIT);
   glPushMatrix();
   glDisable(GL_LIGHTING);
