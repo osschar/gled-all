@@ -664,7 +664,7 @@ for $r (@Members) {
   my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
   die "Link must be a pointer" if $pure_type eq $r->{Type};
   my $glass_var = ($r->{Type} eq "${BASECLASS}*") ?
-    "&$r->{Varname}" : "&((ZGlass*)$r->{Varname})";
+    "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
   print C7 "  ref_list.push_back($glass_var);\n";
 }
 print C7 "}\n\n";
@@ -679,7 +679,7 @@ for $r (@Members) {
   my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
   die "Link must be a pointer" if $pure_type eq $r->{Type};
   my $glass_var = ($r->{Type} eq "${BASECLASS}*") ?
-    "&$r->{Varname}" : "&((ZGlass*)$r->{Varname})";
+    "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
   print C7 "  link_spec_list.push_back( LinkSpec(\"$CLASSNAME\", \"$r->{Methodbase}\") );\n";
 }
 print C7 "}\n\n";
