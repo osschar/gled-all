@@ -391,7 +391,7 @@ sub new {
 sub make_widget {
   my $S = shift;
   return $S->make_widget_A() . 
-    #"\to->when(FL_WHEN_ENTER_KEY|FL_WHEN_RELEASE);\n" .
+    "\to->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
     $S->make_widget_B();
 }
 
@@ -446,7 +446,8 @@ sub new {
 sub make_widget {
   my $S = shift;
   return $S->make_widget_A() .
-    "\to->when(FL_WHEN_ENTER_KEY|FL_WHEN_RELEASE);\n" .
+    "\to->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
+    "\to->tooltip(\"R-button opens file selector\");\n" .
     $S->make_widget_B();
 }
 
