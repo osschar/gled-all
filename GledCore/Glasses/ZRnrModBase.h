@@ -13,7 +13,7 @@ class ZRnrModBase : public ZGlass {
   MAC_RNR_FRIENDS(ZRnrModBase);
 
 public:
-  enum Operation_e { O_Nop, O_On, O_Off };
+  enum Operation_e { O_Nop=-1, O_Off=0, O_On = 1 };
 
 private:
   void _init();
