@@ -3,6 +3,7 @@
 #
 ZImage		1	Glasses/ZImage		.
 Rect		2	Glasses/Rect		.
+ZRibbon		3	Glasses/ZRibbon
 
 SMorph		16	Glasses/SMorph		.
 Board		17	Glasses/Board		.
@@ -15,3 +16,5 @@ WSPoint		65	Glasses/WSPoint		.
 
 Mover		128	Glasses/Mover
 Sleeper		129	Glasses/Sleeper
+
+RndSMorphCreator 1024	Glasses/RndSMorphCreator
