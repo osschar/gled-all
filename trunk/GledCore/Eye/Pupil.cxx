@@ -25,7 +25,6 @@
 #include <GL/glu.h>
 #include <GL/glx.h>
 #include <math.h>
-#include <strstream>
 
 /**************************************************************************/
 

@@ -20,7 +20,6 @@ EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) : ZGlass(n,t) {
 void EyeInfo::Message(const Text_t* s)
 {
   if(mMir == 0) return;
-  cout <<"EyeInfo::Message from "<< mMir->Caller->GetName() <<endl;
   Ray r(Ray::RQN_message, mMir->Caller, s);
   mSaturn->SingleRay(this, r);
 }
