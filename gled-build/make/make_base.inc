@@ -195,6 +195,9 @@ echo_requires_libsets:
 echo_libset_id:
 	@echo ${LIB_SET_ID}
 
+echo_cppflags:
+	@echo ${CPPFLAGS}
+
 echo_blessh:
 	@echo ${BLESSED_HDRS}
 echo_blesss:
