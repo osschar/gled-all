@@ -4,7 +4,7 @@
 # project7 pargen ... second reincarnation with bloated karma
 #                     expect improvements when perl6 is out
 
-# Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
