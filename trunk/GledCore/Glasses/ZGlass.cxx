@@ -295,6 +295,16 @@ void ZGlass::UpdateAllViews()
   if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 }
 
+void ZGlass::ReTriangulate()
+{
+  mStampReqTring = Stamp();
+}
+
+void ZGlass::RebuildRnrScheme()
+{
+  Stamp(FID_t(0,0), 0x1);
+}
+
 /**************************************************************************/
 
 bool ZGlass::IsSunSpace()

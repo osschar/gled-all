@@ -160,8 +160,10 @@ public:
 
   virtual ~ZGlass();
 
-  void UpdateGlassView();       //! X{E} 7 MButt(-join=>1)
-  void UpdateAllViews();        //! X{E} 7 MButt()
+  void UpdateGlassView();   //! X{E} 7 MButt(-join=>1)
+  void UpdateAllViews();    //! X{E} 7 MButt()
+  void ReTriangulate();     //! X{E} 7 MButt(-join=>1)
+  void RebuildRnrScheme();  //! X{E} 7 MButt()
 
   string Identify() const;
 
