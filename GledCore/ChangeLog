@@ -109,6 +109,7 @@
 	
 	* Gled/Gled.cxx:
 	* Gled/Gled.h:
+	* Gled/GledMirDefs.h:
 	* GledView/GledGUI.cxx:
 	* GledView/GledGUI.h:
 
