@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -24,6 +24,7 @@ class GThread {
   friend class Gled;
   friend class Saturn;
   friend class Mountain;
+  friend class ZQueen;
 
 public:
   enum CState { CS_Enable, CS_Disable };
@@ -48,8 +49,6 @@ private:
   bool		 bRunning;	// X{G}
   bool		 bDetached;	// X{G}
 
-  ZMirEmittingEntity*	mOwner;	// X{G}
-
   static GThread* wrap_and_register_self(ZMirEmittingEntity* owner);
 
   static void                init_tsd();
@@ -68,12 +67,12 @@ private:
   static pthread_key_t TSD_ReturnAddress;
   static pthread_key_t TSD_ReturnHandle;
 
-  // Need protected SetOwner, that also stores it into TSD.
-  // And the appropriate static Get, that avoids hash look-up.
 
 public:
   GThread(GThread_foo f, void* a=0, bool d=false);
-  ~GThread();
+  virtual ~GThread();
+
+  static void DeleteIfDetached();
 
   int	Spawn();
   int	Join(void** tret=0);
@@ -86,12 +85,11 @@ public:
   static void TestCancel();
   static void Exit(void* ret=0);
 
-  //static void CleanUpPush(thread_cu_f f, void* a);
-  
   static GThread* Self();
   static unsigned long RawSelf();
 
 #include "GThread.h7"
+  ClassDef(GThread,0)
 }; // endclass GThread
 
 #ifndef __CINT__
