@@ -476,6 +476,7 @@ while($c !~ m!\G\s*$!osgc) {
 
       print "$type $methodbase $localp $member->{ID}\n" if $DEBUG;
 
+      my $weed_done = 0;
       # Go for widget/view
       if($comment =~ m!7\s+(\w+\([^)]*\))!o) {
 	my $view = $1;
@@ -484,13 +485,24 @@ while($c !~ m!\G\s*$!osgc) {
 	my $control = eval("new GLED::Widgets::".$view);
 	die "$view can not be instantiated ..." unless defined $control;
 	push @Views, $control;
-	# range is honoured by Get/Set methods ... if defined
-	# this is not perfect ... must invent widget w/ range/step control
-	# ... could like spawn range/step ctrl on double click; ValuatorGroup?
+	$weed_done = 1;
+	# range is honoured by Set methods ... if defined
 	$member->{Range} =  $control->{-range} if exists $control->{-range};      
 	print "\tView $view\n" if $DEBUG;
       }
-    
+
+      # Enforce view for Links.
+      if(defined $member->{Link} && not $weed_done){
+	my $view = "Link()";
+	$view =~ s/\(/(Type=>'$type',Methodbase=>'$methodbase',Methodname=>"Set$methodbase",/;
+	$view =~ s/,\)/)/;
+	my $control = eval("new GLED::Widgets::".$view);
+	die "$view can not be instantiated ..." unless defined $control;
+	push @Views, $control;
+	$weed_done = 1;
+	print "\tView $view\n" if $DEBUG;
+      }
+
       for $h (@HANDLERS) {
         $h->parse($member, $comment);
       }
@@ -1040,12 +1052,14 @@ for $r (@Members) {
       print C7 "    LinkMemberInfo* lmip = new LinkMemberInfo(\"$r->{Methodbase}\");\n";
       print C7 "    lmip->fType = \"$r->{Args}[0][0]\";\n";
       print C7 "    lmip->fSetMethod = mip;\n";
+      print C7 "    lmip->fClassInfo = _ci;\n";
       print C7 "    _ci->fLinkMemberList.push_back(lmip);\n";      
       print C7 "    sap_$r->{Methodbase}_lmi = lmip;\n";
     } else {
       print C7 "    DataMemberInfo* dmip = new DataMemberInfo(\"$r->{Methodbase}\");\n";
       print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";
       print C7 "    dmip->fSetMethod = mip;\n";
+      print C7 "    dmip->fClassInfo = _ci;\n";
       print C7 "    _ci->fDataMemberList.push_back(dmip);\n";      
     }
     print C7 "  }\n";
@@ -1231,6 +1245,7 @@ for $r (@Views) {
   print C <<"fnord";
   {
     WeedInfo* wi = new WeedInfo("$r->{Methodbase}");
+    wi->bIsLinkWeed = $r->{IsLinkWeed};
     wi->fWidth = $r->{-width};
     wi->fHeight= $r->{-height};
     wi->bLabel = $r->{LabelP};
