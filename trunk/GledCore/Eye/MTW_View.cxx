@@ -36,7 +36,9 @@ void MTW_View::_init()
 void MTW_View::auto_label()
 {
   if(mWindow) {
-    m_label = mGlass ? mGlass->GetName() : "<no-glass>";
+    m_label = mGlass ? 
+      GForm("%s[%s]", mGlass->GetName(), mGlass->VGlassInfo()->fName.c_str()) :
+      "<no-glass>";
     mWindow->label(m_label.c_str());
   }
 }
@@ -120,8 +122,8 @@ void MTW_View::BuildVerticalView()
 
   int cell_w = swm_manager->cell_w();
 
-  bool fancy_p      = mShell->GetShellInfo()->GetFancyClassView();
-  bool show_links_p = mShell->GetShellInfo()->GetShowLinksInClassView();
+  bool fancy_p      = mShell ? mShell->GetShellInfo()->GetFancyClassView() : false;
+  bool show_links_p = mShell ? mShell->GetShellInfo()->GetShowLinksInClassView() : false;
 
   type(FL_VERTICAL);
   GNS::ClassInfo* ci = mGlass->VGlassInfo();
