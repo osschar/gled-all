@@ -34,7 +34,7 @@ void PupilInfo::_init()
   mNameOffset = 0.99;
   mTextCol.rgba(1, 1, 1); mTileCol.rgba(0, 0, 0.3);
 
-  mBuffSize = 4096; mPickW = 5; mPickH = 5;
+  mBuffSize = 4096; mPickR = 5; mPickDisp = 0;
 }
 
 /**************************************************************************/
