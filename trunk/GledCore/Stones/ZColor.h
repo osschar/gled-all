@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -35,9 +35,16 @@ public:
     c[0]=c[1]=c[2]=gray; c[3]=a;
   }
 
+  void to_ubyte(unsigned char* ub, bool wrap=false);
+
   Float_t* operator()() { return c; }
   Float_t  operator[](int i) const { return c[i]; }
   Float_t& operator[](int i) { return c[i]; }
+
+  ZColor& operator*=(Float_t a) {
+    c[0]*=a; c[1]*=a; c[2]*=a; c[3]*=a;
+    return *this;
+  }
 
   friend ZColor operator*(Float_t a, const ZColor& x);
   friend ZColor operator+(const ZColor& x, const ZColor& y);
@@ -48,6 +55,21 @@ public:
 
   ClassDef(ZColor,1)
 };
+
+/**************************************************************************/
+
+inline void ZColor::to_ubyte(unsigned char* ub, bool wrap)
+{
+  if(wrap) {
+    for(int i=0; i<4; ++i)
+      ub[i] = (unsigned char)(255*c[i]);
+  } else {
+    for(int i=0; i<4; ++i)
+      ub[i] = c[i] >= 1 ? 255 : (c[i] <= 0 ? 0 : (unsigned char)(255*c[i]));
+  }
+}
+
+/**************************************************************************/
 
 ostream& operator<<(ostream& s, ZColor& c);
 
