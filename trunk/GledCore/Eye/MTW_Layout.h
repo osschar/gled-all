@@ -43,7 +43,7 @@ protected:
 
 public:
   MTW_Layout(FTW_Nest* nest);
-  void Parse() throw (string);
+  void Parse(int cell_w=0) throw (string);
   int  CountSubViews(ZGlass* glass);
 
   Fl_Group* CreateLabelGroup();

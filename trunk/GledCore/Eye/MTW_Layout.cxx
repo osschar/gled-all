@@ -6,6 +6,7 @@
 
 #include "MTW_Layout.h"
 #include "FTW_Nest.h"
+#include "FTW.h"
 #include <Gled/GledNS.h>
 #include <Glasses/ZGlass.h>
 
@@ -60,7 +61,7 @@ MTW_Layout::MTW_Layout(FTW_Nest* nest) :
 
 /**************************************************************************/
 
-void MTW_Layout::Parse() throw (string)
+void MTW_Layout::Parse(int cell_w) throw (string)
 {
   mClasses.clear(); bIsValid = false;
   lClass_t new_classes;
@@ -99,7 +100,7 @@ void MTW_Layout::Parse() throw (string)
 	throw string("member '"+mmb_name+"' not found for class '"+cls_name+"'");
       }
       int w = atoi(width_arg.c_str());
-      if(w == 0) w = mi->fWidth >? (int)(mi->fName.size());
+      if(w == 0) w = mi->fWidth >? FTW::swm_label_width(*m, cell_w);
       cls.fMembers.push_back(Member(mi, w));
       cls.fFullW += w;
     }
@@ -137,6 +138,9 @@ Fl_Group* MTW_Layout::CreateLabelGroup()
 	b->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
       else
 	b->align(FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
+      if(m->fWeedInfo->fName.size() > m->fW) {
+	b->tooltip(m->fWeedInfo->fName.c_str());
+      }
       x += m->fW;
     }
   }
