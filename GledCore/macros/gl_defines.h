@@ -5,6 +5,9 @@
  * Slightly silly, but CINT really doesn't need to know more about GL.
  */
 
+#ifndef GL_DEFINES_H
+#define GL_DEFINES_H
+
 /*
  *
  * Constants
@@ -845,3 +848,5 @@
 #define GL_DOT3_RGBA				0x86AF
 /* texture_border_clamp */
 #define GL_CLAMP_TO_BORDER			0x812D
+
+#endif
