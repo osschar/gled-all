@@ -98,19 +98,20 @@ void MTW_SubView::UpdateVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
       if(mi.bLabelInside) {
 	weed_w += FGS::swm_string_width(i->fWeedInfo->fName, cell_w);
       } else {
-	lab_w = FGS::swm_label_width(i->fWeedInfo->fName, cell_w) >? MinLabelWidth;
-	vs.fMaxOutsideLabeledW = vs.fMaxOutsideLabeledW >? weed_w;
-	vs.fMaxLabelW          = vs.fMaxLabelW          >? lab_w;
+	lab_w = TMath::Max(FGS::swm_label_width(i->fWeedInfo->fName, cell_w),
+			   MinLabelWidth);
+	vs.fMaxOutsideLabeledW = TMath::Max(vs.fMaxOutsideLabeledW, weed_w);
+	vs.fMaxLabelW          = TMath::Max(vs.fMaxLabelW, lab_w);
       }
     }
     full_w = lab_w + weed_w;
-    vs.fMaxFullW = vs.fMaxFullW >? full_w;
+    vs.fMaxFullW = TMath::Max(vs.fMaxFullW, full_w);
 
     if(in_join) {
       join_w += full_w;
       lMTW_Weed_i ii = i; ++ii;
       if(! mi.bJoinNext || ii==mWeeds.end()) {
-	vs.fMaxGreedyJoinW = vs.fMaxGreedyJoinW >? join_w;
+	vs.fMaxGreedyJoinW = TMath::Max(vs.fMaxGreedyJoinW, join_w);
 	in_join = false;
       }
     } else {
@@ -134,7 +135,7 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
       while(j != mWeeds.end() && ii->fWeedInfo->bJoinNext) {
 	MTW_Widths z = j->GetWidths(cell_w);
 	if(z.full + w.full > lim.full) break;
-	max_h = max_h >? j->fWeedInfo->fHeight;
+	max_h = TMath::Max(max_h, j->fWeedInfo->fHeight);
 	w += z; ii = j++; ++n_join;
       }
     }
@@ -237,13 +238,13 @@ MTW_Vertical_Stats::MTW_Vertical_Stats() : fUse() {
 
 void MTW_Vertical_Stats::Consolidate(float max_align_grow, float max_join_grow)
 {
-  float align_fac = max_align_grow <?
-    float(fMaxLabelW + fMaxOutsideLabeledW)/fMaxFullW;
-  float join_fac  = max_join_grow <?
-    float(fMaxGreedyJoinW)/fMaxFullW;
+  float align_fac = TMath::Min
+    ( max_align_grow, float(fMaxLabelW + fMaxOutsideLabeledW)/fMaxFullW );
+  float join_fac  = TMath::Min
+    ( max_join_grow, float(fMaxGreedyJoinW)/fMaxFullW );
 
   if(align_fac>1 || join_fac>1) {
-    float grow_fac = align_fac >? join_fac;
+    float grow_fac = TMath::Max(align_fac, join_fac);
     fUse.full = int(ceilf(grow_fac * fMaxFullW));
   } else {
     fUse.full = fMaxFullW;

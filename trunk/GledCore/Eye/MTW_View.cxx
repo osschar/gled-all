@@ -98,7 +98,7 @@ void MTW_View::BuildByLayout(MTW_Layout* layout)
 	w->resize(x, 0, m->fW, m->fWeedInfo->fHeight);
 	w->label(0);
 	x += m->fW;
-	maxh = maxh >? m->fWeedInfo->fHeight;
+	maxh = TMath::Max(maxh, m->fWeedInfo->fHeight);
 	sv->mWeeds.push_back( MTW_Weed(w, m->fWeedInfo) );
       }
       sv->end();

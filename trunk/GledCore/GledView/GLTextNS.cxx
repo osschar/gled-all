@@ -439,7 +439,7 @@ namespace GLTextNS {
 			   int &width, int &max_ascent, int &max_descent)
   {
     TexGlyphVertexInfo *tgvi;
-    int w, i;
+    int     w, i;
     int ma = 0, md = 0;
 
     w = 0;
@@ -462,8 +462,8 @@ namespace GLTextNS {
       } else {
 	tgvi = getTCVI(txf, string[i]);
 	w += int(tgvi->advance);
-	ma = ma >?  tgvi->v3[1];
-	md = md >? -tgvi->v0[1];
+	ma = TMath::Max(ma, (int)( tgvi->v3[1]));
+	md = TMath::Max(md, (int)(-tgvi->v0[1]));
       }
     }
     width = w;
@@ -694,7 +694,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   for(lStr_i l=lines.begin(); l!=lines.end(); ++l) {
     tlds.push_back( TextLineData(txf, *l) );
     TextLineData& tld = tlds.back();
-    max_width = max_width >? tld.width;
+    max_width = TMath::Max(max_width, tld.width);
     height += interline;
   }
   height += bs.tm + descent + bs.bm;
