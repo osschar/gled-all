@@ -1,3 +1,27 @@
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	Added project7 invocation to extract info on enums into build
+	catalog.
+
+	* cfg/project7.rc:
+	* lib-exec/project7.pl:
+	Support for parsing of enums, addition of "Local" tag to member
+	description (as in GledCore::GledNS), transition to new locking
+	syntax.
+	
+	* make/make_defs.inc:
+	Added -lThread to ROOTLIBS.
+
+	* bin/gled-create-glass:
+	* cfg/gled-create-glass.rc:
+	* cfg/gled-create-stone.rc:
+	* lib-exec/mk_dict_gen.pl:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+	
 2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
