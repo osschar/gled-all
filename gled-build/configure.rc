@@ -17,6 +17,8 @@ external	=s	.	EXTERNAL	""
 ### build configuration ###
 buildversion	=s	.	BUILD_VERSION	"1.2.4-cvs"
 builddate	=s	.	BUILD_DATE	{ my $d=`date +%F`; chomp $d; $d; }
+noviewlibs	!	.	NOVIEWLIBS	0
+nornrlibs	!	.	NORNRLIBS	0
 rnr		=s	.	RENDERERS	"GL"
 
 # Libsets to build; can be <file:[filename]>, <auto>, <auto-prompt> or

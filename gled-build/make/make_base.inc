@@ -65,18 +65,14 @@ VIEW_FL_SECS =	${VIEW_FL_HDRS} ${VIEW_FL_SRCS}
 VIEW_FL_OBJS =	$(VIEW_FL_FLS:.fl=.o)
 
 ##########################################################################
-# Targets
+# Libset elements
 ##########################################################################
 
-ALL_SRCS	= ${BLESSED_SRCS} ${BASE_SRCS} ${DICT_AUTO_SRCS} \
-		  ${VIEW_SRCS} ${VIEW_FL_SRCS} ${VIEW_AUTO_SRCS} \
-		  ${RNR_SRCS}
 BASE_LIB_NAME	= lib/lib${LIB_SET_NAME}.so
 VIEW_LIB_NAME	= lib/lib${LIB_SET_NAME}_View.so
 
 BASE_LIB_OBJS	= ${BLESSED_OBJS} ${BASE_OBJS} ${DICT_AUTO_OBJS}
 VIEW_LIB_OBJS	= ${VIEW_OBJS} ${VIEW_FL_OBJS} ${VIEW_AUTO_OBJS}
-ALL_OBJS	= ${BASE_LIB_OBJS} ${VIEW_LIB_OBJS} ${RNR_OBJS}
 
 ${BASE_LIB_NAME}: ${BASE_LIB_OBJS}
 	${LD} -o ${BASE_LIB_NAME} -shared ${BASE_LIB_OBJS} \
@@ -88,7 +84,30 @@ ${VIEW_LIB_NAME}: ${VIEW_LIB_OBJS}
 	  -L${GLEDSYS}/lib ${ABOVE_VIEW_LIBS} \
 	  ${USER_LD_FLAGS} ${VIEW_LD_LIBS}
 
-ALL_LIBS	= base_lib view_lib rnr_libs
+##########################################################################
+# Targets
+##########################################################################
+
+ALL_SRCS = ${BLESSED_SRCS} ${BASE_SRCS} ${DICT_AUTO_SRCS}
+ALL_HDRS = ${BASE_HDRS} ${VIEW_HDRS} ${RNR_HDRS}
+ALL_OBJS = ${BASE_LIB_OBJS}
+ALL_LIBS = base_lib
+
+ifndef SKIP_VIEW_LIBS
+ALL_SRCS += ${VIEW_SRCS} ${VIEW_FL_SRCS} ${VIEW_AUTO_SRCS}
+ALL_HDRS += ${VIEW_HDRS}
+ALL_OBJS += ${VIEW_LIB_OBJS}
+ALL_LIBS += view_lib
+VIEW_SECS = ${VIEW_AUTO_HDRS} ${VIEW_FL_SECS} 
+endif
+
+ifndef SKIP_RNR_LIBS
+ALL_SRCS += ${RNR_SRCS}
+ALL_HDRS += ${RNR_HDRS}
+ALL_OBJS += ${RNR_OBJS}
+ALL_LIBS += rnr_libs
+endif
+
 
 default:	${ALL_LIBS} ${LIBSET_TARGETS}
 		${MAKE} install
@@ -137,12 +156,12 @@ glue:
 
 pre_depend:: auto_dirs catalog glue
 	${MKBLESSDEP}
-	${MKP7DEP} ${BASE_HDRS} ${VIEW_HDRS} ${RNR_HDRS} > make_p7.inc
+	${MKP7DEP}   ${ALL_HDRS}  > make_p7.inc
 	${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
 
 p7dep: ${BLESSED_H7} ${P7_AUTO_HDRS}
 
-depend:	p7dep ${DICT_AUTO_HDRS} ${VIEW_AUTO_HDRS} ${VIEW_FL_SECS}
+depend:	p7dep ${DICT_AUTO_HDRS} ${VIEW_SECS}
 	${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- ${ALL_SRCS} \
 	  -f- > make_depend.inc 2>/dev/null
 
@@ -203,3 +222,17 @@ echo_fl_fls:
 	@echo ${VIEW_FL_FLS}
 echo_fl_secs:
 	@echo ${VIEW_FL_SECS}
+
+echo_all_stuff:
+	@echo All sources:
+	@echo ${ALL_SRCS}
+	@echo All headers:	
+	@echo ${ALL_HDRS}
+	@echo All objects:	
+	@echo ${ALL_OBJS}
+	@echo All libraries:	
+	@echo ${ALL_LIBS}
+	@echo View secondary files:	
+	@echo ${VIEW_SECS}
+	@echo Libset targets:
+	@echo ${LIBSET_TARGETS}

@@ -28,8 +28,8 @@ FLUID   	= fluid
 
 # Flags
 LOCALINCL = -I${GLEDSYS}/include -I. $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
-INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I/usr/X11R6/include
-CPPFLAGS += -D_REENTRANT -D_GNU_SOURCE ${INCL} ${USER_CPP_FLAGS}
+INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I${X11INCDIR}
+CPPFLAGS += -D_REENTRANT -D_GNU_SOURCE ${USER_CPP_FLAGS} ${INCL}
 CXXFLAGS  = -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${USER_LD_FLAGS}
 
@@ -49,7 +49,7 @@ ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lThread -lCint \
                 -lPostscript  -lRint -lTree # -lProof -lNew
 ROOTGLIBS = -lGui -lGX11
 
-GUILIBS	= -L/usr/X11R6/lib -lX11 -lXext -lXpm ${FLLIB} ${GLLIB}
+GUILIBS	= -L${X11LIBDIR} -lX11 -lXext -lXpm ${FLLIB} ${GLLIB}
 SYSLIBS	= -lpthread -lm -ldl -rdynamic
 
 ##########################################################################
