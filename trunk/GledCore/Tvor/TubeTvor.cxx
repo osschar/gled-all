@@ -6,22 +6,28 @@
 
 #include "TubeTvor.h"
 
-TubeTvor::TubeTvor() : mV(0), mN(0), mC(0) {}
+TubeTvor::TubeTvor() : mV(0), mN(0), mC(0), mT(0),
+		       bColP(false), bTexP(false)
+ {}
 
 TubeTvor::~TubeTvor() {
-  delete [] mV; delete [] mN; delete [] mC;
+  delete [] mV; delete [] mN; delete [] mC; delete [] mT;
 }
 
-void TubeTvor::Init(bool colp, Int_t npoles, Int_t nrings, Int_t nphi)
+void TubeTvor::Init(Int_t npoles, Int_t nrings, Int_t nphi,
+		    bool colp, bool texp)
 {
+  delete [] mV; delete [] mN; delete [] mC; delete [] mT;
   bColP = colp;
-  mNP = npoles + nphi*nrings;
+  bTexP = texp;
+
+  mNP = npoles + (nphi+1)*nrings;
   mI = 0;
   mRings.clear();
-  delete [] mV; delete [] mN; delete [] mC;
   mV = new float[mNP*3];
   mN = new float[mNP*3];
-  if(bColP) mC = new float[mNP*4];
+  if(bColP) mC = new float[mNP*4]; else mC = 0;
+  if(bTexP) mT = new float[mNP*2]; else mT = 0;
 }
 
 void TubeTvor::NewRing(Int_t n, bool dp)
