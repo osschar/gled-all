@@ -29,7 +29,7 @@ namespace RayNS {
     RQN_set_by_idx,
     RQN_list_rebuild, RQN_list_clear,
     // Non-used; after that individual glasses/views can do anything.
-    RQN_first_non_used,
+    RQN_user_0 = 64,
     RQN_user_1, RQN_user_2, RQN_user_3, RQN_user_4, RQN_user_5
   };
 
