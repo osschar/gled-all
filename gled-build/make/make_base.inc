@@ -94,7 +94,6 @@ default:	${ALL_LIBS} ${LIBSET_TARGETS}
 		${MAKE} install
 
 base_lib:	${BASE_LIB_NAME}
-		@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
 
 view_lib:	${VIEW_LIB_NAME}
 
@@ -111,9 +110,11 @@ build_uninstall:
 
 install:
 	${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
+	@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
 
 uninstall:
 	${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
+	@rm -f lib/.${LIB_SET_ID}
 
 # like install ... only into a tar file (also Readme_<libset> is added)
 # make sure to set environment variable BIN_DIST_TAR
