@@ -64,38 +64,7 @@ void alice_geom(Int_t import_mode=0)
 
   //--------------------------------------------------------------
 
-  // Spawn GUI
-  {
-    const Text_t* default_layout =
-      "ZNode(RnrSelf[5],RnrElements[5]):"
-      "ZGeoNode(RnrOnForDaughters[5],RnrOffForDaughters[5],Color[4],ImportNodes[4],NNodes[4],Mat[8])";
-
-    Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
-    gROOT->LoadMacro("eye.C");
-    register_GledCore_layouts();
-
-    Text_t* eye_name   = "Eye";
-    Text_t* shell_name = "Shell";
-    Text_t* pupil_name = "Pupil";
-
-    CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
-    shell->Add(rscene);
-
-    shell->SetLayout(default_layout);
-    shell->SetLeafLayout(NestInfo::LL_Custom);
-
-    CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), pupil_name, "");
-    pupil->SetFOV(80);
-    pupil->SetCHSize(0.03);
-    pupil->SetBlend(1);
-    pupil->Add(rscene);
-    pupil->SetCameraBase((ZNode*)rscene->GetElementByName("Camera Base"));
-    pupil->SetUpReference(rscene);
-    pupil->SetUpRefAxis(2);
-
-    Gled::theOne->SpawnEye(shell, eye_name);
-  }
-
+  spawn_default_gui(rscene);
 }
 
 /**************************************************************************/
@@ -131,6 +100,7 @@ ZGeoNode* import_nodes(ZGeoNode* root, const Text_t* path)
 }
 
 /**************************************************************************/
+
 void import_by_regexp(ZGeoNode* volt)
 {
   // This demonstrates use of ZGeoNode::ImportByRegexp().
@@ -138,22 +108,23 @@ void import_by_regexp(ZGeoNode* volt)
 
   printf("Import by regexp\n");
 
-  volt->ImportByRegExp("PHOS", TRegexp("^PHOS"));
-  volt->ImportByRegExp("RICH", TRegexp("^RICH"));
-  volt->ImportByRegExp("ITSV", TRegexp("^ITS"));
-  volt->ImportByRegExp("TPC", TRegexp("^TPC")); 
+  volt->ImportByRegExp("PHOS", "^PHOS");
+  volt->ImportByRegExp("RICH", "^RICH");
+  volt->ImportByRegExp("ITSV", "^ITS");
+  volt->ImportByRegExp("TPC",  "^TPC"); 
 
   // import, but not show
-  volt->ImportByRegExp("TRD&TOF", TRegexp("^B")); rnr_elements(volt, "TRD&TOF", false);
-  volt->ImportByRegExp("EPM", TRegexp("^EPM")); rnr_elements(volt, "EPM", false);
-  volt->ImportByRegExp("ZDC", TRegexp("^ZDC")); rnr_elements(volt, "ZDC", false);
-  volt->ImportByRegExp("ZEM", TRegexp("^ZEM")); rnr_elements(volt, "ZEM", false);
-  volt->ImportByRegExp("FMD", TRegexp("^FMD")); rnr_elements(volt, "FMD", false);
-  volt->ImportByRegExp("Hall", TRegexp("^H"));  rnr_elements(volt, "Hall", false);
+  volt->ImportByRegExp("TRD&TOF", "^B"); rnr_elements(volt, "TRD&TOF", false);
+  volt->ImportByRegExp("EPM", "^EPM");   rnr_elements(volt, "EPM", false);
+  volt->ImportByRegExp("ZDC", "^ZDC");   rnr_elements(volt, "ZDC", false);
+  volt->ImportByRegExp("ZEM", "^ZEM");   rnr_elements(volt, "ZEM", false);
+  volt->ImportByRegExp("FMD", "^FMD");   rnr_elements(volt, "FMD", false);
+  volt->ImportByRegExp("Hall", "^H");    rnr_elements(volt, "Hall", false);
 
-  printf("call Import unimported \n");
-  volt->ImportUnimported("Remaining top-levels"); rnr_elements(volt, "Remaining top-levels", false);
-  printf("END call Import unimported \n");
+  printf("Importing unimported top-levels ...\n");
+  volt->ImportUnimported("Remaining top-levels");
+  rnr_elements(volt, "Remaining top-levels", false);
+  printf("Done importing unimported top-levels.\n");
 }
 
 /**************************************************************************/
