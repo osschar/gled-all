@@ -97,6 +97,9 @@ ZGlass* ZList::Last()
   return r;
 }
 
+ZGlass* ZList::GetElementByName(const Text_t* name)
+{ return GetElementByName(string(name)); }
+
 ZGlass* ZList::GetElementByName(const string& name)
 {
   ZGlass* ret = 0;

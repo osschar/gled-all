@@ -155,7 +155,7 @@ void ZKing::ReflectQueen(ZQueen* queen_to_mirror)
 
   auto_ptr<ZMIR> mir(boss->S_reflect_queen(queen_to_mirror, mSaturn->GetSaturnInfo()));
   mir->SetRecipient(mSaturn->GetSaturnInfo());
-  mSaturn->ShootMIR(mir);
+  mSaturn->PostMIR(*mir);
 
   // assert queen in `above' space and not yet ruling, neither awaiting sceptre.
   // pass control to reflect_queen, which also checks dependencies and
@@ -270,6 +270,9 @@ void ZKing::activate_queen(ZQueen* queen)
 
   queen->InvokeReflection(*mMir);
   queen->SetAwaitingSceptre(false);
+
+  ISmess(GForm("%s queen '%s' arrived for king '%s'",
+	       _eh.c_str(), queen->GetName(), GetName()));
 
   mSaturn->RefQueenLoadCnd().Lock();
   mSaturn->SetQueenLoadNum(mSaturn->GetQueenLoadNum() - 1);
