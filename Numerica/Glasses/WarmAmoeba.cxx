@@ -26,9 +26,9 @@ void WarmAmoeba::_init()
 
 void WarmAmoeba::_calc_psum()
 {
-  for(UCIndex_t i=0; i<m_n; i++) {
+  for(Int_t i=0; i<m_n; i++) {
     m_Psum(i) = 0;
-    for(UCIndex_t j=0; j<=m_n; j++) m_Psum(i) += P(j,i);
+    for(Int_t j=0; j<=m_n; j++) m_Psum(i) += P(j,i);
   }
 }
 
@@ -51,27 +51,27 @@ void WarmAmoeba::InitZStuff()
 {
   m_Psum.ResizeTo(m_n);
   delete [] m_P;
-  m_P = new ZVector[m_n+1];
-  for(UCIndex_t i=0; i<=m_n; i++) (m_P[i]).ResizeTo(m_n);
+  m_P = new TVectorF[m_n+1];
+  for(Int_t i=0; i<=m_n; i++) (m_P[i]).ResizeTo(m_n);
   m_Y.ResizeTo(m_n+1);
   m_PBest.ResizeTo(m_n);
 }
 
-Real_t WarmAmoeba::Ooze(UCIndex_t ihi, Real_t& yhi, Real_t fac)
+Float_t WarmAmoeba::Ooze(Int_t ihi, Float_t& yhi, Float_t fac)
 {
-  ZVector ptry(m_n);
-  Real_t fac1 = (1-fac)/m_n;
-  Real_t fac2 = fac1 - fac;
-  for(UCIndex_t j=0; j<m_n; j++) { ptry(j) = m_Psum(j)*fac1 - P(ihi,j)*fac2; }
-  Real_t ytry = hTrueMaster->Foon(ptry);
+  TVectorF ptry(m_n);
+  Float_t fac1 = (1-fac)/m_n;
+  Float_t fac2 = fac1 - fac;
+  for(Int_t j=0; j<m_n; j++) { ptry(j) = m_Psum(j)*fac1 - P(ihi,j)*fac2; }
+  Float_t ytry = hTrueMaster->Foon(ptry);
   if(ytry <= m_y_best) {
     m_PBest = ptry;
     m_y_best = ytry;
   }
-  Real_t yflu = ytry + m_T*TMath::Log(mRanGen.Rndm());
+  Float_t yflu = ytry + m_T*TMath::Log(mRanGen.Rndm());
   if(yflu  < yhi) {
     m_Y(ihi) = ytry; yhi = yflu;
-    for(UCIndex_t j=0; j<m_n; j++) {
+    for(Int_t j=0; j<m_n; j++) {
       m_Psum(j) += ptry(j) - P(ihi,j);
       P(ihi,j) = ptry(j);
     }
@@ -81,38 +81,38 @@ Real_t WarmAmoeba::Ooze(UCIndex_t ihi, Real_t& yhi, Real_t fac)
 
 void WarmAmoeba::WAMove()
 {
-  Real_t ynhi, ylo, yhi, yt;
+  Float_t ynhi, ylo, yhi, yt;
   _calc_psum();
   while(1) {
-    UCIndex_t ilo=0, ihi=1;
+    Int_t ilo=0, ihi=1;
     ynhi = ylo = m_Y(0u) - m_T*TMath::Log(mRanGen.Rndm());
     yhi = m_Y(1u) - m_T*TMath::Log(mRanGen.Rndm());
     if(ylo > yhi) { ihi=0; ilo=1; ynhi=yhi; yhi=ylo; ylo=ynhi; }
-    for(UCIndex_t i=2; i<=m_n; i++) {
+    for(Int_t i=2; i<=m_n; i++) {
       yt = m_Y(i) - m_T*TMath::Log(mRanGen.Rndm());
       if(yt <= ylo) { ilo=i; ylo = yt; }
       if(yt > yhi) { ynhi=yhi; ihi=i; yhi=yt; }
       else { ynhi = yt; }
     }
-    Real_t rtol = 2*TMath::Abs(yhi-ylo) / (TMath::Abs(yhi) + TMath::Abs(ylo));
+    Float_t rtol = 2*TMath::Abs(yhi-ylo) / (TMath::Abs(yhi) + TMath::Abs(ylo));
     if(rtol < mFTol || m_iter<0) {
-      Real_t swap=m_Y(0u); m_Y(0u)=m_Y(ilo); m_Y(ilo)=swap;
-      for(UCIndex_t n=0; n<m_n; n++) {
+      Float_t swap=m_Y(0u); m_Y(0u)=m_Y(ilo); m_Y(ilo)=swap;
+      for(Int_t n=0; n<m_n; n++) {
 	swap=P(0u,n); P(0u,n)=P(ilo,n); P(ilo,n)=swap;
       }
       break;
     }
     m_iter -= 2;
-    Real_t ytry = Ooze(ihi, yhi, -1);
+    Float_t ytry = Ooze(ihi, yhi, -1);
     if(ytry <= ylo) {
       ytry = Ooze(ihi, yhi, 2);
     } else if(ytry >- ynhi) {
-      Real_t ysave = yhi;
+      Float_t ysave = yhi;
       ytry = Ooze(ihi, yhi, 0.5);
       if(ytry >= ysave) {
-	for(UCIndex_t i=0; i<m_n; i++) {
+	for(Int_t i=0; i<m_n; i++) {
 	  if(i!=ilo) {
-	    for(UCIndex_t j=0; j<m_n; j++) {
+	    for(Int_t j=0; j<m_n; j++) {
 	      m_Psum(j) = 0.5*(P(i,j) + P(ilo,j));
 	      P(i,j) = m_Psum(j);
 	    }
@@ -158,7 +158,7 @@ Operator::Arg* WarmAmoeba::PreDance(Operator::Arg* op_arg)
   }
   mRanGen.SetSeed(mSeed);
   { // Init state
-    ZVector *v = hTrueMaster->InitialState(mRanGen);
+    TVectorF *v = hTrueMaster->InitialState(mRanGen);
     if(v->GetNoElements() < 3) {
       ISerr("WarmAmoeba::PreDance Need at least 3 parameters for amoeba");
       delete op_arg;
@@ -171,16 +171,16 @@ Operator::Arg* WarmAmoeba::PreDance(Operator::Arg* op_arg)
     delete v;
   }
   { // Get perturbations
-    ZVector *v = hTrueMaster->InitialPerturbations(mRanGen);
-    for(UCIndex_t i=1; i<=m_n; i++) {
+    TVectorF *v = hTrueMaster->InitialPerturbations(mRanGen);
+    for(Int_t i=1; i<=m_n; i++) {
       m_P[i] = m_P[0]; P(i, i-1) += (*v)(i-1);
       m_Y(i) = hTrueMaster->Foon(m_P[i]);
     }
     delete v;
   }
   // Estimate temperature
-  Real_t t=0;
-  for(UCIndex_t i=1; i<=m_n; i++) t += TMath::Abs(m_Y(0u) - m_Y(i));
+  Float_t t=0;
+  for(Int_t i=1; i<=m_n; i++) t += TMath::Abs(m_Y(0u) - m_Y(i));
   m_T = t/m_n;
   m_y_best = mYBest = 10*m_Y(0u); // Large enough
   mYLast = m_Y(0u);
@@ -217,7 +217,7 @@ void WarmAmoeba::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   Eventor::PreOperate(op_arg);
 
-  m_T = m_T0*TMath::Power(1 - (Real_t)mLocBeatsDone/(mBeatsToDo-1), mAlpha);
+  m_T = m_T0*TMath::Power(1 - (Float_t)mLocBeatsDone/(mBeatsToDo-1), mAlpha);
   m_iter = mMovesPerT;
   WAMove();
 

@@ -44,12 +44,12 @@ ODECrawler::~ODECrawler()
 /**************************************************************************/
 
 Int_t
-ODECrawler::Rkqs(ZVectorD& y, ZVectorD& dydx, Double_t& x, Double_t htry,
-		 ZVectorD& yscal, Double_t& hdid, Double_t& hnext)
+ODECrawler::Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
+		 TVectorD& yscal, Double_t& hdid, Double_t& hnext)
 {
   Double_t errmax,htemp,xnew;
 
-  ZVectorD yerr(mN), ytemp(mN);
+  TVectorD yerr(mN), ytemp(mN);
   Double_t h=htry;
   while(1) {
     Rkck(y, dydx, x, h, ytemp, yerr);
@@ -76,8 +76,8 @@ ODECrawler::Rkqs(ZVectorD& y, ZVectorD& dydx, Double_t& x, Double_t htry,
 /**************************************************************************/
 
 void
-ODECrawler::Rkck(ZVectorD& y, ZVectorD& dydx, Double_t x, Double_t h,
-		 ZVectorD& yout, ZVectorD& yerr)
+ODECrawler::Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,
+		 TVectorD& yout, TVectorD& yerr)
 {
   static Double_t a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
     b31=3.0/40.0,b32=9.0/40.0,b41=0.3,b42 = -0.9,b43=1.2,
@@ -89,7 +89,7 @@ ODECrawler::Rkck(ZVectorD& y, ZVectorD& dydx, Double_t x, Double_t h,
   Double_t dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
     dc4=c4-13525.0/55296.0,dc6=c6-0.25;
 
-  ZVectorD ak2(mN), ak3(mN), ak4(mN), ak5(mN), ak6(mN), ytemp(mN);
+  TVectorD ak2(mN), ak3(mN), ak4(mN), ak5(mN), ak6(mN), ytemp(mN);
 
   for(UInt_t i=0; i<mN; i++)
     ytemp(i) = y(i) + b21*h*dydx(i);
@@ -122,8 +122,8 @@ void ODECrawler::Crawl()
 
   x = mX1;
   h = TMath::Sign(mH1, mX2-mX1);
-  ZVectorD y(mY);
-  ZVectorD yscal(mN), dydx(mN);
+  TVectorD y(mY);
+  TVectorD yscal(mN), dydx(mN);
   if (mStoreMax > 0) xsav = x - 2*mStoreDx;
   for(UInt_t nstp=0; nstp<mMaxSteps; nstp++) {
     hTrueMaster->ODEDerivatives(x, y, dydx);
@@ -135,6 +135,7 @@ void ODECrawler::Crawl()
 
     if(mStoreMax && mStored < mStoreMax-1 && TMath::Abs(x-xsav) > TMath::Abs(mStoreDx)) {
       (*mXStored)(mStored) = x;
+      mYStored[mStored].ResizeTo(mN);
       mYStored[mStored] = y;
       mStored++;
       xsav = x;
@@ -155,6 +156,7 @@ void ODECrawler::Crawl()
       mY = y;
       if(mStoreMax) {
 	(*mXStored)(mStored) = x;
+	mYStored[mStored].ResizeTo(mN);
 	mYStored[mStored] = y;
 	mStored++;
       }
@@ -184,11 +186,11 @@ Operator::Arg* ODECrawler::PreDance(Operator::Arg* op_arg)
   mN = hTrueMaster->ODEOrder();
   if(mY.GetNoElements() != mN) mY.ResizeTo(mN);
   if(!mXStored) {
-    mXStored = new ZVector(mStoreMax);
-    mYStored = new ZVector[mStoreMax];
+    mXStored = new TVectorF(mStoreMax);
+    mYStored = new TVectorF[mStoreMax];
   } else if(mXStored->GetNoElements() != mStoreMax) {
     mXStored->ResizeTo(mStoreMax);
-    delete [] mYStored; mYStored = new ZVector[mStoreMax];
+    delete [] mYStored; mYStored = new TVectorF[mStoreMax];
   } else {
     mXStored->Zero();
   }

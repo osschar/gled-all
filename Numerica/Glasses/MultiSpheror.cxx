@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -52,7 +52,7 @@ void MultiSpheror::Init()
     s->SetNVert(mNVert);
     s->SetBeautyP(true);
     s->SetColor(1, 1, 0.5);
-    auto_ptr<ZVector> v(s->InitialState(rnd));
+    auto_ptr<TVectorF> v(s->InitialState(rnd));
     s->SetState(*v);
 
     mQueen->CheckIn(s); s->Install(); Add(s);

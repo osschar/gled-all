@@ -4,18 +4,18 @@
 #define Numerica_WarmAmoeba_H
 
 #include <Glasses/Eventor.h>
-#include <Stones/ZVector.h>
+#include <TVectorF.h>
 
 #include <TRandom.h>
 
 class WarmAmoebaMaster {
 public:
   virtual ~WarmAmoebaMaster() {}
-  virtual Real_t	Foon(const ZVector& x) = 0;
-  virtual ZVector*	InitialState(TRandom& rnd) = 0;		// Amoeba deletes it
-  virtual ZVector*	InitialPerturbations(TRandom& rnd) = 0; // Amoeba deletes it
-  virtual void		SetState(const ZVector& x) = 0;
-  virtual ZMIR*		S_SetState(const ZVector& x) = 0;
+  virtual Float_t	Foon(const TVectorF& x) = 0;
+  virtual TVectorF*	InitialState(TRandom& rnd) = 0;		// Amoeba deletes it
+  virtual TVectorF*	InitialPerturbations(TRandom& rnd) = 0; // Amoeba deletes it
+  virtual void		SetState(const TVectorF& x) = 0;
+  virtual ZMIR*		S_SetState(const TVectorF& x) = 0;
 
   ClassDef(WarmAmoebaMaster,1)
 };
@@ -24,21 +24,21 @@ class WarmAmoeba : public Eventor {
 private:
   WarmAmoebaMaster* hTrueMaster; //!
 
-  ZVector*	    m_P;	 //! center + simplex vertices
-  ZVector	    m_Y;	 //! values at center + simplex vertices
-  ZVector	    m_Psum;	 //!
-  ZVector	    m_PBest;	 //! Best parameters
+  TVectorF*	    m_P;	 //! center + simplex vertices
+  TVectorF	    m_Y;	 //! values at center + simplex vertices
+  TVectorF	    m_Psum;	 //!
+  TVectorF	    m_PBest;	 //! Best parameters
 
-  Real_t	    m_y_best;	 //!
+  Float_t	    m_y_best;	 //!
   Int_t		    m_iter;	 //!
   UInt_t	    m_n;	 //!
-  Real_t	    m_T;	 //!
-  Real_t	    m_T0;	 //!
+  Float_t	    m_T;	 //!
+  Float_t	    m_T0;	 //!
 
   void		_init();
   void		_calc_psum();
   void		_export_algo_values(Operator::Arg* op_arg, bool bestp=false);
-  Real_t&	P(UCIndex_t m, UCIndex_t n) { return m_P[m](n); }
+  Float_t&	P(Int_t m, Int_t n) { return m_P[m](n); }
 
 protected:
   ZGlass*	mWA_Master;	// X{GS} L{}
@@ -50,26 +50,26 @@ protected:
   UInt_t	mN;	// dimensions	X{GS} 7 ValOut(-join=>1)
   UInt_t	mSeed;	// 		X{GS} 7 Value(-range=>[0,MAX_ID,1])
 
-  Real_t	mFTol;	// Fractional tolerance	X{GS} 7 Value(-range=>[0,1],join=>1)
+  Float_t	mFTol;	// Fractional tolerance	X{GS} 7 Value(-range=>[0,1],join=>1)
 
   // Set T to T_0 times TFactor:
-  Real_t	mTFactor;	// X{GS} 7 Value(-range=>[0,100], join=>1)
+  Float_t	mTFactor;	// X{GS} 7 Value(-range=>[0,100], join=>1)
   // T_n = T_0(1 - n/NumSteps)^alpha 
-  Real_t	mAlpha;		// X{GS} 7 Value(-range=>[1e-2,100,1,100])
+  Float_t	mAlpha;		// X{GS} 7 Value(-range=>[1e-2,100,1,100])
 
   UInt_t	mMovesPerT;	// X{GS} 7 Value(-range=>[0,1e6,1],-width=>6,-join=>1)
   UInt_t	mNumSteps;	// X{GS} 7 Value(-range=>[0,1e6,1],-width=>6)
 
-  Real_t	mT0;	// X{GS} 7 ValOut(-width=>8, -join=>1)
-  Real_t	mT;	// X{GS} 7 ValOut(-width=>8, -range=>[0,100])
+  Float_t	mT0;	// X{GS} 7 ValOut(-width=>8, -join=>1)
+  Float_t	mT;	// X{GS} 7 ValOut(-width=>8, -range=>[0,100])
 
-  Real_t	mYBest;	// Best value reached	 X{GS} 7 ValOut(-join=>1)
-  Real_t	mYLast;	// Value after last move X{GS} 7 ValOut()
+  Float_t	mYBest;	// Best value reached	 X{GS} 7 ValOut(-join=>1)
+  Float_t	mYLast;	// Value after last move X{GS} 7 ValOut()
 
   // protected methods
 
   void		InitZStuff();	// Should be called from derived class::PreDance()
-  Real_t	Ooze(UCIndex_t ihi, Real_t& yhi, Real_t fac);
+  Float_t	Ooze(Int_t ihi, Float_t& yhi, Float_t fac);
   void 		WAMove();
 
 public:

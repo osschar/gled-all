@@ -3,16 +3,16 @@
 #ifndef Numerica_ODECrawler_H
 #define Numerica_ODECrawler_H
 
-#include <Stones/ZVector.h>
-#include <Stones/ZVectorD.h>
+#include <TVectorF.h>
+#include <TVectorD.h>
 #include <Glasses/Eventor.h>
 
 class ODECrawlerMaster {
 public:
   virtual ~ODECrawlerMaster() {}
   virtual UInt_t ODEOrder() = 0;
-  virtual void ODEDerivatives(const Double_t x, const ZVectorD& y, ZVectorD& d) = 0;
-  virtual void ODEStart(ZVectorD& v, Double_t& x1, Double_t& x2) = 0;
+  virtual void ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d) = 0;
+  virtual void ODEStart(TVectorD& v, Double_t& x1, Double_t& x2) = 0;
 
   ClassDef(ODECrawlerMaster,1)
 };
@@ -34,10 +34,10 @@ protected:
   UInt_t	mMaxSteps;	//  X{GS} 7 Value()
   UInt_t	mStoreMax;	//  X{GS} 7 Value(-join=>1)
   Double_t	mStoreDx;	//  X{GS} 7 Value()
-  ZVector*	mXStored;	//! X{g}
-  ZVector*	mYStored;	//! X{g} ROOT now allows streaming ... check syntax
+  TVectorF*	mXStored;	//! X{g}
+  TVectorF*	mYStored;	//! X{g} ROOT now allows streaming ... check syntax
   
-  ZVectorD	mY;		//! X{r}
+  TVectorD	mY;		//! X{r}
   UInt_t	mN;		// X{G}  7 ValOut(-join=>1)
   Double_t	mAcc;		// X{GS} 7 Value(-range=>[0,1])
   Double_t	mX1;		// X{GS} 7 Value(-join=>1)
@@ -45,10 +45,10 @@ protected:
   Double_t	mH1;		// X{GS} 7 Value(-join=>1)
   Double_t	mHmin;		// X{GS} 7 Value()
   
-  Int_t		Rkqs(ZVectorD& y, ZVectorD& dydx, Double_t& x, Double_t htry,
-		     ZVectorD& yscal, Double_t& hdid, Double_t& hnext);
-  void 		Rkck(ZVectorD& y, ZVectorD& dydx, Double_t x, Double_t h,
-		     ZVectorD& yout, ZVectorD& yerr);
+  Int_t		Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
+		     TVectorD& yscal, Double_t& hdid, Double_t& hnext);
+  void 		Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,
+		     TVectorD& yout, TVectorD& yerr);
   void		Crawl();
 
 public:
