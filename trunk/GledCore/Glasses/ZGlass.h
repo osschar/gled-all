@@ -31,11 +31,6 @@ inline TBuffer &operator<<(TBuffer& b, const _gls_ *g) { \
 
 /**************************************************************************/
 
-class YNameChangeCB {
-public:
-  virtual void y_name_change_cb(ZGlass* g, const string& new_name) = 0;
-};
-
 namespace ZGlassBits {
   extern UShort_t kFixedName;
 }
@@ -86,9 +81,15 @@ protected:
   TimeStamp_t	 mStampReqTring;   //! X{GS} TimeStamp of last change that requires retriangulation
 
   // Name change callback
-#ifndef __CINT__
-  set<YNameChangeCB*>*	pSetYNameCBs;
 public:
+  class YNameChangeCB {
+  public:
+    virtual void y_name_change_cb(ZGlass* g, const string& new_name) = 0;
+  };
+
+#ifndef __CINT__
+  set<YNameChangeCB*>*	pSetYNameCBs; //!
+
   void register_name_change_cb(YNameChangeCB* rec);
   void unregister_name_change_cb(YNameChangeCB* rec);
 protected:
@@ -131,6 +132,13 @@ public:
   Short_t IncRefCount(const ZGlass* from);
   Short_t DecRefCount(const ZGlass* from);
 
+  // Queries
+  virtual ZGlass* GetLinkByName(const Text_t* link_name);
+  virtual ZGlass* GetLinkByName(const string& link_name);
+
+  virtual ZGlass* FindLensByPath(const Text_t* url);
+  virtual ZGlass* FindLensByPath(const string& url);
+
   // Stamps
   virtual void SetStamps(TimeStamp_t s)
   { mTimeStamp = mStampReqTring = s; }
@@ -146,9 +154,11 @@ public:
   void SetStamp_CB(zglass_stamp_f foo, void* arg);
   void SetStampLink_CB(zglass_stamp_f foo, void* arg);
 
+  void Test_p7_linkspecs();
+
 #include "ZGlass.h7"
   ClassDef(ZGlass, 1)
-}; // endclass ZGlass
+ }; // endclass ZGlass
 
 GlassIODef(ZGlass);
 

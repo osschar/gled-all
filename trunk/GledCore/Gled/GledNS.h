@@ -245,11 +245,30 @@ namespace GledNS {
   /**************************************************************************/
 
 #ifndef __CINT__
+
   int  split_string(Str_ci start, Str_ci end, lStr_t& l, char c=0);
   int  split_string(const string& s, lStr_t& l, char c=0);
   void deparen_string(const string& in, string& n, string& a,
 		      const string& ops="([{", bool no_parens_ok=false)
     throw(string);
+
+  // url_tokenizator
+
+  class url_token : public string {
+  public:
+    enum type_e { null, link_sel, list_sel };
+  protected:
+    type_e m_type;
+  public:
+    url_token(type_e t=null) : string(), m_type(t) {}
+    url_token(const string& s, type_e t=null) : string(s), m_type(t) {}
+
+    type_e type() const { return m_type; }
+    void type(type_e t) { m_type = t; }
+  };
+
+  int tokenize_url(const string& url, list<url_token>& l);
+
 #endif
 
 } // namespace GledNS

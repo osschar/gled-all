@@ -13,8 +13,10 @@
 // mGlassBits: collection of flags that allow (optimised) handling of lenses.
 
 #include "ZGlass.h"
+#include "ZGlass.c7"
 
 #include <Ephra/Saturn.h>
+#include <Glasses/ZList.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZMirFilter.h>
@@ -47,10 +49,10 @@ void ZGlass::_init()
 
 /**************************************************************************/
 
-typedef set<YNameChangeCB*>		spYNameChangeCB_t;	
-typedef set<YNameChangeCB*>::iterator	spYNameChangeCB_i;	
+typedef set<ZGlass::YNameChangeCB*>		spYNameChangeCB_t;	
+typedef set<ZGlass::YNameChangeCB*>::iterator	spYNameChangeCB_i;	
 
-void ZGlass::register_name_change_cb(YNameChangeCB* rec)
+void ZGlass::register_name_change_cb(ZGlass::YNameChangeCB* rec)
 {
   if(mGlassBits & ZGlassBits::kFixedName) return;
   mRefCountMutex.Lock();
@@ -60,7 +62,7 @@ void ZGlass::register_name_change_cb(YNameChangeCB* rec)
   mRefCountMutex.Unlock();
 }
 
-void ZGlass::unregister_name_change_cb(YNameChangeCB* rec)
+void ZGlass::unregister_name_change_cb(ZGlass::YNameChangeCB* rec)
 {
   mRefCountMutex.Lock();
   if(pSetYNameCBs != 0)
@@ -76,11 +78,6 @@ void ZGlass::SetName(const Text_t* n)
     throw(string("ZGlass::SetName lens has FixedName bit set"));
   }
   string name(n);
-  {
-    string::size_type i;
-    while((i = name.find_first_of('/')) != string::npos)
-      name.replace(i, 1, 1, '_');
-  }
   mExecMutex.Lock();
   mRefCountMutex.Lock();
   if(pSetYNameCBs != 0) {
@@ -182,10 +179,77 @@ Short_t ZGlass::DecRefCount(const ZGlass* from)
 
 /**************************************************************************/
 
+ZGlass* ZGlass::GetLinkByName(const Text_t* link_name)
+{ return GetLinkByName(string(link_name)); }
+
+ZGlass* ZGlass::GetLinkByName(const string& link_name)
+{
+  // Returns glass pointed to by link with name link_name.
+  // Attempts link_name == LinkMemberName and
+  // link_name == Class::LinkMemberName.
+  // Throws an exception (string) if link does not exist.
+  // In principle could have a map link-name->link-specs.
+
+  // Should go in reverse direction !!!!
+  // Locking doesn't make much sense.
+
+  lLinkSpec_t ls; CopyLinkSpecs(ls);
+  for(lLinkSpec_i i=ls.begin(); i!=ls.end(); ++i) {
+    if(link_name == i->fLinkName || link_name == i->full_name())
+      return i->fLinkRef;
+  }
+  throw(string(GForm("ZGlass::GetLinkByName link '%s' does not exist in '%s' (id=%u)",
+		     link_name.c_str(), GetName(), GetSaturnID())));
+}
+
+ZGlass* ZGlass::FindLensByPath(const Text_t* url)
+{ return FindLensByPath(string(url)); }
+
+ZGlass* ZGlass::FindLensByPath(const string& url)
+{
+  static const string _eh("ZGlass::FindLensByPath ");
+  using namespace GledNS;
+
+  list<url_token> l;
+  tokenize_url(url, l);
+  ZGlass* g = this;
+  try {
+    for(list<url_token>::iterator i=l.begin(); i!=l.end(); ++i) {
+      if(g == 0) {
+	// !!! give more details
+	throw(_eh + "null lens; probably a link is not set");
+      }
+      switch (i->type()) {
+      case url_token::link_sel: {
+	g = g->GetLinkByName(*i);
+	break;
+      }
+      case url_token::list_sel: {
+	ZList* l = dynamic_cast<ZList*>(g);
+	if(l == 0) {
+	  // !!! give more details
+	  throw(_eh + "url element is not a list");
+	}
+	g = l->GetElementByName(*i);
+	break;
+      }
+      default:
+	ISerr(_eh + "unknown token type. Attempting to ignore ...");
+	break;
+      }
+    }
+  }
+  catch(string exc) {
+    ISerr(exc);
+    throw;
+  }
+
+  return g;
+}
+
+/**************************************************************************/
+
 // All stamp functions should be *inline*!!
-// And reporting to a queen, not saturn.
-// Queen can than filter out RQN_change requests for *very* dynamic
-// parts of the scene in a case of constant-redraw rendering.
 
 TimeStamp_t ZGlass::Stamp(LID_t lid, CID_t cid)
 {
@@ -237,4 +301,14 @@ void ZGlass::AssertMIRPresence(const string& header, int what)
 
 /**************************************************************************/
 
-#include "ZGlass.c7"
+void ZGlass::Test_p7_linkspecs()
+{
+  lLinkSpec_t ls; CopyLinkSpecs(ls); lLinkSpec_i l = ls.begin();
+  lppZGlass_t gs; CopyLinkRefs(gs); lppZGlass_i g = gs.begin();
+  while(l != ls.end()) {
+    printf("%s::%s %p %p\n", l->fClassName.c_str(), l->fLinkName.c_str(),
+	   &(l->fLinkRef), *g);
+    ++l; ++g;
+  }
+  
+}

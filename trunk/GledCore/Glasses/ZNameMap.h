@@ -9,7 +9,7 @@
 
 #include <Glasses/ZList.h>
 
-class ZNameMap : public ZList, public YNameChangeCB
+class ZNameMap : public ZList, public ZGlass::YNameChangeCB
 {
   // 7777 RnrCtrl("false, 0, RnrBits()")
   MAC_RNR_FRIENDS(ZNameMap);
@@ -28,7 +28,7 @@ public:
   ZNameMap(const Text_t* n="ZNameMap", const Text_t* t=0) : ZList(n,t)
   { _init(); }
 
-  virtual ZGlass* GetByName(const Text_t* name);
+  virtual ZGlass* GetElementByName(const string& name);
 
   virtual void Insert(ZGlass* g);		     // X{E} C{1}
 

@@ -97,37 +97,18 @@ ZGlass* ZList::Last()
   return r;
 }
 
-ZGlass* ZList::GetByName(const Text_t* name)
+ZGlass* ZList::GetElementByName(const string& name)
 {
   ZGlass* ret = 0;
   mListMutex.Lock();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    if(strcmp(name, (*i)->GetName()) == 0) {
+    if(strcmp(name.c_str(), (*i)->GetName()) == 0) {
       ret = *i;
       break;
     }
   }
   mListMutex.Unlock();
   return ret;
-}
-
-ZGlass* ZList::Query(const Text_t* path)
-{
-  string p(path);
-  return Query(p);
-}
-
-ZGlass* ZList::Query(const string& path)
-{
-  lStr_t names;
-  GledNS::split_string(path, names, '/');
-  ZGlass* g = this;
-  for(lStr_i i=names.begin(); i!=names.end(); ++i) {
-    if(i->size() == 0) continue;
-    ZList* l = dynamic_cast<ZList*>(g);
-    g = (l != 0) ? l->GetByName(i->c_str()) : 0;
-  }
-  return g;
 }
 
 /**************************************************************************/
