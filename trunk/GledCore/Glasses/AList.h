@@ -34,7 +34,7 @@ class AList : public ZGlass {
     virtual Int_t   get_id()    { return 0; }
     virtual TString get_label() { return 0; }
 
-    ClassDef(ElRep, 1)
+    ClassDef(AList::ElRep, 1)
   };
 
   typedef list<ElRep>		lElRep_t;
