@@ -22,6 +22,7 @@
 #include <Glasses/ZFireKing.h>
 #include <Glasses/ZSunQueen.h>
 #include <Glasses/ZQueen.h>
+#include <Glasses/ZFireQueen.h>
 #include <Glasses/ZMirFilter.h>
 #include <Gled/GThread.h>
 #include <Stones/ZComet.h>
@@ -59,6 +60,8 @@ ClassImp(Saturn)
 
 namespace {
   GCondition	_server_startup_cond;
+
+  GMutex	_detached_mir_mgmnt_lock;
 
   void sh_SaturnFdSucker(int sig) {
     //ISmess(GForm("Saturn/sh_SaturnFdSucker called with signal %d", sig));
@@ -122,17 +125,94 @@ void* Saturn::tl_MIR_Router(mir_router_ti* arg)
   // Thread foo for routing of a single MIR.
   // If the thread is detached, this method also deletes the GThread.
 
-  GThread::setup_tsd(arg->mir->Caller);
-  arg->sat->RouteMIR(*arg->mir);
+  static const string _eh("Saturn::tl_MIR_Router ");
 
-  if(arg->delete_mir)
-    delete arg->mir;
+  GThread::setup_tsd(arg->sat->GetSaturnInfo());
+
+  auto_ptr<ZMIR> mir(arg->mir);
+  try {
+    arg->sat->RouteMIR(mir);
+    if(mir->RequiresResult) arg->sat->generick_shoot_mir_result(*mir, 0, 0);
+  }
+  catch(string exc) {
+    arg->sat->report_mir_post_demangling_error(*mir, _eh + "MIR execution failed: " + exc);
+  }
+
+  if(!arg->delete_mir)
+    mir.release();
   delete arg;
   
   GThread::DeleteIfDetached();
   GThread::Exit();
   return 0;
 }
+
+
+void* Saturn::tl_MIR_DetachedExecutor(mir_router_ti* arg)
+{
+  // Thread foo for execution of a single *detached* MIR.
+
+  static const string _eh("Saturn::tl_MIR_DetachedExecutor ");
+
+  // These are the defaults anyway ...
+  GThread::SetCancelState(GThread::CS_Enable);
+  GThread::SetCancelType(GThread::CT_Deferred);
+
+  GThread::setup_tsd(arg->sat->GetSaturnInfo());
+
+  arg->self = GThread::TSDSelf(); // Needed in clean-up.
+
+  GTHREAD_CU_PUSH;
+  
+  {
+    ISdebug(1, GForm("%sregistering a detached thread %p to '%s'.",
+		     _eh.c_str(), arg->self, arg->mir->Alpha->GetName()));
+    GMutexHolder mh(_detached_mir_mgmnt_lock);
+    arg->mir->Alpha->mDetachedMIRThreads.push_back(arg->self);
+  }
+
+  auto_ptr<ZMIR> mir(arg->mir);
+  try {
+    ISdebug(1, GForm("%snow execing mir.", _eh.c_str()));
+    arg->sat->ExecMIR(mir, false);
+    if(mir->RequiresResult) arg->sat->generick_shoot_mir_result(*mir, 0, 0);
+    ISdebug(1, GForm("%smir exec done.", _eh.c_str()));
+  }
+  catch(string exc) {
+    arg->sat->report_mir_post_demangling_error(*mir, _eh + "MIR execution failed: " + exc);
+  }
+
+  GThread::TSDSelf()->Detach();
+
+  mir.release();
+
+  GThread::DeleteIfDetached();
+  GThread::Exit();
+
+  GTHREAD_CU_POP;
+
+  return 0;
+}
+
+void Saturn::tl_MIR_DetachedCleanUp(mir_router_ti* arg)
+{
+  static const string _eh("Saturn::tl_MIR_DetachedCleanUp ");
+
+  {
+    ISdebug(1, GForm("%sunregistering a detached thread %p from '%s'.",
+		     _eh.c_str(), arg->self, arg->mir->Alpha->GetName()));
+    GMutexHolder mh(_detached_mir_mgmnt_lock);
+    int l1 = arg->mir->Alpha->mDetachedMIRThreads.size();
+    arg->mir->Alpha->mDetachedMIRThreads.remove(arg->self);
+    int l2 = arg->mir->Alpha->mDetachedMIRThreads.size();
+    ISdebug(1, GForm("%sl1=%d, l2=%d.", _eh.c_str(), l1, l2));
+  } 
+
+  if(arg->delete_mir) delete arg->mir;
+  delete arg;  
+}
+
+/**************************************************************************/
 
 void* Saturn::tl_MIR_Shooter(Saturn* s)
 {
@@ -199,7 +279,8 @@ Saturn::Saturn() :
   mSunInfo(0), mSaturnInfo(0),
   mQueenLoadNum(0), mQueenLoadCnd(GMutex::recursive),
   mBeamReqHandleMutex(GMutex::recursive), mLastBeamReqHandle(0),
-  mMIRShootingCnd()
+  mMIRShootingCnd(GMutex::recursive), mDelayedMIRShootingCnd(GMutex::recursive),
+  bAcceptsRays(false), mRayEmittingCnd()
 {
   bAllowMoons = false;
 
@@ -491,7 +572,33 @@ void Saturn::Shutdown()
 }
 
 /**************************************************************************/
-// Enlight/Endark of lenses
+
+void Saturn::LockMIRShooters(bool wait_until_queue_empty)
+{
+  mMIRShootingCnd.Lock();
+  if(wait_until_queue_empty) {
+    while(1) {
+      if(mMIRShootingQueue.empty()) break;
+      // printf("Saturn::LockMIRShooters MIRShootingQueue non-empty ... delaying.\n");
+      mMIRShootingCnd.Wait();
+    }
+  }
+  mMIRShooterRoutingLock.Lock();
+  mMIRShootingCnd.Unlock();
+
+  mDelayedMIRShootingCnd.Lock();
+}
+
+void Saturn::UnlockMIRShooters()
+{
+  mDelayedMIRShootingCnd.Unlock();
+  //mMIRShootingCnd.Unlock();
+  mMIRShooterRoutingLock.Unlock();
+}
+
+
+/**************************************************************************/
+// Enlight/Reflect/Freeze/Endark of lenses
 /**************************************************************************/
 
 void Saturn::Enlight(ZGlass* glass, ID_t id) throw(string)
@@ -499,19 +606,21 @@ void Saturn::Enlight(ZGlass* glass, ID_t id) throw(string)
   // Inserts glass into hash with key id.
   // Sets Saturn related glass members and calls ZGlass::AdEnlightenment().
 
+  static const string _eh("Saturn::Enlight ");
+
   if(glass == 0)
-    throw(string("Saturn::Enlight glass=0; stalling ..."));
+    throw(_eh + "glass=0; stalling ...");
 
   if(id == 0)
-    throw(string("Saturn::Enlight id=0; stalling ..."));
+    throw(_eh + "id=0; stalling ...");
 
 
   mIDLock.Lock();
   hID2pZGlass_i i = mIDHash.find(id);
   if(i != mIDHash.end()) {
     mIDLock.Unlock();
-    throw(string(GForm("Saturn::Enlight id=%u already used by '%s' (new is '%s'; stalling...",
-		      id, i->second->GetName(), glass->GetName())));
+    throw(_eh + GForm("id=%u already used by '%s' (new is '%s'; stalling...",
+		      id, i->second->GetName(), glass->GetName()));
   }
   mIDHash[id] = glass;
   mIDLock.Unlock();
@@ -519,7 +628,7 @@ void Saturn::Enlight(ZGlass* glass, ID_t id) throw(string)
   // Infrom the new lens
   glass->mSaturnID = id;
   glass->mSaturn = this;
-  ISdebug(2,GForm("Saturn::Enlight for %s, id=%u", glass->GetName(), id));
+  ISdebug(2,GForm("%sfor %s, id=%u", _eh.c_str(), glass->GetName(), id));
   // Now let the newglass call its initialization foos
   glass->AdEnlightenment();
 }
@@ -529,21 +638,81 @@ void Saturn::Reflect(ZGlass* glass) throw(string)
   // Enlights glass with a key taken from glass->mSaturnID.
   // Used for ZComet unpacking on Moons (hence Reflect).
 
-  if(glass->mSaturnID == 0) throw (string("Saturn::Reflect called w/ id 0"));
+  static const string _eh("Saturn::Reflect ");
+
+  if(glass->mSaturnID == 0) throw (_eh + "called w/ id 0");
   Enlight(glass, glass->mSaturnID);
+}
+
+void Saturn::Freeze(ZGlass* glass) throw(string)
+{
+  // Stops all detached MIR threads for glass.
+
+  static const string _eh("Saturn::Freeze ");
+
+  if(glass==0)
+    throw(_eh + "glass=0; stalling.");
+
+  ISdebug(2,GForm("%sfor %s, id=%u", _eh.c_str(), glass->GetName(), glass->GetSaturnID()));
+
+  int ok = 0, failed = 0;
+  // !! Could be rewritten into two loops: Cancel, then Join those that
+  // were successfully cancelled.
+  while (true) {
+    GThread* thr = 0;
+    {
+      GMutexHolder mh(_detached_mir_mgmnt_lock);
+      if (glass->mDetachedMIRThreads.empty()) {
+	break;
+      } else {
+	thr = glass->mDetachedMIRThreads.back();
+	glass->mDetachedMIRThreads.pop_back();
+      }
+    }
+    ISdebug(2, GForm("%sattempting cancellation of a detached MIR thread of lens '%s'.",
+		     _eh.c_str(), glass->GetName()));
+    int retc = thr->Cancel();
+    ISdebug(2, GForm("%scancellation of thread of lens '%s' returned %d.",
+		     _eh.c_str(), glass->GetName(), retc));
+    if(retc) {
+      ISerr(_eh + "having problems cancelling a detached thread of " + glass->GetName() + ".");
+      ++failed;
+    } else {
+      ISdebug(2, GForm("%sattempting join on a detached MIR thread of lens '%s'.",
+		       _eh.c_str(), glass->GetName()));
+      int retj = thr->Join();
+      ISdebug(2, GForm("%sjoin on thread of lens '%s' returned %d.",
+		       _eh.c_str(), glass->GetName(), retj));
+      if(retj) {
+	ISerr(_eh + "having problems joining a detached thread of " + glass->GetName() + ".");
+	++failed;
+      } else {
+	delete thr;
+	++ok;
+      }
+    }
+  }
+  if(ok > 0 || failed > 0) {
+    ISdebug(1, GForm("%ssuccessfully canceled %d (failed for %d) detached MIR threads of lens '%s'.",
+		     _eh.c_str(), ok, failed, glass->GetName()));
+  }
 }
 
 void Saturn::Endark(ZGlass* glass) throw(string)
 {
-  if(glass==0)
-    throw(string("Saturn::Enlight glass=0; stalling ..."));
+  static const string _eh("Saturn::Endark ");
 
-  // First hack self
+  if(glass==0)
+    throw(_eh + "glass=0; stalling.");
+
+  ISdebug(2,GForm("%sfor %s, id=%u", _eh.c_str(), glass->GetName(), glass->GetSaturnID()));
+
+  // Hack self
   mIDLock.Lock();
   hID2pZGlass_i i;
   if((i=mIDHash.find(glass->mSaturnID)) == mIDHash.end() || i->second != glass) {
     mIDLock.Unlock();
-    throw(string("Saturn::Endark id/glass mismatch; stalling..."));
+    throw(_eh + "id/glass mismatch; stalling.");
   }
   mIDHash.erase(i);
   mIDLock.Unlock();
@@ -885,6 +1054,7 @@ void Saturn::finalize_eye_connection(EyeInfo* ei)
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
 	(ei->hSocket, SocketInfo(SocketInfo::OS_Eye, ei)));
   mEyes.push_back(ei);
+  bAcceptsRays = true;
   mEyeLock.Unlock();
 }
 
@@ -938,12 +1108,16 @@ Int_t Saturn::Manage(TSocket* sock) throw(string)
     case GledNS::MT_Flare: 
     case GledNS::MT_Beam:
       {
-	ZMIR mir(m); // Swallows m, deletes it and sets m to null.
-	mir.ReadRoutingHeader();
+	// Swallows the message 'm', deletes it and sets it to null.
+	auto_ptr<ZMIR> mir( new ZMIR(m) );
+	mir->ReadRoutingHeader();
+	// Could have dedicated thread for listening to the master.
 	if(!bSunAbsolute && sock == mSaturnInfo->GetMaster()->hSocket) {
-	  mir.Direction = ZMIR::D_Down;
+	  mir->Direction = ZMIR::D_Down;
 	} else {
-	  mir.Direction = ZMIR::D_Up;
+	  mir->Direction = ZMIR::D_Up;
+	  // These could be handled in separate threads, the first
+	  // listening to saturns and the second to eyes.
 	  hSock2SocketInfo_i i = mSock2InfoHash.find(sock);
 	  if(i == mSock2InfoHash.end()) throw(_eh + "unknown socket");
 	  switch(i->second.fWhat) {
@@ -952,7 +1126,7 @@ Int_t Saturn::Manage(TSocket* sock) throw(string)
 	    break;
 	  case SocketInfo::OS_Eye:
 	    // set caller as eyes don't do that (or even if they do ...)
-	    mir.SetCaller( (i->second.get_eye()) );
+	    mir->SetCaller( (i->second.get_eye()) );
 	    break;
 	  default:
 	    throw(_eh + "internal inconsistency");
@@ -960,7 +1134,7 @@ Int_t Saturn::Manage(TSocket* sock) throw(string)
 	}
 	RouteMIR(mir);
 	break;
-      } // case Flare
+      }
     
     default:
       throw(_eh + "unknown message type");
@@ -1044,25 +1218,19 @@ void Saturn::markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller)
   mir.RewindToExecHeader();
 }
 
-void Saturn::post_mir(ZMIR& mir, ZMirEmittingEntity* caller)
+void Saturn::post_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller)
 {
   static string _eh("Saturn::post_mir ");
   
   ISdebug(8, GForm("%s entered ...", _eh.c_str()));
 
-  SaturnInfo* ex_addr = GThread::get_return_address();
-  UInt_t      ex_hand = GThread::get_return_handle();
-  markup_posted_mir(mir, caller);
+  markup_posted_mir(*mir, caller);
 
   try {
     RouteMIR(mir);
   }
   catch (string exc) {
     ISerr(_eh + "failed: " + exc);
-  }
-  if(ex_addr) {
-    GThread::set_return_address(ex_addr);
-    GThread::set_return_handle(ex_hand);
   }
 }
 
@@ -1080,7 +1248,7 @@ void Saturn::shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
   } else {
     mMIRShootingCnd.Lock();
     mMIRShootingQueue.push_back(mir.release());
-    mMIRShootingCnd.Signal();
+    mMIRShootingCnd.Broadcast();
     mMIRShootingCnd.Unlock();
   }
 }
@@ -1109,13 +1277,17 @@ void Saturn::mir_shooter()
 
   while(1) {
     mMIRShootingCnd.Lock();
-    if(mMIRShootingQueue.empty())
+    if(mMIRShootingQueue.empty()) {
+      mMIRShootingCnd.Broadcast();
       mMIRShootingCnd.Wait();
+    }
     auto_ptr<ZMIR> mir(mMIRShootingQueue.front());
     mMIRShootingQueue.pop_front();
     mMIRShootingCnd.Unlock();
     try {
-      RouteMIR(*mir);
+      mMIRShooterRoutingLock.Lock();
+      RouteMIR(mir);
+      mMIRShooterRoutingLock.Unlock();
     }
     catch(string exc) {
       ISmess(_eh + "caugt exception: " + exc);
@@ -1147,7 +1319,7 @@ void Saturn::delayed_mir_shooter()
     mDelayedMIRShootingQueue.erase(i);
     mDelayedMIRShootingCnd.Unlock();
     try {
-      RouteMIR(*mir);
+      RouteMIR(mir);
     }
     catch(string exc) {
       ISmess(_eh + "caugt exception: " + exc);
@@ -1157,7 +1329,7 @@ void Saturn::delayed_mir_shooter()
 
 /**************************************************************************/
 
-void Saturn::PostMIR(ZMIR& mir)
+void Saturn::PostMIR(auto_ptr<ZMIR>& mir)
 {
   // Routes a MIR in the current thread.
   // Usually called from Operators to publish some result.
@@ -1207,34 +1379,33 @@ ZMIR_RR* Saturn::ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread)
 // sub function doing the actual construction ... and sending.
 // otherwise will have three shitty stuffy
 
-void Saturn::generick_shoot_mir_result(const Text_t* exc, TBuffer* buf)
+void Saturn::generick_shoot_mir_result(ZMIR& mir, const Text_t* exc, TBuffer* buf)
 {
-  SaturnInfo* ret_addr = GThread::get_return_address();
+  SaturnInfo* ret_addr = mir.ResultRecipient;
   if(ret_addr == 0) return;
-  GThread::set_return_address(0);
-  UInt_t handle = GThread::get_return_handle();
 
   UChar_t bits = 0;
   if(exc) bits |= ZMIR_RR::B_HasException;
   if(buf) bits |= ZMIR_RR::B_HasResult;
 
-  auto_ptr<ZMIR> mir( ret_addr->S_ReceiveBeamResult(handle) );
-  *mir << bits;
+  auto_ptr<ZMIR> result( ret_addr->S_ReceiveBeamResult(mir.ResultReqHandle) );
+  *result << bits;
   if(exc) {
     TString s(exc);
-    s.Streamer(*mir);
+    s.Streamer(*result);
   }
   if(buf) {
-    mir->AppendBuffer(*buf);
+    result->AppendBuffer(*buf);
   }
 
-  mir->SetRecipient(ret_addr);
-  mir->SetCaller(ret_addr); // The result pretends to be coming come from the caller itself
-  mir->WriteHeader(); mir->RewindToExecHeader();
+  result->SetRecipient(ret_addr);
+  result->SetCaller(ret_addr); // The result pretends to be coming come from the caller itself
+  result->WriteHeader(); result->RewindToExecHeader();
   mMIRShootingCnd.Lock();
-  mMIRShootingQueue.push_back(mir.release());
+  mMIRShootingQueue.push_back(result.release());
   mMIRShootingCnd.Signal();
   mMIRShootingCnd.Unlock();
+  mir.RequiresResult = false;
 }
 
 void Saturn::ShootMIRResult(TBuffer& b)
@@ -1243,7 +1414,10 @@ void Saturn::ShootMIRResult(TBuffer& b)
   // Should be called from a method called via a MIR (flare OR beam)
   // containing a result request.
 
-  generick_shoot_mir_result(0, &b);
+  ZMIR* mir = GThread::get_mir();
+  if(mir != 0 && mir->RequiresResult) {
+    generick_shoot_mir_result(*mir, 0, &b);
+  }
 }
 
 /**************************************************************************/
@@ -1264,19 +1438,18 @@ void Saturn::report_mir_pre_demangling_error(ZMIR& mir, string error)
        );
     err->SetRecipient(mir.Caller->HostingSaturn());
     ShootMIR(err);
+    // Here could also add entry into local log.
   } else {
     ISerr(_eh + GForm("could not notify caller id=%u", mir.CallerID));
   }
 
+  // The following is equivalent to ZMIR::DemangleResultRecipient(this).
   if(mir.HasResultReq()) {
     mir.ResultRecipient = dynamic_cast<SaturnInfo*>(DemangleID(mir.ResultRecipientID));
     if(mir.ResultRecipient) {
-      mir.DemangleResultRecipient(this);
-      GThread::set_return_address(mir.ResultRecipient);
-      GThread::set_return_handle(mir.ResultReqHandle);
-      generick_shoot_mir_result(error.c_str(), 0);
+      generick_shoot_mir_result(mir, error.c_str(), 0);
     } else {
-      ISerr(_eh + GForm("could not notify result recipient id=%u", mir.ResultRecipientID));
+      ISerr(_eh + GForm("could not damangle&notify result recipient id=%u", mir.ResultRecipientID));
     }
   }
 }
@@ -1298,14 +1471,14 @@ void Saturn::report_mir_post_demangling_error(ZMIR& mir, string error)
     ISerr(_eh + GForm("could not notify caller id=%u", mir.CallerID));
   }
 
-  if(GThread::get_return_address()) {
-    generick_shoot_mir_result(error.c_str(), 0);
+  if(mir.RequiresResult) {
+    generick_shoot_mir_result(mir, error.c_str(), 0);
   }
 }
 
 //--------------------------------------------------------------------------
 
-void Saturn::RouteMIR(ZMIR& mir) throw()
+void Saturn::RouteMIR(auto_ptr<ZMIR>& mir) throw()
 {
   // Decides what to do with a MIR ... and does it.
 
@@ -1313,18 +1486,18 @@ void Saturn::RouteMIR(ZMIR& mir) throw()
 
   ISdebug(8, GForm("%s entered ...", _eh.c_str()));
 
-  GThread::set_return_address(0);
-  GThread::set_return_handle(0);
+  if(mir->AlphaID == 0)
+    throw(_eh + "AlphaID is zero!");
 
-  switch(mir.What()) {
+  switch(mir->What()) {
 
   case GledNS::MT_Flare: {
-    switch(mir.Direction) {
+    switch(mir->Direction) {
     case ZMIR::D_Up:
-      if(mir.AlphaID < mKing->GetSaturnID()) {
+      if(mir->AlphaID < mKing->GetSaturnID()) {
 	// This could in principle break if the connection has just been lost.
 	// But this is catastrophic anyway.
-	ForwardMIR(mir, mSaturnInfo->GetMaster());
+	ForwardMIR(*mir, mSaturnInfo->GetMaster());
       } else {
 	UnfoldMIR(mir);
       }
@@ -1341,27 +1514,37 @@ void Saturn::RouteMIR(ZMIR& mir) throw()
 
   case GledNS::MT_Beam: {
     try {
-      if(!mir.RecipientID) {
+      if(!mir->RecipientID) {
 	throw(_eh + "can't determine recipient of a beam.");
       }
-      if(mir.RecipientID == mSaturnInfo->GetSaturnID()) {
+
+      if(mir->RecipientID == mSaturnInfo->GetSaturnID()) {
+
+	mir->Recipient = mSaturnInfo;
 	UnfoldMIR(mir);
+
       } else {
-	if(mir.Recipient == 0)
-	  mir.Recipient = dynamic_cast<SaturnInfo*>(DemangleID(mir.RecipientID));
-	SaturnInfo* route = mir.Recipient->hRoute;
+
+	mir->Recipient = dynamic_cast<SaturnInfo*>(DemangleID(mir->RecipientID));
+	if(mir->Recipient == 0) {
+	  throw(_eh + "can't demangle recipient of a beam.");
+	}
+	
+	SaturnInfo* route = mir->Recipient->hRoute;
 	if(route == 0) {
-	  route = FindRouteTo(mir.Recipient);
+	  route = FindRouteTo(mir->Recipient);
 	  if(route == 0 || route->hSocket == 0) {
 	    throw(_eh + "no route to recipient.");
 	  }
-	  mir.Recipient->hRoute = route;
+	  mir->Recipient->hRoute = route;
 	}
-	ForwardMIR(mir, route);
+
+	ForwardMIR(*mir, route);
+
       }
     }
     catch(string exc) {
-      report_mir_pre_demangling_error(mir, exc);
+      report_mir_pre_demangling_error(*mir, exc);
     }
     break;
   }
@@ -1372,7 +1555,7 @@ void Saturn::RouteMIR(ZMIR& mir) throw()
   }
 }
 
-void Saturn::UnfoldMIR(ZMIR& mir) throw()
+void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 {
   // Prepares MIR for execution, does checks, proper broadcasting
   // and the execution itself.
@@ -1383,167 +1566,175 @@ void Saturn::UnfoldMIR(ZMIR& mir) throw()
   ISdebug(8, GForm("%s entered ...", _eh.c_str()));
 
   bool is_shared_space;    // if shared_space and flare => mir should be broadcasted
-  bool is_flare = (mir.What() == GledNS::MT_Flare);
+  bool is_flare = (mir->What() == GledNS::MT_Flare);
 
   bool is_moon_space = false;
   bool is_sun_space  = false;
   bool is_fire_space = false;
 
-  if(mir.AlphaID < mKing->GetSaturnID())
+  if(mir->AlphaID < mKing->GetSaturnID())
     {
       is_shared_space = true;
       is_moon_space   = true;
     }
-  else if(mir.AlphaID >= mKing->GetSaturnID() &&
-	  mir.AlphaID <= mKing->GetMaxID())
+  else if(mir->AlphaID >= mKing->GetSaturnID() &&
+	  mir->AlphaID <= mKing->GetMaxID())
     {
       is_shared_space = true;
       is_sun_space    = true;
     }
-  else if(mir.AlphaID >= mFireKing->GetSaturnID() &&
-	  mir.AlphaID <= mFireKing->GetMaxID())
+  else if(mir->AlphaID >= mFireKing->GetSaturnID() &&
+	  mir->AlphaID <= mFireKing->GetMaxID())
     {
       is_shared_space = false;
       is_fire_space   = true;
     }
   else
     {
-      report_mir_pre_demangling_error(mir, _eh + "lens ID out of range.");
+      report_mir_pre_demangling_error(*mir, _eh + "lens ID out of range.");
       return;
     }
 
-  if(mir.HasResultReq() && (!is_flare || (is_flare && is_sun_space))) {
-    try {
-      mir.DemangleResultRecipient(this);
-      GThread::set_return_address(mir.ResultRecipient);
-      GThread::set_return_handle(mir.ResultReqHandle);
-    }
-    catch(string exc) {
-      report_mir_pre_demangling_error(mir, _eh + "could not demangle result recipient.");
-      return;
+  if(mir->HasResultReq()) {
+    if((!is_flare || (is_flare && is_sun_space))) {
+      try {
+	mir->DemangleResultRecipient(this);
+      }
+      catch(string exc) {
+	report_mir_pre_demangling_error(*mir, _eh + "could not demangle result recipient.");
+	return;
+      }
+      mir->RequiresResult = true;
     }
   }
 
   try {
-    mir.ReadExecHeader();
-    mir.Demangle(this);
-    if(!is_flare) {
-      mir.DemangleRecipient(this);
-    }
+    mir->ReadExecHeader();
+    mir->Demangle(this);
   }
   catch(string exc) {
-    report_mir_pre_demangling_error(mir, _eh + "context demangling error: " + exc);
+    report_mir_pre_demangling_error(*mir, _eh + "context demangling error: " + exc);
     return;
   }
 
-  ZKing* king = mir.Alpha->GetQueen()->GetKing();
-  bool is_king = (king == mir.Alpha);
+  ZKing* king        = mir->Alpha->GetQueen()->GetKing();
+  bool is_king       = (king == mir->Alpha);
+  bool is_ruler      = false;
+  MIR_Priest* priest = 0;
+  lpSaturnInfo_t* reflectors = 0;
+  ZGlass* ruler      = 0;
 
   if(is_king) {
-
-    mRulingLock.Lock();
-    try {
-      if(is_flare) {
-	if(is_moon_space) {
-	  BroadcastMIR(mir, mMoons);
-	  ExecMIR(mir);
-	} else {
-	  king->ReadLock();
-	  try { king->BlessMIR(mir); } catch(...) { king->ReadUnlock(); throw; }
-	  king->ReadUnlock();
-	  ExecMIR(mir);
-	  if(is_shared_space && mir.SuppressFlareBroadcast == false) {
-	    BroadcastMIR(mir, mMoons);
-	  }
-	  if(GThread::get_return_address()) generick_shoot_mir_result(0, 0);
-	}
-      } else {
-	king->ReadLock();
-	try { king->BlessMIR(mir); } catch(...) { king->ReadUnlock(); throw; }
-	king->ReadUnlock();
-	ExecMIR(mir);
-	if(GThread::get_return_address()) generick_shoot_mir_result(0, 0);
-      }
-    }
-    catch (string exc) {
-      mRulingLock.Unlock();
-      report_mir_post_demangling_error(mir, _eh + "execution of a MIR (ZKing) failed: " + exc);
-      return;
-    }
-    mRulingLock.Unlock();
-
+    is_ruler   = true;
+    priest     = king;
+    reflectors = &mMoons;
+    ruler      = king;
   } else {
+    ZQueen* queen = mir->Alpha->GetQueen();
+    is_ruler   = (mir->Alpha == queen);
+    priest     = queen;
+    reflectors = &(queen->mReflectors);
+    ruler      = queen;
+  }
 
-    ZQueen* queen = mir.Alpha->GetQueen();
-    bool is_queen = (mir.Alpha == queen);
-    if(is_queen) mRulingLock.Lock();
-    try {
-      if(is_flare) {
-	if(is_moon_space) {
-	  // lpSaturnInfo_t& moons = is_queen ? mMoons : queen->mReflectors;
-	  BroadcastMIR(mir, queen->mReflectors);
-	  ExecMIR(mir);
+  try {
+    if(is_flare) {
+
+      if(is_moon_space) {
+
+	BroadcastMIR(*mir, *reflectors);
+	if(mir->ShouldExeDetached()) {
+	  ExecDetachedMIR(mir);
 	} else {
-	  queen->ReadLock();
-	  try { queen->BlessMIR(mir); } catch(...) { queen->ReadUnlock(); throw; }
-	  queen->ReadUnlock();
-	  ExecMIR(mir);
-	  if(is_shared_space && mir.SuppressFlareBroadcast == false) {
-	    // lpSaturnInfo_t& moons = is_queen ? mMoons : queen->mReflectors;
-	    BroadcastMIR(mir, queen->mReflectors);
-	  }
-	  if(GThread::get_return_address()) generick_shoot_mir_result(0, 0);
+	  if(is_ruler) { GMutexHolder rulerGMH(mRulingLock); ExecMIR(mir); }
+	  else         { ExecMIR(mir); }
 	}
+
       } else {
-	queen->ReadLock();
-	try { queen->BlessMIR(mir); } catch(...) { queen->ReadUnlock(); throw; }
-	queen->ReadUnlock();
-	ExecMIR(mir);
-	if(GThread::get_return_address()) generick_shoot_mir_result(0, 0);
+
+	{ GMutexHolder blessGMH(ruler->mReadMutex); priest->BlessMIR(*mir); }
+	if(mir->ShouldExeDetached()) {
+	  if(is_shared_space && mir->IsDetachedExeMultix()) {
+	    BroadcastMIR(*mir, *reflectors);
+	  }
+	  ExecDetachedMIR(mir);
+	} else {
+	  if(is_ruler) { GMutexHolder rulerGMH(mRulingLock); ExecMIR(mir); }
+	  else         { ExecMIR(mir); }
+	  if(is_shared_space && mir->SuppressFlareBroadcast == false) {
+	    BroadcastMIR(*mir, *reflectors);
+	  }
+	  if(mir->RequiresResult) generick_shoot_mir_result(*mir, 0, 0);
+	}
+
       }
+
+    } else {
+
+      { GMutexHolder blessGMH(ruler->mReadMutex); priest->BlessMIR(*mir); }
+      if(mir->ShouldExeDetached()) {
+	ExecDetachedMIR(mir);
+      } else {
+	if(is_ruler) { GMutexHolder rulerGMH(mRulingLock); ExecMIR(mir); }
+	else         { ExecMIR(mir); }
+	if(mir->RequiresResult) generick_shoot_mir_result(*mir, 0, 0);
+      }
+
     }
-    catch (string exc) {      
-      if(is_queen) mRulingLock.Unlock();
-      report_mir_post_demangling_error(mir, _eh + "execution of a MIR (not ZKing) failed: " + exc);
-      return;
-    }
-    if(is_queen) mRulingLock.Unlock();
+  }
+  catch (string exc) {      
+    report_mir_post_demangling_error(*mir, _eh + "processing failed: " + exc);
+    return;
   }
 } 
 
-void Saturn::ExecMIR(ZMIR& mir)
+void Saturn::ExecMIR(auto_ptr<ZMIR>& mir, bool lockp)
 {
   static string _eh("Saturn::ExecMIR ");
 
   ISdebug(8, GForm("%sentered ...", _eh.c_str()));
 
-  if(mir.IsWriting()) mir.RewindToData();
+  if(mir->IsWriting()) mir->RewindToData();
 
-  GledNS::LibSetInfo* lsi = GledNS::FindLibSetInfo(mir.Lid);
+  GledNS::LibSetInfo* lsi = GledNS::FindLibSetInfo(mir->Lid);
   if(lsi == 0)
-    throw(string(GForm("%s can't demangle lib ID=%u", _eh.c_str(), (unsigned int)mir.Lid)));
-  
-  ZMirEmittingEntity* ex_mee = GThread::get_owner();
-  GThread::set_owner(mir.Caller);
+    throw(string(GForm("%s can't demangle lib ID=%u", _eh.c_str(), (unsigned int)mir->Lid)));
 
-  ZGlass* lens = mir.Alpha;
-  lens->WriteLock();
+  ZGlass* lens = mir->Alpha;
+  ZMirEmittingEntity* ex_mee = GThread::get_owner();
+  GThread::set_owner(mir->Caller);
   // This is rarely non-null. But is, e.g. ZQueen::InstantiateWAttach ...
-  ZMIR* ex_mir = lens->mMir;
-  lens->mMir = &mir;
+  ZMIR* ex_mir = GThread::get_mir();
+  GThread::set_mir(mir.get());
+  if(lockp) lens->WriteLock();
   try {
-    (lsi->fLME_Foo)(lens, mir);
+    (lsi->fLME_Foo)(lens, *mir);
   }
   catch(string exc) {
-    lens->mMir = ex_mir;
-    lens->WriteUnlock();
+    if(lockp) lens->WriteUnlock();
+    GThread::set_mir(ex_mir);
     GThread::set_owner(ex_mee);
     throw;
   }
-  lens->mMir = ex_mir;
-  lens->WriteUnlock();
+  if(lockp) lens->WriteUnlock();
+  GThread::set_mir(ex_mir);
   GThread::set_owner(ex_mee);
 }
+
+
+void Saturn::ExecDetachedMIR(auto_ptr<ZMIR>& mir)
+{
+  // This function spawns a thread that calls ExecMIR().
+
+  mir_router_ti* foo = new mir_router_ti(this, mir.release(), true);
+  // Created joinable, so that it can be canceled and joined.
+  GThread* bar = new GThread((GThread_foo)(tl_MIR_DetachedExecutor), foo, false);
+  bar->SetEndFoo((GThread_cu_foo)tl_MIR_DetachedCleanUp);
+  bar->SetEndArg((void*)foo);
+  bar->Spawn();
+}
+
+/**************************************************************************/
 
 void Saturn::ForwardMIR(ZMIR& mir, SaturnInfo* route)
 {
@@ -1643,17 +1834,17 @@ void Saturn::ray_emitter()
     mRayEmittingCnd.Lock();
     if(mRayEmittingQueue.empty())
       mRayEmittingCnd.Wait();
-    if(mEyes.empty()) {
-      mRayEmittingQueue.pop_front();
-      mRayEmittingCnd.Unlock();
-    } else {
+
+    Ray* ray = mRayEmittingQueue.front();
+    mRayEmittingQueue.pop_front();
+    mRayEmittingCnd.Unlock();
+
+    mEyeLock.Lock();
+    if( ! mEyes.empty()) {
       TMessage msg(GledNS::MT_Ray);
-      mRayEmittingQueue.front().Streamer(msg);
-      mRayEmittingQueue.pop_front();
-      mRayEmittingCnd.Unlock();
-      ISdebug(8, GForm("%snotifying %d eye(s).", _eh.c_str(), mEyes.size()));
+      ray->Write(msg);
+        ISdebug(8, GForm("%snotifying %d eye(s).", _eh.c_str(), mEyes.size()));
       Int_t len = msg.Length() - 4;
-      mEyeLock.Lock();
       lpEyeInfo_i i = mEyes.begin();
       while(i != mEyes.end()) {
 	Int_t ret = (*i)->hSocket->Send(msg);
@@ -1666,28 +1857,31 @@ void Saturn::ray_emitter()
 	  wipe_eye(*j, true);
 	}
       }
-      mEyeLock.Unlock();
     }
+    mEyeLock.Unlock();
+
+    delete ray;
   }
 }
 
-void Saturn::Shine(Ray &r)
+void Saturn::Shine(auto_ptr<Ray>& ray)
 {
-  if(mEyes.empty()) return;
+  if(!bAcceptsRays) return;
   mRayEmittingCnd.Lock();
-  mRayEmittingQueue.push_back(r);
+  mRayEmittingQueue.push_back(ray.release());
   mRayEmittingCnd.Signal();
   mRayEmittingCnd.Unlock();
 }
 
-void Saturn::SingleRay(EyeInfo* eye, Ray& ray)
+void Saturn::DeliverTextMessage(EyeInfo* eye, TextMessage& tm)
 {
-  TMessage msg(GledNS::MT_Ray);
   if(eye->hSocket == 0) {
-    ISerr(GForm("Saturn::SingleRay got request for non-local eye %s",
+    ISerr(GForm("Saturn::DeliverTextMessage got request for non-local eye %s",
 		eye->GetName()));
+    return;
   }
-  ray.Streamer(msg);
+  TMessage msg(GledNS::MT_TextMessage);
+  tm.Streamer(msg);
   mEyeLock.Lock();
   eye->hSocket->Send(msg);
   mEyeLock.Unlock();
@@ -1896,7 +2090,7 @@ void Saturn::wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p)
     mir->SetCaller(mSaturnInfo);
     mir->SetRecipient(mSunInfo);
     mir->WriteHeader(); mir->RewindToExecHeader();
-    RouteMIR(*mir);
+    RouteMIR(mir);
   }
 }
 
@@ -1929,9 +2123,10 @@ void Saturn::wipe_eye(EyeInfo* eye, bool notify_sunqueen_p)
   } else {
     ISerr(GForm("Saturn::wipe_eye %s not found in list", eye->GetName()));
   }
-  
   delete eye->hSocket; eye->hSocket = 0;
 
+  if(mEyes.empty())
+    bAcceptsRays = false;
   mEyeLock.Unlock();
 
   if(notify_sunqueen_p) {
@@ -1939,7 +2134,7 @@ void Saturn::wipe_eye(EyeInfo* eye, bool notify_sunqueen_p)
     mir->SetCaller(mSaturnInfo);
     mir->SetRecipient(mSunKing->mSaturnInfo);
     mir->WriteHeader(); mir->RewindToExecHeader();
-    RouteMIR(*mir);
+    RouteMIR(mir);
   }
 }
 
@@ -1976,10 +2171,10 @@ void Saturn::create_kings(const char* king, const char* whore_king)
   mFireKing->mLightType = ZKing::LT_Fire;
   Enlight(mFireKing, mSaturnInfo->mFireKingID);
   mGod->Add(mFireKing);
-  mFireQueen = new ZQueen(1024, "FireQueen", "Enchantress of ChaOss");
+  mFireQueen = new ZFireQueen(1024, "FireQueen", "Enchantress of ChaOss");
   mFireKing->Enthrone(mFireQueen);
   mFireQueen->SetMapNoneTo(ZMirFilter::R_Allow);
-  mFireQueen->bFollowDeps = true;
+  mFireQueen->bFollowDeps = true; // !!! This is a wicked trick.
 }
 
 void Saturn::arrival_of_kings(TMessage* m)
