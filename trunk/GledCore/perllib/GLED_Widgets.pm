@@ -1,6 +1,6 @@
 # $Header$
 
-# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -89,8 +89,8 @@ sub new {
   my $S = {@_};
   bless($S, $class);
 
-  $S->{-join}  = "false" unless exists $S->{-join};
-  $S->{-const} = "false" unless exists $S->{-join};
+  $S->{-join}  = 0 unless exists $S->{-join};
+  $S->{-const} = 0 unless exists $S->{-const};
   return $S;
 }
 
@@ -168,7 +168,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}($valuestr) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
     mIdol->Set$S->{Methodbase}($valuestr);
   }
@@ -193,7 +193,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}($valuestr) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
     mIdol->Set$S->{Methodbase}($valuestr);
   }
@@ -302,7 +302,7 @@ sub new {
 
 sub make_widget {
   my $S = shift;
-  return $S->make_widget_A() . " o->labelcolor(fl_color_cube(2,0,0));\n" . $S->make_widget_B();
+  return $S->make_widget_A() . "  o->labelcolor(fl_color_cube(2,0,0));\n" . $S->make_widget_B();
 }
 sub make_cxx_cb { my $S = shift; $S->make_varout_widget_cb(); }
 
@@ -332,6 +332,14 @@ sub make_widget {
 }
 
 sub make_cxx_cb { my $S = shift; $S->make_var_widget_cb(); }
+
+sub make_weed_update {
+  my $S = shift;
+  $S->make_weed_update_A() .
+"  $S->{Type} _val = mIdol->Get$S->{Methodbase}();\n" .
+"  if(_val != ($S->{Type})w->value()) w->value(_val);\n" .
+  $S->make_weed_update_B();
+}
 
 ########################################################################
 
@@ -448,6 +456,13 @@ sub make_cxx_cb { my $S = shift; $S->make_text_widget_cb(); }
 
 package GLED::Widgets::PhonyEnum; @ISA = ('GLED::Widgets');
 
+# -vals    [(<val>,<label>)*]
+# -seqvals [<labels>] values from zero with given label
+# Otherwise auto deduce from catalog based on $S->{Type} or -type
+# -type    <string>
+# -labels  [<string>*]
+# -names   [<string>*]
+
 sub new {
   my $proto = shift;
   my $S = $proto->SUPER::new(@_);
@@ -458,23 +473,70 @@ sub new {
   $S->{CanResizeP}   = "true";
   $S->{-width} = 16 unless exists $S->{-width};
   $S->{-height} = 1 unless exists $S->{-height};
+
   return $S;
+}
+
+sub enum_details {
+  my $S = shift;
+  my $E = {};
+  my $_eh = "GLED::Widgets::PhonyEnum::enum_details ";
+
+  if(defined $S->{-vals} or defined $S->{-seqvals}) {
+    $E->{EnumCastType} = $S->{Type};
+  } else {
+    my $type  = (defined $S->{-type}) ? $S->{-type} : $S->{Type};
+    my ($class, $enum) = $type =~ m/(\w+)(?:::(\w+))?/;
+    # print "For type='$type' got class='$class', enum='$enum'\n";
+    unless(defined $enum) { $enum = $class; $class = $::CLASSNAME; }
+    die "$_eh resolver entry not present for enum ${class}::${enum}"
+      unless defined $::resolver->{'GlassName2GlassSpecs'}{$class}{'Enums'}{$enum};
+    if(defined $S->{-type}) {
+      $E->{EnumCastType} = $S->{Type};
+    } else {
+      $E->{EnumCastType} = $class .'::'. $enum;
+    }
+    $E->{EnumSrcClass} = $class;
+    $E->{EnumInfo}  = $::resolver->{'GlassName2GlassSpecs'}{$class}{'Enums'}{$enum};
+  }
+  return $E;
 }
 
 sub make_widget {
   my $S = shift;
+  my $eh = "GLED::Widgets::PhonyEnum ($S->{Methodbase})";
   my $r = $S->make_widget_A();
 
-  if($#{$S->{-vals}} >= 0 && ($#{$S->{-vals}} % 2) == 1) {
+  if($S->{-const}) {
+    $r .= "  o->labelcolor(fl_color_cube(2,0,0));\n";
+  }
+
+  if(defined $S->{-vals}) {
+    die "$eh uneven number of arguments for -vals"
+      if ($#{$S->{-vals}} + 1) % 2 != 0;
     for($i=0; $i<$#{$S->{-vals}}; $i+=2) {
-      $r .= "\to->Bruh($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
+      $r .= "  o->Bruh($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
     }
-  } elsif($#{$S->{-seqvals}} >= 0) {
+
+  } elsif(defined $S->{-seqvals}) {
     for($i=0; $i<=$#{$S->{-seqvals}}; ++$i) {
-      $r .= "\to->Bruh($i, \"$S->{-seqvals}[$i]\");\n";
+      $r .= "  o->Bruh($i, \"$S->{-seqvals}[$i]\");\n";
     }
+
   } else {
-    die "GLED::Widgets::PhonyEnum bad syntax";
+    my $E = $S->enum_details();
+    my $labp = defined $S->{-labels} and ref($S->{-labels}) eq "ARRAY";
+    my $namp = defined $S->{-names}  and ref($S->{-names})  eq "ARRAY";
+    for $h (@{$E->{EnumInfo}}) {
+      my $add = 0;
+      if($labp or $namp) {
+	$add = 1 if(($labp and grep $h->{label}, @{$S->{-labels}}) or
+		    ($namp and grep $h->{name},  @{$S->{-names}}));
+      } else {
+	$add = 1;
+      }
+      $r .= "  o->Bruh($E->{EnumSrcClass}::$h->{name}, \"$h->{label}\");\n" if $add;
+    }
   }
   $r .= $S->make_widget_B();
   $r;
@@ -483,18 +545,24 @@ sub make_widget {
 
 sub make_cxx_cb {
   my $S = shift;
-return <<"fnord";
-void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
+  my $E = $S->enum_details();
+  my $r = "void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {\n";
+  if($S->{-const}) {
+    $r .= "  $S->{Methodbase}_Update(o)\n;";
+  } else {
+    $r .= <<"fnord";
   Eye* e = (mView->fImg) ? mView->fImg->fEye : 0;
   if(e) {
-    auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(o->GetTrueVal()) );
+    auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(($E->{EnumCastType})(o->GetTrueVal())) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
-    mIdol->Set$S->{Methodbase}(o->GetTrueVal());
+    mIdol->Set$S->{Methodbase}(($E->{EnumCastType})(o->GetTrueVal()));
   }
-}\n
 fnord
+  }
+  $r .= "}\n\n";
+  return $r;
 }
 
 sub make_weed_update {
@@ -561,7 +629,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set3Pos(o->x(),o->y(),o->z()) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
     mIdol->Set3Pos(o->x(),o->y(),o->z());
   }
@@ -609,7 +677,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_SetRotByAngles(o->phi(),o->theta(),o->eta()) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
     mIdol->SetRotByAngles(o->phi(),o->theta(),o->eta());
   }
@@ -658,7 +726,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(o->r,o->g,o->b,o->a) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
     mIdol->Set$S->{Methodbase}(o->r,o->g,o->b,o->a);
     o->redraw();
