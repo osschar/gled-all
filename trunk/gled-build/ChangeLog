@@ -1,3 +1,23 @@
+2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* configure.rc:
+
+	New option 'libset' to specify libsets to build; creates Makefile.
+	The build procedure is now more like what people expect.
+
+	* INSTALL:
+	* MANIFEST:
+
+	Corrected for the new build procedure.
+	
+	* build_libsets:
+	* mecca:
+	* mecca.rc:
+
+	Removed files.
+
+
 2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* cfg/project7.rc:
@@ -16,7 +36,7 @@
 	They are exported via #defines in include/config.h, e.g.
 	#define GLED_VERSION_STRING    "1.2.0-cvs"
 	#define GLED_BUILD_DATE_STRING "2003-7-22"
-	
+
 
 2003-07-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
