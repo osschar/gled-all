@@ -16,6 +16,5 @@ CPPFLAGS        = -I/usr/include/glib-1.2 -I/usr/lib/glib/include
 
 include ${GLEDSYS}/make/make_base.inc
 
-.PHONY:	libset_clean libset_distclean
-libset_clean:
-libset_distclean:
+clean::
+distclean::
