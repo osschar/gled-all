@@ -24,6 +24,9 @@ void images()
   scenes->CheckIn(images);
   scenes->Add(images);
 
+  CREATE_ADD_GLASS(lucida34, ZRlFont, scenes, "LucidaBright 34", 0);
+  lucida34->SetFontFile("lucidabright34.txf");
+
   // Images
 
   CREATE_ADD_GLASS(image1, ZImage, images, "GledLogo", 0);
@@ -141,6 +144,7 @@ void images()
   txt1->SetScales(2.2, 2.3, 1);
   txt1->SetFillBack(true);
   txt1->SetFGCol(0, 0, 0); txt1->SetBGCol(1, 0.95, 0.6);
+  txt1->SetFont(lucida34);
 
   CREATE_ADD_GLASS(txt2, Text, images, "Text2", 0);
   txt2->SetText("Generic Lightweight Environment for Distributed computing");
