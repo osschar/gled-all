@@ -75,6 +75,7 @@ namespace {
 ClassImp(ZImage)
 
 GMutex ZImage::sILMutex(GMutex::recursive);
+Bool_t ZImage::sVerboseLoad(false);
 
 /**************************************************************************/
 
@@ -82,10 +83,17 @@ void ZImage::_init()
 {
   mIL_Name = 0;
   mW = mH = 0;
+  mImgFmt = 0;
+  mImgTyp = 0;
+  mIntFmt = GL_RGB8;
+
   mMagFilter = mMinFilter = GL_NEAREST;
   mEnvMode = GL_DECAL;
-  bLoaded = false;
+
   bLoadAdEnlight = false;
+  bUseShadowing  = true;
+  bLoaded        = false;
+  bShadowed      = false;
 }
 
 ZImage::~ZImage() {
@@ -95,10 +103,26 @@ ZImage::~ZImage() {
 void ZImage::AdEnlightenment()
 {
   ZGlass::AdEnlightenment();
-  if(bLoaded && bLoadAdEnlight) Load();
+  if(bLoadAdEnlight) Load();
 }
 
 /**************************************************************************/
+
+void ZImage::SetUseShadowing(Bool_t useshadowing)
+{
+  if(useshadowing == bUseShadowing) return;
+  if(useshadowing) {
+    if(bLoaded && !bShadowed) {
+      shadow();
+    }
+  } else {
+    if(bLoaded && bShadowed) {
+      bind();
+    }
+  }
+  bUseShadowing = useshadowing;
+  Stamp(LibID(), ClassID());
+}
 
 void ZImage::Load()
 {
@@ -110,21 +134,25 @@ void ZImage::Load()
   if(il_err("Gen images")) goto end;
 
   ilBindImage(mIL_Name);
-  if(il_err("Bind Image")) goto end;;
+  if(il_err("Bind Image")) goto end;
 
   if (!ilLoadImage(const_cast<char *>(mFile.Data()))) {
-    il_err("Load Image");
+    il_err(GForm("Load Image <file:%s>", mFile.Data()));
     goto end;
   }
 
-  il_id();
+  if(sVerboseLoad) il_id();
 
   mW = ilGetInteger(IL_IMAGE_WIDTH);
   mH = ilGetInteger(IL_IMAGE_HEIGHT);
+  mImgFmt = gl_format();
+  mImgTyp = gl_type();
   bLoaded = true;
 
+  if(bUseShadowing) shadow();
+
  end:
-  mStampReqTexture = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(LibID(), ClassID());
   sILMutex.Unlock();
 }
 
@@ -132,25 +160,65 @@ void ZImage::Unload()
 {
   sILMutex.Lock();
   delete_image();
-  bLoaded = false;
-  mStampReqTexture = Stamp(LibID(), ClassID());
+  bLoaded = false; bShadowed = false;
+  mStampReqTring = Stamp(LibID(), ClassID());
   sILMutex.Unlock();
 }
 
 void ZImage::Save()
 {
-  // Could easily be implemented now ... that we have devil
+  // Could easily be implemented now ... that we have devil.
 }
 
 /**************************************************************************/
 
 // User's responsibility to lock/unlock image operations
+// and assert that image is loaded.
 
 void ZImage::bind()
 {
-  ilBindImage(mIL_Name);
-  if(il_err("Bind Image")) return;
+  if(bShadowed && bUseShadowing) {
+
+    ilGenImages(1, &mIL_Name);
+    if(il_err("Gen images")) goto error;
+
+    ilBindImage(mIL_Name);
+    if(il_err("Bind Image")) goto error;
+
+    if (!ilLoadImage(const_cast<char *>(mFile.Data()))) {
+      il_err("Load Image");
+      goto error;
+    }
+
+    bShadowed = false;
+
+  } else {
+
+    ilBindImage(mIL_Name);
+    if(il_err("Bind Image")) goto error;
+
+  }
+
+  return;
+
+ error:
+  bLoaded = false;
+  // Do not emit the stamp ...
 }
+
+void ZImage::unbind()
+{
+  if(bUseShadowing && !bShadowed) {
+    shadow();
+  }
+}
+
+void ZImage::shadow()
+{
+  delete_image();
+  bShadowed = true;
+}
+
 void ZImage::delete_image()
 {
   if(mIL_Name) {
@@ -158,6 +226,8 @@ void ZImage::delete_image()
     mIL_Name = 0;
   }
 }
+
+/**************************************************************************/
 
 int ZImage::w() {
   return ilGetInteger(IL_IMAGE_WIDTH);
