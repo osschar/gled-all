@@ -131,7 +131,6 @@ namespace FTW {
   class NameBox : public OptoStructs::A_View, public Fl_Box {
   public:
     NameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h);
-    ~NameBox();
 
     virtual void AbsorbRay(Ray& ray);
 
