@@ -14,6 +14,7 @@
 #include <Stones/ZMIR.h>
 
 #include <FL/Fl.H>
+#include <FL/Fl_Menu_Button.H>
 #include <FL/fl_draw.H>
 
 namespace FGS  = FltkGledStuff;
@@ -133,9 +134,16 @@ void FGS::LensNameBox::draw()
   draw_box();
   draw_label();
   fl_color(FL_BLACK);
+  fl_font(labelfont(), labelsize());
   fl_push_clip(x()+3, y(), w()-6, h());
   fl_draw(mToName.c_str(), x()+3, y(), w()-6, h(), FL_ALIGN_LEFT, 0, 0);
   fl_pop_clip();
+}
+
+/**************************************************************************/
+
+namespace {
+  void clear_cb(Fl_Widget* w, FGS::LensNameBox* ud) { ud->Clear(); }
 }
 
 int FGS::LensNameBox::handle(int ev)
@@ -152,7 +160,13 @@ int FGS::LensNameBox::handle(int ev)
     case 2: Fl::paste(*this); return 1;
     case 3:
       if(fImg) {
-	shell->ImageMenu(fImg, Fl::event_x_root(), Fl::event_y_root());
+	Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+	menu.textsize(shell->cell_fontsize());
+	FTW_Shell::mir_call_data_list mcdl;
+	menu.add("Clear", 0, (Fl_Callback*)clear_cb, this, FL_MENU_DIVIDER);
+	shell->FillImageMenu(fImg, menu, mcdl, "");
+
+	menu.popup();
       }
       return 1;
     }
@@ -238,6 +252,14 @@ void FGS::LinkNameBox::ImagePasted(OptoStructs::ZGlassImg* new_img)
 
   FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
   GNS::MethodInfo* mi = GetLinkInfo()->fSetMethod;
+
   auto_ptr<ZMIR> mir (shell->GetSource()->generate_MIR(mi, fLinkDatum->fImg->fGlass));
   fLinkDatum->fImg->fEye->Send(*mir);
+}
+
+void FGS::LinkNameBox::Clear()
+{
+  ZMIR mir(fLinkDatum->fImg->fGlass->GetSaturnID(), 0);
+  GetLinkInfo()->fSetMethod->ImprintMir(mir);
+  fLinkDatum->fImg->fEye->Send(mir);
 }
