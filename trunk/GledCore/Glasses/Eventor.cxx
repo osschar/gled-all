@@ -262,7 +262,7 @@ void Eventor::Resume()
 void Eventor::Reset()
 {
   mTotalTime = mRunTime = 0;
-  mBeatsDone = mLocBeatsDone = 0; Stamp(LibID(), ClassID());
+  mBeatsDone = mLocBeatsDone = 0; Stamp(FID());
 }
 
 void Eventor::Cancel()
@@ -285,7 +285,7 @@ void Eventor::SetHost(SaturnInfo* host)
   try {
     if(bRunning)
       throw(string("Eventor::SetHost cannot change host while thread is running."));
-    set_link_or_die((ZGlass*&)mHost, host, LibID(), ClassID());
+    set_link_or_die((ZGlass*&)mHost, host, FID());
   }
   catch(...) {
     WriteUnlock();

@@ -44,7 +44,7 @@ void NestInfo::EnactLayout()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, LibID(), ClassID()));
+      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
 

@@ -58,16 +58,14 @@ void WSPoint::Coff(const WSPoint* f)
 
 /**************************************************************************/
 
-TimeStamp_t WSPoint::Stamp(LID_t lid, CID_t cid)
+TimeStamp_t WSPoint::Stamp(FID_t fid)
 {
   // Upon change also change parent's triangulation stamp (if it is a WSSeed).
   // Not optimal as it forces re-computation of Coffs for all WSPoints
   // in the symbol.
 
-  TimeStamp_t t = PARENT_GLASS::Stamp(lid, cid);
-  if(lid == 0              && cid == 0 ||
-     lid == ZNode::LibID() && cid == PARENT_GLASS::ClassID() ||
-     lid == LibID()        && cid == ClassID())
+  TimeStamp_t t = PARENT_GLASS::Stamp(fid);
+  if(fid.is_null() || fid == ZNode::FID() || fid == FID())
   {
     mStampReqTring = t;
 

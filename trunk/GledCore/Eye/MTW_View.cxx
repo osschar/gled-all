@@ -57,7 +57,7 @@ void MTW_View::BuildVerticalView(int cell_w)
   // !! And GledViewNS creators even more so ...
   
   type(FL_VERTICAL);
-  GNS::ClassInfo* ci = GNS::FindClassInfo(mGlass->ZID());
+  GNS::ClassInfo* ci = mGlass->VGlassInfo();
   MTW_Vertical_Stats mtw_vs;
 
   Fl_Group::current(0); // Must reverse order of insertion ...
@@ -125,16 +125,15 @@ void MTW_View::Retitle()
 void MTW_View::AbsorbRay(Ray& ray)
 {
   if(bShown && ray.fRQN == RayNS::RQN_change) {
-    UpdateViews(ray.fLibID, ray.fClassID);
+    UpdateViews(ray.fFID);
   }
 }
 
 /**************************************************************************/
 
-void MTW_View::UpdateViews(LID_t lid, CID_t cid)
+void MTW_View::UpdateViews(FID_t fid)
 {
-  FID_t fid(lid,cid);
-  bool update_all = (lid==0 && cid==0);
+  bool update_all = fid.is_null();
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
     if(update_all) {
       (*sv)->Update();
@@ -221,7 +220,7 @@ int MTW_View::handle(int ev)
 {
   if(ev == FL_SHOW) {
     bShown = true;
-    UpdateViews(0, 0);
+    UpdateViews(FID_t(0,0));
   } else if(ev == FL_HIDE) {
     bShown = false;
   }

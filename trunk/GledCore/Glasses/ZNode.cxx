@@ -99,14 +99,14 @@ Int_t ZNode::MoveLF(int vi, Float_t amount)
 {
   if(vi<0 || vi>3) return 0;
   mTrans.MoveLF((Int_t)vi, amount);
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 1;
 }
 
 Int_t ZNode::Move3(Float_t x, Float_t y, Float_t z)
 {
   mTrans.Move3(x,y,z);
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 1;
 }
 
@@ -114,7 +114,7 @@ Int_t ZNode::RotateLF(Int_t i1, Int_t i2, Float_t amount)
 {
   if(i1<0 || i1>3 || i2<0 || i2>3) return 0;
   mTrans.RotateLF((Int_t)i1, (Int_t)i2, amount);
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 1;
 }
 
@@ -131,7 +131,7 @@ Int_t ZNode::Move(ZNode* ref, Int_t vi, Float_t amount)
     mTrans.Move(a, (Int_t)vi, amount);
     delete a;
   }
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 1;
 }
 
@@ -148,21 +148,21 @@ Int_t ZNode::Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Float_t amount)
     delete a;
   }
 
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 1;
 }
 
 Int_t ZNode::SetTrans(const ZTrans& t)
 {
   mTrans.SetTrans(t);
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 0;
 }
 
 Int_t ZNode::MultBy(ZTrans& t)
 {
   mTrans *= t;
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 0;
 }
 
@@ -170,13 +170,13 @@ Int_t ZNode::MultBy(ZTrans& t)
 
 Int_t ZNode::Set3Pos(Float_t x, Float_t y, Float_t z)
 {
-  mTrans.Set3Pos(x,y,z); mStampReqTrans = Stamp(LibID(), ClassID()); return 1;
+  mTrans.Set3Pos(x,y,z); mStampReqTrans = Stamp(FID()); return 1;
 }
 
 Int_t ZNode::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 {
   mTrans.SetRotByAngles(a1,a2,a3);
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   return 1;
 }
 
@@ -193,7 +193,7 @@ void ZNode::SetS(Float_t xx)
 {
   WriteLock();
   mSx = mSy = mSz = xx;
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   WriteUnlock();
 }
 
@@ -201,7 +201,7 @@ void ZNode::SetScales(Float_t x, Float_t y, Float_t z)
 {
   WriteLock();
   mSx=x; mSy=y; mSz=z;
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   WriteUnlock();
 }
 
@@ -209,7 +209,7 @@ void ZNode::MultS(Float_t s)
 {
   WriteLock();
   mSx*=s; mSy*=s; mSz*=s;
-  mStampReqTrans = Stamp(LibID(), ClassID());
+  mStampReqTrans = Stamp(FID());
   WriteUnlock();
 }
 

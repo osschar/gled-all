@@ -535,7 +535,7 @@ void FTW_Shell::FillImageMenu(OS::ZGlassImg* img, Fl_Menu_Button& menu,
 {
   mcdl.push_back(new mir_call_data_img(img, this, 0));
 
-  menu.add(GForm("%sOpen full view", prefix.c_str()),
+  menu.add(GForm("%sOpen class view", prefix.c_str()),
 	   0, (Fl_Callback*)open_full_view_cb, mcdl.back());
   menu.add(GForm("%sOpen in Nest", prefix.c_str()),
 	   0, (Fl_Callback*)open_nest_cb, mcdl.back());

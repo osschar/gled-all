@@ -74,7 +74,7 @@ void Amphitheatre::CreateChairs(Float_t radius, Float_t xoffset, Float_t z,
     mChairs.push_back(Chair(pos));
   }
   mNumCh += nchair; mNumChFree += nchair; 
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 
@@ -82,7 +82,7 @@ void Amphitheatre::RemoveChairs()
 {
   mChairs.clear();
   mNumCh = mNumChFree = 0;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 /**************************************************************************/
@@ -125,7 +125,7 @@ void Amphitheatre::ClearAmphitheatre()
   ClearList();
   for(lChair_i c=mChairs.begin(); c!=mChairs.end(); ++c) c->fNode = 0;
   mNumChFree = mNumCh;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 /**************************************************************************/
@@ -248,7 +248,7 @@ void Amphitheatre::chair_hunt()
   }
 
   if(changep)
-    Stamp(LibID(), ClassID());
+    Stamp(FID());
 
   chair_hunt_emit_mir();
 }
@@ -284,14 +284,14 @@ void Amphitheatre::StartHunt()
   if(bChairHunt) return;
   bChairHunt = true;
   chair_hunt_emit_mir();
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void Amphitheatre::StopHunt()
 {
   if(!bChairHunt) return;
   bChairHunt = false;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 /**************************************************************************/

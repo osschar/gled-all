@@ -28,8 +28,6 @@
 #include <Glasses/ZKing.h>
 #include <Glasses/ZQueen.h>
 #include <Ephra/Saturn.h>
-#include <Ephra/Forest.h>
-#include <Ephra/Mountain.h>
 #include <Gled/Gled.h>
 
 #include <TBuffer.h>
@@ -70,7 +68,7 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
   if(mIDMap.find(id) == mIDMap.end()) {
     ++num_new;
     mIDMap[id] = g;
-    mLibSets.insert(g->ZibID());
+    mLibSets.insert(g->VFID().lid);
     ISdebug(D_STREAM, GForm("ZComet::AddGlass added lens %s, id=%u",
 			    g->GetName(), id));
   }
@@ -78,13 +76,12 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
   if(depth==0) return num_new;
 
   if(do_links) {
-    lpZGlass_t  links;  g->CopyLinks(links);	  lpZGlass_i  i=links.begin();
-    lLinkSpec_t lspecs; g->CopyLinkSpecs(lspecs); lLinkSpec_i j=lspecs.begin();
-    while(i!=links.end()) {
-      if(*i != 0 && mIgnoredLinks.find(j->full_name())==mIgnoredLinks.end()) {
-	num_new += AddGlass(*i, do_links, do_lists, depth-1);
+    ZGlass::lLinkRep_t lreps; g->CopyLinkReps(lreps);
+    for(ZGlass::lLinkRep_i i = lreps.begin(); i != lreps.end(); ++i) {
+      ZGlass* l = i->fLinkRef;
+      if(l != 0 && mIgnoredLinks.find(i->fLinkInfo->FullName())==mIgnoredLinks.end()) {
+	num_new += AddGlass(l, do_links, do_lists, depth-1);
       }
-      ++i; ++j;
     }
   }
 
@@ -277,30 +274,31 @@ void ZComet::StreamHeader(TBuffer& b)
 
 void ZComet::StreamContents(TBuffer& b)
 {
+  static const string _eh("ZComet::StreamContents ");
+
   if(b.IsReading()) {
     UInt_t size;
     b >> size;
-    ISdebug(D_STREAM, GForm("ZComet::Streamer reading %u glasses", size));
+    ISdebug(D_STREAM, GForm("%sreading %u glasses", _eh.c_str(), size));
     for(UInt_t i=0; i<size; ++i) {
       ZGlass *g = GledNS::StreamLens(b);
       if(g) {
 	ID_t id = g->GetSaturnID();
 	mIDMap[id] = g;
-	ISdebug(D_STREAM+1, GForm("ZComet::Streamer read glass %s[%s] addr=%p",
-				g->GetName(), g->ClassName(), (void*)g));
+	ISdebug(D_STREAM+1, GForm("%sread lesn %s[%s] addr=%p",	_eh.c_str(),
+				  g->GetName(), g->ClassName(), (void*)g));
       } else {
-	ISdebug(D_STREAM, GForm("ZComet::Streamer failed creating node with lid=%u cid=%u",
-				g->ZibID(), g->ZlassID()));
+	ISdebug(D_STREAM, _eh + "lens creation failed.");
       }
     }
   } else {
     UInt_t size = (UInt_t)(mIDMap.size());
     b << size;
-    ISdebug(D_STREAM, GForm("ZComet::Streamer writing %u glasses", size));
+    ISdebug(D_STREAM, GForm("%swriting %u glasses", _eh.c_str(), size));
     if(size > 0) {
       for(mID2pZGlass_i i=mIDMap.begin(); i!=mIDMap.end(); i++) {
-	ISdebug(D_STREAM+1, GForm("ZComet::Streamer writing %s",
-				(i->second)->GetName()));
+	ISdebug(D_STREAM+1, GForm("%swriting %s", _eh.c_str(),
+				  (i->second)->GetName()));
 	GledNS::StreamLens(b, i->second);
       }
     }

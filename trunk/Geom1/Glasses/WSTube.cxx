@@ -132,7 +132,7 @@ void WSTube::Connect()
   Add(ap);
   Add(bp);
 
-  mStampReqTring = Stamp(LibID(), ClassID());
+  mStampReqTring = Stamp(FID());
 }
 
 void WSTube::AnimatedConnect()
@@ -171,7 +171,7 @@ void WSTube::AnimatedConnect()
       TransAtTime(tx, time, false);
       B->SetTrans(tx);
     }
-    mStampReqTring = Stamp(LibID(), ClassID());
+    mStampReqTring = Stamp(FID());
   }
 }
 

@@ -164,7 +164,7 @@ ZGlass* ZList::GetElementByName(const string& name)
 void ZList::SetElementFID(FID_t fid)
 {
   mLid = fid.lid; mCid = fid.cid;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }
 
 void ZList::Add(ZGlass* g)

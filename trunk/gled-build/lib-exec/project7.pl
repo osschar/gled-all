@@ -127,7 +127,8 @@ $Method_FIELDS = "[eE]";
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
     "float", "Real_t", "bool",
-    "ID_t", "LID_t", "CID_t","MID_t","TimeStamp_t", "UCIndex_t", "xxIndex_t");
+    "ID_t", "LID_t", "CID_t","MID_t","FID_t","FMID_t",
+    "TimeStamp_t", "UCIndex_t", "xxIndex_t");
 
 ########################################################################
 # Subs
@@ -590,6 +591,13 @@ while($c !~ m!\G\s*$!osgc) {
   # print substr( $c, pos $c, length($c) - pos($c)), "\n";
 }
 
+# Check if all links are pointers.
+for $r (@Members) {
+  next unless exists $r->{Link};
+  my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
+  die "Link $r->{Methodbase} should be a pointer!" if $pure_type eq $r->{Type};
+}
+
 ########################################################################
 # OUT0FILE, option -0file: resolver hash. for now just enums
 ########################################################################
@@ -627,17 +635,12 @@ if($OUT1FILE eq '-') {
 }
 
 if($IsGlass) {
-print H7 "// ID methods\n";
-
-print H7 "static LID_t LibID() { return $LibID; }\n";
-print H7 "virtual LID_t ZibID() const { return $LibID; }\n";
-print H7 "static CID_t ClassID() { return $ClassID; }\n";
-print H7 "virtual CID_t ZlassID() const { return $ClassID; }\n";
-print H7 "static FID_t FID() { return FID_t($LibID,$ClassID); }\n";
-print H7 "virtual FID_t ZID() const { return FID_t($LibID,$ClassID); }\n";
-print H7 "virtual const char* ZlassName() const { return \"$CLASSNAME\"; }\n";
-print H7 "virtual const char* ZibName() const { return \"$LibSetName\"; }\n";
-print H7 "\n";
+  print H7 "// ID methods\n";
+  print H7 "static  FID_t  FID() { return FID_t($LibID,$ClassID); }\n";
+  print H7 "virtual FID_t VFID() const { return FID_t($LibID,$ClassID); }\n";
+  print H7 "static  GledNS::ClassInfo*  GlassInfo() { return  sap_${CLASSNAME}_ci; }\n";
+  print H7 "virtual GledNS::ClassInfo* VGlassInfo() const { return  sap_${CLASSNAME}_ci; }\n";
+  print H7 "\n";
 }
 
 for $r (@Members) {
@@ -679,7 +682,7 @@ for $r (@Members) {
       if(exists $r->{Link}) {
 	if($stamp) { $stamp .= "  mTimeStamp;\n"; } # Stamped in ZGlass::set_link_or_die
       } else {
-	$stamp .= "  Stamp(LibID(), ClassID());\n";
+	$stamp .= "  Stamp(FID());\n";
       }
     }
 
@@ -692,7 +695,7 @@ for $r (@Members) {
     }
     if(exists $r->{Link}) {
       $setit = <<"fnord";
-  try { set_link_or_die((ZGlass*&)$r->{Varname}, $r->{Args}[0][2], LibID(), ClassID()); }
+  try { set_link_or_die((ZGlass*&)$r->{Varname}, $r->{Args}[0][2], FID()); }
   catch(...) { WriteUnlock(); throw; }
 fnord
     } else {
@@ -726,7 +729,7 @@ print H7 "// Link exporter\n";
 
 print H7 "virtual void CopyLinks(lpZGlass_t& glass_list);\n";
 print H7 "virtual void CopyLinkRefs(lppZGlass_t& ref_list);\n";
-print H7 "virtual void CopyLinkSpecs(lLinkSpec_t& link_spec_list);\n";
+print H7 "virtual void CopyLinkReps(ZGlass::lLinkRep_t& link_rep_list);\n";
 print H7 "virtual Int_t RebuildLinkRefs(An_ID_Demangler* c);\n";
 print H7 "\n";
 
@@ -747,6 +750,13 @@ for $r (@Methods) {
 print H7 "\n";
 
 print H7 "static void _gled_catalog_init();\n\n";
+
+print H7 "protected:\n";
+print H7 "static GledNS::ClassInfo* sap_${CLASSNAME}_ci;\n";
+for $r (@Members) {
+  next unless exists $r->{Link};
+  print H7 "static GledNS::LinkMemberInfo* sap_$r->{Methodbase}_lmi;\n";
+}
 
 gen1_end:
 close H7 unless *H7==*STDOUT;
@@ -783,6 +793,14 @@ unless($CLASSNAME eq $BASECLASS) {
   print C7 "#define PARENT_GLASS ${PARENT}\n\n";
 }
 
+# Protected, static data members
+print C7 "GledNS::ClassInfo* ${CLASSNAME}::sap_${CLASSNAME}_ci;\n";
+for $r (@Members) {
+  next unless exists $r->{Link};
+  print C7 "GledNS::LinkMemberInfo* ${CLASSNAME}::sap_$r->{Methodbase}_lmi;\n";
+}
+print C7 "\n";
+
 # LinkList
 print C7 "void\n${CLASSNAME}::CopyLinks(lpZGlass_t& glass_list) {\n";
 unless($CLASSNAME eq $BASECLASS) {
@@ -790,39 +808,34 @@ unless($CLASSNAME eq $BASECLASS) {
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
-  die "Link must be a pointer" if $pure_type eq $r->{Type};
   print C7 "  glass_list.push_back($r->{Varname});\n";
 }
 print C7 "}\n\n";
 
-# LinkRefList
+# LinkRefs
 print C7 "void\n${CLASSNAME}::CopyLinkRefs(lppZGlass_t& ref_list) {\n";
 unless($CLASSNAME eq $BASECLASS) {
   print C7 "  ${PARENT}::CopyLinkRefs(ref_list);\n"
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
-  die "Link must be a pointer" if $pure_type eq $r->{Type};
   my $glass_var_ptr = ($r->{Type} eq "${BASECLASS}*") ?
     "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
   print C7 "  ref_list.push_back($glass_var_ptr);\n";
 }
 print C7 "}\n\n";
 
-# LinkSpec
-print C7 "void\n${CLASSNAME}::CopyLinkSpecs(lLinkSpec_t& link_spec_list) {\n";
+# LinkReps
+print C7 "void\n${CLASSNAME}::CopyLinkReps(ZGlass::lLinkRep_t& link_rep_list) {\n";
 unless($CLASSNAME eq $BASECLASS) {
-  print C7 "  ${PARENT}::CopyLinkSpecs(link_spec_list);\n"
+  print C7 "  ${PARENT}::CopyLinkReps(link_rep_list);\n"
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
-  die "Link must be a pointer" if $pure_type eq $r->{Type};
   my $glass_var = ($r->{Type} eq "${BASECLASS}*") ?
     "$r->{Varname}" : "(ZGlass*)$r->{Varname}";
-  print C7 "  link_spec_list.push_back( LinkSpec($glass_var, \"$CLASSNAME\", \"$r->{Methodbase}\") );\n";
+  print C7 "  link_rep_list.push_back( ".
+    "ZGlass::LinkRep($glass_var, sap_$r->{Methodbase}_lmi) );\n";
 }
 print C7 "}\n\n";
 
@@ -985,15 +998,15 @@ fnord
 #####################
 
 print C7 <<"fnord";
-namespace { GledNS::ClassInfo* _ci=0; }
 
 void ${CLASSNAME}::_gled_catalog_init() {
   using namespace GledNS;
 
+  GledNS::ClassInfo*& _ci = sap_${CLASSNAME}_ci;
+
   if(_ci) return;
-  _ci = new ClassInfo("${CLASSNAME}", FID_t($LibID, $ClassID));
+  _ci = new ClassInfo("${CLASSNAME}", FID());
   _ci->fParentName = "$PARENT";
-  _ci->fParentCI = 0;
 fnord
 
 #####################
@@ -1029,6 +1042,7 @@ for $r (@Members) {
       print C7 "    lmip->fType = \"$r->{Args}[0][0]\";\n";
       print C7 "    lmip->fSetMethod = mip;\n";
       print C7 "    _ci->fLinkMemberList.push_back(lmip);\n";      
+      print C7 "    sap_$r->{Methodbase}_lmi = lmip;\n";
     } else {
       print C7 "    DataMemberInfo* dmip = new DataMemberInfo(\"$r->{Methodbase}\");\n";
       print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";

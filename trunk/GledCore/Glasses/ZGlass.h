@@ -10,9 +10,6 @@
 #include <Gled/GledTypes.h>
 #include <Gled/GMutex.h>
 
-#include <TObject.h>
-#include <TString.h>
-
 /**************************************************************************/
 
 #define GlassIODef(_gls_) \
@@ -46,6 +43,11 @@ class ZComet;
 class GThread;
 class TBuffer;	class TMessage;
 
+namespace GledNS {
+  class ClassInfo;
+  class LinkMemberInfo;
+}
+
 typedef void (*zglass_stamp_f)(ZGlass*, void*);
 
 class ZGlass : public TObject {
@@ -54,6 +56,18 @@ class ZGlass : public TObject {
   friend class Saturn;
   friend class ZQueen;
   friend class ZComet;
+
+public:
+  struct LinkRep {
+    ZGlass*&                fLinkRef;
+    GledNS::LinkMemberInfo* fLinkInfo;
+
+    LinkRep(ZGlass*& r, GledNS::LinkMemberInfo* li) :
+      fLinkRef(r), fLinkInfo(li) {}
+  };
+
+  typedef list<LinkRep>           lLinkRep_t;
+  typedef list<LinkRep>::iterator lLinkRep_i;
 
 private:
   void		_init();
@@ -79,7 +93,7 @@ protected:
   UShort_t	mFireRefCount;	//! X{G}  7 ValOut(-width=>4)
   UShort_t	mEyeRefCount;	//!
 
-  void set_link_or_die(ZGlass*& link, ZGlass* new_val, LID_t lid, CID_t cid);
+  void set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid);
 
   virtual void reference_all();
   virtual void unreference_all();
@@ -88,13 +102,13 @@ protected:
 
   // Mutexen
   mutable GMutex mReadMutex;    //!
- public:
+public:
   void ReadLock()   const { mReadMutex.Lock(); }
   void ReadUnlock() const { mReadMutex.Unlock(); }
   void WriteLock();
   void WriteUnlock();
 
- protected:
+protected:
   // Detached MIR threads. Stopped by Saturn on CheckOut.
   list<GThread*> mDetachedMIRThreads; //!
 
@@ -180,10 +194,13 @@ public:
   virtual void SetStamps(TimeStamp_t s)
   { mTimeStamp = mStampReqTring = s; }
 
-  virtual TimeStamp_t Stamp(LID_t lid, CID_t cid);
-  TimeStamp_t Stamp() { return Stamp(0, 0); }
-  virtual TimeStamp_t StampLink(LID_t lid, CID_t cid);
-  TimeStamp_t StampLink() { return StampLink(0, 0); }
+  virtual TimeStamp_t Stamp(FID_t fid);
+  TimeStamp_t Stamp()     { return Stamp(FID_t(0,0)); }
+  TimeStamp_t StampVFID() { return Stamp(VFID()); }
+
+  virtual TimeStamp_t StampLink(FID_t fid);
+  TimeStamp_t StampLink()     { return StampLink(FID_t(0,0)); }
+  TimeStamp_t StampLinkVFID() { return StampLink(VFID()); }
 
   virtual void MarkStampReqTring()
   { mStampReqTring = ++mTimeStamp; }
@@ -195,7 +212,7 @@ public:
 
 #include "ZGlass.h7"
   ClassDef(ZGlass, 1) // Base class of Gled enabled classes.
-}; // endclass ZGlass
+    }; // endclass ZGlass
 
 GlassIODef(ZGlass);
 

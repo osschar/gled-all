@@ -27,5 +27,5 @@ void Box::_init()
 void Box::SetABC(Float_t a, Float_t b, Float_t c)
 {
   mA = a; mB = b; mC = c;
-  Stamp(LibID(), ClassID());
+  Stamp(FID());
 }

@@ -225,11 +225,11 @@ void GledViewNS::AddRenderer(const string& rnr)
 /**************************************************************************/
 /**************************************************************************/
 
-A_Rnr* GledViewNS::SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid)
+A_Rnr* GledViewNS::SpawnRnr(const string& rnr, ZGlass* d, FID_t fid)
 {
-  GledNS::LibSetInfo* gns_lsi = GledNS::FindLibSetInfo(lid);
+  GledNS::LibSetInfo* gns_lsi = GledNS::FindLibSetInfo(fid.lid);
   if(gns_lsi == 0) {
-    ISerr(GForm("GledViewNS::SpawnRnr can't demangle lib id=%u", lid));
+    ISerr(GForm("GledViewNS::SpawnRnr can't demangle lib id=%u", fid.lid));
     return 0;
   }
   hRnr2RCFoo_i j = gns_lsi->fViewPart->Rnr2RCFoo.find(rnr);
@@ -238,7 +238,7 @@ A_Rnr* GledViewNS::SpawnRnr(const string& rnr, ZGlass* d, LID_t lid, CID_t cid)
 		rnr.c_str()));
     return 0;
   }
-  return (j->second)(d, cid);
+  return (j->second)(d, fid.cid);
 }
 
 /**************************************************************************/
@@ -283,5 +283,5 @@ A_Rnr* GledViewNS::ClassInfo::SpawnRnr(const string& rnr, ZGlass* g)
   if(fRendererCI == 0) GetRendererCI();
   //cout <<"GledViewNS::ClassInfo::SpawnRnr rnr="<< rnr <<", lens="<< g->GetName() <<
   //"["<< fRendererCI->fClassName <<"]\n";
-  return GledViewNS::SpawnRnr(rnr, g, fRendererCI->fFid.lid, fRendererCI->fFid.cid);
+  return GledViewNS::SpawnRnr(rnr, g, fRendererCI->fFid);
 }

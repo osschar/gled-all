@@ -4,11 +4,13 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_GledTypes_H
-#define Gled_GledTypes_H
+#ifndef GledCore_GledTypes_H
+#define GledCore_GledTypes_H
 
 #include <Rtypes.h>
+#include <TObject.h>
 #include <TString.h>
+
 #include <iostream>
 #include <string>
 #include <assert.h>
@@ -33,6 +35,8 @@ typedef list<string>::const_iterator	lStr_ci;
 typedef set<string>			sStr_t;
 typedef set<string>::iterator		sStr_i;
 
+typedef ULong_t				TimeStamp_t;
+
 /**************************************************************************/
 // Glass typedefs
 /**************************************************************************/
@@ -46,47 +50,15 @@ typedef list<ZGlass*>::const_reverse_iterator	lpZGlass_cri;
 typedef list<ZGlass**>				lppZGlass_t;
 typedef list<ZGlass**>::iterator		lppZGlass_i;
 
-typedef UInt_t		ID_t;
-typedef UShort_t	LID_t;
-typedef UShort_t	CID_t;
-typedef UShort_t	MID_t;
+typedef UInt_t					ID_t;
+typedef UShort_t				LID_t;
+typedef UShort_t				CID_t;
+typedef UShort_t				MID_t;
 
-class An_ID_Demangler { public: virtual ZGlass* DemangleID(ID_t) = 0; };
-
-// FID_t : Full lib/class ID
-
-struct FID_t {
-  LID_t	lid;
-  CID_t	cid;
-
-  FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
-  bool operator==(FID_t r) { return (lid==r.lid && cid==r.cid); }
-  bool is_null()  { return lid==0 && cid==0; }
-  bool is_basic() { return is_null() || (lid==1 && cid==1); }
-};
-
-// LinkSpec : specification of a link returned by p7-generated members
-
-struct LinkSpec {
-  ZGlass*& fLinkRef;
-  string   fClassName;
-  string   fLinkName;
-
-  LinkSpec(ZGlass*& r, const char* c, const char* l) :
-    fLinkRef(r), fClassName(c), fLinkName(l) {}
-  string full_name() const { return fClassName + "::" + fLinkName; }
-};
-
-typedef list<LinkSpec>				lLinkSpec_t;
-typedef list<LinkSpec>::iterator		lLinkSpec_i;
-typedef list<LinkSpec>::reverse_iterator	lLinkSpec_ri;
-
-typedef ULong_t		TimeStamp_t;
-
-typedef	list<ID_t>		lID_t;
-typedef	list<ID_t>::iterator	lID_i;
-typedef set<ID_t>		sID_t;
-typedef set<ID_t>::iterator	sID_i;
+typedef	list<ID_t>				lID_t;
+typedef	list<ID_t>::iterator			lID_i;
+typedef set<ID_t>				sID_t;
+typedef set<ID_t>::iterator			sID_i;
 
 #ifndef __CINT__
 
@@ -98,6 +70,45 @@ typedef hash_map<ID_t, ID_t>			IdiOm_t;
 typedef hash_map<ID_t, ID_t>::iterator		IdiOm_i;
 
 #endif
+
+class An_ID_Demangler { public: virtual ZGlass* DemangleID(ID_t) = 0; };
+
+/**************************************************************************/
+// FID_t : Full libset/class ID & FMID_t: Full-method ID
+/**************************************************************************/
+
+class FID_t {
+public:
+  LID_t	lid;
+  CID_t	cid;
+
+  FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
+  bool operator==(FID_t r) { return (lid == r.lid && cid == r.cid); }
+  bool operator!=(FID_t r) { return (lid != r.lid || cid != r.cid); }
+  bool is_null()  { return lid == 0 && cid == 0; }
+  bool is_basic() { return is_null() || (lid == 1 && cid == 1); }
+};
+
+inline TBuffer &operator>>(TBuffer& b, FID_t& fid)
+{ b >> fid.lid >> fid.cid; return b; }
+
+inline TBuffer &operator<<(TBuffer& b, FID_t fid)
+{ b << fid.lid << fid.cid; return b; }
+
+class FMID_t : public FID_t {
+public:
+  MID_t	mid;
+
+  FMID_t(LID_t l=0, CID_t c=0, MID_t m=0) : FID_t(l,c), mid(m) {}
+  bool operator==(FMID_t r) { return FID_t::operator==(r) && mid == r.mid; }
+  bool operator!=(FMID_t r) { return FID_t::operator!=(r) || mid != r.mid; }
+};
+
+inline TBuffer &operator>>(TBuffer& b, FMID_t& fmid)
+{ b >> (FID_t&)fmid >> fmid.mid; return b; }
+
+inline TBuffer &operator<<(TBuffer& b, FMID_t fmid)
+{ b << (FID_t&)fmid << fmid.mid; return b; }
 
 /**************************************************************************/
 // Defines

@@ -35,7 +35,7 @@ public:
   virtual ~Board() {}
 
   void SetUV(Float_t u, Float_t v)
-  { mULen = u; mVLen = v; Stamp(LibID(), ClassID()); }  // X{E}
+  { mULen = u; mVLen = v; Stamp(FID()); }  // X{E}
 
 #include "Board.h7"
   ClassDef(Board, 1)

@@ -34,6 +34,7 @@ namespace GledNS {
   /**************************************************************************/
 
   class ClassInfo;
+  class LibSetInfo;
 
   struct InfoBase {
     string		fName;
@@ -57,7 +58,9 @@ namespace GledNS {
     MethodInfo(const string& s, MID_t m) :
       InfoBase(s), fMid(m),
       bDetachedExe(false), bMultixDetachedExe(false),
-      fViewPart(0) {}
+      fClassInfo(0),
+      fViewPart(0)
+    {}
     void ImprintMir(ZMIR& mir) const;
     void FixMirBits(ZMIR& mir, SaturnInfo* sat) const;
     void StreamIds(TBuffer& b) const;
@@ -67,19 +70,25 @@ namespace GledNS {
   struct DataMemberInfo : public InfoBase {
     string		fType;
     MethodInfo*		fSetMethod;
+    ClassInfo*		fClassInfo;
 
     GledViewNS::DataMemberInfo* fViewPart;
 
-    DataMemberInfo(const string& s) : InfoBase(s), fViewPart(0) {}
+    DataMemberInfo(const string& s) : InfoBase(s), fClassInfo(0), fViewPart(0)
+    {}
   };
 
   struct LinkMemberInfo : public InfoBase {
     string		fType;
     MethodInfo*		fSetMethod;
+    ClassInfo*		fClassInfo;
 
     GledViewNS::LinkMemberInfo* fViewPart;
 
-    LinkMemberInfo(const string& s) : InfoBase(s), fViewPart(0) {}
+    LinkMemberInfo(const string& s) : InfoBase(s), fClassInfo(0), fViewPart(0)
+    {}
+
+    string FullName();
   };
 
   // List typedefs
@@ -103,6 +112,8 @@ namespace GledNS {
 
   struct ClassInfo : public InfoBase {
     FID_t			fFid;
+    LibSetInfo*			fLibSetInfo;
+
     string			fParentName;
     ClassInfo*			fParentCI;
 
@@ -117,7 +128,11 @@ namespace GledNS {
 
     //----------------------------------------------------------------
 
-    ClassInfo(const string& s, FID_t f) : InfoBase(s), fFid(f), fViewPart(0) {}
+    ClassInfo(const string& s, FID_t f) :
+      InfoBase(s),
+      fFid(f), fLibSetInfo(0), fParentCI(0),
+      fViewPart(0)
+    {}
 
     lpDataMemberInfo_t*	ProduceFullDataMemberInfoList();
     lpLinkMemberInfo_t*	ProduceFullLinkMemberInfoList();
@@ -127,6 +142,7 @@ namespace GledNS {
     DataMemberInfo*	FindDataMemberInfo(const string& mmb, bool recurse);
     LinkMemberInfo*	FindLinkMemberInfo(const string& mmb, bool recurse);
 
+    LibSetInfo*		GetLibSetInfo();
     ClassInfo*		GetParentCI();
   };
 
@@ -249,7 +265,7 @@ namespace GledNS {
   string FabricateInitFoo(const string& libset);
   string FabricateUserInitFoo(const string& libset);
 
-  ZGlass* ConstructLens(LID_t lid, CID_t cid);
+  ZGlass* ConstructLens(FID_t fid);
   bool	  IsA(ZGlass* glass, FID_t fid);
 
   void    LockCINT();

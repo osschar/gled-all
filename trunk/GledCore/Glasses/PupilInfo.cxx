@@ -49,7 +49,7 @@ void PupilInfo::SetCameraBase(ZNode* camerabase)
   }
 
   WriteLock();
-  try { set_link_or_die((ZGlass*&)mCameraBase, camerabase, LibID(), ClassID()); }
+  try { set_link_or_die((ZGlass*&)mCameraBase, camerabase, FID()); }
   catch(...) { WriteUnlock(); throw; }
   WriteUnlock();
 }
@@ -64,7 +64,7 @@ void PupilInfo::SetLookAt(ZNode* lookat)
   }
 
   WriteLock();
-  try { set_link_or_die((ZGlass*&)mLookAt, lookat, LibID(), ClassID()); }
+  try { set_link_or_die((ZGlass*&)mLookAt, lookat, FID()); }
   catch(...) { WriteUnlock(); throw; }
   WriteUnlock();
 }
@@ -79,7 +79,7 @@ void PupilInfo::SetUpReference(ZNode* upreference)
   }
 
   WriteLock();
-  try { set_link_or_die((ZGlass*&)mUpReference, upreference, LibID(), ClassID()); }
+  try { set_link_or_die((ZGlass*&)mUpReference, upreference, FID()); }
   catch(...) { WriteUnlock(); throw; }
   WriteUnlock();
 }
@@ -117,7 +117,7 @@ void PupilInfo::EmitDumpImageRay(const Text_t* filename)
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, LibID(), ClassID()));
+      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, FID()));
     if(filename != 0) {
       TString fn(filename);
       TBuffer cbuff(TBuffer::kWrite);
@@ -139,7 +139,7 @@ void PupilInfo::EmitResizeRay()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_user_2, mTimeStamp, LibID(), ClassID()));
+      (Ray::PtrCtor(this, RayNS::RQN_user_2, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
 }

@@ -37,7 +37,7 @@ public:
   void Coff(const WSPoint* f);
 
   // virtuals
-  virtual TimeStamp_t Stamp(LID_t lid=0, CID_t cid=0);
+  virtual TimeStamp_t Stamp(FID_t fid);
 
 #include "WSPoint.h7"
   ClassDef(WSPoint, 1)
