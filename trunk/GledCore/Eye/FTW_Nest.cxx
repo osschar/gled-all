@@ -8,6 +8,7 @@
 
 #include <Glasses/ZQueen.h>
 #include <Gled/GledNS.h>
+#include <Stones/ZMIR.h>
 
 #include "Eye.h"
 #include "FTW_Nest.h"
@@ -131,10 +132,15 @@ namespace {
     }
 
     case 3: { // Offer some predefined custom layouts; should be pluggable from outside, history !!
+      namespace GVNS = GledViewNS;
+
+      if(GVNS::mtw_layouts.empty()) {
+	nest->GetShell()->Message("No custom layouts stored.", FTW_Shell::MT_wrn);
+	break;
+      }
+
       Fl_Menu_Button mb(Fl::event_x_root(), Fl::event_y_root(), 0,0,0);
       mb.textsize(nest->get_swm_manager()->cell_fontsize());
-
-      namespace GVNS = GledViewNS;
 
       for(list<GVNS::MTW_Layout_Spec>::iterator i = GVNS::mtw_layouts.begin();
 	  i!= GVNS::mtw_layouts.end(); ++i)
@@ -236,7 +242,7 @@ void FTW_Nest::_build(int w, int h)
   { // Create helpers
     Fl_Group::current(0);
 
-    pCtrl = new FTW_Nest_Ctrl(this);
+    pCtrl   = new FTW_Nest_Ctrl(this);
     pLayout = new MTW_Layout(this);
 
     Fl_Group::current(this);
@@ -353,6 +359,14 @@ void FTW_Nest::_build(int w, int h)
   resizable(wMainPack);
 
   label_nest();
+}
+
+void FTW_Nest::finalize_build()
+{
+  if(mNestInfo->GetLeafLayout() == NestInfo::LL_Custom) {
+      EnactLayout(mNestInfo->GetLayout());
+      CustomView();
+  }
 }
 
 /**************************************************************************/
