@@ -43,8 +43,8 @@ void alice_geom(Bool_t impwcol=false)
   Gled::theOne->AddMTWLayout
     ("RootGeo/ZGeoNode",
      "ZGlass(Name,Title):"
-     "ZNode(RnrSelf[4],RnrOnForDaughters[4],RnrOffForDaughters[4]):"
-     "ZGeoNode(Color[4],ImportNodes[5],NNodes[4])"
+     "ZGeoNode(RnrSelf[4],RnrOnForDaughters[4],RnrOffForDaughters[4],"
+     "Color[4],ImportNodes[5],NNodes[4])"
     );
 
   Scene* rscene = new Scene("Alice Detector");
@@ -65,7 +65,7 @@ void alice_geom(Bool_t impwcol=false)
   rscene->GetGlobLamps()->Add(lamp);
   
   printf("Importing geometry ...\n");
-  TGeoManager::Import("/afs/f9.ijs.si/home/alja/gled-dev/demos/RootGeo/alice_all.root");
+  TGeoManager::Import("alice_all.root");
   printf("Done importing geometry.\n");
 
 

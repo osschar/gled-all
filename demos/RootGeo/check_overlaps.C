@@ -42,13 +42,13 @@ void check_overlaps(Float_t epsilon=1)
 
   Gled::theOne->AddMTWLayout
     ("RootGeo/ZGeoNode",
-     "ZGeoNode(RnrSelf[3],RnrOnRec[5],RnrOffRe5[4],"
+     "ZGeoNode(RnrSelf[3],RnrOnRec[5],RnrOffRec[4],"
      "Color[4],ImportNodes[4],NNodes[4],Mat[8]):ZGeoOvl(Overlap[4])");
 
   /**************************************************************************/
 
   printf("Importing geometry.\n");
-  TGeoManager::Import("/afs/f9.ijs.si/home/alja/gled-dev/demos/RootGeo/alice_all.root");
+  TGeoManager::Import("alice_all.root");
   /**************************************************************************/
 
   Scene* rscene = new Scene("Alice Detector");
