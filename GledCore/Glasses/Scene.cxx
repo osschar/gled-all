@@ -20,7 +20,6 @@ ClassImp(Scene)
 void Scene::_init()
 {
   mGlobLamps = 0;
-  mStateMods = 0;
 }
 
 /**************************************************************************/
@@ -32,11 +31,6 @@ void Scene::AdEnlightenment()
     GlobalLamps* l = new GlobalLamps("Global Lamps", GForm("GlobLamps of %s", GetName()));
     mQueen->CheckIn(l);
     SetGlobLamps(l);
-  }
-  if(mStateMods == 0) {
-    ZList* l = new ZList("State Modificators", GForm("StateMods of %s", GetName()));
-    mQueen->CheckIn(l);
-    SetStateMods(l);
   }
 }
 
