@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZTrans_H
-#define Gled_ZTrans_H
+#ifndef GledCore_ZTrans_H
+#define GledCore_ZTrans_H
 
 // Includes
 class ZNode;
@@ -30,11 +30,16 @@ struct ZVec3D {
   Double_t& operator()(Int_t i) { return v[i]; }
 };
 
-// 3D transformation in generalised coordinates
+/**************************************************************************/
+// ZTrans -- 3D transformation in generalised coordinates
+/**************************************************************************/
 
 class ZTrans : public ZMatrix {
-  mutable Real_t	mA1, mA2, mA3;	//!
-  mutable Bool_t	bAsOK;		//!
+
+  mutable Real_t	mA1;   //!
+  mutable Real_t	mA2;   //!
+  mutable Real_t	mA3;   //!
+  mutable Bool_t	bAsOK; //!
 
   void _init() { bAsOK = false; }
 

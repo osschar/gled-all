@@ -103,8 +103,9 @@ void RnrDriver::Render(OS::A_GlassView* gv)
   
   if(gv->fRnrScheme == 0) {
     gv->fRnrScheme = new RnrScheme(max_rnr_level + 1);
+    //***
     //cout <<"RnrDriver::Render making RnrScheme for "
-    //    << gv->fImg->fGlass->GetName() <<endl;
+    //<< gv->fImg->fGlass->GetName() <<endl;
     PrepareRnrElements(gv, gv->fRnrScheme->fScheme);
   }
     
@@ -112,6 +113,9 @@ void RnrDriver::Render(OS::A_GlassView* gv)
     lRnrElement_t& re_list = gv->fRnrScheme->fScheme[rl];
     for(lRnrElement_i re=re_list.begin(); re!=re_list.end(); ++re) {
       if(re->fView) {
+	//***
+	//cout <<"RnrDriver::Render Rendering "
+        //<< re->fView->fImg->fGlass->GetName() <<endl;
 	Render(re->fView);
       } else {
 	re->fRnr->GetGlass()->RefExecMutex().Lock();

@@ -25,7 +25,7 @@ protected:
 public:
   Box(const Text_t* n="Box", const Text_t* t=0) : ZNode(n,t) { _init(); }
 
-  void SetABC(Real_t a, Real_t b, Real_t c); // X{E} C{0}
+  void SetABC(Real_t a, Real_t b, Real_t c); // X{E}
 
 #include "Box.h7"
   ClassDef(Box, 1)
