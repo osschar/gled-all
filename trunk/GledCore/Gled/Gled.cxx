@@ -44,13 +44,14 @@ void Gled::next_arg_or_die(list<char*>& args, list<char*>::iterator& i)
 
 /**************************************************************************/
 
-Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
-				bQuit(false),
-				bShowSplash(true), 
-				bAutoSpawn(false),
-				bAllowMoons(true),
-				bRunRint(true),
-				bRintRunning(false)
+Gled::Gled() : mSaturn(0), bIsSun(false),
+	       bQuit(false),
+	       bShowSplash(true), 
+	       bAutoSpawn(false),
+	       bAllowMoons(true),
+	       bRunRint(true),
+	       bRintRunning(false),
+	       mLoggingMutex(GMutex::recursive)
 {
   if(theOne) {
     cerr <<"Gled::Gled trying to instantiate another object ...\n";
@@ -78,10 +79,16 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
     gSystem->ClosePipe(p);
   }
 
+  mLogFileName = "<stdout>"; mLogFile = 0;
+  mOutFileName = "<stdout>"; mOutFile = 0;
+
   mAuthDir = GForm("%s/.gled/auth", gSystem->Getenv("HOME"));
   mDefEyeIdentity = "guest";
+}
 
-  // Parse command-line options
+void Gled::ParseArguments(list<char*>& args)
+{
+  // Parse command-line arguments.
 
   list<char*>::iterator i = args.begin();
   while(i != args.end()) {
@@ -92,26 +99,31 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
       {
 	printf(
 	  "Arguments: [options] [dir] [file(s)]\n"
-	  "			dir   ~ cd to dir prior to exec of files\n"
-	  "			files ~ ROOT macro scripts to process\n"
+	  "                     dir   ~ cd to dir prior to exec of files\n"
+	  "                     files ~ ROOT macro scripts to process\n"
 	  "Gled options:\n"
 	  "-------------\n"
-	  "  -r[un]		spawn Saturn/Sun immediately (before processing files)\n"
-	  "			Saturn if -master is specified, Sun otherwise\n"
-	  "  -nomoons		do not accept moon connections\n"
-	  "  -s[ssize]	<num>	specify size of sun-space (can be eg. 2e20)\n"
-	  "  -p[ort]	<num>	specify server port (def 9061)\n"
-	  "  -m[aster] <host>[:<port>] master Saturn address (def port 9061)\n"
-	  "  -n[ame]	<str>	name of Saturn\n"
-	  "  -t[itle]	<str>	title of Saturn\n"
-	  "  -l			no splash info\n"
-	  "  -norint		do not run TRint (useful for batch saturns)\n"
+	  "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
+	  "                     Saturn if -master is specified, Sun otherwise\n"
+	  "  -nomoons           do not accept moon connections\n"
+	  "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
+	  "  -p[ort]    <num>   specify server port (def: 9061)\n"
+	  "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
+	  "  -n[ame]    <str>   name of Saturn\n"
+	  "  -t[itle]   <str>   title of Saturn\n"
+	  "  -l                 no splash info\n"
+	  "  -norint            do not run TRint (useful for batch saturns)\n"
+	  "\n"
+	  "Logging options:\n"
+	  "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n" 
+	  "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
+	  "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
 	  "\n"
 	  "Authentication options:\n"
-	  "  -noauth		do not use authentication\n"
-	  "  -authdir	<str>	directory containing auth data (def ~/.gled/auth)\n"
-	  "  -saturnid	<str>	identity of the Saturn (def 'sun.absolute' or 'saturn')\n"
-	  "  -eyeid	<str>	default identity of Eyes (def 'guest')\n"
+	  "  -noauth            do not use authentication\n"
+	  "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
+	  "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
+	  "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
 	  );
 	bQuit = true;
 	return;
@@ -179,6 +191,32 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
       args.erase(start, ++i);
     }
 
+    // Logging options
+
+    else if(strcmp(*i, "-log")==0 || strcmp(*i, "-logfile")==0) {
+      next_arg_or_die(args, i);
+      if(strcmp(*i, "-")==0 || strcmp(*i, "<null>")==0) {
+	mLogFileName = "<null>";
+      } else if(strcmp(*i, "+")==0 || strcmp(*i, "<stdout>")==0) {
+	mLogFileName = "<stdout>";
+      } else {
+	mLogFileName = *i;
+      }
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-out")==0 || strcmp(*i, "-outfile")==0) {
+      next_arg_or_die(args, i);
+      if(strcmp(*i, "-")==0 || strcmp(*i, "<null>")==0) {
+	mOutFileName = "<null>";
+      } else if(strcmp(*i, "+")==0 || strcmp(*i, "<stdout>")==0) {
+	mOutFileName = "<stdout>";
+      } else {
+	mOutFileName = *i;
+      }
+      args.erase(start, ++i);
+    }
+
     // Authentication options
 
     else if(strcmp(*i, "-noauth")==0) {
@@ -210,26 +248,71 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
 
   }
 
-  if(bShowSplash) {
-    int len = strlen(GLED_VERSION_STRING) + strlen(GLED_BUILD_DATE_STRING) + 4;
-    printf(
-      "+----------------------------------------------------------+\n"
-      "| This is Gled, version %s, %s %*s |\n"
-      "| Gled is free software, released under GNU GPL version 2. |\n"
-      "| For further information visit http://www.gled.org/       |\n"
-      "+----------------------------------------------------------+\n",
-      GLED_VERSION_STRING, GLED_BUILD_DATE_STRING, 35 - len, "" );
-    printf("Bootstraping ...\n");
-  }
 }
 
-Gled::~Gled() {
-  delete mSaturn;
+void Gled::InitLogging()
+{
+  if(mLogFileName.CompareTo("<null>") == 0)
+    mLogFile = 0;
+  else if(mLogFileName.CompareTo("<stdout>") == 0)
+    mLogFile = stdout;
+  else {
+    mLogFile = fopen(mLogFileName.Data(), "w");
+    if(mLogFile == 0) {
+      perror("Gled::InitLogging opening of log file failed");
+      exit(1);
+    }
+  }
+
+  if(mOutFileName.CompareTo("<null>") == 0)
+    mOutFile = 0;
+  else if (mOutFileName.CompareTo("<stdout>") == 0)
+    mOutFile = stdout;
+  else if(mOutFileName.CompareTo(mLogFileName) == 0)
+    mOutFile = mLogFile;
+  else {
+    mOutFile = fopen(mOutFileName.Data(), "w");
+    if(mLogFile == 0) {
+      perror("Gled::InitLogging opening of output file failed");
+      exit(1);
+    }
+  }
 }
 
 void Gled::InitGledCore()
 {
+  if(bShowSplash) {
+    int len = strlen(GLED_VERSION_STRING) + strlen(GLED_BUILD_DATE_STRING) + 4;
+    GMutexHolder mh(mLoggingMutex);
+    message("+----------------------------------------------------------+");
+    message(GForm("| This is Gled, version %s, %s %*s |",
+		  GLED_VERSION_STRING, GLED_BUILD_DATE_STRING, 35 - len, "" ));
+    message("| Gled is free software, released under GNU GPL version 2. |");
+    message("| For further information visit http://www.gled.org/       |");
+    message("+----------------------------------------------------------+");
+    message("Gled now bootstraping.");
+  }
+
   ((void(*)())GledCore_GLED_init)();
+}
+
+void Gled::StopLogging()
+{
+  message("Logging stopped.");
+
+  GMutexHolder mh(mLoggingMutex);
+
+  if (mOutFile && mOutFile != stdin) {
+    fclose(mOutFile);
+  }
+  if (mLogFile && mLogFile != stdin && mLogFile != mOutFile) {
+    fclose(mLogFile);
+  }
+  mOutFile = mLogFile = 0;
+}
+
+Gled::~Gled() {
+  delete mSaturn;
 }
 
 /**************************************************************************/
@@ -351,7 +434,7 @@ const char* Gled::GetPrivKeyFile(TString& id, Bool_t use_exc)
 
 /**************************************************************************/
 
-bool Gled::IsIdentityInGroup(const char* id, const char* group)
+Bool_t Gled::IsIdentityInGroup(const char* id, const char* group)
 {
   //printf("Gled::IsIdentityInGroup checking if %s in group %s\n", id, group);
   return (gSystem->Exec(GForm("grep -q %s %s/groups/%s",
@@ -444,31 +527,58 @@ void Gled::SetDebugLevel(Int_t d) {
 /**************************************************************************/
 
 void Gled::output(const char* s) {
-  cout << s << endl;
+  if(mOutFile) {
+    GThreadKeepAlive tka;
+    GMutexHolder     mh(mLoggingMutex);
+    if(mOutFile == mLogFile)
+      fputs("OUT: ", mOutFile);
+    fputs(s, mOutFile);
+    putc(10, mOutFile);
+  }
 }
 
 void Gled::message(const char* s) {
-  cout <<"MSG: "<< s << endl;
+  GThread::SetCancelState(GThread::CS_Disable);
+  if(mLogFile) {
+    GThreadKeepAlive tka;
+    GMutexHolder     mh(mLoggingMutex);
+    fputs("MSG: ", mLogFile);
+    fputs(s, mLogFile);
+    putc(10, mLogFile);
+  }
+  GThread::SetCancelState(GThread::CS_Enable);
 }
 
 void Gled::warning(const char* s) {
-  cout <<"WARN: "<< s << endl;
+  if(mLogFile) {
+    GThreadKeepAlive tka;
+    GMutexHolder     mh(mLoggingMutex);
+    fputs("WRN: ", mLogFile);
+    fputs(s, mLogFile);
+    putc(10, mLogFile);
+  }
 }
 
 void Gled::error(const char* s) {
-  cerr << s << endl;
+  if(mLogFile) {
+    GThreadKeepAlive tka;
+    GMutexHolder     mh(mLoggingMutex);
+    fputs("ERR: ", mLogFile);
+    fputs(s, mLogFile);
+    putc(10, mLogFile);
+  }
 }
 
 /**************************************************************************/
 
-void Gled::SpawnEye(const char* name, const char* title)
+EyeInfo* Gled::SpawnEye(const char* name, const char* title)
 {
   if(mSaturn == 0) {
     ISerr("Gled::SpawnEye Saturn has not been spawned");
-    return;
+    return 0;
   }
 
-  SpawnEye(0, name, title);
+  return SpawnEye(0, name, title);
 }
 
 /**************************************************************************/

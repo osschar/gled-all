@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_GledGUI_H
-#define Gled_GledGUI_H
+#ifndef GledCore_GledGUI_H
+#define GledCore_GledGUI_H
 
 #include <Gled/Gled.h>
 class ShellInfo;
@@ -34,8 +34,10 @@ protected:
   typedef list<Message>		lMessage_t;
 
   Fl_OutputPack*  wOutPack;
-  bool		  bGUIup;
 
+  Bool_t	  bGuiUp;
+
+  Fl_Button*	  wSwmResizer;
   Fl_Value_Input* wDebugLevel;	// X{G}
   Fl_Input*	  wLibSetName;	// X{G}
   Fl_Input*	  wEyeName;	// X{G}
@@ -46,10 +48,16 @@ protected:
 
   Int_t	          mNumShells;
 
+  Fl_SWM_Manager* mSwmManager;
+
+  void build_gui();
+
 public:
-  GledGUI(list<char*>& args);
-  virtual ~GledGUI();
+  GledGUI();
+  virtual void ParseArguments(list<char*>& args);
+  // virtual void InitLogging();
   virtual void InitGledCore();
+  virtual ~GledGUI();
 
   virtual void Run();
   virtual void Exit();
@@ -65,7 +73,7 @@ public:
   virtual void warning(const char* s);
   virtual void error(const char* s);
 
-  virtual void SpawnEye(ShellInfo* si, const char* name, const char* title=0);
+  virtual EyeInfo* SpawnEye(ShellInfo* si, const char* name, const char* title=0);
 
   TCanvas* NewCanvas(const Text_t* name, const Text_t* title,
 		     int w, int h, int npx, int npy);

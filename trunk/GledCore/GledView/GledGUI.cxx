@@ -95,85 +95,16 @@ GledGUI* GledGUI::theOne = 0;
 
 /**************************************************************************/
 
-GledGUI::GledGUI(list<char*>& args) :
-  Gled(args),
-  Fl_Window(60, 30, "Gled"),
-  bGUIup(false),
-  mMsgCond(GMutex::recursive),
-  mNumShells(0)
+void GledGUI::build_gui()
 {
-  if(theOne) {
-    cerr <<"GledGUI::GledGUI trying to instantiate another object ...\n";
-    exit(1);
-  }
-  theOne = this;
+  Fl_Group::current(this);
 
-  char* rnr_string = "GL";
-  int swm_fs = 12, swm_vskip = 6, swm_hwidth = 0;
-  int font = 0;
-  list<char*>::iterator i = args.begin();
-  while(i != args.end()) {
-    list<char*>::iterator start = i;
-
-    if(strcmp(*i, "-h")==0 || strcmp(*i, "-help")==0 ||
-       strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
-      {
-	cout << "\n"
-	  "GledGUI options:\n"
-	  "----------------\n"
-	  "  -swm   fs:dh:dw	specify font-size, vert-space and char width\n"
-	  "			default 12:6:0 (dw~0 means measure font)\n"
-	  "  -font  font-id	use fltk's font-id as default font\n"
-	  "  -rnr <r1>:<r2>:...	specify which rendering libraries to load (def GL)\n";
-	return;
-      }
-
-    else if(strcmp(*i, "-swm")==0) {
-      next_arg_or_die(args, i);
-      int num = sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
-      args.erase(start, ++i);
-    }
-
-    else if(strcmp(*i, "-font")==0) {
-      next_arg_or_die(args, i);
-      font = atoi(*i);
-      args.erase(start, ++i);
-    }
-
-    else if(strcmp(*i, "-rnr")==0) {
-      next_arg_or_die(args, i);
-      rnr_string = *i;
-      args.erase(start, ++i);
-    }
-
-    else {
-      ++i;
-    }
-
-  }
-
-  GledViewNS::no_symbol_label = FL_FREE_LABELTYPE;
-  Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
-  if(font) {
-    Fl::set_font((Fl_Font)FL_HELVETICA, (Fl_Font)font);
-  }
-
-  if(rnr_string) {
-    while(rnr_string && *rnr_string!=0) {
-      char* col = index(rnr_string, ':');
-      if(col) *(col++) = 0;
-      GledViewNS::AddRenderer(rnr_string);
-      if(col) rnr_string = col;
-      else    break;
-    }
-  }
-
-  // Top pack
+    // Top pack
   Fl_Pack* top_pack = new Fl_Pack(0,0,1,2);
   top_pack->type(FL_HORIZONTAL);
 
-  Fl_Button* swm_butt = new Fl_Button(0, 0, 2, 2, "@#3>>");
-  swm_butt->labeltype(FL_SYMBOL_LABEL);
+  wSwmResizer = new Fl_Button(0, 0, 2, 2, "@#3>>");
+  wSwmResizer->labeltype(FL_SYMBOL_LABEL);
 
   {
     Fl_Group* groo = new Fl_Group(0,0,12,2);
@@ -224,24 +155,132 @@ GledGUI::GledGUI(list<char*>& args) :
 
   Fl_Box* res_box = new Fl_Box(57,29,1,1);
   resizable(res_box);
+
+  Fl_Group::current(0);
+}
+
+/**************************************************************************/
+
+GledGUI::GledGUI() : Gled(), Fl_Window(60, 30, "Gled"),
+		     mMsgCond(GMutex::recursive),
+		     mNumShells(0)
+{
   end();
 
-  swm_size_range = new SWM_Size_Range(40, 20, 200, 100);
-  Fl_SWM_Manager* swm = new Fl_SWM_Manager(swm_fs, swm_vskip, swm_hwidth);
-  swm->adopt_window(this);
-  set_swm_hotspot_cb(swm_butt);
+  if(theOne) {
+    cerr <<"GledGUI::GledGUI trying to instantiate another object ...\n";
+    exit(1);
+  }
+  theOne = this;
 
-  Fl_Tooltip::size(swm_manager->cell_fontsize() - 1);
+  bGuiUp    = false;
+
+  // Fix defaults set by Gled constructor.
+  mLogFileName = "<null>";
+}
+
+void GledGUI::ParseArguments(list<char*>& args)
+{
+  Gled::ParseArguments(args);
+
+  // Defaults that can be overridden by options.
+  char* rnr_string = "GL";
+  int   swm_fs = 12, swm_vskip = 6, swm_hwidth = 0;
+  int   font = 0;
+  bool  start_iconized = false, no_msg_window = false;
+
+  list<char*>::iterator i = args.begin();
+  while(i != args.end()) {
+    list<char*>::iterator start = i;
+
+    if(strcmp(*i, "-h")==0 || strcmp(*i, "-help")==0 ||
+       strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
+      {
+	cout << "\n"
+	  "GledGUI options:\n"
+	  "----------------\n"
+	  "  -swm   fs:dh:dw    specify font-size, vert-space and char width\n"
+	  "                     default: 12:6:0 (dw~0 means measure font)\n"
+	  "  -font  font-id     use fltk's font-id as default font\n"
+	  "  -rnr <r1>:<r2>:... specify which rendering libraries to load (def: GL)\n"
+	  "  -iconize           iconize main window on start-up\n"
+	  "  -nomsgwin | -nomw  start gled without the message window (consider '-log +')\n";
+	return;
+      }
+
+    else if(strcmp(*i, "-swm")==0) {
+      next_arg_or_die(args, i);
+      int num = sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-font")==0) {
+      next_arg_or_die(args, i);
+      font = atoi(*i);
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-rnr")==0) {
+      next_arg_or_die(args, i);
+      rnr_string = *i;
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-iconize")==0) {
+      start_iconized = true;
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-nomw")==0 || strcmp(*i, "-nomsgwin")==0) {
+      no_msg_window = true;
+      args.erase(start, ++i);
+    }
+
+    else {
+      ++i;
+    }
+
+  }
+
+  // Init starts here ... should be moved to InitLogging ?
+
+  if(rnr_string) {
+    while(rnr_string && *rnr_string!=0) {
+      char* col = index(rnr_string, ':');
+      if(col) *(col++) = 0;
+      GledViewNS::AddRenderer(rnr_string);
+      if(col) rnr_string = col;
+      else    break;
+    }
+  }
+
+  mSwmManager = new Fl_SWM_Manager(swm_fs, swm_vskip, swm_hwidth);
+
+  GledViewNS::no_symbol_label = FL_FREE_LABELTYPE;
+
+  Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
+  if(font) {
+    Fl::set_font((Fl_Font)FL_HELVETICA, (Fl_Font)font);
+  }
+
+  Fl_Tooltip::size(mSwmManager->cell_fontsize() - 1);
   Fl_Tooltip::enable();	// enable tooltips
-
   Fl::visible_focus(0); // no focus for buttons ETC
 
-  show();
+  if(no_msg_window == false) {  
+    build_gui();
+    swm_size_range = new SWM_Size_Range(40, 20, 200, 100);
+    mSwmManager->adopt_window(this);
+    set_swm_hotspot_cb(wSwmResizer);
+    if(start_iconized)  iconize();
+    else                show();
+    bGuiUp = true;
+  }
 }
 
 GledGUI::~GledGUI()
 {
-  delete swm_manager;
+  delete mSwmManager;
 }
 
 void GledGUI::InitGledCore()
@@ -259,26 +298,32 @@ void GledGUI::Run()
   // Runs in dedicated thread spawned from gled.cxx.
   // ALL gui (also for eyes and therefore for pupils) runs through this loop.
 
-  ISmess("GledGUI::Run starting GUI");
+  // printf("GledGUI::Run entering GUI event loop.\n");
   Fl::lock();		// init thread support
 
-  mMessenger = new GThread((GThread_foo)MessageLoop_tl, this, false);
-  mMessenger->Spawn();
-  bGUIup = true;
+  if(bGuiUp) {
+    mMessenger = new GThread((GThread_foo)MessageLoop_tl, this, false);
+    mMessenger->Spawn();
+  }
+
   while(!bQuit) Fl::wait();
-  mMessenger->Cancel();
-  mMessenger->Join();
-  delete mMessenger; mMessenger = 0;
+
   Fl::unlock();
-  ISmess("GledGUI::Run exiting GUI event loop");
+
+  if(bGuiUp) {
+    bGuiUp = false;
+    mMsgCond.Signal();
+    mMessenger->Join();
+    delete mMessenger; mMessenger = 0;
+    mMsgQueue.clear();
+  }
+  // printf("GledGUI::Run exiting GUI event loop.\n");
 }
 
 void GledGUI::Exit()
 {
   // Shutdown Eyes, GUI ... then Gled
 
-  // ... !!!
-  bGUIup = false;
   Gled::Exit();
   
   Fl::lock();
@@ -299,7 +344,7 @@ Int_t GledGUI::LoadLibSet(const Text_t* lib_set)
 void GledGUI::SetDebugLevel(Int_t d) {
   if(d<0) d=0;
   Gled::SetDebugLevel(d);
-  wDebugLevel->value(d);
+  if(bGuiUp) wDebugLevel->value(d);
 }
 
 /**************************************************************************/
@@ -311,7 +356,7 @@ void GledGUI::SetDebugLevel(Int_t d) {
 
 void GledGUI::MessageLoop()
 {
-  while(1) {
+  while(bGuiUp) {
     mMsgCond.Lock();
     mMsgCond.Wait();
     if(mMsgQueue.begin() != mMsgQueue.end()) {
@@ -340,31 +385,30 @@ void GledGUI::PostMessage(const char* m, Fl_Color c)
 }
 
 void GledGUI::output(const char* s) {
-  if(!bGUIup) { Gled::output(s); return; }
-  PostMessage(s);
+  Gled::output(s);
+  if(bGuiUp) PostMessage(s);
 }
 
 void GledGUI::message(const char* s) {
-  if(!bGUIup) { Gled::message(s); return; }
-  PostMessage(s, FL_CYAN);
+  Gled::message(s);
+  if(bGuiUp) PostMessage(s, FL_CYAN);
 }
 
 
 void GledGUI::warning(const char* s) {
-  if(!bGUIup) { Gled::warning(s); return; }
-  PostMessage(s, FL_YELLOW);
+  Gled::warning(s);
+  if(bGuiUp) PostMessage(s, FL_YELLOW);
 }
 
 void GledGUI::error(const char* s) {
-  // Deliver errors to console, too.
   Gled::error(s);
-  if(bGUIup) PostMessage(s, FL_RED);
+  if(bGuiUp) PostMessage(s, FL_RED);
 }
 
 /**************************************************************************/
 /**************************************************************************/
 
-void GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
+EyeInfo* GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
 {
   // Wrapper for eye spawning from CINT.
   // I really forgot why XLockDisplay is here. It sure
@@ -391,7 +435,7 @@ void GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
   try {
     e = new Eye(mSaturn->GetSaturnInfo()->GetServerPort(),
 		mDefEyeIdentity, si->GetSaturnID(),
-		eye_name.c_str(), title, swm_manager);
+		eye_name.c_str(), title, mSwmManager);
   } catch(string exc) {
     e = 0;
     ISerr(GForm("GledGUI::SpawnEye(%s) caugt exeception: %s", name, exc.c_str()));
@@ -405,6 +449,8 @@ void GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
   }
 
   XUnlockDisplay(rd);
+
+  return e ? e->GetEyeInfo() : 0;
 }
 
 /**************************************************************************/

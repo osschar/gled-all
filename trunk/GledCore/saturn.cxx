@@ -51,8 +51,10 @@ int main(int argc, char **argv)
   gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
 
   // Spawn Gled
-  gled = new Gled(args);
+  gled = new Gled();
+  gled->ParseArguments(args);
   if(gled->GetQuit()) exit(0);
+  gled->InitLogging();
 
   // Prepare remaining args for ROOT, weed out remaining options
   int   rargc = 1;
@@ -122,6 +124,7 @@ int main(int argc, char **argv)
   app_thread.Join();
 
   delete gint;
+  gled->StopLogging();
   delete gled;
 
   exit(0);
