@@ -9,6 +9,7 @@
 #include "MTW_SubView.h"
 #include "MTW_Layout.h"
 #include <Glasses/ZGlass.h>
+#include <Stones/ZMIR.h>
 #include <Eye/Eye.h>
 #include <Gled/GledNS.h>
 
@@ -50,17 +51,20 @@ namespace {
     virtual int handle(int ev) {
       FTW_Shell* shell = fView->GetShell();
       if(shell != 0) {
-	if(ev == FL_PUSH) {
-	  if(Fl::event_button() == 1) {
-	    return 1;
+	switch (ev) {
+
+	case FL_PUSH: {
+	  if(Fl::event_button() == 2) {
+	    Fl::paste(*this);
 	  }
 	  if(Fl::event_button() == 3) {
 	    shell->ImageMenu(fView->fImg, Fl::event_x_root(), Fl::event_y_root());
 	  }
+	  return 1;
 	}
-	if(ev == FL_DRAG && Fl::event_state(FL_BUTTON1) &&
-	   ! Fl::event_inside(this))
-	  {
+
+	case FL_DRAG: {
+	  if(Fl::event_state(FL_BUTTON1) && ! Fl::event_inside(this)) {
 	    ID_t id          = fView->fImg->fGlass->GetSaturnID();
 	    const char* text = GForm("%u", id);
 	    shell->X_SetSource(id);
@@ -68,7 +72,29 @@ namespace {
 	    Fl::dnd();
 	    return 1;
 	  }
-      }
+	}
+
+	case FL_DND_ENTER:
+	  return (fView->fImg->fIsList) ? 1 : 0;
+
+	case FL_DND_LEAVE:
+	  return 1;
+
+	case FL_DND_RELEASE:
+	  return (Fl::belowmouse() == this) ? 1 : 0;
+
+	case FL_PASTE: {
+	  if(shell->GetSource()->has_contents()) {
+	    GNS::MethodInfo* cmi = fView->fImg->fClassInfo->FindMethodInfo("Add", true);
+	    if(cmi) {
+	      auto_ptr<ZMIR> mir (shell->GetSource()->generate_MIR(cmi, fView->fImg->fGlass));
+	      fView->fImg->fEye->Send(*mir);
+	    }
+	  }
+	  return 1;
+	}
+	} // switch (ev)
+      } 
 
       return Fl_Box::handle(ev);
     }
@@ -131,9 +157,10 @@ void MTW_View::auto_label()
 
     View_SelfRep* vsr = dynamic_cast<View_SelfRep*>(child(0));
     if(vsr != 0) {
-      vsr->copy_label(GForm("[ID=%d, RC=%d] '%s' '%s'",
+      vsr->copy_label(GForm("%s [ID=%d, RC=%d] '%s'",
+			    mGlass->GetName(),
 			    mGlass->GetSaturnID(), mGlass->GetRefCount(),
-			    mGlass->GetName(), mGlass->GetTitle()));
+			    mGlass->GetTitle()));
     }
   }
 }
