@@ -110,29 +110,29 @@ void images()
   terrain->Set3Pos(-3, -7, 0.01);
   terrain->SetRibbon(ribbon1);
 
-  SMorph* n1 = new SMorph("Earth"); n1->SetS(2);
+  CREATE_ADD_GLASS(n1, SMorph, images, "Earth", "");
+  n1->SetS(2);
   n1->SetTLevel(20); n1->SetPLevel(20);
   n1->SetTexture(image4);
   n1->Set3Pos(-6, -6, 0); n1->SetRotByAngles(0, TMath::Pi()/2, 0);
-  scenes->CheckIn(n1); images->Add(n1);
 
-  SMorph* n2 = new SMorph("Moon"); n2->SetS(2);
+  CREATE_ADD_GLASS(n2, SMorph, images, "Moon", "");
+  n2->SetS(2);
   n2->SetTLevel(20); n2->SetPLevel(20);
   n2->SetTexture(image5);
   n2->Set3Pos( 6, -6, 0); n2->SetRotByAngles(0, TMath::Pi()/2, 0);
-  scenes->CheckIn(n2); images->Add(n2);
 
   SMorph* morphs[3];
   for(int i=0; i<3; ++i) {
     morphs[i] = new SMorph(Form("Morph %d", i+1));
+    scenes->CheckIn(morphs[i]); images->Add(morphs[i]);
     morphs[i]->SetTLevel(30); morphs[i]->SetPLevel(30);
     morphs[i]->SetS(2);
     morphs[i]->SetTexture(image6);
     morphs[i]->Set3Pos(-6+6*i, 7, 0);
-    scenes->CheckIn(morphs[i]); images->Add(morphs[i]);
   }
-  morphs[0]->SetTx(1); morphs[0]->SetCx(0.5); morphs[0]->SetRz(-0.25);
-  morphs[1]->SetTx(0); morphs[1]->SetCx(-0.5); morphs[1]->SetRz(0.25);
+  morphs[0]->SetTx(1);  morphs[0]->SetCx(0.5);  morphs[0]->SetRz(-0.25);
+  morphs[1]->SetTx(0);  morphs[1]->SetCx(-0.5); morphs[1]->SetRz(0.25);
   morphs[2]->SetTx(-1); morphs[2]->SetCx(0.25); morphs[2]->SetRz(0.25);
 
   CREATE_ADD_GLASS(txt1, Text, images, "Text1", 0);
@@ -159,5 +159,10 @@ void images()
 
 
   // Spawn GUI
-  gROOT->ProcessLine(".x eye.C");
+  gROOT->Macro("eye.C");
+  if(pupil) {
+    // Uncomment to fix camera 'up' direction to 'z' axis.
+    // pupil->SetUpReference(images);
+    // pupil->SetUpRefAxis(3);
+  }
 }
