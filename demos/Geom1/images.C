@@ -38,7 +38,6 @@ void images()
   image2->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(image3, ZImage, images, "HeightField", 0);
-  images->Add(image3);
   image3->SetFile("terrain_128.png");
   image3->Load();
   image3->SetLoadAdEnlight(true);
@@ -64,6 +63,13 @@ void images()
   image6->Load();
   image6->SetLoadAdEnlight(true);
 
+  CREATE_ADD_GLASS(ribbon1, ZRibbon, images, "Ribbon1", 0);
+  ribbon1->SetPOVFile("ribbon1.pov");
+  ribbon1->LoadPOV();
+
+  CREATE_ADD_GLASS(ribbon2, ZRibbon, images, "Ribbon2", 0);
+  ribbon2->SetPOVFile("booby.pov");
+  ribbon2->LoadPOV();
 
   // Geom elements
 
@@ -71,7 +77,7 @@ void images()
   base_plane->SetUnitSquare(16);
   scenes->CheckIn(base_plane);
   images->Add(base_plane);
-
+  base_plane->SetColor(0.5, 0.5, 0.8);
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
@@ -89,25 +95,23 @@ void images()
   board1->SetColor(1, 0.7, 0.7);
   board1->SetTexture(image1);
   board1->SetULen(2.5*1.75); board1->SetVLen(2.5*1);
-  board1->Set3Pos(-3, 2.5, 0.01);
+  board1->Set3Pos(-4.8, 2.5, 0.01);
 
   Board* board2 = new Board("Board2", "Showing Orchid");
   scenes->CheckIn(board2);
   images->Add(board2);
   board2->SetTexture(image2);
   board2->SetULen(2.5); board2->SetVLen(2.5);
-  board2->Set3Pos(3, 2.5, 0.01);
+  board2->Set3Pos(5.7, 2.5, 0.01);
 
   RectTerrain* terrain = new RectTerrain("Terrain");
   scenes->CheckIn(terrain);
   images->Add(terrain);
   terrain->SetFromImage(image3);
   terrain->SetDx(0.05); terrain->SetDy(0.05);
-  terrain->SetZScale(0.5);
   terrain->SetMinCol(1,0,0); terrain->SetMaxCol(0,1,1);
-  terrain->ToCenter();
-  terrain->Set3Pos(0, -3, 0.01);
-
+  terrain->Set3Pos(-3, -7, 0.01);
+  terrain->SetRibbon(ribbon1);
 
   SMorph* n1 = new SMorph("Earth"); n1->SetS(2);
   n1->SetTLevel(20); n1->SetPLevel(20);
@@ -124,7 +128,7 @@ void images()
   SMorph* morphs[3];
   for(int i=0; i<3; ++i) {
     morphs[i] = new SMorph(Form("Morph %d", i+1));
-    morphs[i]->SetTLevel(20); morphs[i]->SetPLevel(20);
+    morphs[i]->SetTLevel(30); morphs[i]->SetPLevel(30);
     morphs[i]->SetS(2);
     morphs[i]->SetTexture(image6);
     morphs[i]->Set3Pos(-6+6*i, 7, 0);
@@ -133,4 +137,18 @@ void images()
   morphs[0]->SetTx(1); morphs[0]->SetCx(0.5); morphs[0]->SetRz(-0.25);
   morphs[1]->SetTx(0); morphs[1]->SetCx(-0.5); morphs[1]->SetRz(0.25);
   morphs[2]->SetTx(-1); morphs[2]->SetCx(0.25); morphs[2]->SetRz(0.25);
+
+  CREATE_ADD_GLASS(txt1, Text, images, "Text1", 0);
+  txt1->SetText("GLED");
+  txt1->Set3Pos(-1.7, 1.8, 0);
+  txt1->SetScales(2.2, 2.3, 1);
+  txt1->SetFillBack(true);
+  txt1->SetFGCol(0, 0, 0); txt1->SetBGCol(1, 0.95, 0.6);
+
+  CREATE_ADD_GLASS(txt2, Text, images, "Text2", 0);
+  txt2->SetText("Generic Lightweight Environment for Distributed computing");
+  txt2->Set3Pos(-7.5, 0, 0);
+  txt2->SetScales(0.67, 1.1, 1);
+  txt2->SetFillBack(true);
+  txt2->SetFGCol(0,0,0); txt2->SetBGCol(0.65, 0.8, 1);
 }
