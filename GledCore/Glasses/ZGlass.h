@@ -31,8 +31,22 @@ inline TBuffer &operator<<(TBuffer& b, const _gls_ *g) { \
 
 /**************************************************************************/
 
+class YNameChangeCB {
+public:
+  virtual void y_name_change_cb(ZGlass* g, const string& new_name) = 0;
+};
+
+namespace ZGlassBits {
+  extern UShort_t kFixedName;
+}
+
+/**************************************************************************/
+
+class Saturn;
+class ZMIR;
 class ZQueen;
-class Saturn;	class ZComet;	class ZMIR;
+class ZMirFilter;
+class ZComet;
 class TBuffer;	class TMessage;
 
 typedef void (*zglass_stamp_f)(ZGlass*, void*);
@@ -49,20 +63,36 @@ private:
 protected:
   Saturn*	mSaturn;	//! X{G}
   ZQueen*	mQueen;		//! X{G}
-  ZMIR*		mMir;		//! X{Gs}
+  ZMIR*		mMir;		//! X{G}
 
-  TString	mName;		//  X{GS} 7 Textor()
+  UShort_t	mGlassBits;	//
+  TString	mName;		//  X{GE} 7 Textor()
   TString	mTitle;		//  X{GS} 7 Textor()
   ID_t		mSaturnID;	//  X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],
                                 //                 -width=>10)
+  ZMirFilter*	mGuard;		//  X{E} L{}
+
   Bool_t	bMIRActive;	//  X{GS} 7 BoolOut(-join=>1)
   Short_t	mRefCount;	//! X{G}  7 ValOut(-width=>4)
+  Short_t	mMoonRefCount;	//!
+  Short_t	mSunRefCount;	//!
+  Short_t	mFireRefCount;	//!
 
   // Locks, TimeStaps and CallBacks
   mutable GMutex	 mExecMutex;	   //! X{r} Used by Saturn::executor, Eye, rnrs
   mutable GMutex	 mRefCountMutex;   //! X{r} Used only for linking to/from obj
+
   TimeStamp_t	 mTimeStamp;	   //! X{GS} TimeStamp of last change
   TimeStamp_t	 mStampReqTring;   //! X{GS} TimeStamp of last change that requires retriangulation
+
+  // Name change callback
+#ifndef __CINT__
+  set<YNameChangeCB*>*	pSetYNameCBs;
+public:
+  void register_name_change_cb(YNameChangeCB* rec);
+  void unregister_name_change_cb(YNameChangeCB* rec);
+protected:
+#endif
 
   // Plain callbacks
   zglass_stamp_f mStamp_CB;	   //! called if non-null
@@ -76,6 +106,9 @@ protected:
 
   virtual void AdUnfoldment() {}	// called by Queen after comet unpacking
 
+  enum MirComponents_e { MC_IsBeam=1, MC_HasResultReq };
+  void AssertMIRPresence(const string& header, int what=0);
+
 public:
   ZGlass(const Text_t* n="ZGlass", const Text_t* t=0) :
     mName(n), mTitle(t),
@@ -83,17 +116,20 @@ public:
     mRefCountMutex(GMutex::recursive)
   { _init(); }
 
-  virtual ~ZGlass() {} // !!!!! Should unref all links; check zlist, too
+  virtual ~ZGlass();
 
+  void SetName(const Text_t* n);
   void SetNameTitle(const Text_t* n, const Text_t* t); // X{E}
+  ZMirFilter* GetGuard() const;
+  void SetGuard(ZMirFilter* guard);
 
   // Saturnalia
   bool IsSunSpace();
   bool IsSunOrFireSpace();
 
   // RefCount
-  Short_t IncRefCount();
-  Short_t DecRefCount();
+  Short_t IncRefCount(const ZGlass* from);
+  Short_t DecRefCount(const ZGlass* from);
 
   // Stamps
   virtual void SetStamps(TimeStamp_t s)
@@ -115,5 +151,7 @@ public:
 }; // endclass ZGlass
 
 GlassIODef(ZGlass);
+
+#include <Glasses/ZMirFilter.h>
 
 #endif

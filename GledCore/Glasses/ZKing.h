@@ -16,6 +16,9 @@ class ZKing : public ZHashList {
   MAC_RNR_FRIENDS(ZKing);
   friend class Saturn;
 
+public:
+  enum LightType_e { LT_Undef, LT_Moon, LT_Sun, LT_Fire };
+
 private:
   void _init();
 
@@ -25,7 +28,10 @@ protected:
   ID_t		mMaxID;		// X{G} ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
   ID_t		mMaxUsedID;	//
 
+  LightType_e	mLightType;	// X{G}
   Bool_t	bFireKing;	// X{G} BoolOut()
+
+  UChar_t	mMapNoneTo; // X{GS} 7 PhonyEnum(-vals=>[ZMirFilter::R_Allow,Allow,ZMirFilter::R_Deny,Deny], -width=>8)
 
   virtual void BlessMIR(ZMIR& mir) throw(string);
 

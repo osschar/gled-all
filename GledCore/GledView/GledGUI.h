@@ -44,12 +44,14 @@ protected:
   GCondition	  mMsgCond;
   lMessage_t	  mMsgQueue;
 
+  Int_t	          mNumShells;
+
 public:
   GledGUI(list<char*>& args);
   virtual ~GledGUI();
 
+  virtual void Run();
   virtual void Exit();
-  void Run();
 
   virtual Int_t LoadLibSet(const Text_t* lib_set);
 

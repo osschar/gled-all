@@ -8,28 +8,29 @@
 #define Gled_EyeInfo_H
 
 // Includes
-#include <Glasses/ZGlass.h>
+#include <Glasses/ZMirEmittingEntity.h>
 #include <Glasses/SaturnInfo.h>
 
 class Saturn;
 
 class TSocket;
 
-class EyeInfo : public ZGlass {
+class EyeInfo : public ZMirEmittingEntity {
   // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0)")
   MAC_RNR_FRIENDS(EyeInfo);
   friend class ZKing; friend class ZQueen; friend class ZSunQueen;
   friend class Saturn;
 private:
   TSocket*	hSocket;	//!
+
 protected:
-  SaturnInfo*	mMaster;	// X{GS} L{}
+  SaturnInfo*	mMaster;		// X{GS} L{}
 
 public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);
 
-  void Message(const Text_t* s); // X{E}
-  void Error(const Text_t* s);   // X{E}
+  virtual void Message(const Text_t* s); // X{E}
+  virtual void Error(const Text_t* s);   // X{E}
 
 #include "EyeInfo.h7"
   ClassDef(EyeInfo,1)

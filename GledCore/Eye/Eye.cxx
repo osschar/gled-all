@@ -33,6 +33,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <stdio.h>
+#include <errno.h>
+
+
 namespace OS = OptoStructs;
 
 /**************************************************************************/
@@ -45,72 +49,69 @@ namespace {
 
 /**************************************************************************/
 
-Eye::Eye(UInt_t port, ID_t shell_id, const char* name, const char* title,
-	 const Fl_SWM_Manager* swm_copy) : mMsg(0)
+Eye::Eye(UInt_t port, TString identity, ID_t shell_id,
+	 const char* name, const char* title,
+	 const Fl_SWM_Manager* swm_copy)
 {
-  static string _eh("Eye::Connect ");
+  static const string _eh("Eye::Eye ");
 
   mSatSocket = new TSocket("localhost", port);
-  if(!mSatSocket->IsValid()) {
-    delete mSatSocket;
-    throw(_eh + GForm("opening socket to %localhost:%d failed.", port));
+  try {
+    Saturn::HandleClientSideSaturnHandshake(mSatSocket);
   }
-
-  { // Receive greeting
-    int ml; char buf[256];
-    ml = mSatSocket->RecvRaw(buf, 255, kDontBlock);
-    if(ml <= 0) {
-      delete mSatSocket;
-      throw(_eh + GForm("handshake failed; len=%d", ml));
-    }
-    buf[ml] = 0;
-    ISmess(_eh + buf);
+  catch(string exc) {
+    ISerr(_eh + exc);
+    goto fail;
   }
-  // No protocol exchange ... 
-  { // Send the desired EyeInfo
-    TMessage m(GledNS::MT_EyeConnect);
-    EyeInfo ei(name, title);
-    GledNS::StreamGlass(m, &ei);
-    mSatSocket->Send(m);
-  }
+  // No protocol exchange ...
   {
-    TMessage *m;
-    Int_t ml = mSatSocket->Recv(m);
-    if(ml == -1 || m->What() != kMESS_ANY) {
-      ISerr(GForm("Eye::Connect Recv of Saturn* failed; len=%d", ml));
+    TMessage* m;
+    try {
+      EyeInfo ei(name, title);
+      ei.SetLogin(identity);
+      m = Saturn::HandleClientSideMeeConnection(mSatSocket, &ei);
+    }
+    catch(string exc) {
+      ISerr(_eh + exc);
       goto fail;
     }
     UInt_t ss;  *m >> ss; mSaturn = (Saturn*)ss;
     ID_t ei_id; *m >> ei_id;
+    delete m;
     mEyeInfo = dynamic_cast<EyeInfo*>(mSaturn->DemangleID(ei_id));
     if(mEyeInfo == 0) {
-      throw(string("Eye::Eye bad eye_info"));
+      ISerr(_eh + "bad eye_info");
+      goto fail;
     }
-    delete m;
-    ISdebug(0, GForm("Eye::Connect got (Saturn*)%p %s", mSaturn, mSaturn->GetName()));
-    // Install fd handler
-    Fl::add_fd(mSatSocket->GetDescriptor(), EyeFdMonitor, this);
-    //mSatSocket->SetOption(kNoBlock, 1);
   }
-
   {
     ShellInfo* si = dynamic_cast<ShellInfo*>(mSaturn->DemangleID(shell_id));
     if(si == 0) {
-      throw(string("Eye::Eye bad shell_info"));
+      ISerr(_eh + "bad shell_info");
+      goto fail;
     }
     mShell = new FTW_Shell(DemanglePtr(si), swm_copy);
   }
 
+  // Install fd handler
+  Fl::add_fd(mSatSocket->GetDescriptor(), EyeFdMonitor, this);
+  //mSatSocket->SetOption(kNoBlock, 1);
+
+  ISdebug(0, GForm("%screation of Eye('%s') complete", _eh.c_str(), name));
+
   return;
+
  fail:
   delete mSatSocket;
+  throw(_eh + "creation failed");
 }
 
 Eye::~Eye() {
-  // !!!! Send sth impressive to Saturn  
-  Fl::remove_fd(mSatSocket->GetDescriptor());
-  // close, delete suncket !!!!
-  // Tell gled you passing away
+  if(mSatSocket) {
+    // !!!! Send sth impressive to Saturn  
+    Fl::remove_fd(mSatSocket->GetDescriptor());
+    // close, delete suncket !!!!
+  }
   // Cleanup own shit ... like all Views
 }
 
@@ -312,9 +313,8 @@ Int_t Eye::Manage(int fd)
 void Eye::Send(TMessage* m) { mSatSocket->Send(*m); }
 
 void Eye::Send(ZMIR& mir) {
-  // !!!! Could set Caller ID before sending !!!!
-  // but then ... Saturn does that for MIRs from Eyes ... security or sth
-  mSatSocket->Send(*mir.Message);
+  mir.WriteHeader();
+  mSatSocket->Send(mir);
 }
 
 /**************************************************************************/
