@@ -97,6 +97,16 @@ public:
       pupil(p), lens(l), operation(o), user_data(ud) {}
   };
 
+  struct glass_data {
+    ZGlass*     lens;
+    float       z;
+    string	name;
+    lpZGlass_t  parents;
+
+    glass_data(ZGlass* l, float depth, const char* n) :
+      lens(l), z(depth), name(n) {}
+  };
+
 protected:
   virtual void pick_callback(Fl_Widget* w, pick_data* pd);
 
