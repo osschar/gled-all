@@ -82,20 +82,15 @@ void starwars()
 
 
   // Spawn GUI
-  // gROOT->ProcessLine(".x eye.C");
 
-  CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, "Shell",
-		   "Reflects into a FTW_Shell");
-  // shell->ImportKings();  // Get all Kings as top level objects
-  shell->Add(starw);
-
-  CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), "PupilInfo",
-		   "Reflects into a GL viewer");
-  pupil->Add(starw);
-  pupil->SetCameraBase(cambase);
-
-  Gled::theOne->SpawnEye(shell, "Eye of Ra");
-
+  gROOT->Macro("eye.C");
+  if(pupil) {
+    pupil->SetCameraBase(cambase);
+    pupil->EmitCameraHomeRay();
+    // Comment to disable fixing of camera 'up' direction to 'z' axis.
+    pupil->SetUpReference(starw);
+    pupil->SetUpRefAxis(3);
+  }
 
   // Start the thread rotating the station.
   dynamo->Start();
