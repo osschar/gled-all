@@ -1,0 +1,7 @@
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.h:
+	* Glasses/WarmAmoeba.h:
+
+	Changed class versions of abstract algorithm master bases from 0
+	to 1. Needed due to changes of streaming mechanism in ROOT.
