@@ -35,9 +35,7 @@ bin/saturn: saturn.o ${BASE_LIB_NAME}
 	-Llib -l${LIB_SET_NAME} \
 	${ROOTLIBS} ${SYSLIBS}
 
-.PHONY: libset_clean libset_distclean
-
-libset_clean:
+clean::
 	@rm -f ${MAINOBJS}
-libset_distclean:
+distclean::
 	@rm -f ${MAINEXES}
