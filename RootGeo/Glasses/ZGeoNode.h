@@ -42,13 +42,13 @@ class ZGeoNode : public ZNode {
   TString		mDefFile;   // X{GS} 7 Filor()
 
  public:
-  void AssignGGeoTopNode();	   // X{E} 7 MButt()
-  void ImportNodes();              // X{E} 7 MButt(-join=>1)
-  void ImportNodesWCollect();      // X{E} 7 MButt()
-  void SaveToFile(const Text_t* file=0); // X{E} 7 MButt()
-  void LoadFromFile(const Text_t* file=0); // X{E} 7 MButt()
-  virtual void Restore(); // X{Ed} 7 MButt()
-  void     delete_list();
+  void AssignGGeoTopNode();                // X{E}  7 MButt()
+  void ImportNodes();                      // X{Ed} 7 MButt(-join=>1)
+  void ImportNodesWCollect();              // X{Ed} 7 MButt()
+
+  void SaveToFile(const Text_t* file=0);   // X{E}  7 MButt()
+  void LoadFromFile(const Text_t* file=0); // X{Ed} 7 MButt()
+  virtual void Restore();                  // X{Ed} 7 MButt()
 
  protected:
   Bool_t	        bRnrSelf;   // X{G} 7 Bool()

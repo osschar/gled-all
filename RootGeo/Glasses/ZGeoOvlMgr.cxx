@@ -17,12 +17,10 @@
 #include <TGeoOverlap.h>
 #include <TPolyMarker3D.h>
 
-
-
 ClassImp(ZGeoOvlMgr)
 
-
 /**************************************************************************/
+
 void ZGeoOvlMgr::_init()
 {
   // !!!! Set all links to 0 !!!!
@@ -37,6 +35,7 @@ void ZGeoOvlMgr::_init()
 }
 
 /**************************************************************************/
+
 void ZGeoOvlMgr::Dump()
 {
   list<ZGeoNode*> gns;
@@ -51,6 +50,7 @@ void ZGeoOvlMgr::Dump()
 }
 
 /*************************************************************************/
+
 ZTrans ZGeoOvlMgr::get_ztrans(TGeoMatrix* gm)
 {
   const Double_t* rm = gm->GetRotationMatrix();
@@ -66,7 +66,9 @@ ZTrans ZGeoOvlMgr::get_ztrans(TGeoMatrix* gm)
 
 
 /**************************************************************************/
-Bool_t ZGeoOvlMgr::locate_first_from_top(TGeoNode* cur_node, TGeoVolume* vol, ZGeoNode* zn, lgn_t& result)
+
+Bool_t ZGeoOvlMgr::locate_first_from_top(TGeoNode* cur_node, TGeoVolume* vol,
+					 ZGeoNode* zn, lgn_t& result)
 {
   if(cur_node->GetVolume() == vol) {
     zn->SetTNode(cur_node);
@@ -88,7 +90,9 @@ Bool_t ZGeoOvlMgr::locate_first_from_top(TGeoNode* cur_node, TGeoVolume* vol, ZG
 }
 
 /*************************************************************************/
-string ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol, ZGeoNode* zn)
+
+string ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol,
+					 ZGeoNode* zn)
 {
   lgn_t  path;
   ZTrans  mt;
@@ -109,6 +113,7 @@ string ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol, ZG
 }
 
 /*************************************************************************/
+
 void ZGeoOvlMgr::RnrOvlInterval()
 {
   // Set mRnrSelf to true in nodes which have mOverlap
@@ -131,7 +136,8 @@ void ZGeoOvlMgr::RnrOvlInterval()
 }
 
 /**************************************************************************/
-void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node )
+
+void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node)
 {
   // Creates a list of TGeoOvl objects reading 
   // gGeoManager list fOverlaps.
@@ -218,7 +224,8 @@ void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node )
 
 }
 
-/************************************************************/
+/**************************************************************************/
+
 void ZGeoOvlMgr::setup_zcolor(ZGeoOvl* ovlm){
   // Sets color to ZGeoOvl node. If node is extrusion, the color is
   // set to mExtrCol. In case node represents overlap, the color of the 
@@ -237,7 +244,8 @@ void ZGeoOvlMgr::setup_zcolor(ZGeoOvl* ovlm){
   }
 }
 
-/************************************************************/
+/**************************************************************************/
+
 ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t, TGeoNode* tn)
 {
   ZGeoOvl *nn = new ZGeoOvl(n, t);
@@ -257,9 +265,12 @@ ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t, TG
   return nn;
 }
 
-/**************************************************************/
-void ZGeoOvlMgr::RecalculateOvl(){
-  delete_list();
+/**************************************************************************/
+
+void ZGeoOvlMgr::RecalculateOvl()
+{
+  RemoveLensesViaQueen(true);
+
   if (gGeoManager) {
     gGeoManager->CheckOverlaps(mResol);
     if (mMinOvl > mResol) mMinOvl=mResol;    
@@ -267,7 +278,8 @@ void ZGeoOvlMgr::RecalculateOvl(){
   }
 }
 
-/************************************************************/
+/**************************************************************************/
+
 void ZGeoOvlMgr::Restore()
 {
   // Sets UserData to nodes with mTNode set.
@@ -318,15 +330,15 @@ void ZGeoOvlMgr::Restore()
   ISdebug(1, GForm("%s END", _eh.c_str()));
 }
 
-/*************************************************************/
+/**************************************************************************/
+
 void ZGeoOvlMgr::set_tnode_by_path( string path, TGeoNode* & gn)
 {
   static const string _eh("ZGeoOvlMgr::SetTNodeByPath");
   Bool_t last_token;
   if( path.find_first_of("/") == path.find_last_of("/")){
     last_token=true;
-  }
-  else {
+  } else {
     last_token=false;
   }
 
@@ -335,7 +347,7 @@ void ZGeoOvlMgr::set_tnode_by_path( string path, TGeoNode* & gn)
   unsigned int pos  = path.find_first_of("/");
 
 
-  if(last_token){
+  if(last_token) {
     TGeoVolume* vol = gn->GetVolume();
     if(vol->GetNodes()) {
       // printf("search  %s in volume %s \n", path.c_str(), vol->GetName());
@@ -348,7 +360,7 @@ void ZGeoOvlMgr::set_tnode_by_path( string path, TGeoNode* & gn)
 	ISerr(GForm("%s Can't find reference for %s in gGeoManager.", _eh.c_str(),path.c_str()));
       }
     }
-  }else {
+  } else {
     if (pos != string::npos) {
       string nname =  path.substr(0,pos);
       path = path.substr(pos, end -pos);   

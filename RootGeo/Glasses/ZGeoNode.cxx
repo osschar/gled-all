@@ -49,6 +49,7 @@ void ZGeoNode::_assert_tnode(const string& _eh, bool _ggeo_fallbackp)
 }
 
 /**************************************************************************/
+
 void ZGeoNode::SetRnrSelf(Bool_t rnrself) 
 {
   bRnrSelf = rnrself;
@@ -56,6 +57,7 @@ void ZGeoNode::SetRnrSelf(Bool_t rnrself)
 }
 
 /**************************************************************************/
+
 void ZGeoNode::RnrOnForDaughters()
 {
   lpZGeoNode_t dts; 
@@ -67,7 +69,6 @@ void ZGeoNode::RnrOnForDaughters()
   }
 }
 
-/***********************************************************************/
 void ZGeoNode::RnrOffForDaughters()
 { 
   lpZGeoNode_t dts; 
@@ -79,7 +80,8 @@ void ZGeoNode::RnrOffForDaughters()
   }
 }
 
-/***********************************************************************/
+/**************************************************************************/
+
 void ZGeoNode::RnrOnRec()
 {
   lpZGeoNode_t dts; 
@@ -91,7 +93,6 @@ void ZGeoNode::RnrOnRec()
   SetRnrSelf(true);   
 }
 
-/***********************************************************************/
 void ZGeoNode::RnrOffRec()
 { 
   lpZGeoNode_t dts; 
@@ -104,6 +105,7 @@ void ZGeoNode::RnrOffRec()
 }
 
 /**************************************************************************/
+
 void ZGeoNode::setup_ztrans(ZNode* zn, TGeoMatrix* gm)
 {
   const Double_t* rm = gm->GetRotationMatrix();
@@ -116,7 +118,6 @@ void ZGeoNode::setup_ztrans(ZNode* zn, TGeoMatrix* gm)
   zn->SetTrans(t);
 }
 
-/************************************************************************/
 void ZGeoNode::setup_color(Float_t alpha)
 {
   Int_t ci = ((mTNode->GetColour() % 8) - 1) * 4;
@@ -130,6 +131,7 @@ void ZGeoNode::setup_color(Float_t alpha)
 }
 
 /**************************************************************************/
+
 ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder, 
 			       Bool_t rnr, const Text_t* title)
 {
@@ -166,6 +168,8 @@ void ZGeoNode::AssignGGeoTopNode()
 }
 
 /**************************************************************************/
+// Importers
+/**************************************************************************/
 
 void ZGeoNode::ImportNodes()
 {
@@ -176,7 +180,7 @@ void ZGeoNode::ImportNodes()
 
   _assert_tnode(_eh);
 
-  ClearList();
+  RemoveLensesViaQueen(true);
 
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
@@ -239,6 +243,7 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
 }
 
 /**************************************************************************/
+
 void ZGeoNode::ImportNodesWCollect() 
 {
   // Import mTGeoNode and groups the nodes by 
@@ -248,7 +253,8 @@ void ZGeoNode::ImportNodesWCollect()
 
   _assert_tnode(_eh);
   
-  ClearList();
+  RemoveLensesViaQueen(true);
+
   map<string, ZNode*> nmap;
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
@@ -281,7 +287,8 @@ void ZGeoNode::ImportNodesWCollect()
   }
 }
 
-/*************************************************************/
+/**************************************************************************/
+
 void ZGeoNode::ImportUnimported(const Text_t* target)
 {  
   static const string _eh("ZGeoNode::ImportUnimported ");
@@ -323,10 +330,8 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
   }
 }
 
-
-
-
 /**************************************************************************/
+
 void ZGeoNode::AssertUserData()
 { 
   // Creates TGLFaceSet object rendered by ZGeoNode_GL_Rnr
@@ -376,8 +381,6 @@ void ZGeoNode::SaveToFile(const Text_t* file)
   f.Close();
 }
 
-
-/**************************************************************************/
 void ZGeoNode::LoadFromFile(const Text_t* file)
 {
   static const string _eh("ZGeoNode::LoadFromFile ");
@@ -385,7 +388,8 @@ void ZGeoNode::LoadFromFile(const Text_t* file)
   if(file == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "loading from '" + file + "'.");
 
-  ClearList();
+  RemoveLensesViaQueen(true);
+
   TFile f(file, "READ");
   auto_ptr<ZComet> c( dynamic_cast<ZComet*>(f.Get("ZGeoNodes")) );
   f.Close();
@@ -397,25 +401,6 @@ void ZGeoNode::LoadFromFile(const Text_t* file)
   mQueen->AdoptComet(this, 0, c.get());
 }
 
-/**************************************************************************/
-TGeoNode* ZGeoNode::get_tnode_search_point()
-{
-  static const string _eh("ZGeoNode::GetTNodeSearchPoint");
-
-  ZGeoNode* p = dynamic_cast<ZGeoNode*>(GetParent());
-  if(p && p->GetTNode() != 0) {
-    return p->GetTNode();
-  } else {
-    // printf("GetTNodeSearchPoint searching from TOP node \n");
-    if(!gGeoManager) {
-      ISerr(GForm("%s gGeoManager not set.", _eh.c_str()) );
-      return 0;
-    }
-    return gGeoManager->GetTopNode();
-  }
-}
-
-  /**************************************************************************/
 void ZGeoNode::Restore()
 {
   static const string _eh("ZGeoNode::Restore");
@@ -442,37 +427,27 @@ void ZGeoNode::Restore()
   EndIteration();
 }
 
+/**************************************************************************/
 
-/*************************************************************************/
+TGeoNode* ZGeoNode::get_tnode_search_point()
+{
+  static const string _eh("ZGeoNode::GetTNodeSearchPoint");
 
-void ZGeoNode::delete_list(){
-  static const string _eh("ZGeoNode::delete_list ");
-
-  if(mSize == 0) return;
-  
-  ISdebug(1, GForm("%slocking list '%s'.", _eh.c_str(), GetName()));
-  mListMutex.Lock();
-
-  lpZGlass_t foo;
-  foo.swap(mGlasses);
-  clear_list();
-  StampListClear();
-  mListMutex.Unlock();
-
-  ISdebug(1, GForm("unlocked list '%s'.", _eh.c_str(), GetName()));
-
-  ZGeoNode* zn;
-  for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
-    if((zn = dynamic_cast<ZGeoNode*>(*i))) {
-      (*i)->DecRefCount(this);
-      zn->delete_list();
+  ZGeoNode* p = dynamic_cast<ZGeoNode*>(GetParent());
+  if(p && p->GetTNode() != 0) {
+    return p->GetTNode();
+  } else {
+    // printf("GetTNodeSearchPoint searching from TOP node \n");
+    if(!gGeoManager) {
+      ISerr(GForm("%s gGeoManager not set.", _eh.c_str()) );
+      return 0;
     }
+    return gGeoManager->GetTopNode();
   }
-
-  ISdebug(1, GForm("%sfinished for '%s'.", _eh.c_str(), GetName()));
 }
 
 /**************************************************************************/
+
 ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
 {
   if(node_names.empty()) return this;
@@ -490,7 +465,8 @@ ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
   return next->set_holder(node_names);
 }
 
-  /************************************************************************/
+/************************************************************************/
+
 Bool_t ZGeoNode::locate_tnode( ZGeoNode* zn, TGeoNode* cur_node)
 {  
   // Searches TGeoNode from cur_node whith name zn->mTNodeName

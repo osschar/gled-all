@@ -41,6 +41,7 @@ protected:
   Float_t               mMaxOvl;            // X{GS}  7 Value(-range=>[0,100,1,1000], -join=>1)
 public:
   void                  RnrOvlInterval();    // X{E}  7 MButt()
+
 protected:
   Bool_t      locate_first_from_top(TGeoNode* cur_node, TGeoVolume* v, ZGeoNode* zn,lgn_t& result);
   string      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v, ZGeoNode* zn);
@@ -51,14 +52,16 @@ protected:
 
 public:
   ZGeoOvlMgr(const Text_t* n="ZGeoOvlMgr", const Text_t* t=0):ZGeoNode(n,t){ _init();}
-  // TO DO -> print method
+
   void         ImportUnReplicated(TObjArray* lOverlaps, TGeoNode* top_node);
+
   virtual void Restore(); // X{Ed} 
-  void         Dump();                       // X{E} 7 MButt()
+
+  void         Dump();    // X{E} 7 MButt()
 
 #include "ZGeoOvlMgr.h7"
   ClassDef(ZGeoOvlMgr, 1)
-    }; // endclass ZGeoOvlMgr
+}; // endclass ZGeoOvlMgr
 
 GlassIODef(ZGeoOvlMgr);
 
