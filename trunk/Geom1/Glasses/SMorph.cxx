@@ -16,7 +16,13 @@ void SMorph::_init(Real_t r)
   mTLevel = 2; mPLevel = 3;
   mSx = mSy = mSz = r;
   mTx = mCx = mRz = 0;
+
+  bOpenTop = bOpenBot = bNormalize = bEquiSurf = false;
+
+  mTexture = 0;
+
   pTuber = new TubeTvor;
+  bTextured = false;
 }
 
 SMorph::~SMorph() { delete pTuber; }
@@ -32,33 +38,43 @@ void SMorph::Messofy(Real_t ct, Real_t st, Real_t phi)
   R[0] = x*c - y*s;
   R[1] = s*x + y*c;
   R[2] = z;
-  pTuber->NewVert(R, R, 0);
+
+  float T[2];
+  if(bTextured) {
+    T[0] = phi / (2*TMath::Pi());
+    T[1] = TMath::ACos(ct)/TMath::Pi();
+  }
+
+  pTuber->NewVert(R, R, 0, T);
 }
 
 void SMorph::Triangulate()
 {
-  pTuber->Init(false, 2, mTLevel-1, mPLevel);
-  pTuber->NewRing(1, 1-bOpenTop);
-  Messofy(1, 0, 0);
-  float last_ct = 1;
-  for(int i=1; i<mTLevel; i++) {
+  bTextured = (mTexture != 0);
+  int tlevel = mTLevel + 1; if(bOpenTop) --tlevel; if(bOpenBot) --tlevel;
+  pTuber->Init(0, tlevel, mPLevel, false, bTextured);
+
+  float last_ct = bOpenTop ? 1 : 1 + 2.0/mTLevel;
+  float delta_t = TMath::Pi()/mTLevel;
+  float t = bOpenTop ? delta_t : 0;
+  for(int i=0; i<tlevel; i++) {
     float ct, st;
     if(bEquiSurf) {
-      ct =  last_ct - 2.0/mTLevel;
+      ct = last_ct - 2.0/mTLevel; if(ct < -1) ct = -1;
       st = sin(acos(ct));
     } else {
-      ct = cos(TMath::Pi()*i/mTLevel);
-      st = sin(TMath::Pi()*i/mTLevel);
+      ct = cos(t);
+      st = sin(t);
+      t += delta_t;
     }
     float phi = 0, step = 2*TMath::Pi()/mPLevel;
     pTuber->NewRing(mPLevel, true);
     for(int j=0; j<mPLevel; j++, phi+=step) {
       Messofy(ct, st, phi);
     }
+    Messofy(ct, st, 2*TMath::Pi());
     last_ct = ct;
   }
-  pTuber->NewRing(1, 1-bOpenBot);
-  Messofy(-1, 0, 0);
 }
 
 #include "SMorph.c7"
