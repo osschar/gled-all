@@ -1,5 +1,8 @@
 2003-07-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* make/make_base.inc: Hidden libset_id files are also needed in
+	libset directory (for binary packages).
+
 	* lib-exec/project7.pl: Fixed pointer-to-pointer exports for links
 	to work on gcc-3.3.
 
