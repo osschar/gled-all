@@ -56,6 +56,7 @@ public:
   ZTrans(const ZNode* n);
   virtual ~ZTrans() {}
 
+  void  UnitTrans();
   Int_t Set3Pos(Float_t x, Float_t y, Float_t z);
   Int_t SetPos(const TVectorF& v);
   Int_t SetPos(const ZTrans& t);
@@ -103,8 +104,6 @@ public:
 
   Float_t& operator()(Int_t rown, Int_t coln)
   { return (fElements[rown*fNcols + coln]); }
-
-  static ZTrans UnitTrans;
 
   ClassDef(ZTrans, 1)
 };

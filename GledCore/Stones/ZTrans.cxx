@@ -11,7 +11,6 @@ ClassImp(ZTrans)
 
 // Matrix Prototype
 static const TMatrixF ZTransMatrixProto(5,5);
-ZTrans ZTrans::UnitTrans;
 
 /**************************************************************************/
 
@@ -30,6 +29,13 @@ ZTrans::ZTrans(const ZTrans& z) : TMatrixF(z) { _init(); }
 ZTrans::ZTrans(const ZNode* n) : TMatrixF(n->RefTrans()) { _init(); }
 
 /**************************************************************************/
+
+void ZTrans::UnitTrans()
+{
+  UnitMatrix();
+  mA1 = mA2 = mA3 = 0;
+  bAsOK = true;
+}
 
 Int_t ZTrans::Set3Pos(Float_t x, Float_t y, Float_t z)
 {
