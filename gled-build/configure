@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # $Header$
 
-# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -12,7 +12,7 @@ use ParseConfig;
 use Gled_ConfCat_Parser;
 use Gled_Installer;
 
-$CFGFILE     = "build_config";
+$CFGFILE = "build_config";
 
 ########################################################################
 
@@ -322,7 +322,7 @@ for $f (@{$resolver->{BaseLibSetList}}) {
   system_or_die("make -C $f build_install install");
 }
 
-# Make base_install from local LibSets
+# Make build_install from local LibSets
 for $f (@{$resolver->{LibSetList}}) {
   system_or_die("make -C $f build_install");
 }
@@ -339,15 +339,23 @@ for $f (@{$resolver->{LibSetList}}) {
 for $f ((map {"$config->{GLEDBASE}/$_"} @{$resolver->{BaseLibSetList}}),
 	@{$resolver->{LibSetList}})
   {
+    print "# Generating resolver for LibSet $f\n";
     Gled_ConfCat_Parser::parse_catalog($f);
     $resolver->{LibID2LibSetName}{$CATALOG->{LibID}} = $CATALOG->{LibSetName};
     for $c (@{$CATALOG->{ClassList}}) {
+      my $p7_path   = "$ENV{GLEDSYS}/lib-exec/project7.pl";
+      my $file_stem = "$ENV{GLEDSYS}/$f/$CATALOG->{Classes}{$c}{Stem}";
       $resolver->{GlassName2GlassSpecs}{$c} =
 	{
-	 'LibSetName' => $f, 'ClassName' => $c,
-	 'LibID' => $CATALOG->{LibID}, 'ClassID' => $CATALOG->{Classes}{$c}{ClassID},
-	 'FileStem' => "$ENV{GLEDSYS}/$f/$CATALOG->{Classes}{$c}{Stem}"
+	 'LibSetName' => $f,
+	 'ClassName'  => $c,
+	 'LibID'      => $CATALOG->{LibID},
+	 'ClassID'    => $CATALOG->{Classes}{$c}{ClassID},
+	 'FileStem'   => $file_stem
 	};
+      my $enum_defs =
+	exec_or_die("cd $f; $p7_path -class $c -infile ${file_stem}.h -0 -");
+      eval $enum_defs;
     }
   }
 
