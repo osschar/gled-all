@@ -8,6 +8,7 @@
 #define GledCore_PupilInfo_H
 
 #include <Glasses/SubShellInfo.h>
+#include <Glasses/CameraInfo.h>
 #include <Glasses/ZNode.h>
 #include <Net/Ray.h>
 
@@ -32,6 +33,14 @@ private:
   void		_init();
 
 protected:
+  // Basic config.
+  Int_t		mMaxRnrDepth;	// X{gS} 7 Value(-range=>[1,1000,1,1])
+  Int_t		mWidth;         // X{gS} Ray{Resize} 7 Value(-range=>[0,4096,1], -join=>1)
+  Int_t		mHeight;        // X{gS} Ray{Resize} 7 Value(-range=>[0,4096,1])
+  ZColor	mClearColor;	// X{PRGS} 7 ColorButt()
+
+
+  // CameraInfo.
   ZNode*	mCameraBase;	// X{gE} L{}
 
   ZNode*	mLookAt;	// X{gE} L{}
@@ -42,13 +51,6 @@ protected:
   Bool_t	bUpRefLockDir;	// X{gS} 7 Bool()
   Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,40,1,100])
 
-  Int_t		mMaxDepth;	// X{gS} 7 Value(-range=>[1,1000,1,1])
-
-  Int_t		mWidth;         // X{gE} 7 Value(-range=>[0,4096,1], -join=>1)
-  Int_t		mHeight;        // X{gE} 7 Value(-range=>[0,4096,1])
-
-  ZColor	mClearColor;	// X{PRGS} 7 ColorButt()
-
   Projection_e	mProjMode;	// X{GS} 7 PhonyEnum()
   Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1,180,1,100], -join=>1)
   Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
@@ -57,11 +59,13 @@ protected:
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
 
+  // Basic rendering options.
   Int_t		mFrontMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6,-join=>1)
   Int_t		mBackMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6)
   Bool_t	bLiMo2Side;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bBlend;		// X{gS} 7 Bool()
 
+  // User interaction and feedback.
   Float_t	mMSRotFac;	// X{gS} 7 Value(-range=>[-1000,1000,1,100])
   Float_t	mMSMoveFac;	// X{gS} 7 Value(-range=>[-1000,1000,1,100])
   Float_t	mMoveOM;	// X{gS} 7 Value(-range=>[-30,30,1,100])
@@ -88,13 +92,13 @@ public:
   void SetLookAt(ZNode* lookat);
   void SetUpReference(ZNode* upreference);
 
+  void ImportCameraInfo(CameraInfo* cam_info); // X{E} C{1} 7 MCWButt()
+
   void Zoom(Float_t delta); // X{E}
 
   void EmitDumpImageRay(const Text_t* filename="screenshot.tga"); // X{E} 7 MButt()
   void EmitImmediateRedrawRay();                                  // X{E} 7 MButt()
 
-  void SetWidth(Int_t w)  { mWidth = w; EmitResizeRay(); }
-  void SetHeight(Int_t h) { mHeight = h; EmitResizeRay(); }
   void EmitResizeRay(); // X{E} 7 MButt()
 
   void EmitCameraHomeRay(); // X{E} 7 MButt()
