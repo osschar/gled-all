@@ -17,7 +17,7 @@ public:
   virtual void		SetState(const ZVector& x) = 0;
   virtual ZMIR*		S_SetState(const ZVector& x) = 0;
 
-  ClassDef(WarmAmoebaMaster,0)
+  ClassDef(WarmAmoebaMaster,1)
 };
 
 class WarmAmoeba : public Eventor {
