@@ -40,6 +40,7 @@ Fl_LorentzVector::Fl_LorentzVector(int x, int y, int w,int h, const char* l) :
 
   end();
   resizable(0);
+  box(FL_FLAT_BOX);
 }
 
 void Fl_LorentzVector::resize(int x, int y, int w, int h)
