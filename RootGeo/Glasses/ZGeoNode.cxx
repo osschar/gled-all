@@ -10,9 +10,10 @@
 // A ZGeoNode serves for representation of root TGeoNode
 // object in Gled framework. 
 //
+
 #include "ZGeoNode.h"
 #include "ZGeoNode.c7"
-// #include <Glasses/ZNode.cxx>
+
 #include <Glasses/ZQueen.h>
 #include <Stones/ZComet.h>
 
@@ -21,16 +22,14 @@
 #include <TGeoNode.h>
 #include <TColor.h>
 
-
-typedef list<ZNode*>              lpZNode_t;
-typedef list<ZNode*>::iterator    lpZNode_i;
-typedef list<ZGeoNode*>           lpZGNode_t;
-typedef list<ZGeoNode*>::iterator lpZGNode_i;
+typedef list<ZGeoNode*>           lpZGeoNode_t;
+typedef list<ZGeoNode*>::iterator lpZGeoNode_i;
 
 ClassImp(ZGeoNode)
 
 /**************************************************************************/
-  void ZGeoNode::_init()
+
+void ZGeoNode::_init()
 {
   // !!!! Set all links to 0 !!!! 
   mTNode     = 0;
@@ -40,6 +39,14 @@ ClassImp(ZGeoNode)
   bRnrSelf = true;
 }
 
+void ZGeoNode::_assert_tnode(const string& _eh, bool _ggeo_fallbackp)
+{
+  if(mTNode == 0)
+    if(_ggeo_fallbackp && gGeoManager &&  gGeoManager->GetTopNode() )
+      mTNode = gGeoManager->GetTopNode();
+    else
+      throw(_eh + "top-node can not be resolved.");
+}
 
 /**************************************************************************/
 void ZGeoNode::SetRnrSelf(Bool_t rnrself) 
@@ -51,53 +58,48 @@ void ZGeoNode::SetRnrSelf(Bool_t rnrself)
 /**************************************************************************/
 void ZGeoNode::RnrOnForDaughters()
 {
-  lpZNode_t dts; 
-  ZNode::CopyByGlass<ZNode*>(dts);
+  lpZGeoNode_t dts; 
+  CopyByGlass<ZGeoNode*>(dts);
   
-  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    ZGeoNode* d = (ZGeoNode*)(*i);
-    d->WriteLock();
-    d->SetRnrSelf(true);
-    d->WriteUnlock();
+  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrSelf(true);
   }
 }
 
 /***********************************************************************/
 void ZGeoNode::RnrOffForDaughters()
 { 
-  lpZNode_t dts; 
-  ZNode::CopyByGlass<ZNode*>(dts);
+  lpZGeoNode_t dts; 
+  CopyByGlass<ZGeoNode*>(dts);
   
-  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    ZGeoNode* d = (ZGeoNode*)(*i);
-    d->WriteLock();
-    d->SetRnrSelf(false);
-    d->WriteUnlock();
+  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrSelf(false);
   }
 }
 
 /***********************************************************************/
 void ZGeoNode::RnrOnRec()
 {
-  lpZNode_t dts; 
-  ZNode::CopyByGlass<ZNode*>(dts);
-  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    ZGeoNode* d = (ZGeoNode*)(*i);
-    d->RnrOnRec();
+  lpZGeoNode_t dts; 
+  CopyByGlass<ZGeoNode*>(dts);
+  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    (*i)->RnrOnRec();
   }
-
+  GLensReadHolder _rlck(this);
   SetRnrSelf(true);   
 }
 
 /***********************************************************************/
 void ZGeoNode::RnrOffRec()
 { 
-  lpZNode_t dts; 
-  ZNode::CopyByGlass<ZNode*>(dts);
-  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
-    ZGeoNode* d = (ZGeoNode*)(*i);
-    d->RnrOffRec();
+  lpZGeoNode_t dts; 
+  CopyByGlass<ZGeoNode*>(dts);
+  for(lpZGeoNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    (*i)->RnrOffRec();
   }
+  GLensReadHolder _rlck(this);
   SetRnrSelf(false);   
 }
 
@@ -156,20 +158,29 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
 }
 
 /**************************************************************************/
+
+void ZGeoNode::AssignGGeoTopNode()
+{
+  static const string _eh("ZGeoNode::AssignGGeoTopNode ");
+  _assert_tnode(_eh, true);
+}
+
+/**************************************************************************/
+
 void ZGeoNode::ImportNodes()
 {
   // Reads mTGeoNode and creates  
   // representative ZGeoNode node. 
 
   static const string _eh("ZGeoNode::ImportNodes ");
-  if(mTNode == 0)
-    throw(_eh + "mTNode not set.");
+
+  _assert_tnode(_eh);
 
   clear_this_list();
 
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
-  while(geon = (TGeoNode*)next_node()) {
+  while((geon = (TGeoNode*)next_node())) {
     const char* vname = "<no-vol>";
     const char* sname = "<no-shp>";
 
@@ -187,13 +198,14 @@ void ZGeoNode::ImportNodes()
 }
 
 /**************************************************************************/
+
 void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
 {
   // Imports mTGeoNode and groups the created nodes by given regular expression.
 
   static const string _eh("ZGeoNode::ImportByRegExp ");
-  if(mTNode == 0)
-    throw(_eh + "mTNode not set.");
+
+  _assert_tnode(_eh);
 
   // split target into list of node names
   lStr_t node_names;
@@ -233,8 +245,8 @@ void ZGeoNode::ImportNodesWCollect()
   // mother volume name.
 
   static const string _eh("ZGeoNode::ImportNodesWCollect ");
-  if(mTNode == 0)
-    throw(_eh + "mTNode not set.");
+
+  _assert_tnode(_eh);
   
   clear_this_list();
   map<string, ZNode*> nmap;
@@ -274,8 +286,7 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
 {  
   static const string _eh("ZGeoNode::ImportUnimported ");
 
-  if(mTNode == 0)
-    throw(_eh + "mTNode not set.");
+  _assert_tnode(_eh);
    
   ZGeoNode* holder = dynamic_cast<ZGeoNode*>(GetElementByName(target));
   if ( holder == 0 ){

@@ -28,6 +28,7 @@ class ZGeoNode : public ZNode {
  private:
   void _init();
   // Bool_t HasTNodeRef(){return mTNodeName.IsNull();}
+  void _assert_tnode(const string& _eh, bool _ggeo_fallbackp=false);
 
  protected:
   TGeoNode	       *mTNode;     //! X{g}
@@ -41,6 +42,7 @@ class ZGeoNode : public ZNode {
   TString		mDefFile;   // X{GS} 7 Filor()
 
  public:
+  void AssignGGeoTopNode();	   // X{E} 7 MButt()
   void ImportNodes();              // X{E} 7 MButt(-join=>1)
   void ImportNodesWCollect();      // X{E} 7 MButt()
   void SaveToFile(const Text_t* file=0); // X{E} 7 MButt()
@@ -65,11 +67,11 @@ class ZGeoNode : public ZNode {
   void ImportUnimported(const Text_t* target="TheRest"); 
   void AssertUserData();
    
-  virtual void RnrOffForDaughters();                        // X{ED} 7 MButt(-join=>1)
-  virtual void RnrOnForDaughters();                         // X{ED} 7 MButt()
-  virtual void RnrOnRec();                                  // X{E}  7 MButt(-join=>1)   
-  virtual void RnrOffRec();                                 // X{E}  7 MButt() 
-  virtual void SetRnrSelf(Bool_t rnrself);                  // X{E}
+  virtual void RnrOnForDaughters();                // X{ED} 7 MButt(-join=>1)
+  virtual void RnrOffForDaughters();               // X{ED} 7 MButt()
+  virtual void RnrOnRec();                         // X{ED} 7 MButt(-join=>1)   
+  virtual void RnrOffRec();                        // X{ED} 7 MButt() 
+  virtual void SetRnrSelf(Bool_t rnrself);         // X{E}
 
   // Manual Get/Set-methods
   void SetTNode(TGeoNode* n)
