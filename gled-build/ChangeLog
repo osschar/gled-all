@@ -1,3 +1,16 @@
+2005-01-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* configure.rc:
+	* make/make_base.inc:
+	* make/make_defs.inc:
+	Use ROOT libs to deduce X11 library path; new options to control
+	compilation of View and Rnr libs.
+	`ldd $ROOTSYS/lib/libgX11.so` is used for determination of X11
+	linker path ... this allows compilation on 64-bit systems.
+	New options to configure: --noviewlibs and --nornrlibs. Note that
+	rendering libraries DO require view libraries.
+
 2004-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
