@@ -1,3 +1,15 @@
+2003-07-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-create-libset: Creates all default directories and adds
+	hidden cvskeep files into them.
+
+	* make/make_base.inc: Hidden libset_id file now created in
+	GLEDSYS/lib only.
+
+	* perllib/Gled_Installer.pm: Now skips hidden files on
+	install/uninstall.
+
+
 2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_base.inc: File lib/.[libset_id] was not removed on
