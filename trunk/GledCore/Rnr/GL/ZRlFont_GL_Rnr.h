@@ -8,21 +8,20 @@
 #define GledCore_ZRlFont_GL_RNR_H
 
 #include <Glasses/ZRlFont.h>
-#include <Rnr/GL/ZGlass_GL_Rnr.h>
+#include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 #include <GledView/GLTextNS.h>
 
-class ZRlFont_GL_Rnr : public ZGlass_GL_Rnr {
+class ZRlFont_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:
   void _init();
 
 protected:
   ZRlFont*		mZRlFont;
-  GLTextNS::TexFont*	mFont;
-  GLTextNS::TexFont*	mExFont;
+  GLTextNS::TexFont*	mFont;    // X{g}
 
 public:
   ZRlFont_GL_Rnr(ZRlFont* idol) :
-    ZGlass_GL_Rnr(idol), mZRlFont(idol) { _init(); }
+    ZRnrModBase_GL_Rnr(idol), mZRlFont(idol) { _init(); }
 
   virtual void AbsorbRay(Ray& ray);
 
@@ -32,9 +31,7 @@ public:
 
   bool LoadFont();
 
-  // Interface for PupilInfo_GL_Rnr
-  void MakeDefault(RnrDriver* rd);
-
+#include "ZRlFont_GL_Rnr.h7"
 }; // endclass ZRlFont_GL_Rnr
 
 #endif

@@ -5,13 +5,17 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZRlFont_GL_Rnr.h"
-#include <RnrBase/RnrDriver.h>
 #include <FL/gl.h>
+
+#define PARENT ZRnrModBase_GL_Rnr
 
 /**************************************************************************/
 
 void ZRlFont_GL_Rnr::_init()
 {
+  // A_Rnr
+  bOnePerRnrDriver = true;
+
   mFont = 0;
   LoadFont();
 }
@@ -30,17 +34,15 @@ void ZRlFont_GL_Rnr::AbsorbRay(Ray& ray)
 void ZRlFont_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   if(mFont) {
-    rd->PushRnrMod(ZRlFont::FID(), mZRlFont);
-    mExFont = rd->GetTexFont();
-    rd->SetTexFont(mFont);
+    PARENT::PreDraw(rd);
+    rd->PushRnrMod(ZRlFont::FID(), mRnrMod);
   }
 }
 
 void ZRlFont_GL_Rnr::Draw(RnrDriver* rd)
 {
   if(mFont) {
-    rd->SetDefRnrMod(ZRlFont::FID(), mZRlFont);
-    rd->SetTexFont(mFont);
+    rd->SetDefRnrMod(ZRlFont::FID(), mRnrMod);
   }
 }
 
@@ -48,7 +50,6 @@ void ZRlFont_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   if(mFont) {
     rd->PopRnrMod(ZRlFont::FID());
-    rd->SetTexFont(mExFont);
   }
 }
 
@@ -74,12 +75,4 @@ bool ZRlFont_GL_Rnr::LoadFont()
     }
   }
   return false;
-}
-
-/**************************************************************************/
-
-void ZRlFont_GL_Rnr::MakeDefault(RnrDriver* rd)
-{
-  rd->SetDefRnrMod(ZRlFont::FID(), mZRlFont);
-  rd->SetTexFont(mFont);
 }
