@@ -11,6 +11,8 @@
 
 #include "GLTextNS.h"
 
+#include <RnrBase/RnrDriver.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -22,28 +24,12 @@ namespace GLTextNS {
 
 #if 0
   /* Uncomment to debug various scenarios. */
- #undef GL_VERSION_1_1
- #undef GL_EXT_texture_object
- #undef GL_EXT_texture
+#undef GL_VERSION_1_1
+#undef GL_EXT_texture_object
+#undef GL_EXT_texture
 #endif
 
-#ifndef GL_VERSION_1_1
- #if defined(GL_EXT_texture_object) && defined(GL_EXT_texture)
-  #define glGenTextures glGenTexturesEXT
-  #define glBindTexture glBindTextureEXT
-  #ifndef GL_INTENSITY4
-   #define GL_INTENSITY4 GL_INTENSITY4_EXT
-  #endif
-  int useLuminanceAlpha = 0;
- #else
-  #define USE_DISPLAY_LISTS
-  /* Intensity texture format not in OpenGL 1.0; added by the EXT_texture
-     extension and now part of OpenGL 1.1. */
   int useLuminanceAlpha = 1;
- #endif
-#else
-  int useLuminanceAlpha = 0;
-#endif
 
   /* byte swap a 32-bit value */
 #define SWAPL(x, n) { \
@@ -94,6 +80,8 @@ namespace GLTextNS {
     if (tgvi) return tgvi;
     tgvi = txf->lut['_' - txf->min_glyph];
     if (tgvi) return tgvi;
+
+    return 0;
   }
 
   /**************************************************************************/
@@ -130,6 +118,7 @@ namespace GLTextNS {
       goto error;
     }
     /* For easy cleanup in error case. */
+    txf->texobj = 0; // MT add
     txf->tgi = NULL;
     txf->tgvi = NULL;
     txf->lut = NULL;
@@ -203,11 +192,11 @@ namespace GLTextNS {
 
       tgi = &txf->tgi[i];
       txf->tgvi[i].t0[0] = tgi->x / w - xstep; // MT - xstep
-      txf->tgvi[i].t0[1] = tgi->y / h - ystep; // MT - xstep
+      txf->tgvi[i].t0[1] = tgi->y / h - ystep; // MT - ystep
       txf->tgvi[i].v0[0] = tgi->xoffset;
       txf->tgvi[i].v0[1] = tgi->yoffset;
       txf->tgvi[i].t1[0] = (tgi->x + tgi->width) / w + xstep;
-      txf->tgvi[i].t1[1] = tgi->y / h - ystep; // MT - xstep
+      txf->tgvi[i].t1[1] = tgi->y / h - ystep; // MT - ystep
       txf->tgvi[i].v1[0] = tgi->xoffset + tgi->width;
       txf->tgvi[i].v1[1] = tgi->yoffset;
       txf->tgvi[i].t2[0] = (tgi->x + tgi->width) / w + xstep;
@@ -349,20 +338,12 @@ namespace GLTextNS {
   {
     if (txf->texobj == 0) {
       if (texobj == 0) {
-#if !defined(USE_DISPLAY_LISTS)
 	glGenTextures(1, &txf->texobj);
-#else
-	txf->texobj = glGenLists(1);
-#endif
       } else {
 	txf->texobj = texobj;
       }
     }
-#if !defined(USE_DISPLAY_LISTS)
     glBindTexture(GL_TEXTURE_2D, txf->texobj);
-#else
-    glNewList(txf->texobj, GL_COMPILE);
-#endif
 
 #if 1
     /* XXX Indigo2 IMPACT in IRIX 5.3 and 6.2 does not support the GL_INTENSITY
@@ -425,14 +406,7 @@ namespace GLTextNS {
 #endif
     }
 
-#if defined(USE_DISPLAY_LISTS)
-    glEndList();
-    glCallList(txf->texobj);
-#endif
-
-    // MT addition:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // MT: tried changing MIN/MAG filters ... bad idea.
 
     return txf->texobj;
   }
@@ -441,11 +415,7 @@ namespace GLTextNS {
 
   void txfBindFontTexture(TexFont * txf)
   {
-#if !defined(USE_DISPLAY_LISTS)
     glBindTexture(GL_TEXTURE_2D, txf->texobj);
-#else
-    glCallList(txf->texobj);
-#endif
   }
 
   /**************************************************************************/
@@ -466,7 +436,7 @@ namespace GLTextNS {
   /**************************************************************************/
 
   void txfGetStringMetrics(TexFont * txf, const char *string, int len,
-			   int *width, int *max_ascent, int *max_descent)
+			   int &width, int &max_ascent, int &max_descent)
   {
     TexGlyphVertexInfo *tgvi;
     int w, i;
@@ -496,9 +466,9 @@ namespace GLTextNS {
 	md = md >? -tgvi->v0[1];
       }
     }
-    *width = w;
-    *max_ascent  = ma; // txf->max_ascent;
-    *max_descent = md; // txf->max_descent;
+    width = w;
+    max_ascent  = ma; // txf->max_ascent;
+    max_descent = md; // txf->max_descent;
     // printf("%d %d %d %d\n", txf->max_ascent, txf->max_descent, ma, md);
 
   }
@@ -523,8 +493,6 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  /**************************************************************************/
-
   void txfRenderString(TexFont * txf, const char *string, int len, 
 		       bool keep_pos)
   {
@@ -533,6 +501,38 @@ namespace GLTextNS {
     if(keep_pos) glPushMatrix();
     for (i = 0; i < len; i++) {
       txfRenderGlyph(txf, string[i]);
+    }
+    if(keep_pos) glPopMatrix();
+  }
+
+  /**************************************************************************/
+
+  void txfRenderGlyphZW(TexFont * txf, int c, float z, float w)
+  {
+    TexGlyphVertexInfo *tgvi;
+
+    tgvi = getTCVI(txf, c);
+    glBegin(GL_QUADS);
+    glTexCoord2fv(tgvi->t0);
+    glVertex4f(tgvi->v0[0], tgvi->v0[1], z, w);
+    glTexCoord2fv(tgvi->t1);
+    glVertex4f(tgvi->v1[0], tgvi->v1[1], z, w);
+    glTexCoord2fv(tgvi->t2);
+    glVertex4f(tgvi->v2[0], tgvi->v2[1], z, w);
+    glTexCoord2fv(tgvi->t3);
+    glVertex4f(tgvi->v3[0], tgvi->v3[1], z, w);
+    glEnd();
+    glTranslatef(tgvi->advance, 0.0, 0.0);
+  }
+
+  void txfRenderStringZW(TexFont * txf, const char *string, int len, 
+			 float z, float w, bool keep_pos)
+  {
+    int i;
+
+    if(keep_pos) glPushMatrix();
+    for (i = 0; i < len; i++) {
+      txfRenderGlyphZW(txf, string[i], z, w);
     }
     if(keep_pos) glPopMatrix();
   }
@@ -653,4 +653,200 @@ namespace GLTextNS {
 
   /**************************************************************************/
 
+}
+
+/**************************************************************************/
+// MT crap starts here.
+// Need a proper implementation of all this ... but so little time ...
+/**************************************************************************/
+
+GLTextNS::TextLineData::TextLineData(TexFont *txf, string line) : text(line)
+{
+  txfGetStringMetrics(txf, text.c_str(), text.length(), width, ascent, descent);
+  hfull   = ascent + descent;
+}
+
+void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
+			  BoxSpecs& bs, float zoffset)
+{
+  GLboolean rv;
+  glRasterPos4f(0, 0, 0, 1);
+  glGetBooleanv(GL_CURRENT_RASTER_POSITION_VALID, &rv);
+  if(rv == false)
+    return;
+
+  typedef list<TextLineData>           lTLD_t;
+  typedef list<TextLineData>::iterator lTLD_i;
+
+  TexFont *txf = rd->fTexFont;
+
+  lStr_t lines;
+  lTLD_t tlds;
+  int
+    max_width = 0,
+    width     = 0,
+    ascent    = txf->max_ascent,
+    descent   = txf->max_descent,
+    height    = 0,
+    interline = ascent + descent + bs.lineskip;
+
+  GledNS::split_string(text, lines, '\n');
+  for(lStr_i l=lines.begin(); l!=lines.end(); ++l) {
+    tlds.push_back( TextLineData(txf, *l) );
+    TextLineData& tld = tlds.back();
+    max_width = max_width >? tld.width;
+    height += interline;
+  }
+  height += bs.tm + descent + bs.bm;
+  width   = max_width + bs.lm + bs.rm;
+  float halfw = float(width)/2, halfh = float(height)/2;
+
+  float tsize = float(rd->GetTextSize());
+  float scale = tsize / ascent;
+
+  // printf("%d = %d + %d; %f %f\n", descent+ascent, ascent, descent, tsize, scale);
+
+  glPushAttrib(GL_TEXTURE_BIT   | GL_LIGHTING_BIT     |
+	       GL_LINE_BIT      | GL_COLOR_BUFFER_BIT |
+	       GL_POLYGON_BIT);
+
+  GLfloat rp[4]; 
+  glGetFloatv(GL_CURRENT_RASTER_POSITION, rp);
+  // printf("RasterPos: %f %f %f %f\n", rp[0], rp[1], rp[2], rp[3]);
+
+  glPushMatrix();
+  glLoadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
+
+  // Translate to required position.
+  float
+    xo = rp[0] - halfw,
+    yo = rp[1] + halfh,
+    zo = rp[2] * zoffset; // + zoffset;
+  for(string::size_type i=0; i<bs.pos.length(); ++i) {
+    switch(bs.pos[i]) {
+    case 'l': case 'L': xo += halfw; break;
+    case 'r': case 'R': xo -= halfw; break;
+    case 't': case 'T': yo -= halfh; break;
+    case 'b': case 'B': yo += halfh; break;
+    }
+  }
+  glTranslatef(TMath::Nint(xo), TMath::Nint(yo), zo);
+
+  //glEnable(GL_POLYGON_OFFSET_FILL);
+  //glPolygonOffset(0, -10);
+
+  glDisable(GL_LIGHTING);
+  glScalef(scale, scale, 1);
+
+  if(rd->GetRnrTiles()) {
+    glColor4fv(rd->RefTileCol()());
+    glBegin(GL_QUADS);
+    glVertex2i(0, -height); glVertex2i(width, -height);
+    glVertex2i(width, 0);   glVertex2i(0, 0);
+    glEnd();
+  }
+
+  glTranslatef(0, 0, -1e-6);
+  glColor4fv(rd->RefTextCol()());
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // The following one makes a sharp border. Too sharp in some way.
+  // glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+  //glPolygonOffset(0, -20); // TRY THIS AGAIN, had problems w/ glOrtho far/near stuffe!!
+
+  if(rd->GetRnrFrames()) {
+    glLineWidth(1);
+    glBegin(GL_LINE_LOOP);
+    glVertex2i(0, -height); glVertex2i(width, -height);
+    glVertex2i(width, 0);   glVertex2i(0, 0);
+    //glVertex2i(x,y); glVertex2i(X,y);
+    //glVertex2i(X,Y); glVertex2i(x,Y);
+    glEnd();
+  }
+
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_TEXTURE_2D);
+
+  txfBindFontTexture(txf);
+  //int x = bs.lm, y = -(bs.tm + descent + ascent);
+  glTranslatef(bs.lm, -(bs.tm + descent + ascent), 0);
+  for(lTLD_i l=tlds.begin(); l!=tlds.end(); ++l) {
+    glPushMatrix();
+    if(l->width != max_width) {
+      switch(bs.align) {
+      case 'c': case 'C': glTranslatef((max_width - l->width)/2, 0, 0); break;
+      case 'r': case 'R': glTranslatef((max_width - l->width),   0, 0); break;
+      }
+    }
+    txfRenderString(txf, l->text.c_str(), l->text.length(), false);
+    glPopMatrix();
+    glTranslatef(0, -interline, 0);
+  }
+
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+
+  glPopAttrib();
+
+}
+
+/**************************************************************************/
+
+void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
+{
+  TexFont *txf = rd->fTexFont;
+
+  glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
+
+  glNormal3f(0, 0, 1);
+
+  glPolygonMode(GL_FRONT, GL_FILL);
+  glDisable(GL_ALPHA_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+  int width, ascent, descent;
+  GLTextNS::txfGetStringMetrics(txf, text.c_str(), text.length(),
+				width, ascent, descent);
+  ascent  = txf->max_ascent;
+  descent = txf->max_descent;
+
+  int   h_box = ascent + descent;
+  float scale = 1.0/h_box;
+
+
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  glPolygonOffset(-1, -1);
+      
+  float x0 = -0.1;
+  float x1 = (float)width/h_box + 0.1;
+  float y0 = -0.1 - float(descent)/(h_box);
+  float y1 =  0.1 + float(ascent)/(h_box);
+  glColor4fv(rd->RefTileCol()());
+  glBegin(GL_QUADS);
+  glVertex2f(x0, y0);
+  glVertex2f(x1, y0);
+  glVertex2f(x1, y1);
+  glVertex2f(x0, y1);
+  glEnd();
+
+
+  glPolygonOffset(-2, -2);
+
+  glColor4fv(rd->RefTextCol()());
+  glPushMatrix();
+  glScalef(scale, scale, 1);
+  glEnable(GL_TEXTURE_2D);
+  GLTextNS::txfBindFontTexture(txf);
+  GLTextNS::txfRenderString(txf, text.c_str(), text.length());
+  glPopMatrix();
+
+  glPopAttrib();
 }

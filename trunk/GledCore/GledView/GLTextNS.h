@@ -12,14 +12,17 @@
    provided without guarantee or warrantee expressed or implied. This
    program is -not- in the public domain. */
 
+#include <Gled/GledTypes.h>
 #include <GL/gl.h>
+
+class RnrDriver;
 
 namespace GLTextNS {
 
 #define TXF_FORMAT_BYTE		0
 #define TXF_FORMAT_BITMAP	1
 
-  typedef struct {
+  struct TexGlyphInfo {
     unsigned short c;       /* Potentially support 16-bit glyphs. */
     unsigned char width;
     unsigned char height;
@@ -29,9 +32,9 @@ namespace GLTextNS {
     char dummy;           /* Space holder for alignment reasons. */
     short x;
     short y;
-  } TexGlyphInfo;
+  };
 
-  typedef struct {
+  struct TexGlyphVertexInfo {
     GLfloat t0[2];
     GLshort v0[2];
     GLfloat t1[2];
@@ -41,9 +44,9 @@ namespace GLTextNS {
     GLfloat t3[2];
     GLshort v3[2];
     GLfloat advance;
-  } TexGlyphVertexInfo;
+  };
 
-  typedef struct {
+  struct TexFont {
     GLuint texobj;
     int tex_width;
     int tex_height;
@@ -56,7 +59,7 @@ namespace GLTextNS {
     TexGlyphInfo *tgi;
     TexGlyphVertexInfo *tgvi;
     TexGlyphVertexInfo **lut;
-  } TexFont;
+  };
 
   extern char *txfErrorString(void);
 
@@ -70,15 +73,52 @@ namespace GLTextNS {
   extern void txfBindFontTexture(TexFont* txf);
 
   extern void txfGetStringMetrics(TexFont* txf, const char *string, int len,
-				  int *width, int *max_ascent, int *max_descent);
+				  int &width, int &max_ascent, int &max_descent);
 
   extern void txfRenderGlyph(TexFont* txf, int c);
-
   extern void txfRenderString(TexFont* txf, const char *string, int len,
 			      bool keep_pos=true);
 
+  extern void txfRenderGlyphZW(TexFont* txf, int c, float z, float w);
+  extern void txfRenderStringZW(TexFont* txf, const char *string, int len,
+				float z, float w, bool keep_pos=true);
+
   extern void txfRenderFancyString(TexFont* txf, char *string, int len);
 
+
+  /**************************************************************************/
+  // Here starts MT higher-level interface
+  /**************************************************************************/
+
+  struct BoxSpecs {
+    int    lm, rm, tm, bm;
+    int    lineskip;
+    char   align;
+    string pos;
+
+    void _init() { align = 'l'; lineskip = 0; }
+
+    BoxSpecs()
+    { lm = rm = 3; tm = 0; bm = 2; _init(); }
+
+    BoxSpecs(int lr, int tb)
+    { lm = rm = lr; tm = bm = tb; _init(); }
+
+    BoxSpecs(int l, int r, int t, int b)
+    { lm = l; rm = r; tm = t; bm = b; _init(); }
+  };
+
+  struct TextLineData {
+    int    width, ascent, descent, hfull;
+    string text;
+
+    TextLineData(TexFont *txf, string line);
+  };
+
+  extern void RnrTextBar(RnrDriver* rd, const string& text,
+			 BoxSpecs& bs, float zoffset=0);
+
+  extern void RnrTextPoly(RnrDriver* rd, const string& text);
 }
 
 #endif
