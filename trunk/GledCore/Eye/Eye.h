@@ -27,7 +27,8 @@ class TMessage;
 class Eye {
 
 protected:
-  OptoStructs::hpZGlass2pZGlassImg_t	mGlass2ImgHash;
+  OptoStructs::hpZGlass2pZGlassImg_t mGlass2ImgHash;
+  OptoStructs::lpImgConsumer_t       mImgConsumers;
 
   Saturn*	mSaturn;	// X{g}
   SaturnInfo*	mSaturnInfo;	// X{g}
@@ -48,6 +49,11 @@ public:
   virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
   virtual OptoStructs::ZGlassImg* DemangleID(ID_t id);
   virtual void RemoveImage(OptoStructs::ZGlassImg* img);
+
+  void RegisterImageConsumer(OptoStructs::ImageConsumer* imgc)
+  { mImgConsumers.push_back(imgc); }
+  void UnregisterImageConsumer(OptoStructs::ImageConsumer* imgc)
+  { mImgConsumers.remove(imgc); }
 
   enum MType_e { MT_std=0, MT_err, MT_wrn, MT_msg };
   virtual void Message(const char* msg, MType_e t=MT_std) {}
