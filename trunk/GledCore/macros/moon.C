@@ -15,8 +15,7 @@ void moon()
   moon = Gled::theOne->GetSaturn();
   if(moon == 0) {
     cerr <<
-     "Saturn is not spawned ... type  Gled::theOne->SpawnSaturn() or consider\n"
-     "using the -r command-line option.\n";
+     "Saturn is not spawned ... use the -r command-line option.\n";
     return;
   }
   saturn = moon;
@@ -24,7 +23,7 @@ void moon()
   sun_queen  = saturn->GetSunQueen();
   fire_queen = saturn->GetFireQueen();
 
-  scenes = saturn->GetSunKing()->GetElementByName("Scenes");
+  scenes = (ZQueen*) saturn->GetSunKing()->GetElementByName("Scenes");
 
   gROOT->Macro("eye.C");	// spawn an eye with a pupil on first scene
 }
