@@ -105,6 +105,7 @@ void ZImage::Load()
   sILMutex.Lock();
 
   delete_image();
+  bLoaded = false;
   ilGenImages(1, &mIL_Name);
   if(il_err("Gen images")) goto end;
 
@@ -121,9 +122,9 @@ void ZImage::Load()
   mW = ilGetInteger(IL_IMAGE_WIDTH);
   mH = ilGetInteger(IL_IMAGE_HEIGHT);
   bLoaded = true;
-  mStampReqTexture = Stamp(LibID(), ClassID());
 
  end:
+  mStampReqTexture = Stamp(LibID(), ClassID());
   sILMutex.Unlock();
 }
 
@@ -131,6 +132,8 @@ void ZImage::Unload()
 {
   sILMutex.Lock();
   delete_image();
+  bLoaded = false;
+  mStampReqTexture = Stamp(LibID(), ClassID());
   sILMutex.Unlock();
 }
 
