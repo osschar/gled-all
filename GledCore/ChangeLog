@@ -1,3 +1,49 @@
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+
+	Introduced static MinLabelWidth to limit the minimal label width.
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+
+	Standardization of Get/Find methods and lens callbacks.  Replaced
+	ZList::Query() with a more general ZGlass::FindLensByPath(). The
+	path is tokenized by GledNS::tokenize_url(). YNameChangeCB is now
+	declared within the ZGlass class.
+
+	* Gled/GledTypes.h: Extended struct LinkSpec.
+	
+	* Gled/Gled.cxx: Attempt at catcing exceptions from TRint::Run().
+
+	* Makefile: Introduced double-colon rules for standard targets.
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+
+	Added scaling support into ZNode.
+	
+	* Glasses/ZSunQueen.cxx:
+	* macros/glass_defines.h:
+	* macros/moon.C:
+	* macros/std_auth.C:
+
+	Put in accordance with ZGlass::FindLensByPath().
+	
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+
+	Minor changes.
+	
 2003-11-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* gled.cxx:
