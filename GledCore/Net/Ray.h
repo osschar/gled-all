@@ -16,7 +16,7 @@
 struct Ray {
   enum RayQN_e { RQN_change=0,
 		 RQN_link_change,
-		 RQN_list_add, RQN_list_remove, RQN_list_rebuild,
+		 RQN_list_add, RQN_list_remove, RQN_list_rebuild, RQN_list_clear,
 		 RQN_birth, RQN_death,
 		 RQN_message, RQN_error,
 		 RQN_apocalypse

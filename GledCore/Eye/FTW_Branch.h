@@ -37,6 +37,7 @@ public:
   virtual void Absorb_ListAdd(OptoStructs::ZGlassImg* newimg, OptoStructs::ZGlassImg* before);
   virtual void Absorb_ListRemove(OptoStructs::ZGlassImg* eximg);
   virtual void Absorb_ListRebuild();
+  virtual void Absorb_ListClear();
 
   virtual void AssertListRnrs(const string& rnr);
 

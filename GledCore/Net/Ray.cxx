@@ -30,6 +30,7 @@ void Ray::Streamer(TBuffer &buf)
     case RQN_list_add:     GetSLC(buf); buf >> a >> b >> g; break;
     case RQN_list_remove:  GetSLC(buf); buf >> a >> b; break;
     case RQN_list_rebuild: GetSLC(buf); buf >> a; break;
+    case RQN_list_clear:   GetSLC(buf); buf >> a; break;
     case RQN_birth:	   GetSLC(buf); buf >> a; break;
     case RQN_death:	   GetSLC(buf); buf >> a; break;
     case RQN_message:
@@ -47,6 +48,7 @@ void Ray::Streamer(TBuffer &buf)
     case RQN_list_add:     PutSLC(buf); buf << UInt_t(fAlpha) << UInt_t(fBeta) << UInt_t(fGamma); break;
     case RQN_list_remove:  PutSLC(buf); buf << UInt_t(fAlpha) << UInt_t(fBeta); break;
     case RQN_list_rebuild: PutSLC(buf); buf << UInt_t(fAlpha); break;
+    case RQN_list_clear:   PutSLC(buf); buf << UInt_t(fAlpha); break;
     case RQN_birth:	   PutSLC(buf); buf << UInt_t(fAlpha); break;
     case RQN_death:	   PutSLC(buf); buf << UInt_t(fAlpha); break;
     case RQN_message:
@@ -71,6 +73,7 @@ const char* Ray::EventName() const
   case RQN_list_add:    return "list_add";
   case RQN_list_remove: return "list_remove";
   case RQN_list_rebuild:return "list_rebuild";
+  case RQN_list_clear:  return "list_clear";
   case RQN_birth:	return "birth";
   case RQN_death:	return "death";
   case RQN_message:     return "message";
@@ -88,6 +91,7 @@ void Ray::Dump(ostream& s) const {
   case RQN_list_add:    s << fAlpha->GetSaturnID() <<","<< fBeta->GetSaturnID() <<","<< (fGamma ? fGamma->GetSaturnID() : 0); break;
   case RQN_list_remove: s << fAlpha->GetSaturnID() <<","<< fBeta->GetSaturnID(); break;
   case RQN_list_rebuild:s << fAlpha->GetSaturnID(); break;
+  case RQN_list_clear:  s << fAlpha->GetSaturnID(); break;
   case RQN_birth:	s << fAlpha->GetSaturnID(); break;
   case RQN_death:	s << fAlpha->GetSaturnID(); break;
   case RQN_message:

@@ -98,6 +98,7 @@ namespace OptoStructs {
     virtual void Absorb_ListAdd(ZGlassImg* newimg, ZGlassImg* before) {}
     virtual void Absorb_ListRemove(ZGlassImg* eximg) {}
     virtual void Absorb_ListRebuild() {}
+    virtual void Absorb_ListClear() {}
     virtual void Absorb_Delete() {}
 
     virtual void InvalidateRnrScheme() {}
@@ -182,6 +183,7 @@ namespace OptoStructs {
     virtual void Absorb_ListAdd(ZGlassImg* newdude, ZGlassImg* before);
     virtual void Absorb_ListRemove(ZGlassImg* exdude);
     virtual void Absorb_ListRebuild();
+    virtual void Absorb_ListClear();
 
     virtual void AssertListRnrs(const string& rnr);
   };

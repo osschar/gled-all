@@ -13,6 +13,7 @@ class ZList;
 typedef void (*zlist_stampadd_f)(ZList*, ZGlass*, ZGlass*, void*);
 typedef void (*zlist_stampremove_f)(ZList*, ZGlass*, void*);
 typedef void (*zlist_stamprebuild_f)(ZList*, void*);
+typedef void (*zlist_stampclear_f)(ZList*, void*);
 
 class ZList : public ZGlass {
 
@@ -41,6 +42,8 @@ protected:
   void*			mStampListRemove_CBarg; //!
   zlist_stamprebuild_f	mStampListRebuild_CB;    //! called if non-null
   void*			mStampListRebuild_CBarg; //!
+  zlist_stampclear_f	mStampListClear_CB;      //! called if non-null
+  void*			mStampListClear_CBarg;   //!
 
   virtual void reference_all();
   virtual void unreference_all();
@@ -105,10 +108,12 @@ public:
   virtual TimeStamp_t	StampListAdd(ZGlass* g, ZGlass* b4);
   virtual TimeStamp_t	StampListRemove(ZGlass* g);
   virtual TimeStamp_t	StampListRebuild();
+  virtual TimeStamp_t	StampListClear();
 
   void SetStampListAdd_CB(zlist_stampadd_f foo, void* arg);
   void SetStampListRemove_CB(zlist_stampremove_f foo, void* arg);
   void SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg);
+  void SetStampListClear_CB(zlist_stampclear_f foo, void* arg);
 
   virtual Int_t RebuildAll(An_ID_Demangler* idd);
   virtual Int_t RebuildList(An_ID_Demangler* idd);
