@@ -31,7 +31,7 @@ void sun()
   if(sun->GetSaturnInfo()->GetUseAuth())
     gROOT->Macro("std_auth.C");
 
-  scenes = new ZQueen(128*1024, "Scenes", "Goddess of Ver");
+  scenes = new ZQueen(256*1024, "Scenes", "Goddess of Ver");
   Gled::theOne->GetSaturn()->GetSunKing()->Enthrone(scenes);
   scenes->SetMandatory(true);
 
