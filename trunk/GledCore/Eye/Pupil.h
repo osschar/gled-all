@@ -64,6 +64,7 @@ public:
 
   // void Rebase(ZNode* newbase, bool keeppos=true);
   void XtachCamera();
+  void JumpCameraAt(ZGlass* lens);
 
   void FullScreen();
 
