@@ -1,7 +1,7 @@
 # You are reading the MANIFEST file of a top-level GLED directory.
 
 # Here the files forming the base of Gled Builder are enumerated,
-# being separated by their m\'ethode de creation
+# being separated by their method of creation.
 
 # Files/Dirs that form the base of GLED build structure
 
@@ -11,8 +11,6 @@
 	  "README",		# short desc of Gled project
 	  "configure",		# top level libset dependency resolver
 	  "configure.rc",	# and its config file
-	  "mecca",		# libset make invocator
-	  "mecca.rc",		# and its config file
 	  "mkenv",		# a simple script for setting environment vars
 	  "make/",		# make fragments
 	  "include/",		# top-level includes
@@ -29,11 +27,11 @@
 # User provided files
 
 @USER_FILES = (
-	"build_libsets"		# simple list of libsets to be built
 );
 
 # Automatically generated files
 
 @AUTO_FILES = (
-	"build_config"		# result of running configure
+	"build_config",		# result of running configure
+	"Makefile"		# auto-generated makefile
 );
