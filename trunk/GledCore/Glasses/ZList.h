@@ -28,11 +28,11 @@ protected:
   lpZGlass_t		mGlasses;
 
   GMutex	 	mListMutex;	   	//!
-  zlist_stampadd_f	mStampListAdd_CB;    	//!
+  zlist_stampadd_f	mStampListAdd_CB;    	//! called if non-null
   void*			mStampListAdd_CBarg; 	//!
-  zlist_stampremove_f	mStampListRemove_CB;    //!
+  zlist_stampremove_f	mStampListRemove_CB;    //! called if non-null
   void*			mStampListRemove_CBarg; //!
-  zlist_stamprebuild_f	mStampListRebuild_CB;    //!
+  zlist_stamprebuild_f	mStampListRebuild_CB;    //! called if non-null
   void*			mStampListRebuild_CBarg; //!
 
 public:

@@ -4,12 +4,16 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+//______________________________________________________________________
+// Ray
+//
+// Ray contains stamping information. Rays are sent from Saturn to Eye.
+// RayQN_e (Ray Quantum Number) lists known event types.
+//
+
 #include "Ray.h"
 #include <Glasses/ZGlass.h>
 #include <TBuffer.h>
-
-// !!!!! should have caller field; now reused in message
-// !!!!! could even provide ctor from mir (or sth)
 
 void Ray::Streamer(TBuffer &buf)
 {

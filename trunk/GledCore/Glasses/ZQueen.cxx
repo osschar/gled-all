@@ -31,6 +31,7 @@ ClassImp(ZQueen)
 void ZQueen::_init()
 {
   bMandatory = bRuling = bAwaitingSceptre = false;
+  bStamping = true;
   mDeps = 0; mOrphans = 0;
 }
 
@@ -95,7 +96,8 @@ void ZQueen::CheckIn(ZGlass* glass) throw(string)
   ID_t prev_max_id = mMaxUsedID;
   try {
     glass->mQueen = this;
-    mMaxUsedID = new_id > mMaxUsedID ? new_id : mMaxUsedID;;
+    glass->SetStamps(1);
+    mMaxUsedID = new_id > mMaxUsedID ? new_id : mMaxUsedID;
     mSaturn->Enlight(glass, new_id);
   }
   catch(string s) {
@@ -110,7 +112,7 @@ void ZQueen::CheckIn(ZGlass* glass) throw(string)
 void ZQueen::CheckOut(ZGlass* glass)
 {
   // !!!!!! this is fooed ... Queens must have special mechanism for deletion
-  // of lenses. Also ... eyes should be pointer-centric, not id-centric.
+  // of lenses. Note ... eyes are pointer-centric, not id-centric.
   // Further ... deletion itself should be delayed and performed
   // on Saturn some time *after* endarkment._eh + 
   // Perform with special message type that is only execed on level lower;
@@ -399,6 +401,16 @@ void ZQueen::remove_reflector(SaturnInfo* moon)
   if(i != mReflectors.end()) {
     mReflectors.erase(i);
   }
+}
+
+
+/**************************************************************************/
+// Stamping
+/**************************************************************************/
+
+void ZQueen::EmitRay(Ray& ray)
+{
+  if(bStamping) mSaturn->Shine(ray);
 }
 
 /**************************************************************************/

@@ -34,16 +34,17 @@ struct Ray {
 
   Ray() {}
 
-  Ray(RayQN_e e, ZGlass* a, ZGlass* b=0, ZGlass* g=0) :
-    fEvent(e), fAlpha(a), fBeta(b), fGamma(g), fLibID(0), fClassID(0) {}
+  Ray(RayQN_e e, TimeStamp_t t, ZGlass* a, ZGlass* b=0, ZGlass* g=0) :
+    fEvent(e), fStamp(t), fAlpha(a), fBeta(b), fGamma(g), fLibID(0), fClassID(0) {}
 
-  Ray(RayQN_e e, ZGlass* a, LID_t lid, CID_t cid, ZGlass* b=0, ZGlass* g=0) :
-    fEvent(e), fAlpha(a), fBeta(b), fGamma(g), fLibID(lid), fClassID(cid) {}
+  Ray(RayQN_e e, TimeStamp_t t, ZGlass* a, LID_t lid, CID_t cid, ZGlass* b=0, ZGlass* g=0) :
+    fEvent(e), fStamp(t), fAlpha(a), fBeta(b), fGamma(g), fLibID(lid), fClassID(cid) {}
 
   Ray(RayQN_e e, ZGlass* c, const Text_t* msg) :
-    fEvent(e), fCaller(c), fMessage(msg) {}
+    fEvent(e), fStamp(0), fCaller(c), fMessage(msg) {}
+
   Ray(RayQN_e e, ZGlass* c, TString& msg) :
-    fEvent(e), fCaller(c), fMessage(msg) {}
+    fEvent(e), fStamp(0), fCaller(c), fMessage(msg) {}
 
   void ListAdd(ZGlass* a, ZGlass* b, ZGlass* g)
   { fEvent=RQN_list_add; fAlpha=a; fBeta=b; fGamma=g; }

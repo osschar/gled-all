@@ -141,11 +141,9 @@ Saturn::Saturn() :
   mPendingConnection(GMutex::recursive),
   mSelector(GMutex::recursive),
   mSaturnInfo(0),
-  mQueenLoadNum(0), mQueenLoadCnd(GMutex::recursive),
-  mMsg(GledNS::MT_Ray)
+  mQueenLoadNum(0), mQueenLoadCnd(GMutex::recursive)
 {
   bAllowMoons = false;
-  mLastID = 0; mStamp = 1;
 
   pZHistoManager = 0;
 
@@ -369,11 +367,10 @@ void Saturn::Enlight(ZGlass* glass, ID_t id) throw(string)
   mIDHash[id] = glass;
   mIDLock.Unlock();
 
-  // And then fix your little lens
+  // Infrom the new lens
   glass->mSaturnID = id;
   glass->mSaturn = this;
   ISdebug(2,GForm("Saturn::Enlight for %s, id=%u", glass->GetName(), id));
-  glass->SetStamps(mStamp);
   // Now let the newglass call its initialization foos
   glass->AdEnlightenment();
 }
@@ -1146,36 +1143,41 @@ ISdebug(8, GForm("%s entered ...", _eh.c_str()));
 // Broadcasting to Eyes
 /**************************************************************************/
 
-TimeStamp_t Saturn::Shine(Ray &r)
+void Saturn::Shine(Ray &r)
 {
-  r.fStamp = ++mStamp; // !!!! Check for mStamp==0 missing
-  if(mEyes.empty()) return mStamp;
+  if(mEyes.empty()) return;
 
-  mEyeLock.Lock();
-  mMsg.Reset();
-  r.Streamer( mMsg );
+  TMessage msg(GledNS::MT_Ray);
+  r.Streamer(msg);
   ISdebug(9, GForm("Saturn::Shine Notifying %d eye(s)", mEyes.size()));
+  Int_t len = msg.Length() - 4;
+  mEyeLock.Lock();
   lpEyeInfo_i i = mEyes.begin();
   while(i != mEyes.end()) {
-    Int_t ret = (*i)->hSocket->Send(mMsg);
+    Int_t ret = (*i)->hSocket->Send(msg);
+    if(ret != len) {
+      ISerr(GForm("Saturn::Shine sent too little: Eye=%s, len=%3d, ret=%3d\n",
+		  (*i)->GetName(), len, ret));
+    }
     lpEyeInfo_i j = i++;
     if(ret < 0) {
       wipe_eye(*j, true);
     }
   }
   mEyeLock.Unlock();
-
-  return mStamp;
 }
 
-void Saturn::SingleRay(EyeInfo* eye, Ray& ray) {
-  mMsg.Reset();
+void Saturn::SingleRay(EyeInfo* eye, Ray& ray)
+{
+  TMessage msg(GledNS::MT_Ray);
   if(eye->hSocket == 0) {
     ISerr(GForm("Saturn::SingleRay got request for non-local eye %s",
 		eye->GetName()));
   }
-  ray.Streamer(mMsg);
-  eye->hSocket->Send(mMsg);
+  ray.Streamer(msg);
+  mEyeLock.Lock();
+  eye->hSocket->Send(msg);
+  mEyeLock.Unlock();
 }
 
 /**************************************************************************/

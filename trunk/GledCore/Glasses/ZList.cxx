@@ -28,7 +28,7 @@
 
 
 #include "ZList.h"
-#include <Ephra/Saturn.h>
+#include <Glasses/ZQueen.h>
 #include <Net/Ray.h>
 #include <Stones/ZComet.h>
 #include <TBuffer.h>
@@ -177,41 +177,41 @@ bool ZList::Has(ZGlass* g)
 
 TimeStamp_t ZList::StampListAdd(ZGlass* g, ZGlass* b4)
 {
-  if(mSaturn) {
-    Ray r(Ray::RQN_list_add, this, g, b4);
-    mTimeStamp = mSaturn->Shine(r);
-    return mTimeStamp;
-  } else {
-    if(mStampListAdd_CB)
-      mStampListAdd_CB(this, g, b4, mStampListAdd_CBarg);
-    return 0;
+  ++mTimeStamp;
+  if(mQueen) {
+    Ray r(Ray::RQN_list_add, mTimeStamp, this, g, b4);
+    mQueen->EmitRay(r);
   }
+  if(mStampListAdd_CB)
+    mStampListAdd_CB(this, g, b4, mStampListAdd_CBarg);
+
+  return mTimeStamp;
 }
 
 TimeStamp_t ZList::StampListRemove(ZGlass* g)
 {
-  if(mSaturn) {
-    Ray r(Ray::RQN_list_remove, this, g);
-    mTimeStamp = mSaturn->Shine(r);
-    return mTimeStamp;
-  } else {
-    if(mStampListRemove_CB)
-      mStampListRemove_CB(this, g, mStampListRemove_CBarg);
-    return 0;
+  ++mTimeStamp;
+  if(mQueen) {
+    Ray r(Ray::RQN_list_remove, mTimeStamp, this, g);
+    mQueen->EmitRay(r);
   }
+  if(mStampListRemove_CB)
+    mStampListRemove_CB(this, g, mStampListRemove_CBarg);
+
+  return mTimeStamp;
 }
 
 TimeStamp_t ZList::StampListRebuild()
 {
-  if(mSaturn) {
-    Ray r(Ray::RQN_list_rebuild, this);
-    mTimeStamp = mSaturn->Shine(r);
-    return mTimeStamp;
-  } else {
-    if(mStampListRebuild_CB)
-      mStampListRebuild_CB(this, mStampListRebuild_CBarg);
-    return 0;
+  ++mTimeStamp;
+  if(mQueen) {
+    Ray r(Ray::RQN_list_rebuild, mTimeStamp, this);
+    mQueen->EmitRay(r);
   }
+  if(mStampListRebuild_CB)
+    mStampListRebuild_CB(this, mStampListRebuild_CBarg);
+
+  return mTimeStamp;
 }
 
 void ZList::SetStampListAdd_CB(zlist_stampadd_f foo, void* arg)
