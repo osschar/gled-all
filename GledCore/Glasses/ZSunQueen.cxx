@@ -7,9 +7,11 @@
 //______________________________________________________________________
 // ZSunQueen
 //
-// The first queen of the Sun Absolute, holding information about all 
-// Saturns/Eyes connected to the Sun. These structures will also be used
-// for authentication of connecting eyes/moons and to hold their certificates.
+// The first queen of the Sun Absolute, holding information about all
+// Saturns/Eyes connected into the Gled cluster. She also holds lists
+// of all identities and group-identities currently used in the sytem
+// and handles the MEE authentication procedure. The RSA keys are
+// provided by the Gled::theOne singleton.
 
 
 #include "ZSunQueen.h"
@@ -38,6 +40,7 @@ ClassImp(ZSunQueen)
 void ZSunQueen::_init()
 {
   mSunInfo = 0;
+  mSaturnGuestId = mEyeGuestId = 0;
 }
 
 /**************************************************************************/
@@ -306,16 +309,25 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
 /**************************************************************************/
 
 void ZSunQueen::initiate_saturn_connection()
-{ initiate_mee_connection(); }
+{
+  // Wrapper for initiate_mee_connection() with
+  // SunQueen::SaturnConnections tag.
+
+  initiate_mee_connection();
+}
 
 void ZSunQueen::initiate_eye_connection()
+{
+  // Wrapper for initiate_mee_connection() with
+  // SunQueen::EyeConnections tag.
 
-{ initiate_mee_connection(); }
+  initiate_mee_connection();
+}
 
 void ZSunQueen::initiate_mee_connection()
 {
   // Sent as a beam with result request from a Saturn that receives
-  // a request for connection of a new Saturn.
+  // a request for connection of a new Saturn to the Sun Absolute.
   // The desired MirEmittingEntity must be attached to the MIR.
 
   static const string _eh("ZSunQueen::initiate_mee_connection ");
@@ -328,8 +340,32 @@ void ZSunQueen::initiate_mee_connection()
 
   ZMirEmittingEntity* mee =
     dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamGlass(*mMir));
+  if(mee == 0)
+    throw(_eh + "did not receive a lens of glass ZMirEmittingEntity");
 
-  if(mSunInfo->GetUseAuth()) {
+  bool use_auth = mSunInfo->GetUseAuth();
+  if(use_auth && mee->mLogin == "guest") {
+    if(GledNS::IsA(mee, SaturnInfo::FID())) {
+      if(mSaturnGuestId != 0) {
+	mee->mLogin = mSaturnGuestId->mName;
+      } else {
+	throw(_eh + "not accepting guest Saturns");
+      }
+    }
+    else if(GledNS::IsA(mee, EyeInfo::FID())) {
+      if(mEyeGuestId != 0) {
+	mee->mLogin = mEyeGuestId->mName;
+      } else {
+	throw(_eh + "not accepting guest Eyes");
+      }
+    }
+    else {
+      throw(_eh + "unknown type of MEE");
+    }
+    use_auth = false;
+  }
+
+  if(use_auth) {
     try {
       Gled::theOne->GetPubKeyFile(mee->mLogin);
     }
@@ -338,14 +374,11 @@ void ZSunQueen::initiate_mee_connection()
     }
   }
 
-  if(mee == 0)
-    throw(_eh + "did not receive a lens of glass ZMirEmittingEntity");
-
   NCMData* ncmd = new NCMData(mee, req);
   UInt_t cid = mNCMasterData.insert(ncmd);
 
   TBuffer ret(TBuffer::kWrite);
-  if(mSunInfo->GetUseAuth()) {
+  if(use_auth) {
     ret << (UChar_t)CRR_ReqAuth;
     ret << cid;
   } else {
@@ -567,8 +600,7 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
     if(Gled::theOne->IsIdentityInGroup((*i)->GetName(), id->GetName())) {
 
       CALL_AND_BROADCAST(mMir->Caller->mActiveIdentities, Add, id);
-      CALL_AND_BROADCAST(id, IncNumMMEs);
-      CALL_AND_BROADCAST(gid->mActiveMMEs, Add, mMir->Caller);
+      CALL_AND_BROADCAST(id->mActiveMMEs, Add, mMir->Caller);
 
       mMir->SuppressFlareBroadcast = true;
       return;
@@ -595,8 +627,7 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
     throw(_eh + "for now only handles group identities");
 
   CALL_AND_BROADCAST(mMir->Caller->mActiveIdentities, Remove, id);
-  CALL_AND_BROADCAST(id, DecNumMMEs);
-  CALL_AND_BROADCAST( gid->mActiveMMEs, Remove, mMir->Caller);    
+  CALL_AND_BROADCAST(id->mActiveMMEs, Remove, mMir->Caller);    
 
   mMir->SuppressFlareBroadcast = true;
 }
@@ -609,7 +640,7 @@ void ZSunQueen::attach_primary_identity(ZMirEmittingEntity* mee)
 
   ZIdentity* identity = GetOrImportIdentity(mee->GetLogin());
   CALL_AND_BROADCAST(mee, SetPrimaryIdentity, identity);
-  CALL_AND_BROADCAST(identity, IncNumMMEs);
+  CALL_AND_BROADCAST(identity->GetActiveMMEs(), Add, mee);
 
   ZMirFilter* def_filter = dynamic_cast<ZMirFilter*>(Query("Auth/Filters/MEESelfFilter"));
   CALL_AND_BROADCAST(mee, SetGuard, def_filter);
@@ -623,16 +654,14 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
   mee->mExecMutex.Lock();
   if((id = mee->mPrimaryIdentity) != 0) {
     mee->SetPrimaryIdentity(0);
-    id->DecNumMMEs();
+    id->mActiveMMEs->Remove(mee);
   }
   if(mee->mActiveIdentities) {
     lpZGlass_i i, end;
     mee->mActiveIdentities->BeginIteration(i, end);
     while(i != end) {
-      ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(*i);
-      if(gid) gid->mActiveMMEs->Remove(mee);
-      id = dynamic_cast<ZIdentity*>(*i);
-      if(id) id->DecNumMMEs();
+      id = (ZIdentity*)(*i);
+      id->mActiveMMEs->Remove(mee);
       ++i;
     }
     mee->mActiveIdentities->EndIteration();
