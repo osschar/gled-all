@@ -24,7 +24,10 @@ private:
   void _init();
 
 protected:
-  SaturnInfo*		mSunInfo; // X{GS} L{}
+  SaturnInfo*		mSunInfo;       // X{GS} L{}
+
+  ZIdentity*		mSaturnGuestId; // X{GS} L{}
+  ZIdentity*		mEyeGuestId;    // X{GS} L{}
 
   virtual ID_t incarnate_moon(SaturnInfo* parent, SaturnInfo* moon);
   virtual ID_t incarnate_eye(SaturnInfo* parent, EyeInfo* eye);
@@ -110,7 +113,7 @@ public:
 					     TString& identity);
 
 #include "ZSunQueen.h7"
-  ClassDef(ZSunQueen, 1)
+  ClassDef(ZSunQueen, 1) // The first queen of the Sun Absolute; handles authentication, identities and MEEs
 }; // endclass ZSunQueen
 
 GlassIODef(ZSunQueen);
