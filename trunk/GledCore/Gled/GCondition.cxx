@@ -13,6 +13,7 @@
 // for wait operations it *must* be called from outside.
 
 #include "GCondition.h"
+
 #include <errno.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -33,16 +34,16 @@ Int_t GCondition::Wait()
   return ret;
 }
 
-Int_t GCondition::TimedWait(Int_t mus)
+Int_t GCondition::TimedWait(UInt_t wait_ms)
 {
   // Performs timedwait ... mutex should be locked upon calling this method.
+  // Time given in mili-seconds.
 
   struct timeval now;
   struct timespec timeout;
 
-  if(mus<1) mus = 1;
   gettimeofday(&now, 0);
-  int mus_add = now.tv_usec + 1000*mus;
+  int mus_add = now.tv_usec + 1000*wait_ms;
   timeout.tv_sec = now.tv_sec + mus_add/1000000;
   timeout.tv_nsec = (mus_add%1000000) * 1000;
   int retcode = pthread_cond_timedwait(&mCond, &mMut, &timeout);

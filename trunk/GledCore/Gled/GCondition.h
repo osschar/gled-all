@@ -23,7 +23,7 @@ public:
   ~GCondition();
 
   Int_t	Wait();
-  Int_t TimedWait(Int_t mus);
+  Int_t TimedWait(UInt_t wait_ms);
   Int_t	Signal();
   Int_t Broadcast();
 
