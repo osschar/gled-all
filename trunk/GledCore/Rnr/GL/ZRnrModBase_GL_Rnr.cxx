@@ -11,7 +11,8 @@
 
 void ZRnrModBase_GL_Rnr::_init()
 {
-  // In sub-classes might want to set A_Rnr::bOnePerRnrDriver to true.
+  // A_Rnr
+  bOnePerRnrDriver = true;
 
   mRnrMod = new RnrDriver::RnrMod(mZRnrModBase, this);
   mRebuildRnrCount = 0;
@@ -26,10 +27,24 @@ ZRnrModBase_GL_Rnr::~ZRnrModBase_GL_Rnr()
 
 void ZRnrModBase_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // Override Tring stamping so it is published via RnrMods.
-  // Ignore self-triangulation and name-stack.
-  // Must persist over one rendering (if this RnrMod is used several times).
+  // Nothing to be done here. Suppress ZGlass implementation.
+  // Sub-classes usually call ConsiderRebuildDL.
+}
 
+void ZRnrModBase_GL_Rnr::Draw(RnrDriver* rd)
+{
+  // Nothing to be done here. Suppress ZGlass implementation.
+}
+
+void ZRnrModBase_GL_Rnr::PostDraw(RnrDriver* rd)
+{
+  // Nothing to be done here. Suppress ZGlass implementation.
+}
+
+/**************************************************************************/
+
+void ZRnrModBase_GL_Rnr::ConsiderRebuildDL(RnrDriver* rd)
+{
   if(mRebuildRnrCount != rd->GetRnrCount()) {
 
     if(mGlass->GetStampReqTring() > mStampTring) {
@@ -41,14 +56,4 @@ void ZRnrModBase_GL_Rnr::PreDraw(RnrDriver* rd)
 
     mRebuildRnrCount = rd->GetRnrCount();
   }
-}
-
-void ZRnrModBase_GL_Rnr::Draw(RnrDriver* rd)
-{
-  // Nothing to be done here. Suppress ZGlass implementation.
-}
-
-void ZRnrModBase_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-  // Nothing to be done here. Suppress ZGlass implementation.
 }

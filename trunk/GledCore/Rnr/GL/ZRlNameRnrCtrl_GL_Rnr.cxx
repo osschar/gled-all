@@ -12,10 +12,7 @@
 /**************************************************************************/
 
 void ZRlNameRnrCtrl_GL_Rnr::_init()
-{
-  // A_Rnr
-  bOnePerRnrDriver = true;
-}
+{}
 
 /**************************************************************************/
 
@@ -24,6 +21,7 @@ void ZRlNameRnrCtrl_GL_Rnr::PreDraw(RnrDriver* rd)
   bExState = rd->GetRnrNames();
   switch(mZRlNameRnrCtrl->mNameRnrOp) {
   case ZRnrModBase::O_On:
+    ConsiderRebuildDL(rd);
     rd->PushRnrMod(ZRlNameRnrCtrl::FID(), mRnrMod);
     rd->SetRnrNames(true);
     break;
@@ -39,6 +37,7 @@ void ZRlNameRnrCtrl_GL_Rnr::Draw(RnrDriver* rd)
 {
   switch(mZRlNameRnrCtrl->mNameRnrOp) {
   case ZRnrModBase::O_On:
+    ConsiderRebuildDL(rd);
     rd->SetDefRnrMod(ZRlNameRnrCtrl::FID(), mRnrMod);
     rd->SetRnrNames(true);
     break;

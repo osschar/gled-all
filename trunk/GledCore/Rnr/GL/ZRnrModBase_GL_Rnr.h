@@ -31,6 +31,8 @@ public:
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
 
+  virtual void ConsiderRebuildDL(RnrDriver* rd);
+
 }; // endclass ZRnrModBase_GL_Rnr
 
 #endif
