@@ -29,8 +29,8 @@ protected:
 public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);
 
-  virtual void Message(const Text_t* s); // X{E}
-  virtual void Error(const Text_t* s);   // X{E}
+  virtual void Message(const Text_t* s); // X{E} T{MEE::Self}
+  virtual void Error(const Text_t* s);   // X{E} T{MEE::Self}
 
 #include "EyeInfo.h7"
   ClassDef(EyeInfo,1)
