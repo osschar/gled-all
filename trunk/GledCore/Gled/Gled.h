@@ -62,8 +62,8 @@ public:
   void        CheckAuthDir();
   const char* PubKeyFile(TString& id);
   const char* PrivKeyFile(TString& id);
-  const char* GetPubKeyFile(TString& id);
-  const char* GetPrivKeyFile(TString& id);
+  const char* GetPubKeyFile(TString& id, Bool_t use_exc=true);
+  const char* GetPrivKeyFile(TString& id, Bool_t use_exc=true);
 
   bool IsIdentityInGroup(const char* id, const char* group);
 
