@@ -37,7 +37,7 @@ public:
 
   void to_ubyte(unsigned char* ub, bool wrap=false);
 
-  Float_t* operator()() { return c; }
+  const Float_t* operator()() const { return c; }
   Float_t  operator[](int i) const { return c[i]; }
   Float_t& operator[](int i) { return c[i]; }
 
