@@ -23,16 +23,16 @@ private:
   void _init();
 
 protected:
-  ZQueen*	mPrimQueen;	// X{GS} L{}
-  ZQueen*	mSecQueen;	// X{GS} L{}
+  ZQueen*	mPrimQueen;	// X{gS} L{}
+  ZQueen*	mSecQueen;	// X{gS} L{}
 
-  SaturnInfo*	mToSaturn;	// X{GS} L{}
+  SaturnInfo*	mToSaturn;	// X{gS} L{}
 
   // Top level request type
-  RequestType_e	 mRequest;	// X{GS} 7 PhonyEnum()
+  RequestType_e	 mRequest;	// X{gS} 7 PhonyEnum()
 
   // Push subdefs. Also mToSaturn, list contents and mSecQueen
-  PushStrategy_e mPushStrategy;	// X{GS} 7 PhonyEnum()
+  PushStrategy_e mPushStrategy;	// X{gS} 7 PhonyEnum()
   
 
 public:

@@ -22,7 +22,7 @@ public:
   ZHisto(ZHistoManager* m=0) : mManager(m) {}
   virtual ~ZHisto() {}
 
-  virtual const ZGlass* GetGlass() const;
+  virtual ZGlass* GetGlass();
   virtual ZHistoManager* GetZHistoManager();
   ZHistoDir* GetHistoDir();
 

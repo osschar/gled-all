@@ -25,13 +25,13 @@ private:
 protected:
   void send_beam_or_flare(auto_ptr<ZMIR>& m);
 
-  TestType_e		mTest;		// X{GS} 7 PhonyEnum(-join=>1);
-  Bool_t		bUseBeams;	// X{GS} 7 Bool()
+  TestType_e		mTest;		// X{gS} 7 PhonyEnum(-join=>1);
+  Bool_t		bUseBeams;	// X{gS} 7 Bool()
 
-  Int_t			mVecSize;	// X{GS} 7 Value(-range=>[1,1000000,1,1])
+  Int_t			mVecSize;	// X{gS} 7 Value(-range=>[1,1000000,1,1])
 
-  PerfMeterTarget*	mTarget;	// X{GS} L{}
-  SaturnInfo*		mBeamHost;	// X{GS} L{}
+  PerfMeterTarget*	mTarget;	// X{gS} L{}
+  SaturnInfo*		mBeamHost;	// X{gS} L{}
 
 public:
   PerfMeterOperator(const Text_t* n="PerfMeterOperator", const Text_t* t=0) : Operator(n,t) { _init(); }

@@ -29,7 +29,7 @@ private:
   void	_init();
 
 protected:
-  GTS::GtsSurface*	pSurf;  //! X{G}
+  GTS::GtsSurface*	pSurf;  //! X{g}
 
   Float_t		mScale;	// X{GST}  7 Value(-range=>[0,1000,1,1000])
   TString		mFile;	// X{GS}   7 Filor()

@@ -38,9 +38,9 @@ protected:
   Bool_t	  bGuiUp;
 
   Fl_Button*	  wSwmResizer;
-  Fl_Value_Input* wDebugLevel;	// X{G}
-  Fl_Input*	  wLibSetName;	// X{G}
-  Fl_Input*	  wEyeName;	// X{G}
+  Fl_Value_Input* wDebugLevel;	// X{g}
+  Fl_Input*	  wLibSetName;	// X{g}
+  Fl_Input*	  wEyeName;	// X{g}
 
   GThread*	  mMessenger;
   GCondition	  mMsgCond;

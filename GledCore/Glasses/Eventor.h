@@ -17,28 +17,28 @@ private:
   void		_init();
 
 protected:
-  Double_t	mTotalTime;	//  in s; X{GS} 7 ValOut()
-  Double_t	mRunTime;	//  in s; X{GS} 7 ValOut()
+  Double_t	mTotalTime;	//  in s; X{gS} 7 ValOut()
+  Double_t	mRunTime;	//  in s; X{gS} 7 ValOut()
 
-  Int_t		mBeatsToDo;	//  X{GS} 7 Value(-range=>[-1,1000000000,1])
-  Int_t		mBeatsDone;	//  X{GS} 7 ValOut(-range=>[0,1000000],-join=>1)
-  Int_t		mLocBeatsDone;	//! X{GS} 7 ValOut(-range=>[0,1000000]) local value
-  Int_t		mStampInterval;	//  X{GS} 7 Value(-range=>[0,1000000,1],-join=>1)
-  Int_t		mInterBeatMS;	//  X{GS} 7 Value(-range=>[0,1000000,1])
+  Int_t		mBeatsToDo;	//  X{gS} 7 Value(-range=>[-1,1000000000,1])
+  Int_t		mBeatsDone;	//  X{gS} 7 ValOut(-range=>[0,1000000],-join=>1)
+  Int_t		mLocBeatsDone;	//! X{gS} 7 ValOut(-range=>[0,1000000]) local value
+  Int_t		mStampInterval;	//  X{gS} 7 Value(-range=>[0,1000000,1],-join=>1)
+  Int_t		mInterBeatMS;	//  X{gS} 7 Value(-range=>[0,1000000,1])
 
   // Thread properties
-  SaturnInfo*	mHost;		//  X{GE} L{}
+  SaturnInfo*	mHost;		//  X{gE} L{}
 
-  Bool_t	bMultix;	//  X{GS} 7 Bool(-join=>1)
-  Bool_t	bSignalSafe;	//  X{GS} 7 Bool()
-  Bool_t	bContinuous;	//  X{GS} 7 Bool(-join=>1)
-  Bool_t	bUseDynCast;	//  X{GS} 7 Bool()
+  Bool_t	bMultix;	//  X{gS} 7 Bool(-join=>1)
+  Bool_t	bSignalSafe;	//  X{gS} 7 Bool()
+  Bool_t	bContinuous;	//  X{gS} 7 Bool(-join=>1)
+  Bool_t	bUseDynCast;	//  X{gS} 7 Bool()
 
   // Thread running status
-  Bool_t	bRunning;	//  X{GS} 7 BoolOut(-join=>1)
-  Bool_t	bSuspended;	//  X{GS} 7 BoolOut()
-  Bool_t	bPerforming;	//! X{GS} 7 BoolOut(-join=>1)
-  Bool_t	bXMultix;	//  X{GS} 7 BoolOut()
+  Bool_t	bRunning;	//  X{gS} 7 BoolOut(-join=>1)
+  Bool_t	bSuspended;	//  X{gS} 7 BoolOut()
+  Bool_t	bPerforming;	//! X{gS} 7 BoolOut(-join=>1)
+  Bool_t	bXMultix;	//  X{gS} 7 BoolOut()
 
   virtual void AdEndarkenment();
   virtual void AdUnfoldment();

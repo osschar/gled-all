@@ -15,7 +15,7 @@ class ZNodeLink : public ZNode {
 private:
   void		_init() 	{ mGlass = 0; }
 protected:
-  ZGlass*	mGlass;		// X{GS} L{} RnrBits{0,0,0,4}
+  ZGlass*	mGlass;		// X{gS} L{} RnrBits{0,0,0,4}
 public:
   ZNodeLink(Text_t* n="ZNodeLink", Text_t* t=0) : ZNode(n,t) {_init();}
 #include "ZNodeLink.h7"

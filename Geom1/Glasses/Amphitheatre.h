@@ -32,26 +32,26 @@ protected:
   typedef list<Chair>           lChair_t;
   typedef list<Chair>::iterator lChair_i;
 
-  ZList*		mNewGuests;  // X{GS} L{}
+  ZList*		mNewGuests;  // X{gS} L{}
   lChair_t		mChairs;
 
-  Int_t			mNumCh;      // X{GS} 7 ValOut(-join=>1)
-  Int_t			mNumChFree;  // X{GS} 7 ValOut()
+  Int_t			mNumCh;      // X{gS} 7 ValOut(-join=>1)
+  Int_t			mNumChFree;  // X{gS} 7 ValOut()
 
-  Int_t			mStageSides; // X{GS} 7 Value(-range=>[0,100,1], -join=>1)
-  Float_t		mStageRot;   // X{GS} 7 Value(-range=>[-1,1,1,1000])
-  Float_t		mStageSize;  // X{GS} 7 Value(-range=>[0,10,1,1000], -join=>1)
-  Float_t		mChairSize;  // X{GS} 7 Value(-range=>[0,10,1,1000])
+  Int_t			mStageSides; // X{gS} 7 Value(-range=>[0,100,1], -join=>1)
+  Float_t		mStageRot;   // X{gS} 7 Value(-range=>[-1,1,1,1000])
+  Float_t		mStageSize;  // X{gS} 7 Value(-range=>[0,10,1,1000], -join=>1)
+  Float_t		mChairSize;  // X{gS} 7 Value(-range=>[0,10,1,1000])
 
-  Float_t		mGuestSize;  // X{GS} 7 Value(-range=>[0,10,1,1000], -join=>1)
-  Float_t	     mGuestScaleFac; // X{GS} 7 Value(-range=>[0,1,1,1000])
+  Float_t		mGuestSize;  // X{gS} 7 Value(-range=>[0,10,1,1000], -join=>1)
+  Float_t	     mGuestScaleFac; // X{gS} 7 Value(-range=>[0,1,1,1000])
 
-  Float_t		mRepX0;        // X{GS} 7 Value(-range=>[0,10,1,1000], -join=>1)
-  Float_t		mRepXm;        // X{GS} 7 Value(-range=>[0,10,1,1000], -join=>1)
-  Float_t		mRepXM;        // X{GS} 7 Value(-range=>[0,10,1,1000])
-  Float_t		mGuestStep;    // X{GS} 7 Value(-range=>[0,10,1,1000], -join=>1)
-  UInt_t		mStepSleepMS;  // X{GS} 7 Value(-range=>[0,1e6,1])
-  Bool_t		bChairHunt;    // X{GS} 7 BoolOut()
+  Float_t		mRepX0;        // X{gS} 7 Value(-range=>[0,10,1,1000], -join=>1)
+  Float_t		mRepXm;        // X{gS} 7 Value(-range=>[0,10,1,1000], -join=>1)
+  Float_t		mRepXM;        // X{gS} 7 Value(-range=>[0,10,1,1000])
+  Float_t		mGuestStep;    // X{gS} 7 Value(-range=>[0,10,1,1000], -join=>1)
+  UInt_t		mStepSleepMS;  // X{gS} 7 Value(-range=>[0,1e6,1])
+  Bool_t		bChairHunt;    // X{gS} 7 BoolOut()
 
   Chair* closest_free_chair(TVector3& pos);
 
@@ -62,11 +62,11 @@ protected:
 
   //--------------------------------
 
-  Bool_t		bRnrStage;  // X{GS}  7 Bool(-join=>1)
-  Bool_t		bRnrChairs; // X{GS}  7 Bool()
+  Bool_t		bRnrStage;  // X{gS}  7 Bool(-join=>1)
+  Bool_t		bRnrChairs; // X{gS}  7 Bool()
 
-  ZColor		mStageCol;  // X{GSP} 7 ColorButt(-join=>1)
-  ZColor		mChairCol;  // X{GSP} 7 ColorButt()
+  ZColor		mStageCol;  // X{gSP} 7 ColorButt(-join=>1)
+  ZColor		mChairCol;  // X{gSP} 7 ColorButt()
 
   TRandom		mRnd;       //
   Double_t rnd(Double_t k=1, Double_t n=0);

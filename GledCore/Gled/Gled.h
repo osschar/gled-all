@@ -34,8 +34,8 @@ class Gled {
 protected:
   void next_arg_or_die(list<char*>& args, list<char*>::iterator& i);
 
-  SaturnInfo*	mSaturnInfo;	// X{G}
-  Saturn*	mSaturn;	// X{G}
+  SaturnInfo*	mSaturnInfo;	// X{g}
+  Saturn*	mSaturn;	// X{g}
   Bool_t	bIsSun;		// X{G}
 
   Bool_t	bQuit;		// X{G}

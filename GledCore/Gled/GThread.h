@@ -43,13 +43,13 @@ private:
   static 	map<pthread_t, GThread*>	sIdMap;
   static	GMutex				sIDLock;
 
-  pthread_t	 mId;		// X{G}
-  GThread_foo	 mStartFoo;	// X{Gs}
-  void*		 mArg;		// X{Gs}
-  GThread_cu_foo mEndFoo;	// X{Gs}
-  void*		 mEndArg;	// X{Gs}
-  bool		 bRunning;	// X{G}
-  bool		 bDetached;	// X{G}
+  pthread_t	 mId;		// X{g}
+  GThread_foo	 mStartFoo;	// X{gs}
+  void*		 mArg;		// X{gs}
+  GThread_cu_foo mEndFoo;	// X{gs}
+  void*		 mEndArg;	// X{gs}
+  bool		 bRunning;	// X{g}
+  bool		 bDetached;	// X{g}
 
   static GThread* wrap_and_register_self(ZMirEmittingEntity* owner);
 

@@ -41,30 +41,30 @@ private:
   Float_t&	P(Int_t m, Int_t n) { return m_P[m](n); }
 
 protected:
-  ZGlass*	mWA_Master;	// X{GS} L{}
+  ZGlass*	mWA_Master;	// X{gS} L{}
   TRandom	mRanGen;
 
   // Low level store
 
   // Algorithm parameters, exported part
-  UInt_t	mN;	// dimensions	X{GS} 7 ValOut(-join=>1)
-  UInt_t	mSeed;	// 		X{GS} 7 Value(-range=>[0,MAX_ID,1])
+  UInt_t	mN;	// dimensions	X{gS} 7 ValOut(-join=>1)
+  UInt_t	mSeed;	// 		X{gS} 7 Value(-range=>[0,MAX_ID,1])
 
-  Float_t	mFTol;	// Fractional tolerance	X{GS} 7 Value(-range=>[0,1],join=>1)
+  Float_t	mFTol;	// Fractional tolerance	X{gS} 7 Value(-range=>[0,1],join=>1)
 
   // Set T to T_0 times TFactor:
-  Float_t	mTFactor;	// X{GS} 7 Value(-range=>[0,100], join=>1)
+  Float_t	mTFactor;	// X{gS} 7 Value(-range=>[0,100], join=>1)
   // T_n = T_0(1 - n/NumSteps)^alpha 
-  Float_t	mAlpha;		// X{GS} 7 Value(-range=>[1e-2,100,1,100])
+  Float_t	mAlpha;		// X{gS} 7 Value(-range=>[1e-2,100,1,100])
 
-  UInt_t	mMovesPerT;	// X{GS} 7 Value(-range=>[0,1e6,1],-width=>6,-join=>1)
-  UInt_t	mNumSteps;	// X{GS} 7 Value(-range=>[0,1e6,1],-width=>6)
+  UInt_t	mMovesPerT;	// X{gS} 7 Value(-range=>[0,1e6,1],-width=>6,-join=>1)
+  UInt_t	mNumSteps;	// X{gS} 7 Value(-range=>[0,1e6,1],-width=>6)
 
-  Float_t	mT0;	// X{GS} 7 ValOut(-width=>8, -join=>1)
-  Float_t	mT;	// X{GS} 7 ValOut(-width=>8, -range=>[0,100])
+  Float_t	mT0;	// X{gS} 7 ValOut(-width=>8, -join=>1)
+  Float_t	mT;	// X{gS} 7 ValOut(-width=>8, -range=>[0,100])
 
-  Float_t	mYBest;	// Best value reached	 X{GS} 7 ValOut(-join=>1)
-  Float_t	mYLast;	// Value after last move X{GS} 7 ValOut()
+  Float_t	mYBest;	// Best value reached	 X{gS} 7 ValOut(-join=>1)
+  Float_t	mYLast;	// Value after last move X{gS} 7 ValOut()
 
   // protected methods
 

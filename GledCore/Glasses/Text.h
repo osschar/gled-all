@@ -20,7 +20,7 @@ private:
 
 protected:
   TString	mText;		// X{GST}  7 Textor()
-  ZRlFont* 	mFont;		// X{GST} L{} RnrBits{2,0,4,0, 0,0,0,0}
+  ZRlFont* 	mFont;		// X{gST} L{} RnrBits{2,0,4,0, 0,0,0,0}
 
   Bool_t	bAlpha;		// X{GST}  7 Bool(-join=>1)
   Bool_t	bBlend;		// X{GST}  7 Bool()

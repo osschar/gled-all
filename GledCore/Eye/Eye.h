@@ -32,11 +32,11 @@ protected:
 
   OptoStructs::hpZGlass2pZGlassImg_t	mGlass2ImgHash;
 
-  Saturn*	mSaturn;	// X{G}
-  SaturnInfo*	mSaturnInfo;	// X{G}
-  ZQueen*	mQueen;		// X{G}
-  EyeInfo*	mEyeInfo;	// X{G}
-  FTW_Shell*	mShell;		// X{G}
+  Saturn*	mSaturn;	// X{g}
+  SaturnInfo*	mSaturnInfo;	// X{g}
+  ZQueen*	mQueen;		// X{g}
+  EyeInfo*	mEyeInfo;	// X{g}
+  FTW_Shell*	mShell;		// X{g}
 
   TSocket*	mSatSocket;
 

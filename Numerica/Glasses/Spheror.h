@@ -21,19 +21,19 @@ private:
   void _init();
 
 protected:
-  UInt_t	mNVert;		// X{GS} 7 Value(-range=>[2,100,1,1], -join=>1)
+  UInt_t	mNVert;		// X{gS} 7 Value(-range=>[2,100,1,1], -join=>1)
 private:
-  UInt_t	mNV;		// X{G}  7 ValOut(-range=>[2,100,1,1])
+  UInt_t	mNV;		// X{g}  7 ValOut(-range=>[2,100,1,1])
 
 protected:
-  WarmAmoeba*	mAmoeba;	// X{GS} L{}
+  WarmAmoeba*	mAmoeba;	// X{gS} L{}
 
   TVectorF	mState;
 
-  Bool_t	bBeautyP;	// X{GS}  7 Bool(-join=>1)
+  Bool_t	bBeautyP;	// X{gS}  7 Bool(-join=>1)
   ZColor	mColor;		// X{PGS} 7 ColorButt()
-  Float_t	mSize;		// X{GS}  7 Value(-range=>[0,100,1,100], -join=>1)
-  Float_t	mScale;		// X{GS}  7 Value(-range=>[0,100,1,10])
+  Float_t	mSize;		// X{gS}  7 Value(-range=>[0,100,1,100], -join=>1)
+  Float_t	mScale;		// X{gS}  7 Value(-range=>[0,100,1,10])
 
   TVectorF*	GimmeXYZ(const TVectorF& x);
 

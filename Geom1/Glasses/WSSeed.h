@@ -32,38 +32,38 @@ protected:
   ZTrans* init_slide(WSPoint* f);
   void ring(ZTrans& lcf, WSPoint* f, Float_t t);
 
-  Int_t		mTLevel;	// X{GST}  7 Value(-range=>[2,1000,1,1],-join=>1)
-  Int_t		mPLevel;	// X{GST}  7 Value(-range=>[2,1000,1,1])
+  Int_t		mTLevel;	// X{gST}  7 Value(-range=>[2,1000,1,1],-join=>1)
+  Int_t		mPLevel;	// X{gST}  7 Value(-range=>[2,1000,1,1])
 
-  Float_t	mTexUOffset;	// X{GE}   7 Value(-range=>[-1e6,1e6,1,1000], -join=>1)
-  Float_t	mTexVOffset;	// X{GE}   7 Value(-range=>[-1e6,1e6,1,1000])
+  Float_t	mTexUOffset;	// X{gE}   7 Value(-range=>[-1e6,1e6,1,1000], -join=>1)
+  Float_t	mTexVOffset;	// X{gE}   7 Value(-range=>[-1e6,1e6,1,1000])
 
-  Bool_t	bRenormLen;	// X{GST}  7 Bool(-join=>1)
-  Float_t	mLength;	// X{GST}  7 Value(-range=>[0,1000,1,100])
+  Bool_t	bRenormLen;	// X{gST}  7 Bool(-join=>1)
+  Float_t	mLength;	// X{gST}  7 Value(-range=>[0,1000,1,100])
 
   ZColor	mColor;		// X{PGST} 7 ColorButt(-join=>1)
-  Float_t	mLineW;		// X{GST}  7 Value(-range=>[1,20,1,100],-join=>1)
-  bool		bFat;		// X{GST}  7 Bool()
+  Float_t	mLineW;		// X{gST}  7 Value(-range=>[1,20,1,100],-join=>1)
+  bool		bFat;		// X{gST}  7 Bool()
 
-  ZImage*	mTexture;	//  X{GS}  L{} RnrBits{2,0,4,0, 0,0,0,0}
+  ZImage*	mTexture;	//  X{gS}  L{} RnrBits{2,0,4,0, 0,0,0,0}
 
-  TimeStamp_t	mStampReqTex;	//! X{GS}  Timestamp for re-texturing
-  TimeStamp_t	mStampTexDone;	//! X{GS}  Timestamp when re-texturing done.
+  TimeStamp_t	mStampReqTex;	//! X{gS}  Timestamp for re-texturing
+  TimeStamp_t	mStampTexDone;	//! X{gS}  Timestamp when re-texturing done.
 
   TubeTvor*	pTuber;		//!
   Bool_t	bTextured;	//!
 
-  Float_t	mDtexU;		// X{GS} 7 Value(-range=>[-1,1,1,1000], -join=>1)
-  Float_t	mDtexV;		// X{GS} 7 Value(-range=>[-1,1,1,1000])
-  Bool_t	bTexAnimOn;	// X{G } 7 BoolOut(-join=>1)
-  UInt_t	mTASleepMS;	// X{GS} 7 Value(-range=>[10,10000,1])
+  Float_t	mDtexU;		// X{gS} 7 Value(-range=>[-1,1,1,1000], -join=>1)
+  Float_t	mDtexV;		// X{gS} 7 Value(-range=>[-1,1,1,1000])
+  Bool_t	bTexAnimOn;	// X{g } 7 BoolOut(-join=>1)
+  UInt_t	mTASleepMS;	// X{gS} 7 Value(-range=>[10,10000,1])
 public:
   void TexAnimStart();          // X{ED} 7 MButt(-join=>1)
   void TexAnimStop();           // X{E}  7 MButt()
 
 protected:
   
-  Bool_t	bUseDispList;	//! X{GS} 7 Bool()
+  Bool_t	bUseDispList;	//! X{gS} 7 Bool()
 
 public:
   WSSeed(const Text_t* n="WSSeed", const Text_t* t=0) :

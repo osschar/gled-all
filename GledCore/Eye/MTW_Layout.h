@@ -34,12 +34,12 @@ protected:
   typedef list<Class>			lClass_t;
   typedef list<Class>::iterator		lClass_i;
   
-  FTW_Nest*	mNest;		// X{G}
+  FTW_Nest*	mNest;		// X{g}
 
   lClass_t	mClasses;
-  bool		bIsValid;	// X{G}
+  bool		bIsValid;	// X{g}
 
-  Fl_Input*	wLaySpecs;	// X{G}
+  Fl_Input*	wLaySpecs;	// X{g}
 
 public:
   MTW_Layout(FTW_Nest* nest);

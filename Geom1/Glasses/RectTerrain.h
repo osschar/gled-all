@@ -30,29 +30,29 @@ private:
   void _init();
 
 protected:
-  Int_t		mNx;	// X{GS}  7 ValOut(-join=>1)
-  Int_t		mNy;	// X{GS}  7 ValOut()
-  Float_t	mDx;	// X{GST} 7 Value(-range=>[0,100,1,100],-join=>1)
-  Float_t	mDy;	// X{GST} 7 Value(-range=>[0,100,1,100])
+  Int_t		mNx;	// X{gS}  7 ValOut(-join=>1)
+  Int_t		mNy;	// X{gS}  7 ValOut()
+  Float_t	mDx;	// X{gST} 7 Value(-range=>[0,100,1,100],-join=>1)
+  Float_t	mDy;	// X{gST} 7 Value(-range=>[0,100,1,100])
   TMatrixF	mP;
 
-  Float_t	mMinZ;	// X{GS}   7 ValOut(-join=>1)
-  Float_t	mMaxZ;	// X{GS}   7 ValOut()
+  Float_t	mMinZ;	// X{gS}   7 ValOut(-join=>1)
+  Float_t	mMaxZ;	// X{gS}   7 ValOut()
   ZColor	mMinCol;// X{PGST} 7 ColorButt(-join=>1)
   ZColor	mMaxCol;// X{PGST} 7 ColorButt()
-  Float_t	mColSep;// X{GST}  7 Value(-range=>[0,100,1,100])
-  ZRibbon*	mRibbon;// X{GST} L{}
+  Float_t	mColSep;// X{gST}  7 Value(-range=>[0,100,1,100])
+  ZRibbon*	mRibbon;// X{gST} L{}
 
-  UChar_t       mRnrMode;     // X{GST} 7 PhonyEnum(-type=>RnrMode_e)
-  UChar_t       mBorderCond;  // X{GS}  7 PhonyEnum(-type=>BorderCond_e)
-  UChar_t       mOriginMode;  // X{GS}  7 PhonyEnum(-type=>OriginMode_e)
-  Float_t	mBValue;      // X{GS}  7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Bool_t	bBorder;      // X{GST} 7 Bool()
+  UChar_t       mRnrMode;     // X{gST} 7 PhonyEnum(-type=>RnrMode_e)
+  UChar_t       mBorderCond;  // X{gS}  7 PhonyEnum(-type=>BorderCond_e)
+  UChar_t       mOriginMode;  // X{gS}  7 PhonyEnum(-type=>OriginMode_e)
+  Float_t	mBValue;      // X{gS}  7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Bool_t	bBorder;      // X{gST} 7 Bool()
 
-  Float_t	mSmoothFac;   // X{GS}  7 Value(-range=>[0,1,1,1000])
+  Float_t	mSmoothFac;   // X{gS}  7 Value(-range=>[0,1,1,1000])
 
-  Bool_t	bUseDispList;	// X{GS} 7 Bool(-join=>1)
-  Bool_t	bStudySize;	// X{GS} 7 Bool()
+  Bool_t	bUseDispList;	// X{gS} 7 Bool(-join=>1)
+  Bool_t	bStudySize;	// X{gS} 7 Bool()
 
   void		MkVN(Int_t i, Int_t j);
 

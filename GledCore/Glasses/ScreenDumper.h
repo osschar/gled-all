@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  PupilInfo*	mPupil; 	// X{GS} L{}
+  PupilInfo*	mPupil; 	// X{gS} L{}
   TString	mFileNameFmt;	// X{GS} 7 Textor()
   
 public:

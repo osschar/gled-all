@@ -22,7 +22,7 @@ private:
   void _init();
 
 protected:
-  GTSurf*		mTarget;  // X{GS} L{}
+  GTSurf*		mTarget;  // X{gS} L{}
 
   TString		mFormula; // X{GS} 7 Textor(-width=>24)
   Algo_e		mAlgo;    // X{GS} 7 PhonyEnum(-join=>1)

@@ -24,7 +24,7 @@ private:
   TSocket*	hSocket;	//!
 
 protected:
-  SaturnInfo*	mMaster;		// X{GS} L{}
+  SaturnInfo*	mMaster;		// X{gS} L{}
 
 public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);

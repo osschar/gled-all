@@ -27,14 +27,14 @@ private:
   void _init();
 
 protected:
-  SaturnInfo*	mSaturnInfo;	// X{GS} L{} Saturn that shines for this King
-  ID_t		mMinID;		// X{G} ValOut(-range=>[0,MAX_ID,1,0], -width=>10, -join=>1)
-  ID_t		mMaxID;		// X{G} ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
+  SaturnInfo*	mSaturnInfo;	// X{gS} L{} Saturn that shines for this King
+  ID_t		mMinID;		// X{g} ValOut(-range=>[0,MAX_ID,1,0], -width=>10, -join=>1)
+  ID_t		mMaxID;		// X{g} ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
   ID_t		mMaxUsedID;	//
 
-  LightType_e	mLightType;	// X{G}
+  LightType_e	mLightType;	// X{g}
 
-  UChar_t	mMapNoneTo;     // X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny], -width=>8)
+  UChar_t	mMapNoneTo;     // X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny], -width=>8)
 
   virtual void BlessMIR(ZMIR& mir);
 

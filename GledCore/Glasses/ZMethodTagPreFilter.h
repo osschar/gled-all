@@ -18,7 +18,7 @@ private:
 
 protected:
   TString	mTags;		// X{GS} 7 Textor(-width=>20)
-  ZMirFilter*	mFilter;	// X{GS} L{}
+  ZMirFilter*	mFilter;	// X{gS} L{}
 
 public:
   ZMethodTagPreFilter(const Text_t* n="ZMethodTagPreFilter", const Text_t* t=0) :

@@ -73,13 +73,13 @@ private:
   void		_init();
 
 protected:
-  Saturn*	mSaturn;	//! X{G}
-  ZQueen*	mQueen;		//! X{G}
+  Saturn*	mSaturn;	//! X{g}
+  ZQueen*	mQueen;		//! X{g}
 
   UShort_t	mGlassBits;	//
   TString	mName;		//  X{RGE} 7 Textor()
   TString	mTitle;		//  X{RGE} 7 Textor()
-  ID_t		mSaturnID;	//  X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],
+  ID_t		mSaturnID;	//  X{G}   7 ValOut(-range=>[0,MAX_ID,1,0],
                                 //                 -width=>10)
   ZMirFilter*	mGuard;		//  X{E} L{}
 

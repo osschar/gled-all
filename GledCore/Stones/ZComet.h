@@ -34,17 +34,17 @@ public:
   mID2pZGlass_t mIDMap;
 #endif
 
-  CometType_e	mType;		// X{G}
+  CometType_e	mType;		// X{g}
 
-  An_ID_Demangler* mExtDemangler; // X{GS}
+  An_ID_Demangler* mExtDemangler; // X{gS}
 
-  bool		bWarnOn;	// X{GS}
-  bool		bVerbose;	// X{GS}
+  bool		bWarnOn;	// X{gS}
+  bool		bVerbose;	// X{gS}
 
   set<LID_t>	mLibSets;	// X{R}
   lpZGlass_t	mTopLevels;
-  ZQueen*	mQueen;		// X{G}
-  ZKing*	mKing;		// X{G}
+  ZQueen*	mQueen;		// X{g}
+  ZKing*	mKing;		// X{g}
   lpZGlass_t	mOrphans;
 
   sStr_t	mIgnoredLinks;

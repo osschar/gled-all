@@ -20,10 +20,10 @@ private:
   void _init();
 
 protected:
-  ZNode*	mTarget;	// X{GS} L{l}
+  ZNode*	mTarget;	// X{gS} L{l}
 
-  Bool_t	bReportID;	// X{GS} 7 Bool(-join=>1)
-  Bool_t	bGetResult;	// X{GS} 7 Bool()
+  Bool_t	bReportID;	// X{gS} 7 Bool(-join=>1)
+  Bool_t	bGetResult;	// X{gS} 7 Bool()
 
   TRandom	mRnd;		//!
   Double_t rnd(Double_t k=1, Double_t n=0);

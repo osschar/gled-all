@@ -18,8 +18,8 @@ private:
   void _init();
 
 protected:
-  ZHashList*	mIdentities;	// X{GS} L{}
-  UChar_t	mOnMatch;	// X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny],-width=>6)
+  ZHashList*	mIdentities;	// X{gS} L{}
+  UChar_t	mOnMatch;	// X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny],-width=>6)
 
 public:
   ZIdentityListFilter(const Text_t* n="ZIdentityListFilter", const Text_t* t=0) :
