@@ -110,11 +110,11 @@ build_uninstall:
 
 install:
 	${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
-	@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
+	@echo ${LIB_SET_NAME} > ${GLEDSYS}/lib/.${LIB_SET_ID}
 
 uninstall:
+	@rm -f ${GLEDSYS}/lib/.${LIB_SET_ID}
 	${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
-	@rm -f lib/.${LIB_SET_ID}
 
 # like install ... only into a tar file (also Readme_<libset> is added)
 # make sure to set environment variable BIN_DIST_TAR
