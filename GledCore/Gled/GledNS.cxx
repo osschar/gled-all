@@ -271,6 +271,13 @@ GledNS::LibSetInfo* GledNS::FindLibSetInfo(LID_t lid)
   return i->second;
 }
 
+GledNS::LibSetInfo* GledNS::FindLibSetInfo(const string& lib_set)
+{
+  hName2Lid_i i = Name2Lid.find(lib_set);
+  return (i != Name2Lid.end()) ? FindLibSetInfo(i->second) : 0;
+}
+
+
 void GledNS::ProduceLibSetInfoList(lpLSI_t& li_list)
 {
   for(hLid2pLSI_i i=Lid2LSInfo.begin(); i!=Lid2LSInfo.end(); ++i) {
