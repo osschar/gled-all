@@ -1,15 +1,34 @@
 # $Header$
 
 $PATCH = {
-"Gled" => { 'Pragmas' => "#pragma link C++ global Gled::theOne;\n" },
 
-"GledNS" => { 'Pragmas' => "#pragma link C++ function GForm;\n" },
-
-"ZList" => {
-  'PragmaSuff' => "!-"
-#  'C7_DoNot_Gen' => { 'RebuildLinks' => 1 }
+"Gled" => {
+  'Pragmas' => "#pragma link C++ global Gled::theOne;\n"
 },
 
-"ZMIR"		=> { 'Pragmas' => "#pragma link C++ class ZMIR_Result_Report;\n" },
-"ZComet"	=> { 'PragmaSuff' => "-" }
+"GledNS" => {
+  'Pragmas' => "#pragma link C++ function GForm;\n"
+},
+
+"ZList" => {
+  'PragmaSuff' => "!-",
+# The following line left as documentation.
+# 'C7_DoNot_Gen' => { 'RebuildLinks' => 1 }
+},
+
+"ZMirEmittingEntity" => {
+  'VirtualBase' => 1	
+},
+
+"ZMIR"=> {
+  'Pragmas'    => "#pragma link C++ class ZMIR_Result_Report;\n",
+},
+
+"ZComet" => { 'PragmaSuff' => "-" },
+
+"GMutex" => 
+{
+ 'Pragmas' => "#pragma link C++ class GMutexHolder;\n" 
+},
+
 };
