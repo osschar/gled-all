@@ -29,6 +29,9 @@ Float_t RectTerrain::sMaxEpsilon = 0.0001;
 
 void RectTerrain::_init()
 {
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   mNx = mNy = 0;
   mDx = mDy = 1;
 
@@ -45,7 +48,6 @@ void RectTerrain::_init()
 
   mSmoothFac = 0.2;
 
-  bUseDispList = true;
   bStudySize   = false;
 }
 

@@ -3,6 +3,8 @@
 
 #include <GL/glu.h>
 
+#define PARENT ZNode_GL_Rnr
+
 /**************************************************************************/
 
 void RectTerrain_GL_Rnr::check(double xf, double yf,
@@ -50,12 +52,7 @@ void RectTerrain_GL_Rnr::Draw(RnrDriver* rd)
       check(0.5,0.5, proj_m, modv_m, viewp);
     }
 
-    if(mTerrain->bUseDispList) {
-      ZGlass_GL_Rnr::Draw(rd);
-    } else {
-      Render(rd);
-    }
-
+    PARENT::Draw(rd);
   }
 }
 
