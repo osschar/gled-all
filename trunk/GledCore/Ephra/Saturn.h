@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -13,11 +13,12 @@
 #include <Glasses/EyeInfo.h>
 #include <Stones/ZMIR.h>
 
-class ZGod; class ZKing; class ZSunQueen; class ZQueen;
+class ZGod; class ZKing; class ZFireKing; class ZSunQueen; class ZQueen;
 
 #include <Gled/GMutex.h>
 #include <Gled/GSelector.h>
 #include <Gled/GCondition.h>
+#include <Gled/GTime.h>
 #include <Net/Ray.h>
 class Forest;
 class Mountain;
@@ -34,7 +35,8 @@ class GThread;
 typedef list<TSocket*>			lpSocket_t;
 typedef list<TSocket*>::iterator	lpSocket_i;
 
-class Saturn : public TObject {
+class Saturn : public TObject, public An_ID_Demangler
+{
   friend class Gled;
   friend class ZKing;
   friend class ZQueen; friend class ZSunQueen;
@@ -57,6 +59,9 @@ public:
   typedef hash_map<TSocket*, SocketInfo>::iterator hSock2SocketInfo_i;
 #endif
 
+  typedef multimap<GTime, ZMIR*>           mTime2MIR_t;
+  typedef multimap<GTime, ZMIR*>::iterator mTime2MIR_i;
+
 protected:
   GMutex		mIDLock;	// X{r} ... must allow locking to eyez
   GMutex		mEyeLock;	// sending to eyes
@@ -72,7 +77,7 @@ protected:
   ZKing*		mSunKing;	// X{G}
   ZSunQueen*		mSunQueen;	// X{G}
   ZKing*		mKing;		// X{G}
-  ZKing*		mFireKing;	// X{G}
+  ZFireKing*		mFireKing;	// X{G}
   ZQueen*		mFireQueen;	// X{G}
   SaturnInfo*		mSunInfo;	// X{G}
   SaturnInfo*		mSaturnInfo;	// X{G}
@@ -97,18 +102,18 @@ protected:
   // Saturn services ... preliminary
   ZHistoManager*	pZHistoManager;
 
-  int	start_server();
-  int	stop_server();
-  int	start_mir_shooter();
-  int	stop_mir_shooter();
+  int  start_server();
+  int  stop_server();
+  int  start_shooters();
+  int  stop_shooters();
 
-  void  socket_closed(TSocket* sock);
-  void	wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p);
-  void	wipe_eye(EyeInfo* eye, bool notify_sunqueen_p);
+  void socket_closed(TSocket* sock);
+  void wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p);
+  void wipe_eye(EyeInfo* eye, bool notify_sunqueen_p);
 
-  void	fix_fire_king_id(SaturnInfo* si);
-  void	create_kings(const char* king, const char* whore_king);
-  void	arrival_of_kings(TMessage* m);
+  void fix_fire_king_id(SaturnInfo* si);
+  void create_kings(const char* king, const char* whore_king);
+  void arrival_of_kings(TMessage* m);
 
   void Enlight(ZGlass* glass, ID_t) throw(string);
   void Reflect(ZGlass* glass) throw(string);
@@ -136,15 +141,13 @@ public:
   void	      AllowMoons();
   void	      Shutdown();
 
-  ZGlass*	DemangleID(ID_t id);
+  virtual ZGlass* DemangleID(ID_t id);
 
   Int_t Freeze();
   Int_t UnFreeze();
 
-  void	Shine(Ray& r);
-  void	SingleRay(EyeInfo* eye, Ray& r);
-
   Bool_t IsMoon(SaturnInfo* si);
+  void CopyMoons(lpSaturnInfo_t& list);
 
   // Saturn services
   ZHistoManager* GetZHistoManager();
@@ -182,10 +185,19 @@ protected:
   GCondition		mMIRShootingCnd;
   list<ZMIR*>		mMIRShootingQueue;
 
+  GThread*		mDelayedMIRShootingThread;
+  GCondition		mDelayedMIRShootingCnd;
+  mTime2MIR_t		mDelayedMIRShootingQueue;
+
+  void     markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller=0);
+  void     post_mir(ZMIR& mir, ZMirEmittingEntity* caller=0);
   void     shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
 		     bool use_own_thread=false);
-  void     markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller=0);
-  void     shoot_mir_from_queue();
+  void     delayed_shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
+			     GTime at_time);
+
+  void     mir_shooter();
+  void     delayed_mir_shooter();
 
   void     generick_shoot_mir_result(const Text_t* exc, TBuffer* buf);
 
@@ -194,6 +206,7 @@ public:
   void     PostMIR(ZMIR& mir);
 
   void     ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
+  void     DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time);
   ZMIR_RR* ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
 
   void     ShootMIRResult(TBuffer& buf);
@@ -201,14 +214,35 @@ public:
   // Internal MIR handling
 
 protected:
-  void	RouteMIR(ZMIR& mir);
-  void	UnfoldMIR(ZMIR& mir);
-  void	ExecMIR(ZMIR& mir) throw(string);
-  void	ForwardMIR(ZMIR& mir, SaturnInfo* route);
-  void	BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons);
-  void	BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons);
+  void report_mir_pre_demangling_error(ZMIR& mir, string error);
+  void report_mir_post_demangling_error(ZMIR& mir, string error);
 
-  
+  void RouteMIR(ZMIR& mir)  throw();
+  void UnfoldMIR(ZMIR& mir) throw();
+  void ExecMIR(ZMIR& mir);
+  void ForwardMIR(ZMIR& mir, SaturnInfo* route);
+  void BroadcastMIR(ZMIR& mir, lpSaturnInfo_t& moons);
+  void BroadcastBeamMIR(ZMIR& mir, lpSaturnInfo_t& moons);
+
+
+  /**************************************************************************/
+  // Ray handling ... viewer notifications.
+  /**************************************************************************/
+
+ protected:
+
+  GThread*		mRayEmittingThread;
+  GCondition		mRayEmittingCnd;
+  list<Ray>		mRayEmittingQueue;
+
+  void ray_emitter();
+
+ public:
+
+  void	Shine(Ray& r);
+  void	SingleRay(EyeInfo* eye, Ray& r);
+
+
   /**************************************************************************/
   // Internal thread structures and functions
   /**************************************************************************/
@@ -237,6 +271,8 @@ private:
   static void* tl_SaturnAcceptor(new_connection_ti *ss);
   static void* tl_MIR_Router(mir_router_ti* arg);
   static void* tl_MIR_Shooter(Saturn* s);
+  static void* tl_Delayed_MIR_Shooter(Saturn* s);
+  static void* tl_Ray_Emitter(Saturn* s);
 
 public:
 #include "Saturn.h7"
