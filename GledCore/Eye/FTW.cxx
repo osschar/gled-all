@@ -251,12 +251,37 @@ int FTW::NameButton::handle(int ev)
   switch(ev) {
 
   case FL_ENTER: {
-    if(leaf) leaf->GetNest()->RefBelowMouse().set(leaf, ant);
+    if(leaf) {
+      leaf->GetNest()->RefBelowMouse().set(leaf, ant);
+      GledViewNS::ClassInfo* ci = leaf->fImg->fClassInfo;
+      ZGlass* lens = leaf->fImg->fGlass;
+      if(ant == 0) {
+	leaf->GetNest()->SetInfoBar(GForm("%s (\"%s\",\"%s\")",
+					  ci->fClassName.c_str(),
+					  lens->GetName(), lens->GetTitle()));
+      } else {
+	OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
+	const char *glass = "null", *name = "", *title = "";
+	if(ant->fToImg) {
+	  glass = ant->fToImg->fClassInfo->fClassName.c_str();
+	  name  = ant->fToGlass->GetName();
+	  title = ant->fToGlass->GetTitle();
+	}
+	leaf->GetNest()->SetInfoBar(GForm("%s (\"%s\") [%s %s] -> %s (\"%s\",\"%s\")",
+					  ci->fClassName.c_str(),
+					  lens->GetName(),
+					  ld->fLinkInfo->fType.c_str(),
+					  ld->fLinkInfo->fName.c_str(),
+					  glass, name, title));
+      }
+    }
     return 1;
   }
 
   case FL_LEAVE: {
-    if(leaf) leaf->GetNest()->RefBelowMouse().set(0, 0);
+    if(leaf) {
+      leaf->GetNest()->RefBelowMouse().set(0, 0);
+    }
     return 1;
   }
 
@@ -431,9 +456,12 @@ namespace {
       if(mgr) menu.textsize(mgr->cell_fontsize());
 
       list<Inst_SelID> datas;
-      for(map<UInt_t, string>::iterator j = res.begin(); j!=res.end(); ++j) {
+      for(map<UInt_t, string>::iterator j=res.begin(); j!=res.end(); ++j) {
 	datas.push_back( Inst_SelID(ud->fidsel, j->first) );
-	menu.add(j->second.c_str(), 0, (Fl_Callback*)cid_sel_cb, &datas.back());
+	// Insert separators at ClassId breaks
+	map<UInt_t, string>::iterator k = j; ++k;
+	int flags = (k != res.end() && k->first - j->first > 1) ? FL_MENU_DIVIDER : 0;
+	menu.add(j->second.c_str(), 0, (Fl_Callback*)cid_sel_cb, &datas.back(), flags);
       }
       const Fl_Menu_Item* mi = menu.popup();    
     }

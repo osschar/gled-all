@@ -22,7 +22,7 @@ class FTW_Shell;
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_SWM.H>
 #include <FL/Fl_Group.H>
-class Fl_Input; class Fl_Menu_Item;
+class Fl_Input; class Fl_Output; class Fl_Menu_Item;
 class Fl_Box;
 
 /**************************************************************************/
@@ -83,12 +83,15 @@ protected:
 
   bool		bLinksShown;	// X{G}
   bool		bCustomWeedsCreated;
+  bool		bAntsReversed;	// X{G}
 
   MTW_Layout*	pLayout;	// X{G}
   Fl_Pack*	wMidPack;
   Fl_Box*	wSepBox;
   Fl_Box*	wCustomTitle;
   Fl_Group*	wCustomLabels;
+
+  Fl_Output*	wInfoBar;	// X{G}
 
   void create_custom_weeds();
   void show_custom_weeds();
@@ -147,6 +150,13 @@ public:
   void UnregisterLocatorConsumer(FTW::LocatorConsumer* lcon);
   bool IsPoint(FTW::Locator& loc) { return &loc == &mPoint; }
   bool IsMark (FTW::Locator& loc) { return &loc == &mMark;  }
+
+  /**************************************************************************/
+
+  void SetInfoBar(const char* info);
+  void SetInfoBar(const string& info) { SetInfoBar(info.c_str()); }
+
+  void ReverseAnts();
 
   /**************************************************************************/
 
