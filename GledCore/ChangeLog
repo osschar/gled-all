@@ -1,3 +1,16 @@
+2005-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	RemoveLenses() can be called in synchronous mode.
+	Also realized that it can safely run in a detached MIR thread; so
+	quite some code went away.
+
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	New function RemoveLensesViaQueen(Bool_t recurse=false). Calls
+	mQueen->RemoveLenses(this) via a MIR and waits for result report.
+
 2005-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.cxx:
@@ -17,7 +30,7 @@
 
 	* Glasses/ZQueen.cxx:
 	* Glasses/ZQueen.h:
-	Support for (recursive) removal of lists. RemoveLens(ZGlass* lens)
+	Support for (recursive) removal of lists. RemoveLenses(ZGlass* lens)
 	spawns a dedicated thread that inspects the directory structure
 	and emits flares to collapse complete sub-directories in a single
 	method PutListElementsToPurgatory(ZList* list). It's also viewer
