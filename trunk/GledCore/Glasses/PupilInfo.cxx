@@ -51,6 +51,9 @@ void PupilInfo::_init()
   bShowRPS = true; bRnrNames = false;
 
   mBuffSize = 4096; mPickR = 5; mPickDisp = 0;
+
+  mPopupDx = 200; mPopupDy = 0;
+  mPopupFx = 0;   mPopupFy = -0.5;
 }
 
 /**************************************************************************/

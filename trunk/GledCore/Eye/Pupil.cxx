@@ -482,8 +482,10 @@ namespace {
   }
 }
 
-void Pupil::Pick()
+OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
 {
+  OS::ZGlassImg* ret_img = 0;
+
   // RedBook snatch
   GLsizei bs = mInfo->GetBuffSize();
   GLuint* b = new GLuint[bs];
@@ -546,17 +548,19 @@ void Pupil::Pick()
      
       glass_data gd(root_img, zmin, lens->GetName());;
       
-      // fill gd.parents list with contents of the pick record
-      for(int j=m-2; j>=0; --j) {
-	UInt_t p_id = x[j];
-	OS::ZGlassImg* img = fImg->fEye->DemangleID(p_id);
-	if(!img) {
-	  printf("Pupil::Pick parent img null for id=%d.\n", p_id);
-	  continue;
+      if(make_menu_p) {
+	// fill gd.parents list with contents of the pick record
+	for(int j=m-2; j>=0; --j) {
+	  UInt_t p_id = x[j];
+	  OS::ZGlassImg* img = fImg->fEye->DemangleID(p_id);
+	  if(!img) {
+	    printf("Pupil::Pick parent img null for id=%d.\n", p_id);
+	    continue;
+	  }
+	  // ZGlass* parent = img->fGlass;
+	  // if(!parent) continue; // MT: this should NEVER happen.
+	  gd.parents.push_back(img);
 	}
-	// ZGlass* parent = img->fGlass;
-	// if(!parent) continue; // MT: this should NEVER happen.
-	gd.parents.push_back(img);
       }
       
       list<glass_data>::iterator ins_pos = gdl.begin();
@@ -567,40 +571,43 @@ void Pupil::Pick()
       x += m;
     }
 
-    // create menu entries
-    int loc = 1;
-    for( list<glass_data>::iterator gdi = gdl.begin(); gdi!=gdl.end(); ++gdi) {
-      if(mInfo->GetPickDisp() != 0) {    
-	Float_t near = mInfo->GetNearClip();
-	Float_t far  = mInfo->GetFarClip();
-	Float_t zdist = near*far/(far - gdi->z/2*(far - near));
-	if(mInfo->GetPickDisp() == 1)
-	  gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.c_str()); 
-	else
-	  gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.c_str()); 
-      } else {
-	gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
+    if(make_menu_p) {
+      int loc = 1;
+      for( list<glass_data>::iterator gdi = gdl.begin(); gdi!=gdl.end(); ++gdi) {
+	if(mInfo->GetPickDisp() != 0) {    
+	  Float_t near = mInfo->GetNearClip();
+	  Float_t far  = mInfo->GetFarClip();
+	  Float_t zdist = near*far/(far - gdi->z/2*(far - near));
+	  if(mInfo->GetPickDisp() == 1)
+	    gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.c_str()); 
+	  else
+	    gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.c_str()); 
+	} else {
+	  gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
+	}
+	++loc;
+
+	mShell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
+
+	// iterate through the list of parents
+	menu.add(GForm("%sParents", gdi->name.c_str()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
+	for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
+	  string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
+	  mShell->FillImageMenu(*pi, menu, mcdl, entry);
+	  fill_pick_menu(this, *pi, menu, mcdl, entry);
+	}
+
+	fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
       }
-      ++loc;
 
-      mShell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
-
-      // iterate through the list of parents
-      menu.add(GForm("%sParents", gdi->name.c_str()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
-      for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
-	string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
-	mShell->FillImageMenu(*pi, menu, mcdl, entry);
-	fill_pick_menu(this, *pi, menu, mcdl, entry);
-      }
-
-      fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
+      menu.popup();
+    } else {
+      ret_img = gdl.front().img;
     }
-
-    menu.popup();
-
   } // if(n>0)
 
   delete [] b;
+  return ret_img;
 }
 
 /**************************************************************************/
@@ -742,8 +749,17 @@ int Pupil::handle(int ev)
 
   case FL_PUSH: {
     mMouseX = x; mMouseY = y; // reset the drag location
+    if(Fl::event_button() == 1 && Fl::event_clicks() == 1) {
+      Fl::event_clicks(0);
+      OS::ZGlassImg* img = Pick();
+      if(img) {
+	int x = Fl::event_x_root() + mInfo->GetPopupDx();
+	int y = Fl::event_y_root() + mInfo->GetPopupDy();
+	mShell->SpawnMTW_View(img, x, y, mInfo->GetPopupFx(), mInfo->GetPopupFy());
+      }
+    }
     if(Fl::event_button() == 3) {
-      Pick();
+      Pick(true);
     }
     return 1;
   }
@@ -827,6 +843,7 @@ int Pupil::handle(int ev)
     }
     if(chg) redraw();
   }
+
   case FL_KEYBOARD: {
     switch(Fl::event_key()) {
 

@@ -77,6 +77,11 @@ protected:
   Int_t		mPickR;		// X{gS} 7 Value(-range=>[0,100,1,1],-join=>1)
   UChar_t       mPickDisp;      // X{gS} 7 PhonyEnum(-vals=>[0,Default, 1,"Z-distance", 2,"Z-percentage"], -width=>9)
 
+  Int_t		mPopupDx;	// X{GS} 7 Value(-range=>[-2000,2000,1,1], -join=>1)
+  Int_t		mPopupDy;	// X{GS} 7 Value(-range=>[-2000,2000,1,1])
+  Float_t	mPopupFx;	// X{GS} 7 Value(-range=>[-10,10,1,10], -join=>1)
+  Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
+
 public:
   PupilInfo(Text_t* n="PupilInfo", Text_t* t=0) : ZList(n,t) { _init(); }
 
