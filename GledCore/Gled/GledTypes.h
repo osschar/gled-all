@@ -8,6 +8,7 @@
 #define Gled_GledTypes_H
 
 #include <Rtypes.h>
+#include <TString.h>
 #include <iostream>
 #include <string>
 #include <assert.h>
@@ -50,7 +51,7 @@ typedef UShort_t	MID_t;
 struct FID_t { // Full lib/class ID
   LID_t	lid;
   CID_t	cid;
-  FID_t(LID_t l, CID_t c) : lid(l), cid(c) {}
+  FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
   bool operator==(FID_t& r) { return (lid==r.lid && cid==r.cid); }
   bool is_null() { return lid==0 && cid==0; }
 };
@@ -73,13 +74,16 @@ typedef	list<ID_t>		lID_t;
 typedef	list<ID_t>::iterator	lID_i;
 typedef set<ID_t>		sID_t;
 typedef set<ID_t>::iterator	sID_i;
+
 #ifndef __CINT__
+
 typedef map<ID_t, ZGlass*>			mID2pZGlass_t;
 typedef map<ID_t, ZGlass*>::iterator		mID2pZGlass_i;
 typedef hash_map<ID_t, ZGlass*>			hID2pZGlass_t;
 typedef hash_map<ID_t, ZGlass*>::iterator	hID2pZGlass_i;
 typedef hash_map<ID_t, ID_t>			IdiOm_t;
 typedef hash_map<ID_t, ID_t>::iterator		IdiOm_i;
+
 #endif
 
 /**************************************************************************/
