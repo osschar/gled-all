@@ -23,6 +23,8 @@ protected:
   Bool_t	bSpawnNests;           // X{GS} 7 Bool()
 
   Bool_t	bFancyClassView;       // X{GS} 7 Bool()
+  Bool_t	bCollZGlass;           // X{GS} 7 Bool(-join=>1)
+  Bool_t	bCollZList;            // X{GS} 7 Bool()
   Bool_t	bShowLinksInClassView; // X{GS} 7 Bool()
 
 public:
