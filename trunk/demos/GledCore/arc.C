@@ -1,13 +1,15 @@
 // $Header$
 
+#include <glass_defines.h>
+#include <gl_defines.h>
 
-void boxer(Int_t n, Box* p, ZQueen* m, Real_t phi, Real_t bf, Real_t cf)
+void boxer(Int_t n, Box* p, ZQueen* m, Float_t phi, Float_t bf, Float_t cf)
 {
   if(n<=0) return;
-  Real_t cphi = TMath::Cos(phi), sphi = TMath::Sin(phi);
+  Float_t cphi = TMath::Cos(phi), sphi = TMath::Sin(phi);
   Box* t = new Box();
   t->SetABC(cphi*p->GetA(), bf*p->GetB(), cf*p->GetC());
-  Real_t foo = (t->GetC() - sphi*p->GetA())/2; 
+  Float_t foo = (t->GetC() - sphi*p->GetA())/2; 
   t->MoveLF(1, foo*sphi);
   t->MoveLF(3, foo*cphi + p->GetC()/2);
   t->RotateLF(3,1,phi);
