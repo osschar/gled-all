@@ -10,6 +10,10 @@ void eye(const Text_t* eye_name="Eye of Ra",
 	 const Text_t* shell_name="Example Shell",
 	 const Text_t* pupil_name="Example Pupil")
 {
+  if(Gled::theOne->HasGUILibs() == false) {
+    printf("eye.C::eye skipping Eye and ShellInfo instantiation (no GUI libraries).\n");
+  }
+
   register_GledCore_layouts();
 
   shell = new ShellInfo(shell_name);

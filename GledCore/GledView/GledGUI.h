@@ -73,6 +73,8 @@ public:
   virtual void warning(const char* s);
   virtual void error(const char* s);
 
+  virtual Bool_t HasGUILibs() const { return true; }
+
   virtual EyeInfo* SpawnEye(ShellInfo* si, const char* name, const char* title=0);
 
   TCanvas* NewCanvas(const Text_t* name, const Text_t* title,
