@@ -160,21 +160,29 @@ int GThread::Detach()
 // Static functions; to be called from within thread.
 /**************************************************************************/
 
-void GThread::SetCancelState(CState s)
+GThread::CState GThread::SetCancelState(CState s)
 {
+  int ex_val;
   if(s == CS_Enable)
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,0);
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,  &ex_val);
   else
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,0);
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &ex_val);
+  return ex_val == PTHREAD_CANCEL_ENABLE ? CS_Enable : CS_Disable;
 }
 
-void GThread::SetCancelType(CType t)
+/**************************************************************************/
+
+GThread::CType GThread::SetCancelType(CType t)
 {
+  int ex_val;
   if(t == CT_Async)
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,0);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &ex_val);
   else
-    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,0);
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,     &ex_val);
+  return ex_val == PTHREAD_CANCEL_DEFERRED ? CT_Deferred : CT_Async;
 }
+
+/**************************************************************************/
 
 void GThread::TestCancel()
 {
