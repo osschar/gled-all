@@ -12,13 +12,15 @@
 
 class GlobalLamps_GL_Rnr : public ZGlass_GL_Rnr {
 private:
+  void _init();
 
 protected:
   GlobalLamps*		mGlobalLamps;
   list<Lamp_GL_Rnr*>	mLampsOn;
 
 public:
-  GlobalLamps_GL_Rnr(GlobalLamps* idol) : ZGlass_GL_Rnr(idol), mGlobalLamps(idol) {}
+  GlobalLamps_GL_Rnr(GlobalLamps* idol) :
+    ZGlass_GL_Rnr(idol), mGlobalLamps(idol) { _init(); }
   virtual ~GlobalLamps_GL_Rnr() {}
 
   virtual void PreDraw(RnrDriver* rd);
