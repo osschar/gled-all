@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-
 namespace OS = OptoStructs;
 
 /**************************************************************************/
@@ -75,7 +74,7 @@ Eye::Eye(UInt_t port, TString identity, ID_t shell_id,
       ISerr(_eh + exc);
       goto fail;
     }
-    UInt_t ss;  *m >> ss; mSaturn = (Saturn*)ss;
+    UInt_t ss;  *m >> ss; mSaturn = (Saturn*)ss; mSaturnInfo = mSaturn->GetSaturnInfo();
     ID_t ei_id; *m >> ei_id;
     delete m;
     mEyeInfo = dynamic_cast<EyeInfo*>(mSaturn->DemangleID(ei_id));
@@ -121,11 +120,18 @@ void Eye::show() { mShell->show(); }
 
 OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
 {
+  if(glass == 0) return 0;
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
   if(i != mGlass2ImgHash.end()) return i->second;
-  OS::ZGlassImg* gi = new OptoStructs::ZGlassImg(this, glass);
+  glass->IncEyeRefCount();
+  OS::ZGlassImg* gi = new OS::ZGlassImg(this, glass);
   mGlass2ImgHash[glass] = gi;
   return gi;
+}
+
+OS::ZGlassImg* Eye::DemangleID(ID_t id)
+{
+  return DemanglePtr(mSaturn->DemangleID(id));
 }
 
 void Eye::RemoveImage(OS::ZGlassImg* img)
@@ -139,20 +145,19 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
     cout <<"Eye::RemoveImage non-matching images\n";
     return;
   }
+  i->first->DecEyeRefCount();
   mGlass2ImgHash.erase(i);
   delete img;
 }
 
 /**************************************************************************/
 
-void Eye::InvalidateRnrs(OS::ZGlassImg* img, bool invalidate_links_p)
+void Eye::InvalidateRnrs(OS::ZGlassImg* img)
 {
   for(OS::lpA_View_i i=img->fFullViews.begin(); i!=img->fFullViews.end(); ++i)
     (*i)->InvalidateRnrScheme();
-  if(invalidate_links_p) {
-    for(OS::lpA_View_i i=img->fLinkViews.begin(); i!=img->fLinkViews.end(); ++i)
-      (*i)->InvalidateRnrScheme();
-  }
+  for(OS::lpA_View_i i=img->fLinkViews.begin(); i!=img->fLinkViews.end(); ++i)
+    (*i)->InvalidateRnrScheme();
 }
 
 /**************************************************************************/
@@ -164,8 +169,8 @@ Int_t Eye::Manage(int fd)
   static const string _eh("Eye::Manage ");
 
   TMessage *m;
-  UInt_t length;
-  Int_t  count = 0, len;
+  UInt_t    length;
+  Int_t     ray_count = 0, all_count = 0, len;
 
   while(1) {
 
@@ -194,142 +199,98 @@ Int_t Eye::Manage(int fd)
       delete m; return -2;
     }
 
-    if(m->What() == kMESS_STRING) {
+    ++all_count;
+
+    switch(m->What()) {
+
+    case kMESS_STRING: {
       TString str;
       *m >> str;
-      ISmess(_eh + "got message string: " + str.Data());
-      delete m;
-      continue;
+      mShell->Message(GForm("Raw message: %s", str.Data()), FTW_Shell::MT_std);
+      break;
     }
 
-    if(!m || m->What() != GledNS::MT_Ray) {
-      ISerr(GForm("%s Recv failed or non MT_Ray' len=%d,what=%d. "
-		  "Dis-synchronization possible.", _eh.c_str(), len, m->What()));
-      delete m;
-      return -3;
-    }
-
-    ++count;
-    mRay.Streamer(*m);
-    // cout << mRay << endl;
-
-    if(mRay.fEvent == Ray::RQN_message) {
-      mShell->Message(GForm("[%s] %s", mRay.fCaller->GetName(), mRay.fMessage.Data()),
-		      FTW_Shell::MT_std);
-      delete m;
-      continue;
-    }
-    if(mRay.fEvent == Ray::RQN_error) {
-      mShell->Message(GForm("[%s] %s", mRay.fCaller->GetName(), mRay.fMessage.Data()),
-		      FTW_Shell::MT_err);
-      delete m;
-      continue;
-    }
-
-    OS::hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(mRay.fAlpha);
-    if(alpha_it == mGlass2ImgHash.end()) {
-      delete m;
-      continue; // no image of alpha
-    }
-
-    OS::ZGlassImg* a = alpha_it->second;
-    OS::ZGlassImg* b = mRay.fBeta  ? DemanglePtr(mRay.fBeta)  : 0;
-    OS::ZGlassImg* g = mRay.fGamma ? DemanglePtr(mRay.fGamma) : 0;
-
-    a->fGlass->ReadLock();
-    switch(mRay.fEvent) {
-    case Ray::RQN_change: {
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_Change(mRay.fLibID, mRay.fClassID);
+    case GledNS::MT_TextMessage: {
+      TextMessage tm;
+      tm.Streamer(*m);
+      // printf("Got message from <%p,%s> %s '%s'\n", tm.fCaller, tm.fCaller ? tm.fCaller->GetName() : "<none>",
+      //        tm.fType ? "error" : "message", tm.fMessage.Data());
+      switch(tm.fType) {
+      case TextMessage::TM_Message: {
+	mShell->Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
+			FTW_Shell::MT_std);
+	break;
       }
-      if(mRay.IsBasic()) {
+      case TextMessage::TM_Error: {
+	mShell->Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
+			FTW_Shell::MT_err);
+	break;
+      }
+      default: {
+	ISerr(_eh + "unknown TextMessage type");
+	break;
+      }
+      } // end switch TextMessage type
+      break;
+    }
+
+    case GledNS::MT_Ray: {
+      Ray ray(*m);
+      OS::hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(ray.fAlpha);
+      if(alpha_it == mGlass2ImgHash.end()) {
+	break;
+      }
+      ray.Read(*m);
+      // cout << mRay << endl;
+
+      ++ray_count;
+      OS::ZGlassImg* a = ray.fAlphaImg = alpha_it->second;
+      ray.fBetaImg  = ray.HasBeta()  ? DemanglePtr(ray.fBeta)  : 0;
+      ray.fGammaImg = ray.HasGamma() ? DemanglePtr(ray.fGamma) : 0;
+
+      // Read-lock alpha
+      GLensReadHolder(a->fGlass);
+      
+      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
+	(*i)->AbsorbRay(ray);
+      }
+
+      if(ray.IsBasicChange() || ray.fRQN==RayNS::RQN_death) {
+	// The death part of 'if' should not be relevant until the
+	// local links are implemented.
 	for(OS::lpA_View_i i=a->fLinkViews.begin(); i!=a->fLinkViews.end(); ++i) {
-	  (*i)->Absorb_Change(mRay.fLibID, mRay.fClassID);
+	  (*i)->AbsorbRay(ray);
 	}
       }
-      break;
-    }
-    case Ray::RQN_link_change: {
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_LinkChange(mRay.fLibID, mRay.fClassID);
-      }
-      InvalidateRnrs(a);
-      break;
-    }
-    case Ray::RQN_list_add: {
-      // alpha zlist, beta newcomer, gamma before
-      // call treereps, pupils
-      assert(b);
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_ListAdd(b, g);
-      }
-      InvalidateRnrs(a, true);
-      break;
-    }
-    case Ray::RQN_list_remove: {
-      // alpha zlist, beta departee
-      // full-views
-      assert(b);
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_ListRemove(b);
-      }
-      InvalidateRnrs(a, true);
-      break;
-    }
-    case Ray::RQN_list_rebuild: {
-      // alpha zlist
-      // full-views
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_ListRebuild();
-      }
-      InvalidateRnrs(a, true);
-      break;
-    }
-    case Ray::RQN_list_clear: {
-      // alpha zlist
-      // full-views
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_ListClear();
-      }
-      InvalidateRnrs(a, true);
-      break;
-    }
-    case Ray::RQN_birth: {
-      // This point never reached !!!!
-      // Should check for this RQN before (if birth_callback enabled).
-      break;
-    }
-    case Ray::RQN_death: {
-      // alpha the dustbiter
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ++i) {
-	(*i)->Absorb_Delete();
-      }
-      for(OS::lpA_View_i i=a->fLinkViews.begin(); i!=a->fLinkViews.end(); ++i) {
-	(*i)->Absorb_Delete();
-      }
-      InvalidateRnrs(a, true);
-      RemoveImage(a);
-      break;
-    }
 
-    case Ray::RQN_apocalypse: {
-      // server shutting down ... Saturn actually never sends this.
-      break;
-    }
-    default: {
-      assert(0);
-    }
-    } // end switch
-    a->fGlass->ReadUnlock();
+      if(ray.fEyeBits & Ray::EB_StructuralChange) {
+	InvalidateRnrs(a);
+      }
 
+      if(ray.fRQN==RayNS::RQN_death) {
+	RemoveImage(a);
+      }
+
+    } // end case MT_Ray
+
+    } // end switch message->What()
     delete m;
+
+    if(bBreakManageLoop) {
+      bBreakManageLoop = false;
+      // printf("Eye::Manage breaking loop on request ...\n");
+      break;
+    }
+  } // end while(1)
+
+  if(ray_count) {
+    for(lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
+      (*w)->redraw();
   }
 
-  for(lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
-    (*w)->redraw();
-
-  ISdebug(6, GForm("%s got %d Ray(s) in this gulp", _eh.c_str(), count));
-  return count;
+  ISdebug(6, GForm("%s got %d message(s), %d ray(s) in this gulp",
+		   _eh.c_str(), all_count, ray_count));
+  return all_count;
 }
 
 void Eye::Send(TMessage* m) { mSatSocket->Send(*m); }
@@ -343,6 +304,4 @@ void Eye::Send(ZMIR& mir) {
 /**************************************************************************/
 
 void Eye::CloseEye()
-{
-
-}
+{}
