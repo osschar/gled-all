@@ -1,3 +1,17 @@
+2004-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	--reconf now takes optional argument: libsets to be bulit. Allows
+	for an easy exclusion or inclusion of libsets into the build.
+	
+	* lib-exec/mk_dict_gen.pl:
+	Nested classes, enums and typedefs are now included in the
+	dictionary by default. Before they had to be specified in
+	catalog.patch.
+	
+	* lib-exec/project7.pl:
+	Sanitize includes for auto-generated glass-views.
+	
 2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure.rc:
