@@ -10,7 +10,7 @@ DICT_DIRS	= Glasses Stones Geom1
 VIEW_DIRS	= FL
 VIEW_FL_DIRS	= FL
 
-BASE_LD_LIBS    = -L${ROOTSYS}/lib -lPhysics -lIL -lILU
+BASE_LD_LIBS    = -lIL -lILU
 
 ##### Targets #####
 
