@@ -10,7 +10,9 @@
 #include <Glasses/ZList.h>
 #include <Gled/GMutex.h>
 #include <Gled/GCondition.h>
+#include <Gled/GTime.h>
 class Eventor;
+#include <Gled/GledMirDefs.h>
 
 class Operator : public ZList {
 
@@ -26,6 +28,10 @@ public:
 
     GCondition	fSuspendidor;	// Suspender for *not* signal-safe evtors
     GMutex	fSignalodor;	// Lock for signal-safe evtors
+
+    GTime	fStart,     fStop;
+    GTime	fBeatStart, fBeatStop;
+    GTime	fBeatSum;
 
     // could have execution stack ??
 
@@ -58,9 +64,9 @@ public:
     ZList(n,t) { _init(); }
 
   // virtuals
-  virtual void PreOperate(Arg* op_arg)	throw(Exception) {}
-  virtual void Operate(Arg* op_arg)	throw(Exception);
-  virtual void PostOperate(Arg* op_arg)	throw(Exception);
+  virtual void PreOperate(Operator::Arg* op_arg)  throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg)     throw(Operator::Exception);
+  virtual void PostOperate(Operator::Arg* op_arg) throw(Operator::Exception);
 
 #include "Operator.h7"
   ClassDef(Operator, 1)

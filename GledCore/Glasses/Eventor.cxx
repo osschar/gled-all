@@ -28,6 +28,7 @@ ClassImp(Eventor)
 
 void Eventor::_init()
 {
+  mTotalTime = mRunTime = 0;
   mBeatsToDo = -1; mBeatsDone = 0;
   mStampInterval = 100; mInterBeatMS = 0;
 
@@ -149,10 +150,12 @@ void Eventor::OnResume(Operator::Arg* op_arg)
 
 void Eventor::OnExit(Operator::Arg* op_arg)
 {
-  
-  if(bSuspended)
+  if(bSuspended) {
     OP_EXE_OR_SP_MIR(this, SetSuspended, false);
+  }
   OP_EXE_OR_SP_MIR(this, SetRunning, false);
+  OP_EXE_OR_SP_MIR(this, SetTotalTime, (op_arg->fStop - op_arg->fStart).ToDouble());
+  OP_EXE_OR_SP_MIR(this, SetRunTime, op_arg->fBeatSum.ToDouble());
   SetPerforming(false);
 }
 
@@ -251,6 +254,7 @@ void Eventor::Resume()
 
 void Eventor::Reset()
 {
+  mTotalTime = mRunTime = 0;
   mBeatsDone = mLocBeatsDone = 0; Stamp(LibID(), ClassID());
 }
 

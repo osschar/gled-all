@@ -23,8 +23,11 @@ ClassImp(Mountain)
 void Mountain::DancerCooler(DancerInfo* di)
 {
   ISout(GForm("Mountain::DancerCooler thread exit for %s", di->fEventor->GetName()));
+  
+  di->fOpArg->fStop.SetNow();
   di->fEventor->OnExit(di->fOpArg);
   delete di->fOpArg;
+  
   di->fMountain->WipeThread(di->fEventor);
 }
 
@@ -64,7 +67,6 @@ void* Mountain::DancerBeat(DancerInfo* di)
     sigaction(SIGUSR1, &sac, 0);
   }
 
-  di->fStartTime = gSystem->Now();
   Operator::Arg* op_arg = di->fEventor->PreDance();
   if(op_arg == 0) GThread::Exit();
 
@@ -72,22 +74,23 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
   di->fOpArg = op_arg;
   di->fEventor->OnStart(op_arg);
+  op_arg->fStart.SetNow();
 
   bool exc_p = false, exit_p = false, suspend_p = false;
-  TTime op_start, op_stop, now;
 
   if(di->fShouldSuspend) {
     // Hack: allows connecting moons to properly initialize multix
     // suspended threads.
     // Time difference is wrong, but this shouldn't matter for multixen.
-    op_start = gSystem->Now() - TTime(di->fEventor->GetInterBeatMS() / 2);
+    op_arg->fBeatStart.SetNow();
+    op_arg->fBeatStart -= 1000 * di->fEventor->GetInterBeatMS() / 2;
     goto suspend_exit_check;
   }
 
   while(1) {
     exc_p = exit_p = suspend_p = false;
 
-    op_start = gSystem->Now();
+    op_arg->fBeatStart.SetNow();
     try {
       di->fEventor->PreBeat(op_arg);
       di->fEventor->Operate(op_arg);
@@ -117,25 +120,19 @@ void* Mountain::DancerBeat(DancerInfo* di)
 	break;
 
       case Operator::OE_Break:
+	ISerr(GForm("Mountain::DancerBeat [%s] Exit with Break",
+		di->fEventor->GetName()));
 	di->fEventor->OnBreak(op_arg, op_exc);
 	exit_p = true;
 	break;
 
       }
-
     }
+    op_arg->fBeatStop.SetNow();
+    op_arg->fBeatSum += op_arg->fBeatStop - op_arg->fBeatStart;
     if(!exc_p && !op_arg->fContinuous) {
       di->fEventor->PostDance(op_arg);
       exit_p = true;
-    }
-    op_stop = gSystem->Now();
-
-    di->fLastDuration = op_start - op_stop;
-    if(di->fAvg10Duration == 0) {
-      di->fAvg10Duration = ULong_t(di->fLastDuration);
-    } else {
-      di->fAvg10Duration = 0.9*di->fAvg10Duration +
-	0.1*ULong_t(di->fLastDuration);
     }
 
   suspend_exit_check:
@@ -163,8 +160,10 @@ void* Mountain::DancerBeat(DancerInfo* di)
       di->fOpArg->fSuspendidor.Unlock();
     }
 
-    now = gSystem->Now();
-    Int_t sleep_time = di->fEventor->GetInterBeatMS() - (ULong_t)(now - op_start);
+    GTime since_start(GTime::Now);
+    since_start -= op_arg->fBeatStart;
+
+    Int_t sleep_time = di->fEventor->GetInterBeatMS() - since_start.ToMiliSec();
     if(sleep_time > 0) {
       if(op_arg->fSignalSafe) {
 	gSystem->Sleep(UInt_t(sleep_time));

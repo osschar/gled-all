@@ -17,11 +17,14 @@ private:
   void		_init();
 
 protected:
-  Int_t		mBeatsToDo;	//  X{GS} 7 Value(-range=>[-1,1000000,1])
+  Double_t	mTotalTime;	//  in s; X{GS} 7 ValOut()
+  Double_t	mRunTime;	//  in s; X{GS} 7 ValOut()
+
+  Int_t		mBeatsToDo;	//  X{GS} 7 Value(-range=>[-1,1000000000,1])
   Int_t		mBeatsDone;	//  X{GS} 7 ValOut(-range=>[0,1000000],-join=>1)
   Int_t		mLocBeatsDone;	//! X{GS} 7 ValOut(-range=>[0,1000000]) local value
-  Int_t		mStampInterval;	//  X{GS} 7 Value(-range=>[0,10000,1],-join=>1)
-  Int_t		mInterBeatMS;	//  X{GS} 7 Value(-range=>[0,100000,1])
+  Int_t		mStampInterval;	//  X{GS} 7 Value(-range=>[0,1000000,1],-join=>1)
+  Int_t		mInterBeatMS;	//  X{GS} 7 Value(-range=>[0,1000000,1])
 
   // Thread properties
   SaturnInfo*	mHost;		//  X{GE} L{}

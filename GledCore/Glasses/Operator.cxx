@@ -28,6 +28,10 @@ void Operator::_init()
 
 /**************************************************************************/
 
+void Operator::PreOperate(Operator::Arg* op_arg) throw(Exception)
+{
+}
+
 void Operator::Operate(Operator::Arg* op_arg) throw(Exception)
 {
   PreOperate(op_arg);
