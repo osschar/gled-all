@@ -229,10 +229,16 @@ ZGlass* GledNS::ConstructLens(LID_t lid, CID_t cid)
 
 bool GledNS::IsA(ZGlass* glass, FID_t fid)
 {
+  if(fid.is_null()) return true;
   LibSetInfo* lsi = FindLibSetInfo(fid.lid);
   if(lsi == 0) return false;
   return (lsi->fISA_Foo)(glass, fid.cid);
 }
+
+/**************************************************************************/
+
+void GledNS::LockCINT()   { gCINTMutex->Lock();   }
+void GledNS::UnlockCINT() { gCINTMutex->UnLock(); }
 
 /**************************************************************************/
 
@@ -325,9 +331,10 @@ void GledNS::MethodInfo::ImprintMir(ZMIR& mir) const
   mir.SetLCM_Ids(fClassInfo->fFid.lid, fClassInfo->fFid.cid, fMid);
 }
 
-void GledNS::MethodInfo::BeamofyIfLocal(ZMIR& mir, SaturnInfo* sat) const
+void GledNS::MethodInfo::FixMirBits(ZMIR& mir, SaturnInfo* sat) const
 {
-  if(bLocal) mir.SetRecipient(sat);
+  if(bLocal)       mir.SetRecipient(sat);
+  if(bDetachedExe) mir.SetDetachedExe(bMultixDetachedExe);
 }
 
 void GledNS::MethodInfo::StreamIds(TBuffer& b) const
@@ -470,10 +477,12 @@ int GledNS::split_string(Str_ci start, Str_ci end, lStr_t& l, char c)
   int cnt=0;
   string g;
   for(Str_ci i=start; i!=end; ++i) {
-    if(c==0 && isspace(*i) && g.size()>0) {
-      ++cnt; l.push_back(g); g.erase(); continue;
+    if(c==0) {
+      if(isspace(*i) && g.size()>0) {
+	++cnt; l.push_back(g); g.erase(); continue;
+      }
+      if(isspace(*i)) continue;
     }
-    if(isspace(*i)) continue;
     if(*i==c) {
       ++cnt; l.push_back(g); g.erase(); continue;
     }
@@ -487,6 +496,27 @@ int GledNS::split_string(const string& s, lStr_t& l, char c)
 {
   // Splits string on character c. If c==0 splits on whitespace.
   return split_string(s.begin(), s.end(), l, c);
+}
+
+int GledNS::split_string(const string& s, lStr_t& l, string ptr)
+{
+  // Splits string on whole contents of ptr.
+
+  int cnt = 0;
+  string::size_type i = 0;
+  const string::size_type end    = s.length();
+  const string::size_type ptrlen = ptr.length();
+
+  while(i < end) {
+    string::size_type j = s.find(ptr, i);
+    if(j == string::npos) j = end;
+    if(j > i) {
+      ++cnt;
+      l.push_back(s.substr(i, j-i));
+    }
+    i = j + ptrlen;
+  }
+  return cnt;
 }
 
 void GledNS::deparen_string(const string& in, string& n, string& a,
@@ -558,10 +588,13 @@ int GledNS::tokenize_url(const string& url, list<url_token>& l)
 	++i;
 	break;
       case '-':
-	if(url[i+1] =='>') {
+	if(url[i+1] == '>') {
 	  terminal = true;
 	  next_type = url_token::link_sel;
 	  i += 2;
+	} else {
+	  part += "-";
+	  ++i;
 	}
 	break;
       } // switch
