@@ -20,6 +20,26 @@ namespace GVNS = GledViewNS;
 
 /**************************************************************************/
 
+RnrDriver::RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r)
+{
+  bUseOwnRnrs = false;
+
+  mRnrCount = 0;
+  bDryRun   = false;
+
+  mMaxDepth = 100;
+  mMaxLamps = 8;
+  mLamps = new (A_Rnr*)[mMaxLamps];
+  bRnrNames = false;
+}
+
+RnrDriver::~RnrDriver()
+{
+  delete [] mLamps;
+}
+
+/**************************************************************************/
+
 void RnrDriver::FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
 		   const GledViewNS::RnrBits& bits)
 {
@@ -78,13 +98,21 @@ A_Rnr* RnrDriver::AssertDefRnr(OS::ZGlassImg* img)
   // This one is somewhat tricky: A_Rnr is A_View, but constructed
   // with 0 image. Thus we set it after.
 
-  if(img->fDefRnr == 0) {
-    img->fDefRnr = img->fClassInfo->fViewPart->SpawnRnr(mRnrName, img->fGlass);
-    if(img->fDefRnr) {
-      img->fDefRnr->SetImg(img);
-    }
-  }
-  return img->fDefRnr;
+  if(img->fDefRnr != 0) return img->fDefRnr;
+
+  hImg2Rnr_i oi = mOwnRnrs.find(img);
+  if(oi != mOwnRnrs.end()) return oi->second;
+
+  A_Rnr* rnr = img->fClassInfo->fViewPart->SpawnRnr(mRnrName, img->fGlass);
+  assert(rnr != 0);
+  rnr->SetImg(img);
+
+  if(rnr->bOnePerRnrDriver)
+    mOwnRnrs[img] = rnr;
+  else
+    img->fDefRnr = rnr;
+
+  return rnr;
 }
 
 void RnrDriver::Render(A_Rnr* rnr)
@@ -118,14 +146,27 @@ void RnrDriver::Render(A_Rnr* rnr)
 
 /**************************************************************************/
 /**************************************************************************/
-/**************************************************************************/
 
-void RnrDriver::InitLamps()
+void RnrDriver::BeginRender()
 {
+  ++mRnrCount;
   for(int i=0; i<mMaxLamps; ++i) {
     mLamps[i] = 0;
+  } 
+}
+
+
+void RnrDriver::EndRender()
+{
+  for(int l=0; l<GetMaxLamps(); ++l) {
+    if(mLamps[l] != 0) {
+      // cout <<"RnrDriver cleaning-up a dirty lamp ...\n";
+      mLamps[l]->CleanUp(this);
+    }
   }
 }
+
+/**************************************************************************/
 
 int RnrDriver::GetLamp(A_Rnr* l_rnr)
 {
@@ -144,16 +185,16 @@ void RnrDriver::ReturnLamp(int lamp)
 // RnrMods interface
 /**************************************************************************/
 
-void RnrDriver::SetDefRnrMod(FID_t fid, TObject* ud)
+void RnrDriver::SetDefRnrMod(FID_t fid, RnrMod* ud)
 {
   if(find_rnrmod(fid)) {
     mRMI->second.def = ud;
   } else {
-    mRnrMods[fid].def = ud;
+    mRMStacks[fid].def = ud;
   }
 }
 
-TObject* RnrDriver::GetDefRnrMod(FID_t fid)
+RnrDriver::RnrMod* RnrDriver::GetDefRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid)) {
     return mRMI->second.def;
@@ -162,19 +203,19 @@ TObject* RnrDriver::GetDefRnrMod(FID_t fid)
   }
 }
 
-void RnrDriver::PushRnrMod(FID_t fid, TObject* ud)
+void RnrDriver::PushRnrMod(FID_t fid, RnrMod* ud)
 {
   if(find_rnrmod(fid)) {
     mRMI->second.stack.push(ud);
   } else {
-    mRnrMods[fid].stack.push(ud);
+    mRMStacks[fid].stack.push(ud);
   }
 }
 
-TObject* RnrDriver::PopRnrMod(FID_t fid)
+RnrDriver::RnrMod* RnrDriver::PopRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid) && ! mRMI->second.stack.empty()) {
-    TObject* r = mRMI->second.stack.top();
+    RnrMod* r = mRMI->second.stack.top();
     mRMI->second.stack.pop();
     return r;
   } else {
@@ -182,7 +223,7 @@ TObject* RnrDriver::PopRnrMod(FID_t fid)
   }
 }
 
-TObject* RnrDriver::TopRnrMod(FID_t fid)
+RnrDriver::RnrMod* RnrDriver::TopRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid) && ! mRMI->second.stack.empty()) {
     return mRMI->second.stack.top();
@@ -191,17 +232,20 @@ TObject* RnrDriver::TopRnrMod(FID_t fid)
   }
 }
 
-TObject* RnrDriver::GetRnrMod(FID_t fid)
+RnrDriver::RnrMod* RnrDriver::GetRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid) == false) {
-    mRMI = mRnrMods.insert(make_pair(fid, RnrMod())).first;
+    mRMI = mRMStacks.insert(make_pair(fid, RMStack())).first;
     mRMFid = fid;
   }
 
   if(mRMI->second.stack.empty()) {
     if(mRMI->second.def) return mRMI->second.def;
-    if(mRMI->second.def_autogen == 0)
-      mRMI->second.def_autogen = GledNS::ConstructLens(fid);
+    if(mRMI->second.def_autogen == 0) {
+      ZGlass* lens = GledNS::ConstructLens(fid);
+      A_Rnr*  rnr  = lens->VGlassInfo()->fViewPart->SpawnRnr(mRnrName, lens);
+      mRMI->second.def_autogen = new RnrMod(lens, rnr);
+    }
     return mRMI->second.def_autogen;
   } else {
     return mRMI->second.stack.top();
@@ -213,8 +257,13 @@ TObject* RnrDriver::GetRnrMod(FID_t fid)
 void RnrDriver::RemoveRnrModEntry(FID_t fid)
 {
   if(find_rnrmod(fid)) {
-    delete mRMI->second.def_autogen;
-    mRnrMods.erase(mRMI); mRMFid.clear();
+    if(mRMI->second.def_autogen != 0) {
+      RnrMod* rm = mRMI->second.def_autogen;
+      delete rm->fRnr;
+      delete rm->fLens;
+      delete rm;
+    }
+    mRMStacks.erase(mRMI); mRMFid.clear();
   }
 }
 
@@ -222,15 +271,16 @@ void RnrDriver::CleanUpRnrModDefaults()
 {
   static const string _eh("RnrDriver::CleanUpRnrModDefaults ");
 
-  for(hRnrMod_i i=mRnrMods.begin(); i!=mRnrMods.end(); ++i) {
+  for(hRMStack_i i=mRMStacks.begin(); i!=mRMStacks.end(); ++i) {
     i->second.def = 0;
     int cnt = 0; 
     while( ! i->second.stack.empty()) {
       ++cnt;
       i->second.stack.pop();
     }
-    if(cnt) printf("%sstack for '%s' not empty (%d entries remained).",
-		   _eh.c_str(), GledNS::FindClassInfo(i->first)->fName.c_str());
+    if(cnt)
+      printf("%sstack for '%s' not empty (%d entries remained).",
+	     _eh.c_str(), GledNS::FindClassInfo(i->first)->fName.c_str(), cnt);
   }
 }
 

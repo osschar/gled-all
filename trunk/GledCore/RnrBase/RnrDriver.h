@@ -24,50 +24,65 @@ namespace GLTextNS {
 class Lamp_GL_Rnr;
 
 class RnrDriver {
+private:
+  void _init();
+
 protected:
   Eye*		mEye;		// X{g}
 
   string	mRnrName;	// X{RGs}
-  bool		bUseOwnRnrs;	// X{gs} True for all but GL
-  bool		bDryRun;	// X{gs} Don't render, create Rnrs
+  Bool_t	bUseOwnRnrs;	// X{gs} True for all but GL
 
-  int		mMaxDepth;	// X{gs} Max render level
+  UInt_t	mRnrCount;	// X{g}
+  Bool_t	bDryRun;	// X{gs} Don't render, create Rnrs
+
+  Int_t		mMaxDepth;	// X{gs} Max render level
   lpZGlass_t	mPMStack;	// X{g}  Position Matrix Node Stack
 
-  int		mMaxLamps;	// X{g}
+  Int_t		mMaxLamps;	// X{g}
   A_Rnr**	mLamps;
   
-  bool	             bRnrNames;	 // X{gs}
-  GLTextNS::TexFont* mTexFont;   // X{gs}
+  Bool_t        bRnrNames;	 // X{gs}
 
-  int		mWidth;		 // X{gs}
-  int		mHeight;	 // X{gs}
+  Int_t		mWidth;		 // X{gs}
+  Int_t		mHeight;	 // X{gs}
 
+public:
   struct RnrMod {
-    TObject*        def;
-    TObject*        def_autogen;
-    stack<TObject*> stack;
-    RnrMod() : def(0), def_autogen(0) {}
+    ZGlass* fLens;
+    A_Rnr*  fRnr;
+    bool    bRebuildDL;
+
+    RnrMod(ZGlass* l=0, A_Rnr* r=0, bool rdl=false) :
+      fLens(l), fRnr(r), bRebuildDL(rdl) {}
+
+    // Casting templates?
   };
 
-  typedef hash_map<FID_t, RnrMod>           hRnrMod_t;
-  typedef hash_map<FID_t, RnrMod>::iterator hRnrMod_i;
+protected:
+  struct RMStack {
+    RnrMod*        def;
+    RnrMod*        def_autogen;
+    stack<RnrMod*> stack;
+    RMStack() : def(0), def_autogen(0) {}
+  };
 
-  hRnrMod_t     mRnrMods;
-  hRnrMod_i	mRMI;
+  typedef hash_map<FID_t, RMStack>           hRMStack_t;
+  typedef hash_map<FID_t, RMStack>::iterator hRMStack_i;
+
+  hRMStack_t    mRMStacks;
+  hRMStack_i	mRMI;
   FID_t		mRMFid;
   bool          find_rnrmod(FID_t fid);
 
+  typedef hash_map<OptoStructs::ZGlassImg*, A_Rnr*>           hImg2Rnr_t;
+  typedef hash_map<OptoStructs::ZGlassImg*, A_Rnr*>::iterator hImg2Rnr_i;
+  
+  hImg2Rnr_t    mOwnRnrs;
+
 public:
-  RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r) {
-    bUseOwnRnrs = false; bDryRun = false;
-    mMaxDepth = 100;
-    mMaxLamps = 8;
-    mLamps = new (A_Rnr*)[mMaxLamps];
-    mTexFont = 0;
-    bRnrNames = false;
-  }
-  virtual ~RnrDriver() { delete [] mLamps; }
+  RnrDriver(Eye* e, const string& r);
+  virtual ~RnrDriver();
 
   void FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
 		     const GledViewNS::RnrBits& bits);
@@ -81,6 +96,9 @@ public:
 
   virtual void Render(A_Rnr* img);
 
+  virtual void BeginRender();
+  virtual void EndRender();
+
   // Interface for Rnrs
   // Position Matrix Name Stack
   void PushPM(ZGlass* g) { mPMStack.push_back(g); }
@@ -90,18 +108,17 @@ public:
   void ClearPM()         { mPMStack.clear(); }
 
   A_Rnr** GetLamps() { return mLamps; }
-  void InitLamps();
   int  GetLamp(A_Rnr* l_rnr);
   void ReturnLamp(int lamp);
 
   //----------------------------------------------------------------
 
-  void     SetDefRnrMod(FID_t fid, TObject* ud);
-  TObject* GetDefRnrMod(FID_t fid);
-  void     PushRnrMod(FID_t fid, TObject* ud);
-  TObject* PopRnrMod(FID_t fid);
-  TObject* TopRnrMod(FID_t fid);
-  TObject* GetRnrMod(FID_t fid);
+  void    SetDefRnrMod(FID_t fid, RnrMod* ud);
+  RnrMod* GetDefRnrMod(FID_t fid);
+  void    PushRnrMod(FID_t fid, RnrMod* ud);
+  RnrMod* PopRnrMod(FID_t fid);
+  RnrMod* TopRnrMod(FID_t fid);
+  RnrMod* GetRnrMod(FID_t fid);
 
   void RemoveRnrModEntry(FID_t fid);
   void CleanUpRnrModDefaults();
@@ -111,20 +128,47 @@ public:
 
 /**************************************************************************/
 
-#define RNRDRIVER_GET_RNRMOD(_var_, _rd_, _typ_) \
-  _typ_* _var_ = (_typ_*) (_rd_->GetRnrMod(_typ_::FID()))
-
-/**************************************************************************/
-
 inline bool RnrDriver::find_rnrmod(FID_t fid)
 {
   if(fid == mRMFid) return true;
-  mRMI = mRnrMods.find(fid);
-  if(mRMI == mRnrMods.end()) {
+  mRMI = mRMStacks.find(fid);
+  if(mRMI == mRMStacks.end()) {
     mRMFid.clear(); return false;
   } else {
     mRMFid = fid;   return true;
   }
 }
+
+/**************************************************************************/
+// Preprocessor shortcuts for render-mod access.
+/**************************************************************************/
+
+#define RNRDRIVER_GET_RNRMOD_BOTH(_var_, _rd_, _typ_) \
+  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
+  _typ_* _var_ ## _lens = (_typ_*) _var_->fLens; \
+  _typ_ ## _GL_Rnr* _var_ ## _rnr = (_typ_ ## _GL_Rnr*) _var_->fRnr
+
+#define RNRDRIVER_GET_RNRMOD_LENS(_var_, _rd_, _typ_) \
+  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
+  _typ_* _var_ ## _lens = (_typ_*) _var_->fLens
+
+#define RNRDRIVER_GET_RNRMOD_RNR(_var_, _rd_, _typ_) \
+  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
+  _typ_ ## _GL_Rnr* _var_ ## _rnr = (_typ_ ## _GL_Rnr*) _var_->fRnr
+
+#define RNRDRIVER_GET_RNRMOD(_var_, _rd_, _typ_) \
+  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID())
+
+
+#define RNRDRIVER_CAST_RNRMOD_BOTH(_var_, _rnrmod_, _typ_) \
+  _typ_* _var_ ## _lens = (_typ_*) _rnrmod_->fLens; \
+  _typ_ ## _GL_Rnr* _var_ ## _rnr = (_typ_ ## _GL_Rnr*) _rnrmod_->fRnr
+
+#define RNRDRIVER_CAST_RNRMOD_LENS(_var_, _rnrmod_, _typ_) \
+  _typ_* _var_ ## _lens = (_typ_*) _rnrmod_->fLens
+
+#define RNRDRIVER_CAST_RNRMOD_RNR(_var_, _rnrmod_, _typ_) \
+  _typ_ ## _GL_Rnr* _var_ ## _rnr = (_typ_ ## _GL_Rnr*) _rnrmod_->fRnr
+
 
 #endif
