@@ -268,7 +268,7 @@ int ZQueen::release_zombies()
   int zc = 0;
   while( ! mZombies.empty() && mZombies.front()->mEyeRefCount == 0) {
     ISdebug(0, _eh + GForm("EyeRefCount=0 for %s. Killing a zombie.",
-			   mZombies.front()->Identify()));
+			   mZombies.front()->Identify().c_str()));
     delete mZombies.front();
     mZombies.pop_front();
     ++zc;
@@ -806,7 +806,7 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
     }
   } else {
     ISdebug(0, _eh + GForm("EyeRefCount=%d for %s. Making a zombie.",
-			   lens->mEyeRefCount, lens->Identify()));
+			   lens->mEyeRefCount, lens->Identify().c_str()));
     mZombies.push_back(lens);
   }
 
