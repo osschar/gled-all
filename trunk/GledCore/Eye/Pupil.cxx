@@ -35,7 +35,7 @@ void PupilStamp(ZNode* n, Pupil* p) { p->valid(0); p->redraw(); }
 
 void Pupil::Label()
 {
-  snprintf(mLabel, 127, "Pupil [%s]", mBase->GetName());
+  snprintf(mLabel, 127, "pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
   label(mLabel);
   redraw();
 }
@@ -45,37 +45,41 @@ Pupil::Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, // FTW_Leaf* leaf,
   Fl_Gl_Window(w,h), mInfo(info), mRoot(zgv) // mLeaf(leaf)
 {
   end();
-  label(GForm("pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle()));
+  Label();
+  mode(FL_RGB | FL_DOUBLE | FL_DEPTH);
+  resizable(this);
+  size_range(0, 0, 4096, 4096);
 
+  mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
   mBase = 0;
   mCamera = new Camera;
   // mCamera->mParent = base;
   mCamera->MoveLF(1, -5);
-  // Label();
 
   // pInfo = new PupilInfo();
   // pInfo->SetStampCallback((znode_stamp_f)PupilStamp, this);
 
-  resizable(this);
-  mode(FL_RGB | FL_DOUBLE | FL_DEPTH);
   bJustCamera = true;
   bFollowBase = false;
+  bFullScreen = false;
 
+  // Hmmph ... the locking doesn't seem to be needed any more.
+
+  /*
   Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
   XLockDisplay(rd);
   XSync(rd, False);
   XLockDisplay(fl_display);
   XSync(fl_display, False);
-
+  */
   show();
   //redraw_overlay();
-
+  /*
   XSync(fl_display, False);
   XUnlockDisplay(fl_display);
   XSync(rd, False);
   XUnlockDisplay(rd);
-
-  mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
+  */
 }
 
 Pupil::~Pupil() {
@@ -197,6 +201,19 @@ void Pupil::XtachCamera()
   (ZTrans&)(*mCamera) = *t;
   delete t;
   */
+}
+
+/**************************************************************************/
+
+void Pupil::FullScreen()
+{
+  if(bFullScreen) {
+    fullscreen_off(mFSx, mFSy, mFSw, mFSh);
+  } else {
+    mFSx = x(); mFSy = y(); mFSw = w(); mFSh = h();
+    fullscreen();
+  }
+  bFullScreen = !bFullScreen;
 }
 
 /**************************************************************************/
@@ -378,15 +395,16 @@ void Pupil::draw()
   glEnable(GL_LIGHTING);
 
   // This is overriden with first light ... just in case there are no lights in the scene
-  GLfloat ambient[] = { 0.1, 0.1, 0.1, 1.0 };
-  GLfloat position[] = { 0, 0.0, 10.0, 0.0 };
+  GLfloat ambient[]  = { 0.1, 0.1,  0.1, 1.0 };
+  GLfloat position[] = { 0.0, 0.0, 10.0, 0.0 };
   glLightfv(GL_LIGHT0, GL_POSITION, position);
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
   glEnable(GL_LIGHT0);
 
-  GLfloat mat_diffuse[] = { 0.5, 0.2, 0.6, 1.0 };
-  GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-  GLfloat mat_shininess[] = { 200.0 };
+
+  static const GLfloat mat_diffuse[]   = { 0.8, 0.8, 0.8, 1.0 };
+  static const GLfloat mat_specular[]  = { 1.0, 1.0, 1.0, 1.0 };
+  static const GLfloat mat_shininess[] = { 60.0 };
 
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
@@ -394,20 +412,15 @@ void Pupil::draw()
 
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL);
+
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, mInfo->GetLiMo2Side());
   glPolygonMode(GL_FRONT, (GLenum)mInfo->GetFrontMode());
-  glPolygonMode(GL_BACK, (GLenum)mInfo->GetBackMode());
+  glPolygonMode(GL_BACK,  (GLenum)mInfo->GetBackMode());
 
   if(mInfo->GetBlend()) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
-  /*
-    glEnable(GL_POINT_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
-    glHint(GL_POINT_SMOOTH, GL_FASTEST);
-    glHint(GL_LINE_SMOOTH, GL_FASTEST);
-  */
 
   Render();
 
@@ -597,6 +610,10 @@ int Pupil::handle(int ev)
 
     case FL_Home:
       mCamera->Home(); redraw();
+      return 1;
+
+    case 'f':
+      FullScreen(); redraw();
       return 1;
 
       /*

@@ -47,6 +47,9 @@ protected:
   char		mLabel[128];		
   void		Label();
 
+  bool		bFullScreen;
+  int		mFSx, mFSy, mFSw, mFSh;
+
 public:
   Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, int w=640, int h=480);
   virtual ~Pupil();
@@ -57,6 +60,8 @@ public:
 
   // void Rebase(ZNode* newbase, bool keeppos=true);
   void XtachCamera();
+
+  void FullScreen();
 
   void Render();
   void Pick();
