@@ -18,7 +18,7 @@
 #include <Gled/GThread.h>
 #include <Gled/GledMirDefs.h>
 
-#include <memory>
+
 #include <signal.h>
 #include <errno.h>
 

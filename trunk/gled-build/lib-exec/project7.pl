@@ -700,7 +700,7 @@ print C7 "#include <Ephra/Saturn.h>\n";
 print C7 "#include <Gled/GledNS.h>\n";
 print C7 "#include <Stones/ZMIR.h>\n";
 print C7 "#include <Stones/ZComet.h>\n";
-print C7 "#include <memory>\n\n";
+print C7 "\n";
 
 unless($CLASSNAME eq $BASECLASS) {
   print C7 "#define PARENT_GLASS ${PARENT}\n\n";

@@ -34,7 +34,7 @@
 #include <TDirectory.h>
 #include <TSystem.h>
 
-#include <memory>
+
 #include <errno.h>
 #include <signal.h>
 

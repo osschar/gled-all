@@ -29,7 +29,7 @@
 
 #include <TROOT.h>
 
-#include <memory>
+
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;

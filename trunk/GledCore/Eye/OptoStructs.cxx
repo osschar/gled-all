@@ -16,7 +16,7 @@
 
 #include <algorithm>
 #include <iterator>
-#include <memory>
+
 
 using namespace OptoStructs;
 namespace GNS  = GledNS;

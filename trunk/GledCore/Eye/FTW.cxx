@@ -24,7 +24,7 @@
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_draw.H>
 
-#include <memory>
+
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
