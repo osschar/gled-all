@@ -5,12 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Board.h"
-//#include <Glasses/ZImage.h>
-
-#include "FL/gl.h"
-#include "GL/glu.h"
-
-#include <stdio.h>
+#include "Board.c7"
 
 ClassImp(Board)
 
@@ -19,11 +14,11 @@ ClassImp(Board)
 void Board::_init()
 {
   mTexture = 0;
+  mTexX0 = mTexY0 = 0;
+  mTexX1 = mTexY1 = 1;
+
   mULen = mVLen = 1;
   bFillBack = false;
-  mColor.rgba(1,0,0);
 }
 
 /**************************************************************************/
-
-#include "Board.c7"

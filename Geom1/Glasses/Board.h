@@ -11,17 +11,18 @@
 #include <Glasses/ZImage.h>
 #include <Stones/ZColor.h>
 
-// Thinks GL_RGB, GL_UNSIGNED_BYTE ... should be a parameter
-// Now working on ZImage.
-
 class Board : public ZNode {
-  // 7777 RnrCtrl("true, 4, RnrBits(1,2,4,0, 0,0,0,3)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Board);
 
-private:
+protected:
   void _init();
 
-  ZImage*	mTexture;	// X{GS} L{} RnrBits{1,0,2,0, 0,0,0,0}
+  ZImage*	mTexture;	// X{GS} L{} RnrBits{2,0,4,0, 0,0,0,0}
+  Float_t	mTexX0;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY0;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000])
+  Float_t	mTexX1;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY1;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000])
 
   Float_t	mULen;		// X{GS}  7 Value(-range=>[0,1000,1,100],-join=>1)
   Float_t	mVLen;		// X{GS}  7 Value(-range=>[0,1000,1,100])
@@ -34,7 +35,7 @@ public:
   virtual ~Board() {}
 
   void SetUV(Float_t u, Float_t v)
-  { mULen = u; mVLen = v; Stamp(LibID(), ClassID()); }
+  { mULen = u; mVLen = v; Stamp(LibID(), ClassID()); }  // X{E}
 
 #include "Board.h7"
   ClassDef(Board, 1)

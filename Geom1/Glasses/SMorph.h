@@ -15,7 +15,7 @@
 class TubeTvor;
 
 class SMorph : public ZNode {
-  // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(SMorph);
 
 private:
@@ -36,6 +36,11 @@ protected:
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
   ZImage*	mTexture;	// X{GST} L{} RnrBits{2,0,4,0, 0,0,0,0}
+  Float_t	mTexX0;         // X{GST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY0;         // X{GST} 7 Value(-range=>[-1e3,1e3,1,1000])
+  Float_t	mTexXC;         // X{GST} 7 Value(-range=>[0,1e3,1,1000], -join=>1)
+  Float_t	mTexYC;         // X{GST} 7 Value(-range=>[0,1e3,1,1000])
+  Float_t	mTexYOff;	// X{GST} 7 Value(-range=>[-10,10,1,1000])
 
   TubeTvor*	pTuber;		//!
   Bool_t	bTextured;	//!
@@ -52,7 +57,7 @@ public:
 
 #include "SMorph.h7"
   ClassDef(SMorph, 1)
-}; // endclass SMorph
+    }; // endclass SMorph
 
 GlassIODef(SMorph);
 
