@@ -1,3 +1,22 @@
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	Renamed mMat to mMaterial; use MCWButt weed for
+	SaveTo/LoadFromFile(); avoid attempts to open a file with empty
+	name.
+
+	* Glasses/ZGeoOvlMgr.cxx:
+	Following changes in ZGeoNode.
+
+	* Glasses/ZGeoRepacker.cxx:
+	* Glasses/ZGeoRepacker.h:
+	New glass: copies parts of geometry as selected by user to another
+	geo-manager and exports it. Used for geometry simplification.
+
+	* glass.list:
+	New glass ZGeoRepacker.
+
 2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoNode.cxx:

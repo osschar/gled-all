@@ -1,3 +1,9 @@
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Added handling of Ray pragma; export member-data to weed-data via
+	member 'TOP'.
+
 2005-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
