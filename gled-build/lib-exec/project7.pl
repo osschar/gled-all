@@ -79,11 +79,14 @@ print "LibID $LibID, ClassID $ClassID, VirtualBase $VirtualBase\n" if $DEBUG;
 
 # Remapping of composite types into basic ones
 %GetSetMap = (
-  'TString' => { GetType=>'const Text_t*', GetMeth=>'.Data()',
-		 SetArgs=>'const Text_t* s' },
+  'TString' => { GetType=>'Text_t*',
+		 GetMeth=>'.Data()',
+		 SetArgs=>'const Text_t* s'
+	       },
   'ZColor'  => { GetType=>'ZColor&',
 		 SetMeth=>'.rgba(r,g,b,a)',
-		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1' }
+		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1'
+	       }
 );
 
 # Shorthands for keys in comment field
@@ -334,9 +337,9 @@ while($c !~ m!\G$!osgc) {
   ##############
   # Data members
   ##############
-  if($c =~ m!\G\s*
-             ((?:const\s+)?[\w:]+\*?)\s+         # type
-             (\*?\w+)\s*;          # varname
+  if($c =~ m!\G\s*(?:mutable\s+)?
+             ((?:const\s+)?[\w:]+\*?)\s+  # type
+             (\*?\w+)\s*;                 # varname
             !mgcx)
   {
     my $comment = SlurpComments();
@@ -476,20 +479,36 @@ print H7 "\n";
 }
 
 for $r (@Members) {
+  # Get methods
   if( $r->{Xport} =~ m/(g|G)/ ) {
     my $const = ($1 eq 'G') ? 'const' : '';
+    my ($const, $type, $val, $constret, $pre, $post);
+    $const = ' const' if $1 eq 'G'; # and not($IsGlass && $LOCK_GET_METHS); 
     if(exists $GetSetMap{$r->{Type}}) {
       my $h = $GetSetMap{$r->{Type}};
-      print H7 "const " if $const and  $h->{GetType} =~ /&$/;
-      print H7 "$h->{GetType}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}$h->{GetMeth}; }\n";
+      $type = "$h->{GetType}";
+      $val = "$r->{Varname}$h->{GetMeth}";
+      $constret = 'const ' if $1 eq 'G';
+      #print H7 "const " if $const and  $h->{GetType} =~ /&$/;
+      #print H7 "$h->{GetType}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}$h->{GetMeth}; }\n";
     } else {
-      print H7 "$r->{Type}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}; }\n";
+      $type = "$r->{Type}";
+      $val = "$r->{Varname}";
+      $constret = 'const ' if $1 eq 'G' and  $h->{GetType} =~ /&|\*$/;
+      #print H7 "$r->{Type}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}; }\n";
     }
+    if($IsGlass && $LOCK_GET_METHS) {
+      $pre = "mExecMutex.Lock(); ";
+      $post= "mExecMutex.Unlock(); ";
+    }
+    print H7 "${constret}${type} Get$r->{Methodbase}()${const} ".
+      "{ ${pre}${constret}${type} _ret = ${val}; ${post}return _ret; }\n";
   }
+
   if( $r->{Xport} =~ m/(s|S)/ ) {
     my ($pre, $setit, $post, $stamp, $ret);
     if($IsGlass) {
-      $pre     .= "mExecMutex.Lock(); ";
+      $pre     .= "mExecMutex.Lock(); " if $LOCK_SET_METHS;
       if(exists $r->{Link}) {
 	$pre   .= "if($r->{Varname}) $r->{Varname}->DecRefCount(); ";      
       }
@@ -509,11 +528,11 @@ for $r (@Members) {
       if(exists $r->{Link}) {
 	$post  .= "if($r->{Varname}) $r->{Varname}->IncRefCount(); "      
       }
-      $post    .= "mExecMutex.Unlock(); ";
+      $post    .= "mExecMutex.Unlock(); " if $LOCK_SET_METHS;
     }
 
     $r->{Type} =~ /(.)/; my $arg = lc $1;
-    print H7 "void\tSet$r->{Methodbase}($r->{ArgStr})\t{";
+    print H7 "void Set$r->{Methodbase}($r->{ArgStr}) {";
     if(exists $r->{Range}) { # Check if range is set ... make if stuff
       my $arg = $r->{Args}[0][2]; # assume single argument
       my $rr = $r->{Range};
@@ -527,25 +546,27 @@ for $r (@Members) {
     $setit .=
       ((exists $GetSetMap{$r->{Type}} and exists $GetSetMap{$r->{Type}}->{SetMeth}) ?
       $GetSetMap{$r->{Type}}->{SetMeth} : " = $r->{Args}[0][2]") . "; ";
-    print H7 "${pre}${setit}${post}${stamp}${ret}";
-
-    # Produce ZGlass* version with dynamic_cast for links
-    if(exists $r->{Link} && not($r->{Type} eq "${BASECLASS}*")) {
-      print H7<<"fnord";
-void\tSet$r->{Methodbase}(ZGlass* d) {
+    print H7 "${pre}${setit}${stamp}${post}${ret}";
+  }
+  
+  # Produce ZGlass* version with dynamic_cast for links;
+  # Do it also if the Set method is hand-written (e|E specifier)
+  if($r->{Xport} =~ m/(e|E)/ && exists $r->{Link} && not($r->{Type} eq "${BASECLASS}*")) {
+    print H7<<"fnord";
+void Set$r->{Methodbase}(ZGlass* d) {
   $r->{Type} dd=0; if(d) dd = dynamic_cast<$r->{Type}>(d);
   if(d==0 || dd) Set$r->{Methodbase}(dd);
 }
 fnord
-    }
   }
+
   if( $r->{Xport} =~ m/(r|R)/ ) {
-    my $const = ($1 eq 'R') ? 'const' : '';
-    print H7 "$const $r->{Type}&\tRef$r->{Methodbase}()\t$const\t{ return $r->{Varname}; }\n";
+    my $const = ($1 eq 'R') ? 'const ' : '';
+    print H7 "${const}$r->{Type}& Ref$r->{Methodbase}() ${const}\{ return $r->{Varname}; }\n";
   }
   if( $r->{Xport} =~ m/(p|P)/ ) {
-    my $const = ($1 eq 'P') ? 'const' : '';
-    print H7 "$const $r->{Type}*\tPtr$r->{Methodbase}()\t$const\t{ return &$r->{Varname}; }\n";
+    my $const = ($1 eq 'P') ? 'const ' : '';
+    print H7 "${const}$r->{Type}* Ptr$r->{Methodbase}() ${const}\{ return &$r->{Varname}; }\n";
   }
 }
 print H7 "\n";
