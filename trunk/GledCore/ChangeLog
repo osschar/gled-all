@@ -1,3 +1,27 @@
+2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/FTW_Leaf.h:
+	Added virtual method CopyListLeaves(list<FTW_Leaf*>& list).
+
+	* Glasses/NestInfo.cxx:
+	* Glasses/NestInfo.h:
+	Added members 'Bool_t bShowSelf' and 'Int_t mMaxChildExp'.
+
+	* Eye/FTW_Nest.cxx:
+	Honour bShowSelf and mMaxChildExp during nest construction.
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Added methods RnrOn/OffForDaughters. Actually moved them in from
+	RootGeo's ZGeoNode glass.
+
+	* macros/glass_defines.h:
+	Added define CREATE_ATT_GLASS to support different attachment
+	scenarios. Usefull for setting links or using alternate
+	add-methods.
+
 2005-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledNS.cxx:
