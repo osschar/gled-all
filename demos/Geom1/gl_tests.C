@@ -8,6 +8,9 @@
 // 3.Feb.2005 Measurements on PIV-3.2, ATI radeon 9600 (w/ fglrx driver):
 // 1k points ~ 23mus
 // 1k trings ~ 70mus [2.0ms w/ translate, 2.6ms w/ push/pop matrix and translate]
+//
+// 1k GetFloatv  MODELVIEW_MATRIX ~ 158mus
+// 1k GetDoublev MODELVIEW_MATRIX ~ 182mus
 
 #include <glass_defines.h>
 #include <gl_defines.h>
