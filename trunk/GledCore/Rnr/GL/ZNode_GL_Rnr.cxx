@@ -5,7 +5,9 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZNode_GL_Rnr.h"
+#include <Glasses/ZRlNameRnrCtrl.h>
 #include <RnrBase/RnrDriver.h>
+#include <GledView/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
 #include <FL/gl.h>
@@ -136,9 +138,10 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   if(rd->GetRnrNames() == true && bSuppressNameLabel == false && mNode->mName != "") {
+    RNRDRIVER_GET_RNRMOD(nrc, rd, ZRlNameRnrCtrl);
     string name( mNode->GetName() );
-    GLTextNS::BoxSpecs boxs; boxs.pos = rd->RefTilePos();
-    GLTextNS::RnrTextBar(rd, name, boxs, rd->GetNameOffset());
+    GLTextNS::BoxSpecs boxs; boxs.pos = nrc->RefTilePos();
+    GLTextNS::RnrTextBar(rd, name, boxs, nrc->GetNameOffset());
   }
 
   rd->PopPM();

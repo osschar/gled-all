@@ -47,7 +47,8 @@ namespace GLTextNS {
     GLfloat advance;
   };
 
-  struct TexFont {
+  class TexFont : public TObject {
+  public:
     GLuint texobj;
     int tex_width;
     int tex_height;

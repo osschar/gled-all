@@ -18,9 +18,12 @@
 
 class PupilInfo : public ZList {
   MAC_RNR_FRIENDS(PupilInfo);
+  friend class Pupil;
 
 public:
   enum Projection_e { P_Perspective, P_Orthographic };
+
+private:
 
   enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
 		      PRQN_dump_image,
@@ -28,9 +31,9 @@ public:
 		      PRQN_camera_home
   };
 
-protected:
   void		_init();
 
+protected:
   ZNode*	mCameraBase;	// X{gE} L{}
 
   ZNode*	mLookAt;	// X{gE} L{}
@@ -46,10 +49,10 @@ protected:
   Int_t		mWidth;         // X{gE} 7 Value(-range=>[0,4096,1], -join=>1)
   Int_t		mHeight;        // X{gE} 7 Value(-range=>[0,4096,1])
 
-  ZColor	mClearColor;	// X{PGS} 7 ColorButt(-join=>1)
+  ZColor	mClearColor;	// X{PRGS} 7 ColorButt()
 
-  Projection_e	mProjMode;	// X{GS} 7 PhonyEnum(-join=>1)
-  Float_t	mFOV;		// X{gS} 7 Value(-range=>[1,180,1,10])
+  Projection_e	mProjMode;	// X{GS} 7 PhonyEnum()
+  Float_t	mFOV;		// X{gS} 7 Value(-range=>[1,180,1,10], -join=>1)
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>5, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>5, -range=>[0,1000,1,1000])
   Float_t	mYSize;		// X{gS} 7 Value(-range=>[1e-3,1000,1,1000], -join=>1)
@@ -65,15 +68,10 @@ protected:
   Float_t	mMoveOM;	// X{gS} 7 Value(-range=>[-30,30,1,100])
   Float_t	mAccelExp;	// X{gS} 7 Value(-range=>[-10,10,1,1000])
 
-  Float_t	mCHSize;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>4,-join=>1)
-  Int_t		mTextSize;	// X{gS} 7 Value(-range=>[0,100,1,1])
+  Float_t	mCHSize;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>4)
 
   Bool_t	bShowRPS;	// X{gS} 7 Bool(-join=>1)
-  Bool_t	bRnrNames;	// X{gS} 7 Bool(-join=>1)
-  Bool_t	bRnrTiles;	// X{gS} 7 Bool()
-  Float_t	mNameOffset;	// X{gS} 7 Value(-range=>[0,2,1,10000])
-  ZColor	mTextCol;	// X{PGS} 7 ColorButt(-join=>1)
-  ZColor	mTileCol;	// X{PGS} 7 ColorButt()
+  Bool_t	bRnrNames;	// X{gS} 7 Bool()
 
   UInt_t	mBuffSize;	// X{gS} 7 Value(-range=>[0,65535,1,1])
   Int_t		mPickR;		// X{gS} 7 Value(-range=>[0,100,1,1],-join=>1)

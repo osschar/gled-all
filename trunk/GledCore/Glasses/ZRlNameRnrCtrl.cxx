@@ -10,7 +10,6 @@
 //
 
 #include "ZRlNameRnrCtrl.h"
-
 #include "ZRlNameRnrCtrl.c7"
 
 ClassImp(ZRlNameRnrCtrl)
@@ -19,17 +18,12 @@ ClassImp(ZRlNameRnrCtrl)
 
 void ZRlNameRnrCtrl::_init()
 {
-  // !!!! Set all links to 0 !!!!
-  mNameRnrOp  = GSO_Nop;
+  mNameRnrOp  = GSO_On;
   bRnrTiles   = true; bRnrFrames = true;
   mNameOffset = 0.99;
-  mTextSize   = 12;
   mTextCol.rgba(1, 1, 1);
   mTileCol.rgba(0, 0, 0.3);
   mTilePos = "";
 }
-
-/**************************************************************************/
-
 
 /**************************************************************************/

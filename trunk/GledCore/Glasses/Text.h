@@ -19,7 +19,7 @@ private:
 
 protected:
   TString	mText;		// X{GST}  7 Textor()
-  ZRlFont* 	mFont;		// X{gST} L{} RnrBits{2,0,4,0, 0,0,0,0}
+  ZRlFont* 	mFont;		// X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
 
   Bool_t	bAlpha;		// X{GST}  7 Bool(-join=>1)
   Bool_t	bBlend;		// X{GST}  7 Bool()
@@ -35,6 +35,8 @@ protected:
   Float_t	mYBorder;	// X{GST}  7 Value(-range=>[0,100,1,100])
   ZColor	mFGCol;		// X{PGST} 7 ColorButt(-join=>1)
   ZColor	mBGCol;		// X{PGST} 7 ColorButt()
+
+  Bool_t	bUseDispList;	// X{GS}   7 Bool()
 
 public:
   Text(const Text_t* n="Text", const Text_t* t=0) : ZNode(n,t) { _init(); }
