@@ -8,6 +8,7 @@
 #define GledCore_ZIdentity_H
 
 #include <Glasses/ZGlass.h>
+#include <Glasses/ZHashList.h>
 
 class ZIdentity : public ZGlass {
   // 7777 RnrCtrl("false, 0, RnrBits()")
@@ -19,21 +20,17 @@ private:
   void _init();
 
 protected:
-  UInt_t		mNumMMEs;	// X{GS} 7 ValOut()
+  ZHashList*		mActiveMMEs;	// X{GS} L{}
+
   ZMirFilter*		mAllowThis;	// X{GS} L{}
 
 public:
   ZIdentity(const Text_t* n="ZIdentity", const Text_t* t=0) : ZGlass(n,t) { _init(); }
 
-  void IncNumMMEs() {
-    mExecMutex.Lock(); ++mNumMMEs; Stamp(LibID(), ClassID()); mExecMutex.Unlock();
-  } // X{E}
-  void DecNumMMEs() {
-    mExecMutex.Lock(); --mNumMMEs; Stamp(LibID(), ClassID()); mExecMutex.Unlock();
-  } // X{E}
+  virtual void AdEnlightenment();
 
 #include "ZIdentity.h7"
-  ClassDef(ZIdentity, 1)
+  ClassDef(ZIdentity, 1) // Representation of a user identity
 }; // endclass ZIdentity
 
 GlassIODef(ZIdentity);

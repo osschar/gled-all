@@ -7,9 +7,12 @@
 //__________________________________________________________________________
 // ZIdentity
 //
-//
+// A glass representation of a user identity. ZGroupIdentity
+// represents user groups and/or virtual organizations.
 
 #include "ZIdentity.h"
+#include "ZIdentity.c7"
+#include <Glasses/ZQueen.h>
 
 ClassImp(ZIdentity)
 
@@ -17,16 +20,21 @@ ClassImp(ZIdentity)
 
 void ZIdentity::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mGlassBits |= ZGlassBits::kFixedName;
-  mNumMMEs = 0;
+  mActiveMMEs = 0;
   mAllowThis = 0;
 }
 
 /**************************************************************************/
 
-
+void ZIdentity::AdEnlightenment()
+{
+  PARENT_GLASS::AdEnlightenment();
+  if(mActiveMMEs == 0) {
+    mActiveMMEs = new ZHashList("ActiveMMEs", GForm("ActiveMMEs of %s", GetName()));
+    mActiveMMEs->SetElementFID(ZMirEmittingEntity::FID());
+    mQueen->CheckIn(mActiveMMEs);
+  }
+}
 
 /**************************************************************************/
-
-#include "ZIdentity.c7"
