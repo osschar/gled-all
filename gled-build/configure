@@ -118,8 +118,9 @@ sub collect_dependencies {
 # MAIN
 ########################################################################
 
-$config  = {};
-$resolver= {};
+$config   = {};
+$resolver = {};
+$num_args = $#ARGV;
 
 $def_cfg = "$ENV{GLEDSYS}/configure.rc";
 
@@ -144,7 +145,8 @@ if($config->{RECONFIGURE} == 0) {
   # Basic configure: write config.h, makefile includes;
   #                  read build_libsets and produce resolver   
 
-  print "BASE = $config->{GLEDBASE}, SYS = $ENV{GLEDSYS}, CFG = $CFGFILE\n";
+  print "LIBSETS='$config->{LIBSETS}'\n";
+  print "BASE='$config->{GLEDBASE}', SYS='$ENV{GLEDSYS}', CFG='$CFGFILE'\n";
 
   my @Rnrs = split(/:/, $config->{RENDERERS});
   my $renderers = join(' ', @Rnrs);
@@ -222,9 +224,24 @@ fnord
 
   # Reconfigure: read build_libsets, build resolver
 
+  if($num_args > 1 || ($num_args == 1 && $#ARGV < 0)) {
+    print "reconfigure must be the only flag (with optional argument), e.g.\n";
+    print "  ./configure --reconfigure [<libsets>]\n";
+    print "All other options are taken from build_config.\n";
+    print "Either edit build_config or use full configure statement.\n";
+    print "Aborting.\n";
+    exit 1;
+  }
+
   Gled_ConfCat_Parser::import_build_config();
 
-  print "BASE = $config->{GLEDBASE}, SYS = $ENV{GLEDSYS}, CFG = $CFGFILE\n";
+  if($#ARGV == 0) {
+    $config->{LIBSETS} = shift;
+  }
+
+  print "LIBSETS='$config->{LIBSETS}'\n";
+  print "BASE='$config->{GLEDBASE}', SYS='$ENV{GLEDSYS}', CFG='$CFGFILE'\n";
+
 }
 
 $resolver = {};
