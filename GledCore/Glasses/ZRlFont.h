@@ -22,7 +22,7 @@ private:
   void _init();
 
 protected:
-  TString	mFontFile;    // X{GE}  7 Filor()
+  TString	mFontFile;    // X{GE}  7 Filor(-pat=>"*.txf")
   Int_t         mSize;        // X{GST} 7 Value(-range=>[1,512,1])
 
 public:
