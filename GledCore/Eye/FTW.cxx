@@ -928,7 +928,7 @@ ZMIR* FTW::Source_Selector::generate_MIR(GNS::MethodInfo* mi,
 
   case Top_Selector::T_Locator: {
     ID_t a = alpha->GetSaturnID();
-    ID_t b = wLoc_Sel->get_locator()->get_contents();
+    ID_t b = get_contents();
     ID_t g = gamma ? gamma->GetSaturnID() : 0;
     ZMIR* mir = new ZMIR(a, b, g);
     mi->ImprintMir(*mir);
