@@ -1,0 +1,799 @@
+2004-06-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_View.cxx:
+	Fixed a bug resulting (after some time) in a corrupt window title.
+
+	* Eye/Pupil.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Display of RPS now optional (PupilInfo::bShowRPS), weed formatting
+	changes.
+	
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Eye.cxx:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Net/Ray.cxx:
+	* Net/Ray.h:
+	Added new Ray quantum number Ray::RQN_list_clear.
+
+	* Glasses/ZGlLightModel.cxx:
+	* Glasses/ZGlLightModel.h:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	Fixed a type in mLightModelOp variable name.
+	
+2004-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	==================================================
+	Check-in of major changes from 1.2.2 towards 1.2.3
+	==================================================
+
+	* Glasses/Text.cxx:
+	* Glasses/Text.h:
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/Text_GL_Rnr.h:
+	New files; GL text support.
+	
+	* Glasses/ZEunuch.cxx:
+	* Glasses/ZEunuch.h:
+	* Glasses/ZFireKing.cxx:
+	* Glasses/ZFireKing.h:
+	* Glasses/ZFireQueen.cxx:
+	* Glasses/ZFireQueen.h:
+	New files; place-holders for the coming re-implementation of queen
+	dependency management and mirroring.
+	
+	* Glasses/ZGlBlending.cxx:
+	* Glasses/ZGlBlending.h:
+	* Glasses/ZGlLightModel.cxx:
+	* Glasses/ZGlLightModel.h:
+	* Glasses/ZGlMaterial.cxx:
+	* Glasses/ZGlMaterial.h:
+	* Glasses/ZGlStateBase.cxx:
+	* Glasses/ZGlStateBase.h:
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.h:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.h:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.cxx:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.h:
+	New files; GL state modificators.
+
+	* Stones/ZColorMark.cxx:
+	* Stones/ZColorMark.h:
+	New files; ZColor with a float for gradients (see Geom1::ZRibbon).
+
+	
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	Added thread cancelation support. See Eventor::Cancel() and
+	Mountain::Cancel().
+	
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Many improvements.
+	New thread: delayed mir shooter (at given time).
+	New thread: ray shooter (allows beter handling of Rays).
+	Rewrite of UnfoldMIR(): proper exception handling and reporting.
+	
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Support for removal of lenses.
+	
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Ant.cxx:
+	* Eye/FTW_Ant.h:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	Support for measuring of label widths and minor GUI improvements.
+	
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Infrastructure for picking menus, GL text support and display of
+	fps.
+	
+	* Glasses/EyeInfo.h:
+	* Glasses/ZMirEmittingEntity.h:
+	New virtual member SaturnInfo* HostingSaturn().
+	
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+	New methods Message() and Error() to properly report MIR failures
+	(and other stuff) from executions on other Saturns.
+	
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Reverse references, referencing control, new/cleaner locking
+	mechanism.
+	
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	New referencing/unreferencing/clearing mechanisms.
+	
+	* Glasses/ZKing.cxx:
+	* Glasses/ZKing.h:
+	BlessMIR() now performs mild context checks, modifications for
+	future queen management.	
+	
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	New locking, transition to ROOT vec/mat classes.
+	
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Many major improvements.
+	Support for delition of lenses.
+	Better check-in/out implementation.
+	Better ZComet handling and unpacking.
+	Introduction of zero-ref-count policy.
+	New member BroadcastMIRToNonRulingReflections(); simplifies
+	maintainance of coherent queen-state. Methods, that need to be
+	executed also on non-active reflections (dependencies, mandatory 
+	status) now use this facility.
+	Better ray handling and control.
+	New locking.
+	
+	* Gled/GCondition.cxx:
+	* Gled/GCondition.h:
+	Member TimedWait() renamed to TimedWaitMS(), new member
+	TimedWaitMus().
+
+	* Gled/GMutex.cxx:
+	* Gled/GMutex.h:
+	New class GMutexHolder. Usefull for locking with automatic
+	variables in view of exceptions.
+	
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Moved ZMirEmittingEntity* owner from member data to TLS for proper
+	access control.
+	
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Added relational and equality operators.
+	
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Now using TSystem::Getenv().
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Renaming of methods stem Glass to Lens where appropriate. Addition
+	of some global functions.
+
+	* Gled/GledTypes.h:
+	Addition of An_ID_Demangler virtual base and removal of index
+	types for ex ZVector, ZMatrix classes.
+	
+	* Net/Ray.cxx:
+	Beautification of debug output.
+	
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Added support for automatic creation of GL display lists on per
+	lens level.
+	
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Support for a default GL font.
+
+	* Stones/ZColor.h:
+	Added to_ubyte() member.
+
+	* Stones/ZComet.cxx:
+	* Stones/ZComet.h:
+	* Stones/ZMIR.cxx:
+	* Stones/ZMIR.h:
+	Now use An_ID_Demangler; some minor additions.
+
+	* Stones/Z3Mark.cxx:
+	* Stones/Z3Mark.h:
+	* Stones/Z3Point.cxx:
+	* Stones/Z3Point.h:
+	* Stones/ZMark.cxx:
+	* Stones/ZMark.h:
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Transition to pure ROOT vector/matrix classes.
+	
+	* catalog.patch: 
+	* glass.list:
+	Extensions with new glasses, fixes.
+	
+	* macros/eye.C:
+	New check before opening a default pupil.
+	
+	* perllib/GLED_Widgets.pm:
+	Extension of PhonyEnum. Now the class understands enums declared
+	in glasses.
+
+	* gled.cxx:
+	* saturn.cxx:
+	Added initialization of ROOT thread system.
+
+	* FL/Fl_TransCtrl.cxx:
+	* FL/Fl_TransCtrl.h:
+	Fix of box-type and suppresion of widget update when new value is
+	the same as the one shown.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	* Glasses/Box.cxx:
+	* Glasses/Box.h:
+	* Glasses/PerfMeterOperator.h:
+	* Glasses/PerfMeterTarget.cxx:
+	* Glasses/PipeEventor.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Glasses/Sphere.h:
+	* Glasses/ZCometBag.cxx:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.h:
+	* Glasses/ZMirFilter.h:
+	* Glasses/ZSunQueen.cxx:
+	* Glasses/ZSunQueen.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* Tvor/TubeTvor.h:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/SphereTrings.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+
+2004-01-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+
+	Dnd support, camera attachment. Nameboxes in Nest support dnd for
+	a) pushing elements to the end of the list or b) setting links.
+	Camera can be attached to an object in the scene that is connected
+	to PupilInfo in question. Node that the default camera is looking
+	at and the reference object for "up" direction can also be
+	specified.
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+
+	Added LibSetInfo* FindLibSetInfo(const string& lib_set).
+
+	* GledView/GledViewNS.cxx: Bugfix in ViewSet init.
+
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+
+	Introduced static MinLabelWidth to limit the minimal label width.
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+
+	Standardization of Get/Find methods and lens callbacks.  Replaced
+	ZList::Query() with a more general ZGlass::FindLensByPath(). The
+	path is tokenized by GledNS::tokenize_url(). YNameChangeCB is now
+	declared within the ZGlass class.
+
+	* Gled/GledTypes.h: Extended struct LinkSpec.
+	
+	* Gled/Gled.cxx: Attempt at catcing exceptions from TRint::Run().
+
+	* Makefile: Introduced double-colon rules for standard targets.
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+
+	Added scaling support into ZNode.
+	
+	* Glasses/ZSunQueen.cxx:
+	* macros/glass_defines.h:
+	* macros/moon.C:
+	* macros/std_auth.C:
+
+	Put in accordance with ZGlass::FindLensByPath().
+	
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+
+	Minor changes.
+	
+2003-11-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled.cxx:
+	* saturn.cxx:
+
+	Fixed initialization order. TRint is now instantiated ASAP.
+
+2003-11-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+
+	Added reporting of ZList sizes in the FTW::NameButton.
+	
+	* Glasses/ZGroupIdentity.cxx:
+	* Glasses/ZGroupIdentity.h:
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZIdentity.h:
+
+	Moved link to list of active MMEs (mActiveMMEs) from
+	ZGroupIdentity to ZIdentity.
+		
+	* Glasses/ZSunQueen.cxx:
+	* Glasses/ZSunQueen.h: Added links to Saturn & Eye guest
+	identities. Changes to reflect ZIdentity change.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:   Improved RSA key handling and checking.
+	
+	* Glasses/EyeInfo.h: Added tag MEE::Self to Message() and Error().
+	* Glasses/ZKing.cxx: Improved BlessMIR().
+	* Glasses/ZMirEmittingEntity.cxx: Minor improvement.
+	* Glasses/ZQueen.cxx: Lens instantiation consistency fix.
+	* GledView/GledGUI.cxx:	Added -font command line option.
+	* macros/std_auth.C: Added guest registration and set-up.
+
+
+2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	==================================================
+	Check-in of major changes from 1.2.1 towards 1.2.2
+	==================================================
+
+	1) Saturn and ZMIR
+	==================
+	
+	Synchronous MIR execution and MIR results
+	-----------------------------------------
+
+	MIRs can now be executed synchronously and can return arbitrary
+	data stream. MIRs with result request should only be sent from
+	threads, as synchronous execution blocks the calling thread until
+	the result (or error) is available. Also, locking an object for
+	the duration of a sync MIR is a bad idea and can lead to
+	deadlocks.
+
+	Flares just wait.
+	
+	Beams can also request Beam Result. It is simply a TBuffer
+	containing an arbitrary datagram (usually streamed ROOT
+	objects). Of course, the caller must know the return data format.
+	
+	* Glasses/SaturnObserver.cxx:
+	* Glasses/SaturnObserver.h: New glass, demo for beam-shooting.
+	
+	MIR shooting thread
+	-------------------
+
+	Saturn now has a bunch of methods allowing "shooting of MIRS" in
+	separate threads. There is a standard thread running on the Saturn
+	that routes and possibly executes the threads that were shot into
+	the solar system.
+
+	Shooting is complementary to posting where the MIR is
+	routed/executed in the calling thread itself.
+	
+	Exec / Broadcast order
+	----------------------
+	
+	Until now, flares were first broadcasted and only later executed.
+	
+	Now flares are executed first on the master Saturn (where Alpha is
+	in the sun-space) and NOT broadcasted if an exception is thrown or
+	ZMIR::SuppressFlareBroadcast is set to true.
+	
+	
+	2) Authentication & Authorization infrastructure
+	================================================
+
+	This contains loads of changes. Please see documentation for
+	details.
+	
+	* Glasses/ZFilterAggregator.cxx:
+	* Glasses/ZFilterAggregator.h:
+	* Glasses/ZGroupIdentity.cxx:
+	* Glasses/ZGroupIdentity.h:
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZIdentity.h:
+	* Glasses/ZIdentityFilter.cxx:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.cxx:
+	* Glasses/ZIdentityListFilter.h:
+	* Glasses/ZMEESelfFilter.cxx:
+	* Glasses/ZMEESelfFilter.h:
+	* Glasses/ZMethodTagPreFilter.cxx:
+	* Glasses/ZMethodTagPreFilter.h:
+	* Glasses/ZMirEmittingEntity.cxx:
+	* Glasses/ZMirEmittingEntity.h:
+	* Glasses/ZMirFilter.cxx:
+	* Glasses/ZMirFilter.h:
+	* Gled/GKeyRSA.cxx:
+	* Gled/GKeyRSA.h:
+	* Stones/ZMirExchangeSession.h:
+	* bin/gled-auth-genkeypair:
+	* bin/gled-auth-init:
+	* cfg/gled-auth.rc:
+	* macros/glass_defines.h:
+	* macros/std_auth.C:
+	* perllib/Gled_Shell_Wrappers.pm:
+
+	New files (authentication and authorization).
+	
+	* Makefile:
+	* catalog.patch:
+	* glass.list:
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+
+	* Glasses/EyeInfo.cxx:
+	* Glasses/EyeInfo.h:
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZKing.cxx:
+	* Glasses/ZKing.h:
+	* Glasses/ZNode.h:
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	* Glasses/ZSunQueen.cxx:
+	* Glasses/ZSunQueen.h:
+	
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* Gled/GledMirDefs.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+
+	* Stones/ZMIR.cxx:
+	* Stones/ZMIR.h:
+	* macros/sun.C:
+
+	Changes due to authentication and authorization support.
+
+	
+	3) ZGlass
+	=========
+	
+	ZGlass::mGlassBits: 
+	-------------------
+	
+	Added a bit-field for describing state of a lens on a
+	Saturn. Values described in namespace ZGlassBits.
+
+	
+	ZGlassBits::FixedName glass bit
+	-------------------------------
+	
+	If this bit is set the name of lens can not be changed.
+	
+	Reference counting
+	------------------
+	
+	Now done separately for each type of object space
+	(moon/sun/fire). Inc/DecRefCount methods take ZGlass* argument
+	specifying the lens that is (de)referencing the object.
+		
+	Name change callback
+	--------------------
+
+	SetName method has been changed to make callbacks when the name of
+	a lens changes. Used by ZNameMap. Names MAY NOT contain '/'
+	characters. They will be silently converted to '_'.
+	
+	This could in principle be solved by using Stamping mechanism.
+	That would require some list on the Saturn side (ideally in the
+	ZGlass itself), possibly with RayQN filter. That's how name change
+	callback is implemented anyway.
+	
+
+	4) ZNameMap
+	===========
+	
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:	New container base glass.
+
+	Keeps elements sorted by their name. Registers self to each
+	element of the map to receive name-change callback.  All add
+	methods are overridden to the Insert() method.
+	
+	ZQueen now inherits from ZNameMap (ZHashList before). Therefore
+	queens provide a fast directory service (e.g. Auth/Identities in
+	ZSunQueen).
+	
+	
+	5) ZList::Query
+	===============
+
+	ZList::Query(path) provides access method to retrieve lenses from
+	nested lists. Example path: "Auth/Identities/foo.bar@baz.org".
+	'/' is a directory separator.
+	
+	Could be extended to ZGlass, need semantics for links
+	
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:	 Query() method implemented. 
+
+	6) Gled
+	=======
+	
+	A&A options: -authdir, -saturnid, -eyeid, -noauth.
+
+	Currently Gled provides a service for finding of files containing
+	public/private keys. This should be done otherwise ... once
+	external identity/group servers are incorporated.
+	
+	
+	7) GledNS & GledViewNS
+	======================
+	
+	Most of glass-catalogues moved to GledNS (from GledViewNS).  This
+	is needed for per method access control (implemented through
+	method tags on project7/catalogue level).
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/MTW_Layout.cxx:
+	* Eye/MTW_Layout.h:
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+	* Eye/MTW_View.cxx:
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	
+	Changes related to migration of glass catalogues from GledViewNS
+	to GledNS.
+	
+	8) Minor changes
+	================
+	
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h: Added bXMultix variable describing multix
+	state of the running thread. Fixed SetHost() to follow new
+	ref-counting scheme.
+	
+	* Glasses/NestInfo.h:
+	* Glasses/ShellInfo.h:	Const-correctness fix.
+	
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:		TimeUntilNow() now returns GTime.
+	
+	* Gled/GledTypes.h:	Added default args for FID_t ctor.
+	
+	* gled.cxx:
+	* saturn.cxx:	Common thread functions moved to class Gled.
+	
+	* macros/gl_defines.h:	Added protection against multiple inclusion.
+	
+	* perllib/GLED_Widgets.pm: All widgets now call self-update after
+	sending a MIR. No locking is done!
+
+	* Eye/Pupil.cxx:	Initialization fix.
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	* RnrBase/RnrDriver.cxx:
+	* Glasses/Box.h:	Beautification.
+	
+	
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	* Glasses/Operator.cxx:
+	* Glasses/Operator.h:
+
+	Improved timing of thread execution by using GTime.
+	
+	* Gled/GCondition.cxx:
+	* Gled/GCondition.h:
+
+	Fixed variable naming in TimedWait(UInt_t wait_ms) to properly
+	reflect that argument is expected in miliseconds.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+
+	New class. Time in micro-second precision.
+	
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	* Net/Ray.cxx:
+	* Net/Ray.h:
+	
+	New implementation of stamping mechanism. Lenses now Stamp
+	themselves via their ZQueen. Each queen can block emission of
+	stamps for all hers subjects. Each lens has its own TimeStamp.
+	There is no central timestamp on Saturn anymore.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+
+	Brought in accordance with the new stamping model.
+	
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+
+	Changed Saturn socket to non-blocking mode.
+	There are problems with receiving ROOT messages (Rays) in
+	non-blocking mode when incoming buffer is filled-up.
+	
+	* Gled/GledMirDefs.h: Added #include <memory>.
+
+	* Gled/GledTypes.h: Use ROOT types for core typedefs of Gled.
+	
+	* perllib/GLED_Widgets.pm: New option -seqvals for
+	Widgets::PhonyEnum.  See Glasses/PerfMeterOperator.h.
+	
+	* Glasses/PipeEventor.h:
+	* Glasses/PipeEventor.cxx:
+	* Glasses/PipeEventor.h:
+	* Glasses/PerfMeterTarget.cxx:
+	* Glasses/PerfMeterTarget.h:
+	* Glasses/PerfMeterOperator.cxx:
+	* Glasses/PerfMeterOperator.h:
+	* glass.list:
+
+	New glasses.
+	PipeEventor: Spawns a command via gSystem->PipeOpen() in write
+	mode.
+	PerfMeters: Allow timing of MIR processing infrastructure.
+	
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* gled.cxx:
+	* saturn.cxx:
+
+	Changed user-thread code to be POSIX compliant (used LinuxThreads
+	specifics before).
+
+	In particular SigUSR1 and SigUSR2 are used to suspend/restart
+	signal-safe threads. TRint is stopped by thread cancellation.
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	* Eye/Eye.cxx:
+
+	Restructuring of protocol for new server connections.
+
+	Now have a static Int_t Saturn::s_Gled_Protocol_Version.  The
+	connecting client now sends messages with well defined types to
+	initiate server response.
+	
+	* Glasses/ZGlass.h: mExecMutex and mRefCountMutex are now
+	mutable. Needed for const Get methods when locking is required.
+
+	* Rnr/GL/TubeTvor_GL_Rnr.cxx:
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+
+	Added support for texture coordinates.
+	
+	* Gled/GSelector.h: Changed default mutex init to fast (was
+	resursive) for consistency.
+
+	* Glasses/Eventor.cxx:
+	* Glasses/EyeInfo.cxx:
+	* Glasses/ZNode.cxx:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* GledView/GledGUI.cxx:
+
+	Minimal code clean-up.
+	
+2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/MTW_Layout.cxx:
+	* Eye/MTW_View.cxx:
+
+	Added InfoBar to FTW_Nest (it displays some information about
+	Leaf/Ant below mouse).
+	
+	Some minor additions (option to reverse order of ants,
+	separator between glass groups in Creator class menu).
+
+	Fixed some Fl_SWM related problems (ColorChooser, size of
+	predefined custom views menu).
+
+2003-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+
+	Virtualized Stamping methods.
+
+	* Gled/GMutex.h:
+	* Tvor/TubeTvor.h:
+
+	Minor changes.
+
+2003-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Saturn.cxx: Fixed initialization order of variables in
+	arrival_of_kings().
+

@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+# $Header$
+
+# Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
+
+use lib "$ENV{GLEDSYS}/perllib";
+use ParseConfig;
+require Gled_Shell_Wrappers;
+
+$def_cfg = "$ENV{GLEDSYS}/cfg/gled-auth.rc";
+
+my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg, -useenv=>1);
+$cfg_parser->parse();
+
+if($HELP or $NAME eq '<null>') {
+  print <<"fnord";
+usage: gled-auth-genkeypair -name <identity> <other-options>
+
+Produces private/public key pair of length <keysize> (in bits).
+The private key is stored in the files private_keys/<name> and
+the public one in public_keys/<name>.
+
+config file: $cfg_parser->{Config}
+options:
+fnord
+  print `cat $def_cfg`;
+  exit 0;
+}
+
+die "auth dir $AUTHDIR does not exist (use gled-auth-init to create one)"
+  unless -d $AUTHDIR;
+
+cd($AUTHDIR);
+
+die "auth dir $AUTHDIR must contain directories public_keys and private_keys"
+  unless -d "public_keys" and -d "private_keys";
+  
+die "identity $NAME already exists"
+  if -x "public_keys/$NAME" or -x "private_keys/$NAME";
+
+#umask og-rwx
+my $exumask = umask;
+umask 0077;
+system_or_die("openssl genrsa -out private_keys/$NAME $KEYSIZE");
+umask $exumask;
+#umask og+r
+system_or_die("openssl rsa -in private_keys/$NAME -out public_keys/$NAME -pubout");

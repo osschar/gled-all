@@ -1,0 +1,21 @@
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	New glass; creates a surface from a formula (TF3).
+
+	* glass.list:
+	New glasses added.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Added method GTS::Surface::Replace().
+	
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	* Rnr/GL/GTSurf_GL_Rnr.h:
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.

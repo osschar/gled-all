@@ -1,0 +1,155 @@
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	Added project7 invocation to extract info on enums into build
+	catalog.
+
+	* cfg/project7.rc:
+	* lib-exec/project7.pl:
+	Support for parsing of enums, addition of "Local" tag to member
+	description (as in GledCore::GledNS), transition to new locking
+	syntax.
+	
+	* make/make_defs.inc:
+	Added -lThread to ROOTLIBS.
+
+	* bin/gled-create-glass:
+	* cfg/gled-create-glass.rc:
+	* cfg/gled-create-stone.rc:
+	* lib-exec/mk_dict_gen.pl:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+	
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+
+	Libset dependencies are now stored into the configuration data.
+	
+	* lib-exec/project7.pl:
+
+	Reflect changes in struct LinkSpec; now supports loading of libset
+	specific widget classes from GLED_<libset>_Widgets.pm.
+	
+	* make/make_base.inc:
+	* bin/gled-create-libset:
+
+	Introduced double-colon rules for standard targets.
+
+2003-11-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-htmldoc-create:
+	* cfg/gled-htmldoc-create.rc:
+	* configure:
+	* lib-exec/mk_dict_dep.pl:
+	* lib-exec/mk_dict_gen.pl:
+	* macros/gled_html_doc.C:
+	* make/make_base.inc:
+
+	Creation of basic infrastructure for generation of HTML class
+	documentation. The gled-htmldoc-create command creates a CINT
+	script to generate html docs via ROOT THtml class and generates
+	the index.html file.
+	
+2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-create-glass:
+	* bin/gled-create-rnr:
+	* bin/gled-create-stone:
+	* cfg/Glass_SKEL.cxx:
+	
+	Beautification.
+	
+	* cfg/project7.rc:
+	* lib-exec/gled_glue_gen.pl:
+	* lib-exec/project7.pl:
+
+	Updated for new format of ZMIR and glass catalogs.
+
+
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* configure.rc:
+
+	configure now produces build_env [c]sh scripts with given
+	environment settings. The name is configurable.
+	
+	* lib-exec/project7.pl: Set methods can optionally take the
+	argument as const reference. See GledCore::PerfMeterTarget.
+	
+	* make/make_defs.inc: Added option -pipe to CXXFLAGS.
+
+
+2003-07-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_base.inc: Hidden libset_id files are also needed in
+	libset directory (for binary packages).
+
+	* lib-exec/project7.pl: Fixed pointer-to-pointer exports for links
+	to work on gcc-3.3.
+
+
+2003-07-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-create-libset: Creates all default directories and adds
+	hidden cvskeep files into them.
+
+	* make/make_base.inc: Hidden libset_id file now created in
+	GLEDSYS/lib only.
+
+	* perllib/Gled_Installer.pm: Now skips hidden files on
+	install/uninstall.
+
+
+2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_base.inc: File lib/.[libset_id] was not removed on
+	uninstall.
+
+	* configure:
+	* configure.rc:
+
+	New option 'libset' to specify libsets to build; creates Makefile.
+	The build procedure is now more like what people expect.
+
+	* INSTALL:
+	* MANIFEST:
+
+	Corrected for the new build procedure.
+
+	* build_libsets:
+	* mecca:
+	* mecca.rc:
+
+	Removed files.
+
+
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* cfg/project7.rc:
+	* lib-exec/project7.pl:
+
+	New options determining locking of lenses in Get/Set methods.
+
+	Until now Set methods always locked the lens and Get methods
+	never.  Current default is that both types of methods lock
+	ZGlass::mExecMutex.
+
+	* configure:
+	* configure.rc:
+
+	Added options: buildversion and builddate.
+	They are exported via #defines in include/config.h, e.g.
+	#define GLED_VERSION_STRING    "1.2.0-cvs"
+	#define GLED_BUILD_DATE_STRING "2003-7-22"
+
+
+2003-07-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog: new file.
+
+	* macros/gl_defines.h: new file; contains #defines from GL/gl.h
+	for easy import into gled/cint (so that GL constants can be used).
