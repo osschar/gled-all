@@ -13,6 +13,8 @@ ClassImp(SMorph)
 
 void SMorph::_init(Float_t r)
 {
+  // Override settings from ZGlass
+  bUseDispList = true;
   // Override settings from ZNode
   bUseScale = true;
   mSx = mSy = mSz = r;
@@ -21,7 +23,6 @@ void SMorph::_init(Float_t r)
   mTx = mCx = mRz = 0;
 
   bOpenTop = bOpenBot = bEquiSurf = false;
-  bUseDispList = false;
 
   mTexture = 0;
   mTexX0 = mTexY0 = 0;

@@ -19,8 +19,6 @@ protected:
 public:
   SMorph_GL_Rnr(SMorph* m) : ZNode_GL_Rnr(m), mSMorph(m) {}
 
-  virtual void Draw(RnrDriver* rd);
-
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd);
 

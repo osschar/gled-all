@@ -9,17 +9,6 @@
 
 /**************************************************************************/
 
-void SMorph_GL_Rnr::Draw(RnrDriver* rd)
-{
-  if(mSMorph->bUseDispList) {
-    ZGlass_GL_Rnr::Draw(rd);
-  } else {
-    Render(rd);
-  }
-}
-
-/**************************************************************************/
-
 void SMorph_GL_Rnr::Render(RnrDriver* rd)
 {
   glPushAttrib(GL_CURRENT_BIT);

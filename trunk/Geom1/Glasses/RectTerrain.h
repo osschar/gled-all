@@ -50,7 +50,6 @@ protected:
 
   Float_t	mSmoothFac;   // X{gS}  7 Value(-range=>[0,1,1,1000])
 
-  Bool_t	bUseDispList;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bStudySize;	// X{gS} 7 Bool()
 
   void		MkVN(Int_t i, Int_t j);
