@@ -21,16 +21,18 @@ EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) :
 
 void EyeInfo::Message(const Text_t* s)
 {
-  if(mMir == 0) return;
-  Ray r(Ray::RQN_message, mMir->Caller, s);
-  mSaturn->SingleRay(this, r);
+  ZMIR* mir = get_MIR();
+  if(mir == 0) return;
+  TextMessage tm(mir->Caller, TextMessage::TM_Message, s);
+  mSaturn->DeliverTextMessage(this, tm);
 }
 
 void EyeInfo::Error(const Text_t* s)
 {
-  if(mMir == 0) return;
-  Ray r(Ray::RQN_error, mMir->Caller, s);
-  mSaturn->SingleRay(this, r);
+  ZMIR* mir = get_MIR();
+  if(mir == 0) return;
+  TextMessage tm(mir->Caller, TextMessage::TM_Error, s);
+  mSaturn->DeliverTextMessage(this, tm);
 }
 
 /**************************************************************************/
