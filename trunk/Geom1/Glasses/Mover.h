@@ -15,13 +15,13 @@ private:
   void _init();
 
 protected:
-  ZNode*	mNode;	// X{GS} L{l}
+  ZNode*	mNode;	// X{gS} L{l}
 
-  UInt_t	mMi;	// X{GS} 7 Value(-range=>[0,3,1], -width=>2, -join=>1)
-  Float_t	mMa;	// X{GS} 7 Value(-range=>[-10,10,1,1000000], -width=>8)
-  UInt_t	mRi;	// X{GS} 7 Value(-range=>[0,3,1], -width=>2, -join=>1)
-  UInt_t	mRj;	// X{GS} 7 Value(-range=>[0,3,1], -width=>2, -join=>1)
-  Float_t	mRa;	// X{GS} 7 Value(-range=>[-10,10,1,1000000], -width=>8)
+  UInt_t	mMi;	// X{gS} 7 Value(-range=>[0,3,1], -width=>2, -join=>1)
+  Float_t	mMa;	// X{gS} 7 Value(-range=>[-10,10,1,1000000], -width=>8)
+  UInt_t	mRi;	// X{gS} 7 Value(-range=>[0,3,1], -width=>2, -join=>1)
+  UInt_t	mRj;	// X{gS} 7 Value(-range=>[0,3,1], -width=>2, -join=>1)
+  Float_t	mRa;	// X{gS} 7 Value(-range=>[-10,10,1,1000000], -width=>8)
 
 public:
   Mover(Text_t* n="Mover", Text_t* t=0) : Operator(n,t), mNode(0) { _init(); }

@@ -71,25 +71,25 @@ protected:
   GMutex		mMasterLock;	// sending to master
   GMutex		mRulingLock;	// Exec in kings & queens
 
-  bool			bAllowMoons;	// X{G}
+  bool			bAllowMoons;	// X{g}
 
   GSelector		mSelector;	// fd select wrapper for sockets
 
-  ZGod*			mGod;		// X{G}
-  ZKing*		mSunKing;	// X{G}
-  ZSunQueen*		mSunQueen;	// X{G}
-  ZKing*		mKing;		// X{G}
-  ZFireKing*		mFireKing;	// X{G}
-  ZFireQueen*		mFireQueen;	// X{G}
-  SaturnInfo*		mSunInfo;	// X{G}
-  SaturnInfo*		mSaturnInfo;	// X{G}
-  bool			bSunAbsolute;	// X{G}
+  ZGod*			mGod;		// X{g}
+  ZKing*		mSunKing;	// X{g}
+  ZSunQueen*		mSunQueen;	// X{g}
+  ZKing*		mKing;		// X{g}
+  ZFireKing*		mFireKing;	// X{g}
+  ZFireQueen*		mFireQueen;	// X{g}
+  SaturnInfo*		mSunInfo;	// X{g}
+  SaturnInfo*		mSaturnInfo;	// X{g}
+  bool			bSunAbsolute;	// X{g}
 
-  Int_t			mQueenLoadNum;	// X{GS}
+  Int_t			mQueenLoadNum;	// X{gS}
   GCondition		mQueenLoadCnd;	// X{r}
 
-  Forest*		mVer;		// X{G} Will hold URL->queen/glass maps
-  Mountain*		mChaItOss;	// X{G}
+  Forest*		mVer;		// X{g} Will hold URL->queen/glass maps
+  Mountain*		mChaItOss;	// X{g}
 #ifndef __CINT__
   hID2pZGlass_t		mIDHash;
   hSock2SocketInfo_t	mSock2InfoHash;

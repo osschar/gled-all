@@ -19,23 +19,23 @@ private:
   void _init();
 
 protected:
-  ZNode*	mNodeA;		// X{GS} L{}
-  ZNode*	mNodeB;		// X{GS} L{}
+  ZNode*	mNodeA;		// X{gS} L{}
+  ZNode*	mNodeB;		// X{gS} L{}
 
-  ZList*	mLenses;	// X{GS} L{} RnrBits{0,0,0,0, 0,0,0,5}
+  ZList*	mLenses;	// X{gS} L{} RnrBits{0,0,0,0, 0,0,0,5}
 
-  Float_t	mDefWidth;	// X{GS} 7 Value(-range=>[  0,1000, 1,1000], join=>1)
-  Float_t	mDefSpread;	// X{GS} 7 Value(-range=>[-180,180, 1,1000], join=>1)
-  Float_t	mDefTension;	// X{GS} 7 Value(-range=>[-10,10,1,100])
+  Float_t	mDefWidth;	// X{gS} 7 Value(-range=>[  0,1000, 1,1000], join=>1)
+  Float_t	mDefSpread;	// X{gS} 7 Value(-range=>[-180,180, 1,1000], join=>1)
+  Float_t	mDefTension;	// X{gS} 7 Value(-range=>[-10,10,1,100])
 
-  TLorentzVector mVecA;		// X{GSR} 7 LorentzVector()
-  TLorentzVector mSgmA;		// X{GSR} 7 LorentzVector()
-  TLorentzVector mVecB;		// X{GSR} 7 LorentzVector()
-  TLorentzVector mSgmB;		// X{GSR} 7 LorentzVector()
+  TLorentzVector mVecA;		// X{gSR} 7 LorentzVector()
+  TLorentzVector mSgmA;		// X{gSR} 7 LorentzVector()
+  TLorentzVector mVecB;		// X{gSR} 7 LorentzVector()
+  TLorentzVector mSgmB;		// X{gSR} 7 LorentzVector()
 
   // SleepMS, InitDt used by AnimatedConnect and Travel.
-  Int_t		mSleepMS;	// X{GS} 7 Value(-range=>[10,10000,1])
-  Float_t	mInitDt;	// X{GS} 7 Value(-range=>[0,1,1,10000])
+  Int_t		mSleepMS;	// X{gS} 7 Value(-range=>[10,10000,1])
+  Float_t	mInitDt;	// X{gS} 7 Value(-range=>[0,1,1,10000])
 
   TRandom	mRnd;
 

@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  ZHashList*	mSlides;	// X{GS} L{}
+  ZHashList*	mSlides;	// X{gS} L{}
 
 public:
   MultiBoard(const Text_t* n="MultiBoard", const Text_t* t=0) :

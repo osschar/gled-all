@@ -16,11 +16,11 @@ private:
   void _init();
 
 protected:
-  ZGlass*	mRoot;		// X{GS} L{}
+  ZGlass*	mRoot;		// X{gS} L{}
 
-  Int_t		mDepth;		// X{GS} 7 Value(-range=>[-1,100,1,1])
-  Bool_t	bFollowLinks;	// X{GS} 7 Bool()
-  Bool_t	bFollowLists;	// X{GS} 7 Bool()
+  Int_t		mDepth;		// X{gS} 7 Value(-range=>[-1,100,1,1])
+  Bool_t	bFollowLinks;	// X{gS} 7 Bool()
+  Bool_t	bFollowLists;	// X{gS} 7 Bool()
 
 public:
   ZSubTree(const Text_t* n="ZSubTree", const Text_t* t=0) : ZGlass(n,t)

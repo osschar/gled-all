@@ -18,9 +18,9 @@ private:
   void _init();
 
 protected:
-  Lamp*		mLamp;	  // X{GS} L{} RnrBits zero
-  Bool_t	bTurnOn;  // X{GS} 7 Bool(-join=>1)
-  Bool_t	bTurnOff; // X{GS} 7 Bool()
+  Lamp*		mLamp;	  // X{gS} L{} RnrBits zero
+  Bool_t	bTurnOn;  // X{gS} 7 Bool(-join=>1)
+  Bool_t	bTurnOff; // X{gS} 7 Bool()
 
 public:
   LampLink(const Text_t* n="LampLink", const Text_t* t=0) : ZGlass(n,t) { _init(); }

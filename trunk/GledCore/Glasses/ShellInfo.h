@@ -17,11 +17,11 @@ private:
   void _init();
 
 protected:
-  ZList*	mNests;		// X{GS} L{l}
-  ZGlass*	mBeta;		// X{GS} L{}
-  ZGlass*	mGamma;		// X{GS} L{}
+  ZList*	mNests;		// X{gS} L{l}
+  ZGlass*	mBeta;		// X{gS} L{}
+  ZGlass*	mGamma;		// X{gS} L{}
 
-  Bool_t	bSpawnNests;	// X{GS} 7 Bool()
+  Bool_t	bSpawnNests;	// X{gS} 7 Bool()
 public:
   ShellInfo(const Text_t* n="ShellInfo", const Text_t* t=0) :
     NestInfo(n,t) { _init(); }

@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  ZHashList*	mEunuchs;	// X{GS} L{}
+  ZHashList*	mEunuchs;	// X{gS} L{}
 
   virtual void bootstrap();
 

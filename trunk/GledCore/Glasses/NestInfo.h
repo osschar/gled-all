@@ -23,7 +23,7 @@ private:
   void _init();
 
 protected:
-  ZList*	mPupils;	// X{GS} L{l}
+  ZList*	mPupils;	// X{gS} L{l}
 
   Bool_t	bSpawnPupils;	// X{GS} 7 Bool()
 

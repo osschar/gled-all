@@ -22,13 +22,13 @@ class ZHistoDir {
 protected:
   TDirectory*		mDir;		// X{g}
 
-  const ZHisto*		mHisto;		// X{g}
+  ZHisto*		mHisto;		// X{g}
 #ifndef __CINT__
   mName2HistoGroup_t	mName2Group;
 #endif
 
 public:
-  ZHistoDir(const ZHisto* n, const Text_t* name, const Text_t* title);
+  ZHistoDir(ZHisto* n, const Text_t* name, const Text_t* title);
   virtual ~ZHistoDir();
 
   void AddGroup(const Text_t* name, const Text_t* title);

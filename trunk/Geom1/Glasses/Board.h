@@ -18,15 +18,15 @@ class Board : public ZNode {
 protected:
   void _init();
 
-  ZImage*	mTexture;	// X{GS} L{} RnrBits{2,0,4,0, 0,0,0,0}
-  Float_t	mTexX0;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
-  Float_t	mTexY0;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000])
-  Float_t	mTexX1;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
-  Float_t	mTexY1;         // X{GS} 7 Value(-range=>[-1e3,1e3,1,1000])
+  ZImage*	mTexture;	// X{gS} L{} RnrBits{2,0,4,0, 0,0,0,0}
+  Float_t	mTexX0;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY0;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000])
+  Float_t	mTexX1;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY1;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000])
 
-  Float_t	mULen;		// X{GS}  7 Value(-range=>[0,1000,1,100],-join=>1)
-  Float_t	mVLen;		// X{GS}  7 Value(-range=>[0,1000,1,100])
-  bool		bFillBack;	// X{GS}  7 Bool(-join=>1);
+  Float_t	mULen;		// X{gS}  7 Value(-range=>[0,1000,1,100],-join=>1)
+  Float_t	mVLen;		// X{gS}  7 Value(-range=>[0,1000,1,100])
+  bool		bFillBack;	// X{gS}  7 Bool(-join=>1);
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
 public:

@@ -24,8 +24,8 @@ private:
 
 protected:
   TString		mLogin;			// X{GS} 7 TextOut()
-  ZIdentity*		mPrimaryIdentity;	// X{GS} L{}
-  ZHashList*		mActiveIdentities;	// X{GS} L{}
+  ZIdentity*		mPrimaryIdentity;	// X{gS} L{}
+  ZHashList*		mActiveIdentities;	// X{gS} L{}
 
 public:
   ZMirEmittingEntity(const Text_t* n="ZMirEmittingEntity", const Text_t* t=0) :

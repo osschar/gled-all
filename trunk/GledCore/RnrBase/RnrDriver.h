@@ -24,31 +24,31 @@ class Lamp_GL_Rnr;
 
 class RnrDriver {
 protected:
-  Eye*		mEye;		// X{G}
+  Eye*		mEye;		// X{g}
 
   string	mRnrName;	// X{RGs}
-  bool		bUseOwnRnrs;	// X{Gs} True for all but GL
-  bool		bDryRun;	// X{Gs} Don't render, create Rnrs
+  bool		bUseOwnRnrs;	// X{gs} True for all but GL
+  bool		bDryRun;	// X{gs} Don't render, create Rnrs
 
-  int		mMaxDepth;	// X{Gs} Max render level
-  lpZGlass_t	mPMStack;	// X{G}  Position Matrix Node Stack
+  int		mMaxDepth;	// X{gs} Max render level
+  lpZGlass_t	mPMStack;	// X{g}  Position Matrix Node Stack
 
-  int		mMaxLamps;	// X{G}
+  int		mMaxLamps;	// X{g}
   A_Rnr**	mLamps;
   
-  bool		bRnrPureGlasses; // X{Gs}
-  bool		bRnrNames;	 // X{Gs}
-  bool		bRnrTiles;	 // X{Gs}
-  bool		bRnrFrames;	 // X{Gs}
-  Float_t	mNameOffset;	 // X{Gs}
+  bool		bRnrPureGlasses; // X{gs}
+  bool		bRnrNames;	 // X{gs}
+  bool		bRnrTiles;	 // X{gs}
+  bool		bRnrFrames;	 // X{gs}
+  Float_t	mNameOffset;	 // X{gs}
 
-  Int_t		mTextSize;	 // X{Gs}
+  Int_t		mTextSize;	 // X{gs}
   ZColor	mTextCol;	 // X{pr}
   ZColor	mTileCol;	 // X{pr}
   string	mTilePos;	 // X{rGs}
 
-  int		mWidth;		 // X{Gs}
-  int		mHeight;	 // X{Gs}
+  int		mWidth;		 // X{gs}
+  int		mHeight;	 // X{gs}
 
   void fill_rnrelem_vec(OptoStructs::A_GlassView* gv,
 			const GledViewNS::RnrBits& bits,

@@ -30,7 +30,7 @@ protected:
   bool		_firstp;
 
   PupilInfo*	mInfo;
-  OptoStructs::ZGlassView* mRoot;  // X{G}
+  OptoStructs::ZGlassView* mRoot;  // X{g}
 
   RnrDriver*	mDriver;
 

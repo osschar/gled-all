@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  GlobalLamps*		mGlobLamps; // X{GS} L{l} RnrBits{3,0,7,0}
+  GlobalLamps*		mGlobLamps; // X{gS} L{l} RnrBits{3,0,7,0}
 
 public:
   Scene(const Text_t* n="Scene", const Text_t* t=0) : ZNode(n,t) { _init(); }

@@ -11,9 +11,9 @@
 
 ClassImp(ZHisto)
 
-const ZGlass* ZHisto::GetGlass() const
+ZGlass* ZHisto::GetGlass()
 {
-  return dynamic_cast<const ZGlass*>(this);
+  return dynamic_cast<ZGlass*>(this);
 }
 
 ZHistoManager* ZHisto::GetZHistoManager()

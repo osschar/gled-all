@@ -60,21 +60,21 @@ private:
 
 protected:
 
-  ZKing*	mKing;		  //! X{G}
+  ZKing*	mKing;		  //! X{g}
 
-  Bool_t	bMandatory;	  //  X{GS} 7 Bool(-join=>1)
-  Bool_t	bFollowDeps;	  //  X{GS} 7 Bool() Used by fire-space queens
+  Bool_t	bMandatory;	  //  X{gS} 7 Bool(-join=>1)
+  Bool_t	bFollowDeps;	  //  X{gS} 7 Bool() Used by fire-space queens
 
-  Bool_t	bRuling;	  //! X{GS} 7 BoolOut(-join=>1)
-  Bool_t	bAwaitingSceptre; //! X{GS} 7 BoolOut()
-  QueenState_e	mState;	          //! X{GS} 7 PhonyEnum(-const=>1, -width=>12)
+  Bool_t	bRuling;	  //! X{gS} 7 BoolOut(-join=>1)
+  Bool_t	bAwaitingSceptre; //! X{gS} 7 BoolOut()
+  QueenState_e	mState;	          //! X{gS} 7 PhonyEnum(-const=>1, -width=>12)
 
-  ID_t		mMinID;		// X{G} 7 ValOut(-range=>[0,MAX_ID], -width=>8, -join=>1)
-  ID_t		mMaxID;		// X{G} 7 ValOut(-range=>[0,MAX_ID], -width=>8)
-  ID_t		mIDSpan;	// X{G} 7 ValOut(-join=>1)
-  ID_t		mIDsUsed;	// X{G} 7 ValOut()
-  ID_t		mIDsPurged;	// X{G} 7 ValOut(-join=>1)
-  ID_t		mIDsFree;	// X{G} 7 ValOut()
+  ID_t		mMinID;		// X{g} 7 ValOut(-range=>[0,MAX_ID], -width=>8, -join=>1)
+  ID_t		mMaxID;		// X{g} 7 ValOut(-range=>[0,MAX_ID], -width=>8)
+  ID_t		mIDSpan;	// X{g} 7 ValOut(-join=>1)
+  ID_t		mIDsUsed;	// X{g} 7 ValOut()
+  ID_t		mIDsPurged;	// X{g} 7 ValOut(-join=>1)
+  ID_t		mIDsFree;	// X{g} 7 ValOut()
 
   typedef map<ID_t, LensDetails*>		QueenIDMap_t;
   typedef map<ID_t, LensDetails*>::iterator	QueenIDMap_i;
@@ -84,24 +84,24 @@ protected:
   ID_t		mCreationID;	//  Creation point ID
   lID_t		mPurgatory;	//  List of released but still reserved ids
 
-  UShort_t	mAvgPurgLen;	// X{GS} 7 Value(-range=>[1,65000,1], -width=>5, -join=>1)
-  Float_t	mSgmPurgLen;	// X{GS} 7 Value(-range=>[0,1,1,100], -width=>5)
-  UInt_t	mPurgedMS;	// X{GS} 7 Value(-range=>[100,1e6,10], -width=>7, -join=>1)
-  UInt_t	mDeletedMS;	// X{GS} 7 Value(-range=>[100,1e6,10], -width=>7)
+  UShort_t	mAvgPurgLen;	// X{gS} 7 Value(-range=>[1,65000,1], -width=>5, -join=>1)
+  Float_t	mSgmPurgLen;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>5)
+  UInt_t	mPurgedMS;	// X{gS} 7 Value(-range=>[100,1e6,10], -width=>7, -join=>1)
+  UInt_t	mDeletedMS;	// X{gS} 7 Value(-range=>[100,1e6,10], -width=>7)
 
-  ZeroRCPolicy_e mZeroRCPolicy; // X{GS} 7 PhonyEnum()
+  ZeroRCPolicy_e mZeroRCPolicy; // X{gS} 7 PhonyEnum()
 
-  Bool_t	bStamping;	// X{GS} 7 Bool()
+  Bool_t	bStamping;	// X{gS} 7 Bool()
 
-  UChar_t	mAuthMode;      // X{GS} 7 PhonyEnum(-type=>AuthMode_e, -width=>12)
-  UChar_t	mAlignment;     // X{GS} 7 PhonyEnum(-type=>Align_e)
-  UChar_t	mMapNoneTo;     // X{GS} 7 PhonyEnum(-type=>ZMirFilter::Result_e,
+  UChar_t	mAuthMode;      // X{gS} 7 PhonyEnum(-type=>AuthMode_e, -width=>12)
+  UChar_t	mAlignment;     // X{gS} 7 PhonyEnum(-type=>Align_e)
+  UChar_t	mMapNoneTo;     // X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e,
                                 //                   -names=>[R_Allow,R_Deny])
 
-  ZMirFilter*	mProtector;     // X{GS} L{}
+  ZMirFilter*	mProtector;     // X{gS} L{}
 
-  ZHashList*	mDeps;          // X{GS} L{}
-  ZHashList*	mOrphans;       // X{GS} L{}
+  ZHashList*	mDeps;          // X{gS} L{}
+  ZHashList*	mOrphans;       // X{gS} L{}
 
   lpSaturnInfo_t mReflectors;	//!
 

@@ -18,12 +18,12 @@ private:
   void _init();
 
 protected:
-  Bool_t	bStrongNone;	// X{GS} 7 Bool(-join=>1)
-  Bool_t	bPreemptNone;	// X{GS} 7 Bool()
-  Bool_t	bPreemptAllow;	// X{GS} 7 Bool(-join=>1)
-  Bool_t	bPreemptDeny;	// X{GS} 7 Bool()
+  Bool_t	bStrongNone;	// X{gS} 7 Bool(-join=>1)
+  Bool_t	bPreemptNone;	// X{gS} 7 Bool()
+  Bool_t	bPreemptAllow;	// X{gS} 7 Bool(-join=>1)
+  Bool_t	bPreemptDeny;	// X{gS} 7 Bool()
 
-  ZHashList*	mFilters;	// X{GS} L{}
+  ZHashList*	mFilters;	// X{gS} L{}
 
 public:
   ZFilterAggregator(const Text_t* n="ZFilterAggregator", const Text_t* t=0) :

@@ -77,9 +77,9 @@ protected:
 
   // Cluster structure
 
-  SaturnInfo*	mMaster;	// X{GS} L{}
-  ZHashList*	mMoons;		// X{GS} L{}
-  ZHashList*	mEyes;		// X{GS} L{}
+  SaturnInfo*	mMaster;	// X{gS} L{}
+  ZHashList*	mMoons;		// X{gS} L{}
+  ZHashList*	mEyes;		// X{gS} L{}
 
   void create_lists();
 

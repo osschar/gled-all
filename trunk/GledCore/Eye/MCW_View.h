@@ -67,7 +67,7 @@ class MCW_View : public Fl_Window, public Fl_SWM_Client
  protected:
   string		mTitle;
 
-  FTW_Shell*		mShell;   // X{G}
+  FTW_Shell*		mShell;   // X{g}
   GledNS::MethodInfo*	mMInfo;
 
   Fl_Pack*		mPack;

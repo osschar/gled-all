@@ -20,8 +20,8 @@ class FTW_Ant : public Fl_Group, public OptoStructs::ZLinkView {
   friend class FTW_Shell;
   friend class FTW::Locator;
 protected:
-  FTW_Leaf*		mParent; // X{G} needed for method request propagation, decollapses
-  FTW_Leaf*		mLeaf;	 // X{G} sub-leaf (if expanded)
+  FTW_Leaf*		mParent; // X{g} needed for method request propagation, decollapses
+  FTW_Leaf*		mLeaf;	 // X{g} sub-leaf (if expanded)
   bool			bExpanded;
   bool			bExpandIfCan;
   // Sub weeds

@@ -23,9 +23,9 @@ class FTW_Leaf : public Fl_Pack, public OptoStructs::A_GlassView {
 private:
   Int_t			mIter;
 protected:
-  FTW_Nest*		mNest;	 // X{G}
-  FTW_Leaf*		mParent; // X{G}
-  Int_t			mLevel;	 // X{Gs}
+  FTW_Nest*		mNest;	 // X{g}
+  FTW_Leaf*		mParent; // X{g}
+  Int_t			mLevel;	 // X{gs}
   bool			bIsListMember;
   bool			bIsLinkDescendant;
 

@@ -20,9 +20,9 @@ private:
   void _init();
 
 protected:
-  ZHashList*		mActiveMMEs;	// X{GS} L{}
+  ZHashList*		mActiveMMEs;	// X{gS} L{}
 
-  ZMirFilter*		mAllowThis;	// X{GS} L{}
+  ZMirFilter*		mAllowThis;	// X{gS} L{}
 
 public:
   ZIdentity(const Text_t* n="ZIdentity", const Text_t* t=0) : ZGlass(n,t) { _init(); }

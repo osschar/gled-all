@@ -61,12 +61,12 @@ private:
   void finalize_build();
 
 protected:
-  NestInfo*	 mNestInfo;	// X{G}
+  NestInfo*	 mNestInfo;	// X{g}
   FTW::PupilAm*	 pPupilAm;
 
   int		 mW;
-  FTW_Shell*	 mShell;	// X{G}
-  FTW_Nest_Ctrl* pCtrl;		// X{G}
+  FTW_Shell*	 mShell;	// X{g}
+  FTW_Nest_Ctrl* pCtrl;		// X{g}
 
   FTW::Locator	 mPoint;	// X{r}
   FTW::Locator	 mMark;		// X{r}
@@ -82,17 +82,17 @@ protected:
   Fl_Pack*	 mPack;
   Fl_Scroll*	 mScroll;
 
-  bool		bLinksShown;	// X{G}
+  bool		bLinksShown;	// X{g}
   bool		bCustomWeedsCreated;
-  bool		bAntsReversed;	// X{G}
+  bool		bAntsReversed;	// X{g}
 
-  MTW_Layout*	pLayout;	// X{G}
+  MTW_Layout*	pLayout;	// X{g}
   Fl_Pack*	wMidPack;
   Fl_Box*	wSepBox;
   Fl_Box*	wCustomTitle;
   Fl_Group*	wCustomLabels;
 
-  Fl_Output*	wInfoBar;	// X{G}
+  Fl_Output*	wInfoBar;	// X{g}
 
   void create_custom_weeds();
   void show_custom_weeds();

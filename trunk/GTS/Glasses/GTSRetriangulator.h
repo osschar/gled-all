@@ -23,20 +23,20 @@ private:
   void _init();
 
 protected:
-  GTSurf*		mTarget;      // X{GS} L{}
+  GTSurf*		mTarget;      // X{gS} L{}
 
-  StopOpts_e		mStopOpts;    // X{GS} 7 PhonyEnum(-join=>1)
-  UInt_t		mStopNumber;  // X{GS} 7 Value(-range=>[6,1e8,1,1])
-  Double_t		mStopCost;    // X{GS} 7 Value(-range=>[0,1e9,1,100])
+  StopOpts_e		mStopOpts;    // X{gS} 7 PhonyEnum(-join=>1)
+  UInt_t		mStopNumber;  // X{gS} 7 Value(-range=>[6,1e8,1,1])
+  Double_t		mStopCost;    // X{gS} 7 Value(-range=>[0,1e9,1,100])
 
-  CostOpts_e		mCostOpts;        // X{GS} 7 PhonyEnum()
-  Double_t		mVO_VolumeWght;   // X{GS} 7 Value(-join=>1, -range=>[0,1e9,1,100])
-  Double_t		mVO_BoundaryWght; // X{GS} 7 Value(-join=>1, -range=>[0,1e9,1,100])
-  Double_t		mVO_ShapeWght;    // X{GS} 7 Value(-range=>[0,1e9,1,100])
+  CostOpts_e		mCostOpts;        // X{gS} 7 PhonyEnum()
+  Double_t		mVO_VolumeWght;   // X{gS} 7 Value(-join=>1, -range=>[0,1e9,1,100])
+  Double_t		mVO_BoundaryWght; // X{gS} 7 Value(-join=>1, -range=>[0,1e9,1,100])
+  Double_t		mVO_ShapeWght;    // X{gS} 7 Value(-range=>[0,1e9,1,100])
 
-  MidvertOpts_e		mMidvertOpts; // X{GS} 7 PhonyEnum()
+  MidvertOpts_e		mMidvertOpts; // X{gS} 7 PhonyEnum()
 
-  Double_t		mMinAngleDeg; // X{GS} 7 Value(-range=>[0,180,1,1000])
+  Double_t		mMinAngleDeg; // X{gS} 7 Value(-range=>[0,180,1,1000])
 public:
   GTSRetriangulator(const Text_t* n="GTSRetriangulator", const Text_t* t=0) : ZGlass(n,t) { _init(); }
 

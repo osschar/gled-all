@@ -10,7 +10,7 @@
 
 ClassImp(ZHistoDir)
 
-ZHistoDir::ZHistoDir(const ZHisto* n, const Text_t* name, const Text_t* title) :
+ZHistoDir::ZHistoDir(ZHisto* n, const Text_t* name, const Text_t* title) :
   mHisto(n)
 {
   mDir = new TDirectory(name, title);

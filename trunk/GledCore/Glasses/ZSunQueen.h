@@ -25,10 +25,10 @@ private:
   void _init();
 
 protected:
-  SaturnInfo*		mSunInfo;       // X{GS} L{}
+  SaturnInfo*		mSunInfo;       // X{gS} L{}
 
-  ZIdentity*		mSaturnGuestId; // X{GS} L{}
-  ZIdentity*		mEyeGuestId;    // X{GS} L{}
+  ZIdentity*		mSaturnGuestId; // X{gS} L{}
+  ZIdentity*		mEyeGuestId;    // X{gS} L{}
 
   virtual ID_t incarnate_moon(SaturnInfo* parent, SaturnInfo* moon);
   virtual ID_t incarnate_eye(SaturnInfo* parent, EyeInfo* eye);

@@ -15,34 +15,34 @@ private:
   Double_t	hKappa;
   Double_t	hEscapeVelocity;
 
-  Float_t	mScale;		// X{GS} 7 Value(-range=>[0,10,1,1000], -join=>1)
-  Int_t		mLOD;		// X{GS} 7 Value(-range=>[1,50,1,1])
+  Float_t	mScale;		// X{gS} 7 Value(-range=>[0,10,1,1000], -join=>1)
+  Int_t		mLOD;		// X{gS} 7 Value(-range=>[1,50,1,1])
   ZColor	mEColor;	// X{PGS} 7 ColorButt(-join=>1)
   ZColor	mMColor;	// X{PGS} 7 ColorButt()
   ZColor	mSColor;	// X{PGS} 7 ColorButt(-join=>1)
-  Float_t	mRShell;	// X{GS} 7 Value(-range=>[0,1,1,100])
+  Float_t	mRShell;	// X{gS} 7 Value(-range=>[0,1,1,100])
   ZColor	mTColor;	// X{PGS} 7 ColorButt(-join=>1)
-  Float_t	mTWidth;	// X{GS}  7 Value(-range=>[0,20,1,100])
+  Float_t	mTWidth;	// X{gS}  7 Value(-range=>[0,20,1,100])
 
   void _init();
 
 protected:
-  ODECrawler*	mODECrawler;	// X{GS} L{}
+  ODECrawler*	mODECrawler;	// X{gS} L{}
 
-  Float_t	mT0Moon;	// X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
-  Float_t	mRMoon;		// X{GS} 7 Value(-range=>[0,100,1,1000])
-  Float_t	mMMoon;		// X{GS} 7 Value(-range=>[0,100,1,1000], -join=>1)
-  Float_t	mDMoon;		// X{GS} 7 Value(-range=>[0,1000,1,1000])
+  Float_t	mT0Moon;	// X{gS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
+  Float_t	mRMoon;		// X{gS} 7 Value(-range=>[0,100,1,1000])
+  Float_t	mMMoon;		// X{gS} 7 Value(-range=>[0,100,1,1000], -join=>1)
+  Float_t	mDMoon;		// X{gS} 7 Value(-range=>[0,1000,1,1000])
 
-  Float_t	mT;		// X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1, -width=>6)
-  Float_t	mT0;		// X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1, -width=>6)
-  Float_t	mT1;		// X{GS} 7 Value(-range=>[-1000,1000,1,1000], -width=>6)
+  Float_t	mT;		// X{gS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1, -width=>6)
+  Float_t	mT0;		// X{gS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1, -width=>6)
+  Float_t	mT1;		// X{gS} 7 Value(-range=>[-1000,1000,1,1000], -width=>6)
 
-  Float_t	mLat;		// X{GS} 7 Value(-range=>[-90,90,1,100], -join=>1)
-  Float_t	mLon;		// X{GS} 7 Value(-range=>[-180,180,1,100])
-  Float_t	mTheta;		// X{GS} 7 Value(-range=>[-90,90,1,100], -join=>1)
-  Float_t	mPhi;		// X{GS} 7 Value(-range=>[-90,90,1,100])
-  Float_t	mV0;		// X{GS} 7 Value(-range=>[0,10,1,10000])
+  Float_t	mLat;		// X{gS} 7 Value(-range=>[-90,90,1,100], -join=>1)
+  Float_t	mLon;		// X{gS} 7 Value(-range=>[-180,180,1,100])
+  Float_t	mTheta;		// X{gS} 7 Value(-range=>[-90,90,1,100], -join=>1)
+  Float_t	mPhi;		// X{gS} 7 Value(-range=>[-90,90,1,100])
+  Float_t	mV0;		// X{gS} 7 Value(-range=>[0,10,1,10000])
 
   ZVec3D MoonPos(Double_t t) const;
 
