@@ -23,7 +23,7 @@ void ZGlLightModel_GL_Rnr::Draw(RnrDriver* rd)
 {
   ZGlLightModel& x = *mZGlLightModel;
 
-  switch(x.mLigtModelOp) {
+  switch(x.mLightModelOp) {
   case ZGlStateBase::GSO_On:
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, x.mLiMoAmbient());
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL, x.mLiMoColorCtrl);
