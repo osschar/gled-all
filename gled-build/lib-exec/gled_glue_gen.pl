@@ -60,6 +60,7 @@ for $c (@{ $CATALOG->{ClassList} }) {
 # E_Demangle
 print C <<"fnord";
 void lib${libname}_Mir_Exec(ZGlass *lens, ZMIR& mir) {
+  static const string _eh("lib${libname}_Mir_Exec dynamic_cast to ");
   switch(mir.Cid) {
 fnord
 
@@ -67,7 +68,7 @@ for $c (@{ $CATALOG->{ClassList} }) {
   print C <<"fnord";
   case $CATALOG->{Classes}{$c}{ClassID}: {
     $c* _true_node = dynamic_cast<$c*>(lens);
-    if(!_true_node) throw(string("doogl moogl failed for $c"));
+    if(!_true_node) throw(_eh + "glass '$c' failed.");
     _true_node->ExecuteMir(mir);
     break;
   }
@@ -75,7 +76,7 @@ fnord
 }
 
 print C <<"fnord";
-  default: { throw(string("doogl moogl failed for unknown cid")); }
+  default: { throw(_eh + "unknown ClassID."); }
   } // switch
 }
 fnord
