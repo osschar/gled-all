@@ -31,8 +31,11 @@ void FTW_Branch::build_leoim()
 
 void FTW_Branch::wipe_leoim()
 {
-  for(lLoI_i i=mLeoim.begin(); i!=mLeoim.end(); ++i)
-    delete i->leaf;
+  if(bLeavesCreated) {
+    for(lLoI_i i=mLeoim.begin(); i!=mLeoim.end(); ++i)
+      delete i->leaf;
+    bLeavesCreated = false;
+  }
   mLeoim.clear();
 }
 
@@ -134,7 +137,6 @@ void FTW_Branch::AbsorbRay(Ray& ray)
     bool was_expanded = bListExpanded;
     if(bListExpanded)  CollapseList();
     wipe_leoim();
-    bLeavesCreated = false;
     build_leoim();
     if(was_expanded)   ExpandList();
     label_namebox();
@@ -144,7 +146,7 @@ void FTW_Branch::AbsorbRay(Ray& ray)
   case RQN_list_clear: {
     bool was_expanded = bListExpanded;
     if(bListExpanded)  CollapseList();
-    if(bLeavesCreated) wipe_leoim();
+    wipe_leoim();
     if(was_expanded)   ExpandList();
     label_namebox();
     return;
