@@ -49,7 +49,7 @@ protected:
   ZNode*	mUpReference;	// X{gE} L{}
   UChar_t	mUpRefAxis;	// X{gS} 7 Value(-range=>[1,3,1,1], -join=>1)
   Bool_t	bUpRefLockDir;	// X{gS} 7 Bool()
-  Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,40,1,100])
+  Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,90,1,100])
 
   Projection_e	mProjMode;	// X{GS} 7 PhonyEnum()
   Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1,180,1,100], -join=>1)
