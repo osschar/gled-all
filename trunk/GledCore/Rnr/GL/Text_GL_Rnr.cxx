@@ -43,20 +43,25 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
   }
   if(mText->bBlend) {
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   } else {
     glDisable(GL_BLEND);
   }
 
   int width, ascent, descent;
   GLTextNS::txfGetStringMetrics(txf, mText->mText.Data(), mText->mText.Length(),
-				&width, &ascent, &descent);
+				width, ascent, descent);
   if(mText->bAbsSize) {
     ascent  = txf->max_ascent;
     descent = txf->max_descent;
   }
   int   h_box = ascent + descent;
   float scale = 1.0/h_box;
+
+  glPushMatrix();
+  if(mText->bCenter) {
+    glTranslatef(-width/2.0*scale, 0, 0);
+  }
 
   if(mText->bBorder) {
 
@@ -71,7 +76,9 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
     float x1 = (float)width/h_box + mText->mXBorder;
     float y0 = -mText->mYBorder   - float(descent)/(h_box);
     float y1 =  mText->mYBorder   + float(ascent)/(h_box);
+
     glColor4fv(mText->mBGCol());
+
     glBegin(GL_QUADS);
     glVertex2f(x0, y0);
     glVertex2f(x1, y0);
@@ -89,11 +96,11 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
   }
 
   glColor4fv(mText->mFGCol());
-  glPushMatrix();
   glScalef(scale, scale, 1);
   glEnable(GL_TEXTURE_2D);
   GLTextNS::txfBindFontTexture(txf);
   GLTextNS::txfRenderString(txf, mText->mText.Data(), mText->mText.Length());
+
   glPopMatrix();
 
   glPopAttrib();
