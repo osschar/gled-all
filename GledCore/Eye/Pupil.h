@@ -29,6 +29,8 @@ class Pupil : public FTW_SubShell,
 private:
   static Fl_Gl_Window* gl_ctx_holder;
 
+  void _build();
+
 protected:
 
   PupilInfo*	mInfo;
@@ -59,7 +61,9 @@ public:
   static Pupil* Create_Pupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
 
 
-  Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int w=0, int h=0);
+  Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int w=640, int h=480);
+  Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg,
+	int x, int y, int w, int h);
   virtual ~Pupil();
 
   virtual void AbsorbRay(Ray& ray);
