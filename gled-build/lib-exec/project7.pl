@@ -499,6 +499,7 @@ while($c !~ m!\G\s*$!osgc) {
 	my $control = eval("new GLED::Widgets::".$view);
 	die "$view can not be instantiated ..." unless defined $control;
 	push @Views, $control;
+	$control->{TOP} = $member;
 	$weed_done = 1;
 	print "\tView $view\n" if $DEBUG;
       }
@@ -540,10 +541,10 @@ while($c !~ m!\G\s*$!osgc) {
 	print "\t$x->[0]\t$x->[1]\n";
       }
     }
+    my $member = {};
     if($methodname eq $CLASSNAME && not $VirtualBase) {
       # Here was constructor-glue.
     } elsif($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o) {
-      my $member = {};
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
 
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
@@ -585,6 +586,7 @@ while($c !~ m!\G\s*$!osgc) {
       #print $view."\n";
       $view =~ s/,\)/)/;
       my $control = eval("new GLED::Widgets::"."$view") or die;
+      $control->{TOP} = $member;
       push @Views, $control;
       print "\tView\t$view\n" if $DEBUG;
     }
@@ -711,6 +713,14 @@ for $r (@Members) {
       $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
 		 $GetSetMap{$r->{Type}}->{SetMeth} :
 		 " = $r->{Args}[0][2]") . ";\n";
+    }
+
+    if(exists $r->{Ray}) {
+      $post = "  ";
+      for $f (split(/\s*,\s*/, $r->{Ray})) {
+	$post .= "Emit${f}Ray(); ";
+      }
+      $post .= "\n";
     }
     print H7 "  ${pre}${setit}${stamp}${post}}\n";
   }
