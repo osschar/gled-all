@@ -24,10 +24,11 @@ class FTW_Leaf;
 // !!!! Pupil should be A_View of its PupilInfo
 // !!!! Need locator support
 
-class Pupil : public Fl_Gl_Window
+class Pupil : public Fl_Gl_Window, public OptoStructs::A_View
 {
 
 protected:
+  bool		_firstp;
 
   PupilInfo*	mInfo;
   FTW_Leaf*	mLeaf;
@@ -44,15 +45,23 @@ protected:
   bool		bJustCamera;
   bool		bFollowBase;
 
-  char		mLabel[128];		
-  void		Label();
+  string	mLabel;		
+  void		label_window();
+
+  GLTextNS::TexFont* mTexFont;
 
   bool		bFullScreen;
   int		mFSx, mFSy, mFSw, mFSh;
 
+  bool		bDumpImage;
+  TString	mImageName;
+  void		dump_image();
+
 public:
-  Pupil(PupilInfo* info, OptoStructs::ZGlassView* zgv, int w=640, int h=480);
+  Pupil(OptoStructs::ZGlassImg* infoimg, OptoStructs::ZGlassView* zgv, int w=0, int h=0);
   virtual ~Pupil();
+
+  virtual void AbsorbRay(Ray& ray);
 
   void SetProjection1();
   void SetProjection2();
@@ -67,7 +76,7 @@ public:
   void Pick();
 
   virtual void draw();
-  virtual void draw_overlay();
+  // virtual void draw_overlay();
   virtual int  handle(int ev);
 
   ////////////////////////////////////////////////////////////////
