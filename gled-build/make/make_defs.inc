@@ -43,7 +43,8 @@ MKDEPFLAGS	=-cc /lib/cpp -Y -w 666
 GLLIB	  = -lGL -lGLU
 FLLIB	  = -lfltk -lfltk_gl -lfltk-mt
 
-ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lCint -lGraf -lGraf3d -lGpad \
+ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lThread -lCint \
+		-lGraf -lGraf3d -lGpad \
 		-lHist -lHistPainter -lMatrix -lPhysics \
                 -lPostscript  -lRint -lTree # -lProof -lNew
 ROOTGLIBS = -lGui -lGX11
