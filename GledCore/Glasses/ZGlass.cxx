@@ -46,6 +46,8 @@ void ZGlass::_init()
   mTimeStamp = mStampReqTring = 0;
   pSetYNameCBs = 0;
   mStamp_CB = mStampLink_CB = 0; mStamp_CBarg = mStampLink_CBarg = 0;
+
+  bUseDispList = false;
 }
 
 /**************************************************************************/

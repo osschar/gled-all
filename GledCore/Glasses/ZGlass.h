@@ -164,6 +164,9 @@ public:
   void UpdateAllViews();    //! X{E} 7 MButt()
   void ReTriangulate();     //! X{E} 7 MButt(-join=>1)
   void RebuildRnrScheme();  //! X{E} 7 MButt()
+protected:
+  Bool_t bUseDispList;      // X{GST} 7 Bool()
+public:
 
   string Identify() const;
 
