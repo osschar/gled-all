@@ -37,25 +37,34 @@ private:
   float*	mV;
   float*	mN;
   float*	mC;
+  float*	mT;
   bool		bColP;
+  bool		bTexP;
 
 public:
   TubeTvor();
   ~TubeTvor();
 
-  void Init(bool colp, Int_t npoles, Int_t nrings, Int_t nphi);
+  void Init(Int_t npoles, Int_t nrings, Int_t nphi,
+	    bool colp=false, bool texp=false);
   void NewRing(Int_t n, bool dp);
-  void NewVert(float *v, float *n, float *c);
+  void NewVert(float *v, float *n, float *c=0, float* t=0);
 }; // endclass GL_TubeTvor
 
 inline void
-TubeTvor::NewVert(float *v, float *n, float *c) {
-  Int_t i = mI*3;
+TubeTvor::NewVert(float *v, float *n, float *c, float *t) {
+  {
+  const int i = mI*3;
   mV[i] = v[0]; mV[i+1] = v[1]; mV[i+2] = v[2];
   mN[i] = n[0]; mN[i+1] = n[1]; mN[i+2] = n[2];
+  }
   if(bColP) {
-    i += mI;
+    const int i = mI*4;
     mC[i] = c[0]; mC[i+1] = c[1]; mC[i+2] = c[2]; mC[i+3] = c[3];
+  }
+  if(bTexP) {
+    const int i = mI*2;
+    mT[i] = t[0]; mT[i+1] = t[1];
   }
   ++mI;
 }

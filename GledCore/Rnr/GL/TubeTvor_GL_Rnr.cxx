@@ -1,7 +1,7 @@
 // $#Header$
 
 #include "TubeTvor_GL_Rnr.h"
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 
@@ -11,13 +11,13 @@ void TubeTvor_GL_Rnr::TriangleFan(vRingInfo_i r1, vRingInfo_i r2)
     if(r1->fNVert==1) {
       glArrayElement(r1->fIndex);
       Int_t M = r2->fIndex + r2->fNVert;
-      for(int i=r2->fIndex; i<M; i++) glArrayElement(i);
-      glArrayElement(r2->fIndex);
+      for(int i=r2->fIndex; i<=M; i++) glArrayElement(i);
+      //glArrayElement(r2->fIndex);
     } else {
       glArrayElement(r2->fIndex);
       Int_t M = r1->fIndex + r1->fNVert - 1;
-      for(int i=M; i>=r1->fIndex; i--) glArrayElement(i);
-      glArrayElement(M);
+      for(int i=M+1; i>=r1->fIndex; i--) glArrayElement(i);
+      //glArrayElement(M);
     }
   } glEnd();
 }
@@ -25,10 +25,10 @@ void TubeTvor_GL_Rnr::TriangleFan(vRingInfo_i r1, vRingInfo_i r2)
 void TubeTvor_GL_Rnr::QuadStrip(vRingInfo_i r1, vRingInfo_i r2)
 {
   glBegin(GL_QUAD_STRIP); {
-    for(int j=0; j<r1->fNVert; j++) {
+    for(int j=0; j<=r1->fNVert; j++) {
       glArrayElement(r1->fIndex+j); glArrayElement(r2->fIndex+j);
     }
-    glArrayElement(r1->fIndex); glArrayElement(r2->fIndex);	
+    // glArrayElement(r1->fIndex); glArrayElement(r2->fIndex);	
   } glEnd();
 }
 
@@ -44,6 +44,10 @@ void TubeTvor_GL_Rnr::Render(TubeTvor* ttvor)
   if(ttvor->bColP) {
     glColorPointer(4, GL_FLOAT, 0, ttvor->mC);
     glEnableClientState(GL_COLOR_ARRAY);
+  }
+  if(ttvor->bTexP) {
+    glTexCoordPointer(2, GL_FLOAT, 0, ttvor->mT);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
   vRingInfo_i i = ttvor->mRings.begin();
