@@ -1,5 +1,53 @@
 2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Ephra/Saturn.h:
+	* Eye/Eye.h:
+	* Eye/FTW_Ant.h:
+	* Eye/FTW_Leaf.h:
+	* Eye/FTW_Nest.h:
+	* Eye/MCW_View.h:
+	* Eye/MTW_Layout.h:
+	* Eye/Pupil.h:
+	* Glasses/Eventor.h:
+	* Glasses/EyeInfo.h:
+	* Glasses/LampLink.h:
+	* Glasses/NestInfo.h:
+	* Glasses/PerfMeterOperator.h:
+	* Glasses/PupilInfo.h:
+	* Glasses/SaturnInfo.h:
+	* Glasses/SaturnObserver.h:
+	* Glasses/Scene.h:
+	* Glasses/ScreenDumper.h:
+	* Glasses/ShellInfo.h:
+	* Glasses/Text.h:
+	* Glasses/ZEunuch.h:
+	* Glasses/ZFilterAggregator.h:
+	* Glasses/ZFireQueen.h:
+	* Glasses/ZGlass.h:
+	* Glasses/ZIdentity.h:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.h:
+	* Glasses/ZKing.h:
+	* Glasses/ZMethodTagPreFilter.h:
+	* Glasses/ZMirEmittingEntity.h:
+	* Glasses/ZNodeLink.h:
+	* Glasses/ZQueen.h:
+	* Glasses/ZSubTree.h:
+	* Glasses/ZSunQueen.h:
+	* Gled/GThread.h:
+	* Gled/Gled.h:
+	* GledView/GledGUI.h:
+	* RnrBase/RnrDriver.h:
+	* Stones/ZComet.h:
+	* Stones/ZHisto.cxx:
+	* Stones/ZHisto.h:
+	* Stones/ZHistoDir.cxx:
+	* Stones/ZHistoDir.h:
+	Const-correctness changes (project7 now properly generates const
+	Get methods).
+
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Eye/FTW.cxx:
 	* Eye/FTW.h:
 	* Eye/FltkGledStuff.cxx:

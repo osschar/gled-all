@@ -1,3 +1,11 @@
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.h:
+	Const-correctness changes (project7 now properly generates const
+	Get methods).
+
 2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:
