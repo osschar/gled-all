@@ -30,13 +30,7 @@ class FTW_Branch : public FTW_Leaf {
 	     bool is_list_member, bool is_link_desc);
   virtual ~FTW_Branch();
 
-  // ZListView::
-  virtual void AssertDependantViews();
-  virtual void CopyListViews(OptoStructs::lpA_GlassView_t& v);
-
   virtual void AbsorbRay(Ray& ray);
-
-  virtual void AssertListRnrs(const string& rnr);
 
   virtual void CollExpList();
   virtual void ExpandList();

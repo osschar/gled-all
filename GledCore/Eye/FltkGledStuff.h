@@ -60,7 +60,6 @@ namespace FltkGledStuff {
     FID_t	fFID;
 
     LensNameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h);
-    ~LensNameBox();
 
     virtual void AbsorbRay(Ray& ray);
 

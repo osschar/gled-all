@@ -77,7 +77,6 @@ FTW_Shell::FTW_Shell(OS::ZGlassImg* img, const Fl_SWM_Manager* swm_copy) :
   mEye = fImg->fEye;
   mShellInfo = dynamic_cast<ShellInfo*>(fImg->fGlass);
   assert(mShellInfo);
-  fImg->CheckInFullView(this);
 
   OS::ZGlassImg* nests_img = mEye->DemanglePtr(mShellInfo->GetNests());
   pNestAm = new FTW::NestAm(this, nests_img);
@@ -144,7 +143,6 @@ FTW_Shell::FTW_Shell(OS::ZGlassImg* img, const Fl_SWM_Manager* swm_copy) :
 FTW_Shell::~FTW_Shell()
 {
   delete pNestAm;
-  if(fImg) fImg->CheckOutFullView(this);
 }
 
 /**************************************************************************/
@@ -220,7 +218,7 @@ void FTW_Shell::X_SetLink(FTW::Locator& target)
   if(!target.is_link)		throw(_eh + "target is not a link");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
 
-  GNS::MethodInfo* mi = target.ant->fLinkDatum->fLinkInfo->fSetMethod;
+  GNS::MethodInfo* mi = target.ant->GetLinkInfo()->fSetMethod;
   auto_ptr<ZMIR> mir (mSource->generate_MIR(mi, target.get_leaf_glass()));
   fImg->fEye->Send(*mir);
 }
@@ -233,7 +231,7 @@ void FTW_Shell::X_ClearLink(FTW::Locator& target)
   if(!target.is_link) throw(_eh + "target is not a link");
 
   ZMIR mir(target.get_leaf_id(), 0);
-  GNS::MethodInfo* mi = target.ant->fLinkDatum->fLinkInfo->fSetMethod;
+  GNS::MethodInfo* mi = target.ant->GetLinkInfo()->fSetMethod;
   mi->ImprintMir(mir);
   mi->FixMirBits(mir, mEye->GetSaturn()->GetSaturnInfo());
   fImg->fEye->Send(mir);

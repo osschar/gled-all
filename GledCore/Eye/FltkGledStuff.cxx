@@ -69,11 +69,6 @@ FGS::LensNameBox::LensNameBox(OS::ZGlassImg* i, int x, int y, int w, int h) :
   ChangeImage(i);
 }
 
-FGS::LensNameBox::~LensNameBox()
-{
-  if(fImg) fImg->CheckOutFullView(this);
-}
-
 /**************************************************************************/
 
 void FGS::LensNameBox::AbsorbRay(Ray& ray)
@@ -83,8 +78,7 @@ void FGS::LensNameBox::AbsorbRay(Ray& ray)
     auto_label(); return;
   }
   if(ray.fRQN == RQN_death) {
-    ChangeImage(0);
-    return;
+    ChangeImage(0); return;
   }
 }
 
@@ -102,9 +96,7 @@ void FGS::LensNameBox::ChangeImage(OS::ZGlassImg* new_img)
     return;
   }
 
-  if(fImg) fImg->CheckOutFullView(this);
-  fImg = new_img;
-  if(fImg) fImg->CheckInFullView(this);
+  SetImg(new_img);
   auto_label();
 }
 

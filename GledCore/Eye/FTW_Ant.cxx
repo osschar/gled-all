@@ -28,9 +28,9 @@ cb_ant_list_collexp(Fl_Button* b, FTW_Ant* a) {
 // FTW_Ant
 /**************************************************************************/
 
-FTW_Ant::FTW_Ant(OS::ZGlassImg* from, OS::ZLinkDatum* ld, FTW_Leaf* p) :
+FTW_Ant::FTW_Ant(OS::ZLinkDatum* ld, FTW_Leaf* p) :
   Fl_Group(0,0,1,1),
-  OS::ZLinkView(from, p, ld),
+  OS::ZLinkView(ld),
   mParent(p), mLeaf(0),
   bExpanded(false), bExpandIfCan(false)
 {
@@ -47,7 +47,7 @@ FTW_Ant::FTW_Ant(OS::ZGlassImg* from, OS::ZLinkDatum* ld, FTW_Leaf* p) :
   wName = new FTW::NameButton(this, 0,0,1,1);
   wName->color(FTW::background_color);
   wName->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
-  wName->label(fLinkDatum->fLinkInfo->fName.c_str());
+  wName->label(GetLinkInfo()->fName.c_str());
 
   label_weeds();
   resizable(0);
@@ -67,13 +67,7 @@ void FTW_Ant::Update()
   bExpanded = false;
   ZLinkView::Update();
   label_weeds();
-  if(fToImg && (bExpandIfCan || was_expanded)) CollExp();
-}
-
-/**************************************************************************/
-
-OptoStructs::A_GlassView* FTW_Ant::GetView() {
-  return ((mLeaf != 0) ? mLeaf : ZLinkView::GetView());
+  if(fToGlass && (bExpandIfCan || was_expanded)) CollExp();
 }
 
 /**************************************************************************/
@@ -82,7 +76,7 @@ void FTW_Ant::CollExp() {
   if(bExpanded) {
     mParent->CollapseLink(this);
   } else {
-    if(fToImg) mParent->ExpandLink(this);
+    if(fToGlass) mParent->ExpandLink(this);
   }
 }
 
@@ -91,7 +85,7 @@ void FTW_Ant::ListExpander() {
     mLeaf->CollapseList();
     mParent->CollapseLink(this);
   } else {
-    if(fToImg) mParent->ExpandLink(this);
+    if(fToGlass) mParent->ExpandLink(this);
     if(mLeaf) mLeaf->ExpandList();
   }
 }
@@ -112,11 +106,11 @@ void FTW_Ant::label_weeds() {
     wExpander->label("@#->");
   } else {
     wExpander->label("@#->|");
-    if(!fToImg) wExpander->labelcolor(FL_DARK_RED);
+    if(!GetToImg()) wExpander->labelcolor(FL_DARK_RED);
   }
   wExpander->redraw();
 
-  if(fToImg && fToImg->fIsList) {
+  if(IsList()) {
     wListExpander->labelcolor(FL_BLACK);
   } else {
     wListExpander->labelcolor(FL_DARK_RED);

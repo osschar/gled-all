@@ -231,7 +231,6 @@ void FTW_Nest::_build(int w, int h)
 {
   mNestInfo = dynamic_cast<NestInfo*>(fImg->fGlass);
   assert(mNestInfo);
-  fImg->CheckInFullView(this);
 
   OS::ZGlassImg* pupils_img = fImg->fEye->DemanglePtr(mNestInfo->GetPupils());
   pPupilAm = new FTW::PupilAm(this, pupils_img);
@@ -393,7 +392,6 @@ FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int
 FTW_Nest::~FTW_Nest() {
   // !!!! here should clear all locator consumers with destroy_base()!!!!
   delete pPupilAm;
-  fImg->CheckOutFullView(this);
   delete pCtrl;
   delete pLayout;
 }

@@ -69,7 +69,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
 		   OS::ZGlassImg* img,
 		   bool is_list_member, bool is_link_desc) :
   Fl_Pack(0,0,1,1),
-  A_GlassView(img),
+  A_View(img),
   mNest(nest), mParent(parent),
   bIsListMember(is_list_member), bIsLinkDescendant(is_link_desc)
 {
@@ -103,7 +103,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
 
   wAntPack = new Fl_Pack(0,0,1,1); wAntPack->type(FL_HORIZONTAL);
   for(OS::lZLinkDatum_i l=fImg->fLinkData.begin(); l!=fImg->fLinkData.end(); ++l) {
-    FTW_Ant* a = new FTW_Ant(fImg, &(*l), this);
+    FTW_Ant* a = new FTW_Ant(&(*l), this);
   }
   wAntPack->end();
 
@@ -126,23 +126,6 @@ FTW_Leaf::~FTW_Leaf() {
 
 /**************************************************************************/
 
-void FTW_Leaf::AssertDependantViews() {
-  for(int c=0; c<wAntPack->children(); ++c) {
-    FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    if(a->fToImg && !a->mLeaf)
-      a->fToImg->AssertDefView();
-  }
-}
-
-void FTW_Leaf::CopyLinkViews(OS::lpZLinkView_t& v)
-{
-  for(int c=0; c<wAntPack->children(); ++c) {
-    FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    v.push_back(a);
-  }
-}
-
-/**************************************************************************/
 void FTW_Leaf::AbsorbRay(Ray& ray)
 {
   // No parental absorber!
@@ -175,10 +158,11 @@ void FTW_Leaf::AbsorbRay(Ray& ray)
 /**************************************************************************/
 
 void FTW_Leaf::ExpandLink(FTW_Ant* ant) {
-  if(ant->bExpanded || ant->fToImg==0) return;
+  OS::ZGlassImg* to_img = ant->GetToImg();
+  if(ant->bExpanded || to_img==0) return;
   if(ant->mLeaf == 0) {
-    ant->mLeaf = FTW_Leaf::Construct(mNest, this, ant->fToImg, false, true);
-    ant->mLeaf->wIndentBox->label(ant->fLinkDatum->fLinkInfo->fName.c_str());
+    ant->mLeaf = FTW_Leaf::Construct(mNest, this, to_img, false, true);
+    ant->mLeaf->wIndentBox->label(ant->GetLinkInfo()->fName.c_str());
     ant->mLeaf->wIndentBox->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT);
     ant->mLeaf->wIndentBox->labelsize(ant->mLeaf->wIndentBox->labelsize() - 4);
     FTW_Leaf* after = 0;
@@ -212,7 +196,7 @@ void FTW_Leaf::ExpandLinks() {
   int  n_children = wAntPack->children();
   for(int c=0; c<n_children; ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(reverse ? n_children-c-1  : c) );
-    if(a->fToImg && ! a->bExpanded) ExpandLink(a);
+    if(a->GetToImg() && ! a->bExpanded) ExpandLink(a);
   }
   label_weeds();
 }
@@ -220,7 +204,7 @@ void FTW_Leaf::ExpandLinks() {
 void FTW_Leaf::CollapseLinks() {
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    if(a->fToImg && a->bExpanded) CollapseLink(a);
+    if(a->GetToImg() && a->bExpanded) CollapseLink(a);
   }
   label_weeds();
 }
@@ -235,8 +219,8 @@ float FTW_Leaf::FractionOfExpandedAnts() {
   float n_expanded=0, n_nonnull=0;
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    if(a->fToImg)    ++n_nonnull;
-    if(a->bExpanded) ++n_expanded;
+    if(a->GetToImg()) ++n_nonnull;
+    if(a->bExpanded)  ++n_expanded;
   }
   return n_expanded / n_nonnull;
 }
@@ -312,7 +296,7 @@ void FTW_Leaf::resize_weeds() {
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>(wAntPack->child(c));
     int name_w = ant_w ? ant_w :
-      FGS::swm_label_width(a->fLinkDatum->fLinkInfo->fName, cell_w);
+      FGS::swm_label_width(a->GetLinkInfo()->fName, cell_w);
     a->resize_weeds(name_w, 2, 1);
   }
   wAntPack->size(1,1);

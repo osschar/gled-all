@@ -31,7 +31,6 @@ protected:
   bool		_firstp;
 
   PupilInfo*	mInfo;
-  OptoStructs::ZGlassView* mRoot;  // X{g}
 
   RnrDriver*	mDriver;
 
@@ -58,8 +57,7 @@ protected:
   void		dump_image();
 
 public:
-  Pupil(OptoStructs::ZGlassImg* infoimg, OptoStructs::ZGlassView* zgv,
-	FTW_Shell* shell, int w=0, int h=0);
+  Pupil(OptoStructs::ZGlassImg* infoimg, FTW_Shell* shell, int w=0, int h=0);
   virtual ~Pupil();
 
   virtual void AbsorbRay(Ray& ray);

@@ -113,18 +113,15 @@ void Pupil::dump_image()
 
 /**************************************************************************/
 
-Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv,
-	     FTW_Shell* shell, int w, int h) :
+Pupil::Pupil(OS::ZGlassImg* infoimg, FTW_Shell* shell, int w, int h) :
   OS::A_View(infoimg), FTW_Shell_Client(shell),
   Fl_Gl_Window(w,h),
-  mInfo(0), mRoot(zgv),
+  mInfo(0),
   mCameraView(0), mCameraViewWin(0),
   mCamBase(0)
 {
-  if(fImg) {
-    fImg->CheckInFullView(this);
-    mInfo = dynamic_cast<PupilInfo*>(fImg->fGlass);
-  }
+  mInfo = dynamic_cast<PupilInfo*>(fImg->fGlass);
+  assert(mInfo);
 
   end();
   label_window();
@@ -132,7 +129,7 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv,
   resizable(this);
   size_range(0, 0, 4096, 4096);
 
-  mDriver = new RnrDriver(zgv->fImg->fEye, "GL");
+  mDriver = new RnrDriver(fImg->fEye, "GL");
 
   mCamera = new Camera;
 
@@ -181,7 +178,6 @@ Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv,
 Pupil::~Pupil() {
   // notify eye ... Shell, that is ... !!!!
   delete mCamera;
-  if(fImg) fImg->CheckOutFullView(this);
 }
 
 /**************************************************************************/
@@ -439,7 +435,7 @@ void Pupil::Render()
 
   mDriver->SetMaxDepth(mInfo->GetMaxDepth());
   mDriver->InitLamps();
-  mDriver->Render(mRoot);
+  mDriver->Render(mDriver->GetRnr(fImg));
   for(int l=0; l<mDriver->GetMaxLamps(); ++l) {
     if(mDriver->GetLamps()[l] != 0) {
       // cout <<"Pupil cleaning-up a dirty lamp ...\n";
@@ -541,7 +537,7 @@ void Pupil::Pick()
 
       UInt_t id = x[m-1];
 
-      OS::ZGlassImg* root_img = mRoot->fImg->fEye->DemangleID(id);
+      OS::ZGlassImg* root_img = fImg->fEye->DemangleID(id);
       if(!root_img) {
 	printf("Pupil::Pick root_img null for id=%d.\n", id);
 	continue;
@@ -555,7 +551,7 @@ void Pupil::Pick()
       // fill gd.parents list with contents of the pick record
       for(int j=m-2; j>=0; --j) {
 	UInt_t p_id = x[j];
-	OS::ZGlassImg* img = mRoot->fImg->fEye->DemangleID(p_id);
+	OS::ZGlassImg* img = fImg->fEye->DemangleID(p_id);
 	if(!img) {
 	  printf("Pupil::Pick parent img null for id=%d.\n", p_id);
 	  continue;
@@ -877,7 +873,7 @@ int Pupil::handle(int ev)
       return 1;
 
     case FL_F+1:
-      mShell->SpawnMTW_View(mRoot->fImg);
+      mShell->SpawnMTW_View(fImg);
       return 1;
 
     case FL_F+2:

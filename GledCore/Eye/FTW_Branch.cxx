@@ -61,28 +61,6 @@ FTW_Branch::~FTW_Branch() {
 
 /**************************************************************************/
 
-void FTW_Branch::AssertDependantViews()
-{
-  FTW_Leaf::AssertDependantViews();
-  if(bLeavesCreated) return;
-  for(lLoI_i l=mLeoim.begin(); l!=mLeoim.end(); ++l) {
-    l->img->AssertDefView();
-  }
-}
-
-void FTW_Branch::CopyListViews(OS::lpA_GlassView_t& v) {
-  if(bLeavesCreated) {
-    for(lLoI_i l=mLeoim.begin(); l!=mLeoim.end(); ++l) {
-      v.push_back(l->leaf);
-    }
-  } else {
-    for(lLoI_i l=mLeoim.begin(); l!=mLeoim.end(); ++l) {
-      v.push_back(l->img->fDefView);
-    }
-  }
-}
-
-/**************************************************************************/
 void FTW_Branch::AbsorbRay(Ray& ray)
 {
   using namespace RayNS;
@@ -154,20 +132,6 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 
   } // end switch ray.fRQN
   FTW_Leaf::AbsorbRay(ray);
-}
-
-/**************************************************************************/
-
-void FTW_Branch::AssertListRnrs(const string& rnr) {
-  if(bLeavesCreated) {
-    for(lLoI_i l=mLeoim.begin(); l!=mLeoim.end(); ++l) {
-      l->leaf->AssertRnr(rnr);
-    }
-  } else {
-    for(lLoI_i l=mLeoim.begin(); l!=mLeoim.end(); ++l) {
-      l->img->fDefView->AssertRnr(rnr);
-    }
-  }
 }
 
 /**************************************************************************/
