@@ -8,9 +8,9 @@
 #define GledCore_ZGlLightModel_GL_RNR_H
 
 #include <Glasses/ZGlLightModel.h>
-#include <Rnr/GL/ZGlass_GL_Rnr.h>
+#include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 
-class ZGlLightModel_GL_Rnr : public ZGlass_GL_Rnr {
+class ZGlLightModel_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:
   void _init();
 
@@ -18,7 +18,7 @@ protected:
   ZGlLightModel*	mZGlLightModel;
 
 public:
-  ZGlLightModel_GL_Rnr(ZGlLightModel* idol) : ZGlass_GL_Rnr(idol), mZGlLightModel(idol) {}
+  ZGlLightModel_GL_Rnr(ZGlLightModel* idol) : ZRnrModBase_GL_Rnr(idol), mZGlLightModel(idol) {}
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

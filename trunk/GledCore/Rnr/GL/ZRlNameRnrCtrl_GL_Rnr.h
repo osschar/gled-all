@@ -8,10 +8,10 @@
 #define GledCore_ZRlNameRnrCtrl_GL_RNR_H
 
 #include <Glasses/ZRlNameRnrCtrl.h>
-#include <Rnr/GL/ZGlass_GL_Rnr.h>
+#include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 #include <GledView/GLTextNS.h>
 
-class ZRlNameRnrCtrl_GL_Rnr : public ZGlass_GL_Rnr {
+class ZRlNameRnrCtrl_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:
   void _init();
 
@@ -21,7 +21,7 @@ protected:
 
 public:
   ZRlNameRnrCtrl_GL_Rnr(ZRlNameRnrCtrl* idol) :
-    ZGlass_GL_Rnr(idol), mZRlNameRnrCtrl(idol) { _init(); }
+    ZRnrModBase_GL_Rnr(idol), mZRlNameRnrCtrl(idol) { _init(); }
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

@@ -8,9 +8,9 @@
 #define GledCore_ZGlMaterial_GL_RNR_H
 
 #include <Glasses/ZGlMaterial.h>
-#include <Rnr/GL/ZGlass_GL_Rnr.h>
+#include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 
-class ZGlMaterial_GL_Rnr : public ZGlass_GL_Rnr {
+class ZGlMaterial_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:
   void _init();
 
@@ -18,7 +18,7 @@ protected:
   ZGlMaterial*	mZGlMaterial;
 
 public:
-  ZGlMaterial_GL_Rnr(ZGlMaterial* idol) : ZGlass_GL_Rnr(idol), mZGlMaterial(idol) {}
+  ZGlMaterial_GL_Rnr(ZGlMaterial* idol) : ZRnrModBase_GL_Rnr(idol), mZGlMaterial(idol) {}
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

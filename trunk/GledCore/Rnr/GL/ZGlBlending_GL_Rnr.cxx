@@ -16,7 +16,7 @@ void ZGlBlending_GL_Rnr::_init()
 
 void ZGlBlending_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // Ignore ZGlass::PreDraw
+  // Ignore ZRnrModBase::PreDraw
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POINT_BIT |
                GL_LINE_BIT         | GL_FOG_BIT);
   SetupGL();
@@ -29,7 +29,7 @@ void ZGlBlending_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlBlending_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  // Ignore ZGlass::PostDraw
+  // Ignore ZRnrModBase::PostDraw
   glPopAttrib();
 }
 
@@ -40,22 +40,22 @@ void ZGlBlending_GL_Rnr::SetupGL()
   ZGlBlending& x = *mZGlBlending;
 
   switch(x.mBlendOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glBlendFunc(x.mBSrcFac, x.mBDstFac);
     glBlendEquation(x.mBEquation);
     glBlendColor(x.mBConstCol.r(), x.mBConstCol.g(), x.mBConstCol.b(), x.mBConstCol.a());
     glEnable(GL_BLEND);
     break;
-  case ZGlStateBase::GSO_Off:
+  case ZRnrModBase::O_Off:
     glDisable(GL_BLEND);
     break;
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }
 
   switch(x.mAntiAliasOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glPointSize(x.mPointSize);
     glHint(GL_POINT_SMOOTH_HINT, x.mPointHint);
     if(x.bPointSmooth)
@@ -70,17 +70,17 @@ void ZGlBlending_GL_Rnr::SetupGL()
     else
       glDisable(GL_LINE_SMOOTH);
     break;
-  case ZGlStateBase::GSO_Off:
+  case ZRnrModBase::O_Off:
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     break;
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }
 
   switch(x.mFogOp) {
-  case ZGlStateBase::GSO_On:
+  case ZRnrModBase::O_On:
     glFogi(GL_FOG_MODE, x.mFogMode);
     glHint(GL_FOG_HINT, x.mFogHint);
     glFogfv(GL_FOG_COLOR, x.mFogColor());
@@ -89,10 +89,10 @@ void ZGlBlending_GL_Rnr::SetupGL()
     glFogf(GL_FOG_END, x.mFogEnd);
     glEnable(GL_FOG);
     break;
-  case ZGlStateBase::GSO_Off:
+  case ZRnrModBase::O_Off:
     glDisable(GL_FOG);
     break;
-  case ZGlStateBase::GSO_Nop:
+  case ZRnrModBase::O_Nop:
   default:
     break;
   }
