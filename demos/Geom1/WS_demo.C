@@ -5,6 +5,11 @@
 //
 // vars: ZQueen* scenes
 // libs: Geom1
+
+#include <glass_defines.h>
+#include <gl_defines.h>
+
+void WS_demo()
 {
   if(Gled::theOne->GetSaturn() == 0) {
     gROOT->Macro("sun.C");
@@ -47,12 +52,24 @@
   scenes->CheckIn(n);
   l->Add(n);
 
+  CREATE_ADD_GLASS(image1, ZImage, wsdemo, "Photon", 0);
+  image1->SetFile("photon.png");
+  image1->Load();
+  image1->SetEnvMode(GL_MODULATE);
+  image1->SetLoadAdEnlight(true);
+
+  CREATE_ADD_GLASS(image2, ZImage, wsdemo, "Gluon", 0);
+  image2->SetFile("gluon.png");
+  image2->Load();
+  image2->SetLoadAdEnlight(true);
+
   WSSeed* seed1 = new WSSeed();
   seed1->SetFat(true);
+  seed1->SetTexture(image1);
   scenes->CheckIn(seed1); wsdemo->Add(seed1);
 
   Int_t NP = 10;
-  WSPoint *points[NP];
+  WSPoint **points = new WSPoint[NP];
   for(int i=0; i<NP; ++i) {
     points[i] = new WSPoint(GForm("Point %d",i+1));
     double phi = i*TMath::Pi()/4;
