@@ -14,6 +14,7 @@
 #include <FL/Fl_Window.H>
 
 class FTW_Shell;
+class Fl_Menu_Button;
 class Fl_Menu_Item;
 
 // Use this one in a public part of a Fl_Widget descendant
@@ -147,14 +148,18 @@ namespace FltkGledStuff {
   class MenuBox : public Fl_Button {
   private:
     void _init();
+
   protected:
-    Fl_Menu_Item* fMenuItem;
+    Fl_Menu_Item*   fMenuItem;
+    Fl_Menu_Button* fMenuButton;
+
   public:
     MenuBox(int x, int y, int w, int h, const char* t=0);
     MenuBox(Fl_Menu_Item* mi, int w, int h, const char* t=0);
+    virtual ~MenuBox();
 
     Fl_Menu_Item* menu_item()        { return fMenuItem; }
-    void menu_item(Fl_Menu_Item* mi) { fMenuItem = mi; }
+    void menu_item(Fl_Menu_Item* mi);
 
     virtual int handle(int ev);
   };
