@@ -22,8 +22,8 @@ public:
   GTime(Init_e i) { SetNow(); }
   GTime(const GTime& t) : mSec(t.mSec), mMuSec(t.mMuSec) {}
 
-  void SetNow();
-  void TimeUntilNow();
+  void  SetNow();
+  GTime TimeUntilNow();
 
   GTime& operator+=(const GTime& t);
   GTime& operator-=(const GTime& t);

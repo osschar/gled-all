@@ -21,11 +21,11 @@ void GTime::SetNow()
   mMuSec = t.tv_usec;
 }
 
-void GTime::TimeUntilNow()
+GTime GTime::TimeUntilNow()
 {
-  GTime n;
+  GTime n(Now);
   n -= *this;
-  *this = n;
+  return n;
 }
 
 /**************************************************************************/
