@@ -7,6 +7,7 @@
 #ifndef GledCore_OptoStructs_H
 #define GledCore_OptoStructs_H
 
+#include <Glasses/ZGlass.h>
 #include <GledView/GledViewNS.h>
 #include <Net/Ray.h>
 
@@ -17,15 +18,13 @@ class Fl_Window;
 
 namespace OptoStructs {
 
-  struct ZGlassView;
+  struct ZGlassImg;
+  typedef list<ZGlassImg*>              lpZGlassImg_t;
+  typedef list<ZGlassImg*>::iterator    lpZGlassImg_i;
 
   struct A_View;
   typedef list<A_View*>			lpA_View_t;
   typedef list<A_View*>::iterator	lpA_View_i;
-
-  struct A_GlassView;
-  typedef list<A_GlassView*>		lpA_GlassView_t;
-  typedef list<A_GlassView*>::iterator	lpA_GlassView_i;
 
   class ZLinkView;
   typedef list<ZLinkView*>		lpZLinkView_t;
@@ -45,23 +44,24 @@ namespace OptoStructs {
     GledNS::ClassInfo*	fClassInfo;
 
     bool		fIsList;
-    ZGlassView*		fDefView;
     lZLinkDatum_t	fLinkData;
+    lpZGlassImg_t*	fElementImgs; // Should NOT be accessed directly.
+
+    A_Rnr*		fDefRnr;
 
     Fl_Window*		fFullMTW_View;
-    lpA_View_t		fFullViews;
-    lpA_View_t		fLinkViews;
+    lpA_View_t		fViews;
 
     ZGlassImg(Eye* e, ZGlass* g);
     ~ZGlassImg();
 
-    void CheckInFullView(A_View* v)  { fFullViews.push_back(v); }
-    void CheckOutFullView(A_View* v) { fFullViews.remove(v); }
-    void CheckInLinkView(A_View* v)  { fLinkViews.push_back(v); }
-    void CheckOutLinkView(A_View* v) { fLinkViews.remove(v); }
+    void PreAbsorption(Ray& ray);
+    void PostAbsorption(Ray& ray);
 
-    void CreateDefView();
-    void AssertDefView();
+    void CheckInView(A_View* v)  { fViews.push_back(v); }
+    void CheckOutView(A_View* v) { fViews.remove(v); }
+
+    lpZGlassImg_t* GetElementImgs();
   };
 
   typedef list<ZGlassImg*>			  lpZGlassImg_t;
@@ -74,139 +74,58 @@ namespace OptoStructs {
   /**************************************************************************/
 
   struct ZLinkDatum {
-    GledNS::LinkMemberInfo*	fLinkInfo;
-    ZGlassImg*			fOwnerImg;
-    ZGlass*& 			fLinkRef;
+    ZGlassImg*      fImg;
+    ZGlass::LinkRep fLinkRep;
+    ZGlass*         fToGlass;
+    ZGlassImg*      fToImg;
 
-    ZLinkDatum(GledNS::LinkMemberInfo* lmi, ZGlassImg* i, ZGlass*& lr) :
-      fLinkInfo(lmi), fOwnerImg(i), fLinkRef(lr) {}
+    ZLinkDatum(ZGlassImg* img, ZGlass::LinkRep& lrep) :
+      fImg(img),
+      fLinkRep(lrep), fToGlass(lrep.fLinkRef), fToImg(0) {}
+
+    GledNS::LinkMemberInfo* GetLinkInfo() { return fLinkRep.fLinkInfo; }
+    ZGlass*&                GetLinkRef () { return fLinkRep.fLinkRef;  }
+
+    ZGlass*    GetToGlass() { return fToGlass; }
+    ZGlassImg* GetToImg();
   };
 
   /**************************************************************************/
-  // A_View: base of all views
+  // A_View: base of all lens views
   /**************************************************************************/
 
   struct A_View {
     ZGlassImg*	fImg;
 
-    A_View(ZGlassImg* i) : fImg(i) {}
-    virtual ~A_View() {}
+    A_View(ZGlassImg* i) : fImg(i) { if(fImg) fImg->CheckInView(this);  }
+    virtual ~A_View()              { if(fImg) fImg->CheckOutView(this); }
+
+    virtual void SetImg(ZGlassImg* newimg);
 
     virtual void AbsorbRay(Ray& ray) {}
-
-    virtual void InvalidateRnrScheme() {}
   };
 
   /**************************************************************************/
-  // A_GlassView: abstract interface for all Glass views
+  // ZLinkView: A link representation with state.
   /**************************************************************************/
 
-  struct A_GlassView : public A_View {
-    // abstract interface to link/list info
-    // also owns rnr and rnr_scheme ptrs
-    // ctor/dtor do check-in / check-out
-
-    A_Rnr*	fRnr;
-    RnrScheme*	fRnrScheme;
-
-    A_GlassView(ZGlassImg* i);
-    virtual ~A_GlassView();
-
-    virtual void AssertDependantViews() = 0;
-
-    virtual void CopyLinkViews(lpZLinkView_t& v) {}
-    virtual void CopyListViews(lpA_GlassView_t& v) {}
-
-    virtual const GledViewNS::RnrCtrl& GetRnrCtrl()
-    { return fImg->fClassInfo->fViewPart->fDefRnrCtrl; }
-
-    virtual const GledViewNS::RnrBits& GetRnrBits()
-    { return GetRnrCtrl().fRnrBits; }
-
-    virtual A_Rnr* GetRnr(const string& rnr)
-    { return fRnr; }
-
-    virtual void   SpawnRnr(const string& rnr);
-    virtual void   AssertRnr(const string& rnr)
-    { if(fRnr == 0) SpawnRnr(rnr); }
-
-    virtual void   AssertListRnrs(const string& rnr) {}
-
-    virtual void InvalidateRnrScheme();
-  };
-
-  typedef list<A_GlassView*>		lpA_GlassView_t;
-  typedef list<A_GlassView*>::iterator	lpA_GlassView_i;
-
-  /**************************************************************************/
-  // ZGlassView: default view for glasses
-  /**************************************************************************/
-
-  struct ZGlassView : public A_GlassView {
-    // ctor creates LinkViews
-    // dtor wipes them
-    lpZLinkView_t	fLinkViews;
-
-    ZGlassView(ZGlassImg* img);
-    virtual ~ZGlassView();
-
-    virtual void AssertDependantViews();
-    virtual void CopyLinkViews(lpZLinkView_t& v);
-
-    virtual void AbsorbRay(Ray& ray);
-  };
-
-  typedef list<ZGlassView*>		lpZGlassView_t;
-  typedef list<ZGlassView*>::iterator	lpZGlassView_i;
-
-  /**************************************************************************/
-  // ZListView: default view for Lists (those that have no links)
-  /**************************************************************************/
-
-  struct ZListView : virtual public ZGlassView {
-    // ctor creates/obtains daugter imgs
-    lpZGlassImg_t		fDaughterImgs;
-    void build_daughters();
-
-    ZListView(ZGlassImg* img);
-    virtual ~ZListView() {}
-    virtual void AssertDependantViews();
-    virtual void CopyListViews(lpA_GlassView_t& v);
-
-    virtual void AbsorbRay(Ray& ray);
-
-    virtual void AssertListRnrs(const string& rnr);
-  };
-
-  /**************************************************************************/
-  // ZLinkView: all about a link
-  /**************************************************************************/
-
-  struct ZLinkView : public A_View {
-    // Update asserts GlassImg of lens pointed to exits
-    // Check in/out from img pointed to also done here
-    A_View*	fMasterView;
+  struct ZLinkView {
     ZLinkDatum*	fLinkDatum;
-    ZGlassImg*	fToImg;		// image of dude the link is pointing to
-    ZGlass*	fToGlass;	// Glass pointing to (or at least pointed to last)
+    ZGlass*	fToGlass; // Glass pointing to last.
 
-    ZLinkView(ZGlassImg* from, A_View* master, ZLinkDatum* ld) :
-      A_View(from), fMasterView(master), fLinkDatum(ld),
-      fToImg(0),  fToGlass(0) { Update(); }
-    virtual ~ZLinkView();
+    ZLinkView(ZLinkDatum* ld) : fLinkDatum(ld), fToGlass(0) { Update(); }
+    virtual ~ZLinkView() {}
 
-    virtual bool NeedsUpdate() { return fToGlass != fLinkDatum->fLinkRef; }
-    virtual void Update();
+    GledNS::LinkMemberInfo* GetLinkInfo() { return fLinkDatum->GetLinkInfo(); }
+    ZGlassImg* GetToImg() { return fLinkDatum->GetToImg(); }
 
-    virtual A_GlassView* GetView() { return fToImg->fDefView; }
-    // The following method never used
-    // virtual A_Rnr*       GetRnr()  { return fToImg->->fDefView->fRnr; }
-    
+    virtual bool NeedsUpdate() { return fToGlass != fLinkDatum->fToGlass; }
+    virtual void Update() { fToGlass = fLinkDatum->fToGlass; }
+
+    // !!! This might go to ZLinkDatum::GetDefRnrBits()
     virtual const GledViewNS::RnrBits& GetRnrBits() {
-      return fLinkDatum->fLinkInfo->fViewPart->fDefRnrBits;
+      return GetLinkInfo()->fViewPart->fDefRnrBits;
     }
-
-    virtual void InvalidateRnrScheme() { fMasterView->InvalidateRnrScheme(); }
   };
 
 }
