@@ -13,8 +13,8 @@
   _glass_* _var_ = new _glass_(_name_, _title_); \
   _list_->GetQueen()->CheckIn(_var_); _list_->Add(_var_)
 
-#define QUERY_GLASS(_var_, _glass_, _list_, _path_) \
-  _glass_* _var_ = _list_->Query(_path_); \
+#define PATH_FIND_GLASS(_var_, _glass_, _lens_, _path_) \
+  _glass_* _var_ = _lens_->FindLensByPath(_path_); \
   if(_var_ && GledNS::IsA(_var_, _glass_::FID())==false) _var_ = 0
 
 #endif
