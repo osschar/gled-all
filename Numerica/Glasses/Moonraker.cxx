@@ -29,7 +29,7 @@ void Moonraker::_init()
   mT0Moon = 27.3333; mRMoon = 0.2725; mMMoon = 0.0123; mDMoon = 60.0815;
   mV0 = 1;
   // cout <<"Kappa="<< hKappa <<"\tEscVel="<< hEscapeVelocity <<endl;
-  mT = 0; mDuration = 2;
+  mT = 0; mT0 = 0; mT1 = 2;
 
   mScale = 1; mLOD = 20;
   mEColor.rgba(0.2, 0.6, 0.8);
@@ -70,9 +70,11 @@ Moonraker::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d)
 void
 Moonraker::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
 {
-  v(0) = TMath::Cos(2*TMath::Pi()*mT + mLon*TMath::Pi()/180);
-  v(1) = TMath::Sin(2*TMath::Pi()*mT + mLon*TMath::Pi()/180);
-  v(2) = TMath::Sin(mLat*TMath::Pi()/180);
+  Double_t phi = 2*TMath::Pi()*mT0 + mLon*TMath::DegToRad(),
+         theta = mLat*TMath::DegToRad();
+  v(0) = TMath::Cos(phi)*TMath::Cos(theta);
+  v(1) = TMath::Sin(phi)*TMath::Cos(theta);
+  v(2) = TMath::Sin(theta);
 
   TVectorF z(3);
   for(Int_t i=0; i<3; i++) z(i) = mV0*hEscapeVelocity*v(i);
@@ -80,7 +82,7 @@ Moonraker::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
   t.Rot3Vec(z);
   for(Int_t i=0; i<3; i++) v(i + 3) = z(i);
 
-  x1 = mT; x2 = mT+mDuration;
+  x1 = mT0; x2 = mT1;
 }
 
 /**************************************************************************/

@@ -26,7 +26,7 @@ void ODECrawler::_init()
 {
   hTINY = 1e-30; hSAFETY = 0.9; hPGROW = -0.2; hPSHRNK = -0.25; hERRCON = 1.89e-4;
   mGuessesOK = mGuessesBad = mStored = 0;
-  mMaxSteps = 1000000; mStoreDx = 0.01; mStoreMax = 1000;
+  mMaxSteps = 1000000; mStoreDx = 0.001; mStoreMax = 1000;
   mXStored = mYStored = 0;
   mAcc = 1e-8; mH1 = 1e-2; mHmin = 1e-18;
   mX1 = 0; mX2 = 0;
