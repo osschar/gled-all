@@ -21,3 +21,5 @@ Mover		128	Glasses/Mover
 Sleeper		129	Glasses/Sleeper
 
 RndSMorphCreator 1024	Glasses/RndSMorphCreator
+
+GLTesterOne	2048	Glasses/GLTesterOne	.
