@@ -35,8 +35,9 @@ ZMirEmittingEntity	72	Glasses/ZMirEmittingEntity
 SaturnInfo		73	Glasses/SaturnInfo
 EyeInfo			74	Glasses/EyeInfo
 ShellInfo		75	Glasses/ShellInfo
-NestInfo		80	Glasses/NestInfo
-PupilInfo		81	Glasses/PupilInfo	.
+SubShellInfo		80	Glasses/SubShellInfo
+NestInfo		81	Glasses/NestInfo
+PupilInfo		82	Glasses/PupilInfo	.
 
 # Streaming of sub-graphs
 ZCometBag		96	Glasses/ZCometBag
