@@ -16,11 +16,16 @@ private:
 
 protected:
   WSSeed*	mWSSeed;
+  TimeStamp_t	mStampTex;
 
   void vert(WSPoint* f, Float_t t);
 
 public:
-  WSSeed_GL_Rnr(WSSeed* idol) : ZNode_GL_Rnr(idol), mWSSeed(idol) {}
+  WSSeed_GL_Rnr(WSSeed* idol) : ZNode_GL_Rnr(idol), mWSSeed(idol)
+  { mStampTex = 0; }
+
+  virtual void PreDraw(RnrDriver* rd);
+  virtual void Draw(RnrDriver* rd);
 
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd);
