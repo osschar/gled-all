@@ -51,9 +51,21 @@ void ZKing::BlessMIR(ZMIR& mir) throw(string)
 
   static string _eh("ZKing::BlessMIR() ");
 
+  // Authorization
+
+  // Allow everything if UseAuth is false
+  if(mSaturn->GetSaturnInfo()->GetUseAuth() == false) {
+    return;
+  }
+
+  // Always allow SunAbsolute access
+  if(mir.Caller->HasIdentity(mSaturn->mSunInfo->GetPrimaryIdentity())) {
+    return;
+  }
+
   UChar_t result = (mGuard != 0) ? mGuard->FilterMIR(mir) : ZMirFilter::R_None;
   if( result == ZMirFilter::R_Deny ||
-     (result == ZMirFilter::R_None && mMapNoneTo == ZMirFilter::R_Deny))
+      (result == ZMirFilter::R_None && mMapNoneTo == ZMirFilter::R_Deny))
     {
       throw(_eh + "access denied");
     }
@@ -79,6 +91,10 @@ void ZKing::Enthrone(ZQueen* queen)
   if(bFireKing) {
     queen->SetAuthMode(ZQueen::AM_None);
   }
+
+  // The first queen is mQueen. Used for emitting Rays.
+  if(mQueen == 0)
+    mQueen = queen;
 
   // should broadmoon via streaming ... or whatever.
   // perhaps solve at sun level. More like a helper for whore queens.
