@@ -4,9 +4,9 @@ LIB_SET_ID	= 2
 REQUIRES_LIB_SETS = GledCore # add
 
 BLESSED_DIRS	= Glasses
-BASE_DIRS	= Stones Geom1 
+BASE_DIRS	= Stones
 
-DICT_DIRS	= Glasses Stones Geom1
+DICT_DIRS	= Glasses Stones
 VIEW_DIRS	= FL
 VIEW_FL_DIRS	= FL
 
