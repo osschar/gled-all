@@ -1,3 +1,28 @@
+2005-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Added function FindSymbol() that uses dlsym. CINT's
+	G__findsym has problems with finding symbols from libraries linked
+	at 'compile-time' until it loads the first library
+	itself. Probably some initialization is missing.
+
+	* Eye/FTW_Shell.cxx:
+	* GledView/GledGUI.cxx:
+	Use GledNS::FindSymbol to find symbols from shared libraries.
+
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	MenuBox: added member to hold Fl_Menu_Button; need to send
+	FL_SHORTCUT events to it as well.
+
+	* Glasses/Cylinder.cxx:
+	* Glasses/Cylinder.h:
+	* Rnr/GL/Cylinder_GL_Rnr.cxx:
+	* Rnr/GL/Cylinder_GL_Rnr.h:
+	* glass.list:
+	New glass Cylinder. A generic interface to gluCylinder.
+
 2005-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Eye.cxx:
