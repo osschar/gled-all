@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -10,6 +10,8 @@
 
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Value_Input.H>
+
+#include <math.h>
 
 class Fl_TransPosCtrl : public Fl_Group {
 protected:
@@ -22,8 +24,7 @@ public:
   double y() const { return mP[1]->value(); }
   double z() const { return mP[2]->value(); }
 
-  void pos(double x, double y, double z)
-  { mP[0]->value(x); mP[1]->value(y); mP[2]->value(z); }
+  void pos(double x, double y, double z);
 
   virtual void resize(int x, int y, int w, int h);
 };
@@ -42,6 +43,8 @@ public:
   double eta() const { return mP[2]->value() * d2r; }
 
   void rot(double x, double y, double z);
+
+  double mungl(double x) { return (int)round(100*x/d2r)/100.0; }
 
   virtual void resize(int x, int y, int w, int h);
 };
