@@ -102,7 +102,40 @@ void FGS::LensNameBox::auto_label()
 
 int FGS::LensNameBox::handle(int ev)
 {
+  static const string _eh("FGS::LensNameBox::handle ");
+
+  FTW_Shell* shell = 0;
+  // !!! This shell acquiring procedure sux badly.
+  shell = grep_parent<FTW_Shell*>(this);
+  if(shell == 0) {
+    MCW_View* mcw = grep_parent<MCW_View*>(this);
+    if(mcw) shell = mcw->GetShell();
+  }
+
   switch(ev) {
+
+  case FL_PUSH:
+    switch (Fl::event_button()) {
+    case 1: return 1;
+    case 2: Fl::paste(*this); return 1;
+    }
+    break;
+
+  case FL_DRAG: {
+    if(Fl::event_state(FL_BUTTON1)) {
+      if( ! Fl::event_inside(this) && fImg != 0 ) {
+	if(shell == 0) throw(_eh + "can not reach FTW_Shell.");
+
+	ID_t id          = fImg->fGlass->GetSaturnID();
+	const char* text = GForm("%u", id);
+	shell->X_SetSource(id);
+	Fl::copy(text, strlen(text), 0);
+	Fl::dnd();
+      }
+      return 1;
+    }
+    break;
+  }
 
   case FL_DND_ENTER: {
     // could check if valid type, change cursor
@@ -119,20 +152,13 @@ int FGS::LensNameBox::handle(int ev)
   }
 
   case FL_PASTE: {
-    MCW_View* mcw = grep_parent<MCW_View*>(this);
     try {
-      ID_t source_id = mcw->GetShell()->GetSource()->get_contents();
-      ID_t paste_id = atoll(Fl::event_text());
-
-      if(source_id == paste_id) {
-	ChangeImage(mcw->GetShell()->GetEye()->DemangleID(paste_id));
-      } else {
-	throw(string("FGS::LensNameBox::handle dnd error."));
-      }
-
+      if(shell == 0) throw(_eh + "can not reach FTW_Shell.");
+      ID_t source_id = shell->GetSource()->get_contents();
+      ChangeImage(shell->GetEye()->DemangleID(source_id));
     }
     catch(string exc) {
-      mcw->GetShell()->Message(exc.c_str(), FTW_Shell::MT_err);
+      shell->Message(exc.c_str(), FTW_Shell::MT_err);
     }
     return 1;
   }

@@ -205,15 +205,15 @@ void FTW::LocatorConsumer::clear_base()
 /**************************************************************************/
 
 FTW::NameButton::NameButton(Loc_e l, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h), m_loc(l), b_dnd_tried(false)
+  : Fl_Button(x,y,w,h), m_loc(l)
 { labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 FTW::NameButton::NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h), m_loc(L_Leaf), b_dnd_tried(false)
+  : Fl_Button(x,y,w,h), m_loc(L_Leaf)
 { labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 FTW::NameButton::NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h), m_loc(L_Ant), b_dnd_tried(false)
+  : Fl_Button(x,y,w,h), m_loc(L_Ant)
 { labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 /**************************************************************************/
@@ -268,15 +268,6 @@ void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 
 /**************************************************************************/
 
-void FTW::NameButton::set_label(const char* l)
-{
-  m_name = (l != 0) ? l : "";
-  label(m_name.c_str());
-  redraw_label();
-}
-
-/**************************************************************************/
-
 int FTW::NameButton::handle(int ev)
 {
   static int x, y, dx, dy;
@@ -286,7 +277,6 @@ int FTW::NameButton::handle(int ev)
   switch(ev) {
 
   case FL_ENTER: {
-    b_dnd_tried = false;
     if(leaf) {
       leaf->GetNest()->RefBelowMouse().set(leaf, ant);
       set_nests_info_bar(leaf, ant);
@@ -308,6 +298,11 @@ int FTW::NameButton::handle(int ev)
       labelcolor(fl_color_cube(2,0,0)); value(1); redraw();
       return 1;
 
+    case 2: {
+      Fl::paste(*this);
+      return 1;
+    }
+
     case 3: {
       Locator loc(leaf->GetNest(), leaf, ant);
       FTW_Shell *shell = leaf->GetNest()->GetShell();
@@ -327,8 +322,7 @@ int FTW::NameButton::handle(int ev)
 	if(dx > w()/7) labelcolor(fl_color_cube(0,0,2));
 	else	     labelcolor(fl_color_cube(2,0,0));
 	value(1);
-      } 
-      else if(!b_dnd_tried) {
+      } else {
 	// we have just left the widget ... initiate dnd
 	const char* text = 0;
 	if(ant == 0) {
@@ -338,15 +332,13 @@ int FTW::NameButton::handle(int ev)
 	    text = GForm("%u", ant->fToImg->fGlass->GetSaturnID());
 	}
 	if(text) {
-	  // Dnd is faked via setting of direct source locator
-	  Locator* loc = new Locator(leaf->GetNest(), leaf, ant);
-	  leaf->GetNest()->GetShell()->X_SetSource(*loc);
+	  Locator loc(leaf->GetNest(), leaf, ant);
+	  leaf->GetNest()->GetShell()->X_SetSource(loc.get_contents());
 	  Fl::copy(text, strlen(text), 0);
 	  Fl::dnd();
 	}
 	labelcolor(FL_BLACK);
 	value(0);
-	b_dnd_tried = true;
       }
     } else {
       labelcolor(FL_BLACK);
@@ -399,21 +391,16 @@ int FTW::NameButton::handle(int ev)
   }
 
   case FL_PASTE: {
+    FTW_Shell* shell = leaf->GetNest()->GetShell();
     try {
-      ID_t source_id = leaf->GetNest()->GetShell()->GetSource()->get_contents();
-      ID_t paste_id = atoll(Fl::event_text());
-
-      if(source_id == paste_id) {
+      if(shell->GetSource()->has_contents()) {
 	Locator me(leaf->GetNest(), leaf, ant);
 	if(ant == 0) {
 	  leaf->GetNest()->GetShell()->X_Push(me);
 	} else {
 	  leaf->GetNest()->GetShell()->X_SetLink(me);
 	}
-      } else {
-	throw(string("FTW::NameButton::handle dnd incompatible with source"));
       }
-
     }
     catch(string exc) {
       leaf->GetNest()->GetShell()->Message(exc.c_str(), FTW_Shell::MT_err);
@@ -471,23 +458,6 @@ void FTW::NameBox::ChangeImage(OS::ZGlassImg* new_img, bool keep_label)
   }
   redraw();
 }
-
-/*
-void FTW::NameBox::Label(const char* name)
-{
-  if(name == 0) {
-    label(0);
-  } else {
-    string l(name);
-    string::size_type i = 0;
-    while((i=l.find('@',i)) != string::npos) {
-      l.insert(i, 1, '@');
-      i+=2;
-    }
-    label(l.c_str());
-  }
-}
-*/
 
 /**************************************************************************/
 /**************************************************************************/
@@ -664,7 +634,7 @@ int FTW::Inst_Selector::handle(int ev) {
 }
 
 /**************************************************************************/
-// Nest Point/Mark Selector
+// Nest Locator Selector
 /**************************************************************************/
 
 namespace {
@@ -790,6 +760,48 @@ int FTW::Locator_Selector::handle(int ev) {
 }
 
 /**************************************************************************/
+// Direct bot selector
+/**************************************************************************/
+
+FTW::Direct_Selector::Direct_Selector(Top_Selector* ts, Top_Selector::Type_e t) :
+  Bot_Selector(ts, t), Fl_Group(0,0,18,2)
+{
+  wTop = new Fl_Light_Button(0,0,6,2,"Direct");
+  wTop->selection_color(m_top->get_light_color());
+  wTop->callback((Fl_Callback*)top_set_cb, this);
+  wTop->labelfont(FL_HELVETICA_BOLD);
+
+  wNameBox = new FGS::LensNameBox(0, 6, 0, 12, 1);
+  wNameBox->box(FL_BORDER_BOX);
+
+  end();
+}
+
+void FTW::Direct_Selector::activate() {
+  wTop->color(background_color + m_top->get_active_modcol());
+  wTop->value(1);
+  redraw();
+}
+
+void FTW::Direct_Selector::deactivate() {
+  wTop->color(background_color);
+  wTop->value(0);
+  redraw();
+}
+
+ID_t FTW::Direct_Selector::get_id()
+{
+  if(wNameBox->fImg) return wNameBox->fImg->fGlass->GetSaturnID();
+  return 0;
+}
+
+void FTW::Direct_Selector::set_id(ID_t id)
+{
+  OS::ZGlassImg* img = m_top->get_shell()->GetEye()->DemangleID(id);
+  wNameBox->ChangeImage(img);
+}
+
+/**************************************************************************/
 // /dev/null selector
 /**************************************************************************/
 
@@ -847,36 +859,30 @@ FTW::Source_Selector::Source_Selector(FTW_Shell* s, int x, int y, int dw, const 
 
   b = new Fl_Box(separator_box, 0,0,1,2,0); b->color(separator_color);
 
-  //wListOpsSel = new ListOpsSelector(ListOpsSelector::T_Source);
-  //wOnListOpRem = new Fl_Button(0,0,8,2, "On ListOps remove");
-  //wOnListOpRem->align(FL_ALIGN_INSIDE | FL_ALIGN_WRAP | FL_ALIGN_TOP_LEFT);
+  wDir_Sel = new Direct_Selector(this, T_Direct);
 
   end();
 
+  wCurrent = 0;
   set_type(Top_Selector::T_Inst);
 }
 
 void FTW::Source_Selector::set_type(Type_e t)
 {
-  // could have Bot_sel* exsel
+
+  Bot_Selector* cur = 0;
   switch(t) {
-
-  case Top_Selector::T_Locator:
-    wInst_Sel->deactivate();
-    wLoc_Sel->activate();
-    break;
-
-  case Top_Selector::T_Inst:
-    wLoc_Sel->deactivate();
-    wInst_Sel->activate();
-    break;
-
+  case Top_Selector::T_Locator: cur = wLoc_Sel;  break;
+  case Top_Selector::T_Inst:    cur = wInst_Sel; break;
+  case Top_Selector::T_Direct:  cur = wDir_Sel;  break;
   default:
     cerr <<"FTW::Source_Selector::set_type wrong type "<< t <<endl;
     return;
-
   }
 
+  if(wCurrent != 0) { wCurrent->deactivate(); }
+  wCurrent = cur;
+  wCurrent->activate();
   m_cur_type = t;
 }
 
@@ -894,6 +900,9 @@ bool FTW::Source_Selector::has_contents()
   case Top_Selector::T_Inst:
     return true;
 
+  case Top_Selector::T_Direct:
+    return wDir_Sel->get_id() != 0;
+
   default:
     return false;
   }
@@ -910,6 +919,9 @@ ID_t FTW::Source_Selector::get_contents()
 
   case Top_Selector::T_Inst:
     return 0;
+
+  case Top_Selector::T_Direct:
+    return wDir_Sel->get_id();
 
   default:
     return 0;
@@ -933,12 +945,22 @@ ZMIR* FTW::Source_Selector::generate_MIR(GNS::MethodInfo* mi,
   }
 
   case Top_Selector::T_Inst: {
-    // !!!! Need fixed queen option in Instantiator
+    // !!! Need fixed queen option in Instantiator
     ZQueen* q = alpha->GetQueen();
     if(q==0) throw(string("Creator: target has no Queen"));
     return q->S_InstantiateWAttach(alpha, gamma,
 	       mi->fClassInfo->fFid.lid, mi->fClassInfo->fFid.cid, mi->fMid,
 	       wInst_Sel->get_lid(), wInst_Sel->get_cid());
+  }
+
+  case Top_Selector::T_Direct: {
+    ID_t a = alpha->GetSaturnID();
+    ID_t b = wDir_Sel->get_id();
+    ID_t g = gamma ? gamma->GetSaturnID() : 0;
+    ZMIR* mir = new ZMIR(a, b, g);
+    mi->ImprintMir(*mir);
+    return mir;
+
   }
 
   default: {
