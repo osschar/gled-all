@@ -14,7 +14,7 @@
 
 #define GlassIODef(_gls_) \
 inline TBuffer &operator>>(TBuffer& b, _gls_*& g) { \
-  ID_t id; b >> id; g = (_gls_*)(id); \
+  ID_t id; b >> id; char* ptr = 0; ptr += id; g = (_gls_*)(ptr); \
   ISdebug(D_STREAM, GForm("Read _gls_ with id of %u", id)); return b; } \
 inline TBuffer &operator<<(TBuffer& b, const _gls_ *g) { \
   if(g) { b << g->GetSaturnID(); ISdebug(D_STREAM, GForm("Writing id of %s, id=%u", g->GetName(), g->GetSaturnID())); } \
