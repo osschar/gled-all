@@ -1,17 +1,15 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZNode_H
-#define Gled_ZNode_H
+#ifndef GledCore_ZNode_H
+#define GledCore_ZNode_H
 
 #include <Glasses/ZGlass.h>
 #include <Glasses/ZList.h>
 #include <Stones/ZTrans.h>
-
-#include <list>
 
 class ZNode : public ZList {
   // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
@@ -32,9 +30,9 @@ protected:
   // 777 Trans_Rot_Ctrl(Methodbase=>'Rot', Methodname=>'Rot',Transname=>'Trans')
 
   Bool_t	bUseScale;	// X{GS}  7 Bool()
-  Real_t	mSx;		// X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
-  Real_t	mSy;		// X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
-  Real_t	mSz;		// X{GS}  7 Value(-range=>[0,100, 1,100])
+  Float_t	mSx;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
+  Float_t	mSy;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
+  Float_t	mSz;		// X{GS}  7 Value(-range=>[0,1000, 1,1000])
 
   Bool_t	bKeepParent;	// X{GS} 7 Bool()
 
@@ -55,20 +53,20 @@ public:
 
   // Overrides for ZTrans stuff that needs stamping
   Int_t	Level();
-  Int_t MoveLF(Int_t vi, Real_t amount);		// X{E}
-  Int_t RotateLF(Int_t i1, Int_t i2, Real_t amount);	// X{E}
-  Int_t Move(ZNode* ref, Int_t vi, Real_t amount);	// X{E} C{1}
-  Int_t Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Real_t amount);// X{E} C{1}
+  Int_t MoveLF(Int_t vi, Float_t amount);		// X{E}
+  Int_t RotateLF(Int_t i1, Int_t i2, Float_t amount);	// X{E}
+  Int_t Move(ZNode* ref, Int_t vi, Float_t amount);	// X{E} C{1}
+  Int_t Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Float_t amount);// X{E} C{1}
   Int_t SetTrans(ZTrans& t);	// X{E}
   Int_t MultBy(ZTrans& t);	// X{E}
 
-  Int_t Set3Pos(Real_t x, Real_t y, Real_t z);		  // X{E}
-  Int_t SetRotByAngles(Real_t a1, Real_t a2, Real_t a3);  // X{E}
-  Int_t SetRotByDegrees(Real_t a1, Real_t a2, Real_t a3); // X{E}
+  Int_t Set3Pos(Float_t x, Float_t y, Float_t z);		  // X{E}
+  Int_t SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);  // X{E}
+  Int_t SetRotByDegrees(Float_t a1, Float_t a2, Float_t a3); // X{E}
 
-  void SetS(Real_t xx);  			// X{E}
-  void SetScales(Real_t x, Real_t y, Real_t z); // X{E}
-  void MultS(Real_t s);                         // X{E}
+  void SetS(Float_t xx);  			// X{E}
+  void SetScales(Float_t x, Float_t y, Float_t z); // X{E}
+  void MultS(Float_t s);                         // X{E}
 
   ZTrans* ToMFR(int depth=0);
   ZTrans* ToNode(ZNode* top, int depth=0);
