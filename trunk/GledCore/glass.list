@@ -56,9 +56,10 @@ GlobalLamps		163	Glasses/GlobalLamps	.
 LampLink		164	Glasses/LampLink	.
 Sphere			165	Glasses/Sphere		.
 Box			166	Glasses/Box		.
-Text			167	Glasses/Text		.
-ScreenDumper		168	Glasses/ScreenDumper
-ScreenText		169	Glasses/ScreenText	.
+Cylinder		167	Glasses/Cylinder	.
+Text			168	Glasses/Text		.
+ScreenDumper		169	Glasses/ScreenDumper
+ScreenText		170	Glasses/ScreenText	.
 
 # GL State Modifiers
 ZRnrModBase		178	Glasses/ZRnrModBase	.
