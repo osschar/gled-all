@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -8,6 +8,8 @@
 
 #include <pthread.h>
 #include <stdio.h>
+
+ClassImp(GThread)
 
 map<pthread_t, GThread*> GThread::sIdMap;
 GMutex GThread::sIDLock;
@@ -20,8 +22,7 @@ pthread_key_t GThread::TSD_ReturnHandle;
 /**************************************************************************/
 
 GThread::GThread(GThread_foo f, void* a, bool d) :
-  mStartFoo(f), mArg(a), bDetached(d),
-  mOwner(0)
+  mStartFoo(f), mArg(a), bDetached(d)
 {
   mId = 0;
 }
@@ -32,6 +33,14 @@ GThread::~GThread()
   // but ... as well ... object can die b4 thread does
 
   sIDLock.Lock(); sIdMap.erase(mId); sIDLock.Unlock();
+}
+
+void GThread::DeleteIfDetached()
+{
+  GThread* self = GThread::get_self();
+  if(self->GetDetached()) {
+    delete self;
+  }
 }
 
 /**************************************************************************/
@@ -81,7 +90,6 @@ GThread* GThread::get_self()
 void GThread::set_owner(ZMirEmittingEntity* owner)
 {
   pthread_setspecific(TSD_Owner, owner);
-  get_self()->mOwner = owner;
 }
 
 ZMirEmittingEntity* GThread::get_owner()
