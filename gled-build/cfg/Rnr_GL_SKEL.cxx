@@ -15,16 +15,10 @@ void CLASSNAME_GL_Rnr::_init()
 /**************************************************************************/
 
 void CLASSNAME_GL_Rnr::PreDraw(RnrDriver* rd)
-{
-
-}
+{}
 
 void CLASSNAME_GL_Rnr::Draw(RnrDriver* rd)
-{
-
-}
+{}
 
 void CLASSNAME_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-
-}
+{}

@@ -10,7 +10,7 @@
 #include <Glasses/BASENAME.h>
 
 class CLASSNAME : public BASENAME {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(CLASSNAME);
 
 private:
@@ -19,7 +19,8 @@ private:
 protected:
 
 public:
-  CLASSNAME(const Text_t* n="CLASSNAME", const Text_t* t=0) : BASENAME(n,t) { _init(); }
+  CLASSNAME(const Text_t* n="CLASSNAME", const Text_t* t=0) :
+    BASENAME(n,t) { _init(); }
 
 
 #include "CLASSNAME.h7"
