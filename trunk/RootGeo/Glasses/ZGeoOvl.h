@@ -21,8 +21,8 @@ class ZGeoOvl : public ZGeoNode {
  protected:
   Bool_t    mIsExtr;    // X{G}  
   Double_t  mOverlap;   // X{GS}  7 ValOut()
-  Float_t*  mPM_p;      // X{GS}
   Int_t     mPM_N;      // X{GS} 
+  Float_t*  mPM_p;      //[mPM_N*3] X{gS}
   ZColor    mPM_Col;    // X{GSP}
   Bool_t    mRnrMark;   // X{GS}   7 Bool()
 
@@ -30,6 +30,7 @@ class ZGeoOvl : public ZGeoNode {
   ZGeoOvl(const Text_t* n="ZGeoOvl", const Text_t* t=0) : ZGeoNode(n,t) { _init(); }
   virtual void SetRnrSelf(Bool_t rnrself);   //X{E} 
   virtual void Dump();
+  virtual void Restore(TGeoVolume* vol);
 
 #include "ZGeoOvl.h7"
   ClassDef(ZGeoOvl, 1)

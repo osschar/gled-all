@@ -7,5 +7,5 @@
 #ZNodeLink	4	Glasses/ZNodeLink	ZNode
 ZGeoNode        1       Glasses/ZGeoNode        .
 ZGeoOvlMgr      2       Glasses/ZGeoOvlMgr      ZGeoNode
-GeoOvlPair      3       Glasses/GeoOvlPair
+# GeoOvlPair      3       Glasses/GeoOvlPair
 ZGeoOvl         4       Glasses/ZGeoOvl         .

@@ -13,7 +13,6 @@
 
 #include <TObject.h>
 #include <TGeoNode.h>
-#include <TGeoManager.h>
 
 typedef list<TGeoNode*>                  	 lgn_t;
 typedef list<TGeoNode*>::iterator                lgn_i;
@@ -33,7 +32,6 @@ protected:
   ZColor		mOvlCol2;          // X{GSP} 
   ZColor                mExtrCol;          // X{GSP} 
   ZColor                mPM_Col;           // X{GSP} 
-  TGeoManager          *mGeoManager;    // X{GS}
   Float_t               mResol;            // X{GS}  7 Value(-range=>[0,100,1,1000], -join=>1)
 public:
   void                  RecalculateOvl();  // X{Ed}  7 MButt()
@@ -44,18 +42,19 @@ protected:
 public:
   void                  RnrOvlInterval();    // X{E}  7 MButt()
 protected:
-  Bool_t      LocateFirstFromTop(TGeoNode* cur_node, TGeoVolume* search_vol,lgn_t& result);
-  string      setup_absolute_matrix(TGeoNode* top_node, ZGeoNode* zn);
+  Bool_t      locate_first_from_top(TGeoNode* cur_node, TGeoVolume* v, ZGeoNode* zn,lgn_t& result);
+  string      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v, ZGeoNode* zn);
   void        setup_zcolor(ZGeoOvl* ovlm);
-  ZGeoOvl    *CreateStandaloneZNode( const Text_t* n, const Text_t* t, TGeoVolume* v = 0);
+  ZGeoOvl    *create_standalone_node( const Text_t* n, const Text_t* t, TGeoNode* tn = 0);
   ZTrans      get_ztrans(TGeoMatrix* gm);
-  Bool_t      DeleteList(ZGeoNode* n);
+  void        set_tnode_by_path( string path, TGeoNode* & gn);
 
 public:
   ZGeoOvlMgr(const Text_t* n="ZGeoOvlMgr", const Text_t* t=0):ZGeoNode(n,t){ _init();}
   // TO DO -> print method
-  void        ImportUnReplicated(TObjArray* lOverlaps, TGeoNode* top_node);
-  void        Dump();                       // X{E} 7 MButt()
+  void         ImportUnReplicated(TObjArray* lOverlaps, TGeoNode* top_node);
+  virtual void Restore(); // X{Ed} 
+  void         Dump();                       // X{E} 7 MButt()
 
 #include "ZGeoOvlMgr.h7"
   ClassDef(ZGeoOvlMgr, 1)

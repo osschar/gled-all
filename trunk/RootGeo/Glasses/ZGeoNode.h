@@ -13,7 +13,8 @@
 
 
 #include <TObject.h>
-#include <TGeoVolume.h>
+#include <TGeoNode.h>
+#include <TGeoManager.h>
 #include <TGLSceneObject.h>
 #include <TRegexp.h>
 
@@ -24,39 +25,67 @@ class ZGeoNode : public ZNode {
   MAC_RNR_FRIENDS(ZGeoNode);
   friend class ZGeoOvlMgr;
 
-private:
+ private:
   void _init();
+  // Bool_t HasTNodeRef(){return mTNodeName.IsNull();}
 
-protected:
-  TGeoVolume*		mVol;       // X{GS}
+ protected:
+  TGeoNode	       *mTNode;     //! X{g}
+  // only restored reference to TGeoNode is its name 
+  TString               mTNodeName;    // X{GS}          
   Int_t			mNNodes;    // X{G}   7 ValOut(-join=>1);
   Float_t		mNodeAlpha; // X{GS}  7 Value(-range=>[0,1,1,1000])
   TString               mMat;       // X{GS}  7 Textor(-join=>1)
   ZColor		mColor;     // X{GSP} 7 ColorButt()
-public:
+
+  TString		mDefFile;   // X{GS} 7 Filor()
+
+ public:
   void ImportNodes();              // X{E} 7 MButt(-join=>1)
   void ImportNodesWCollect();      // X{E} 7 MButt()
-protected:
-  Bool_t	        bRnrSelf;   // X{G} 7 Bool()
+  void SaveToFile(const Text_t* file=0); // X{E} 7 MButt()
+  void LoadFromFile(const Text_t* file=0); // X{E} 7 MButt()
+  virtual void Restore(); // X{Ed} 7 MButt()
+  void     delete_list();
 
+ protected:
+  Bool_t	        bRnrSelf;   // X{G} 7 Bool()
+  void clear_this_list();
   void setup_ztrans(ZNode* zn, TGeoMatrix* gm);
   void setup_color(Float_t alpha);
-  ZGeoNode* InsertNode(TGeoNode* geon, ZNode* holder, Bool_t rnr, const Text_t* name);
-  ZGeoNode* LocateNodeByPath(lStr_t& node_names); 
-  void ClearThisList();
+  TGeoNode* get_tnode_search_point();
+  ZGeoNode* insert_node(TGeoNode* geon, ZNode* holder, Bool_t rnr, const Text_t* name);
+  ZGeoNode* set_holder(lStr_t& node_names); 
+  Bool_t locate_tnode( ZGeoNode* zn, TGeoNode* cur_node);
 
-public:
+ public:
   ZGeoNode(const Text_t* n="ZGeoNode", const Text_t* t=0) : ZNode(n,t) { _init(); }
-  
+  // ZGeoNode(TGeoNode* n, const Text_t* t=0) : ZNode(n->GetName(),t) {  _init(); mTNode = n}
   void ImportByRegExp(const Text_t* target, TRegexp filter); 
   void ImportUnimported(const Text_t* target="TheRest"); 
-  void CreateFaceset(GeoUserData* userdata = 0);
- 
+  void AssertUserData();
+   
   virtual void RnrOffForDaughters();                        // X{ED} 7 MButt(-join=>1)
   virtual void RnrOnForDaughters();                         // X{ED} 7 MButt()
-  virtual void RnrOnRec();                               // X{E}  7 MButt(-join=>1)   
-  virtual void RnrOffRec();                              // X{E}  7 MButt() 
+  virtual void RnrOnRec();                                  // X{E}  7 MButt(-join=>1)   
+  virtual void RnrOffRec();                                 // X{E}  7 MButt() 
   virtual void SetRnrSelf(Bool_t rnrself);                  // X{E}
+
+  // Manual Get/Set-methods
+  void SetTNode(TGeoNode* n)
+  { mTNode = n;  mTNodeName = n ? n->GetName() : ""; Stamp(FID()); }
+
+    TGeoVolume* GetVolume() {
+    if(mTNode) return mTNode->GetVolume();
+    else       return 0;
+  }
+
+  TObject* GetVolumeField() {
+    if(mTNode && mTNode->GetVolume())
+      return mTNode->GetVolume()->GetField();
+    else
+      return 0;
+  }
 
 #include "ZGeoNode.h7"
   ClassDef(ZGeoNode, 1)
