@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -25,6 +25,25 @@ ClassImp(ZNameMap)
 
 void ZNameMap::_init()
 {}
+
+/**************************************************************************/
+
+void ZNameMap::clear_list()
+{
+  PARENT_GLASS::clear_list();
+  mItMap.clear();
+}
+
+/**************************************************************************/
+
+void ZNameMap::remove_references_to(ZGlass* lens)
+{
+  ZGlass::remove_references_to(lens);
+
+  if(Has(lens)) {
+    Remove(lens);
+  }
+}
 
 /**************************************************************************/
 
@@ -109,12 +128,6 @@ void ZNameMap::Remove(ZGlass* g)
 void ZNameMap::RemoveLast(ZGlass* g)
 { Remove(g); }
 
-void ZNameMap::Clear()
-{
-  PARENT_GLASS::Clear();
-  mItMap.clear();
-}
-
 /**************************************************************************/
 
 void ZNameMap::RecreateMap()
@@ -138,9 +151,9 @@ void ZNameMap::RecreateMap()
 
 /**************************************************************************/
 
-Int_t ZNameMap::RebuildList(ZComet* c)
+Int_t ZNameMap::RebuildList(An_ID_Demangler* idd)
 {
-  Int_t ret = ZList::RebuildList(c);
+  Int_t ret = ZList::RebuildList(idd);
   mItMap.clear();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     mItMap.insert(Name2LIter_p((*i)->GetName(), i));

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -53,12 +53,55 @@ void ZList::_init()
 
 /**************************************************************************/
 
-void ZList::unref_all() {
+void ZList::reference_all() {
+  PARENT_GLASS::reference_all();
+  mListMutex.Lock();
+  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i)
+    (*i)->IncRefCount(this);
+  mListMutex.Unlock();
+}
+
+void ZList::unreference_all() {
+  PARENT_GLASS::unreference_all();
   mListMutex.Lock();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i)
     (*i)->DecRefCount(this);
   mListMutex.Unlock();
 }
+
+/**************************************************************************/
+
+void ZList::clear_list()
+{
+  mGlasses.clear();
+  mSize = 0;
+}
+
+/**************************************************************************/
+
+void ZList::remove_references_to(ZGlass* lens)
+{
+  ZGlass::remove_references_to(lens);
+
+  int n = 0;
+  mListMutex.Lock();
+  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
+    if(*i == lens) {
+      (*i)->DecRefCount(this);
+      lpZGlass_i j = i; --i;
+      mGlasses.erase(j);
+      ++n;
+    }
+  }
+  mListMutex.Unlock();
+  if(n) {
+    if(n == 1) StampListRemove(lens);
+    else       StampListRebuild();
+  }
+}
+
+
+/**************************************************************************/
 
 void ZList::new_element_check(ZGlass* g)
 {
@@ -187,12 +230,30 @@ void ZList::RemoveLast(ZGlass* g)
   if(succ) g->DecRefCount(this);
 }
 
-void ZList::Clear()
+/**************************************************************************/
+
+void ZList::ClearList()
 {
-  unref_all();
-  mGlasses.clear();
-  mSize = 0;
+  if(mSize == 0) return;
+
+  lpZGlass_t foo;
+  ISdebug(1, "ZList::ClearList locking list.");
+  mListMutex.Lock();
+  foo.swap(mGlasses);
+  clear_list();
   StampListRebuild();
+  mListMutex.Unlock();
+  ISdebug(1, "ZList::ClearList unlocked list.");
+  for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
+    (*i)->DecRefCount(this);
+  }
+  ISdebug(1, "ZList::ClearList finished.");
+}
+
+void ZList::ClearAllReferences()
+{
+  PARENT_GLASS::ClearAllReferences();
+  ClearList();
 }
 
 /**************************************************************************/
@@ -268,30 +329,55 @@ void ZList::SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg)
 
 void ZList::Streamer(TBuffer &b)
 {
-  ZGlass::Streamer(b);
+  UInt_t R__s, R__c;
+
   if(b.IsReading()) {
+
+    Version_t v = b.ReadVersion(&R__s, &R__c);
+    ZGlass::Streamer(b);
+    b >> mSize >> mLid >> mCid;
+    ISdebug(D_STREAM, GForm("ZList::Streamer reading %d elements (%d,%d).",
+			    mSize, mLid, mCid));
     mIDs.clear();
     ID_t id;
-    b >> mSize;
-    ISdebug(D_STREAM, GForm("ZList::Streamer reading %d elements", mSize));
     for(UInt_t i=0; i<mSize; i++) { b >> id; mIDs.push_back(id); }
+    b.CheckByteCount(R__s, R__c, ZList::IsA());
+
   } else {
-    b << mSize;
-    ISdebug(D_STREAM, GForm("ZList::Streamer writing %d elements", mSize));
+
+    R__c = b.WriteVersion(ZList::IsA(), kTRUE);
+    ZGlass::Streamer(b);
+    b << mSize << mLid << mCid;
+    ISdebug(D_STREAM, GForm("ZList::Streamer writing %d elements (%d,%d).",
+			    mSize, mLid, mCid));
     for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); i++)
       b << (*i)->GetSaturnID();
+    b.SetByteCount(R__c, kTRUE);
+
   }
 }
 
-Int_t ZList::RebuildList(ZComet* c)
+/**************************************************************************/
+
+Int_t ZList::RebuildAll(An_ID_Demangler* idd)
+{
+  return RebuildLinks(idd) + RebuildList(idd);
+}
+
+Int_t ZList::RebuildList(An_ID_Demangler* idd)
 {
   Int_t ret = 0;
-  mGlasses.clear();
+  mGlasses.clear(); mSize = 0;
   for(lID_i i=mIDs.begin(); i!=mIDs.end(); ++i) {
-    ZGlass* g = c->FindID(*i);
-    if(g) {
-      mGlasses.push_back(g);
-      g->IncRefCount(this);
+    ZGlass* lens = idd->DemangleID(*i);
+    if(lens) {
+      try {
+	lens->IncRefCount(this);
+	mGlasses.push_back(lens); ++mSize;
+      }
+      catch(...) {
+	++ret;
+      }
     } else {
       ++ret;
     }
