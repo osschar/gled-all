@@ -1,11 +1,11 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZList_H
-#define Gled_ZList_H
+#ifndef GledCore_ZList_H
+#define GledCore_ZList_H
 
 #include <Glasses/ZGlass.h>
 
@@ -15,14 +15,16 @@ typedef void (*zlist_stampremove_f)(ZList*, ZGlass*, void*);
 typedef void (*zlist_stamprebuild_f)(ZList*, void*);
 
 class ZList : public ZGlass {
+
   // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
   // **** Custom Streamer ****
   MAC_RNR_FRIENDS(ZList);
+
   friend class Saturn;
   friend class ZQueen;
 
 private:
-  lID_t		mIDs;	 // Temporary store for Streaming
+  lID_t		mIDs;	                       //! Temporary store for Streaming
   void	       _init();
 
 protected:
@@ -40,7 +42,13 @@ protected:
   zlist_stamprebuild_f	mStampListRebuild_CB;    //! called if non-null
   void*			mStampListRebuild_CBarg; //!
 
-  void unref_all();
+  virtual void reference_all();
+  virtual void unreference_all();
+
+  virtual void clear_list();
+
+  virtual void remove_references_to(ZGlass* lens);
+
   virtual void new_element_check(ZGlass* g);
 
 public:
@@ -68,6 +76,17 @@ public:
   ZGlass* Last();
   virtual ZGlass* GetElementByName(const Text_t* name);
   virtual ZGlass* GetElementByName(const string& name);
+  template <class GLASS>
+  GLASS GetElementByGlass() {
+    GLASS g;
+    mListMutex.Lock();
+    for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
+      g = dynamic_cast<GLASS>(*i);
+      if(g) { mListMutex.Unlock(); return g; }
+    }
+    mListMutex.Unlock();
+    return 0;
+  }
 
   void         SetElementFID(FID_t fid);
   virtual void Add(ZGlass* g);			     // X{E} C{1}
@@ -75,7 +94,9 @@ public:
   virtual void AddFirst(ZGlass* g);		     // X{E} C{1}
   virtual void Remove(ZGlass* g);		     // X{E} C{1}
   virtual void RemoveLast(ZGlass* g);		     // X{E} C{1}
-  virtual void Clear();				     // X{E}
+
+  void         ClearList();                   	     // X{E}
+  virtual void ClearAllReferences();
 
   virtual Int_t  Size() { return mSize; }
   virtual Bool_t IsEmpty() { return mSize==0; }
@@ -89,7 +110,8 @@ public:
   void SetStampListRemove_CB(zlist_stampremove_f foo, void* arg);
   void SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg);
 
-  virtual Int_t RebuildList(ZComet* c);
+  virtual Int_t RebuildAll(An_ID_Demangler* idd);
+  virtual Int_t RebuildList(An_ID_Demangler* idd);
 
 #include "ZList.h7"
   ClassDef(ZList, 1)

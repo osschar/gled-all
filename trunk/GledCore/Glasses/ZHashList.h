@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -12,12 +12,18 @@
 class ZHashList : public ZList {
   // 7777 RnrCtrl("false, 7, RnrBits(2,4,6,0, 0,0,0,5)")
   MAC_RNR_FRIENDS(ZHashList);
+
 private:
   void _init();
+
 protected:
 #ifndef __CINT__
   hash_map<ZGlass*, lpZGlass_i >	mItHash;
 #endif
+
+  virtual void clear_list();
+
+  virtual void remove_references_to(ZGlass* lens);
 
   bool	bNerdyListOps;	// X{GS} 7 Bool()
 
@@ -30,11 +36,10 @@ public:
   virtual void AddFirst(ZGlass* g);		     // X{E} C{1}
   virtual void Remove(ZGlass* g);		     // X{E} C{1}
   virtual void RemoveLast(ZGlass* g);		     // X{E} C{1}
-  virtual void Clear();				     // X{E}
 
   virtual Bool_t Has(ZGlass* g);
 
-  virtual Int_t RebuildList(ZComet* c);
+  virtual Int_t RebuildList(An_ID_Demangler* idd);
 
 #include "ZHashList.h7"
   ClassDef(ZHashList, 1)

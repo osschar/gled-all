@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -17,9 +17,31 @@ typedef hash_map<ZGlass*, lpZGlass_i>::iterator	Glass2LIter_i;
 
 ClassImp(ZHashList)
 
+/**************************************************************************/
+
 void ZHashList::_init()
 {
   bNerdyListOps = true;
+}
+
+/**************************************************************************/
+
+void ZHashList::clear_list()
+{
+  PARENT_GLASS::clear_list();
+  mItHash.clear();
+}
+
+
+/**************************************************************************/
+
+void ZHashList::remove_references_to(ZGlass* lens)
+{
+  ZGlass::remove_references_to(lens);
+
+  if(Has(lens)) {
+    Remove(lens);
+  }
 }
 
 /**************************************************************************/
@@ -96,12 +118,6 @@ void ZHashList::Remove(ZGlass* g)
 void ZHashList::RemoveLast(ZGlass* g)
 { Remove(g); }
 
-void ZHashList::Clear()
-{
-  PARENT_GLASS::Clear();
-  mItHash.clear();
-}
-
 /**************************************************************************/
 
 Bool_t ZHashList::Has(ZGlass* g)
@@ -115,9 +131,9 @@ Bool_t ZHashList::Has(ZGlass* g)
 
 /**************************************************************************/
 
-Int_t ZHashList::RebuildList(ZComet* c)
+Int_t ZHashList::RebuildList(An_ID_Demangler* idd)
 {
-  Int_t ret = ZList::RebuildList(c);
+  Int_t ret = ZList::RebuildList(idd);
   mItHash.clear();
   for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
     mItHash[*i] = i;
