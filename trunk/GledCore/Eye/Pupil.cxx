@@ -514,10 +514,6 @@ OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
   GLint n = glRenderMode(GL_RENDER);
 
   if (n > 0) {
-    Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
-    menu.textsize(mShell->cell_fontsize());
-
-    FTW_Shell::mir_call_data_list mcdl;
     list<glass_data> gdl;
 
     GLuint* x = b;
@@ -572,6 +568,10 @@ OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
     }
 
     if(make_menu_p) {
+      Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+      menu.textsize(mShell->cell_fontsize());
+      FTW_Shell::mir_call_data_list mcdl;
+
       int loc = 1;
       for( list<glass_data>::iterator gdi = gdl.begin(); gdi!=gdl.end(); ++gdi) {
 	if(mInfo->GetPickDisp() != 0) {    
