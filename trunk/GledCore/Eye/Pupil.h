@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Pupil_H
-#define Gled_Pupil_H
+#ifndef GledCore_Pupil_H
+#define GledCore_Pupil_H
 
 // Includes
 #include <Glasses/ZNode.h>
@@ -14,7 +14,6 @@
 #include <Eye/OptoStructs.h>
 
 class PupilInfo;
-class FTW_Leaf;
 
 #include <RnrBase/RnrDriver.h>
 
@@ -31,15 +30,12 @@ protected:
   bool		_firstp;
 
   PupilInfo*	mInfo;
-  FTW_Leaf*	mLeaf;
   OptoStructs::ZGlassView* mRoot;  // X{G}
 
   RnrDriver*	mDriver;
 
   ZNode*	mBase;
   Camera*	mCamera;
-
-  //ZNodeMixer*	pInfoView;
 
   int		mMouseX, mMouseY;
   bool		bJustCamera;
@@ -83,35 +79,15 @@ public:
   // Picking stuff
   ////////////////////////////////////////////////////////////////
 
-  enum pick_e { p_null=0, p_open_view,
-		p_user_1=0x100, p_user_2, p_user_3, p_user_4, p_user_5
-  };
-
-  struct pick_data {
-    Pupil*  pupil;
-    ZGlass* lens;
-    pick_e  operation;
-    void*   user_data;
-
-    pick_data(Pupil* p, ZGlass* l, pick_e o=p_null, void* ud=0) :
-      pupil(p), lens(l), operation(o), user_data(ud) {}
-  };
-
   struct glass_data {
-    ZGlass*     lens;
-    float       z;
-    string	name;
-    lpZGlass_t  parents;
+    OptoStructs::ZGlassImg*    img;
+    float                      z;
+    string	               name;
+    OptoStructs::lpZGlassImg_t parents;
 
-    glass_data(ZGlass* l, float depth, const char* n) :
-      lens(l), z(depth), name(n) {}
+    glass_data(OptoStructs::ZGlassImg* i, float depth, const char* n) :
+      img(i), z(depth), name(n) {}
   };
-
-protected:
-  virtual void pick_callback(Fl_Widget* w, pick_data* pd);
-
-public:
-  static void fltk_pick_callback(Fl_Widget* w, pick_data* pd);
 
 #include "Pupil.h7"
 }; // endclass Pupil

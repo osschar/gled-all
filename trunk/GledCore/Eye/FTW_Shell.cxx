@@ -387,11 +387,11 @@ void FTW_Shell::Y_SendMessage(const char* msg)
 
 /**************************************************************************/
 
-void FTW_Shell::ExportToInterpreter(FTW::Locator& loc, const char* varname)
+void FTW_Shell::ExportToInterpreter(OS::ZGlassImg* img, const char* varname)
 {
-  GNS::ClassInfo* ci = loc.get_class_info();
+  GNS::ClassInfo* ci = img->fClassInfo;
   gROOT->ProcessLine(GForm("%s* %s = (%s*)%p;", ci->fName.c_str(), varname,
-			  ci->fName.c_str(), loc.get_glass()));
+			  ci->fName.c_str(), img->fGlass));
 }
 
 /**************************************************************************/
@@ -448,44 +448,44 @@ void FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
 // Local callbacks for FTW_Shell::LocatorMenu(...);
 
 namespace {
-  struct mir_call_data {
-    FTW_Shell* 		shell;
-    FTW::Locator&       loc;
-    GNS::MethodInfo*	mi;
-    mir_call_data(FTW_Shell* s, FTW::Locator& l, GNS::MethodInfo* m) :
-      shell(s), loc(l), mi(m) {}
-  };
 
-  /**************************************************************************/
+  // Locator based
+  //==============
 
-  void set_source_cb(Fl_Widget* w, mir_call_data* ud) {
+  void set_source_cb(Fl_Widget* w, FTW_Shell::mir_call_data_loc* ud) {
     FTW::Locator* true_loc = new FTW::Locator(ud->loc);
     ud->shell->X_SetSource(*true_loc);
   }
-  void set_sink_cb(Fl_Widget* w, mir_call_data* ud) {
+  void set_sink_cb(Fl_Widget* w, FTW_Shell::mir_call_data_loc* ud) {
     FTW::Locator* true_loc = new FTW::Locator(ud->loc);
     ud->shell->X_SetSink(*true_loc);
   }
 
   /**************************************************************************/
 
-  void set_beta_cb(Fl_Widget* w, mir_call_data* ud) {
+  void set_beta_cb(Fl_Widget* w, FTW_Shell::mir_call_data_loc* ud) {
     ud->shell->X_SetBeta(ud->loc);
   }
-  void set_gamma_cb(Fl_Widget* w, mir_call_data* ud) {
+  void set_gamma_cb(Fl_Widget* w, FTW_Shell::mir_call_data_loc* ud) {
     ud->shell->X_SetGamma(ud->loc);
   }
  
-
   /**************************************************************************/
 
-  void open_nest_cb(Fl_Widget* w, mir_call_data* ud) {
+  // Image based
+  //============
+
+  void open_full_view_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+    ud->shell->SpawnMTW_View(ud->get_image());
+  }
+
+  void open_nest_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
     FTW_Shell* shell = ud->shell;
     ZQueen*    queen = shell->GetShellInfo()->GetQueen();
 
     NestInfo ni(GForm("Nest %d",   shell->GetShellInfo()->GetNests()->Size()+1),
 		GForm("shell: %s", shell->GetShellInfo()->GetName()));
-    ni.Add(ud->loc.get_glass());
+    ni.Add(ud->get_lens());
 
     GNS::ClassInfo*  ci = GNS::FindClassInfo("ZList");
     GNS::MethodInfo* mi = ci->FindMethodInfo("Add", true);
@@ -498,21 +498,83 @@ namespace {
   }
 
 
-  void glass_export_cb(Fl_Widget* w, mir_call_data* ud) {
-    const char* var = fl_input("Varname for %s:", "foo", ud->loc.get_image()->fGlass->GetName());
+  void glass_export_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+    const char* var = fl_input("Varname for %s:", "foo", ud->get_lens()->GetName());
     if(var)
-      ud->shell->ExportToInterpreter(ud->loc, var);
+      ud->shell->ExportToInterpreter(ud->get_image(), var);
   }
 
-  void spawn_mcw_cb(Fl_Widget* w, mir_call_data* ud) {
+  void spawn_mcw_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
     try {
-      ud->shell->SpawnMCW_View(ud->loc.get_image(), ud->mi);
+      ud->shell->SpawnMCW_View(ud->get_image(), ud->mi);
     }
     catch(string exc) {
       ud->shell->Message(exc.c_str(), FTW_Shell::MT_err);
     }
   }
 }
+
+void FTW_Shell::FillLocatorMenu(FTW::Locator& loc, Fl_Menu_Button& menu,
+				mir_call_data_list& mcdl, const string& prefix)
+{
+    mcdl.push_back(new mir_call_data_loc(loc, this, 0));
+
+    menu.add(GForm("%sSet as Source", prefix.c_str()),
+	     0, (Fl_Callback*)set_source_cb, mcdl.back());
+    menu.add(GForm("%sSet as Sink", prefix.c_str()),
+		   0, (Fl_Callback*)set_sink_cb, mcdl.back(), FL_MENU_DIVIDER);
+
+    menu.add(GForm("%sSet as Beta", prefix.c_str()),
+		   0, (Fl_Callback*)set_beta_cb, mcdl.back());
+    menu.add(GForm("%sSet as Gamma", prefix.c_str()),
+		   0, (Fl_Callback*)set_gamma_cb, mcdl.back(), FL_MENU_DIVIDER);
+}
+
+void FTW_Shell::FillImageMenu(OS::ZGlassImg* img, Fl_Menu_Button& menu,
+			      mir_call_data_list& mcdl, const string& prefix)
+{
+  mcdl.push_back(new mir_call_data_img(img, this, 0));
+
+  menu.add(GForm("%sOpen full view", prefix.c_str()),
+	   0, (Fl_Callback*)open_full_view_cb, mcdl.back());
+  menu.add(GForm("%sOpen in Nest", prefix.c_str()),
+	   0, (Fl_Callback*)open_nest_cb, mcdl.back());
+  menu.add(GForm("%sExport to CINT ...", prefix.c_str()),
+	   0, (Fl_Callback*)glass_export_cb, mcdl.back(), FL_MENU_DIVIDER);
+
+  { // Methods ... obtained from ClassInfo
+    GNS::ClassInfo* ci = img->fClassInfo;
+    const char* p1   = "Methods";
+    const char* pset = "Set methods";
+    while(ci) {
+      string s2(GForm("%s (%d,%d)", ci->fName.c_str(), ci->fFid.lid, ci->fFid.cid));
+      const char* p2 = s2.c_str();
+      for(GNS::lpMethodInfo_i cmi=ci->fMethodList.begin();
+	  cmi!=ci->fMethodList.end(); ++cmi)
+	{
+	  mcdl.push_back(new mir_call_data_img(img, this, *cmi));
+	  string& mn( (*cmi)->fName );
+	  if(mn.length() >= 4 && mn.compare(0, 3, "Set") == 0 && isupper(mn[3])) {
+	    menu.add(GForm("%s%s/%s/%s/%s (%d; %d,%d)", prefix.c_str(),
+			   p1, p2, pset,
+			   (*cmi)->fName.c_str(), (*cmi)->fMid,
+			   (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
+		     0, (Fl_Callback*)spawn_mcw_cb, mcdl.back(), 0);
+	  } else {
+	    menu.add(GForm("%s%s/%s/%s (%d; %d,%d)", prefix.c_str(),
+			   p1, p2,
+			   (*cmi)->fName.c_str(), (*cmi)->fMid,
+			   (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
+		     0, (Fl_Callback*)spawn_mcw_cb, mcdl.back(), 0);
+	  }
+	}
+      ci = ci->GetParentCI();
+    };
+
+  }
+
+}
+
 
 void FTW_Shell::LocatorMenu(FTW::Locator& loc, int x, int y)
 {
@@ -521,47 +583,10 @@ void FTW_Shell::LocatorMenu(FTW::Locator& loc, int x, int y)
     Fl_Menu_Button menu(x, y, 0, 0, 0);
     menu.textsize(cell_fontsize());
 
-    list<mir_call_data> lccd;
+    mir_call_data_list mcdl;
 
-    // Local foos
-    lccd.push_back(mir_call_data(this, loc, 0));
-    menu.add("Set as Source", 0, (Fl_Callback*)set_source_cb, &lccd.back());
-    menu.add("Set as Sink",   0, (Fl_Callback*)set_sink_cb, &lccd.back(), FL_MENU_DIVIDER);
-
-    menu.add("Set as Beta", 0, (Fl_Callback*)set_beta_cb, &lccd.back());
-    menu.add("Set as Gamma",   0, (Fl_Callback*)set_gamma_cb, &lccd.back(), FL_MENU_DIVIDER);
-
-    menu.add("Open in Nest ...", 0, (Fl_Callback*)open_nest_cb, &lccd.back());
-    menu.add("Export to CINT", 0, (Fl_Callback*)glass_export_cb, &lccd.back(), FL_MENU_DIVIDER);
-
-    { // Methods ... obtained from ClassInfo
-      GNS::ClassInfo* ci = loc.get_class_info();
-      const char* p1   = "Methods";
-      const char* pset = "Set methods";
-      while(ci) {
-	string s2(GForm("%s (%d,%d)", ci->fName.c_str(), ci->fFid.lid, ci->fFid.cid));
-	const char* p2 = s2.c_str();
-	for(GNS::lpMethodInfo_i cmi=ci->fMethodList.begin();
-	    cmi!=ci->fMethodList.end(); ++cmi)
-	  {
-	    lccd.push_back(mir_call_data(this, loc, *cmi));
-	    string& mn( (*cmi)->fName );
-	    if(mn.length() >= 4 && mn.compare(0, 3, "Set") == 0 && isupper(mn[3])) {
-	      menu.add(GForm("%s/%s/%s/%s (%d; %d,%d)", p1, p2, pset,
-			     (*cmi)->fName.c_str(), (*cmi)->fMid,
-			     (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
-		       0, (Fl_Callback*)spawn_mcw_cb, &lccd.back(), 0);
-	    } else {
-	      menu.add(GForm("%s/%s/%s (%d; %d,%d)", p1, p2,
-			     (*cmi)->fName.c_str(), (*cmi)->fMid,
-			     (*cmi)->fContextArgs.size(), (*cmi)->fArgs.size()),
-		       0, (Fl_Callback*)spawn_mcw_cb, &lccd.back(), 0);
-	    }
-	  }
-	ci = ci->GetParentCI();
-      };
-
-    }
+    FillLocatorMenu(loc, menu, mcdl, "");
+    FillImageMenu(loc.get_image(), menu, mcdl, "");
     
     menu.popup();
   }
