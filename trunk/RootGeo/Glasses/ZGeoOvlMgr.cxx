@@ -200,11 +200,11 @@ void ZGeoOvlMgr::ImportUnReplicated( TObjArray* lOverlaps, TGeoNode* top_node)
       mn = GForm("overlap%d",ovlm->Size());
       ovln = create_standalone_node(mn, "holder");
       // create the overlaping nodes
-      insert_node(ovl->GetNode(0), ovln, true,  GForm("%s",ovl->GetNode(0)->GetName()));
+      insert_node(ovl->GetNode(0), ovln, GForm("%s",ovl->GetNode(0)->GetName()));
       // string tname = mt + '/' + ovl->GetNode(0)->GetName();
       // ovln->First()->SetTitle(tname.c_str());
       
-      insert_node(ovl->GetNode(1), ovln, true,  GForm("%s",ovl->GetNode(1)->GetName() ));
+      insert_node(ovl->GetNode(1), ovln, GForm("%s",ovl->GetNode(1)->GetName() ));
       // tname = mt + '/' + ovl->GetNode(1)->GetName();
       // ovln->Last()->SetTitle(tname.c_str());
     }
