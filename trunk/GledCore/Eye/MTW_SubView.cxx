@@ -48,8 +48,9 @@ Fl_Widget* MTW_SubView::CreateWeed(GVNS::WeedInfo* wi)
   if(w == 0) return 0;
   if(wi->bIsLinkWeed) {
     mLinkWeeds.push_back( MTW_Weed(w, wi) );
+    // These could/should be set somewhere else.
     w->box(FL_UP_BOX);
-    w->color(fl_rgb_color(220, 230, 240));
+    w->color(fl_rgb_color(200, 200, 220));
   } else {
     mDataWeeds.push_back( MTW_Weed(w, wi) );
   }
@@ -106,9 +107,11 @@ void MTW_SubView::UpdateFromTimer_s(MTW_SubView* v)
 
 /**************************************************************************/
 
-void MTW_SubView::BuildFromList(GVNS::lpWeedInfo_t& l)
+void MTW_SubView::BuildFromList(GVNS::lpWeedInfo_t& l, bool show_links)
 {
   for(GVNS::lpWeedInfo_i i=l.begin(); i!=l.end(); ++i) {
+    if((*i)->bIsLinkWeed && show_links == false)
+      continue;
     CreateWeed(*i);
     // cout <<" MTW_SubView::BuildFromList() adding member "<< (*i)->fName << endl; 
   }

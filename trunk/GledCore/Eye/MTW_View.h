@@ -63,6 +63,7 @@ public:
   void UpdateLinkWeeds(FID_t fid);
 
   void ShowWindow();
+  void ReHeight(int dh);
 
   virtual int handle(int ev);
 

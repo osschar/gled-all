@@ -15,6 +15,7 @@
 #include <GledView/GledViewNS.h>
 #include <FL/Fl_Valuator.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl.H>
 #include <FL/fl_draw.H>
 
 namespace GNS  = GledNS;
@@ -69,8 +70,48 @@ MTW_View::~MTW_View() {
 
 /**************************************************************************/
 
-static float MaxAlignGrow = 1.2;
-static float MaxJoinGrow  = 2;
+namespace {
+
+  float MaxAlignGrow = 1.2;
+  float MaxJoinGrow  = 2;
+
+  class SubView_Header;
+  void cb_coll(Fl_Button* w, SubView_Header* svh);
+
+  class SubView_Header : public Fl_Group {
+  public:
+    Fl_Button*   fBut;
+    MTW_SubView* fSubView;
+
+    SubView_Header(MTW_SubView* sv, int w, const char* t) :
+      Fl_Group(0,0,w,1), fSubView(sv)
+    {
+      fBut = new Fl_Button(0,0,2,1, "@#>");
+      fBut->labeltype(FL_SYMBOL_LABEL);
+      fBut->callback((Fl_Callback*)cb_coll, this);
+      fBut->color(fl_rgb_color(200,220,200));
+
+      Fl_Box* b = new Fl_Box(2,0,w-2,1, t);
+      b->box(FL_EMBOSSED_BOX);
+      if(b->labelfont() < FL_BOLD)
+	b->labelfont(b->labelfont() + FL_BOLD);
+      b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+      b->color(fl_rgb_color(200,220,200));
+    }
+  };
+
+  void cb_coll(Fl_Button* w, SubView_Header* svh) {
+    if(svh->fSubView->visible()) {
+      svh->fSubView->hide();
+      svh->fBut->label("@#>[]");
+      svh->fSubView->GetView()->ReHeight(-svh->fSubView->h());
+    } else {
+      svh->fSubView->show();
+      svh->fBut->label("@#>");
+      svh->fSubView->GetView()->ReHeight(svh->fSubView->h());
+    }
+  }
+}
 
 void MTW_View::BuildVerticalView()
 {
@@ -78,6 +119,9 @@ void MTW_View::BuildVerticalView()
   // Weedgets are stacked vertically and resized to maximal width.
 
   int cell_w = swm_manager->cell_w();
+
+  bool fancy_p      = mShell->GetShellInfo()->GetFancyClassView();
+  bool show_links_p = mShell->GetShellInfo()->GetShowLinksInClassView();
 
   type(FL_VERTICAL);
   GNS::ClassInfo* ci = mGlass->VGlassInfo();
@@ -88,7 +132,7 @@ void MTW_View::BuildVerticalView()
     //cout <<"MTW_View::BuildVerticalView() ci="<< ci->fClassName <<endl;
     MTW_SubView* sv = (ci->fViewPart->fooSVCreator)(ci, this, mGlass);
     assert(sv);
-    sv->BuildFromList(ci->fViewPart->fWeedList);
+    sv->BuildFromList(ci->fViewPart->fWeedList, show_links_p);
     sv->UpdateVerticalStats(mtw_vs, cell_w);
     mSubViews.push_front(sv);
     ci = ci->GetParentCI();
@@ -99,6 +143,11 @@ void MTW_View::BuildVerticalView()
   // mtw_vs.Dump();
   int h = 0;
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
+    if(fancy_p) {
+      add( new SubView_Header(*sv, mtw_vs.fUse.full,
+			      (*sv)->mClassInfo->fName.c_str()) );
+      ++h;
+    }
     h += (*sv)->ResizeByVerticalStats(mtw_vs, cell_w);
     add(*sv);
   }
@@ -195,6 +244,19 @@ void MTW_View::UpdateLinkWeeds(FID_t fid)
 void MTW_View::ShowWindow()
 {
   if(mWindow) mWindow->show();
+}
+
+void MTW_View::ReHeight(int dh)
+{
+  // Called from callbacks.
+
+  init_sizes();
+  redraw();
+  if(mWindow) {
+    mWindow->position(mWindow->x(), mWindow->y() + dh/2);
+    mWindow->size(w(), h()+dh);
+    mWindow->redraw();
+  }
 }
 
 /**************************************************************************/
