@@ -108,7 +108,7 @@ sub collect_dependencies {
 	  die "Dependency $d of libset $libset not found ...";
 	}
       }
-      collect_dependencies($d, $dephash);
+      collect_dependencies($d, $deparr);
       push @$deparr, $d;
     }
   }
@@ -309,6 +309,7 @@ $resolver->{BaseLibSetList} = \@base_libsets;
 $resolver->{LibSetList}     = \@ok_libsets;
 
 for $f (@ok_libsets) {
+  $resolver->{LibName2LibSpecs}{$f}{Deps} = $deps{$f};
   $resolver->{LibName2LibSpecs}{$f}{CPP_FLAGS} =
     join(' ', (map {"-I$ENV{GLEDSYS}/$_" } @{$deps{$f}}));
 }
