@@ -1,0 +1,38 @@
+# $Header$
+
+### configure options ###
+confdebug	!	.	CONFDEBUG	0
+reconfigure	!	.	RECONFIGURE	0
+help		!	.	HELP		0
+envsetupstem	=s	.	ENVSETUPSTEM	"build_env"
+
+### compile/link options ###
+ucpp		=s	.	USER_CPP_FLAGS	""
+ucxx		=s	.	USER_CXX_FLAGS	""
+uld		=s	.	USER_LD_FLAGS	""	
+debug		!	.	DEBUG		0
+# directories where foreign software is installed (eg. /opt); ':' separated
+external	=s	.	EXTERNAL	""
+
+### build configuration ###
+buildversion	=s	.	BUILD_VERSION	"1.2.4-cvs"
+builddate	=s	.	BUILD_DATE	{ my $d=`date +%F`; chomp $d; $d; }
+noviewlibs	!	.	NOVIEWLIBS	0
+nornrlibs	!	.	NORNRLIBS	0
+rnr		=s	.	RENDERERS	"GL"
+
+# Libsets to build; can be <file:[filename]>, <auto>, <auto-prompt> or
+# ':' separated list of libset names
+libsets		=s	.	LIBSETS		"<auto-prompt>"
+
+# Directories to search for more basic libsets; ':' separated
+# If found they are sim-linked into the GLEDSYS.
+base		=s	.	GLEDBASE	""
+
+### libset configuration ###
+### names of auto-generated files and directories
+glasslist	=s	.	GLASS_LIST	"glass.list"
+catalog		=s	.	CATALOG		"catalog"
+gluedir		=s	.	GLUE_DIR	"glue"
+dictdir		=s	.	DICT_DIR	"dict"
+viewdir		=s	.	VIEW_DIR	"Views"

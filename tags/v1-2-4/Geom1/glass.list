@@ -1,0 +1,23 @@
+# glass		class	location		rnr-class
+# name		id				[]~ZGlass, [.]~own rnr, [<glass>]
+#
+ZImage		1	Glasses/ZImage		.
+Rect		2	Glasses/Rect		.
+ZRibbon		3	Glasses/ZRibbon
+
+SMorph		16	Glasses/SMorph		.
+Board		17	Glasses/Board		.
+RectTerrain	18	Glasses/RectTerrain	.
+MultiBoard	19	Glasses/MultiBoard	Board
+Amphitheatre	10	Glasses/Amphitheatre    .
+
+RelParticle	32	Glasses/RelParticle
+
+WSSeed		64	Glasses/WSSeed		.
+WSPoint		65	Glasses/WSPoint		.
+WSTube		66	Glasses/WSTube		WSSeed
+
+Mover		128	Glasses/Mover
+Sleeper		129	Glasses/Sleeper
+
+RndSMorphCreator 1024	Glasses/RndSMorphCreator

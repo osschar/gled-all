@@ -1,0 +1,43 @@
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MultiSpheror.cxx:
+	* Glasses/Spheror.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MultiSpheror.cxx:
+	Init() method can now be called several times. The old contents is
+	unreferenced from the list and links of Spheror elements and their
+	Amoebas are wiped.
+
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	* Glasses/MultiSpheror.cxx:
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	* Glasses/Spheror.cxx:
+	* Glasses/Spheror.h:
+	* Glasses/WarmAmoeba.cxx:
+	* Glasses/WarmAmoeba.h:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	* Rnr/GL/Spheror_GL_Rnr.cxx:
+	Transition to pure ROOT vector/matrix classes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+	
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.h:
+	* Glasses/WarmAmoeba.h:
+
+	Changed class versions of abstract algorithm master bases from 0
+	to 1. Needed due to changes of streaming mechanism in ROOT.

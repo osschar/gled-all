@@ -1,0 +1,76 @@
+# glass			class	location		rnr-class
+# name			id				[]~ZGlass, [.]~own rnr, [<glass>]
+
+# Base glasses
+ZGlass			1	Glasses/ZGlass		.
+ZList			2	Glasses/ZList
+ZHashList		3	Glasses/ZHashList
+ZNameMap		4	Glasses/ZNameMap
+AList			5	Glasses/AList
+ZDeque			6	Glasses/ZDeque
+ZNode			16	Glasses/ZNode		.
+ZNodeLink		17	Glasses/ZNodeLink	ZNode
+
+# God & Rulers
+ZGod			32	Glasses/ZGod
+ZKing			33	Glasses/ZKing
+ZQueen			34	Glasses/ZQueen
+ZSunQueen		35	Glasses/ZSunQueen
+ZFireKing		36	Glasses/ZFireKing
+ZFireQueen		37	Glasses/ZFireQueen
+ZEunuch			38	Glasses/ZEunuch
+
+# MirFilters
+ZMirFilter		48	Glasses/ZMirFilter
+ZIdentityFilter		49	Glasses/ZIdentityFilter
+ZIdentityListFilter	50	Glasses/ZIdentityListFilter
+ZFilterAggregator	51	Glasses/ZFilterAggregator
+ZMethodTagPreFilter	52	Glasses/ZMethodTagPreFilter
+ZMEESelfFilter		53	Glasses/ZMEESelfFilter
+
+# Identities, MirEmittingEntities & Info glasses
+ZIdentity		64	Glasses/ZIdentity
+ZGroupIdentity		65	Glasses/ZGroupIdentity
+ZMirEmittingEntity	72	Glasses/ZMirEmittingEntity
+SaturnInfo		73	Glasses/SaturnInfo
+EyeInfo			74	Glasses/EyeInfo
+ShellInfo		75	Glasses/ShellInfo
+NestInfo		80	Glasses/NestInfo
+PupilInfo		81	Glasses/PupilInfo	.
+
+# Streaming of sub-graphs
+ZCometBag		96	Glasses/ZCometBag
+ZSubTree		97	Glasses/ZSubTree
+
+# Thread related glasses
+Operator		128	Glasses/Operator
+Eventor			129	Glasses/Eventor
+PipeEventor		130	Glasses/PipeEventor
+
+# Basic scene & geometry elements
+Scene			160	Glasses/Scene		.
+Camera			161	Glasses/Camera
+Lamp			162	Glasses/Lamp		.
+GlobalLamps		163	Glasses/GlobalLamps	.
+LampLink		164	Glasses/LampLink	.
+Sphere			165	Glasses/Sphere		.
+Box			166	Glasses/Box		.
+Text			167	Glasses/Text		.
+ScreenDumper		168	Glasses/ScreenDumper
+ScreenText		169	Glasses/ScreenText	.
+
+# GL State Modifiers
+ZGlStateBase		178	Glasses/ZGlStateBase
+ZGlLightModel		179	Glasses/ZGlLightModel	.
+ZGlMaterial		180	Glasses/ZGlMaterial	.
+ZGlBlending		181	Glasses/ZGlBlending	.
+ZRlNameRnrCtrl		182	Glasses/ZRlNameRnrCtrl	.
+ZRlFont			183	Glasses/ZRlFont		.
+
+# Node/Cluster Monitoring
+GledMonitor		192	Glasses/GledMonitor
+SaturnObserver		193	Glasses/SaturnObserver
+
+# Performance investigators
+PerfMeterTarget		224	Glasses/PerfMeterTarget
+PerfMeterOperator	225	Glasses/PerfMeterOperator

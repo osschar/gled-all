@@ -1,0 +1,242 @@
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Board.h:
+	* Glasses/Rect.h:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSTube.cxx:
+	* Glasses/ZImage.cxx:
+	* Glasses/ZRibbon.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
+2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+        ==================================================
+        Check-in of major changes from 1.2.3 towards 1.2.4
+        ==================================================
+
+	Changes that influence several groups of files:
+        ===============================================
+        
+        [RD7] RnrDriver now uses exactly 7 rnr levels
+        ---------------------------------------------
+        This allowed for a simplification in declaration of RnrCtrl in a
+        glass header. Most glasses are affected by this; the files with
+        *only* this change are not listed in in this entry.
+
+	* FL/Fl_LorentzVector.cxx:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	Changed variable ordering to be in accordance with TLorentzVector
+	(x,y,z,t).
+	
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Amphitheatre.h:
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/Amphitheatre_GL_Rnr.h:
+	New files: implementation of amphitheatre for placing of ZNode
+	descendants. Includes methods for automatic placement of assigned
+	nodes with traveling towards the nearest free chair.
+	
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	Selection of arbitrary texture coordinate limits (offers
+	subviews and repeated tiling).
+
+	* Glasses/MultiBoard.cxx:
+	* Glasses/MultiBoard.h:
+	New files; sub class of Board with a list of ZImages and Next/Prev
+	methods. Useful for slide shows.
+	
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	Selection of arbitrary texture coordinate limits (offers
+	subviews and repeated tiling).
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Texture animation, methods for obtaining transformation matrix at
+	a given time.
+	
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	New files; subclass of WSSeed for connecting two nodes (supports
+	animated connect and traveling of spheres along the path).
+	
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+	Can specify internal GL image format, support for shadowing (load
+	on demand, usefull for textures that are stored in GL anyway).
+	
+	* glass.list:
+	New glasses: Amphitheatre, MultiBoard, WSTube.
+	
+	* Glasses/Mover.h:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Minor beautifications.
+	
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Rect.h:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Width 0 now prevents rendering.
+
+	* Makefile:
+	Minor beautification.
+	
+2004-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	* Rnr/GL/RectTerrain_GL_Rnr.h:
+	Improvements and extensions of rendering, creation from
+	TH2, custom color gradient for z-value coloration (see ZRibbon).
+
+	* Glasses/ZRibbon.cxx:
+	* Glasses/ZRibbon.h:
+	New files; color gradient, loadable from POV-Ray color_map.
+
+	* glass.list:
+	New glasses added.
+
+	* Glasses/RndSMorphCreator.cxx:
+	* Glasses/RndSMorphCreator.h:
+	New files; Operator creating new random SMorphs. Used for testing
+	of lens-delition mechanism.
+
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.h:
+	Now uses display-list infrastructure from ZGlass.
+	
+	* Glasses/Board.h:
+	* Glasses/Mover.h:
+	* Glasses/Rect.h:
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Glasses/ZImage.h:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* glass.list:
+	* Glasses/RelParticle.cxx:
+	* Glasses/RelParticle.h:
+	* FL/Fl_LorentzVector.cxx:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+
+	New files; wrappers for TLorentzVector.
+	
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h: 
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	
+	Simplified due to scaling support in ZNode. 
+	
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+
+	Weaver symbols can now be textured.
+	
+	* Makefile: Introduced double-colon rules for standard targets.
+
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx: Include clean-up.
+	
+	* Glasses/WSPoint.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+
+	Brought in accordance with the new stamping mechanism.
+
+2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx: Proper Stamping for Load/Unload methods.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+
+	_init() was not called from ctor.
+
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	
+	Allow texturing and follow-up on TubeTvor changes.
+
+	SMorph can now be textured by a ZImage holding mercator
+	projection of surface image.
+
+	* Glasses/WSSeed.cxx: Follow-up on TubeTvor changes.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+
+	Addition of glTexEnv and GL_TEXTURE_MAG/MIN_FILTER parameters.
+
+	The image can now apply in Decal, Replace, Modulate and Blend
+	modes (was always Decal before). GL_TEXTURE_ENV_COLOR can also be
+	specified for Blend mode.
+
+	GL_TEXTURE_MAG/MIN_FILTER can now be Nearest or Linear (was always
+	Nearest before).
+	
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+
+	Minor code clean-up.
+
+2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx: The Operate() method did not invoke
+	Pre/PostOperate methods.
+
+2003-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSPoint_GL_Rnr.cxx:
+	* Rnr/GL/WSPoint_GL_Rnr.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	* glass.list:
+
+	Added new glasses WSSeed and WSPoint
+
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.h:
+
+	Minor changes
+

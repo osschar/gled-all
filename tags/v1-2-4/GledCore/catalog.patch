@@ -1,0 +1,56 @@
+# $Header$
+
+# NOTE: Linking of nested classes, enums and typedefs IS enabled by default.
+
+$PATCH = {
+
+"Gled" => {
+  'Pragmas' => "#pragma link C++ global Gled::theOne;\n"
+},
+
+"GledNS" => {
+  'Pragmas' => "#pragma link C++ function GForm;\n"
+},
+
+"AList" => {
+  'PragmaSuff' => "!-",
+  'VirtualBase' => 1,
+  'Pragmas' => "#pragma link C++ class AList::ElRep;\n"
+},
+
+"ZDeque" => {
+  'PragmaSuff' => "!-",
+},
+
+"ZList" => {
+  'PragmaSuff' => "!-",
+# The following line left as documentation.
+# 'C7_DoNot_Gen' => { 'RebuildLinkRefs' => 1 }
+},
+
+"ZMirEmittingEntity" => {
+  'VirtualBase' => 1
+},
+
+"ZMIR"=> {
+  'Pragmas'    => "#pragma link C++ class ZMIR_Result_Report;\n",
+},
+
+"ZComet" => { 'PragmaSuff' => "-" },
+
+"GMutex" => 
+{
+ 'Pragmas' =>
+  "#pragma link C++ class GMutexHolder;\n"     .
+  "#pragma link C++ class GMutexAntiHolder;\n" .
+  "#pragma link C++ class GLensReadHolder;\n"  .
+  "#pragma link C++ class GLensWriteHolder;\n"	
+},
+
+"GThread" => 
+{
+ 'Pragmas' =>
+  "#pragma link C++ class GThreadKeepAlive;\n"
+}
+
+};
