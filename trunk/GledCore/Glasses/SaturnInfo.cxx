@@ -153,9 +153,9 @@ void SaturnInfo::ReceiveBeamResult(UInt_t req_handle)
 
   static const string _eh("SaturnInfo::ReceiveBeamResult ");
 
-  assert_MIR_presence(_eh);
+  ZMIR* mir = assert_MIR_presence(_eh);
 
-  mSaturn->handle_mir_result(req_handle, mMir);
+  mSaturn->handle_mir_result(req_handle, mir);
 }
 
 /**************************************************************************/

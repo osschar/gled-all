@@ -1,6 +1,7 @@
-// $#Header$
-#ifndef Gled_TubeTvor_GL_Rnr_H
-#define Gled_TubeTvor_GL_Rnr_H
+// $Header$
+
+#ifndef GledCore_TubeTvor_GL_Rnr_H
+#define GledCore_TubeTvor_GL_Rnr_H
 
 #include <Tvor/TubeTvor.h>
 

@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_PupilInfo_GL_RNR_H
-#define Gled_PupilInfo_GL_RNR_H
+#ifndef GledCore_PupilInfo_GL_RNR_H
+#define GledCore_PupilInfo_GL_RNR_H
 
 #include <Glasses/PupilInfo.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>

@@ -13,7 +13,7 @@
 class SaturnInfo;
 
 class PerfMeterOperator : public Operator {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(PerfMeterOperator);
 
 public:
@@ -23,7 +23,7 @@ private:
   void _init();
 
 protected:
-  void send_beam_or_flare(ZMIR& m);
+  void send_beam_or_flare(auto_ptr<ZMIR>& m);
 
   TestType_e		mTest;		// X{GS} 7 PhonyEnum(-join=>1);
   Bool_t		bUseBeams;	// X{GS} 7 Bool()

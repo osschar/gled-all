@@ -5,6 +5,9 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZSubTree.h"
+#include "ZSubTree.c7"
+
+ClassImp(ZSubTree)
 
 void ZSubTree::_init()
 {
@@ -13,6 +16,3 @@ void ZSubTree::_init()
 }
 
 /**************************************************************************/
-
-#include "ZSubTree.c7"
-ClassImp(ZSubTree)

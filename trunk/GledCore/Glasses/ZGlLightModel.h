@@ -13,7 +13,7 @@
 #include <GL/gl.h>
 
 class ZGlLightModel : public ZGlStateBase {
-  // 7777 RnrCtrl("false, 1, RnrBits(0,1,0,0)")
+  // 7777 RnrCtrl("true, true, RnrBits(0,4,0,0)")
   MAC_RNR_FRIENDS(ZGlLightModel);
 
 private:
@@ -22,7 +22,7 @@ private:
 protected:
   // Light model
   ZGlStateBase::GlStateOp_e
-                mLightModelOp;     // X{GS}  7 PhonyEnum()
+                mLightModelOp;    // X{GS}  7 PhonyEnum()
   ZColor	mLiMoAmbient;     // X{PGS} 7 ColorButt(-join=>1)
   Int_t		mLiMoColorCtrl;	  // X{GS}  7 PhonyEnum(-width=>10, -vals=>[GL_SINGLE_COLOR,Single, GL_SEPARATE_SPECULAR_COLOR,SeparateSpecular]);
   Bool_t	bLiMoLocViewer;	  // X{GS}  7 Bool(-join=>1)
@@ -40,6 +40,7 @@ protected:
   ZGlStateBase::GlStateOp_e
                 mFaceCullOp;       // X{GS}  7 PhonyEnum()
   Int_t		mFaceCullMode;     // X{GS}  7 PhonyEnum(-vals=>[GL_FRONT,Front, GL_BACK,Back, GL_FRONT_AND_BACK,FrontAndBack])
+
 public:
   ZGlLightModel(const Text_t* n="ZGlLightModel", const Text_t* t=0) : ZGlStateBase(n,t) { _init(); }
 

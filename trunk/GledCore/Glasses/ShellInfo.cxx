@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ShellInfo.h"
+#include "ShellInfo.c7"
 #include <Glasses/ZQueen.h>
 
 ClassImp(ShellInfo)
@@ -22,7 +23,7 @@ void ShellInfo::_init()
 
 void ShellInfo::AdEnlightenment()
 {
-  NestInfo::AdEnlightenment();
+  PARENT_GLASS::AdEnlightenment();
   if(mNests == 0) {
     ZList* l = new ZList("NestInfos", GForm("Nests of %s", GetName()));
     mQueen->CheckIn(l);
@@ -31,5 +32,3 @@ void ShellInfo::AdEnlightenment()
 }
 
 /**************************************************************************/
-
-#include "ShellInfo.c7"

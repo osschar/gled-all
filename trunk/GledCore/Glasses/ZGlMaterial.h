@@ -13,7 +13,7 @@
 #include <GL/gl.h>
 
 class ZGlMaterial : public ZGlStateBase {
-  // 7777 RnrCtrl("false, 1, RnrBits(0,1,0,0)")
+  // 7777 RnrCtrl("true, true, RnrBits(0,4,0,0)")
   MAC_RNR_FRIENDS(ZGlMaterial);
 
 private:

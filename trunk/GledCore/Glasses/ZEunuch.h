@@ -12,7 +12,7 @@
 #include <Glasses/SaturnInfo.h>
 
 class ZEunuch : public ZHashList {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZEunuch);
 
 public:

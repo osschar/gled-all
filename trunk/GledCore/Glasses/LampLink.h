@@ -11,7 +11,7 @@
 #include <Glasses/Lamp.h>
 
 class LampLink : public ZGlass {
-  // 7777 RnrCtrl("false, 1, RnrBits(0,1,0,0)")
+  // 7777 RnrCtrl("true, false, RnrBits(0,4,0,0)")
   MAC_RNR_FRIENDS(LampLink);
 
 private:

@@ -12,7 +12,7 @@
 #include <TVector.h>
 
 class PerfMeterTarget : public ZList {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(PerfMeterTarget);
 
 private:

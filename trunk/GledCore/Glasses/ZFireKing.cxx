@@ -52,7 +52,7 @@ void ZFireKing::RequestQueenMirroring(ZQueen* queen_to_mirror)
 
   auto_ptr<ZMIR> mir(boss->S_reflect_queen(queen_to_mirror, mSaturn->GetSaturnInfo()));
   mir->SetRecipient(mSaturn->GetSaturnInfo());
-  mSaturn->PostMIR(*mir);
+  mSaturn->PostMIR(mir);
 
   // assert queen in `above' space and not yet ruling, neither awaiting sceptre.
   // pass control to reflect_queen, which also checks dependencies and
