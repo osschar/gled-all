@@ -90,7 +90,7 @@ print "LibID $LibID, ClassID $ClassID, VirtualBase $VirtualBase\n" if $DEBUG;
 );
 
 # Shorthands for keys in comment field
-%X_TO_KEY = ( 'X' => 'Xport', 'L' => 'Link', 'C' => 'Ctx' );
+%X_TO_KEY = ( 'X' => 'Xport', 'L' => 'Link', 'C' => 'Ctx', 'T' => 'Tags' );
 
 # Recognized fields for Xporter
 # g/s get/set, r ref, p ptr, t/T trans/tring, e provide just remote exec Set
@@ -112,7 +112,7 @@ $Method_FIELDS = "[eE]";
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
     "float", "Real_t", "bool",
-    "ID_t", "LID_t", "CID_t","TimeStamp_t", "UCIndex_t", "xxIndex_t");
+    "ID_t", "LID_t", "CID_t","MID_t","TimeStamp_t", "UCIndex_t", "xxIndex_t");
 
 ########################################################################
 # Subs
@@ -215,6 +215,12 @@ sub BeamArgs {
       next;
     }
 
+    # Stream enums as Int_t
+    if($r->[3] =~ m/_e$/) {
+      $ret .= "  *$bufp << (Int_t)$r->[2];\n";
+      next;
+    }
+
     if($r->[0] eq $r->[4]) {
       $ret .= "   $r->[2]${arrp}Streamer(*$bufp);\n";
     } else {
@@ -228,7 +234,7 @@ sub QeamArgs {
   # Returns code that un-streams arguments and assigns them to
   # given variable names
 
-  my $ar = shift; my $prefix = shift;
+  my ($ar, $bufvar, $prefix) = @_;
   my $ret = "";
   for $r (@$ar) {
     my $pointerp = ($r->[3] =~ m/(.*)\*$/);
@@ -236,7 +242,7 @@ sub QeamArgs {
     $ret .= "${prefix}";
 
     if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
-      $ret .= "$r->[3] $r->[2]_raw=0; buf->ReadArray($r->[2]_raw); ".
+      $ret .= "$r->[3] $r->[2]_raw=0; $bufvar.ReadArray($r->[2]_raw); ".
 	      "auto_ptr<$puretype> $r->[2]($r->[2]_raw);\n";
       $r->[5] = "$r->[2].get()";
       next;
@@ -244,25 +250,43 @@ sub QeamArgs {
 
     if( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
       if($pointerp) {
-        $ret .= "auto_ptr<$puretype> $r->[2] (new $puretype); *buf >> *$r->[2];\n";
+        $ret .= "auto_ptr<$puretype> $r->[2] (new $puretype); $bufvar >> *$r->[2];\n";
 	$r->[5] = "$r->[2].get()";
       } else {
-        $ret .= "$r->[3] $r->[2]; *buf >> $r->[2];\n";
+        $ret .= "$r->[3] $r->[2]; $bufvar >> $r->[2];\n";
       }
       next;
     }
 
     if( exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
-      $ret .= "{ ID_t _x; *buf >> _x; $r->[2] = dynamic_cast<$r->[3]>(${SUNPTRVAR}->DemangleID(_x)); }\n";
+      $ret .= "{ ID_t _x; $bufvar >> _x; $r->[2] = dynamic_cast<$r->[3]>(${SUNPTRVAR}->DemangleID(_x)); }\n";
+      next;
+    }
+
+    # Stream enums as Int_t
+    if($r->[3] =~ m/_e$/) {
+      $ret .= "$r->[3] $r->[2]; { Int_t _e; $bufvar >> _e; $r->[2] = ($r->[3])_e; }\n";
       next;
     }
 
     if($pointerp) {
-      $ret .= "auto_ptr<$puretype> $r->[2](new $puretype); $r->[2]\->Streamer(*buf);\n";
+      $ret .= "auto_ptr<$puretype> $r->[2](new $puretype); $r->[2]\->Streamer($bufvar);\n";
       $r->[5] = "$r->[2].get()";
     } else {
-      $ret .= "$r->[3] $r->[2]; $r->[2]\.Streamer(*buf);\n";
+      $ret .= "$r->[3] $r->[2]; $r->[2]\.Streamer($bufvar);\n";
     }
+  }
+  return $ret;
+}
+
+########################################################################
+
+sub produce_tags {
+  my ($list, $tag_string) = @_;
+  my $ret = "";
+  my @tags = split(/\s*,\s*/, $tag_string);
+  for $t (@tags) {
+    $ret .= "$list.push_back(\"$t\");";
   }
   return $ret;
 }
@@ -308,6 +332,9 @@ sub AddViewInclude {
 # Parse loop
 ########################################################################
 
+$MemberID = 1;
+$MethodID = 257;
+
 $state = 'private';
 
 while($c !~ m!\G$!osgc) {
@@ -327,11 +354,10 @@ while($c !~ m!\G$!osgc) {
             !omgcx)
   {
     my $view = $1;
-    # Type and Methodbase should be defed in GLED::Widgets::xx
-    # So far nothing is checked and ZTransCtrl weed created ... how lame !!!!!!
+    # Methodbase and Methodname should be defed in the constructor in .h file.
     $view =~ s/,\)/)/;
     my $control = eval("new GLED::Widgets::"."$view");
-    push @ExpViews, $control;
+    push @Views, $control;
     print "777\t$view\n" if $DEBUG;
     next;
   }
@@ -373,7 +399,7 @@ while($c !~ m!\G$!osgc) {
     print "Trying for $varname: $comment\n" if $DEBUG;;
     if($comment =~ m!X|(?:Xport)\{.*\}!o) {
       my $member = {};
-      
+      my $exported = ($comment=~m/^\!/) ? 0 : 1;
       # Parse out instr{args} constructs
       print "  partitions: " if $DEBUG;;
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
@@ -399,18 +425,23 @@ while($c !~ m!\G$!osgc) {
 
       $member->{Type} = $type;
       $member->{Methodbase} = $methodbase;
+      $member->{Methodname} = "Set$methodbase";
       $member->{Varname} = $varname;
       $member->{ArgStr} = $argstr;
       $member->{Args} = &MunchArgs($argstr);
+      $member->{Exported} = $exported;
+      $member->{ID} = $exported ? $MemberID++ : 0;
+
+      print "$type $methodbase $exported $member->{ID}\n" if $DEBUG;
 
       # Go for widget/view
       if($comment =~ m!7\s+(\w+\([^)]*\))!o) {
 	my $view = $1;
-	$view =~ s/\(/(Type=>'$type',Methodbase=>'$methodbase',/;
+	$view =~ s/\(/(Type=>'$type',Methodbase=>'$methodbase',Methodname=>"Set$methodbase",/;
 	$view =~ s/,\)/)/;
 	my $control = eval("new GLED::Widgets::".$view);
 	die "$view can not be instantiated ..." unless defined $control;
-	push @VarViews, $control;
+	push @Views, $control;
 	# range is honoured by Get/Set methods ... if defined
 	# this is not perfect ... must invent widget w/ range/step control
 	# ... could like spawn range/step ctrl on double click; ValuatorGroup?
@@ -452,9 +483,10 @@ while($c !~ m!\G$!osgc) {
       }
     }
     if($methodname eq $CLASSNAME && not $VirtualBase) {
-      push @Constructors, {Type=>$type, Methodbase=>$methodname, ArgStr=>$args, Args=>$ar};
+      # Here was constructor-glue.
     } elsif($comment =~ m!X|(?:Xport)\{$Method_FIELDS+\}!o) {
-      my $member = {Type=>$type, Methodbase=>$methodname, ArgStr=>$args, Args=>$ar};
+      my $member = {Type=>$type, Methodbase=>$methodname, Methodname=>$methodname, ID=>$MethodID++,
+		    ArgStr=>$args, Args=>$ar};
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
 	my $key = $1;
 	my $val = $2;
@@ -470,11 +502,11 @@ while($c !~ m!\G$!osgc) {
       my $view = $1;
       # Args can contain " ... must backslash them
       $args =~ s/"/\\"/og;
-      $view =~ s/\(/(Type=>"$type",Methodbase=>"$methodname",Const=>"$const",Args=>"$args",/;
+      $view =~ s/\(/(Type=>"$type",Methodbase=>"$methodname",Methodname=>"$methodname",Const=>"$const",Args=>"$args",/;
       #print $view."\n";
       $view =~ s/,\)/)/;
       my $control = eval("new GLED::Widgets::"."$view") or die;
-      push @MetViews, $control;
+      push @Views, $control;
       print "\tView\t$view\n" if $DEBUG;
     }
     next;
@@ -545,7 +577,7 @@ for $r (@Members) {
     if($IsGlass) {
       $pre     .= "mExecMutex.Lock(); " if $LOCK_SET_METHS;
       if(exists $r->{Link}) {
-	$pre   .= "if($r->{Varname}) $r->{Varname}->DecRefCount(); ";      
+	$pre   .= "if($r->{Varname}) $r->{Varname}->DecRefCount(this); ";      
       }
     }
     if($1 eq 'S' and $IsGlass) {
@@ -561,13 +593,13 @@ for $r (@Members) {
     }
     if($IsGlass) {
       if(exists $r->{Link}) {
-	$post  .= "if($r->{Varname}) $r->{Varname}->IncRefCount(); "      
+	$post  .= "if($r->{Varname}) $r->{Varname}->IncRefCount(this); "      
       }
       $post    .= "mExecMutex.Unlock(); " if $LOCK_SET_METHS;
     }
 
     $r->{Type} =~ /(.)/; my $arg = lc $1;
-    print H7 "void Set$r->{Methodbase}($r->{ArgStr}) {";
+    print H7 "void $r->{Methodname}($r->{ArgStr}) {";
     if(exists $r->{Range}) { # Check if range is set ... make if stuff
       my $arg = $r->{Args}[0][2]; # assume single argument
       my $rr = $r->{Range};
@@ -586,14 +618,14 @@ for $r (@Members) {
   
   # Produce ZGlass* version with dynamic_cast for links;
   # Do it also if the Set method is hand-written (e|E specifier)
-  if($r->{Xport} =~ m/(e|E)/ && exists $r->{Link} && not($r->{Type} eq "${BASECLASS}*")) {
-    print H7<<"fnord";
-void Set$r->{Methodbase}(ZGlass* d) {
-  $r->{Type} dd=0; if(d) dd = dynamic_cast<$r->{Type}>(d);
-  if(d==0 || dd) Set$r->{Methodbase}(dd);
-}
-fnord
-  }
+#  if($r->{Xport} =~ m/(e|E)/ && exists $r->{Link} && not($r->{Type} eq "${BASECLASS}*")) {
+#    print H7<<"fnord";
+#void Set$r->{Methodbase}(ZGlass* d) {
+#  $r->{Type} dd=0; if(d) dd = dynamic_cast<$r->{Type}>(d);
+#  if(d==0 || dd) Set$r->{Methodbase}(dd);
+#}
+#fnord
+#  }
 
   if( $r->{Xport} =~ m/(r|R)/ ) {
     my $const = ($1 eq 'R') ? 'const ' : '';
@@ -622,28 +654,21 @@ print H7 "virtual Int_t RebuildLinks(ZComet* c);\n";
 print H7 "\n";
 
 print H7 "// Declarations of remote-exec methods\n";
-print H7 "Int_t E_Exec(TBuffer* buf);\n";
-for $r (@Constructors) {
-  my $args = "TMessage* _msg" .($r->{ArgStr} ? ", " : ""). $r->{ArgStr};
-  print H7 "static TMessage* S_$r->{Methodbase}($args);\n";
-}
-print H7 "static ${BASECLASS}* Btor(Saturn* _sat_, TBuffer* buf);\n" unless $VirtualBase;
+print H7 "void ExecuteMir(ZMIR& mir);\n";
 
 for $r (@Members) {
-  next unless $r->{Xport} =~ m/s|S|e|E/o;
-  print H7 "ZMIR* S_Set$r->{Methodbase}($r->{ArgStr});\n";
-  if(exists $r->{Link}) {
-    print H7 "static void SC_Set$r->{Methodbase}(TBuffer* _buf);\n";
-  }
+  next unless $r->{Xport} =~ m/s|S|e|E/o && $r->{Exported};
+  print H7 "ZMIR* S_$r->{Methodname}($r->{ArgStr});\n";
+  print H7 "static MID_t Mid_$r->{Methodname}() { return $r->{ID}; }\n";
 }
 
 for $r (@Methods) {
   print H7 "ZMIR* S_$r->{Methodbase}($r->{ArgStr});\n";
-  if(exists $r->{Ctx}) {
-    print H7 "static void SC_$r->{Methodbase}(TBuffer* _buf);\n";
-  }
+  print H7 "static MID_t Mid_$r->{Methodbase}() { return $r->{ID}; }\n";
 }
 print H7 "\n";
+
+print H7 "static void _gled_catalog_init();\n\n";
 
 gen1_end:
 close H7 unless *H7==*STDOUT;
@@ -671,8 +696,15 @@ goto gen3_end if not $IsGlass;
 ### Forest following and building
 #################################
 
+print C7 "#include <Ephra/Saturn.h>\n";
+print C7 "#include <Gled/GledNS.h>\n";
+print C7 "#include <Stones/ZMIR.h>\n";
 print C7 "#include <Stones/ZComet.h>\n";
 print C7 "#include <memory>\n\n";
+
+unless($CLASSNAME eq $BASECLASS) {
+  print C7 "#define PARENT_GLASS ${PARENT}\n\n";
+}
 
 # LinkList
 print C7 "void\n${CLASSNAME}::CopyLinks(lpZGlass_t& glass_list, Bool_t lockp) {\n";
@@ -728,7 +760,7 @@ unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinks}) {
     next unless exists $r->{Link};
     print C7 "  if($r->{Varname} != 0) {\n";
     print C7 "    $r->{Varname} = dynamic_cast<$r->{Type}>(c->FindID((UInt_t)$r->{Varname}));\n";
-    print C7 "    if($r->{Varname}==0) ++ret; else $r->{Varname}->IncRefCount();\n";
+
     print C7 "  }\n";
   }
   print C7 "  return ret;\n}\n\n";
@@ -738,38 +770,14 @@ unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinks}) {
 ### Remote-exec methods
 #######################
 
-print C7 "#include <Stones/ZMIR.h>\n";
-print C7 "#include <Ephra/Saturn.h>\n";
-print C7 "#include <TMessage.h>\n\n";
-
-### Constructors ... always static
-$methid = 1;
-for $r (@Constructors) {
-  my $args1 = join(", ", "TMessage* _msg", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
-  # Watch it ... constructors do not stream ZMIR ...
-  print C7 <<"fnord";
-TMessage*
-${CLASSNAME}::S_$r->{Methodbase}($args1) {
-  *_msg << (LID_t)$LibID << (CID_t)$ClassID << (MID_t)$methid;
-fnord
-  print C7 BeamArgs("_msg", $r->{Args});
-  print C7 "  return _msg;\n}\n\n";
-  $methid++;
-}
-
-### Set Methods ...
-$methid = 100;
 for $r (@Members) {
-  next unless $r->{Xport} =~ m/s|S|E|e/o;
+  next unless $r->{Xport} =~ m/s|S|E|e/o && $r->{Exported};
   if(exists $r->{Link}) {
     print C7 <<"fnordlink";
-ZMIR* ${CLASSNAME}::S_Set$r->{Methodbase}($r->{ArgStr}) {
+ZMIR* ${CLASSNAME}::S_$r->{Methodname}($r->{ArgStr}) {
   ZMIR* _mir = new ZMIR(mSaturnID, ($r->{Args}[0][1] ? $r->{Args}[0][1]\->GetSaturnID() : 0));
-  *_mir->Message << (LID_t)$LibID << (CID_t)$ClassID << (MID_t)$methid;
+  _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});
   return _mir;
-}
-void ${CLASSNAME}::SC_Set$r->{Methodbase}(TBuffer* _buf) {
-  *_buf << (LID_t)$LibID << (CID_t)$ClassID << (MID_t)$methid;
 }
 
 fnordlink
@@ -777,22 +785,20 @@ fnordlink
   my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
   my $args2 = join(", ", map( { $_->[2] } @{$r->{Args}}));
   print C7 <<"fnord";
-ZMIR* ${CLASSNAME}::S_Set$r->{Methodbase}($args1) {
+ZMIR* ${CLASSNAME}::S_$r->{Methodname}($args1) {
   ZMIR* _mir = new ZMIR(mSaturnID);
-  *_mir->Message << (LID_t)$LibID << (CID_t)$ClassID << (MID_t)$methid;
+  _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});
 fnord
-  print C7 BeamArgs("_mir->Message", $r->{Args});
+  print C7 BeamArgs("_mir", $r->{Args});
   print C7 <<"fnord";
   return _mir;
 }
 
 fnord
   } # end if Link
-  $methid++;
 }
 
 ### Others/Explicit/Exported/Executable Methods
-$methid = 1000;
 for $r (@Methods) {
   my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
   my $args2 = join(", ", map( { $_->[2] } @{$r->{Args}}));
@@ -806,67 +812,56 @@ for $r (@Methods) {
   } else {
     print C7 "  ZMIR* _mir = new ZMIR(mSaturnID);\n";
   }
-  print C7 "  *_mir->Message << (LID_t)$LibID << (CID_t)$ClassID << (MID_t)$methid;\n";
+  print C7 "  _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});\n";
   my @aa = @{$r->{Args}}[$c .. $C];
-  print C7 BeamArgs("_mir->Message", \@aa);
+  print C7 BeamArgs("_mir", \@aa);
   print C7 <<"fnord";
   return _mir;
 }
+
 fnord
-  if(exists $r->{Ctx}) {
-    print C7 "void\n${CLASSNAME}::SC_$r->{Methodbase}(TBuffer* _buf) {\n";
-    print C7 " *_buf << (LID_t)$LibID << (CID_t)$ClassID << (MID_t)$methid;\n}\n";
-  }
-  print C7 "\n";
-  $methid++;
 }
 
-############
-### E_Exec
-############
+##############
+### ExecuteMir
+##############
 
 if($IsGlass) {
   print C7<<"fnord";
-Int_t
-${CLASSNAME}::E_Exec(TBuffer* buf) {
-  static string _eh("${CLASSNAME}::E_Exec ");
+void ${CLASSNAME}::ExecuteMir(ZMIR& mir) {
+  static string _eh("${CLASSNAME}::ExecuteMir ");
   static string _bad_ctx("ctx argument of wrong type");
-  MID_t methId; *buf >> methId;
-  switch(methId) {
+  switch(mir.Mid) {
 fnord
-  # Constructors are NOT handled vie E_Exec; see GledNS::ConstructNode and Btor
+
   # Set stuff
-  $methid = 100;
   for $r (@Members) {
-    next unless $r->{Xport} =~ m/s|S|e|E/o;
+    next unless $r->{Xport} =~ m/s|S|e|E/o && $r->{Exported};
     if(exists $r->{Link}) {
 
       print C7 << "fnordlink";
-  case $methid: {
-    $r->{Type} _beta = dynamic_cast<$r->{Type}>(mMir->Beta);
-    if(mMir->Beta != 0 && _beta == 0)
-      throw(_eh + "[Set$r->{Methodbase}] " + _bad_ctx);
-    Set$r->{Methodbase}(_beta);
-    return 0;
+  case $r->{ID}: {
+    $r->{Type} _beta = dynamic_cast<$r->{Type}>(mir.Beta);
+    if(mir.Beta != 0 && _beta == 0)
+      throw(_eh + "[$r->{Methodname}] " + _bad_ctx);
+    $r->{Methodname}(_beta);
+    break;
   }
 fnordlink
 
     } else {
 
-      print C7 "  case $methid: {\n";
-      print C7 QeamArgs($r->{Args}, "    ");
+      print C7 "  case $r->{ID}: {\n";
+      print C7 QeamArgs($r->{Args}, "mir", "    ");
       my @ca = map { $_->[5] } (@{$r->{Args}});
-      print C7 "    Set$r->{Methodbase}(". join(", ", @ca) .");\n";
-      print C7 "    return 0;\n  }\n";
+      print C7 "    $r->{Methodname}(". join(", ", @ca) .");\n    break;\n  }\n";
 
     } # end if Link
-    $methid++;
   }
 
   # Others
-  $methid = 1000;
   for $r (@Methods) {
-    print C7 "  case $methid: {\n";
+    print C7 "  case $r->{ID}: {\n";
     my $c = exists $r->{Ctx} ? substr($r->{Ctx},0,1) : 0;
     my $C = $#{$r->{Args}};
     if(exists $r->{Ctx}) {
@@ -881,44 +876,91 @@ fnord
 	++$cc;
       }
       my @aa = @{$r->{Args}}[$c .. $C];
-      print C7 QeamArgs(\@aa, "    ");
+      print C7 QeamArgs(\@aa, "mir", "    ");
     } else {
-      print C7 QeamArgs($r->{Args}, "    ");
+      print C7 QeamArgs($r->{Args}, "mir", "    ");
     }
     my @ca = map { $_->[5] } (@{$r->{Args}});
     print C7 "    $r->{Methodbase}(". join(", ", @ca) .");";
-    print C7 "\n    return 0;\n  }\n";
-    $methid++;
+    print C7 "\n    break;\n  }\n";
   }
   # end
-  print C7 " default: { return 16; }\n";
+  print C7 " default: { }\n";
   print C7 " } // end switch\n}\n\n";
 }
 
-#### Btor
-  if($IsGlass and !$VirtualBase) {
-  print C7<<"fnord";
-ZGlass*
-${CLASSNAME}::Btor(Saturn* _sat_, TBuffer* buf) {
-  MID_t methId; *buf >> methId;
-  switch(methId) {
-  case 0: { return new ${CLASSNAME}; }
+#####################
+### Catalog generator
+#####################
+
+print C7 <<"fnord";
+namespace { GledNS::ClassInfo* _ci=0; }
+
+void ${CLASSNAME}::_gled_catalog_init() {
+  using namespace GledNS;
+
+  if(_ci) return;
+  _ci = new ClassInfo("${CLASSNAME}", FID_t($LibID, $ClassID));
+  _ci->fParentName = "$PARENT";
+  _ci->fParentCI = 0;
 fnord
-  $methid = 1;
-  my $spv = $SUNPTRVAR;
-  $SUNPTRVAR = "_sat_";
-  for $r (@Constructors) {
-    print C7 "  case $methid: {\n";
-    print C7 QeamArgs($r->{Args}, "    ");
-    my @ca = map { $_->[5] } (@{$r->{Args}});
-    print C7 "    return new ${CLASSNAME}(". join(", ", @ca) .");\n  }\n";
 
-    $methid++;
+#####################
+### Member/MethodInfo
+#####################
+
+for $r (@Members) {
+  if($r->{Xport} =~ m/s|S|e|E/o && $r->{Exported}) {
+    print C7 "  {\n    MethodInfo* mip = new MethodInfo(\"$r->{Methodname}\", $r->{ID});\n";
+    if(exists $r->{Link}) {
+      print C7 "    mip->fContextArgs.push_back(\"$r->{Args}[0][0] $r->{Args}[0][1]\");\n";
+    } else {
+      print C7 "    mip->fArgs.push_back(\"$r->{Args}[0][0] $r->{Args}[0][1]\");\n";
+    }
+    if(exists $r->{Tags}) {
+      print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
+    }
+    print C7 "    mip->fClassInfo = _ci;\n";
+    print C7 "    _ci->fMethodList.push_back(mip);\n";
+    print C7 "    _ci->fMethodHash[$r->{ID}] = mip;\n\n";
+
+    if(exists $r->{Link}) {
+      print C7 "    LinkMemberInfo* lmip = new LinkMemberInfo(\"$r->{Methodbase}\");\n";
+      print C7 "    lmip->fType = \"$r->{Args}[0][0]\";\n";
+      print C7 "    lmip->fSetMethod = mip;\n";
+      print C7 "    _ci->fLinkMemberList.push_back(lmip);\n";      
+    } else {
+      print C7 "    DataMemberInfo* dmip = new DataMemberInfo(\"$r->{Methodbase}\");\n";
+      print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";
+      print C7 "    dmip->fSetMethod = mip;\n";
+      print C7 "    _ci->fDataMemberList.push_back(dmip);\n";      
+    }
+    print C7 "  }\n";
   }
-  print C7 " default: { return 0; }\n";
-  print C7 " } // end switch\n}\n\n";
-  $SUNPTRVAR = $spv;
 }
+
+for $r (@Methods) {
+  if($r->{Xport} =~ m/s|S|e|E/o) {
+    print C7 "  {\n    MethodInfo* mip = new MethodInfo(\"$r->{Methodname}\", $r->{ID});\n";
+    my $c = exists $r->{Ctx} ? substr($r->{Ctx}, 0, 1) : 0;
+    my $C = $#{$r->{Args}};
+    for($i=0; $i<=$C; ++$i) {
+      if($i < $c) {
+	print C7 "    mip->fContextArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
+      } else {
+	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
+      }
+    }
+    if(exists $r->{Tags}) {
+      print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
+    }
+    print C7 "    mip->fClassInfo = _ci;\n";
+    print C7 "    _ci->fMethodList.push_back(mip);\n";
+    print C7 "    _ci->fMethodHash[$r->{ID}] = mip;\n\n";
+    print C7 "  }\n";
+  }
+}
+print C7 "  GledNS::BootstrapClass(_ci);\n}\n\n";
 
 gen3_end:
 close C7 unless *C7==*STDOUT;
@@ -950,7 +992,7 @@ fnord
 
 {
   my %done = ();
-  my @incs = map {$_->{Include} } @ExpViews,@VarViews,@MetViews;
+  my @incs = map {$_->{Include} } @Views;
   for $r (@incs, @AdditionalViewIncludes) {
     if(not exists $done{$r}) {
       print H "#include <$r>\n";
@@ -961,18 +1003,18 @@ fnord
 
 print H "\nclass ${CLASSNAME}View : public MTW_SubView {\n";
 
-for $r (@ExpViews,@VarViews,@MetViews) {
+for $r (@Views) {
   print H $r->make_header_ccbu();
 }
 
 print H <<"fnord";
   ${CLASSNAME}* mIdol;
 public:
-  ${CLASSNAME}View(GledViewNS::ClassInfo* ci, MTW_View* v, ${CLASSNAME}* i) :
+  ${CLASSNAME}View(GledNS::ClassInfo* ci, MTW_View* v, ${CLASSNAME}* i) :
     MTW_SubView(ci, v), mIdol(i) {}
 
-  static void CheckIn();
-  static MTW_SubView* Construct(GledViewNS::ClassInfo* ci, MTW_View* v, ZGlass* g);
+  static MTW_SubView* Construct(GledNS::ClassInfo* ci, MTW_View* v, ZGlass* g);
+  static void _gled_catalog_init();
 };
 
 #endif
@@ -983,7 +1025,7 @@ close H unless *H==*STDOUT;
 # OUT7FILE, option -7file; In fact .cxx file for class <Class>View
 ########################################################################
 gen7:
-goto heaven if($OUT7FILE eq 'skip'); # || ($#VarView==-1 and $#MetViews==-1));
+goto heaven if($OUT7FILE eq 'skip');
 
 if($OUT7FILE eq '-') {
   *C = *STDOUT;
@@ -1005,7 +1047,7 @@ fnord
 ### Creator, Callback and Update foos
 #####################################
 
-for $r (@ExpViews,@VarViews,@MetViews) {
+for $r (@Views) {
   print C $r->make_widget();
   print C $r->make_cxx_cb();
   print C $r->make_weed_update();
@@ -1013,65 +1055,37 @@ for $r (@ExpViews,@VarViews,@MetViews) {
   print C "// -----\n\n";
 }
 
-######################################
-### Check-In into GledViewNS structure
-######################################
+# SubView Creator
+print C <<"fnord";
+MTW_SubView*
+${CLASSNAME}View::Construct(GledNS::ClassInfo* ci, MTW_View* v, ZGlass* g) {
+  ${CLASSNAME}* tg = dynamic_cast<${CLASSNAME}*>(g);
+  if(!tg) return 0;
+  return new ${CLASSNAME}View(ci, v, tg);
+}
+
+fnord
+
+#####################
+### Catalog generator
+#####################
 
 print C <<"fnord";
-static GledViewNS::ClassInfo* _ci=0;
+namespace { GledViewNS::ClassInfo* _ci=0; }
 
-void ${CLASSNAME}View::CheckIn() {
+void ${CLASSNAME}View::_gled_catalog_init() {
   using namespace GledViewNS;
-
   if(_ci) return;
-  _ci = new ClassInfo(FID_t($LibID, $ClassID));
-  _ci->fClassName = "${CLASSNAME}";
+  _ci = new ClassInfo;
   _ci->fooSVCreator = &Construct;
-  _ci->fParentName = "$PARENT";
   _ci->fRendererGlass = "$CATALOG->{Classes}{$CLASSNAME}{RnrClass}";
   _ci->fDefRnrCtrl = RnrCtrl(${RnrCtrl_ctor});
   _ci->fRendererCI = 0;
-  _ci->fParentCI = 0;
+  GledNS::ClassInfo* master = GledNS::FindClassInfo(FID_t($LibID, $ClassID));
+  master->fViewPart = _ci;
 fnord
 
-###################
-# ContextMethodInfo
-###################
-
-for $r (@Members) {
-  if(exists $r->{Link}) {
-    print C <<"fnord";
-  {
-    ContextMethodInfo* cmip = new ContextMethodInfo;
-    cmip->fName = "Set$r->{Methodbase}";
-    cmip->fContextArgs.push_back("$r->{Args}[0][0] $r->{Args}[0][1]");
-    cmip->fooCCCreator = &${CLASSNAME}::SC_Set$r->{Methodbase};
-
-    _ci->fCMIlist.push_back(cmip);
-  }
-fnord
-  }
-}
-
-for $r (@Methods) {
-  if(exists $r->{Ctx}) {
-    print C "  {\n    ContextMethodInfo* cmip = new ContextMethodInfo;\n";
-    print C "    cmip->fName = \"$r->{Methodbase}\";\n";
-    my $c = substr($r->{Ctx}, 0, 1);
-    my $C = $#{$r->{Args}};
-    for($i=0; $i<=$C; ++$i) {
-      if($i < $c) {
-	print C "    cmip->fContextArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
-      } else {
-	print C "    cmip->fFreeArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
-      }
-    }
-    my $t = substr($r->{Ctx}, 1);
-    print C "    cmip->fFreeTemplate = \"$t\";\n";
-    print C "    cmip->fooCCCreator = &${CLASSNAME}::SC_$r->{Methodbase};\n";
-    print C "\n    _ci->fCMIlist.push_back(cmip);\n  }\n";
-  }
-}
+### No special data for Methods & DataMembers
 
 ################
 # LinkMemberInfo
@@ -1079,58 +1093,41 @@ for $r (@Methods) {
 
 for $r (@Members) {
   if(exists $r->{Link}) {
-    my $is_list = ($r->{Link} =~ m/(l|L)/) ? "true" : "false";
     print C <<"fnord";
   {
     LinkMemberInfo* lmip = new LinkMemberInfo;
-    lmip->fName  = "$r->{Methodbase}";
-    lmip->fType  = "$r->{Type}";
-    lmip->bIsLinkToList = $is_list;
     lmip->fDefRnrBits = RnrBits($r->{RnrBits});
-    lmip->fooCCCreator = &${CLASSNAME}::SC_Set$r->{Methodbase};
-
-    _ci->fLMIlist.push_back(lmip);
+    GledNS::LinkMemberInfo* master_lmip = master->FindLinkMemberInfo("$r->{Methodbase}", false);
+    master_lmip->fViewPart = lmip;
   }
 fnord
   }
 }
 
-############
-# MemberInfo
-############
+################
+# Views -> Weeds
+################
 
-for $r (@ExpViews,@VarViews,@MetViews) {
+for $r (@Views) {
   print C <<"fnord";
   {
-    MemberInfo* mip = new MemberInfo;
-    mip->fName  = "$r->{Methodbase}";
-    mip->fType  = "$r->{Type}";
-    mip->fWidth = $r->{-width};
-    mip->fHeight= $r->{-height};
-    mip->bLabel = $r->{LabelP};
-    mip->bLabelInside = $r->{LabelInsideP};
-    mip->bCanResize = $r->{CanResizeP};
-    mip->bJoinNext = $r->{-join};
-    mip->fooWCreator  = $r->{Methodbase}_Creator_s;
-    mip->fooWCallback = (WeedCallback_foo) $r->{Methodbase}_Callback_s;
-    mip->fooWUpdate   = (WeedUpdate_foo)   $r->{Methodbase}_Update_s;
-
-    _ci->fMImap["$r->{Methodbase}"] = mip;
-    _ci->fMIlist.push_back(mip);
+    WeedInfo* wi = new WeedInfo("$r->{Methodbase}");
+    wi->fWidth = $r->{-width};
+    wi->fHeight= $r->{-height};
+    wi->bLabel = $r->{LabelP};
+    wi->bLabelInside = $r->{LabelInsideP};
+    wi->bCanResize = $r->{CanResizeP};
+    wi->bJoinNext = $r->{-join};
+    wi->fooWCreator  = $r->{Methodbase}_Creator_s;
+    wi->fooWCallback = (WeedCallback_foo) $r->{Methodbase}_Callback_s;
+    wi->fooWUpdate   = (WeedUpdate_foo)   $r->{Methodbase}_Update_s;
+    _ci->fWeedList.push_back(wi);
   }
 fnord
 }
-print C "  GledViewNS::BootstrapClassInfo(_ci);\n}\n\n";
 
-# Creator
-print C <<"fnord";
-MTW_SubView*
-${CLASSNAME}View::Construct(GledViewNS::ClassInfo* ci, MTW_View* v, ZGlass* g) {
-  ${CLASSNAME}* tg = dynamic_cast<${CLASSNAME}*>(g);
-  if(!tg) return 0;
-  return new ${CLASSNAME}View(ci, v, tg);
-}
-fnord
+
+print C "  GledViewNS::BootstrapClassInfo(_ci);\n}\n\n";
 
 close C unless *C==*STDOUT;
 

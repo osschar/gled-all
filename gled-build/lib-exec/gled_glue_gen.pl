@@ -43,7 +43,6 @@ print C <<"fnord";
 #include <Gled/GledNS.h>
 #include <Stones/ZMIR.h>
 #include <Ephra/Saturn.h>
-#include <TBuffer.h>
 
 fnord
 
@@ -60,51 +59,30 @@ for $c (@{ $CATALOG->{ClassList} }) {
 
 # E_Demangle
 print C <<"fnord";
-Int_t
-lib${libname}_E_Demangle(ZGlass *n, TBuffer* b) {
-  CID_t classId; *b >> classId;
-  switch(classId) {
+void lib${libname}_Mir_Exec(ZGlass *lens, ZMIR& mir) {
+  switch(mir.Cid) {
 fnord
 
 for $c (@{ $CATALOG->{ClassList} }) {
   print C <<"fnord";
   case $CATALOG->{Classes}{$c}{ClassID}: {
-    $c* _true_node = dynamic_cast<$c*>( n );
-    if(!_true_node) return 1;
-    return _true_node->E_Exec(b);
+    $c* _true_node = dynamic_cast<$c*>(lens);
+    if(!_true_node) throw(string("doogl moogl failed for $c"));
+    _true_node->ExecuteMir(mir);
+    break;
   }
 fnord
 }
 
 print C <<"fnord";
-  default: {
-    return 16;
-  }
-  } // switch
-}
-fnord
-
-# E_Construct
-print C <<"fnord";
-ZGlass*
-lib${libname}_E_Construct(Saturn* s, TBuffer* b) {
-  CID_t classId; *b >> classId;
-  switch(classId) {
-fnord
-for $c (@{ $CATALOG->{ClassList} }) {
-  print C "  case $CATALOG->{Classes}{$c}{ClassID}: { return " .
-  (($CATALOG->{Classes}{$c}{VirtualBase}) ? "0" : "${c}::Btor(s, b)") . "; }\n";
-}
-print C <<"fnord";
-  default: { return 0; }
+  default: { throw(string("doogl moogl failed for unknown cid")); }
   } // switch
 }
 fnord
 
 # DEF_Construct
 print C <<"fnord";
-ZGlass*
-lib${libname}_DEF_Construct(CID_t cid) {
+ZGlass* lib${libname}_Lens_Constructor(CID_t cid) {
   switch(cid) {
 fnord
 for $c (@{ $CATALOG->{ClassList} }) {
@@ -119,7 +97,7 @@ fnord
 
 # IS_A
 print C <<"fnord";
-bool lib${libname}_IS_A(ZGlass* g, CID_t cid) {
+bool lib${libname}_Is_A_Glass(ZGlass* g, CID_t cid) {
   switch(cid) {
 fnord
 
@@ -132,10 +110,7 @@ fnord
 }
 
 print C <<"fnord";
-  default: {
-    // well safertundhell ... this monkeys should all be exception throwing
-    return false;
-  }
+  default: { return false; }
   } // switch
 }
 fnord
@@ -145,18 +120,15 @@ fnord
 print C <<"fnord";
 void
 lib${libname}_GLED_init() {
-  GledNS::LibSetInfo* lsi = new GledNS::LibSetInfo;
-  lsi->fLid = $libid;
-  lsi->fName = "$libname";
+  GledNS::LibSetInfo* lsi = new GledNS::LibSetInfo("$libname", $libid);
   lsi->fDeps = _deplist;
-  lsi->fEDFoo = lib${libname}_E_Demangle;
-  lsi->fECFoo = lib${libname}_E_Construct;
-  lsi->fDCFoo = lib${libname}_DEF_Construct;
-  lsi->fISAFoo = lib${libname}_IS_A;
+  lsi->fLME_Foo = lib${libname}_Mir_Exec;
+  lsi->fLC_Foo = lib${libname}_Lens_Constructor;
+  lsi->fISA_Foo = lib${libname}_Is_A_Glass;
   GledNS::BootstrapSoSet(lsi);
 fnord
 for $c (@{ $CATALOG->{ClassList} }) {
-  print C "  GledNS::BootstrapClass(\"$c\", $libid, $CATALOG->{Classes}{$c}{ClassID});\n";
+  print C "  ${c}::_gled_catalog_init();\n";
 }
 print C "}\n\n";
 print C "void *${libname}_GLED_init = (void*)lib${libname}_GLED_init;\n";
@@ -197,7 +169,7 @@ void lib${libname}_GLED_init_View() {
 fnord
 for $c (@{ $CATALOG->{ClassList} }) {
   print C <<"fnord";
-  ${c}View::CheckIn();
+  ${c}View::_gled_catalog_init();
 fnord
 }
 print C "}\n\n";
