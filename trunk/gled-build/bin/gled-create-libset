@@ -69,10 +69,8 @@ include \${GLEDSYS}/make/make_base.inc
 
 # user targets go here; enumerate them in LIBSET_TARGETS
 
-.PHONY:	libset_clean libset_distclean
-# clean and distclean defined in make_base.inc
-# libset_ versions are user-definable ... must clean all local stuff
-libset_clean:
-libset_distclean:
+# clean and distclean defined as '::' rules in make_base.inc
+clean::
+distclean::
 fnord
 close M;

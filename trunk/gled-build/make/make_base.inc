@@ -135,7 +135,7 @@ catalog:
 glue:
 	${GLEDGLUEGEN} ${REQUIRES_LIB_SETS} :: ${RENDERERS}
 
-pre_depend: auto_dirs catalog glue
+pre_depend:: auto_dirs catalog glue
 	${MKBLESSDEP}
 	${MKP7DEP} ${BASE_HDRS} ${VIEW_HDRS} ${RNR_HDRS} > make_p7.inc
 	${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
@@ -152,14 +152,13 @@ depend:	p7dep ${DICT_AUTO_HDRS} ${VIEW_AUTO_HDRS} ${VIEW_FL_SECS}
 dist:
 	(cd ..; tar czf ${LIB_SET_NAME}-`date +"%y%m%d-%H%M"`.tgz ${LIB_SET_NAME})
 
-clean:	libset_clean
+clean::
 	@rm -f ${ALL_OBJS}
 
-distclean:
+distclean::
 	${MAKE} uninstall
 	${MAKE} build_uninstall
 	${MAKE} clean
-	${MAKE} libset_distclean
 	@rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}
 	@rm -rf ${VIEW_FL_SECS} ${BLESSED_H7} ${BLESSED_C7}
 	@rm -rf lib/.${LIB_SET_ID} lib/lib* catalog.auto \
