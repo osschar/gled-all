@@ -20,7 +20,7 @@ ClassImp(ZGlMaterial)
 void ZGlMaterial::_init()
 {
   // !!!! Set all links to 0 !!!!
-  mMatOp     = GSO_On;
+  mMatOp     = O_On;
   mFace      = GL_FRONT_AND_BACK;
   mShininess = 64;
   mAmbient.rgba(0.2,0.2,0.2);
@@ -28,7 +28,7 @@ void ZGlMaterial::_init()
   mSpecular.rgba(0,0,0);
   mEmission.rgba(0,0,0);
 
-  mModeOp    = GSO_Nop;
+  mModeOp    = O_Nop;
   mModeFace  = GL_FRONT_AND_BACK;
   mModeColor = GL_AMBIENT_AND_DIFFUSE;
 }

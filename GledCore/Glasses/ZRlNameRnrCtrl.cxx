@@ -18,7 +18,7 @@ ClassImp(ZRlNameRnrCtrl)
 
 void ZRlNameRnrCtrl::_init()
 {
-  mNameRnrOp  = GSO_On;
+  mNameRnrOp  = O_On;
   bRnrTiles   = true; bRnrFrames = true;
   mNameOffset = 0.99;
   mTextCol.rgba(1, 1, 1);

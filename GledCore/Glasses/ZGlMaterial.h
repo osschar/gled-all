@@ -7,12 +7,12 @@
 #ifndef GledCore_ZGlMaterial_H
 #define GledCore_ZGlMaterial_H
 
-#include <Glasses/ZGlStateBase.h>
+#include <Glasses/ZRnrModBase.h>
 #include <Stones/ZColor.h>
 
 #include <GL/gl.h>
 
-class ZGlMaterial : public ZGlStateBase {
+class ZGlMaterial : public ZRnrModBase {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZGlMaterial);
 
@@ -21,7 +21,7 @@ private:
 
 protected:
   // Material properties
-  ZGlStateBase::GlStateOp_e
+  ZRnrModBase::Operation_e
                 mMatOp;     // X{GS}  7 PhonyEnum()
   Int_t		mFace;	    // X{GS}  7 PhonyEnum(-vals=>[GL_FRONT,Front, GL_BACK,Back, GL_FRONT_AND_BACK,FrontAndBack], -width=>10, -join=>1)
   Float_t	mShininess; // X{GS}  7 Value(-range=>[0,1024,1,100], -width=>4)
@@ -31,12 +31,12 @@ protected:
   ZColor	mEmission;  // X{PGS} 7 ColorButt()
 
   // Material mode
-  ZGlStateBase::GlStateOp_e
+  ZRnrModBase::Operation_e
                 mModeOp;    // X{GS}  7 PhonyEnum()
   Int_t         mModeFace;  // X{GS}  7 PhonyEnum(-vals=>[GL_FRONT,Front, GL_BACK,Back, GL_FRONT_AND_BACK,FrontAndBack], -width=>10, -join=>1)
   Int_t		mModeColor; // X{GS}  7 PhonyEnum(-vals=>[GL_AMBIENT,Ambient, GL_DIFFUSE,Diffuse, GL_SPECULAR,Specular, GL_AMBIENT_AND_DIFFUSE,AmbAndDiff, GL_EMISSION,Emission], -width=>10)
 public:
-  ZGlMaterial(const Text_t* n="ZGlMaterial", const Text_t* t=0) : ZGlStateBase(n,t) { _init(); }
+  ZGlMaterial(const Text_t* n="ZGlMaterial", const Text_t* t=0) : ZRnrModBase(n,t) { _init(); }
 
 
 #include "ZGlMaterial.h7"
