@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -259,20 +259,33 @@ void Eventor::Reset()
   mBeatsDone = mLocBeatsDone = 0; Stamp(LibID(), ClassID());
 }
 
+void Eventor::Cancel()
+{
+  if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
+
+  if(!bRunning) {
+    ISwarn("Eventor::Cancel not running");
+    //return;
+  }
+
+  mSaturn->GetChaItOss()->Cancel(this);
+}
+
 /**************************************************************************/
 
 void Eventor::SetHost(SaturnInfo* host)
 {
-  mExecMutex.Lock();
-  if(bRunning) {
-    mExecMutex.Unlock();
-    throw(string("Eventor::SetHost cannot change host while thread is running."));
+  WriteLock();
+  try {
+    if(bRunning)
+      throw(string("Eventor::SetHost cannot change host while thread is running."));
+    set_link_or_die((ZGlass*&)mHost, host, LibID(), ClassID());
   }
-  if(mHost) mHost->DecRefCount(this);
-  mHost = host;
-  if(mHost) mHost->IncRefCount(this);
-  StampLink(LibID(), ClassID());
-  mExecMutex.Unlock();
+  catch(...) {
+    WriteUnlock();
+    throw;
+  }
+  WriteUnlock();
 }
 
 /**************************************************************************/
