@@ -1306,12 +1306,13 @@ void Saturn::arrival_of_kings(TMessage* m)
       mSunKing  = k;
       mSunQueen = dynamic_cast<ZSunQueen*>(queens.front());
       assert(mSunQueen!=0);
+
       ZComet t; t.Streamer(*m); t.UseSaturn(this);
+      mSaturnInfo = dynamic_cast<SaturnInfo*>(t.FindID((ID_t)mSaturnInfo));
+      assert(mSaturnInfo != 0);
       //t.bWarnOn = false; t.bVerbose = false;
       t.RebuildGraph();
       mSunQueen->UnfoldFrom(t);
-      mSaturnInfo = dynamic_cast<SaturnInfo*>(t.FindID((ID_t)mSaturnInfo));
-      assert(mSaturnInfo != 0);
       // Fix sun-king's SaturnInfo pointer
       mSunKing->mSaturnInfo = mSunQueen->mSunInfo;
     }
