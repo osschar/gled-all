@@ -1,0 +1,9 @@
+2003-07-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog: new file.
+
+	* macros/gl_defines.h: new file; contains #defines from GL/gl.h
+	for easy import into gled/cint (so that GL constants can be used).
+
+	
+
