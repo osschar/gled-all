@@ -108,6 +108,7 @@ GledGUI::GledGUI(list<char*>& args) :
 
   char* rnr_string = "GL";
   int swm_fs = 12, swm_vskip = 6, swm_hwidth = 0;
+  int font = 0;
   list<char*>::iterator i = args.begin();
   while(i != args.end()) {
     list<char*>::iterator start = i;
@@ -118,8 +119,9 @@ GledGUI::GledGUI(list<char*>& args) :
 	cout << "\n"
 	  "GledGUI options:\n"
 	  "----------------\n"
-	  "  -swm	fs:dh:dw	specify font-size, vert-space and char width\n"
+	  "  -swm   fs:dh:dw	specify font-size, vert-space and char width\n"
 	  "			default 12:6:0 (dw~0 means measure font)\n"
+	  "  -font  font-id	use fltk's font-id as default font\n"
 	  "  -rnr <r1>:<r2>:...	specify which rendering libraries to load (def GL)\n";
 	return;
       }
@@ -127,6 +129,12 @@ GledGUI::GledGUI(list<char*>& args) :
     else if(strcmp(*i, "-swm")==0) {
       next_arg_or_die(args, i);
       int num = sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-font")==0) {
+      next_arg_or_die(args, i);
+      font = atoi(*i);
       args.erase(start, ++i);
     }
 
@@ -143,8 +151,12 @@ GledGUI::GledGUI(list<char*>& args) :
   }
 
   libGledCore_GLED_init_View();
+
   GledViewNS::no_symbol_label = FL_FREE_LABELTYPE;
   Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
+  if(font) {
+    Fl::set_font((Fl_Font)FL_HELVETICA, (Fl_Font)font);
+  }
 
   if(rnr_string) {
     while(rnr_string && *rnr_string!=0) {
