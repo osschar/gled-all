@@ -28,6 +28,11 @@
 #include <FL/Fl_Box.H>
 #include <FL/fl_draw.H>
 
+#include <TUnixSystem.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
 namespace OS = OptoStructs;
 
 /**************************************************************************/
@@ -84,8 +89,8 @@ Eye::Eye(UInt_t port, ID_t shell_id, const char* name, const char* title,
     delete m;
     ISdebug(0, GForm("Eye::Connect got (Saturn*)%p %s", mSaturn, mSaturn->GetName()));
     // Install fd handler
-    mSatSocket->SetOption(kNoBlock, 1);
     Fl::add_fd(mSatSocket->GetDescriptor(), EyeFdMonitor, this);
+    //mSatSocket->SetOption(kNoBlock, 1);
   }
 
   {
@@ -126,17 +131,27 @@ OptoStructs::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
 // SatSocket bussines
 /**************************************************************************/
 
-Int_t Eye::Connect(UInt_t port)
-{
-
-  return 0;
-}
-
 Int_t Eye::Manage(int fd)
 {
   TMessage *m;
-  int count=0, len;
-  while((len = mSatSocket->Recv(m)) != -4) { // -4 means "would block"
+  UInt_t length;
+  Int_t  count = 0, len;
+
+  while(1) {
+
+    // Prefetch ...
+    len = recv(mSatSocket->GetDescriptor(), &length, sizeof(UInt_t),
+	       MSG_PEEK|MSG_DONTWAIT);
+    if(len < 0) {
+      if(errno == EWOULDBLOCK) {
+	break;
+      }
+      perror("Eye::Manage Prefetch got error that is not EWOULDBLOCK");
+      break;
+    }
+
+    m = 0;
+    len = mSatSocket->Recv(m);
 
     if(len == -1) {
       ISerr("Eye::Manage: Recv error");
@@ -164,22 +179,26 @@ Int_t Eye::Manage(int fd)
       return -3;
     }
 
+    ++count;
     mRay.Streamer(*m);
     // cout << mRay << endl;
 
     if(mRay.fEvent == Ray::RQN_message) {
       mShell->Message(GForm("[%s] %s", mRay.fCaller->GetName(), mRay.fMessage.Data()),
 		      FTW_Shell::MT_std);
+      delete m;
       continue;
     }
     if(mRay.fEvent == Ray::RQN_error) {
       mShell->Message(GForm("[%s] %s", mRay.fCaller->GetName(), mRay.fMessage.Data()),
 		      FTW_Shell::MT_err);
+      delete m;
       continue;
     }
 
     OS::hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(mRay.fAlpha);
     if(alpha_it == mGlass2ImgHash.end()) {
+      delete m;
       continue; // no image of alpha
     }
 
@@ -281,13 +300,12 @@ Int_t Eye::Manage(int fd)
     }
 
     delete m;
-    count++;
   }
 
   for(lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
     (*w)->redraw();
 
-  ISdebug(9, GForm("Eye::Manage got %d Ray(s) in this gulp", count));
+  ISdebug(6, GForm("Eye::Manage got %d Ray(s) in this gulp", count));
   return count;
 }
 

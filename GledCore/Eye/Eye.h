@@ -56,7 +56,6 @@ public:
   OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
 
   // Socketing
-  Int_t	Connect(UInt_t port);
   Int_t	Manage(int fd);
 
   void Send(TMessage* m);
