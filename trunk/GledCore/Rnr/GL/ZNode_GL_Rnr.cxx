@@ -33,7 +33,7 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
   ZGlass_GL_Rnr::PreDraw(rd);
   if(mNode->mStampReqTrans > mStampTrans) {
     build_GL_mat();
-    mStampTrans = mNode->mStampReqTrans;
+    mStampTrans = mNode->mTimeStamp;
   }
   glPushMatrix();
   glMultMatrixf(mGL_Mat);
