@@ -197,6 +197,9 @@ echo_dict:
 	@echo Dict sources:
 	@echo ${DICT_SRCS}
 
+echo_dict_dirs:
+	@echo ${DICT_DIRS}
+
 echo_fl_fls:
 	@echo ${VIEW_FL_FLS}
 echo_fl_secs:
