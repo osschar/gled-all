@@ -50,19 +50,13 @@ namespace {
 
 Pupil* Pupil::Create_Pupil(FTW_Shell* sh, OS::ZGlassImg* img)
 {
-  if(gl_ctx_holder == 0) {
-    gl_ctx_holder = new pupils_gl_ctx_holder;
-    gl_ctx_holder->end();
-    gl_ctx_holder->show();
-    // gl_ctx_holder->iconize();
-  }
-
   Pupil* p = new Pupil(sh, img);
   return p;
 }
 
 void *SubShellCreator_GledCore_Pupil = (void*)Pupil::Create_Pupil;
 
+/**************************************************************************/
 /**************************************************************************/
 
 namespace {
@@ -112,52 +106,19 @@ namespace {
 
 /**************************************************************************/
 
-void Pupil::label_window()
+void Pupil::_build()
 {
-  mLabel = GForm("pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
-  label(mLabel.c_str());
-  redraw();
-}
-
-/**************************************************************************/
-
-void Pupil::dump_image()
-{
-  printf("Pupil::draw dumping '%s'\n", mImageName.Data());
-
-  FILE* img = fopen(mImageName.Data(), "w");
-  if(img == 0) {
-    printf("Pupil::draw can't open screenshot file '%s'.\n", mImageName.Data());
-    return;
+  // Hack to keep the same GL context opened all the time.
+  if(gl_ctx_holder == 0) {
+    gl_ctx_holder = new pupils_gl_ctx_holder;
+    gl_ctx_holder->end();
+    gl_ctx_holder->show();
+    // gl_ctx_holder->iconize();
   }
 
-  tga_header header(w(), h());
-  header.dump(img);
-  
-  unsigned char* xx = new unsigned char[w()*h()*3];
-  glReadBuffer(GL_BACK);
-  glPixelStorei(GL_PACK_ALIGNMENT,1); 
-  glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
-  fwrite(xx, 3, w()*h(), img);
-  delete [] xx;
-
-  fclose(img);
-}
-
-/**************************************************************************/
-
-Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
-  FTW_SubShell(shell),
-  OS::A_View(infoimg),
-  Fl_Gl_Window(w,h), 
-  mInfo(0),
-  mCameraView(0),
-  mCamBase(0)
-{
   mInfo = dynamic_cast<PupilInfo*>(fImg->fGlass);
   assert(mInfo);
 
-  end();
   label_window();
   mode(FL_RGB | FL_DOUBLE | FL_DEPTH);
   resizable(this);
@@ -185,10 +146,37 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
   bFullScreen = false;
   bDumpImage  = false;
 
-  size(mInfo->GetWidth(), mInfo->GetHeight());
-
   mWindow = this;
   mShell->RegisterROARWindow(this);
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
+  FTW_SubShell(shell),
+  OS::A_View(infoimg),
+  Fl_Gl_Window(w,h), 
+  mInfo(0),
+  mCameraView(0),
+  mCamBase(0)
+{
+  end();
+  _build();
+  size(mInfo->GetWidth(), mInfo->GetHeight());
+}
+
+Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
+	     int x, int y, int w, int h) :
+  FTW_SubShell(shell),
+  OS::A_View(infoimg),
+  Fl_Gl_Window(x,y,w,h), 
+  mInfo(0),
+  mCameraView(0),
+  mCamBase(0)
+{
+  end();
+  _build();
 }
 
 Pupil::~Pupil() {
@@ -202,7 +190,12 @@ void Pupil::AbsorbRay(Ray& ray)
 {
   using namespace RayNS;
 
-  if( ray.fFID != PupilInfo::FID() )
+  if(ray.IsBasic()) {
+    label_window();
+    return;
+  }
+
+  if(ray.fFID != PupilInfo::FID())
     return;
 
   switch(ray.fRQN) { 
@@ -227,6 +220,7 @@ void Pupil::AbsorbRay(Ray& ray)
   }
 
   case PupilInfo::PRQN_camera_home: {
+    SetAbsRelCamera();
     mCamera->Home();
     redraw();
     break;
@@ -451,7 +445,7 @@ void Pupil::Render()
   // Calls rnr driver to perform actual rendering.
   // Used by draw() and Pick().
 
-  mDriver->SetMaxDepth(mInfo->GetMaxDepth());
+  mDriver->SetMaxDepth(mInfo->GetMaxRnrDepth());
   mDriver->BeginRender();
   mDriver->Render(mDriver->GetRnr(fImg));
   mDriver->EndRender();
@@ -886,8 +880,11 @@ int Pupil::handle(int ev)
       return 1;
 
     case 'f':
-      FullScreen(); redraw();
-      return 1;
+      if(parent() == 0) {
+	FullScreen(); redraw();
+	return 1;
+      }
+      break;
 
     case FL_F+1:
       mShell->SpawnMTW_View(fImg);
@@ -977,6 +974,43 @@ int Pupil::handle(int ev)
 */
 
 /**************************************************************************/
+// Protected methods.
+/**************************************************************************/
+
+void Pupil::label_window()
+{
+  mLabel = GForm("pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
+  label(mLabel.c_str());
+  redraw();
+}
+
+/**************************************************************************/
+
+void Pupil::dump_image()
+{
+  printf("Pupil::draw dumping '%s'\n", mImageName.Data());
+
+  FILE* img = fopen(mImageName.Data(), "w");
+  if(img == 0) {
+    printf("Pupil::draw can't open screenshot file '%s'.\n", mImageName.Data());
+    return;
+  }
+
+  tga_header header(w(), h());
+  header.dump(img);
+  
+  unsigned char* xx = new unsigned char[w()*h()*3];
+  glReadBuffer(GL_BACK);
+  glPixelStorei(GL_PACK_ALIGNMENT,1); 
+  glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
+  fwrite(xx, 3, w()*h(), img);
+  delete [] xx;
+
+  fclose(img);
+}
+
+/**************************************************************************/
+// Hacks.
 /**************************************************************************/
 
 void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
