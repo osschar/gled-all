@@ -840,28 +840,21 @@ void ZQueen::RemoveLens(ZGlass* lens)
 void ZQueen::RemoveLenses(ZList* list, Bool_t recurse)
 {
   // Remove elements of list. Does NOT cross queen boundaries.
-  // Spawns a separate thread to do the job.
-  //
-  // The thread spawning should go via Saturn ... MEE setting etc.
+  // Spawned in a dedicated thread.
 
   static const string _eh("ZQueen::RemoveLenses ");
 
   if(mKing->GetLightType() == ZKing::LT_Moon)
     throw(_eh + "can not be called at a moon.");
 
-  ZMIR* mir = GThread::get_mir();
-  if(mir && mir->IsFlare())
-    mir->SuppressFlareBroadcast = true;
+  ZMIR* mir = assert_MIR_presence(_eh);
 
-  lens_remover_ti* lrti = new lens_remover_ti
-    (GThread::get_owner(), this, list, recurse);
-
-  GThread* rt = new GThread((GThread_foo)tl_LensRemover, lrti, true);
-  rt->Spawn();
+  Bool_t syncp = mir->HasResultReq();
+  remove_lenses(list, recurse, syncp);
 }
 
 /**************************************************************************/
-// Lens-list removal ... low-level functions + thread spawner.
+// Lens-list removal ... low-level functions
 /**************************************************************************/
 
 void ZQueen::remove_lens(ZGlass* lens)
@@ -888,7 +881,7 @@ void ZQueen::remove_lens(ZGlass* lens)
   mSaturn->ShootMIR(purg_mir);
 }
 
-void ZQueen::remove_lenses(ZList* list, Bool_t recurse)
+void ZQueen::remove_lenses(ZList* list, Bool_t recurse, Bool_t syncmode)
 {
   // Low-level massive lens remove initiator. Called on queen's Sun.
 
@@ -903,32 +896,21 @@ void ZQueen::remove_lenses(ZList* list, Bool_t recurse)
       if(recurse) {
 	ZList* seclist = dynamic_cast<ZList*>(*i);
 	if(seclist && ! seclist->IsEmpty())
-	  remove_lenses(seclist, true);
+	  remove_lenses(seclist, true, false);
       }
     }
   }
 
   auto_ptr<ZMIR> purg_mir( S_PutListElementsToPurgatory(list) );
-  mSaturn->ShootMIR(purg_mir);
+  if(syncmode)
+    mSaturn->ShootMIRWaitResult(purg_mir);
+  else
+    mSaturn->ShootMIR(purg_mir);
 }
 
-void* ZQueen::tl_LensRemover(lens_remover_ti* arg)
-{
-  // Wrapper to call remove_lenses in a special thread.
-
-  GThread::setup_tsd(arg->mee);
-
-  arg->queen->remove_lenses(arg->list, arg->recurse);
-
-  delete arg;
-
-  GThread::Exit(0);
-  return 0;
-}
-
-  /**************************************************************************/
-  // ZeroRefCount and management of Orphans
-  /**************************************************************************/
+/**************************************************************************/
+// ZeroRefCount and management of Orphans
+/**************************************************************************/
 
 void ZQueen::ZeroRefCount(ZGlass* lens)
 {
