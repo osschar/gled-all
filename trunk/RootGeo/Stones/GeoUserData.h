@@ -25,7 +25,6 @@ public:
     bIsImported(impp),fFaceSet(fs)
   { _init(); }
 
-
 #include "GeoUserData.h7"
   ClassDef(GeoUserData, 1)
 }; // endclass GeoUserData

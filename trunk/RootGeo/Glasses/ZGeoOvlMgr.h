@@ -20,11 +20,13 @@ typedef list<TGeoNode*>::reverse_iterator        lgn_ri;
 
 
 class ZGeoOvlMgr : public ZGeoNode {
+
   MAC_RNR_FRIENDS(ZGeoOvlMgr);
 
 private:
   void _init();
 
+  // Overlap import / markup.
 protected:
   ZColor		mMotherCol;        // X{GSP}
   ZColor		mOvlCol1;          // X{GSP}
@@ -35,28 +37,32 @@ protected:
 public:
   void                  RecalculateOvl();  // X{Ed}  7 MButt()
 
+  // Selection of displayed overlaps.
 protected:
-  Float_t               mMinOvl;            // X{GS}  7 Value(-range=>[0,100,1,1000], -join=>1)
-  Float_t               mMaxOvl;            // X{GS}  7 Value(-range=>[0,100,1,1000], -join=>1)
+  Float_t               mMinOvl;           // X{GS}  7 Value(-range=>[0,100,1,1000], -join=>1)
+  Float_t               mMaxOvl;           // X{GS}  7 Value(-range=>[0,100,1,1000])
 public:
-  void                  RnrOvlInterval();    // X{E}  7 MButt()
+  void                  RnrOvlInterval();  // X{ED}  7 MButt()
 
 protected:
-  Bool_t      locate_first_from_top(TGeoNode* cur_node, TGeoVolume* v, ZGeoNode* zn,lgn_t& result);
-  string      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v, ZGeoNode* zn);
-  void        setup_zcolor(ZGeoOvl* ovlm);
-  ZGeoOvl    *create_standalone_node( const Text_t* n, const Text_t* t, TGeoNode* tn = 0);
   ZTrans      get_ztrans(TGeoMatrix* gm);
-  void        set_tnode_by_path( string path, TGeoNode* & gn);
+  Bool_t      locate_first_from_top(TGeoNode* cur_node, TGeoVolume* v,
+				    ZGeoNode* zn, lgn_t& result);
+  string      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v,
+				    ZGeoNode* zn);
+  void        setup_zcolor(ZGeoOvl* ovlm);
+  ZGeoOvl*    create_standalone_node(const Text_t* n, const Text_t* t,
+				     TGeoNode* tn = 0);
+  void        set_tnode_by_path(string path, TGeoNode* & gn);
 
 public:
   ZGeoOvlMgr(const Text_t* n="ZGeoOvlMgr", const Text_t* t=0):ZGeoNode(n,t){ _init();}
 
-  void         ImportUnReplicated(TObjArray* lOverlaps, TGeoNode* top_node);
+  void         ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node);
 
-  virtual void Restore(); // X{Ed} 
+  virtual void Restore();    // X{Ed} 
 
-  void         Dump();    // X{E} 7 MButt()
+  void         DumpOvlMgr(); //! X{E} 7 MButt()
 
 #include "ZGeoOvlMgr.h7"
   ClassDef(ZGeoOvlMgr, 1)
