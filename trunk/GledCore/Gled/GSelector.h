@@ -33,7 +33,7 @@ public:
   Float_t	fTimeOut;
 
 public:
-  GSelector(Init_e e=recursive);
+  GSelector(Init_e e=fast);
   virtual ~GSelector() {}
 
   Int_t Select();
