@@ -6,6 +6,8 @@ ZGlass			1	Glasses/ZGlass		.
 ZList			2	Glasses/ZList
 ZHashList		3	Glasses/ZHashList
 ZNameMap		4	Glasses/ZNameMap
+AList			5	Glasses/AList
+ZDeque			6	Glasses/ZDeque
 ZNode			16	Glasses/ZNode		.
 ZNodeLink		17	Glasses/ZNodeLink	ZNode
 
@@ -46,7 +48,7 @@ Eventor			129	Glasses/Eventor
 PipeEventor		130	Glasses/PipeEventor
 
 # Basic scene & geometry elements
-Scene			160	Glasses/Scene		ZNode
+Scene			160	Glasses/Scene		.
 Camera			161	Glasses/Camera
 Lamp			162	Glasses/Lamp		.
 GlobalLamps		163	Glasses/GlobalLamps	.
@@ -54,12 +56,15 @@ LampLink		164	Glasses/LampLink	.
 Sphere			165	Glasses/Sphere		.
 Box			166	Glasses/Box		.
 Text			167	Glasses/Text		.
+ScreenDumper		168	Glasses/ScreenDumper
 
 # GL State Modifiers
 ZGlStateBase		178	Glasses/ZGlStateBase
 ZGlLightModel		179	Glasses/ZGlLightModel	.
 ZGlMaterial		180	Glasses/ZGlMaterial	.
 ZGlBlending		181	Glasses/ZGlBlending	.
+ZRlNameRnrCtrl		182	Glasses/ZRlNameRnrCtrl	.
+ZRlFont			183	Glasses/ZRlFont		.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
