@@ -28,16 +28,13 @@ private:
   bool		bFillBack;	// X{GS}  7 Bool(-join=>1);
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
-  UChar_t*	pData;		//!
-
 public:
   Board(const Text_t* n="Board", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
-  virtual ~Board();
+  virtual ~Board() {}
 
   void SetUV(Real_t u, Real_t v)
   { mULen = u; mVLen = v; Stamp(LibID(), ClassID()); }
-  Int_t ReadFile();		// X{E} 77 MButt()
 
 #include "Board.h7"
   ClassDef(Board, 1)
