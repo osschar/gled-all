@@ -24,15 +24,47 @@ which contains two executables:
  * gled    standard executable with gui,
  * saturn  command interface only; useful for pure servers and proxies.
 
-For a trivial demo type:
 
-gled hello_gled.C
+Preparing the environment
+-------------------------
+
+If you have a full binary packet, then the script binenv.(c)sh should
+do the job: '. binenv.sh' or 'source binenv.csh'.
+
+It expects ROOT to be in external/root/ and all other external software
+to reside in external/ (with inner directories bin/, lib/, man/ etc).
+
+The scripts should give you a good idea of what needs to be set.
+
+
+Building Gled
+-------------
+
+See INSTALL.
+
+
+Running
+-------
+
+gled -h 		# display command-line options:
+
+gled hello_gled.C	# trivial demo
+
+You will get the main window (basically message output), GUI shell
+(somewhat intuitive, see gui-docs for details) and a GL window.
 
 To navigate in GL window (pupil) use left/middle mouse buttons. Control key
-modifies behaviour and is really usefull. <Home> will return you to the origin.
+modifies behaviour and is *REALLY* usefull:
+left-drag	   forward/backwards slide left/right
+ctrl-left-drag	   slide up/down     slide left/right
+mid-drag	   turn up/down	     turn left/right
+ctrl-mid-drag	   turn down/up	     roll left/right (think pilot stick)
+<Home> will return you to the origin.
+
 
 To connect to an already running gled, use:
 
 gled -r -m <host-to-connect-to> moon.C
 
-For more information see http://www.gled.org/.
+For more information see http://www.gled.org/ and in particular
+http://www.gled.org/docs/html/gledimp.html.

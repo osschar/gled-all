@@ -96,7 +96,7 @@ Gled::Gled(list<char*>& args) : mSaturn(0), bIsSun(false),
 	  "			files ~ ROOT macro scripts to process\n"
 	  "Gled options:\n"
 	  "-------------\n"
-	  "  -r[un]		spawn Saturn/Sun immediately\n"
+	  "  -r[un]		spawn Saturn/Sun immediately (before processing files)\n"
 	  "			Saturn if -master is specified, Sun otherwise\n"
 	  "  -nomoons		do not accept moon connections\n"
 	  "  -s[ssize]	<num>	specify size of sun-space (can be eg. 2e20)\n"
