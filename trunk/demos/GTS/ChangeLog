@@ -1,0 +1,12 @@
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* cone.gts:
+	* cube.gts:
+	* icosa.gts:
+	* sphere20.gts:
+	* sphere5.gts:
+	* tetrahedron.gts:
+	New files; standard GTS test files.
+	
+	* iso_surfs.C:
+	New demo; demonstrating GTSIsoMaker.
