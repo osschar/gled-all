@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Rect.h"
+#include "Rect.c7"
 
 ClassImp(Rect)
 
@@ -13,5 +14,3 @@ void Rect::_init() {
   mUStrips = mVStrips = 10;
   mWidth = 1;
 }
-
-#include "Rect.c7"
