@@ -1,3 +1,22 @@
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	* Glasses/MultiSpheror.cxx:
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	* Glasses/Spheror.cxx:
+	* Glasses/Spheror.h:
+	* Glasses/WarmAmoeba.cxx:
+	* Glasses/WarmAmoeba.h:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	* Rnr/GL/Spheror_GL_Rnr.cxx:
+	Transition to pure ROOT vector/matrix classes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+	
 2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ODECrawler.h:
