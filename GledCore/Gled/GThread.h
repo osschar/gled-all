@@ -17,6 +17,7 @@ typedef void*   (*GThread_foo)(void*);
 typedef void (*GThread_cu_foo)(void*);
 
 class SaturnInfo;
+class ZMIR;
 class ZMirEmittingEntity;
 
 class GThread {
@@ -24,6 +25,7 @@ class GThread {
   friend class Gled;
   friend class Saturn;
   friend class Mountain;
+  friend class ZKing;
   friend class ZQueen;
 
 public:
@@ -57,16 +59,11 @@ private:
   static GThread*            get_self();
   static void                set_owner(ZMirEmittingEntity* owner);
   static ZMirEmittingEntity* get_owner();
-  static void                set_return_address(SaturnInfo* ra);
-  static SaturnInfo*         get_return_address();
-  static void                set_return_handle(UInt_t);
-  static UInt_t              get_return_handle();
+  static void                set_mir(ZMIR* mir);
 
   static pthread_key_t TSD_Self;
   static pthread_key_t TSD_Owner;
-  static pthread_key_t TSD_ReturnAddress;
-  static pthread_key_t TSD_ReturnHandle;
-
+  static pthread_key_t TSD_MIR;
 
 public:
   GThread(GThread_foo f, void* a=0, bool d=false);
@@ -85,7 +82,10 @@ public:
   static void TestCancel();
   static void Exit(void* ret=0);
 
+  static ZMIR* get_mir();
+
   static GThread* Self();
+  static GThread* TSDSelf();
   static unsigned long RawSelf();
 
 #include "GThread.h7"

@@ -16,8 +16,7 @@ GMutex GThread::sIDLock;
 
 pthread_key_t GThread::TSD_Self;
 pthread_key_t GThread::TSD_Owner;
-pthread_key_t GThread::TSD_ReturnAddress;
-pthread_key_t GThread::TSD_ReturnHandle;
+pthread_key_t GThread::TSD_MIR;
 
 /**************************************************************************/
 
@@ -39,6 +38,7 @@ void GThread::DeleteIfDetached()
 {
   GThread* self = GThread::get_self();
   if(self->GetDetached()) {
+    pthread_setspecific(TSD_Self, 0);
     delete self;
   }
 }
@@ -62,22 +62,19 @@ void GThread::init_tsd()
 {
   pthread_key_create(&TSD_Self, 0);
   pthread_key_create(&TSD_Owner, 0);
-  pthread_key_create(&TSD_ReturnAddress, 0);
-  pthread_key_create(&TSD_ReturnHandle, 0);
+  pthread_key_create(&TSD_MIR, 0);
 }
 
 void GThread::setup_tsd(ZMirEmittingEntity* owner)
 {
   pthread_setspecific(TSD_Self, Self());
   set_owner(owner);
-  set_return_address(0);
-  set_return_handle(0);
+  set_mir(0);
 }
 
 void GThread::cleanup_tsd()
 {
-  set_return_handle(0);
-  set_return_address(0);
+  set_mir(0);
   set_owner(0);
   pthread_setspecific(TSD_Self, 0);
 }
@@ -97,24 +94,14 @@ ZMirEmittingEntity* GThread::get_owner()
   return (ZMirEmittingEntity*)pthread_getspecific(TSD_Owner);
 }
 
-void GThread::set_return_address(SaturnInfo* ra)
+void GThread::set_mir(ZMIR* mir)
 {
-  pthread_setspecific(TSD_ReturnAddress, ra);
+  pthread_setspecific(TSD_MIR, mir);
 }
 
-SaturnInfo* GThread::get_return_address()
+ZMIR* GThread::get_mir()
 {
-  return (SaturnInfo*)pthread_getspecific(TSD_ReturnAddress);
-}
-
-void GThread::set_return_handle(UInt_t rh)
-{
-  pthread_setspecific(TSD_ReturnHandle, (void*)rh);
-}
-
-UInt_t GThread::get_return_handle()
-{
-  return (UInt_t)pthread_getspecific(TSD_ReturnHandle);
+  return (ZMIR*)pthread_getspecific(TSD_MIR);
 }
 
 /**************************************************************************/
@@ -211,6 +198,11 @@ GThread* GThread::Self()
   sIDLock.Lock(); GThread* t = sIdMap[ pthread_self() ]; sIDLock.Unlock();
   pthread_setcancelstate(foo, 0);
   return t;
+}
+
+GThread* GThread::TSDSelf()
+{
+  return get_self();
 }
 
 unsigned long GThread::RawSelf()
