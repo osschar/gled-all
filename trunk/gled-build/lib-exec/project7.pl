@@ -11,7 +11,6 @@
 use lib "$ENV{GLEDSYS}/perllib";
 use Gled_ConfCat_Parser;
 use ParseConfig;
-use GLED_Widgets;
 
 my $cfg_parser = new ParseConfig(-defcfg=>"$ENV{GLEDSYS}/cfg/project7.rc");
 $cfg_parser->parse();
@@ -38,7 +37,7 @@ $_=join('',@_);
 die "Class $CLASSNAME not matched ...\n" unless ($p, $c) =
   m!class \s+ $CLASSNAME \s+ :?\s* 
     ([\n\s:\w,]*?) \s*
-    {(.*)} [\n\s]*; \s*
+    {(.*)} [\n\s]* ; \s*
     //\s*endclass\s+$CLASSNAME
    !sx;
 
@@ -72,6 +71,20 @@ $ClassID = (exists $CATALOG->{Classes}{$CLASSNAME}{ClassID} ?
 $IsGlass = defined $ClassID;
 $VirtualBase = $CATALOG->{Classes}{$CLASSNAME}{VirtualBase};
 print "LibID $LibID, ClassID $ClassID, VirtualBase $VirtualBase\n" if $DEBUG;
+
+########################################################################
+# Loading of existing Widget.pm's
+########################################################################
+
+use GLED_Widgets;
+for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
+  my $weed_pm = "$ENV{GLEDSYS}/perllib/GLED_${ls}_Widgets.pm";
+  print "Trying $weed_pm\n" if $DEBUG;
+  if(-r $weed_pm) {
+    print "Importing $weed_pm\n" if $DEBUG;
+    eval "use GLED_${ls}_Widgets";
+  }
+}
 
 ########################################################################
 # Set-up of globals
@@ -337,8 +350,8 @@ $MethodID = 257;
 
 $state = 'private';
 
-while($c !~ m!\G$!osgc) {
-  #print "Enterring at ", pos $c,"\n" if $DEBUG;
+while($c !~ m!\G\s*$!osgc) {
+  # print "Enterring at ", pos $c, ", len ", length $c, "\n" if $DEBUG;
   # Check for 7777 instructions
   if($c =~ m!\G\s*//\s*
              7777\s*([^\n]*?)\s*\n
@@ -376,7 +389,11 @@ while($c !~ m!\G$!osgc) {
     $state = 'private'; next;
   }
 
-  # search for public enums missing !!!
+  # search for enums; // comments allowed but only *after* opening '{'
+  if($c =~ m!\G\s*enum\s+(\w*)\s*{([^}]*)}\s*;!mgcx) {
+    # $1 ~ name, $2 ~ contents comments still embedded
+    # here parse $2
+  }
 
   ##############
   # Data members
@@ -515,7 +532,8 @@ while($c !~ m!\G$!osgc) {
   # Hmmmh ... there are things p7 ignores ... eat line ... retry
   # Like static stuff, some empty lines, ClassDef() ... #include "xx.h7" ;)
   $c =~ m!\G(.*)\n!omgc;
-  print "Fijou-fijou ... $1\n" if $DEBUG;
+  print "Fijou-fijou: '$1'\n" if $DEBUG;
+  # print substr( $c, pos $c, length($c) - pos($c)), "\n";
 }
 
 ########################################################################
@@ -730,9 +748,9 @@ for $r (@Members) {
   next unless exists $r->{Link};
   my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
   die "Link must be a pointer" if $pure_type eq $r->{Type};
-  my $glass_var = ($r->{Type} eq "${BASECLASS}*") ?
+  my $glass_var_ptr = ($r->{Type} eq "${BASECLASS}*") ?
     "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
-  print C7 "  ref_list.push_back($glass_var);\n";
+  print C7 "  ref_list.push_back($glass_var_ptr);\n";
 }
 print C7 "}\n\n";
 
@@ -746,8 +764,8 @@ for $r (@Members) {
   my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
   die "Link must be a pointer" if $pure_type eq $r->{Type};
   my $glass_var = ($r->{Type} eq "${BASECLASS}*") ?
-    "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
-  print C7 "  link_spec_list.push_back( LinkSpec(\"$CLASSNAME\", \"$r->{Methodbase}\") );\n";
+    "$r->{Varname}" : "(ZGlass*)$r->{Varname}";
+  print C7 "  link_spec_list.push_back( LinkSpec($glass_var, \"$CLASSNAME\", \"$r->{Methodbase}\") );\n";
 }
 print C7 "}\n\n";
 
