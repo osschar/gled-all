@@ -1,3 +1,12 @@
+2005-02-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	In auto generated set methods with range: removed check for bottom
+	of the range if variable type is unsigned and lower limit is 0.
+	Introduced global @UnsignedTypes to provide the needed information.
+	Also, if the argument is out of range, it is moved to the limit
+	instead of ignoring the call.
+
 2005-02-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
