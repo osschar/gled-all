@@ -139,7 +139,7 @@ Fl_Group* MTW_Layout::CreateLabelGroup()
 	b->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
       else
 	b->align(FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
-      if(m->fWeedInfo->fName.size() > m->fW) {
+      if(m->fWeedInfo->fName.size() > (unsigned int)(m->fW)) {
 	b->tooltip(m->fWeedInfo->fName.c_str());
       }
       x += m->fW;
