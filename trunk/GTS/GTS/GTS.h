@@ -11,7 +11,10 @@
 
 namespace GTS
 {
+
 #include <gts.h>
+
+  GtsSurface* MakeDefaultSurface();
 }
 
 #endif
