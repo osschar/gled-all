@@ -1,3 +1,15 @@
+2005-02-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/gled_glue_gen.pl:
+	Emit meaningful warnings when a lens can't be casted into a given
+	glass.
+	
+	* lib-exec/project7.pl:
+	Added automatic creation of 'Link' weed for links; set
+	GledViewNS::WeedInfo::bIsLinkWeed during view-catalog creation.
+	Bugfix: ClassInfo* was not set for LinkMemberInfo and
+	DataMemberInfo catalog entries.
+
 2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
