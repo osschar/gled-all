@@ -749,6 +749,12 @@ int Pupil::handle(int ev)
 
   case FL_PUSH: {
     mMouseX = x; mMouseY = y; // reset the drag location
+
+    // Raise on click.
+    if(Fl::event_button() == 1) {
+      show();
+    }
+
     if(Fl::event_button() == 1 && Fl::event_clicks() == 1) {
       Fl::event_clicks(0);
       OS::ZGlassImg* img = Pick();
@@ -758,6 +764,7 @@ int Pupil::handle(int ev)
 	mShell->SpawnMTW_View(img, x, y, mInfo->GetPopupFx(), mInfo->GetPopupFy());
       }
     }
+
     if(Fl::event_button() == 3) {
       Pick(true);
     }
