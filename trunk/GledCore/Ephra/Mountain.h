@@ -11,8 +11,7 @@
 #include <Gled/GThread.h>
 #include <Gled/GMutex.h>
 #include <Gled/GCondition.h>
-
-#include <TTime.h>
+#include <Gled/GTime.h>
 
 class Mountain;
 
@@ -22,10 +21,6 @@ struct DancerInfo {
   Mountain*	fMountain;
   Operator::Arg* fOpArg;
 
-  TTime		fStartTime;
-  TTime		fLastDuration;
-  Float_t	fAvg10Duration;
-
   bool		fSuspended;
   bool		fSleeping;
   bool		fShouldSuspend;
@@ -33,7 +28,6 @@ struct DancerInfo {
 
   DancerInfo(GThread* t, Eventor* e, Mountain* m) :
     fThread(t), fEventor(e), fMountain(m), fOpArg(0),
-    fAvg10Duration(0),
     fSuspended(false), fSleeping(false),
     fShouldSuspend(false), fShouldExit(false) {}
 };
