@@ -1,3 +1,13 @@
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Added handling for X{x} pragma - mark structural change in emitted
+	ray (for Set methods). For link and list changes this was already
+	explicitly done by the StampLink/List methods.
+
+	* cfg/Glass_SKEL.h:
+	Removed RnrCtrl(0) pragma.
+
 2005-02-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
