@@ -116,8 +116,14 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
     "float", "Real_t", "bool",
-    "ID_t", "LID_t", "CID_t","MID_t","FID_t","FMID_t",
-    "TimeStamp_t", "UCIndex_t", "xxIndex_t");
+    "ID_t", "LID_t", "CID_t", "MID_t", "FID_t", "FMID_t",
+    "TimeStamp_t", "UCIndex_t", "xxIndex_t"
+  );
+
+@UnsignedTypes =
+  ( "UChar_t", "UShort_t", "UInt_t", "ULong_t",
+    "ID_t", "LID_t", "CID_t", "MID_t", "TimeStamp_t"
+  );
 
 ########################################################################
 # Subs
@@ -678,7 +684,9 @@ for $r (@Members) {
     if(exists $r->{Range}) { # Check if range is set ... make if stuff
       my $arg = $r->{Args}[0][2]; # assume single argument
       my $rr = $r->{Range};
-      print H7 "  if($arg>$rr->[1] || $arg<$rr->[0]) return;\n";
+      print H7 "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
+      print H7 "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
+	unless(grep(/$r->{Type}/, @UnsignedTypes) and $rr->[0] == 0);
     }
     if(exists $r->{Link}) {
       $setit = <<"fnord";
