@@ -59,7 +59,8 @@ void GTSIsoMaker::MakeSurface()
 
   using namespace GTS;
 
-  if(mTarget == 0) {
+  GTSurf* target = mTarget;
+  if(target == 0) {
     throw(_eh + "Link Target should be set.");
   }
 
@@ -73,10 +74,7 @@ void GTSIsoMaker::MakeSurface()
     mZmin, (mZmax - mZmin) / mZdiv
   };
 
-  GtsSurface* s = gts_surface_new(gts_surface_class (),
-				  gts_face_class (),
-				  gts_edge_class (),
-				  gts_vertex_class ());
+  GtsSurface* s = MakeDefaultSurface();
 
   switch(mAlgo) {
   case A_Cartesian: 
@@ -92,8 +90,10 @@ void GTSIsoMaker::MakeSurface()
     gts_isosurface_tetra_bcl(s, grid, form_to_plane, &formula, mValue);
     break;
   }
-  // No locking. Data-model for GTS sux badly anyway ...
-  mTarget->Replace(s);
+
+  target->WriteLock();
+  target->ReplaceSurface(s);
+  target->WriteUnlock();
 }
 
 /**************************************************************************/

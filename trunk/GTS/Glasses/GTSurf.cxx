@@ -60,7 +60,7 @@ void GTSurf::_init()
 
 /**************************************************************************/
 
-void GTSurf::Replace(GTS::GtsSurface* new_surf)
+void GTSurf::ReplaceSurface(GTS::GtsSurface* new_surf)
 {
   using namespace GTS;
 
@@ -70,6 +70,22 @@ void GTSurf::Replace(GTS::GtsSurface* new_surf)
   pSurf = new_surf;
   mStampReqTring = Stamp(LibID(), ClassID());
 }
+
+GTS::GtsSurface* GTSurf::CopySurface()
+{
+  using namespace GTS;
+
+  GtsSurface* s = 0;
+  ReadLock();
+  if(pSurf) {
+    s = MakeDefaultSurface();
+    gts_surface_copy(s, pSurf);
+  }
+  ReadUnlock();
+  return s;
+}
+
+/**************************************************************************/
 
 void GTSurf::Load()
 {
@@ -81,10 +97,7 @@ void GTSurf::Load()
     ISerr(GForm("GTS::Surface::Load Cant' open %s", mFile.Data()));
     return;
   }
-  GtsSurface* s = gts_surface_new(gts_surface_class (),
-				  gts_face_class (),
-				  gts_edge_class (),
-				  gts_vertex_class ());
+  GtsSurface* s = MakeDefaultSurface();
   if(s==0) {
     ISerr(GForm("GTS::Surface::Load gts_surface_new failed ..."));
     fclose(fp);
@@ -101,7 +114,7 @@ void GTSurf::Load()
   gts_file_destroy(gsf);
   fclose(fp);
 
-  Replace(s);
+  ReplaceSurface(s);
 }
 
 void GTSurf::Save()
