@@ -13,8 +13,9 @@
 #include <TSystem.h>
 
 namespace {
-  ZRlFont*        def_font = 0;
-  ZRlFont_GL_Rnr* def_font_rnr = 0;
+  ZRlFont*          def_font = 0;
+  ZRlFont_GL_Rnr*   def_font_rnr = 0;
+  RnrDriver::RnrMod font_rnrmod;
 }
 
 void PupilInfo_GL_Rnr::_init()
@@ -26,17 +27,19 @@ void PupilInfo_GL_Rnr::_init()
     def_font->SetFontFile
       (GForm("%s/lib/fontdefault.txf", gSystem->Getenv("GLEDSYS")));
     def_font_rnr = new ZRlFont_GL_Rnr(def_font);
+    def_font_rnr->LoadFont();
+    font_rnrmod.fLens = def_font;
+    font_rnrmod.fRnr  = def_font_rnr;
   }
-  def_font_rnr->LoadFont();
 }
 
 /**************************************************************************/
 
 void PupilInfo_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  rd->CleanUpRnrModDefaults();
   // Default font
-  def_font_rnr->MakeDefault(rd);
-
+  rd->SetDefRnrMod(ZRlFont::FID(), &font_rnrmod);
   // Default name-rendering on/off
   rd->SetRnrNames(mPupilInfo->GetRnrNames());
 }
@@ -46,5 +49,6 @@ void PupilInfo_GL_Rnr::Draw(RnrDriver* rd)
 
 void PupilInfo_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  rd->CleanUpRnrModDefaults();
+  // Reset def font for overlay rendering.
+  rd->SetDefRnrMod(ZRlFont::FID(), &font_rnrmod);
 }
