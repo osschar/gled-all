@@ -19,13 +19,18 @@ die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
 chdir "$ENV{GLEDSYS}";
 die "$lsname exists" if -e $lsname;
 
+@TopDirs1 = ( $lsname, "Glasses", "Stones" );
+@TopDirs2 = ( "lib", "bin", "macros", "cfg", "lib-exec", "perllib" );
+
 mkdir $lsname, 0755;
 chdir $lsname;
-for $d ($lsname, "Glasses", "Stones", "lib", "bin", "macros",
-	"cfg", "lib-exec")
-  {
-    mkdir $d, 0755;
-  }
+for $d (@TopDirs1) {
+  mkdir $d, 0755;
+}
+for $d (@TopDirs2) {
+  mkdir $d, 0755;
+  open C, ">$d/.cvskeep"; close C;
+}
 
 open G, ">glass.list";
 print G <<"fnord";
