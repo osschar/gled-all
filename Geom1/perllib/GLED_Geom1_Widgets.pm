@@ -53,7 +53,7 @@ sub make_weed_update {
   my $S = shift;
   $S->make_weed_update_A() .
     "  const TLorentzVector& x = mIdol->Ref$S->{Methodbase}();\n" .
-    "  w->set(x.T(),x.X(),x.Y(),x.Z());\n" .
+    "  w->set(x.X(), x.Y(), x.Z(), x.T());\n" .
   $S->make_weed_update_B();
 }
 
