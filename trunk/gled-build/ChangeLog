@@ -1,3 +1,11 @@
+2004-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Fixed code generating the LinkReps to properly initialize
+	refs-to-pointers in gcc-3.3. Apparently there's a difference in
+	pointer-cast behavior (gcc-3.3 maybe creates temporaries, didn't
+	really investigate).
+	
 2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
