@@ -24,15 +24,15 @@ void Lamp_GL_Rnr::Draw(RnrDriver* rd)
     else if(mLamp->bOffIfOn) LampOff(rd);
     
   if(mLampID != -1 && mLamp->bDrawLamp) {
-    glColor4fv(mLamp->mDiffuse());
     glPushMatrix();
-    glRotatef(TMath::Pi(), 0, 0, 1);
+    glPushAttrib(GL_CURRENT_BIT | GL_TRANSFORM_BIT);
+    glEnable(GL_NORMALIZE);
+    glColor4fv(mLamp->mDiffuse());
     glScalef(1, 0.5, 0.5);
     SphereTrings::EnableGL(0);
     SphereTrings::DrawAndDisableGL(0);
+    glPopAttrib();
     glPopMatrix();
-
-    // Here should render lamp as geometric object.
   }
 }
 
