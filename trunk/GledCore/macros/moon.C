@@ -15,7 +15,7 @@
   ZSunQueen* sun_queen  = sun->GetSunQueen();
   ZQueen*    fire_queen = sun->GetFireQueen();
 
-  ZQueen* scenes = sun->GetSunKing()->GetByName("Scenes");
+  ZQueen* scenes = sun->GetSunKing()->GetElementByName("Scenes");
 
   gROOT->Macro("eye.C");	// spawn an eye with a pupil on first scene
 }

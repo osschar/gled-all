@@ -40,8 +40,8 @@ void std_auth()
 {
   // Query basic elements
   ZSunQueen* sun_queen = Gled::theOne->GetSaturn()->GetSunQueen();
-  QUERY_GLASS(ids, ZNameMap, sun_queen, "Auth/Identities");
-  QUERY_GLASS(idlists, ZNameMap, sun_queen, "Auth/IdentityLists");
+  PATH_FIND_GLASS(ids, ZNameMap, sun_queen, "Auth/Identities");
+  PATH_FIND_GLASS(idlists, ZNameMap, sun_queen, "Auth/IdentityLists");
 
   // Load-up standard identities and all available groups
   load_std_identities(sun_queen);
@@ -52,18 +52,19 @@ void std_auth()
   CREATE_GLASS(eyed_saturns, ZHashList, sun_queen,
 	       "EyedSaturns", "Saturns that accept Eye connections");
   idlists->Add(eyed_saturns);
-  eyed_saturns->Add(ids->Query("sun.absolute"));
-  eyed_saturns->Add(ids->Query("saturn"));
-  eyed_saturns->Add(ids->Query("venus"));
+  eyed_saturns->Add(ids->FindLensByPath("sun.absolute"));
+  eyed_saturns->Add(ids->FindLensByPath("saturn"));
+  eyed_saturns->Add(ids->FindLensByPath("venus"));
 
   CREATE_GLASS(mooned_saturns, ZHashList, sun_queen,
 	       "MoonedSaturns", "Saturns that accept Moon connections");
   idlists->Add(mooned_saturns);
-  mooned_saturns->Add(ids->Query("sun.absolute"));
-  mooned_saturns->Add(ids->Query("saturn"));
-  mooned_saturns->Add(ids->Query("neptune"));
+  mooned_saturns->Add(ids->FindLensByPath("sun.absolute"));
+  mooned_saturns->Add(ids->FindLensByPath("saturn"));
+  mooned_saturns->Add(ids->FindLensByPath("neptune"));
 
-  ZNameMap* filt = dynamic_cast<ZNameMap*>(sun_queen->Query("Auth/Filters"));
+  ZNameMap* filt = dynamic_cast<ZNameMap*>(
+	             sun_queen->FindLensByPath("Auth/Filters"));
   if(filt == 0) {
     printf("std_auth: can not retrieve Auth/Filters directory\n");
     return;

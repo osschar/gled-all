@@ -548,11 +548,11 @@ ZIdentity* ZSunQueen::GetOrImportIdentity(const char* ident)
     fid = ZIdentity::FID();
   }
 
-  ZNameMap* id_dir = dynamic_cast<ZNameMap*>(Query(path));
+  ZNameMap* id_dir = dynamic_cast<ZNameMap*>(FindLensByPath(path));
   if(id_dir == 0)
     throw _eh + "can not retrieve the identity directory";
 
-  identity = dynamic_cast<ZIdentity*>(id_dir->Query(ident));
+  identity = dynamic_cast<ZIdentity*>(id_dir->FindLensByPath(ident));
   if(identity != 0)
     return identity;
 
@@ -642,7 +642,8 @@ void ZSunQueen::attach_primary_identity(ZMirEmittingEntity* mee)
   CALL_AND_BROADCAST(mee, SetPrimaryIdentity, identity);
   CALL_AND_BROADCAST(identity->GetActiveMMEs(), Add, mee);
 
-  ZMirFilter* def_filter = dynamic_cast<ZMirFilter*>(Query("Auth/Filters/MEESelfFilter"));
+  ZMirFilter* def_filter = dynamic_cast<ZMirFilter*>(
+			     FindLensByPath("Auth/Filters/MEESelfFilter"));
   CALL_AND_BROADCAST(mee, SetGuard, def_filter);
 }
 
