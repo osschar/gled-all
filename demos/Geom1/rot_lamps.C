@@ -28,27 +28,32 @@
   rot_lamps->Add(lamp_base);
   
   l = new Lamp("Lamp1");
-  l->SetDiffuse(0.8, 0.3, 0.5);
-  l->MoveLF(1, 5); l->RotateLF(1,2, TMath::Pi());
+  l->SetDiffuse(1, 0.3, 0.4);
+  l->MoveLF(1, 5);
+  l->SetRotByDegrees(180, -30, 0);
+  l->SetScale(1);
+  l->SetSpotExp(3);
+  l->SetSpotCutOff(60);
+  l->SetLinAtt(0.05);
   scenes->CheckIn(l); lamp_base->Add(l);
   rot_lamps->GetGlobLamps()->Add(l);
-  n = new Sphere(0.1, "Sph1");
-  scenes->CheckIn(n);
-  l->Add(n);
 
   l = new Lamp("Lamp2");
-  l->SetDiffuse(0.5, 0.3, 0.8);
+  l->SetDiffuse(0.2, 0.5, 1);
   l->MoveLF(1,-5);
+  l->SetRotByDegrees(0, -30, 0);
+  l->SetScale(1);
+  l->SetSpotExp(3);
+  l->SetSpotCutOff(60);
+  l->SetLinAtt(0.05);
   scenes->CheckIn(l); lamp_base->Add(l);
   rot_lamps->GetGlobLamps()->Add(l);
-  n = new Sphere(0.1, "Sph2");
-  scenes->CheckIn(n);
-  l->Add(n);
 
   SMorph* n1 = new SMorph(); n1->SetScales(5, 2, 1);
-  n1->SetColor(0.48, 0.78, 0.58);
+  n1->SetColor(0.75, 0.75, 0.75);
   n1->SetTLevel(16); n1->SetPLevel(16);
   scenes->CheckIn(n1); rot_lamps->Add(n1);
+
   Sphere* n2 = new Sphere(); n2->MoveLF(1,1); n2->SetRadius(0.5);
   n2->SetColor(1,0.3,0.3);
   n2->SetLOD(20);
@@ -70,6 +75,11 @@
   mm->SetNode(lamp_base);
   mm->SetRi(1); mm->SetRj(2); mm->SetRa(0.01745);
   scenes->CheckIn(mm); dynamo->Add(mm);
+
+
+  // Spawn GUI
+  gROOT->ProcessLine(".x eye.C");
+
 
   dynamo->Start();
 }

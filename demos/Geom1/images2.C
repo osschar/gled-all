@@ -2,6 +2,7 @@
 
 // Simple scene with images and RectTerrain.
 // Like images.C but with severeal queens (test of queen dependencies).
+// Does NOT create the default GUI.
 // Requires manual dragging of SunKing/GeomQueen/Images into the PupilInfo.
 
 // vars: ZQueen* scenes

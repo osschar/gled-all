@@ -85,9 +85,6 @@ void images()
   l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
   scenes->CheckIn(l); images->Add(l);
   images->GetGlobLamps()->Add(l);
-  ZNode* n = new Sphere(0.5, "Sph");
-  scenes->CheckIn(n); l->Add(n);
-
 
   Board* board1 = new Board("Board1", "Showing GledLogo");
   scenes->CheckIn(board1);
@@ -140,15 +137,27 @@ void images()
 
   CREATE_ADD_GLASS(txt1, Text, images, "Text1", 0);
   txt1->SetText("GLED");
-  txt1->Set3Pos(-1.7, 1.8, 0);
+  txt1->Set3Pos(1, 1.8, 0);
   txt1->SetScales(2.2, 2.3, 1);
   txt1->SetFillBack(true);
   txt1->SetFGCol(0, 0, 0); txt1->SetBGCol(1, 0.95, 0.6);
 
   CREATE_ADD_GLASS(txt2, Text, images, "Text2", 0);
   txt2->SetText("Generic Lightweight Environment for Distributed computing");
-  txt2->Set3Pos(-7.5, 0, 0);
+  txt2->Set3Pos(0, 0, 0);
   txt2->SetScales(0.67, 1.1, 1);
   txt2->SetFillBack(true);
   txt2->SetFGCol(0,0,0); txt2->SetBGCol(0.65, 0.8, 1);
+
+  // RndSmorphCreator
+  CREATE_ADD_GLASS(rs_node, ZNode, images, "RndSmorph Node", 0);
+  CREATE_ADD_GLASS(rs_eventor, Eventor, images, "Eventor", 0);
+  rs_eventor->SetBeatsToDo(100);
+  rs_eventor->SetInterBeatMS(100);
+  CREATE_ADD_GLASS(rs_op, RndSMorphCreator, rs_eventor, "SMorph Creator", 0);
+  rs_op->SetTarget(rs_node);
+
+
+  // Spawn GUI
+  gROOT->ProcessLine(".x eye.C");
 }

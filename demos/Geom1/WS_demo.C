@@ -33,35 +33,32 @@ void WS_demo()
   lamp_base->MoveLF(3, 3.5);
   scenes->CheckIn(lamp_base);
   wsdemo->Add(lamp_base);
-  
-  l = new Lamp("Lamp1");
-  l->SetDiffuse(1, 0.3, 0.3);
-  l->MoveLF(1, 5); l->RotateLF(1,2, TMath::Pi());
-  l->SetScale(1);
-  scenes->CheckIn(l); lamp_base->Add(l);
-  wsdemo->GetGlobLamps()->Add(l);
-  n = new Sphere(0.1, "Sph1");
-  scenes->CheckIn(n);
-  l->Add(n);
 
-  l = new Lamp("Lamp2");
-  l->SetDiffuse(0.3, 0.3, 1);
-  l->MoveLF(1,-5);
-  l->SetScale(1);
-  scenes->CheckIn(l); lamp_base->Add(l);
-  wsdemo->GetGlobLamps()->Add(l);
-  n = new Sphere(0.1, "Sph2");
-  scenes->CheckIn(n);
-  l->Add(n);
+  CREATE_ADD_GLASS(lamp1, Lamp, lamp_base, "Lamp1", 0);
+  lamp1->MoveLF(1, 5);
+  lamp1->RotateLF(1,2, TMath::Pi());
+  lamp1->SetDiffuse(1, 0.3, 0.3);
+  lamp1->SetScale(1);
+  wsdemo->GetGlobLamps()->Add(lamp1);
+  CREATE_ADD_GLASS(sph1, Sphere, lamp1, "Sph1", 0);
+  sph1->SetRadius(0.38); sph1->SetLOD(20);
+
+  CREATE_ADD_GLASS(lamp2, Lamp, lamp_base, "Lamp2", 0);  
+  lamp2->MoveLF(1,-5);
+  lamp2->SetDiffuse(0.3, 0.3, 1);
+  lamp2->SetScale(1);
+  wsdemo->GetGlobLamps()->Add(lamp2);
+  CREATE_ADD_GLASS(sph2, Sphere, lamp2, "Sph2", 0);
+  sph2->SetRadius(0.38); sph2->SetLOD(20);
 
   CREATE_ADD_GLASS(image1, ZImage, wsdemo, "Photon", 0);
-  image1->SetFile("photon.png");
+  image1->SetFile("photon-blurred.png");
   image1->Load();
   image1->SetEnvMode(GL_MODULATE);
   image1->SetLoadAdEnlight(true);
 
-  CREATE_ADD_GLASS(image2, ZImage, wsdemo, "Gluon", 0);
-  image2->SetFile("gluon.png");
+  CREATE_ADD_GLASS(image2, ZImage, wsdemo, "Checker", 0);
+  image2->SetFile("checker_4.png");
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
@@ -84,4 +81,35 @@ void WS_demo()
     scenes->CheckIn(points[i]); seed1->Add(points[i]);
   }
 
+  CREATE_ADD_GLASS(t1, SMorph, wsdemo, "TubeStart", 0);
+  t1->SetTLevel(20); t1->SetPLevel(3);
+  t1->Set3Pos(-5, 8, 0);
+  t1->SetColor(.6, 0.2, 0.2);
+
+  CREATE_ADD_GLASS(t2, SMorph, wsdemo, "TubeEnd", 0);
+  t2->SetTLevel(20); t2->SetPLevel(5);
+  t2->Set3Pos(3, -2, 6);
+  t2->SetColor(.2, 0.2, 0.6);
+
+  CREATE_ADD_GLASS(tube1, WSTube, wsdemo, "Tube1", 0);
+  tube1->SetTLevel(30); 
+  tube1->SetFat(false);
+  tube1->SetTexture(image2);
+  tube1->SetNodeA(t1);
+  tube1->SetNodeB(t2);
+  tube1->Connect();
+
+  CREATE_ADD_GLASS(tube2, WSTube, wsdemo, "Tube2", 0);
+  tube2->SetTLevel(30); 
+  tube2->SetFat(false);
+  tube2->SetTexture(image2);
+  tube2->SetNodeA(sph1);
+  tube2->SetNodeB(sph2);
+  tube2->SetVecA(TLorentzVector(0,     0,  1, 1));
+  tube2->SetVecB(TLorentzVector(0,     0, -1, 1));
+  tube2->SetSgmA(TLorentzVector(0.2, 0.2,  0, 0));
+  tube2->SetSgmB(TLorentzVector(0.2, 0.2,  0, 0));
+  tube2->Connect();
+
+  gROOT->ProcessLine(".x eye.C");
 }
