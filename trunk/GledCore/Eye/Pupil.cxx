@@ -459,7 +459,7 @@ void Pupil::draw()
     }
   */
 
-  if(mDriver->fTexFont) { // TexFont test
+  if(mInfo->GetShowRPS() == true && mDriver->fTexFont) {
     GLTextNS::TexFont *txf = mDriver->fTexFont;
 
     int step = txf->max_ascent + txf->max_descent;

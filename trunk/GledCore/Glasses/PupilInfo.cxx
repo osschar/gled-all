@@ -24,6 +24,7 @@ void PupilInfo::_init()
   bBlend = false;
   mMSRotFac = -600; mMSMoveFac = -200;
   mCHSize = 0.03;
+  bShowRPS = true;
   mBuffSize = 4096; mPickW = 5; mPickH = 5;
 }
 
