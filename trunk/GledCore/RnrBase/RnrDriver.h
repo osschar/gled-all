@@ -23,7 +23,7 @@ namespace GLTextNS {
 
 class Lamp_GL_Rnr;
 
-class RnrDriver {
+class RnrDriver : public OptoStructs::ImageConsumer {
 private:
   void _init();
 
@@ -83,6 +83,8 @@ protected:
 public:
   RnrDriver(Eye* e, const string& r);
   virtual ~RnrDriver();
+
+  virtual void ImageDeath(OptoStructs::ZGlassImg* img);
 
   void FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
 		     const GledViewNS::RnrBits& bits);

@@ -31,11 +31,25 @@ RnrDriver::RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r)
   mMaxLamps = 8;
   mLamps = new (A_Rnr*)[mMaxLamps];
   bRnrNames = false;
+
+  mEye->RegisterImageConsumer(this);
 }
 
 RnrDriver::~RnrDriver()
 {
+  mEye->UnregisterImageConsumer(this);
   delete [] mLamps;
+}
+
+/**************************************************************************/
+
+void RnrDriver::ImageDeath(OS::ZGlassImg* img)
+{
+  hImg2Rnr_i oi = mOwnRnrs.find(img);
+  if(oi != mOwnRnrs.end()) {
+    delete oi->second;
+    mOwnRnrs.erase(oi);
+  }
 }
 
 /**************************************************************************/
@@ -124,14 +138,16 @@ void RnrDriver::Render(A_Rnr* rnr)
 
   if(rnr->mRnrScheme == 0) {
     rnr->mRnrScheme = new RnrScheme;
+    rnr->fImg->fGlass->ReadLock();
     rnr->CreateRnrScheme(this);
+    rnr->fImg->fGlass->ReadUnlock();
   }
 
   for(UChar_t rl=1; rl<=A_Rnr::sMaxRnrLevel; ++rl) {
     lRnrElement_t& re_list = rnr->mRnrScheme->fScheme[rl];
     for(lRnrElement_i re=re_list.begin(); re!=re_list.end(); ++re) {
       if(re->fRnrFoo == 0) {
-	// cout << _eh + "Descending to " << re->fRnr->fImg->fGlass->GetName() <<endl;
+	// printf("%sDescending to %s, from %s, rl=%d\n", _eh.c_str(), re->fRnr->fImg->fGlass->Identify().c_str(), rnr->fImg->fGlass->Identify().c_str(), rl);
 	Render(re->fRnr);
       } else {
 	re->fRnr->fImg->fGlass->ReadLock();
