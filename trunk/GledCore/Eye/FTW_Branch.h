@@ -35,6 +35,7 @@ class FTW_Branch : public FTW_Leaf {
   virtual void CollExpList();
   virtual void ExpandList();
   virtual void CollapseList();
+  virtual void CopyListLeaves(list<FTW_Leaf*>& list);
 
   virtual void ShowListMembers();
   virtual void HideListMembers();

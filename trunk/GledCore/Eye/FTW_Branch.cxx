@@ -171,6 +171,14 @@ void FTW_Branch::CollapseList()
   mNest->redraw();
 }
 
+void FTW_Branch::CopyListLeaves(list<FTW_Leaf*>& list)
+{
+  if(!bLeavesCreated) return;
+  for(lLoI_i i=mLeoim.begin(); i!=mLeoim.end(); ++i) {
+    list.push_back(i->leaf);
+  } 
+}
+
 /**************************************************************************/
 
 void FTW_Branch::ShowListMembers()
