@@ -62,7 +62,7 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
 {
   // Adds a glass (et al) into local structure
   // depth controls traversal length
-  // depth of 0 means add ONLY g
+  // depth of 0 means add ONLY g, not even its links or lists.
   // depth of -1 means don't stop
 
   Int_t num_new = 0;
@@ -112,11 +112,11 @@ ZGlass* ZComet::DemangleID(ID_t id)
   if(mExtDemangler != 0) {
     ZGlass* l = mExtDemangler->DemangleID(id);
     if(l == 0 && bVerbose) 
-      ISmess(GForm("%sid %u not in this comet nor saturn", _eh.c_str(), id));
+      ISmess(GForm("%sid %u not found neither in this comet nor saturn.", _eh.c_str(), id));
     return l;
   } else {
     if(bVerbose)
-      ISmess(GForm("%sid %u not in this comet", _eh.c_str(), id));
+      ISmess(GForm("%sid %u not found in this comet.", _eh.c_str(), id));
     return 0;
   } 
 }
@@ -142,19 +142,19 @@ Int_t ZComet::RebuildGraph()
   // First pass: rebuild and count missed links & list members
   for(mID2pZGlass_i i=mIDMap.begin(); i!=mIDMap.end(); i++) {
     ZGlass* g = i->second;
-    if(Int_t m = g->RebuildLinks(this)) {
+    if(Int_t m = g->RebuildLinkRefs(this)) {
       ret += m;
       if(bWarnOn)
-	ISwarn(GForm("ZComet::RebuildGraph(links) %d missed lens(es) in %s",
+	ISwarn(GForm("ZComet::RebuildGraph(links) %d missed lens(es) in '%s'.",
 		     m, g->GetName()));
     }
     ZList* l = dynamic_cast<ZList*>(g);
     if(l) {
-      Int_t m = l->RebuildList(this);
+      Int_t m = l->RebuildListRefs(this);
       if(m>0) {
 	ret += m;
 	if(bWarnOn)
-	  ISwarn(GForm("ZComet::RebuildGraph(list) %d missed lens(es) in %s",
+	  ISwarn(GForm("ZComet::RebuildGraph(list) %d missed lens(es) in '%s'.",
 		       m, g->GetName()));
       }
     }
@@ -166,7 +166,7 @@ Int_t ZComet::RebuildGraph()
     ZGlass* g = i->second;
     if(g->GetRefCount()==0) {
       if(find(mTopLevels.begin(), mTopLevels.end(), g) == mTopLevels.end()) {
-	ISdebug(D_STREAM, GForm("ZComet::RebuildGraph %s is an orphan",
+	ISdebug(D_STREAM, GForm("ZComet::RebuildGraph '%s' is an orphan.",
 				g->GetName()));
 	mOrphans.push_back(g);
       }
