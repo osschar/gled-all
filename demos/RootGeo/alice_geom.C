@@ -62,7 +62,11 @@ void alice_geom(Int_t import_mode=0)
   em_ovlm->SetUseOM(true);
 
   switch(import_mode) {
-  case  0: { import_by_regexp(znode); break; }
+  case  0: { 
+    import_by_regexp(znode); 
+    select_some_dets(znode);
+    break; 
+  }
   case  1:
   default: { import_with_collect(znode); break; }
   }
@@ -72,9 +76,8 @@ void alice_geom(Int_t import_mode=0)
   // Spawn GUI
   {
     const Text_t* default_layout =
-      "ZGlass(Name[7]):"
-      "ZGeoNode(RnrSelf[4],RnrOnForDaughters[5],RnrOffForDaughters[5],"
-      "Color[4],ImportNodes[4],NNodes[4],Mat[8])";
+      "ZNode(RnrSelf[5],RnrElements[5]):"
+      "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Mat[8])";
 
     Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
     gROOT->LoadMacro("eye.C");
@@ -86,7 +89,6 @@ void alice_geom(Int_t import_mode=0)
 
     CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
     shell->Add(rscene);
-    // shell->ImportKings();	  // Get all Kings as top level objects
 
     shell->SetLayout(default_layout);
     shell->SetLeafLayout(NestInfo::LL_Custom);
@@ -150,6 +152,7 @@ void import_by_regexp(ZGeoNode* volt)
   volt->ImportByRegExp("ZDC", TRegexp("^ZDC"));
   volt->ImportByRegExp("ZEM", TRegexp("^ZEM"));
   volt->ImportByRegExp("FMD", TRegexp("^FMD"));
+  volt->ImportByRegExp("DDIP", TRegexp("^DDIP"));
 
   volt->ImportByRegExp("S/S01", TRegexp("^S01"));
   volt->ImportByRegExp("S/S03", TRegexp("^S02"));
@@ -164,15 +167,11 @@ void import_by_regexp(ZGeoNode* volt)
   volt->ImportByRegExp("S/SCF3", TRegexp("^S[CF]3"));
   volt->ImportByRegExp("S/SCF4", TRegexp("^S[CF]4"));
 
-  volt->ImportByRegExp("B-Stuffe", TRegexp("^B"));
+  volt->ImportByRegExp("TRD&TOF", TRegexp("^B"));
 
+  printf("call Import unimported \n");
   volt->ImportUnimported("Remaining top-levels");
-
-  //--------------------------------------------------------------
-
-  select_some_dets(volt);
-
-  for(int i=1; i<=4; ++i) rnr_self_on(volt, GForm("EPM/EPM%d_1", i));
+  printf("END call Import unimported \n");
 }
 
 /**************************************************************************/
@@ -185,12 +184,6 @@ void import_with_collect(ZGeoNode* volt)
   printf("Import nodes with collect\n");
 
   volt->ImportNodesWCollect();
-
-  //--------------------------------------------------------------
-
-  select_some_dets(volt);
-
-  for(int i=1; i<=4; ++i) rnr_self_on(volt, GForm("EPM%d/EPM%d_1", i, i));
 }
 
 /**************************************************************************/
@@ -202,7 +195,7 @@ void select_some_dets(ZGeoNode* volt)
 
   ZGeoNode* tpc1 = import_nodes(volt, "TPC/TPC_1");
   if(tpc1) {
-    tpc1->RnrOffForDaughters();
+    tpc1->SetRnrElements(false);
     DECLARE_CAST(tpcgas, ZGeoNode, tpc1->FindLensByPath("TDGN_1"));
     if(tpcgas) {
       tpcgas->SetColor(0.3, 0.7, 0.5, 0.75);
