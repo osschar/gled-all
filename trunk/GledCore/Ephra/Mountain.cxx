@@ -22,13 +22,21 @@ ClassImp(Mountain)
 
 void Mountain::DancerCooler(DancerInfo* di)
 {
-  ISout(GForm("Mountain::DancerCooler thread exit for %s", di->fEventor->GetName()));
+  static const string _eh("Mountain::DancerCooler ");
+
+  ISdebug(1, _eh + GForm("thread exit for %s", di->fEventor->GetName()));
   
   di->fOpArg->fStop.SetNow();
+
+  GLensWriteHolder wrlck(di->fEventor);
+  
+  DancerInfo* rdi = di->fMountain->UnregisterThread(di->fEventor);
+  if(di != rdi) {
+    ISerr(_eh + "mismatch between local and global thread data.");
+  }
   di->fEventor->OnExit(di->fOpArg);
   delete di->fOpArg;
-  
-  di->fMountain->WipeThread(di->fEventor);
+  delete di;
 }
 
 /**************************************************************************/
@@ -71,13 +79,20 @@ void* Mountain::DancerBeat(DancerInfo* di)
     GThread::setup_tsd(di->fOwner);
   }
 
-  Operator::Arg* op_arg = di->fEventor->PreDance();
+  Operator::Arg* op_arg;
+  {
+    GLensWriteHolder wrlck(di->fEventor);
+    op_arg = di->fEventor->PreDance();
+  }
   if(op_arg == 0) GThread::Exit();
 
   GTHREAD_CU_PUSH;
 
   di->fOpArg = op_arg;
-  di->fEventor->OnStart(op_arg);
+  {
+    GLensWriteHolder wrlck(di->fEventor);
+    di->fEventor->OnStart(op_arg);
+  }
   op_arg->fStart.SetNow();
 
   bool exc_p = false, exit_p = false, suspend_p = false;
@@ -96,45 +111,59 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
     op_arg->fBeatStart.SetNow();
     try {
-      di->fEventor->PreBeat(op_arg);
+      {
+	GLensWriteHolder wrlck(di->fEventor);
+	di->fEventor->PreBeat(op_arg);
+      }
+      // Operate this the only method NOT called with write lock.
       di->fEventor->Operate(op_arg);
-      di->fEventor->PostBeat(op_arg);
+      {
+	GLensWriteHolder wrlck(di->fEventor);
+	di->fEventor->PostBeat(op_arg);
+      }
     }
     catch(Operator::Exception op_exc) {
       exc_p = true;
 
       switch(op_exc.fExc) {
 
-      case Operator::OE_Done:
+      case Operator::OE_Done: {
+	GLensWriteHolder wrlck(di->fEventor);
 	di->fEventor->PostDance(op_arg);
 	exit_p = true;
-
-      case Operator::OE_Continue:
+	break;
+      }
+      case Operator::OE_Continue: {
+	GLensWriteHolder wrlck(di->fEventor);
 	di->fEventor->OnContinue(op_arg, op_exc);
 	break;
-
-      case Operator::OE_Wait:
+      }
+      case Operator::OE_Wait: {
+	GLensWriteHolder wrlck(di->fEventor);
 	di->fEventor->OnWait(op_arg, op_exc);
 	suspend_p = true;
 	break;
-
-      case Operator::OE_Stop:
+      }
+      case Operator::OE_Stop: {
+	GLensWriteHolder wrlck(di->fEventor);
 	di->fEventor->OnStop(op_arg, op_exc);
 	exit_p = true;
 	break;
-
-      case Operator::OE_Break:
+      }
+      case Operator::OE_Break: {
 	ISerr(GForm("Mountain::DancerBeat [%s] Exit with Break",
-		di->fEventor->GetName()));
+		    di->fEventor->GetName()));
+	GLensWriteHolder wrlck(di->fEventor);
 	di->fEventor->OnBreak(op_arg, op_exc);
 	exit_p = true;
 	break;
-
+      }
       }
     }
     op_arg->fBeatStop.SetNow();
     op_arg->fBeatSum += op_arg->fBeatStop - op_arg->fBeatStart;
     if(!exc_p && !op_arg->fContinuous) {
+      GLensWriteHolder wrlck(di->fEventor);
       di->fEventor->PostDance(op_arg);
       exit_p = true;
     }
@@ -331,19 +360,24 @@ void Mountain::Cancel(Eventor* e)
 
 /**************************************************************************/
 
-void Mountain::WipeThread(Eventor* e)
+DancerInfo* Mountain::UnregisterThread(Eventor* e)
 {
-  hStageLock.Lock();
+  static const string _eh("Mountain::UnregisterThread ");
+
+  GMutexHolder stg_lck(hStageLock);
   hEv2DI_i i = hOnStage.find(e);
   if(i == hOnStage.end() || i->second==0) {
-   hStageLock.Unlock();
-   ISerr(GForm("Mountain::WipeThread ... thread of %s not found", e->GetName()));
-    return;
+    ISerr(_eh + GForm("thread of %s not found.", e->GetName()));
+    return 0;
   }
-  delete i->second->fThread;
-  delete i->second;
   hOnStage.erase(i);  
-  hStageLock.Unlock();
+  return i->second;
+}
+
+void Mountain::WipeThread(Eventor* e)
+{
+  DancerInfo* di = UnregisterThread(e);
+  delete di;
 }
 
 /**************************************************************************/
