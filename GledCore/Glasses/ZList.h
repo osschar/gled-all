@@ -100,7 +100,7 @@ public:
   void         ClearList();                   	     // X{E}
   virtual void ClearAllReferences();
 
-  void         RemoveLensesViaQueen(Bool_t recurse=false);
+  void         RemoveLensesViaQueen(Bool_t recurse=false); // X{Ed}
 
   virtual Int_t  Size() { return mSize; }
   virtual Bool_t IsEmpty() { return mSize==0; }
