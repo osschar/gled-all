@@ -1,3 +1,19 @@
+2004-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Changed default z-value from 0 to 1e-3. 0 didn't render anything on
+	some GLs.
+	
+	* Glasses/ScreenText.cxx:
+	* Glasses/ScreenText.h:
+	* Rnr/GL/ScreenText_GL_Rnr.cxx:
+	* Rnr/GL/ScreenText_GL_Rnr.h:
+	New glass ScreenText. Allows text placement in window coordinates.
+	
+	* glass.list:
+	New glass ScreenText.
+	
 2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Eye.cxx:
