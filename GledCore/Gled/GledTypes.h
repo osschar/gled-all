@@ -50,23 +50,32 @@ typedef UShort_t	LID_t;
 typedef UShort_t	CID_t;
 typedef UShort_t	MID_t;
 
-struct FID_t { // Full lib/class ID
+// FID_t : Full lib/class ID
+
+struct FID_t {
   LID_t	lid;
   CID_t	cid;
+
   FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
   bool operator==(FID_t& r) { return (lid==r.lid && cid==r.cid); }
   bool is_null() { return lid==0 && cid==0; }
 };
 
+// LinkSpec : specification of a link returned by p7-generated members
+
 struct LinkSpec {
-  string fClassName;
-  string fLinkName;
-  LinkSpec(const char* c, const char* l) : fClassName(c), fLinkName(l) {}
-  string full_name() { return fClassName + "::" + fLinkName; }
+  ZGlass*& fLinkRef;
+  string   fClassName;
+  string   fLinkName;
+
+  LinkSpec(ZGlass*& r, const char* c, const char* l) :
+    fLinkRef(r), fClassName(c), fLinkName(l) {}
+  string full_name() const { return fClassName + "::" + fLinkName; }
 };
 
-typedef list<LinkSpec>			lLinkSpec_t;
-typedef list<LinkSpec>::iterator	lLinkSpec_i;
+typedef list<LinkSpec>				lLinkSpec_t;
+typedef list<LinkSpec>::iterator		lLinkSpec_i;
+typedef list<LinkSpec>::reverse_iterator	lLinkSpec_ri;
 
 typedef ULong_t		TimeStamp_t;
 typedef UInt_t		UCIndex_t;	// Unckecked Index for ZVec/Mat
