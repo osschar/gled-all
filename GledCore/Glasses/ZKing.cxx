@@ -28,7 +28,7 @@
 #include <Stones/ZMIR.h>
 #include <Stones/ZComet.h>
 
-#include <memory>
+
 
 ClassImp(ZKing)
 

@@ -19,7 +19,7 @@
 
 #include <TSystem.h>
 
-#include <memory>
+
 
 ClassImp(GledMonitor)
 

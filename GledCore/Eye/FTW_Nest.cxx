@@ -24,7 +24,7 @@
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_ask.H>
 
-#include <memory>
+
 
 namespace OS = OptoStructs;
 namespace GNS  = GledNS;

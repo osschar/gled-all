@@ -5,7 +5,7 @@
 #include <Ephra/Mountain.h>
 #include <Gled/GledMirDefs.h>
 
-#include <memory>
+
 
 ClassImp(WarmAmoeba)
 

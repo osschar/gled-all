@@ -16,7 +16,7 @@
 
 #include <TRandom.h>
 
-#include <memory>
+
 
 ClassImp(MultiSpheror)
 
