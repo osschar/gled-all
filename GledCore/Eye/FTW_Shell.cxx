@@ -165,6 +165,12 @@ void FTW_Shell::X_SetSource(FTW::Locator& loc)
   mSource->set_type(FTW::Top_Selector::T_Locator);
 }
 
+void FTW_Shell::X_SetSource(ID_t id)
+{
+  mSource->wDir_Sel->set_id(id);
+  mSource->set_type(FTW::Top_Selector::T_Direct);
+}
+
 void FTW_Shell::X_SetSink(FTW::Locator& loc)
 {
   mSink->wLoc_Sel->set_base(loc);
