@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -38,7 +38,7 @@ void Ray::Streamer(TBuffer &buf)
     }
     fCaller = (ZGlass*)caller;
     fAlpha = (ZGlass*)a; fBeta = (ZGlass*)b; fGamma = (ZGlass*)g;
-    ISdebug(9, GForm("Ray::Streamer Read\t%u\t%u", fAlpha ? fAlpha->GetSaturnID() : 0, fStamp));
+    ISdebug(9, GForm("Ray::Streamer Read  %u %u", fAlpha ? fAlpha->GetSaturnID() : 0, fStamp));
   } else {
     buf << ((unsigned char)fEvent);
     switch(fEvent) {
@@ -53,7 +53,7 @@ void Ray::Streamer(TBuffer &buf)
     case RQN_error:        buf << UInt_t(fCaller) << fMessage; break;
     case RQN_apocalypse:   break;
     }
-    ISdebug(9, GForm("Ray::Streamer Wrote\t%u\t%u", fAlpha ? fAlpha->GetSaturnID() : 0, fStamp));
+    ISdebug(9, GForm("Ray::Streamer Wrote %u %u", fAlpha ? fAlpha->GetSaturnID() : 0, fStamp));
   }
 }
 
@@ -81,7 +81,7 @@ const char* Ray::EventName() const
 }
 
 void Ray::Dump(ostream& s) const {
-  s << EventName() <<"\t"<< fStamp << "\t";
+  s << EventName() <<" "<< fStamp << " ";
   switch(fEvent) {
   case RQN_change:
   case RQN_link_change: s << fAlpha->GetSaturnID() <<","<< fLibID <<","<< fClassID; break;
