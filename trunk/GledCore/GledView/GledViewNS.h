@@ -53,13 +53,22 @@ namespace GledViewNS {
   };
 
   struct RnrCtrl {
+    bool		fRnrSelf;
     bool		fRnrLinks;
-    UChar_t		fMaxLvl;
     RnrBits		fRnrBits;
 
-    RnrCtrl() : fRnrLinks(false), fMaxLvl(0) {}
-    RnrCtrl(bool rl, UChar_t ml, const RnrBits& rb) :
-      fRnrLinks(rl), fMaxLvl(ml), fRnrBits(rb) {}
+    RnrCtrl(int on_off=0) {
+      if(on_off == 0) {
+	fRnrSelf = fRnrLinks = false;
+      } else {
+	fRnrSelf = fRnrLinks = true;
+	fRnrBits = RnrBits(2,4,6,0, 0,0,0,5);
+      }
+    }
+    RnrCtrl(bool rs, bool rl) :
+      fRnrSelf(rs), fRnrLinks(rl), fRnrBits(2,4,6,0, 0,0,0,5) {}
+    RnrCtrl(bool rs, bool rl, const RnrBits& rb) :
+      fRnrSelf(rs), fRnrLinks(rl), fRnrBits(rb) {}
   };
 
   // Low level: weed info
