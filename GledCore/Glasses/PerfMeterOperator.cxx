@@ -40,7 +40,7 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception
       mTarget->NullMethod();
     } else {
       auto_ptr<ZMIR> mir(mTarget->S_NullMethod());
-      send_beam_or_flare(*mir);
+      send_beam_or_flare(mir);
     }
     break;
   }
@@ -50,7 +50,7 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception
       mTarget->IncCount();
     } else {
       auto_ptr<ZMIR> mir(mTarget->S_IncCount());
-      send_beam_or_flare(*mir);
+      send_beam_or_flare(mir);
     }
     break;
   }
@@ -61,7 +61,7 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception
       mTarget->AssignVector(vec);
     } else {
       auto_ptr<ZMIR> mir(mTarget->S_AssignVector(vec));
-      send_beam_or_flare(*mir);
+      send_beam_or_flare(mir);
     }
     break;
   }
@@ -74,10 +74,10 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception
 
 /**************************************************************************/
 
-void PerfMeterOperator::send_beam_or_flare(ZMIR& m)
+void PerfMeterOperator::send_beam_or_flare(auto_ptr<ZMIR>& m)
 {
   if(bUseBeams) {
-    m.SetRecipient(mBeamHost);
+    m->SetRecipient(mBeamHost);
   }
   mSaturn->PostMIR(m);
 }

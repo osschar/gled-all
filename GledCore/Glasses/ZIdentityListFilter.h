@@ -11,7 +11,7 @@
 #include <Glasses/ZHashList.h>
 
 class ZIdentityListFilter : public ZMirFilter {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZIdentityListFilter);
 
 private:

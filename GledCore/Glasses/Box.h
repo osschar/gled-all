@@ -11,7 +11,7 @@
 #include <Stones/ZColor.h>
 
 class Box : public ZNode {
-  // 7777 RnrCtrl("false, 4, RnrBits(1,2,4,0, 0,0,0,3)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Box);
 
 private:

@@ -1,4 +1,4 @@
-// $#Header$
+// $Header$
 
 #include "TubeTvor_GL_Rnr.h"
 #include <GL/gl.h>

@@ -10,6 +10,7 @@
 //
 
 #include "Box.h"
+#include "Box.c7"
 
 ClassImp(Box)
 
@@ -28,7 +29,3 @@ void Box::SetABC(Float_t a, Float_t b, Float_t c)
   mA = a; mB = b; mC = c;
   Stamp(LibID(), ClassID());
 }
-
-/**************************************************************************/
-
-#include "Box.c7"

@@ -11,12 +11,12 @@
 #include <Stones/ZColor.h>
 
 class Sphere : public ZNode {
-  // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Sphere);
 
 protected:
-  Float_t	mRadius;	// X{GS}  7 Value(-range=>[0,1000,1,100])
-  Int_t		mLOD;		// X{GS}  7 Value(-range=>[1,50,1,1], -join=>1)
+  Float_t	mRadius;	// X{GS}  7 Value(-range=>[0,1000,1,1000])
+  Int_t		mLOD;		// X{GS}  7 Value(-range=>[1,100,1,1], -join=>1)
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
   void _init();
