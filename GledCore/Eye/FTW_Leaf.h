@@ -71,6 +71,7 @@ public:
   // General foonctionality, partially overridden in FTW_Branch.
   virtual void ExpandList() {}
   virtual void CollapseList() {}
+  virtual void CopyListLeaves(list<FTW_Leaf*>& list) {}
 
   virtual void ExpandLink(FTW_Ant* ant);
   virtual void CollapseLink(FTW_Ant* ant);
