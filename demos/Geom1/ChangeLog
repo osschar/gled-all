@@ -1,3 +1,18 @@
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	Now adds custom layout.
+	
+	* photon.png:
+	Fixed texture corners for proper wrap-around.
+
+	* photon-blurred.png:
+	New texture, a tilable blur of photon.png.
+	
+	* images.C:
+	* rot_lamps.C:
+	Minor changes.
+	
 2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* booby.pov:
