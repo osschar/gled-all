@@ -1,5 +1,24 @@
 2005-02-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	SpawnMTW_View has been extended to allow caller to specify window
+	position.
+
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	Bugfix: before deleting mWindow should unregister self from it.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Left double-click now spawns class-view for clicked object
+	(pick-menu not shown) with position calculated as specified in
+	PupilInfo::mPopup* variables. 
+
+2005-02-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Eye/FTW_Leaf.cxx:
 	* Eye/FTW_Shell.cxx:
 	* Eye/FTW_Shell.h:
