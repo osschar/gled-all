@@ -10,7 +10,7 @@
 #include <Glasses/ZList.h>
 
 class ZHashList : public ZList {
-  // 7777 RnrCtrl("false, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(ZHashList);
 
 private:
@@ -39,7 +39,10 @@ public:
 
   virtual Bool_t Has(ZGlass* g);
 
-  virtual Int_t RebuildList(An_ID_Demangler* idd);
+  ZGlass* After(ZGlass* g);
+  ZGlass* Before(ZGlass* g);
+
+  virtual Int_t RebuildListRefs(An_ID_Demangler* idd);
 
 #include "ZHashList.h7"
   ClassDef(ZHashList, 1)
