@@ -194,7 +194,8 @@ void Pupil::AbsorbRay(Ray& ray)
     return;
 
   switch(ray.fRQN) { 
-  case RQN_user_1: {
+
+  case PupilInfo::PRQN_dump_image: {
     if(ray.fRayBits & Ray::RB_CustomBuffer) {
       mImageName.Streamer(*ray.fCustomBuffer);
       ray.ResetCustomBuffer();
@@ -206,11 +207,17 @@ void Pupil::AbsorbRay(Ray& ray)
     break;
   }
 
-  case RQN_user_2: {
+  case PupilInfo::PRQN_resize_window: {
     size(mInfo->GetWidth(), mInfo->GetHeight());
+    break;
   }
 
-    // need case for link change (or rebase camera in draw()).
+  case PupilInfo::PRQN_camera_home: {
+    mCamera->Home();
+    redraw();
+    break;
+  }
+
   }
 }
 

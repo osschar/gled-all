@@ -161,7 +161,7 @@ void PupilInfo::EmitDumpImageRay(const Text_t* filename)
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, FID()));
+      (Ray::PtrCtor(this, PRQN_dump_image, mTimeStamp, FID()));
     if(filename != 0) {
       TString fn(filename);
       TBuffer cbuff(TBuffer::kWrite);
@@ -183,7 +183,18 @@ void PupilInfo::EmitResizeRay()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_user_2, mTimeStamp, FID()));
+      (Ray::PtrCtor(this, PRQN_resize_window, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
+}
+
+/**************************************************************************/
+
+void PupilInfo::EmitCameraHomeRay()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_camera_home, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
 }
