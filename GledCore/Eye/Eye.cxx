@@ -159,16 +159,6 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
 }
 
 /**************************************************************************/
-
-void Eye::InvalidateRnrs(OS::ZGlassImg* img)
-{
-  for(OS::lpA_View_i i=img->fFullViews.begin(); i!=img->fFullViews.end(); ++i)
-    (*i)->InvalidateRnrScheme();
-  for(OS::lpA_View_i i=img->fLinkViews.begin(); i!=img->fLinkViews.end(); ++i)
-    (*i)->InvalidateRnrScheme();
-}
-
-/**************************************************************************/
 // SatSocket bussines
 /**************************************************************************/
 
@@ -259,21 +249,16 @@ Int_t Eye::Manage(int fd)
       // Read-lock alpha
       GLensReadHolder(a->fGlass);
       
-      for(OS::lpA_View_i i=a->fFullViews.begin(); i!=a->fFullViews.end(); ) {
-	OS::A_View* v = *i; ++i; v->AbsorbRay(ray);
+      a->PreAbsorption(ray);
+
+      for(OS::lpA_View_i i=a->fViews.begin(); i!=a->fViews.end(); ) {
+	// Be careful! Views can come and go in response to Rays.
+	OS::A_View* v = *i; --i;
+	v->AbsorbRay(ray);
+	++i; if(*i == v) ++i;
       }
 
-      if(ray.IsBasicChange() || ray.fRQN==RayNS::RQN_death) {
-	// The death part of 'if' should not be relevant until the
-	// local links are implemented.
-	for(OS::lpA_View_i i=a->fLinkViews.begin(); i!=a->fLinkViews.end(); ++i) {
-	  (*i)->AbsorbRay(ray);
-	}
-      }
-
-      if(ray.fEyeBits & Ray::EB_StructuralChange) {
-	InvalidateRnrs(a);
-      }
+      a->PostAbsorption(ray);
 
       if(ray.fRQN==RayNS::RQN_death) {
 	RemoveImage(a);

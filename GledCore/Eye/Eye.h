@@ -56,9 +56,6 @@ public:
   OptoStructs::ZGlassImg* DemangleID(ID_t id);
   void RemoveImage(OptoStructs::ZGlassImg* img);
 
-  // Rnr Invalidation
-  void InvalidateRnrs(OptoStructs::ZGlassImg* img);
-
   // Socketing
   Int_t	Manage(int fd);
 
