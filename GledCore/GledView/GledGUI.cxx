@@ -8,6 +8,7 @@
 #include <Ephra/Saturn.h>
 #include <Glasses/ShellInfo.h>
 #include <Glasses/ZQueen.h>
+#include <Glasses/ZFireQueen.h>
 #include <Gled/GledNS.h>
 #include <GledView/GledViewNS.h>
 #include <Eye/Eye.h>
@@ -207,7 +208,7 @@ GledGUI::GledGUI(list<char*>& args) :
   {
     Fl_Button* b = new Fl_Button(0,0,16,2,"EatFlamingDeath");
     b->callback(quit_cb);
-    b->labelcolor(168); b->tooltip("are tooltips really working?");
+    b->labelcolor(168);
   }
 
   top_pack->end();
@@ -355,8 +356,9 @@ void GledGUI::warning(const char* s) {
 }
 
 void GledGUI::error(const char* s) {
-  if(!bGUIup) { Gled::error(s); return; }
-  PostMessage(s, FL_RED);
+  // Deliver errors to console, too.
+  Gled::error(s);
+  if(bGUIup) PostMessage(s, FL_RED);
 }
 
 /**************************************************************************/
@@ -378,7 +380,7 @@ void GledGUI::SpawnEye(ShellInfo* si, const char* name, const char* title)
   XLockDisplay(rd);
 
   if(si == 0) {
-    ZQueen* fq = mSaturn->GetFireQueen();
+    ZFireQueen* fq = mSaturn->GetFireQueen();
     si = new ShellInfo(GForm("Shell[%d] of %s", ++mNumShells, eye_name.c_str()),
 		       "created by Gled::SpawnEye");
     fq->CheckIn(si); fq->Add(si);
