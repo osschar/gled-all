@@ -19,7 +19,7 @@ void ShellInfo::_init()
   bSpawnNests = true;
 
   bFancyClassView       = true;
-  bShowLinksInClassView = false;
+  bShowLinksInClassView = true;
 }
 
 /**************************************************************************/
