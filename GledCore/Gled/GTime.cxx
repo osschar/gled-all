@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "GTime.h"
+#include <time.h>
 #include <sys/time.h>
 
 //______________________________________________________________________
@@ -52,16 +53,46 @@ GTime& GTime::operator-=(const GTime& t)
   return *this;
 }
 
-GTime& GTime::operator+=(Long_t t)
+GTime& GTime::operator+=(Long_t mus)
 {
-  GTime tt(t/1000000, t%1000000);
+  GTime tt(mus/1000000, mus%1000000);
   *this += tt;
   return *this;
 }
 
-GTime& GTime::operator-=(Long_t t)
+GTime& GTime::operator-=(Long_t mus)
 {
-  GTime tt(t/1000000, t%1000000);
+  GTime tt(mus/1000000, mus%1000000);
+  *this -= tt;
+  return *this;
+}
+
+GTime& GTime::operator+=(ULong_t mus)
+{
+  GTime tt(mus/1000000, mus%1000000);
+  *this += tt;
+  return *this;
+}
+
+GTime& GTime::operator-=(ULong_t mus)
+{
+  GTime tt(mus/1000000, mus%1000000);
+  *this -= tt;
+  return *this;
+}
+
+GTime& GTime::operator+=(Double_t sec)
+{
+  Long_t s = (Long_t)sec;
+  GTime tt(s, 1000000*((Long_t)(sec-s)) );
+  *this += tt;
+  return *this;
+}
+
+GTime& GTime::operator-=(Double_t sec)
+{
+  Long_t s = (Long_t)sec;
+  GTime tt(s, 1000000*((Long_t)(sec-s)) );
   *this -= tt;
   return *this;
 }
@@ -113,3 +144,26 @@ bool GTime::operator==(const GTime& t) const
   return mMuSec == t.mMuSec && mSec == t.mSec;
 }
 
+/**************************************************************************/
+
+void GTime::Sleep()
+{
+  struct timespec req, rem;
+  req.tv_sec  = mSec;
+  req.tv_nsec = mMuSec * 1000;
+  if(nanosleep(&req, &rem))
+    perror("GTime::Sleep");
+  // !!! Should sleep on? Need flag.
+}
+
+/**************************************************************************/
+
+void GTime::SleepMiliSec(UInt_t ms)
+{
+  struct timespec req, rem;
+  req.tv_sec  = ms / 1000;
+  req.tv_nsec = (ms % 1000) * 1000000;
+  if(nanosleep(&req, &rem))
+    perror("GTime::SleepMiliSec");
+  // !!! Should sleep on? Need flag.
+}

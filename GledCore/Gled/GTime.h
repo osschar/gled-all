@@ -29,8 +29,14 @@ public:
   GTime& operator+=(const GTime& t);
   GTime& operator-=(const GTime& t);
 
-  GTime& operator+=(Long_t t);
-  GTime& operator-=(Long_t t);
+  GTime& operator+=(Long_t mus);
+  GTime& operator-=(Long_t mus);
+
+  GTime& operator+=(ULong_t mus);
+  GTime& operator-=(ULong_t mus);
+
+  GTime& operator+=(Double_t sec);
+  GTime& operator-=(Double_t sec);
 
   GTime operator+(const GTime& t) const;
   GTime operator-(const GTime& t) const;
@@ -43,6 +49,10 @@ public:
 
   Double_t ToDouble()  { return mSec + 1e-6*mMuSec; }
   ULong_t  ToMiliSec() { return mSec*1000 + mMuSec/1000; }
+
+  void Sleep();
+
+  static void SleepMiliSec(UInt_t ms);
 
 #include "GTime.h7"
   ClassDef(GTime, 1)
