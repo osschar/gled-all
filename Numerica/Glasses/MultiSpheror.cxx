@@ -32,9 +32,40 @@ void MultiSpheror::_init()
 
 /**************************************************************************/
 
+namespace {
+  template <class T>
+  T NextOf(lpZGlass_i& i, lpZGlass_i& end)
+  {
+    T ret = 0;
+    do {
+      if(++i == end) break;
+      ret = dynamic_cast<T>(*i);
+    } while(ret == 0);
+    return ret;
+  }
+};
+
+/**************************************************************************/
+
 void MultiSpheror::Init()
 {
-  if(mNG != 0) throw(string("MultiSpheror::Init was already called"));
+  if(mNG != 0) {
+    mListMutex.Lock();
+    lpZGlass_i spheri = mGlasses.begin();
+    Spheror* spheror = 0;
+    while(spheri != mGlasses.end()) {
+      spheror = dynamic_cast<Spheror*>(*spheri);
+      if(spheror) {
+	spheror->GetAmoeba()->SetHost(0);
+	spheror->GetAmoeba()->SetWA_Master(0);
+	spheror->SetAmoeba(0);
+      }
+      ++spheri;
+    }
+    mListMutex.Unlock();
+    ClearList();
+    mNG = 0;
+  }
 
   mNG = mNGrid; mNtoDo = mNG*mNG; mNDone = 0;
 
@@ -60,19 +91,6 @@ void MultiSpheror::Init()
   }
   Stamp(LibID(), ClassID());
 }
-
-namespace {
-  template <class T>
-  T NextOf(lpZGlass_i& i, lpZGlass_i& end)
-  {
-    T ret = 0;
-    do {
-      if(++i == end) break;
-      ret = dynamic_cast<T>(*i);
-    } while(ret == 0);
-    return ret;
-  }
-};
 
 void MultiSpheror::ClaimCPUs()
 {
