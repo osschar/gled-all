@@ -15,6 +15,7 @@
 #include <TVirtualX.h>
 #include <TGX11.h>
 #include <TSystem.h>
+#include <TVector3.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Button.H>
@@ -94,6 +95,68 @@ void Pupil::SetProjection2()
   gluPerspective(mInfo->GetFOV(), (double)w()/h(),
 		 mInfo->GetNearClip(),  mInfo->GetFarClip());
 }
+
+void Pupil::SetCameraView()
+{
+  ZTrans z;
+  ZNode* cam_base = mInfo->GetCameraBase();
+  if(cam_base) {
+    auto_ptr<ZTrans> t( mInfo->ToPupilFrame(cam_base) );
+    if(t.get() != 0) {
+      z *= *t;
+    } else {
+      printf("Pupil::SetCameraView cam_base is not connected ... ignoring.\n");
+    }
+    z *= mCamera->GetTrans();
+  } else {
+    z = mCamera->GetTrans();
+  }
+
+  ZNode* look_at = mInfo->GetLookAt();
+  if(look_at) {
+    auto_ptr<ZTrans> t( mInfo->ToPupilFrame(look_at) );
+    if(t.get() != 0) {
+      TVector3 cam_pos(z(1u,4u), z(2u,4u), z(3u,4u));
+      TVector3 obj_pos((*t)(1u,4u), (*t)(2u,4u), (*t)(3u,4u));
+      TVector3 delta = obj_pos - cam_pos;
+      delta.SetMag(1);
+      
+      TVector3 up(0, 0, 0); // take absolute z for up reference
+      bool done = false;
+      ZNode* up_ref = mInfo->GetUpReference();
+      if(up_ref != 0) {
+	auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
+	if(t.get() != 0) {
+	  UCIndex_t c = mInfo->GetUpRefAxis();
+	  up.SetXYZ((*t)(1u,c), (*t)(2u,c), (*t)(3u,c));
+	  done = true;
+	} else {
+	  printf("Pupil::SetCameraView up_ref not connected ... ignoring.\n");
+	}
+      }
+      if(!done) {
+	int idx = mInfo->GetUpRefAxis();
+	if(idx > 0) up(idx-1) = 1;
+      }
+
+      Double_t dp = up.Dot(delta);
+      // should have: if(dp < eps) ... but then need pos history
+      up -= dp*delta;
+      gluLookAt(z(1u,4u), z(2u,4u), z(3u,4u),
+		(*t)(1u,4u), (*t)(2u,4u), (*t)(3u,4u),
+		up.x(), up.y(), up.z());
+
+      return;
+    } else {
+      printf("Pupil::SetCameraView look_at is not connected ... ignoring.\n");
+    }
+  }
+  gluLookAt(z(1u,4u), z(2u,4u), z(3u,4u),
+	    z(1u,4u)+z(1u,1u), z(2u,4u)+z(2u,1u), z(3u,4u)+z(3u,1u),
+	    z(1u,2u), z(2u,2u), z(3u,2u));
+}
+
+/**************************************************************************/
 
 /*
 void Pupil::Rebase(ZNode* newbase, bool keeppos)
@@ -188,11 +251,7 @@ void Pupil::Pick(bool showparents)
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  //mCamera->SetView();
-  const ZTrans& z = mCamera->RefTrans();
-  gluLookAt(z(1u,4u), z(2u,4u), z(3u,4u),
-	    z(1u,4u)+z(1u,1u), z(2u,4u)+z(2u,1u), z(3u,4u)+z(3u,1u),
-	    z(1u,2u), z(2u,2u), z(3u,2u));
+  SetCameraView();
 
   Render();
 
@@ -272,11 +331,7 @@ void Pupil::draw()
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  // mCamera->SetView();
-  const ZTrans& z = mCamera->RefTrans();
-  gluLookAt(z(1u,4u), z(2u,4u), z(3u,4u),
-	    z(1u,4u)+z(1u,1u), z(2u,4u)+z(2u,1u), z(3u,4u)+z(3u,1u),
-	    z(1u,2u), z(2u,2u), z(3u,2u));
+  SetCameraView();
 
   // Should move this shit somewhere ... and hope other shit cleans up ... naaah
   // i think i would better leave it here a bit longer
@@ -379,153 +434,149 @@ int Pupil::handle(int ev)
     return 1;
   }
 
-  int ret = 0;
   int x = Fl::event_x(); int y = Fl::event_y();
-  //cout << "Peep " << ev << endl;
-  switch(ev) {
-  case FL_PUSH:
-    if(Fl::event_button() == 2) {
-      mMouseX = x; mMouseY = y;
-    }
-    
-    if(Fl::event_button() == 3) {
-      mMouseX = x; mMouseY = y; Pick(!Fl::event_state(FL_SHIFT));
-    }
-    ret = 1;
-    break;
+  //printf("PupilEvent %d (%d, %d)\n", ev, x, y);
 
-  case FL_KEYBOARD:
+  switch(ev) {
+
+  case FL_PUSH: {
+    mMouseX = x; mMouseY = y; // reset the drag location
+    if(Fl::event_button() == 3) {
+      Pick(!Fl::event_state(FL_SHIFT));
+    }
+    return 1;
+  }
+  case FL_DRAG: {
+    ZNode* target = mCamera;
+    /*
+      if(bJustCamera) {
+      target = mCamera;
+      } else {
+      target = mMir[0] ? mForestView->GetSelected(mMir[0]) : mBase;
+      if(target == 0) target = mCamera;
+      }
+
+      // Beta check
+      Text_t *move_cmd, *rotate_cmd;
+      UInt_t beta = 0;
+      if(Fl::event_state(FL_SHIFT)) {
+      move_cmd = "Move"; rotate_cmd = "Rotate";
+      ZNode* n = mForestView->GetSelected(mMir[1]); // returns 0 if empty or multiple
+      if(n) beta = n->GetSunID();
+      } else {
+      move_cmd = "MoveLF"; rotate_cmd = "RotateLF";
+      }
+    */
+
+    bool chg = 0;
+    int dx = x - mMouseX, dy = y - mMouseY;
+    mMouseX = x; mMouseY = y;
+    // Fwd/Bck
+    if(Fl::event_state(FL_BUTTON1)) { 
+      char x[64];
+      if(!Fl::event_state(FL_CTRL)) {
+	mCamera->MoveLF(1, dy*abs(dy)/mInfo->GetMSMoveFac());
+	//sprintf(x, "1,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
+	//mEye->Send(move_cmd, x, target, beta);
+      } else {
+	mCamera->MoveLF(2, dy*abs(dy)/mInfo->GetMSMoveFac());
+	//sprintf(x, "2,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
+	//mEye->Send(move_cmd, x, target, beta);      
+      }
+      mCamera->MoveLF(3, -dx*abs(dx)/mInfo->GetMSMoveFac());
+      //sprintf(x, "3,%g", -dx*abs(dx)/mInfo->GetMSMoveFac());
+      //mEye->Send(move_cmd, x, target, beta);
+      chg = 1;
+    }
+
+    /*
+    // Kbd Moves
+    if(Fl::event_key(' ')) { mEye->Send(move_cmd, "2, 0.1", target, beta); chg=1; }
+    if(Fl::event_key('c')) { mEye->Send(move_cmd, "2, -0.1", target, beta); chg=1; }
+    if(Fl::event_key('x')) { mEye->Send(move_cmd, "3, 0.1", target, beta); chg=1; }
+    if(Fl::event_key('z')) { mEye->Send(move_cmd, "3, -0.1", target, beta); chg=1; }
+
+    if(Fl::event_key('a')) { mEye->Send(rotate_cmd, "2,3,0.1", target, beta); chg=1; }
+    if(Fl::event_key('s')) { mEye->Send(rotate_cmd, "2, 3, -0.1", target, beta); chg=1; }
+    */
+
+    // cout << mMouseX << " " << mMouseY << " " << dx << " " << dy << endl;
+    if(Fl::event_state(FL_BUTTON2) && dy!=0) {
+      char foo[16];
+      if(!Fl::event_state(FL_CTRL)) {
+	mCamera->RotateLF(1,2,dy/mInfo->GetMSRotFac());
+      } else {
+	mCamera->RotateLF(1,2,-dy/mInfo->GetMSRotFac());
+      }
+      chg=1;
+    }
+    if(Fl::event_state(FL_BUTTON2) && dx!=0) {
+      char foo[16];
+      if(!Fl::event_state(FL_CTRL)) {
+	mCamera->RotateLF(3,1,dx/mInfo->GetMSRotFac());
+	//sprintf(foo,"3,1,%8g", dx/mInfo->GetMSRotFac());
+      } else {
+	mCamera->RotateLF(2,3,-dx/mInfo->GetMSRotFac());
+	//sprintf(foo,"2,3,%8g", -dx/mInfo->GetMSRotFac());
+      }
+      //mEye->Send(rotate_cmd, foo, target, beta);
+      chg=1;
+    }
+    if(chg) redraw();
+  }
+  case FL_KEYBOARD: {
     switch(Fl::event_key()) {
+
     case FL_Home:
       mCamera->Home(); redraw();
       return 1;
 
-    }
-  /*
-    case FL_Tab:
-      bJustCamera = !bJustCamera; redraw();
-      return 1;
-    case 'q':
-      XtachCamera(); redraw();
-      return 1;
-    case FL_F+1:
-      //if(!pInfoView) pInfoView = new ZNodeMixer(mInfo);
-      //pInfoView->show();
-      return 1;
-    case FL_F+2:
-      return 1;
-    case FL_F+3:
-      (Int_t&)(mMir[0]) +=1;
-      if(mMir[0] == ForestView::SID_name)
+      /*
+	case FL_Tab:
+	bJustCamera = !bJustCamera; redraw();
+	return 1;
+	case 'q':
+	XtachCamera(); redraw();
+	return 1;
+	case FL_F+1:
+	//if(!pInfoView) pInfoView = new ZNodeMixer(mInfo);
+	//pInfoView->show();
+	return 1;
+	case FL_F+2:
+	return 1;
+	case FL_F+3:
+	(Int_t&)(mMir[0]) +=1;
+	if(mMir[0] == ForestView::SID_name)
 	mMir[0] = ForestView::SID_current;
-      redraw(); return 1;
-    case FL_F+4:
-      (Int_t&)(mMir[1]) += 1;
-      if(mMir[1] == ForestView::SID_name)
+	redraw(); return 1;
+	case FL_F+4:
+	(Int_t&)(mMir[1]) += 1;
+	if(mMir[1] == ForestView::SID_name)
 	mMir[1] = ForestView::SID_current;
-      redraw(); return 1;
+	redraw(); return 1;
       
-    case FL_Left: // previous
-      Rebase(mBase->PrevBro(), !Fl::event_state(FL_SHIFT));
-      redraw(); return 1;
-    case FL_Right: // next
-      Rebase(mBase->NextBro(), !Fl::event_state(FL_SHIFT));
-      redraw(); return 1;
-    case FL_Up: // parent
-      Rebase(mBase->Parent(), !Fl::event_state(FL_SHIFT));
-      redraw(); return 1;
-    case FL_Down: // first son
-      Rebase(mBase->Glasses().First(), !Fl::event_state(FL_SHIFT));
-      redraw(); return 1;
+	case FL_Left: // previous
+	Rebase(mBase->PrevBro(), !Fl::event_state(FL_SHIFT));
+	redraw(); return 1;
+	case FL_Right: // next
+	Rebase(mBase->NextBro(), !Fl::event_state(FL_SHIFT));
+	redraw(); return 1;
+	case FL_Up: // parent
+	Rebase(mBase->Parent(), !Fl::event_state(FL_SHIFT));
+	redraw(); return 1;
+	case FL_Down: // first son
+	Rebase(mBase->Glasses().First(), !Fl::event_state(FL_SHIFT));
+	redraw(); return 1;
+      */
 
     } // switch(Fl::event_key())
-  */
-    if(!Fl::event_key(FL_Escape))
-      ret = 1;
-    break;
+
+    return 1;
+  } // case FL_KEYBOARD
 
   } // switch(ev)
   
-  
-  ZNode* target = mCamera;
-  /*
-  if(bJustCamera) {
-    target = mCamera;
-  } else {
-    target = mMir[0] ? mForestView->GetSelected(mMir[0]) : mBase;
-    if(target == 0) target = mCamera;
-  }
-
-  // Beta check
-  Text_t *move_cmd, *rotate_cmd;
-  UInt_t beta = 0;
-  if(Fl::event_state(FL_SHIFT)) {
-    move_cmd = "Move"; rotate_cmd = "Rotate";
-    ZNode* n = mForestView->GetSelected(mMir[1]); // returns 0 if empty or multiple
-    if(n) beta = n->GetSunID();
-  } else {
-    move_cmd = "MoveLF"; rotate_cmd = "RotateLF";
-  }
-  */
-
-  int dx = x - mMouseX;  int dy = y - mMouseY;
-  int chg = 0;
-  mMouseX = x; mMouseY = y;
-  // Fwd/Bck
-  if(Fl::event_state(FL_BUTTON1)) { 
-    char x[64];
-    if(!Fl::event_state(FL_CTRL)) {
-      mCamera->MoveLF(1, dy*abs(dy)/mInfo->GetMSMoveFac());
-      //sprintf(x, "1,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
-      //mEye->Send(move_cmd, x, target, beta);
-    } else {
-      mCamera->MoveLF(2, dy*abs(dy)/mInfo->GetMSMoveFac());
-      //sprintf(x, "2,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
-      //mEye->Send(move_cmd, x, target, beta);      
-    }
-    mCamera->MoveLF(3, -dx*abs(dx)/mInfo->GetMSMoveFac());
-    //sprintf(x, "3,%g", -dx*abs(dx)/mInfo->GetMSMoveFac());
-    //mEye->Send(move_cmd, x, target, beta);
-    chg = 1;
-  }
-
-  /*
-  // Kbd Moves
-  if(Fl::event_key(' ')) { mEye->Send(move_cmd, "2, 0.1", target, beta); chg=1; }
-  if(Fl::event_key('c')) { mEye->Send(move_cmd, "2, -0.1", target, beta); chg=1; }
-  if(Fl::event_key('x')) { mEye->Send(move_cmd, "3, 0.1", target, beta); chg=1; }
-  if(Fl::event_key('z')) { mEye->Send(move_cmd, "3, -0.1", target, beta); chg=1; }
-
-  if(Fl::event_key('a')) { mEye->Send(rotate_cmd, "2,3,0.1", target, beta); chg=1; }
-  if(Fl::event_key('s')) { mEye->Send(rotate_cmd, "2, 3, -0.1", target, beta); chg=1; }
-  */
-
-  // cout << mMouseX << " " << mMouseY << " " << dx << " " << dy << endl;
-  if(Fl::event_state(FL_BUTTON2) && dy!=0) {
-    char foo[16];
-    if(!Fl::event_state(FL_CTRL)) {
-      mCamera->RotateLF(1,2,dy/mInfo->GetMSRotFac());
-    } else {
-      mCamera->RotateLF(1,2,-dy/mInfo->GetMSRotFac());
-    }
-    chg=1;
-  }
-  if(Fl::event_state(FL_BUTTON2) && dx!=0) {
-    char foo[16];
-    if(!Fl::event_state(FL_CTRL)) {
-      mCamera->RotateLF(3,1,dx/mInfo->GetMSRotFac());
-      //sprintf(foo,"3,1,%8g", dx/mInfo->GetMSRotFac());
-    } else {
-      mCamera->RotateLF(2,3,-dx/mInfo->GetMSRotFac());
-      //sprintf(foo,"2,3,%8g", -dx/mInfo->GetMSRotFac());
-    }
-    //mEye->Send(rotate_cmd, foo, target, beta);
-    chg=1;
-  }
-
-  if(chg) redraw();
-
-  return(ret);
+  return 0;
 }
 
 void Pupil::draw_overlay()

@@ -23,7 +23,7 @@ private:
 protected:
   TimeStamp_t	mStampReqTrans;	//! TimeStamp of last change of mTrans
 
-  ZTrans	mTrans;		// X{RP} Transform from parent
+  ZTrans	mTrans;		// X{RPG} Transform from parent
 
   // Position and Rotation widgets
 
@@ -70,8 +70,8 @@ public:
   void SetScales(Real_t x, Real_t y, Real_t z); // X{E}
   void MultS(Real_t s);                         // X{E}
 
-  ZTrans* ToMFR();
-  ZTrans* ToNode(ZNode* top);
+  ZTrans* ToMFR(int depth=0);
+  ZTrans* ToNode(ZNode* top, int depth=0);
   static ZTrans* BtoA(ZNode* a, ZNode* b);
 
   // Clump

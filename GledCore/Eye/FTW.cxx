@@ -23,6 +23,7 @@
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_draw.H>
+#include <FL/fl_ask.H>
 
 
 
@@ -206,15 +207,15 @@ void FTW::LocatorConsumer::clear_base()
 /**************************************************************************/
 
 FTW::NameButton::NameButton(Loc_e l, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h), m_loc(l)
+  : Fl_Button(x,y,w,h), m_loc(l), b_dnd_tried(false)
 { labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 FTW::NameButton::NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h), m_loc(L_Leaf)
+  : Fl_Button(x,y,w,h), m_loc(L_Leaf), b_dnd_tried(false)
 { labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 FTW::NameButton::NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t)
-  : Fl_Button(x,y,w,h), m_loc(L_Ant)
+  : Fl_Button(x,y,w,h), m_loc(L_Ant), b_dnd_tried(false)
 { labeltype((Fl_Labeltype)GVNS::no_symbol_label); set_label(t); }
 
 /**************************************************************************/
@@ -238,6 +239,37 @@ FTW_Ant* FTW::NameButton::get_ant()
   }
 }
 
+void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
+					 const char* prefix)
+{
+  GledNS::ClassInfo* ci = leaf->fImg->fClassInfo;
+  ZGlass* lens = leaf->fImg->fGlass;
+  if(ant == 0) {
+    leaf->GetNest()->SetInfoBar(GForm("%s%s (\"%s\",\"%s\")",
+				      prefix,
+				      ci->fName.c_str(),
+				      lens->GetName(), lens->GetTitle()));
+  } else {
+    OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
+    const char *glass = "null", *name = "", *title = "";
+    if(ant->fToImg) {
+      glass = ant->fToImg->fClassInfo->fName.c_str();
+      name  = ant->fToGlass->GetName();
+      title = ant->fToGlass->GetTitle();
+    }
+    leaf->GetNest()->SetInfoBar(GForm("%s%s (\"%s\") [%s %s] -> %s (\"%s\",\"%s\")",
+				      prefix,
+				      ci->fName.c_str(),
+				      lens->GetName(),
+				      ld->fLinkInfo->fType.c_str(),
+				      ld->fLinkInfo->fName.c_str(),
+				      glass, name, title));
+  }
+
+}
+
+/**************************************************************************/
+
 void FTW::NameButton::set_label(const char* l)
 {
   m_name = (l != 0) ? l : "";
@@ -256,29 +288,10 @@ int FTW::NameButton::handle(int ev)
   switch(ev) {
 
   case FL_ENTER: {
+    b_dnd_tried = false;
     if(leaf) {
       leaf->GetNest()->RefBelowMouse().set(leaf, ant);
-      GledNS::ClassInfo* ci = leaf->fImg->fClassInfo;
-      ZGlass* lens = leaf->fImg->fGlass;
-      if(ant == 0) {
-	leaf->GetNest()->SetInfoBar(GForm("%s (\"%s\",\"%s\")",
-					  ci->fName.c_str(),
-					  lens->GetName(), lens->GetTitle()));
-      } else {
-	OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
-	const char *glass = "null", *name = "", *title = "";
-	if(ant->fToImg) {
-	  glass = ant->fToImg->fClassInfo->fName.c_str();
-	  name  = ant->fToGlass->GetName();
-	  title = ant->fToGlass->GetTitle();
-	}
-	leaf->GetNest()->SetInfoBar(GForm("%s (\"%s\") [%s %s] -> %s (\"%s\",\"%s\")",
-					  ci->fName.c_str(),
-					  lens->GetName(),
-					  ld->fLinkInfo->fType.c_str(),
-					  ld->fLinkInfo->fName.c_str(),
-					  glass, name, title));
-      }
+      set_nests_info_bar(leaf, ant);
     }
     return 1;
   }
@@ -310,11 +323,33 @@ int FTW::NameButton::handle(int ev)
 
 
   case FL_DRAG: {
-    if(Fl::event_inside(this) && Fl::event_state(FL_BUTTON1)) {
-      dx = abs(Fl::event_x() - x); y = abs(Fl::event_y() - y);
-      if(dx > w()/7) labelcolor(fl_color_cube(0,0,2));
-      else	     labelcolor(fl_color_cube(2,0,0));
-      value(1);
+    if(Fl::event_state(FL_BUTTON1)) {
+      if(Fl::event_inside(this)) {
+	dx = abs(Fl::event_x() - x); y = abs(Fl::event_y() - y);
+	if(dx > w()/7) labelcolor(fl_color_cube(0,0,2));
+	else	     labelcolor(fl_color_cube(2,0,0));
+	value(1);
+      } 
+      else if(!b_dnd_tried) {
+	// we have just left the widget ... initiate dnd
+	const char* text = 0;
+	if(ant == 0) {
+	  text = GForm("%u", leaf->fImg->fGlass->GetSaturnID());
+	} else {
+	  if(ant->fToImg)
+	    text = GForm("%u", ant->fToImg->fGlass->GetSaturnID());
+	}
+	if(text) {
+	  // Dnd is faked via setting of direct source locator
+	  Locator* loc = new Locator(leaf->GetNest(), leaf, ant);
+	  leaf->GetNest()->GetShell()->X_SetSource(*loc);
+	  Fl::copy(text, strlen(text), 0);
+	  Fl::dnd();
+	}
+	labelcolor(FL_BLACK);
+	value(0);
+	b_dnd_tried = true;
+      }
     } else {
       labelcolor(FL_BLACK);
       value(0);
@@ -344,6 +379,43 @@ int FTW::NameButton::handle(int ev)
     labelcolor(FL_BLACK);
     value(0);
     redraw();
+    return 1;
+  }
+
+  case FL_DND_ENTER: {
+    if(ant == 0) {
+      set_nests_info_bar(leaf, ant, "dnd pushing to list: ");
+    } else {
+      set_nests_info_bar(leaf, ant, "dnd setting link: ");
+    }
+    return 1;
+  }
+
+  case FL_DND_RELEASE: {
+    return (Fl::belowmouse() == this) ? 1 : 0;
+  }
+
+  case FL_PASTE: {
+    try {
+      ID_t source_id = leaf->GetNest()->GetShell()->GetSource()->get_contents();
+      ID_t paste_id = atoll(Fl::event_text());
+
+      if(source_id == paste_id) {
+	Locator me(leaf->GetNest(), leaf, ant);
+	if(ant == 0) {
+	  leaf->GetNest()->GetShell()->X_Push(me);
+	} else {
+	  leaf->GetNest()->GetShell()->X_SetLink(me);
+	}
+      } else {
+	throw(string("FTW::NameButton::handle dnd incompatible with source"));
+      }
+
+    }
+    catch(string exc) {
+      leaf->GetNest()->GetShell()->Message(exc.c_str(), FTW_Shell::MT_err);
+      fl_beep(FL_BEEP_ERROR);
+    }
     return 1;
   }
 
@@ -822,6 +894,23 @@ bool FTW::Source_Selector::has_contents()
 
   default:
     return false;
+  }
+}
+
+ID_t FTW::Source_Selector::get_contents()
+{
+  switch (m_cur_type) {
+
+  case Top_Selector::T_Locator: {
+    if(wLoc_Sel->get_locator() == 0) return 0;
+    return wLoc_Sel->get_locator()->get_contents();
+  }
+
+  case Top_Selector::T_Inst:
+    return 0;
+
+  default:
+    return 0;
   }
 }
 

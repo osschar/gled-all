@@ -122,7 +122,11 @@ namespace FTW {
     FTW_Leaf*	get_leaf();
     FTW_Ant*	get_ant();
 
+    void set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant, const char* prefix="");
+
     string	m_name;
+
+    bool	b_dnd_tried;
 
   public:
     NameButton(Loc_e l, int x, int y, int w, int h, const char* t=0);
@@ -309,6 +313,8 @@ namespace FTW {
     virtual Fl_Color get_active_modcol() { return source_modcol; }
 
     bool has_contents();
+    ID_t get_contents();
+
     ZMIR* generate_MIR(GledNS::MethodInfo* mi, ZGlass* alpha, ZGlass* gamma=0);
   };
 
