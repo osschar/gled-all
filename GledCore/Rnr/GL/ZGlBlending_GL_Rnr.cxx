@@ -17,15 +17,33 @@ void ZGlBlending_GL_Rnr::_init()
 void ZGlBlending_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   // Ignore ZGlass::PreDraw
+  glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POINT_BIT |
+               GL_LINE_BIT         | GL_FOG_BIT);
+  SetupGL();
 }
 
 void ZGlBlending_GL_Rnr::Draw(RnrDriver* rd)
+{
+  SetupGL();
+}
+
+void ZGlBlending_GL_Rnr::PostDraw(RnrDriver* rd)
+{
+  // Ignore ZGlass::PostDraw
+  glPopAttrib();
+}
+
+/**************************************************************************/
+
+void ZGlBlending_GL_Rnr::SetupGL()
 {
   ZGlBlending& x = *mZGlBlending;
 
   switch(x.mBlendOp) {
   case ZGlStateBase::GSO_On:
     glBlendFunc(x.mBSrcFac, x.mBDstFac);
+    glBlendEquation(x.mBEquation);
+    glBlendColor(x.mBConstCol.r(), x.mBConstCol.g(), x.mBConstCol.b(), x.mBConstCol.a());
     glEnable(GL_BLEND);
     break;
   case ZGlStateBase::GSO_Off:
@@ -78,10 +96,4 @@ void ZGlBlending_GL_Rnr::Draw(RnrDriver* rd)
   default:
     break;
   }
-
-}
-
-void ZGlBlending_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-  // Ignore ZGlass::PostDraw
 }

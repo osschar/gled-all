@@ -24,6 +24,8 @@ public:
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
 
+  void SetupGL();
+
 }; // endclass ZGlMaterial_GL_Rnr
 
 #endif

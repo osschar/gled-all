@@ -17,9 +17,24 @@ void ZGlMaterial_GL_Rnr::_init()
 void ZGlMaterial_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   // Ignore ZGlass::PreDraw
+  glPushAttrib(GL_LIGHTING_BIT);
+  SetupGL();
 }
 
 void ZGlMaterial_GL_Rnr::Draw(RnrDriver* rd)
+{
+  SetupGL();
+}
+
+void ZGlMaterial_GL_Rnr::PostDraw(RnrDriver* rd)
+{
+  // Ignore ZGlass::PostDraw
+  glPopAttrib();
+}
+
+/**************************************************************************/
+
+void ZGlMaterial_GL_Rnr::SetupGL()
 {
   ZGlMaterial& x = *mZGlMaterial;
 
@@ -43,9 +58,4 @@ void ZGlMaterial_GL_Rnr::Draw(RnrDriver* rd)
   default:
     break;
   }
-}
-
-void ZGlMaterial_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-  // Ignore ZGlass::PostDraw
 }

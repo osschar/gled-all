@@ -16,21 +16,39 @@ void ZGlLightModel_GL_Rnr::_init()
 
 void ZGlLightModel_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-
+  // Ignore ZGlass::PreDraw
+  glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT);
+  SetupGL();
 }
 
 void ZGlLightModel_GL_Rnr::Draw(RnrDriver* rd)
+{
+  SetupGL();
+}
+
+void ZGlLightModel_GL_Rnr::PostDraw(RnrDriver* rd)
+{
+  // Ignore ZGlass::PostDraw
+  glPopAttrib();
+}
+
+/**************************************************************************/
+
+void ZGlLightModel_GL_Rnr::SetupGL()
 {
   ZGlLightModel& x = *mZGlLightModel;
 
   switch(x.mLightModelOp) {
   case ZGlStateBase::GSO_On:
+    glEnable(GL_LIGHTING);
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, x.mLiMoAmbient());
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL, x.mLiMoColorCtrl);
     glLightModeli (GL_LIGHT_MODEL_LOCAL_VIEWER, x.bLiMoLocViewer);
     glLightModeli (GL_LIGHT_MODEL_TWO_SIDE, x.bLiMoTwoSide);
     break;
   case ZGlStateBase::GSO_Off:
+    glDisable(GL_LIGHTING);
+    break;
   case ZGlStateBase::GSO_Nop:
   default:
     break;
@@ -61,9 +79,4 @@ void ZGlLightModel_GL_Rnr::Draw(RnrDriver* rd)
   default:
     break;
   }
-}
-
-void ZGlLightModel_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-
 }
