@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,7 +23,7 @@ void Box::_init()
 
 /**************************************************************************/
 
-void Box::SetABC(Real_t a, Real_t b, Real_t c)
+void Box::SetABC(Float_t a, Float_t b, Float_t c)
 {
   mA = a; mB = b; mC = c;
   Stamp(LibID(), ClassID());

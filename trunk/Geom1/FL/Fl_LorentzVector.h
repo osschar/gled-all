@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,8 +23,12 @@ public:
   double y() const { return mP[2]->value(); }
   double z() const { return mP[3]->value(); }
 
-  void set(double t, double x, double y, double z)
-  { mP[0]->value(t); mP[1]->value(x); mP[2]->value(y); mP[3]->value(z); }
+  void set(double t, double x, double y, double z) {
+    if(t != mP[0]->value()) mP[0]->value(t);
+    if(x != mP[1]->value()) mP[1]->value(x);
+    if(y != mP[2]->value()) mP[2]->value(y);
+    if(z != mP[3]->value()) mP[3]->value(z);
+  }
 
   virtual void resize(int x, int y, int w, int h);
 };

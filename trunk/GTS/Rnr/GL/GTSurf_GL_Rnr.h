@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,7 +19,7 @@ protected:
 public:
   GTSurf_GL_Rnr(GTSurf* idol) : ZNode_GL_Rnr(idol), mGTSurf(idol) {}
 
-  virtual void Draw(RnrDriver* rd);
+  virtual void Render(RnrDriver* rd);
 
 }; // endclass GTSurf_GL_Rnr
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,21 +23,21 @@ class WSSeed : public ZNode {
 private:
   void _init();
   void InitSlide(WSPoint* f);
-  void Ring(WSPoint* f, Real_t t);
+  void Ring(WSPoint* f, Float_t t);
 
-  ZVector	hPnt;	//! Coord-sys; used during Triangulation
-  ZVector	hAxe;	//!
-  ZVector	hUp;	//!
-  ZVector	hAw;	//!
-  Real_t	hTexU;	//! Texture coords; used during Triangulation
-  Real_t	hTexV;	//!
+  TVectorF	hPnt;	//! Coord-sys; used during Triangulation
+  TVectorF	hAxe;	//!
+  TVectorF	hUp;	//!
+  TVectorF	hAw;	//!
+  Float_t	hTexU;	//! Texture coords; used during Triangulation
+  Float_t	hTexV;	//!
 
 protected:
   Int_t		mTLevel;	// X{GST} 7 Value(-range=>[2,1000,1,1],-join=>1)
   Int_t		mPLevel;	// X{GST} 7 Value(-range=>[2,1000,1,1])
 
   Bool_t	bRenormLen;	// X{GST} 7 Bool(-join=>1)
-  Real_t	mLength;	// X{GST} 7 Value(-range=>[0,1000,1,100])
+  Float_t	mLength;	// X{GST} 7 Value(-range=>[0,1000,1,100])
 
   ZColor	mColor;		// X{PGS} 7 ColorButt(-join=>1)
   Int_t		mLineW;		// X{GST} 7 Value(-range=>[1,20,1,1],-join=>1)

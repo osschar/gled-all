@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -11,7 +11,7 @@
 
 ClassImp(SMorph)
 
-void SMorph::_init(Real_t r)
+void SMorph::_init(Float_t r)
 {
   // Override settings from ZNode
   bUseScale = true;
@@ -21,6 +21,7 @@ void SMorph::_init(Real_t r)
   mTx = mCx = mRz = 0;
 
   bOpenTop = bOpenBot = bEquiSurf = false;
+  bUseDispList = false;
 
   mTexture = 0;
 
@@ -32,12 +33,12 @@ SMorph::~SMorph() { delete pTuber; }
 
 /**************************************************************************/
 
-void SMorph::Messofy(Real_t ct, Real_t st, Real_t phi)
+void SMorph::Messofy(Float_t ct, Float_t st, Float_t phi)
 {
   float R[3];
-  Real_t twist = ct*mTx, conv = ct*mCx;
-  Real_t x = ct, y = (1+conv)*st*cos(phi+twist), z = (1+conv)*st*sin(phi+twist);
-  Real_t a = x*mRz, c=cos(a), s=sin(a);
+  Float_t twist = ct*mTx, conv = ct*mCx;
+  Float_t x = ct, y = (1+conv)*st*cos(phi+twist), z = (1+conv)*st*sin(phi+twist);
+  Float_t a = x*mRz, c=cos(a), s=sin(a);
   R[0] = x*c - y*s;
   R[1] = s*x + y*c;
   R[2] = z;

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -17,13 +17,13 @@ private:
 protected:
   WSSeed*	mWSSeed;
 
-  void vert(WSPoint* f, Real_t t);
+  void vert(WSPoint* f, Float_t t);
 
 public:
   WSSeed_GL_Rnr(WSSeed* idol) : ZNode_GL_Rnr(idol), mWSSeed(idol) {}
 
-  virtual void Draw(RnrDriver* rd);
-  virtual void Triangulate();
+  virtual void Render(RnrDriver* rd);
+  virtual void Triangulate(RnrDriver* rd);
 
 }; // endclass WSSeed_GL_Rnr
 

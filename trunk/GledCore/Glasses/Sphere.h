@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -15,7 +15,7 @@ class Sphere : public ZNode {
   MAC_RNR_FRIENDS(Sphere);
 
 protected:
-  Real_t	mRadius;	// X{GS}  7 Value(-range=>[0,1000,1,100])
+  Float_t	mRadius;	// X{GS}  7 Value(-range=>[0,1000,1,100])
   Int_t		mLOD;		// X{GS}  7 Value(-range=>[1,50,1,1], -join=>1)
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
@@ -24,7 +24,7 @@ protected:
 public:
   Sphere(const Text_t* n="Sphere", const Text_t* t=0) :
     ZNode(n, t), mRadius(1) { _init(); }
-  Sphere(Real_t r, const Text_t* n="Sphere", Text_t* t=0) :
+  Sphere(Float_t r, const Text_t* n="Sphere", Text_t* t=0) :
     ZNode(n, t), mRadius(r) { _init();}
 
 #include "Sphere.h7"

@@ -1,6 +1,6 @@
 # $Header$
 
-# Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -41,7 +41,7 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   if(e) {
     auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(TLorentzVector(o->x(),o->y(),o->z(),o->t())) );
     e->Send(*_m);
-    $S->{Methodbase}_Update(o);
+    SetUpdateTimer();
   } else {
     mIdol->Set$S->{Methodbase}(TLorentzVector(o->x(),o->y(),o->z(),o->t()));
   }

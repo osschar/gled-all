@@ -1,11 +1,11 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZSunQueen_H
-#define Gled_ZSunQueen_H
+#ifndef GledCore_ZSunQueen_H
+#define GledCore_ZSunQueen_H
 
 #include <Glasses/ZQueen.h>
 #include <Glasses/SaturnInfo.h>
@@ -13,6 +13,7 @@
 #include <Stones/ZMirExchangeSession.h>
 
 class ZSunQueen : public ZQueen {
+
   // 7777 RnrCtrl("false, 0, RnrBits()")
   MAC_RNR_FRIENDS(ZSunQueen);
 
@@ -32,6 +33,7 @@ protected:
   virtual ID_t incarnate_moon(SaturnInfo* parent, SaturnInfo* moon);
   virtual ID_t incarnate_eye(SaturnInfo* parent, EyeInfo* eye);
 
+  virtual void bootstrap();
 
 public:
   ZSunQueen(const Text_t* n="ZSunQueen", const Text_t* t=0) : ZQueen(n,t)
@@ -41,9 +43,7 @@ public:
 
   virtual ~ZSunQueen();
 
-  virtual void Bootstrap();
   virtual void AdEnlightenment();
-  virtual void UnfoldFrom(ZComet& comet);
 
   ZIdentity* GetOrImportIdentity(const char* ident);
 
@@ -84,7 +84,7 @@ private:
   };
 
   ZMES_map<NCMData>	mNCMasterData;	//! Only needed on SunAbsolute
-  ZMES_map<NCSData>	mNCSlaveData;	//!
+  ZMES_map<NCSData>	mNCSlaveData;	//! Needed on all Saturns
 
 protected:
 
