@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_MTW_SubView
-#define Gled_MTW_SubView
+#ifndef GledCore_MTW_SubView_H
+#define GledCore_MTW_SubView_H
 
 #include <Gled/GledTypes.h>
 #include <Gled/GledNS.h>
@@ -14,6 +14,10 @@
 
 class Eye;
 class MTW_SubView; class MTW_View;
+namespace OptoStructs {
+  class ZLinkDatum;
+}
+
 class Fl_Widget;
 
 struct MTW_Widths {
@@ -56,12 +60,18 @@ protected:
   GledNS::ClassInfo*	mClassInfo;
   MTW_View*		mView;	// Access to ZGlassImg, Eye
   lMTW_Weed_t		mWeeds;
+  lMTW_Weed_t		mDataWeeds;
+  lMTW_Weed_t		mLinkWeeds;
 
 public:
   MTW_SubView(GledNS::ClassInfo* ci, MTW_View* v);
   virtual ~MTW_SubView();
 
+  Fl_Widget* CreateWeed(GledViewNS::WeedInfo* wi);
+
   void Update();
+  void UpdateDataWeeds();
+  void UpdateLinkWeeds();
 
   void SetUpdateTimer();
   void RemoveUpdateTimer();
@@ -70,6 +80,8 @@ public:
   void BuildFromList(GledViewNS::lpWeedInfo_t& l);
   void UpdateVerticalStats(MTW_Vertical_Stats& vs, int cell_w);
   int  ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w);
+
+  OptoStructs::ZLinkDatum* GrepLinkDatum(const string& link_fqn);
 
   static const int MinLabelWidth;
 

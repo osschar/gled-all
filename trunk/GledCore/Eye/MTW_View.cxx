@@ -21,27 +21,45 @@ namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;
 
-MTW_View::MTW_View(OS::ZGlassImg* img) :
-  OS::A_View(img), Fl_Pack(0,0,0,0,0)
-{
-  // end() called from BuildVerticalView() or BuildByLayout()
+/**************************************************************************/
 
-  mGlass = fImg->fGlass;
+void MTW_View::_init()
+{
   bShown = false;
   resizable(0);
+  end();
+  mWindow = dynamic_cast<Fl_Window*>(parent());
+  auto_label();
 }
 
-MTW_View::MTW_View(ZGlass* glass) :
-  OS::A_View(0), Fl_Pack(0,0,0,0,0)
+void MTW_View::auto_label()
 {
-  // end() called from BuildVerticalView() or BuildByLayout()
+  m_label = mGlass ? mGlass->GetName() : "<no-glass>";
+  if(mWindow) mWindow->label(m_label.c_str());
+}
 
+/**************************************************************************/
+
+MTW_View::MTW_View(OS::ZGlassImg* img, FTW_Shell* shell) :
+  OS::A_View(img),
+  FTW_Shell_Client(shell),
+  Fl_Pack(0,0,0,0), Fl_SWM_Client(shell)
+{
+  mGlass = fImg->fGlass;
+  _init();
+}
+
+MTW_View::MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
+  OS::A_View(0),
+  FTW_Shell_Client(0),
+  Fl_Pack(0,0,0,0), Fl_SWM_Client(swm_mgr)
+{
   mGlass = glass;
-  resizable(0);
+  _init();
 }
 
 MTW_View::~MTW_View() {
-  // fltk deletes all
+  delete mWindow;
 }
 
 /**************************************************************************/
@@ -49,18 +67,18 @@ MTW_View::~MTW_View() {
 static float MaxAlignGrow = 1.2;
 static float MaxJoinGrow  = 2;
 
-void MTW_View::BuildVerticalView(int cell_w)
+void MTW_View::BuildVerticalView()
 {
-  // Builds complete view of a given object
-  // Weedgets are stacked vertically and resized to maximal width
-  // !! This should be exception throwing
-  // !! And GledViewNS creators even more so ...
-  
+  // Builds complete class-view for mGlass.
+  // Weedgets are stacked vertically and resized to maximal width.
+
+  int cell_w = swm_manager->cell_w();
+
   type(FL_VERTICAL);
   GNS::ClassInfo* ci = mGlass->VGlassInfo();
   MTW_Vertical_Stats mtw_vs;
 
-  Fl_Group::current(0); // Must reverse order of insertion ...
+  // Fill sub-view list from front
   while(ci) {
     //cout <<"MTW_View::BuildVerticalView() ci="<< ci->fClassName <<endl;
     MTW_SubView* sv = (ci->fViewPart->fooSVCreator)(ci, this, mGlass);
@@ -69,7 +87,7 @@ void MTW_View::BuildVerticalView(int cell_w)
     sv->UpdateVerticalStats(mtw_vs, cell_w);
     mSubViews.push_front(sv);
     ci = ci->GetParentCI();
-  } while(ci);
+  }
 
   // mtw_vs.Dump();
   mtw_vs.Consolidate(MaxAlignGrow, MaxJoinGrow);
@@ -79,67 +97,88 @@ void MTW_View::BuildVerticalView(int cell_w)
     h += (*sv)->ResizeByVerticalStats(mtw_vs, cell_w);
     add(*sv);
   }
-  Fl_Group::current(this);
-  end();
 
-  // cout <<"ended with h=" << h << endl;
   size(mtw_vs.fUse.full, h);
+  if(mWindow) mWindow->size(mtw_vs.fUse.full, h);
 }
 
 void MTW_View::BuildByLayout(MTW_Layout* layout)
 {
   type(FL_HORIZONTAL);
+  Fl_Group* ex_cur = Fl_Group::current();
+  Fl_Group::current(this);
+  int win_w = 0, win_h = 0;
   for(MTW_Layout::lClass_i c=layout->mClasses.begin(); c!=layout->mClasses.end(); ++c) {
     if(GNS::IsA(mGlass, c->fClassInfo->fFid)) {
       MTW_SubView* sv = (c->fClassInfo->fViewPart->fooSVCreator)(c->fClassInfo, this, mGlass);
       int x = 0, maxh=0;
       for(MTW_Layout::lMember_i m=c->fMembers.begin(); m!=c->fMembers.end(); ++m) {
-	Fl_Widget* w = (m->fWeedInfo->fooWCreator)(sv);
-	w->resize(x, 0, m->fW, m->fWeedInfo->fHeight);
-	w->label(0);
+	Fl_Widget* w = sv->CreateWeed(m->fWeedInfo);
+	if(w == 0) {
+	  w = new Fl_Box(FL_FLAT_BOX, x, 0, m->fW, m->fWeedInfo->fHeight, 0);
+	} else {
+	  w->resize(x, 0, m->fW, m->fWeedInfo->fHeight);
+	  w->label(0);
+	}
 	x += m->fW;
 	maxh = TMath::Max(maxh, m->fWeedInfo->fHeight);
-	sv->mWeeds.push_back( MTW_Weed(w, m->fWeedInfo) );
       }
       sv->end();
       sv->resize(0,0,x,maxh);
       mSubViews.push_back(sv);
+      win_h = TMath::Max(maxh, win_h);
     } else {
       Fl_Box* b = new Fl_Box(0,0,c->fFullW,1); b->box(FL_FLAT_BOX);
     }
+    win_w += c->fFullW;
   }
-  end();
+  Fl_Group::current(ex_cur);
+  size(win_w, win_h);
+  if(mWindow) mWindow->size(win_w, win_h);
 }
 
 /**************************************************************************/
-
-/*
-void MTW_View::Retitle()
-{
-  ostrstream title;
-  title << mNode->GetName() << "[" << mNode->ClassName() << "]";
-  label(title.str());
-}
-*/
 
 void MTW_View::AbsorbRay(Ray& ray)
 {
-  if(bShown && ray.fRQN == RayNS::RQN_change) {
-    UpdateViews(ray.fFID);
+  if(ray.IsBasicChange()) { auto_label(); redraw(); }
+
+  if(bShown) {
+    if(ray.fRQN == RayNS::RQN_change) {
+      UpdateDataWeeds(ray.fFID);
+    }
+    else if(ray.fRQN == RayNS::RQN_link_change) {
+      UpdateLinkWeeds(ray.fFID);
+    }
   }
 }
 
 /**************************************************************************/
 
-void MTW_View::UpdateViews(FID_t fid)
+void MTW_View::UpdateDataWeeds(FID_t fid)
 {
   bool update_all = fid.is_null();
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
     if(update_all) {
-      (*sv)->Update();
+      (*sv)->UpdateDataWeeds();
     } else {
       if((*sv)->mClassInfo->fFid == fid) {
-	(*sv)->Update();
+	(*sv)->UpdateDataWeeds();
+	break;
+      }
+    }
+  }
+}
+
+void MTW_View::UpdateLinkWeeds(FID_t fid)
+{
+  bool update_all = fid.is_null();
+  for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
+    if(update_all) {
+      (*sv)->UpdateLinkWeeds();
+    } else {
+      if((*sv)->mClassInfo->fFid == fid) {
+	(*sv)->UpdateLinkWeeds();
 	break;
       }
     }
@@ -147,71 +186,10 @@ void MTW_View::UpdateViews(FID_t fid)
 }
 
 /**************************************************************************/
-/**************************************************************************/
 
-namespace {
-
-  class MTW_View_Window : public Fl_Window, public Fl_SWM_Client,
-			  public OS::A_View
-  {
-  protected:
-    string m_title_label;
-  public:
-    MTW_View_Window(OS::ZGlassImg* img, int x, int y, const char* t=0) :
-      Fl_Window(x,y,t), A_View(img) {}
-
-    ~MTW_View_Window() {}
-
-    void auto_label() { 
-      if(fImg) {
-	m_title_label = GForm("%s[%s]", fImg->fGlass->GetName(),
-			      fImg->fClassInfo->fName.c_str());
-	label(m_title_label.c_str());
-      }
-    }
-
-    virtual void AssertDependantViews() {}
-    virtual void AbsorbRay(Ray& ray) {
-      if(ray.IsBasicChange()) { auto_label(); redraw(); }
-    }
-  };
-
-}
-
-Fl_Window* MTW_View::ConstructVerticalWindow(OS::ZGlassImg* img,
-					     Fl_SWM_Manager* swm_mgr)
+void MTW_View::ShowWindow()
 {
-  // Some controls &| collapsors would be usefull.
-
-  MTW_View_Window* w = new MTW_View_Window(img, 0, 0, 0);
-  w->auto_label();
-
-  MTW_View* v = new MTW_View(img);
-  int cell_w = 0;
-  if(swm_mgr) {
-    fl_font(fl_font(), swm_mgr->cell_fontsize());
-    cell_w = swm_mgr->cell_w();
-  }
-  v->BuildVerticalView(cell_w);
-  w->end();
-  w->size(v->w(), v->h());
-  return w;
-}
-
-Fl_Window* MTW_View::ConstructVerticalWindow(ZGlass* glass,
-					     Fl_SWM_Manager* swm_mgr)
-{
-  Fl_Window* w = new MTW_View_Window(0, 0, 0, glass->GetName());
-  MTW_View* v = new MTW_View(glass);
-  int cell_w = 0;
-  if(swm_mgr) {
-    fl_font(fl_font(), swm_mgr->cell_fontsize());
-    cell_w = swm_mgr->cell_w();
-  }
-  v->BuildVerticalView(cell_w);
-  w->end();
-  w->size(v->w(), v->h());
-  return w;
+  if(mWindow) mWindow->show();
 }
 
 /**************************************************************************/
@@ -220,7 +198,8 @@ int MTW_View::handle(int ev)
 {
   if(ev == FL_SHOW) {
     bShown = true;
-    UpdateViews(FID_t(0,0));
+    UpdateDataWeeds(FID_t(0,0));
+    UpdateLinkWeeds(FID_t(0,0));
   } else if(ev == FL_HIDE) {
     bShown = false;
   }

@@ -99,6 +99,7 @@ public:
   void FillImageMenu(OptoStructs::ZGlassImg* img, Fl_Menu_Button& menu,
 		     mir_call_data_list& mcdl, const string& prefix);
   void LocatorMenu(FTW::Locator& loc, int x, int y);
+  void ImageMenu(OptoStructs::ZGlassImg* img, int x, int y);
 
   void Message(const char* msg, MType_e t=MT_std);
   void Message(const string& msg, MType_e t=MT_std);

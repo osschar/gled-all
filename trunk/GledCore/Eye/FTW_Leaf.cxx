@@ -343,12 +343,12 @@ void FTW_Leaf::modify_box_color(Fl_Color mod, bool on_p) {
 void FTW_Leaf::create_custom_view(MTW_Layout* layout) {
   int n = layout->CountSubViews(fImg->fGlass);
   if(n > 0) {
-    MTW_View* v = new MTW_View(fImg);
-    v->BuildByLayout(layout);
-    mNest->get_swm_manager()->prepare_group(v);
-    wCustomView = v;
-    v->hide();
+    FTW_Shell* shell = mNest->GetShell();
+    wCustomView = new MTW_View(fImg, shell);
+    wCustomView->BuildByLayout(layout);
+    shell->prepare_group(wCustomView);
     insert(*wCustomView, wTailBox);
+    wCustomView->hide();
   }
 }
 
