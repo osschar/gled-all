@@ -110,7 +110,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 # Recognized fields for Xporter
 # g/s get/set, r ref, p ptr, t/T trans/tring, e provide just remote exec Set
 # These not used any more ... a god, we really need a proper parser soon.
-$Xport_FIELDS = "[gGsStTrRpPeE]";
+$Xport_FIELDS = "[gGsStTrRpPeEdD]";
 
 # l ~ link to list
 $Link_FIELDS = "[lL]";
@@ -410,7 +410,7 @@ while($c !~ m!\G\s*$!osgc) {
     map { s/\s*=.*//; s/\s+$//; } @en_els;
     for $e (@en_els) {
       my $e_label = $e;
-      $e_label =~ s/^([A-Z]*_)//; # remove 'FOO_'-like prefix
+      $e_label =~ s/^([A-Za-z]*_)//; # remove 'FOO_'-like prefix
       push @enum, { 'label' => $e_label, 'name' => $e };
     }
     {
@@ -425,7 +425,7 @@ while($c !~ m!\G\s*$!osgc) {
   ################################
   # Data members
   ################################
-  if($c =~ m!\G\s*(?:mutable\s+)?
+  if($c =~ m!\G\s*(?:static\s+)?(?:mutable\s+)?
              ((?:const\s+)?[\w:]+\*?\&?)\s+  # type
              (\*?\w+)\s*;                 # varname
             !mgcx)
@@ -444,6 +444,7 @@ while($c !~ m!\G\s*$!osgc) {
     if($comment =~ m!X|(?:Xport)\{.*\}!o) {
       my $member = {};
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
+      
       # Parse out instr{args} constructs
       print "  partitions: " if $DEBUG;;
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
@@ -460,9 +461,9 @@ while($c !~ m!\G\s*$!osgc) {
 	  print "$1 -> $2 |" if $DEBUG;
 	}
 	print "\n"if $DEBUG;
-
       }
     
+
       my $settype = $type;
       $settype .= "&" if $member->{Xport}{s}{ref};
       my $argstr = &SetArgs($settype, lc($methodbase));
@@ -474,6 +475,7 @@ while($c !~ m!\G\s*$!osgc) {
       $member->{ArgStr} = $argstr;
       $member->{Args} = &MunchArgs($argstr);
       $member->{Local} = $localp;
+
       $member->{ID} = $MemberID++;
 
       print "$type $methodbase $localp $member->{ID}\n" if $DEBUG;
@@ -510,7 +512,8 @@ while($c !~ m!\G\s*$!osgc) {
      (virtual\s)?\s*                # Must handle virtuals, too
      ((?:const\s+)?[\w:]+(?:\*|&)?)?\s+ # Return value (optional const, */&)
      (\w+)                          # Name
-     \(([\w\d\s,*&=\"\.]*)\)\s*     # Arguments ... w/ possible default values
+     \(([-+_\w\d\s,~*/&=\"\.]*)\)\s*   # Arguments ... w/ possible default values:
+                                    #   strings also possible, so we (should) match mostly anything.
      (const\s)?\s*                  # [const]
      (throw\([\w\d_]*\))?\s*        # [throw]
      (?:;|(?::[^{]+)?{.*?})         # (; | {inline def}); not greedy for *}*
@@ -536,12 +539,19 @@ while($c !~ m!\G\s*$!osgc) {
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
 
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
-	my $key = $1;
+        my $key = $1;
 	my $val = $2;
 	$key = $X_TO_KEY{$key} if exists $X_TO_KEY{$key};
 	$member->{$key} = $val;
 	# It is pushed after check for range is done
 	print "$key:$val " if $DEBUG;
+      }
+
+      my $detexe = 0;
+      my $multix_detexe = 0;
+      if($member->{Xport} =~ m/d|D/o ) {
+	$detexe = 1;
+	$multix_detexe = 1 if $& eq "D";
       }
 
       $member->{Type}       = $type;
@@ -550,7 +560,10 @@ while($c !~ m!\G\s*$!osgc) {
       $member->{ArgStr}     = $args;
       $member->{Args}       = $ar;
       $member->{Local}      = $localp;
+      $member->{DetachedExe}       = $detexe;
+      $member->{MultixDetachedExe} = $multix_detexe;
       $member->{Virtual}    = $virtual;
+
       $member->{ID}         = $MemberID++;
 
       push @Methods, $member;
@@ -630,7 +643,6 @@ print H7 "\n";
 for $r (@Members) {
   # Get methods
   if( $r->{Xport} =~ m/(g|G)/ ) {
-    my $const = ($1 eq 'G') ? 'const' : '';
     my ($const, $type, $val, $constret, $pre, $post);
     $const = ' const' if $1 eq 'G'; # and not($IsGlass && $LOCK_GET_METHS); 
     if(exists $GetSetMap{$r->{Type}}) {
@@ -643,7 +655,7 @@ for $r (@Members) {
     } else {
       $type = "$r->{Type}";
       $val = "$r->{Varname}";
-      $constret = 'const ' if $1 eq 'G' and  $h->{GetType} =~ /&|\*$/;
+      $constret = 'const ' if ($1 eq 'G' and  $h->{GetType} =~ /&|\*$/);
       #print H7 "$r->{Type}\tGet$r->{Methodbase}()\t$const\t{ return $r->{Varname}; }\n";
     }
     if($IsGlass && $LOCK_GET_METHS) {
@@ -715,7 +727,7 @@ print H7 "// Link exporter\n";
 print H7 "virtual void CopyLinks(lpZGlass_t& glass_list);\n";
 print H7 "virtual void CopyLinkRefs(lppZGlass_t& ref_list);\n";
 print H7 "virtual void CopyLinkSpecs(lLinkSpec_t& link_spec_list);\n";
-print H7 "virtual Int_t RebuildLinks(An_ID_Demangler* c);\n";
+print H7 "virtual Int_t RebuildLinkRefs(An_ID_Demangler* c);\n";
 print H7 "\n";
 
 print H7 "// Declarations of remote-exec methods\n";
@@ -814,11 +826,11 @@ for $r (@Members) {
 }
 print C7 "}\n\n";
 
-# RebuildLinks
-unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinks}) {
-  print C7 "Int_t\n${CLASSNAME}::RebuildLinks(An_ID_Demangler* idd) {\n";
+# RebuildLinkRefs
+unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
+  print C7 "Int_t\n${CLASSNAME}::RebuildLinkRefs(An_ID_Demangler* idd) {\n";
   print C7 "  Int_t ret" . 
-      (defined $PARENT ? "=${PARENT}::RebuildLinks(idd)" : "=0") .
+      (defined $PARENT ? "=${PARENT}::RebuildLinkRefs(idd)" : "=0") .
       ";\n";
   # Here should rebuild [...|r...] marked; NodeLists are recoverd from above
   for $r (@Members) {
@@ -848,6 +860,7 @@ fnord
 ### Remote-exec methods
 #######################
 
+### Set methods
 for $r (@Members) {
   next unless $r->{Xport} =~ m/s|S|E|e/o;
   if(exists $r->{Link}) {
@@ -887,6 +900,10 @@ for $r (@Methods) {
     print C7 "  ZMIR* _mir = new ZMIR(mSaturnID);\n";
   }
   print C7 "  _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});\n";
+  if($r->{DetachedExe}) {
+    my $arg = ($r->{MultixDetachedExe}) ? "true" : "false";
+    print C7 "  _mir->SetDetachedExe($arg);\n";
+  }
   my @aa = @{$r->{Args}}[$c .. $C];
   print C7 BeamArgs("_mir", \@aa);
   if($r->{Local}) {
@@ -943,8 +960,8 @@ fnordlink
       while($cc < $c) {
 	$ar = $r->{Args}[$cc];
 	print C7 << "fnord";
-    $ar->[0] $ar->[2] = dynamic_cast<$ar->[0]>(mMir->$names[$cc]);
-    if($ar->[2] == 0 && mMir->$names[$cc] != 0)
+    $ar->[0] $ar->[2] = dynamic_cast<$ar->[0]>(mir.$names[$cc]);
+    if($ar->[2] == 0 && mir.$names[$cc] != 0)
       throw(_eh + "[${CLASSNAME}::$r->{Methodbase}] " + _bad_ctx + ":$ar->[2] [$names[$cc]]");
 fnord
 	++$cc;
@@ -989,7 +1006,15 @@ for $r (@Members) {
     if(exists $r->{Link}) {
       print C7 "    mip->fContextArgs.push_back(\"$r->{Args}[0][0] $r->{Args}[0][1]\");\n";
     } else {
-      print C7 "    mip->fArgs.push_back(\"$r->{Args}[0][0] $r->{Args}[0][1]\");\n";
+      # Due to type-mapping can translate a single composite type into
+      # list of basic types (eg. ZColor->(4 x float)).
+      my $C = $#{$r->{Args}};
+      for($i=0; $i<=$C; ++$i) {
+	# must backslash-o-fy the "s
+	my $xxarg = $r->{Args}[$i][1];
+	$xxarg =~ s/"/\\"/g;
+	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $xxarg\");\n";
+      }
     }
     if(exists $r->{Tags}) {
       print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
@@ -1023,13 +1048,18 @@ for $r (@Methods) {
       if($i < $c) {
 	print C7 "    mip->fContextArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
       } else {
-	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
+	# must backslash-o-fy the "s
+	my $xxarg = $r->{Args}[$i][1];
+	$xxarg =~ s/"/\\"/g;
+	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $xxarg\");\n";
       }
     }
     if(exists $r->{Tags}) {
       print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
     }
     print C7 "    mip->bLocal = " . ($r->{Local} ? "true" : "false") . ";\n";
+    print C7 "    mip->bDetachedExe = " . ($r->{DetachedExe} ? "true" : "false") . ";\n";
+    print C7 "    mip->bMultixDetachedExe = " . ($r->{MultixDetachedExe} ? "true" : "false") . ";\n";
     print C7 "    mip->fClassInfo = _ci;\n";
     print C7 "    _ci->fMethodList.push_back(mip);\n";
     print C7 "    _ci->fMethodHash[$r->{ID}] = mip;\n\n";
