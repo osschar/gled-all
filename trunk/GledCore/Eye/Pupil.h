@@ -35,7 +35,6 @@ protected:
 
   Camera*	mCamera;
   MTW_View*	mCameraView;
-  Fl_Window*	mCameraViewWin;
 
   ZNode*	mCamBase;
   ZTrans	mCamBaseTrans;
