@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -11,6 +11,7 @@
 #include "RnrScheme.h"
 #include <Eye/OptoStructs.h>
 #include <GledView/GledViewNS.h>
+#include <GledView/GLTextNS.h>
 
 #include <stack>
 
@@ -42,12 +43,15 @@ protected:
 			bool as_list, bool full_descent);
 
 public:
+  GLTextNS::TexFont* fTexFont;
+
   RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r) {
     bUseOwnRnrs = false; bDryRun = false;
     mMaxDepth = 100;
     mMaxLamps = 8;
     mLamps = new A_Rnr*[mMaxLamps];
     bRnrPureGlasses = false;
+    fTexFont = 0;
   }
   virtual ~RnrDriver() { delete [] mLamps; }
 

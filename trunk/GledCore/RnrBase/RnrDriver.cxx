@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -118,9 +118,9 @@ void RnrDriver::Render(OS::A_GlassView* gv)
         //<< re->fView->fImg->fGlass->GetName() <<endl;
 	Render(re->fView);
       } else {
-	re->fRnr->GetGlass()->RefExecMutex().Lock();
+	re->fRnr->GetGlass()->ReadLock();
 	((re->fRnr)->*(re->fRnrFoo))(this);
-	re->fRnr->GetGlass()->RefExecMutex().Unlock();
+	re->fRnr->GetGlass()->ReadUnlock();
       }
     }
   }
