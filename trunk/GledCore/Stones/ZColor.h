@@ -46,6 +46,11 @@ public:
     return *this;
   }
 
+  ZColor& operator+=(ZColor& x) {
+    c[0] += x[0]; c[1] += x[1]; c[2] += x[2]; c[3] += x[3];
+    return *this;
+  }
+
   friend ZColor operator*(Float_t a, const ZColor& x);
   friend ZColor operator+(const ZColor& x, const ZColor& y);
   friend ZColor operator-(const ZColor& x, const ZColor& y);
