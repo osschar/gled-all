@@ -31,8 +31,9 @@ namespace OptoStructs {
   typedef list<ZLinkView*>::iterator	lpZLinkView_i;
 
   struct ZLinkDatum;
-  typedef list<ZLinkDatum>		lZLinkDatum_t;
-  typedef list<ZLinkDatum>::iterator	lZLinkDatum_i;
+  typedef list<ZLinkDatum>                   lZLinkDatum_t;
+  typedef list<ZLinkDatum>::iterator         lZLinkDatum_i;
+  typedef list<ZLinkDatum>::reverse_iterator lZLinkDatum_ri;
 
   /**************************************************************************/
   // ZGlassImg: complete image of a glass in an eye
@@ -61,6 +62,7 @@ namespace OptoStructs {
     void CheckInView(A_View* v)  { fViews.push_back(v); }
     void CheckOutView(A_View* v) { fViews.remove(v); }
 
+    ZLinkDatum*    GetLinkDatum(const string& lnk);
     lpZGlassImg_t* GetElementImgs();
   };
 

@@ -64,6 +64,14 @@ void ZGlassImg::PostAbsorption(Ray& ray)
 
 /**************************************************************************/
 
+ZLinkDatum* ZGlassImg::GetLinkDatum(const string& lnk)
+{
+  for(lZLinkDatum_ri i=fLinkData.rbegin(); i!=fLinkData.rend(); ++i) {
+    if(i->fLinkRep.fLinkInfo->fName == lnk) return &(*i);
+  }
+  return 0;
+}
+
 lpZGlassImg_t* ZGlassImg::GetElementImgs()
 {
   if(!fIsList) return 0;
