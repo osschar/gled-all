@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_FTW_H
-#define Gled_FTW_H
+#ifndef GledCore_FTW_H
+#define GledCore_FTW_H
 
 #include "OptoStructs.h"
 class FTW_Shell; class FTW_Nest;
@@ -29,24 +29,6 @@ namespace FTW {
   extern Fl_Color	sink_modcol;
 
   extern Fl_Boxtype	separator_box;
-
-  /**************************************************************************/
-
-  template<class T>
-  T grep_parent(Fl_Widget *w) {
-    T ret = 0;
-    while(ret == 0 && (w = w->parent())) {
-      ret = dynamic_cast<T>(w);
-    }
-    return ret;
-  }
-
-  /**************************************************************************/
-
-  int swm_generick_width(string& str, int cell_w, float extra);
-  int swm_label_width(string& str, int cell_w);
-  int swm_string_width(string& str, int cell_w);
-
 
   /**************************************************************************/
 
@@ -118,6 +100,7 @@ namespace FTW {
   };
 
   /**************************************************************************/
+  /**************************************************************************/
 
   class NameButton : public Fl_Button {
   public:
@@ -153,7 +136,7 @@ namespace FTW {
     NameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h);
     ~NameBox();
 
-    virtual void Absorb_Change(LID_t lid, CID_t cid);
+    virtual void AbsorbRay(Ray& ray);
 
     void ChangeImage(OptoStructs::ZGlassImg* new_img, bool keep_label=false);
   };
@@ -379,10 +362,7 @@ namespace FTW {
     PupilAm(FTW_Nest* n, OptoStructs::ZGlassImg* img);
     virtual ~PupilAm();
 
-    virtual void Absorb_ListAdd(OptoStructs::ZGlassImg* newimg, OptoStructs::ZGlassImg* before);
-    //virtual void Absorb_ListRemove(OptoStructs::ZGlassImg* eximg);
-    //virtual void Absorb_ListRebuild();
-
+    virtual void AbsorbRay(Ray& ray);
   };
 
   class NestAm : public OptoStructs::A_View
@@ -401,10 +381,7 @@ namespace FTW {
     NestAm(FTW_Shell* s, OptoStructs::ZGlassImg* img);
     virtual ~NestAm();
 
-    virtual void Absorb_ListAdd(OptoStructs::ZGlassImg* newimg, OptoStructs::ZGlassImg* before);
-    //virtual void Absorb_ListRemove(OptoStructs::ZGlassImg* eximg);
-    //virtual void Absorb_ListRebuild();
-
+    virtual void AbsorbRay(Ray& ray);
   };
 
 } // namespace FTW
