@@ -35,8 +35,8 @@ void Eventor::_init()
   mHost = 0;
 
   bUseDynCast = true; bSignalSafe = false;
-  bContinuous = true;    bMultix = false;
-  bRunning = bSuspended = bPerforming = false;
+  bContinuous = true; bMultix = false;
+  bRunning = bSuspended = bPerforming = bXMultix = false;
 }
 
 /**************************************************************************/
@@ -62,7 +62,7 @@ void Eventor::AdUnfoldment()
   // anyway dislike the duplication in op_arg.
   // Too lazy to write the manual Set Methods?
 
-  if(bMultix && bRunning) {
+  if(bXMultix && bRunning) {
     if(mHost == 0) {
       mHost = GetQueen()->GetKing()->GetSaturnInfo();
     }
@@ -135,6 +135,7 @@ void Eventor::PostBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 void Eventor::OnStart(Operator::Arg* op_arg)
 {
   OP_EXE_OR_SP_MIR(this, SetRunning, true);
+  OP_EXE_OR_SP_MIR(this, SetXMultix, op_arg->fMultix);
   SetPerforming(true);
 }
 
@@ -208,7 +209,7 @@ void Eventor::Start()
 
 void Eventor::Stop()
 {
-  if(!bMultix && mHost != mSaturn->GetSaturnInfo()) return;
+  if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
     ISwarn("Eventor::Stop not running");
@@ -220,7 +221,7 @@ void Eventor::Stop()
 
 void Eventor::Suspend()
 {
-  if(!bMultix && mHost != mSaturn->GetSaturnInfo()) return;
+  if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
     ISwarn("Eventor::Suspend not running");
@@ -237,7 +238,7 @@ void Eventor::Suspend()
 
 void Eventor::Resume()
 {
-  if(!bMultix && mHost != mSaturn->GetSaturnInfo()) return;
+  if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
     ISwarn("Eventor::Resume not running");
@@ -267,20 +268,12 @@ void Eventor::SetHost(SaturnInfo* host)
     mExecMutex.Unlock();
     throw(string("Eventor::SetHost cannot change host while thread is running."));
   }
-  if(mHost) mHost->DecRefCount();
+  if(mHost) mHost->DecRefCount(this);
   mHost = host;
-  if(mHost) mHost->IncRefCount();
+  if(mHost) mHost->IncRefCount(this);
   StampLink(LibID(), ClassID());
   mExecMutex.Unlock();
 }
-
-/*
-void Eventor::SetHost(ZGlass* host)
-{
-  SaturnInfo* si=0; if(host) si = dynamic_cast<SaturnInfo*>(host);
-  if(host==0 || si) SetHost(si);
-}
-*/
 
 /**************************************************************************/
 
