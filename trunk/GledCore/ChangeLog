@@ -1,4 +1,26 @@
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Eye.cxx:
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	* Net/Ray.cxx:
+	* Net/Ray.h:
+	Added new Ray quantum number Ray::RQN_list_clear.
+
+	* Glasses/ZGlLightModel.cxx:
+	* Glasses/ZGlLightModel.h:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	Fixed a type in mLightModelOp variable name.
+	
 2004-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	==================================================
+	Check-in of major changes from 1.2.2 towards 1.2.3
+	==================================================
 
 	* Glasses/Text.cxx:
 	* Glasses/Text.h:
