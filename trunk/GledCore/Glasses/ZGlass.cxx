@@ -261,10 +261,8 @@ ZMirFilter* ZGlass::GetGuard() const
 
 void ZGlass::SetGuard(ZMirFilter* guard)
 {
-  WriteLock();
-  try { set_link_or_die((ZGlass*&)mGuard, guard, FID()); }
-  catch(...) { WriteUnlock(); throw; }
-  WriteUnlock();
+  // Might want to read-lock if LOCK_SET_METHS is true in project7.
+  set_link_or_die((ZGlass*&)mGuard, guard, FID());
 }
 
 /**************************************************************************/
