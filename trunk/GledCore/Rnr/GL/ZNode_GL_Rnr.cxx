@@ -9,7 +9,81 @@
 #include <Ephra/Saturn.h>
 
 #include <FL/gl.h>
-#include <GL/glu.h>
+
+namespace GVNS = GledViewNS;
+namespace OS   = OptoStructs;
+
+#define PARENT ZGlass_GL_Rnr
+
+/**************************************************************************/
+
+void ZNode_GL_Rnr::_init()
+{
+  _setup_rnrmod();
+}
+
+void ZNode_GL_Rnr::_setup_rnrmod()
+{
+  if(fImg) {
+    OS::lZLinkDatum_i ld = fImg->fLinkData.begin();
+    while(ld != fImg->fLinkData.end()) {
+      if(&ld->GetLinkRef() == &mNode->mRnrMod) {
+	mRnrModLD = &(*ld);
+	return;
+      }
+      ++ld;
+    }
+  }
+  mRnrModLD = 0;
+}
+
+/**************************************************************************/
+
+void ZNode_GL_Rnr::SetImg(OS::ZGlassImg* newimg)
+{
+  PARENT::SetImg(newimg);
+  _setup_rnrmod();
+}
+
+/**************************************************************************/
+
+void ZNode_GL_Rnr::CreateRnrScheme(RnrDriver* rd)
+{
+  ZNode& N = *mNode;
+  GVNS::RnrBits& rb = fImg->fClassInfo->fViewPart->fDefRnrCtrl.fRnrBits;
+
+  if(mRnrModLD && mRnrModLD->GetToGlass()) {
+    int pre = 0, post = 0;
+    if(N.bModSelf) {
+      pre = rb.fSelf[1] ? rb.fSelf[1] : 4; // This should almost always be 4.
+      post = pre + 1;
+    }
+    if(N.bModElements) {
+      if(pre) {
+	pre  = TMath::Min(pre,  int(rb.fList[3]));
+	post = TMath::Max(post, int(rb.fList[3] + 1));
+      } else {
+	pre = rb.fList[3];
+	post = pre + 1;
+      }
+    }
+    // printf("Calculated %d %d for '%s'.\n", pre, post, mRnrModLD->GetToGlass()->GetName());
+    if(pre) {
+      A_Rnr* rm_rnr = rd->GetRnr(mRnrModLD->GetToImg());
+      (*mRnrScheme)[pre].push_back(RnrElement(rm_rnr, &A_Rnr::PreDraw));
+      (*mRnrScheme)[post].push_back(RnrElement(rm_rnr, &A_Rnr::PostDraw));
+    }
+  }
+
+  crs_links(rd, mRnrScheme);
+  if(N.bRnrSelf) {
+    crs_self(rd, mRnrScheme);
+  } else {
+    (*mRnrScheme)[rb.fSelf[0]].push_back(RnrElement(this, &A_Rnr::PreDraw));
+    (*mRnrScheme)[rb.fSelf[2]].push_back(RnrElement(this, &A_Rnr::PostDraw));
+  }
+  if(N.bRnrElements) crs_elements(rd, mRnrScheme);
+}
 
 /**************************************************************************/
 // Basic GL Drawing
@@ -31,7 +105,7 @@ void ZNode_GL_Rnr::build_GL_mat()
 
 void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  ZGlass_GL_Rnr::PreDraw(rd);
+  PARENT::PreDraw(rd);
   if(mNode->mStampReqTrans > mStampTrans) {
     build_GL_mat();
     mStampTrans = mNode->mTimeStamp;
@@ -70,6 +144,6 @@ void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
   rd->PopPM();
   glPopMatrix();
   glPopAttrib();
-  ZGlass_GL_Rnr::PostDraw(rd);
+  PARENT::PostDraw(rd);
 }
 
