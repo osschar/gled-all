@@ -83,6 +83,7 @@ protected:
 
   ID_t		mCreationID;	//  Creation point ID
   lID_t		mPurgatory;	//  List of released but still reserved ids
+  lpZGlass_t	mZombies;	//! Lenses that are dead but still need to be deleted.
 
   UShort_t	mAvgPurgLen;	// X{gS} 7 Value(-range=>[1,65000,1], -width=>5, -join=>1)
   Float_t	mSgmPurgLen;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>5)
@@ -91,7 +92,8 @@ protected:
 
   ZeroRCPolicy_e mZeroRCPolicy; // X{gS} 7 PhonyEnum()
 
-  Bool_t	bStamping;	// X{gS} 7 Bool()
+  Bool_t	bStamping;	// X{GS} 7 Bool(-join=>1)
+  Bool_t	bStampIdOps;	// X{GS} 7 Bool()
 
   UChar_t	mAuthMode;      // X{gS} 7 PhonyEnum(-type=>AuthMode_e, -width=>12)
   UChar_t	mAlignment;     // X{gS} 7 PhonyEnum(-type=>Align_e)
@@ -119,6 +121,7 @@ protected:
   virtual LensDetails* produce_lens_details(ID_t id, ZGlass* lens);
   void                 release_purgatory(ID_t n_needed);
   void                 release_moon_purgatory(ID_t n_to_release); // X{E}
+  int		       release_zombies();
 
   virtual ZGlass* instantiate(FID_t fid,
 		    const Text_t* name=0, const Text_t* title=0); // X{E}
@@ -127,6 +130,9 @@ protected:
   void add_reflector(SaturnInfo* moon);
   void remove_reflector(SaturnInfo* moon);
 
+  void put_lens_to_purgatory(ZGlass* lens);
+  void remove_lens(ZGlass* lens);
+  void remove_lenses(ZList* list, Bool_t recurse);
 
 public:
 
@@ -170,9 +176,11 @@ public:
   // instantiate URL
 
   // Lens deletion
-  void PutLensToPurgatory(ZGlass* lens); // X{E} C{1}
-  void PutLensToVoid(ID_t lens_id);      // X{E}
-  void RemoveLens(ZGlass* lens);         // X{E} C{1}
+  void PutLensToPurgatory(ZGlass* lens);                // X{E} C{1}
+  void PutListElementsToPurgatory(ZList* list);         // X{E} C{1}
+  void PutLensToVoid(ID_t lens_id);                     // X{E}
+  void RemoveLens(ZGlass* lens);                        // X{E} C{1}
+  void RemoveLenses(ZList* list, Bool_t recurse=false); // X{E} C{1}
 
   // ZeroRefCount and management of Orphans
   void ZeroRefCount(ZGlass* lens);
@@ -206,6 +214,20 @@ public:
 
   // tmp
   void ListAll();		 //! X{E} 7 MButt()
+
+  // Thread functions
+
+  struct lens_remover_ti {
+    ZMirEmittingEntity* mee;
+    ZQueen* 	queen;
+    ZList*	list;
+    bool	recurse;
+
+    lens_remover_ti(ZMirEmittingEntity* m, ZQueen* q, ZList* l, bool r) :
+      mee(m), queen(q), list(l), recurse(r) {}
+  };
+
+  static void* tl_LensRemover(lens_remover_ti* arg);
 
 #include "ZQueen.h7"
   ClassDef(ZQueen, 1)
