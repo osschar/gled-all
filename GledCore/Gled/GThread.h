@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_GThread_H
-#define Gled_GThread_H
+#ifndef GledCore_GThread_H
+#define GledCore_GThread_H
 
 #include <Gled/GledTypes.h>
 #include <Gled/GMutex.h>
@@ -77,12 +77,16 @@ public:
   int	Cancel();
   int   Detach();
 
-  static void SetCancelState(CState s);
-  static void SetCancelType(CType t);
-  static void TestCancel();
-  static void Exit(void* ret=0);
+  static CState SetCancelState(CState s);
+  static CState CancelOn()  { return SetCancelState(CS_Enable);  }
+  static CState CancelOff() { return SetCancelState(CS_Disable); }
 
-  static ZMIR* get_mir();
+  static CType  SetCancelType(CType t);
+
+  static void   TestCancel();
+  static void   Exit(void* ret=0);
+
+  static ZMIR*  get_mir();
 
   static GThread* Self();
   static GThread* TSDSelf();
@@ -97,5 +101,16 @@ public:
                                              GThread::Self()->GetEndArg())
 #define GTHREAD_CU_POP  pthread_cleanup_pop(0)
 #endif
+
+/**************************************************************************/
+// GThreadKeepAlive
+/**************************************************************************/
+
+class GThreadKeepAlive {
+  GThread::CState mExCancelState;
+public:
+  GThreadKeepAlive()  { mExCancelState = GThread::CancelOff(); }
+  ~GThreadKeepAlive() { GThread::SetCancelState(mExCancelState); }
+};
 
 #endif
