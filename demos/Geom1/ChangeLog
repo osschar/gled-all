@@ -1,3 +1,11 @@
+2005-02-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lucidabright34.txf:
+	New file.
+
+	* images.C:
+	Use special font for rendering of text 'GLED'.
+
 2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* spheres.C:
