@@ -5,19 +5,19 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// ZGlStateBase
+// ZRnrModBase
 //
 //
 
-#include "ZGlStateBase.h"
+#include "ZRnrModBase.h"
 
-#include "ZGlStateBase.c7"
+#include "ZRnrModBase.c7"
 
-ClassImp(ZGlStateBase)
+ClassImp(ZRnrModBase)
 
 /**************************************************************************/
 
-void ZGlStateBase::_init()
+void ZRnrModBase::_init()
 {
   // !!!! Set all links to 0 !!!!
 }
