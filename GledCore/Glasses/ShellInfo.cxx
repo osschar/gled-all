@@ -18,7 +18,7 @@ void ShellInfo::_init()
   mBeta = mGamma = 0;
   bSpawnNests = true;
 
-  bFancyClassView       = true;
+  bFancyClassView       = true; bCollZGlass = bCollZList = true;
   bShowLinksInClassView = true;
 }
 
