@@ -122,21 +122,10 @@ void MTW_View::Retitle()
 }
 */
 
-void MTW_View::Absorb_Change(LID_t lid, CID_t cid)
+void MTW_View::AbsorbRay(Ray& ray)
 {
-  if(bShown) {
-    FID_t fid(lid,cid);
-    bool update_all = (lid==0 && cid==0);
-    for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
-      if(update_all) {
-	(*sv)->Update();
-      } else {
-	if((*sv)->mClassInfo->fFid == fid) {
-	  (*sv)->Update();
-	  break;
-	}
-      }
-    }
+  if(bShown && ray.fRQN == RayNS::RQN_change) {
+    UpdateViews(ray.fLibID, ray.fClassID);
   }
 }
 
@@ -144,7 +133,18 @@ void MTW_View::Absorb_Change(LID_t lid, CID_t cid)
 
 void MTW_View::UpdateViews(LID_t lid, CID_t cid)
 {
-  Absorb_Change(lid, cid);
+  FID_t fid(lid,cid);
+  bool update_all = (lid==0 && cid==0);
+  for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
+    if(update_all) {
+      (*sv)->Update();
+    } else {
+      if((*sv)->mClassInfo->fFid == fid) {
+	(*sv)->Update();
+	break;
+      }
+    }
+  }
 }
 
 /**************************************************************************/
@@ -172,9 +172,8 @@ namespace {
     }
 
     virtual void AssertDependantViews() {}
-    virtual void Absorb_Change(LID_t lid, CID_t cid) {
-      FID_t fid(lid, cid);
-      if(fid.is_basic()) { auto_label(); redraw(); }
+    virtual void AbsorbRay(Ray& ray) {
+      if(ray.IsBasicChange()) { auto_label(); redraw(); }
     }
   };
 
@@ -222,7 +221,7 @@ int MTW_View::handle(int ev)
 {
   if(ev == FL_SHOW) {
     bShown = true;
-    Absorb_Change(0, 0);
+    UpdateViews(0, 0);
   } else if(ev == FL_HIDE) {
     bShown = false;
   }

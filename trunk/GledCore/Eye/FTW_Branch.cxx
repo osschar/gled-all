@@ -84,56 +84,64 @@ void FTW_Branch::CopyListViews(OS::lpA_GlassView_t& v) {
 }
 
 /**************************************************************************/
-
-void FTW_Branch::Absorb_ListAdd(OS::ZGlassImg* newimg, OS::ZGlassImg* before)
+void FTW_Branch::AbsorbRay(Ray& ray)
 {
-  lLoI_i i = before ?
-    find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(before)) :
-    mLeoim.end();
-  FTW_Leaf* leaf = bLeavesCreated ?
-    FTW_Leaf::Construct(mNest, this, newimg, true, false) : 0;
-  mLeoim.insert(i, Leaf_o_Img(newimg, leaf));
-  if(bListExpanded) {
-    if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
-    else	        mNest->InsertLeaf(leaf, i->leaf);
-  }
-  label_namebox();
-}
+  using namespace RayNS;
+  switch(ray.fRQN) {
 
-void FTW_Branch::Absorb_ListRemove(OS::ZGlassImg* eximg)
-{
-  lLoI_i i = find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(eximg));
-  //cout <<"FTW_Branch::Absorb_ListRemove for "<< eximg->fGlass->GetName() <<
-  //", leaf="<< i->leaf <<endl;
-  if(i == mLeoim.end()) {
-    cout <<"FTW_Branch::Absorb_ListRemove didn't find view to remove ...\n";
+  case RQN_list_add: {
+    lLoI_i i = ray.fGammaImg ?
+      find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fGammaImg)) :
+      mLeoim.end();
+    FTW_Leaf* leaf = bLeavesCreated ?
+      FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false) : 0;
+    mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
+    if(bListExpanded) {
+      if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
+      else	          mNest->InsertLeaf(leaf, i->leaf);
+    }
+    label_namebox();
     return;
   }
-  if(bLeavesCreated) {
-    // mNest->RemoveLeaf(i->leaf); // Called in Leaf dtor.
-    delete i->leaf;
+
+  case RQN_list_remove: {
+    lLoI_i i = find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fBetaImg));
+    //cout <<"FTW_Branch::AbsorbRay RQN_list_remove for "<< eximg->fGlass->GetName() <<
+    //", leaf="<< i->leaf <<endl;
+    if(i == mLeoim.end()) {
+      cout <<"FTW_Branch::AbsorbRay RQN_list_remove didn't find view to remove ...\n";
+      return;
+    }
+    if(bLeavesCreated) {
+      // mNest->RemoveLeaf(i->leaf); // Called in Leaf dtor.
+      delete i->leaf;
+    }
+    mLeoim.erase(i);
+    label_namebox();
+    return;
   }
-  mLeoim.erase(i);
-  label_namebox();
-}
 
-void FTW_Branch::Absorb_ListRebuild()
-{
-  bool was_expanded = bListExpanded;
-  if(bListExpanded) CollapseList();
-  wipe_leoim();
-  build_leoim();
-  if(was_expanded) ExpandList();
-  label_namebox();
-}
+  case RQN_list_rebuild: {
+    bool was_expanded = bListExpanded;
+    if(bListExpanded) CollapseList();
+    wipe_leoim();
+    build_leoim();
+    if(was_expanded) ExpandList();
+    label_namebox();
+    return;
+  }
 
-void FTW_Branch::Absorb_ListClear()
-{
-  bool was_expanded = bListExpanded;
-  if(bListExpanded) CollapseList();
-  wipe_leoim();
-  if(was_expanded) ExpandList();
-  label_namebox();
+  case RQN_list_clear: {
+    bool was_expanded = bListExpanded;
+    if(bListExpanded) CollapseList();
+    wipe_leoim();
+    if(was_expanded) ExpandList();
+    label_namebox();
+    return;
+  }
+
+  } // end switch ray.fRQN
+  FTW_Leaf::AbsorbRay(ray);
 }
 
 /**************************************************************************/

@@ -7,7 +7,6 @@
 #ifndef Gled_MTW_View_H
 #define Gled_MTW_View_H
 
-// Includes
 #include <Gled/GledTypes.h>
 #include "OptoStructs.h"
 #include <FL/Fl_Pack.H>
@@ -41,7 +40,7 @@ public:
   void BuildVerticalView(int cell_w);
   void BuildByLayout(MTW_Layout* layout);
 
-  virtual void Absorb_Change(LID_t lid, CID_t cid);
+  virtual void AbsorbRay(Ray& ray);
   virtual void AssertDependantViews() {}
 
   virtual void InvalidateRnrScheme() {}

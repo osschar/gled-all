@@ -12,19 +12,19 @@
 #include "FTW.h"
 
 class FTW_Branch : public FTW_Leaf {
-private:
+ private:
   FTW::lLoI_t		mLeoim;
   void build_leoim();
   void wipe_leoim();
 
-protected:
+ protected:
   bool			bLeavesCreated;
   bool			bListExpanded;	// mLeafs shown
 
   virtual void label_namebox();
   virtual void label_weeds();
 
-public:
+ public:
   FTW_Branch(FTW_Nest* nest, FTW_Leaf* parent,
 	     OptoStructs::ZGlassImg* img,
 	     bool is_list_member, bool is_link_desc);
@@ -34,10 +34,7 @@ public:
   virtual void AssertDependantViews();
   virtual void CopyListViews(OptoStructs::lpA_GlassView_t& v);
 
-  virtual void Absorb_ListAdd(OptoStructs::ZGlassImg* newimg, OptoStructs::ZGlassImg* before);
-  virtual void Absorb_ListRemove(OptoStructs::ZGlassImg* eximg);
-  virtual void Absorb_ListRebuild();
-  virtual void Absorb_ListClear();
+  virtual void AbsorbRay(Ray& ray);
 
   virtual void AssertListRnrs(const string& rnr);
 

@@ -7,12 +7,12 @@
 #ifndef Gled_OptoStructs
 #define Gled_OptoStructs
 
-#include <GledView/GledViewNS.h>
-
 #include <Glasses/ZGlass.h>
+#include <GledView/GledViewNS.h>
 
 class ZGlass;
 class Eye;
+class Ray;
 class A_Rnr; class RnrScheme;
 class Fl_Window;
 
@@ -93,13 +93,7 @@ namespace OptoStructs {
     A_View(ZGlassImg* i) : fImg(i) {}
     virtual ~A_View() {}
 
-    virtual void Absorb_Change(LID_t lid, CID_t cid) {}
-    virtual void Absorb_LinkChange(LID_t lid, CID_t cid) {}
-    virtual void Absorb_ListAdd(ZGlassImg* newimg, ZGlassImg* before) {}
-    virtual void Absorb_ListRemove(ZGlassImg* eximg) {}
-    virtual void Absorb_ListRebuild() {}
-    virtual void Absorb_ListClear() {}
-    virtual void Absorb_Delete() {}
+    virtual void AbsorbRay(Ray& ray) {}
 
     virtual void InvalidateRnrScheme() {}
   };
@@ -160,7 +154,7 @@ namespace OptoStructs {
     virtual void AssertDependantViews();
     virtual void CopyLinkViews(lpZLinkView_t& v);
 
-    virtual void Absorb_LinkChange(LID_t lid, CID_t cid);
+    virtual void AbsorbRay(Ray& ray);
   };
 
   typedef list<ZGlassView*>		lpZGlassView_t;
@@ -180,10 +174,7 @@ namespace OptoStructs {
     virtual void AssertDependantViews();
     virtual void CopyListViews(lpA_GlassView_t& v);
 
-    virtual void Absorb_ListAdd(ZGlassImg* newdude, ZGlassImg* before);
-    virtual void Absorb_ListRemove(ZGlassImg* exdude);
-    virtual void Absorb_ListRebuild();
-    virtual void Absorb_ListClear();
+    virtual void AbsorbRay(Ray& ray);
 
     virtual void AssertListRnrs(const string& rnr);
   };
