@@ -49,14 +49,15 @@ int Lamp_GL_Rnr::LampOn(RnrDriver* rd, const ZTrans* t)
     return 1;
   }
 
-  // cout <<"Lamp_GL_Rnr::LampOn turning on lamp id="<< mLampID <<endl;
-
   if(t == 0) t = mLamp->PtrTrans();
 
   GLfloat x[4], d[4];
   // !!! should lock master
   x[0]=(*t)(1u,4u); x[1]=(*t)(2u,4u); x[2]=(*t)(3u,4u); x[3]= mLamp->mScale;
   d[0]=(*t)(1u,1u); d[1]=(*t)(2u,1u); d[2]=(*t)(3u,1u); d[3]=1;
+
+  //printf("Lamp_GL_Rnr::LampOn turning on lamp id=%d (%.3f,%.3f,%.3f;%.3f)\n",
+  //  mLampID, x[0], x[1], x[2], x[3]);
 
   GLenum L = (GLenum)(GL_LIGHT0 + mLampID);
 
