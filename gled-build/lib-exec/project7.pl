@@ -1146,7 +1146,7 @@ print C <<"fnord";
 
 #include "${CLASSNAME}View.h"
 #include <Eye/Eye.h>
-#include <memory>\n
+#include <Stones/ZMIR.h>\n
 fnord
 
 #####################################
