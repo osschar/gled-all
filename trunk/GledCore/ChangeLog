@@ -1,3 +1,86 @@
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Glasses/NestInfo.cxx:
+	* Glasses/NestInfo.h:
+	Moved nest-element width control to NestInfo glass.
+
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	New option 'bool show_p' to spawn_subshell(); shell now expects
+	that all passed sub-shells are first registered in
+	ShellInfo::mSubShells; split MCW_View creation into two methods.
+
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	New class LensChoiceMenuBox.
+
+	* Eye/MCW_Button.cxx:
+	* Eye/MCW_Button.h:
+	New files; fltk widget of MCWButt weed.
+
+	* Eye/MCW_View.cxx:
+	* Eye/MCW_View.h:
+	Blessed split_argument() and unrefptrconst_type() from anonymous
+	namespace to static members.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	New method 'ZLinkDatum*ZGlassImg::GetLinkDatum(const string& lnk_name)'.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Added privete _build() method; create ctx-holder from Pupil
+	constructor, not static Create_Pupil(); recalculate camera
+	position upon receiving camera-home ray.
+
+	* Eye/GuiPupil.cxx:
+	* Eye/GuiPupil.h:
+	New class: fltk wrapper around Pupil, steered by GuiPupilInfo
+	glass.
+
+	* Glasses/CameraInfo.cxx:
+	* Glasses/CameraInfo.h:
+	New glass: full information about camera handling and viewing
+	volume.
+
+	* Glasses/GuiPupilInfo.cxx:
+	* Glasses/GuiPupilInfo.h:
+	New glass: representation of a more customizable Pupil adorned
+	with gui (so far menu but possibly other things will be added).
+	Preliminary implementation.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added method ImportCameraInfo(CameraInfo*); fixed Zoom() to call
+	set-methods and thus honour value-ranges; some code
+	reorganization.
+
+	* Glasses/ShellInfo.cxx:
+	Default sub-shell assignment first asserts that the argument is an
+	element of it SubShells (adds it if necessary). This allows cleaner
+	handling of sub-shell windows on the gui side, especially in view
+	of sub-shell swallowing.
+
+	* Glasses/ZRnrModBase.h:
+	Offset the Operation_e initialization to -1. This makes
+	initialization via integers much easier to read.
+
+	* Rnr/GL/GlobalLamps_GL_Rnr.cxx:
+	* Rnr/GL/GlobalLamps_GL_Rnr.h:
+	Disabled use of name-stack.
+
+	* glass.list:
+	New glasses GuiPupilInfo and CameraInfo.
+
+	* macros/glass_defines.h:
+	Added macros ASSIGN_ADD/ATT_GLASS.
+
+	* perllib/GLED_Widgets.pm:
+	Added weed-class MCWButt.
+
 2005-03-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PupilInfo.cxx:
