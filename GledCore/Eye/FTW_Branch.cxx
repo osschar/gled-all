@@ -89,6 +89,18 @@ void FTW_Branch::AbsorbRay(Ray& ray)
     lLoI_i i = ray.fGammaImg ?
       find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fGammaImg)) :
       mLeoim.end();
+
+    FTW_Leaf* leaf = 0;
+    if(bLeavesCreated) {
+      leaf = FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false);
+      if(!bListExpanded) leaf->hide();
+      if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
+      else	          mNest->InsertLeaf(leaf, i->leaf);
+
+    }
+    mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
+
+    /*
     FTW_Leaf* leaf = bLeavesCreated ?
       FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false) : 0;
     mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
@@ -96,6 +108,7 @@ void FTW_Branch::AbsorbRay(Ray& ray)
       if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
       else	          mNest->InsertLeaf(leaf, i->leaf);
     }
+    */
     label_namebox();
     return;
   }
