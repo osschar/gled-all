@@ -1,3 +1,21 @@
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Board.h:
+	* Glasses/Rect.h:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSTube.cxx:
+	* Glasses/ZImage.cxx:
+	* Glasses/ZRibbon.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
 2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
         ==================================================
