@@ -1,3 +1,18 @@
+2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	Moved RnrOn/OffForDaughters methods to GledCore::ZNode; code
+	clean-up.
+
+	* Glasses/ZGeoOvl.cxx:
+	* Glasses/ZGeoOvl.h:
+	* Glasses/ZGeoOvlMgr.cxx:
+	* Glasses/ZGeoOvlMgr.h:
+	* Stones/GeoUserData.cxx:
+	* Stones/GeoUserData.h:
+	Code clean-up.
+
 2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoNode.h:
