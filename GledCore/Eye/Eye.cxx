@@ -111,6 +111,10 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
     cout << _eh + " non-matching images.\n";
     return;
   }
+
+  for(OS::lpImgConsumer_i c=mImgConsumers.begin(); c!=mImgConsumers.end(); ++c)
+    (*c)->ImageDeath(img);
+
   {
     GLensReadHolder rlck(i->first);
     i->first->DecEyeRefCount();
