@@ -1,3 +1,9 @@
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* spheres.C:
+	Added ZGlLightModel objects to demonstrates use of ZNode's RnrMod
+	link and self/element rendering flags.
+
 2005-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* gl_tests.C:
