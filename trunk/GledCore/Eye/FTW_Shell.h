@@ -30,17 +30,17 @@ public:
   struct mir_call_data_list;
 
 protected:
-  Eye*		mEye;		// X{G}
-  ShellInfo*	mShellInfo;	// X{G}
+  Eye*		mEye;		 // X{g}
+  ShellInfo*	mShellInfo;	 // X{g}
 
   FTW::NestAm*	 pNestAm;
 
   Fl_Pack*	 wMainPack;
-  FTW_Nest*	 mNest;		// X{G}
+  FTW_Nest*	 mNest;		 // X{g}
   Fl_OutputPack* wOutPack;
 
-  FTW::Source_Selector*	mSource; // X{G}
-  FTW::Sink_Selector*	mSink;   // X{G}
+  FTW::Source_Selector*	mSource; // X{g}
+  FTW::Sink_Selector*	mSink;   // X{g}
 
   void label_shell();
 
@@ -51,6 +51,7 @@ public:
   virtual void AbsorbRay(Ray& ray);
 
   void X_SetSource(FTW::Locator& loc);
+  void X_SetSource(ID_t id);
   void X_SetSink(FTW::Locator& loc);
   void X_ExchangeSourceAndSink();
 
