@@ -4,6 +4,10 @@
 //
 // vars: ZQueen* scenes
 // libs: Geom1
+
+#include <gl_defines.h>
+
+void spheres()
 {
   if(Gled::theOne->GetSaturn() == 0) {
     gROOT->Macro("sun.C");
@@ -28,12 +32,21 @@
   Sphere* top_sphere = new Sphere("Mother Sphere");
   top_sphere->SetRadius(25);
   top_sphere->SetLOD(50);
-  top_sphere->SetColor(1,1,1);
+  top_sphere->SetColor(0.7, 0.1, 0.3);
   scenes->CheckIn(top_sphere); spheres->Add(top_sphere);
 
+  ZGlLightModel* lm = new ZGlLightModel("ZGlLightModel 1");
+  scenes->CheckIn(lm);
+  lm->SetShadeModelOp(1);
+  lm->SetFrontMode(GL_LINE);
+  lm->SetBackMode(GL_LINE);
+  lm->SetFaceCullOp(1);
+  top_sphere->SetRnrMod(lm);
+  top_sphere->SetModElements(false);
+
+  Sphere* sss[6];
   {
     float x = 0; float phi = 3.14 / 6;
-    Sphere* sss[6];
     for(int i=1; i<=6; ++i) {
       Sphere* s = new Sphere(Form("Sphere_%d",i));
       sss[i-1] = s;
@@ -55,12 +68,22 @@
     }
   }
 
+  ZGlLightModel* lm2 = new ZGlLightModel("ZGlLightModel 2");
+  scenes->CheckIn(lm2);
+  lm2->SetShadeModelOp(1);
+  lm2->SetFrontMode(GL_LINE);
+  lm2->SetBackMode(GL_LINE);
+  sss[4]->SetRnrMod(lm2);
+  sss[4]->SetModSelf(false);
+
   Eventor* etor = new Eventor("Dynamo");
-  etor->SetBeatsToDo(-1); etor->SetInterBeatMS(25); etor->SetStampInterval(10);
+  etor->SetBeatsToDo(-1);
+  etor->SetInterBeatMS(25);
+  etor->SetStampInterval(50);
   scenes->CheckIn(etor); spheres->Add(etor);
 
   Mover* mv = new Mover("S1 Rotator");
-  mv->SetNode(top_sphere); mv->SetRi(1); mv->SetRj(2); mv->SetRa(0.005);
+  mv->SetNode(top_sphere); mv->SetRi(1); mv->SetRj(2); mv->SetRa(0.001);
   scenes->CheckIn(mv);
   etor->Add(mv);
 
