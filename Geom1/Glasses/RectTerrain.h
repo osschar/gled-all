@@ -15,7 +15,6 @@ class ZImage;
 #include <TH2.h>
 
 class RectTerrain : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(RectTerrain);
 
 public:

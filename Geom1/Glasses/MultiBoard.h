@@ -11,7 +11,6 @@
 #include <Glasses/ZHashList.h>
 
 class MultiBoard : public Board {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(MultiBoard);
 
 private:

@@ -20,7 +20,7 @@ typedef unsigned int ILuint;
 #include <GL/gl.h>
 
 class ZImage : public ZGlass {
-  // 7777 RnrCtrl("true, true, RnrBits(0,4,0,0)")
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZImage);
 
 private:

@@ -10,7 +10,6 @@
 #include <Glasses/ZHashList.h>
 
 class MultiSpheror : public ZHashList {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(MultiSpheror);
 
 private:

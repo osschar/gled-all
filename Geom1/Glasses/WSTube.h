@@ -12,7 +12,6 @@
 #include <TRandom.h>
 
 class WSTube : public WSSeed {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(WSTube);
 
 private:

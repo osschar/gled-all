@@ -11,7 +11,6 @@
 
 class WSPoint : public ZNode {
 
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(WSPoint);
   MAC_RNR_FRIENDS(WSSeed);
   friend class WSSeed;

@@ -8,7 +8,6 @@
 #include <Stones/ZColor.h>
 
 class Moonraker : public ZNode, public ODECrawlerMaster {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Moonraker);
 
 private:

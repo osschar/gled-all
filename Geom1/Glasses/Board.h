@@ -12,7 +12,6 @@
 #include <Stones/ZColor.h>
 
 class Board : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Board);
 
 protected:

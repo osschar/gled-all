@@ -22,7 +22,6 @@ namespace GTS {
 
 class GTSurf : public ZNode {
 
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(GTSurf);
 
 private:

@@ -11,7 +11,6 @@
 #include <Stones/ZColor.h>
 
 class Rect : public ZNode {
-  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(Rect);
 
 private:

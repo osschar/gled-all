@@ -11,7 +11,6 @@
 #include <Stones/ZColorMark.h>
 
 class ZRibbon : public ZGlass {
-  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(ZRibbon);
 
 private:
