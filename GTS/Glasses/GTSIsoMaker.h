@@ -12,7 +12,7 @@
 
 class GTSIsoMaker : public ZGlass {
 
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(GTSIsoMaker);
 
 public:
@@ -44,7 +44,7 @@ public:
   GTSIsoMaker(const Text_t* n="GTSIsoMaker", const Text_t* t=0) : ZGlass(n,t)
   { _init(); }
 
-  void MakeSurface(); // X{E} 7 MButt()
+  void MakeSurface(); // X{ED} 7 MButt()
 
 #include "GTSIsoMaker.h7"
   ClassDef(GTSIsoMaker, 1)

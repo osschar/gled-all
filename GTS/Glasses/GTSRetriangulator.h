@@ -11,7 +11,7 @@
 #include <Glasses/GTSurf.h>
 
 class GTSRetriangulator : public ZGlass {
-  // 7777 RnrCtrl("false, 0, RnrBits()")
+  // 7777 RnrCtrl(0)
   MAC_RNR_FRIENDS(GTSRetriangulator);
 
 public:
@@ -40,8 +40,8 @@ protected:
 public:
   GTSRetriangulator(const Text_t* n="GTSRetriangulator", const Text_t* t=0) : ZGlass(n,t) { _init(); }
 
-  void Coarsen(); // X{E} 7 MButt(-join=>1)
-  void Refine();  // X{E} 7 MButt()
+  void Coarsen(); // X{ED} 7 MButt(-join=>1)
+  void Refine();  // X{ED} 7 MButt()
 
 #include "GTSRetriangulator.h7"
   ClassDef(GTSRetriangulator, 1) // Coarsen or refine GTSurf

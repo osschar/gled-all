@@ -22,16 +22,14 @@ namespace GTS {
 
 class GTSurf : public ZNode {
 
-  // 7777 RnrCtrl("true, 7, RnrBits(2,4,6,0, 0,0,0,5)")
+  // 7777 RnrCtrl(1)
   MAC_RNR_FRIENDS(GTSurf);
 
 private:
   void	_init();
 
 protected:
-#ifndef __CINT__
   GTS::GtsSurface*	pSurf;  //! X{G}
-#endif
 
   Float_t		mScale;	// X{GST}  7 Value(-range=>[0,1000,1,1000])
   TString		mFile;	// X{GS}   7 Filor()
@@ -51,7 +49,9 @@ protected:
 public:
   GTSurf(Text_t* n="GTSurf", Text_t* t=0) : ZNode(n,t) { _init(); }
 
-  void Replace(GTS::GtsSurface* new_surf);
+  void ReplaceSurface(GTS::GtsSurface* new_surf);
+  GTS::GtsSurface* CopySurface();
+
   void Load();		//  X{E} 7 MButt(-join=>1)
   void Save();		//  X{E} 7 MButt()
   

@@ -75,10 +75,14 @@ void GTSRetriangulator::Coarsen()
 
   using namespace GTS;
 
-  if(mTarget == 0) {
+  GTSurf* target = mTarget;
+  if(target == 0) {
     throw(_eh + "Link Target should be set.");
   }
-  GtsSurface* s = mTarget->GetSurf();
+  if(target == 0) {
+    throw(_eh + "Link Target should be set.");
+  }
+  GtsSurface* s = target->CopySurface();
   if(s == 0) {
     throw(_eh + "Target should have non-null surface.");
   }
@@ -136,8 +140,9 @@ void GTSRetriangulator::Coarsen()
 		      l_stop_func, l_stop_data,
 		      mMinAngleDeg*TMath::Pi()/180);
  
-  mTarget->MarkStampReqTring();
-  Stamp(LibID(), ClassID());
+  target->WriteLock();
+  target->ReplaceSurface(s);
+  target->WriteUnlock();
 }
 
 /**************************************************************************/
@@ -148,10 +153,14 @@ void GTSRetriangulator::Refine()
 
   using namespace GTS;
 
-  if(mTarget == 0) {
+  GTSurf* target = mTarget;
+  if(target == 0) {
     throw(_eh + "Link Target should be set.");
   }
-  GtsSurface* s = mTarget->GetSurf();
+  if(target == 0) {
+    throw(_eh + "Link Target should be set.");
+  }
+  GtsSurface* s = target->CopySurface();
   if(s == 0) {
     throw(_eh + "Target should have non-null surface.");
   }
@@ -195,8 +204,9 @@ void GTSRetriangulator::Refine()
 		     0, 0,
 		     l_stop_func, l_stop_data);
 
-  mTarget->MarkStampReqTring();
-  Stamp(LibID(), ClassID());
+  target->WriteLock();
+  target->ReplaceSurface(s);
+  target->WriteUnlock();
 }
 
 /**************************************************************************/
