@@ -6,7 +6,6 @@
 
 #include "Pupil.h"
 #include "Eye.h"
-#include "FTW_Leaf.h"
 #include "FTW_Shell.h"
 
 #include <Glasses/Camera.h>
@@ -114,10 +113,9 @@ void Pupil::dump_image()
 
 /**************************************************************************/
 
-Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, // FTW_Leaf* leaf,
-	     int w, int h) :
+Pupil::Pupil(OS::ZGlassImg* infoimg, OS::ZGlassView* zgv, int w, int h) :
   Fl_Gl_Window(w,h), OS::A_View(infoimg),
-  mInfo(0), mRoot(zgv) // mLeaf(leaf)
+  mInfo(0), mRoot(zgv)
 {
   if(fImg) {
     fImg->CheckInFullView(this);
@@ -362,41 +360,6 @@ void Pupil::Render()
 // Picking
 /**************************************************************************/
 
-void Pupil::fltk_pick_callback(Fl_Widget* w, pick_data* pd)
-{
-  pd->pupil->pick_callback(w, pd);
-}
-
-void Pupil::pick_callback(Fl_Widget* w, pick_data* pd)
-{
-  switch(pd->operation) {
-  case p_open_view: {
-    Eye* eye = GetRoot()->fImg->fEye;
-    eye->GetShell()->SpawnMTW_View(eye->DemanglePtr(pd->lens));
-    break;
-  }
-  case p_null:
-  default:
-    break;
-  }
-}
-
-namespace {
-
-  void make_menu(Fl_Menu_Button& menu, list<Pupil::pick_data>& pdl,
-		 const string& prefix,
-		 Pupil* pupil, ZGlass* lens)
-  {
-    // Make a menu for lens. Called from Pupil::Pick().
-    // Presently rather empty and non-configurable.
-
-    pdl.push_back( Pupil::pick_data(pupil, lens, Pupil::p_open_view) );
-    menu.add(GForm("%s/Open view ...", prefix.c_str()), 0,
-	     (Fl_Callback*)Pupil::fltk_pick_callback, &pdl.back(), FL_MENU_DIVIDER);
-  }
-
-}
-
 void Pupil::Pick()
 {
   // RedBook snatch
@@ -427,14 +390,15 @@ void Pupil::Pick()
   GLint n = glRenderMode(GL_RENDER);
 
   if (n > 0) {
+    FTW_Shell* shell = mRoot->fImg->fEye->GetShell();
 
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
-    menu.textsize(mRoot->fImg->fEye->GetShell()->cell_fontsize());
+    menu.textsize(shell->cell_fontsize());
 
-    GLuint* x = b;
-    list<pick_data> pdl;
+    FTW_Shell::mir_call_data_list mcdl;
     list<glass_data> gdl;
 
+    GLuint* x = b;
     // create a list of picked lenses sorted by z buffer
     for(int i=0; i<n; i++) {
       GLuint m = *x; x++;
@@ -458,11 +422,11 @@ void Pupil::Pick()
       }
 
       ZGlass* lens = root_img->fGlass;
-      if(!lens) continue;
+      // if(!lens) continue; // MT: this should NEVER happen.
      
-      glass_data gd(lens, zmin, lens->GetName());;
+      glass_data gd(root_img, zmin, lens->GetName());;
       
-      // fill gd.parents list with contents of the pisck record
+      // fill gd.parents list with contents of the pick record
       for(int j=m-2; j>=0; --j) {
         UInt_t p_id = x[j];
         OS::ZGlassImg* img = mRoot->fImg->fEye->DemangleID(p_id);
@@ -470,9 +434,9 @@ void Pupil::Pick()
           printf("Pupil::Pick parent img null for id=%d.\n", p_id);
           continue;
         }
-        ZGlass* parent = img->fGlass;
-        if(!parent) continue;
-        gd.parents.push_back(parent);
+        // ZGlass* parent = img->fGlass;
+        // if(!parent) continue; // MT: this should NEVER happen.
+        gd.parents.push_back(img);
       }
       
       list<glass_data>::iterator ins_pos = gdl.begin();
@@ -491,25 +455,20 @@ void Pupil::Pick()
         Float_t far  = mInfo->GetFarClip();
         Float_t zdist = near*far/(far - gdi->z/2*(far - near));
         if(mInfo->GetPickDisp() == 1)
-          gdi->name = GForm("%2d. (%6.3f)  %s",  loc, zdist, gdi->name.c_str()); 
+          gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.c_str()); 
         else
-          gdi->name = GForm("%2d. (%6.3f%%)  %s", loc, 100*(zdist/far), gdi->name.c_str()); 
+          gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.c_str()); 
       } else {
-        gdi->name = GForm("%2d. %s", loc, gdi->name.c_str());
+        gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
       }
       ++loc;
-      pdl.push_back( pick_data(this, gdi->lens) );
-      menu.add(gdi->name.c_str(), 0, (Fl_Callback*)fltk_pick_callback,
-	       &pdl.back(), FL_SUBMENU);
-      make_menu(menu, pdl, string(gdi->name), this, gdi->lens);
-       
+
+      shell->FillImageMenu(gdi->img, menu, mcdl, gdi->name);
+
       // iterate through the list of parents
-      for(lpZGlass_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
-        ZGlass* pfl = *pi;
-        pdl.push_back( pick_data(this, pfl,  Pupil::p_open_view) );
-        make_menu(menu, pdl,
-                  string(GForm("%s/Parents/%s", gdi->name.c_str(), pfl->GetName())),
-                  this, pfl);
+      for(OS::lpZGlassImg_i pi=gdi->parents.begin(); pi!=gdi->parents.end(); ++pi) {
+	string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
+	shell->FillImageMenu(*pi, menu, mcdl, entry);
       }
     }
 
@@ -791,10 +750,7 @@ int Pupil::handle(int ev)
 	case 'q':
 	XtachCamera(); redraw();
 	return 1;
-	case FL_F+1:
-	//if(!pInfoView) pInfoView = new ZNodeMixer(mInfo);
-	//pInfoView->show();
-	return 1;
+
 	case FL_F+2:
 	return 1;
 	case FL_F+3:
