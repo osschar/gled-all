@@ -32,6 +32,8 @@ ZGlassImg::ZGlassImg(Eye* e, ZGlass* g) : fEye(e), fGlass(g) {
 }
 
 ZGlassImg::~ZGlassImg() {
+  delete fElementImgs;
+
   while(!fViews.empty()) {
     // The destructor of A_View removes itself from the fViews list.
     delete fViews.back();

@@ -72,6 +72,18 @@ namespace OptoStructs {
   typedef hash_map<ZGlass*, ZGlassImg*>::iterator hpZGlass2pZGlassImg_i;
 
   /**************************************************************************/
+  // ImageConsumer: abstract base for str
+  /**************************************************************************/
+
+  class ImageConsumer {
+  public:
+    virtual void ImageDeath(ZGlassImg* img) = 0;
+  };
+
+  typedef list<ImageConsumer*>           lpImgConsumer_t;
+  typedef list<ImageConsumer*>::iterator lpImgConsumer_i;
+
+  /**************************************************************************/
   // ZLinkDatum: information provided for links of each lens
   /**************************************************************************/
 
