@@ -1,3 +1,10 @@
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MultiSpheror.cxx:
+	Init() method can now be called several times. The old contents is
+	unreferenced from the list and links of Spheror elements and their
+	Amoebas are wiped.
+
 2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Moonraker.cxx:
