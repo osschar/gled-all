@@ -217,6 +217,26 @@ void ZNode::MultS(Float_t s)
 
 /**************************************************************************/
 
+// Methods for changing properties of daugters.
+
+void ZNode::RnrOnForDaughters()
+{
+  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrSelf(true);
+  }
+}
+
+void ZNode::RnrOffForDaughters()
+{ 
+  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrSelf(false);
+  }
+}
+
 void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
 {
   // If enforce_to_all also changes OM of children w/ parent != this.
@@ -224,13 +244,10 @@ void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
   lpZNode_t dts; CopyByGlass<ZNode*>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     ZNode* d = *i;
-    d->ReadLock();
+    GLensReadHolder _rlck(d);
     if(enforce_to_all || d->mParent == this) {
-      d->WriteLock();
       d->SetOM(om);
-      d->WriteUnlock();
     }
-    d->ReadUnlock();
   }
 }
 

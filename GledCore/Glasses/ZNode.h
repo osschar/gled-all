@@ -35,13 +35,18 @@ protected:
   Float_t	mSy;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
   Float_t	mSz;		// X{GS}  7 Value(-range=>[0,1000, 1,1000])
 
+  Bool_t	bKeepParent;	// X{GS} 7 Bool(-width=>6, -join=>1)
   ZNode*	mParent;	// X{gS} L{l} Structural parent
-  Bool_t	bKeepParent;	// X{GS} 7 Bool()
 
   // RnrBits of RnrMod calculated on the fly.
-  ZGlass*	mRnrMod;	// X{gS} L{}
   Bool_t	bRnrSelf;	// X{GSx} 7 Bool(-join=>1)
   Bool_t	bRnrElements;	// X{GSx} 7 Bool()
+public:
+  void RnrOnForDaughters();     // X{ED}  7 MButt(-join=>1)
+  void RnrOffForDaughters();    // X{ED}  7 MButt()
+
+protected:
+  ZGlass*	mRnrMod;	// X{gS} L{}
   Bool_t	bModSelf;	// X{GSx} 7 Bool(-join=>1)
   Bool_t	bModElements;	// X{GSx} 7 Bool()
 
