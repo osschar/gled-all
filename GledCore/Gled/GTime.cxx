@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2003, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,7 +23,7 @@ void GTime::SetNow()
 
 GTime GTime::TimeUntilNow()
 {
-  GTime n(Now);
+  GTime n(I_Now);
   n -= *this;
   return n;
 }
@@ -81,3 +81,35 @@ GTime GTime::operator-(const GTime& t) const
   r -= t;
   return r;
 }
+
+/**************************************************************************/
+
+bool GTime::operator<(const GTime& t) const
+{
+  if(mSec == t.mSec) return mMuSec < t.mMuSec;
+  return mSec < t.mSec;
+}
+
+bool GTime::operator>(const GTime& t) const
+{
+  if(mSec == t.mSec) return mMuSec > t.mMuSec;
+  return mSec > t.mSec;
+}
+
+bool GTime::operator<=(const GTime& t) const
+{
+  if(mSec == t.mSec) return mMuSec <= t.mMuSec;
+  return mSec <= t.mSec;
+}
+
+bool GTime::operator>=(const GTime& t) const
+{
+  if(mSec == t.mSec) return mMuSec >= t.mMuSec;
+  return mSec >= t.mSec;
+}
+
+bool GTime::operator==(const GTime& t) const
+{
+  return mMuSec == t.mMuSec && mSec == t.mSec;
+}
+
