@@ -1,3 +1,30 @@
+2004-01-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW.cxx:
+	* Eye/FTW.h:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Shell.h:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+
+	Dnd support, camera attachment. Nameboxes in Nest support dnd for
+	a) pushing elements to the end of the list or b) setting links.
+	Camera can be attached to an object in the scene that is connected
+	to PupilInfo in question. Node that the default camera is looking
+	at and the reference object for 'up' direction can also be
+	specified.
+	
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+
+	Added LibSetInfo* FindLibSetInfo(const string& lib_set).
+
+	* GledView/GledViewNS.cxx: Bugfix in ViewSet init.
+
 2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_SubView.cxx:
