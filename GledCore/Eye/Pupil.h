@@ -14,6 +14,7 @@
 #include <Eye/OptoStructs.h>
 
 class PupilInfo;
+class MTW_View;
 
 #include <RnrBase/RnrDriver.h>
 
@@ -33,12 +34,15 @@ protected:
 
   RnrDriver*	mDriver;
 
-  ZNode*	mBase;
   Camera*	mCamera;
+  MTW_View*	mCameraView;
+  Fl_Window*	mCameraViewWin;
+
+  ZNode*	mCamBase;
+  ZTrans	mCamBaseTrans;
+  ZTrans	mCamAbsTrans;
 
   int		mMouseX, mMouseY;
-  bool		bJustCamera;
-  bool		bFollowBase;
 
   string	mLabel;		
   void		label_window();
@@ -60,11 +64,10 @@ public:
 
   void SetProjection1();
   void SetProjection2();
+  void SetAbsRelCamera();
   void SetCameraView();
 
-  // void Rebase(ZNode* newbase, bool keeppos=true);
-  void XtachCamera();
-  void JumpCameraAt(ZGlass* lens);
+  void TurnCamTowards(ZGlass* lens, Float_t max_dist);
 
   void FullScreen();
 
@@ -74,6 +77,10 @@ public:
   virtual void draw();
   // virtual void draw_overlay();
   virtual int  handle(int ev);
+
+  static void camera_stamp_cb(Camera* cam, Pupil* pup);
+
+  float default_distance();
 
   ////////////////////////////////////////////////////////////////
   // Picking stuff
