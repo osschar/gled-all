@@ -850,7 +850,8 @@ unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
     print C7 <<"fnord"
   if($r->{Varname} != 0) {
     bool _resolved = false;
-    $r->{Type} _pointee = dynamic_cast<$r->{Type}>(idd->DemangleID((ID_t)$r->{Varname}));
+    ID_t _id = 0; _id += (unsigned long)$r->{Varname};
+    $r->{Type} _pointee = dynamic_cast<$r->{Type}>(idd->DemangleID(_id));
     if(_pointee) {
       try {
         _pointee->IncRefCount(this); 
