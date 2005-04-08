@@ -210,7 +210,7 @@ void RnrDriver::SetDefRnrMod(FID_t fid, RnrMod* ud)
   }
 }
 
-RnrDriver::RnrMod* RnrDriver::GetDefRnrMod(FID_t fid)
+RnrMod* RnrDriver::GetDefRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid)) {
     return mRMI->second.def;
@@ -228,7 +228,7 @@ void RnrDriver::PushRnrMod(FID_t fid, RnrMod* ud)
   }
 }
 
-RnrDriver::RnrMod* RnrDriver::PopRnrMod(FID_t fid)
+RnrMod* RnrDriver::PopRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid) && ! mRMI->second.stack.empty()) {
     RnrMod* r = mRMI->second.stack.top();
@@ -239,7 +239,7 @@ RnrDriver::RnrMod* RnrDriver::PopRnrMod(FID_t fid)
   }
 }
 
-RnrDriver::RnrMod* RnrDriver::TopRnrMod(FID_t fid)
+RnrMod* RnrDriver::TopRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid) && ! mRMI->second.stack.empty()) {
     return mRMI->second.stack.top();
@@ -248,7 +248,7 @@ RnrDriver::RnrMod* RnrDriver::TopRnrMod(FID_t fid)
   }
 }
 
-RnrDriver::RnrMod* RnrDriver::GetRnrMod(FID_t fid)
+RnrMod* RnrDriver::GetRnrMod(FID_t fid)
 {
   if(find_rnrmod(fid) == false) {
     mRMI = mRMStacks.insert(make_pair(fid, RMStack())).first;

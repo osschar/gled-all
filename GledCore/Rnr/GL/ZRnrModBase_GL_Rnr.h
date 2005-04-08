@@ -9,17 +9,14 @@
 
 #include <Glasses/ZRnrModBase.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
-#include <RnrBase/RnrDriver.h>
 
 class ZRnrModBase_GL_Rnr : public ZGlass_GL_Rnr {
 private:
   void _init();
 
 protected:
-  ZRnrModBase*	     mZRnrModBase;
-
-  RnrDriver::RnrMod* mRnrMod;
-  UInt_t             mRebuildRnrCount;
+  ZRnrModBase* mZRnrModBase;
+  RnrMod*      mRnrMod;
 
 public:
   ZRnrModBase_GL_Rnr(ZRnrModBase* idol) :

@@ -96,4 +96,29 @@ public:
   lRnrElement_t& operator[](int i) { return fScheme[i]; }
 }; // endclass RnrScheme
 
+/**************************************************************************/
+// RnrMod & RnrModStore
+/**************************************************************************/
+
+struct RnrMod {
+  ZGlass*     fLens;
+  A_Rnr*      fRnr;
+  TimeStamp_t fTringTS;
+
+  RnrMod(ZGlass* l=0, A_Rnr* r=0, TimeStamp_t ts=0) :
+    fLens(l), fRnr(r), fTringTS(ts) {}
+};
+
+struct RnrModStore {
+  FID_t	fFid;
+  RnrMod*     fRnrMod;
+  TimeStamp_t fTringTS;
+
+  RnrModStore(FID_t f) : fFid(f), fRnrMod(0), fTringTS(0) {}
+
+  ZGlass* lens() { return fRnrMod->fLens; }
+  A_Rnr*  rnr()  { return fRnrMod->fRnr; }
+};
+
+
 #endif

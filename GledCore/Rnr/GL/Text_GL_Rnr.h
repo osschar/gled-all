@@ -9,18 +9,19 @@
 
 #include <Glasses/Text.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
-#include <RnrBase/RnrDriver.h>
 
 class Text_GL_Rnr : public ZNode_GL_Rnr {
 private:
   void _init();
 
 protected:
-  Text*	             mText;
-  RnrDriver::RnrMod* mFontRM;
+  Text*	      mText;
+  RnrModStore mFontRMS;
 
 public:
-  Text_GL_Rnr(Text* idol) : ZNode_GL_Rnr(idol), mText(idol) { _init(); }
+  Text_GL_Rnr(Text* idol) : ZNode_GL_Rnr(idol),
+			    mText(idol), mFontRMS(ZRlFont::FID())
+  { _init(); }
 
   virtual void Draw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);

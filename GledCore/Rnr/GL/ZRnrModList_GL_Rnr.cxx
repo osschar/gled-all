@@ -35,7 +35,7 @@ void ZRnrModList_GL_Rnr::PreDraw(RnrDriver* rd)
 void ZRnrModList_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   OS::lpZGlassImg_t* imgs = fImg->GetElementImgs();
-  for(OS::lpZGlassImg_i img=imgs->begin(); img!=imgs->end(); ++img)
+  for(OS::lpZGlassImg_ri img=imgs->rbegin(); img!=imgs->rend(); ++img)
     rd->GetRnr(*img)->PostDraw(rd);  
   PARENT::PostDraw(rd);
 }

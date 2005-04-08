@@ -61,3 +61,15 @@ void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 
 void ZGlass_GL_Rnr::Render(RnrDriver* rd)
 {}
+
+/**************************************************************************/
+
+void ZGlass_GL_Rnr::obtain_rnrmod(RnrDriver* rd, RnrModStore& rms)
+{
+  RnrMod* rm = rd->GetRnrMod(rms.fFid);
+  if(rm != rms.fRnrMod || rm->fTringTS > rms.fTringTS) {
+    bRebuildDL   = true;
+    rms.fRnrMod  = rm;
+    rms.fTringTS = rm->fTringTS;
+  }
+}

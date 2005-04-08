@@ -23,6 +23,8 @@ protected:
   bool          bUseNameStack;
   bool		bSuppressNameLabel;
 
+  void obtain_rnrmod(RnrDriver* rd, RnrModStore& rms);
+
 public:
   ZGlass_GL_Rnr(ZGlass* d=0);
   virtual ~ZGlass_GL_Rnr();
