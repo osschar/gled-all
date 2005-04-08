@@ -11,6 +11,7 @@
 
 #include "GuiPupilInfo.h"
 #include "GuiPupilInfo.c7"
+#include <Glasses/ZQueen.h>
 
 ClassImp(GuiPupilInfo)
 
@@ -28,5 +29,13 @@ void GuiPupilInfo::_init()
 
 /**************************************************************************/
 
+void GuiPupilInfo::AssertDefaultPupil()
+{
+  if(mPupil == 0) {
+    PupilInfo* p = new PupilInfo("Swallowed Pupil", GForm("Pupil of %s", GetName()));
+    mQueen->CheckIn(p);
+    SetPupil(p);
+  }
+}
 
 /**************************************************************************/
