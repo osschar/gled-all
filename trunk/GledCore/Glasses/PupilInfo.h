@@ -74,6 +74,7 @@ protected:
   Float_t	mCHSize;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>4)
 
   Bool_t	bShowRPS;	// X{gS} 7 Bool(-join=>1)
+  Bool_t	bShowView;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bRnrNames;	// X{gS} 7 Bool()
 
   UInt_t	mBuffSize;	// X{gS} 7 Value(-range=>[0,65535,1,1])

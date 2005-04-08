@@ -728,6 +728,31 @@ void Pupil::draw()
     ZColor col = ZColor(1,1,1) - mInfo->RefClearColor();
     GLTextNS::RnrTextAt(mDriver, text, 2, 0, 1e-3, &col, 0);
   }
+  if(mInfo->GetShowView() == true) {
+    const char* base = "<null>";
+    if(mInfo->GetCameraBase()) base = mInfo->GetCameraBase()->GetName();
+    const char *mode, *zstr; float zval;
+    if(mInfo->GetProjMode() == PupilInfo::P_Perspective) {
+      mode = "persp"; zstr = "zfov"; zval = mInfo->GetZFov();
+    } else {
+      mode = "orto"; zstr = "zsize"; zval = mInfo->GetZSize();
+    }
+    ZTrans& z( mCamAbsTrans );
+    int omw = int(mInfo->GetMoveOM()) - 2;
+    omw = (omw < 0) ? -omw : 0;
+
+    const string text1
+      (GForm("mode='%s' %s=%.2f clip=(%.3f,%.3f)",
+	     mode, zstr, zval,
+	     mInfo->GetNearClip(), mInfo->GetFarClip()));
+    const string text2
+      (GForm("base='%1$s' pos=(%2$.*5$f,%3$.*5$f,%4$.*5$f)",
+	     base, z(1,4), z(2,4), z(3,4), omw));
+
+    ZColor col = ZColor(1,1,1) - mInfo->RefClearColor();
+    GLTextNS::RnrTextAt(mDriver, text1, -2, 0, 1e-3, &col, 0);
+    GLTextNS::RnrTextAt(mDriver, text2, -2, 1, 1e-3, &col, 0);
+  }
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
