@@ -1,3 +1,134 @@
+2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZFireQueen.cxx:
+	Create 'Etc' directory on bootstrap.
+
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZIdentity.h:
+	* Glasses/ZSunQueen.cxx:
+	Type fix: ZIdentity::mActiveMMEs changed to mActiveMEEs.
+	MEE ~ Mir Emitting Entity.
+
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	Added methods for creation of sub-directories (AssertPath()) and
+	insertion of lenses into sub-directories (Swallow(), to be used
+	for configuration-entry registration during
+	start-up). Copy-methods now return the TimeStamp.
+
+	* Gled/Gled.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	Removed MTWLayout handling.
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Added functions 'string join_strings(const string& sep, lStr_t&
+	list)' and 'void remove_whitespace(string& s)'.
+
+	* Eye/Eye.h:
+	Removed data member mQueen; was not used anywhere.
+
+	* Eye/FTW.cxx:
+	Added check for image existence in NameButton::handle().
+
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Branch.h:
+	Added timestamp of FTW::Leoim creation; leoim list is only created
+	when the branch is expanded.
+
+	* Eye/FTW_Nest.cxx:
+	* Glasses/NestInfo.cxx:
+	* Glasses/NestInfo.h:
+	Custom-layout handling now goes via lens-directory mechanism.
+
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	Window-size and text-message handling improved. FTW_Shell now
+	provides directory-entry search with fallback to his queen and
+	fire_queen. 'Etc' directory is created ad enlightenment.
+
+	* macros/eye.C:
+	Use new nest-layout registration mechanism.
+
+	* Eye/FltkGledStuff.cxx:
+	* Eye/FltkGledStuff.h:
+	LensChoiceMenuBox extended to also take lens-directory-path as a
+	fall-back when the source of the menu-config-list is empty.
+
+	* Eye/GuiPupil.cxx:
+	* Glasses/GuiPupilInfo.cxx:
+	* Glasses/GuiPupilInfo.h:
+	Improved handling of low-level pupil.
+
+	* Eye/MTW_Layout.cxx:
+	Remove white-space from the layout string prior to parsing.
+
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	Added Labelofy() method; UpdateXYZ() methods no longer assume a
+	single sub-view for a given glass.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Fullscreen handling extended to also work in a swallowed-window
+	mode.
+
+	* Stones/ZColor.h:
+	Added rgb_to_ubyte() method.
+
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+	* Rnr/GL/TubeTvor_GL_Rnr.cxx:
+	Use UChar_t (instead of Float_t) for color-arrays. What was i
+	thinking?
+
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/Text_GL_Rnr.h:
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.h:
+	* Rnr/GL/ZRnrModList_GL_Rnr.cxx:
+	* RnrBase/A_Rnr.h:
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	RnrMod moved out of RnrDriver (to A_Rnr.h); RnrModStore introduced
+	to allow timestamp-based tracking of rnrmod changes in
+	'rnrmod-consumers'. This is most likely the final design of rnrmod
+	infrastructure.
+
+	* Makefile:
+	Added stuff for RegExp compilation and registration.
+
+	* Readme_GledCore:
+	Mention origin of RegExp and GledView/GLTextNS.
+
+	* Eye/MTW_SubView.cxx:
+	* Eye/OptoStructs.h:
+	* Glasses/PupilInfo.h:
+	Minor changes.
+
+	* RegExp/Makefile:
+	* RegExp/pcre.h:
+	* RegExp/pcre/chartables.c:
+	* RegExp/pcre/config.h:
+	* RegExp/pcre/get.c:
+	* RegExp/pcre/internal.h:
+	* RegExp/pcre/pcre.c:
+	* RegExp/pcre/study.c:
+	* RegExp/pme.h:
+	* RegExp/pme/config.h:
+	* RegExp/pme/pme.cpp:
+	New files; stripped down import of PCRE-5.0 and PME-1.0.3.
+
 2005-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/OptoStructs.cxx:
