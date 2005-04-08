@@ -95,6 +95,7 @@ void* Saturn::tl_SaturnFdSucker(Saturn *s)
 
   _server_startup_cond.Lock();
   _server_startup_cond.Signal();
+  _server_startup_cond.Wait();
   _server_startup_cond.Unlock();
   // Perhaps should install some exit-foo ... to close sockets ...
   while(1) {
@@ -382,6 +383,8 @@ void Saturn::Create(SaturnInfo* si)
 {
   // Spawns SunAbsolute and starts internal Saturn threads.
 
+  static const string _eh("Saturn::Create ");
+
   mSunInfo = mSaturnInfo = si;
   mSaturnInfo->hSocket = 0; // No masters above me
   bSunAbsolute = true;
@@ -400,7 +403,7 @@ void Saturn::Create(SaturnInfo* si)
   mSunQueen->mSunInfo = mSaturnInfo;
   mSaturnInfo->create_lists();
 
-  if(start_shooters() || start_server()) {
+  if(start_server() || start_shooters()) {
     exit(1);
   }
 
@@ -411,9 +414,14 @@ void Saturn::Create(SaturnInfo* si)
     mSunQueen->attach_primary_identity(mSaturnInfo);
   }
   catch(string exc) {
-    cerr <<"Saturn::Create exception: "<< exc <<endl;
+    cerr << _eh + "exception: "<< exc <<endl;
     exit(1);
   }
+
+  // Allow server thread to accept connections:
+  _server_startup_cond.Lock();
+  _server_startup_cond.Signal();
+  _server_startup_cond.Unlock();
 }
 
 SaturnInfo* Saturn::Connect(SaturnInfo* si)
@@ -517,7 +525,7 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
   mSelector.fRead[sock->GetDescriptor()] = (void*)sock;
   //sock->SetOption(kNoBlock, 1);
 
-  if(start_shooters() || start_server()) {
+  if(start_server() || start_shooters()) {
     exit(1);
   }
 
@@ -538,6 +546,10 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     }
   }
   
+  // Allow server thread to accept connections:
+  _server_startup_cond.Lock();
+  _server_startup_cond.Signal();
+  _server_startup_cond.Unlock();
 
   return mSaturnInfo;
 }
@@ -1922,25 +1934,28 @@ void Saturn::DeliverTextMessage(EyeInfo* eye, TextMessage& tm)
 
 int Saturn::start_server()
 {
+  static const string _eh("Saturn::start_server ");
+
   mServerSocket = new TServerSocket(mSaturnInfo->GetServerPort(), kTRUE, 4);
   if( !mServerSocket->IsValid() ) {
     int err = 10 - mServerSocket->GetErrorCode();
-    ISerr("Saturn::start_server Can't create ServerSocket ... Dying");
+    ISerr(_eh +"can't create server socket ... dying.");
     return err;
   }
   mSelector.fRead[mServerSocket->GetDescriptor()] = (void*)mServerSocket;
-  ISdebug(2, GForm("Saturn::start_server starting server, port=%d",
+  ISdebug(2, GForm("%sstarting server, port=%d", _eh.c_str(),
 		   mSaturnInfo->GetServerPort()));
   
   mServerThread = new GThread((GThread_foo)tl_SaturnFdSucker, this, false);
   _server_startup_cond.Lock();
   if( mServerThread->Spawn() ) {
-    ISerr(GForm("Saturn::start_server Can't create server thread ... dying. errno=%d", errno));
+    ISerr(GForm("%scan't create server thread ... dying. errno=%d",
+		_eh.c_str(), errno));
     return 1;
   }
   _server_startup_cond.Wait();
   _server_startup_cond.Unlock();
-  ISdebug(2, "Saturn::start_server Started Server thread");
+  ISdebug(2, _eh + "started server thread.");
   return 0;
 }
 
