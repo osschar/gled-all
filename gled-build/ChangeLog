@@ -1,3 +1,14 @@
+2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Added handling of Stamp pragma; added string to a list of basic
+	types.
+
+	* make/make_base.inc:
+	Added LIBSET_PREREQS variable as a first dependency of the default
+	target: by setting it to some target, libsets can build something
+	prior to libraries themselves.
+
 2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:

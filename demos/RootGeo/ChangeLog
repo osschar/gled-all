@@ -1,3 +1,8 @@
+2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* common_foos.C:
+	Use new registration of nest-layouts.
+
 2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* common_foos.C:
