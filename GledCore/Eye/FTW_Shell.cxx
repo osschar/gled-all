@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include <Glasses/ZQueen.h>
+#include <Glasses/ZFireQueen.h>
 #include <Ephra/Saturn.h>
 #include <Gled/GledNS.h>
 #include <GledView/GledGUI.h>
@@ -86,13 +87,12 @@ namespace {
   // Configs
   /**************************************************************************/
 
-  int def_W = 80;
-  int def_H = 16;
-
   int min_W = 30;
-  int max_W = 240;
-  int min_H = 16;
-  int max_H = 120;
+  int max_W = 512;
+  int max_H = 256;
+
+  int min_H = 9;
+  int min_canvas_H = 6;
 
   string _meth_no_cat(" method not found in catalog");
 
@@ -159,7 +159,7 @@ namespace {
 FTW_Shell::FTW_Shell(TSocket* sock, EyeInfo* ei, const Fl_SWM_Manager* swm_copy) :
   Eye(sock, ei),
   OS::A_View(0),
-  Fl_Window(def_W, 2 + 6 + 1 + 20 + 1 + 8 + 1 + 1),
+  Fl_Window(1, 1),
   Fl_SWM_Manager(swm_copy), Fl_SWM_Client()
 {
   mSubShellCount = 0;
@@ -174,6 +174,12 @@ FTW_Shell::~FTW_Shell()
 
 void FTW_Shell::_bootstrap()
 {
+  int def_w        = mShellInfo->GetDefW();
+  int def_sshell_h = mShellInfo->GetDefSShellH();
+  int msgout_h     = mShellInfo->GetMsgOutH();
+
+  size(def_w, 7 + def_sshell_h + 2 + msgout_h);
+
   begin();
 
   wMainPack = new Fl_Pack(0, 0, w(), h());
@@ -207,27 +213,59 @@ void FTW_Shell::_bootstrap()
   nest_pre->labelfont(nest_pre->labelfont() + FL_BOLD);
   nest_pre->color(fl_rgb_color(200,220,200));
 
-  mEmptyCanvas = new Fl_Window(0, 7, def_W, 22);
+  mEmptyCanvas = new Fl_Window(0, 7, w(), def_sshell_h);
   mEmptyCanvas->end();
   mCurCanvas = mEmptyCanvas;
 
-  // Message Output
+  // Message Input/Output
 
-  new FGS::PackEntryCollapsor("Message output:");
+  // new FGS::PackEntryCollapsor("Message input/output:");
+  {
+    wMsgPack = new Fl_Pack(0, 0, w(), msgout_h + 2);
+    wMsgPack->type(FL_VERTICAL);
+    { // Top matter
+      Fl_Group* inpp = new Fl_Group(0, 0, w(), 1);
 
-  wOutPack = new Fl_OutputPack(0,0,w(),8);
-  //wOutPack->base_size_mod(-1);
-  wOutPack->base_skip_mod(-4);
-  wOutPack->bg_color((Fl_Color)0x20202000);
-  wOutPack->fg_color((Fl_Color)0xf0f0f000);
+      Fl_Box* msg_pre = new Fl_Box(FTW::separator_box,0,0,14,1,
+				   "Message input/output:");
+      msg_pre->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+      msg_pre->labelfont(msg_pre->labelfont() + FL_BOLD);
+      msg_pre->color(fl_rgb_color(200,220,200));
 
-  // Message Input
+      Fl_Group::current(0);
+      MTW_Layout lout(0);
+      Fl_Group::current(inpp);
+      MTW_View* mtw = new MTW_View(fImg, this);
+      lout.GetLaySpecs()->value("ShellInfo(MessageRecipient[16],MsgOutH)");
+      lout.Parse(cell_w());
+      mtw->BuildByLayout(&lout);
+      mtw->Labelofy();
+      mtw->position(msg_pre->w(), 0);
 
-  new FGS::PackEntryCollapsor("Message input:");
+      Fl_Widget* o = mtw;
+      int xbeg = o->x() + o->w();
+      Fl_Box* xb = new Fl_Box(FTW::separator_box, xbeg, 0, w()-xbeg, 1, "");
+      printf("%d %d\n", xbeg, w());
+      xb->color(fl_rgb_color(200,220,200));
 
-  Fl_Input* flinp = new Fl_Input(0,0,w(),1);
-  flinp->callback((Fl_Callback*)msg_send_cb, this);
-  flinp->when(FL_WHEN_ENTER_KEY_ALWAYS);
+      inpp->end();
+      inpp->resizable(xb);    
+    }
+    { // Output
+      wOutPack = new Fl_OutputPack(0, 0, w(), msgout_h);
+      //wOutPack->base_size_mod(-1);
+      wOutPack->base_skip_mod(-4);
+      wOutPack->bg_color((Fl_Color)0x20202000);
+      wOutPack->fg_color((Fl_Color)0xf0f0f000);
+    }
+    { // Input
+      Fl_Input* flinp = new Fl_Input(0,0,w(),1);
+      flinp->callback((Fl_Callback*)msg_send_cb, this);
+      flinp->when(FL_WHEN_ENTER_KEY_ALWAYS);
+    }
+    wMsgPack->end();
+    wMsgPack->resizable(0);
+  }
 
   wMainPack->end();
   end();
@@ -235,7 +273,8 @@ void FTW_Shell::_bootstrap()
   wMainPack->resizable(mCurCanvas);
   resizable(wMainPack);
 
-  swm_size_range = new SWM_Size_Range(min_W, min_H, max_W, max_H);
+  swm_size_range = new SWM_Size_Range(min_W, min_H + min_canvas_H + wOutPack->h(),
+				      max_W, max_H);
   adopt_window(this);
 
   label_shell();
@@ -288,11 +327,18 @@ void FTW_Shell::AbsorbRay(Ray& ray)
     return;
   }
 
+  /*
+  if(ray.fRQN == RayNS::RQN_link_change) {
+    if(wMsgRecipient->NeedsUpdate()) {
+      wMsgRecipient->Update();
+    }
+    return;
+  }
+  */
+
   if(ray.fFID == ShellInfo::FID()) {
 
     switch (ray.fRQN) {
-
-      // here missing triangulation check for resize.
 
     case ShellInfo::PRQN_set_def_subshell:
       set_canvased_subshell(ray.fBetaImg);
@@ -306,9 +352,47 @@ void FTW_Shell::AbsorbRay(Ray& ray)
       kill_subshell(ray.fBetaImg);
       break;
 
+    case ShellInfo::PRQN_resize_window: {
+      int cmoh = wOutPack->h()/cell_h();
+      int nmoh = mShellInfo->GetMsgOutH();
+      int delta = nmoh - cmoh;
+      // printf("cur=%d new=%d delta=%d\n", cmoh, nmoh, delta);
+      if(delta != 0) {
+	int cch = mCurCanvas->h()/cell_h();
+	if(cch - delta < min_canvas_H) {
+	  size(w(), h() + (min_canvas_H - cch + delta)*cell_h());
+	}
+	
+	mCurCanvas->size(w(), mCurCanvas->h() - delta*cell_h());
+	wOutPack->size(w(),   wOutPack->h()   + delta*cell_h());
+	wMainPack->init_sizes();
+	wMainPack->resizable(mCurCanvas);
+	wMsgPack->init_sizes();
+	set_size_range();
+	redraw();
+      }
+      break;
+    }
+
     }
 
   }
+}
+
+/**************************************************************************/
+
+OS::ZGlassImg* FTW_Shell::SearchConfigEntry(const string& name)
+{
+  ZGlass* res = 0;
+  try {
+    res = mShellInfo->FindLensByPath(name);
+    if(res == 0) res = mShellInfo->GetQueen()->FindLensByPath(name);
+    if(res == 0) res = mSaturn->GetFireQueen()->FindLensByPath(name);
+  }
+  catch(string exc) {
+    return 0;
+  }
+  return DemanglePtr(res);
 }
 
 /**************************************************************************/
@@ -660,16 +744,14 @@ void FTW_Shell::Y_SendMessage(const char* msg)
   static string _eh("FTW_Shell::Y_SendMessage ");
 
   // Need recipient FGS::LensNameBox ...
-  /*
-  FTW::Locator& tgt = *mNest->RefTargetLoc();
-  if(!tgt.has_contents())	throw(_eh + "target has no contents");
-  EyeInfo* ei = dynamic_cast<EyeInfo*>(tgt.get_glass());
-  if(!ei)	throw(_eh + "target is not of class EyeInfo");
-
-  auto_ptr<ZMIR> mir( ei->S_Message(msg) );
-  mir->SetRecipient(ei->GetMaster());
-  Send(*mir);
-  */
+  ZMirEmittingEntity* mee = mShellInfo->GetMessageRecipient();
+  if(mee) {
+    auto_ptr<ZMIR> mir( mee->S_Message(msg) );
+    mir->SetRecipient(mee->HostingSaturn());
+    Send(*mir);
+  } else {
+    Message(_eh + "MessageRecipient is not set.", MT_err);
+  }
 }
 
 /**************************************************************************/
@@ -969,4 +1051,12 @@ void FTW_Shell::label_shell()
   label(GForm("shell: %s; eye: %s", mShellInfo->GetName(),
 	                            GetEyeInfo()->GetName()) );
   redraw();
+}
+
+void FTW_Shell::set_size_range()
+{
+  SWM_Size_Range& s = *swm_size_range;
+  s.hl = min_H + min_canvas_H + wOutPack->h()/cell_h();
+  int nw=cell_w(), nh=cell_h();
+  size_range(nw*s.wl, nh*s.hl, nw*s.wh, nh*s.hh, nw*s.dwf, nh*s.dhf);
 }
