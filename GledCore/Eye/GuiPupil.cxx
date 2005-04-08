@@ -32,6 +32,7 @@ GuiPupil* GuiPupil::Create_GuiPupil(FTW_Shell* sh, OS::ZGlassImg* img)
 
   GuiPupilInfo* ni = dynamic_cast<GuiPupilInfo*>(img->fGlass);
   if(ni == 0) throw(_eh + "user-data is not GuiPupilInfo.");
+  if(ni->GetPupil() == 0) throw(_eh + "link 'Pupil' must be set.");
 
   GuiPupil* guipupil = new GuiPupil(sh, img);
   

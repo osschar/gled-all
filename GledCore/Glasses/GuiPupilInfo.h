@@ -24,6 +24,7 @@ public:
   GuiPupilInfo(const Text_t* n="GuiPupilInfo", const Text_t* t=0) :
     SubShellInfo(n,t) { _init(); }
 
+  void AssertDefaultPupil(); // X{E} 7 MButt()
 
 #include "GuiPupilInfo.h7"
   ClassDef(GuiPupilInfo, 1)
