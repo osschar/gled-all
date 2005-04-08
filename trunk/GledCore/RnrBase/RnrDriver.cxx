@@ -30,7 +30,7 @@ RnrDriver::RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r)
   mMaxDepth = 100;
   mMaxLamps = 8;
   mLamps = new (A_Rnr*)[mMaxLamps];
-  bRnrNames = false;
+  bMarkupNodes = false;
 
   mEye->RegisterImageConsumer(this);
 }

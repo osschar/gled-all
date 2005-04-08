@@ -18,15 +18,15 @@ void ZRlNameRnrCtrl_GL_Rnr::_init()
 
 void ZRlNameRnrCtrl_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  bExState = rd->GetRnrNames();
+  bExState = rd->GetMarkupNodes();
   switch(mZRlNameRnrCtrl->mNameRnrOp) {
   case ZRnrModBase::O_On:
     ConsiderRebuildDL(rd);
     rd->PushRnrMod(ZRlNameRnrCtrl::FID(), mRnrMod);
-    rd->SetRnrNames(true);
+    rd->SetMarkupNodes(true);
     break;
   case ZRnrModBase::O_Off:
-    rd->SetRnrNames(false);
+    rd->SetMarkupNodes(false);
     break;
   case ZRnrModBase::O_Nop:
     break;
@@ -39,10 +39,10 @@ void ZRlNameRnrCtrl_GL_Rnr::Draw(RnrDriver* rd)
   case ZRnrModBase::O_On:
     ConsiderRebuildDL(rd);
     rd->SetDefRnrMod(ZRlNameRnrCtrl::FID(), mRnrMod);
-    rd->SetRnrNames(true);
+    rd->SetMarkupNodes(true);
     break;
   case ZRnrModBase::O_Off:
-    rd->SetRnrNames(false);
+    rd->SetMarkupNodes(false);
     break;
   case ZRnrModBase::O_Nop:
     break;
@@ -54,10 +54,10 @@ void ZRlNameRnrCtrl_GL_Rnr::PostDraw(RnrDriver* rd)
   switch(mZRlNameRnrCtrl->mNameRnrOp) {
   case ZRnrModBase::O_On:
     rd->PopRnrMod(ZRlNameRnrCtrl::FID());
-    rd->SetRnrNames(bExState);
+    rd->SetMarkupNodes(bExState);
     break;
   case ZRnrModBase::O_Off:
-    rd->SetRnrNames(bExState);
+    rd->SetMarkupNodes(bExState);
     break;
   case ZRnrModBase::O_Nop:
     break;

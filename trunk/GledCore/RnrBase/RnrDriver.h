@@ -42,7 +42,7 @@ protected:
   Int_t		mMaxLamps;	// X{g}
   A_Rnr**	mLamps;
   
-  Bool_t        bRnrNames;	 // X{gs}
+  Bool_t        bMarkupNodes;	 // X{gs}
 
   Int_t		mWidth;		 // X{gs}
   Int_t		mHeight;	 // X{gs}

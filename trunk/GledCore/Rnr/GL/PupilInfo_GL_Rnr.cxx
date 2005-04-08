@@ -40,8 +40,8 @@ void PupilInfo_GL_Rnr::PreDraw(RnrDriver* rd)
   rd->CleanUpRnrModDefaults();
   // Default font
   rd->SetDefRnrMod(ZRlFont::FID(), &font_rnrmod);
-  // Default name-rendering on/off
-  rd->SetRnrNames(mPupilInfo->GetRnrNames());
+  // Default node markup: name-rendering on/off
+  rd->SetMarkupNodes(mPupilInfo->GetRnrNames());
 }
 
 void PupilInfo_GL_Rnr::Draw(RnrDriver* rd)

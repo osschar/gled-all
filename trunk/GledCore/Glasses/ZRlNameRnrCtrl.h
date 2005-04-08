@@ -21,6 +21,8 @@ protected:
   ZRnrModBase::Operation_e
                 mNameRnrOp;   // X{GS}   7 PhonyEnum()
 
+  Bool_t	bRnrAxes;     // X{GS}   7 Bool(-join=>1)
+  Bool_t	bRnrNames;    // X{GS}   7 Bool()
   Bool_t	bRnrTiles;    // X{GS}   7 Bool(-join=>1)
   Bool_t	bRnrFrames;   // X{GS}   7 Bool()
   Float_t	mNameOffset;  // X{GS}   7 Value(-range=>[0,1,1,10000])
