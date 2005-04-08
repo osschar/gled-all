@@ -60,7 +60,7 @@ void PupilInfo::_init()
 
   mCHSize = 0.03;
 
-  bShowRPS = true; bRnrNames = false;
+  bShowRPS = true; bShowView = true; bRnrNames = false;
 
   mBuffSize = 4096; mPickR = 5; mPickDisp = 0;
 
