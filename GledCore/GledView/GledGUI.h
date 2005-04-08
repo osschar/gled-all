@@ -86,10 +86,6 @@ public:
 
   static GledGUI* theOne;
 
-  // Misc
-
-  virtual void AddMTWLayout(const char* name, const char* layout);
-
 #include "GledGUI.h7"
 }; // endclass GledGUI
 

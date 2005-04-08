@@ -510,16 +510,3 @@ int GledGUI::handle(int ev)
   }
   return Fl_Window::handle(ev);
 }
-
-/**************************************************************************/
-// Misc
-/**************************************************************************/
-
-void GledGUI::AddMTWLayout(const char* name, const char* layout)
-{
-  if(name == 0 || layout == 0) {
-    ISerr(GForm("GledGUI::AddMTWLayout got zero argument; ignoring."));
-    return;
-  }
-  GledViewNS::mtw_layouts.push_back(GledViewNS::MTW_Layout_Spec(name, layout));
-}
