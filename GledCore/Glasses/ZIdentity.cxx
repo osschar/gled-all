@@ -21,7 +21,7 @@ ClassImp(ZIdentity)
 void ZIdentity::_init()
 {
   mGlassBits |= ZGlassBits::kFixedName;
-  mActiveMMEs = 0;
+  mActiveMEEs = 0;
   mAllowThis = 0;
 }
 
@@ -30,10 +30,10 @@ void ZIdentity::_init()
 void ZIdentity::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
-  if(mActiveMMEs == 0) {
-    mActiveMMEs = new ZHashList("ActiveMMEs", GForm("ActiveMMEs of %s", GetName()));
-    mActiveMMEs->SetElementFID(ZMirEmittingEntity::FID());
-    mQueen->CheckIn(mActiveMMEs);
+  if(mActiveMEEs == 0) {
+    mActiveMEEs = new ZHashList("ActiveMEEs", GForm("ActiveMEEs of %s", GetName()));
+    mActiveMEEs->SetElementFID(ZMirEmittingEntity::FID());
+    mQueen->CheckIn(mActiveMEEs);
   }
 }
 
