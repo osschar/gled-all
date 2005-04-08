@@ -179,17 +179,19 @@ namespace FltkGledStuff {
     string                   mSrcLinkName;
     OptoStructs::ZLinkDatum* mSrcLinkDatum;
     FID_t                    mSrcFid;
+    string                   mSrcConfigPath;
 
     GledNS::MethodInfo*      mMInfo;
 
-    ZList* get_src_list();
+    void   fill_menu(ZList* list, Fl_Menu_Button& menu, string prefix);
+    ZList* get_src_list(FTW_Shell* shell);
 
   public:
     LensChoiceMenuBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
 
     virtual void AbsorbRay(Ray& ray);
 
-    void EmitMir(ZGlass* beta);
+    void EmitMir(ID_t beta_id);
 
     void SetSrcImg(OptoStructs::ZGlassImg* i)
     { mSrcLinkDatum = 0; SetImg(i); }
@@ -197,6 +199,9 @@ namespace FltkGledStuff {
     { mSrcLinkDatum = 0; mSrcLinkName = n ? n : ""; }
     void SetSrcFid(FID_t fid)
     { mSrcFid = fid; }
+
+    void SetSrcConfigPath(const char* n)
+    { mSrcConfigPath = n; }
 
     void SetMethodInfo(GledNS::MethodInfo* mi) { mMInfo = mi; }
 

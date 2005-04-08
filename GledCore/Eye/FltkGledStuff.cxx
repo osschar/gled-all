@@ -196,15 +196,24 @@ void FGS::LensNameBox::auto_label()
 
 void FGS::LensNameBox::draw()
 {
+  static const string _eh("LensNameBox::draw ");
+
   draw_box();
-  draw_label();
+
+  string text;
+  if(align() & FL_ALIGN_INSIDE) {
+    text = GForm("%s: %s", label(), mToName.c_str());
+  } else {
+    text = mToName;
+    draw_label();
+  }
 
   int X = x() + Fl::box_dx(box()) + 3, Y = y() + Fl::box_dy(box());
   int W = w() - Fl::box_dw(box()) - 3, H = h() - Fl::box_dh(box());
   fl_color(FL_BLACK);
   fl_font(labelfont(), labelsize());
   fl_push_clip(X, Y, W, H);
-  fl_draw(mToName.c_str(), X, Y, W, H, FL_ALIGN_LEFT, 0, 0);
+  fl_draw(text.c_str(), X, Y, W, H, FL_ALIGN_LEFT, 0, 0);
   fl_pop_clip();	
 }
 
@@ -307,6 +316,7 @@ void FGS::LensRepNameBox::ImagePasted(OS::ZGlassImg* new_img)
 {
   FTW_Shell *shell = grep_shell(parent());
   if(shell->GetSource()->has_contents()) {
+    // Here missing FID check.
     GNS::MethodInfo* cmi = fImg->fClassInfo->FindMethodInfo("Add", true);
     if(cmi) {
       auto_ptr<ZMIR> mir (shell->GetSource()->generate_MIR(cmi, fImg->fGlass));
@@ -322,6 +332,9 @@ void FGS::LensRepNameBox::ImagePasted(OS::ZGlassImg* new_img)
 FGS::LinkNameBox::LinkNameBox(OS::ZLinkDatum* ld, int x, int y, int w, int h, const char* t) :
   OS::ZLinkView(ld), LensNameBox(ld->GetToImg(),x,y,w,h,t)
 {
+  box(FL_UP_BOX);
+  color(fl_rgb_color(200, 200, 220));
+
   Update();
 }
 
@@ -439,13 +452,12 @@ void FGS::LensChoiceMenuBox::AbsorbRay(Ray& ray)
   }
 }
 
-void FGS::LensChoiceMenuBox::EmitMir(ZGlass* beta)
+void FGS::LensChoiceMenuBox::EmitMir(ID_t beta_id)
 {
   static const string _eh("LensChoiceMenuBox::EmitMir ");
 
   FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
-  auto_ptr<ZMIR> mir( new ZMIR(mAlphaImg->fGlass->GetSaturnID(),
-			       beta->GetSaturnID()) );
+  auto_ptr<ZMIR> mir( new ZMIR(mAlphaImg->fGlass->GetSaturnID(), beta_id) );
   mMInfo->ImprintMir(*mir);
   mMInfo->FixMirBits(*mir, shell->GetSaturnInfo());
   shell->Send(*mir);
@@ -454,8 +466,28 @@ void FGS::LensChoiceMenuBox::EmitMir(ZGlass* beta)
 /**************************************************************************/
 
 namespace {
-  void lcmb_select_cb(Fl_Menu_Button* m, ZGlass* ud)
-  { ((FGS::LensChoiceMenuBox*)m->user_data())->EmitMir(ud); }
+  void lcmb_select_cb(Fl_Menu_Button* m, void* ud)
+  { ((FGS::LensChoiceMenuBox*)m->user_data())->EmitMir((ID_t)ud); }
+}
+
+void FGS::LensChoiceMenuBox::fill_menu(ZList* list, Fl_Menu_Button& menu,
+				       string prefix)
+{
+  lpZGlass_t l; list->Copy(l);
+  for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
+
+    string name    = prefix + (*i)->GetName();
+    ZList* clist   = dynamic_cast<ZList*>(*i);
+    bool   list_ok = clist && clist->Size();
+
+    if(GledNS::IsA(*i, mSrcFid)) {
+      menu.add(name.c_str(), 0, (Fl_Callback*)lcmb_select_cb,
+	       (void*)((*i)->GetSaturnID()), list_ok ? FL_SUBMENU : 0);
+    }
+    if(list_ok) {
+      fill_menu(clist, menu, name + "/");
+    }
+  }
 }
 
 int FGS::LensChoiceMenuBox::handle(int ev)
@@ -465,22 +497,17 @@ int FGS::LensChoiceMenuBox::handle(int ev)
   if(ev == FL_PUSH && Fl::event_button() == 1) {
     if(mMInfo == 0) return 0;
 
-    ZList* zlist = get_src_list();
-    if(zlist == 0) return 0;
-
     FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
+
+    ZList* zlist = get_src_list(shell);
+    if(zlist == 0) return 0;
 
     Fl_Menu_Button m(x(), y(), w(), h() - Fl::box_dh(box()));
     m.parent(parent());
     m.user_data(this);
     m.textsize(shell->cell_fontsize());
 
-    lpZGlass_t l; zlist->Copy(l);
-    for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
-      if(GledNS::IsA(*i, mSrcFid)) {
-	m.add((*i)->GetName(), 0, (Fl_Callback*)lcmb_select_cb, *i);
-      }
-    }
+    fill_menu(zlist, m, "");
 
     m.popup();
     return 1;
@@ -491,7 +518,7 @@ int FGS::LensChoiceMenuBox::handle(int ev)
 
 /**************************************************************************/
 
-ZList* FGS::LensChoiceMenuBox::get_src_list()
+ZList* FGS::LensChoiceMenuBox::get_src_list(FTW_Shell* shell)
 {
   if(fImg == 0) return 0;
 
@@ -509,6 +536,10 @@ ZList* FGS::LensChoiceMenuBox::get_src_list()
   } else {
     list_img = fImg;
   }
+  if(list_img == 0 && mSrcConfigPath.length()) {
+    list_img = shell->SearchConfigEntry(mSrcConfigPath);
+  }
+
   if(list_img && list_img->fIsList) return (ZList*)list_img->fGlass;
   return 0;
 }
