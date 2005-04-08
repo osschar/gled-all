@@ -86,7 +86,8 @@ protected:
   Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
 
 public:
-  PupilInfo(Text_t* n="PupilInfo", Text_t* t=0) : SubShellInfo(n,t) { _init(); }
+  PupilInfo(const Text_t* n="PupilInfo", const Text_t* t=0) :
+    SubShellInfo(n,t) { _init(); }
 
   void SetCameraBase(ZNode* camerabase);
   void SetLookAt(ZNode* lookat);

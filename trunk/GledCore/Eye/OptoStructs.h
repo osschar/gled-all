@@ -19,16 +19,17 @@ class MTW_View;
 namespace OptoStructs {
 
   struct ZGlassImg;
-  typedef list<ZGlassImg*>              lpZGlassImg_t;
-  typedef list<ZGlassImg*>::iterator    lpZGlassImg_i;
+  typedef list<ZGlassImg*>                   lpZGlassImg_t;
+  typedef list<ZGlassImg*>::iterator         lpZGlassImg_i;
+  typedef list<ZGlassImg*>::reverse_iterator lpZGlassImg_ri;
 
   struct A_View;
-  typedef list<A_View*>			lpA_View_t;
-  typedef list<A_View*>::iterator	lpA_View_i;
+  typedef list<A_View*>                      lpA_View_t;
+  typedef list<A_View*>::iterator            lpA_View_i;
 
   class ZLinkView;
-  typedef list<ZLinkView*>		lpZLinkView_t;
-  typedef list<ZLinkView*>::iterator	lpZLinkView_i;
+  typedef list<ZLinkView*>                   lpZLinkView_t;
+  typedef list<ZLinkView*>::iterator         lpZLinkView_i;
 
   struct ZLinkDatum;
   typedef list<ZLinkDatum>                   lZLinkDatum_t;

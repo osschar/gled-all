@@ -48,9 +48,6 @@ Fl_Widget* MTW_SubView::CreateWeed(GVNS::WeedInfo* wi)
   if(w == 0) return 0;
   if(wi->bIsLinkWeed) {
     mLinkWeeds.push_back( MTW_Weed(w, wi) );
-    // These could/should be set somewhere else.
-    w->box(FL_UP_BOX);
-    w->color(fl_rgb_color(200, 200, 220));
   } else {
     mDataWeeds.push_back( MTW_Weed(w, wi) );
   }
