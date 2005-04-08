@@ -68,6 +68,7 @@ void MTW_Layout::Parse(int cell_w) throw (string)
   lClass_t new_classes;
 
   string line(wLaySpecs->value());
+  GNS::remove_whitespace(line);
   lStr_t classes;
   GNS::split_string(line, classes, ':');
   if(classes.size()==0) throw string("got void");
