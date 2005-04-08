@@ -50,6 +50,7 @@ protected:
   void		label_window();
 
   bool		bFullScreen;
+  Fl_Window*	mFullScreenWin;
   int		mFSx, mFSy, mFSw, mFSh;
 
   bool		bDumpImage;
@@ -75,7 +76,7 @@ public:
 
   void TurnCamTowards(ZGlass* lens, Float_t max_dist);
 
-  void FullScreen();
+  void FullScreen(Fl_Window* fsw);
 
   void Render();
   OptoStructs::ZGlassImg* Pick(bool make_menu_p=false);
