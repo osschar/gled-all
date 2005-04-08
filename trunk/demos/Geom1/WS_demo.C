@@ -15,10 +15,13 @@ void WS_demo()
     gROOT->Macro("sun.C");
   }
   Gled::theOne->AssertLibSet("Geom1");
-
-  Gled::theOne->AddMTWLayout("WS_Demo/ZNode:WS_Point","ZNode(Pos[18],Rot[18]):WSPoint(*)");
-
-  Lamp  *l;
+  {
+    ZList* l = fire_queen;
+    l = l->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
+    l = l->AssertPath("WS_Demo", "ZList");
+    l->Swallow(new ZGlass("ZNode:WS_Point",
+			  "ZNode(Pos[18],Rot[18]):WSPoint(*)"));
+  }
 
   Scene* wsdemo  = new Scene("WeaverSymbol Demo Scene");
   scenes->CheckIn(wsdemo);
