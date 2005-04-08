@@ -131,29 +131,7 @@ namespace {
       break;
     }
 
-    case 3: { // Offer some predefined custom layouts; should be pluggable from outside, history !!
-      namespace GVNS = GledViewNS;
-
-      if(GVNS::mtw_layouts.empty()) {
-	nest->GetShell()->Message("No custom layouts stored.", FTW_Shell::MT_wrn);
-	break;
-      }
-
-      Fl_Menu_Button mb(Fl::event_x_root(), Fl::event_y_root(), 0,0,0);
-      mb.textsize(nest->get_swm_manager()->cell_fontsize());
-
-      for(list<GVNS::MTW_Layout_Spec>::iterator i = GVNS::mtw_layouts.begin();
-	  i!= GVNS::mtw_layouts.end(); ++i)
-	{
-	  mb.add(i->fName.c_str(), 0, 0, (void*) i->fLayout.c_str());
-	}
-      const Fl_Menu_Item* cv = mb.popup();
-      if(cv) {
-	nest->EnactLayout((char*)(cv->user_data()));
-	if(nest->GetLinksShown()) nest->CustomView();
-      }
-      break;
-    }
+    // case 3 (custom layouts)) removed
 
     case 4: { // Reverse order of ants for all leafs.
       nest->ReverseAnts();
@@ -185,7 +163,6 @@ namespace {
   Fl_Menu_Item s_View_Menu[] = {
     { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
     { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
-    { "Predef Custom ...", FL_CTRL + 'c', (Fl_Callback*) view_menu_cb, (void*)3, FL_MENU_DIVIDER },
     { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER }, 
     { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5 },
     {0}
@@ -243,6 +220,19 @@ void FTW_Nest::_build(int w, int h)
     wMenuPack->type(FL_HORIZONTAL);
 
     new FGS::MenuBox(s_View_Menu,   4, 2, "View");
+
+    {
+      FGS::LensChoiceMenuBox* view_sel = new FGS::LensChoiceMenuBox
+	(fImg, 0, 0, 6, 2, "Layouts");
+      view_sel->SetSrcImg(fImg);
+      view_sel->SetSrcLinkName("LayoutList");
+      view_sel->SetSrcFid(FID_t(0,0)); // anything goes
+      view_sel->SetSrcConfigPath(NestInfo::sLayoutPath);
+      view_sel->SetMethodInfo(fImg->fClassInfo->
+			      FindMethodInfo("ImportLayout", true));
+      view_sel->box((Fl_Boxtype)GVNS::menubar_box);
+    }
+
     new FGS::MenuBox(s_Set_Menu,    4, 2, "Set");
     new FGS::MenuBox(s_Action_Menu, 5, 2, "Action");
 
@@ -295,7 +285,7 @@ void FTW_Nest::_build(int w, int h)
     wSepBox = new Fl_Box(FTW::separator_box,0,0,1,2,0);
     wSepBox->color(FTW::separator_color);
 
-    wCustomTitle = new Fl_Box(0,0,max_W,2, "Custom Titles");
+    wCustomTitle = new Fl_Box(0,0,max_W,2, "All Links");
     wCustomTitle->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     wCustomTitle->box(FL_EMBOSSED_BOX);
 
@@ -571,12 +561,14 @@ void FTW_Nest::CustomView()
 
 void FTW_Nest::EnactLayout(const char* layout)
 {
+  static const string _eh("FTW_Nest::EnactLayout ");
+
   if(layout) { pLayout->GetLaySpecs()->value(layout); pLayout->GetLaySpecs()->redraw(); }
   try {
     pLayout->Parse(swm_manager->cell_w());
   }
   catch(string exc) {
-    cout <<"FTW_Contents_Nest::EnactLayout parse failed: " << exc <<endl;
+    mShell->Message(_eh + "parse failed: '" + exc + "'.", FTW_Shell::MT_err);
     return;
   }
 
