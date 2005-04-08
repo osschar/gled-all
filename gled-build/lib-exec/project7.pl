@@ -116,6 +116,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
     "float", "Real_t", "bool",
+    "string",
     "ID_t", "LID_t", "CID_t", "MID_t", "FID_t", "FMID_t",
     "TimeStamp_t", "UCIndex_t", "xxIndex_t"
   );
@@ -685,13 +686,20 @@ for $r (@Members) {
     if( $r->{Xport} =~ m/(S|E)/ and $IsGlass) {
       $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
       $stamp .= "mStampReqTring = " if $r->{Xport} =~ m/T/;
+      if(exists $r->{Stamp}) {
+	for $f (split(/\s*,\s*/, $r->{Stamp})) {
+	  $stamp .= "mStamp${f} = ";
+	}
+      }
+
       if(exists $r->{Link}) {
-	if($stamp) { $stamp .= "  mTimeStamp;\n"; } # Stamped in ZGlass::set_link_or_die
+	# Links are stanped in ZGlass::set_link_or_die
+	if($stamp) { $stamp = "  " . $stamp . "mTimeStamp;\n"; }
       } else {
 	if($r->{Xport} =~ m/x/) {
-	  $stamp .= "  Stamp(FID(), 0x1);\n";
+	  $stamp = "  ". $stamp ."Stamp(FID(), 0x1);\n";
 	} else {
-	  $stamp .= "  Stamp(FID());\n";
+	  $stamp = "  ". $stamp ."Stamp(FID());\n";
 	}
       }
     }
@@ -722,7 +730,7 @@ for $r (@Members) {
       }
       $post .= "\n";
     }
-    print H7 "  ${pre}${setit}${stamp}${post}}\n";
+    print H7 "${pre}${setit}${stamp}${post}}\n";
   }
 
   if( $r->{Xport} =~ m/(r|R)/ ) {
