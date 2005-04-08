@@ -20,6 +20,8 @@ ClassImp(NestInfo)
 
 /**************************************************************************/
 
+const Text_t* NestInfo::sLayoutPath = "Etc/NestLayouts";
+
 void NestInfo::_init()
 {
   // Override from SubShellInfo:
@@ -32,19 +34,31 @@ void NestInfo::_init()
   mWName   = 30; mWAnt    = 0;
   mWIndent = 2;  mWSepBox = 1;
 
+  mLayoutList = 0;
   mLeafLayout = LL_Ants;
 }
 
 /**************************************************************************/
 
-void NestInfo::EnactLayout()
+void NestInfo::ImportLayout(ZGlass* src)
 {
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, FID()));
-    mQueen->EmitRay(ray);
+  ZList* lsrc = dynamic_cast<ZList*>(src);
+  if(lsrc != 0) {
+    lStr_t     parts;
+    lpZGlass_t l; lsrc->Copy(l);
+    for(lpZGlass_i i=l.begin(); i!=l.end(); ++i)
+      parts.push_back((*i)->GetTitle());
+    mLayout = GledNS::join_strings(" : ", parts);
+    mLeafLayout = LL_Custom;
+  } else {
+    mLayout     = src->GetTitle();
+    mLeafLayout = LL_Custom;
   }
+  Stamp(FID());
+  EmitLayoutRay();
 }
+
+/**************************************************************************/
 
 void NestInfo::ImportKings()
 {
@@ -54,6 +68,15 @@ void NestInfo::ImportKings()
 }
 
 /**************************************************************************/
+
+void NestInfo::EmitLayoutRay()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, RayNS::RQN_user_1, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
+}
 
 void NestInfo::EmitRewidthRay()
 {

@@ -30,7 +30,7 @@ private:
 protected:
   // Creation parameters.
   Bool_t	bShowSelf;      // X{GS} 7 Bool(-join=>1)
-  Int_t		mMaxChildExp;	// X{GS} 7 Value(-range=>[0,1000,1])
+  UInt_t	mMaxChildExp;	// X{GS} 7 Value(-range=>[0,1000,1])
 
   // Widths of major elements.
   Int_t		mWName;   // X{GS} Ray{Rewidth} 7 Value(-range=>[18,50,1], -join=>1)
@@ -39,17 +39,22 @@ protected:
   Int_t		mWSepBox; // X{GS} Ray{Rewidth} 7 Value(-range=>[0,5,1])
 
   // Layout specification.
-  LeafLayout_e  mLeafLayout;    // X{GS} 7 PhonyEnum()
-  TString       mLayout;        // X{GS} 7 Textor()
+  ZList*	mLayoutList;	// X{GS} L{}
+  LeafLayout_e  mLeafLayout;    // X{GS} Ray{Layout} 7 PhonyEnum()
+  TString       mLayout;        // X{GS} Ray{Layout} 7 Textor()
 
 public:
   NestInfo(const Text_t* n="NestInfo", const Text_t* t=0) :
     SubShellInfo(n,t) { _init(); }
 
-  void EnactLayout(); // X{E} 7 MButt()
+  void ImportLayout(ZGlass* src); // X{E} C{1} 7 MCWButt()
+
   void ImportKings(); // X{E} 7 MButt()
 
-  void EmitRewidthRay();
+  void EmitLayoutRay();  // X{E} 7 MButt(-join=>1)
+  void EmitRewidthRay(); // X{E} 7 MButt()
+
+  static const Text_t* sLayoutPath;
 
 #include "NestInfo.h7"
   ClassDef(NestInfo, 1) // Glass representation of GUI browser 'FTW_Nest'.
