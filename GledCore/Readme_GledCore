@@ -5,3 +5,9 @@ server/client code) and basic GUI elements.
 
 License: GNU GPL v2
 Info: http://www.gled.org/
+
+RegExp/ directory contains slimmed down versions of PCRE-5.0 and
+PME-1.0.3.
+
+GledView/GLTextNS.(h|cxx) is a wrapper around TexFont API by Mark
+J. Kilgard.
