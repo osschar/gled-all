@@ -42,7 +42,7 @@ void TubeTvor_GL_Rnr::Render(TubeTvor* ttvor)
   glNormalPointer(GL_FLOAT, 0, ttvor->mN);
   glEnableClientState(GL_NORMAL_ARRAY);
   if(ttvor->bColP) {
-    glColorPointer(4, GL_FLOAT, 0, ttvor->mC);
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, ttvor->mC);
     glEnableClientState(GL_COLOR_ARRAY);
   }
   if(ttvor->bTexP) {
