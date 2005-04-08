@@ -425,13 +425,16 @@ void Pupil::TurnCamTowards(ZGlass* lens, Float_t max_dist)
 
 /**************************************************************************/
 
-void Pupil::FullScreen()
+void Pupil::FullScreen(Fl_Window* fsw)
 {
   if(bFullScreen) {
-    fullscreen_off(mFSx, mFSy, mFSw, mFSh);
+    if(fsw == mFullScreenWin)
+       fsw->fullscreen_off(mFSx, mFSy, mFSw, mFSh);
+    mFullScreenWin = 0;
   } else {
-    mFSx = x(); mFSy = y(); mFSw = w(); mFSh = h();
-    fullscreen();
+    mFSx = fsw->x(); mFSy = fsw->y(); mFSw = fsw->w(); mFSh = fsw->h();
+    fsw->fullscreen();
+    mFullScreenWin = fsw;
   }
   bFullScreen = !bFullScreen;
 }
@@ -879,13 +882,16 @@ int Pupil::handle(int ev)
       mCamera->Home(); redraw();
       return 1;
 
-    case 'f':
-      if(parent() == 0) {
-	FullScreen(); redraw();
-	return 1;
+    case 'f': {
+      Fl_Group* fsg = this;
+      while(fsg->parent()) fsg = fsg->parent();
+      if(fsg->type() >= FL_WINDOW) {
+	Fl_Window* fsw = (Fl_Window*)fsg;
+	FullScreen(fsw);
+	fsw->redraw();
       }
-      break;
-
+      return 1;
+    }
     case FL_F+1:
       mShell->SpawnMTW_View(fImg);
       return 1;
