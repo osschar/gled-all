@@ -19,7 +19,7 @@ private:
   void _init();
 
 protected:
-  ZHashList*		mActiveMMEs;	// X{gS} L{}
+  ZHashList*		mActiveMEEs;	// X{gS} L{}
 
   ZMirFilter*		mAllowThis;	// X{gS} L{}
 

@@ -592,7 +592,7 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
     if(Gled::theOne->IsIdentityInGroup((*i)->GetName(), id->GetName())) {
 
       CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Add, id);
-      CALL_AND_BROADCAST(id->mActiveMMEs, Add, mir->Caller);
+      CALL_AND_BROADCAST(id->mActiveMEEs, Add, mir->Caller);
 
       mir->SuppressFlareBroadcast = true;
       return;
@@ -619,7 +619,7 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
     throw(_eh + "for now only handles group identities");
 
   CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Remove, id);
-  CALL_AND_BROADCAST(id->mActiveMMEs, Remove, mir->Caller);    
+  CALL_AND_BROADCAST(id->mActiveMEEs, Remove, mir->Caller);    
 
   mir->SuppressFlareBroadcast = true;
 }
@@ -632,7 +632,7 @@ void ZSunQueen::attach_primary_identity(ZMirEmittingEntity* mee)
 
   ZIdentity* identity = GetOrImportIdentity(mee->GetLogin());
   CALL_AND_BROADCAST(mee, SetPrimaryIdentity, identity);
-  CALL_AND_BROADCAST(identity->GetActiveMMEs(), Add, mee);
+  CALL_AND_BROADCAST(identity->GetActiveMEEs(), Add, mee);
 
   ZMirFilter* def_filter = dynamic_cast<ZMirFilter*>(
 			     FindLensByPath("Auth/Filters/MEESelfFilter"));
@@ -647,14 +647,14 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
   mee->WriteLock();
   if((id = mee->mPrimaryIdentity) != 0) {
     mee->SetPrimaryIdentity(0);
-    id->mActiveMMEs->Remove(mee);
+    id->mActiveMEEs->Remove(mee);
   }
   if(mee->mActiveIdentities) {
     lpZGlass_i i, end;
     mee->mActiveIdentities->BeginIteration(i, end);
     while(i != end) {
       id = (ZIdentity*)(*i);
-      id->mActiveMMEs->Remove(mee);
+      id->mActiveMEEs->Remove(mee);
       ++i;
     }
     mee->mActiveIdentities->EndIteration();
