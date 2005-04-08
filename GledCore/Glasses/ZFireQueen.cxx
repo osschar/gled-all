@@ -31,6 +31,9 @@ void ZFireQueen::bootstrap()
   ZHashList* l = new ZHashList("Eunuchs");
   l->SetElementFID(ZEunuch::FID());
   CheckIn(l); SetEunuchs(l); l->SetMIRActive(false);
+
+  ZNameMap* nm = new ZNameMap("Etc");
+  CheckIn(nm); Add(nm);
 }
 
 /**************************************************************************/
