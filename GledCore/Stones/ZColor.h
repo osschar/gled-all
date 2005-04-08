@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_ZColor_H
-#define Gled_ZColor_H
+#ifndef GledCore_ZColor_H
+#define GledCore_ZColor_H
 
 #include <Gled/GledTypes.h>
 #include <TObject.h>
@@ -36,6 +36,7 @@ public:
   }
 
   void to_ubyte(unsigned char* ub, bool wrap=false);
+  void rgb_to_ubyte(unsigned char* ub, bool wrap=false);
 
   const Float_t* operator()() const { return c; }
   Float_t  operator[](int i) const { return c[i]; }
@@ -70,6 +71,17 @@ inline void ZColor::to_ubyte(unsigned char* ub, bool wrap)
       ub[i] = (unsigned char)(255*c[i]);
   } else {
     for(int i=0; i<4; ++i)
+      ub[i] = c[i] >= 1 ? 255 : (c[i] <= 0 ? 0 : (unsigned char)(255*c[i]));
+  }
+}
+
+inline void ZColor::rgb_to_ubyte(unsigned char* ub, bool wrap)
+{
+  if(wrap) {
+    for(int i=0; i<3; ++i)
+      ub[i] = (unsigned char)(255*c[i]);
+  } else {
+    for(int i=0; i<3; ++i)
       ub[i] = c[i] >= 1 ? 255 : (c[i] <= 0 ? 0 : (unsigned char)(255*c[i]));
   }
 }
