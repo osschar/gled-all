@@ -261,6 +261,31 @@ void MTW_View::BuildByLayout(MTW_Layout* layout)
 
 /**************************************************************************/
 
+void MTW_View::Labelofy()
+{
+  // Sets labels to sub-views ... resizes self.
+
+  int dww = 0;
+  for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
+    int dx = 0;
+    for(lMTW_Weed_i w=(*sv)->mWeeds.begin(); w!=(*sv)->mWeeds.end(); ++w) {
+      Fl_Widget*       o = w->fWeed;
+      GVNS::WeedInfo& wi = *w->fWeedInfo;
+      o->label(w->fWeedInfo->fName.c_str());
+      if(wi.bLabel && !wi.bLabelInside) {
+	o->align(FL_ALIGN_LEFT);
+	dx += FGS::swm_label_width(w->fWeedInfo->fName, swm_manager->cell_w());
+	o->position(o->x()+dx, o->y());
+      }
+    }
+    (*sv)->size((*sv)->w() + dx, (*sv)->y());
+    dww += dx;
+  }
+  size(w() + dww, h());
+}
+
+/**************************************************************************/
+
 void MTW_View::AbsorbRay(Ray& ray)
 {
   if(ray.IsBasicChange()) { auto_label(); redraw(); }
@@ -281,14 +306,8 @@ void MTW_View::UpdateDataWeeds(FID_t fid)
 {
   bool update_all = fid.is_null();
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
-    if(update_all) {
+    if(update_all || (*sv)->mClassInfo->fFid == fid)
       (*sv)->UpdateDataWeeds();
-    } else {
-      if((*sv)->mClassInfo->fFid == fid) {
-	(*sv)->UpdateDataWeeds();
-	break;
-      }
-    }
   }
 }
 
@@ -296,14 +315,8 @@ void MTW_View::UpdateLinkWeeds(FID_t fid)
 {
   bool update_all = fid.is_null();
   for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
-    if(update_all) {
+    if(update_all || (*sv)->mClassInfo->fFid == fid)
       (*sv)->UpdateLinkWeeds();
-    } else {
-      if((*sv)->mClassInfo->fFid == fid) {
-	(*sv)->UpdateLinkWeeds();
-	break;
-      }
-    }
   }
 }
 

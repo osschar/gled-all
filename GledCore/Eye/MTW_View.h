@@ -54,6 +54,8 @@ public:
   void BuildVerticalView();
   void BuildByLayout(MTW_Layout* layout);
 
+  void Labelofy();
+
   virtual void AbsorbRay(Ray& ray);
   virtual void AssertDependantViews() {}
 
