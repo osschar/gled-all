@@ -109,7 +109,7 @@ ALL_LIBS += rnr_libs
 endif
 
 
-default:	${ALL_LIBS} ${LIBSET_TARGETS}
+default:	${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
 		${MAKE} install
 
 base_lib:	${BASE_LIB_NAME}
