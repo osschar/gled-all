@@ -13,26 +13,19 @@
 /**************************************************************************/
 
 void Text_GL_Rnr::_init()
-{
-  mFontRM = 0;
-}
+{}
 
 /**************************************************************************/
 
 void Text_GL_Rnr::Draw(RnrDriver* rd)
 {
-  RNRDRIVER_GET_RNRMOD(font, rd, ZRlFont);
-  if(font != mFontRM || font->bRebuildDL) {
-    bRebuildDL = true;
-    mFontRM    = font;
-  }
+  obtain_rnrmod(rd, mFontRMS);
   PARENT::Draw(rd);
 }
 
 void Text_GL_Rnr::Render(RnrDriver* rd)
 {
-  RNRDRIVER_CAST_RNRMOD_RNR(font, mFontRM, ZRlFont);
-  GLTextNS::TexFont *txf = font_rnr->GetFont();
+  GLTextNS::TexFont *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 

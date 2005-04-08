@@ -137,7 +137,9 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if(rd->GetRnrNames() == true && bSuppressNameLabel == false && mNode->mName != "") {
+  if(rd->GetRnrNames() == true && bSuppressNameLabel == false &&
+     mNode->mName != "")
+  {
     string name( mNode->GetName() );
     GLTextNS::RnrTextBar(rd, name);
   }

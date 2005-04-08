@@ -13,9 +13,9 @@
 #include <TSystem.h>
 
 namespace {
-  ZRlFont*          def_font = 0;
-  ZRlFont_GL_Rnr*   def_font_rnr = 0;
-  RnrDriver::RnrMod font_rnrmod;
+  ZRlFont*        def_font = 0;
+  ZRlFont_GL_Rnr* def_font_rnr = 0;
+  RnrMod          font_rnrmod;
 }
 
 void PupilInfo_GL_Rnr::_init()

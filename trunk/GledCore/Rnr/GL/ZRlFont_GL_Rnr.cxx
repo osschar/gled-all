@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZRlFont_GL_Rnr.h"
+#include <RnrBase/RnrDriver.h>
 #include <FL/gl.h>
 
 #define PARENT ZRnrModBase_GL_Rnr

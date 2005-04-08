@@ -47,19 +47,6 @@ protected:
   Int_t		mWidth;		 // X{gs}
   Int_t		mHeight;	 // X{gs}
 
-public:
-  struct RnrMod {
-    ZGlass* fLens;
-    A_Rnr*  fRnr;
-    bool    bRebuildDL;
-
-    RnrMod(ZGlass* l=0, A_Rnr* r=0, bool rdl=false) :
-      fLens(l), fRnr(r), bRebuildDL(rdl) {}
-
-    // Casting templates?
-  };
-
-protected:
   struct RMStack {
     RnrMod*        def;
     RnrMod*        def_autogen;
@@ -146,20 +133,20 @@ inline bool RnrDriver::find_rnrmod(FID_t fid)
 /**************************************************************************/
 
 #define RNRDRIVER_GET_RNRMOD_BOTH(_var_, _rd_, _typ_) \
-  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
+  RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
   _typ_* _var_ ## _lens = (_typ_*) _var_->fLens; \
   _typ_ ## _GL_Rnr* _var_ ## _rnr = (_typ_ ## _GL_Rnr*) _var_->fRnr
 
 #define RNRDRIVER_GET_RNRMOD_LENS(_var_, _rd_, _typ_) \
-  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
+  RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
   _typ_* _var_ ## _lens = (_typ_*) _var_->fLens
 
 #define RNRDRIVER_GET_RNRMOD_RNR(_var_, _rd_, _typ_) \
-  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
+  RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID()); \
   _typ_ ## _GL_Rnr* _var_ ## _rnr = (_typ_ ## _GL_Rnr*) _var_->fRnr
 
 #define RNRDRIVER_GET_RNRMOD(_var_, _rd_, _typ_) \
-  RnrDriver::RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID())
+  RnrMod* _var_ = _rd_->GetRnrMod(_typ_::FID())
 
 
 #define RNRDRIVER_CAST_RNRMOD_BOTH(_var_, _rnrmod_, _typ_) \

@@ -12,10 +12,9 @@
 void ZRnrModBase_GL_Rnr::_init()
 {
   // A_Rnr
-  bOnePerRnrDriver = true;
+  // bOnePerRnrDriver = true; // Not needed with time-stamp based mods.
 
-  mRnrMod = new RnrDriver::RnrMod(mZRnrModBase, this);
-  mRebuildRnrCount = 0;
+  mRnrMod = new RnrMod(mZRnrModBase, this);
 }
 
 ZRnrModBase_GL_Rnr::~ZRnrModBase_GL_Rnr()
@@ -45,15 +44,5 @@ void ZRnrModBase_GL_Rnr::PostDraw(RnrDriver* rd)
 
 void ZRnrModBase_GL_Rnr::ConsiderRebuildDL(RnrDriver* rd)
 {
-  if(mRebuildRnrCount != rd->GetRnrCount()) {
-
-    if(mGlass->GetStampReqTring() > mStampTring) {
-      mStampTring         = mGlass->GetTimeStamp();
-      mRnrMod->bRebuildDL = true;
-    } else {
-      mRnrMod->bRebuildDL = false;
-    }
-
-    mRebuildRnrCount = rd->GetRnrCount();
-  }
+  mRnrMod->fTringTS = mGlass->GetStampReqTring();
 }
