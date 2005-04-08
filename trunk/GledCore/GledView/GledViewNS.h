@@ -144,23 +144,12 @@ namespace GledViewNS {
   string FabricateRnrLibName(const string& libset, const string& rnr);
   string FabricateRnrInitFoo(const string& libset, const string& rnr);
 
+  // Rnr support
+
   void AssertRenderers();
   void AddRenderer(const string& rnr);
   
-  // Services
-
   A_Rnr* SpawnRnr(const string& rnr, ZGlass* d, FID_t fid);
-
-  // Predefined MTW_Layout manager
-
-  struct MTW_Layout_Spec {
-    string fName;
-    string fLayout;
-
-    MTW_Layout_Spec(const char* n, const char* l) : fName(n), fLayout(l) {}
-  };
-  
-  extern list<MTW_Layout_Spec> mtw_layouts;
 
   // GUI magick
 

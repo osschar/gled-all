@@ -114,10 +114,6 @@ public:
 
   static Gled* theOne;
 
-  // Misc
-
-  virtual void AddMTWLayout(const char* name, const char* layout) {}
-
 #include "Gled.h7"
   ClassDef(Gled, 0)
 }; // endclass Gled
