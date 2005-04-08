@@ -10,6 +10,8 @@
 #include <Glasses/ZNameMap.h>
 #include <Glasses/ZHashList.h>
 #include <Glasses/SubShellInfo.h>
+#include <Glasses/ZMirEmittingEntity.h>
+
 #include <Net/Ray.h>
 
 class ShellInfo : public ZNameMap {
@@ -19,18 +21,25 @@ public:
   enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
 		      PRQN_set_def_subshell,
 		      PRQN_add_subshell,
-		      PRQN_remove_subshell
+		      PRQN_remove_subshell,
+		      PRQN_resize_window
   };
 
 private:
   void _init();
 
 protected:
-  SubShellInfo* mDefSubShell;   // X{gE} L{} 
   ZHashList*	mSubShells;	// X{gE} L{}
+  SubShellInfo* mDefSubShell;   // X{gE} L{} 
 
   ZGlass*	mBeta;		// X{gS} L{}
   ZGlass*	mGamma;		// X{gS} L{}
+
+  ZMirEmittingEntity* mMessageRecipient; // // X{gS} L{}
+
+  Int_t		mDefW;		// X{GS} 7 Value(-range=>[32, 256, 1])
+  Int_t		mDefSShellH;	// X{GS} 7 Value(-range=>[10, 128, 1])
+  UChar_t	mMsgOutH;	// X{GS} Ray{Resize} 7 Value(-range=>[0,32,1])
 
   Bool_t	bFancyClassView;       // X{GS} 7 Bool()
   Bool_t	bCollZGlass;           // X{GS} 7 Bool(-join=>1)
@@ -45,11 +54,13 @@ public:
 
   virtual SubShellInfo* MakeDefSubShell();
 
-  virtual void AddSubShell(SubShellInfo* sub_shell);    // X{E} C{1}
-  virtual void RemoveSubShell(SubShellInfo* sub_shell); // X{E} C{1}
+  virtual void AddSubShell(SubShellInfo* sub_shell);    // X{E} C{1} 7 MCWButt(-join=>1)
+  virtual void RemoveSubShell(SubShellInfo* sub_shell); // X{E} C{1} 7 MCWButt()
 
   void SetDefSubShell(SubShellInfo* ss);
   void SetSubShells(ZHashList* ss);
+
+  void EmitResizeRay();
 
 #include "ShellInfo.h7"
   ClassDef(ShellInfo, 1) // Glass representation of GUI shell 'FTW_Shell'.

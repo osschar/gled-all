@@ -25,9 +25,14 @@ ClassImp(ShellInfo)
 
 void ShellInfo::_init()
 {
-  mDefSubShell = 0;
   mSubShells   = 0;
+  mDefSubShell = 0;  
   mBeta = mGamma = 0;
+  mMessageRecipient = 0;
+
+  mDefW       = 80;
+  mDefSShellH = 22;
+  mMsgOutH     = 7;
 
   bFancyClassView       = true; bCollZGlass = bCollZList = true;
   bShowLinksInClassView = true;
@@ -44,13 +49,18 @@ void ShellInfo::AdEnlightenment()
     mQueen->CheckIn(l);
     SetSubShells(l);
   }
+  const string etc("Etc");
+  if(!GetElementByName(etc)) {
+    ZNameMap* nm = new ZNameMap(etc.c_str());
+    mQueen->CheckIn(nm); Add(nm);
+  }
 }
 
 /**************************************************************************/
 
 SubShellInfo* ShellInfo::MakeDefSubShell()
 {
-  NestInfo* nest = new NestInfo("Browser Nest", "Default SubShell");
+  NestInfo* nest = new NestInfo("Default Nest");
   mQueen->CheckIn(nest);
   nest->ImportKings();
   AddSubShell(nest);
@@ -105,4 +115,15 @@ void ShellInfo::SetSubShells(ZHashList* ss)
   if(mSubShells != 0)
     throw(_eh + "can not be changed.");
   set_link_or_die((ZGlass*&)mSubShells, ss, FID());
+}
+
+/**************************************************************************/
+
+void ShellInfo::EmitResizeRay()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_resize_window, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
 }

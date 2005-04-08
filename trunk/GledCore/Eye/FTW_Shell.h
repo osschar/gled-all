@@ -70,14 +70,17 @@ protected:
   // Widgets.
   Fl_Pack*	 wMainPack;
   Fl_Pack*       wMenuPack;
+  Fl_Pack*       wMsgPack;
   Fl_Window*     mEmptyCanvas;   // X{g}
   Fl_Window*     mCurCanvas;     // X{g}
   Fl_OutputPack* wOutPack;
+  OptoStructs::ZLinkView*        wMsgRecipient;
 
   FTW::Source_Selector*	mSource; // X{g}
   FTW::Sink_Selector*	mSink;   // X{g}
 
   void label_shell();
+  void set_size_range();
 
 public:
 
@@ -94,6 +97,8 @@ public:
   virtual void AbsorbRay(Ray& ray);
 
   // FTW_Shell
+
+  OptoStructs::ZGlassImg* SearchConfigEntry(const string& name);
 
   void SpawnSubShell(SubShellInfo* ssi, bool markup=false);
   void RemoveSubShell(OptoStructs::ZGlassImg* img);
@@ -143,7 +148,7 @@ public:
   virtual void Message(const char* msg, Eye::MType_e t=MT_std);
   virtual void Message(const string& msg, Eye::MType_e t=MT_std);
 
-  int handle(int ev);
+  virtual int  handle(int ev);
 
   /**************************************************************************/
   // mir_call_data ... temporary structures (user-data) for callbacks
