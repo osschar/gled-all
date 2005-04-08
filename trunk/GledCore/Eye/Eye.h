@@ -32,7 +32,6 @@ protected:
 
   Saturn*	mSaturn;	// X{g}
   SaturnInfo*	mSaturnInfo;	// X{g}
-  ZQueen*	mQueen;		// X{g}
   EyeInfo*	mEyeInfo;	// X{g}
 
   TSocket*	mSatSocket;
