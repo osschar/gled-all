@@ -155,9 +155,12 @@ void spawn_default_gui(Scene* rscene)
     "RnrOnForDaughters[5],RnrOffForDaughters[5]):"
     "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Material[8]):ZGeoOvl(Overlap[7])";
 
-  Gled::theOne->AddMTWLayout("RootGeo/ZGeoNode", default_layout);
+
   gROOT->LoadMacro("eye.C");
-  register_GledCore_layouts();
+  {
+    ZList* laytop = register_GledCore_layouts();
+    laytop->Swallow("RootGeo", new ZGlass("ZGeoNode", default_layout));
+  }
 
   Text_t* eye_name   = "Eye";
   Text_t* shell_name = "Shell";
