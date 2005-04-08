@@ -15,7 +15,7 @@ TubeTvor::~TubeTvor() {
 }
 
 void TubeTvor::Init(Int_t npoles, Int_t nrings, Int_t nphi,
-		    bool colp, bool texp)
+		    Bool_t colp, Bool_t texp)
 {
   delete [] mV; delete [] mN; delete [] mC; delete [] mT;
   bColP = colp;
@@ -24,13 +24,13 @@ void TubeTvor::Init(Int_t npoles, Int_t nrings, Int_t nphi,
   mNP = npoles + (nphi+1)*nrings;
   mI = 0;
   mRings.clear();
-  mV = new float[mNP*3];
-  mN = new float[mNP*3];
-  if(bColP) mC = new float[mNP*4]; else mC = 0;
-  if(bTexP) mT = new float[mNP*2]; else mT = 0;
+  mV = new Float_t[mNP*3];
+  mN = new Float_t[mNP*3];
+  if(bColP) mC = new UChar_t[mNP*4]; else mC = 0;
+  if(bTexP) mT = new Float_t[mNP*2]; else mT = 0;
 }
 
-void TubeTvor::NewRing(Int_t n, bool dp)
+void TubeTvor::NewRing(Int_t n, Bool_t dp)
 {
   mRings.push_back( RingInfo(mI, n, dp) );
 }
