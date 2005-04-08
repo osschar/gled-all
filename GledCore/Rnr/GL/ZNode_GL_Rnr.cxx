@@ -137,11 +137,21 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if(rd->GetRnrNames() == true && bSuppressNameLabel == false &&
-     mNode->mName != "")
-  {
-    string name( mNode->GetName() );
-    GLTextNS::RnrTextBar(rd, name);
+  if(rd->GetMarkupNodes() == true) {
+    RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+    if(nrc_lens->GetRnrNames() && bSuppressNameLabel == false &&
+       mNode->mName != "")
+      {
+	string name( mNode->GetName() );
+	GLTextNS::RnrTextBar(rd, name);
+      }
+    if(nrc_lens->GetRnrAxes()) {
+      glBegin(GL_LINES);
+      glColor3f(1,0,0); glVertex3f(0,0,0); glVertex3f(1,0,0);
+      glColor3f(0,1,0); glVertex3f(0,0,0); glVertex3f(0,1,0);
+      glColor3f(0,0,1); glVertex3f(0,0,0); glVertex3f(0,0,1);
+      glEnd();
+    }
   }
 
   rd->PopPM();
