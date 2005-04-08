@@ -31,6 +31,7 @@
 #include "ZList.c7"
 
 #include <Glasses/ZQueen.h>
+#include <Glasses/ZKing.h>
 #include <Net/Ray.h>
 #include <Stones/ZComet.h>
 #include <Gled/GledNS.h>
@@ -121,27 +122,23 @@ void ZList::new_element_check(ZGlass* g)
 
 /**************************************************************************/
 
-void ZList::Copy(lpZGlass_t& dest)
+TimeStamp_t ZList::Copy(lpZGlass_t& dest)
 {
-  mListMutex.Lock();
+  GMutexHolder _lstlck(mListMutex);
   copy(mGlasses.begin(), mGlasses.end(), back_inserter(dest));
-  mListMutex.Unlock();
+  return mTimeStamp;
 }
 
 ZGlass* ZList::First()
 {
-  mListMutex.Lock();
-  ZGlass* r = mSize ? mGlasses.front() : 0;
-  mListMutex.Unlock();
-  return r;
+  GMutexHolder _lstlck(mListMutex);
+  return mSize ? mGlasses.front() : 0;
 }
 
 ZGlass* ZList::Last()
 { 
-  mListMutex.Lock();
-  ZGlass* r = mSize ? mGlasses.back() : 0;
-  mListMutex.Unlock();
-  return r;
+  GMutexHolder _lstlck(mListMutex);
+  return mSize ? mGlasses.back() : 0;
 }
 
 ZGlass* ZList::GetElementByName(const Text_t* name)
@@ -159,6 +156,110 @@ ZGlass* ZList::GetElementByName(const string& name)
   }
   mListMutex.Unlock();
   return ret;
+}
+
+/**************************************************************************/
+
+ZList* ZList::AssertPath(const Text_t* path, const Text_t* new_el_type)
+{
+  // Makes sure that 'path' exists. From the missing element onwards
+  // creates new sub-lists of type 'new_el_type'.
+  // Throws an exception if:
+  // a) link dereferencing is found in path;
+  // b) would have to create a missing element under some other queen;
+  // c) element in path is not a list;
+  // d) instantiation fails.
+
+  static const string _eh("ZList::AssertPath ");
+
+  namespace GNS = GledNS;
+
+  FID_t new_el_fid = GNS::FindClassID(new_el_type);
+  if(new_el_fid.is_null())
+    throw(_eh + "unknown list element type '" + new_el_type + "'.");
+
+
+  list<GNS::url_token> ts;
+  GNS::tokenize_url(path, ts);
+
+  ZList* l = this;
+  for(list<GNS::url_token>::iterator i=ts.begin(); i!=ts.end(); ++i) {
+    switch (i->type()) {
+
+    case GNS::url_token::link_sel: {
+      throw(_eh + "link found but only list elements expected.");
+      break;
+    }
+
+    case GNS::url_token::list_sel: {
+      ZGlass* e = l->GetElementByName(*i);
+      if(e != 0) {
+	l = dynamic_cast<ZList*>(e);
+	if(l == 0)
+	  throw(_eh + "path element is not a list.");
+      } else {
+	if(l->GetQueen() != mQueen)
+	  throw(_eh + "path leading to another queen.");
+
+	if(mQueen->GetKing()->GetLightType() == ZKing::LT_Fire) {
+	  ZGlass* g = GledNS::ConstructLens(new_el_fid);
+	  if(g == 0) throw(_eh + "direct lens construction failed.");
+	  g->SetName(i->c_str());
+	  mQueen->CheckIn(g); l->Add(g);
+	  l = dynamic_cast<ZList*>(g);
+	} else {
+	  auto_ptr<ZMIR> att_mir( l->S_Add(0) );
+	  auto_ptr<ZMIR> inst_mir
+	    ( mQueen->S_InstantiateWAttach
+	      (l, 0, att_mir->Lid, att_mir->Cid, att_mir->Mid,
+	       new_el_fid.lid, new_el_fid.cid, i->c_str())
+	      );
+	  auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(inst_mir) );
+	  if(res->HasException())
+	    throw(_eh + "got exception: " + res->Exception.Data());
+	  if(res->HasResult()) {
+	    ID_t id; *res >> id;
+	    l = dynamic_cast<ZList*>(mSaturn->DemangleID(id));
+	  } else
+	    throw(_eh + "bad MIR result.");
+	}
+	if(l == 0)
+	  throw(_eh + "instantiation of missing element failed.");
+      }
+      break;
+    }
+
+    default:
+      throw(_eh + "unknown token type.");
+      break;
+
+    } // end switch
+  } // end for
+
+  return l;
+}
+
+void ZList::Swallow(ZGlass* entry, Bool_t replace_p,
+		    const Text_t* path, const Text_t* new_el_type)
+{
+  // A helper function for adding configuration DB entries.
+  // Mostly intended for use from scripts.
+  // Should NOT be called on exposed object-spaces!
+
+  ZList *l = AssertPath(path, new_el_type);
+  if(entry->GetSaturnID() == 0) mQueen->CheckIn(entry);
+  ZGlass* ex_entry = l->GetElementByName(entry->GetName());
+  if(ex_entry)
+    if(replace_p)
+      l->Remove(ex_entry);
+    else 
+      return;
+  l->Add(entry);
+}
+
+void ZList::Swallow(const Text_t* path, ZGlass* entry)
+{
+  Swallow(entry, true, path, "ZList");
 }
 
 /**************************************************************************/

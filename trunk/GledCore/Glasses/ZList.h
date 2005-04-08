@@ -63,15 +63,15 @@ public:
   void EndIteration()
   { mListMutex.Unlock(); }
 
-  virtual void Copy(lpZGlass_t& dest);
+  virtual TimeStamp_t Copy(lpZGlass_t& dest);
   template <class GLASS>
-  void CopyByGlass(list<GLASS>& dest) {
-    mListMutex.Lock();
+  TimeStamp_t CopyByGlass(list<GLASS>& dest) {
+    GMutexHolder _lstlck(mListMutex);
     for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
       GLASS g = dynamic_cast<GLASS>(*i);
       if(g) dest.push_back(g);
     }
-    mListMutex.Unlock();
+    return mTimeStamp;
   }
 
   ZGlass* First();
@@ -89,6 +89,13 @@ public:
     mListMutex.Unlock();
     return 0;
   }
+
+  ZList* AssertPath(const Text_t* path,
+                    const Text_t* new_el_type="ZList"); // X{Ed}
+  void Swallow(ZGlass* entry, Bool_t replace_p=true,
+	       const Text_t* path="",
+	       const Text_t* new_el_type="ZList");
+  void Swallow(const Text_t* path, ZGlass* entry);
 
   void         SetElementFID(FID_t fid);
   virtual void Add(ZGlass* g);			     // X{E} C{1}
