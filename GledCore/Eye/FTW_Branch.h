@@ -14,6 +14,7 @@
 class FTW_Branch : public FTW_Leaf {
  private:
   FTW::lLoI_t		mLeoim;
+  TimeStamp_t		mLeoimTimeStamp;
   void build_leoim();
   void wipe_leoim();
 

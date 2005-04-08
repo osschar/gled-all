@@ -23,10 +23,10 @@ static void cb_list_collexp(Fl_Button* b, FTW_Branch* l) {
 void FTW_Branch::build_leoim()
 {
   ZList* l = dynamic_cast<ZList*>(fImg->fGlass);
-  lpZGlass_t d; l->Copy(d);
+  lpZGlass_t d; mLeoimTimeStamp = l->Copy(d);
   for(lpZGlass_i i=d.begin(); i!=d.end(); ++i) {
     mLeoim.push_back(Leaf_o_Img(fImg->fEye->DemanglePtr(*i)));
-  }  
+  }
 }
 
 void FTW_Branch::wipe_leoim()
@@ -52,7 +52,7 @@ FTW_Branch::FTW_Branch(FTW_Nest* nest, FTW_Leaf* parent,
   wListExpander->labelcolor(FL_BLACK);
   wListExpander->callback((Fl_Callback*)cb_list_collexp, this);
 
-  build_leoim();
+  //build_leoim();
 }
 
 FTW_Branch::~FTW_Branch() {
@@ -64,73 +64,74 @@ FTW_Branch::~FTW_Branch() {
 void FTW_Branch::AbsorbRay(Ray& ray)
 {
   using namespace RayNS;
-  switch(ray.fRQN) {
 
-  case RQN_list_add: {
-    lLoI_i i = ray.fGammaImg ?
-      find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fGammaImg)) :
-      mLeoim.end();
+  if(ray.fRQN > RQN_list_begin && ray.fRQN < RQN_list_end) {
 
-    FTW_Leaf* leaf = 0;
-    if(bLeavesCreated) {
-      leaf = FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false);
-      if(!bListExpanded) leaf->hide();
-      if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
-      else	          mNest->InsertLeaf(leaf, i->leaf);
+    if(bLeavesCreated && mLeoimTimeStamp < ray.fStamp) {
+
+      switch(ray.fRQN) {
+
+      case RQN_list_add: {
+	lLoI_i i = ray.fGammaImg ?
+	  find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fGammaImg)) :
+	  mLeoim.end();
+
+	FTW_Leaf* leaf = FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false);
+	if(!bListExpanded) leaf->hide();
+	if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
+	else                mNest->InsertLeaf(leaf, i->leaf);
+
+	mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
+
+	label_namebox();
+	return;
+      }
+
+      case RQN_list_remove: {
+	lLoI_i i = find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fBetaImg));
+	//cout <<"FTW_Branch::AbsorbRay RQN_list_remove for "<< eximg->fGlass->GetName() <<
+	//", leaf="<< i->leaf <<endl;
+	if(i == mLeoim.end()) {
+	  cout <<"FTW_Branch::AbsorbRay RQN_list_remove didn't find view to remove ...\n";
+	  return;
+	}
+	// mNest->RemoveLeaf(i->leaf); // Called in Leaf dtor.
+	delete i->leaf;
+
+	mLeoim.erase(i);
+	label_namebox();
+	return;
+      }
+
+      case RQN_list_rebuild: {
+	bool was_expanded = bListExpanded;
+	if(bListExpanded) CollapseList();
+	wipe_leoim();
+	build_leoim();
+	if(was_expanded)  ExpandList();
+	label_namebox();
+	return;
+      }
+
+      case RQN_list_clear: {
+	bool was_expanded = bListExpanded;
+	if(bListExpanded) CollapseList();
+	wipe_leoim();
+	if(was_expanded)  ExpandList();
+	label_namebox();
+	return;
+      }
+
+      } // end switch ray.fRQN
+
+    } else { // leaves not created
+
+      label_namebox();
 
     }
-    mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
 
-    /*
-    FTW_Leaf* leaf = bLeavesCreated ?
-      FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false) : 0;
-    mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
-    if(bListExpanded) {
-      if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
-      else	          mNest->InsertLeaf(leaf, i->leaf);
-    }
-    */
-    label_namebox();
-    return;
-  }
+  } // enf if list-ray
 
-  case RQN_list_remove: {
-    lLoI_i i = find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fBetaImg));
-    //cout <<"FTW_Branch::AbsorbRay RQN_list_remove for "<< eximg->fGlass->GetName() <<
-    //", leaf="<< i->leaf <<endl;
-    if(i == mLeoim.end()) {
-      cout <<"FTW_Branch::AbsorbRay RQN_list_remove didn't find view to remove ...\n";
-      return;
-    }
-    if(bLeavesCreated) {
-      // mNest->RemoveLeaf(i->leaf); // Called in Leaf dtor.
-      delete i->leaf;
-    }
-    mLeoim.erase(i);
-    label_namebox();
-    return;
-  }
-
-  case RQN_list_rebuild: {
-    bool was_expanded = bListExpanded;
-    if(bListExpanded)  CollapseList();
-    wipe_leoim();
-    build_leoim();
-    if(was_expanded)   ExpandList();
-    label_namebox();
-    return;
-  }
-
-  case RQN_list_clear: {
-    bool was_expanded = bListExpanded;
-    if(bListExpanded)  CollapseList();
-    wipe_leoim();
-    if(was_expanded)   ExpandList();
-    label_namebox();
-    return;
-  }
-
-  } // end switch ray.fRQN
   FTW_Leaf::AbsorbRay(ray);
 }
 
@@ -145,6 +146,7 @@ void FTW_Branch::ExpandList() {
   if(bListExpanded) return; // ants can call this for no good reason
   if(!bLeavesCreated) {
     int before_pos = mNest->PackPosAfter(this);
+    build_leoim();
     for(lLoI_i i=mLeoim.begin(); i!=mLeoim.end(); ++i) {
       i->leaf = FTW_Leaf::Construct(mNest, this, i->img, true, false);
       mNest->InsertLeaf(i->leaf, before_pos++);
@@ -214,7 +216,7 @@ float FTW_Branch::LeafPosition(FTW_Leaf* leaf)
 /**************************************************************************/
 
 void FTW_Branch::label_namebox() {
-  int s = mLeoim.size();
+  int s = bLeavesCreated ? mLeoim.size() : ((ZList*)fImg->fGlass)->Size();
   if(s) {
     wName->set_label(GForm("%s [%d]", fImg->fGlass->GetName(), s));
   } else {
