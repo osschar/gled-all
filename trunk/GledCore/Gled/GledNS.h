@@ -299,6 +299,10 @@ namespace GledNS {
 		      const string& ops="([{", bool no_parens_ok=false)
     throw(string);
 
+  string join_strings(const string& sep, lStr_t& list);
+
+  void remove_whitespace(string& s);
+
   // url_tokenizator
 
   class url_token : public string {
