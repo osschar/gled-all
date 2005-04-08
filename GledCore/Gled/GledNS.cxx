@@ -554,6 +554,28 @@ void GledNS::deparen_string(const string& in, string& n, string& a,
 }
 
 /**************************************************************************/
+
+string GledNS::join_strings(const string& sep, lStr_t& list)
+{
+  if(list.empty()) return "";
+  lStr_i i = list.begin();
+  string ret = *i;
+  while(++i != list.end()) ret += sep + *i;
+  return ret;
+}
+
+/**************************************************************************/
+
+void GledNS::remove_whitespace(string& s)
+{
+  string g;
+  for(Str_ci i=s.begin(); i!=s.end(); ++i) {
+    if(!isspace(*i)) g += *i;
+  }
+  s = g;
+}
+
+/**************************************************************************/
 /**************************************************************************/
 
 int GledNS::tokenize_url(const string& url, list<url_token>& l)
