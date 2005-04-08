@@ -1,5 +1,27 @@
 2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Ephra/Saturn.cxx:
+	Start server thread before service threads (got sporadic segvs
+	when port was already used). Minor forformatting changes.
+
+	* Eye/Pupil.cxx:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added option to display some view-related information.
+
+	* Glasses/ZRlNameRnrCtrl.cxx:
+	* Glasses/ZRlNameRnrCtrl.h:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.cxx:
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Renamed Rnrdriver::bRnrNames to bMarkupNodes; added option to
+	display coordinate axes. ZRlNameRnrCtrl should be eventually
+	renamed to ZRlNodeMarkupCtrl.
+
+2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/ZFireQueen.cxx:
 	Create 'Etc' directory on bootstrap.
 
