@@ -1035,13 +1035,8 @@ A syntax for passing arguments of poiter or reference type is missing.
 (T) has been changed (and needs to be re-calculated when
 used). Accompanies set-methods.
 
-This field could (well, should) be generalized into a special family
-to allow specification of any timestamp variable that needs to be
-updated by a cannonical name, e.g.
-
- Timestamps{Trans,Tring}
-
-But this requires some thinking.
+These are special cases of themore general C<Stamp> pragma:
+C<t =~ ReqTrans>, C<T =~ ReqTring>.
 
 =item<x>
 
@@ -1079,6 +1074,11 @@ and then there is no need to have the C<E> field present for data members.
 =item C<Link> (shorthand C<L>)
 
 Declares a data member as I<link>. Takes no arguments, just C<L{}>.
+
+=item C<Stamp>
+
+Comma separated list of time-stamps to set. User must declare
+C<TimeStamp_t mStampE<lt>stamp-nameE<gt>> data members.
 
 =item C<Ray>
 
