@@ -35,8 +35,8 @@ public:
     c[0]=c[1]=c[2]=gray; c[3]=a;
   }
 
-  void to_ubyte(unsigned char* ub, bool wrap=false);
-  void rgb_to_ubyte(unsigned char* ub, bool wrap=false);
+  void to_ubyte(unsigned char* ub, bool wrap=false) const;
+  void rgb_to_ubyte(unsigned char* ub, bool wrap=false) const;
 
   const Float_t* operator()() const { return c; }
   Float_t  operator[](int i) const { return c[i]; }
@@ -64,7 +64,7 @@ public:
 
 /**************************************************************************/
 
-inline void ZColor::to_ubyte(unsigned char* ub, bool wrap)
+inline void ZColor::to_ubyte(unsigned char* ub, bool wrap) const
 {
   if(wrap) {
     for(int i=0; i<4; ++i)
@@ -75,7 +75,7 @@ inline void ZColor::to_ubyte(unsigned char* ub, bool wrap)
   }
 }
 
-inline void ZColor::rgb_to_ubyte(unsigned char* ub, bool wrap)
+inline void ZColor::rgb_to_ubyte(unsigned char* ub, bool wrap) const
 {
   if(wrap) {
     for(int i=0; i<3; ++i)
