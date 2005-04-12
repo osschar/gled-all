@@ -114,12 +114,12 @@ int FGS::PackEntryCollapsor::collexp(bool resize_p)
     pg->redraw();
     Fl_Window* win = dynamic_cast<Fl_Window*>(pg->parent());
     if(win) {
-      Fl_Widget* res = pg->resizable();
-      pg->resizable(0);
+      Fl_Widget* res = win->resizable();
+      win->resizable(0);
       win->position(win->x(), win->y() + dh/2);
-      win->size(pg->w(), pg->h()+dh);
+      win->size(win->w(), pg->h()+dh);
       win->redraw();
-      pg->resizable(res);
+      win->resizable(res);
     }
   }
 
