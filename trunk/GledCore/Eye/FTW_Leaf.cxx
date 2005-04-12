@@ -14,7 +14,7 @@
 #include <Glasses/NestInfo.h>
 #include <Net/Ray.h>
 
-#include "MTW_View.h"
+#include "MTW_ClassView.h"
 #include "MTW_Layout.h"
 
 #include <FL/Fl_Box.H>
@@ -347,7 +347,7 @@ void FTW_Leaf::create_custom_view(MTW_Layout* layout) {
   int n = layout->CountSubViews(fImg->fGlass);
   if(n > 0) {
     FTW_Shell* shell = mNest->GetShell();
-    wCustomView = new MTW_View(fImg, shell);
+    wCustomView = new MTW_ClassView(fImg, shell);
     wCustomView->BuildByLayout(layout);
     shell->prepare_group(wCustomView);
     insert(*wCustomView, wTailBox);

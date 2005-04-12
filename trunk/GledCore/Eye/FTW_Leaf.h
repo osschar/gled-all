@@ -9,7 +9,7 @@
 
 #include "OptoStructs.h"
 #include "FTW.h"
-class FTW_Nest; class MTW_Layout;
+class FTW_Nest; class MTW_ClassView; class MTW_Layout;
 
 #include <FL/Fl_Pack.H>
 class Fl_Box; class Fl_Button;
@@ -40,7 +40,7 @@ protected:
   Fl_Box*		wSepBox;
   Fl_Pack*		wAntPack;
 
-  MTW_View*		wCustomView;
+  MTW_ClassView*	wCustomView;
   Fl_Box*		wTailBox;
   // Rnr Ctrl weedget
 
