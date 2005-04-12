@@ -1,5 +1,10 @@
 2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* common_foos.C:
+	Unknown: part II.
+
+2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* alice_simple.C:
 	* simple_geo.root:
 	Unknown.
