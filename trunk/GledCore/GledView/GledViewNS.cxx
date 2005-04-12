@@ -259,14 +259,15 @@ namespace {
 
 
 GledViewNS::WeedInfo*
-GledViewNS::ClassInfo::FindWeedInfo(const string& name, bool recurse, GledNS::ClassInfo* true_class)
+GledViewNS::ClassInfo::FindWeedInfo(const string& name, bool recurse,
+				    GledNS::ClassInfo* true_class)
 {
   lpWeedInfo_i i = find_if(fWeedList.begin(), fWeedList.end(),
 			   infobase_name_eq(name));
   if(i != fWeedList.end()) return *i;
-  if(recurse) {
+  if(recurse && true_class != 0) {
     GledNS::ClassInfo* p = true_class->GetParentCI();
-    if(p) return p->fViewPart->FindWeedInfo(name, recurse, true_class);
+    if(p) return p->fViewPart->FindWeedInfo(name, recurse, p);
   }
   return 0;
 }
