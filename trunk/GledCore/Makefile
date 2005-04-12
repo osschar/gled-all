@@ -43,7 +43,7 @@ bin/saturn: saturn.o ${BASE_LIB_NAME}
 
 bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
 	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
-	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
+	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View -l${REGEXP_LIB_BASE} \
 	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
 
 ${REGEXP_LIB}:
