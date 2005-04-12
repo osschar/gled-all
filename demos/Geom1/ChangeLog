@@ -1,3 +1,8 @@
+2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	New file demonstrating use of metagui infrastructure.
+
 2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* WS_demo.C:

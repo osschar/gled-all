@@ -1,3 +1,61 @@
+2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MetaSubViewInfo.cxx:
+	* Glasses/MetaSubViewInfo.h:
+	* Glasses/MetaViewInfo.cxx:
+	* Glasses/MetaViewInfo.h:
+	* Glasses/MetaWeedInfo.cxx:
+	* Glasses/MetaWeedInfo.h:
+	* glass.list:
+	New glasses ('MetaViewInfo', 'MetaSubViewInfo' and 'MetaWeedInfo')
+	for lens-tree representation of custom lens-view GUIs.
+
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	Added method SpawnMetaGui and accompanying custom ray.
+
+	* Eye/MTW_View.cxx:
+	* Eye/MTW_View.h:
+	Cleaned-up to represent common behaviour; implementation of view
+	building process moved to 'MTW_ClassView'.
+
+	* Eye/MTW_Layout.cxx:
+	* Eye/MTW_Layout.h:
+	* Eye/MTW_SubView.h:
+	Interface regularization.
+
+	* Eye/MTW_ClassView.cxx:
+	* Eye/MTW_ClassView.h:
+	* Eye/MTW_MetaView.cxx:
+	* Eye/MTW_MetaView.h:
+	New files. Sub-classes of MTW_View. MTW_ClassView is what MTW_View
+	used to be, MTW_MetaView is a new incarnation that can be built
+	from MetaView-lens-graph.
+
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	Added member spawn_metagui(); changes due to MTW_View split.
+
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FTW_Leaf.h:
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	Changes due to MTW_View split.
+
+	* Eye/FltkGledStuff.cxx:
+	Fixed parent resizing in PackEntryCollapsor::collexp().
+
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	ClassInfo::FindWeedInfo(): better handling of recursion arguments.
+
+	* Stones/ZColor.h:
+	constified to_ubyte() and rgb_to_ubyte().
+
+	* perllib/GLED_Widgets.pm:
+	Trans weeds set label to 0 instead of setting label-type to
+	no-label.
+
 2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:
