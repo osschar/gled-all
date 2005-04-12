@@ -105,7 +105,8 @@ namespace GledViewNS {
 
     //----------------------------------------------------------------
 
-    WeedInfo*		FindWeedInfo(const string& name, bool recurse, GledNS::ClassInfo* true_class);
+    WeedInfo*		FindWeedInfo(const string& name, bool recurse=false,
+				     GledNS::ClassInfo* true_class=0);
     GledNS::ClassInfo*	GetRendererCI();
     A_Rnr*		SpawnRnr(const string& rnr, ZGlass* g);
   };
