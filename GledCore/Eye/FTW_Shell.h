@@ -61,6 +61,9 @@ protected:
 
   void set_canvased_subshell(OptoStructs::ZGlassImg* img);
 
+  // Meta-GUI spawning
+  void spawn_metagui(OptoStructs::ZGlassImg* img, ZGlass* gui);
+
   // Windows that get redrawn on every Ray ... pupils, in principle.
   typedef list<Fl_Window*>		lpFl_Window_t;
   typedef list<Fl_Window*>::iterator	lpFl_Window_i;

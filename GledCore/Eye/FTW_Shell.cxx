@@ -18,7 +18,8 @@
 #include "FTW_Branch.h"
 #include "FTW_Ant.h"
 #include "FTW_Nest.h"
-#include "MTW_View.h"
+#include "MTW_ClassView.h"
+#include "MTW_MetaView.h"
 #include "Eye.h"
 #include "Pupil.h"
 
@@ -234,18 +235,17 @@ void FTW_Shell::_bootstrap()
 
       Fl_Group::current(0);
       MTW_Layout lout(0);
-      Fl_Group::current(inpp);
-      MTW_View* mtw = new MTW_View(fImg, this);
       lout.GetLaySpecs()->value("ShellInfo(MessageRecipient[16],MsgOutH)");
       lout.Parse(cell_w());
+      Fl_Group::current(inpp);
+
+      MTW_ClassView* mtw = new MTW_ClassView(fImg, this);
       mtw->BuildByLayout(&lout);
       mtw->Labelofy();
       mtw->position(msg_pre->w(), 0);
 
-      Fl_Widget* o = mtw;
-      int xbeg = o->x() + o->w();
+      int xbeg = mtw->x() + mtw->w();
       Fl_Box* xb = new Fl_Box(FTW::separator_box, xbeg, 0, w()-xbeg, 1, "");
-      printf("%d %d\n", xbeg, w());
       xb->color(fl_rgb_color(200,220,200));
 
       inpp->end();
@@ -350,6 +350,12 @@ void FTW_Shell::AbsorbRay(Ray& ray)
 
     case ShellInfo::PRQN_remove_subshell:
       kill_subshell(ray.fBetaImg);
+      break;
+
+    case ShellInfo::PRQN_spawn_metagui:
+      printf("Shell spawning metagui of %s, template %s\n",
+	     ray.fBeta->Identify().c_str(), ray.fGamma->Identify().c_str());
+      spawn_metagui(ray.fBetaImg, ray.fGamma);
       break;
 
     case ShellInfo::PRQN_resize_window: {
@@ -515,6 +521,24 @@ void FTW_Shell::set_canvased_subshell(OptoStructs::ZGlassImg* img)
   }
 
   mCurCanvas = new_canvas;
+}
+
+/**************************************************************************/
+
+void FTW_Shell::spawn_metagui(OptoStructs::ZGlassImg* img, ZGlass* gui)
+{
+  Fl_Window* w = new Fl_Window(0,0);
+  MTW_MetaView* mv = new MTW_MetaView(img, this);
+  w->end();
+  try {
+    mv->BuildByLensGraph(gui);
+  }
+  catch(string exc) {
+    Message(exc, MT_err);
+    return;
+  }
+  adopt_window(w);
+  w->show();
 }
 
 /**************************************************************************/
@@ -769,14 +793,15 @@ void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool show_p)
 {
   if(img->fFullMTW_View == 0) {
     Fl_Window* w = new Fl_Window(0,0);
-    img->fFullMTW_View = new MTW_View(img, this);
+    MTW_ClassView* cv = new MTW_ClassView(img, this);
     w->end();
-    img->fFullMTW_View->BuildVerticalView();
+    cv->BuildVerticalView();
     adopt_window(w);
+    img->fFullMTW_View = cv;
     mMTW_Views.insert(img);
   }
   if(show_p) {
-    img->fFullMTW_View->ShowWindow();
+    img->fFullMTW_View->GetWindow()->show();
   }
 }
 
