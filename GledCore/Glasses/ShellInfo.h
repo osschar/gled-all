@@ -14,6 +14,8 @@
 
 #include <Net/Ray.h>
 
+class MetaViewInfo;
+
 class ShellInfo : public ZNameMap {
   MAC_RNR_FRIENDS(ShellInfo);
 
@@ -22,6 +24,7 @@ public:
 		      PRQN_set_def_subshell,
 		      PRQN_add_subshell,
 		      PRQN_remove_subshell,
+		      PRQN_spawn_metagui,
 		      PRQN_resize_window
   };
 
@@ -59,6 +62,8 @@ public:
 
   void SetDefSubShell(SubShellInfo* ss);
   void SetSubShells(ZHashList* ss);
+
+  void SpawnMetaGui(ZGlass* source, MetaViewInfo* gui_template); // X{E} C{2} 7 MCWButt()
 
   void EmitResizeRay();
 

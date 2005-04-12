@@ -15,6 +15,7 @@
 // of some sort if it is not set.
 
 #include "ShellInfo.h"
+#include "MetaViewInfo.h"
 #include "ShellInfo.c7"
 #include "NestInfo.h"
 #include <Glasses/ZQueen.h>
@@ -115,6 +116,19 @@ void ShellInfo::SetSubShells(ZHashList* ss)
   if(mSubShells != 0)
     throw(_eh + "can not be changed.");
   set_link_or_die((ZGlass*&)mSubShells, ss, FID());
+}
+
+/**************************************************************************/
+
+void ShellInfo::SpawnMetaGui(ZGlass* source, MetaViewInfo* gui_template)
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_spawn_metagui, mTimeStamp, FID()));
+    ray->SetBeta(source);
+    ray->SetGamma(gui_template);
+    mQueen->EmitRay(ray);
+  }
 }
 
 /**************************************************************************/
