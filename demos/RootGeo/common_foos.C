@@ -3,6 +3,8 @@
 // Common functions for ROOT geometry demos.
 // #include <glass_defines.h>
 
+Text_t* default_nest_layout = 0;
+
 Scene* create_basic_scene()
 {
   Scene* rscene = new Scene("Alice Detector Scene");
@@ -52,7 +54,7 @@ Scene* create_basic_scene()
     base->Set3Pos(7, 4, 7);
     base->SetRotByDegrees(180, -45, 90);
     base->RotateLF(3, 1, 22*TMath::DegToRad());
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Default", "");
     info->SetCameraBase(base);
@@ -66,7 +68,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Z+", "");
     base->Set3Pos(0, 0, ZCam);
     base->SetRotByDegrees(0, -90, 270);
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Z+", "");
     info->SetCameraBase(base);
@@ -76,7 +78,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Z-", "");
     base->Set3Pos(0, 0, -ZCam);
     base->SetRotByDegrees(0, 90, 270);
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Z-", "");
     info->SetCameraBase(base);
@@ -87,7 +89,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Y+", "");
     base->Set3Pos(0, YCam, 0);
     base->SetRotByDegrees(270, 0, 270);
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Y+", "");
     info->SetCameraBase(base);
@@ -97,7 +99,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Y-", "");
     base->Set3Pos(0, -YCam, 0);
     base->SetRotByDegrees(90, 0, 270);
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Y-", "");
     info->SetCameraBase(base);
@@ -108,7 +110,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "X+", "");
     base->Set3Pos(XCam, 0, 0);
     base->SetRotByDegrees(0, 180, 270);
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto X+", "");
     info->SetCameraBase(base);
@@ -118,7 +120,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "X-", "");
     base->Set3Pos(-XCam, 0, 0);
     base->SetRotByDegrees(0, 0, 270);
-    base->SetRadius(0.01);
+    base->SetRadius(0.002);
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto X-", "");
     info->SetCameraBase(base);
@@ -126,13 +128,15 @@ Scene* create_basic_scene()
     info->SetZSize(12);
   }
 
-  // Rnr mods.
+  // Var.
 
-  CREATE_ADD_GLASS(pointmod, ZGlBlending, rscene, "Blending", 0);
+  CREATE_ADD_GLASS(var, ZNode, rscene, "Var", 0);
+
+  CREATE_ADD_GLASS(pointmod, ZGlBlending, var, "Blending", 0);
   pointmod->SetAntiAliasOp(1);
   pointmod->SetPointSize(10);
 
-  CREATE_ADD_GLASS(lightmod, ZGlLightModel, rscene, "Light Model", 0);
+  CREATE_ADD_GLASS(lightmod, ZGlLightModel, var, "Light Model", 0);
   lightmod->SetShadeModelOp(1);
   lightmod->SetFaceCullOp(1);
 
@@ -161,6 +165,8 @@ void spawn_default_gui(Scene* rscene)
     ZList* laytop = register_GledCore_layouts();
     laytop->Swallow("RootGeo", new ZGlass("ZGeoNode", default_layout));
   }
+  if(default_nest_layout == 0)
+    default_nest_layout = default_layout;
 
   Text_t* eye_name   = "Eye";
   Text_t* shell_name = "Shell";
@@ -170,7 +176,7 @@ void spawn_default_gui(Scene* rscene)
 
   CREATE_ATT_GLASS(nest, NestInfo, shell, SetDefSubShell, "Nest", 0);
   nest->Add(rscene);
-  nest->SetLayout(default_layout);
+  nest->SetLayout(default_nest_layout);
   nest->SetLeafLayout(NestInfo::LL_Custom);
 
   CREATE_ATT_GLASS(gui_pupil, GuiPupilInfo, shell, AddSubShell, "GuiPupil", "");
