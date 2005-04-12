@@ -54,14 +54,13 @@ typedef list<MTW_Weed>::iterator	lMTW_Weed_i;
 /**************************************************************************/
 
 class MTW_SubView : public Fl_RelGroup {
-  friend class MTW_View;
 
 protected:
-  GledNS::ClassInfo*	mClassInfo;
-  MTW_View*		mView;	// Access to ZGlassImg, Eye
-  lMTW_Weed_t		mWeeds;
-  lMTW_Weed_t		mDataWeeds;
-  lMTW_Weed_t		mLinkWeeds;
+  GledNS::ClassInfo*	mClassInfo; // X{g}
+  MTW_View*		mView;	    // Access to ZGlassImg, Eye
+  lMTW_Weed_t		mWeeds;     // X{r}
+  lMTW_Weed_t		mDataWeeds; // X{r}
+  lMTW_Weed_t		mLinkWeeds; // X{r}
 
 public:
   MTW_SubView(GledNS::ClassInfo* ci, MTW_View* v);
@@ -86,6 +85,7 @@ public:
 
   static const int MinLabelWidth;
 
+#include "MTW_SubView.h7"
 }; // endclass MTW_SubView
 
 #endif
