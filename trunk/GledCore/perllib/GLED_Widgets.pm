@@ -682,7 +682,7 @@ sub new {
 sub make_widget {
   my $S=shift;
   return $S->make_widget_A() .
-         "\to->labeltype(FL_NO_LABEL);\n" .
+         "  o->label(0);\n" .
 	 $S->make_widget_B();
 }
 
@@ -730,7 +730,7 @@ sub new {
 sub make_widget {
   my $S=shift;
   return $S->make_widget_A() .
-         "\to->labeltype(FL_NO_LABEL);\n" .
+         "  o->label(0);\n" .
 	 $S->make_widget_B();
 }
 
