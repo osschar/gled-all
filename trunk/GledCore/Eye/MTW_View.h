@@ -11,11 +11,10 @@
 #include "OptoStructs.h"
 #include "FTW_SubShell.h"
 
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Pack.H>
 #include <FL/Fl_SWM.H>
+#include <FL/Fl_Box.H>
 
-class MTW_SubView; class MTW_Layout;
+class MTW_SubView;
 class ZGlass;
 class Eye;
 
@@ -26,23 +25,30 @@ class Fl_SWM_Manager;
 
 class MTW_View : public OptoStructs::A_View,
 		 public FTW_SubShell,
-		 public Fl_Pack, public Fl_SWM_Client
+		 public Fl_SWM_Client
 {
 private:
   void _init();
 
 protected:
-  void auto_label();
-  string m_label;
+  string  m_window_label;
+  virtual void auto_label();
 
   ZGlass*		mGlass;
   lpMTW_SubView_t	mSubViews;
 
+  Fl_Group*		mFltkRep;
   bool			bShown;
 
-  Fl_Window*		mWindow;	// X{gs}
-  
-  // Some alignment flags, collapses per mid-class
+  // Self representation
+  class SelfRep : public Fl_Box {
+    MTW_View* fView;
+  public:
+    SelfRep(MTW_View* v, int x, int y, int w, int h);
+    virtual int handle(int ev);
+  };
+
+  SelfRep*		mSelfRep;
 
 public:
   // View created from FTW_Shell:
@@ -50,9 +56,6 @@ public:
   // Direct view for non enlightened lenses:
   MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr);
   ~MTW_View();
-
-  void BuildVerticalView();
-  void BuildByLayout(MTW_Layout* layout);
 
   void Labelofy();
 
@@ -63,10 +66,6 @@ public:
 
   void UpdateDataWeeds(FID_t fid);
   void UpdateLinkWeeds(FID_t fid);
-
-  void ShowWindow();
-
-  virtual int handle(int ev);
 
 #include "MTW_View.h7"
 }; // endclass MTW_View
