@@ -97,7 +97,7 @@ void MTW_Layout::Parse(int cell_w) throw (string)
     for(lStr_i m=members.begin(); m!=members.end(); ++m) {
       string mmb_name, width_arg;
       GNS::deparen_string(*m, mmb_name, width_arg, "{[", true);
-      GVNS::WeedInfo* mi = ci->fViewPart->FindWeedInfo(mmb_name, false, ci);
+      GVNS::WeedInfo* mi = ci->fViewPart->FindWeedInfo(mmb_name);
       if(mi==0) {
 	throw string("member '"+mmb_name+"' not found for class '"+cls_name+"'");
       }

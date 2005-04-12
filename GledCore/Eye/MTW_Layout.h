@@ -15,9 +15,8 @@
 class FTW_Nest;
 
 class MTW_Layout : public Fl_Window, public Fl_SWM_Client {
-  friend class MTW_View;
 
-protected:
+public:
   struct Member {
     GledViewNS::WeedInfo*	fWeedInfo;
     int				fW;
@@ -25,6 +24,7 @@ protected:
   };
   typedef list<Member>			lMember_t;
   typedef list<Member>::iterator	lMember_i;
+
   struct Class {
     GledNS::ClassInfo*		fClassInfo;
     lMember_t			fMembers;
@@ -33,10 +33,11 @@ protected:
   };
   typedef list<Class>			lClass_t;
   typedef list<Class>::iterator		lClass_i;
-  
+
+protected:
   FTW_Nest*	mNest;		// X{g}
 
-  lClass_t	mClasses;
+  lClass_t	mClasses;	// X{r}
   bool		bIsValid;	// X{g}
 
   Fl_Input*	wLaySpecs;	// X{g}
