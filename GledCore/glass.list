@@ -79,3 +79,8 @@ SaturnObserver		193	Glasses/SaturnObserver
 # Performance investigators
 PerfMeterTarget		224	Glasses/PerfMeterTarget
 PerfMeterOperator	225	Glasses/PerfMeterOperator
+
+# Meta GUI
+MetaViewInfo		256	Glasses/MetaViewInfo
+MetaSubViewInfo		257	Glasses/MetaSubViewInfo
+MetaWeedInfo		258	Glasses/MetaWeedInfo
