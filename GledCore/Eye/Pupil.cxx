@@ -6,7 +6,7 @@
 
 #include "Pupil.h"
 #include "Eye.h"
-#include "MTW_View.h"
+#include "MTW_ClassView.h"
 #include "FTW_Shell.h"
 
 #include <Glasses/Camera.h>
@@ -924,13 +924,14 @@ int Pupil::handle(int ev)
     case FL_F+2:
       if(mCameraView == 0) {
 	Fl_Window* w = new Fl_Window(0,0);
-	mCameraView = new MTW_View(mCamera, mShell);
+	MTW_ClassView* cv = new MTW_ClassView(mCamera, mShell);
+	mCameraView = cv;
 	w->end();
-	mCameraView->BuildVerticalView();
+	cv->BuildVerticalView();
 	mShell->adopt_window(w);
 	mCamera->SetStamp_CB((zglass_stamp_f)camera_stamp_cb, this);
       }
-      mCameraView->ShowWindow();
+      mCameraView->GetWindow()->show();
       return 1;
 
       /*

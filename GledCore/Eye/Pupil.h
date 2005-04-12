@@ -14,7 +14,7 @@
 #include <Eye/OptoStructs.h>
 #include "FTW_SubShell.h"
 class PupilInfo;
-class MTW_View;
+class MTW_ClassView;
 
 #include <RnrBase/RnrDriver.h>
 
@@ -38,7 +38,7 @@ protected:
   RnrDriver*	mDriver;
 
   Camera*	mCamera;
-  MTW_View*	mCameraView;
+  MTW_View* 	mCameraView;
 
   ZNode*	mCamBase;
   ZTrans	mCamBaseTrans;
