@@ -10,6 +10,8 @@
 #include "MTW_View.h"
 #include <FL/Fl_Group.H>
 
+class MetaSubViewInfo;
+
 class MTW_MetaView : public MTW_View, public Fl_Group
 {
 private:
@@ -19,6 +21,9 @@ protected:
   // virtual void auto_label(); use default labeling
 
   ID_t	mGuiTemplate; // X{GS}
+
+  void build_subview(MTW_SubView* sv, MetaSubViewInfo* msvi,
+		     Int_t cX, Int_t cY);
 
 public:
   MTW_MetaView(OptoStructs::ZGlassImg* img, FTW_Shell* shell);

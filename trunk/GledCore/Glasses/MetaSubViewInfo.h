@@ -16,6 +16,8 @@ private:
   void _init();
 
 protected:
+  Int_t		mX;      // X{GS} 7 Value(-range=>[0,256,1], -join=>1)
+  Int_t		mY;      // X{GS} 7 Value(-range=>[0,256,1])
 
 public:
   MetaSubViewInfo(const Text_t* n="MetaSubViewInfo", const Text_t* t=0) :
