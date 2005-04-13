@@ -1,11 +1,7 @@
 // $Header$
 
-// simple scene with images and RectTerrain
+// copy of images.C with added metagui example
 //
-// crystal.png bacteria.png are 512x512 AFM scans, eg:
-//   image3->SetFile("bacteria.png");
-//   image3->Load();
-//   terrain->SetFromImage(image3);
 
 // vars: ZQueen* scenes
 // libs: Geom1
@@ -188,12 +184,13 @@ void metagui_test()
   w13->Box(MetaWeedInfo::BT_Engraved);
 
   CREATE_ADD_GLASS(ms2, MetaSubViewInfo, mg, "ZNode", 0);
+  ms2->Position(0, 4);
   CREATE_ADD_GLASS(w21, MetaWeedInfo, ms2, "Pos", 0);
-  w21->Resize(0, 4, 32, 2);
+  w21->Resize(0, 0, 32, 2);
   w21->Label("Drag mouse for ultimate enjointment.");
   w21->Align(false, 0, -1);
   CREATE_ADD_GLASS(w22, MetaWeedInfo, ms2, "Rot", 0);
-  w22->Resize(0, 6, 32, 2);
+  w22->Resize(0, 2, 32, 2);
   w22->Label("middle button x10, right x100");
   w22->Align(false, 0, 1);
 
