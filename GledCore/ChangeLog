@@ -1,3 +1,12 @@
+2005-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MTW_MetaView.cxx:
+	* Eye/MTW_MetaView.h:
+	* Glasses/MetaSubViewInfo.cxx:
+	* Glasses/MetaSubViewInfo.h:
+	Added offset variables for each MetaSubView. This should make
+	packing of elements somewhat more natural.
+
 2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/MetaSubViewInfo.cxx:
