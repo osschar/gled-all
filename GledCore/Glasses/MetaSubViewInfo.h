@@ -23,6 +23,7 @@ public:
   MetaSubViewInfo(const Text_t* n="MetaSubViewInfo", const Text_t* t=0) :
     ZList(n,t) { _init(); }
 
+  void Position(int x, int y);  // X{E}
 
 #include "MetaSubViewInfo.h7"
   ClassDef(MetaSubViewInfo, 1)
