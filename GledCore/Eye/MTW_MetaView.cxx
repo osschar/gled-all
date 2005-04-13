@@ -66,6 +66,82 @@ namespace {
   void rebuild_cb(Fl_Widget* o, MTW_MetaView* ud) { ud->Rebuild(); }
 }
 
+void MTW_MetaView::build_subview(MTW_SubView* sv, MetaSubViewInfo* msvi,
+				 Int_t cX, Int_t cY)
+{
+  static const string _eh("MTW_MetaView::build_subview ");
+
+  GNS::ClassInfo*  msvi_ci = sv->GetClassInfo();
+
+  cX += msvi->GetX();
+  cY += msvi->GetY();
+
+  list<MetaWeedInfo*> weeds;
+  msvi->CopyByGlass<MetaWeedInfo*>(weeds);
+  list<MetaWeedInfo*>::iterator weed_it = weeds.begin();
+  while(weed_it != weeds.end()) {
+    MetaWeedInfo*  mwi = *weed_it;
+
+    string wname(mwi->GetName());
+    PME       re("<(.*)>", "o");
+    int rec = re.match(wname);
+
+    Fl_Widget* o = 0;
+    if(rec == 0) {
+      GVNS::WeedInfo* wi = msvi_ci->fViewPart->FindWeedInfo(mwi->GetName());
+      if(wi == 0)
+	throw(_eh + GForm("member '%s::%s' not found.", msvi->GetName(), mwi->GetName()));
+      
+      // printf("    W: %s (%p) %d,%d,%d,%d\n", mwi->GetName(), wi,
+      //     mwi->GetX(), mwi->GetY(), mwi->GetW(), mwi->GetH());
+
+      Fl_Widget* w = sv->CreateWeed(wi);
+      w->resize(mwi->GetX() + cX, mwi->GetY() + cY, mwi->GetW(), mwi->GetH());
+      o = w;
+    } else {
+      if(re[1] == "box") {
+	Fl_Box* b = new Fl_Box(mwi->GetX() + cX, mwi->GetY() + cY,
+			       mwi->GetW(), mwi->GetH());
+	b->copy_label(mwi->GetTitle());
+	o = b;
+      }
+    }
+    if(o == 0)
+      throw(_eh + GForm("creation of '%s::%s' failed.", msvi->GetName(), mwi->GetName()));
+      
+    if(mwi->GetColorP()) {
+      UChar_t c[3]; mwi->PtrColor()->rgb_to_ubyte(c);
+      o->color(fl_rgb_color(c[0], c[1], c[2]));
+    }
+    if(mwi->GetLabelP()) {
+      o->copy_label(mwi->GetTitle());
+    }
+    if(mwi->GetAlignP()) {
+      int a = 0;
+      if(mwi->GetAInside()) a |= FL_ALIGN_INSIDE;
+      if(char l=mwi->GetALtRt()) a |= l<0 ? FL_ALIGN_LEFT : FL_ALIGN_RIGHT;
+      if(char l=mwi->GetAUpDn()) a |= l<0 ? FL_ALIGN_TOP  : FL_ALIGN_BOTTOM;
+      o->align(a);
+    }
+    if(mwi->GetBoxType() != 0) {
+      Fl_Boxtype b;
+      switch(mwi->GetBoxType()) {
+      case MetaWeedInfo::BT_Flat:     b = FL_FLAT_BOX; break;
+      case MetaWeedInfo::BT_Up:       b = FL_UP_BOX; break;
+      case MetaWeedInfo::BT_ThinUp:   b = FL_THIN_UP_BOX; break;
+      case MetaWeedInfo::BT_Engraved: b = FL_ENGRAVED_BOX; break;
+      case MetaWeedInfo::BT_Border:   b = FL_BORDER_BOX; break;
+      default: b = FL_FLAT_BOX;;
+      }
+      if(mwi->GetBDown())  b = fl_down(b);
+      if(mwi->GetBFrame()) b = fl_frame(b);
+      o->box(b);
+    }
+
+    ++weed_it;
+  }
+}
+
 void MTW_MetaView::BuildByLensGraph(ZGlass* gui)
 {
   static const string _eh("MTW_MetaView::BuildByLensGraph ");
@@ -94,6 +170,9 @@ void MTW_MetaView::BuildByLensGraph(ZGlass* gui)
   list<MetaSubViewInfo*> subviews;
   mvi->CopyByGlass<MetaSubViewInfo*>(subviews);
   list<MetaSubViewInfo*>::iterator subview_it = subviews.begin();
+
+  hash_map<FID_t, MTW_SubView*> sv_hash;
+
   while(subview_it != subviews.end()) {
     MetaSubViewInfo* msvi    = *subview_it;
     GNS::ClassInfo*  msvi_ci = GNS::FindClassInfo(msvi->GetName());
@@ -104,78 +183,19 @@ void MTW_MetaView::BuildByLensGraph(ZGlass* gui)
       throw(_eh + "source lens is not of glass '" + msvi->GetName() + "'.");
 
     // printf("  Sub: %s (%p)\n", msvi->GetName(), msvi_ci);
-
-    MTW_SubView* sv = (msvi_ci->fViewPart->fooSVCreator)(msvi_ci, this, mGlass);
-
-    list<MetaWeedInfo*> weeds;
-    msvi->CopyByGlass<MetaWeedInfo*>(weeds);
-    list<MetaWeedInfo*>::iterator weed_it = weeds.begin();
-    while(weed_it != weeds.end()) {
-      MetaWeedInfo*  mwi = *weed_it;
-
-      string wname(mwi->GetName());
-      PME       re("<(.*)>", "o");
-      int rec = re.match(wname);
-
-      Fl_Widget* o = 0;
-      if(rec == 0) {
-	GVNS::WeedInfo* wi = msvi_ci->fViewPart->FindWeedInfo(mwi->GetName());
-	if(wi == 0)
-	  throw(_eh + GForm("member '%s::%s' not found.", msvi->GetName(), mwi->GetName()));
-      
-	// printf("    W: %s (%p) %d,%d,%d,%d\n", mwi->GetName(), wi,
-	//     mwi->GetX(), mwi->GetY(), mwi->GetW(), mwi->GetH());
-
-	Fl_Widget* w = sv->CreateWeed(wi);
-	w->resize(mwi->GetX() + cX, mwi->GetY() + cY, mwi->GetW(), mwi->GetH());
-	o = w;
-      } else {
-	if(re[1] == "box") {
-	  Fl_Box* b = new Fl_Box(mwi->GetX() + cX, mwi->GetY() + cY,
-				 mwi->GetW(), mwi->GetH());
-	  b->copy_label(mwi->GetTitle());
-	  o = b;
-	}
-      }
-      if(o == 0)
-	throw(_eh + GForm("creation of '%s::%s' failed.", msvi->GetName(), mwi->GetName()));
-      
-      if(mwi->GetColorP()) {
-	UChar_t c[3]; mwi->PtrColor()->rgb_to_ubyte(c);
-	o->color(fl_rgb_color(c[0], c[1], c[2]));
-      }
-      if(mwi->GetLabelP()) {
-	o->copy_label(mwi->GetTitle());
-      }
-      if(mwi->GetAlignP()) {
-	int a = 0;
-	if(mwi->GetAInside()) a |= FL_ALIGN_INSIDE;
-	if(char l=mwi->GetALtRt()) a |= l<0 ? FL_ALIGN_LEFT : FL_ALIGN_RIGHT;
-	if(char l=mwi->GetAUpDn()) a |= l<0 ? FL_ALIGN_TOP  : FL_ALIGN_BOTTOM;
-	o->align(a);
-      }
-      if(mwi->GetBoxType() != 0) {
-	Fl_Boxtype b;
-	switch(mwi->GetBoxType()) {
-	case MetaWeedInfo::BT_Flat:     b = FL_FLAT_BOX; break;
-	case MetaWeedInfo::BT_Up:       b = FL_UP_BOX; break;
-	case MetaWeedInfo::BT_ThinUp:   b = FL_THIN_UP_BOX; break;
-	case MetaWeedInfo::BT_Engraved: b = FL_ENGRAVED_BOX; break;
-	case MetaWeedInfo::BT_Border:   b = FL_BORDER_BOX; break;
-	default: b = FL_FLAT_BOX;;
-	}
-	if(mwi->GetBDown())  b = fl_down(b);
-	if(mwi->GetBFrame()) b = fl_frame(b);
-	o->box(b);
-      }
-
-      ++weed_it;
+    MTW_SubView* sv = 0;
+    hash_map<FID_t, MTW_SubView*>::iterator svh_i = sv_hash.find(msvi_ci->fFid);
+    if(svh_i == sv_hash.end()) {
+      sv = (msvi_ci->fViewPart->fooSVCreator)(msvi_ci, this, mGlass);
+      sv->size(W,H);
+      mSubViews.push_back(sv);
+      sv_hash[msvi_ci->fFid] = sv;
+    } else {
+      sv = svh_i->second;
+      sv->begin();
     }
-
+    build_subview(sv, msvi, cX, cY);
     sv->end();
-    sv->size(W,H);
-    add(sv);
-    mSubViews.push_back(sv);
 
     ++subview_it;
   }
@@ -206,6 +226,7 @@ void MTW_MetaView::Rebuild()
   catch(string exc) {
     mShell->Message(exc, FTW_Shell::MT_err);
     delete w;
+    Fl_Group::current(0);
     return;
   }
   mShell->adopt_window(w);

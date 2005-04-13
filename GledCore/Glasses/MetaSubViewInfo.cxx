@@ -19,6 +19,7 @@ ClassImp(MetaSubViewInfo)
 void MetaSubViewInfo::_init()
 {
   // *** Set all links to 0 ***
+  mX = mY = 0;
 }
 
 /**************************************************************************/
