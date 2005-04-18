@@ -103,9 +103,9 @@ void FTW_Ant::resize_weeds(int name_w, int butt_w, int h) {
 void FTW_Ant::label_weeds() {
   wExpander->labelcolor(FL_BLACK);
   if(bExpanded) {
-    wExpander->label("@#->");
+    wExpander->label("@#-2->");
   } else {
-    wExpander->label("@#->|");
+    wExpander->label("@#-2->|");
     if(!GetToImg()) wExpander->labelcolor(FL_DARK_RED);
   }
   wExpander->redraw();

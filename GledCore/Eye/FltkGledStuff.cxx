@@ -72,7 +72,7 @@ int FGS::swm_string_width(string& str, int cell_w)
 FGS::PackEntryCollapsor::PackEntryCollapsor(const char* t) :
   Fl_Group(0,0,4,1), mColWid(0)
 {
-  fBut = new Fl_Button(0,0,2,1, "@#>");
+  fBut = new Fl_Button(0,0,2,1, "@#-2>");
   fBut->labeltype(FL_SYMBOL_LABEL);
   fBut->callback((Fl_Callback*)cb_collexp, this);
   fBut->color(fl_rgb_color(200,220,200));
@@ -101,11 +101,11 @@ int FGS::PackEntryCollapsor::collexp(bool resize_p)
   int dh = 0;
   if(mColWid->visible()) {
     mColWid->hide();
-    fBut->label("@#>[]");
+    fBut->label("@#-2>[]");
     dh = -mColWid->h();
   } else {
     mColWid->show();
-    fBut->label("@#>");
+    fBut->label("@#-2>");
     dh = mColWid->h();
   }
   
