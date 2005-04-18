@@ -392,9 +392,15 @@ sub new {
 
 sub make_widget {
   my $S = shift;
-  return $S->make_widget_A() . 
-    "\to->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
-    $S->make_widget_B();
+  my $whencb;
+  if(defined $S->{-whenchanged}) {
+    $whencb = "  o->when(FL_WHEN_CHANGED);\n";
+  } else {
+    $whencb = "  o->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
+      "  o->color(fl_rgb_color(255, 245, 245));\n" .
+      "  o->tooltip(sTextorTooltip);\n";
+  }
+  return $S->make_widget_A() . $whencb . $S->make_widget_B();
 }
 
 sub make_cxx_cb { my $S = shift; $S->make_text_widget_cb(); }
@@ -451,6 +457,8 @@ sub make_widget {
     "\to->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
     "\to->tooltip(\"R-button opens file selector\");\n" .
     (defined $S->{-pat} ? "\to->pattern(\"$S->{-pat}\");\n" : "" ) .
+    (defined $S->{-abs} ? "\to->absolute_p(true);\n" : "" ) .
+    (defined $S->{-dir} ? "\to->directory_p(true);\n" : "" ) .
     $S->make_widget_B();
 }
 
