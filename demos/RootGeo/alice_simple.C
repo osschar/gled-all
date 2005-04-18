@@ -9,6 +9,8 @@
 
 class ZGeoNode;
 
+ZGeoNode* g_simple_geometry = 0;
+
 #include "common_foos.C"
 
 /**************************************************************************/
@@ -31,7 +33,8 @@ Scene* alice_simple(const Text_t* geom_file = "simple_geo.root",
 
   //--------------------------------------------------------------
 
-  spawn_default_gui(rscene);
+  setup_default_gui(rscene);
+  spawn_default_gui();
 
   return rscene;
 }
@@ -57,7 +60,7 @@ Scene* alice_simple_init(const Text_t* geom_file = "simple_geo.root",
 
   //--------------------------------------------------------------
 
-  ZGeoNode* znode = new ZGeoNode("MasterVolume");
+  ZGeoNode* znode = new ZGeoNode("Geometry");
   znode->SetTNode(gGeoManager->GetTopNode());
   znode->SetOM(-2);
   znode->SetUseOM(true);
@@ -68,6 +71,8 @@ Scene* alice_simple_init(const Text_t* geom_file = "simple_geo.root",
   znode->SetDefFile(det_file);
   znode->LoadFromFile();
   znode->Restore();
+
+  g_simple_geometry = znode;
 
   return rscene;
 }

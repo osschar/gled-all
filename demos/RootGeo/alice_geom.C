@@ -70,7 +70,8 @@ void alice_geom(Int_t import_mode=0)
 
   //--------------------------------------------------------------
 
-  spawn_default_gui(rscene);
+  setup_default_gui(rscene);
+  spawn_default_gui();
 }
 
 /**************************************************************************/

@@ -1,9 +1,22 @@
 // $Header$
 
 // Common functions for ROOT geometry demos.
-// #include <glass_defines.h>
+
+#include <glass_defines.h>
 
 Text_t* default_nest_layout = 0;
+
+const Text_t* geometry_layout =
+  "ZNode(RnrSelf[5],RnrElements[5],"
+  "RnrOnForDaughters[8],RnrOffForDaughters[4]):"
+  "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Material[7]):ZGeoOvl(Overlap[7])";
+
+const Text_t* geometry_mini_layout =
+  "ZNode(RnrSelf[5],RnrElements[5],"
+  "RnrOnForDaughters[8],RnrOffForDaughters[4]):"
+  "ZGeoNode(Color[4],Material[7])";
+
+/**************************************************************************/
 
 Scene* create_basic_scene()
 {
@@ -134,7 +147,7 @@ Scene* create_basic_scene()
 
   CREATE_ADD_GLASS(pointmod, ZGlBlending, var, "Blending", 0);
   pointmod->SetAntiAliasOp(1);
-  pointmod->SetPointSize(10);
+  pointmod->SetPointSize(4);
 
   CREATE_ADD_GLASS(lightmod, ZGlLightModel, var, "Light Model", 0);
   lightmod->SetShadeModelOp(1);
@@ -152,27 +165,22 @@ Scene* create_basic_scene()
 
 /**************************************************************************/
 
-void spawn_default_gui(Scene* rscene)
+void setup_default_gui(Scene* rscene)
 {
-  const Text_t* default_layout =
-    "ZNode(RnrSelf[5],RnrElements[5],"
-    "RnrOnForDaughters[5],RnrOffForDaughters[5]):"
-    "ZGeoNode(Color[4],ImportNodes[4],NNodes[4],Material[8]):ZGeoOvl(Overlap[7])";
-
-
   gROOT->LoadMacro("eye.C");
   {
     ZList* laytop = register_GledCore_layouts();
-    laytop->Swallow("RootGeo", new ZGlass("ZGeoNode", default_layout));
+    laytop->Swallow("RootGeo", new ZGlass("MiniGeometry", geometry_mini_layout));
+    laytop->Swallow("RootGeo", new ZGlass("Geometry", geometry_layout));
   }
   if(default_nest_layout == 0)
-    default_nest_layout = default_layout;
+    default_nest_layout = geometry_layout;
 
   Text_t* eye_name   = "Eye";
   Text_t* shell_name = "Shell";
   Text_t* pupil_name = "Pupil";
 
-  CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
+  ASSIGN_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
 
   CREATE_ATT_GLASS(nest, NestInfo, shell, SetDefSubShell, "Nest", 0);
   nest->Add(rscene);
@@ -189,7 +197,9 @@ void spawn_default_gui(Scene* rscene)
 
   gui_pupil->SetCameras((ZList*)rscene->FindLensByPath("Markers/CameraInfos"));
   pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->First());
-
-  Gled::theOne->SpawnEye(0, shell, "GledCore", "FTW_Shell");
 }
 
+void spawn_default_gui()
+{
+  Gled::theOne->SpawnEye(0, shell, "GledCore", "FTW_Shell");
+}
