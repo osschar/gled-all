@@ -62,6 +62,8 @@ protected:
   lMTW_Weed_t		mDataWeeds; // X{r}
   lMTW_Weed_t		mLinkWeeds; // X{r}
 
+  static const Text_t* sTextorTooltip;
+
 public:
   MTW_SubView(GledNS::ClassInfo* ci, MTW_View* v);
   virtual ~MTW_SubView();

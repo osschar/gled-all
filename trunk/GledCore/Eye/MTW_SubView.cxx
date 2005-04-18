@@ -23,7 +23,8 @@ namespace OS   = OptoStructs;
 
 /**************************************************************************/
 
-const int MTW_SubView::MinLabelWidth = 3;
+const int     MTW_SubView::MinLabelWidth  = 3;
+const Text_t* MTW_SubView::sTextorTooltip = "press Enter to send data";
 
 /**************************************************************************/
 
