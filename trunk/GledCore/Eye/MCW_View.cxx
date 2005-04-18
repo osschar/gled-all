@@ -433,11 +433,6 @@ int MCW_View::handle(int ev)
     delete this;
     return 1;
   }
-
-  if(ev == FL_HIDE) {
-    delete this;
-    return 1;
-  }
   return Fl_Window::handle(ev);
 }
 
