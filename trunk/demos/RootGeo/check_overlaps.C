@@ -55,5 +55,6 @@ void check_overlaps(Float_t epsilon=1)
 
   //--------------------------------------------------------------
 
-  spawn_default_gui(rscene);
+  setup_default_gui(rscene);
+  spawn_default_gui();
 }
