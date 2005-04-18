@@ -353,8 +353,8 @@ void FTW_Shell::AbsorbRay(Ray& ray)
       break;
 
     case ShellInfo::PRQN_spawn_metagui:
-      printf("Shell spawning metagui of %s, template %s\n",
-	     ray.fBeta->Identify().c_str(), ray.fGamma->Identify().c_str());
+      // printf("Shell spawning metagui of %s, template %s\n",
+      //    ray.fBeta->Identify().c_str(), ray.fGamma->Identify().c_str());
       spawn_metagui(ray.fBetaImg, ray.fGamma);
       break;
 
