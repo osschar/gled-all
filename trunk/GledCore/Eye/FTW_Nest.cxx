@@ -43,7 +43,7 @@ FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
   NestInfo* ni = dynamic_cast<NestInfo*>(img->fGlass);
   if(ni == 0) throw(_eh + "user-data is not NestInfo.");
 
-  FTW_Nest* nest = new FTW_Nest(sh, img);
+  FTW_Nest* nest = new FTW_Nest(sh, img, ni->GetDefW(), ni->GetDefH());
   
   nest->SetSWM(sh, true);
   FTW_Leaf* top_leaf = FTW_Leaf::Construct(nest, 0, img, false, false);
@@ -143,6 +143,12 @@ namespace {
       break;
     }
 
+    case 6: { // Remove stand-alone MTV_Views.
+      auto_ptr<ZMIR> mir( nest->GetNestInfo()->S_ImportKings() );
+      nest->GetShell()->Send(*mir);
+      break;
+    }
+
     } // end switch
   }
 
@@ -164,7 +170,8 @@ namespace {
     { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
     { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
     { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER }, 
-    { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5 },
+    { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5, FL_MENU_DIVIDER },
+    { "Import Kings",                  0, (Fl_Callback*) view_menu_cb, (void*)6 },
     {0}
   };
 
