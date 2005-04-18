@@ -1,3 +1,43 @@
+2005-04-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Ant.cxx:
+	* Eye/FTW_Leaf.cxx:
+	* Eye/FltkGledStuff.cxx:
+	Downscaled expand/collapse symbol labels.
+
+	* Eye/FTW_Branch.cxx:
+	Deny expansion of lists longer that 1024 elements; downscaled
+	expand/collapse symbol labels.
+
+	* Eye/FTW_Nest.cxx:
+	Added 'Import Kings' to View menu.
+
+	* Eye/FTW_Shell.cxx:
+	Minor changes.
+
+	* Eye/MCW_Button.cxx:
+	Tooltip string was not constructed properly.
+
+	* Eye/MCW_View.cxx:
+	Delete the window on receiving FL_HIDE event.
+
+	* Eye/MTW_SubView.cxx:
+	* Eye/MTW_SubView.h:
+	Added 'static const Text_t* sTextorTooltip' advising users to
+	press the Enter key to send the typed value.
+
+	* Glasses/SubShellInfo.cxx:
+	* Glasses/SubShellInfo.h:
+	Added members 'Int_t mDefW, mDefH' specifying size of the
+	sub-shell-window on startup. Must be honoured by the actual
+	sub-shell spawning function.
+
+	* perllib/GLED_Widgets.pm:
+	Filor weed extended with several options.
+	'-whenchanged' make callback on every change.
+	'-abs'         return absolute pathnames.
+	'-dir'         select directories, not files.
+
 2005-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MTW_MetaView.cxx:
