@@ -318,9 +318,9 @@ void FTW_Leaf::label_namebox() {
 void FTW_Leaf::label_weeds() {
   // just labels the ant part ... virtuality should take care of branches
   if(FractionOfExpandedAnts() <= 0.5) {
-    wExpander->label("@#->|");
+    wExpander->label("@#-2->|");
   } else {
-    wExpander->label("@#->");
+    wExpander->label("@#-2->");
   }
   if(wAntPack->children() == 0)
     wExpander->labelcolor(FL_DARK_RED);
