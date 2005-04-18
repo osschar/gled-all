@@ -19,6 +19,7 @@ ClassImp(SubShellInfo)
 void SubShellInfo::_init()
 {
   // *** Set all links to 0 ***
+  mDefW = 64; mDefH = 30;
 }
 
 /**************************************************************************/
