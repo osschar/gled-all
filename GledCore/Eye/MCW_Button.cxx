@@ -45,6 +45,8 @@ void MCW_Button::FillData(GNS::MethodInfo* mi, const char* label,
   dt.fLabel = "";
   dt.fTooltip = mi->fName + "(";
 
+  lStr_t args;
+
   bool comma_p = false;
   int nc=0, ncd=0, na=0, nad=0;
   string t, n, d;
@@ -52,14 +54,15 @@ void MCW_Button::FillData(GNS::MethodInfo* mi, const char* label,
     MCW_View::split_argument(*m, t, n, d);
     if(d.length()) ++ncd;
     ++nc;
-    if(comma_p) dt.fTooltip += ", ";
-    dt.fTooltip += *m;
+    args.push_back(*m);
   }
   for(lStr_i m=mi->fArgs.begin(); m!=mi->fArgs.end(); ++m) {
     MCW_View::split_argument(*m, t, n, d);
     if(d.length()) ++nad;
     ++na;
+    args.push_back(*m);
   }
+
   if(ncd==nc && nad==na)
     dt.fDirectP = true;
   if((nc==1 || (nc>1 && ncd==nc)) && (nad==na))
@@ -69,7 +72,7 @@ void MCW_Button::FillData(GNS::MethodInfo* mi, const char* label,
   dt.fLabel += label;
   dt.fLabel += (dt.fDirectP) ? " .." : " ...";
   
-  dt.fTooltip += ")";
+  dt.fTooltip += GNS::join_strings(", ", args) + ")";
 }
 
 /**************************************************************************/
