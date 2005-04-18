@@ -6,6 +6,7 @@
 
 #include "FTW_Branch.h"
 #include "FTW_Nest.h"
+#include "FTW_Shell.h"
 #include "Eye.h"
 #include <Glasses/ZList.h>
 
@@ -143,8 +144,16 @@ void FTW_Branch::CollExpList()
 }
 
 void FTW_Branch::ExpandList() {
+  static const string _eh("FTW_Branch::ExpandList ");
+
   if(bListExpanded) return; // ants can call this for no good reason
   if(!bLeavesCreated) {
+    if(((ZList*)fImg->fGlass)->Size() > 1024) {
+      mNest->GetShell()->Message
+	(_eh + "refusing to expand list longer than 1024 elements.", Eye::MT_wrn);
+      return;
+    }
+
     int before_pos = mNest->PackPosAfter(this);
     build_leoim();
     for(lLoI_i i=mLeoim.begin(); i!=mLeoim.end(); ++i) {
@@ -226,9 +235,9 @@ void FTW_Branch::label_namebox() {
 
 void FTW_Branch::label_weeds() {
   if(bListExpanded) {
-    wListExpander->label("@#>");
+    wListExpander->label("@#-2>");
   } else {
-    wListExpander->label("@#>|");
+    wListExpander->label("@#-2>|");
   }
   wListExpander->redraw_label();
   FTW_Leaf::label_weeds();
