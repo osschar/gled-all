@@ -63,6 +63,7 @@ public:
   void ImportNodes();                      // X{Ed} 7 MButt(-join=>1)
   void Collapse();                         // X{Ed} 7 MButt()
   void ImportNodesWCollect();              // X{Ed} 7 MButt()
+  void ImportNodesRec(Int_t depth=2);      // X{Ed} 7 MCWButt()
 
   // Persistence.
   void SaveToFile(const Text_t* file=0);   // X{E}  7 MCWButt(-join=>1)
