@@ -29,9 +29,9 @@ protected:
   Float_t	mQuadAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000]);
 
   // How/When to draw the lamp, turn on/off the light
-  bool		bDrawLamp;		// X{GS} 7 Bool()
-  bool		bOnIfOff; 		// X{GS} 7 Bool(-join=>1)
-  bool		bOffIfOn;		// X{GS} 7 Bool()
+  Bool_t	bDrawLamp;		// X{GS} 7 Bool()
+  Bool_t	bOnIfOff; 		// X{GS} 7 Bool(-join=>1)
+  Bool_t	bOffIfOn;		// X{GS} 7 Bool()
 
 public:
   Lamp(const Text_t* n="Lamp", Text_t* t=0) : ZNode(n,t) { _init(); }
