@@ -10,6 +10,7 @@
 // Includes
 #include <Glasses/ZNode.h>
 #include <Glasses/Camera.h>
+class GTime;
 
 #include <Eye/OptoStructs.h>
 #include "FTW_SubShell.h"
@@ -55,7 +56,13 @@ protected:
 
   bool		bDumpImage;
   TString	mImageName;
-  void		dump_image();
+  Int_t		mImgNTiles;
+  void		dump_image(const string& fname);
+
+  // rendering elements
+  void rnr_default_init();
+  void rnr_fake_overlay(GTime& rnr_time);
+  void rnr_standard(Int_t n_tiles=1, Int_t x_i=0, Int_t y_i=0);
 
 public:
 
@@ -70,7 +77,7 @@ public:
   virtual void AbsorbRay(Ray& ray);
 
   void SetProjection1();
-  void SetProjection2();
+  void SetProjection2(Int_t n_tiles=1, Int_t x_i=0, Int_t y_i=0);
   void SetAbsRelCamera();
   void SetCameraView();
 

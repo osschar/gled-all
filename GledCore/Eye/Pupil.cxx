@@ -30,6 +30,11 @@
 #include <GL/glx.h>
 #include <math.h>
 
+// exp!
+
+#include "pbuffer.h"
+
+
 namespace OS = OptoStructs;
 
 /**************************************************************************/
@@ -203,6 +208,7 @@ void Pupil::AbsorbRay(Ray& ray)
   case PupilInfo::PRQN_dump_image: {
     if(ray.fRayBits & Ray::RB_CustomBuffer) {
       mImageName.Streamer(*ray.fCustomBuffer);
+      *ray.fCustomBuffer >> mImgNTiles;
       ray.ResetCustomBuffer();
       if(mImageName != "") {
 	bDumpImage = true;
@@ -239,20 +245,34 @@ void Pupil::SetProjection1()
   glViewport(0,0,w(),h());
 }
 
-void Pupil::SetProjection2()
+void Pupil::SetProjection2(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
+  double aspect = mInfo->GetYFac() * w()/h();
+  double near   = TMath::Max(mInfo->GetNearClip(), 1e-5l);
+  double far    = mInfo->GetFarClip();
+
+  double top, bot, rgt, lft;
+  void (*set_foo)(GLdouble, GLdouble, GLdouble, GLdouble, GLdouble, GLdouble);
+
   switch(mInfo->GetProjMode()) {
-  case PupilInfo::P_Perspective: {
-    gluPerspective(mInfo->GetZFov(), mInfo->GetYFac()*w()/h(),
-		   mInfo->GetNearClip(),  mInfo->GetFarClip());
+  case PupilInfo::P_Perspective:
+    top     = near*TMath::Tan(TMath::DegToRad()*mInfo->GetZFov()/2);
+    set_foo = glFrustum;
+    break;
+  case PupilInfo::P_Orthographic:
+    top     = mInfo->GetZSize()/2;
+    set_foo = glOrtho;
     break;
   }
-  case PupilInfo::P_Orthographic: {
-    float yh = mInfo->GetZSize()/2;
-    float xh = yh*w()/h()*mInfo->GetYFac();
-    glOrtho(-xh, xh, -yh, yh, mInfo->GetNearClip(), mInfo->GetFarClip());
+
+  bot = -top;
+  rgt = top*aspect;
+  lft = -rgt;
+  if(n_tiles > 1) {
+    double xs = 2*rgt/n_tiles; lft += x_i * xs; rgt  = lft + xs; 
+    double ys = 2*top/n_tiles; top -= y_i * ys; bot  = top - ys;
   }
-  }
+  set_foo(lft, rgt, bot, top, near, far);
 }
 
 void Pupil::SetAbsRelCamera()
@@ -448,10 +468,26 @@ void Pupil::Render()
   // Calls rnr driver to perform actual rendering.
   // Used by draw() and Pick().
 
+  static const string _eh("Pupil::Render ");
+
+  mDriver->SetWidth(w());
+  mDriver->SetHeight(h());
+
   mDriver->SetMaxDepth(mInfo->GetMaxRnrDepth());
   mDriver->BeginRender();
   mDriver->Render(mDriver->GetRnr(fImg));
   mDriver->EndRender();
+
+  if(mDriver->SizePM() > 0) {
+    printf("%sposition stack not empty (%d).\n", _eh.c_str(), mDriver->SizePM());
+    mDriver->ClearPM();
+  }
+
+  GLenum gl_err = glGetError();
+  if(gl_err) {
+    printf("%sGL error: %s.\n", _eh.c_str(), gluErrorString(gl_err));
+  }
+
 }
 
 /**************************************************************************/
@@ -622,25 +658,74 @@ OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
 }
 
 /**************************************************************************/
-// FLTK virtuals
+// fltk draw
 /**************************************************************************/
 
 void Pupil::draw()
 {
   static const string _eh("Pupil::draw ");
 
-  GTime start_time(GTime::I_Now);
-
   // if (!valid()) {}
 
+  if(bDumpImage) {
+
+    PBuffer pbuffer(w(), h());
+    pbuffer.Use();
+
+    if(mImgNTiles > 1) {
+      for(Int_t xi=0; xi<mImgNTiles; ++xi) {
+	for(Int_t yi=0; yi<mImgNTiles; ++yi) {
+	  rnr_standard(mImgNTiles, xi, yi);
+	  string fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
+	  dump_image(fname);
+	}
+      }
+      printf("Merge with: montage -tile %dx%d -geometry %dx%d %s-* %s.png\n",
+	     mImgNTiles, mImgNTiles, w(), h(), mImageName.Data(), mImageName.Data());
+    } else {
+      rnr_standard();
+      dump_image(string(mImageName.Data()) + ".tga");
+    }
+
+    bDumpImage = false;
+
+  } else {
+
+    GTime start_time(GTime::I_Now);
+
+    rnr_standard();
+
+    GTime stop_time(GTime::I_Now);
+    GTime rnr_time = stop_time - start_time;
+
+    rnr_fake_overlay(rnr_time);
+
+  }
+}
+
+/**************************************************************************/
+
+void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
+{
   glMatrixMode(GL_PROJECTION);
   SetProjection1();
-  SetProjection2();
+  SetProjection2(n_tiles, x_i, y_i);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   SetAbsRelCamera();
   SetCameraView();
+
+  rnr_default_init();
+
+  Render();
+}
+
+void Pupil::rnr_default_init()
+{
+  static const GLfloat mat_diffuse[]   = { 1.0, 1.0, 1.0, 1.0 };
+  static const GLfloat mat_specular[]  = { 0.2, 0.2, 0.2, 1.0 };
+  static const GLfloat mat_shininess[] = { 60.0 };
 
   { // clear
     const ZColor& c = mInfo->RefClearColor();
@@ -660,10 +745,6 @@ void Pupil::draw()
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
   glEnable(GL_LIGHT0);
 
-  static const GLfloat mat_diffuse[]   = { 1.0, 1.0, 1.0, 1.0 };
-  static const GLfloat mat_specular[]  = { 0.2, 0.2, 0.2, 1.0 };
-  static const GLfloat mat_shininess[] = { 60.0 };
-
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
@@ -679,25 +760,10 @@ void Pupil::draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
+}
 
-  mDriver->SetWidth(w());
-  mDriver->SetHeight(h());
-
-  Render();
-
-  if(mDriver->SizePM() > 0) {
-    printf("%sposition stack not empty (%d).\n", _eh.c_str(), mDriver->SizePM());
-    mDriver->ClearPM();
-  }
-
-  GLenum gl_err = glGetError();
-  if(gl_err) {
-    printf("%sGL error: %s.\n", _eh.c_str(), gluErrorString(gl_err));
-  }
-
-  GTime stop_time(GTime::I_Now);
-  GTime rnr_time = stop_time - start_time;
-
+void Pupil::rnr_fake_overlay(GTime& rnr_time)
+{
   // Overlay simulation ... couldn't get draw_overlay working
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
@@ -756,20 +822,12 @@ void Pupil::draw()
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
-
-  if(bDumpImage) {
-    bDumpImage = false;
-    dump_image();
-  }
-
+  glMatrixMode(GL_MODELVIEW);
 }
 
 /**************************************************************************/
-
-namespace {
-  const Float_t defMSMoveFac = 200;
-  const Float_t defMSRotFac  = 600;
-}
+// fltk handle
+/**************************************************************************/
 
 int Pupil::handle(int ev)
 {
@@ -1018,13 +1076,15 @@ void Pupil::label_window()
 
 /**************************************************************************/
 
-void Pupil::dump_image()
+void Pupil::dump_image(const string& fname)
 {
-  printf("Pupil::draw dumping '%s'\n", mImageName.Data());
+  static const string _eh("Pupil::dump_image ");
 
-  FILE* img = fopen(mImageName.Data(), "w");
+  printf("%sdumping '%s'.\n", _eh.c_str(), fname.c_str());
+
+  FILE* img = fopen(fname.c_str(), "w");
   if(img == 0) {
-    printf("Pupil::draw can't open screenshot file '%s'.\n", mImageName.Data());
+    printf("%scan't open screenshot file '%s'.\n", _eh.c_str(), fname.c_str());
     return;
   }
 
@@ -1032,7 +1092,7 @@ void Pupil::dump_image()
   header.dump(img);
   
   unsigned char* xx = new unsigned char[w()*h()*3];
-  glReadBuffer(GL_BACK);
+  // glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT,1); 
   glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
   fwrite(xx, 3, w()*h(), img);

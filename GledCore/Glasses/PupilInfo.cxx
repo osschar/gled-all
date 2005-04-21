@@ -222,7 +222,7 @@ ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
 
 /**************************************************************************/
 
-void PupilInfo::EmitDumpImageRay(const Text_t* filename)
+void PupilInfo::EmitDumpImageRay(const Text_t* filename, Int_t n_tiles)
 {
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
@@ -231,6 +231,7 @@ void PupilInfo::EmitDumpImageRay(const Text_t* filename)
       TString fn(filename);
       TBuffer cbuff(TBuffer::kWrite);
       fn.Streamer(cbuff);
+      cbuff << n_tiles;
       ray->SetCustomBuffer(cbuff);
     }
     mQueen->EmitRay(ray);
