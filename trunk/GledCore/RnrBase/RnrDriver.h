@@ -41,7 +41,10 @@ protected:
 
   Int_t		mMaxLamps;	// X{g}
   A_Rnr**	mLamps;
-  
+
+  Int_t		mMaxClipPlanes; // X{g}
+  A_Rnr**	mClipPlanes;
+
   Bool_t        bMarkupNodes;	 // X{gs}
 
   Int_t		mWidth;		 // X{gs}
@@ -97,8 +100,12 @@ public:
   void ClearPM()         { mPMStack.clear(); }
 
   A_Rnr** GetLamps() { return mLamps; }
-  int  GetLamp(A_Rnr* l_rnr);
-  void ReturnLamp(int lamp);
+  Int_t   GetLamp(A_Rnr* rnr);
+  void    ReturnLamp(Int_t lamp);
+
+  A_Rnr** GetClipPlanes() { return mClipPlanes; }
+  Int_t   GetClipPlane(A_Rnr* rnr);
+  void    ReturnClipPlane(Int_t lamp);
 
   //----------------------------------------------------------------
 
