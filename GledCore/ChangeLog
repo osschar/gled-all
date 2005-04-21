@@ -1,5 +1,12 @@
 2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZGlBlending.cxx:
+	* Glasses/ZGlBlending.h:
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	Added controls for depth-buffer.
+
+2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Eye/Pupil.cxx:
 	* Eye/Pupil.h:
 	* Glasses/PupilInfo.cxx:
