@@ -18,7 +18,8 @@ void ZGlBlending_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   // Ignore ZRnrModBase::PreDraw
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POINT_BIT |
-               GL_LINE_BIT         | GL_FOG_BIT);
+               GL_LINE_BIT         | GL_FOG_BIT   |
+	       GL_DEPTH_BUFFER_BIT);
   SetupGL();
 }
 
@@ -96,4 +97,29 @@ void ZGlBlending_GL_Rnr::SetupGL()
   default:
     break;
   }
+
+  switch(x.mDepthOp) {
+  case ZRnrModBase::O_On:
+    glDepthFunc(x.mDepthFunc);
+    glEnable(GL_DEPTH_TEST);
+    break;
+  case ZRnrModBase::O_Off:
+    glDisable(GL_DEPTH_TEST);
+    break;
+  case ZRnrModBase::O_Nop:
+  default:
+    break;
+  }
+  switch(x.mDepthMaskOp) {
+  case ZRnrModBase::O_On:
+    glDepthMask(1);
+    break;
+  case ZRnrModBase::O_Off:
+    glDepthMask(0);
+    break;
+  case ZRnrModBase::O_Nop:
+  default:
+    break;
+  }
+
 }
