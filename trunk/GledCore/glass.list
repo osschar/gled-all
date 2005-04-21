@@ -64,13 +64,14 @@ ScreenDumper		169	Glasses/ScreenDumper
 ScreenText		170	Glasses/ScreenText	.
 
 # GL State Modifiers
-ZRnrModBase		178	Glasses/ZRnrModBase	.
-ZRnrModList		179	Glasses/ZRnrModList	.
-ZGlLightModel		180	Glasses/ZGlLightModel	.
-ZGlMaterial		181	Glasses/ZGlMaterial	.
-ZGlBlending		182	Glasses/ZGlBlending	.
-ZRlNameRnrCtrl		183	Glasses/ZRlNameRnrCtrl	.
-ZRlFont			184	Glasses/ZRlFont		.
+ZRnrModBase		176	Glasses/ZRnrModBase	.
+ZRnrModList		177	Glasses/ZRnrModList	.
+ZGlLightModel		178	Glasses/ZGlLightModel	.
+ZGlMaterial		179	Glasses/ZGlMaterial	.
+ZGlBlending		180	Glasses/ZGlBlending	.
+ZGlClipPlane		181	Glasses/ZGlClipPlane	.
+ZRlNameRnrCtrl		182	Glasses/ZRlNameRnrCtrl	.
+ZRlFont			183	Glasses/ZRlFont		.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
