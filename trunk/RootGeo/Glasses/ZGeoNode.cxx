@@ -205,7 +205,7 @@ void ZGeoNode::ImportNodes()
     insert_node(geon, this, GForm("%s::%s", vname, sname));
     ni++;
   }
-  if(ni)SetRnrSelf(false);
+  if(ni) SetRnrSelf(false);
 }
 
 void  ZGeoNode::Collapse()
@@ -257,6 +257,20 @@ void ZGeoNode::ImportNodesWCollect()
     ni++;
   }
   if(ni) SetRnrSelf(false);
+}
+
+void ZGeoNode::ImportNodesRec(Int_t depth)
+{
+  ImportNodes();
+
+  if(depth > 0) {
+    lpZGeoNode_t l; CopyByGlass<ZGeoNode*>(l);
+
+    for(lpZGeoNode_i n=l.begin(); n!=l.end(); ++n) {
+      if((*n)->mNNodes > 0)
+	(*n)->ImportNodesRec(depth - 1);
+    }
+  }
 }
 
 /**************************************************************************/
