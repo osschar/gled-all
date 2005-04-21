@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Lamp.h"
+#include "Lamp.c7"
 
 ClassImp(Lamp)
 
@@ -23,5 +24,3 @@ void Lamp::_init()
 }
 
 /**************************************************************************/
-
-#include "Lamp.c7"
