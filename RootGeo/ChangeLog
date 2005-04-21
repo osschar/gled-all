@@ -1,3 +1,9 @@
+2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	Added recursive import of nodes: ImportNodesRec(Int_t depth).
+
 2005-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoRepacker.cxx:
