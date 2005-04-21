@@ -1,3 +1,32 @@
+2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added support for multi-frame screenshots; screenshots now
+	rendered via pbuffers.
+
+	* Eye/pbuffer.cxx:
+	* Eye/pbuffer.h:
+	New files: taken from comp.graphics.api.opengl, by Wolfgang
+	Draxinger.
+
+	* Glasses/Lamp.cxx:
+	* Glasses/Lamp.h:
+	Formatting changes.
+
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Added support for clipping-plane management.
+
+	* Glasses/ZGlClipPlane.cxx:
+	* Glasses/ZGlClipPlane.h:
+	* Rnr/GL/ZGlClipPlane_GL_Rnr.cxx:
+	* Rnr/GL/ZGlClipPlane_GL_Rnr.h:
+	* glass.list:
+	New glass ZGlClipPlane: an interface to GL clipping plane.
+
 2005-04-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Ant.cxx:
