@@ -49,6 +49,13 @@ protected:
   Float_t	mFogBeg;      // X{GS}  7 Value(-range=>[-1000,1000,1,100], -join=>1)
   Float_t	mFogEnd;      // X{GS}  7 Value(-range=>[-1000,1000,1,100])
 
+  // Depth-buffer
+  // Missing support for glDepthRange
+  ZRnrModBase::Operation_e
+                mDepthOp;     // X{GS}  7 PhonyEnum()
+  Int_t         mDepthFunc;   // X{GS}  7 PhonyEnum(-vals=>[GL_NEVER,Never, GL_LESS,Less, GL_EQUAL,Equal, GL_LEQUAL,LessEqual, GL_GREATER,Greater, GL_NOTEQUAL,NotEqual, GL_GEQUAL,GreaterEqual, GL_ALWAYS,Always]);
+  ZRnrModBase::Operation_e
+                mDepthMaskOp; // X{GS}  7 PhonyEnum()
 public:
   ZGlBlending(const Text_t* n="ZGlBlending", const Text_t* t=0) : ZRnrModBase(n,t) { _init(); }
 

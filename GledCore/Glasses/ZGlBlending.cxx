@@ -41,6 +41,10 @@ void ZGlBlending::_init()
   mFogDensity = 0.2;
   mFogBeg     = 0;
   mFogEnd     = 20;
+
+  mDepthOp   = O_Nop;
+  mDepthFunc = GL_LESS;
+  mDepthMaskOp = O_Nop;
 }
 
 /**************************************************************************/
