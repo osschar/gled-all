@@ -98,8 +98,9 @@ public:
 
   void Zoom(Float_t delta); // X{E}
 
-  void EmitDumpImageRay(const Text_t* filename="screenshot.tga"); // X{E} 7 MButt()
-  void EmitImmediateRedrawRay();                                  // X{E} 7 MButt()
+  void EmitDumpImageRay(const Text_t* filename="screenshot",
+			Int_t n_tiles=1); // X{E} 7 MCWButt()
+  void EmitImmediateRedrawRay();          // X{E} 7 MButt()
 
   void EmitResizeRay(); // X{E} 7 MButt()
 
