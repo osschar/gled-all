@@ -28,7 +28,7 @@ class ZGeoNode : public ZNode {
 
 private:
   void _init();
-  void _assert_tnode(const string& _eh, bool _ggeo_fallbackp=false);
+  void _assert_tnode(const string& _eh, bool ggeo_fallbackp=false);
 
 protected:
   TGeoNode	       *mTNode;     //! X{g}
@@ -51,15 +51,15 @@ protected:
 public:
   ZGeoNode(const Text_t* n="ZGeoNode", const Text_t* t=0) : ZNode(n,t) { _init(); }
 
+  void AssertUserData();    // X{E}
+  void AssignGGeoTopNode(); // X{E} 7 MButt()
+
   // Top-level imports from gGeoManager.
   void ImportByRegExp(const Text_t* target, TRegexp filter);
-  void ImportByRegExp(const Text_t* target, const Text_t* filter); // X{E}
+  void ImportByRegExp(const Text_t* target, const Text_t* filter); // X{E} 7 MCWButt(-join=>1)
   void ImportUnimported(const Text_t* target="TheRest");           // X{E}
 
-  void AssertUserData();    // X{E}
-  void AssignGGeoTopNode(); // X{E}
-
-  // Daugter management.
+  // Daughter management.
   void ImportNodes();                      // X{Ed} 7 MButt(-join=>1)
   void Collapse();                         // X{Ed} 7 MButt()
   void ImportNodesWCollect();              // X{Ed} 7 MButt()
