@@ -33,10 +33,10 @@ protected:
   ZRnrModBase::Operation_e
                 mAntiAliasOp; // X{GS}  7 PhonyEnum()
   Bool_t	bPointSmooth; // X{GS}  7 Bool(-join=>1)
-  Float_t	mPointSize;   // X{GS}  7 Value(-width=>5, -range=>[0.01,100,1,100], -join=>1)
+  Float_t	mPointSize;   // X{GS}  7 Value(-width=>5, -range=>[0.01,64,1,100], -join=>1)
   Int_t		mPointHint;   // X{GS}  7 PhonyEnum(-width=>6, -vals=>[GL_NICEST,Nicest, GL_FASTEST,Fastest, GL_DONT_CARE,DontCare])
   Bool_t	bLineSmooth;  // X{GS}  7 Bool(-join=>1)
-  Float_t	mLineWidth;   // X{GS}  7 Value(-width=>4, -range=>[0.01,10,1,100], -join=>1)
+  Float_t	mLineWidth;   // X{GS}  7 Value(-width=>4, -range=>[0.01,128,1,100], -join=>1)
   Int_t		mLineHint;    // X{GS}  7 PhonyEnum(-width=>6, -vals=>[GL_NICEST,Nicest, GL_FASTEST,Fastest, GL_DONT_CARE,DontCare])
 
   // Fog
