@@ -21,7 +21,7 @@ protected:
   Float_t	mVLen;		// X{GS}  7 Value(-range=>[0,1000, 1,100])
   UShort_t	mUStrips;	// X{GS}  7 Value(-range=>[0,1000,1], -join=>1)
   UShort_t	mVStrips;	// X{GS}  7 Value(-range=>[0,1000,1])
-  Float_t	mWidth;		// X{GS}  7 Value(-range=>[0,10,1,100])
+  Float_t	mWidth;		// X{GS}  7 Value(-range=>[0,128,1,100])
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
 public:
