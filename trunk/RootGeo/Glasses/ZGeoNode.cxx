@@ -38,13 +38,47 @@ void ZGeoNode::_init()
   mDefFile   = "ZGeoNodes.root";
 }
 
-void ZGeoNode::_assert_tnode(const string& _eh, bool _ggeo_fallbackp)
+void ZGeoNode::_assert_tnode(const string& _eh, bool ggeo_fallbackp)
 {
   if(mTNode == 0)
-    if(_ggeo_fallbackp && gGeoManager &&  gGeoManager->GetTopNode() )
+    if(ggeo_fallbackp && gGeoManager &&  gGeoManager->GetTopNode() )
       mTNode = gGeoManager->GetTopNode();
     else
       throw(_eh + "top-node can not be resolved.");
+}
+
+/**************************************************************************/
+
+void ZGeoNode::AssertUserData()
+{ 
+  // Creates TGLFaceSet object rendered by ZGeoNode_GL_Rnr
+  // and saves it in TGeoVolume.  
+
+  TGeoVolume* v = GetVolume();
+  if (v) {
+    GeoUserData* userdata = dynamic_cast<GeoUserData*>(v->GetField());
+
+    if (v->GetField() == 0) {
+      userdata = new GeoUserData();
+      v->SetField(userdata);
+    }
+
+    if (userdata->fFaceSet == 0) {    
+      TGeoVolume* vol = GetVolume();
+      TBuffer3D*  buff = GetVolume()->GetShape()->MakeBuffer3D();
+      Float_t colorRGB[3] = {1, 0, 0};
+      TGLFaceSet* fs = new TGLFaceSet(*buff, colorRGB, mSaturnID, vol);
+      userdata->fFaceSet = fs;
+      userdata->bIsImported = true;
+      vol->SetField(userdata);
+    }
+  }
+}
+
+void ZGeoNode::AssignGGeoTopNode()
+{
+  static const string _eh("ZGeoNode::AssignGGeoTopNode ");
+  _assert_tnode(_eh, true);
 }
 
 /**************************************************************************/
@@ -58,7 +92,8 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
 
   static const string _eh("ZGeoNode::ImportByRegExp ");
 
-  _assert_tnode(_eh);
+  _assert_tnode(_eh, true);
+  if(target == 0) target = "";
 
   // split target into list of node names
   lStr_t node_names;
@@ -101,7 +136,7 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
 {  
   static const string _eh("ZGeoNode::ImportUnimported ");
 
-  _assert_tnode(_eh);
+  _assert_tnode(_eh, true);
   Int_t ni=0;
   ZGeoNode* holder = dynamic_cast<ZGeoNode*>(GetElementByName(target));
   if ( holder == 0 ){
@@ -138,40 +173,6 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
     } 
   }
   if(ni) SetRnrSelf(false);
-}
-
-/**************************************************************************/
-
-void ZGeoNode::AssertUserData()
-{ 
-  // Creates TGLFaceSet object rendered by ZGeoNode_GL_Rnr
-  // and saves it in TGeoVolume.  
-
-  TGeoVolume* v = GetVolume();
-  if (v) {
-    GeoUserData* userdata = dynamic_cast<GeoUserData*>(v->GetField());
-
-    if (v->GetField() == 0) {
-      userdata = new GeoUserData();
-      v->SetField(userdata);
-    }
-
-    if (userdata->fFaceSet == 0) {    
-      TGeoVolume* vol = GetVolume();
-      TBuffer3D*  buff = GetVolume()->GetShape()->MakeBuffer3D();
-      Float_t colorRGB[3] = {1, 0, 0};
-      TGLFaceSet* fs = new TGLFaceSet(*buff, colorRGB, mSaturnID, vol);
-      userdata->fFaceSet = fs;
-      userdata->bIsImported = true;
-      vol->SetField(userdata);
-    }
-  }
-}
-
-void ZGeoNode::AssignGGeoTopNode()
-{
-  static const string _eh("ZGeoNode::AssignGGeoTopNode ");
-  _assert_tnode(_eh, true);
 }
 
 /**************************************************************************/
