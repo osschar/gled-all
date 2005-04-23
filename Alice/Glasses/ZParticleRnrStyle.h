@@ -26,10 +26,10 @@ class ZParticleRnrStyle : public ZRnrModBase {
   Bool_t                   mFitDaughters;  // X{GST}  7 Bool(-join=>1)
   Bool_t                   mFitDecay;      // X{GST}  7 Bool()
   ZColor                   mVertexColor;   // X{GSPT} 7 ColorButt(-join=>1)
-  Float_t                  mVertexSize;    // X{GSPT} 7 Value(-range=>[0,50,1,10])
+  Float_t                  mVertexSize;    // X{GSPT} 7 Value(-range=>[0.1,64,1,10])
   // track
   // ZColor                   mTrackColor;    // X{GSPT} 7 ColorButt(-join=>1)
-  Float_t                  mTrackWidth;    // X{GST}  7 Value(-range=>[0,10,1,10])
+  Float_t                  mTrackWidth;    // X{GST}  7 Value(-range=>[0.1,128,1,10])
   // momentum
   ZColor                   mPColor;        // X{GSPT} 7 ColorButt(-join=>1)
   Bool_t                   mRnrP;          // X{GST}  7 Bool()
