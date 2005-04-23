@@ -1,0 +1,4 @@
+2005-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZParticleRnrStyle.h:
+	Changed maximum point size to 64, line widtth to 128.
