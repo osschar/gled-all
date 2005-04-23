@@ -1,3 +1,10 @@
+2005-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	ImportNodesWCollect() inserts ZGeoNodes (ZNode's before) as
+	intermediate holders of nodes with common volume name.
+
 2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoNode.cxx:
