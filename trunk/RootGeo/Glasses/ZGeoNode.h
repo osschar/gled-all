@@ -56,7 +56,7 @@ public:
 
   // Top-level imports from gGeoManager.
   void ImportByRegExp(const Text_t* target, TRegexp filter);
-  void ImportByRegExp(const Text_t* target, const Text_t* filter); // X{E} 7 MCWButt(-join=>1)
+  void ImportByRegExp(const Text_t* target, const Text_t* filter); // X{E} 7 MCWButt()
   void ImportUnimported(const Text_t* target="TheRest");           // X{E}
 
   // Daughter management.
