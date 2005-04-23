@@ -183,13 +183,15 @@ void ZGeoNode::ImportNodes()
 {
   // Reads mTGeoNode and creates  
   // representative ZGeoNode node. 
-  Int_t ni=0;
 
-  TIter next_node(mTNode->GetNodes());
-  TGeoNode* geon;
   static const string _eh("ZGeoNode::ImportNodes ");
   _assert_tnode(_eh);
+
   RemoveLensesViaQueen(true);
+
+  Int_t ni=0;
+  TIter next_node(mTNode->GetNodes());
+  TGeoNode* geon;
 
   while((geon = (TGeoNode*)next_node())) {
     const char* vname = "<no-vol>";
@@ -226,7 +228,7 @@ void ZGeoNode::ImportNodesWCollect()
   
   RemoveLensesViaQueen(true);
 
-  map<string, ZNode*> nmap;
+  map<string, ZGeoNode*> nmap;
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
   Int_t ni=0;
@@ -243,10 +245,10 @@ void ZGeoNode::ImportNodesWCollect()
       }
     }
 
-    ZNode* holder = 0;
-    map<string, ZNode*>::iterator i = nmap.find(vname);
+    ZGeoNode* holder = 0;
+    map<string, ZGeoNode*>::iterator i = nmap.find(vname);
     if(i == nmap.end()) {
-      ZNode* n = new ZNode(vname);
+      ZGeoNode* n = new ZGeoNode(vname);
       mQueen->CheckIn(n);
       Add(n);
       nmap[vname] = n;
