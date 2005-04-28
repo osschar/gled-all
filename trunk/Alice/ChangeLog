@@ -1,5 +1,28 @@
 2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/TPCSegRnrMod.cxx:
+	* Glasses/TPCSegRnrMod.h:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+	Added Int_t TPCSegRnrMod::mTimeWidth which controls width of the
+	window for signal integration. Fixed faulty logick when dealing
+	with braindead First/Next retrieval of TPC digitis.
+
+	* Stones/TTreeTools.cxx:
+	* Stones/TTreeTools.h:
+	New files: holder for classes TTreeQuery and TSelectorToEventList.
+
+	* catalog.patch:
+	New file: now needed for multi-class TTreeTools files.
+	
+	* Makefile:
+	Added ROOT's libTreePlayer to base libraries.
+
+	* Glasses/ZAliLoad.cxx:
+	Use TTreeQuery in hit/cluster selection.
+
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/HitContainer.cxx:
 	* Glasses/HitContainer.h:
 	* Glasses/ZAliLoad.cxx:
