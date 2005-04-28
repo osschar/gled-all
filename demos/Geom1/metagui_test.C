@@ -159,17 +159,17 @@ void metagui_test()
   CREATE_ADD_GLASS(rs_op, RndSMorphCreator, rs_eventor, "SMorph Creator", 0);
   rs_op->SetTarget(rs_node);
 
+  //--------------------------------
 
-  // Spawn GUI
-  // gROOT->Macro("eye.C");
-  // if(pupil) {
-  //   // Comment to disable fixing of camera 'up' direction to 'z' axis.
-  //   pupil->SetUpReference(images);
-  //   pupil->SetUpRefAxis(3);
-  // }
+  CREATE_ATT_GLASS(clipplane, ZGlClipPlane, morphs[1], SetRnrMod,
+		   "ClipPlane", 0);
+
+  //--------------------------------
+
+  int W = 32;
 
   CREATE_ADD_GLASS(mg, MetaViewInfo, fire_queen, "Some MetaView", 0);
-  mg->Size(32, 9);
+  mg->Size(W, 10);
   mg->SetExpertP(true);
 
   CREATE_ADD_GLASS(ms1, MetaSubViewInfo, mg, "ZGlass", 0);
@@ -177,22 +177,29 @@ void metagui_test()
   w11->Resize(6, 1, 26, 1);
   CREATE_ADD_GLASS(w12, MetaWeedInfo, ms1, "Title", 0);
   w12->Resize(6, 2, 26, 1);
-  CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "<box>", "Oovad Krootham dei Narook:");
-  w13->Resize(0, 0, 32, 1);
+  CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "<box>", "ZGlass: basic information, like name and title:");
+  w13->Resize(0, 0, W, 1);
   w13->Color(1, .7, .8);
   w13->Align(true, -1, 0);
   w13->Box(MetaWeedInfo::BT_Engraved);
 
   CREATE_ADD_GLASS(ms2, MetaSubViewInfo, mg, "ZNode", 0);
-  ms2->Position(0, 4);
+  ms2->Position(0, 3);
+  CREATE_ADD_GLASS(w20, MetaWeedInfo, ms2, "<box>", "ZNode: position and rotation:");
+  w20->Resize(0, 0, W, 1);
+  w20->Color(1, .7, .8);
+  w20->Align(true, -1, 0);
+  w20->Box(MetaWeedInfo::BT_Engraved);
   CREATE_ADD_GLASS(w21, MetaWeedInfo, ms2, "Pos", 0);
-  w21->Resize(0, 0, 32, 2);
+  w21->Resize(0, 2, W, 2);
   w21->Label("Drag mouse for ultimate enjointment.");
   w21->Align(false, 0, -1);
   CREATE_ADD_GLASS(w22, MetaWeedInfo, ms2, "Rot", 0);
-  w22->Resize(0, 2, 32, 2);
+  w22->Resize(0, 4, W, 2);
   w22->Label("middle button x10, right x100");
   w22->Align(false, 0, 1);
+
+  //--------------------------------
 
   gROOT->LoadMacro("eye.C");
 
@@ -222,5 +229,5 @@ void metagui_test()
   Gled::theOne->SpawnEye(0, shell, "GledCore", "FTW_Shell");
 
   gSystem->Sleep(1000);
-  shell->SpawnMetaGui(board1, mg);
+  shell->SpawnMetaGui(morphs[1], mg);
 }
