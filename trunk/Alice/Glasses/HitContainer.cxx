@@ -18,7 +18,11 @@ ClassImp(HitContainer)
 
 void HitContainer::_init()
 {
-  mNHits = 0;
+  mNPoints = 0;
+  mPointLabels = 0;
+  mPoints      = 0;
+
+  mSize = 0;
   mColor.rgba(0,0,1,1);
   // *** Set all links to 0 ***
 }
@@ -27,17 +31,41 @@ void HitContainer::_init()
 
 HitContainer::~HitContainer()
 {
-  for(vHit_i k=mHits.begin(); k!=mHits.end(); ++k) {
-    delete *k;
-  }
+  delete [] mPointLabels;
+  delete [] mPoints;
 }
 
 /**************************************************************************/
-void HitContainer::Dump()
+
+void HitContainer::Reset(Int_t n_points)
 {
-  for(vHit_i i=mHits.begin(); i!=mHits.end(); ++i) {
-    (*i)->Dump();
+  if(n_points != mNPoints) {
+    delete [] mPointLabels;
+    delete [] mPoints;
+    mNPoints = n_points;
+    if(mNPoints > 0) {
+      mPointLabels = new   Int_t[mNPoints];
+      mPoints      = new Float_t[3*mNPoints];
+    } else {
+      mPointLabels = 0;
+      mPoints      = 0;
+    }
   }
 }
 
 /**************************************************************************/
+
+void HitContainer::SetPoint(Int_t i, Int_t label, Float_t* pos)
+{
+  mPointLabels[i] = label;
+  Float_t* p = mPoints + 3*i;
+  p[0] = pos[0]; p[1] = pos[1]; p[2] = pos[2];
+}
+
+void HitContainer::SetPoint(Int_t i, Int_t label,
+			    Float_t x, Float_t y, Float_t z)
+{
+  mPointLabels[i] = label;
+  Float_t* p = mPoints + 3*i;
+  p[0] = x; p[1] = y; p[2] = z;
+}

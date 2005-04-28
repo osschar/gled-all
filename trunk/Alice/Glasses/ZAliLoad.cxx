@@ -467,11 +467,11 @@ void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
       add_holder_p = true;
     }
 
+    holder->Reset(n);
     for(Int_t i=0; i<n; i++) {
-      mTreeH->GetEntry(evl.GetEntry(i));
-      // printf("%s hit selection \n",selection);
-      //  mH.Dump();
-      holder->AddHit(new Hit(*mpH)); // !!!
+      const Int_t entry = evl.GetEntry(i);
+      mTreeH->GetEntry(entry);
+      holder->SetPoint(i, entry, &mpH->x);
     }
   } else {
     throw(_eh + "no hits matching selection.");
