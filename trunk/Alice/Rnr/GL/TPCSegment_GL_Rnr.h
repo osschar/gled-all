@@ -17,7 +17,8 @@ class TPCSegRnrMod;
 const int ImageWidth  = 256;
 const int ImageHeight = 128;
 
-class TPCSegment_GL_Rnr : public ZNode_GL_Rnr {
+class TPCSegment_GL_Rnr : public ZNode_GL_Rnr
+{
  private:
   void          _init();
   void          load_padrow(Int_t row, Int_t offx, Int_t offy);
