@@ -1,3 +1,22 @@
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/COPYRIGHT:
+	* ACTC/tc.cxx:
+	* ACTC/tc.h:
+	Import of ACTC triangle consolidator by Brad Grantham.
+
+	* Makefile:
+	Included ACTC in base-lib directories.
+
+	* Readme_Geom1:
+	Added ACTC as external software and its copright.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	Added triangle-based rendering modes. Should be moved somewhere
+	else and only the basic implementation left here.
+
 2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Rect.cxx:
