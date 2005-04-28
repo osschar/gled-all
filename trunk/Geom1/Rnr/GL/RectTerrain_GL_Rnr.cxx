@@ -58,6 +58,8 @@ void RectTerrain_GL_Rnr::Draw(RnrDriver* rd)
 
 /**************************************************************************/
 
+// #include <TRandom.h>
+
 void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
 {
   switch(mTerrain->mRnrMode) {
@@ -93,6 +95,95 @@ void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
       glEnd();
     }
     glDisable(GL_NORMALIZE);
+    break;
+  }
+
+  case RectTerrain::RM_SmoothTring: {
+    mTerrain->Tringoo();
+    RectTringTvor& RTT = *mTerrain->pRTTvor;
+
+    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+    glVertexPointer(3, GL_FLOAT, 0, RTT.mVerts);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, RTT.mNorms);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glColorPointer(3, GL_UNSIGNED_BYTE, 0, RTT.mCols);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    // TRandom colgen(2);
+
+    if(mTerrain->bUseTringStrips) {
+      // Requires GL-1.4
+      // glMultiDrawElements(GL_TRIANGLE_STRIP, RTT.mStripLens,
+      //                     GL_UNSIGNED_INT, RTT.mStripBegs, RTT.mNStrips);
+
+      for(Int_t i=0; i<RTT.mNStrips; ++i) {
+	// glColor3f(0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm());
+	glDrawElements(GL_TRIANGLE_STRIP, RTT.mStripLens[i],
+		       GL_UNSIGNED_INT, RTT.mStripBegs[i]);
+      }
+
+    } else {
+
+      glDrawElements(GL_TRIANGLES, RTT.mNTrings*3,
+		     GL_UNSIGNED_INT, RTT.mTrings);
+
+    }
+    glPopClientAttrib();
+    break;
+  }
+
+  case RectTerrain::RM_FlatTring: {
+    mTerrain->Tringoo();
+    RectTringTvor& RTT = *mTerrain->pRTTvor;
+
+    GLint ex_shade_model;
+    glGetIntegerv(GL_SHADE_MODEL, &ex_shade_model);
+    glShadeModel(GL_FLAT);
+
+    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+    glVertexPointer(3, GL_FLOAT, 0, RTT.mVerts);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glColorPointer(3, GL_UNSIGNED_BYTE, 0, RTT.mCols);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    // TRandom colgen(2);
+
+    if(mTerrain->bUseTringStrips) {
+
+      for(Int_t i=0; i<RTT.mNStrips; ++i) {
+	glBegin(GL_TRIANGLE_STRIP);
+	Int_t* idxp = RTT.mStripBegs[i];
+
+	glArrayElement(*(idxp++));
+	glArrayElement(*(idxp++));
+	
+	Int_t* tring_idxp = RTT.mStripTrings + (idxp - RTT.mStripEls);
+	Int_t  n          = RTT.mStripLens[i] - 2;
+	// glColor3f(0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm());
+	while(n-- > 0) {
+	  glNormal3fv( RTT.TriangleNormal(*(tring_idxp++)) ); 
+	  glArrayElement(*(idxp++));
+	}
+	glEnd();
+      }
+
+    } else {
+
+      glBegin(GL_TRIANGLES);
+      for(Int_t t=0; t<RTT.mNTrings; ++t) {
+	Int_t*   T = RTT.Triangle(t);
+	Float_t* N = RTT.TriangleNormal(t);
+	glNormal3fv(N);
+	glArrayElement(T[0]);
+	glArrayElement(T[1]);
+	glArrayElement(T[2]);
+      }
+      glEnd();
+
+    }
+    glPopClientAttrib();
+    glShadeModel(ex_shade_model);
     break;
   }
 
