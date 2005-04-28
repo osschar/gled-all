@@ -4,7 +4,7 @@ LIB_SET_ID	= 2
 REQUIRES_LIB_SETS = GledCore # add
 
 BLESSED_DIRS	= Glasses
-BASE_DIRS	= Stones
+BASE_DIRS	= Stones ACTC
 
 DICT_DIRS	= Glasses Stones
 VIEW_DIRS	= FL
