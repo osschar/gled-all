@@ -10,6 +10,7 @@
 #include <Glasses/ZNode.h>
 #include <Glasses/ZParticle.h>
 #include <Glasses/HitContainer.h>
+#include <Stones/Hit.h>
 #include <Glasses/TPCSegment.h>
 #include <Stones/TPCDigitsInfo.h>
 #include <Stones/MCParticle.h>

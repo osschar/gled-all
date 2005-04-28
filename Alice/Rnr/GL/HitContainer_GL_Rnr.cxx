@@ -16,15 +16,19 @@ void HitContainer_GL_Rnr::_init()
 
 void HitContainer_GL_Rnr::Draw(RnrDriver* rd)
 {
-  const HitContainer::vHit_t& hits = mHitContainer->RefHits();
-  glBegin(GL_POINTS);
-  if(! hits.empty()) {  
-    glColor4fv(mHitContainer->mColor());
-    for(HitContainer::vHit_ci i=hits.begin(); i!=hits.end(); ++i) {
-      const Hit* h = (*i);
-      glVertex3f(h->x, h->y, h->z);
-    }
-  }
-  glEnd();
+  HitContainer&	HC = *mHitContainer;
+  if(HC.mNPoints > 0) {
 
+    if(HC.mSize > 0) glPointSize(HC.mSize);
+    glColor4fv(mHitContainer->mColor());
+
+    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+    glVertexPointer(3, GL_FLOAT, 0, HC.mPoints);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    glDrawArrays(GL_POINTS, 0, HC.mNPoints);
+    // In selection mode should loop over points and do push/pop name.
+
+    glPopClientAttrib();
+  }
 }
