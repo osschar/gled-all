@@ -12,8 +12,8 @@
 
 void TPCSegment_GL_Rnr::_init()
 {
-  //  mSegRM = 0;
-  mImage = 0;
+  // mSegRM = 0;
+  mImage   = 0;
   mTexture = 0;
 }
 
@@ -24,18 +24,11 @@ TPCSegment_GL_Rnr::~TPCSegment_GL_Rnr()
 }
  
 /**************************************************************************/
+
 void TPCSegment_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mSegRMS);
-  rst_lens  = (TPCSegRnrMod*) mSegRMS.fRnrMod->fLens;
-  /*
-  RNRDRIVER_GET_RNRMOD(srm, rd, TPCSegRnrMod);
-  if(srm != mSegRM || srm->bRebuildDL) {
-    bRebuildDL = true;
-    mSegRM    = srm;
-    rst_lens  = (TPCSegRnrMod*) srm->fLens;
-  }
-  */
+  rst_lens = (TPCSegRnrMod*) mSegRMS.fRnrMod->fLens;
   ZNode_GL_Rnr::Draw(rd);
 }
 
@@ -122,44 +115,64 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
 }
 
 /**************************************************************************/
+
 void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off) 
 {
   AliSimDigits *digit =  &mTPCSegment->mDigInfo->mSimDigits;
-  digit->First();
-  Int_t  cur_pad = -1, max_digit = 0;
-  Int_t  time, pad, val;   
+
+  Int_t    pad_var = 0;
+  Int_t    time, pad, val;   
   GLubyte* img_pos;
-  //printf("texture_padrow %d off %f \n",row, col_off);
+
+  Int_t  min_time = rst_lens->mTime - rst_lens->mTimeWidth/2,
+         max_time = rst_lens->mTime + rst_lens->mTimeWidth/2;
+  Bool_t half_border_time = (rst_lens->mTimeWidth % 2 == 0);
+
+  Bool_t done_p = false;
+  Bool_t save_p = false;
+  digit->First();
   do {
+
     time = digit->CurrentRow();
     pad  = digit->CurrentColumn();
     val  = digit->CurrentDigit();
 
-    if( rst_lens->bShowMax) {
-      if(cur_pad != pad) {
-	// printf("get row_col (%d,%d)  offsets(%d,%d) \n",row+ row_off,pad+col_off,row, pad );
-	img_pos = get_row_col(row+ row_off,pad+col_off);
-	if(max_digit > rst_lens->mTreshold) {
-	  SetCol(max_digit,img_pos);
-	}
-	cur_pad = pad;
-	max_digit = 0;   
-      }
-      if(val>rst_lens->mTreshold && val>max_digit ) {
-	max_digit = val;
-	SetCol(max_digit,img_pos);
+    if(rst_lens->bShowMax) {
+      if(val > pad_var) {
+	pad_var = val;
       }
     } else {
-      if(time == rst_lens->mTime && rst_lens->mTreshold < val) {
-	img_pos = get_row_col(row+ row_off,pad+col_off);
-	SetCol(val,img_pos);
-	break;
+      // Integrate int max_val.
+      if(time >= min_time && time <= max_time) {
+	if(half_border_time && (time == min_time || time == max_time))
+	  pad_var += val/2;
+	else
+	  pad_var += val;
       }
     }
-  } while (digit->Next());
+
+    if(digit->Next()) {
+      if(pad != digit->CurrentColumn())
+	save_p = true;
+    } else {
+      done_p = true;
+      save_p = true;
+    }
+
+    if(save_p) {
+      pad_var = TMath::Min(pad_var, rst_lens->mMaxVal);
+      if(pad_var > rst_lens->mTreshold) {
+	img_pos = get_row_col(row + row_off, pad + col_off);
+	SetCol(pad_var, img_pos);
+      }
+      pad_var = 0; 
+    }
+
+  } while (!done_p);
 }
  
 /**************************************************************************/
+
 void TPCSegment_GL_Rnr::SetCol(Float_t z, GLubyte* pixel)
 {
   //  printf("set color row pad:  %d,  %d \n",row, cpad);
@@ -177,20 +190,23 @@ void TPCSegment_GL_Rnr::SetCol(Float_t z, GLubyte* pixel)
 }
 
 /**************************************************************************/
-void TPCSegment_GL_Rnr::init_texture(){
-  glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT| GL_ENABLE_BIT | GL_POLYGON_BIT);
+
+void TPCSegment_GL_Rnr::init_texture()
+{
+  glPushAttrib(GL_CURRENT_BIT      | GL_DEPTH_BUFFER_BIT |
+	       GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT       | GL_POLYGON_BIT);
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glShadeModel(GL_FLAT);
 
-  glBindTexture (GL_TEXTURE_2D,mTexture);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_REPEAT);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_REPEAT);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexImage2D (GL_TEXTURE_2D,0,GL_RGBA,ImageWidth,               
-		ImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mImage);
+  glBindTexture  (GL_TEXTURE_2D, mTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D   (GL_TEXTURE_2D, 0, GL_RGBA,ImageWidth,               
+		  ImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mImage);
 
   glPolygonOffset(2,2);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -201,10 +217,11 @@ void TPCSegment_GL_Rnr::init_texture(){
   glBindTexture (GL_TEXTURE_2D, mTexture);
 }
 
-void TPCSegment_GL_Rnr::display_texture (Float_t pw, Float_t pl, Float_t vR, Int_t nMaxPads, Int_t nRows, 
+void TPCSegment_GL_Rnr::display_texture (Float_t pw, Float_t pl, Float_t vR,
+					 Int_t nMaxPads, Int_t nRows, 
 					 Int_t startCol, Int_t startRow)
 {
-  Float_t w = nMaxPads*pw/2;
+  Float_t w  = nMaxPads*pw/2;
   Float_t v1 = 1.0*startRow/ImageHeight;
   Float_t v2 = v1 + 1.0*nRows/ImageHeight;
   Float_t u1 = 1.0 *startCol/ImageWidth;
@@ -220,11 +237,15 @@ void TPCSegment_GL_Rnr::display_texture (Float_t pw, Float_t pl, Float_t vR, Int
   glEnd();
 }
 
-void TPCSegment_GL_Rnr::end_texture(){
+void TPCSegment_GL_Rnr::end_texture()
+{
   glPopAttrib();
 }
+
 /**************************************************************************/
-void TPCSegment_GL_Rnr::display_quads (Float_t pw, Float_t pl, Float_t vR, Int_t nMaxPads, Int_t nRows, 
+
+void TPCSegment_GL_Rnr::display_quads (Float_t pw, Float_t pl, Float_t vR,
+				       Int_t nMaxPads, Int_t nRows, 
 				       Int_t startCol, Int_t startRow)
 {
   GLubyte *pix, *alpha;
@@ -253,7 +274,9 @@ void TPCSegment_GL_Rnr::display_quads (Float_t pw, Float_t pl, Float_t vR, Int_t
 }
 
 /**************************************************************************/
-void TPCSegment_GL_Rnr::display_frame(TPCDigitsInfo* info) {
+
+void TPCSegment_GL_Rnr::display_frame(TPCDigitsInfo* info)
+{
   AliTPCParam* par = info->mParameter;
   glColor4fv(rst_lens->mFrameCol());
   TPCSeg* seg;

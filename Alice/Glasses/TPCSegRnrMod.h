@@ -20,9 +20,9 @@ class TPCSegRnrMod : public ZRnrModBase {
   void _init();
 
  protected:
-  Bool_t		     bShowMax;	   // X{GST}  7 Bool(-join=>1)
-  Bool_t		     bUseTexture;	   // X{GST}  7 Bool()
-  Int_t                      mTime;        // X{GST}  7 Value(-range=>[0,445,1])
+  Bool_t		     bShowMax;	   // X{GST}  7 Bool()
+  Int_t                      mTime;        // X{GST}  7 Value(-range=>[0,445,1], -join=>1)
+  Int_t                      mTimeWidth;   // X{GST}  7 Value(-range=>[1,445,1])
   Short_t                    mTreshold;    // X{GST}  7 Value(-range=>[0,445,1])
   Int_t                      mMaxVal;      // X{GST}  7 Value(-range=>[0,100,1])
 
@@ -30,6 +30,8 @@ class TPCSegRnrMod : public ZRnrModBase {
   ZColor		     mMaxCol;      // X{PGST} 7 ColorButt()
   Float_t	             mColSep;      // X{gST}  7 Value(-range=>[0,100,1,100])
   ZRibbon*	             mRibbon;      // X{gST}  L{}
+
+  Bool_t		     bUseTexture;  // X{GST}  7 Bool()
   Bool_t		     bRnrFrame;	   // X{GST}  7 Bool()
   ZColor                     mFrameCol;    // X{PGST} 7 ColorButt(-join=>1)
   Float_t                    mAlpha;       // X{gST}  7 Value(-range=>[0,1,1,100])

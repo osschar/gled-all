@@ -20,14 +20,18 @@ ClassImp(TPCSegRnrMod)
 {
   // *** Set all links to 0 ***
   bShowMax = true;
-  mTime=0;
-  mTreshold=5;
-  mMaxVal=80;
-  mRibbon=0;
+
+  mTime      = 0;
+  mTimeWidth = 1;
+  mTreshold  = 5;
+  mMaxVal    = 80;
+
   mMinCol.gray(0.3); mMaxCol.gray(1);
   mColSep = 1;
-  bRnrFrame = true;
-  bUseTexture=true;
+  mRibbon = 0;
+
+  bUseTexture = true;
+  bRnrFrame   = true;
   mFrameCol.gray(0.5);
   mAlpha = 1.0;
 }
