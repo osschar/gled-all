@@ -22,7 +22,7 @@ CPPFLAGS	:=-I${ALICE_ROOT}/include -I${ALICE_ROOT}/TPC -I${ALICE_ROOT}/CONTAINER
 VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
-BASE_LD_LIBS    = -L${ROOTSYS}/lib -lGeom -lEG -lVMC \
+BASE_LD_LIBS    = -L${ROOTSYS}/lib -lGeom -lEG -lVMC -lTreePlayer \
 		-L${ALICE_ROOT}/lib/tgt_${ALICE_TARGET} ${ALICE_LIBS}
 
 ##### Targets #####
