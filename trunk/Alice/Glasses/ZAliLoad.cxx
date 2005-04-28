@@ -25,6 +25,8 @@
 #include <AliTPCParam.h>
 #include <AliSimDigits.h>
 
+#include <Stones/TTreeTools.h>
+
 typedef list<ZParticle*>           lpZATrack_t;
 typedef list<ZParticle*>::iterator lpZATrack_i;
 
@@ -310,9 +312,9 @@ void ZAliLoad::SelectParticles(ZNode* holder, const Text_t* selection,
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mParticleSelection.Data();
 
-  TEventList evl("STD");
-  Int_t n = mTreeK->Draw(">>STD", selection);
-  // printf("%d entries in selection %s \n", n,  selection);
+  TTreeQuery evl;
+  Int_t n = evl.Select(mTreeK, selection);
+  // printf("%d entries in selection '%s'.\n", n,  selection);
 
   bool add_holder_p = false;
   if(holder == 0) {
@@ -455,8 +457,8 @@ void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mHitSelection.Data();
 
-  TEventList evl("SH"); 
-  Int_t n = mTreeH->Draw(">>SH", selection);
+  TTreeQuery evl;
+  Int_t n = evl.Select(mTreeH, selection);
   // printf("ImportHitsWithSelection %d entries for selection %s\n", n, selection);
   
   bool add_holder_p = false;
