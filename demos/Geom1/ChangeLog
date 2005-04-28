@@ -1,3 +1,8 @@
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	Added a clipping plane example; somewhat beautifed construction.
+
 2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* metagui_test.C:
