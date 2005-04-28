@@ -1,3 +1,13 @@
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/HitContainer.cxx:
+	* Glasses/HitContainer.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	* Rnr/GL/HitContainer_GL_Rnr.cxx:
+	Reimplementation of HitContainer: it now holds vertex data and
+	hit-tree entry index only.
+
 2005-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZParticleRnrStyle.h:
