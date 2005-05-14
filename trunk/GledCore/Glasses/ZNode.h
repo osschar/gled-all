@@ -81,6 +81,7 @@ public:
   void SetS(Float_t xx);                           // X{E}
   void SetScales(Float_t x, Float_t y, Float_t z); // X{E}
   void MultS(Float_t s);                           // X{E}
+  void ApplyScale(ZTrans& t);
 
   void SetOMofDaughters(Float_t om, Bool_t enforce_to_all=false); // X{ED}
 
