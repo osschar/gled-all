@@ -215,6 +215,19 @@ void ZNode::MultS(Float_t s)
   WriteUnlock();
 }
 
+void ZNode::ApplyScale(ZTrans& t)
+{
+  if(bUseScale) { t.Scale3(mSx, mSy, mSz); }
+  ZNode *p = mParent;
+  if(bUseOM && p != 0 && p->bUseOM) {
+    const Float_t dom =  mOM - p->mOM;
+    if(dom != 0) {
+      const Float_t s = TMath::Power(10, dom);
+      t.Scale3(s, s, s);
+    }
+  }
+}
+
 /**************************************************************************/
 
 // Methods for changing properties of daugters.
@@ -273,13 +286,13 @@ ZTrans* ZNode::ToMFR(int depth)
     ReadLock();
     *x *= mTrans;
     if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
-      if(bUseOM && p->bUseOM) {
-	Float_t dom =  mOM - p->mOM;
-	if(dom != 0) {
-	  Float_t s = TMath::Power(10, dom);
-	  x->Scale3(s, s, s);
-	}
+    if(bUseOM && p->bUseOM) {
+      Float_t dom =  mOM - p->mOM;
+      if(dom != 0) {
+	Float_t s = TMath::Power(10, dom);
+	x->Scale3(s, s, s);
       }
+    }
     ReadUnlock();
   }
   return x;
