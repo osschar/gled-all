@@ -1,3 +1,24 @@
+2005-05-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Pupil.cxx:
+	Export absoulte camera transformation to RnrDriver in Render().
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Added method ApplyScale(ZTrans& t).
+
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Extended position-matrix stack to hold transformations to/from
+	global coordinate system. The transformations are only constructed
+	when requested and then cached. New member 'ZTrans* mAbsCamera';
+	must be set from outside.
+
+	* Rnr/GL/GlobalLamps_GL_Rnr.cxx:
+	* Rnr/GL/LampLink_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	Followup to changes in RnrDriver position-matrix stack. 
+
 2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlBlending.cxx:
