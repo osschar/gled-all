@@ -472,8 +472,9 @@ void Pupil::Render()
 
   mDriver->SetWidth(w());
   mDriver->SetHeight(h());
-
   mDriver->SetMaxDepth(mInfo->GetMaxRnrDepth());
+  mDriver->SetAbsCamera(&mCamAbsTrans);
+
   mDriver->BeginRender();
   mDriver->Render(mDriver->GetRnr(fImg));
   mDriver->EndRender();
