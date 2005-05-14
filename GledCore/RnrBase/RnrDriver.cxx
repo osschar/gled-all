@@ -14,6 +14,7 @@
 #include "RnrDriver.h"
 #include <Eye/Eye.h>
 #include <Glasses/ZGlass.h>
+#include <Glasses/ZNode.h>
 
 namespace OS   = OptoStructs;
 namespace GVNS = GledViewNS;
@@ -171,6 +172,7 @@ void RnrDriver::Render(A_Rnr* rnr)
 void RnrDriver::BeginRender()
 {
   ++mRnrCount;
+  mPMStack.push_back(PMSEntry());
   for(int i=0; i<mMaxLamps; ++i) {
     mLamps[i] = 0;
   } 
@@ -194,8 +196,39 @@ void RnrDriver::EndRender()
       mClipPlanes[l]->CleanUp(this);
     }
   }
+  mPMStack.pop_back();
 }
 
+/**************************************************************************/
+// RnrDriver::PMSEntry
+/**************************************************************************/
+
+RnrDriver::PMSEntry::PMSEntry(PMSEntry* p, ZNode* n) :
+      fPrev(p), fNode(n), bTo(0), bFrom(0), fToGCS(n)
+{
+  n->ApplyScale(fToGCS);
+}
+
+ZTrans& RnrDriver::PMSEntry::ToGCS()
+{
+  if(bTo == false && fPrev != 0) {
+    fToGCS = fPrev->ToGCS()*fToGCS;
+    bTo = true;
+  }
+  return fToGCS;
+}
+
+ZTrans& RnrDriver::PMSEntry::FromGCS()
+{
+  if(bFrom == false) {
+    fFromGCS = ToGCS();
+    fFromGCS.InvertFast();
+    bFrom = true;
+  }
+  return fFromGCS;
+} 
+
+/**************************************************************************/
 /**************************************************************************/
 
 Int_t RnrDriver::GetLamp(A_Rnr* rnr)

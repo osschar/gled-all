@@ -9,6 +9,7 @@
 
 #include "A_Rnr.h"
 #include <GledView/GledViewNS.h>
+#include <Stones/ZTrans.h>
 #include <Stones/ZColor.h>
 
 #include <stack>
@@ -37,7 +38,28 @@ protected:
   Bool_t	bDryRun;	// X{gs} Don't render, create Rnrs
 
   Int_t		mMaxDepth;	// X{gs} Max render level
-  lpZGlass_t	mPMStack;	// X{g}  Position Matrix Node Stack
+
+  // --------------------------------
+
+  struct PMSEntry {
+    PMSEntry*   fPrev;
+    ZNode*	fNode;
+    Bool_t	bTo, bFrom;
+    ZTrans	fToGCS;
+    ZTrans	fFromGCS;
+
+    PMSEntry() : 
+      fPrev(0), fNode(0), bTo(1), bFrom(1) {}
+    PMSEntry(PMSEntry* p, ZNode* n);
+
+    ZTrans& ToGCS();
+    ZTrans& FromGCS();
+  };
+
+  list<PMSEntry> mPMStack;	// X{r}
+  ZTrans*        mAbsCamera;	// X{gs}
+
+  // --------------------------------
 
   Int_t		mMaxLamps;	// X{g}
   A_Rnr**	mLamps;
@@ -91,18 +113,25 @@ public:
   virtual void BeginRender();
   virtual void EndRender();
 
-  // Interface for Rnrs
-  // Position Matrix Name Stack
-  void PushPM(ZGlass* g) { mPMStack.push_back(g); }
-  void PopPM() 		 { mPMStack.pop_back(); }
-  ZGlass* TopPM() 	 { return mPMStack.empty() ? 0 : mPMStack.back(); }
-  int  SizePM()          { return mPMStack.size(); }
-  void ClearPM()         { mPMStack.clear(); }
+  // Position Matrix Stack
+  void PushPM(ZNode* n) { mPMStack.push_back(PMSEntry(TopPM(), n)); }
+  void PopPM() 		{ mPMStack.pop_back(); }
 
+  PMSEntry* TopPM() 	{ return &mPMStack.back(); }
+  ZNode*    TopPMNode() { return mPMStack.back().fNode; }
+
+  int  SizePM()  { return mPMStack.size(); }
+  void ClearPM() { mPMStack.clear(); }
+
+  ZTrans& ToGCS()   { return mPMStack.back().ToGCS(); }
+  ZTrans& FromGCS() { return mPMStack.back().FromGCS(); }
+
+  // Lamps
   A_Rnr** GetLamps() { return mLamps; }
   Int_t   GetLamp(A_Rnr* rnr);
   void    ReturnLamp(Int_t lamp);
 
+  // Clipping planes
   A_Rnr** GetClipPlanes() { return mClipPlanes; }
   Int_t   GetClipPlane(A_Rnr* rnr);
   void    ReturnClipPlane(Int_t lamp);
