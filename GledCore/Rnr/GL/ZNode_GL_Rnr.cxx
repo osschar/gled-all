@@ -122,7 +122,7 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
       norm_p = true;
     }
     ZNode* pn = mNode->mParent;
-    if(mNode->bUseOM && pn && (ZGlass*)pn==rd->TopPM() && pn->bUseOM) {
+    if(mNode->bUseOM && pn && pn==rd->TopPMNode() && pn->bUseOM) {
       Float_t dom =  mNode->mOM - pn->mOM;
       if(dom != 0) {
 	Double_t s = TMath::Power(10, dom);

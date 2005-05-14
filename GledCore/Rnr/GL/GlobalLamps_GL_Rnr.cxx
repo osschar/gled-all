@@ -31,11 +31,7 @@ void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
 
   ZGlass_GL_Rnr::PreDraw(rd);
 
-  ZNode* top = dynamic_cast<ZNode*>(rd->TopPM());
-  if(top == 0) {
-    cout << _eh <<"top lens is not ZNode.\n";
-    return;
-  }
+  ZNode* top = rd->TopPMNode();
 
   mLampsOn.clear();
   // should reuse lamps_on and wipe out those that failed
