@@ -26,11 +26,7 @@ void LampLink_GL_Rnr::Draw(RnrDriver* rd)
   if(lamp_rnr->GetLampID() != -1 && mLampLink->bTurnOff) {
     lamp_rnr->LampOff(rd);
   } else if(lamp_rnr->GetLampID() == -1 && mLampLink->bTurnOn) {
-    ZNode* top = dynamic_cast<ZNode*>(rd->TopPM());
-    if(top == 0) {
-      cout << _eh <<"top lens is not ZNode.\n";
-      return;
-    }
+    ZNode* top = rd->TopPMNode();
     ZTrans* tr = lamp->ToNode(top);
     if(tr) {
       lamp_rnr->LampOn(rd, tr);
