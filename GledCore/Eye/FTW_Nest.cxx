@@ -300,18 +300,10 @@ void FTW_Nest::_build(int w, int h)
     wMidPack->resizable(0);
   } // end MidPack
 
-  // Scroll pack
+  // Scrollpack
   {
-    mScroll = new Fl_Scroll(0, 0, w, h-5);
-    mScroll->type(Fl_Scroll::VERTICAL_ALWAYS);
-    mScroll->scrollbar.resize(w-2, 0, 2, 1);
-    mScroll->hscrollbar.resize(0,0, w-2, 1);
-
-    mPack   = new Fl_Pack(0, 0, 512, 1); // Wide enough ...
-    mPack->type(FL_VERTICAL);
-
+    mPack = new Fl_ScrollPack(0, 0, w, h-5);
     mPack->end();
-    mScroll->end();
 
     swm_size_range = new SWM_Size_Range(min_W, min_H, max_W, max_H);
   }
@@ -320,7 +312,7 @@ void FTW_Nest::_build(int w, int h)
   wMainPack->end();
   end();
 
-  wMainPack->resizable(mScroll);
+  wMainPack->resizable(mPack);
   resizable(wMainPack);
 
   label_nest();
@@ -401,7 +393,7 @@ void FTW_Nest::AbsorbRay(Ray& ray)
 
 void FTW_Nest::Rewidth()
 {
-  for(int c=0; c<mPack->children(); ++c) {
+  for(int c=1; c<mPack->children(); ++c) {
     dynamic_cast<FTW_Leaf*>(mPack->child(c))->resize_weeds();
   }
   mPack->redraw();
@@ -443,13 +435,13 @@ void FTW_Nest::SetSWM(Fl_SWM_Manager* swm, bool self_p)
 void FTW_Nest::InsertLeaf(FTW_Leaf* newleaf, int at) {
   mPack->insert(*newleaf, at);
   AdInsertio(newleaf);
-  mScroll->redraw();
+  mPack->redraw();
 }
 
 void FTW_Nest::InsertLeaf(FTW_Leaf* newleaf, FTW_Leaf* before) {
   mPack->insert(*newleaf, before);
   AdInsertio(newleaf);
-  mScroll->redraw();
+  mPack->redraw();
 }
 
 void FTW_Nest::RemoveLeaf(FTW_Leaf* exleaf) {
@@ -472,7 +464,7 @@ void FTW_Nest::RemoveLeaf(FTW_Leaf* exleaf) {
 
   exleaf->hide();
   mPack->remove(*exleaf);
-  mScroll->redraw();
+  mPack->redraw();
 }
 
 /**************************************************************************/
@@ -492,7 +484,7 @@ int FTW_Nest::PackPosAfter(FTW_Leaf* leaf) {
 
 int FTW_Nest::PackPosBefore(FTW_Leaf* leaf) {
   int pos = mPack->find(leaf);
-  while(--pos >= 0) {
+  while(--pos > 0) {
     if(dynamic_cast<FTW_Leaf*>(mPack->child(pos))->mLevel <= leaf->mLevel)
        return pos;
   }
@@ -501,7 +493,7 @@ int FTW_Nest::PackPosBefore(FTW_Leaf* leaf) {
 
 FTW_Leaf* FTW_Nest::LeafAt(int pos)
 {
-  if(pos < 0 || pos >= mPack->children()) return 0;
+  if(pos < 1 || pos >= mPack->children()) return 0;
   return dynamic_cast<FTW_Leaf*>(mPack->child(pos));
 }
 
@@ -530,13 +522,13 @@ FTW_Leaf* FTW_Nest::VisibleLeafAfter(FTW_Leaf* leaf)
 
 FTW_Leaf* FTW_Nest::FirstVisibleLeaf()
 {
-  return dynamic_cast<FTW_Leaf*>(mPack->child(0));
+  return dynamic_cast<FTW_Leaf*>(mPack->child(1));
 }
 
 FTW_Leaf* FTW_Nest::LastVisibleLeaf()
 {
   int c = mPack->children();
-  while(--c >= 0) {
+  while(--c > 0) {
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     if(l->visible()) return l;
   }
@@ -585,7 +577,7 @@ void FTW_Nest::EnactLayout(const char* layout)
   if(!bLinksShown) {
     create_custom_weeds();
     show_custom_weeds();
-    mScroll->redraw();
+    mPack->redraw();
   }
 }
 
@@ -707,7 +699,7 @@ void FTW_Nest::SetInfoBar(const char* info)
 
 void FTW_Nest::ReverseAnts()
 {
-  for(int c=0; c<mPack->children(); ++c) {
+  for(int c=1; c<mPack->children(); ++c) {
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     l->reverse_ants();
   }
@@ -822,9 +814,8 @@ void FTW_Nest::resize(int x, int y, int w, int h)
   
   Fl_Window::resize(x,y,w,h);
 
-  mScroll->Fl_Widget::resize(mScroll->x(), mScroll->y(),
-			     mScroll->w()+dw, mScroll->h()+dh);
-  wMainPack->resizable(mScroll);
+  mPack->resize(mPack->x(), mPack->y(), mPack->w()+dw, mPack->h()+dh);
+  wMainPack->resizable(mPack);
 }
 
 /**************************************************************************/
@@ -833,7 +824,7 @@ void FTW_Nest::resize(int x, int y, int w, int h)
 
 void FTW_Nest::create_custom_weeds()
 {
-  for(int c=0; c<mPack->children(); ++c) {
+  for(int c=1; c<mPack->children(); ++c) {
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     l->create_custom_view(pLayout);
   }
@@ -848,7 +839,7 @@ void FTW_Nest::create_custom_weeds()
 
 void FTW_Nest::show_custom_weeds()
 {
-  for(int c=0; c<mPack->children(); ++c) {
+  for(int c=1; c<mPack->children(); ++c) {
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     l->show_custom_view();
   }
@@ -859,11 +850,11 @@ void FTW_Nest::show_custom_weeds()
 
 void FTW_Nest::hide_custom_weeds()
 {
-  for(int c=0; c<mPack->children(); ++c) {
+  for(int c=1; c<mPack->children(); ++c) {
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     l->hide_custom_view();
   }
-  mScroll->redraw();
+  mPack->redraw();
   wCustomLabels->hide();
   wCustomTitle->show();
   wMidPack->redraw();
@@ -871,7 +862,7 @@ void FTW_Nest::hide_custom_weeds()
 
 void FTW_Nest::wipe_custom_weeds()
 {
-  for(int c=0; c<mPack->children(); ++c) {
+  for(int c=1; c<mPack->children(); ++c) {
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     l->wipe_custom_view();
   }
