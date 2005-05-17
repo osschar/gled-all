@@ -18,12 +18,14 @@ class FTW_Leaf;
 class FTW_Nest;
 
 #include <FL/Fl_Window.H>
-#include <FL/Fl_Scroll.H>
 #include <FL/Fl_Pack.H>
+#include <FL/Fl_ScrollPack.H>
 #include <FL/Fl_SWM.H>
 #include <FL/Fl_Group.H>
 class Fl_Input; class Fl_Output; class Fl_Menu_Item;
 class Fl_Box;
+
+class FooPack;
 
 /**************************************************************************/
 // FTW_Nest
@@ -61,8 +63,7 @@ protected:
   Fl_Pack*	 wMainPack;
   Fl_Pack*	 wMenuPack;
   Fl_Pack*	 wTargetPack;
-  Fl_Pack*	 mPack;
-  Fl_Scroll*	 mScroll;
+  Fl_ScrollPack* mPack;
 
   bool		bLinksShown;	// X{g}
   bool		bCustomWeedsCreated;

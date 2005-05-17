@@ -148,9 +148,9 @@ void FTW_Branch::ExpandList() {
 
   if(bListExpanded) return; // ants can call this for no good reason
   if(!bLeavesCreated) {
-    if(((ZList*)fImg->fGlass)->Size() > 1024) {
+    if(((ZList*)fImg->fGlass)->Size() > 128000) {
       mNest->GetShell()->Message
-	(_eh + "refusing to expand list longer than 1024 elements.", Eye::MT_wrn);
+	(_eh + "refusing to expand list longer than 128000 elements.", Eye::MT_wrn);
       return;
     }
 
