@@ -1,3 +1,12 @@
+2005-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Branch.cxx:
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	FTW_Nest now uses Fl_ScrollPack from fltk-mt as a vertical
+	browser. The limitation on length (due to Fl_Widget::x,y being
+	short integers) is thus removed.
+
 2005-05-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Pupil.cxx:
