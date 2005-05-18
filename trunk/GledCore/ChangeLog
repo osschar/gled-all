@@ -1,3 +1,14 @@
+2005-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Removed directory Tvor.
+
+	* Rnr/GL/TubeTvor_GL_Rnr.cxx:
+	* Rnr/GL/TubeTvor_GL_Rnr.h:
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+	Moved to Geom1.
+
 2005-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Branch.cxx:
