@@ -24,20 +24,16 @@ class ZParticle : public ZNode {
   void _init();
  protected:
   MCParticle*		   mParticle; 	   // X{GS}  
-  Int_t         	   mLabel;         // X{GS}   
-  Int_t                    mEvaLabel;      // X{GS}
   TString                  mV;             // X{GS}  7 TextOut()
   TString                  mP;             // X{GS}  7 TextOut()
   TString                  mVDecay;        // X{GS}  7 TextOut()
   Int_t                    mNDaughters;    // X{GS}  7 ValOut()
-  // track info
-  TVector3                 mDecay;
 
  public:
   ZParticle(const Text_t* n="ZParticle", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
 
-  ZParticle(MCParticle* p,Int_t label, const Text_t* n="ZParticle", const Text_t* t=0);
+  ZParticle(MCParticle* p, const Text_t* n="ZParticle", const Text_t* t=0);
   
   // particles
   void ImportDaughters(ZAliLoad* alil = 0);    //X{E} C{1} 7 MButt(-join=>1)
