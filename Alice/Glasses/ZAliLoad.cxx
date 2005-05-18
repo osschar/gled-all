@@ -17,6 +17,8 @@
 #include <TBranchElement.h>
 #include <TEventList.h>
 #include <TParticle.h>
+#include <Glasses/RecTrack.h>
+#include <Glasses/V0.h>
 
 #include <AliRun.h>
 #include <AliHit.h>
@@ -24,6 +26,11 @@
 #include <AliPDG.h>
 #include <AliTPCParam.h>
 #include <AliSimDigits.h>
+#include <AliKalmanTrack.h>
+#include <AliESD.h>
+#include <AliTPCclusterMI.h>
+#include <AliTPCClustersRow.h>
+
 
 #include <Stones/TTreeTools.h>
 
@@ -31,17 +38,20 @@ typedef list<ZParticle*>           lpZATrack_t;
 typedef list<ZParticle*>::iterator lpZATrack_i;
 
 ClassImp(ZAliLoad)
-
 /**************************************************************************/
 
-void ZAliLoad::_init()
+  void ZAliLoad::_init()
 {
   // *** Set all links to 0 ***
   mTreeK  = 0;
   mTreeH  = 0;
   mTreeTR = 0;
+  mTreeC  = 0;
+  mTreeR  = 0;
   mpP = &mP;
   mpH = &mH;
+  mpC = &mC;
+  mpR = &mR;
   mTPCDigInfo = 0;
 
   mDataDir = ".";
@@ -51,12 +61,14 @@ void ZAliLoad::_init()
   mFile    = 0; mDirectory = 0;
 
   mParticleSelection = "GetMother(0) == -1";
-  mHitSelection      = "det_ID < 5";
-
+  mHitSelection      = "GetDetID() < 5";
+  mClusterSelection  = mHitSelection;
+  mTrackSelection    = "GetLabel() >= 0";
   pRunLoader = 0;
 
   // Pain:
   AliPDG::AddParticlesToPdgDataBase();
+  AliKalmanTrack::SetConvConst(1); 
 }
 
 /**************************************************************************/
@@ -89,8 +101,9 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
     printf("Start importing AliRunLoader from dir %s\n", mDataDir.Data());
 
     string galice_file (GForm("%s/galice.root", mDataDir.Data()));
+    printf("END importing AliRunLoader from dir %s\n", mDataDir.Data());
 
-    GTime time(GTime::I_Now);
+    // GTime time(GTime::I_Now);
     if(gSystem->AccessPathName(galice_file.c_str(), kReadPermission)) {
       // CAN'T Read
       throw(_eh + "Can not access file '" + galice_file + "'.");
@@ -98,18 +111,20 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
     pRunLoader = AliRunLoader::Open(galice_file.c_str());
     pRunLoader->LoadgAlice();
     pRunLoader->LoadHeader();
-    pRunLoader->LoadHits();
     pRunLoader->LoadKinematics();
+    //printf("End load KINEE \n");
+    pRunLoader->LoadHits();
+    //printf("End load HITTS \n");
     pRunLoader->LoadTrackRefs();
-    GTime delta = time.TimeUntilNow();
-    printf("AliRunLoader::Open took %lf sec\n", delta.ToDouble());
+    //printf("End load Tr \n");
+    //    GTime delta = time.TimeUntilNow();
+    // printf("AliRunLoader::Open took %lf sec\n", delta.ToDouble());
 
     GledNS::PushFD();
     gDirectory = 0;
     mDirectory = new TDirectory(GForm("Event%d", mEvent), "RECREATE");
     GledNS::PopFD();
   }
-
   SetupEvent(use_aliroot);
 }
 
@@ -117,33 +132,45 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
 void ZAliLoad::SetupEvent(Bool_t use_aliroot)
 {
   if (use_aliroot) {
-
     LoadKinematics();
     LoadHits();
-
+    LoadClusters();
+    LoadRecTracks();
   } else {
-
+    // printf("Importing kinematics \n");
     mTreeK = (TTree*)mDirectory->Get("Kinematics");
-    //printf("treeK %p \n", mTreeK);
     if(mTreeK == 0) {
-      printf("ERROR importing treek \n");
-      return;
+      printf("ERROR importing kinematics  \n");
+    }else {
+      mTreeK->SetBranchAddress("P", &mpP);
     }
-    mTreeK->SetBranchAddress("P", &mpP);
-
-    mTreeH =  (TTree*)mDirectory->Get("AliDetHit");
-    //printf("TreeH %p \n", mTreeH);
+    // printf("Importing hits TreeH %p \n", mTreeH);  
+    mTreeH =  (TTree*)mDirectory->Get("Hits");
     if (mTreeH == 0){
       printf("ERROR importing hits\n");
-      return;
+    } else {
+      mTreeH->SetBranchAddress("H", &mpH);
     }
-    mTreeH->SetBranchAddress("H", &mpH);
 
+    printf("Importing reconstructed clusters. \n");
+    mTreeC =  (TTree*)mDirectory->Get("Clusters");
+    if (mTreeC == 0){
+      printf("ERROR importing Clusters\n");
+    }else {
+      mTreeC->SetBranchAddress("C", &mpC);
+    }
+
+    printf("Importing reconstructed tracks. \n");
+    mTreeR =  (TTree*)mDirectory->Get("RecTracks");
+    if (mTreeR == 0){
+      printf("ERROR importing RecTracks\n");
+    }else {
+      mTreeR->SetBranchAddress("R", &mpR);
+    }
   }
 }
 
 /**************************************************************************/
-
 void ZAliLoad::Write()
 {
   string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
@@ -172,6 +199,16 @@ void ZAliLoad::Write()
     mTreeH->Write();
   }
 
+  if (mTreeC){
+    printf("write mTreeC %p\n", mTreeC);
+    mTreeC->Write();
+  }
+
+  if (mTreeR) { 
+    printf("write mTreeR %p\n", mTreeR);
+    mTreeR->Write();
+  }
+
   vsd->Write();
   vsd->Close();
   delete vsd;
@@ -188,6 +225,7 @@ void ZAliLoad::ResetEvent()
   delete mTreeK;      mTreeK      = 0;
   delete mTreeH;      mTreeH      = 0;
   delete mTreeTR;     mTreeTR     = 0;
+  delete mTreeR;      mTreeR      = 0;
   delete mTPCDigInfo; mTPCDigInfo = 0;
 
   if (mFile) {
@@ -224,8 +262,8 @@ void ZAliLoad::LoadKinematics()
   TTree* treek = pRunLoader->TreeK();
   TParticle tp, *_tp = &tp;
   treek->SetBranchAddress("Particles", &_tp);
-  TEventList evl("STDO");
-  Int_t nprimary = treek->Draw(">>STDO","fMother[0]==-1");
+  TTreeQuery evl;
+  Int_t nprimary = evl.Select(treek, "fMother[0]==-1");
 
   Int_t nentries = (Int_t)treek->GetEntries();
   vector<MCParticle>  vmc(nentries);
@@ -236,7 +274,9 @@ void ZAliLoad::LoadKinematics()
       idx - nprimary;
 
     treek->GetEntry(ent);
+    //printf("Import Kinematics %s \n",tp.GetName());
     vmc[idx] = tp;
+    vmc[idx].SetLabel(idx);
   }
 
   // read track refrences 
@@ -251,16 +291,17 @@ void ZAliLoad::LoadKinematics()
     for (Int_t iTrackRef = 0; iTrackRef < RunArrayTR->GetEntriesFast(); iTrackRef++) {
       AliTrackReference *trackRef = (AliTrackReference*)RunArrayTR->At(iTrackRef); 
       Int_t track = trackRef->GetTrack();
+      vmc[track].SetEvaID(iPrimPart);
       MCParticle& mcp = vmc[track];
       if(track < treek->GetEntries()){
 
 	if(trackRef->TestBit(kNotDeleted)) {
-	  mcp.bDecayed=true;
+	  mcp.SetDecayed(true);
 	  mcp.fDt=trackRef->GetTime();
 	  mcp.fDx=trackRef->X(); mcp.fDy=trackRef->Y(); mcp.fDz=trackRef->Z();
 	  mcp.fDPx=trackRef->Px(); mcp.fDPy=trackRef->Py(); mcp.fDPz=trackRef->Pz();
 	  // if(mcp.GetPDG()->Stable()) printf("WARNING import TR %s track %d stable , but decayed \n", mcp.GetName(), track);
-	  if(mcp.GetPdgCode() == 11)  mcp.bDecayed=false; // a bug in TreeTR
+	  if(mcp.GetPdgCode() == 11)  mcp.SetDecayed(false); // a bug in TreeTR
 	}
       } 
     }
@@ -276,7 +317,6 @@ void ZAliLoad::LoadKinematics()
 }
 
 /**************************************************************************/
-
 MCParticle* ZAliLoad::Particle(Int_t i)
 {
   static const string _eh("ZAliLoad::Particle ");
@@ -288,6 +328,41 @@ MCParticle* ZAliLoad::Particle(Int_t i)
   return p;
 }
 
+ZParticle* ZAliLoad::create_particle_with_parents(Int_t label, Int_t depth)
+{
+  lpZATrack_t plist;
+  MCParticle* p;
+  ZParticle* zp; 
+
+  Int_t idx = label;
+  while(depth != 0){
+    p= Particle(idx);
+    zp = new ZParticle(p); 
+    mQueen->CheckIn(zp); 
+    plist.push_front(zp);
+    idx = p->GetMother(0);
+
+    if(idx == -1) break;
+    depth--;
+  }
+
+  lpZATrack_i i = plist.begin();
+  ZParticle* base = *i;
+  printf("retun base %s \n", base->GetName());
+  plist.pop_front();
+  ZParticle* holder = base;
+
+  for(lpZATrack_i k=plist.begin(); k!=plist.end(); ++k) {
+    zp = *k;
+    printf("Add %s to holder %s \n", zp->GetName(), holder->GetName());
+    holder->Add(zp);
+    holder = zp; 
+  }
+  printf("retun base %s \n", base->GetName());
+  return base;
+}
+
+
 void ZAliLoad::PrintTreeK()
 {
   MCParticle*  m_P = &mP;
@@ -296,7 +371,8 @@ void ZAliLoad::PrintTreeK()
 
   for (Int_t i=0;i<nentries;i++) {
     mTreeK->GetEntry(i);
-    printf("<< print treek  %s p(%f) PGD(%d) Mother %d \n", m_P->GetName(), m_P->P(), m_P->GetPdgCode(), m_P->GetMother(0));
+    printf("%4d %4d >> %s p(%f) PGD(%d)  \n", i, m_P->GetMother(0), 
+	   m_P->GetName(), m_P->P(), m_P->GetPdgCode());
   }
 }
 
@@ -328,7 +404,7 @@ void ZAliLoad::SelectParticles(ZNode* holder, const Text_t* selection,
       Int_t label = evl.GetEntry(i);
       mTreeK->GetEntry(label);
       MCParticle* p = new MCParticle(*mpP); 
-      ZParticle* zp = new ZParticle(p, label, GForm("%d %s", label, p->GetName()));
+      ZParticle* zp = new ZParticle(p, GForm("%d %s", label, p->GetName()));
       mQueen->CheckIn(zp);
       if(import_daughters) zp->ImportDaughtersRec(this);
       holder->WriteLock();
@@ -374,7 +450,7 @@ void ZAliLoad::LoadHits()
   if(mTreeH != 0)
     throw(_eh + "hits already loaded.");
 
-  mTreeH =  new TTree("AliDetHit", "Hit objects read from detects array");
+  mTreeH =  new TTree("Hits", "Hit objects read from detects array");
   // Hit *_H=&mH; //!!!!!!
   Hit::Class()->IgnoreTObjectStreamer(true);
   mTreeH->Branch("H", "Hit",  &mpH,128*1024,1);
@@ -402,9 +478,9 @@ void ZAliLoad::LoadHits()
 	  AliHit* ah = hv2.GetHit();
 	  x1=ah->X();y1=ah->Y();z1=ah->Z();
 	  if((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1) > 4){
-	    mH.det_ID=det.detidx;
-	    mH.eva_ID=eva_idx;
-	    mH.particle_ID=ah->Track();
+	    mH.fDetID=det.detidx;
+	    mH.fEvaID=eva_idx;
+	    mH.fLabel=ah->Track();
 	    mH.x=x1; mH.y=y1; mH.z=z1;
 	    mTreeH->Fill();
 	    x=x1;y=y1;z=z1;
@@ -429,9 +505,9 @@ void ZAliLoad::LoadHits()
 	// printf("%d entry %d hits for primary %d \n", i, nh, eva_idx);
 	for (Int_t j=0; j<nh; j++) {
 	  AliHit* ali_hit = (AliHit*)arr->UncheckedAt(j);
-	  mH.eva_ID=eva_idx;
-	  mH.det_ID=det.detidx;
-	  mH.particle_ID=ali_hit->GetTrack();
+	  mH.fEvaID=eva_idx;
+	  mH.fDetID=det.detidx;
+	  mH.fLabel=ali_hit->GetTrack();
 	  mH.x=ali_hit->X(); mH.y=ali_hit->Y(); mH.z=ali_hit->Z();
 	  // mH.Dump();
 	  mTreeH->Fill(); 
@@ -440,9 +516,7 @@ void ZAliLoad::LoadHits()
       break;
     } // end default 
     } // end switch
-  } // end while
-
-  // mpH = &mH;//!!!
+  } // end whi/le
 }
 
 /**************************************************************************/
@@ -483,6 +557,213 @@ void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
 }
 
 /**************************************************************************/
+// Clusters
+/**************************************************************************/
+void ZAliLoad::LoadClusters()
+{
+  static const string _eh("ZAliLoad::LoadClusters ");
+
+  if(pRunLoader == 0)
+    throw(_eh + "AliRunLoader not available.");
+
+  if(mTreeC != 0)
+    throw(_eh + "clusters already loaded.");
+
+  mDirectory->cd();
+  mTreeC =  new TTree("Clusters", "rec clusters");
+  mTreeC->Branch("C", "Hit",  &mpC,128*1024,1);
+  mDirectory->Add(mTreeC);
+
+  LoadTPCClusters();
+}
+
+void ZAliLoad::SelectClusters(HitContainer* holder, const char* selection)
+{
+  static const string _eh("ZAliLoad::SelectClusters ");
+
+  if(mTreeC == 0) 
+    throw (_eh + "clusters not available.");
+
+  if(selection == 0 || strcmp(selection,"") == 0)
+    selection = mClusterSelection.Data();
+
+  TTreeQuery evl;
+  Int_t n = evl.Select(mTreeC, selection);
+  
+  bool add_holder_p = false;
+  if(n > 0) {
+    if( holder == 0 ) {
+      holder = new HitContainer(GForm("Clusers %s", selection));
+      holder->SetColor(1.,1.,0.,1.);
+      mQueen->CheckIn(holder);
+      add_holder_p = true;
+    }
+
+    holder->Reset(n);
+    for(Int_t i=0; i<n; i++) {
+      const Int_t entry = evl.GetEntry(i);
+      mTreeC->GetEntry(entry);
+      holder->SetPoint(i, entry, &mpC->x);
+    }
+  } else {
+    throw(_eh + "no hits matching selection.");
+  }
+  if(add_holder_p)
+    Add(holder);
+}
+
+/**************************************************************************/
+// ESD
+/**************************************************************************/
+void ZAliLoad::LoadRecTracks()
+{
+  static const string _eh("ZAliLoad::LoadRecTracks ");
+
+  if(pRunLoader == 0)
+    throw(_eh + "AliRunLoader not available.");
+
+  if(mTreeR != 0)
+    throw(_eh + "tracks already loaded.");
+
+
+  mDirectory->cd();
+  mTreeR =  new TTree("RecTracks", "rec tracks");
+  mTreeR->Branch("R", "ESDTrack",  &mpR,128*1024,1);
+  mDirectory->Add(mTreeR);
+ 
+  TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
+  if(!f.IsOpen()){
+    printf("no AliESDs.root file\n");
+    return;
+    // throw(_eh + "no AliESDs.root file\n");
+  }
+
+  TTree* tree = (TTree*) f.Get("esdTree");
+  if (tree == 0) 
+    throw(_eh + "no esdTree\n");
+
+ 
+  AliESD *fEvent=0;  
+  tree->SetBranchAddress("ESD", &fEvent);
+  tree->GetEntry(0); 
+
+ 
+  // reconstructed tracks
+  AliESDtrack* esd_t;
+  for (Int_t n =0; n< fEvent->GetNumberOfTracks();n++){
+    esd_t = fEvent->GetTrack(n);
+    esd_t->GetXYZ(mpR->fV);
+    esd_t->GetPxPyPz(mpR->fP);
+    mpR->fSign = esd_t->GetSign();
+    mpR->fLabel = esd_t->GetLabel();
+    mTreeR->Fill();
+  }
+
+  /*
+  // V0
+  ZNode* vh = new ZNode("V0Tracks");
+  mQueen->CheckIn(vh);
+  Add(vh);
+  AliESDv0* v0;
+  for (Int_t n =0; n< fEvent->GetNumberOfV0s();n++){
+  printf("Importing V0 of %d\n",fEvent->GetNumberOfV0s() );
+  v0 = fEvent->GetV0(n);
+  V0* vt = new  V0(v0);
+  mQueen->CheckIn(vt);
+  vh->Add(vt);
+  }
+  */
+}
+
+
+ZNode* ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
+{
+  static const string _eh("ZAliLoad::SelectRecTracks ");
+  if(mTreeR == 0) 
+    throw (_eh + "reconstructed tracks not available.");
+  
+  if(selection == 0 || strcmp(selection,"") == 0)
+    selection = mTrackSelection.Data();
+
+  TTreeQuery evl;
+  Int_t n = evl.Select(mTreeR, selection);
+  // printf("%d entries in selection %s \n", n,  selection);
+
+  bool add_holder_p = false;
+  if(holder == 0) {
+    holder = new ZNode("RecTracks", selection);
+    mQueen->CheckIn(holder);
+    add_holder_p = true;
+  }
+
+  if(n > 0) {
+    for (Int_t i=0; i<n; i++){
+      Int_t label = evl.GetEntry(i);
+      mTreeR->GetEntry(label);
+      printf("Importing track %s \n", mpR->GetName());
+      ESDTrack* et = new ESDTrack(*mpR);
+      RecTrack* t = new RecTrack(et); 
+      mQueen->CheckIn(t);
+      holder->WriteLock();
+      holder->Add(t);
+      holder->WriteUnlock();
+    }
+  }
+  if(add_holder_p) Add(holder);
+  return holder;
+}
+
+void ZAliLoad::SelectRecTracksWithKine(ZNode* holder, const Text_t* selection, Int_t depth)
+{
+  static const string _eh("ZAliLoad::SelectRecTracksWithKine ");
+  if(mTreeK == 0) 
+    throw (_eh + "reconstructed tracks not available.");
+  
+  bool add_holder_p = false;
+  if(holder == 0) {
+    holder = new ZNode("RecTracksWithKine", selection);
+    mQueen->CheckIn(holder);
+    add_holder_p = true;
+  }
+
+  // import ESD tracks
+  ZNode* esd_holder = new ZNode("ESD", selection);
+  mQueen->CheckIn(esd_holder);
+  SelectRecTracks(esd_holder,selection);  
+  holder->Add(esd_holder);
+
+
+
+  ZNode* k_holder = new ZNode("Kine", selection);
+  mQueen->CheckIn(k_holder);
+  holder->Add(k_holder);
+  // loop through the list of reconstracted track and import particle
+  // with same label
+  RecTrack* rt;
+  ZParticle* zp;
+  lpZGlass_i i, end;
+  esd_holder->BeginIteration(i, end);
+  while(i != end) {
+    if((rt = dynamic_cast<RecTrack*>(*i))) {
+      if(depth == 0){
+	MCParticle* mcp = Particle(rt->GetESD()->GetLabel());
+	zp = new ZParticle(mcp);
+      }
+      else {
+        zp = create_particle_with_parents(rt->GetESD()->GetLabel(), depth);
+      }
+      mQueen->CheckIn(zp);
+      k_holder->Add(zp);
+    }
+    ++i;
+  }
+  esd_holder->EndIteration();
+
+
+  if(add_holder_p) Add(holder);
+}
+
+/**************************************************************************/
 // TPC digits
 /**************************************************************************/
 
@@ -506,7 +787,7 @@ TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
       TFile* f2 = new TFile(GForm("%s/TPC.Digits.root", mDataDir.Data()));
       //gDirectory->cd();
       TDirectory* d = (TDirectory*)f2->Get(GForm("Event%d",mEvent));
-      printf("file %p dir %p\n",f2,d);
+      //  printf("file %p dir %p\n",f2,d);
       //d->cd();
       tree = (TTree*)d->Get("TreeD");
     }
@@ -564,3 +845,63 @@ void ZAliLoad::ShowTPCPlate(Int_t side)
 }
 
 /**************************************************************************/
+void ZAliLoad::LoadTPCClusters()
+{
+  static const string _eh("ZAliLoad::LoadTPCClusters");
+  TFile* f = new TFile(GForm("%s/TPC.RecPoints.root", mDataDir.Data()));
+  if(!f)
+    throw(_eh + "no TPC.RecPoints.root file");
+
+  TDirectory* d = (TDirectory*)f->Get(GForm("Event%d",mEvent));
+  printf("file %p dir %p\n",f,d);
+  TTree* tree = (TTree*)d->Get("TreeR");
+
+  TFile* fp = new TFile(GForm("%s/galice.root", mDataDir.Data()));
+  AliTPCParam* par=(AliTPCParam *)fp->Get("75x40_100x60_150x60");
+
+  if (par == 0 || tree == 0){
+    printf("TPC data not found \n");
+    return;
+  }
+
+  AliTPCClustersRow  clrow, *_clrow=&clrow;
+  AliTPCclusterMI *cl;
+  _clrow->SetClass("AliTPCclusterMI");
+  tree->SetBranchAddress("Segment", &_clrow);
+
+  // count clusters
+  Int_t nClusters = 0;
+  Int_t n_ent = tree->GetEntries();
+  for (Int_t n=0; n<n_ent; n++) {
+    tree->GetEntry(n);
+    nClusters += _clrow->GetArray()->GetEntriesFast();
+  }
+
+  // calculate xyz for a cluster and add it to container 
+  Double_t x,y,z;
+  Float_t cs, sn, tmp;
+
+  for (Int_t n=0; n<tree->GetEntries(); n++) {
+    tree->GetEntry(n);
+    Int_t ncl=_clrow->GetArray()->GetEntriesFast();
+    if(ncl > 0){
+      Int_t sec,row;
+      par->AdjustSectorRow(_clrow->GetID(),sec,row);    
+      while (ncl--) {
+	if(_clrow->GetArray()){
+	  cl=new AliTPCclusterMI(*(AliTPCclusterMI*)_clrow->GetArray()->UncheckedAt(ncl));
+	  x=par->GetPadRowRadii(sec,row); y=cl->GetY(); z=cl->GetZ();
+	  par->AdjustCosSin(sec,cs,sn);
+	  tmp = x*cs-y*sn; y= x*sn+y*cs; x=tmp; 
+	  Int_t trackId = cl->GetLabel(0);
+	  mC.fDetID=1;
+	  mC.fLabel = trackId;
+          mC.x = x;
+          mC.y = y;
+          mC.z = z;
+          mTreeC->Fill();
+	}
+      }   
+    }
+  }
+}
