@@ -7,7 +7,6 @@
 #include "ZParticleRnrStyle_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 #include <FL/gl.h>
-// #include <RnrBase/RnrDriver.h>
 
 /**************************************************************************/
 

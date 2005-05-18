@@ -8,9 +8,9 @@
 #define Alice_ZParticleRnrStyle_GL_RNR_H
 
 #include <Glasses/ZParticleRnrStyle.h>
-#include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
+#include <Rnr/GL/PRSBase_GL_Rnr.h>
 
-class ZParticleRnrStyle_GL_Rnr : public ZRnrModBase_GL_Rnr {
+class ZParticleRnrStyle_GL_Rnr : public PRSBase_GL_Rnr {
 private:
   void _init();
 
@@ -18,7 +18,7 @@ protected:
 
 public:
   ZParticleRnrStyle_GL_Rnr(ZParticleRnrStyle* idol) :
-    ZRnrModBase_GL_Rnr(idol)
+    PRSBase_GL_Rnr(idol)
   { _init(); }
 
   virtual void PreDraw(RnrDriver* rd);
