@@ -11,7 +11,7 @@ REGEXP_LIB       := lib/lib${REGEXP_LIB_BASE}.so
 # Can add your own before ... or after (are += -ed into the vars)
 
 BLESSED_DIRS	= Glasses
-BASE_DIRS	= Ephra Stones Gled Net Tvor
+BASE_DIRS	= Ephra Stones Gled Net
 
 DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView Eye FL RnrBase
