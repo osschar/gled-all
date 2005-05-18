@@ -13,13 +13,13 @@ class MCParticle : public TParticle {
  private:
   void _init();
 
- protected:
-
  public:
+  Int_t    fLabel;         // X{GS}   
+  Int_t    fEvaID;      // X{GS}
+  Bool_t   bDecayed;       // X{GS}
   Double_t fDx,  fDy, fDz;
   Double_t fDPx, fDPy,fDPz;
   Float_t  fDt;
-  Bool_t   bDecayed;
 
   MCParticle(const Text_t* n="MCParticle", const Text_t* t=0) :
     TParticle()
