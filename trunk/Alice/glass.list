@@ -3,6 +3,7 @@
 
 ZAliLoad        	1	Glasses/ZAliLoad		ZNode
 
+PRSBase                 63      Glasses/PRSBase                 .
 ZParticle       	64	Glasses/ZParticle		.
 ZParticleRnrStyle       65	Glasses/ZParticleRnrStyle	.
 
@@ -10,3 +11,6 @@ HitContainer		70	Glasses/HitContainer		.
 
 TPCSegment		86	Glasses/TPCSegment		.
 TPCSegRnrMod		87	Glasses/TPCSegRnrMod		.
+RecTrack                89      Glasses/RecTrack                .
+RecTrackRS              90      Glasses/RecTrackRS              .
+V0                      91      Glasses/V0                      RecTrack 
