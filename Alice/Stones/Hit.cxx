@@ -17,9 +17,9 @@ ClassImp(Hit)
 
 Hit::Hit(UChar_t Detector, Int_t Particle, Int_t Eva, Float_t X, Float_t Y, Float_t Z ):TObject()
 { 
-  det_ID=Detector;
-  particle_ID=Particle;
-  eva_ID=Eva;
+  fDetID=Detector;
+  fLabel=Particle;
+  fEvaID=Eva;
   x=X;y=Y;z=Z;
 }
 
@@ -28,7 +28,7 @@ Hit::Hit(UChar_t Detector, Int_t Particle, Int_t Eva, Float_t X, Float_t Y, Floa
 void Hit::Dump() 
 {
   printf("XYZ(%f,%f,%f) eva(%d) label(%d) det(%d) \n",
-	 x,y,z,eva_ID, particle_ID, det_ID );
+	 x,y,z,fEvaID, fLabel, fDetID);
 }
 
 /**************************************************************************/
