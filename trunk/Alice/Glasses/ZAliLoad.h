@@ -11,6 +11,7 @@
 #include <Glasses/ZParticle.h>
 #include <Glasses/HitContainer.h>
 #include <Stones/Hit.h>
+#include <Glasses/RecTrack.h>
 #include <Glasses/TPCSegment.h>
 #include <Stones/TPCDigitsInfo.h>
 #include <Stones/MCParticle.h>
@@ -24,16 +25,20 @@
 class ZAliLoad : public ZNode {
   MAC_RNR_FRIENDS(ZAliLoad);
 
-private:
-  void _init();
+ private:
+  void                           _init();
+  ZParticle*                     create_particle_with_parents(Int_t label, Int_t depth = -1);
   TTree*                         mTreeK;   // X{g}
   TTree*                         mTreeH;   // X{g}
   TTree*                         mTreeTR;  // X{g}
+  TTree*                         mTreeC;   // X{g}
+  TTree*                         mTreeR;   // X{g}
   Hit                            mH, *mpH;      // needed for selection in mTreeH
   MCParticle                     mP, *mpP;      // needed for selection in mTreeK
+  Hit                            mC, *mpC;      // needed for selection in mTreeC    
+  ESDTrack                       mR, *mpR;      // needed for selection in mTreeR                   
   TPCDigitsInfo*                 mTPCDigInfo;
-
-protected:
+ protected:
   ZParticle* get_track(Int_t tid);
 
   TString                  mDataDir;   // X{GS} 7 Filor(-dir=>1)
@@ -44,7 +49,7 @@ protected:
   TFile*                   mFile;      // X{G} 
   TDirectory*              mDirectory; // X{G}
 
-public:
+ public:
   ZAliLoad(const Text_t* n="ZAliLoad", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
 
@@ -64,9 +69,9 @@ public:
   MCParticle* Particle(Int_t i);
   void PrintTreeK();
 
-protected:
+ protected:
   TString    mParticleSelection;               // X{GS} 7 Textor()
-public:
+ public:
   void SelectParticles(ZNode* holder=0, const Text_t* selection=0,
 		       Bool_t import_daughters=false
 		       ); // X{Ed} C{1} 7 MCWButt()
@@ -76,18 +81,37 @@ public:
 
   void LoadHits();
 
-protected:
+ protected:
   TString    mHitSelection;               // X{GS} 7 Textor()
-public:
+ public:
   void SelectHits(HitContainer* holder=0, const Text_t* selection=0
 		  );     // X{Ed} C{1} 7 MCWButt()
 
-
   // --------------------------------------------------------------
-  // TPC digits
-
+  // ESD
+  void        LoadRecTracks();
+ protected:
+  TString     mTrackSelection;                                  // X{GS} 7 Textor()
+ public:
+  ZNode*        SelectRecTracks(ZNode* holder=0,
+			      const Text_t* selection=0);     // X{Ed} C{1} 7 MCWButt()
+  void        SelectRecTracksWithKine(ZNode* holder=0,
+				     const Text_t* selection=0, Int_t depth = -1); // X{Ed} C{1} 7 MCWButt()
+  ZNode*      mRecTrackList;
+  // --------------------------------------------------------------
+  // Clusters
+  void        LoadClusters();
+ protected:
+  TString     mClusterSelection;
+ public:                             // X{GS} 7 Textor()
+  void        SelectClusters(HitContainer* holder=0, const Text_t* selection=0
+			     );     // X{Ed} C{1} 7 MCWButt()
+  // --------------------------------------------------------------
+  // TPC specific  (digits,clusters,tracks)
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  
   void        ShowTPCPlate(Int_t side = -1);   // X{Ed} 7 MCWButt()
+  void        LoadTPCClusters();
+
 
   // --------------------------------------------------------------
   // Public globals.
@@ -96,7 +120,7 @@ public:
 
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
-}; // endclass ZAliLoad
+    }; // endclass ZAliLoad
 
 GlassIODef(ZAliLoad);
 
