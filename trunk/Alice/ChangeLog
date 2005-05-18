@@ -1,3 +1,67 @@
+2005-05-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+	New base render style class for ZParticle and RecTrack.
+
+	* Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+	New class RecTrack. 
+
+	* Glasses/RecTrackRS.cxx:
+	* Glasses/RecTrackRS.h:
+	New render style class for RecTrack.
+
+	* Glasses/V0.cxx:
+	* Glasses/V0.h:
+	New class for V0 representation. 
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added functionality for writinig reconstructed tracks and clusters
+	into trees.
+
+	* Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+	Some members moved to MCParticle.
+
+	* Glasses/ZParticleRnrStyle.cxx:
+	* Glasses/ZParticleRnrStyle.h:
+	Changes due inheritance from PRSBase.
+
+	* Rnr/GL/HelixLineRnr.h:
+	New structures used by RecTrackRS and ZParticleRnrStyle.
+
+	* Rnr/GL/PRSBase_GL_Rnr.cxx:
+	* Rnr/GL/PRSBase_GL_Rnr.h:
+	New Rnr class for PRSBase.
+
+	* Rnr/GL/RecTrackRS_GL_Rnr.cxx:
+	* Rnr/GL/RecTrackRS_GL_Rnr.h:
+        New Rnr class for RecTrackRS.
+
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.h:
+	New Rnr class for RecTrack.
+
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.h:
+	* Rnr/GL/ZParticle_GL_Rnr.cxx:
+	Changes due introduction of PRSBase.
+
+	* Stones/ESDTrack.cxx:
+	* Stones/ESDTrack.h:
+	New stone ESDTrack. Structure to save reconstructed data into tree
+	by ZAliLoad.
+
+	* Stones/Hit.cxx:
+	* Stones/Hit.h:
+	* Stones/MCParticle.h:
+        Renamed some members.
+
+	* glass.list:
+	New glasses PRSBase, RecTrack, RecTrackRS, V0.
+
 2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TPCSegRnrMod.cxx:
