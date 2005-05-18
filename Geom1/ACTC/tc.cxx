@@ -766,18 +766,6 @@ int actcEndOutput(ACTCData *tc)
 ACTCData *actcNew(void)
 {
     ACTCData *tc;
-#if defined(DEBUG) || defined(INFO)
-    static int didPrintVersion = 0;
-
-    if(!didPrintVersion) {
-	int verMinor, verMajor;
-	didPrintVersion = 1;
-
-        actcGetParami(tc, ACTC_MAJOR_VERSION, &verMajor);
-        actcGetParami(tc, ACTC_MINOR_VERSION, &verMinor);
-	fprintf(stderr, "TC Version %d.%d\n", verMajor, verMinor);
-    }
-#endif /* defined(DEBUG) || defined(INFO) */
 
     chartedSetLabel("the tc struct");
     tc = (ACTCData *)calloc(sizeof(*tc), 1);
