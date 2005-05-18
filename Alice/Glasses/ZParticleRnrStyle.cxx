@@ -12,6 +12,8 @@
 #include "ZParticleRnrStyle.h"
 #include "ZParticleRnrStyle.c7"
 
+
+
 ClassImp(ZParticleRnrStyle)
 
 /**************************************************************************/
@@ -19,24 +21,6 @@ ClassImp(ZParticleRnrStyle)
   void ZParticleRnrStyle::_init()
 {
   // *** Set all links to 0 ***
-  mVertexColor.rgba(1,0,0,1);
-  mVertexSize = 5;
-  mRnrP = false;
-  mPColor.rgba(1,0,0,1);
-  mPMinLen = 10;
-  mPScale = 1;
-
-  // mTrackColor.rgba(1,1,0,1);
-  mTrackWidth=1.2;
-  mMinP = 0.00005;
-  mTheta = 90;
-  mThetaOff = 90;
-  mMaxR=600; 
-  mMaxZ=550;
-  mMaxOrbs=2;
-  mDelta  = 0.1; //calculate step size depending of helix radius
-  mMinAng = 45;
-
   mFitDaughters = true;
   mFitDecay = true;
   // pdg color scheme 
@@ -46,11 +30,6 @@ ClassImp(ZParticleRnrStyle)
   mGammaCol.rgba(1,1,0,1);
   mMesCol.rgba(0.5,0.5,1,1);
   mBarCol.rgba(1,0.8,1,1);
-
-  //textures
-  mTexture = 0;
-  mTexFactor = 200;
-  mTexVCoor = 0.2;
 }
 
 /**************************************************************************/
