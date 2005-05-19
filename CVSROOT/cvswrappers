@@ -35,3 +35,7 @@
 *.txf		-k 'b'
 
 *.root		-k 'b'
+
+*.wav		-k 'b'
+*.mp3		-k 'b'
+*.ogg		-k 'b'
