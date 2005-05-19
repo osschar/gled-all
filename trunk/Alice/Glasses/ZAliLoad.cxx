@@ -676,7 +676,7 @@ void ZAliLoad::LoadRecTracks()
 }
 
 
-ZNode* ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
+void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
 {
   static const string _eh("ZAliLoad::SelectRecTracks ");
   if(mTreeR == 0) 
@@ -710,7 +710,6 @@ ZNode* ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
     }
   }
   if(add_holder_p) Add(holder);
-  return holder;
 }
 
 void ZAliLoad::SelectRecTracksWithKine(ZNode* holder, const Text_t* selection, Int_t depth)

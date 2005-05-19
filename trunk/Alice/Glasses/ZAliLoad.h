@@ -93,10 +93,10 @@ class ZAliLoad : public ZNode {
  protected:
   TString     mTrackSelection;                                  // X{GS} 7 Textor()
  public:
-  ZNode*        SelectRecTracks(ZNode* holder=0,
-			      const Text_t* selection=0);     // X{Ed} C{1} 7 MCWButt()
+  void        SelectRecTracks(ZNode* holder=0,
+				const Text_t* selection=0);     // X{Ed} C{1} 7 MCWButt()
   void        SelectRecTracksWithKine(ZNode* holder=0,
-				     const Text_t* selection=0, Int_t depth = -1); // X{Ed} C{1} 7 MCWButt()
+				      const Text_t* selection=0, Int_t depth = 0); // X{Ed} C{1} 7 MCWButt()
   ZNode*      mRecTrackList;
   // --------------------------------------------------------------
   // Clusters
@@ -106,6 +106,11 @@ class ZAliLoad : public ZNode {
  public:                             // X{GS} 7 Textor()
   void        SelectClusters(HitContainer* holder=0, const Text_t* selection=0
 			     );     // X{Ed} C{1} 7 MCWButt()
+
+  // --------------------------------------------------------------
+  // GenInfo
+  void         MakeGenInfo();
+
   // --------------------------------------------------------------
   // TPC specific  (digits,clusters,tracks)
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  

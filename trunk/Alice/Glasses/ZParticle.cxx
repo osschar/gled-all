@@ -33,7 +33,9 @@ ZParticle::ZParticle(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t)
 {
   _init();
   mParticle = p;
-  SetName(GForm("%d ZParticle",p->GetLabel()));
+  TDatabasePDG db; 
+  TParticlePDG* pdgp = db.GetParticle(p->GetPdgCode());
+  SetName(GForm("%d %s",p->GetLabel(), pdgp->GetName()));
   mNDaughters = p->GetNDaughters();
   mV = GForm("% 4.f, % 4.f, % 4.f", mParticle->Vx(), mParticle->Vy(), mParticle->Vz());
   if(mParticle->bDecayed) mVDecay = GForm("% 4.f, % 4.f, % 4.f", mParticle->fDx, mParticle->fDy, mParticle->fDz);
