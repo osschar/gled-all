@@ -1386,6 +1386,15 @@ void Saturn::ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread)
   shoot_mir(mir, 0, use_own_thread);
 }
 
+void Saturn::ShootMIR(ZMIR* mir, bool use_own_thread)
+{
+  // Accepts a MIR and shoots it into the system.
+  // Wrapper for auto_ptr function.
+
+  auto_ptr<ZMIR> apmir(mir);
+  shoot_mir(apmir, 0, use_own_thread);
+}
+
 void Saturn::DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time)
 {
   // Accepts a MIR and shoots it into the system.
