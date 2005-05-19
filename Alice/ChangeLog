@@ -1,3 +1,12 @@
+2005-05-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Changed retun value of SelectRecTracks() to void.
+	* Glasses/ZParticle.cxx:
+        Make correction in the class name to use PDG name.
+ 
+
 2005-05-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/PRSBase.cxx:
