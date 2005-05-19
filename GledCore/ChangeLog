@@ -1,3 +1,12 @@
+2005-05-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Added PostMIR with MIR* argument.
+
+	* macros/sun.C:
+	Creation of Scenes queen now optional.
+
 2005-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
