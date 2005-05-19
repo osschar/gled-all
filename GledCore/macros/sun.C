@@ -11,7 +11,7 @@ ZSunQueen*  sun_queen  = 0;
 ZFireQueen* fire_queen = 0;
 ZQueen*     scenes     = 0;
 
-void sun()
+void sun(bool create_scenes_queen=true)
 {
   // This is needed if main was NOT run with -r flag
   if(Gled::theOne->GetSaturn() == 0) {
@@ -31,8 +31,10 @@ void sun()
   if(sun->GetSaturnInfo()->GetUseAuth())
     gROOT->Macro("std_auth.C");
 
-  scenes = new ZQueen(256*1024, "Scenes", "Goddess of Ver");
-  Gled::theOne->GetSaturn()->GetSunKing()->Enthrone(scenes);
-  scenes->SetMandatory(true);
+  if(create_scenes_queen) {
+    scenes = new ZQueen(256*1024, "Scenes", "Goddess of Ver");
+    Gled::theOne->GetSaturn()->GetSunKing()->Enthrone(scenes);
+    scenes->SetMandatory(true);
+  }
 
 }
