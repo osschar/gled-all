@@ -1,0 +1,97 @@
+$GenerationPrefix = "/.f9/u0/u/atlas/matevz/g2/TADemo/";
+
+$Buffers = [
+  ["TA_Unit.cxx", "Glasses/TA_Unit.cxx", "RW", 1],
+  [" *Minibuf-0*", "", "RW", 0],
+  ["TA_Unit.h", "Glasses/TA_Unit.h", "RW", 1],
+  ["glass.list", "glass.list", "RW", 1],
+  ["*scratch*", "", "RW", 0],
+  [" *Echo Area*", "", "RW", 0],
+  [" *pixmap conversion*", "", "RW", 0],
+  [" *Message-Log*", "", "RW", 0],
+  ["TA_SubUnit.h", "Glasses/TA_SubUnit.h", "RW", 1],
+  ["TA_SubUnit.cxx", "Glasses/TA_SubUnit.cxx", "RW", 1],
+  ["*Completions*", "", "RO", 0],
+  [" *substitute*", "", "RW", 0],
+  ["TA_TextureContainer.h", "Glasses/TA_TextureContainer.h", "RW", 1],
+  ["TA_TextureContainer.cxx", "Glasses/TA_TextureContainer.cxx", "RW", 1],
+  ["TA_TextureContainer.cxx<2>", "Rnr/GL/TA_TextureContainer.cxx", "RW", 1],
+  ["TA_Unit_GL_Rnr.h", "Rnr/GL/TA_Unit_GL_Rnr.h", "RW", 1],
+  ["TA_Unit_GL_Rnr.cxx", "Rnr/GL/TA_Unit_GL_Rnr.cxx", "RW", 1],
+  ["TA_SubUnit_GL_Rnr.h", "Rnr/GL/TA_SubUnit_GL_Rnr.h", "RW", 1],
+  ["TA_SubUnit_GL_Rnr.cxx", "Rnr/GL/TA_SubUnit_GL_Rnr.cxx", "RW", 1],
+  ["Makefile", "Makefile", "RW", 1],
+  ["*compilation*", "", "RW", 1],
+  ["ta_init.C", "macros/ta_init.C", "RW", 1],
+  ["ta.C", "../../../../../../../u/atlas/matevz/.gled/ta.C", "RW", 0],
+  ["*bar*", "", "RW", 0],
+];
+
+$Frames = [
+ {
+  Geom => [82, 60, 0, 0, 0],
+  Windows => [
+   ["ta.C", "../../../../../../../u/atlas/matevz/.gled/ta.C", 60, 0, 239, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 772, 151, 0],
+  Windows => [
+   ["ta_init.C", "macros/ta_init.C", 60, 0, 1056, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 761, 97, 0],
+  Windows => [
+   ["*compilation*", "", 30, 450, 1060, 1],
+   ["Makefile", "Makefile", 30, 0, 361, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 579, 1, 0],
+  Windows => [
+   ["TA_SubUnit_GL_Rnr.cxx", "Rnr/GL/TA_SubUnit_GL_Rnr.cxx", 30, 450, 633, 437],
+   ["TA_SubUnit_GL_Rnr.h", "Rnr/GL/TA_SubUnit_GL_Rnr.h", 30, 0, 593, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 159, 92, 0],
+  Windows => [
+   ["TA_Unit_GL_Rnr.cxx", "Rnr/GL/TA_Unit_GL_Rnr.cxx", 30, 450, 532, 281],
+   ["TA_Unit_GL_Rnr.h", "Rnr/GL/TA_Unit_GL_Rnr.h", 30, 0, 456, 1],
+  ]
+ },
+ {
+  Geom => [82, 31, 38, 207, 0],
+  Windows => [
+   ["TA_TextureContainer.cxx<2>", "Rnr/GL/TA_TextureContainer.cxx", 31, 0, 146, 100],
+  ]
+ },
+ {
+  Geom => [82, 60, 183, 94, 0],
+  Windows => [
+   ["TA_TextureContainer.cxx", "Glasses/TA_TextureContainer.cxx", 33, 405, 812, 1],
+   ["TA_TextureContainer.h", "Glasses/TA_TextureContainer.h", 27, 0, 563, 563],
+  ]
+ },
+ {
+  Geom => [82, 60, 682, 101, 1],
+  Windows => [
+   ["TA_SubUnit.cxx", "Glasses/TA_SubUnit.cxx", 34, 390, 1564, 1511],
+   ["TA_SubUnit.h", "Glasses/TA_SubUnit.h", 26, 0, 1144, 810],
+  ]
+ },
+ {
+  Geom => [82, 60, 135, 70, 1],
+  Windows => [
+   ["TA_Unit.cxx", "Glasses/TA_Unit.cxx", 34, 390, 451, 139],
+   ["TA_Unit.h", "Glasses/TA_Unit.h", 26, 0, 341, 91],
+  ]
+ },
+ {
+  Geom => [82, 60, 307, 44, 0],
+  Windows => [
+   ["glass.list", "glass.list", 60, 0, 200, 1],
+  ]
+ },
+];
