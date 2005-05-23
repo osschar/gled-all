@@ -1,3 +1,16 @@
+2005-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added operation-mutex to assert single processing thread. Minor
+	formatting/print-out changes.
+
+	* Glasses/ZParticle.cxx:
+	Obtain pdg-db entry directly.
+
+	* Makefile:
+	Removed most ALICE libraries from link command of base-library.
+
 2005-05-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/ZAliLoad.cxx:
@@ -5,7 +18,6 @@
         Changed retun value of SelectRecTracks() to void.
 	* Glasses/ZParticle.cxx:
         Make correction in the class name to use PDG name.
- 
 
 2005-05-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
