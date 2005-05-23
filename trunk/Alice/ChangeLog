@@ -1,5 +1,11 @@
 2005-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+	Added destructor: MCParticle was not deleted.
+
+2005-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/ZAliLoad.cxx:
 	* Glasses/ZAliLoad.h:
 	Added operation-mutex to assert single processing thread. Minor
