@@ -9,8 +9,7 @@ REQUIRES_LIB_SETS := GledCore Geom1 RootGeo
 # ALICE_TARGET=linuxDEBUG
 # ALICE_TARGET=linux
 
-ALICE_LIBS = -lESD -lSTEER -lRICHbase -lRICHsim -lRICHrec -lCONTAINERS -lRAW \
-	     -lTPCbase -lTPCrec -lTPCsim -lTPCfast # -lMUONgeometry
+ALICE_LIBS = -lESD -lSTEER -lCONTAINERS
 
 # Nice, friendly woozies that don't need special treatment
 BLESSED_DIRS	:= Glasses
