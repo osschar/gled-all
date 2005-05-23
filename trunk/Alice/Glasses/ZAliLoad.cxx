@@ -133,9 +133,9 @@ ZAliLoad:: ZAliLoad(const Text_t* n, const Text_t* t) :
 
 void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
 {
-  static const string _eh("ZAliLoad::SetUpDataSource ");
+  static const string _eh("ZAliLoad::SetupDataSource ");
 
-  OpMutexHolder omh(this, "SetUpDataSource");
+  OpMutexHolder omh(this, "SetupDataSource");
 
   ResetEvent();
 
