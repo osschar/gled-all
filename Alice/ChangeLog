@@ -9,7 +9,7 @@
 	Obtain pdg-db entry directly.
 
 	* Makefile:
-	Removed most ALICE libraries from link command of base-library.
+	Removed most ALICE libraries from link-command of base-library.
 
 2005-05-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
