@@ -40,6 +40,12 @@ ZParticle::ZParticle(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t)
   mP = GForm("% 6.3f, % 6.3f, % 6.3f", mParticle->Px(), mParticle->Py(), mParticle->Pz());
 }
 
+ZParticle::~ZParticle()
+{
+  delete mParticle;
+}
+
+/**************************************************************************/
 
 void ZParticle::ImportDaughters(ZAliLoad* alil)
 {
