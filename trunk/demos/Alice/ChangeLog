@@ -1,0 +1,8 @@
+2005-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	Added custom gui for selection of clusters and reconstructed
+	tracks.
+
+	* loadlibs.C:
+	Updated for new version of AliROOT.
