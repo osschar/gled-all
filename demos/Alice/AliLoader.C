@@ -127,7 +127,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 32, H = 11;
+  int Y = 0, W = 32, H = 18;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -198,6 +198,57 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w32, MetaWeedInfo, ms3, "SelectHits", 0);
   w32->Resize(0, y, W, 1);
   w32->Label("Run selection ..");
+  // w21->Align(false, 0, 1);
+  y++;
+
+  Y += y; y=0;
+
+  // Clusters:
+  CREATE_ADD_GLASS(ms5, MetaSubViewInfo, mv, "ZAliLoad", 0);
+  ms5->Position(0, Y);
+  // Intro
+  CREATE_ADD_GLASS(w50, MetaWeedInfo, ms5, "<box>", "Clusters:");
+  w50->Resize(0, y, W, 1);
+  w50->Color(0.7, 0.85, 0.7);
+  w50->Align(true, -1, 0);
+  w50->Box(MetaWeedInfo::BT_Engraved);
+  y++;
+  CREATE_ADD_GLASS(w51, MetaWeedInfo, ms5, "ClusterSelection", 0);
+  w51->Resize(6, y, W-6, 1);
+  w51->Label("selection: ");
+  // w20->Align(false, 0, -1);
+  y++;
+  CREATE_ADD_GLASS(w52, MetaWeedInfo, ms5, "SelectClusters", 0);
+  w52->Resize(0, y, W, 1);
+  w52->Label("Run selection ..");
+  // w21->Align(false, 0, 1);
+  y++;
+
+  Y += y; y=0;
+
+  // RecTracks:
+  CREATE_ADD_GLASS(ms6, MetaSubViewInfo, mv, "ZAliLoad", 0);
+  ms6->Position(0, Y);
+  // Intro
+  CREATE_ADD_GLASS(w60, MetaWeedInfo, ms6, "<box>", "RecTracks:");
+  w60->Resize(0, y, W, 1);
+  w60->Color(0.7, 0.85, 0.7);
+  w60->Align(true, -1, 0);
+  w60->Box(MetaWeedInfo::BT_Engraved);
+  y++;
+  CREATE_ADD_GLASS(w61, MetaWeedInfo, ms6, "RecTrackSelection", 0);
+  w61->Resize(6, y, W-6, 1);
+  w61->Label("selection: ");
+  // w20->Align(false, 0, -1);
+  y++;
+  CREATE_ADD_GLASS(w62, MetaWeedInfo, ms6, "SelectRecTracks", 0);
+  w62->Resize(0, y, W, 1);
+  w62->Label("Run selection ..");
+  // w21->Align(false, 0, 1);
+  ++y;
+  CREATE_ADD_GLASS(w63, MetaWeedInfo, ms6, "SelectRecTracksWithKine", 0);
+  w63->Resize(0, y, W, 1);
+  w63->Label("Run selection with kine ..");
   // w21->Align(false, 0, 1);
   y++;
 
