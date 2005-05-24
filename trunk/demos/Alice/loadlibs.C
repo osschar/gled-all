@@ -1,7 +1,16 @@
 void loadlibs () 
 {
+  // Macro which loads the libraries needed for simulation and reconstruction
+  // Possible usage: In a Root session (no AliRoot) one does
+  // root [0] .x loadlibs.C
+  // root [1] gAlice = new AliRun("gAlice","test")           
+  // root [2] AliSimulation sim
+  // root [3] sim.Run()
+  // root [4] AliReconstruction rec
+  // root [5] rec.Run()
+
   gSystem->Load("libPhysics");
-  gSystem->Load("libMinuit");
+  // gSystem->Load("libMinuit");
 
   // Uncomment the following line for macosx
   // Waiting for a better solution
@@ -16,32 +25,36 @@ void loadlibs ()
 
   gSystem->Load("libEGPythia6");
 
-  gSystem->Load("libRAW");
+  gSystem->Load("libRAWData");
 
   gSystem->Load("libESD");
   gSystem->Load("libSTEER");
   gSystem->Load("libEVGEN");
   gSystem->Load("libFASTSIM");
   gSystem->Load("libAliPythia6");
+
+  gSystem->Load("libhijing");
+  gSystem->Load("libTHijing");// AliGenHijingEventHeader needed by libZDCsim.so
+
   gSystem->Load("libSTRUCT");
   gSystem->Load("libPHOS");
   gSystem->Load("libMUONmapping");
-  gSystem->Load("libMUON");
-  gSystem->Load("libFMDbase");
-  gSystem->Load("libFMDsim");
-  gSystem->Load("libFMDrec");
+  gSystem->Load("libMUONgeometry");
+  gSystem->Load("libMUONbase");
+  gSystem->Load("libMUONsim");
+  gSystem->Load("libMUONrec");
+  //gSystem->Load("libFMDbase");
+  //gSystem->Load("libFMDsim");
+  //gSystem->Load("libFMDrec");
   gSystem->Load("libPMDbase");
   gSystem->Load("libPMDsim");
   gSystem->Load("libPMDrec");
-  //gSystem->Load("libRICH");
   //gSystem->Load("libRICHbase");
   //gSystem->Load("libRICHsim");
   //gSystem->Load("libRICHrec");
   gSystem->Load("libSTARTbase");
   gSystem->Load("libSTARTsim");
   gSystem->Load("libSTARTrec");
-  
-// gSystem->Load("libZDC");
   gSystem->Load("libZDCbase");
   gSystem->Load("libZDCsim");
   gSystem->Load("libZDCrec");
@@ -49,7 +62,7 @@ void loadlibs ()
   gSystem->Load("libVZERObase");
   gSystem->Load("libVZEROsim");
   gSystem->Load("libVZEROrec");
-  gSystem->Load("libEMCAL");
+  //gSystem->Load("libEMCAL");
   gSystem->Load("libCONTAINERS");
 
   // The following lines have to be commented on Darwin
@@ -63,14 +76,14 @@ void loadlibs ()
   gSystem->Load("libTRDsim");
   gSystem->Load("libTRDrec");
   gSystem->Load("libTRDfast");
-  //  gSystem->Load("libTOF");
   gSystem->Load("libTOFbase");
   gSystem->Load("libTOFsim");
   gSystem->Load("libTOFrec");
 
- gSystem->Load("libMUONgeometry");
- gSystem->Load("libMUONbase");
-  gSystem->Load("libMUONsim");
-  gSystem->Load("libMUONrec");
-  
+  //gSystem->Load("libAliL3Src");
+  //gSystem->Load("libAliL3Misc");
+  //gSystem->Load("libAliL3Comp");
+  //gSystem->Load("libThread");
+  //gSystem->Load("libAliL3Hough");
+  //gSystem->Load("libAliL3ITS");
 }
