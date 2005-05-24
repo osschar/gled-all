@@ -130,7 +130,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 32, H = 18;
+  int Y = 0, W = 32, H = 19;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -157,8 +157,13 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "SetupDataSource", 0);
   w13->Resize(0, y, W, 1);
   y++;
+  CREATE_ADD_GLASS(w14, MetaWeedInfo, ms1, "Operation", 0);
+  w14->Resize(8, y, W-8, 1);
+  y++;
 
   Y += y; y=0;
+
+  // ### Data importers
 
   // Kinematics:
   CREATE_ADD_GLASS(ms2, MetaSubViewInfo, mv, "ZAliLoad", 0);
