@@ -101,7 +101,7 @@ void ZAliLoad::_init()
   AliPDG::AddParticlesToPdgDataBase();
   {
     TDatabasePDG *pdgDB = TDatabasePDG::Instance();
-    const Int_t kspe=50000000;
+    // const Int_t kspe=50000000;
     const Int_t kion=10000000;
 
     const Double_t kAu2Gev=0.9314943228;
@@ -142,14 +142,16 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
   if(mDataDir == "")
     SetDataDir(".");
 
-  if(use_aliroot == false){
+  if(use_aliroot == false) {
 
     string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
 
     if(gSystem->AccessPathName(vsd_file.c_str(), kReadPermission) == false) {
       // Read OK!
       mFile      = new TFile(vsd_file.c_str());
-      mDirectory = (TDirectory*)mFile->Get(GForm("Event%d", mEvent));
+      mDirectory = (TDirectory*) mFile->Get(GForm("Event%d", mEvent));
+      if(!mDirectory)
+	throw(_eh + GForm("event directory '%d' not found.", mEvent));
     } else {
       use_aliroot = true; 
       printf("VSD data does not exist, falling back to AliRunLoader.\n");
@@ -169,6 +171,10 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
       throw(_eh + "Can not access file '" + galice_file + "'.");
     }
     pRunLoader = AliRunLoader::Open(galice_file.c_str());
+    if(pRunLoader == 0)
+      throw(_eh + "AliRunLoader::Open failed.");
+    if(pRunLoader->GetEvent(mEvent) != 0)
+      throw(_eh + GForm("event '%d' not found.", mEvent));
     pRunLoader->LoadgAlice();
     pRunLoader->LoadHeader();
     pRunLoader->LoadKinematics();
@@ -198,14 +204,14 @@ void ZAliLoad::SetupEvent(Bool_t use_aliroot)
     LoadRecTracks();
   } else {
     // printf("Importing kinematics \n");
-    mTreeK = (TTree*)mDirectory->Get("Kinematics");
+    mTreeK = (TTree*) mDirectory->Get("Kinematics");
     if(mTreeK == 0) {
       printf("ERROR importing kinematics  \n");
     }else {
       mTreeK->SetBranchAddress("P", &mpP);
     }
     // printf("Importing hits TreeH %p \n", mTreeH);  
-    mTreeH =  (TTree*)mDirectory->Get("Hits");
+    mTreeH =  (TTree*) mDirectory->Get("Hits");
     if (mTreeH == 0){
       printf("ERROR importing hits\n");
     } else {
@@ -213,7 +219,7 @@ void ZAliLoad::SetupEvent(Bool_t use_aliroot)
     }
 
     // printf("Importing reconstructed clusters. \n");
-    mTreeC =  (TTree*)mDirectory->Get("Clusters");
+    mTreeC =  (TTree*) mDirectory->Get("Clusters");
     if (mTreeC == 0){
       printf("ERROR importing Clusters\n");
     } else {
@@ -221,7 +227,7 @@ void ZAliLoad::SetupEvent(Bool_t use_aliroot)
     }
 
     // printf("Importing reconstructed tracks. \n");
-    mTreeR =  (TTree*)mDirectory->Get("RecTracks");
+    mTreeR =  (TTree*) mDirectory->Get("RecTracks");
     if (mTreeR == 0){
       printf("ERROR importing RecTracks\n");
     } else {
