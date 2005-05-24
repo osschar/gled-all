@@ -1,6 +1,11 @@
 2005-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
+	Added custom gui showing current operation of ZAliLoad.
+
+2005-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
 	Disabled authentication of queen 'scenes'.
 
 2005-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
