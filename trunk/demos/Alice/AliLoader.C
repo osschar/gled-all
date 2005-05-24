@@ -37,6 +37,9 @@ void AliLoader(const Text_t* dirname = 0,
   gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
 
+  scenes->SetAuthMode(ZQueen::AM_None);
+  scenes->SetMapNoneTo(ZMirFilter::R_Allow);
+
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
 
