@@ -19,7 +19,7 @@ Hit::Hit(UChar_t Detector, Int_t Particle, Int_t Eva, Float_t X, Float_t Y, Floa
 { 
   fDetID=Detector;
   fLabel=Particle;
-  fEvaID=Eva;
+  fEvaLabel=Eva;
   x=X;y=Y;z=Z;
 }
 
@@ -28,7 +28,7 @@ Hit::Hit(UChar_t Detector, Int_t Particle, Int_t Eva, Float_t X, Float_t Y, Floa
 void Hit::Dump() 
 {
   printf("XYZ(%f,%f,%f) eva(%d) label(%d) det(%d) \n",
-	 x,y,z,fEvaID, fLabel, fDetID);
+	 x,y,z,fEvaLabel, fLabel, fDetID);
 }
 
 /**************************************************************************/

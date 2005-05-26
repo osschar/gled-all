@@ -69,3 +69,11 @@ void HitContainer::SetPoint(Int_t i, Int_t label,
   Float_t* p = mPoints + 3*i;
   p[0] = x; p[1] = y; p[2] = z;
 }
+
+/**************************************************************************/
+void  HitContainer::Print()
+{
+  for(Int_t i=0; i<mNPoints; i++){
+    printf("Point%d V(%f,%f,%f)\n",mPointLabels[i], mPoints[i],mPoints[i+1],mPoints[i+2]);
+  }
+}
