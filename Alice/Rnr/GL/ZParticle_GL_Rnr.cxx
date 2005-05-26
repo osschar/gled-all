@@ -42,7 +42,7 @@ void ZParticle_GL_Rnr::Render(RnrDriver* rd)
   RNRDRIVER_GET_RNRMOD(srm, rd, ZParticleRnrStyle);
   ZParticleRnrStyle* rst_lens  = (ZParticleRnrStyle*) srm->fLens;
   // !!! temporary hardcode value of magnetic field
-  Float_t B = 4.0/10;// kGauss->T
+  Float_t B = rst_lens->mMagField/10;// kGauss->T
 
   MCParticle* p = mZParticle->mParticle;
   Float_t vx=p->Vx(), vy=p->Vy(), vz=p->Vz();
@@ -87,6 +87,10 @@ void ZParticle_GL_Rnr::Render(RnrDriver* rd)
       irnr->PreDraw(rd);
     }
 
+    if(p->GetPDG() == 0){
+      printf("ERROR, can\t find PDG code for %d\n",p->GetPdgCode()); 
+      return;
+    }
 
     if (B && p->GetPDG()->Charge()) {
       Float_t a = 0.2998*B*3*p->GetPDG()->Charge()/1000; // m->mm

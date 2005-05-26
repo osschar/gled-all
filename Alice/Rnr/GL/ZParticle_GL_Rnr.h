@@ -32,7 +32,6 @@ class ZParticle_GL_Rnr : public ZNode_GL_Rnr {
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
-
   virtual void Render(RnrDriver* rd);
 
 }; // endclass ZParticle_GL_Rnr
