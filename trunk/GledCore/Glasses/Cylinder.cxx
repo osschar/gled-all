@@ -20,12 +20,14 @@ ClassImp(Cylinder)
 
 void Cylinder::_init()
 {
+  mOrientation = O_Z;
+
   mHeight = 2;
   bRnrDisks = true;
 
   mROutBase = mROutTop = 1.0;
   mRInBase  = mRInTop  = 0; 
 
-  mLodZ     = 1;
+  mLodH     = 1;
   mLodPhi   = 8;
 }

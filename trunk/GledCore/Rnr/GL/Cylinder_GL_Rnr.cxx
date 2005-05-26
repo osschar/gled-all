@@ -27,17 +27,22 @@ void Cylinder_GL_Rnr::Draw(RnrDriver* rd)
   glPushAttrib(GL_CURRENT_BIT);
   glColor4fv(C.mColor());
   glPushMatrix();
+  switch (C.mOrientation) {
+  case Cylinder::O_Z: break;
+  case Cylinder::O_Y: glRotatef(90, -1, 0, 0); break;
+  case Cylinder::O_X: glRotatef(90,  0, 1, 0); break;
+  }
   glTranslatef(0,0,-C.mHeight/2);
   // inner cylinder
   if(C.mRInBase != 0 || C.mRInTop != 0) {
     gluQuadricOrientation(mQuadric,GLU_INSIDE);
     gluCylinder(mQuadric, C.mRInBase, C.mRInTop, C.mHeight, 
-		C.mLodPhi, C.mLodZ);
+		C.mLodPhi, C.mLodH);
   }
   // outer cylinder 
   gluQuadricOrientation(mQuadric,GLU_OUTSIDE);
   gluCylinder(mQuadric, C.mROutBase, C.mROutTop, C.mHeight, 
-	      C.mLodPhi, C.mLodZ);
+	      C.mLodPhi, C.mLodH);
   // base and top plates
   if(C.bRnrDisks){
     gluQuadricOrientation(mQuadric,GLU_INSIDE);
