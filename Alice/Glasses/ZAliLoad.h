@@ -25,6 +25,9 @@
 class ZAliLoad : public ZNode {
   MAC_RNR_FRIENDS(ZAliLoad);
 
+ public:
+  enum KineType_e { KT_Standard, KT_ProtonProton };
+
  private:
   void                           _init();
   ZParticle*                     create_particle_with_parents(Int_t label, Int_t depth = -1);
@@ -45,6 +48,7 @@ class ZAliLoad : public ZNode {
 
   TString                  mDataDir;   // X{GS} 7 Filor(-dir=>1)
   Int_t			   mEvent;     // X{GS} 7 Value(-range=>[0,100,1])
+  KineType_e               mKineType;  // X{GS} 7 PhonyEnum()
 
   TString	           mVSDName;   // X{GS} 7 Textor()
 
@@ -61,7 +65,7 @@ class ZAliLoad : public ZNode {
 
   void SetupEvent(Bool_t use_aliroot);
 
-  void Write();      // X{Ed} 7 MButt()
+  void WriteVSD();      // X{Ed} 7 MButt()
 
   void ResetEvent(); // X{Ed} 7 MButt()
 
