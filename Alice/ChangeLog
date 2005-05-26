@@ -1,3 +1,10 @@
+2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added KineType enum/var to distinguish between standard and
+	proton-proton kine-tree format; renamed Write() to WriteVSD().
+
 2005-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZAliLoad.cxx:
