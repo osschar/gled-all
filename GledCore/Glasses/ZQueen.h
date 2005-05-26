@@ -174,10 +174,16 @@ public:
 
   // instantiate URL
 
+  // Lens mir-activity
+  void MIRActivateLens(ZGlass* lens);                   // X{E}  C{1}
+  void MIRDeactivateLens(ZGlass* lens);                 // X{E}  C{1}
+
   // Lens deletion
+ protected:
   void PutLensToPurgatory(ZGlass* lens);                // X{E}  C{1}
   void PutListElementsToPurgatory(ZList* list);         // X{E}  C{1}
   void PutLensToVoid(ID_t lens_id);                     // X{E}
+ public:
   void RemoveLens(ZGlass* lens);                        // X{E}  C{1}
   void RemoveLenses(ZList* list, Bool_t recurse=false); // X{Ed} C{1}
 

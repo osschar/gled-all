@@ -581,6 +581,40 @@ ID_t ZQueen::IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
 }
 
 /**************************************************************************/
+// Lens MIR-activity
+/**************************************************************************/
+
+void ZQueen::MIRActivateLens(ZGlass* lens)
+{
+  static const string _eh("ZQueen::MIRActivateLens ");
+
+  assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
+
+  if(lens->mQueen != this)
+    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+
+  if(lens == this)
+    throw(_eh + "will not apply to myself " + Identify() + ".");
+
+  lens->SetMIRActive(true);
+}
+
+void ZQueen::MIRDeactivateLens(ZGlass* lens)
+{
+  static const string _eh("ZQueen::MIRDeactivateLens ");
+
+  assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
+
+  if(lens->mQueen != this)
+    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+
+  if(lens == this)
+    throw(_eh + "will not apply to myself " + Identify() + ".");
+
+  lens->SetMIRActive(false);
+}
+
+/**************************************************************************/
 // Lens deletion
 /**************************************************************************/
 
