@@ -15,7 +15,7 @@ class MCParticle : public TParticle {
 
  public:
   Int_t    fLabel;         // X{GS}   
-  Int_t    fEvaID;      // X{GS}
+  Int_t    fEvaLabel;      // X{GS}
   Bool_t   bDecayed;       // X{GS}
   Double_t fDx,  fDy, fDz;
   Double_t fDPx, fDPy,fDPz;

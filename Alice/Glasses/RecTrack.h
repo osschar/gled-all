@@ -27,6 +27,7 @@ class RecTrack : public ZNode {
     ZNode(n,t) { _init(); }
 
   RecTrack(ESDTrack* esd, const Text_t* n="RecTrack", const Text_t* t=0);
+  virtual ~RecTrack() { delete mESD; }
   void Dump();                            // X{E} 7 MButt()
 
 #include "RecTrack.h7"

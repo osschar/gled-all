@@ -32,6 +32,7 @@ public:
   void Reset(Int_t n_points);
   void SetPoint(Int_t i, Int_t label, Float_t* pos);
   void SetPoint(Int_t i, Int_t label, Float_t x, Float_t y, Float_t z);
+  void Print();
 
 #include "HitContainer.h7"
   ClassDef(HitContainer, 1)

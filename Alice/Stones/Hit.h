@@ -14,7 +14,7 @@ class Hit : public TObject {
   Float_t  x,y,z;
   UChar_t  fDetID;   // X{GS} 
   Int_t    fLabel;   // X{GS} 
-  Int_t    fEvaID;   // X{GS} 
+  Int_t    fEvaLabel;   // X{GS} 
 
   Hit() : TObject() {}
   Hit(UChar_t detector, Int_t particle, Int_t eva,
