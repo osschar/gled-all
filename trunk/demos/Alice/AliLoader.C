@@ -23,6 +23,12 @@ const Text_t* particle_layout =
   //"ZParticleRnrStyle(VertexColor[4],RnrP[4])";
   // "HitContainer(NHits[4],Color[4],Dump[4])";
 
+/*
+  PP kine selection example:
+  fStatusCode<=1 && Pt()>0.4 && abs(Eta())<1 && GetPDG()->Charge()!=0
+
+*/
+
 /**************************************************************************/
 
 class MultiBoard;
@@ -117,7 +123,7 @@ void AliLoader(const Text_t* dirname = 0,
   // geo_nest->SetDefW(66);
 
   MetaViewInfo* mvi = make_zaliload_metagui();
-  mvi->SetExpertP(true);
+  // mvi->SetExpertP(true);
 
   spawn_default_gui();
 
@@ -153,9 +159,14 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w12, MetaWeedInfo, ms1, "Event", 0);
   w12->Resize(W-6, y, 6, 1);
   y++;
+  CREATE_ADD_GLASS(w16, MetaWeedInfo, ms1, "KineType", 0);
+  w16->Resize(8, y, W-8, 1);
+  y++;
   // methods
   CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "SetupDataSource", 0);
-  w13->Resize(0, y, W, 1);
+  w13->Resize(0, y, W/2, 1);
+  CREATE_ADD_GLASS(w15, MetaWeedInfo, ms1, "WriteVSD", 0);
+  w15->Resize(W/2, y, W/2, 1);
   y++;
   CREATE_ADD_GLASS(w14, MetaWeedInfo, ms1, "Operation", 0);
   w14->Resize(8, y, W-8, 1);
@@ -254,11 +265,6 @@ MetaViewInfo* make_zaliload_metagui()
   w62->Label("Run selection ..");
   // w21->Align(false, 0, 1);
   ++y;
-  CREATE_ADD_GLASS(w63, MetaWeedInfo, ms6, "SelectRecTracksWithKine", 0);
-  w63->Resize(0, y, W, 1);
-  w63->Label("Run selection with kine ..");
-  // w21->Align(false, 0, 1);
-  y++;
 
   Y += y; y=0;
 
