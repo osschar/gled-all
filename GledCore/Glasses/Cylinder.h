@@ -13,10 +13,14 @@
 class Cylinder : public ZNode {
   MAC_RNR_FRIENDS(Cylinder);
 
+public:
+  enum Orientation_e { O_X, O_Y, O_Z };
 private:
   void _init();
 
 protected:
+  Orientation_e mOrientation;   // X{GS}  7 PhonyEnum()
+
   Float_t       mHeight;        // X{GS}  7 Value(-range=>[0,1000,1,1000], -join=>1)
   Bool_t        bRnrDisks;      // X{gS}  7 Bool()
   Float_t	mRInBase;	// X{GS}  7 Value(-range=>[0,1000,1,1000], -join=>1)
@@ -24,7 +28,7 @@ protected:
   Float_t	mROutBase;	// X{GS}  7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t	mROutTop;	// X{GS}  7 Value(-range=>[0,1000,1,1000])
   ZColor	mColor;		// X{PGS} 7 ColorButt()
-  Int_t		mLodZ;		// X{GS}  7 Value(-range=>[1,100,1,1], -join=>1)
+  Int_t		mLodH;		// X{GS}  7 Value(-range=>[1,100,1,1], -join=>1)
   Int_t		mLodPhi;	// X{GS}  7 Value(-range=>[1,100,1,1])
 
 public:
