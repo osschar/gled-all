@@ -29,14 +29,14 @@ void ZGlBlending::_init()
   mAntiAliasOp = O_Nop;
   bPointSmooth = true;
   mPointSize   = 1;
-  mPointHint   = GL_NICEST;
+  mPointHint   = GL_FASTEST;
   bLineSmooth  = true;
   mLineWidth   = 1;
-  mLineHint    = GL_NICEST;
+  mLineHint    = GL_FASTEST;
 
   mFogOp   = O_Nop;
   mFogMode = GL_EXP;
-  mFogHint = GL_NICEST;
+  mFogHint = GL_FASTEST;
   mFogColor.rgba(0.1,0.1,0.1);
   mFogDensity = 0.2;
   mFogBeg     = 0;
