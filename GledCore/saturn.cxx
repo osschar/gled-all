@@ -37,6 +37,8 @@ TROOT root("Root", "ROOT of GLED", initfuncs);
 
 int main(int argc, char **argv)
 {
+  static const string _eh("saturn::main() ");
+
   list<char*> args; for(int i=1; i<argc; ++i) args.push_back(argv[i]);
 
   GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
@@ -92,7 +94,14 @@ int main(int argc, char **argv)
 
   // Process macros;
   // -q added to options, so it exits after macro processing
-  gint->Run(true); // Process macros
+  try {
+    gint->Run(true); // Process macros
+  }
+  catch (string exc) {
+    fprintf(stderr, "%sexception caught during macro processing:\n%s\n",
+	    _eh.c_str(), exc.c_str());
+    exit(1);
+  }
   if(gint->InputFiles()) {
     gint->ClearInputFiles();
   } else {
@@ -108,7 +117,7 @@ int main(int argc, char **argv)
   GThread app_thread((GThread_foo)Gled::TRint_runner_tl, gint, false);
   if(gled->GetRunRint()) {
     if( app_thread.Spawn() ) {
-      perror("saturn.cxx can't create Rint thread");
+      perror(GForm("%scan't create Rint thread", _eh.c_str()));
       exit(1);
     }
   }
