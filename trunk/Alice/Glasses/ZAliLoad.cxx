@@ -83,8 +83,9 @@ void ZAliLoad::_init()
   mpR = &mR;
   mTPCDigInfo = 0;
 
-  mDataDir = ".";
-  mEvent   = 0;
+  mDataDir  = ".";
+  mEvent    = 0;
+  mKineType = KT_Standard;
 
   mVSDName = "AliVSD.root";
   mFile    = 0; mDirectory = 0;
@@ -150,8 +151,11 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
       // Read OK!
       mFile      = new TFile(vsd_file.c_str());
       mDirectory = (TDirectory*) mFile->Get(GForm("Event%d", mEvent));
-      if(!mDirectory)
-	throw(_eh + GForm("event directory '%d' not found.", mEvent));
+      if(!mDirectory) {
+	use_aliroot = true; 
+	printf("event directory '%d' not found in VSD file, falling back to AliRunLoader.\n", mEvent);
+	delete mFile; mFile = 0;
+      }
     } else {
       use_aliroot = true; 
       printf("VSD data does not exist, falling back to AliRunLoader.\n");
@@ -238,9 +242,9 @@ void ZAliLoad::SetupEvent(Bool_t use_aliroot)
 
 /**************************************************************************/
 
-void ZAliLoad::Write()
+void ZAliLoad::WriteVSD()
 {
-  OpMutexHolder omh(this, "Write");
+  OpMutexHolder omh(this, "WriteVSD");
 
   string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
 
@@ -336,8 +340,14 @@ void ZAliLoad::LoadKinematics()
   TTree* treek = pRunLoader->TreeK();
   TParticle tp, *_tp = &tp;
   treek->SetBranchAddress("Particles", &_tp);
+
+  Text_t* prim_selection = 0;
+  switch(mKineType) {
+  case KT_Standard:     prim_selection = "fMother[0] == -1"; break;
+  case KT_ProtonProton: prim_selection = "fStatusCode > 0";  break;
+  }
   TTreeQuery evl;
-  Int_t nprimary = evl.Select(treek, "fMother[0]==-1");
+  Int_t nprimary = evl.Select(treek, prim_selection);
 
   Int_t nentries = (Int_t)treek->GetEntries();
   vector<MCParticle>  vmc(nentries);
@@ -922,7 +932,7 @@ TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
 
 void ZAliLoad::ShowTPCPlate(Int_t side)
 {
-  ZGlass* cfg;
+  ZGlass* cfg = 0;
   try {
     cfg = mQueen->FindLensByPath("Etc/Alice/TPC_RM_list");
   }
