@@ -1,3 +1,50 @@
+2005-05-26  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/GIImportStyle.cxx:
+	* Glasses/GIImportStyle.h:
+	New class do define import on GenInfo selection.
+
+	* Glasses/HitContainer.cxx:
+	* Glasses/HitContainer.h:
+        Rename memebers.
+
+	* Glasses/PRSBase.h:
+        Add magnetic field adjustment.
+
+	* Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+        Rename memebers.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	* Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+        Change name on import of daughters.
+
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+        Control of etha, theta range.
+
+	* Rnr/GL/ZParticle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticle_GL_Rnr.h:
+        Read magnetic field from rnr style.
+
+	* Stones/ESDTrack.h:
+        Change memeber names.
+
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+        Different class structure.
+
+	* Stones/Hit.cxx:
+	* Stones/Hit.h:
+        Rename memebers.
+
+	* Stones/MCParticle.h:
+        Rename memebers.
+
+	* glass.list:
+        Add GIImportStyle class.
+
 2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZAliLoad.cxx:
