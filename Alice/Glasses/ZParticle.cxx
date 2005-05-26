@@ -24,7 +24,6 @@ void ZParticle::_init()
 {
   // override from ZGlass 
   bUseDispList=true;
-
   mParticle = 0;
   mNDaughters = 0;
 }
@@ -33,16 +32,16 @@ ZParticle::ZParticle(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t)
 {
   _init();
   mParticle = p;
-  SetName(GForm("%d %s", p->GetLabel(), p->GetPDG()->GetName()));
+  TParticlePDG* pdgp = TDatabasePDG::Instance()->GetParticle(p->GetPdgCode());
+  if(pdgp == 0) {
+    printf("Error PDG %d not found \n",p->GetPdgCode() );
+  }else {
+    SetName(GForm("%s %d", pdgp->GetName(),p->GetLabel()));
+  }
   mNDaughters = p->GetNDaughters();
-  mV = GForm("% 4.f, % 4.f, % 4.f", mParticle->Vx(), mParticle->Vy(), mParticle->Vz());
   if(mParticle->bDecayed) mVDecay = GForm("% 4.f, % 4.f, % 4.f", mParticle->fDx, mParticle->fDy, mParticle->fDz);
+  mV = GForm("% 4.f, % 4.f, % 4.f", mParticle->Vx(), mParticle->Vy(), mParticle->Vz());
   mP = GForm("% 6.3f, % 6.3f, % 6.3f", mParticle->Px(), mParticle->Py(), mParticle->Pz());
-}
-
-ZParticle::~ZParticle()
-{
-  delete mParticle;
 }
 
 /**************************************************************************/
@@ -94,7 +93,7 @@ void  ZParticle::ImportHits(ZAliLoad* alil)
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
   }
   char selection[128];
-  sprintf (selection, "particle_ID==%d", mParticle->fLabel);
+  sprintf (selection, "fLabel==%d", mParticle->fLabel);
   alil->SelectHits(0, selection);
 }
 
@@ -106,7 +105,7 @@ void  ZParticle::ImportHitsFromPrimary(ZAliLoad* alil)
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
   }
   char selection[128];
-  sprintf (selection, "eva_ID==%d", mParticle->fLabel);
+  sprintf (selection, "fEvaLabel==%d", mParticle->fLabel);
   alil->SelectHits(0, selection);
 }
 
