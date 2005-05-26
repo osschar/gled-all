@@ -22,7 +22,7 @@ class PRSBase : public ZRnrModBase {
  protected:
 
  public:
-  Float_t                  mMagField;      // X{GSPT}
+  Float_t                  mMagField;      // X{GSPT} 7 Value(-range=>[0.1,10,1,10])
   //
   ZColor                   mVertexColor;   // X{GSPT} 7 ColorButt(-join=>1)
   Float_t                  mVertexSize;    // X{GSPT} 7 Value(-range=>[0.1,64,1,10])
