@@ -355,7 +355,7 @@ void FTW_Shell::AbsorbRay(Ray& ray)
     case ShellInfo::PRQN_spawn_metagui:
       // printf("Shell spawning metagui of %s, template %s\n",
       //    ray.fBeta->Identify().c_str(), ray.fGamma->Identify().c_str());
-      spawn_metagui(ray.fBetaImg, ray.fGamma);
+      SpawnMetaView(ray.fBetaImg, ray.fGamma);
       break;
 
     case ShellInfo::PRQN_resize_window: {
@@ -521,24 +521,6 @@ void FTW_Shell::set_canvased_subshell(OptoStructs::ZGlassImg* img)
   }
 
   mCurCanvas = new_canvas;
-}
-
-/**************************************************************************/
-
-void FTW_Shell::spawn_metagui(OptoStructs::ZGlassImg* img, ZGlass* gui)
-{
-  Fl_Window* w = new Fl_Window(0,0);
-  MTW_MetaView* mv = new MTW_MetaView(img, this);
-  w->end();
-  try {
-    mv->BuildByLensGraph(gui);
-  }
-  catch(string exc) {
-    Message(exc, MT_err);
-    return;
-  }
-  adopt_window(w);
-  w->show();
 }
 
 /**************************************************************************/
@@ -788,6 +770,22 @@ void FTW_Shell::ExportToInterpreter(OS::ZGlassImg* img, const char* varname)
 }
 
 /**************************************************************************/
+
+void FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui)
+{
+  Fl_Window* w = new Fl_Window(0,0);
+  MTW_MetaView* mv = new MTW_MetaView(img, this);
+  w->end();
+  try {
+    mv->BuildByLensGraph(gui);
+  }
+  catch(string exc) {
+    Message(exc, MT_err);
+    return;
+  }
+  adopt_window(w);
+  w->show();
+}
 
 void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool show_p)
 {
