@@ -38,7 +38,7 @@ class ZImage;
 
 void AliLoader(const Text_t* dirname = 0,
 	       Bool_t use_aliroot    = 0,
-	       Bool_t show_det       = 0)
+	       Bool_t geninfo        = 0)
 {
   gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
@@ -91,7 +91,7 @@ void AliLoader(const Text_t* dirname = 0,
 
   if(dirname != 0) {
     al->SetDataDir(dirname);
-    al->SetupDataSource(use_aliroot);
+    al->SetupDataSource(use_aliroot, geninfo);
   }
 
   ZList* aliconf = rscene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
@@ -255,7 +255,7 @@ MetaViewInfo* make_zaliload_metagui()
   w60->Align(true, -1, 0);
   w60->Box(MetaWeedInfo::BT_Engraved);
   y++;
-  CREATE_ADD_GLASS(w61, MetaWeedInfo, ms6, "RecTrackSelection", 0);
+  CREATE_ADD_GLASS(w61, MetaWeedInfo, ms6, "RecSelection", 0);
   w61->Resize(6, y, W-6, 1);
   w61->Label("selection: ");
   // w20->Align(false, 0, -1);
