@@ -1,5 +1,24 @@
 2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZGlBlending.cxx:
+	Changed point, line and fog hints to fastest.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Added methods MIRActivateLens and MIRDeactivateLens.
+
+	* Glasses/Cylinder.cxx:
+	* Glasses/Cylinder.h:
+	* Rnr/GL/Cylinder_GL_Rnr.cxx:
+	Added enum/member orientation; renamed height variable from mLodZ
+	to mLodH.
+
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	Renamed spawn_metagui to SpawnMetaView.
+
+2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* gled.cxx:
 	* saturn.cxx:
 	Added try-block around command-line macro processing. 
