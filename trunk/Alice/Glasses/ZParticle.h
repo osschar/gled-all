@@ -34,8 +34,7 @@ class ZParticle : public ZNode {
     ZNode(n,t) { _init(); }
 
   ZParticle(MCParticle* p, const Text_t* n="ZParticle", const Text_t* t=0);
-  
-  virtual ~ZParticle();
+  virtual ~ZParticle() { delete mParticle; }
 
   // particles
   void ImportDaughters(ZAliLoad* alil = 0);    //X{E} C{1} 7 MButt(-join=>1)
