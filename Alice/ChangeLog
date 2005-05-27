@@ -1,3 +1,21 @@
+2005-05-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Performance boosts and code beautification.
+
+	SelectGenInfo loads hits and clusters in a single pass.
+
+	WriteVSD renamed to CreateVSD.
+	Load-methods re-prefixed to a more meaningful Convert.
+
+	VSD file is now opened for writing to disk prior to calling
+	Converters (ex Loaders):
+	a) WriteVSD is no longer needed;
+	b) works much better for large events (filled up memory before).
+
+	Added '-whenchanged' to selection string Textor widgets.
+
 2005-05-27  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/ZAliLoad.cxx:
