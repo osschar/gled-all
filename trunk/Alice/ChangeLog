@@ -1,3 +1,16 @@
+2005-05-27  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Add branches P and R to GI tree.
+
+	* Stones/ESDTrack.cxx:
+        Set default values in _init().
+
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+        Set default values in _init().
+
 2005-05-26  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/GIImportStyle.cxx:
