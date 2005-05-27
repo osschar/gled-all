@@ -10,18 +10,21 @@
 #include <Glasses/ZNode.h>
 #include <Glasses/ZParticle.h>
 #include <Glasses/HitContainer.h>
-#include <Stones/Hit.h>
 #include <Glasses/RecTrack.h>
 #include <Glasses/TPCSegment.h>
 #include <Glasses/GIImportStyle.h>
+
 #include <Stones/TPCDigitsInfo.h>
 #include <Stones/MCParticle.h>
 #include <Stones/GenInfo.h>
-#include <TEventList.h>
+#include <Stones/Hit.h>
+
 #include <AliRunLoader.h>
 #include <AliStack.h>
 #include <AliMagF.h>
 #include <AliTrackReference.h>
+
+#include <TEventList.h>
 
 class ZAliLoad : public ZNode {
   MAC_RNR_FRIENDS(ZAliLoad);
@@ -32,7 +35,7 @@ class ZAliLoad : public ZNode {
  private:
   void                           _init();
   GenInfo*                       get_geninfo(Int_t label);
-  Bool_t                         bGenInfo; // X{GS} 
+
   TTree*                         mTreeK;   // X{g}
   TTree*                         mTreeH;   // X{g}
   TTree*                         mTreeTR;  // X{g}
@@ -65,11 +68,11 @@ class ZAliLoad : public ZNode {
  public:
   ZAliLoad(const Text_t* n="ZAliLoad", const Text_t* t=0);
 
-  void SetupDataSource(Bool_t use_aliroot=false, Bool_t make_geninfo=false); // X{Ed} 7 MCWButt()
+  void SetupDataSource(Bool_t use_aliroot=false); // X{Ed} 7 MCWButt()
 
-  void SetupEvent(Bool_t use_aliroot);
+  void SetupEvent();
 
-  void WriteVSD();      // X{Ed} 7 MButt()
+  void CreateVSD();  // X{Ed} 7 MButt()
 
   void ResetEvent(); // X{Ed} 7 MButt()
 
@@ -77,12 +80,12 @@ class ZAliLoad : public ZNode {
   // Kinematics
 
  protected:
-  TString    mParticleSelection; // X{GS} 7 Textor()
+  TString    mParticleSelection;    // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void LoadKinematics();
+  void ConvertKinematics();
   void SelectParticles(ZNode* holder=0, const Text_t* selection=0,
 		       Bool_t import_daughters=false
-		       );        // X{Ed} C{1} 7 MCWButt()
+		       );           // X{Ed} C{1} 7 MCWButt()
 
   MCParticle* Particle(Int_t i);
   void        PrintTreeK();
@@ -91,47 +94,56 @@ class ZAliLoad : public ZNode {
   // Hits 
 
  protected:
-  TString    mHitSelection; // X{GS} 7 Textor()
+  TString mHitSelection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void LoadHits();
+  void ConvertHits();
   void SelectHits(HitContainer* holder=0, const Text_t* selection=0
-		  );        // X{Ed} C{1} 7 MCWButt()
+		  );           // X{Ed} C{1} 7 MCWButt()
 
   // --------------------------------------------------------------
   // Clusters
-  void        LoadClusters();
+
  protected:
-  TString     mClusterSelection;                              // X{GS} 7 Textor()
+  TString mClusterSelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:                            
-  void        SelectClusters(HitContainer* holder=0, const Text_t* selection=0
-                             );     // X{Ed} C{1} 7 MCWButt()
+  void ConvertClusters();
+  void SelectClusters(HitContainer* holder=0, const Text_t* selection=0
+		      );      // X{Ed} C{1} 7 MCWButt()
+
   // --------------------------------------------------------------
   // ESD
-  void        LoadRecTracks();
+
  protected:
-  TString     mRecSelection;                                  // X{GS} 7 Textor()
+  TString mRecSelection;      // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void        SelectRecTracks(ZNode* holder=0,
-                              const Text_t* selection=0);     // X{Ed} C{1} 7 MCWButt()
+  void ConvertRecTracks();
+  void SelectRecTracks(ZNode* holder=0, const Text_t* selection=0
+		       );    // X{Ed} C{1} 7 MCWButt()
+
   // --------------------------------------------------------------
   // GenInfo
-  void           LoadGenInfo();
+
  protected:
-  TString        mGISelection;               // X{GS} 7 Textor()
+  GIImportStyle* mGIIStyle;     // X{GS} L{}
+  TString        mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void           SelectGenInfo(ZNode* holder=0,
-			     const Text_t* selection=0); // X{Ed} C{1} 7 MCWButt()
-  GIImportStyle* mGIIStyle;                              // X{GS}
+  void ConvertGenInfo();
+  void SelectGenInfo(ZNode* holder=0, const Text_t* selection=0
+		     );         // X{Ed} C{1} 7 MCWButt()
+
   // --------------------------------------------------------------
   // TPC specific  (digits,clusters)
+
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  
   void        ShowTPCPlate(Int_t side = -1);   // X{Ed} 7 MCWButt()
-  void        LoadTPCClusters();
+  void        ConvertTPCClusters();
 
 
   // --------------------------------------------------------------
   // Globals.
+
   AliRunLoader* pRunLoader;
+
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
 }; // endclass ZAliLoad

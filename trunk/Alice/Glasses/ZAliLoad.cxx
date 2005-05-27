@@ -57,7 +57,8 @@ namespace {
 	throw(string(GForm("%s rejected (command queuing not implemented).", op)));
       }
       mOldOp = mAli->GetOperation();
-      mAli->SetOperation(op);
+      TString new_op = mOldOp == "<idle>" ? "" : mOldOp + "::";
+      mAli->SetOperation(new_op + op);
     }
 
     ~OpMutexHolder()
@@ -103,7 +104,6 @@ void ZAliLoad::_init()
   mRecSelection    = "GetLabel() >= 0";
   mGISelection    = "bR == 1";
   pRunLoader = 0;
-  bGenInfo = false;
 
   // Pain:
   AliPDG::AddParticlesToPdgDataBase();
@@ -139,7 +139,7 @@ ZAliLoad:: ZAliLoad(const Text_t* n, const Text_t* t) :
 
 /**************************************************************************/
 
-void ZAliLoad::SetupDataSource(Bool_t use_aliroot, Bool_t make_geninfo)
+void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
 {
   static const string _eh("ZAliLoad::SetupDataSource ");
 
@@ -169,150 +169,117 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot, Bool_t make_geninfo)
     }
   }
 
-  bGenInfo=make_geninfo;
-   
- 
-  if(use_aliroot && pRunLoader == 0){
+  if(use_aliroot) {
     printf("Start importing AliRunLoader from dir %s\n", mDataDir.Data());
+    // GTime time(GTime::I_Now);
 
     string galice_file (GForm("%s/galice.root", mDataDir.Data()));
-    printf("END importing AliRunLoader from dir %s\n", mDataDir.Data());
 
-    // GTime time(GTime::I_Now);
     if(gSystem->AccessPathName(galice_file.c_str(), kReadPermission)) {
-      // CAN'T Read
-      throw(_eh + "Can not access file '" + galice_file + "'.");
+      throw(_eh + "Can not read file '" + galice_file + "'.");
     }
     pRunLoader = AliRunLoader::Open(galice_file.c_str());
     if(pRunLoader == 0)
       throw(_eh + "AliRunLoader::Open failed.");
     if(pRunLoader->GetEvent(mEvent) != 0)
       throw(_eh + GForm("event '%d' not found.", mEvent));
+
     pRunLoader->LoadgAlice();
     pRunLoader->LoadHeader();
     pRunLoader->LoadKinematics();
     pRunLoader->LoadHits();
     pRunLoader->LoadTrackRefs();
+
+    CreateVSD();
+
     //GTime delta = time.TimeUntilNow();
-    // printf("AliRunLoader::Open took %lf sec\n", delta.ToDouble());
-    GledNS::PushFD();
-    gDirectory = 0;
-    mDirectory = new TDirectory(GForm("Event%d", mEvent), "RECREATE");
-    GledNS::PopFD();
+
+    printf("END importing AliRunLoader from dir '%s'.\n", mDataDir.Data());
+  } else {
+    SetupEvent();
   }
-  SetupEvent(use_aliroot);
 }
 
 
-void ZAliLoad::SetupEvent(Bool_t use_aliroot)
+void ZAliLoad::SetupEvent()
 {
   static const string _eh("ZAliLoad::SetupEvent ");
  
-  if (use_aliroot) {
-    LoadKinematics();
-    LoadHits();
-    LoadClusters();
-    LoadRecTracks();
-    if(bGenInfo) LoadGenInfo();
+  printf("Reading kinematics.\n");
+  mTreeK = (TTree*) mDirectory->Get("Kinematics");
+  if (mTreeK == 0) {
+    printf("%s Kinematics not available in directory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
   } else {
-    printf("Importing kinematics \n");
-    mTreeK = (TTree*) mDirectory->Get("Kinematics");
-    if(mTreeK == 0) {
-      printf("%s Kinematics not available in directory %s.\n", 
-	     _eh.c_str(), mDirectory->GetName());
-    }else {
-      mTreeK->SetBranchAddress("P", &mpP);
-    }
-    printf("Importing hits TreeH \n");  
-    mTreeH =  (TTree*) mDirectory->Get("Hits");
-    if (mTreeH == 0){
-      printf("%s Hits not available in directory %s.\n", 
-	     _eh.c_str(), mDirectory->GetName());
-    } else {
-      mTreeH->SetBranchAddress("H", &mpH);
-    }
+    mTreeK->SetBranchAddress("P", &mpP);
+  }
+  printf("Reading hits.\n");  
+  mTreeH = (TTree*) mDirectory->Get("Hits");
+  if (mTreeH == 0) {
+    printf("%s Hits not available in directory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
+  } else {
+    mTreeH->SetBranchAddress("H", &mpH);
+  }
 
-    printf("Importing reconstructed clusters. \n");
-    mTreeC =  (TTree*) mDirectory->Get("Clusters");
-    if (mTreeC == 0){
-      printf("%s Clusters not available in directory %s.\n", 
-	     _eh.c_str(), mDirectory->GetName());
-    } else {
-      mTreeC->SetBranchAddress("C", &mpC);
-    }
+  printf("Reading clusters.\n");
+  mTreeC = (TTree*) mDirectory->Get("Clusters");
+  if (mTreeC == 0) {
+    printf("%s Clusters not available in directory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
+  } else {
+    mTreeC->SetBranchAddress("C", &mpC);
+  }
 
-    printf("Importing reconstructed tracks. \n");
-    mTreeR =  (TTree*) mDirectory->Get("RecTracks");
-    if (mTreeR == 0){
-      printf("%s ESD not available in directory %s.\n", 
-	     _eh.c_str(), mDirectory->GetName());
-    } else {
-      mTreeR->SetBranchAddress("R", &mpR);
-    }
+  printf("Reading reconstructed tracks.\n");
+  mTreeR = (TTree*) mDirectory->Get("RecTracks");
+  if (mTreeR == 0){ 
+    printf("%s RecTracks not available in directory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
+  } else {
+    mTreeR->SetBranchAddress("R", &mpR);
+  }
     
-    if(bGenInfo){
-      printf("Importing GenInfo tracks. \n");
-      mTreeGI =  (TTree*)mDirectory->Get("GenInfo");
-      if (mTreeGI == 0){
-	printf("%s GenInfo not available in directory %s.\n", 
-	       _eh.c_str(), mDirectory->GetName());
-      }else {
-	mTreeGI->SetBranchAddress("GI", &mpGI);
-      }
-    }
+  printf("Reading GenInfo.\n");
+  mTreeGI = (TTree*)mDirectory->Get("GenInfo");
+  if (mTreeGI == 0) {
+    printf("%s GenInfo not available in directory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
+  } else {
+    mTreeGI->SetBranchAddress("GI", &mpGI);
+    mTreeGI->SetBranchAddress("P.", &mpP);
+    mTreeGI->SetBranchAddress("R.", &mpR);
   }
 }
 
 /**************************************************************************/
 
-void ZAliLoad::WriteVSD()
+void ZAliLoad::CreateVSD()
 {
-  OpMutexHolder omh(this, "WriteVSD");
+  OpMutexHolder omh(this, "CreateVSD");
 
   string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
 
   GledNS::PushFD();
 
-  TFile* GAf = new TFile(GForm("%s/galice.root", mDataDir.Data()));
-  AliTPCParam* par = (AliTPCParam *)GAf->Get("75x40_100x60_150x60");
-  GAf->Close();
-  delete GAf;
+  pRunLoader->CdGAFile();
+  AliTPCParam* par = (AliTPCParam *) gDirectory->Get("75x40_100x60_150x60");
 
-  TFile* vsd = new TFile(vsd_file.c_str(), "RECREATE",
-			 "ALICE VisualizationDataSummary");
-  gDirectory->cd();
+  // Single file per event
+  mFile = new TFile(vsd_file.c_str(), "RECREATE", "ALICE VisualizationDataSummary");
+
   par->SetName("TPCParameter");
   par->Write();
 
-  TDirectory* d = new TDirectory(mDirectory->GetName(), mDirectory->GetTitle());
-  d->cd();
-  if (mTreeK) {
-    printf("write mTreeK %p\n", mTreeK);
-    mTreeK->Write();
-  }
-  if (mTreeH) { 
-    printf("write mTreeH %p\n", mTreeH);
-    mTreeH->Write();
-  }
+  mDirectory = new TDirectory(GForm("Event%d", mEvent), "");
 
-  if (mTreeC){
-    printf("write mTreeC %p\n", mTreeC);
-    mTreeC->Write();
-  }
+  ConvertKinematics();
+  ConvertHits();
+  ConvertClusters();
+  ConvertRecTracks();
+  ConvertGenInfo();
 
-  if (mTreeR) { 
-    printf("write mTreeR %p\n", mTreeR);
-    mTreeR->Write();
-  }
-
-  if (mTreeGI){
-    printf("write mTreeGI %p\n", mTreeGI);
-    mTreeGI->Write();
-  }
-
-  vsd->Write();
-  vsd->Close();
-  delete vsd;
+  mFile->Write();
 
   GledNS::PopFD();
 }
@@ -354,16 +321,17 @@ void ZAliLoad::ResetEvent()
 // Kinematics
 /**************************************************************************/
 
-void ZAliLoad::LoadKinematics()
+void ZAliLoad::ConvertKinematics()
 {
-  OpMutexHolder omh(this, "LoadKinematics");
+  static const string _eh("ZAliLoad::ConvertKinematics ");
 
-  if(pRunLoader == 0) {
-    printf("AliRunLoader not imported 'n");
-    return;
-  }
+  OpMutexHolder omh(this, "ConvertKinematics");
+
+  if(pRunLoader == 0)
+    throw(_eh + "AliRunLoader not imported.");
+
+  mDirectory->cd();
   mTreeK = new TTree("Kinematics", "Sorted TParticles as in Alistack");
-  mDirectory->Add(mTreeK);
  
   TTree* treek = pRunLoader->TreeK();
   TParticle tp, *_tp = &tp;
@@ -386,7 +354,7 @@ void ZAliLoad::LoadKinematics()
       idx - nprimary;
 
     treek->GetEntry(ent);
-    //printf("Import Kinematics %s \n",tp.GetName());
+    //printf("Convert Kinematics %s \n",tp.GetName());
     vmc[idx] = tp;
     vmc[idx].SetLabel(idx);
   }
@@ -423,8 +391,8 @@ void ZAliLoad::LoadKinematics()
     MCParticle& mcp = *k;
     mP= mcp;
 
-    TParticle* m = &mcp; Int_t mi;
-    mi = mcp.GetLabel();
+    TParticle* m  = &mcp;
+    Int_t      mi = mcp.GetLabel();
     while( m->GetMother(0) != -1){
       mi = m->GetMother(0);
       m = &vmc[mi];
@@ -466,7 +434,7 @@ void ZAliLoad::PrintTreeK()
 void ZAliLoad::SelectParticles(ZNode* holder, const Text_t* selection,
 			       Bool_t import_daughters)
 {
-  static const string _eh("ZAliLoad::ImportParticlesWithSelection ");
+  static const string _eh("ZAliLoad::SelectParticles ");
 
   OpMutexHolder omh(this, "SelectParticles");
 
@@ -505,32 +473,36 @@ void ZAliLoad::SelectParticles(ZNode* holder, const Text_t* selection,
 }
 
 /**************************************************************************/
+// Hits
+/**************************************************************************/
+
 namespace {
 
   struct Detector 
   {
-    const char* name;
-    const char* hitbranch;
+    const char*   name;
+    const char*   hitbranch;
     unsigned char detidx;
   };
 
   Detector detects[] = {
-    { "TPC", "AliTPCTrackHitsV2", 1 },
-    { "ITS", "AliITShit", 0 },
-    { "TRD", "AliTRDhit", 2 },
-    { "TOF", "AliTOFhit", 3 },
-    { "RICH", "AliRICHhit", 4 },
+    { "ITS",  "AliITShit",         0 },
+    { "TPC",  "AliTPCTrackHitsV2", 1 },
+    { "TRD",  "AliTRDhit",         2 },
+    { "TOF",  "AliTOFhit",         3 },
+    // { "RICH", "AliRICHhit",        4 },
     { 0 }
   };
 
 }
 
 /*************************************************************************/
-void ZAliLoad::LoadHits()
-{
-  static const string _eh("ZAliLoad::LoadHits ");
 
-  OpMutexHolder omh(this, "LoadHits");
+void ZAliLoad::ConvertHits()
+{
+  static const string _eh("ZAliLoad::ConvertHits ");
+
+  OpMutexHolder omh(this, "ConvertHits");
 
   if(pRunLoader == 0)
     throw(_eh + "AliRunLoader not available.");
@@ -538,10 +510,10 @@ void ZAliLoad::LoadHits()
   if(mTreeH != 0)
     throw(_eh + "hits already loaded.");
 
+  mDirectory->cd();
   mTreeH =  new TTree("Hits", "Combined detector hits.");
   Hit::Class()->IgnoreTObjectStreamer(true);
-  mTreeH->Branch("H", "Hit",  &mpH,128*1024,1);
-  mDirectory->Add(mTreeH);
+  mTreeH->Branch("H", "Hit", &mpH, 512*1024, 1);
  
   map<Int_t, Int_t> hmap;
 
@@ -565,14 +537,17 @@ void ZAliLoad::LoadHits()
 	do {
 	  AliHit* ah = hv2.GetHit();
 	  x1=ah->X();y1=ah->Y();z1=ah->Z();
-	  if((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1) > 4){
-	    mH.fDetID=det.detidx;
-	    mH.fEvaLabel=eva_idx;
-	    mH.fLabel=ah->Track();
-	    mH.x=x1; mH.y=y1; mH.z=z1;
-	    mTreeH->Fill();
+	  if((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1) > 4) {
+	    mH.fDetID    = det.detidx;
+	    mH.fEvaLabel = eva_idx;
+	    mH.fLabel    = ah->Track();
+	    mH.x = x1; mH.y = y1; mH.z = z1;
+	    Int_t xx = mTreeH->Fill();
+	    if(xx != 21)
+	      printf("Hit: %d %d %d %d\n", xx, mH.fLabel, mH.fEvaLabel, mH.fDetID);
+
 	    hmap[mH.fLabel]++;
-	    x=x1;y=y1;z=z1;
+	    x=x1; y=y1; z=z1;
 	    count++;
 	  }
 	} while (hv2.Next());
@@ -583,35 +558,36 @@ void ZAliLoad::LoadHits()
     default: {
       TTree* treeh = pRunLoader->GetTreeH(det.name, false);
       TClonesArray *arr = new TClonesArray(det.hitbranch);
-      treeh->SetBranchAddress(det.name,&arr);
+      treeh->SetBranchAddress(det.name, &arr);
       Int_t np = treeh->GetEntries();
       // in TreeH files hits are grouped in clones arrays
       // each eva particle has its own clone array 
-      for ( Int_t i=0; i<np; i++) {
+      for (Int_t i=0; i<np; i++) {
 	treeh->GetEntry(i);
 	Int_t eva_idx = np -i -1;
 	Int_t nh=arr->GetEntriesFast();
 	// printf("%d entry %d hits for primary %d \n", i, nh, eva_idx);
 	for (Int_t j=0; j<nh; j++) {
 	  AliHit* ali_hit = (AliHit*)arr->UncheckedAt(j);
-	  mH.fEvaLabel=eva_idx;
-	  mH.fDetID=det.detidx;
-	  mH.fLabel=ali_hit->GetTrack();
+	  mH.fEvaLabel = eva_idx;
+	  mH.fDetID    = det.detidx;
+	  mH.fLabel    = ali_hit->GetTrack();
 	  mH.x=ali_hit->X(); mH.y=ali_hit->Y(); mH.z=ali_hit->Z();
 	  hmap[mH.fLabel]++;
-	  mTreeH->Fill(); 
+	  Int_t xx = mTreeH->Fill(); 
+	  if(xx != 21)
+	    printf("Hit: %d %d %d %d\n", xx, mH.fLabel, mH.fEvaLabel, mH.fDetID);
 	}
       }
+      delete arr;
       break;
     } // end default 
     } // end switch
   } // end while
   
   //set geninfo
-  if(bGenInfo){
-    for(map<Int_t, Int_t>::iterator j=hmap.begin(); j!=hmap.end(); ++j) {
-      get_geninfo(j->first)->Nh += j->second;
-    }
+  for(map<Int_t, Int_t>::iterator j=hmap.begin(); j!=hmap.end(); ++j) {
+    get_geninfo(j->first)->Nh += j->second;
   }
   
 }
@@ -620,7 +596,7 @@ void ZAliLoad::LoadHits()
 
 void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
 {
-  static const string _eh("ZAliLoad::ImportHitsWithSelection ");
+  static const string _eh("ZAliLoad::SelectHits ");
 
   OpMutexHolder omh(this, "SelectHits");
 
@@ -659,11 +635,11 @@ void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
 // Clusters
 /**************************************************************************/
 
-void ZAliLoad::LoadClusters()
+void ZAliLoad::ConvertClusters()
 {
-  static const string _eh("ZAliLoad::LoadClusters ");
+  static const string _eh("ZAliLoad::ConvertClusters ");
 
-  OpMutexHolder omh(this, "LoadClusters");
+  OpMutexHolder omh(this, "ConvertClusters");
 
   if(pRunLoader == 0)
     throw(_eh + "AliRunLoader not available.");
@@ -673,10 +649,9 @@ void ZAliLoad::LoadClusters()
 
   mDirectory->cd();
   mTreeC =  new TTree("Clusters", "rec clusters");
-  mTreeC->Branch("C", "Hit",  &mpC,128*1024,1);
-  mDirectory->Add(mTreeC);
+  mTreeC->Branch("C", "Hit", &mpC, 128*1024, 1);
 
-  LoadTPCClusters();
+  ConvertTPCClusters();
 }
 
 void ZAliLoad::SelectClusters(HitContainer* holder, const char* selection)
@@ -720,11 +695,11 @@ void ZAliLoad::SelectClusters(HitContainer* holder, const char* selection)
 // ESD
 /**************************************************************************/
 
-void ZAliLoad::LoadRecTracks()
+void ZAliLoad::ConvertRecTracks()
 {
-  static const string _eh("ZAliLoad::LoadRecTracks ");
+  static const string _eh("ZAliLoad::ConvertRecTracks ");
 
-  OpMutexHolder omh(this, "LoadRecTracks");
+  OpMutexHolder omh(this, "ConvertRecTracks");
 
   if(pRunLoader == 0)
     throw(_eh + "AliRunLoader not available.");
@@ -732,12 +707,10 @@ void ZAliLoad::LoadRecTracks()
   if(mTreeR != 0)
     throw(_eh + "tracks already loaded.");
 
-
   mDirectory->cd();
   mTreeR =  new TTree("RecTracks", "rec tracks");
   ESDTrack::Class()->IgnoreTObjectStreamer(true);
   mTreeR->Branch("R", "ESDTrack",  &mpR,128*1024,1);
-  mDirectory->Add(mTreeR);
  
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
   if(!f.IsOpen()){
@@ -826,14 +799,19 @@ void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
 /**************************************************************************/
 // GenInfo
 /**************************************************************************/
-void ZAliLoad::LoadGenInfo()
+
+void ZAliLoad::ConvertGenInfo()
 {
+  static const string _eh("ZAliLoad::ConvertGenInfo ");
+
+  OpMutexHolder omh(this, "ConvertGenInfo");
+
+  mDirectory->cd();
   mTreeGI = new TTree("GenInfo", "Objects prepared for cross querry");
   GenInfo::Class()->IgnoreTObjectStreamer(true);
-  mDirectory->Add(mTreeGI);  
   mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
   mTreeGI->Branch("P.", "MCParticle", &mpP);
-  mTreeGI->Branch("R.", "ESDTrack", &mpR);
+  mTreeGI->Branch("R.", "ESDTrack",   &mpR);
 
   for(map<Int_t, GenInfo*>::iterator j=gimap.begin(); j!=gimap.end(); ++j) {
     mGI = *(j->second);
@@ -855,6 +833,7 @@ void ZAliLoad::LoadGenInfo()
 void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
 {
   static const string _eh("ZAliLoad::SelectGenInfo ");
+
   OpMutexHolder omh(this, "SelectGenInfo");
 
   if(mTreeGI == 0)
@@ -881,15 +860,17 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
   holder->Add(mc_holder); holder->Add(rec_holder);
 
   Int_t nc = 0, nh = 0;
-  Int_t labels[nlabels];
+  // Int_t labels[nlabels];
+  set<Int_t> labels;
 
   for (Int_t i=0; i<nlabels; i++){
     mTreeGI->GetEntry(evl.GetEntry(i));
-    labels[i]=mGI.fLabel;
+
+    labels.insert(mGI.fLabel);
     //    printf("import mgi %d  \n", mGI.fLabel );
 
-    MCParticle* p = new MCParticle(mP); // check if gimap exists
-    ZParticle* zp  = new ZParticle(p);
+    MCParticle* p  = new MCParticle(mP);
+    ZParticle*  zp = new ZParticle(p);
     mQueen->CheckIn(zp);
     mc_holder->Add(zp);
     
@@ -904,54 +885,56 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
     nc += mpGI->Nc;
   }
 
-
-  const Text_t* select;
-  if(nh > 0){
+  if(nh > 0) {
     HitContainer* hcont = new HitContainer(GForm("%d Hits", nh));
     hcont->Reset(nh);
-    Int_t count = 0;
-    for(Int_t i=0; i<nlabels; i++){
-      select = GForm("fLabel == %d", labels[i]);
-      TTreeQuery hevl;
-      Int_t hentries = hevl.Select(mTreeH, select);
-      mTreeH->SetBranchAddress("H", &mpH);
-      // printf("Selected %d hits for %s count %d::: total %d \n",hentries, select, count, nh);
-      
-      for(Int_t k=0; k<hentries; k++){
-        // printf("label[%d] get entry  %d /%d  of %d treeh\n",i,k,hevl.GetEntry(k), hentries);
-	mTreeH->GetEntry(hevl.GetEntry(k));
-	hcont->SetPoint(count, labels[i], &mpH->x);
-        count++;
+
+    Int_t  all_hits   = mTreeH->GetEntries();
+    Int_t  count      = 0;
+    Int_t  last_label = -1;
+    Bool_t store_p    = false;
+    for(Int_t i=0; i<all_hits; ++i) {
+      mTreeH->GetEntry(i);
+      if(mH.fLabel != last_label) {
+	store_p    = ( labels.find(mH.fLabel) != labels.end() );
+	last_label = mH.fLabel;
       }
-      hevl.Clear();
+      if(store_p) {
+	hcont->SetPoint(count, last_label, &mH.x);
+	++count;
+      }
     }
+
     mQueen->CheckIn(hcont);
     holder->Add(hcont);
   }
   
   // printf("Selecting clusters in GI select \n");
-  if(nc > 0){
+  if(nc > 0) {
     HitContainer* ccont = new HitContainer(GForm("%d Clusters", nc));
     ccont->Reset(nc);
     ccont->SetColor(1.,1.,0.,1.);
-    Int_t count = 0;
-    for(Int_t i=0; i<nlabels; i++){
-      select = GForm("fLabel == %d", labels[i]);
-      TTreeQuery cevl;
-      Int_t centries = cevl.Select(mTreeC, select);
-      mTreeC->SetBranchAddress("C", &mpC);
-      // printf("Selected %d clusters for %s count %d::: total %d \n",centries, select, count, nc);
-      for(Int_t k=0; k<centries; k++){
-	mTreeC->GetEntry(cevl.GetEntry(k));
-	ccont->SetPoint(count, labels[i], &mpC->x);
-	count++;
+
+    Int_t  all_clus   = mTreeC->GetEntries();
+    Int_t  count      = 0;
+    Int_t  last_label = -1;
+    Bool_t store_p    = false;
+    for(Int_t i=0; i<all_clus; ++i) {
+      mTreeC->GetEntry(i);
+      if(mC.fLabel != last_label) {
+	store_p    = ( labels.find(mC.fLabel) != labels.end() );
+	last_label = mC.fLabel;
       }
-      cevl.Clear();
+      if(store_p) {
+	ccont->SetPoint(count, last_label, &mC.x);
+	++count;
+      }
     }
+
     mQueen->CheckIn(ccont);
     holder->Add(ccont);
   }
-  
+
 }
 
 
@@ -1045,9 +1028,10 @@ void ZAliLoad::ShowTPCPlate(Int_t side)
 
 /**************************************************************************/
 
-void ZAliLoad::LoadTPCClusters()
+void ZAliLoad::ConvertTPCClusters()
 {
-  static const string _eh("ZAliLoad::LoadTPCClusters ");
+  static const string _eh("ZAliLoad::ConvertTPCTPCClusters ");
+
   auto_ptr<TFile> f 
     ( TFile::Open(GForm("%s/TPC.RecPoints.root", mDataDir.Data())) );
   if(!f.get())
@@ -1065,7 +1049,7 @@ void ZAliLoad::LoadTPCClusters()
   auto_ptr<AliTPCParam> par( get_tpc_param(_eh) );
 
   AliTPCClustersRow  clrow, *_clrow=&clrow;
-  AliTPCclusterMI *cl;
+  AliTPCclusterMI   *cl;
   _clrow->SetClass("AliTPCclusterMI");
   tree->SetBranchAddress("Segment", &_clrow);
 
@@ -1084,34 +1068,35 @@ void ZAliLoad::LoadTPCClusters()
 
   for (Int_t n=0; n<tree->GetEntries(); n++) {
     tree->GetEntry(n);
-    Int_t ncl=_clrow->GetArray()->GetEntriesFast();
-    if(ncl > 0){
+    Int_t ncl = _clrow->GetArray()->GetEntriesFast();
+    if(ncl > 0) {
       Int_t sec,row;
       par->AdjustSectorRow(_clrow->GetID(),sec,row);    
       while (ncl--) {
-	if(_clrow->GetArray()){
-	  cl=new AliTPCclusterMI(*(AliTPCclusterMI*)_clrow->GetArray()->UncheckedAt(ncl));
+	if(_clrow->GetArray()) {
+	  // cl = new AliTPCclusterMI(*(AliTPCclusterMI*)_clrow->GetArray()->UncheckedAt(ncl));
+	  cl = (AliTPCclusterMI*)_clrow->GetArray()->UncheckedAt(ncl);
           if(cl->GetLabel(0) >= 0){
-	    x=par->GetPadRowRadii(sec,row); y=cl->GetY(); z=cl->GetZ();
+	    x = par->GetPadRowRadii(sec,row); y = cl->GetY(); z = cl->GetZ();
 	    par->AdjustCosSin(sec,cs,sn);
 	    tmp = x*cs-y*sn; y= x*sn+y*cs; x=tmp; 
-	    mC.fDetID=1;
+
+	    mC.fDetID = 1;
 	    mC.fLabel = cl->GetLabel(0);
-	    mC.x = x;
-	    mC.y = y;
-	    mC.z = z;
+	    mC.x      = x;
+	    mC.y      = y;
+	    mC.z      = z;
+
 	    mTreeC->Fill();
 	    cmap[mC.fLabel]++;
 	  }
 	}
-      }   
+      }
     }
   }
   //set geninfo
-  if(bGenInfo){
-    for(map<Int_t, Int_t>::iterator j=cmap.begin(); j!=cmap.end(); ++j) {
-      get_geninfo(j->first)->Nc += j->second;
-    }
+  for(map<Int_t, Int_t>::iterator j=cmap.begin(); j!=cmap.end(); ++j) {
+    get_geninfo(j->first)->Nc += j->second;
   }
 }
 
