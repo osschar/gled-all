@@ -20,8 +20,7 @@ class GenInfo : public TObject {
  protected:
 
  public:
-  MCParticle   P;   // kinematics
-  ESDTrack     R;   // reconstruction
+  Int_t        fLabel;
   Bool_t       bR;  // is reconstructed
   Int_t        Nh;  // number of hits
   Int_t        Nc;  // number of clusters
