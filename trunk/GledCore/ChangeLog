@@ -1,3 +1,14 @@
+2005-05-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Nest.cxx:
+	Bugfix: child(0) of mPack (scrollbar) was reached via
+	arrow-up/down keys and caused segv.
+
+	* perllib/GLED_Widgets.pm:
+	Added Textor::make_weed_update to refresh widget only if the value
+	string is different and to fix cursor position to the end
+	afterwards (instead of selecting the whole string).
+
 2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlBlending.cxx:
