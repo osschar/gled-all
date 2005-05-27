@@ -405,6 +405,16 @@ sub make_widget {
 
 sub make_cxx_cb { my $S = shift; $S->make_text_widget_cb(); }
 
+sub make_weed_update {
+  my $S = shift;
+  $S->make_weed_update_A().
+"  if(strcmp(w->value(), mIdol->Get$S->{Methodbase}()) != 0) {
+    w->value(mIdol->Get$S->{Methodbase}());
+    if(w->position() != w->mark()) w->position(w->size());
+   }\n".
+  $S->make_weed_update_B();
+}
+
 ########################################################################
 
 package GLED::Widgets::TextOut; @ISA = ('GLED::Widgets');
