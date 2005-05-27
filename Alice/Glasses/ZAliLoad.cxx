@@ -86,6 +86,7 @@ void ZAliLoad::_init()
   mpR  = &mR;
   mpGI = &mGI;
   mTPCDigInfo = 0;
+  mGIIStyle = 0;
 
   mDataDir  = ".";
   mEvent    = 0;
@@ -212,7 +213,7 @@ void ZAliLoad::SetupEvent(Bool_t use_aliroot)
     LoadHits();
     LoadClusters();
     LoadRecTracks();
-    LoadGenInfo();
+    if(bGenInfo) LoadGenInfo();
   } else {
     printf("Importing kinematics \n");
     mTreeK = (TTree*) mDirectory->Get("Kinematics");
@@ -222,7 +223,7 @@ void ZAliLoad::SetupEvent(Bool_t use_aliroot)
     }else {
       mTreeK->SetBranchAddress("P", &mpP);
     }
-    printf("Importing hits TreeH %p \n", mTreeH);  
+    printf("Importing hits TreeH \n");  
     mTreeH =  (TTree*) mDirectory->Get("Hits");
     if (mTreeH == 0){
       printf("%s Hits not available in directory %s.\n", 
@@ -430,7 +431,6 @@ void ZAliLoad::LoadKinematics()
     }
     mP.SetEvaLabel(mi);
     mTreeK->Fill();
-    if(bGenInfo) get_geninfo(mcp.fLabel)->P = mcp;  
   }
 }
 
@@ -735,7 +735,7 @@ void ZAliLoad::LoadRecTracks()
 
   mDirectory->cd();
   mTreeR =  new TTree("RecTracks", "rec tracks");
-  RecTrack::Class()->IgnoreTObjectStreamer(true);
+  ESDTrack::Class()->IgnoreTObjectStreamer(true);
   mTreeR->Branch("R", "ESDTrack",  &mpR,128*1024,1);
   mDirectory->Add(mTreeR);
  
@@ -765,13 +765,8 @@ void ZAliLoad::LoadRecTracks()
     mpR->fSign = esd_t->GetSign();
     mpR->fLabel = esd_t->GetLabel();
     mTreeR->Fill();
-    if(bGenInfo){
-      GenInfo* gi =  get_geninfo(mpR->GetLabel());
-      gi->bR = true; 
-      gi->R  = mR;
-    }
   }
-
+  mTreeR->BuildIndex("fLabel");
   /*
   // V0
   ZNode* vh = new ZNode("V0Tracks");
@@ -833,19 +828,26 @@ void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
 /**************************************************************************/
 void ZAliLoad::LoadGenInfo()
 {
-  mTreeGI = new TTree("GenInfo", "Objects prepaired for cross querry");
+  mTreeGI = new TTree("GenInfo", "Objects prepared for cross querry");
   GenInfo::Class()->IgnoreTObjectStreamer(true);
-  // RecTrack::Class()->IgnoreTObjectStreamer(true);
   mDirectory->Add(mTreeGI);  
-  mTreeGI->Branch("GI", "GenInfo",  &mpGI, 512*1024, 99);
+  mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
+  mTreeGI->Branch("P.", "MCParticle", &mpP);
+  mTreeGI->Branch("R.", "ESDTrack", &mpR);
 
-  Int_t count = 0;
   for(map<Int_t, GenInfo*>::iterator j=gimap.begin(); j!=gimap.end(); ++j) {
     mGI = *(j->second);
-    //   printf("Filling %d GI with label %d \n", count,j->first);
+    mGI.fLabel = j->first;
+    mTreeK->GetEntry(j->first);
+
+    Int_t re = mTreeR->GetEntryNumberWithIndex(j->first);
+    if(re != -1){
+      mGI.bR = 1;
+      mTreeR->GetEntry(re);
+      // printf(">>> %d track with label %d", re, j->first);
+      // printf(">>> R %d  Pz %f \n", mpR->fLabel,mpR->Pz() );
+    }    
     mTreeGI->Fill();
-    delete j->second;
-    count++;
   }
   gimap.clear();
 }
@@ -856,7 +858,7 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
   OpMutexHolder omh(this, "SelectGenInfo");
 
   if(mTreeGI == 0)
-    throw (_eh + "reconstructed tracks not available.");
+    throw (_eh + "mTreeGI not available.");
 
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mGISelection.Data();
@@ -880,19 +882,22 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
 
   Int_t nc = 0, nh = 0;
   Int_t labels[nlabels];
+
   for (Int_t i=0; i<nlabels; i++){
     mTreeGI->GetEntry(evl.GetEntry(i));
-    // printf("%d >>> %p mGI.P, %p mpGI-P \n",i, mGI.P, mpGI->P );
-    labels[i] =  mpGI->P.GetLabel();
-    // add particle and esd track to holder
+    labels[i]=mGI.fLabel;
+    //    printf("import mgi %d  \n", mGI.fLabel );
 
-    MCParticle* p = new MCParticle(mpGI->P); // check if gimap exists
-    ZParticle* zp = new ZParticle(p);
+    MCParticle* p = new MCParticle(mP); // check if gimap exists
+    ZParticle* zp  = new ZParticle(p);
     mQueen->CheckIn(zp);
     mc_holder->Add(zp);
-    if(mpGI->bR == 1){
-      ESDTrack* t = new ESDTrack(mpGI->R);
-      RecTrack* rt = new RecTrack(t); 
+    
+    if(mGI.bR == 1){
+      // printf("Created rec track %d \n", mGI.fLabel);
+      ESDTrack* t = new ESDTrack(mR);
+      RecTrack* rt = new RecTrack(t);
+      mQueen->CheckIn(rt);
       rec_holder->Add(rt);
     }
     nh += mpGI->Nh;
@@ -913,7 +918,7 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
       // printf("Selected %d hits for %s count %d::: total %d \n",hentries, select, count, nh);
       
       for(Int_t k=0; k<hentries; k++){
-	// printf("label[%d] get entry  %d /%d  of %d treeh\n",i,k,hevl.GetEntry(k), hentries);
+        // printf("label[%d] get entry  %d /%d  of %d treeh\n",i,k,hevl.GetEntry(k), hentries);
 	mTreeH->GetEntry(hevl.GetEntry(k));
 	hcont->SetPoint(count, labels[i], &mpH->x);
         count++;

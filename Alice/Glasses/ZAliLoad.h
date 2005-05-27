@@ -13,10 +13,10 @@
 #include <Stones/Hit.h>
 #include <Glasses/RecTrack.h>
 #include <Glasses/TPCSegment.h>
+#include <Glasses/GIImportStyle.h>
 #include <Stones/TPCDigitsInfo.h>
 #include <Stones/MCParticle.h>
 #include <Stones/GenInfo.h>
-
 #include <TEventList.h>
 #include <AliRunLoader.h>
 #include <AliStack.h>
@@ -115,12 +115,13 @@ class ZAliLoad : public ZNode {
                               const Text_t* selection=0);     // X{Ed} C{1} 7 MCWButt()
   // --------------------------------------------------------------
   // GenInfo
-  void         LoadGenInfo();
+  void           LoadGenInfo();
  protected:
-  TString      mGISelection;               // X{GS} 7 Textor()
+  TString        mGISelection;               // X{GS} 7 Textor()
  public:
-  void         SelectGenInfo(ZNode* holder=0,
+  void           SelectGenInfo(ZNode* holder=0,
 			     const Text_t* selection=0); // X{Ed} C{1} 7 MCWButt()
+  GIImportStyle* mGIIStyle;                              // X{GS}
   // --------------------------------------------------------------
   // TPC specific  (digits,clusters)
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  
