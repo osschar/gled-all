@@ -503,7 +503,7 @@ FTW_Leaf* FTW_Nest::VisibleLeafBefore(FTW_Leaf* leaf)
 {
   int c = mPack->find(leaf);
   if(c == mPack->children()) return 0;
-  while(--c >= 0) {
+  while(--c > 0) { // child 0 is scrollbar
     FTW_Leaf* l = dynamic_cast<FTW_Leaf*>(mPack->child(c));
     if(l->visible()) return l;
   }
