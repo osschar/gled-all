@@ -24,7 +24,7 @@ void RecTrack::_init()
 
 /**************************************************************************/
 
-RecTrack:: RecTrack(ESDTrack* esd, const Text_t* n, const Text_t* t):ZNode(n,t) 
+RecTrack:: RecTrack(ESDParticle* esd, const Text_t* n, const Text_t* t):ZNode(n,t) 
 {
   _init();
   mESD = esd;

@@ -4,29 +4,29 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Alice_ZParticle_GL_RNR_H
-#define Alice_ZParticle_GL_RNR_H
+#ifndef Alice_MCTrack_GL_RNR_H
+#define Alice_MCTrack_GL_RNR_H
 
 
-#include <Glasses/ZParticle.h>
+#include <Glasses/MCTrack.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 #include <RnrBase/RnrDriver.h>
 
 class ZAliLoad;
 
-class ZParticle_GL_Rnr : public ZNode_GL_Rnr {
-  friend class ZParticleRnrStyle;
+class MCTrack_GL_Rnr : public ZNode_GL_Rnr {
+  friend class MCTrackRnrStyle;
  private:
   void _init();
 
  protected:
-  ZParticle*	mZParticle;
+  MCTrack*	mMCTrack;
   // RnrDriver::RnrMod* mParticleRM;
   RnrModStore	       mParticleRMS;
 
  public:
-  ZParticle_GL_Rnr(ZParticle* idol) :
-    ZNode_GL_Rnr(idol), mZParticle(idol), mParticleRMS(FID_t(0,0))
+  MCTrack_GL_Rnr(MCTrack* idol) :
+    ZNode_GL_Rnr(idol), mMCTrack(idol), mParticleRMS(FID_t(0,0))
   { _init(); }
 
   virtual void PreDraw(RnrDriver* rd);
@@ -34,6 +34,6 @@ class ZParticle_GL_Rnr : public ZNode_GL_Rnr {
   virtual void PostDraw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
 
-}; // endclass ZParticle_GL_Rnr
+}; // endclass MCTrack_GL_Rnr
 
 #endif

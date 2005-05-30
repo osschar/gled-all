@@ -4,32 +4,32 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "ZParticle_GL_Rnr.h"
+#include "MCTrack_GL_Rnr.h"
 #include "HelixLineRnr.h"
-#include <Glasses/ZParticleRnrStyle.h>
+#include <Glasses/MCTrackRnrStyle.h>
 #include <FL/gl.h>
 
 /**************************************************************************/
-void ZParticle_GL_Rnr::_init()
+void MCTrack_GL_Rnr::_init()
 {
-  mParticleRMS.fFid = ZParticleRnrStyle::FID();
+  mParticleRMS.fFid = MCTrackRnrStyle::FID();
 }
 
 /**************************************************************************/
 
-void ZParticle_GL_Rnr::PreDraw(RnrDriver* rd)
+void MCTrack_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   ZGlass_GL_Rnr::PreDraw(rd);
-  rd->PushPM(mZParticle);
+  rd->PushPM(mMCTrack);
 }
 
-void ZParticle_GL_Rnr::Draw(RnrDriver* rd)
+void MCTrack_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mParticleRMS);
   ZNode_GL_Rnr::Draw(rd);
 }
 
-void ZParticle_GL_Rnr::PostDraw(RnrDriver* rd)
+void MCTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   rd->PopPM();
   ZGlass_GL_Rnr::PostDraw(rd);
@@ -37,19 +37,19 @@ void ZParticle_GL_Rnr::PostDraw(RnrDriver* rd)
 
 /**************************************************************************/
 
-void ZParticle_GL_Rnr::Render(RnrDriver* rd)
+void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 {
-  RNRDRIVER_GET_RNRMOD(srm, rd, ZParticleRnrStyle);
-  ZParticleRnrStyle* rst_lens  = (ZParticleRnrStyle*) srm->fLens;
+  RNRDRIVER_GET_RNRMOD(srm, rd, MCTrackRnrStyle);
+  MCTrackRnrStyle* rst_lens  = (MCTrackRnrStyle*) srm->fLens;
   // !!! temporary hardcode value of magnetic field
   Float_t B = rst_lens->mMagField/10;// kGauss->T
 
-  MCParticle* p = mZParticle->mParticle;
+  MCParticle* p = mMCTrack->mParticle;
   Float_t vx=p->Vx(), vy=p->Vy(), vz=p->Vz();
   Float_t px = p->Px(), py=p->Py(), pz=p->Pz();  
   // check P cut off
   if (p->P() < rst_lens->mMinP) return;
-  //  printf("ZParticle_GL_Rnr::Render THETA %f \n",p->Theta());
+  //  printf("MCTrack_GL_Rnr::Render THETA %f \n",p->Theta());
   if(TMath::RadToDeg()*p->Theta() < (rst_lens->mTheta - rst_lens->mThetaOff) || 
      TMath::RadToDeg()*p->Theta() > (rst_lens->mTheta + rst_lens->mThetaOff)  )return;
   // check boundaries
@@ -97,10 +97,10 @@ void ZParticle_GL_Rnr::Render(RnrDriver* rd)
       Helix helix(a, rst_lens);
 
       // case 1  
-      if( rst_lens->mFitDaughters && (mZParticle->IsEmpty() == false)){
-	list<ZParticle*> dts; 
-	mZParticle->CopyByGlass<ZParticle*>(dts);
-	for(list<ZParticle*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
+      if( rst_lens->mFitDaughters && (mMCTrack->IsEmpty() == false)){
+	list<MCTrack*> dts; 
+	mMCTrack->CopyByGlass<MCTrack*>(dts);
+	for(list<MCTrack*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
 	  GLensReadHolder _rlck(*i);
 	  const MCParticle* d = (*i)->GetParticle();
 	  helix.init( TMath::Sqrt(px*px+py*py), pz);
@@ -117,7 +117,7 @@ void ZParticle_GL_Rnr::Render(RnrDriver* rd)
 	helix.init(TMath::Sqrt(px*px+py*py), pz);
 	helix.loop_from_to(vx, vy, vz, px, py, pz,
 			   p->fDx, p->fDy, p->fDz);
-	//printf("%s decay offset(%f,%f), steps %d \n",mZParticle->GetName(),helix.x_off, helix.y_off, helix.fN);
+	//printf("%s decay offset(%f,%f), steps %d \n",mMCTrack->GetName(),helix.x_off, helix.y_off, helix.fN);
       }
 
       // case 3
@@ -139,10 +139,10 @@ void ZParticle_GL_Rnr::Render(RnrDriver* rd)
 
       // draw line to daughters
       if(rst_lens->mFitDaughters ){
-        if( mZParticle->IsEmpty() == false){
-          list<ZParticle*> dts; 
-          mZParticle->CopyByGlass<ZParticle*>(dts);
-          for(list<ZParticle*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
+        if( mMCTrack->IsEmpty() == false){
+          list<MCTrack*> dts; 
+          mMCTrack->CopyByGlass<MCTrack*>(dts);
+          for(list<MCTrack*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
             GLensReadHolder _rlck(*i);
             const MCParticle* d = (*i)->GetParticle();
 
@@ -152,7 +152,7 @@ void ZParticle_GL_Rnr::Render(RnrDriver* rd)
             }
 
             line.draw_to(vx,vy,vz,d->Vx(), d->Vy(), d->Vz());
-            // printf("%s draw daughter %s\n", mZParticle->GetName(), d->GetName());
+            // printf("%s draw daughter %s\n", mMCTrack->GetName(), d->GetName());
             px -= d->Px();  py -= d->Py(); pz -= d->Pz();
             Tb = line.get_bounds_time(vx, vy, vz, px, py, pz);
           }

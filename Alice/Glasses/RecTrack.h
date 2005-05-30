@@ -8,7 +8,7 @@
 #define Alice_RecTrack_H
 
 #include <Glasses/ZNode.h>
-#include <Stones/ESDTrack.h>
+#include <Stones/ESDParticle.h>
 
 
 class RecTrack : public ZNode {
@@ -18,7 +18,7 @@ class RecTrack : public ZNode {
   void _init();
 
  protected:
-  ESDTrack*                mESD;           // X{GS} 
+  ESDParticle*             mESD;           // X{GS} 
   TString                  mV;             // X{GS}  7 TextOut()
   TString                  mP;             // X{GS}  7 TextOut()
 
@@ -26,7 +26,7 @@ class RecTrack : public ZNode {
   RecTrack(const Text_t* n="RecTrack", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
 
-  RecTrack(ESDTrack* esd, const Text_t* n="RecTrack", const Text_t* t=0);
+  RecTrack(ESDParticle* esd, const Text_t* n="RecTrack", const Text_t* t=0);
   virtual ~RecTrack() { delete mESD; }
   void Dump();                            // X{E} 7 MButt()
 
