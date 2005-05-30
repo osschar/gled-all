@@ -12,6 +12,8 @@
 #include "AlListener.h"
 #include "AlListener.c7"
 
+#include <AL/al.h>
+
 ClassImp(AlListener)
 
 /**************************************************************************/
@@ -19,9 +21,13 @@ ClassImp(AlListener)
 void AlListener::_init()
 {
   // *** Set all links to 0 ***
+  mLocationType = LT_Camera;
+  mGain = 1;
 }
 
 /**************************************************************************/
 
-
-/**************************************************************************/
+void AlListener::EmitSourceRay()
+{
+  alListenerf(AL_GAIN, mGain);
+}
