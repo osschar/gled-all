@@ -32,7 +32,12 @@ void AlContext::_init()
 void AlContext::Open()
 {
   static const string _eh("AlContext::Open ");
-  
+
+  if(mDevice != 0) {
+    ISerr(_eh + "device already opened.");
+    return;
+  } 
+
   mDevice = alcOpenDevice(0);
   if(mDevice == 0)
     throw(_eh + "can't open device.");
@@ -44,4 +49,17 @@ void AlContext::Open()
     throw(_eh + "can't create context.");
   }
   alcMakeContextCurrent(mContext);
+}
+
+void AlContext::Close()
+{
+  static const string _eh("AlContext::Close ");
+
+  if(mContext == 0) return;
+
+  if (alcGetCurrentContext() == mContext)
+    alcMakeContextCurrent(0);
+  alcDestroyContext(mContext); mContext = 0;
+  alcCloseDevice(mDevice);     mDevice  = 0;
+  
 }
