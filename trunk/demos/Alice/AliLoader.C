@@ -37,8 +37,7 @@ class ZImage;
 /**************************************************************************/
 
 void AliLoader(const Text_t* dirname = 0,
-	       Bool_t use_aliroot    = 0,
-	       Bool_t geninfo        = 0)
+	       Bool_t use_aliroot    = 0)
 {
   gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
@@ -73,8 +72,9 @@ void AliLoader(const Text_t* dirname = 0,
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
-  CREATE_ADD_GLASS(rst, MCTrackRnrStyle, var, "MCParticle RnrStyle", 0);
-  rst->SetTexture(image2);
+  CREATE_ADD_GLASS(mcrst, MCTrackRnrStyle, var, "MC Track RnrStyle", 0);
+  mcrst->SetTexture(image2);
+  CREATE_ADD_GLASS(recrst, RecTrackRS, var, "Rec Track RnrStyle", 0);
 
   CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
   ribbon1->SetPOVFile("images/romania.pov");
@@ -86,15 +86,9 @@ void AliLoader(const Text_t* dirname = 0,
   aliload = al;
   al->SetOM(-2);
   al->SetUseOM(true);
-  al->SetRnrMod(rst);
   //al->SetGIIStyle(giis);
   scenes->CheckIn(al);
   rscene->Add(al);
-
-  if(dirname != 0) {
-    al->SetDataDir(dirname);
-    al->SetupDataSource(use_aliroot);
-  }
 
   ZList* aliconf = rscene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
   CREATE_ATT_GLASS(tpclist, ZRnrModList, aliconf, Swallow, "TPC_RM_list", 0);
@@ -103,7 +97,6 @@ void AliLoader(const Text_t* dirname = 0,
   lightmod->SetShadeModelOp(1);
   lightmod->SetFaceCullOp(0);
 
-  
   CREATE_ADD_GLASS(tpcrnrmod, TPCSegRnrMod, tpclist, "TPC RnrMod", 0);
   tpcrnrmod->SetRnrFrame(1);
   tpcrnrmod->SetRibbon(ribbon1);
@@ -130,6 +123,15 @@ void AliLoader(const Text_t* dirname = 0,
   spawn_default_gui();
 
   shell->SpawnMetaGui(al, mvi);
+
+  if(dirname != 0) {
+    al->SetDataDir(dirname);
+    // al->SetupDataSource(use_aliroot);
+    // Shoot a MIR to have functional GUI during processing:
+    ZMIR* setup_mir = al->S_SetupDataSource(use_aliroot);
+    sun->ShootMIR(setup_mir);
+  }
+
 }
 
 /**************************************************************************/
@@ -138,7 +140,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 32, H = 19;
+  int Y = 0, W = 40, H = 21;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -190,7 +192,7 @@ MetaViewInfo* make_zaliload_metagui()
   // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w22, MetaWeedInfo, ms2, "SelectParticles", 0);
-  w22->Resize(0, y, W, 1);
+  w22->Resize(W-12, y, 12, 1);
   w22->Label("Run selection ..");
   // w21->Align(false, 0, 1);
   y++;
@@ -213,7 +215,7 @@ MetaViewInfo* make_zaliload_metagui()
   // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w32, MetaWeedInfo, ms3, "SelectHits", 0);
-  w32->Resize(0, y, W, 1);
+  w32->Resize(W-12, y, 12, 1);
   w32->Label("Run selection ..");
   // w21->Align(false, 0, 1);
   y++;
@@ -236,7 +238,7 @@ MetaViewInfo* make_zaliload_metagui()
   // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w52, MetaWeedInfo, ms5, "SelectClusters", 0);
-  w52->Resize(0, y, W, 1);
+  w52->Resize(W-12, y, 12, 1);
   w52->Label("Run selection ..");
   // w21->Align(false, 0, 1);
   y++;
@@ -259,8 +261,31 @@ MetaViewInfo* make_zaliload_metagui()
   // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w62, MetaWeedInfo, ms6, "SelectRecTracks", 0);
-  w62->Resize(0, y, W, 1);
+  w62->Resize(W-12, y, 12, 1);
   w62->Label("Run selection ..");
+  // w21->Align(false, 0, 1);
+  ++y;
+
+  Y += y; y=0;
+
+  // GenInfo:
+  CREATE_ADD_GLASS(ms7, MetaSubViewInfo, mv, "ZAliLoad", 0);
+  ms7->Position(0, Y);
+  // Intro
+  CREATE_ADD_GLASS(w70, MetaWeedInfo, ms7, "<box>", "GenInfo:");
+  w70->Resize(0, y, W, 1);
+  w70->Color(0.7, 0.85, 0.7);
+  w70->Align(true, -1, 0);
+  w70->Box(MetaWeedInfo::BT_Engraved);
+  y++;
+  CREATE_ADD_GLASS(w71, MetaWeedInfo, ms7, "GISelection", 0);
+  w71->Resize(6, y, W-6, 1);
+  w71->Label("selection: ");
+  // w20->Align(false, 0, -1);
+  y++;
+  CREATE_ADD_GLASS(w72, MetaWeedInfo, ms7, "SelectGenInfo", 0);
+  w72->Resize(W-12, y, 12, 1);
+  w72->Label("Run selection ..");
   // w21->Align(false, 0, 1);
   ++y;
 
