@@ -25,7 +25,8 @@ public:
   AlContext(const Text_t* n="AlContext", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
 
-  void Open(); // X{E}  7 MButt()
+  void Open();  // X{E}  7 MButt(-join=>1)
+  void Close(); // X{E}  7 MButt()
 
 #include "AlContext.h7"
   ClassDef(AlContext, 1)
