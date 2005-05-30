@@ -4,30 +4,30 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "ZParticleRnrStyle_GL_Rnr.h"
+#include "MCTrackRnrStyle_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 #include <FL/gl.h>
 
 /**************************************************************************/
 
-void ZParticleRnrStyle_GL_Rnr::_init()
+void MCTrackRnrStyle_GL_Rnr::_init()
 {}
 
 /**************************************************************************/
 
-void ZParticleRnrStyle_GL_Rnr::PreDraw(RnrDriver* rd)
+void MCTrackRnrStyle_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   ConsiderRebuildDL(rd);
-  rd->PushRnrMod(ZParticleRnrStyle::FID(),  mRnrMod);
+  rd->PushRnrMod(MCTrackRnrStyle::FID(),  mRnrMod);
 }
 
-void ZParticleRnrStyle_GL_Rnr::Draw(RnrDriver* rd)
+void MCTrackRnrStyle_GL_Rnr::Draw(RnrDriver* rd)
 {
   ConsiderRebuildDL(rd);
-  rd->SetDefRnrMod(ZParticleRnrStyle::FID(), mRnrMod);
+  rd->SetDefRnrMod(MCTrackRnrStyle::FID(), mRnrMod);
 }
 
-void ZParticleRnrStyle_GL_Rnr::PostDraw(RnrDriver* rd)
+void MCTrackRnrStyle_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  rd->PopRnrMod(ZParticleRnrStyle::FID());
+  rd->PopRnrMod(MCTrackRnrStyle::FID());
 }
