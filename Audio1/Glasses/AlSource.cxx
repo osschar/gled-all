@@ -95,6 +95,7 @@ void AlSource::Play(Int_t count)
     if(mAlSrc == 0) {
       alGenSources(1, &mAlSrc);
       EmitSourceRay();
+      EmitConeRay();
     }
 
     // --------------------------------------------------------------
