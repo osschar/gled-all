@@ -1945,8 +1945,18 @@ int Saturn::start_server()
 {
   static const string _eh("Saturn::start_server ");
 
-  mServerSocket = new TServerSocket(mSaturnInfo->GetServerPort(), kTRUE, 4);
+  int try_count = 0;
+open_server_socket:
+  int serv_port = mSaturnInfo->GetServerPort();
+  mServerSocket = new TServerSocket(serv_port, kTRUE, 4);
   if( !mServerSocket->IsValid() ) {
+    if(++try_count <= mSaturnInfo->GetServPortScan()) {
+      delete mServerSocket;
+      ISwarn(GForm("%sfailed opening server socket at port %d. Trying %d.",
+		   _eh.c_str(), serv_port, serv_port + 1));
+      mSaturnInfo->SetServerPort(serv_port + 1);
+      goto open_server_socket;
+    }
     int err = 10 - mServerSocket->GetErrorCode();
     ISerr(_eh +"can't create server socket ... dying.");
     return err;

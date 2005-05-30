@@ -108,6 +108,7 @@ void Gled::ParseArguments(list<char*>& args)
 	  "  -nomoons           do not accept moon connections\n"
 	  "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
 	  "  -p[ort]    <num>   specify server port (def: 9061)\n"
+	  "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
 	  "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
 	  "  -n[ame]    <str>   name of Saturn\n"
 	  "  -t[itle]   <str>   title of Saturn\n"
@@ -154,6 +155,12 @@ void Gled::ParseArguments(list<char*>& args)
     else if(strcmp(*i, "-p")==0 || strcmp(*i, "-port")==0) {
       next_arg_or_die(args, i);
       mSaturnInfo->SetServerPort( atoi(*i) );
+      args.erase(start, ++i);
+    }
+
+    else if(strcmp(*i, "-portscan")==0) {
+      next_arg_or_die(args, i);
+      mSaturnInfo->SetServPortScan( atoi(*i) );
       args.erase(start, ++i);
     }
 
@@ -319,7 +326,6 @@ Gled::~Gled() {
 
 void Gled::SpawnSunOrSaturn() {
   if(strcmp(mSaturnInfo->GetMasterName(), "") == 0) {
-    mSaturnInfo->SetMasterPort(0);
     SpawnSun();
   } else {
     SpawnSaturn();
@@ -331,6 +337,8 @@ void Gled::SpawnSun()
   static string _eh("Gled::SpawnSun ");
 
   if(mSaturn) return;
+  mSaturnInfo->SetMasterPort(0);
+
   if(strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
     mSaturnInfo->SetName(GForm("Sun at %s", gSystem->HostName()));
   if(strcmp(mSaturnInfo->GetLogin(), "") == 0)
