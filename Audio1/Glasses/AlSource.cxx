@@ -26,8 +26,23 @@ void AlSource::_init()
   // *** Set all links to 0 ***
   mFile = "boom.wav";
 
+  mGain    = 1;
+  mMinGain = 0;
+  mMaxGain = 1;
+  mPitch   = 1;
+
+  mConeInnerAngle = 360;
+  mConeOuterAngle = 360;
+  mConeOuterGain  = 0;
+
   mAlBuf = 0;
   mAlSrc = 0;
+}
+
+AlSource::~AlSource()
+{
+  if(mAlSrc) alDeleteSources(1, &mAlSrc);
+  if(mAlBuf) alDeleteBuffers(1, &mAlBuf);
 }
 
 /**************************************************************************/
@@ -71,13 +86,16 @@ void source_info(ALuint vorbsource, const Text_t* foo)
 
 void AlSource::Play(Int_t count)
 {
-  static const string _eh("AlContext::Test ");
+  static const string _eh("AlContext::Play ");
 
   {
     GLensReadHolder _rdlck(this);
 
-    alGenBuffers(1, &mAlBuf);
-    alGenSources(1, &mAlSrc);
+    if(mAlBuf == 0) alGenBuffers(1, &mAlBuf);
+    if(mAlSrc == 0) {
+      alGenSources(1, &mAlSrc);
+      EmitSourceRay();
+    }
 
     // --------------------------------------------------------------
     // ogg loader
@@ -148,25 +166,40 @@ void AlSource::Play(Int_t count)
     }
   }
 
-  GTime time(GTime::I_Now);
+  // GTime time(GTime::I_Now);
   alSourcePlay(mAlSrc);
-
-  return;
-  source_info(mAlSrc, "play.");
-
+  // source_info(mAlSrc, "play.");
   while(SourceIsPlaying(mAlSrc) == AL_TRUE) {
     // source_info(mAlSrc, "sleep.");
-    gSystem->Sleep(10);
+    gSystem->Sleep(100);
   }
-  time = time.TimeUntilNow();
-  printf("Time used %lfs.\n", time.ToDouble());
-
-  source_info(mAlSrc, "done.");
+  // time = time.TimeUntilNow();
+  // printf("Time used %lfs.\n", time.ToDouble());
+  // source_info(mAlSrc, "done.");
 
   GLensReadHolder _rdlck(this);
+
   alDeleteBuffers(1, &mAlBuf); mAlBuf = 0;
-  alDeleteSources(1, &mAlSrc); mAlSrc = 0;
-  
+  alDeleteSources(1, &mAlSrc); mAlSrc = 0;  
 }
 
 /**************************************************************************/
+
+void AlSource::EmitSourceRay()
+{
+  if(mAlSrc) {
+    alSourcef(mAlSrc, AL_GAIN, mGain);
+    alSourcef(mAlSrc, AL_MIN_GAIN, mMinGain);
+    alSourcef(mAlSrc, AL_MAX_GAIN, mMaxGain);
+    alSourcef(mAlSrc, AL_PITCH, mPitch);
+  }
+}
+
+void AlSource::EmitConeRay()
+{
+  if(mAlSrc) {
+    alSourcef(mAlSrc, AL_CONE_INNER_ANGLE, mConeInnerAngle);
+    alSourcef(mAlSrc, AL_CONE_OUTER_ANGLE, mConeOuterAngle);
+    alSourcef(mAlSrc, AL_CONE_OUTER_GAIN,  mConeOuterGain);
+  }
+}

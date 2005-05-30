@@ -18,7 +18,14 @@ private:
 protected:
   TString     mFile;    // X{GS} 7 Filor()
 
-  Float_t     mGain;    // X{GS} & Value(-range=>[0,100,1,100])
+  Float_t     mGain;    // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000])
+  Float_t     mMinGain; // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000], -join=>1)
+  Float_t     mMaxGain; // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000])
+  Float_t     mPitch;   // X{GS} Ray{Source} 7 Value(-range=>[0.001,1,1,1000])
+
+  Float_t     mConeInnerAngle; // X{GS} Ray{Cone} 7 Value(-range=>[0,360,1,1000])
+  Float_t     mConeOuterAngle; // X{GS} Ray{Cone} 7 Value(-range=>[0,360,1,1000])
+  Float_t     mConeOuterGain;  // X{GS} Ray{Cone} 7 Value(-range=>[0,1,  1,1000])
 
   UInt_t      mAlBuf;	//!
   UInt_t      mAlSrc;	//!
@@ -26,10 +33,12 @@ protected:
 public:
   AlSource(const Text_t* n="AlSource", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
+  virtual ~AlSource();
 
   void Play(Int_t count=1); // X{Ed} 7 MCWButt()
 
-  //void SetGain() {
+  void EmitSourceRay();
+  void EmitConeRay();
 
 #include "AlSource.h7"
   ClassDef(AlSource, 1)
