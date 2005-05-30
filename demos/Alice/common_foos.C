@@ -49,6 +49,13 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(mv, Mover, el, "Lamp Origin Rotator", "");
   mv->SetNode(origin); mv->SetRi(1); mv->SetRj(3); mv->SetRa(0.005);
  
+  // y=0 plane.
+
+  CREATE_ADD_GLASS(xzplane, Rect, rscene, "X-Z Plane", "");
+  xzplane->SetRotByDegrees(180, 0, -90);
+  xzplane->SetUnitSquare(20);
+  xzplane->SetColor(0.4, 1, 0.45, 0.4);
+
   // Camera bases.
 
   CREATE_ADD_GLASS(mark, ZNode, rscene, "Markers", "");
@@ -152,13 +159,6 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(lightmod, ZGlLightModel, var, "Light Model", 0);
   lightmod->SetShadeModelOp(1);
   lightmod->SetFaceCullOp(1);
-
-  // y=0 plane.
-
-  CREATE_ADD_GLASS(xzplane, Rect, rscene, "X-Z Plane", "");
-  xzplane->SetRotByDegrees(180, 0, -90);
-  xzplane->SetUnitSquare(20);
-  xzplane->SetColor(0.4, 1, 0.45, 0.4);
 
   return rscene;
 }
