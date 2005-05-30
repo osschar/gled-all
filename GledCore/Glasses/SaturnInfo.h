@@ -40,10 +40,11 @@ protected:
   // Saturn config
 
   TString	mHostName;	// X{GS} 7 TextOut(-join=>1)
-  Int_t		mServerPort;	// X{GS} 7 ValOut(-range=>[0,65525,1,1])
+  Int_t		mServerPort;	// X{GS} 7 ValOut(-range=>[0,65535,1])
+  Int_t         mServPortScan;  // X{GS} 7 Value(-range=>[0,256,1])
 
   TString	mMasterName;	// X{GS} 7 TextOut(-join=>1)
-  Int_t		mMasterPort;	// X{GS} 7 ValOut(-range=>[0,65525,1,1])
+  Int_t		mMasterPort;	// X{GS} 7 ValOut(-range=>[0,65535,1,1])
 
   ID_t		mSunSpaceSize;	// X{GS} 7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
   ID_t		mKingID;	// X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],

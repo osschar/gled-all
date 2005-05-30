@@ -28,7 +28,7 @@ SaturnInfo::SaturnInfo(const Text_t* n, const Text_t* t) :
 {
   hSocket = 0; hRoute = 0;
 
-  mHostName = "";   mServerPort = GLED_DEF_PORT;
+  mHostName   = ""; mServerPort = GLED_DEF_PORT; mServPortScan = 0;
   mMasterName = ""; mMasterPort = GLED_DEF_PORT;
 
   mSunSpaceSize = mKingID = mFireKingID = 0;
