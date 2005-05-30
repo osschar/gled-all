@@ -13,7 +13,6 @@
 #include "ZAliLoad.c7"
 #include <Glasses/ZQueen.h>
 #include <Glasses/RecTrack.h>
-#include <Glasses/V0.h>
 #include <Stones/TTreeTools.h>
 
 #include <TSystem.h>
@@ -29,11 +28,12 @@
 #include <AliSimDigits.h>
 #include <AliKalmanTrack.h>
 #include <AliESD.h>
+#include <AliESDV0MI.h>
 #include <AliTPCclusterMI.h>
 #include <AliTPCClustersRow.h>
 
-typedef list<ZParticle*>           lpZATrack_t;
-typedef list<ZParticle*>::iterator lpZATrack_i;
+typedef list<MCTrack*>           lpZATrack_t;
+typedef list<MCTrack*>::iterator lpZATrack_i;
 
 map<Int_t, GenInfo*> gimap;
 
@@ -80,11 +80,13 @@ void ZAliLoad::_init()
   mTreeTR = 0;
   mTreeC  = 0;
   mTreeR  = 0;
+  mTreeV0 = 0;
   mTreeGI = 0;
   mpP  = &mP;
   mpH  = &mH;
   mpC  = &mC;
   mpR  = &mR;
+  mpV0 = &mV0;
   mpGI = &mGI;
   mTPCDigInfo = 0;
   mGIIStyle = 0;
@@ -101,8 +103,9 @@ void ZAliLoad::_init()
   mParticleSelection = "GetMother(0) == -1";
   mHitSelection      = "GetDetID() < 5";
   mClusterSelection  = mHitSelection;
-  mRecSelection    = "GetLabel() >= 0";
-  mGISelection    = "bR == 1";
+  mRecSelection      = "GetLabel() >= 0";
+  mV0Selection       = "fStatus >= 0";
+  mGISelection       = "bR == 1";
   pRunLoader = 0;
 
   // Pain:
@@ -205,6 +208,7 @@ void ZAliLoad::SetupEvent()
 {
   static const string _eh("ZAliLoad::SetupEvent ");
  
+
   printf("Reading kinematics.\n");
   mTreeK = (TTree*) mDirectory->Get("Kinematics");
   if (mTreeK == 0) {
@@ -231,6 +235,7 @@ void ZAliLoad::SetupEvent()
     mTreeC->SetBranchAddress("C", &mpC);
   }
 
+
   printf("Reading reconstructed tracks.\n");
   mTreeR = (TTree*) mDirectory->Get("RecTracks");
   if (mTreeR == 0){ 
@@ -238,6 +243,15 @@ void ZAliLoad::SetupEvent()
 	   _eh.c_str(), mDirectory->GetName());
   } else {
     mTreeR->SetBranchAddress("R", &mpR);
+  }
+
+  printf("Reading V0 points. \n");
+  mTreeV0 =  (TTree*) mDirectory->Get("V0");
+  if (mTreeV0 == 0){
+    printf("%s V0 not available in directory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
+  } else {
+    mTreeV0->SetBranchAddress("V0", &mpV0);
   }
     
   printf("Reading GenInfo.\n");
@@ -273,12 +287,12 @@ void ZAliLoad::CreateVSD()
 
   mDirectory = new TDirectory(GForm("Event%d", mEvent), "");
 
+
   ConvertKinematics();
   ConvertHits();
   ConvertClusters();
   ConvertRecTracks();
   ConvertGenInfo();
-
   mFile->Write();
 
   GledNS::PopFD();
@@ -297,6 +311,7 @@ void ZAliLoad::ResetEvent()
   delete mTreeTR;     mTreeTR     = 0;
   delete mTreeC;      mTreeC      = 0;
   delete mTreeR;      mTreeR      = 0;
+  delete mTreeV0;     mTreeV0     = 0;
   delete mTPCDigInfo; mTPCDigInfo = 0;
 
   if (mFile) {
@@ -460,7 +475,7 @@ void ZAliLoad::SelectParticles(ZNode* holder, const Text_t* selection,
       Int_t label = evl.GetEntry(i);
       mTreeK->GetEntry(label);
       MCParticle* p = new MCParticle(*mpP); 
-      ZParticle* zp = new ZParticle(p, GForm("%d %s", label, p->GetName()));
+      MCTrack* zp = new MCTrack(p, GForm("%d %s", label, p->GetName()));
       mQueen->CheckIn(zp);
       if(import_daughters) zp->ImportDaughtersRec(this);
       holder->WriteLock();
@@ -709,8 +724,10 @@ void ZAliLoad::ConvertRecTracks()
 
   mDirectory->cd();
   mTreeR =  new TTree("RecTracks", "rec tracks");
-  ESDTrack::Class()->IgnoreTObjectStreamer(true);
-  mTreeR->Branch("R", "ESDTrack",  &mpR,128*1024,1);
+  ESDParticle::Class()->IgnoreTObjectStreamer(true);
+  mTreeR->Branch("R", "ESDParticle",  &mpR,128*1024,1);
+  mDirectory->Add(mTreeR);
+
  
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
   if(!f.IsOpen()){
@@ -740,20 +757,7 @@ void ZAliLoad::ConvertRecTracks()
     mTreeR->Fill();
   }
   mTreeR->BuildIndex("fLabel");
-  /*
-  // V0
-  ZNode* vh = new ZNode("V0Tracks");
-  mQueen->CheckIn(vh);
-  Add(vh);
-  AliESDv0* v0;
-  for (Int_t n =0; n< fEvent->GetNumberOfV0s();n++){
-  printf("Importing V0 of %d\n",fEvent->GetNumberOfV0s() );
-  v0 = fEvent->GetV0(n);
-  V0* vt = new  V0(v0);
-  mQueen->CheckIn(vt);
-  vh->Add(vt);
-  }
-  */
+ 
 }
 
 
@@ -785,7 +789,7 @@ void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
       Int_t label = evl.GetEntry(i);
       mTreeR->GetEntry(label);
       // printf("Importing track %s \n", mpR->GetName());
-      ESDTrack* et = new ESDTrack(*mpR);
+      ESDParticle* et = new ESDParticle(*mpR);
       RecTrack* t = new RecTrack(et); 
       mQueen->CheckIn(t);
       holder->WriteLock();
@@ -793,6 +797,134 @@ void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
       holder->WriteUnlock();
     }
   }
+  if(add_holder_p) Add(holder);
+}
+
+
+void ZAliLoad::ConvertV0()
+{
+  static const string _eh("ZAliLoad::LoadV0 ");
+  // return; 
+  //OpMutexHolder omh(this, "LoadV0");
+
+  if(pRunLoader == 0)
+    throw(_eh + "AliRunLoader not available.");
+
+  if(mTreeV0 != 0)
+    throw(_eh + "V0 already loaded.");
+
+  mDirectory->cd();
+  mTreeV0 =  new TTree("V0", "V0 points");
+  ESDParticle::Class()->IgnoreTObjectStreamer(true);
+  mTreeV0->Branch("V0", "V0", &mpV0, 128*1024,1);
+  mDirectory->Add(mTreeV0);
+
+  TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
+  if(!f.IsOpen()){
+    throw(_eh + "no AliESDs.root file\n");
+  }
+
+  TTree* tree = (TTree*) f.Get("esdTree");
+  if (tree == 0) 
+    throw(_eh + "no esdTree\n");
+
+  AliESD *fEvent=0;  
+  tree->SetBranchAddress("ESD", &fEvent);
+  tree->GetEntry(0); 
+
+  AliESDV0MI* av;
+  for (Int_t n =0; n< fEvent->GetNumberOfV0MIs();n++){
+    printf("Importing V0 of %d\n",fEvent->GetNumberOfV0MIs() );
+    av = fEvent->GetV0MI(n);
+    Double_t x,y,cos,sin; 
+
+    mV0.fStatus = av->GetStatus();
+    // distance to closest approach
+    mV0.fVDCA[0] = av->GetXr(0); 
+    mV0.fVDCA[1] = av->GetXr(1);
+    mV0.fVDCA[2] = av->GetXr(2);
+    // set birth vertex of neutral particle     
+    av->GetXYZ(mV0.fV0[0],mV0.fV0[1],mV0.fV0[2]);
+    // momentum and position of negative particle
+    Double_t* pp = av->GetPMp();
+    mV0.fPM[0]=pp[0];  mV0.fPM[1]=pp[1]; mV0.fPM[2]=pp[2];
+    // read AliExternalTrackParam
+    x = av->GetParamM()->X(); 
+    y = av->GetParamM()->Y(); 
+    cos = TMath::Cos( av->GetParamM()->Alpha());
+    sin = TMath::Sin( av->GetParamM()->Alpha());
+    mV0.fVM[0] = x*cos - y*sin;
+    mV0.fVM[1] = x*cos + y*sin;
+    mV0.fVM[2] = av->GetParamM()->Z();
+    // momentum and position of positive particle
+    Double_t* pm = av->GetPPp();
+    mV0.fPP[0]=pm[0];  mV0.fPP[1]=pm[1]; mV0.fPP[2]=pm[2];
+    x = av->GetParamP()->X();
+    y = av->GetParamP()->Y();
+    cos = TMath::Cos(av->GetParamP()->Alpha());
+    sin = TMath::Sin(av->GetParamP()->Alpha());
+    mV0.fVM[0] = x*cos - y*sin;
+    mV0.fVM[1] = x*cos + y*sin;
+    mV0.fVM[2] = av->GetParamP()->Z();
+    // daughter indices
+    mV0.fIndex[0] = av->GetIndex(0);
+    mV0.fIndex[1] = av->GetIndex(1);
+    // simulation data ???
+    mV0.fPDG = av->GetPdgCode();
+
+    mTreeV0->Fill();
+  }
+}
+
+void ZAliLoad::SelectV0(ZNode* holder, const Text_t* selection)
+{
+  static const string _eh("ZAliLoad::SelectV0 ");
+
+  //  OpMutexHolder omh(this, "SelectV0 ");
+
+  if(mTreeV0 == 0) 
+    throw (_eh + "V0 tree not available.");
+  
+  if(selection == 0 || strcmp(selection,"") == 0)
+    selection = mV0Selection.Data();
+
+  TTreeQuery evl;
+  Int_t n = evl.Select(mTreeV0, selection);
+  // printf("%d entries in selection %s \n", n,  selection);
+
+  bool add_holder_p = false;
+  if(holder == 0) {
+    holder = new ZNode("V0", selection);
+    mQueen->CheckIn(holder);
+    add_holder_p = true;
+  }
+
+  if(n > 0) {
+    for (Int_t i=0; i<n; i++){
+      mTreeV0->GetEntry( evl.GetEntry(i));
+      // nutral mother
+      Double_t pp[3];
+      pp[0]= mV0.fPP[0]+mV0.fPM[0];
+      pp[1]= mV0.fPP[1]+mV0.fPM[1];
+      pp[2]= mV0.fPP[2]+mV0.fPM[2];
+      ESDParticle* v = new ESDParticle(&mV0.fVDCA[0], &pp[0],-1, 0);
+      RecTrack* tV0 = new RecTrack(v); 
+      tV0->SetName(GForm("V0 %d",mV0.fPDG));
+      mQueen->CheckIn(tV0);
+      holder->Add(tV0);
+      // minus daughter
+      ESDParticle* m = new ESDParticle(&mV0.fVM[0], &mV0.fPM[0], mV0.fIndex[0], -1);
+      RecTrack* tM = new RecTrack(m); 
+      mQueen->CheckIn(tM);
+      tV0->Add(tM);
+      // plus daughter
+      ESDParticle* p = new ESDParticle(&mV0.fVP[0], &mV0.fPP[0], mV0.fIndex[1], 1);
+      RecTrack* tP = new RecTrack(p); 
+      mQueen->CheckIn(tP);
+      tV0->Add(tP);
+    }
+  }
+
   if(add_holder_p) Add(holder);
 }
 
@@ -811,7 +943,7 @@ void ZAliLoad::ConvertGenInfo()
   GenInfo::Class()->IgnoreTObjectStreamer(true);
   mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
   mTreeGI->Branch("P.", "MCParticle", &mpP);
-  mTreeGI->Branch("R.", "ESDTrack",   &mpR);
+  mTreeGI->Branch("R.", "ESDParticle",   &mpR);
 
   for(map<Int_t, GenInfo*>::iterator j=gimap.begin(); j!=gimap.end(); ++j) {
     mGI = *(j->second);
@@ -869,14 +1001,14 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
     labels.insert(mGI.fLabel);
     //    printf("import mgi %d  \n", mGI.fLabel );
 
-    MCParticle* p  = new MCParticle(mP);
-    ZParticle*  zp = new ZParticle(p);
+    MCParticle* p = new MCParticle(mP); // check if gimap exists
+    MCTrack* zp  = new MCTrack(p);
     mQueen->CheckIn(zp);
     mc_holder->Add(zp);
     
     if(mGI.bR == 1){
       // printf("Created rec track %d \n", mGI.fLabel);
-      ESDTrack* t = new ESDTrack(mR);
+      ESDParticle* t = new ESDParticle(mR);
       RecTrack* rt = new RecTrack(t);
       mQueen->CheckIn(rt);
       rec_holder->Add(rt);
