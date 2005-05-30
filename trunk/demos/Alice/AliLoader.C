@@ -19,8 +19,8 @@ Scene*    gscene  = 0;
 // default event display layout
 const Text_t* particle_layout =
   "ZNode(RnrSelf[4],RnrElements[4],RnrMod[8]):"
-  "ZParticle(NDaughters[4],ImportDaughtersRec[5],V[10],P[14],VDecay[10],ImportHitsFromPrimary[4],Dump[4])";
-  //"ZParticleRnrStyle(VertexColor[4],RnrP[4])";
+  "MCTrack(NDaughters[4],ImportDaughtersRec[5],V[10],P[14],VDecay[10],ImportHitsFromPrimary[4],Dump[4])";
+  //"MCTrackRnrStyle(VertexColor[4],RnrP[4])";
   // "HitContainer(NHits[4],Color[4],Dump[4])";
 
 /*
@@ -73,25 +73,27 @@ void AliLoader(const Text_t* dirname = 0,
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
-  CREATE_ADD_GLASS(rst, ZParticleRnrStyle, var, "Particle RnrStyle", 0);
+  CREATE_ADD_GLASS(rst, MCTrackRnrStyle, var, "MCParticle RnrStyle", 0);
   rst->SetTexture(image2);
 
   CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
   ribbon1->SetPOVFile("images/romania.pov");
   ribbon1->LoadPOV();
 
+  //CREATE_ADD_GLASS(giis, GIImportStyle, var, "GenInfo Import", 0);
 
   ZAliLoad* al = new ZAliLoad(); 
   aliload = al;
   al->SetOM(-2);
   al->SetUseOM(true);
   al->SetRnrMod(rst);
+  //al->SetGIIStyle(giis);
   scenes->CheckIn(al);
   rscene->Add(al);
 
   if(dirname != 0) {
     al->SetDataDir(dirname);
-    al->SetupDataSource(use_aliroot, geninfo);
+    al->SetupDataSource(use_aliroot);
   }
 
   ZList* aliconf = rscene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
@@ -160,13 +162,9 @@ MetaViewInfo* make_zaliload_metagui()
   w12->Resize(W-6, y, 6, 1);
   y++;
   CREATE_ADD_GLASS(w16, MetaWeedInfo, ms1, "KineType", 0);
-  w16->Resize(8, y, W-8, 1);
-  y++;
-  // methods
+  w16->Resize(8, y, W-8-12, 1);
   CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "SetupDataSource", 0);
-  w13->Resize(0, y, W/2, 1);
-  CREATE_ADD_GLASS(w15, MetaWeedInfo, ms1, "WriteVSD", 0);
-  w15->Resize(W/2, y, W/2, 1);
+  w13->Resize(W-12, y, 12, 1);
   y++;
   CREATE_ADD_GLASS(w14, MetaWeedInfo, ms1, "Operation", 0);
   w14->Resize(8, y, W-8, 1);
