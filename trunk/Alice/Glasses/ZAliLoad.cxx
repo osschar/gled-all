@@ -100,11 +100,11 @@ void ZAliLoad::_init()
 
   mOperation = "<idle>";
 
-  mParticleSelection = "GetMother(0) == -1";
-  mHitSelection      = "GetDetID() < 5";
+  mParticleSelection = "fMother[0] == -1";
+  mHitSelection      = "fDetID < 5";
   mClusterSelection  = mHitSelection;
-  mRecSelection      = "GetLabel() >= 0";
-  mV0Selection       = "fStatus >= 0";
+  mRecSelection      = "fLabel >= 0";
+  mV0Selection       = "fStatus == 100";
   mGISelection       = "bR == 1";
   pRunLoader = 0;
 
@@ -287,12 +287,13 @@ void ZAliLoad::CreateVSD()
 
   mDirectory = new TDirectory(GForm("Event%d", mEvent), "");
 
-
   ConvertKinematics();
   ConvertHits();
   ConvertClusters();
   ConvertRecTracks();
+  ConvertV0();
   ConvertGenInfo();
+
   mFile->Write();
 
   GledNS::PopFD();
@@ -804,8 +805,8 @@ void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
 void ZAliLoad::ConvertV0()
 {
   static const string _eh("ZAliLoad::LoadV0 ");
-  // return; 
-  //OpMutexHolder omh(this, "LoadV0");
+
+  OpMutexHolder omh(this, "ConvertV0");
 
   if(pRunLoader == 0)
     throw(_eh + "AliRunLoader not available.");
@@ -815,6 +816,7 @@ void ZAliLoad::ConvertV0()
 
   mDirectory->cd();
   mTreeV0 =  new TTree("V0", "V0 points");
+
   ESDParticle::Class()->IgnoreTObjectStreamer(true);
   mTreeV0->Branch("V0", "V0", &mpV0, 128*1024,1);
   mDirectory->Add(mTreeV0);
@@ -832,10 +834,8 @@ void ZAliLoad::ConvertV0()
   tree->SetBranchAddress("ESD", &fEvent);
   tree->GetEntry(0); 
 
-  AliESDV0MI* av;
-  for (Int_t n =0; n< fEvent->GetNumberOfV0MIs();n++){
-    printf("Importing V0 of %d\n",fEvent->GetNumberOfV0MIs() );
-    av = fEvent->GetV0MI(n);
+  for (Int_t n =0; n< fEvent->GetNumberOfV0MIs(); n++) {
+    AliESDV0MI* av = fEvent->GetV0MI(n);
     Double_t x,y,cos,sin; 
 
     mV0.fStatus = av->GetStatus();
@@ -845,6 +845,7 @@ void ZAliLoad::ConvertV0()
     mV0.fVDCA[2] = av->GetXr(2);
     // set birth vertex of neutral particle     
     av->GetXYZ(mV0.fV0[0],mV0.fV0[1],mV0.fV0[2]);
+
     // momentum and position of negative particle
     Double_t* pp = av->GetPMp();
     mV0.fPM[0]=pp[0];  mV0.fPM[1]=pp[1]; mV0.fPM[2]=pp[2];
@@ -854,8 +855,9 @@ void ZAliLoad::ConvertV0()
     cos = TMath::Cos( av->GetParamM()->Alpha());
     sin = TMath::Sin( av->GetParamM()->Alpha());
     mV0.fVM[0] = x*cos - y*sin;
-    mV0.fVM[1] = x*cos + y*sin;
+    mV0.fVM[1] = x*sin + y*cos;
     mV0.fVM[2] = av->GetParamM()->Z();
+
     // momentum and position of positive particle
     Double_t* pm = av->GetPPp();
     mV0.fPP[0]=pm[0];  mV0.fPP[1]=pm[1]; mV0.fPP[2]=pm[2];
@@ -863,13 +865,14 @@ void ZAliLoad::ConvertV0()
     y = av->GetParamP()->Y();
     cos = TMath::Cos(av->GetParamP()->Alpha());
     sin = TMath::Sin(av->GetParamP()->Alpha());
-    mV0.fVM[0] = x*cos - y*sin;
-    mV0.fVM[1] = x*cos + y*sin;
-    mV0.fVM[2] = av->GetParamP()->Z();
+    mV0.fVP[0] = x*cos - y*sin;
+    mV0.fVP[1] = x*sin + y*cos;
+    mV0.fVP[2] = av->GetParamP()->Z();
+
     // daughter indices
-    mV0.fIndex[0] = av->GetIndex(0);
-    mV0.fIndex[1] = av->GetIndex(1);
-    // simulation data ???
+    mV0.fLabels[0] = av->GetLab(0);
+    mV0.fLabels[1] = av->GetLab(1);
+
     mV0.fPDG = av->GetPdgCode();
 
     mTreeV0->Fill();
@@ -909,16 +912,16 @@ void ZAliLoad::SelectV0(ZNode* holder, const Text_t* selection)
       pp[2]= mV0.fPP[2]+mV0.fPM[2];
       ESDParticle* v = new ESDParticle(&mV0.fVDCA[0], &pp[0],-1, 0);
       RecTrack* tV0 = new RecTrack(v); 
-      tV0->SetName(GForm("V0 %d",mV0.fPDG));
+      tV0->SetName(GForm("V0 %d : %d {%d}", mV0.fLabels[0], mV0.fLabels[1], mV0.fPDG));
       mQueen->CheckIn(tV0);
       holder->Add(tV0);
       // minus daughter
-      ESDParticle* m = new ESDParticle(&mV0.fVM[0], &mV0.fPM[0], mV0.fIndex[0], -1);
+      ESDParticle* m = new ESDParticle(&mV0.fVM[0], &mV0.fPM[0], mV0.fLabels[0], -1);
       RecTrack* tM = new RecTrack(m); 
       mQueen->CheckIn(tM);
       tV0->Add(tM);
       // plus daughter
-      ESDParticle* p = new ESDParticle(&mV0.fVP[0], &mV0.fPP[0], mV0.fIndex[1], 1);
+      ESDParticle* p = new ESDParticle(&mV0.fVP[0], &mV0.fPP[0], mV0.fLabels[1], 1);
       RecTrack* tP = new RecTrack(p); 
       mQueen->CheckIn(tP);
       tV0->Add(tP);
@@ -940,6 +943,7 @@ void ZAliLoad::ConvertGenInfo()
 
   mDirectory->cd();
   mTreeGI = new TTree("GenInfo", "Objects prepared for cross querry");
+
   GenInfo::Class()->IgnoreTObjectStreamer(true);
   mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
   mTreeGI->Branch("P.", "MCParticle", &mpP);

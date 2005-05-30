@@ -121,16 +121,16 @@ class ZAliLoad : public ZNode {
  public:
   void ConvertRecTracks();
   void SelectRecTracks(ZNode* holder=0, const Text_t* selection=0
-		       );    // X{Ed} C{1} 7 MCWButt()
+		       );     // X{Ed} C{1} 7 MCWButt()
   
+  // --------------------------------------------------------------
   // V0 points
-  void        ConvertV0();
  protected:
-  TString     mV0Selection;
+  TString mV0Selection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void        SelectV0(ZNode* holder=0,
-		       const Text_t* selection=0); // X{Ed} C{1} 7 MCWButt()
-
+  void ConvertV0();
+  void SelectV0(ZNode* holder=0, const Text_t* selection=0
+		);            // X{Ed} C{1} 7 MCWButt()
 
   // --------------------------------------------------------------
   // GenInfo
