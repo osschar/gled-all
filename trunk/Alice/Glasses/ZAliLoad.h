@@ -8,7 +8,7 @@
 #define Alice_ZAliLoad_H
 
 #include <Glasses/ZNode.h>
-#include <Glasses/ZParticle.h>
+#include <Glasses/MCTrack.h>
 #include <Glasses/HitContainer.h>
 #include <Glasses/RecTrack.h>
 #include <Glasses/TPCSegment.h>
@@ -16,6 +16,7 @@
 
 #include <Stones/TPCDigitsInfo.h>
 #include <Stones/MCParticle.h>
+#include <Stones/V0.h>
 #include <Stones/GenInfo.h>
 #include <Stones/Hit.h>
 
@@ -41,16 +42,18 @@ class ZAliLoad : public ZNode {
   TTree*                         mTreeTR;  // X{g}
   TTree*                         mTreeC;   // X{g}
   TTree*                         mTreeR;   // X{g}
+  TTree*                         mTreeV0;  // X{g}
   TTree*                         mTreeGI;  // X{g}
   Hit                            mH, *mpH;     // needed for selection in mTreeH
   MCParticle                     mP, *mpP;     // needed for selection in mTreeK
   Hit                            mC, *mpC;     // needed for selection in mTreeC    
-  ESDTrack                       mR, *mpR;     // needed for selection in mTreeR    
+  ESDParticle                    mR, *mpR;     // needed for selection in mTreeR  
+  V0                             mV0, *mpV0;   // needed for selection in mTreeV0  
   GenInfo                        mGI,*mpGI;    // needed for selection in mTreeGI      
   TPCDigitsInfo*                 mTPCDigInfo;
 
  protected:
-  ZParticle* get_track(Int_t tid);
+  MCTrack* get_track(Int_t tid);
   AliTPCParam* get_tpc_param(const string& eh);
 
   TString                  mDataDir;   // X{GS} 7 Filor(-dir=>1)
@@ -119,6 +122,15 @@ class ZAliLoad : public ZNode {
   void ConvertRecTracks();
   void SelectRecTracks(ZNode* holder=0, const Text_t* selection=0
 		       );    // X{Ed} C{1} 7 MCWButt()
+  
+  // V0 points
+  void        ConvertV0();
+ protected:
+  TString     mV0Selection;
+ public:
+  void        SelectV0(ZNode* holder=0,
+		       const Text_t* selection=0); // X{Ed} C{1} 7 MCWButt()
+
 
   // --------------------------------------------------------------
   // GenInfo
@@ -130,6 +142,7 @@ class ZAliLoad : public ZNode {
   void ConvertGenInfo();
   void SelectGenInfo(ZNode* holder=0, const Text_t* selection=0
 		     );         // X{Ed} C{1} 7 MCWButt()
+
 
   // --------------------------------------------------------------
   // TPC specific  (digits,clusters)
@@ -146,7 +159,7 @@ class ZAliLoad : public ZNode {
 
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
-}; // endclass ZAliLoad
+    }; // endclass ZAliLoad
 
 GlassIODef(ZAliLoad);
 
