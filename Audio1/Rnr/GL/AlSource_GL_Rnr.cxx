@@ -27,7 +27,8 @@ void AlSource_GL_Rnr::Draw(RnrDriver* rd)
   if(mAlSource->mAlSrc) {
     ZTrans& t = rd->ToGCS();
     alSource3f(mAlSource->mAlSrc, AL_POSITION, t(1,4), t(2,4), t(3,4));
-    printf("Source: %f %f %f\n", t(1,4), t(2,4), t(3,4));
+    // printf("Source: %f %f %f\n", t(1,4), t(2,4), t(3,4));
+    alSource3f(mAlSource->mAlSrc, AL_DIRECTION, t(1,1), t(2,1), t(3,1));
   }
 }
 
