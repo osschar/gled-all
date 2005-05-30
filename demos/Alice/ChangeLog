@@ -1,3 +1,11 @@
+2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	Custom gui: added GenInfo selection.
+	
+	* common_foos.C:
+	Moved XZ plane to second position.
+
 2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:

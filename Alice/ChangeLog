@@ -1,3 +1,13 @@
+2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Use fLab instead of FIndex from AliESDV0MI. Fixed a few typos.
+
+	* Stones/V0.cxx:
+	* Stones/V0.h:
+	Renamed fIndex to fLabels.
+
 2005-05-30  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/MCTrack.cxx:
