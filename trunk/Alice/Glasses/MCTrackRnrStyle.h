@@ -4,18 +4,18 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Alice_ZParticleRnrStyle_H
-#define Alice_ZParticleRnrStyle_H
+#ifndef Alice_MCTrackRnrStyle_H
+#define Alice_MCTrackRnrStyle_H
 
 #include <Glasses/PRSBase.h>
 #include <Stones/ZColor.h>
-#include <Glasses/ZParticle.h>
+#include <Glasses/MCTrack.h>
 #include <Glasses/ZImage.h>
 
-class ZParticleRnrStyle : public PRSBase {
+class MCTrackRnrStyle : public PRSBase {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
-  MAC_RNR_FRIENDS(ZParticleRnrStyle);
-  MAC_RNR_FRIENDS(ZParticle);
+  MAC_RNR_FRIENDS(MCTrackRnrStyle);
+  MAC_RNR_FRIENDS(MCTrack);
 
  private:
   void _init();
@@ -35,15 +35,15 @@ class ZParticleRnrStyle : public PRSBase {
 
 
   // public:
-  ZParticleRnrStyle(const Text_t* n="ZParticleRnrStyle", const Text_t* t=0) :
+  MCTrackRnrStyle(const Text_t* n="MCTrackRnrStyle", const Text_t* t=0) :
     PRSBase(n,t) { _init(); }
   ZColor                   GetPdgColor(Int_t pdg);
   ZImage*                  GetPdgTexture(Int_t pdg);
 
-#include "ZParticleRnrStyle.h7"
-  ClassDef(ZParticleRnrStyle, 1)
-    }; // endclass ZParticleRnrStyle
+#include "MCTrackRnrStyle.h7"
+  ClassDef(MCTrackRnrStyle, 1)
+    }; // endclass MCTrackRnrStyle
 
-GlassIODef(ZParticleRnrStyle);
+GlassIODef(MCTrackRnrStyle);
 
 #endif

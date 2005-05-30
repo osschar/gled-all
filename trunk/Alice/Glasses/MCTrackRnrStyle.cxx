@@ -5,20 +5,20 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// ZParticleRnrStyle
+// MCTrackRnrStyle
 //
 //
 
-#include "ZParticleRnrStyle.h"
-#include "ZParticleRnrStyle.c7"
+#include "MCTrackRnrStyle.h"
+#include "MCTrackRnrStyle.c7"
 
 
 
-ClassImp(ZParticleRnrStyle)
+ClassImp(MCTrackRnrStyle)
 
 /**************************************************************************/
 
-  void ZParticleRnrStyle::_init()
+  void MCTrackRnrStyle::_init()
 {
   // *** Set all links to 0 ***
   mFitDaughters = true;
@@ -33,7 +33,7 @@ ClassImp(ZParticleRnrStyle)
 }
 
 /**************************************************************************/
-ZColor ZParticleRnrStyle:: GetPdgColor(Int_t pdg)
+ZColor MCTrackRnrStyle:: GetPdgColor(Int_t pdg)
 {
   Int_t pdga = TMath::Abs(pdg);
   ZColor col =  mDefCol;
@@ -70,7 +70,7 @@ ZColor ZParticleRnrStyle:: GetPdgColor(Int_t pdg)
   return col;
 }
 
-ZImage* ZParticleRnrStyle::GetPdgTexture(Int_t pdg)
+ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
 {
   Int_t pdga = TMath::Abs(pdg);
   if (pdga > 100 && pdga < 100000){ 

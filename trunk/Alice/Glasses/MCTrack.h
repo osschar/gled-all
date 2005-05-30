@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Alice_ZParticle_H
-#define Alice_ZParticle_H
+#ifndef Alice_MCTrack_H
+#define Alice_MCTrack_H
 
 
 #include <Glasses/ZNode.h>
@@ -17,8 +17,8 @@
 
 class ZAliLoad;
 
-class ZParticle : public ZNode {
-  MAC_RNR_FRIENDS(ZParticle);
+class MCTrack : public ZNode {
+  MAC_RNR_FRIENDS(MCTrack);
 
  private:
   void _init();
@@ -30,11 +30,11 @@ class ZParticle : public ZNode {
   Int_t                    mNDaughters;    // X{GS}  7 ValOut()
 
  public:
-  ZParticle(const Text_t* n="ZParticle", const Text_t* t=0) :
+  MCTrack(const Text_t* n="MCTrack", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
 
-  ZParticle(MCParticle* p, const Text_t* n="ZParticle", const Text_t* t=0);
-  virtual ~ZParticle() { delete mParticle; }
+  MCTrack(MCParticle* p, const Text_t* n="MCTrack", const Text_t* t=0);
+  virtual ~MCTrack() { delete mParticle; }
 
   // particles
   void ImportDaughters(ZAliLoad* alil = 0);    //X{E} C{1} 7 MButt(-join=>1)
@@ -44,10 +44,10 @@ class ZParticle : public ZNode {
   void Dump();				            // X{E} 7 MButt()
 	
  
-#include "ZParticle.h7"
-  ClassDef(ZParticle, 1)
-    }; // endclass ZParticle
+#include "MCTrack.h7"
+  ClassDef(MCTrack, 1)
+    }; // endclass MCTrack
 
-GlassIODef(ZParticle);
+GlassIODef(MCTrack);
 
 #endif
