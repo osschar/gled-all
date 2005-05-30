@@ -9,18 +9,18 @@
 //
 //
 
-#include "ZParticle.h"
+#include "MCTrack.h"
 #include <Glasses/ZAliLoad.h>
-#include "ZParticle.c7"
+#include "MCTrack.c7"
 #include <Glasses/ZQueen.h>
 
-ClassImp(ZParticle);
+ClassImp(MCTrack);
 
-typedef list<ZParticle*>                   lpZParticle_t;
-typedef list<ZParticle*>::iterator         lpZParticle_i;
+typedef list<MCTrack*>                   lpMCTrack_t;
+typedef list<MCTrack*>::iterator         lpMCTrack_i;
 /**************************************************************************/
 
-void ZParticle::_init()
+void MCTrack::_init()
 {
   // override from ZGlass 
   bUseDispList=true;
@@ -28,7 +28,7 @@ void ZParticle::_init()
   mNDaughters = 0;
 }
 
-ZParticle::ZParticle(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t) 
+MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t) 
 {
   _init();
   mParticle = p;
@@ -46,9 +46,9 @@ ZParticle::ZParticle(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t)
 
 /**************************************************************************/
 
-void ZParticle::ImportDaughters(ZAliLoad* alil)
+void MCTrack::ImportDaughters(ZAliLoad* alil)
 {
-  static const string _eh("ZParticle::ImportDaughters");
+  static const string _eh("MCTrack::ImportDaughters");
   if (alil == 0) {
     alil = GrepParentByGlass<ZAliLoad*>();
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
@@ -57,15 +57,15 @@ void ZParticle::ImportDaughters(ZAliLoad* alil)
   if ( mParticle->GetNDaughters() == 0 ) return;
   for(int i=d0; i<=d1; ++i) {
     MCParticle* tp = alil->Particle(i);
-    ZParticle* p = new ZParticle(tp, GForm("%d %s", i, tp->GetName())); 
+    MCTrack* p = new MCTrack(tp, GForm("%d %s", i, tp->GetName())); 
     mQueen->CheckIn(p);Add(p);
   }
   mStampReqTring = Stamp(FID());
 }
 
-void ZParticle::ImportDaughtersRec(ZAliLoad* alil)
+void MCTrack::ImportDaughtersRec(ZAliLoad* alil)
 {
-  static const string _eh("ZParticle::ImportDaughters");
+  static const string _eh("MCTrack::ImportDaughters");
   if (alil == 0) {
     alil = GrepParentByGlass<ZAliLoad*>();
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
@@ -76,7 +76,7 @@ void ZParticle::ImportDaughtersRec(ZAliLoad* alil)
   for(int i=d0; i<=d1; ++i) {
     // printf("%s ImportDaughtersRec :: new particle idx %d \n",GetName(), i);
     MCParticle* tp = alil->Particle(i);
-    ZParticle* p = new ZParticle(tp, GForm("%d %s", i, tp->GetName())); 
+    MCTrack* p = new MCTrack(tp, GForm("%d %s", i, tp->GetName())); 
     mQueen->CheckIn(p);Add(p);
     p->ImportDaughtersRec(alil);
   }
@@ -85,9 +85,9 @@ void ZParticle::ImportDaughtersRec(ZAliLoad* alil)
 
 /**************************************************************************/
 
-void  ZParticle::ImportHits(ZAliLoad* alil)
+void  MCTrack::ImportHits(ZAliLoad* alil)
 {
-  static const string _eh("ZParticle::ImportHits ");
+  static const string _eh("MCTrack::ImportHits ");
   if (alil == 0) {
     alil = GrepParentByGlass<ZAliLoad*>();
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
@@ -97,9 +97,9 @@ void  ZParticle::ImportHits(ZAliLoad* alil)
   alil->SelectHits(0, selection);
 }
 
-void  ZParticle::ImportHitsFromPrimary(ZAliLoad* alil)
+void  MCTrack::ImportHitsFromPrimary(ZAliLoad* alil)
 {
-  static const string _eh("ZParticle::ImportHits ");
+  static const string _eh("MCTrack::ImportHits ");
   if (alil == 0) {
     alil = GrepParentByGlass<ZAliLoad*>();
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
@@ -111,16 +111,16 @@ void  ZParticle::ImportHitsFromPrimary(ZAliLoad* alil)
 
 /**************************************************************************/
 
-void ZParticle::Dump()
+void MCTrack::Dump()
 {
-  printf("ZParticle %s, v(%3.f, %3.f, %3.f), p(%6.5f, %6.5f, %6.5f), m(%.3f)\n", 
+  printf("MCTrack %s, v(%3.f, %3.f, %3.f), p(%6.5f, %6.5f, %6.5f), m(%.3f)\n", 
          GetName(),
 	 mParticle->Vx(), mParticle->Vy(), mParticle->Vz(),
          mParticle->Px(), mParticle->Py(), mParticle->Pz(),
          mParticle->GetMass());
 
   
-  printf("ZParticle %s, decay  v(%3.f, %3.f, %3.f), p(%6.4f, %6.4f, %6.4f), t(%f) \n",
+  printf("MCTrack %s, decay  v(%3.f, %3.f, %3.f), p(%6.4f, %6.4f, %6.4f), t(%f) \n",
 	 GetName(),
 	 mParticle->fDx,  mParticle->fDy,  mParticle->fDz,
 	 mParticle->fDPx, mParticle->fDPy, mParticle->fDPz,
