@@ -1,3 +1,58 @@
+2005-05-30  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+        New files, due to rename of ZParticle to MCTrack.
+	
+        * Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+        Changes due to rename of ESDTrack to ESDParticle.
+	
+        * Glasses/V0.cxx:
+	* Glasses/V0.h:
+        Remove files. V0 changed from Glass to Stone.
+	
+        * Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Load/Convert of V0 points.
+	
+        * Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+	* Glasses/ZParticleRnrStyle.cxx:
+	* Glasses/ZParticleRnrStyle.h:
+        New files, due to rename of ZParticle to MCTrack.
+	
+        * Rnr/GL/MCTrackRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.h:
+	* Rnr/GL/ZParticle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticle_GL_Rnr.h:
+        Changes due to rename of ESDTrack to ESDParticle.
+
+	* Stones/ESDParticle.cxx:
+	* Stones/ESDParticle.h:
+        New file. Renamed ESDTrack to ESDParticle.
+
+	* Stones/ESDTrack.cxx:
+	* Stones/ESDTrack.h:
+        Remove file. Renamed ESDTrack to ESDParticle.
+
+	* Stones/GenInfo.h:
+        Change member names.
+
+	* Stones/V0.cxx:
+	* Stones/V0.h:
+        New files.
+
+	* glass.list:
+        Rename ZParticle to MCTrack.
+
 2005-05-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZAliLoad.cxx:
