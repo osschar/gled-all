@@ -8,7 +8,7 @@
 #define Alice_GenInfo_H
 
 #include <Stones/MCParticle.h>
-#include <Stones/ESDTrack.h>
+#include <Stones/ESDParticle.h>
 
 #include <TObject.h>
 
