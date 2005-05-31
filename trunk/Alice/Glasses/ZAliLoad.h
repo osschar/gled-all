@@ -53,7 +53,10 @@ class ZAliLoad : public ZNode {
   TPCDigitsInfo*                 mTPCDigInfo;
 
  protected:
-  MCTrack* get_track(Int_t tid);
+  void open_vsd();
+  void close_vsd();
+
+  MCTrack*     get_track(Int_t tid);
   AliTPCParam* get_tpc_param(const string& eh);
 
   TString                  mDataDir;   // X{GS} 7 Filor(-dir=>1)
