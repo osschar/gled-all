@@ -1,3 +1,18 @@
+2005-05-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PRSBase.h:
+	Fixed MagField range and step.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added methods open/close_vsd(). Removed mDirectory->Add() calls
+	from ConvertRecTracks() and ConvertV0().
+
+	* Glasses/PRSBase.cxx:
+	* Rnr/GL/HelixLineRnr.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	Nitpicking.
+
 2005-05-31  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/MCTrack.cxx:

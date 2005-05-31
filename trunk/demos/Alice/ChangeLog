@@ -1,3 +1,11 @@
+2005-05-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	Custom gui: added V0 selection.
+
+	* gled_loadlibs.C:
+	Removed loading of AliDet libset, long ago merged into Alice.
+
 2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
