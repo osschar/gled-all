@@ -18,7 +18,7 @@ ClassImp(PRSBase)
 
   void PRSBase::_init()
 {
-  // *** Set all links to 0 ***// *** Set all links to 0 ***
+  // *** Set all links to 0 ***/
   mMagField = 0.4;
 
   mVertexColor.rgba(1,0,0,1);

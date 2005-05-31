@@ -41,8 +41,6 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 {
   RNRDRIVER_GET_RNRMOD(srm, rd, MCTrackRnrStyle);
   MCTrackRnrStyle* rst_lens  = (MCTrackRnrStyle*) srm->fLens;
-  // !!! temporary hardcode value of magnetic field
-  Float_t B = rst_lens->mMagField/10;// kGauss->T
 
   MCParticle* p = mMCTrack->mParticle;
   Float_t vx=p->Vx(), vy=p->Vy(), vz=p->Vz();
@@ -75,7 +73,7 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
     glEnd();
   }
 
-  // show tracks tracks 
+  // show tracks
   if(rst_lens->mMaxR != 0) {
     glLineWidth(rst_lens->mTrackWidth);
     ZColor c = rst_lens->GetPdgColor( p->GetPdgCode());
@@ -88,12 +86,12 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
     }
 
     if(p->GetPDG() == 0){
-      printf("ERROR, can\t find PDG code for %d\n",p->GetPdgCode()); 
+      printf("ERROR, can not find PDG entry for code %d\n", p->GetPdgCode()); 
       return;
     }
 
-    if (B && p->GetPDG()->Charge()) {
-      Float_t a = 0.2998*B*3*p->GetPDG()->Charge()/1000; // m->mm
+    if (rst_lens->mMagField && p->GetPDG()->Charge()) {
+      Float_t a = 0.2998*rst_lens->mMagField*3*p->GetPDG()->Charge()/1000; // m->mm
       Helix helix(a, rst_lens);
 
       // case 1  
@@ -107,13 +105,13 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 	  Bool_t bound = helix.loop_from_to(vx,vy,vz,px,py,pz,
 					    d->Vx(),d->Vy(),d->Vz());
 	  if(bound = false) goto fin;
-	  // after reach daughter birt point reduce momentum
+	  // after reaching daughter birth point reduce momentum
 	  px -= d->Px(); py -= d->Py(); pz -= d->Pz();
 	}
       }
 
       //case 2
-      if(rst_lens->mFitDecay &&  p->bDecayed ){
+      if(rst_lens->mFitDecay && p->bDecayed) {
 	helix.init(TMath::Sqrt(px*px+py*py), pz);
 	helix.loop_from_to(vx, vy, vz, px, py, pz,
 			   p->fDx, p->fDy, p->fDz);
@@ -121,12 +119,14 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
       }
 
       // case 3
-      if((rst_lens->mFitDaughters == false && rst_lens->mFitDecay == false) || p->bDecayed == false){
-	helix.init( TMath::Sqrt(px*px+py*py), pz);
-	helix.loop_to_bounds(vx, vy, vz, px, py, pz);
-      }
+      if((rst_lens->mFitDaughters == false && rst_lens->mFitDecay == false) ||
+	 p->bDecayed == false) 
+	{
+	  helix.init( TMath::Sqrt(px*px+py*py), pz);
+	  helix.loop_to_bounds(vx, vy, vz, px, py, pz);
+	}
      
-      if(rst_lens->mFitDecay == false &&  p->bDecayed == true){
+      if(rst_lens->mFitDecay == false &&  p->bDecayed == true) {
 	helix.init( TMath::Sqrt(px*px+py*py), pz);
 	helix.loop_to_bounds(vx, vy, vz, px, py, pz);
       }
