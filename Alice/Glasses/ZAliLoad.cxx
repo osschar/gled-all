@@ -154,21 +154,12 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
     SetDataDir(".");
 
   if(use_aliroot == false) {
-
-    string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
-
-    if(gSystem->AccessPathName(vsd_file.c_str(), kReadPermission) == false) {
-      // Read OK!
-      mFile      = new TFile(vsd_file.c_str());
-      mDirectory = (TDirectory*) mFile->Get(GForm("Event%d", mEvent));
-      if(!mDirectory) {
-	use_aliroot = true; 
-	printf("event directory '%d' not found in VSD file, falling back to AliRunLoader.\n", mEvent);
-	delete mFile; mFile = 0;
-      }
-    } else {
-      use_aliroot = true; 
-      printf("VSD data does not exist, falling back to AliRunLoader.\n");
+    try {
+      open_vsd();
+    }
+    catch(string exc) {
+      ISwarn(_eh + exc + " Falling back to AliRunLoader.");
+      use_aliroot = true;
     }
   }
 
@@ -195,12 +186,13 @@ void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
 
     CreateVSD();
 
-    //GTime delta = time.TimeUntilNow();
+    open_vsd();
 
+    //GTime delta = time.TimeUntilNow();
     printf("END importing AliRunLoader from dir '%s'.\n", mDataDir.Data());
-  } else {
-    SetupEvent();
   }
+
+  SetupEvent();
 }
 
 
@@ -268,8 +260,46 @@ void ZAliLoad::SetupEvent()
 
 /**************************************************************************/
 
+void ZAliLoad::open_vsd()
+{
+  // Opens VSD in READ mode. Throws exception if not found.
+
+  string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
+
+  mFile = TFile::Open(vsd_file.c_str());
+  if(!mFile)
+    throw(string(GForm("can not open VSD file '%s'.", vsd_file.c_str())));
+
+  mDirectory = (TDirectory*) mFile->Get(GForm("Event%d", mEvent));
+  if(!mDirectory) {
+    delete mFile; mFile = 0;
+    throw(string(GForm("event directory 'Event%d' not found in VSD file '%s'.",
+		       mEvent, vsd_file.c_str())));
+  }
+}
+
+void ZAliLoad::close_vsd()
+{
+  delete mTreeK;      mTreeK      = 0;
+  delete mTreeH;      mTreeH      = 0;
+  delete mTreeTR;     mTreeTR     = 0;
+  delete mTreeC;      mTreeC      = 0;
+  delete mTreeR;      mTreeR      = 0;
+  delete mTreeV0;     mTreeV0     = 0;
+  delete mTreeGI;     mTreeGI     = 0;
+  delete mTPCDigInfo; mTPCDigInfo = 0;
+
+  if (mFile) {
+    mFile->Close();
+    delete mFile;
+    mFile = 0; mDirectory = 0;
+  }
+}
+
 void ZAliLoad::CreateVSD()
 {
+  static const string _eh("ZAliLoad::CreateVSD ");
+
   OpMutexHolder omh(this, "CreateVSD");
 
   string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
@@ -296,6 +326,8 @@ void ZAliLoad::CreateVSD()
 
   mFile->Write();
 
+  close_vsd();
+
   GledNS::PopFD();
 }
 
@@ -307,19 +339,7 @@ void ZAliLoad::ResetEvent()
 
   RemoveLensesViaQueen(true);
 
-  delete mTreeK;      mTreeK      = 0;
-  delete mTreeH;      mTreeH      = 0;
-  delete mTreeTR;     mTreeTR     = 0;
-  delete mTreeC;      mTreeC      = 0;
-  delete mTreeR;      mTreeR      = 0;
-  delete mTreeV0;     mTreeV0     = 0;
-  delete mTPCDigInfo; mTPCDigInfo = 0;
-
-  if (mFile) {
-    mFile->Close();
-    delete mFile;
-    mFile = 0; mDirectory = 0;
-  }
+  close_vsd();
 
   if (pRunLoader) {
     pRunLoader->UnloadAll();
@@ -725,10 +745,9 @@ void ZAliLoad::ConvertRecTracks()
 
   mDirectory->cd();
   mTreeR =  new TTree("RecTracks", "rec tracks");
-  ESDParticle::Class()->IgnoreTObjectStreamer(true);
-  mTreeR->Branch("R", "ESDParticle",  &mpR,128*1024,1);
-  mDirectory->Add(mTreeR);
 
+  ESDParticle::Class()->IgnoreTObjectStreamer(true);
+  mTreeR->Branch("R", "ESDParticle", &mpR, 512*1024,1);
  
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
   if(!f.IsOpen()){
@@ -818,8 +837,7 @@ void ZAliLoad::ConvertV0()
   mTreeV0 =  new TTree("V0", "V0 points");
 
   ESDParticle::Class()->IgnoreTObjectStreamer(true);
-  mTreeV0->Branch("V0", "V0", &mpV0, 128*1024,1);
-  mDirectory->Add(mTreeV0);
+  mTreeV0->Branch("V0", "V0", &mpV0, 512*1024,1);
 
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
   if(!f.IsOpen()){
