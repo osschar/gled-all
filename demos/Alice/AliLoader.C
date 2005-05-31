@@ -19,7 +19,8 @@ Scene*    gscene  = 0;
 // default event display layout
 const Text_t* particle_layout =
   "ZNode(RnrSelf[4],RnrElements[4],RnrMod[8]):"
-  "MCTrack(NDaughters[4],ImportDaughtersRec[5],V[10],P[14],VDecay[10],ImportHitsFromPrimary[4],Dump[4])";
+  "TrackBase(V[10],P[14]):"
+  "MCTrack(NDaughters[4],ImportDaughtersRec[5],VDecay[10],ImportHitsFromPrimary[4],Dump[4])";
   //"MCTrackRnrStyle(VertexColor[4],RnrP[4])";
   // "HitContainer(NHits[4],Color[4],Dump[4])";
 
