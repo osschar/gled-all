@@ -122,8 +122,7 @@ struct Helix {
       
     }
       
-    // fix momentum in the remaining part
-    {
+    { // fix momentum in the remaining part
       Float_t cosr =  TMath::Cos((fnsteps-nsteps)*fPhiStep); 
       Float_t sinr =  TMath::Sin((fnsteps-nsteps)*fPhiStep); 
       Float_t px_t = px*cosr - py*sinr ;
@@ -131,17 +130,13 @@ struct Helix {
       px = px_t;
       py = py_t;
     }
-    // calculate direction of faked px,py
-    {
-	
+    { // calculate direction of faked px,py
       Float_t pxf = (p0x*cosf - p0y*sinf)/TMath::Abs(fA) + x_off/fPhiStep;
       Float_t pyf = (p0y*cosf + p0x*sinf)/TMath::Abs(fA) + y_off/fPhiStep;
       Float_t fac = TMath::Sqrt(p0x*p0x + p0y*p0y)/TMath::Sqrt(pxf*pxf + pyf*pyf);
       px = fac*pxf;
       py = fac*pyf;
-       
     }
-     
     return true;
   }
     
