@@ -1,3 +1,18 @@
+2005-05-31  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+        * Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+        Change base class from ZNode to TrackBase.
+
+	* Glasses/TrackBase.cxx:
+	* Glasses/TrackBase.h:
+        New files.
+
+	* glass.list:
+        New glass TrackBase.
+
 2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZAliLoad.cxx:
