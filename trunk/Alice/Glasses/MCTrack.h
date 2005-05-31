@@ -8,7 +8,7 @@
 #define Alice_MCTrack_H
 
 
-#include <Glasses/ZNode.h>
+#include <Glasses/TrackBase.h>
 #include <Stones/ZColor.h>
 #include <Stones/MCParticle.h>
 
@@ -17,21 +17,19 @@
 
 class ZAliLoad;
 
-class MCTrack : public ZNode {
+class MCTrack : public TrackBase {
   MAC_RNR_FRIENDS(MCTrack);
 
  private:
   void _init();
  protected:
   MCParticle*		   mParticle; 	   // X{GS}  
-  TString                  mV;             // X{GS}  7 TextOut()
-  TString                  mP;             // X{GS}  7 TextOut()
   TString                  mVDecay;        // X{GS}  7 TextOut()
   Int_t                    mNDaughters;    // X{GS}  7 ValOut()
 
  public:
   MCTrack(const Text_t* n="MCTrack", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
+    TrackBase(n,t) { _init(); }
 
   MCTrack(MCParticle* p, const Text_t* n="MCTrack", const Text_t* t=0);
   virtual ~MCTrack() { delete mParticle; }
