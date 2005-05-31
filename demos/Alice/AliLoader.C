@@ -141,7 +141,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 40, H = 21;
+  int Y = 0, W = 40, H = 24;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -264,6 +264,29 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w62, MetaWeedInfo, ms6, "SelectRecTracks", 0);
   w62->Resize(W-12, y, 12, 1);
   w62->Label("Run selection ..");
+  // w21->Align(false, 0, 1);
+  ++y;
+
+  Y += y; y=0;
+
+  // V0:
+  CREATE_ADD_GLASS(ms8, MetaSubViewInfo, mv, "ZAliLoad", 0);
+  ms8->Position(0, Y);
+  // Intro
+  CREATE_ADD_GLASS(w80, MetaWeedInfo, ms8, "<box>", "V0:");
+  w80->Resize(0, y, W, 1);
+  w80->Color(0.7, 0.85, 0.7);
+  w80->Align(true, -1, 0);
+  w80->Box(MetaWeedInfo::BT_Engraved);
+  y++;
+  CREATE_ADD_GLASS(w81, MetaWeedInfo, ms8, "V0Selection", 0);
+  w81->Resize(6, y, W-6, 1);
+  w81->Label("selection: ");
+  // w20->Align(false, 0, -1);
+  y++;
+  CREATE_ADD_GLASS(w82, MetaWeedInfo, ms8, "SelectV0", 0);
+  w82->Resize(W-12, y, 12, 1);
+  w82->Label("Run selection ..");
   // w21->Align(false, 0, 1);
   ++y;
 
