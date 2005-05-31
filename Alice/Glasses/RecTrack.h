@@ -7,11 +7,11 @@
 #ifndef Alice_RecTrack_H
 #define Alice_RecTrack_H
 
-#include <Glasses/ZNode.h>
+#include <Glasses/TrackBase.h>
 #include <Stones/ESDParticle.h>
 
 
-class RecTrack : public ZNode {
+class RecTrack : public TrackBase {
   MAC_RNR_FRIENDS(RecTrack);
 
  private:
@@ -19,12 +19,10 @@ class RecTrack : public ZNode {
 
  protected:
   ESDParticle*             mESD;           // X{GS} 
-  TString                  mV;             // X{GS}  7 TextOut()
-  TString                  mP;             // X{GS}  7 TextOut()
 
  public:
   RecTrack(const Text_t* n="RecTrack", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
+    TrackBase(n,t) { _init(); }
 
   RecTrack(ESDParticle* esd, const Text_t* n="RecTrack", const Text_t* t=0);
   virtual ~RecTrack() { delete mESD; }

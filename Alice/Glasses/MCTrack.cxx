@@ -28,7 +28,7 @@ void MCTrack::_init()
   mNDaughters = 0;
 }
 
-MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):ZNode(n,t) 
+MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):TrackBase(n,t) 
 {
   _init();
   mParticle = p;
