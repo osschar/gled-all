@@ -39,8 +39,8 @@ void RecTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 /**************************************************************************/
 void RecTrack_GL_Rnr::Render(RnrDriver* rd)
 {
-  RNRDRIVER_GET_RNRMOD(srm, rd, RecTrackRS);
-  RecTrackRS* rst_lens  = (RecTrackRS*) srm->fLens;
+  // RNRDRIVER_GET_RNRMOD(srm, rd, RecTrackRS);
+  RecTrackRS* rst_lens  = (RecTrackRS*) mTrackRMS.lens();
   ESDParticle* p = mRecTrack->mESD;
   Float_t vx = p->fV[0], vy = p->fV[1], vz = p->fV[2];
   Float_t px = p->fP[0], py = p->fP[1], pz = p->fP[2];
@@ -72,27 +72,24 @@ void RecTrack_GL_Rnr::Render(RnrDriver* rd)
   }
 
   // propagate particle 
-  if(rst_lens->mMaxR != 0) {
-    if (p->fSign ) {
-      glLineWidth(rst_lens->mTrackWidth);
-      glColor4fv(rst_lens->mTrackColor());
+  if(rst_lens->mMaxR != 0 && p->fSign ) {
+    glColor4fv(rst_lens->mTrackColor());
+    //  printf("RecTrack_GL_Rnr draw with charg %d \n",p->fSign );
+    glLineWidth(rst_lens->mTrackWidth);
 
+    /*
       A_Rnr* irnr = 0;
       if(rst_lens->mTexture) {
-	irnr = rd->GetLensRnr(rst_lens->mTexture);
-	irnr->PreDraw(rd);
+      irnr = rd->GetLensRnr(rst_lens->mTexture);
+      irnr->PreDraw(rd);
       }
-      Float_t a = 0.2998*rst_lens->mMagField*3*p->fSign/1000; // m->mm
-      Helix helix(a, rst_lens);
-      helix.init( TMath::Sqrt(px*px+py*py), pz);
-      helix.loop_to_bounds(vx, vy, vz, px, py, pz);
-
+    */
+    Float_t a = 0.2998*rst_lens->mMagField*p->fSign/100; // m->cm
+    Helix helix(a, rst_lens);
+    helix.init( TMath::Sqrt(px*px+py*py), pz);
+    helix.loop_to_bounds(vx, vy, vz, px, py, pz);
+    /*
       if(irnr) irnr->PostDraw(rd);
-    }
-  } else {
-    Line line;
-    line.fRnrMod=rst_lens;
-    Float_t Tb = line.get_bounds_time(vx, vy, vz, px, py, pz);
-    line.draw_to(vx, vy, vz, vx+px*Tb, vy+py*Tb, vz+pz*Tb);
+    */
   }
 }
