@@ -103,8 +103,8 @@ void ZAliLoad::_init()
 
   mParticleSelection = "fMother[0] == -1";
   mHitSelection      = "fDetID < 5";
-  mClusterSelection  =  mHitSelection;
-  mRecSelection      = "fLabel >= 0";
+  mClusterSelection  = "fDetID == 1";
+  mRecSelection      = "Pt() > 0.1";
   mV0Selection       = "fStatus == 100";
   mGISelection       = "bR == 1";
   pRunLoader = 0;
@@ -488,9 +488,12 @@ void ZAliLoad::SelectParticles(ZNode* holder, const Text_t* selection,
   Int_t n = evl.Select(mTreeK, selection);
   // printf("%d entries in selection '%s'.\n", n,  selection);
 
+  if(n == 0)
+    throw (_eh + "no entries found for selection in kinematics.");
+
   bool add_holder_p = false;
   if(holder == 0) {
-    holder = new ZNode("Particles", selection);
+    holder = new ZNode(GForm("Particles %s", selection));
     mQueen->CheckIn(holder);
     add_holder_p = true;
   }
@@ -650,24 +653,22 @@ void ZAliLoad::SelectHits(ZNode* holder, const char* selection)
   Int_t n = evl.Select(mTreeH, selection);
   // printf("ImportHitsWithSelection %d entries for selection %s\n", n, selection);
   
-  if(n > 0) {
-    HitContainer* container = new HitContainer(GForm("Hits %s", selection));
-    mQueen->CheckIn(container);
-
-    container->Reset(n);
-    for(Int_t i=0; i<n; i++) {
-      const Int_t entry = evl.GetEntry(i);
-      mTreeH->GetEntry(entry);
-      container->SetPoint(i, entry, &mpH->x);
-    }
-    if(holder)
-      holder->Add(container);
-    else Add(container);
-  } else {
+  if(n==0)
     throw(_eh + "no hits matching selection.");
+
+
+  HitContainer* container = new HitContainer(GForm("%d Hits %s",n, selection));
+  mQueen->CheckIn(container);
+
+  container->Reset(n);
+  for(Int_t i=0; i<n; i++) {
+    const Int_t entry = evl.GetEntry(i);
+    mTreeH->GetEntry(entry);
+    container->SetPoint(i, entry, &mpH->x);
   }
- 
-  
+  if(holder)
+    holder->Add(container);
+  else Add(container); 
 }
 
 /**************************************************************************/
@@ -707,23 +708,22 @@ void ZAliLoad::SelectClusters(ZNode* holder, const char* selection)
 
   TTreeQuery evl;
   Int_t n = evl.Select(mTreeC, selection);
-  
-  if(n > 0) {
-    HitContainer* container = new HitContainer(GForm("Clusers %s", selection));
-    container->SetColor(1.,1.,0.,1.);
-    mQueen->CheckIn(container);
-    container->Reset(n);
-    for(Int_t i=0; i<n; i++) {
-      const Int_t entry = evl.GetEntry(i);
-      mTreeC->GetEntry(entry);
-      container->SetPoint(i, entry, &mpC->x);
-    }
-    if(holder)
-      holder->Add(container);
-    else Add(container);
-  } else { 
-    throw(_eh + "no hits matching selection.");
+
+  if(n == 0)
+    throw (_eh + "no entries found for selection in clusters.");
+
+  HitContainer* container = new HitContainer(GForm("%d Clusters %s",n, selection));
+  container->SetColor(1.,1.,0.,1.);
+  mQueen->CheckIn(container);
+  container->Reset(n);
+  for(Int_t i=0; i<n; i++) {
+    const Int_t entry = evl.GetEntry(i);
+    mTreeC->GetEntry(entry);
+    container->SetPoint(i, entry, &mpC->x);
   }
+  if(holder)
+    holder->Add(container);
+  else Add(container);
   
   
 }
@@ -797,9 +797,12 @@ void ZAliLoad::SelectRecTracks(ZNode* holder, const Text_t* selection)
   Int_t n = evl.Select(mTreeR, selection);
   // printf("%d entries in selection %s \n", n,  selection);
 
+  if (n == 0)
+    throw (_eh + "No entries found in ESD data.");
+
   bool add_holder_p = false;
   if(holder == 0) {
-    holder = new ZNode("RecTracks", selection);
+    holder = new ZNode(GForm("RecTracks %s", selection));
     mQueen->CheckIn(holder);
     add_holder_p = true;
   }
@@ -912,6 +915,9 @@ void ZAliLoad::SelectV0(ZNode* holder, const Text_t* selection, Bool_t import_ki
   TTreeQuery evl;
   Int_t n = evl.Select(mTreeV0, selection);
   // printf("%d entries in selection %s \n", n,  selection);
+ 
+  if(n==0)
+    throw (_eh + "no entries found for selection.");
 
   bool add_holder_p = false;
   if(holder == 0) {
@@ -1028,7 +1034,6 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
     throw (_eh + "No entries match selection in  mTreeGI.");
   }
 
-  Bool_t add_holder = false;
   if(holder == 0) {
     holder = new ZNode(GForm("GI %s", selection));
     mQueen->CheckIn(holder);
