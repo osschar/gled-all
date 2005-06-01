@@ -20,7 +20,7 @@ Scene*    gscene  = 0;
 const Text_t* particle_layout =
   "ZNode(RnrSelf[4],RnrElements[4],RnrMod[8]):"
   "TrackBase(V[10],P[14]):"
-  "MCTrack(NDaughters[4],ImportDaughtersRec[5],VDecay[10],ImportHitsFromPrimary[4],Dump[4])";
+  "MCTrack(NDaughters[4],ImportDaughtersRec[5],VDecay[10],ImportHits[4],Dump[4])";
   //"MCTrackRnrStyle(VertexColor[4],RnrP[4])";
   // "HitContainer(NHits[4],Color[4],Dump[4])";
 
@@ -81,13 +81,13 @@ void AliLoader(const Text_t* dirname = 0,
   ribbon1->SetPOVFile("images/romania.pov");
   ribbon1->LoadPOV();
 
-  //CREATE_ADD_GLASS(giis, GIImportStyle, var, "GenInfo Import", 0);
+  CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
 
   ZAliLoad* al = new ZAliLoad(); 
   aliload = al;
   al->SetOM(-2);
   al->SetUseOM(true);
-  //al->SetGIIStyle(giis);
+  al->SetImportMode(giis);
   scenes->CheckIn(al);
   rscene->Add(al);
 
