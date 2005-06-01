@@ -81,6 +81,7 @@ protected:
 
   void label_shell();
   void set_size_range();
+  void set_vis_of_vertical_component(Fl_Widget* w, bool on_p);
 
 public:
 
@@ -148,6 +149,13 @@ public:
 
   virtual void Message(const char* msg, Eye::MType_e t=MT_std);
   virtual void Message(const string& msg, Eye::MType_e t=MT_std);
+
+  // --- view toggles ---
+
+  void SourceVis(bool on_p);
+  void SinkVis(bool on_p);
+
+  // --- fltk ---
 
   virtual int  handle(int ev);
 
