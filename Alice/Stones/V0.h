@@ -8,6 +8,7 @@
 #define Alice_V0_H
 
 #include <TObject.h>
+#include <TMath.h>
 
 class V0 : public TObject {
 
@@ -39,9 +40,28 @@ class V0 : public TObject {
 
 
   V0(const Text_t* n="V0", const Text_t* t=0) { _init(); }
+  Double_t  R() const {return TMath::Sqrt(fDCA[0]*fDCA[0]+fDCA[1]*fDCA[1]);}
+
+  
+   
+  Double_t  P()  const {return TMath::Sqrt((fPM[0]+fPP[0])*(fPM[0]+fPP[0])+
+					   (fPM[1]+fPP[1])*(fPM[1]+fPP[1])+
+					   (fPM[2]+fPP[2])*(fPM[2]+fPP[2]));}    
+
+  Double_t  Pt()  const {return TMath::Sqrt((fPM[0]+fPP[0])*(fPM[0]+fPP[0])+
+					    (fPM[1]+fPP[1])*(fPM[1]+fPP[1]));}    
+
+  Double_t  Theta() const { Double_t pz =  fPM[3]+fPP[3];
+    return (pz==0)?TMath::PiOver2():TMath::ACos(pz/P()); }
+
+  Double_t  Eta()   const {  Double_t pz =  fPM[3]+fPP[3];
+    if (TMath::Abs(P() != pz)) return 0.5*TMath::Log((P()+pz)/(P()-pz));
+    else return 1.e30;
+  }
+
 
 #include "V0.h7"
   ClassDef(V0, 1)
-}; // endclass V0
+    }; // endclass V0
 
 #endif
