@@ -136,7 +136,11 @@ void* Saturn::tl_MIR_Router(mir_router_ti* arg)
     if(mir->RequiresResult) arg->sat->generick_shoot_mir_result(*mir, 0, 0);
   }
   catch(string exc) {
+#ifdef DEBUG
     arg->sat->report_mir_post_demangling_error(*mir, _eh + "MIR execution failed: " + exc);
+#else
+    arg->sat->report_mir_post_demangling_error(*mir, exc + " [MirRouter]");
+#endif
   }
 
   if(!arg->delete_mir)
@@ -180,7 +184,11 @@ void* Saturn::tl_MIR_DetachedExecutor(mir_router_ti* arg)
     ISdebug(1, GForm("%smir exec done.", _eh.c_str()));
   }
   catch(string exc) {
+#ifdef DEBUG
     arg->sat->report_mir_post_demangling_error(*mir, _eh + "MIR execution failed: " + exc);
+#else
+    arg->sat->report_mir_post_demangling_error(*mir, exc + " [DetExe]");
+#endif
   }
 
   GThread::TSDSelf()->Detach();
@@ -1478,10 +1486,7 @@ void Saturn::report_mir_pre_demangling_error(ZMIR& mir, string error)
 
   mir.Caller = dynamic_cast<ZMirEmittingEntity*>(DemangleID(mir.CallerID));
   if(mir.Caller != 0) {
-    auto_ptr<ZMIR> err
-      (mir.Caller->S_Error(GForm("Saturn '%s': %s",
-				 mSaturnInfo->GetName(), error.c_str()))
-       );
+    auto_ptr<ZMIR> err( mir.Caller->S_Error( error.c_str()) );
     err->SetRecipient(mir.Caller->HostingSaturn());
     ShootMIR(err);
     // Here could also add entry into local log.
@@ -1507,10 +1512,7 @@ void Saturn::report_mir_post_demangling_error(ZMIR& mir, string error)
   ISerr(error);
   
   if(mir.Caller != 0) {
-    auto_ptr<ZMIR> err
-      (mir.Caller->S_Error(GForm("Saturn '%s': %s",
-				 mSaturnInfo->GetName(), error.c_str()))
-       );
+    auto_ptr<ZMIR> err( mir.Caller->S_Error(error.c_str()) );
     err->SetRecipient(mir.Caller->HostingSaturn());
     ShootMIR(err);
   } else {
