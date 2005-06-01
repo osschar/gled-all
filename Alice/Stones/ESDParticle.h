@@ -18,8 +18,9 @@ class ESDParticle : public TObject {
  protected:
 
  public:
-  Double_t fV[3];
-  Double_t fP[3];
+  Double_t fV[3];   // birth point
+  Double_t fP[3];   // momentum
+  Double_t fD[3];   // decay point
   Int_t    fSign;    
   Int_t    fLabel;  // X{GS}
 
