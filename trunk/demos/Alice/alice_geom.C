@@ -24,6 +24,9 @@ void alice_geom(Int_t import_mode=0)
 
   if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
 
+  scenes->SetAuthMode(ZQueen::AM_None);
+  scenes->SetMapNoneTo(ZMirFilter::R_Allow);
+
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
 

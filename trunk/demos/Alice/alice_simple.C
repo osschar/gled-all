@@ -24,6 +24,9 @@ Scene* alice_simple(const Text_t* geom_file = "alice_minigeo.root",
 
   if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
 
+  scenes->SetAuthMode(ZQueen::AM_None);
+  scenes->SetMapNoneTo(ZMirFilter::R_Allow);
+
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
 
