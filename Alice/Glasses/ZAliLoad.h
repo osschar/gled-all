@@ -103,7 +103,7 @@ class ZAliLoad : public ZNode {
   TString mHitSelection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void ConvertHits();
-  void SelectHits(HitContainer* holder=0, const Text_t* selection=0
+  void SelectHits(ZNode* holder=0, const Text_t* selection=0
 		  );           // X{Ed} C{1} 7 MCWButt()
 
   // --------------------------------------------------------------
@@ -113,7 +113,7 @@ class ZAliLoad : public ZNode {
   TString mClusterSelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:                            
   void ConvertClusters();
-  void SelectClusters(HitContainer* holder=0, const Text_t* selection=0
+  void SelectClusters(ZNode* holder=0, const Text_t* selection=0
 		      );      // X{Ed} C{1} 7 MCWButt()
 
   // --------------------------------------------------------------
@@ -132,14 +132,14 @@ class ZAliLoad : public ZNode {
   TString mV0Selection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void ConvertV0();
-  void SelectV0(ZNode* holder=0, const Text_t* selection=0
-		);            // X{Ed} C{1} 7 MCWButt()
+  void SelectV0(ZNode* holder=0, const Text_t* selection=0,
+		Bool_t import_kine=false);            // X{Ed} C{1} 7 MCWButt()
 
   // --------------------------------------------------------------
   // GenInfo
 
  protected:
-  GIImportStyle* mGIIStyle;     // X{GS} L{}
+  GIImportStyle* mImportMode;     // X{GS} L{}
   TString        mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void ConvertGenInfo();

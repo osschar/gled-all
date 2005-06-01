@@ -13,6 +13,7 @@
 #include "ZAliLoad.c7"
 #include <Glasses/ZQueen.h>
 #include <Glasses/RecTrack.h>
+#include <Glasses/V0Track.h>
 #include <Stones/TTreeTools.h>
 
 #include <TSystem.h>
@@ -89,7 +90,7 @@ void ZAliLoad::_init()
   mpV0 = &mV0;
   mpGI = &mGI;
   mTPCDigInfo = 0;
-  mGIIStyle = 0;
+  mImportMode = 0;
 
   mDataDir  = ".";
   mEvent    = 0;
@@ -102,7 +103,7 @@ void ZAliLoad::_init()
 
   mParticleSelection = "fMother[0] == -1";
   mHitSelection      = "fDetID < 5";
-  mClusterSelection  = mHitSelection;
+  mClusterSelection  =  mHitSelection;
   mRecSelection      = "fLabel >= 0";
   mV0Selection       = "fStatus == 100";
   mGISelection       = "bR == 1";
@@ -416,7 +417,7 @@ void ZAliLoad::ConvertKinematics()
 	  mcp.fDt=trackRef->GetTime();
 	  mcp.fDx=trackRef->X(); mcp.fDy=trackRef->Y(); mcp.fDz=trackRef->Z();
 	  mcp.fDPx=trackRef->Px(); mcp.fDPy=trackRef->Py(); mcp.fDPz=trackRef->Pz();
-	  if(mcp.GetPdgCode() == 11)  mcp.SetDecayed(false); // a bug in TreeTR
+	  if(TMath::Abs(mcp.GetPdgCode()) == 11)  mcp.SetDecayed(false); // a bug in TreeTR
 	}
       }       
     }
@@ -436,6 +437,8 @@ void ZAliLoad::ConvertKinematics()
     mP.SetEvaLabel(mi);
     mTreeK->Fill();
   }
+
+  mTreeK->BuildIndex("fLabel");
 }
 
 /**************************************************************************/
@@ -446,7 +449,8 @@ MCParticle* ZAliLoad::Particle(Int_t i)
   if(mTreeK == 0) 
     throw (_eh + "kinematics not available.");
   
-  mTreeK->GetEntry(i);
+  Int_t re = mTreeK->GetEntryNumberWithIndex(i);
+  mTreeK->GetEntry(re);
   MCParticle* p = new MCParticle(mP); 
   return p;
 }
@@ -630,7 +634,7 @@ void ZAliLoad::ConvertHits()
 
 /**************************************************************************/
 
-void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
+void ZAliLoad::SelectHits(ZNode* holder, const char* selection)
 {
   static const string _eh("ZAliLoad::SelectHits ");
 
@@ -646,25 +650,24 @@ void ZAliLoad::SelectHits(HitContainer* holder, const char* selection)
   Int_t n = evl.Select(mTreeH, selection);
   // printf("ImportHitsWithSelection %d entries for selection %s\n", n, selection);
   
-  bool add_holder_p = false;
   if(n > 0) {
-    if( holder == 0 ) {
-      holder = new HitContainer(GForm("Hits %s", selection));
-      mQueen->CheckIn(holder);
-      add_holder_p = true;
-    }
+    HitContainer* container = new HitContainer(GForm("Hits %s", selection));
+    mQueen->CheckIn(container);
 
-    holder->Reset(n);
+    container->Reset(n);
     for(Int_t i=0; i<n; i++) {
       const Int_t entry = evl.GetEntry(i);
       mTreeH->GetEntry(entry);
-      holder->SetPoint(i, entry, &mpH->x);
+      container->SetPoint(i, entry, &mpH->x);
     }
+    if(holder)
+      holder->Add(container);
+    else Add(container);
   } else {
     throw(_eh + "no hits matching selection.");
   }
-  if(add_holder_p)
-    Add(holder);
+ 
+  
 }
 
 /**************************************************************************/
@@ -690,7 +693,7 @@ void ZAliLoad::ConvertClusters()
   ConvertTPCClusters();
 }
 
-void ZAliLoad::SelectClusters(HitContainer* holder, const char* selection)
+void ZAliLoad::SelectClusters(ZNode* holder, const char* selection)
 {
   static const string _eh("ZAliLoad::SelectClusters ");
 
@@ -705,26 +708,24 @@ void ZAliLoad::SelectClusters(HitContainer* holder, const char* selection)
   TTreeQuery evl;
   Int_t n = evl.Select(mTreeC, selection);
   
-  bool add_holder_p = false;
   if(n > 0) {
-    if( holder == 0 ) {
-      holder = new HitContainer(GForm("Clusers %s", selection));
-      holder->SetColor(1.,1.,0.,1.);
-      mQueen->CheckIn(holder);
-      add_holder_p = true;
-    }
-
-    holder->Reset(n);
+    HitContainer* container = new HitContainer(GForm("Clusers %s", selection));
+    container->SetColor(1.,1.,0.,1.);
+    mQueen->CheckIn(container);
+    container->Reset(n);
     for(Int_t i=0; i<n; i++) {
       const Int_t entry = evl.GetEntry(i);
       mTreeC->GetEntry(entry);
-      holder->SetPoint(i, entry, &mpC->x);
+      container->SetPoint(i, entry, &mpC->x);
     }
-  } else {
+    if(holder)
+      Add(container);
+    else holder->Add(container);
+  } else { 
     throw(_eh + "no hits matching selection.");
   }
-  if(add_holder_p)
-    Add(holder);
+  
+  
 }
 
 /**************************************************************************/
@@ -777,7 +778,6 @@ void ZAliLoad::ConvertRecTracks()
     mTreeR->Fill();
   }
   mTreeR->BuildIndex("fLabel");
- 
 }
 
 
@@ -858,9 +858,9 @@ void ZAliLoad::ConvertV0()
 
     mV0.fStatus = av->GetStatus();
     // distance to closest approach
-    mV0.fVDCA[0] = av->GetXr(0); 
-    mV0.fVDCA[1] = av->GetXr(1);
-    mV0.fVDCA[2] = av->GetXr(2);
+    mV0.fDCA[0] = av->GetXr(0); 
+    mV0.fDCA[1] = av->GetXr(1);
+    mV0.fDCA[2] = av->GetXr(2);
     // set birth vertex of neutral particle     
     av->GetXYZ(mV0.fV0[0],mV0.fV0[1],mV0.fV0[2]);
 
@@ -897,7 +897,7 @@ void ZAliLoad::ConvertV0()
   }
 }
 
-void ZAliLoad::SelectV0(ZNode* holder, const Text_t* selection)
+void ZAliLoad::SelectV0(ZNode* holder, const Text_t* selection, Bool_t import_kine)
 {
   static const string _eh("ZAliLoad::SelectV0 ");
 
@@ -915,38 +915,62 @@ void ZAliLoad::SelectV0(ZNode* holder, const Text_t* selection)
 
   bool add_holder_p = false;
   if(holder == 0) {
-    holder = new ZNode("V0", selection);
+    holder = new ZNode(GForm("V0 %s", selection));
     mQueen->CheckIn(holder);
     add_holder_p = true;
+    Add(holder);
   }
 
   if(n > 0) {
     for (Int_t i=0; i<n; i++){
       mTreeV0->GetEntry( evl.GetEntry(i));
-      // nutral mother
+      // neutral mother
       Double_t pp[3];
       pp[0]= mV0.fPP[0]+mV0.fPM[0];
       pp[1]= mV0.fPP[1]+mV0.fPM[1];
       pp[2]= mV0.fPP[2]+mV0.fPM[2];
-      ESDParticle* v = new ESDParticle(&mV0.fVDCA[0], &pp[0],-1, 0);
-      RecTrack* tV0 = new RecTrack(v); 
+      ESDParticle* v = new ESDParticle(&mV0.fV0[0], &pp[0],-1, 0);
+      v->fD[0]=mV0.fDCA[0]; v->fD[1]=mV0.fDCA[1]; v->fD[2] = mV0.fDCA[2];
+      V0Track* tV0 = new V0Track(v); 
+      tV0->mVM[0]=mV0.fVM[0]; tV0->mVM[1]=mV0.fVM[1]; tV0->mVM[2]=mV0.fVM[2];
+      tV0->mVP[0]=mV0.fVP[0]; tV0->mVP[1]=mV0.fVP[1]; tV0->mVP[2]=mV0.fVP[2];
       tV0->SetName(GForm("V0 %d : %d {%d}", mV0.fLabels[0], mV0.fLabels[1], mV0.fPDG));
       mQueen->CheckIn(tV0);
       holder->Add(tV0);
-      // minus daughter
+      // minus rec daughter
       ESDParticle* m = new ESDParticle(&mV0.fVM[0], &mV0.fPM[0], mV0.fLabels[0], -1);
       RecTrack* tM = new RecTrack(m); 
       mQueen->CheckIn(tM);
       tV0->Add(tM);
-      // plus daughter
+      // plus rec daughter
       ESDParticle* p = new ESDParticle(&mV0.fVP[0], &mV0.fPP[0], mV0.fLabels[1], 1);
       RecTrack* tP = new RecTrack(p); 
       mQueen->CheckIn(tP);
       tV0->Add(tP);
+
+      //kinematics
+      if(import_kine){
+	holder->SetName(GForm("V0&Kine %s", selection));
+	// minus kine daughter
+	MCParticle* mk = Particle(mV0.fLabels[0]);
+	MCTrack* mc_mk = new MCTrack(mk);
+	mQueen->CheckIn(mc_mk);
+	tV0->Add(mc_mk);
+	// plus kine daughter
+	MCParticle* pk = Particle(mV0.fLabels[1]);
+	MCTrack* mc_pk = new MCTrack(pk);
+	mQueen->CheckIn(mc_pk);
+	tV0->Add(mc_pk);
+	// check for kine mother
+	if (mk->GetFirstMother() == pk->GetFirstMother()){
+	  MCParticle* k = Particle(pk->GetFirstMother());
+	  MCTrack* mc_k = new MCTrack(k);
+	  mQueen->CheckIn(mc_k);
+	  tV0->Add(mc_k);
+	}
+      }
     }
   }
-
-  if(add_holder_p) Add(holder);
 }
 
 /**************************************************************************/
@@ -1011,7 +1035,14 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
   ZNode* mc_holder =  new ZNode(GForm("MC  %s", selection));
   ZNode* rec_holder =  new ZNode(GForm("Rec %s", selection));
   mQueen->CheckIn(mc_holder); mQueen->CheckIn(rec_holder);
-  holder->Add(mc_holder); holder->Add(rec_holder);
+  if( mImportMode->mImportKine)
+    holder->Add(mc_holder); 
+  if( mImportMode->mImportRec)
+    holder->Add(rec_holder);
+
+
+  // create new import mode object, if not set alrady
+  if(mImportMode == 0 ) mImportMode= new GIImportStyle();
 
   Int_t nc = 0, nh = 0;
   // Int_t labels[nlabels];
@@ -1019,27 +1050,28 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
 
   for (Int_t i=0; i<nlabels; i++){
     mTreeGI->GetEntry(evl.GetEntry(i));
-
     labels.insert(mGI.fLabel);
-    //    printf("import mgi %d  \n", mGI.fLabel );
-
-    MCParticle* p = new MCParticle(mP); // check if gimap exists
-    MCTrack* zp  = new MCTrack(p);
-    mQueen->CheckIn(zp);
-    mc_holder->Add(zp);
-    
-    if(mGI.bR == 1){
+    if( mImportMode->mImportKine){
+      MCParticle* p = new MCParticle(mP); // check if gimap exists
+      MCTrack* zp  = new MCTrack(p);
+      mQueen->CheckIn(zp);
+      mc_holder->Add(zp); 
+      mc_holder->SetRnrElements(mImportMode->mRnrKine);
+    }
+    if(mGI.bR == 1 &&  mImportMode->mImportRec){
       // printf("Created rec track %d \n", mGI.fLabel);
       ESDParticle* t = new ESDParticle(mR);
       RecTrack* rt = new RecTrack(t);
       mQueen->CheckIn(rt);
       rec_holder->Add(rt);
+      rec_holder->SetRnrElements(mImportMode->mRnrRec);
     }
+     
     nh += mpGI->Nh;
     nc += mpGI->Nc;
   }
 
-  if(nh > 0) {
+  if(nh > 0 && mImportMode->mImportHits) {
     HitContainer* hcont = new HitContainer(GForm("%d Hits", nh));
     hcont->Reset(nh);
 
@@ -1058,13 +1090,13 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
 	++count;
       }
     }
-
-    mQueen->CheckIn(hcont);
+    hcont->SetRnrSelf( mImportMode->mRnrHits);
+    mQueen->CheckIn(hcont);    
     holder->Add(hcont);
   }
   
   // printf("Selecting clusters in GI select \n");
-  if(nc > 0) {
+  if(nc > 0 && mImportMode->mImportClusters) {
     HitContainer* ccont = new HitContainer(GForm("%d Clusters", nc));
     ccont->Reset(nc);
     ccont->SetColor(1.,1.,0.,1.);
@@ -1084,11 +1116,10 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
 	++count;
       }
     }
-
+    ccont->SetRnrSelf(mImportMode->mRnrClusters);
     mQueen->CheckIn(ccont);
     holder->Add(ccont);
   }
-
 }
 
 
