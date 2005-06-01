@@ -719,8 +719,8 @@ void ZAliLoad::SelectClusters(ZNode* holder, const char* selection)
       container->SetPoint(i, entry, &mpC->x);
     }
     if(holder)
-      Add(container);
-    else holder->Add(container);
+      holder->Add(container);
+    else Add(container);
   } else { 
     throw(_eh + "no hits matching selection.");
   }
