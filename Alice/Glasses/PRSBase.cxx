@@ -16,10 +16,12 @@ ClassImp(PRSBase)
 
 /**************************************************************************/
 
-  void PRSBase::_init()
+Float_t PRSBase::sDefaultMagField = 0.4;
+
+void PRSBase::_init()
 {
   // *** Set all links to 0 ***/
-  mMagField = 0.4;
+  mMagField = sDefaultMagField;
 
   mVertexColor.rgba(1,0,0,1);
   mVertexSize = 5;
