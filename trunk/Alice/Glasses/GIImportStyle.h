@@ -18,17 +18,17 @@ class GIImportStyle : public ZGlass {
  protected:
 
  public:
-  Bool_t    mImportHits;
-  Bool_t    mImportClusters;
-  Bool_t    mImportKine;
+  Bool_t    mImportKine;   // X{GS} 7 Bool(-join=>1)
+  Bool_t    mRnrKine;      // X{GS} 7 Bool()
 
-  Bool_t    mRnrKine;
-  Bool_t    mRnrHits;
-  
-  Bool_t    mRnrClusters;
+  Bool_t    mImportHits;   // X{GS} 7 Bool(-join=>1)
+  Bool_t    mRnrHits;      // X{GS} 7 Bool()
 
-  Bool_t    mImportRec;
-  Bool_t    mRnrRec;
+  Bool_t    mImportRec;    // X{GS} 7 Bool(-join=>1)
+  Bool_t    mRnrRec;       // X{GS} 7 Bool()
+
+  Bool_t    mImportClusters; // X{GS} 7 Bool(-join=>1)
+  Bool_t    mRnrClusters;    // X{GS} 7 Bool()
 
   GIImportStyle(const Text_t* n="GIImportStyle", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }

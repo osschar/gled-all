@@ -24,9 +24,9 @@ ClassImp(GIImportStyle)
   mImportClusters=true;
   mImportRec = true;
   mRnrKine = true;
-  mRnrHits = false;
-  mRnrClusters = false;
-  mRnrRec = false;
+  mRnrHits = true;
+  mRnrClusters = true;
+  mRnrRec = true;
 }
 
 /**************************************************************************/
