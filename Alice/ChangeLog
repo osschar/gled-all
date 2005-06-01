@@ -1,5 +1,19 @@
 2005-06-01  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
+	* Glasses/MCTrackRnrStyle.cxx:
+        Change color of photon. 
+
+	* Glasses/ZAliLoad.cxx:
+        Change name and creation of holder node in 
+        select functions.
+
+	* Stones/ESDParticle.h:
+	* Stones/Hit.h:
+	* Stones/V0.h:
+        Add utility fuctions R(), P(), Pt(), Theta() and Eta().
+
+2005-06-01  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
 	* Glasses/GIImportStyle.cxx:
 	* Glasses/GIImportStyle.h:
         Set rnr on for kinematics, hits and clusters. 
