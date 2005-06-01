@@ -1,3 +1,42 @@
+2005-06-01  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/GIImportStyle.cxx:
+	* Glasses/GIImportStyle.h:
+        Set rnr on for kinematics, hits and clusters. 
+	
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+        Remove ImportHitsFromPrimary/ImportClustersFromPrimary().
+	
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+        Add memeber sDefaultMagField.
+	
+	* Glasses/V0Track.cxx:
+	* Glasses/V0Track.h:
+        New files.
+	
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Corrections in Convert and Select functions.
+	
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+        Change charge value in the helix propagation.
+	
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+	* Rnr/GL/V0Track_GL_Rnr.h:
+        New files.
+	
+	* Stones/ESDParticle.h:
+	Add member for decay.
+	
+	* Stones/V0.h:
+        Rename member from VDCA to DCA.
+	
+	* glass.list:
+	Add class V0Track.
+
 2005-05-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PRSBase.h:
