@@ -1,3 +1,17 @@
+2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+	Added members 'UShort_t mTrackStippleFac/Pat' to control optional
+	line stippling.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Honour mTrackStippleFac/Pat frpm PRSBase.
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	Nitpicking.
+
 2005-06-01  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/MCTrackRnrStyle.cxx:
