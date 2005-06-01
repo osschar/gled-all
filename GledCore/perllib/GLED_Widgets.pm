@@ -312,8 +312,6 @@ sub make_cxx_cb { my $S = shift; $S->make_varout_widget_cb(); }
 
 package GLED::Widgets::Value; @ISA = ('GLED::Widgets');
 
-sub xxxx { print "xxxx\n";}
-
 sub new {
   my $proto = shift;
   my $S = $proto->SUPER::new(@_);
@@ -340,6 +338,56 @@ sub make_weed_update {
   $S->make_weed_update_A() .
 "  $S->{Type} _val = mIdol->Get$S->{Methodbase}();\n" .
 "  if(_val != ($S->{Type})w->value()) w->value(_val);\n" .
+  $S->make_weed_update_B();
+}
+
+########################################################################
+
+package GLED::Widgets::HexValue; @ISA = ('GLED::Widgets');
+
+sub new {
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget}  = "Fl_Int_Input";
+  $S->{Include} = "FL/Fl_Int_Input.H";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = "true";
+  $S->{-width} = $S->measure_range()  unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  $S->{-format} = '0x%x' unless exists $S->{-format};
+  return $S;
+}
+
+sub make_widget {
+  my $S = shift;
+  return $S->make_widget_A() . "  o->when(FL_WHEN_CHANGED);\n" .
+         $S->make_widget_B();
+}
+
+sub make_cxx_cb {
+  my $S = shift;
+  return <<"fnord";
+void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
+  Eye* e = (mView->fImg) ? mView->fImg->fEye : 0;
+  int _val; sscanf(o->value(), "%x", &_val);
+  if(e) {
+    auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(_val) );
+    e->Send(*_m);
+    SetUpdateTimer();
+  } else {
+    mIdol->Set$S->{Methodbase}(_val);
+  }
+}\n
+fnord
+}
+
+sub make_weed_update {
+  my $S = shift;
+  $S->make_weed_update_A() .
+"  int _val = mIdol->Get$S->{Methodbase}();\n" .
+"  int _exval; sscanf(w->value(), \"%x\", &_exval);\n" .
+"  if(_val != _exval) w->value(GForm(\"$S->{-format}\", _val));\n" .
   $S->make_weed_update_B();
 }
 
@@ -877,7 +925,6 @@ sub new {
   $S->{IsLinkWeed} = "true";
   $S->{Widget} = "FltkGledStuff::LinkNameBox";
   $S->{Include} = "Eye/FltkGledStuff.h";
-  # $S->{CastTo} = "int"; # internal representation of value() for button
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "false";
   $S->{CanResizeP}   = "true";
