@@ -1,3 +1,23 @@
+2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	Sanitized error reporting from MIR handling (removed saturn name
+	since saturn's identity is sent in Caller variable of the reportin
+	MIR anyway); DEBUG-ifdefed verbose reporting in thread-exec
+	functions tl_MIR_Router and tl_MIR_DetachedExecutor.
+
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	Added members 'Bool_t bDefSourceVis, bDefSinkVis'; increased
+	default sub-shell height (22->28) and decreased default message
+	output height (7->5).
+
+	* Eye/FTW_Shell.cxx:
+	* Eye/FTW_Shell.h:
+	Added support for toggling source/sink widgets on and off (in new
+	View menu). Honour value of ShellInfo::bDefSource/SinkVis on
+	construction time.
+
 2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:
