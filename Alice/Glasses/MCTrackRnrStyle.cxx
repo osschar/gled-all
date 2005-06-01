@@ -51,7 +51,7 @@ ZColor MCTrackRnrStyle:: GetPdgColor(Int_t pdg)
   }
   else if (pdga < 100000){ 
     Int_t i  = pdga;
-    Int_t i0 = i%10; i /= 10; // printf("i: %d \n", i);
+    Int_t i0 = i%10; i /= 10;
     Int_t i1 = i%10; i /= 10; 
     Int_t i2 = i%10; i /= 10; 
     Int_t i3 = i%10; i /= 10; 
