@@ -1,3 +1,12 @@
+2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alice_geom.C:
+	* alice_simple.C:
+	Disabled authentication of queen 'scenes'.
+
+	* common_foos.C:
+	ShellInfo setup: set DefSourceVis to false.
+
 2005-05-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
