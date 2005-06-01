@@ -73,6 +73,14 @@ void RecTrack_GL_Rnr::Render(RnrDriver* rd)
 
   // propagate particle 
   if(rst_lens->mMaxR != 0 && p->fSign ) {
+
+    bool stipple_off_p = false;
+    if(rst_lens->mTrackStippleFac) {
+      stipple_off_p = (glIsEnabled(GL_LINE_STIPPLE) == false);
+      glLineStipple(rst_lens->mTrackStippleFac, rst_lens->mTrackStipplePat);
+      glEnable(GL_LINE_STIPPLE);
+    }
+
     glColor4fv(rst_lens->mTrackColor());
     //  printf("RecTrack_GL_Rnr draw with charg %d \n",p->fSign );
     glLineWidth(rst_lens->mTrackWidth);
@@ -91,5 +99,7 @@ void RecTrack_GL_Rnr::Render(RnrDriver* rd)
     /*
       if(irnr) irnr->PostDraw(rd);
     */
+
+    if(stipple_off_p) glDisable(GL_LINE_STIPPLE);
   }
 }

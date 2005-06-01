@@ -60,9 +60,10 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
   glVertex3f(vx,vy,vz);
   glEnd();
 
+  
   // show particle momentum
-  if ( rst_lens->mRnrP) {
-    glLineWidth(2*rst_lens->mTrackWidth);
+  if (rst_lens->mRnrP) {
+    if(rst_lens->mTrackWidth) glLineWidth(2*rst_lens->mTrackWidth);
     glBegin(GL_LINES);
     glColor4fv(rst_lens->mPColor());
     glVertex3f(vx,vy,vz);
@@ -75,7 +76,15 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 
   // show tracks
   if(rst_lens->mMaxR != 0) {
-    glLineWidth(rst_lens->mTrackWidth);
+
+    bool stipple_off_p = false;
+    if(rst_lens->mTrackStippleFac) {
+      stipple_off_p = (glIsEnabled(GL_LINE_STIPPLE) == false);
+      glLineStipple(rst_lens->mTrackStippleFac, rst_lens->mTrackStipplePat);
+      glEnable(GL_LINE_STIPPLE);
+    }
+
+    if(rst_lens->mTrackWidth) glLineWidth(rst_lens->mTrackWidth);
     ZColor c = rst_lens->GetPdgColor( p->GetPdgCode());
     glColor4fv(c());
 
@@ -180,5 +189,8 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
     } // if neutral
   fin:
     if(irnr) irnr->PostDraw(rd);
+
+    if(stipple_off_p) glDisable(GL_LINE_STIPPLE);
+    
   } // if rnr tracks
 } //Render func
