@@ -52,10 +52,11 @@ class PRSBase : public ZRnrModBase {
   PRSBase(const Text_t* n="PRSBase", const Text_t* t=0) :
     ZRnrModBase(n,t) { _init(); }
 
+  static Float_t sDefaultMagField;
 
 #include "PRSBase.h7"
   ClassDef(PRSBase, 1)
-    }; // endclass PRSBase
+}; // endclass PRSBase
 
 GlassIODef(PRSBase);
 
