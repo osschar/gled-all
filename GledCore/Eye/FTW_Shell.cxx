@@ -31,6 +31,7 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Menu_Button.H>
+#include <FL/Fl_Light_Button.H>
 #include <FL/fl_ask.H>
 
 //#include <TSocket.h>
@@ -136,6 +137,27 @@ namespace {
     {0}
   };
 
+
+  // View menu
+  //----------
+
+  void view_menu_cb(Fl_Menu_Button* b, void* what)
+  {
+    FTW_Shell* shell = FGS::grep_parent<FTW_Shell*>(b);
+    bool on_p = b->mvalue()->value();
+    switch(int(what)) {
+    case 1: shell->SourceVis(on_p); break;
+    case 2: shell->SinkVis(on_p);   break;
+    }
+  }
+
+  Fl_Menu_Item s_View_Menu[] = {
+    { "Source",  0, (Fl_Callback*) view_menu_cb, (void*)1, FL_MENU_TOGGLE|FL_MENU_VALUE },
+    { "Sink",    0, (Fl_Callback*) view_menu_cb, (void*)2, FL_MENU_TOGGLE|FL_MENU_VALUE },
+    {0}
+  };
+
+
   // Message sending callback
   //--------------------------
 
@@ -179,7 +201,13 @@ void FTW_Shell::_bootstrap()
   int def_sshell_h = mShellInfo->GetDefSShellH();
   int msgout_h     = mShellInfo->GetMsgOutH();
 
-  size(def_w, 7 + def_sshell_h + 2 + msgout_h);
+  bool src_on_p    = mShellInfo->GetDefSourceVis();
+  bool snk_on_p    = mShellInfo->GetDefSinkVis();
+
+  int sum_h = 3 + (src_on_p ? 2 : 0) + (snk_on_p ? 2 : 0) + 
+              def_sshell_h + 2 + msgout_h;
+
+  size(def_w, sum_h);
 
   begin();
 
@@ -196,7 +224,10 @@ void FTW_Shell::_bootstrap()
     b_swm->labeltype(FL_SYMBOL_LABEL);
     set_swm_hotspot_cb(b_swm);
 
-    new FGS::MenuBox(s_New_Menu, 4, 2, "New");
+    new FGS::MenuBox(s_New_Menu,  4, 2, "New");
+    new FGS::MenuBox(s_View_Menu, 4, 2, "View");
+    if(!src_on_p) s_View_Menu[0].flags ^= FL_MENU_VALUE;
+    if(!snk_on_p) s_View_Menu[1].flags ^= FL_MENU_VALUE;
 
     FGS::LensRepNameBox* self = new FGS::LensRepNameBox(fImg, 0, 0, max_W, 2);
     self->box((Fl_Boxtype)GVNS::menubar_box);
@@ -207,7 +238,9 @@ void FTW_Shell::_bootstrap()
   }
 
   mSource = new FTW::Source_Selector(this, 0, 0, 6, "Source");
+  if(!src_on_p) mSource->hide();
   mSink   = new FTW::Sink_Selector(this, 0, 0, 6, "Sink");
+  if(!snk_on_p) mSink->hide();
   
   Fl_Box* nest_pre = new Fl_Box(FTW::separator_box,0,0,1,1, "Swallowed SubShell:");
   nest_pre->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
@@ -1045,6 +1078,16 @@ void FTW_Shell::Message(const string& msg, Eye::MType_e t)
 }
 
 /**************************************************************************/
+/**************************************************************************/
+
+void FTW_Shell::SourceVis(bool on_p)
+{ set_vis_of_vertical_component(mSource, on_p); }
+
+void FTW_Shell::SinkVis(bool on_p)
+{ set_vis_of_vertical_component(mSink, on_p); }
+
+/**************************************************************************/
+/**************************************************************************/
 
 int FTW_Shell::handle(int ev)
 {
@@ -1082,4 +1125,13 @@ void FTW_Shell::set_size_range()
   s.hl = min_H + min_canvas_H + wOutPack->h()/cell_h();
   int nw=cell_w(), nh=cell_h();
   size_range(nw*s.wl, nh*s.hl, nw*s.wh, nh*s.hh, nw*s.dwf, nh*s.dhf);
+}
+
+void FTW_Shell::set_vis_of_vertical_component(Fl_Widget* w, bool on_p)
+{
+  if(w->visible() == on_p) return;
+  if(on_p) w->show(); else w->hide();
+  mCurCanvas->size(mCurCanvas->w(), mCurCanvas->h() + w->h()*(on_p ? -1 : 1));
+  init_sizes();
+  redraw();
 }
