@@ -37,8 +37,9 @@ class MCTrack : public TrackBase {
   // particles
   void ImportDaughters(ZAliLoad* alil = 0);    //X{E} C{1} 7 MButt(-join=>1)
   void ImportDaughtersRec(ZAliLoad* alil = 0); //X{E} C{1} 7 MButt()
-  void ImportHits(ZAliLoad* alil = 0);              // X{Ed} C{1} 7 MButt(-join=>1)
-  void ImportHitsFromPrimary(ZAliLoad* alil = 0);   // X{Ed} C{1} 7 MButt()
+  void ImportHits(ZAliLoad* alil=0, Bool_t from_primary=false); // X{Ed} C{1} 7 MCWButt(-join=>1)
+  void ImportClusters(ZAliLoad* alil=0, Bool_t from_primary=false); // X{Ed} C{1} 7 MCWButt()
+
   void Dump();				            // X{E} 7 MButt()
 	
  
