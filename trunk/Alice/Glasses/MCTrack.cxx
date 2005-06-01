@@ -84,8 +84,7 @@ void MCTrack::ImportDaughtersRec(ZAliLoad* alil)
 }
 
 /**************************************************************************/
-
-void  MCTrack::ImportHits(ZAliLoad* alil)
+void  MCTrack::ImportHits(ZAliLoad* alil, Bool_t from_primary)
 {
   static const string _eh("MCTrack::ImportHits ");
   if (alil == 0) {
@@ -93,22 +92,30 @@ void  MCTrack::ImportHits(ZAliLoad* alil)
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
   }
   char selection[128];
-  sprintf (selection, "fLabel==%d", mParticle->fLabel);
-  alil->SelectHits(0, selection);
+  if(from_primary){
+    sprintf (selection, "fEvaLabel==%d", mParticle->fLabel);
+  } else {
+    sprintf (selection, "fLabel==%d", mParticle->fLabel);
+  }
+  alil->SelectHits(this, selection);
 }
 
-void  MCTrack::ImportHitsFromPrimary(ZAliLoad* alil)
+/**************************************************************************/
+void  MCTrack::ImportClusters(ZAliLoad* alil, Bool_t from_primary)
 {
-  static const string _eh("MCTrack::ImportHits ");
+  static const string _eh("MCTrack::ImportClusters ");
   if (alil == 0) {
     alil = GrepParentByGlass<ZAliLoad*>();
     if(alil == 0) throw(_eh + "can't set ZAliLoad.");
   }
   char selection[128];
-  sprintf (selection, "fEvaLabel==%d", mParticle->fLabel);
-  alil->SelectHits(0, selection);
+  if(from_primary){
+    sprintf (selection, "fEvaLabel==%d", mParticle->fLabel);
+  } else {
+    sprintf (selection, "fLabel==%d", mParticle->fLabel);
+  }
+  alil->SelectClusters(this, selection);
 }
-
 /**************************************************************************/
 
 void MCTrack::Dump()
