@@ -42,6 +42,9 @@ protected:
 
   Int_t		mDefW;		// X{GS} 7 Value(-range=>[32, 256, 1])
   Int_t		mDefSShellH;	// X{GS} 7 Value(-range=>[10, 128, 1])
+  Bool_t	bDefSourceVis;	// X{GS} 7 Bool(-join=>1)
+  Bool_t	bDefSinkVis;	// X{GS} 7 Bool()
+
   UChar_t	mMsgOutH;	// X{GS} Ray{Resize} 7 Value(-range=>[0,32,1])
 
   Bool_t	bFancyClassView;       // X{GS} 7 Bool()

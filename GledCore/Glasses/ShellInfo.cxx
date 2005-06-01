@@ -32,8 +32,11 @@ void ShellInfo::_init()
   mMessageRecipient = 0;
 
   mDefW       = 80;
-  mDefSShellH = 22;
-  mMsgOutH     = 7;
+  mDefSShellH = 28;
+  bDefSourceVis = true;
+  bDefSinkVis   = false;
+
+  mMsgOutH     = 5;
 
   bFancyClassView       = true; bCollZGlass = bCollZList = true;
   bShowLinksInClassView = true;
