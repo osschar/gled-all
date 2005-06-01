@@ -31,7 +31,10 @@ void PRSBase::_init()
   mPScale = 1;
 
   mTrackColor.rgba(1,1,0,1);
-  mTrackWidth=1.2;
+  mTrackWidth      = 1.2;
+  mTrackStippleFac = 0;
+  mTrackStipplePat = 0xCCCC;
+
   mMinP = 0.00005;
   mTheta = 90;
   mThetaOff = 90;
