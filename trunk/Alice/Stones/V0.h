@@ -23,8 +23,8 @@ class V0 : public TObject {
   Double_t fVM[3];
   Double_t fVP[3];
 
-  // dca vertex
-  Double_t fVDCA[3];
+  // distance to closest approach
+  Double_t fDCA[3];
 
   // birth point of neutral, mother particle
   Double_t fV0[3];
