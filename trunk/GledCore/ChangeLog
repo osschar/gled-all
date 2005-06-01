@@ -1,5 +1,10 @@
 2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* perllib/GLED_Widgets.pm:
+	Added weed HexValue.
+
+2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Ephra/Saturn.cxx:
 	Sanitized error reporting from MIR handling (removed saturn name
 	since saturn's identity is sent in Caller variable of the reportin
