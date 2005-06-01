@@ -181,6 +181,7 @@ void setup_default_gui(Scene* rscene)
   Text_t* pupil_name = "Pupil";
 
   ASSIGN_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
+  shell->SetDefSourceVis(false);
 
   CREATE_ATT_GLASS(nest, NestInfo, shell, SetDefSubShell, "Nest", 0);
   nest->Add(rscene);
