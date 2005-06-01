@@ -254,7 +254,7 @@ void ZAliLoad::SetupEvent()
 	   _eh.c_str(), mDirectory->GetName());
   } else {
     mTreeGI->SetBranchAddress("GI", &mpGI);
-    mTreeGI->SetBranchAddress("P.", &mpP);
+    mTreeGI->SetBranchAddress("K.", &mpP);
     mTreeGI->SetBranchAddress("R.", &mpR);
   }
 }
@@ -988,7 +988,7 @@ void ZAliLoad::ConvertGenInfo()
 
   GenInfo::Class()->IgnoreTObjectStreamer(true);
   mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
-  mTreeGI->Branch("P.", "MCParticle", &mpP);
+  mTreeGI->Branch("K.", &mpP);
   mTreeGI->Branch("R.", "ESDParticle",   &mpR);
 
   for(map<Int_t, GenInfo*>::iterator j=gimap.begin(); j!=gimap.end(); ++j) {
@@ -1024,7 +1024,11 @@ void ZAliLoad::SelectGenInfo(ZNode* holder, const Text_t* selection)
   Int_t nlabels = evl.Select(mTreeGI, selection);
   // printf("%d entries in selection %s \n", nlabels,  selection);
 
+  if(nlabels == 0) {
+    throw (_eh + "No entries match selection in  mTreeGI.");
+  }
 
+  Bool_t add_holder = false;
   if(holder == 0) {
     holder = new ZNode(GForm("GI %s", selection));
     mQueen->CheckIn(holder);
