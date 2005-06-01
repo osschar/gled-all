@@ -91,7 +91,7 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
     }
 
     if (rst_lens->mMagField && p->GetPDG()->Charge()) {
-      Float_t a = 0.2998*rst_lens->mMagField*3*p->GetPDG()->Charge()/1000; // m->mm
+      Float_t a = 0.2998*rst_lens->mMagField*p->GetPDG()->Charge()/300; // m->cm, 
       Helix helix(a, rst_lens);
 
       // case 1  
