@@ -46,7 +46,8 @@ void Gled::next_arg_or_die(list<char*>& args, list<char*>::iterator& i)
 
 Gled::Gled() : mSaturn(0), bIsSun(false),
 	       bQuit(false),
-	       bShowSplash(true), 
+	       bShowSplash(true),
+	       bPreExec(false),
 	       bAutoSpawn(false),
 	       bAllowMoons(true),
 	       bRunRint(true),
@@ -103,6 +104,7 @@ void Gled::ParseArguments(list<char*>& args)
 	  "                     files ~ ROOT macro scripts to process\n"
 	  "Gled options:\n"
 	  "-------------\n"
+	  "  -preexec <m1:m2..> pre-exec specified macros\n"
 	  "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
 	  "                     Saturn if -master is specified, Sun otherwise\n"
 	  "  -nomoons           do not accept moon connections\n"
@@ -129,6 +131,13 @@ void Gled::ParseArguments(list<char*>& args)
 	bQuit = true;
 	return;
       }
+
+    else if(strcmp(*i, "-preexec")==0) {
+      next_arg_or_die(args, i);
+      bPreExec = true;
+      mPreExecString   = *i;
+      args.erase(start, ++i);
+    }
 
     else if(strcmp(*i, "-r")==0 || strcmp(*i, "-run")==0) {
       bAutoSpawn = true;
@@ -320,6 +329,16 @@ void Gled::StopLogging()
 
 Gled::~Gled() {
   delete mSaturn;
+}
+
+/**************************************************************************/
+
+void Gled::PreExec()
+{
+  lStr_t l;
+  GledNS::split_string(string(mPreExecString.Data()), l, ':');
+  for(lStr_i i=l.begin(); i!=l.end(); ++i)
+    gROOT->Macro(i->c_str());
 }
 
 /**************************************************************************/
