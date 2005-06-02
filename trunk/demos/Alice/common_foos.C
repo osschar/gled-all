@@ -204,3 +204,35 @@ void spawn_default_gui()
 {
   Gled::theOne->SpawnEye(0, shell, "GledCore", "FTW_Shell");
 }
+
+/**************************************************************************/
+
+Text_t* g_share_path = 0;
+
+const Text_t* file_grep(const Text_t* file, const Text_t* pref="data")
+{
+  if(g_share_path == 0) {
+    g_share_path = gSystem->Getenv("ALIGLEDSHARE");
+    if(g_share_path == 0) {
+      g_share_path = gSystem->WorkingDirectory();
+    }
+  }
+
+  if(gSystem->AccessPathName(file, kReadPermission) == false)
+    return file;
+
+  const Text_t* f1 = GForm("%s/%s", pref, file);
+  if(gSystem->AccessPathName(f1, kReadPermission) == false)
+    return f1;
+
+  const Text_t* f2 = GForm("%s/%s/%s", g_share_path, pref, file);
+  if(gSystem->AccessPathName(f2, kReadPermission) == false)
+    return f2;
+
+  const Text_t* f3 = GForm("%s/%s", g_share_path, file);
+  if(gSystem->AccessPathName(f3, kReadPermission) == false)
+    return f3;
+
+  // If not found ... let the consumer fail with local filename.
+  return file;
+}
