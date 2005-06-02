@@ -1,5 +1,11 @@
 2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* gled.cxx:
+	* saturn.cxx:
+	Moved GledCore_init and PreExec before spawning of TRint.
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Gled/Gled.cxx:
 	* Gled/Gled.h:
 	Added command line option '-preexec' to allow execution of macros
