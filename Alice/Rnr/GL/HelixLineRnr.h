@@ -90,12 +90,15 @@ struct Helix {
       return false;
     }
 
+
     Float_t p0x = px, p0y = py;
     Float_t zs = fLam*TMath::Abs(fR*fPhiStep);
     Float_t fnsteps = (ez - vz)/zs;
     Int_t   nsteps  = Int_t((ez - vz)/zs);
     Float_t sinf = TMath::Sin(fnsteps*fPhiStep);
     Float_t cosf = TMath::Cos(fnsteps*fPhiStep);
+    Int_t os_max =Int_t(fRnrMod->mMaxOrbs*2*TMath::Pi()/TMath::Abs(fPhiStep));
+
     {
       glBegin(GL_LINE_STRIP);
       glTexCoord2f(0.0, fRnrMod->mTexVCoor);
@@ -109,6 +112,10 @@ struct Helix {
 	for (Int_t l=0; l<nsteps; l++) {
 	  if ( vx*vx+vy*vy > fRnrMod->mMaxR*fRnrMod->mMaxR){
 	    glEnd(); return false;
+	  }
+          if(fN > os_max ){
+	    glEnd();
+	    return false;
 	  }
 	  step(vx,vy,vz,px,py,pz); 
 	}
