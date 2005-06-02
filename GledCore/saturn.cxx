@@ -75,18 +75,19 @@ int main(int argc, char **argv)
   }
   args.clear();
 
+  // Init GledCore libset
+  gled->InitGledCore();
+
+  // Call pre-exec macros if any.
+  if(gled->GetPreExec()) {
+    gled->PreExec();
+  }
+
   // Spawn TRint
   if(gled->GetShowSplash())
     cout <<"Staring ROOT command-line interpreter ...\n";
   gint = new TRint("TRint", &rargc, rargv);
   gint->SetPrompt("saturn[%d] ");
-
-  // Init GledCore libset
-  gled->InitGledCore();
-
-  if(gled->GetPreExec()) {
-    gled->PreExec();
-  }
 
   // Prepare gled exit condition & Spawn saturn
   GCondition gled_exit;

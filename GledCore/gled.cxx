@@ -81,6 +81,14 @@ int main(int argc, char **argv)
   }
   args.clear();
 
+  // Init GledCore libset
+  gled->InitGledCore();
+
+  // Call pre-exec macros if any.
+  if(gled->GetPreExec()) {
+    gled->PreExec();
+  }
+
   // Spawn TRint
   if(gled->GetShowSplash())
     cout <<"Staring ROOT command-line interpreter ...\n";
@@ -94,13 +102,6 @@ int main(int argc, char **argv)
     perror(GForm("%scan't create Gled thread", _eh.c_str()));
     exit(1);
   }  
-
-  // Init GledCore libset
-  gled->InitGledCore();
-
-  if(gled->GetPreExec()) {
-    gled->PreExec();
-  }
 
   // Spawn saturn
   if(gled->GetAutoSpawn()) {
