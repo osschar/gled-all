@@ -37,6 +37,8 @@ class ZAliLoad : public ZNode {
   void                           _init();
   GenInfo*                       get_geninfo(Int_t label);
 
+  bool                           m_auto_vsdfile_p;
+
   TTree*                         mTreeK;   // X{g}
   TTree*                         mTreeH;   // X{g}
   TTree*                         mTreeTR;  // X{g}
@@ -53,17 +55,20 @@ class ZAliLoad : public ZNode {
   TPCDigitsInfo*                 mTPCDigInfo;
 
  protected:
-  void open_vsd();
-  void close_vsd();
+  Bool_t check_read(const string& file);
+  string get_vsd_name(Bool_t check_p);
+  void   open_vsd();
+  void   close_vsd();
 
   MCTrack*     get_track(Int_t tid);
   AliTPCParam* get_tpc_param(const string& eh);
 
-  TString                  mDataDir;   // X{GS} 7 Filor(-dir=>1)
+  TString                  mDataDir;   // X{GS} 7 Filor(-dir=>1, -whenchanged=>1)
   Int_t			   mEvent;     // X{GS} 7 Value(-range=>[0,100,1])
   KineType_e               mKineType;  // X{GS} 7 PhonyEnum()
 
-  TString	           mVSDName;   // X{GS} 7 Textor()
+  TString                  mDefVSDName;// X{GS} 7 Textor(-whenchanged=>1)
+  TString                  mVSDFile;   // X{GS} 7 Filor(-whenchanged=>1)
 
   TFile*                   mFile;      // X{G} 
   TDirectory*              mDirectory; // X{G}
@@ -74,7 +79,8 @@ class ZAliLoad : public ZNode {
  public:
   ZAliLoad(const Text_t* n="ZAliLoad", const Text_t* t=0);
 
-  void SetupDataSource(Bool_t use_aliroot=false); // X{Ed} 7 MCWButt()
+  void LoadVSD(Bool_t create_if_not_found=true, Bool_t force_recreate=false
+	       );    // X{Ed} 7 MCWButt()
 
   void SetupEvent();
 
