@@ -211,7 +211,7 @@ void FTW_Branch::HideListMembers()
 float FTW_Branch::LeafPosition(FTW_Leaf* leaf)
 {
   if(!bLeavesCreated) return 0;
-  int j;
+  int j = 0;
   for(lLoI_i i=mLeoim.begin(); i!=mLeoim.end(); ++i, ++j) {
     if(i->leaf == leaf) return float(j)/mLeoim.size();
   }
