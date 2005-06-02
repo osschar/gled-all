@@ -15,7 +15,7 @@ ALICE_LIBS = -lESD -lSTEER -lCONTAINERS
 BLESSED_DIRS	:= Glasses
 BASE_DIRS	:= Stones Alice 
 
-DICT_DIRS	:= Glasses Stones Alice 
+DICT_DIRS	:= Glasses Stones
 CPPFLAGS	:=-I${ALICE_ROOT}/include -I${ALICE_ROOT}/TPC -I${ALICE_ROOT}/CONTAINERS
 
 VIEW_DIRS	:=
