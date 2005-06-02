@@ -40,7 +40,6 @@ class ZImage;
 void AliLoader(const Text_t* dirname = 0,
 	       Bool_t use_aliroot    = 0)
 {
-  gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
 
   scenes->SetAuthMode(ZQueen::AM_None);
@@ -62,14 +61,14 @@ void AliLoader(const Text_t* dirname = 0,
   CREATE_ADD_GLASS(image, ZImage, var, "Checker", 0);
   image->SetMagFilter(GL_LINEAR);
   image->SetEnvMode(GL_MODULATE);
-  image->SetFile("images/checker_8.png");
+  image->SetFile(file_grep("images/checker_8.png"));
   image->Load();
   image->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(image2, ZImage, var, "LineTex", 0);
   image2->SetMagFilter(GL_LINEAR);
   image2->SetEnvMode(GL_MODULATE);
-  image2->SetFile("images/lin_fssccw.png");
+  image2->SetFile(file_grep("images/lin_fssccw.png"));
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
@@ -78,7 +77,7 @@ void AliLoader(const Text_t* dirname = 0,
   CREATE_ADD_GLASS(recrst, RecTrackRS, var, "Rec Track RnrStyle", 0);
 
   CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
-  ribbon1->SetPOVFile("images/romania.pov");
+  ribbon1->SetPOVFile(file_grep("images/romania.pov"));
   ribbon1->LoadPOV();
 
   CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
@@ -129,7 +128,7 @@ void AliLoader(const Text_t* dirname = 0,
     al->SetDataDir(dirname);
     // al->SetupDataSource(use_aliroot);
     // Shoot a MIR to have functional GUI during processing:
-    ZMIR* setup_mir = al->S_SetupDataSource(use_aliroot);
+    ZMIR* setup_mir = al->S_LoadVSD(true, use_aliroot);
     sun->ShootMIR(setup_mir);
   }
 
@@ -141,7 +140,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 40, H = 24;
+  int Y = 0, W = 40, H = 26;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -166,11 +165,22 @@ MetaViewInfo* make_zaliload_metagui()
   y++;
   CREATE_ADD_GLASS(w16, MetaWeedInfo, ms1, "KineType", 0);
   w16->Resize(8, y, W-8-12, 1);
-  CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "SetupDataSource", 0);
+  CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "CreateVSD", 0);
   w13->Resize(W-12, y, 12, 1);
   y++;
+  CREATE_ADD_GLASS(w17, MetaWeedInfo, ms1, "VSDFile", 0);
+  w17->Resize(6, y, W-12-6, 1);
+  CREATE_ADD_GLASS(w18, MetaWeedInfo, ms1, "LoadVSD", 0);
+  w18->Resize(W-12, y, 12, 1);
+  y++;
+  CREATE_ADD_GLASS(w15, MetaWeedInfo, ms1, "<box>", "Current operation:");
+  w15->Resize(0, y, W, 1);
+  w15->Color(0.7, 0.7, 0.85);
+  w15->Align(true, -1, 0);
+  w15->Box(MetaWeedInfo::BT_Engraved);
+  y++;
   CREATE_ADD_GLASS(w14, MetaWeedInfo, ms1, "Operation", 0);
-  w14->Resize(8, y, W-8, 1);
+  w14->Resize(0, y, W, 1);
   y++;
 
   Y += y; y=0;
@@ -213,12 +223,10 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w31, MetaWeedInfo, ms3, "HitSelection", 0);
   w31->Resize(6, y, W-6, 1);
   w31->Label("selection: ");
-  // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w32, MetaWeedInfo, ms3, "SelectHits", 0);
   w32->Resize(W-12, y, 12, 1);
   w32->Label("Run selection ..");
-  // w21->Align(false, 0, 1);
   y++;
 
   Y += y; y=0;
@@ -236,12 +244,10 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w51, MetaWeedInfo, ms5, "ClusterSelection", 0);
   w51->Resize(6, y, W-6, 1);
   w51->Label("selection: ");
-  // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w52, MetaWeedInfo, ms5, "SelectClusters", 0);
   w52->Resize(W-12, y, 12, 1);
   w52->Label("Run selection ..");
-  // w21->Align(false, 0, 1);
   y++;
 
   Y += y; y=0;
@@ -259,12 +265,10 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w61, MetaWeedInfo, ms6, "RecSelection", 0);
   w61->Resize(6, y, W-6, 1);
   w61->Label("selection: ");
-  // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w62, MetaWeedInfo, ms6, "SelectRecTracks", 0);
   w62->Resize(W-12, y, 12, 1);
   w62->Label("Run selection ..");
-  // w21->Align(false, 0, 1);
   ++y;
 
   Y += y; y=0;
@@ -282,12 +286,10 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w81, MetaWeedInfo, ms8, "V0Selection", 0);
   w81->Resize(6, y, W-6, 1);
   w81->Label("selection: ");
-  // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w82, MetaWeedInfo, ms8, "SelectV0", 0);
   w82->Resize(W-12, y, 12, 1);
   w82->Label("Run selection ..");
-  // w21->Align(false, 0, 1);
   ++y;
 
   Y += y; y=0;
@@ -305,12 +307,10 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w71, MetaWeedInfo, ms7, "GISelection", 0);
   w71->Resize(6, y, W-6, 1);
   w71->Label("selection: ");
-  // w20->Align(false, 0, -1);
   y++;
   CREATE_ADD_GLASS(w72, MetaWeedInfo, ms7, "SelectGenInfo", 0);
   w72->Resize(W-12, y, 12, 1);
   w72->Label("Run selection ..");
-  // w21->Align(false, 0, 1);
   ++y;
 
   Y += y; y=0;

@@ -48,7 +48,7 @@ Scene* alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
 			 const Text_t* det_file  = "def_geoview.root")
 {
   printf("Importing geometry ...\n");
-  TGeoManager::Import(geom_file);
+  TGeoManager::Import(file_grep(geom_file));
   printf("Done importing geometry.\n");
 
   //--------------------------------------------------------------
@@ -71,7 +71,7 @@ Scene* alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
   rscene->Add(znode);
   znode->SetRnrSelf(false);
 
-  znode->SetDefFile(det_file);
+  znode->SetDefFile(file_grep(det_file));
   znode->LoadFromFile();
   znode->Restore();
 
