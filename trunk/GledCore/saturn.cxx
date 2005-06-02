@@ -84,6 +84,10 @@ int main(int argc, char **argv)
   // Init GledCore libset
   gled->InitGledCore();
 
+  if(gled->GetPreExec()) {
+    gled->PreExec();
+  }
+
   // Prepare gled exit condition & Spawn saturn
   GCondition gled_exit;
   gled_exit.Lock();

@@ -98,6 +98,10 @@ int main(int argc, char **argv)
   // Init GledCore libset
   gled->InitGledCore();
 
+  if(gled->GetPreExec()) {
+    gled->PreExec();
+  }
+
   // Spawn saturn
   if(gled->GetAutoSpawn()) {
     gled->SpawnSunOrSaturn();
