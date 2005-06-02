@@ -1,3 +1,10 @@
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Re-engineered VSD file creation and determination of its
+	name/location.
+
 2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PRSBase.cxx:
