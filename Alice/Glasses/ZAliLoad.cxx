@@ -76,6 +76,8 @@ namespace {
 void ZAliLoad::_init()
 {
   // *** Set all links to 0 ***
+  m_auto_vsdfile_p = false;
+
   mTreeK  = 0;
   mTreeH  = 0;
   mTreeTR = 0;
@@ -96,7 +98,7 @@ void ZAliLoad::_init()
   mEvent    = 0;
   mKineType = KT_Standard;
 
-  mVSDName = "AliVSD.root";
+  mDefVSDName = "AliVSD.root";
   mFile    = 0; mDirectory = 0;
 
   mOperation = "<idle>";
@@ -143,54 +145,29 @@ ZAliLoad:: ZAliLoad(const Text_t* n, const Text_t* t) :
 
 /**************************************************************************/
 
-void ZAliLoad::SetupDataSource(Bool_t use_aliroot)
+void ZAliLoad::LoadVSD(Bool_t create_if_not_found, Bool_t force_recreate)
 {
-  static const string _eh("ZAliLoad::SetupDataSource ");
+  static const string _eh("ZAliLoad::LoadVSD ");
 
-  OpMutexHolder omh(this, "SetupDataSource");
+  OpMutexHolder omh(this, "LoadVSD");
 
   ResetEvent();
 
-  if(mDataDir == "")
-    SetDataDir(".");
+  if(mDataDir == "") SetDataDir(".");
 
-  if(use_aliroot == false) {
-    try {
-      open_vsd();
-    }
-    catch(string exc) {
-      ISwarn(_eh + exc + " Falling back to AliRunLoader.");
-      use_aliroot = true;
-    }
-  }
+  if(force_recreate) CreateVSD();
 
-  if(use_aliroot) {
-    printf("Start importing AliRunLoader from dir %s\n", mDataDir.Data());
-    // GTime time(GTime::I_Now);
-
-    string galice_file (GForm("%s/galice.root", mDataDir.Data()));
-
-    if(gSystem->AccessPathName(galice_file.c_str(), kReadPermission)) {
-      throw(_eh + "Can not read file '" + galice_file + "'.");
-    }
-    pRunLoader = AliRunLoader::Open(galice_file.c_str());
-    if(pRunLoader == 0)
-      throw(_eh + "AliRunLoader::Open failed.");
-    if(pRunLoader->GetEvent(mEvent) != 0)
-      throw(_eh + GForm("event '%d' not found.", mEvent));
-
-    pRunLoader->LoadgAlice();
-    pRunLoader->LoadHeader();
-    pRunLoader->LoadKinematics();
-    pRunLoader->LoadHits();
-    pRunLoader->LoadTrackRefs();
-
-    CreateVSD();
-
+  try {
     open_vsd();
-
-    //GTime delta = time.TimeUntilNow();
-    printf("END importing AliRunLoader from dir '%s'.\n", mDataDir.Data());
+  }
+  catch(string exc) {
+    if(create_if_not_found && !force_recreate) {
+      ISwarn(_eh + exc + " Falling back to AliRunLoader.");
+      CreateVSD();
+      open_vsd();
+    } else {
+      throw;
+    }
   }
 
   SetupEvent();
@@ -201,7 +178,6 @@ void ZAliLoad::SetupEvent()
 {
   static const string _eh("ZAliLoad::SetupEvent ");
  
-
   printf("Reading kinematics.\n");
   mTreeK = (TTree*) mDirectory->Get("Kinematics");
   if (mTreeK == 0) {
@@ -261,21 +237,61 @@ void ZAliLoad::SetupEvent()
 
 /**************************************************************************/
 
+Bool_t ZAliLoad::check_read(const string& file)
+{
+  return (gSystem->AccessPathName(file.c_str(), kReadPermission) == false);
+}
+
+string ZAliLoad::get_vsd_name(Bool_t check_p)
+{
+  m_auto_vsdfile_p = false;
+
+  string file(mVSDFile.Data());
+  if(file != "") {
+    if(!check_p || (check_p && check_read(file))) {
+      return file;
+    }
+  }
+
+  m_auto_vsdfile_p = true;
+
+  string there(GForm("%s/%s", mDataDir.Data(), mDefVSDName.Data()));
+  if(!check_p || (check_p && check_read(there)))
+    return there;
+
+  string here(mDefVSDName.Data());
+  if(!check_p || (check_p && check_read(here)))
+    return here;
+
+  throw(file + " | " + there + " | " + here);
+}
+
 void ZAliLoad::open_vsd()
 {
   // Opens VSD in READ mode. Throws exception if not found.
 
-  string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
+  static const string _eh("ZAliLoad::open_vsd ");
+
+  string vsd_file;
+  try {
+    vsd_file = get_vsd_name(true);
+  }
+  catch(string exc) {
+    throw(_eh + "VSD file not found, tried '" + exc + "'.");
+  }
+  SetVSDFile(vsd_file.c_str());
 
   mFile = TFile::Open(vsd_file.c_str());
   if(!mFile)
-    throw(string(GForm("can not open VSD file '%s'.", vsd_file.c_str())));
+    throw(_eh + GForm("can not open VSD file '%s'.", vsd_file.c_str()));
 
-  mDirectory = (TDirectory*) mFile->Get(GForm("Event%d", mEvent));
+
+  string event_dir("Event0"); // (GForm("Event%d", mEvent));
+  mDirectory = (TDirectory*) mFile->Get(event_dir.c_str());
   if(!mDirectory) {
     delete mFile; mFile = 0;
-    throw(string(GForm("event directory 'Event%d' not found in VSD file '%s'.",
-		       mEvent, vsd_file.c_str())));
+    throw(_eh + GForm("event directory '%s' not found in VSD file '%s'.",
+		       event_dir.c_str(), vsd_file.c_str()));
   }
 }
 
@@ -295,6 +311,8 @@ void ZAliLoad::close_vsd()
     delete mFile;
     mFile = 0; mDirectory = 0;
   }
+
+  if(m_auto_vsdfile_p) SetVSDFile("");
 }
 
 void ZAliLoad::CreateVSD()
@@ -303,20 +321,44 @@ void ZAliLoad::CreateVSD()
 
   OpMutexHolder omh(this, "CreateVSD");
 
-  string vsd_file (GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
+  printf("Start importing AliRunLoader from dir '%s'.\n", mDataDir.Data());
+  GTime time(GTime::I_Now);
+
+  string galice_file (GForm("%s/galice.root", mDataDir.Data()));
+
+  if(gSystem->AccessPathName(galice_file.c_str(), kReadPermission)) {
+    throw(_eh + "Can not read file '" + galice_file + "'.");
+  }
+  pRunLoader = AliRunLoader::Open(galice_file.c_str());
+  if(pRunLoader == 0)
+    throw(_eh + "AliRunLoader::Open failed.");
+  if(pRunLoader->GetEvent(mEvent) != 0)
+    throw(_eh + GForm("event '%d' not found.", mEvent));
+
+  pRunLoader->LoadgAlice();
+  pRunLoader->LoadHeader();
+  pRunLoader->LoadKinematics();
+  pRunLoader->LoadHits();
+  pRunLoader->LoadTrackRefs();
+
+  string vsd_file = get_vsd_name(false);
+  SetVSDFile(vsd_file.c_str());
 
   GledNS::PushFD();
 
   pRunLoader->CdGAFile();
   AliTPCParam* par = (AliTPCParam *) gDirectory->Get("75x40_100x60_150x60");
 
-  // Single file per event
-  mFile = new TFile(vsd_file.c_str(), "RECREATE", "ALICE VisualizationDataSummary");
+  // Single file per event, directory name fixed to "Event0".
+  mFile = TFile::Open(vsd_file.c_str(), "RECREATE", "ALICE VisualizationDataSummary");
+  if(mFile == 0)
+    throw(_eh + GForm("can not open VSD file '%s' for writing.", vsd_file.c_str()));
 
   par->SetName("TPCParameter");
   par->Write();
 
-  mDirectory = new TDirectory(GForm("Event%d", mEvent), "");
+  mDirectory = new TDirectory("Event0", "");
+  // mDirectory = new TDirectory(GForm("Event%d", mEvent), "");
 
   ConvertKinematics();
   ConvertHits();
@@ -330,6 +372,10 @@ void ZAliLoad::CreateVSD()
   close_vsd();
 
   GledNS::PopFD();
+
+  GTime delta = time.TimeUntilNow();
+  printf("END importing AliRunLoader from dir '%s', time=%lfs.\n",
+	 mDataDir.Data(), delta.ToDouble());
 }
 
 /**************************************************************************/
@@ -346,10 +392,8 @@ void ZAliLoad::ResetEvent()
     pRunLoader->UnloadAll();
     delete pRunLoader;
     if(gAlice){
-      printf("Clear:: gAlice \n");
       delete gAlice; gAlice = 0; //!!!! dont know what it is used for
     }
-    printf("Clear %p pRunLoader \n", pRunLoader);
     pRunLoader = 0;
   }
 }
@@ -1149,11 +1193,8 @@ TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
       pRunLoader->LoadDigits("TPC");
       tree = pRunLoader->GetTreeD("TPC", false);
     } else {
-      TFile f(GForm("%s/%s", mDataDir.Data(), mVSDName.Data()));
-      if(!f.IsOpen())
-	throw(_eh + GForm("can not open '%s'.", mVSDName.Data()));
-      par = (AliTPCParam *)f.Get("TPCParameter");
-      f.Close();
+      if(mFile == 0) open_vsd();
+      par = (AliTPCParam *) mFile->Get("TPCParameter");
 
       //gDirectory->cd();
       TFile* f2 = TFile::Open(GForm("%s/TPC.Digits.root", mDataDir.Data()));
