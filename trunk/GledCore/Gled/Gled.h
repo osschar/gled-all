@@ -40,6 +40,8 @@ protected:
 
   Bool_t	bQuit;		// X{G}
   Bool_t	bShowSplash;	// X{G}
+  Bool_t	bPreExec;       // X{G}
+  TString	mPreExecString; // X{G}
   Bool_t	bAutoSpawn;	// X{G}
   Bool_t	bAllowMoons;	// X{G}
 
@@ -67,6 +69,8 @@ public:
   virtual ~Gled();
 
   void SetExitCondVar(GCondition* cond) { mExitCondVar = cond; }
+
+  void PreExec();
 
   void SpawnSunOrSaturn();
   void SpawnSun();
