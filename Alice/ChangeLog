@@ -1,5 +1,14 @@
 2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Alice/user_init.cxx:
+	New file: setup ROOT's macro and include path to ENV{ALIGLEDSHARE}
+	if defined.
+
+	* Makefile:
+	Added dir Alice to the list of base-directories.
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/ZAliLoad.cxx:
 	* Glasses/ZAliLoad.h:
 	Re-engineered VSD file creation and determination of its
