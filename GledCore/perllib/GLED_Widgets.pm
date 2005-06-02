@@ -511,8 +511,14 @@ sub new {
 
 sub make_widget {
   my $S = shift;
-  return $S->make_widget_A() .
-    "\to->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
+  if(defined $S->{-whenchanged}) {
+    $whencb = "  o->when(FL_WHEN_CHANGED);\n";
+  } else {
+    $whencb = "  o->when(FL_WHEN_ENTER_KEY | FL_WHEN_RELEASE);\n" .
+      "  o->color(fl_rgb_color(255, 245, 245));\n" .
+      "  o->tooltip(sTextorTooltip);\n";
+  }
+  return $S->make_widget_A() . $whencb .
     "\to->tooltip(\"R-button opens file selector\");\n" .
     (defined $S->{-pat} ? "\to->pattern(\"$S->{-pat}\");\n" : "" ) .
     (defined $S->{-abs} ? "\to->absolute_p(true);\n" : "" ) .
