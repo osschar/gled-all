@@ -1,6 +1,11 @@
 2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Alice/user_init.cxx:
+	Removed all init actions.
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Alice/user_init.cxx:
 	New file: setup ROOT's macro and include path to ENV{ALIGLEDSHARE}
 	if defined.
 

@@ -1,5 +1,16 @@
 2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Added command line option '-preexec' to allow execution of macros
+	prior to spawning saturn or normal command line macro processing.
+
+	* gled.cxx:
+	* saturn.cxx:
+	Added optional call to Gled::PreExec.
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* perllib/GLED_Widgets.pm:
 	Added '-whanchanged' option handling to Filor weed.
 
