@@ -199,13 +199,15 @@ void FTW_Shell::_bootstrap()
 {
   int def_w        = mShellInfo->GetDefW();
   int def_sshell_h = mShellInfo->GetDefSShellH();
+  int top_h        = 3;
   int msgout_h     = mShellInfo->GetMsgOutH();
 
   bool src_on_p    = mShellInfo->GetDefSourceVis();
   bool snk_on_p    = mShellInfo->GetDefSinkVis();
 
-  int sum_h = 3 + (src_on_p ? 2 : 0) + (snk_on_p ? 2 : 0) + 
-              def_sshell_h + 2 + msgout_h;
+  int src_snk_h    = (src_on_p ? 2 : 0) + (snk_on_p ? 2 : 0);
+
+  int sum_h = top_h + src_snk_h + def_sshell_h + 2 + msgout_h;
 
   size(def_w, sum_h);
 
@@ -247,7 +249,7 @@ void FTW_Shell::_bootstrap()
   nest_pre->labelfont(nest_pre->labelfont() + FL_BOLD);
   nest_pre->color(fl_rgb_color(200,220,200));
 
-  mEmptyCanvas = new Fl_Window(0, 7, w(), def_sshell_h);
+  mEmptyCanvas = new Fl_Window(0, top_h + src_snk_h, w(), def_sshell_h);
   mEmptyCanvas->end();
   mCurCanvas = mEmptyCanvas;
 
@@ -1131,7 +1133,10 @@ void FTW_Shell::set_vis_of_vertical_component(Fl_Widget* w, bool on_p)
 {
   if(w->visible() == on_p) return;
   if(on_p) w->show(); else w->hide();
-  mCurCanvas->size(mCurCanvas->w(), mCurCanvas->h() + w->h()*(on_p ? -1 : 1));
-  init_sizes();
+  int dh = w->h()*(on_p ? -1 : 1);
+  mCurCanvas->resize(mCurCanvas->x(), mCurCanvas->y() - dh,
+		     mCurCanvas->w(), mCurCanvas->h() + dh);
+  wMainPack->init_sizes();
+  wMainPack->resizable(mCurCanvas);
   redraw();
 }
