@@ -38,12 +38,18 @@ void Moonraker::_init()
   mTColor.rgba(1,1,1);	   mTWidth = 1;
 }
 
-ZVec3D Moonraker::MoonPos(Double_t t) const
+void Moonraker::MoonPos(Double_t* r, Double_t t) const
 {
-  return ZVec3D( mDMoon*TMath::Cos(2*TMath::Pi()/mT0Moon*t),
-		 mDMoon*TMath::Sin(2*TMath::Pi()/mT0Moon*t),
-		 0
-	       );
+  r[0] = mDMoon*TMath::Cos(2*TMath::Pi()/mT0Moon*t);
+  r[1] = mDMoon*TMath::Sin(2*TMath::Pi()/mT0Moon*t);
+  r[2] = 0;
+}
+
+void Moonraker::MoonPos(TVector3& r, Double_t t) const
+{
+  r.SetXYZ(mDMoon*TMath::Cos(2*TMath::Pi()/mT0Moon*t),
+	   mDMoon*TMath::Sin(2*TMath::Pi()/mT0Moon*t),
+	   0);
 }
 
 /**************************************************************************/
@@ -55,12 +61,12 @@ namespace {
 void
 Moonraker::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d)
 {
-  TVectorD pos(y.GetSub(0,2));
-  ZVec3D moon = MoonPos(x);
-  TVectorD md(pos);
-  for(UInt_t i=0; i<3; i++) { md(i) -= moon(i); }
-  Double_t r0 = p223(pos.Norm2Sqr());
-  Double_t r1 = p223(md.Norm2Sqr());
+  TVector3 pos(y(0), y(1), y(2));
+  TVector3 moon; MoonPos(moon, x);
+  TVector3 md(pos);
+  md -= moon;
+  Double_t r0 = p223(pos.Mag2());
+  Double_t r1 = p223(md.Mag2());
   for(UInt_t i=0; i<3; i++) {
     d(i) = y(i+3u);
     d(i+3u) = -hKappa*(pos(i)/r0 + md(i)/r1*mMMoon);
