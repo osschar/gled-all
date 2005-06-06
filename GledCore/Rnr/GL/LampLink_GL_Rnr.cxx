@@ -27,12 +27,14 @@ void LampLink_GL_Rnr::Draw(RnrDriver* rd)
     lamp_rnr->LampOff(rd);
   } else if(lamp_rnr->GetLampID() == -1 && mLampLink->bTurnOn) {
     ZNode* top = rd->TopPMNode();
-    ZTrans* tr = lamp->ToNode(top);
-    if(tr) {
-      lamp_rnr->LampOn(rd, tr);
-      delete tr;
-    } else {
-      cout << _eh <<"no route from lamp to top.\n";
+    if(top) {
+      ZTrans* tr = lamp->ToNode(top);
+      if(tr) {
+	lamp_rnr->LampOn(rd, tr);
+	delete tr;
+	return;
+      }
     }
+    cout << _eh <<"no route from lamp to top.\n";
   }
 }
