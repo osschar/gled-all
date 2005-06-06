@@ -1,3 +1,37 @@
+2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Clean-up and extension of the interface.
+
+	* Glasses/ZNode.h:
+	Added retransform flag 't' to export options of scaling variables.
+	
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.h:
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Redid Position Matrix Stack handling.
+
+	* RnrBase/PMSEntry.cxx:
+	* RnrBase/PMSEntry.h:
+	New files: Position Matrix Stack Entry (implemented in RnrDriver
+	before).
+
+	* Rnr/GL/LampLink_GL_Rnr.cxx:
+	Additional protection during global position determination.
+
+	* perllib/GLED_Widgets.pm:
+	Trans_Pos/Rot_Ctrl: use different getter from ZTrans.
+	
+	* Stones/Z3Mark.cxx:
+	* Stones/Z3Mark.h:
+	* Stones/Z3Point.cxx:
+	* Stones/Z3Point.h:
+	* Stones/ZMark.cxx:
+	* Stones/ZMark.h:
+	Removed obsolete files.
+
 2005-06-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Shell.cxx:
