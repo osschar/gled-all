@@ -31,8 +31,8 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
 
   // Moon
   glPushMatrix();
-  ZVec3D mp = mMoonraker->MoonPos(mMoonraker->mT);
-  glTranslated(mp(0), mp(1), mp(2));
+  Double_t mp[3]; mMoonraker->MoonPos(mp, mMoonraker->mT);
+  glTranslated(mp[0], mp[1], mp[2]);
   glColor4fv(mMoonraker->mMColor());
   gluSphere(mQuadric, mMoonraker->mRMoon, mMoonraker->mLOD, mMoonraker->mLOD);
   glPopMatrix();
@@ -66,7 +66,7 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
     glLineWidth(mMoonraker->mTWidth);
     glColor4fv(mMoonraker->mTColor());
     glBegin(GL_LINE_STRIP);
-    for(Int_t i=0; i<M; i++) {
+    for(UInt_t i=0; i<M; i++) {
       //printf("\t%u\t%f\t%f\t%f\t%f\n", i, (*x)(i), (y[i])(0u), (y[i])(1u), (y[i])(2u));
       glVertex3fv(y[i].GetMatrixArray());
     }

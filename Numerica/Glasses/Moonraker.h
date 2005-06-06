@@ -43,7 +43,8 @@ protected:
   Float_t	mPhi;		// X{gS} 7 Value(-range=>[-90,90,1,100])
   Float_t	mV0;		// X{gS} 7 Value(-range=>[0,10,1,10000])
 
-  ZVec3D MoonPos(Double_t t) const;
+  void MoonPos(Double_t* x, Double_t t) const;
+  void MoonPos(TVector3& x, Double_t t) const;
 
 public:
   Moonraker(const Text_t* n="Moonraker", const Text_t* t=0) : ZNode(n,t)
