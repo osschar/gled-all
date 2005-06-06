@@ -9,28 +9,11 @@
 
 // Includes
 class ZNode;
-class ZMark;
 
 #include <TVector3.h>
 #include <TVectorF.h>
 #include <TMatrixF.h>
 #include <TMath.h>
-
-// Should use TVector3!
-
-struct ZVec3 {
-  Float_t v[3];
-  ZVec3() { v[0] = v[1] = v[2] = 0; }
-  ZVec3(Float_t x, Float_t y, Float_t z) { v[0]=x; v[1]=y; v[2]=z; }
-  Float_t& operator()(Int_t i) { return v[i]; }
-};
-
-struct ZVec3D {
-  Double_t v[3];
-  ZVec3D() { v[0] = v[1] = v[2] = 0; }
-  ZVec3D(Double_t x, Double_t y, Double_t z) { v[0]=x; v[1]=y; v[2]=z; }
-  Double_t& operator()(Int_t i) { return v[i]; }
-};
 
 /**************************************************************************/
 // ZTrans -- 3D transformation in generalised coordinates
@@ -58,15 +41,19 @@ public:
 
   void  UnitTrans();
   Int_t Set3Pos(Float_t x, Float_t y, Float_t z);
+  Int_t Set3Pos(Float_t* x);
   Int_t SetPos(const TVectorF& v);
   Int_t SetPos(const ZTrans& t);
-  ZVec3 Get3Pos() const
-  { return ZVec3((*this)(1,4), (*this)(2,4), (*this)(3,4)); }
+  void  Get3Pos(Float_t& x, Float_t& y, Float_t& z) const
+  {  x = (*this)(1,4); y = (*this)(2,4); z = (*this)(3,4); }
+  void  Get3Pos(Float_t* x) const
+  {  x[0] = (*this)(1,4); x[1] = (*this)(2,4); x[2] = (*this)(3,4); }
 
-  TVectorF* GetZVector() const;
   TVectorF* GetBaseV(Int_t b) const;
   TVector3  GetBaseVec3(Int_t b) const;
-  TVector3  GetPosVec3() const           { return GetBaseVec3(4); }
+  void      GetBaseVec3(TVector3& v, Int_t b) const;
+  TVector3  GetPosVec3() const             { return GetBaseVec3(4); }
+  void      GetPosVec3(TVector3& v) const  { return GetBaseVec3(v, 4); }
 
   void SetRot(Int_t i, Int_t j, Float_t f);
   void SetTrans(const ZTrans& t);
@@ -84,7 +71,7 @@ public:
   Int_t Move(ZTrans* a, Int_t ai, Float_t amount=1);
   Int_t Rotate(ZTrans* a, Int_t i1, Int_t i2, Float_t amount=0.02);
   Int_t SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);
-  ZVec3 Get3Rot() const;
+  void  Get3Rot(Float_t* x) const;
 
   void     Scale3(Float_t sx, Float_t sy, Float_t sz);
   void     GetScale3(Float_t& sx, Float_t& sy, Float_t& sz);
@@ -108,7 +95,6 @@ public:
   ClassDef(ZTrans, 1)
 };
 
-ostream& operator<<(ostream& s, const ZVec3& v);
 ostream& operator<<(ostream& s, const ZTrans& t);
 
 #endif
