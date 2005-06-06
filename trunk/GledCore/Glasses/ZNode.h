@@ -28,12 +28,12 @@ protected:
 
   // 777 Trans_Rot_Ctrl(Methodbase=>'Rot', Methodname=>'Rot',Transname=>'Trans')
 
-  Bool_t	bUseScale;	// X{GS}  7 Bool(-join=>1)
-  Bool_t	bUseOM;		// X{GS}  7 Bool(-join=>1)
-  Float_t	mOM;		// X{GS}  7 Value(-range=>[-32, 32, 1,1000])
-  Float_t	mSx;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
-  Float_t	mSy;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
-  Float_t	mSz;		// X{GS}  7 Value(-range=>[0,1000, 1,1000])
+  Bool_t	bUseScale;	// X{GSt}  7 Bool(-join=>1)
+  Bool_t	bUseOM;		// X{GSt}  7 Bool(-join=>1)
+  Float_t	mOM;		// X{GSt}  7 Value(-range=>[-32, 32, 1,1000])
+  Float_t	mSx;		// X{GSt}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
+  Float_t	mSy;		// X{GSt}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
+  Float_t	mSz;		// X{GSt}  7 Value(-range=>[0,1000, 1,1000])
 
   ZNode*	mParent;	// X{gS} L{l} Structural parent
   Bool_t	bKeepParent;	// X{GS} 7 Bool()
