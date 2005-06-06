@@ -1,3 +1,10 @@
+2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	ZVec3 no longer available from ZTrans.
+
 2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Moonraker.h:
