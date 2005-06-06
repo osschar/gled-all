@@ -8,15 +8,18 @@
 #define GledCore_RnrDriver_H
 
 #include "A_Rnr.h"
+#include "PMSEntry.h"
 #include <GledView/GledViewNS.h>
 #include <Stones/ZTrans.h>
 #include <Stones/ZColor.h>
 
+#include <list>
 #include <stack>
 
 namespace GLTextNS {
   class TexFont;
 };
+
 
 /**************************************************************************/
 // Rnr driver
@@ -41,23 +44,10 @@ protected:
 
   // --------------------------------
 
-  struct PMSEntry {
-    PMSEntry*   fPrev;
-    ZNode*	fNode;
-    Bool_t	bTo, bFrom;
-    ZTrans	fToGCS;
-    ZTrans	fFromGCS;
-
-    PMSEntry() : 
-      fPrev(0), fNode(0), bTo(1), bFrom(1) {}
-    PMSEntry(PMSEntry* p, ZNode* n);
-
-    ZTrans& ToGCS();
-    ZTrans& FromGCS();
-  };
-
-  list<PMSEntry> mPMStack;	// X{r}
-  ZTrans*        mAbsCamera;	// X{gs}
+protected:
+  list<PMSEntry*> mPMStack;	// X{r}
+  PMSEntry        mBotPMSE;
+  ZTrans*         mAbsCamera;   // X{gs}
 
   // --------------------------------
 
@@ -114,17 +104,17 @@ public:
   virtual void EndRender();
 
   // Position Matrix Stack
-  void PushPM(ZNode* n) { mPMStack.push_back(PMSEntry(TopPM(), n)); }
-  void PopPM() 		{ mPMStack.pop_back(); }
+  void PushPM(PMSEntry& pmse) { mPMStack.push_back(&pmse); }
+  void PopPM()                { mPMStack.pop_back(); }
 
-  PMSEntry* TopPM() 	{ return &mPMStack.back(); }
-  ZNode*    TopPMNode() { return mPMStack.back().fNode; }
+  PMSEntry& TopPM() 	{ return *mPMStack.back(); }
+  ZNode*    TopPMNode() { return mPMStack.back()->fNode; }
 
   int  SizePM()  { return mPMStack.size(); }
   void ClearPM() { mPMStack.clear(); }
 
-  ZTrans& ToGCS()   { return mPMStack.back().ToGCS(); }
-  ZTrans& FromGCS() { return mPMStack.back().FromGCS(); }
+  ZTrans& ToGCS()   { return mPMStack.back()->ToGCS(); }
+  ZTrans& FromGCS() { return mPMStack.back()->FromGCS(); }
 
   // Lamps
   A_Rnr** GetLamps() { return mLamps; }

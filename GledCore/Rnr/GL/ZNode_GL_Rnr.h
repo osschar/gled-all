@@ -9,15 +9,21 @@
 
 #include <Glasses/ZNode.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
+#include <RnrBase/PMSEntry.h>
 class RnrDriver;
 
 class ZNode_GL_Rnr : public ZGlass_GL_Rnr {
   void _init();
   void _setup_rnrmod();
 protected:
-  ZNode*	mNode;
-  TimeStamp_t	mStampTrans;
-  float		mGL_Mat[16];
+  ZNode*        mNode;
+  TimeStamp_t   mStampTrans;
+
+  PMSEntry      mPMSE;
+  GLdouble      mGL_Mat[16];
+  bool          bNormP;
+  bool          bNormWasOffP;
+  Float_t       mExDOM;
 
   void build_GL_mat();
 
