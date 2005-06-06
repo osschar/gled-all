@@ -30,6 +30,8 @@ RnrDriver::RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r)
 
   mMaxDepth = 100;
 
+  mBotPMSE.bTo = true; mBotPMSE.bFrom = true; // Bottom PMSE holds the identity.
+
   mMaxLamps = 8;
   mLamps = new (A_Rnr*)[mMaxLamps];
 
@@ -172,7 +174,7 @@ void RnrDriver::Render(A_Rnr* rnr)
 void RnrDriver::BeginRender()
 {
   ++mRnrCount;
-  mPMStack.push_back(PMSEntry());
+  mPMStack.push_back(&mBotPMSE);
   for(int i=0; i<mMaxLamps; ++i) {
     mLamps[i] = 0;
   } 
@@ -198,35 +200,6 @@ void RnrDriver::EndRender()
   }
   mPMStack.pop_back();
 }
-
-/**************************************************************************/
-// RnrDriver::PMSEntry
-/**************************************************************************/
-
-RnrDriver::PMSEntry::PMSEntry(PMSEntry* p, ZNode* n) :
-      fPrev(p), fNode(n), bTo(0), bFrom(0), fToGCS(n)
-{
-  n->ApplyScale(fToGCS);
-}
-
-ZTrans& RnrDriver::PMSEntry::ToGCS()
-{
-  if(bTo == false && fPrev != 0) {
-    fToGCS = fPrev->ToGCS()*fToGCS;
-    bTo = true;
-  }
-  return fToGCS;
-}
-
-ZTrans& RnrDriver::PMSEntry::FromGCS()
-{
-  if(bFrom == false) {
-    fFromGCS = ToGCS();
-    fFromGCS.InvertFast();
-    bFrom = true;
-  }
-  return fFromGCS;
-} 
 
 /**************************************************************************/
 /**************************************************************************/
@@ -362,5 +335,3 @@ void RnrDriver::CleanUpRnrModDefaults()
 	     _eh.c_str(), GledNS::FindClassInfo(i->first)->fName.c_str(), cnt);
   }
 }
-
-/**************************************************************************/

@@ -22,6 +22,8 @@ namespace OS   = OptoStructs;
 void ZNode_GL_Rnr::_init()
 {
   _setup_rnrmod();
+  mPMSE.fNode = mNode;
+  mExDOM = 0;
 }
 
 void ZNode_GL_Rnr::_setup_rnrmod()
@@ -94,13 +96,14 @@ void ZNode_GL_Rnr::CreateRnrScheme(RnrDriver* rd)
 
 void ZNode_GL_Rnr::build_GL_mat()
 {
+  ZTrans& T(mPMSE.fLocal);
   int s=0;
   for(Int_t i=1; i<=3; i++) {
     for(Int_t j=1; j<=4; j++)
-      mGL_Mat[s++] = mNode->mTrans(j,i);
+      mGL_Mat[s++] = T(j,i);
   }
-  mGL_Mat[s++] = mNode->mTrans(1,4); mGL_Mat[s++] = mNode->mTrans(2,4);
-  mGL_Mat[s++] = mNode->mTrans(3,4); mGL_Mat[s++] = mNode->mTrans(4,4);
+  mGL_Mat[s++] = T(1,4); mGL_Mat[s++] = T(2,4);
+  mGL_Mat[s++] = T(3,4); mGL_Mat[s++] = T(4,4);
 }
 
 /**************************************************************************/
@@ -108,31 +111,38 @@ void ZNode_GL_Rnr::build_GL_mat()
 void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   PARENT::PreDraw(rd);
-  if(mNode->mStampReqTrans > mStampTrans) {
-    build_GL_mat();
-    mStampTrans = mNode->mTimeStamp;
+
+  PMSEntry& prev_pmse = rd->TopPM();
+  Float_t dom = 0;
+  if(mNode->bUseOM && prev_pmse.fNode && prev_pmse.fNode->bUseOM) {
+    dom = mNode->mOM - prev_pmse.fNode->mOM;
   }
-  glPushAttrib(GL_TRANSFORM_BIT);
-  glPushMatrix();
-  glMultMatrixf(mGL_Mat);
-  { // Scaling stuff
-    bool norm_p = false;
+
+  if(mNode->mStampReqTrans > mStampTrans || dom != mExDOM) {
+    mPMSE.fLocal = mNode->mTrans;
+    bNormP = false;
     if(mNode->bUseScale) {
-      glScalef(mNode->mSx, mNode->mSy, mNode->mSz);
-      norm_p = true;
+      mPMSE.fLocal.Scale3(mNode->mSx, mNode->mSy, mNode->mSz);
+      bNormP = true;
     }
-    ZNode* pn = mNode->mParent;
-    if(mNode->bUseOM && pn && pn==rd->TopPMNode() && pn->bUseOM) {
-      Float_t dom =  mNode->mOM - pn->mOM;
-      if(dom != 0) {
-	Double_t s = TMath::Power(10, dom);
-	glScaled(s, s, s);
-	norm_p = true;
-      }
+    if(dom != 0) {
+      const Double_t s = TMath::Power(10, dom);
+      mPMSE.fLocal.Scale3(s, s, s);
+      bNormP = true;
     }
-    if(norm_p) glEnable(GL_NORMALIZE);
+    mExDOM = dom;
+    build_GL_mat();
+    mStampTrans  = mNode->mTimeStamp;
   }
-  rd->PushPM(mNode);
+  glPushMatrix();
+  glMultMatrixd(mGL_Mat);
+  if(bNormP) {
+    Bool_t bNormWasOffP = !glIsEnabled(GL_NORMALIZE);
+    if(bNormWasOffP) glEnable(GL_NORMALIZE);
+  }
+
+  mPMSE.bTo = false; mPMSE.bFrom = false; // Could be optimized if rnr and pmse separated.
+  rd->PushPM(mPMSE);
 }
 
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
@@ -155,8 +165,8 @@ void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
   }
 
   rd->PopPM();
+  if(bNormP && bNormWasOffP) glDisable(GL_NORMALIZE);
   glPopMatrix();
-  glPopAttrib();
   PARENT::PostDraw(rd);
 }
 
