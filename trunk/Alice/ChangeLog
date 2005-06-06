@@ -1,3 +1,10 @@
+2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Removed calls to rnrdriver->Push/PopPM (transformation matrix was
+	not used anyway).
+
 2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Alice/user_init.cxx:
