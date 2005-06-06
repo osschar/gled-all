@@ -20,8 +20,8 @@ void RecTrack_GL_Rnr::_init()
 
 void RecTrack_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  // Completely ignore position information.
   ZGlass_GL_Rnr::PreDraw(rd);
-  rd->PushPM(mRecTrack);
 }
 
 void RecTrack_GL_Rnr::Draw(RnrDriver* rd)
@@ -32,7 +32,6 @@ void RecTrack_GL_Rnr::Draw(RnrDriver* rd)
 
 void RecTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  rd->PopPM();
   ZGlass_GL_Rnr::PostDraw(rd);
 }
 

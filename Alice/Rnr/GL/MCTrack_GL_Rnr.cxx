@@ -19,8 +19,8 @@ void MCTrack_GL_Rnr::_init()
 
 void MCTrack_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  // Completely ignore position information.
   ZGlass_GL_Rnr::PreDraw(rd);
-  rd->PushPM(mMCTrack);
 }
 
 void MCTrack_GL_Rnr::Draw(RnrDriver* rd)
@@ -31,7 +31,6 @@ void MCTrack_GL_Rnr::Draw(RnrDriver* rd)
 
 void MCTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  rd->PopPM();
   ZGlass_GL_Rnr::PostDraw(rd);
 }
 
