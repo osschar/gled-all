@@ -777,8 +777,8 @@ fnord
 sub make_weed_update {
   my $S = shift;
   $S->make_weed_update_A() .
-    "  ZVec3 x = mIdol->Ref$S->{Transname}().Get3Pos();\n" .
-    "  w->pos(x(0),x(1),x(2));\n" .
+    "  Float_t x[3]; mIdol->Ref$S->{Transname}().Get3Pos(x);\n" .
+    "  w->pos(x[0],x[1],x[2]);\n" .
   $S->make_weed_update_B();
 }
 
@@ -825,8 +825,8 @@ fnord
 sub make_weed_update {
   my $S = shift;
   $S->make_weed_update_A().
-    "  ZVec3 x = mIdol->Ref$S->{Transname}().Get3Rot();\n" .
-    "  w->rot(x(0),x(1),x(2));\n" .
+    "  Float_t x[3];  mIdol->Ref$S->{Transname}().Get3Rot(x);\n" .
+    "  w->rot(x[0],x[1],x[2]);\n" .
   $S->make_weed_update_B();
 }
 
