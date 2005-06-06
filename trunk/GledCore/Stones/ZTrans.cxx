@@ -44,6 +44,13 @@ Int_t ZTrans::Set3Pos(Float_t x, Float_t y, Float_t z)
   return 1;
 }
 
+Int_t ZTrans::Set3Pos(Float_t* x)
+{
+  ZTrans& M = *this;
+  M(1, 4) = x[0]; M(2, 4) = x[1]; M(3, 4) = x[2];
+  return 1;
+}
+
 Int_t ZTrans::SetPos(const TVectorF& v)
 {
   if(v.GetNoElements() != 5) return 1;
@@ -62,16 +69,6 @@ Int_t ZTrans::SetPos(const ZTrans& t)
   return 0;
 }
 
-TVectorF* ZTrans::GetZVector() const
-{
-  // *CHTD*; obsoleted by the next method
-  TVectorF* v = new TVectorF(5);
-  const ZTrans& M = *this;
-  for(Int_t i = 0; i<5; i++)
-    (*v)(i) = M(i, 4);
-  return v;
-}
-
 TVectorF* ZTrans::GetBaseV(Int_t b) const
 {
   // *CHTD*
@@ -86,6 +83,12 @@ TVector3 ZTrans::GetBaseVec3(Int_t b) const
 {
   const ZTrans& M = *this;
   return TVector3(M(1,b), M(2,b), M(3,b));
+}
+
+void ZTrans::GetBaseVec3(TVector3& v, Int_t b) const
+{
+  const ZTrans& M = *this;
+  v.SetXYZ(M(1,b), M(2,b), M(3,b));
 }
 
 /**************************************************************************/
@@ -111,7 +114,6 @@ void ZTrans::SetBaseV(Int_t i, Float_t x, Float_t y, Float_t z)
   ZTrans& M = *this;
   M(1,i) = x; M(2,i) = y; M(3,i) = z;
   bAsOK = false;
-  // Should be stamped ... but not node ... safr
 }
 
 void ZTrans::SetBaseVec3(Int_t i, const TVector3& v)
@@ -119,7 +121,6 @@ void ZTrans::SetBaseVec3(Int_t i, const TVector3& v)
   ZTrans& M = *this;
   M(1,i) = v.x(); M(2,i) = v.y(); M(3,i) = v.z();
   bAsOK = false;
-  // Should be stamped ... but not node ... safr
 }
 
 /**************************************************************************/
@@ -209,7 +210,7 @@ Int_t ZTrans::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 }
 
 
-ZVec3 ZTrans::Get3Rot() const
+void ZTrans::Get3Rot(Float_t* x) const
 {
   const ZTrans& M = *this;
   if(!bAsOK) {
@@ -226,7 +227,7 @@ ZVec3 ZTrans::Get3Rot() const
     }
     bAsOK = true;
   }
-  return ZVec3(mA1, mA2, mA3);
+  x[0] = mA1; x[1] = mA2; x[2] = mA3;
 }
 
 /**************************************************************************/
@@ -341,11 +342,6 @@ void ZTrans::OrtoNorm3()
 /**************************************************************************/
 
 #include <iomanip>
-
-ostream& operator<<(ostream& s, const ZVec3& v) {
-  s.setf(ios::fixed, ios::floatfield); s.precision(3);
-  return s << v.v[0] << " " << v.v[1] << " " << v.v[2];
-}
 
 ostream& operator<<(ostream& s, const ZTrans& t) {
   s.setf(ios::fixed, ios::floatfield); s.precision(3);
