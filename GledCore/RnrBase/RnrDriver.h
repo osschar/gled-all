@@ -104,8 +104,10 @@ public:
   virtual void EndRender();
 
   // Position Matrix Stack
-  void PushPM(PMSEntry& pmse) { mPMStack.push_back(&pmse); }
-  void PopPM()                { mPMStack.pop_back(); }
+  void PushPM(PMSEntry& pmse)
+  { pmse.fPrev = mPMStack.back(); mPMStack.push_back(&pmse); }
+  void PopPM()
+  { mPMStack.pop_back(); }
 
   PMSEntry& TopPM() 	{ return *mPMStack.back(); }
   ZNode*    TopPMNode() { return mPMStack.back()->fNode; }
