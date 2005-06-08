@@ -2,7 +2,7 @@
 
 // 
 //
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1
 
 #include <glass_defines.h>
@@ -40,10 +40,14 @@ class ZImage;
 void AliLoader(const Text_t* dirname = 0,
 	       Bool_t use_aliroot    = 0)
 {
-  if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
+  Gled::AssertMacro("sun.C");
 
-  scenes->SetAuthMode(ZQueen::AM_None);
-  scenes->SetMapNoneTo(ZMirFilter::R_Allow);
+  g_queen = new ZQueen(512*1024, "AliceQueen", "Goddess of Ver");
+  g_sun_king->Enthrone(g_queen);
+  g_queen->SetMandatory(true);
+
+  g_queen->SetAuthMode(ZQueen::AM_None);
+  g_queen->SetMapNoneTo(ZMirFilter::R_Allow);
 
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
@@ -53,6 +57,7 @@ void AliLoader(const Text_t* dirname = 0,
 
   gROOT->LoadMacro("alice_simple.C");
 
+  // Returned also in g_scene.
   Scene* rscene = alice_simple_init("alice_minigeo.root",
 				    "def_geoview.root");
   
@@ -87,7 +92,7 @@ void AliLoader(const Text_t* dirname = 0,
   al->SetOM(-2);
   al->SetUseOM(true);
   al->SetImportMode(giis);
-  scenes->CheckIn(al);
+  g_queen->CheckIn(al);
   rscene->Add(al);
 
   ZList* aliconf = rscene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
@@ -105,9 +110,9 @@ void AliLoader(const Text_t* dirname = 0,
 
   // leave geometry as default
   default_nest_layout = particle_layout;
-  setup_default_gui(rscene);
+  setup_default_gui();
   {
-    ZList* l = fire_queen;
+    ZList* l = g_fire_queen;
     l = l->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
     l = l->AssertPath("Alice", "ZList");
     l->Swallow(new ZGlass("Particle", particle_layout));
@@ -122,7 +127,7 @@ void AliLoader(const Text_t* dirname = 0,
 
   spawn_default_gui();
 
-  shell->SpawnMetaGui(al, mvi);
+  g_shell->SpawnMetaGui(al, mvi);
 
   if(dirname != 0) {
     al->SetDataDir(dirname);
@@ -142,7 +147,7 @@ MetaViewInfo* make_zaliload_metagui()
 {
   int Y = 0, W = 40, H = 26;
 
-  CREATE_ADD_GLASS(mv, MetaViewInfo, fire_queen, "MetaGui for ZAliLoad", 0);
+  CREATE_ADD_GLASS(mv, MetaViewInfo, g_fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
 
   int y = 0;
