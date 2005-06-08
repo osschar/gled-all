@@ -1376,11 +1376,22 @@ void Saturn::delayed_mir_shooter()
 
 void Saturn::PostMIR(auto_ptr<ZMIR>& mir)
 {
-  // Routes a MIR in the current thread.
+  // Routes MIR 'mir' in the current thread.
   // Usually called from Operators to publish some result.
-  // If mir is to be re-used, do: mir.RewindToMIR() prior to posting it again.
+  // 'mir' will NOT be harmed; if it is to be re-used, do:
+  //  mir.RewindToMIR() prior to posting it again.
 
   post_mir(mir, 0);
+}
+
+void Saturn::PostMIR(ZMIR* mir)
+{
+  // Routes a MIR in the current thread.
+  // Wrapper for auto_ptr function.
+
+  auto_ptr<ZMIR> apmir(mir);
+  post_mir(apmir, 0);
+  apmir.release();
 }
 
 /**************************************************************************/
