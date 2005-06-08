@@ -2,62 +2,83 @@
 
 // Spawn a standard GUI.
 //
-// assumes: ZQueen* scenes; ZQueen* fire_queen (as declared by sun.C)
 
-EyeInfo*       eye          = 0;
-ShellInfo*     shell        = 0;
-SubShellInfo*  def_subshell = 0;
-PupilInfo*     pupil        = 0;
-
-void eye(const Text_t* eye_name  ="Eye of Ra",
-	 const Text_t* shell_name="Shell",
-	 const Text_t* pupil_name="Default Pupil",
-	 const Text_t* scene_name=0)
+void eye(Bool_t spawn_pupil=true)
 {
+
   if(Gled::theOne->HasGUILibs() == false) {
     printf("eye.C::eye skipping Eye and ShellInfo instantiation (no GUI libraries).\n");
     return;
   }
 
-  register_GledCore_layouts();
+  Gled::AssertMacro("gled_view_globals.C");
 
-  EyeInfo* pre_ei = new EyeInfo(eye_name);
+  if(g_eye == 0) {
+    register_GledCore_layouts();
 
-  shell = new ShellInfo(shell_name);
-  fire_queen->CheckIn(shell);
-  fire_queen->Add(shell);
-  def_subshell = shell->MakeDefSubShell();
+    EyeInfo* pre_ei = new EyeInfo("Eye");
 
-  if(pupil_name) {
-    pupil = new PupilInfo(pupil_name);
-    fire_queen->CheckIn(pupil);
-    shell->GetSubShells()->Add(pupil);
-    ZGlass* sc = 0;
-    if(scene_name != 0) sc = scenes->GetElementByName(scene_name);
-    if(sc == 0)         sc = scenes->First();
-    if(sc != 0)
-      pupil->Add(sc);
+    g_shell = new ShellInfo("Shell");
+    g_fire_queen->CheckIn(g_shell);
+    g_fire_queen->Add(g_shell);
+
+    g_nest = new_nest();
+    g_shell->SetDefSubShell(g_nest);
+
+    g_eye = Gled::theOne->SpawnEye(pre_ei, g_shell, "GledCore", "FTW_Shell");
   }
-  
-  //shell->SetDefSubShell(pupil);
 
-  eye = Gled::theOne->SpawnEye(pre_ei, shell, "GledCore", "FTW_Shell");
+  if(spawn_pupil)
+    g_pupil = new_pupil();
+
+  if(g_scene != 0) {
+    if(g_nest)  g_nest->Add(g_scene);
+    if(g_pupil) g_pupil->Add(g_scene);
+  }
 }
 
 /**************************************************************************/
 
-NestInfo* new_nest(const Text_t* name="Nest X", const Text_t* layout = 0)
+NestInfo* new_nest(const Text_t* name="Nest", const Text_t* layout = 0)
 {
+  if(g_shell == 0) {
+    printf("eye.C::new_nest g_shell is null. Returning zero.\n");
+    return 0;
+  }
+
   NestInfo* ni = new NestInfo(name);
-  fire_queen->CheckIn(ni);
+  g_fire_queen->CheckIn(ni);
   
   if(layout != 0) {
     ni->SetLayout(layout);
     ni->SetLeafLayout(NestInfo::LL_Custom);
   }
 
-  shell->AddSubShell(ni);
+  g_shell->AddSubShell(ni);
   return ni;
+}
+
+PupilInfo* new_pupil(const Text_t* name="Pupil")
+{
+  if(g_shell == 0) {
+    printf("eye.C::new_pupil g_shell is null. Returning zero.\n");
+    return 0;
+  }
+ 
+  PupilInfo* pi = new PupilInfo(name);
+  g_fire_queen->CheckIn(pi);
+  g_shell->AddSubShell(pi);
+
+  return pi;
+}
+
+void setup_pupil_up_reference(ZNode* n=0, Int_t a=3)
+{
+  if(n == 0) n = g_scene;
+  if(g_pupil && n) {
+    g_pupil->SetUpReference(n);
+    g_pupil->SetUpRefAxis(a);
+  }
 }
 
 /**************************************************************************/
@@ -65,7 +86,7 @@ NestInfo* new_nest(const Text_t* name="Nest X", const Text_t* layout = 0)
 
 ZList* register_GledCore_layouts(ZList* top=0)
 {
-  if(top == 0) top = fire_queen;
+  if(top == 0) top = g_fire_queen;
   top = top->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
   ZList* l = top->AssertPath("GledCore", "ZList");
 
