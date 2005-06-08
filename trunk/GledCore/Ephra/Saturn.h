@@ -211,6 +211,7 @@ protected:
 public:
 
   void     PostMIR(auto_ptr<ZMIR>& mir);
+  void     PostMIR(ZMIR* mir);
 
   void     ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
   void     ShootMIR(ZMIR* mir, bool use_own_thread=false);
