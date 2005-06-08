@@ -10,6 +10,18 @@
 
 #include <FL/gl.h>
 
+void LampLink_GL_Rnr::_init()
+{
+  bWarn = true;
+}
+
+/**************************************************************************/
+
+void LampLink_GL_Rnr::AbsorbRay(Ray& ray)
+{
+  bWarn = true;
+}
+
 /**************************************************************************/
 
 void LampLink_GL_Rnr::Draw(RnrDriver* rd)
@@ -17,9 +29,15 @@ void LampLink_GL_Rnr::Draw(RnrDriver* rd)
   static const string _eh("LampLink_GL_Rnr::Draw ");
 
   Lamp* lamp = mLampLink->mLamp;
+  if(lamp == 0) return;
+
   Lamp_GL_Rnr* lamp_rnr = dynamic_cast<Lamp_GL_Rnr*>(rd->GetLensRnr(lamp));
-  if(lamp_rnr==0) {
-    cout << _eh <<"got 0 lamp rnr.\n";
+  if(lamp_rnr == 0) {
+    if(bWarn) {
+      printf("%s'%s' got 0 lamp-rnr for '%s'.\n", _eh.c_str(),
+	     mLampLink->Identify().c_str(), lamp->Identify().c_str());;
+      bWarn = false;
+    }
     return;
   }
 
@@ -35,6 +53,10 @@ void LampLink_GL_Rnr::Draw(RnrDriver* rd)
 	return;
       }
     }
-    cout << _eh <<"no route from lamp to top.\n";
+    if(bWarn) {
+      printf("%s'%s' no route to '%s'.\n", _eh.c_str(),
+	     mLampLink->Identify().c_str(), lamp->Identify().c_str());;
+      bWarn = false;
+    }
   }
 }
