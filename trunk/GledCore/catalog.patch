@@ -5,7 +5,9 @@
 $PATCH = {
 
 "Gled" => {
-  'Pragmas' => "#pragma link C++ global Gled::theOne;\n"
+  'Pragmas' =>
+    "#pragma link C++ global Gled::theOne;\n" .
+    "#pragma link C++ global gGled;\n"
 },
 
 "GledNS" => {
