@@ -4,35 +4,30 @@
 //   minimization thread.
 // MultiSpheror spawns several Spherors and process them on moons.
 //
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Numerica
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Numerica");
 
   Scene* sph_scene  = new Scene("Spheror Scene");
-  scenes->CheckIn(sph_scene);
-  scenes->Add(sph_scene);
+  g_queen->CheckIn(sph_scene);
+  g_queen->Add(sph_scene);
+  g_scene = sph_scene;
 
   Spheror* spheror = new Spheror("Single Spheror");
-  scenes->CheckIn(spheror); sph_scene->Add(spheror);
+  g_queen->CheckIn(spheror); sph_scene->Add(spheror);
   spheror->Set3Pos(0, 0, 2.5);
   spheror->SetNVert(30); spheror->SetBeautyP(true);
   spheror->Install();
   spheror->SelfInit();
 
   MultiSpheror* multi_spheror = new MultiSpheror("Grid Spheror");
-  scenes->CheckIn(multi_spheror); sph_scene->Add(multi_spheror);
+  g_queen->CheckIn(multi_spheror); sph_scene->Add(multi_spheror);
   multi_spheror->Init();
 
 
   // Spawn GUI
-  gROOT->Macro("eye.C");
-  if(pupil) {
-    // Comment to disable fixing of camera 'up' direction to 'z' axis.
-    pupil->SetUpReference(sph_scene);
-    pupil->SetUpRefAxis(3);
-  }
+  Gled::Macro("eye.C");
+  setup_pupil_up_reference();
 }

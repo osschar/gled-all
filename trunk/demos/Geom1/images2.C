@@ -5,7 +5,7 @@
 // Does NOT create the default GUI.
 // Requires manual dragging of SunKing/GeomQueen/Images into the PupilInfo.
 
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1
 
 #include <glass_defines.h>
@@ -13,11 +13,8 @@
 
 void images2()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
-
 
   // Images
 

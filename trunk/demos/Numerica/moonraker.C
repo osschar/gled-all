@@ -9,33 +9,32 @@
 // compute trajectory. No check for collision with earth/moon is done.
 // Change Moonraker->T variable to animate shell movement.
 //
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Numerica, Geom1
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Numerica");
   Gled::theOne->AssertLibSet("Geom1");
 
   Scene* moon_scene  = new Scene("Moonraker Scene");
-  scenes->CheckIn(moon_scene);
-  scenes->Add(moon_scene);
+  g_queen->CheckIn(moon_scene);
+  g_queen->Add(moon_scene);
+  g_scene = moon_scene;
 
   Rect* base_plane = new Rect("BasePlane");
   base_plane->SetUnitSquare(20);
   base_plane->SetColor(0.6, 0.6, 0.6);
-  scenes->CheckIn(base_plane);
+  g_queen->CheckIn(base_plane);
   moon_scene->Add(base_plane);
 
   ODECrawler* ode_c = new ODECrawler();
-  scenes->CheckIn(ode_c);
+  g_queen->CheckIn(ode_c);
   moon_scene->Add(ode_c);
   ode_c->SetAcc(1e-12);
   ode_c->SetStoreMax(2000);
 
   Moonraker* moon = new Moonraker();
-  scenes->CheckIn(moon);
+  g_queen->CheckIn(moon);
   moon_scene->Add(moon);
   moon->SetDMoon(6);
   moon->SetT1(0.25);
@@ -50,10 +49,6 @@
 
 
   // Spawn GUI
-  gROOT->Macro("eye.C");
-  if(pupil) {
-    // Comment to disable fixing of camera 'up' direction to 'z' axis.
-    pupil->SetUpReference(moon_scene);
-    pupil->SetUpRefAxis(3);
-  }
+  Gled::Macro("eye.C");
+  setup_pupil_up_reference();
 }

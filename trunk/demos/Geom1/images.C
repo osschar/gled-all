@@ -7,7 +7,7 @@
 //   image3->Load();
 //   terrain->SetFromImage(image3);
 
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1
 
 #include <glass_defines.h>
@@ -15,16 +15,15 @@
 
 void images()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
 
   Scene* images  = new Scene("Images");
-  scenes->CheckIn(images);
-  scenes->Add(images);
+  g_queen->CheckIn(images);
+  g_queen->Add(images);
+  g_scene = images;
 
-  CREATE_ADD_GLASS(lucida34, ZRlFont, scenes, "LucidaBright 34", 0);
+  CREATE_ADD_GLASS(lucida34, ZRlFont, g_queen, "LucidaBright 34", 0);
   lucida34->SetFontFile("lucidabright34.txf");
 
   // Images
@@ -78,7 +77,7 @@ void images()
 
   Rect* base_plane = new Rect("BasePlane");
   base_plane->SetUnitSquare(16);
-  scenes->CheckIn(base_plane);
+  g_queen->CheckIn(base_plane);
   images->Add(base_plane);
   base_plane->SetColor(0.7, 0.7, 0.7);
 
@@ -86,11 +85,11 @@ void images()
   l->SetDiffuse(0.8, 0.8, 0.8);
   l->SetScale(1);
   l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
-  scenes->CheckIn(l); images->Add(l);
+  g_queen->CheckIn(l); images->Add(l);
   images->GetGlobLamps()->Add(l);
 
   Board* board1 = new Board("Board1", "Showing GledLogo");
-  scenes->CheckIn(board1);
+  g_queen->CheckIn(board1);
   images->Add(board1);
   board1->SetColor(1, 0.7, 0.7);
   board1->SetTexture(image1);
@@ -98,14 +97,14 @@ void images()
   board1->Set3Pos(-4.8, 2.5, 0.01);
 
   Board* board2 = new Board("Board2", "Showing Orchid");
-  scenes->CheckIn(board2);
+  g_queen->CheckIn(board2);
   images->Add(board2);
   board2->SetTexture(image2);
   board2->SetULen(2.5); board2->SetVLen(2.5);
   board2->Set3Pos(5.7, 2.5, 0.01);
 
   RectTerrain* terrain = new RectTerrain("Terrain");
-  scenes->CheckIn(terrain);
+  g_queen->CheckIn(terrain);
   images->Add(terrain);
   terrain->SetFromImage(image3);
   terrain->SetDx(0.05); terrain->SetDy(0.05);
@@ -128,7 +127,7 @@ void images()
   SMorph* morphs[3];
   for(int i=0; i<3; ++i) {
     morphs[i] = new SMorph(Form("Morph %d", i+1));
-    scenes->CheckIn(morphs[i]); images->Add(morphs[i]);
+    g_queen->CheckIn(morphs[i]); images->Add(morphs[i]);
     morphs[i]->SetTLevel(30); morphs[i]->SetPLevel(30);
     morphs[i]->SetS(2);
     morphs[i]->SetTexture(image6);
@@ -163,11 +162,7 @@ void images()
 
 
   // Spawn GUI
-  gROOT->Macro("eye.C");
-  if(pupil) {
-    // Comment to disable fixing of camera 'up' direction to 'z' axis.
-    pupil->SetUpReference(images);
-    pupil->SetUpRefAxis(3);
-  }
+  Gled::Macro("eye.C");
+  setup_pupil_up_reference();
 
 }

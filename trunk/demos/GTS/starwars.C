@@ -2,24 +2,22 @@
 
 // simple scene with some GTS models; more available from http://gts.sf.net/
 
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1 GTS
 
 #include <glass_defines.h>
 
 void starwars()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-    // Declares sun, sun_queen, fire_queen and scenes.
-    // Starts Saturn in master server mode.
-  }
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("GTS");
 
+  Gled::AssertMacro("sun_demos.C");
+
   Scene* starw  = new Scene("StarWars");
-  scenes->CheckIn(starw);
-  scenes->Add(starw);
+  g_queen->CheckIn(starw);
+  g_queen->Add(starw);
+  g_scene = starw;
 
   // Geom elements
 
@@ -33,13 +31,13 @@ void starwars()
   base_plane->Set3Pos(0, 0, -5);
   base_plane->SetUnitSquare(15);
   base_plane->SetUV(30, 30);
-  scenes->CheckIn(base_plane);
+  g_queen->CheckIn(base_plane);
   starw->Add(base_plane);
 
   Lamp* l = new Lamp("Lamp");
   l->Set3Pos(15, 0, 5);
   l->SetScale(1);
-  scenes->CheckIn(l); starw->Add(l);
+  g_queen->CheckIn(l); starw->Add(l);
   starw->GetGlobLamps()->Add(l);
 
   // GTS models
@@ -48,7 +46,7 @@ void starwars()
   surf1->Set3Pos(-4.1, -4.3, 0);
   surf1->SetScale(0.4);
   surf1->SetColor(0.6, 1, 0.9);
-  scenes->CheckIn(surf1); starw->Add(surf1);
+  g_queen->CheckIn(surf1); starw->Add(surf1);
   surf1->SetFile("space_station.gts");
   surf1->Load();
   surf1->Invert(); // this gts file has unstandard orientation of faces
@@ -58,7 +56,7 @@ void starwars()
   surf2->SetRotByDegrees(110, 180, 170);
   surf2->SetScale(0.12);
   surf2->SetColor(0.6, 1, 0.7);
-  scenes->CheckIn(surf2); starw->Add(surf2);
+  g_queen->CheckIn(surf2); starw->Add(surf2);
   surf2->SetFile("x_wing.gts");
   surf2->Load();
 
@@ -67,7 +65,7 @@ void starwars()
   surf3->SetRotByDegrees(20, 10, -10);
   surf3->SetScale(0.06);
   surf3->SetColor(1, 0.3, 0.5);
-  scenes->CheckIn(surf3); starw->Add(surf3);
+  g_queen->CheckIn(surf3); starw->Add(surf3);
   surf3->SetFile("tie.gts");
   surf3->Load();
 
@@ -82,14 +80,11 @@ void starwars()
 
 
   // Spawn GUI
-
-  gROOT->Macro("eye.C");
-  if(pupil) {
-    pupil->SetCameraBase(cambase);
-    pupil->EmitCameraHomeRay();
-    // Comment to disable fixing of camera 'up' direction to 'z' axis.
-    pupil->SetUpReference(starw);
-    pupil->SetUpRefAxis(3);
+  Gled::Macro("eye.C");
+  setup_pupil_up_reference();
+  if(g_pupil) {
+    g_pupil->SetCameraBase(cambase);
+    g_pupil->EmitCameraHomeRay();
   }
 
   // Start the thread rotating the station.

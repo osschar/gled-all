@@ -21,9 +21,11 @@ const Text_t* geometry_mini_layout =
 Scene* create_basic_scene()
 {
   Scene* rscene = new Scene("Alice Detector Scene");
-  scenes->CheckIn(rscene);
-  scenes->Add(rscene);
+  g_queen->CheckIn(rscene);
+  g_queen->Add(rscene);
   rscene->SetUseOM(true);
+
+  g_scene = rscene;
 
   // Lamps.
 
@@ -165,9 +167,10 @@ Scene* create_basic_scene()
 
 /**************************************************************************/
 
-void setup_default_gui(Scene* rscene)
+void setup_default_gui()
 {
-  gROOT->LoadMacro("eye.C");
+  Gled::AssertMacro("gled_view_globals.C");
+  Gled::LoadMacro("eye.C");
   {
     ZList* laytop = register_GledCore_layouts();
     laytop->Swallow("RootGeo", new ZGlass("MiniGeometry", geometry_mini_layout));
@@ -180,26 +183,30 @@ void setup_default_gui(Scene* rscene)
   Text_t* shell_name = "Shell";
   Text_t* pupil_name = "Pupil";
 
-  ASSIGN_ADD_GLASS(shell, ShellInfo, fire_queen, shell_name, "");
+  if(g_shell == 0) {
 
-  CREATE_ATT_GLASS(nest, NestInfo, shell, SetDefSubShell, "Nest", 0);
-  nest->Add(rscene);
-  nest->SetLayout(default_nest_layout);
-  nest->SetLeafLayout(NestInfo::LL_Custom);
+    ASSIGN_ADD_GLASS(g_shell, ShellInfo, g_fire_queen, shell_name, "");
 
-  CREATE_ATT_GLASS(gui_pupil, GuiPupilInfo, shell, AddSubShell, "GuiPupil", "");
+    CREATE_ATT_GLASS(g_nest, NestInfo, g_shell, SetDefSubShell, "Nest", 0);
+    g_nest->Add(g_scene);
+    g_nest->SetLayout(default_nest_layout);
+    g_nest->SetLeafLayout(NestInfo::LL_Custom);
+
+  }
+
+  CREATE_ATT_GLASS(gui_pupil, GuiPupilInfo, g_shell, AddSubShell, "GuiPupil", "");
 
   CREATE_ATT_GLASS(pupil, PupilInfo, gui_pupil, SetPupil, pupil_name, "");
   pupil->SetZFov(80);
   pupil->SetCHSize(0.03);
   pupil->SetBlend(1);
-  pupil->Add(rscene);
+  pupil->Add(g_scene);
 
-  gui_pupil->SetCameras((ZList*)rscene->FindLensByPath("Markers/CameraInfos"));
+  gui_pupil->SetCameras((ZList*)g_scene->FindLensByPath("Markers/CameraInfos"));
   pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->First());
 }
 
 void spawn_default_gui()
 {
-  Gled::theOne->SpawnEye(0, shell, "GledCore", "FTW_Shell");
+  Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 }

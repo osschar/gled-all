@@ -3,7 +3,7 @@
 // simple scene with a Weaver Symbol
 // Use "ZNode(Pos,Rot):WSPoint(W,S,T)" as custom view for best performance.
 //
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1
 
 #include <glass_defines.h>
@@ -11,12 +11,10 @@
 
 void WS_demo()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
   {
-    ZList* l = fire_queen;
+    ZList* l = g_fire_queen;
     l = l->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
     l = l->AssertPath("WS_Demo", "ZList");
     l->Swallow(new ZGlass("ZNode:WS_Point",
@@ -24,17 +22,18 @@ void WS_demo()
   }
 
   Scene* wsdemo  = new Scene("WeaverSymbol Demo Scene");
-  scenes->CheckIn(wsdemo);
-  scenes->Add(wsdemo);
+  g_queen->CheckIn(wsdemo);
+  g_queen->Add(wsdemo);
+  g_scene = wsdemo;
 
   Rect* base_plane = new Rect("BasePlane");
   base_plane->SetUnitSquare(20);
-  scenes->CheckIn(base_plane);
+  g_queen->CheckIn(base_plane);
   wsdemo->Add(base_plane);
 
   ZNode* lamp_base = new ZNode("LampBase");
   lamp_base->MoveLF(3, 3.5);
-  scenes->CheckIn(lamp_base);
+  g_queen->CheckIn(lamp_base);
   wsdemo->Add(lamp_base);
 
   CREATE_ADD_GLASS(lamp1, Lamp, lamp_base, "Lamp1", 0);
@@ -68,7 +67,7 @@ void WS_demo()
   WSSeed* seed1 = new WSSeed();
   seed1->SetFat(true);
   seed1->SetTexture(image1);
-  scenes->CheckIn(seed1); wsdemo->Add(seed1);
+  g_queen->CheckIn(seed1); wsdemo->Add(seed1);
 
   Int_t NP = 10;
   WSPoint **points = new WSPoint[NP];
@@ -81,7 +80,7 @@ void WS_demo()
     double der = TMath::ATan2(ss+phi*cc, cc-phi*ss);
     points[i]->RotateLF(1,2, der);
     points[i]->SetW(i*0.1);
-    scenes->CheckIn(points[i]); seed1->Add(points[i]);
+    g_queen->CheckIn(points[i]); seed1->Add(points[i]);
   }
 
   CREATE_ADD_GLASS(t1, SMorph, wsdemo, "TubeStart", 0);
@@ -114,10 +113,6 @@ void WS_demo()
   tube2->SetSgmB(TLorentzVector(0.2, 0.2,  0, 0));
   tube2->Connect();
 
-  gROOT->ProcessLine(".x eye.C");
-  if(pupil) {
-    // Comment to disable fixing of camera 'up' direction to 'z' axis.
-    pupil->SetUpReference(wsdemo);
-    pupil->SetUpRefAxis(3);
-  }
+  Gled::Macro("eye.C");
+  setup_pupil_up_reference();
 }

@@ -3,7 +3,7 @@
 // Scene to test ZQueen::RemoveLenses() method.
 //
 
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1
 
 #include <glass_defines.h>
@@ -15,16 +15,15 @@ class RndSMorphCreator;
 
 void remove_test(Int_t NSN = 32)
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
   gSystem->Exec("make rt_functions.so");
   gSystem->Load("rt_functions.so");
 
   Scene* images  = new Scene("Images");
-  scenes->CheckIn(images);
-  scenes->Add(images);
+  g_queen->CheckIn(images);
+  g_queen->Add(images);
+  g_scene = images;
 
   // Top-node to receive subnodes (children) and smorphs (grand-children).
 
@@ -47,6 +46,5 @@ void remove_test(Int_t NSN = 32)
   create_smorphs(NSN);
 
   // Spawn GUI
-  gROOT->LoadMacro("eye.C");
-  eye("Eyeeous", "Shellious", 0);
+  Gled::Macro("eye.C");
 }

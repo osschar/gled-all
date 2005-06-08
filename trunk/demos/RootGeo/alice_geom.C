@@ -22,7 +22,7 @@ void alice_geom(Int_t import_mode=0)
   //
   // usage: aligled <options> -- <gled-options> 'alice_geom(1)'
 
-  if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
+  Gled::AssertMacro("sun_demos.C");
 
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
@@ -35,7 +35,7 @@ void alice_geom(Int_t import_mode=0)
 
   //--------------------------------------------------------------
 
-  Scene* rscene = create_basic_scene();
+  Scene* rscene = create_basic_scene(); // Returned also in g_scene
 
   //--------------------------------------------------------------
 
@@ -43,7 +43,7 @@ void alice_geom(Int_t import_mode=0)
   znode->SetTNode(gGeoManager->GetTopNode());
   znode->SetOM(-2);
   znode->SetUseOM(true);
-  scenes->CheckIn(znode);
+  g_queen->CheckIn(znode);
   rscene->Add(znode);
   znode->SetRnrSelf(false);
 
@@ -70,7 +70,7 @@ void alice_geom(Int_t import_mode=0)
 
   //--------------------------------------------------------------
 
-  setup_default_gui(rscene);
+  setup_default_gui();
   spawn_default_gui();
 }
 
