@@ -1,3 +1,15 @@
+2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	* gl_tests.C:
+	* images.C:
+	* images2.C:
+	* metagui_test.C:
+	* remove_test.C:
+	* rot_lamps.C:
+	* spheres.C:
+	Updated to new startup macro conventions.
+
 2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* metagui_test.C:
