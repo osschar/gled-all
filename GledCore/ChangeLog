@@ -1,3 +1,51 @@
+2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Added PostMIR with MIR* argument.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Changed default moon-connection/autorization settings (two
+	command line options changed); added wrappers for macro
+	loading and execution that guarantee consistent state of global
+	variables declared in them.
+
+	Do NOT use authentication by default. New option '-auth';
+	'-noauth' option no longer recognized.
+	
+	Do NOT allow moon connections by default. New option
+	'-allowmoons'; '-nomoons' option no longer recognized.
+
+	Added macro executing/loading static methods that check if the
+	macro has been already loaded (to avoid reloading and resetting
+	of global-variables declared in that file). These are now used by
+	standard startup steering scripts and demos.
+
+	Turned AssertLibSet into static method.
+
+	Added global variable 'Gled* gGled' (slight ROOT symmetry).
+
+	* catalog.patch:
+	Export global 'Gled* gGled' from Gled.
+
+	* macros/eye.C:
+	* macros/moon.C:
+	* macros/sun.C:
+	Cleaned-up startup steering. Globals are now declared in
+	'gled_globals.C' and 'gled_view_globals.C'. Use new static
+	functions from Gled for macro loading.
+
+	* macros/sun_demos.C:
+	* macros/gled_globals.C:
+	* macros/gled_view_globals.C:
+	New files for startup steering.
+
+	* Rnr/GL/LampLink_GL_Rnr.cxx:
+	* Rnr/GL/LampLink_GL_Rnr.h:
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+	Cleaned-up warnings about non-connected routes between nodes.
+
 2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/ZTrans.cxx:
@@ -133,7 +181,7 @@
 
 	* Ephra/Saturn.cxx:
 	* Ephra/Saturn.h:
-	Added PostMIR with MIR* argument.
+	Added RouteMIR with MIR* argument.
 
 	* macros/sun.C:
 	Creation of Scenes queen now optional.

@@ -1,3 +1,11 @@
+2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alice_geom.C:
+	* alice_simple.C:
+	* check_overlaps.C:
+	* common_foos.C:
+	Updated to new startup macro conventions.
+
 2005-04-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* alice_geom.C:
