@@ -12,12 +12,16 @@
 
 class LampLink_GL_Rnr : public ZGlass_GL_Rnr {
 private:
+  void _init();
 
 protected:
+  Bool_t        bWarn;
   LampLink*	mLampLink;
 
 public:
-  LampLink_GL_Rnr(LampLink* idol) : ZGlass_GL_Rnr(idol), mLampLink(idol) {}
+  LampLink_GL_Rnr(LampLink* idol) : ZGlass_GL_Rnr(idol), mLampLink(idol) { _init(); }
+
+  virtual void AbsorbRay(Ray& ray);
 
   virtual void Draw(RnrDriver* rd);
 

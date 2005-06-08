@@ -46,13 +46,12 @@ void Lamp_GL_Rnr::CleanUp(RnrDriver* rd)
 int Lamp_GL_Rnr::LampOn(RnrDriver* rd, const ZTrans* t)
 {
   if(mLampID != -1) {
-    cout <<"Lamp_GL_Rnr::LampOn Lamp seems to be on ...\n";
     return 1;
   }
 
   mLampID = rd->GetLamp(this);
   if(mLampID == -1) {
-    cout <<"Lamp_GL_Rnr::LampOn No available lights ...\n";
+    cout <<"Lamp_GL_Rnr::LampOn No more available lights.\n";
     return 1;
   }
 
@@ -94,7 +93,6 @@ int Lamp_GL_Rnr::LampOn(RnrDriver* rd, const ZTrans* t)
 int Lamp_GL_Rnr::LampOff(RnrDriver* rd)
 {
   if(mLampID == -1) {
-    cout <<"Lamp_GL_Rnr::LampOff Lamp doesn't seem to be on ...\n";
     return 1;
   }
 
