@@ -92,7 +92,6 @@ public:
 
   virtual Int_t LoadLibSet(const Text_t* lib_set);
   virtual Int_t LoadLibSet(LID_t lid);
-  virtual Int_t	AssertLibSet(const Text_t* lib_set);
 
   virtual void SetDebugLevel(Int_t d=0);
 
@@ -113,6 +112,12 @@ public:
 	    int w=640, int h=480, int npx=1, int npy=1)
   { return 0; }
 
+  static void AssertLibSet(const Text_t* lib_set);
+
+  static void AssertMacro(const Text_t* mac);
+  static void Macro(const Text_t* mac);
+  static void LoadMacro(const Text_t* mac);
+
   static void* TRint_runner_tl(TRint* gint);
   static void* Gled_runner_tl(Gled* gled);
 
@@ -121,5 +126,7 @@ public:
 #include "Gled.h7"
   ClassDef(Gled, 0)
 }; // endclass Gled
+
+extern Gled* gGled;
 
 #endif

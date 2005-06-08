@@ -29,6 +29,7 @@ ClassImp(Gled)
 /**************************************************************************/
 
 Gled* Gled::theOne = 0;
+Gled* gGled        = 0;
 
 /**************************************************************************/
 
@@ -49,7 +50,7 @@ Gled::Gled() : mSaturn(0), bIsSun(false),
 	       bShowSplash(true),
 	       bPreExec(false),
 	       bAutoSpawn(false),
-	       bAllowMoons(true),
+	       bAllowMoons(false),
 	       bRunRint(true),
 	       bRintRunning(false),
 	       mLoggingMutex(GMutex::recursive)
@@ -58,14 +59,13 @@ Gled::Gled() : mSaturn(0), bIsSun(false),
     cerr <<"Gled::Gled trying to instantiate another object ...\n";
     exit(1);
   }
-  theOne = this;
+  gGled = theOne = this;
   GThread::init_tsd();
 
   // Set-up SaturnInfo, set defaults
 
   mSaturnInfo = new SaturnInfo;
   mSaturnInfo->SetHostName(gSystem->HostName());
-  mSaturnInfo->SetUseAuth(true);
 
   FILE* p = gSystem->OpenPipe("GledNodeReport.pl cpuinfo meminfo", "r");
   if(p != 0) {
@@ -107,7 +107,7 @@ void Gled::ParseArguments(list<char*>& args)
 	  "  -preexec <m1:m2..> pre-exec specified macros\n"
 	  "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
 	  "                     Saturn if -master is specified, Sun otherwise\n"
-	  "  -nomoons           do not accept moon connections\n"
+	  "  -allowmoons        accept moon connections\n"
 	  "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
 	  "  -p[ort]    <num>   specify server port (def: 9061)\n"
 	  "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
@@ -123,7 +123,7 @@ void Gled::ParseArguments(list<char*>& args)
 	  "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
 	  "\n"
 	  "Authentication options:\n"
-	  "  -noauth            do not use authentication\n"
+	  "  -auth              use authentication\n"
 	  "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
 	  "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
 	  "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
@@ -144,8 +144,8 @@ void Gled::ParseArguments(list<char*>& args)
       args.erase(start, ++i);
     }
 
-    else if(strcmp(*i, "-nomoons")==0) {
-      bAllowMoons = false;
+    else if(strcmp(*i, "-allowmoons")==0) {
+      bAllowMoons = true;
       args.erase(start, ++i);
     }
 
@@ -235,8 +235,8 @@ void Gled::ParseArguments(list<char*>& args)
 
     // Authentication options
 
-    else if(strcmp(*i, "-noauth")==0) {
-      mSaturnInfo->SetUseAuth(false);
+    else if(strcmp(*i, "-auth")==0) {
+      mSaturnInfo->SetUseAuth(true);
       args.erase(start, ++i);
     }
 
@@ -533,15 +533,6 @@ Int_t Gled::LoadLibSet(LID_t lid)
   }
 }
 
-Int_t Gled::AssertLibSet(const Text_t* lib_set)
-{
-  if(GledNS::IsLoaded(lib_set)) {
-    return 0;
-  } else {
-    return LoadLibSet(lib_set);
-  }
-}
-
 /**************************************************************************/
 
 void Gled::SetDebugLevel(Int_t d) {
@@ -606,6 +597,55 @@ EyeInfo* Gled::SpawnEye(const char* libset, const char* eyector)
   }
 
   return SpawnEye(0, 0, libset, eyector);
+}
+
+/**************************************************************************/
+
+void Gled::AssertLibSet(const Text_t* lib_set)
+{
+  // Makes sure libset 'lib_set' is loaded.
+
+  if(GledNS::IsLoaded(lib_set) == false)
+    theOne->LoadLibSet(lib_set);
+}
+
+namespace {
+  void chomp_tail(string& s, char c='.') {
+    size_t p = s.rfind(c);
+    if(p != string::npos)
+      s.erase(p, string::npos);
+  }
+}
+
+void Gled::AssertMacro(const Text_t* mac)
+{
+  // Load and execute macro 'mac' if it has not been loaded yet.
+
+  string foo(mac); chomp_tail(foo);
+  if(gROOT->GetGlobalFunction(foo.c_str(), 0, true) == 0) {
+    gROOT->Macro(mac);
+  }
+}
+
+void Gled::Macro(const Text_t* mac)
+{
+  // Execute macro 'mac'. Do not reload the macro.
+
+  string foo(mac); chomp_tail(foo);
+  if(gROOT->GetGlobalFunction(foo.c_str(), 0, true) == 0)
+    gROOT->LoadMacro(mac);
+
+  foo += "()";
+  gROOT->ProcessLine(foo.c_str());
+}
+
+void Gled::LoadMacro(const Text_t* mac)
+{
+  // Makes sure that macro 'mac' is loaded, but do not reload it.
+
+  string foo(mac); chomp_tail(foo);
+  if(gROOT->GetGlobalFunction(foo.c_str(), 0, true) == 0)
+    gROOT->LoadMacro(mac);
 }
 
 /**************************************************************************/
