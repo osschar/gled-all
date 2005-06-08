@@ -1,5 +1,14 @@
 2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* RnrBase/PMSEntry.cxx:
+	ToGCS: return local matrix instead of previously cached value if
+	fPrev is not set.
+
+	* RnrBase/RnrDriver.h:
+	Bugfix: PMSEntry::fPrev was not set in RnrDriver::PushPM().
+
+2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Ephra/Saturn.cxx:
 	* Ephra/Saturn.h:
 	Added PostMIR with MIR* argument.
