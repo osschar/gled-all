@@ -4,7 +4,7 @@
 
 void post_mir(ZMIR* mir)
 {
-  sun->PostMIR(*mir);
+  g_saturn->PostMIR(mir);
   delete mir;
 }
 

@@ -2,35 +2,35 @@
 
 // A simple scene demonstrating GTSIsoMaker.
 
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1 GTS
 #include <glass_defines.h>
 #include <gl_defines.h>
 
 void iso_surfs()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("GTS");
 
+  Gled::AssertMacro("sun_demos.C");
+
   Scene* starw  = new Scene("Iso Surfaces");
-  scenes->CheckIn(starw);
-  scenes->Add(starw);
+  g_queen->CheckIn(starw);
+  g_queen->Add(starw);
+  g_scene = starw;
 
   // Geom elements
 
   Rect* base_plane = new Rect("BasePlane");
   base_plane->SetUnitSquare(16);
-  scenes->CheckIn(base_plane);
+  g_queen->CheckIn(base_plane);
   starw->Add(base_plane);
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
   l->Set3Pos(-2, -6, 6);
   l->RotateLF(1,2, TMath::Pi());
-  scenes->CheckIn(l); starw->Add(l);
+  g_queen->CheckIn(l); starw->Add(l);
 
   // GTS models
 
@@ -74,20 +74,17 @@ void iso_surfs()
   CREATE_ADD_GLASS(retring, GTSRetriangulator, starw, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
   retring->SetTarget(surf2);
 
-  gROOT->Macro("eye.C");
-  if(pupil) {
-    // Comment to disable fixing of camera 'up' direction to 'z' axis.
-    pupil->SetUpReference(starw);
-    pupil->SetUpRefAxis(3);
-  }
+  // Spawn GUI
+  Gled::Macro("eye.C");
+  setup_pupil_up_reference();
 
   { // Torus rotator
     Eventor* e = new Eventor("Dynamo");
     e->SetBeatsToDo(-1); e->SetInterBeatMS(40); e->SetStampInterval(10);
-    scenes->CheckIn(e); starw->Add(e);
+    g_queen->CheckIn(e); starw->Add(e);
     Mover* mv = new Mover("S1 Rotator");
     mv->SetNode(surf2); mv->SetRi(2); mv->SetRj(3); mv->SetRa(0.01);
-    scenes->CheckIn(mv); e->Add(mv);
+    g_queen->CheckIn(mv); e->Add(mv);
     e->Start();
   }
 }

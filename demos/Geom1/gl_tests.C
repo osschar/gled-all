@@ -2,7 +2,7 @@
 
 // Simple setup for GL speed tests.
 
-// vars: ZQueen* scenes
+// vars: ZQueen* g_queen
 // libs: Geom1
 
 // 3.Feb.2005 Measurements on PIV-3.2, ATI radeon 9600 (w/ fglrx driver):
@@ -17,20 +17,18 @@
 
 void gl_tests()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
+  Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
 
   Scene* images  = new Scene("Images");
-  scenes->CheckIn(images);
-  scenes->Add(images);
+  g_queen->CheckIn(images);
+  g_queen->Add(images);
 
   // Geom elements
 
   Rect* base_plane = new Rect("BasePlane");
   base_plane->SetUnitSquare(25);
-  scenes->CheckIn(base_plane);
+  g_queen->CheckIn(base_plane);
   images->Add(base_plane);
   base_plane->SetColor(0.1, 0.4, 0.1);
 
@@ -38,7 +36,7 @@ void gl_tests()
   l->SetDiffuse(0.8, 0.8, 0.8);
   l->SetScale(1);
   l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
-  scenes->CheckIn(l); images->Add(l);
+  g_queen->CheckIn(l); images->Add(l);
   images->GetGlobLamps()->Add(l);
 
   CREATE_ADD_GLASS(pointmod, ZGlBlending, images, "Blending", 0);
@@ -51,15 +49,11 @@ void gl_tests()
   g1->Set3Pos(0, 0, 2);
 
   // Spawn GUI
-  gROOT->Macro("eye.C");
-  if(pupil) {
-    // Uncomment to fix camera 'up' direction to 'z' axis.
-    // pupil->SetUpReference(images);
-    // pupil->SetUpRefAxis(3);
-  }
+  g_scene = images;
+  Gled::Macro("eye.C");
 
   // Set pupil so that GLTesterOne can send redraw requests.
-  g1->SetPupil(pupil);
+  g1->SetPupil(g_pupil);
 
   // Open a canvas.
   // Creation of canvases from a non-cint thread is dangerous.
