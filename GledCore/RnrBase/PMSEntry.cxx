@@ -13,8 +13,13 @@ ZTrans& PMSEntry::ToGCS()
 {
   if(fToGCS == 0) fToGCS = new ZTrans;
 
-  if(bTo == false && fPrev != 0) {
-    *fToGCS = fPrev->ToGCS()*fLocal;
+  if(bTo == false) {
+    if(fPrev != 0) {
+      *fToGCS  = fPrev->ToGCS();
+      *fToGCS *= fLocal;
+    } else {
+      *fToGCS  = fLocal;
+    }
     bTo = true;
   }
   return *fToGCS;
