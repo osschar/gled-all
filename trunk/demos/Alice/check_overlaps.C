@@ -20,7 +20,7 @@ void check_overlaps(Float_t epsilon=1)
   //
   // usage: ./aligled <options> -- <gled-options> 'check_overlaps(0.1)'
 
-  if(Gled::theOne->GetSaturn() == 0) gROOT->Macro("sun.C");
+  Gled::AssertMacro("sun_demos.C");
 
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("RootGeo");
@@ -33,12 +33,12 @@ void check_overlaps(Float_t epsilon=1)
 
   //--------------------------------------------------------------
 
-  Scene* rscene = create_basic_scene();
+  Scene* rscene = create_basic_scene(); // Returned also in g_scene
 
   //--------------------------------------------------------------
 
   ZGeoOvlMgr* ovl = new ZGeoOvlMgr("Overlap Mgr");
-  scenes->CheckIn(ovl);
+  g_queen->CheckIn(ovl);
   rscene->Add(ovl);  
   ovl->SetResol(epsilon);
   ovl->RecalculateOvl();
@@ -50,11 +50,11 @@ void check_overlaps(Float_t epsilon=1)
   em_node->SetOM(-2.5);
   em_node->Set3Pos(6.5, 0, 0);
   em_node->SetUseOM(true);
-  scenes->CheckIn(em_node);
+  g_queen->CheckIn(em_node);
   rscene->Add(em_node);
 
   //--------------------------------------------------------------
 
-  setup_default_gui(rscene);
+  setup_default_gui();
   spawn_default_gui();
 }
