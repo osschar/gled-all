@@ -17,13 +17,11 @@ class ZImage;
 
 void slides(Bool_t start_hunt_p=true)
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    gROOT->Macro("sun.C");
-  }
-  Gled::theOne->AssertLibSet("Geom1");
+  Gled::AssertMacro("sun_demos.C");
+  Gled::AssertLibSet("Geom1");
 
-  CREATE_ADD_GLASS(ss, Scene, scenes, "Slide Scene", "Gled and PROOF talk");
-
+  CREATE_ADD_GLASS(ss, Scene, g_queen, "Slide Scene", "Gled and PROOF talk");
+  g_scene = ss;
 
   // Basic scene elements
   //----------------------
@@ -42,8 +40,8 @@ void slides(Bool_t start_hunt_p=true)
   //--------------------------------
 
   CREATE_ADD_GLASS(blend, ZGlBlending, ss, "Line Smoothing", 0);
-  blend->SetBlendOp(ZGlStateBase::GSO_On);
-  blend->SetAntiAliasOp(ZGlStateBase::GSO_On);
+  blend->SetBlendOp(ZRnrModBase::O_On);
+  blend->SetAntiAliasOp(ZRnrModBase::O_On);
   blend->SetLineWidth(1);
   blend->SetPointSize(16);
 
@@ -79,28 +77,23 @@ void slides(Bool_t start_hunt_p=true)
 
   printf("Instantiating GUI ...\n");
 
-  CREATE_ADD_GLASS(shell, ShellInfo, fire_queen, "Slide Shell", 0);
-  // shell->ImportKings();   // Get all Kings as top level objects
-  shell->Add(ss);
+  Gled::Macro("eye.C");
 
-  CREATE_ADD_GLASS(pupil, PupilInfo, shell->GetPupils(), "Pupil", 0);
-  pupil->Add(ss);
-  pupil->SetFOV(90);
-  pupil->SetWidth(1024);
-  pupil->SetHeight(600);
-  pupil->SetClearColor(0.06, 0.07, 0.06);
+  g_pupil->Add(ss);
+  g_pupil->SetZFov(90);
+  g_pupil->SetWidth(1024);
+  g_pupil->SetHeight(600);
+  g_pupil->SetClearColor(0.06, 0.07, 0.06);
 
-  pupil->SetCameraBase(cam_base);
-  pupil->SetUpReference(ss);
+  g_pupil->SetCameraBase(cam_base);
+  g_pupil->SetUpReference(ss);
 
   CREATE_ADD_GLASS(etor, Eventor, ss, "Movie Maker", 0);
   etor->SetBeatsToDo(-1);
   etor->SetInterBeatMS(400); etor->SetStampInterval(10);
   CREATE_ADD_GLASS(sdumper, ScreenDumper, etor, "DumpRayEmitter", 0);
-  sdumper->SetPupil(pupil);
+  sdumper->SetPupil(g_pupil);
   // sdumper->SetFileNameFmt("someplace/img%05d.tga");
-
-  Gled::theOne->SpawnEye(shell, "Eye of magick");
 
   if(start_hunt_p) {
     gSystem->Sleep(1000);
@@ -160,7 +153,7 @@ MultiBoard* fons_talk(ZList* list)
     img->SetFile(GForm("fons-gridka/page.%d.png", i));
     img->SetMagFilter(GL_LINEAR);
     img->Load();
-    scenes->CheckIn(img);
+    g_queen->CheckIn(img);
     multiboard->GetSlides()->Add(img);
   }
 
@@ -185,7 +178,7 @@ MultiBoard* matevz_talk(ZList* list)
     img->SetMinFilter(GL_LINEAR);
     img->Load();
     img->SetLoadAdEnlight(true);
-    scenes->CheckIn(img);
+    g_queen->CheckIn(img);
     multiboard->GetSlides()->Add(img);
   }
 
