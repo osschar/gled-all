@@ -38,8 +38,6 @@ void alice_simple(const Text_t* geom_file = "alice_minigeo.root",
 
   setup_default_gui();
   spawn_default_gui();
-
-  return rscene;
 }
 
 /**************************************************************************/
