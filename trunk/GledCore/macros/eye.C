@@ -16,16 +16,12 @@ void eye(Bool_t spawn_pupil=true)
   if(g_eye == 0) {
     register_GledCore_layouts();
 
-    EyeInfo* pre_ei = new EyeInfo("Eye");
-
     g_shell = new ShellInfo("Shell");
     g_fire_queen->CheckIn(g_shell);
     g_fire_queen->Add(g_shell);
 
     g_nest = new_nest();
-    g_shell->SetDefSubShell(g_nest);
-
-    g_eye = Gled::theOne->SpawnEye(pre_ei, g_shell, "GledCore", "FTW_Shell");
+    g_shell->SetDefSubShell(g_nest);    
   }
 
   if(spawn_pupil)
@@ -35,6 +31,9 @@ void eye(Bool_t spawn_pupil=true)
     if(g_nest)  g_nest->Add(g_scene);
     if(g_pupil) g_pupil->Add(g_scene);
   }
+
+  if(g_eye == 0)
+    g_eye = Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 }
 
 /**************************************************************************/
