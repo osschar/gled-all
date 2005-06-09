@@ -1,0 +1,88 @@
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.h:
+	Clean-up of RnrCtrl constructors; in most cases they are not
+	needed anymore.
+
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.h:
+	Const-correctness changes (project7 now properly generates const
+	Get methods).
+
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
+2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Added function MakeDefaultSurface().
+	
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Surface operations now using detached threads, proper use of
+	locking. But be careful, GTS is not yet thread safe.
+
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Moved all stuff to GTSurf; now just imports gts under namespace GTS.
+	
+	* Glasses/GTSIsoMaker.cxx:
+	
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	New glass: coarsening and refinement of GTS surfaces.
+	
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added statistics display (using stone SGTSRange); new methods
+	Replace() and Save(). Moved in Load/Invert code from GTS/GTS.cxx.
+	
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Reflections of changes in GTSurf.
+		
+	* Stones/SGTSRange.cxx:
+	* Stones/SGTSRange.h:
+	New Stone: range with mean and sigma.
+	
+	* glass.list:
+	New glass GTSRetriangulator.
+
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	New glass; creates a surface from a formula (TF3).
+
+	* glass.list:
+	New glasses added.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Added method GTS::Surface::Replace().
+	
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	* Rnr/GL/GTSurf_GL_Rnr.h:
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.

@@ -1,0 +1,137 @@
+2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	* gl_tests.C:
+	* images.C:
+	* images2.C:
+	* metagui_test.C:
+	* remove_test.C:
+	* rot_lamps.C:
+	* spheres.C:
+	Updated to new startup macro conventions.
+
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	Added a clipping plane example; somewhat beautifed construction.
+
+2005-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	New file demonstrating use of metagui infrastructure.
+
+2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	* images.C:
+	Use new registration of nest-layouts.
+
+2005-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	* images.C:
+	* rot_lamps.C:
+	* spheres.C:
+	Set pupils UpRefAxis.
+
+2005-02-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lucidabright34.txf:
+	New file.
+
+	* images.C:
+	Use special font for rendering of text 'GLED'.
+
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* spheres.C:
+	Added ZGlLightModel objects to demonstrates use of ZNode's RnrMod
+	link and self/element rendering flags.
+
+2005-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gl_tests.C:
+	New file: a scene for speed measurements of (some) GL operations
+	(using the GLTesterOne glass).
+
+2005-02-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* remove_test.C:
+	Moved create_smorphs() to rt_functions.cxx which is compiled and
+	loaded as a shared library. This solves a problem with CINT not
+	being thread-safe.
+
+	* Makefile:
+	* rt_functions.cxx:
+	* rt_functions.h:
+	* rt_functions_LinkDef.h:
+	New files. Together with remove_test.C these give an example of
+	loading pre-compiled C/C++ code into Gled (and compiling it
+	together with CINT dictionary stuff, which isn't exactly trivial).
+
+2005-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* images.C:
+	Minor beautification. Added comment to show how to fix up
+	direction in pupil.
+
+	* remove_test.C:
+	New file: test of massive/recursive lens removal function
+	ZQueen::RemoveLenses().
+
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	Now adds custom layout.
+	
+	* photon.png:
+	Fixed texture corners for proper wrap-around.
+
+	* photon-blurred.png:
+	New texture, a tilable blur of photon.png.
+	
+	* images.C:
+	* rot_lamps.C:
+	Minor changes.
+	
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* booby.pov:
+	* ribbon1.pov:
+	New files; POV gradients for Geom1::ZRibbon.
+
+	* images2.C:
+	New file; demonstrates usage of several queens.
+
+	* images.C:
+	Added example lenses with GLText and new features of RectTerrain
+	and ZRibbon.
+	
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:	Demonstrates also texturing of Weaver symbols.
+
+	* gluon.png:
+	* photon.png:
+
+	New textures for WS_demo.C.
+
+2003-11-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* images.C: Now uses macros from glass_defines.h for lens construction.
+
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	* checker_2.png:
+	* checker_4.png:
+	* checker_8.png:
+	* checker_8a.png:
+	* earth.png:
+	* moon.jpeg:
+
+	New files.
+
+	* images.C: Added demos for: a) textured SMorph and b) texturing
+	parameters in ZImage.
+

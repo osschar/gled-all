@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+# $Header$
+
+# Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
+
+use lib "$ENV{GLEDSYS}/perllib";
+use ParseConfig;
+
+$def_cfg = "$ENV{GLEDSYS}/cfg/gled-create-glass.rc";
+
+my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg, -useenv=>1);
+$cfg_parser->parse();
+
+if($CLASSNAME eq "CLASSNAME" or $BASENAME eq "BASENAME") {
+  print "usage: gled-create-glass -c <classname> -b <baseclass> <other-options>\n";
+  print "Options:\n";
+  print `cat $def_cfg`;
+  print "if dir = <std>, the new glass is put into ./Glasses directory\n";
+  print "if libset = <std>, the libset is deduced from name of '.'.\n";
+  print "<std> options for dir and libset assume you are in top libset directory\n";
+  exit 1;
+}
+
+$SKELBASE = "$ENV{GLEDSYS}/cfg/Glass_SKEL" if($SKELBASE eq '<std>');
+$OUTDIR = "Glasses" if($OUTDIR eq "<std>");
+unless(-d $OUTDIR) { die "Directory $OUTDIR does not exist"; }
+if($LIBSETNAME eq "<std>") {
+  my $a = `pwd`; chomp $a;
+  $a=~m!([^/]*)/?$!;
+  $LIBSETNAME = $1;
+}
+
+{
+  my $ex_sla = $/; undef $/;
+  open H, "${SKELBASE}.${SUF_H}" or die "can't open ${SKELBASE}.${SUF_H}";
+  $skel_h = <H>; close H;
+  open C, "${SKELBASE}.${SUF_C}" or die "can't open ${SKELBASE}.${SUF_C}";
+  $skel_cxx = <C>; close C;
+  $/ = $ex_sla;
+}
+
+for $f ($skel_h, $skel_cxx) {
+  $f =~ s/LIBSETNAME/$LIBSETNAME/g;
+  $f =~ s/CLASSNAME/$CLASSNAME/g;
+  $f =~ s/BASENAME/$BASENAME/g;
+}
+
+open H, ">${OUTDIR}/${CLASSNAME}.${SUF_H}" or
+  die "can't open ${OUTDIR}/${CLASSNAME}.${SUF_H}";
+print H $skel_h; close H;
+open H, ">${OUTDIR}/${CLASSNAME}.${SUF_C}" or
+  die "can't open ${OUTDIR}/${CLASSNAME}.${SUF_C}";
+print H $skel_cxx; close H;
+
+if($DUMPINFO) {
+  print "# Now add the following line to glass.list file:\n";
+  print "$CLASSNAME\t<id>\t${OUTDIR}/${CLASSNAME}\t<rnr-spec>\n";
+  print "# Remember to run configure --reconf in top-level build directory.\n";
+}

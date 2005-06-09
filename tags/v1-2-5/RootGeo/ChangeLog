@@ -1,0 +1,71 @@
+2005-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	ImportNodesWCollect() inserts ZGeoNodes (ZNode's before) as
+	intermediate holders of nodes with common volume name.
+
+2005-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	Added recursive import of nodes: ImportNodesRec(Int_t depth).
+
+2005-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoRepacker.cxx:
+	Kludge to allow two simultaneous TGeoManager was moved from ROOT
+	code to this class.
+
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	Renamed mMat to mMaterial; use MCWButt weed for
+	SaveTo/LoadFromFile(); avoid attempts to open a file with empty
+	name.
+
+	* Glasses/ZGeoOvlMgr.cxx:
+	Following changes in ZGeoNode.
+
+	* Glasses/ZGeoRepacker.cxx:
+	* Glasses/ZGeoRepacker.h:
+	New glass: copies parts of geometry as selected by user to another
+	geo-manager and exports it. Used for geometry simplification.
+
+	* glass.list:
+	New glass ZGeoRepacker.
+
+2005-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	Moved RnrOn/OffForDaughters methods to GledCore::ZNode; code
+	clean-up.
+
+	* Glasses/ZGeoOvl.cxx:
+	* Glasses/ZGeoOvl.h:
+	* Glasses/ZGeoOvlMgr.cxx:
+	* Glasses/ZGeoOvlMgr.h:
+	* Stones/GeoUserData.cxx:
+	* Stones/GeoUserData.h:
+	Code clean-up.
+
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.h:
+	Now uses bRnrSelf from ZNode, clean-up of RnrCtrl constructors.
+
+	* Glasses/ZGeoOvl.h:
+	* Glasses/ZGeoOvlMgr.h:
+	Clean-up of RnrCtrl constructors.
+
+2005-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	* Glasses/ZGeoOvlMgr.cxx:
+	* Glasses/ZGeoOvlMgr.h:
+	Use ZList::RemoveLensesViaQueen() to recursively remove sub-nodes
+	before importing or loading. All these methods now execute in a
+	detached thread.
