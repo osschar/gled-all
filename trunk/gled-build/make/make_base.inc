@@ -140,6 +140,7 @@ uninstall:
 # make sure to set environment variable BIN_DIST_TAR
 bin_dist:
 	@perl -e "die \"must set BIN_DIST_TAR environment variable for target bin_dist\" if \"${BIN_DIST_TAR}\" eq \"\""
+	if [ ! -e Readme_${LIB_SET_NAME} ]; then touch Readme_${LIB_SET_NAME}; fi
 	tar cf ${BIN_DIST_TAR} Readme_${LIB_SET_NAME} ${INSTALL_DIRS}
 
 # Depend and pre-depend group
