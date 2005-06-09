@@ -94,7 +94,7 @@ In short:
  cd gled
  . binenv.sh
  cd demos/GledCore
- gled -noauth hello_gled.C
+ gled hello_gled.C
 
 Reading section L<"Running Gled"> is recommended. Instructions for
 running demos are also there.
@@ -137,7 +137,7 @@ C<source> this script (or initialize your environment
 accordingly). Now you're ready to run:
 
  cd demos/GledCore
- gled -noauth hello_gled.C
+ gled hello_gled.C
 
 =back
 
@@ -254,11 +254,13 @@ switch:
                       files ~ ROOT macro scripts to process
  Gled options:
  -------------
+   -preexec <m1:m2..> pre-exec specified macros
    -r[un]             spawn Saturn/Sun immediately (before processing files)
                       Saturn if -master is specified, Sun otherwise
-   -nomoons           do not accept moon connections
+   -allowmoons        accept moon connections
    -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)
    -p[ort]    <num>   specify server port (def: 9061)
+   -portscan  <num>   if server port can not be opened, try <num> higher ports
    -m[aster] <host>[:<port>] master Saturn address (def port: 9061)
    -n[ame]    <str>   name of Saturn
    -t[itle]   <str>   title of Saturn
@@ -271,7 +273,7 @@ switch:
                       <file> shorthands: '-' => '<null>', '+' => '<stdout>'
  
  Authentication options:
-   -noauth            do not use authentication
+   -auth              use authentication
    -authdir   <str>   directory containing auth data (def: ~/.gled/auth)
    -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')
    -eyeid     <str>   default identity of Eyes (def: 'guest')
@@ -287,25 +289,22 @@ switch:
 
 But usually, at least for first-time usage, the following will do:
 
- gled -noauth some_scene.C
+ gled some_scene.C
 
 This starts C<gled> without authentication and executes C<c++> macro
 script C<some_scene.C>. Most macros in the demo section 
 start the server and GUI automatically.
 
 There is no rule as to what macros should contain, but before you
-start adding objects into the system, the server must be spawned, as
-in C<$GLEDSYS/macros/sun.C>:
+start adding objects into the system, the server must be spawned:
 
- if(Gled::theOne->GetSaturn() == 0) {
-   Gled::theOne->SpawnSun();
- }
+ Gled::AssertMacro("sun.C");
 
 C<Gled>'s search path for macros is initially set to
 C<.:$HOME/.gled:$GLEDSYS/macros>. Some standard macros are supplied
-with the distribution and reside in the C<$GLEDSYS/macros>
-directory. Typically the demo macros execute C<sun.C> somwhere close
-to the beginning and C<eye.C> (standard GUI) at the end.
+with the distribution and reside in the C<$GLEDSYS/macros> directory
+(eg. C<sun.C>). Typically the demo macros execute C<sun.C> somwhere
+close to the beginning and C<eye.C> (standard GUI) at the end.
 
 To quit C<Gled>, click on the C<Eat flaming death> button in the main
 window or type C<.q> on the C<ROOT> prompt.
@@ -357,7 +356,9 @@ Please modify the scripts to suit your needs.
 
 =head2 Configuration of Gled authentication
 
-External configuration is only needed for authentication support.
+To run Gled with authentication, use the C<-auth> command-line option.
+
+Additional configuration is needed for authentication support.
 All other configuration can be done via command-line options and
 start-up scripts. See the C<$GLEDSYS/macros> directory and the
 provided demos for examples.
@@ -410,20 +411,12 @@ window).
 
 Some scripts might not start the GUI. They should be run as:
 
- gled -noauth <demo-name>.C
+ gled <demo-name>.C
 
-or, if the server/viewer is not started from the script:
-
- gled -noauth sun.C <demo-name>.C eye.C
-
-The C<sun.C> macro starts the server (must precede the demo macro) and
-C<eye.C> starts the default viewer (must follow the demo macro).
-
-Note that you will need the C<-nauth> option (to disable
-authentication) or C<-eyeid sun.absolute> (to spawn GUI with the
-adminstrator privileges) if you want to edit the top-level
-objects. Most demo scripts do not setup any authorization scheme and
-thus GUI requests to top-level objects are bluntly denied.
+Note that you will need the C<-auth> option to enable authentication
+and C<-eyeid sun.absolute> to spawn GUI with the adminstrator
+privileges. Most demo scripts do not setup any authorization scheme
+and GUI requests to top-level objects would be refused.
 
 To check for demo updates:
 
@@ -570,20 +563,33 @@ directly from the pupil itself. This has been implemented in
 C<Gled-1.0> and was quite useful.
 
 
-=head2 Connecting to a running Gled
+=head2 Connecting a Gled cluster
+
+To start gled in a server mode, use:
+
+ gled -allowmoons <other options>
+
+or call
+
+ Gled::theOne->AllowMoonConnections()
+
+from the command line. Consider using the authentication as well.
 
 To connect to an already running gled, use:
 
- gled -r -m <host-to-connect-to> moon.C
+ gled -m <host-to-connect-to> moon.C
 
-C<moon.C> script will in principle just open the shell and a GL window
-on the first scene.
+C<moon.C> script will open the connection, download the server-objects
+and spawn GUI shell and a GL viewer on the first available scene. For
+specific uses the macro should be modified to open views of concrete,
+predetermined objects).
 
 Once connected, you cannot reconnect to another saturn: quit gled and
 run a new one.
 
 If the master dies (or closes socket), gled will die with an assertion
-failure. This should be fixed soon.
+failure. In principle local instance could adopt server's objects and
+continue running in a detached mode.
 
 
 =head2 Gled Bootstrap
@@ -598,6 +604,11 @@ options. The Gled object is a singleton, accessible via
 C<Gled::theOne> (or C<GledGUI::theOne>) both from your compiled code
 and C<ROOT> prompt/scripts.
 
+=item Execute C<-preexec> macros.
+
+=item Create ROOT application interface (C<TRint>); let it parse
+command-line arguments.
+
 =item Start the GUI thread that manages all FLTK windows and eye's
 event-loop.
 
@@ -610,12 +621,12 @@ ALL mandatory queens have been received from the master server. This
 means that the scripts (being executed on the next step) can rely on
 having client object-space set-up properly.
 
-=item C<TRint> (C<ROOT>'s interactive application) processes macros given
-on the command line. Note that the server is not allowing moon
-connections yet and the scripts can freely create objects and attach
-them into the object graphs without worrying about the clients.
+=item C<TRint> processes macros given on the command line. Note that
+the server is not allowing moon connections yet and the scripts can
+freely create objects and attach them into the object graphs without
+worrying about the clients.
 
-=item Unless C<-nomoons> option is given, allow moon connections. This can
+=item If C<-allowmoons> option is given, allow moon connections. This can
 also be achieved later by calling
 C<< Gled::theOne->AllowMoonConnections() >>.
 
@@ -663,6 +674,7 @@ ftp://ftp.gled.org/current/libsets/ . To get the base
 sources, do:
 
  wget -q ftp://ftp.gled.org/current/libsets/gled.tar.gz
+ tar xzf gled.tar.gz
  cd gled
  for a in GledCore Geom1 Numerica ; do
    wget -q ftp://ftp.gled.org/current/libsets/$a-src.tar.gz
