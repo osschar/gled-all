@@ -16,7 +16,7 @@ BLESSED_DIRS	:= Glasses
 BASE_DIRS	:= Stones Alice 
 
 DICT_DIRS	:= Glasses Stones
-CPPFLAGS	:=-I${ALICE_ROOT}/include -I${ALICE_ROOT}/TPC -I${ALICE_ROOT}/CONTAINERS
+CPPFLAGS	:=-I${ALICE_ROOT}/include -I${ALICE_ROOT}/TPC -I${ALICE_ROOT}/ITS  -I${ALICE_ROOT}/CONTAINERS
 
 VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
