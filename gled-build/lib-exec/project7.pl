@@ -1011,8 +1011,10 @@ fnord
       print C7 QeamArgs($r->{Args}, "mir", "    ");
     }
     my @ca = map { $_->[5] } (@{$r->{Args}});
-    print C7 "    ${CLASSNAME}::$r->{Methodbase}(". join(", ", @ca) .");";
-    print C7 "\n    break;\n  }\n";
+    # FQ Names do not permit proper virtualization.
+    # print C7 "    ${CLASSNAME}::$r->{Methodbase}(". join(", ", @ca) .");";
+    print C7 "    $r->{Methodbase}(". join(", ", @ca) .");\n";
+    print C7 "    break;\n  }\n";
   }
   # end
   print C7 " default: { }\n";
