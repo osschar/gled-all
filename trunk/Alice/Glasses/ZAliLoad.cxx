@@ -14,6 +14,7 @@
 #include <Glasses/ZQueen.h>
 #include <Glasses/RecTrack.h>
 #include <Glasses/V0Track.h>
+#include <Glasses/ITSModule.h>
 #include <Stones/TTreeTools.h>
 
 #include <TSystem.h>
@@ -32,6 +33,10 @@
 #include <AliESDV0MI.h>
 #include <AliTPCclusterMI.h>
 #include <AliTPCClustersRow.h>
+#include <AliITS.h>
+#include <AliITSclusterV2.h>
+#include <AliITSLoader.h>
+#include <AliITSgeom.h>
 
 typedef list<MCTrack*>           lpZATrack_t;
 typedef list<MCTrack*>::iterator lpZATrack_i;
@@ -305,6 +310,7 @@ void ZAliLoad::close_vsd()
   delete mTreeV0;     mTreeV0     = 0;
   delete mTreeGI;     mTreeGI     = 0;
   delete mTPCDigInfo; mTPCDigInfo = 0;
+  delete mITSDigInfo; mITSDigInfo = 0;
 
   if (mFile) {
     mFile->Close();
@@ -735,6 +741,7 @@ void ZAliLoad::ConvertClusters()
   mTreeC =  new TTree("Clusters", "rec clusters");
   mTreeC->Branch("C", "Hit", &mpC, 128*1024, 1);
 
+  ConvertITSClusters();
   ConvertTPCClusters();
 }
 
@@ -1265,7 +1272,7 @@ void ZAliLoad::ShowTPCPlate(Int_t side)
 
 void ZAliLoad::ConvertTPCClusters()
 {
-  static const string _eh("ZAliLoad::ConvertTPCTPCClusters ");
+  static const string _eh("ZAliLoad::ConvertTPCClusters ");
 
   auto_ptr<TFile> f 
     ( TFile::Open(GForm("%s/TPC.RecPoints.root", mDataDir.Data())) );
@@ -1332,6 +1339,186 @@ void ZAliLoad::ConvertTPCClusters()
   //set geninfo
   for(map<Int_t, Int_t>::iterator j=cmap.begin(); j!=cmap.end(); ++j) {
     get_geninfo(j->first)->Nc += j->second;
+  }
+}
+
+
+/**************************************************************************/
+// ITS clusters
+/**************************************************************************/
+void ZAliLoad::ConvertITSClusters()
+{
+  static const string _eh("ZAliLoad::ConvertITSClusters ");
+
+  auto_ptr<TFile> f 
+    ( TFile::Open(GForm("%s/ITS.RecPoints.root", mDataDir.Data())) );
+  if(!f.get())
+    throw(_eh + "can not open 'ITS.RecPoints.root' file.");
+    
+  auto_ptr<TDirectory> d
+    ( (TDirectory*) f->Get(GForm("Event%d",mEvent)) );
+  if(!d.get())
+    throw(_eh + GForm("event directory '%d' not found.", mEvent));
+
+  auto_ptr<TTree> tree( (TTree*) d->Get("TreeR") );
+  if(!tree.get())
+    throw(_eh + "'TreeR' not found.");
+
+  AliITSLoader* ITSld =  (AliITSLoader*) pRunLoader->GetLoader("ITSLoader");
+  AliITS* pITS = ITSld->GetITS();
+  AliITSgeom* geom = pITS->GetITSgeom();
+  //AliITSgeom* geom = new AliITSgeom();
+  //geom->ReadNewFile("/home/aljam/ITSgeometry.det");
+
+  //printf("alice ITS geom %p \n",geom );
+
+  if(!geom)
+    throw(_eh + "can not find ITS geometry");
+
+  TClonesArray *arr = new TClonesArray("AliITSclusterV2");
+  tree->SetBranchAddress("Clusters", &arr);
+  Int_t nmods = tree->GetEntries();
+  Float_t gc[3];
+  map<Int_t, Int_t> cmap;
+
+  for (Int_t mod=0; mod<nmods; mod++) {
+    tree->GetEntry(mod);
+    Int_t nc=arr->GetEntriesFast();
+    for (Int_t j=0; j<nc; j++) {
+      AliITSclusterV2* recp = (AliITSclusterV2*)arr->UncheckedAt(j);
+
+      Double_t rot[9];     
+      geom->GetRotMatrix(mod,rot);
+      Int_t lay,lad,det;   
+      geom->GetModuleId(mod,lay,lad,det);
+      Float_t tx,ty,tz;    
+      geom->GetTrans(lay,lad,det,tx,ty,tz);     
+
+      Double_t alpha=TMath::ATan2(rot[1],rot[0])+TMath::Pi();
+      Double_t phi1=TMath::Pi()/2+alpha;
+      if(lay==1) phi1+=TMath::Pi();
+
+      Float_t cp=TMath::Cos(phi1), sp=TMath::Sin(phi1);
+      Float_t  r=tx*cp+ty*sp;
+      gc[0]= r*cp - recp->GetY()*sp;
+      gc[1]= r*sp + recp->GetY()*cp;
+      gc[2]= recp->GetZ();
+      // write in mTreeC  tree
+      mC.fDetID = 0;
+      mC.fLabel = recp->GetLabel(0);
+      mC.x      = r*cp - recp->GetY()*sp;
+      mC.y      = r*sp + recp->GetY()*cp;
+      mC.z      = recp->GetZ();
+      mTreeC->Fill();
+      cmap[mC.fLabel]++;
+    } 
+
+    for(map<Int_t, Int_t>::iterator j=cmap.begin(); j!=cmap.end(); ++j) {
+      get_geninfo(j->first)->Nc += j->second;
+    }
+  }
+  delete arr;
+}
+
+/**************************************************************************/
+// ITS digits
+/**************************************************************************/
+void ZAliLoad::make_its_digits_info()
+{
+  static const string _eh("ZAliLoad::make_its_digits_info ");
+  delete mITSDigInfo;
+
+  AliITSgeom* geom = new AliITSgeom();
+  geom->ReadNewFile("ITSgeometry.det");
+  if(geom == 0)
+    throw(_eh + GForm("can load ITS geometry \n"));
+   
+  TFile* f2 = TFile::Open(GForm("%s/ITS.Digits.root", mDataDir.Data()));
+  if(f2 == 0)
+    throw(_eh + "can not open ITS.Digits.root.");
+
+  TDirectory* d = (TDirectory*)f2->Get(GForm("Event%d",mEvent));
+  TTree* tree = (TTree*)d->Get("TreeD");
+  mITSDigInfo = new ITSDigitsInfo();
+  mITSDigInfo->SetData(geom,tree);
+}
+
+
+void ZAliLoad::ShowITSModule(Int_t id, ZNode* holder)
+{
+  static const string _eh("ZAliLoad::ShowITSModule ");
+  if(!mITSDigInfo)
+    make_its_digits_info();
+
+  ITSModule* m = new ITSModule(id, mITSDigInfo);
+  mQueen->CheckIn(m);
+  if (holder) 
+    holder->Add(m);
+  else Add(m);
+}
+
+void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
+{
+  if(!mITSDigInfo)
+    make_its_digits_info();
+
+  Int_t layer, lad, det;
+  ZNode *dh, *hl1, *hl2, *th;
+  Int_t first, last;
+  TClonesArray* arr;
+
+  if(id == -1 || id == 0){
+    dh = new ZNode("SPD");
+    mQueen->CheckIn(dh); Add(dh);
+    hl1 = new ZNode("Layer 1"); hl2 = new ZNode("Layer 2");
+    mQueen->CheckIn(hl1); mQueen->CheckIn(hl2);
+    dh->Add(hl1); dh->Add(hl2);
+  
+    first = mITSDigInfo->mGeom->GetStartSPD();
+    last = mITSDigInfo->mGeom->GetLastSPD();
+    for(Int_t i =first; i<last; i++ ){
+      arr= mITSDigInfo->GetDigits(i,0);
+      mITSDigInfo->mGeom->GetModuleId(i,layer,lad, det);
+      th = (layer == 1) ? hl1 : hl2;
+      if(arr->GetEntriesFast() || show_empty)
+	ShowITSModule(i, th);
+    }
+  }
+
+  if(id == -1 || id == 1){
+    dh = new ZNode("SDD");
+    mQueen->CheckIn(dh); Add(dh);
+    hl1 = new ZNode("Layer 3"); hl2 = new ZNode("Layer 4");
+    mQueen->CheckIn(hl1); mQueen->CheckIn(hl2);
+    dh->Add(hl1); dh->Add(hl2);
+
+    first = mITSDigInfo->mGeom->GetStartSDD();
+    last = mITSDigInfo->mGeom->GetLastSDD();
+    for(Int_t i =first; i<last; i++ ){
+      arr= mITSDigInfo->GetDigits(i,1);
+      mITSDigInfo->mGeom->GetModuleId(i,layer,lad, det);
+      th = (layer == 3) ? hl1 : hl2;
+      if(arr->GetEntriesFast() || show_empty)
+	ShowITSModule(i, th);
+    }
+  }
+
+  if(id == -1 || id == 2){
+    dh = new ZNode("SSD");
+    mQueen->CheckIn(dh); Add(dh);
+    hl1 = new ZNode("Layer 5"); hl2 = new ZNode("Layer 6");
+    mQueen->CheckIn(hl1); mQueen->CheckIn(hl2);
+    dh->Add(hl1); dh->Add(hl2);
+
+    first = mITSDigInfo->mGeom->GetStartSSD();
+    last = mITSDigInfo->mGeom->GetLastSSD();
+    for(Int_t i =first; i<last; i++ ){
+      arr= mITSDigInfo->GetDigits(i,2);
+      mITSDigInfo->mGeom->GetModuleId(i,layer,lad, det);
+      th = (layer == 5) ? hl1 : hl2;
+      if(arr->GetEntriesFast() || show_empty)
+	ShowITSModule(i, th);
+    }
   }
 }
 

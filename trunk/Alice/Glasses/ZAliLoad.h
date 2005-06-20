@@ -15,6 +15,7 @@
 #include <Glasses/GIImportStyle.h>
 
 #include <Stones/TPCDigitsInfo.h>
+#include <Stones/ITSDigitsInfo.h>
 #include <Stones/MCParticle.h>
 #include <Stones/V0.h>
 #include <Stones/GenInfo.h>
@@ -35,6 +36,7 @@ class ZAliLoad : public ZNode {
 
  private:
   void                           _init();
+  void                           make_its_digits_info();
   GenInfo*                       get_geninfo(Int_t label);
 
   bool                           m_auto_vsdfile_p;
@@ -52,8 +54,8 @@ class ZAliLoad : public ZNode {
   ESDParticle                    mR, *mpR;     // needed for selection in mTreeR  
   V0                             mV0, *mpV0;   // needed for selection in mTreeV0  
   GenInfo                        mGI,*mpGI;    // needed for selection in mTreeGI      
-  TPCDigitsInfo*                 mTPCDigInfo;
-
+  TPCDigitsInfo*                 mTPCDigInfo; // X{g}
+  ITSDigitsInfo*                 mITSDigInfo; // X{g}
  protected:
   Bool_t check_read(const string& file);
   string get_vsd_name(Bool_t check_p);
@@ -160,6 +162,11 @@ class ZAliLoad : public ZNode {
   void        ShowTPCPlate(Int_t side = -1);   // X{Ed} 7 MCWButt()
   void        ConvertTPCClusters();
 
+  // --------------------------------------------------------------
+  // ITS specific  (digits,clusters)
+  void        ConvertITSClusters();
+  void        ShowITSModule(Int_t module, ZNode* holder=0);
+  void        ShowITSDet(Int_t subdet = -1, Bool_t show_empty = false);
 
   // --------------------------------------------------------------
   // Globals.
