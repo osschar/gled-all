@@ -1,3 +1,27 @@
+2005-06-20  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+        New files.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Add function to display ITS digits and modules.
+
+	* Makefile:
+        Add  $ALIROOT/ITS in include path.
+
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+        New files.
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+        New files.
+
+	* glass.list:
+        Add classes ITSModule and ITSDigitsInfo.
+
 2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/MCTrack_GL_Rnr.cxx:
