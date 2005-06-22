@@ -16,13 +16,13 @@ void metagui_test()
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
 
+  CREATE_ADD_GLASS(lucida34, ZRlFont, g_queen, "LucidaBright 34", 0);
+  lucida34->SetFontFile("lucidabright34.txf");
+
   Scene* images  = new Scene("Images");
   g_queen->CheckIn(images);
   g_queen->Add(images);
   g_scene = images;
-
-  CREATE_ADD_GLASS(lucida34, ZRlFont, g_queen, "LucidaBright 34", 0);
-  lucida34->SetFontFile("lucidabright34.txf");
 
   // Images
 
@@ -105,9 +105,10 @@ void metagui_test()
   g_queen->CheckIn(terrain);
   images->Add(terrain);
   terrain->SetFromImage(image3);
+  terrain->SetOriginMode(RectTerrain::OM_Center);
   terrain->SetDx(0.05); terrain->SetDy(0.05);
   terrain->SetMinCol(1,0,0); terrain->SetMaxCol(0,1,1);
-  terrain->Set3Pos(-3, -7, 0.01);
+  terrain->Set3Pos(0, -4, 0.01);
   terrain->SetRibbon(ribbon1);
 
   CREATE_ADD_GLASS(n1, SMorph, images, "Earth", "");
@@ -152,17 +153,50 @@ void metagui_test()
 
   // RndSmorphCreator
   CREATE_ADD_GLASS(rs_node, ZNode, images, "RndSmorph Node", 0);
-  CREATE_ADD_GLASS(rs_eventor, Eventor, images, "Eventor", 0);
+  CREATE_ADD_GLASS(rs_eventor, Eventor, images, "SMorph-Eventor", 0);
   rs_eventor->SetBeatsToDo(100);
   rs_eventor->SetInterBeatMS(100);
   CREATE_ADD_GLASS(rs_op, RndSMorphCreator, rs_eventor, "SMorph Creator", 0);
   rs_op->SetTarget(rs_node);
+
+  // Rotator
+  CREATE_ADD_GLASS(rot_eventor, Eventor, images, "Rotator-Eventor", 0);
+  rot_eventor->SetInterBeatMS(30);
+  CREATE_ADD_GLASS(rot_op, Mover, rot_eventor, "Rotator", 0);
+  rot_op->SetRotateParams(1, 2, 0.01);
 
   //--------------------------------
 
   CREATE_ATT_GLASS(clipplane, ZGlClipPlane, morphs[1], SetRnrMod,
 		   "ClipPlane", 0);
 
+  //--------------------------------
+  // Overlay
+  //--------------------------------
+
+  CREATE_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
+
+  CREATE_ADD_GLASS(ovl_lamp, Lamp, overlay, "Ovl Lamp", 0);  
+  ovl_lamp->Set3Pos(0, -5, 10);
+  ovl_lamp->SetScale(1);
+  overlay->GetGlobLamps()->Add(ovl_lamp);
+
+  CREATE_ADD_GLASS(ovl_lm, ZGlLightModel, overlay, "LightOff", 0);
+  ovl_lm->SetLightModelOp(0);
+
+  CREATE_ADD_GLASS(nll, ZNodeListLink, overlay, "Element list", "Bar");
+  nll->SetContents(images);
+  CREATE_ATT_GLASS(nlltp, ZRlNameRnrCtrl, nll, SetRnrMod, "TextCtrl", 0);
+
+  nll->Set3Pos(0, 0, 4);
+
+  nll->StandardFixed();
+
+  nll->SetCbackAlpha(rot_op);
+  nll->SetCbackMethodName("Mover::SetNode");
+
+  //--------------------------------
+  // Meta GUI
   //--------------------------------
 
   int W = 32;
@@ -223,10 +257,14 @@ void metagui_test()
   g_pupil->SetUpReference(images);
   g_pupil->SetUpRefAxis(3);
 
+  g_pupil->SetOverlay(overlay);
+  g_pupil->SetEventHandler(nll);
+
   g_shell->SetDefSubShell(g_nest);
 
   Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 
-  gSystem->Sleep(1000);
   g_shell->SpawnMetaGui(morphs[1], mg);
+
+  rot_eventor->Start();
 }
