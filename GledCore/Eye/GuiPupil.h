@@ -24,15 +24,12 @@ class GuiPupil : public FTW_SubShell,
 private:
 
 protected:
-  GuiPupilInfo*	mInfo;   // X{g}
+  GuiPupilInfo*  mInfo;   // X{g}
 
-  Fl_Pack*	 wMainPack;
-  Fl_Pack*	 wMenuPack;
+  Fl_Pack*       wMainPack;
+  Fl_Pack*       wMenuPack;
 
   Pupil*         wPupil; // X{g}
-
-  string	mLabel;		
-  void		label_window();
 
 public:
 
@@ -44,7 +41,8 @@ public:
 
   virtual void AbsorbRay(Ray& ray);
 
-  virtual int handle(int ev);
+  virtual void label_window(const char* l=0);
+  virtual int  handle(int ev);
 
 #include "GuiPupil.h7"
 }; // endclass GuiPupil

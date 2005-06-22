@@ -82,8 +82,6 @@ protected:
   void hide_custom_weeds();
   void wipe_custom_weeds();
 
-  void label_nest();
-
 public:
 
   static FTW_Nest* Create_FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
@@ -143,6 +141,7 @@ public:
   Fl_Color LeafName_Color(FTW_Leaf* leaf);
   Fl_Color AntName_Color(FTW_Ant* ant);
 
+  virtual void label_window(const char* l=0);
   virtual int  handle(int ev);
   virtual void resize(int x, int y, int w, int h);
 

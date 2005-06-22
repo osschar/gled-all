@@ -64,11 +64,10 @@ namespace {
 /**************************************************************************/
 
 GuiPupil::GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
-  FTW_SubShell(sh),
+  FTW_SubShell(sh, this),
   OS::A_View(img),
   Fl_Window(w, h)
 {
-  mWindow = this;
   mInfo = dynamic_cast<GuiPupilInfo*>(fImg->fGlass);
   assert(mInfo);
 
@@ -138,6 +137,12 @@ void GuiPupil::AbsorbRay(Ray& ray)
 /**************************************************************************/
 /**************************************************************************/
 
+void GuiPupil::label_window(const char* l)
+{
+  if(l == 0) l = GForm("guipupil: %s '%s'", mInfo->GetName(), mInfo->GetTitle());
+  FTW_SubShell::label_window(l);
+}
+
 int GuiPupil::handle(int ev)
 {
   switch (ev) {
@@ -156,12 +161,3 @@ int GuiPupil::handle(int ev)
 }
 
 /**************************************************************************/
-// Protected methods.
-/**************************************************************************/
-
-void GuiPupil::label_window()
-{
-  mLabel = GForm("GuiPupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
-  label(mLabel.c_str());
-  redraw();
-}
