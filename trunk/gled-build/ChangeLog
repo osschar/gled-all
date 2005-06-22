@@ -1,3 +1,12 @@
+2005-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	In auto-generated MirExec: do not use fully-quantified names
+	for execution of virtual methods.
+
+	* cfg/Rnr_GL_SKEL.cxx:
+	Include GL/gl.h instead of FL/gl.h.
+
 2005-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
