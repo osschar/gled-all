@@ -1,3 +1,99 @@
+2005-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/FTW_Nest.cxx:
+	* Eye/FTW_Nest.h:
+	* Eye/FTW_SubShell.cxx:
+	* Eye/FTW_SubShell.h:
+	* Eye/GuiPupil.cxx:
+	* Eye/GuiPupil.h:
+	Consolidated handling of window-titles for
+	sub-shells. FTW_SubShell now holds the label in 'std::string
+	mWindowLabel' and provides virtual method 'label_window(const
+	char*)'.
+	
+	* Stones/ZTrans.cxx:
+	Changed Invert() with InvertFast().
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Added method 'MakeRnrModList()' to facilitate management of
+	RnrMods.
+
+	* Eye/Pupil.cxx:
+	* Eye/Pupil.h:
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added preliminary support for interactive overlay and X-event
+	delivery into renderers.
+
+	Added 'ZoomFac' method for changing ZFov or ZSize. It uses
+	exponential model and is now the default. 'Bool_t
+	PupilInfo::bZoomByFac' controls the behaviour.
+
+	* Glasses/ZNodeListLink.cxx:
+	* Glasses/ZNodeListLink.h:
+	* Rnr/GL/ZNodeListLink_GL_Rnr.cxx:
+	* Rnr/GL/ZNodeListLink_GL_Rnr.h:
+	New files: protoype of list rendering. So far only supports
+	rectangular 3D-grid display (see demos/Geom1/metagui_test.C).
+	
+	* RnrBase/A_Rnr.h:
+	Added nested struct Fl_Event (looks a lot like FLTK event but is
+	fully contained in the Gled-rendering sub-system.
+
+	* RnrBase/Fl_Event_Enums.h:
+	New file: copy of relevant parts of FLTK Enumerations.H.
+
+	* RnrBase/RnrDriver.h:
+	Added member 'Float* mProjBase' holding a copy of projection
+	matrix prior to setting of viewing frustum. This is identity,
+	unless picking is active: by accessing this information renderers
+	switching into ortho-mode (eg. some text renderers) can still use
+	picking.
+
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	New variant of txfRenderString that takes max x-width of text as
+	an argument (fades-out when approaching it); use projection base
+	from RnrDriver when setting orthographic projection (required for
+	picking to work on rendered text).
+
+	* Rnr/GL/SphereTrings.cxx:
+	* Rnr/GL/SphereTrings.h:
+	New function UnitBox().
+
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Added nested class 'GL_Capability_Switch' to ease
+	enabling/disabling of GL capabilities.
+
+	* Rnr/GL/Cylinder_GL_Rnr.h:
+	* Rnr/GL/GlobalLamps_GL_Rnr.cxx: 
+	* Rnr/GL/LampLink_GL_Rnr.cxx:
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/SEvTaskState_GL_Rnr.cxx:
+	* Rnr/GL/Scene_GL_Rnr.cxx:
+	* Rnr/GL/ScreenText_GL_Rnr.cxx:
+	* Rnr/GL/Sphere_GL_Rnr.h:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	* Rnr/GL/ZGlClipPlane_GL_Rnr.cxx:
+	* Rnr/GL/ZGlLightModel_GL_Rnr.cxx:
+	* Rnr/GL/ZGlMaterial_GL_Rnr.cxx:
+	* Rnr/GL/ZNodeLink_GL_Rnr.cxx:
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModList_GL_Rnr.cxx:
+	Changed include FL/gl.h to GL/gl.h.
+
+	* glass.list:
+	Added new glass ZNodeListLink.
+
+	* perllib/GLED_Widgets.pm:
+	Somewhat improved max-width determination for Value weed.
+
 2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* RnrBase/PMSEntry.cxx:
