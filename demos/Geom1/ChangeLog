@@ -1,3 +1,8 @@
+2005-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	Added demo of interactive overlays.
+
 2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* WS_demo.C:
