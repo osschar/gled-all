@@ -315,7 +315,7 @@ void FTW_Nest::_build(int w, int h)
   wMainPack->resizable(mPack);
   resizable(wMainPack);
 
-  label_nest();
+  label_window();
 }
 
 void FTW_Nest::_finalize_build()
@@ -329,26 +329,24 @@ void FTW_Nest::_finalize_build()
 /**************************************************************************/
 
 FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
-  FTW_SubShell(sh),
+  FTW_SubShell(sh, this),
   OS::A_View(img),
   Fl_Window(w, h),
   mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
   end();
-  mWindow = this;
   _build(w, h);
 }
 
 FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h) :
-  FTW_SubShell(sh),
+  FTW_SubShell(sh, this),
   OS::A_View(img),
   Fl_Window(x, y, w, h),
   mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
   end();
-  mWindow = this;
   _build(w, h);
 }
 
@@ -362,7 +360,7 @@ FTW_Nest::~FTW_Nest() {
 void FTW_Nest::AbsorbRay(Ray& ray)
 {
   if(ray.IsBasicChange()) {
-    label_nest();
+    label_window();
     return;
   }
 
@@ -728,6 +726,12 @@ Fl_Color FTW_Nest::AntName_Color(FTW_Ant* ant)
 
 /**************************************************************************/
 
+void FTW_Nest::label_window(const char* l)
+{
+  if(l == 0) l = GForm("nest: %s '%s'", mNestInfo->GetName(), mNestInfo->GetTitle());
+  FTW_SubShell::label_window(l);
+}
+
 int FTW_Nest::handle(int ev)
 {
   if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
@@ -869,15 +873,6 @@ void FTW_Nest::wipe_custom_weeds()
   bCustomWeedsCreated = false;
   wMidPack->remove(wCustomLabels);
   delete wCustomLabels; wCustomLabels = 0;
-}
-
-/**************************************************************************/
-
-void FTW_Nest::label_nest()
-{
-  label(GForm("nest: %s; shell: %s", mNestInfo->GetName(),
- 	                             mShell->GetShellInfo()->GetName()));
-  redraw();
 }
 
 /**************************************************************************/

@@ -7,19 +7,27 @@
 #ifndef GledCore_FTW_SubShell_H
 #define GledCore_FTW_SubShell_H
 
+#include <string>
+
 class FTW_Shell;
 class Fl_Window;
 
 class FTW_SubShell {
 protected:
-  FTW_Shell*	mShell;
-  Fl_Window*	mWindow; // Needed due to a braindead bug in gcc-3.2.3.
+  FTW_Shell*    mShell;
+  Fl_Window*    mWindow;
+
+  std::string   mWindowLabel;
 
 public:
-  FTW_SubShell(FTW_Shell* s=0) : mShell(s), mWindow(0) {}
+  FTW_SubShell(FTW_Shell* s=0, Fl_Window* w=0) : mShell(s), mWindow(w) {}
+  virtual ~FTW_SubShell() {}
 
   FTW_Shell* GetShell()          { return mShell;  }
   virtual Fl_Window* GetWindow() { return mWindow; }
+
+  virtual void label_window(const char* l=0);
+
 }; // endclass FTW_SubShell
 
 #endif
