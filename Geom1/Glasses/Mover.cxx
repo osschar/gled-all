@@ -27,6 +27,14 @@ void Mover::_init()
 
 /**************************************************************************/
 
+void Mover::SetRotateParams(UInt_t i, UInt_t j, Float_t a)
+{
+  mRi = i; mRj = j; mRa = a;
+  Stamp(FID());
+}
+
+/**************************************************************************/
+
 void Mover::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   Operator::PreOperate(op_arg);

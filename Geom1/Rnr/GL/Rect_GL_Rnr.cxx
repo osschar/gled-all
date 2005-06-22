@@ -1,6 +1,6 @@
 // $#Header$
 #include "Rect_GL_Rnr.h"
-#include "FL/gl.h"
+#include "GL/gl.h"
 
 void Rect_GL_Rnr::Draw(RnrDriver* rd)
 {

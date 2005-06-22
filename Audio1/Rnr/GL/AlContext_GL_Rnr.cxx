@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "AlContext_GL_Rnr.h"
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 

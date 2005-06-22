@@ -6,7 +6,7 @@
 
 #include "Spheror_GL_Rnr.h"
 #include <Rnr/GL/SphereTrings.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 

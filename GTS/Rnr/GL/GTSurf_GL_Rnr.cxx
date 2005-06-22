@@ -6,7 +6,7 @@
 
 #include "GTSurf_GL_Rnr.h"
 #include <GTS/GTS.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 

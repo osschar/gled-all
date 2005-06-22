@@ -28,6 +28,8 @@ public:
   Mover(ZNode* m, Text_t* n="Mover", Text_t* t=0) :
     Operator(n,t), mNode(m) { _init(); }
 
+  void SetRotateParams(UInt_t i, UInt_t j, Float_t a); // X{E}
+
   // virtuals
   virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
 
