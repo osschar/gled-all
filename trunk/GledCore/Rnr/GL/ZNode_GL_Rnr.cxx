@@ -10,7 +10,7 @@
 #include <GledView/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;

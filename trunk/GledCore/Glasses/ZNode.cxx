@@ -6,6 +6,8 @@
 
 #include "ZNode.h"
 #include "ZNode.c7"
+#include "ZQueen.h"
+#include "ZRnrModList.h"
 #include <Stones/ZComet.h>
 
 #include <ctype.h>
@@ -250,6 +252,25 @@ void ZNode::RnrOffForDaughters()
   }
 }
 
+void ZNode::MakeRnrModList(ZGlass* optional_element)
+{
+  // Makes sure that link mRnrMod is pointing to a ZRnrModList.
+  // Previous contents of the link is added to the list if it is
+  // created.
+  // If non-zero, 'optional_element' is also added to the list.
+
+  ZRnrModList* rml = dynamic_cast<ZRnrModList*>(mRnrMod);
+  if(rml == 0) {
+    rml = new ZRnrModList;
+    mQueen->CheckIn(rml);
+    if(mRnrMod)
+      rml->Add(mRnrMod);
+    SetRnrMod(rml);
+  }
+  if(optional_element)
+    rml->Add(optional_element);
+}
+
 void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
 {
   // If enforce_to_all also changes OM of children w/ parent != this.
@@ -343,7 +364,7 @@ ZTrans* ZNode::BtoA(ZNode* a, ZNode* b, ZNode* top)
     if(top == 0) return 0;
   }
   ZTrans* at = a->ToNode(top); if(at == 0) { return 0; }
-  at->Invert();
+  at->InvertFast();
   ZTrans* bt = b->ToNode(top); if(bt == 0) { delete at; return 0; }
   *at *= *bt;
   delete bt;

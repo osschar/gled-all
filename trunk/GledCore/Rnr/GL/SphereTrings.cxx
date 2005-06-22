@@ -14,16 +14,22 @@ namespace {
   float sqrt2 = sqrt(2);
   float sqrt3 = sqrt(3);
   float x = sqrt(sqrt3/2), z = (1-sqrt3)/2, y = sqrt3*x/2;
+
   // Tethraedron
   GLfloat V_Tetrus[] = { 0,0,1,	x,0,z,	-x/2,y,z,	-x/2,-y,z };
   //GLfloat N_Tetrus[] = { 0,0,1,	x,0,z,	-x/2,y,z,	-x/2,-y,z };
   GLubyte I_Tetrus[] = { 0,1,2,	0,2,3,	0,3,1,	1,3,2 };
 
+  // Cube
   float Ca = 2/sqrt3;
   float a = Ca/2;
-  // Cube ... watch it ... a = 2 sqrt(3)/3
-  GLfloat V_Cube[] = { a,a,a,	a,-a,a,		a,-a,-a,   a,a,-a,
-		      -a,a,a,  -a,-a,a,        -a,-a,-a,  -a,a,-a
+  GLfloat V_Cube[] = { 
+    a,a,a,    a,-a,a,   a,-a,-a,   a,a,-a,
+    -a,a,a,  -a,-a,a,  -a,-a,-a,  -a,a,-a
+  };
+  GLfloat V_UnitCube[] = {
+    1,1,1,  1,0,1,  1,0,0,  1,1,0,
+    0,1,1,  0,0,1,  0,0,0,  0,1,0
   };
   GLubyte I_Cube[] = { 0,1,2,3,	3,2,6,7,	2,1,5,6,   6,5,4,7,
 		       7,4,0,3,	0,4,5,1 
@@ -97,4 +103,24 @@ void SphereTrings::DrawAndDisableGL(int i)
 {
   glDrawElements(GLmode[i], IndexSize[i], GL_UNSIGNED_BYTE, Indexen[i]);
   glDisableClientState(GL_VERTEX_ARRAY); glDisableClientState(GL_NORMAL_ARRAY);
+}
+
+/**************************************************************************/
+
+void SphereTrings::UnitBox()
+{
+  // Renders a flat box from (0,0,0) -> (1,1,1)
+
+  GLfloat *v   = V_UnitCube;
+  GLfloat *n   = N_Cube;
+  GLubyte *idx = I_Cube;
+  glBegin(GL_QUADS);
+  for(int i=0; i<6; ++i) {
+    glNormal3fv(n); n += 3;
+    glVertex3fv( & v[*(idx++) * 3]);
+    glVertex3fv( & v[*(idx++) * 3]);
+    glVertex3fv( & v[*(idx++) * 3]);
+    glVertex3fv( & v[*(idx++) * 3]);
+  }
+  glEnd();
 }

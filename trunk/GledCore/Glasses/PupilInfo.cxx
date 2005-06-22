@@ -15,7 +15,13 @@
 // mXDist is used as a 'typical distance of objects' when changing from one
 // mode to the other.
 //
-// Emits custom Rays: user_1 -> dump image, user_2 -> resize window
+// Emits custom Rays: dump_image, resize_window, camera_home
+//
+// *Overlay*
+//
+// Two links control display and interaction with the overlay:
+// _mOverlay_ is rendered after the rendering of the scene
+// _mEventHandler_ if non-zero, fltk-like-events are sent to its renderer
 
 #include "PupilInfo.h"
 #include "PupilInfo.c7"
@@ -49,6 +55,7 @@ void PupilInfo::_init()
   mZFov     = 90;   mZSize   = 20;
   mYFac     = 1;    mXDist   = 10;
   mNearClip = 0.01; mFarClip = 100;
+  bZoomByFac = true;
 
   // Basic rendering options.
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
@@ -66,6 +73,9 @@ void PupilInfo::_init()
 
   mPopupDx = 200; mPopupDy = 0;
   mPopupFx = 0;   mPopupFy = -0.5;
+
+  mOverlay      = 0;
+  mEventHandler = 0;
 }
 
 /**************************************************************************/
@@ -162,6 +172,21 @@ void PupilInfo::Zoom(Float_t delta)
   }
   case P_Orthographic: {
     SetZSize(mZSize += 0.5*delta);
+    SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
+  }
+  }
+}
+
+void PupilInfo::ZoomFac(Float_t fac)
+{ 
+  switch(mProjMode) {
+  case P_Perspective: {
+    SetZFov (fac*mZFov);
+    SetZSize(2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2));
+    break;
+  }
+  case P_Orthographic: {
+    SetZSize(fac*mZSize);
     SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
   }
   }

@@ -6,7 +6,7 @@
 
 #include "Text_GL_Rnr.h"
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 #define PARENT ZNode_GL_Rnr
 

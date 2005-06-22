@@ -44,11 +44,13 @@ protected:
   ZNode*	mCamBase;
   ZTrans	mCamBaseTrans;
   ZTrans	mCamAbsTrans;
+  Float_t       mProjBase[16];
+
+  OptoStructs::ZGlassImg* mOverlayImg;
+  OptoStructs::ZGlassImg* mEventHandlerImg;
+  OptoStructs::ZGlassImg* mBelowMouseImg;
 
   int		mMouseX, mMouseY;
-
-  string	mLabel;		
-  void		label_window();
 
   bool		bFullScreen;
   Fl_Window*	mFullScreenWin;
@@ -76,8 +78,7 @@ public:
 
   virtual void AbsorbRay(Ray& ray);
 
-  void SetProjection1();
-  void SetProjection2(Int_t n_tiles=1, Int_t x_i=0, Int_t y_i=0);
+  void SetProjection(Int_t n_tiles=1, Int_t x_i=0, Int_t y_i=0);
   void SetAbsRelCamera();
   void SetCameraView();
 
@@ -85,9 +86,11 @@ public:
 
   void FullScreen(Fl_Window* fsw);
 
-  void Render();
-  OptoStructs::ZGlassImg* Pick(bool make_menu_p=false);
+  void Render(bool rnr_self=true, bool rnr_overlay=true);
+  OptoStructs::ZGlassImg* Pick(int xpick, int ypick, bool make_menu_p=false,
+			       bool rnr_self=true, bool rnr_overlay=true);
 
+  virtual void label_window(const char* l=0);
   virtual void draw();
   // virtual void draw_overlay();
   virtual int  handle(int ev);

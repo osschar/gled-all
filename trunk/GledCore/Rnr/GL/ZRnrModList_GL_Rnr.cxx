@@ -6,7 +6,7 @@
 
 #include "ZRnrModList_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 namespace OS = OptoStructs;
 

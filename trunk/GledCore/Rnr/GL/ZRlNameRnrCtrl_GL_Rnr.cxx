@@ -7,7 +7,7 @@
 #include "ZRlNameRnrCtrl_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 #include <TSystem.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 

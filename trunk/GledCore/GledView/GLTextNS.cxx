@@ -187,6 +187,7 @@ namespace GLTextNS {
     }
     w = txf->tex_width;
     h = txf->tex_height;
+    txf->max_width = 0;
     xstep = 0.5 / w;
     ystep = 0.5 / h;
     for (i = 0; i < txf->num_glyphs; i++) {
@@ -210,6 +211,8 @@ namespace GLTextNS {
       txf->tgvi[i].v3[0] = tgi->xoffset;
       txf->tgvi[i].v3[1] = tgi->yoffset + tgi->height;
       txf->tgvi[i].advance = tgi->advance;
+
+      if(tgi->width > txf->max_width) txf->max_width = tgi->width;
     }
 
     min_glyph = txf->tgi[0].c;
@@ -461,12 +464,64 @@ namespace GLTextNS {
 		       bool keep_pos)
   {
     int i;
-
     if(keep_pos) glPushMatrix();
     for (i = 0; i < len; i++) {
       txfRenderGlyph(txf, string[i]);
     }
     if(keep_pos) glPopMatrix();
+  }
+
+  void txfRenderString(TexFont * txf, const char *string, int len, 
+		       GLfloat maxx, GLfloat fadew,
+		       bool keep_pos)
+  {
+    GLfloat x = 0, xg0, xg1, yg0, yg1, f0, f1;
+    fadew *= txf->max_width;
+    GLfloat xfade = maxx - fadew;
+
+    GLfloat col[4];
+    glGetFloatv(GL_CURRENT_COLOR, col);
+
+    glBegin(GL_QUADS);
+    for (int i = 0; i < len; i++) {
+
+      TexGlyphVertexInfo *tgvi;
+
+      tgvi = getTCVI(txf, string[i]);
+
+      xg0 = x + tgvi->v0[0];
+      xg1 = x + tgvi->v1[0];
+      yg0 = tgvi->v0[1];
+      yg1 = tgvi->v2[1];
+
+      if(xg1 > xfade) {
+	f0 = 1;	if(xg0 > xfade) f0 *= 1 - (xg0-xfade)/fadew;
+	f1 = 1 - (xg1-xfade)/fadew;
+
+	// printf("XX %s %c %f %f x(%f,%f) y(%f,%f)\n",
+	//        string, string[i], f0, f1,
+	//        xg0, xg1,yg0, yg1);
+
+	glColor4f(f0*col[0], f0*col[1], f0*col[2], f0*col[3]);
+	glTexCoord2fv(tgvi->t0);    glVertex2f(xg0, yg0);
+	glColor4f(f1*col[0], f1*col[1], f1*col[2], f1*col[3]);
+	glTexCoord2fv(tgvi->t1);    glVertex2f(xg1, yg0);
+	glTexCoord2fv(tgvi->t2);    glVertex2f(xg1, yg1);
+	glColor4f(f0*col[0], f0*col[1], f0*col[2], f0*col[3]);
+	glTexCoord2fv(tgvi->t3);    glVertex2f(xg0, yg1);
+      } else {
+	glTexCoord2fv(tgvi->t0);    glVertex2f(xg0, yg0);
+	glTexCoord2fv(tgvi->t1);    glVertex2f(xg1, yg0);
+	glTexCoord2fv(tgvi->t2);    glVertex2f(xg1, yg1);
+	glTexCoord2fv(tgvi->t3);    glVertex2f(xg0, yg1);
+      }
+
+      x += tgvi->advance;
+      if(x > maxx) break;
+    }
+    glEnd();
+
+    if(!keep_pos) glTranslatef(x, 0.0, 0.0);
   }
 
   /**************************************************************************/
@@ -692,7 +747,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-  glLoadIdentity();
+  glLoadMatrixf(rd->GetProjBase());
   glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
 
   // Translate to required position.
@@ -806,15 +861,22 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
   float y0 = -0.1 - float(descent)/(h_box);
   float y1 =  0.1 + float(ascent)/(h_box);
   glColor4fv(nrc_lens->RefTileCol()());
-  glBegin(GL_QUADS);
-  glVertex2f(x0, y0);
-  glVertex2f(x1, y0);
-  glVertex2f(x1, y1);
-  glVertex2f(x0, y1);
-  glEnd();
 
+  if(nrc_lens->GetRnrTiles()) {
+    glBegin(GL_QUADS);
+    glVertex2f(x0, y0); glVertex2f(x1, y0);
+    glVertex2f(x1, y1); glVertex2f(x0, y1);
+    glEnd();
+  }
 
   glPolygonOffset(-2, -2);
+
+  if(nrc_lens->GetRnrFrames()) {
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(x0, y0); glVertex2f(x1, y0);
+    glVertex2f(x1, y1); glVertex2f(x0, y1);
+    glEnd();
+  }
 
   glColor4fv(nrc_lens->RefTextCol()());
   glPushMatrix();
@@ -868,7 +930,7 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-  glLoadIdentity();
+  glLoadMatrixf(rd->GetProjBase());
   glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
 
   if(x < 0)

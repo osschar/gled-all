@@ -8,7 +8,7 @@
 #include "ZRlFont_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 #include <GledView/GLTextNS.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 #include <TSystem.h>
 

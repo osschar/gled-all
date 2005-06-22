@@ -10,7 +10,7 @@
 #include <Glasses/Cylinder.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 #include <GL/glu.h>
 
 class Cylinder_GL_Rnr : public ZNode_GL_Rnr {
