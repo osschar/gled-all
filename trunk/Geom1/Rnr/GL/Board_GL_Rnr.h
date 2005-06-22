@@ -5,7 +5,7 @@
 #include <Glasses/Board.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 class Board_GL_Rnr : public ZNode_GL_Rnr {
 private:

@@ -2,8 +2,6 @@
 #include "TA_Unit.h"
 #include "TA_Unit.c7"
 
-#include <FL/gl.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

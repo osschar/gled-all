@@ -10,7 +10,7 @@
 #include <Glasses/Moonraker.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 #include <GL/glu.h>
 
 class Moonraker_GL_Rnr : public ZNode_GL_Rnr {

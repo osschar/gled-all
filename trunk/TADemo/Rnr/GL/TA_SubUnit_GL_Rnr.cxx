@@ -7,7 +7,7 @@
 #include "TA_SubUnit_GL_Rnr.h"
 #include <Glasses/TA_Unit.h>
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 
