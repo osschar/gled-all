@@ -7,7 +7,7 @@
 #ifndef Gled_SphereTrings
 #define Gled_SphereTrings
 
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 namespace SphereTrings {
   extern GLfloat  CubeA;
@@ -23,6 +23,8 @@ namespace SphereTrings {
 
   void EnableGL(int i);
   void DrawAndDisableGL(int i);
+
+  void UnitBox();
 
 } // namespace SphereTrings
 

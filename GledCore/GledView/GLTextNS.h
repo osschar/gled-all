@@ -54,6 +54,7 @@ namespace GLTextNS {
     int tex_height;
     int max_ascent;
     int max_descent;
+    int max_width;   // max glyph width (MT)
     int num_glyphs;
     int min_glyph;
     int range;
@@ -79,6 +80,9 @@ namespace GLTextNS {
 
   extern void txfRenderGlyph(TexFont* txf, int c);
   extern void txfRenderString(TexFont* txf, const char *string, int len,
+			      bool keep_pos=true);
+  extern void txfRenderString(TexFont* txf, const char *string, int len,
+			      GLfloat maxx, GLfloat fadew,
 			      bool keep_pos=true);
 
   extern void txfRenderGlyphZW(TexFont* txf, int c, float z, float w);

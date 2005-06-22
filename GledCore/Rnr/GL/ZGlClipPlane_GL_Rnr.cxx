@@ -6,7 +6,7 @@
 
 #include "ZGlClipPlane_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
-#include <FL/gl.h>
+#include <GL/gl.h>
 
 /**************************************************************************/
 
@@ -87,8 +87,7 @@ void ZGlClipPlane_GL_Rnr::RnrSelf()
 {
   ZGlClipPlane& cp = *mZGlClipPlane;
 
-  GLboolean lightp; glGetBooleanv(GL_LIGHTING, &lightp);
-  if(lightp) glDisable(GL_LIGHTING);
+  GL_Capability_Switch light_off(GL_LIGHTING, false);
 
   glColor3f(1, 1, 1);
   glPushMatrix();
@@ -102,9 +101,7 @@ void ZGlClipPlane_GL_Rnr::RnrSelf()
   glVertex3f(0,  0.5, -0.5);
   glEnd();
   glBegin(GL_LINES);
-  glVertex3f(0, 0, 0); glVertex3f(1, 0, 0);
+  glVertex3f(0, 0, 0); glVertex3f(-1, 0, 0);
   glEnd();
   glPopMatrix();
-
-  if(lightp) glEnable(GL_LIGHTING);
 }

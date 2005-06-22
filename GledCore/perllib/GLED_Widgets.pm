@@ -255,10 +255,11 @@ sub measure_range {
   my $S = shift;
   return 4 unless exists $S->{-range};
   my ($l1, $l2) = ( length(eval($S->{-range}[0])), length(eval($S->{-range}[1])) );
-  my $m1 = defined $S->{-range}[3] ? length($S->{-range}[2]/$S->{-range}[3]) :
-    length($S->{-range}[2]);
   my $w = $l1 > $l2 ? $l1 : $l2;
-  $w += $m1-2 if $m1 > 2;
+  if(defined $S->{-range}[3]) {
+    my $m1 = length($S->{-range}[2]/$S->{-range}[3]) - 2; # subtract '0.'
+    $w += $m1 if $m1 > 0;
+  }
   return $w + 1;
 }
 

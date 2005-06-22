@@ -170,7 +170,7 @@ Int_t ZTrans::Rotate(ZTrans* a, Int_t i1, Int_t i2, Float_t amount)
 {
   // a is shitted
   if(i1==i2) return 0;
-  ZTrans ai(*a); ai.Invert();
+  ZTrans ai(*a); ai.InvertFast();
   ZTrans R; R.SetRot(i1, i2, amount); 
   *a *= R;
   *a *= ai;

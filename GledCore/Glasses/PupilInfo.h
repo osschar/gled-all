@@ -58,6 +58,7 @@ protected:
   Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
+  Bool_t	bZoomByFac;     // X{gS} 7 Bool()
 
   // Basic rendering options.
   Int_t		mFrontMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6,-join=>1)
@@ -86,6 +87,9 @@ protected:
   Float_t	mPopupFx;	// X{GS} 7 Value(-range=>[-10,10,1,10], -join=>1)
   Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
 
+  ZGlass*       mOverlay;       // X{GS} L{}
+  ZGlass*       mEventHandler;  // X{GS} L{}
+
 public:
   PupilInfo(const Text_t* n="PupilInfo", const Text_t* t=0) :
     SubShellInfo(n,t) { _init(); }
@@ -96,7 +100,8 @@ public:
 
   void ImportCameraInfo(CameraInfo* cam_info); // X{E} C{1} 7 MCWButt()
 
-  void Zoom(Float_t delta); // X{E}
+  void Zoom(Float_t delta);  // X{E}
+  void ZoomFac(Float_t fac); // X{E}
 
   void EmitDumpImageRay(const Text_t* filename="screenshot",
 			Int_t n_tiles=1); // X{E} 7 MCWButt()

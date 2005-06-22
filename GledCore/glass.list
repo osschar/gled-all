@@ -10,6 +10,7 @@ AList			5	Glasses/AList
 ZDeque			6	Glasses/ZDeque
 ZNode			16	Glasses/ZNode		.
 ZNodeLink		17	Glasses/ZNodeLink	.
+ZNodeListLink		18	Glasses/ZNodeListLink	.
 
 # God & Rulers
 ZGod			32	Glasses/ZGod

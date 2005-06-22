@@ -130,6 +130,7 @@ void Pupil::_build()
   size_range(0, 0, 4096, 4096);
 
   mDriver = new RnrDriver(fImg->fEye, "GL");
+  mDriver->SetProjBase(mProjBase);
 
   mCamera = new Camera;
 
@@ -148,10 +149,13 @@ void Pupil::_build()
   mCamAbsTrans  = mCamBaseTrans;
   mCamAbsTrans *= mCamera->RefTrans();
 
+  mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
+  mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
+  mBelowMouseImg   = 0;
+
   bFullScreen = false;
   bDumpImage  = false;
 
-  mWindow = this;
   mShell->RegisterROARWindow(this);
 }
 
@@ -159,7 +163,7 @@ void Pupil::_build()
 /**************************************************************************/
 
 Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
-  FTW_SubShell(shell),
+  FTW_SubShell(shell, this),
   OS::A_View(infoimg),
   Fl_Gl_Window(w,h), 
   mInfo(0),
@@ -173,7 +177,7 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
 
 Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
 	     int x, int y, int w, int h) :
-  FTW_SubShell(shell),
+  FTW_SubShell(shell, this),
   OS::A_View(infoimg),
   Fl_Gl_Window(x,y,w,h), 
   mInfo(0),
@@ -202,6 +206,11 @@ void Pupil::AbsorbRay(Ray& ray)
 
   if(ray.fFID != PupilInfo::FID())
     return;
+
+  if(ray.fRQN == RayNS::RQN_link_change) {
+    mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
+    mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
+  }
 
   switch(ray.fRQN) { 
 
@@ -239,14 +248,10 @@ void Pupil::AbsorbRay(Ray& ray)
 // Magick
 /**************************************************************************/
 
-void Pupil::SetProjection1()
+void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
-  glLoadIdentity();
-  glViewport(0,0,w(),h());
-}
+  glGetFloatv(GL_PROJECTION_MATRIX, mProjBase);
 
-void Pupil::SetProjection2(Int_t n_tiles, Int_t x_i, Int_t y_i)
-{
   double aspect = mInfo->GetYFac() * w()/h();
   double near   = TMath::Max(mInfo->GetNearClip(), 1e-5l);
   double far    = mInfo->GetFarClip();
@@ -291,7 +296,7 @@ void Pupil::SetAbsRelCamera()
       if(t.get() != 0) {
 	mCamBase = cam_base;
 	mCamBaseTrans = *t;
-	t->Invert();
+	t->InvertFast();
 	mCamera->SetTrans( *t * mCamera->RefTrans() );
       }
     }
@@ -393,7 +398,7 @@ void Pupil::SetAbsRelCamera()
   // Multiply-out the CamBaseTrans to get true camera for local controls.
   if(mCamBase != 0) {
     ZTrans t = mCamBaseTrans;
-    t.Invert();
+    t.InvertFast();
     mCamera->SetTrans(t*mCamAbsTrans);
   } else {
     mCamera->SetTrans(mCamAbsTrans);
@@ -463,7 +468,7 @@ void Pupil::FullScreen(Fl_Window* fsw)
 // Render & Pick
 /**************************************************************************/
 
-void Pupil::Render()
+void Pupil::Render(bool rnr_self, bool rnr_overlay)
 {
   // Calls rnr driver to perform actual rendering.
   // Used by draw() and Pick().
@@ -476,7 +481,10 @@ void Pupil::Render()
   mDriver->SetAbsCamera(&mCamAbsTrans);
 
   mDriver->BeginRender();
-  mDriver->Render(mDriver->GetRnr(fImg));
+  if(rnr_self)
+    mDriver->Render(mDriver->GetRnr(fImg));
+  if(rnr_overlay && mOverlayImg != 0)
+    mDriver->Render(mDriver->GetRnr(mOverlayImg));
   mDriver->EndRender();
 
   if(mDriver->SizePM() > 0) {
@@ -528,35 +536,29 @@ namespace {
   }
 }
 
-OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
+OS::ZGlassImg* Pupil::Pick(int xpick, int ypick, bool make_menu_p,
+			   bool rnr_self, bool rnr_overlay)
 {
   OS::ZGlassImg* ret_img = 0;
 
-  // RedBook snatch
   GLsizei bs = mInfo->GetBuffSize();
   GLuint* b = new GLuint[bs];
   glSelectBuffer(bs, b);
-  glRenderMode(GL_SELECT);
-  glInitNames();
 
   GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
   glLoadIdentity();
-  gluPickMatrix((GLdouble) mMouseX, (GLdouble)(vp[3] - mMouseY),
+  gluPickMatrix((GLdouble) xpick, (GLdouble)(vp[3] - ypick),
 		mInfo->GetPickR(), mInfo->GetPickR(), vp);
-  SetProjection2();
+  SetProjection();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   SetCameraView();
 
-  Render();
-
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-
+  glRenderMode(GL_SELECT);
+  Render(rnr_self, rnr_overlay);
   GLint n = glRenderMode(GL_RENDER);
 
   if (n > 0) {
@@ -659,6 +661,16 @@ OS::ZGlassImg* Pupil::Pick(bool make_menu_p)
 }
 
 /**************************************************************************/
+// fltk stuff
+/**************************************************************************/
+
+void Pupil::label_window(const char* l)
+{
+  if(l == 0) l = GForm("pupil: %s '%s'", mInfo->GetName(), mInfo->GetTitle());
+  FTW_SubShell::label_window(l);
+}
+
+/**************************************************************************/
 // fltk draw
 /**************************************************************************/
 
@@ -709,8 +721,9 @@ void Pupil::draw()
 void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
   glMatrixMode(GL_PROJECTION);
-  SetProjection1();
-  SetProjection2(n_tiles, x_i, y_i);
+  glLoadIdentity();
+  glViewport(0,0,w(),h());
+  SetProjection(n_tiles, x_i, y_i);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -832,6 +845,43 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
 
 int Pupil::handle(int ev)
 {
+
+  if(ev == FL_ENTER || ev == FL_LEAVE) return 1;
+    
+  if(mEventHandlerImg != 0 &&
+     (ev == FL_PUSH      || ev == FL_RELEASE || ev == FL_DRAG ||
+      ev == FL_KEYDOWN   || ev == FL_KEYUP   || ev == FL_MOVE ||
+      ev == FL_MOUSEWHEEL) ) {
+
+    A_Rnr::Fl_Event e;
+    e.fKey    = Fl::event_key();
+    e.fButton = Fl::event_button();
+    e.fState  = Fl::event_state();
+
+    OS::ZGlassImg* bm = Pick(Fl::event_x(), Fl::event_y(), false, false, true);
+
+    // Simulate enter / leave events
+    if(mBelowMouseImg != bm) {
+      if(mBelowMouseImg != 0) {
+	e.fBelowMouse = mBelowMouseImg;
+	e.fEvent      = FL_LEAVE;
+	mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
+      } 
+      if(bm != 0) {
+	e.fBelowMouse = bm;
+	e.fEvent      = FL_ENTER;
+	mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
+      }
+      mBelowMouseImg = bm;
+    }
+
+    e.fBelowMouse = mBelowMouseImg;
+    e.fEvent      = ev;
+    int done = mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
+    if(done)
+      return done; 
+  }
+
   if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
     iconize();
     return 1;
@@ -852,7 +902,7 @@ int Pupil::handle(int ev)
 
     if(Fl::event_button() == 1 && Fl::event_clicks() == 1) {
       Fl::event_clicks(0);
-      OS::ZGlassImg* img = Pick();
+      OS::ZGlassImg* img = Pick(mMouseX, mMouseY);
       if(img) {
 	int x = Fl::event_x_root() + mInfo->GetPopupDx();
 	int y = Fl::event_y_root() + mInfo->GetPopupDy();
@@ -861,7 +911,7 @@ int Pupil::handle(int ev)
     }
 
     if(Fl::event_button() == 3) {
-      Pick(true);
+      Pick(mMouseX, mMouseY, true);
     }
     
     return 1;
@@ -951,10 +1001,18 @@ int Pupil::handle(int ev)
   case FL_MOUSEWHEEL: {
     if(Fl::event_dy() != 0) {
       Float_t delta = Fl::event_dy();
-      if(Fl::event_state(FL_CTRL)) delta *= 0.2;
-      else if(Fl::event_state(FL_SHIFT)) delta *= 5;
-      auto_ptr<ZMIR> mir( mInfo->S_Zoom(delta) );
-      mShell->Send(*mir);
+      if(mInfo->GetZoomByFac()) {
+	Float_t base = 1.25;
+	if(Fl::event_state(FL_CTRL)) base = 1.05;
+	else if(Fl::event_state(FL_SHIFT)) base = 2;
+	auto_ptr<ZMIR> mir( mInfo->S_ZoomFac(TMath::Power(base,delta)) );
+	mShell->Send(*mir);
+      } else {
+	if(Fl::event_state(FL_CTRL)) delta *= 0.2;
+	else if(Fl::event_state(FL_SHIFT)) delta *= 5;
+	auto_ptr<ZMIR> mir( mInfo->S_Zoom(delta) );
+	mShell->Send(*mir);
+      }
     }
     return 1;
   }
@@ -1038,81 +1096,46 @@ int Pupil::handle(int ev)
   return 0;
 }
 
-/*
-  void Pupil::draw_overlay()
-  {
-  // Safr ... this works not; redraw_overlay commented out in ctor.
+    /**************************************************************************/
+    // Protected methods.
+    /**************************************************************************/
 
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  SetProjection1();
+    void Pupil::dump_image(const string& fname)
+    {
+      static const string _eh("Pupil::dump_image ");
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+      printf("%sdumping '%s'.\n", _eh.c_str(), fname.c_str());
 
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_COLOR_MATERIAL);
+      FILE* img = fopen(fname.c_str(), "w");
+      if(img == 0) {
+	printf("%scan't open screenshot file '%s'.\n", _eh.c_str(), fname.c_str());
+	return;
+      }
 
-  gl_color(FL_GREEN);
-  glBegin(GL_LINES); {
-  glVertex3f(-0.5, -5, -5);	glVertex3f(0.5, 5, 5);
-  } glEnd();
-
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  }
-*/
-
-/**************************************************************************/
-// Protected methods.
-/**************************************************************************/
-
-void Pupil::label_window()
-{
-  mLabel = GForm("pupil: %s; %s", mInfo->GetName(), mInfo->GetTitle());
-  label(mLabel.c_str());
-  redraw();
-}
-
-/**************************************************************************/
-
-void Pupil::dump_image(const string& fname)
-{
-  static const string _eh("Pupil::dump_image ");
-
-  printf("%sdumping '%s'.\n", _eh.c_str(), fname.c_str());
-
-  FILE* img = fopen(fname.c_str(), "w");
-  if(img == 0) {
-    printf("%scan't open screenshot file '%s'.\n", _eh.c_str(), fname.c_str());
-    return;
-  }
-
-  tga_header header(w(), h());
-  header.dump(img);
+      tga_header header(w(), h());
+      header.dump(img);
   
-  unsigned char* xx = new unsigned char[w()*h()*3];
-  // glReadBuffer(GL_BACK);
-  glPixelStorei(GL_PACK_ALIGNMENT,1); 
-  glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
-  fwrite(xx, 3, w()*h(), img);
-  delete [] xx;
+      unsigned char* xx = new unsigned char[w()*h()*3];
+      // glReadBuffer(GL_BACK);
+      glPixelStorei(GL_PACK_ALIGNMENT,1); 
+      glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
+      fwrite(xx, 3, w()*h(), img);
+      delete [] xx;
 
-  fclose(img);
-}
+      fclose(img);
+    }
 
-/**************************************************************************/
-// Hacks.
-/**************************************************************************/
+    /**************************************************************************/
+    // Hacks.
+    /**************************************************************************/
 
-void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
-{
-  pup->mCameraView->UpdateDataWeeds(FID_t(0,0));
-  pup->redraw();
-}
+    void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
+    {
+      pup->mCameraView->UpdateDataWeeds(FID_t(0,0));
+      pup->redraw();
+    }
 
-float Pupil::default_distance()
-{
-  return mInfo->GetMSMoveFac() * TMath::Power(10, mInfo->GetMoveOM() + 2);
-}
+    float Pupil::default_distance()
+    {
+      return mInfo->GetMSMoveFac() * TMath::Power(10, mInfo->GetMoveOM() + 2);
+    }

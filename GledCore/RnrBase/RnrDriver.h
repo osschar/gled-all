@@ -48,6 +48,7 @@ protected:
   list<PMSEntry*> mPMStack;	// X{r}
   PMSEntry        mBotPMSE;
   ZTrans*         mAbsCamera;   // X{gs}
+  Float_t*        mProjBase;    // X{gs}
 
   // --------------------------------
 

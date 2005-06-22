@@ -38,6 +38,28 @@ public:
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd) {}
 
+  /**************************************************************************/
+
+  class GL_Capability_Switch {
+    GLenum    fWhat;
+    GLboolean fState;
+    bool      fFlip;
+
+    void set_state(GLboolean s)
+    { if(s) glEnable(fWhat); else glDisable(fWhat); }
+
+  public:
+    GL_Capability_Switch(GLenum what, GLboolean state) : fWhat(what)
+    {
+      fState = glIsEnabled(fWhat);
+      fFlip  = (fState != state);
+      if(fFlip)	set_state(state);
+    }
+    ~GL_Capability_Switch()
+    { if(fFlip) set_state(fState); }
+  };
+
+
 }; // endclass ZGlass_GL_Rnr
 
 #endif

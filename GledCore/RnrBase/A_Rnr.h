@@ -16,6 +16,15 @@ class RnrScheme;
 class A_Rnr : public OptoStructs::A_View {
   friend class RnrDriver;
 
+public:
+  struct Fl_Event {
+    int fEvent;
+    int fKey;
+    int fButton;
+    int fState;
+    OptoStructs::ZGlassImg* fBelowMouse;
+  };
+
 protected:
   RnrScheme* mRnrScheme;
   bool       bOnePerRnrDriver;
@@ -39,6 +48,8 @@ public:
   virtual void PostDraw(RnrDriver* rd) = 0;
 
   virtual void CleanUp(RnrDriver* rd) {}
+
+  virtual int  Handle(RnrDriver* rd, Fl_Event& ev) { return 0; }
 
   static const int sMaxRnrLevel;
 };
