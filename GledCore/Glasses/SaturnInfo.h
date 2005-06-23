@@ -89,8 +89,10 @@ public:
   virtual ~SaturnInfo();
 
   virtual SaturnInfo* HostingSaturn() { return this; }
-  virtual void Message(const Text_t* s); // X{E}
-  virtual void Error(const Text_t* s);   // X{E}
+  // Virtuals exported from MEE
+  virtual void Message(const Text_t* s);
+  virtual void Warning(const Text_t* s);
+  virtual void Error(const Text_t* s);
 
   void AddMoon(SaturnInfo* moon); // X{E} C{1}
   void AddEye(EyeInfo* eye);	  // X{E} C{1}

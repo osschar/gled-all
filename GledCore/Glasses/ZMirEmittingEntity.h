@@ -34,7 +34,8 @@ public:
 
   virtual SaturnInfo* HostingSaturn() = 0;
   virtual void Message(const Text_t* s) {} // X{E}
-  virtual void Error(const Text_t* s)   {} // X{E}
+  virtual void Warning(const Text_t* s) {} // X{E} T{MEE::Self}
+  virtual void Error(const Text_t* s)   {} // X{E} T{MEE::Self}
 
   Bool_t HasIdentity(ZIdentity* ident);
 

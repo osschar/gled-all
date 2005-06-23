@@ -27,6 +27,14 @@ void EyeInfo::Message(const Text_t* s)
   mSaturn->DeliverTextMessage(this, tm);
 }
 
+void EyeInfo::Warning(const Text_t* s)
+{
+  ZMIR* mir = get_MIR();
+  if(mir == 0) return;
+  TextMessage tm(mir->Caller, TextMessage::TM_Warning, s);
+  mSaturn->DeliverTextMessage(this, tm);
+}
+
 void EyeInfo::Error(const Text_t* s)
 {
   ZMIR* mir = get_MIR();

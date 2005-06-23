@@ -184,9 +184,14 @@ Int_t Eye::Manage(int fd)
 		MT_std);
 	break;
       }
+      case TextMessage::TM_Warning: {
+	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
+		MT_wrn);
+	break;
+      }
       case TextMessage::TM_Error: {
 	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		       MT_err);
+		MT_err);
 	break;
       }
       default: {

@@ -47,9 +47,16 @@ SaturnInfo::~SaturnInfo()
 
 /**************************************************************************/
 
+// !!! Caller id missing
+
 void SaturnInfo::Message(const Text_t* s)
 {
   ISmess(string("Received message: ") + s);
+}
+
+void SaturnInfo::Warning(const Text_t* s)
+{
+  ISwarn(string("Received warning: ") + s);
 }
 
 void SaturnInfo::Error(const Text_t* s)

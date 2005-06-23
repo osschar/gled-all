@@ -33,8 +33,10 @@ public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);
 
   virtual SaturnInfo* HostingSaturn() { return mMaster; }
-  virtual void Message(const Text_t* s); // X{E} T{MEE::Self}
-  virtual void Error(const Text_t* s);   // X{E} T{MEE::Self}
+  // Virtuals exported from MEE
+  virtual void Message(const Text_t* s);
+  virtual void Warning(const Text_t* s);
+  virtual void Error(const Text_t* s);
 
 #include "EyeInfo.h7"
   ClassDef(EyeInfo,1)
