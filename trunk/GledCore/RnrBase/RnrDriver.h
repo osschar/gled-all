@@ -58,6 +58,7 @@ protected:
   Int_t		mMaxClipPlanes; // X{g}
   A_Rnr**	mClipPlanes;
 
+  Bool_t        bInDLRebuild;    // X{gs}
   Bool_t        bMarkupNodes;	 // X{gs}
 
   Int_t		mWidth;		 // X{gs}
