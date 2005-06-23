@@ -165,7 +165,7 @@ ostream& operator<<(ostream& s, const Ray& n);
 /**************************************************************************/
 
 struct TextMessage {
-  enum Type_e { TM_Message, TM_Error };
+  enum Type_e { TM_Message, TM_Warning, TM_Error };
 
   ZGlass*		fCaller;
   Type_e		fType;          // Streamed as UShort_t
