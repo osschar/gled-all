@@ -21,10 +21,9 @@ Cylinder_GL_Rnr::~Cylinder_GL_Rnr()
 }
 /**************************************************************************/
 
-void Cylinder_GL_Rnr::Draw(RnrDriver* rd)
+void Cylinder_GL_Rnr::Render(RnrDriver* rd)
 {
   Cylinder& C = *mCylinder;
-  glPushAttrib(GL_CURRENT_BIT);
   glColor4fv(C.mColor());
   glPushMatrix();
   switch (C.mOrientation) {
@@ -32,6 +31,7 @@ void Cylinder_GL_Rnr::Draw(RnrDriver* rd)
   case Cylinder::O_Y: glRotatef(90, -1, 0, 0); break;
   case Cylinder::O_X: glRotatef(90,  0, 1, 0); break;
   }
+  if(C.mPhiOffset != 0) glRotatef(C.mPhiOffset*360/C.mLodPhi, 0, 0, 1);
   glTranslatef(0,0,-C.mHeight/2);
   // inner cylinder
   if(C.mRInBase != 0 || C.mRInTop != 0) {
@@ -52,6 +52,5 @@ void Cylinder_GL_Rnr::Draw(RnrDriver* rd)
     gluDisk(mQuadric, C.mRInTop,  C.mROutTop, C.mLodPhi,1);
   }
   glPopMatrix();
-  glPopAttrib();
 }
 
