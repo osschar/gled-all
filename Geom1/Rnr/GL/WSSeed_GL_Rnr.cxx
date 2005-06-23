@@ -37,15 +37,6 @@ void WSSeed_GL_Rnr::PreDraw(RnrDriver* rd)
   }
 }
 
-void WSSeed_GL_Rnr::Draw(RnrDriver* rd)
-{
-  if(mWSSeed->bUseDispList) {
-    ZGlass_GL_Rnr::Draw(rd);
-  } else {
-    Render(rd);
-  }
-}
-
 /**************************************************************************/
 
 void WSSeed_GL_Rnr::Render(RnrDriver* rd)

@@ -60,9 +60,6 @@ public:
   void TexAnimStart();          // X{ED} 7 MButt(-join=>1)
   void TexAnimStop();           // X{E}  7 MButt()
 
-protected:
-  
-  Bool_t	bUseDispList;	//! X{gS} 7 Bool()
 
 public:
   WSSeed(const Text_t* n="WSSeed", const Text_t* t=0) :

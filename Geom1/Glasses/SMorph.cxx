@@ -14,7 +14,7 @@ ClassImp(SMorph)
 void SMorph::_init(Float_t r)
 {
   // Override settings from ZGlass
-  // bUseDispList = true; // Not necessary, uses vertex arrays anyway.
+  bUseDispList = true;
 
   // Override settings from ZNode
   bUseScale = true;

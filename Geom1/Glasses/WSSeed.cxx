@@ -38,6 +38,9 @@ ClassImp(WSSeed)
 
 void WSSeed::_init()
 {
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   mTLevel = 16; mPLevel = 16;
 
   mTexUOffset = mTexVOffset = 0;
@@ -51,8 +54,6 @@ void WSSeed::_init()
   pTuber = 0;     bTextured = false;
   mTASleepMS = 50;  bTexAnimOn = false;
   mDtexU = -0.01; mDtexV = 0;
-
-  bUseDispList = false;
 }
 
 WSSeed::~WSSeed() { delete pTuber; }
