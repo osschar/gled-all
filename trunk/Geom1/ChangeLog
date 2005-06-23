@@ -1,5 +1,11 @@
 2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Added wrappers for ILU's blur, contrast and equalize.
+
+2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/SMorph.cxx:
 	* Glasses/WSSeed.cxx:
 	* Glasses/WSSeed.h:

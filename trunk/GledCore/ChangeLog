@@ -1,5 +1,24 @@
 2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Added protected method 'warn_caller()'. If mir is being executed,
+	a warning message is sent to the caller.
+
+	* Eye/Eye.cxx:
+	* Glasses/EyeInfo.cxx:
+	* Glasses/EyeInfo.h:
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+	* Glasses/ZMirEmittingEntity.h:
+	* Net/Ray.h:
+	Added 'Warning()' method to ZMirEmittingEntity and sub-classes.
+
+	* RnrBase/RnrDriver.h:
+	Wiped obsolete declaration of TexFont.
+
+2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Rnr/GL/ZGlass_GL_Rnr.cxx:
 	* RnrBase/RnrDriver.cxx:
 	* RnrBase/RnrDriver.h:
