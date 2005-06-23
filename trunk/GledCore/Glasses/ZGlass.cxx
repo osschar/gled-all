@@ -189,6 +189,16 @@ ZMIR* ZGlass::suggest_MIR_presence(const string& header, int what)
   return mir;
 }
 
+void ZGlass::warn_caller(const string& warning)
+{
+  ZMIR* mir = GThread::get_mir();
+  if(mir && mir->Caller) {
+    auto_ptr<ZMIR> wrn( mir->Caller->S_Warning(warning.c_str()) );
+    wrn->SetRecipient(mir->Caller->HostingSaturn());
+    mSaturn->ShootMIR(wrn);
+  }
+}
+
 /**************************************************************************/
 // YNameChangeCB
 
