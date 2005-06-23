@@ -61,6 +61,11 @@ public:
   void Unload();  // X{E} 7 MButt(-join=>1)
   void Save();    // X{E} 7 MButt()
 
+  void BlurAverage(UInt_t count=1);       // X{E} 7 MCWButt(-join=>1)
+  void BlurGaussian(UInt_t count=1);      // X{E} 7 MCWButt()
+  void Contrastify(Float_t contrast=1.1); // X{E} 7 MCWButt(-join=>1)
+  void Equalize();                        // X{E} 7 MCWButt()
+
   // Image operations ... locking is user's responsibility
   void  bind();
   void  unbind();
