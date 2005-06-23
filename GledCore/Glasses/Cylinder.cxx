@@ -20,7 +20,11 @@ ClassImp(Cylinder)
 
 void Cylinder::_init()
 {
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   mOrientation = O_Z;
+  mPhiOffset   = 0;
 
   mHeight = 2;
   bRnrDisks = true;

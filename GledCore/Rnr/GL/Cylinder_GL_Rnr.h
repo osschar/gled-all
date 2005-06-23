@@ -26,7 +26,7 @@ class Cylinder_GL_Rnr : public ZNode_GL_Rnr {
     ZNode_GL_Rnr(idol), mCylinder(idol) { _init(); }
   virtual ~Cylinder_GL_Rnr();
 
-  virtual void Draw(RnrDriver* rd);
+  virtual void Render(RnrDriver* rd);
 }; 
 
 #endif
