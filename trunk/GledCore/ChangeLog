@@ -1,3 +1,20 @@
+2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Consolidation of rendering into display lists; ZGlass_GL_Rnr
+	uses RnrDriver::bInDLRebuild to announce DL capture is in
+	progress. This should allow DL captures to spawn across several
+	renderers and thus include larger chunks of a scene graph.
+
+	* Glasses/Cylinder.cxx:
+	* Glasses/Cylinder.h:
+	* Rnr/GL/Cylinder_GL_Rnr.cxx:
+	* Rnr/GL/Cylinder_GL_Rnr.h:
+	Added member 'Float_t mPhiOffset' allowing rotation around central
+	axis in edge-angle units.
+
 2005-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/FTW_Nest.cxx:
