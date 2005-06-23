@@ -1,3 +1,12 @@
+2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.cxx:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Consolidation of rendering into display lists.
+
 2005-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* ACTC/tc.cxx:
