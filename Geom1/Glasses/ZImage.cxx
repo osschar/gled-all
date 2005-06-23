@@ -10,6 +10,9 @@
 // This is a glass wrapper for DevIL image.
 // It should be used for loading/saving/binding of images, as this class
 // contains a static mutex to perform locking of all IL operations.
+//
+// Some ILU image transformations are supported (blurring, contrast).
+// Do NOT use shadowing when applying the transforms.
 
 #include "ZImage.h"
 
@@ -168,6 +171,74 @@ void ZImage::Unload()
 void ZImage::Save()
 {
   // Could easily be implemented now ... that we have devil.
+}
+
+/**************************************************************************/
+
+void ZImage::BlurAverage(UInt_t count)
+{
+  static const string _eh("ZImage::BlurAverage ");
+  if(bUseShadowing) {
+    warn_caller(_eh + "has no effect with shadowing on.");
+    return;
+  }
+
+  sILMutex.Lock();
+  bind();
+  iluBlurAvg(count);
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::BlurGaussian(UInt_t count)
+{
+  static const string _eh("ZImage::BlurGaussian ");
+  if(bUseShadowing) {
+    warn_caller(_eh + "has no effect with shadowing on.");
+    return;
+  }
+
+  sILMutex.Lock();
+  bind();
+  iluBlurGaussian(count);
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::Contrastify(Float_t contrast)
+{
+  static const string _eh("ZImage::Contrastify ");
+  if(bUseShadowing) {
+    warn_caller(_eh + "has no effect with shadowing on.");
+    return;
+  }
+
+  if(contrast > 1.7)  contrast = 1.7;
+  if(contrast < -0.5) contrast = -0.5;
+  sILMutex.Lock();
+  bind();
+  iluContrast(contrast);
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::Equalize()
+{
+  static const string _eh("ZImage::Equalize ");
+  if(bUseShadowing) {
+    warn_caller(_eh + "has no effect with shadowing on.");
+    return;
+  }
+
+  sILMutex.Lock();
+  bind();
+  iluEqualize();
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/
