@@ -180,7 +180,8 @@ void RnrDriver::BeginRender()
   } 
   for(int i=0; i<mMaxClipPlanes; ++i) {
     mClipPlanes[i] = 0;
-  } 
+  }
+  bInDLRebuild = false;
 }
 
 

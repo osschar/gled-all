@@ -42,13 +42,23 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 {
   // cout <<"ZGlass_GL_Rnr::Draw rendering '"<< mGlass->GetName() <<"'.\n";
 
-  if(bRebuildDL) {
-    glNewList(mDispList, GL_COMPILE_AND_EXECUTE);
-    Render(rd);
-    glEndList();
-    bRebuildDL = false;
+  if(mGlass->bUseDispList) {
+    if(bRebuildDL) {
+      if(rd->GetInDLRebuild() == false) {
+	rd->SetInDLRebuild(true);
+	glNewList(mDispList, GL_COMPILE_AND_EXECUTE);
+	Render(rd);
+	glEndList();
+	rd->SetInDLRebuild(false);
+	bRebuildDL = false;
+      } else {
+	Render(rd);
+      }
+    } else {
+      glCallList(mDispList);
+    }
   } else {
-    glCallList(mDispList);
+    Render(rd);
   }
 }
 
