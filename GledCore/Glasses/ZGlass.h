@@ -128,6 +128,8 @@ protected:
   ZMIR* assert_MIR_presence(const string& header, int what=0);
   ZMIR* suggest_MIR_presence(const string& header, int what=0);
 
+  void  warn_caller(const string& warning);
+
   // TimeStaps
   TimeStamp_t	 mTimeStamp;	   //! X{GS} TimeStamp of last change
   TimeStamp_t	 mStampReqTring;   //! X{GS} TimeStamp of last change that requires retriangulation
