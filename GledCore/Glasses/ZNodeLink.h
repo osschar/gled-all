@@ -14,12 +14,14 @@ class ZNodeLink : public ZNode {
   MAC_RNR_FRIENDS(ZNodeLink);
 private:
   void		_init() 	{ mLens = 0; }
+
 protected:
   ZGlass*	mLens;		// X{gS} L{} RnrBits{0,4,0,0, 0,0,0,5}
-public:
-  ZNodeLink(Text_t* n="ZNodeLink", Text_t* t=0) : ZNode(n,t) {_init();}
-#include "ZNodeLink.h7"
 
+public:
+  ZNodeLink(Text_t* n="ZNodeLink", Text_t* t=0) : ZNode(n,t) { _init(); }
+
+#include "ZNodeLink.h7"
   ClassDef(ZNodeLink, 1)
 }; // endclass ZNodeLink
 
