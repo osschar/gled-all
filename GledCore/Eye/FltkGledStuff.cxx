@@ -184,11 +184,14 @@ void FGS::LensNameBox::auto_label()
     GNS::ClassInfo*   ci = fImg->fClassInfo;
     GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(ci->fFid.lid);
     mToName = fImg->fGlass->GetName();
-    set_tooltip(GForm("%s::%s [%d]", lsi->fName.c_str(), ci->fName.c_str(),
+    set_tooltip(GForm("%s::%s* [%d]", lsi->fName.c_str(), ci->fName.c_str(),
 		      fImg->fGlass->GetSaturnID()));
   } else {
+    FID_t fid(fFID); if(fid.is_null()) fid.lid = fid.cid = 1;
+    GNS::ClassInfo*   ci = GNS::FindClassInfo(fid);
+    GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(fid.lid);
     mToName = "<null>";
-    set_tooltip(0);
+    set_tooltip(GForm("%s::%s*", lsi->fName.c_str(), ci->fName.c_str()));
   }
   redraw();
 }
@@ -334,6 +337,11 @@ FGS::LinkNameBox::LinkNameBox(OS::ZLinkDatum* ld, int x, int y, int w, int h, co
 {
   box(FL_UP_BOX);
   color(fl_rgb_color(200, 200, 220));
+
+  string link_type = fLinkDatum->fLinkRep.fLinkInfo->fType;
+  link_type.replace(link_type.length()-1, 1, "");
+  printf("Brugu %s\n", link_type.c_str());
+  fFID = GNS::FindClassID(link_type);
 
   Update();
 }
