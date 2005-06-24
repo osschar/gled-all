@@ -1,3 +1,23 @@
+2005-06-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Pupil.cxx:
+	* RnrBase/A_Rnr.cxx:
+	* RnrBase/A_Rnr.h:
+	Added string event_text to Fl_Event.
+
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	Added boolean members bReplaceOnInsert=true and
+	bReplaceOnRename=false controlling behaviour in case of name
+	conflicts. Adding an element with conflicting name will now remove
+	the old element.
+
+	* Eye/FltkGledStuff.cxx:
+	LinkNameBox: display link-type when link is not set.
+
+	* Glasses/ZNodeLink.h:
+	Formatting.
+
 2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.cxx:
