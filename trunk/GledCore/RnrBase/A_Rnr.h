@@ -22,7 +22,11 @@ public:
     int fKey;
     int fButton;
     int fState;
+    string fText;
+
     OptoStructs::ZGlassImg* fBelowMouse;
+
+    void dump();
   };
 
 protected:

@@ -857,6 +857,7 @@ int Pupil::handle(int ev)
     e.fKey    = Fl::event_key();
     e.fButton = Fl::event_button();
     e.fState  = Fl::event_state();
+    e.fText   = string(Fl::event_text(), Fl::event_length());
 
     OS::ZGlassImg* bm = Pick(Fl::event_x(), Fl::event_y(), false, false, true);
 

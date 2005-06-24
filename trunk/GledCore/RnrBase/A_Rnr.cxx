@@ -82,6 +82,45 @@ void A_Rnr::DropRnrScheme()
 }
 
 /**************************************************************************/
+// A_Rnr::Fl_Event
+
+namespace {
+  char* fl_event_names[] = {
+    "NO_EVENT",
+    "PUSH",
+    "RELEASE",
+    "ENTER",
+    "LEAVE",
+    "DRAG",
+    "FOCUS",
+    "UNFOCUS",
+    "KEYDOWN",
+    "KEYUP",
+    "CLOSE",
+    "MOVE",
+    "SHORTCUT",
+    "DEACTIVATE",
+    "ACTIVATE",
+    "HIDE",
+    "SHOW",
+    "PASTE",
+    "SELECTIONCLEAR",
+    "MOUSEWHEEL",
+    "DND_ENTER",
+    "DND_DRAG",
+    "DND_LEAVE",
+    "DND_RELEASE"
+  };
+}
+
+void A_Rnr::Fl_Event::dump()
+{
+  printf("%s: key=%d but=%d state=0x%x text='%s' len=%d\n",
+	 fl_event_names[fEvent], fKey, fButton, fState,
+	 fText.c_str(), fText.length());
+}
+
+/**************************************************************************/
 // ListChangeObserver
 /**************************************************************************/
 
