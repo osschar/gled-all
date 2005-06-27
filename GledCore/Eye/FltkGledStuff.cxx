@@ -339,8 +339,7 @@ FGS::LinkNameBox::LinkNameBox(OS::ZLinkDatum* ld, int x, int y, int w, int h, co
   color(fl_rgb_color(200, 200, 220));
 
   string link_type = fLinkDatum->fLinkRep.fLinkInfo->fType;
-  link_type.replace(link_type.length()-1, 1, "");
-  printf("Brugu %s\n", link_type.c_str());
+  link_type.replace(link_type.length()-1, 1, ""); // Remove trailing '*'
   fFID = GNS::FindClassID(link_type);
 
   Update();
