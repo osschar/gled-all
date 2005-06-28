@@ -24,6 +24,11 @@ MAINSRCS := saturn.cxx gled.cxx
 MAINOBJS := $(MAINSRCS:.cxx=.o)
 MAINEXES := bin/saturn bin/gled
 
+PUPILS_LIB     := lib/libGledCore_Pupils.so
+PUPILS_HDRS    := $(wildcard Pupils/*.h)
+PUPILS_SRCS    := $(wildcard Pupils/*.cxx)
+PUPILS_OBJS    := $(addsuffix .o ,$(basename ${PUPILS_SRCS}))
+
 LIBSET_PREREQS := ${REGEXP_LIB}
 LIBSET_TARGETS := local_targets
 
@@ -31,23 +36,33 @@ include ${GLEDSYS}/make/make_base.inc
 
 local_targets:: ${REGEXP_LIB} bin/saturn
 ifndef SKIP_VIEW_LIBS
-local_targets:: bin/gled
+  local_targets:: bin/gled ${PUPILS_LIB}
+  ifndef SKIP_RNR_LIBS
+    ALL_HDRS += ${PUPILS_HDRS}
+    ALL_OBJS += ${PUPILS_OBJS}
+    ALL_LIBS += ${PUPILS_LIB}
+  endif
 endif
 
-gled_core_targets: ${LOCAL_TARGETS}
+# --------------------------------
 
 bin/saturn: saturn.o ${BASE_LIB_NAME}
 	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
-	-Llib -l${LIB_SET_NAME} \
+	-Llib -l${LIB_SET_NAME} -l${REGEXP_LIB_BASE} \
 	${ROOTLIBS} ${SYSLIBS}
 
 bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
 	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
-	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View -l${REGEXP_LIB_BASE} \
+	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View -l${LIB_SET_NAME}_Rnr_GL -l${REGEXP_LIB_BASE} \
 	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
 
 ${REGEXP_LIB}:
 	${MAKE} -C RegExp
+
+${PUPILS_LIB}: ${PUPILS_OBJS}
+	${LD} -shared -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
+
+# --------------------------------
 
 clean::
 	@rm -f ${MAINOBJS}
