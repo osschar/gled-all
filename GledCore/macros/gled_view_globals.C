@@ -10,4 +10,6 @@ PupilInfo*     g_pupil = 0;
 void gled_view_globals()
 {
   // Needed to determine if the script has been already loaded.
+
+  GledNS::LoadSo("libGledCore_Pupils.so");
 }
