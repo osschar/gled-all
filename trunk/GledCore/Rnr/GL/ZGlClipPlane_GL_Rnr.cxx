@@ -6,6 +6,7 @@
 
 #include "ZGlClipPlane_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GL/gl.h>
 
 /**************************************************************************/
@@ -57,7 +58,7 @@ void ZGlClipPlane_GL_Rnr::CleanUp(RnrDriver* rd)
 void ZGlClipPlane_GL_Rnr::TurnOn(RnrDriver* rd)
 {
   if(mClipId >= 0) return;
-  mClipId = rd->GetClipPlane(this);
+  mClipId = rd->GL()->GetClipPlane(this);
   if(mClipId >= 0) {
     ZGlClipPlane& cp = *mZGlClipPlane;
     GLdouble plane[4];
@@ -78,7 +79,7 @@ void ZGlClipPlane_GL_Rnr::TurnOff(RnrDriver* rd)
 {
   if(mClipId >= 0) {
     glDisable(GL_CLIP_PLANE0 + mClipId);
-    rd->ReturnClipPlane(mClipId);
+    rd->GL()->ReturnClipPlane(mClipId);
   }
   mClipId = -1;
 }

@@ -5,8 +5,8 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZNode_GL_Rnr.h"
-#include <Glasses/ZRlNameRnrCtrl.h>
-#include <RnrBase/RnrDriver.h>
+#include <Glasses/ZRlNodeMarkup.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GledView/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
@@ -147,8 +147,8 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if(rd->GetMarkupNodes() == true) {
-    RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+  if(rd->GL()->GetMarkupNodes() == true) {
+    RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNodeMarkup);
     if(nrc_lens->GetRnrNames() && bSuppressNameLabel == false &&
        mNode->mName != "")
       {
