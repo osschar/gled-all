@@ -151,6 +151,8 @@ public:
 
   bool IsBasic()       { return fFID.is_basic(); }
   bool IsBasicChange() { return fRQN == RayNS::RQN_change && IsBasic(); }
+  bool IsChangeOf(FID_t fid)
+  { return fRQN == RayNS::RQN_change && (fFID.is_null() || fFID == fid); }
 
   const char* EventName() const;
   void Dump(ostream& s) const;
