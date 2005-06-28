@@ -71,7 +71,7 @@ ZGlLightModel		178	Glasses/ZGlLightModel	.
 ZGlMaterial		179	Glasses/ZGlMaterial	.
 ZGlBlending		180	Glasses/ZGlBlending	.
 ZGlClipPlane		181	Glasses/ZGlClipPlane	.
-ZRlNameRnrCtrl		182	Glasses/ZRlNameRnrCtrl	.
+ZRlNodeMarkup		182	Glasses/ZRlNodeMarkup	.
 ZRlFont			183	Glasses/ZRlFont		.
 
 # Node/Cluster Monitoring

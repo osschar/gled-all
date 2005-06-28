@@ -4,29 +4,29 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef GledCore_ZRlNameRnrCtrl_GL_RNR_H
-#define GledCore_ZRlNameRnrCtrl_GL_RNR_H
+#ifndef GledCore_ZRlNodeMarkup_GL_RNR_H
+#define GledCore_ZRlNodeMarkup_GL_RNR_H
 
-#include <Glasses/ZRlNameRnrCtrl.h>
+#include <Glasses/ZRlNodeMarkup.h>
 #include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 #include <GledView/GLTextNS.h>
 
-class ZRlNameRnrCtrl_GL_Rnr : public ZRnrModBase_GL_Rnr {
+class ZRlNodeMarkup_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:
   void _init();
 
 protected:
   bool            bExState;
-  ZRlNameRnrCtrl* mZRlNameRnrCtrl;
+  ZRlNodeMarkup* mZRlNodeMarkup;
 
 public:
-  ZRlNameRnrCtrl_GL_Rnr(ZRlNameRnrCtrl* idol) :
-    ZRnrModBase_GL_Rnr(idol), mZRlNameRnrCtrl(idol) { _init(); }
+  ZRlNodeMarkup_GL_Rnr(ZRlNodeMarkup* idol) :
+    ZRnrModBase_GL_Rnr(idol), mZRlNodeMarkup(idol) { _init(); }
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
 
-}; // endclass ZRlNameRnrCtrl_GL_Rnr
+}; // endclass ZRlNodeMarkup_GL_Rnr
 
 #endif

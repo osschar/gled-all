@@ -4,15 +4,15 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef GledCore_ZRlNameRnrCtrl_H
-#define GledCore_ZRlNameRnrCtrl_H
+#ifndef GledCore_ZRlNodeMarkup_H
+#define GledCore_ZRlNodeMarkup_H
 
 #include <Glasses/ZRnrModBase.h>
 #include <Stones/ZColor.h>
 
-class ZRlNameRnrCtrl : public ZRnrModBase {
+class ZRlNodeMarkup : public ZRnrModBase {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
-  MAC_RNR_FRIENDS(ZRlNameRnrCtrl);
+  MAC_RNR_FRIENDS(ZRlNodeMarkup);
 
 private:
   void _init();
@@ -31,13 +31,13 @@ protected:
   TString	mTilePos;     // X{RGS}  7 Textor()
 
 public:
-  ZRlNameRnrCtrl(const Text_t* n="ZRlNameRnrCtrl", const Text_t* t=0) :
+  ZRlNodeMarkup(const Text_t* n="ZRlNodeMarkup", const Text_t* t=0) :
     ZRnrModBase(n,t) { _init(); }
 
-#include "ZRlNameRnrCtrl.h7"
-  ClassDef(ZRlNameRnrCtrl, 1)
-}; // endclass ZRlNameRnrCtrl
+#include "ZRlNodeMarkup.h7"
+  ClassDef(ZRlNodeMarkup, 1)
+}; // endclass ZRlNodeMarkup
 
-GlassIODef(ZRlNameRnrCtrl);
+GlassIODef(ZRlNodeMarkup);
 
 #endif

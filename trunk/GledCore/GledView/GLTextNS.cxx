@@ -13,7 +13,7 @@
 
 #include <RnrBase/RnrDriver.h>
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
-#include <Rnr/GL/ZRlNameRnrCtrl_GL_Rnr.h>
+#include <Rnr/GL/ZRlNodeMarkup_GL_Rnr.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -687,7 +687,7 @@ GLTextNS::TextLineData::TextLineData(TexFont *txf, string line) : text(line)
 
 void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text)
 {
-  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNodeMarkup);
   BoxSpecs boxs;
   boxs.pos = nrc_lens->RefTilePos();
   RnrTextBar(rd, text, boxs, nrc_lens->GetNameOffset());
@@ -705,7 +705,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   typedef list<TextLineData>           lTLD_t;
   typedef list<TextLineData>::iterator lTLD_i;
 
-  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNodeMarkup);
   RNRDRIVER_GET_RNRMOD_BOTH(font, rd, ZRlFont);
   TexFont *txf = font_rnr->GetFont();
 
@@ -832,7 +832,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 {
   RNRDRIVER_GET_RNRMOD_RNR(font, rd, ZRlFont);
   TexFont *txf = font_rnr->GetFont();
-  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNameRnrCtrl);
+  RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNodeMarkup);
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 

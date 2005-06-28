@@ -5,18 +5,18 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// ZRlNameRnrCtrl
+// ZRlNodeMarkup
 //
 //
 
-#include "ZRlNameRnrCtrl.h"
-#include "ZRlNameRnrCtrl.c7"
+#include "ZRlNodeMarkup.h"
+#include "ZRlNodeMarkup.c7"
 
-ClassImp(ZRlNameRnrCtrl)
+ClassImp(ZRlNodeMarkup)
 
 /**************************************************************************/
 
-void ZRlNameRnrCtrl::_init()
+void ZRlNodeMarkup::_init()
 {
   mNameRnrOp  = O_On;
   bRnrAxes    = false; bRnrNames  = true;
