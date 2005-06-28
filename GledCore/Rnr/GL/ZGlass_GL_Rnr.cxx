@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZGlass_GL_Rnr.h"
-#include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/SphereTrings.h>
 #include <Ephra/Saturn.h>
 
@@ -44,12 +44,12 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 
   if(mGlass->bUseDispList) {
     if(bRebuildDL) {
-      if(rd->GetInDLRebuild() == false) {
-	rd->SetInDLRebuild(true);
+      if(rd->GL()->GetInDLRebuild() == false) {
+	rd->GL()->SetInDLRebuild(true);
 	glNewList(mDispList, GL_COMPILE_AND_EXECUTE);
 	Render(rd);
 	glEndList();
-	rd->SetInDLRebuild(false);
+	rd->GL()->SetInDLRebuild(false);
 	bRebuildDL = false;
       } else {
 	Render(rd);

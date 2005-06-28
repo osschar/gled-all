@@ -6,7 +6,7 @@
 
 #include "PupilInfo_GL_Rnr.h"
 #include "ZRlFont_GL_Rnr.h"
-#include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GledView/GLTextNS.h>
 #include <GL/gl.h>
 
@@ -41,7 +41,7 @@ void PupilInfo_GL_Rnr::PreDraw(RnrDriver* rd)
   // Default font
   rd->SetDefRnrMod(ZRlFont::FID(), &font_rnrmod);
   // Default node markup: name-rendering on/off
-  rd->SetMarkupNodes(mPupilInfo->GetRnrNames());
+  rd->GL()->SetMarkupNodes(mPupilInfo->GetRnrNames());
 }
 
 void PupilInfo_GL_Rnr::Draw(RnrDriver* rd)

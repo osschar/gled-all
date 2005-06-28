@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Lamp_GL_Rnr.h"
-#include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/SphereTrings.h>
 
 #include <GL/gl.h>
@@ -49,7 +49,7 @@ int Lamp_GL_Rnr::LampOn(RnrDriver* rd, const ZTrans* t)
     return 1;
   }
 
-  mLampID = rd->GetLamp(this);
+  mLampID = rd->GL()->GetLamp(this);
   if(mLampID == -1) {
     cout <<"Lamp_GL_Rnr::LampOn No more available lights.\n";
     return 1;
@@ -98,7 +98,7 @@ int Lamp_GL_Rnr::LampOff(RnrDriver* rd)
 
   // cout <<"Lamp_GL_Rnr::LampOn turning off lamp id="<< mLampID <<endl;
   glDisable((GLenum)(GL_LIGHT0 + mLampID));
-  rd->ReturnLamp(mLampID);
+  rd->GL()->ReturnLamp(mLampID);
   mLampID = -1;
   return 0;
 }
