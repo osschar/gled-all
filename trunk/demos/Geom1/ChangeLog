@@ -1,3 +1,8 @@
+2005-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	Spawn eye in a manner consistent with eye.C macro.
+
 2005-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* metagui_test.C:
