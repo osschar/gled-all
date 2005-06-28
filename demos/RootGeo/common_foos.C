@@ -57,7 +57,7 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(cams, ZNode, mark, "CameraInfos", "");
   CREATE_ADD_GLASS(cam_bases, ZNode, mark, "CameraBases", "");
 
-  CREATE_ATT_GLASS(nms, ZRlNameRnrCtrl, cam_bases, SetRnrMod, "NamesOn", 0);
+  CREATE_ATT_GLASS(nms, ZRlNodeMarkup, cam_bases, SetRnrMod, "NamesOn", 0);
   nms->SetRnrTiles(false); nms->SetRnrFrames(false);
   nms->SetTextCol(0.62, 1, 0.64);
   nms->SetTileCol(0,0,0,0);
