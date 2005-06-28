@@ -186,7 +186,6 @@ void metagui_test()
 
   CREATE_ADD_GLASS(nll, ZNodeListLink, overlay, "Element list", "Bar");
   nll->SetContents(images);
-  CREATE_ATT_GLASS(nlltp, ZRlNameRnrCtrl, nll, SetRnrMod, "TextCtrl", 0);
 
   nll->Set3Pos(0, 0, 4);
 
@@ -234,6 +233,7 @@ void metagui_test()
 
   //--------------------------------
 
+  Gled::AssertMacro("gled_view_globals.C");
   Gled::LoadMacro("eye.C");
 
   ZList* laytop = register_GledCore_layouts();
@@ -262,7 +262,7 @@ void metagui_test()
 
   g_shell->SetDefSubShell(g_nest);
 
-  Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
+  g_eye = Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 
   g_shell->SpawnMetaGui(morphs[1], mg);
 
