@@ -21,7 +21,6 @@
 #include "MTW_ClassView.h"
 #include "MTW_MetaView.h"
 #include "Eye.h"
-#include "Pupil.h"
 
 #include "MCW_View.h"
 
