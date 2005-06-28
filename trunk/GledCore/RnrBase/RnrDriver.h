@@ -20,7 +20,7 @@
 // Rnr driver
 /**************************************************************************/
 
-class Lamp_GL_Rnr;
+class GLRnrDriver;
 
 class RnrDriver : public OptoStructs::ImageConsumer {
 private:
@@ -37,27 +37,19 @@ protected:
 
   Int_t		mMaxDepth;	// X{gs} Max render level
 
-  // --------------------------------
+  //----------------------------------------------------------------
+  // PositionMatrix stack & viewing transforms
 
-protected:
   list<PMSEntry*> mPMStack;	// X{r}
   PMSEntry        mBotPMSE;
   ZTrans*         mAbsCamera;   // X{gs}
   Float_t*        mProjBase;    // X{gs}
 
-  // --------------------------------
+  Int_t	          mWidth;       // X{gs}
+  Int_t	          mHeight;      // X{gs}
 
-  Int_t		mMaxLamps;	// X{g}
-  A_Rnr**	mLamps;
-
-  Int_t		mMaxClipPlanes; // X{g}
-  A_Rnr**	mClipPlanes;
-
-  Bool_t        bInDLRebuild;    // X{gs}
-  Bool_t        bMarkupNodes;	 // X{gs}
-
-  Int_t		mWidth;		 // X{gs}
-  Int_t		mHeight;	 // X{gs}
+  //----------------------------------------------------------------
+  // RnrMod Stack
 
   struct RMStack {
     RnrMod*        def;
@@ -73,6 +65,9 @@ protected:
   hRMStack_i	mRMI;
   FID_t		mRMFid;
   bool          find_rnrmod(FID_t fid);
+
+  //----------------------------------------------------------------
+  // Local renderer stash
 
   typedef hash_map<OptoStructs::ZGlassImg*, A_Rnr*>           hImg2Rnr_t;
   typedef hash_map<OptoStructs::ZGlassImg*, A_Rnr*>::iterator hImg2Rnr_i;
@@ -107,23 +102,13 @@ public:
   { mPMStack.pop_back(); }
 
   PMSEntry& TopPM() 	{ return *mPMStack.back(); }
-  ZNode*    TopPMNode() { return mPMStack.back()->fNode; }
+  ZNode*    TopPMNode() { return  mPMStack.back()->fNode; }
 
   int  SizePM()  { return mPMStack.size(); }
   void ClearPM() { mPMStack.clear(); }
 
   ZTrans& ToGCS()   { return mPMStack.back()->ToGCS(); }
   ZTrans& FromGCS() { return mPMStack.back()->FromGCS(); }
-
-  // Lamps
-  A_Rnr** GetLamps() { return mLamps; }
-  Int_t   GetLamp(A_Rnr* rnr);
-  void    ReturnLamp(Int_t lamp);
-
-  // Clipping planes
-  A_Rnr** GetClipPlanes() { return mClipPlanes; }
-  Int_t   GetClipPlane(A_Rnr* rnr);
-  void    ReturnClipPlane(Int_t lamp);
 
   //----------------------------------------------------------------
 
@@ -137,9 +122,16 @@ public:
   void RemoveRnrModEntry(FID_t fid);
   void CleanUpRnrModDefaults();
 
+  //----------------------------------------------------------------
+
+  GLRnrDriver* GL() { return (GLRnrDriver*)this; }
+
 #include "RnrDriver.h7"
 }; // endclass RnrDriver
 
+
+/**************************************************************************/
+// Inlines
 /**************************************************************************/
 
 inline bool RnrDriver::find_rnrmod(FID_t fid)
