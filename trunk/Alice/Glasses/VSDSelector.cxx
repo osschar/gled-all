@@ -234,6 +234,7 @@ void VSDSelector::SelectHits( ZNode* holder, const char* selection)
 }
 
 /**************************************************************************/
+
 void VSDSelector::SelectClusters(ZNode* holder, const char* selection)
 {
   static const string _eh("VSDSelector::SelectClusters ");
@@ -265,6 +266,7 @@ void VSDSelector::SelectClusters(ZNode* holder, const char* selection)
 }
 
 /**************************************************************************/
+
 void VSDSelector::SelectRecTracks(ZNode* holder, const Text_t* selection)
 {
   static const string _eh("VSDSelector::SelectRecTracks ");
@@ -306,7 +308,9 @@ void VSDSelector::SelectRecTracks(ZNode* holder, const Text_t* selection)
 }
 
 /**************************************************************************/
-void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,  Bool_t import_kine)
+
+void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
+			   Bool_t import_kine)
 {
   static const string _eh("VSDSelector::SelectV0 ");
 
@@ -384,6 +388,7 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,  Bool_t impor
 }
 
 /**************************************************************************/
+
 void VSDSelector::SelectGenInfo( ZNode* holder, const Text_t* selection)
 {
   static const string _eh("VSDSelector::SelectGenInfo ");
@@ -408,18 +413,21 @@ void VSDSelector::SelectGenInfo( ZNode* holder, const Text_t* selection)
     Add(holder);
   }
 
+  // create new import mode object, if not set alrady
+  if(mImportMode == 0) {
+    GIImportStyle* s = new GIImportStyle;
+    mQueen->CheckIn(s);
+    SetImportMode(s);
+  }
+
   // holders for reconstructed and MC particles
-  ZNode* mc_holder =  new ZNode(GForm("MC  %s", selection));
+  ZNode* mc_holder  =  new ZNode(GForm("MC  %s", selection));
   ZNode* rec_holder =  new ZNode(GForm("Rec %s", selection));
   mQueen->CheckIn(mc_holder); mQueen->CheckIn(rec_holder);
-  if( mImportMode->mImportKine)
+  if(mImportMode->mImportKine)
     holder->Add(mc_holder); 
-  if( mImportMode->mImportRec)
+  if(mImportMode->mImportRec)
     holder->Add(rec_holder);
-
-
-  // create new import mode object, if not set alrady
-  if(mImportMode == 0 ) mImportMode= new GIImportStyle();
 
   Int_t nc = 0, nh = 0;
   // Int_t labels[nlabels];
