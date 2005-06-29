@@ -8,6 +8,7 @@
 #include <glass_defines.h>
 #include <gl_defines.h>
 
+#include "alice_simple.C"
 
 class ZGeoNode;
 class GeoUserData;
@@ -41,7 +42,7 @@ class ZImage;
 void AliLoader(const Text_t* dirname = 0,
 	       Bool_t use_aliroot    = 0)
 {
-  gSystem->IgnoreSignal(kSigSegmentationViolation, true);
+  // gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   Gled::AssertMacro("sun.C");
 
   g_queen = new ZQueen(512*1024, "AliceQueen", "Goddess of Ver");
@@ -51,19 +52,20 @@ void AliLoader(const Text_t* dirname = 0,
   g_queen->SetAuthMode(ZQueen::AM_None);
   g_queen->SetMapNoneTo(ZMirFilter::R_Allow);
 
-  Gled::theOne->AssertLibSet("Geom1");
-  Gled::theOne->AssertLibSet("RootGeo");
+  Gled::AssertLibSet("Geom1");
+  Gled::AssertLibSet("RootGeo");
 
-  gROOT->Macro("loadlibs.C");
-  Gled::theOne->AssertLibSet("Alice");
+  //gROOT->Macro("loadlibs.C");
+  Gled::AssertMacro("loadlibs.C");
+  Gled::AssertLibSet("Alice");
 
-  gROOT->LoadMacro("alice_simple.C");
+  // gROOT->LoadMacro("alice_simple.C");
+  // Gled::LoadMacro("alice_simple.C");
 
-  // Returned also in g_scene.
-  Scene* rscene = alice_simple_init("alice_minigeo.root",
-				    "def_geoview.root");
+  // Scene returned in g_scene.
+  alice_simple_init("alice_minigeo.root", "def_geoview.root");
   
-  ZNode* var = (ZNode*) rscene->FindLensByPath("Var");
+  ZNode* var = (ZNode*) g_scene->FindLensByPath("Var");
 
   CREATE_ADD_GLASS(image, ZImage, var, "Checker", 0);
   image->SetMagFilter(GL_LINEAR);
@@ -94,9 +96,9 @@ void AliLoader(const Text_t* dirname = 0,
   al->SetOM(-2);
   al->SetUseOM(true);
   g_queen->CheckIn(al);
-  rscene->Add(al);
+  g_scene->Add(al);
 
-  ZList* aliconf = rscene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
+  ZList* aliconf = g_scene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
   CREATE_ATT_GLASS(tpclist, ZRnrModList, aliconf, Swallow, "TPC_RM_list", 0);
 
   CREATE_ADD_GLASS(lightmod, ZGlLightModel, tpclist, "TPC Light Model", 0);
@@ -131,7 +133,6 @@ void AliLoader(const Text_t* dirname = 0,
   g_shell->SpawnMetaGui(al, mvi);
 
   if(dirname != 0) {
-    printf("Create VSD in %s \n", dirname);
     al->SetDataDir(dirname);
   }
 }

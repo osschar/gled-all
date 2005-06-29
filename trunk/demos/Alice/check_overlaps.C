@@ -33,13 +33,13 @@ void check_overlaps(Float_t epsilon=1)
 
   //--------------------------------------------------------------
 
-  Scene* rscene = create_basic_scene(); // Returned also in g_scene
+  create_basic_scene(); // Returned in g_scene
 
   //--------------------------------------------------------------
 
   ZGeoOvlMgr* ovl = new ZGeoOvlMgr("Overlap Mgr");
   g_queen->CheckIn(ovl);
-  rscene->Add(ovl);  
+  g_scene->Add(ovl);  
   ovl->SetResol(epsilon);
   ovl->RecalculateOvl();
   ovl->SetUseOM(1);
@@ -51,7 +51,7 @@ void check_overlaps(Float_t epsilon=1)
   em_node->Set3Pos(6.5, 0, 0);
   em_node->SetUseOM(true);
   g_queen->CheckIn(em_node);
-  rscene->Add(em_node);
+  g_scene->Add(em_node);
 
   //--------------------------------------------------------------
 

@@ -38,7 +38,7 @@ void alice_geom(Int_t import_mode=0)
 
   //--------------------------------------------------------------
 
-  Scene* rscene = create_basic_scene(); // Returned also in g_scene
+  create_basic_scene(); // Returned in g_scene
 
   //--------------------------------------------------------------
 
@@ -47,14 +47,14 @@ void alice_geom(Int_t import_mode=0)
   znode->SetOM(-2);
   znode->SetUseOM(true);
   g_queen->CheckIn(znode);
-  rscene->Add(znode);
+  g_scene->Add(znode);
   znode->SetRnrSelf(false);
 
   import_by_regexp(znode); 
   select_some_dets(znode);
 
   // create an empty node to test save/load from file 
-  CREATE_ADD_GLASS(em_node, ZGeoNode, rscene, "A GeoNode", "");
+  CREATE_ADD_GLASS(em_node, ZGeoNode, g_scene, "A GeoNode", "");
   em_node->SetTNode(gGeoManager->GetTopNode());
   em_node->SetOM(-2.5);
   em_node->SetUseOM(true);
@@ -62,13 +62,13 @@ void alice_geom(Int_t import_mode=0)
   em_node->SetDefFile("EvDisp.root");
 
   // create an empty OvlMgr.
-  CREATE_ADD_GLASS(em_ovlm, ZGeoOvlMgr, rscene, "A GeoOvlMgr", "");
+  CREATE_ADD_GLASS(em_ovlm, ZGeoOvlMgr, g_scene, "A GeoOvlMgr", "");
   em_ovlm->SetOM(-2.5);
   em_ovlm->Set3Pos(-6.5, 0, 0);
   em_ovlm->SetUseOM(true);
 
   // Geo repacker
-  CREATE_ADD_GLASS(repack, ZGeoRepacker, rscene, "GeoRepacker", "");
+  CREATE_ADD_GLASS(repack, ZGeoRepacker, g_scene, "GeoRepacker", "");
   repack->SetRoot(znode);
 
   //--------------------------------------------------------------
