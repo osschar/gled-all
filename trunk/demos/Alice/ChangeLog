@@ -1,3 +1,12 @@
+2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	* alice_geom.C:
+	* alice_simple.C:
+	* check_overlaps.C:
+	* common_foos.C:
+	Always use global 'Scene* g_scene'.
+
 2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
