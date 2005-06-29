@@ -12,12 +12,15 @@
 #include "ITSDigitsInfo.h"
 #include <AliITSresponseSDD.h>
 
+#include <Gled/GledTypes.h>
+
 ClassImp(ITSDigitsInfo)
 
 /**************************************************************************/
 
 void ITSDigitsInfo::_init()
 {
+  mDataDir = ".";
   mTree = 0;
   mGeom = 0;
   mSegSPD = 0;
@@ -37,14 +40,29 @@ ITSDigitsInfo:: ~ITSDigitsInfo()
   for(map<Int_t, TClonesArray*>::iterator j=mSSDmap.begin(); j!=mSSDmap.end(); ++j) {
     delete j->second;
   }
-  delete mSegSPD; delete mSegSDD; delete mSegSSD; delete mGeom;
+  delete mSegSPD; delete mSegSDD; delete mSegSSD; 
+  delete mGeom;
+  delete mTree;
 }
 
 /**************************************************************************/
-void ITSDigitsInfo::SetData(AliITSgeom* geom, TTree* tree)
+void ITSDigitsInfo::SetData(const Text_t* data_dir)
 {
-  mGeom = geom;
-  mTree = tree;
+  static const string _eh("ITSDigitsInfo::SetData ");
+ 
+  mDataDir = data_dir;
+  mGeom = new AliITSgeom();
+  mGeom->ReadNewFile("ITSgeometry.det");
+  if(mGeom == 0)
+    throw(_eh + GForm("can not load ITS geometry \n"));
+    
+  TFile* f2 = TFile::Open(GForm("%s/ITS.Digits.root", mDataDir.Data()));
+  if(f2 == 0)
+    throw(_eh + "can not open ITS.Digits.root.");
+ 
+  TDirectory* d = (TDirectory*)f2->Get("Event0");
+  mTree = (TTree*)d->Get("TreeD");
+
   SetITSSegmentation();
 }
 

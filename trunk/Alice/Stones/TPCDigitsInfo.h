@@ -37,7 +37,7 @@ class TPCDigitsInfo : public TObject {
   void _init();
 
  protected:
-
+  TString             mDataDir;    // X{G} 
  public:
   AliSimDigits        mSimDigits;
   AliTPCParam*        mParameter;
@@ -51,7 +51,7 @@ class TPCDigitsInfo : public TObject {
     TObject() { _init(); }
   virtual ~TPCDigitsInfo();
 
-  void SetData(AliTPCParam* par, TTree* tree);
+  void SetData(const Text_t* data_dir);
 
 #include "TPCDigitsInfo.h7"
   ClassDef(TPCDigitsInfo, 1)
