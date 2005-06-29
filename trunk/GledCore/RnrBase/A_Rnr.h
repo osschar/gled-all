@@ -17,12 +17,24 @@ class A_Rnr : public OptoStructs::A_View {
   friend class RnrDriver;
 
 public:
+  struct NameStack_Entry {
+    A_Rnr* fRnr;
+    void*  fUserData;
+  };
+  typedef NameStack_Entry                 NSE_t;
+  typedef list<NameStack_Entry>           lNSE_t;
+  typedef list<NameStack_Entry>::iterator lNSE_i;
+  typedef vector<NameStack_Entry>         vNSE_t;
+
   struct Fl_Event {
-    int fEvent;
-    int fKey;
-    int fButton;
-    int fState;
+    int    fEvent;
+    int    fKey;
+    int    fButton;
+    int    fState;
     string fText;
+
+    lNSE_t fNameStack;
+    lNSE_i fCurrentNSE;
 
     OptoStructs::ZGlassImg* fBelowMouse;
 
