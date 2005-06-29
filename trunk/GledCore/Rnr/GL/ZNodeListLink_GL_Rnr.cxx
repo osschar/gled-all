@@ -6,8 +6,8 @@
 
 #include "ZNodeListLink_GL_Rnr.h"
 
-#include <RnrBase/RnrDriver.h>
 #include <RnrBase/Fl_Event_Enums.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/SphereTrings.h>
 #include <GledView/GLTextNS.h>
 
@@ -96,7 +96,7 @@ void ZNodeListLink_GL_Rnr::Draw(RnrDriver* rd)
 
     glPushMatrix();
     glTranslatef(nx*M.mDx, ny*M.mDy, nz*M.mDz);
-    glPushName((*i)->GetSaturnID());
+    rd->GL()->PushName(this, *i);
 
     if(M.bDrawBox) {
 
@@ -169,7 +169,7 @@ void ZNodeListLink_GL_Rnr::Draw(RnrDriver* rd)
       glPopMatrix();
     }
 
-    glPopName();
+    rd->GL()->PopName();
     glPopMatrix();
 
     (*ns[0])++;
@@ -205,26 +205,31 @@ int ZNodeListLink_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
   ZNodeListLink& M = *mZNodeListLink;
 
-  if(ev.fEvent == FL_ENTER) {
-    auto_ptr<ZMIR> mir( M.S_SetCurrent(ev.fBelowMouse->fGlass) );
-    fImg->fEye->Send(*mir);
-    return 1;
-  }
   if(ev.fEvent == FL_LEAVE) {
     auto_ptr<ZMIR> mir( M.S_SetCurrent(0) );
     fImg->fEye->Send(*mir);
     return 1;
   }
+  
+  if(ev.fBelowMouse != fImg) return 0;
 
-  if(ev.fBelowMouse == 0) return 0;
+  ZGlass* tgt = (ZGlass*) ev.fNameStack.back().fUserData;
+  if(tgt != M.mCurrent) {
+    auto_ptr<ZMIR> mir( M.S_SetCurrent(tgt) );
+    fImg->fEye->Send(*mir);
+  }
+
+  if(ev.fEvent == FL_ENTER)
+    return 1;
 
   if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
     GledNS::MethodInfo* mi = M.GetCbackMethodInfo();
     if(mi == 0) return 0;
-    ZMIR mir(M.mCbackAlpha, ev.fBelowMouse->fGlass);
+    ZMIR mir(M.mCbackAlpha, tgt);
     mi->ImprintMir(mir);
     mi->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
     fImg->fEye->Send(mir);
+    // return 1; // pass through so far
   }
 
   return 0;
