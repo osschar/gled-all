@@ -1,3 +1,15 @@
+2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Reintroduced mDirectory->cd() calls in convert methods.
+
+	* Glasses/ZAliLoad.cxx:
+	Select wrappers: do not pass holder node to VSD selector methods.
+
+	* Glasses/VSDSelector.cxx:
+	Minor changes.
+
 2005-06-29  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/AliConverter.cxx:
