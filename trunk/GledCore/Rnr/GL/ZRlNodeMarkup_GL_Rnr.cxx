@@ -19,7 +19,7 @@ void ZRlNodeMarkup_GL_Rnr::_init()
 void ZRlNodeMarkup_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   bExState = rd->GL()->GetMarkupNodes();
-  switch(mZRlNodeMarkup->mNameRnrOp) {
+  switch(mZRlNodeMarkup->mNodeMarkupOp) {
   case ZRnrModBase::O_On:
     ConsiderRebuildDL(rd);
     rd->PushRnrMod(ZRlNodeMarkup::FID(), mRnrMod);
@@ -35,7 +35,7 @@ void ZRlNodeMarkup_GL_Rnr::PreDraw(RnrDriver* rd)
 
 void ZRlNodeMarkup_GL_Rnr::Draw(RnrDriver* rd)
 {
-  switch(mZRlNodeMarkup->mNameRnrOp) {
+  switch(mZRlNodeMarkup->mNodeMarkupOp) {
   case ZRnrModBase::O_On:
     ConsiderRebuildDL(rd);
     rd->SetDefRnrMod(ZRlNodeMarkup::FID(), mRnrMod);
@@ -51,7 +51,7 @@ void ZRlNodeMarkup_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZRlNodeMarkup_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  switch(mZRlNodeMarkup->mNameRnrOp) {
+  switch(mZRlNodeMarkup->mNodeMarkupOp) {
   case ZRnrModBase::O_On:
     rd->PopRnrMod(ZRlNodeMarkup::FID());
     rd->GL()->SetMarkupNodes(bExState);
