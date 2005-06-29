@@ -121,7 +121,7 @@ void AliConverter::CreateVSD(const Text_t* data_dir, const Text_t* vsd_file)
     ConvertGenInfo();
   }
   catch(string exc) {
-    printf("Conversion breaked. \n");
+    warn_caller(_eh + "conversion non-complete: '" + exc + "'.");
   }
  
   mFile->Write();  
@@ -159,6 +159,7 @@ void AliConverter::ConvertKinematics()
   if(mTreeK != 0) 
     throw (_eh + "kinematics already converted");
 
+  mDirectory->cd();
   mTreeK = new TTree("Kinematics", "Sorted TParticles as in Alistack");
  
   TTree* treek = pRunLoader->TreeK();
@@ -257,6 +258,7 @@ namespace {
 }
 
 /**************************************************************************/
+
 void AliConverter::ConvertHits()
 {
   static const string _eh("AliConverter::ConvertHits ");
@@ -264,6 +266,7 @@ void AliConverter::ConvertHits()
   if(mTreeH != 0)
     throw(_eh + "hits already converted.");
 
+  mDirectory->cd();
   mTreeH =  new TTree("Hits", "Combined detector hits.");
   Hit::Class()->IgnoreTObjectStreamer(true);
   mTreeH->Branch("H", "Hit", &mpH, 512*1024, 1);
@@ -348,6 +351,7 @@ void AliConverter::ConvertHits()
 /**************************************************************************/
 // Clusters
 /**************************************************************************/
+
 void AliConverter::ConvertClusters()
 {
   static const string _eh("AliConverter::ConvertClusters ");
@@ -355,7 +359,7 @@ void AliConverter::ConvertClusters()
   if(mTreeC != 0)
     throw(_eh + "clusters already converted.");
 
-  //  mDirectory->cd();
+  mDirectory->cd();
   mTreeC =  new TTree("Clusters", "rec clusters");
   mTreeC->Branch("C", "Hit", &mpC, 128*1024, 1);
 
@@ -364,6 +368,7 @@ void AliConverter::ConvertClusters()
 }
 
 /**************************************************************************/
+
 void AliConverter::ConvertTPCClusters()
 {
   static const string _eh("AliConverter::ConvertTPCClusters ");
@@ -436,8 +441,8 @@ void AliConverter::ConvertTPCClusters()
   }
 }
 
-
 /**************************************************************************/
+
 void AliConverter::ConvertITSClusters()
 {
   static const string _eh("AliConverter::ConvertITSClusters ");
@@ -522,7 +527,7 @@ void AliConverter::ConvertRecTracks()
   if(mTreeR != 0)
     throw(_eh + "tracks already converted.");
 
-  //  mDirectory->cd();
+  mDirectory->cd();
   mTreeR =  new TTree("RecTracks", "rec tracks");
 
   ESDParticle::Class()->IgnoreTObjectStreamer(true);
@@ -566,7 +571,7 @@ void AliConverter::ConvertV0()
   if(mTreeV0 != 0)
     throw(_eh + "V0 already converted.");
 
-  // mDirectory->cd();
+  mDirectory->cd();
   mTreeV0 =  new TTree("V0", "V0 points");
 
   ESDParticle::Class()->IgnoreTObjectStreamer(true);
@@ -633,6 +638,7 @@ void AliConverter::ConvertV0()
 /**************************************************************************/
 // GenInfo
 /**************************************************************************/
+
 void AliConverter::ConvertGenInfo()
 {
   static const string _eh("AliConverter::ConvertGenInfo ");
@@ -640,7 +646,7 @@ void AliConverter::ConvertGenInfo()
   if(mTreeGI != 0)
     throw(_eh + "GI already converted.");
 
-  // mDirectory->cd();
+  mDirectory->cd();
   mTreeGI = new TTree("GenInfo", "Objects prepared for cross querry");
 
   GenInfo::Class()->IgnoreTObjectStreamer(true);
