@@ -565,13 +565,45 @@ Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
   if (mPickBuff == 0) mPickBuff = new GLuint[mPickBuffSize];
   glSelectBuffer(mPickBuffSize, mPickBuff);
   glRenderMode(GL_SELECT);
+  mDriver->BeginPick();
   Render(rnr_self, rnr_overlay);
+  mDriver->EndPick();
   GLint n = glRenderMode(GL_RENDER);
 
   if (n < 0)
     printf("Pupil::Pick overflow of selection buffer, %d entries returned.\n", n);
   
   return n;
+}
+
+Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
+			      int  xpick,    int  ypick,
+			      bool rnr_self, bool rnr_overlay)
+{
+  Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
+
+  if (n > 0) {
+    float   min_z = 1;
+    GLuint* min_p = 0;
+
+    GLuint* x = mPickBuff;
+
+    for(int i=0; i<n; i++) {
+      float zmin = (float) *(x+1)/0x7fffffff;
+      if(zmin < min_z) {
+	min_z = zmin;
+	min_p = x;
+      }
+      x += 3 + *x;
+    }
+
+    x = min_p;
+    int m = *x; x += 3;
+    for(int i=0; i<m; ++i) {
+      result.push_back(mDriver->NameStack(x[i]));
+    }
+  }
+  return n; 
 }
 
 Int_t Pupil::PickLenses(list<pick_lens_data>& result,
@@ -585,12 +617,11 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 
   if (n > 0) {
     GLuint* x = mPickBuff;
-    // create a list of picked lenses sorted by z buffer
     for(int i=0; i<n; i++) {
       GLuint m = *x; x++;
 
-      if(x - mPickBuff + 2 + m > mPickBuffSize) {
-	cout <<_eh << "overflow of selection buffer, should not happen.\n";
+      if(x - mPickBuff + 2 + m > (UInt_t)mPickBuffSize) {
+	cout << _eh << "overflow of selection buffer, should not happen.\n";
 	continue;
       }
 
@@ -601,12 +632,7 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 
       UInt_t id = x[m-1];
 
-      OS::ZGlassImg* root_img = fImg->fEye->DemangleID(id);
-      if(!root_img) {
-	printf("Pupil::Pick root_img null for id=%d.\n", id);
-	continue;
-      }
-
+      OS::ZGlassImg* root_img = mDriver->NameStack(id).fRnr->fImg;
       ZGlass* lens = root_img->fGlass;
      
       pick_lens_data pld(root_img, zmin, lens->GetName());;
@@ -614,11 +640,7 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
       if(fill_stack) {
 	for(int j=m-2; j>=0; --j) {
 	  UInt_t p_id = x[j];
-	  OS::ZGlassImg* img = fImg->fEye->DemangleID(p_id);
-	  if(!img) {
-	    printf("%sparent img null for id=%d.\n", _eh.c_str(), p_id);
-	    continue;
-	  }
+	  OS::ZGlassImg* img = mDriver->NameStack(p_id).fRnr->fImg;
 	  pld.name_stack.push_back(img);
 	}
       }
@@ -640,6 +662,15 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
   return n;
 }
 
+OS::ZGlassImg* Pupil::PickTopLens(int xpick, int ypick,
+				  bool rnr_self, bool rnr_overlay)
+{
+  list<pick_lens_data> gdl;
+  Int_t n = PickLenses(gdl, true, false, xpick, ypick, rnr_self, rnr_overlay);
+  return (n > 0) ? gdl.front().img : 0;
+}
+
+/**************************************************************************/
 
 void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 {
@@ -686,14 +717,6 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 
     menu.popup();
   }
-}
-
-OS::ZGlassImg* Pupil::PickTop(int xpick, int ypick,
-			      bool rnr_self, bool rnr_overlay)
-{
-  list<pick_lens_data> gdl;
-  Int_t n = PickLenses(gdl, true, false, xpick, ypick, rnr_self, rnr_overlay);
-  return (n > 0) ? gdl.front().img : 0;
 }
 
 /**************************************************************************/
@@ -898,7 +921,9 @@ int Pupil::handle(int ev)
     e.fState  = Fl::event_state();
     e.fText   = string(Fl::event_text(), Fl::event_length());
 
-    OS::ZGlassImg* bm = PickTop(Fl::event_x(), Fl::event_y(), false, true);
+    Int_t n = PickTopNameStack(e.fNameStack, Fl::event_x(), Fl::event_y(), false, true);
+    
+    OS::ZGlassImg* bm = n ? e.fNameStack.back().fRnr->fImg : 0;
 
     // Simulate enter / leave events
     if(mBelowMouseImg != bm) {
@@ -942,7 +967,7 @@ int Pupil::handle(int ev)
 
     if(Fl::event_button() == 1 && Fl::event_clicks() == 1) {
       Fl::event_clicks(0);
-      OS::ZGlassImg* img = PickTop(mMouseX, mMouseY);
+      OS::ZGlassImg* img = PickTopLens(mMouseX, mMouseY);
       if(img) {
 	int x = Fl::event_x_root() + mInfo->GetPopupDx();
 	int y = Fl::event_y_root() + mInfo->GetPopupDy();

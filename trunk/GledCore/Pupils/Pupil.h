@@ -34,9 +34,9 @@ private:
 
 protected:
 
-  PupilInfo*	mInfo;
+  PupilInfo*    mInfo;
 
-  RnrDriver*	mDriver;
+  GLRnrDriver*  mDriver;
 
   Camera*	mCamera;
   MTW_View* 	mCameraView;
@@ -50,8 +50,8 @@ protected:
   OptoStructs::ZGlassImg* mEventHandlerImg;
   OptoStructs::ZGlassImg* mBelowMouseImg;
 
-  GLsizei       mPickBuffSize;
-  GLuint*       mPickBuff;
+  UInt_t        mPickBuffSize;
+  UInt_t*       mPickBuff;
 
   int		mMouseX, mMouseY;
 
@@ -107,16 +107,21 @@ public:
   Int_t Pick(int xpick, int ypick,
 	     bool rnr_self=true, bool rnr_overlay=true);
 
+  Int_t PickTopNameStack(A_Rnr::lNSE_t& result,
+			 int  xpick,    int  ypick,
+			 bool rnr_self, bool rnr_overlay);
+
   Int_t PickLenses(list<pick_lens_data>& result,
 		   bool sort_z,        bool fill_stack,
 		   int  xpick,         int  ypick,
 		   bool rnr_self=true, bool rnr_overlay=true);
 
+  OptoStructs::ZGlassImg* PickTopLens(int xpick, int ypick,
+				      bool rnr_self=true, bool rnr_overlay=true);
+
   void PickMenu(int xpick, int ypick,
 		bool rnr_self=true, bool rnr_overlay=true);
 
-  OptoStructs::ZGlassImg* PickTop(int xpick, int ypick,
-				  bool rnr_self=true, bool rnr_overlay=true);
 
   //--------------------------------------------------------------
   // Fltk interface
