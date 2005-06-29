@@ -11,13 +11,23 @@
 
 class GLRnrDriver : public RnrDriver
 {
-private:
-
 protected:
-  Int_t		mMaxLamps;	// X{g}
+  Bool_t                    bInPicking;  // X{G}
+  Bool_t                    bDoPickOps;  // X{gs}
+
+  UInt_t                    mPickCount;  // X{g}
+  UInt_t                    mPickSize;
+  A_Rnr::vNSE_t             mPickVector; // X{r}
+
+  void push_name(A_Rnr* rnr, void* ud);
+  void pop_name();
+
+  //--------------------------------
+
+  Int_t		mMaxLamps;	 // X{g}
   A_Rnr**	mLamps;
 
-  Int_t		mMaxClipPlanes; // X{g}
+  Int_t		mMaxClipPlanes;  // X{g}
   A_Rnr**	mClipPlanes;
 
   Bool_t        bInDLRebuild;    // X{gs}
@@ -29,6 +39,19 @@ public:
 
   virtual void BeginRender();
   virtual void EndRender();
+
+  // NameStack
+  virtual void BeginPick();
+  virtual void EndPick();
+  
+  A_Rnr::NSE_t& NameStack(UInt_t i)
+  { if(i>mPickCount) i=0; return mPickVector[i]; }
+
+  void PushName(A_Rnr* rnr, void* ud=0)
+  { if(bInPicking && bDoPickOps) push_name(rnr, ud); }
+  void PopName()
+  { if(bInPicking && bDoPickOps) pop_name(); }
+
 
   // Lamps
   A_Rnr** GetLamps() { return mLamps; }
