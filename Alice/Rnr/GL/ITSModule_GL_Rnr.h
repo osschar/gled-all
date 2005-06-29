@@ -9,21 +9,47 @@
 
 #include <Glasses/ITSModule.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
+#include <RnrBase/RnrDriver.h>
+#include <Glasses/ITSDigRnrMod.h>
 
 class ITSModule_GL_Rnr : public ZNode_GL_Rnr {
-private:
+ private:
   void _init();
 
-protected:
-  ITSModule*	mITSModule;
+ protected:
+  ITSModule*	mITSModule; 
+  
+  ITSDigRnrMod*	       rst_lens;
+  RnrModStore	       mSegRMS;
 
-public:
+ public:
+
   ITSModule_GL_Rnr(ITSModule* idol) :
-    ZNode_GL_Rnr(idol), mITSModule(idol)
+    ZNode_GL_Rnr(idol), mITSModule(idol), mSegRMS(ITSDigRnrMod::FID())
   { _init(); }
 
   virtual void Draw(RnrDriver* rd);
+  virtual void Render(RnrDriver* rd);
 
+  void MkCol(Int_t z, Int_t val_min, Int_t val_max);
 }; // endclass ITSModule_GL_Rnr
+
+
+/**************************************************************************/
+
+inline void ITSModule_GL_Rnr::MkCol(Int_t z, Int_t vmin, Int_t vmax)
+{
+  Float_t c = (z - vmin) * rst_lens->mColSep / (vmax - vmin);
+  if(c > 1)
+    c -= (int)c;
+  
+  if(rst_lens->mRibbon) {
+    glColor4fv(rst_lens->mRibbon->MarkToCol(c)());
+  } else {
+    ZColor col( (1 - c)*rst_lens->mMinCol + c*rst_lens->mMaxCol );
+    glColor4fv(col());
+  }
+}
+
 
 #endif
