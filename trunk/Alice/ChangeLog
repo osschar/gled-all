@@ -1,3 +1,37 @@
+2005-06-29  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+        New files.
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+        Change dependence from ZAliLoad to
+        VSDSelector.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+        New files.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Move functionaliry to AliConverter and
+        VSDSelector.
+
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+        Fix bug in writing digits to Outer2 
+        segment.
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+        Now owns digits tree and geometry.
+
+	* glass.list:
+        Add AliConverter and VSDSelector.
+        
+
 2005-06-20  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/ITSModule.cxx:
