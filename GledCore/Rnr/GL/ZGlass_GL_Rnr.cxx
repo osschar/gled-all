@@ -29,7 +29,7 @@ ZGlass_GL_Rnr::~ZGlass_GL_Rnr()
 
 void ZGlass_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  if(bUseNameStack) glPushName(mGlass->mSaturnID);
+  if(bUseNameStack) rd->GL()->PushName(this);
 
   if(mGlass->mStampReqTring > mStampTring) {
     Triangulate(rd);
@@ -64,7 +64,7 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if(bUseNameStack) glPopName();
+  if(bUseNameStack) rd->GL()->PopName();
 }
 
 /**************************************************************************/
