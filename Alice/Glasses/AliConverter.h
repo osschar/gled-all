@@ -40,19 +40,20 @@ class AliConverter : public ZGlass {
   KineType_e                     mKineType;  // X{GS} 7 PhonyEnum()
   TString                        mDataDir;   // X{G}
 
-  TTree*                         mTreeK;   // X{g}
-  TTree*                         mTreeH;   // X{g}
-  TTree*                         mTreeTR;  // X{g}
-  TTree*                         mTreeC;   // X{g}
-  TTree*                         mTreeR;   // X{g}
-  TTree*                         mTreeV0;  // X{g}
-  TTree*                         mTreeGI;  // X{g}
-  Hit                            mH, *mpH;     // needed for selection in mTreeH
-  MCParticle                     mP, *mpP;     // needed for selection in mTreeK
-  Hit                            mC, *mpC;     // needed for selection in mTreeC    
-  ESDParticle                    mR, *mpR;     // needed for selection in mTreeR  
-  V0                             mV0, *mpV0;   // needed for selection in mTreeV0  
-  GenInfo                        mGI,*mpGI;    // needed for selection in mTreeGI      
+  TTree*                         mTreeK;       //! X{g}
+  TTree*                         mTreeH;       //! X{g}
+  TTree*                         mTreeTR;      //! X{g}
+  TTree*                         mTreeC;       //! X{g}
+  TTree*                         mTreeR;       //! X{g}
+  TTree*                         mTreeV0;      //! X{g}
+  TTree*                         mTreeGI;      //! X{g}
+
+  Hit                            mH,  *mpH;    //! needed for selection in mTreeH
+  MCParticle                     mP,  *mpP;    //! needed for selection in mTreeK
+  Hit                            mC,  *mpC;    //! needed for selection in mTreeC    
+  ESDParticle                    mR,  *mpR;    //! needed for selection in mTreeR  
+  V0                             mV0, *mpV0;   //! needed for selection in mTreeV0  
+  GenInfo                        mGI, *mpGI;   //! needed for selection in mTreeGI      
 
  protected:
   TFile*                         mFile;      // X{gs} 
