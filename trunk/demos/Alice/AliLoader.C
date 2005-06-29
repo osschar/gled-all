@@ -1,5 +1,4 @@
 /// $Header$
-
 // 
 //
 // vars: ZQueen* g_queen
@@ -108,6 +107,11 @@ void AliLoader(const Text_t* dirname = 0,
   CREATE_ADD_GLASS(tpcrnrmod, TPCSegRnrMod, tpclist, "TPC RnrMod", 0);
   tpcrnrmod->SetRnrFrame(1);
   tpcrnrmod->SetRibbon(ribbon1);
+
+  CREATE_ADD_GLASS(itsrnrmod, ITSDigRnrMod, var, "ITS RnrMod", 0);
+  itsrnrmod->SetRnrFrame(1);
+  itsrnrmod->SetRibbon(ribbon1);
+
 
   //--------------------------------------------------------------
 
