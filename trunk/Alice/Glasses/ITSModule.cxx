@@ -22,10 +22,6 @@ void ITSModule::_init()
   bSetTrans = true;
   mID   = -1;
   mInfo = 0;
-  mFrameCol.rgba(1,1,1,0.25);
-  mDigCol.rgba(1,1,1,0.4);
-  mSSDPCol.rgba(1,0,0,0.4);
-  mSSDNCol.rgba(0,1,0,0.4);
 }
 
 /**************************************************************************/

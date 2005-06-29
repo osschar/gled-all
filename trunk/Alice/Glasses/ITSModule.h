@@ -34,11 +34,6 @@ class ITSModule : public ZNode {
   Float_t     mDz;         // X{G}  7 ValOut(-join=>1)
   Float_t     mDy;         // X{G}  7 ValOut()
 
-  ZColor     mFrameCol;    // X{GSPT} 7 ColorButt(-join=>1)
-  ZColor     mDigCol;      // X{GSPT} 7 ColorButt()
-
-  ZColor     mSSDPCol;    // X{GSPT} 7 ColorButt(-join=>1)
-  ZColor     mSSDNCol;      // X{GSPT} 7 ColorButt()
  public:
   ITSModule(const Text_t* n="ITSModule", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
