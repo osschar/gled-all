@@ -56,14 +56,13 @@ namespace {
 
   mConverter= 0;
   mSelector = 0;
-  mDataDir = ".";
-  mVSDFile = "AliVSD.root";
-
 
   mDataDir  = ".";
   mEvent    = 0;
-  mDefVSDName = "AliVSD.root";
   mKineType = AliConverter::KT_Standard;
+
+  mDefVSDName = "AliVSD.root";
+  mVSDFile    = "";
 
   mParticleSelection = "fMother[0] == -1";
   mHitSelection      = "fDetID < 5";
@@ -107,7 +106,7 @@ void ZAliLoad::LoadVSD()
 {
   static const string _eh("ZAliLoad::LoadVSD ");
 
-  OpMutexHolder omh(this, "LoadVSD()");
+  OpMutexHolder omh(this, "LoadVSD");
 
   string vsd_file;
   try {
@@ -150,10 +149,15 @@ void ZAliLoad::ClearData()
 
 void ZAliLoad::CreateVSD()
 {
-  // OpMutexHolder omh(this, "CreateVSD()");
+  OpMutexHolder omh(this, "CreateVSD");
+
   string vsd_file = get_vsd_name(false);
   SetVSDFile(vsd_file.c_str());
-  if(!mConverter) mConverter = new AliConverter();
+  if(!mConverter) {
+    AliConverter* c = new AliConverter;
+    mQueen->CheckIn(c);
+    SetConverter(c);
+  }
   mConverter->SetKineType(mKineType);
   ///printf("Write Converter in VSD file %s , data dir %s\n",mVSDFile.Data(),mDataDir.Data() );
   mConverter->CreateVSD(mDataDir,mVSDFile);
@@ -216,6 +220,7 @@ void ZAliLoad::ShowTPCPlate(Int_t side)
 }
 
 /**************************************************************************/
+
 void ZAliLoad::ShowITSModule(Int_t id, ZNode* holder)
 {
   static const string _eh("ZAliLoad::ShowITSModule ");
@@ -300,10 +305,12 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
     }
   }
 }
+
 /**************************************************************************/
 /**************************************************************************/
 // Wrappers
 /**************************************************************************/
+
 void ZAliLoad::SelectParticles(const Text_t* selection,Bool_t import_daughters)
 {
   static const string _eh("ZAliLoad::SelectParticles ");
@@ -316,7 +323,7 @@ void ZAliLoad::SelectParticles(const Text_t* selection,Bool_t import_daughters)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mParticleSelection.Data();
 
-  mSelector->SelectParticles(mSelector, selection, import_daughters);
+  mSelector->SelectParticles(0, selection, import_daughters);
 }
 /**************************************************************************/
 
@@ -332,7 +339,7 @@ void ZAliLoad::SelectHits(const Text_t* selection)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mHitSelection.Data();
 
-  mSelector->SelectHits(mSelector, selection);
+  mSelector->SelectHits(0, selection);
 }
 /**************************************************************************/
 
@@ -348,7 +355,7 @@ void ZAliLoad::SelectClusters(const Text_t* selection)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mClusterSelection.Data();
 
-  mSelector->SelectClusters(mSelector, selection);
+  mSelector->SelectClusters(0, selection);
 }
 /**************************************************************************/
 
@@ -364,7 +371,7 @@ void ZAliLoad::SelectRecTracks(const Text_t* selection)
  if(selection == 0 || strcmp(selection,"") == 0)
     selection = mRecSelection.Data();
 
-  mSelector->SelectRecTracks(mSelector, selection);
+  mSelector->SelectRecTracks(0, selection);
 }
 /**************************************************************************/
 
@@ -380,7 +387,7 @@ void ZAliLoad::SelectV0(const Text_t* selection, Bool_t import_kine)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mV0Selection.Data();
 
-  mSelector->SelectV0(mSelector, selection, import_kine);
+  mSelector->SelectV0(0, selection, import_kine);
 }
 /**************************************************************************/
 
@@ -396,7 +403,7 @@ void ZAliLoad::SelectGenInfo(const Text_t* selection)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mGISelection.Data();
 
-  mSelector->SelectGenInfo(mSelector, selection);
+  mSelector->SelectGenInfo(0, selection);
 }
 
 
