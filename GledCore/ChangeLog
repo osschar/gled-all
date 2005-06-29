@@ -1,3 +1,44 @@
+2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Added method 'PickTopNameStack' that returns whole name-stack for
+	the first (closest to viewer) selection hit. Used in overlay event
+	handling. Use new name-stack demangling from GLRnrDriver.
+
+	* RnrBase/A_Rnr.h:
+	Added struct NameStack_Entry (for picking support).
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	Wrapped-up GL picking support; picking now based on
+	A_Rnr::NameStack_Entry. GLRnrDriver constructs internal look-up
+	vector.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	Use new name-stack wrappers from GLRnrDriver.
+
+	* Rnr/GL/ZNodeListLink_GL_Rnr.cxx:
+	Use new name-stack wrappers from GLRnrDriver; use new event
+	format with below-mouse-lens being deduced from
+	user-data field of A_Rnr::NameStack_Entry. 
+
+	* Glasses/ZRlNameStack.cxx:
+	* Glasses/ZRlNameStack.h:
+	* Rnr/GL/ZRlNameStack_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNameStack_GL_Rnr.h:
+	* glass.list:
+	New glass ZRlNameStack: control of name-stack use.
+
+	* Makefile:
+	Removed libGledCore_GL_Rnr.so from gled link-time deps.
+
+	* Glasses/ZRlNodeMarkup.cxx:
+	* Glasses/ZRlNodeMarkup.h:
+	* Rnr/GL/ZRlNodeMarkup_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNodeMarkup_GL_Rnr.h:
+	Varname consistency fix.
+
 2005-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MANIFEST:
