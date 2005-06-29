@@ -25,6 +25,7 @@ class ITSDigitsInfo : public TObject {
   Float_t mSPDZCoord[192];
 
  protected:
+  TString                    mDataDir;  // X{G} 
   map<Int_t,  TClonesArray*> mSPDmap;   //!
   map<Int_t,  TClonesArray*> mSDDmap;   //!
   map<Int_t,  TClonesArray*> mSSDmap;   //!
@@ -38,7 +39,7 @@ class ITSDigitsInfo : public TObject {
   AliITSsegmentationSSD*   mSegSSD; 
 
 
-  void                     SetData(AliITSgeom* geom, TTree* tree);
+  void                     SetData(const Text_t* data_dir);
   ITSDigitsInfo(const Text_t* n="ITSDigitsInfo", const Text_t* t=0) :
     TObject()
   {_init(); } 

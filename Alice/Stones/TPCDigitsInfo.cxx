@@ -10,8 +10,8 @@
 //
 
 #include "TPCDigitsInfo.h"
+#include <Gled/GledTypes.h>
 
-using namespace std;
 
 ClassImp(TPCDigitsInfo)
 
@@ -20,22 +20,44 @@ ClassImp(TPCDigitsInfo)
 
 void TPCDigitsInfo::_init()
 {
+  mDataDir = ".";
   mTree = 0;
   mParameter= 0;
 }
 
+
 TPCDigitsInfo::~TPCDigitsInfo()
 {
+  delete mParameter;
+  delete mTree;
 }
 /**************************************************************************/
-void TPCDigitsInfo::SetData(AliTPCParam* par, TTree* tree)
+void TPCDigitsInfo::SetData(const Text_t* data_dir)
 { 
-  mParameter = par;
-  mSegEnt.assign(72,-1);
-  mTree = tree;
-
  
-  AliSimDigits *digit=&mSimDigits;
+  static const string _eh("TPCDigitsInfo::SetData");
+
+  mDataDir = data_dir;
+  TFile* file = TFile::Open(GForm("%s/galice.root", data_dir));
+  if(!file)
+    throw(_eh + "galice.root file not found.");
+
+  mParameter = (AliTPCParam *) file->Get("75x40_100x60_150x60");
+  if (!mParameter){
+    throw(_eh + "TPCParameter not found");
+  }
+
+  TFile* f2 = TFile::Open(GForm("%s/TPC.Digits.root", data_dir));
+  if(!f2)
+    throw(_eh + "can not open TPC.Digits.root.");
+
+  TDirectory* d = (TDirectory*)f2->Get("Event0");
+  mTree = (TTree*)d->Get("TreeD");
+
+
+  mSegEnt.assign(72,-1);
+  AliTPCParam *par = mParameter;
+  AliSimDigits *digit = &mSimDigits;
   mTree->GetBranch("Segment")->SetAddress(&digit);
   
   Int_t sbr=(Int_t)mTree->GetEntries();
@@ -50,25 +72,25 @@ void TPCDigitsInfo::SetData(AliTPCParam* par, TTree* tree)
 
 
   // read TPC Seg data
-  mInnSeg.pad_width = par->GetInnerPadPitchWidth();
+  mInnSeg.pad_width  = par->GetInnerPadPitchWidth();
   mInnSeg.pad_length = par->GetInnerPadPitchLength();
-  mInnSeg.Rlow = par->GetPadRowRadiiLow(0);
-  mInnSeg.nRows = par->GetNRowLow();
-  mInnSeg.nMaxPads = par->GetNPadsLow(mInnSeg.nRows -1);
+  mInnSeg.Rlow       = par->GetPadRowRadiiLow(0);
+  mInnSeg.nRows      = par->GetNRowLow();
+  mInnSeg.nMaxPads   = par->GetNPadsLow(mInnSeg.nRows - 1);
 
 
-  mOut1Seg.pad_width = par->GetOuterPadPitchWidth();
+  mOut1Seg.pad_width  = par->GetOuterPadPitchWidth();
   mOut1Seg.pad_length = par->GetOuter1PadPitchLength();
-  mOut1Seg.Rlow = par->GetPadRowRadiiUp(0);
-  mOut1Seg.nRows = par->GetNRowUp1();
-  mOut1Seg.nMaxPads =  par->GetNPadsUp(mOut1Seg.nRows-1);
+  mOut1Seg.Rlow       = par->GetPadRowRadiiUp(0);
+  mOut1Seg.nRows      = par->GetNRowUp1();
+  mOut1Seg.nMaxPads   = par->GetNPadsUp(mOut1Seg.nRows-1);
  
 
-  mOut2Seg.pad_width =  par->GetOuterPadPitchWidth();
-  mOut2Seg.pad_length =par->GetOuter2PadPitchLength();
-  mOut2Seg.Rlow = par->GetPadRowRadiiUp(mOut1Seg.nRows);
-  mOut2Seg.nRows = par->GetNRowUp() - mOut1Seg.nRows;
-  mOut2Seg.nMaxPads = par->GetNPadsUp(par->GetNRowUp()-1);
+  mOut2Seg.pad_width  = par->GetOuterPadPitchWidth();
+  mOut2Seg.pad_length = par->GetOuter2PadPitchLength();
+  mOut2Seg.Rlow       = par->GetPadRowRadiiUp(mOut1Seg.nRows);
+  mOut2Seg.nRows      = par->GetNRowUp() - mOut1Seg.nRows;
+  mOut2Seg.nMaxPads   = par->GetNPadsUp(par->GetNRowUp()-1);
 
 
   // set stepsize array
