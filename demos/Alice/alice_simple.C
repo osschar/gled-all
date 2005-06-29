@@ -42,7 +42,7 @@ void alice_simple(const Text_t* geom_file = "alice_minigeo.root",
 
 /**************************************************************************/
 
-Scene* alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
+void alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
 			 const Text_t* det_file  = "def_geoview.root")
 {
   printf("Importing geometry ...\n");
@@ -51,9 +51,9 @@ Scene* alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
 
   //--------------------------------------------------------------
 
-  Scene* rscene = create_basic_scene(); // Returned also in g_scene
+  create_basic_scene(); // Returned in g_scene
 
-  ZGlLightModel* lm = (ZGlLightModel*) rscene->FindLensByPath("Var/Light Model");
+  ZGlLightModel* lm = (ZGlLightModel*) g_scene->FindLensByPath("Var/Light Model");
   lm->SetLightModelOp(0);
   lm->SetFrontMode(GL_LINE);
   lm->SetBackMode(GL_LINE);
@@ -66,7 +66,7 @@ Scene* alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
   znode->SetOM(-2);
   znode->SetUseOM(true);
   g_queen->CheckIn(znode);
-  rscene->Add(znode);
+  g_scene->Add(znode);
   znode->SetRnrSelf(false);
 
   znode->SetDefFile(file_grep(det_file));
@@ -74,6 +74,4 @@ Scene* alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
   znode->Restore();
 
   g_simple_geometry = znode;
-
-  return rscene;
 }

@@ -18,18 +18,16 @@ const Text_t* geometry_mini_layout =
 
 /**************************************************************************/
 
-Scene* create_basic_scene()
+void create_basic_scene()
 {
-  Scene* rscene = new Scene("Alice Detector Scene");
-  g_queen->CheckIn(rscene);
-  g_queen->Add(rscene);
-  rscene->SetUseOM(true);
-
-  g_scene = rscene;
+  g_scene = new Scene("Alice Detector Scene");
+  g_queen->CheckIn(g_scene);
+  g_queen->Add(g_scene);
+  g_scene->SetUseOM(true);
 
   // Lamps.
 
-  CREATE_ADD_GLASS(origin, ZNode, rscene, "Lamp Origin", "");
+  CREATE_ADD_GLASS(origin, ZNode, g_scene, "Lamp Origin", "");
 
   CREATE_ADD_GLASS(lamp1, Lamp, origin, "Lamp1", "");
   lamp1->SetDiffuse(1, 1, 1);
@@ -43,8 +41,8 @@ Scene* create_basic_scene()
   lamp2->SetScale(0);
   lamp2->Set3Pos(12, 12, 0);
  
-  rscene->GetGlobLamps()->Add(lamp1);
-  rscene->GetGlobLamps()->Add(lamp2);
+  g_scene->GetGlobLamps()->Add(lamp1);
+  g_scene->GetGlobLamps()->Add(lamp2);
  
   CREATE_ADD_GLASS(el, Eventor, origin, "Dynamo", "Rotates Lamp Origin");
   el->SetBeatsToDo(-1); el->SetInterBeatMS(100); el->SetStampInterval(10);
@@ -53,18 +51,18 @@ Scene* create_basic_scene()
  
   // y=0 plane.
 
-  CREATE_ADD_GLASS(xzplane, Rect, rscene, "X-Z Plane", "");
+  CREATE_ADD_GLASS(xzplane, Rect, g_scene, "X-Z Plane", "");
   xzplane->SetRotByDegrees(180, 0, -90);
   xzplane->SetUnitSquare(20);
   xzplane->SetColor(0.4, 1, 0.45, 0.4);
 
   // Camera bases.
 
-  CREATE_ADD_GLASS(mark, ZNode, rscene, "Markers", "");
+  CREATE_ADD_GLASS(mark, ZNode, g_scene, "Markers", "");
   CREATE_ADD_GLASS(cams, ZNode, mark, "CameraInfos", "");
   CREATE_ADD_GLASS(cam_bases, ZNode, mark, "CameraBases", "");
 
-  CREATE_ATT_GLASS(nms, ZRlNameRnrCtrl, cam_bases, SetRnrMod, "NamesOn", 0);
+  CREATE_ATT_GLASS(nms, ZRlNodeMarkup, cam_bases, SetRnrMod, "NamesOn", 0);
   nms->SetRnrTiles(false); nms->SetRnrFrames(false);
   nms->SetTextCol(0.62, 1, 0.64);
   nms->SetTileCol(0,0,0,0);
@@ -80,7 +78,7 @@ Scene* create_basic_scene()
 
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Default", "");
     info->SetCameraBase(base);
-    info->SetUpReference(rscene);
+    info->SetUpReference(g_scene);
     info->SetUpRefAxis(2);
     info->SetProjMode(CameraInfo::P_Perspective);
     info->SetZFov(80);
@@ -152,7 +150,7 @@ Scene* create_basic_scene()
 
   // Var.
 
-  CREATE_ADD_GLASS(var, ZNode, rscene, "Var", 0);
+  CREATE_ADD_GLASS(var, ZNode, g_scene, "Var", 0);
 
   CREATE_ADD_GLASS(pointmod, ZGlBlending, var, "Blending", 0);
   pointmod->SetAntiAliasOp(1);
@@ -161,8 +159,6 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(lightmod, ZGlLightModel, var, "Light Model", 0);
   lightmod->SetShadeModelOp(1);
   lightmod->SetFaceCullOp(1);
-
-  return rscene;
 }
 
 /**************************************************************************/
