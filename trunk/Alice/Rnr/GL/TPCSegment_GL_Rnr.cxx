@@ -57,50 +57,48 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
   if(ent != -1) {
     row=0;
     //info->mInnSeg.dump();
-    while(row <  par->GetNRowLow()-1){
+    while(ent < t->GetEntriesFast()) {
       t->GetEntry(ent);
       par->AdjustSectorRow(digit->GetID(),s,row);
-      if(s != mTPCSegment->mSegment) break;
       // printf("AdjustSectorRow DigitID %d sector %d row %d \n",digit->GetID(),s,row );
+      if(s != mTPCSegment->mSegment) break;
       off =  (info->mInnSeg.nMaxPads - par->GetNPadsLow(row))/2;
       load_padrow(row, off,0);
       ent++;
     }
   }
-  ent = info->mSegEnt[mTPCSegment->mSegment +36];
+  ent = info->mSegEnt[mTPCSegment->mSegment + 36];
   if(ent != -1) {
     row=0;
     // info->mOut1Seg.dump();
-    while(row < par->GetNRowUp1()-1){
+    while(ent < t->GetEntriesFast()) {
       t->GetEntry(ent);
       par->AdjustSectorRow(digit->GetID(),s,row);
+      // printf("AdjustSectorRow DigitID %d sector %d row %d \n",digit->GetID(),s,row );
       if(s != (mTPCSegment->mSegment+36)) break;
-      //printf("AdjustSectorRow DigitID %d sector %d row %d \n",digit->GetID(),s,row );
-      off =  (info->mOut1Seg.nMaxPads - par->GetNPadsUp(row))/2;
-      //    texture_padrow(row, off, info->mOut1Seg.nRowOff);
-      load_padrow(row, off +info->mInnSeg.nMaxPads , 0);
-      ent++;
-    }
-    //info->mOut2Seg.dump();
-    while(row < par->GetNRowUp()-1){
-      t->GetEntry(ent);
-      par->AdjustSectorRow(digit->GetID(),s,row);
-      if(s != (mTPCSegment->mSegment + 36)) break;
-      //printf("AdjustSectorRow DigitID %d sector %d row %d \n",digit->GetID(),s,row );
-      off =  (info->mOut2Seg.nMaxPads - par->GetNPadsUp(row))/2;
-      load_padrow(row, off,info->mInnSeg.nRows - info->mOut1Seg.nRows);
+
+      if(row < par->GetNRowUp1()) {
+	off =  (info->mOut1Seg.nMaxPads - par->GetNPadsUp(row))/2;
+	load_padrow(row, off + info->mInnSeg.nMaxPads, 0);
+      } else {
+	off =  (info->mOut2Seg.nMaxPads - par->GetNPadsUp(row))/2;
+	load_padrow(row, off, 0); // info->mInnSeg.nRows - info->mOut1Seg.nRows);
+      }
+
       ent++;
     }
   }
   // rnr digits
   if( rst_lens->bUseTexture){
     init_texture(); 
+   
     display_texture(info->mInnSeg.pad_width, info->mInnSeg.pad_length, info->mInnSeg.Rlow,
 		    info->mInnSeg.nMaxPads, info->mInnSeg.nRows, 0,0);
     display_texture(info->mOut1Seg.pad_width, info->mOut1Seg.pad_length, info->mOut1Seg.Rlow,
 		    info->mOut1Seg.nMaxPads,info->mOut1Seg.nRows,info->mInnSeg.nMaxPads,0);
     display_texture(info->mOut2Seg.pad_width, info->mOut2Seg.pad_length, info->mOut2Seg.Rlow,
-		    info->mOut2Seg.nMaxPads, info->mOut2Seg.nRows,0,info->mInnSeg.nRows);
+		    info->mOut2Seg.nMaxPads, info->mOut2Seg.nRows,0,info->mOut1Seg.nRows);
+
     end_texture();
   }
   else { 
@@ -109,7 +107,7 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
     display_quads(info->mOut1Seg.pad_width, info->mOut1Seg.pad_length, info->mOut1Seg.Rlow,
 		  info->mOut1Seg.nMaxPads,info->mOut1Seg.nRows,info->mInnSeg.nMaxPads,0);
     display_quads(info->mOut2Seg.pad_width, info->mOut2Seg.pad_length, info->mOut2Seg.Rlow,
-		  info->mOut2Seg.nMaxPads, info->mOut2Seg.nRows,0,info->mInnSeg.nRows);
+		  info->mOut2Seg.nMaxPads, info->mOut2Seg.nRows,0,info->mOut1Seg.nRows);
   }
   if(rst_lens->bRnrFrame) display_frame(info);
 }
@@ -230,10 +228,19 @@ void TPCSegment_GL_Rnr::display_texture (Float_t pw, Float_t pl, Float_t vR,
   // printf("vertex coord >>> nPads %d pw %f, w: %f, y1: %f, y2: %f \n",nMaxPads,pw, w, vR, vR+nRows*pl);
   glColor4f(1.,1.,1.,rst_lens->mAlpha); 
   glBegin (GL_QUADS);
+
   glTexCoord2f(u1, v1);     glVertex3f (-w,vR, 0.0);
   glTexCoord2f(u1, v2);     glVertex3f (-w,vR+nRows*pl,0.0);
   glTexCoord2f(u2, v2);     glVertex3f (w,vR+nRows*pl,0.0);
   glTexCoord2f(u2, v1);     glVertex3f (w,vR,0.0);
+
+  /*
+    glTexCoord2f(0., 0.);     glVertex3f (-w,vR, 0.0);
+    glTexCoord2f(1., 0.);     glVertex3f (w,vR,0.0);
+    glTexCoord2f(1, 1);     glVertex3f (w,vR+nRows*pl,0.0);
+    glTexCoord2f(0., 1);     glVertex3f (-w,vR+nRows*pl,0.0);
+  */
+
   glEnd();
 }
 
@@ -248,7 +255,7 @@ void TPCSegment_GL_Rnr::display_quads (Float_t pw, Float_t pl, Float_t vR,
 				       Int_t nMaxPads, Int_t nRows, 
 				       Int_t startCol, Int_t startRow)
 {
-  GLubyte *pix, *alpha;
+  GLubyte *pix;
   Float_t y_d, y_u;
   Float_t x_off, x;
 
@@ -257,15 +264,14 @@ void TPCSegment_GL_Rnr::display_quads (Float_t pw, Float_t pl, Float_t vR,
     y_d = vR + row*pl;
     y_u = y_d + pl;
     x_off = -nMaxPads*pw/2;
-    for(Int_t pad = 0l; pad<nMaxPads; pad++){
-      pix = get_row_col(row+startRow,pad+startCol);
-      alpha = pix + 3*sizeof(GLubyte);
+    for(Int_t pad = 0; pad<nMaxPads; pad++){
+      pix = get_row_col(row + startRow, pad + startCol);
       x = x_off + pad*pw;
-      if(*alpha != 0){
+      if(pix[3] != 0){
 	glColor4ubv(pix);
 	glVertex3f(x+pw, y_d, 0);
-	glVertex3f(x, y_d, 0);
-	glVertex3f(x, y_u, 0);
+	glVertex3f(x,    y_d, 0);
+	glVertex3f(x,    y_u, 0);
 	glVertex3f(x+pw, y_u, 0);
       }
     }
