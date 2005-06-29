@@ -1,5 +1,4 @@
 // $Header$
-#include "GLRnrDriver.h"
 
 // Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -9,9 +8,17 @@
 // GLRnrDriver
 //
 
+#include "GLRnrDriver.h"
+#include <GL/gl.h>
 
 GLRnrDriver::GLRnrDriver(Eye* e, const string& r) : RnrDriver(e, r)
 {
+  bInPicking = false;
+  bDoPickOps = false;
+  mPickCount = 0;
+  mPickSize  = 1024;
+  mPickVector.resize(mPickSize);
+
   mMaxLamps = 8;
   mLamps = new (A_Rnr*)[mMaxLamps];
 
@@ -27,6 +34,8 @@ GLRnrDriver::~GLRnrDriver()
   delete [] mClipPlanes;
 }
 
+/**************************************************************************/
+// Rendering
 /**************************************************************************/
 
 void GLRnrDriver::BeginRender()
@@ -61,6 +70,42 @@ void GLRnrDriver::EndRender()
   RnrDriver::EndRender();
 }
 
+/**************************************************************************/
+// Name stack / Picking
+/**************************************************************************/
+
+void GLRnrDriver::BeginPick()
+{
+  bInPicking = true;
+  bDoPickOps = true;
+  mPickCount = 0;
+}
+
+void GLRnrDriver::EndPick()
+{
+  bInPicking = false;
+}
+
+void GLRnrDriver::push_name(A_Rnr* rnr, void* ud)
+{
+  ++mPickCount;
+  if(mPickCount >= mPickSize) {
+    mPickSize *= 2;
+    mPickVector.resize(mPickSize);
+  }
+  A_Rnr::NSE_t& nse(mPickVector[mPickCount]);
+  nse.fRnr      = rnr;
+  nse.fUserData = ud;
+  glPushName(mPickCount);
+}
+
+void GLRnrDriver::pop_name()
+{
+  glPopName();
+}
+
+/**************************************************************************/
+// Lamps & Clipping planes
 /**************************************************************************/
 
 Int_t GLRnrDriver::GetLamp(A_Rnr* rnr)
