@@ -18,22 +18,28 @@ void ITSModule_GL_Rnr::_init()
 
 /**************************************************************************/
 
-
-
 void ITSModule_GL_Rnr::Draw(RnrDriver* rd)
+{
+  obtain_rnrmod(rd, mSegRMS);
+  rst_lens = (ITSDigRnrMod*) mSegRMS.fRnrMod->fLens;
+  ZNode_GL_Rnr::Draw(rd);
+}
+
+void ITSModule_GL_Rnr::Render(RnrDriver* rd)
 {
   Float_t x = mITSModule->mDx;
   Float_t z = mITSModule->mDz;
 
   //frame
-  glBegin (GL_QUADS);
-  glColor4fv(mITSModule->mFrameCol());
-  glVertex3f( x, 0,  z);
-  glVertex3f(-x, 0,  z);
-  glVertex3f(-x, 0, -z);
-  glVertex3f( x, 0, -z);
-  glEnd();
-
+  if(rst_lens->bRnrFrame){
+    glBegin (GL_QUADS);
+    glColor4fv(rst_lens->mFrameCol());
+    glVertex3f( x, 0,  z);
+    glVertex3f(-x, 0,  z);
+    glVertex3f(-x, 0, -z);
+    glVertex3f( x, 0, -z);
+    glEnd();
+  }
   // digits
   TClonesArray *digits;
   Int_t ndigits;
@@ -49,12 +55,11 @@ void ITSModule_GL_Rnr::Draw(RnrDriver* rd)
     AliITSdigitSPD *d=0;
 
     glBegin (GL_QUADS);
-    glColor4fv(mITSModule->mDigCol());
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSPD*)digits->UncheckedAt(k);
       j = d->GetCoord1();
       i = d->GetCoord2();
-
+      MkCol(1, 0,1);
       x = -seg->Dx()/2 + seg->Dpx(0) *i;
       x *= 0.0001;
       mITSModule->mInfo->GetSPDLocalZ(j,z);
@@ -74,11 +79,11 @@ void ITSModule_GL_Rnr::Draw(RnrDriver* rd)
     AliITSdigitSDD *d=0;
 
     glBegin (GL_QUADS);
-    glColor4fv(mITSModule->mDigCol());
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSDD*)digits->UncheckedAt(k);
       j = d->GetCoord1();
       i = d->GetCoord2();
+      MkCol(d->GetSignal(), rst_lens->mSDDTreshold, rst_lens->mSDDMaxVal);
       seg->DetToLocal(i,j,x,z);
 
       dpx = seg->Dpx(i)*0.0001;
@@ -108,11 +113,11 @@ void ITSModule_GL_Rnr::Draw(RnrDriver* rd)
       Float_t ap,an,a;
       seg->Angles(ap,an);
       if( d->GetCoord1() == 1) {
-	glColor4fv(mITSModule->mSSDPCol());
+	MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
 	a = ap;
       }
       else {
-	glColor4fv(mITSModule->mSSDNCol());
+	MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
 	a = -an;
       }
       glVertex3f( x,0,-mITSModule->mDz);
