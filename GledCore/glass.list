@@ -73,6 +73,7 @@ ZGlBlending		180	Glasses/ZGlBlending	.
 ZGlClipPlane		181	Glasses/ZGlClipPlane	.
 ZRlNodeMarkup		182	Glasses/ZRlNodeMarkup	.
 ZRlFont			183	Glasses/ZRlFont		.
+ZRlNameStack		184	Glasses/ZRlNameStack	.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
