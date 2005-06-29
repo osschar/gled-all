@@ -120,8 +120,8 @@ void AliConverter::CreateVSD(const Text_t* data_dir, const Text_t* vsd_file)
     ConvertV0();
     ConvertGenInfo();
   }
-  catch() {
-    printf("Coversion breaked \n");
+  catch(string exc) {
+    printf("Conversion breaked. \n");
   }
  
   mFile->Write();  
