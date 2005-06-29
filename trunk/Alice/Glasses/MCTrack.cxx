@@ -10,7 +10,7 @@
 //
 
 #include "MCTrack.h"
-#include <Glasses/ZAliLoad.h>
+#include <Glasses/VSDSelector.h>
 #include "MCTrack.c7"
 #include <Glasses/ZQueen.h>
 
@@ -46,50 +46,50 @@ MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):TrackBase(n,t)
 
 /**************************************************************************/
 
-void MCTrack::ImportDaughters(ZAliLoad* alil)
+void MCTrack::ImportDaughters(VSDSelector* sel)
 {
   static const string _eh("MCTrack::ImportDaughters");
-  if (alil == 0) {
-    alil = GrepParentByGlass<ZAliLoad*>();
-    if(alil == 0) throw(_eh + "can't set ZAliLoad.");
+  if (sel == 0) {
+    sel = GrepParentByGlass<VSDSelector*>();
+    if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
   Int_t d0 =  mParticle->GetDaughter(0), d1 = mParticle->GetDaughter(1);
   if ( mParticle->GetNDaughters() == 0 ) return;
   for(int i=d0; i<=d1; ++i) {
-    MCParticle* tp = alil->Particle(i);
+    MCParticle* tp = sel->Particle(i);
     MCTrack* p = new MCTrack(tp, GForm("%d %s", i, tp->GetName())); 
     mQueen->CheckIn(p);Add(p);
   }
   mStampReqTring = Stamp(FID());
 }
 
-void MCTrack::ImportDaughtersRec(ZAliLoad* alil)
+void MCTrack::ImportDaughtersRec(VSDSelector* sel)
 {
   static const string _eh("MCTrack::ImportDaughters");
-  if (alil == 0) {
-    alil = GrepParentByGlass<ZAliLoad*>();
-    if(alil == 0) throw(_eh + "can't set ZAliLoad.");
+  if (sel == 0) {
+    sel = GrepParentByGlass<VSDSelector*>();
+    if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
 
   Int_t d0 =  mParticle->GetDaughter(0), d1 = mParticle->GetDaughter(1);
   if ( mParticle->GetNDaughters() == 0 ) return;
   for(int i=d0; i<=d1; ++i) {
     // printf("%s ImportDaughtersRec :: new particle idx %d \n",GetName(), i);
-    MCParticle* tp = alil->Particle(i);
+    MCParticle* tp = sel->Particle(i);
     MCTrack* p = new MCTrack(tp, GForm("%d %s", i, tp->GetName())); 
     mQueen->CheckIn(p);Add(p);
-    p->ImportDaughtersRec(alil);
+    p->ImportDaughtersRec(sel);
   }
   mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/
-void  MCTrack::ImportHits(ZAliLoad* alil, Bool_t from_primary)
+void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 {
   static const string _eh("MCTrack::ImportHits ");
-  if (alil == 0) {
-    alil = GrepParentByGlass<ZAliLoad*>();
-    if(alil == 0) throw(_eh + "can't set ZAliLoad.");
+  if (sel == 0) {
+    sel = GrepParentByGlass<VSDSelector*>();
+    if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
   char selection[128];
   if(from_primary){
@@ -97,16 +97,16 @@ void  MCTrack::ImportHits(ZAliLoad* alil, Bool_t from_primary)
   } else {
     sprintf (selection, "fLabel==%d", mParticle->fLabel);
   }
-  alil->SelectHits(this, selection);
+  sel->SelectHits(this, selection);
 }
 
 /**************************************************************************/
-void  MCTrack::ImportClusters(ZAliLoad* alil, Bool_t from_primary)
+void  MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
 {
   static const string _eh("MCTrack::ImportClusters ");
-  if (alil == 0) {
-    alil = GrepParentByGlass<ZAliLoad*>();
-    if(alil == 0) throw(_eh + "can't set ZAliLoad.");
+  if (sel == 0) {
+    sel = GrepParentByGlass<VSDSelector*>();
+    if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
   char selection[128];
   if(from_primary){
@@ -114,7 +114,7 @@ void  MCTrack::ImportClusters(ZAliLoad* alil, Bool_t from_primary)
   } else {
     sprintf (selection, "fLabel==%d", mParticle->fLabel);
   }
-  alil->SelectClusters(this, selection);
+  sel->SelectClusters(this, selection);
 }
 /**************************************************************************/
 

@@ -15,7 +15,7 @@
 #include <TParticle.h>
 #include <AliHit.h>
 
-class ZAliLoad;
+class VSDSelector;
 
 class MCTrack : public TrackBase {
   MAC_RNR_FRIENDS(MCTrack);
@@ -35,10 +35,10 @@ class MCTrack : public TrackBase {
   virtual ~MCTrack() { delete mParticle; }
 
   // particles
-  void ImportDaughters(ZAliLoad* alil = 0);    //X{E} C{1} 7 MButt(-join=>1)
-  void ImportDaughtersRec(ZAliLoad* alil = 0); //X{E} C{1} 7 MButt()
-  void ImportHits(ZAliLoad* alil=0, Bool_t from_primary=false); // X{Ed} C{1} 7 MCWButt(-join=>1)
-  void ImportClusters(ZAliLoad* alil=0, Bool_t from_primary=false); // X{Ed} C{1} 7 MCWButt()
+  void ImportDaughters(VSDSelector* sel = 0);    //X{E} C{1} 7 MButt(-join=>1)
+  void ImportDaughtersRec(VSDSelector* sel = 0); //X{E} C{1} 7 MButt()
+  void ImportHits(VSDSelector* sel=0, Bool_t from_primary=false); // X{Ed} C{1} 7 MCWButt(-join=>1)
+  void ImportClusters(VSDSelector* sel=0, Bool_t from_primary=false); // X{Ed} C{1} 7 MCWButt()
 
   void Dump();				            // X{E} 7 MButt()
 	
