@@ -18,8 +18,7 @@ private:
   void _init();
 
 protected:
-  ZRnrModBase::Operation_e
-                mNameRnrOp;   // X{GS}   7 PhonyEnum()
+  ZRnrModBase::Operation_e mNodeMarkupOp; // X{GS}   7 PhonyEnum()
 
   Bool_t	bRnrAxes;     // X{GS}   7 Bool(-join=>1)
   Bool_t	bRnrNames;    // X{GS}   7 Bool()

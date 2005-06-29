@@ -16,7 +16,7 @@ private:
   void _init();
 
 protected:
-  bool            bExState;
+  bool           bExState;
   ZRlNodeMarkup* mZRlNodeMarkup;
 
 public:
