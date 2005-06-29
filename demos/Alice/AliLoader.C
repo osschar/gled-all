@@ -8,13 +8,14 @@
 #include <glass_defines.h>
 #include <gl_defines.h>
 
+
 class ZGeoNode;
 class GeoUserData;
 class ZAliLoad;
 
-ZGeoNode* volt    = 0;
-ZAliLoad* aliload = 0;
-Scene*    gscene  = 0;
+ZGeoNode*     volt      = 0;
+Scene*        gscene    = 0;
+ZAliLoad*     aliload   = 0;
 
 // default event display layout
 const Text_t* particle_layout =
@@ -40,6 +41,7 @@ class ZImage;
 void AliLoader(const Text_t* dirname = 0,
 	       Bool_t use_aliroot    = 0)
 {
+  gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   Gled::AssertMacro("sun.C");
 
   g_queen = new ZQueen(512*1024, "AliceQueen", "Goddess of Ver");
@@ -87,11 +89,10 @@ void AliLoader(const Text_t* dirname = 0,
 
   CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
 
-  ZAliLoad* al = new ZAliLoad(); 
+  ZAliLoad* al = new ZAliLoad();
   aliload = al;
   al->SetOM(-2);
   al->SetUseOM(true);
-  al->SetImportMode(giis);
   g_queen->CheckIn(al);
   rscene->Add(al);
 
@@ -121,7 +122,7 @@ void AliLoader(const Text_t* dirname = 0,
   // NestInfo* geo_nest = new_nest("Geometry's nest", geometry_mini_layout);
   // geo_nest->Add(g_simple_geometry);
   // geo_nest->SetDefW(66);
-
+  //
   MetaViewInfo* mvi = make_zaliload_metagui();
   // mvi->SetExpertP(true);
 
@@ -130,13 +131,9 @@ void AliLoader(const Text_t* dirname = 0,
   g_shell->SpawnMetaGui(al, mvi);
 
   if(dirname != 0) {
+    printf("Create VSD in %s \n", dirname);
     al->SetDataDir(dirname);
-    // al->SetupDataSource(use_aliroot);
-    // Shoot a MIR to have functional GUI during processing:
-    ZMIR* setup_mir = al->S_LoadVSD(true, use_aliroot);
-    g_saturn->ShootMIR(setup_mir);
   }
-
 }
 
 /**************************************************************************/
@@ -145,7 +142,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 40, H = 26;
+  int Y = 0, W = 40, H = 28;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, g_fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -176,6 +173,9 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w17, MetaWeedInfo, ms1, "VSDFile", 0);
   w17->Resize(6, y, W-12-6, 1);
   CREATE_ADD_GLASS(w18, MetaWeedInfo, ms1, "LoadVSD", 0);
+  w18->Resize(W-12, y, 12, 1);
+  y++;
+  CREATE_ADD_GLASS(w18, MetaWeedInfo, ms1, "ClearData", 0);
   w18->Resize(W-12, y, 12, 1);
   y++;
   CREATE_ADD_GLASS(w15, MetaWeedInfo, ms1, "<box>", "Current operation:");
@@ -332,8 +332,11 @@ MetaViewInfo* make_zaliload_metagui()
   y++;
   CREATE_ADD_GLASS(w41, MetaWeedInfo, ms4, "ShowTPCPlate", 0);
   w41->Resize(0, y, W, 1);
-  w41->Label("Show TPC Plate ..");
+  w41->Label("Show TPC Digits ..");
   y++;
-
+ CREATE_ADD_GLASS(w41, MetaWeedInfo, ms4, "ShowITSDet", 0);
+  w41->Resize(0, y, W, 1);
+  w41->Label("Show ITS Digits ..");
+  y++;
   return mv;
 }
