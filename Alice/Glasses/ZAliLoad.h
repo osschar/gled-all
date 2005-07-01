@@ -19,6 +19,7 @@ class ZAliLoad : public ZNode {
 
  private:
   void _init();
+  bool m_auto_vsdfile_p; //!
 
  protected:
   Bool_t check_read(const string& file);
@@ -36,18 +37,19 @@ class ZAliLoad : public ZNode {
   
   TString                        mOperation; //! X{GS} 7 TextOut()
   GMutex                         mOpMutex;   //! X{r}
+
  public:
   ZAliLoad(const Text_t* n="ZAliLoad", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
+    ZNode(n,t), mOpMutex(GMutex::recursive) { _init(); }
 
-  void LoadVSD();     // X{Ed} 7 MButt()
   void CreateVSD();   // X{Ed} 7 MButt()
+  void LoadVSD();     // X{Ed} 7 MButt()
   void ClearData();   // X{Ed} 7 MButt()
 
   // -------------------------------------------------------------- 
   // Wrapper functions for selections. 
  protected:
-  TString    mParticleSelection;    // X{GS} 7 Textor(-whenchanged=>1)
+  TString mParticleSelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectParticles(const Text_t* selection=0,
 		       Bool_t import_daughters=false); // X{Ed} 7 MCWButt()
@@ -58,22 +60,22 @@ class ZAliLoad : public ZNode {
   void SelectHits(const Text_t* selection=0);          // X{Ed} 7 MCWButt()
 
  protected:
-  TString mClusterSelection;  // X{GS} 7 Textor(-whenchanged=>1)
+  TString mClusterSelection;   // X{GS} 7 Textor(-whenchanged=>1)
  public:  
   void SelectClusters(const Text_t* selection=0);      // X{Ed} 7 MCWButt()
 
  protected:
-  TString mRecSelection;      // X{GS} 7 Textor(-whenchanged=>1)
+  TString mRecSelection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectRecTracks(const Text_t* selection=0);     // X{Ed} 7 MCWButt()
 
  protected:
-  TString mV0Selection;       // X{GS} 7 Textor(-whenchanged=>1)
+  TString mV0Selection;        // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectV0(const Text_t* selection=0,
-		Bool_t import_kine=false);            // X{Ed} 7 MCWButt()
+		Bool_t import_kine=false);             // X{Ed} 7 MCWButt()
  protected:
-  TString        mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)
+  TString mGISelection;        // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectGenInfo(const Text_t* selection=0);       // X{Ed} 7 MCWButt()
 

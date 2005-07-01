@@ -18,14 +18,11 @@ ClassImp(TPCSegment)
 
 void TPCSegment::_init()
 {
-  // *** Set all links to 0 ***
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   mSegment = 0;
   mDigInfo = 0;
-
-  // Override from ZGlass
-  bUseDispList = true;
 }
-/**************************************************************************/
-
 
 /**************************************************************************/

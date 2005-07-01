@@ -24,7 +24,9 @@ ClassImp(ZAliLoad)
 // Prevents simultaneous execution of detached threads.
 // Should provide optional queuing.
 /**************************************************************************/
+
 namespace {
+
   class OpMutexHolder {
     ZAliLoad* mAli;
     TString   mOldOp;
@@ -45,7 +47,9 @@ namespace {
       mAli->RefOpMutex().Unlock();
     }
   };
+
 }
+
 /**************************************************************************/
 
   void ZAliLoad::_init()
@@ -71,8 +75,11 @@ namespace {
   mV0Selection       = "fStatus == 100";
   mGISelection       = "bR == 1";
 
+  mOperation = "<idle>";
 }
 
+/**************************************************************************/
+// VSD handling
 /**************************************************************************/
 
 Bool_t ZAliLoad::check_read(const string& file)
@@ -82,12 +89,16 @@ Bool_t ZAliLoad::check_read(const string& file)
 
 string ZAliLoad::get_vsd_name(Bool_t check_p)
 {
+  m_auto_vsdfile_p = false;
+
   string file(mVSDFile.Data());
   if(file != "") {
     if(!check_p || (check_p && check_read(file))) {
       return file;
     }
   }
+
+  m_auto_vsdfile_p = true;
 
   string there(GForm("%s/%s", mDataDir.Data(), mDefVSDName.Data()));
   if(!check_p || (check_p && check_read(there)))
@@ -101,6 +112,22 @@ string ZAliLoad::get_vsd_name(Bool_t check_p)
 }
 
 /**************************************************************************/
+
+void ZAliLoad::CreateVSD()
+{
+  OpMutexHolder omh(this, "CreateVSD");
+
+  string vsd_file = get_vsd_name(false);
+  SetVSDFile(vsd_file.c_str());
+  if(!mConverter) {
+    AliConverter* c = new AliConverter;
+    mQueen->CheckIn(c);
+    SetConverter(c);
+  }
+  mConverter->SetKineType(mKineType);
+  ///printf("Write Converter in VSD file %s , data dir %s\n",mVSDFile.Data(),mDataDir.Data() );
+  mConverter->CreateVSD(mDataDir, mVSDFile);
+}
 
 void ZAliLoad::LoadVSD()
 {
@@ -127,6 +154,8 @@ void ZAliLoad::ClearData()
 {
   OpMutexHolder omh(this, "ResetData()");
  
+  SetConverter(0);
+  SetSelector(0);
   RemoveLensesViaQueen(true);
  
   if (mTPCDigInfo) {
@@ -136,31 +165,9 @@ void ZAliLoad::ClearData()
     delete mITSDigInfo; mITSDigInfo = 0;
   }
 
-  delete mConverter;
-
-  mConverter = 0;   
-  mSelector= 0;
-
-  mDataDir = ".";
-  mVSDFile = "AliVSD.root";
-}
-
-/**************************************************************************/
-
-void ZAliLoad::CreateVSD()
-{
-  OpMutexHolder omh(this, "CreateVSD");
-
-  string vsd_file = get_vsd_name(false);
-  SetVSDFile(vsd_file.c_str());
-  if(!mConverter) {
-    AliConverter* c = new AliConverter;
-    mQueen->CheckIn(c);
-    SetConverter(c);
-  }
-  mConverter->SetKineType(mKineType);
-  ///printf("Write Converter in VSD file %s , data dir %s\n",mVSDFile.Data(),mDataDir.Data() );
-  mConverter->CreateVSD(mDataDir,mVSDFile);
+  SetDataDir(".");
+  if(m_auto_vsdfile_p = true)
+    SetVSDFile("");
 }
 
 /**************************************************************************/

@@ -15,8 +15,8 @@
 // #include <AliTPCParam.h>
 // #include <AliSimDigits.h>
 
-
-class TPCSegment : public ZNode {
+class TPCSegment : public ZNode
+{
   MAC_RNR_FRIENDS(TPCSegment);
 
  private:
@@ -39,10 +39,9 @@ class TPCSegment : public ZNode {
     mStampReqTring = Stamp(FID());
   }
 
-
 #include "TPCSegment.h7"
   ClassDef(TPCSegment, 1)
-    }; // endclass TPCSegment
+}; // endclass TPCSegment
 
 GlassIODef(TPCSegment);
 
