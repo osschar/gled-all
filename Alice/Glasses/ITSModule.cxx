@@ -18,7 +18,9 @@ ClassImp(ITSModule)
 
 void ITSModule::_init()
 {
-  // *** Set all links to 0 ***
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   bSetTrans = true;
   mID   = -1;
   mInfo = 0;
