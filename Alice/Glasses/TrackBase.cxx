@@ -18,7 +18,8 @@ ClassImp(TrackBase)
 
 void TrackBase::_init()
 {
-  // *** Set all links to 0 ***
+  // Override settings from ZGlass
+  bUseDispList = true;
 }
 
 /**************************************************************************/

@@ -22,9 +22,7 @@ typedef list<MCTrack*>::iterator         lpMCTrack_i;
 
 void MCTrack::_init()
 {
-  // override from ZGlass 
-  bUseDispList=true;
-  mParticle = 0;
+  mParticle   = 0;
   mNDaughters = 0;
 }
 
