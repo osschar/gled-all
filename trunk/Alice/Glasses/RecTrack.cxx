@@ -18,20 +18,19 @@ ClassImp(RecTrack)
 
 void RecTrack::_init()
 {
-  // *** Set all links to 0 ***
   mESD=0;
 }
 
 /**************************************************************************/
 
-RecTrack:: RecTrack(ESDParticle* esd, const Text_t* n, const Text_t* t):TrackBase(n,t) 
+RecTrack:: RecTrack(ESDParticle* esd, const Text_t* n, const Text_t* t) :
+  TrackBase(n,t) 
 {
   _init();
   mESD = esd;
   SetName(GForm("RecTrack %d",mESD->fLabel));
   mV = GForm("% 4.f, % 4.f, % 4.f",  mESD->fV[0],  mESD->fV[1], mESD->fV[2]);
   mP = GForm("% 6.3f, % 6.3f, % 6.3f", mESD->fP[0],  mESD->fP[1], mESD->fP[2]);
-
 }
 
 void RecTrack::Dump()
