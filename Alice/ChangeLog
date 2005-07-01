@@ -1,3 +1,24 @@
+2005-06-29  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Alice/Glasses/ITSDigRnrMod.cxx:
+	* Alice/Glasses/ITSDigRnrMod.h:
+        New files.
+
+	* Alice/Glasses/ITSModule.cxx:
+	* Alice/Glasses/ITSModule.h:
+        Some members moved to ITSDigRnrMod.
+
+	* Alice/Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
+	* Alice/Rnr/GL/ITSDigRnrMod_GL_Rnr.h:
+        New files.
+
+        * Alice/Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Alice/Rnr/GL/ITSModule_GL_Rnr.h:
+        Read data from ITSDigRnrMod.
+
+	* Alice/glass.list:
+        New class ITSDigRnrMod.
+
 2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AliConverter.cxx:
