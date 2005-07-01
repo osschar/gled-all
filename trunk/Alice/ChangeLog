@@ -1,3 +1,19 @@
+2005-07-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ITSModule.cxx:
+	Use display-lists by default.
+
+	* Glasses/TrackBase.cxx:
+	* Glasses/MCTrack.cxx:
+	* Glasses/RecTrack.cxx:
+	Enabled use of display-lists in the base-class.
+
+	* Glasses/TPCSegment.cxx:
+	* Glasses/TPCSegment.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Minor changes.
+
 2005-06-29  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Alice/Glasses/ITSDigRnrMod.cxx:
