@@ -550,6 +550,8 @@ namespace {
 
 Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 {
+  make_current();
+
   GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
@@ -697,7 +699,6 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 	} else {
 	  gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
 	}
-	++loc;
 
 	fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
 	mShell->FillLensMenu(gdi->img, menu, mcdl, gdi->name);
@@ -713,6 +714,9 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 	    mShell->FillLensMenu(*pi, menu, mcdl, entry);
 	    mShell->FillShellVarsMenu(*pi, menu, mcdl, entry);
 	  }
+
+	++loc;
+	if(loc > mInfo->GetPickMaxN()) break;
       }
 
     menu.popup();
