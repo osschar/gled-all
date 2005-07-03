@@ -1,3 +1,17 @@
+2005-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CameraInfo.h:
+	Extended ranges of view-variables.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Added control for max-pick-menu-length; extended ranges of
+	view-variables.
+
+	* Pupils/Pupil.cxx:
+	Added support for max-pick-menu-length; added missing
+	make_current() (GL context) call to Pick().
+
 2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Pupils/Pupil.cxx:
