@@ -71,7 +71,7 @@ struct Helix {
     vx += (px*sin - py*(1 - cos))/fA + x_off;
     vy += (py*sin + px*(1 - cos))/fA + y_off;
     vz += fLam*TMath::Abs(fR*fPhiStep);
-    glTexCoord2f(fN*stex,fRnrMod->mTexVCoor);
+    glTexCoord2f(fN*stex + fRnrMod->mTexUCoor, fRnrMod->mTexVCoor);
     glVertex3f(vx, vy, vz);
     Float_t px_t = px*cos - py*sin ;
     Float_t py_t = py*cos + px*sin ;
@@ -101,7 +101,7 @@ struct Helix {
 
     {
       glBegin(GL_LINE_STRIP);
-      glTexCoord2f(0.0, fRnrMod->mTexVCoor);
+      glTexCoord2f(fRnrMod->mTexUCoor, fRnrMod->mTexVCoor);
       glVertex3f(vx,vy,vz);
 
       if(nsteps > 0){
@@ -122,7 +122,8 @@ struct Helix {
 	 
       }
       Float_t fu = TMath::Sqrt((vx-ex)*(vx-ex)+(vy-ey)*(vy-ey) +(vz-ez)*(vz-ez));
-      glTexCoord2f(fN*stex + fu/fRnrMod->mTexFactor, fRnrMod->mTexVCoor);
+      glTexCoord2f(fN*stex + fu/fRnrMod->mTexFactor + fRnrMod->mTexUCoor,
+		   fRnrMod->mTexVCoor);
       vx = ex; vy = ey; vz = ez; 
       glVertex3f(vx,vy,vz);
       glEnd();
@@ -153,7 +154,7 @@ struct Helix {
     set_bounds(vx,vy,vz);
     if(NMax > 0){
       glBegin(GL_LINE_STRIP);
-      glTexCoord2f(0.0, fRnrMod->mTexVCoor);
+      glTexCoord2f(fRnrMod->mTexUCoor, fRnrMod->mTexVCoor);
       glVertex3f(vx, vy, vz);
       Float_t tx,ty;
       while(fN < NMax){
@@ -179,33 +180,35 @@ struct Helix {
 //  LINE
 /**************************************************************************/
 
-
-
-
 struct Line {
+
   PRSBase * fRnrMod;  // RnrMod data 
-  void draw_to(Float_t &x0, Float_t &y0, Float_t &z0, Float_t x1, Float_t y1, Float_t z1)
+
+  void draw_to(Float_t &x0, Float_t &y0, Float_t &z0,
+	       Float_t  x1, Float_t  y1, Float_t  z1)
   {
     glBegin(GL_LINES);
-    glTexCoord2f(0.,fRnrMod->mTexVCoor);
+    glTexCoord2f(fRnrMod->mTexUCoor, fRnrMod->mTexVCoor);
     glVertex3f(x0, y0, z0);
     Float_t u = TMath::Sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1)+(z0-z1)*(z0-z1))/fRnrMod->mTexFactor;
 
     x0=x1; y0=y1; z0=z1;
 
-    glTexCoord2f(u,fRnrMod->mTexVCoor);
+    glTexCoord2f(u + fRnrMod->mTexUCoor, fRnrMod->mTexVCoor);
     glVertex3f(x0, y0, z0);
     glEnd();	
   }
   
-  Bool_t in_bounds(Float_t ex, Float_t ey, Float_t ez){
+  Bool_t in_bounds(Float_t ex, Float_t ey, Float_t ez)
+  {
     if ((TMath::Abs(ez) > fRnrMod->mMaxZ) || (ex*ex+ey*ey > fRnrMod->mMaxR*fRnrMod->mMaxR))
       return false;
     else
       return true;
   }
 
-  Float_t get_bounds_time(Float_t vx, Float_t vy, Float_t vz, Float_t px, Float_t py, Float_t pz)
+  Float_t get_bounds_time(Float_t vx, Float_t vy, Float_t vz,
+			  Float_t px, Float_t py, Float_t pz)
   {
     Float_t tZ,Tb = 0;
     // time where particle intersect +/- mMaxZ
