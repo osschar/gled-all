@@ -32,6 +32,7 @@ class ESDParticle : public TObject {
   
   /**************************************************************************/
   // methods needed for combined tree selection
+
   Double_t  R()            const { return TMath::Sqrt(fV[0]*fV[0]+fV[1]*fV[1]);}
 
   Double_t  P()            const { return TMath::Sqrt(fP[0]*fP[0]+fP[1]*fP[1]+fP[2]*fP[2]); }
@@ -41,6 +42,8 @@ class ESDParticle : public TObject {
     else  return 1.e30;
   }
   Double_t  Theta()        const { return (fP[2]==0)?TMath::PiOver2():TMath::ACos(fP[2]/P()); }
+  Double_t  Phi()          const { return TMath::ATan2(fP[1], fP[0]); }
+
   /**************************************************************************/
 
 #include "ESDParticle.h7"
