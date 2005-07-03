@@ -23,7 +23,7 @@ class MCTrack : public TrackBase {
  private:
   void _init();
  protected:
-  MCParticle*		   mParticle; 	   // X{GS}  
+  MCParticle*		   mParticle; 	   // X{GST}  
   TString                  mVDecay;        // X{GS}  7 TextOut()
   Int_t                    mNDaughters;    // X{GS}  7 ValOut()
 

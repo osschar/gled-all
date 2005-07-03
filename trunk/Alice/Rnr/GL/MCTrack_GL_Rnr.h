@@ -20,9 +20,8 @@ class MCTrack_GL_Rnr : public ZNode_GL_Rnr {
   void _init();
 
  protected:
-  MCTrack*	mMCTrack;
-  // RnrDriver::RnrMod* mParticleRM;
-  RnrModStore	       mParticleRMS;
+  MCTrack*      mMCTrack;
+  RnrModStore   mParticleRMS;
 
  public:
   MCTrack_GL_Rnr(MCTrack* idol) :
