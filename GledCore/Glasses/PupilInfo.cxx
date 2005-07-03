@@ -69,7 +69,7 @@ void PupilInfo::_init()
 
   bShowRPS = true; bShowView = true; bRnrNames = false;
 
-  mBuffSize = 4096; mPickR = 5; mPickDisp = 0;
+  mBuffSize = 4096; mPickR = 5; mPickDisp = 0; mPickMaxN = 24;
 
   mPopupDx = 200; mPopupDy = 0;
   mPopupFx = 0;   mPopupFy = -0.5;
