@@ -35,11 +35,10 @@ void PRSBase::_init()
   mTrackStippleFac = 0;
   mTrackStipplePat = 0xCCCC;
 
-  mMinP = 0.00005;
-  mTheta = 90;
-  mThetaOff = 90;
-  mMaxR=600; 
-  mMaxZ=550;
+  mMinP  = 0.00005;
+  mTheta = 90;    mThetaOff = 90;
+  mPhi   = 180;   mPhiOff   = 360;
+  mMaxR  = 600;   mMaxZ     = 550;
   mMaxOrbs=2;
   mDelta  = 0.1; //calculate step size depending of helix radius
   mMinAng = 45;
@@ -47,7 +46,7 @@ void PRSBase::_init()
   //textures
   mTexture = 0;
   mTexFactor = 200;
-  mTexVCoor = 0.2;
+  mTexUCoor = 0;  mTexVCoor = 0;
 }
 
 /**************************************************************************/
