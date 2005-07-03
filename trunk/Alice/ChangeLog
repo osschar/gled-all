@@ -1,3 +1,24 @@
+2005-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MCTrack.h:
+	* Glasses/MCTrackRnrStyle.h:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	Minor changes.
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+	Added phi-limits and u texture coordinate offset.
+
+	* Rnr/GL/HelixLineRnr.h:
+	Honour u-tex offset.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Honour phi-limits from PRSBase. Needs wrap-around ifx.
+
+	* Stones/ESDParticle.h:
+	Added inline method Phi().
+
 2005-07-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ITSModule.cxx:
