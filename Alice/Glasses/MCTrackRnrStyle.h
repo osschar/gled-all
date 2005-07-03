@@ -12,7 +12,8 @@
 #include <Glasses/MCTrack.h>
 #include <Glasses/ZImage.h>
 
-class MCTrackRnrStyle : public PRSBase {
+class MCTrackRnrStyle : public PRSBase
+{
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(MCTrackRnrStyle);
   MAC_RNR_FRIENDS(MCTrack);
@@ -22,8 +23,8 @@ class MCTrackRnrStyle : public PRSBase {
 
   // protected:
  public:
-  Bool_t                   mFitDaughters;  // X{GST}  7 Bool(-join=>1)
-  Bool_t                   mFitDecay;      // X{GST}  7 Bool()])
+  Bool_t   mFitDaughters; // X{GST}  7 Bool(-join=>1)
+  Bool_t   mFitDecay;     // X{GST}  7 Bool()])
 
   // PDG colors
   ZColor   mDefCol;       // X{GSPT} 7 ColorButt(-join=>1)
@@ -33,7 +34,6 @@ class MCTrackRnrStyle : public PRSBase {
   ZColor   mMesCol;       // X{GSPT} 7 ColorButt(-join=>1)
   ZColor   mBarCol;       // X{GSPT} 7 ColorButt()
 
-
   // public:
   MCTrackRnrStyle(const Text_t* n="MCTrackRnrStyle", const Text_t* t=0) :
     PRSBase(n,t) { _init(); }
@@ -42,7 +42,7 @@ class MCTrackRnrStyle : public PRSBase {
 
 #include "MCTrackRnrStyle.h7"
   ClassDef(MCTrackRnrStyle, 1)
-    }; // endclass MCTrackRnrStyle
+}; // endclass MCTrackRnrStyle
 
 GlassIODef(MCTrackRnrStyle);
 
