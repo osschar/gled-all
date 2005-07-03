@@ -38,17 +38,24 @@ void MCTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 
 void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 {
+  MCParticle* p = mMCTrack->mParticle;
+  if(p == 0) return;
+
   RNRDRIVER_GET_RNRMOD(srm, rd, MCTrackRnrStyle);
   MCTrackRnrStyle* rst_lens  = (MCTrackRnrStyle*) srm->fLens;
 
-  MCParticle* p = mMCTrack->mParticle;
-  Float_t vx=p->Vx(), vy=p->Vy(), vz=p->Vz();
+  Float_t vx = p->Vx(), vy=p->Vy(), vz=p->Vz();
   Float_t px = p->Px(), py=p->Py(), pz=p->Pz();  
   // check P cut off
   if (p->P() < rst_lens->mMinP) return;
   //  printf("MCTrack_GL_Rnr::Render THETA %f \n",p->Theta());
   if(TMath::RadToDeg()*p->Theta() < (rst_lens->mTheta - rst_lens->mThetaOff) || 
-     TMath::RadToDeg()*p->Theta() > (rst_lens->mTheta + rst_lens->mThetaOff)  )return;
+     TMath::RadToDeg()*p->Theta() > (rst_lens->mTheta + rst_lens->mThetaOff)  )
+    return;
+  if(TMath::RadToDeg()*p->Phi() < (rst_lens->mPhi - rst_lens->mPhiOff) || 
+     TMath::RadToDeg()*p->Phi() > (rst_lens->mPhi + rst_lens->mPhiOff)  )
+    return;
+
   // check boundaries
   if(TMath::Abs(vz)>rst_lens->mMaxZ || (vx*vx + vy*vy) > (rst_lens->mMaxR)*(rst_lens->mMaxR)) return;
 

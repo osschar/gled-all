@@ -46,7 +46,12 @@ void RecTrack_GL_Rnr::Render(RnrDriver* rd)
 
   if (p->P() < rst_lens->mMinP) return;
   if(TMath::RadToDeg()*p->Theta() < (rst_lens->mTheta - rst_lens->mThetaOff) || 
-     TMath::RadToDeg()*p->Theta() > (rst_lens->mTheta + rst_lens->mThetaOff)  )return;
+     TMath::RadToDeg()*p->Theta() > (rst_lens->mTheta + rst_lens->mThetaOff)  )
+    return;
+  if(TMath::RadToDeg()*p->Phi() < (rst_lens->mPhi - rst_lens->mPhiOff) || 
+     TMath::RadToDeg()*p->Phi() > (rst_lens->mPhi + rst_lens->mPhiOff)  )
+    return;
+
   // check boundaries
   if(TMath::Abs(vz)>rst_lens->mMaxZ || (vx*vx + vy*vy) > (rst_lens->mMaxR)*(rst_lens->mMaxR)) return;
 
