@@ -35,10 +35,10 @@ protected:
   Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,90,1,100])
 
   Projection_e	mProjMode;	// X{GS} 7 PhonyEnum()
-  Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1,180,1,100], -join=>1)
-  Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
-  Float_t	mYFac;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000], -join=>1)
-  Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
+  Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,180,  1,1000], -join=>1)
+  Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
+  Float_t	mYFac;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000], -join=>1)
+  Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
 
