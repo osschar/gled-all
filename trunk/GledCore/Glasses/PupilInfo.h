@@ -52,10 +52,10 @@ protected:
   Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,90,1,100])
 
   Projection_e	mProjMode;	// X{GS} 7 PhonyEnum()
-  Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1,180,1,100], -join=>1)
-  Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
-  Float_t	mYFac;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000], -join=>1)
-  Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-3,1000, 1,1000])
+  Float_t	mZFov;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,180,  1,1000], -join=>1)
+  Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
+  Float_t	mYFac;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000], -join=>1)
+  Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
   Bool_t	bZoomByFac;     // X{gS} 7 Bool()
@@ -67,9 +67,9 @@ protected:
   Bool_t	bBlend;		// X{gS} 7 Bool()
 
   // User interaction and feedback.
-  Float_t	mMSRotFac;	// X{gS} 7 Value(-range=>[-1000,1000,1,100])
+  Float_t	mMSRotFac;	// X{gS} 7 Value(-range=>[-1000,1000,1,100], -join=>1)
   Float_t	mMSMoveFac;	// X{gS} 7 Value(-range=>[-1000,1000,1,100])
-  Float_t	mMoveOM;	// X{gS} 7 Value(-range=>[-30,30,1,100])
+  Float_t	mMoveOM;	// X{gS} 7 Value(-range=>[-30,30,1,100], -join=>1)
   Float_t	mAccelExp;	// X{gS} 7 Value(-range=>[-10,10,1,1000])
 
   Float_t	mCHSize;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>4)
@@ -78,9 +78,10 @@ protected:
   Bool_t	bShowView;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bRnrNames;	// X{gS} 7 Bool()
 
-  UInt_t	mBuffSize;	// X{gS} 7 Value(-range=>[0,65535,1,1])
-  Int_t		mPickR;		// X{gS} 7 Value(-range=>[0,100,1,1],-join=>1)
-  UChar_t       mPickDisp;      // X{gS} 7 PhonyEnum(-vals=>[0,Default, 1,"Z-distance", 2,"Z-percentage"], -width=>9)
+  UInt_t	mBuffSize;	// X{gS} 7 Value(-range=>[0,65535,1])
+  Int_t		mPickR;		// X{gS} 7 Value(-range=>[0,100,1],-join=>1)
+  UChar_t       mPickDisp;      // X{gS} 7 PhonyEnum(-vals=>[0,Default, 1,"Z-distance", 2,"Z-percentage"], -width=>9, -join=>1)
+  Int_t         mPickMaxN;      // X{GS} 7 Value(-range=>[1,100,1])
 
   Int_t		mPopupDx;	// X{GS} 7 Value(-range=>[-2000,2000,1,1], -join=>1)
   Int_t		mPopupDy;	// X{GS} 7 Value(-range=>[-2000,2000,1,1])
