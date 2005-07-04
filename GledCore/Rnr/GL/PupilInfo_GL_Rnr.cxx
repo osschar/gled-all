@@ -7,7 +7,7 @@
 #include "PupilInfo_GL_Rnr.h"
 #include "ZRlFont_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/GLTextNS.h>
 #include <GL/gl.h>
 
 #include <TSystem.h>

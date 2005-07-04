@@ -9,7 +9,7 @@
 #include <RnrBase/Fl_Event_Enums.h>
 #include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/SphereTrings.h>
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/GLTextNS.h>
 
 #include <Stones/ZMIR.h>
 #include <Eye/Eye.h>
@@ -99,9 +99,6 @@ void ZNodeListLink_GL_Rnr::Draw(RnrDriver* rd)
     rd->GL()->PushName(this, *i);
 
     if(M.bDrawBox) {
-
-      // !!!! Need special sub-if for ortho-mode, use Sz as border width
-
       glColor4fv(back_color());
       glPushMatrix();
       glTranslatef(M.mBoxDx, M.mBoxDy, M.mBoxDz);
