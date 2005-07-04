@@ -1,3 +1,28 @@
+2005-07-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZRlNodeMarkup.cxx:
+	* Glasses/ZRlNodeMarkup.h:
+	Added Float_t members mAxeWidth and mAxeLength.
+
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	In PostDraw use Axes paramaters from ZRlNodeMarkup.
+
+	* Pupils/Pupil.cxx:
+	Fixed some picking glitches.
+
+	* Rnr/GL/GLTextNS.cxx:
+	* Rnr/GL/GLTextNS.h:
+	* GledView/GLTextNS.cxx:
+	* GledView/GLTextNS.h:
+	Moved GLTextNS.h/.cxx from GledView/ to Rnr/GL/.
+
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/ScreenText_GL_Rnr.cxx:
+	* Rnr/GL/ZNodeListLink_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.h:
+	* Rnr/GL/ZRlNodeMarkup_GL_Rnr.h:
+	Fixes include path of GLTextNS.h.
+
 2005-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/CameraInfo.h:
