@@ -20,11 +20,13 @@ private:
 protected:
   ZRnrModBase::Operation_e mNodeMarkupOp; // X{GS}   7 PhonyEnum()
 
-  Bool_t	bRnrAxes;     // X{GS}   7 Bool(-join=>1)
+  Bool_t        bRnrAxes;     // X{GS}   7 Bool()
+  Float_t       mAxeWidth;    // X{GS}   7 Value(-range=>[0,128,1,100], -join=>1)
+  Float_t       mAxeLength;   // X{GS}   7 Value(-range=>[-100,100,1,100])
   Bool_t	bRnrNames;    // X{GS}   7 Bool()
   Bool_t	bRnrTiles;    // X{GS}   7 Bool(-join=>1)
   Bool_t	bRnrFrames;   // X{GS}   7 Bool()
-  Float_t	mNameOffset;  // X{GS}   7 Value(-range=>[0,1,1,10000])
+  Float_t	mNameOffset;  // X{GS}   7 Value(-range=>[-2,2,1,10000])
   ZColor	mTextCol;     // X{PRGS} 7 ColorButt(-join=>1)
   ZColor	mTileCol;     // X{PRGS} 7 ColorButt()
   TString	mTilePos;     // X{RGS}  7 Textor()
