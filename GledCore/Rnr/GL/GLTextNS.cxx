@@ -11,7 +11,7 @@
 
 #include "GLTextNS.h"
 
-#include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
 #include <Rnr/GL/ZRlNodeMarkup_GL_Rnr.h>
 
@@ -696,11 +696,26 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text)
 void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 			  BoxSpecs& bs, float zoffset)
 {
+  // RasterPos screws-up picking ... but so does gluProject.
+  /*
+    GLdouble pm[16], mm[16], wx, wy, wz;
+    GLint    vp[4];
+    glGetDoublev(GL_PROJECTION_MATRIX, pm);
+    glGetDoublev(GL_MODELVIEW_MATRIX,  mm);
+    glGetIntegerv(GL_VIEWPORT, vp);
+
+    glColor3f(0,1,0); glBegin(GL_POINTS); glVertex3f(-.3, 0, 0); glEnd();
+
+    int ret = gluProject(0, 0, 0, mm, pm, vp, &wx, &wy, &wz);
+    if(wx < vp[0] || wx > vp[0]+vp[2]) return;
+    if(wy < vp[1] || wy > vp[1]+vp[3]) return;
+    if(wz < 0     || wz > 1)           return;
+  */
+
   GLboolean rv;
   glRasterPos4f(0, 0, 0, 1);
   glGetBooleanv(GL_CURRENT_RASTER_POSITION_VALID, &rv);
-  if(rv == false)
-    return;
+  if(rv == false) return;
 
   typedef list<TextLineData>           lTLD_t;
   typedef list<TextLineData>::iterator lTLD_i;
@@ -735,7 +750,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
   // printf("%d = %d + %d; %f %f\n", descent+ascent, ascent, descent, tsize, scale);
 
-  glPushAttrib(GL_TEXTURE_BIT   | GL_LIGHTING_BIT     |
+  glPushAttrib(GL_TEXTURE_BIT   |
 	       GL_LINE_BIT      | GL_COLOR_BUFFER_BIT |
 	       GL_POLYGON_BIT);
 
@@ -749,12 +764,13 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   glPushMatrix();
   glLoadMatrixf(rd->GetProjBase());
   glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
+  glMatrixMode(GL_MODELVIEW);
 
   // Translate to required position.
   float
     xo = rp[0] - halfw,
     yo = rp[1] + halfh,
-    zo = rp[2] * zoffset; // + zoffset;
+    zo = rp[2] * zoffset;
   for(string::size_type i=0; i<bs.pos.length(); ++i) {
     switch(bs.pos[i]) {
     case 'l': case 'L': xo += halfw; break;
@@ -765,10 +781,6 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
   }
   glTranslatef(TMath::Nint(xo), TMath::Nint(yo), zo);
 
-  //glEnable(GL_POLYGON_OFFSET_FILL);
-  //glPolygonOffset(0, -10);
-
-  glDisable(GL_LIGHTING);
   glScalef(scale, scale, 1);
 
   if(nrc_lens->GetRnrTiles()) {
@@ -779,31 +791,23 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
     glEnd();
   }
 
-  glTranslatef(0, 0, -1e-6);
   glColor4fv(nrc_lens->RefTextCol()());
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  // The following one makes a sharp border. Too sharp in some way.
-  // glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-  //glPolygonOffset(0, -20); // TRY THIS AGAIN, had problems w/ glOrtho far/near stuffe!!
+  glTranslatef(0, 0, -1e-6);
 
   if(nrc_lens->GetRnrFrames()) {
     glLineWidth(1);
     glBegin(GL_LINE_LOOP);
     glVertex2i(0, -height); glVertex2i(width, -height);
     glVertex2i(width, 0);   glVertex2i(0, 0);
-    //glVertex2i(x,y); glVertex2i(X,y);
-    //glVertex2i(X,Y); glVertex2i(x,Y);
     glEnd();
   }
 
+  glEnable(GL_BLEND);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_TEXTURE_2D);
-
   txfBindFontTexture(txf);
-  //int x = bs.lm, y = -(bs.tm + descent + ascent);
+
   glTranslatef(bs.lm, -(bs.tm + descent + ascent), 0);
   for(lTLD_i l=tlds.begin(); l!=tlds.end(); ++l) {
     glPushMatrix();
@@ -818,12 +822,12 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
     glTranslatef(0, -interline, 0);
   }
 
+  glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
 
   glPopAttrib();
-
 }
 
 /**************************************************************************/
