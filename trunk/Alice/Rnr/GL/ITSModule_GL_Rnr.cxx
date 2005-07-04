@@ -29,17 +29,8 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
 {
   Float_t x = mITSModule->mDx;
   Float_t z = mITSModule->mDz;
-
-  //frame
-  if(rst_lens->bRnrFrame){
-    glBegin (GL_QUADS);
-    glColor4fv(rst_lens->mFrameCol());
-    glVertex3f( x, 0,  z);
-    glVertex3f(-x, 0,  z);
-    glVertex3f(-x, 0, -z);
-    glVertex3f( x, 0, -z);
-    glEnd();
-  }
+  Bool_t above_treshold = false;
+ 
   // digits
   TClonesArray *digits;
   Int_t ndigits;
@@ -51,6 +42,7 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
 
   switch(mITSModule->mDetID) {
   case 0: {
+    above_treshold = true;
     AliITSsegmentationSPD* seg =  mITSModule->mInfo->mSegSPD; 
     AliITSdigitSPD *d=0;
 
@@ -81,18 +73,21 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
     glBegin (GL_QUADS);
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSDD*)digits->UncheckedAt(k);
-      j = d->GetCoord1();
-      i = d->GetCoord2();
-      MkCol(d->GetSignal(), rst_lens->mSDDTreshold, rst_lens->mSDDMaxVal);
-      seg->DetToLocal(i,j,x,z);
+      if(d->GetSignal() > rst_lens->mSDDTreshold){
+	j = d->GetCoord1();
+	i = d->GetCoord2();
+	above_treshold = true;
+	MkCol(d->GetSignal(), rst_lens->mSDDTreshold, rst_lens->mSDDMaxVal);
+	seg->DetToLocal(i,j,x,z);
 
-      dpx = seg->Dpx(i)*0.0001;
-      dpz = seg->Dpz(j)*0.0001;
+	dpx = seg->Dpx(i)*0.0001;
+	dpz = seg->Dpz(j)*0.0001;
 
-      glVertex3f( x,0,z);
-      glVertex3f( x,0,z+dpz);
-      glVertex3f( x+dpx,0,z+dpz);
-      glVertex3f( x+dpx,0,z);
+	glVertex3f( x,0,z);
+	glVertex3f( x,0,z+dpz);
+	glVertex3f( x+dpx,0,z+dpz);
+	glVertex3f( x+dpx,0,z);
+      }
     }
     glEnd();
     break;
@@ -104,27 +99,44 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
     glBegin (GL_LINES);
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSSD*)digits->UncheckedAt(k);
-      j = d->GetCoord1();
-      i = d->GetCoord2();
-      seg->DetToLocal(i,j,x,z);
-      // printf("Coord i,j %f,%f  x,z %f,%f\n",i,j,x,z);
-      dpx = seg->Dpx(i)*0.0001;
-      dpz = seg->Dpz(j)*0.0001;
-      Float_t ap,an,a;
-      seg->Angles(ap,an);
-      if( d->GetCoord1() == 1) {
-	MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
-	a = ap;
+      if(d->GetSignal() > rst_lens->mSSDTreshold){
+	above_treshold = true;
+	j = d->GetCoord1();
+	i = d->GetCoord2();
+	seg->DetToLocal(i,j,x,z);
+	// printf("Coord i,j %f,%f  x,z %f,%f\n",i,j,x,z);
+	dpx = seg->Dpx(i)*0.0001;
+	dpz = seg->Dpz(j)*0.0001;
+	Float_t ap,an,a;
+	seg->Angles(ap,an);
+	if( d->GetCoord1() == 1) {
+	  MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
+	  a = ap;
+	}
+	else {
+	  MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
+	  a = -an;
+	}
+     
+	glVertex3f( x,0,-mITSModule->mDz);
+	glVertex3f( x+TMath::Tan(a)*mITSModule->mDz*2,0,mITSModule->mDz);
       }
-      else {
-	MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
-	a = -an;
-      }
-      glVertex3f( x,0,-mITSModule->mDz);
-      glVertex3f( x+TMath::Tan(a)*mITSModule->mDz*2,0,mITSModule->mDz);
     }
     glEnd();
     break;
   }
+  }
+
+  //frame
+  x = mITSModule->mDx;
+  z = mITSModule->mDz;
+  if(rst_lens->bRnrFrame && above_treshold){
+    glBegin (GL_QUADS);
+    glColor4fv(rst_lens->mFrameCol());
+    glVertex3f( x, 0,  z);
+    glVertex3f(-x, 0,  z);
+    glVertex3f(-x, 0, -z);
+    glVertex3f( x, 0, -z);
+    glEnd();
   }
 }
