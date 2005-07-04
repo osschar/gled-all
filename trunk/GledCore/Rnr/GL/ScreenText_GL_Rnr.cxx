@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ScreenText_GL_Rnr.h"
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/GLTextNS.h>
 #include <GL/gl.h>
 
 /**************************************************************************/

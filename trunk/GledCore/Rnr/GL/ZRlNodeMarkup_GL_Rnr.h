@@ -9,7 +9,6 @@
 
 #include <Glasses/ZRlNodeMarkup.h>
 #include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
-#include <GledView/GLTextNS.h>
 
 class ZRlNodeMarkup_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:

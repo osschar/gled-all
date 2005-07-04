@@ -9,7 +9,7 @@
 
 #include <Glasses/ZRlFont.h>
 #include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/GLTextNS.h>
 
 class ZRlFont_GL_Rnr : public ZRnrModBase_GL_Rnr {
 private:
