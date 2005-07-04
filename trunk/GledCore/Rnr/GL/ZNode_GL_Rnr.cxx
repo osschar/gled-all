@@ -7,7 +7,7 @@
 #include "ZNode_GL_Rnr.h"
 #include <Glasses/ZRlNodeMarkup.h>
 #include <Rnr/GL/GLRnrDriver.h>
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
 #include <GL/gl.h>
@@ -148,6 +148,8 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   if(rd->GL()->GetMarkupNodes() == true) {
+    GL_Capability_Switch light_off(GL_LIGHTING, 0);
+
     RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNodeMarkup);
     if(nrc_lens->GetRnrNames() && bSuppressNameLabel == false &&
        mNode->mName != "")
@@ -156,11 +158,20 @@ void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
 	GLTextNS::RnrTextBar(rd, name);
       }
     if(nrc_lens->GetRnrAxes()) {
+      Float_t w = nrc_lens->GetAxeWidth(), wold,
+	      l = nrc_lens->GetAxeLength();
+      if(w != 0) {
+	glGetFloatv(GL_LINE_WIDTH, &wold);
+	glLineWidth(w);
+      }
       glBegin(GL_LINES);
-      glColor3f(1,0,0); glVertex3f(0,0,0); glVertex3f(1,0,0);
-      glColor3f(0,1,0); glVertex3f(0,0,0); glVertex3f(0,1,0);
-      glColor3f(0,0,1); glVertex3f(0,0,0); glVertex3f(0,0,1);
+      glColor3f(1,0,0); glVertex3f(0,0,0); glVertex3f(l,0,0);
+      glColor3f(0,1,0); glVertex3f(0,0,0); glVertex3f(0,l,0);
+      glColor3f(0,0,1); glVertex3f(0,0,0); glVertex3f(0,0,l);
       glEnd();
+      if(w != 0) {
+	glLineWidth(wold);
+      }
     }
   }
 
