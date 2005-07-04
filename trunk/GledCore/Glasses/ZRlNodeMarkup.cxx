@@ -19,7 +19,11 @@ ClassImp(ZRlNodeMarkup)
 void ZRlNodeMarkup::_init()
 {
   mNodeMarkupOp  = O_On;
-  bRnrAxes    = false; bRnrNames  = true;
+
+  bRnrAxes    = false;
+  mAxeWidth   = 0;  mAxeLength = 1.2;
+
+  bRnrNames   = true;
   bRnrTiles   = true;  bRnrFrames = true;
   mNameOffset = 0.99;
   mTextCol.rgba(1, 1, 1);
