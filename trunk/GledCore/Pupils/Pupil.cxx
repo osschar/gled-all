@@ -12,7 +12,7 @@
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
 #include <Gled/GledNS.h>
-#include <GledView/GLTextNS.h>
+#include <Rnr/GL/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
 #include <Rnr/GL/GLRnrDriver.h>
@@ -585,7 +585,7 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
   Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
 
   if (n > 0) {
-    float   min_z = 1;
+    float   min_z = 1e10;
     GLuint* min_p = 0;
 
     GLuint* x = mPickBuff;
@@ -598,6 +598,7 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
       }
       x += 3 + *x;
     }
+    if(min_p == 0) return 0;
 
     x = min_p;
     int m = *x; x += 3;
