@@ -196,6 +196,8 @@ void ZGlass::warn_caller(const string& warning)
     auto_ptr<ZMIR> wrn( mir->Caller->S_Warning(warning.c_str()) );
     wrn->SetRecipient(mir->Caller->HostingSaturn());
     mSaturn->ShootMIR(wrn);
+  } else {
+    ISwarn(warning);
   }
 }
 
