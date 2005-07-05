@@ -36,21 +36,31 @@ void RecTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 }
 
 /**************************************************************************/
+
+namespace {
+  inline double dphi_deg(const double p1, const double p2) {
+    double r = p1 - p2;
+    if(r > 180)     r -= 360;
+    else if(r < -180) r += 360;
+    return r;
+  }
+}
+
 void RecTrack_GL_Rnr::Render(RnrDriver* rd)
 {
-  // RNRDRIVER_GET_RNRMOD(srm, rd, RecTrackRS);
-  RecTrackRS* rst_lens  = (RecTrackRS*) mTrackRMS.lens();
   ESDParticle* p = mRecTrack->mESD;
+  if(p == 0) return;
+
+  RecTrackRS* rst_lens  = (RecTrackRS*) mTrackRMS.lens();
+
   Float_t vx = p->fV[0], vy = p->fV[1], vz = p->fV[2];
   Float_t px = p->fP[0], py = p->fP[1], pz = p->fP[2];
 
   if (p->P() < rst_lens->mMinP) return;
-  if(TMath::RadToDeg()*p->Theta() < (rst_lens->mTheta - rst_lens->mThetaOff) || 
-     TMath::RadToDeg()*p->Theta() > (rst_lens->mTheta + rst_lens->mThetaOff)  )
-    return;
-  if(TMath::RadToDeg()*p->Phi() < (rst_lens->mPhi - rst_lens->mPhiOff) || 
-     TMath::RadToDeg()*p->Phi() > (rst_lens->mPhi + rst_lens->mPhiOff)  )
-    return;
+  if(TMath::Abs(TMath::RadToDeg()*p->Theta() - rst_lens->mTheta) >
+     rst_lens->mThetaOff)       return;
+  if(TMath::Abs(dphi_deg(TMath::RadToDeg()*p->Phi(), rst_lens->mPhi)) >
+     rst_lens->mPhiOff)         return;
 
   // check boundaries
   if(TMath::Abs(vz)>rst_lens->mMaxZ || (vx*vx + vy*vy) > (rst_lens->mMaxR)*(rst_lens->mMaxR)) return;
