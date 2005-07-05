@@ -28,7 +28,7 @@ TPCSegment_GL_Rnr::~TPCSegment_GL_Rnr()
 void TPCSegment_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mSegRMS);
-  rst_lens = (TPCSegRnrMod*) mSegRMS.fRnrMod->fLens;
+  mSRM = (TPCSegRnrMod*) mSegRMS.fRnrMod->fLens;
   ZNode_GL_Rnr::Draw(rd);
 }
 
@@ -41,7 +41,7 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
   Int_t s,row,ent,off;
 
   if(mTPCSegment->mDigInfo == 0 ) {
-    if (rst_lens->bRnrFrame) display_frame(info);
+    if (mSRM->bRnrFrame) display_frame(info);
     return;
   }
   // init mImage table
@@ -89,7 +89,7 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
     }
   }
   // rnr digits
-  if( rst_lens->bUseTexture){
+  if( mSRM->bUseTexture){
     init_texture(); 
    
     display_texture(info->mInnSeg.pad_width, info->mInnSeg.pad_length, info->mInnSeg.Rlow,
@@ -109,7 +109,7 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
     display_quads(info->mOut2Seg.pad_width, info->mOut2Seg.pad_length, info->mOut2Seg.Rlow,
 		  info->mOut2Seg.nMaxPads, info->mOut2Seg.nRows,0,info->mOut1Seg.nRows);
   }
-  if(rst_lens->bRnrFrame) display_frame(info);
+  if(mSRM->bRnrFrame) display_frame(info);
 }
 
 /**************************************************************************/
@@ -122,9 +122,9 @@ void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off)
   Int_t    time, pad, val;   
   GLubyte* img_pos;
 
-  Int_t  min_time = rst_lens->mTime - rst_lens->mTimeWidth/2,
-         max_time = rst_lens->mTime + rst_lens->mTimeWidth/2;
-  Bool_t half_border_time = (rst_lens->mTimeWidth % 2 == 0);
+  Int_t  min_time = mSRM->mTime - mSRM->mTimeWidth/2,
+         max_time = mSRM->mTime + mSRM->mTimeWidth/2;
+  Bool_t half_border_time = (mSRM->mTimeWidth % 2 == 0);
 
   Bool_t done_p = false;
   Bool_t save_p = false;
@@ -135,7 +135,7 @@ void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off)
     pad  = digit->CurrentColumn();
     val  = digit->CurrentDigit();
 
-    if(rst_lens->bShowMax) {
+    if(mSRM->bShowMax) {
       if(val > pad_var) {
 	pad_var = val;
       }
@@ -158,8 +158,8 @@ void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off)
     }
 
     if(save_p) {
-      pad_var = TMath::Min(pad_var, rst_lens->mMaxVal);
-      if(pad_var > rst_lens->mTreshold) {
+      pad_var = TMath::Min(pad_var, mSRM->mMaxVal);
+      if(pad_var > mSRM->mTreshold) {
 	img_pos = get_row_col(row + row_off, pad + col_off);
 	SetCol(pad_var, img_pos);
       }
@@ -174,15 +174,15 @@ void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off)
 void TPCSegment_GL_Rnr::SetCol(Float_t z, GLubyte* pixel)
 {
   //  printf("set color row pad:  %d,  %d \n",row, cpad);
-  Float_t c = (z - rst_lens->mTreshold) * rst_lens->mColSep /
-    (rst_lens->mMaxVal - rst_lens->mTreshold);
+  Float_t c = (z - mSRM->mTreshold) * mSRM->mColSep /
+    (mSRM->mMaxVal - mSRM->mTreshold);
   c -= (int)c;
   
   ZColor col;
-  if(rst_lens->mRibbon) {
-    col =  rst_lens->mRibbon->MarkToCol(c);
+  if(mSRM->mRibbon) {
+    col =  mSRM->mRibbon->MarkToCol(c);
   } else {
-    col = (1-c)*rst_lens->mMinCol + c*rst_lens->mMaxCol;
+    col = (1-c)*mSRM->mMinCol + c*mSRM->mMaxCol;
   }
   col.to_ubyte(pixel);
 }
@@ -226,7 +226,7 @@ void TPCSegment_GL_Rnr::display_texture (Float_t pw, Float_t pl, Float_t vR,
   Float_t u2 = u1 + 1.0 *nMaxPads/ImageWidth;
   // printf("tex coord u1,v1: (%f, %f), v2,u2: (%f,%f) \n", v1, u1, v2, u2);
   // printf("vertex coord >>> nPads %d pw %f, w: %f, y1: %f, y2: %f \n",nMaxPads,pw, w, vR, vR+nRows*pl);
-  glColor4f(1.,1.,1.,rst_lens->mAlpha); 
+  glColor4f(1.,1.,1.,mSRM->mAlpha); 
   glBegin (GL_QUADS);
 
   glTexCoord2f(u1, v1);     glVertex3f (-w,vR, 0.0);
@@ -283,8 +283,9 @@ void TPCSegment_GL_Rnr::display_quads (Float_t pw, Float_t pl, Float_t vR,
 
 void TPCSegment_GL_Rnr::display_frame(TPCDigitsInfo* info)
 {
-  AliTPCParam* par = info->mParameter;
-  glColor4fv(rst_lens->mFrameCol());
+  // AliTPCParam* par = info->mParameter;
+
+  glColor4fv(mSRM->mFrameCol());
   TPCSeg* seg;
 
   seg = &info->mInnSeg;

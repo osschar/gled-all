@@ -37,8 +37,8 @@ class TPCSegment_GL_Rnr : public ZNode_GL_Rnr
   TPCSegment*	       mTPCSegment;
   GLubyte*             mImage;
   GLuint               mTexture;
-  TPCSegRnrMod*	       rst_lens;
 
+  TPCSegRnrMod*	       mSRM;
   RnrModStore	       mSegRMS;
  
  public:

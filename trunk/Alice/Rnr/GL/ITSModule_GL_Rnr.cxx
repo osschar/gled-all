@@ -13,15 +13,14 @@
 /**************************************************************************/
 
 void ITSModule_GL_Rnr::_init()
-{
-}
+{}
 
 /**************************************************************************/
 
 void ITSModule_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mSegRMS);
-  rst_lens = (ITSDigRnrMod*) mSegRMS.fRnrMod->fLens;
+  mDRM = (ITSDigRnrMod*) mSegRMS.fRnrMod->fLens;
   ZNode_GL_Rnr::Draw(rd);
 }
 
@@ -73,11 +72,11 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
     glBegin (GL_QUADS);
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSDD*)digits->UncheckedAt(k);
-      if(d->GetSignal() > rst_lens->mSDDTreshold){
+      if(d->GetSignal() > mDRM->mSDDTreshold){
 	j = d->GetCoord1();
 	i = d->GetCoord2();
 	above_treshold = true;
-	MkCol(d->GetSignal(), rst_lens->mSDDTreshold, rst_lens->mSDDMaxVal);
+	MkCol(d->GetSignal(), mDRM->mSDDTreshold, mDRM->mSDDMaxVal);
 	seg->DetToLocal(i,j,x,z);
 
 	dpx = seg->Dpx(i)*0.0001;
@@ -99,7 +98,7 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
     glBegin (GL_LINES);
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSSD*)digits->UncheckedAt(k);
-      if(d->GetSignal() > rst_lens->mSSDTreshold){
+      if(d->GetSignal() > mDRM->mSSDTreshold){
 	above_treshold = true;
 	j = d->GetCoord1();
 	i = d->GetCoord2();
@@ -110,11 +109,11 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
 	Float_t ap,an,a;
 	seg->Angles(ap,an);
 	if( d->GetCoord1() == 1) {
-	  MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
+	  MkCol(d->GetSignal(), mDRM->mSSDTreshold, mDRM->mSSDMaxVal);
 	  a = ap;
 	}
 	else {
-	  MkCol(d->GetSignal(), rst_lens->mSSDTreshold, rst_lens->mSSDMaxVal);
+	  MkCol(d->GetSignal(), mDRM->mSSDTreshold, mDRM->mSSDMaxVal);
 	  a = -an;
 	}
      
@@ -130,9 +129,9 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
   //frame
   x = mITSModule->mDx;
   z = mITSModule->mDz;
-  if(rst_lens->bRnrFrame && above_treshold){
+  if(mDRM->bRnrFrame && above_treshold){
     glBegin (GL_QUADS);
-    glColor4fv(rst_lens->mFrameCol());
+    glColor4fv(mDRM->mFrameCol());
     glVertex3f( x, 0,  z);
     glVertex3f(-x, 0,  z);
     glVertex3f(-x, 0, -z);
