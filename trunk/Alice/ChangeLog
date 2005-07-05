@@ -1,3 +1,33 @@
+2005-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Handling of event-id (for pp file format); maximized work
+	performed by CreateVSD() (not exiting in case when, say, kinematics
+	or hits do not exist).
+
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+	* Glasses/TPCSegment.cxx:
+	* Glasses/TPCSegment.h:
+	Added Inc/DecRefCount calls for DigitsInfo stones.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added methods check_itsdig_info() and check_tpcdig_info().
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+	Now subclassed from GledCore::ZRCStone.
+
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+	Varname consolidation.
+
 2005-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/MCTrack.h:
