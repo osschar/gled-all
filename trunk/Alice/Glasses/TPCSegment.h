@@ -23,21 +23,16 @@ class TPCSegment : public ZNode
   void _init();
 
  protected:
-  TPCDigitsInfo*             mDigInfo;     // X{GS}  
-  Int_t                      mSegment;     // X{gE}   7 Value(-range=>[0,36,1])
+  TPCDigitsInfo*      mDigInfo; // X{gE}  
+  Int_t               mSegment; // X{gE}   7 Value(-range=>[0,36,1])
 
  public:
-  TPCSegment(const Text_t* n="TPCSegment", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
+  TPCSegment(const Text_t* n="TPCSegment", const Text_t* t=0) : ZNode(n,t)
+  { _init(); }
+  virtual ~TPCSegment();
 
-  // Manual Get/Set-methods
-  void SetSegment(Int_t segment) {
-    if(segment < 0 ) segment = 0;
-    if(segment > 36) segment = 36;
-    mSegment = segment;
-    SetName(GForm("TPCSegment %d", mSegment));
-    mStampReqTring = Stamp(FID());
-  }
+  void SetDigInfo(TPCDigitsInfo* diginfo);
+  void SetSegment(Int_t segment);
 
 #include "TPCSegment.h7"
   ClassDef(TPCSegment, 1)

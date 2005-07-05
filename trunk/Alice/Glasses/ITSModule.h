@@ -16,36 +16,36 @@ class ITSModule : public ZNode {
 
  private:
   void _init();
-  void init_module();
 
  protected:
+  void init_module();
   void set_trans();
-  ITSDigitsInfo*           mInfo;
 
-  Bool_t      bSetTrans;// X{GS}  7 Bool()
-  Int_t       mID;      // X{g}   7 Value(-range=>[0,2200,1], -join=>1)
-  Int_t       mDetID;   // X{G}   7 ValOut()
+  ITSDigitsInfo* mInfo;
 
-  Int_t       mLayer;   // X{gS}  7 ValOut(-range=>[0,6,1], -join=>1)
-  Int_t       mLadder;  // X{gS}  7 ValOut(-range=>[0,100,1], -join=>1)
-  Int_t       mDet;     // X{gS}  7 ValOut(-range=>[0,100,1])
+  Bool_t      bSetTrans; // X{GS}  7 Bool()
+  Int_t       mID;       // X{g}   7 Value(-range=>[0,2200,1], -join=>1)
+  Int_t       mDetID;    // X{G}   7 ValOut()
+
+  Int_t       mLayer;    // X{gS}  7 ValOut(-range=>[0,6,1], -join=>1)
+  Int_t       mLadder;   // X{gS}  7 ValOut(-range=>[0,100,1], -join=>1)
+  Int_t       mDet;      // X{gS}  7 ValOut(-range=>[0,100,1])
   
-  Float_t     mDx;         // X{G}  7 ValOut(-join=>1)
-  Float_t     mDz;         // X{G}  7 ValOut(-join=>1)
-  Float_t     mDy;         // X{G}  7 ValOut()
+  Float_t     mDx;       // X{G}  7 ValOut(-join=>1)
+  Float_t     mDz;       // X{G}  7 ValOut(-join=>1)
+  Float_t     mDy;       // X{G}  7 ValOut()
 
  public:
-  ITSModule(const Text_t* n="ITSModule", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
-
+  ITSModule(const Text_t* n="ITSModule", const Text_t* t=0) : ZNode(n,t)
+  { _init(); }
   ITSModule(Int_t id, ITSDigitsInfo* info);
-  
+  virtual ~ITSModule();
 
   virtual void SetID(Int_t id); // X{E}
 
 #include "ITSModule.h7"
   ClassDef(ITSModule, 1)
-    }; // endclass ITSModule
+}; // endclass ITSModule
 
 GlassIODef(ITSModule);
 
