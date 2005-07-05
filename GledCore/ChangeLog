@@ -1,3 +1,12 @@
+2005-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	warn_caller(): added call to ISwarn as a fallback.
+
+	* Stones/ZRCStone.cxx:
+	* Stones/ZRCStone.h:
+	New file: RefCounted Stone.
+
 2005-07-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZRlNodeMarkup.cxx:
