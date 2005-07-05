@@ -125,8 +125,8 @@ void ZAliLoad::CreateVSD()
     SetConverter(c);
   }
   mConverter->SetKineType(mKineType);
-  ///printf("Write Converter in VSD file %s , data dir %s\n",mVSDFile.Data(),mDataDir.Data() );
-  mConverter->CreateVSD(mDataDir, mVSDFile);
+  // printf("Write Converter in VSD file %s , data dir %s\n",mVSDFile.Data(),mDataDir.Data() );
+  mConverter->CreateVSD(mDataDir, mEvent, mVSDFile);
 }
 
 void ZAliLoad::LoadVSD()
@@ -174,14 +174,28 @@ void ZAliLoad::ClearData()
 // DIGITS
 /**************************************************************************/
 
+void ZAliLoad::check_tpcdig_info()
+{
+  if (mTPCDigInfo != 0 &&
+      (mTPCDigInfo->GetDataDir() != mDataDir || 
+       mTPCDigInfo->GetEvent()   != mEvent))
+    { 
+      mTPCDigInfo->DecRefCount();
+      mTPCDigInfo = 0;
+    }
+  if (mTPCDigInfo == 0)
+    {
+      mTPCDigInfo = new TPCDigitsInfo();
+      mTPCDigInfo->IncRefCount();
+      mTPCDigInfo->SetData(mDataDir, mEvent);
+    }
+}
+
 TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
 {
   static const string _eh("ZAliLoad::ShowTPCSegment ");
 
-  if (mTPCDigInfo == 0 || (mTPCDigInfo->GetDataDir() != mDataDir)) {
-    mTPCDigInfo = new TPCDigitsInfo();
-    mTPCDigInfo->SetData(mDataDir);
-  }
+  check_tpcdig_info();
 
   TPCSegment* tpc = new TPCSegment();
   tpc->SetSegment(segment_id);
@@ -228,14 +242,28 @@ void ZAliLoad::ShowTPCPlate(Int_t side)
 
 /**************************************************************************/
 
+void ZAliLoad::check_itsdig_info()
+{
+  if (mITSDigInfo != 0 &&
+      (mITSDigInfo->GetDataDir() != mDataDir || 
+       mITSDigInfo->GetEvent()   != mEvent))
+    { 
+      mITSDigInfo->DecRefCount();
+      mITSDigInfo = 0;
+    }
+  if (mITSDigInfo == 0)
+    {
+      mITSDigInfo = new ITSDigitsInfo();
+      mITSDigInfo->IncRefCount();
+      mITSDigInfo->SetData(mDataDir, mEvent);
+    }
+}
+
 void ZAliLoad::ShowITSModule(Int_t id, ZNode* holder)
 {
   static const string _eh("ZAliLoad::ShowITSModule ");
 
-  if (mITSDigInfo == 0 || (mITSDigInfo->GetDataDir() != mDataDir)) {
-    mITSDigInfo = new ITSDigitsInfo();
-    mITSDigInfo->SetData(mDataDir);
-  }
+  check_itsdig_info();
 
   ITSModule* m = new ITSModule(id, mITSDigInfo);
   mQueen->CheckIn(m);
@@ -246,19 +274,16 @@ void ZAliLoad::ShowITSModule(Int_t id, ZNode* holder)
  
 void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
 {
-  OpMutexHolder omh(this, "ShowITSDet()");
+  OpMutexHolder omh(this, "ShowITSDet");
 
-  if (mITSDigInfo == 0 || (mITSDigInfo->GetDataDir() != mDataDir)) {
-    mITSDigInfo = new ITSDigitsInfo();
-    mITSDigInfo->SetData(mDataDir);
-  }
+  check_itsdig_info();
  
   Int_t layer, lad, det;
   ZNode *dh, *hl1, *hl2, *th;
   Int_t first, last;
   TClonesArray* arr;
  
-  if(id == -1 || id == 0){
+  if(id == -1 || id == 0) {
     dh = new ZNode(GForm("%s SPD", mDataDir.Data()));
     mQueen->CheckIn(dh); Add(dh);
     hl1 = new ZNode("Layer 1"); hl2 = new ZNode("Layer 2");
@@ -276,7 +301,7 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
     }
   }
  
-  if(id == -1 || id == 1){
+  if(id == -1 || id == 1) {
     dh = new ZNode(GForm("%s SDD", mDataDir.Data()));
     mQueen->CheckIn(dh); Add(dh);
     hl1 = new ZNode("Layer 3"); hl2 = new ZNode("Layer 4");
@@ -294,7 +319,7 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
     }
   }
  
-  if(id == -1 || id == 2){
+  if(id == -1 || id == 2) {
     dh = new ZNode(GForm("%s SSD", mDataDir.Data()));
     mQueen->CheckIn(dh); Add(dh);
     hl1 = new ZNode("Layer 5"); hl2 = new ZNode("Layer 6");

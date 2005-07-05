@@ -81,19 +81,23 @@ class ZAliLoad : public ZNode {
 
   // --------------------------------------------------------------
   // Digits. 
-  
-  TPCDigitsInfo*                 mTPCDigInfo; // X{g}
+ protected:
+  void check_tpcdig_info();
+  TPCDigitsInfo* mTPCDigInfo; // X{g}
+ public:
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  
   void        ShowTPCPlate(Int_t side = -1);   // X{Ed} 7 MCWButt()
 
-  ITSDigitsInfo*                 mITSDigInfo; // X{g}
+ protected:
+  void check_itsdig_info();
+  ITSDigitsInfo* mITSDigInfo; // X{g}
+ public:
   void        ShowITSModule(Int_t module, ZNode* holder=0);
   void        ShowITSDet(Int_t subdet = -1, Bool_t show_empty = false);// X{Ed} 7 MCWButt()
 
-
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
-    }; // endclass ZAliLoad
+}; // endclass ZAliLoad
 
 GlassIODef(ZAliLoad);
 
