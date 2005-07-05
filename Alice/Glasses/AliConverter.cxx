@@ -79,11 +79,15 @@ void AliConverter::_init()
 }
 
 /**************************************************************************/
-void AliConverter::CreateVSD(const Text_t* data_dir, const Text_t* vsd_file)
+
+void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
+			     const Text_t* vsd_file)
 {
   static const string _eh("AliConverter::CreateVSD ");
 
   mDataDir = data_dir;
+  mEvent   = event;
+
   string galice_file (GForm("%s/galice.root", mDataDir.Data()));
  
   // printf("Acces file to open runloader %s \n", mDataDir.Data());
@@ -96,39 +100,51 @@ void AliConverter::CreateVSD(const Text_t* data_dir, const Text_t* vsd_file)
     throw(_eh + "AliRunLoader::Open failed.");
 
   pRunLoader->LoadgAlice();
+  Int_t status = pRunLoader->GetEvent(mEvent);
+  if(status)
+    throw(_eh + GForm("GetEvent(%d) failed, exit code %s.", mEvent, status));
+
   pRunLoader->LoadHeader();
   pRunLoader->LoadKinematics();
-  pRunLoader->LoadHits();
   pRunLoader->LoadTrackRefs();
+  pRunLoader->LoadHits();
 
   GledNS::PushFD();
-
-  pRunLoader->CdGAFile();
-
-  GledNS::PopFD();
 
   mFile = TFile::Open(vsd_file, "RECREATE", "ALICE VisualizationDataSummary");
   mDirectory = new TDirectory("Event0", "");
   mDirectory->cd();
-  GledNS::PushFD(); 
 
   try {
     ConvertKinematics();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
     ConvertHits();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
     ConvertClusters();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
     ConvertRecTracks();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
     ConvertV0();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
     ConvertGenInfo();
-  }
-  catch(string exc) {
-    warn_caller(_eh + "conversion non-complete: '" + exc + "'.");
-  }
+  } catch(string exc) { warn_caller(exc); }
  
   mFile->Write();  
-  GledNS::PopFD();
-  //mFile->Close();
+  mFile->Close();
   delete mFile; 
   mFile=0, mDirectory =0;
+
+  GledNS::PopFD();
 
   // clean after the VSD data was sucessfuly 
   // written
@@ -142,8 +158,8 @@ void AliConverter::CreateVSD(const Text_t* data_dir, const Text_t* vsd_file)
 
   pRunLoader->UnloadAll();
   delete pRunLoader;
-  if(gAlice){
-    delete gAlice; gAlice = 0; //!!!! dont know what it is used for
+  if(gAlice) {
+    delete gAlice; gAlice = 0;
   }
   pRunLoader = 0;
 }
@@ -159,13 +175,17 @@ void AliConverter::ConvertKinematics()
   if(mTreeK != 0) 
     throw (_eh + "kinematics already converted");
 
-  mDirectory->cd();
-  mTreeK = new TTree("Kinematics", "Sorted TParticles as in Alistack");
- 
   TTree* treek = pRunLoader->TreeK();
+  if(treek == 0) {
+    warn_caller(_eh + "no kinematics.");
+    return;
+  }
   TParticle tp, *_tp = &tp;
   treek->SetBranchAddress("Particles", &_tp);
 
+  mDirectory->cd();
+  mTreeK = new TTree("Kinematics", "TParticles sorted by Label");
+ 
   Text_t* prim_selection = 0;
   switch(mKineType) {
   case KT_Standard:     prim_selection = "fMother[0] == -1"; break;
@@ -183,7 +203,6 @@ void AliConverter::ConvertKinematics()
       idx - nprimary;
 
     treek->GetEntry(ent);
-    //printf("Convert Kinematics %s \n",tp.GetName());
     vmc[idx] = tp;
     vmc[idx].SetLabel(idx);
   }
@@ -216,13 +235,14 @@ void AliConverter::ConvertKinematics()
   }
 
   mTreeK->Branch("P", "MCParticle",  &mpP, 512*1024, 99);
+  int i= 0;
   for(vector<MCParticle>::iterator k=vmc.begin(); k!=vmc.end(); ++k) {
     MCParticle& mcp = *k;
     mP= mcp;
 
     TParticle* m  = &mcp;
     Int_t      mi = mcp.GetLabel();
-    while( m->GetMother(0) != -1){
+    while(m->GetMother(0) != -1) {
       mi = m->GetMother(0);
       m = &vmc[mi];
     }
@@ -282,6 +302,10 @@ void AliConverter::ConvertHits()
     case 1: { 
       Int_t count = 0;
       TTree* treeh = pRunLoader->GetTreeH(det.name, false);
+      if(treeh == 0) {
+	warn_caller(_eh + "no hits for "+ det.name +".");
+	continue;
+      }
       AliTPCTrackHitsV2 hv2, *_hv2=&hv2; 
       Float_t x=0,y=0,z=0, x1,y1,z1;
       treeh->SetBranchAddress("TPC2", &_hv2);
@@ -313,6 +337,10 @@ void AliConverter::ConvertHits()
     }
     default: {
       TTree* treeh = pRunLoader->GetTreeH(det.name, false);
+      if(treeh == 0) {
+	warn_caller(_eh + "no hits for "+ det.name +".");
+	continue;
+      }
       TClonesArray *arr = new TClonesArray(det.hitbranch);
       treeh->SetBranchAddress(det.name, &arr);
       Int_t np = treeh->GetEntries();
@@ -363,8 +391,13 @@ void AliConverter::ConvertClusters()
   mTreeC =  new TTree("Clusters", "rec clusters");
   mTreeC->Branch("C", "Hit", &mpC, 128*1024, 1);
 
-  ConvertITSClusters();
-  ConvertTPCClusters();
+  try {
+    ConvertITSClusters();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
+    ConvertTPCClusters();
+  } catch(string exc) { warn_caller(exc); }
 }
 
 /**************************************************************************/
@@ -379,7 +412,7 @@ void AliConverter::ConvertTPCClusters()
     throw(_eh + "can not open 'TPC.RecPoints.root' file.");
     
   auto_ptr<TDirectory> d
-    ( (TDirectory*) f->Get(GForm("Event%d",0)) );
+    ( (TDirectory*) f->Get(GForm("Event%d", mEvent)) );
   if(!d.get())
     throw(_eh + GForm("event directory '%d' not found.", 0));
 
@@ -453,7 +486,7 @@ void AliConverter::ConvertITSClusters()
     throw(_eh + "can not open 'ITS.RecPoints.root' file.");
     
   auto_ptr<TDirectory> d
-    ( (TDirectory*) f->Get(GForm("Event%d",0)) );
+    ( (TDirectory*) f->Get(GForm("Event%d", mEvent)) );
   if(!d.get())
     throw(_eh + GForm("event directory '%d' not found.", 0));
 
@@ -520,6 +553,7 @@ void AliConverter::ConvertITSClusters()
 /**************************************************************************/
 // ESD
 /**************************************************************************/
+
 void AliConverter::ConvertRecTracks()
 {
   static const string _eh("AliConverter::ConvertRecTracks ");
@@ -547,16 +581,16 @@ void AliConverter::ConvertRecTracks()
  
   AliESD *fEvent=0;  
   tree->SetBranchAddress("ESD", &fEvent);
-  tree->GetEntry(0); 
+  tree->GetEntry(mEvent); 
 
  
   // reconstructed tracks
   AliESDtrack* esd_t;
-  for (Int_t n =0; n< fEvent->GetNumberOfTracks();n++){
+  for (Int_t n =0; n< fEvent->GetNumberOfTracks();n++) {
     esd_t = fEvent->GetTrack(n);
     esd_t->GetXYZ(mpR->fV);
     esd_t->GetPxPyPz(mpR->fP);
-    mpR->fSign = esd_t->GetSign();
+    mpR->fSign  = esd_t->GetSign();
     mpR->fLabel = esd_t->GetLabel();
     mTreeR->Fill();
   }
@@ -564,6 +598,7 @@ void AliConverter::ConvertRecTracks()
 }
 
 /**************************************************************************/
+
 void AliConverter::ConvertV0()
 {
   static const string _eh("AliConverter::LoadV0 ");
@@ -588,7 +623,7 @@ void AliConverter::ConvertV0()
 
   AliESD *fEvent=0;  
   tree->SetBranchAddress("ESD", &fEvent);
-  tree->GetEntry(0); 
+  tree->GetEntry(mEvent); 
 
   for (Int_t n =0; n< fEvent->GetNumberOfV0MIs(); n++) {
     AliESDV0MI* av = fEvent->GetV0MI(n);
@@ -660,7 +695,7 @@ void AliConverter::ConvertGenInfo()
     mTreeK->GetEntry(j->first);
 
     Int_t re = mTreeR->GetEntryNumberWithIndex(j->first);
-    if(re != -1){
+    if(re != -1) {
       mGI.bR = 1;
       mTreeR->GetEntry(re);
       // printf(">>> %d track with label %d", re, j->first);

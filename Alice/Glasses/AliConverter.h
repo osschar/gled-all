@@ -25,7 +25,8 @@
 #include <AliRun.h>
 #include <AliTPCParam.h>
 
-class AliConverter : public ZGlass {
+class AliConverter : public ZGlass
+{
   MAC_RNR_FRIENDS(AliConverter);
  
  public:
@@ -33,12 +34,15 @@ class AliConverter : public ZGlass {
 
  private:
   void _init();
+
+ protected:
   void                           make_its_digits_info();
   GenInfo*                       get_geninfo(Int_t label);
   AliTPCParam*                   get_tpc_param(const string& eh);
 
   KineType_e                     mKineType;  // X{GS} 7 PhonyEnum()
   TString                        mDataDir;   // X{G}
+  Int_t                          mEvent;     // X{G}
 
   TTree*                         mTreeK;       //! X{g}
   TTree*                         mTreeH;       //! X{g}
@@ -55,7 +59,6 @@ class AliConverter : public ZGlass {
   V0                             mV0, *mpV0;   //! needed for selection in mTreeV0  
   GenInfo                        mGI, *mpGI;   //! needed for selection in mTreeGI      
 
- protected:
   TFile*                         mFile;      // X{gs} 
   TDirectory*                    mDirectory; // X{gs}
 
@@ -64,7 +67,8 @@ class AliConverter : public ZGlass {
     ZGlass(n,t) { _init();}
   // virtual ~AliConverter(){ delete mVSDFile; }
 
-  void CreateVSD(const Text_t* data_dir, const Text_t* vsd_file);  // X{Ed} 
+  void CreateVSD(const Text_t* data_dir, Int_t event,
+		 const Text_t* vsd_file);  // X{Ed} 
 
   // --------------------------------------------------------------
   // Conversion functions.
@@ -85,7 +89,7 @@ class AliConverter : public ZGlass {
 
 #include "AliConverter.h7"
   ClassDef(AliConverter, 1)
-    }; // endclass AliConverter
+}; // endclass AliConverter
 
 GlassIODef(AliConverter);
 
