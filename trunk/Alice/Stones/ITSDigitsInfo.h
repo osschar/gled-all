@@ -9,7 +9,7 @@
 
 #include <map>
 
-#include <TObject.h>
+#include <Stones/ZRCStone.h>
 #include <TClonesArray.h>
 
 #include <AliITS.h>
@@ -18,14 +18,16 @@
 #include <AliITSsegmentationSDD.h>
 #include <AliITSsegmentationSSD.h>
 
-class ITSDigitsInfo : public TObject {
-
+class ITSDigitsInfo : public ZRCStone
+{
  private:
   void _init();
   Float_t mSPDZCoord[192];
 
  protected:
   TString                    mDataDir;  // X{G} 
+  Int_t                      mEvent;    // X{G}
+
   map<Int_t,  TClonesArray*> mSPDmap;   //!
   map<Int_t,  TClonesArray*> mSDDmap;   //!
   map<Int_t,  TClonesArray*> mSSDmap;   //!
@@ -38,15 +40,16 @@ class ITSDigitsInfo : public TObject {
   AliITSsegmentationSDD*   mSegSDD; 
   AliITSsegmentationSSD*   mSegSSD; 
 
-
-  void                     SetData(const Text_t* data_dir);
   ITSDigitsInfo(const Text_t* n="ITSDigitsInfo", const Text_t* t=0) :
-    TObject()
+    ZRCStone()
   {_init(); } 
  
   virtual ~ITSDigitsInfo();
+
+  void SetData(const Text_t* data_dir, Int_t event);
  
-  TClonesArray*            GetDigits(Int_t moduleID, Int_t detector);
+  TClonesArray* GetDigits(Int_t moduleID, Int_t detector);
+
   void    GetSPDLocalZ(Int_t j, Float_t& z);
   void    Dump();
 

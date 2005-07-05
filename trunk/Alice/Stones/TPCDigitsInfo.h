@@ -7,14 +7,14 @@
 #ifndef Alice_TPCDigitsInfo_H
 #define Alice_TPCDigitsInfo_H
 
-#include <vector>
-
-#include <TObject.h>
+#include <Stones/ZRCStone.h>
 #include <TArrayI.h>
 #include <TTree.h>
 
 #include <AliTPCParam.h>
 #include <AliSimDigits.h>
+
+#include <vector>
 
 struct TPCSeg {
   Float_t   pad_width, pad_length,Rlow; // vertices data
@@ -27,17 +27,18 @@ struct TPCSeg {
     printf("TPCSeg>> pw %f, pl %f, R %f, nRows %d, nMaxPads %d \n",
 	   pad_width, pad_length,Rlow,nRows,nMaxPads);
   }
-
-
 };
 
 
-class TPCDigitsInfo : public TObject {
+class TPCDigitsInfo : public ZRCStone
+{
  private:
   void _init();
 
  protected:
-  TString             mDataDir;    // X{G} 
+  TString             mDataDir;  // X{G} 
+  Int_t               mEvent;    // X{G}
+
  public:
   AliSimDigits        mSimDigits;
   AliTPCParam*        mParameter;
@@ -48,10 +49,10 @@ class TPCDigitsInfo : public TObject {
   TPCSeg              mOut2Seg;
 
   TPCDigitsInfo(const Text_t* n="TPCDigitsInfo", const Text_t* t=0) :
-    TObject() { _init(); }
+    ZRCStone() { _init(); }
   virtual ~TPCDigitsInfo();
 
-  void SetData(const Text_t* data_dir);
+  void SetData(const Text_t* data_dir, Int_t event);
 
 #include "TPCDigitsInfo.h7"
   ClassDef(TPCDigitsInfo, 1)

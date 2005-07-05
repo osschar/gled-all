@@ -20,7 +20,7 @@ ClassImp(TPCDigitsInfo)
 
 void TPCDigitsInfo::_init()
 {
-  mDataDir = ".";
+  mDataDir = "."; mEvent = 0;
   mTree = 0;
   mParameter= 0;
 }
@@ -31,11 +31,16 @@ TPCDigitsInfo::~TPCDigitsInfo()
   delete mParameter;
   delete mTree;
 }
+
 /**************************************************************************/
-void TPCDigitsInfo::SetData(const Text_t* data_dir)
+
+void TPCDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
 { 
  
   static const string _eh("TPCDigitsInfo::SetData");
+
+  mDataDir = "";
+  mEvent   = -1;
 
   mDataDir = data_dir;
   TFile* file = TFile::Open(GForm("%s/galice.root", data_dir));
@@ -51,9 +56,14 @@ void TPCDigitsInfo::SetData(const Text_t* data_dir)
   if(!f2)
     throw(_eh + "can not open TPC.Digits.root.");
 
-  TDirectory* d = (TDirectory*)f2->Get("Event0");
+  const Text_t* ev_dir = GForm("Event%d", event);
+  TDirectory* d = (TDirectory*)f2->Get(ev_dir);
+  if(d == 0)
+    throw(_eh + "can not get directory '"+ ev_dir +"'.");
   mTree = (TTree*)d->Get("TreeD");
 
+  mDataDir = data_dir;
+  mEvent   = event;
 
   mSegEnt.assign(72,-1);
   AliTPCParam *par = mParameter;

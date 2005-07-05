@@ -29,6 +29,7 @@ void ITSDigitsInfo::_init()
 }
 
 /**************************************************************************/
+
 ITSDigitsInfo:: ~ITSDigitsInfo() 
 {
   for(map<Int_t, TClonesArray*>::iterator j=mSPDmap.begin(); j!=mSPDmap.end(); ++j) {
@@ -46,27 +47,39 @@ ITSDigitsInfo:: ~ITSDigitsInfo()
 }
 
 /**************************************************************************/
-void ITSDigitsInfo::SetData(const Text_t* data_dir)
+
+void ITSDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
 {
   static const string _eh("ITSDigitsInfo::SetData ");
- 
-  mDataDir = data_dir;
-  mGeom = new AliITSgeom();
-  mGeom->ReadNewFile("ITSgeometry.det");
-  if(mGeom == 0)
-    throw(_eh + GForm("can not load ITS geometry \n"));
-    
-  TFile* f2 = TFile::Open(GForm("%s/ITS.Digits.root", mDataDir.Data()));
+
+  mDataDir = "";
+  mEvent   = -1;
+
+  if(mGeom == 0) {
+    mGeom = new AliITSgeom();
+    mGeom->ReadNewFile("ITSgeometry.det");
+    if(mGeom == 0)
+      throw(_eh + GForm("can not load ITS geometry \n"));
+  }
+
+  TFile* f2 = TFile::Open(GForm("%s/ITS.Digits.root", data_dir));
   if(f2 == 0)
     throw(_eh + "can not open ITS.Digits.root.");
  
-  TDirectory* d = (TDirectory*)f2->Get("Event0");
+  const Text_t* ev_dir = GForm("Event%d", event);
+  TDirectory* d = (TDirectory*)f2->Get(ev_dir);
+  if(d == 0)
+    throw(_eh + "can not get directory '"+ ev_dir +"'.");
   mTree = (TTree*)d->Get("TreeD");
+
+  mDataDir = data_dir;
+  mEvent   = event;
 
   SetITSSegmentation();
 }
 
 /**************************************************************************/
+
 void ITSDigitsInfo::SetITSSegmentation()
 {
   // SPD
@@ -95,7 +108,7 @@ void ITSDigitsInfo::SetITSSegmentation()
   // end of SPD geometry
   
   // SDD
-  AliITSresponseSDD *resp1=new AliITSresponseSDD("simulated");
+  AliITSresponseSDD *resp1 = new AliITSresponseSDD("simulated");
   mSegSDD = new AliITSsegmentationSDD(mGeom, resp1);
 
   // SSD
@@ -108,7 +121,8 @@ void ITSDigitsInfo::GetSPDLocalZ(Int_t j, Float_t& z)
 }
 
 /**************************************************************************/
-TClonesArray*  ITSDigitsInfo::GetDigits(Int_t mod, Int_t subdet)
+
+TClonesArray* ITSDigitsInfo::GetDigits(Int_t mod, Int_t subdet)
 {
   switch(subdet) {
   case 0: {
@@ -155,11 +169,13 @@ TClonesArray*  ITSDigitsInfo::GetDigits(Int_t mod, Int_t subdet)
   }
   default:
     return 0;
-  }//end switch
+  } //end switch
 }
 
 /**************************************************************************/
-void ITSDigitsInfo::Dump() {
+
+void ITSDigitsInfo::Dump()
+{
   printf("*********************************************************\n");
   printf("SPD module dimension (%f,%f) \n",mSegSPD->Dx()*0.0001, mSegSPD->Dz()*0.0001);
   printf("SPD first,last module:: %d,%d \n", mGeom->GetStartSPD(),mGeom->GetLastSPD() );
