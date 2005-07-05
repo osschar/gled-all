@@ -27,20 +27,33 @@ void ITSModule::_init()
 }
 
 /**************************************************************************/
-ITSModule::ITSModule(Int_t id, ITSDigitsInfo* info):ZNode() 
+
+ITSModule::ITSModule(Int_t id, ITSDigitsInfo* info) : ZNode() 
 {
   _init();
   mInfo = info;
+  if(mInfo) mInfo->IncRefCount();
+  
   SetID(id);
 }
 
+ITSModule::~ITSModule()
+{
+  if(mInfo) mInfo->DecRefCount();
+}
+
 /**************************************************************************/
-void ITSModule::SetID(Int_t id) {
+
+void ITSModule::SetID(Int_t id)
+{
   static const string _eh("ITSModule::SetID ");
 
+  if(mInfo == 0)
+    throw(_eh + "ITSDigitsInfo not set.");
+
   if (id < mInfo->mGeom->GetStartSPD() || id > mInfo->mGeom->GetLastSSD())
-    throw(_eh + GForm("%d is not valid. ID range from %d to %d",
-		      id,mInfo->mGeom->GetStartSPD(), mInfo->mGeom->GetLastSSD()));
+    throw(_eh + GForm("%d is not valid. ID range from %d to %d", id,
+		      mInfo->mGeom->GetStartSPD(), mInfo->mGeom->GetLastSSD()));
 
   mID = id;
   init_module();
@@ -77,6 +90,7 @@ void ITSModule::init_module()
 }
 
 /**************************************************************************/
+
 void ITSModule::set_trans()
 {
   Double_t pos[3];
@@ -89,4 +103,4 @@ void ITSModule::set_trans()
   mTrans.SetBaseV(4, pos[0], pos[1], pos[2]);
 }
 
-  /**************************************************************************/
+/**************************************************************************/
