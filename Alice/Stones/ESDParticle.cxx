@@ -17,8 +17,10 @@ ClassImp(ESDParticle)
 
 void ESDParticle::_init()
 {
+  bE = false; 
   fSign = 0;
   fLabel = -1;
+  fStatus = 0;
   //fV = {0};
 }
 
