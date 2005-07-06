@@ -71,12 +71,12 @@ void V0Track_GL_Rnr::Render(RnrDriver* rd)
     glBegin(GL_LINES);
     // from birth to decay 
     glVertex3f(vx, vy, vz);
-    glVertex3f(p->fD[0],p->fD[1],p->fD[2]);
+    glVertex3f(p->fV[0],p->fV[1],p->fV[2]);
     // from decay to minus
-    glVertex3f( p->fD[0],p->fD[1],p->fD[2]);
+    glVertex3f( p->fV[0],p->fV[1],p->fV[2]);
     glVertex3f(mV0Track->mVM[0],  mV0Track->mVM[1], mV0Track->mVM[2]);
     // from decay to plus
-    glVertex3f( p->fD[0],p->fD[1],p->fD[2]);
+    glVertex3f( p->fV[0],p->fV[1],p->fV[2]);
     glVertex3f(mV0Track->mVP[0],  mV0Track->mVP[1], mV0Track->mVP[2]);
     glEnd();	
 
@@ -84,7 +84,7 @@ void V0Track_GL_Rnr::Render(RnrDriver* rd)
     glPointSize(1.4*rst_lens->mVertexSize);
     glBegin(GL_POINTS);
     glColor4f(1.0,1.0, 1.0,1.0);
-    glVertex3f(p->fD[0],p->fD[1],p->fD[2]);
+    glVertex3f(p->fV[0],p->fV[1],p->fV[2]);
     glEnd();
 
   }

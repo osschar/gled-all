@@ -19,7 +19,7 @@ class V0Track : public RecTrack {
 
  public:
   Double_t mVM[3];
-  Float_t mVP[3];
+  Float_t  mVP[3];
   V0Track(const Text_t* n="V0Track", const Text_t* t=0) :
     RecTrack(n,t) { _init(); }
   V0Track(ESDParticle* esd, const Text_t* n="RecTrack", const Text_t* t=0);
