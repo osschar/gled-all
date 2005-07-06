@@ -25,6 +25,7 @@
 #include <AliITS.h>
 #include <AliITSclusterV2.h>
 #include <AliTrackReference.h>
+#include <AliESDkink.h>
 
 map<Int_t, GenInfo*> gimap;
 ClassImp(AliConverter)
@@ -45,12 +46,14 @@ void AliConverter::_init()
   mTreeC  = 0;
   mTreeR  = 0;
   mTreeV0 = 0;
+  mTreeKK = 0;
   mTreeGI = 0;
   mpP  = &mP;
   mpH  = &mH;
   mpC  = &mC;
-  mpR  = &mR;
   mpV0 = &mV0;
+  mpKK = &mKK;
+  mpR  = &mR;
   mpGI = &mGI;
 
   // Pain:
@@ -131,8 +134,13 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
     ConvertRecTracks();
   } catch(string exc) { warn_caller(exc); }
 
+
   try {
     ConvertV0();
+  } catch(string exc) { warn_caller(exc); }
+
+  try {
+    ConvertKinks();
   } catch(string exc) { warn_caller(exc); }
 
   try {
@@ -152,8 +160,9 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   mTreeH      = 0;
   mTreeTR     = 0;
   mTreeC      = 0;
-  mTreeR      = 0;
   mTreeV0     = 0;
+  mTreeKK     = 0;
+  mTreeR      = 0;
   mTreeGI     = 0;
 
   pRunLoader->UnloadAll();
@@ -235,7 +244,7 @@ void AliConverter::ConvertKinematics()
   }
 
   mTreeK->Branch("P", "MCParticle",  &mpP, 512*1024, 99);
-  int i= 0;
+
   for(vector<MCParticle>::iterator k=vmc.begin(); k!=vmc.end(); ++k) {
     MCParticle& mcp = *k;
     mP= mcp;
@@ -601,7 +610,7 @@ void AliConverter::ConvertRecTracks()
 
 void AliConverter::ConvertV0()
 {
-  static const string _eh("AliConverter::LoadV0 ");
+  static const string _eh("AliConverter::ConvertV0 ");
 
   if(mTreeV0 != 0)
     throw(_eh + "V0 already converted.");
@@ -661,15 +670,91 @@ void AliConverter::ConvertV0()
     mV0.fVP[2] = av->GetParamP()->Z();
 
     // daughter indices
-    mV0.fLabels[0] = av->GetLab(0);
-    mV0.fLabels[1] = av->GetLab(1);
+    mV0.fDLabels[0] = av->GetLab(0);
+    mV0.fDLabels[1] = av->GetLab(1);
 
     mV0.fPDG = av->GetPdgCode();
 
+    // printf("V0 convert labels(%d,%d) index(%d,%d)\n", 
+    //	   av->GetLab(0), av->GetLab(1),
+    //	   av->GetIndex(0), av->GetIndex(1));
+
     mTreeV0->Fill();
   }
+  // if(fEvent->GetNumberOfV0MIs()) mTreeV0->BuildIndex("fLabel");
 }
 
+/**************************************************************************/
+void AliConverter::ConvertKinks()
+{
+  static const string _eh("AliConverter::ConvertKinks ");
+
+  if(mTreeKK != 0)
+    throw(_eh + "Kinks already converted.");
+
+  mDirectory->cd();
+  mTreeKK =  new TTree("Kinks", "ESD Kinks");
+
+  ESDParticle::Class()->IgnoreTObjectStreamer(true);
+  mTreeKK->Branch("KK", "Kink", &mpKK, 512*1024,1);
+
+  TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
+  if(!f.IsOpen()){
+    throw(_eh + "no AliESDs.root file\n");
+  }
+
+  TTree* tree = (TTree*) f.Get("esdTree");
+  if (tree == 0) 
+    throw(_eh + "no esdTree\n");
+
+  AliESD *fEvent=0;  
+  tree->SetBranchAddress("ESD", &fEvent);
+  tree->GetEntry(0); 
+
+  //  printf("CONVERT KINK Read %d entries in tree kinks \n",  fEvent->GetNumberOfKinks());
+  for (Int_t n =0; n< fEvent->GetNumberOfKinks(); n++) {
+    AliESDkink* kk = fEvent->GetKink(n);
+    Double_t x,y,cos,sin; 
+
+    mKK.fLabel = kk->fLab[0];
+    mKK.fStatus = Int_t(kk->fStatus);
+    // momentum and position of mother 
+
+    mKK.fP[0]= kk->fParamMother.Px();
+    mKK.fP[1]= kk->fParamMother.Py();
+    mKK.fP[2]= kk->fParamMother.Pz();
+    const Double_t* par =  kk->fParamMother.GetParameter();
+    // printf("KINK Pt %f, %f \n",1/kk->fParamMother.Pt(),par[4] );
+    if(par[4] < 0)  
+      mKK.fSign = -1;
+    else
+      mKK.fSign = 1;
+
+    x = kk->fParamMother.X(); 
+    y = kk->fParamMother.Y(); 
+    cos = TMath::Cos( kk->fParamMother.Alpha());
+    sin = TMath::Sin( kk->fParamMother.Alpha());
+    mKK.fV[0] = x*cos - y*sin;
+    mKK.fV[1] = x*sin + y*cos;
+    mKK.fV[2] = kk->fParamMother.Z();
+   
+    // momentum and position of daughter 
+    mKK.fDP[0]= kk->fParamDaughter.Px();
+    mKK.fDP[1]= kk->fParamDaughter.Py();
+    mKK.fDP[2]= kk->fParamDaughter.Pz();
+
+    x = kk->fParamDaughter.X(); 
+    y = kk->fParamDaughter.Y(); 
+    cos = TMath::Cos(kk->fParamDaughter.Alpha());
+    sin = TMath::Sin( kk->fParamDaughter.Alpha());
+    mKK.fEV[0] = x*cos - y*sin;
+    mKK.fEV[1] = x*sin + y*cos;
+    mKK.fEV[2] = kk->fParamDaughter.Z();
+
+    mTreeKK->Fill();
+  }
+  if(fEvent->GetNumberOfKinks()) mTreeKK->BuildIndex("fLabel");
+}
 /**************************************************************************/
 // GenInfo
 /**************************************************************************/
@@ -683,24 +768,31 @@ void AliConverter::ConvertGenInfo()
 
   mDirectory->cd();
   mTreeGI = new TTree("GenInfo", "Objects prepared for cross querry");
+  printf("conver GEnInfo 1\n ");
 
   GenInfo::Class()->IgnoreTObjectStreamer(true);
   mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
   mTreeGI->Branch("K.", &mpP);
   mTreeGI->Branch("R.", "ESDParticle",   &mpR);
-
+  printf("conver GEnInfo 2\n ");
   for(map<Int_t, GenInfo*>::iterator j=gimap.begin(); j!=gimap.end(); ++j) {
     mGI = *(j->second);
     mGI.fLabel = j->first;
     mTreeK->GetEntry(j->first);
 
-    Int_t re = mTreeR->GetEntryNumberWithIndex(j->first);
-    if(re != -1) {
-      mGI.bR = 1;
-      mTreeR->GetEntry(re);
-      // printf(">>> %d track with label %d", re, j->first);
-      // printf(">>> R %d  Pz %f \n", mpR->fLabel,mpR->Pz() );
-    }    
+    if(mTreeR) {
+      Int_t re = mTreeR->GetEntryNumberWithIndex(j->first);
+      if(re != -1) 
+	mGI.bR = 1;
+    }
+    //    Int_t has_v0 =  mTreeV0->GetEntryNumberWithIndex(j->first);
+    //if (has_v0 != -1)
+    //  mGI.bV0 = 1;
+    if (mTreeKK){
+      Int_t has_kk =  mTreeKK->GetEntryNumberWithIndex(j->first);
+      if (has_kk != -1)
+	mGI.bKK = 1;
+    }
     mTreeGI->Fill();
   }
   gimap.clear();

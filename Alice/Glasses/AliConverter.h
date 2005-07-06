@@ -16,6 +16,7 @@
 #include <Stones/GenInfo.h>
 #include <Stones/Hit.h>
 #include <Stones/MCParticle.h>
+#include <Stones/Kink.h>
 #include <Stones/V0.h>
 
 #include <TBranchElement.h>
@@ -48,8 +49,9 @@ class AliConverter : public ZGlass
   TTree*                         mTreeH;       //! X{g}
   TTree*                         mTreeTR;      //! X{g}
   TTree*                         mTreeC;       //! X{g}
-  TTree*                         mTreeR;       //! X{g}
   TTree*                         mTreeV0;      //! X{g}
+  TTree*                         mTreeKK;       //! X{g}
+  TTree*                         mTreeR;       //! X{g}
   TTree*                         mTreeGI;      //! X{g}
 
   Hit                            mH,  *mpH;    //! needed for selection in mTreeH
@@ -57,6 +59,7 @@ class AliConverter : public ZGlass
   Hit                            mC,  *mpC;    //! needed for selection in mTreeC    
   ESDParticle                    mR,  *mpR;    //! needed for selection in mTreeR  
   V0                             mV0, *mpV0;   //! needed for selection in mTreeV0  
+  Kink                           mKK, *mpKK;   //! needed for selection in mTreeV0  
   GenInfo                        mGI, *mpGI;   //! needed for selection in mTreeGI      
 
   TFile*                         mFile;      // X{gs} 
@@ -78,8 +81,9 @@ class AliConverter : public ZGlass
   void ConvertClusters();
   void ConvertTPCClusters();
   void ConvertITSClusters();
-  void ConvertRecTracks();
   void ConvertV0();
+  void ConvertKinks();
+  void ConvertRecTracks();
   void ConvertGenInfo();
 
   // --------------------------------------------------------------
