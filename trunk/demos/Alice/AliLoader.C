@@ -39,7 +39,7 @@ class ZImage;
 /**************************************************************************/
 
 void AliLoader(const Text_t* dirname = 0,
-	       Bool_t use_aliroot    = 0)
+	       Bool_t use_aliroot    = false)
 {
   // gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   Gled::AssertMacro("sun.C");
@@ -138,6 +138,9 @@ void AliLoader(const Text_t* dirname = 0,
 
   if(dirname != 0) {
     al->SetDataDir(dirname);
+    // Shoot a MIR to have functional GUI during processing: 	 
+    ZMIR* setup_mir = al->S_LoadVSD(); 	 
+    g_saturn->ShootMIR(setup_mir);
   }
 }
 
