@@ -114,6 +114,29 @@ void  MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
   }
   sel->SelectClusters(this, selection);
 }
+
+/**************************************************************************/
+
+void MCTrack::SetDecayFromDaughter()
+{
+  MCTrack* last_d = dynamic_cast<MCTrack*>(Last());
+  if(last_d) {
+    mParticle->SetDecayed(true);
+    mParticle->fDx = last_d->mParticle->Vx();
+    mParticle->fDy = last_d->mParticle->Vy();
+    mParticle->fDz = last_d->mParticle->Vz();
+  } else {
+    mParticle->SetDecayed(false);
+  }
+  mStampReqTring = Stamp(FID());
+}
+
+void MCTrack::ClearDecay()
+{
+  mParticle->SetDecayed(false);
+  mStampReqTring = Stamp(FID());
+}
+
 /**************************************************************************/
 
 void MCTrack::Dump()
