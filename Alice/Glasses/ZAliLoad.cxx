@@ -52,7 +52,7 @@ namespace {
 
 /**************************************************************************/
 
-  void ZAliLoad::_init()
+void ZAliLoad::_init()
 {
   // *** Set all links to 0 ***
   mITSDigInfo = 0;
@@ -73,6 +73,7 @@ namespace {
   mClusterSelection  = "fDetID == 1";
   mRecSelection      = "Pt() > 0.1";
   mV0Selection       = "fStatus == 100";
+  mKinkSelection       = "fStatus > 0";
   mGISelection       = "bR == 1";
 
   mOperation = "<idle>";
@@ -420,6 +421,22 @@ void ZAliLoad::SelectV0(const Text_t* selection, Bool_t import_kine)
     selection = mV0Selection.Data();
 
   mSelector->SelectV0(0, selection, import_kine);
+}
+/**************************************************************************/
+
+void ZAliLoad::SelectKinks(const Text_t* selection, Bool_t import_kine)
+{
+  static const string _eh("ZAliLoad::SelectKinks ");
+
+  OpMutexHolder omh(this, "SelectKinks ");
+
+  if(!mSelector)
+    throw(_eh + "No VSD data loaded.");
+
+  if(selection == 0 || strcmp(selection,"") == 0)
+    selection = mKinkSelection.Data();
+
+  mSelector->SelectKinks(0, selection, import_kine);
 }
 /**************************************************************************/
 

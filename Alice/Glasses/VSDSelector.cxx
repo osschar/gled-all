@@ -16,6 +16,7 @@
 #include <Glasses/ZQueen.h>
 #include <Glasses/RecTrack.h>
 #include <Glasses/V0Track.h>
+#include <Glasses/KinkTrack.h>
 #include <Stones/TTreeTools.h>
 
 ClassImp(VSDSelector)
@@ -30,12 +31,14 @@ void VSDSelector::_init()
   mTreeC  = 0;
   mTreeR  = 0;
   mTreeV0 = 0;
+  mTreeKK = 0;
   mTreeGI = 0;
   mpP  = &mP;
   mpH  = &mH;
   mpC  = &mC;
   mpR  = &mR;
   mpV0 = &mV0;
+  mpKK = &mKK;
   mpGI = &mGI;
   mImportMode = 0;
 
@@ -44,6 +47,7 @@ void VSDSelector::_init()
   mClusterSelection  = "fDetID == 1";
   mRecSelection      = "Pt() > 0.1";
   mV0Selection       = "fStatus == 100";
+  mKinkSelection     = "fDP[0] > 0";
   mGISelection       = "bR == 1";
 
   mFile    = 0; 
@@ -108,7 +112,17 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   } else {
     mTreeV0->SetBranchAddress("V0", &mpV0);
   }
-    
+ 
+
+  printf("Reading Kinks. \n");
+  mTreeKK =  (TTree*) mDirectory->Get("Kinks");
+  if (mTreeKK == 0){
+    printf("%s Kinks not available in mDirectoryectory %s.\n", 
+	   _eh.c_str(), mDirectory->GetName());
+  } else {
+    mTreeKK->SetBranchAddress("KK", &mpKK);
+  }
+   
   printf("Reading GenInfo.\n");
   mTreeGI = (TTree*)mDirectory->Get("GenInfo");
   if (mTreeGI == 0) {
@@ -132,6 +146,7 @@ void VSDSelector::ResetEvent()
   delete mTreeC;      mTreeC      = 0;
   delete mTreeR;      mTreeR      = 0;
   delete mTreeV0;     mTreeV0     = 0;
+  delete mTreeKK;     mTreeKK     = 0;
   delete mTreeGI;     mTreeGI     = 0;
 
   if (mFile) {
@@ -344,20 +359,20 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
       pp[1]= mV0.fPP[1]+mV0.fPM[1];
       pp[2]= mV0.fPP[2]+mV0.fPM[2];
       ESDParticle* v = new ESDParticle(&mV0.fV0[0], &pp[0],-1, 0);
-      v->fD[0]=mV0.fDCA[0]; v->fD[1]=mV0.fDCA[1]; v->fD[2] = mV0.fDCA[2];
+      v->fV[0]=mV0.fDCA[0]; v->fV[1]=mV0.fDCA[1]; v->fV[2] = mV0.fDCA[2];
       V0Track* tV0 = new V0Track(v); 
       tV0->mVM[0]=mV0.fVM[0]; tV0->mVM[1]=mV0.fVM[1]; tV0->mVM[2]=mV0.fVM[2];
       tV0->mVP[0]=mV0.fVP[0]; tV0->mVP[1]=mV0.fVP[1]; tV0->mVP[2]=mV0.fVP[2];
-      tV0->SetName(GForm("V0 %d : %d {%d}", mV0.fLabels[0], mV0.fLabels[1], mV0.fPDG));
+      tV0->SetName(GForm("V0 %d : %d {%d}", mV0.fDLabels[0], mV0.fDLabels[1], mV0.fPDG));
       mQueen->CheckIn(tV0);
       holder->Add(tV0);
       // minus rec daughter
-      ESDParticle* m = new ESDParticle(&mV0.fVM[0], &mV0.fPM[0], mV0.fLabels[0], -1);
+      ESDParticle* m = new ESDParticle(&mV0.fVM[0], &mV0.fPM[0], mV0.fDLabels[0], -1);
       RecTrack* tM = new RecTrack(m); 
       mQueen->CheckIn(tM);
       tV0->Add(tM);
       // plus rec daughter
-      ESDParticle* p = new ESDParticle(&mV0.fVP[0], &mV0.fPP[0], mV0.fLabels[1], 1);
+      ESDParticle* p = new ESDParticle(&mV0.fVP[0], &mV0.fPP[0], mV0.fDLabels[1], 1);
       RecTrack* tP = new RecTrack(p); 
       mQueen->CheckIn(tP);
       tV0->Add(tP);
@@ -366,12 +381,12 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
       if(import_kine){
 	holder->SetName(GForm("V0&Kine %s", selection));
 	// minus kine daughter
-	MCParticle* mk = Particle(mV0.fLabels[0]);
+	MCParticle* mk = Particle(mV0.fDLabels[0]);
 	MCTrack* mc_mk = new MCTrack(mk);
 	mQueen->CheckIn(mc_mk);
 	tV0->Add(mc_mk);
 	// plus kine daughter
-	MCParticle* pk = Particle(mV0.fLabels[1]);
+	MCParticle* pk = Particle(mV0.fDLabels[1]);
 	MCTrack* mc_pk = new MCTrack(pk);
 	mQueen->CheckIn(mc_pk);
 	tV0->Add(mc_pk);
@@ -382,6 +397,64 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
 	  mQueen->CheckIn(mc_k);
 	  tV0->Add(mc_k);
 	}
+      }
+    }
+  }
+}
+
+
+/**************************************************************************/
+
+void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
+			      Bool_t import_kine)
+{
+  static const string _eh("VSDSelector::SelectKinks ");
+
+  if(mTreeKK == 0) 
+    throw (_eh + "Kinks tree not available.");
+  
+  if(selection == 0 || strcmp(selection,"") == 0)
+    selection = mKinkSelection.Data();
+
+  TTreeQuery evl;
+  Int_t n = evl.Select(mTreeKK, selection);
+  // printf("%d entries in selection %s \n", n,  selection);
+ 
+  if(n==0)
+    throw (_eh + "no entries found for selection.");
+
+  bool add_holder_p = false;
+  if(holder == 0) {
+    holder = new ZNode(GForm("Kinks %s", selection));
+    mQueen->CheckIn(holder);
+    add_holder_p = true;
+    Add(holder);
+  }
+
+  if(n > 0) {
+    Kink* k;
+    KinkTrack* kt;
+    for (Int_t i=0; i<n; i++){
+      Int_t label = evl.GetEntry(i);
+      mTreeKK->GetEntry(label);
+      k = new Kink(*mpKK); 
+      kt = new KinkTrack(k); 
+      mQueen->CheckIn(kt);
+      holder->Add(kt);
+    
+      //kinematics
+      if(import_kine){
+	printf("kinks & import kine");
+	//  kine mother
+	MCParticle* mk = Particle(k->fLabel);
+	MCTrack* mc_mk = new MCTrack(mk);
+	mQueen->CheckIn(mc_mk);
+	kt->Add(mc_mk);
+	//  kine daughter
+	MCParticle* pk = Particle(k->fDLabel);
+	MCTrack* mc_pk = new MCTrack(pk);
+	mQueen->CheckIn(mc_pk);
+	kt->Add(mc_pk);
       }
     }
   }
