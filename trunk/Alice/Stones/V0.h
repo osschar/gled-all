@@ -36,7 +36,8 @@ class V0 : public TObject {
 
   // data from simulation ???
   Int_t    fPDG;
-  Int_t    fLabels[2];
+  Int_t    fDLabels[2];
+  Int_t    fLabel;  // mother label read from kinematics
 
 
   V0(const Text_t* n="V0", const Text_t* t=0) { _init(); }

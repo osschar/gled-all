@@ -17,12 +17,13 @@ class ESDParticle : public TObject {
 
  protected:
 
- public:
+ public: 
+  Bool_t   bE;      // X{G}
+  Int_t    fSign;   // X{G}
+  Int_t    fLabel;  // X{G}
+  Int_t    fStatus; // X{G}
   Double_t fV[3];   // birth point
   Double_t fP[3];   // momentum
-  Double_t fD[3];   // decay point
-  Int_t    fSign;    
-  Int_t    fLabel;  // X{GS}
 
   ESDParticle(const Text_t* n="ESDParticle", const Text_t* t=0) :
     TObject()
