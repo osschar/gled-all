@@ -1,3 +1,9 @@
+2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	Reintroduced invocation of LoadVSD() on start-up when directory
+	name is given as an argument.
+	
 2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:

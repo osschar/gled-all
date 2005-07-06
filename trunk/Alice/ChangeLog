@@ -1,3 +1,19 @@
+2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	Conversion flow improvement.
+	In CreateVSD(): skip V0 and Kink conversion if RecTrack conversion
+	fails.
+	In ConvertKinematics(): protection agains non-existing
+	TrackRefs.root. Conversion proceeds, decay points are not set.
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	Added methods SetDecayFromDaughter() and ClearDecay().
+
+	* Glasses/VSDSelector.cxx:
+	Fixed a cutnpast typo.
+
 2005-07-06  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/AliConverter.cxx:
@@ -28,7 +44,7 @@
 
 	* Stones/ESDParticle.cxx:
 	* Stones/ESDParticle.h:
-         Rename members.
+        Rename members.
 
 	* Stones/GenInfo.cxx:
 	* Stones/GenInfo.h:
