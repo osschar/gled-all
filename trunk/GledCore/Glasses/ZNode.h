@@ -44,6 +44,8 @@ protected:
 public:
   void RnrOnForDaughters();     // X{ED}  7 MButt(-join=>1)
   void RnrOffForDaughters();    // X{ED}  7 MButt()
+  void RnrElmsOnForDaughters(); // X{ED}  7 MButt(-join=>1)
+  void RnrElmsOffForDaughters();// X{ED}  7 MButt()
 
 protected:
   ZGlass*	mRnrMod;	// X{gS} L{}

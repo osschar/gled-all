@@ -252,6 +252,24 @@ void ZNode::RnrOffForDaughters()
   }
 }
 
+void ZNode::RnrElmsOnForDaughters()
+{
+  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrElements(true);
+  }
+}
+
+void ZNode::RnrElmsOffForDaughters()
+{ 
+  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
+    GLensReadHolder _rlck(*i);
+    (*i)->SetRnrElements(false);
+  }
+}
+
 void ZNode::MakeRnrModList(ZGlass* optional_element)
 {
   // Makes sure that link mRnrMod is pointing to a ZRnrModList.
