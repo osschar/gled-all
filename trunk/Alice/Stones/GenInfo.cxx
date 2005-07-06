@@ -17,7 +17,9 @@ ClassImp(GenInfo)
 
   void GenInfo::_init()
 {
-  bR = false;
+  bR =  false;
+  bV0 = false;
+  bKK = false;
   Nh = Nc = 0;
   fLabel = -1;
 }

@@ -22,6 +22,8 @@ class GenInfo : public TObject {
  public:
   Int_t        fLabel;
   Bool_t       bR;  // is reconstructed
+  Bool_t       bV0; // has V0
+  Bool_t       bKK; // has Kink
   Int_t        Nh;  // number of hits
   Int_t        Nc;  // number of clusters
 
