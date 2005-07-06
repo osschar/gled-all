@@ -132,8 +132,10 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
 
   try {
     ConvertRecTracks();
-  } catch(string exc) { warn_caller(exc); }
-
+  } catch(string exc) {
+    warn_caller(exc + " Skipping V0 extraction.");
+    goto end_esd_processing;
+  }
 
   try {
     ConvertV0();
@@ -142,6 +144,8 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   try {
     ConvertKinks();
   } catch(string exc) { warn_caller(exc); }
+
+ end_esd_processing:
 
   try {
     ConvertGenInfo();
@@ -218,28 +222,33 @@ void AliConverter::ConvertKinematics()
 
   // read track refrences 
   TTree* mTreeTR =  pRunLoader->TreeTR();
-  TClonesArray* RunArrayTR = 0;
-  mTreeTR->SetBranchAddress("AliRun", &RunArrayTR);
 
-  Int_t nPrimaries = (Int_t) mTreeTR->GetEntries();
-  for (Int_t iPrimPart = 0; iPrimPart<nPrimaries; iPrimPart++) {
-    // printf("START mTreeTR->GetEntry(%d) \n",iPrimPart);
-    mTreeTR->GetEntry(iPrimPart);
-    // printf("END mTreeTR->GetEntry(%d) \n",iPrimPart);
+  if(mTreeTR == 0) {
+    warn_caller(_eh + "no TrackRefs; some data will not be available.");
+  } else {
+    TClonesArray* RunArrayTR = 0;
+    mTreeTR->SetBranchAddress("AliRun", &RunArrayTR);
+
+    Int_t nPrimaries = (Int_t) mTreeTR->GetEntries();
+    for (Int_t iPrimPart = 0; iPrimPart<nPrimaries; iPrimPart++) {
+      // printf("START mTreeTR->GetEntry(%d) \n",iPrimPart);
+      mTreeTR->GetEntry(iPrimPart);
+      // printf("END mTreeTR->GetEntry(%d) \n",iPrimPart);
     
-    for (Int_t iTrackRef = 0; iTrackRef < RunArrayTR->GetEntriesFast(); iTrackRef++) {
-      AliTrackReference *trackRef = (AliTrackReference*)RunArrayTR->At(iTrackRef); 
-      Int_t track = trackRef->GetTrack();
-      if(track < nentries && track > 0){ 
-	MCParticle& mcp = vmc[track];	
-	if(trackRef->TestBit(kNotDeleted)) {
-	  mcp.SetDecayed(true);
-	  mcp.fDt=trackRef->GetTime();
-	  mcp.fDx=trackRef->X(); mcp.fDy=trackRef->Y(); mcp.fDz=trackRef->Z();
-	  mcp.fDPx=trackRef->Px(); mcp.fDPy=trackRef->Py(); mcp.fDPz=trackRef->Pz();
-	  if(TMath::Abs(mcp.GetPdgCode()) == 11)  mcp.SetDecayed(false); // a bug in TreeTR
-	}
-      }       
+      for (Int_t iTrackRef = 0; iTrackRef < RunArrayTR->GetEntriesFast(); iTrackRef++) {
+	AliTrackReference *trackRef = (AliTrackReference*)RunArrayTR->At(iTrackRef); 
+	Int_t track = trackRef->GetTrack();
+	if(track < nentries && track > 0){ 
+	  MCParticle& mcp = vmc[track];	
+	  if(trackRef->TestBit(kNotDeleted)) {
+	    mcp.SetDecayed(true);
+	    mcp.fDt=trackRef->GetTime();
+	    mcp.fDx=trackRef->X(); mcp.fDy=trackRef->Y(); mcp.fDz=trackRef->Z();
+	    mcp.fDPx=trackRef->Px(); mcp.fDPy=trackRef->Py(); mcp.fDPz=trackRef->Pz();
+	    if(TMath::Abs(mcp.GetPdgCode()) == 11)  mcp.SetDecayed(false); // a bug in TreeTR
+	  }
+	}       
+      }
     }
   }
 
@@ -577,15 +586,12 @@ void AliConverter::ConvertRecTracks()
   mTreeR->Branch("R", "ESDParticle", &mpR, 512*1024,1);
  
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
-  if(!f.IsOpen()){
-    printf("no AliESDs.root file\n");
-    return;
-    // throw(_eh + "no AliESDs.root file\n");
-  }
+  if(!f.IsOpen())
+    throw(_eh + "no AliESDs.root file.");
 
   TTree* tree = (TTree*) f.Get("esdTree");
   if (tree == 0) 
-    throw(_eh + "no esdTree\n");
+    throw(_eh + "no esdTree.");
 
  
   AliESD *fEvent=0;  
@@ -623,12 +629,12 @@ void AliConverter::ConvertV0()
 
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
   if(!f.IsOpen()){
-    throw(_eh + "no AliESDs.root file\n");
+    throw(_eh + "no AliESDs.root file.");
   }
 
   TTree* tree = (TTree*) f.Get("esdTree");
   if (tree == 0) 
-    throw(_eh + "no esdTree\n");
+    throw(_eh + "no esdTree.");
 
   AliESD *fEvent=0;  
   tree->SetBranchAddress("ESD", &fEvent);
@@ -685,6 +691,7 @@ void AliConverter::ConvertV0()
 }
 
 /**************************************************************************/
+
 void AliConverter::ConvertKinks()
 {
   static const string _eh("AliConverter::ConvertKinks ");
@@ -700,12 +707,12 @@ void AliConverter::ConvertKinks()
 
   TFile f(GForm("%s/AliESDs.root", mDataDir.Data()));
   if(!f.IsOpen()){
-    throw(_eh + "no AliESDs.root file\n");
+    throw(_eh + "no AliESDs.root file.");
   }
 
   TTree* tree = (TTree*) f.Get("esdTree");
   if (tree == 0) 
-    throw(_eh + "no esdTree\n");
+    throw(_eh + "no esdTree.");
 
   AliESD *fEvent=0;  
   tree->SetBranchAddress("ESD", &fEvent);
