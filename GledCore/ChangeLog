@@ -1,3 +1,9 @@
+2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Added methods RnrElmsOn/OffForDaughters().
+
 2005-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.cxx:
