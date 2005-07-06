@@ -19,6 +19,7 @@
 #include <Stones/V0.h>
 #include <Stones/GenInfo.h>
 #include <Stones/Hit.h>
+#include <Stones/Kink.h>
 
 #include <Glasses/ZNode.h>
 
@@ -35,12 +36,14 @@ class VSDSelector : public ZNode {
   TTree*                         mTreeC;   // X{g}
   TTree*                         mTreeR;   // X{g}
   TTree*                         mTreeV0;  // X{g}
+  TTree*                         mTreeKK;  // X{g}
   TTree*                         mTreeGI;  // X{g}
   Hit                            mH, *mpH;     // needed for selection in mTreeH
   MCParticle                     mP, *mpP;     // needed for selection in mTreeK
   Hit                            mC, *mpC;     // needed for selection in mTreeC    
   ESDParticle                    mR, *mpR;     // needed for selection in mTreeR  
   V0                             mV0,*mpV0;    // needed for selection in mTreeV0  
+  Kink                           mKK,*mpKK;    // needed for selection in mTreeV0  
   GenInfo                        mGI,*mpGI;    // needed for selection in mTreeGI      
 
  protected:
@@ -99,6 +102,14 @@ class VSDSelector : public ZNode {
  public:
   void SelectV0( ZNode* holder=0, const Text_t* selection=0,
 		 Bool_t import_kine=false);            // X{Ed} C{1} 7 MCWButt()
+  // --------------------------------------------------------------
+  // Kinks
+ protected:
+  TString mKinkSelection;        // X{GS} 7 Textor(-whenchanged=>1)
+ public:
+  void SelectKinks( ZNode* holder=0, const Text_t* selection=0,
+		    Bool_t import_kine=false);            // X{Ed} C{1} 7 MCWButt()
+
 
   // --------------------------------------------------------------
   // GenInfo
