@@ -1,3 +1,50 @@
+2005-07-06  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+        Create new tree of Kink stones.
+
+	* Glasses/KinkTrack.cxx:
+	* Glasses/KinkTrack.h:
+        New file.
+
+	* Glasses/V0Track.h:
+        Rename V0 memebers.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+        Select kinks.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Select kinks.
+
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Rnr/GL/KinkTrack_GL_Rnr.h:
+        New files.
+
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+        Rename V0 memebers.
+
+	* Stones/ESDParticle.cxx:
+	* Stones/ESDParticle.h:
+         Rename members.
+
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+        bKK == true, if kink found in mother.
+
+	* Stones/Kink.cxx:
+	* Stones/Kink.h:
+        New Files.
+
+	* Stones/V0.cxx:
+	* Stones/V0.h:
+        Rename members.
+
+	* glass.list:
+        New class KinkTrack.
+
 2005-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/MCTrack_GL_Rnr.cxx:
