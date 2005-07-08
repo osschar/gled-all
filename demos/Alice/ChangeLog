@@ -1,3 +1,16 @@
+2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* AliLoader.C:
+	* common_foos.C:
+
+2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* AliLoader.C:
+        Add Kink selection in metagui.
+
+	* common_foos.C:
+        Add g_pupil to test GL user interface.
+
 2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
