@@ -60,7 +60,6 @@ struct Helix {
     if(TMath::Sqrt(x*x+y*y) < fRnrMod->mMaxR + TMath::Abs(fR)) {
       crosR = true;
     }
-    printf("NMax %d \n", NMax);
   }
 
 
