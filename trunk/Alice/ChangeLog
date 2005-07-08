@@ -1,5 +1,11 @@
 2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+        Add TRD and ITS hit resolution parameter.
+
+2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
 	* Glasses/PRSBase.h:
         Change mMaxOrbs from Int_t to Float_t.        
 
