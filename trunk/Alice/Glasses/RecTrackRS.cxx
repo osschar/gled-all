@@ -19,8 +19,10 @@ ClassImp(RecTrackRS)
   void RecTrackRS::_init()
 {
   // *** Set all links to 0 ***
-  bFitKinks = false;
-  bFitV0 = false;
+  bFitKinks  = false;
+  bFitV0     = false;
+  mKinkVSize = 8;
+  mKinkVColor.rgba(0.2, 0.8, 1);
 }
 
 /**************************************************************************/
