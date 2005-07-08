@@ -45,7 +45,7 @@ class PRSBase : public ZRnrModBase {
   Float_t                  mMaxR;          // X{GST}  7 Value(-range=>[0,100000,1], -join=>1)
   Float_t                  mMaxZ;          // X{GST}  7 Value(-range=>[0,100000,1])
   // helix limits 
-  Int_t                    mMaxOrbs;       // X{GST}  7 Value(-range=>[0,500,1,100])
+  Float_t                  mMaxOrbs;       // X{GST}  7 Value(-range=>[0,20,1,100])
   Float_t                  mMinAng;        // X{GST}  7 Value(-range=>[1,180 ,1], -join=>1)
   Float_t                  mDelta;         // X{GST}  7 Value(-range=>[1e-3,100, 1,1000])
   // track textures
