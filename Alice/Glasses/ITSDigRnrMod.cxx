@@ -16,7 +16,7 @@ ClassImp(ITSDigRnrMod)
 
 /**************************************************************************/
 
-  void ITSDigRnrMod::_init()
+void ITSDigRnrMod::_init()
 {
   // *** Set all links to 0 ***
   mSDDTreshold  = 5;
@@ -28,11 +28,10 @@ ClassImp(ITSDigRnrMod)
   mColSep = 1;
   mRibbon = 0;
 
-  bRnrFrame   = true;
+  mDigitW   = 0;
+  mFrameW   = 0;
+  bRnrFrame = true;
   mFrameCol.gray(0.5);
 }
-
-/**************************************************************************/
-
 
 /**************************************************************************/
