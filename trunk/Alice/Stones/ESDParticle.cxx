@@ -17,15 +17,14 @@ ClassImp(ESDParticle)
 
 void ESDParticle::_init()
 {
-  bE = false; 
   fSign = 0;
   fLabel = -1;
   fStatus = 0;
-  //fV = {0};
 }
 
 /**************************************************************************/
-ESDParticle::ESDParticle( Double_t* v, Double_t* p, Int_t lab, Int_t sign)
+
+ESDParticle::ESDParticle(Double_t* v, Double_t* p, Int_t lab, Int_t sign)
 {
   _init();
   fSign=sign;
@@ -39,6 +38,5 @@ ESDParticle::ESDParticle( Double_t* v, Double_t* p, Int_t lab, Int_t sign)
   fP[1]= p[1];
   fP[2]= p[2];
 }
-
 
 /**************************************************************************/

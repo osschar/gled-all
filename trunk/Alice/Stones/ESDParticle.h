@@ -10,15 +10,12 @@
 #include <TObject.h>
 #include <TMath.h>
 
-class ESDParticle : public TObject {
-
+class ESDParticle : public TObject
+{
  private:
   void _init();
 
- protected:
-
  public: 
-  Bool_t   bE;      // X{G}
   Int_t    fSign;   // X{G}
   Int_t    fLabel;  // X{G}
   Int_t    fStatus; // X{G}
@@ -49,6 +46,6 @@ class ESDParticle : public TObject {
 
 #include "ESDParticle.h7"
   ClassDef(ESDParticle, 1)
-    }; // endclass ESDParticle
+}; // endclass ESDParticle
 
 #endif
