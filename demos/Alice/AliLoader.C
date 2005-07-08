@@ -63,6 +63,9 @@ void AliLoader(const Text_t* dirname = 0,
 
   // Scene returned in g_scene.
   alice_simple_init("alice_minigeo.root", "def_geoview.root");
+
+
+ 
   
   ZNode* var = (ZNode*) g_scene->FindLensByPath("Var");
 
@@ -90,12 +93,16 @@ void AliLoader(const Text_t* dirname = 0,
 
   CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
 
+
+  
+
   ZAliLoad* al = new ZAliLoad();
   aliload = al;
   al->SetOM(-2);
   al->SetUseOM(true);
   g_queen->CheckIn(al);
   g_scene->Add(al);
+
 
   ZList* aliconf = g_scene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
   CREATE_ATT_GLASS(tpclist, ZRnrModList, aliconf, Swallow, "TPC_RM_list", 0);
@@ -150,7 +157,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 40, H = 28;
+  int Y = 0, W = 40, H = 31;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, g_fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -307,6 +314,26 @@ MetaViewInfo* make_zaliload_metagui()
 
   Y += y; y=0;
 
+  // Kinks:
+  CREATE_ADD_GLASS(ms8, MetaSubViewInfo, mv, "ZAliLoad", 0);
+  ms8->Position(0, Y);
+  // Intro
+  CREATE_ADD_GLASS(w80, MetaWeedInfo, ms8, "<box>", "Kinks:");
+  w80->Resize(0, y, W, 1);
+  w80->Color(0.7, 0.85, 0.7);
+  w80->Align(true, -1, 0);
+  w80->Box(MetaWeedInfo::BT_Engraved);
+  y++;
+  CREATE_ADD_GLASS(w81, MetaWeedInfo, ms8, "KinkSelection", 0);
+  w81->Resize(6, y, W-6, 1);
+  w81->Label("selection: ");
+  y++;
+  CREATE_ADD_GLASS(w82, MetaWeedInfo, ms8, "SelectKinks", 0);
+  w82->Resize(W-12, y, 12, 1);
+  w82->Label("Run selection ..");
+  ++y;
+
+  Y += y; y=0;
   // GenInfo:
   CREATE_ADD_GLASS(ms7, MetaSubViewInfo, mv, "ZAliLoad", 0);
   ms7->Position(0, Y);
@@ -332,19 +359,19 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(ms4, MetaSubViewInfo, mv, "ZAliLoad", 0);
   ms4->Position(0, Y);
   // Intro
-  CREATE_ADD_GLASS(w40, MetaWeedInfo, ms4, "<box>", "TPC digits:");
+  CREATE_ADD_GLASS(w40, MetaWeedInfo, ms4, "<box>", "Digits:");
   w40->Resize(0, y, W, 1);
   w40->Color(0.7, 0.85, 0.7);
   w40->Align(true, -1, 0);
   w40->Box(MetaWeedInfo::BT_Engraved);
   y++;
-  CREATE_ADD_GLASS(w41, MetaWeedInfo, ms4, "ShowTPCPlate", 0);
-  w41->Resize(0, y, W, 1);
-  w41->Label("Show TPC Digits ..");
-  y++;
- CREATE_ADD_GLASS(w41, MetaWeedInfo, ms4, "ShowITSDet", 0);
+  CREATE_ADD_GLASS(w41, MetaWeedInfo, ms4, "ShowITSDet", 0);
   w41->Resize(0, y, W, 1);
   w41->Label("Show ITS Digits ..");
+  y++;
+  CREATE_ADD_GLASS(w42, MetaWeedInfo, ms4, "ShowTPCPlate", 0);
+  w42->Resize(0, y, W, 1);
+  w42->Label("Show TPC Digits ..");
   y++;
   return mv;
 }
