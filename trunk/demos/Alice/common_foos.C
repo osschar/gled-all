@@ -198,6 +198,7 @@ void setup_default_gui()
   pupil->SetCHSize(0.03);
   pupil->SetBlend(1);
   pupil->Add(g_scene);
+  g_pupil = pupil;
 
   gui_pupil->SetCameras((ZList*)g_scene->FindLensByPath("Markers/CameraInfos"));
   pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->First());
