@@ -65,6 +65,9 @@ class AliConverter : public ZGlass
   TFile*                         mFile;      // X{gs} 
   TDirectory*                    mDirectory; // X{gs}
 
+  Float_t                        mTRDHitRes;  // X{gs} 
+  Float_t                        mTPCHitRes;  // X{gs} 
+
  public:
   AliConverter(const Text_t* n="AliConverter", const Text_t* t=0) :
     ZGlass(n,t) { _init();}

@@ -56,6 +56,9 @@ void AliConverter::_init()
   mpR  = &mR;
   mpGI = &mGI;
 
+  mTPCHitRes = 2;
+  mTRDHitRes = 2;
+
   // Pain:
   AliPDG::AddParticlesToPdgDataBase();
   {
@@ -310,6 +313,10 @@ void AliConverter::ConvertHits()
   mTreeH->Branch("H", "Hit", &mpH, 512*1024, 1);
  
   map<Int_t, Int_t> hmap;
+  // parameters for ITS, TPC hits filtering
+  Float_t x,y,z, x1,y1,z1;
+  Float_t tpc_sqr_res = mTPCHitRes*mTPCHitRes;
+  Float_t trd_sqr_res = mTRDHitRes*mTRDHitRes;
 
   int l=0;
   // load hits from the rest of detectors
@@ -325,25 +332,22 @@ void AliConverter::ConvertHits()
 	continue;
       }
       AliTPCTrackHitsV2 hv2, *_hv2=&hv2; 
-      Float_t x=0,y=0,z=0, x1,y1,z1;
       treeh->SetBranchAddress("TPC2", &_hv2);
       Int_t np = treeh->GetEntries();
       for(Int_t i=0; i<np; i++){
 	treeh->GetEntry(i);
 	Int_t eva_idx = np -i -1;
 	if (hv2.First() == 0) continue;
+        x = y = z = 0;
 	do {
 	  AliHit* ah = hv2.GetHit();
 	  x1=ah->X();y1=ah->Y();z1=ah->Z();
-	  if((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1) > 4) {
+	  if((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1) > tpc_sqr_res) {
 	    mH.fDetID    = det.detidx;
 	    mH.fEvaLabel = eva_idx;
 	    mH.fLabel    = ah->Track();
 	    mH.x = x1; mH.y = y1; mH.z = z1;
-	    Int_t xx = mTreeH->Fill();
-	    if(xx != 21)
-	      printf("Hit: %d %d %d %d\n", xx, mH.fLabel, mH.fEvaLabel, mH.fDetID);
-
+	    mTreeH->Fill();
 	    hmap[mH.fLabel]++;
 	    x=x1; y=y1; z=z1;
 	    count++;
@@ -368,6 +372,7 @@ void AliConverter::ConvertHits()
 	treeh->GetEntry(i);
 	Int_t eva_idx = np -i -1;
 	Int_t nh=arr->GetEntriesFast();
+	x = y = z = 0;
 	// printf("%d entry %d hits for primary %d \n", i, nh, eva_idx);
 	for (Int_t j=0; j<nh; j++) {
 	  AliHit* ali_hit = (AliHit*)arr->UncheckedAt(j);
@@ -375,10 +380,13 @@ void AliConverter::ConvertHits()
 	  mH.fDetID    = det.detidx;
 	  mH.fLabel    = ali_hit->GetTrack();
 	  mH.x=ali_hit->X(); mH.y=ali_hit->Y(); mH.z=ali_hit->Z();
+          if(det.detidx == 2) {
+	    x1=ali_hit->X();y1=ali_hit->Y();z1=ali_hit->Z();
+	    if((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1) < trd_sqr_res) continue;
+	    x=x1; y=y1; z=z1;
+	  } 
 	  hmap[mH.fLabel]++;
-	  Int_t xx = mTreeH->Fill(); 
-	  if(xx != 21)
-	    printf("Hit: %d %d %d %d\n", xx, mH.fLabel, mH.fEvaLabel, mH.fDetID);
+	  mTreeH->Fill(); 
 	}
       }
       delete arr;
@@ -387,6 +395,7 @@ void AliConverter::ConvertHits()
     } // end switch
   } // end while
   
+
   //set geninfo
   for(map<Int_t, Int_t>::iterator j=hmap.begin(); j!=hmap.end(); ++j) {
     get_geninfo(j->first)->Nh += j->second;
