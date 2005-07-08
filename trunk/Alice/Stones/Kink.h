@@ -9,22 +9,19 @@
 
 #include <Stones/ESDParticle.h>
 
-class Kink : public ESDParticle {
-
+class Kink : public ESDParticle
+{
 private:
   void _init();
 
-protected:
-
 public:
+  Double_t fKV[3];   // reconstructed position of the kink
   Double_t fEV[3];   // end point
   Int_t    fDLabel;  // daughter label  
   Double_t fDP[3];   // daughter momentum
 
-  Kink(const Text_t* n="Kink", const Text_t* t=0) :
-    ESDParticle(n,t)
+  Kink(const Text_t* n="Kink", const Text_t* t=0) : ESDParticle(n,t)
   { _init(); }
-
 
 #include "Kink.h7"
   ClassDef(Kink, 1)
