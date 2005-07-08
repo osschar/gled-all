@@ -30,15 +30,16 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
   Float_t z = mITSModule->mDz;
   Bool_t above_treshold = false;
  
-  // digits
+  // Digits
   TClonesArray *digits;
   Int_t ndigits;
   Float_t dpx,dpz; 
   Int_t i,j;
-  digits = mITSModule->mInfo->GetDigits(mITSModule->mID, mITSModule->mDetID );
-  ndigits=digits->GetEntriesFast(); 
+  digits  = mITSModule->mInfo->GetDigits(mITSModule->mID, mITSModule->mDetID );
+  ndigits = digits->GetEntriesFast(); 
   // printf("%d digits in %d\n", ndigits,mITSModule->mID);
 
+  if(mDRM->mDigitW) glLineWidth(mDRM->mDigitW);
   switch(mITSModule->mDetID) {
   case 0: {
     above_treshold = true;
@@ -51,21 +52,21 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
       j = d->GetCoord1();
       i = d->GetCoord2();
       MkCol(1, 0,1);
-      x = -seg->Dx()/2 + seg->Dpx(0) *i;
-      x *= 0.0001;
+      x  = -seg->Dx()/2 + seg->Dpx(0) *i;
+      x *=  0.0001;
       mITSModule->mInfo->GetSPDLocalZ(j,z);
       dpx = seg->Dpx(i)*0.0001;
       dpz = seg->Dpz(j)*0.0001;
 
-      glVertex3f( x,0,z);
-      glVertex3f( x,0,z+dpz);
-      glVertex3f( x+dpx,0,z+dpz);
-      glVertex3f( x+dpx,0,z);
+      glVertex3f(x,     0, z);
+      glVertex3f(x,     0, z+dpz);
+      glVertex3f(x+dpx, 0, z+dpz);
+      glVertex3f(x+dpx, 0, z);
     }
     glEnd();
     break;
   }
-  case 1:{
+  case 1: {
     AliITSsegmentationSDD* seg =  mITSModule->mInfo->mSegSDD; 
     AliITSdigitSDD *d=0;
 
@@ -91,7 +92,7 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
     glEnd();
     break;
   }
-  case 2:{
+  case 2: {
     AliITSsegmentationSSD* seg =  mITSModule->mInfo->mSegSSD; 
     AliITSdigitSSD *d=0;
 
@@ -126,11 +127,12 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
   }
   }
 
-  //frame
+  // Frame
   x = mITSModule->mDx;
   z = mITSModule->mDz;
-  if(mDRM->bRnrFrame && above_treshold){
-    glBegin (GL_QUADS);
+  if(mDRM->bRnrFrame && above_treshold) {
+    if(mDRM->mFrameW) glLineWidth(mDRM->mFrameW);
+    glBegin (GL_LINE_LOOP);
     glColor4fv(mDRM->mFrameCol());
     glVertex3f( x, 0,  z);
     glVertex3f(-x, 0,  z);
