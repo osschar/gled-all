@@ -25,7 +25,8 @@ struct Helix {
   Helix(Float_t a, PRSBase* rs) :
     fA(a) {fRnrMod = rs;}
 
-  void init(Float_t pT, Float_t pZ){
+  void init(Float_t pT, Float_t pZ)
+  {
     fN=0;
     crosR = false;
     x_off = 0; y_off = 0;
@@ -34,7 +35,7 @@ struct Helix {
 
     fPhiStep = fRnrMod->mMinAng *TMath::Pi()/180;
     if(fRnrMod->mDelta < TMath::Abs(fR)){
-      Float_t ang  = 2*TMath::ACos(1-fRnrMod->mDelta/TMath::Abs(fR));
+      Float_t ang  = 2*TMath::ACos(1 - fRnrMod->mDelta/TMath::Abs(fR));
       if (ang < fPhiStep) fPhiStep = ang; 
     }
     if(fA<0) fPhiStep = -fPhiStep;
@@ -42,25 +43,24 @@ struct Helix {
     stex = TMath::Abs(fR*fPhiStep)*TMath::Sqrt(1+fLam*fLam)/fRnrMod->mTexFactor;
   }
 
-  void set_bounds(Float_t x, Float_t y, Float_t z){
+  void set_bounds(Float_t x, Float_t y, Float_t z)
+  {
     // check steps for max orbits
-    NMax =Int_t(fRnrMod->mMaxOrbs*2*TMath::Pi()/TMath::Abs(fPhiStep));
+    NMax = Int_t(fRnrMod->mMaxOrbs*TMath::TwoPi()/TMath::Abs(fPhiStep));
     // check steps for Z boundaries
     Float_t nz;
-    if(fLam > 0){
-      nz = (fRnrMod->mMaxZ - z)/fLam*TMath::Abs(fR*fPhiStep);
-    }
-    else {
-      nz = (-fRnrMod->mMaxZ - z)/fLam*TMath::Abs(fR*fPhiStep);
+    if(fLam > 0) {
+      nz = (fRnrMod->mMaxZ - z)/(fLam*TMath::Abs(fR*fPhiStep));
+    } else {
+      nz = (-fRnrMod->mMaxZ - z)/(fLam*TMath::Abs(fR*fPhiStep));
     }
     if (nz < NMax) NMax = Int_t(nz);
     
-
-    
-    // check steps if circles intesetct
-    if(TMath::Sqrt(x*x+y*y) < fRnrMod->mMaxR +TMath::Abs(fR)){
+    // check steps if circles intersect
+    if(TMath::Sqrt(x*x+y*y) < fRnrMod->mMaxR + TMath::Abs(fR)) {
       crosR = true;
     }
+    printf("NMax %d \n", NMax);
   }
 
 
@@ -85,7 +85,7 @@ struct Helix {
 		      Float_t ex, Float_t ey, Float_t ez)
   {
         
-    if ( TMath::Abs(ez) > fRnrMod->mMaxZ){
+    if (TMath::Abs(ez) > fRnrMod->mMaxZ) {
       loop_to_bounds(vx, vy, vz, px, py, pz);
       return false;
     }
@@ -97,7 +97,6 @@ struct Helix {
     Int_t   nsteps  = Int_t((ez - vz)/zs);
     Float_t sinf = TMath::Sin(fnsteps*fPhiStep);
     Float_t cosf = TMath::Cos(fnsteps*fPhiStep);
-    Int_t os_max =Int_t(fRnrMod->mMaxOrbs*2*TMath::Pi()/TMath::Abs(fPhiStep));
 
     {
       glBegin(GL_LINE_STRIP);
@@ -110,12 +109,8 @@ struct Helix {
 	x_off =  (ex - xf)/fnsteps;
 	y_off =  (ey - yf)/fnsteps;
 	for (Int_t l=0; l<nsteps; l++) {
-	  if ( vx*vx+vy*vy > fRnrMod->mMaxR*fRnrMod->mMaxR){
+	  if (vx*vx+vy*vy > fRnrMod->mMaxR*fRnrMod->mMaxR) {
 	    glEnd(); return false;
-	  }
-          if(fN > os_max ){
-	    glEnd();
-	    return false;
 	  }
 	  step(vx,vy,vz,px,py,pz); 
 	}
@@ -160,12 +155,14 @@ struct Helix {
       while(fN < NMax){
 	tx = vx + (px*sin - py*(1 - cos))/fA + x_off;
 	ty = vy + (py*sin + px*(1 - cos))/fA + y_off;
-	if ( tx*tx+ty*ty > fRnrMod->mMaxR*fRnrMod->mMaxR){
+	
+	if (crosR && tx*tx+ty*ty > fRnrMod->mMaxR*fRnrMod->mMaxR) {
 	  glEnd(); return false;
 	}
-	if(TMath::Abs(vz + fLam*TMath::Abs(fR*fPhiStep)) >  fRnrMod->mMaxZ){
+	if(TMath::Abs(vz + fLam*TMath::Abs(fR*fPhiStep)) > fRnrMod->mMaxZ) {
 	  glEnd(); return false;
 	}
+
 	step(vx,vy,vz,px,py,pz);
       }
       glEnd();
