@@ -1,3 +1,27 @@
+2005-07-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/KinkTrack.cxx:
+	* Glasses/KinkTrack.h:
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Stones/Kink.cxx:
+	* Stones/Kink.h:
+	Added reconstructed kink position.
+
+	* Glasses/ITSDigRnrMod.cxx:
+	* Glasses/ITSDigRnrMod.h:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	Added digit and frame line width control.
+
+	* Glasses/RecTrackRS.cxx:
+	* Glasses/RecTrackRS.h:
+	Added kink-vertex size and color controls.
+
+	* Glasses/PRSBase.h:
+	* Stones/ESDParticle.cxx:
+	* Stones/ESDParticle.h:
+	Minor changes.
+
 2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AliConverter.cxx:
