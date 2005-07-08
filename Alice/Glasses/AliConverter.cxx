@@ -716,26 +716,26 @@ void AliConverter::ConvertKinks()
 
   AliESD *fEvent=0;  
   tree->SetBranchAddress("ESD", &fEvent);
-  tree->GetEntry(0); 
+  tree->GetEntry(mEvent); 
 
   //  printf("CONVERT KINK Read %d entries in tree kinks \n",  fEvent->GetNumberOfKinks());
   for (Int_t n =0; n< fEvent->GetNumberOfKinks(); n++) {
     AliESDkink* kk = fEvent->GetKink(n);
     Double_t x,y,cos,sin; 
 
-    mKK.fLabel = kk->fLab[0];
+    mKK.fLabel  = kk->fLab[0];
     mKK.fStatus = Int_t(kk->fStatus);
-    // momentum and position of mother 
 
-    mKK.fP[0]= kk->fParamMother.Px();
-    mKK.fP[1]= kk->fParamMother.Py();
-    mKK.fP[2]= kk->fParamMother.Pz();
+    // reconstructed kink position
+    mKK.fKV[0] = kk->fXr[0]; mKK.fKV[1] = kk->fXr[1]; mKK.fKV[2] = kk->fXr[2];
+
+    // momentum and position of mother 
+    mKK.fP[0] = kk->fParamMother.Px();
+    mKK.fP[1] = kk->fParamMother.Py();
+    mKK.fP[2] = kk->fParamMother.Pz();
     const Double_t* par =  kk->fParamMother.GetParameter();
     // printf("KINK Pt %f, %f \n",1/kk->fParamMother.Pt(),par[4] );
-    if(par[4] < 0)  
-      mKK.fSign = -1;
-    else
-      mKK.fSign = 1;
+    mKK.fSign = (par[4] < 0) ? -1 : 1;
 
     x = kk->fParamMother.X(); 
     y = kk->fParamMother.Y(); 
@@ -775,13 +775,12 @@ void AliConverter::ConvertGenInfo()
 
   mDirectory->cd();
   mTreeGI = new TTree("GenInfo", "Objects prepared for cross querry");
-  printf("conver GEnInfo 1\n ");
 
   GenInfo::Class()->IgnoreTObjectStreamer(true);
   mTreeGI->Branch("GI", "GenInfo", &mpGI, 512*1024, 99);
   mTreeGI->Branch("K.", &mpP);
   mTreeGI->Branch("R.", "ESDParticle",   &mpR);
-  printf("conver GEnInfo 2\n ");
+
   for(map<Int_t, GenInfo*>::iterator j=gimap.begin(); j!=gimap.end(); ++j) {
     mGI = *(j->second);
     mGI.fLabel = j->first;

@@ -16,14 +16,15 @@ ClassImp(KinkTrack)
 
 /**************************************************************************/
 
-  void KinkTrack::_init()
+void KinkTrack::_init()
 {
   // *** Set all links to 0 ***
   mKink = 0;
 }
+
 /**************************************************************************/
 
-KinkTrack:: KinkTrack( Kink* kink, const Text_t* n, const Text_t* t) :
+KinkTrack:: KinkTrack(Kink* kink, const Text_t* n, const Text_t* t) :
   TrackBase(n,t) 
 {
   _init();
@@ -32,6 +33,5 @@ KinkTrack:: KinkTrack( Kink* kink, const Text_t* n, const Text_t* t) :
   mV = GForm("% 4.f, % 4.f, % 4.f",  mKink->fV[0],  mKink->fV[1], mKink->fV[2]);
   mP = GForm("% 6.3f, % 6.3f, % 6.3f", mKink->fP[0],  mKink->fP[1], mKink->fP[2]);
 }
-
 
 /**************************************************************************/

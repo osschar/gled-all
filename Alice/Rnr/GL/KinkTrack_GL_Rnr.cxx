@@ -34,7 +34,9 @@ void KinkTrack_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   ZGlass_GL_Rnr::PostDraw(rd);
 }
+
 /**************************************************************************/
+
 namespace {
   inline double dphi_deg(const double p1, const double p2) {
     double r = p1 - p2;
@@ -45,6 +47,7 @@ namespace {
 }
 
 /**************************************************************************/
+
 void KinkTrack_GL_Rnr::Render(RnrDriver* rd)
 {
   Kink* p = mKinkTrack->mKink;
@@ -61,14 +64,20 @@ void KinkTrack_GL_Rnr::Render(RnrDriver* rd)
      rst_lens->mPhiOff)         return;
 
   // check boundaries
-  if(TMath::Abs(vz)>rst_lens->mMaxZ || (vx*vx + vy*vy) > (rst_lens->mMaxR)*(rst_lens->mMaxR)) return;
+  if(TMath::Abs(vz) > rst_lens->mMaxZ ||
+     (vx*vx + vy*vy) > (rst_lens->mMaxR)*(rst_lens->mMaxR)) return;
 
   // render particle as point
-  glPointSize(rst_lens->mVertexSize);
-  glBegin(GL_POINTS);
+  if(rst_lens->mVertexSize) glPointSize(rst_lens->mVertexSize);
   glColor4fv(rst_lens->mVertexColor());
-  glVertex3f(vx,vy,vz); //mother
-  glVertex3f(p->fEV[0],p->fEV[1],p->fEV[2]);  // daughter
+  glBegin(GL_POINTS);
+  glVertex3f(vx,vy,vz); // mother
+  glVertex3dv(p->fEV);  // daughter
+  glEnd();
+  if(rst_lens->mVertexSize) glPointSize(2*rst_lens->mVertexSize);
+  glColor4fv(rst_lens->mKinkVColor());
+  glBegin(GL_POINTS);
+  glVertex3dv(p->fKV);  // reconstructed kink position
   glEnd();
 
   // show particle momentum
@@ -77,7 +86,8 @@ void KinkTrack_GL_Rnr::Render(RnrDriver* rd)
     glBegin(GL_LINES);
     glColor4fv(rst_lens->mPColor());
     glVertex3f(vx,vy,vz);
-    Float_t ps = rst_lens->mPMinLen + TMath::Log10(1 + TMath::Sqrt(px*px+py*py+pz*pz)/rst_lens->mPScale);
+    Float_t ps = rst_lens->mPMinLen +
+      TMath::Log10(1 + TMath::Sqrt(px*px+py*py+pz*pz)/rst_lens->mPScale);
     TVector3 v(px,py,pz);
     v = ps*v.Unit();
     glVertex3f(v.X() + vx, v.Y() + vy, v.Z() + vz);

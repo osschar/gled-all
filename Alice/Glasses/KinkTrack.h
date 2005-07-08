@@ -10,7 +10,8 @@
 #include <Glasses/TrackBase.h>
 #include <Stones/Kink.h>
  
-class KinkTrack : public TrackBase {
+class KinkTrack : public TrackBase
+{
   MAC_RNR_FRIENDS(KinkTrack);
 
  private:
@@ -18,6 +19,7 @@ class KinkTrack : public TrackBase {
 
  protected:
   Kink*             mKink;           // X{GS} 
+
  public:
   KinkTrack(const Text_t* n="KinkTrack", const Text_t* t=0) :
     TrackBase(n,t) { _init(); }
@@ -27,7 +29,7 @@ class KinkTrack : public TrackBase {
 
 #include "KinkTrack.h7"
   ClassDef(KinkTrack, 1)
-    }; // endclass KinkTrack
+}; // endclass KinkTrack
 
 GlassIODef(KinkTrack);
 
