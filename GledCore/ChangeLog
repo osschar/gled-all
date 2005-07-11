@@ -1,3 +1,14 @@
+2005-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZRlNameStack.cxx:
+	* Glasses/ZRlNameStack.h:
+	* Pupils/Pupil.cxx:
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	* Rnr/GL/ZRlNameStack_GL_Rnr.cxx:
+	Added support for clearing and restoring name-stack contents when
+	disabling name-stack operations via ZRlNameStack.
+
 2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZNode.cxx:
