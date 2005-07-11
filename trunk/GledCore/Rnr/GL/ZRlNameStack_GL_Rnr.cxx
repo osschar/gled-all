@@ -20,12 +20,12 @@ void ZRlNameStack_GL_Rnr::PreDraw(RnrDriver* rd)
   bExState = rd->GL()->GetDoPickOps();
   switch(mZRlNameStack->mNameStackOp) {
   case ZRnrModBase::O_On:
-    ConsiderRebuildDL(rd);
     rd->PushRnrMod(ZRlNameStack::FID(), mRnrMod);
     rd->GL()->SetDoPickOps(true);
     break;
   case ZRnrModBase::O_Off:
     rd->GL()->SetDoPickOps(false);
+    if(mZRlNameStack->bClearStack) rd->GL()->ClearNameStack();
     break;
   case ZRnrModBase::O_Nop:
     break;
@@ -36,7 +36,6 @@ void ZRlNameStack_GL_Rnr::Draw(RnrDriver* rd)
 {
   switch(mZRlNameStack->mNameStackOp) {
   case ZRnrModBase::O_On:
-    ConsiderRebuildDL(rd);
     rd->SetDefRnrMod(ZRlNameStack::FID(), mRnrMod);
     rd->GL()->SetDoPickOps(true);
     break;
@@ -46,6 +45,8 @@ void ZRlNameStack_GL_Rnr::Draw(RnrDriver* rd)
   case ZRnrModBase::O_Nop:
     break;
   }
+  if(mZRlNameStack->bClearStack)   rd->GL()->ClearNameStack();
+  if(mZRlNameStack->bRestoreStack) rd->GL()->RestoreNameStack();
 }
 
 void ZRlNameStack_GL_Rnr::PostDraw(RnrDriver* rd)
@@ -57,6 +58,7 @@ void ZRlNameStack_GL_Rnr::PostDraw(RnrDriver* rd)
     break;
   case ZRnrModBase::O_Off:
     rd->GL()->SetDoPickOps(bExState);
+    if(mZRlNameStack->bRestoreStack) rd->GL()->RestoreNameStack();
     break;
   case ZRnrModBase::O_Nop:
     break;

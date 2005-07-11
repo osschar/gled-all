@@ -18,7 +18,9 @@ ClassImp(ZRlNameStack)
 
 void ZRlNameStack::_init()
 {
-  mNameStackOp = O_Off;
+  mNameStackOp = O_Nop;
+  bClearStack    = false;
+  bRestoreStack  = false;
 }
 
 /**************************************************************************/

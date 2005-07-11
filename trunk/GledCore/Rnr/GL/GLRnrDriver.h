@@ -18,6 +18,7 @@ protected:
   UInt_t                    mPickCount;  // X{g}
   UInt_t                    mPickSize;
   A_Rnr::vNSE_t             mPickVector; // X{r}
+  list<UInt_t>              mStackCopy;
 
   void push_name(A_Rnr* rnr, void* ud);
   void pop_name();
@@ -52,6 +53,8 @@ public:
   void PopName()
   { if(bInPicking && bDoPickOps) pop_name(); }
 
+  void ClearNameStack();
+  void RestoreNameStack();
 
   // Lamps
   A_Rnr** GetLamps() { return mLamps; }

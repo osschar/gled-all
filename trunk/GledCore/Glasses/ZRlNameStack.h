@@ -10,13 +10,16 @@
 #include <Glasses/ZRnrModBase.h>
 
 class ZRlNameStack : public ZRnrModBase {
+  // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZRlNameStack);
 
 private:
   void _init();
 
 protected:
-  ZRnrModBase::Operation_e mNameStackOp; // X{GS}   7 PhonyEnum()
+  ZRnrModBase::Operation_e mNameStackOp;  // X{GS} 7 PhonyEnum()
+  Bool_t                   bClearStack;   // X{GS} 7 Bool(-join=>1)
+  Bool_t                   bRestoreStack; // X{GS} 7 Bool()
 
 public:
   ZRlNameStack(const Text_t* n="ZRlNameStack", const Text_t* t=0) :
