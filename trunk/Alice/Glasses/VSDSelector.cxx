@@ -447,7 +447,6 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
     
       //kinematics
       if(import_kine){
-	printf("kinks & import kine");
 	//  kine mother
 	MCParticle* mk = Particle(k->fLabel);
 	MCTrack* mc_mk = new MCTrack(mk);
