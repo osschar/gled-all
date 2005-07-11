@@ -79,12 +79,33 @@ void GLRnrDriver::BeginPick()
   bInPicking = true;
   bDoPickOps = true;
   mPickCount = 0;
+  mStackCopy.clear();
 }
 
 void GLRnrDriver::EndPick()
 {
   bInPicking = false;
 }
+
+/**************************************************************************/
+
+void GLRnrDriver::ClearNameStack()
+{
+  if(!bInPicking) return;
+  int m = mStackCopy.size();
+  while(m-- > 0)
+    glPopName();
+}
+
+void GLRnrDriver::RestoreNameStack()
+{
+  if(!bInPicking) return;
+  list<UInt_t>::iterator i = mStackCopy.begin();
+  while(i != mStackCopy.end())
+    glPushName(*(i++));
+}
+
+/**************************************************************************/
 
 void GLRnrDriver::push_name(A_Rnr* rnr, void* ud)
 {
@@ -97,10 +118,12 @@ void GLRnrDriver::push_name(A_Rnr* rnr, void* ud)
   nse.fRnr      = rnr;
   nse.fUserData = ud;
   glPushName(mPickCount);
+  mStackCopy.push_back(mPickCount);
 }
 
 void GLRnrDriver::pop_name()
 {
+  mStackCopy.pop_back();
   glPopName();
 }
 

@@ -623,8 +623,14 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
     for(int i=0; i<n; i++) {
       GLuint m = *x; x++;
 
+      if(m == 0) {
+	// This is ok ... name-stack ops can be switched off.
+	x += 2 + m;
+	continue;
+      }
       if(x - mPickBuff + 2 + m > (UInt_t)mPickBuffSize) {
 	cout << _eh << "overflow of selection buffer, should not happen.\n";
+	x += 2 + m;
 	continue;
       }
 
