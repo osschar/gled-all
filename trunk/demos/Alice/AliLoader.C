@@ -63,9 +63,12 @@ void AliLoader(const Text_t* dirname = 0,
 
   // Scene returned in g_scene.
   alice_simple_init("alice_minigeo.root", "def_geoview.root");
+  // alice_simple_init("alice_fullgeo.root", "def_geoview.root");
 
-
- 
+  ZNode* geo_top = (ZNode*) g_scene->FindLensByPath("Geometry");
+  CREATE_ATT_GLASS(pick_off, ZRlNameStack, geo_top, SetRnrMod, "Picking Off", 0);
+  pick_off->SetClearStack(true); pick_off->SetRestoreStack(true);
+  pick_off->SetNameStackOp(0);
   
   ZNode* var = (ZNode*) g_scene->FindLensByPath("Var");
 
@@ -93,8 +96,6 @@ void AliLoader(const Text_t* dirname = 0,
 
   CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
 
-
-  
 
   ZAliLoad* al = new ZAliLoad();
   aliload = al;
