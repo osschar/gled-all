@@ -24,16 +24,17 @@ void Text::_init()
   // Override settings from ZGlass
   bUseDispList = true;
   // Override settings from ZNode
-  bUseScale = true;
+  bUseScale    = true;
 
   bAlpha     = false;   bBlend     = true;
-  bPolyOffFG = true;    bPolyOffBG = true;
-  mPOFac     = -2;      mPOUni     = -2;
   bAbsSize   = true;    bCenter    = true;
+  bBackPoly  = true;
+  bFramePoly = true;
   bFillBack  = false;
-  bBorder    = true;
   mXBorder   = 0.1;     mYBorder   = 0.1;
   mFGCol.rgba(1,1,1,1); mBGCol.rgba(0,0,0,1);
+  mFrameW    = 0.05;
+  mFrameCol.gray(0.8);
 }
 
 /**************************************************************************/

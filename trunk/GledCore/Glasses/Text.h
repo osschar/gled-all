@@ -23,18 +23,17 @@ protected:
 
   Bool_t	bAlpha;		// X{GST}  7 Bool(-join=>1)
   Bool_t	bBlend;		// X{GST}  7 Bool()
-  Bool_t	bPolyOffFG;	// X{GST}  7 Bool(-join=>1)
-  Bool_t	bPolyOffBG;	// X{GST}  7 Bool()
-  Float_t	mPOFac;		// X{GST}  7 Value(-range=>[-10,10,1,100], -join=>1)
-  Float_t	mPOUni;		// X{GST}  7 Value(-range=>[-10,10,1,100])
   Bool_t	bAbsSize;	// X{GST}  7 Bool(-join=>1)
   Bool_t	bCenter;	// X{GST}  7 Bool()
-  Bool_t	bFillBack;	// X{GST}  7 Bool(-join=>1)
-  Bool_t	bBorder;	// X{GST}  7 Bool()
+  Bool_t	bBackPoly;	// X{GST}  7 Bool(-join=>1)
+  Bool_t	bFramePoly;	// X{GST}  7 Bool(-join=>1)
+  Bool_t	bFillBack;	// X{GST}  7 Bool(=>1)
   Float_t	mXBorder;	// X{GST}  7 Value(-range=>[0,100,1,100], -join=>1)
   Float_t	mYBorder;	// X{GST}  7 Value(-range=>[0,100,1,100])
   ZColor	mFGCol;		// X{PGST} 7 ColorButt(-join=>1)
   ZColor	mBGCol;		// X{PGST} 7 ColorButt()
+  Float_t	mFrameW;	// X{GST}  7 Value(-range=>[0,100,1,1000], -join=>1)
+  ZColor        mFrameCol;      // X{PGST} 7 ColorButt()
 
 public:
   Text(const Text_t* n="Text", const Text_t* t=0) : ZNode(n,t) { _init(); }
