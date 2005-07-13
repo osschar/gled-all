@@ -17,13 +17,13 @@ void MCTrackRnrStyle_GL_Rnr::_init()
 
 void MCTrackRnrStyle_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  ConsiderRebuildDL(rd);
+  update_tring_stamp(rd);
   rd->PushRnrMod(MCTrackRnrStyle::FID(),  mRnrMod);
 }
 
 void MCTrackRnrStyle_GL_Rnr::Draw(RnrDriver* rd)
 {
-  ConsiderRebuildDL(rd);
+  update_tring_stamp(rd);
   rd->SetDefRnrMod(MCTrackRnrStyle::FID(), mRnrMod);
 }
 
