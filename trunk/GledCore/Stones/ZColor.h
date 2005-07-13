@@ -39,6 +39,7 @@ public:
   void rgb_to_ubyte(unsigned char* ub, bool wrap=false) const;
 
   const Float_t* operator()() const { return c; }
+  const Float_t* array()      const { return c; }
   Float_t  operator[](int i) const { return c[i]; }
   Float_t& operator[](int i) { return c[i]; }
 
