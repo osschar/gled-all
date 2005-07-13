@@ -18,6 +18,8 @@ protected:
   ZRnrModBase* mZRnrModBase;
   RnrMod*      mRnrMod;
 
+  virtual void update_tring_stamp(RnrDriver* rd);
+
 public:
   ZRnrModBase_GL_Rnr(ZRnrModBase* idol) :
     ZGlass_GL_Rnr(idol), mZRnrModBase(idol)
@@ -27,8 +29,6 @@ public:
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
-
-  virtual void ConsiderRebuildDL(RnrDriver* rd);
 
 }; // endclass ZRnrModBase_GL_Rnr
 

@@ -27,7 +27,7 @@ ZRnrModBase_GL_Rnr::~ZRnrModBase_GL_Rnr()
 void ZRnrModBase_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   // Nothing to be done here. Suppress ZGlass implementation.
-  // Sub-classes usually call ConsiderRebuildDL.
+  // Sub-classes usually call update_tring_stamp.
 }
 
 void ZRnrModBase_GL_Rnr::Draw(RnrDriver* rd)
@@ -42,7 +42,7 @@ void ZRnrModBase_GL_Rnr::PostDraw(RnrDriver* rd)
 
 /**************************************************************************/
 
-void ZRnrModBase_GL_Rnr::ConsiderRebuildDL(RnrDriver* rd)
+void ZRnrModBase_GL_Rnr::update_tring_stamp(RnrDriver* rd)
 {
-  mRnrMod->fTringTS = mGlass->GetStampReqTring();
+  mRnrMod->fTringTS = mZRnrModBase->GetStampReqTring();
 }

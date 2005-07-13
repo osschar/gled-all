@@ -32,7 +32,7 @@ void ZRlFont_GL_Rnr::AbsorbRay(Ray& ray)
 void ZRlFont_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   if(mFont) {
-    ConsiderRebuildDL(rd);
+    update_tring_stamp(rd);
     rd->PushRnrMod(ZRlFont::FID(), mRnrMod);
   }
 }
@@ -40,7 +40,7 @@ void ZRlFont_GL_Rnr::PreDraw(RnrDriver* rd)
 void ZRlFont_GL_Rnr::Draw(RnrDriver* rd)
 {
   if(mFont) {
-    ConsiderRebuildDL(rd);
+    update_tring_stamp(rd);
     rd->SetDefRnrMod(ZRlFont::FID(), mRnrMod);
   }
 }
