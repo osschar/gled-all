@@ -64,36 +64,42 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
     glTranslatef(-width/2.0*scale, 0, 0);
   }
 
-  if(mText->bBorder) {
+  Float_t poly_offa = 0;
 
-    if(mText->bPolyOffBG) {
-      glEnable(GL_POLYGON_OFFSET_FILL);
-      glPolygonOffset(mText->mPOFac/2, mText->mPOUni/2);
-    } else {
-      glDisable(GL_POLYGON_OFFSET_FILL);
-    }
-      
+  if(mText->bBackPoly) {
+
     float x0 = -mText->mXBorder;
     float x1 = (float)width/h_box + mText->mXBorder;
     float y0 = -mText->mYBorder   - float(descent)/(h_box);
     float y1 =  mText->mYBorder   + float(ascent)/(h_box);
 
-    glColor4fv(mText->mBGCol());
+    if(mText->bFramePoly) {
+      glColor4fv(mText->mFrameCol());
+      Float_t w = mText->mFrameW;
+      glBegin(GL_QUADS);
+      glVertex2f(x0-w, y0-w);  glVertex2f(x1+w, y0-w);
+      glVertex2f(x1+w, y1+w);  glVertex2f(x0-w, y1+w);
+      glEnd();
+      poly_offa -= 1;
+    }
 
+    if(poly_offa != 0) {
+      glEnable(GL_POLYGON_OFFSET_FILL);
+      glPolygonOffset(poly_offa, poly_offa);
+    }
+    
+    glColor4fv(mText->mBGCol());
     glBegin(GL_QUADS);
-    glVertex2f(x0, y0);
-    glVertex2f(x1, y0);
-    glVertex2f(x1, y1);
-    glVertex2f(x0, y1);
+    glVertex2f(x0, y0);  glVertex2f(x1, y0);
+    glVertex2f(x1, y1);  glVertex2f(x0, y1);
     glEnd();
 
+    poly_offa -= 1;
   }
 
-  if(mText->bPolyOffFG) {
+  if(poly_offa != 0) {
     glEnable(GL_POLYGON_OFFSET_FILL);
-    glPolygonOffset(mText->mPOFac, mText->mPOUni);
-  } else {
-    glDisable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(poly_offa, poly_offa);
   }
 
   glColor4fv(mText->mFGCol());
