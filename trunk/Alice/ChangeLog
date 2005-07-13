@@ -1,3 +1,13 @@
+2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/PRSBase_GL_Rnr.cxx:
+	* Rnr/GL/RecTrackRS_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegRnrMod_GL_Rnr.cxx:
+	In GledCore::ZRnrModBase renamed ConsiderRebuildDL() to
+	update_tring_stamp().
+
 2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/AliConverter.cxx:
@@ -43,7 +53,7 @@
 	Conversion flow improvement.
 	In CreateVSD(): skip V0 and Kink conversion if RecTrack conversion
 	fails.
-	In ConvertKinematics(): protection agains non-existing
+	In ConvertKinematics(): protection against non-existing
 	TrackRefs.root. Conversion proceeds, decay points are not set.
 
 	* Glasses/MCTrack.cxx:

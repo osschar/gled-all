@@ -1,3 +1,13 @@
+2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	Disabled picking of geometry by default.
+
+	* common_foos.C:
+	Use demo_scene_elements.C macro from GledCore for creation of
+	orthographic camera bases. In fact the code was moved there and
+	extended to allow selection of a custom up-axis.
+
 2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* AliLoader.C:
