@@ -28,15 +28,23 @@ public:
 
   struct Fl_Event {
     int    fEvent;
+    int    fState;
     int    fKey;
     int    fButton;
-    int    fState;
+    int    fButtons;
+    int    fClicks;
+    int    fIsClick;
+    int    fX, fY;
     string fText;
+
+    bool   bIsMouse;
 
     lNSE_t fNameStack;
     lNSE_i fCurrentNSE;
+    int    fNameStackSize;
 
-    OptoStructs::ZGlassImg* fBelowMouse;
+    bool ns_empty() { return fNameStackSize > 0; }
+    int  ns_size()  { return fNameStackSize;  }
 
     void dump();
   };
