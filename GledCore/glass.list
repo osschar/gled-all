@@ -10,7 +10,6 @@ AList			5	Glasses/AList
 ZDeque			6	Glasses/ZDeque
 ZNode			16	Glasses/ZNode		.
 ZNodeLink		17	Glasses/ZNodeLink	.
-ZNodeListLink		18	Glasses/ZNodeListLink	.
 
 # God & Rulers
 ZGod			32	Glasses/ZGod
@@ -74,6 +73,7 @@ ZGlClipPlane		181	Glasses/ZGlClipPlane	.
 ZRlNodeMarkup		182	Glasses/ZRlNodeMarkup	.
 ZRlFont			183	Glasses/ZRlFont		.
 ZRlNameStack		184	Glasses/ZRlNameStack	.
+ZGlPerspective		185	Glasses/ZGlPerspective	.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
@@ -87,3 +87,8 @@ PerfMeterOperator	225	Glasses/PerfMeterOperator
 MetaViewInfo		256	Glasses/MetaViewInfo
 MetaSubViewInfo		257	Glasses/MetaSubViewInfo
 MetaWeedInfo		258	Glasses/MetaWeedInfo
+
+# GL GUI
+WGlDirectory		288	Glasses/WGlDirectory	.
+WGlButton		289	Glasses/WGlButton	.
+WGlFrameStyle		290	Glasses/WGlFrameStyle	.
