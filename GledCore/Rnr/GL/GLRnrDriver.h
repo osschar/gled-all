@@ -23,6 +23,10 @@ protected:
   void push_name(A_Rnr* rnr, void* ud);
   void pop_name();
 
+  A_Rnr*                    mBelowMouse; // X{gs}
+  A_Rnr*                    mPushed;     // X{gs}
+  A_Rnr*                    mFocus;      // X{gs}
+
   //--------------------------------
 
   Int_t		mMaxLamps;	 // X{g}
@@ -33,6 +37,8 @@ protected:
 
   Bool_t        bInDLRebuild;    // X{gs}
   Bool_t        bMarkupNodes;	 // X{gs}
+
+  Bool_t        bRedraw;         // X{gs}
 
 public:
   GLRnrDriver(Eye* e, const string& r);
@@ -48,10 +54,9 @@ public:
   A_Rnr::NSE_t& NameStack(UInt_t i)
   { if(i>mPickCount) i=0; return mPickVector[i]; }
 
-  void PushName(A_Rnr* rnr, void* ud=0)
-  { if(bInPicking && bDoPickOps) push_name(rnr, ud); }
-  void PopName()
-  { if(bInPicking && bDoPickOps) pop_name(); }
+  Bool_t PickingP()                     { return bInPicking && bDoPickOps; }
+  void PushName(A_Rnr* rnr, void* ud=0) { if(PickingP()) push_name(rnr, ud); }
+  void PopName()                        { if(PickingP()) pop_name(); }
 
   void ClearNameStack();
   void RestoreNameStack();

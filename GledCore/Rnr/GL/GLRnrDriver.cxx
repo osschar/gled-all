@@ -19,6 +19,8 @@ GLRnrDriver::GLRnrDriver(Eye* e, const string& r) : RnrDriver(e, r)
   mPickSize  = 1024;
   mPickVector.resize(mPickSize);
 
+  mBelowMouse = mPushed = mFocus;
+
   mMaxLamps = 8;
   mLamps = new (A_Rnr*)[mMaxLamps];
 
@@ -26,6 +28,8 @@ GLRnrDriver::GLRnrDriver(Eye* e, const string& r) : RnrDriver(e, r)
   mClipPlanes = new (A_Rnr*)[mMaxClipPlanes];
 
   bMarkupNodes = false;
+
+  bRedraw = false;
 }
 
 GLRnrDriver::~GLRnrDriver()
