@@ -19,7 +19,8 @@ protected:
   ZGlass*	mLens;		// X{gS} L{} RnrBits{0,4,0,0, 0,0,0,5}
 
 public:
-  ZNodeLink(Text_t* n="ZNodeLink", Text_t* t=0) : ZNode(n,t) { _init(); }
+  ZNodeLink(const Text_t* n="ZNodeLink", const Text_t* t=0) : ZNode(n,t)
+  { _init(); }
 
 #include "ZNodeLink.h7"
   ClassDef(ZNodeLink, 1)
