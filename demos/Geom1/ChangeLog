@@ -1,3 +1,9 @@
+2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	Modified and extended to use new GL-widget stuff; added standard
+	camera bases for orthographic viewing.
+
 2005-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* metagui_test.C:

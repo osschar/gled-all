@@ -1,5 +1,10 @@
 2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* macros/demo_scene_elements.C:
+	New file: contains creators of common complex scene elements.
+
+2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Pupils/Pupil.cxx:
 	* Pupils/Pupil.h:
 	Rewritten overlay event handling and delivery: now tries to
