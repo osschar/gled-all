@@ -603,7 +603,7 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
     x = min_p;
     int m = *x; x += 3;
     for(int i=0; i<m; ++i) {
-      result.push_back(mDriver->NameStack(x[i]));
+      result.push_front(mDriver->NameStack(x[i]));
     }
   }
   return n; 
@@ -784,6 +784,7 @@ void Pupil::draw()
     rnr_fake_overlay(rnr_time);
 
   }
+  check_driver_redraw();
 }
 
 /**************************************************************************/
@@ -839,6 +840,9 @@ void Pupil::rnr_default_init()
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, mInfo->GetLiMo2Side());
   glPolygonMode(GL_FRONT, (GLenum)mInfo->GetFrontMode());
   glPolygonMode(GL_BACK,  (GLenum)mInfo->GetBackMode());
+
+  glPointSize(1);
+  glLineWidth(1);
 
   if(mInfo->GetBlend()) {
     glEnable(GL_BLEND);
@@ -913,49 +917,132 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
 // fltk handle
 /**************************************************************************/
 
-int Pupil::handle(int ev)
+int Pupil::overlay_pick(A_Rnr::Fl_Event& e)
 {
+  Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
+  if(n > 0) {
+    e.fCurrentNSE    = e.fNameStack.begin();
+    e.fNameStackSize = n;
+  } else {
+    e.fCurrentNSE    = e.fNameStack.end();
+    e.fNameStackSize = 0;
+  }
+  return n;
+}
 
-  if(ev == FL_ENTER || ev == FL_LEAVE) {
-    Fl_Window::handle(ev);
+int Pupil::overlay_pick_and_deliver(A_Rnr::Fl_Event& e)
+{
+  Int_t n = overlay_pick(e);
+  if(n > 0) {
+    while(e.fCurrentNSE != e.fNameStack.end()) {
+      if( e.fCurrentNSE->fRnr->Handle(mDriver, e) )
+	return 1;
+      ++e.fCurrentNSE;
+    }
+  }
+  return 0;
+}
+
+int Pupil::handle_overlay(int ev)
+{
+  A_Rnr::Fl_Event e;
+  e.fEvent   = ev;
+
+  e.fState   = Fl::event_state();
+  e.fKey     = Fl::event_key();
+  e.fButton  = Fl::event_button();
+  e.fButtons = Fl::event_buttons();
+  e.fClicks  = Fl::event_clicks();
+  e.fIsClick = Fl::event_is_click();
+  e.fX       = Fl::event_x();
+  e.fY       = Fl::event_y();
+  e.fText    = string(Fl::event_text(), Fl::event_length());
+
+  e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
+		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE);
+
+  if(ev == FL_ENTER) {
+    overlay_pick_and_deliver(e);
+    return 1; // always return 1 to keep getting move events
+  }
+  else if(ev == FL_MOVE) {
+    A_Rnr* below_mouse = mDriver->GetBelowMouse();
+    Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
+    if(n > 0) {
+      // Simulate ENTER / LEAVE events.
+      e.fEvent = FL_ENTER;
+      e.fCurrentNSE = e.fNameStack.begin();
+      while(e.fCurrentNSE != e.fNameStack.end() &&
+	    e.fCurrentNSE->fRnr != below_mouse)
+	{
+	  if( e.fCurrentNSE->fRnr->Handle(mDriver, e) ) {
+	    if(below_mouse) {
+	      e.fEvent = FL_LEAVE;
+	      below_mouse->Handle(mDriver, e);
+	    }
+	    mDriver->SetBelowMouse(e.fCurrentNSE->fRnr);
+	    return 1;
+	  }
+	  ++e.fCurrentNSE;
+	}
+      // Deliver MOVE
+      e.fEvent = FL_MOVE;
+      if(below_mouse) {
+	return below_mouse->Handle(mDriver, e);
+      }
+    } else {
+      if(below_mouse) {
+	e.fEvent = FL_LEAVE;
+	below_mouse->Handle(mDriver, e);
+	mDriver->SetBelowMouse(0);
+	return 1;
+      }
+    }
+    return 0;
+  }
+  else if(ev == FL_LEAVE) {
+    if(mDriver->GetBelowMouse()) {
+      mDriver->GetBelowMouse()->Handle(mDriver, e);
+    }
     return 1;
   }
-    
-  if(mEventHandlerImg != 0 && mOverlayImg != 0 &&
-     (ev == FL_PUSH      || ev == FL_RELEASE || ev == FL_DRAG ||
-      ev == FL_KEYDOWN   || ev == FL_KEYUP   || ev == FL_MOVE ||
-      ev == FL_MOUSEWHEEL) ) {
-
-    A_Rnr::Fl_Event e;
-    e.fKey    = Fl::event_key();
-    e.fButton = Fl::event_button();
-    e.fState  = Fl::event_state();
-    e.fText   = string(Fl::event_text(), Fl::event_length());
-
-    Int_t n = PickTopNameStack(e.fNameStack, Fl::event_x(), Fl::event_y(), false, true);
-    
-    OS::ZGlassImg* bm = n ? e.fNameStack.back().fRnr->fImg : 0;
-
-    // Simulate enter / leave events
-    if(mBelowMouseImg != bm) {
-      if(mBelowMouseImg != 0) {
-	e.fBelowMouse = mBelowMouseImg;
-	e.fEvent      = FL_LEAVE;
-	mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
-      } 
-      if(bm != 0) {
-	e.fBelowMouse = bm;
-	e.fEvent      = FL_ENTER;
-	mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
+  else if(ev == FL_PUSH || ev == FL_RELEASE || ev == FL_DRAG) {
+    A_Rnr* pushed = mDriver->GetPushed();
+    if(pushed) {
+      overlay_pick(e);
+      pushed->Handle(mDriver, e);
+      if(ev == FL_RELEASE) { // as in fltk; would prefer "&& e.fButtons == 0"
+	mDriver->SetPushed(0);
       }
-      mBelowMouseImg = bm;
+      return 1;
+    } else {
+      if(ev == FL_PUSH) {
+	if( overlay_pick_and_deliver(e) ) {
+	  mDriver->SetPushed(e.fCurrentNSE->fRnr);
+	  return 1;
+	}
+      }
     }
+  }
+  else if(ev == FL_MOUSEWHEEL) {
 
-    e.fBelowMouse = mBelowMouseImg;
-    e.fEvent      = ev;
-    int done = mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
-    if(done)
-      return done; 
+  }
+  else if(ev == FL_KEYDOWN || ev == FL_KEYUP) {
+
+  }
+
+  return 0;
+}
+
+int Pupil::handle(int ev)
+{    
+  // mEventHandlerImg - ???? reuse as fallback or as default; or split in two
+  if(mOverlayImg) {
+    int ovlp = handle_overlay(ev);
+    if(ovlp) {
+      check_driver_redraw();
+      return 1;
+    }
   }
 
   if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
@@ -1202,16 +1289,33 @@ void Pupil::dump_image(const string& fname)
 }
 
 /**************************************************************************/
+// Driver redraw
+/**************************************************************************/
+
+void Pupil::check_driver_redraw()
+{
+  if(mDriver->GetRedraw()) {
+    Fl::add_timeout(0, (Fl_Timeout_Handler)redraw_timeout, this);
+    mDriver->SetRedraw(false);
+  }
+}
+
+void Pupil::redraw_timeout(Pupil* pup)
+{
+  pup->redraw();
+}
+
+/**************************************************************************/
 // Hacks.
 /**************************************************************************/
+
+float Pupil::default_distance()
+{
+  return mInfo->GetMSMoveFac() * TMath::Power(10, mInfo->GetMoveOM() + 2);
+}
 
 void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
 {
   pup->mCameraView->UpdateDataWeeds(FID_t(0,0));
   pup->redraw();
-}
-
-float Pupil::default_distance()
-{
-  return mInfo->GetMSMoveFac() * TMath::Power(10, mInfo->GetMoveOM() + 2);
 }
