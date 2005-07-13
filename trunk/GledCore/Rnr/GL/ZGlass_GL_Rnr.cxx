@@ -17,6 +17,7 @@ ZGlass_GL_Rnr::ZGlass_GL_Rnr(ZGlass* d) : A_Rnr(), mGlass(d)
   mDispList   = glGenLists(1);
   bRebuildDL         = true;
   bUseNameStack      = true;
+  bUsesSubPicking    = false;
   bSuppressNameLabel = false;
 }
 
@@ -44,15 +45,16 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 
   if(mGlass->bUseDispList) {
     if(bRebuildDL) {
-      if(rd->GL()->GetInDLRebuild() == false) {
-	rd->GL()->SetInDLRebuild(true);
+      GLRnrDriver* glrd = rd->GL();
+      if(glrd->GetInDLRebuild() || (bUsesSubPicking && glrd->PickingP())) {
+	Render(rd);
+      } else {
+	glrd->SetInDLRebuild(true);
 	glNewList(mDispList, GL_COMPILE_AND_EXECUTE);
 	Render(rd);
 	glEndList();
-	rd->GL()->SetInDLRebuild(false);
+	glrd->SetInDLRebuild(false);
 	bRebuildDL = false;
-      } else {
-	Render(rd);
       }
     } else {
       glCallList(mDispList);
@@ -71,6 +73,14 @@ void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 
 void ZGlass_GL_Rnr::Render(RnrDriver* rd)
 {}
+
+/**************************************************************************/
+
+void ZGlass_GL_Rnr::Redraw(RnrDriver* rd)
+{
+  bRebuildDL = true;
+  rd->GL()->SetRedraw(true);
+}
 
 /**************************************************************************/
 

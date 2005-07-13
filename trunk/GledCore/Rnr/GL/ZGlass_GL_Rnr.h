@@ -21,6 +21,7 @@ protected:
   GLuint	mDispList;
   bool		bRebuildDL;
   bool          bUseNameStack;
+  bool          bUsesSubPicking;
   bool		bSuppressNameLabel;
 
   void obtain_rnrmod(RnrDriver* rd, RnrModStore& rms);
@@ -37,6 +38,8 @@ public:
 
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd) {}
+
+  virtual void Redraw(RnrDriver* rd);
 
   /**************************************************************************/
 
