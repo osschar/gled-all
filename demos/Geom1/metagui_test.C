@@ -24,6 +24,9 @@ void metagui_test()
   g_queen->Add(images);
   g_scene = images;
 
+  Gled::LoadMacro("demo_scene_elements.C");
+  dse_make_camera_bases(g_scene, g_scene, 3, 10, 0, -12, 6);
+
   // Images
 
   CREATE_ADD_GLASS(image1, ZImage, images, "GledLogo", 0);
@@ -31,6 +34,10 @@ void metagui_test()
   image1->Load();
   image1->SetEnvMode(GL_MODULATE);
   image1->SetLoadAdEnlight(true);
+
+  // CREATE_ATT_GLASS(nmc, ZRlNodeMarkup, images, SetRnrMod, "ZRlNodeMarkup", 0);
+  // nmc->SetRnrAxes(true);
+  // nmc->SetTilePos("r");
 
   CREATE_ADD_GLASS(image2, ZImage, images, "Orchid", 0);
   image2->SetFile("orchid.jpeg");
@@ -164,11 +171,14 @@ void metagui_test()
   rot_eventor->SetInterBeatMS(30);
   CREATE_ADD_GLASS(rot_op, Mover, rot_eventor, "Rotator", 0);
   rot_op->SetRotateParams(1, 2, 0.01);
+  rot_op->SetNode(morphs[1]);
 
   //--------------------------------
 
   CREATE_ATT_GLASS(clipplane, ZGlClipPlane, morphs[1], SetRnrMod,
 		   "ClipPlane", 0);
+  // clipplane->SetRnrSelf(false);
+  // morphs[1]->MoveLF(3, 2);
 
   //--------------------------------
   // Overlay
@@ -184,15 +194,34 @@ void metagui_test()
   CREATE_ADD_GLASS(ovl_lm, ZGlLightModel, overlay, "LightOff", 0);
   ovl_lm->SetLightModelOp(0);
 
-  CREATE_ADD_GLASS(nll, ZNodeListLink, overlay, "Element list", "Bar");
-  nll->SetContents(images);
+  CREATE_ADD_GLASS(pp, ZGlPerspective, overlay, "Perspective", 0);
+  pp->StandardFixed();
 
-  nll->Set3Pos(0, 0, 4);
+  CREATE_ADD_GLASS(glfs, WGlFrameStyle, overlay, "Dir Frame Style", 0);
 
-  nll->StandardFixed();
+  CREATE_ADD_GLASS(gl_dir, WGlDirectory, overlay, "Gl Directory", "Bar");
+  gl_dir->SetContents(images);
+  gl_dir->StandardFixed();
+  gl_dir->SetCbackAlpha(rot_op);
+  gl_dir->SetCbackMethodName("Mover::SetNode");
+  gl_dir->SetCbackBetaType("ZNode");
 
-  nll->SetCbackAlpha(rot_op);
-  nll->SetCbackMethodName("Mover::SetNode");
+  CREATE_ADD_GLASS(bfs, WGlFrameStyle, overlay, "Butt Frame Style", 0);
+  bfs->SetHAlign(WGlFrameStyle::HA_Center);
+  bfs->SetTextFadeW(0);
+  bfs->SetTileColor(0.3, 0.5, 0.5, 0.6);
+  bfs->SetBelowMColor(0.5, 0.7, 0.7, 0.8);
+
+  CREATE_ADD_GLASS(but1, WGlButton, overlay, "Start", 0);
+  but1->Set3Pos(8.6, 1, 0);
+  but1->SetDx(1.2);
+  but1->SetCbackAlpha(rot_eventor);
+  but1->SetCbackMethodName("Start");
+  CREATE_ADD_GLASS(but2, WGlButton, overlay, "Stop", 0);
+  but2->Set3Pos(8.6, 0.2, 0);
+  but2->SetDx(1.2);
+  but2->SetCbackAlpha(rot_eventor);
+  but2->SetCbackMethodName("Stop");
 
   //--------------------------------
   // Meta GUI
@@ -251,14 +280,15 @@ void metagui_test()
   g_nest->ImportKings();
 
   ASSIGN_ATT_GLASS(guipupil, GuiPupilInfo, g_shell, AddSubShell, "GuiPupil", "");
+  guipupil->SetCameras((ZList*)g_scene->FindLensByPath("Markers/CameraInfos"));
 
   ASSIGN_ATT_GLASS(g_pupil, PupilInfo, guipupil, SetPupil, "Pupil", "");
   g_pupil->Add(images);
   g_pupil->SetUpReference(images);
   g_pupil->SetUpRefAxis(3);
+  g_pupil->ImportCameraInfo((CameraInfo*)guipupil->GetCameras()->First());
 
   g_pupil->SetOverlay(overlay);
-  g_pupil->SetEventHandler(nll);
 
   g_shell->SetDefSubShell(g_nest);
 
