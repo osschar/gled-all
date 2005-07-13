@@ -131,7 +131,18 @@ public:
   // virtual void draw_overlay();
   virtual int  handle(int ev);
 
+  virtual int  overlay_pick(A_Rnr::Fl_Event& e);
+  virtual int  overlay_pick_and_deliver(A_Rnr::Fl_Event& e);
+  virtual int  handle_overlay(int ev);
 
+  //--------------------------------------------------------------
+  // Driver redraw: combo of GLRnrDriver, draw and handle_overlay
+  
+  void check_driver_redraw();
+  static void redraw_timeout(Pupil* pup);
+
+  //--------------------------------------------------------------
+  // Hacks
   float default_distance();
   static void camera_stamp_cb(Camera* cam, Pupil* pup);
 
