@@ -1,3 +1,80 @@
+2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Rewritten overlay event handling and delivery: now tries to
+	deliver each event to the whole name-stack (belonging to the
+	nearest selection hit).
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	Added event-delivery state (mBelowMouse, mPushed, mFocus) and a flag
+	(bRedraw) via which the renderers can signal a redraw request from
+	DrawX or Handle.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Added Redraw method (signal to executor that the scene needs to be
+	redrawn) and a flag bUsesSubPicking which prevents usage of
+	display-lists during picking.
+
+	* RnrBase/A_Rnr.h:
+	Extened Fl_Event structure.
+
+	* Glasses/ZNodeListLink.cxx:
+	* Glasses/ZNodeListLink.h:
+	* Rnr/GL/ZNodeListLink_GL_Rnr.cxx:
+	* Rnr/GL/ZNodeListLink_GL_Rnr.h:
+	Renamed to WGlDirectory (and changed substantially).
+
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	* Rnr/GL/WGlButton_GL_Rnr.cxx:
+	* Rnr/GL/WGlButton_GL_Rnr.h:
+	New glass: a GL button with callback.
+
+	* Glasses/WGlDirectory.cxx:
+	* Glasses/WGlDirectory.h:
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	* Rnr/GL/WGlDirectory_GL_Rnr.h:
+	Renamed from ZNodeListLink; much code moved to WGlFrameStyle and
+	ZGlPerspective.
+
+	* Glasses/WGlFrameStyle.cxx:
+	* Glasses/WGlFrameStyle.h:
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.cxx:
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.h:
+	New glass holding frame and label drawing parameters.
+
+	* Glasses/ZGlPerspective.cxx:
+	* Glasses/ZGlPerspective.h:
+	* Rnr/GL/ZGlPerspective_GL_Rnr.cxx:
+	* Rnr/GL/ZGlPerspective_GL_Rnr.h:
+	New glass: modifies GL projection and modelview matrix for
+	orthographic viewing.
+
+	* glass.list:
+	New glasses ZGlPerspective, WGlButton, WGlFrameStyle; renamed
+	ZNodeListLink to WGlDirectory.
+
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRlNodeMarkup_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.cxx:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.h:
+	Renamed ZRnrModBase_GL_Rnr::ConsiderRebuildDL to
+	update_tring_stamp and moved it to protected section.
+
+	* Glasses/Text.cxx:
+	* Glasses/Text.h:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	Added frame, removed control of polygon offset (defaults seem ok).
+
+	* Stones/ZColor.h:
+	Added member array() returning pointer to color array.
+
+	* Glasses/ZNodeLink.h:
+	Formatting changes.
+	
 2005-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZRlNameStack.cxx:
