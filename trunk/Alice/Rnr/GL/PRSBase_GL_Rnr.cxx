@@ -17,13 +17,13 @@ void PRSBase_GL_Rnr::_init()
 
 void PRSBase_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  ConsiderRebuildDL(rd);
+  update_tring_stamp(rd);
   rd->PushRnrMod(PRSBase::FID(),  mRnrMod);
 }
 
 void PRSBase_GL_Rnr::Draw(RnrDriver* rd)
 {
-  ConsiderRebuildDL(rd);
+  update_tring_stamp(rd);
   rd->SetDefRnrMod(PRSBase::FID(), mRnrMod);
 }
 

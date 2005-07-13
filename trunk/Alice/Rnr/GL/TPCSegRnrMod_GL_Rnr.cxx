@@ -17,13 +17,13 @@ void TPCSegRnrMod_GL_Rnr::_init()
 
 void TPCSegRnrMod_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  ConsiderRebuildDL(rd);
+  update_tring_stamp(rd);
   rd->PushRnrMod(TPCSegRnrMod::FID(),  mRnrMod);
 }
 
 void TPCSegRnrMod_GL_Rnr::Draw(RnrDriver* rd)
 {
-  ConsiderRebuildDL(rd);
+  update_tring_stamp(rd);
   rd->SetDefRnrMod(TPCSegRnrMod::FID(), mRnrMod);
 }
 
