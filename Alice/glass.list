@@ -18,8 +18,10 @@ TPCSegment		87	Glasses/TPCSegment		.
 TPCSegRnrMod		88	Glasses/TPCSegRnrMod		.
 ITSModule               89      Glasses/ITSModule               .
 ITSDigRnrMod		90	Glasses/ITSDigRnrMod		.
+TOFSector               92      Glasses/TOFSector               .
+TOFDigRnrMod            93      Glasses/TOFDigRnrMod            .
 
-RecTrack                91      Glasses/RecTrack                .
-RecTrackRS              92      Glasses/RecTrackRS              .
-V0Track                 93      Glasses/V0Track                 .
-KinkTrack		94	Glasses/KinkTrack		.
+RecTrack                100     Glasses/RecTrack                .
+RecTrackRS              101     Glasses/RecTrackRS              .
+V0Track                 102     Glasses/V0Track                 .
+KinkTrack		103	Glasses/KinkTrack		.
