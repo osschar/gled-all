@@ -13,6 +13,7 @@
 #include "ZAliLoad.c7"
 
 #include <Glasses/ITSModule.h>
+#include <Glasses/TOFSector.h>
 #include <Gled/GledTypes.h>
 
 #include <AliTPCParam.h>
@@ -57,6 +58,7 @@ void ZAliLoad::_init()
   // *** Set all links to 0 ***
   mITSDigInfo = 0;
   mTPCDigInfo = 0;
+  mTOFDigInfo = 0;
 
   mConverter= 0;
   mSelector = 0;
@@ -165,7 +167,9 @@ void ZAliLoad::ClearData()
   if (mITSDigInfo) {
     delete mITSDigInfo; mITSDigInfo = 0;
   }
-
+  if (mTOFDigInfo) {
+    delete mITSDigInfo; mITSDigInfo = 0;
+  }
   SetDataDir(".");
   if(m_auto_vsdfile_p = true)
     SetVSDFile("");
@@ -336,6 +340,44 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
       if(arr->GetEntriesFast() || show_empty)
 	ShowITSModule(i, th);
     }
+  }
+}
+/**************************************************************************/
+void ZAliLoad::check_tofdig_info()
+{
+  if (mTOFDigInfo != 0 &&
+      (mTOFDigInfo->GetDataDir() != mDataDir || 
+       mTOFDigInfo->GetEvent()   != mEvent))
+    { 
+      mTOFDigInfo->DecRefCount();
+      mTOFDigInfo = 0;
+    }
+  if (mTOFDigInfo == 0)
+    {
+      mTOFDigInfo = new TOFDigitsInfo();
+      mTOFDigInfo->IncRefCount();
+      mTOFDigInfo->SetData(mDataDir, mEvent);
+    }
+}
+
+
+void ZAliLoad::ShowTOFSector(Int_t sec)
+{
+  if(sec == -1) {
+    ZNode* dh = new ZNode(GForm("%s TOF Digits", mDataDir.Data()));
+    mQueen->CheckIn(dh); Add(dh);
+    for(Int_t s = 0; s<18; s++) {
+      check_tofdig_info();
+      TOFSector* m = new TOFSector(s, mTOFDigInfo);
+      mQueen->CheckIn(m);
+      dh->Add(m);
+    }
+  }
+  else {
+    check_tofdig_info();
+    TOFSector* m = new TOFSector(sec, mTOFDigInfo);
+    mQueen->CheckIn(m);
+    Add(m);
   }
 }
 
