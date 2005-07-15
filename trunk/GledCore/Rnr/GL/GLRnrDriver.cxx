@@ -19,7 +19,7 @@ GLRnrDriver::GLRnrDriver(Eye* e, const string& r) : RnrDriver(e, r)
   mPickSize  = 1024;
   mPickVector.resize(mPickSize);
 
-  mBelowMouse = mPushed = mFocus;
+  mBelowMouse = mPushed = mFocus = 0;
 
   mMaxLamps = 8;
   mLamps = new (A_Rnr*)[mMaxLamps];
