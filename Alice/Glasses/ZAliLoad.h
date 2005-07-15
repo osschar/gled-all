@@ -12,6 +12,7 @@
 
 #include <Stones/TPCDigitsInfo.h>
 #include <Stones/ITSDigitsInfo.h>
+#include <Stones/TOFDigitsInfo.h>
 
 class ZAliLoad : public ZNode {
   MAC_RNR_FRIENDS(ZAliLoad);
@@ -100,10 +101,16 @@ class ZAliLoad : public ZNode {
   void        ShowITSModule(Int_t module, ZNode* holder=0);
   void        ShowITSDet(Int_t subdet = -1, Bool_t show_empty = false);// X{Ed} 7 MCWButt()
 
+ protected:
+  void check_tofdig_info();
+  TOFDigitsInfo* mTOFDigInfo; // X{g}
+ public:
+  void        ShowTOFSector(Int_t sec = -1); // X{Ed} 7 MCWButt()
+
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
     }; // endclass ZAliLoad
 
-GlassIODef(ZAliLoad);
+  GlassIODef(ZAliLoad);
 
 #endif
