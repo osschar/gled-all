@@ -120,6 +120,9 @@ void AliLoader(const Text_t* dirname = 0,
   itsrnrmod->SetRnrFrame(1);
   itsrnrmod->SetRibbon(ribbon1);
 
+  CREATE_ADD_GLASS(tofrnrmod, TOFDigRnrMod, var, "TOF RnrMod", 0);
+  tofrnrmod->SetRnrModFrame(1);
+  tofrnrmod->SetRibbon(ribbon1);
 
   //--------------------------------------------------------------
 
@@ -158,7 +161,7 @@ void AliLoader(const Text_t* dirname = 0,
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 40, H = 31;
+  int Y = 0, W = 40, H = 32;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, g_fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -373,6 +376,10 @@ MetaViewInfo* make_zaliload_metagui()
   CREATE_ADD_GLASS(w42, MetaWeedInfo, ms4, "ShowTPCPlate", 0);
   w42->Resize(0, y, W, 1);
   w42->Label("Show TPC Digits ..");
+  y++;
+  CREATE_ADD_GLASS(w42, MetaWeedInfo, ms4, "ShowTOFSector", 0);
+  w42->Resize(0, y, W, 1);
+  w42->Label("Show TOF Digits ..");
   y++;
   return mv;
 }
