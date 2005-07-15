@@ -136,3 +136,11 @@ void TPCDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
   }
   mOut2Seg.nsteps=k;
 }
+/**************************************************************************/
+
+void TPCDigitsInfo::Dump()
+{
+  mInnSeg.dump();
+  mOut1Seg.dump();
+  mOut2Seg.dump();
+}

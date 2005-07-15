@@ -44,15 +44,16 @@ class TPCDigitsInfo : public ZRCStone
   AliTPCParam*        mParameter;
   TTree*              mTree;
   std::vector<Int_t>  mSegEnt;
-  TPCSeg              mInnSeg;
-  TPCSeg              mOut1Seg;
-  TPCSeg              mOut2Seg;
+  TPCSeg              mInnSeg;   
+  TPCSeg              mOut1Seg;  
+  TPCSeg              mOut2Seg;  
 
   TPCDigitsInfo(const Text_t* n="TPCDigitsInfo", const Text_t* t=0) :
     ZRCStone() { _init(); }
   virtual ~TPCDigitsInfo();
 
   void SetData(const Text_t* data_dir, Int_t event);
+  void Dump();
 
 #include "TPCDigitsInfo.h7"
   ClassDef(TPCDigitsInfo, 1)
