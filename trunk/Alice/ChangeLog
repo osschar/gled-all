@@ -1,3 +1,31 @@
+2005-07-15  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/TOFDigRnrMod.cxx:
+	* Glasses/TOFDigRnrMod.h:
+	* Glasses/TOFSector.cxx:
+	* Glasses/TOFSector.h:
+        New files.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Show TOF Digits.
+ 
+	* Makefile:
+        Add TOF to include path.
+
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.h:
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	* Rnr/GL/TOFSector_GL_Rnr.h:
+        New files.
+
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+        Add Dump() function.
+
+	* glass.list:
+        New glass TOFSector.
+
 2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
