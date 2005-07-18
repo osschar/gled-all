@@ -36,11 +36,18 @@ class TPCSegRnrMod : public ZRnrModBase {
   ZColor                     mFrameCol;    // X{PGST} 7 ColorButt(-join=>1)
   Float_t                    mAlpha;       // X{gST}  7 Value(-range=>[0,1,1,100])
 
+  Bool_t                     bUseLabels;   // X{GST}  7 Bool()
+  set<Int_t>                 mLabels;
 
  public:
   TPCSegRnrMod(const Text_t* n="TPCSegRnrMod", const Text_t* t=0) :
     ZRnrModBase(n,t) { _init(); }
 
+  void   AddLabel(Int_t label);    // X{E} 7 MCWButt()
+  void   RemoveLabel(Int_t label); // X{E} 7 MCWButt()
+  void   ClearLabels();            // X{E} 7 MButt()
+  Bool_t HasLabel(Int_t label)
+  { return mLabels.find(label) != mLabels.end(); }
 
 #include "TPCSegRnrMod.h7"
   ClassDef(TPCSegRnrMod, 1)

@@ -16,7 +16,7 @@ ClassImp(TPCSegRnrMod)
 
 /**************************************************************************/
 
-  void TPCSegRnrMod::_init()
+void TPCSegRnrMod::_init()
 {
   // *** Set all links to 0 ***
   bShowMax = true;
@@ -34,9 +34,28 @@ ClassImp(TPCSegRnrMod)
   bRnrFrame   = true;
   mFrameCol.gray(0.5);
   mAlpha = 1.0;
+
+  bUseLabels = false;
 }
 
 /**************************************************************************/
 
+void TPCSegRnrMod::AddLabel(Int_t label)
+{
+  mLabels.insert(label);
+  mStampReqTring = Stamp(FID());
+}
+
+void TPCSegRnrMod::RemoveLabel(Int_t label)
+{
+  mLabels.erase(label);
+  mStampReqTring = Stamp(FID());
+}
+
+void TPCSegRnrMod::ClearLabels()
+{
+  mLabels.clear();
+  mStampReqTring = Stamp(FID());
+}
 
 /**************************************************************************/
