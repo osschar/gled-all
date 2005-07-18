@@ -466,7 +466,7 @@ void ZAliLoad::SelectV0(const Text_t* selection, Bool_t import_kine)
 }
 /**************************************************************************/
 
-void ZAliLoad::SelectKinks(const Text_t* selection, Bool_t import_kine)
+void ZAliLoad::SelectKinks(const Text_t* selection, Bool_t import_kine, Bool_t import_daughters)
 {
   static const string _eh("ZAliLoad::SelectKinks ");
 
@@ -478,7 +478,7 @@ void ZAliLoad::SelectKinks(const Text_t* selection, Bool_t import_kine)
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mKinkSelection.Data();
 
-  mSelector->SelectKinks(0, selection, import_kine);
+  mSelector->SelectKinks(0, selection, import_kine, import_daughters);
 }
 /**************************************************************************/
 
