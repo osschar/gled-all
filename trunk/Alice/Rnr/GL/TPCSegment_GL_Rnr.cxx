@@ -51,8 +51,6 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
   }
   memset(mImage, 0, ImageWidth*ImageHeight*4);
 
-  
-
   ent = info->mSegEnt[mTPCSegment->mSegment];
   if(ent != -1) {
     row=0;
@@ -89,7 +87,7 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
     }
   }
   // rnr digits
-  if( mSRM->bUseTexture){
+  if(mSRM->bUseTexture) {
     init_texture(); 
    
     display_texture(info->mInnSeg.pad_width, info->mInnSeg.pad_length, info->mInnSeg.Rlow,
@@ -123,11 +121,14 @@ void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off)
   GLubyte* img_pos;
 
   Int_t  min_time = mSRM->mTime - mSRM->mTimeWidth/2,
-         max_time = mSRM->mTime + mSRM->mTimeWidth/2;
+    max_time = mSRM->mTime + mSRM->mTimeWidth/2;
   Bool_t half_border_time = (mSRM->mTimeWidth % 2 == 0);
 
   Bool_t done_p = false;
   Bool_t save_p = false;
+
+  if(mSRM->bUseLabels) digit->ExpandTrackBuffer();
+
   digit->First();
   do {
 
@@ -135,17 +136,31 @@ void TPCSegment_GL_Rnr::load_padrow(Int_t row, Int_t col_off, Int_t row_off)
     pad  = digit->CurrentColumn();
     val  = digit->CurrentDigit();
 
-    if(mSRM->bShowMax) {
-      if(val > pad_var) {
-	pad_var = val;
+    Bool_t use_digit = true;
+
+    if(mSRM->bUseLabels) {
+      use_digit = false;
+      for(Int_t i=0; i<3; ++i) {
+	Int_t l = digit->GetTrackIDFast(time, pad, i);
+	if(l == 0) break;
+	l -= 2;
+	if(mSRM->HasLabel(l)) { use_digit = true; break; }
       }
-    } else {
-      // Integrate int max_val.
-      if(time >= min_time && time <= max_time) {
-	if(half_border_time && (time == min_time || time == max_time))
-	  pad_var += val/2;
-	else
-	  pad_var += val;
+    }
+
+    if(use_digit) {
+      if(mSRM->bShowMax) {
+	if(val > pad_var) {
+	  pad_var = val;
+	}
+      } else {
+	// Integrate int max_val.
+	if(time >= min_time && time <= max_time) {
+	  if(half_border_time && (time == min_time || time == max_time))
+	    pad_var += val/2;
+	  else
+	    pad_var += val;
+	}
       }
     }
 
