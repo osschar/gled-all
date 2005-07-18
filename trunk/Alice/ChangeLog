@@ -1,9 +1,27 @@
+2005-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TPCSegRnrMod.cxx:
+	* Glasses/TPCSegRnrMod.h:
+	Added set of MC labels that can be used to select only digits
+	produced by specifed simulated tracks.
+
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	Use MC label set from TPCSegRnrMod if enabled.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added argument 'Bool_t import_daughters=false' to SelectKinks().
+
 2005-07-15  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/TOFDigRnrMod.cxx:
 	* Glasses/TOFDigRnrMod.h:
 	* Glasses/TOFSector.cxx:
 	* Glasses/TOFSector.h:
+	* Stones/TOFDigitsInfo.cxx:
+	* Stones/TOFDigitsInfo.h:
         New files.
 
 	* Glasses/ZAliLoad.cxx:
