@@ -72,13 +72,14 @@ class ZAliLoad : public ZNode {
   TString mV0Selection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectV0(const Text_t* selection=0,
-		Bool_t import_kine=false);            // X{Ed} 7 MCWButt()
+		Bool_t import_kine=false);             // X{Ed} 7 MCWButt()
 
  protected:
   TString mKinkSelection;       // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectKinks(const Text_t* selection=0,
-		   Bool_t import_kine=false);         // X{Ed} 7 MCWButt()
+		   Bool_t import_kine=false,
+		   Bool_t import_daughters=false);     // X{Ed} 7 MCWButt()
 
  protected:
   TString        mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)

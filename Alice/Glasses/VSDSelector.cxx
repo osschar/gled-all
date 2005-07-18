@@ -409,7 +409,7 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
 /**************************************************************************/
 
 void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
-			      Bool_t import_kine)
+			      Bool_t import_kine, Bool_t import_daughters)
 {
   static const string _eh("VSDSelector::SelectKinks ");
 
@@ -452,11 +452,17 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
 	MCTrack* mc_mk = new MCTrack(mk);
 	mQueen->CheckIn(mc_mk);
 	kt->Add(mc_mk);
+	if(import_daughters) {
+	  mc_mk->ImportDaughtersRec();
+	}
 	//  kine daughter
+	// !!!! MT: DLabel  wrong ... always the same as fLabel
+	/*
 	MCParticle* pk = Particle(k->fDLabel);
 	MCTrack* mc_pk = new MCTrack(pk);
 	mQueen->CheckIn(mc_pk);
 	kt->Add(mc_pk);
+	*/
       }
     }
   }

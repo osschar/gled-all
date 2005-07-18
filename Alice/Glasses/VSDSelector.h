@@ -107,8 +107,9 @@ class VSDSelector : public ZNode {
  protected:
   TString mKinkSelection;        // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void SelectKinks( ZNode* holder=0, const Text_t* selection=0,
-		    Bool_t import_kine=false);            // X{Ed} C{1} 7 MCWButt()
+  void SelectKinks(ZNode* holder=0, const Text_t* selection=0,
+		   Bool_t import_kine=false,
+		   Bool_t import_daughters=false);     // X{Ed} C{1} 7 MCWButt()
 
 
   // --------------------------------------------------------------
