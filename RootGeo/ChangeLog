@@ -1,3 +1,9 @@
+2005-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Rnr/GL/ZGeoNode_GL_Rnr.cxx:
+	Chanages for ROOT-5, backwards compatible.
+
 2005-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoNode.cxx:
