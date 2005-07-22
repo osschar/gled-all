@@ -1,3 +1,9 @@
+2005-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Chanages for ROOT-5, backwards compatible.
+
 2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* macros/demo_scene_elements.C:
