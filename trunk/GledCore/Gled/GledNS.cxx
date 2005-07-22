@@ -228,8 +228,16 @@ bool GledNS::IsA(ZGlass* glass, FID_t fid)
 
 /**************************************************************************/
 
-void GledNS::LockCINT()   { gCINTMutex->Lock();   }
-void GledNS::UnlockCINT() { gCINTMutex->UnLock(); }
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,0,0)
+  #define ROOT_CINT_MUTEX gGlobalMutex
+#else
+  #define ROOT_CINT_MUTEX gCINTMutex
+#endif
+
+TVirtualMutex* GledNS::GetCINTMutex() { return ROOT_CINT_MUTEX; }
+
+void GledNS::LockCINT()   { ROOT_CINT_MUTEX->Lock();   }
+void GledNS::UnlockCINT() { ROOT_CINT_MUTEX->UnLock(); }
 
 /**************************************************************************/
 
@@ -239,7 +247,7 @@ void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 
   assert(b.IsWriting());
   b << lens->VFID();
-  R__LOCKGUARD(gCINTMutex);
+  R__LOCKGUARD(ROOT_CINT_MUTEX);
   lens->Streamer(b);
 }
 
@@ -252,7 +260,7 @@ ZGlass* GledNS::StreamLens(TBuffer& b)
   b >> fid;
   ZGlass *lens = ConstructLens(fid);
   if(lens) {
-    R__LOCKGUARD(gCINTMutex);
+    R__LOCKGUARD(ROOT_CINT_MUTEX);
     lens->Streamer(b);
   }
   return lens;

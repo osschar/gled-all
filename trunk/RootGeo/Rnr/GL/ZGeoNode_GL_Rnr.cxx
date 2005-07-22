@@ -34,7 +34,11 @@ void ZGeoNode_GL_Rnr::Draw(RnrDriver* rd)
   }
   
   glColor4fv(N.mColor());
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,0,0)
+  fs->Draw(10); // Dummy LOD ... not sure how it's used in TGLxxx.
+#else
   fs->GLDrawPolys();
+#endif
 
   glPopAttrib();
 }

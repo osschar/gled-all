@@ -18,6 +18,7 @@ class TMessage;
 class TDirectory;
 class TBuffer;
 class TFile;
+class TVirtualMutex;
 
 namespace GledViewNS {
   class MethodInfo;
@@ -267,6 +268,7 @@ namespace GledNS {
   ZGlass* ConstructLens(FID_t fid);
   bool	  IsA(ZGlass* glass, FID_t fid);
 
+  TVirtualMutex* GetCINTMutex();
   void    LockCINT();
   void    UnlockCINT();
 
