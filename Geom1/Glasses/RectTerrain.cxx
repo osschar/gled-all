@@ -258,7 +258,7 @@ void RectTerrain::Boobofy()
     h->Fill(0.1*r.Gaus() + 2, 0.1*r.Gaus());
   }
   {
-    R__LOCKGUARD(gCINTMutex);
+    R__LOCKGUARD(GledNS::GetCINTMutex());
     h->Draw("LEGO2");
   }
   SetFromHisto(h);
