@@ -13,6 +13,7 @@
 #include "ZAliLoad.c7"
 
 #include <Glasses/ITSModule.h>
+#include <Glasses/ITSScaledModule.h>
 #include <Glasses/TOFSector.h>
 #include <Gled/GledTypes.h>
 
@@ -220,7 +221,7 @@ TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
   return tpc;
 }
 
-void ZAliLoad::ShowTPCPlate(Int_t side)
+void ZAliLoad::ShowTPCPlate(Int_t side, ZNode* top_holder)
 {
   OpMutexHolder omh(this, "ShowTPCPlate()");
   ZGlass* cfg = 0;
@@ -229,20 +230,27 @@ void ZAliLoad::ShowTPCPlate(Int_t side)
   }
   catch(...) {}
 
+  ZNode* holder;
+  if( side == 0) 
+    holder = new ZNode(GForm("%s TPCD front", mDataDir.Data()));
+  else if (side == 1)
+    holder = new ZNode(GForm("%s TPCD back", mDataDir.Data()));
+  else 
+    holder = new ZNode(GForm("%s TPCD ", mDataDir.Data()));
+  
   if (side == 0 || side == -1) {
-    ZNode* holder = new ZNode(GForm("%s TPCD front", mDataDir.Data()));
-    mQueen->CheckIn(holder);
     for (int i=0; i < 18; i++) ShowTPCSegment(i, holder);
-    Add(holder);
     if(cfg) holder->SetRnrMod(cfg);
   } 
   if ( side == 1 || side == -1) {
-    ZNode* holder = new ZNode(GForm("%s TPCD back", mDataDir.Data()));
     mQueen->CheckIn(holder);
     for (int i=18; i < 2*18; i++) ShowTPCSegment(i, holder);
-    Add(holder);
     if(cfg) holder->SetRnrMod(cfg);
   }
+
+  if(top_holder == 0) top_holder = this;
+  mQueen->CheckIn(holder);
+  top_holder->Add(holder);
 }
 
 /**************************************************************************/
@@ -264,20 +272,27 @@ void ZAliLoad::check_itsdig_info()
     }
 }
 
-void ZAliLoad::ShowITSModule(Int_t id, ZNode* holder)
+void ZAliLoad::ShowITSModule(Int_t id, Bool_t scale, ZNode* holder)
 {
   static const string _eh("ZAliLoad::ShowITSModule ");
 
   check_itsdig_info();
 
-  ITSModule* m = new ITSModule(id, mITSDigInfo);
+  ITSModule* m;
+
+  if(scale){
+    m = new ITSScaledModule(id, mITSDigInfo);
+  }
+  else  
+    m = new ITSModule(id, mITSDigInfo);
+
   mQueen->CheckIn(m);
   if (holder) 
     holder->Add(m);
   else Add(m);
 }
  
-void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
+void ZAliLoad::ShowITSDet(Int_t id, Bool_t scale, ZNode* holder, Bool_t show_empty)
 {
   OpMutexHolder omh(this, "ShowITSDet");
 
@@ -285,13 +300,24 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
  
   Int_t layer, lad, det;
   ZNode *dh, *hl1, *hl2, *th;
+  dh = hl1 = hl2 = 0;
   Int_t first, last;
   TClonesArray* arr;
- 
+
+  // top holder 
+  if(id == 0) 
+    dh = new ZNode("SPD");
+  else if(id == 1)
+    dh = new ZNode("SDD");
+  else if(id == 2)
+    dh = new ZNode("SSD");
+  else
+    dh = new ZNode("ITS Digits");
+
+
+
   if(id == -1 || id == 0) {
-    dh = new ZNode(GForm("%s SPD", mDataDir.Data()));
-    mQueen->CheckIn(dh); Add(dh);
-    hl1 = new ZNode("Layer 1"); hl2 = new ZNode("Layer 2");
+    hl1 = new ZNode("InnerLayer"); hl2 = new ZNode("OuterLayer");
     mQueen->CheckIn(hl1); mQueen->CheckIn(hl2);
     dh->Add(hl1); dh->Add(hl2);
    
@@ -302,14 +328,12 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
       mITSDigInfo->mGeom->GetModuleId(i,layer,lad, det);
       th = (layer == 1) ? hl1 : hl2;
       if(arr->GetEntriesFast() || show_empty)
-	ShowITSModule(i, th);
+	ShowITSModule(i,scale, th);
     }
   }
  
   if(id == -1 || id == 1) {
-    dh = new ZNode(GForm("%s SDD", mDataDir.Data()));
-    mQueen->CheckIn(dh); Add(dh);
-    hl1 = new ZNode("Layer 3"); hl2 = new ZNode("Layer 4");
+    hl1 = new ZNode("InnerLayer"); hl2 = new ZNode("OuterLayer");
     mQueen->CheckIn(hl1); mQueen->CheckIn(hl2);
     dh->Add(hl1); dh->Add(hl2);
  
@@ -320,14 +344,12 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
       mITSDigInfo->mGeom->GetModuleId(i,layer,lad, det);
       th = (layer == 3) ? hl1 : hl2;
       if(arr->GetEntriesFast() || show_empty)
-	ShowITSModule(i, th);
+	ShowITSModule(i, scale, th);
     }
   }
  
   if(id == -1 || id == 2) {
-    dh = new ZNode(GForm("%s SSD", mDataDir.Data()));
-    mQueen->CheckIn(dh); Add(dh);
-    hl1 = new ZNode("Layer 5"); hl2 = new ZNode("Layer 6");
+    hl1 = new ZNode("InnerLayer"); hl2 = new ZNode("OuterLayer");
     mQueen->CheckIn(hl1); mQueen->CheckIn(hl2);
     dh->Add(hl1); dh->Add(hl2);
  
@@ -338,9 +360,12 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t show_empty)
       mITSDigInfo->mGeom->GetModuleId(i,layer,lad, det);
       th = (layer == 5) ? hl1 : hl2;
       if(arr->GetEntriesFast() || show_empty)
-	ShowITSModule(i, th);
+	ShowITSModule(i, scale, th);
     }
-  }
+  } 
+
+  if(holder == 0) holder == this;
+  mQueen->CheckIn(dh); holder->Add(dh);
 }
 /**************************************************************************/
 void ZAliLoad::check_tofdig_info()
@@ -361,11 +386,13 @@ void ZAliLoad::check_tofdig_info()
 }
 
 
-void ZAliLoad::ShowTOFSector(Int_t sec)
+void ZAliLoad::ShowTOFSector(Int_t sec, ZNode* holder)
 {
+  if (holder == 0) holder = this;
+
   if(sec == -1) {
     ZNode* dh = new ZNode(GForm("%s TOF Digits", mDataDir.Data()));
-    mQueen->CheckIn(dh); Add(dh);
+    mQueen->CheckIn(dh); holder->Add(dh);
     for(Int_t s = 0; s<18; s++) {
       check_tofdig_info();
       TOFSector* m = new TOFSector(s, mTOFDigInfo);
@@ -377,7 +404,7 @@ void ZAliLoad::ShowTOFSector(Int_t sec)
     check_tofdig_info();
     TOFSector* m = new TOFSector(sec, mTOFDigInfo);
     mQueen->CheckIn(m);
-    Add(m);
+    holder->Add(m);
   }
 }
 
