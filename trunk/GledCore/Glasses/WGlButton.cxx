@@ -22,6 +22,8 @@ void WGlButton::_init()
 {
   // *** Set all links to 0 ***
   mDx = mDy = 0;
+  mCbackAlpha = 0;
+  mCbackMethodInfo = 0;
 }
 
 /**************************************************************************/
