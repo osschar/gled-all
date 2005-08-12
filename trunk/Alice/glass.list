@@ -20,8 +20,11 @@ ITSModule               89      Glasses/ITSModule               .
 ITSDigRnrMod		90	Glasses/ITSDigRnrMod		.
 TOFSector               92      Glasses/TOFSector               .
 TOFDigRnrMod            93      Glasses/TOFDigRnrMod            .
+ITSScaledModule         94      Glasses/ITSScaledModule         .
 
 RecTrack                100     Glasses/RecTrack                .
 RecTrackRS              101     Glasses/RecTrackRS              .
 V0Track                 102     Glasses/V0Track                 .
 KinkTrack		103	Glasses/KinkTrack		.
+
+DigitsGUI               110     Glasses/DigitsGUI		ZNode
