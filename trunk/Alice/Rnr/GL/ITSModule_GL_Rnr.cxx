@@ -51,6 +51,7 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
       d=(AliITSdigitSPD*)digits->UncheckedAt(k);
       j = d->GetCoord1();
       i = d->GetCoord2();
+      //printf("SPD cood (%d,%d)\n",i,j);
       MkCol(1, 0,1);
       x  = -seg->Dx()/2 + seg->Dpx(0) *i;
       x *=  0.0001;
@@ -76,6 +77,7 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
       if(d->GetSignal() > mDRM->mSDDTreshold){
 	j = d->GetCoord1();
 	i = d->GetCoord2();
+	//printf("SDD cood (%d,%d)\n",i,j);
 	above_treshold = true;
 	MkCol(d->GetSignal(), mDRM->mSDDTreshold, mDRM->mSDDMaxVal);
 	seg->DetToLocal(i,j,x,z);
@@ -95,7 +97,8 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
   case 2: {
     AliITSsegmentationSSD* seg =  mITSModule->mInfo->mSegSSD; 
     AliITSdigitSSD *d=0;
-
+    Float_t ap,an,a;
+    seg->Angles(ap,an);
     glBegin (GL_LINES);
     for (Int_t k=0; k<ndigits; k++) {
       d=(AliITSdigitSSD*)digits->UncheckedAt(k);
@@ -104,22 +107,19 @@ void ITSModule_GL_Rnr::Render(RnrDriver* rd)
 	j = d->GetCoord1();
 	i = d->GetCoord2();
 	seg->DetToLocal(i,j,x,z);
-	// printf("Coord i,j %f,%f  x,z %f,%f\n",i,j,x,z);
-	dpx = seg->Dpx(i)*0.0001;
-	dpz = seg->Dpz(j)*0.0001;
-	Float_t ap,an,a;
-	seg->Angles(ap,an);
+
+	MkCol(d->GetSignal(), mDRM->mSSDTreshold, mDRM->mSSDMaxVal);
+
+        // printf("original %f for %d,%d \n", x,i,j);
 	if( d->GetCoord1() == 1) {
-	  MkCol(d->GetSignal(), mDRM->mSSDTreshold, mDRM->mSSDMaxVal);
 	  a = ap;
 	}
 	else {
-	  MkCol(d->GetSignal(), mDRM->mSSDTreshold, mDRM->mSSDMaxVal);
 	  a = -an;
 	}
      
-	glVertex3f( x,0,-mITSModule->mDz);
-	glVertex3f( x+TMath::Tan(a)*mITSModule->mDz*2,0,mITSModule->mDz);
+	glVertex3f( x-TMath::Tan(a)*mITSModule->mDz,0,-mITSModule->mDz);
+	glVertex3f( x+TMath::Tan(a)*mITSModule->mDz,0,mITSModule->mDz);
       }
     }
     glEnd();
