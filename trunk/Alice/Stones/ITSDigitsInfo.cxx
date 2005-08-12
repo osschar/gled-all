@@ -11,6 +11,8 @@
 
 #include "ITSDigitsInfo.h"
 #include <AliITSresponseSDD.h>
+#include <AliITSdigit.h>
+#include <AliITSdigitSPD.h>
 
 #include <Gled/GledTypes.h>
 
@@ -76,6 +78,50 @@ void ITSDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
   mEvent   = event;
 
   SetITSSegmentation();
+  
+  // create tables for scaling
+  Int_t scales = NSCALE;
+  // lowest scale factor refers unscaled ITS module
+  mSPDScaleX[0]=1;
+  mSPDScaleZ[0]=1;
+  mSDDScaleX[0]=1;
+  mSDDScaleZ[0]=1;
+  mSSDScale[0]=1;
+  // spd lows rsolution is in the level of 8x2 redaut chips
+  Int_t nx = 8; // mSegSPD->Npx()/8; // 32
+  Int_t nz = 6; // mSegSPD->Npz()/2; // 128
+
+  mSPDScaleX[1] = Int_t(nx); 
+  mSPDScaleZ[1] = Int_t(nz); 
+  mSPDScaleX[2] = Int_t(nx*2); 
+  mSPDScaleZ[2] = Int_t(nz*2); 
+  mSPDScaleX[3] = Int_t(nx*3); 
+  mSPDScaleZ[3] = Int_t(nz*3); 
+  mSPDScaleX[4] = Int_t(nx*4); 
+  mSPDScaleZ[4] = Int_t(nz*4); 
+
+
+  mSDDScaleX[1] = 2;
+  mSDDScaleZ[1] = 2;
+  mSDDScaleX[2] = 8;
+  mSDDScaleZ[2] = 8;
+  mSDDScaleX[3] = 16;
+  mSDDScaleZ[3] = 16;
+  mSDDScaleX[4] = 25;
+  mSDDScaleZ[4] = 25;
+
+  mSSDScale[1] = 3;
+  mSSDScale[2] = 9;
+  mSSDScale[3] = 20;
+  mSSDScale[4] = 30;
+
+  
+  // lowest scale factor refers unscaled ITS module
+  mSPDScaleX[0]=1;
+  mSPDScaleZ[0]=1;
+  mSDDScaleX[0]=1;
+  mSDDScaleZ[0]=1;
+  mSSDScale[0]=1;
 }
 
 /**************************************************************************/
@@ -172,6 +218,7 @@ TClonesArray* ITSDigitsInfo::GetDigits(Int_t mod, Int_t subdet)
   } //end switch
 }
 
+
 /**************************************************************************/
 
 void ITSDigitsInfo::Dump()
@@ -184,28 +231,7 @@ void ITSDigitsInfo::Dump()
   printf("SPD dimesion of (%d,%d) in pixel(%f,%f) \n", ix,iz, mSegSPD->Dpx(ix), mSegSPD->Dpz(iz));
   iz = 32;
   printf("SPD dimesion of pixel (%d,%d) are (%f,%f) \n", ix,iz, mSegSPD->Dpx(ix)*0.001, mSegSPD->Dpz(iz)*0.001);
-  /*
-    Float_t x = 0.;
-    printf("Cell dimension in x direction \n");
-    for(Int_t l=0; l<mSegSPD->Npx(); l++) {
-    x += mSegSPD->Dpx(l); 
-    //printf("%d:%4f \n",l,mSegSPD->Dpx(l));
-    }
-    printf("\n");
-    printf(">>> Summary in x direction %f \n",x*0.0001);
-
-    Float_t z = 0.;
-    printf("Cell dimension in z direction \n");
-    for(Int_t l=0; l<mSegSPD->Npz(); l++) {
-    z += mSegSPD->Dpz(l); // sum up to cell ix-1
-    if(mSegSPD->Dpz(l)>mSegSPD->Dpz(0))
-    printf("Z Dimension:: idx %d ==  %4f \n ",l,mSegSPD->Dpz(l));
-    if(mSegSPD->Dpz(l)<mSegSPD->Dpz(0))
-    printf("Z Dimension:: idx %d == %4f \n ",l,mSegSPD->Dpz(l));
-    }
-    printf("\n");
-    printf(">>> Summary in z direction %f \n",z*0.0001);
-  */
+ 
   printf("*********************************************************\n");
   printf("SDD module dimension (%f,%f) \n",mSegSDD->Dx()*0.0001, mSegSDD->Dz()*0.0001);
   printf("SDD first,last module:: %d,%d \n", mGeom->GetStartSDD(),mGeom->GetLastSDD() );
@@ -221,3 +247,17 @@ void ITSDigitsInfo::Dump()
   mSegSSD->SetLayer(6);  mSegSSD->Angles(ap,an);
   printf("SSD layer 6 stereoP %f stereoN %f angle \n",ap,an); 
 }
+
+
+        /*
+	  printf("num cells %d,%d scaled %d,%d \n",mSegSPD->Npz(),mSegSPD->Npx(),Nz,Nx);
+	  printf("%d digits in ITSModule %d\n",ne, module);
+	  Float_t zn = i*(3.48*2)/Nz - 3.48 ;
+	  Float_t xo =  -mSegSPD->Dx()*0.00005 + mSegSPD->Dpx(0)*od->GetCoord2()*0.0001;
+	  Float_t xn =  -mSegSPD->Dx()*0.00005 + j*0.0001*mSegSPD->Dx()/Nx;
+	  Float_t dpx = 0.0001*mSegSPD->Dx()/Nx;
+	  Float_t dpz = 3.48*2/Nz;
+	  printf("Z::original (%3f) scaled (%3f, %3f) \n", zo, zn-dpz/2, zn+dpz/2);
+	  printf("X::original (%3f) scaled (%3f, %3f) \n", xo, xn-dpx/2, xn+dpx/2);
+	  printf("%d,%d maped to %d,%d \n", od->GetCoord1(), od->GetCoord2(), i,j );
+	*/        
