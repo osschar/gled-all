@@ -93,20 +93,20 @@ class ZAliLoad : public ZNode {
   TPCDigitsInfo* mTPCDigInfo; // X{g}
  public:
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  
-  void        ShowTPCPlate(Int_t side = -1);   // X{Ed} 7 MCWButt()
+  void        ShowTPCPlate(Int_t side = -1, ZNode* holder = 0);   // X{Ed} 7 MCWButt()
 
  protected:
   void check_itsdig_info();
   ITSDigitsInfo* mITSDigInfo; // X{g}
  public:
-  void        ShowITSModule(Int_t module, ZNode* holder=0);
-  void        ShowITSDet(Int_t subdet = -1, Bool_t show_empty = false);// X{Ed} 7 MCWButt()
+  void        ShowITSModule(Int_t module, Bool_t scale=false, ZNode* holder=0);
+  void        ShowITSDet(Int_t subdet = -1, Bool_t scale=false, ZNode* holder=0, Bool_t show_empty = false);// X{Ed} 7 MCWButt()
 
  protected:
   void check_tofdig_info();
   TOFDigitsInfo* mTOFDigInfo; // X{g}
  public:
-  void        ShowTOFSector(Int_t sec = -1); // X{Ed} 7 MCWButt()
+  void        ShowTOFSector(Int_t sec = -1, ZNode* holder = 0); // X{Ed} 7 MCWButt()
 
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
