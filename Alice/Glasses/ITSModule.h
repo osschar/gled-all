@@ -13,13 +13,14 @@
 
 class ITSModule : public ZNode {
   MAC_RNR_FRIENDS(ITSModule);
+  MAC_RNR_FRIENDS(ITSScaledModule);
 
  private:
   void _init();
 
  protected:
-  void init_module();
-  void set_trans();
+  virtual void init_module();
+  virtual void set_trans();
 
   ITSDigitsInfo* mInfo;
 
@@ -45,7 +46,7 @@ class ITSModule : public ZNode {
 
 #include "ITSModule.h7"
   ClassDef(ITSModule, 1)
-}; // endclass ITSModule
+    }; // endclass ITSModule
 
 GlassIODef(ITSModule);
 
