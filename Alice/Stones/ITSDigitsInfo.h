@@ -18,6 +18,8 @@
 #include <AliITSsegmentationSDD.h>
 #include <AliITSsegmentationSSD.h>
 
+const static int NSCALE = 5;
+
 class ITSDigitsInfo : public ZRCStone
 {
  private:
@@ -31,6 +33,7 @@ class ITSDigitsInfo : public ZRCStone
   map<Int_t,  TClonesArray*> mSPDmap;   //!
   map<Int_t,  TClonesArray*> mSDDmap;   //!
   map<Int_t,  TClonesArray*> mSSDmap;   //!
+
   void        SetITSSegmentation();
 
  public:
@@ -39,6 +42,13 @@ class ITSDigitsInfo : public ZRCStone
   AliITSsegmentationSPD*   mSegSPD; 
   AliITSsegmentationSDD*   mSegSDD; 
   AliITSsegmentationSSD*   mSegSSD; 
+
+
+  Int_t        mSPDScaleX[NSCALE];
+  Int_t        mSPDScaleZ[NSCALE];
+  Int_t        mSDDScaleX[NSCALE];
+  Int_t        mSDDScaleZ[NSCALE];
+  Int_t        mSSDScale[NSCALE];
 
   ITSDigitsInfo(const Text_t* n="ITSDigitsInfo", const Text_t* t=0) :
     ZRCStone()
@@ -56,5 +66,4 @@ class ITSDigitsInfo : public ZRCStone
 #include "ITSDigitsInfo.h7"
   ClassDef(ITSDigitsInfo, 1)
     }; // endclass ITSDigitsInfo
-
 #endif
