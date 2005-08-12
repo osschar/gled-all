@@ -78,7 +78,7 @@ void ITSModule::init_module()
   else {
     mDetID=2;
     mInfo->mSegSSD->SetLayer(mLayer);  
-    mDx = mInfo->mSegSSD->Dx()*0.0001;
+    mDx = mInfo->mSegSSD->Dx()*0.00005;
     mDz = mInfo->mSegSSD->Dz()*0.00005;
     mDy = mInfo->mSegSSD->Dy()*0.00005;
   }
