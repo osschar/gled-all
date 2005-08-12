@@ -1,41 +1,41 @@
 2005-08-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
-	* Alice/Glasses/DigitsGUI.cxx:
-	* Alice/Glasses/DigitsGUI.h:
+	* Glasses/DigitsGUI.cxx:
+	* Glasses/DigitsGUI.h:
          New files for GL Digits user interface.    
 
-	* Alice/Glasses/ITSDigRnrMod.cxx:
-	* Alice/Glasses/ITSDigRnrMod.h:
+	* Glasses/ITSDigRnrMod.cxx:
+	* Glasses/ITSDigRnrMod.h:
         Add scaling table for each subdetector.
 
-	* Alice/Glasses/ITSModule.cxx:
-	* Alice/Glasses/ITSModule.h:
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
         Remove code commented out.
 
-	* Alice/Glasses/ITSScaledModule.cxx:
-	* Alice/Glasses/ITSScaledModule.h:
+	* Glasses/ITSScaledModule.cxx:
+	* Glasses/ITSScaledModule.h:
         New class with ITS cells scaled.
 
-	* Alice/Glasses/ZAliLoad.cxx:
-	* Alice/Glasses/ZAliLoad.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
         Add functionality for ITS scaled module.
 
-	* Alice/Makefile:
+	* Makefile:
         Remove code commented out.
 
-	* Alice/Rnr/GL/ITSModule_GL_Rnr.cxx:
-	* Alice/Rnr/GL/ITSModule_GL_Rnr.h:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
         Modify MkCol().
 
-	* Alice/Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
-	* Alice/Rnr/GL/ITSScaledModule_GL_Rnr.h:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.h:
         New class.
 
-	* Alice/Stones/ITSDigitsInfo.cxx:
-	* Alice/Stones/ITSDigitsInfo.h:
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
         Add scaling tables.
 
-	* Alice/glass.list:
+	* glass.list:
         Add class ITSScaledModule and DigitsGUI.
 
 2005-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
