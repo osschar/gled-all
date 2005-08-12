@@ -16,7 +16,7 @@ ClassImp(ITSDigRnrMod)
 
 /**************************************************************************/
 
-void ITSDigRnrMod::_init()
+  void ITSDigRnrMod::_init()
 {
   // *** Set all links to 0 ***
   mSDDTreshold  = 5;
@@ -32,6 +32,24 @@ void ITSDigRnrMod::_init()
   mFrameW   = 0;
   bRnrFrame = true;
   mFrameCol.gray(0.5);
+  
+  mStatType = ST_Average;
+  mScale = 1;
+
+  mMaxOcc = 0.2;
+  mMaxAverage = 1;
+  mMaxRms = 1;
 }
 
 /**************************************************************************/
+void ITSDigRnrMod::ZoomIn()
+{
+  Int_t s = mScale;
+  SetScale(++s);
+}
+
+void ITSDigRnrMod::ZoomOut()
+{
+  Int_t s = mScale;
+  SetScale(--s);
+}
