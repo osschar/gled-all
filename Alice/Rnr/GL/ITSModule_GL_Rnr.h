@@ -31,18 +31,20 @@ class ITSModule_GL_Rnr : public ZNode_GL_Rnr
   virtual void Draw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
 
-  void MkCol(Int_t z, Int_t val_min, Int_t val_max);
+  void MkCol(Float_t z, Float_t val_min, Float_t val_max);
 }; // endclass ITSModule_GL_Rnr
 
 
 /**************************************************************************/
 
-inline void ITSModule_GL_Rnr::MkCol(Int_t z, Int_t vmin, Int_t vmax)
+inline void ITSModule_GL_Rnr::MkCol(Float_t z, Float_t vmin, Float_t vmax)
 {
   Float_t c = (z - vmin) * mDRM->mColSep / (vmax - vmin);
-  if(c > 1)
-    c -= (int)c;
-  
+  if(c >= 1) { c = 1.0;}
+
+
+  //  printf("MkCol %f input val %f, min %f, max %f \n",c*1.0, z, vmin, vmax); 
+ 
   if(mDRM->mRibbon) {
     glColor4fv(mDRM->mRibbon->MarkToCol(c)());
   } else {
