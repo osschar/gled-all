@@ -97,12 +97,6 @@ class MCW_View : public FTW_SubShell,
   static void s_Exit_cb(Fl_Widget* w, MCW_View* ud)     { delete ud; };
   static void s_SendExit_cb(Fl_Widget* w, MCW_View* ud) { ud->Send(); delete ud; };
 
-  //----------------------------------------------------------------
-
-  static void split_argument(const string& arg,
-			     string& type, string& name, string& def);
-  static void unrefptrconst_type(string& type);
-
 }; // endclass MCW_View
 
 #endif

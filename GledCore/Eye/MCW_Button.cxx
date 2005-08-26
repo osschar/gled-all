@@ -51,13 +51,13 @@ void MCW_Button::FillData(GNS::MethodInfo* mi, const char* label,
   int nc=0, ncd=0, na=0, nad=0;
   string t, n, d;
   for(lStr_i m=mi->fContextArgs.begin(); m!=mi->fContextArgs.end(); ++m) {
-    MCW_View::split_argument(*m, t, n, d);
+    GNS::split_argument(*m, t, n, d);
     if(d.length()) ++ncd;
     ++nc;
     args.push_back(*m);
   }
   for(lStr_i m=mi->fArgs.begin(); m!=mi->fArgs.end(); ++m) {
-    MCW_View::split_argument(*m, t, n, d);
+    GNS::split_argument(*m, t, n, d);
     if(d.length()) ++nad;
     ++na;
     args.push_back(*m);

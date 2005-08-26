@@ -21,43 +21,6 @@ namespace GNS = GledNS;
 namespace OS  = OptoStructs;
 namespace FGS = FltkGledStuff;
 
-/**************************************************************************/
-// Argument/type-name parsing foos
-/**************************************************************************/
-
-void MCW_View::split_argument(const string& arg,
-			      string& type, string& name, string& def)
-{
-  string::size_type ei = arg.find('=');
-  if(ei != string::npos) {
-    string::size_type tei = ei+1; while(isspace(arg[tei])) ++tei;
-    def = string(arg, tei, arg.length()-tei);
-  } else {
-    ei = arg.length();
-  }
-  --ei;
-  while(isspace(arg[ei])) --ei;
-  string::size_type ti = ei;
-  while(isalnum(arg[ti]) || arg[ti] == '_') --ti;
-  name = string(arg, ti+1, ei-ti);
-  while(isspace(arg[ti])) --ti;
-  type = string(arg, 0, ti+1);
-}
-
-void MCW_View::unrefptrconst_type(string& type)
-{
-  string::size_type i;
-  while((i = type.find_first_of("*&")) != string::npos) {
-    type.replace(i, 1, " ");
-  }
-  type.insert(0, " ");
-  while((i = type.find(" const ")) != string::npos) {
-    type.replace(i+1, 5, "");
-  }
-  while((i = type.find(" ")) != string::npos) {
-    type.replace(i, 1, "");
-  }
-}
 
 /**************************************************************************/
 // MCW_View's inner classes
@@ -290,9 +253,9 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(string)
   hctx++;
 
   for(lStr_i m=mMInfo->fContextArgs.begin(); m!=mMInfo->fContextArgs.end(); ++m) {
-    split_argument(*m, t, n, d);
+    GNS::split_argument(*m, t, n, d);
     bt = t;
-    unrefptrconst_type(bt);
+    GNS::unrefptrconst_type(bt);
     // printf("Ctx '%s' -> '%s' [%s] '%s' '%s'\n", m->c_str(),
     //   t.c_str(), bt.c_str(), n.c_str(), d.c_str());
 
@@ -304,9 +267,9 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(string)
   mVarPack = new Fl_Pack(0,hctx,0,0);
   mVarPack->type(FL_VERTICAL);
   for(lStr_i m=mMInfo->fArgs.begin(); m!=mMInfo->fArgs.end(); ++m) {
-    split_argument(*m, t, n, d);
+    GNS::split_argument(*m, t, n, d);
     bt = t;
-    unrefptrconst_type(bt);
+    GNS::unrefptrconst_type(bt);
     // printf("Var '%s' -> '%s' [%s] '%s' '%s'\n", m->c_str(),
     //  t.c_str(), bt.c_str(), n.c_str(), d.c_str());
 
