@@ -222,6 +222,13 @@ void metagui_test()
   but2->SetDx(1.2);
   but2->SetCbackAlpha(rot_eventor);
   but2->SetCbackMethodName("Stop");
+  CREATE_ADD_GLASS(val1, WGlValuator, overlay, "Speed", 0);
+  val1->Set3Pos(6.2, 0.2, 0);
+  val1->SetDx(2.2);
+  val1->SetMin(1); val1->SetMax(1000);
+  val1->SetFormat("Sleep: %.0f");
+  val1->SetCbackAlpha(rot_eventor);
+  val1->SetCbackMemberName("InterBeatMS");
 
   //--------------------------------
   // Meta GUI
