@@ -21,8 +21,8 @@ protected:
   Float_t   mDx; // X{GST} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t   mDy; // X{GST} 7 Value(-range=>[0,1000,1,1000])
 
-  ZGlass*             mCbackAlpha;      //  X{GS} L{}
-  TString             mCbackMethodName; //  X{GS} Ray{CbackReset} 7 Textor()
+  ZGlass*             mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
+  TString             mCbackMethodName; //  X{GS}     Ray{CbackReset} 7 Textor()
   GledNS::MethodInfo* mCbackMethodInfo; //!
 
 public:

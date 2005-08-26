@@ -30,21 +30,8 @@ void WGlButton::_init()
 
 GledNS::MethodInfo* WGlButton::GetCbackMethodInfo()
 {
-  using namespace GledNS;
-
-  if(mCbackMethodInfo == 0) {
-    PME re("::");
-    int ret = re.split(mCbackMethodName.Data());
-    if(ret == 2) {
-      ClassInfo* ci = FindClassInfo(re[0]);
-      if(ci == 0)  return 0;
-      mCbackMethodInfo = ci->FindMethodInfo(re[1], false);
-    }
-    else if(ret == 1) {
-      ClassInfo* ci = mCbackAlpha->VGlassInfo();
-      mCbackMethodInfo = ci->FindMethodInfo(re[0], true);
-    }
-  }
+  if(mCbackMethodInfo == 0)
+    mCbackMethodInfo = GledNS::DeduceMethodInfo(mCbackAlpha, mCbackMethodName.Data());
   return mCbackMethodInfo;
 }
 
