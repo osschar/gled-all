@@ -1,3 +1,8 @@
+2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_defs.inc:
+	Added -DGL_GLEXT_PROTOTYPES to CPPFLAGS. There was a mistery about
+	inclusion of GL-1.2 prototypes from NVIDIA's glext.h (1.0-7676).
 
 2005-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 

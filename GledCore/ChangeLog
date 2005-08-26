@@ -1,3 +1,46 @@
+2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/MCW_Button.cxx:
+	* Eye/MCW_View.cxx:
+	* Eye/MCW_View.h:
+	Moved split_argument() and unrefptrconst_type() to GledNS.
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	New functions for catalog interactions, argument parsing and
+	value-type operations.
+
+	1. DeduceMethodInfo(), DeduceDataMemberInfo(): generick search for
+	methods and data-members.
+
+	2. split_argument(), unrefptrconst_type(): parsing and processing
+	of argument strings (moved in fromEye/MCW_View).
+
+	3. peek_value(), stream_value(): peek at an address or stream a
+	value using ROOT's value-type id; so far only Double_t supported
+	as caller-side input/output type. This is useful for FLTK-style
+	valuators which use double as internal storage.
+
+	* Glasses/ZGlass.cxx:
+	Fixed compilation warning.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	Reworked logick for Render/glCallList selection during picking
+	when sub-picking is advertised by the rendered object.
+
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	* Glasses/WGlDirectory.cxx:
+	Use GledNS::DeduceXY() methods.
+
+	* Glasses/WGlValuator.cxx:
+	* Glasses/WGlValuator.h:
+	* Rnr/GL/WGlValuator_GL_Rnr.cxx:
+	* Rnr/GL/WGlValuator_GL_Rnr.h:
+	* glass.list:
+	New glass WGlValuator, a GL widget for manipulating glass
+	value data-members.
+	
 2005-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledNS.cxx:

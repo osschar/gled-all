@@ -1,3 +1,8 @@
+2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* metagui_test.C:
+	Added a WGlValuator GL-weed to modify sleep time of the rotator.
+
 2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* metagui_test.C:
