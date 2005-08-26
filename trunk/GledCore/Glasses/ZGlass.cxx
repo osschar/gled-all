@@ -390,6 +390,7 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
     if(i == mReverseRefs.end()) {
       mQueen->SubjectRefCntUnlock();
       ISerr(_eh + Identify() + " not referenced by " + from->Identify() + ".");
+      return mRefCount;
     }
     if(n > i->second) {
       ISwarn(_eh + GForm("%s, called by %s: mismatch %d > %d.", Identify().c_str(),
