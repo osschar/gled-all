@@ -214,6 +214,9 @@ namespace GledNS {
   ClassInfo*  FindClassInfo(const string& name);
   FID_t       FindClassID(const string& name);
 
+  MethodInfo*     DeduceMethodInfo(ZGlass* alpha, const string& name);
+  DataMemberInfo* DeduceDataMemberInfo(ZGlass* alpha, const string& name);
+
   /**************************************************************************/
   /**************************************************************************/
 
@@ -304,6 +307,15 @@ namespace GledNS {
   string join_strings(const string& sep, lStr_t& list);
 
   void remove_whitespace(string& s);
+
+  // Function argument parsing, type converters
+
+  void split_argument(const string& arg,
+		      string& type, string& name, string& def);
+  void unrefptrconst_type(string& type);
+
+  Double_t peek_value(void* addr, Int_t type);
+  void     stream_value(TBuffer& b, Int_t type, Double_t value); 
 
   // url_tokenizator
 

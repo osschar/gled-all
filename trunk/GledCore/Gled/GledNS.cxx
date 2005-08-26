@@ -11,6 +11,8 @@
 #include <Gled/GMutex.h>
 #include <Gled/Gled.h>
 
+#include <RegExp/pme.h>
+
 #include <TMessage.h>
 #include <TDirectory.h>
 #include <TFile.h>
@@ -322,6 +324,44 @@ GledNS::ClassInfo* GledNS::FindClassInfo(const string& name)
 }
 
 /**************************************************************************/
+
+GledNS::MethodInfo* GledNS::DeduceMethodInfo(ZGlass* alpha, const string& name)
+{
+  // 'name' can be FQ, eg. "SomeGlass::Foo".
+
+  PME re("::");
+  int ret = re.split(name);
+  if(ret == 2) {
+    ClassInfo* ci = FindClassInfo(re[0]);
+    if(ci == 0)  return 0;
+    return ci->FindMethodInfo(re[1], false);
+  }
+  else if(ret == 1 && alpha != 0) {
+    ClassInfo* ci = alpha->VGlassInfo();
+    return ci->FindMethodInfo(re[0], true);
+  }
+  return 0;
+}
+
+GledNS::DataMemberInfo* GledNS::DeduceDataMemberInfo(ZGlass* alpha, const string& name)
+{
+  // 'name' can be FQ, eg. "SomeGlass::Foo".
+
+  PME re("::");
+  int ret = re.split(name);
+  if(ret == 2) {
+    ClassInfo* ci = FindClassInfo(re[0]);
+    if(ci == 0)  return 0;
+    return ci->FindDataMemberInfo(re[1], false);
+  }
+  else if(ret == 1 && alpha != 0) {
+    ClassInfo* ci = alpha->VGlassInfo();
+    return ci->FindDataMemberInfo(re[0], true);
+  }
+  return 0;
+}
+
+/**************************************************************************/
 // GledNS::MethodInfo
 /**************************************************************************/
 
@@ -581,6 +621,87 @@ void GledNS::remove_whitespace(string& s)
     if(!isspace(*i)) g += *i;
   }
   s = g;
+}
+
+/**************************************************************************/
+// Argument/type-name parsing foos
+/**************************************************************************/
+
+void GledNS::split_argument(const string& arg,
+			    string& type, string& name, string& def)
+{
+  string::size_type ei = arg.find('=');
+  if(ei != string::npos) {
+    string::size_type tei = ei+1; while(isspace(arg[tei])) ++tei;
+    def = string(arg, tei, arg.length()-tei);
+  } else {
+    ei = arg.length();
+  }
+  --ei;
+  while(isspace(arg[ei])) --ei;
+  string::size_type ti = ei;
+  while(isalnum(arg[ti]) || arg[ti] == '_') --ti;
+  name = string(arg, ti+1, ei-ti);
+  while(isspace(arg[ti])) --ti;
+  type = string(arg, 0, ti+1);
+}
+
+void GledNS::unrefptrconst_type(string& type)
+{
+  string::size_type i;
+  while((i = type.find_first_of("*&")) != string::npos) {
+    type.replace(i, 1, " ");
+  }
+  type.insert(0, " ");
+  while((i = type.find(" const ")) != string::npos) {
+    type.replace(i+1, 5, "");
+  }
+  while((i = type.find(" ")) != string::npos) {
+    type.replace(i, 1, "");
+  }
+}
+
+/**************************************************************************/
+
+// Type snatched from TDataType.h
+
+Double_t GledNS::peek_value(void* addr, Int_t type)
+{
+  switch(type) {
+  case  2: return *((Short_t*)addr);   
+  case  3: return *((Int_t*)addr);   
+  case  4: return *((Long_t*)addr);   
+  case  5: return *((Float_t*)addr);   
+  case  6: return *((Int_t*)addr);   
+  case  8: return *((Double_t*)addr);
+  case  9: return *((Double32_t*)addr);
+  case 11: return *((UChar_t*)addr);   
+  case 12: return *((UShort_t*)addr);   
+  case 13: return *((UInt_t*)addr);   
+  case 14: return *((ULong_t*)addr); 
+  case 15: return *((UInt_t*)addr); 
+  default: return 0;
+  };
+}
+
+void GledNS::stream_value(TBuffer& b, Int_t type, Double_t value)
+{
+  assert(b.IsWriting());
+  switch(type) {
+  case  2: b << (Short_t)value;    break;
+  case  3: b << (Int_t)value;      break;
+  case  4: b << (Long_t)value;     break;
+  case  5: b << (Float_t)value;    break;
+  case  6: b << (Int_t)value;      break;
+  case  8: b << (Double_t)value;   break;
+  case  9: b << (Double32_t)value; break;
+  case 11: b << (UChar_t)value;    break;
+  case 12: b << (UShort_t)value;   break;
+  case 13: b << (UInt_t)value;     break;
+  case 14: b << (ULong_t)value;    break;
+  case 15: b << (UInt_t)value;     break;
+  default: b << Int_t(0);          break;
+  };
 }
 
 /**************************************************************************/
