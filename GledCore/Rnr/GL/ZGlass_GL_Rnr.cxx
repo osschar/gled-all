@@ -44,9 +44,12 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
   // cout <<"ZGlass_GL_Rnr::Draw rendering '"<< mGlass->GetName() <<"'.\n";
 
   if(mGlass->bUseDispList) {
-    if(bRebuildDL) {
-      GLRnrDriver* glrd = rd->GL();
-      if(glrd->GetInDLRebuild() || (bUsesSubPicking && glrd->PickingP())) {
+    GLRnrDriver* glrd = rd->GL();
+    if(bUsesSubPicking && glrd->PickingP()) {
+      Render(rd);
+    }
+    else if(bRebuildDL) {
+      if(glrd->GetInDLRebuild()) {
 	Render(rd);
       } else {
 	glrd->SetInDLRebuild(true);
@@ -56,7 +59,8 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 	glrd->SetInDLRebuild(false);
 	bRebuildDL = false;
       }
-    } else {
+    }
+    else {
       glCallList(mDispList);
     }
   } else {
@@ -74,7 +78,7 @@ void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 void ZGlass_GL_Rnr::Render(RnrDriver* rd)
 {}
 
-/**************************************************************************/
+  /**************************************************************************/
 
 void ZGlass_GL_Rnr::Redraw(RnrDriver* rd)
 {
