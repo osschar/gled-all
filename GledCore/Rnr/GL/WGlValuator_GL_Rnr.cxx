@@ -72,8 +72,8 @@ int WGlValuator_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
   if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
     if(V.DataOK()) {
-      mX = ev.fX; mY = ev.fX;
-      printf("push at %d %d\n", mX, mY);
+      mX = ev.fX; mY = ev.fY;
+      // printf("push at %d %d\n", mX, mY);
       return 1;
     } else {
       return 0;
@@ -81,7 +81,7 @@ int WGlValuator_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
   }
   if(ev.fEvent == FL_DRAG) {
     Int_t dx = (ev.fX - mX) / 4;
-    printf("drag at %d %d; x=%d, d=%d\n", ev.fX, ev.fX, mX, dx);
+    // printf("drag at %d %d; x=%d, d=%d\n", ev.fX, ev.fX, mX, dx);
     if(dx !=0 && V.DataOK()) {
       ZMIR mir(V.mCbackAlpha);
       V.mDataMemberInfo->fSetMethod->ImprintMir(mir);
