@@ -17,7 +17,13 @@ $PATCH = {
 "AList" => {
   'PragmaSuff' => "!-",
   'VirtualBase' => 1,
-  'Pragmas' => "#pragma link C++ class AList::ElRep;\n"
+  'Pragmas' =>
+   "#pragma link C++ class AList::ElRep;\n" .
+   "#pragma link C++ class list<ZGlass*>;\n" .
+   "#pragma link C++ class list<ZGlass*>::iterator;\n" .
+   "#pragma link C++ typedef lpZGlass_t;\n" .
+   "#pragma link C++ typedef lpZGlass_i;\n"
+
 },
 
 "ZDeque" => {
