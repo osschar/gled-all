@@ -1,3 +1,9 @@
+2005-08-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* catalog.patch:
+	Added pragmas to make lpZGlass_t/i stuff (also ZLiat::Copy()) to
+	work from CINT.
+
 2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/MCW_Button.cxx:
