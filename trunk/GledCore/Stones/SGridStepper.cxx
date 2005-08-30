@@ -4,14 +4,15 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "GLGridStepper.h"
-#include <GL/gl.h>
+#include "SGridStepper.h"
 
 //______________________________________________________________________
-// GLGridStepper
+// SGridStepper
 //
 
-GLGridStepper::GLGridStepper(Int_t sm) : Mode(StepMode_e(sm))
+ClassImp(SGridStepper)
+
+SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
 {
   switch(Mode) { 
   case SM_XYZ:
@@ -33,7 +34,7 @@ GLGridStepper::GLGridStepper(Int_t sm) : Mode(StepMode_e(sm))
   Dx = Dy = Dz = 1;
 }
 
-bool GLGridStepper::Step()
+bool SGridStepper::Step()
 {
   (*ns[0])++;
   if(*ns[0] >= *ls[0]) {
@@ -48,14 +49,7 @@ bool GLGridStepper::Step()
   return true;
 }
 
-void GLGridStepper::GetPosition(Float_t* p)
+void SGridStepper::GetPosition(Float_t* p)
 {
   p[0] = nx*Dx; p[1] = ny*Dy; p[2] = nz*Dz;
-}
-
-void GLGridStepper::TranslateToPosition()
-{
-  Float_t p[3];
-  GetPosition(p);
-  glTranslatef(p[0], p[1], p[2]);
 }
