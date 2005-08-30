@@ -21,9 +21,9 @@ public:
 
   GLGridStepper(Int_t sm);
 
-  void SetNs(Int_t nx, Int_t ny, Int_t nz)
+  void SetNs(Int_t nx, Int_t ny, Int_t nz=1)
   { Nx = nx; Ny = ny; Nz = nz; }
-  void SetDs(Float_t dx, Float_t dy, Float_t dz)
+  void SetDs(Float_t dx, Float_t dy, Float_t dz=0)
   { Dx = dx; Dy = dy; Dz = dz; }
   
   bool Step();
