@@ -4,12 +4,12 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef GledCore_GLGridStepper_H
-#define GledCore_GLGridStepper_H
+#ifndef GledCore_SGridStepper_H
+#define GledCore_SGridStepper_H
 
 #include <Rtypes.h>
 
-class GLGridStepper {
+class SGridStepper {
   Int_t *ls[3], *ns[3];
 public:
   enum StepMode_e { SM_XYZ, SM_YXZ, SM_XZY };
@@ -19,7 +19,7 @@ public:
   Int_t   Nx, Ny, Nz;
   Float_t Dx, Dy, Dz;
 
-  GLGridStepper(Int_t sm);
+  SGridStepper(Int_t sm);
 
   void SetNs(Int_t nx, Int_t ny, Int_t nz=1)
   { Nx = nx; Ny = ny; Nz = nz; }
@@ -29,8 +29,8 @@ public:
   bool Step();
 
   void GetPosition(Float_t* p);
-  void TranslateToPosition();
 
-}; // endclass GLGridStepper
+  ClassDef(SGridStepper, 1)
+}; // endclass SGridStepper
 
 #endif
