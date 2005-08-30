@@ -2,6 +2,17 @@
 
 	* Rnr/GL/GLGridStepper.cxx:
 	* Rnr/GL/GLGridStepper.h:
+	* Stones/SGridStepper.cxx:
+	* Stones/SGridStepper.h:
+	Moved Rnr/GL/GLGridStepper to Stones/SGridStepper.
+
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	Use non-gl dependent GridStepper.
+
+2005-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/GLGridStepper.cxx:
+	* Rnr/GL/GLGridStepper.h:
 	New class GLGridStepper: stepping over regular grid.
 
 	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
