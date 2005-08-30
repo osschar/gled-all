@@ -1,3 +1,12 @@
+2005-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/GLGridStepper.cxx:
+	* Rnr/GL/GLGridStepper.h:
+	New class GLGridStepper: stepping over regular grid.
+
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	Stepping code moved to independent class GLGridStepper.
+
 2005-08-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* catalog.patch:
