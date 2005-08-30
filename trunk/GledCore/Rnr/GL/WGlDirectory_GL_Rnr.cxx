@@ -12,7 +12,7 @@
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
 #include <Rnr/GL/WGlFrameStyle_GL_Rnr.h>
 
-#include <Rnr/GL/GLGridStepper.h>
+#include <Stones/SGridStepper.h>
 
 #include <Stones/ZMIR.h>
 #include <Eye/Eye.h>
@@ -53,7 +53,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
   lpZGlass_t cont; M.mContents->Copy(cont);
 
 
-  GLGridStepper stepper(M.mStepMode);
+  SGridStepper stepper(M.mStepMode);
   stepper.SetNs(M.mNx, M.mNy, M.mNz);
   stepper.SetDs(M.mDx, M.mDy, M.mDz);
 
@@ -72,7 +72,9 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     bool belowmouse = (*i == mCurrent);
 
     glPushMatrix();
-    stepper.TranslateToPosition();
+    Float_t pos[3];
+    stepper.GetPosition(pos);
+    glTranslatef(pos[0], pos[1], pos[2]);
     rd->GL()->PushName(this, *i);
 
     if(M.bDrawBox) {
