@@ -12,6 +12,8 @@
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
 #include <Rnr/GL/WGlFrameStyle_GL_Rnr.h>
 
+#include <Rnr/GL/GLGridStepper.h>
+
 #include <Stones/ZMIR.h>
 #include <Eye/Eye.h>
 
@@ -50,22 +52,10 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
 
   lpZGlass_t cont; M.mContents->Copy(cont);
 
-  Int_t nx=0, ny=0, nz=0;
-  Int_t *ls[3], *ns[3];
-  switch(M.mStepMode) { 
-  case WGlDirectory::SM_XYZ:
-    ls[0] = &M.mNx; ls[1] = &M.mNy; ls[2] = &M.mNz;
-    ns[0] = &nx;    ns[1] = &ny;    ns[2] = &nz;
-    break;
-  case WGlDirectory::SM_YXZ:
-    ls[0] = &M.mNy; ls[1] = &M.mNx; ls[2] = &M.mNz;
-    ns[0] = &ny;    ns[1] = &nx;    ns[2] = &nz;
-    break;
-  case WGlDirectory::SM_XZY:
-    ls[0] = &M.mNx; ls[1] = &M.mNz; ls[2] = &M.mNy;
-    ns[0] = &nx;    ns[1] = &nz;    ns[2] = &ny;
-    break;
-  }
+
+  GLGridStepper stepper(M.mStepMode);
+  stepper.SetNs(M.mNx, M.mNy, M.mNz);
+  stepper.SetDs(M.mDx, M.mDy, M.mDz);
 
   GledNS::ClassInfo* bci = M.GetCbackBetaClassInfo();
 
@@ -82,7 +72,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     bool belowmouse = (*i == mCurrent);
 
     glPushMatrix();
-    glTranslatef(nx*M.mDx, ny*M.mDy, nz*M.mDz);
+    stepper.TranslateToPosition();
     rd->GL()->PushName(this, *i);
 
     if(M.bDrawBox) {
@@ -107,16 +97,8 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     rd->GL()->PopName();
     glPopMatrix();
 
-    (*ns[0])++;
-    if(*ns[0] >= *ls[0]) {
-      *ns[0] = 0; (*ns[1])++;
-      if(*ns[1] >= *ls[1]) {
-	*ns[1] = 0; (*ns[2])++;
-	if(*ns[2] >= *ls[2]) {
-	  printf("out of space ... proceeding any way\n");
-	}
-      }
-    }
+    if(stepper.Step() == false)
+      printf("out of space ... proceeding any way\n");
   }
 
   glPopAttrib();
