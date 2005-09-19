@@ -15,16 +15,20 @@ HitContainer		70	Glasses/HitContainer		.
 GIImportStyle           86      Glasses/GIImportStyle
 
 TPCSegment		87	Glasses/TPCSegment		.
-TPCSegRnrMod		88	Glasses/TPCSegRnrMod		.
-ITSModule               89      Glasses/ITSModule               .
-ITSDigRnrMod		90	Glasses/ITSDigRnrMod		.
-TOFSector               92      Glasses/TOFSector               .
-TOFDigRnrMod            93      Glasses/TOFDigRnrMod            .
-ITSScaledModule         94      Glasses/ITSScaledModule         .
+TPCPadRow		88	Glasses/TPCPadRow		.
+TPCSegFrame		89	Glasses/TPCSegFrame		.
+TPCSegRnrMod		90	Glasses/TPCSegRnrMod		.
+ITSModule               91      Glasses/ITSModule               .
+ITSDigRnrMod		92	Glasses/ITSDigRnrMod		.
+TOFSector               93      Glasses/TOFSector               .
+TOFDigRnrMod            94      Glasses/TOFDigRnrMod            .
+ITSScaledModule         95      Glasses/ITSScaledModule         .
 
 RecTrack                100     Glasses/RecTrack                .
 RecTrackRS              101     Glasses/RecTrackRS              .
 V0Track                 102     Glasses/V0Track                 .
 KinkTrack		103	Glasses/KinkTrack		.
 
-DigitsGUI               110     Glasses/DigitsGUI		ZNode
+UINodeLink              111     Glasses/UINodeLink              .
+MenuDriver              112     Glasses/MenuDriver              WGlDirectory
+Menu                    113     Glasses/Menu
