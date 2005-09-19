@@ -62,8 +62,8 @@ void loadlibs ()
   gSystem->Load("libVZERObase");
   gSystem->Load("libVZEROsim");
   gSystem->Load("libVZEROrec");
-  //gSystem->Load("libEMCAL");
-  gSystem->Load("libCONTAINERS");
+  // gSystem->Load("libEMCAL");
+  // gSystem->Load("libCONTAINERS");
 
   // The following lines have to be commented on Darwin
   // for the moment due to cross dependencies
@@ -71,7 +71,9 @@ void loadlibs ()
   gSystem->Load("libTPCrec");
   gSystem->Load("libTPCsim");
   gSystem->Load("libTPCfast");
-  gSystem->Load("libITS");
+  // gSystem->Load("libITS");
+  gSystem->Load("libITSbase");
+  gSystem->Load("libITSsim");
   gSystem->Load("libTRDbase");
   gSystem->Load("libTRDsim");
   gSystem->Load("libTRDrec");
