@@ -128,6 +128,10 @@ namespace GLTextNS {
 
   extern void RnrTextPoly(RnrDriver* rd, const string& text);
 
+  extern void RnrText(RnrDriver* rd, const string& text,
+		      int x, int yrow, float z,
+		      const ZColor* front_col, const ZColor* back_col=0);
+
   extern void RnrTextAt(RnrDriver* rd, const string& text,
 			int x, int yrow, float z,
 			const ZColor* front_col, const ZColor* back_col=0);
