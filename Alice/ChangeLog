@@ -1,3 +1,58 @@
+2005-09-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+        Changes required for aliroot v4-03-04.
+
+	* Glasses/DigitsGUI.cxx:
+	* Glasses/DigitsGUI.h:
+        Remove files.
+
+	* Glasses/ITSModule.h:
+        Add Get/Set functions.
+
+	* Glasses/Menu.cxx:
+	* Glasses/Menu.h:
+	* Glasses/MenuDriver.cxx:
+	* Glasses/MenuDriver.h:
+         New files for GL user interface (demo).    
+
+	* Glasses/TPCPadRow.cxx:
+	* Glasses/TPCPadRow.h:
+	* Rnr/GL/TPCPadRow_GL_Rnr.cxx:
+	* Rnr/GL/TPCPadRow_GL_Rnr.h:
+        New file for interface for picked TPC padrow.
+
+	* Glasses/TPCSegFrame.cxx:
+	* Glasses/TPCSegFrame.h:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.h:
+        New class for GL interface (picking).
+
+	* Glasses/TPCSegRnrMod.h:
+	* Glasses/TPCSegment.h:	
+        * Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+        Changes required for new TPCPadRow class.
+
+	* Glasses/ZAliLoad.cxx:
+        Changes required for aliroot v4-03-04.
+	
+	* Makefile:
+        Remove CONTAINERS library.
+
+	* Rnr/GL/UINodeLink_GL_Rnr.cxx:
+	* Rnr/GL/UINodeLink_GL_Rnr.h:
+	* Glasses/UINodeLink.cxx:
+	* Glasses/UINodeLink.h:
+        New classes used by MenuDriver.
+	
+        * Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+        Changes required for aliroot v4-03-04.
+
+	* glass.list:
+        New classes: UINodeLink, TPCPadRow, Menu and MenuDirver.
+
 2005-08-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/DigitsGUI.cxx:
