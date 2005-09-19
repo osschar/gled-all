@@ -26,6 +26,7 @@
 #include <AliITSclusterV2.h>
 #include <AliTrackReference.h>
 #include <AliESDkink.h>
+#include <AliITSLoader.h>
 
 map<Int_t, GenInfo*> gimap;
 ClassImp(AliConverter)
@@ -81,7 +82,7 @@ void AliConverter::_init()
     pdgDB->AddParticle("HE3","HE3",3*kAu2Gev+14.931e-3,kFALSE,
 		       0,2,"Ion",kion+20030);
   }
-  AliKalmanTrack::SetConvConst(1); 
+  // AliKalmanTrack::SetConvConst(1); 
 }
 
 /**************************************************************************/
@@ -522,8 +523,8 @@ void AliConverter::ConvertITSClusters()
     throw(_eh + "'TreeR' not found.");
 
   AliITSLoader* ITSld =  (AliITSLoader*) pRunLoader->GetLoader("ITSLoader");
-  AliITS* pITS = ITSld->GetITS();
-  AliITSgeom* geom = pITS->GetITSgeom();
+  //AliITS* pITS = ITSld->GetITS();
+  AliITSgeom* geom = ITSld->GetITSgeom();
   //AliITSgeom* geom = new AliITSgeom();
   //geom->ReadNewFile("/home/aljam/ITSgeometry.det");
 
@@ -685,8 +686,8 @@ void AliConverter::ConvertV0()
     mV0.fVP[2] = av->GetParamP()->Z();
 
     // daughter indices
-    mV0.fDLabels[0] = av->GetLab(0);
-    mV0.fDLabels[1] = av->GetLab(1);
+    mV0.fDLabels[0] = av->fLab[0];
+    mV0.fDLabels[1] = av->fLab[1];
 
     mV0.fPDG = av->GetPdgCode();
 

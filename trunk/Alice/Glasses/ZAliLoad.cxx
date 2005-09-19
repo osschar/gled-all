@@ -364,7 +364,7 @@ void ZAliLoad::ShowITSDet(Int_t id, Bool_t scale, ZNode* holder, Bool_t show_emp
     }
   } 
 
-  if(holder == 0) holder == this;
+  if(holder == 0) holder = this;
   mQueen->CheckIn(dh); holder->Add(dh);
 }
 /**************************************************************************/

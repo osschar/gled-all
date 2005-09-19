@@ -80,7 +80,6 @@ void ITSDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
   SetITSSegmentation();
   
   // create tables for scaling
-  Int_t scales = NSCALE;
   // lowest scale factor refers unscaled ITS module
   mSPDScaleX[0]=1;
   mSPDScaleZ[0]=1;

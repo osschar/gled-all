@@ -11,6 +11,7 @@
 
 #include <Stones/ZRCStone.h>
 #include <TClonesArray.h>
+#include <TTree.h>
 
 #include <AliITS.h>
 #include <AliITSgeom.h>
