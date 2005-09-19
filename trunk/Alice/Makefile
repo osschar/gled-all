@@ -9,14 +9,14 @@ REQUIRES_LIB_SETS := GledCore Geom1 RootGeo
 # ALICE_TARGET=linuxDEBUG
 # ALICE_TARGET=linux
 
-ALICE_LIBS = -lESD -lSTEER -lCONTAINERS
+ALICE_LIBS = -lESD -lSTEER # -lCONTAINERS
 
 # Nice, friendly woozies that don't need special treatment
 BLESSED_DIRS	:= Glasses
 BASE_DIRS	:= Stones Alice 
 
 DICT_DIRS	:= Glasses Stones
-CPPFLAGS	:=-I${ALICE_ROOT}/include -I${ALICE_ROOT}/TPC -I${ALICE_ROOT}/ITS -I${ALICE_ROOT}/TOF -I${ALICE_ROOT}/CONTAINERS
+CPPFLAGS	:=-I${ALICE_ROOT}/include -I${ALICE_ROOT}/TPC -I${ALICE_ROOT}/ITS -I${ALICE_ROOT}/TOF # -I${ALICE_ROOT}/CONTAINERS
 
 VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
