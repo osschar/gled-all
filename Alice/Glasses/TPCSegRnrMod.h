@@ -15,7 +15,7 @@
 class TPCSegRnrMod : public ZRnrModBase {
   MAC_RNR_FRIENDS(TPCSegRnrMod);
   MAC_RNR_FRIENDS(TPCSegment);
-
+  MAC_RNR_FRIENDS(TPCPadRow);
  private:
   void _init();
 
