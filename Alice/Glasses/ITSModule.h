@@ -22,7 +22,7 @@ class ITSModule : public ZNode {
   virtual void init_module();
   virtual void set_trans();
 
-  ITSDigitsInfo* mInfo;
+  ITSDigitsInfo* mInfo;  // X{GS}
 
   Bool_t      bSetTrans; // X{GS}  7 Bool()
   Int_t       mID;       // X{g}   7 Value(-range=>[0,2200,1], -join=>1)
