@@ -32,7 +32,7 @@ class TPCSegment : public ZNode
   virtual ~TPCSegment();
 
   void SetDigInfo(TPCDigitsInfo* diginfo);
-  void SetSegment(Int_t segment);
+  virtual void SetSegment(Int_t segment);
 
 #include "TPCSegment.h7"
   ClassDef(TPCSegment, 1)

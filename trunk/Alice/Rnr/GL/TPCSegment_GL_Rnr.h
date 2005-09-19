@@ -20,20 +20,19 @@ const int ImageHeight = 128;
 class TPCSegment_GL_Rnr : public ZNode_GL_Rnr
 {
  private:
+ public:
   void          _init();
-  void          load_padrow(Int_t row, Int_t offx, Int_t offy);
+  void          load_padrow(Int_t row, Int_t off);
   void          display_texture(Float_t pw, Float_t pl, Float_t vR, Int_t nMaxPads, 
 				Int_t nRows, Int_t startRow,Int_t startCol);
-  void          init_texture();
   void          display_quads(Float_t pw, Float_t pl, Float_t vR, Int_t nMaxPads, 
 			      Int_t nRows, Int_t startRow,Int_t startCol);
-  void          end_texture();
   void          display_frame(TPCDigitsInfo* info);
 
   GLubyte* get_row(Int_t row);
   GLubyte* get_row_col(Int_t row, Int_t col);
 
- protected:
+  // protected:
   TPCSegment*	       mTPCSegment;
   GLubyte*             mImage;
   GLuint               mTexture;
@@ -49,7 +48,10 @@ class TPCSegment_GL_Rnr : public ZNode_GL_Rnr
 
   virtual void Draw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
-  void SetCol(Float_t z,GLubyte* pixel);
+  void         SetCol(Float_t z,GLubyte* pixel);
+  void         InitTexture();
+  void         EndTexture();
+
 }; // endclass TPCSegment_GL_Rnr
 
 
