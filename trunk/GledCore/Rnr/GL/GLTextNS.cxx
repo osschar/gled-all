@@ -895,6 +895,84 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 
 /**************************************************************************/
 
+void GLTextNS::RnrText(RnrDriver* rd, const string& text,
+		       int x, int y, float z,
+		       const ZColor* front_col, const ZColor* back_col)
+{
+  // Renders string text on position specified by:
+  // x - num pixels from the left border (right if x < 0)
+  // y - pixels from bottom border
+  // z - z coordinate in depth-buffer coordinates (0 -> 1)
+  // If front_col == 0 renders uses white pen.
+  // If back_col  != 0 renders a square of that color behind the text.
+
+  RNRDRIVER_GET_RNRMOD_BOTH(font, rd, ZRlFont);
+  TexFont *txf = font_rnr->GetFont();
+
+  glPushAttrib(GL_TEXTURE_BIT      |
+	       GL_LIGHTING_BIT     |
+	       GL_COLOR_BUFFER_BIT |
+	       GL_POLYGON_BIT);
+
+
+  glPolygonMode(GL_FRONT, GL_FILL);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_ALPHA_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+  int width, ascent, descent;
+  GLTextNS::txfGetStringMetrics(txf, text.c_str(), text.length(),
+                                width, ascent, descent);
+  ascent  = txf->max_ascent;
+  descent = txf->max_descent;
+
+  int   h_box = ascent + descent;
+  float scale = float(font_lens->GetSize()) / ascent;
+
+  glPushMatrix();
+  glLoadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadMatrixf(rd->GetProjBase());
+  glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
+
+  if(x < 0)
+    x = rd->GetWidth() - TMath::Nint(width*scale) + x;
+  glTranslatef(x, (y - descent)*scale, z);
+  glScalef(scale, scale, 1);
+
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  glPolygonOffset(-1, -1);
+      
+  if(back_col != 0) {      
+    float x0 = -1;
+    float x1 = width + 1;
+    float y0 = -descent;
+    float y1 = ascent;
+    glColor4fv((*back_col)());
+    glBegin(GL_QUADS);
+    glVertex2f(x0, y0);
+    glVertex2f(x1, y0);
+    glVertex2f(x1, y1);
+    glVertex2f(x0, y1);
+    glEnd();
+  }
+
+  glPolygonOffset(-2, -2);
+  if(front_col == 0) glColor3f(1, 1, 1); else glColor4fv((*front_col)());
+  glEnable(GL_TEXTURE_2D);
+
+  GLTextNS::txfBindFontTexture(txf);
+  GLTextNS::txfRenderString(txf, text.c_str(), text.length());
+
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+
+  glPopAttrib();
+}
+
 void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
 			 int x, int yrow, float z,
                          const ZColor* front_col, const ZColor* back_col)
