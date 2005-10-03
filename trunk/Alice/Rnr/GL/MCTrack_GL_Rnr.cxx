@@ -117,7 +117,7 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
       // case 1  
       if( rst_lens->mFitDaughters && (mMCTrack->IsEmpty() == false)){
 	list<MCTrack*> dts; 
-	mMCTrack->CopyByGlass<MCTrack*>(dts);
+	mMCTrack->CopyListByGlass<MCTrack>(dts);
 	for(list<MCTrack*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
 	  GLensReadHolder _rlck(*i);
 	  const MCParticle* d = (*i)->GetParticle();
@@ -161,7 +161,7 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
       if(rst_lens->mFitDaughters ){
         if( mMCTrack->IsEmpty() == false){
           list<MCTrack*> dts; 
-          mMCTrack->CopyByGlass<MCTrack*>(dts);
+          mMCTrack->CopyListByGlass<MCTrack>(dts);
           for(list<MCTrack*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
             GLensReadHolder _rlck(*i);
             const MCParticle* d = (*i)->GetParticle();

@@ -8,7 +8,7 @@
 #define GledCore_NestInfo_H
 
 #include <Glasses/SubShellInfo.h>
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 
 class NestInfo : public SubShellInfo {
   MAC_RNR_FRIENDS(NestInfo);
@@ -39,7 +39,7 @@ protected:
   Int_t		mWSepBox; // X{GS} Ray{Rewidth} 7 Value(-range=>[0,5,1])
 
   // Layout specification.
-  ZList*	mLayoutList;	// X{GS} L{}
+  ZLink<ZList>	mLayoutList;	// X{GS} L{}
   LeafLayout_e  mLeafLayout;    // X{GS} Ray{Layout} 7 PhonyEnum()
   TString       mLayout;        // X{GS} Ray{Layout} 7 Textor()
 
@@ -60,6 +60,5 @@ public:
   ClassDef(NestInfo, 1) // Glass representation of GUI browser 'FTW_Nest'.
 }; // endclass NestInfo
 
-GlassIODef(NestInfo);
 
 #endif

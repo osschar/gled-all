@@ -29,8 +29,8 @@ protected:
 
   Int_t			mVecSize;	// X{gS} 7 Value(-range=>[1,1000000,1,1])
 
-  PerfMeterTarget*	mTarget;	// X{gS} L{}
-  SaturnInfo*		mBeamHost;	// X{gS} L{}
+  ZLink<PerfMeterTarget>	mTarget;	// X{gS} L{}
+  ZLink<SaturnInfo>		mBeamHost;	// X{gS} L{}
 
 public:
   PerfMeterOperator(const Text_t* n="PerfMeterOperator", const Text_t* t=0) : Operator(n,t) { _init(); }
@@ -41,6 +41,5 @@ public:
   ClassDef(PerfMeterOperator, 1)
 }; // endclass PerfMeterOperator
 
-GlassIODef(PerfMeterOperator);
 
 #endif

@@ -99,35 +99,37 @@ void Gled::ParseArguments(list<char*>& args)
        strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
       {
 	printf(
-	  "Arguments: [options] [dir] [file(s)]\n"
-	  "                     dir   ~ cd to dir prior to exec of files\n"
-	  "                     files ~ ROOT macro scripts to process\n"
-	  "Gled options:\n"
-	  "-------------\n"
-	  "  -preexec <m1:m2..> pre-exec specified macros\n"
-	  "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
-	  "                     Saturn if -master is specified, Sun otherwise\n"
-	  "  -allowmoons        accept moon connections\n"
-	  "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
-	  "  -p[ort]    <num>   specify server port (def: 9061)\n"
-	  "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
-	  "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
-	  "  -n[ame]    <str>   name of Saturn\n"
-	  "  -t[itle]   <str>   title of Saturn\n"
-	  "  -l                 no splash info\n"
-	  "  -norint            do not run TRint (useful for batch saturns)\n"
-	  "\n"
-	  "Logging options:\n"
-	  "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n" 
-	  "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
-	  "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
-	  "\n"
-	  "Authentication options:\n"
-	  "  -auth              use authentication\n"
-	  "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
-	  "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
-	  "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
-	  );
+	       "Arguments: [options] [dir] [file(s)]\n"
+	       "                     dir   ~ cd to dir prior to exec of files\n"
+	       "                     files ~ ROOT macro scripts to process\n"
+	       "Gled options:\n"
+	       "-------------\n"
+	       "  -preexec <m1:m2..> pre-exec specified macros\n"
+	       "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
+	       "                     Saturn if -master is specified, Sun otherwise\n"
+	       "  -allowmoons        accept moon connections\n"
+	       "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
+	       "  -p[ort]    <num>   specify server port (def: 9061)\n"
+	       "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
+	       "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
+	       "  -n[ame]    <str>   name of Saturn\n"
+	       "  -t[itle]   <str>   title of Saturn\n"
+	       "  -l                 no splash info\n"
+	       "  -norint            do not run TRint (useful for batch saturns)\n"
+	       "\n"
+	       "Logging options:\n"
+	       "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n" 
+	       "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
+	       "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
+	       "\n"
+	       "Authentication options:\n"
+	       "  -auth              use authentication\n"
+	       "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
+	       "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
+	       "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
+	       "Renderer loading options:\n"
+	       "  -rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n"
+	       );
 	bQuit = true;
 	return;
       }
@@ -258,6 +260,14 @@ void Gled::ParseArguments(list<char*>& args)
       args.erase(start, ++i);
     }
 
+    // Renderer loading options
+
+    else if(strcmp(*i, "-rnr")==0) {
+      next_arg_or_die(args, i);
+      mRenderers = *i;
+      args.erase(start, ++i);
+    }
+
     else {
       ++i;
     }
@@ -310,6 +320,15 @@ void Gled::InitGledCore()
   }
 
   ((void(*)())GledCore_GLED_init)();
+
+  if(mRenderers != "") {
+    lStr_t rnrs;
+    GledNS::split_string(mRenderers.Data(), rnrs, ':');
+    for(lStr_i r=rnrs.begin(); r!=rnrs.end(); ++r)
+      GledNS::AddRenderer(*r);
+
+    GledNS::AssertRenderers();
+  }
 }
 
 void Gled::StopLogging()
@@ -336,15 +355,15 @@ Gled::~Gled() {
 void Gled::PreExec()
 {
   lStr_t l;
-  GledNS::split_string(string(mPreExecString.Data()), l, ':');
+  GledNS::split_string(mPreExecString, l, ':');
   for(lStr_i i=l.begin(); i!=l.end(); ++i)
-    gROOT->Macro(i->c_str());
+    gROOT->Macro(i->Data());
 }
 
 /**************************************************************************/
 
 void Gled::SpawnSunOrSaturn() {
-  if(strcmp(mSaturnInfo->GetMasterName(), "") == 0) {
+  if(mSaturnInfo->RefMasterName().IsNull()) {
     SpawnSun();
   } else {
     SpawnSaturn();
@@ -353,7 +372,7 @@ void Gled::SpawnSunOrSaturn() {
 
 void Gled::SpawnSun()
 {
-  static string _eh("Gled::SpawnSun ");
+  static const Exc_t _eh("Gled::SpawnSun ");
 
   if(mSaturn) return;
   mSaturnInfo->SetMasterPort(0);
@@ -380,7 +399,7 @@ void Gled::SpawnSun()
 
 void Gled::SpawnSaturn()
 {
-  static string _eh("Gled::SpawnSaturn ");
+  static const Exc_t _eh("Gled::SpawnSaturn ");
 
   if(mSaturn) return;
   if(strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
@@ -410,7 +429,7 @@ void Gled::SpawnSaturn()
     }
     WaitUntillQueensLoaded();
   }
-  catch(string exc) {
+  catch(Exc_t& exc) {
     cerr << _eh <<" failed ... dying at:\n  "<< exc <<endl;
     exit(1);
   }
@@ -437,10 +456,12 @@ const char* Gled::PrivKeyFile(TString& id)
 
 const char* Gled::GetPubKeyFile(TString& id, Bool_t use_exc)
 {
+  static const Exc_t _eh("Gled::GetPubKeyFile ");
+
   const char* ret = PubKeyFile(id);
   if(gSystem->AccessPathName(ret, kReadPermission)) {
     if(use_exc)
-      throw(string("Gled::GetPubKeyFile can not access file:") + ret);
+      throw(_eh + "can not access file:" + ret + ".");
     else
       ret = 0;
   }
@@ -449,10 +470,12 @@ const char* Gled::GetPubKeyFile(TString& id, Bool_t use_exc)
 
 const char* Gled::GetPrivKeyFile(TString& id, Bool_t use_exc)
 {
+  static const Exc_t _eh("Gled::GetPrivKeyFile ");
+
   const char* ret = PrivKeyFile(id);
   if(gSystem->AccessPathName(ret, kReadPermission)) {
     if(use_exc)
-      throw(string("Gled::GetPrivKeyFile can not access file:") + ret);
+      throw(_eh + "can not access file:" + ret + ".");
     else
       ret = 0;
   }
@@ -610,10 +633,10 @@ void Gled::AssertLibSet(const Text_t* lib_set)
 }
 
 namespace {
-  void chomp_tail(string& s, char c='.') {
-    size_t p = s.rfind(c);
-    if(p != string::npos)
-      s.erase(p, string::npos);
+  void chomp_tail(TString& s, char c='.') {
+    Ssiz_t p = s.Last(c);
+    if(p != kNPOS)
+      s.Remove(p);
   }
 }
 
@@ -621,8 +644,8 @@ void Gled::AssertMacro(const Text_t* mac)
 {
   // Load and execute macro 'mac' if it has not been loaded yet.
 
-  string foo(mac); chomp_tail(foo);
-  if(gROOT->GetGlobalFunction(foo.c_str(), 0, true) == 0) {
+  TString foo(mac); chomp_tail(foo);
+  if(gROOT->GetGlobalFunction(foo.Data(), 0, true) == 0) {
     gROOT->Macro(mac);
   }
 }
@@ -631,20 +654,20 @@ void Gled::Macro(const Text_t* mac)
 {
   // Execute macro 'mac'. Do not reload the macro.
 
-  string foo(mac); chomp_tail(foo);
-  if(gROOT->GetGlobalFunction(foo.c_str(), 0, true) == 0)
+  TString foo(mac); chomp_tail(foo);
+  if(gROOT->GetGlobalFunction(foo.Data(), 0, true) == 0)
     gROOT->LoadMacro(mac);
 
   foo += "()";
-  gROOT->ProcessLine(foo.c_str());
+  gROOT->ProcessLine(foo.Data());
 }
 
 void Gled::LoadMacro(const Text_t* mac)
 {
   // Makes sure that macro 'mac' is loaded, but do not reload it.
 
-  string foo(mac); chomp_tail(foo);
-  if(gROOT->GetGlobalFunction(foo.c_str(), 0, true) == 0)
+  TString foo(mac); chomp_tail(foo);
+  if(gROOT->GetGlobalFunction(foo.Data(), 0, true) == 0)
     gROOT->LoadMacro(mac);
 }
 
@@ -667,7 +690,7 @@ void* Gled::TRint_runner_tl(TRint* gint)
       Gled::theOne->bRintRunning = false;
       cout << "Gint terminated ...\n";
     }
-    catch(string exc) {
+    catch(Exc_t& exc) {
       cout <<"TRint runner caught exception: "<< exc << endl;
       cout <<"TRint runner reentering event loop ...\n";
     }
@@ -705,9 +728,9 @@ void InfoStream(InfoStream_e type, const char* s)
   }
 }
 
-void InfoStream(InfoStream_e type, const string& s)
+void InfoStream(InfoStream_e type, const TString& s)
 {
-  InfoStream(type, s.c_str());
+  InfoStream(type, s.Data());
 }
 
 /**************************************************************************/

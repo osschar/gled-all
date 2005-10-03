@@ -8,8 +8,8 @@
 #define GledCore_OptoStructs_H
 
 #include <Glasses/ZGlass.h>
-#include <GledView/GledViewNS.h>
-#include <Net/Ray.h>
+#include <Gled/GledNS.h>
+#include <Eye/Ray.h>
 
 class ZGlass;
 class Eye;
@@ -40,22 +40,25 @@ namespace OptoStructs {
   // ZGlassImg: complete image of a glass in an eye
   /**************************************************************************/
 
-  struct ZGlassImg {
+  class ZGlassImg {
+  protected:
+    lpZGlassImg_t*	fElementImgs; // List-of-images for ALists. Cache.
+
+  public:
     Eye*		fEye;
-    ZGlass*		fGlass;
-    GledNS::ClassInfo*	fClassInfo;
+    ZGlass*		fLens;
 
     bool		fIsList;
     lZLinkDatum_t	fLinkData;
-    lpZGlassImg_t*	fElementImgs; // Should NOT be accessed directly.
-
-    A_Rnr*		fDefRnr;
-
-    MTW_View*		fFullMTW_View;
     lpA_View_t		fViews;
 
-    ZGlassImg(Eye* e, ZGlass* g);
+    A_Rnr*		fDefRnr;
+    MTW_View*		fFullMTW_View;
+
+    ZGlassImg(Eye* e, ZGlass* lens);
     ~ZGlassImg();
+
+    GledNS::ClassInfo* GetCI()   { return fLens->VGlassInfo(); }
 
     void PreAbsorption(Ray& ray);
     void PostAbsorption(Ray& ray);
@@ -63,7 +66,7 @@ namespace OptoStructs {
     void CheckInView(A_View* v)  { fViews.push_back(v); }
     void CheckOutView(A_View* v) { fViews.remove(v); }
 
-    ZLinkDatum*    GetLinkDatum(const string& lnk);
+    ZLinkDatum*    GetLinkDatum(const TString& lnk);
     lpZGlassImg_t* GetElementImgs();
   };
 
@@ -138,8 +141,8 @@ namespace OptoStructs {
     virtual void Update() { fToGlass = fLinkDatum->fToGlass; }
 
     // !!! This might go to ZLinkDatum::GetDefRnrBits()
-    virtual const GledViewNS::RnrBits& GetRnrBits() {
-      return GetLinkInfo()->fViewPart->fDefRnrBits;
+    virtual const GledNS::RnrBits& GetRnrBits() {
+      return GetLinkInfo()->fDefRnrBits;
     }
   };
 

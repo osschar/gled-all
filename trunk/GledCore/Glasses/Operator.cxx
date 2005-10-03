@@ -42,7 +42,7 @@ void Operator::Operate(Operator::Arg* op_arg) throw(Exception)
 void Operator::PostOperate(Operator::Arg* op_arg) throw(Exception)
 {
   if(bOpRecurse) {
-    lpZGlass_t l; Copy(l);
+    lpZGlass_t l; CopyList(l);
     if(op_arg->fUseDynCast) {
       for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
 	if(Operator* o = dynamic_cast<Operator*>(*i)) {

@@ -123,7 +123,7 @@ void ZAliLoad::CreateVSD()
 
   string vsd_file = get_vsd_name(false);
   SetVSDFile(vsd_file.c_str());
-  if(!mConverter) {
+  if(mConverter == 0) {
     AliConverter* c = new AliConverter;
     mQueen->CheckIn(c);
     SetConverter(c);
@@ -135,7 +135,7 @@ void ZAliLoad::CreateVSD()
 
 void ZAliLoad::LoadVSD()
 {
-  static const string _eh("ZAliLoad::LoadVSD ");
+  static const Exc_t _eh("ZAliLoad::LoadVSD ");
 
   OpMutexHolder omh(this, "LoadVSD");
 
@@ -144,11 +144,11 @@ void ZAliLoad::LoadVSD()
     vsd_file = get_vsd_name(true);
     SetVSDFile(vsd_file.c_str());
   }
-  catch(string exc) {
+  catch(Exc_t& exc) {
     CreateVSD();
   }
   mSelector = new VSDSelector(GForm("VSD %s", mDataDir.Data()));
-  mQueen->CheckIn(mSelector); Add(mSelector);
+  mQueen->CheckIn(*mSelector); Add(*mSelector);
   mSelector->LoadVSD(mVSDFile);
 }
 
@@ -199,7 +199,7 @@ void ZAliLoad::check_tpcdig_info()
 
 TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
 {
-  static const string _eh("ZAliLoad::ShowTPCSegment ");
+  static const Exc_t _eh("ZAliLoad::ShowTPCSegment ");
 
   check_tpcdig_info();
 
@@ -210,9 +210,9 @@ TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
   tpc->RotateLF(1,2, + (segment_id + 0.5)*20*TMath::Pi()/180);
   tpc->RotateLF(1,3, TMath::Pi());
   if(segment_id < 18) {
-    tpc->Move3(0,0,  mTPCDigInfo->mParameter->GetZLength());
+    tpc->MoveLF(3, mTPCDigInfo->mParameter->GetZLength());
   } else {
-    tpc->Move3(0,0, -mTPCDigInfo->mParameter->GetZLength());
+    tpc->MoveLF(3, -mTPCDigInfo->mParameter->GetZLength());
   }
  
   mQueen->CheckIn(tpc);
@@ -274,7 +274,7 @@ void ZAliLoad::check_itsdig_info()
 
 void ZAliLoad::ShowITSModule(Int_t id, Bool_t scale, ZNode* holder)
 {
-  static const string _eh("ZAliLoad::ShowITSModule ");
+  static const Exc_t _eh("ZAliLoad::ShowITSModule ");
 
   check_itsdig_info();
 
@@ -415,11 +415,11 @@ void ZAliLoad::ShowTOFSector(Int_t sec, ZNode* holder)
 
 void ZAliLoad::SelectParticles(const Text_t* selection,Bool_t import_daughters)
 {
-  static const string _eh("ZAliLoad::SelectParticles ");
+  static const Exc_t _eh("ZAliLoad::SelectParticles ");
 
   OpMutexHolder omh(this, "SelectParticles");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
   if(selection == 0 || strcmp(selection,"") == 0)
@@ -431,11 +431,11 @@ void ZAliLoad::SelectParticles(const Text_t* selection,Bool_t import_daughters)
 
 void ZAliLoad::SelectHits(const Text_t* selection)
 {
-  static const string _eh("ZAliLoad::SelectHits ");
+  static const Exc_t _eh("ZAliLoad::SelectHits ");
 
   OpMutexHolder omh(this, "SelectHits");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
   if(selection == 0 || strcmp(selection,"") == 0)
@@ -447,11 +447,11 @@ void ZAliLoad::SelectHits(const Text_t* selection)
 
 void ZAliLoad::SelectClusters(const Text_t* selection)
 {
-  static const string _eh("ZAliLoad::SelectClusters ");
+  static const Exc_t _eh("ZAliLoad::SelectClusters ");
 
   OpMutexHolder omh(this, "SelectClusters");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
   if(selection == 0 || strcmp(selection,"") == 0)
@@ -463,11 +463,11 @@ void ZAliLoad::SelectClusters(const Text_t* selection)
 
 void ZAliLoad::SelectRecTracks(const Text_t* selection)
 {
-  static const string _eh("ZAliLoad::SelectRecTracks ");
+  static const Exc_t _eh("ZAliLoad::SelectRecTracks ");
 
   OpMutexHolder omh(this, "SelectRecTracks");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
  if(selection == 0 || strcmp(selection,"") == 0)
@@ -479,11 +479,11 @@ void ZAliLoad::SelectRecTracks(const Text_t* selection)
 
 void ZAliLoad::SelectV0(const Text_t* selection, Bool_t import_kine)
 {
-  static const string _eh("ZAliLoad::SelectV0 ");
+  static const Exc_t _eh("ZAliLoad::SelectV0 ");
 
   OpMutexHolder omh(this, "SelectV0 ");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
   if(selection == 0 || strcmp(selection,"") == 0)
@@ -495,11 +495,11 @@ void ZAliLoad::SelectV0(const Text_t* selection, Bool_t import_kine)
 
 void ZAliLoad::SelectKinks(const Text_t* selection, Bool_t import_kine, Bool_t import_daughters)
 {
-  static const string _eh("ZAliLoad::SelectKinks ");
+  static const Exc_t _eh("ZAliLoad::SelectKinks ");
 
   OpMutexHolder omh(this, "SelectKinks ");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
   if(selection == 0 || strcmp(selection,"") == 0)
@@ -511,11 +511,11 @@ void ZAliLoad::SelectKinks(const Text_t* selection, Bool_t import_kine, Bool_t i
 
 void ZAliLoad::SelectGenInfo(const Text_t* selection)
 {
-  static const string _eh("ZAliLoad::SelectGenInfo ");
+  static const Exc_t _eh("ZAliLoad::SelectGenInfo ");
 
   OpMutexHolder omh(this, "SelectGenInfo");
 
-  if(!mSelector)
+  if(mSelector == 0)
     throw(_eh + "No VSD data loaded.");
 
   if(selection == 0 || strcmp(selection,"") == 0)

@@ -17,7 +17,7 @@ class TPCPadRow : public ZNode {
 
  private:
   void _init();
-  TPCSegment*         mSegment;    // X{gS} L{} 
+  ZLink<TPCSegment>         mSegment;    // X{gS} L{} 
 
   Float_t             mDx;         // X{GST} 7 Value(-range=>[0,100,1])
   Float_t             mDy;         // X{GST} 7 Value(-range=>[0,100,1])
@@ -48,6 +48,5 @@ class TPCPadRow : public ZNode {
   ClassDef(TPCPadRow, 1)
     }; // endclass TPCPadRow
 
-GlassIODef(TPCPadRow);
 
 #endif

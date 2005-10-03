@@ -17,7 +17,7 @@ private:
   void _init();
 
 protected:
-  ZIdentity*		mIdentity;	// X{gS} L{}
+  ZLink<ZIdentity>		mIdentity;	// X{gS} L{}
   UChar_t		mOnMatch;	// X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny], -width=>6)
 
 public:
@@ -30,6 +30,5 @@ public:
   ClassDef(ZIdentityFilter, 1)
 }; // endclass ZIdentityFilter
 
-GlassIODef(ZIdentityFilter);
 
 #endif

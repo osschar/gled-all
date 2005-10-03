@@ -40,6 +40,5 @@ public:
   ClassDef(Cylinder, 1) // Simple cylinder, possibly hollow.
 }; // endclass Cylinder
 
-GlassIODef(Cylinder);
 
 #endif

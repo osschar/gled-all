@@ -27,7 +27,7 @@ private:
 
 protected:
   struct Message {
-    string	fMsg;
+    TString	fMsg;
     Fl_Color	fCol;
     Message(const char* m, Fl_Color c=(Fl_Color)0) : fMsg(m), fCol(c) {}
   };

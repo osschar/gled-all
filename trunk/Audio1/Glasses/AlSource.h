@@ -44,6 +44,5 @@ public:
   ClassDef(AlSource, 1)
 }; // endclass AlSource
 
-GlassIODef(AlSource);
 
 #endif

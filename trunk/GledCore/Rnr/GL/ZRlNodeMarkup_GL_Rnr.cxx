@@ -9,6 +9,8 @@
 #include <TSystem.h>
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void ZRlNodeMarkup_GL_Rnr::_init()
@@ -18,6 +20,7 @@ void ZRlNodeMarkup_GL_Rnr::_init()
 
 void ZRlNodeMarkup_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   bExState = rd->GL()->GetMarkupNodes();
   switch(mZRlNodeMarkup->mNodeMarkupOp) {
   case ZRnrModBase::O_On:
@@ -62,4 +65,5 @@ void ZRlNodeMarkup_GL_Rnr::PostDraw(RnrDriver* rd)
   case ZRnrModBase::O_Nop:
     break;
   }
+  PARENT::PostDraw(rd);
 }

@@ -4,13 +4,14 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_GlobalLamps_H
-#define Gled_GlobalLamps_H
+#ifndef GledCore_GlobalLamps_H
+#define GledCore_GlobalLamps_H
 
 #include <Glasses/ZHashList.h>
 #include <Glasses/Lamp.h>
 
-class GlobalLamps : public ZHashList {
+class GlobalLamps : public ZHashList
+{
   MAC_RNR_FRIENDS(GlobalLamps);
 
 private:
@@ -25,6 +26,5 @@ public:
   ClassDef(GlobalLamps, 1)
 }; // endclass GlobalLamps
 
-GlassIODef(GlobalLamps);
 
 #endif

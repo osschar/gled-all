@@ -33,6 +33,5 @@ public:
   ClassDef(ZGlClipPlane, 1)
 }; // endclass ZGlClipPlane
 
-GlassIODef(ZGlClipPlane);
 
 #endif

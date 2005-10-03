@@ -22,7 +22,7 @@ private:
   void _init();
 
 protected:
-  GTSurf*		mTarget;      // X{gS} L{}
+  ZLink<GTSurf>		mTarget;      // X{gS} L{}
 
   StopOpts_e		mStopOpts;    // X{gS} 7 PhonyEnum(-join=>1)
   UInt_t		mStopNumber;  // X{gS} 7 Value(-range=>[6,1e8,1,1])
@@ -46,6 +46,5 @@ public:
   ClassDef(GTSRetriangulator, 1) // Coarsen or refine GTSurf
 }; // endclass GTSRetriangulator
 
-GlassIODef(GTSRetriangulator);
 
 #endif

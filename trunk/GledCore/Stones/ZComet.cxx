@@ -87,7 +87,7 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
 
   ZList* l = dynamic_cast<ZList*>(g);
   if(l && do_lists) {
-    lpZGlass_t members; l->Copy(members);
+    lpZGlass_t members; l->CopyList(members);
     for(lpZGlass_i i=members.begin(); i!=members.end(); ++i) {
       num_new += AddGlass(*i, do_links, do_lists, depth-1);
     }
@@ -99,7 +99,7 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
 
 ZGlass* ZComet::DemangleID(ID_t id)
 {
-  static const string _eh("ZComet::DemangleID ");
+  static const Exc_t _eh("ZComet::DemangleID ");
 
   if(id == 0) return 0;
   mID2pZGlass_i i;
@@ -133,7 +133,7 @@ void ZComet::AssignQueen(ZQueen* queen)
 
 Int_t ZComet::RebuildGraph()
 {
-  static const string _eh("ZComet::RebuildGraph ");
+  static const Exc_t _eh("ZComet::RebuildGraph ");
 
   if(bGraphRebuilt) return 0;
   Int_t ret = 0;
@@ -182,7 +182,7 @@ Int_t ZComet::RebuildGraph()
 
 void ZComet::Streamer(TBuffer& b)
 {
-  static const string _eh("ZComet::Streamer ");
+  static const Exc_t _eh("ZComet::Streamer ");
 
   StreamHeader(b);
   StreamContents(b);
@@ -219,7 +219,7 @@ void ZComet::StreamHeader(TBuffer& b)
 {
   // Streams Type, Size, Libsets, TopLevels|Queen|King
 
-  static const string _eh("ZComet::StreamHeader ");
+  static const Exc_t _eh("ZComet::StreamHeader ");
 
   if(b.IsReading()) {
     /*** Reading ***/
@@ -242,18 +242,23 @@ void ZComet::StreamHeader(TBuffer& b)
 	}
       }
     }
-    if(bFail) throw(string("LibSets missing."));
+    if(bFail) throw _eh + "LibSets missing.";
 
     switch(mType) {
     case CT_CometBag:
       b >> cnt;
       for(UInt_t i=0; i<cnt; i++) {
-	ID_t id; b >> id;
-	mTopLevels.push_back((ZGlass*)id);
+	mTopLevels.push_back(GledNS::ReadLensID(b));
       }
       break;
-    case CT_Queen: b >> mQueen; break;
-    case CT_King:  b >> mKing;  break;
+    case CT_Queen: {
+      mQueen = (ZQueen*) GledNS::ReadLensID(b);
+      break;
+    }
+    case CT_King: {
+      mKing  = (ZKing*)  GledNS::ReadLensID(b);
+      break;
+    }
     }
 
   } else {
@@ -266,17 +271,17 @@ void ZComet::StreamHeader(TBuffer& b)
     case CT_CometBag:
       b << (UInt_t) mTopLevels.size();
       for(lpZGlass_i i=mTopLevels.begin(); i!=mTopLevels.end(); ++i)
-	b << (*i)->GetSaturnID();
+	GledNS::WriteLensID(b, *i);
       break;
-    case CT_Queen: b << mQueen; break;
-    case CT_King:  b << mKing;  break;
+    case CT_Queen: GledNS::WriteLensID(b, mQueen); break;
+    case CT_King:  GledNS::WriteLensID(b, mKing);  break;
     }
   }
 }
 
 void ZComet::StreamContents(TBuffer& b)
 {
-  static const string _eh("ZComet::StreamContents ");
+  static const Exc_t _eh("ZComet::StreamContents ");
 
   if(b.IsReading()) {
     UInt_t size;

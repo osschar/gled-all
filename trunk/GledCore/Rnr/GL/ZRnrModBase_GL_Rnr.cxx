@@ -7,13 +7,12 @@
 #include "ZRnrModBase_GL_Rnr.h"
 #include <GL/gl.h>
 
+#define PARENT ZGlass_GL_Rnr
+
 /**************************************************************************/
 
 void ZRnrModBase_GL_Rnr::_init()
 {
-  // A_Rnr
-  // bOnePerRnrDriver = true; // Not needed with time-stamp based mods.
-
   mRnrMod = new RnrMod(mZRnrModBase, this);
 }
 
@@ -24,25 +23,9 @@ ZRnrModBase_GL_Rnr::~ZRnrModBase_GL_Rnr()
 
 /**************************************************************************/
 
-void ZRnrModBase_GL_Rnr::PreDraw(RnrDriver* rd)
-{
-  // Nothing to be done here. Suppress ZGlass implementation.
-  // Sub-classes usually call update_tring_stamp.
-}
-
-void ZRnrModBase_GL_Rnr::Draw(RnrDriver* rd)
-{
-  // Nothing to be done here. Suppress ZGlass implementation.
-}
-
-void ZRnrModBase_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-  // Nothing to be done here. Suppress ZGlass implementation.
-}
-
-/**************************************************************************/
-
 void ZRnrModBase_GL_Rnr::update_tring_stamp(RnrDriver* rd)
 {
+  // Usually called by sub-classes from PreDraw and Draw.
+
   mRnrMod->fTringTS = mZRnrModBase->GetStampReqTring();
 }

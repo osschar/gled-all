@@ -12,7 +12,8 @@
 
 #include <TRandom.h>
 
-class Amphitheatre : public ZNode {
+class Amphitheatre : public ZNode
+{
   MAC_RNR_FRIENDS(Amphitheatre);
 
 private:
@@ -31,7 +32,7 @@ protected:
   typedef list<Chair>           lChair_t;
   typedef list<Chair>::iterator lChair_i;
 
-  ZList*		mNewGuests;  // X{gS} L{}
+  ZLink<ZList>		mNewGuests;  // X{gS} L{}
   lChair_t		mChairs;
 
   Int_t			mNumCh;      // X{gS} 7 ValOut(-join=>1)
@@ -93,6 +94,5 @@ public:
   ClassDef(Amphitheatre, 1)
 }; // endclass Amphitheatre
 
-GlassIODef(Amphitheatre);
 
 #endif

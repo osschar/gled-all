@@ -174,10 +174,11 @@ GledGUI::GledGUI() : Gled(), Fl_Window(60, 30, "Gled"),
   }
   theOne = this;
 
-  bGuiUp    = false;
+  bGuiUp = false;
 
   // Fix defaults set by Gled constructor.
   mLogFileName = "<null>";
+  mRenderers   = "GL";
 }
 
 void GledGUI::ParseArguments(list<char*>& args)
@@ -185,7 +186,6 @@ void GledGUI::ParseArguments(list<char*>& args)
   Gled::ParseArguments(args);
 
   // Defaults that can be overridden by options.
-  char* rnr_string = "GL";
   int   swm_fs = 12, swm_vskip = 6, swm_hwidth = 0;
   int   font = 0;
   bool  start_iconized = false, no_msg_window = false;
@@ -203,7 +203,6 @@ void GledGUI::ParseArguments(list<char*>& args)
 	  "  -swm   fs:dh:dw    specify font-size, vert-space and char width\n"
 	  "                     default: 12:6:0 (dw~0 means measure font)\n"
 	  "  -font  font-id     use fltk's font-id as default font\n"
-	  "  -rnr <r1>:<r2>:... specify which rendering libraries to load (def: GL)\n"
 	  "  -iconize           iconize main window on start-up\n"
 	  "  -nomsgwin | -nomw  start gled without the message window (consider '-log +')\n";
 	return;
@@ -218,12 +217,6 @@ void GledGUI::ParseArguments(list<char*>& args)
     else if(strcmp(*i, "-font")==0) {
       next_arg_or_die(args, i);
       font = atoi(*i);
-      args.erase(start, ++i);
-    }
-
-    else if(strcmp(*i, "-rnr")==0) {
-      next_arg_or_die(args, i);
-      rnr_string = *i;
       args.erase(start, ++i);
     }
 
@@ -244,16 +237,6 @@ void GledGUI::ParseArguments(list<char*>& args)
   }
 
   // Init starts here ... should be moved to InitLogging ?
-
-  if(rnr_string) {
-    while(rnr_string && *rnr_string!=0) {
-      char* col = index(rnr_string, ':');
-      if(col) *(col++) = 0;
-      GledViewNS::AddRenderer(rnr_string);
-      if(col) rnr_string = col;
-      else    break;
-    }
-  }
 
   mSwmManager = new Fl_SWM_Manager(swm_fs, swm_vskip, swm_hwidth);
 
@@ -289,7 +272,6 @@ void GledGUI::InitGledCore()
   Gled::InitGledCore();
   ((void(*)())GledCore_GLED_init_View)();
   ((void(*)())GledCore_GLED_user_init_View)();
-  GledViewNS::AssertRenderers();
 
   /*
   printf("SAFR1.\n");
@@ -382,7 +364,7 @@ void GledGUI::MessageLoop()
       mMsgCond.Lock();
       while(mMsgQueue.begin() != mMsgQueue.end()) {
 	Message& msg = mMsgQueue.front();
-	wOutPack->add_line(msg.fMsg.c_str(), msg.fCol);
+	wOutPack->add_line(msg.fMsg.Data(), msg.fCol);
 	mMsgQueue.pop_front();
       }
       wOutPack->redraw();
@@ -430,14 +412,14 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 {
   // Wrapper for eye spawning from CINT.
 
-  static const string _eh("GledGUI::SpawnEye ");
+  static const Exc_t _eh("GledGUI::SpawnEye ");
 
   bool wipe_ei = false;
 
-  string eye_name = GForm("%s@%s", mDefEyeIdentity.Data(), gSystem->HostName());
+  TString eye_name = GForm("%s@%s", mDefEyeIdentity.Data(), gSystem->HostName());
 
   if(ei == 0) {
-    ei = new EyeInfo(eye_name.c_str());
+    ei = new EyeInfo(eye_name.Data());
     wipe_ei = true;
   }
   if(strlen(ei->GetLogin()) == 0)
@@ -446,14 +428,14 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
   if(ud==0 && strcmp(libset,"GledCore")==0 && strcmp(eyector,"FTW_Shell")==0) {
     ZFireQueen* fq = mSaturn->GetFireQueen();
     ShellInfo* si = new ShellInfo
-      (GForm("Shell[%d] of %s", ++mNumShells, eye_name.c_str()),
+      (GForm("Shell[%d] of %s", ++mNumShells, eye_name.Data()),
              "Created by GledGUI");
     fq->CheckIn(si); fq->Add(si);
     si->MakeDefSubShell();
     ud = si;
   }
 
-  string foo_name = GForm("EyeCreator_%s_%s", libset, eyector);
+  TString foo_name = GForm("EyeCreator_%s_%s", libset, eyector);
   long* p2foo = (long*) GledNS::FindSymbol(foo_name);
   if(!p2foo) {
     ISerr(_eh +"can't find symbol '"+ foo_name +"'.");
@@ -467,7 +449,7 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
   try {
     e = ec_foo(sock, ei, ud);
   }
-  catch(string exc) {
+  catch(Exc_t& exc) {
     delete sock;
     ISerr(_eh + "Eye creation failed: '" + exc + "'.");
   }

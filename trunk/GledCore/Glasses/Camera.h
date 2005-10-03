@@ -23,6 +23,5 @@ public:
   ClassDef(Camera, 1)
 }; // endclass Camera
 
-GlassIODef(Camera);
 
 #endif

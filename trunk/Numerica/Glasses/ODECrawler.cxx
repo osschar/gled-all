@@ -17,6 +17,8 @@
 //________________________________________________________________________
 
 #include "ODECrawler.h"
+#include "ODECrawler.c7"
+
 #include <TMath.h>
 
 ClassImp(ODECrawlerMaster)
@@ -54,7 +56,7 @@ ODECrawler::Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
   while(1) {
     Rkck(y, dydx, x, h, ytemp, yerr);
     errmax = 0.0;
-    for(UInt_t i=0; i<mN; i++) errmax = TMath::Max(errmax,TMath::Abs(yerr(i)/yscal(i)));
+    for(Int_t i=0; i<mN; i++) errmax = TMath::Max(errmax,TMath::Abs(yerr(i)/yscal(i)));
     errmax /= mAcc;
     if(errmax <= 1.0) break;
     htemp = hSAFETY*h*TMath::Power(errmax,hPSHRNK);
@@ -91,24 +93,24 @@ ODECrawler::Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,
 
   TVectorD ak2(mN), ak3(mN), ak4(mN), ak5(mN), ak6(mN), ytemp(mN);
 
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     ytemp(i) = y(i) + b21*h*dydx(i);
   hTrueMaster->ODEDerivatives(x+a2*h,ytemp,ak2);
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     ytemp(i)=y(i)+h*(b31*dydx(i)+b32*ak2(i));
   hTrueMaster->ODEDerivatives(x+a3*h,ytemp,ak3);
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     ytemp(i)=y(i)+h*(b41*dydx(i)+b42*ak2(i)+b43*ak3(i));
   hTrueMaster->ODEDerivatives(x+a4*h,ytemp,ak4);
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     ytemp(i)=y(i)+h*(b51*dydx(i)+b52*ak2(i)+b53*ak3(i)+b54*ak4(i));
   hTrueMaster->ODEDerivatives(x+a5*h,ytemp,ak5);
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     ytemp(i)=y(i)+h*(b61*dydx(i)+b62*ak2(i)+b63*ak3(i)+b64*ak4(i)+b65*ak5(i));
   hTrueMaster->ODEDerivatives(x+a6*h,ytemp,ak6);
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     yout(i)=y(i)+h*(c1*dydx(i)+c3*ak3(i)+c4*ak4(i)+c6*ak6(i));
-  for(UInt_t i=0; i<mN; i++)
+  for(Int_t i=0; i<mN; i++)
     yerr(i)=h*(dc1*dydx(i)+dc3*ak3(i)+dc4*ak4(i)+dc5*ak5(i)+dc6*ak6(i));
 }
 
@@ -125,10 +127,10 @@ void ODECrawler::Crawl()
   TVectorD y(mY);
   TVectorD yscal(mN), dydx(mN);
   if (mStoreMax > 0) xsav = x - 2*mStoreDx;
-  for(UInt_t nstp=0; nstp<mMaxSteps; nstp++) {
+  for(Int_t nstp=0; nstp<mMaxSteps; nstp++) {
     hTrueMaster->ODEDerivatives(x, y, dydx);
     ISdebug(6, GForm("ODECrawl Pre Rkqs at x=%f", x));
-    for(UInt_t i=0; i<mN; i++) {
+    for(Int_t i=0; i<mN; i++) {
       yscal(i)=TMath::Abs(y(i)) + TMath::Abs(dydx(i)*h) + hTINY;
       ISdebug(6, GForm(" %6d %f %f", i, y(i), dydx(i)));
     }
@@ -147,7 +149,7 @@ void ODECrawler::Crawl()
 
     ISdebug(6, GForm("ODECrawl Post Rkqs at x=%f hdid=%f hnext=%f",
 		     x, hdid, hnext));
-    for(UInt_t i=0; i<mN; i++) {
+    for(Int_t i=0; i<mN; i++) {
       ISdebug(6, GForm("  %6d %f %f", i, y(i), dydx(i)));
     }
 
@@ -177,7 +179,7 @@ Operator::Arg* ODECrawler::PreDance(Operator::Arg* op_arg)
 {
   op_arg = Eventor::PreDance(op_arg);
 
-  hTrueMaster = dynamic_cast<ODECrawlerMaster*>(mODEMaster);
+  hTrueMaster = dynamic_cast<ODECrawlerMaster*>(*mODEMaster);
   if(!hTrueMaster) {
     ISerr("ODECrawler::PreDance master not of an ODECrawlerMaster");
     delete op_arg;
@@ -206,7 +208,3 @@ ODECrawler::Operate(Operator::Arg* op_arg) throw(Operator::Exception) {
   Crawl();
   Eventor::PostOperate(op_arg);
 }
-
-/**************************************************************************/
-
-#include "ODECrawler.c7"

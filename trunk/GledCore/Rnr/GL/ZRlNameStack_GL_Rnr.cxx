@@ -8,6 +8,8 @@
 #include <Rnr/GL/GLRnrDriver.h>
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void ZRlNameStack_GL_Rnr::_init()
@@ -17,6 +19,7 @@ void ZRlNameStack_GL_Rnr::_init()
 
 void ZRlNameStack_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   bExState = rd->GL()->GetDoPickOps();
   switch(mZRlNameStack->mNameStackOp) {
   case ZRnrModBase::O_On:
@@ -63,4 +66,5 @@ void ZRlNameStack_GL_Rnr::PostDraw(RnrDriver* rd)
   case ZRnrModBase::O_Nop:
     break;
   }
+  PARENT::PostDraw(rd);
 }

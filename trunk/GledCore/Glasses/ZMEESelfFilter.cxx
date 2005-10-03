@@ -30,7 +30,7 @@ ZMirFilter::Result_e ZMEESelfFilter::FilterMIR(ZMIR& mir)
   // the method is tagged by the "MEE::Self" tag.
   // Otherwise returns a remapped R_None.
 
-  const string mee_self_tag("MEE::Self");
+  const TString mee_self_tag("MEE::Self");
 
   if(mir.Caller == mir.Alpha) {
     GledNS::ClassInfo* ci = GledNS::FindClassInfo(FID_t(mir.Lid, mir.Cid));

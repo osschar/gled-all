@@ -38,6 +38,5 @@ class GIImportStyle : public ZGlass {
   ClassDef(GIImportStyle, 1)
     }; // endclass GIImportStyle
 
-GlassIODef(GIImportStyle);
 
 #endif

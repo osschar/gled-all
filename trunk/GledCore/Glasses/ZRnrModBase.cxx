@@ -10,7 +10,6 @@
 //
 
 #include "ZRnrModBase.h"
-
 #include "ZRnrModBase.c7"
 
 ClassImp(ZRnrModBase)
@@ -19,10 +18,6 @@ ClassImp(ZRnrModBase)
 
 void ZRnrModBase::_init()
 {
-  // !!!! Set all links to 0 !!!!
+  // From ZGlass:
+  bUseNameStack = false;
 }
-
-/**************************************************************************/
-
-
-/**************************************************************************/

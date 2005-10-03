@@ -36,6 +36,5 @@ public:
   ClassDef(MultiSpheror, 1)
 }; // endclass MultiSpheror
 
-GlassIODef(MultiSpheror);
 
 #endif

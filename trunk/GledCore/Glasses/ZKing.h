@@ -10,10 +10,11 @@
 #include <Glasses/ZHashList.h>
 #include <Glasses/SaturnInfo.h>
 #include <Glasses/ZMirFilter.h>
-#include <Gled/MIR_Priest.h>
+
 class ZQueen;
 
-class ZKing : public ZHashList, public MIR_Priest
+class ZKing : public ZHashList,
+	      public MIR_Priest
 {
   MAC_RNR_FRIENDS(ZKing);
 
@@ -26,7 +27,7 @@ private:
   void _init();
 
 protected:
-  SaturnInfo*	mSaturnInfo;	// X{gS} L{} Saturn that shines for this King
+  ZLink<SaturnInfo>	mSaturnInfo;	// X{gS} L{} Saturn that shines for this King
   ID_t		mMinID;		// X{g} ValOut(-range=>[0,MAX_ID,1,0], -width=>10, -join=>1)
   ID_t		mMaxID;		// X{g} ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
   ID_t		mMaxUsedID;	//
@@ -74,6 +75,5 @@ public:
   ClassDef(ZKing, 1) // Ruler of top-level object-spaces
 }; // endclass ZKing
 
-GlassIODef(ZKing);
 
 #endif

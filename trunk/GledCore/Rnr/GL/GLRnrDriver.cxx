@@ -11,7 +11,7 @@
 #include "GLRnrDriver.h"
 #include <GL/gl.h>
 
-GLRnrDriver::GLRnrDriver(Eye* e, const string& r) : RnrDriver(e, r)
+GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
 {
   bInPicking = false;
   bDoPickOps = false;

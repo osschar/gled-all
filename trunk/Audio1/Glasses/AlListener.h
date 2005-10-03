@@ -33,6 +33,5 @@ public:
   ClassDef(AlListener, 1)
 }; // endclass AlListener
 
-GlassIODef(AlListener);
 
 #endif

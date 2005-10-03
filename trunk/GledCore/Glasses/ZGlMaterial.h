@@ -43,6 +43,5 @@ public:
   ClassDef(ZGlMaterial, 1) // Control of GL material colors and mode of application of current color
 }; // endclass ZGlMaterial
 
-GlassIODef(ZGlMaterial);
 
 #endif

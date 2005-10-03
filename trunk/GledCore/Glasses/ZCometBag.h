@@ -12,13 +12,19 @@ class ZSubTree;
 
 class ZComet;
 
-class ZCometBag : public ZHashList {
+class ZCometBag : public ZHashList
+{
   MAC_RNR_FRIENDS(ZCometBag);
 
 private:
   void _init();
 
 protected:
+  // ZList
+  virtual void on_insert(ZList::iterator it);
+
+  //----------------------------------------------------------------------
+
   Bool_t	bSmartZNodes;	// X{GS} 7 Bool()
   Int_t		mDepth;		// X{GS} 7 Value(-range=>[-1,100,1,1])
   Bool_t	bFollowLinks;	// X{GS} 7 Bool(-join=>1)
@@ -34,9 +40,7 @@ protected:
 public:
   ZCometBag(const Text_t* n="ZCometBag", const Text_t* t=0) : ZHashList(n,t) { _init(); }
 
-  virtual void Add(ZGlass* g);			     // X{E} C{1}
-  virtual void AddBefore(ZGlass* g, ZGlass* before); // X{E} C{2}
-  virtual void AddFirst(ZGlass* g);		     // X{E} C{1}
+  virtual void ImportSubTree(ZGlass* lens); // X{E} C{1} 7 MCWButt()
 
   ZComet* MakeComet();
 
@@ -44,6 +48,5 @@ public:
   ClassDef(ZCometBag, 1)
 }; // endclass ZCometBag
 
-GlassIODef(ZCometBag);
 
 #endif

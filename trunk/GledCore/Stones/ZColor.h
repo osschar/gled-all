@@ -24,6 +24,8 @@ public:
   Float_t g() const { return c[1]; }
   Float_t b() const { return c[2]; }
   Float_t a() const { return c[3]; }
+  Float_t gray() const { return (c[0]+c[1]+c[2])/3; }
+
   void r(Float_t x) { c[0] = x; }
   void g(Float_t x) { c[1] = x; }
   void b(Float_t x) { c[2] = x; }

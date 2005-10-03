@@ -8,7 +8,7 @@
 #define GledCore_ZRlFont_H
 
 #include <Glasses/ZRnrModBase.h>
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 
 class ZRlFont : public ZRnrModBase {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
@@ -35,6 +35,5 @@ public:
   ClassDef(ZRlFont, 1)
 }; // endclass ZRlFont
 
-GlassIODef(ZRlFont);
 
 #endif

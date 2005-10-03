@@ -12,8 +12,8 @@
 
 #include <GL/gl.h>
 
-namespace GVNS = GledViewNS;
-namespace OS   = OptoStructs;
+namespace GNS = GledNS;
+namespace OS  = OptoStructs;
 
 #define PARENT ZGlass_GL_Rnr
 
@@ -31,7 +31,7 @@ void ZNode_GL_Rnr::_setup_rnrmod()
   if(fImg) {
     OS::lZLinkDatum_i ld = fImg->fLinkData.begin();
     while(ld != fImg->fLinkData.end()) {
-      if(&ld->GetLinkRef() == &mNode->mRnrMod) {
+      if(&ld->GetLinkRef() == mNode->mRnrMod.ptr_link()) {
 	mRnrModLD = &(*ld);
 	return;
       }
@@ -54,7 +54,7 @@ void ZNode_GL_Rnr::SetImg(OS::ZGlassImg* newimg)
 void ZNode_GL_Rnr::CreateRnrScheme(RnrDriver* rd)
 {
   ZNode& N = *mNode;
-  GVNS::RnrBits& rb = fImg->fClassInfo->fViewPart->fDefRnrCtrl.fRnrBits;
+  GNS::RnrBits& rb = fImg->GetCI()->fDefRnrCtrl.fRnrBits;
 
   if(mRnrModLD && mRnrModLD->GetToGlass()) {
     int pre = 0, post = 0;
@@ -94,20 +94,6 @@ void ZNode_GL_Rnr::CreateRnrScheme(RnrDriver* rd)
 /**************************************************************************/
 // Be reasonable when redefining Pre/Post Draw in derived classes
 
-void ZNode_GL_Rnr::build_GL_mat()
-{
-  ZTrans& T(mPMSE.fLocal);
-  int s=0;
-  for(Int_t i=1; i<=3; i++) {
-    for(Int_t j=1; j<=4; j++)
-      mGL_Mat[s++] = T(j,i);
-  }
-  mGL_Mat[s++] = T(1,4); mGL_Mat[s++] = T(2,4);
-  mGL_Mat[s++] = T(3,4); mGL_Mat[s++] = T(4,4);
-}
-
-/**************************************************************************/
-
 void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   PARENT::PreDraw(rd);
@@ -122,20 +108,19 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
     mPMSE.fLocal = mNode->mTrans;
     bNormP = false;
     if(mNode->bUseScale) {
-      mPMSE.fLocal.Scale3(mNode->mSx, mNode->mSy, mNode->mSz);
+      mPMSE.fLocal.Scale(mNode->mSx, mNode->mSy, mNode->mSz);
       bNormP = true;
     }
     if(dom != 0) {
       const Double_t s = TMath::Power(10, dom);
-      mPMSE.fLocal.Scale3(s, s, s);
+      mPMSE.fLocal.Scale(s, s, s);
       bNormP = true;
     }
     mExDOM = dom;
-    build_GL_mat();
     mStampTrans  = mNode->mTimeStamp;
   }
   glPushMatrix();
-  glMultMatrixd(mGL_Mat);
+  glMultMatrixd(mPMSE.fLocal.Array());
   if(bNormP) {
     Bool_t bNormWasOffP = !glIsEnabled(GL_NORMALIZE);
     if(bNormWasOffP) glEnable(GL_NORMALIZE);
@@ -154,7 +139,7 @@ void ZNode_GL_Rnr::PostDraw(RnrDriver* rd)
     if(nrc_lens->GetRnrNames() && bSuppressNameLabel == false &&
        mNode->mName != "")
       {
-	string name( mNode->GetName() );
+	TString name( mNode->GetName() );
 	GLTextNS::RnrTextBar(rd, name);
       }
     if(nrc_lens->GetRnrAxes()) {

@@ -12,7 +12,6 @@
 #include <TString.h>
 
 #include <iostream>
-#include <string>
 #include <assert.h>
 
 #include <list>
@@ -25,15 +24,12 @@ using namespace std;
 
 #include <config.h>
 
-// String type and collections of strings
-typedef string				Str_t;
-typedef string::iterator		Str_i;
-typedef string::const_iterator		Str_ci;
-typedef list<string>			lStr_t;
-typedef list<string>::iterator		lStr_i;
-typedef list<string>::const_iterator	lStr_ci;
-typedef set<string>			sStr_t;
-typedef set<string>::iterator		sStr_i;
+// String type and collections of TStrings
+typedef list<TString>			lStr_t;
+typedef list<TString>::iterator		lStr_i;
+typedef list<TString>::const_iterator	lStr_ci;
+typedef set<TString>			sStr_t;
+typedef set<TString>::iterator		sStr_i;
 
 typedef ULong_t				TimeStamp_t;
 
@@ -49,6 +45,9 @@ typedef list<ZGlass*>::reverse_iterator		lpZGlass_ri;
 typedef list<ZGlass*>::const_reverse_iterator	lpZGlass_cri;
 typedef list<ZGlass**>				lppZGlass_t;
 typedef list<ZGlass**>::iterator		lppZGlass_i;
+
+typedef vector<ZGlass*>				vpZGlass_t;
+typedef vector<ZGlass*>::iterator		vpZGlass_i;
 
 typedef UInt_t					ID_t;
 typedef UShort_t				LID_t;
@@ -73,8 +72,6 @@ typedef hash_map<ID_t, ID_t>::iterator		IdiOm_i;
 
 #endif
 
-class An_ID_Demangler { public: virtual ZGlass* DemangleID(ID_t) = 0; };
-
 /**************************************************************************/
 // FID_t : Full libset/class ID & FMID_t: Full-method ID
 /**************************************************************************/
@@ -90,6 +87,8 @@ public:
   bool is_null()  const { return lid == 0 && cid == 0; }
   bool is_basic() const { return is_null() || (lid == 1 && cid == 1); }
   void clear() { lid = 0; cid = 0; }
+
+  ClassDef(FID_t, 1)
 };
 
 namespace __gnu_cxx {
@@ -113,6 +112,8 @@ public:
   FMID_t(LID_t l=0, CID_t c=0, MID_t m=0) : FID_t(l,c), mid(m) {}
   bool operator==(FMID_t r) { return FID_t::operator==(r) && mid == r.mid; }
   bool operator!=(FMID_t r) { return FID_t::operator!=(r) || mid != r.mid; }
+
+  ClassDef(FMID_t, 1)
 };
 
 inline TBuffer &operator>>(TBuffer& b, FMID_t& fmid)
@@ -129,16 +130,37 @@ inline TBuffer &operator<<(TBuffer& b, FMID_t fmid)
 #define GLED_DEF_PORT	9061
 
 /**************************************************************************/
-// Debug, warn, mess Stuff
+// Exceptions, debug, warn, message stuff
 /**************************************************************************/
 
+class Exc_t : public string
+{
+ public:
+  Exc_t(const string& s) : string(s) {}
+  Exc_t(const char* s)   : string(s) {}
+
+  virtual ~Exc_t() throw() {}
+
+  const char* Data() const { return c_str(); }
+};
+
+Exc_t operator+(const Exc_t &s1, const string  &s2);
+Exc_t operator+(const Exc_t &s1, const TString &s2);
+Exc_t operator+(const Exc_t &s1, const char    *s2);
+
 const char* GForm(const char* fmt, ...);
+
+TBuffer& operator<<(TBuffer& b, const string& s);
+TBuffer& operator>>(TBuffer& b, string& s);
+
+bool operator==(const TString& t, const string& s);
+bool operator==(const string&  s, const TString& t);
 
 extern int G_DEBUG;
 
 enum InfoStream_e { ISoutput, ISmessage, ISwarning, ISerror };
 void InfoStream(InfoStream_e, const char* s);
-void InfoStream(InfoStream_e, const string& s);
+void InfoStream(InfoStream_e, const TString& s);
 
 #define ISout(_str_)  { InfoStream(ISoutput, _str_); }
 #define ISmess(_str_) { InfoStream(ISmessage, _str_); }

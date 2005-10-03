@@ -7,7 +7,7 @@
 #include "A_Rnr.h"
 #include "RnrDriver.h"
 
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
@@ -33,7 +33,7 @@ void A_Rnr::crs_links(RnrDriver* rd, RnrScheme* sch)
   for(; ldatum != ldend; ++ldatum) {
     if(ldatum->fToGlass == 0) continue;
     OS::ZGlassImg* limg = ldatum->GetToImg();
-    const GVNS::RnrBits& rb = ldatum->GetLinkInfo()->fViewPart->fDefRnrBits;
+    const GNS::RnrBits& rb = ldatum->GetLinkInfo()->fDefRnrBits;
 
     if(rb.SelfOn()) {
       rd->FillRnrScheme(sch, rd->GetRnr(limg), rb);
@@ -49,7 +49,7 @@ void A_Rnr::crs_links(RnrDriver* rd, RnrScheme* sch)
 void A_Rnr::crs_self(RnrDriver* rd, RnrScheme* sch)
 {
   // Fill self.
-  GVNS::RnrBits& rb(fImg->fClassInfo->fViewPart->fDefRnrCtrl.fRnrBits);
+  GNS::RnrBits& rb(fImg->GetCI()->fDefRnrCtrl.fRnrBits);
   if(rb.SelfOn()) {
     rd->FillRnrScheme(sch, this, rb);
   }
@@ -58,7 +58,7 @@ void A_Rnr::crs_self(RnrDriver* rd, RnrScheme* sch)
 void A_Rnr::crs_elements(RnrDriver* rd, RnrScheme* sch)
 {
   // Fill self as list.
-  GVNS::RnrBits& rb(fImg->fClassInfo->fViewPart->fDefRnrCtrl.fRnrBits);
+  GNS::RnrBits& rb(fImg->GetCI()->fDefRnrCtrl.fRnrBits);
   if(fImg->fIsList && rb.ListOn()) {
     rd->FillRnrScheme(sch, fImg->GetElementImgs(), rb);
   }
@@ -117,7 +117,7 @@ void A_Rnr::Fl_Event::dump()
 {
   printf("%s: key=%d but=%d state=0x%x text='%s' len=%d\n",
 	 fl_event_names[fEvent], fKey, fButton, fState,
-	 fText.c_str(), fText.length());
+	 fText.Data(), fText.Length());
 }
 
 /**************************************************************************/

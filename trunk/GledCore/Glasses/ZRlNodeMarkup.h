@@ -39,6 +39,5 @@ public:
   ClassDef(ZRlNodeMarkup, 1)
 }; // endclass ZRlNodeMarkup
 
-GlassIODef(ZRlNodeMarkup);
 
 #endif

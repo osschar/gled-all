@@ -10,6 +10,7 @@
 //
 
 #include "SaturnObserver.h"
+#include "SaturnObserver.c7"
 
 ClassImp(SaturnObserver)
 
@@ -27,9 +28,9 @@ void SaturnObserver::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   Operator::PreOperate(op_arg);
 
-  if(mTarget) {
+  if(mTarget != 0) {
     auto_ptr<ZMIR> mir( mTarget->S_TellAverages() );
-    mir->SetRecipient(mTarget);
+    mir->SetRecipient(mTarget.get());
     auto_ptr<ZMIR_RR> ret ( mSaturn->ShootMIRWaitResult(mir) );
     if(ret->BeamResult_OK()) {
       Float_t lavg[3];
@@ -40,7 +41,3 @@ void SaturnObserver::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 
   Operator::PostOperate(op_arg);
 }
-
-/**************************************************************************/
-
-#include "SaturnObserver.c7"

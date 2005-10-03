@@ -34,6 +34,5 @@ public:
   ClassDef(PerfMeterTarget, 1)
 }; // endclass PerfMeterTarget
 
-GlassIODef(PerfMeterTarget);
 
 #endif

@@ -45,7 +45,7 @@ inline void ITSModule_GL_Rnr::MkCol(Float_t z, Float_t vmin, Float_t vmax)
 
   //  printf("MkCol %f input val %f, min %f, max %f \n",c*1.0, z, vmin, vmax); 
  
-  if(mDRM->mRibbon) {
+  if(mDRM->mRibbon != 0) {
     glColor4fv(mDRM->mRibbon->MarkToCol(c)());
   } else {
     ZColor col( (1 - c)*mDRM->mMinCol + c*mDRM->mMaxCol );

@@ -64,6 +64,5 @@ public:
   ClassDef(ZGlBlending, 1) // Control of GL blending, anti-aliasing of points & lines and fog
 }; // endclass ZGlBlending
 
-GlassIODef(ZGlBlending);
 
 #endif

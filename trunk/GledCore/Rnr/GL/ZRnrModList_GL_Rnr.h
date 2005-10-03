@@ -10,7 +10,8 @@
 #include <Glasses/ZRnrModList.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
 
-class ZRnrModList_GL_Rnr : public ZGlass_GL_Rnr {
+class ZRnrModList_GL_Rnr : public ZGlass_GL_Rnr
+{
 private:
   void _init();
 

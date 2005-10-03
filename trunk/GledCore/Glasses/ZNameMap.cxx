@@ -15,9 +15,7 @@
 #include "ZNameMap.h"
 #include "ZNameMap.c7"
 
-typedef map<string, lpZGlass_i>	          Name2LIter_t;
-typedef map<string, lpZGlass_i>::iterator Name2LIter_i;
-typedef pair<string,lpZGlass_i>           Name2LIter_p;
+typedef pair<TString,lpZGlass_i>           Name2LIter_p;
 
 ClassImp(ZNameMap)
 
@@ -31,190 +29,137 @@ void ZNameMap::_init()
 
 /**************************************************************************/
 
+void ZNameMap::new_element_check(ZGlass* lens)
+{
+  static const Exc_t _eh("ZNameMap::new_element_check ");
+
+  PARENT_GLASS::new_element_check(lens);
+  mName2Iter_i i = mItMap.find(lens->StrName());
+  if(i != mItMap.end()) {
+    if(bReplaceOnInsert) {
+      ZList::iterator l = i->second;
+      mItMap.erase(i);
+      l.lens()->unregister_name_change_cb(this);
+      mElements.erase(l); --mSize;
+      l.lens()->DecRefCount(this);
+      StampListRemove(l->fId);
+    } else {
+      throw(_eh + "lens " + lens->Identify() + " already in the list.");
+    }
+  }
+}
+
 void ZNameMap::clear_list()
 {
+  for(ZList::iterator i=begin(); i!=end(); ++i)
+    i.lens()->unregister_name_change_cb(this);
   PARENT_GLASS::clear_list();
   mItMap.clear();
 }
 
 /**************************************************************************/
 
-Int_t ZNameMap::remove_references_to(ZGlass* lens)
+void ZNameMap::on_insert(ZList::iterator it)
 {
-  Int_t n = ZGlass::remove_references_to(lens);
-  mListMutex.Lock();
-  Name2LIter_i i = mItMap.find(lens->GetName());
-  if(i != mItMap.end()) {
-    mGlasses.erase(i->second); --mSize;
-    mItMap.erase(i);
-    StampListRemove(lens);
-    lens->unregister_name_change_cb(this);
-    ++n;
+  it.lens()->register_name_change_cb(this);
+  mItMap[it.lens()->GetName()] = it;
+}
+
+void ZNameMap::on_remove(ZList::iterator it)
+{
+  static const Exc_t _eh("ZNameMap::on_remove ");
+
+  mName2Iter_i i = mItMap.find(it.lens()->StrName());
+  if(i == mItMap.end()) {
+    ISwarn(_eh + "*strange*, name not found in the map.");
+    return;
   }
-  mListMutex.Unlock();
-  return n;
-}
-
-/**************************************************************************/
-
-ZGlass* ZNameMap::GetElementByName(const string& name)
-{
-  mListMutex.Lock();
-  Name2LIter_i i = mItMap.find(name);
-  ZGlass* ret = (i != mItMap.end()) ? *(i->second) : 0;
-  mListMutex.Unlock();
-  return ret;
-}
-
-/**************************************************************************/
-
-lpZGlass_i ZNameMap::insert(ZGlass* g, const string& name)
-{
-  static const string _eh("ZNameMap::insert ");
-
-  Name2LIter_i i = mItMap.find(name);
-  if(i != mItMap.end()) {
-    if(bReplaceOnInsert) {
-      ZGlass* ex_el = *i->second;
-      warn_caller(_eh + "replacing element '" + ex_el->Identify() + "'.");
-      Remove(ex_el);
-    } else {
-      throw(_eh + "insertion failed (name already in the map).");
-    }
+  if(i->second != it) {
+    ISwarn(_eh + "*strange*, got uncompatible iterators.");
   }
-
-  pair<Name2LIter_i,bool> res = mItMap.insert(Name2LIter_p(name,0));
-
-  Name2LIter_i x = res.first; ++x;
-  lpZGlass_i b4 = (x != mItMap.end()) ? x->second : mGlasses.end();
-  res.first->second = mGlasses.insert(b4, g);
-  ++mSize;
-
-  return b4;
+  mItMap.erase(i);
+  it.lens()->unregister_name_change_cb(this);
 }
 
-void ZNameMap::Insert(ZGlass* g)
+void ZNameMap::on_rebuild()
 {
-  new_element_check(g);
-  string name(g->GetName());
-
-  GMutexHolder list_lock(mListMutex);
-
-  g->IncRefCount(this);
-  lpZGlass_i before;
-  try        { before = insert(g, name); }
-  catch(...) { g->DecRefCount(this); throw; }
-  g->register_name_change_cb(this);
-
-  StampListAdd(g, (before != mGlasses.end() ? *before : 0));
-}
-
-void ZNameMap::Add(ZGlass* g)
-{ Insert(g); }
-
-void ZNameMap::AddBefore(ZGlass* g, ZGlass* before)
-{ Insert(g); }
-
-void ZNameMap::AddFirst(ZGlass* g)
-{ Insert(g); }
-
-void ZNameMap::Remove(ZGlass* g)
-{
-  // Removes a lens g from the map.
-
-  mListMutex.Lock();
-  Name2LIter_i i = mItMap.find(g->GetName());
-  if(i != mItMap.end()) {
-    mGlasses.erase(i->second); --mSize;
-    mItMap.erase(i);
-    StampListRemove(g);
-    mListMutex.Unlock();
-    g->DecRefCount(this);
-    g->unregister_name_change_cb(this);
-  } else {
-    // Try also "remove by glass ptr"
-    UInt_t old_size = mSize;
-    PARENT_GLASS::Remove(g);
-    if(old_size != mSize) {
-      RecreateMap();
-      StampListRebuild();
-      ISwarn(GForm("ZNameMap::Remove rebuilt list contents"));
-    }
-    mListMutex.Unlock();
-  }
-}
-
-void ZNameMap::RemoveLast(ZGlass* g)
-{ Remove(g); }
-
-/**************************************************************************/
-
-void ZNameMap::RecreateMap()
-{
-  mListMutex.Lock();
-  map<string,ZGlass*> buf;
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    pair<map<string,ZGlass*>::iterator, bool> res =
-      buf.insert(pair<string,ZGlass*>((*i)->GetName(), *i));
-    if(res.second == false) 
-      (*i)->DecRefCount(this);
-  }
-  mItMap.clear(); mGlasses.clear(); mSize = 0;
-  for(map<string,ZGlass*>::iterator i=buf.begin(); i!=buf.end(); ++i) {
-    mGlasses.push_back(i->second); ++mSize;
-    lpZGlass_i j = mGlasses.end(); --j;
-    mItMap.insert(Name2LIter_p(i->first, j));
-  }
-  mListMutex.Unlock();
-}
-
-/**************************************************************************/
-
-Int_t ZNameMap::RebuildListRefs(An_ID_Demangler* idd)
-{
-  Int_t ret = ZList::RebuildListRefs(idd);
   mItMap.clear();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    mItMap.insert(Name2LIter_p((*i)->GetName(), i));
-    (*i)->register_name_change_cb(this);
+  for(ZList::iterator i=begin(); i!=end(); ++i) {
+    i.lens()->register_name_change_cb(this);
+    mItMap[i.lens()->StrName()] = i;
   }
-  return ret;
 }
 
 /**************************************************************************/
 
-void ZNameMap::y_name_change_cb(ZGlass* g, const string& new_name)
+ZGlass* ZNameMap::GetElementByName(const TString& name)
 {
-  static const string _eh("ZNameMap::y_name_change_cb ");
+  GMutexHolder lck(mListMutex);
+  mName2Iter_i i = mItMap.find(name);
+  return (i != mItMap.end()) ? i->second.lens() : 0;
+}
 
-  string old_name(g->GetName());
+/**************************************************************************/
+
+void ZNameMap::SortByName()
+{
+
+  GMutexHolder llck(mListMutex);
+  if(mSize < 2) return;
+
+  list<element> store;
+  mElements.swap(store);
+  mNextId = 0;
+  for(mName2Iter_i i=mItMap.begin(); i!=mItMap.end(); ++i) {
+    mElements.push_back(element(i->second.lens(), mNextId++));
+    i->second = --mElements.end();
+  }
+  on_rebuild();
+  StampListRebuild();
+}
+
+/**************************************************************************/
+
+void ZNameMap::name_change_cb(ZGlass* g, const TString& new_name)
+{
+  static const Exc_t _eh("ZNameMap::name_change_cb ");
+
+  TString old_name(g->StrName());
   if(new_name == old_name) return;
 
   GMutexHolder list_lock(mListMutex);
 
-  Name2LIter_i n = mItMap.find(new_name);
-  Name2LIter_i o = mItMap.find(old_name);
+  mName2Iter_i o = mItMap.find(old_name);
   if(o == mItMap.end()) {
-    ISwarn(_eh + "element '" + g->Identify() + "'not found in map '" +
-	   Identify() + "'.");
-    return;
+    throw(_eh + "element " + g->Identify() + " not found in map " + Identify() + ".");
   }
-
+  mName2Iter_i n = mItMap.find(new_name);
   if(n != mItMap.end()) {
-    if(bReplaceOnRename) {
-      ISwarn(_eh + "removing element that changed its name to the value already existing in the map.");
-      Remove(*n->second);
+    if(bReplaceOnRename) { // Remove the old one (with new name).
+      ISwarn(_eh + "removing conflicting element " + n->second.lens()->Identify() +
+	     "as another element changed its name to the same value..");
+      // remove at n
+      ZList::iterator l    = n->second;
+      ZGlass*         lens = l.lens();
+      mItMap.erase(n);
+      lens->unregister_name_change_cb(this);
+      mElements.erase(l); --mSize;
+      lens->DecRefCount(this);
+      // remove o and recreate with n
+      mItMap[new_name] = o->second;
+      mItMap.erase(o);
+      StampListRemove(l->fId);
     } else {
-      ISwarn(_eh + "removing element that changed its name to the value already existing in the map.");
-      Remove(g);
-      return;
+      ISwarn(_eh + "removing element " + g->Identify() +
+	     " that changed its name to the value already existing in the map.");
+      // remove at o
+      ZList::iterator l    = o->second;
+      ZGlass*         lens = l.lens();
+      mItMap.erase(o);
+      lens->unregister_name_change_cb(this);
+      mElements.erase(l); --mSize;
+      lens->DecRefCount(this);
+      StampListRemove(l->fId);
     }
   }
-
-  lpZGlass_i before = insert(g, new_name);
-  mGlasses.erase(o->second);
-  mItMap.erase(o);	
-
-  StampListRemove(g);
-  StampListAdd(g, (before != mGlasses.end() ? *before : 0));
 }

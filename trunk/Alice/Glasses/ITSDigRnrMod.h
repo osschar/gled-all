@@ -31,7 +31,7 @@ class ITSDigRnrMod : public ZRnrModBase
   ZColor	   mMinCol;      // X{PGST} 7 ColorButt(-join=>1)
   ZColor           mMaxCol;      // X{PGST} 7 ColorButt()
   Float_t          mColSep;      // X{gST}  7 Value(-range=>[0,100,1,100])
-  ZRibbon*         mRibbon;      // X{gST}  L{}
+  ZLink<ZRibbon>         mRibbon;      // X{gST}  L{}
 
   Float_t          mDigitW;      // X{gST}  7 Value(-range=>[0,100,1,100], -join=>1)
   Float_t          mFrameW;      // X{gST}  7 Value(-range=>[0,100,1,100])
@@ -57,6 +57,5 @@ class ITSDigRnrMod : public ZRnrModBase
   ClassDef(ITSDigRnrMod, 1)
     }; // endclass ITSDigRnrMod
 
-GlassIODef(ITSDigRnrMod);
 
 #endif

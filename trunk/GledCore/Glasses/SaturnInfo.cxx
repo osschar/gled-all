@@ -9,17 +9,15 @@
 //
 // Saturnnfo glass represents a Saturn within a Gled cluster.
 
-#include <Gled/GledNS.h>
+#include "SaturnInfo.c7"
 #include "SaturnInfo.h"
-#include <Ephra/Saturn.h>
+
 #include <Glasses/ZQueen.h>
 #include <Glasses/EyeInfo.h>
 #include <Stones/ZMIR.h>
 
 #include <TSocket.h>
 #include <TSystem.h>
-
-#include "SaturnInfo.c7"
 
 ClassImp(SaturnInfo)
 
@@ -51,17 +49,17 @@ SaturnInfo::~SaturnInfo()
 
 void SaturnInfo::Message(const Text_t* s)
 {
-  ISmess(string("Received message: ") + s);
+  ISmess(TString("Received message: ") + s);
 }
 
 void SaturnInfo::Warning(const Text_t* s)
 {
-  ISwarn(string("Received warning: ") + s);
+  ISwarn(TString("Received warning: ") + s);
 }
 
 void SaturnInfo::Error(const Text_t* s)
 {
-  ISerr(string("Received error: ") + s);
+  ISerr(TString("Received error: ") + s);
 }
 
 /**************************************************************************/
@@ -158,7 +156,7 @@ void SaturnInfo::ReceiveBeamResult(UInt_t req_handle)
   // Should be called via S_ and passed as beam to beam result
   // requestor (a SaturnInfo).
 
-  static const string _eh("SaturnInfo::ReceiveBeamResult ");
+  static const Exc_t _eh("SaturnInfo::ReceiveBeamResult ");
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
@@ -171,7 +169,7 @@ void SaturnInfo::TellAverages()
 {
   // Sort-of-a demo for Beam Result facility.
 
-  static const string _eh("SaturnInfo::TellAverages ");
+  static const Exc_t _eh("SaturnInfo::TellAverages ");
 
   assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 

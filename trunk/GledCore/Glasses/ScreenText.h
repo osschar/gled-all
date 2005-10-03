@@ -33,6 +33,5 @@ public:
   ClassDef(ScreenText, 1)
 }; // endclass ScreenText
 
-GlassIODef(ScreenText);
 
 #endif

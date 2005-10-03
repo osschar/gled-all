@@ -15,6 +15,7 @@
 // Do NOT use shadowing when applying the transforms.
 
 #include "ZImage.h"
+#include "ZImage.c7"
 
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -84,7 +85,13 @@ Bool_t ZImage::sVerboseLoad(false);
 
 void ZImage::_init()
 {
+  // From ZGlass:
+  bUseNameStack = false;
+
+  m_data = 0;
+  m_bpp  = 0;
   mIL_Name = 0;
+
   mW = mH = 0;
   mImgFmt = 0;
   mImgTyp = 0;
@@ -146,6 +153,7 @@ void ZImage::Load()
 
   if(sVerboseLoad) il_id();
 
+  _setup();
   mW = ilGetInteger(IL_IMAGE_WIDTH);
   mH = ilGetInteger(IL_IMAGE_HEIGHT);
   mImgFmt = gl_format();
@@ -177,7 +185,7 @@ void ZImage::Save()
 
 void ZImage::BlurAverage(UInt_t count)
 {
-  static const string _eh("ZImage::BlurAverage ");
+  static const Exc_t _eh("ZImage::BlurAverage ");
   if(bUseShadowing) {
     warn_caller(_eh + "has no effect with shadowing on.");
     return;
@@ -193,7 +201,7 @@ void ZImage::BlurAverage(UInt_t count)
 
 void ZImage::BlurGaussian(UInt_t count)
 {
-  static const string _eh("ZImage::BlurGaussian ");
+  static const Exc_t _eh("ZImage::BlurGaussian ");
   if(bUseShadowing) {
     warn_caller(_eh + "has no effect with shadowing on.");
     return;
@@ -209,7 +217,7 @@ void ZImage::BlurGaussian(UInt_t count)
 
 void ZImage::Contrastify(Float_t contrast)
 {
-  static const string _eh("ZImage::Contrastify ");
+  static const Exc_t _eh("ZImage::Contrastify ");
   if(bUseShadowing) {
     warn_caller(_eh + "has no effect with shadowing on.");
     return;
@@ -227,7 +235,7 @@ void ZImage::Contrastify(Float_t contrast)
 
 void ZImage::Equalize()
 {
-  static const string _eh("ZImage::Equalize ");
+  static const Exc_t _eh("ZImage::Equalize ");
   if(bUseShadowing) {
     warn_caller(_eh + "has no effect with shadowing on.");
     return;
@@ -238,6 +246,76 @@ void ZImage::Equalize()
   iluEqualize();
   unbind();
   sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+/**************************************************************************/
+
+void ZImage::SetupAsCanvas(Int_t w, Int_t h, Int_t bpp, Bool_t clear_p)
+{
+  static const Exc_t _eh("ZImage::SetupAsCanvas ");
+
+  switch(bpp) {
+  case 1:
+    mImgFmt = GL_LUMINANCE;
+    mImgTyp = GL_UNSIGNED_BYTE;
+    mIntFmt = GL_INTENSITY8;
+    break;
+  case 2:
+    mImgFmt = GL_LUMINANCE;
+    mImgTyp = GL_UNSIGNED_SHORT;
+    mIntFmt = GL_INTENSITY16;
+    break;
+  case 3:
+    mImgFmt = GL_RGB;
+    mImgTyp = GL_UNSIGNED_BYTE;
+    mIntFmt = GL_RGB8;
+    break;
+  case 4:
+    mImgFmt = GL_RGBA;
+    mImgTyp = GL_UNSIGNED_BYTE;
+    mIntFmt = GL_RGBA8;
+    break;
+  default:
+    throw(_eh + "unsupported bytes-per-pixel (1-4 valid).");
+  }
+  bUseShadowing  = false;
+
+  sILMutex.Lock();
+  create_image(w, h, bpp);
+  if(clear_p) {
+    if(bpp == 1) {
+      memset(data(), int(255*mClearColor.gray()), mW*mH);
+    }
+    else if(bpp == 2) {
+      int c = mW*mH;
+      unsigned short *p = (unsigned short *) data();
+      unsigned short  v = (unsigned short)(65535*mClearColor.gray());
+      while(c--) *(p++) = v;
+    }
+    else {
+      ILubyte c[4]; mClearColor.to_ubyte(c);
+      ilClearColour(c[0], c[1], c[2], c[3]);
+      ilClearImage();
+    }
+  }
+  sILMutex.Unlock();
+
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::Diagonal(Float_t r, Float_t g, Float_t b)
+{
+  sILMutex.Lock();
+  bind();
+  sILMutex.Unlock();
+
+  Int_t max = TMath::Max(mW, mH);
+  for(Int_t i=0; i<max; ++i) {
+    set_pixel(i, i, r, g, b);
+    set_pixel(i, max-i-1, r, g, b);
+  }
+
   mStampReqTring = Stamp(FID());
 }
 
@@ -269,7 +347,7 @@ void ZImage::bind()
     if(il_err("Bind Image")) goto error;
 
   }
-
+  _setup();
   return;
 
  error:
@@ -295,7 +373,26 @@ void ZImage::delete_image()
   if(mIL_Name) {
     ilDeleteImages(1, &mIL_Name);
     mIL_Name = 0;
+    _reset();
   }
+}
+
+void ZImage::create_image(Int_t w, Int_t h, Int_t bpp)
+{
+  static const Exc_t _eh("ZImage::create_image ");
+
+  delete_image();
+  bLoaded = false;
+  ilGenImages(1, &mIL_Name);
+  if(il_err("Gen Images")) throw(_eh + "Gen Images.");
+
+  ilBindImage(mIL_Name);
+  if(il_err("Bind Image")) throw(_eh + "Bind Image.");
+
+  ilTexImage(w, h, 1, bpp, mImgFmt, mImgTyp, 0);
+  _setup();
+  mW = w; mH = h;
+  bLoaded = true;
 }
 
 /**************************************************************************/
@@ -311,6 +408,11 @@ int ZImage::h() {
 void* ZImage::data()
 {
   return ilGetData();
+}
+
+int ZImage::bpp()
+{
+  return ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
 }
 
 int ZImage::gl_format()
@@ -345,6 +447,135 @@ int ZImage::gl_type()
   }
 }
 
+
+/**************************************************************************/
+// Low-level pixel control
+/**************************************************************************/
+
+void ZImage::set_pixel(Int_t x, Int_t y, Float_t w)
+{
+  Int_t _w = Int_t(255*w);
+  switch(m_bpp) {
+  case 1: set_byte(x, y, _w); break;
+  case 2: set_short(x, y, _w*255); break;
+  case 3: set_rgb(x, y, _w, _w, _w); break;
+  case 4: set_rgba(x, y, _w, _w, _w, 1); break;
+  }
+}
+
+void ZImage::get_pixel(Int_t x, Int_t y, Float_t& w)
+{
+  switch(m_bpp) {
+  case 1: { UChar_t  q; get_byte(x, y, q);  w = q/255.0;   break; }
+  case 2: { UShort_t q; get_short(x, y, q); w = q/65535.0; break; }
+  case 3: { UChar_t r,g,b;   get_rgb(x, y, r, g, b);     w = (r+g+b)/3.0/255.0; break; }
+  case 4: { UChar_t r,g,b,a; get_rgba(x, y, r, g, b, a); w = (r+g+b)/3.0/255.0; break; }
+  }
+}
+
+
+void  ZImage::set_pixel(Int_t x, Int_t y, Float_t r, Float_t g, Float_t b)
+{
+  Int_t _r = Int_t(255*r), _g = Int_t(255*g), _b = Int_t(255*b);
+  switch(m_bpp) {
+  case 1: set_byte(x, y, (_r+_g+_b)/3); break;
+  case 2: set_short(x, y, 255*(_r+_g+_b)/3); break;
+  case 3: set_rgb(x, y, _r, _g, _b); break;
+  case 4: set_rgba(x, y, _r, _g, _b, 1); break;
+  }
+}
+
+void  ZImage::get_pixel(Int_t x, Int_t y, Float_t& r, Float_t& g, Float_t& b)
+{
+  switch(m_bpp) {
+  case 1: { UChar_t q; get_byte(x, y, q);   r = g = b = q/255.0;   break; }
+  case 2: { UShort_t q; get_short(x, y, q); r = g = b = q/65535.0; break; }
+  case 3: { UChar_t _r,_g,_b;    get_rgb(x, y, _r, _g, _b);     r=_r/255.0; g=_g/255.0; b=_b/255.0; break; }
+  case 4: { UChar_t _r,_g,_b,_a; get_rgba(x, y, _r, _g, _b, _a); r=_r/255.0; g=_g/255.0; b=_b/255.0; break; }
+  }
+}
+
+void  ZImage::set_pixel(Int_t x, Int_t y, Float_t r, Float_t g, Float_t b, Float_t a)
+{
+  Int_t _r = Int_t(255*r), _g = Int_t(255*g), _b = Int_t(255*b), _a = Int_t(255*a);
+  switch(m_bpp) {
+  case 1: set_byte(x, y, (_r+_g+_b)/3); break;
+  case 2: set_short(x, y, 255*(_r+_g+_b)/3); break;
+  case 3: set_rgb(x, y, _r, _g, _b); break;
+  case 4: set_rgba(x, y, _r, _g, _b, _a); break;
+  }
+}
+
+void  ZImage::get_pixel(Int_t x, Int_t y, Float_t& r, Float_t& g, Float_t& b, Float_t& a)
+{
+  a = 1;
+  switch(m_bpp) {
+  case 1: { UChar_t q; get_byte(x, y, q);   r = g = b = q/255.0;   break; }
+  case 2: { UShort_t q; get_short(x, y, q); r = g = b = q/65535.0; break; }
+  case 3: { UChar_t _r,_g,_b;    get_rgb(x, y, _r, _g, _b);     r=_r/255.0; g=_g/255.0; b=_b/255.0; break; }
+  case 4: { UChar_t _r,_g,_b,_a; get_rgba(x, y, _r, _g, _b, _a); r=_r/255.0; g=_g/255.0; b=_b/255.0; a=_a/255.0; break; }
+  }
+}
+
+/**************************************************************************/
+
+namespace {
+  inline Float_t add_clip(Float_t a, Float_t b, Bool_t clip)
+  { a += b; if(clip && a > 1) return 1; return a; }
+}
+
+void ZImage::add_pixel(Int_t x, Int_t y, Float_t w, Bool_t clip)
+{
+  Float_t q; get_pixel(x,y,q);
+  set_pixel(x, y, add_clip(w,q,clip));
+}
+
+void ZImage::add_pixel(Int_t x, Int_t y, Float_t r, Float_t g, Float_t b, Bool_t clip)
+{
+  Float_t _r,_g,_b;
+  get_pixel(x,y,_r,_g,_b);
+  set_pixel(x,y, add_clip(_r,r,clip), add_clip(_g,g,clip), add_clip(_b,b,clip));
+}
+
+void ZImage::add_pixel(Int_t x, Int_t y, Float_t r, Float_t g, Float_t b, Float_t a, Bool_t clip)
+{
+  Float_t _r,_g,_b,_a;
+  get_pixel(x,y,_r,_g,_b,_a);
+  set_pixel(x,y, add_clip(_r,r,clip), add_clip(_g,g,clip), add_clip(_b,b,clip), add_clip(_a,a,clip));
+}
+
+/**************************************************************************/
+
+namespace {
+  inline void inc_clip(UChar_t& w, Bool_t clip)
+  { if(++w == 0 && clip) --w; }
+  inline void inc_clip(UShort_t& w, Bool_t clip)
+  { if(++w == 0 && clip) --w; }
+}
+
+
+void ZImage::inc_pixel(Int_t x, Int_t y, Bool_t clip)
+{
+  switch(m_bpp) {
+  case 1: { inc_clip(m_data[y*mH + x], clip); break; }
+  case 2: { inc_clip(((UShort_t*)m_data)[y*mH + x], clip); break; }
+  case 3:
+  case 4: { UChar_t*p = &m_data[m_bpp*(y*mH + x)]; inc_clip(*p++, clip); inc_clip(*p++, clip); inc_clip(*p++, clip); break; }
+  }
+}
+
+void ZImage::inc_pixel_idx(Int_t idx, Int_t x, Int_t y, Bool_t clip)
+{
+  switch(m_bpp) {
+  case 1: { inc_clip(m_data[y*mH + x], clip); break; }
+  case 2: { inc_clip(((UShort_t*)m_data)[y*mH + x], clip); break; }
+  case 3:
+  case 4: { UChar_t*p = &m_data[m_bpp*(y*mH + x)+idx]; inc_clip(*p++, clip); inc_clip(*p++, clip); inc_clip(*p++, clip); break; }
+  }
+}
+
+
+/**************************************************************************/
 /**************************************************************************/
 
 // For now, user init is here ... when another piece will need initialization
@@ -359,5 +590,3 @@ void libGeom1_GLED_user_init()
 void *Geom1_GLED_user_init = (void*)libGeom1_GLED_user_init;
 
 /**************************************************************************/
-
-#include "ZImage.c7"

@@ -7,6 +7,8 @@
 #include "ZGlLightModel_GL_Rnr.h"
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void ZGlLightModel_GL_Rnr::_init()
@@ -16,7 +18,7 @@ void ZGlLightModel_GL_Rnr::_init()
 
 void ZGlLightModel_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // Ignore ZRnrModBase::PreDraw
+  PARENT::PreDraw(rd);
   glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT);
   SetupGL();
 }
@@ -28,8 +30,8 @@ void ZGlLightModel_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlLightModel_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  // Ignore ZRnrModBase::PostDraw
   glPopAttrib();
+  PARENT::PostDraw(rd);
 }
 
 /**************************************************************************/

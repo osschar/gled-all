@@ -38,7 +38,7 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
   glPopMatrix();
 
   // Trajectory
-  if(mMoonraker->mODECrawler && mMoonraker->mODECrawler->GetStored()) {
+  if(*mMoonraker->mODECrawler && mMoonraker->mODECrawler->GetStored()) {
     UInt_t M = mMoonraker->mODECrawler->GetStored();
     TVectorF *x = mMoonraker->mODECrawler->GetXStored();
     TVectorF *y = mMoonraker->mODECrawler->GetYStored();

@@ -31,7 +31,7 @@ private:
 
   Float_t	    m_y_best;	 //!
   Int_t		    m_iter;	 //!
-  UInt_t	    m_n;	 //!
+  Int_t	  	    m_n;	 //!
   Float_t	    m_T;	 //!
   Float_t	    m_T0;	 //!
 
@@ -41,13 +41,13 @@ private:
   Float_t&	P(Int_t m, Int_t n) { return m_P[m](n); }
 
 protected:
-  ZGlass*	mWA_Master;	// X{gS} L{}
+  ZLink<ZGlass>	mWA_Master;	// X{gS} L{}
   TRandom	mRanGen;
 
   // Low level store
 
   // Algorithm parameters, exported part
-  UInt_t	mN;	// dimensions	X{gS} 7 ValOut(-join=>1)
+  Int_t		mN;	// dimensions	X{gS} 7 ValOut(-join=>1)
   UInt_t	mSeed;	// 		X{gS} 7 Value(-range=>[0,MAX_ID,1])
 
   Float_t	mFTol;	// Fractional tolerance	X{gS} 7 Value(-range=>[0,1],join=>1)
@@ -57,8 +57,8 @@ protected:
   // T_n = T_0(1 - n/NumSteps)^alpha 
   Float_t	mAlpha;		// X{gS} 7 Value(-range=>[1e-2,100,1,100])
 
-  UInt_t	mMovesPerT;	// X{gS} 7 Value(-range=>[0,1e6,1],-width=>6,-join=>1)
-  UInt_t	mNumSteps;	// X{gS} 7 Value(-range=>[0,1e6,1],-width=>6)
+  Int_t		mMovesPerT;	// X{gS} 7 Value(-range=>[0,1e6,1],-width=>6,-join=>1)
+  Int_t		mNumSteps;	// X{gS} 7 Value(-range=>[0,1e6,1],-width=>6)
 
   Float_t	mT0;	// X{gS} 7 ValOut(-width=>8, -join=>1)
   Float_t	mT;	// X{gS} 7 ValOut(-width=>8, -range=>[0,100])
@@ -88,6 +88,5 @@ public:
   ClassDef(WarmAmoeba, 1)
 }; // endclass WarmAmoeba
 
-GlassIODef(WarmAmoeba);
 
 #endif

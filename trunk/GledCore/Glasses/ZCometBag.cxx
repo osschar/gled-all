@@ -20,36 +20,33 @@ void ZCometBag::_init()
 
 /**************************************************************************/
 
-ZSubTree* ZCometBag::make_sub_tree_rep(ZGlass* g)
+void ZCometBag::on_insert(ZList::iterator it)
+{
+  PARENT_GLASS::on_insert(it);
+  ZSubTree* st = dynamic_cast<ZSubTree*>(it.lens());
+  if(!st) st = make_sub_tree_rep(it.lens());
+}
+
+/**************************************************************************/
+
+ZSubTree* ZCometBag::make_sub_tree_rep(ZGlass* lens)
 {
   ZSubTree* st = new ZSubTree(mDepth, bFollowLinks, bFollowLists,
-			      GForm("ST of %s", g->GetName()));
+			      GForm("ST of %s", lens->GetName()));
   mQueen->CheckIn(st);
-  st->SetRoot(g);
+  st->SetRoot(lens);
   return st;
 }
 
 /**************************************************************************/
 
-void ZCometBag::Add(ZGlass* g)
+void ZCometBag::ImportSubTree(ZGlass* lens)
 {
-  ZSubTree* st = dynamic_cast<ZSubTree*>(g);
-  if(!st) st = make_sub_tree_rep(g);
-  ZHashList::Add(st);
-}
+  // !!! NOT cluster safe.
+  // Should run on a detached thread on the Sun.
 
-void ZCometBag::AddBefore(ZGlass* g, ZGlass* before)
-{
-  ZSubTree* st = dynamic_cast<ZSubTree*>(g);
-  if(!st) st = make_sub_tree_rep(g);
-  ZHashList::AddBefore(st, before);
-}
-
-void ZCometBag::AddFirst(ZGlass* g)
-{
-  ZSubTree* st = dynamic_cast<ZSubTree*>(g);
-  if(!st) st = make_sub_tree_rep(g);
-  ZHashList::AddFirst(st);
+  ZSubTree* st = make_sub_tree_rep(lens);
+  Add(st);
 }
 
 /**************************************************************************/
@@ -62,11 +59,10 @@ ZComet* ZCometBag::MakeComet()
   // !!!! See ZComet, about correct streaming struct
   if(bSmartZNodes) comet->mIgnoredLinks.insert("ZNode::Parent");
 
-  lpZGlass_t sts; Copy(sts);
-  for(lpZGlass_i i=sts.begin(); i!=sts.end(); ++i) {
-    ZSubTree* t = dynamic_cast<ZSubTree*>(*i);
-    comet->AddTopLevel(t->GetRoot(), t->GetFollowLinks(), t->GetFollowLists(),
-		      t->GetDepth());
+  Stepper<ZSubTree> s(this);
+  while(s.step()) {
+    comet->AddTopLevel(s->GetRoot(), s->GetFollowLinks(), s->GetFollowLists(),
+		       s->GetDepth());
   }
   WriteUnlock();
   return comet;

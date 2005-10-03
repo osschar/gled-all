@@ -25,8 +25,8 @@ class ZAliLoad : public ZNode {
   Bool_t check_read(const string& file);
   string get_vsd_name(Bool_t check_p);
 
-  AliConverter*                  mConverter;  // X{GS} L{}
-  VSDSelector*                   mSelector;   // X{GS} L{}
+  ZLink<AliConverter>            mConverter;  // X{GS} L{}
+  ZLink<VSDSelector>             mSelector;   // X{GS} L{}
 
   TString                        mDataDir;    // X{GS} 7 Filor(-dir=>1, -whenchanged=>1)
   Int_t                          mEvent;      // X{GS} 7 Value(-range=>[0,100,1])
@@ -110,8 +110,7 @@ class ZAliLoad : public ZNode {
 
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
-    }; // endclass ZAliLoad
+}; // endclass ZAliLoad
 
-  GlassIODef(ZAliLoad);
 
 #endif

@@ -53,6 +53,5 @@ public:
   ClassDef(WGlFrameStyle, 1)
 }; // endclass WGlFrameStyle
 
-GlassIODef(WGlFrameStyle);
 
 #endif

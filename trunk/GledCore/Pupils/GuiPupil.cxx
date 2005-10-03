@@ -14,8 +14,9 @@
 #include <Glasses/GuiPupilInfo.h>
 #include <Glasses/PupilInfo.h>
 
-#include <Eye/FTW_Shell.h>
-#include <Eye/FltkGledStuff.h>
+#include <GledView/GledViewNS.h>
+#include <GledView/FTW_Shell.h>
+#include <GledView/FltkGledStuff.h>
 
 namespace OS   = OptoStructs;
 namespace GNS  = GledNS;
@@ -28,9 +29,9 @@ namespace FGS  = FltkGledStuff;
 
 GuiPupil* GuiPupil::Create_GuiPupil(FTW_Shell* sh, OS::ZGlassImg* img)
 {
-  static const string _eh("GuiPupil::Create_GuiPupil ");
+  static const Exc_t _eh("GuiPupil::Create_GuiPupil ");
 
-  GuiPupilInfo* ni = dynamic_cast<GuiPupilInfo*>(img->fGlass);
+  GuiPupilInfo* ni = dynamic_cast<GuiPupilInfo*>(img->fLens);
   if(ni == 0) throw(_eh + "user-data is not GuiPupilInfo.");
   if(ni->GetPupil() == 0) throw(_eh + "link 'Pupil' must be set.");
 
@@ -68,7 +69,7 @@ GuiPupil::GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
   OS::A_View(img),
   Fl_Window(w, h)
 {
-  mInfo = dynamic_cast<GuiPupilInfo*>(fImg->fGlass);
+  mInfo = dynamic_cast<GuiPupilInfo*>(fImg->fLens);
   assert(mInfo);
 
   OS::ZGlassImg* pupil_img = mShell->DemanglePtr(mInfo->GetPupil());
@@ -86,7 +87,7 @@ GuiPupil::GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
     view_sel->SetSrcImg(fImg);
     view_sel->SetSrcLinkName("Cameras");
     view_sel->SetSrcFid(CameraInfo::FID());
-    view_sel->SetMethodInfo(pupil_img->fClassInfo->
+    view_sel->SetMethodInfo(pupil_img->GetCI()->
 			    FindMethodInfo("ImportCameraInfo", true));
     view_sel->box((Fl_Boxtype)GVNS::menubar_box);
 

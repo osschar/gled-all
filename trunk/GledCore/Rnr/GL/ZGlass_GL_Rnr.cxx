@@ -16,7 +16,7 @@ ZGlass_GL_Rnr::ZGlass_GL_Rnr(ZGlass* d) : A_Rnr(), mGlass(d)
   mStampTring = 0;
   mDispList   = glGenLists(1);
   bRebuildDL         = true;
-  bUseNameStack      = true;
+
   bUsesSubPicking    = false;
   bSuppressNameLabel = false;
 }
@@ -30,7 +30,7 @@ ZGlass_GL_Rnr::~ZGlass_GL_Rnr()
 
 void ZGlass_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  if(bUseNameStack) rd->GL()->PushName(this);
+  if(mGlass->bUseNameStack) rd->GL()->PushName(this);
 
   if(mGlass->mStampReqTring > mStampTring) {
     Triangulate(rd);
@@ -70,7 +70,7 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if(bUseNameStack) rd->GL()->PopName();
+  if(mGlass->bUseNameStack) rd->GL()->PopName();
 }
 
 /**************************************************************************/

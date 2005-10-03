@@ -10,7 +10,7 @@
 #include <Glasses/SubShellInfo.h>
 #include <Glasses/CameraInfo.h>
 #include <Glasses/ZNode.h>
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 
 #include <Stones/ZColor.h>
 
@@ -41,12 +41,12 @@ protected:
 
 
   // CameraInfo.
-  ZNode*	mCameraBase;	// X{gE} L{}
+  ZLink<ZNode>	mCameraBase;	// X{gE} L{}
 
-  ZNode*	mLookAt;	// X{gE} L{}
+  ZLink<ZNode>	mLookAt;	// X{gE} L{}
   Float_t	mLookAtMinDist; // X{gS} 7 Value(-range=>[0,1000,1,1000])
 
-  ZNode*	mUpReference;	// X{gE} L{}
+  ZLink<ZNode>	mUpReference;	// X{gE} L{}
   UChar_t	mUpRefAxis;	// X{gS} 7 Value(-range=>[1,3,1,1], -join=>1)
   Bool_t	bUpRefLockDir;	// X{gS} 7 Bool()
   Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,90,1,100])
@@ -88,8 +88,8 @@ protected:
   Float_t	mPopupFx;	// X{GS} 7 Value(-range=>[-10,10,1,10], -join=>1)
   Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
 
-  ZGlass*       mOverlay;       // X{GS} L{}
-  ZGlass*       mEventHandler;  // X{GS} L{}
+  ZLink<ZGlass>       mOverlay;       // X{GS} L{}
+  ZLink<ZGlass>       mEventHandler;  // X{GS} L{}
 
 public:
   PupilInfo(const Text_t* n="PupilInfo", const Text_t* t=0) :
@@ -121,6 +121,5 @@ public:
   ClassDef(PupilInfo, 1)
 }; // endclass PupilInfo
 
-GlassIODef(PupilInfo);
 
 #endif

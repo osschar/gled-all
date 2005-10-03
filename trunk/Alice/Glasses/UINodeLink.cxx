@@ -38,14 +38,14 @@ ClassImp(UINodeLink)
 /**************************************************************************/
 GledNS::MethodInfo* UINodeLink::GetCbackMethodInfo()
 {
-  if(mCbackMethodInfo == 0 && mCbackAlpha)
-    mCbackMethodInfo = GledNS::DeduceMethodInfo(mCbackAlpha, mCbackMethodName.Data());
+  if(mCbackMethodInfo == 0 && mCbackAlpha != 0)
+    mCbackMethodInfo = GledNS::DeduceMethodInfo(*mCbackAlpha, mCbackMethodName.Data());
   return mCbackMethodInfo;
 }
 /**************************************************************************/
 GledNS::MethodInfo* UINodeLink::GetFocusMethodInfo()
 {
-  if(mFocusMethodInfo == 0 && mFocusAlpha)
-    mFocusMethodInfo = GledNS::DeduceMethodInfo(mFocusAlpha, mFocusMethodName.Data());
+  if(mFocusMethodInfo == 0 && mFocusAlpha != 0)
+    mFocusMethodInfo = GledNS::DeduceMethodInfo(*mFocusAlpha, mFocusMethodName.Data());
   return mFocusMethodInfo;
 }

@@ -71,11 +71,11 @@ void GTSRetriangulator::_init()
 
 void GTSRetriangulator::Coarsen()
 {
-  static const string _eh("GTSRetriangulator::Coarsen ");
+  static const Exc_t _eh("GTSRetriangulator::Coarsen ");
 
   using namespace GTS;
 
-  GTSurf* target = mTarget;
+  GTSurf* target = *mTarget;
   if(target == 0) {
     throw(_eh + "Link Target should be set.");
   }
@@ -149,11 +149,11 @@ void GTSRetriangulator::Coarsen()
 
 void GTSRetriangulator::Refine()
 {
-  static const string _eh("GTSRetriangulator::Refine ");
+  static const Exc_t _eh("GTSRetriangulator::Refine ");
 
   using namespace GTS;
 
-  GTSurf* target = mTarget;
+  GTSurf* target = *mTarget;
   if(target == 0) {
     throw(_eh + "Link Target should be set.");
   }

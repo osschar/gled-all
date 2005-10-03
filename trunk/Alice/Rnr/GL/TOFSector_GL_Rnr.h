@@ -40,11 +40,12 @@ inline void TOFSector_GL_Rnr::MkCol(Float_t z, Float_t vmin, Float_t vmax)
   if(c > 1)
     c -= (int)c;
   
-  if(mDRM->mRibbon) {
+  if(mDRM->mRibbon != 0) {
     glColor4fv(mDRM->mRibbon->MarkToCol(c)());
   } else {
     ZColor col( (1 - c)*mDRM->mMinCol + c*mDRM->mMaxCol );
     glColor4fv(col());
   }
 }
+
 #endif

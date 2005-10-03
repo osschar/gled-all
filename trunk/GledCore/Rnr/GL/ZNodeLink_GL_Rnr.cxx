@@ -25,7 +25,7 @@ void ZNodeLink_GL_Rnr::_setup_lens()
   if(fImg) {
     OS::lZLinkDatum_i ld = fImg->fLinkData.begin();
     while(ld != fImg->fLinkData.end()) {
-      if(&ld->GetLinkRef() == &mZNodeLink->mLens) {
+      if(&ld->GetLinkRef() == mZNodeLink->mLens.ptr_link()) {
 	mLensLD = &(*ld);
 	return;
       }

@@ -38,7 +38,7 @@ void WGlButton_GL_Rnr::Draw(RnrDriver* rd)
   WGlFrameStyle_GL_Rnr &FSR = *(WGlFrameStyle_GL_Rnr*)mFrameRMS.rnr();
 
   WGlButton& B = *mWGlButton;
-  string label = B.GetName();
+  TString label = B.GetName();
   FSR.FullRender(txf, label, B.mDx, B.mDy, bBelowMouse);
 }
 
@@ -63,9 +63,8 @@ int WGlButton_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
   if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
     GledNS::MethodInfo* mi = B.GetCbackMethodInfo();
     if(mi == 0) return 0;
-    ZMIR mir(B.mCbackAlpha);
+    ZMIR mir(B.mCbackAlpha.get());
     mi->ImprintMir(mir);
-    mi->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
     fImg->fEye->Send(mir);
 
     bBelowMouse = false;

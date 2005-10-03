@@ -26,10 +26,6 @@ public:
   { _init(); }
   virtual ~ZRnrModBase_GL_Rnr();
 
-  virtual void PreDraw(RnrDriver* rd);
-  virtual void Draw(RnrDriver* rd);
-  virtual void PostDraw(RnrDriver* rd);
-
 }; // endclass ZRnrModBase_GL_Rnr
 
 #endif

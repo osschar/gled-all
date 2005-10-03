@@ -10,29 +10,12 @@
 //
 //
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Need member-lid, member-cid limiters for Add methods. DONE
-// This should also be used for Links to Lists ...
-// there can specify member-lid, member-cid of list, that can be assigned.
-// have: ZList*   mOperators; L{list<Operator>}, p7 translates that to 1, 8 (eg)
-// SetOperators(ZList* x) { 
-//   if(lid or cid differr) {
-//	instantiate x->lid, x->cid
-//	try dyn-casting to self.lid, self.cid
-//   }
-// But then can get more restrictive list-contents than originally
-// anticipated.
-//
-// This in contrast to dis-activation of Glasses and providing
-// Add/Remove wrappers (as in SaturnInfo or SunQueen)
-
-
 #include "ZList.h"
 #include "ZList.c7"
 
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZKing.h>
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 #include <Stones/ZComet.h>
 #include <Gled/GledNS.h>
 
@@ -45,119 +28,289 @@ ClassImp(ZList)
 
 void ZList::_init()
 {
-  mSize = 0;
-  mLid  = 0; mCid  = 0;
-  mStampListAdd_CB = 0;		mStampListAdd_CBarg = 0;
-  mStampListRemove_CB = 0;	mStampListRemove_CBarg = 0;
-  mStampListRebuild_CB = 0;	mStampListRebuild_CBarg = 0;
-  mStampListClear_CB = 0;	mStampListClear_CBarg = 0;
-}
-
-/**************************************************************************/
-
-void ZList::reference_all() {
-  PARENT_GLASS::reference_all();
-  mListMutex.Lock();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i)
-    (*i)->IncRefCount(this);
-  mListMutex.Unlock();
-}
-
-void ZList::unreference_all() {
-  PARENT_GLASS::unreference_all();
-  mListMutex.Lock();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i)
-    (*i)->DecRefCount(this);
-  mListMutex.Unlock();
+  mNextId = 0;
 }
 
 /**************************************************************************/
 
 void ZList::clear_list()
 {
-  mGlasses.clear();
   mSize = 0;
+  mElements.clear();
+  mNextId = 0;
 }
-
-/**************************************************************************/
 
 Int_t ZList::remove_references_to(ZGlass* lens)
 {
-  Int_t nl = ZGlass::remove_references_to(lens);
+  Int_t n  = ZGlass::remove_references_to(lens);
+  GMutexHolder llck(mListMutex);
+  for(iterator i=begin(); i!=end(); ++i) {
+    if(i() == lens) {
+      iterator j = i; --i;
+      Int_t id = j->fId;
+      on_remove(j);
+      mElements.erase(j);
+      StampListRemove(id);
+      ++n;
+    }
+  }
+  return n;
+}
 
-  int n = 0;
+/**************************************************************************/
+// ZGlass reference management, extensions for lists, public part.
+/**************************************************************************/
+
+Int_t ZList::RebuildListRefs(An_ID_Demangler* idd)
+{
+  Int_t ret = 0;
+  container in;
+  mElements.swap(in);
+  mSize   = 0;
+  mNextId = 0;
+  for(iterator i=in.begin(); i!=in.end(); ++i) {
+    ZGlass* lens = idd->DemangleID(ID_t(i->fLens));
+    if(lens) {
+      try {
+	lens->IncRefCount(this);
+	mElements.push_back(element(lens, mNextId++)); ++mSize;
+      }
+      catch(...) {
+	++ret;
+      }
+    } else {
+      ++ret;
+    }
+  }
+  on_rebuild();
+  return ret;
+}
+
+void ZList::ClearList()
+{
+  static const Exc_t _eh("ZList::ClearList ");
+
+  if(mSize == 0) return;
+
+  container foo;
+  ISdebug(1, _eh + GForm("locking list '%s'.", GetName()));
   mListMutex.Lock();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    if(*i == lens) {
-      lpZGlass_i j = i; --i;
-      mGlasses.erase(j);
+  foo.swap(mElements);
+  clear_list();
+  StampListClear();
+  mListMutex.Unlock();
+  ISdebug(1, _eh + GForm("unlocked list '%s'.", GetName()));
+  for(iterator i=foo.begin(); i!=foo.end(); ++i) {
+    i()->DecRefCount(this);
+  }
+  ISdebug(1, _eh + GForm("sfinished for '%s'.", GetName()));
+}
+
+/**************************************************************************/
+// AList methods, public part.
+/**************************************************************************/
+
+AList::stepper_base* ZList::make_stepper_imp(bool return_zeros)
+{
+  return new stepper_imp<ZList>(begin(), end(), return_zeros);
+}
+
+/**************************************************************************/
+// Generick
+/**************************************************************************/
+
+void ZList::Add(ZGlass* lens)
+{
+  PushBack(lens);
+}
+
+void ZList::RemoveAll(ZGlass* lens)
+{
+  Int_t n  = 0;
+  mListMutex.Lock();
+  for(iterator i=begin(); i!=end(); ++i) {
+    if(i() == lens) {
+      iterator j = i; --i;
+      StampListRemove(j->fId);
+      mElements.erase(j); --mSize;
       ++n;
     }
   }
   mListMutex.Unlock();
-  if(n) {
-    if(n == 1) StampListRemove(lens);
-    else       StampListRebuild();
-  }
-
-  return nl + n;
-}
-
-
-/**************************************************************************/
-
-void ZList::new_element_check(ZGlass* g)
-{
-  static const string _eh("ZList::new_element_check ");
-
-  if(g == 0) {
-    throw(_eh + "called with null ZGlass*.");
-  }
-  if(mLid && mCid) {
-    if(!GledNS::IsA(g, FID_t(mLid, mCid))) {
-      throw(_eh + "lens of wrong FID_t.");
-    }
-  }
+  if(n) lens->DecRefCount(this, n);
 }
 
 /**************************************************************************/
+// Deque
+/**************************************************************************/
 
-TimeStamp_t ZList::Copy(lpZGlass_t& dest)
+ZGlass* ZList::FrontElement()
 {
-  GMutexHolder _lstlck(mListMutex);
-  copy(mGlasses.begin(), mGlasses.end(), back_inserter(dest));
-  return mTimeStamp;
+  ZGlass* l;
+  { GMutexHolder llck(mListMutex);
+    l = mSize ? mElements.front().fLens : 0;
+  }
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, l);
+    mSaturn->ShootMIRResult(b);
+  }
+  return l;
 }
 
-ZGlass* ZList::First()
-{
-  GMutexHolder _lstlck(mListMutex);
-  return mSize ? mGlasses.front() : 0;
-}
-
-ZGlass* ZList::Last()
+ZGlass* ZList::BackElement()
 { 
-  GMutexHolder _lstlck(mListMutex);
-  return mSize ? mGlasses.back() : 0;
-}
-
-ZGlass* ZList::GetElementByName(const Text_t* name)
-{ return GetElementByName(string(name)); }
-
-ZGlass* ZList::GetElementByName(const string& name)
-{
-  ZGlass* ret = 0;
-  mListMutex.Lock();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    if(strcmp(name.c_str(), (*i)->GetName()) == 0) {
-      ret = *i;
-      break;
-    }
+  ZGlass* l;
+  { GMutexHolder _lstlck(mListMutex);
+    l = mSize ? mElements.back().fLens : 0;
   }
-  mListMutex.Unlock();
-  return ret;
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, l);
+    mSaturn->ShootMIRResult(b);
+  }
+  return l;
 }
 
+void ZList::PushBack(ZGlass* lens)
+{
+  GMutexHolder llck(mListMutex);
+  new_element_check(lens);
+  lens->IncRefCount(this);
+  mElements.push_back(element(lens, mNextId++)); ++mSize;
+  on_insert(--end());
+  StampListPushBack(lens, mNextId - 1);
+}
+
+ZGlass* ZList::PopBack()
+{
+  static const Exc_t _eh("ZList::PopBack ");
+
+  if(mSize == 0)
+    throw(_eh + "list empty.");
+
+  ZGlass* l;
+  { GMutexHolder llck(mListMutex);
+    l = mElements.back().fLens;
+    on_remove(--end());
+    mElements.pop_back(); --mSize;
+    l->DecRefCount(this);
+    StampListPopBack();
+  }
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, l);
+    mSaturn->ShootMIRResult(b);
+  }
+  return l;
+}
+
+void ZList::PushFront(ZGlass* lens)
+{
+  GMutexHolder llck(mListMutex);
+  new_element_check(lens);
+  lens->IncRefCount(this);
+  mElements.push_front(element(lens, mNextId++)); ++mSize;
+  on_insert(begin());
+  StampListPushFront(lens, mNextId - 1);
+}
+
+ZGlass* ZList::PopFront()
+{
+  static const Exc_t _eh("ZList::PopFront ");
+
+  if(mSize == 0)
+    throw(_eh + "list empty.");
+
+  ZGlass* l;
+  { GMutexHolder llck(mListMutex);
+    l = mElements.front().fLens;
+    on_remove(begin());
+    mElements.pop_front(); --mSize;
+    l->DecRefCount(this);
+    StampListPopFront();
+  }
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, l);
+    mSaturn->ShootMIRResult(b);
+  }
+  return l;
+}
+
+/**************************************************************************/
+// Insert by Id
+/**************************************************************************/
+
+namespace {
+  struct element_eq_id : public unary_function<ZList::element&, bool> {
+    Int_t id;
+    element_eq_id(Int_t i) : id(i) {}
+    bool operator()(const ZList::element& el) { return el.fId == id; }
+  };
+}
+
+void ZList::InsertById(ZGlass* lens, Int_t before_id)
+{
+  static const Exc_t _eh("ZList::InsertById ");
+
+  new_element_check(lens);
+
+  GMutexHolder llck(mListMutex);
+  iterator i = find_if(begin(), end(), element_eq_id(before_id));
+  if(i == end())
+    throw(_eh + "element with given id not found.");
+  lens->IncRefCount(this);
+  mElements.insert(i, element(lens, mNextId++)); ++mSize;
+  on_insert(--i);
+  StampListInsert(lens, mNextId-1, before_id);
+}
+
+void ZList::RemoveById(Int_t id_to_remove)
+{
+  static const Exc_t _eh("ZList::RemoveById ");
+
+  if(mSize == 0)
+    throw(_eh + "list empty.");
+
+  GMutexHolder llck(mListMutex);
+  iterator i = find_if(begin(), end(), element_eq_id(id_to_remove));
+  if(i == end())
+    throw(_eh + "element with given id not found.");
+  ZGlass* l = i->fLens;
+  on_remove(i);
+  mElements.erase(i); --mSize;
+  l->DecRefCount(this);
+  StampListRemove(id_to_remove);
+}
+
+/**************************************************************************/
+// ZList specific
+/**************************************************************************/
+
+void ZList::SortByName()
+{
+  GMutexHolder llck(mListMutex);
+  if(mSize < 2) return;
+  multimap<TString, ZGlass*> nmap;
+  for(iterator i=begin(); i!=end(); ++i) {
+    nmap.insert(pair<TString, ZGlass*>(i()->GetName(), i()));
+  }
+  mElements.clear();
+  mNextId = 0;
+  for(multimap<TString, ZGlass*>::iterator i=nmap.begin(); i!=nmap.end(); ++i) {
+    mElements.push_back(element(i->second, mNextId++));
+  }
+  on_rebuild();
+  StampListRebuild();
+}
+
+/**************************************************************************/
+// Configuration helpers.
 /**************************************************************************/
 
 ZList* ZList::AssertPath(const Text_t* path, const Text_t* new_el_type)
@@ -170,7 +323,7 @@ ZList* ZList::AssertPath(const Text_t* path, const Text_t* new_el_type)
   // c) element in path is not a list;
   // d) instantiation fails.
 
-  static const string _eh("ZList::AssertPath ");
+  static const Exc_t _eh("ZList::AssertPath ");
 
   namespace GNS = GledNS;
 
@@ -204,16 +357,16 @@ ZList* ZList::AssertPath(const Text_t* path, const Text_t* new_el_type)
 	if(mQueen->GetKing()->GetLightType() == ZKing::LT_Fire) {
 	  ZGlass* g = GledNS::ConstructLens(new_el_fid);
 	  if(g == 0) throw(_eh + "direct lens construction failed.");
-	  g->SetName(i->c_str());
+	  g->SetName(i->Data());
 	  mQueen->CheckIn(g); l->Add(g);
 	  l = dynamic_cast<ZList*>(g);
 	} else {
 	  auto_ptr<ZMIR> att_mir( l->S_Add(0) );
 	  auto_ptr<ZMIR> inst_mir
 	    ( mQueen->S_InstantiateWAttach
-	      (l, 0, att_mir->Lid, att_mir->Cid, att_mir->Mid,
-	       new_el_fid.lid, new_el_fid.cid, i->c_str())
-	      );
+	      (new_el_fid.lid, new_el_fid.cid, i->Data()) );
+	  inst_mir->ChainMIR(att_mir.get());
+
 	  auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(inst_mir) );
 	  if(res->HasException())
 	    throw(_eh + "got exception: " + res->Exception.Data());
@@ -251,7 +404,7 @@ void ZList::Swallow(ZGlass* entry, Bool_t replace_p,
   ZGlass* ex_entry = l->GetElementByName(entry->GetName());
   if(ex_entry)
     if(replace_p)
-      l->Remove(ex_entry);
+      l->RemoveAll(ex_entry);
     else 
       return;
   l->Add(entry);
@@ -262,235 +415,10 @@ void ZList::Swallow(const Text_t* path, ZGlass* entry)
   Swallow(entry, true, path, "ZList");
 }
 
-/**************************************************************************/
-/**************************************************************************/
-
-void ZList::SetElementFID(FID_t fid)
-{
-  mLid = fid.lid; mCid = fid.cid;
-  Stamp(FID());
-}
-
-void ZList::Add(ZGlass* g)
-{
-  new_element_check(g);
-  mListMutex.Lock();
-  mGlasses.push_back(g); ++mSize;
-  StampListAdd(g, 0);
-  mListMutex.Unlock();
-  g->IncRefCount(this);
-}
-
-void ZList::AddBefore(ZGlass* g, ZGlass* before)
-{
-  new_element_check(g);
-  mListMutex.Lock();
-  lpZGlass_i i = find(mGlasses.begin(), mGlasses.end(), before);
-  mGlasses.insert(i, g); ++mSize;
-  StampListAdd(g, before);
-  mListMutex.Unlock();
-  g->IncRefCount(this);
-}
-
-void ZList::AddFirst(ZGlass* g)
-{
-  new_element_check(g);
-  mListMutex.Lock();
-  ZGlass* b4 = mSize > 0 ? mGlasses.front() : 0;
-  mGlasses.push_front(g); ++mSize;
-  StampListAdd(g, b4);
-  mListMutex.Unlock();
-  g->IncRefCount(this);
-}
-
-void ZList::Remove(ZGlass* g)
-{
-  if(mSize==0) return;
-  mListMutex.Lock();
-  lpZGlass_i i = find(mGlasses.begin(), mGlasses.end(), g);
-  bool succ;
-  if(succ = (i!=mGlasses.end())) {
-    mGlasses.erase(i); --mSize;
-    StampListRemove(g);
-  }
-  mListMutex.Unlock();
-  if(succ) g->DecRefCount(this);
-}
-
-void ZList::RemoveLast(ZGlass* g)
-{
-  if(mSize==0) return;
-  mListMutex.Lock();
-  bool succ = false;
-  lpZGlass_i i = mGlasses.end();
-  do {
-    if(*(--i) == g) {
-      mGlasses.erase(i); --mSize;
-      StampListRemove(g);
-      succ = true;
-      break;
-    }
-  } while(i!=mGlasses.begin());
-  mListMutex.Unlock();
-  if(succ) g->DecRefCount(this);
-}
-
-/**************************************************************************/
-
-void ZList::ClearList()
-{
-  static const string _eh("ZList::ClearList ");
-
-  if(mSize == 0) return;
-
-  lpZGlass_t foo;
-  ISdebug(1, _eh + GForm("locking list '%s'.", GetName()));
-  mListMutex.Lock();
-  foo.swap(mGlasses);
-  clear_list();
-  StampListClear();
-  mListMutex.Unlock();
-  ISdebug(1, _eh + GForm("unlocked list '%s'.", GetName()));
-  for(lpZGlass_i i=foo.begin(); i!=foo.end(); ++i) {
-    (*i)->DecRefCount(this);
-  }
-  ISdebug(1, _eh + GForm("sfinished for '%s'.", GetName()));
-}
-
-void ZList::ClearAllReferences()
-{
-  PARENT_GLASS::ClearAllReferences();
-  ClearList();
-}
-
-/**************************************************************************/
-
-void ZList::RemoveLensesViaQueen(Bool_t recurse)
-{
-  // Sends MIR to queen and waits for result.
-  // This should be called from a detached thread.
-
-  if(IsEmpty()) return;
-
-  auto_ptr<ZMIR> mir( mQueen->S_RemoveLenses(this, recurse) );
-  auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(mir) );
-  if(res->HasException())
-    throw(string(res->Exception.Data()));
-}
-
-/**************************************************************************/
-
-Bool_t ZList::Has(ZGlass* g)
-{
-  mListMutex.Lock();
-  lpZGlass_i i = find(mGlasses.begin(), mGlasses.end(), g);
-  bool ret = (i != mGlasses.end());
-  mListMutex.Unlock();
-  return ret;
-}
-
-/**************************************************************************/
-
-void ZList::SortByName()
-{
-  GMutexHolder llck(mListMutex);
-  if(mSize < 2) return;
-  multimap<string, ZGlass*> nmap;
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    nmap.insert(pair<string, ZGlass*>((*i)->GetName(), *i));
-  }
-  mGlasses.clear();
-  for(multimap<string, ZGlass*>::iterator i=nmap.begin(); i!=nmap.end(); ++i) {
-    mGlasses.push_back(i->second);
-  }
-  StampListRebuild();
-}
 
 /**************************************************************************/
 /**************************************************************************/
-
-// !! The analogous calls in ZGlass have lid/cid counterparts.
-// Didn't need them for lists so far. And don't see why I would.
-// Just slightly non-consistent.
-
-TimeStamp_t ZList::StampListAdd(ZGlass* g, ZGlass* b4)
-{
-  ++mTimeStamp;
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_list_add, mTimeStamp, Ray::EB_StructuralChange));
-    ray->SetBeta(g);
-    ray->SetGamma(b4);
-    mQueen->EmitRay(ray);
-  }
-  if(mStampListAdd_CB)
-    mStampListAdd_CB(this, g, b4, mStampListAdd_CBarg);
-
-  return mTimeStamp;
-}
-
-TimeStamp_t ZList::StampListRemove(ZGlass* g)
-{
-  ++mTimeStamp;
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_list_remove, mTimeStamp, Ray::EB_StructuralChange));
-    ray->SetBeta(g);
-    mQueen->EmitRay(ray);
-  }
-  if(mStampListRemove_CB)
-    mStampListRemove_CB(this, g, mStampListRemove_CBarg);
-
-  return mTimeStamp;
-}
-
-TimeStamp_t ZList::StampListRebuild()
-{
-  ++mTimeStamp;
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_list_rebuild, mTimeStamp, Ray::EB_StructuralChange));
-    mQueen->EmitRay(ray);
-  }
-  if(mStampListRebuild_CB)
-    mStampListRebuild_CB(this, mStampListRebuild_CBarg);
-
-  return mTimeStamp;
-}
-
-TimeStamp_t ZList::StampListClear()
-{
-  ++mTimeStamp;
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_list_clear, mTimeStamp, Ray::EB_StructuralChange));
-    mQueen->EmitRay(ray);
-  }
-  if(mStampListClear_CB)
-    mStampListClear_CB(this, mStampListClear_CBarg);
-
-  return mTimeStamp;
-}
-
-/**************************************************************************/
-
-void ZList::SetStampListAdd_CB(zlist_stampadd_f foo, void* arg)
-{
-  mStampListAdd_CB = foo; mStampListAdd_CBarg = arg;
-}
-void ZList::SetStampListRemove_CB(zlist_stampremove_f foo, void* arg)
-{
-  mStampListRemove_CB = foo; mStampListRemove_CBarg = arg;
-}
-void ZList::SetStampListRebuild_CB(zlist_stamprebuild_f foo, void* arg)
-{
-  mStampListRebuild_CB = foo; mStampListRebuild_CBarg = arg;
-}
-void ZList::SetStampListClear_CB(zlist_stampclear_f foo, void* arg)
-{
-  mStampListClear_CB = foo; mStampListClear_CBarg = arg;
-}
-
+// Streamer
 /**************************************************************************/
 
 void ZList::Streamer(TBuffer &b)
@@ -499,57 +427,28 @@ void ZList::Streamer(TBuffer &b)
 
   if(b.IsReading()) {
 
-    Version_t v = b.ReadVersion(&R__s, &R__c);
-    ZGlass::Streamer(b);
-    b >> mSize >> mLid >> mCid;
-    ISdebug(D_STREAM, GForm("ZList::Streamer reading %d elements (%d,%d).",
-			    mSize, mLid, mCid));
-    mIDs.clear();
-    ID_t id;
-    for(UInt_t i=0; i<mSize; i++) { b >> id; mIDs.push_back(id); }
+    Version_t R__v = b.ReadVersion(&R__s, &R__c); if(R__v) { }
+    AList::Streamer(b);
+    b >> mNextId;
+    Int_t el_id;
+    ID_t  id;
+    mElements.clear();
+    for(Int_t i=0; i<mSize; ++i) {
+      b >> id >> el_id; 
+      mElements.push_back(element((ZGlass*)id, el_id));
+    }
     b.CheckByteCount(R__s, R__c, ZList::IsA());
 
   } else {
 
     R__c = b.WriteVersion(ZList::IsA(), kTRUE);
-    ZGlass::Streamer(b);
-    b << mSize << mLid << mCid;
-    ISdebug(D_STREAM, GForm("ZList::Streamer writing %d elements (%d,%d).",
-			    mSize, mLid, mCid));
-    for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); i++)
-      b << (*i)->GetSaturnID();
+    AList::Streamer(b);
+    b << mNextId;
+    for(iterator i=begin(); i!=end(); ++i)
+      b << i()->GetSaturnID() << i->fId;
     b.SetByteCount(R__c, kTRUE);
 
   }
-}
-
-/**************************************************************************/
-
-Int_t ZList::RebuildAllRefs(An_ID_Demangler* idd)
-{
-  return RebuildLinkRefs(idd) + RebuildListRefs(idd);
-}
-
-Int_t ZList::RebuildListRefs(An_ID_Demangler* idd)
-{
-  Int_t ret = 0;
-  mGlasses.clear(); mSize = 0;
-  for(lID_i i=mIDs.begin(); i!=mIDs.end(); ++i) {
-    ZGlass* lens = idd->DemangleID(*i);
-    if(lens) {
-      try {
-	lens->IncRefCount(this);
-	mGlasses.push_back(lens); ++mSize;
-      }
-      catch(...) {
-	++ret;
-      }
-    } else {
-      ++ret;
-    }
-  }
-  mIDs.clear();
-  return ret;
 }
 
 /**************************************************************************/

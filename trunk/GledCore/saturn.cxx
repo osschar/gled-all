@@ -37,7 +37,7 @@ TROOT root("Root", "ROOT of GLED", initfuncs);
 
 int main(int argc, char **argv)
 {
-  static const string _eh("saturn::main() ");
+  static const Exc_t _eh("saturn::main() ");
 
   list<char*> args; for(int i=1; i<argc; ++i) args.push_back(argv[i]);
 
@@ -102,9 +102,9 @@ int main(int argc, char **argv)
   try {
     gint->Run(true); // Process macros
   }
-  catch (string exc) {
+  catch(exception& exc) {
     fprintf(stderr, "%sexception caught during macro processing:\n%s\n",
-	    _eh.c_str(), exc.c_str());
+	    _eh.Data(), exc.what());
     exit(1);
   }
   if(gint->InputFiles()) {
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
   GThread app_thread((GThread_foo)Gled::TRint_runner_tl, gint, false);
   if(gled->GetRunRint()) {
     if( app_thread.Spawn() ) {
-      perror(GForm("%scan't create Rint thread", _eh.c_str()));
+      perror(GForm("%scan't create Rint thread", _eh.Data()));
       exit(1);
     }
   }

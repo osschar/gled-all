@@ -42,9 +42,9 @@ namespace {
     TF3& formula = *((TF3*)data);
 
     Double_t x = g.x;
-    for(int nx=0; nx<g.nx; ++nx) {
+    for(unsigned int nx=0; nx<g.nx; ++nx) {
       Double_t y = g.y;
-      for(int ny=0; ny<g.ny; ++ny) {
+      for(unsigned int ny=0; ny<g.ny; ++ny) {
 	a[nx][ny] = formula.Eval(x, y, z);
 	y += g.dy;
       }
@@ -55,11 +55,11 @@ namespace {
 
 void GTSIsoMaker::MakeSurface()
 {  
-  static const string _eh("GTSIsoMaker::MakeSurface ");
+  static const Exc_t _eh("GTSIsoMaker::MakeSurface ");
 
   using namespace GTS;
 
-  GTSurf* target = mTarget;
+  GTSurf* target = *mTarget;
   if(target == 0) {
     throw(_eh + "Link Target should be set.");
   }

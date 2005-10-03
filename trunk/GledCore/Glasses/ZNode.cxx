@@ -39,50 +39,19 @@ void ZNode::_init()
 // ZList virtuals
 /**************************************************************************/
 
-// Method SetParent is auto generated.
-// Perhaps want manual version that will do list remove. ????
-// On the other hand it could also be done here.
-// Or require all cals to Add to also remove it from previous list.
-// Or provide AdMigration virtual base in ZGlass ... hmmmph
-
-// Locks done in ZList, SetParent
-
-// Yoohoo ... here are some real problems with adding nodes to nodes in lower
-// kings. Need TakeParentship method!
-// Beta should be relatively permissive ... to allow local collections
-// and links to global objects.
-
-void ZNode::Add(ZGlass* g)
+void ZNode::on_insert(ZList::iterator it)
 {
-  ZNode* n = dynamic_cast<ZNode*>(g);
-  if(n==this) return;
-  if(n && !n->bKeepParent && n->mParent)
-    n->mParent->Remove(g);
-  ZList::Add(g);
-  if(n && (n->mParent == 0 || (n->mParent !=0 && !n->bKeepParent)))
-    n->SetParent(this);
-}
+  // Set parent if possible; honour policy bKeepParent policy of the
+  // new node.
 
-void ZNode::AddBefore(ZGlass* g, ZGlass* before)
-{
-  ZNode* n = dynamic_cast<ZNode*>(g);
-  if(n==this) return;
-  if(n && !n->bKeepParent && n->mParent)
-    n->mParent->Remove(g);
-  ZList::AddBefore(g, before);
-  if(n && (n->mParent == 0 || (n->mParent !=0 && !n->bKeepParent)))
-    n->SetParent(this);
-}
-
-void ZNode::AddFirst(ZGlass* g)
-{
-  ZNode* n = dynamic_cast<ZNode*>(g);
-  if(n==this) return;
-  if(n && !n->bKeepParent && n->mParent)
-    n->mParent->Remove(g);
-  ZList::AddFirst(g);
-  if(n && (n->mParent == 0 || (n->mParent !=0 && !n->bKeepParent)))
-    n->SetParent(this);
+  ZNode* n = dynamic_cast<ZNode*>(it.lens());
+  if(n == 0 || n == this)
+    return;
+  if((n->mParent == 0 || n->bKeepParent == false) &&
+     (n->mQueen->DependsOn(mQueen)))
+    {
+      n->SetParent(this);
+    }
 }
 
 /**************************************************************************/
@@ -96,136 +65,176 @@ Int_t ZNode::Level()
 }
 
 /**************************************************************************/
-// Wrappers for ZTrans
+// ZTrans wrappers
 /**************************************************************************/
 
-Int_t ZNode::MoveLF(int vi, Float_t amount)
-{
-  if(vi<0 || vi>3) return 0;
-  mTrans.MoveLF((Int_t)vi, amount);
-  mStampReqTrans = Stamp(FID());
-  return 1;
-}
-
-Int_t ZNode::Move3(Float_t x, Float_t y, Float_t z)
-{
-  mTrans.Move3(x,y,z);
-  mStampReqTrans = Stamp(FID());
-  return 1;
-}
-
-Int_t ZNode::RotateLF(Int_t i1, Int_t i2, Float_t amount)
-{
-  if(i1<0 || i1>3 || i2<0 || i2>3) return 0;
-  mTrans.RotateLF((Int_t)i1, (Int_t)i2, amount);
-  mStampReqTrans = Stamp(FID());
-  return 1;
-}
-
-/**************************************************************************/
-
-Int_t ZNode::Move(ZNode* ref, Int_t vi, Float_t amount)
-{
-  if(ref==0) return MoveLF(vi, amount);
-  if(vi<0 || vi>3) return 0;
-  if(ref == this) {
-    mTrans.MoveLF((Int_t)vi, amount);
-  } else {
-    ZTrans* a = BtoA(mParent, ref);
-    mTrans.Move(a, (Int_t)vi, amount);
-    delete a;
-  }
-  mStampReqTrans = Stamp(FID());
-  return 1;
-}
-
-Int_t ZNode::Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Float_t amount)
-{
-  if(ref==0) return RotateLF(ii1, ii2, amount);
-  if(ii1<0 || ii1>3 || ii2<0 || ii1>3) return 0;
-  if(ref == this) {
-    // Get segv from m^-1 * m
-    mTrans.RotateLF((Int_t)ii1, (Int_t)ii2, amount);
-  } else {
-    ZTrans* a = BtoA(mParent, ref);
-    mTrans.Rotate(a, (Int_t)ii1, (Int_t)ii2, amount);
-    delete a;
-  }
-
-  mStampReqTrans = Stamp(FID());
-  return 1;
-}
-
-Int_t ZNode::SetTrans(const ZTrans& t)
+void ZNode::SetTrans(const ZTrans& t)
 {
   mTrans.SetTrans(t);
   mStampReqTrans = Stamp(FID());
-  return 0;
 }
 
-Int_t ZNode::MultBy(ZTrans& t)
+void ZNode::MultLeft(const ZTrans& t)
 {
-  mTrans *= t;
+  mTrans.MultLeft(t);
   mStampReqTrans = Stamp(FID());
-  return 0;
+}
+
+void ZNode::MultRight(const ZTrans& t)
+{
+  mTrans.MultRight(t);
+  mStampReqTrans = Stamp(FID());
 }
 
 /**************************************************************************/
 
-Int_t ZNode::Set3Pos(Float_t x, Float_t y, Float_t z)
+void ZNode::MoveLF(Int_t vi, Double_t amount)
 {
-  mTrans.Set3Pos(x,y,z); mStampReqTrans = Stamp(FID()); return 1;
+  if(vi<1 || vi>3) return;
+  mTrans.MoveLF(vi, amount);
+  mStampReqTrans = Stamp(FID());
 }
 
-Int_t ZNode::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
+void ZNode::Move3LF(Double_t x, Double_t y, Double_t z)
+{
+  mTrans.Move3LF(x,y,z);
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::RotateLF(Int_t i1, Int_t i2, Double_t amount)
+{
+  if(i1<1 || i1>3 || i2<1 || i2>3) return;
+  mTrans.RotateLF(i1, i2, amount);
+  mStampReqTrans = Stamp(FID());
+}
+
+/**************************************************************************/
+
+void ZNode::MovePF(Int_t vi, Double_t amount)
+{
+  if(vi<1 || vi>3) return;
+  mTrans.MovePF(vi, amount);
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::Move3PF(Double_t x, Double_t y, Double_t z)
+{
+  mTrans.Move3PF(x,y,z);
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::RotatePF(Int_t i1, Int_t i2, Double_t amount)
+{
+  if(i1<1 || i1>3 || i2<1 || i2>3) return;
+  mTrans.RotatePF(i1, i2, amount);
+  mStampReqTrans = Stamp(FID());
+}
+
+/**************************************************************************/
+
+void ZNode::Move(ZNode* ref, Int_t vi, Double_t amount)
+{
+  static const Exc_t _eh("ZNode::Move ");
+
+  if(ref == 0) throw _eh + "called with zero reference.";
+  if(vi<1 || vi>3) return;
+
+  if(ref == this) {
+    mTrans.MoveLF(vi, amount);
+  } else {
+    auto_ptr<ZTrans> a( BtoA(*mParent, ref) );
+    throw _eh + "no path from " + Identify() + " to reference node " + ref->Identify() + ".";
+    mTrans.Move(*a, vi, amount);
+  }
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::Move3(ZNode* ref, Double_t x, Double_t y, Double_t z)
+{
+  static const Exc_t _eh("ZNode::Move3 ");
+
+  if(ref == 0) throw _eh + "called with zero reference.";
+
+  if(ref == this) {
+    mTrans.Move3LF(x, y, z);
+  } else {
+    auto_ptr<ZTrans> a( BtoA(*mParent, ref) );
+    throw _eh + "no path from " + Identify() + " to reference node " + ref->Identify() + ".";
+    mTrans.Move3(*a, x, y, z);
+  }
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::Rotate(ZNode* ref, Int_t ii1, Int_t ii2, Double_t amount)
+{
+  static const Exc_t _eh("ZNode::Rotate ");
+
+  if(ref == 0) throw _eh + "called with zero reference.";
+  if(ii1<1 || ii1>3 || ii2<1 || ii1>3) return;
+  if(ref == this) {
+    // Get segv from m^-1 * m
+    mTrans.RotateLF(ii1, ii2, amount);
+  } else {
+    auto_ptr<ZTrans> a( BtoA(*mParent, ref) );
+    if(a.get() == 0)
+      throw _eh + "no path from " + Identify() + " to reference node " + ref->Identify() + ".";
+    mTrans.Rotate(*a, ii1, ii2, amount);
+  }
+  mStampReqTrans = Stamp(FID());
+}
+
+
+/**************************************************************************/
+// All possible Set methods.
+/**************************************************************************/
+
+void ZNode::SetPos(Double_t x, Double_t y, Double_t z)
+{
+  mTrans.SetPos(x,y,z); mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 {
   mTrans.SetRotByAngles(a1,a2,a3);
   mStampReqTrans = Stamp(FID());
-  return 1;
 }
 
-Int_t ZNode::SetRotByDegrees(Float_t a1, Float_t a2, Float_t a3)
+void ZNode::SetRotByDegrees(Float_t a1, Float_t a2, Float_t a3)
 {
-  Float_t f = TMath::Pi()/180;
+  const Float_t f = TMath::DegToRad();
   SetRotByAngles(f*a1, f*a2, f*a3);
-  return 1;
 }
 
 /**************************************************************************/
 
-void ZNode::SetS(Float_t xx)
+void ZNode::SetScale(Float_t s)
 {
-  WriteLock();
-  mSx = mSy = mSz = xx;
+  mSx = mSy = mSz = s;
   mStampReqTrans = Stamp(FID());
-  WriteUnlock();
 }
 
 void ZNode::SetScales(Float_t x, Float_t y, Float_t z)
 {
-  WriteLock();
   mSx=x; mSy=y; mSz=z;
   mStampReqTrans = Stamp(FID());
-  WriteUnlock();
 }
 
-void ZNode::MultS(Float_t s)
+void ZNode::MultScale(Float_t s)
 {
-  WriteLock();
   mSx*=s; mSy*=s; mSz*=s;
   mStampReqTrans = Stamp(FID());
-  WriteUnlock();
 }
 
 void ZNode::ApplyScale(ZTrans& t)
 {
-  if(bUseScale) { t.Scale3(mSx, mSy, mSz); }
-  ZNode *p = mParent;
-  if(bUseOM && p != 0 && p->bUseOM) {
-    const Float_t dom =  mOM - p->mOM;
+  if(bUseScale) {
+    t.Scale(mSx, mSy, mSz);
+  }
+  if(bUseOM && mParent != 0 && mParent->bUseOM) {
+    const Float_t dom =  mOM - mParent->mOM;
     if(dom != 0) {
-      const Float_t s = TMath::Power(10, dom);
-      t.Scale3(s, s, s);
+      const Double_t s = TMath::Power(10, dom);
+      t.Scale(s, s, s);
     }
   }
 }
@@ -236,7 +245,7 @@ void ZNode::ApplyScale(ZTrans& t)
 
 void ZNode::RnrOnForDaughters()
 {
-  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     GLensReadHolder _rlck(*i);
     (*i)->SetRnrSelf(true);
@@ -245,7 +254,7 @@ void ZNode::RnrOnForDaughters()
 
 void ZNode::RnrOffForDaughters()
 { 
-  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     GLensReadHolder _rlck(*i);
     (*i)->SetRnrSelf(false);
@@ -254,7 +263,7 @@ void ZNode::RnrOffForDaughters()
 
 void ZNode::RnrElmsOnForDaughters()
 {
-  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     GLensReadHolder _rlck(*i);
     (*i)->SetRnrElements(true);
@@ -263,7 +272,7 @@ void ZNode::RnrElmsOnForDaughters()
 
 void ZNode::RnrElmsOffForDaughters()
 { 
-  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     GLensReadHolder _rlck(*i);
     (*i)->SetRnrElements(false);
@@ -277,12 +286,12 @@ void ZNode::MakeRnrModList(ZGlass* optional_element)
   // created.
   // If non-zero, 'optional_element' is also added to the list.
 
-  ZRnrModList* rml = dynamic_cast<ZRnrModList*>(mRnrMod);
+  ZRnrModList* rml = dynamic_cast<ZRnrModList*>(mRnrMod.get());
   if(rml == 0) {
     rml = new ZRnrModList;
     mQueen->CheckIn(rml);
-    if(mRnrMod)
-      rml->Add(mRnrMod);
+    if(mRnrMod != 0)
+      rml->Add(mRnrMod.get());
     SetRnrMod(rml);
   }
   if(optional_element)
@@ -293,7 +302,7 @@ void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
 {
   // If enforce_to_all also changes OM of children w/ parent != this.
   
-  lpZNode_t dts; CopyByGlass<ZNode*>(dts);
+  lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     ZNode* d = *i;
     GLensReadHolder _rlck(d);
@@ -312,24 +321,24 @@ ZTrans* ZNode::ToMFR(int depth)
     return 0;
   }
 
-  ZNode *p = mParent;
+  ZNode *p = mParent.get();
   ZTrans* x;
   if(p == 0) {
     ReadLock();
     x = new ZTrans(mTrans);
-    if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
+    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
     ReadUnlock();
   } else {
     x = p->ToMFR(++depth);
     if(x == 0) return 0;
     ReadLock();
     *x *= mTrans;
-    if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
+    if(bUseScale) { x->Scale(mSx, mSy, mSz); }
     if(bUseOM && p->bUseOM) {
       Float_t dom =  mOM - p->mOM;
       if(dom != 0) {
-	Float_t s = TMath::Power(10, dom);
-	x->Scale3(s, s, s);
+	const Double_t s = TMath::Power(10, dom);
+	x->Scale(s, s, s);
       }
     }
     ReadUnlock();
@@ -344,7 +353,7 @@ ZTrans* ZNode::ToNode(ZNode* top, int depth)
     return 0;
   }
 
-  ZNode *p = mParent;
+  ZNode *p = *mParent;
   if(p == 0) return 0;
 
   ZTrans* x;
@@ -361,12 +370,12 @@ ZTrans* ZNode::ToNode(ZNode* top, int depth)
     }
   }
 
-  if(bUseScale) { x->Scale3(mSx, mSy, mSz); }
+  if(bUseScale) { x->Scale(mSx, mSy, mSz); }
   if(bUseOM && p->bUseOM) {
     Float_t dom =  mOM - p->mOM;
     if(dom != 0) {
-      Float_t s = TMath::Power(10, dom);
-      x->Scale3(s, s, s);
+      const Double_t s = TMath::Power(10, dom);
+      x->Scale(s, s, s);
     }
   }
 
@@ -378,11 +387,11 @@ ZTrans* ZNode::ToNode(ZNode* top, int depth)
 ZTrans* ZNode::BtoA(ZNode* a, ZNode* b, ZNode* top)
 {
   if(top == 0) {
-    top = FindCommonParent(a,b);
+    top = FindCommonParent(a, b);
     if(top == 0) return 0;
   }
   ZTrans* at = a->ToNode(top); if(at == 0) { return 0; }
-  at->InvertFast();
+  at->Invert();
   ZTrans* bt = b->ToNode(top); if(bt == 0) { delete at; return 0; }
   *at *= *bt;
   delete bt;
@@ -393,8 +402,8 @@ ZTrans* ZNode::BtoA(ZNode* a, ZNode* b, ZNode* top)
 
 void ZNode::FillParentList(list<ZNode*>& plist)
 {
-  ZNode* p = mParent;
-  if(p) {
+  ZNode* p = *mParent;
+  if(p != 0) {
     plist.push_back(p);
     p->FillParentList(plist);
   }
@@ -418,25 +427,4 @@ ZNode* ZNode::FindCommonParent(ZNode* a, ZNode* b)
     y = x; x = 1 - x;
   } while(!l[0].empty() && !l[1].empty());
   return 0;
-}
-
-/**************************************************************************/
-/*** Stupid junk ***/
-/**************************************************************************/
-
-void ZNode::Spit() const
-{
-  cout << GetName() << endl << mTrans;
-}
-
-/**************************************************************************/
-
-ostream& operator<<(ostream& s, const ZNode& n) {
-  const ZTrans& t = n.RefTrans();
-  for(Int_t i=0; i<=3; i++) {
-    s << t(i,4u) << "\t|\t";
-    for(Int_t j=0; j<=3; j++)
-      s << t(i,j) << ((j==3) ? "\n" : "\t");
-  }
-  return s;
 }

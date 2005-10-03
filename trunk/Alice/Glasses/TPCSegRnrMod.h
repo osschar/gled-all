@@ -29,7 +29,7 @@ class TPCSegRnrMod : public ZRnrModBase {
   ZColor	             mMinCol;      // X{PGST} 7 ColorButt(-join=>1)
   ZColor		     mMaxCol;      // X{PGST} 7 ColorButt()
   Float_t	             mColSep;      // X{gST}  7 Value(-range=>[0,100,1,100])
-  ZRibbon*	             mRibbon;      // X{gST}  L{}
+  ZLink<ZRibbon>	             mRibbon;      // X{gST}  L{}
 
   Bool_t		     bUseTexture;  // X{GST}  7 Bool()
   Bool_t		     bRnrFrame;	   // X{GST}  7 Bool()
@@ -53,5 +53,4 @@ class TPCSegRnrMod : public ZRnrModBase {
   ClassDef(TPCSegRnrMod, 1)
     }; // endclass TPCSegRnrMod
 
-GlassIODef(TPCSegRnrMod);
 #endif

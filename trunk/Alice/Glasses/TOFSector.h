@@ -30,6 +30,5 @@ class TOFSector : public ZNode {
   ClassDef(TOFSector, 1)
     }; // endclass TOFSector
 
-GlassIODef(TOFSector);
 
 #endif

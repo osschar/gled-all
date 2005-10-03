@@ -10,42 +10,40 @@
 #include <Glasses/ZNode.h>
 #include <Glasses/ZQueen.h>
 
-class Menu : public ZList {
+class Menu : public ZList
+{
   MAC_RNR_FRIENDS(Menu);
 
  private:
   void _init();
 
  protected:
-  Menu*    mParent;          //  X{GS} L{}
-  ZNode*   mCanvas3D;         //  X{GS} L{}
-  ZNode*   mCanvas2D;         //  X{GS} L{}
-  ZList*   mSettings;         //  X{GS} L{}
+  ZLink<Menu>    mParent;       //  X{GS} L{}
+  ZLink<ZNode>   mCanvas3D;     //  X{GS} L{}
+  ZLink<ZNode>   mCanvas2D;     //  X{GS} L{}
+  ZLink<ZList>   mSettings;     //  X{GS} L{}
 
   // mir memebers
-  ZGlass*  mCreatorLens;     //  X{GS} L{}
-  TString  mCreatorMethod;   //  X{GS} 
-  ZGlass*  mOnEnterLens;     //  X{GS} L{}
-  TString  mOnEnterMethod;   //  X{GS} 
-  ZGlass*  mOnExitLens;     //  X{GS} L{}
-  TString  mOnExitMethod;   //  X{GS} 
+  ZLink<ZGlass>  mCreatorLens;  //  X{GS} L{}
+  TString  mCreatorMethod;      //  X{GS} 
+  ZLink<ZGlass>  mOnEnterLens;  //  X{GS} L{}
+  TString  mOnEnterMethod;      //  X{GS} 
+  ZLink<ZGlass>  mOnExitLens;   //  X{GS} L{}
+  TString  mOnExitMethod;       //  X{GS} 
 
-  Bool_t   mDigImport;       //  X{GS}
-  Bool_t   mShowIn3D;        //  X{GS}
+  Bool_t   mDigImport;          //  X{GS}
+  Bool_t   mShowIn3D;           //  X{GS}
+
  public:
   Menu(const Text_t* n="Menu", const Text_t* t=0) :
-    ZList(n,t) { 
-      _init(); Init();  
-    }
-  void Init();
+    ZList(n,t) { _init(); }
+
   void Dump();
-  // virtual void     Init();
-  virtual void     OnEnter();
+  virtual void OnEnter();
 
 #include "Menu.h7"
   ClassDef(Menu, 1)
-    }; // endclass Menu
+}; // endclass Menu
 
-GlassIODef(Menu);
 
 #endif

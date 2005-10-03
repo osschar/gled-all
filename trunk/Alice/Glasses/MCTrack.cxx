@@ -46,9 +46,9 @@ MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):TrackBase(n,t)
 
 void MCTrack::ImportDaughters(VSDSelector* sel)
 {
-  static const string _eh("MCTrack::ImportDaughters");
+  static const Exc_t _eh("MCTrack::ImportDaughters");
   if (sel == 0) {
-    sel = GrepParentByGlass<VSDSelector*>();
+    sel = GrepParentByGlass<VSDSelector>();
     if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
   Int_t d0 =  mParticle->GetDaughter(0), d1 = mParticle->GetDaughter(1);
@@ -63,9 +63,9 @@ void MCTrack::ImportDaughters(VSDSelector* sel)
 
 void MCTrack::ImportDaughtersRec(VSDSelector* sel)
 {
-  static const string _eh("MCTrack::ImportDaughters");
+  static const Exc_t _eh("MCTrack::ImportDaughters");
   if (sel == 0) {
-    sel = GrepParentByGlass<VSDSelector*>();
+    sel = GrepParentByGlass<VSDSelector>();
     if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
 
@@ -84,9 +84,9 @@ void MCTrack::ImportDaughtersRec(VSDSelector* sel)
 /**************************************************************************/
 void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 {
-  static const string _eh("MCTrack::ImportHits ");
+  static const Exc_t _eh("MCTrack::ImportHits ");
   if (sel == 0) {
-    sel = GrepParentByGlass<VSDSelector*>();
+    sel = GrepParentByGlass<VSDSelector>();
     if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
   char selection[128];
@@ -101,9 +101,9 @@ void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 /**************************************************************************/
 void  MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
 {
-  static const string _eh("MCTrack::ImportClusters ");
+  static const Exc_t _eh("MCTrack::ImportClusters ");
   if (sel == 0) {
-    sel = GrepParentByGlass<VSDSelector*>();
+    sel = GrepParentByGlass<VSDSelector>();
     if(sel == 0) throw(_eh + "can't set VSDSelector.");
   }
   char selection[128];
@@ -119,7 +119,7 @@ void  MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
 
 void MCTrack::SetDecayFromDaughter()
 {
-  MCTrack* last_d = dynamic_cast<MCTrack*>(Last());
+  MCTrack* last_d = dynamic_cast<MCTrack*>(BackElement());
   if(last_d) {
     mParticle->SetDecayed(true);
     mParticle->fDx = last_d->mParticle->Vx();

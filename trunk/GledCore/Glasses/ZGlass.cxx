@@ -16,7 +16,7 @@
 #include "ZGlass.h"
 #include "ZGlass.c7"
 
-#include <Glasses/ZList.h>
+#include <Glasses/AList.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZMirFilter.h>
@@ -44,19 +44,15 @@ void ZGlass::_init()
   bMIRActive = true; bAcceptRefs = true;
   mRefCount = mMoonRefCount = mSunRefCount = mFireRefCount = mEyeRefCount = 0; 
   mTimeStamp = mStampReqTring = 0;
-  pSetYNameCBs = 0;
-  mStamp_CB = mStampLink_CB = 0; mStamp_CBarg = mStampLink_CBarg = 0;
+  pspRayAbsorber  = 0;
+  pspNameChangeCB = 0;
 
-  bUseDispList = false;
+  bUseDispList  = false;
+  bUseNameStack = true;
 }
 
 /**************************************************************************/
 
-/**************************************************************************/
-// Hairy Inlines
-/**************************************************************************/
-
-// inline /// used to be in the header ... gave segvs with cint
 void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid)
 {
   if(link == new_val) return;
@@ -72,10 +68,12 @@ void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid)
   StampLink(fid);
 }
 
-
 /**************************************************************************/
 
-void ZGlass::reference_all() {
+void ZGlass::reference_all()   { reference_links();   }
+void ZGlass::unreference_all() { unreference_links(); }
+
+void ZGlass::reference_links() {
   lppZGlass_t link_refs;
   CopyLinkRefs(link_refs);
   for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
@@ -83,14 +81,14 @@ void ZGlass::reference_all() {
       try {
 	(**i)->IncRefCount(this);
       }
-      catch(string exc) {
+      catch(Exc_t& exc) {
 	**i = 0;
       }
     }
   }
 }
 
-void ZGlass::unreference_all() {
+void ZGlass::unreference_links() {
   lppZGlass_t link_refs;
   CopyLinkRefs(link_refs);
   for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
@@ -104,8 +102,8 @@ void ZGlass::unreference_all() {
 
 Int_t ZGlass::remove_references_to(ZGlass* lens)
 {
-  // Removes all references to *lens*.
-  // Virtual ... lists overrirde it but also call the ZGlass version
+  // Removes link references to *lens*.
+  // Virtual ... lists overrirde it but also call the link version
   // for unreferencing of links.
   // Emits Rays, but does NOT call DecRefCount: this is done by wrapper
   // RemoveReferencesTo() (and sometimes by ZQueen during lens delition).
@@ -124,10 +122,19 @@ Int_t ZGlass::remove_references_to(ZGlass* lens)
 }
 
 /**************************************************************************/
+// Public methods
+/**************************************************************************/
 
-string ZGlass::Identify() const
+Int_t ZGlass::RebuildAllRefs(An_ID_Demangler* idd)
 {
-  return string(GForm("'%s'[%d]", mName.Data(), mSaturnID));
+  return RebuildLinkRefs(idd);
+}
+
+/**************************************************************************/
+
+TString ZGlass::Identify() const
+{
+  return TString(GForm("'%s'[%d]", mName.Data(), mSaturnID));
 }
 
 /**************************************************************************/
@@ -152,7 +159,7 @@ ZMIR* ZGlass::get_MIR()
   return GThread::get_mir();
 }
 
-ZMIR* ZGlass::assert_MIR_presence(const string& header, int what)
+ZMIR* ZGlass::assert_MIR_presence(const TString& header, int what)
 {
   ZMIR* mir = GThread::get_mir();
   if(mir == 0) {
@@ -170,7 +177,7 @@ ZMIR* ZGlass::assert_MIR_presence(const string& header, int what)
   return mir;
 }
 
-ZMIR* ZGlass::suggest_MIR_presence(const string& header, int what)
+ZMIR* ZGlass::suggest_MIR_presence(const TString& header, int what)
 {
   ZMIR* mir = GThread::get_mir();
   if(mir == 0) {
@@ -189,11 +196,11 @@ ZMIR* ZGlass::suggest_MIR_presence(const string& header, int what)
   return mir;
 }
 
-void ZGlass::warn_caller(const string& warning)
+void ZGlass::warn_caller(const TString& warning)
 {
   ZMIR* mir = GThread::get_mir();
   if(mir && mir->Caller) {
-    auto_ptr<ZMIR> wrn( mir->Caller->S_Warning(warning.c_str()) );
+    auto_ptr<ZMIR> wrn( mir->Caller->S_Warning(warning.Data()) );
     wrn->SetRecipient(mir->Caller->HostingSaturn());
     mSaturn->ShootMIR(wrn);
   } else {
@@ -202,45 +209,25 @@ void ZGlass::warn_caller(const string& warning)
 }
 
 /**************************************************************************/
-// YNameChangeCB
-
-typedef set<ZGlass::YNameChangeCB*>		spYNameChangeCB_t;	
-typedef set<ZGlass::YNameChangeCB*>::iterator	spYNameChangeCB_i;	
-
-void ZGlass::register_name_change_cb(ZGlass::YNameChangeCB* rec)
-{
-  if(mGlassBits & ZGlassBits::kFixedName) return;
-  ReadLock();
-  if(pSetYNameCBs == 0)
-    pSetYNameCBs = new set<YNameChangeCB*>;
-  pSetYNameCBs->insert(rec);
-  ReadUnlock();
-}
-
-void ZGlass::unregister_name_change_cb(ZGlass::YNameChangeCB* rec)
-{
-  ReadLock();
-  if(pSetYNameCBs != 0)
-    pSetYNameCBs->erase(rec);
-  ReadUnlock();
-}
-
-/**************************************************************************/
 
 void ZGlass::SetName(const Text_t* n)
 {
+  static const Exc_t _eh("ZGlass::SetName ");
+
   if(mGlassBits & ZGlassBits::kFixedName) {
     Stamp(FID());
-    throw(string("ZGlass::SetName lens has FixedName bit set"));
+    throw(_eh + "lens has FixedName bit set.");
   }
-  string name(n);
+  TString name(n);
   WriteLock();
-  if(pSetYNameCBs != 0) {
-    for(set<YNameChangeCB*>::iterator i=pSetYNameCBs->begin(); i!=pSetYNameCBs->end(); ++i) {
-      (*i)->y_name_change_cb(this, name);
-    }
+  if(pspNameChangeCB != 0) {
+    for(set<NameChangeCB*>::iterator i=pspNameChangeCB->begin();
+	i!=pspNameChangeCB->end(); ++i)
+      {
+	(*i)->name_change_cb(this, name);
+      }
   }
-  mName = name.c_str();
+  mName = name.Data();
   Stamp(FID());
   WriteUnlock();
   if(mQueen == this) {
@@ -263,26 +250,22 @@ void ZGlass::SetTitle(const Text_t* t)
 
 /**************************************************************************/
 
-ZMirFilter* ZGlass::GetGuard() const
+ZMirFilter* ZGlass::GetGuard()
 {
-  ReadLock();
-  ZMirFilter* _ret = mGuard;
-  ReadLock();
-  return _ret;
+  return mGuard.get();
 }
 
 void ZGlass::SetGuard(ZMirFilter* guard)
 {
   // Might want to read-lock if LOCK_SET_METHS is true in project7.
-  set_link_or_die((ZGlass*&)mGuard, guard, FID());
+  set_link_or_die(mGuard.ref_link(), guard, FID());
 }
 
 /**************************************************************************/
 
 ZGlass::~ZGlass()
 {
-  // !!!!! Should unref all links; check zlist, too
-  delete pSetYNameCBs;
+  delete pspNameChangeCB;
 }
 
 /**************************************************************************/
@@ -294,7 +277,6 @@ void ZGlass::UpdateGlassView()
       (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
-  if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 }
 
 void ZGlass::UpdateAllViews()
@@ -304,7 +286,6 @@ void ZGlass::UpdateAllViews()
       (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, FID_t(0,0)));
     mQueen->EmitRay(ray);
   }
-  if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
 }
 
 void ZGlass::ReTriangulate()
@@ -342,7 +323,7 @@ Short_t ZGlass::IncRefCount(ZGlass* from)
   // Throws an exception if the reference is not allowed by *this*
   // lens or its queen.
 
-  static const string _eh("ZGlass::IncRefCount ");
+  static const Exc_t _eh("ZGlass::IncRefCount ");
 
   if(mQueen && from->mQueen) {
     mQueen->SubjectRefCntLock();
@@ -381,7 +362,7 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
 {
   // Called to notify *this* that it is no longer referenced by lens from.
 
-  static const string _eh("ZGlass::DecRefCount ");
+  static const Exc_t _eh("ZGlass::DecRefCount ");
 
   if(mQueen && from->mQueen) {
     mQueen->SubjectRefCntLock();
@@ -393,8 +374,8 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
       return mRefCount;
     }
     if(n > i->second) {
-      ISwarn(_eh + GForm("%s, called by %s: mismatch %d > %d.", Identify().c_str(),
-			 from->Identify().c_str(), n, i->second));
+      ISwarn(_eh + GForm("%s, called by %s: mismatch %d > %d.", Identify().Data(),
+			 from->Identify().Data(), n, i->second));
       n = i->second;
     }
 
@@ -449,115 +430,149 @@ Int_t ZGlass::RemoveReferencesTo(ZGlass* lens)
 
 /**************************************************************************/
 
-ZGlass* ZGlass::GetLinkByName(const Text_t* link_name)
-{ return GetLinkByName(string(link_name)); }
-
-ZGlass* ZGlass::GetLinkByName(const string& link_name)
+ZGlass* ZGlass::GetLinkByName(const TString& link_name)
 {
   // Returns glass pointed to by link with name link_name.
   // Attempts link_name == LinkMemberName and
   // link_name == Class::LinkMemberName.
-  // Throws an exception (string) if link does not exist.
+  // Throws an exception (TString) if link does not exist.
   // In principle could have a map link-name->link-specs.
 
   // Should go in reverse direction !!!!
   // Locking doesn't make much sense.
+
+  static const Exc_t _eh("ZGlass::GetLinkByName ");
 
   lLinkRep_t lr; CopyLinkReps(lr);
   for(lLinkRep_i i=lr.begin(); i!=lr.end(); ++i) {
     if(link_name == i->fLinkInfo->fName || link_name == i->fLinkInfo->FullName())
       return i->fLinkRef;
   }
-  throw(string(GForm("ZGlass::GetLinkByName link '%s' does not exist in '%s' (id=%u)",
-		     link_name.c_str(), GetName(), GetSaturnID())));
+  throw(_eh + GForm("link '%s' does not exist in '%s' (id=%u)",
+		    link_name.Data(), GetName(), GetSaturnID()));
 }
 
-ZGlass* ZGlass::FindLensByPath(const Text_t* url)
-{ return FindLensByPath(string(url)); }
-
-ZGlass* ZGlass::FindLensByPath(const string& url)
+ZGlass* ZGlass::FindLensByPath(const TString& url, bool throwp)
 {
-  static const string _eh("ZGlass::FindLensByPath ");
+  static const Exc_t _eh("ZGlass::FindLensByPath ");
   using namespace GledNS;
 
-  list<url_token> l;
-  tokenize_url(url, l);
+  list<url_token> tokens;
+  tokenize_url(url, tokens);
   ZGlass* g = this;
   try {
-    for(list<url_token>::iterator i=l.begin(); i!=l.end(); ++i) {
-      if(g == 0) {
-	// !!! give more details
-	throw(_eh + "null lens; probably a link is not set");
-      }
+    for(list<url_token>::iterator i=tokens.begin(); i!=tokens.end(); ++i) {
+      assert(g != 0);
       switch (i->type()) {
       case url_token::link_sel: {
-	g = g->GetLinkByName(*i);
+	ZGlass* lnk = g->GetLinkByName(*i);
+	if(lnk == 0)
+	  throw(_eh + "link '" + *i + "' of lens '" + g->Identify() + "' not set.");
+	g = lnk;
 	break;
       }
       case url_token::list_sel: {
-	ZList* l = dynamic_cast<ZList*>(g);
+	AList* l = dynamic_cast<AList*>(g);
 	if(l == 0) {
-	  // !!! give more details
-	  throw(_eh + "url element is not a list");
+	  throw(_eh + "url element '" + g->Identify() + "' is not a list.");
 	}
-	g = l->GetElementByName(*i);
+	ZGlass* elm = l->GetElementByName(*i);
+	if(elm == 0)
+	  throw(_eh + "list " + g->Identify() + " does not have element '" + *i + "'.");
+	g = elm;
 	break;
       }
       default:
-	ISerr(_eh + "unknown token type. Attempting to ignore ...");
+	throw(_eh + "unknown token type.");
 	break;
       }
     }
   }
-  catch(string exc) {
-    ISerr(exc);
-    throw;
+  catch(Exc_t& exc) {
+    if(throwp) {
+      ISerr(exc);
+      throw;
+    } else
+      return 0;
   }
-
   return g;
 }
 
 /**************************************************************************/
+// RayAbsorber
+
+void ZGlass::register_ray_absorber(RayAbsorber* ra)
+{
+  GMutexHolder rdlck(mReadMutex);
+  if(pspRayAbsorber == 0)
+    pspRayAbsorber = new set<RayAbsorber*>;
+  pspRayAbsorber->insert(ra);
+}
+
+void ZGlass::unregister_ray_absorber(RayAbsorber* ra)
+{
+  GMutexHolder rdlck(mReadMutex);
+  if(pspRayAbsorber != 0)
+    pspRayAbsorber->erase(ra);
+}
+
+/**************************************************************************/
+// YNameChangeCB
+
+void ZGlass::register_name_change_cb(ZGlass::NameChangeCB* nccb)
+{
+  if(mGlassBits & ZGlassBits::kFixedName) return;
+  GMutexHolder rdlck(mReadMutex);
+  if(pspNameChangeCB == 0)
+    pspNameChangeCB = new set<NameChangeCB*>;
+  pspNameChangeCB->insert(nccb);
+}
+
+void ZGlass::unregister_name_change_cb(ZGlass::NameChangeCB* nccb)
+{
+  GMutexHolder rdlck(mReadMutex);
+  if(pspNameChangeCB != 0)
+    pspNameChangeCB->erase(nccb);
+}
+
+/**************************************************************************/
+// Stamping
 
 TimeStamp_t ZGlass::Stamp(FID_t fid, UChar_t eye_bits)
 {
   ++mTimeStamp;
-  if(mQueen && mQueen->GetStamping() && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_change, mTimeStamp, fid, eye_bits));
-    mQueen->EmitRay(ray);
+  IF_ZGLASS_CHANGE_RAY(this, RayNS::RQN_change, mTimeStamp, fid, eye_bits) {
+    ZGLASS_SEND_RAY;
   }
-  if(mStamp_CB) mStamp_CB(this, mStamp_CBarg);
-
   return mTimeStamp;
 }
 
 TimeStamp_t ZGlass::StampLink(FID_t fid)
 {
   ++mTimeStamp;
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, RayNS::RQN_link_change, mTimeStamp, fid,
-		    Ray::EB_StructuralChange));
-    mQueen->EmitRay(ray);
+  IF_ZGLASS_RAY(this, RayNS::RQN_link_change, mTimeStamp, fid,
+		Ray::EB_StructuralChange) {
+    ZGLASS_SEND_RAY;
   }
-  if(mStampLink_CB) mStampLink_CB(this, mStampLink_CBarg);
-
   return mTimeStamp;
-}
-
-void ZGlass::SetStamp_CB(zglass_stamp_f foo, void* arg)
-{
-  mStamp_CB = foo; mStamp_CBarg = arg;
-}
-void ZGlass::SetStampLink_CB(zglass_stamp_f foo, void* arg)
-{
-  mStampLink_CB = foo; mStampLink_CBarg = arg;
 }
 
 /**************************************************************************/
 
-Int_t ZGlass::RebuildAllRefs(An_ID_Demangler* idd)
+/**************************************************************************/
+/**************************************************************************/
+// ZLinkBase
+/**************************************************************************/
+/**************************************************************************/
+
+void ZLinkBase::Streamer(TBuffer &b)
 {
-  return RebuildLinkRefs(idd);
+  if(b.IsReading()) {
+    ID_t id;  b >> id;
+    char* ptr = 0; ptr += id;
+    _lens = (ZGlass*)ptr;
+  } else {
+    ID_t id = _lens ? _lens->GetSaturnID() : 0;
+    b << id;
+  }
 }

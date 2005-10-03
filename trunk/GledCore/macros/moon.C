@@ -15,7 +15,7 @@ void moon()
 
   g_queen = (ZQueen*) g_sun_king->GetElementByName("Scenes");
   if(g_queen)
-    g_scene = dynamic_cast<Scene*>(g_queen->First());
+    g_scene = dynamic_cast<Scene*>(g_queen->FrontElement());
 
   Gled::Macro("eye.C"); // spawn an eye with a pupil on first scene
   setup_pupil_up_reference();

@@ -39,20 +39,20 @@ protected:
 
   // Saturn config
 
-  TString	mHostName;	// X{GS} 7 TextOut(-join=>1)
-  Int_t		mServerPort;	// X{GS} 7 ValOut(-range=>[0,65535,1])
-  Int_t         mServPortScan;  // X{GS} 7 Value(-range=>[0,256,1])
+  TString	mHostName;	// X{GSR} 7 TextOut(-join=>1)
+  Int_t		mServerPort;	// X{GS}  7 ValOut(-range=>[0,65535,1])
+  Int_t         mServPortScan;  // X{GS}  7 Value(-range=>[0,256,1])
 
-  TString	mMasterName;	// X{GS} 7 TextOut(-join=>1)
-  Int_t		mMasterPort;	// X{GS} 7 ValOut(-range=>[0,65535,1,1])
+  TString	mMasterName;	// X{GSR} 7 TextOut(-join=>1)
+  Int_t		mMasterPort;	// X{GS}  7 ValOut(-range=>[0,65535,1,1])
 
-  ID_t		mSunSpaceSize;	// X{GS} 7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
-  ID_t		mKingID;	// X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],
+  ID_t		mSunSpaceSize;	// X{GS}  7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
+  ID_t		mKingID;	// X{G}   7 ValOut(-range=>[0,MAX_ID,1,0],
                                 //                -width=>10, -join=>1)
-  ID_t		mFireKingID;	// X{G}  7 ValOut(-range=>[0,MAX_ID,1,0],
+  ID_t		mFireKingID;	// X{G}   7 ValOut(-range=>[0,MAX_ID,1,0],
                                 //                -width=>10)
   Bool_t	bUseAuth;	// Only relevant for Sun Absolute; set for all SaturnInfos on mee incarnation
-				// X{GS} 7 BoolOut()
+				// X{GS}  7 BoolOut()
 
   // Node info
 
@@ -77,9 +77,9 @@ protected:
 
   // Cluster structure
 
-  SaturnInfo*	mMaster;	// X{gS} L{}
-  ZHashList*	mMoons;		// X{gS} L{}
-  ZHashList*	mEyes;		// X{gS} L{}
+  ZLink<SaturnInfo>	mMaster;	// X{gS} L{}
+  ZLink<ZHashList>	mMoons;		// X{gS} L{}
+  ZLink<ZHashList>	mEyes;		// X{gS} L{}
 
   void create_lists();
 
@@ -105,7 +105,6 @@ public:
   ClassDef(SaturnInfo, 1)
 }; // endclass SaturnInfo
 
-GlassIODef(SaturnInfo);
 
 typedef list<SaturnInfo*>		lpSaturnInfo_t;
 typedef list<SaturnInfo*>::iterator	lpSaturnInfo_i;

@@ -25,6 +25,5 @@ public:
   ClassDef(Sleeper, 1)
 }; // endclass Sleeper
 
-GlassIODef(Sleeper);
 
 #endif

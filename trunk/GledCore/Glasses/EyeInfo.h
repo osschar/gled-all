@@ -27,12 +27,12 @@ private:
   TSocket*	hSocket;	//!
 
 protected:
-  SaturnInfo*	mMaster;		// X{gS} L{}
+  ZLink<SaturnInfo>	mMaster;		// X{gS} L{}
 
 public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);
 
-  virtual SaturnInfo* HostingSaturn() { return mMaster; }
+  virtual SaturnInfo* HostingSaturn() { return mMaster.get(); }
   // Virtuals exported from MEE
   virtual void Message(const Text_t* s);
   virtual void Warning(const Text_t* s);
@@ -42,7 +42,6 @@ public:
   ClassDef(EyeInfo,1)
 }; // endclass EyeInfo
 
-GlassIODef(EyeInfo);
 
 typedef list<EyeInfo*>			lpEyeInfo_t;
 typedef list<EyeInfo*>::iterator	lpEyeInfo_i;

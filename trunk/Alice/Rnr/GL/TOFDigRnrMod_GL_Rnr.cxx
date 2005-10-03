@@ -8,6 +8,8 @@
 #include <RnrBase/RnrDriver.h>
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void TOFDigRnrMod_GL_Rnr::_init()
@@ -17,6 +19,7 @@ void TOFDigRnrMod_GL_Rnr::_init()
 
 void TOFDigRnrMod_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   update_tring_stamp(rd);
   rd->PushRnrMod(TOFDigRnrMod::FID(),  mRnrMod);
 }
@@ -30,4 +33,5 @@ void TOFDigRnrMod_GL_Rnr::Draw(RnrDriver* rd)
 void TOFDigRnrMod_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   rd->PopRnrMod(TOFDigRnrMod::FID());
+  PARENT::PostDraw(rd);
 }

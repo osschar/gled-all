@@ -31,6 +31,5 @@ class KinkTrack : public TrackBase
   ClassDef(KinkTrack, 1)
 }; // endclass KinkTrack
 
-GlassIODef(KinkTrack);
 
 #endif

@@ -57,6 +57,8 @@ protected:
   TString	mAuthDir;	 // X{GS}
   TString	mDefEyeIdentity; // X{GS}
 
+  TString	mRenderers;      // X{GS}
+
   GCondition*	mExitCondVar;
 
 public:

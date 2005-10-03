@@ -43,6 +43,5 @@ public:
   ClassDef(ZGlPerspective, 1)
 }; // endclass ZGlPerspective
 
-GlassIODef(ZGlPerspective);
 
 #endif

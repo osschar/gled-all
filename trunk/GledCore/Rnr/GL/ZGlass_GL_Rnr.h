@@ -20,7 +20,7 @@ protected:
   TimeStamp_t	mStampTring;
   GLuint	mDispList;
   bool		bRebuildDL;
-  bool          bUseNameStack;
+
   bool          bUsesSubPicking;
   bool		bSuppressNameLabel;
 

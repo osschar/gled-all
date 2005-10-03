@@ -58,7 +58,7 @@ public:
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
 					void* ud);
 
-  void GenerateTriangleStrips();
+  void GenerateTriangleStrips(Int_t max_verts=128);
 
 }; // endclass TringTvor
 

@@ -12,8 +12,6 @@ void ZImage_GL_Rnr::_init()
 {
   mStampTexture = 0;
   mTexture = 0;
-  // From ZGlass_GL_Rnr:
-  bUseNameStack = false;
 }
 
 ZImage_GL_Rnr::~ZImage_GL_Rnr()

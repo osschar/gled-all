@@ -32,6 +32,7 @@ void ZRlFont_GL_Rnr::AbsorbRay(Ray& ray)
 void ZRlFont_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   if(mFont) {
+    PARENT::PreDraw(rd);
     update_tring_stamp(rd);
     rd->PushRnrMod(ZRlFont::FID(), mRnrMod);
   }
@@ -49,6 +50,7 @@ void ZRlFont_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   if(mFont) {
     rd->PopRnrMod(ZRlFont::FID());
+    PARENT::PostDraw(rd);
   }
 }
 
@@ -56,7 +58,7 @@ void ZRlFont_GL_Rnr::PostDraw(RnrDriver* rd)
 
 bool ZRlFont_GL_Rnr::LoadFont()
 {
-  static const string _eh("ZRlFont_GL_Rnr::LoadFont ");
+  static const Exc_t _eh("ZRlFont_GL_Rnr::LoadFont ");
 
   if(mFont) {
     GLTextNS::txfUnloadFont(mFont);

@@ -55,6 +55,5 @@ public:
   ClassDef(MetaWeedInfo, 1)
 }; // endclass MetaWeedInfo
 
-GlassIODef(MetaWeedInfo);
 
 #endif

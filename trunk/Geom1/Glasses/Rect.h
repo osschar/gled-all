@@ -36,6 +36,5 @@ public:
   ClassDef(Rect, 1)
 }; // endclass Rect
 
-GlassIODef(Rect);
 
 #endif

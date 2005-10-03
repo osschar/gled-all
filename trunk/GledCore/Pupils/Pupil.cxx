@@ -6,8 +6,8 @@
 
 #include "Pupil.h"
 #include <Eye/Eye.h>
-#include <Eye/MTW_ClassView.h>
-#include <Eye/FTW_Shell.h>
+#include <GledView/MTW_ClassView.h>
+#include <GledView/FTW_Shell.h>
 
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
@@ -123,7 +123,7 @@ void Pupil::_build()
     // gl_ctx_holder->iconize();
   }
 
-  mInfo = dynamic_cast<PupilInfo*>(fImg->fGlass);
+  mInfo = dynamic_cast<PupilInfo*>(fImg->fLens);
   assert(mInfo);
 
   label_window();
@@ -132,7 +132,7 @@ void Pupil::_build()
   size_range(0, 0, 4096, 4096);
 
   mDriver = new GLRnrDriver(fImg->fEye, "GL");
-  mDriver->SetProjBase(mProjBase);
+  mDriver->SetProjBase(&mProjBase);
 
   mCamera = new Camera;
 
@@ -173,7 +173,8 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
   Fl_Gl_Window(w,h), 
   mInfo(0),
   mCameraView(0),
-  mCamBase(0)
+  mCamBase(0),
+  mCameraCB(this)
 {
   end();
   _build();
@@ -187,7 +188,8 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
   Fl_Gl_Window(x,y,w,h), 
   mInfo(0),
   mCameraView(0),
-  mCamBase(0)
+  mCamBase(0),
+  mCameraCB(this)
 {
   end();
   _build();
@@ -262,7 +264,7 @@ void Pupil::AbsorbRay(Ray& ray)
 
 void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
-  glGetFloatv(GL_PROJECTION_MATRIX, mProjBase);
+  glGetDoublev(GL_PROJECTION_MATRIX, mProjBase.Array());
 
   double aspect = mInfo->GetYFac() * w()/h();
   double near   = TMath::Max(mInfo->GetNearClip(), 1e-5l);
@@ -294,12 +296,12 @@ void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
 
 void Pupil::SetAbsRelCamera()
 {
-  static const string _eh("Pupil::SetCameraView ");
+  static const Exc_t _eh("Pupil::SetAbsRelCamera ");
 
   ZNode* cam_base = mInfo->GetCameraBase();
   if(mCamBase != cam_base) {
     if(mCamBase != 0) {
-      mCamera->SetTrans( mCamBaseTrans * mCamera->RefTrans() );
+      mCamera->SetTrans(mCamBaseTrans * mCamera->RefTrans() );
     }
     mCamBase = 0;
     mCamBaseTrans.UnitTrans();
@@ -308,8 +310,11 @@ void Pupil::SetAbsRelCamera()
       if(t.get() != 0) {
 	mCamBase = cam_base;
 	mCamBaseTrans = *t;
-	t->InvertFast();
-	mCamera->SetTrans( *t * mCamera->RefTrans() );
+	t->Invert();
+	*t *= mCamera->RefTrans();
+	mCamera->SetTrans(*t);
+      } else {
+	cout << _eh + "CameraBase is not connected ... ignoring.\n";
       }
     }
   }
@@ -331,10 +336,10 @@ void Pupil::SetAbsRelCamera()
   }
 
   // Construct fwd/up vectors ... consider LookAt and UpReference.
-  TVector3 c_pos( z.GetBaseVec3(4) );
-  TVector3 x_vec( z.GetBaseVec3(1) ); // Forward vector
-  TVector3 z_vec( z.GetBaseVec3(3) ); // Up vector
-  TVector3 y_vec;                     // Deduced from x and z vecs at the end.
+  TVector3 c_pos( z.GetBaseVec(4) );
+  TVector3 x_vec( z.GetBaseVec(1) ); // Forward vector
+  TVector3 z_vec( z.GetBaseVec(3) ); // Up vector
+  TVector3 y_vec;                    // Deduced from x and z vecs at the end.
   bool abs_cam_changed = false;
   bool look_at_p       = false;
 
@@ -344,9 +349,9 @@ void Pupil::SetAbsRelCamera()
     if(t.get() != 0) {
       TVector3 o_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
       x_vec = (o_pos - c_pos);
-      Float_t min_dist = mInfo->GetLookAtMinDist();
+      Double_t min_dist = mInfo->GetLookAtMinDist();
       if(min_dist != 0) {
-	Float_t dist = x_vec.Mag();
+	Double_t dist = x_vec.Mag();
 	if(dist < min_dist)
 	  c_pos = o_pos - min_dist/dist*x_vec;
       }
@@ -361,7 +366,7 @@ void Pupil::SetAbsRelCamera()
   if(up_ref != 0) {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
     if(t.get() != 0) {
-      z_vec = t->GetBaseVec3( mInfo->GetUpRefAxis() );
+      z_vec = t->GetBaseVec( mInfo->GetUpRefAxis() );
       abs_cam_changed = true;
     } else {
       cout << _eh << "UpReference not connected ... ignoring.\n";
@@ -371,7 +376,7 @@ void Pupil::SetAbsRelCamera()
   // Ortonormalize the vectors.
   if(abs_cam_changed) {
     if(x_vec.Mag2() == 0) {
-      x_vec = mCamAbsTrans.GetBaseVec3(1);
+      x_vec = mCamAbsTrans.GetBaseVec(1);
     }
     x_vec = x_vec.Unit();
     z_vec = z_vec.Unit();
@@ -388,7 +393,7 @@ void Pupil::SetAbsRelCamera()
 	z_vec -= xz_dp*x_vec;
 	z_vec  = z_vec.Unit();
       } else {
-	z_vec  = mCamAbsTrans.GetBaseVec3(3);
+	z_vec  = mCamAbsTrans.GetBaseVec(3);
 	xz_dp  = z_vec.Dot(x_vec);
 	z_vec -= xz_dp*x_vec;
 	z_vec  = z_vec.Unit();
@@ -402,16 +407,17 @@ void Pupil::SetAbsRelCamera()
 
   // Construct absolute CamAbsTrans,
   mCamAbsTrans.UnitTrans();
-  mCamAbsTrans.SetBaseVec3(1, x_vec);
-  mCamAbsTrans.SetBaseVec3(2, y_vec);
-  mCamAbsTrans.SetBaseVec3(3, z_vec);
-  mCamAbsTrans.SetBaseVec3(4, c_pos);
+  mCamAbsTrans.SetBaseVec(1, x_vec);
+  mCamAbsTrans.SetBaseVec(2, y_vec);
+  mCamAbsTrans.SetBaseVec(3, z_vec);
+  mCamAbsTrans.SetBaseVec(4, c_pos);
 
   // Multiply-out the CamBaseTrans to get true camera for local controls.
   if(mCamBase != 0) {
-    ZTrans t = mCamBaseTrans;
-    t.InvertFast();
-    mCamera->SetTrans(t*mCamAbsTrans);
+    ZTrans t(mCamBaseTrans);
+    t.Invert();
+    t *= mCamAbsTrans;
+    mCamera->SetTrans(t);
   } else {
     mCamera->SetTrans(mCamAbsTrans);
   }
@@ -420,10 +426,13 @@ void Pupil::SetAbsRelCamera()
 
 void Pupil::SetCameraView()
 {
-  ZTrans& z( mCamAbsTrans );
-  gluLookAt(z(1,4),        z(2,4),        z(3,4),
-	    z(1,4)+z(1,1), z(2,4)+z(2,1), z(3,4)+z(3,1),
-	    z(1,3),        z(2,3),        z(3,3));
+  const Double_t *Pos = mCamAbsTrans.ArrT();
+  const Double_t *Fwd = mCamAbsTrans.ArrX();
+  const Double_t *Up  = mCamAbsTrans.ArrZ();
+    
+  gluLookAt(Pos[0],        Pos[1],        Pos[2],
+	    Pos[0]+Fwd[0], Pos[1]+Fwd[1], Pos[2]+Fwd[2],
+	    Up [0],        Up [1],        Up [2]);
 }
 
 /**************************************************************************/
@@ -437,10 +446,10 @@ void Pupil::TurnCamTowards(ZGlass* lens, Float_t max_dist)
   auto_ptr<ZTrans> t( mInfo->ToCameraFrame(node) );
   if(t.get() == 0) return;
 
-  TVector3 x = t->GetPosVec3() - mCamera->RefTrans().GetBaseVec3(4);
+  TVector3 x = t->GetPos() - mCamera->RefTrans().GetPos();
   Double_t dist = x.Mag();
   x = x.Unit();
-  TVector3 y = mCamera->RefTrans().GetBaseVec3(2);
+  TVector3 y = mCamera->RefTrans().GetBaseVec(2);
   y -= (y.Dot(x))*x;
   y  = y.Unit();
 
@@ -448,10 +457,10 @@ void Pupil::TurnCamTowards(ZGlass* lens, Float_t max_dist)
   if(dist > max_dist) to_move = dist - max_dist;
 
   // Now reuse t to hold new camera transformation.
-  t->SetBaseVec3(1, x);
-  t->SetBaseVec3(2, y);
-  t->SetBaseVec3(3, x.Cross(y));
-  t->SetBaseVec3(4, mCamera->RefTrans().GetBaseVec3(4));
+  t->SetBaseVec(1, x);
+  t->SetBaseVec(2, y);
+  t->SetBaseVec(3, x.Cross(y));
+  t->SetPos(mCamera->RefTrans());
   t->MoveLF(1, to_move);
   mCamera->SetTrans(*t);
 
@@ -485,7 +494,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
   // Calls rnr driver to perform actual rendering.
   // Used by draw() and Pick().
 
-  static const string _eh("Pupil::Render ");
+  static const Exc_t _eh("Pupil::Render ");
 
   mDriver->SetWidth(w());
   mDriver->SetHeight(h());
@@ -500,13 +509,13 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
   mDriver->EndRender();
 
   if(mDriver->SizePM() > 0) {
-    printf("%sposition stack not empty (%d).\n", _eh.c_str(), mDriver->SizePM());
+    printf("%sposition stack not empty (%d).\n", _eh.Data(), mDriver->SizePM());
     mDriver->ClearPM();
   }
 
   GLenum gl_err = glGetError();
   if(gl_err) {
-    printf("%sGL error: %s.\n", _eh.c_str(), gluErrorString(gl_err));
+    printf("%sGL error: %s.\n", _eh.Data(), gluErrorString(gl_err));
   }
 
 }
@@ -524,26 +533,26 @@ namespace {
   };
 
   void cam_towards_cb(Fl_Widget* w, pick_menu_data* ud)
-  { ud->pupil->TurnCamTowards(ud->img->fGlass, ud->pupil->default_distance()); }
+  { ud->pupil->TurnCamTowards(ud->img->fLens, ud->pupil->default_distance()); }
 
   void cam_at_cb(Fl_Widget* w, pick_menu_data* ud)
-  { ud->pupil->TurnCamTowards(ud->img->fGlass, 0); }
+  { ud->pupil->TurnCamTowards(ud->img->fLens, 0); }
   
   void copy_to_clipboard_cb(Fl_Widget* w, pick_menu_data* ud)
   {
     ud->pupil->GetShell()->X_SetSource(ud->img);
-    const char* idstr = GForm("%u", ud->img->fGlass->GetSaturnID());
+    const char* idstr = GForm("%u", ud->img->fLens->GetSaturnID());
     Fl::copy(idstr, strlen(idstr), 0);
   }
 
   void fill_pick_menu(Pupil* pup, OS::ZGlassImg* img, Fl_Menu_Button& menu,
-		      FTW_Shell::mir_call_data_list& mcdl, const string& prefix)
+		      FTW_Shell::mir_call_data_list& mcdl, const TString& prefix)
   {
     mcdl.push_back(new pick_menu_data(pup, img));
 
-    menu.add(GForm("%sJump Towards", prefix.c_str()),
+    menu.add(GForm("%sJump Towards", prefix.Data()),
 	     0, (Fl_Callback*)cam_towards_cb, mcdl.back(), 0);
-    menu.add(GForm("%sJump At", prefix.c_str()),
+    menu.add(GForm("%sJump At", prefix.Data()),
 	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), FL_MENU_DIVIDER); 
   }
 }
@@ -614,7 +623,7 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 			int  xpick,    int  ypick,
 			bool rnr_self, bool rnr_overlay)
 {
-  static const string _eh("Pupil::PickLenses ");
+  static const Exc_t _eh("Pupil::PickLenses ");
 
   Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
 
@@ -642,7 +651,7 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
       UInt_t id = x[m-1];
 
       OS::ZGlassImg* root_img = mDriver->NameStack(id).fRnr->fImg;
-      ZGlass* lens = root_img->fGlass;
+      ZGlass* lens = root_img->fLens;
      
       pick_lens_data pld(root_img, zmin, lens->GetName());;
       
@@ -700,11 +709,11 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 	  Float_t far  = mInfo->GetFarClip();
 	  Float_t zdist = near*far/(far - gdi->z/2*(far - near));
 	  if(mInfo->GetPickDisp() == 1)
-	    gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.c_str()); 
+	    gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.Data()); 
 	  else
-	    gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.c_str()); 
+	    gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.Data()); 
 	} else {
-	  gdi->name = GForm("%2d. %s/", loc, gdi->name.c_str());
+	  gdi->name = GForm("%2d. %s/", loc, gdi->name.Data());
 	}
 
 	fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
@@ -712,11 +721,11 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 	mShell->FillShellVarsMenu(gdi->img, menu, mcdl, gdi->name);
 
 	// iterate through the list of parents
-	menu.add(GForm("%sParents", gdi->name.c_str()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
+	menu.add(GForm("%sParents", gdi->name.Data()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
 	for (OS::lpZGlassImg_i pi=gdi->name_stack.begin();
 	     pi!=gdi->name_stack.end(); ++pi)
 	  {
-	    string entry(GForm("%sParents/%s/", gdi->name.c_str(), (*pi)->fGlass->GetName()));
+	    TString entry(GForm("%sParents/%s/", gdi->name.Data(), (*pi)->fLens->GetName()));
 	    fill_pick_menu(this, *pi, menu, mcdl, entry);
 	    mShell->FillLensMenu(*pi, menu, mcdl, entry);
 	    mShell->FillShellVarsMenu(*pi, menu, mcdl, entry);
@@ -746,7 +755,7 @@ void Pupil::label_window(const char* l)
 
 void Pupil::draw()
 {
-  static const string _eh("Pupil::draw ");
+  static const Exc_t _eh("Pupil::draw ");
 
   // if (!valid()) {}
 
@@ -759,7 +768,7 @@ void Pupil::draw()
       for(Int_t xi=0; xi<mImgNTiles; ++xi) {
 	for(Int_t yi=0; yi<mImgNTiles; ++yi) {
 	  rnr_standard(mImgNTiles, xi, yi);
-	  string fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
+	  TString fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
 	  dump_image(fname);
 	}
       }
@@ -767,7 +776,7 @@ void Pupil::draw()
 	     mImgNTiles, mImgNTiles, w(), h(), mImageName.Data(), mImageName.Data());
     } else {
       rnr_standard();
-      dump_image(string(mImageName.Data()) + ".tga");
+      dump_image(mImageName + ".tga");
     }
 
     bDumpImage = false;
@@ -878,7 +887,7 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
 
 
   if(mInfo->GetShowRPS() == true) {
-    const string text(GForm("%.1frps", TMath::Min(1/rnr_time.ToDouble(), 999.9)));
+    const TString text(GForm("%.1frps", TMath::Min(1/rnr_time.ToDouble(), 999.9)));
     ZColor col = ZColor(1,1,1) - mInfo->RefClearColor();
     GLTextNS::RnrTextAt(mDriver, text, 2, 0, 1e-3, &col, 0);
   }
@@ -895,11 +904,11 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
     int omw = int(mInfo->GetMoveOM()) - 2;
     omw = (omw < 0) ? -omw : 0;
 
-    const string text1
+    const TString text1
       (GForm("mode='%s' %s=%.2f clip=(%.3f,%.3f)",
 	     mode, zstr, zval,
 	     mInfo->GetNearClip(), mInfo->GetFarClip()));
-    const string text2
+    const TString text2
       (GForm("base='%1$s' pos=(%2$.*5$f,%3$.*5$f,%4$.*5$f)",
 	     base, z(1,4), z(2,4), z(3,4), omw));
 
@@ -956,7 +965,7 @@ int Pupil::handle_overlay(int ev)
   e.fIsClick = Fl::event_is_click();
   e.fX       = Fl::event_x();
   e.fY       = Fl::event_y();
-  e.fText    = string(Fl::event_text(), Fl::event_length());
+  e.fText    = TString(Fl::event_text(), Fl::event_length());
 
   e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
 		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE);
@@ -1110,20 +1119,26 @@ int Pupil::handle(int ev)
       TMath::Power(10, mInfo->GetMoveOM());
     Float_t rot_fac  = mInfo->GetMSRotFac() * TMath::TwoPi() / 1000;
     if(Fl::event_state(FL_BUTTON1)) { 
-      if(!Fl::event_state(FL_CTRL)) {
-	mCamera->MoveLF(1, dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp()));
-	//sprintf(x, "1,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
-	//mEye->Send(move_cmd, x, target, beta);
-      } else {
-	mCamera->MoveLF(3, dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp()));
-	//sprintf(x, "2,%g", dy*abs(dy)/mInfo->GetMSMoveFac());
-	//mEye->Send(move_cmd, x, target, beta);      
+      double Dy = dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp());
+      if(Dy != 0) {
+	chg = 1;
+	if(!Fl::event_state(FL_CTRL)) {
+	  mCamera->MoveLF(1, Dy);
+	  //printf("1,%g\n", Dy);
+	  //mEye->Send(move_cmd, x, target, beta);
+	} else {
+	  mCamera->MoveLF(3, Dy);
+	  //printf("3,%g\n", Dy);
+	  //mEye->Send(move_cmd, x, target, beta);
+	}
       }
-      mCamera->MoveLF(2, dx*move_fac*TMath::Power(abs(dx), mInfo->GetAccelExp()));
-
-      //sprintf(x, "3,%g", -dx*abs(dx)/mInfo->GetMSMoveFac());
-      //mEye->Send(move_cmd, x, target, beta);
-      chg = 1;
+      double Dx = dx*move_fac*TMath::Power(abs(dx), mInfo->GetAccelExp());
+      if(Dx != 0) {
+	chg = 1;
+	mCamera->MoveLF(2, Dx);
+	//printf("2,%g\n", Dx);
+	//mEye->Send(move_cmd, x, target, beta);
+      }
     }
 
     /*
@@ -1209,45 +1224,10 @@ int Pupil::handle(int ev)
 	w->end();
 	cv->BuildVerticalView();
 	mShell->adopt_window(w);
-	mCamera->SetStamp_CB((zglass_stamp_f)camera_stamp_cb, this);
+	mCamera->register_ray_absorber(&mCameraCB);
       }
       mCameraView->GetWindow()->show();
       return 1;
-
-      /*
-	case FL_Tab:
-	bJustCamera = !bJustCamera; redraw();
-	return 1;
-	case 'q':
-	XtachCamera(); redraw();
-	return 1;
-
-	case FL_F+2:
-	return 1;
-	case FL_F+3:
-	(Int_t&)(mMir[0]) +=1;
-	if(mMir[0] == ForestView::SID_name)
-	mMir[0] = ForestView::SID_current;
-	redraw(); return 1;
-	case FL_F+4:
-	(Int_t&)(mMir[1]) += 1;
-	if(mMir[1] == ForestView::SID_name)
-	mMir[1] = ForestView::SID_current;
-	redraw(); return 1;
-      
-	case FL_Left: // previous
-	Rebase(mBase->PrevBro(), !Fl::event_state(FL_SHIFT));
-	redraw(); return 1;
-	case FL_Right: // next
-	Rebase(mBase->NextBro(), !Fl::event_state(FL_SHIFT));
-	redraw(); return 1;
-	case FL_Up: // parent
-	Rebase(mBase->Parent(), !Fl::event_state(FL_SHIFT));
-	redraw(); return 1;
-	case FL_Down: // first son
-	Rebase(mBase->Glasses().First(), !Fl::event_state(FL_SHIFT));
-	redraw(); return 1;
-      */
 
     } // switch(Fl::event_key())
 
@@ -1263,15 +1243,15 @@ int Pupil::handle(int ev)
 // Protected methods.
 /**************************************************************************/
 
-void Pupil::dump_image(const string& fname)
+void Pupil::dump_image(const TString& fname)
 {
-  static const string _eh("Pupil::dump_image ");
+  static const Exc_t _eh("Pupil::dump_image ");
 
-  printf("%sdumping '%s'.\n", _eh.c_str(), fname.c_str());
+  printf("%sdumping '%s'.\n", _eh.Data(), fname.Data());
 
-  FILE* img = fopen(fname.c_str(), "w");
+  FILE* img = fopen(fname.Data(), "w");
   if(img == 0) {
-    printf("%scan't open screenshot file '%s'.\n", _eh.c_str(), fname.c_str());
+    printf("%scan't open screenshot file '%s'.\n", _eh.Data(), fname.Data());
     return;
   }
 
@@ -1314,8 +1294,8 @@ float Pupil::default_distance()
   return mInfo->GetMSMoveFac() * TMath::Power(10, mInfo->GetMoveOM() + 2);
 }
 
-void Pupil::camera_stamp_cb(Camera* cam, Pupil* pup)
+void Pupil::camera_stamp_cb::AbsorbRay(Ray& ray)
 {
-  pup->mCameraView->UpdateDataWeeds(FID_t(0,0));
-  pup->redraw();
+  pupil->mCameraView->UpdateDataWeeds(FID_t(0,0));
+  pupil->redraw();
 }

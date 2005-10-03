@@ -30,7 +30,7 @@ class TOFDigRnrMod : public ZRnrModBase {
   Float_t          mColSep;      // X{gST}  7 Value(-range=>[0,100,1,100])
   Float_t          mTdcScale;    // X{gST}  7 Value(-range=>[0,10,1,1000])
   Float_t          mTdcMinH;     // X{gST}  7 Value(-range=>[0,100,1,100])
-  ZRibbon*         mRibbon;      // X{gST}  L{}
+  ZLink<ZRibbon>         mRibbon;      // X{gST}  L{}
 
  public:
   TOFDigRnrMod(const Text_t* n="TOFDigRnrMod", const Text_t* t=0) :
@@ -41,6 +41,5 @@ class TOFDigRnrMod : public ZRnrModBase {
   ClassDef(TOFDigRnrMod, 1)
     }; // endclass TOFDigRnrMod
 
-GlassIODef(TOFDigRnrMod);
 
 #endif

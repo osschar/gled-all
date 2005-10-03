@@ -31,6 +31,5 @@ class RecTrackRS : public PRSBase
   ClassDef(RecTrackRS, 1)
 }; // endclass RecTrackRS
 
-GlassIODef(RecTrackRS);
 
 #endif

@@ -38,6 +38,5 @@ public:
   ClassDef(HitContainer, 1)
 }; // endclass HitContainer
 
-GlassIODef(HitContainer);
 
 #endif

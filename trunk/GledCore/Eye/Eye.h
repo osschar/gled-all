@@ -42,7 +42,8 @@ public:
   Eye(TSocket* sock, EyeInfo* ei);
   virtual ~Eye();
 
-  virtual void InstallFdHandler() = 0;
+  virtual void InstallFdHandler()   = 0;
+  virtual void UninstallFdHandler() = 0;
 
   // Basic ZGlassImg functionality
   virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
@@ -56,7 +57,7 @@ public:
 
   enum MType_e { MT_std=0, MT_err, MT_wrn, MT_msg };
   virtual void Message(const char* msg, MType_e t=MT_std) {}
-  virtual void Message(const string& msg, MType_e t=MT_std) {}
+  virtual void Message(const TString& msg, MType_e t=MT_std) {}
 
   // Socketing
   Int_t	Manage(int fd);

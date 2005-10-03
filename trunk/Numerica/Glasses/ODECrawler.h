@@ -26,19 +26,19 @@ private:
   void _init();
 
 protected:
-  ZGlass*	mODEMaster;	// X{gS} L{}
+  ZLink<ZGlass>	mODEMaster;	// X{gS} L{}
 
-  UInt_t	mGuessesOK;	//! X{g}  7 ValOut(-join=>1)
-  UInt_t	mGuessesBad;	//! X{g}  7 ValOut()
-  UInt_t	mStored;	//! X{g}  7 ValOut(-join=>1)
-  UInt_t	mMaxSteps;	//  X{gS} 7 Value()
-  UInt_t	mStoreMax;	//  X{gS} 7 Value(-join=>1)
+  Int_t 	mGuessesOK;	//! X{g}  7 ValOut(-join=>1)
+  Int_t 	mGuessesBad;	//! X{g}  7 ValOut()
+  Int_t 	mStored;	//! X{g}  7 ValOut(-join=>1)
+  Int_t 	mMaxSteps;	//  X{gS} 7 Value()
+  Int_t 	mStoreMax;	//  X{gS} 7 Value(-join=>1)
   Double_t	mStoreDx;	//  X{gS} 7 Value()
   TVectorF*	mXStored;	//! X{g}
   TVectorF*	mYStored;	//! X{g} ROOT now allows streaming ... check syntax
   
   TVectorD	mY;		//! X{r}
-  UInt_t	mN;		// X{g}  7 ValOut(-join=>1)
+  Int_t		mN;		// X{g}  7 ValOut(-join=>1)
   Double_t	mAcc;		// X{gS} 7 Value(-range=>[0,1])
   Double_t	mX1;		// X{gS} 7 Value(-join=>1)
   Double_t	mX2;		// X{gS} 7 Value()
@@ -69,6 +69,5 @@ public:
   ClassDef(ODECrawler, 1)
 }; // endclass ODECrawler
 
-GlassIODef(ODECrawler);
 
 #endif

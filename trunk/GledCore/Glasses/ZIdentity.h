@@ -19,9 +19,9 @@ private:
   void _init();
 
 protected:
-  ZHashList*		mActiveMEEs;	// X{gS} L{}
+  ZLink<ZHashList>		mActiveMEEs;	// X{gS} L{}
 
-  ZMirFilter*		mAllowThis;	// X{gS} L{}
+  ZLink<ZMirFilter>		mAllowThis;	// X{gS} L{}
 
 public:
   ZIdentity(const Text_t* n="ZIdentity", const Text_t* t=0) : ZGlass(n,t) { _init(); }
@@ -32,6 +32,5 @@ public:
   ClassDef(ZIdentity, 1) // Representation of a user identity
 }; // endclass ZIdentity
 
-GlassIODef(ZIdentity);
 
 #endif

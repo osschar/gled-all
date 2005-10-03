@@ -41,7 +41,7 @@ class RectTerrain : public ZNode {
   ZColor	mMinCol;// X{PGST} 7 ColorButt(-join=>1)
   ZColor	mMaxCol;// X{PGST} 7 ColorButt()
   Float_t	mColSep;// X{gST}  7 Value(-range=>[0,100,1,100])
-  ZRibbon*	mRibbon;// X{gST} L{}
+  ZLink<ZRibbon>	mRibbon;// X{gST} L{}
 
   UChar_t       mRnrMode;     // X{gST} 7 PhonyEnum(-type=>RnrMode_e)
   UChar_t       mBorderCond;  // X{gS}  7 PhonyEnum(-type=>BorderCond_e)
@@ -55,7 +55,8 @@ class RectTerrain : public ZNode {
 
   TringTvor*    pTTvor;          //! X{g}
   TimeStamp_t	mTTvorStamp;     //!
-  Bool_t        bUseTringStrips; //  X{GST} 7 Bool()
+  Bool_t        bUseTringStrips; //  X{GST} 7 Bool(-join=>1)
+  Int_t         mMaxTSVerts;     //  X{GST} 7 Value(-range=>[3,32767,1])
 
   ZColor make_color(Float_t z);
   static void color_filler(Float_t* v, UChar_t* c, void* rt);
@@ -83,7 +84,6 @@ class RectTerrain : public ZNode {
   ClassDef(RectTerrain, 1)
 }; // endclass RectTerrain
 
-GlassIODef(RectTerrain);
 
 /**************************************************************************/
 
@@ -92,7 +92,7 @@ inline ZColor RectTerrain::make_color(Float_t z)
   if(mColSep > 0) {
     Float_t c = (z - mMinZ) * mColSep /	(mMaxZ - mMinZ);
     c -= (int)c;
-    if(mRibbon) {
+    if(mRibbon != 0) {
       return mRibbon->MarkToCol(c);
     } else {
       return (1 - c)*mMinCol + c*mMaxCol;

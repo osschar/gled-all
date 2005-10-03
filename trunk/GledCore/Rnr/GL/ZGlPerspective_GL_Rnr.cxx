@@ -9,6 +9,8 @@
 
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void ZGlPerspective_GL_Rnr::_init()
@@ -25,7 +27,7 @@ void ZGlPerspective_GL_Rnr::setup_matrices(RnrDriver* rd, bool push_p)
     glLoadIdentity();
     glMatrixMode(GL_PROJECTION);
     if(push_p) glPushMatrix();
-    glLoadMatrixf(rd->GetProjBase());
+    glLoadMatrixd(rd->GetProjBase()->Array());
     switch(M.mViewMode) {
     case ZGlPerspective::VM_OrthoPixel:
       glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), M.mOrthoNear, M.mOrthoFar);
@@ -50,6 +52,7 @@ void ZGlPerspective_GL_Rnr::setup_matrices(RnrDriver* rd, bool push_p)
 
 void ZGlPerspective_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   setup_matrices(rd, true);
 }
 
@@ -65,4 +68,5 @@ void ZGlPerspective_GL_Rnr::PostDraw(RnrDriver* rd)
     glMatrixMode(GL_PROJECTION); glPopMatrix();
     glMatrixMode(GL_MODELVIEW);  glPopMatrix();
   }
+  PARENT::PostDraw(rd);
 }

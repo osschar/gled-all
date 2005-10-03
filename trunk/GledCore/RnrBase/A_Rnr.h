@@ -27,15 +27,15 @@ public:
   typedef vector<NameStack_Entry>         vNSE_t;
 
   struct Fl_Event {
-    int    fEvent;
-    int    fState;
-    int    fKey;
-    int    fButton;
-    int    fButtons;
-    int    fClicks;
-    int    fIsClick;
-    int    fX, fY;
-    string fText;
+    int     fEvent;
+    int     fState;
+    int     fKey;
+    int     fButton;
+    int     fButtons;
+    int     fClicks;
+    int     fIsClick;
+    int     fX, fY;
+    TString fText;
 
     bool   bIsMouse;
 

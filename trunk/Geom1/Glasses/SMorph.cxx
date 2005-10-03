@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "SMorph.h"
+#include "SMorph.c7"
 #include <Tvor/TubeTvor.h>
 
 #include <TMath.h>
@@ -86,5 +87,3 @@ void SMorph::Triangulate()
     last_ct = ct;
   }
 }
-
-#include "SMorph.c7"

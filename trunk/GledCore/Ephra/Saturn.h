@@ -21,7 +21,7 @@ class ZSunQueen; class ZQueen; class ZFireQueen;
 #include <Gled/GSelector.h>
 #include <Gled/GCondition.h>
 #include <Gled/GTime.h>
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 class Forest;
 class Mountain;
 class ZHistoManager;
@@ -48,12 +48,12 @@ public:
   struct SocketInfo {
     enum OtherSide_e { OS_Moon, OS_Eye };  // What on other side ...
     OtherSide_e	fWhat;
-    ZGlass*	fGlass;
+    ZGlass*	fLensRep;
 
-    SaturnInfo* get_moon() { return (SaturnInfo*)fGlass; }
-    EyeInfo*	get_eye()  { return (EyeInfo*)fGlass; }
+    SaturnInfo* get_moon() { return (SaturnInfo*)fLensRep; }
+    EyeInfo*	get_eye()  { return (EyeInfo*)fLensRep; }
 
-    SocketInfo(OtherSide_e w, ZGlass* g) : fWhat(w), fGlass(g) {}
+    SocketInfo(OtherSide_e w, ZGlass* g) : fWhat(w), fLensRep(g) {}
   };
 
 #ifndef __CINT__
@@ -101,6 +101,14 @@ protected:
   // Server Thread
   GThread*		mServerThread;
 
+  // Detached lens threads
+#ifndef __CINT__
+  typedef hash_map<ZGlass*, list<GThread*> >           hpZGlass2lpGThread_t;
+  typedef hash_map<ZGlass*, list<GThread*> >::iterator hpZGlass2lpGThread_i;
+
+  hpZGlass2lpGThread_t  mDetachedThreadsHash;  
+#endif
+
   // Saturn services ... preliminary
   ZHistoManager*	pZHistoManager;
 
@@ -117,26 +125,26 @@ protected:
   void create_kings(const char* king, const char* whore_king);
   void arrival_of_kings(TMessage* m);
 
-  void Enlight(ZGlass* glass, ID_t) throw(string);
-  void Reflect(ZGlass* glass) throw(string);
-  void Freeze(ZGlass* glass) throw(string);
-  void Endark(ZGlass* glass) throw(string);
+  void Enlight(ZGlass* glass, ID_t) throw(Exc_t);
+  void Reflect(ZGlass* glass) throw(Exc_t);
+  void Freeze(ZGlass* glass) throw(Exc_t);
+  void Endark(ZGlass* glass) throw(Exc_t);
 
   Int_t	SockSuck();	// Called constantly from ServerThread
   SaturnInfo* FindRouteTo(SaturnInfo* target);
 
   void AcceptWrapper(TSocket* newsocket);
-  void Accept(TSocket* newsocket) throw(string);
+  void Accept(TSocket* newsocket) throw(Exc_t);
   void finalize_moon_connection(SaturnInfo* si);
   void finalize_eye_connection(EyeInfo* ei);
 
-  Int_t	Manage(TSocket* sock) throw(string);
+  Int_t	Manage(TSocket* sock) throw(Exc_t);
 
 public:
   Saturn();
   virtual ~Saturn();
 
-  static string    HandleClientSideSaturnHandshake(TSocket*& socket);
+  static TString    HandleClientSideSaturnHandshake(TSocket*& socket);
   static TMessage* HandleClientSideMeeConnection(TSocket* socket, ZMirEmittingEntity* mee);
 
   void	      Create(SaturnInfo* si);
@@ -223,8 +231,8 @@ public:
   // Internal MIR handling
 
 protected:
-  void report_mir_pre_demangling_error(ZMIR& mir, string error);
-  void report_mir_post_demangling_error(ZMIR& mir, string error);
+  void report_mir_pre_demangling_error(ZMIR& mir, TString error);
+  void report_mir_post_demangling_error(ZMIR& mir, TString error);
 
   void RouteMIR(auto_ptr<ZMIR>& mir)  throw();
   void UnfoldMIR(auto_ptr<ZMIR>& mir) throw();

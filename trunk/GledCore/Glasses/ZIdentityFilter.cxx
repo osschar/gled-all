@@ -10,7 +10,6 @@
 //
 
 #include "ZIdentityFilter.h"
-
 #include "ZIdentityFilter.c7"
 
 ClassImp(ZIdentityFilter)
@@ -28,8 +27,8 @@ void ZIdentityFilter::_init()
 
 ZMirFilter::Result_e ZIdentityFilter::FilterMIR(ZMIR& mir)
 {
-  if(mIdentity) {
-    if(mir.Caller->HasIdentity(mIdentity))
+  if(mIdentity != 0) {
+    if(mir.Caller->HasIdentity(mIdentity.get()))
       return (Result_e)mOnMatch;
     else
       return NegateResult((Result_e)mOnMatch);

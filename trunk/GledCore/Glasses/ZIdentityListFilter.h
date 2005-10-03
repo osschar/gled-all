@@ -17,8 +17,8 @@ private:
   void _init();
 
 protected:
-  ZHashList*	mIdentities;	// X{gS} L{}
-  UChar_t	mOnMatch;	// X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny],-width=>6)
+  ZLink<ZHashList> mIdentities; // X{gS} L{}
+  UChar_t          mOnMatch;    // X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny],-width=>6)
 
 public:
   ZIdentityListFilter(const Text_t* n="ZIdentityListFilter", const Text_t* t=0) :
@@ -30,6 +30,5 @@ public:
   ClassDef(ZIdentityListFilter, 1)
 }; // endclass ZIdentityListFilter
 
-GlassIODef(ZIdentityListFilter);
 
 #endif

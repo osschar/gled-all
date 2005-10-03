@@ -23,8 +23,8 @@ void _dse_init_orto_base(ZList* cbs, ZList* cis, Float_t z_size,
   y_vec = z_vec.Cross(x_vec);
 
   ZTrans t;
-  t.SetBaseVec3(1, x_vec); t.SetBaseVec3(2, y_vec);
-  t.SetBaseVec3(3, z_vec); t.SetBaseVec3(4, p_vec);
+  t.SetBaseVec(1, x_vec); t.SetBaseVec(2, y_vec);
+  t.SetBaseVec(3, z_vec); t.SetBaseVec(4, p_vec);
   base->SetTrans(t);
 
   base->SetRadius(0.002);
@@ -62,8 +62,8 @@ void dse_make_camera_bases(ZList* cont, ZNode* up_ref, Int_t up_axis,
     z_vec[up_axis - 1] = 1;
     y_vec = z_vec.Cross(x_vec);
     ZTrans t;
-    t.SetBaseVec3(1, x_vec); t.SetBaseVec3(2, y_vec);
-    t.SetBaseVec3(3, z_vec); t.SetBaseVec3(4, p_vec);
+    t.SetBaseVec(1, x_vec); t.SetBaseVec(2, y_vec);
+    t.SetBaseVec(3, z_vec); t.SetBaseVec(4, p_vec);
     t.OrtoNorm3();
     base->SetTrans(t);
     base->SetRadius(0.002);

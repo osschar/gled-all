@@ -9,7 +9,7 @@
 
 #include <Gled/GledTypes.h>
 #include <Eye/OptoStructs.h>
-#include <Eye/FTW_SubShell.h>
+#include <GledView/FTW_SubShell.h>
 class Pupil;
 class GuiPupilInfo;
 

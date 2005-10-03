@@ -14,24 +14,33 @@ $PATCH = {
   'Pragmas' => "#pragma link C++ function GForm;\n"
 },
 
+"ZGlass" => {
+  'PrePragmas' => "#pragma link C++ class ZLinkBase-;\n",
+  'Pragmas'    => "#pragma link C++ class ZGlass::NameChangeCB+;\n" .
+                  "#pragma link C++ class ZGlass::RayAbsorber+;\n"  .
+                  "#pragma link C++ class FID_t+;\n"                .
+                  "#pragma link C++ class FMID_t+;\n"               .
+                  "#pragma link C++ class An_ID_Demangler+;\n"      .
+	          "#pragma link C++ class MIR_Priest+;\n"
+},
+
 "AList" => {
-  'PragmaSuff' => "!-",
+  'PragmaSuff' => "-",
   'VirtualBase' => 1,
   'Pragmas' =>
-   "#pragma link C++ class AList::ElRep;\n" .
+   "#pragma link C++ class AList::ElRep+;\n" .
    "#pragma link C++ class list<ZGlass*>;\n" .
    "#pragma link C++ class list<ZGlass*>::iterator;\n" .
    "#pragma link C++ typedef lpZGlass_t;\n" .
    "#pragma link C++ typedef lpZGlass_i;\n"
-
 },
 
 "ZDeque" => {
-  'PragmaSuff' => "!-",
+  'PragmaSuff' => "-",
 },
 
 "ZList" => {
-  'PragmaSuff' => "!-",
+  'PragmaSuff' => "-",
 # The following line left as documentation.
 # 'C7_DoNot_Gen' => { 'RebuildLinkRefs' => 1 }
 },

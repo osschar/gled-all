@@ -44,6 +44,5 @@ class MCTrackRnrStyle : public PRSBase
   ClassDef(MCTrackRnrStyle, 1)
 }; // endclass MCTrackRnrStyle
 
-GlassIODef(MCTrackRnrStyle);
 
 #endif

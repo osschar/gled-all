@@ -1,11 +1,10 @@
 // $Header$
 
 #include "WarmAmoeba.h"
+#include "WarmAmoeba.c7"
 
 #include <Ephra/Mountain.h>
 #include <Gled/GledMirDefs.h>
-
-
 
 ClassImp(WarmAmoeba)
 
@@ -150,7 +149,7 @@ Operator::Arg* WarmAmoeba::PreDance(Operator::Arg* op_arg)
 {
   op_arg = Eventor::PreDance(op_arg);
 
-  hTrueMaster = dynamic_cast<WarmAmoebaMaster*>(mWA_Master);
+  hTrueMaster = dynamic_cast<WarmAmoebaMaster*>(*mWA_Master);
   if(!hTrueMaster) {
     ISerr("WarmAmoeba::PreDance master not a WarmAmoebaMaster");
     delete op_arg;
@@ -223,7 +222,3 @@ void WarmAmoeba::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 
   Eventor::PostOperate(op_arg);
 }
-
-/**************************************************************************/
-
-#include "WarmAmoeba.c7"

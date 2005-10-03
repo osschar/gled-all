@@ -31,7 +31,7 @@ ZTrans& PMSEntry::FromGCS()
 
   if(bFrom == false) {
     *fFromGCS = ToGCS();
-    fFromGCS->InvertFast();
+    fFromGCS->Invert();
     bFrom = true;
   }
   return *fFromGCS;

@@ -33,7 +33,7 @@ void ZIdentity::AdEnlightenment()
   if(mActiveMEEs == 0) {
     mActiveMEEs = new ZHashList("ActiveMEEs", GForm("ActiveMEEs of %s", GetName()));
     mActiveMEEs->SetElementFID(ZMirEmittingEntity::FID());
-    mQueen->CheckIn(mActiveMEEs);
+    mQueen->CheckIn(mActiveMEEs.get());
   }
 }
 

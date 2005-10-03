@@ -116,7 +116,7 @@ class VSDSelector : public ZNode {
   // GenInfo
 
  protected:
-  GIImportStyle* mImportMode;   // X{GS} L{}
+  ZLink<GIImportStyle> mImportMode;   // X{GS} L{}
   TString        mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectGenInfo(ZNode* holder=0, const Text_t* selection=0
@@ -126,6 +126,5 @@ class VSDSelector : public ZNode {
   ClassDef(VSDSelector, 1)
     }; // endclass VSDSelector
 
-GlassIODef(VSDSelector);
 
 #endif

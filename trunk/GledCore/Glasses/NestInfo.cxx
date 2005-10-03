@@ -45,7 +45,7 @@ void NestInfo::ImportLayout(ZGlass* src)
   ZList* lsrc = dynamic_cast<ZList*>(src);
   if(lsrc != 0) {
     lStr_t     parts;
-    lpZGlass_t l; lsrc->Copy(l);
+    lpZGlass_t l; lsrc->CopyList(l);
     for(lpZGlass_i i=l.begin(); i!=l.end(); ++i)
       parts.push_back((*i)->GetTitle());
     mLayout = GledNS::join_strings(" : ", parts);
@@ -62,7 +62,7 @@ void NestInfo::ImportLayout(ZGlass* src)
 
 void NestInfo::ImportKings()
 {
-  lpZGlass_t kings; mSaturn->GetGod()->Copy(kings);
+  lpZGlass_t kings; mSaturn->GetGod()->CopyList(kings);
   for(lpZGlass_i k=kings.begin(); k!=kings.end(); ++k)
     Add(*k);
 }

@@ -30,17 +30,17 @@ public:
 
   void BoxLimits(float& dx, float& dy,
 		 float& x, float& y, float& w, float& h);
-  void StudyText(GLTextNS::TexFont *txf, string& label,
+  void StudyText(GLTextNS::TexFont *txf, TString& label,
 		 float& scale,
 		 float& x, float& y, float& w, float& h);
 		  
 
   void RenderTile (float dx, float dy, bool belowmouse=false);
   void RenderFrame(float dx, float dy);
-  void RenderText (GLTextNS::TexFont *txf, string& label,
+  void RenderText (GLTextNS::TexFont *txf, TString& label,
 		   float x, float y, float w, float h);
 
-  void FullRender(GLTextNS::TexFont *txf, string& label,
+  void FullRender(GLTextNS::TexFont *txf, TString& label,
 		  float dx, float dy, bool belowmouse=false);
 
 }; // endclass WGlFrameStyle_GL_Rnr

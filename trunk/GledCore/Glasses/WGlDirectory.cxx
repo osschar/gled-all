@@ -12,8 +12,6 @@
 #include "WGlDirectory.h"
 #include "WGlDirectory.c7"
 
-#include <RegExp/pme.h>
-
 ClassImp(WGlDirectory)
 
 /**************************************************************************/
@@ -50,14 +48,14 @@ void WGlDirectory::_init()
 GledNS::MethodInfo* WGlDirectory::GetCbackMethodInfo()
 {
   if(mCbackMethodInfo == 0)
-    mCbackMethodInfo = GledNS::DeduceMethodInfo(mCbackAlpha, mCbackMethodName.Data());
+    mCbackMethodInfo = GledNS::DeduceMethodInfo(*mCbackAlpha, mCbackMethodName);
   return mCbackMethodInfo;
 }
 
 GledNS::ClassInfo* WGlDirectory::GetCbackBetaClassInfo()
 {
   if(mCbackBetaClassInfo == 0 && mCbackBetaType != "")
-    mCbackBetaClassInfo = GledNS::FindClassInfo(string(mCbackBetaType.Data()));
+    mCbackBetaClassInfo = GledNS::FindClassInfo(mCbackBetaType);
   return mCbackBetaClassInfo;
 }
 
@@ -79,7 +77,7 @@ void WGlDirectory::StandardPersp()
 
 void WGlDirectory::StandardFixed()
 {
-  Set3Pos(0.2, 8, 0);
+  SetPos(0.2, 8, 0);
   SetStepMode(SM_YXZ);
   SetDx(2);  SetDy(-0.7); SetDz(1);
   SetNx(16); SetNy(10);   SetNz(16);

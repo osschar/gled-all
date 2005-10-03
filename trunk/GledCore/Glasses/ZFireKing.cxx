@@ -41,7 +41,7 @@ void ZFireKing::RequestQueenMirroring(ZQueen* queen_to_mirror)
   // on behalf of Saturn.
   // (would be more proper to have MirrorQueen or MirrorPrincess in fire-space)
 
-  static string _eh("ZFireKing::RequestQueenMirroring ");
+  static TString _eh("ZFireKing::RequestQueenMirroring ");
 
   // Should assert queen exists etc ...
 
@@ -63,7 +63,7 @@ void ZFireKing::RequestQueenShattering(ZQueen* queen_to_leave)
 {
   // Ignore gloriously. Deps first.
 
-  static string _eh("ZFireKing::RequestQueenShattering ");
+  static TString _eh("ZFireKing::RequestQueenShattering ");
 
   ISerr(_eh + "not implemented.");
 }

@@ -21,17 +21,6 @@
 
 #include <TSystem.h>
 
-namespace {
-  double orto_norm(TVectorF& v, const TVectorF& x, int M) {
-    double dp = 0;
-    for(Int_t i=0; i<M; ++i) dp   += v(i)*x(i);
-    for(Int_t i=0; i<M; ++i) v(i) -= x(i)*dp;
-    double ni = 1/TMath::Sqrt(v.Norm2Sqr()); 
-    for(Int_t i=0; i<M; ++i) v(i) *= ni;
-    return dp;
-  }
-}
-
 ClassImp(WSSeed)
 
 /**************************************************************************/
@@ -78,7 +67,7 @@ void WSSeed::Triangulate()
 {
   // Should be called under ReadLock.
 
-  list<WSPoint*> points; CopyByGlass<WSPoint*>(points);
+  list<WSPoint*> points; CopyListByGlass<WSPoint>(points);
   int size = points.size();
   if(!bFat || size < 2) {
     // !!!!! Could at least call Coffs !!!!!
@@ -182,9 +171,9 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
   // If repeat_p is true, the time is clamped into the range.
   // 'Up' and 'right' axes are Gram-Schmidt orto-normalized wrt 'front'.
 
-  static const string _eh("WSSeed::TransAtTime ");
+  static const Exc_t _eh("WSSeed::TransAtTime ");
 
-  list<WSPoint*> points; CopyByGlass<WSPoint*>(points);
+  list<WSPoint*> points; CopyListByGlass<WSPoint>(points);
   int size = points.size();
   if(size < 2) {
     throw(_eh + "not enough points.");
@@ -195,8 +184,8 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
   // Then also don't need Coff call below.
 
   list<WSPoint*>::iterator a, b;
-  Float_t len_fac = 1;
-  Float_t len = 0;
+  Double_t len_fac = 1;
+  Double_t len = 0;
   b = points.begin();
   while((a=b++, b) != points.end()) len += (*a)->mStretch;
   if(bRenormLen) {
@@ -215,18 +204,36 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
   
   // printf("OK ... came up with time=%f\n", time);
 
-  Float_t done = 0;
+  Double_t done = 0;
   b = points.begin();
   while((a=b++, b) != points.end()) {
     done += (*a)->mStretch * len_fac;
     if(done >= time) break;
   }
-  Float_t t = 1  -  (done - time) / ((*a)->mStretch * len_fac);
+  Double_t t = 1  -  (done - time) / ((*a)->mStretch * len_fac);
 
   // printf("  limits '%s', '%s'; rel.time=%f\n",
   //   (*a)->GetName(), (*b)->GetName(), t);
 
 
+  (*a)->Coff(*b);
+
+  const Double_t t2 = t*t, t3 = t2*t;
+  Double_t* Pnt = lcf.ArrT();
+  Double_t* Axe = lcf.ArrX();
+
+  WSPoint* f = *a;
+  for(Int_t i=0; i<3; i++) {
+    Pnt[i] = f->mCoffs(i, 0) + f->mCoffs(i, 1)*t +
+      f->mCoffs(i, 2)*t2 + f->mCoffs(i, 3)*t3;
+    Axe[i] = f->mCoffs(i, 1) + 2*f->mCoffs(i, 2)*t +
+      3*f->mCoffs(i, 3)*t2;
+  }
+
+  lcf.OrtoNorm3();
+
+  //---------------------
+  /*
   (*a)->Coff(*b);
   TMatrixFColumn hPnt(lcf,4), hAxe(lcf,1);
 
@@ -242,6 +249,7 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
   }
 
   lcf.OrtoNorm3();
+  */
 }
 
 /**************************************************************************/
@@ -251,10 +259,9 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
 WSPoint* WSSeed::get_first_point()
 {
   GMutexHolder lmh(mListMutex);
-  WSPoint* p = 0;
-  lpZGlass_i i = mGlasses.begin();
-  while(i != mGlasses.end() && (p = dynamic_cast<WSPoint*>(*i)) == 0) ++i;
-  return p;
+  Stepper<WSPoint> s(this);
+  if(s.step()) return *s;
+  return 0;
 }
 
 ZTrans* WSSeed::init_slide(WSPoint* f)
@@ -266,22 +273,23 @@ ZTrans* WSSeed::init_slide(WSPoint* f)
 
 void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
 {
-  TMatrixFColumn hPnt(lcf,4), hAxe(lcf,1), hUp(lcf,2), hAw(lcf,3);
+  Double_t *Pnt = lcf.ArrT();
+  Double_t *Axe = lcf.ArrX(), *Up = lcf.ArrY(), *Aw = lcf.ArrZ();
 
-  Float_t t2 = t*t;
-  Float_t t3 = t2*t;
-  for(Int_t i=1; i<=3; i++) {
-    hPnt(i) = f->mCoffs(i, 0) + f->mCoffs(i, 1)*t +
+  const Double_t t2 = t*t, t3 = t2*t;
+
+  for(Int_t i=0; i<3; i++) {
+    Pnt[i] = f->mCoffs(i, 0) + f->mCoffs(i, 1)*t +
       f->mCoffs(i, 2)*t2 + f->mCoffs(i, 3)*t3;
-    hAxe(i) = f->mCoffs(i, 1) + 2*f->mCoffs(i, 2)*t +
+    Axe[i] = f->mCoffs(i, 1) + 2*f->mCoffs(i, 2)*t +
       3*f->mCoffs(i, 3)*t2;
   }
-  Float_t w = f->mCoffs(4, 0) + f->mCoffs(4, 1)*t +
-    f->mCoffs(4, 2)*t2 + f->mCoffs(4, 3)*t3;
-  Float_t dwdt = TMath::ATan(f->mCoffs(4, 1) + 2*f->mCoffs(4, 2)*t +
-			    3*f->mCoffs(4, 3)*t2);
-  Float_t dwc = TMath::Cos(dwdt);
-  Float_t dws = TMath::Sin(dwdt);
+  Double_t w = f->mCoffs(3, 0) + f->mCoffs(3, 1)*t +
+    f->mCoffs(3, 2)*t2 + f->mCoffs(3, 3)*t3;
+  Double_t dwdt = TMath::ATan(f->mCoffs(3, 1) + 2*f->mCoffs(3, 2)*t +
+			     3*f->mCoffs(3, 3)*t2);
+  Double_t dwc = TMath::Cos(dwdt);
+  Double_t dws = TMath::Sin(dwdt);
 
   lcf.OrtoNorm3();
 
@@ -290,9 +298,9 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
   Float_t R[3], N[3], T[2];
   for(int j=0; j<mPLevel; j++, phi-=step) {
     Float_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
-    for(Int_t i=1; i<=3; ++i) {
-      R[i-1] = hPnt(i) + cp*w*hUp(i) + sp*w*hAw(i);
-      N[i-1] = -dws*hAxe(i) + dwc*(cp*hUp(i) + sp*hAw(i));
+    for(Int_t i=0; i<3; ++i) {
+      R[i] = Pnt[i] + cp*w*Up[i] + sp*w*Aw[i];
+      N[i] = -dws*Axe[i] + dwc*(cp*Up[i] + sp*Aw[i]);
     }
     // perhaps should invert normals for w<0
     T[0] = hTexU; T[1] = hTexV  - phi/TMath::TwoPi();
@@ -301,9 +309,9 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
   { // last one
     phi = -2*TMath::Pi();
     Float_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
-    for(Int_t i=1; i<=3; ++i) {
-      R[i-1] = hPnt(i) + cp*w*hUp(i) + sp*w*hAw(i);
-      N[i-1] = -dws*hAxe(i) + dwc*(cp*hUp(i) + sp*hAw(i));
+    for(Int_t i=0; i<3; ++i) {
+      R[i] = Pnt[i] + cp*w*Up[i] + sp*w*Aw[i];
+      N[i] = -dws*Axe[i] + dwc*(cp*Up[i] + sp*Aw[i]);
     }
     // perhaps should invert normals for w<0
     T[0] = hTexU; T[1] = hTexV + 1;

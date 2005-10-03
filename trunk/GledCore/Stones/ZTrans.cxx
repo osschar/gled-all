@@ -4,225 +4,313 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+//______________________________________________________________________
+// ZTrans
+//
+// ZTrans is a 4x4 transformation matrix for homogeneous coordinates
+// stored internaly in a column-major order to allow direct usage by
+// GL. The element type is Double32_t, chosen for speed optimization
+// (floats would be precise enough).
+//
+// Cartan angles (+z, -y, +x) are stored for backward
+// compatibility and will be removed soon.
+//
+// Direct  element access:
+// operator[i]    direct access to elements,   i:0->15
+// CM(i,j)        element 4*j + i;           i,j:0->3
+// operator(i,j)  element 4*(j-1) + i - 1    i,j:1->4
+//
+// For all methods taking the matrix indices:
+// 1->X, 2->Y, 3->Z; 4->Position (if applicable). 0 reserved for time.
+//
+
 #include "ZTrans.h"
 #include <Glasses/ZNode.h>
+#include <TMath.h>
+
+#define F00  0
+#define F01  4
+#define F02  8
+#define F03 12
+
+#define F10  1
+#define F11  5
+#define F12  9
+#define F13 13
+
+#define F20  2
+#define F21  6
+#define F22 10
+#define F23 14
+
+#define F30  3
+#define F31  7
+#define F32 11
+#define F33 15
 
 ClassImp(ZTrans)
 
-// Matrix Prototype
-static const TMatrixF ZTransMatrixProto(5,5);
-
 /**************************************************************************/
 
-void ZTrans::_init()
-{ 
-  mA1 = mA2 = mA3 = 0;
-  bAsOK = false;
-}
+ZTrans::ZTrans() { UnitTrans(); }
 
-ZTrans::ZTrans() : TMatrixF(TMatrixFBase::kUnit, ZTransMatrixProto) { _init(); }
+ZTrans::ZTrans(const ZTrans& z) { *this = z; }
 
-ZTrans::ZTrans(const TMatrixF& m) : TMatrixF(m) { _init(); }
-
-ZTrans::ZTrans(const ZTrans& z) : TMatrixF(z) { _init(); }
-
-ZTrans::ZTrans(const ZNode* n) : TMatrixF(n->RefTrans()) { _init(); }
+ZTrans::ZTrans(const ZNode* n)  { *this = n->RefTrans(); }
 
 /**************************************************************************/
 
 void ZTrans::UnitTrans()
 {
-  UnitMatrix();
+  memset(M, 0, sizeof(M));
+  M[F00] = M[F11] = M[F22] = M[F33] = 1;
   mA1 = mA2 = mA3 = 0;
   bAsOK = true;
 }
 
-Int_t ZTrans::Set3Pos(Float_t x, Float_t y, Float_t z)
+void ZTrans::SetTrans(const ZTrans& t)
 {
-  ZTrans& M = *this;
-  M(1, 4) = x; M(2, 4) = y; M(3, 4) = z;
-  return 1;
+  memcpy(M, t.M, sizeof(M));
+  bAsOK = false;
 }
 
-Int_t ZTrans::Set3Pos(Float_t* x)
-{
-  ZTrans& M = *this;
-  M(1, 4) = x[0]; M(2, 4) = x[1]; M(3, 4) = x[2];
-  return 1;
-}
 
-Int_t ZTrans::SetPos(const TVectorF& v)
+void ZTrans::SetupRotation(Int_t i, Int_t j, Double_t f)
 {
-  if(v.GetNoElements() != 5) return 1;
-  ZTrans& M = *this;
-  for(Int_t i=0;i<5;i++)
-    M(i, 4) = v(i);
-  return 0;
-}
-
-Int_t ZTrans::SetPos(const ZTrans& t)
-{
-  if(t.GetNrows() != 5) return 1;
-  ZTrans& M = *this;
-  for(Int_t i=0;i<5;i++)
-    M(i, 4) = t(i,4);
-  return 0;
-}
-
-TVectorF* ZTrans::GetBaseV(Int_t b) const
-{
-  // *CHTD*
-  TVectorF* v = new TVectorF(5);
-  const ZTrans& M = *this;
-  for(Int_t i = 0; i<5; i++)
-    (*v)(i) = M(i, b);
-  return v;
-}
-
-TVector3 ZTrans::GetBaseVec3(Int_t b) const
-{
-  const ZTrans& M = *this;
-  return TVector3(M(1,b), M(2,b), M(3,b));
-}
-
-void ZTrans::GetBaseVec3(TVector3& v, Int_t b) const
-{
-  const ZTrans& M = *this;
-  v.SetXYZ(M(1,b), M(2,b), M(3,b));
-}
-
-/**************************************************************************/
-
-void ZTrans::SetRot(Int_t i, Int_t j, Float_t f)
-{
-  // Expects identity matrix
+  // Setup the matrix as an elementary rotation.
+  // Expects identity matrix.
+  
+  if(i == j) return;
   ZTrans& M = *this;
   M(i,i) = M(j,j) = TMath::Cos(f);
-  Float_t s = TMath::Sin(f);
+  Double_t s = TMath::Sin(f);
   M(i,j) = -s; M(j,i) = s;
   bAsOK = false;
 }
 
-void ZTrans::SetTrans(const ZTrans& t)
+/**************************************************************************/
+
+// OrtoNorm3 and Invert are near the bottom.
+
+/**************************************************************************/
+
+void ZTrans::MultLeft(const ZTrans& t)
 {
-  TMatrixF::operator=(t);
+  Double_t  B[4];
+  Double_t* C = M;
+  for(int c=0; c<4; ++c, C+=4) {
+    const Double_t* T = t.M;
+    for(int r=0; r<4; ++r, ++T)
+      B[r] = T[0]*C[0] + T[4]*C[1] + T[8]*C[2] + T[12]*C[3];
+    C[0] = B[0]; C[1] = B[1]; C[2] = B[2]; C[3] = B[3];
+  }
   bAsOK = false;
 }
 
-void ZTrans::SetBaseV(Int_t i, Float_t x, Float_t y, Float_t z)
+void ZTrans::MultRight(const ZTrans& t)
 {
-  ZTrans& M = *this;
-  M(1,i) = x; M(2,i) = y; M(3,i) = z;
+  Double_t  B[4];
+  Double_t* C = M;
+  for(int r=0; r<4; ++r, ++C) {
+    const Double_t* T = t.M;
+    for(int c=0; c<4; ++c, T+=4)
+      B[c] = C[0]*T[0] + C[4]*T[1] + C[8]*T[2] + C[12]*T[3];
+    C[0] = B[0]; C[4] = B[1]; C[8] = B[2]; C[12] = B[3];
+  }
   bAsOK = false;
 }
 
-void ZTrans::SetBaseVec3(Int_t i, const TVector3& v)
+ZTrans ZTrans::operator*(const ZTrans& t)
 {
-  ZTrans& M = *this;
-  M(1,i) = v.x(); M(2,i) = v.y(); M(3,i) = v.z();
-  bAsOK = false;
+  ZTrans b(*this);
+  b.MultRight(t);
+  return b;
 }
 
 /**************************************************************************/
-// Basic Transformations
+// Move & Rotate
 /**************************************************************************/
 
-Int_t ZTrans::MoveLF(Int_t ai, Float_t amount)
+void ZTrans::MoveLF(Int_t ai, Double_t amount)
 {
-  ZTrans& M = *this;
-  for(Int_t i=0; i<=3; i++)
-    M(i,4) += amount*M(i, ai);
-  bAsOK = false;
-  return 1;
+  const Double_t *C = M + 4*--ai;
+  M[F03] += amount*C[0]; M[F13] += amount*C[1]; M[F23] += amount*C[2];
 }
 
-Int_t ZTrans::Move3(Float_t x, Float_t y, Float_t z)
+void ZTrans::Move3LF(Double_t x, Double_t y, Double_t z)
 {
-  ZTrans& M = *this;
-  M(1,4) += x; M(2,4) += y; M(3,4) += z;
-  bAsOK = false;
-  return 1;
+  M[F03] += x*M[0] + y*M[4] + z*M[8];
+  M[F13] += x*M[1] + y*M[5] + z*M[9];
+  M[F23] += x*M[2] + y*M[6] + z*M[10];
 }
 
-Int_t ZTrans::RotateLF(Int_t i1, Int_t i2, Float_t amount)
+void ZTrans::RotateLF(Int_t i1, Int_t i2, Double_t amount)
 {
-  if(i1==i2) return 0;
+  if(i1 == i2) return;
   ZTrans a;
-  a(i1,i1) = a(i2,i2) = TMath::Cos(amount);
-  Float_t s = TMath::Sin(amount);
-  a(i1,i2) = -s; a(i2,i1) = s;
-  *this *= a;
+  a.SetupRotation(i1, i2, amount);
+  MultRight(a);
   bAsOK = false;
-  return 1;
 }
 
 /**************************************************************************/
 
-Int_t ZTrans::Move(ZTrans* a, Int_t ai, Float_t amount)
+void ZTrans::MovePF(Int_t ai, Double_t amount)
 {
-  ZTrans& M = *this;
-  for(Int_t i=0; i<=3; i++)
-    M(i,4) += amount * (*a)(i, ai);
-  return 1;
+  M[F03 + --ai] += amount;
 }
 
-Int_t ZTrans::Rotate(ZTrans* a, Int_t i1, Int_t i2, Float_t amount)
+void ZTrans::Move3PF(Double_t x, Double_t y, Double_t z)
 {
-  // a is shitted
-  if(i1==i2) return 0;
-  ZTrans ai(*a); ai.InvertFast();
-  ZTrans R; R.SetRot(i1, i2, amount); 
-  *a *= R;
-  *a *= ai;
-  *a *= *this;
-  *this = *a;
-  bAsOK = false;
-  return 1;
+  M[F03] += x;
+  M[F13] += y;
+  M[F23] += z;
 }
+
+void ZTrans::RotatePF(Int_t i1, Int_t i2, Double_t amount)
+{
+  if(i1 == i2) return;
+  ZTrans a;
+  a.SetupRotation(i1, i2, amount);
+  printf("a:\n");
+  a.Print();
+  printf("before:\n");
+  Print();
+  MultLeft(a);
+  printf("after:\n");
+  Print();
+  bAsOK = false;
+}
+
+/**************************************************************************/
+
+void ZTrans::Move(const ZTrans& a, Int_t ai, Double_t amount)
+{
+  const Double_t* A = a.M + 4*--ai;
+  M[F03] += amount*A[0];
+  M[F13] += amount*A[1];
+  M[F23] += amount*A[2];
+}
+
+void ZTrans::Move3(const ZTrans& a, Double_t x, Double_t y, Double_t z)
+{
+  const Double_t* A = a.M;
+  M[F03] += x*A[F00] + y*A[F01] + z*A[F02];
+  M[F13] += x*A[F10] + y*A[F11] + z*A[F12];
+  M[F23] += x*A[F20] + y*A[F21] + z*A[F22];
+}
+
+void ZTrans::Rotate(const ZTrans& a, Int_t i1, Int_t i2, Double_t amount)
+{
+  if(i1 == i2) return;
+  ZTrans X(a);
+  X.Invert();
+  MultLeft(X);
+  X.UnitTrans();
+  X.SetupRotation(i1, i2, amount); 
+  MultLeft(X);
+  MultLeft(a);
+  bAsOK = false;
+}
+
+/**************************************************************************/
+// Base-vector interface
+/**************************************************************************/
+
+void ZTrans::SetBaseVec(Int_t b, Double_t x, Double_t y, Double_t z)
+{
+  Double_t* C = M + 4*--b;
+  C[0] = x; C[1] = y; C[2] = z;
+  bAsOK = false;
+}
+
+void ZTrans::SetBaseVec(Int_t b, const TVector3& v)
+{
+  Double_t* C = M + 4*--b;
+  v.GetXYZ(C);
+  bAsOK = false;
+}
+
+TVector3 ZTrans::GetBaseVec(Int_t b) const
+{ return TVector3(&M[4*--b]); }
+
+void ZTrans::GetBaseVec(Int_t b, TVector3& v) const
+{
+  const Double_t* C = M + 4*--b;
+  v.SetXYZ(C[0], C[1], C[2]);
+}
+
+/**************************************************************************/
+// Position interface
+/**************************************************************************/
+
+void ZTrans::SetPos(Double_t x, Double_t y, Double_t z)
+{ M[F03] = x; M[F13] = y; M[F23] = z; }
+
+void ZTrans::SetPos(Double_t* x)
+{ M[F03] = x[0]; M[F13] = x[1]; M[F23] = x[2]; }
+
+void ZTrans::SetPos(const ZTrans& t)
+{
+  const Double_t* T = t.M;
+  M[F03] = T[F03]; M[F13] = T[F13]; M[F23] = T[F23];
+}
+
+void ZTrans::GetPos(Double_t& x, Double_t& y, Double_t& z) const
+{ x = M[F03]; y = M[F13]; z = M[F23]; }
+
+void ZTrans::GetPos(Double_t* x) const
+{ x[0] = M[F03]; x[1] = M[F13]; x[2] = M[F23]; }
+
+void ZTrans::GetPos(TVector3& v) const
+{ v.SetXYZ(M[F03], M[F13], M[F23]); }
+
+TVector3 ZTrans::GetPos() const
+{ return TVector3(M[F03], M[F13], M[F23]); }
+
+/**************************************************************************/
+// Cardan angle interface
+/**************************************************************************/
 
 namespace {
   inline void clamp_angle(Float_t& a) {
-    while(a < -2*TMath::Pi()) a += 2*TMath::Pi();
-    while(a >  2*TMath::Pi()) a -= 2*TMath::Pi();
+    while(a < -TMath::TwoPi()) a += TMath::TwoPi();
+    while(a >  TMath::TwoPi()) a -= TMath::TwoPi();
   }
 }
 
-Int_t ZTrans::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
+void ZTrans::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 {
   // Sets Rotation part as given by angles:
   // a1 around z, -a2 around y, a3 around x
   clamp_angle(a1); clamp_angle(a2); clamp_angle(a3);
 
-  Float_t A, B, C, D, E, F;
-  A = cos(a3); B = sin(a3);
-  C = cos(a2); D = sin(a2); // should be -sin(a2) for positive direction
-  E = cos(a1); F = sin(a1);
-  Float_t AD = A*D, BD = B*D;
+  Double_t A, B, C, D, E, F;
+  A = TMath::Cos(a3); B = TMath::Sin(a3);
+  C = TMath::Cos(a2); D = TMath::Sin(a2); // should be -sin(a2) for positive direction
+  E = TMath::Cos(a1); F = TMath::Sin(a1);
+  Double_t AD = A*D, BD = B*D;
 
-  ZTrans& M = *this;
-  M(1,1) = C*E; M(1,2) = -BD*E -A*F;  M(1,3) = -AD*E + B*F;
-  M(2,1) = C*F; M(2,2) = -BD*F + A*E; M(2,3) = -AD*F - B*E;
-  M(3,1) = D;   M(3,2) = B*C;         M(3,3) = A*C;
+  M[F00] = C*E; M[F01] = -BD*E - A*F; M[F02] = -AD*E + B*F;
+  M[F10] = C*F; M[F11] = -BD*F + A*E; M[F12] = -AD*F - B*E;
+  M[F20] = D;   M[F21] = B*C;         M[F22] = A*C;
 
   mA1 = a1; mA2 = a2; mA3 = a3;
   bAsOK = true;
-  return 1;
 }
 
-
-void ZTrans::Get3Rot(Float_t* x) const
+void ZTrans::GetRotAngles(Float_t* x) const
 {
-  const ZTrans& M = *this;
   if(!bAsOK) {
-    Float_t d = M(3,1);
+    Double_t d = M[F20];
     if(d>1) d=1; else if(d<-1) d=-1; // Fix numerical errors
     mA2 = TMath::ASin(d);
-    Float_t C = TMath::Cos(mA2);
+    Double_t C = TMath::Cos(mA2);
     if(TMath::Abs(C) > 8.7e-6) {
-      mA1 = TMath::ATan2(M(2,1), M(1,1));      
-      mA3 = TMath::ATan2(M(3,2), M(3,3));
+      mA1 = TMath::ATan2(M[F10], M[F00]);      
+      mA3 = TMath::ATan2(M[F21], M[F22]);
     } else {
-      mA1 = TMath::ATan2(M(2,1), M(2,2));
+      mA1 = TMath::ATan2(M[F10], M[F11]);
       mA3 = 0;
     }
     bAsOK = true;
@@ -231,104 +319,88 @@ void ZTrans::Get3Rot(Float_t* x) const
 }
 
 /**************************************************************************/
+// Scaling
+/**************************************************************************/
 
-void ZTrans::Scale3(Float_t sx, Float_t sy, Float_t sz)
+void ZTrans::Scale(Double_t sx, Double_t sy, Double_t sz)
 {
-  Double_t s[4] = {0, sx, sy, sz};
-  ZTrans& M = *this;
-  for(int i=1;i<=3;++i)
-    for(int j=1;j<=3;++j)
-      M(j,i) *= s[i];
+  M[F00] *= sx; M[F10] *= sx; M[F20] *= sx;
+  M[F01] *= sy; M[F11] *= sy; M[F21] *= sy;
+  M[F02] *= sz; M[F12] *= sz; M[F22] *= sz;
 }
 
-void ZTrans::GetScale3(Float_t& sx, Float_t& sy, Float_t& sz)
+void ZTrans::GetScale(Double_t& sx, Double_t& sy, Double_t& sz)
 {
-  ZTrans& M = *this;
-  Double_t s[4] = {0,0,0,0};
-  for(int i=1;i<=3;++i) {
-    for(int j=1;j<=3;++j)
-      s[i] += M(j, i) * M(j, i);
-    s[i] = TMath::Sqrt(s[i]);
-  }
-  sx = s[1]; sy = s[2]; sz = s[3];
+  sx = TMath::Sqrt( M[F00]*M[F00] + M[F10]*M[F10] + M[F20]*M[F20] );
+  sy = TMath::Sqrt( M[F01]*M[F01] + M[F11]*M[F11] + M[F21]*M[F21] );
+  sz = TMath::Sqrt( M[F02]*M[F02] + M[F12]*M[F12] + M[F22]*M[F22] );
 }
 
-void ZTrans::Unscale3(Float_t& sx, Float_t& sy, Float_t& sz)
+void ZTrans::Unscale(Double_t& sx, Double_t& sy, Double_t& sz)
 {
-  ZTrans& M = *this;
-  Double_t s[4] = {0,0,0,0};
-  for(int i=1;i<=3;++i) {
-    for(int j=1;j<=3;++j)
-      s[i] += M(j, i) * M(j, i);
-    s[i] = TMath::Sqrt(s[i]);
-  }
-  for(int i=1;i<=3;++i)
-    for(int j=1;j<=3;++j)
-      M(j,i) /= s[i];
-  sx = s[1]; sy = s[2]; sz = s[3];
+  GetScale(sx, sy, sz);
+  M[F00] /= sx; M[F10] /= sx; M[F20] /= sx;
+  M[F01] /= sy; M[F11] /= sy; M[F21] /= sy;
+  M[F02] /= sz; M[F12] /= sz; M[F22] /= sz;
 }
 
-
-Float_t ZTrans::Unscale3()
+Double_t ZTrans::Unscale()
 {
-  Float_t sx, sy, sz;
-  Unscale3(sx, sy, sz);
+  Double_t sx, sy, sz;
+  Unscale(sx, sy, sz);
   return (sx + sy + sz)/3;
 }
 
 /**************************************************************************/
-// 3 Vec manipulation ... perhaps should have uniform funcs ... well ...
+// Operations on vectors
 /**************************************************************************/
 
-TVectorF& ZTrans::Mult3Vec(TVectorF& v) const
+void ZTrans::MultiplyIP(TVector3& v, Double_t w)
 {
-  // Multiplies v in-place w/ spatial part of mM ... takes Scale to be 1
-  const ZTrans& M = *this;
-  Float_t buf[4];
-  for(Int_t i=0; i<=2; i++) buf[i]=v(i);
-  buf[3] = 1; // Scale
-
-  for(Int_t i=0; i<=2; i++) {
-    v(i) = 0;
-    for(Int_t j=0; j<=3; j++)
-      v(i) += M(i+1, j+1)*buf[j];
-  }
-  return v;
+  v.SetXYZ(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z() + M[F03]*w,
+	   M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z() + M[F13]*w,
+	   M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z() + M[F23]*w);
 }
 
-TVectorF& ZTrans::Rot3Vec(TVectorF& v) const
+TVector3 ZTrans::Multiply(const TVector3& v, Double_t w)
 {
-  // Multiplies v in-place w/ rotational-spatial part of mM ... Scale not used
-  const ZTrans& M = *this;
-  Float_t buf[3];
-  for(Int_t i=0; i<=2; i++) buf[i]=v(i);
+  return TVector3(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z() + M[F03]*w,
+		  M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z() + M[F13]*w,
+		  M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z() + M[F23]*w);
+}
 
-  for(Int_t i=0; i<=2; i++) {
-    v(i) = 0;
-    for(Int_t j=0; j<=2; j++)
-      v(i) += M(i+1, j+1)*buf[j];
-  }
-  return v;
+void ZTrans::RotateIP(TVector3& v)
+{
+  v.SetXYZ(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z(),
+	   M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z(),
+	   M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z());
+}
+
+TVector3 ZTrans::Rotate(const TVector3& v)
+{
+  return TVector3(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z(),
+		  M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z(),
+		  M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z());
 }
 
 /**************************************************************************/
+// Normalization, ortogonalization
+/**************************************************************************/
 
-Float_t ZTrans::norm3_column(Int_t col)
+Double_t ZTrans::norm3_column(Int_t col)
 {
-  ZTrans& M = *this;
-  Double_t l = 0;
-  for(Int_t i=1; i<=3; ++i) l += M(i,col)*M(i,col);
-  l = TMath::Sqrt(l);
-  for(Int_t i=1; i<=3; ++i) M(i,col) /= l;
+  Double_t* C = M + 4*--col;
+  const Double_t  l = TMath::Sqrt(C[0]*C[0] + C[1]*C[1] + C[2]*C[2]);
+  C[0] /= l; C[1] /= l; C[2] /= l;
   return l;
 }
 
-Float_t ZTrans::orto3_column(Int_t col, Int_t ref)
+Double_t ZTrans::orto3_column(Int_t col, Int_t ref)
 {
-  ZTrans& M = *this;
-  Double_t dp = 0;
-  for(Int_t i=1; i<=3; ++i) dp       += M(i,col)*M(i,ref);
-  for(Int_t i=1; i<=3; ++i) M(i,col) -= M(i,ref)*dp;
+  Double_t* C = M + 4*--col;
+  Double_t* R = M + 4*--ref;
+  const Double_t dp = C[0]*R[0] + C[1]*R[1] + C[2]*R[2];
+  C[0] -= R[0]*dp; C[1] -= R[1]*dp; C[2] -= R[2]*dp;
   return dp;
 }
 
@@ -340,13 +412,103 @@ void ZTrans::OrtoNorm3()
 }
 
 /**************************************************************************/
+// Inversion
+/**************************************************************************/
+
+Double_t ZTrans::Invert()
+{
+  // Copied from ROOT's TMatrixFCramerInv.
+
+  static const Exc_t _eh("ZTrans::Invert ");
+
+  // Find all NECESSARY 2x2 dets:  (18 of them)
+  const Double_t det2_12_01 = M[F10]*M[F21] - M[F11]*M[F20];
+  const Double_t det2_12_02 = M[F10]*M[F22] - M[F12]*M[F20];
+  const Double_t det2_12_03 = M[F10]*M[F23] - M[F13]*M[F20];
+  const Double_t det2_12_13 = M[F11]*M[F23] - M[F13]*M[F21];
+  const Double_t det2_12_23 = M[F12]*M[F23] - M[F13]*M[F22];
+  const Double_t det2_12_12 = M[F11]*M[F22] - M[F12]*M[F21];
+  const Double_t det2_13_01 = M[F10]*M[F31] - M[F11]*M[F30];
+  const Double_t det2_13_02 = M[F10]*M[F32] - M[F12]*M[F30];
+  const Double_t det2_13_03 = M[F10]*M[F33] - M[F13]*M[F30];
+  const Double_t det2_13_12 = M[F11]*M[F32] - M[F12]*M[F31];
+  const Double_t det2_13_13 = M[F11]*M[F33] - M[F13]*M[F31];
+  const Double_t det2_13_23 = M[F12]*M[F33] - M[F13]*M[F32];
+  const Double_t det2_23_01 = M[F20]*M[F31] - M[F21]*M[F30];
+  const Double_t det2_23_02 = M[F20]*M[F32] - M[F22]*M[F30];
+  const Double_t det2_23_03 = M[F20]*M[F33] - M[F23]*M[F30];
+  const Double_t det2_23_12 = M[F21]*M[F32] - M[F22]*M[F31];
+  const Double_t det2_23_13 = M[F21]*M[F33] - M[F23]*M[F31];
+  const Double_t det2_23_23 = M[F22]*M[F33] - M[F23]*M[F32];
+
+  // Find all NECESSARY 3x3 dets:   (16 of them)
+  const Double_t det3_012_012 = M[F00]*det2_12_12 - M[F01]*det2_12_02 + M[F02]*det2_12_01;
+  const Double_t det3_012_013 = M[F00]*det2_12_13 - M[F01]*det2_12_03 + M[F03]*det2_12_01;
+  const Double_t det3_012_023 = M[F00]*det2_12_23 - M[F02]*det2_12_03 + M[F03]*det2_12_02;
+  const Double_t det3_012_123 = M[F01]*det2_12_23 - M[F02]*det2_12_13 + M[F03]*det2_12_12;
+  const Double_t det3_013_012 = M[F00]*det2_13_12 - M[F01]*det2_13_02 + M[F02]*det2_13_01;
+  const Double_t det3_013_013 = M[F00]*det2_13_13 - M[F01]*det2_13_03 + M[F03]*det2_13_01;
+  const Double_t det3_013_023 = M[F00]*det2_13_23 - M[F02]*det2_13_03 + M[F03]*det2_13_02;
+  const Double_t det3_013_123 = M[F01]*det2_13_23 - M[F02]*det2_13_13 + M[F03]*det2_13_12;
+  const Double_t det3_023_012 = M[F00]*det2_23_12 - M[F01]*det2_23_02 + M[F02]*det2_23_01;
+  const Double_t det3_023_013 = M[F00]*det2_23_13 - M[F01]*det2_23_03 + M[F03]*det2_23_01;
+  const Double_t det3_023_023 = M[F00]*det2_23_23 - M[F02]*det2_23_03 + M[F03]*det2_23_02;
+  const Double_t det3_023_123 = M[F01]*det2_23_23 - M[F02]*det2_23_13 + M[F03]*det2_23_12;
+  const Double_t det3_123_012 = M[F10]*det2_23_12 - M[F11]*det2_23_02 + M[F12]*det2_23_01;
+  const Double_t det3_123_013 = M[F10]*det2_23_13 - M[F11]*det2_23_03 + M[F13]*det2_23_01;
+  const Double_t det3_123_023 = M[F10]*det2_23_23 - M[F12]*det2_23_03 + M[F13]*det2_23_02;
+  const Double_t det3_123_123 = M[F11]*det2_23_23 - M[F12]*det2_23_13 + M[F13]*det2_23_12;
+
+  // Find the 4x4 det:
+  const Double_t det = M[F00]*det3_123_123 - M[F01]*det3_123_023 + 
+                       M[F02]*det3_123_013 - M[F03]*det3_123_012;
+
+  if(det == 0) {
+    throw(_eh + "matrix is singular.");
+  }
+
+  const Double_t oneOverDet = 1.0/det;
+  const Double_t mn1OverDet = - oneOverDet;
+
+  M[F00] = det3_123_123 * oneOverDet;
+  M[F01] = det3_023_123 * mn1OverDet;
+  M[F02] = det3_013_123 * oneOverDet;
+  M[F03] = det3_012_123 * mn1OverDet;
+
+  M[F10] = det3_123_023 * mn1OverDet;
+  M[F11] = det3_023_023 * oneOverDet;
+  M[F12] = det3_013_023 * mn1OverDet;
+  M[F13] = det3_012_023 * oneOverDet;
+
+  M[F20] = det3_123_013 * oneOverDet;
+  M[F21] = det3_023_013 * mn1OverDet;
+  M[F22] = det3_013_013 * oneOverDet;
+  M[F23] = det3_012_013 * mn1OverDet;
+
+  M[F30] = det3_123_012 * mn1OverDet;
+  M[F31] = det3_023_012 * oneOverDet;
+  M[F32] = det3_013_012 * mn1OverDet;
+  M[F33] = det3_012_012 * oneOverDet;
+
+  bAsOK = false;
+  return det;
+}
+
+/**************************************************************************/
+
+void ZTrans::Print(Option_t* option) const
+{
+  const Double_t* C = M;
+  for(Int_t i=0; i<4; ++i, ++C)
+    printf("%8.3lf %8.3lf %8.3lf | %8.3lf\n", C[0], C[4], C[8], C[12]);
+}
 
 #include <iomanip>
 
 ostream& operator<<(ostream& s, const ZTrans& t) {
   s.setf(ios::fixed, ios::floatfield); s.precision(3);
-  for(Int_t i=0; i<5; i++)
-    for(Int_t j=0; j<5; j++)
+  for(Int_t i=1; i<=4; i++)
+    for(Int_t j=1; j<=4; j++)
       s << t(i,j) << ((j==4) ? "\n" : "\t");
   return s;
 }

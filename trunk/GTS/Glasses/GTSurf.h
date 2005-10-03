@@ -63,6 +63,5 @@ public:
   ClassDef(GTSurf, 1)
 }; // endclass GTSurf
 
-GlassIODef(GTSurf);
 
 #endif

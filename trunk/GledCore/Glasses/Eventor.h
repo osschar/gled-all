@@ -27,7 +27,7 @@ protected:
   Int_t		mInterBeatMS;	//  X{gS} 7 Value(-range=>[0,1000000,1])
 
   // Thread properties
-  SaturnInfo*	mHost;		//  X{gE} L{}
+  ZLink<SaturnInfo> mHost;	//  X{gE} L{}
 
   Bool_t	bMultix;	//  X{gS} 7 Bool(-join=>1)
   Bool_t	bSignalSafe;	//  X{gS} 7 Bool()
@@ -80,6 +80,5 @@ public:
   ClassDef(Eventor, 1)
 }; // endclass Eventor
 
-GlassIODef(Eventor);
 
 #endif

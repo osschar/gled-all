@@ -24,12 +24,12 @@ protected:
   Bool_t	bFixLookAt;      // X{GS} 7 Bool()
   Bool_t	bFixUpReference; // X{GS} 7 Bool()
 
-  ZNode*	mCameraBase;	// X{gS} L{}
+  ZLink<ZNode>	mCameraBase;	// X{gS} L{}
 
-  ZNode*	mLookAt;	// X{gS} L{}
+  ZLink<ZNode>	mLookAt;	// X{gS} L{}
   Float_t	mLookAtMinDist; // X{gS} 7 Value(-range=>[0,1000,1,1000])
 
-  ZNode*	mUpReference;	// X{gS} L{}
+  ZLink<ZNode>	mUpReference;	// X{gS} L{}
   UChar_t	mUpRefAxis;	// X{gS} 7 Value(-range=>[1,3,1,1], -join=>1)
   Bool_t	bUpRefLockDir;	// X{gS} 7 Bool()
   Float_t	mUpRefMinAngle;	// X{gS} 7 Value(-range=>[0,90,1,100])
@@ -51,6 +51,5 @@ public:
   ClassDef(CameraInfo, 1)
 }; // endclass CameraInfo
 
-GlassIODef(CameraInfo);
 
 #endif

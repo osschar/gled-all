@@ -21,8 +21,8 @@ private:
   void _init();
 
 protected:
-  ZList*            mContents;     // X{GS} L{}
-  ZList*            mSelection;    // X{GS} L{}
+  ZLink<ZList>      mContents;     // X{GS} L{}
+  ZLink<ZList>      mSelection;    // X{GS} L{}
 
   StepMode_e        mStepMode;     // X{GS} 7 PhonyEnum()
   Float_t           mDx;           // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
@@ -54,7 +54,7 @@ protected:
   ZColor            mBoxColor;     // X{GSP} 7 ColorButt(-join=>1)
   ZColor            mSelColor;     // X{GSP} 7 ColorButt()
 
-  ZGlass*             mCbackAlpha;         //  X{GS} L{}
+  ZLink<ZGlass>       mCbackAlpha;         //  X{GS} L{}
   TString             mCbackMethodName;    //  X{GS} Ray{CbackReset} 7 Textor()
   TString             mCbackBetaType;      //  X{GS} Ray{CbackReset} 7 Textor()
   GledNS::MethodInfo* mCbackMethodInfo;    //!
@@ -77,6 +77,5 @@ public:
   ClassDef(WGlDirectory, 1)
 }; // endclass WGlDirectory
 
-GlassIODef(WGlDirectory);
 
 #endif

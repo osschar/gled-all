@@ -10,14 +10,15 @@
 #include <Glasses/Board.h>
 #include <Glasses/ZHashList.h>
 
-class MultiBoard : public Board {
+class MultiBoard : public Board
+{
   MAC_RNR_FRIENDS(MultiBoard);
 
 private:
   void _init();
 
 protected:
-  ZHashList*	mSlides;	// X{gS} L{}
+  ZLink<ZHashList>	mSlides;	// X{gS} L{}
 
 public:
   MultiBoard(const Text_t* n="MultiBoard", const Text_t* t=0) :
@@ -34,6 +35,5 @@ public:
   ClassDef(MultiBoard, 1) // Board with a sequence of images/slides.
 }; // endclass MultiBoard
 
-GlassIODef(MultiBoard);
 
 #endif

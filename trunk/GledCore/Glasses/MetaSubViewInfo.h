@@ -29,6 +29,5 @@ public:
   ClassDef(MetaSubViewInfo, 1)
 }; // endclass MetaSubViewInfo
 
-GlassIODef(MetaSubViewInfo);
 
 #endif

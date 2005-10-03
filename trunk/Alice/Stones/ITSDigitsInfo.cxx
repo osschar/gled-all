@@ -52,7 +52,7 @@ ITSDigitsInfo:: ~ITSDigitsInfo()
 
 void ITSDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
 {
-  static const string _eh("ITSDigitsInfo::SetData ");
+  static const Exc_t _eh("ITSDigitsInfo::SetData ");
 
   mDataDir = "";
   mEvent   = -1;
