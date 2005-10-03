@@ -28,10 +28,11 @@
 	wrapped in a base class Exc_t.
 
 	ZTrans has been changed to use 4x4 double matrix internally
-	(instead of 5x5 float). ZNode's interface somewhat consolidated.
+	(instead of 5x5 float). ZNode's transformation interface is somewhat
+	consolidated.
 
 	
-	Most of the files have changed.
+	Most of the files have changed in all libsets and demos.
 
 2005-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
