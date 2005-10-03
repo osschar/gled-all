@@ -9,9 +9,8 @@
 	principle be used without fltk (no inter-library dependence).
 
 	Directory reorganizations:
-	1) Eye/ moved ftws, mtws and friends to GledView/.
-	2) Net/ removed directory, Ray was put into Eye/.
-	3) RegExp/ added TPME wrapper working with ROOT's TString class.
+	1) Moved ftws, mtws and alike from Eye/ to GledView/.
+	2) Removed Net/ directory, Ray was put into Eye/.
 
 	Implemented links via ZLinkBase class and templated class
 	ZLink. This was needed for adoption of ROOT's automatic schema
@@ -25,7 +24,8 @@
 
 	Consistently use TString instead of std::string. The only place
 	where std::string is still used are exceptions, but they have been
-	wrapped in a base class Exc_t.
+	wrapped in a base class Exc_t. Added TPME wrapper over PCRE
+	working with ROOT's TString class (just PME with TString).
 
 	ZTrans has been changed to use 4x4 double matrix internally
 	(instead of 5x5 float). ZNode's transformation interface is somewhat
@@ -34,6 +34,35 @@
 	
 	Most of the files have changed in all libsets and demos.
 
+
+	Migration instructions
+	======================
+
+	To convert Links to new format [formatting lost]:
+	find . -name \*.h | xargs grep -l L{} | \
+	xargs perl -pi -e '          \
+	  if(m/L{}/) {               \
+	    ($t) = /^\s*([\w]+)\*/;  \
+	    s/$t\*/ZLink<$t>/;       \
+	  }'
+
+	To remove GlassIODefs:
+	find . -name \*.h | xargs grep -l GlassIODef | \
+	xargs perl -pi -e 'undef $_ if /GlassIODef/;'
+
+	Exceptions are now of Exc_t, see GledCore/Gled/GledTypes.h.
+	To replace exception headers (as used in GledCore):
+	find . -name \*.cxx | xargs grep -l "static const string" | \
+	  xargs perl -pi -e 's/static const string/static const Exc_t/og;'
+
+	Replace the following for copying/accessing ZList elements (and
+	use AList* as generic container interface):
+	Copy -> CopyList
+	CopyByGlass -> CopyListByGlass
+
+	Direct iterations over mGlasses should be replaced with
+	AList::Stepper.
+	
 2005-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/GLGridStepper.cxx:
