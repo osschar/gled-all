@@ -58,13 +58,13 @@ void alice_geom(Int_t import_mode=0)
   em_node->SetTNode(gGeoManager->GetTopNode());
   em_node->SetOM(-2.5);
   em_node->SetUseOM(true);
-  em_node->Set3Pos(6.5, 0, 0);
+  em_node->SetPos(6.5, 0, 0);
   em_node->SetDefFile("EvDisp.root");
 
   // create an empty OvlMgr.
   CREATE_ADD_GLASS(em_ovlm, ZGeoOvlMgr, g_scene, "A GeoOvlMgr", "");
   em_ovlm->SetOM(-2.5);
-  em_ovlm->Set3Pos(-6.5, 0, 0);
+  em_ovlm->SetPos(-6.5, 0, 0);
   em_ovlm->SetUseOM(true);
 
   // Geo repacker

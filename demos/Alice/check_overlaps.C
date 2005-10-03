@@ -48,7 +48,7 @@ void check_overlaps(Float_t epsilon=1)
   // create an empty node to test save/load from file 
   ZGeoNode* em_node = new ZGeoNode("Empty Node");
   em_node->SetOM(-2.5);
-  em_node->Set3Pos(6.5, 0, 0);
+  em_node->SetPos(6.5, 0, 0);
   em_node->SetUseOM(true);
   g_queen->CheckIn(em_node);
   g_scene->Add(em_node);

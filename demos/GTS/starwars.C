@@ -24,18 +24,18 @@ void starwars()
   CREATE_ADD_GLASS(cambase, Sphere, starw, "Camera Base",
 		   "Type <Home> to jump here.");
   cambase->SetRadius(0.005);
-  cambase->Set3Pos(0, -9, 5);
+  cambase->SetPos(0, -9, 5);
   cambase->SetRotByDegrees(90, -30, 0);
 
   Rect* base_plane = new Rect("BasePlane");
-  base_plane->Set3Pos(0, 0, -5);
+  base_plane->SetPos(0, 0, -5);
   base_plane->SetUnitSquare(15);
   base_plane->SetUV(30, 30);
   g_queen->CheckIn(base_plane);
   starw->Add(base_plane);
 
   Lamp* l = new Lamp("Lamp");
-  l->Set3Pos(15, 0, 5);
+  l->SetPos(15, 0, 5);
   l->SetScale(1);
   g_queen->CheckIn(l); starw->Add(l);
   starw->GetGlobLamps()->Add(l);
@@ -43,7 +43,7 @@ void starwars()
   // GTS models
 
   GTSurf* surf1 = new GTSurf("Station");
-  surf1->Set3Pos(-4.1, -4.3, 0);
+  surf1->SetPos(-4.1, -4.3, 0);
   surf1->SetScale(0.4);
   surf1->SetColor(0.6, 1, 0.9);
   g_queen->CheckIn(surf1); starw->Add(surf1);
@@ -52,7 +52,7 @@ void starwars()
   surf1->Invert(); // this gts file has unstandard orientation of faces
 
   GTSurf* surf2 = new GTSurf("X Wing");
-  surf2->Set3Pos(4.3, -4.3, 0);
+  surf2->SetPos(4.3, -4.3, 0);
   surf2->SetRotByDegrees(110, 180, 170);
   surf2->SetScale(0.12);
   surf2->SetColor(0.6, 1, 0.7);
@@ -61,7 +61,7 @@ void starwars()
   surf2->Load();
 
   GTSurf* surf3 = new GTSurf("Tie");
-  surf3->Set3Pos(1, 2.3, 1);
+  surf3->SetPos(1, 2.3, 1);
   surf3->SetRotByDegrees(20, 10, -10);
   surf3->SetScale(0.06);
   surf3->SetColor(1, 0.3, 0.5);

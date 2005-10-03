@@ -82,7 +82,7 @@ void arc(Int_t Npil = 5)
   Lamp* lamp = new Lamp("Lamp");
   lamp->SetScale(1);
   lamp->SetDiffuse(0.8, 0.8, 0.8);
-  lamp->Set3Pos(5, -5, 10); lamp->RotateLF(1,2, TMath::Pi());
+  lamp->SetPos(5, -5, 10); lamp->RotateLF(1,2, TMath::Pi());
   g_queen->CheckIn(lamp); arcs->Add(lamp);
   arcs->GetGlobLamps()->Add(lamp);
 

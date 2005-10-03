@@ -76,7 +76,7 @@ void WS_demo()
     double phi = i*TMath::Pi()/4;
     double ss = TMath::Sin(phi);
     double cc = TMath::Cos(phi);
-    points[i]->Set3Pos(i*cc, i*ss, 0);
+    points[i]->SetPos(i*cc, i*ss, 0);
     double der = TMath::ATan2(ss+phi*cc, cc-phi*ss);
     points[i]->RotateLF(1,2, der);
     points[i]->SetW(i*0.1);
@@ -85,12 +85,12 @@ void WS_demo()
 
   CREATE_ADD_GLASS(t1, SMorph, wsdemo, "TubeStart", 0);
   t1->SetTLevel(20); t1->SetPLevel(3);
-  t1->Set3Pos(-5, 8, 0);
+  t1->SetPos(-5, 8, 0);
   t1->SetColor(.6, 0.2, 0.2);
 
   CREATE_ADD_GLASS(t2, SMorph, wsdemo, "TubeEnd", 0);
   t2->SetTLevel(20); t2->SetPLevel(5);
-  t2->Set3Pos(3, -2, 6);
+  t2->SetPos(3, -2, 6);
   t2->SetColor(.2, 0.2, 0.6);
 
   CREATE_ADD_GLASS(tube1, WSTube, wsdemo, "Tube1", 0);

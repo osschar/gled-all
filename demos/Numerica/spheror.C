@@ -17,7 +17,7 @@
 
   Spheror* spheror = new Spheror("Single Spheror");
   g_queen->CheckIn(spheror); sph_scene->Add(spheror);
-  spheror->Set3Pos(0, 0, 2.5);
+  spheror->SetPos(0, 0, 2.5);
   spheror->SetNVert(30); spheror->SetBeautyP(true);
   spheror->Install();
   spheror->SelfInit();

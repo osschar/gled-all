@@ -27,13 +27,13 @@ void slides(Bool_t start_hunt_p=true)
   //----------------------
 
   CREATE_ADD_GLASS(cam_base, Sphere, ss, "CameraBase", 0);
-  cam_base->Set3Pos(5, -5, 4);
+  cam_base->SetPos(5, -5, 4);
   cam_base->SetRotByDegrees(140, -26, 0);
   cam_base->SetRadius(0.01);
 
   CREATE_ADD_GLASS(l, Lamp, ss, "Lamp", 0);
   l->SetScale(1);
-  l->Set3Pos(-4, -3, 10);
+  l->SetPos(-4, -3, 10);
   l->SetAmbient(0.4, 0.4, 0.4);
   ss->GetGlobLamps()->Add(l);
 
@@ -48,7 +48,7 @@ void slides(Bool_t start_hunt_p=true)
   CREATE_ADD_GLASS(plane_xy, Rect, ss, "Plane XY", 0);
   plane_xy->SetUnitSquare(20);
   plane_xy->SetColor(0,0,1,0.5);
-  plane_xy->Set3Pos(0,0,-0.05);
+  plane_xy->SetPos(0,0,-0.05);
   plane_xy->SetRotByDegrees(0,0,0);
   plane_xy->SetWidth(1);
 
@@ -60,13 +60,13 @@ void slides(Bool_t start_hunt_p=true)
   demo_amphitheatre(amph);
 
   MultiBoard* mtalk = matevz_talk(ss);
-  mtalk->Set3Pos(-2, -3.5, 2.2);
+  mtalk->SetPos(-2, -3.5, 2.2);
   mtalk->SetUV(6, 4.5);
   mtalk->SetRotByDegrees(90, 0, 90);
   mtalk->First();
 
   MultiBoard* ftalk = fons_talk(ss);
-  ftalk->Set3Pos(-2, 3.5, 2.2);
+  ftalk->SetPos(-2, 3.5, 2.2);
   ftalk->SetUV(6, 4.5);
   ftalk->SetRotByDegrees(90, 0, 90);
   ftalk->First();
@@ -125,7 +125,7 @@ void gled_promo(ZList* list)
 {
   CREATE_ADD_GLASS(txt1, Text, list, "Text1", 0);
   txt1->SetText("GLED");
-  txt1->Set3Pos(0, 5, 1.55);
+  txt1->SetPos(0, 5, 1.55);
   txt1->SetRotByDegrees(0, 0, 90);
   txt1->SetScales(1.8, 1.2, 1);
   txt1->SetCenter(false);
@@ -134,7 +134,7 @@ void gled_promo(ZList* list)
 
   CREATE_ADD_GLASS(txt2, Text, list, "Text2", 0);
   txt2->SetText("Generic Lightweight Environment for Distributed computing");
-  txt2->Set3Pos(0, 5, 0.3);
+  txt2->SetPos(0, 5, 0.3);
   txt2->SetRotByDegrees(0, 0, 90);
   txt2->SetScales(0.5, 1, 1);
   txt2->SetCenter(false);
@@ -205,12 +205,12 @@ void demo_amphitheatre(Amphitheatre* amph)
 
   CREATE_ADD_GLASS(occ1, Sphere, amph, "A Big Guest", 0);
   occ1->SetRadius(0.2);
-  occ1->Set3Pos(0, 0.25, 0);
+  occ1->SetPos(0, 0.25, 0);
   occ1->SetColor(0, 0, 1);
   amph->AddGuest(occ1);
   CREATE_ADD_GLASS(occ2, Sphere, amph, "Big Guest's Wife", 0);
   occ2->SetRadius(0.25);
-  occ2->Set3Pos(0, -0.25, 0);
+  occ2->SetPos(0, -0.25, 0);
   occ2->SetColor(1, 0, 0);
   amph->AddGuest(occ2);
 

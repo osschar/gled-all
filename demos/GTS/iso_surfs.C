@@ -28,7 +28,7 @@ void iso_surfs()
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
-  l->Set3Pos(-2, -6, 6);
+  l->SetPos(-2, -6, 6);
   l->RotateLF(1,2, TMath::Pi());
   g_queen->CheckIn(l); starw->Add(l);
 
@@ -36,7 +36,7 @@ void iso_surfs()
 
   CREATE_ADD_GLASS(maker1, GTSIsoMaker, starw, "Iso Maker 1", 0);
   CREATE_ADD_GLASS(surf1, GTSurf, starw, "Clipped Sphere", 0);
-  surf1->Set3Pos(3, 0, 0);
+  surf1->SetPos(3, 0, 0);
   surf1->SetColor(1,0.8,0.2);
   maker1->SetTarget(surf1);
   maker1->SetFormula("x^2 + y^2 + z^2");
@@ -61,9 +61,9 @@ void iso_surfs()
 
   CREATE_ADD_GLASS(maker3, GTSIsoMaker, starw, "Iso Maker 3", 0);
   CREATE_ADD_GLASS(surf3, GTSurf, starw, "Hyperboloid", 0);
-  surf3->Set3Pos(-3, 0, 0);
+  surf3->SetPos(-3, 0, 0);
   surf3->SetRotByDegrees(0,-30,0);
-  surf3->SetS(1.5);
+  surf3->SetScale(1.5);
   surf3->SetUseScale(true);
   surf3->SetColor(0.8,0.2,1);
   maker3->SetTarget(surf3);
