@@ -27,6 +27,5 @@ public:
   ClassDef(ZMEESelfFilter, 1)
 }; // endclass ZMEESelfFilter
 
-GlassIODef(ZMEESelfFilter);
 
 #endif

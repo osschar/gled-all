@@ -23,8 +23,8 @@ private:
 
 protected:
   TString		mLogin;			// X{GS} 7 TextOut()
-  ZIdentity*		mPrimaryIdentity;	// X{gS} L{}
-  ZHashList*		mActiveIdentities;	// X{gS} L{}
+  ZLink<ZIdentity>		mPrimaryIdentity;	// X{gS} L{}
+  ZLink<ZHashList>		mActiveIdentities;	// X{gS} L{}
 
 public:
   ZMirEmittingEntity(const Text_t* n="ZMirEmittingEntity", const Text_t* t=0) :
@@ -43,6 +43,5 @@ public:
   ClassDef(ZMirEmittingEntity, 1)
 }; // endclass ZMirEmittingEntity
 
-GlassIODef(ZMirEmittingEntity);
 
 #endif

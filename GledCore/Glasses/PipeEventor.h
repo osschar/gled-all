@@ -45,6 +45,5 @@ public:
   ClassDef(PipeEventor, 1)
 }; // endclass PipeEventor
 
-GlassIODef(PipeEventor);
 
 #endif

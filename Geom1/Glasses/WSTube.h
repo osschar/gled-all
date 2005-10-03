@@ -11,17 +11,18 @@
 #include <TLorentzVector.h>
 #include <TRandom.h>
 
-class WSTube : public WSSeed {
+class WSTube : public WSSeed
+{
   MAC_RNR_FRIENDS(WSTube);
 
 private:
   void _init();
 
 protected:
-  ZNode*	mNodeA;		// X{gS} L{}
-  ZNode*	mNodeB;		// X{gS} L{}
+  ZLink<ZNode>	mNodeA;		// X{gS} L{}
+  ZLink<ZNode>	mNodeB;		// X{gS} L{}
 
-  ZList*	mLenses;	// X{gS} L{} RnrBits{0,0,0,0, 0,0,0,5}
+  ZLink<ZList>	mLenses;	// X{gS} L{} RnrBits{0,0,0,0, 0,0,0,5}
 
   Float_t	mDefWidth;	// X{gS} 7 Value(-range=>[  0,1000, 1,1000], join=>1)
   Float_t	mDefSpread;	// X{gS} 7 Value(-range=>[-180,180, 1,1000], join=>1)
@@ -59,6 +60,5 @@ public:
   ClassDef(WSTube, 1)
 }; // endclass WSTube
 
-GlassIODef(WSTube);
 
 #endif

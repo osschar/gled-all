@@ -3,11 +3,13 @@
 
 # Base glasses
 ZGlass			1	Glasses/ZGlass		.
-ZList			2	Glasses/ZList
-ZHashList		3	Glasses/ZHashList
-ZNameMap		4	Glasses/ZNameMap
-AList			5	Glasses/AList
-ZDeque			6	Glasses/ZDeque
+AList			2	Glasses/AList
+ZDeque			3	Glasses/ZDeque
+ZList			4	Glasses/ZList
+ZHashList		5	Glasses/ZHashList
+ZVector			6	Glasses/ZVector
+ZNameMap		7	Glasses/ZNameMap
+ZStringMap		8	Glasses/ZStringMap
 ZNode			16	Glasses/ZNode		.
 ZNodeLink		17	Glasses/ZNodeLink	.
 

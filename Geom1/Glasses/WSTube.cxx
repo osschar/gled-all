@@ -50,16 +50,16 @@ void WSTube::define_direction(ZTrans& t, TVector3& dr,
 			      TLorentzVector& vec, TLorentzVector& sgm)
 {
   TVector3 x;
-  x += t.GetBaseVec3(1) * (vec.X() + mRnd.Gaus(0, sgm.X()));
-  x += t.GetBaseVec3(2) * (vec.Y() + mRnd.Gaus(0, sgm.Y()));
-  x += t.GetBaseVec3(3) * (vec.Z() + mRnd.Gaus(0, sgm.Z()));
-  x += dr               * (vec.T() + mRnd.Gaus(0, sgm.T()));
+  x += t.GetBaseVec(1) * (vec.X() + mRnd.Gaus(0, sgm.X()));
+  x += t.GetBaseVec(2) * (vec.Y() + mRnd.Gaus(0, sgm.Y()));
+  x += t.GetBaseVec(3) * (vec.Z() + mRnd.Gaus(0, sgm.Z()));
+  x += dr              * (vec.T() + mRnd.Gaus(0, sgm.T()));
 
   x = x.Unit();
   TVector3 y = x.Orthogonal().Unit();
-  t.SetBaseVec3(1, x);
-  t.SetBaseVec3(2, y);
-  t.SetBaseVec3(3, x.Cross(y));
+  t.SetBaseVec(1, x);
+  t.SetBaseVec(2, y);
+  t.SetBaseVec(3, x.Cross(y));
 }
 
 /**************************************************************************/
@@ -80,7 +80,7 @@ void WSTube::AdEndarkenment()
 {
   PARENT_GLASS::AdEndarkenment();
   if(mLenses != 0) {
-    mQueen->RemoveLens(mLenses);
+    mQueen->RemoveLens(*mLenses);
   }
 }
 
@@ -88,12 +88,12 @@ void WSTube::AdEndarkenment()
 
 void WSTube::Connect()
 {
-  static const string _eh("WSTube::Connect2 ");
+  static const Exc_t _eh("WSTube::Connect2 ");
 
   if(mNodeA == 0 || mNodeB == 0)
     throw(_eh + "node links A and B must be set.");
 
-  ZNode* abcp = ZNode::FindCommonParent(mNodeA, mNodeB);
+  ZNode* abcp = ZNode::FindCommonParent(mNodeA.get(), mNodeB.get());
   if(abcp == 0)
     throw(_eh + "nodes A and B have no common parent.");
 
@@ -101,26 +101,24 @@ void WSTube::Connect()
   if(top == 0)
     throw(_eh + "this WSTube does not have a common parent w/ nodes A and B.");
 
-  ZList::ClearList();
+  ClearList();
 
-  auto_ptr<ZTrans> at( ZNode::BtoA(this, mNodeA, top) );
-  auto_ptr<ZTrans> bt( ZNode::BtoA(this, mNodeB, top) );
-  TVector3 dr( (bt->GetPosVec3() - at->GetPosVec3()).Unit() ); // vector A -> B
-  // ZTrans x(*at); x.Invert(); x *= *bt;
-  
+  auto_ptr<ZTrans> at( ZNode::BtoA(this, *mNodeA, top) );
+  auto_ptr<ZTrans> bt( ZNode::BtoA(this, *mNodeB, top) );
+  TVector3 dr( (bt->GetPos() - at->GetPos()).Unit() ); // vector A -> B
 
   WSPoint* ap = new WSPoint("TubeStart", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
   define_direction(*at, dr, mVecA, mSgmA);
   ap->SetTrans(*at);
   ap->SetW(mDefWidth/2);
-  ap->SetS(mDefSpread);
+  ap->SetScale(mDefSpread);
   ap->SetT(mDefTension);
 
   WSPoint* bp = new WSPoint("TubeEnd", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
   define_direction(*bt, dr, mVecB, mSgmB);
   bp->SetTrans(*bt);
   bp->SetW(mDefWidth/2);
-  bp->SetS(-mDefSpread);
+  bp->SetScale(-mDefSpread);
   bp->SetT(mDefTension);
 
   // These should be via ZQueen::IncarnateWAttach for cluster stuff.
@@ -137,14 +135,14 @@ void WSTube::Connect()
 
 void WSTube::AnimatedConnect()
 {
-  static const string _eh("WSTube::AnimatedConnect ");
+  static const Exc_t _eh("WSTube::AnimatedConnect ");
 
   WSPoint* B;
   ZTrans   transB;
   {
     GLensWriteHolder wrlck(this);
     Connect();
-    B = dynamic_cast<WSPoint*>(Last());
+    B = dynamic_cast<WSPoint*>(BackElement());
     if(B == 0)
       throw(_eh + "last point not reachable (by trivial algo).");
     auto_ptr<ZTrans> trans ( init_slide(0) );
@@ -152,7 +150,7 @@ void WSTube::AnimatedConnect()
     B->SetTrans(*trans);
   }
 
-  Float_t time = 0, dt = mInitDt, max_t = mLength;
+  Double_t time = 0, dt = mInitDt, max_t = mLength;
   bool done = false;
   while(!done) {
     gSystem->Sleep(mSleepMS);
@@ -198,11 +196,11 @@ void WSTube::Travel(Float_t abs_dt, UInt_t sleep_ms, Bool_t AtoB)
     delete tt;
     if(AtoB == false) {
       TransAtTime(trans, mLength, false);
-      TVector3 xcy = trans.GetBaseVec3(1);
-      xcy = xcy.Cross(trans.GetBaseVec3(2));
-      TVector3 z(trans.GetBaseVec3(3));
+      TVector3 xcy = trans.GetBaseVec(1);
+      xcy = xcy.Cross(trans.GetBaseVec(2));
+      TVector3 z(trans.GetBaseVec(3));
       if(xcy.Dot(z) < 0) {
-	trans.SetBaseVec3(3, -z);
+	trans.SetBaseVec(3, -z);
       }
     }
     s->SetTrans(trans);
@@ -219,7 +217,6 @@ void WSTube::Travel(Float_t abs_dt, UInt_t sleep_ms, Bool_t AtoB)
   {
     GLensWriteHolder s_wrlck(s);
     s->SetParent(this);
-    // s->IncRefCount(this); // try-catch
   }
 
   // This whole thing should be split into two functions for
@@ -230,7 +227,7 @@ void WSTube::Travel(Float_t abs_dt, UInt_t sleep_ms, Bool_t AtoB)
 
 
   {
-    GLensWriteHolder lenses_wrlck(mLenses);
+    GLensWriteHolder lenses_wrlck(mLenses.get());
     mLenses->Add(s);
   }
   Float_t
@@ -247,9 +244,9 @@ void WSTube::Travel(Float_t abs_dt, UInt_t sleep_ms, Bool_t AtoB)
 	s->SetParent(0);
       }
       {
-	GLensWriteHolder wrlck(mLenses);
+	GLensWriteHolder wrlck(mLenses.get());
 	// s->DecRefCount(this);
-	mLenses->Remove(s);
+	mLenses->RemoveAll(s);
 	// mQueen->RemoveLens(s);
       }
       break;

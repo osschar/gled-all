@@ -27,6 +27,5 @@ public:
   ClassDef(ITSScaledModule, 1)
 }; // endclass ITSScaledModule
 
-GlassIODef(ITSScaledModule);
 
 #endif

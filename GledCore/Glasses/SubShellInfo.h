@@ -31,6 +31,5 @@ public:
   ClassDef(SubShellInfo, 1)
 }; // endclass SubShellInfo
 
-GlassIODef(SubShellInfo);
 
 #endif

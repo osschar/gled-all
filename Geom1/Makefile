@@ -4,7 +4,7 @@ LIB_SET_ID	= 2
 REQUIRES_LIB_SETS = GledCore # add
 
 BLESSED_DIRS	= Glasses
-BASE_DIRS	= Stones Tvor ACTC
+BASE_DIRS	= Stones Tvor ACTC GForge
 
 DICT_DIRS	= Glasses Stones
 VIEW_DIRS	= FL
@@ -12,11 +12,19 @@ VIEW_FL_DIRS	= FL
 
 BASE_LD_LIBS    = -lIL -lILU
 
-##### Targets #####
+GFORGE_EXE      = bin/gforge
 
-LIBSET_TARGETS := # define additional targets (libraires built by default)
+##### Targets
+
+LIBSET_TARGETS := ${GFORGE_EXE}
 
 include ${GLEDSYS}/make/make_base.inc
 
+${GFORGE_EXE}:
+	${MAKE} -C GForge
+
 clean::
+	${MAKE} -C GForge clean
+
 distclean::
+	${MAKE} -C GForge distclean

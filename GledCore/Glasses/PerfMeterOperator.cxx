@@ -78,7 +78,7 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception
 void PerfMeterOperator::send_beam_or_flare(auto_ptr<ZMIR>& m)
 {
   if(bUseBeams) {
-    SaturnInfo *rec = mBeamHost ? mBeamHost : mSaturn->GetSaturnInfo();
+    SaturnInfo *rec = mBeamHost.is_set() ? mBeamHost.get() : mSaturn->GetSaturnInfo();
     m->SetRecipient(rec);
   }
   mSaturn->PostMIR(m);

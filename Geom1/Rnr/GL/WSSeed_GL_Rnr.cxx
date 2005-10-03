@@ -14,13 +14,11 @@
 
 void WSSeed_GL_Rnr::vert(WSPoint* f, Float_t t)
 {
-  Float_t x[3];
-  Float_t t2 = t*t;
-  Float_t t3 = t2*t;
-  for(UInt_t i=1; i<=3; i++)
-    x[i-1] = f->mCoffs(i,0u) + f->mCoffs(i,1u)*t +
-             f->mCoffs(i,2u)*t2 + f->mCoffs(i,3u)*t3;
-  glVertex3fv(x);
+  Double_t x[3], t2 = t*t, t3 = t2*t;
+  for(UInt_t i=0; i<3; i++)
+    x[i] = f->mCoffs(i,0) + f->mCoffs(i,1)*t +
+      f->mCoffs(i,2)*t2 + f->mCoffs(i,3)*t3;
+  glVertex3dv(x);
 }
 
 /**************************************************************************/
@@ -50,7 +48,7 @@ void WSSeed_GL_Rnr::Render(RnrDriver* rd)
   if(mWSSeed->bFat) {
     if(mWSSeed->pTuber) TubeTvor_GL_Rnr::Render(mWSSeed->pTuber);
   } else {
-    list<WSPoint*> points; mWSSeed->CopyByGlass<WSPoint*>(points);
+    list<WSPoint*> points; mWSSeed->CopyListByGlass<WSPoint>(points);
     if(points.size() >= 2) {
       list<WSPoint*>::iterator a = points.begin();
       list<WSPoint*>::iterator b;

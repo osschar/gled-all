@@ -39,7 +39,7 @@ class AliConverter : public ZGlass
  protected:
   void                           make_its_digits_info();
   GenInfo*                       get_geninfo(Int_t label);
-  AliTPCParam*                   get_tpc_param(const string& eh);
+  AliTPCParam*                   get_tpc_param(const Exc_t& eh);
 
   KineType_e                     mKineType;  // X{GS} 7 PhonyEnum()
   TString                        mDataDir;   // X{G}
@@ -98,6 +98,5 @@ class AliConverter : public ZGlass
   ClassDef(AliConverter, 1)
 }; // endclass AliConverter
 
-GlassIODef(AliConverter);
 
 #endif

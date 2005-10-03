@@ -12,7 +12,6 @@
 #include "EHSWrap.h"
 #include "EHSWrap.c7"
 
-#include <RegExp/pme.h>
 #include "ehs_formtest.cpp"
 
 ClassImp(EHSWrap)
@@ -29,7 +28,7 @@ void EHSWrap::_init()
 
 void EHSWrap::StartServer()
 {
-  const string _eh("EHSWrap::StartServer ");
+  const TString _eh("EHSWrap::StartServer ");
 
   if(bServerUp)
     throw(_eh + "server already running.");
@@ -62,7 +61,7 @@ void EHSWrap::StartServer()
 
 void EHSWrap::StopServer()
 {
-  const string _eh("EHSWrap::StopServer ");
+  const TString _eh("EHSWrap::StopServer ");
 
   if(! bServerUp)
     throw(_eh + "server not running.");

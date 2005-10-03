@@ -19,8 +19,6 @@ ClassImp(ZIdentityListFilter)
 
 void ZIdentityListFilter::_init()
 {
-  // !!!! Set all links to 0 !!!!
-  mIdentities = 0;
   mOnMatch = ZMirFilter::R_Allow;
 }
 
@@ -28,18 +26,13 @@ void ZIdentityListFilter::_init()
 
 ZMirFilter::Result_e ZIdentityListFilter::FilterMIR(ZMIR& mir)
 {
-  if(mIdentities) {
-    lpZGlass_i i, end;
-    mIdentities->BeginIteration(i, end);
-    while(i != end) {
-      ZIdentity *id = (ZIdentity*)*i;
-      if(mir.Caller->HasIdentity(id)) {
-	mIdentities->EndIteration();
+  if(mIdentities != 0) {
+    GMutexHolder ids_lock(mIdentities->RefListMutex());
+    AList::Stepper<> s(*mIdentities);
+    while(s.step()) {
+      if(mir.Caller->HasIdentity((ZIdentity*)*s))
 	return (Result_e)mOnMatch;
-      }
-      ++i;
     }
-    mIdentities->EndIteration();
     return NegateResult((Result_e)mOnMatch);
   }
   return PARENT_GLASS::FilterMIR(mir);

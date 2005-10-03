@@ -22,10 +22,10 @@ private:
   void _init();
 
 protected:
-  ZQueen*	mPrimQueen;	// X{gS} L{}
-  ZQueen*	mSecQueen;	// X{gS} L{}
+  ZLink<ZQueen>	mPrimQueen;	// X{gS} L{}
+  ZLink<ZQueen>	mSecQueen;	// X{gS} L{}
 
-  SaturnInfo*	mToSaturn;	// X{gS} L{}
+  ZLink<SaturnInfo>	mToSaturn;	// X{gS} L{}
 
   // Top level request type
   RequestType_e	 mRequest;	// X{gS} 7 PhonyEnum()
@@ -43,6 +43,5 @@ public:
   ClassDef(ZEunuch, 1)
 }; // endclass ZEunuch
 
-GlassIODef(ZEunuch);
 
 #endif

@@ -90,7 +90,7 @@ void AliConverter::_init()
 void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
 			     const Text_t* vsd_file)
 {
-  static const string _eh("AliConverter::CreateVSD ");
+  static const Exc_t _eh("AliConverter::CreateVSD ");
 
   mDataDir = data_dir;
   mEvent   = event;
@@ -124,36 +124,36 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
 
   try {
     ConvertKinematics();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
     ConvertHits();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
     ConvertClusters();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
     ConvertRecTracks();
-  } catch(string exc) {
+  } catch(Exc_t& exc) {
     warn_caller(exc + " Skipping V0 extraction.");
     goto end_esd_processing;
   }
 
   try {
     ConvertV0();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
     ConvertKinks();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 
  end_esd_processing:
 
   try {
     ConvertGenInfo();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
  
   mFile->Write();  
   mFile->Close();
@@ -187,7 +187,7 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
 
 void AliConverter::ConvertKinematics()
 {
-  static const string _eh("AliConverter::ConvertKinematics ");
+  static const Exc_t _eh("AliConverter::ConvertKinematics ");
 
   if(mTreeK != 0) 
     throw (_eh + "kinematics already converted");
@@ -303,7 +303,7 @@ namespace {
 
 void AliConverter::ConvertHits()
 {
-  static const string _eh("AliConverter::ConvertHits ");
+  static const Exc_t _eh("AliConverter::ConvertHits ");
 
   if(mTreeH != 0)
     throw(_eh + "hits already converted.");
@@ -410,7 +410,7 @@ void AliConverter::ConvertHits()
 
 void AliConverter::ConvertClusters()
 {
-  static const string _eh("AliConverter::ConvertClusters ");
+  static const Exc_t _eh("AliConverter::ConvertClusters ");
 
   if(mTreeC != 0)
     throw(_eh + "clusters already converted.");
@@ -421,18 +421,18 @@ void AliConverter::ConvertClusters()
 
   try {
     ConvertITSClusters();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
     ConvertTPCClusters();
-  } catch(string exc) { warn_caller(exc); }
+  } catch(Exc_t& exc) { warn_caller(exc); }
 }
 
 /**************************************************************************/
 
 void AliConverter::ConvertTPCClusters()
 {
-  static const string _eh("AliConverter::ConvertTPCClusters ");
+  static const Exc_t _eh("AliConverter::ConvertTPCClusters ");
 
   auto_ptr<TFile> f 
     ( TFile::Open(GForm("%s/TPC.RecPoints.root", mDataDir.Data())) );
@@ -506,7 +506,7 @@ void AliConverter::ConvertTPCClusters()
 
 void AliConverter::ConvertITSClusters()
 {
-  static const string _eh("AliConverter::ConvertITSClusters ");
+  static const Exc_t _eh("AliConverter::ConvertITSClusters ");
 
   auto_ptr<TFile> f 
     ( TFile::Open(GForm("%s/ITS.RecPoints.root", mDataDir.Data())) );
@@ -584,7 +584,7 @@ void AliConverter::ConvertITSClusters()
 
 void AliConverter::ConvertRecTracks()
 {
-  static const string _eh("AliConverter::ConvertRecTracks ");
+  static const Exc_t _eh("AliConverter::ConvertRecTracks ");
 
   if(mTreeR != 0)
     throw(_eh + "tracks already converted.");
@@ -626,7 +626,7 @@ void AliConverter::ConvertRecTracks()
 
 void AliConverter::ConvertV0()
 {
-  static const string _eh("AliConverter::ConvertV0 ");
+  static const Exc_t _eh("AliConverter::ConvertV0 ");
 
   if(mTreeV0 != 0)
     throw(_eh + "V0 already converted.");
@@ -704,7 +704,7 @@ void AliConverter::ConvertV0()
 
 void AliConverter::ConvertKinks()
 {
-  static const string _eh("AliConverter::ConvertKinks ");
+  static const Exc_t _eh("AliConverter::ConvertKinks ");
 
   if(mTreeKK != 0)
     throw(_eh + "Kinks already converted.");
@@ -778,7 +778,7 @@ void AliConverter::ConvertKinks()
 
 void AliConverter::ConvertGenInfo()
 {
-  static const string _eh("AliConverter::ConvertGenInfo ");
+  static const Exc_t _eh("AliConverter::ConvertGenInfo ");
 
   if(mTreeGI != 0)
     throw(_eh + "GI already converted.");
@@ -820,7 +820,7 @@ void AliConverter::ConvertGenInfo()
 /**************************************************************************/
 /**************************************************************************/
 
-AliTPCParam* AliConverter::get_tpc_param(const string& eh)
+AliTPCParam* AliConverter::get_tpc_param(const Exc_t& eh)
 {
   auto_ptr<TFile> fp( TFile::Open(GForm("%s/galice.root", mDataDir.Data())) );
   if(!fp.get())

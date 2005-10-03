@@ -33,6 +33,5 @@ public:
   ClassDef(ZRibbon, 1)
 }; // endclass ZRibbon
 
-GlassIODef(ZRibbon);
 
 #endif

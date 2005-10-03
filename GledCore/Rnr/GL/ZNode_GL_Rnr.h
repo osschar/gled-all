@@ -20,12 +20,10 @@ protected:
   TimeStamp_t   mStampTrans;
 
   PMSEntry      mPMSE;
-  GLdouble      mGL_Mat[16];
+
   bool          bNormP;
   bool          bNormWasOffP;
   Float_t       mExDOM;
-
-  void build_GL_mat();
 
   OptoStructs::ZLinkDatum* mRnrModLD;
 

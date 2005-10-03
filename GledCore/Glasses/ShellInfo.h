@@ -12,11 +12,12 @@
 #include <Glasses/SubShellInfo.h>
 #include <Glasses/ZMirEmittingEntity.h>
 
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 
 class MetaViewInfo;
 
-class ShellInfo : public ZNameMap {
+class ShellInfo : public ZNameMap
+{
   MAC_RNR_FRIENDS(ShellInfo);
 
 public:
@@ -32,13 +33,13 @@ private:
   void _init();
 
 protected:
-  ZHashList*	mSubShells;	// X{gE} L{}
-  SubShellInfo* mDefSubShell;   // X{gE} L{} 
+  ZLink<ZHashList>	mSubShells;	// X{gE} L{}
+  ZLink<SubShellInfo> mDefSubShell;   // X{gE} L{} 
 
-  ZGlass*	mBeta;		// X{gS} L{}
-  ZGlass*	mGamma;		// X{gS} L{}
+  ZLink<ZGlass>	mBeta;		// X{gS} L{}
+  ZLink<ZGlass>	mGamma;		// X{gS} L{}
 
-  ZMirEmittingEntity* mMessageRecipient; // // X{gS} L{}
+  ZLink<ZMirEmittingEntity> mMessageRecipient; // // X{gS} L{}
 
   Int_t		mDefW;		// X{GS} 7 Value(-range=>[32, 256, 1])
   Int_t		mDefSShellH;	// X{GS} 7 Value(-range=>[10, 128, 1])
@@ -74,6 +75,5 @@ public:
   ClassDef(ShellInfo, 1) // Glass representation of GUI shell 'FTW_Shell'.
 }; // endclass ShellInfo
 
-GlassIODef(ShellInfo);
 
 #endif

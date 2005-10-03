@@ -34,6 +34,5 @@ public:
   ClassDef(ZFireKing, 1) // Ruler of fire space and queen mirroring broker.
 }; // endclass ZFireKing
 
-GlassIODef(ZFireKing);
 
 #endif

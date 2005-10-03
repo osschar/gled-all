@@ -75,21 +75,21 @@ namespace GLTextNS {
 
   extern void txfBindFontTexture(TexFont* txf);
 
-  extern void txfGetStringMetrics(TexFont* txf, const char *string, int len,
+  extern void txfGetStringMetrics(TexFont* txf, const char *TString, int len,
 				  int &width, int &max_ascent, int &max_descent);
 
   extern void txfRenderGlyph(TexFont* txf, int c);
-  extern void txfRenderString(TexFont* txf, const char *string, int len,
+  extern void txfRenderString(TexFont* txf, const char *TString, int len,
 			      bool keep_pos=true);
-  extern void txfRenderString(TexFont* txf, const char *string, int len,
+  extern void txfRenderString(TexFont* txf, const char *TString, int len,
 			      GLfloat maxx, GLfloat fadew,
 			      bool keep_pos=true);
 
   extern void txfRenderGlyphZW(TexFont* txf, int c, float z, float w);
-  extern void txfRenderStringZW(TexFont* txf, const char *string, int len,
+  extern void txfRenderStringZW(TexFont* txf, const char *TString, int len,
 				float z, float w, bool keep_pos=true);
 
-  extern void txfRenderFancyString(TexFont* txf, char *string, int len);
+  extern void txfRenderFancyString(TexFont* txf, char *TString, int len);
 
 
   /**************************************************************************/
@@ -97,10 +97,10 @@ namespace GLTextNS {
   /**************************************************************************/
 
   struct BoxSpecs {
-    int    lm, rm, tm, bm;
-    int    lineskip;
-    char   align;
-    string pos;
+    int     lm, rm, tm, bm;
+    int     lineskip;
+    char    align;
+    TString pos;
 
     void _init() { align = 'l'; lineskip = 0; }
 
@@ -116,23 +116,23 @@ namespace GLTextNS {
 
   struct TextLineData {
     int    width, ascent, descent, hfull;
-    string text;
+    TString text;
 
-    TextLineData(TexFont *txf, string line);
+    TextLineData(TexFont *txf, TString line);
   };
 
-  extern void RnrTextBar(RnrDriver* rd, const string& text);
+  extern void RnrTextBar(RnrDriver* rd, const TString& text);
 
-  extern void RnrTextBar(RnrDriver* rd, const string& text,
+  extern void RnrTextBar(RnrDriver* rd, const TString& text,
 			 BoxSpecs& bs, float zoffset=0);
 
-  extern void RnrTextPoly(RnrDriver* rd, const string& text);
+  extern void RnrTextPoly(RnrDriver* rd, const TString& text);
 
-  extern void RnrText(RnrDriver* rd, const string& text,
-		      int x, int yrow, float z,
+  extern void RnrText(RnrDriver* rd, const TString& text,
+		      int x, int y, float z,
 		      const ZColor* front_col, const ZColor* back_col=0);
 
-  extern void RnrTextAt(RnrDriver* rd, const string& text,
+  extern void RnrTextAt(RnrDriver* rd, const TString& text,
 			int x, int yrow, float z,
 			const ZColor* front_col, const ZColor* back_col=0);
 }

@@ -63,7 +63,7 @@ void ZKing::BlessMIR(ZMIR& mir)
   // Performs dependenciy check of context arguments and access
   // authorization.
 
-  static string _eh("ZKing::BlessMIR ");
+  static TString _eh("ZKing::BlessMIR ");
 
   // Dependency check
   // Mild version ... just assert args in moon or sun space.
@@ -140,7 +140,7 @@ ZComet* ZKing::MakeComet()
 
   ReadLock();
   comet->AddGlass(this);
-  lpZGlass_t queens; Copy(queens);
+  lpZGlass_t queens; CopyList(queens);
   for(lpZGlass_i i=queens.begin(); i!=queens.end(); ++i) {
     ZQueen* q = dynamic_cast<ZQueen*>(*i);
     assert(q!=0);
@@ -165,7 +165,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
   //   if(have the queen active) push it along
   //   else forward the request and mark thingies (queen and the new reflector).
 
-  static string _eh("ZKing::reflect_queen() ");
+  static TString _eh("ZKing::reflect_queen() ");
 
   assert_MIR_presence(_eh);
 
@@ -213,7 +213,7 @@ void ZKing::reflect_queen(ZQueen* queen_to_mirror, SaturnInfo* moon)
       queen_to_mirror->add_reflector(moon);
       queen_to_mirror->WriteUnlock();
       ISdebug(0, GForm("%s Sending queen '%s' to moon '%s'; length=%d",
-		       _eh.c_str(), queen_to_mirror->GetName(),
+		       _eh.Data(), queen_to_mirror->GetName(),
 		       moon->GetName(), mir->Length()));
       mSaturn->PostMIR(mir);
       moon->hQueens.insert(queen_to_mirror);
@@ -248,7 +248,7 @@ void ZKing::activate_queen(ZQueen* queen)
   // Invoke it upon reflection.
   // Check, if the queen has any aspiring reflectors ... forward the beam to them
 
-  static string _eh("ZKing::activate_queen() ");
+  static TString _eh("ZKing::activate_queen() ");
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
@@ -260,7 +260,7 @@ void ZKing::activate_queen(ZQueen* queen)
   queen->SetAwaitingSceptre(false);
 
   ISmess(GForm("%s queen '%s' arrived for king '%s'",
-	       _eh.c_str(), queen->GetName(), GetName()));
+	       _eh.Data(), queen->GetName(), GetName()));
 
   mSaturn->RefQueenLoadCnd().Lock();
   mSaturn->SetQueenLoadNum(mSaturn->GetQueenLoadNum() - 1);
@@ -285,7 +285,7 @@ void ZKing::receive_eunuch()
 {
   // Receives an eunuch.
 
-  static string _eh("ZKing::receive_eunuch ");
+  static TString _eh("ZKing::receive_eunuch ");
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsBeam);
 
   ZEunuch* e = GledNS::StreamLensByGlass<ZEunuch*>(*mir);

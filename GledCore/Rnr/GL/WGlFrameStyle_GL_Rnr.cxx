@@ -10,6 +10,8 @@
 
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void WGlFrameStyle_GL_Rnr::_init()
@@ -19,6 +21,7 @@ void WGlFrameStyle_GL_Rnr::_init()
 
 void WGlFrameStyle_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   update_tring_stamp(rd);
   rd->PushRnrMod(WGlFrameStyle::FID(), mRnrMod);
 }
@@ -32,6 +35,7 @@ void WGlFrameStyle_GL_Rnr::Draw(RnrDriver* rd)
 void WGlFrameStyle_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   rd->PopRnrMod(WGlFrameStyle::FID());
+  PARENT::PostDraw(rd);
 }
 
 /**************************************************************************/
@@ -50,7 +54,7 @@ void WGlFrameStyle_GL_Rnr::BoxLimits(float& dx, float& dy,
   h = dy - 2*FS.mYBorder;
 }
 
-void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, string& label,
+void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, TString& label,
 				     float& scale,
 				     float& x, float& y, float& w, float& h)
 {
@@ -60,7 +64,7 @@ void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, string& label,
   WGlFrameStyle& FS = *mWGlFrameStyle;
 
   int width, ascent, descent;
-  GLTextNS::txfGetStringMetrics(txf, label.c_str(), label.length(),
+  GLTextNS::txfGetStringMetrics(txf, label.Data(), label.Length(),
 				width, ascent, descent);
   ascent  = txf->max_ascent;
   descent = txf->max_descent;
@@ -128,7 +132,7 @@ void WGlFrameStyle_GL_Rnr::RenderFrame(float dx, float dy)
    }
 }
 
-void WGlFrameStyle_GL_Rnr::RenderText(GLTextNS::TexFont *txf, string& label,
+void WGlFrameStyle_GL_Rnr::RenderText(GLTextNS::TexFont *txf, TString& label,
 				      float scale,
 				      float x, float y, float max_w)
 {
@@ -141,7 +145,7 @@ void WGlFrameStyle_GL_Rnr::RenderText(GLTextNS::TexFont *txf, string& label,
   glColor4fv(FS.mTextColor());
   GL_Capability_Switch texure_on(GL_TEXTURE_2D, true);
   GLTextNS::txfBindFontTexture(txf);
-  txfRenderString(txf, label.c_str(), label.length(),
+  txfRenderString(txf, label.Data(), label.Length(),
 		  max_w/scale, FS.mTextFadeW);
 
   glPopMatrix();
@@ -149,7 +153,7 @@ void WGlFrameStyle_GL_Rnr::RenderText(GLTextNS::TexFont *txf, string& label,
 
 /**************************************************************************/
 
-void WGlFrameStyle_GL_Rnr::FullRender(GLTextNS::TexFont *txf, string& label,
+void WGlFrameStyle_GL_Rnr::FullRender(GLTextNS::TexFont *txf, TString& label,
 				      float dx, float dy, bool belowmouse)
 {
   WGlFrameStyle& FS = *mWGlFrameStyle;

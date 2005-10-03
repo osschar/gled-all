@@ -32,6 +32,5 @@ class RecTrack : public TrackBase {
   ClassDef(RecTrack, 1)
     }; // endclass RecTrack
 
-GlassIODef(RecTrack);
 
 #endif

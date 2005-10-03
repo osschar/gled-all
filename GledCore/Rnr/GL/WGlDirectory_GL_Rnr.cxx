@@ -50,8 +50,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-  lpZGlass_t cont; M.mContents->Copy(cont);
-
+  lpZGlass_t cont; M.mContents->CopyList(cont);
 
   SGridStepper stepper(M.mStepMode);
   stepper.SetNs(M.mNx, M.mNy, M.mNz);
@@ -64,7 +63,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     if(bci && ! GledNS::IsA(*i, bci->fFid))
       continue;
 
-    string lens_name((*i)->GetName());
+    TString lens_name((*i)->GetName());
 
     ZColor back_color = M.mBoxColor;
     // if(*i selected)
@@ -115,7 +114,7 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
   // printf("Handloo: %d %d 0x%x 0x%x %p '%s'\n", ev.fEvent,
   // ev.fKey, ev.fButton, ev.fState, ev.fBelowMouse, 
-  // ev.fBelowMouse ? ev.fBelowMouse->fGlass->GetName() : "-");
+  // ev.fBelowMouse ? ev.fBelowMouse->fLens->GetName() : "-");
 
   WGlDirectory& M = *mWGlDirectory;
 
@@ -149,9 +148,8 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     if(mCurrent) {
       GledNS::MethodInfo* mi = M.GetCbackMethodInfo();
       if(mi == 0) return 0;
-      ZMIR mir(M.mCbackAlpha, mCurrent);
+      ZMIR mir(M.mCbackAlpha.get(), mCurrent);
       mi->ImprintMir(mir);
-      mi->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
       fImg->fEye->Send(mir);
 
       mCurrent = 0;

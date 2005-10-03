@@ -28,6 +28,5 @@ class V0Track : public RecTrack {
   ClassDef(V0Track, 1)
     }; // endclass V0Track
 
-GlassIODef(V0Track);
 
 #endif

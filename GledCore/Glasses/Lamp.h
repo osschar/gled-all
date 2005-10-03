@@ -41,6 +41,5 @@ public:
   ClassDef(Lamp, 1)
 }; // endclass Lamp
 
-GlassIODef(Lamp);
 
 #endif

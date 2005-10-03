@@ -86,7 +86,7 @@ void source_info(ALuint vorbsource, const Text_t* foo)
 
 void AlSource::Play(Int_t count)
 {
-  static const string _eh("AlContext::Play ");
+  static const Exc_t _eh("AlContext::Play ");
 
   {
     GLensReadHolder _rdlck(this);

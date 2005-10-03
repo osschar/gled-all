@@ -31,7 +31,7 @@ void AlContext::_init()
 
 void AlContext::Open()
 {
-  static const string _eh("AlContext::Open ");
+  static const Exc_t _eh("AlContext::Open ");
 
   if(mDevice != 0) {
     ISerr(_eh + "device already opened.");
@@ -53,7 +53,7 @@ void AlContext::Open()
 
 void AlContext::Close()
 {
-  static const string _eh("AlContext::Close ");
+  static const Exc_t _eh("AlContext::Close ");
 
   if(mContext == 0) return;
 

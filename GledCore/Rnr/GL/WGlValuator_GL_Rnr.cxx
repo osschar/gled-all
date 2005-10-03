@@ -30,7 +30,7 @@ void WGlValuator_GL_Rnr::_init()
 Double_t WGlValuator_GL_Rnr::get_value()
 {
   WGlValuator& V = *mWGlValuator;
-  char* addr = (char*)V.mCbackAlpha + V.mDataMember->GetOffset();
+  char* addr = (char*)*V.mCbackAlpha + V.mDataMember->GetOffset();
   return GledNS::peek_value(addr, V.mDataMember->GetDataType()->GetType());
 }
 
@@ -46,7 +46,7 @@ void WGlValuator_GL_Rnr::Draw(RnrDriver* rd)
 
   WGlValuator& V = *mWGlValuator;
 
-  string label("<no-set>");
+  TString label("<no-set>");
   if(V.DataOK())
     label = GForm(V.GetFormat(), get_value());
   FSR.FullRender(txf, label, V.mDx, V.mDy, bBelowMouse);
@@ -83,9 +83,8 @@ int WGlValuator_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     Int_t dx = (ev.fX - mX) / 4;
     // printf("drag at %d %d; x=%d, d=%d\n", ev.fX, ev.fX, mX, dx);
     if(dx !=0 && V.DataOK()) {
-      ZMIR mir(V.mCbackAlpha);
+      ZMIR mir(*V.mCbackAlpha);
       V.mDataMemberInfo->fSetMethod->ImprintMir(mir);
-      V.mDataMemberInfo->fSetMethod->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
       Double_t     val  = dx*V.mStepA;
       if(V.mStepB) val /= V.mStepB;
       val += get_value();

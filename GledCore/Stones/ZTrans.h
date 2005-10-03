@@ -7,92 +7,123 @@
 #ifndef GledCore_ZTrans_H
 #define GledCore_ZTrans_H
 
-// Includes
-class ZNode;
-
 #include <TVector3.h>
-#include <TVectorF.h>
-#include <TMatrixF.h>
-#include <TMath.h>
+
+class ZNode;
 
 /**************************************************************************/
 // ZTrans -- 3D transformation in generalised coordinates
 /**************************************************************************/
 
-class ZTrans : public TMatrixF {
+class ZTrans : public TObject
+{
+protected:
+  Double32_t            M[16];
 
   mutable Float_t	mA1;   //!
   mutable Float_t	mA2;   //!
   mutable Float_t	mA3;   //!
   mutable Bool_t	bAsOK; //!
 
-  void _init();
-
-protected:
-  Float_t norm3_column(Int_t col);
-  Float_t orto3_column(Int_t col, Int_t ref);
+  Double_t norm3_column(Int_t col);
+  Double_t orto3_column(Int_t col, Int_t ref);
 
 public:
   ZTrans();
-  ZTrans(const TMatrixF& m);
   ZTrans(const ZTrans& z);
   ZTrans(const ZNode* n);
   virtual ~ZTrans() {}
 
-  void  UnitTrans();
-  Int_t Set3Pos(Float_t x, Float_t y, Float_t z);
-  Int_t Set3Pos(Float_t* x);
-  Int_t SetPos(const TVectorF& v);
-  Int_t SetPos(const ZTrans& t);
-  void  Get3Pos(Float_t& x, Float_t& y, Float_t& z) const
-  {  x = (*this)(1,4); y = (*this)(2,4); z = (*this)(3,4); }
-  void  Get3Pos(Float_t* x) const
-  {  x[0] = (*this)(1,4); x[1] = (*this)(2,4); x[2] = (*this)(3,4); }
+  // General operations
 
-  TVectorF* GetBaseV(Int_t b) const;
-  TVector3  GetBaseVec3(Int_t b) const;
-  void      GetBaseVec3(TVector3& v, Int_t b) const;
-  TVector3  GetPosVec3() const             { return GetBaseVec3(4); }
-  void      GetPosVec3(TVector3& v) const  { return GetBaseVec3(v, 4); }
+  void     UnitTrans();
+  void     SetTrans(const ZTrans& t);
+  ZTrans&  operator=(const ZTrans& t) { SetTrans(t); return *this; }
+  void     SetupRotation(Int_t i, Int_t j, Double_t f);
 
-  void SetRot(Int_t i, Int_t j, Float_t f);
-  void SetTrans(const ZTrans& t);
-  void SetBaseV(Int_t i, Float_t x, Float_t y, Float_t z);
-  void SetBaseVec3(Int_t i, const TVector3& v);
+  void     OrtoNorm3();
+  Double_t Invert();
 
-  // Space-Time Position
-  // Move in LocalFrame; ai=1(fwd,bck), 2(up/down), 3(r/l)
-  Int_t MoveLF(Int_t ai, Float_t amount=1);
-  Int_t Move3(Float_t x, Float_t y, Float_t z);
-  // Rotate in LocalFrame; i1, i2 ... generator indices
-  Int_t RotateLF(Int_t i1, Int_t i2, Float_t amount=0.02);
+  void MultLeft(const ZTrans& t);
+  void MultRight(const ZTrans& t);
+  void operator*=(const ZTrans& t) { MultRight(t); }
 
-  // Now in some other frame ... 
-  Int_t Move(ZTrans* a, Int_t ai, Float_t amount=1);
-  Int_t Rotate(ZTrans* a, Int_t i1, Int_t i2, Float_t amount=0.02);
-  Int_t SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);
-  void  Get3Rot(Float_t* x) const;
+  ZTrans operator*(const ZTrans& t);
 
-  void     Scale3(Float_t sx, Float_t sy, Float_t sz);
-  void     GetScale3(Float_t& sx, Float_t& sy, Float_t& sz);
-  void     Unscale3(Float_t& sx, Float_t& sy, Float_t& sz);
-  Float_t  Unscale3();
+  // Move & Rotate
 
-  // Stuff to do w/ 3Vecs ...
-  TVectorF& Mult3Vec(TVectorF& v) const;
-  TVectorF& Rot3Vec(TVectorF& v) const;
+  void MoveLF(Int_t ai, Double_t amount);
+  void Move3LF(Double_t x, Double_t y, Double_t z);
+  void RotateLF(Int_t i1, Int_t i2, Double_t amount);
 
-  void OrtoNorm3();
+  void MovePF(Int_t ai, Double_t amount);
+  void Move3PF(Double_t x, Double_t y, Double_t z);
+  void RotatePF(Int_t i1, Int_t i2, Double_t amount);
 
-  void Invert() { TMatrixF::InvertFast(); bAsOK = false; }
+  void Move(const ZTrans& a, Int_t ai, Double_t amount);
+  void Move3(const ZTrans& a, Double_t x, Double_t y, Double_t z);
+  void Rotate(const ZTrans& a, Int_t i1, Int_t i2, Double_t amount);
 
-  Float_t operator()(Int_t rown, Int_t coln) const
-  { return (fElements[rown*fNcols + coln]); }
+  // Element access
 
-  Float_t& operator()(Int_t rown, Int_t coln)
-  { return (fElements[rown*fNcols + coln]); }
+  Double_t* Array() { return M; }      const Double_t* Array() const { return M; }
+  Double_t* ArrX()  { return M; }      const Double_t* ArrX()  const  { return M; }
+  Double_t* ArrY()  { return M +  4; } const Double_t* ArrY()  const  { return M +  4; }
+  Double_t* ArrZ()  { return M +  8; } const Double_t* ArrZ()  const  { return M +  8; }
+  Double_t* ArrT()  { return M + 12; } const Double_t* ArrT()  const  { return M + 12; }
 
-  ClassDef(ZTrans, 1)
+  Double_t  operator[](Int_t i) const { return M[i]; }
+  Double_t& operator[](Int_t i)       { return M[i]; }
+
+  Double_t  CM(Int_t i, Int_t j) const { return M[4*j + i]; }
+  Double_t& CM(Int_t i, Int_t j)       { return M[4*j + i]; }
+
+  Double_t  operator()(Int_t i, Int_t j) const { return M[4*j + i - 5]; }
+  Double_t& operator()(Int_t i, Int_t j)       { return M[4*j + i - 5]; }
+
+  // Base-vector interface
+
+  void SetBaseVec(Int_t b, Double_t x, Double_t y, Double_t z);
+  void SetBaseVec(Int_t b, const TVector3& v);
+
+  TVector3 GetBaseVec(Int_t b) const;
+  void     GetBaseVec(Int_t b, TVector3& v) const;
+
+  // Position interface
+
+  void SetPos(Double_t x, Double_t y, Double_t z);
+  void SetPos(Double_t* x);
+  void SetPos(const ZTrans& t);
+
+  void GetPos(Double_t& x, Double_t& y, Double_t& z) const;
+  void GetPos(Double_t* x) const;
+  void GetPos(TVector3& v) const;  
+  TVector3 GetPos() const;
+
+  // Cardan angle interface
+
+  void SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);
+  void GetRotAngles(Float_t* x) const;
+
+  // Scaling
+
+  void     Scale(Double_t sx, Double_t sy, Double_t sz);
+  void     GetScale(Double_t& sx, Double_t& sy, Double_t& sz);
+  void     Unscale(Double_t& sx, Double_t& sy, Double_t& sz);
+  Double_t Unscale();
+
+
+  // Operations on vectors
+
+  void     MultiplyIP(TVector3& v, Double_t w=1);
+  TVector3 Multiply(const TVector3& v, Double_t w=1);
+  void     RotateIP(TVector3& v);
+  TVector3 Rotate(const TVector3& v);
+
+
+  virtual void Print(Option_t* option = "") const;
+
+  ClassDef(ZTrans, 1) // Column-major 4x4 matrix for homogeneous coordinates.
 };
 
 ostream& operator<<(ostream& s, const ZTrans& t);

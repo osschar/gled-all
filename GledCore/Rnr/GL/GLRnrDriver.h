@@ -41,7 +41,7 @@ protected:
   Bool_t        bRedraw;         // X{gs}
 
 public:
-  GLRnrDriver(Eye* e, const string& r);
+  GLRnrDriver(Eye* e, const TString& r);
   virtual ~GLRnrDriver();
 
   virtual void BeginRender();

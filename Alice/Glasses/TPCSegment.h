@@ -38,6 +38,5 @@ class TPCSegment : public ZNode
   ClassDef(TPCSegment, 1)
 }; // endclass TPCSegment
 
-GlassIODef(TPCSegment);
 
 #endif

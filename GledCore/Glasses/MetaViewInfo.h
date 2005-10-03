@@ -31,6 +31,5 @@ public:
   ClassDef(MetaViewInfo, 1)
 }; // endclass MetaViewInfo
 
-GlassIODef(MetaViewInfo);
 
 #endif

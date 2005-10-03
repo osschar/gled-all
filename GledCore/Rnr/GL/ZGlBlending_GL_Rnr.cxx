@@ -7,6 +7,8 @@
 #include "ZGlBlending_GL_Rnr.h"
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void ZGlBlending_GL_Rnr::_init()
@@ -16,7 +18,7 @@ void ZGlBlending_GL_Rnr::_init()
 
 void ZGlBlending_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  // Ignore ZRnrModBase::PreDraw
+  PARENT::PreDraw(rd);
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POINT_BIT |
                GL_LINE_BIT         | GL_FOG_BIT   |
 	       GL_DEPTH_BUFFER_BIT);
@@ -30,8 +32,8 @@ void ZGlBlending_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlBlending_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  // Ignore ZRnrModBase::PostDraw
   glPopAttrib();
+  PARENT::PostDraw(rd);
 }
 
 /**************************************************************************/

@@ -30,22 +30,21 @@ void ZFilterAggregator::_init()
 
 ZMirFilter::Result_e ZFilterAggregator::FilterMIR(ZMIR& mir)
 {
-  if(mFilters) {
-    lpZGlass_i i, end;
+  if(mFilters != 0) {
     UChar_t result  = 0;
     UChar_t preempt = BuildPreemptionBits();
-    mFilters->BeginIteration(i, end);
-    while(i != end) {
-      UChar_t r = ((ZMirFilter*)*i)->FilterMIR(mir);
-      if(r & preempt) {
-	mFilters->EndIteration();
-	return FinaliseResult((Result_e)r);
+    {
+      GMutexHolder filter_lock(mFilters->RefListMutex());
+      AList::Stepper<> s(*mFilters);
+      while(s.step()) {
+	UChar_t r = ((ZMirFilter*)*s)->FilterMIR(mir);
+	if(r & preempt) {
+	  return FinaliseResult((Result_e)r);
+	}
+	result |= r;
+	if(result & R_Allow && result & R_Deny) break;
       }
-      result |= r;
-      if(result & R_Allow && result & R_Deny) break;
-      ++i;
     }
-    mFilters->EndIteration();
     if( (result & R_Allow && result & R_Deny) ||
         (result & ZMirFilter::R_None && bStrongNone) )
       {    

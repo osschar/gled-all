@@ -22,7 +22,7 @@ protected:
   Bool_t	bPreemptAllow;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bPreemptDeny;	// X{gS} 7 Bool()
 
-  ZHashList*	mFilters;	// X{gS} L{}
+  ZLink<ZHashList>  mFilters;	// X{gS} L{}
 
 public:
   ZFilterAggregator(const Text_t* n="ZFilterAggregator", const Text_t* t=0) :
@@ -36,7 +36,6 @@ public:
   ClassDef(ZFilterAggregator, 1)
 }; // endclass ZFilterAggregator
 
-GlassIODef(ZFilterAggregator);
 
 /**************************************************************************/
 // Inlines

@@ -54,6 +54,7 @@ void RectTerrain::_init()
   pTTvor = 0;
   mTTvorStamp = 0;
   bUseTringStrips = true;
+  mMaxTSVerts     = 256;
 }
 
 RectTerrain::~RectTerrain()
@@ -275,7 +276,7 @@ void RectTerrain::color_filler(Float_t* v, UChar_t* c, void* rt)
 
 void RectTerrain::MakeTringTvor()
 {
-  static const string _eh("RectTerrain::MakeTringTvor ");
+  static const Exc_t _eh("RectTerrain::MakeTringTvor ");
 
   Int_t minX = 1, maxX = mNx, minY = 1, maxY = mNy;
   if(bBorder) {
@@ -345,7 +346,7 @@ void RectTerrain::MakeTringTvor()
       TT.GenerateTriangleNormals();
   }
   if(bUseTringStrips)
-    TT.GenerateTriangleStrips();
+    TT.GenerateTriangleStrips(mMaxTSVerts);
 
   mTTvorStamp = mTimeStamp;
 }

@@ -30,6 +30,5 @@ public:
   ClassDef(Sphere, 1)
 }; // endclass Sphere
 
-GlassIODef(Sphere);
 
 #endif

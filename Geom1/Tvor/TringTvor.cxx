@@ -111,9 +111,9 @@ namespace __gnu_cxx {
   };
 }
 
-void TringTvor::GenerateTriangleStrips()
+void TringTvor::GenerateTriangleStrips(Int_t max_verts)
 {
-  static const string _eh("TringTvor::GenerateTriangleStrips ");
+  static const Exc_t _eh("TringTvor::GenerateTriangleStrips ");
 
   hash_map<xx_tring, Int_t> tring_map;
 
@@ -121,6 +121,7 @@ void TringTvor::GenerateTriangleStrips()
   if(tc == 0) throw(_eh + "failed to allocate TC structure.");
   // actcParami(tc, ACTC_OUT_MIN_FAN_VERTS, is maxint); // 
   // actcParami(tc, ACTC_OUT_MAX_PRIM_VERTS, 128);
+  actcParami(tc, ACTC_OUT_MAX_PRIM_VERTS, max_verts);
   actcParami(tc, ACTC_OUT_HONOR_WINDING, 1);
   actcBeginInput(tc);
   for(Int_t t=0; t<mNTrings; ++t) {

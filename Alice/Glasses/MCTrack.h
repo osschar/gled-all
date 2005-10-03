@@ -52,6 +52,5 @@ class MCTrack : public TrackBase {
   ClassDef(MCTrack, 1)
     }; // endclass MCTrack
 
-GlassIODef(MCTrack);
 
 #endif

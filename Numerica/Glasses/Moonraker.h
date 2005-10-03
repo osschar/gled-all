@@ -26,7 +26,7 @@ private:
   void _init();
 
 protected:
-  ODECrawler*	mODECrawler;	// X{gS} L{}
+  ZLink<ODECrawler>	mODECrawler;	// X{gS} L{}
 
   Float_t	mT0Moon;	// X{gS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t	mRMoon;		// X{gS} 7 Value(-range=>[0,100,1,1000])
@@ -59,6 +59,5 @@ public:
   ClassDef(Moonraker, 1)
 }; // endclass Moonraker
 
-GlassIODef(Moonraker);
 
 #endif

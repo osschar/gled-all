@@ -43,15 +43,15 @@ public:
 
   enum Exc_e { OE_Done, OE_Continue, OE_Wait, OE_Stop, OE_Break };
 
-  struct Exception {
+  struct Exception : public Exc_t {
     Operator*	fSource;
     Exc_e	fExc;
-    string	fMessage;
 
-    Exception(Operator* o, Exc_e e, const string& m) :
-      fSource(o), fExc(e), fMessage(m) {}
+    Exception(Operator* o, Exc_e e, const TString& m) :
+      Exc_t(m), fSource(o), fExc(e) {}
     Exception(Operator* o, Exc_e e, const char* m) :
-      fSource(o), fExc(e), fMessage(m) {}
+      Exc_t(m), fSource(o), fExc(e) {}
+    virtual ~Exception() throw() {}
   };
 
 private:
@@ -74,7 +74,6 @@ public:
   ClassDef(Operator, 1)
 }; // endclass Operator
 
-GlassIODef(Operator);
 
 
 #define OP_EXE_OR_SP_MIR(_lens_, _method_, ...) { \

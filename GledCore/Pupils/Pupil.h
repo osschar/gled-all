@@ -7,13 +7,12 @@
 #ifndef GledCore_Pupil_H
 #define GledCore_Pupil_H
 
-// Includes
 #include <Glasses/ZNode.h>
 #include <Glasses/Camera.h>
 class GTime;
 
 #include <Eye/OptoStructs.h>
-#include <Eye/FTW_SubShell.h>
+#include <GledView/FTW_SubShell.h>
 class PupilInfo;
 class MTW_ClassView;
 
@@ -44,7 +43,7 @@ protected:
   ZNode*	mCamBase;
   ZTrans	mCamBaseTrans;
   ZTrans	mCamAbsTrans;
-  Float_t       mProjBase[16];
+  ZTrans        mProjBase;
 
   OptoStructs::ZGlassImg* mOverlayImg;
   OptoStructs::ZGlassImg* mEventHandlerImg;
@@ -62,7 +61,7 @@ protected:
   bool		bDumpImage;
   TString	mImageName;
   Int_t		mImgNTiles;
-  void		dump_image(const string& fname);
+  void		dump_image(const TString& fname);
 
   // rendering elements
   void rnr_default_init();
@@ -97,7 +96,7 @@ public:
   struct pick_lens_data {
     OptoStructs::ZGlassImg*    img;
     float                      z;
-    string	               name;
+    TString	               name;
     OptoStructs::lpZGlassImg_t name_stack;
 
     pick_lens_data(OptoStructs::ZGlassImg* i, float depth, const char* n) :
@@ -141,10 +140,24 @@ public:
   void check_driver_redraw();
   static void redraw_timeout(Pupil* pup);
 
+
   //--------------------------------------------------------------
   // Hacks
+  //--------------------------------------------------------------
+
   float default_distance();
-  static void camera_stamp_cb(Camera* cam, Pupil* pup);
+
+ protected:
+
+  class camera_stamp_cb : public ZGlass::RayAbsorber
+  {
+    Pupil* pupil;
+  public:
+    camera_stamp_cb(Pupil* p) : pupil(p) {}
+    virtual void AbsorbRay(Ray& ray);
+  };
+
+  camera_stamp_cb mCameraCB;
 
 #include "Pupil.h7"
 }; // endclass Pupil

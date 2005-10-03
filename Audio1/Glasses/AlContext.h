@@ -32,6 +32,5 @@ public:
   ClassDef(AlContext, 1)
 }; // endclass AlContext
 
-GlassIODef(AlContext);
 
 #endif

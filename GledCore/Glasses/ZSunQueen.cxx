@@ -85,7 +85,7 @@ void ZSunQueen::bootstrap()
   Gled::theOne->CopyIdentities(ids);
   Gled::theOne->CopyGroupIdentities(ids);
   for(lStr_i i=ids.begin(); i!=ids.end(); ++i) {
-    GetOrImportIdentity(i->c_str());
+    GetOrImportIdentity(i->Data());
   }
   */
 }
@@ -108,7 +108,7 @@ ID_t ZSunQueen::incarnate_moon(SaturnInfo* parent, SaturnInfo* moon)
 
 void ZSunQueen::IncarnateMoon(SaturnInfo* parent)
 {
-  static const string _eh("ZSunQueen::IncarnateMoon ");
+  static const Exc_t _eh("ZSunQueen::IncarnateMoon ");
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
@@ -129,7 +129,7 @@ ID_t ZSunQueen::incarnate_eye(SaturnInfo* parent, EyeInfo* eye)
 
 void ZSunQueen::IncarnateEye(SaturnInfo* parent)
 {
-  static const string _eh("ZSunQueen::IncarnateEye ");
+  static const Exc_t _eh("ZSunQueen::IncarnateEye ");
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
@@ -146,7 +146,7 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
   // If sent as MT_Beam interprets it as request to shut down
   // connection to the moon with notification sent to SunQueen.
 
-  static string _eh("ZSunQueen::CremateMoon ");
+  static TString _eh("ZSunQueen::CremateMoon ");
   ZMIR* mir = ZGlass::assert_MIR_presence(_eh);
 
   if(moon->GetMaster() == mSaturn->GetSaturnInfo()) {
@@ -163,7 +163,7 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
 
   if(mSaturn->GetSunAbsolute()) {
     mir->ClearRecipient();
-    mir->SetCaller(mSunInfo);
+    mir->SetCaller(mSunInfo.get());
     mSaturn->BroadcastMIR(*mir, mSaturn->mMoons);
   }
 
@@ -175,7 +175,7 @@ void ZSunQueen::CremateMoon(SaturnInfo* moon)
 
 void ZSunQueen::CremateEye(EyeInfo* eye)
 {
-  static const string _eh("ZSunQueen::CremateEye ");
+  static const Exc_t _eh("ZSunQueen::CremateEye ");
 
   ZMIR* mir = ZGlass::assert_MIR_presence(_eh);
 
@@ -193,7 +193,7 @@ void ZSunQueen::CremateEye(EyeInfo* eye)
 
   if(mSaturn->GetSunAbsolute()) {
     mir->ClearRecipient();
-    mir->SetCaller(mSunInfo);
+    mir->SetCaller(mSunInfo.get());
     mSaturn->BroadcastMIR(*mir, mSaturn->mMoons);
   }
 
@@ -214,12 +214,13 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
   // Handles most of the connection stuff on the Saturn side, in particular
   // all communication with Sun Absolute.
 
-  static const string _eh("ZSunQueen::handle_mee_connection ");
+  static const Exc_t _eh("ZSunQueen::handle_mee_connection ");
 
   ZMIR* mir_ptr;
   if(GledNS::IsA(mee, SaturnInfo::FID())) {
     if(mSaturn->GetAllowMoons() == false) {
-      throw(_eh + "Saturn is not accepting moon connections");
+      printf("type = %s\n", typeid(_eh + "frek").name());
+      throw(_eh + "Saturn is not accepting moon connections.");
     }
     mir_ptr = S_initiate_saturn_connection();
   }
@@ -227,23 +228,23 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
     mir_ptr = S_initiate_eye_connection();
   }
   else {
-    throw(_eh + "unknown type of mee");
+    throw(_eh + "unknown type of mee.");
   }
   auto_ptr<ZMIR> mir( mir_ptr );
   GledNS::StreamLens(*mir, mee);
-  mir->SetRecipient(mSunInfo);
+  mir->SetRecipient(mSunInfo.get());
   delete mee;
 
-  ISdebug(0, _eh + "Waiting for MirEmittingEntity instantiation");
+  ISdebug(0, _eh + "Waiting for MirEmittingEntity instantiation.");
   auto_ptr<ZMIR_RR> ret ( mSaturn->ShootMIRWaitResult(mir) );
   if(!ret->BeamResult_OK())
-    throw(string(ret->GenError()));
+    throw(Exc_t(ret->GenError()));
 
   UChar_t crr_buf; *ret >> crr_buf;
   ConnReqResult_e crr = (ConnReqResult_e)crr_buf;
 
   if(crr == CRR_Denied) {
-    throw(_eh + "connection denied");
+    throw(_eh + "connection denied.");
   }
 
   ID_t mee_id;
@@ -267,18 +268,18 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
     mee_id = ncsd->fMeeID;
     mNCSlaveData.remove(conn_id);
     if(state != CRR_OK)
-      throw(_eh + "permission denied");
+      throw(_eh + "permission denied.");
   }
   else if(crr == CRR_OK) {
     *ret >> mee_id;
   }
   else {
-    throw(_eh + "unknown reponse from master");
+    throw(_eh + "unknown reponse from master.");
   }
 
   mee = dynamic_cast<ZMirEmittingEntity*>(mSaturn->DemangleID(mee_id));
   if(mee == 0) {
-    throw(_eh + "received CRR_OK but can't demangle MirEmittingEntity");
+    throw(_eh + "received CRR_OK but can't demangle MirEmittingEntity.");
   }
 
   if(GledNS::IsA(mee, SaturnInfo::FID())) {
@@ -292,10 +293,10 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
     mSaturn->finalize_eye_connection(ei);
   } 
   else {
-    throw(_eh + "unknow type of MEE");
+    throw(_eh + "unknow type of MEE.");
   }
 
-  ISdebug(0, _eh + "MirEmittingEntity received and finalised");
+  ISdebug(0, _eh + "MirEmittingEntity received and finalised.");
 
 }
 
@@ -323,7 +324,7 @@ void ZSunQueen::initiate_mee_connection()
   // a request for connection of a new Saturn to the Sun Absolute.
   // The desired MirEmittingEntity must be attached to the MIR.
 
-  static const string _eh("ZSunQueen::initiate_mee_connection ");
+  static const Exc_t _eh("ZSunQueen::initiate_mee_connection ");
 
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
@@ -362,7 +363,7 @@ void ZSunQueen::initiate_mee_connection()
     try {
       Gled::theOne->GetPubKeyFile(mee->mLogin);
     }
-    catch(string exc) {
+    catch(Exc_t& exc) {
       throw(_eh + "unknown identity (" + exc + ")"); // !!!! should deny below
     }
   }
@@ -385,8 +386,8 @@ void ZSunQueen::initiate_mee_connection()
 
 void ZSunQueen::handle_mee_authentication(UInt_t conn_id, TSocket* socket)
 {
-  static const string _eh("ZSunQueen::handle_mee_authentication "); 
-  string err;
+  static const Exc_t _eh("ZSunQueen::handle_mee_authentication "); 
+  TString err;
 
   NCMData* ncmd = mNCMasterData.retrieve(conn_id);
   if(ncmd == 0) {
@@ -400,7 +401,7 @@ void ZSunQueen::handle_mee_authentication(UInt_t conn_id, TSocket* socket)
     // !!!! should assert key of mee equal or longer from sun key
     mee.GenerateSecret();
   }
-  catch(string exc) {
+  catch(Exc_t& exc) {
     err = "key handling failed";
     goto auth_failed;
   }
@@ -449,7 +450,7 @@ void ZSunQueen::handle_mee_authentication(UInt_t conn_id, TSocket* socket)
 
 void ZSunQueen::accept_mee_connection(UInt_t conn_id, ID_t mee_id)
 {
-  static const string _eh("ZSunQueen::accept_mee_connection ");
+  static const Exc_t _eh("ZSunQueen::accept_mee_connection ");
 
   NCSData* ncsd = mNCSlaveData.retrieve(conn_id);
   if(ncsd == 0) {
@@ -464,7 +465,7 @@ void ZSunQueen::accept_mee_connection(UInt_t conn_id, ID_t mee_id)
 
 void ZSunQueen::deny_mee_connection(UInt_t conn_id)
 {
-  static const string _eh("ZSunQueen::drop_mee_connection ");
+  static const Exc_t _eh("ZSunQueen::drop_mee_connection ");
 
   NCSData* ncsd = mNCSlaveData.retrieve(conn_id);
   if(ncsd == 0) {
@@ -484,7 +485,7 @@ ID_t ZSunQueen::incarnate_mee(UInt_t conn_id)
   // Creates a flare and shoots id with set-uid to SunAbsolute.
   // Also calls attach_primary_identity().
 
-  static const string _eh("ZSunQueen::incarnate_mee ");
+  static const Exc_t _eh("ZSunQueen::incarnate_mee ");
 
   NCMData* ncd = mNCMasterData.retrieve(conn_id);
   if(ncd == 0)
@@ -527,7 +528,7 @@ ID_t ZSunQueen::incarnate_mee(UInt_t conn_id)
 
 ZIdentity* ZSunQueen::GetOrImportIdentity(const char* ident)
 {
-  static const string _eh("ZSunQueen::GetOrImportIdentity ");
+  static const Exc_t _eh("ZSunQueen::GetOrImportIdentity ");
 
   ZIdentity* identity = 0;
   const char* path;
@@ -571,7 +572,7 @@ ZIdentity* ZSunQueen::GetOrImportIdentity(const char* ident)
 
 void ZSunQueen::AttachIdentity(ZIdentity* id)
 {
-  static string _eh("ZSunQueen::AttachIdentity ");
+  static TString _eh("ZSunQueen::AttachIdentity ");
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
@@ -585,8 +586,8 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
     throw(_eh + "for now only handles group identities");
 
   lpZGlass_t mee_ids;
-  mee_ids.push_back(mir->Caller->mPrimaryIdentity);
-  mir->Caller->mActiveIdentities->Copy(mee_ids);
+  mee_ids.push_back(mir->Caller->mPrimaryIdentity.get());
+  mir->Caller->mActiveIdentities->CopyList(mee_ids);
   for(lpZGlass_i i=mee_ids.begin(); i!=mee_ids.end(); ++i) {
 
     if(Gled::theOne->IsIdentityInGroup((*i)->GetName(), id->GetName())) {
@@ -604,7 +605,7 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
 
 void ZSunQueen::DetachIdentity(ZIdentity* id)
 {
-  static string _eh("ZSunQueen::DetachIdentity ");
+  static TString _eh("ZSunQueen::DetachIdentity ");
 
   ZMIR* mir = assert_MIR_presence(_eh);
   if(id == 0)
@@ -628,7 +629,7 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
 
 void ZSunQueen::attach_primary_identity(ZMirEmittingEntity* mee)
 {
-  static const string _eh("ZSunQueen::attach_primary_identity ");
+  static const Exc_t _eh("ZSunQueen::attach_primary_identity ");
 
   ZIdentity* identity = GetOrImportIdentity(mee->GetLogin());
   CALL_AND_BROADCAST(mee, SetPrimaryIdentity, identity);
@@ -641,31 +642,26 @@ void ZSunQueen::attach_primary_identity(ZMirEmittingEntity* mee)
 
 void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
 {
-  static const string _eh("ZSunQueen::detach_all_identities ");
+  static const Exc_t _eh("ZSunQueen::detach_all_identities ");
 
   ZIdentity* id;
   mee->WriteLock();
-  if((id = mee->mPrimaryIdentity) != 0) {
+  if((id = mee->mPrimaryIdentity.get()) != 0) {
     mee->SetPrimaryIdentity(0);
     id->mActiveMEEs->Remove(mee);
   }
-  if(mee->mActiveIdentities) {
-    lpZGlass_i i, end;
-    mee->mActiveIdentities->BeginIteration(i, end);
-    while(i != end) {
-      id = (ZIdentity*)(*i);
-      id->mActiveMEEs->Remove(mee);
-      ++i;
-    }
-    mee->mActiveIdentities->EndIteration();
+  {
+    Stepper<ZIdentity> s(*mee->mActiveIdentities);
+    while(s.step())
+      s->mActiveMEEs->Remove(mee);
     mee->mActiveIdentities->ClearList();
   }
 
   SaturnInfo* si = dynamic_cast<SaturnInfo*>(mee);
   if(si != 0) {
     lpZGlass_t l;
-    si->GetMoons()->Copy(l);
-    si->GetEyes()->Copy(l);
+    si->GetMoons()->CopyList(l);
+    si->GetEyes()->CopyList(l);
     for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
       detach_all_identities((ZMirEmittingEntity*)*i);
     }
@@ -681,7 +677,7 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
 void ZSunQueen::HandleClientSideAuthentication(TSocket* socket, UInt_t conn_id,
 					       TString& identity)
 {
-  static const string _eh("ZSunQueen::HandleClientSideAuthentication "); 
+  static const Exc_t _eh("ZSunQueen::HandleClientSideAuthentication "); 
 
   {
     TMessage m(GledNS::MT_MEE_Authenticate);
@@ -700,7 +696,7 @@ void ZSunQueen::HandleClientSideAuthentication(TSocket* socket, UInt_t conn_id,
     try {
       key.ReadPrivKey(Gled::theOne->GetPrivKeyFile(identity));
     }
-    catch(string exc) {
+    catch(Exc_t& exc) {
       delete m;
       throw(_eh + "error reading private key (" + exc + ")");
     }

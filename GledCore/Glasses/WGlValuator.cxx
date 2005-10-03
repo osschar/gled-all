@@ -37,24 +37,23 @@ void WGlValuator::_init()
 GledNS::DataMemberInfo* WGlValuator::GetDataMemberInfo()
 {
   if(mDataMemberInfo == 0)
-    mDataMemberInfo = GledNS::DeduceDataMemberInfo(mCbackAlpha, mCbackMemberName.Data());
+    mDataMemberInfo = GledNS::DeduceDataMemberInfo(*mCbackAlpha, mCbackMemberName.Data());
   return mDataMemberInfo;
 }
 
 TDataMember* WGlValuator::GetDataMember()
 {
   if(mDataMember == 0 && mCbackAlpha != 0) {
-    TRealData* rd = mCbackAlpha->IsA()->GetRealData((string("m") + mCbackMemberName.Data()).c_str());
-    if(rd != 0)
-      mDataMember = rd->GetDataMember();
+    if(GetDataMemberInfo() == 0)
+      return 0;
+    mDataMember = mDataMemberInfo->GetTDataMember();
   }
   return mDataMember;
 }
 
 Bool_t WGlValuator::DataOK()
 {
-  GetDataMemberInfo(); GetDataMember();
-  return (mDataMemberInfo != 0 && mDataMember != 0);
+  return (GetDataMemberInfo() != 0 && GetDataMember() != 0);
 }
 
 /**************************************************************************/

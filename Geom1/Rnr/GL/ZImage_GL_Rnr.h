@@ -12,7 +12,8 @@
 
 #include <GL/gl.h>
 
-class ZImage_GL_Rnr : public ZGlass_GL_Rnr {
+class ZImage_GL_Rnr : public ZGlass_GL_Rnr
+{
 private:
   void _init();
 

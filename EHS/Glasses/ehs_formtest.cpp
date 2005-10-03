@@ -26,7 +26,7 @@
 #include <string>
 #include <list>
 
-#include <EHS.h>
+#include <ehs/ehs.h>
 
 typedef std::list < std::string > StringList;
 

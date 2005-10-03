@@ -31,9 +31,8 @@ int UINodeLink_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     mUINodeLink->SetHasFocus(false);
     GledNS::MethodInfo* mi = mUINodeLink->GetFocusMethodInfo();
     if(mi == 0) return 0;
-    ZMIR mir(mUINodeLink->mFocusAlpha,mUINodeLink->mFocusBeta);
+    ZMIR mir(*mUINodeLink->mFocusAlpha, *mUINodeLink->mFocusBeta);
     mi->ImprintMir(mir);
-    mi->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
     fImg->fEye->Send(mir);
     Redraw(rd);
     return 1;
@@ -44,9 +43,8 @@ int UINodeLink_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     mUINodeLink->SetHasFocus(true);
     GledNS::MethodInfo* mi = mUINodeLink->GetFocusMethodInfo();
     if(mi == 0) return 0;
-    ZMIR mir(mUINodeLink->mFocusAlpha,mUINodeLink->mFocusBeta);
+    ZMIR mir(*mUINodeLink->mFocusAlpha, *mUINodeLink->mFocusBeta);
     mi->ImprintMir(mir);
-    mi->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
     fImg->fEye->Send(mir);
     Redraw(rd);
     return 1;
@@ -55,9 +53,8 @@ int UINodeLink_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
   if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
     GledNS::MethodInfo* mi = mUINodeLink->GetCbackMethodInfo();
     if(mi == 0) return 0;
-    ZMIR mir(mUINodeLink->mCbackAlpha,mUINodeLink->mCbackBeta);
+    ZMIR mir(*mUINodeLink->mCbackAlpha, *mUINodeLink->mCbackBeta);
     mi->ImprintMir(mir);
-    mi->FixMirBits(mir, fImg->fEye->GetSaturnInfo());
     fImg->fEye->Send(mir);
     bBelowMouse = false;
     Redraw(rd);

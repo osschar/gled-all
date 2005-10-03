@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "EyeInfo.h"
-#include <Net/Ray.h>
+#include <Eye/Ray.h>
 #include <Stones/ZMIR.h>
 #include <Ephra/Saturn.h>
 

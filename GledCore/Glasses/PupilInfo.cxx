@@ -82,7 +82,7 @@ void PupilInfo::_init()
 
 void PupilInfo::SetCameraBase(ZNode* camerabase)
 {
-  static const string _eh("PupilInfo::SetCameraBase ");
+  static const Exc_t _eh("PupilInfo::SetCameraBase ");
 
   if(camerabase != 0) {
     ZTrans* t = ToPupilFrame(camerabase);
@@ -90,12 +90,12 @@ void PupilInfo::SetCameraBase(ZNode* camerabase)
       throw(_eh + "camera not connected into pupil contents.");
     delete t;
   }
-  set_link_or_die((ZGlass*&)mCameraBase, camerabase, FID());
+  set_link_or_die(mCameraBase.ref_link(), camerabase, FID());
 }
 
 void PupilInfo::SetLookAt(ZNode* lookat)
 {
-  static const string _eh("PupilInfo::SetLookAt ");
+  static const Exc_t _eh("PupilInfo::SetLookAt ");
 
   if(lookat != 0) {
     ZTrans* t = ToPupilFrame(lookat);
@@ -103,12 +103,12 @@ void PupilInfo::SetLookAt(ZNode* lookat)
       throw(_eh + "camera not connected into pupil contents.");
     delete t;
   }
-  set_link_or_die((ZGlass*&)mLookAt, lookat, FID());
+  set_link_or_die(mLookAt.ref_link(), lookat, FID());
 }
 
 void PupilInfo::SetUpReference(ZNode* upreference)
 {
-  static const string _eh("PupilInfo::SetUpReference ");
+  static const Exc_t _eh("PupilInfo::SetUpReference ");
 
   if(upreference != 0) {
     ZTrans* t = ToPupilFrame(upreference);
@@ -117,7 +117,7 @@ void PupilInfo::SetUpReference(ZNode* upreference)
     delete t;
   }
 
-  set_link_or_die((ZGlass*&)mUpReference, upreference, FID());
+  set_link_or_die(mUpReference.ref_link(), upreference, FID());
 }
 
 /**************************************************************************/
@@ -129,7 +129,7 @@ void PupilInfo::ImportCameraInfo(CameraInfo* cam_info)
   // cat cbase.defs | perl -e 'undef $/; $l=<STDIN>; @x=split(/\s*=[^;]+\s*;\s*/, $l); for $d (@x) { $m=$d; $m=~s/^m|b//; print "  $d = cam_info->Get$m();\n";}'
   // + hand fixes for links/enums.
 
-  static const string _eh("PupilInfo::ImportCameraInfo ");
+  static const Exc_t _eh("PupilInfo::ImportCameraInfo ");
 
   if(cam_info == 0) throw(_eh + "called with cam_info=0.");
 
@@ -203,19 +203,17 @@ ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
   if(node == 0) return 0;
 
   GMutexHolder lst_lck(mListMutex);
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    ZNode* pup_elm = dynamic_cast<ZNode*>(*i);
-    if(pup_elm) {
-      if(pup_elm == node) {
-	return new ZTrans(pup_elm->RefTrans());
-      } else {
-	ZTrans* t = node->ToNode(pup_elm);
-	if(t != 0) {
-	  ZTrans* ret = new ZTrans(pup_elm->RefTrans());
-	  *ret *= *t;
-	  delete t;
-	  return ret;
-	}
+  Stepper<ZNode> s(this);
+  while(s.step()) {
+    if(*s == node) {
+      return new ZTrans(s->RefTrans());
+    } else {
+      ZTrans* t = node->ToNode(*s);
+      if(t != 0) {
+	ZTrans* ret = new ZTrans(s->RefTrans());
+	*ret *= *t;
+	delete t;
+	return ret;
       }
     }
   }
@@ -230,7 +228,7 @@ ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
   ZTrans* n2p = ToPupilFrame(node);
   if(n2p == 0) return 0;
   
-  ZNode* cam_base = mCameraBase;
+  ZNode* cam_base = mCameraBase.get();
   if(cam_base) {
     ZTrans* c2p = ToPupilFrame(cam_base);
     if(c2p == 0) {

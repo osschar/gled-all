@@ -19,8 +19,6 @@
 
 #include <TUnixSystem.h>
 
-#include <FL/Fl.H>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -37,12 +35,12 @@ void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 
 Eye::Eye(TSocket* sock, EyeInfo* ei) : mSatSocket(sock)
 {
-  static const string _eh("Eye::Eye ");
+  static const Exc_t _eh("Eye::Eye ");
 
   try {
     Saturn::HandleClientSideSaturnHandshake(mSatSocket);
   }
-  catch(string exc) {
+  catch(Exc_t& exc) {
     throw(_eh + exc);
   }
   // No protocol exchange ...
@@ -51,7 +49,7 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) : mSatSocket(sock)
     try {
       m = Saturn::HandleClientSideMeeConnection(mSatSocket, ei);
     }
-    catch(string exc) {
+    catch(Exc_t& exc) {
       throw(_eh + exc);
     }
     UInt_t ss;  *m >> ss; mSaturn = (Saturn*)ss; mSaturnInfo = mSaturn->GetSaturnInfo();
@@ -63,7 +61,7 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) : mSatSocket(sock)
     }
   }
 
-  ISdebug(0, GForm("%screation of Eye('%s') complete", _eh.c_str(), mEyeInfo->GetName()));
+  ISdebug(0, GForm("%screation of Eye('%s') complete", _eh.Data(), mEyeInfo->GetName()));
 
 }
 
@@ -100,9 +98,9 @@ OS::ZGlassImg* Eye::DemangleID(ID_t id)
 
 void Eye::RemoveImage(OS::ZGlassImg* img)
 {
-  static const string _eh("Eye::RemoveImage ");
+  static const Exc_t _eh("Eye::RemoveImage ");
 
-  OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fGlass);
+  OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fLens);
   if(i == mGlass2ImgHash.end()) {
     cout << _eh + "lens of passed image not found in hash.\n";
     return;
@@ -129,7 +127,7 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
 
 Int_t Eye::Manage(int fd)
 {
-  static const string _eh("Eye::Manage ");
+  static const Exc_t _eh("Eye::Manage ");
 
   TMessage *m;
   UInt_t    length;
@@ -157,8 +155,8 @@ Int_t Eye::Manage(int fd)
     }
 
     if(len == 0) {
-      ISerr(_eh + "Saturn closed connection ... unregistring fd handler.");
-      Fl::remove_fd(mSatSocket->GetDescriptor());
+      ISerr(_eh + "Saturn closed connection ... unregiTString fd handler.");
+      UninstallFdHandler();
       delete m; return -2;
     }
 
@@ -217,7 +215,7 @@ Int_t Eye::Manage(int fd)
       ray.fGammaImg = ray.HasGamma() ? DemanglePtr(ray.fGamma) : 0;
 
       // Read-lock alpha
-      GLensReadHolder(a->fGlass);
+      GLensReadHolder(a->fLens);
       
       a->PreAbsorption(ray);
 
@@ -244,10 +242,14 @@ Int_t Eye::Manage(int fd)
       // printf("Eye::Manage breaking loop on request ...\n");
       break;
     }
+
+    if(all_count > 9999) {
+      break;
+    }
   } // end while(1)
 
   ISdebug(6, GForm("%s got %d message(s), %d ray(s) in this gulp",
-		   _eh.c_str(), all_count, ray_count));
+		   _eh.Data(), all_count, ray_count));
 
   PostManage(ray_count);
 

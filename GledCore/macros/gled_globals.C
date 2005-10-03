@@ -23,7 +23,7 @@ void gled_globals()
 {
   g_saturn = Gled::theOne->GetSaturn();
   if(g_saturn == 0) {
-    throw(string("Sun is not spawned ...\n"));
+    throw(Exc_t("gled_globals: Sun is not spawned.\n"));
   }
 
   g_sun_king   = g_saturn->GetSunKing();

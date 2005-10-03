@@ -38,28 +38,28 @@ void MultiBoard::AdEnlightenment()
 
 void MultiBoard::First()
 {
-  ZImage* i = dynamic_cast<ZImage*>(mSlides->First());
+  ZImage* i = dynamic_cast<ZImage*>(mSlides->FrontElement());
   if(i == 0) return;
   SetTexture(i);
 }
 
 void MultiBoard::Last()
 {
-  ZImage* i = dynamic_cast<ZImage*>(mSlides->Last());
+  ZImage* i = dynamic_cast<ZImage*>(mSlides->BackElement());
   if(i == 0) return;
   SetTexture(i);
 }
 
 void MultiBoard::Prev()
 {
-  ZImage* i = dynamic_cast<ZImage*>(mSlides->Before(mTexture));
+  ZImage* i = dynamic_cast<ZImage*>(mSlides->ElementBefore(mTexture.get()));
   if(i == 0) First();
   else	     SetTexture(i);
 }
 
 void MultiBoard::Next()
 {
-  ZImage* i = dynamic_cast<ZImage*>(mSlides->After(mTexture));
+  ZImage* i = dynamic_cast<ZImage*>(mSlides->ElementAfter(mTexture.get()));
   if(i == 0) Last();
   else	     SetTexture(i);
 }

@@ -96,8 +96,8 @@ void Amphitheatre::AddGuest(ZNode* guest)
     if(gp != 0) {
       auto_ptr<ZTrans> t( ZNode::BtoA(this, guest) );
       if(t.get() != 0) {
-	Float_t s[3];
-	t->Unscale3(s[0], s[1], s[2]);
+	Double_t s[3];
+	t->Unscale(s[0], s[1], s[2]);
 	guest->SetTrans(*t);
 	guest->SetScales(s[0], s[1], s[2]);
       }
@@ -110,11 +110,10 @@ void Amphitheatre::AddGuest(ZNode* guest)
 
 void Amphitheatre::ClearFailedGuests()
 {
-  lpZGlass_i i, end;
   mNewGuests->WriteLock();
-  mNewGuests->BeginIteration(i, end);
-  while(i != end) { Remove(*i); ++i; }
-  mNewGuests->EndIteration();
+  lpZGlass_t l; mNewGuests->CopyList(l);
+  for(lpZGlass_i i=l.begin(); i!=l.end(); ++i)
+    RemoveAll(*i);
   mNewGuests->ClearList();
   mNewGuests->WriteUnlock();
 }
@@ -161,7 +160,7 @@ void Amphitheatre::chair_hunt()
   typedef list<ZNode*>::iterator lpZNode_i;
 
   lpZNode_t nodes;
-  mNewGuests->CopyByGlass<ZNode*>(nodes);
+  mNewGuests->CopyListByGlass<ZNode>(nodes);
   
   if(bChairHunt == false || nodes.empty() || mNumChFree <= 0) {
     StopHunt();
@@ -173,7 +172,7 @@ void Amphitheatre::chair_hunt()
     if(mNumChFree <= 0)
       break;
 
-    TVector3 x   = node->RefTrans().GetPosVec3();
+    TVector3 x   = node->RefTrans().GetPos();
     Chair* chair = closest_free_chair(x);
     
     x = chair->fPos - x;
@@ -186,7 +185,7 @@ void Amphitheatre::chair_hunt()
     bool finalp = (dx <= mGuestStep); // Guest has reached the chair.
 
     node->WriteLock();
-    node->Move3(x.x(), x.y(), x.z());
+    node->Move3LF(x.x(), x.y(), x.z());
     fix_guest_scale(node, finalp);
     // !! Could rotate it along travel axis.
     node->WriteUnlock();
@@ -195,7 +194,7 @@ void Amphitheatre::chair_hunt()
       changep = true;
       // !!! Should also rotate it towards the stage.
       mNewGuests->WriteLock();
-      mNewGuests->Remove(node);
+      mNewGuests->RemoveAll(node);
       mNewGuests->WriteUnlock();
       chair->fNode = node;
       --mNumChFree;
@@ -211,11 +210,11 @@ void Amphitheatre::chair_hunt()
   for(lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n) {
     TVector3 f;
     ZNode* node = *n;    
-    TVector3 x(node->RefTrans().GetPosVec3());
+    TVector3 x(node->RefTrans().GetPos());
     // loop over rivals
     for(lpZNode_i o=nodes.begin(); o!=nodes.end(); ++o) {
       if(o == n) continue;
-      TVector3 y = (*o)->RefTrans().GetPosVec3();
+      TVector3 y = (*o)->RefTrans().GetPos();
       y -= x;
       Double_t d = y.Mag();
       if(d < rxM) {
@@ -227,7 +226,7 @@ void Amphitheatre::chair_hunt()
     // loop over taken chairs
     for(lChair_i i=mChairs.begin(); i != mChairs.end(); ++i) {
       if(! i->freep()) {
-	TVector3 y = i->fNode->RefTrans().GetPosVec3();
+	TVector3 y = i->fNode->RefTrans().GetPos();
 	y -= x;
 	Double_t d = y.Mag();
 	if(d < rxM) {
@@ -242,7 +241,7 @@ void Amphitheatre::chair_hunt()
     if(fmag != 0) {
       if(fmag > mGuestStep/2) f *= mGuestStep/2/fmag;
       node->WriteLock();
-      node->Move3(f.x(), f.y(), f.z());
+      node->Move3LF(f.x(), f.y(), f.z());
       node->WriteUnlock();
     }
   }
@@ -310,7 +309,7 @@ void Amphitheatre::MakeRandomGuests(Int_t nguests, Float_t box_size)
   for(Int_t i=0; i<nguests; ++i) {
     Sphere* s = new Sphere(GForm("Guest %d", int(1000*mRnd.Rndm())));
 
-    s->Set3Pos(rnd(box_size, -bh), rnd(box_size, -bh), rnd(box_size, -bh));
+    s->SetPos(rnd(box_size, -bh), rnd(box_size, -bh), rnd(box_size, -bh));
     s->SetColor(rnd(0.6,0.4), rnd(0.6,0.4), rnd(0.6,0.4));
     s->SetLOD(12);
     s->SetRadius(0.1);

@@ -49,7 +49,7 @@ class PRSBase : public ZRnrModBase {
   Float_t                  mMinAng;        // X{GST}  7 Value(-range=>[1,180 ,1], -join=>1)
   Float_t                  mDelta;         // X{GST}  7 Value(-range=>[1e-3,100, 1,1000])
   // track textures
-  ZImage*                  mTexture;      // X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
+  ZLink<ZImage>                  mTexture;      // X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
   Float_t                  mTexFactor;    // X{GST}  7 Value(-range=>[0,1000, 1,100])
   Float_t                  mTexUCoor;     // X{GST}  7 Value(-range=>[0,1, 1,1000], -join=>1)
   Float_t                  mTexVCoor;     // X{GST}  7 Value(-range=>[0,1, 1,1000])
@@ -63,6 +63,5 @@ class PRSBase : public ZRnrModBase {
   ClassDef(PRSBase, 1)
 }; // endclass PRSBase
 
-GlassIODef(PRSBase);
 
 #endif

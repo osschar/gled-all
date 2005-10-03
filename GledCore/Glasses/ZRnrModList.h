@@ -9,7 +9,8 @@
 
 #include <Glasses/ZHashList.h>
 
-class ZRnrModList : public ZHashList {
+class ZRnrModList : public ZHashList
+{
   MAC_RNR_FRIENDS(ZRnrModList);
 
 private:
@@ -26,6 +27,5 @@ public:
   ClassDef(ZRnrModList, 1) // List of lenses that modify renderer-state
 }; // endclass ZRnrModList
 
-GlassIODef(ZRnrModList);
 
 #endif

@@ -19,7 +19,7 @@ private:
 
 protected:
   TString	mText;		// X{GST}  7 Textor()
-  ZRlFont* 	mFont;		// X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
+  ZLink<ZRlFont> 	mFont;		// X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
 
   Bool_t	bAlpha;		// X{GST}  7 Bool(-join=>1)
   Bool_t	bBlend;		// X{GST}  7 Bool()
@@ -43,6 +43,5 @@ public:
   ClassDef(Text, 1)
 }; // endclass Text
 
-GlassIODef(Text);
 
 #endif

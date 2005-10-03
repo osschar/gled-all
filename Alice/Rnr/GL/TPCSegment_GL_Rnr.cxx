@@ -194,7 +194,7 @@ void TPCSegment_GL_Rnr::SetCol(Float_t z, GLubyte* pixel)
   c -= (int)c;
   
   ZColor col;
-  if(mSRM->mRibbon) {
+  if(mSRM->mRibbon != 0) {
     col =  mSRM->mRibbon->MarkToCol(c);
   } else {
     col = (1-c)*mSRM->mMinCol + c*mSRM->mMaxCol;

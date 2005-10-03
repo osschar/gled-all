@@ -28,7 +28,7 @@ void ScreenDumper::_init()
 void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)
 {
   PreOperate(op_arg);
-  if(mPupil)
+  if(mPupil != 0)
     mPupil->EmitDumpImageRay(GForm(mFileNameFmt.Data(), op_arg->fEventID));
   PostOperate(op_arg);
 }

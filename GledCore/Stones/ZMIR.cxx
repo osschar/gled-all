@@ -19,8 +19,6 @@
 #include "ZMIR.h"
 #include <Glasses/SaturnInfo.h>
 #include <Gled/GledNS.h>
-#include <TMessage.h>
-
 
 /**************************************************************************/
 // ZMIR
@@ -96,6 +94,15 @@ ZMIR::ZMIR(TMessage*& m) :
   SuppressFlareBroadcast(false), RequiresResult(false)
 {
   m->DetachBuffer(); delete m; m = 0;
+  _init();
+  fTrueBuffer = 0;
+}
+
+ZMIR::ZMIR(void* buf, Int_t size) :
+  TMessage(buf,size),
+  Direction(D_Unknown),
+  SuppressFlareBroadcast(false), RequiresResult(false)
+{
   _init();
   fTrueBuffer = 0;
 }
@@ -189,10 +196,10 @@ void ZMIR::RewindToExecHeader()
 /**************************************************************************/
 
 namespace {
-  const string demangle_eh("ZMIR::Demangle failed for ");
+  const TString demangle_eh("ZMIR::Demangle failed for ");
 }
 
-void ZMIR::Demangle(An_ID_Demangler* s) throw(string)
+void ZMIR::Demangle(An_ID_Demangler* s) throw(TString)
 {
   Caller = dynamic_cast<ZMirEmittingEntity*>(s->DemangleID(CallerID));
   if(!Caller) throw(demangle_eh + GForm("Caller(id=%d)",CallerID));
@@ -200,26 +207,26 @@ void ZMIR::Demangle(An_ID_Demangler* s) throw(string)
   // Recipient & Result recipient separated. Called by Saturn when appropriate.
 
   Alpha = s->DemangleID(AlphaID);
-  if(!Alpha) throw(demangle_eh + "Alpha");
+  if(!Alpha) throw(demangle_eh + GForm("Alpha [%d]", AlphaID));
   if(BetaID) {
     Beta = s->DemangleID(BetaID);
-    if(!Beta) throw(demangle_eh + "Beta");
+    if(!Beta) throw(demangle_eh + GForm("Beta", BetaID));
   }
   if(GammaID) {
     Gamma = s->DemangleID(GammaID);
-    if(!Gamma) throw(demangle_eh + "Gamma");
+    if(!Gamma) throw(demangle_eh + GForm("Gamma", GammaID));
   }
 }
 
-void ZMIR::DemangleRecipient(An_ID_Demangler* s) throw(string)
+void ZMIR::DemangleRecipient(An_ID_Demangler* s) throw(TString)
 {
   if(MirBits & MB_HasRecipient) {
     Recipient = dynamic_cast<SaturnInfo*>(s->DemangleID(RecipientID));
-    if(!Recipient) throw(demangle_eh + "Recipient");
+    if(!Recipient) throw(demangle_eh + GForm("Recipient", RecipientID));
   }
 }
 
-void ZMIR::DemangleResultRecipient(An_ID_Demangler* s) throw(string)
+void ZMIR::DemangleResultRecipient(An_ID_Demangler* s) throw(TString)
 {
   if(MirBits & MB_HasResultReq) {
     ResultRecipient = dynamic_cast<SaturnInfo*>(s->DemangleID(ResultRecipientID));
@@ -250,8 +257,9 @@ void ZMIR::SetRecipient(SaturnInfo* recipient)
 {
   // Can be called for MIR in write mode or for MIR in read mode
   // if it is already a Beam.
+  // recipient == 0 means local invocation.
 
-  RecipientID = recipient->GetSaturnID();
+  RecipientID = recipient ? recipient->GetSaturnID() : 0;
   if(IsReading()) {
     assert(MirBits | MB_HasRecipient);
     Recipient = recipient;
@@ -316,6 +324,36 @@ void ZMIR::AppendBuffer(TBuffer& b)
   // Appends contents of b to the MIR.
 
   WriteFastArray(b.Buffer(), b.Length());
+}
+
+/**************************************************************************/
+
+void ZMIR::ChainMIR(ZMIR* mir)
+{
+  // Appends mir to the end of *this.
+
+  MirBits |= MB_HasChainedMIR;
+  mir->WriteHeader();
+  mir->SetBufferOffset(0);
+  mir->SetReadMode();
+  mir->CopyToBuffer(*this);
+}
+
+ZMIR* ZMIR::UnchainMIR(An_ID_Demangler* s)
+{
+  // Creates a secondary mir from current position onwards.
+  // This means that *this must be read to its end. Relevant if *this
+  // uses custom-buffer.
+
+  assert(HasChainedMIR());
+  ZMIR* mir = new ZMIR(Buffer() + Length(), BufferSize() - Length());
+  mir->ResetBit(TBuffer::kIsOwner);
+  mir->SetCaller(Caller);
+  mir->ReadRoutingHeader();
+  mir->ReadExecHeader();
+  if(s != 0)
+    mir->Demangle(s);
+  return mir;
 }
 
 /**************************************************************************/

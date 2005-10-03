@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef TADemo_EHSWrap_H
-#define TADemo_EHSWrap_H
+#ifndef EHS_EHSWrap_H
+#define EHS_EHSWrap_H
 
 #include <Glasses/ZNameMap.h>
 
@@ -34,6 +34,5 @@ public:
   ClassDef(EHSWrap, 1)
 }; // endclass EHSWrap
 
-GlassIODef(EHSWrap);
 
 #endif

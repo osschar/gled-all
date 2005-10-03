@@ -10,6 +10,7 @@
 //
 
 #include "GlobalLamps.h"
+#include "GlobalLamps.c7"
 
 ClassImp(GlobalLamps)
 
@@ -17,13 +18,6 @@ ClassImp(GlobalLamps)
 
 void GlobalLamps::_init()
 {
-  // !!!! Set all links to 0 !!!!
+  // From ZGlass:
+  bUseNameStack = false;
 }
-
-/**************************************************************************/
-
-
-
-/**************************************************************************/
-
-#include "GlobalLamps.c7"

@@ -11,10 +11,10 @@ REGEXP_LIB       := lib/lib${REGEXP_LIB_BASE}.so
 # Can add your own before ... or after (are += -ed into the vars)
 
 BLESSED_DIRS	= Glasses
-BASE_DIRS	= Ephra Stones Gled Net
-
+BASE_DIRS	= Ephra Stones Gled Eye RnrBase
 DICT_DIRS	= Glasses Stones Gled Ephra
-VIEW_DIRS	= GledView Eye FL RnrBase
+
+VIEW_DIRS	= GledView FL
 VIEW_FL_DIRS	= FL
 
 CPPFLAGS	=-I/usr/kerberos/include
@@ -34,9 +34,9 @@ LIBSET_TARGETS := local_targets
 
 include ${GLEDSYS}/make/make_base.inc
 
-local_targets:: ${REGEXP_LIB} bin/saturn
+local_targets:: ${REGEXP_LIB} bin/saturn # ?? Could remove REGEXP ?? it's a PREREQ
 ifndef SKIP_VIEW_LIBS
-  local_targets:: bin/gled ${PUPILS_LIB}
+  local_targets:: bin/gled ${PUPILS_LIB} # ?? Move PUPILS below ??
   ifndef SKIP_RNR_LIBS
     ALL_HDRS += ${PUPILS_HDRS}
     ALL_OBJS += ${PUPILS_OBJS}

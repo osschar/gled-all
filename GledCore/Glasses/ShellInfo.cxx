@@ -53,9 +53,9 @@ void ShellInfo::AdEnlightenment()
     mQueen->CheckIn(l);
     SetSubShells(l);
   }
-  const string etc("Etc");
+  const TString etc("Etc");
   if(!GetElementByName(etc)) {
-    ZNameMap* nm = new ZNameMap(etc.c_str());
+    ZNameMap* nm = new ZNameMap(etc.Data());
     mQueen->CheckIn(nm); Add(nm);
   }
 }
@@ -100,11 +100,11 @@ void ShellInfo::RemoveSubShell(SubShellInfo* sub_shell)
 
 void ShellInfo::SetDefSubShell(SubShellInfo* ss)
 {
-  static const string _eh("ShellInfo::SetDefSubShell ");
+  static const Exc_t _eh("ShellInfo::SetDefSubShell ");
   if(!mSubShells->Has(ss)) {
     AddSubShell(ss);
   }
-  set_link_or_die((ZGlass*&)mDefSubShell, ss, FID());
+  set_link_or_die(mDefSubShell.ref_link(), ss, FID());
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_set_def_subshell, mTimeStamp, FID()));
@@ -115,10 +115,10 @@ void ShellInfo::SetDefSubShell(SubShellInfo* ss)
 
 void ShellInfo::SetSubShells(ZHashList* ss)
 {
-  static const string _eh("ShellInfo::SetSubShells ");
+  static const Exc_t _eh("ShellInfo::SetSubShells ");
   if(mSubShells != 0)
     throw(_eh + "can not be changed.");
-  set_link_or_die((ZGlass*&)mSubShells, ss, FID());
+  set_link_or_die(mSubShells.ref_link(), ss, FID());
 }
 
 /**************************************************************************/

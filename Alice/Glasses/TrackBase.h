@@ -29,6 +29,5 @@ public:
   ClassDef(TrackBase, 1)
 }; // endclass TrackBase
 
-GlassIODef(TrackBase);
 
 #endif

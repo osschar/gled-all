@@ -12,6 +12,7 @@
 //________________________________________________________________________
 
 #include "Eventor.h"
+#include "Eventor.c7"
 #include <Ephra/Mountain.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZQueen.h>
@@ -281,11 +282,13 @@ void Eventor::Cancel()
 
 void Eventor::SetHost(SaturnInfo* host)
 {
+  Exc_t _eh("Eventor::SetHost ");
+
   WriteLock();
   try {
     if(bRunning)
-      throw(string("Eventor::SetHost cannot change host while thread is running."));
-    set_link_or_die((ZGlass*&)mHost, host, FID());
+      throw(_eh + "cannot change host while thread is running.");
+    set_link_or_die(mHost.ref_link(), host, FID());
   }
   catch(...) {
     WriteUnlock();
@@ -295,5 +298,3 @@ void Eventor::SetHost(SaturnInfo* host)
 }
 
 /**************************************************************************/
-
-#include "Eventor.c7"

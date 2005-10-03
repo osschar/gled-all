@@ -9,7 +9,7 @@
 
 #include <Glasses/ZList.h>
 
-class ZNameMap : public ZList, public ZGlass::YNameChangeCB
+class ZNameMap : public ZList, public ZGlass::NameChangeCB
 {
   MAC_RNR_FRIENDS(ZNameMap);
 
@@ -17,45 +17,43 @@ private:
   void _init();
 
 protected:
-#ifndef __CINT__
-  map<string, lpZGlass_i>		mItMap;
-#endif
-
+  // AList ... ZList
+  virtual void new_element_check(ZGlass* lens);
   virtual void clear_list();
 
-  virtual Int_t remove_references_to(ZGlass* lens);
+  // ZList
+  virtual void on_insert(ZList::iterator it);
+  virtual void on_remove(ZList::iterator it);
+  virtual void on_rebuild();
 
-  lpZGlass_i insert(ZGlass* g, const string& name);
+  //----------------------------------------------------------------------
 
-  Bool_t          bReplaceOnInsert; // X{GS} 7 Bool(-join=>1)
-  Bool_t          bReplaceOnRename; // X{GS} 7 Bool()
+  Bool_t      bReplaceOnInsert; // X{GS} 7 Bool(-join=>1)
+  Bool_t      bReplaceOnRename; // X{GS} 7 Bool()
+
+#ifndef __CINT__
+  typedef map<TString, ZList::iterator>           mName2Iter_t;
+  typedef map<TString, ZList::iterator>::iterator mName2Iter_i;
+
+  mName2Iter_t mItMap; //!
+#endif
 
 public:
   ZNameMap(const Text_t* n="ZNameMap", const Text_t* t=0) : ZList(n,t)
   { _init(); }
 
-  virtual ZGlass* GetElementByName(const string& name);
+  virtual ZGlass* GetElementByName(const TString& name);
 
-  virtual void Insert(ZGlass* g);		     // X{E} C{1}
+  virtual void SortByName();
 
-  virtual void Add(ZGlass* g);			     // X{E} C{1}
-  virtual void AddBefore(ZGlass* g, ZGlass* before); // X{E} C{2}
-  virtual void AddFirst(ZGlass* g);		     // X{E} C{1}
-  virtual void Remove(ZGlass* g);		     // X{E} C{1}
-  virtual void RemoveLast(ZGlass* g);		     // X{E} C{1}
+  //----------------------------------------------------------------------
 
-  virtual void SortByName() {}                       // X{E}
-
-  void RecreateMap();
-
-  virtual Int_t RebuildListRefs(An_ID_Demangler* idd);
-
-  virtual void y_name_change_cb(ZGlass* g, const string& new_name);
+  // ZGlass::NameChangeCB
+  virtual void name_change_cb(ZGlass* g, const TString& new_name);
 
 #include "ZNameMap.h7"
   ClassDef(ZNameMap, 1)
 }; // endclass ZNameMap
 
-GlassIODef(ZNameMap);
 
 #endif

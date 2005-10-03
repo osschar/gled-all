@@ -20,12 +20,12 @@ private:
   void _init();
 
 protected:
-  UInt_t	mNVert;		// X{gS} 7 Value(-range=>[2,100,1,1], -join=>1)
+  Int_t	mNVert;		// X{gS} 7 Value(-range=>[2,100,1,1], -join=>1)
 private:
-  UInt_t	mNV;		// X{g}  7 ValOut(-range=>[2,100,1,1])
+  Int_t	mNV;		// X{g}  7 ValOut(-range=>[2,100,1,1])
 
 protected:
-  WarmAmoeba*	mAmoeba;	// X{gS} L{}
+  ZLink<WarmAmoeba>	mAmoeba;	// X{gS} L{}
 
   TVectorF	mState;
 
@@ -52,6 +52,5 @@ public:
   ClassDef(Spheror, 1)
 }; // endclass Spheror
 
-GlassIODef(Spheror);
 
 #endif

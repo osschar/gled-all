@@ -11,13 +11,17 @@
 #include <Gled/GMutex.h>
 #include <Gled/Gled.h>
 
-#include <RegExp/pme.h>
+#include <RegExp/TPME.h>
 
 #include <TMessage.h>
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TSystem.h>
 #include <TVirtualMutex.h>
+
+#include <TClass.h>
+#include <TRealData.h>
+#include <TDataMember.h>
 
 #include <stack>
 
@@ -74,39 +78,42 @@ void GledNS::PopFD()
 
 /**************************************************************************/
 
-Int_t GledNS::LoadSoSet(const string& lib_set)
+Int_t GledNS::LoadSoSet(const TString& lib_set)
 {
-  string libname = FabricateLibName(lib_set);
+  TString libname = FabricateLibName(lib_set);
   Int_t ret = LoadSo(libname);
   if(ret) {
-    ISmess(GForm( "GledNS::LoadSoSet loading %s as %s returned %d",
-		  lib_set.c_str(), libname.c_str(), ret));
+    ISmess(GForm("GledNS::LoadSoSet loading %s as %s returned %d",
+		  lib_set.Data(), libname.Data(), ret));
   }
   if(ret < 0) return ret;
-  return InitSoSet(lib_set);
+  ret = InitSoSet(lib_set);
+  if(ret) return ret;
+  AssertRenderers();
+  return ret;
 }
 
-Int_t GledNS::InitSoSet(const string& lib_set)
+Int_t GledNS::InitSoSet(const TString& lib_set)
 {
   { // init
-    string cmd = FabricateInitFoo(lib_set);
-    long* p2foo = (long*) G__findsym( cmd.c_str() );
+    TString cmd = FabricateInitFoo(lib_set);
+    long* p2foo = (long*) FindSymbol(cmd);
     if(!p2foo) {
-      ISerr(GForm("GledNS::InitSoSet can't find %s. Safr!", cmd.c_str()));
+      ISerr(GForm("GledNS::InitSoSet can't find %s. Safr!", cmd.Data()));
       return 2;
     }
     void (*foo)() = (void(*)())(*p2foo);
     foo();
   }
   { // user_init
-    string cmd = FabricateUserInitFoo(lib_set);
-    long* p2foo = (long*) G__findsym( cmd.c_str() );
+    TString cmd = FabricateUserInitFoo(lib_set);
+    long* p2foo = (long*) FindSymbol(cmd);
     if(!p2foo) {
       ISmess(GForm("GledNS::InitSoSet no user initialization for %s.",
-		   lib_set.c_str()));
+		   lib_set.Data()));
     } else {
       ISmess(GForm("GledNS::InitSoSet execing user initialization for %s.",
-		   lib_set.c_str()));
+		   lib_set.Data()));
       void (*foo)() = (void(*)())(*p2foo);
       foo();
     }
@@ -114,21 +121,23 @@ Int_t GledNS::InitSoSet(const string& lib_set)
   return 0;
 }
 
-Int_t GledNS::LoadSo(const string& full_lib_name)
+Int_t GledNS::LoadSo(const TString& full_lib_name)
 {
   G__Set_RTLD_LAZY();
-  Int_t ret = gSystem->Load(full_lib_name.c_str());
+  Int_t ret = gSystem->Load(full_lib_name.Data());
   if(ret) {
     ISmess(GForm("GledNS::LoadSo loading %s returned %d",
-		 full_lib_name.c_str(), ret));
+		 full_lib_name.Data(), ret));
   }
   return ret;
 }
 
 
-void* GledNS::FindSymbol(const string& sym)
+void* GledNS::FindSymbol(const TString& sym)
 {
-  return dlsym(RTLD_DEFAULT, sym.c_str());
+  // Used to be G__findsym( sym );
+  // Didn't work for explicitly linked libs. Guess those are not registered in cint.
+  return dlsym(RTLD_DEFAULT, sym.Data());
 }
 
 /**************************************************************************/
@@ -138,11 +147,11 @@ void GledNS::BootstrapSoSet(LibSetInfo* lsi)
   hLid2pLSI_i i = Lid2LSInfo.find(lsi->fLid);
   if(i != Lid2LSInfo.end()) {
     ISwarn(GForm("GledNS::BootstrapSoSet %s(id=%u) already loaded ...",
-		 i->second->fName.c_str(), lsi->fLid));
+		 i->second->fName.Data(), lsi->fLid));
     return;
   }
   ISmess(GForm("GledNS::BootstrapSoSet installing %s(id=%u) ...",
-	       lsi->fName.c_str(), lsi->fLid));
+	       lsi->fName.Data(), lsi->fLid));
   Lid2LSInfo[lsi->fLid] = lsi;
   Name2Lid[lsi->fName] = lsi->fLid;
   // Init deps as well ... loaded by link-time dependence
@@ -158,7 +167,7 @@ void GledNS::BootstrapSoSet(LibSetInfo* lsi)
 
 /**************************************************************************/
 
-bool GledNS::IsLoaded(const string& lib_set)
+bool GledNS::IsLoaded(const TString& lib_set)
 {
   return (Name2Lid.find(lib_set) != Name2Lid.end());
 }
@@ -177,32 +186,127 @@ void GledNS::BootstrapClass(GledNS::ClassInfo* ci)
   // will be thinking of that later ...
   LibSetInfo* lsi = FindLibSetInfo(ci->fFid.lid);
   lsi->Cid2CInfo[ci->fFid.cid] = ci;
-  Name2Fid.insert(pair<string,FID_t>(ci->fName, ci->fFid));
+  Name2Fid.insert(pair<TString,FID_t>(ci->fName, ci->fFid));
 }
 
 /**************************************************************************/
 
-string GledNS::FabricateLibName(const string& libset)
+TString GledNS::FabricateLibName(const TString& libset)
 {
-  return string("lib") + libset + ".so";
+  return TString("lib") + libset + ".so";
 }
 
-string GledNS::FabricateInitFoo(const string& libset)
+TString GledNS::FabricateInitFoo(const TString& libset)
 {
   // Returns name of void* pointing to init_foo
 
-  string foo = libset + "_GLED_init";
-  return foo;
+  return libset + "_GLED_init";
 }
 
-string GledNS::FabricateUserInitFoo(const string& libset)
+TString GledNS::FabricateUserInitFoo(const TString& libset)
 {
   // Returns name of void* pointing to user_init_foo
 
-  string foo = libset + "_GLED_user_init";
+  return libset + "_GLED_user_init";
+}
+
+/**************************************************************************/
+
+namespace GledNS {
+  set<TString>	RnrNames;
+}
+
+void GledNS::BootstrapRnrSet(const TString& libset, LID_t lid,
+			     const TString& rnr, A_Rnr_Creator_foo rfoo)
+{
+  static const Exc_t _eh("GledNS::BootstrapRnrSet ");
+
+  LibSetInfo* lsi = FindLibSetInfo(lid);
+  if(lsi == 0) {
+    ISwarn(_eh + GForm("LibSet %s(lid=%u) not loaded.", libset.Data(), lid));
+    return;
+  }
+  hRnr2RCFoo_i j = lsi->Rnr2RCFoo.find(rnr);
+  if(j != lsi->Rnr2RCFoo.end()) {
+    ISwarn(_eh + GForm("RnrCreator for rnr=%s, LibSet=%s (lid=%u) already present.",
+		       rnr.Data(), libset.Data(), lid));
+    return;
+  }
+  lsi->Rnr2RCFoo[rnr] = rfoo;
+}
+
+TString GledNS::FabricateRnrLibName(const TString& libset, const TString& rnr)
+{
+  return TString("lib") + libset + "_Rnr_" + rnr + ".so";
+}
+
+TString GledNS::FabricateRnrInitFoo(const TString& libset, const TString& rnr)
+{
+  TString foo = libset + "_GLED_init_Rnr_" + rnr;
   return foo;
 }
 
+
+/**************************************************************************/
+
+void GledNS::AssertRenderers()
+{
+  static const Exc_t _eh("GledNS::AssertRenderers ");
+
+  lpLSI_t ls_list;
+  ProduceLibSetInfoList(ls_list);
+  for(lpLSI_i lsi=ls_list.begin(); lsi!=ls_list.end(); ++lsi) {
+    TString libset = (*lsi)->fName;
+    for(set<TString>::iterator rnr=RnrNames.begin(); rnr!=RnrNames.end(); ++rnr) {
+      if((*lsi)->Rnr2RCFoo.find(*rnr) == (*lsi)->Rnr2RCFoo.end()) {
+	TString cmd = FabricateRnrInitFoo(libset, *rnr);
+	long* p2foo = (long*) FindSymbol(cmd);
+	if(!p2foo) {
+	  TString libname = FabricateRnrLibName(libset, *rnr);
+	  int ret = LoadSo(libname);
+	  if(ret < 0) {
+	    ISerr(_eh + libname + " not existing.");
+	    return;
+	  }
+	  p2foo = (long*) FindSymbol(cmd);
+	  if(!p2foo) {
+	    ISerr(_eh + cmd + " not existing in " + libname + ".");
+	    return;
+	  }
+	}
+	void (*foo)() = (void(*)())(*p2foo);
+	foo();
+      }
+    }
+  }
+}
+
+void GledNS::AddRenderer(const TString& rnr)
+{
+  if(RnrNames.find(rnr) == RnrNames.end()) {
+    RnrNames.insert(rnr);
+    AssertRenderers();
+  }
+}
+
+A_Rnr* GledNS::SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid)
+{
+  static const Exc_t _eh("GledNS::SpawnRnr ");
+
+  LibSetInfo* lsi = FindLibSetInfo(fid.lid);
+  if(lsi == 0) {
+    ISerr(_eh + GForm("can't demangle lib id=%u.", fid.lid));
+    return 0;
+  }
+  hRnr2RCFoo_i j = lsi->Rnr2RCFoo.find(rnr);
+  if(j == lsi->Rnr2RCFoo.end()) {
+    ISerr(_eh + GForm("can't find Rnr Constructor for %s.", rnr.Data()));
+    return 0;
+  }
+  return (j->second)(d, fid.cid);
+}
+
+/**************************************************************************/
 /**************************************************************************/
 
 ZGlass* GledNS::ConstructLens(FID_t fid)
@@ -245,7 +349,7 @@ void GledNS::UnlockCINT() { ROOT_CINT_MUTEX->UnLock(); }
 
 void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 {
-  // Writes glass, prefixed by Lid/Cid to the buffer.
+  // Writes lens, prefixed by Lid/Cid to the buffer.
 
   assert(b.IsWriting());
   b << lens->VFID();
@@ -255,7 +359,7 @@ void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 
 ZGlass* GledNS::StreamLens(TBuffer& b)
 {
-  // Reads lid/cid of the glass, instantiates it and streams it out.
+  // Reads lid/cid of the glass, instantiates a lens and streams it out.
 
   assert(b.IsReading());
   FID_t fid;
@@ -266,6 +370,25 @@ ZGlass* GledNS::StreamLens(TBuffer& b)
     lens->Streamer(b);
   }
   return lens;
+}
+
+void GledNS::WriteLensID(TBuffer& b, ZGlass* lens)
+{
+  // Writes lens ID to the buffer.
+
+  assert(b.IsWriting());
+  b << (lens ? lens->GetSaturnID() : ID_t(0));
+}
+
+ZGlass* GledNS::ReadLensID(TBuffer& b)
+{
+  // Reads lens ID and assign it lensref.
+
+  assert(b.IsReading());
+  ID_t id;
+  b >> id;
+  char* p = 0; p += id;
+  return (ZGlass*) p;  
 }
 
 /**************************************************************************/
@@ -284,7 +407,7 @@ GledNS::LibSetInfo* GledNS::FindLibSetInfo(LID_t lid)
   return i->second;
 }
 
-GledNS::LibSetInfo* GledNS::FindLibSetInfo(const string& lib_set)
+GledNS::LibSetInfo* GledNS::FindLibSetInfo(const TString& lib_set)
 {
   hName2Lid_i i = Name2Lid.find(lib_set);
   return (i != Name2Lid.end()) ? FindLibSetInfo(i->second) : 0;
@@ -312,25 +435,25 @@ GledNS::ClassInfo* GledNS::FindClassInfo(FID_t fid)
   return i->second->FindClassInfo(fid.cid);
 }
 
-FID_t GledNS::FindClassID(const string& name)
+FID_t GledNS::FindClassID(const TString& name)
 {
   hName2Fid_i i = Name2Fid.find(name);
   return (i != Name2Fid.end()) ? i->second : FID_t(0,0);
 }
 
-GledNS::ClassInfo* GledNS::FindClassInfo(const string& name)
+GledNS::ClassInfo* GledNS::FindClassInfo(const TString& name)
 {
   return FindClassInfo(FindClassID(name));
 }
 
 /**************************************************************************/
 
-GledNS::MethodInfo* GledNS::DeduceMethodInfo(ZGlass* alpha, const string& name)
+GledNS::MethodInfo* GledNS::DeduceMethodInfo(ZGlass* alpha, const TString& name)
 {
   // 'name' can be FQ, eg. "SomeGlass::Foo".
 
-  PME re("::");
-  int ret = re.split(name);
+  TPME re("::");
+  int  ret = re.split(name);
   if(ret == 2) {
     ClassInfo* ci = FindClassInfo(re[0]);
     if(ci == 0)  return 0;
@@ -343,12 +466,12 @@ GledNS::MethodInfo* GledNS::DeduceMethodInfo(ZGlass* alpha, const string& name)
   return 0;
 }
 
-GledNS::DataMemberInfo* GledNS::DeduceDataMemberInfo(ZGlass* alpha, const string& name)
+GledNS::DataMemberInfo* GledNS::DeduceDataMemberInfo(ZGlass* alpha, const TString& name)
 {
   // 'name' can be FQ, eg. "SomeGlass::Foo".
 
-  PME re("::");
-  int ret = re.split(name);
+  TPME re("::");
+  int  ret = re.split(name);
   if(ret == 2) {
     ClassInfo* ci = FindClassInfo(re[0]);
     if(ci == 0)  return 0;
@@ -365,14 +488,17 @@ GledNS::DataMemberInfo* GledNS::DeduceDataMemberInfo(ZGlass* alpha, const string
 // GledNS::MethodInfo
 /**************************************************************************/
 
+ZMIR* GledNS::MethodInfo::MakeMir(ZGlass* a, ZGlass* b, ZGlass* g)
+{
+  ZMIR* mir = new ZMIR(a, b, g);
+  ImprintMir(*mir);
+  return mir;
+}
+
 void GledNS::MethodInfo::ImprintMir(ZMIR& mir) const
 {
   mir.SetLCM_Ids(fClassInfo->fFid.lid, fClassInfo->fFid.cid, fMid);
-}
-
-void GledNS::MethodInfo::FixMirBits(ZMIR& mir, SaturnInfo* sat) const
-{
-  if(bLocal)       mir.SetRecipient(sat);
+  if(bLocal)       mir.SetRecipient(0);
   if(bDetachedExe) mir.SetDetachedExe(bMultixDetachedExe);
 }
 
@@ -383,12 +509,28 @@ void GledNS::MethodInfo::StreamIds(TBuffer& b) const
 }
 
 /**************************************************************************/
-// GledNS::LinkMemberInfo
+// GledNS::DataMemberInfo
 /**************************************************************************/
 
-string GledNS::LinkMemberInfo::FullName()
+TString GledNS::DataMemberInfo::CName()
+{ return fPrefix + fName; }
+
+TString GledNS::DataMemberInfo::FullName()
+{ return fClassInfo->fName + "::" + fName; }
+
+TString GledNS::DataMemberInfo::FullCName()
+{ return fClassInfo->fName + "::" + CName(); }
+
+TRealData* GledNS::DataMemberInfo::GetTRealData()
 {
-  return fClassInfo->fName + "::" + fName;
+  if(fTRealData == 0)
+    fTRealData = fClassInfo->GetTClass()->GetRealData(CName().Data());
+  return fTRealData;
+}
+
+TDataMember* GledNS::DataMemberInfo::GetTDataMember()
+{
+  return (GetTRealData()) ? fTRealData->GetDataMember() : 0;
 }
 
 /**************************************************************************/
@@ -421,15 +563,32 @@ GledNS::ClassInfo::ProduceFullLinkMemberInfoList()
 
 /**************************************************************************/
 
+GledNS::ClassInfo* GledNS::ClassInfo::GetRendererCI()
+{
+  if(!fRendererCI && !fRendererGlass.IsNull()) {
+    fRendererCI = GledNS::FindClassInfo(fRendererGlass);
+  }
+  return fRendererCI;
+}
+
+A_Rnr* GledNS::ClassInfo::SpawnRnr(const TString& rnr, ZGlass* g)
+{
+  if(fRendererCI == 0) GetRendererCI();
+  //cout <<"GledNS::ClassInfo::SpawnRnr rnr="<< rnr <<", lens="<< g->GetName() <<
+  //  "["<< fRendererCI->fName <<"]\n";
+  return GledNS::SpawnRnr(rnr, g, fRendererCI->fFid);
+}
+
+/**************************************************************************/
+
 namespace {
   struct infobase_name_eq : public unary_function<GledNS::InfoBase*, bool> {
-    string name;
-    infobase_name_eq(const string& s) : name(s) {}
+    TString name;
+    infobase_name_eq(const TString& s) : name(s) {}
     bool operator()(const GledNS::InfoBase* ib) {
       return ib->fName == name; }
   };
 }
-
 
 GledNS::MethodInfo*
 GledNS::ClassInfo::FindMethodInfo(MID_t mid)
@@ -439,8 +598,10 @@ GledNS::ClassInfo::FindMethodInfo(MID_t mid)
 }
 
 GledNS::MethodInfo*
-GledNS::ClassInfo::FindMethodInfo(const string& func_name, bool recurse)
+GledNS::ClassInfo::FindMethodInfo(const TString& func_name, bool recurse, bool throwp)
 {
+  static const Exc_t _eh("GledNS::ClassInfo::FindMethodInfo ");
+
   lpMethodInfo_i i = find_if(fMethodList.begin(), fMethodList.end(),
 			     infobase_name_eq(func_name));
   if(i != fMethodList.end()) return *i;
@@ -448,12 +609,17 @@ GledNS::ClassInfo::FindMethodInfo(const string& func_name, bool recurse)
     ClassInfo* p = GetParentCI();
     if(p) return p->FindMethodInfo(func_name, recurse);
   }
+  if(throwp)
+    throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
+		      func_name.Data(), fName.Data(), recurse));
   return 0;
 }
 
 GledNS::DataMemberInfo*
-GledNS::ClassInfo::FindDataMemberInfo(const string& s, bool recurse)
+GledNS::ClassInfo::FindDataMemberInfo(const TString& s, bool recurse, bool throwp)
 {
+  static const Exc_t _eh("GledNS::ClassInfo::FindDataMemberInfo ");
+
   lpDataMemberInfo_i i = find_if(fDataMemberList.begin(), fDataMemberList.end(),
 				infobase_name_eq(s));
   
@@ -462,12 +628,17 @@ GledNS::ClassInfo::FindDataMemberInfo(const string& s, bool recurse)
     ClassInfo* p = GetParentCI();
     if(p) return p->FindDataMemberInfo(s, recurse);
   }
+  if(throwp)
+    throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
+		      s.Data(), fName.Data(), recurse));
   return 0;
 }
 
 GledNS::LinkMemberInfo*
-GledNS::ClassInfo::FindLinkMemberInfo(const string& s, bool recurse)
+GledNS::ClassInfo::FindLinkMemberInfo(const TString& s, bool recurse, bool throwp)
 {
+  static const Exc_t _eh("GledNS::ClassInfo::FindLinkMemberInfo ");
+
   lpLinkMemberInfo_i i = find_if(fLinkMemberList.begin(), fLinkMemberList.end(),
 				infobase_name_eq(s));
   
@@ -476,6 +647,9 @@ GledNS::ClassInfo::FindLinkMemberInfo(const string& s, bool recurse)
     ClassInfo* p = GetParentCI();
     if(p) return p->FindLinkMemberInfo(s, recurse);
   }
+  if(throwp)
+    throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
+		      s.Data(), fName.Data(), recurse));
   return 0;
 }
 
@@ -489,11 +663,20 @@ GledNS::LibSetInfo* GledNS::ClassInfo::GetLibSetInfo()
 
 GledNS::ClassInfo* GledNS::ClassInfo::GetParentCI()
 {
-  if(!fParentCI && !fParentName.empty()) {
+  if(!fParentCI && !fParentName.IsNull()) {
     FID_t fid = GledNS::FindClassID(fParentName);
     fParentCI = const_cast<ClassInfo*>(FindClassInfo(fid));
   }
   return fParentCI;
+}
+
+/**************************************************************************/
+
+TClass* GledNS::ClassInfo::GetTClass()
+{
+  if(fTClass == 0)
+    fTClass = gROOT->GetClass(fName.Data(), true);
+  return fTClass;
 }
 
 /**************************************************************************/
@@ -522,145 +705,8 @@ GledNS::ClassInfo* GledNS::LibSetInfo::FirstClassInfo()
 
 /**************************************************************************/
 /**************************************************************************/
-// Simple string parser
+// Value-type peek and MIR-poke
 /**************************************************************************/
-/**************************************************************************/
-
-int GledNS::split_string(Str_ci start, Str_ci end, lStr_t& l, char c)
-{
-  int cnt=0;
-  string g;
-  for(Str_ci i=start; i!=end; ++i) {
-    if(c==0) {
-      if(isspace(*i) && g.size()>0) {
-	++cnt; l.push_back(g); g.erase(); continue;
-      }
-      if(isspace(*i)) continue;
-    }
-    if(*i==c) {
-      ++cnt; l.push_back(g); g.erase(); continue;
-    }
-    g += *i;
-  }
-  if(g.size()>0) { ++cnt; l.push_back(g); }
-  return cnt;
-}
-
-int GledNS::split_string(const string& s, lStr_t& l, char c)
-{
-  // Splits string on character c. If c==0 splits on whitespace.
-  return split_string(s.begin(), s.end(), l, c);
-}
-
-int GledNS::split_string(const string& s, lStr_t& l, string ptr)
-{
-  // Splits string on whole contents of ptr.
-
-  int cnt = 0;
-  string::size_type i = 0;
-  const string::size_type end    = s.length();
-  const string::size_type ptrlen = ptr.length();
-
-  while(i < end) {
-    string::size_type j = s.find(ptr, i);
-    if(j == string::npos) j = end;
-    if(j > i) {
-      ++cnt;
-      l.push_back(s.substr(i, j-i));
-    }
-    i = j + ptrlen;
-  }
-  return cnt;
-}
-
-void GledNS::deparen_string(const string& in, string& n, string& a,
-			    const string& ops, bool no_parens_ok)
-  throw (string)
-{
-  // expects back parens to be the last char ... could as well grep it
-  unsigned int op_pos = in.find_first_of(ops);
-  if(op_pos==string::npos) {
-    if(no_parens_ok) {
-      if(in.size()==0) throw string("missing name");
-      n = in;
-      return;
-    } else {
-      throw string("no open paren");
-    }
-  }
-  int cp_pos = in.size()-1;
-  char o = in[op_pos];
-  char c = in[in.size()-1];
-  if(o=='('&&c!=')' || o=='['&&c!=']' || o=='{'&&c!='}') {
-    throw string("no close paren");
-  }
-  n = in;
-  n.replace(op_pos, cp_pos-op_pos+1, "");
-  a = in.substr(op_pos+1, cp_pos-op_pos-1);
-  if(n.size()==0) throw string("missing name");
-  if(a.size()==0) throw string("no args for " + n);
-}
-
-/**************************************************************************/
-
-string GledNS::join_strings(const string& sep, lStr_t& list)
-{
-  if(list.empty()) return "";
-  lStr_i i = list.begin();
-  string ret = *i;
-  while(++i != list.end()) ret += sep + *i;
-  return ret;
-}
-
-/**************************************************************************/
-
-void GledNS::remove_whitespace(string& s)
-{
-  string g;
-  for(Str_ci i=s.begin(); i!=s.end(); ++i) {
-    if(!isspace(*i)) g += *i;
-  }
-  s = g;
-}
-
-/**************************************************************************/
-// Argument/type-name parsing foos
-/**************************************************************************/
-
-void GledNS::split_argument(const string& arg,
-			    string& type, string& name, string& def)
-{
-  string::size_type ei = arg.find('=');
-  if(ei != string::npos) {
-    string::size_type tei = ei+1; while(isspace(arg[tei])) ++tei;
-    def = string(arg, tei, arg.length()-tei);
-  } else {
-    ei = arg.length();
-  }
-  --ei;
-  while(isspace(arg[ei])) --ei;
-  string::size_type ti = ei;
-  while(isalnum(arg[ti]) || arg[ti] == '_') --ti;
-  name = string(arg, ti+1, ei-ti);
-  while(isspace(arg[ti])) --ti;
-  type = string(arg, 0, ti+1);
-}
-
-void GledNS::unrefptrconst_type(string& type)
-{
-  string::size_type i;
-  while((i = type.find_first_of("*&")) != string::npos) {
-    type.replace(i, 1, " ");
-  }
-  type.insert(0, " ");
-  while((i = type.find(" const ")) != string::npos) {
-    type.replace(i+1, 5, "");
-  }
-  while((i = type.find(" ")) != string::npos) {
-    type.replace(i, 1, "");
-  }
-}
-
 /**************************************************************************/
 
 // Type snatched from TDataType.h
@@ -668,18 +714,21 @@ void GledNS::unrefptrconst_type(string& type)
 Double_t GledNS::peek_value(void* addr, Int_t type)
 {
   switch(type) {
-  case  2: return *((Short_t*)addr);   
-  case  3: return *((Int_t*)addr);   
-  case  4: return *((Long_t*)addr);   
-  case  5: return *((Float_t*)addr);   
-  case  6: return *((Int_t*)addr);   
+  case  2: return *((Short_t*)addr);
+  case  3: return *((Int_t*)addr);
+  case  4: return *((Long_t*)addr);
+  case  5: return *((Float_t*)addr);
+  case  6: return *((Int_t*)addr);
   case  8: return *((Double_t*)addr);
   case  9: return *((Double32_t*)addr);
-  case 11: return *((UChar_t*)addr);   
-  case 12: return *((UShort_t*)addr);   
-  case 13: return *((UInt_t*)addr);   
-  case 14: return *((ULong_t*)addr); 
-  case 15: return *((UInt_t*)addr); 
+  case 11: return *((UChar_t*)addr);
+  case 12: return *((UShort_t*)addr);
+  case 13: return *((UInt_t*)addr);
+  case 14: return *((ULong_t*)addr);
+  case 15: return *((UInt_t*)addr);
+  case 16: return *((Long64_t*)addr);
+  case 17: return *((ULong64_t*)addr);
+  case 18: return *((Bool_t*)addr);
   default: return 0;
   };
 }
@@ -700,31 +749,184 @@ void GledNS::stream_value(TBuffer& b, Int_t type, Double_t value)
   case 13: b << (UInt_t)value;     break;
   case 14: b << (ULong_t)value;    break;
   case 15: b << (UInt_t)value;     break;
+  case 16: b << (Long64_t)value;   break;
+  case 17: b << (ULong64_t)value;  break;
+  case 18: b << (Bool_t)value;     break;
   default: b << Int_t(0);          break;
   };
 }
 
 /**************************************************************************/
 /**************************************************************************/
+// Simple TString parser
+/**************************************************************************/
+/**************************************************************************/
 
-int GledNS::tokenize_url(const string& url, list<url_token>& l)
+int GledNS::split_string(const TString& s, Ssiz_t start, Ssiz_t end,
+			 lStr_t& l, char c)
 {
-  string::size_type i = 0;
-  const string::size_type end = url.length();
+  int cnt=0;
+  TString g;
+  for(Ssiz_t i=start; i!=end; ++i) {
+    if(c==0) {
+      if(isspace(s(i)) && g.Length()>0) {
+	++cnt; l.push_back(g); g = (char)0; continue;
+      }
+      if(isspace(s(i))) continue;
+    }
+    if(s(i)==c) {
+      ++cnt; l.push_back(g); g = (char)0; continue;
+    }
+    g += s(i);
+  }
+  if(g.Length()>0) { ++cnt; l.push_back(g); }
+  return cnt;
+}
+
+int GledNS::split_string(const TString& s, lStr_t& l, char c)
+{
+  // Splits TString on character c. If c==0 splits on whitespace.
+  return split_string(s, 0, s.Length(), l, c);
+}
+
+int GledNS::split_string(const TString& s, lStr_t& l, const TString& ptr)
+{
+  // Splits TString on whole contents of ptr.
+
+  int cnt = 0;
+  Ssiz_t       i      = 0;
+  const Ssiz_t end    = s.Length();
+  const Ssiz_t ptrlen = ptr.Length();
+
+  while(i < end) {
+    Ssiz_t j = s.Index(ptr, i);
+    if(j == kNPOS) j = end;
+    if(j > i) {
+      ++cnt;
+      l.push_back(s(i, j-i));
+    }
+    i = j + ptrlen;
+  }
+  return cnt;
+}
+
+void GledNS::deparen_string(const TString& in, TString& n, TString& a,
+			    const TString& ops, bool no_parens_ok)
+  throw (Exc_t)
+{
+  // expects back parens to be the last char ... could as well grep it
+  static const Exc_t _eh("GledNS::deparen_string ");
+
+  Ssiz_t op_pos = in.First(ops);
+  if(op_pos == kNPOS) {
+    if(no_parens_ok) {
+      if(in.IsNull()) throw _eh + "missing name.";
+      n = in;
+      return;
+    } else {
+      throw _eh + "no open paren.";
+    }
+  }
+  int cp_pos = in.Length()-1;
+  char o = in(op_pos);
+  char c = in(cp_pos);
+  if(o=='('&&c!=')' || o=='['&&c!=']' || o=='{'&&c!='}') {
+    throw _eh + "no close paren.";
+  }
+  n = in;
+  n.Remove(op_pos, cp_pos-op_pos+1);
+  a = in(op_pos+1, cp_pos-op_pos-1);
+  if(n.Length()==0) throw _eh + "missing name";
+  if(a.Length()==0) throw _eh + "no args for " + n + ".";
+}
+
+/**************************************************************************/
+
+TString GledNS::join_strings(const TString& sep, lStr_t& list)
+{
+  if(list.empty()) return "";
+  lStr_i i = list.begin();
+  TString ret = *i;
+  while(++i != list.end()) ret += sep + *i;
+  return ret;
+}
+
+/**************************************************************************/
+
+void GledNS::remove_whitespace(TString& s)
+{
+  TString g;
+  Ssiz_t end = s.Length();
+  for(Ssiz_t i=0; i!=end; ++i) {
+    if(!isspace(s(i))) g += s(i);
+  }
+  s = g;
+}
+
+Ssiz_t GledNS::find_first_of(const TString& s, const char* accept, Ssiz_t i)
+{
+  if(i >= s.Length()) return kNPOS;
+  const char *f = strpbrk(s.Data()+i, accept);
+  return f ? f - s.Data() : kNPOS;
+}
+
+/**************************************************************************/
+// Argument/type-name parsing foos
+/**************************************************************************/
+
+void GledNS::split_argument(const TString& arg,
+			    TString& type, TString& name, TString& def)
+{
+  Ssiz_t ei = arg.First('=');
+  if(ei != kNPOS) {
+    Ssiz_t tei = ei+1; while(isspace(arg(tei))) ++tei;
+    def = arg(tei, arg.Length()-tei);
+  } else {
+    ei = arg.Length();
+  }
+  --ei;
+  while(isspace(arg(ei))) --ei;
+  Ssiz_t ti = ei;
+  while(isalnum(arg(ti)) || arg(ti) == '_') --ti;
+  name = arg(ti+1, ei-ti);
+  while(isspace(arg(ti))) --ti;
+  type = arg(0, ti+1);
+}
+
+void GledNS::unrefptrconst_type(TString& type)
+{
+  Ssiz_t i;
+  while((i = type.First("*&")) != kNPOS) {
+    type.Replace(i, 1, " ");
+  }
+  type.Prepend(" ");
+  while((i = type.Index(" const ")) != kNPOS) {
+    type.Remove(i+1, 5);
+  }
+  remove_whitespace(type);
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+int GledNS::tokenize_url(const TString& url, list<url_token>& l)
+{
+  Ssiz_t i = 0;
+  const Ssiz_t end = url.Length();
   url_token::type_e type = url_token::list_sel;
   url_token::type_e next_type;
-  string part;
+  TString part;
   int count = 0;
 
   while(i < end) {
-    string::size_type j = url.find_first_of("/-\\", i);
-    if(j == string::npos) j = end;
+    Ssiz_t j = find_first_of(url, "/-\\", i);
+    if(j == kNPOS) j = end;
     if(j > i) {
-      part += url.substr(i, j-i);
+      part += url(i, j-i);
       i = j;
     }
     bool terminal = false;
-    char c = url[i];
+    char c = url(i); // Relies on url(end) == 0
 
     if(c == '\\') {
       if(++i < end) part += url[i];
@@ -757,7 +959,7 @@ int GledNS::tokenize_url(const string& url, list<url_token>& l)
       } // switch
     }
     if(terminal) {
-      if(part.length() > 0) {
+      if(part.Length() > 0) {
 	// cout <<"tokenize_url making token " << part <<","<< (int)type <<endl;
 	l.push_back(url_token(part, type));
 	++count;
@@ -768,6 +970,25 @@ int GledNS::tokenize_url(const string& url, list<url_token>& l)
   }
   return count;
 }
+
+
+/**************************************************************************/
+/**************************************************************************/
+// Exception stuffe
+/**************************************************************************/
+/**************************************************************************/
+
+//Exc_t operator+(const Exc_t &s1, const Exc_t &s2)
+//{ return Exc_t((string&)s1 + (string&)s2) }
+
+Exc_t operator+(const Exc_t &s1, const string &s2)
+{ return Exc_t((string&)s1 + s2); }
+
+Exc_t operator+(const Exc_t &s1, const TString &s2)
+{ return Exc_t((string&)s1 + s2.Data()); }
+
+Exc_t operator+(const Exc_t &s1,  const char *s2)
+{ return Exc_t((string&)s1 + s2); }
 
 /**************************************************************************/
 /**************************************************************************/
@@ -808,3 +1029,48 @@ const char* GForm(const char* fmt, ...)
   form_mutex.Unlock();
   return ret;
 }
+
+/**************************************************************************/
+/**************************************************************************/
+// TString .vs. std::TString.
+/**************************************************************************/
+/**************************************************************************/
+
+TBuffer& operator<<(TBuffer& b, const string& s)
+{
+  Int_t   nbig;
+  UChar_t nwh;
+  nbig = s.length();
+  if (nbig > 254) {
+    nwh = 255;
+    b << nwh;
+    b << nbig;
+  } else {
+    nwh = UChar_t(nbig);
+    b << nwh;
+  }
+  b.WriteFastArray(s.data(), nbig);
+  return b;
+}
+
+TBuffer& operator>>(TBuffer& b, string& s)
+{
+   Int_t   nbig;
+   UChar_t nwh;
+   b >> nwh;
+   if (nwh == 255)
+     b >> nbig;
+   else
+     nbig = nwh;
+   s.resize(nbig);
+   b.ReadFastArray(const_cast<char*>(s.data()), nbig);
+   return b;
+}
+
+// Relies on TString::Data() fast & null-terminated.
+
+bool operator==(const TString& t, const string& s)
+{ return (s == t.Data()); }
+
+bool operator==(const string&  s, const TString& t)
+{ return (s == t.Data()); }

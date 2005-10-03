@@ -21,7 +21,7 @@ private:
   void _init();
 
 protected:
-  GTSurf*		mTarget;  // X{gS} L{}
+  ZLink<GTSurf>		mTarget;  // X{gS} L{}
 
   TString		mFormula; // X{GS} 7 Textor(-width=>24)
   Algo_e		mAlgo;    // X{GS} 7 PhonyEnum(-join=>1)
@@ -49,6 +49,5 @@ public:
   ClassDef(GTSIsoMaker, 1)
 }; // endclass GTSIsoMaker
 
-GlassIODef(GTSIsoMaker);
 
 #endif

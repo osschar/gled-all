@@ -35,7 +35,6 @@ public:
   ClassDef(ZMirFilter, 1)
 }; // endclass ZMirFilter
 
-GlassIODef(ZMirFilter);
 
 /**************************************************************************/
 // Inlines

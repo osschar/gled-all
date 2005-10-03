@@ -1,5 +1,7 @@
 # $Header$
 
 $PATCH = {
-"ZImage" => { 'CINT_Opts' => "" }
+"ZImage" => {
+  'CINT_Opts' => ""
+},
 };

@@ -10,7 +10,6 @@
 #include <Glasses/ZNameMap.h>
 #include <Glasses/SaturnInfo.h>
 
-#include <Gled/MIR_Priest.h>
 #include <Gled/GTime.h>
 
 class ZKing; class ZQueen;
@@ -20,7 +19,8 @@ class Ray;
 typedef set<ZQueen*>		spZQueen_t;
 typedef set<ZQueen*>::iterator	spZQueen_i;
 
-class ZQueen : public ZNameMap, public An_ID_Demangler, public MIR_Priest
+class ZQueen : public ZNameMap,
+	       public An_ID_Demangler, public MIR_Priest
 {
 
   MAC_RNR_FRIENDS(ZQueen);
@@ -99,10 +99,10 @@ protected:
   UChar_t	mMapNoneTo;     // X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e,
                                 //                   -names=>[R_Allow,R_Deny])
 
-  ZMirFilter*	mProtector;     // X{gS} L{}
+  ZLink<ZMirFilter>	mProtector;     // X{gS} L{}
 
-  ZHashList*	mDeps;          // X{gS} L{}
-  ZHashList*	mOrphans;       // X{gS} L{}
+  ZLink<ZHashList>	mDeps;          // X{gS} L{}
+  ZLink<ZHashList>	mOrphans;       // X{gS} L{}
 
   lpSaturnInfo_t mReflectors;	//!
 
@@ -131,7 +131,7 @@ protected:
 
   void put_lens_to_purgatory(ZGlass* lens);
   void remove_lens(ZGlass* lens);
-  void remove_lenses(ZList* list, Bool_t recurse, Bool_t syncmode);
+  void remove_lenses(AList* list, Bool_t recurse, Bool_t syncmode);
 
 public:
 
@@ -163,14 +163,11 @@ public:
   virtual void DepCheckMIR(ZMIR& mir);
 
   // Instantiation methods
-  ID_t InstantiateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
-			  LID_t att_lid, CID_t att_cid, MID_t att_mid,
-			  LID_t new_lid, CID_t new_cid,
+  ID_t InstantiateWAttach(LID_t new_lid, CID_t new_cid,
 			  const Text_t* name=0, const Text_t* title=0
-			  ); // X{E} C{2} T{ZQueen::Instantiate}
-  ID_t IncarnateWAttach(ZGlass* attach_to, ZGlass* attach_gamma,
-			LID_t att_lid, CID_t att_cid, MID_t att_mid
-			); // X{E} C{2} T{ZQueen::Instantiate}
+			  ); // X{E} T{ZQueen::Instantiate}
+
+  ID_t IncarnateWAttach();   // X{E} T{ZQueen::Instantiate}
 
   // instantiate URL
 
@@ -181,11 +178,11 @@ public:
   // Lens deletion
  protected:
   void PutLensToPurgatory(ZGlass* lens);                // X{E}  C{1}
-  void PutListElementsToPurgatory(ZList* list);         // X{E}  C{1}
+  void PutListElementsToPurgatory(AList* list);         // X{E}  C{1}
   void PutLensToVoid(ID_t lens_id);                     // X{E}
  public:
   void RemoveLens(ZGlass* lens);                        // X{E}  C{1}
-  void RemoveLenses(ZList* list, Bool_t recurse=false); // X{Ed} C{1}
+  void RemoveLenses(AList* list, Bool_t recurse=false); // X{Ed} C{1}
 
   // ZeroRefCount and management of Orphans
   void ZeroRefCount(ZGlass* lens);
@@ -224,7 +221,6 @@ public:
   ClassDef(ZQueen, 1)
 }; // endclass ZQueen
 
-GlassIODef(ZQueen);
 
 // Attempt at server exec + broadcast
 #ifndef __CINT__

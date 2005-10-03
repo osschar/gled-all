@@ -27,7 +27,7 @@ private:
   void _init();
 
 protected:
-  PupilInfo*	mPupil;		// X{gS} L{}
+  ZLink<PupilInfo>	mPupil;		// X{gS} L{}
 
   TestType_e	mTestSelection; // X{GS} 7 PhonyEnum()
 
@@ -68,6 +68,5 @@ public:
   ClassDef(GLTesterOne, 1) // Speed tests for some GL operations
 }; // endclass GLTesterOne
 
-GlassIODef(GLTesterOne);
 
 #endif

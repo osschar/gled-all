@@ -10,14 +10,15 @@
 #include <Glasses/ZQueen.h>
 class ZEunuch;
 
-class ZFireQueen : public ZQueen {
+class ZFireQueen : public ZQueen
+{
   MAC_RNR_FRIENDS(ZFireQueen);
 
 private:
   void _init();
 
 protected:
-  ZHashList*	mEunuchs;	// X{gS} L{}
+  ZLink<ZHashList>	mEunuchs;	// X{gS} L{}
 
   virtual void bootstrap();
 
@@ -34,6 +35,5 @@ public:
   ClassDef(ZFireQueen, 1)
 }; // endclass ZFireQueen
 
-GlassIODef(ZFireQueen);
 
 #endif

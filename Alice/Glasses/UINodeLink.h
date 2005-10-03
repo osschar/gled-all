@@ -22,12 +22,12 @@ class UINodeLink : public ZNodeLink {
   Bool_t              mActive;          //  X{GS}
   Bool_t              mHasFocus;        //  X{GS}
 
-  ZGlass*             mCbackAlpha;      //  X{GS} L{}
-  ZGlass*             mCbackBeta;       //  X{GS} L{}
+  ZLink<ZGlass>             mCbackAlpha;      //  X{GS} L{}
+  ZLink<ZGlass>             mCbackBeta;       //  X{GS} L{}
   TString             mCbackMethodName; //  X{GS} Ray{CbackReset} 7 Textor()
 
-  ZGlass*             mFocusAlpha;      //  X{GS} L{}
-  ZGlass*             mFocusBeta;       //  X{GS} L{}
+  ZLink<ZGlass>             mFocusAlpha;      //  X{GS} L{}
+  ZLink<ZGlass>             mFocusBeta;       //  X{GS} L{}
   TString             mFocusMethodName; //  X{GS} Ray{CbackReset} 7 Textor()
 
   GledNS::MethodInfo* mCbackMethodInfo; //! 
@@ -47,6 +47,5 @@ class UINodeLink : public ZNodeLink {
   ClassDef(UINodeLink, 1)
     }; // endclass UINodeLink
 
-GlassIODef(UINodeLink);
 
 #endif

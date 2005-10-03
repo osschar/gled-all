@@ -9,7 +9,7 @@
 
 #include "A_Rnr.h"
 #include "PMSEntry.h"
-#include <GledView/GledViewNS.h>
+#include <Gled/GledNS.h>
 #include <Stones/ZTrans.h>
 #include <Stones/ZColor.h>
 
@@ -29,7 +29,7 @@ private:
 protected:
   Eye*		mEye;		// X{g}
 
-  string	mRnrName;	// X{RGs}
+  TString	mRnrName;	// X{RGs}
   Bool_t	bUseOwnRnrs;	// X{gs} True for all but GL
 
   UInt_t	mRnrCount;	// X{g}
@@ -43,7 +43,7 @@ protected:
   list<PMSEntry*> mPMStack;	// X{r}
   PMSEntry        mBotPMSE;
   ZTrans*         mAbsCamera;   // X{gs}
-  Float_t*        mProjBase;    // X{gs}
+  ZTrans*         mProjBase;    // X{gs}
 
   Int_t	          mWidth;       // X{gs}
   Int_t	          mHeight;      // X{gs}
@@ -75,15 +75,15 @@ protected:
   hImg2Rnr_t    mOwnRnrs;
 
 public:
-  RnrDriver(Eye* e, const string& r);
+  RnrDriver(Eye* e, const TString& r);
   virtual ~RnrDriver();
 
   virtual void ImageDeath(OptoStructs::ZGlassImg* img);
 
   void FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
-		     const GledViewNS::RnrBits& bits);
+		     const GledNS::RnrBits& bits);
   void FillRnrScheme(RnrScheme* rs, OptoStructs::lpZGlassImg_t* imgs,
-		     const GledViewNS::RnrBits& bits);
+		     const GledNS::RnrBits& bits);
 
   virtual A_Rnr* GetLensRnr(ZGlass*lens);
   virtual A_Rnr* AssertDefRnr(OptoStructs::ZGlassImg* img);

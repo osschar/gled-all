@@ -16,7 +16,7 @@ private:
   void _init();
 
 protected:
-  GlobalLamps*		mGlobLamps; // X{gS} L{} RnrBits{3,0,6,0}
+  ZLink<GlobalLamps>		mGlobLamps; // X{gS} L{} RnrBits{3,0,6,0}
 
 public:
   Scene(const Text_t* n="Scene", const Text_t* t=0) : ZNode(n,t) { _init(); }
@@ -27,6 +27,5 @@ public:
   ClassDef(Scene, 1) // Representation of a Scene with global lamps and ability do define GL state
 }; // endclass Scene
 
-GlassIODef(Scene);
 
 #endif

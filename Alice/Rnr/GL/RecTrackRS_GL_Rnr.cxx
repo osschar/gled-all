@@ -8,6 +8,8 @@
 #include <RnrBase/RnrDriver.h>
 #include <FL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void RecTrackRS_GL_Rnr::_init()
@@ -17,6 +19,7 @@ void RecTrackRS_GL_Rnr::_init()
 
 void RecTrackRS_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   update_tring_stamp(rd);
   rd->PushRnrMod(RecTrackRS::FID(),  mRnrMod);
 }
@@ -30,4 +33,5 @@ void RecTrackRS_GL_Rnr::Draw(RnrDriver* rd)
 void RecTrackRS_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   rd->PopRnrMod(RecTrackRS::FID());
+  PARENT::PostDraw(rd);
 }

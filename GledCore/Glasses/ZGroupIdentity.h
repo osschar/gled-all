@@ -27,6 +27,5 @@ public:
   ClassDef(ZGroupIdentity, 1) // Representation of a group identity
 }; // endclass ZGroupIdentity
 
-GlassIODef(ZGroupIdentity);
 
 #endif

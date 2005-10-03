@@ -12,8 +12,6 @@
 #include "WGlButton.h"
 #include "WGlButton.c7"
 
-#include <RegExp/pme.h>
-
 ClassImp(WGlButton)
 
 /**************************************************************************/
@@ -31,7 +29,7 @@ void WGlButton::_init()
 GledNS::MethodInfo* WGlButton::GetCbackMethodInfo()
 {
   if(mCbackMethodInfo == 0)
-    mCbackMethodInfo = GledNS::DeduceMethodInfo(mCbackAlpha, mCbackMethodName.Data());
+    mCbackMethodInfo = GledNS::DeduceMethodInfo(*mCbackAlpha, mCbackMethodName.Data());
   return mCbackMethodInfo;
 }
 

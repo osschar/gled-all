@@ -20,7 +20,7 @@ namespace {
 
 void PupilInfo_GL_Rnr::_init()
 {
-  static const string _eh("PupilInfo_GL_Rnr::_init ");
+  static const Exc_t _eh("PupilInfo_GL_Rnr::_init ");
 
   if(def_font == 0) {
     def_font = new ZRlFont();

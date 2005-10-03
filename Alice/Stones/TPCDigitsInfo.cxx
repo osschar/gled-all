@@ -37,7 +37,7 @@ TPCDigitsInfo::~TPCDigitsInfo()
 void TPCDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
 { 
  
-  static const string _eh("TPCDigitsInfo::SetData");
+  static const Exc_t _eh("TPCDigitsInfo::SetData");
 
   mDataDir = "";
   mEvent   = -1;

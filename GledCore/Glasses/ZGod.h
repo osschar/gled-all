@@ -21,6 +21,5 @@ public:
   ClassDef(ZGod, 1)
 }; // endclass ZGod
 
-GlassIODef(ZGod);
 
 #endif

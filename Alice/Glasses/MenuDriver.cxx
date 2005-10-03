@@ -52,32 +52,32 @@ void MenuDriver::Init()
   mZAliLoad->Add(mScreenText);
 
   mContents = new ZList("WGl Contents");
-  mQueen->CheckIn(mContents);
-  Add(mContents);
+  mQueen->CheckIn(*mContents);
+  Add(*mContents);
 
   mMDir = new ZNode("Settings");
-  mQueen->CheckIn(mMDir);
-  mOverlay->Add(mMDir);
+  mQueen->CheckIn(*mMDir);
+  mOverlay->Add(*mMDir);
   
   mCanvas3D = new ZNode("MDriver 3DCanvas");
-  mQueen->CheckIn(mCanvas3D);
-  mZAliLoad->Add(mCanvas3D);
+  mQueen->CheckIn(*mCanvas3D);
+  mZAliLoad->Add(*mCanvas3D);
 
   mCanvas2D = new ZNode("MDriver 2DCanvas");
-  mQueen->CheckIn(mCanvas2D);
-  mOverlay->Add(mCanvas2D);
+  mQueen->CheckIn(*mCanvas2D);
+  mOverlay->Add(*mCanvas2D);
 
 
   // RNR STYLES 
-  mTPCPlateRM = new TPCSegRnrMod("TPC Plate RM"); mQueen->CheckIn(mTPCPlateRM); 
-  mTPCSegRM = new TPCSegRnrMod("TPC Seg RM");     mQueen->CheckIn(mTPCSegRM);
+  mTPCPlateRM = new TPCSegRnrMod("TPC Plate RM"); mQueen->CheckIn(*mTPCPlateRM); 
+  mTPCSegRM = new TPCSegRnrMod("TPC Seg RM");     mQueen->CheckIn(*mTPCSegRM);
   mTPCSegRM->SetFrameCol(1.,0.,0.,1.);
-  mZAliLoad->Add(mTPCPlateRM);
-  mZAliLoad->Add(mTPCSegRM);
+  mZAliLoad->Add(*mTPCPlateRM);
+  mZAliLoad->Add(*mTPCSegRM);
 
-  mITSRM = new ITSDigRnrMod(); mQueen->CheckIn(mITSRM);
+  mITSRM = new ITSDigRnrMod(); mQueen->CheckIn(*mITSRM);
   mITSRM->SetFrameCol(1.,1.,1.,0.6);
-  mZAliLoad->Add(mITSRM);
+  mZAliLoad->Add(*mITSRM);
 
  
 
@@ -96,12 +96,12 @@ void MenuDriver::Init()
   mQueen->CheckIn(settings);
   WGlButton* zoomin = new WGlButton("ZoomIn");
   mQueen->CheckIn(zoomin);
-  zoomin->SetCbackAlpha(mITSRM);
+  zoomin->SetCbackAlpha(*mITSRM);
   zoomin->SetCbackMethodName("ZoomIn");
   settings->Add(zoomin);
   WGlButton* zoomout = new WGlButton("ZoomOut");
   mQueen->CheckIn(zoomout);
-  zoomout->SetCbackAlpha(mITSRM);
+  zoomout->SetCbackAlpha(*mITSRM);
   zoomout->SetCbackMethodName("ZoomOut");
   settings->Add(zoomout);
   itsmod->SetSettings(settings);
@@ -229,7 +229,7 @@ void MenuDriver::SwitchSelected(Menu* menu)
 
   // GL menu GUI
   list<Menu*> ml;  
-  menu->CopyByGlass<Menu*>(ml);
+  menu->CopyListByGlass<Menu>(ml);
   for(list<Menu*>::iterator i=ml.begin(); i!=ml.end(); ++i) {
     mContents->Add(*i);
   }
@@ -251,7 +251,7 @@ void MenuDriver::SwitchSelected(Menu* menu)
   //copy content to the menu settigs wgl directory
   if(menu->GetSettings() && (!menu->GetSettings()->IsEmpty())){
     list<ZGlass*> cl;  
-    menu->GetSettings()->Copy(cl);
+    menu->GetSettings()->CopyList(cl);
     SGridStepper stepper(SGridStepper::SM_YXZ);
     stepper.SetNs(6, 2);
     stepper.SetDs(-2, 1);
@@ -261,7 +261,7 @@ void MenuDriver::SwitchSelected(Menu* menu)
 	Float_t pos[3];
 	stepper.GetPosition(pos);
 	pos[0] += 7.8; pos[1] += 6;
-	n->Set3Pos(pos[0], pos[1], 0.5);
+	n->SetPos(pos[0], pos[1], 0.5);
 	stepper.Step();
       }
       mMDir->Add(*i);
@@ -270,7 +270,7 @@ void MenuDriver::SwitchSelected(Menu* menu)
   if(menu->GetCanvas3D()){
     //printf("SwitchSelected read menu canvas %s \n",menu->GetCanvas3D()->GetName() );
     list<ZGlass*> cl;  
-    menu->GetCanvas3D()->Copy(cl);
+    menu->GetCanvas3D()->CopyList(cl);
     for(list<ZGlass*>::iterator i=cl.begin(); i!=cl.end(); ++i) {
       //printf("Fill canvas %s from %s \n", (*i)->GetName(), menu->GetName());
       mCanvas3D->Add(*i);
@@ -280,7 +280,7 @@ void MenuDriver::SwitchSelected(Menu* menu)
   if(menu->GetCanvas2D() && (!menu->GetCanvas2D()->IsEmpty())){
     //printf("SwitchSelected read menu canvas %s \n",menu->GetCanvas2D()->GetName() );
     list<ZGlass*> cl;  
-    menu->GetCanvas2D()->Copy(cl);
+    menu->GetCanvas2D()->CopyList(cl);
     for(list<ZGlass*>::iterator i=cl.begin(); i!=cl.end(); ++i) {
       //printf("Fill LINKS  %s from %s \n", (*i)->GetName(), menu->GetName());
       mCanvas2D->Add(*i);
@@ -295,7 +295,7 @@ void MenuDriver::SetParentToSubMenues(Menu* menu)
   //  printf("SetParentToSubMenues \n");
   if(menu == 0) menu = mCurrent;
   list<Menu*> sml;  
-  mCurrent->CopyByGlass<Menu*>(sml);
+  mCurrent->CopyListByGlass<Menu>(sml);
   for(list<Menu*>::iterator i=sml.begin(); i!=sml.end(); ++i) {
     (*i)->SetParent(mCurrent);
   } 
@@ -321,7 +321,7 @@ void MenuDriver::SPDMenu(ZNode* dh, ZNode* lh)
   ZNode* lens = dynamic_cast<ZNode*>(mPrevious->GetCanvas3D()->FindLensByPath("SPD"));
   if(lens) {
     list<ZNode*> cl;  
-    lens->CopyByGlass<ZNode*>(cl);
+    lens->CopyListByGlass<ZNode>(cl);
     for(list<ZNode*>::iterator i=cl.begin(); i!=cl.end(); ++i) {
       dh->Add(*i);
     } 
@@ -333,7 +333,7 @@ void MenuDriver::SDDMenu(ZNode* dh, ZNode* lh)
   ZNode* lens = dynamic_cast<ZNode*>(mPrevious->GetCanvas3D()->FindLensByPath("SDD"));
   if(lens) {
     list<ZNode*> cl;  
-    lens->CopyByGlass<ZNode*>(cl);
+    lens->CopyListByGlass<ZNode>(cl);
     for(list<ZNode*>::iterator i=cl.begin(); i!=cl.end(); ++i) {
       dh->Add(*i);
     } 
@@ -345,7 +345,7 @@ void MenuDriver::SSDMenu(ZNode* dh, ZNode* lh)
   ZNode* lens = dynamic_cast<ZNode*>(mPrevious->GetCanvas3D()->FindLensByPath("SSD"));
   if(lens) {
     list<ZNode*> cl;  
-    lens->CopyByGlass<ZNode*>(cl);
+    lens->CopyListByGlass<ZNode>(cl);
     for(list<ZNode*>::iterator i=cl.begin(); i!=cl.end(); ++i) {
       dh->Add(*i);
     } 
@@ -393,7 +393,7 @@ void MenuDriver:: SelectITSLayer(ZNode* dh, ZNode* lh)
 
   ZNode* lens = dynamic_cast<ZNode*>(mPrevious->GetCanvas3D()->FindLensByPath(mCurrent->GetName()));
   list<ITSScaledModule*> cl;  
-  lens->CopyByGlass<ITSScaledModule*>(cl);
+  lens->CopyListByGlass<ITSScaledModule>(cl);
   for(list<ITSScaledModule*>::iterator i=cl.begin(); i!=cl.end(); ++i) {
     mod = *i;
     link = new UINodeLink(GForm("ITS mod link  %d",mod->GetID()));
@@ -408,7 +408,7 @@ void MenuDriver:: SelectITSLayer(ZNode* dh, ZNode* lh)
       y = y0 + (lad-1)*2*mod->GetDx()*scale + mod->GetDx()*scale;
     }
     x = x0 + (mod->GetDet()-1)*2*mod->GetDz()*scale + mod->GetDz()*scale;
-    link->Set3Pos(x,y, 0.);
+    link->SetPos(x,y, 0.);
     link->SetCbackAlpha(this);link->SetCbackBeta(mod);
     link->SetCbackMethodName("ITSModPickMenu");
     mQueen->CheckIn(link);
@@ -419,21 +419,21 @@ void MenuDriver:: SelectITSLayer(ZNode* dh, ZNode* lh)
   plane->SetULen(gridH*nCol*mod->GetDz()/(mod->GetDx()*nLad)); 
   plane->SetVStrips(nLad);
   plane->SetUStrips(nCol);
-  plane->Set3Pos(plane->GetULen()/2.+x0, gridH/2.+y0, 0.);
+  plane->SetPos(plane->GetULen()/2.+x0, gridH/2.+y0, 0.);
 }
 
 void MenuDriver::ITSModuleMenu(ZNode* dh, ZNode* lh) 
 {
   UINodeLink* ml = new UINodeLink("ITSModuleLink");
-  ml->SetRnrMod(mITSRM);
+  ml->SetRnrMod(*mITSRM);
   ml->SetUseScale(true);
   ml->SetScales(.5,.5,.5);
   ml->RotateLF(1,2, TMath::Pi()/2);
   ml->RotateLF(2,3, TMath::Pi()/2); 
-  ml->Move3(3.5,4.,0.);
+  ml->Move3LF(3.5, 4, 0);
   mQueen->CheckIn(ml);
   // if no segment selected, then show first one == Seg0
-  ZGlass* mod = mPrevious->GetCanvas3D()->First();
+  ZGlass* mod = mPrevious->GetCanvas3D()->FrontElement();
   ml->SetLens(mod);
   lh->Add(ml);
 }
@@ -471,16 +471,16 @@ void MenuDriver::TPCMenu(ZNode* dh, ZNode* lh)
   for (int i=0; i < 36; i++) {
     seg = mZAliLoad->ShowTPCSegment(i, dh);
     link = new UINodeLink(GForm("Segment link  %d",i));
-    link->SetRnrMod(mTPCPlateRM);
+    link->SetRnrMod(*mTPCPlateRM);
     link->SetLens(seg);
     link->RotateLF(1,2, - TMath::Pi()/2 + (i + 0.5)*20*TMath::Pi()/180);
     link->RotateLF(1,3, TMath::Pi());
     link->SetUseScale(true);
     link->SetScales(0.008, 0.008, 0.008);
     if(i < 18)
-      link->Move3(2.4,6.2,0.); 
+      link->Move3LF(2.4, 6.2, 0); 
     else
-      link->Move3(7.3, 6.2,0.);
+      link->Move3LF(7.3, 6.2, 0);
     link->SetCbackAlpha(this);link->SetCbackBeta(seg);
     link->SetCbackMethodName("TPCSegPickMenu");
     link->SetFocusAlpha(this);link->SetFocusBeta(link);
@@ -500,14 +500,14 @@ void MenuDriver::TPCSegMenu(ZNode* dh, ZNode* lh)
   Float_t y0 = -3.3;
   
   UINodeLink* sl = new UINodeLink("SegmentLink");
-  sl->SetRnrMod(mTPCSegRM);
+  sl->SetRnrMod(*mTPCSegRM);
   sl->SetUseScale(true);
   sl->SetScales(scale, scale, 1.);
-  sl->Move3(x0,y0,0.);
+  sl->Move3LF(x0, y0, 0.);
   sl->SetActive(false);
   mQueen->CheckIn(sl);
 
-  ZGlass* lens = mPrevious->GetCanvas3D()->First();
+  ZGlass* lens = mPrevious->GetCanvas3D()->FrontElement();
   TPCSegment* seg = dynamic_cast<TPCSegment*>(lens);
   sl->SetLens(seg);
   lh->Add(sl);
@@ -516,7 +516,7 @@ void MenuDriver::TPCSegMenu(ZNode* dh, ZNode* lh)
   pr->SetSegment(seg);
   pr->SetUseScale(true);
   pr->SetScales(0.06, 0.1, 1.);
-  pr->Move3(7.5, 7.3, 0.2);
+  pr->Move3LF(7.5, 7.3, 0.2);
   mQueen->CheckIn(pr);
   lh->Add(pr);
 
@@ -525,7 +525,7 @@ void MenuDriver::TPCSegMenu(ZNode* dh, ZNode* lh)
   frame->SetTPCPar(mZAliLoad->GetTPCDigInfo()->mParameter);
   frame->SetUseScale(true);
   frame->SetScales(scale, scale, 1.);
-  frame->Move3(x0,y0,0.2);
+  frame->Move3LF(x0, y0, 0.2);
   frame->SetPadRow(pr);
   frame->SetLens(pr);
   mQueen->CheckIn(frame);
@@ -562,11 +562,11 @@ void MenuDriver::TPCSegFocus(ZGlass* zlink)
   //printf("TPCSegFocus %s focus %d \n",lens->GetName(),link->GetHasFocus() ? 1:0 );
   if(link->GetHasFocus()) {
     //    lens->SetRnrMod(mTPCSegRM);
-    link->SetRnrMod(mTPCSegRM);
+    link->SetRnrMod(*mTPCSegRM);
   }
   else {
     // lens->SetRnrMod(mTPCPlateRM);
-    link->SetRnrMod(mTPCPlateRM);
+    link->SetRnrMod(*mTPCPlateRM);
   }
 }
 
@@ -575,7 +575,7 @@ void MenuDriver::Dump()
 {
   Int_t count = 0;
   list<ZGlass*> dl3;
-  mCanvas3D->Copy(dl3);
+  mCanvas3D->CopyList(dl3);
   //  printf("MenuDrive 3D Cavas content: \n");
   for(list<ZGlass*>::iterator i=dl3.begin(); i!=dl3.end(); ++i) {
     printf("MenuDrive 3D canvas %d %s \n", count,(*i)->GetName());
@@ -584,7 +584,7 @@ void MenuDriver::Dump()
   
   count = 0;
   list<ZGlass*> dl2;
-  mCanvas2D->CopyByGlass<ZGlass*>(dl2);
+  mCanvas2D->CopyList(dl2);
   // printf("2D Cavas content: \n");
   for(list<ZGlass*>::iterator i=dl2.begin(); i!=dl2.end(); ++i) {
     printf("MenuDriver  2D canvas %d %s \n", count,(*i)->GetName());

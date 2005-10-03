@@ -19,7 +19,7 @@ private:
   void _init();
 
 protected:
-  ZNode*	mTarget;	// X{gS} L{l}
+  ZLink<ZNode>	mTarget;	// X{gS} L{}
 
   Bool_t	bReportID;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bGetResult;	// X{gS} 7 Bool()
@@ -37,6 +37,5 @@ public:
   ClassDef(RndSMorphCreator, 1)
 }; // endclass RndSMorphCreator
 
-GlassIODef(RndSMorphCreator);
 
 #endif

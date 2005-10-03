@@ -14,7 +14,8 @@
 
 class TubeTvor;
 
-class SMorph : public ZNode {
+class SMorph : public ZNode
+{
   MAC_RNR_FRIENDS(SMorph);
 
 private:
@@ -33,7 +34,7 @@ protected:
   Bool_t	bEquiSurf;	// X{gST} 7 Bool()
   ZColor	mColor;		// X{PGST} 7 ColorButt()
 
-  ZImage*	mTexture;	// X{gST} L{} RnrBits{4,0,5,0}
+  ZLink<ZImage>	mTexture;	// X{gST} L{} RnrBits{4,0,5,0}
   Float_t	mTexX0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
   Float_t	mTexY0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000])
   Float_t	mTexXC;         // X{gST} 7 Value(-range=>[0,1e3,1,1000], -join=>1)
@@ -55,8 +56,7 @@ public:
 
 #include "SMorph.h7"
   ClassDef(SMorph, 1)
-    }; // endclass SMorph
+}; // endclass SMorph
 
-GlassIODef(SMorph);
 
 #endif

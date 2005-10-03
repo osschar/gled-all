@@ -32,9 +32,9 @@ void TPCPadRow_GL_Rnr::Render(RnrDriver* rd)
   Float_t x0,y0;
   x0 =  mTPCPadRow->mDx/2.;
   y0 =  mTPCPadRow->mDy/2.;
-  if (mTPCPadRow->mSegment){
+  if(mTPCPadRow->mSegment != 0) {
     TPCSegment_GL_Rnr* seg_rnr = 
-      dynamic_cast<TPCSegment_GL_Rnr*>(rd->GetRnr(fImg->fEye->DemanglePtr(mTPCPadRow->mSegment)));
+      dynamic_cast<TPCSegment_GL_Rnr*>(rd->GetRnr(fImg->fEye->DemanglePtr(*mTPCPadRow->mSegment)));
     AliTPCParam* par = mTPCPadRow->mSegment->GetDigInfo()->mParameter;//get from segment
     Int_t row = mTPCPadRow->mRow;
     Int_t nMaxPads,start_row,start_col,end_col;
@@ -78,9 +78,8 @@ void TPCPadRow_GL_Rnr::Render(RnrDriver* rd)
     glEnd();
     seg_rnr->EndTexture();
 
-
-    Float_t x,y,z;    
-    mTPCPadRow->GetTrans().Get3Pos(x,y,z);
+    Double_t x,y,z;    
+    mTPCPadRow->GetTrans().GetPos(x,y,z);
 
     GLTextNS::RnrText(rd, GForm("Seg: %d Sec: %d Row: %d Pad: %d",mTPCPadRow->mSegment->GetSegment(), sec, row, mTPCPadRow->mPad),
 		      Int_t((x - mTPCPadRow->GetDx()*0.5*mTPCPadRow->GetSx())*rd->GetWidth()/10.)+ mTPCPadRow->mTX,
@@ -105,10 +104,10 @@ int TPCPadRow_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
   if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
     TPCPadRow& R = *mTPCPadRow;
-    Float_t x,y,z;
-    
-    R.GetTrans().Get3Pos(x,y,z);
-    Float_t dx = ev.fX*10./rd->GetWidth() -x + R.GetDx()*R.GetSx()*0.5;
+
+    Double_t x,y,z;    
+    R.RefTrans().GetPos(x,y,z);
+    Double_t dx = ev.fX*10./rd->GetWidth() - x + R.GetDx()*R.GetSx()*0.5;
     Int_t pad = Int_t(dx/(R.GetDx()*R.GetSx()/mNPads));
     R.SetPad(pad);
     printf("selcted pad %d of %d pos %f ev.pos in pix %d rel %f) \n",

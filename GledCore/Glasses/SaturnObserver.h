@@ -16,7 +16,7 @@ private:
   void _init();
 
 protected:
-  SaturnInfo*	mTarget;	// X{gS} L{}
+  ZLink<SaturnInfo>	mTarget;	// X{gS} L{}
 
 public:
   SaturnObserver(const Text_t* n="SaturnObserver", const Text_t* t=0) : Operator(n,t) { _init(); }
@@ -27,6 +27,5 @@ public:
   ClassDef(SaturnObserver, 1)
 }; // endclass SaturnObserver
 
-GlassIODef(SaturnObserver);
 
 #endif

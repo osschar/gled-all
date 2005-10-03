@@ -12,9 +12,6 @@
 #include "ZHashList.h"
 #include "ZHashList.c7"
 
-typedef hash_map<ZGlass*, lpZGlass_i>		Glass2LIter_t;
-typedef hash_map<ZGlass*, lpZGlass_i>::iterator	Glass2LIter_i;
-
 ClassImp(ZHashList)
 
 /**************************************************************************/
@@ -26,171 +23,160 @@ void ZHashList::_init()
 
 /**************************************************************************/
 
+void ZHashList::new_element_check(ZGlass* lens)
+{
+  static const Exc_t _eh("ZHashList::new_element_check ");
+
+  hpLens2Iter_i i = mItHash.find(lens);
+  if(i != mItHash.end()) {
+    throw(_eh + "lens " + lens->Identify() + " already in the list.");
+  }
+  PARENT_GLASS::new_element_check(lens);
+}
+
 void ZHashList::clear_list()
 {
   PARENT_GLASS::clear_list();
   mItHash.clear();
 }
 
-
 /**************************************************************************/
 
 Int_t ZHashList::remove_references_to(ZGlass* lens)
 {
   Int_t n = ZGlass::remove_references_to(lens);
-  mListMutex.Lock();
-  Glass2LIter_i i = mItHash.find(lens);
+
+  GMutexHolder llck(mListMutex);
+  hpLens2Iter_i i = mItHash.find(lens);
   if(i != mItHash.end()) {
-    mGlasses.erase(i->second); --mSize;
+    ZList::iterator l = i->second;
     mItHash.erase(i);
+    mElements.erase(l); --mSize;
     StampListRemove(lens);
     ++n;
   }
-  mListMutex.Unlock();
 
   return n;
 }
 
 /**************************************************************************/
 
-void ZHashList::rebuild_hash()
+void ZHashList::on_insert(ZList::iterator it)
+{
+  mItHash[it.lens()] = it;
+}
+
+void ZHashList::on_remove(ZList::iterator it)
+{
+  hpLens2Iter_i i = mItHash.find(it.lens());
+  assert(i != mItHash.end());
+  mItHash.erase(i);
+}
+
+void ZHashList::on_rebuild()
 {
   mItHash.clear();
-  for(lpZGlass_i i=mGlasses.begin(); i!=mGlasses.end(); ++i) {
-    mItHash[*i] = i;
-  }
+  for(ZList::iterator i=begin(); i!=end(); ++i)
+    mItHash[i.lens()] = i;
 }
 
 /**************************************************************************/
 
-void ZHashList::Add(ZGlass* g)
-{
-  new_element_check(g);
-  if(!Has(g)) {
-    mListMutex.Lock();
-    mGlasses.push_back(g); ++mSize;
-    mItHash[g] = --mGlasses.end();
-    StampListAdd(g, 0);
-    mListMutex.Unlock();
-    g->IncRefCount(this);
-  } else {
-    if(bNerdyListOps)
-      throw(string("ZHashList::Add element already in the list"));
-  }
-}
-
-void ZHashList::AddBefore(ZGlass* g, ZGlass* before)
-{
-  new_element_check(g);
-  if(!Has(g)) {
-    mListMutex.Lock();
-    Glass2LIter_i h = mItHash.find(before);
-    lpZGlass_i i = (h != mItHash.end()) ? h->second : mGlasses.end();
-    mGlasses.insert(i, g); ++mSize;
-    mItHash[g] = --i;
-    StampListAdd(g, before);
-    mListMutex.Unlock();
-    g->IncRefCount(this);
-  } else {
-    if(bNerdyListOps)
-      throw(string("ZHashList::AddBefore element already in the list"));
-  }
-}
-
-void ZHashList::AddFirst(ZGlass* g)
-{
-  new_element_check(g);
-  if(!Has(g)) {
-    mListMutex.Lock();
-    ZGlass* b4 = mSize > 0 ? mGlasses.front() : 0;
-    mGlasses.push_front(g); ++mSize;
-    mItHash[g] = mGlasses.begin();
-    StampListAdd(g, b4);
-    mListMutex.Unlock();
-    g->IncRefCount(this);
-  } else {
-    if(bNerdyListOps)
-      throw(string("ZHashList::AddFirst element already in the list"));
-  }
-}
-
-void ZHashList::Remove(ZGlass* g)
-{
-  mListMutex.Lock();
-  Glass2LIter_i i = mItHash.find(g);
-  if(i != mItHash.end()) {
-    mGlasses.erase(i->second); --mSize;
-    mItHash.erase(i);
-    StampListRemove(g);
-    g->DecRefCount(this);
-  } else {
-    if(bNerdyListOps) {
-      mListMutex.Unlock();
-      throw(string("ZHashList::Remove element not in the list"));
-    }
-  }
-  mListMutex.Unlock();
-}
-
-void ZHashList::RemoveLast(ZGlass* g)
-{ Remove(g); }
-
-/**************************************************************************/
-
-Bool_t ZHashList::Has(ZGlass* g)
-{
-  mListMutex.Lock();
-  Glass2LIter_i i = mItHash.find(g);
-  bool ret = (i != mItHash.end());
-  mListMutex.Unlock();
-  return ret;
-}
-
-/**************************************************************************/
-
-ZGlass* ZHashList::After(ZGlass* g)
-{
-  ZGlass* ret = 0;
-  mListMutex.Lock();
-  Glass2LIter_i i = mItHash.find(g);
-  if(i != mItHash.end()) {
-    lpZGlass_i j(i->second); ++j;
-    if(j != mGlasses.end())
-      ret = *j;
-  }
-  mListMutex.Unlock();
-  return ret;
-}
-
-ZGlass* ZHashList::Before(ZGlass* g)
-{
-  ZGlass* ret = 0;
-  mListMutex.Lock();
-  Glass2LIter_i i = mItHash.find(g);
-  if(i != mItHash.end()) {
-    lpZGlass_i j(i->second);
-    if(j != mGlasses.begin())
-      ret = *(--j);
-  }
-  mListMutex.Unlock();
-  return ret;
-}
-
-/**************************************************************************/
-
-void ZHashList::SortByName()
+Bool_t ZHashList::Has(ZGlass* lens)
 {
   GMutexHolder llck(mListMutex);
-  ZList::SortByName();
-  rebuild_hash();
+  hpLens2Iter_i i = mItHash.find(lens);
+  return (i != mItHash.end());
 }
 
 /**************************************************************************/
 
-Int_t ZHashList::RebuildListRefs(An_ID_Demangler* idd)
+void ZHashList::RemoveAll(ZGlass* lens)
 {
-  Int_t ret = ZList::RebuildListRefs(idd);
-  rebuild_hash();
+  GMutexHolder llck(mListMutex);
+  hpLens2Iter_i i = mItHash.find(lens);
+  if(i != mItHash.end()) {
+    ZList::iterator l = i->second;
+    mItHash.erase(i);
+    mElements.erase(l); --mSize;
+    lens->DecRefCount(this);
+    StampListRemove(lens);
+  }
+}
+
+/**************************************************************************/
+
+void ZHashList::Insert(ZGlass* lens, ZGlass* before)
+{
+  static const Exc_t _eh("ZHashList::Insert ");
+
+  GMutexHolder llck(mListMutex);
+  new_element_check(lens);
+  hpLens2Iter_i i = mItHash.find(before);
+  if(i == mItHash.end())
+    throw(_eh + "before-lens " + before->Identify() + " not found in the list.");
+  lens->IncRefCount(this);
+  ZList::iterator l = i->second;
+  mElements.insert(l, element(lens, mNextId++)); ++mSize;
+  mItHash[lens] = --l;
+  StampListInsert(lens, mNextId-1, before);
+}
+
+void ZHashList::Remove(ZGlass* lens)
+{
+  static const Exc_t _eh("ZHashList::Remove ");
+
+  GMutexHolder llck(mListMutex);
+  hpLens2Iter_i i = mItHash.find(lens);
+  if(i == mItHash.end())
+    throw(_eh + "lens " + lens->Identify() + " not found in the list.");
+  ZList::iterator l = i->second;
+  mItHash.erase(i);
+  mElements.erase(l); --mSize;
+  lens->DecRefCount(this);
+  StampListRemove(lens);
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+ZGlass* ZHashList::ElementAfter(ZGlass* lens)
+{
+  ZGlass* ret = 0;
+  { GMutexHolder llck(mListMutex);
+    hpLens2Iter_i i = mItHash.find(lens);
+    if(i != mItHash.end()) {
+      ZList::iterator j(i->second);
+      if(++j != end())
+	ret = j.lens();
+    }
+  }
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, ret);
+    mSaturn->ShootMIRResult(b);
+  }
+  return ret;
+}
+
+ZGlass* ZHashList::ElementBefore(ZGlass* lens)
+{
+  ZGlass* ret = 0;
+  { GMutexHolder llck(mListMutex);
+    hpLens2Iter_i i = mItHash.find(lens);
+    if(i != mItHash.end()) {
+      ZList::iterator j = i->second;
+      if(j != begin())
+	ret = (--j).lens();
+    }
+  }
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, ret);
+    mSaturn->ShootMIRResult(b);
+  }
   return ret;
 }
 

@@ -15,9 +15,7 @@ namespace OS = OptoStructs;
 /**************************************************************************/
 
 void GlobalLamps_GL_Rnr::_init()
-{
-  bUseNameStack = false;
-}
+{}
 
 /**************************************************************************/
 
@@ -27,7 +25,7 @@ void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
   // traced back (via Parents) to current position matrix owner.
   // In principle should store list of 
 
-  static const string _eh("GlobalLamps_GL_Rnr::PreDraw ");
+  static const Exc_t _eh("GlobalLamps_GL_Rnr::PreDraw ");
 
   ZGlass_GL_Rnr::PreDraw(rd);
 
@@ -36,7 +34,7 @@ void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
   mLampsOn.clear();
   // should reuse lamps_on and wipe out those that failed
   // should ... perhaps ... also check if the light is already on and leave it alone.
-  list<Lamp*> lamps; mGlobalLamps->CopyByGlass<Lamp*>(lamps);
+  list<Lamp*> lamps; mGlobalLamps->CopyListByGlass<Lamp>(lamps);
   for(list<Lamp*>::iterator l=lamps.begin(); l!=lamps.end(); ++l) {
     // cout <<"GlobalLamps_GL_Rnr::PreDraw lamp="<< (*l)->GetName() <<endl;
     ZTrans* tr = (*l)->ToNode(top);

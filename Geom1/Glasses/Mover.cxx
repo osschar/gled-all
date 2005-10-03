@@ -16,6 +16,7 @@
 //________________________________________________________________________
 
 #include "Mover.h"
+#include "Mover.c7"
 
 ClassImp(Mover)
 
@@ -38,15 +39,13 @@ void Mover::SetRotateParams(UInt_t i, UInt_t j, Float_t a)
 void Mover::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   Operator::PreOperate(op_arg);
-  if(mNode) {
+  if(mNode != 0) {
     if(mMa != 0) {
-      OP_EXE_OR_SP_MIR(mNode, MoveLF, mMi, mMa);
+      OP_EXE_OR_SP_MIR(mNode.get(), MoveLF, mMi, mMa);
     }
     if(mRa != 0) {
-      OP_EXE_OR_SP_MIR(mNode, RotateLF, mRi, mRj, mRa);
+      OP_EXE_OR_SP_MIR(mNode.get(), RotateLF, mRi, mRj, mRa);
     }
   }
   Operator::PostOperate(op_arg);
 }
-
-#include "Mover.c7"

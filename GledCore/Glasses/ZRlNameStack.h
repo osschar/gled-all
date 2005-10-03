@@ -29,6 +29,5 @@ public:
   ClassDef(ZRlNameStack, 1)
 }; // endclass ZRlNameStack
 
-GlassIODef(ZRlNameStack);
 
 #endif

@@ -12,8 +12,8 @@
 
 #include <Stones/ZMirExchangeSession.h>
 
-class ZSunQueen : public ZQueen {
-
+class ZSunQueen : public ZQueen
+{
   MAC_RNR_FRIENDS(ZSunQueen);
 
   friend class Gled;
@@ -24,10 +24,10 @@ private:
   void _init();
 
 protected:
-  SaturnInfo*		mSunInfo;       // X{gS} L{}
+  ZLink<SaturnInfo>		mSunInfo;       // X{gS} L{}
 
-  ZIdentity*		mSaturnGuestId; // X{gS} L{}
-  ZIdentity*		mEyeGuestId;    // X{gS} L{}
+  ZLink<ZIdentity>		mSaturnGuestId; // X{gS} L{}
+  ZLink<ZIdentity>		mEyeGuestId;    // X{gS} L{}
 
   virtual ID_t incarnate_moon(SaturnInfo* parent, SaturnInfo* moon);
   virtual ID_t incarnate_eye(SaturnInfo* parent, EyeInfo* eye);
@@ -115,6 +115,5 @@ public:
   ClassDef(ZSunQueen, 1) // The first queen of the Sun Absolute; handles authentication, identities and MEEs
 }; // endclass ZSunQueen
 
-GlassIODef(ZSunQueen);
 
 #endif

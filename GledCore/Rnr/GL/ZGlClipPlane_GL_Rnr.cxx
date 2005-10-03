@@ -9,6 +9,8 @@
 #include <Rnr/GL/GLRnrDriver.h>
 #include <GL/gl.h>
 
+#define PARENT ZRnrModBase_GL_Rnr
+
 /**************************************************************************/
 
 void ZGlClipPlane_GL_Rnr::_init()
@@ -20,6 +22,7 @@ void ZGlClipPlane_GL_Rnr::_init()
 
 void ZGlClipPlane_GL_Rnr::PreDraw(RnrDriver* rd)
 {
+  PARENT::PreDraw(rd);
   if(mZGlClipPlane->bRnrSelf)
     RnrSelf();
   TurnOn(rd);
@@ -44,6 +47,7 @@ void ZGlClipPlane_GL_Rnr::Draw(RnrDriver* rd)
 void ZGlClipPlane_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   TurnOff(rd);
+  PARENT::PostDraw(rd);
 }
 
 /**************************************************************************/

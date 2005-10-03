@@ -698,7 +698,7 @@ sub new {
   my $proto = shift;
   my $S = $proto->SUPER::new(@_);
   $S->{Widget} = "MCW_Button";
-  $S->{Include} = "Eye/MCW_Button.h";
+  $S->{Include} = "GledView/MCW_Button.h";
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "true";
   $S->{CanResizeP}   = "true";
@@ -712,7 +712,7 @@ sub make_widget {
   return <<"fnord";
 Fl_Widget* ${::CLASSNAME}View::$S->{Methodbase}_Creator() {
   static MCW_Button::Data $S->{Methodbase}_butt_data;
-  if($S->{Methodbase}_butt_data.fLabel.length() == 0) {
+  if($S->{Methodbase}_butt_data.fLabel.IsNull()) {
     $S->{Widget}::FillData(${::CLASSNAME}::GlassInfo()->FindMethodInfo($S->{TOP}{ID}),
                             \"$S->{Methodbase}\", $S->{Methodbase}_butt_data);
   }
@@ -765,11 +765,11 @@ return <<"fnord";
 void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   Eye* e = (mView->fImg) ? mView->fImg->fEye : 0;
   if(e) {
-    auto_ptr<ZMIR> _m( mIdol->S_Set3Pos(o->x(),o->y(),o->z()) );
+    auto_ptr<ZMIR> _m( mIdol->S_SetPos(o->x(),o->y(),o->z()) );
     e->Send(*_m);
     SetUpdateTimer();
   } else {
-    mIdol->Set3Pos(o->x(),o->y(),o->z());
+    mIdol->SetPos(o->x(),o->y(),o->z());
   }
 }\n
 fnord
@@ -778,7 +778,7 @@ fnord
 sub make_weed_update {
   my $S = shift;
   $S->make_weed_update_A() .
-    "  Float_t x[3]; mIdol->Ref$S->{Transname}().Get3Pos(x);\n" .
+    "  Double_t x[3]; mIdol->Ref$S->{Transname}().GetPos(x);\n" .
     "  w->pos(x[0],x[1],x[2]);\n" .
   $S->make_weed_update_B();
 }
@@ -826,7 +826,7 @@ fnord
 sub make_weed_update {
   my $S = shift;
   $S->make_weed_update_A().
-    "  Float_t x[3];  mIdol->Ref$S->{Transname}().Get3Rot(x);\n" .
+    "  Float_t x[3];  mIdol->Ref$S->{Transname}().GetRotAngles(x);\n" .
     "  w->rot(x[0],x[1],x[2]);\n" .
   $S->make_weed_update_B();
 }
@@ -931,7 +931,7 @@ sub new {
   my $S = $proto->SUPER::new(@_);
   $S->{IsLinkWeed} = "true";
   $S->{Widget} = "FltkGledStuff::LinkNameBox";
-  $S->{Include} = "Eye/FltkGledStuff.h";
+  $S->{Include} = "GledView/FltkGledStuff.h";
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "false";
   $S->{CanResizeP}   = "true";

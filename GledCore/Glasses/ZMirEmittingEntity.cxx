@@ -33,7 +33,7 @@ void ZMirEmittingEntity::AdEnlightenment()
     mActiveIdentities = new ZHashList("ActiveIdentities",
 	                        GForm("ActiveIdentities of %s", GetName()));
     mActiveIdentities->SetElementFID(ZIdentity::FID());
-    mQueen->CheckIn(mActiveIdentities);
+    mQueen->CheckIn(mActiveIdentities.get());
   }
 }
 
@@ -42,7 +42,7 @@ void ZMirEmittingEntity::AdEnlightenment()
 Bool_t ZMirEmittingEntity::HasIdentity(ZIdentity* ident)
 {
   return ( mPrimaryIdentity == ident ||
-	  (mActiveIdentities && mActiveIdentities->Has(ident))
+	  (mActiveIdentities != 0 && mActiveIdentities->Has(ident))
 	 );
 }
 

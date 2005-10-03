@@ -10,12 +10,13 @@
 //
 
 #include "MultiSpheror.h"
+#include "MultiSpheror.c7"
+
 #include "Spheror.h"
 #include <Glasses/ZQueen.h>
 #include <Gled/GledMirDefs.h>
 
 #include <TRandom.h>
-
 
 
 ClassImp(MultiSpheror)
@@ -32,35 +33,15 @@ void MultiSpheror::_init()
 
 /**************************************************************************/
 
-namespace {
-  template <class T>
-  T NextOf(lpZGlass_i& i, lpZGlass_i& end)
-  {
-    T ret = 0;
-    do {
-      if(++i == end) break;
-      ret = dynamic_cast<T>(*i);
-    } while(ret == 0);
-    return ret;
-  }
-};
-
-/**************************************************************************/
-
 void MultiSpheror::Init()
 {
   if(mNG != 0) {
     mListMutex.Lock();
-    lpZGlass_i spheri = mGlasses.begin();
-    Spheror* spheror = 0;
-    while(spheri != mGlasses.end()) {
-      spheror = dynamic_cast<Spheror*>(*spheri);
-      if(spheror) {
-	spheror->GetAmoeba()->SetHost(0);
-	spheror->GetAmoeba()->SetWA_Master(0);
-	spheror->SetAmoeba(0);
-      }
-      ++spheri;
+    Stepper<Spheror> s(this);
+    while(s.step()) {
+      s->GetAmoeba()->SetHost(0);
+      s->GetAmoeba()->SetWA_Master(0);
+      s->SetAmoeba(0);
     }
     mListMutex.Unlock();
     ClearList();
@@ -94,46 +75,40 @@ void MultiSpheror::Init()
 
 void MultiSpheror::ClaimCPUs()
 {
-  if(IsSunSpace()) {
-    if(mNDone >= mNtoDo) {
-      throw(string(GForm("MultiSpheror::ClaimCPUs [%s] finished.", GetName())));
-    }
+  static const Exc_t _eh("MultiSpheror::ClaimCPUs ");
 
-    mListMutex.Lock();
-    lpZGlass_i spheri = mGlasses.begin();
-    Spheror* spheror = 0;
-    while(spheri != mGlasses.end()) {
-      spheror = dynamic_cast<Spheror*>(*spheri);
-      if(spheror && spheror->GetAmoeba()->GetHost() == 0) break;
-      ++spheri;
-    }
-    if(spheror == 0) {
-      throw(string("MultiSpheror::ClaimCPUs no spherors found."));
-    }
+  if(IsSunSpace() == false)
+    return;
 
-    lpZGlass_t sats;
-    mSaturn->GetSaturnInfo()->GetMoons()->Copy(sats);
-    sats.push_back(mSaturn->GetSaturnInfo());
-    for(lpZGlass_i s=sats.begin(); s!=sats.end(); ++s) {
-      if(mNDone >= mNtoDo) break;
-      SaturnInfo* si = dynamic_cast<SaturnInfo*>(*s);
-      if(si && si->GetLAvg5() < si->GetCPU_Num()) {
-	if(spheror == 0 || spheror->GetAmoeba() == 0) {
-	  mListMutex.Unlock();
-	  throw(string("MultiSpheror::ClaimCPUs Improper spheror structure. Abandoning."));
-	}
-	SP_MIR(spheror->GetAmoeba(), SetHost, si);
-	SP_MIR(spheror->GetAmoeba(), Start);
-	++mNDone; Stamp(FID());
-	lpZGlass_i xx = mGlasses.end();
-	spheror = NextOf<Spheror*>(spheri, xx);
-      }
-    }
-
-    mListMutex.Unlock();
+  if(mNDone >= mNtoDo) {
+    throw(_eh + Identify() + "finished.");
   }
+
+  list<Spheror*> todo;
+  {
+    GMutexHolder llck(mListMutex);
+    Stepper<Spheror> s(this);
+    while(s.step()) {
+      if(s->GetAmoeba()->GetHost() == 0)
+	todo.push_back(*s);
+    }
+  }
+  if(todo.empty())
+    throw(_eh + "nothing to do.");
+
+  lpZGlass_t sats;
+  mSaturn->GetSaturnInfo()->GetMoons()->CopyList(sats);
+  sats.push_back(mSaturn->GetSaturnInfo());
+  for(lpZGlass_i s=sats.begin(); s!=sats.end(); ++s) {
+    if(mNDone >= mNtoDo) break;
+    SaturnInfo* si = dynamic_cast<SaturnInfo*>(*s);
+    if(si && si->GetLAvg5() < si->GetCPU_Num()) {
+      Spheror* spheror = todo.front();
+      SP_MIR(spheror->GetAmoeba(), SetHost, si);
+      SP_MIR(spheror->GetAmoeba(), Start);
+      ++mNDone; Stamp(FID());
+      todo.pop_front();
+    }
+  }
+
 }
-
-/**************************************************************************/
-
-#include "MultiSpheror.c7"

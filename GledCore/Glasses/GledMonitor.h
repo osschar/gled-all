@@ -42,6 +42,5 @@ public:
   ClassDef(GledMonitor, 1)
 }; // endclass GledMonitor
 
-GlassIODef(GledMonitor);
 
 #endif

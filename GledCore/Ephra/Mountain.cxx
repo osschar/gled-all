@@ -22,7 +22,7 @@ ClassImp(Mountain)
 
 void Mountain::DancerCooler(DancerInfo* di)
 {
-  static const string _eh("Mountain::DancerCooler ");
+  static const Exc_t _eh("Mountain::DancerCooler ");
 
   ISdebug(1, _eh + GForm("thread exit for %s", di->fEventor->GetName()));
   
@@ -362,7 +362,7 @@ void Mountain::Cancel(Eventor* e)
 
 DancerInfo* Mountain::UnregisterThread(Eventor* e)
 {
-  static const string _eh("Mountain::UnregisterThread ");
+  static const Exc_t _eh("Mountain::UnregisterThread ");
 
   GMutexHolder stg_lck(hStageLock);
   hEv2DI_i i = hOnStage.find(e);

@@ -20,6 +20,8 @@ WSTube		66	Glasses/WSTube		WSSeed
 Mover		128	Glasses/Mover
 Sleeper		129	Glasses/Sleeper
 
+GForger		256	Glasses/GForger
+
 RndSMorphCreator 1024	Glasses/RndSMorphCreator
 
 GLTesterOne	2048	Glasses/GLTesterOne	.

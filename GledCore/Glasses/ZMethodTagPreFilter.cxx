@@ -40,7 +40,7 @@ ZMirFilter::Result_e ZMethodTagPreFilter::FilterMIR(ZMIR& mir)
     for(lStr_i i=tags.begin(); i!=tags.end(); ++i) {
       for(lStr_i j=mi->fTags.begin(); j!=mi->fTags.end(); ++j) {
 	if(*i == *j) {
-	  if(mFilter)
+	  if(mFilter != 0)
 	    return mFilter->FilterMIR(mir);
 	  else
 	    return PARENT_GLASS::FilterMIR(mir);

@@ -9,7 +9,8 @@
 
 #include <Glasses/ZGlass.h>
 
-class ZRnrModBase : public ZGlass {
+class ZRnrModBase : public ZGlass
+{
   MAC_RNR_FRIENDS(ZRnrModBase);
 
 public:
@@ -28,6 +29,5 @@ public:
   ClassDef(ZRnrModBase, 1)
 }; // endclass ZRnrModBase
 
-GlassIODef(ZRnrModBase);
 
 #endif

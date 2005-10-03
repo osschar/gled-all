@@ -9,6 +9,7 @@
 
 #include <Gled/GledTypes.h>
 
+class An_ID_Demangler;
 class ZMirEmittingEntity;
 class SaturnInfo;
 
@@ -34,7 +35,9 @@ public:
 		    MB_HasRecipient       = 2,
 		    MB_HasResultReq       = 4,
                     MB_DetachedExe        = 8,
-                    MB_MultixDetachedExe  = 16 };
+                    MB_MultixDetachedExe  = 16,
+                    MB_HasChainedMIR      = 32
+  };
 
 private:
   void _init();
@@ -74,6 +77,7 @@ public:
   ZMIR(ID_t a=0, ID_t b=0, ID_t g=0);
   ZMIR(ZGlass* a, ZGlass* b=0, ZGlass* g=0);
   ZMIR(TMessage*& m);
+  ZMIR(void* buf, Int_t size);
   virtual ~ZMIR();
 
   Bool_t HasRecipient()	{ return (MirBits & MB_HasRecipient); }
@@ -82,6 +86,7 @@ public:
   Bool_t IsBeam()       { return HasRecipient(); }
   Bool_t ShouldExeDetached()   { return (MirBits & MB_DetachedExe); }
   Bool_t IsDetachedExeMultix() { return (MirBits & MB_MultixDetachedExe); }
+  Bool_t HasChainedMIR()       { return (MirBits & MB_HasChainedMIR); }
 
   Int_t HeaderLength();
   Int_t RoutingHeaderLength();
@@ -93,9 +98,9 @@ public:
 
   // virtual void Reset(); // restore buff from true buf;
 
-  void Demangle(An_ID_Demangler* s) throw(string);
-  void DemangleRecipient(An_ID_Demangler* s) throw(string);
-  void DemangleResultRecipient(An_ID_Demangler* s) throw(string);
+  void Demangle(An_ID_Demangler* s) throw(TString);
+  void DemangleRecipient(An_ID_Demangler* s) throw(TString);
+  void DemangleResultRecipient(An_ID_Demangler* s) throw(TString);
 
   void SetLCM_Ids(LID_t l, CID_t c, MID_t m) { Lid=l; Cid=c; Mid=m; }
   void SetCaller(ZMirEmittingEntity* caller);
@@ -106,6 +111,9 @@ public:
 
   void CopyToBuffer(TBuffer& b);
   void AppendBuffer(TBuffer& b);
+
+  void  ChainMIR(ZMIR* mir);
+  ZMIR* UnchainMIR(An_ID_Demangler* s=0);
 
   ClassDef(ZMIR, 0)
 };

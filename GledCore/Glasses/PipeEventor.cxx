@@ -67,7 +67,7 @@ void PipeEventor::OnExit(Operator::Arg* op_arg)
 void PipeEventor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   if(!mPipe) {
-    throw( Operator::Exception(this, Operator::OE_Break, "pipe closed") );
+    throw(Operator::Exception(this, Operator::OE_Break, "pipe closed"));
   }
   
   mSendCond.Lock();
@@ -76,7 +76,7 @@ void PipeEventor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
     mSendCond.TimedWaitMS(mWaitTimeMS);
     feed_commands();
   }
-  catch (Operator::Exception exc) {
+  catch(Operator::Exception exc) {
     mSendCond.Unlock();
     throw;
   }

@@ -30,6 +30,5 @@ public:
   ClassDef(Box, 1)
 }; // endclass Box
 
-GlassIODef(Box);
 
 #endif

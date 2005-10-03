@@ -46,7 +46,7 @@ ITSModule::~ITSModule()
 
 void ITSModule::SetID(Int_t id)
 {
-  static const string _eh("ITSModule::SetID ");
+  static const Exc_t _eh("ITSModule::SetID ");
 
   if(mInfo == 0)
     throw(_eh + "ITSDigitsInfo not set.");
@@ -97,10 +97,10 @@ void ITSModule::set_trans()
   Double_t rot[9];
   mInfo->mGeom->GetTrans(mID,pos);
   mInfo->mGeom->GetRotMatrix(mID,rot);
-  mTrans.SetBaseV(1, rot[0], rot[1], rot[2]);
-  mTrans.SetBaseV(2, rot[3], rot[4], rot[5]);
-  mTrans.SetBaseV(3, rot[6], rot[7], rot[8]);
-  mTrans.SetBaseV(4, pos[0], pos[1], pos[2]);
+  mTrans.SetBaseVec(1, rot[0], rot[1], rot[2]);
+  mTrans.SetBaseVec(2, rot[3], rot[4], rot[5]);
+  mTrans.SetBaseVec(3, rot[6], rot[7], rot[8]);
+  mTrans.SetBaseVec(4, pos[0], pos[1], pos[2]);
 }
 
 /**************************************************************************/

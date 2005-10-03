@@ -17,7 +17,7 @@ private:
   void _init();
 
 protected:
-  PupilInfo*	mPupil; 	// X{gS} L{}
+  ZLink<PupilInfo>	mPupil; 	// X{gS} L{}
   TString	mFileNameFmt;	// X{GS} 7 Textor()
   
 public:
@@ -29,6 +29,5 @@ public:
   ClassDef(ScreenDumper, 1)
 }; // endclass ScreenDumper
 
-GlassIODef(ScreenDumper);
 
 #endif

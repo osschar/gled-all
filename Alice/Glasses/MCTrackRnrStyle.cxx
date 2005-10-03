@@ -83,11 +83,11 @@ ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
     // meson
     if ((i3 == 0) && ( i4 < 2)){
       if(i1 == 3 || i2 == 3)
-	return mTexture;          
+	return *mTexture;          
     } // barion
     else if ( i2 >= i1 && i3 >= i2 ) {
       if(i1 == 3 || i2 == 3 ||i3 == 3 )
-	return mTexture;
+	return *mTexture;
     }
   }
   return 0;

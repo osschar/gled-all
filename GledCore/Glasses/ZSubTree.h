@@ -15,7 +15,7 @@ private:
   void _init();
 
 protected:
-  ZGlass*	mRoot;		// X{gS} L{}
+  ZLink<ZGlass>	mRoot;		// X{gS} L{}
 
   Int_t		mDepth;		// X{gS} 7 Value(-range=>[-1,100,1,1])
   Bool_t	bFollowLinks;	// X{gS} 7 Bool()
@@ -28,13 +28,12 @@ public:
   ZSubTree(Int_t d, Bool_t flnk, Bool_t flst,
 	   const Text_t* n="ZSubTree", const Text_t* t=0) :
     ZGlass(n,t),
-    mRoot(0), mDepth(d), bFollowLinks(flnk), bFollowLists(flst)
+    mDepth(d), bFollowLinks(flnk), bFollowLists(flst)
   {}
 
 #include "ZSubTree.h7"
   ClassDef(ZSubTree, 1)
 }; // endclass ZSubTree
 
-GlassIODef(ZSubTree);
 
 #endif

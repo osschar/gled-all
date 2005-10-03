@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <TString.h>
 #include <GL/glu.h>
 
 namespace GLTextNS {
@@ -402,7 +402,7 @@ namespace GLTextNS {
 
   /**************************************************************************/
 
-  void txfGetStringMetrics(TexFont * txf, const char *string, int len,
+  void txfGetStringMetrics(TexFont * txf, const char *TString, int len,
 			   int &width, int &max_ascent, int &max_descent)
   {
     TexGlyphVertexInfo *tgvi;
@@ -411,8 +411,8 @@ namespace GLTextNS {
 
     w = 0;
     for (i = 0; i < len; i++) {
-      if (string[i] == 27) {
-	switch (string[i + 1]) {
+      if (TString[i] == 27) {
+	switch (TString[i + 1]) {
 	case 'M':
 	  i += 4;
 	  break;
@@ -427,7 +427,7 @@ namespace GLTextNS {
 	  break;
 	}
       } else {
-	tgvi = getTCVI(txf, string[i]);
+	tgvi = getTCVI(txf, TString[i]);
 	w += int(tgvi->advance);
 	ma = TMath::Max(ma, (int)( tgvi->v3[1]));
 	md = TMath::Max(md, (int)(-tgvi->v0[1]));
@@ -460,18 +460,18 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  void txfRenderString(TexFont * txf, const char *string, int len, 
+  void txfRenderString(TexFont * txf, const char *TString, int len, 
 		       bool keep_pos)
   {
     int i;
     if(keep_pos) glPushMatrix();
     for (i = 0; i < len; i++) {
-      txfRenderGlyph(txf, string[i]);
+      txfRenderGlyph(txf, TString[i]);
     }
     if(keep_pos) glPopMatrix();
   }
 
-  void txfRenderString(TexFont * txf, const char *string, int len, 
+  void txfRenderString(TexFont * txf, const char *TString, int len, 
 		       GLfloat maxx, GLfloat fadew,
 		       bool keep_pos)
   {
@@ -487,7 +487,7 @@ namespace GLTextNS {
 
       TexGlyphVertexInfo *tgvi;
 
-      tgvi = getTCVI(txf, string[i]);
+      tgvi = getTCVI(txf, TString[i]);
 
       xg0 = x + tgvi->v0[0];
       xg1 = x + tgvi->v1[0];
@@ -499,7 +499,7 @@ namespace GLTextNS {
 	f1 = 1 - (xg1-xfade)/fadew;
 
 	// printf("XX %s %c %f %f x(%f,%f) y(%f,%f)\n",
-	//        string, string[i], f0, f1,
+	//        TString, TString[i], f0, f1,
 	//        xg0, xg1,yg0, yg1);
 
 	glColor4f(f0*col[0], f0*col[1], f0*col[2], f0*col[3]);
@@ -544,14 +544,14 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  void txfRenderStringZW(TexFont * txf, const char *string, int len, 
+  void txfRenderStringZW(TexFont * txf, const char *TString, int len, 
 			 float z, float w, bool keep_pos)
   {
     int i;
 
     if(keep_pos) glPushMatrix();
     for (i = 0; i < len; i++) {
-      txfRenderGlyphZW(txf, string[i], z, w);
+      txfRenderGlyphZW(txf, TString[i], z, w);
     }
     if(keep_pos) glPopMatrix();
   }
@@ -564,7 +564,7 @@ namespace GLTextNS {
 
   /**************************************************************************/
 
-  void txfRenderFancyString(TexFont * txf, char *string, int len)
+  void txfRenderFancyString(TexFont * txf, char *TString, int len)
   {
     TexGlyphVertexInfo *tgvi;
     GLubyte c[4][3];
@@ -572,36 +572,36 @@ namespace GLTextNS {
     int i;
 
     for (i = 0; i < len; i++) {
-      if (string[i] == 27) {
-	switch (string[i + 1]) {
+      if (TString[i] == 27) {
+	switch (TString[i + 1]) {
 	case 'M':
 	  mode = MONO;
-	  glColor3ubv((GLubyte *) & string[i + 2]);
+	  glColor3ubv((GLubyte *) & TString[i + 2]);
 	  i += 4;
 	  break;
 	case 'T':
 	  mode = TOP_BOTTOM;
-	  memcpy(c, &string[i + 2], 6);
+	  memcpy(c, &TString[i + 2], 6);
 	  i += 7;
 	  break;
 	case 'L':
 	  mode = LEFT_RIGHT;
-	  memcpy(c, &string[i + 2], 6);
+	  memcpy(c, &TString[i + 2], 6);
 	  i += 7;
 	  break;
 	case 'F':
 	  mode = FOUR;
-	  memcpy(c, &string[i + 2], 12);
+	  memcpy(c, &TString[i + 2], 12);
 	  i += 13;
 	  break;
 	}
       } else {
 	switch (mode) {
 	case MONO:
-	  txfRenderGlyph(txf, string[i]);
+	  txfRenderGlyph(txf, TString[i]);
 	  break;
 	case TOP_BOTTOM:
-	  tgvi = getTCVI(txf, string[i]);
+	  tgvi = getTCVI(txf, TString[i]);
 	  glBegin(GL_QUADS);
 	  glColor3ubv(c[0]);
 	  glTexCoord2fv(tgvi->t0);
@@ -617,7 +617,7 @@ namespace GLTextNS {
 	  glTranslatef(tgvi->advance, 0.0, 0.0);
 	  break;
 	case LEFT_RIGHT:
-	  tgvi = getTCVI(txf, string[i]);
+	  tgvi = getTCVI(txf, TString[i]);
 	  glBegin(GL_QUADS);
 	  glColor3ubv(c[0]);
 	  glTexCoord2fv(tgvi->t0);
@@ -635,7 +635,7 @@ namespace GLTextNS {
 	  glTranslatef(tgvi->advance, 0.0, 0.0);
 	  break;
 	case FOUR:
-	  tgvi = getTCVI(txf, string[i]);
+	  tgvi = getTCVI(txf, TString[i]);
 	  glBegin(GL_QUADS);
 	  glColor3ubv(c[0]);
 	  glTexCoord2fv(tgvi->t0);
@@ -679,13 +679,13 @@ namespace GLTextNS {
 // Need a proper implementation of all this ... but so little time ...
 /**************************************************************************/
 
-GLTextNS::TextLineData::TextLineData(TexFont *txf, string line) : text(line)
+GLTextNS::TextLineData::TextLineData(TexFont *txf, TString line) : text(line)
 {
-  txfGetStringMetrics(txf, text.c_str(), text.length(), width, ascent, descent);
+  txfGetStringMetrics(txf, text.Data(), text.Length(), width, ascent, descent);
   hfull   = ascent + descent;
 }
 
-void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text)
+void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text)
 {
   RNRDRIVER_GET_RNRMOD_LENS(nrc, rd, ZRlNodeMarkup);
   BoxSpecs boxs;
@@ -693,7 +693,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text)
   RnrTextBar(rd, text, boxs, nrc_lens->GetNameOffset());
 }
 
-void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
+void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
 			  BoxSpecs& bs, float zoffset)
 {
   // RasterPos screws-up picking ... but so does gluProject.
@@ -756,13 +756,13 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
   GLfloat rp[4]; 
   glGetFloatv(GL_CURRENT_RASTER_POSITION, rp);
-  // printf("RasterPos[%s]: %f %f %f %f\n", text.c_str(), rp[0], rp[1], rp[2], rp[3]);
+  // printf("RasterPos[%s]: %f %f %f %f\n", text.Data(), rp[0], rp[1], rp[2], rp[3]);
 
   glPushMatrix();
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-  glLoadMatrixf(rd->GetProjBase());
+  glLoadMatrixd(rd->GetProjBase()->Array());
   glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
   glMatrixMode(GL_MODELVIEW);
 
@@ -771,8 +771,8 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
     xo = rp[0] - halfw,
     yo = rp[1] + halfh,
     zo = rp[2] * zoffset;
-  for(string::size_type i=0; i<bs.pos.length(); ++i) {
-    switch(bs.pos[i]) {
+  for(Ssiz_t i=0; i<bs.pos.Length(); ++i) {
+    switch(bs.pos(i)) {
     case 'l': case 'L': xo += halfw; break;
     case 'r': case 'R': xo -= halfw; break;
     case 't': case 'T': yo -= halfh; break;
@@ -817,7 +817,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
       case 'r': case 'R': glTranslatef((max_width - l->width),   0, 0); break;
       }
     }
-    txfRenderString(txf, l->text.c_str(), l->text.length(), false);
+    txfRenderString(txf, l->text.Data(), l->text.Length(), false);
     glPopMatrix();
     glTranslatef(0, -interline, 0);
   }
@@ -832,7 +832,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const string& text,
 
 /**************************************************************************/
 
-void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
+void GLTextNS::RnrTextPoly(RnrDriver* rd, const TString& text)
 {
   RNRDRIVER_GET_RNRMOD_RNR(font, rd, ZRlFont);
   TexFont *txf = font_rnr->GetFont();
@@ -848,7 +848,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
   int width, ascent, descent;
-  GLTextNS::txfGetStringMetrics(txf, text.c_str(), text.length(),
+  GLTextNS::txfGetStringMetrics(txf, text.Data(), text.Length(),
 				width, ascent, descent);
   ascent  = txf->max_ascent;
   descent = txf->max_descent;
@@ -887,7 +887,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
   glScalef(scale, scale, 1);
   glEnable(GL_TEXTURE_2D);
   GLTextNS::txfBindFontTexture(txf);
-  GLTextNS::txfRenderString(txf, text.c_str(), text.length());
+  GLTextNS::txfRenderString(txf, text.Data(), text.Length());
   glPopMatrix();
 
   glPopAttrib();
@@ -895,7 +895,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const string& text)
 
 /**************************************************************************/
 
-void GLTextNS::RnrText(RnrDriver* rd, const string& text,
+void GLTextNS::RnrText(RnrDriver* rd, const TString& text,
 		       int x, int y, float z,
 		       const ZColor* front_col, const ZColor* back_col)
 {
@@ -922,19 +922,18 @@ void GLTextNS::RnrText(RnrDriver* rd, const string& text,
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
   int width, ascent, descent;
-  GLTextNS::txfGetStringMetrics(txf, text.c_str(), text.length(),
+  GLTextNS::txfGetStringMetrics(txf, text.Data(), text.Length(),
                                 width, ascent, descent);
   ascent  = txf->max_ascent;
   descent = txf->max_descent;
-
-  int   h_box = ascent + descent;
+  // int h_box = ascent + descent;
   float scale = float(font_lens->GetSize()) / ascent;
 
   glPushMatrix();
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-  glLoadMatrixf(rd->GetProjBase());
+  glLoadMatrixd(rd->GetProjBase()->Array());
   glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
 
   if(x < 0)
@@ -964,7 +963,7 @@ void GLTextNS::RnrText(RnrDriver* rd, const string& text,
   glEnable(GL_TEXTURE_2D);
 
   GLTextNS::txfBindFontTexture(txf);
-  GLTextNS::txfRenderString(txf, text.c_str(), text.length());
+  GLTextNS::txfRenderString(txf, text.Data(), text.Length());
 
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
@@ -973,11 +972,13 @@ void GLTextNS::RnrText(RnrDriver* rd, const string& text,
   glPopAttrib();
 }
 
-void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
+/**************************************************************************/
+
+void GLTextNS::RnrTextAt(RnrDriver* rd, const TString& text,
 			 int x, int yrow, float z,
                          const ZColor* front_col, const ZColor* back_col)
 {
-  // Renders string text on position specified by:
+  // Renders TString text on position specified by:
   // x    - num pixels from the left border (right if x < 0)
   // yrow - line number in up-down order; 0 is the first/top line
   // z    - z coordinate in depth-buffer coordinates (0 -> 1)
@@ -1000,11 +1001,10 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
   int width, ascent, descent;
-  GLTextNS::txfGetStringMetrics(txf, text.c_str(), text.length(),
+  GLTextNS::txfGetStringMetrics(txf, text.Data(), text.Length(),
                                 width, ascent, descent);
   ascent  = txf->max_ascent;
   descent = txf->max_descent;
-
   int   h_box = ascent + descent;
   float scale = float(font_lens->GetSize()) / ascent;
 
@@ -1012,7 +1012,7 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-  glLoadMatrixf(rd->GetProjBase());
+  glLoadMatrixd(rd->GetProjBase()->Array());
   glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), 0, -1);
 
   if(x < 0)
@@ -1042,7 +1042,7 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const string& text,
   glEnable(GL_TEXTURE_2D);
 
   GLTextNS::txfBindFontTexture(txf);
-  GLTextNS::txfRenderString(txf, text.c_str(), text.length());
+  GLTextNS::txfRenderString(txf, text.Data(), text.Length());
 
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);

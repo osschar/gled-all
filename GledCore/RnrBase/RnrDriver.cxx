@@ -21,7 +21,7 @@ namespace GVNS = GledViewNS;
 
 /**************************************************************************/
 
-RnrDriver::RnrDriver(Eye* e, const string& r) : mEye(e), mRnrName(r)
+RnrDriver::RnrDriver(Eye* e, const TString& r) : mEye(e), mRnrName(r)
 {
   bUseOwnRnrs = false;
 
@@ -54,7 +54,7 @@ void RnrDriver::ImageDeath(OS::ZGlassImg* img)
 /**************************************************************************/
 
 void RnrDriver::FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
-		   const GledViewNS::RnrBits& bits)
+		   const GledNS::RnrBits& bits)
 {
   vlRnrElement_t& rev = rs->fScheme;
   if(bits.fSelf[0]) {
@@ -72,7 +72,7 @@ void RnrDriver::FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
 }
 
 void RnrDriver::FillRnrScheme(RnrScheme* rs, OS::lpZGlassImg_t* imgs,
-		   const GledViewNS::RnrBits& bits)
+		   const GledNS::RnrBits& bits)
 {
   vlRnrElement_t& rev = rs->fScheme;
   if(bits.fList[0]) {
@@ -116,7 +116,7 @@ A_Rnr* RnrDriver::AssertDefRnr(OS::ZGlassImg* img)
   hImg2Rnr_i oi = mOwnRnrs.find(img);
   if(oi != mOwnRnrs.end()) return oi->second;
 
-  A_Rnr* rnr = img->fClassInfo->fViewPart->SpawnRnr(mRnrName, img->fGlass);
+  A_Rnr* rnr = img->GetCI()->SpawnRnr(mRnrName, img->fLens);
   assert(rnr != 0);
   rnr->SetImg(img);
 
@@ -130,28 +130,28 @@ A_Rnr* RnrDriver::AssertDefRnr(OS::ZGlassImg* img)
 
 void RnrDriver::Render(A_Rnr* rnr)
 {
-  static const string _eh("RnrDriver::Render ");
+  static const Exc_t _eh("RnrDriver::Render ");
 
   if(mMaxDepth <= 0) return;
   --mMaxDepth;
 
   if(rnr->mRnrScheme == 0) {
     rnr->mRnrScheme = new RnrScheme;
-    rnr->fImg->fGlass->ReadLock();
+    rnr->fImg->fLens->ReadLock();
     rnr->CreateRnrScheme(this);
-    rnr->fImg->fGlass->ReadUnlock();
+    rnr->fImg->fLens->ReadUnlock();
   }
 
   for(UChar_t rl=1; rl<=A_Rnr::sMaxRnrLevel; ++rl) {
     lRnrElement_t& re_list = rnr->mRnrScheme->fScheme[rl];
     for(lRnrElement_i re=re_list.begin(); re!=re_list.end(); ++re) {
       if(re->fRnrFoo == 0) {
-	// printf("%sDescending to %s, from %s, rl=%d\n", _eh.c_str(), re->fRnr->fImg->fGlass->Identify().c_str(), rnr->fImg->fGlass->Identify().c_str(), rl);
+	// printf("%sDescending to %s, from %s, rl=%d\n", _eh.Data(), re->fRnr->fImg->fLens->Identify().Data(), rnr->fImg->fLens->Identify().Data(), rl);
 	Render(re->fRnr);
       } else {
-	re->fRnr->fImg->fGlass->ReadLock();
+	re->fRnr->fImg->fLens->ReadLock();
 	((re->fRnr)->*(re->fRnrFoo))(this);
-	re->fRnr->fImg->fGlass->ReadUnlock();
+	re->fRnr->fImg->fLens->ReadUnlock();
       }
     }
   }
@@ -236,7 +236,7 @@ RnrMod* RnrDriver::GetRnrMod(FID_t fid)
     if(mRMI->second.def) return mRMI->second.def;
     if(mRMI->second.def_autogen == 0) {
       ZGlass* lens = GledNS::ConstructLens(fid);
-      A_Rnr*  rnr  = lens->VGlassInfo()->fViewPart->SpawnRnr(mRnrName, lens);
+      A_Rnr*  rnr  = lens->VGlassInfo()->SpawnRnr(mRnrName, lens);
       mRMI->second.def_autogen = new RnrMod(lens, rnr);
     }
     return mRMI->second.def_autogen;
@@ -262,7 +262,7 @@ void RnrDriver::RemoveRnrModEntry(FID_t fid)
 
 void RnrDriver::CleanUpRnrModDefaults()
 {
-  static const string _eh("RnrDriver::CleanUpRnrModDefaults ");
+  static const Exc_t _eh("RnrDriver::CleanUpRnrModDefaults ");
 
   for(hRMStack_i i=mRMStacks.begin(); i!=mRMStacks.end(); ++i) {
     i->second.def = 0;
@@ -273,6 +273,6 @@ void RnrDriver::CleanUpRnrModDefaults()
     }
     if(cnt)
       printf("%sstack for '%s' not empty (%d entries remained).",
-	     _eh.c_str(), GledNS::FindClassInfo(i->first)->fName.c_str(), cnt);
+	     _eh.Data(), GledNS::FindClassInfo(i->first)->fName.Data(), cnt);
   }
 }

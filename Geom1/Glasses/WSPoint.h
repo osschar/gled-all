@@ -8,16 +8,18 @@
 #define Geom1_WSPoint_H
 
 #include <Glasses/ZNode.h>
+#include <TMatrixD.h>
 
-class WSPoint : public ZNode {
-
+class WSPoint : public ZNode
+{
   MAC_RNR_FRIENDS(WSPoint);
   MAC_RNR_FRIENDS(WSSeed);
   friend class WSSeed;
 
 private:
   void _init();
-  TMatrixF	mCoffs;
+
+  TMatrixD	mCoffs;         //!
 
 protected:
   Float_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
@@ -31,17 +33,16 @@ protected:
 
 public:
   WSPoint(const Text_t* n="WSPoint", const Text_t* t=0) : 
-    ZNode(n,t), mCoffs(5,4) { _init(); }
+    ZNode(n,t), mCoffs(4,4) { _init(); }
 
   void Coff(const WSPoint* f);
 
   // virtuals
-  virtual TimeStamp_t Stamp(FID_t fid);
+  virtual TimeStamp_t Stamp(FID_t fid, UChar_t eye_bits=0);
 
 #include "WSPoint.h7"
   ClassDef(WSPoint, 1)
 }; // endclass WSPoint
 
-GlassIODef(WSPoint);
 
 #endif

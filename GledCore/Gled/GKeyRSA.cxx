@@ -27,7 +27,7 @@
 // 	cout <<"Secret comparison failed\n";
 //       }
 //     }
-//     catch(string exc) {
+//     catch(Exc_t& exc) {
 //       cout << "encode test failed: "<< exc << endl;
 //     }
 //
@@ -117,7 +117,7 @@ GKeyRSA::~GKeyRSA()
 
 void GKeyRSA::ReadPubKey(const char* file)
 {
-  string _eh("GKeyRSA::ReadPubKey ");
+  TString _eh("GKeyRSA::ReadPubKey ");
 
   if(pKey) { delete pKey; bIsPrivate = false; }
   FILE* fp = fopen(file, "r");
@@ -132,7 +132,7 @@ void GKeyRSA::ReadPubKey(const char* file)
 
 void GKeyRSA::ReadPrivKey(const char* file)
 {
-  string _eh("GKeyRSA::ReadPrivKey ");
+  TString _eh("GKeyRSA::ReadPrivKey ");
 
   if(pKey) { delete pKey; bIsPrivate = false; }
   FILE* fp = fopen(file, "r");
@@ -150,7 +150,7 @@ void GKeyRSA::ReadPrivKey(const char* file)
 
 void GKeyRSA::GenerateSecret()
 {
-  static string _eh("GKeyRSA::GenerateSecret ");
+  static TString _eh("GKeyRSA::GenerateSecret ");
 
   assert(pKey);
 
@@ -172,7 +172,7 @@ void GKeyRSA::GenerateSecret()
 
 void GKeyRSA::SendSecret(TBuffer& b)
 {
-  static string _eh("GKeyRSA::SendSecret ");
+  static TString _eh("GKeyRSA::SendSecret ");
 
   int modlen = RSA_size(pKey);
   unsigned char enc_secret[modlen];
@@ -188,7 +188,7 @@ void GKeyRSA::SendSecret(TBuffer& b)
 
 void GKeyRSA::ReceiveSecret(TBuffer& b)
 {
-  static string _eh("GKeyRSA::ReceiveSecret ");
+  static TString _eh("GKeyRSA::ReceiveSecret ");
 
   assert(pKey && bIsPrivate);
 

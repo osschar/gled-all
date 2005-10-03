@@ -28,6 +28,5 @@ public:
   ClassDef(RelParticle, 1)
 }; // endclass RelParticle
 
-GlassIODef(RelParticle);
 
 #endif

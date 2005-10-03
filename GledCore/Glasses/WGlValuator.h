@@ -30,7 +30,7 @@ protected:
 
   TString         mFormat; // X{GS} 7 Textor()
   
-  ZGlass*         mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
+  ZLink<ZGlass>   mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
   TString         mCbackMemberName; //  X{GS}     Ray{CbackReset} 7 Textor()
 
   // Local stash 
@@ -51,7 +51,5 @@ public:
 #include "WGlValuator.h7"
   ClassDef(WGlValuator, 1)
 }; // endclass WGlValuator
-
-GlassIODef(WGlValuator);
 
 #endif

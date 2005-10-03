@@ -1,3 +1,38 @@
+2005-10-03  Matevz TADEL  <matevz.tadel@ijs.si>
+
+	======================================================
+	Major changes for gled-1.3
+	======================================================
+
+	Eye and RnrDriver completely decoupled from fltk. This allows them
+	to be put into base part of the libset. GL rendering can now in
+	principle be used without fltk (no inter-library dependence).
+
+	Directory reorganizations:
+	1) Eye/ moved ftws, mtws and friends to GledView/.
+	2) Net/ removed directory, Ray was put into Eye/.
+	3) RegExp/ added TPME wrapper working with ROOT's TString class.
+
+	Implemented links via ZLinkBase class and templated class
+	ZLink. This was needed for adoption of ROOT's automatic schema
+	evolution mechanism. Also makes things easier to change now. It is
+	no longer necessary to initialize links to zero in the _init()
+	method of a glass.
+	
+	Rewrite of list inheritance: base class for Gled-lists is now
+	abstract base-glass AList. Allows optimal implementation of
+	specific containers (like ZVector and ZStringMap).
+
+	Consistently use TString instead of std::string. The only place
+	where std::string is still used are exceptions, but they have been
+	wrapped in a base class Exc_t.
+
+	ZTrans has been changed to use 4x4 double matrix internally
+	(instead of 5x5 float). ZNode's interface somewhat consolidated.
+
+	
+	Most of the files have changed.
+
 2005-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/GLGridStepper.cxx:
@@ -21,7 +56,7 @@
 2005-08-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* catalog.patch:
-	Added pragmas to make lpZGlass_t/i stuff (also ZLiat::Copy()) to
+	Added pragmas to make lpZGlass_t/i stuff (also ZList::Copy()) to
 	work from CINT.
 
 2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>

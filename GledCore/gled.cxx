@@ -39,7 +39,7 @@ TROOT root("Root", "ROOT of GLED", initfuncs);
 
 int main(int argc, char **argv)
 {
-  static const string _eh("gled::main() ");
+  static const Exc_t _eh("gled::main() ");
 
   list<char*> args; for(int i=1; i<argc; ++i) args.push_back(argv[i]);
 
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
   // Run GUI
   GThread gled_thread((GThread_foo)Gled::Gled_runner_tl, gled, false);
   if( gled_thread.Spawn() ) {
-    perror(GForm("%scan't create Gled thread", _eh.c_str()));
+    perror(GForm("%scan't create Gled thread", _eh.Data()));
     exit(1);
   }  
 
@@ -113,9 +113,9 @@ int main(int argc, char **argv)
   try {
     gint->Run(true);
   }
-  catch (string exc) {
+  catch(exception& exc) {
     fprintf(stderr, "%sexception caught during macro processing:\n%s\n",
-	    _eh.c_str(), exc.c_str());
+	    _eh.Data(), exc.what());
     exit(1);
   }
   if(gint->InputFiles()) {
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
   GThread app_thread((GThread_foo)Gled::TRint_runner_tl, gint, false);
   if(gled->GetRunRint()) {
     if( app_thread.Spawn() ) {
-      perror(GForm("%scan't create Rint thread.", _eh.c_str()));
+      perror(GForm("%scan't create Rint thread.", _eh.Data()));
       exit(1);
     }
   }

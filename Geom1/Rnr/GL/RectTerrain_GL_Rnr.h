@@ -34,7 +34,7 @@ inline void RectTerrain_GL_Rnr::MkCol(Float_t z)
     Float_t c = (z - mTerrain->mMinZ) * mTerrain->mColSep /
 	(mTerrain->mMaxZ - mTerrain->mMinZ);
     c -= (int)c;
-    if(mTerrain->mRibbon) {
+    if(mTerrain->mRibbon != 0) {
       glColor4fv(mTerrain->mRibbon->MarkToCol(c)());
     } else {
       ZColor col( (1 - c)*mTerrain->mMinCol + c*mTerrain->mMaxCol );

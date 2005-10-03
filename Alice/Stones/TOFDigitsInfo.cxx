@@ -30,7 +30,7 @@ ClassImp(TOFDigitsInfo)
 /**************************************************************************/
 void TOFDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
 {
-  static const string _eh("TOFDigitsInfo::SetData ");
+  static const Exc_t _eh("TOFDigitsInfo::SetData ");
 
   mDataDir = "";
   mEvent   = -1;

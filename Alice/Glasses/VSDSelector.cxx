@@ -58,7 +58,7 @@ void VSDSelector::_init()
 
 void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
 {
-  static const string _eh("VSDSelector::LoadVSD ");
+  static const Exc_t _eh("VSDSelector::LoadVSD ");
   
   mFile = TFile::Open(vsd_file_name);
   if(!mFile)
@@ -73,7 +73,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeK = (TTree*) mDirectory->Get("Kinematics");
   if (mTreeK == 0) {
     printf("%s Kinematics not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeK->SetBranchAddress("P", &mpP);
   }
@@ -81,7 +81,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeH = (TTree*) mDirectory->Get("Hits");
   if (mTreeH == 0) {
     printf("%s Hits not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeH->SetBranchAddress("H", &mpH);
   }
@@ -90,7 +90,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeC = (TTree*) mDirectory->Get("Clusters");
   if (mTreeC == 0) {
     printf("%s Clusters not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeC->SetBranchAddress("C", &mpC);
   }
@@ -99,7 +99,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeR = (TTree*) mDirectory->Get("RecTracks");
   if (mTreeR == 0){ 
     printf("%s RecTracks not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeR->SetBranchAddress("R", &mpR);
   }
@@ -108,7 +108,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeV0 =  (TTree*) mDirectory->Get("V0");
   if (mTreeV0 == 0){
     printf("%s V0 not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeV0->SetBranchAddress("V0", &mpV0);
   }
@@ -118,7 +118,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeKK =  (TTree*) mDirectory->Get("Kinks");
   if (mTreeKK == 0){
     printf("%s Kinks not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeKK->SetBranchAddress("KK", &mpKK);
   }
@@ -127,7 +127,7 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   mTreeGI = (TTree*)mDirectory->Get("GenInfo");
   if (mTreeGI == 0) {
     printf("%s GenInfo not available in mDirectory %s.\n", 
-	   _eh.c_str(), mDirectory->GetName());
+	   _eh.Data(), mDirectory->GetName());
   } else {
     mTreeGI->SetBranchAddress("GI", &mpGI);
     mTreeGI->SetBranchAddress("K.", &mpP);
@@ -161,7 +161,7 @@ void VSDSelector::ResetEvent()
 
 MCParticle* VSDSelector::Particle(Int_t i)
 {
-  static const string _eh("VSDSelector::Particle ");
+  static const Exc_t _eh("VSDSelector::Particle ");
   if(mTreeK == 0) 
     throw (_eh + "kinematics not available.");
   
@@ -178,7 +178,7 @@ MCParticle* VSDSelector::Particle(Int_t i)
 void VSDSelector::SelectParticles( ZNode* holder, const Text_t* selection, 
 			       Bool_t import_daughters)
 {
-  static const string _eh("VSDSelector::SelectParticles ");
+  static const Exc_t _eh("VSDSelector::SelectParticles ");
 
   if(mTreeK == 0) 
     throw (_eh + "kinematics not available.");
@@ -221,7 +221,7 @@ void VSDSelector::SelectParticles( ZNode* holder, const Text_t* selection,
 
 void VSDSelector::SelectHits( ZNode* holder, const char* selection)
 {
-  static const string _eh("VSDSelector::SelectHits ");
+  static const Exc_t _eh("VSDSelector::SelectHits ");
 
   if(mTreeH == 0) 
     throw (_eh + "hits not available.");
@@ -255,7 +255,7 @@ void VSDSelector::SelectHits( ZNode* holder, const char* selection)
 
 void VSDSelector::SelectClusters(ZNode* holder, const char* selection)
 {
-  static const string _eh("VSDSelector::SelectClusters ");
+  static const Exc_t _eh("VSDSelector::SelectClusters ");
 
   if(mTreeC == 0) 
     throw (_eh + "clusters not available.");
@@ -267,9 +267,9 @@ void VSDSelector::SelectClusters(ZNode* holder, const char* selection)
   Int_t n = evl.Select(mTreeC, selection);
 
   if(n == 0)
-    throw (_eh + "no entries found for selection in clusters.");
+    throw (_eh + "no clusters matching selection.");
 
-  HitContainer* container = new HitContainer(GForm("%d Clusters %s",n, selection));
+  HitContainer* container = new HitContainer(GForm("%d Clusters %s", n, selection));
   container->SetColor(1.,1.,0.,1.);
   mQueen->CheckIn(container);
   container->Reset(n);
@@ -287,7 +287,7 @@ void VSDSelector::SelectClusters(ZNode* holder, const char* selection)
 
 void VSDSelector::SelectRecTracks(ZNode* holder, const Text_t* selection)
 {
-  static const string _eh("VSDSelector::SelectRecTracks ");
+  static const Exc_t _eh("VSDSelector::SelectRecTracks ");
 
   if(mTreeR == 0) 
     throw (_eh + "reconstructed tracks not available.");
@@ -330,7 +330,7 @@ void VSDSelector::SelectRecTracks(ZNode* holder, const Text_t* selection)
 void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
 			   Bool_t import_kine)
 {
-  static const string _eh("VSDSelector::SelectV0 ");
+  static const Exc_t _eh("VSDSelector::SelectV0 ");
 
   if(mTreeV0 == 0) 
     throw (_eh + "V0 tree not available.");
@@ -411,7 +411,7 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
 void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
 			      Bool_t import_kine, Bool_t import_daughters)
 {
-  static const string _eh("VSDSelector::SelectKinks ");
+  static const Exc_t _eh("VSDSelector::SelectKinks ");
 
   if(mTreeKK == 0) 
     throw (_eh + "Kinks tree not available.");
@@ -472,7 +472,7 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
 
 void VSDSelector::SelectGenInfo( ZNode* holder, const Text_t* selection)
 {
-  static const string _eh("VSDSelector::SelectGenInfo ");
+  static const Exc_t _eh("VSDSelector::SelectGenInfo ");
 
   if(mTreeGI == 0)
     throw (_eh + "mTreeGI not available.");

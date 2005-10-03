@@ -17,8 +17,8 @@ private:
   void _init();
 
 protected:
-  PupilInfo*	mPupil;   // X{gS} L{}
-  ZList*	mCameras; // X{gS} L{}
+  ZLink<PupilInfo>	mPupil;   // X{gS} L{}
+  ZLink<ZList>	mCameras; // X{gS} L{}
 
 public:
   GuiPupilInfo(const Text_t* n="GuiPupilInfo", const Text_t* t=0) :
@@ -30,6 +30,5 @@ public:
   ClassDef(GuiPupilInfo, 1)
 }; // endclass GuiPupilInfo
 
-GlassIODef(GuiPupilInfo);
 
 #endif

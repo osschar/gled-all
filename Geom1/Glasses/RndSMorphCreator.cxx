@@ -41,22 +41,22 @@ Double_t RndSMorphCreator::rnd(Double_t k, Double_t n)
 
 void RndSMorphCreator::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
-  static const string _eh("RndSMorphCreator::Operate ");
+  static const Exc_t _eh("RndSMorphCreator::Operate ");
 
   Operator::PreOperate(op_arg);
-  if(mTarget) {
+  if(mTarget != 0) {
     SMorph m(GForm("Random SMorph %d", int(rnd(1e6,1))));
-    m.Set3Pos(rnd(20,-10), rnd(20,-10), rnd(20,-10));
+    m.SetPos(rnd(20,-10), rnd(20,-10), rnd(20,-10));
     m.SetUseScale(1);
     m.SetScales(rnd(1.5,0.5), rnd(1.5,0.5), rnd(1.5,0.5));
     m.SetTLevel((int)rnd(20,3)); m.SetPLevel((int)rnd(20,3));
     m.SetColor(rnd(0.6,0.4), rnd(0.6,0.4), rnd(0.6,0.4));
 
-    FID_t fid = ZNode::FID();
-    MID_t mid = ZNode::Mid_Add(); // 
     auto_ptr<ZMIR> mir
-      (mTarget->GetQueen()->S_IncarnateWAttach(mTarget, 0, fid.lid, fid.cid, mid));
+      (mTarget->GetQueen()->S_IncarnateWAttach());
     GledNS::StreamLens(*mir, &m);
+    auto_ptr<ZMIR> att_mir( mTarget->S_Add(0) );
+    mir->ChainMIR(att_mir.get());
 
     if(bGetResult) {
       auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(mir) );
@@ -67,7 +67,7 @@ void RndSMorphCreator::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
       if(res->HasResult()) {
 	ID_t id; *res >> id;
 	if(bReportID)
-	  printf("%sgot id %u, at %p\n", _eh.c_str(), id, mSaturn->DemangleID(id));
+	  printf("%sgot id %u, at %p\n", _eh.Data(), id, mSaturn->DemangleID(id));
       }
     } else {
       mSaturn->ShootMIR(mir);

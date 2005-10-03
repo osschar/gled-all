@@ -12,6 +12,7 @@
 class Saturn;
 class SaturnInfo;
 class ZMIR;
+class A_Rnr;
 class GMutex;
 
 class TMessage;
@@ -19,6 +20,10 @@ class TDirectory;
 class TBuffer;
 class TFile;
 class TVirtualMutex;
+
+class TClass;
+class TRealData;
+class TDataMember;
 
 namespace GledViewNS {
   class MethodInfo;
@@ -29,6 +34,44 @@ namespace GledViewNS {
 }
 
 namespace GledNS {
+  
+  /**************************************************************************/
+  // Rnr Bits and Ctrl
+  /**************************************************************************/
+  // Or move them to RnrBase something ...
+
+  struct RnrBits {
+    // At which RenderLevel to call a specific rendering
+    // Values of fX are RenderLevels at which to invoke the method
+    // 0 ~ PreDraw, 1 ~ Draw, 2 ~ PostDraw; 3 ~ FullDescent
+    UChar_t	fSelf[4];	// Self rendering
+    UChar_t	fList[4];	// List member rendering
+
+    RnrBits(UChar_t a=0, UChar_t b=0, UChar_t c=0, UChar_t d=0,
+	    UChar_t x=0, UChar_t y=0, UChar_t w=0, UChar_t z=0) {
+      fSelf[0] = a; fSelf[1] = b; fSelf[2] = c; fSelf[3] = d;
+      fList[0] = x; fList[1] = y; fList[2] = w; fList[3] = z;
+    }
+    void SetSelf(UChar_t a=0, UChar_t b=0, UChar_t c=0, UChar_t d=0) {
+      fSelf[0] = a; fSelf[1] = b; fSelf[2] = c; fSelf[3] = d;
+    }
+    void SetList(UChar_t x=0, UChar_t y=0, UChar_t w=0, UChar_t z=0) {
+      fList[0] = x; fList[1] = y; fList[2] = w; fList[3] = z;
+    }
+
+    bool SelfOn() const { return fSelf[0]!=0 || fSelf[1]!=0 || fSelf[2]!=0 || fSelf[3]!=0; }
+    bool SelfOnDirect() const { return fSelf[0]!=0 || fSelf[1]!=0 || fSelf[2]!=0; }
+    bool ListOn() const { return fList[0]!=0 || fList[1]!=0 || fList[2]!=0 || fList[3]!=0; }
+    bool ListOnDirect() const { return fList[0]!=0 || fList[1]!=0 || fList[2]!=0; }
+  };
+
+  struct RnrCtrl {
+    RnrBits		fRnrBits;
+
+    RnrCtrl() : fRnrBits(2,4,6,0, 0,0,0,5) {}
+    RnrCtrl(const RnrBits& rb) : fRnrBits(rb) {}
+  };
+
 
   /**************************************************************************/
   // Elements of ClassInfo: Method, DataMember & LinkMember Infos
@@ -38,15 +81,15 @@ namespace GledNS {
   class LibSetInfo;
 
   struct InfoBase {
-    string		fName;
+    TString		fName;
 
-    InfoBase(const string& s) : fName(s) {}
-    bool operator==(const string& s) const { return (fName == s); }
+    InfoBase(const TString& s) : fName(s) {}
+    bool operator==(const TString& s) const { return (fName == s); }
   };
 
   struct MethodInfo : public InfoBase {
     MID_t		fMid;
-    lStr_t		fContextArgs; //
+    lStr_t		fContextArgs;
     lStr_t		fArgs;
     lStr_t		fTags;
     bool		bLocal;
@@ -54,42 +97,39 @@ namespace GledNS {
     bool		bMultixDetachedExe;
     ClassInfo*		fClassInfo;
 
-    GledViewNS::MethodInfo* fViewPart;
-
-    MethodInfo(const string& s, MID_t m) :
+    MethodInfo(const TString& s, MID_t m) :
       InfoBase(s), fMid(m),
       bDetachedExe(false), bMultixDetachedExe(false),
-      fClassInfo(0),
-      fViewPart(0)
+      fClassInfo(0)
     {}
-    void ImprintMir(ZMIR& mir) const;
-    void FixMirBits(ZMIR& mir, SaturnInfo* sat) const;
-    void StreamIds(TBuffer& b) const;
+    ZMIR* MakeMir(ZGlass* a, ZGlass* b=0, ZGlass* g=0);
+    void  ImprintMir(ZMIR& mir) const;
+    void  StreamIds(TBuffer& b) const;
   };
 
 
   struct DataMemberInfo : public InfoBase {
-    string		fType;
+    TString             fPrefix;
+    TString		fType;
     MethodInfo*		fSetMethod;
     ClassInfo*		fClassInfo;
 
-    GledViewNS::DataMemberInfo* fViewPart;
+    DataMemberInfo(const TString& s) :
+      InfoBase(s), fClassInfo(0), fTRealData(0) {}
 
-    DataMemberInfo(const string& s) : InfoBase(s), fClassInfo(0), fViewPart(0)
-    {}
+    TString CName();
+    TString FullName();
+    TString FullCName();
+
+    TRealData*   fTRealData;
+    TRealData*   GetTRealData();
+    TDataMember* GetTDataMember();
   };
 
-  struct LinkMemberInfo : public InfoBase {
-    string		fType;
-    MethodInfo*		fSetMethod;
-    ClassInfo*		fClassInfo;
+  struct LinkMemberInfo : public DataMemberInfo {
+    RnrBits		fDefRnrBits;
 
-    GledViewNS::LinkMemberInfo* fViewPart;
-
-    LinkMemberInfo(const string& s) : InfoBase(s), fClassInfo(0), fViewPart(0)
-    {}
-
-    string FullName();
+    LinkMemberInfo(const TString& s) : DataMemberInfo(s) {}
   };
 
   // List typedefs
@@ -115,7 +155,7 @@ namespace GledNS {
     FID_t			fFid;
     LibSetInfo*			fLibSetInfo;
 
-    string			fParentName;
+    TString			fParentName;
     ClassInfo*			fParentCI;
 
     lpMethodInfo_t		fMethodList;
@@ -125,44 +165,57 @@ namespace GledNS {
     hMid2pMethodInfo_t		fMethodHash;
 #endif
 
+    TString			fRendererGlass;
+    RnrCtrl			fDefRnrCtrl;
+    ClassInfo*	                fRendererCI;
+
     GledViewNS::ClassInfo*	fViewPart;
 
     //----------------------------------------------------------------
 
-    ClassInfo(const string& s, FID_t f) :
+    ClassInfo(const TString& s, FID_t f) :
       InfoBase(s),
       fFid(f), fLibSetInfo(0), fParentCI(0),
-      fViewPart(0)
+      fRendererCI(0),
+      fViewPart(0),
+      fTClass(0)
     {}
 
     lpDataMemberInfo_t*	ProduceFullDataMemberInfoList();
     lpLinkMemberInfo_t*	ProduceFullLinkMemberInfoList();
 
     MethodInfo*		FindMethodInfo(MID_t mid);
-    MethodInfo*		FindMethodInfo(const string& func_name, bool recurse);
-    DataMemberInfo*	FindDataMemberInfo(const string& mmb, bool recurse);
-    LinkMemberInfo*	FindLinkMemberInfo(const string& mmb, bool recurse);
+    MethodInfo*		FindMethodInfo(const TString& func_name, bool recurse, bool throwp=true);
+    DataMemberInfo*	FindDataMemberInfo(const TString& mmb,   bool recurse, bool throwp=true);
+    LinkMemberInfo*	FindLinkMemberInfo(const TString& mmb,   bool recurse, bool throwp=true);
 
     LibSetInfo*		GetLibSetInfo();
     ClassInfo*		GetParentCI();
+
+    ClassInfo*          GetRendererCI();
+    A_Rnr*              SpawnRnr(const TString& rnr, ZGlass* g);
+
+    TClass* fTClass;
+    TClass* GetTClass();
   };
 
   /**************************************************************************/
-  /**************************************************************************/
-
-#ifndef __CINT__
-  typedef hash_map<CID_t, ClassInfo*>			 hCid2pCI_t;
-  typedef hash_map<CID_t, ClassInfo*>::iterator		 hCid2pCI_i;
-#endif
-
-  /**************************************************************************/
-  // Libset / LibID, ClassID / LibName, ClassName lookup structures
+  // LibSet
   /**************************************************************************/
 
   // Demangler/Constructor functions
   typedef void    (*Libset_Mir_Exec_foo)  (ZGlass*, ZMIR&);
   typedef ZGlass* (*Lens_Constructor_foo) (CID_t);
   typedef bool 	  (*Is_A_Glass_foo)	  (ZGlass*, CID_t);
+  typedef A_Rnr*  (*A_Rnr_Creator_foo)    (ZGlass*, CID_t);
+
+#ifndef __CINT__
+  typedef hash_map<CID_t, ClassInfo*>			 hCid2pCI_t;
+  typedef hash_map<CID_t, ClassInfo*>::iterator		 hCid2pCI_i;
+
+  typedef hash_map<TString, A_Rnr_Creator_foo>		 hRnr2RCFoo_t;
+  typedef hash_map<TString, A_Rnr_Creator_foo>::iterator  hRnr2RCFoo_i;
+#endif
 
   struct LibSetInfo : public InfoBase {
     LID_t		fLid;
@@ -170,6 +223,7 @@ namespace GledNS {
 
 #ifndef __CINT__
     hCid2pCI_t		Cid2CInfo;
+    hRnr2RCFoo_t	Rnr2RCFoo;
 #endif
 
     Libset_Mir_Exec_foo		fLME_Foo;
@@ -180,7 +234,9 @@ namespace GledNS {
 
     //--------------------------------------------------------------
 
-    LibSetInfo(const string& s, LID_t lid) : InfoBase(s), fLid(lid), fViewPart(0) {}
+    LibSetInfo(const TString& s, LID_t lid) :
+      InfoBase(s), fLid(lid) , fViewPart(0)
+    {}
 
     ClassInfo* FindClassInfo(CID_t cid);
     ClassInfo* FirstClassInfo();
@@ -198,24 +254,39 @@ namespace GledNS {
   // Hashes of Dependencies and various ID/Name demanglers
   /**************************************************************************/
 
-  typedef hash_map<string, LID_t>		hName2Lid_t;
-  typedef hash_map<string, LID_t>::iterator	hName2Lid_i;
-  typedef hash_map<string, FID_t>		hName2Fid_t;
-  typedef hash_map<string, FID_t>::iterator	hName2Fid_i;
+  typedef hash_map<TString, LID_t>		hName2Lid_t;
+  typedef hash_map<TString, LID_t>::iterator	hName2Lid_i;
+  typedef hash_map<TString, FID_t>		hName2Fid_t;
+  typedef hash_map<TString, FID_t>::iterator	hName2Fid_i;
 
 #endif
 
   // Inquiries
 
   LibSetInfo* FindLibSetInfo(LID_t lid);
-  LibSetInfo* FindLibSetInfo(const string& lib_set);
+  LibSetInfo* FindLibSetInfo(const TString& lib_set);
   void	      ProduceLibSetInfoList(lpLSI_t& li_list);
   ClassInfo*  FindClassInfo(FID_t fid);
-  ClassInfo*  FindClassInfo(const string& name);
-  FID_t       FindClassID(const string& name);
+  ClassInfo*  FindClassInfo(const TString& name);
+  FID_t       FindClassID(const TString& name);
 
-  MethodInfo*     DeduceMethodInfo(ZGlass* alpha, const string& name);
-  DataMemberInfo* DeduceDataMemberInfo(ZGlass* alpha, const string& name);
+  MethodInfo*     DeduceMethodInfo(ZGlass* alpha, const TString& name);
+  DataMemberInfo* DeduceDataMemberInfo(ZGlass* alpha, const TString& name);
+
+  // Renderers
+
+  extern set<TString>	RnrNames;
+
+  void BootstrapRnrSet(const TString& libset, LID_t id,
+		       const TString& rnr,  A_Rnr_Creator_foo rfoo);
+
+  TString FabricateRnrLibName(const TString& libset, const TString& rnr);
+  TString FabricateRnrInitFoo(const TString& libset, const TString& rnr);
+
+  void AssertRenderers();
+  void AddRenderer(const TString& rnr);
+  
+  A_Rnr* SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid);
 
   /**************************************************************************/
   /**************************************************************************/
@@ -241,7 +312,7 @@ namespace GledNS {
 
     MT_MEE_ConnectionGranted,	// Followed by MEE specific data
     MT_MEE_AuthRequested,	// Followed by hostname, port, conn_id
-    MT_MEE_ConnectionDenied,	// Followed by string
+    MT_MEE_ConnectionDenied,	// Followed by TString
 
     MT_Auth_Challenge,		// challenge + pub key of SunAbsolute
     MT_Auth_ChallengeResponse,	// challenge response
@@ -252,21 +323,21 @@ namespace GledNS {
     MT_EyeCommand               // Commands for the Eye
   };
 
-  Int_t LoadSoSet(const string& lib_set);
-  Int_t InitSoSet(const string& lib_set);
-  Int_t LoadSo(const string& full_lib_name);
-  void* FindSymbol(const string& sym);
+  Int_t LoadSoSet(const TString& lib_set);
+  Int_t InitSoSet(const TString& lib_set);
+  Int_t LoadSo(const TString& full_lib_name);
+  void* FindSymbol(const TString& sym);
 
   void	BootstrapSoSet(LibSetInfo* lsi);
 
-  bool	IsLoaded(const string& lib_set);
+  bool	IsLoaded(const TString& lib_set);
   bool	IsLoaded(LID_t lid);
 
   void  BootstrapClass(ClassInfo* ci);
 
-  string FabricateLibName(const string& libset);
-  string FabricateInitFoo(const string& libset);
-  string FabricateUserInitFoo(const string& libset);
+  TString FabricateLibName(const TString& libset);
+  TString FabricateInitFoo(const TString& libset);
+  TString FabricateUserInitFoo(const TString& libset);
 
   ZGlass* ConstructLens(FID_t fid);
   bool	  IsA(ZGlass* glass, FID_t fid);
@@ -277,6 +348,8 @@ namespace GledNS {
 
   void    StreamLens(TBuffer& b, ZGlass* lens);
   ZGlass* StreamLens(TBuffer& b);
+  void    WriteLensID(TBuffer& b, ZGlass* lens);
+  ZGlass* ReadLensID(TBuffer& b);
 
   template <class GLASS>
   GLASS StreamLensByGlass(TBuffer& b) {
@@ -290,49 +363,54 @@ namespace GledNS {
     }
   }
 
-
   /**************************************************************************/
-  // Simple string parser
+  // Value-type peek and MIR-poke
   /**************************************************************************/
-
-#ifndef __CINT__
-
-  int  split_string(Str_ci start, Str_ci end, lStr_t& l, char c=0);
-  int  split_string(const string& s, lStr_t& l, char c=0);
-  int  split_string(const string& s, lStr_t& l, string ptr);
-  void deparen_string(const string& in, string& n, string& a,
-		      const string& ops="([{", bool no_parens_ok=false)
-    throw(string);
-
-  string join_strings(const string& sep, lStr_t& list);
-
-  void remove_whitespace(string& s);
-
-  // Function argument parsing, type converters
-
-  void split_argument(const string& arg,
-		      string& type, string& name, string& def);
-  void unrefptrconst_type(string& type);
 
   Double_t peek_value(void* addr, Int_t type);
   void     stream_value(TBuffer& b, Int_t type, Double_t value); 
 
+  /**************************************************************************/
+  // Simple TString parser
+  /**************************************************************************/
+
+#ifndef __CINT__
+
+  int  split_string(const TString& s, Ssiz_t start, Ssiz_t end,
+		    lStr_t& l, char c=0);
+  int  split_string(const TString& s, lStr_t& l, char c=0);
+  int  split_string(const TString& s, lStr_t& l, const TString& ptr);
+  void deparen_string(const TString& in, TString& n, TString& a,
+		      const TString& ops="([{", bool no_parens_ok=false)
+    throw(Exc_t);
+
+  TString join_strings(const TString& sep, lStr_t& list);
+
+  void   remove_whitespace(TString& s);
+  Ssiz_t find_first_of(const TString& s, const char* accept, Ssiz_t i=0);
+
+  // Function argument parsing, type converters
+
+  void split_argument(const TString& arg,
+		      TString& type, TString& name, TString& def);
+  void unrefptrconst_type(TString& type);
+
   // url_tokenizator
 
-  class url_token : public string {
+  class url_token : public TString {
   public:
     enum type_e { null, link_sel, list_sel };
   protected:
     type_e m_type;
   public:
-    url_token(type_e t=null) : string(), m_type(t) {}
-    url_token(const string& s, type_e t=null) : string(s), m_type(t) {}
+    url_token(type_e t=null) : TString(), m_type(t) {}
+    url_token(const TString& s, type_e t=null) : TString(s), m_type(t) {}
 
     type_e type() const { return m_type; }
     void type(type_e t) { m_type = t; }
   };
 
-  int tokenize_url(const string& url, list<url_token>& l);
+  int tokenize_url(const TString& url, list<url_token>& l);
 
 #endif
 

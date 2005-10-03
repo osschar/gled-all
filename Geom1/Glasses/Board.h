@@ -17,7 +17,7 @@ class Board : public ZNode {
 protected:
   void _init();
 
-  ZImage*	mTexture;	// X{gS} L{} RnrBits{4,0,5,0, 0,0,0,0}
+  ZLink<ZImage>	mTexture;	// X{gS} L{} RnrBits{4,0,5,0, 0,0,0,0}
   Float_t	mTexX0;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
   Float_t	mTexY0;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000])
   Float_t	mTexX1;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
@@ -40,6 +40,5 @@ public:
   ClassDef(Board, 1)
 }; // endclass Board
 
-GlassIODef(Board);
 
 #endif

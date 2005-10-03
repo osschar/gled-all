@@ -48,6 +48,5 @@ class ITSModule : public ZNode {
   ClassDef(ITSModule, 1)
     }; // endclass ITSModule
 
-GlassIODef(ITSModule);
 
 #endif

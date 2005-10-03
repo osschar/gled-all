@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  Lamp*		mLamp;	  // X{gS} L{} RnrBits zero
+  ZLink<Lamp>		mLamp;	  // X{gS} L{} RnrBits zero
   Bool_t	bTurnOn;  // X{gS} 7 Bool(-join=>1)
   Bool_t	bTurnOff; // X{gS} 7 Bool()
 
@@ -30,6 +30,5 @@ public:
   ClassDef(LampLink, 1)
 }; // endclass LampLink
 
-GlassIODef(LampLink);
 
 #endif

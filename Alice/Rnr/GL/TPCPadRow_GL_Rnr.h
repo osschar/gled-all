@@ -10,7 +10,8 @@
 #include <Glasses/TPCPadRow.h>
 #include <Rnr/GL/TPCSegment_GL_Rnr.h>
 
-class TPCPadRow_GL_Rnr : public ZNode_GL_Rnr {
+class TPCPadRow_GL_Rnr : public ZNode_GL_Rnr
+{
  private:
   void _init();
   void  render_padrow(Int_t row);
@@ -20,6 +21,7 @@ class TPCPadRow_GL_Rnr : public ZNode_GL_Rnr {
   TPCPadRow*	       mTPCPadRow;  
   TPCSegRnrMod*	       mSRM;
   RnrModStore	       mSegRMS;
+
  public:
   TPCPadRow_GL_Rnr(TPCPadRow* idol) :
     ZNode_GL_Rnr(idol), mTPCPadRow(idol), mSegRMS(TPCSegRnrMod::FID())

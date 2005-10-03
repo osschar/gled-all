@@ -31,6 +31,5 @@ public:
   ClassDef(TPCSegFrame, 1)
 }; // endclass TPCSegFrame
 
-GlassIODef(TPCSegFrame);
 
 #endif
