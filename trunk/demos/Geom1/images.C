@@ -94,14 +94,14 @@ void images()
   board1->SetColor(1, 0.7, 0.7);
   board1->SetTexture(image1);
   board1->SetULen(2.5*1.75); board1->SetVLen(2.5*1);
-  board1->Set3Pos(-4.8, 2.5, 0.01);
+  board1->SetPos(-4.8, 2.5, 0.01);
 
   Board* board2 = new Board("Board2", "Showing Orchid");
   g_queen->CheckIn(board2);
   images->Add(board2);
   board2->SetTexture(image2);
   board2->SetULen(2.5); board2->SetVLen(2.5);
-  board2->Set3Pos(5.7, 2.5, 0.01);
+  board2->SetPos(5.7, 2.5, 0.01);
 
   RectTerrain* terrain = new RectTerrain("Terrain");
   g_queen->CheckIn(terrain);
@@ -109,29 +109,29 @@ void images()
   terrain->SetFromImage(image3);
   terrain->SetDx(0.05); terrain->SetDy(0.05);
   terrain->SetMinCol(1,0,0); terrain->SetMaxCol(0,1,1);
-  terrain->Set3Pos(-3, -7, 0.01);
+  terrain->SetPos(-3, -7, 0.01);
   terrain->SetRibbon(ribbon1);
 
   CREATE_ADD_GLASS(n1, SMorph, images, "Earth", "");
-  n1->SetS(2);
+  n1->SetScale(2);
   n1->SetTLevel(20); n1->SetPLevel(20);
   n1->SetTexture(image4);
-  n1->Set3Pos(-6, -6, 0); n1->SetRotByAngles(0, TMath::Pi()/2, 0);
+  n1->SetPos(-6, -6, 0); n1->SetRotByAngles(0, TMath::Pi()/2, 0);
 
   CREATE_ADD_GLASS(n2, SMorph, images, "Moon", "");
-  n2->SetS(2);
+  n2->SetScale(2);
   n2->SetTLevel(20); n2->SetPLevel(20);
   n2->SetTexture(image5);
-  n2->Set3Pos( 6, -6, 0); n2->SetRotByAngles(0, TMath::Pi()/2, 0);
+  n2->SetPos( 6, -6, 0); n2->SetRotByAngles(0, TMath::Pi()/2, 0);
 
   SMorph* morphs[3];
   for(int i=0; i<3; ++i) {
     morphs[i] = new SMorph(Form("Morph %d", i+1));
     g_queen->CheckIn(morphs[i]); images->Add(morphs[i]);
     morphs[i]->SetTLevel(30); morphs[i]->SetPLevel(30);
-    morphs[i]->SetS(2);
+    morphs[i]->SetScale(2);
     morphs[i]->SetTexture(image6);
-    morphs[i]->Set3Pos(-6+6*i, 7, 0);
+    morphs[i]->SetPos(-6+6*i, 7, 0);
   }
   morphs[0]->SetTx(1);  morphs[0]->SetCx(0.5);  morphs[0]->SetRz(-0.25);
   morphs[1]->SetTx(0);  morphs[1]->SetCx(-0.5); morphs[1]->SetRz(0.25);
@@ -139,7 +139,7 @@ void images()
 
   CREATE_ADD_GLASS(txt1, Text, images, "Text1", 0);
   txt1->SetText("GLED");
-  txt1->Set3Pos(1, 1.8, 0);
+  txt1->SetPos(1, 1.8, 0);
   txt1->SetScales(2.2, 2.3, 1);
   txt1->SetFillBack(true);
   txt1->SetFGCol(0, 0, 0); txt1->SetBGCol(1, 0.95, 0.6);
@@ -147,7 +147,7 @@ void images()
 
   CREATE_ADD_GLASS(txt2, Text, images, "Text2", 0);
   txt2->SetText("Generic Lightweight Environment for Distributed computing");
-  txt2->Set3Pos(0, 0, 0);
+  txt2->SetPos(0, 0, 0);
   txt2->SetScales(0.67, 1.1, 1);
   txt2->SetFillBack(true);
   txt2->SetFGCol(0,0,0); txt2->SetBGCol(0.65, 0.8, 1);

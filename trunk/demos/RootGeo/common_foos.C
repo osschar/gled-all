@@ -35,13 +35,13 @@ Scene* create_basic_scene()
   lamp1->SetDiffuse(1, 1, 1);
   lamp1->SetAmbient(0.3, 0.3, 0.3);
   lamp1->SetScale(0);
-  lamp1->Set3Pos(0, 12, 12);
+  lamp1->SetPos(0, 12, 12);
   
   CREATE_ADD_GLASS(lamp2, Lamp, origin, "Lamp2", "");
   lamp2->SetDiffuse(0.65, 0.35, 0.5);
   lamp2->SetAmbient(0, 0, 0);
   lamp2->SetScale(0);
-  lamp2->Set3Pos(12, 12, 0);
+  lamp2->SetPos(12, 12, 0);
  
   rscene->GetGlobLamps()->Add(lamp1);
   rscene->GetGlobLamps()->Add(lamp2);
@@ -66,7 +66,7 @@ Scene* create_basic_scene()
 
   {
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "", "");
-    base->Set3Pos(7, 4, 7);
+    base->SetPos(7, 4, 7);
     base->SetRotByDegrees(180, -45, 90);
     base->RotateLF(3, 1, 22*TMath::DegToRad());
     base->SetRadius(0.002);
@@ -81,7 +81,7 @@ Scene* create_basic_scene()
 
   { // Z-views
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Z+", "");
-    base->Set3Pos(0, 0, ZCam);
+    base->SetPos(0, 0, ZCam);
     base->SetRotByDegrees(0, -90, 270);
     base->SetRadius(0.002);
 
@@ -91,7 +91,7 @@ Scene* create_basic_scene()
     info->SetZSize(12);
   }{
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Z-", "");
-    base->Set3Pos(0, 0, -ZCam);
+    base->SetPos(0, 0, -ZCam);
     base->SetRotByDegrees(0, 90, 270);
     base->SetRadius(0.002);
 
@@ -102,7 +102,7 @@ Scene* create_basic_scene()
   }
   { // Y-views
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Y+", "");
-    base->Set3Pos(0, YCam, 0);
+    base->SetPos(0, YCam, 0);
     base->SetRotByDegrees(270, 0, 270);
     base->SetRadius(0.002);
 
@@ -112,7 +112,7 @@ Scene* create_basic_scene()
     info->SetZSize(12);
   }{
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Y-", "");
-    base->Set3Pos(0, -YCam, 0);
+    base->SetPos(0, -YCam, 0);
     base->SetRotByDegrees(90, 0, 270);
     base->SetRadius(0.002);
 
@@ -123,7 +123,7 @@ Scene* create_basic_scene()
   }
   { // X-views
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "X+", "");
-    base->Set3Pos(XCam, 0, 0);
+    base->SetPos(XCam, 0, 0);
     base->SetRotByDegrees(0, 180, 270);
     base->SetRadius(0.002);
 
@@ -133,7 +133,7 @@ Scene* create_basic_scene()
     info->SetZSize(12);
   }{
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "X-", "");
-    base->Set3Pos(-XCam, 0, 0);
+    base->SetPos(-XCam, 0, 0);
     base->SetRotByDegrees(0, 0, 270);
     base->SetRadius(0.002);
 
@@ -203,7 +203,7 @@ void setup_default_gui()
   pupil->Add(g_scene);
 
   gui_pupil->SetCameras((ZList*)g_scene->FindLensByPath("Markers/CameraInfos"));
-  pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->First());
+  pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->FrontElement());
 }
 
 void spawn_default_gui()

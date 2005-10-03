@@ -33,13 +33,13 @@ void create_basic_scene()
   lamp1->SetDiffuse(1, 1, 1);
   lamp1->SetAmbient(0.3, 0.3, 0.3);
   lamp1->SetScale(0);
-  lamp1->Set3Pos(0, 12, 12);
+  lamp1->SetPos(0, 12, 12);
   
   CREATE_ADD_GLASS(lamp2, Lamp, origin, "Lamp2", "");
   lamp2->SetDiffuse(0.65, 0.35, 0.5);
   lamp2->SetAmbient(0, 0, 0);
   lamp2->SetScale(0);
-  lamp2->Set3Pos(12, 12, 0);
+  lamp2->SetPos(12, 12, 0);
  
   g_scene->GetGlobLamps()->Add(lamp1);
   g_scene->GetGlobLamps()->Add(lamp2);
@@ -114,7 +114,7 @@ void setup_default_gui()
   g_pupil = pupil;
 
   gui_pupil->SetCameras((ZList*)g_scene->FindLensByPath("Markers/CameraInfos"));
-  pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->First());
+  pupil->ImportCameraInfo((CameraInfo*)gui_pupil->GetCameras()->FrontElement());
 }
 
 void spawn_default_gui()

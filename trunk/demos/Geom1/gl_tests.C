@@ -46,7 +46,7 @@ void gl_tests()
   lightmod->SetFaceCullOp(1);
 
   CREATE_ADD_GLASS(g1, GLTesterOne, images, "GlOne", 0);
-  g1->Set3Pos(0, 0, 2);
+  g1->SetPos(0, 0, 2);
 
   // Spawn GUI
   g_scene = images;
