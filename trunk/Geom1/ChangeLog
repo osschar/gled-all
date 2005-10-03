@@ -1,3 +1,12 @@
+2005-10-03  Matevz TADEL  <matevz.tadel@ijs.si>
+
+	* Glasses/GForger.cxx:
+	* Glasses/GForger.h:
+	* GForge/*:
+	New files; gforge executable and a glass wrapper for
+	execution. GForger can be told about a ZImage and RectTerrain to
+	perform automatic image reloads and updates of terrain.
+
 2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZImage.cxx:
