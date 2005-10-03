@@ -38,6 +38,5 @@ public:
   ClassDef(ZGeoOvl, 1)
 }; // endclass ZGeoOvl
 
-GlassIODef(ZGeoOvl);
 
 #endif

@@ -13,7 +13,7 @@ struct _TA_Texture;
 
 //#ifndef __CINT__
 struct _TA_Prim {
-  string	fTextureName;
+  TString	fTextureName;
   UShort_t	fN;
   UShort_t	fIndices[4]; // !!! Expect no more
   float		fNormal[3];
@@ -54,6 +54,5 @@ public:
   ClassDef(TA_SubUnit, 1)
 }; // endclass TA_SubUnit
 
-GlassIODef(TA_SubUnit);
 
 #endif

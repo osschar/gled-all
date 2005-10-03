@@ -15,7 +15,7 @@ class TA_Unit : public TA_SubUnit {
 
 protected:
   TString	       mFile;  	 // X{GS} 7 Filor()
-  TA_TextureContainer* mTexCont; // X{gS} L{}
+  ZLink<TA_TextureContainer> mTexCont; // X{gS} L{}
 
   ZColor	mColor;	  // X{PGS} 7 ColorButt()
   Float_t	mS;	  // X{GS} 7 Value(-range=>[0,100,1,100])
@@ -32,6 +32,5 @@ public:
   ClassDef(TA_Unit, 1)
 }; // endclass TA_Unit
 
-GlassIODef(TA_Unit);
 
 #endif

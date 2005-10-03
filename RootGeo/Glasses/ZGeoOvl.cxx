@@ -37,12 +37,12 @@ void ZGeoOvl::Restore(TGeoVolume* vol)
     SetTNode(tn);
     AssertUserData();
   } else {
-    zn = (ZGeoNode*)First();
+    zn = (ZGeoNode*)FrontElement();
     tn = vol->FindNode(zn->GetTitle());
     zn->SetTNode(tn);
     zn->AssertUserData();
 
-    zn = (ZGeoNode*)Last();
+    zn = (ZGeoNode*)BackElement();
     tn = vol->FindNode(zn->GetTitle());
     zn->SetTNode(tn);
     zn->AssertUserData();
@@ -59,8 +59,8 @@ void ZGeoOvl::DumpOvl()
     nn2 = 0;
   }
   else {
-    ZGeoNode* n1 = (ZGeoNode*)First();
-    ZGeoNode* n2 = (ZGeoNode*)Last();
+    ZGeoNode* n1 = (ZGeoNode*)FrontElement();
+    ZGeoNode* n2 = (ZGeoNode*)BackElement();
     nn1 = n1->GetName();
     nn2 = n2->GetName();
   }

@@ -20,21 +20,21 @@ while($_=shift) {
   ($cname) = m!/(\w+).h$!;
   # $cname is now base name ... also class name
 
-  print "Messing $_ $cname, suff=",$CATALOG->{Classes}{$cname}{PragmaSuff},"\n";
+  print "Messing $_ as $cname.\n";
 
   my $pragma_suff;
-  if(exists $CATALOG->{Classes}{$cname}{PragmaSuff}) {
+  my $pragma_link;
+
+  if(defined $CATALOG->{Classes}{$cname}{PragmaSuff}) {
     $pragma_suff = $CATALOG->{Classes}{$cname}{PragmaSuff};
   } else {
-    if(exists $resolver->{GlassName2GlassSpecs}{$cname}) {
-      $pragma_suff = "!";
-    } else {
-      $pragma_suff = "+";
-    }
+    $pragma_suff = "+";
+  }
+  if(defined $resolver->{GlassName2GlassSpecs}{$cname}) {
+    $pragma_link = "#pragma link C++ class ZLink<${cname}>;";
   }
 
   $token = ($cname =~ m/NS$/) ? 'namespace' : 'class';
-  #$token = 'class';
 
   open( FOO, ">$dict/${cname}_LinkDef.h");
   print FOO <<"END";
@@ -47,14 +47,16 @@ while($_=shift) {
 #pragma link C++ nestedenum;
 #pragma link C++ nestedtypedef;
 
+$CATALOG->{Classes}{$cname}{PrePragmas}
+${pragma_link}
 #pragma link C++ ${token} ${cname}${pragma_suff};
 $CATALOG->{Classes}{$cname}{Pragmas}
+$CATALOG->{Classes}{$cname}{PostPragmas}
+
 #endif
 END
   close FOO;
   my $cintopts = $CATALOG->{Classes}{$cname}{CINT_Opts};
-  # when do i need the -p option ... what includes ...
-  # on general ... il ne faudrait pas savoir de gl dans les .h datoquoques
   $exe = "rootcint -f $dict/$cname.cc -c $cintopts " .
          "-I. $ENV{CPPFLAGS} -I$ENV{ROOTSYS}/include " .
 	 "$_ $dict/${cname}_LinkDef.h";
@@ -64,4 +66,3 @@ END
 }
 # Remove all traces
 #unlink "${cname}_LinkDef.h";
-

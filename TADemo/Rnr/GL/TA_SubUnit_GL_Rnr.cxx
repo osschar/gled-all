@@ -30,7 +30,7 @@ void TA_SubUnit_GL_Rnr::Draw(RnrDriver* rd)
     end = mTA_SubUnit->mPrims.begin() + mTA_SubUnit->mNPEnd;
   for(v_TA_Prim_i i=beg; i<end; ++i) {
     if(i->fN>=3) glNormal3fv(i->fNormal);
-    if(i->fTATex==0 && i->fTextureName.size() > 0 &&
+    if(i->fTATex==0 && i->fTextureName.Length() > 0 &&
        mTA_SubUnit->mUnit->GetTexCont())
       {
 	i->fTATex = mTA_SubUnit->mUnit->GetTexCont()->FindTexture(i->fTextureName);

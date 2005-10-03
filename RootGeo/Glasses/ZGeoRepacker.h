@@ -17,7 +17,8 @@ class TGeoShape; class TGeoVolume; class TGeoNode;
 #include <ext/hash_set>
 #endif
 
-class ZGeoRepacker : public ZGlass {
+class ZGeoRepacker : public ZGlass
+{
   MAC_RNR_FRIENDS(ZGeoRepacker);
 
 private:
@@ -41,11 +42,11 @@ protected:
 #undef _PAIN_
 #endif
 
-  TGeoManager*	mSrcGeo; //!
-  TGeoManager*	mNeoGeo; //!
+  TGeoManager*	  mSrcGeo;  //!
+  TGeoManager*	  mNeoGeo;  //!
 
-  ZGeoNode*	mRoot;    // X{gS} L{}
-  TString	mOutFile; // X{GS} 7 Textor()
+  ZLink<ZGeoNode> mRoot;    // X{gS} L{}
+  TString         mOutFile; // X{GS} 7 Textor()
 
   void repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume);
 
@@ -60,6 +61,5 @@ public:
   ClassDef(ZGeoRepacker, 1)
 }; // endclass ZGeoRepacker
 
-GlassIODef(ZGeoRepacker);
 
 #endif

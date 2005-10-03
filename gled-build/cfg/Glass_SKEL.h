@@ -9,7 +9,8 @@
 
 #include <Glasses/BASENAME.h>
 
-class CLASSNAME : public BASENAME {
+class CLASSNAME : public BASENAME
+{
   MAC_RNR_FRIENDS(CLASSNAME);
 
 private:
@@ -26,6 +27,5 @@ public:
   ClassDef(CLASSNAME, 1)
 }; // endclass CLASSNAME
 
-GlassIODef(CLASSNAME);
 
 #endif
