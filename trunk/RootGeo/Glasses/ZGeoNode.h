@@ -28,7 +28,7 @@ class ZGeoNode : public ZNode
 
 private:
   void _init();
-  void _assert_tnode(const TString& _eh, bool ggeo_fallbackp=false);
+  void _assert_tnode(const Exc_t& _eh, bool ggeo_fallbackp=false);
 
 protected:
   TGeoNode	       *mTNode;     //! X{g}
@@ -46,7 +46,7 @@ protected:
   ZGeoNode* insert_node(TGeoNode* geon, ZNode* holder, const Text_t* name);
   TGeoNode* get_tnode_search_point();
   ZGeoNode* set_holder(lStr_t& node_names); 
-  Bool_t locate_tnode( ZGeoNode* zn, TGeoNode* cur_node);
+  Bool_t    locate_tnode(ZGeoNode* zn, TGeoNode* cur_node);
 
 public:
   ZGeoNode(const Text_t* n="ZGeoNode", const Text_t* t=0) : ZNode(n,t) { _init(); }

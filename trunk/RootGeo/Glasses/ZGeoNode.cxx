@@ -31,14 +31,13 @@ ClassImp(ZGeoNode)
 
 void ZGeoNode::_init()
 {
-  // !!!! Set all links to 0 !!!! 
   mTNode     = 0;
   mNNodes    = 0;
   mNodeAlpha = 1;
   mDefFile   = "ZGeoNodes.root";
 }
 
-void ZGeoNode::_assert_tnode(const TString& _eh, bool ggeo_fallbackp)
+void ZGeoNode::_assert_tnode(const Exc_t& _eh, bool ggeo_fallbackp)
 {
   if(mTNode == 0)
     if(ggeo_fallbackp && gGeoManager &&  gGeoManager->GetTopNode() )
@@ -446,7 +445,7 @@ ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
 
 /************************************************************************/
 
-Bool_t ZGeoNode::locate_tnode( ZGeoNode* zn, TGeoNode* cur_node)
+Bool_t ZGeoNode::locate_tnode(ZGeoNode* zn, TGeoNode* cur_node)
 {  
   // Searches TGeoNode from cur_node whith name zn->mTNodeName
   // and sets the mTNode value to zn. The function is needed when
