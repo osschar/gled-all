@@ -17,7 +17,6 @@ ClassImp(ZGeoOvl)
 
 void ZGeoOvl::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mPM_p = 0;
   mIsExtr  = false;
   mRnrMark = true;
