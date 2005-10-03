@@ -12,11 +12,8 @@
 #include <hash_map>
 
 template <>
-struct hash<string> {
-  hash<const char *> h;  
-  size_t operator()(const string& str) const {
-      return (h(str.c_str()));
-  }
+struct hash<TString> {
+  size_t operator()(const TString& str) const { return str.Hash(); }
 };
 
 template <class T>
@@ -42,11 +39,8 @@ using namespace __gnu_cxx;
 // !! krumph ... one would expect this in stdlib ... perhaps gcc-3
 namespace __gnu_cxx {
 template <>
-struct hash<string> {
-  hash<const char *> h;  
-  size_t operator()(const string& str) const {
-      return (h(str.c_str()));
-  }
+struct hash<TString> {
+  size_t operator()(const TString& str) const { return str.Hash(); }
 };
 // this one appears semi-obvious as well ...
 template <class T>

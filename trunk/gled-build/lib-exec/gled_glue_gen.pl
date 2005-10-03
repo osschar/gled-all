@@ -207,7 +207,7 @@ close H;
 open C, ">$config->{GLUE_DIR}/${libname}_Rnr_${rnr}_LibSet.cxx";
 print C <<"fnord";
 #include "${libname}_Rnr_${rnr}_LibSet.h"
-#include <GledView/GledViewNS.h>
+#include <Gled/GledNS.h>
 #include <Glasses/ZGlass.h>
 
 fnord
@@ -239,7 +239,7 @@ print C <<"fnord";
 }
 
 void lib${libname}_GLED_init_Rnr_${rnr}() {
-  GledViewNS::BootstrapRnrSet("$libname", $libid, "$rnr", lib${libname}_Rnr_${rnr}_Construct);
+  GledNS::BootstrapRnrSet("$libname", $libid, "$rnr", lib${libname}_Rnr_${rnr}_Construct);
 }
 
 void *${libname}_GLED_init_Rnr_${rnr} = (void*)lib${libname}_GLED_init_Rnr_${rnr};

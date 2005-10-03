@@ -20,8 +20,8 @@ struct _TA_Texture {
   void GL_UnUse();
 };
 
-typedef hash_map<string, _TA_Texture*>			hName2p_TA_Texture_t;
-typedef hash_map<string, _TA_Texture*>::iterator	hName2p_TA_Texture_i;
+typedef hash_map<TString, _TA_Texture*>			hName2p_TA_Texture_t;
+typedef hash_map<TString, _TA_Texture*>::iterator	hName2p_TA_Texture_i;
 
 #else
 
@@ -46,12 +46,11 @@ public:
     ZGlass(n,t) { _init(); }
 
   void ProcessDescFile(); // X{E} 7 MButt()
-  _TA_Texture* FindTexture(const string& name);
+  _TA_Texture* FindTexture(const TString& name);
 
 #include "TA_TextureContainer.h7"
   ClassDef(TA_TextureContainer, 1)
 }; // endclass TA_TextureContainer
 
-GlassIODef(TA_TextureContainer);
 
 #endif

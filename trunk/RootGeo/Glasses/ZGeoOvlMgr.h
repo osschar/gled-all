@@ -48,12 +48,12 @@ protected:
   ZTrans      get_ztrans(TGeoMatrix* gm);
   Bool_t      locate_first_from_top(TGeoNode* cur_node, TGeoVolume* v,
 				    ZGeoNode* zn, lgn_t& result);
-  string      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v,
+  TString      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v,
 				    ZGeoNode* zn);
   void        setup_zcolor(ZGeoOvl* ovlm);
   ZGeoOvl*    create_standalone_node(const Text_t* n, const Text_t* t,
 				     TGeoNode* tn = 0);
-  void        set_tnode_by_path(string path, TGeoNode* & gn);
+  void        set_tnode_by_path(TString path, TGeoNode* & gn);
 
 public:
   ZGeoOvlMgr(const Text_t* n="ZGeoOvlMgr", const Text_t* t=0):ZGeoNode(n,t){ _init();}
@@ -68,6 +68,5 @@ public:
   ClassDef(ZGeoOvlMgr, 1)
 }; // endclass ZGeoOvlMgr
 
-GlassIODef(ZGeoOvlMgr);
 
 #endif

@@ -41,9 +41,9 @@ void ZGeoOvlMgr::RnrOvlInterval()
   // Set mRnrSelf to true in nodes which have mOverlap
   // value between  mMinOvl amd mMaxOvl.
 
-  list<ZGeoNode*> gns; CopyByGlass<ZGeoNode*>(gns);
+  list<ZGeoNode*> gns; CopyListByGlass<ZGeoNode>(gns);
   for(list<ZGeoNode*>::iterator i=gns.begin(); i!=gns.end(); ++i) {
-    list<ZGeoOvl*> ol; (*i)->CopyByGlass<ZGeoOvl*>(ol);
+    list<ZGeoOvl*> ol; (*i)->CopyListByGlass<ZGeoOvl>(ol);
     Bool_t rnr_top_p = false;
     for(list<ZGeoOvl*>::iterator k=ol.begin(); k!=ol.end(); ++k) {
       ZGeoOvl* n = *k;
@@ -65,8 +65,8 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
   // Creates a list of TGeoOvl objects reading 
   // gGeoManager list fOverlaps.
 
-  static const string _eh("ZGeoOvlMgr::ImportOverlaps");
-  ISdebug(1, GForm("%s, resolution %f", _eh.c_str(), mResol));
+  static const Exc_t _eh("ZGeoOvlMgr::ImportOverlaps");
+  ISdebug(1, GForm("%s, resolution %f", _eh.Data(), mResol));
 
   //  printf("Import START %f \n", mResol);
   TIter next_node(lOverlaps);
@@ -76,8 +76,8 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
   ZGeoOvl         *ovln = 0;
   TPolyMarker3D*   pm;
   const Text_t    *mn;
-  string           mt;
-  map<string, ZGeoNode*> nmap;
+  TString           mt;
+  map<TString, ZGeoNode*> nmap;
 
   // go through the list of overlaps  locate each node in 
   // absolute coordinates
@@ -85,9 +85,9 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
     TGeoVolume* motherv = ovl->GetVolume();
     const char* mname = motherv->GetName(); 
     // printf ("Importing %s %s Extr(%d).\n", mname, ovl->GetName(), ovl->IsExtrusion());
-    ISdebug(1, GForm("%s Importing %s %s Extr(%d)", _eh.c_str(), mname, ovl->GetName(), ovl->IsExtrusion()));
+    ISdebug(1, GForm("%s Importing %s %s Extr(%d)", _eh.Data(), mname, ovl->GetName(), ovl->IsExtrusion()));
     
-    map<string, ZGeoNode*>::iterator i = nmap.find(motherv->GetName());
+    map<TString, ZGeoNode*>::iterator i = nmap.find(motherv->GetName());
     if(i == nmap.end()) {     
       ovlm = new ZGeoNode(mname);
       // printf("creating mother node %s \n", ovlm->GetName());
@@ -99,7 +99,7 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
 
       mt = setup_absolute_matrix(top_node,motherv, ovlm);
       ovlm->setup_color(mNodeAlpha);
-      ovlm->SetTitle(mt.c_str()); 
+      ovlm->SetTitle(mt.Data()); 
       ovlm->AssertUserData();
       nmap[mname] = ovlm;
     } 
@@ -114,8 +114,8 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
       // printf("number of nodes ... %d \n", ovlm->Size());
       mn = GForm("%s::extr%d",n1->GetVolume()->GetName(), ovlm->Size());
       ovln = create_standalone_node(mn, n1->GetName(), n1);
-      // string tname = mt + '/' + n1->GetName();
-      // ovln->SetTitle(tname.c_str());      
+      // TString tname = mt + '/' + n1->GetName();
+      // ovln->SetTitle(tname.Data());      
       // ovln->SetTrans(get_ztrans(n1->GetMatrix()));
       setup_ztrans(ovln, n1->GetMatrix());
       ovln->mIsExtr = true;
@@ -124,12 +124,12 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
       ovln = create_standalone_node(mn, "holder");
       // create the overlaping nodes
       insert_node(ovl->GetNode(0), ovln, GForm("%s",ovl->GetNode(0)->GetName()));
-      // string tname = mt + '/' + ovl->GetNode(0)->GetName();
-      // ovln->First()->SetTitle(tname.c_str());
+      // TString tname = mt + '/' + ovl->GetNode(0)->GetName();
+      // ovln->First()->SetTitle(tname.Data());
       
       insert_node(ovl->GetNode(1), ovln, GForm("%s",ovl->GetNode(1)->GetName() ));
       // tname = mt + '/' + ovl->GetNode(1)->GetName();
-      // ovln->Last()->SetTitle(tname.c_str());
+      // ovln->Last()->SetTitle(tname.Data());
     }
 
     pm = ovl->GetPolyMarker();
@@ -165,49 +165,38 @@ void ZGeoOvlMgr::Restore()
   // Sets UserData to nodes with mTNode set.
   // The list was created by calling function LoadFromFile. 
 
-  static const string _eh("ZGeoOvlMgr::Restore");
-  ISdebug(1, GForm("%s START", _eh.c_str()));
-  lpZGlass_i i, end;
-  BeginIteration(i, end);
-  ZGeoNode* mn;
+  static const Exc_t _eh("ZGeoOvlMgr::Restore");
+  ISdebug(1, GForm("%s START", _eh.Data()));
 
-  while(i != end) {
-    if((mn = dynamic_cast<ZGeoNode*>(*i))) {
-      string path = mn->GetTitle();
-      path = path.substr(1, path.length() -1);
+  Stepper<ZGeoNode> mn(this);
+  while(mn.step()) {
+    TString path = mn->GetTitle();
+    path = path(1, path.Length() - 1);
 
-      // printf("search TNode for mother path: %s \n", path.c_str());
-      const string::size_type end = path.length();
-      unsigned int pos =  path.find_first_of("/");
+    // printf("search TNode for mother path: %s \n", path.Data());
+    Ssiz_t end = path.Length();
+    Ssiz_t pos = path.First("/");
      
-      TGeoNode* tn = gGeoManager->GetTopNode();
+    TGeoNode* tn = gGeoManager->GetTopNode();
 
-      // check if mother tnod is not top node , that is /ALIC
-      if( pos != string::npos){
-	path = path.substr(pos, end -pos);
-	set_tnode_by_path( path, tn);
-        // printf("Tnode in Restore %s \n", tn->GetName());
-      }
+    // check if mother tnod is not top node , that is /ALIC
+    if(pos != kNPOS) {
+      path = path(pos, end - pos);
+      set_tnode_by_path(path, tn);
+      // printf("Tnode in Restore %s \n", tn->GetName());
+    }
 
-      if (tn) {
-	mn->SetTNode(tn);
-	mn->AssertUserData();
-	ZGeoOvl* ovl;
-	lpZGlass_i k, last;
-	mn->BeginIteration(k, last);
-	while(k != last) {
-	  if(ovl = dynamic_cast<ZGeoOvl*>(*k)) {
-	    ovl->Restore( mn->GetVolume());
-	  }
-	  k++;
-	}
-	mn->EndIteration(); // through TGeoOvl in mother volume
+    if(tn) {
+      mn->SetTNode(tn);
+      mn->AssertUserData();
+
+      Stepper<ZGeoOvl> ovl(*mn);
+      while(ovl.step()) {
+	ovl->Restore( mn->GetVolume());
       }
     }
-    ++i;
   }
-  EndIteration(); // mother volumes
-  ISdebug(1, GForm("%s END", _eh.c_str()));
+  ISdebug(1, GForm("%s END", _eh.Data()));
 }
 
 /**************************************************************************/
@@ -215,10 +204,10 @@ void ZGeoOvlMgr::Restore()
 void ZGeoOvlMgr::DumpOvlMgr()
 {
   list<ZGeoNode*> gns;
-  CopyByGlass<ZGeoNode*>(gns);
+  CopyListByGlass<ZGeoNode>(gns);
   for(list<ZGeoNode*>::iterator i=gns.begin(); i!=gns.end(); ++i) {
     list<ZGeoOvl*> ol;
-    (*i)->CopyByGlass<ZGeoOvl*>(ol);
+    (*i)->CopyListByGlass<ZGeoOvl>(ol);
     for(list<ZGeoOvl*>::iterator k=ol.begin(); k!=ol.end(); ++k) {
       (*k)->DumpOvl();
     }
@@ -267,7 +256,7 @@ Bool_t ZGeoOvlMgr::locate_first_from_top(TGeoNode* cur_node, TGeoVolume* vol,
 
 /*************************************************************************/
 
-string ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol,
+TString ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol,
 					 ZGeoNode* zn)
 {
   lgn_t  path;
@@ -276,7 +265,7 @@ string ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol,
   //  printf(" ZGeoOvlMgr::setup_absolute_matrix %s \n", zn->GetName());
   locate_first_from_top(top_node, vol, zn, path);
   // printf("setup_absolute_matrix zn->GetTNode()->GetName() \n", zn->GetTNode()->GetName());
-  string title;
+  TString title;
 
   for(lgn_ri k=path.rbegin(); k!=path.rend(); ++k) { 
     gn = *k;
@@ -300,10 +289,10 @@ void ZGeoOvlMgr::setup_zcolor(ZGeoOvl* ovlm)
   if (ovlm->mIsExtr) {
     ovlm->SetColor(mExtrCol.r(), mExtrCol.g(), mExtrCol.b(), mExtrCol.a());
   } else {
-    ZGeoNode* n = (ZGeoNode*)ovlm->First();
+    ZGeoNode* n = (ZGeoNode*)ovlm->FrontElement();
     n->mColor = mOvlCol1;
 
-    n = (ZGeoNode*)ovlm->Last();
+    n = (ZGeoNode*)ovlm->BackElement();
     n->mColor = mOvlCol2;
   }
 }
@@ -318,10 +307,11 @@ ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t,
   if (tn) {
     TGeoVolume* v = tn->GetVolume();
     nn->SetTNode(tn);
-    string m = v->GetMaterial()->GetName();
-    int j = m.find_first_of("$");
-    m = m.substr(0,j);
-    nn->SetMaterial(m.c_str());
+    TString m = v->GetMaterial()->GetName();
+    int j = m.First('$');
+    if(j != kNPOS)
+      m = m(0,j);
+    nn->SetMaterial(m.Data());
     nn->AssertUserData();
   }
 
@@ -330,46 +320,44 @@ ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t,
 }
 
 
-void ZGeoOvlMgr::set_tnode_by_path(string path, TGeoNode*& gn)
+void ZGeoOvlMgr::set_tnode_by_path(TString path, TGeoNode*& gn)
 {
-  static const string _eh("ZGeoOvlMgr::SetTNodeByPath");
+  static const Exc_t _eh("ZGeoOvlMgr::SetTNodeByPath");
 
   Bool_t last_token;
-  if (path.find_first_of("/") == path.find_last_of("/")) {
+  if (path.First('/') == path.Last('/')) {
     last_token=true;
   } else {
     last_token=false;
   }
 
-  const string::size_type end = path.length();
-  path = path.substr(1, end -1);  //remove first slash in path
-  unsigned int pos  = path.find_first_of("/");
-
+  path = path(1, path.Length() - 1);  //remove first slash in path
+  Ssiz_t pos  = path.First('/');
 
   if (last_token) {
     TGeoVolume* vol = gn->GetVolume();
     if (vol->GetNodes()) {
-      // printf("search  %s in volume %s \n", path.c_str(), vol->GetName());
-      TGeoNode* n = vol->FindNode(path.c_str());
+      // printf("search  %s in volume %s \n", path.Data(), vol->GetName());
+      TGeoNode* n = vol->FindNode(path.Data());
       if (n) {
-	gn =n;
-	// printf("TGeoNode %s found from path  %s in volume %s \n", gn->GetName(), path.c_str(), vol->GetName());
+	gn = n;
+	// printf("TGeoNode %s found from path  %s in volume %s \n", gn->GetName(), path.Data(), vol->GetName());
       }
       else {
-	ISerr(GForm("%s Can't find reference for %s in gGeoManager.", _eh.c_str(),path.c_str()));
+	ISerr(GForm("%s Can't find reference for %s in gGeoManager.", _eh.Data(),path.Data()));
       }
     }
   } else {
-    if (pos != string::npos) {
-      string nname =  path.substr(0,pos);
-      path = path.substr(pos, end -pos);   
-      // printf("temp %s \n", path.c_str());
+    if (pos != kNPOS) {
+      TString nname = path(0, pos);
+      path = path(pos, path.Length() - pos);   
+      // printf("temp %s \n", path.Data());
       TGeoVolume* vol = gn->GetVolume();
       if (vol->GetNodes()) {
-	TGeoNode* n = vol->FindNode(nname.c_str());
+	TGeoNode* n = vol->FindNode(nname.Data());
 	if (n) {
 	  gn = n;
-	  set_tnode_by_path( path, gn);
+	  set_tnode_by_path(path, gn);
 	}
       }
     }

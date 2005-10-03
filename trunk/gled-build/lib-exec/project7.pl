@@ -95,9 +95,9 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 # Remapping of composite types into basic ones
 %GetSetMap = (
   'TString' => { GetType=>'Text_t*',
-		 GetMeth=>'.Data()',
-		 SetArgs=>'const Text_t* s'
-	       },
+                 GetMeth=>'.Data()',
+                 SetArgs=>'const Text_t* s'
+               },
   'ZColor'  => { SetMeth=>'.rgba(r,g,b,a)',
 		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1'
 	       }
@@ -115,7 +115,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
     "Long_t", "unsigned long", "ULong_t", "float", "Float_t", "double",
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
-    "float", "Real_t", "bool",
+    "float", "bool", "Double32_t",
     "string",
     "ID_t", "LID_t", "CID_t", "MID_t", "FID_t", "FMID_t",
     "TimeStamp_t", "UCIndex_t", "xxIndex_t"
@@ -191,11 +191,6 @@ sub MunchArgs {
     $sa->[3] = $sa->[0]; $sa->[3] =~ s/^const\s+//;
     $sa->[4] = $sa->[3]; $sa->[3] =~ s/&//;
     $sa->[2] = $sa->[1]; $sa->[2] =~ s/=.*//;
-    # Push in TString to char* translation
-    # ???? Is this obsoleted by GetSetMap ????
-    #if($sa->[3] eq 'TString') {
-    #  $sa->[3] = 'char*'; $sa->[2] .= '.Data()';
-    #}
     $sa->[5] = $sa->[2];
     push @$r, $sa;
   }
@@ -379,8 +374,12 @@ while($c !~ m!\G\s*$!osgc) {
     print "777\t$view\n" if $DEBUG;
     next;
   }
-  # Otherwise pure comments not expected/parsed ... whatever ...
-  SlurpComments();
+  # Skip comment lines.
+  if($c =~ m!\G\s*//.*$!omgcx) {
+    next;
+  }
+
+  # Protection-level changes.
   if($c =~ m!\G\s*public:!osgc) {
     print "Going public ...\n" if $DEBUG;
     $state = 'public'; next;
@@ -423,8 +422,8 @@ while($c !~ m!\G\s*$!osgc) {
   # Data members
   ################################
   if($c =~ m!\G\s*(?:static\s+)?(?:mutable\s+)?
-             ((?:const\s+)?[\w:]+\*?\&?)\s+  # type
-             (\*?\w+)\s*;                 # varname
+             ((?:const\s+)?[\w:<>]+\*?\&?)\s+  # type
+             (\*?\w+)\s*;                      # varname
             !mgcx)
   {
     my $comment = SlurpComments();
@@ -434,7 +433,8 @@ while($c !~ m!\G\s*$!osgc) {
     $type =~ s/$/*/ if $varname =~ s/^\*//; # move * sign to type field (if needed)
     # strip beginning of varname for method base [like Get<methodbase>]
     #   strips 1st character and optional number; think h1
-    my $methodbase = $varname; $methodbase =~ s/.\d?//;
+
+    my($mprefix, $methodbase) = $varname =~ m/([[:lower:]\d]*_?)(.*)/;
 
     # Go for Key{Value} construts ... assert Xport exists before parsing on
     print "Trying for $varname: $comment\n" if $DEBUG;;
@@ -460,17 +460,21 @@ while($c !~ m!\G\s*$!osgc) {
 	print "\n"if $DEBUG;
       }
     
-
-      my $settype = $type;
-      $settype .= "&" if $member->{Xport}{s}{ref};
-      my $argstr = &SetArgs($settype, lc($methodbase));
-
       $member->{Type} = $type;
       $member->{Methodbase} = $methodbase;
       $member->{Methodname} = "Set$methodbase";
-      $member->{Varname} = $varname;
-      $member->{ArgStr} = $argstr;
-      $member->{Args} = &MunchArgs($argstr);
+      $member->{Prefix}     = $mprefix;
+      $member->{Varname}    = $varname;
+      if(exists $member->{Link}) {
+	my ($link_type) = $member->{Type} =~ m/<(\w+)>/;
+	$member->{LinkType} = $link_type;
+	$member->{ArgStr} = &SetArgs("$link_type*", lc($methodbase));	
+      } else {
+	my $settype = $type;
+	$settype .= "&" if $member->{Xport}{s}{ref};
+        $member->{ArgStr} = &SetArgs($settype, lc($methodbase));
+      }
+      $member->{Args} = &MunchArgs($member->{ArgStr});
       $member->{Local} = $localp;
 
       $member->{ID} = $MemberID++;
@@ -521,12 +525,12 @@ while($c !~ m!\G\s*$!osgc) {
   if($c =~ m!\G\s*
      (virtual\s)?\s*                # Must handle virtuals, too
      ((?:const\s+)?[\w:]+(?:\*|&)?)?\s+ # Return value (optional const, */&)
-     (\w+)                          # Name
+     (\w+)\s*                       # Name
      \(([-+_\w\d\s,~*/&=\"\.]*)\)\s*   # Arguments ... w/ possible default values:
                                     #   strings also possible, so we (should) match mostly anything.
      (const\s)?\s*                  # [const]
      (throw\([\w\d_]*\))?\s*        # [throw]
-     (?:;|(?::[^{]+)?{.*?})         # (; | {inline def}); not greedy for *}*
+     (?:(?:=\s*0\s*)?;|(?::[^{]+)?{.*?})  # ( (=0)?; | {inline def}); not greedy for *}*
       !osgcx)
   {
     my $type = $2; my $methodname = $3; my $args = $4;
@@ -650,31 +654,42 @@ if($IsGlass) {
   print H7 "virtual FID_t VFID() const { return FID_t($LibID,$ClassID); }\n";
   print H7 "static  GledNS::ClassInfo*  GlassInfo() { return  sap_${CLASSNAME}_ci; }\n";
   print H7 "virtual GledNS::ClassInfo* VGlassInfo() const { return  sap_${CLASSNAME}_ci; }\n";
+  # unless ($CLASSNAME eq $BASECLASS) {
+  #   print H7 "static  ${CLASSNAME}* DynamicCast(ZGlass* l) { return dynamic_cast<${CLASSNAME}*>(l); }\n";
+  # }
   print H7 "\n";
 }
 
 for $r (@Members) {
   # Get methods
   if( $r->{Xport} =~ m/(g|G)/ ) {
-    my ($type, $val, $constret, $const, $pre, $post);
-    if(exists $GetSetMap{$r->{Type}}{GetType}) {
-      my $h = $GetSetMap{$r->{Type}};
-      $type = "$h->{GetType}";
-      $val = "$r->{Varname}$h->{GetMeth}";
+    my ($type, $val, $constret, $const, $lock);
+    if(exists $r->{Link}) {
+      $type = "$r->{LinkType}*";
+      $val  = "$r->{Varname}.get()";
     } else {
-      $type = "$r->{Type}";
-      $val = "$r->{Varname}";
+      if(exists $GetSetMap{$r->{Type}}{GetType}) {
+	my $h = $GetSetMap{$r->{Type}};
+	$type = "$h->{GetType}";
+	$val = "$r->{Varname}$h->{GetMeth}";
+      } else {
+	$type = "$r->{Type}";
+	$val = "$r->{Varname}";
+      }
+      if($1 eq 'G') {
+	$const    = ' const';
+	$constret = 'const ' if $type =~ /(?:&|\*)$/;
+      }
+      if($IsGlass && $LOCK_GET_METHS) {
+	$lock = "GLensReadHolder _rdlck(this); ";
+      }
     }
-    if($1 eq 'G' and not exists $r->{Link}) {
-      $const    = ' const';
-      $constret = 'const ' if $type =~ /(?:&|\*)$/;
+    print H7 "${constret}${type} Get$r->{Methodbase}()${const} " .
+             "{ ${lock}return ${val}; }\n";
+    if($r->{Type} eq "TString") {
+      print H7 "TString Str$r->{Methodbase}()${const} " .
+             "{ ${lock}return $r->{Varname}; }\n";
     }
-    if($IsGlass && $LOCK_GET_METHS) {
-      $pre = "ReadLock(); ";
-      $post= "ReadUnlock(); ";
-    }
-    print H7 "${constret}${type} Get$r->{Methodbase}()${const} ".
-      "{ ${pre}${constret}${type} _ret = ${val}; ${post}return _ret; }\n";
   }
 
   if( $r->{Xport} =~ m/(s|S)/ ) {
@@ -715,7 +730,7 @@ for $r (@Members) {
     }
     if(exists $r->{Link}) {
       $setit = 
-	"  set_link_or_die((ZGlass*&)$r->{Varname}, $r->{Args}[0][2], FID());\n";
+	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
     } else {
       $setit  = "  $r->{Varname}";
       $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
@@ -834,7 +849,7 @@ unless($CLASSNAME eq $BASECLASS) {
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  print C7 "  glass_list.push_back($r->{Varname});\n";
+  print C7 "  glass_list.push_back($r->{Varname}.get_link());\n";
 }
 print C7 "}\n\n";
 
@@ -845,8 +860,9 @@ unless($CLASSNAME eq $BASECLASS) {
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  my $glass_var_ptr = ($r->{Type} eq "${BASECLASS}*") ?
-    "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
+  #my $glass_var_ptr = ($r->{Type} eq "${BASECLASS}*") ?
+  #  "&$r->{Varname}" : "(ZGlass**)(&$r->{Varname})";
+  $glass_var_ptr = "$r->{Varname}.ptr_link()";
   print C7 "  ref_list.push_back($glass_var_ptr);\n";
 }
 print C7 "}\n\n";
@@ -858,7 +874,8 @@ unless($CLASSNAME eq $BASECLASS) {
 }
 for $r (@Members) {
   next unless exists $r->{Link};
-  my $glass_var = "*(ZGlass**)(&$r->{Varname})";
+  # my $glass_var = "*(ZGlass**)(&$r->{Varname})";
+  my $glass_var = "$r->{Varname}.ref_link()";
   print C7 "  link_rep_list.push_back( ".
     "ZGlass::LinkRep($glass_var, sap_$r->{Methodbase}_lmi) );\n";
 }
@@ -870,24 +887,23 @@ unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
   print C7 "  Int_t ret" . 
       (defined $PARENT ? "=${PARENT}::RebuildLinkRefs(idd)" : "=0") .
       ";\n";
-  # Here should rebuild [...|r...] marked; NodeLists are recoverd from above
   for $r (@Members) {
     next unless exists $r->{Link};
     print C7 <<"fnord"
-  if($r->{Varname} != 0) {
+  if($r->{Varname}.is_set()) {
     bool _resolved = false;
-    ID_t _id = 0; _id += (unsigned long)$r->{Varname};
-    $r->{Type} _pointee = dynamic_cast<$r->{Type}>(idd->DemangleID(_id));
+    ID_t _id = $r->{Varname}.get_id();
+    $r->{LinkType}* _pointee = dynamic_cast<$r->{LinkType}*>(idd->DemangleID(_id));
     if(_pointee) {
       try {
         _pointee->IncRefCount(this); 
-        $r->{Varname} = _pointee;
+        $r->{Varname}.set(_pointee);
         _resolved = true;
       }
       catch(...) {}
     }
     if(!_resolved) {
-      $r->{Varname} = 0; ++ret;
+      $r->{Varname}.set(0); ++ret;
     }
   }
 fnord
@@ -932,11 +948,10 @@ for $r (@Methods) {
   my $C = $#{$r->{Args}};
   print C7 "ZMIR*\n${CLASSNAME}::S_$r->{Methodbase}($args1) {\n";
   if(exists $r->{Ctx}) {
-    print C7 "  ZMIR* _mir = new ZMIR(mSaturnID" . ($c>0 ? ", " : " ") .
-    join(", ", map( { "($_->[2] ? $_->[2]\->GetSaturnID() : 0)" } @{$r->{Args}}[0 .. $c-1])) .
-    ");\n";
+    print C7 "  ZMIR* _mir = new ZMIR(this" . ($c>0 ? ", " : " ") .
+      join(", ", map( { "$_->[2]" } @{$r->{Args}}[0 .. $c-1])) . ");\n";
   } else {
-    print C7 "  ZMIR* _mir = new ZMIR(mSaturnID);\n";
+    print C7 "  ZMIR* _mir = new ZMIR(this);\n";
   }
   print C7 "  _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});\n";
   if($r->{DetachedExe}) {
@@ -958,8 +973,8 @@ for $r (@Methods) {
 if($IsGlass) {
   print C7<<"fnord";
 void ${CLASSNAME}::ExecuteMir(ZMIR& mir) {
-  static string _eh("${CLASSNAME}::ExecuteMir ");
-  static string _bad_ctx("ctx argument of wrong type");
+  static const Exc_t _eh("${CLASSNAME}::ExecuteMir ");
+  static const Exc_t _bad_ctx("ctx argument of wrong type");
   switch(mir.Mid) {
 fnord
 
@@ -970,7 +985,7 @@ fnord
 
       print C7 << "fnordlink";
   case $r->{ID}: {
-    $r->{Type} _beta = dynamic_cast<$r->{Type}>(mir.Beta);
+    $r->{LinkType}* _beta = dynamic_cast<$r->{LinkType}*>(mir.Beta);
     if(mir.Beta != 0 && _beta == 0)
       throw(_eh + "[$r->{Methodname}] " + _bad_ctx);
     ${CLASSNAME}::$r->{Methodname}(_beta);
@@ -1038,6 +1053,8 @@ void ${CLASSNAME}::_gled_catalog_init() {
   if(_ci) return;
   _ci = new ClassInfo("${CLASSNAME}", FID());
   _ci->fParentName = "$PARENT";
+  _ci->fRendererGlass = "$CATALOG->{Classes}{$CLASSNAME}{RnrClass}";
+  _ci->fDefRnrCtrl = RnrCtrl(${RnrCtrl_ctor});
 fnord
 
 #####################
@@ -1068,20 +1085,18 @@ for $r (@Members) {
     print C7 "    _ci->fMethodList.push_back(mip);\n";
     print C7 "    _ci->fMethodHash[$r->{ID}] = mip;\n\n";
 
+    my $Mtype = (exists $r->{Link}) ? "Link" : "Data";
+
+    print C7 "    ${Mtype}MemberInfo* dmip = new ${Mtype}MemberInfo(\"$r->{Methodbase}\");\n";
+    print C7 "    dmip->fPrefix = \"$r->{Prefix}\";\n";
+    print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";
+    print C7 "    dmip->fSetMethod = mip;\n";
+    print C7 "    dmip->fClassInfo = _ci;\n";
     if(exists $r->{Link}) {
-      print C7 "    LinkMemberInfo* lmip = new LinkMemberInfo(\"$r->{Methodbase}\");\n";
-      print C7 "    lmip->fType = \"$r->{Args}[0][0]\";\n";
-      print C7 "    lmip->fSetMethod = mip;\n";
-      print C7 "    lmip->fClassInfo = _ci;\n";
-      print C7 "    _ci->fLinkMemberList.push_back(lmip);\n";      
-      print C7 "    sap_$r->{Methodbase}_lmi = lmip;\n";
-    } else {
-      print C7 "    DataMemberInfo* dmip = new DataMemberInfo(\"$r->{Methodbase}\");\n";
-      print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";
-      print C7 "    dmip->fSetMethod = mip;\n";
-      print C7 "    dmip->fClassInfo = _ci;\n";
-      print C7 "    _ci->fDataMemberList.push_back(dmip);\n";      
+      print C7 "    dmip->fDefRnrBits = RnrBits($r->{RnrBits});\n";
+      print C7 "    sap_$r->{Methodbase}_lmi = dmip;\n";
     }
+    print C7 "    _ci->f${Mtype}MemberList.push_back(dmip);\n";      
     print C7 "  }\n";
   }
 }
@@ -1138,8 +1153,8 @@ print H <<"fnord";
 #ifndef ${LibSetName}_${CLASSNAME}View_H
 #define ${LibSetName}_${CLASSNAME}View_H
 
-#include <Eye/MTW_View.h>
-#include <Eye/MTW_SubView.h>
+#include <GledView/MTW_View.h>
+#include <GledView/MTW_SubView.h>
 #include <$INFILE>
 fnord
 
@@ -1231,31 +1246,11 @@ void ${CLASSNAME}View::_gled_catalog_init() {
   if(_ci) return;
   _ci = new ClassInfo;
   _ci->fooSVCreator = &Construct;
-  _ci->fRendererGlass = "$CATALOG->{Classes}{$CLASSNAME}{RnrClass}";
-  _ci->fDefRnrCtrl = RnrCtrl(${RnrCtrl_ctor});
-  _ci->fRendererCI = 0;
   GledNS::ClassInfo* master = GledNS::FindClassInfo(FID_t($LibID, $ClassID));
   master->fViewPart = _ci;
 fnord
 
-### No special data for Methods & DataMembers
-
-################
-# LinkMemberInfo
-################
-
-for $r (@Members) {
-  if(exists $r->{Link}) {
-    print C <<"fnord";
-  {
-    LinkMemberInfo* lmip = new LinkMemberInfo;
-    lmip->fDefRnrBits = RnrBits($r->{RnrBits});
-    GledNS::LinkMemberInfo* master_lmip = master->FindLinkMemberInfo("$r->{Methodbase}", false);
-    master_lmip->fViewPart = lmip;
-  }
-fnord
-  }
-}
+### No special data for Methods & DataMembers; nor links.
 
 ################
 # Views -> Weeds

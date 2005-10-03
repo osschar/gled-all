@@ -38,7 +38,7 @@ void ZGeoNode::_init()
   mDefFile   = "ZGeoNodes.root";
 }
 
-void ZGeoNode::_assert_tnode(const string& _eh, bool ggeo_fallbackp)
+void ZGeoNode::_assert_tnode(const TString& _eh, bool ggeo_fallbackp)
 {
   if(mTNode == 0)
     if(ggeo_fallbackp && gGeoManager &&  gGeoManager->GetTopNode() )
@@ -83,7 +83,7 @@ void ZGeoNode::AssertUserData()
 
 void ZGeoNode::AssignGGeoTopNode()
 {
-  static const string _eh("ZGeoNode::AssignGGeoTopNode ");
+  static const Exc_t _eh("ZGeoNode::AssignGGeoTopNode ");
   _assert_tnode(_eh, true);
 }
 
@@ -96,7 +96,7 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
   // Imports mTGeoNode and groups the created nodes by given regular
   // expression.
 
-  static const string _eh("ZGeoNode::ImportByRegExp ");
+  static const Exc_t _eh("ZGeoNode::ImportByRegExp ");
 
   _assert_tnode(_eh, true);
   if(target == 0) target = "";
@@ -140,7 +140,7 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, const Text_t* filter)
 
 void ZGeoNode::ImportUnimported(const Text_t* target)
 {  
-  static const string _eh("ZGeoNode::ImportUnimported ");
+  static const Exc_t _eh("ZGeoNode::ImportUnimported ");
 
   _assert_tnode(_eh, true);
   Int_t ni=0;
@@ -190,7 +190,7 @@ void ZGeoNode::ImportNodes()
   // Reads mTGeoNode and creates  
   // representative ZGeoNode node. 
 
-  static const string _eh("ZGeoNode::ImportNodes ");
+  static const Exc_t _eh("ZGeoNode::ImportNodes ");
   _assert_tnode(_eh);
 
   RemoveLensesViaQueen(true);
@@ -228,13 +228,13 @@ void ZGeoNode::ImportNodesWCollect()
   // Import mTGeoNode and groups the nodes by 
   // mother volume name.
 
-  static const string _eh("ZGeoNode::ImportNodesWCollect ");
+  static const Exc_t _eh("ZGeoNode::ImportNodesWCollect ");
 
   _assert_tnode(_eh);
   
   RemoveLensesViaQueen(true);
 
-  map<string, ZGeoNode*> nmap;
+  map<TString, ZGeoNode*> nmap;
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
   Int_t ni=0;
@@ -252,7 +252,7 @@ void ZGeoNode::ImportNodesWCollect()
     }
 
     ZGeoNode* holder = 0;
-    map<string, ZGeoNode*>::iterator i = nmap.find(vname);
+    map<TString, ZGeoNode*>::iterator i = nmap.find(vname);
     if(i == nmap.end()) {
       ZGeoNode* n = new ZGeoNode(vname);
       mQueen->CheckIn(n);
@@ -273,7 +273,7 @@ void ZGeoNode::ImportNodesRec(Int_t depth)
   ImportNodes();
 
   if(depth > 0) {
-    lpZGeoNode_t l; CopyByGlass<ZGeoNode*>(l);
+    lpZGeoNode_t l; CopyListByGlass<ZGeoNode>(l);
 
     for(lpZGeoNode_i n=l.begin(); n!=l.end(); ++n) {
       if((*n)->mNNodes > 0)
@@ -288,20 +288,18 @@ void ZGeoNode::ImportNodesRec(Int_t depth)
 
 void ZGeoNode::SaveToFile(const Text_t* file)
 {
-  static const string _eh("ZGeoNode::SaveToFile ");
+  static const Exc_t _eh("ZGeoNode::SaveToFile ");
   
   if(file == 0 || strcmp(file,"") == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "loading from '" + file + "'.");
 
   ZComet c("ZGeoNodes");
-  lpZGlass_i i, end;
-  BeginIteration(i, end);
-  while(i != end) {
-    c.AddTopLevel(*i, false, true, -1);
-    ++i;
+  {
+    GMutexHolder llck(mListMutex);
+    Stepper<> s(this);
+    while(s.step())
+      c.AddTopLevel(*s, false, true, -1);
   }
-  EndIteration();
-
   TFile f(file, "RECREATE");
   c.Write();
   f.Close();
@@ -309,7 +307,7 @@ void ZGeoNode::SaveToFile(const Text_t* file)
 
 void ZGeoNode::LoadFromFile(const Text_t* file)
 {
-  static const string _eh("ZGeoNode::LoadFromFile ");
+  static const Exc_t _eh("ZGeoNode::LoadFromFile ");
 
   if(file == 0 || strcmp(file,"") == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "loading from '" + file + "'.");
@@ -332,9 +330,9 @@ void ZGeoNode::Restore()
   // Has to be called after Load to reinitialize pointers to TGeo
   // structures. The method is virtual and overriden by ZGeoOvl.
 
-  static const string _eh("ZGeoNode::Restore");
+  static const Exc_t _eh("ZGeoNode::Restore");
 
-  ISdebug(1, GForm("%s", _eh.c_str()));
+  ISdebug(1, GForm("%s", _eh.Data()));
   // printf("restoring node %s:%p \n", GetName(), this);
   if (! mTNodeName.IsNull()) {
     // search TGeoVolume to set it to zgeonode
@@ -344,16 +342,12 @@ void ZGeoNode::Restore()
       AssertUserData();
     }
   }
-  lpZGlass_i i, end;
-  BeginIteration(i, end);
-  ZGeoNode* nn;
-  while(i != end) {
-    if((nn = dynamic_cast<ZGeoNode*>(*i))) {
-      nn->Restore();
-    }
-    ++i;
+  {
+    GMutexHolder llck(mListMutex);
+    Stepper<ZGeoNode> s(this);
+    while(s.step())
+      s->Restore();
   }
-  EndIteration();
 }
 
 /**************************************************************************/
@@ -399,10 +393,11 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
   nn->mTNode = geon;
   setup_ztrans(nn, geon->GetMatrix());
   nn->mTNodeName = geon->GetName();
-  string m = v->GetMaterial()->GetName();
-  int j = m.find_first_of("$");
-  m = m.substr(0,j);
-  nn->SetMaterial(m.c_str());
+  TString m(v->GetMaterial()->GetName());
+  int j = m.First("$");
+  if(j != kNPOS)
+    m = m(0,j);
+  nn->SetMaterial(m.Data());
   nn->mNNodes = geon->GetNdaughters();
   mQueen->CheckIn(nn);
   holder->Add(nn);
@@ -415,7 +410,7 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
 
 TGeoNode* ZGeoNode::get_tnode_search_point()
 {
-  static const string _eh("ZGeoNode::get_tnode_search_point ");
+  static const Exc_t _eh("ZGeoNode::get_tnode_search_point ");
 
   ZGeoNode* p = dynamic_cast<ZGeoNode*>(GetParent());
   if(p && p->GetTNode() != 0) {
@@ -423,7 +418,7 @@ TGeoNode* ZGeoNode::get_tnode_search_point()
   } else {
     // printf("GetTNodeSearchPoint searching from TOP node \n");
     if(!gGeoManager) {
-      ISerr(GForm("%s gGeoManager not set.", _eh.c_str()) );
+      ISerr(GForm("%s gGeoManager not set.", _eh.Data()) );
       return 0;
     }
     return gGeoManager->GetTopNode();
@@ -436,11 +431,11 @@ ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
 {
   if(node_names.empty()) return this;
 
-  string& name = node_names.front();
+  TString& name = node_names.front();
   ZGeoNode* next = dynamic_cast<ZGeoNode*>(GetElementByName(name));
   if(next == 0) {
-    // printf("Create new node in LocateNode %s \n", name.c_str());
-    next = new ZGeoNode(name.c_str());
+    // printf("Create new node in LocateNode %s \n", name.Data());
+    next = new ZGeoNode(name.Data());
     mQueen->CheckIn(next);
     Add(next);
   }

@@ -48,7 +48,7 @@ void TA_TextureContainer::ProcessDescFile()
 }
 
 _TA_Texture*
-TA_TextureContainer::FindTexture(const string& name) {
+TA_TextureContainer::FindTexture(const TString& name) {
   hName2p_TA_Texture_i i = mName2Tex.find(name);
   if(i == mName2Tex.end()) {
     cout <<"Unresolved texture '"<< name <<"'\n";

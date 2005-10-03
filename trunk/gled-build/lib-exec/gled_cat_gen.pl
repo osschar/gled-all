@@ -39,12 +39,19 @@ $FAFALOG = { 'LibID' => $libid, 'LibSetName' => $libname };
 open ZOO, $config->{GLASS_LIST} or die "can't open $config->{GLASS_LIST} for reading";
 while($_=<ZOO>) {
   next if /^\#/ or /^\s*$/;
-  chomp; my ($c, $id, $stem, $rnr) = split;
+  chomp;
+  s/\s*$//;
+  my ($c, $id, $stem, $rnr) = split;
   $rnr = "ZGlass" unless defined $rnr;
   $rnr = $c if $rnr eq ".";
-  $FAFALOG->{Classes}{$c} = { 'ClassID' => $id, 'PragmaSuff' => '!',
-			      'Stem' => $stem, 'RnrClass' => $rnr
-			    };
+  $FAFALOG->{Classes}{$c} =
+    {
+     'ClassID' => $id,
+     'PragmaSuff' => '+',
+     'Stem' => $stem,
+     'RnrClass' => $rnr
+    };
+  
   $FAFALOG->{ClassID2Name}{$id} = "$c";
   push @{$FAFALOG->{ClassList}}, $c;
 }

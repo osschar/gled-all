@@ -32,10 +32,10 @@ void ZGeoRepacker::RepackGeometry()
   mSrcGeo = gGeoManager; // Perhaps should import it independently.
 
   gGeoManager = 0;
-  mNeoGeo = new TGeoManager("Simplix", "Driplix");
+  mNeoGeo = new TGeoManager("MicroALICE", "Very Simplified ALICE geometry");
   gGeoManager = mSrcGeo;
 
-  repack_geometry(mRoot, 0);
+  repack_geometry(*mRoot, 0);
 
   gGeoManager = mNeoGeo;
   mNeoGeo->CloseGeometry();
@@ -58,7 +58,7 @@ void ZGeoRepacker::repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume)
   tnode = zgnode->GetTNode();
   if(tnode == 0) {
     printf("Null node for %s; assuming it's a holder and descending.\n",
-	   zgnode->Identify().c_str());
+	   zgnode->Identify().Data());
 
     recurse_p = true;
     tvolume = parent_volume;
@@ -67,7 +67,7 @@ void ZGeoRepacker::repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume)
 
   tvolume = tnode->GetVolume();
   if(tvolume == 0) {
-    printf("Null volume for %s; skipping.\n", zgnode->Identify().c_str());
+    printf("Null volume for %s; skipping.\n", zgnode->Identify().Data());
     return;
   }
 
@@ -94,7 +94,7 @@ void ZGeoRepacker::repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume)
  recurse_loop:
 
   if(recurse_p) {
-    list<ZGeoNode*> l; zgnode->CopyByGlass<ZGeoNode*>(l);
+    list<ZGeoNode*> l; zgnode->CopyListByGlass<ZGeoNode>(l);
     for(list<ZGeoNode*>::iterator i=l.begin(); i!=l.end(); ++i)
       repack_geometry(*i, tvolume);
   }

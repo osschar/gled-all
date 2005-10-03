@@ -20,15 +20,15 @@
 
 class TGeoMatrix;
 
-class ZGeoNode : public ZNode {
-
+class ZGeoNode : public ZNode
+{
   // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,3))
   MAC_RNR_FRIENDS(ZGeoNode);
   friend class ZGeoOvlMgr;
 
 private:
   void _init();
-  void _assert_tnode(const string& _eh, bool ggeo_fallbackp=false);
+  void _assert_tnode(const TString& _eh, bool ggeo_fallbackp=false);
 
 protected:
   TGeoNode	       *mTNode;     //! X{g}
@@ -85,6 +85,5 @@ public:
   ClassDef(ZGeoNode, 1)
 }; // endclass ZGeoNode
 
-GlassIODef(ZGeoNode);
 
 #endif
