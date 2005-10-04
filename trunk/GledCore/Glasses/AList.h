@@ -304,7 +304,7 @@ class AList : public ZGlass
 
 
 #ifndef __CINT__
-bool AList::Stepper<ZGlass>::is_ok() { return true; }
+inline bool AList::Stepper<ZGlass>::is_ok() { return true; }
 #endif
 
 #endif
