@@ -1,3 +1,16 @@
+2005-10-10  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+        Add fuctionality for time interval checking.
+	* Glasses/MenuDriver.cxx:
+        Fix bug in 2D rotation/tralstion order.
+	* Rnr/GL/MCHelixLine.h:
+        New structure for fixing time interval.
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+        Use MCHelixLine instead of HelixLine.
+
 2005-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AliConverter.cxx:
