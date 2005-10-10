@@ -310,9 +310,9 @@ void MenuDriver::Exit()
 
 void MenuDriver::ITSMenu(ZNode* dh, ZNode* lh) 
 {
-  mZAliLoad->ShowITSDet(0,1, dh);
-  mZAliLoad->ShowITSDet(1,1, dh);
-  mZAliLoad->ShowITSDet(2,1, dh);
+  mZAliLoad->ShowITSDet(dh, 0,1);
+  mZAliLoad->ShowITSDet(dh, 1,1);
+  mZAliLoad->ShowITSDet(dh, 2,1);
 }
 
 void MenuDriver::SPDMenu(ZNode* dh, ZNode* lh) 
