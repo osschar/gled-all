@@ -86,16 +86,16 @@ void ZAliLoad::_init()
 // VSD handling
 /**************************************************************************/
 
-Bool_t ZAliLoad::check_read(const string& file)
+Bool_t ZAliLoad::check_read(const TString& file)
 {
-  return (gSystem->AccessPathName(file.c_str(), kReadPermission) == false);
+  return (gSystem->AccessPathName(file, kReadPermission) == false);
 }
 
-string ZAliLoad::get_vsd_name(Bool_t check_p)
+TString ZAliLoad::get_vsd_name(Bool_t check_p)
 {
   m_auto_vsdfile_p = false;
 
-  string file(mVSDFile.Data());
+  TString file(mVSDFile);
   if(file != "") {
     if(!check_p || (check_p && check_read(file))) {
       return file;
@@ -104,15 +104,15 @@ string ZAliLoad::get_vsd_name(Bool_t check_p)
 
   m_auto_vsdfile_p = true;
 
-  string there(GForm("%s/%s", mDataDir.Data(), mDefVSDName.Data()));
+  TString there(GForm("%s/%s", mDataDir.Data(), mDefVSDName.Data()));
   if(!check_p || (check_p && check_read(there)))
     return there;
 
-  string here(mDefVSDName.Data());
+  TString here(mDefVSDName);
   if(!check_p || (check_p && check_read(here)))
     return here;
 
-  throw(file + " | " + there + " | " + here);
+  throw(Exc_t(file + " | " + there + " | " + here));
 }
 
 /**************************************************************************/
@@ -121,8 +121,8 @@ void ZAliLoad::CreateVSD()
 {
   OpMutexHolder omh(this, "CreateVSD");
 
-  string vsd_file = get_vsd_name(false);
-  SetVSDFile(vsd_file.c_str());
+  TString vsd_file = get_vsd_name(false);
+  SetVSDFile(vsd_file);
   if(mConverter == 0) {
     AliConverter* c = new AliConverter;
     mQueen->CheckIn(c);
@@ -221,7 +221,7 @@ TPCSegment* ZAliLoad::ShowTPCSegment(Int_t segment_id, ZNode* holder)
   return tpc;
 }
 
-void ZAliLoad::ShowTPCPlate(Int_t side, ZNode* top_holder)
+void ZAliLoad::ShowTPCPlate(ZNode* top_holder, Int_t side)
 {
   OpMutexHolder omh(this, "ShowTPCPlate()");
   ZGlass* cfg = 0;
@@ -292,7 +292,7 @@ void ZAliLoad::ShowITSModule(Int_t id, Bool_t scale, ZNode* holder)
   else Add(m);
 }
  
-void ZAliLoad::ShowITSDet(Int_t id, Bool_t scale, ZNode* holder, Bool_t show_empty)
+void ZAliLoad::ShowITSDet(ZNode* holder, Int_t id, Bool_t scale, Bool_t show_empty)
 {
   OpMutexHolder omh(this, "ShowITSDet");
 
@@ -386,7 +386,7 @@ void ZAliLoad::check_tofdig_info()
 }
 
 
-void ZAliLoad::ShowTOFSector(Int_t sec, ZNode* holder)
+void ZAliLoad::ShowTOFSector(ZNode* holder, Int_t sec)
 {
   if (holder == 0) holder = this;
 

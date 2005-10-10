@@ -14,7 +14,8 @@
 #include <Stones/ITSDigitsInfo.h>
 #include <Stones/TOFDigitsInfo.h>
 
-class ZAliLoad : public ZNode {
+class ZAliLoad : public ZNode
+{
   MAC_RNR_FRIENDS(ZAliLoad);
 
  private:
@@ -22,8 +23,8 @@ class ZAliLoad : public ZNode {
   bool m_auto_vsdfile_p; //!
 
  protected:
-  Bool_t check_read(const string& file);
-  string get_vsd_name(Bool_t check_p);
+  Bool_t  check_read(const TString& file);
+  TString get_vsd_name(Bool_t check_p);
 
   ZLink<AliConverter>            mConverter;  // X{GS} L{}
   ZLink<VSDSelector>             mSelector;   // X{GS} L{}
@@ -93,20 +94,21 @@ class ZAliLoad : public ZNode {
   TPCDigitsInfo* mTPCDigInfo; // X{g}
  public:
   TPCSegment* ShowTPCSegment(Int_t segment_id, ZNode* holder = 0);  
-  void        ShowTPCPlate(Int_t side = -1, ZNode* holder = 0);   // X{Ed} 7 MCWButt()
+  void        ShowTPCPlate(ZNode* holder=0, Int_t side=-1); // X{Ed} C{1} 7 MCWButt()
 
  protected:
   void check_itsdig_info();
   ITSDigitsInfo* mITSDigInfo; // X{g}
  public:
   void        ShowITSModule(Int_t module, Bool_t scale=false, ZNode* holder=0);
-  void        ShowITSDet(Int_t subdet = -1, Bool_t scale=false, ZNode* holder=0, Bool_t show_empty = false);// X{Ed} 7 MCWButt()
+  void        ShowITSDet(ZNode* holder=0, Int_t subdet=-1, Bool_t scale=false,
+			 Bool_t show_empty=false); // X{Ed} C{1} 7 MCWButt()
 
  protected:
   void check_tofdig_info();
   TOFDigitsInfo* mTOFDigInfo; // X{g}
  public:
-  void        ShowTOFSector(Int_t sec = -1, ZNode* holder = 0); // X{Ed} 7 MCWButt()
+  void        ShowTOFSector(ZNode* holder=0, Int_t sec=-1); // X{Ed} C{1} 7 MCWButt()
 
 #include "ZAliLoad.h7"
   ClassDef(ZAliLoad, 1)
