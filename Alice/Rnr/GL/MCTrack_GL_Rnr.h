@@ -11,17 +11,27 @@
 #include <Glasses/MCTrack.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 #include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/MCHelixLine.h>
 
 class ZAliLoad;
 
 class MCTrack_GL_Rnr : public ZNode_GL_Rnr {
   friend class MCTrackRnrStyle;
+
+  typedef void (MCTrack_GL_Rnr::*RegVertices)(); 
+
  private:
-  void _init();
+
+  void             _init();
+  void             make_track(RnrDriver* rd);
+  void             loop_points();
+  void             loop_points_and_check_time();
+  vector<MCVertex> track_points;
+  RegVertices      vertices_foo;
 
  protected:
-  MCTrack*      mMCTrack;
-  RnrModStore   mParticleRMS;
+  MCTrack*         mMCTrack;
+  RnrModStore      mParticleRMS;
 
  public:
   MCTrack_GL_Rnr(MCTrack* idol) :
