@@ -428,9 +428,9 @@ void MenuDriver::ITSModuleMenu(ZNode* dh, ZNode* lh)
   ml->SetRnrMod(*mITSRM);
   ml->SetUseScale(true);
   ml->SetScales(.5,.5,.5);
+  ml->Move3LF(3.5, 4, 0);
   ml->RotateLF(1,2, TMath::Pi()/2);
   ml->RotateLF(2,3, TMath::Pi()/2); 
-  ml->Move3LF(3.5, 4, 0);
   mQueen->CheckIn(ml);
   // if no segment selected, then show first one == Seg0
   ZGlass* mod = mPrevious->GetCanvas3D()->FrontElement();
@@ -473,14 +473,14 @@ void MenuDriver::TPCMenu(ZNode* dh, ZNode* lh)
     link = new UINodeLink(GForm("Segment link  %d",i));
     link->SetRnrMod(*mTPCPlateRM);
     link->SetLens(seg);
-    link->RotateLF(1,2, - TMath::Pi()/2 + (i + 0.5)*20*TMath::Pi()/180);
-    link->RotateLF(1,3, TMath::Pi());
-    link->SetUseScale(true);
-    link->SetScales(0.008, 0.008, 0.008);
     if(i < 18)
       link->Move3LF(2.4, 6.2, 0); 
     else
       link->Move3LF(7.3, 6.2, 0);
+    link->RotateLF(1,2, - TMath::Pi()/2 + (i + 0.5)*20*TMath::Pi()/180);
+    link->RotateLF(1,3, TMath::Pi());
+    link->SetUseScale(true);
+    link->SetScales(0.008, 0.008, 0.008);
     link->SetCbackAlpha(this);link->SetCbackBeta(seg);
     link->SetCbackMethodName("TPCSegPickMenu");
     link->SetFocusAlpha(this);link->SetFocusBeta(link);
