@@ -29,7 +29,8 @@
 #include <AliITSLoader.h>
 
 map<Int_t, GenInfo*> gimap;
-ClassImp(AliConverter)
+
+ClassImp(AliConverter);
 
 /**************************************************************************/
 

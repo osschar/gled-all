@@ -95,7 +95,7 @@ class AliConverter : public ZGlass
   AliRunLoader* pRunLoader;
 
 #include "AliConverter.h7"
-  ClassDef(AliConverter, 1)
+  ClassDef(AliConverter, 1);
 }; // endclass AliConverter
 
 
