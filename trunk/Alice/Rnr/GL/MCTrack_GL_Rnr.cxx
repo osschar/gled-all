@@ -55,7 +55,6 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
   Float_t max_time = rst_lens->mMaxT * TMath::Power(10, rst_lens->mMaxTScale);
   Float_t min_time = rst_lens->mMinT * TMath::Power(10, rst_lens->mMaxTScale);
 
-
   if (p->P() < rst_lens->mMinP) show_p = false;
   if(TMath::Abs(TMath::RadToDeg()*p->Theta() - rst_lens->mTheta) >
      rst_lens->mThetaOff)       show_p = false;
@@ -63,7 +62,8 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
      rst_lens->mPhiOff)         show_p = false;
 
   
-  if(rst_lens->mCheckT && (p->T()>max_time || p->T()<min_time))
+  //  if(rst_lens->mCheckT && (p->T()>max_time || p->T()<min_time))
+  if(rst_lens->mCheckT && p->T()>max_time )
     show_p = false;
 
   if(p->GetPDG() == 0) show_p = false;
@@ -84,12 +84,13 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
   if(show_p == false) return;
 
   //render particle as point
-  glPointSize(rst_lens->mVertexSize);
-  glBegin(GL_POINTS);
-  glColor4fv(rst_lens->mVertexColor());
-  glVertex3f(vx,vy,vz);
-  glEnd();
-
+  if( p->T() > min_time ){
+    glPointSize(rst_lens->mVertexSize);
+    glBegin(GL_POINTS);
+    glColor4fv(rst_lens->mVertexColor());
+    glVertex3f(vx,vy,vz);
+    glEnd();
+  }
   
   // show particle momentum
   if (rst_lens->mRnrP) {
@@ -190,13 +191,11 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
 	  px -= d->Px(); py -= d->Py(); pz -= d->Pz();
 	} else {
 	  if(rst_lens->mFixDaughterTime){
-	    (*i)->SetPTimeFixed(true);
 	    d->SetProductionVertex(d->Vx(),d->Vy(),d->Vz(), max_time+1);
 	  }
 	}
       }
     }
-  
 
     //case 2
     if(rst_lens->mFitDecay && p->bDecayed) {
