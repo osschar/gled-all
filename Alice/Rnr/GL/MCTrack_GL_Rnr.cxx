@@ -62,7 +62,6 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
      rst_lens->mPhiOff)         show_p = false;
 
   
-  //  if(rst_lens->mCheckT && (p->T()>max_time || p->T()<min_time))
   if(rst_lens->mCheckT && p->T()>max_time )
     show_p = false;
 
@@ -80,8 +79,6 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
     else 
       mMCTrack->SetRnrElements(true);
   } 
-
-  if(show_p == false) return;
 
   //render particle as point
   if( p->T() > min_time ){

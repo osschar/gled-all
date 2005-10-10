@@ -270,7 +270,8 @@ void AliConverter::ConvertKinematics()
       m = &vmc[mi];
     }
     mP.SetEvaLabel(mi);
-    mTreeK->Fill();
+    if(mP.GetPDG())
+      mTreeK->Fill();
   }
 
   mTreeK->BuildIndex("fLabel");

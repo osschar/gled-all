@@ -31,11 +31,8 @@ MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):TrackBase(n,t)
   _init();
   mParticle = p;
   TParticlePDG* pdgp = TDatabasePDG::Instance()->GetParticle(p->GetPdgCode());
-  if(pdgp == 0) {
-    printf("Error PDG %d not found \n",p->GetPdgCode() );
-  }else {
-    SetName(GForm("%s %d", pdgp->GetName(),p->GetLabel()));
-  }
+  SetName(GForm("%s %d", pdgp->GetName(),p->GetLabel()));
+
   mNDaughters = p->GetNDaughters();
   if(mParticle->bDecayed) mVDecay = GForm("% 4.f, % 4.f, % 4.f", mParticle->fDx, mParticle->fDy, mParticle->fDz);
   mV = GForm("% 4.f, % 4.f, % 4.f", mParticle->Vx(), mParticle->Vy(), mParticle->Vz());
