@@ -1,3 +1,17 @@
+2005-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Formatting changes.
+	
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Replaced some remaining strings with TStrings; reordering
+	of arguments for inclusive digit-showing methods.
+
+	* Glasses/MenuDriver.cxx:
+	Follow-up on ZAliLoad changes.
+
 2005-09-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/AliConverter.cxx:
