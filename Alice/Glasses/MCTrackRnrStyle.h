@@ -26,6 +26,21 @@ class MCTrackRnrStyle : public PRSBase
   Bool_t   mFitDaughters; // X{GST}  7 Bool(-join=>1)
   Bool_t   mFitDecay;     // X{GST}  7 Bool()])
 
+  // helix limits 
+  Bool_t                   mCheckT;          // X{GST}  7 Bool(-join=>1)
+  Bool_t                   mFixDaughterTime; // X{GST}  7 Bool()
+  Float_t                  mMaxT;            // X{GST}  7 Value(-range=>[0,10000,  1,100],-join=>1)
+  Float_t                  mMinT;            // X{GST}  7 Value(-range=>[0,10000,  1,100])
+  Float_t                  mMeanT;           // X{GE}   7 Value(-range=>[0,10000,  1,100],-join=>1)
+  Float_t                  mDeltaT;          // X{GE}   7 Value(-range=>[0,10000,  1,100])
+  Float_t                  mMaxTScale;       // X{GST}  7 Value(-range=>[-32,0, 1,100])
+  Bool_t                   mForceVisParents; // X{GST}  7 Bool(-join=>1)
+  Bool_t                   mUseSingleCol;    // X{GST}  7 Bool(-join=>1)
+  Bool_t                   mRnrPoints;       // X{GST}  7 Bool()
+  ZColor                   mSingleCol;       // X{GSPT} 7 ColorButt(-join=>1)
+  ZColor                   mHeadCol;         // X{GSPT} 7 ColorButt()
+  Float_t                  mSatur;           // X{GST}  7 Value(-range=>[0,1, 1,1000])
+
   // PDG colors
   ZColor   mDefCol;       // X{GSPT} 7 ColorButt(-join=>1)
   ZColor   mECol;         // X{GSPT} 7 ColorButt()
@@ -40,8 +55,23 @@ class MCTrackRnrStyle : public PRSBase
   ZColor                   GetPdgColor(Int_t pdg);
   ZImage*                  GetPdgTexture(Int_t pdg);
 
+  // Manual Get/Set-methods
+  void SetDeltaT(Float_t t){
+    mDeltaT = t;
+    mMaxT = mMeanT + mDeltaT/2; 
+    mMinT = mMeanT - mDeltaT/2; 
+    mStampReqTring = Stamp(FID());
+  }
+
+  void SetMeanT(Float_t t){
+    mMeanT = t;
+    mMaxT = mMeanT + mDeltaT/2; 
+    mMinT = mMeanT - mDeltaT/2;
+    mStampReqTring = Stamp(FID());
+  }
+
 #include "MCTrackRnrStyle.h7"
-  ClassDef(MCTrackRnrStyle, 1)
+  ClassDef(MCTrackRnrStyle, 1);
 }; // endclass MCTrackRnrStyle
 
 

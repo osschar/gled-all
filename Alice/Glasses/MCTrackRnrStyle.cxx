@@ -23,6 +23,21 @@ ClassImp(MCTrackRnrStyle)
   // *** Set all links to 0 ***
   mFitDaughters = true;
   mFitDecay = true;
+
+  mForceVisParents = true;
+  mFixDaughterTime =true;
+  mCheckT    = false;
+  mMaxT      = 100.;
+  mMinT      = 0.;
+  mMeanT = (mMaxT+mMinT)/2;
+  mDeltaT = mMaxT - mMinT;
+  mMaxTScale = -11.;
+  mUseSingleCol = true;
+  mSingleCol.rgba(.6,1,.9,1.);
+  mHeadCol.rgba(1,.2,.5,1.);
+  mSatur = 0.;
+  mRnrPoints = false;
+
   // pdg color scheme 
   mDefCol.rgba(0.15,0.45,0.67,1);
   mECol.rgba(0.2,1,0.2,1);
