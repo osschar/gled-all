@@ -8,11 +8,13 @@
 #define Alice_MCTrackRnrStyle_H
 
 #include <Glasses/PRSBase.h>
-#include <Stones/ZColor.h>
 #include <Glasses/MCTrack.h>
 #include <Glasses/ZImage.h>
 
-class MCTrackRnrStyle : public PRSBase
+#include <Stones/ZColor.h>
+#include <Stones/TimeMakerClient.h>
+
+class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
 {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(MCTrackRnrStyle);
@@ -23,18 +25,18 @@ class MCTrackRnrStyle : public PRSBase
 
   // protected:
  public:
-  Bool_t   mFitDaughters; // X{GST}  7 Bool(-join=>1)
-  Bool_t   mFitDecay;     // X{GST}  7 Bool()])
+  Bool_t   mFitDaughters; // X{GST} Stamp{PointCalcReq}  7 Bool(-join=>1)
+  Bool_t   mFitDecay;     // X{GST} Stamp{PointCalcReq}  7 Bool()
 
   // helix limits 
   Bool_t                   mCheckT;          // X{GST}  7 Bool(-join=>1)
   Bool_t                   mFixDaughterTime; // X{GST}  7 Bool()
-  Float_t                  mMaxT;            // X{GST}  7 Value(-range=>[0,10000,  1,100],-join=>1)
-  Float_t                  mMinT;            // X{GST}  7 Value(-range=>[0,10000,  1,100])
-  Float_t                  mMeanT;           // X{GE}   7 Value(-range=>[0,10000,  1,100],-join=>1)
-  Float_t                  mDeltaT;          // X{GE}   7 Value(-range=>[0,10000,  1,100])
+  Float_t                  mMaxT;            // X{GST}  7 Value(-range=>[0,10000, 1,100],-join=>1)
+  Float_t                  mMinT;            // X{GST}  7 Value(-range=>[0,10000, 1,100])
+  Float_t                  mMeanT;           // X{GE}   7 Value(-range=>[0,10000, 1,100],-join=>1)
+  Float_t                  mDeltaT;          // X{GE}   7 Value(-range=>[0,10000, 1,100])
   Float_t                  mMaxTScale;       // X{GST}  7 Value(-range=>[-32,0, 1,100])
-  Bool_t                   mForceVisParents; // X{GST}  7 Bool(-join=>1)
+  Bool_t                   mForceVisParents; // X{GST} Stamp{PointCalcReq}  7 Bool(-join=>1)
   Bool_t                   mUseSingleCol;    // X{GST}  7 Bool(-join=>1)
   Bool_t                   mRnrPoints;       // X{GST}  7 Bool()
   ZColor                   mSingleCol;       // X{GSPT} 7 ColorButt(-join=>1)
@@ -69,6 +71,9 @@ class MCTrackRnrStyle : public PRSBase
     mMinT = mMeanT - mDeltaT/2;
     mStampReqTring = Stamp(FID());
   }
+
+  // TimeMakerClient
+  virtual void TimeTick(Double_t t, Double_t dt);
 
 #include "MCTrackRnrStyle.h7"
   ClassDef(MCTrackRnrStyle, 1);
