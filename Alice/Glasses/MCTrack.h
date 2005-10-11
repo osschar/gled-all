@@ -17,7 +17,8 @@
 
 class VSDSelector;
 
-class MCTrack : public TrackBase {
+class MCTrack : public TrackBase
+{
   MAC_RNR_FRIENDS(MCTrack);
 
  private:
@@ -46,11 +47,10 @@ class MCTrack : public TrackBase {
   void ClearDecay();                              // X{E} 7 MButt()
 
   void Dump();				          // X{E} 7 MButt()
-	
  
 #include "MCTrack.h7"
-  ClassDef(MCTrack, 1)
-    }; // endclass MCTrack
+  ClassDef(MCTrack, 1);
+}; // endclass MCTrack
 
 
 #endif
