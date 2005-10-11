@@ -17,8 +17,12 @@ WSSeed		64	Glasses/WSSeed		.
 WSPoint		65	Glasses/WSPoint		.
 WSTube		66	Glasses/WSTube		WSSeed
 
-Mover		128	Glasses/Mover
+TimeMaker	128	Glasses/TimeMaker
 Sleeper		129	Glasses/Sleeper
+## LocalMover	130	Glasses/LocalMover
+## FormulaMover	131	Glasses/FormulaMover
+# Mover will be removed or replaced by LocalMover. Or sth like that.
+Mover		132	Glasses/Mover
 
 GForger		256	Glasses/GForger
 
