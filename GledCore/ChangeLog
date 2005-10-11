@@ -1,3 +1,55 @@
+2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Operator.cxx:
+	* Glasses/Operator.h:
+	* Ephra/Mountain.cxx:
+	Renamed Operator::Arg::fEventID to fBeatID and moved its
+	manipulation from Eventor to Mountain (where other low-level stuff
+	from Op::Arg is handled).
+
+	* Eye/Ray.cxx:
+	* Eye/Ray.h:
+	Added Get/PutAnyPTR methods.
+
+	* Glasses/AList.h:
+	Added member m_cur to AList::Stepper; this allows selecting a base
+	that is not derived from ZGlass.
+
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	Added internal time service. Time can feed on system time or make
+	fixed steps thus producing fictitious internal time. Also provides
+	a stack of time so that Operator hierarchy can modify notion of
+	time for a sub-tree.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Modified image dumping, added option to wait for a redraw/dump to
+	finish; added option to turn off auto-redraw.
+
+	* Glasses/ScreenDumper.cxx:
+	* Glasses/ScreenDumper.h:
+	Added option to wait for screen dump to finish (useful for
+	key-frame animation). Now uses internal counter, not event id from
+	Operator::Arg.
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Added method 'SetUseDLRec(Bool_t state)' that sets usage of
+	display lists for the lens and all its list elements recursively
+	(but stays within the same queen).
+
+	* GledView/MCW_View.cxx:
+	* GledView/MCW_View.h:
+	Added support for TString and string arguments. Fixed an old
+	exception format.
+
+	* Pupils/pbuffer.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	Cosmetics.
+
 2005-10-03  Matevz TADEL  <matevz.tadel@ijs.si>
 
 	======================================================
