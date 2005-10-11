@@ -21,6 +21,8 @@ class MTW_ClassView;
 #include <FL/gl.h>
 #include <FL/Fl_Gl_Window.H>
 
+class PBuffer;
+
 
 class Pupil : public FTW_SubShell,
 	      public OptoStructs::A_View,
@@ -30,10 +32,12 @@ private:
   static Fl_Gl_Window* gl_ctx_holder;
 
   void _build();
+  void _check_auto_redraw();
 
 protected:
 
   PupilInfo*    mInfo;
+  Bool_t        bAutoRedraw;
 
   GLRnrDriver*  mDriver;
 
@@ -61,6 +65,8 @@ protected:
   bool		bDumpImage;
   TString	mImageName;
   Int_t		mImgNTiles;
+  bool          bSignalDumpFinish;
+  PBuffer*      mPBuffer;
   void		dump_image(const TString& fname);
 
   // rendering elements
