@@ -116,9 +116,9 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
     "float", "bool", "Double32_t",
-    "string",
+    "TString", "string",
     "ID_t", "LID_t", "CID_t", "MID_t", "FID_t", "FMID_t",
-    "TimeStamp_t", "UCIndex_t", "xxIndex_t"
+    "TimeStamp_t"
   );
 
 @UnsignedTypes =
