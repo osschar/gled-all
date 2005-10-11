@@ -1,3 +1,8 @@
+2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	SimpleTypes array: added TString, removed obsolete Index_t types.
+
 2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_defs.inc:
