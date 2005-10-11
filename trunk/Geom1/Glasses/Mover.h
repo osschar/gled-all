@@ -10,7 +10,8 @@
 #include <Glasses/Operator.h>
 #include <Glasses/ZNode.h>
 
-class Mover : public Operator {
+class Mover : public Operator
+{
 private:
   void _init();
 
@@ -30,11 +31,11 @@ public:
 
   void SetRotateParams(UInt_t i, UInt_t j, Float_t a); // X{E}
 
-  // virtuals
+  // Operator:
   virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
 
 #include "Mover.h7"
-  ClassDef(Mover, 1)
+  ClassDef(Mover, 1);
 }; // endclass Mover
 
 

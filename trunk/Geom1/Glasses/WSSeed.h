@@ -44,7 +44,7 @@ protected:
   Float_t	mLineW;		// X{gST}  7 Value(-range=>[1,20,1,100],-join=>1)
   bool		bFat;		// X{gST}  7 Bool()
 
-  ZLink<ZImage>	mTexture;	//  X{gS}  L{} RnrBits{4,0,5,0, 0,0,0,0}
+  ZLink<ZImage>	mTexture;	// X{gS} L{} RnrBits{4,0,5,0, 0,0,0,0}
 
   TimeStamp_t	mStampReqTex;	//! X{gS}  Timestamp for re-texturing
   TimeStamp_t	mStampTexDone;	//! X{gS}  Timestamp when re-texturing done.
