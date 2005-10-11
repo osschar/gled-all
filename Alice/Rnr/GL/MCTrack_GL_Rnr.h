@@ -15,23 +15,26 @@
 
 class ZAliLoad;
 
-class MCTrack_GL_Rnr : public ZNode_GL_Rnr {
+class MCTrack_GL_Rnr : public ZNode_GL_Rnr
+{
   friend class MCTrackRnrStyle;
 
-  typedef void (MCTrack_GL_Rnr::*RegVertices)(); 
+  typedef void (MCTrack_GL_Rnr::*RenderVertices)(ZColor& col); 
 
  private:
 
   void             _init();
   void             make_track(RnrDriver* rd);
-  void             loop_points();
-  void             loop_points_and_check_time();
+  void             loop_points(ZColor& col);
+  void             loop_points_and_check_time(ZColor& col);
   vector<MCVertex> track_points;
-  RegVertices      vertices_foo;
+  RenderVertices   vertices_foo;
 
  protected:
   MCTrack*         mMCTrack;
   RnrModStore      mParticleRMS;
+
+  TimeStamp_t      mStampPointCalc;
 
  public:
   MCTrack_GL_Rnr(MCTrack* idol) :
