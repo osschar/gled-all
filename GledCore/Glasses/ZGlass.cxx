@@ -559,6 +559,23 @@ TimeStamp_t ZGlass::StampLink(FID_t fid)
 
 /**************************************************************************/
 
+void ZGlass::SetUseDLRec(Bool_t state)
+{
+  {
+    GLensReadHolder rdlck(this);
+    if(bUseDispList != state)
+      SetUseDispList(state);
+  }
+  AList* l = dynamic_cast<AList*>(this);
+  if(l != 0) {
+    lpZGlass_t c; l->CopyList(c);
+    for(lpZGlass_i i=c.begin(); i!=c.end(); ++i) {
+      if((*i)->mQueen == mQueen)
+	(*i)->SetUseDLRec(state);
+    }
+  }
+}
+
 /**************************************************************************/
 /**************************************************************************/
 // ZLinkBase
