@@ -36,7 +36,7 @@ namespace {
     OpMutexHolder(ZAliLoad* a, const Text_t* op) : mAli(a)
     {
       if(mAli->RefOpMutex().TryLock() != GMutex::ok) {
-	throw(string(GForm("%s rejected (command queuing not implemented).", op)));
+	throw(Exc_t(GForm("%s rejected (command queuing not implemented).", op)));
       }
       mOldOp = mAli->GetOperation();
       TString new_op = mOldOp == "<idle>" ? "" : mOldOp + "::";
