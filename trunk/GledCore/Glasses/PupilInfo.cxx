@@ -37,6 +37,7 @@ void PupilInfo::_init()
 
   // Basic config.
   mMaxRnrDepth = 100;
+  bAutoRedraw  = true;
   mWidth = 640; mHeight = 480;
   mClearColor.rgba(0,0,0);
 
@@ -245,29 +246,6 @@ ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
 
 /**************************************************************************/
 
-void PupilInfo::EmitDumpImageRay(const Text_t* filename, Int_t n_tiles)
-{
-  if(mQueen && mSaturn->AcceptsRays()) {
-    auto_ptr<Ray> ray
-      (Ray::PtrCtor(this, PRQN_dump_image, mTimeStamp, FID()));
-    if(filename != 0) {
-      TString fn(filename);
-      TBuffer cbuff(TBuffer::kWrite);
-      fn.Streamer(cbuff);
-      cbuff << n_tiles;
-      ray->SetCustomBuffer(cbuff);
-    }
-    mQueen->EmitRay(ray);
-  }
-}
-
-void PupilInfo::EmitImmediateRedrawRay()
-{
-  EmitDumpImageRay(0);
-}
-
-/**************************************************************************/
-
 void PupilInfo::EmitResizeRay()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
@@ -277,8 +255,6 @@ void PupilInfo::EmitResizeRay()
   }
 }
 
-/**************************************************************************/
-
 void PupilInfo::EmitCameraHomeRay()
 {
   if(mQueen && mSaturn->AcceptsRays()) {
@@ -286,4 +262,49 @@ void PupilInfo::EmitCameraHomeRay()
       (Ray::PtrCtor(this, PRQN_camera_home, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
+}
+
+/**************************************************************************/
+
+void PupilInfo::EmitDumpImageRay(TString filename, Int_t n_tiles, Bool_t signal_p)
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_dump_image, mTimeStamp, FID()));
+
+    TBuffer cbuff(TBuffer::kWrite);
+    cbuff << filename;
+    cbuff << n_tiles;
+    cbuff << signal_p;
+    ray->SetCustomBuffer(cbuff);
+
+    mQueen->EmitRay(ray);
+  }
+}
+
+void PupilInfo::DumpImage(TString filename, Int_t n_tiles)
+{
+  EmitDumpImageRay(filename, n_tiles, false);
+}
+
+void PupilInfo::ImmediateRedraw()
+{
+  EmitDumpImageRay();
+}
+
+void PupilInfo::DumpImageWaitSignal(TString filename, Int_t n_tiles)
+{
+  // *this must NOT be locked or rendering will deadlock!
+
+  mDirectDumpCond.Lock();
+  EmitDumpImageRay(filename, n_tiles, true);
+  mDirectDumpCond.Wait();
+  mDirectDumpCond.Unlock();
+}
+
+void PupilInfo::ReceiveDumpFinishedSignal()
+{
+  mDirectDumpCond.Lock();
+  mDirectDumpCond.Signal();
+  mDirectDumpCond.Unlock();
 }

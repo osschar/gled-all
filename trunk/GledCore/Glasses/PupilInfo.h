@@ -10,6 +10,7 @@
 #include <Glasses/SubShellInfo.h>
 #include <Glasses/CameraInfo.h>
 #include <Glasses/ZNode.h>
+#include <Gled/GCondition.h>
 #include <Eye/Ray.h>
 
 #include <Stones/ZColor.h>
@@ -24,9 +25,9 @@ class PupilInfo : public SubShellInfo {
 public:
   enum Projection_e { P_Perspective, P_Orthographic };
   enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
-		      PRQN_dump_image,
 		      PRQN_resize_window,
-		      PRQN_camera_home
+		      PRQN_camera_home,
+		      PRQN_dump_image
   };
 
 private:
@@ -34,7 +35,8 @@ private:
 
 protected:
   // Basic config.
-  Int_t		mMaxRnrDepth;	// X{gS} 7 Value(-range=>[1,1000,1,1])
+  Int_t		mMaxRnrDepth;	// X{gS} 7 Value(-range=>[1,1000,1,1], -join=>1)
+  Bool_t        bAutoRedraw;    // X{GS} 7 Bool()
   Int_t		mWidth;         // X{gS} Ray{Resize} 7 Value(-range=>[0,4096,1], -join=>1)
   Int_t		mHeight;        // X{gS} Ray{Resize} 7 Value(-range=>[0,4096,1])
   ZColor	mClearColor;	// X{PRGS} 7 ColorButt()
@@ -88,8 +90,12 @@ protected:
   Float_t	mPopupFx;	// X{GS} 7 Value(-range=>[-10,10,1,10], -join=>1)
   Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
 
-  ZLink<ZGlass>       mOverlay;       // X{GS} L{}
-  ZLink<ZGlass>       mEventHandler;  // X{GS} L{}
+  ZLink<ZGlass> mOverlay;       // X{GS} L{}
+  ZLink<ZGlass> mEventHandler;  // X{GS} L{}
+
+  // Direct dump hack.
+  GCondition mDirectDumpCond; //!
+  // Could have max wait time.
 
 public:
   PupilInfo(const Text_t* n="PupilInfo", const Text_t* t=0) :
@@ -104,18 +110,18 @@ public:
   void Zoom(Float_t delta);  // X{E}
   void ZoomFac(Float_t fac); // X{E}
 
-  void EmitDumpImageRay(const Text_t* filename="screenshot",
-			Int_t n_tiles=1); // X{E} 7 MCWButt()
-  void EmitImmediateRedrawRay();          // X{E} 7 MButt()
-
-  void EmitResizeRay(); // X{E} 7 MButt()
-
-  void EmitCameraHomeRay(); // X{E} 7 MButt()
-
   ZTrans* ToPupilFrame(ZNode* node);
   ZTrans* ToCameraFrame(ZNode* node);
 
-  // virtuals
+  void EmitResizeRay();     // X{E} 7 MButt(-join=>1)
+  void EmitCameraHomeRay(); // X{E} 7 MButt()
+
+  void EmitDumpImageRay(TString filename="", Int_t n_tiles=1, Bool_t signal_p=false);
+  void DumpImage(TString filename="screenshot", Int_t n_tiles=1); // X{E} 7 MCWButt(-join=>1)
+  void ImmediateRedraw();                                         // X{E} 7 MButt()
+
+  void DumpImageWaitSignal(TString filename="", Int_t n_tiles=1);
+  void ReceiveDumpFinishedSignal();
 
 #include "PupilInfo.h7"
   ClassDef(PupilInfo, 1)

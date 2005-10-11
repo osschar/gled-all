@@ -125,6 +125,7 @@ void Pupil::_build()
 
   mInfo = dynamic_cast<PupilInfo*>(fImg->fLens);
   assert(mInfo);
+  bAutoRedraw = false;
 
   label_window();
   mode(FL_RGB | FL_DOUBLE | FL_DEPTH);
@@ -134,7 +135,8 @@ void Pupil::_build()
   mDriver = new GLRnrDriver(fImg->fEye, "GL");
   mDriver->SetProjBase(&mProjBase);
 
-  mCamera = new Camera;
+  mCamera     = new Camera;
+  mCameraView = 0;
 
   mCamBase = mInfo->GetCameraBase();
   if(mCamBase == 0) {
@@ -160,8 +162,22 @@ void Pupil::_build()
 
   bFullScreen = false;
   bDumpImage  = false;
+  mPBuffer    = 0;
 
-  mShell->RegisterROARWindow(this);
+  _check_auto_redraw();
+}
+
+void Pupil::_check_auto_redraw()
+{
+  if(bAutoRedraw != mInfo->bAutoRedraw) {
+    if(mInfo->bAutoRedraw) {
+      mShell->RegisterROARWindow(this);
+      bAutoRedraw = true;
+    } else {
+      mShell->UnregisterROARWindow(this);
+      bAutoRedraw = false;
+    }
+  }
 }
 
 /**************************************************************************/
@@ -171,9 +187,6 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
   FTW_SubShell(shell, this),
   OS::A_View(infoimg),
   Fl_Gl_Window(w,h), 
-  mInfo(0),
-  mCameraView(0),
-  mCamBase(0),
   mCameraCB(this)
 {
   end();
@@ -186,9 +199,6 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
   FTW_SubShell(shell, this),
   OS::A_View(infoimg),
   Fl_Gl_Window(x,y,w,h), 
-  mInfo(0),
-  mCameraView(0),
-  mCamBase(0),
   mCameraCB(this)
 {
   end();
@@ -196,9 +206,12 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
 }
 
 Pupil::~Pupil() {
-  mShell->UnregisterROARWindow(this);
+  if(bAutoRedraw) mShell->UnregisterROARWindow(this);
+  delete mDriver;
+  delete mCameraView;
   delete mCamera;
   delete [] mPickBuff;
+  delete mPBuffer;
 }
 
 /**************************************************************************/
@@ -209,8 +222,10 @@ void Pupil::AbsorbRay(Ray& ray)
 
   if(ray.IsBasic()) {
     label_window();
-    return;
   }
+
+  if(ray.fFID != PupilInfo::FID())
+    return;
 
   if(ray.IsChangeOf(PupilInfo::FID()) && mInfo->GetBuffSize() != mPickBuffSize) {
     mPickBuffSize = mInfo->GetBuffSize();
@@ -218,8 +233,6 @@ void Pupil::AbsorbRay(Ray& ray)
     mPickBuff     = 0;
   }
 
-  if(ray.fFID != PupilInfo::FID())
-    return;
 
   if(ray.fRQN == RayNS::RQN_link_change) {
     mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
@@ -228,16 +241,32 @@ void Pupil::AbsorbRay(Ray& ray)
 
   switch(ray.fRQN) { 
 
+  case RayNS::RQN_change:
+    _check_auto_redraw();
+    if(mInfo->GetBuffSize() != mPickBuffSize) {
+      mPickBuffSize = mInfo->GetBuffSize();
+      delete [] mPickBuff;
+      mPickBuff     = 0;
+    }
+    break;
+
+  case RayNS::RQN_link_change:
+    mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
+    mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
+    break;
+
   case PupilInfo::PRQN_dump_image: {
     if(ray.fRayBits & Ray::RB_CustomBuffer) {
-      mImageName.Streamer(*ray.fCustomBuffer);
+      *ray.fCustomBuffer >> mImageName;
       *ray.fCustomBuffer >> mImgNTiles;
+      *ray.fCustomBuffer >> bSignalDumpFinish;
       ray.ResetCustomBuffer();
       if(mImageName != "") {
 	bDumpImage = true;
       }
     }
     fImg->fEye->BreakManageLoop();
+    redraw();
     break;
   }
 
@@ -760,10 +789,16 @@ void Pupil::draw()
   // if (!valid()) {}
 
   if(bDumpImage) {
-
-    PBuffer pbuffer(w(), h());
-    pbuffer.Use();
-
+    try {
+      if(mPBuffer == 0 || mPBuffer->get_width() != w() || mPBuffer->get_height() != h()) {
+	delete mPBuffer;
+	mPBuffer = new PBuffer(w(), h());
+      }
+      mPBuffer->Use();
+    }
+    catch(const char* exc) {
+      printf("%spbuffer init failed: %s.\n", _eh.Data(), exc);
+    }
     if(mImgNTiles > 1) {
       for(Int_t xi=0; xi<mImgNTiles; ++xi) {
 	for(Int_t yi=0; yi<mImgNTiles; ++yi) {
@@ -778,8 +813,8 @@ void Pupil::draw()
       rnr_standard();
       dump_image(mImageName + ".tga");
     }
-
     bDumpImage = false;
+    mPBuffer->Release();
 
   } else {
 
@@ -793,6 +828,12 @@ void Pupil::draw()
     rnr_fake_overlay(rnr_time);
 
   }
+
+  if(bSignalDumpFinish) {
+    mInfo->ReceiveDumpFinishedSignal();
+    bSignalDumpFinish = false;
+  }
+
   check_driver_redraw();
 }
 
