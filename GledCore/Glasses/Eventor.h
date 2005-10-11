@@ -12,7 +12,8 @@
 class Mountain;
 class GThread;
 
-class Eventor : public Operator {
+class Eventor : public Operator
+{
 private:
   void		_init();
 
@@ -50,7 +51,7 @@ public:
   Mountain* GetChaItOss();
 
   virtual Operator::Arg* PreDance(Operator::Arg* op_arg=0);
-  virtual void		PostDance(Operator::Arg* op_arg);
+  virtual void           PostDance(Operator::Arg* op_arg);
 
   virtual void	PreBeat(Operator::Arg* op_arg)	 throw(Operator::Exception);
   virtual void	PostBeat(Operator::Arg* op_arg)	 throw(Operator::Exception);
@@ -76,8 +77,35 @@ public:
 
   void SetHost(SaturnInfo* host);
 
+
+  //-------------------------------------
+  // Time service for operators
+  //-------------------------------------
+
+public:
+  enum EpochType_e  { ET_Manual, ET_DanceStart };
+  enum TimeSource_e { TS_System, TS_IntStep };
+
+  Double_t GetEventTime();
+  void     PushEventTime(Double_t time);
+  void     PopEventTime();
+
+protected:
+  Int_t          mEventID;      // X{GS} 7 Value()
+  Double_t       mInternalTime; // X{GS} 7 Value()
+
+  EpochType_e    mEpochType;    // X{GS} 7 PhonyEnum(-width=>8, -join=>1)
+  TimeSource_e   mTimeSource;   // X{GS} 7 PhonyEnum(-width=>8)
+  
+  Double_t       mTimeEpoch;    // X{GS} 7 Value(-join=>1)
+  Double_t       mTimeStep;     // X{GS} 7 Value(-range=>[-1e6,1e6,1,1000])
+
+  list<Double_t> mTimeStack;    //!
+
+public:
+
 #include "Eventor.h7"
-  ClassDef(Eventor, 1)
+  ClassDef(Eventor, 1);
 }; // endclass Eventor
 
 
