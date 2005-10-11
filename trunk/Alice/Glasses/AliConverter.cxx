@@ -261,7 +261,7 @@ void AliConverter::ConvertKinematics()
 
   for(vector<MCParticle>::iterator k=vmc.begin(); k!=vmc.end(); ++k) {
     MCParticle& mcp = *k;
-    mP= mcp;
+    mP = mcp;
 
     TParticle* m  = &mcp;
     Int_t      mi = mcp.GetLabel();
@@ -270,8 +270,8 @@ void AliConverter::ConvertKinematics()
       m = &vmc[mi];
     }
     mP.SetEvaLabel(mi);
-    if(mP.GetPDG())
-      mTreeK->Fill();
+
+    mTreeK->Fill();
   }
 
   mTreeK->BuildIndex("fLabel");

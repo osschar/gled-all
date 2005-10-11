@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// ZAliTrack
+// MCTrack
 //
 //
 
@@ -18,6 +18,7 @@ ClassImp(MCTrack);
 
 typedef list<MCTrack*>                   lpMCTrack_t;
 typedef list<MCTrack*>::iterator         lpMCTrack_i;
+
 /**************************************************************************/
 
 void MCTrack::_init()
@@ -26,11 +27,16 @@ void MCTrack::_init()
   mNDaughters = 0;
 }
 
-MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t):TrackBase(n,t) 
+MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t) :
+  TrackBase(n,t) 
 {
   _init();
+  // TParticlePDG* pdgp = TDatabasePDG::Instance()->GetParticle(p->GetPdgCode());
+  TParticlePDG* pdgp = p->GetPDG();
+  if(pdgp == 0) {
+    p->ResetPdgCode(); pdgp = p->GetPDG();
+  }
   mParticle = p;
-  TParticlePDG* pdgp = TDatabasePDG::Instance()->GetParticle(p->GetPdgCode());
   SetName(GForm("%s %d", pdgp->GetName(),p->GetLabel()));
 
   mNDaughters = p->GetNDaughters();
@@ -79,6 +85,7 @@ void MCTrack::ImportDaughtersRec(VSDSelector* sel)
 }
 
 /**************************************************************************/
+
 void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 {
   static const Exc_t _eh("MCTrack::ImportHits ");
@@ -96,6 +103,7 @@ void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 }
 
 /**************************************************************************/
+
 void  MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
 {
   static const Exc_t _eh("MCTrack::ImportClusters ");
