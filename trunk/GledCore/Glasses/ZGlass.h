@@ -248,6 +248,7 @@ public:
   virtual void MarkStampReqTring()
   { mStampReqTring = ++mTimeStamp; }
 
+  void SetUseDLRec(Bool_t state); // X{ED} 7 MCWButt()
 
   //----------------------------------------------------------------------
   // RayAbsorber and NameChangeCB
