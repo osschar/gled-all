@@ -1,3 +1,36 @@
+2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/MCParticle.cxx:
+	* Stones/MCParticle.h:
+	Added method ResetPdgCode() for fixing unknown particle types.
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	Revert last changes from Alja, use MCParticle::ResetPdgCode()
+	in MCTrack ctor instead.
+
+	* Glasses/PRSBase.h:
+	Added member 'TimeStamp_t mStampPointCalcReq' and appropriate
+	stamp pragmas.
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+	Added TimeMakerClient abstract base; added stamp pragmas for
+	PointCalcReq.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	Use StampPointCalc to signal rebuild of vertex array.
+
+	* Glasses/ZAliLoad.cxx:
+	Fix of remaining string exception to Exc_t.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+	* Rnr/GL/MCHelixLine.h:
+	Cosmetics.
+
 2005-10-10  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/AliConverter.cxx:
@@ -9,11 +42,14 @@
 
 	* Glasses/MCTrackRnrStyle.cxx:
 	* Glasses/MCTrackRnrStyle.h:
-        Add fuctionality for time interval checking.
+        Add functionality for time interval checking.
+
 	* Glasses/MenuDriver.cxx:
-        Fix bug in 2D rotation/tralstion order.
+        Fix bug in 2D rotation/translation order.
+
 	* Rnr/GL/MCHelixLine.h:
-        New structure for fixing time interval.
+        New structure for selection of time interval.
+
 	* Rnr/GL/MCTrack_GL_Rnr.cxx:
 	* Rnr/GL/MCTrack_GL_Rnr.h:
         Use MCHelixLine instead of HelixLine.
