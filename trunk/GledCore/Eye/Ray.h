@@ -37,6 +37,8 @@ namespace RayNS {
 
   void PutPTR(TBuffer& b, ZGlass*& p);
   void GetPTR(TBuffer& b, ZGlass*& p);
+  void PutAnyPTR(TBuffer& b, void*& p);
+  void GetAnyPTR(TBuffer& b, void*& p);
 }
 
 
