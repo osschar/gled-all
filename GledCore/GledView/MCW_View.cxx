@@ -101,9 +101,13 @@ namespace {
     { "Float_t",  1, 8, -FLT_MAX, FLT_MAX,     1, 1000 },  // 8
     { "Double_t", 1, 8, -DBL_MAX, DBL_MAX,     1, 1000 },  // 9
 
-    { "Text_t",   2, 12, 0,0,0,0 },
+    { "Bool_t",   2, 4,  0,0,0,0 },
 
-    { "Bool_t",   3, 4,  0,0,0,0 },
+    { "Text_t",   3, 12, 0,0,0,0 },
+
+    { "TString",  4, 12, 0,0,0,0 }, // TString and string streamed the same
+    { "string",   4, 12, 0,0,0,0 }, // way, defaults as "" anyway.
+
     { 0 }
   };
 
@@ -132,41 +136,45 @@ MCW_View::VarArg::VarArg(TString& typ, TString& base_typ,
 
   arg_type& at = VarArgTypes[_typ_idx];
   switch(at.weed_type) {
-  case 1: {
-    Fl_Value_Input* w = new Fl_Value_Input(0, 0, at.weed_w, 1);
-    w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
-    w->range(at.min, at.max);
-    // Darned UInt_t does not work properly ...
-    // printf("%s::%s -> %lf, %lf\n", base_typ.Data(), name.Data(),
-    //   w->minimum(), w->maximum());
-    w->step(at.stepA, at.stepB);
-    if(!defval.IsNull()) {
-      double x; sscanf(defval.Data(), "%lf", &x);
-      w->value(x);
+  case 1:
+    {
+      Fl_Value_Input* w = new Fl_Value_Input(0, 0, at.weed_w, 1);
+      w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
+      w->range(at.min, at.max);
+      // Darned UInt_t does not work properly ...
+      // printf("%s::%s -> %lf, %lf\n", base_typ.Data(), name.Data(),
+      //   w->minimum(), w->maximum());
+      w->step(at.stepA, at.stepB);
+      if(!defval.IsNull()) {
+	double x; sscanf(defval.Data(), "%lf", &x);
+	w->value(x);
+      }
+      // !!! Here should add range/step control widget
+      insert_box(4, "Rng");
+      break;
     }
-    // !!! Here should add range/step control widget
-    insert_box(4, "Rng");
-    break;
-  }
-  case 2: {
-    Fl_Input* w = new Fl_Input(0, 0, at.weed_w, 1);
-    // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
-    if(!defval.IsNull() && defval(0) == '"' && defval(defval.Length()-1) == '"') {
-      TString def(defval);
-      def.Remove(0, 1); def.Remove(def.Length()-1, 1);
-      w->value(def.Data());
+  case 2:
+    {
+      Fl_Light_Button* w = new Fl_Light_Button(0, 0, at.weed_w, 1);
+      // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
+      if(!defval.IsNull()) {
+	if(defval == "true" || defval == "")
+	  w->value(1);
+      }
+      break;
     }
-    break;
-  }
-  case 3: {
-    Fl_Light_Button* w = new Fl_Light_Button(0, 0, at.weed_w, 1);
-    // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
-    if(!defval.IsNull()) {
-      if(defval == "true" || defval == "")
-	w->value(1);
+  case 3:
+  case 4:
+    {
+      Fl_Input* w = new Fl_Input(0, 0, at.weed_w, 1);
+      // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
+      if(!defval.IsNull() && defval(0) == '"' && defval(defval.Length()-1) == '"') {
+	TString def(defval);
+	def.Remove(0, 1); def.Remove(def.Length()-1, 1);
+	w->value(def.Data());
+      }
+      break;
     }
-    break;
-  }
   }
 
   end();
@@ -178,36 +186,46 @@ void MCW_View::VarArg::StreamData(TBuffer& b)
 
   arg_type& at = VarArgTypes[_typ_idx];
   switch(at.weed_type) {
-  case 1: {
-    Fl_Value_Input* w = (Fl_Value_Input*)child(2);
-    switch(_typ_idx) {
-    case 0: { Char_t   x = (Char_t)w->value(); b << x; break; }
-    case 1: { UChar_t  x = (UChar_t)w->value(); b << x; break; }
-    case 2: { Short_t  x = (Short_t)w->value(); b << x; break; }
-    case 3: { UShort_t x = (UShort_t)w->value(); b << x; break; }
-    case 4: { Int_t    x = (Int_t)w->value(); b << x; break; }
-    case 5: { UInt_t   x = (UInt_t)w->value(); b << x; break; }
-    case 6: { Long_t   x = (Long_t)w->value(); b << x; break; }
-    case 7: { ULong_t  x = (ULong_t)w->value(); b << x; break; }
-    case 8: { Float_t  x = (Float_t)w->value(); b << x; break; }
-    case 9: { Double_t x = (Double_t)w->value(); b << x; break; }
-    default:{ printf("%sunexpected valuator type.", _eh.Data()); break; }
+  case 1:
+    {
+      Fl_Value_Input* w = (Fl_Value_Input*)child(2);
+      switch(_typ_idx) {
+      case 0: { Char_t   x = (Char_t)w->value(); b << x; break; }
+      case 1: { UChar_t  x = (UChar_t)w->value(); b << x; break; }
+      case 2: { Short_t  x = (Short_t)w->value(); b << x; break; }
+      case 3: { UShort_t x = (UShort_t)w->value(); b << x; break; }
+      case 4: { Int_t    x = (Int_t)w->value(); b << x; break; }
+      case 5: { UInt_t   x = (UInt_t)w->value(); b << x; break; }
+      case 6: { Long_t   x = (Long_t)w->value(); b << x; break; }
+      case 7: { ULong_t  x = (ULong_t)w->value(); b << x; break; }
+      case 8: { Float_t  x = (Float_t)w->value(); b << x; break; }
+      case 9: { Double_t x = (Double_t)w->value(); b << x; break; }
+      default:{ printf("%sunexpected valuator type.", _eh.Data()); break; }
 
+      }
+      break;
     }
-    break;
-  }
-  case 2: {
-    Fl_Input* w = (Fl_Input*)child(2);
-    const Text_t* s = w->value();
-    b.WriteArray(s, s ? strlen(s)+1 : 0);
-    break;
-  }
-  case 3: {
-    Fl_Light_Button* w = (Fl_Light_Button*)child(2);
-    Bool_t x = w->value();
-    b << x;
-    break;
-  }
+  case 2:
+    {
+      Fl_Light_Button* w = (Fl_Light_Button*)child(2);
+      Bool_t x = w->value();
+      b << x;
+      break;
+    }
+  case 3:
+    {
+      Fl_Input* w = (Fl_Input*)child(2);
+      const Text_t* s = w->value();
+      b.WriteArray(s, s ? strlen(s)+1 : 0);
+      break;
+    }
+  case 4:
+    {
+      Fl_Input* w = (Fl_Input*)child(2);
+      TString s(w->value());
+      b << s;
+      break;
+    }
   default: {
     printf("%sunexpected argument type.", _eh.Data());
     break;
@@ -229,7 +247,7 @@ MCW_View::MCW_View(FTW_Shell* shell) :
 
 /**************************************************************************/
 
-void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(TString)
+void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t)
 {
   mMInfo = mi;
   mTitle = GForm("%s::%s", mMInfo->fClassInfo->fName.Data(), mMInfo->fName.Data());

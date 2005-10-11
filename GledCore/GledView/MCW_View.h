@@ -82,7 +82,7 @@ class MCW_View : public FTW_SubShell,
  public:
   MCW_View(FTW_Shell* shell);
 
-  void ParseMethodInfo(GledNS::MethodInfo* mi) throw(TString);
+  void ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t);
   void SetABG(ZGlass* alpha, ZGlass* beta=0, ZGlass* gamma=0);
   void SetABG(ID_t alpha, ID_t beta=0, ID_t gamma=0);
 
