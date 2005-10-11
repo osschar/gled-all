@@ -38,6 +38,13 @@ void Eventor::_init()
   bUseDynCast = true; bSignalSafe = false;
   bContinuous = true; bMultix = false;
   bRunning = bSuspended = bPerforming = bXMultix = false;
+
+  mEventID      = 0;
+  mInternalTime = 0;
+  mEpochType    = ET_DanceStart;
+  mTimeSource   = TS_System;
+  mTimeStep     = 1;
+  mTimeEpoch    = 0;
 }
 
 /**************************************************************************/
@@ -92,12 +99,11 @@ Operator::Arg* Eventor::PreDance(Operator::Arg* op_arg)
 
   if(op_arg == 0) op_arg = new Operator::Arg;
 
+  op_arg->fEventor      = this;
   op_arg->fMultix	= bMultix;
   op_arg->fSignalSafe	= bSignalSafe;
   op_arg->fContinuous	= bContinuous;
   op_arg->fUseDynCast	= bUseDynCast;
-
-  op_arg->fEventID = 0;
 
   return op_arg;
 }
@@ -117,7 +123,17 @@ void Eventor::PreBeat(Operator::Arg* op_arg) throw(Operator::Exception)
   // Eventor::PreBeat() is called from Mountain::OperatorBeat() prior to
   // calling Operate.
 
-  op_arg->fEventID = mLocBeatsDone + 1;
+  switch(mTimeSource) {
+  case TS_System:
+    mInternalTime = op_arg->fBeatStart.ToDouble() - mTimeEpoch;
+    break;
+  case TS_IntStep:
+    mInternalTime += mTimeStep;
+    break;
+  }
+
+  mTimeStack.clear();
+  mTimeStack.push_back(mInternalTime);
 }
 
 void Eventor::PostBeat(Operator::Arg* op_arg) throw(Operator::Exception)
@@ -143,6 +159,18 @@ void Eventor::OnStart(Operator::Arg* op_arg)
 {
   OP_EXE_OR_SP_MIR(this, SetRunning, true);
   OP_EXE_OR_SP_MIR(this, SetXMultix, op_arg->fMultix);
+
+  // Set epoch on start; for multix moons use the streamed value.
+  // ???? Does gettimeofday return the UTC time?
+  // If not, must offset the epoch by correct amount on moons..
+  if((op_arg->fMultix && IsSunOrFireSpace()) || !op_arg->fMultix) {
+    if(mEpochType == ET_DanceStart)
+      mTimeEpoch = op_arg->fStart.ToDouble();
+
+    if(!op_arg->fMultix)
+      OP_EXE_OR_SP_MIR(this, SetTimeEpoch, mTimeEpoch);
+  }
+
   SetPerforming(true);
 }
 
@@ -197,6 +225,8 @@ void Eventor::OnBreak(Operator::Arg* op_arg, Operator::Exception& op_exc)
 
 void Eventor::Start()
 {
+  static const Exc_t _eh("Eventor::Start ");
+
   if(mHost == 0) {
     SetHost(GetQueen()->GetKing()->GetSaturnInfo());
   }
@@ -204,11 +234,11 @@ void Eventor::Start()
   if(!bMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(bRunning) {
-    ISwarn("Eventor::Start already running");
+    ISwarn(_eh + "already running.");
     //return;
   }
   if(bSuspended) {
-    ISwarn("Eventor::Start paused ... use Resume to continue");
+    ISwarn(_eh + "paused; use Resume to continue.");
     //return;
   }
   mSaturn->GetChaItOss()->Start(this);
@@ -216,10 +246,12 @@ void Eventor::Start()
 
 void Eventor::Stop()
 {
+  static const Exc_t _eh("Eventor::Stop ");
+
   if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
-    ISwarn("Eventor::Stop not running");
+    ISwarn(_eh + "not running.");
     //return;
   }
 
@@ -228,15 +260,17 @@ void Eventor::Stop()
 
 void Eventor::Suspend()
 {
+  static const Exc_t _eh("Eventor::Suspend ");
+
   if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
-    ISwarn("Eventor::Suspend not running");
+    ISwarn(_eh + "not running.");
     //return;
   }
 
   if(bSuspended) {
-    ISwarn("Eventor::Suspend already suspended");
+    ISwarn(_eh + "already suspended.");
     //return;
   }
 
@@ -245,15 +279,17 @@ void Eventor::Suspend()
 
 void Eventor::Resume()
 {
+  static const Exc_t _eh("Eventor::Resume ");
+
   if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
-    ISwarn("Eventor::Resume not running");
+    ISwarn(_eh + "not running.");
     //return;
   }
 
   if(!bSuspended) {
-    ISwarn("Eventor::Resume not paused");
+    ISwarn(_eh + "not paused.");
     //return;
   }
 
@@ -268,10 +304,12 @@ void Eventor::Reset()
 
 void Eventor::Cancel()
 {
+  static const Exc_t _eh("Eventor::Cancel ");
+
   if(!bXMultix && mHost != mSaturn->GetSaturnInfo()) return;
 
   if(!bRunning) {
-    ISwarn("Eventor::Cancel not running");
+    ISwarn(_eh + "not running.");
     //return;
   }
 
@@ -282,7 +320,7 @@ void Eventor::Cancel()
 
 void Eventor::SetHost(SaturnInfo* host)
 {
-  Exc_t _eh("Eventor::SetHost ");
+  static const Exc_t _eh("Eventor::SetHost ");
 
   WriteLock();
   try {
@@ -297,4 +335,22 @@ void Eventor::SetHost(SaturnInfo* host)
   WriteUnlock();
 }
 
+
 /**************************************************************************/
+// Time service for operators
+/**************************************************************************/
+
+Double_t Eventor::GetEventTime()
+{
+  return mTimeStack.back();
+}
+
+void Eventor::PushEventTime(Double_t time)
+{
+  mTimeStack.push_back(time);
+}
+
+void Eventor::PopEventTime()
+{
+  mTimeStack.pop_back();
+}
