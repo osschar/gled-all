@@ -101,10 +101,12 @@ class AList : public ZGlass
   {
   protected:
     stepper_base* m_imp;
+    G*            m_cur;
 
-    bool is_ok() {
-      if(dynamic_cast<G*>(get_lens())) return true;
-      return false;
+    bool is_ok()
+    {
+      m_cur = dynamic_cast<G*>(get_lens());
+      return (m_cur != 0);
     }
   public:
     Stepper(AList* l, bool return_zeros=false) :
@@ -120,8 +122,8 @@ class AList : public ZGlass
     ZGlass*      get_lens()  { return m_imp->lens();  }
     AList::ElRep get_elrep() { return m_imp->elrep(); }
 
-    G* operator->() { return (G*) m_imp->lens(); }
-    G* operator*()  { return (G*) m_imp->lens(); }
+    G* operator->() { return m_cur; }
+    G* operator*()  { return m_cur; }
   };
 
   virtual stepper_base* make_stepper_imp(bool return_zeros=false) { return 0; }
@@ -188,7 +190,7 @@ class AList : public ZGlass
   }
 
   // Searching of elements by name.
-  virtual ZGlass* GetElementByName(const TString& name); // Override for optimization.
+  virtual ZGlass* GetElementByName(const TString& name);
 
   void DumpElements(Bool_t dump_zeros=false); //! X{E} 7 MCWButt()
 
@@ -241,11 +243,11 @@ class AList : public ZGlass
   // virtual void SetElementById(ZGlass* lens, Int_t target_id);  // X{E} C{1}
 
   // Set-by-label interface
-  // virtual void SetElementByLabel(ZGlass* lens, TString label);  // X{E} C{1}
+  // virtual void SetElementByLabel(ZGlass* lens, TString label); // X{E} C{1}
 
   // Label handling
   // virtual void AddLabel(TString label);                        // X{E} C{0}
-  // virtual void InsertLabel(TString label, TString before);      // X{E} C{0}
+  // virtual void InsertLabel(TString label, TString before);     // X{E} C{0}
   // virtual void RemoveLabel(TString label);                     // X{E} C{0}
 
 
@@ -274,7 +276,10 @@ class AList : public ZGlass
   // Stamping methods ... coded here for all sub-classes
   //----------------------------------------------------------------------
 
- public:
+  // ZGlass virtuals
+  virtual void SetStamps(TimeStamp_t s)
+  { ZGlass::SetStamps(s); mListTimeStamp = s; }
+
   virtual TimeStamp_t StampListPushBack(ZGlass* lens, Int_t id=-1);
   virtual TimeStamp_t StampListPopBack();
   virtual TimeStamp_t StampListPushFront(ZGlass* lens, Int_t id=-1);
@@ -304,7 +309,7 @@ class AList : public ZGlass
 
 
 #ifndef __CINT__
-inline bool AList::Stepper<ZGlass>::is_ok() { return true; }
+inline bool AList::Stepper<ZGlass>::is_ok() { m_cur = get_lens(); return true; }
 #endif
 
 #endif
