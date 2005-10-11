@@ -11,9 +11,17 @@ PBuffer::PBuffer(int width, int height)
 	this->height=height;
 
 	dpy = glXGetCurrentDisplay();
+	if (dpy == NULL)
+	{
+		throw "unable to get display";
+	}
 	scrnum = DefaultScreen( dpy );
 	FBRC = glXGetCurrentContext();
 	FBDC = glXGetCurrentDrawable();
+	if (!FBDC)
+	{
+		throw "unable to get render context";
+	}
 
 	Create();
 }
@@ -63,14 +71,6 @@ void PBuffer::Create()
 		Destroy();
 	}
 
-	if (dpy == NULL)
-	{
-		throw "unable to get device context";
-	}
-	if (!FBDC)
-	{
-		throw "unable to get render context";
-	}
 	// define the minimum pixel format requirements we will need for our pbuffer
 	// a pbuffer is just like a frame buffer, it can have a depth buffer associated
 	// with it and it can be double buffered.
@@ -134,7 +134,7 @@ void PBuffer::Create()
 	  unsigned int w,h;
 	  glXQueryDrawable(dpy, PBDC, GLX_WIDTH,  &w);
 	  glXQueryDrawable(dpy, PBDC, GLX_HEIGHT, &h);
-	  printf("GLX w=%ud h=%ud\n", w, h);
+	  printf("GLX Pbuffer w=%u h=%u\n", w, h);
 	}
 
 	XFree(config);

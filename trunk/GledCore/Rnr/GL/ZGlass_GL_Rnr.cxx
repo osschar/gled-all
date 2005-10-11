@@ -78,7 +78,7 @@ void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 void ZGlass_GL_Rnr::Render(RnrDriver* rd)
 {}
 
-  /**************************************************************************/
+/**************************************************************************/
 
 void ZGlass_GL_Rnr::Redraw(RnrDriver* rd)
 {
