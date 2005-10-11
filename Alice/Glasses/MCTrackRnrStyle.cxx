@@ -48,6 +48,7 @@ ClassImp(MCTrackRnrStyle)
 }
 
 /**************************************************************************/
+
 ZColor MCTrackRnrStyle:: GetPdgColor(Int_t pdg)
 {
   Int_t pdga = TMath::Abs(pdg);
@@ -88,7 +89,7 @@ ZColor MCTrackRnrStyle:: GetPdgColor(Int_t pdg)
 ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
 {
   Int_t pdga = TMath::Abs(pdg);
-  if (pdga > 100 && pdga < 100000){ 
+  if (pdga > 100 && pdga < 100000) { 
     Int_t i  = pdga;
     Int_t i0 = i%10; i /= 10; // printf("i: %d \n", i);
     Int_t i1 = i%10; i /= 10; 
@@ -96,14 +97,23 @@ ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
     Int_t i3 = i%10; i /= 10; 
     Int_t i4 = i%10;
     // meson
-    if ((i3 == 0) && ( i4 < 2)){
-      if(i1 == 3 || i2 == 3)
+    if ((i3 == 0) && (i4 < 2)) {
+      if (i1 == 3 || i2 == 3)
 	return *mTexture;          
     } // barion
-    else if ( i2 >= i1 && i3 >= i2 ) {
-      if(i1 == 3 || i2 == 3 ||i3 == 3 )
+    else if (i2 >= i1 && i3 >= i2) {
+      if (i1 == 3 || i2 == 3 || i3 == 3)
 	return *mTexture;
     }
   }
   return 0;
+}
+
+/**************************************************************************/
+
+void MCTrackRnrStyle::TimeTick(Double_t t, Double_t dt)
+{
+  mMaxT = t;
+  mMinT = t - mDeltaT;
+  mStampReqTring = Stamp(FID());
 }
