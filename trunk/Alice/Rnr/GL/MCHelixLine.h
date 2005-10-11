@@ -192,17 +192,19 @@ struct MCHelix : public MCStruct {
   }
 };
 
-  /**************************************************************************/
-  //  LINE
-  /**************************************************************************/
+/**************************************************************************/
+//  LINE
+/**************************************************************************/
 
-struct MCLine : public MCStruct {
+struct MCLine : public MCStruct
+{
   MCLine(MCTrackRnrStyle* rs, MCVertex* v0 ,Float_t vel, vector<MCVertex>* tpv):
     MCStruct(rs, v0 , vel, tpv){};
 
   Bool_t in_bounds(Float_t ex, Float_t ey, Float_t ez)
   {
-    if ((TMath::Abs(ez) > fRnrMod->mMaxZ) || ((ex*ex+ey*ey) > fRnrMod->mMaxR*fRnrMod->mMaxR))
+    if(TMath::Abs(ez) > fRnrMod->mMaxZ ||
+       ex*ex + ey*ey  > fRnrMod->mMaxR*fRnrMod->mMaxR)
       return false;
     else
       return true;

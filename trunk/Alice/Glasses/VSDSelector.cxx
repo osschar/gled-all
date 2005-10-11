@@ -19,9 +19,10 @@
 #include <Glasses/KinkTrack.h>
 #include <Stones/TTreeTools.h>
 
-ClassImp(VSDSelector)
+ClassImp(VSDSelector);
 
 /**************************************************************************/
+
 void VSDSelector::_init()
 {
   // *** Set all links to 0 ***
@@ -175,8 +176,8 @@ MCParticle* VSDSelector::Particle(Int_t i)
 //  selection methods
 /**************************************************************************/
 
-void VSDSelector::SelectParticles( ZNode* holder, const Text_t* selection, 
-			       Bool_t import_daughters)
+void VSDSelector::SelectParticles(ZNode* holder, const Text_t* selection, 
+				  Bool_t import_daughters)
 {
   static const Exc_t _eh("VSDSelector::SelectParticles ");
 
@@ -201,7 +202,7 @@ void VSDSelector::SelectParticles( ZNode* holder, const Text_t* selection,
   }
 
   if(n > 0) {
-    for (Int_t i=0; i<n; i++){
+    for(Int_t i=0; i<n; i++) {
       Int_t label = evl.GetEntry(i);
       mTreeK->GetEntry(label);
       MCParticle* p = new MCParticle(*mpP); 
