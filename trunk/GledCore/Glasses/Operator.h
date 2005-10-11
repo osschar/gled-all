@@ -26,14 +26,14 @@ public:
     bool	fContinuous;
     bool	fUseDynCast;
 
-    Int_t	fEventID;
-
     GCondition	fSuspendidor;	// Suspender for *not* signal-safe evtors
     GMutex	fSignalodor;	// Lock for signal-safe evtors
 
     GTime	fStart,     fStop;
     GTime	fBeatStart, fBeatStop;
     GTime	fBeatSum;
+
+    Int_t	fBeatID;
 
     // could have execution stack ??
 

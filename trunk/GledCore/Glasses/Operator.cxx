@@ -15,9 +15,7 @@
 //________________________________________________________________________
 
 #include "Operator.h"
-#include <Ephra/Mountain.h>
-#include <Glasses/Eventor.h>
-#include <Ephra/Saturn.h>
+#include "Operator.c7"
 
 ClassImp(Operator)
 
@@ -57,5 +55,3 @@ void Operator::PostOperate(Operator::Arg* op_arg) throw(Exception)
     }
   }
 }
-
-#include "Operator.c7"

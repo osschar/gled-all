@@ -89,11 +89,12 @@ void* Mountain::DancerBeat(DancerInfo* di)
   GTHREAD_CU_PUSH;
 
   di->fOpArg = op_arg;
+  op_arg->fStart.SetNow();
+  op_arg->fBeatID = -1;
   {
     GLensWriteHolder wrlck(di->fEventor);
     di->fEventor->OnStart(op_arg);
   }
-  op_arg->fStart.SetNow();
 
   bool exc_p = false, exit_p = false, suspend_p = false;
 
@@ -110,6 +111,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
     exc_p = exit_p = suspend_p = false;
 
     op_arg->fBeatStart.SetNow();
+    ++op_arg->fBeatID;
     try {
       {
 	GLensWriteHolder wrlck(di->fEventor);
@@ -222,17 +224,18 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
 void Mountain::Start(Eventor* e, bool suspend_immediately)
 {
-  if(bInSuspend) { // !!! should use mutex ... rethink suspend all !!!
+  static const Exc_t _eh("Mountain::Start ");
+
+ if(bInSuspend) { // !!! should use mutex ... rethink suspend all !!!
     // In fact ... should add it to on stage w/ fThread=0 ...
-    ISerr("Mountain::Start ... Mountain suspended ... stalling");
+    ISerr(_eh + "Mountain suspended, stalling.");
     return;
   }
   
   hStageLock.Lock();
   if(hOnStage.find(e) != hOnStage.end()) {
     hStageLock.Unlock();
-    ISerr(GForm("Mountain::Start ... Thread of %s already alive",
-		e->GetName()));
+    ISerr(_eh + "Thread of " + e->GetName() + " already alive.");
     return;
   }
 
