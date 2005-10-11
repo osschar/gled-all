@@ -25,11 +25,13 @@ class MCParticle : public TParticle {
     TParticle()
   { _init(); }
 
+  void ResetPdgCode() { fPdgCode = 0; }
+
   const TParticle& operator=(const TParticle& p)
   { *((TParticle*)this) = p; return *this; }
 
 #include "MCParticle.h7"
-  ClassDef(MCParticle, 1)
-    }; // endclass MCParticle
+  ClassDef(MCParticle, 1);
+}; // endclass MCParticle
 
 #endif
