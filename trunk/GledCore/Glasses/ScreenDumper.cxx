@@ -21,6 +21,11 @@ void ScreenDumper::_init()
 {
   mPupil       = 0;
   mFileNameFmt = "screendumper/img%04d.tga";
+
+  mNTiles   = 1;
+  bWaitDump = false;
+
+  mDumpID = 0;
 }
 
 /**************************************************************************/
@@ -28,9 +33,15 @@ void ScreenDumper::_init()
 void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)
 {
   PreOperate(op_arg);
-  if(mPupil != 0)
-    mPupil->EmitDumpImageRay(GForm(mFileNameFmt.Data(), op_arg->fEventID));
+  if(mPupil != 0) {
+    TString fname(GForm(mFileNameFmt.Data(), mDumpID++));
+    if(bWaitDump)
+      mPupil->DumpImageWaitSignal(fname, mNTiles);
+    else
+      mPupil->EmitDumpImageRay(fname, mNTiles);
+  }
   PostOperate(op_arg);
+  Stamp(FID());
 }
 
 /**************************************************************************/

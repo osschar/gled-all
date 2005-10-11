@@ -10,23 +10,30 @@
 #include <Glasses/Operator.h>
 #include <Glasses/PupilInfo.h>
 
-class ScreenDumper : public Operator {
+class ScreenDumper : public Operator
+{
   MAC_RNR_FRIENDS(ScreenDumper);
 
 private:
   void _init();
 
 protected:
-  ZLink<PupilInfo>	mPupil; 	// X{gS} L{}
-  TString	mFileNameFmt;	// X{GS} 7 Textor()
-  
-public:
-  ScreenDumper(const Text_t* n="ScreenDumper", const Text_t* t=0) : Operator(n,t) { _init(); }
+  ZLink<PupilInfo> mPupil;       // X{gS} L{}
+  TString          mFileNameFmt; // X{GS} 7 Textor()
 
-  virtual void Operate(Operator::Arg* op_arg)     throw(Operator::Exception);
+  Int_t            mNTiles;      // X{GS} 7 Value(-range=>[1,4,1], -join=>1)
+  Bool_t           bWaitDump;    // X{GS} 7 Bool()
+
+  Int_t            mDumpID;      // X{GS} 7 Value()
+
+public:
+  ScreenDumper(const Text_t* n="ScreenDumper", const Text_t* t=0) :
+    Operator(n,t) { _init(); }
+
+  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
 
 #include "ScreenDumper.h7"
-  ClassDef(ScreenDumper, 1)
+  ClassDef(ScreenDumper, 1);
 }; // endclass ScreenDumper
 
 
