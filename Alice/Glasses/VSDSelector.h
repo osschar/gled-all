@@ -23,7 +23,8 @@
 
 #include <Glasses/ZNode.h>
 
-class VSDSelector : public ZNode {
+class VSDSelector : public ZNode
+{
   MAC_RNR_FRIENDS(VSDSelector);
   friend class ZAliLoad;
 
