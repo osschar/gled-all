@@ -26,6 +26,13 @@ namespace RayNS {
   void GetPTR(TBuffer& b, ZGlass*& p) {
     b.ReadFastArray((Char_t*)(&p), sizeof(void*));
   }
+
+  void PutAnyPTR(TBuffer& b, void*& p) {
+    b.WriteFastArray((Char_t*)(&p), sizeof(void*));
+  }
+  void GetAnyPTR(TBuffer& b, void*& p) {
+    b.ReadFastArray((Char_t*)(&p), sizeof(void*));
+  }
 }
 
 /**************************************************************************/
