@@ -14,28 +14,29 @@
 
 
 
-ClassImp(MCTrackRnrStyle)
+ClassImp(MCTrackRnrStyle);
 
 /**************************************************************************/
 
-  void MCTrackRnrStyle::_init()
+void MCTrackRnrStyle::_init()
 {
   // *** Set all links to 0 ***
   mFitDaughters = true;
   mFitDecay = true;
 
-  mForceVisParents = true;
+  mForceVisParents = false;
   mFixDaughterTime =true;
   mCheckT    = false;
   mMaxT      = 100.;
-  mMinT      = 0.;
-  mMeanT = (mMaxT+mMinT)/2;
-  mDeltaT = mMaxT - mMinT;
-  mMaxTScale = -11.;
+  mMinT      = 0;
+  mTScale    = -11.;
+  mAnimDeltaT= 100;
   mUseSingleCol = true;
   mSingleCol.rgba(.6,1,.9,1.);
   mHeadCol.rgba(1,.2,.5,1.);
-  mSatur = 0.;
+  mAlphaS = 0.2;
+  mHeadS  = 0.2;
+
   mRnrPoints = false;
 
   // pdg color scheme 
@@ -47,9 +48,19 @@ ClassImp(MCTrackRnrStyle)
   mBarCol.rgba(1,0.8,1,1);
 }
 
+void MCTrackRnrStyle::calculate_abs_times()
+{
+  const Float_t scale = TMath::Power(10, mTScale);
+  mMaxAT   = scale * mMaxT;
+  mMinAT   = scale * mMinT;
+  mDeltaAT = mMaxAT - mMinAT;
+  mAlphaAT = mMinAT + mDeltaAT * mAlphaS;
+  mHeadAT  = mMaxAT - mDeltaAT * mHeadS;
+}
+
 /**************************************************************************/
 
-ZColor MCTrackRnrStyle:: GetPdgColor(Int_t pdg)
+ZColor MCTrackRnrStyle::GetPdgColor(Int_t pdg)
 {
   Int_t pdga = TMath::Abs(pdg);
   ZColor col =  mDefCol;
@@ -114,6 +125,6 @@ ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
 void MCTrackRnrStyle::TimeTick(Double_t t, Double_t dt)
 {
   mMaxT = t;
-  mMinT = t - mDeltaT;
+  mMinT = mMaxT - mAnimDeltaT;
   mStampReqTring = Stamp(FID());
 }
