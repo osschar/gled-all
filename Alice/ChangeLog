@@ -1,3 +1,21 @@
+2005-10-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+        Fix bugs for color setting in loop_points_and_check_time.
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+        Add variable to draw point in the production vertex.
+
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.h:
+        Set time variables in MCTrackRnrStyle in PreDraw function.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+        Rename/reorganize time memebers.
+
 2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/MCParticle.cxx:
