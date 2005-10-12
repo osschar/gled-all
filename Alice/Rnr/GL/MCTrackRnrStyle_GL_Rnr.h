@@ -15,10 +15,11 @@ private:
   void _init();
 
 protected:
+  MCTrackRnrStyle* mTRS;
 
 public:
   MCTrackRnrStyle_GL_Rnr(MCTrackRnrStyle* idol) :
-    PRSBase_GL_Rnr(idol)
+    PRSBase_GL_Rnr(idol), mTRS(idol)
   { _init(); }
 
   virtual void PreDraw(RnrDriver* rd);
