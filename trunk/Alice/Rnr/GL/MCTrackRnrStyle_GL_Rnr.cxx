@@ -18,12 +18,14 @@ void MCTrackRnrStyle_GL_Rnr::_init()
 void MCTrackRnrStyle_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   update_tring_stamp(rd);
+  mTRS->calculate_abs_times();
   rd->PushRnrMod(MCTrackRnrStyle::FID(),  mRnrMod);
 }
 
 void MCTrackRnrStyle_GL_Rnr::Draw(RnrDriver* rd)
 {
   update_tring_stamp(rd);
+  mTRS->calculate_abs_times();
   rd->SetDefRnrMod(MCTrackRnrStyle::FID(), mRnrMod);
 }
 
