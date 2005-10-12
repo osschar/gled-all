@@ -142,7 +142,7 @@ void AliAnimator(const Text_t* dirname = 0,
 
   sdumper->SetPupil(mpupil);
   mcrst->SetCheckT(true);
-  mcrst->SetMaxTScale(-10);
+  mcrst->SetTScale(-10);
 
   /**************************************************************************/
   // End Anim
