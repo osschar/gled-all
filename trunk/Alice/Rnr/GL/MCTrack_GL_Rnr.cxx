@@ -169,7 +169,7 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
    
   if (RS.mMagField && p->GetPDG()->Charge()) {
     Float_t a = 0.2998*RS.mMagField*p->GetPDG()->Charge()/300; // m->cm
-    MCHelix helix(&RS, &mc_v0, 100*TMath::C()*p->P()/p->Energy(), &track_points, a); //m->cm
+    MCHelix helix(&RS, &mc_v0, TMath::C()*p->P()/p->Energy(), &track_points, a); //m->cm
 
     // case 1  
     Bool_t in_bounds = true;
@@ -210,7 +210,7 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
 	helix.loop_to_bounds(px, py, pz);
       }
   } else {  // *************** LINE ************************
-    MCLine line(&RS, &mc_v0 , 100*TMath::C()*p->P()/p->Energy(), &track_points); // m->cm
+    MCLine line(&RS, &mc_v0 , TMath::C()*p->P()/p->Energy(), &track_points); // m->cm
 
     // draw line to daughters
     if(RS.mFitDaughters && mMCTrack->IsEmpty() == false){
