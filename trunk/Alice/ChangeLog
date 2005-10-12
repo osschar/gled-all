@@ -1,5 +1,10 @@
 2005-10-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+        Remove 100 factor.
+
+2005-10-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
 	* Glasses/MCTrackRnrStyle.cxx:
 	* Glasses/MCTrackRnrStyle.h:
         Fix bugs for color setting in loop_points_and_check_time.
