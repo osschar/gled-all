@@ -23,10 +23,19 @@ class MCTrack_GL_Rnr : public ZNode_GL_Rnr
 
  private:
 
-  void             _init();
-  void             make_track(RnrDriver* rd);
-  void             loop_points(ZColor& col);
-  void             loop_points_and_check_time(ZColor& col);
+  void       _init();
+
+  void       make_track(RnrDriver* rd);
+
+  void       loop_points(ZColor& col);
+
+  int        find_index(int start, float time);
+  void       set_color(Float_t time, ZColor col);
+  void       mark_vertex(Int_t idx, ZColor& orig_col);
+  void       interpolate_vertex(Int_t idx, Float_t time, ZColor& orig_col);
+
+  void       loop_points_and_check_time(ZColor& col);
+
   vector<MCVertex> track_points;
   RenderVertices   vertices_foo;
 
