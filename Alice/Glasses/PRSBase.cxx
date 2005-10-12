@@ -26,6 +26,7 @@ void PRSBase::_init()
   mVertexColor.rgba(1,0,0,1);
   mVertexSize = 5;
   mRnrP = false;
+  mRnrV = false;
   mPColor.rgba(1,0,0,1);
   mPMinLen = 10;
   mPScale = 1;

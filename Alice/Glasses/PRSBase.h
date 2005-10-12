@@ -35,6 +35,7 @@ class PRSBase : public ZRnrModBase
   UShort_t                 mTrackStipplePat;  // X{GST} 7 HexValue(-range=>[0,65535, 1])
   // momentum
   ZColor                   mPColor;        // X{GSPT} 7 ColorButt(-join=>1)
+  Bool_t                   mRnrV;          // X{GST}  7 Bool(-join=>1)
   Bool_t                   mRnrP;          // X{GST}  7 Bool()
   Float_t                  mPMinLen;       // X{GST}  7 Value(-range=>[0,1000, 1,100], -join=>1)
   Float_t                  mPScale;        // X{GST}  7 Value(-range=>[0.01,1, 1,100])
