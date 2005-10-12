@@ -23,7 +23,15 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
  private:
   void _init();
 
-  // protected:
+ protected:
+  Float_t  mMaxAT;   //!       
+  Float_t  mMinAT;   //!       
+  Float_t  mDeltaAT; //!       
+  Float_t  mAlphaAT; //!
+  Float_t  mHeadAT;  //!
+
+  void calculate_abs_times();
+
  public:
   Bool_t   mFitDaughters; // X{GST} Stamp{PointCalcReq}  7 Bool(-join=>1)
   Bool_t   mFitDecay;     // X{GST} Stamp{PointCalcReq}  7 Bool()
@@ -33,15 +41,18 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
   Bool_t                   mFixDaughterTime; // X{GST}  7 Bool()
   Float_t                  mMaxT;            // X{GST}  7 Value(-range=>[0,10000, 1,100],-join=>1)
   Float_t                  mMinT;            // X{GST}  7 Value(-range=>[0,10000, 1,100])
-  Float_t                  mMeanT;           // X{GE}   7 Value(-range=>[0,10000, 1,100],-join=>1)
-  Float_t                  mDeltaT;          // X{GE}   7 Value(-range=>[0,10000, 1,100])
-  Float_t                  mMaxTScale;       // X{GST}  7 Value(-range=>[-32,0, 1,100])
+  Float_t                  mTScale;          // X{GST}  7 Value(-range=>[-32,0, 1,100],-join=>1)
+  Float_t                  mAnimDeltaT;      // X{GST}  7 Value(-range=>[0,10000, 1,100])
+
   Bool_t                   mForceVisParents; // X{GST} Stamp{PointCalcReq}  7 Bool(-join=>1)
   Bool_t                   mUseSingleCol;    // X{GST}  7 Bool(-join=>1)
   Bool_t                   mRnrPoints;       // X{GST}  7 Bool()
   ZColor                   mSingleCol;       // X{GSPT} 7 ColorButt(-join=>1)
-  ZColor                   mHeadCol;         // X{GSPT} 7 ColorButt()
-  Float_t                  mSatur;           // X{GST}  7 Value(-range=>[0,1, 1,1000])
+  ZColor                   mHeadCol;         // X{GSPT} 7 ColorButt(-join=>1)
+  ZColor                   mTailCol;         // X{GSPT} 7 ColorButt()
+  Float_t                  mAlphaS;          // X{GST}  7 Value(-range=>[0,1, 1,1000],-join=>1)
+  Float_t                  mHeadS;           // X{GST}  7 Value(-range=>[0,1, 1,1000])
+
 
   // PDG colors
   ZColor   mDefCol;       // X{GSPT} 7 ColorButt(-join=>1)
@@ -56,21 +67,6 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
     PRSBase(n,t) { _init(); }
   ZColor                   GetPdgColor(Int_t pdg);
   ZImage*                  GetPdgTexture(Int_t pdg);
-
-  // Manual Get/Set-methods
-  void SetDeltaT(Float_t t){
-    mDeltaT = t;
-    mMaxT = mMeanT + mDeltaT/2; 
-    mMinT = mMeanT - mDeltaT/2; 
-    mStampReqTring = Stamp(FID());
-  }
-
-  void SetMeanT(Float_t t){
-    mMeanT = t;
-    mMaxT = mMeanT + mDeltaT/2; 
-    mMinT = mMeanT - mDeltaT/2;
-    mStampReqTring = Stamp(FID());
-  }
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
