@@ -1,3 +1,13 @@
+2005-10-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliLoader.C:
+	* zaliload_metagui.C:
+	Moved make_zaliload_metagui() from AliLoader.C to new file
+	zaliload_metagui.C.
+
+	* AliAnimator.C:
+	New file: set-up for event movie capture.
+
 2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
