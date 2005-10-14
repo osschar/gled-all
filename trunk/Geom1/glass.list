@@ -24,6 +24,8 @@ Sleeper		129	Glasses/Sleeper
 # Mover will be removed or replaced by LocalMover. Or sth like that.
 Mover		132	Glasses/Mover
 
+TimeScreenText	192	Glasses/TimeScreenText	ScreenText
+
 GForger		256	Glasses/GForger
 
 RndSMorphCreator 1024	Glasses/RndSMorphCreator
