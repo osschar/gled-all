@@ -10,6 +10,8 @@
 #include <Glasses/Operator.h>
 #include <Stones/TimeMakerClient.h>
 
+#include <TF1.h>
+
 class TimeMaker : public Operator
 {
   MAC_RNR_FRIENDS(TimeMaker);
@@ -29,10 +31,15 @@ protected:
   Double_t   mLastT;    // X{GS} 7 Value(-join=>1)
   Bool_t     bLastTOK;  // X{GS} 7 Bool()
 
+  TString    mFormula;      // X{GS} Ray{Formula} 7 Textor()
+  Bool_t     bApplyFormula; // X{GS} 7 Bool()
+  TF1        mTF1;          //
+
   Bool_t     bPushToStack;  // X{GS} 7 Bool(-join=>1)
   Bool_t     bPopFromStack; // X{GS} 7 Bool()
 
-  Bool_t     bEmitStamps;   // X{GS} 7 Bool()
+  Bool_t     bEmitStamps;   // X{GS} 7 Bool(-join=>1)
+  Bool_t     bPrintOut;     // X{GS} 7 Bool()
 
   ZLink<AList> mClients; // X{GS} L{}
 
@@ -42,6 +49,8 @@ public:
 
   // Operator:
   virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+
+  void EmitFormulaRay();
 
 #include "TimeMaker.h7"
   ClassDef(TimeMaker, 1);

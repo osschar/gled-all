@@ -25,9 +25,18 @@ void TimeMaker::_init()
   mMinT = 0; mMaxT = 1;
   mLastT = 0; bLastTOK = false;
 
+  bApplyFormula = false;
+
   bPushToStack = bPopFromStack = true;
 
   bEmitStamps = false;
+}
+
+/**************************************************************************/
+
+void TimeMaker::EmitFormulaRay()
+{
+  mTF1.Compile(mFormula);
 }
 
 /**************************************************************************/
@@ -62,7 +71,20 @@ void TimeMaker::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
     }
   }
 
-  double dt = bLastTOK ? t - mLastT : 0;
+  Double_t dt;
+  if(bApplyFormula) {
+    Double_t t_pf = t;
+    t = mTF1.Eval(t);
+    dt = bLastTOK ? t - mLastT : 0;
+    if(bPrintOut)
+      printf("%s Operate t_in = %g, t_pf = %g, t = %g, dt = %g\n",
+	     Identify().Data(), op_arg->fEventor->GetEventTime(), t_pf, t, dt);
+  } else {
+    dt = bLastTOK ? t - mLastT : 0;
+    if(bPrintOut)
+      printf("%s Operate t_in = %g, t = %g, dt = %g\n",
+	     Identify().Data(), op_arg->fEventor->GetEventTime(), t, dt); 
+  }
 
   if(mClients != 0) {
     list<TimeMakerClient*> clients;
