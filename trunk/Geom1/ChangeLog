@@ -1,3 +1,19 @@
+2005-10-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx:
+	* Glasses/Mover.h:
+	Added option to move/rotate in parent frame.
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	Added option to apply an arbitrary formula to time.
+
+	* Glasses/TimeScreenText.cxx:
+	* Glasses/TimeScreenText.h:
+	* glass.list:
+	New glass TimeScreenText: a TimeMakerClient that displays current
+	time (subclass of ScreenText).
+
 2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TimeMaker.cxx:
