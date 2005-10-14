@@ -22,8 +22,9 @@ ClassImp(Mover)
 
 void Mover::_init()
 {
-  mMi = mRi = mRj = 0;
+  mMi = 1; mRi = 1; mRj = 2;
   mMa = mRa = 0;
+  bMovParentFrame = bRotParentFrame = false;
 }
 
 /**************************************************************************/
@@ -41,10 +42,18 @@ void Mover::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
   Operator::PreOperate(op_arg);
   if(mNode != 0) {
     if(mMa != 0) {
-      OP_EXE_OR_SP_MIR(mNode.get(), MoveLF, mMi, mMa);
+      if(bMovParentFrame) {
+	OP_EXE_OR_SP_MIR(mNode.get(), MovePF, mMi, mMa);
+      } else {
+	OP_EXE_OR_SP_MIR(mNode.get(), MoveLF, mMi, mMa);
+      }
     }
     if(mRa != 0) {
-      OP_EXE_OR_SP_MIR(mNode.get(), RotateLF, mRi, mRj, mRa);
+      if(bRotParentFrame) {
+	OP_EXE_OR_SP_MIR(mNode.get(), RotatePF, mRi, mRj, mRa);
+      } else {
+	OP_EXE_OR_SP_MIR(mNode.get(), RotateLF, mRi, mRj, mRa);
+      }
     }
   }
   Operator::PostOperate(op_arg);
