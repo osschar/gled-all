@@ -112,18 +112,23 @@ void AliAnimator(const Text_t* dirname = 0,
   CREATE_ADD_GLASS(tclist, ZList, g_queen, "TimeConsumerList", 0);
   tclist->Add(mcrst);
 
+  CREATE_ADD_GLASS(stxt, TimeScreenText, var, "TimeScreenText", 0);
+  stxt->SetX(-1);
+  stxt->SetFormat("time: %4.1f ns");
+  tclist->Add(stxt);
   /**************************************************************************/
 
   CREATE_ADD_GLASS(etor, Eventor, g_queen, "Animator", 0);
   etor->SetEpochType(Eventor::ET_Manual);
   etor->SetTimeSource(Eventor::TS_IntStep);
-  etor->SetBeatsToDo(1000);
-  etor->SetTimeStep(0.5);
+  etor->SetBeatsToDo(1750);
+  etor->SetTimeStep(0.02);
   
   CREATE_ADD_GLASS(tmaker, TimeMaker, etor, "TimeMaker", 0);
   tmaker->SetMinT(0);
   tmaker->SetMaxT(1000);
   tmaker->SetClients(tclist);
+
 
   etor->Add(g_scene->FindLensByPath("Lamp Origin/Dynamo/Lamp Origin Rotator"));
 
@@ -131,18 +136,24 @@ void AliAnimator(const Text_t* dirname = 0,
   sdumper->SetFileNameFmt("");
   sdumper->SetWaitDump(true);
 
-/**************************************************************************/
+  /**************************************************************************/
 
   CREATE_ADD_GLASS(mpupil, PupilInfo, g_queen, "MoviePupil", 0);
   mpupil->SetAutoRedraw(false);
   mpupil->SetBlend(true);
+  mpupil->SetShowView(false);
   mpupil->Add(g_scene);
   mpupil->SetUpReference(g_scene);
   mpupil->SetUpRefAxis(2);
 
   sdumper->SetPupil(mpupil);
   mcrst->SetCheckT(true);
-  mcrst->SetTScale(-10);
+  mcrst->SetMaxT(0.1);
+  mcrst->SetFadeT(30);
+  mcrst->SetKillT(35);
+  mcrst->SetAnimDeltaT(10);
+  mcrst->SetTScale(-9);
+  mcrst->SetTrackWidth(1.6);
 
   /**************************************************************************/
   // End Anim
@@ -188,8 +199,8 @@ void AliAnimator(const Text_t* dirname = 0,
 
   Gled::LoadMacro("zaliload_metagui.C");
   MetaViewInfo* mvi = make_zaliload_metagui();
-  // mvi->SetExpertP(true);
-  g_shell->SpawnMetaGui(al, mvi);
+  mvi->SetExpertP(true);
+  //g_shell->SpawnMetaGui(al, mvi);
 
   // Movie!!
   g_shell->AddSubShell(mpupil);
