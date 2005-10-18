@@ -29,6 +29,8 @@ void MCTrackRnrStyle::_init()
   mCheckT    = false;
   mMaxT      = 100.;
   mMinT      = 0;
+  mFadeT     = 280;
+  mKillT     = 300;
   mTScale    = -11.;
   mAnimDeltaT= 100;
   mUseSingleCol = true;
@@ -53,6 +55,8 @@ void MCTrackRnrStyle::calculate_abs_times()
   const Float_t scale = TMath::Power(10, mTScale);
   mMaxAT   = scale * mMaxT;
   mMinAT   = scale * mMinT;
+  mFadeAT  = scale * mFadeT;
+  mKillAT  = scale * mKillT; 
   mDeltaAT = mMaxAT - mMinAT;
   mAlphaAT = mMinAT + mDeltaAT * mAlphaS;
   mHeadAT  = mMaxAT - mDeltaAT * mHeadS;

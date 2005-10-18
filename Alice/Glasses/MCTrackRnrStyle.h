@@ -29,6 +29,8 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
   Float_t  mDeltaAT; //!       
   Float_t  mAlphaAT; //!
   Float_t  mHeadAT;  //!
+  Float_t  mFadeAT;  //!
+  Float_t  mKillAT;  //!
 
   void calculate_abs_times();
 
@@ -41,6 +43,8 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
   Bool_t                   mFixDaughterTime; // X{GST}  7 Bool()
   Float_t                  mMaxT;            // X{GST}  7 Value(-range=>[0,10000, 1,100],-join=>1)
   Float_t                  mMinT;            // X{GST}  7 Value(-range=>[0,10000, 1,100])
+  Float_t                  mFadeT;           // X{GST}  7 Value(-range=>[0,10000, 1,100],-join=>1)
+  Float_t                  mKillT;           // X{GST}  7 Value(-range=>[0,10000, 1,100])
   Float_t                  mTScale;          // X{GST}  7 Value(-range=>[-32,0, 1,100],-join=>1)
   Float_t                  mAnimDeltaT;      // X{GST}  7 Value(-range=>[0,10000, 1,100])
 
@@ -49,11 +53,8 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
   Bool_t                   mRnrPoints;       // X{GST}  7 Bool()
   ZColor                   mSingleCol;       // X{GSPT} 7 ColorButt(-join=>1)
   ZColor                   mHeadCol;         // X{GSPT} 7 ColorButt(-join=>1)
-  ZColor                   mTailCol;         // X{GSPT} 7 ColorButt()
   Float_t                  mAlphaS;          // X{GST}  7 Value(-range=>[0,1, 1,1000],-join=>1)
   Float_t                  mHeadS;           // X{GST}  7 Value(-range=>[0,1, 1,1000])
-
-
   // PDG colors
   ZColor   mDefCol;       // X{GSPT} 7 ColorButt(-join=>1)
   ZColor   mECol;         // X{GSPT} 7 ColorButt()

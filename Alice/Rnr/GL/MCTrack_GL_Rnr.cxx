@@ -278,7 +278,7 @@ inline void MCTrack_GL_Rnr::set_color(Float_t time, ZColor col)
 {
   MCTrackRnrStyle& RS  = * (MCTrackRnrStyle*) mParticleRMS.lens();
   Float_t alpha = 1.;
-
+  
   if(time > RS.mHeadAT) {
     Float_t xx = (time - RS.mHeadAT) / (RS.mHeadS * RS.mDeltaAT);
     col *= 1 - xx;
@@ -291,6 +291,15 @@ inline void MCTrack_GL_Rnr::set_color(Float_t time, ZColor col)
   if(time < RS.mAlphaAT){
     alpha = (time - RS.mMinAT) / (RS.mAlphaS * RS.mDeltaAT);
   }
+
+  if(RS.mMaxAT > RS.mFadeAT) {
+    if( RS.mMaxAT < RS.mKillAT ) {
+      alpha *= (RS.mKillAT - RS.mMaxAT)/(RS.mKillAT - RS.mFadeAT);
+    } else {
+      alpha = 0.;
+    }
+  }
+
   glColor4f(col[0], col[1], col[2], col[3]*alpha);  
 }
 
