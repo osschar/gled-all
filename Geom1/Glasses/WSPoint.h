@@ -19,7 +19,7 @@ class WSPoint : public ZNode
 private:
   void _init();
 
-  TMatrixD	mCoffs;         //!
+  TMatrixD	mCoffs;         //! X{R}
 
 protected:
   Float_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
