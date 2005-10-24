@@ -841,6 +841,8 @@ void Pupil::draw()
 
 void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
+  static const Exc_t _eh("Pupil::rnr_standard ");
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0,0,w(),h());
@@ -848,8 +850,13 @@ void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  SetAbsRelCamera();
-  SetCameraView();
+  try {
+    SetAbsRelCamera();
+    SetCameraView();
+  }
+  catch(Exc_t& exc) {
+    cerr << _eh << "exception during camera setup: " << exc << endl;
+  }
 
   rnr_default_init();
 
