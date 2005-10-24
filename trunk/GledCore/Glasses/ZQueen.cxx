@@ -1140,7 +1140,7 @@ ZComet* ZQueen::MakeComet()
   return comet;
 }
 
-void ZQueen::AdoptComet(ZList* top_dest, ZList* orphan_dest, ZComet* comet)
+void ZQueen::AdoptComet(AList* top_dest, AList* orphan_dest, ZComet* comet)
 {
   // Adopts a Comet of type ST_CometBag.
   // External references of a Comet are ignored.
