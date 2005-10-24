@@ -34,13 +34,13 @@ Scene* create_basic_scene()
   CREATE_ADD_GLASS(lamp1, Lamp, origin, "Lamp1", "");
   lamp1->SetDiffuse(1, 1, 1);
   lamp1->SetAmbient(0.3, 0.3, 0.3);
-  lamp1->SetScale(0);
+  lamp1->SetLampScale(0);
   lamp1->SetPos(0, 12, 12);
   
   CREATE_ADD_GLASS(lamp2, Lamp, origin, "Lamp2", "");
   lamp2->SetDiffuse(0.65, 0.35, 0.5);
   lamp2->SetAmbient(0, 0, 0);
-  lamp2->SetScale(0);
+  lamp2->SetLampScale(0);
   lamp2->SetPos(12, 12, 0);
  
   rscene->GetGlobLamps()->Add(lamp1);

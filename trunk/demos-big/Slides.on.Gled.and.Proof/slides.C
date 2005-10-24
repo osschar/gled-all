@@ -32,7 +32,7 @@ void slides(Bool_t start_hunt_p=true)
   cam_base->SetRadius(0.01);
 
   CREATE_ADD_GLASS(l, Lamp, ss, "Lamp", 0);
-  l->SetScale(1);
+  l->SetLampScale(1);
   l->SetPos(-4, -3, 10);
   l->SetAmbient(0.4, 0.4, 0.4);
   ss->GetGlobLamps()->Add(l);
