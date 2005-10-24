@@ -104,7 +104,7 @@ ZColor MCTrackRnrStyle::GetPdgColor(Int_t pdg)
 ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
 {
   Int_t pdga = TMath::Abs(pdg);
-  if (pdga > 100 && pdga < 100000) { 
+  if (pdga > 100 && pdga < 100000) {
     Int_t i  = pdga;
     Int_t i0 = i%10; i /= 10; // printf("i: %d \n", i);
     Int_t i1 = i%10; i /= 10; 
@@ -114,7 +114,7 @@ ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
     // meson
     if ((i3 == 0) && (i4 < 2)) {
       if (i1 == 3 || i2 == 3)
-	return *mTexture;          
+	return *mTexture;   
     } // barion
     else if (i2 >= i1 && i3 >= i2) {
       if (i1 == 3 || i2 == 3 || i3 == 3)
