@@ -48,17 +48,19 @@ void WSPoint::Coff(const WSPoint* f)
     const Double_t Q = T1*AX[i];
     const Double_t R = T2*BX[i] - 2*P + Q;
 
-    mCoffs(i,0) = AT[i];
-    mCoffs(i,1) = Q;
-    mCoffs(i,2) = P - Q - R;
-    mCoffs(i,3) = R;
+    TMatrixDRow row( mCoffs[i] );
+    row[0] = AT[i];
+    row[1] = Q;
+    row[2] = P - Q - R;
+    row[3] = R;
   }
   // Widths
   const Double_t A = f->mS - 2*(f->mW - mW) + mS;
-  mCoffs(3,0) = mW;
-  mCoffs(3,1) = mS;
-  mCoffs(3,2) = (f->mW - mW) - mS - A;
-  mCoffs(3,3) = A;
+  TMatrixDRow row( mCoffs[3] );
+  row[0] = mW;
+  row[1] = mS;
+  row[2] = (f->mW - mW) - mS - A;
+  row[3] = A;
 }
 
 /**************************************************************************/
