@@ -16,17 +16,16 @@ private:
   void	_init();
 
 protected:
-  ZColor	mAmbient;		// X{PGS} 7 ColorButt()
-  ZColor	mDiffuse;		// X{PGS} 7 ColorButt()
-  ZColor	mSpecular;		// X{PGS} 7 ColorButt()
-
-  Float_t	mScale;			// X{GS} 7 Value(-range=>[0,100,1,10], -join=>1);
-  Float_t	mSpotExp;		// X{GS} 7 Value(-range=>[0,500,1,1000]);
+  ZColor	mAmbient;		// X{PGS} 7 ColorButt(-width=>5, -join=>1)
+  ZColor	mDiffuse;		// X{PGS} 7 ColorButt(-width=>5)
+  ZColor	mSpecular;		// X{PGS} 7 ColorButt(-width=>5, -join=>1)
+  Float_t	mLampScale;		// X{GS} 7 Value(-range=>[0,100,1,10], -width=>5);
+  Float_t	mSpotExp;		// X{GS} 7 Value(-range=>[0,500,1,1000], -join=>1);
   Float_t	mSpotCutOff;		// X{GS} 7 Value(-range=>[0,180,1,10]);
 
-  Float_t	mConstAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000]);
-  Float_t	mLinAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000]);
-  Float_t	mQuadAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000]);
+  Float_t	mConstAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000], -width=>5, -join=>1);
+  Float_t	mLinAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000], -width=>5, -join=>1);
+  Float_t	mQuadAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000], -width=>5);
 
   // How/When to draw the lamp, turn on/off the light
   Bool_t	bDrawLamp;		// X{GS} 7 Bool()

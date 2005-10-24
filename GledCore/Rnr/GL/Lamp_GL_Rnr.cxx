@@ -58,9 +58,8 @@ int Lamp_GL_Rnr::LampOn(RnrDriver* rd, const ZTrans* t)
   if(t == 0) t = mLamp->PtrTrans();
 
   GLfloat x[4], d[4];
-  // !!! should lock master
-  x[0]=(*t)(1u,4u); x[1]=(*t)(2u,4u); x[2]=(*t)(3u,4u); x[3]= mLamp->mScale;
-  d[0]=(*t)(1u,1u); d[1]=(*t)(2u,1u); d[2]=(*t)(3u,1u); d[3]=1;
+  x[0]=(*t)(1,4); x[1]=(*t)(2,4); x[2]=(*t)(3,4); x[3]=mLamp->mLampScale;
+  d[0]=(*t)(1,1); d[1]=(*t)(2,1); d[2]=(*t)(3,1); d[3]=1;
 
   //printf("Lamp_GL_Rnr::LampOn turning on lamp id=%d (%.3f,%.3f,%.3f;%.3f)\n",
   //  mLampID, x[0], x[1], x[2], x[3]);
@@ -72,10 +71,10 @@ int Lamp_GL_Rnr::LampOn(RnrDriver* rd, const ZTrans* t)
   glLightfv(L, GL_AMBIENT, mLamp->mAmbient());
   glLightfv(L, GL_SPECULAR, mLamp->mSpecular());
 
-  if(mLamp->mScale > 0) {
+  if(mLamp->mLampScale > 0) {
     glLightfv(L, GL_SPOT_DIRECTION, d);
   }
-  if(mLamp->mScale > 0 && mLamp->mSpotCutOff <= 90) {
+  if(mLamp->mLampScale > 0 && mLamp->mSpotCutOff <= 90) {
     glLightf (L, GL_SPOT_CUTOFF, mLamp->mSpotCutOff);
     glLightf (L, GL_SPOT_EXPONENT, mLamp->mSpotExp);
   } else {
