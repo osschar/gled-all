@@ -30,7 +30,7 @@
   l->SetDiffuse(1, 0.3, 0.4);
   l->MoveLF(1, 5);
   l->SetRotByDegrees(180, -30, 0);
-  l->SetScale(1);
+  l->SetLampScale(1);
   l->SetSpotExp(3);
   l->SetSpotCutOff(60);
   l->SetLinAtt(0.05);
@@ -41,7 +41,7 @@
   l->SetDiffuse(0.2, 0.5, 1);
   l->MoveLF(1,-5);
   l->SetRotByDegrees(0, -30, 0);
-  l->SetScale(1);
+  l->SetLampScale(1);
   l->SetSpotExp(3);
   l->SetSpotCutOff(60);
   l->SetLinAtt(0.05);

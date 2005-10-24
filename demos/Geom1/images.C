@@ -83,7 +83,7 @@ void images()
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
-  l->SetScale(1);
+  l->SetLampScale(1);
   l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
   g_queen->CheckIn(l); images->Add(l);
   images->GetGlobLamps()->Add(l);
