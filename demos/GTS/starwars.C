@@ -36,7 +36,7 @@ void starwars()
 
   Lamp* l = new Lamp("Lamp");
   l->SetPos(15, 0, 5);
-  l->SetScale(1);
+  l->SetLampScale(1);
   g_queen->CheckIn(l); starw->Add(l);
   starw->GetGlobLamps()->Add(l);
 
