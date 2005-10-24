@@ -40,7 +40,7 @@ void WS_demo()
   lamp1->MoveLF(1, 5);
   lamp1->RotateLF(1,2, TMath::Pi());
   lamp1->SetDiffuse(1, 0.3, 0.3);
-  lamp1->SetScale(1);
+  lamp1->SetLampScale(1);
   wsdemo->GetGlobLamps()->Add(lamp1);
   CREATE_ADD_GLASS(sph1, Sphere, lamp1, "Sph1", 0);
   sph1->SetRadius(0.38); sph1->SetLOD(20);
@@ -48,7 +48,7 @@ void WS_demo()
   CREATE_ADD_GLASS(lamp2, Lamp, lamp_base, "Lamp2", 0);  
   lamp2->MoveLF(1,-5);
   lamp2->SetDiffuse(0.3, 0.3, 1);
-  lamp2->SetScale(1);
+  lamp2->SetLampScale(1);
   wsdemo->GetGlobLamps()->Add(lamp2);
   CREATE_ADD_GLASS(sph2, Sphere, lamp2, "Sph2", 0);
   sph2->SetRadius(0.38); sph2->SetLOD(20);
@@ -112,6 +112,16 @@ void WS_demo()
   tube2->SetSgmA(TLorentzVector(0.2, 0.2,  0, 0));
   tube2->SetSgmB(TLorentzVector(0.2, 0.2,  0, 0));
   tube2->Connect();
+
+  CREATE_ADD_GLASS(etor, Eventor, wsdemo, "Eventor", 0);
+  etor->SetInterBeatMS(50);
+  CREATE_ADD_GLASS(tmaker, TimeMaker, etor, "TimeMaker", 0);
+  CREATE_ATT_GLASS(wker, WSWalker, tmaker, AddClient, "WSWalker", 0);
+  wker->SetLoop(true);
+
+  CREATE_ADD_GLASS(traveler, SMorph, seed1, "Travel SMorph", 0);
+  wker->SetSeed(seed1);
+  wker->SetNode(traveler);
 
   Gled::Macro("eye.C");
   setup_pupil_up_reference();
