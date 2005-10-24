@@ -204,7 +204,7 @@ public:
 
   // Comet operations
   ZComet* MakeComet();
-  void AdoptComet(ZList* top_dest, ZList* orphan_dest, ZComet* comet); // X{E} C{2}
+  void AdoptComet(AList* top_dest, AList* orphan_dest, ZComet* comet); // X{E} C{2}
   virtual void UnfoldFrom(ZComet& comet);
 
   // Maintenance of non-ruling queen reflections
