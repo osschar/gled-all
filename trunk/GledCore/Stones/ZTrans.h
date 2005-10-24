@@ -37,6 +37,7 @@ public:
   // General operations
 
   void     UnitTrans();
+  void     UnitRot();
   void     SetTrans(const ZTrans& t);
   ZTrans&  operator=(const ZTrans& t) { SetTrans(t); return *this; }
   void     SetupRotation(Int_t i, Int_t j, Double_t f);
@@ -103,6 +104,7 @@ public:
   // Cardan angle interface
 
   void SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);
+  void SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3, const Text_t* pat);
   void GetRotAngles(Float_t* x) const;
 
   // Scaling

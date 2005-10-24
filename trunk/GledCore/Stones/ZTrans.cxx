@@ -62,8 +62,16 @@ ZTrans::ZTrans(const ZNode* n)  { *this = n->RefTrans(); }
 
 void ZTrans::UnitTrans()
 {
-  memset(M, 0, sizeof(M));
+  memset(M, 0, 16*sizeof(Double_t));
   M[F00] = M[F11] = M[F22] = M[F33] = 1;
+  mA1 = mA2 = mA3 = 0;
+  bAsOK = true;
+}
+
+void ZTrans::UnitRot()
+{
+  memset(M, 0, 12*sizeof(Double_t));
+  M[F00] = M[F11] = M[F22] = 1;
   mA1 = mA2 = mA3 = 0;
   bAsOK = true;
 }
@@ -78,6 +86,8 @@ void ZTrans::SetTrans(const ZTrans& t)
 void ZTrans::SetupRotation(Int_t i, Int_t j, Double_t f)
 {
   // Setup the matrix as an elementary rotation.
+  // Optimized versions of left/right multiplication with an elementary
+  // rotation matrix are implemented in RotatePF/RotateLF.
   // Expects identity matrix.
   
   if(i == j) return;
@@ -146,10 +156,20 @@ void ZTrans::Move3LF(Double_t x, Double_t y, Double_t z)
 
 void ZTrans::RotateLF(Int_t i1, Int_t i2, Double_t amount)
 {
+  // Rotate in local frame. Does optimised version of MultRight.
+
   if(i1 == i2) return;
-  ZTrans a;
-  a.SetupRotation(i1, i2, amount);
-  MultRight(a);
+  // Algorithm: ZTrans a; a.SetupRotation(i1, i2, amount); MultRight(a);
+  // Optimized version:
+  const Double_t cos = TMath::Cos(amount), sin = TMath::Sin(amount);
+  Double_t  b1, b2;
+  Double_t* C = M;
+  --i1 <<= 2; --i2 <<= 2; // column major
+  for(int r=0; r<4; ++r, ++C) {
+    b1 = cos*C[i1] + sin*C[i2];
+    b2 = cos*C[i2] - sin*C[i1];
+    C[i1] = b1; C[i2] = b2;
+  }
   bAsOK = false;
 }
 
@@ -169,16 +189,21 @@ void ZTrans::Move3PF(Double_t x, Double_t y, Double_t z)
 
 void ZTrans::RotatePF(Int_t i1, Int_t i2, Double_t amount)
 {
+  // Rotate in parent frame. Does optimised version of MultLeft.
+
   if(i1 == i2) return;
-  ZTrans a;
-  a.SetupRotation(i1, i2, amount);
-  printf("a:\n");
-  a.Print();
-  printf("before:\n");
-  Print();
-  MultLeft(a);
-  printf("after:\n");
-  Print();
+  // Algorithm: ZTrans a; a.SetupRotation(i1, i2, amount); MultLeft(a);
+
+  // Optimized version:
+  const Double_t cos = TMath::Cos(amount), sin = TMath::Sin(amount);
+  Double_t  b1, b2;
+  Double_t* C = M;
+  --i1; --i2;
+  for(int c=0; c<4; ++c, C+=4) {
+    b1 = cos*C[i1] - sin*C[i2];
+    b2 = cos*C[i2] + sin*C[i1];
+    C[i1] = b1; C[i2] = b2;
+  }
   bAsOK = false;
 }
 
@@ -206,9 +231,7 @@ void ZTrans::Rotate(const ZTrans& a, Int_t i1, Int_t i2, Double_t amount)
   ZTrans X(a);
   X.Invert();
   MultLeft(X);
-  X.UnitTrans();
-  X.SetupRotation(i1, i2, amount); 
-  MultLeft(X);
+  RotatePF(i1, i2, amount);
   MultLeft(a);
   bAsOK = false;
 }
@@ -297,6 +320,32 @@ void ZTrans::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 
   mA1 = a1; mA2 = a2; mA3 = a3;
   bAsOK = true;
+}
+
+void ZTrans::SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3,
+			       const Text_t* pat)
+{
+  // Sets Rotation part as given by angles a1, a1, a3 and pattern pat.
+  // Pattern consists of "XxYyZz" characters.
+  // eg: x means rotate about x axis, X means rotate in negative direction
+  // xYz -> R_x(a3) * R_y(-a2) * R_z(a1); (standard Gled representation)
+  // Note that angles and pattern elements have inversed order!
+  //
+  // Implements Eulerian/Cardanian angles in a uniform way.
+
+  int n = strspn(pat, "XxYyZz"); if(n > 3) n = 3;
+  // Build Trans ... assign ...
+  Float_t a[] = { a3, a2, a1 };
+  UnitRot();
+  for(int i=0; i<n; i++) {
+    if(isupper(pat[i])) a[i] = -a[i];
+    switch(pat[i]) {
+    case 'x': case 'X': RotateLF(2, 3, a[i]); break;
+    case 'y': case 'Y': RotateLF(3, 1, a[i]); break;
+    case 'z': case 'Z': RotateLF(1, 2, a[i]); break;
+    }
+  }
+  bAsOK = false;
 }
 
 void ZTrans::GetRotAngles(Float_t* x) const
@@ -408,7 +457,11 @@ void ZTrans::OrtoNorm3()
 {
   norm3_column(1);
   orto3_column(2,1); norm3_column(2);
-  orto3_column(3,1); orto3_column(3,2); norm3_column(3);
+  M[F02] = M[F10]*M[F21] - M[F11]*M[F20];
+  M[F12] = M[F20]*M[F01] - M[F21]*M[F00];
+  M[F22] = M[F00]*M[F11] - M[F01]*M[F10];
+  // cross-product faster.
+  // orto3_column(3,1); orto3_column(3,2); norm3_column(3);
 }
 
 /**************************************************************************/
