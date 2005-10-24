@@ -1,3 +1,20 @@
+2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* WS_demo.C:
+	Added an eventor with demo of WSWalker.
+
+	* metagui_test.C:
+	Added TimeMaker and a TimeScreenText (being a TimeMakerClient).
+
+	* gl_tests.C:
+	* images.C:
+	* images2.C:
+	* rot_lamps.C:
+	Lamp::Scale was renamed to Lamp::LampScale.
+
+	* run_all.sh:
+	New file, run all demos.
+
 2005-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* metagui_test.C:
