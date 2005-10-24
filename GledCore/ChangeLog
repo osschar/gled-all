@@ -1,3 +1,30 @@
+2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	New method SetRotByAnyAngles (arbitrary Cardan/Euler angles);
+	optimized RotateLF/PF and OrtoNorm3.
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Wrappers for new ZTrans method SetRotByAnyAngles.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	AdoptComet: replaced ZList* arguments by AList*.
+
+	* Glasses/Eventor.cxx:
+	During Reset set mEventID and mInternalTime to zero.
+
+	* Glasses/Lamp.cxx:
+	* Glasses/Lamp.h:
+	* Rnr/GL/Lamp_GL_Rnr.cxx:
+	* Rnr/GL/Lamp_GL_Rnr.h:
+	Renamed member mScale to mLampScale.
+
+	* Pupils/Pupil.cxx:
+	rnr_standard: added try-catch around camera setup.
+
 2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Operator.cxx:
