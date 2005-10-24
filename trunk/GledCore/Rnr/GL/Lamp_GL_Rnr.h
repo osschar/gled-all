@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Gled_Lamp_GL_RNR_H
-#define Gled_Lamp_GL_RNR_H
+#ifndef GledCore_Lamp_GL_RNR_H
+#define GledCore_Lamp_GL_RNR_H
 
 #include <Glasses/Lamp.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>

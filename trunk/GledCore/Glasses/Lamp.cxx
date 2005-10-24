@@ -16,7 +16,7 @@ void Lamp::_init()
   mAmbient.rgba(0.05, 0.05, 0.05, 1);
   mDiffuse.rgba(1, 1, 1, 1);
   mSpecular.rgba(0.2, 0.2, 0.2, 1);
-  mScale = 0;
+  mLampScale = 0;
   mSpotExp = 0; mSpotCutOff = 180;
   mConstAtt = 1; mLinAtt = mQuadAtt = 0;
 
