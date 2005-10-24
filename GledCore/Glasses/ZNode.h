@@ -90,6 +90,8 @@ public:
   void SetPos(Double_t x, Double_t y, Double_t z);          // X{E}
   void SetRotByAngles(Float_t a1, Float_t a2, Float_t a3);  // X{E}
   void SetRotByDegrees(Float_t a1, Float_t a2, Float_t a3); // X{E}
+  void SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3, const Text_t* pat);  // X{E}
+  void SetRotByAnyDegrees(Float_t a1, Float_t a2, Float_t a3, const Text_t* pat); // X{E}
 
   // Scaling (stored separately from ZTrans, use ApplyScale to imprint it)
 

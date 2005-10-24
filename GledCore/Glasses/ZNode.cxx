@@ -195,7 +195,7 @@ void ZNode::SetPos(Double_t x, Double_t y, Double_t z)
 
 void ZNode::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 {
-  mTrans.SetRotByAngles(a1,a2,a3);
+  mTrans.SetRotByAngles(a1, a2, a3);
   mStampReqTrans = Stamp(FID());
 }
 
@@ -203,6 +203,18 @@ void ZNode::SetRotByDegrees(Float_t a1, Float_t a2, Float_t a3)
 {
   const Float_t f = TMath::DegToRad();
   SetRotByAngles(f*a1, f*a2, f*a3);
+}
+
+void ZNode::SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3, const Text_t* pat)
+{
+  mTrans.SetRotByAnyAngles(a1, a2, a3, pat);
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::SetRotByAnyDegrees(Float_t a1, Float_t a2, Float_t a3, const Text_t* pat)
+{
+  const Float_t f = TMath::DegToRad();
+  SetRotByAnyAngles(f*a1, f*a2, f*a3, pat);
 }
 
 /**************************************************************************/
