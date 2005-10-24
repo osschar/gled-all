@@ -1,3 +1,13 @@
+2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliAnimator.C:
+	Added camera movement along a spiral and a convenience function
+	prepare_for_capture().
+
+	* common_foos.C:
+	g_nest was not initialized (create instead of assign was called);
+	Lamp::Scale was renamed to Lamp::LampScale.
+	
 2005-10-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* AliAnimator.C:
