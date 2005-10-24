@@ -299,7 +299,10 @@ void Eventor::Resume()
 void Eventor::Reset()
 {
   mTotalTime = mRunTime = 0;
-  mBeatsDone = mLocBeatsDone = 0; Stamp(FID());
+  mBeatsDone = mLocBeatsDone = 0;
+  mEventID      = 0;
+  mInternalTime = 0;
+  Stamp(FID());
 }
 
 void Eventor::Cancel()
