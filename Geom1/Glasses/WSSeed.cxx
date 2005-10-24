@@ -21,6 +21,12 @@
 
 #include <TSystem.h>
 
+
+//--- tmp ---
+#include <Glasses/ZQueen.h>
+#include <Glasses/Sphere.h>
+#include <TRandom.h>
+
 ClassImp(WSSeed)
 
 /**************************************************************************/
@@ -46,20 +52,6 @@ void WSSeed::_init()
 }
 
 WSSeed::~WSSeed() { delete pTuber; }
-
-/**************************************************************************/
-
-void WSSeed::SetTexUOffset(Float_t texu)
-{
-  mTexUOffset = texu;
-  mStampReqTex = Stamp(FID());
-}
-
-void WSSeed::SetTexVOffset(Float_t texv)
-{
-  mTexVOffset = texv;
-  mStampReqTex = Stamp(FID());
-}
 
 /**************************************************************************/
 
@@ -133,6 +125,7 @@ void WSSeed::ReTexturize()
 }
 
 /**************************************************************************/
+/**************************************************************************/
 
 void WSSeed::TexAnimStart()
 {
@@ -164,8 +157,32 @@ void WSSeed::TexAnimStop()
 }
 
 /**************************************************************************/
+/**************************************************************************/
 
-void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
+Float_t WSSeed::MeasureLength()
+{
+  GMutexHolder lstlck(mListMutex);
+
+  Float_t len = 0;
+  Stepper<WSPoint> s(this);
+  WSPoint* a = *s;
+  while(s.step()) {
+    len += a->mStretch;
+    a = *s;
+  }
+  return len;
+}
+
+void WSSeed::MeasureAndSetLength()
+{
+  mLength = MeasureLength();
+  mStampReqTex = Stamp(FID());
+}
+
+/**************************************************************************/
+/**************************************************************************/
+
+void WSSeed::TransAtTime(ZTrans& lcf, Double_t time, Bool_t repeat_p, Bool_t reinit_trans_p)
 {
   // Positions lcf to time.
   // If repeat_p is true, the time is clamped into the range.
@@ -215,6 +232,8 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
   // printf("  limits '%s', '%s'; rel.time=%f\n",
   //   (*a)->GetName(), (*b)->GetName(), t);
 
+  if(reinit_trans_p)
+    lcf = (*a)->RefTrans();
 
   (*a)->Coff(*b);
 
@@ -222,34 +241,13 @@ void WSSeed::TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p)
   Double_t* Pnt = lcf.ArrT();
   Double_t* Axe = lcf.ArrX();
 
-  WSPoint* f = *a;
   for(Int_t i=0; i<3; i++) {
-    Pnt[i] = f->mCoffs(i, 0) + f->mCoffs(i, 1)*t +
-      f->mCoffs(i, 2)*t2 + f->mCoffs(i, 3)*t3;
-    Axe[i] = f->mCoffs(i, 1) + 2*f->mCoffs(i, 2)*t +
-      3*f->mCoffs(i, 3)*t2;
+    const TMatrixDRow R( (*a)->mCoffs[i] );
+    Pnt[i] = R[0] + R[1]*t + R[2]*t2 + R[3]*t3;
+    Axe[i] = R[1] + 2*R[2]*t + 3*R[3]*t2;
   }
 
   lcf.OrtoNorm3();
-
-  //---------------------
-  /*
-  (*a)->Coff(*b);
-  TMatrixFColumn hPnt(lcf,4), hAxe(lcf,1);
-
-  Float_t t2 = t*t;
-  Float_t t3 = t2*t;
-
-  WSPoint* f = *a;
-  for(Int_t i=1; i<=3; i++) {
-    hPnt(i) = f->mCoffs(i, 0) + f->mCoffs(i, 1)*t +
-      f->mCoffs(i, 2)*t2 + f->mCoffs(i, 3)*t3;
-    hAxe(i) = f->mCoffs(i, 1) + 2*f->mCoffs(i, 2)*t +
-      3*f->mCoffs(i, 3)*t2;
-  }
-
-  lcf.OrtoNorm3();
-  */
 }
 
 /**************************************************************************/
@@ -271,7 +269,7 @@ ZTrans* WSSeed::init_slide(WSPoint* f)
   return new ZTrans(f->RefTrans());
 }
 
-void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
+void WSSeed::ring(ZTrans& lcf, WSPoint* f, Double_t t)
 {
   Double_t *Pnt = lcf.ArrT();
   Double_t *Axe = lcf.ArrX(), *Up = lcf.ArrY(), *Aw = lcf.ArrZ();
@@ -294,10 +292,10 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
   lcf.OrtoNorm3();
 
   pTuber->NewRing(mPLevel, true);
-  Float_t phi = 0, step = 2*TMath::Pi()/mPLevel;
+  Double_t phi = 0, step = 2*TMath::Pi()/mPLevel;
   Float_t R[3], N[3], T[2];
   for(int j=0; j<mPLevel; j++, phi-=step) {
-    Float_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
+    Double_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
     for(Int_t i=0; i<3; ++i) {
       R[i] = Pnt[i] + cp*w*Up[i] + sp*w*Aw[i];
       N[i] = -dws*Axe[i] + dwc*(cp*Up[i] + sp*Aw[i]);
@@ -308,7 +306,7 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
   }
   { // last one
     phi = -2*TMath::Pi();
-    Float_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
+    Double_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
     for(Int_t i=0; i<3; ++i) {
       R[i] = Pnt[i] + cp*w*Up[i] + sp*w*Aw[i];
       N[i] = -dws*Axe[i] + dwc*(cp*Up[i] + sp*Aw[i]);
@@ -318,4 +316,85 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Float_t t)
     pTuber->NewVert(R, N, 0, T);
   }
 
+}
+
+/**************************************************************************/
+
+void WSSeed::Travel(Double_t abs_dt, UInt_t sleep_ms, Bool_t reverse_p)
+{
+  TRandom rndgen(0);
+
+  Sphere* s = new Sphere("Observator");
+  ZTrans trans;
+  {
+    GLensWriteHolder wrlck(this);
+    ZTrans* tt = init_slide(0);
+    trans = *tt;
+    delete tt;
+    if(reverse_p) {
+      TransAtTime(trans, mLength, false);
+      TVector3 xcy = trans.GetBaseVec(1);
+      xcy = xcy.Cross(trans.GetBaseVec(2));
+      TVector3 z(trans.GetBaseVec(3));
+      if(xcy.Dot(z) < 0) {
+	trans.SetBaseVec(3, -z);
+      }
+    }
+    s->SetTrans(trans);
+    s->SetUseScale(true);
+    s->SetSx(0.2+0.8*rndgen.Rndm()); s->SetSy(0.2+0.8*rndgen.Rndm()); s->SetSz(0.2+0.8*rndgen.Rndm()); 
+    s->SetColor(0.2+0.8*rndgen.Rndm(), 0.2+0.8*rndgen.Rndm(), 0.2+0.8*rndgen.Rndm());
+  }
+
+  {
+    GLensWriteHolder q_wrlck(mQueen);
+    mQueen->CheckIn(s);   // try-catch !!!!
+  }
+
+  {
+    GLensWriteHolder s_wrlck(s);
+    s->SetParent(this);
+  }
+
+  // This whole thing should be split into two functions for
+  // proper operation in a cluster context.
+  // 1. Instantiation at the Sun, Broadcast of MIR to call stepper in a
+  //    dedicated thread. (declared as X{E}, require MIR)
+  // 2. Stepper itself (declared as X{ED})
+
+
+  {
+    GLensWriteHolder wrlck(this);
+    Add(s);
+  }
+  Double_t time, dt, max_t;
+  if(!reverse_p) { time = 0;        dt =  abs_dt;  max_t = mLength; }
+  else           { time = mLength;  dt = -abs_dt;  max_t = 0;  }
+    
+
+  while(1) {
+    gSystem->Sleep(sleep_ms);
+    time += dt;
+    if(time*(reverse_p ? -1 : 1) > max_t) {
+      {
+	GLensWriteHolder s_wrlck(s);
+	s->SetParent(0);
+      }
+      {
+	GLensWriteHolder wrlck(this);
+	// s->DecRefCount(this);
+	RemoveAll(s);
+	// mQueen->RemoveLens(s);
+      }
+      break;
+    }
+    {
+      GLensWriteHolder wrlck(this);
+      TransAtTime(trans, time, false);
+    }
+    {
+      GLensWriteHolder wrlck(s);
+      s->SetTrans(trans);
+    }
+  }
 }

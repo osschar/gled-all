@@ -29,20 +29,20 @@ protected:
   WSPoint* get_first_point();
 
   ZTrans* init_slide(WSPoint* f);
-  void ring(ZTrans& lcf, WSPoint* f, Float_t t);
+  void ring(ZTrans& lcf, WSPoint* f, Double_t t);
 
   Int_t		mTLevel;	// X{gST}  7 Value(-range=>[2,1000,1,1],-join=>1)
   Int_t		mPLevel;	// X{gST}  7 Value(-range=>[2,1000,1,1])
 
-  Float_t	mTexUOffset;	// X{gE}   7 Value(-range=>[-1e6,1e6,1,1000], -join=>1)
-  Float_t	mTexVOffset;	// X{gE}   7 Value(-range=>[-1e6,1e6,1,1000])
+  Float_t	mTexUOffset;	// X{GS} Stamp{ReqTex} 7 Value(-range=>[-1e6,1e6,1,1000], -join=>1)
+  Float_t	mTexVOffset;	// X{GS} Stamp{ReqTex} 7 Value(-range=>[-1e6,1e6,1,1000])
 
   Bool_t	bRenormLen;	// X{gST}  7 Bool(-join=>1)
   Float_t	mLength;	// X{gST}  7 Value(-range=>[0,1000,1,100])
 
   ZColor	mColor;		// X{PGST} 7 ColorButt(-join=>1)
   Float_t	mLineW;		// X{gST}  7 Value(-range=>[1,20,1,100],-join=>1)
-  bool		bFat;		// X{gST}  7 Bool()
+  Bool_t	bFat;		// X{gST}  7 Bool()
 
   ZLink<ZImage>	mTexture;	// X{gS} L{} RnrBits{4,0,5,0, 0,0,0,0}
 
@@ -66,9 +66,6 @@ public:
     ZNode(n,t) { _init(); }
   virtual ~WSSeed();
 
-  void SetTexUOffset(Float_t texu);
-  void SetTexVOffset(Float_t texv);
-
   // ZGlass virtuals
   virtual void SetStamps(TimeStamp_t s)
   { ZNode::SetStamps(s); mStampReqTex = s; mStampTexDone = s - 1; }
@@ -77,7 +74,14 @@ public:
   virtual void Triangulate();
   virtual void ReTexturize();
 
-  void TransAtTime(ZTrans& lcf, Float_t time, bool repeat_p=false);
+  Float_t MeasureLength();
+  void    MeasureAndSetLength(); // X{E} 7 MButt();
+
+  void TransAtTime(ZTrans& lcf, Double_t time,
+		   Bool_t repeat_p=false, Bool_t reinit_trans_p=false);
+
+  void Travel(Double_t abs_dt=0.01, UInt_t sleep_ms=50,
+	      Bool_t reverse_p=false); // X{ED} 7 MCWButt()
 
 #include "WSSeed.h7"
   ClassDef(WSSeed, 1)
