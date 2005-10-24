@@ -40,4 +40,4 @@ clean:
 	rm -f ${OBJS}
 
 distclean: clean
-	rm ${GFORGE}
+	rm -f ${GFORGE}
