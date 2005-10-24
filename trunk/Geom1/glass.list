@@ -16,6 +16,7 @@ RelParticle	32	Glasses/RelParticle
 WSSeed		64	Glasses/WSSeed		.
 WSPoint		65	Glasses/WSPoint		.
 WSTube		66	Glasses/WSTube		WSSeed
+WSWalker	67	Glasses/WSWalker
 
 TimeMaker	128	Glasses/TimeMaker
 Sleeper		129	Glasses/Sleeper
