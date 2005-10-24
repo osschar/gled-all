@@ -88,7 +88,7 @@ void metagui_test()
 
   Lamp* l = new Lamp("Lamp");
   l->SetDiffuse(0.8, 0.8, 0.8);
-  l->SetScale(1);
+  l->SetLampScale(1);
   l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
   g_queen->CheckIn(l); images->Add(l);
   images->GetGlobLamps()->Add(l);
@@ -172,6 +172,13 @@ void metagui_test()
   CREATE_ADD_GLASS(rot_op, Mover, rot_eventor, "Rotator", 0);
   rot_op->SetRotateParams(1, 2, 0.01);
   rot_op->SetNode(morphs[1]);
+
+  CREATE_ADD_GLASS(rot_time, TimeMaker, rot_eventor, "TimeMaker", 0);
+  CREATE_ATT_GLASS(time_display, TimeScreenText, rot_time, AddClient,
+		   "TimeScreenText", 0);
+  time_display->SetY(1);
+  time_display->SetFormat("time: %.1f s");
+  g_scene->Add(time_display);
 
   // GForger
   CREATE_ADD_GLASS(gforge, GForger, images, "GForger", 0);
