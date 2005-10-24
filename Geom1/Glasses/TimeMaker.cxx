@@ -12,6 +12,7 @@
 #include "TimeMaker.h"
 #include "TimeMaker.c7"
 #include <Glasses/Eventor.h>
+#include <Glasses/ZQueen.h>
 
 ClassImp(TimeMaker);
 
@@ -30,6 +31,21 @@ void TimeMaker::_init()
   bPushToStack = bPopFromStack = true;
 
   bEmitStamps = false;
+}
+
+/**************************************************************************/
+
+void TimeMaker::AddClient(ZGlass* lens)
+{
+  if(lens == 0) return;
+
+  if(mClients == 0) {
+    ZList* l = new ZList("TimeMakerClients");
+    mQueen->CheckIn(l);
+    SetClients(l);
+  }
+
+  mClients->Add(lens);
 }
 
 /**************************************************************************/
