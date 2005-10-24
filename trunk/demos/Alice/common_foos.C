@@ -32,13 +32,13 @@ void create_basic_scene()
   CREATE_ADD_GLASS(lamp1, Lamp, origin, "Lamp1", "");
   lamp1->SetDiffuse(1, 1, 1);
   lamp1->SetAmbient(0.3, 0.3, 0.3);
-  lamp1->SetScale(0);
+  lamp1->SetLampScale(0);
   lamp1->SetPos(0, 12, 12);
   
   CREATE_ADD_GLASS(lamp2, Lamp, origin, "Lamp2", "");
   lamp2->SetDiffuse(0.65, 0.35, 0.5);
   lamp2->SetAmbient(0, 0, 0);
-  lamp2->SetScale(0);
+  lamp2->SetLampScale(0);
   lamp2->SetPos(12, 12, 0);
  
   g_scene->GetGlobLamps()->Add(lamp1);
@@ -97,7 +97,7 @@ void setup_default_gui()
     ASSIGN_ADD_GLASS(g_shell, ShellInfo, g_fire_queen, shell_name, "");
     g_shell->SetDefSourceVis(false);
 
-    CREATE_ATT_GLASS(g_nest, NestInfo, g_shell, SetDefSubShell, "Nest", 0);
+    ASSIGN_ATT_GLASS(g_nest, NestInfo, g_shell, SetDefSubShell, "Nest", 0);
     g_nest->Add(g_scene);
     g_nest->SetLayout(default_nest_layout);
     g_nest->SetLeafLayout(NestInfo::LL_Custom);
