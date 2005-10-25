@@ -1,3 +1,27 @@
+2005-10-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_base.inc:
+	* make/make_targets.inc:
+	Separated targets from make_base.inc and put them into a new file
+	make_targets.inc. This allows libset makefiles to be written in a
+	more transparent way. As a drawback two files need to be included
+	manually.
+
+	* bin/gled-create-libset:
+	Fixed makefile template to match the new inclusion policy.
+
+	* Alice/Makefile:
+	* Audio1/Makefile:
+	* EHS/Makefile:
+	* GTS/Makefile:
+	* Geom1/Makefile:
+	* GledCore/Makefile:
+	* Numerica/Makefile:
+	* RootGeo/Makefile:
+	* TADemo/Makefile:
+	Makefiles of all libsets under my control converted to the new
+	top-make-fragment inclusion policy.
+
 2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
