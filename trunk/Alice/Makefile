@@ -24,15 +24,15 @@ VIEW_FL_DIRS	:=
 BASE_LD_LIBS    = -L${ROOTSYS}/lib -lGeom -lEG -lVMC -lTreePlayer \
 		-L${ALICE_ROOT}/lib/tgt_${ALICE_TARGET} ${ALICE_LIBS}
 
-##### Targets #####
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
 
 LIBSET_TARGETS := # define additional targets (libraires built by default)
 
-include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_targets.inc
+#--------------------------------------------------------------
 
-# user targets go here; enumerate them in LIBSET_TARGETS
-
-# clean and distclean defined as '::' rules in make_base.inc
 clean::
 distclean::
-# DO NOT DELETE

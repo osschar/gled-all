@@ -19,10 +19,13 @@ BASE_LD_LIBS	:= -lehs
 
 LIBSET_TARGETS := # define additional targets (libraires built by default)
 
+#--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
 
-# user targets go here; enumerate them in LIBSET_TARGETS
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_targets.inc
+#--------------------------------------------------------------
 
-# clean and distclean defined as '::' rules in make_base.inc
 clean::
 distclean::

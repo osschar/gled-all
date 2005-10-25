@@ -13,13 +13,15 @@ VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
 
-##### Targets #####
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
 
 LIBSET_TARGETS := # define additional targets (libraires built by default)
 
-include ${GLEDSYS}/make/make_base.inc
-
-# user targets go here; enumerate them in LIBSET_TARGETS
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_targets.inc
+#--------------------------------------------------------------
 
 clean::
 distclean::

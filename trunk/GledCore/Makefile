@@ -29,22 +29,21 @@ PUPILS_HDRS    := $(wildcard Pupils/*.h)
 PUPILS_SRCS    := $(wildcard Pupils/*.cxx)
 PUPILS_OBJS    := $(addsuffix .o ,$(basename ${PUPILS_SRCS}))
 
-LIBSET_PREREQS := ${REGEXP_LIB}
-LIBSET_TARGETS := local_targets
-
+#--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
 
-local_targets:: ${REGEXP_LIB} bin/saturn # ?? Could remove REGEXP ?? it's a PREREQ
+LIBSET_PREREQS := ${REGEXP_LIB}
+LIBSET_TARGETS := bin/saturn
+
 ifndef SKIP_VIEW_LIBS
-  local_targets:: bin/gled ${PUPILS_LIB} # ?? Move PUPILS below ??
+  LIBSET_TARGETS   += bin/gled
   ifndef SKIP_RNR_LIBS
-    ALL_HDRS += ${PUPILS_HDRS}
-    ALL_OBJS += ${PUPILS_OBJS}
-    ALL_LIBS += ${PUPILS_LIB}
+    ALL_HDRS       += ${PUPILS_HDRS}
+    ALL_OBJS       += ${PUPILS_OBJS}
+    LIBSET_TARGETS += ${PUPILS_LIB}
   endif
 endif
-
-# --------------------------------
 
 bin/saturn: saturn.o ${BASE_LIB_NAME}
 	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
@@ -62,7 +61,9 @@ ${REGEXP_LIB}:
 ${PUPILS_LIB}: ${PUPILS_OBJS}
 	${LD} -shared -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
 
-# --------------------------------
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_targets.inc
+#--------------------------------------------------------------
 
 clean::
 	@rm -f ${MAINOBJS}
