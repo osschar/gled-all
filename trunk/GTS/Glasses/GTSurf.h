@@ -57,10 +57,16 @@ public:
   void CalcStats();	//! X{E} 7 MButt(-join=>1)
   void PrintStats();	//! X{E} 7 MButt()
 
+  void Destroy();       //  X{E} 7 MButt(-join=>1)
   void Invert(); 	//  X{E} 7 MButt()
 
+  void Tessellate(UInt_t order=1);     // X{E} 7 MCWButt(-join=>1)
+  void GenerateSphere(UInt_t order=1); // X{E} 7 MCWButt()
+
+  void Legendrofy(Int_t max_l, Double_t abs_scale=0.1,Double_t pow_scale=2.7); // X{E} 7 MCWButt()
+
 #include "GTSurf.h7"
-  ClassDef(GTSurf, 1)
+  ClassDef(GTSurf, 1);
 }; // endclass GTSurf
 
 
