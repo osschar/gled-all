@@ -14,11 +14,15 @@ BASE_LD_LIBS    = -lIL -lILU
 
 GFORGE_EXE      = bin/gforge
 
-##### Targets
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
 
 LIBSET_TARGETS := ${GFORGE_EXE}
 
-include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_targets.inc
+#--------------------------------------------------------------
 
 ${GFORGE_EXE}:
 	${MAKE} -C GForge

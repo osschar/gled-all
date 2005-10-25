@@ -17,7 +17,13 @@ endif
 CPPFLAGS	= $(shell ${GLIB_CONFIG} --cflags)
 BASE_LD_LIBS	= $(shell ${GLIB_CONFIG} --libs) -lgts
 
+#--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
+#--------------------------------------------------------------
+
+#--------------------------------------------------------------
+include ${GLEDSYS}/make/make_targets.inc
+#--------------------------------------------------------------
 
 clean::
 distclean::
