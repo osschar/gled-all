@@ -13,13 +13,13 @@
 namespace GLTextNS { class TexFont; }
 
 class WGlFrameStyle_GL_Rnr : public ZRnrModBase_GL_Rnr {
-private:
+ private:
   void _init();
-
-protected:
+  void render_triangle(int id, float dx, float dy, const ZColor* col);
+ protected:
   WGlFrameStyle*	mWGlFrameStyle;
 
-public:
+ public:
   WGlFrameStyle_GL_Rnr(WGlFrameStyle* idol) :
     ZRnrModBase_GL_Rnr(idol), mWGlFrameStyle(idol)
   { _init(); }
@@ -35,13 +35,16 @@ public:
 		 float& x, float& y, float& w, float& h);
 		  
 
-  void RenderTile (float dx, float dy, bool belowmouse=false);
+  void RenderTile (float dx, float dy, bool belowmouse=false, const ZColor* col=0);
   void RenderFrame(float dx, float dy);
   void RenderText (GLTextNS::TexFont *txf, TString& label,
 		   float x, float y, float w, float h);
 
   void FullRender(GLTextNS::TexFont *txf, TString& label,
 		  float dx, float dy, bool belowmouse=false);
+
+  void FullSymbolRender(GLTextNS::TexFont *txf, TString& label,
+			float dx, float dy, bool belowmouse=false, const ZColor* col1=0, const ZColor* col2=0);
 
 }; // endclass WGlFrameStyle_GL_Rnr
 

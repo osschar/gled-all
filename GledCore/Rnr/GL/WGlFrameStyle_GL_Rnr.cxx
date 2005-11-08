@@ -99,19 +99,22 @@ void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, TString& label,
     }
   }
   y += descent*scale;
-
   w = scaled_w;
   h = text_h;
 }
 
 /**************************************************************************/
 
-void WGlFrameStyle_GL_Rnr::RenderTile(float dx, float dy, bool belowmouse)
+void WGlFrameStyle_GL_Rnr::RenderTile(float dx, float dy, bool belowmouse, const ZColor* col)
 {
    WGlFrameStyle& FS = *mWGlFrameStyle;
    if(FS.bDrawTile) {
-     if(belowmouse) glColor4fv(FS.mBelowMColor());
-     else           glColor4fv(FS.mTileColor());
+     if(belowmouse) {
+       glColor4fv(FS.mBelowMColor());
+     } else {
+       if(col) glColor4fv((*col)());
+       else         glColor4fv(FS.mTileColor());
+     }
      glBegin(GL_QUADS);
      glVertex2f(0, 0);   glVertex2f(dx, 0);
      glVertex2f(dx, dy); glVertex2f(0, dy);
@@ -184,4 +187,83 @@ void WGlFrameStyle_GL_Rnr::FullRender(GLTextNS::TexFont *txf, TString& label,
   glDisable(GL_POLYGON_OFFSET_FILL);
 
   glPopAttrib();
+}
+
+/**************************************************************************/
+
+void WGlFrameStyle_GL_Rnr::FullSymbolRender(GLTextNS::TexFont *txf, TString& label,
+					    float dx, float dy, bool belowmouse, const ZColor* back_col, const ZColor* sym_color)
+{
+  WGlFrameStyle& FS = *mWGlFrameStyle;
+
+  glPushAttrib(GL_COLOR_BUFFER_BIT);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+  float x, y, w, h, scale, xt, yt, wt, ht;
+  BoxLimits(dx, dy, x, y, w, h);
+  xt = x; yt = y; wt = w; ht = h;
+
+  StudyText(txf, label, scale, xt, yt, wt, ht);
+  if(FS.bMinTile && FS.mHAlign == WGlFrameStyle::HA_Left)
+    dx -= (x + w) - (xt + wt);
+
+  glNormal3f(0, 0, 1);
+  glEnable(GL_POLYGON_OFFSET_FILL);
+
+  glPolygonOffset(1, 1);
+  RenderTile(dx, dy, belowmouse, back_col);
+
+  RenderFrame(dx, dy);
+
+  glPolygonOffset(-1, -1);
+  if (label == "<" ) {
+    render_triangle(1, dx, dy, sym_color);
+  } else if (label == "<<" ) {
+    render_triangle(2,dx, dy, sym_color);
+  } else if (label == ">" ) {
+    render_triangle(3,dx, dy, sym_color);
+  } else if (label == ">>") {
+    render_triangle(4,dx, dy, sym_color);
+  }
+  else {
+    RenderText(txf, label, scale, xt, yt, w);
+  }
+  glDisable(GL_POLYGON_OFFSET_FILL);
+  glPopAttrib();
+}
+
+/**************************************************************************/
+void WGlFrameStyle_GL_Rnr::render_triangle(int id, float dx, float dy, const ZColor* col){
+  glColor4fv((*col)());
+  float xs = dx/4, ys = dy/4;
+
+  glBegin(GL_TRIANGLES);
+  switch (id) {
+  case 1:
+    {
+      glVertex2f(xs*2.5, ys*3); glVertex2f(xs*1.5, ys*2); glVertex2f(xs*2.5, ys);
+      break;
+    }
+  case 2:
+    {
+      glVertex2f(xs*2, ys*3); glVertex2f(xs, ys*2); glVertex2f(xs*2, ys);
+      glVertex2f(xs*3, ys*3); glVertex2f(xs*2, ys*2); glVertex2f(xs*3, ys);
+      break;
+    }
+  case 3:
+    {
+      glVertex2f(xs*1.5, ys);  glVertex2f(xs*2.5, ys*2); glVertex2f(xs*1.5, ys*3);
+      break;
+    }
+  case 4:
+    {
+      glVertex2f(xs, ys);  glVertex2f(xs*2, ys*2); glVertex2f(xs, ys*3);
+      glVertex2f(xs*2, ys); glVertex2f(xs*3, ys*2); glVertex2f(xs*2, ys*3);
+      break;
+    }
+  default:
+    break;
+  }
+  glEnd();
 }
