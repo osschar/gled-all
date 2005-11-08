@@ -21,7 +21,11 @@ protected:
   RnrModStore         mFontRMS;
   RnrModStore         mFrameRMS;
 
-  ZGlass*             mCurrent;
+  void* m_current;
+  void* m_prev_page;
+  void* m_next_page;
+  void* m_prev;
+  void* m_next;
 
 public:
   WGlDirectory_GL_Rnr(WGlDirectory* idol) :

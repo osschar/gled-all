@@ -16,7 +16,7 @@ ClassImp(WGlDirectory)
 
 /**************************************************************************/
 
-void WGlDirectory::_init()
+  void WGlDirectory::_init()
 {
   // *** Set all links to 0 ***
   mContents  = 0;
@@ -25,6 +25,17 @@ void WGlDirectory::_init()
   mStepMode = SM_XYZ;
   mDx = mDy = mDz = 1;
   mNx = mNy = mNz = 16;
+  mFirst = 1;
+  bDrawTitle = false;
+  mNameFraction = 0.4;
+
+  bDrawPageCtrl = true;
+  mPageCtrlWidth  = 0.1;
+  mPageCtrlOff   = 0.015;
+  mPageInfoWidth = 0.2;
+  mPageInfoOff    = 0.04;
+  mPageColor.rgba(0.18, 0.45, 0.6,0.6);
+  mSymColor.rgba(1., 0., 0.,1.);
 
   bDrawBox = true;
   mBoxOx = mBoxOy = mBoxOz = 0;
@@ -104,3 +115,31 @@ void WGlDirectory::StandardPixel()
   SetTextA1(0);  SetTextA2(0); SetTextA3(0);
 }
 
+Int_t WGlDirectory::count_entries()
+{
+  if(mContents->GetListTimeStamp() > mNEntriesStamp) {
+    mNEntries = 0;
+    if(*mContents != 0) {
+      GledNS::ClassInfo* bci = GetCbackBetaClassInfo();
+      if(bci == 0) {
+	mNEntries = mContents->Size();
+      } else {
+	lpZGlass_t cont; mContents->CopyList(cont);
+	for(lpZGlass_i i=cont.begin(); i!=cont.end(); ++i) {
+	  if(GledNS::IsA(*i, bci->fFid))
+	    ++mNEntries;
+	}
+      }
+    }
+    mNEntriesStamp = mContents->GetListTimeStamp();
+    if(mFirst > mNEntries)
+      SetFirst(mNEntries);// - mNx*mNy*mNz + 1);
+  }
+  return mNEntries;
+}
+
+void WGlDirectory::SetContents(AList* cont)
+{
+  mNEntriesStamp = 0;
+  set_link_or_die(mContents.ref_link(), cont, FID());
+}
