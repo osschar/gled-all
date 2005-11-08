@@ -1,3 +1,16 @@
+2005-11-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/WGlDirectory.cxx:
+	* Glasses/WGlDirectory.h:
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	* Rnr/GL/WGlDirectory_GL_Rnr.h:
+        Add pager and title display.
+
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.cxx:
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.h:
+        Add FullSymbolRender and addtional arguments in FullRender
+        to display pager in WGlDirectory.
+
 2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/ZTrans.cxx:
