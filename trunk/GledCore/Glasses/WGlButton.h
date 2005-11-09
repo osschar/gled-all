@@ -32,6 +32,9 @@ public:
   GledNS::MethodInfo* GetCbackMethodInfo();
   void EmitCbackResetRay() { mCbackMethodInfo = 0; }
 
+  void MenuEnter(); // X{E}
+  void MenuExit();  // X{E}
+
 #include "WGlButton.h7"
   ClassDef(WGlButton, 1)
 }; // endclass WGlButton
