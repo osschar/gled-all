@@ -531,10 +531,22 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
   mDriver->SetAbsCamera(&mCamAbsTrans);
 
   mDriver->BeginRender();
-  if(rnr_self)
-    mDriver->Render(mDriver->GetRnr(fImg));
-  if(rnr_overlay && mOverlayImg != 0)
-    mDriver->Render(mDriver->GetRnr(mOverlayImg));
+  if(rnr_self) {
+    try {
+      mDriver->Render(mDriver->GetRnr(fImg));
+    }
+    catch(Exc_t exc) {
+      cout << _eh << "scene exception: '" << exc << "'.\n"; 
+    }
+  }
+  if(rnr_overlay && mOverlayImg != 0) {
+    try {
+      mDriver->Render(mDriver->GetRnr(mOverlayImg));
+    }
+    catch(Exc_t exc) {
+      cout << _eh << "overlay exception: '" << exc << "'.\n"; 
+    }
+ }
   mDriver->EndRender();
 
   if(mDriver->SizePM() > 0) {
