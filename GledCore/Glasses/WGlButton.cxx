@@ -34,3 +34,15 @@ GledNS::MethodInfo* WGlButton::GetCbackMethodInfo()
 }
 
 /**************************************************************************/
+
+void WGlButton::MenuEnter()
+{
+  mParent->RnrOffForDaughters();
+  SetRnrElements(true);
+}
+
+void  WGlButton::MenuExit()
+{
+  SetRnrElements(false);
+  mParent->RnrOnForDaughters();
+}
