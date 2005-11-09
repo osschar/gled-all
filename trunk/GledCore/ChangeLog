@@ -1,3 +1,11 @@
+2005-11-09  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	* Pupils/Pupil.cxx:
+	* Stones/SGridStepper.cxx:
+	* Stones/SGridStepper.h:
+
 2005-11-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/WGlDirectory.cxx:
