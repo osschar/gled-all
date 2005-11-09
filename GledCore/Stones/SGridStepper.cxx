@@ -32,7 +32,19 @@ SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
   nx = ny = nz = 0;
   Nx = Ny = Nz = 16;
   Dx = Dy = Dz = 1;
+  Ox = Oy = Oz = 0;
 }
+
+void SGridStepper::Reset()
+{
+  nx = ny = nz = 0;
+}
+
+void SGridStepper::Subtract(SGridStepper& s)
+{
+  Ox = -s.nx; Oy = -s.ny; Oz = -s.nz;
+}
+/**************************************************************************/
 
 bool SGridStepper::Step()
 {
@@ -49,7 +61,22 @@ bool SGridStepper::Step()
   return true;
 }
 
+/**************************************************************************/
+
 void SGridStepper::GetPosition(Float_t* p)
 {
-  p[0] = nx*Dx; p[1] = ny*Dy; p[2] = nz*Dz;
+  p[0] = Ox + nx*Dx; p[1] = Oy + ny*Dy; p[2] = Oz + nz*Dz;
+}
+
+#include <Glasses/ZNode.h>
+
+void SGridStepper::SetNode(ZNode* node)
+{
+  node->SetPos(Ox + nx*Dx, Oy + ny*Dy, Oz + nz*Dz);
+}
+
+void SGridStepper::SetNodeAdvance(ZNode* node)
+{
+  SetNode(node);
+  Step();
 }
