@@ -66,7 +66,8 @@ public:
   void ImportNodesRec(Int_t depth=2);      // X{Ed} 7 MCWButt()
 
   // Persistence.
-  void SaveToFile(const Text_t* file=0);   // X{E}  7 MCWButt(-join=>1)
+  void SaveToFile(Bool_t as_top_level, Bool_t save_links=true,
+		  const Text_t* file=0);   // X{E}  7 MCWButt(-join=>1)
   void LoadFromFile(const Text_t* file=0); // X{Ed} 7 MCWButt()
   virtual void Restore();                  // X{Ed} 7 MButt()
 
