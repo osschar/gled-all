@@ -285,19 +285,22 @@ void ZGeoNode::ImportNodesRec(Int_t depth)
 // Save/Load/Restore
 /***************************************************************************/
 
-void ZGeoNode::SaveToFile(const Text_t* file)
+void ZGeoNode::SaveToFile(Bool_t as_top_level, Bool_t save_links,
+			  const Text_t* file)
 {
   static const Exc_t _eh("ZGeoNode::SaveToFile ");
   
   if(file == 0 || strcmp(file,"") == 0) file = mDefFile.Data();
-  ISdebug(1, _eh + "loading from '" + file + "'.");
+  ISdebug(1, _eh + "saving to '" + file + "'.");
 
   ZComet c("ZGeoNodes");
-  {
+  if(as_top_level) {
+    c.AddTopLevel(this, save_links, true, -1);
+  } else {
     GMutexHolder llck(mListMutex);
     Stepper<> s(this);
     while(s.step())
-      c.AddTopLevel(*s, false, true, -1);
+      c.AddTopLevel(*s, save_links, true, -1);
   }
   TFile f(file, "RECREATE");
   c.Write();
