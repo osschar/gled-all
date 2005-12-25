@@ -63,7 +63,7 @@ int WGlButton_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
   if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
     GledNS::MethodInfo* mi = B.GetCbackMethodInfo();
     if(mi == 0) return 0;
-    ZMIR mir(B.mCbackAlpha.get());
+    ZMIR mir(*B.mCbackAlpha, *B.mCbackBeta);
     mi->ImprintMir(mir);
     fImg->fEye->Send(mir);
 
