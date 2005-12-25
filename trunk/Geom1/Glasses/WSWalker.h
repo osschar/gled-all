@@ -28,6 +28,11 @@ protected:
 
   void set_trans(Double_t t);
 
+  // Local cache
+  Double_t m_last_time;  //!
+  ZTrans   m_last_trans; //!
+  
+
 public:
   WSWalker(const Text_t* n="WSWalker", const Text_t* t=0) :
     Operator(n,t) { _init(); }
