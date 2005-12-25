@@ -66,6 +66,8 @@ public:
     ZList(n,t) { _init(); }
 
   // virtuals
+  virtual void ResetRecursively();
+
   virtual void PreOperate(Operator::Arg* op_arg)  throw(Operator::Exception);
   virtual void Operate(Operator::Arg* op_arg)     throw(Operator::Exception);
   virtual void PostOperate(Operator::Arg* op_arg) throw(Operator::Exception);
