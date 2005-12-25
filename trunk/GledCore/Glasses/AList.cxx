@@ -363,175 +363,178 @@ ZMIR* AList::MkMir_RemoveLabel(TString label)
 
 TimeStamp_t AList::StampListPushBack(ZGlass* lens, Int_t id)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_push_back, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_push_back, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens); ray->SetBeta(id);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListPopBack()
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_pop_back, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_pop_back, stamp,
 		Ray::EB_StructuralChange)
   {
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListPushFront(ZGlass* lens, Int_t id)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_push_front, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_push_front, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens); ray->SetBeta(id);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListPopFront()
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_pop_front, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_pop_front, stamp,
 		Ray::EB_StructuralChange)
   {
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 /**************************************************************************/
 
 TimeStamp_t AList::StampListInsert(ZGlass* lens, Int_t id, ZGlass* before)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_insert, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_insert, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens); ray->SetBeta(id);
     ray->SetGamma(before);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListInsert(ZGlass* lens, Int_t id, Int_t before_id)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_insert, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_insert, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens); ray->SetBeta(id);
     ray->SetGamma(before_id);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListRemove(ZGlass* lens)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_remove, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_remove, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
-TimeStamp_t AList::StampListRemove(Int_t id)
+TimeStamp_t AList::StampListRemove(ZGlass* lens, Int_t id)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_remove, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_remove, stamp,
 		Ray::EB_StructuralChange)
   {
+    ray->SetBeta(lens);
     ray->SetBeta(id);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListElementSet(ZGlass* lens, Int_t id)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_element_set, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_element_set, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens);
     ray->SetBeta(id);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListElementSet(ZGlass* lens, TString label)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_element_set, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_element_set, stamp,
 		Ray::EB_StructuralChange)
   {
     ray->SetBeta(lens);
     ray->SetBeta(label);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
-TimeStamp_t AList::StampListInsertLabel(TString label, TString before)
+TimeStamp_t AList::StampListInsertLabel(ZGlass* lens, TString label, TString before)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_insert_label, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_insert_label, stamp,
 		Ray::EB_StructuralChange)
   {
+    ray->SetBeta(lens);
     ray->SetBeta(label);
     ray->SetGamma(before);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
-TimeStamp_t AList::StampListRemoveLabel(TString label)
+TimeStamp_t AList::StampListRemoveLabel(ZGlass* lens, TString label)
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_remove_label, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_remove_label, stamp,
 		Ray::EB_StructuralChange)
   {
+    ray->SetBeta(lens);
     ray->SetBeta(label);
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 /**************************************************************************/
 
 TimeStamp_t AList::StampListRebuild()
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_rebuild, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_rebuild, stamp,
 		Ray::EB_StructuralChange)
   {
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t AList::StampListClear()
 {
-  mListTimeStamp = ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_list_clear, mListTimeStamp,
+  TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_list_clear, stamp,
 		Ray::EB_StructuralChange)
   {
     ZGLASS_SEND_RAY;
   }
-  return mListTimeStamp;
+  return stamp;
 }
 
 /**************************************************************************/
