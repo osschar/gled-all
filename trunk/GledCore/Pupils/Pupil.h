@@ -62,6 +62,8 @@ protected:
   Fl_Window*	mFullScreenWin;
   int		mFSx, mFSy, mFSw, mFSh;
 
+  bool          bShowOverlay;
+
   bool		bDumpImage;
   TString	mImageName;
   Int_t		mImgNTiles;
