@@ -10,6 +10,8 @@
 
 #include <GL/gl.h>
 
+#define PARENT ZNode_GL_Rnr
+
 /**************************************************************************/
 
 void WSSeed_GL_Rnr::vert(WSPoint* f, Float_t t)
@@ -23,16 +25,19 @@ void WSSeed_GL_Rnr::vert(WSPoint* f, Float_t t)
 
 /**************************************************************************/
 
-void WSSeed_GL_Rnr::PreDraw(RnrDriver* rd)
+void WSSeed_GL_Rnr::Draw(RnrDriver* rd)
 {
-  ZNode_GL_Rnr::PreDraw(rd);
-  if(mWSSeed->mStampTexDone < mWSSeed->mStampReqTex) {
-    mWSSeed->ReTexturize();
-  }
-  if(mStampTex != mWSSeed->mStampTexDone) {
-    bRebuildDL = true;    
-    mStampTex = mWSSeed->mStampTexDone;
-  }
+  glMatrixMode(GL_TEXTURE);
+  glPushMatrix();
+  glTranslatef(mWSSeed->mTexUOffset, mWSSeed->mTexVOffset, 0);
+  glScalef(mWSSeed->mTexUScale, mWSSeed->mTexVScale, 1);
+  glMatrixMode(GL_MODELVIEW);
+
+  PARENT::Draw(rd);
+
+  glMatrixMode(GL_TEXTURE);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
 }
 
 /**************************************************************************/
@@ -43,33 +48,32 @@ void WSSeed_GL_Rnr::Render(RnrDriver* rd)
 
   glPushAttrib(GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT);
 
-  glLineWidth(mWSSeed->mLineW);
+  if(mWSSeed->mLineW != 0)
+    glLineWidth(mWSSeed->mLineW);
   glColor4fv(mWSSeed->mColor());
   if(mWSSeed->bFat) {
     if(mWSSeed->pTuber) TubeTvor_GL_Rnr::Render(mWSSeed->pTuber);
   } else {
-    list<WSPoint*> points; mWSSeed->CopyListByGlass<WSPoint>(points);
-    if(points.size() >= 2) {
-      list<WSPoint*>::iterator a = points.begin();
-      list<WSPoint*>::iterator b;
-      while((b = a, ++b) != points.end()) {
-	(*a)->Coff(*b);
-	Float_t delta = 1.0/mWSSeed->mTLevel, max = 1 - delta/2;
-	glBegin(GL_LINE_STRIP);
-	// Texturing is fooed!!!
-	// Need proper length and stretch etc ...
-	Float_t utex = mWSSeed->mTexUOffset;
-	Float_t vtex = mWSSeed->mTexVOffset;
-	for(Float_t t=0; t<max; t+=delta) {
-	  glTexCoord2f(utex + t, vtex);
-	  vert(*a, t);
-	}
-	glTexCoord2f(utex + 1, vtex);
-	vert(*a, 1);
-	glEnd();
-	a = b;
+    GMutexHolder lstlck(mWSSeed->mListMutex);
+    AList::Stepper<WSPoint> s(mWSSeed);
+    s.step();
+    WSPoint* a = *s;
+
+    const Float_t delta = 1.0/mWSSeed->mTLevel, max = 1 - delta/2;
+    Float_t utex = 0, vtex = 0;
+    glBegin(GL_LINE_STRIP);
+    while(s.step()) {
+      a->Coff(*s);
+      for(Float_t t=0; t<max; t+=delta) {
+	glTexCoord2f(utex + t*a->mStretch, vtex + t*a->mTwist);
+	vert(a, t);
       }
+      utex += a->mStretch; vtex += a->mTwist;
+      glTexCoord2f(utex, vtex);
+      vert(a, 1);
+      a = *s;
     }
+    glEnd();
   }
 
   glPopAttrib();

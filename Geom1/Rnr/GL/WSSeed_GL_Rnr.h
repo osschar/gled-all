@@ -10,21 +10,17 @@
 #include <Glasses/WSSeed.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class WSSeed_GL_Rnr : public ZNode_GL_Rnr {
-private:
-  void _init();
-
+class WSSeed_GL_Rnr : public ZNode_GL_Rnr
+{
 protected:
   WSSeed*	mWSSeed;
-  TimeStamp_t	mStampTex;
 
   void vert(WSPoint* f, Float_t t);
 
 public:
-  WSSeed_GL_Rnr(WSSeed* idol) : ZNode_GL_Rnr(idol), mWSSeed(idol)
-  { mStampTex = 0; }
+  WSSeed_GL_Rnr(WSSeed* idol) : ZNode_GL_Rnr(idol), mWSSeed(idol) {}
 
-  virtual void PreDraw(RnrDriver* rd);
+  virtual void Draw(RnrDriver* rd);
 
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd);
