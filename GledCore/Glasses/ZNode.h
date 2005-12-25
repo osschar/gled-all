@@ -65,7 +65,6 @@ public:
   virtual void SetStamps(TimeStamp_t s)
   { ZList::SetStamps(s); mStampReqTrans = s; }
 
-  // Overrides for ZTrans stuff that needs stamping
   Int_t	Level();
 
   // ZTrans wrappers
@@ -74,6 +73,7 @@ public:
   void SetTrans(const ZTrans& t);  // X{E}
   void MultLeft(const ZTrans& t);  // X{E}
   void MultRight(const ZTrans& t); // X{E}
+  ZTrans& ref_trans() { return mTrans; } // Use wisely.
 
   void MoveLF(Int_t vi, Double_t amount);             // X{E}
   void Move3LF(Double_t x, Double_t y, Double_t z);   // X{E}
