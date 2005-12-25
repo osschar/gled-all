@@ -5,10 +5,10 @@ CC		= gcc
 LD		= g++
 CPPFLAGS	= $(shell make -s -C ${GLEDSYS}/Geom1 echo_cppflags)
 CXXFLAGS	= -O -g -Wall -Wno-return-type -fPIC
-LDFLAGS		= -shared
+LDFLAGS		= ${LDSHAREDOPT}
 
 SRCS		= $(wildcard *.cxx)
-TGTLIBS		= $(SRCS:.cxx=.so)
+TGTLIBS		= $(SRCS:.cxx=.${LDEXT})
 
 .SUFFIXES: .cxx .cc .h .o
 
@@ -22,11 +22,11 @@ TGTLIBS		= $(SRCS:.cxx=.so)
 	@echo Generating dictionary for $*
 	rootcint -f $@ -c $*.h $*_LinkDef.h
 
-%.so: %.o %_Dict.o
+%.${LDEXT}: %.o %_Dict.o
 	${LD} ${LDFLAGS} -o $@ $^
 
 
 all: ${TGTLIBS}
 
 clean:
-	rm -f *_Dict* *.o *.so
+	rm -f *_Dict* *.o *.${LDEXT}

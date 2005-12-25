@@ -25,7 +25,10 @@ build_install:
 build_uninstall:
 	${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
 
-install:
+install::
+ifeq (${GLED_SYSTEM},Darwin)
+	cd lib; ${GLEDSYS}/lib-exec/gled_liblink.sh .dylib .so
+endif
 	${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
 	@echo ${LIB_SET_NAME} > ${GLEDSYS}/lib/.${LIB_SET_ID}
 

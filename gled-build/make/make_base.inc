@@ -68,19 +68,19 @@ VIEW_FL_OBJS =	$(VIEW_FL_FLS:.fl=.o)
 # Libset elements
 ##########################################################################
 
-BASE_LIB_NAME	= lib/lib${LIB_SET_NAME}.so
-VIEW_LIB_NAME	= lib/lib${LIB_SET_NAME}_View.so
+BASE_LIB_NAME	= lib/lib${LIB_SET_NAME}.${LDEXT}
+VIEW_LIB_NAME	= lib/lib${LIB_SET_NAME}_View.${LDEXT}
 
 BASE_LIB_OBJS	= ${BLESSED_OBJS} ${BASE_OBJS} ${DICT_AUTO_OBJS}
 VIEW_LIB_OBJS	= ${VIEW_OBJS} ${VIEW_FL_OBJS} ${VIEW_AUTO_OBJS}
 
 ${BASE_LIB_NAME}: ${BASE_LIB_OBJS}
-	${LD} -o ${BASE_LIB_NAME} -shared ${BASE_LIB_OBJS} \
+	${LD} -o ${BASE_LIB_NAME} ${LDSHAREDOPT} ${BASE_LIB_OBJS} \
 	  -L${GLEDSYS}/lib ${ABOVE_BASE_LIBS} \
 	  ${USER_LD_FLAGS} ${BASE_LD_LIBS}
 
 ${VIEW_LIB_NAME}: ${VIEW_LIB_OBJS}
-	${LD} -o ${VIEW_LIB_NAME} -shared ${VIEW_LIB_OBJS} \
+	${LD} -o ${VIEW_LIB_NAME} ${LDSHAREDOPT} ${VIEW_LIB_OBJS} \
 	  -L${GLEDSYS}/lib ${ABOVE_VIEW_LIBS} \
 	  ${USER_LD_FLAGS} ${VIEW_LD_LIBS}
 
