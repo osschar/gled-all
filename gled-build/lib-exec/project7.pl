@@ -301,6 +301,34 @@ sub produce_tags {
 }
 
 ########################################################################
+# Set method for stones
+########################################################################
+
+sub stone_set_method
+{
+  my $r = shift; # member info
+  my ($pre, $setit, $post, $stamp);
+  my $X;
+
+  $r->{Type} =~ /(.)/; my $arg = lc $1;
+  my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
+  $X .= "void $r->{Methodname}($r->{ArgStr}) {\n";
+  if(exists $r->{Range}) { # Check if range is set ... make if stuff
+    my $arg = $r->{Args}[0][2]; # assume single argument
+    my $rr = $r->{Range};
+    $X .= "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
+    $X .= "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
+      unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
+  }
+  $setit  = "  $r->{Varname}";
+  $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
+	     $GetSetMap{$r->{Type}}->{SetMeth} :
+	     " = $r->{Args}[0][2]") . ";\n";
+  $X .= "${pre}${setit}${stamp}${post}}\n\n";
+  return $X;
+}
+
+########################################################################
 # External handler registration
 ########################################################################
 
@@ -692,60 +720,13 @@ for $r (@Members) {
     }
   }
 
+  # Set methods defined in c7 file.
   if( $r->{Xport} =~ m/(s|S)/ ) {
-    # This shit should be split into if link / otherwise
-    my ($pre, $setit, $post, $stamp);
-    if($IsGlass and $LOCK_SET_METHS) {
-      $pre  .= "  GLensReadHolder _wrlck(this);\n";
-    }
-    if( $r->{Xport} =~ m/(S|E)/ and $IsGlass) {
-      $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
-      $stamp .= "mStampReqTring = " if $r->{Xport} =~ m/T/;
-      if(exists $r->{Stamp}) {
-	for $f (split(/\s*,\s*/, $r->{Stamp})) {
-	  $stamp .= "mStamp${f} = ";
-	}
-      }
-
-      if(exists $r->{Link}) {
-	# Links are stanped in ZGlass::set_link_or_die
-	if($stamp) { $stamp = "  " . $stamp . "mTimeStamp;\n"; }
-      } else {
-	if($r->{Xport} =~ m/x/) {
-	  $stamp = "  ". $stamp ."Stamp(FID(), 0x1);\n";
-	} else {
-	  $stamp = "  ". $stamp ."Stamp(FID());\n";
-	}
-      }
-    }
-
-    $r->{Type} =~ /(.)/; my $arg = lc $1;
-    print H7 "void $r->{Methodname}($r->{ArgStr}) {\n";
-    if(exists $r->{Range}) { # Check if range is set ... make if stuff
-      my $arg = $r->{Args}[0][2]; # assume single argument
-      my $rr = $r->{Range};
-      print H7 "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
-      print H7 "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
-	unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
-    }
-    if(exists $r->{Link}) {
-      $setit = 
-	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
+    if($IsGlass) {
+      print H7 "void $r->{Methodname}($r->{ArgStr});\n";
     } else {
-      $setit  = "  $r->{Varname}";
-      $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
-		 $GetSetMap{$r->{Type}}->{SetMeth} :
-		 " = $r->{Args}[0][2]") . ";\n";
+      print H7 stone_set_method($r);
     }
-
-    if(exists $r->{Ray}) {
-      $post = "  ";
-      for $f (split(/\s*,\s*/, $r->{Ray})) {
-	$post .= "Emit${f}Ray(); ";
-      }
-      $post .= "\n";
-    }
-    print H7 "${pre}${setit}${stamp}${post}}\n";
   }
 
   if( $r->{Xport} =~ m/(r|R)/ ) {
@@ -821,10 +802,6 @@ for $h (@HANDLERS) {
 
 goto gen3_end if not $IsGlass;
 
-#################################
-### Forest following and building
-#################################
-
 print C7 "#include <Ephra/Saturn.h>\n";
 print C7 "#include <Gled/GledNS.h>\n";
 print C7 "#include <Stones/ZMIR.h>\n";
@@ -833,6 +810,12 @@ print C7 "\n";
 unless($CLASSNAME eq $BASECLASS) {
   print C7 "#define PARENT_GLASS ${PARENT}\n\n";
 }
+
+##############
+### Link stuff
+##############
+
+print C7 "// Link Stuff\n//" . '-' x 72 . "\n\n";
 
 # Protected, static data members
 print C7 "GledNS::ClassInfo* ${CLASSNAME}::sap_${CLASSNAME}_ci;\n";
@@ -843,7 +826,7 @@ for $r (@Members) {
 print C7 "\n";
 
 # LinkList
-print C7 "void\n${CLASSNAME}::CopyLinks(lpZGlass_t& glass_list) {\n";
+print C7 "void ${CLASSNAME}::CopyLinks(lpZGlass_t& glass_list) {\n";
 unless($CLASSNAME eq $BASECLASS) {
   print C7 "  ${PARENT}::CopyLinks(glass_list);\n"
 }
@@ -854,7 +837,7 @@ for $r (@Members) {
 print C7 "}\n\n";
 
 # LinkRefs
-print C7 "void\n${CLASSNAME}::CopyLinkRefs(lppZGlass_t& ref_list) {\n";
+print C7 "void ${CLASSNAME}::CopyLinkRefs(lppZGlass_t& ref_list) {\n";
 unless($CLASSNAME eq $BASECLASS) {
   print C7 "  ${PARENT}::CopyLinkRefs(ref_list);\n"
 }
@@ -868,7 +851,7 @@ for $r (@Members) {
 print C7 "}\n\n";
 
 # LinkReps
-print C7 "void\n${CLASSNAME}::CopyLinkReps(ZGlass::lLinkRep_t& link_rep_list) {\n";
+print C7 "void ${CLASSNAME}::CopyLinkReps(ZGlass::lLinkRep_t& link_rep_list) {\n";
 unless($CLASSNAME eq $BASECLASS) {
   print C7 "  ${PARENT}::CopyLinkReps(link_rep_list);\n"
 }
@@ -883,7 +866,7 @@ print C7 "}\n\n";
 
 # RebuildLinkRefs
 unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
-  print C7 "Int_t\n${CLASSNAME}::RebuildLinkRefs(An_ID_Demangler* idd) {\n";
+  print C7 "Int_t ${CLASSNAME}::RebuildLinkRefs(An_ID_Demangler* idd) {\n";
   print C7 "  Int_t ret" . 
       (defined $PARENT ? "=${PARENT}::RebuildLinkRefs(idd)" : "=0") .
       ";\n";
@@ -911,9 +894,78 @@ fnord
   print C7 "  return ret;\n}\n\n";
 }
 
+##############
+### SetMethods
+##############
+
+print C7 "\n// Set methods\n//" . '-' x 72 . "\n\n";
+
+for $r (@Members) {
+
+    if( $r->{Xport} =~ m/(s|S)/ ) {
+    # This shit should be split into if link / otherwise
+    my ($pre, $setit, $post, $stamp);
+    if($IsGlass and $LOCK_SET_METHS) {
+      $pre  .= "  GLensReadHolder _wrlck(this);\n";
+    }
+    if( $r->{Xport} =~ m/(S|E)/ and $IsGlass) {
+      $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
+      $stamp .= "mStampReqTring = " if $r->{Xport} =~ m/T/;
+      if(exists $r->{Stamp}) {
+	for $f (split(/\s*,\s*/, $r->{Stamp})) {
+	  $stamp .= "mStamp${f} = ";
+	}
+      }
+
+      if(exists $r->{Link}) {
+	# Links are stanped in ZGlass::set_link_or_die
+	if($stamp) { $stamp = "  " . $stamp . "mTimeStamp;\n"; }
+      } else {
+	if($r->{Xport} =~ m/x/) {
+	  $stamp = "  ". $stamp ."Stamp(FID(), 0x1);\n";
+	} else {
+	  $stamp = "  ". $stamp ."Stamp(FID());\n";
+	}
+      }
+    }
+
+    $r->{Type} =~ /(.)/; my $arg = lc $1;
+    my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
+    print C7 "void ${CLASSNAME}::$r->{Methodname}($args1) {\n";
+    if(exists $r->{Range}) { # Check if range is set ... make if stuff
+      my $arg = $r->{Args}[0][2]; # assume single argument
+      my $rr = $r->{Range};
+      print C7 "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
+      print C7 "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
+	unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
+    }
+    if(exists $r->{Link}) {
+      $setit = 
+	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
+    } else {
+      $setit  = "  $r->{Varname}";
+      $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
+		 $GetSetMap{$r->{Type}}->{SetMeth} :
+		 " = $r->{Args}[0][2]") . ";\n";
+    }
+
+    if(exists $r->{Ray}) {
+      $post = "  ";
+      for $f (split(/\s*,\s*/, $r->{Ray})) {
+	$post .= "Emit${f}Ray(); ";
+      }
+      $post .= "\n";
+    }
+    print C7 "${pre}${setit}${stamp}${post}}\n\n";
+  }
+
+}
+
 #######################
 ### Remote-exec methods
 #######################
+
+print C7 "\n// Remote-exec methods\n//" . '-' x 72 . "\n\n";
 
 ### Set methods
 for $r (@Members) {
@@ -926,7 +978,6 @@ ZMIR* ${CLASSNAME}::S_$r->{Methodname}($r->{ArgStr}) {
 fnordlink
   } else {
     my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
-    my $args2 = join(", ", map( { $_->[2] } @{$r->{Args}}));
     print C7 <<"fnord";
 ZMIR* ${CLASSNAME}::S_$r->{Methodname}($args1) {
   ZMIR* _mir = new ZMIR(mSaturnID);
@@ -943,7 +994,6 @@ fnord
 ### Others/Explicit/Exported/Executable Methods
 for $r (@Methods) {
   my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
-  my $args2 = join(", ", map( { $_->[2] } @{$r->{Args}}));
   my $c = exists $r->{Ctx} ? substr($r->{Ctx},0,1) : 0;
   my $C = $#{$r->{Args}};
   print C7 "ZMIR*\n${CLASSNAME}::S_$r->{Methodbase}($args1) {\n";
@@ -969,6 +1019,8 @@ for $r (@Methods) {
 ##############
 ### ExecuteMir
 ##############
+
+print C7 "\n// Execute Mir\n//" . '-' x 72 . "\n\n";
 
 if($IsGlass) {
   print C7<<"fnord";
@@ -1042,6 +1094,8 @@ fnord
 #####################
 ### Catalog generator
 #####################
+
+print C7 "\n// Catalog\n//" . '-' x 72 . "\n\n";
 
 print C7 <<"fnord";
 
