@@ -42,7 +42,9 @@ void SGridStepper::Reset()
 
 void SGridStepper::Subtract(SGridStepper& s)
 {
-  Ox = -s.nx; Oy = -s.ny; Oz = -s.nz;
+  Ox = -(s.Ox + s.nx*s.Dx);
+  Oy = -(s.Oy + s.ny*s.Dy);
+  Oz = -(s.Oz + s.nz*s.Dz);
 }
 /**************************************************************************/
 

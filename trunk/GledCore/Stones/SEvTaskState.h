@@ -26,7 +26,10 @@ protected:
 public:
   SEvTaskState() : TObject() { _init(); }
 
+  void Reinit();
   void Reinit(Int_t n);
+
+  void Finalize();
 
   void IncNAll (Int_t dn) { mNAll  += dn; }
   void IncNOK  (Int_t dn) { mNOK   += dn; }
