@@ -21,6 +21,7 @@ class ZLinkBase
  public:
   ZLinkBase()          : _lens(0) {}
   ZLinkBase(ZGlass* l) : _lens(l) {}
+  virtual ~ZLinkBase() {}
 
   void     set_link(ZGlass* l) { _lens = l; }
   ZGlass** ptr_link()          { return &_lens; }
@@ -42,6 +43,7 @@ class ZLink : public ZLinkBase
  public:
   ZLink()     : ZLinkBase()  {}
   ZLink(T* l) : ZLinkBase(l) {}
+  virtual ~ZLink() {}
 
 
   T* operator*()  { return (T*)_lens; }
@@ -87,6 +89,7 @@ namespace GledNS {
 class An_ID_Demangler
 {
  public:
+  virtual ~An_ID_Demangler() {}
   virtual ZGlass* DemangleID(ID_t) = 0;
   ClassDef(An_ID_Demangler, 0)
 };
@@ -94,6 +97,8 @@ class An_ID_Demangler
 class MIR_Priest
 {
   friend class Saturn;
+public:
+  virtual ~MIR_Priest () {}
 protected:
   virtual void BlessMIR(ZMIR& mir) = 0;
   ClassDef(MIR_Priest, 0)
@@ -258,6 +263,7 @@ public:
   class RayAbsorber
   {
   public:
+    virtual ~RayAbsorber() {}
     virtual void AbsorbRay(Ray& ray) = 0;
     ClassDef(RayAbsorber, 0)
   };
@@ -267,6 +273,7 @@ public:
   class NameChangeCB
   {
   public:
+    virtual ~NameChangeCB() {}
     virtual void name_change_cb(ZGlass* g, const TString& new_name) = 0;
     ClassDef(NameChangeCB, 0)
   };

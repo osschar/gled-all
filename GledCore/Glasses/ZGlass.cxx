@@ -540,21 +540,21 @@ void ZGlass::unregister_name_change_cb(ZGlass::NameChangeCB* nccb)
 
 TimeStamp_t ZGlass::Stamp(FID_t fid, UChar_t eye_bits)
 {
-  ++mTimeStamp;
-  IF_ZGLASS_CHANGE_RAY(this, RayNS::RQN_change, mTimeStamp, fid, eye_bits) {
+  TimeStamp_t stamp = ++mTimeStamp;
+  IF_ZGLASS_CHANGE_RAY(this, RayNS::RQN_change, stamp, fid, eye_bits) {
     ZGLASS_SEND_RAY;
   }
-  return mTimeStamp;
+  return stamp;
 }
 
 TimeStamp_t ZGlass::StampLink(FID_t fid)
 {
-  ++mTimeStamp;
-  IF_ZGLASS_RAY(this, RayNS::RQN_link_change, mTimeStamp, fid,
+  TimeStamp_t stamp = ++mTimeStamp;
+  IF_ZGLASS_RAY(this, RayNS::RQN_link_change, stamp, fid,
 		Ray::EB_StructuralChange) {
     ZGLASS_SEND_RAY;
   }
-  return mTimeStamp;
+  return stamp;
 }
 
 /**************************************************************************/

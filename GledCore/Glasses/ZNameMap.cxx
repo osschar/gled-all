@@ -37,12 +37,14 @@ void ZNameMap::new_element_check(ZGlass* lens)
   mName2Iter_i i = mItMap.find(lens->StrName());
   if(i != mItMap.end()) {
     if(bReplaceOnInsert) {
-      ZList::iterator l = i->second;
+      iterator l = i->second;
       mItMap.erase(i);
-      l.lens()->unregister_name_change_cb(this);
+      ZGlass* lens = l->fLens;
+      Int_t   id   = l->fId;
+      lens->unregister_name_change_cb(this);
       mElements.erase(l); --mSize;
-      l.lens()->DecRefCount(this);
-      StampListRemove(l->fId);
+      lens->DecRefCount(this);
+      StampListRemove(lens, id);
     } else {
       throw(_eh + "lens " + lens->Identify() + " already in the list.");
     }
@@ -141,6 +143,7 @@ void ZNameMap::name_change_cb(ZGlass* g, const TString& new_name)
       // remove at n
       ZList::iterator l    = n->second;
       ZGlass*         lens = l.lens();
+      Int_t           id   = l->fId;
       mItMap.erase(n);
       lens->unregister_name_change_cb(this);
       mElements.erase(l); --mSize;
@@ -148,18 +151,19 @@ void ZNameMap::name_change_cb(ZGlass* g, const TString& new_name)
       // remove o and recreate with n
       mItMap[new_name] = o->second;
       mItMap.erase(o);
-      StampListRemove(l->fId);
+      StampListRemove(lens, id);
     } else {
       ISwarn(_eh + "removing element " + g->Identify() +
 	     " that changed its name to the value already existing in the map.");
       // remove at o
       ZList::iterator l    = o->second;
       ZGlass*         lens = l.lens();
+      Int_t           id   = l->fId;
       mItMap.erase(o);
       lens->unregister_name_change_cb(this);
       mElements.erase(l); --mSize;
       lens->DecRefCount(this);
-      StampListRemove(l->fId);
+      StampListRemove(lens, id);
     }
   }
 }

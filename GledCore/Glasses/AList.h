@@ -62,6 +62,7 @@ class AList : public ZGlass
     bool return_zeros;
   public:
     stepper_base(bool rz=false) : first_p(true), return_zeros(rz) {}
+    virtual ~stepper_base() {}
     virtual bool    step()  = 0;
     virtual ZGlass* lens()  = 0;
     virtual ElRep   elrep() = 0;
@@ -80,6 +81,7 @@ class AList : public ZGlass
       stepper_base(return_zeros), iter(b), end(e) {}
 
     virtual bool step() {
+      if(iter == end) return false;
       if(first_p)
 	first_p = false;
       else
@@ -288,13 +290,13 @@ class AList : public ZGlass
   virtual TimeStamp_t StampListInsert(ZGlass* lens, Int_t id, ZGlass* before);
   virtual TimeStamp_t StampListInsert(ZGlass* lens, Int_t id, Int_t before_id);
   virtual TimeStamp_t StampListRemove(ZGlass* lens);
-  virtual TimeStamp_t StampListRemove(Int_t id);
+  virtual TimeStamp_t StampListRemove(ZGlass* lens, Int_t id);
 
   virtual TimeStamp_t StampListElementSet(ZGlass* lens, Int_t id);
   virtual TimeStamp_t StampListElementSet(ZGlass* lens, TString label);
 
-  virtual TimeStamp_t StampListInsertLabel(TString label, TString before);
-  virtual TimeStamp_t StampListRemoveLabel(TString label);
+  virtual TimeStamp_t StampListInsertLabel(ZGlass* lens, TString label, TString before);
+  virtual TimeStamp_t StampListRemoveLabel(ZGlass* lens, TString label);
 
   virtual TimeStamp_t StampListRebuild();
   virtual TimeStamp_t StampListClear();
@@ -309,7 +311,7 @@ class AList : public ZGlass
 
 
 #ifndef __CINT__
-inline bool AList::Stepper<ZGlass>::is_ok() { m_cur = get_lens(); return true; }
+/* inline template */ template <> inline bool AList::Stepper<ZGlass>::is_ok() { m_cur = get_lens(); return true; }
 #endif
 
 #endif

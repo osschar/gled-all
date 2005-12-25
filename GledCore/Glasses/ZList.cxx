@@ -50,7 +50,7 @@ Int_t ZList::remove_references_to(ZGlass* lens)
       Int_t id = j->fId;
       on_remove(j);
       mElements.erase(j);
-      StampListRemove(id);
+      StampListRemove(lens, id);
       ++n;
     }
   }
@@ -131,7 +131,7 @@ void ZList::RemoveAll(ZGlass* lens)
   for(iterator i=begin(); i!=end(); ++i) {
     if(i() == lens) {
       iterator j = i; --i;
-      StampListRemove(j->fId);
+      StampListRemove(j->fLens, j->fId);
       mElements.erase(j); --mSize;
       ++n;
     }
@@ -285,7 +285,7 @@ void ZList::RemoveById(Int_t id_to_remove)
   on_remove(i);
   mElements.erase(i); --mSize;
   l->DecRefCount(this);
-  StampListRemove(id_to_remove);
+  StampListRemove(l, id_to_remove);
 }
 
 /**************************************************************************/
