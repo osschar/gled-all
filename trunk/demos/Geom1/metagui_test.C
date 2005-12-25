@@ -214,6 +214,8 @@ void metagui_test()
   CREATE_ADD_GLASS(gl_dir, WGlDirectory, overlay, "Gl Directory", "Bar");
   gl_dir->SetContents(images);
   gl_dir->StandardFixed();
+  gl_dir->SetNx(2);
+  gl_dir->SetNy(6);
   gl_dir->SetCbackAlpha(rot_op);
   gl_dir->SetCbackMethodName("Mover::SetNode");
   gl_dir->SetCbackBetaType("ZNode");
