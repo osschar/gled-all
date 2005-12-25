@@ -41,8 +41,17 @@ void WGlButton::MenuEnter()
   SetRnrElements(true);
 }
 
-void  WGlButton::MenuExit()
+void WGlButton::MenuExit()
 {
   SetRnrElements(false);
   mParent->RnrOnForDaughters();
+}
+
+/**************************************************************************/
+
+#include <Gled/Gled.h>
+
+void WGlButton::ExitGled()
+{
+  Gled::theOne->Exit();
 }
