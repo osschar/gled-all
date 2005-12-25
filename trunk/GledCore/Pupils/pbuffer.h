@@ -6,7 +6,7 @@
 class PBuffer
 {
 public:
-	PBuffer(int width, int height);
+	PBuffer(int w, int h);
 	virtual ~PBuffer();
 
 	void Use();
