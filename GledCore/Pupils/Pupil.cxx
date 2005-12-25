@@ -18,24 +18,19 @@
 #include <Rnr/GL/GLRnrDriver.h>
 
 #include <TVirtualX.h>
-#include <TGX11.h>
 #include <TSystem.h>
 #include <TVector3.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Button.H>
-#include <FL/x.H>
-#include <X11/Xlib.h>
 
 #include <FL/gl.h>
 #include <GL/glu.h>
-#include <GL/glx.h>
+
 #include <math.h>
 
 // exp!
-
 #include "pbuffer.h"
-
 
 namespace OS = OptoStructs;
 
@@ -160,9 +155,10 @@ void Pupil::_build()
   mPickBuffSize = mInfo->GetBuffSize();
   mPickBuff     = 0;
 
-  bFullScreen = false;
-  bDumpImage  = false;
-  mPBuffer    = 0;
+  bFullScreen  = false;
+  bShowOverlay = true;
+  bDumpImage   = false;
+  mPBuffer     = 0;
 
   _check_auto_redraw();
 }
@@ -211,7 +207,9 @@ Pupil::~Pupil() {
   delete mCameraView;
   delete mCamera;
   delete [] mPickBuff;
+#ifndef __APPLE__
   delete mPBuffer;
+#endif
 }
 
 /**************************************************************************/
@@ -250,11 +248,13 @@ void Pupil::AbsorbRay(Ray& ray)
     }
     break;
 
-  case RayNS::RQN_link_change:
-    mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
+  case RayNS::RQN_link_change: {
+    OS::ZGlassImg* oo = mOverlayImg;
+    mOverlayImg = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
+    if(oo != mOverlayImg) bShowOverlay = true;
     mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
     break;
-
+  }
   case PupilInfo::PRQN_dump_image: {
     if(ray.fRayBits & Ray::RB_CustomBuffer) {
       *ray.fCustomBuffer >> mImageName;
@@ -539,7 +539,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
       cout << _eh << "scene exception: '" << exc << "'.\n"; 
     }
   }
-  if(rnr_overlay && mOverlayImg != 0) {
+  if(bShowOverlay && rnr_overlay && mOverlayImg != 0) {
     try {
       mDriver->Render(mDriver->GetRnr(mOverlayImg));
     }
@@ -571,6 +571,7 @@ namespace {
 
     pick_menu_data(Pupil* p, OS::ZGlassImg* i) :
       mir_call_data_img(i, 0, 0), pupil(p) {}
+    virtual ~pick_menu_data() {}
   };
 
   void cam_towards_cb(Fl_Widget* w, pick_menu_data* ud)
@@ -614,8 +615,8 @@ Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
   glLoadIdentity();
   SetCameraView();
 
-  if (mPickBuff == 0) mPickBuff = new GLuint[mPickBuffSize];
-  glSelectBuffer(mPickBuffSize, mPickBuff);
+  if (mPickBuff == 0) mPickBuff = new UInt_t[mPickBuffSize];
+  glSelectBuffer((GLsizei)mPickBuffSize, (GLuint*)mPickBuff);
   glRenderMode(GL_SELECT);
   mDriver->BeginPick();
   Render(rnr_self, rnr_overlay);
@@ -623,7 +624,7 @@ Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
   GLint n = glRenderMode(GL_RENDER);
 
   if (n < 0)
-    printf("Pupil::Pick overflow of selection buffer, %d entries returned.\n", n);
+    printf("Pupil::Pick overflow of selection buffer, %d entries returned.\n", (int)n);
   
   return n;
 }
@@ -636,9 +637,8 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
 
   if (n > 0) {
     float   min_z = 1e10;
-    GLuint* min_p = 0;
-
-    GLuint* x = mPickBuff;
+    UInt_t* min_p = 0;
+    UInt_t*     x = mPickBuff;
 
     for(int i=0; i<n; i++) {
       float zmin = (float) *(x+1)/0x7fffffff;
@@ -669,16 +669,16 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
   Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
 
   if (n > 0) {
-    GLuint* x = mPickBuff;
+    UInt_t* x = mPickBuff;
     for(int i=0; i<n; i++) {
-      GLuint m = *x; x++;
+      UInt_t m = *x; x++;
 
       if(m == 0) {
 	// This is ok ... name-stack ops can be switched off.
 	x += 2 + m;
 	continue;
       }
-      if(x - mPickBuff + 2 + m > (UInt_t)mPickBuffSize) {
+      if(x - mPickBuff + 2 + m > mPickBuffSize) {
 	cout << _eh << "overflow of selection buffer, should not happen.\n";
 	x += 2 + m;
 	continue;
@@ -811,6 +811,7 @@ void Pupil::draw()
     catch(const char* exc) {
       printf("%spbuffer init failed: %s.\n", _eh.Data(), exc);
     }
+
     if(mImgNTiles > 1) {
       for(Int_t xi=0; xi<mImgNTiles; ++xi) {
 	for(Int_t yi=0; yi<mImgNTiles; ++yi) {
@@ -825,8 +826,9 @@ void Pupil::draw()
       rnr_standard();
       dump_image(mImageName + ".tga");
     }
-    bDumpImage = false;
     mPBuffer->Release();
+
+    bDumpImage = false;
 
   } else {
 
@@ -1105,11 +1107,18 @@ int Pupil::handle_overlay(int ev)
 
 int Pupil::handle(int ev)
 {    
+  static const Exc_t _eh("Pupil::handle ");
+
   // mEventHandlerImg - ???? reuse as fallback or as default; or split in two
-  if(mOverlayImg) {
+  if(mOverlayImg && bShowOverlay) {
+    try {
     int ovlp = handle_overlay(ev);
     if(ovlp) {
       check_driver_redraw();
+      return 1;
+    }
+    } catch(Exc_t exc) {
+      printf("%sexception in handle_overlay: '%s'.\n", _eh.Data(), exc.Data());
       return 1;
     }
   }
@@ -1260,6 +1269,10 @@ int Pupil::handle(int ev)
 
     case FL_Home:
       mCamera->Home(); redraw();
+      return 1;
+
+    case FL_Tab:
+      bShowOverlay = !bShowOverlay; redraw();
       return 1;
 
     case 'f': {
