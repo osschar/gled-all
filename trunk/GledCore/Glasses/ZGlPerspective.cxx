@@ -23,7 +23,6 @@ ClassImp(ZGlPerspective)
 
 void ZGlPerspective::_init()
 {
-  // *** Set all links to 0 ***
   mViewMode  = VM_Nop;
   mOrthoW    = 10; mOrthoH   = 10;
   mOrthoNear = -1; mOrthoFar = 1;
@@ -38,7 +37,6 @@ void ZGlPerspective::StandardPersp()
   X.SetViewMode(VM_Nop);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
   X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
-  X.SetOx(0); X.SetOy(0); X.SetOz(0);
 }
 
 void ZGlPerspective::StandardFixed()
@@ -47,7 +45,6 @@ void ZGlPerspective::StandardFixed()
   X.SetViewMode(VM_OrthoFixed);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
   X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
-  X.SetOx(0); X.SetOy(0); X.SetOz(0);
 }
 
 void ZGlPerspective::StandardPixel()
@@ -56,7 +53,6 @@ void ZGlPerspective::StandardPixel()
   X.SetViewMode(VM_OrthoPixel);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
   X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
-  X.SetOx(5.000000); X.SetOy(-50.000000); X.SetOz(0.000000);
 }
 
 /**************************************************************************/
