@@ -25,6 +25,7 @@ ClassImp(WSWalker)
 void WSWalker::_init()
 {
   bLoop = false;
+  m_last_time = 1e500;
 }
 
 /**************************************************************************/
@@ -32,10 +33,10 @@ void WSWalker::_init()
 void WSWalker::set_trans(Double_t t)
 {
   if(mNode != 0 && mSeed != 0) {
-    ZTrans lcf;
-    mSeed->TransAtTime(lcf, t, bLoop, true);
+    mSeed->TransAtTime(m_last_trans, t, bLoop, (t < m_last_time));
     GLensWriteHolder node_wrlck(*mNode);
-    mNode->SetTrans(lcf);
+    mNode->SetTrans(m_last_trans);
+    m_last_time = t;
   } 
 }
 
