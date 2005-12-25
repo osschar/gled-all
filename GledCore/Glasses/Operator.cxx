@@ -26,6 +26,20 @@ void Operator::_init()
 
 /**************************************************************************/
 
+void Operator::ResetRecursively()
+{
+  if(bOpRecurse) {
+    lpZGlass_t l; CopyList(l);
+    for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
+      if(Operator* o = dynamic_cast<Operator*>(*i)) {
+	if(o->bOpActive) o->ResetRecursively();
+      }
+    }
+  }
+}
+
+/**************************************************************************/
+
 void Operator::PreOperate(Operator::Arg* op_arg) throw(Exception)
 {
 }

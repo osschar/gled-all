@@ -75,6 +75,8 @@ public:
   virtual void	Reset();	// X{E} 7 MButt(-join=>1)
   virtual void	Cancel();	// X{E} 7 MButt()
 
+  virtual void ResetRecursively(); // X{E} 7 MButt()
+
   void SetHost(SaturnInfo* host);
 
 

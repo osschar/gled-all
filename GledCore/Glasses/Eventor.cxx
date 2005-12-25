@@ -321,6 +321,21 @@ void Eventor::Cancel()
 
 /**************************************************************************/
 
+void Eventor::ResetRecursively()
+{
+  static const Exc_t _eh("Eventor::ResetRecursively ");
+
+  if(bRunning)
+    throw(_eh + "called during operation.");
+
+  Reset();
+  PARENT_GLASS::ResetRecursively();
+}
+
+
+/**************************************************************************/
+/**************************************************************************/
+
 void Eventor::SetHost(SaturnInfo* host)
 {
   static const Exc_t _eh("Eventor::SetHost ");
