@@ -6,12 +6,11 @@
 
 BUILD_CONFIG	= ${GLEDSYS}/build_config
 
-# CXX, CC taken from environment
-LD		= ${CXX}
+# CXX, CC taken from environment; LD set by configure
 SHELL		= /bin/sh
 
 libexecdir 	= ${GLEDSYS}/lib-exec
-MKDEP		= makedepend
+MKDEP		= ${ROOTSYS}/bin/rmkdepend
 MKBLESSDEP	= ${libexecdir}/mk_bless_dep.pl
 MKP7DEP		= ${libexecdir}/mk_p7_dep.pl
 MKDICTDEP	= ${libexecdir}/mk_dict_dep.pl
@@ -34,24 +33,26 @@ CPPFLAGS += -D_REENTRANT -D_GNU_SOURCE -DGL_GLEXT_PROTOTYPES ${USER_CPP_FLAGS} $
 CXXFLAGS  = -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${USER_LD_FLAGS}
 
+# LDSHAREDOPT, LDEXT set by configure
+
 # Pain ... X4 comes with somewhat broken makedepend ... perhaps fixed ??
-MKDEPFLAGS	=-cc /lib/cpp -Y -w 666
+MKDEPFLAGS	= -Y -w 666
 
 ##########################################################################
 # Basic external libraries
 ##########################################################################
 
-GLLIB	  = -lGL -lGLU
-FLLIB	  = -lfltk -lfltk_gl -lfltk-mt
+# X11LIB, FLLIB, *_CONF set by configure
 
+GLLIB	  = -lGL -lGLU
 ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lThread -lCint \
 		-lGraf -lGraf3d -lGpad \
 		-lHist -lHistPainter -lMatrix -lPhysics \
-                -lPostscript  -lRint -lTree # -lProof -lNew
-ROOTGLIBS = -lGui -lGX11
+                -lPostscript -lRint -lTree
+ROOTGLIBS = -lGui -lGX11 ${ROOTGLIBS_CONF}
 
-GUILIBS	= -L${X11LIBDIR} -lX11 -lXext -lXpm ${FLLIB} ${GLLIB}
-SYSLIBS	= -lpthread -lm -ldl -rdynamic
+GUILIBS	= ${X11LIB} ${FLLIB} ${GLLIB}
+SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 
 ##########################################################################
 # Rules
