@@ -1,3 +1,108 @@
+2005-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Port to gcc-4 and OSX. Some other fixes.
+	
+	* Glasses/AList.cxx:
+	* Glasses/AList.h:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZNameMap.cxx:
+	Better stamping; gcc-4.
+
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	* Glasses/Operator.cxx:
+	* Glasses/Operator.h:
+	Added virtual function ResetRecursively().
+
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	Added optional callback-beta link and method ExitGled() (does not
+	belong here, really).
+
+	* Glasses/WGlDirectory.cxx:
+	* Glasses/WGlDirectory.h:
+	Added local link LastClicked.
+
+	* Glasses/ZGlPerspective.cxx:
+	Removed origin setting from standard-setters.
+
+	* Glasses/ZHashList.h:
+	Added missing virtual method el_type().
+
+	* Glasses/ZNode.h:
+	Added non-const ZTrans& ref_trans() for faster low-level
+	operations.
+
+	* Glasses/ZQueen.cxx:
+	Added argument checks in RemoveLens[es]().
+
+	* Gled/GCondition.cxx:
+	* Gled/GCondition.h:
+	Added methods LockSignal() and LockBroadcast().
+
+	* Gled/GMutex.cxx:
+	Use standard posix pthread macros for mutex types (was using _NP
+	macros from linux-threads before). For OSX.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Expose more of GThread class to CINT.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Added operator=() for Long_t, ULong_t and Double_t.
+
+	* Gled/GledNS.cxx:
+	Commented-out CINT-lock protections in StreamLens methods (locks
+	now done in ROOT's streaming code); in ClassInfo::GetRendererCI
+	search upwards for actual renderer.
+
+	* GledView/FTW_Branch.cxx:
+	Relabel namebox on any list related ray.
+
+	* GledView/FTW_Shell.cxx:
+	Static exception headerss changed from TString to Exc_t.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Added bShowOverlay, OSX.
+
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	Check if default font found.
+
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	Decoupled rendering of back-polygon from frame-polygon. 
+
+	* Rnr/GL/WGlButton_GL_Rnr.cxx:
+	Added callback-beta to mir (can of course be zero).
+
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	Style changes.
+
+	* Stones/SEvTaskState.cxx:
+	* Stones/SEvTaskState.h:
+	* Stones/SGridStepper.cxx:
+	Origin was not taken into account.
+
+	* Eye/OptoStructs.h:
+	* Gled/GledTypes.h:
+	* Gled/GSelector.cxx:
+	* GledView/FTW.h:
+	* GledView/FltkGledStuff.h:
+	* GledView/GledGUI.cxx:
+	* GledView/MTW_MetaView.h:
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Stones/ZColor.h:
+	gcc-4.
+
+	* Makefile:
+	* Pupils/pbuffer.cxx:
+	* Pupils/pbuffer.h:
+	* RegExp/Makefile:
+	OSX.
+
 2005-11-09  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/WGlButton.cxx:
