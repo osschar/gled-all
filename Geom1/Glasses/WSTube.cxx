@@ -13,6 +13,7 @@
 #include "WSTube.c7"
 #include <Glasses/WSPoint.h>
 
+#include <Glasses/ZHashList.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/Sphere.h>
 
@@ -26,22 +27,23 @@ ClassImp(WSTube)
 
 void WSTube::_init()
 {
-  // WSSeed overrides
-  bRenormLen = true; mLength = 1;
-
-  // *** Set all links to 0 ***
-  mNodeA = mNodeB = 0;
-  mLenses = 0;
-
-  mDefWidth   = 0.1;
-  mDefSpread  = 0.02;
-  mDefTension = 1;
+  bWeakConnect = true;
+  mDefWidth    = 0.1;
+  mDefSpread   = 0.02;
+  mDefTension  = 1;
 
   mVecA.SetX(1);
   mVecB.SetX(1);
 
-  mSleepMS = 50;
-  mInitDt  = 0.008;
+  mDefVelocity      = 0.2;
+  mMinWaitTime      = 0.05;
+  mConnectionStauts = CS_Disconnected;
+  m_conn_cof = 0;
+}
+
+WSTube::~WSTube()
+{
+  delete m_conn_cof;
 }
 
 /**************************************************************************/
@@ -68,27 +70,27 @@ void WSTube::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   mRnd.SetSeed(mSaturnID);
-  if(mLenses == 0) {
-    ZList* l = new ZList("DependentLenses");
+  if(mTravelers == 0) {
+    AList* l = new ZHashList("DependentLenses");
     l->SetElementFID(ZNode::FID());
     mQueen->CheckIn(l);
-    SetLenses(l);
+    SetTravelers(l);
   }
 }
 
 void WSTube::AdEndarkenment()
 {
   PARENT_GLASS::AdEndarkenment();
-  if(mLenses != 0) {
-    mQueen->RemoveLens(*mLenses);
+  if(mTravelers != 0) {
+    mQueen->RemoveLens(*mTravelers);
   }
 }
 
 /**************************************************************************/
 
-void WSTube::Connect()
+void WSTube::connect(WSPoint*& ap, WSPoint*& bp)
 {
-  static const Exc_t _eh("WSTube::Connect2 ");
+  static const Exc_t _eh("WSTube::connect ");
 
   if(mNodeA == 0 || mNodeB == 0)
     throw(_eh + "node links A and B must be set.");
@@ -101,163 +103,266 @@ void WSTube::Connect()
   if(top == 0)
     throw(_eh + "this WSTube does not have a common parent w/ nodes A and B.");
 
-  ClearList();
 
   auto_ptr<ZTrans> at( ZNode::BtoA(this, *mNodeA, top) );
   auto_ptr<ZTrans> bt( ZNode::BtoA(this, *mNodeB, top) );
+  at->Unscale(); // Usually helpful; should be an option?
+  bt->Unscale();
   TVector3 dr( (bt->GetPos() - at->GetPos()).Unit() ); // vector A -> B
 
-  WSPoint* ap = new WSPoint("TubeStart", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
+  ap = new WSPoint("TubeStart", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
   define_direction(*at, dr, mVecA, mSgmA);
   ap->SetTrans(*at);
   ap->SetW(mDefWidth/2);
   ap->SetScale(mDefSpread);
   ap->SetT(mDefTension);
 
-  WSPoint* bp = new WSPoint("TubeEnd", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
+  bp = new WSPoint("TubeEnd", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
   define_direction(*bt, dr, mVecB, mSgmB);
   bp->SetTrans(*bt);
   bp->SetW(mDefWidth/2);
   bp->SetScale(-mDefSpread);
-  bp->SetT(mDefTension);
-
-  // These should be via ZQueen::IncarnateWAttach for cluster stuff.
-  mQueen->WriteLock();
-  mQueen->CheckIn(ap);
-  mQueen->CheckIn(bp);
-  mQueen->WriteUnlock();
-
-  Add(ap);
-  Add(bp);
-
-  mStampReqTring = Stamp(FID());
+  bp->SetT(mDefTension);  
 }
 
-void WSTube::AnimatedConnect()
+void WSTube::disconnect()
 {
-  static const Exc_t _eh("WSTube::AnimatedConnect ");
+  mTravelers->ClearList();
+  m_traveler_list.clear();
+  ClearList();
+}
 
-  WSPoint* B;
-  ZTrans   transB;
+void WSTube::assert_disconnect(const Exc_t& eh)
+{
+  if(mConnectionStauts != CS_Disconnected) {
+    if(bWeakConnect) {
+      GLensWriteHolder wrlck(this);
+      disconnect();
+      mConnectionStauts = CS_Disconnected;
+    } else {
+      throw(eh + "not disconnected.");
+    }
+  }
+}
+
+void WSTube::conn_travel(WSPoint* p, Double_t t)
+{
+  // Expects t in [0..1]
+  // Spread does not work.
+
+  ZTrans& lcf = p->ref_trans();
+  const Double_t t2 = t*t, t3 = t2*t;
+
+  Double_t* Pnt = lcf.ArrT();
+  Double_t* Axe = lcf.ArrX();
+
+  for(Int_t i=0; i<3; i++) {
+    const TMatrixDRow R( (*m_conn_cof)[i] );
+    Pnt[i] = R[0] +   R[1]*t +   R[2]*t2 + R[3]*t3;
+    Axe[i] = R[1] + 2*R[2]*t + 3*R[3]*t2;
+  }
   {
-    GLensWriteHolder wrlck(this);
-    Connect();
-    B = dynamic_cast<WSPoint*>(BackElement());
-    if(B == 0)
-      throw(_eh + "last point not reachable (by trivial algo).");
-    auto_ptr<ZTrans> trans ( init_slide(0) );
-    transB = B->RefTrans();
-    B->SetTrans(*trans);
+    const TMatrixDRow R( (*m_conn_cof)[3] );
+    p->mW = R[0] +   R[1]*t +   R[2]*t2 + R[3]*t3;
   }
-
-  Double_t time = 0, dt = mInitDt, max_t = mLength;
-  bool done = false;
-  while(!done) {
-    gSystem->Sleep(mSleepMS);
-
-    time += dt;
-    if(time > max_t) {
-      time = max_t;
-      done = true;
-    }
-
-    GLensWriteHolder wrlck(this);
-    {
-      GLensWriteHolder B_wrlck(B);
-      ZTrans tx(B->RefTrans());
-      B->SetTrans(transB);
-      TransAtTime(tx, time, false);
-      B->SetTrans(tx);
-    }
-    mStampReqTring = Stamp(FID());
-  }
+  lcf.OrtoNorm3();
 }
 
 /**************************************************************************/
 
-void WSTube::TravelAtoB()
+void WSTube::Connect()
 {
-  Travel(mInitDt, mSleepMS, true);
+  static const Exc_t _eh("WSTube::Connect ");
+
+  assert_disconnect(_eh);
+
+  WSPoint *ap, *bp;
+  connect(ap, bp);
+  // These should be via ZQueen::IncarnateWAttach for cluster stuff.
+  { GLensWriteHolder wrlck(this);
+    mQueen->CheckIn(ap); Add(ap);
+    mQueen->CheckIn(bp); Add(bp);
+  }
+
+  mConnectionStauts = CS_Connected;
+  mStampReqTring = Stamp(FID());
 }
 
-void WSTube::TravelBtoA()
+void WSTube::Disconnect()
 {
-  Travel(mInitDt, mSleepMS, false);
+  static const Exc_t _eh("WSTube::Disconnect ");
+
+  if(mConnectionStauts != CS_Connected && !bWeakConnect)
+    throw(_eh + "not connected.");
+
+  disconnect();
+  mConnectionStauts = CS_Disconnected;
+  Stamp(FID());
 }
 
-void WSTube::Travel(Float_t abs_dt, UInt_t sleep_ms, Bool_t AtoB)
+void WSTube::AnimateConnect(Float_t velocity)
 {
+  static const Exc_t _eh("WSTube::AnimatedConnect ");
+
+  assert_disconnect(_eh);
+
+  WSPoint *ap, *bp;
+  connect(ap, bp);
+  Bool_t rnrself_state = bRnrSelf;
+  bRnrSelf = false;
+  // These should be via ZQueen::IncarnateWAttach for cluster stuff.
+  { GLensWriteHolder wrlck(this);
+    mQueen->CheckIn(ap); Add(ap);
+    mQueen->CheckIn(bp); Add(bp);
+  }
+
+  ap->Coff(bp);
+  m_conn_cof = new TMatrixD(ap->RefCoffs());
+  bp->SetTrans(ap->RefTrans());
+
+  if(velocity == 0) velocity = mDefVelocity;
+  m_conn_time = 0;
+  m_conn_vel  = velocity;
+
+  bRnrSelf = rnrself_state;
+  mConnectionStauts = CS_Connecting;
+  Stamp(FID());
+}
+
+void WSTube::AnimateDisconnect(Float_t velocity, Bool_t delay_p)
+{
+  // If delay_p==true resend mir to self if connecting.
+
+  static const Exc_t _eh("WSTube::AnimateDisconnect ");
+
+  if(mConnectionStauts == CS_Connecting && delay_p) {
+    auto_ptr<ZMIR> redo( S_AnimateDisconnect(velocity, delay_p) );
+    GTime time(GTime::I_Now);
+    // Don't know anything about time scale ... so take 1 seconf.
+    time += 1.0;
+    mSaturn->DelayedShootMIR(redo, time);
+    return;
+  }
+
+  if(mConnectionStauts != CS_Connected)
+    throw(_eh + "not connected.");
+
+  WSPoint *ap, *bp;
+  connect(ap, bp);
+  ap->Coff(bp);
+  m_conn_cof = new TMatrixD(m_first_point->RefCoffs());
+
+  if(velocity == 0) velocity = mDefVelocity;
+  m_conn_time = Length();
+  m_conn_vel  = -velocity;
+
+  mConnectionStauts = CS_Disconnecting;
+
+  Stamp(FID());
+}
+
+/**************************************************************************/
+
+void WSTube::MakeTraveler(Float_t velocity, Float_t wait_time)
+{
+  static const Exc_t _eh("WSTube::MakeTraveler ");
+
+  if(mConnectionStauts != CS_Connected && mConnectionStauts != CS_Connecting)
+    throw(_eh + "not connected or connecting.");
+
+  if(velocity == 0)            velocity  = mDefVelocity;
+  if(wait_time < mMinWaitTime) wait_time = mMinWaitTime;
+
+  Float_t len      = Length();
+  Float_t init_pos = (velocity > 0) ? 0 : len;
+
   Sphere* s = new Sphere("Observator");
-  ZTrans trans;
-  {
+  TransAtTime(s->ref_trans(), init_pos, true);    
+  s->SetUseScale(true);
+  s->SetSx(2*mDefWidth); s->SetSy(mDefWidth); s->SetSz(mDefWidth); 
+  s->SetColor(0.2+0.8*mRnd.Rndm(), 0.2+0.8*mRnd.Rndm(), 0.2+0.8*mRnd.Rndm());
+  mQueen->CheckIn(s);
+  s->SetParent(this);
+
+  list<Traveler>::iterator list_pos = m_traveler_list.end();
+  if( ! m_traveler_list.empty()) {
+    if(velocity > 0) {
+      if(m_traveler_list.front().fPosition < wait_time &&
+	 m_traveler_list.front().fVelocity > 0)
+	{
+	  init_pos = m_traveler_list.front().fPosition - wait_time;
+	}
+      list_pos = m_traveler_list.begin();
+    } else {
+      if(m_traveler_list.back().fPosition > len - wait_time &&
+	 m_traveler_list.back().fVelocity < 0)
+	{
+	  init_pos = m_traveler_list.back().fPosition + wait_time;
+	}
+    }
+  }
+  m_traveler_list.insert(list_pos, Traveler(s, init_pos , velocity));
+}
+
+void WSTube::TimeTick(Double_t t, Double_t dt)
+{
+  if( mConnectionStauts == CS_Connected ||
+     (mConnectionStauts == CS_Disconnecting && ! m_traveler_list.empty())) {
+
+    PARENT_GLASS::TimeTick(t, dt);
+
     GLensWriteHolder wrlck(this);
-    ZTrans* tt = init_slide(0);
-    trans = *tt;
-    delete tt;
-    if(AtoB == false) {
-      TransAtTime(trans, mLength, false);
-      TVector3 xcy = trans.GetBaseVec(1);
-      xcy = xcy.Cross(trans.GetBaseVec(2));
-      TVector3 z(trans.GetBaseVec(3));
-      if(xcy.Dot(z) < 0) {
-	trans.SetBaseVec(3, -z);
+    Float_t len = Length();
+    list<Traveler>::iterator i = m_traveler_list.begin();
+    while(i != m_traveler_list.end()) {
+      Float_t step  = i->fVelocity*dt;
+      i->fPosition += step;
+      if(i->fShown == false && i->fPosition >= 0 && i->fPosition <= len) {
+	mTravelers->Add(i->fNode);	
+	i->fShown = true;
       }
-    }
-    s->SetTrans(trans);
-    s->SetUseScale(true);
-    s->SetSx(2*mDefWidth); s->SetSy(mDefWidth); s->SetSz(mDefWidth); 
-    s->SetColor(0.2+0.8*mRnd.Rndm(), 0.2+0.8*mRnd.Rndm(), 0.2+0.8*mRnd.Rndm());
-  }
-
-  {
-    GLensWriteHolder q_wrlck(mQueen);
-    mQueen->CheckIn(s);   // try-catch !!!!
-  }
-
-  {
-    GLensWriteHolder s_wrlck(s);
-    s->SetParent(this);
-  }
-
-  // This whole thing should be split into two functions for
-  // proper operation in a cluster context.
-  // 1. Instantiation at the Sun, Broadcast of MIR to call stepper in a
-  //    dedicated thread. (declared as X{E}, require MIR)
-  // 2. Stepper itself (declared as X{ED})
-
-
-  {
-    GLensWriteHolder lenses_wrlck(mLenses.get());
-    mLenses->Add(s);
-  }
-  Float_t
-    time  = AtoB ? 0 : mLength,
-    dt    = AtoB ? abs_dt : -abs_dt,
-    max_t = AtoB ? mLength : 0;
-
-  while(1) {
-    gSystem->Sleep(sleep_ms);
-    time += dt;
-    if(time*(AtoB ? 1 : -1) > max_t) {
+      if((i->fVelocity < 0 && i->fPosition < 0) ||
+	 (i->fVelocity > 0 && i->fPosition > len))
+	{
+	  list<Traveler>::iterator j = i--;
+	  mTravelers->RemoveAll(j->fNode);
+	  m_traveler_list.erase(j);
+	  break;
+	}
       {
-	GLensWriteHolder s_wrlck(s);
-	s->SetParent(0);
+	GLensWriteHolder node_wrlck(i->fNode);
+	TransAtTime(i->fNode->ref_trans(), i->fPosition, false);
+	i->fNode->StampReqTrans();
       }
-      {
-	GLensWriteHolder wrlck(mLenses.get());
-	// s->DecRefCount(this);
-	mLenses->RemoveAll(s);
-	// mQueen->RemoveLens(s);
-      }
-      break;
+      ++i;
     }
-    {
-      GLensWriteHolder wrlck(this);
-      TransAtTime(trans, time, false);
+
+  }
+  else if(mConnectionStauts == CS_Connecting ||
+	  mConnectionStauts == CS_Disconnecting) {
+
+    GLensWriteHolder wrlck(this);
+    Float_t len  = Length();
+    Float_t step = m_conn_vel*dt;
+    Bool_t done  = false;
+    m_conn_time += step;
+
+    if(m_conn_vel < 0 && m_conn_time  < 0) {
+      disconnect();
+      mConnectionStauts = CS_Disconnected;
+      done = true;
+    } else {
+      if(m_conn_vel > 0 && m_conn_time > len) {
+	m_conn_time       = len;
+	mConnectionStauts = CS_Connected;
+      done = true;
+      } 
+      conn_travel(m_last_point, m_conn_time/len);
+      m_last_point->Stamp(WSPoint::FID());
     }
-    {
-      GLensWriteHolder wrlck(s);
-      s->SetTrans(trans);
+    if(done) {
+      delete m_conn_cof; m_conn_cof = 0;
+      Stamp(FID());
     }
   }
 }
