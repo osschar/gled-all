@@ -294,6 +294,9 @@ void ZGeoNode::SaveToFile(Bool_t as_top_level, Bool_t save_links,
   ISdebug(1, _eh + "saving to '" + file + "'.");
 
   ZComet c("ZGeoNodes");
+  if(save_links)
+    c.mIgnoredLinks.insert("ZNode::Parent");
+
   if(as_top_level) {
     c.AddTopLevel(this, save_links, true, -1);
   } else {
