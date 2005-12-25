@@ -1,3 +1,11 @@
+2005-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	OSX.
+
+	* metagui_test.C:
+	Changed Nx/Ny for wgl-directory.
+
 2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* WS_demo.C:
