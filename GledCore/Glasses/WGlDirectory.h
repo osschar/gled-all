@@ -20,8 +20,9 @@ class WGlDirectory : public ZNode {
  private:
   void _init();
  protected:
-  ZLink<AList>      mContents;     // X{GE} L{}
-  ZLink<ZList>      mSelection;    // X{GS} L{}
+  ZLink<AList>      mContents;     //  X{GE} L{}
+  ZLink<ZList>      mSelection;    //  X{GS} L{}
+  ZLink<ZGlass>     mLastClicked;  //! X{GS} L{}
 
   StepMode_e        mStepMode;     // X{GS} 7 PhonyEnum()
   Float_t           mDx;           // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
