@@ -226,11 +226,13 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
       fImg->fEye->Send(*mir);
     }else {
       ZGlass* lens = (ZGlass*)m_current;
+      auto_ptr<ZMIR> clicked( M.S_SetLastClicked(lens) );
+      fImg->fEye->Send(*clicked);
       GledNS::MethodInfo* mi = M.GetCbackMethodInfo();
       if(mi == 0) return 0;
-      ZMIR mir(M.mCbackAlpha.get(), lens);
-      mi->ImprintMir(mir);
-      fImg->fEye->Send(mir);
+      ZMIR cback(M.mCbackAlpha.get(), lens);
+      mi->ImprintMir(cback);
+      fImg->fEye->Send(cback);
     }
     m_current = 0;
     Redraw(rd);
