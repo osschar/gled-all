@@ -215,5 +215,5 @@ GThread* GThread::TSDSelf()
 
 unsigned long GThread::RawSelf()
 {
-  return pthread_self();
+  return (unsigned long) pthread_self();
 }
