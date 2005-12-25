@@ -892,6 +892,9 @@ void ZQueen::RemoveLens(ZGlass* lens)
   if(mKing->GetLightType() == ZKing::LT_Moon)
     throw(_eh + "can not be called at a moon.");
 
+  if(lens == 0)
+    throw(_eh + "called with null argument.");
+
   if(lens->mQueen != this)
     throw(_eh + "lens " + lens->Identify() + " is not my subject.");
 
@@ -914,6 +917,9 @@ void ZQueen::RemoveLenses(AList* list, Bool_t recurse)
 
   if(mKing->GetLightType() == ZKing::LT_Moon)
     throw(_eh + "can not be called at a moon.");
+
+  if(list == 0)
+    throw(_eh + "called with null argument.");
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
