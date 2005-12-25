@@ -27,6 +27,8 @@ public:
   Int_t TimedWaitMuS(UInt_t wait_mus);
   Int_t	Signal();
   Int_t Broadcast();
+  Int_t	LockSignal();
+  Int_t LockBroadcast();
 
 #include "GCondition.h7"
   ClassDef(GCondition,0)

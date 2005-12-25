@@ -92,3 +92,19 @@ Int_t GCondition::Broadcast()
   return ret;
 }
 
+Int_t GCondition::LockSignal()
+{
+  Lock();
+  int ret = pthread_cond_signal(&mCond);
+  Unlock();
+  return ret;
+}
+
+Int_t GCondition::LockBroadcast()
+{
+  Lock();
+  int ret = pthread_cond_broadcast(&mCond);
+  Unlock();
+  return ret;
+}
+
