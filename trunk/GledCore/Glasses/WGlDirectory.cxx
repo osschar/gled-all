@@ -12,36 +12,32 @@
 #include "WGlDirectory.h"
 #include "WGlDirectory.c7"
 
-ClassImp(WGlDirectory)
+ClassImp(WGlDirectory);
 
 /**************************************************************************/
 
-  void WGlDirectory::_init()
+void WGlDirectory::_init()
 {
-  // *** Set all links to 0 ***
-  mContents  = 0;
-  mSelection = 0;
-
   mStepMode = SM_XYZ;
   mDx = mDy = mDz = 1;
-  mNx = mNy = mNz = 16;
+  mNx = mNy = mNz = 1;
   mFirst = 1;
-  bDrawTitle = false;
-  mNameFraction = 0.4;
 
-  bDrawPageCtrl = true;
-  mPageCtrlWidth  = 0.1;
+  bDrawPageCtrl  = true;
+  mPageCtrlWidth = 0.1;
   mPageCtrlOff   = 0.015;
   mPageInfoWidth = 0.2;
-  mPageInfoOff    = 0.04;
+  mPageInfoOff   = 0.04;
   mPageColor.rgba(0.18, 0.45, 0.6,0.6);
   mSymColor.rgba(1., 0., 0.,1.);
 
-  bDrawBox = true;
+  bDrawBox  = true;
   mBoxOx = mBoxOy = mBoxOz = 0;
   mBoxDx = mBoxDy = mBoxDz = 1;
 
-  bDrawText   = true;
+  bDrawText  = true;
+  bDrawTitle = false;
+  mNameFraction = 0.2;
   mTextOx = mTextOy = mTextOz = 0;
   mTextDx = mTextDy = 0;
   mTextA1 = mTextA2 = mTextA3 = 0;
@@ -76,7 +72,6 @@ void WGlDirectory::StandardPersp()
 {
   SetStepMode(SM_XZY);
   SetDx(2.5); SetDy(1);  SetDz(-1);
-  SetNx(6);   SetNy(16); SetNz(16);
   SetDrawBox(1);
   SetBoxOx(-0.1); SetBoxOy(-0.1); SetBoxOz(-0.21);
   SetBoxDx(2.2);  SetBoxDy(0.6);  SetBoxDz(0.2);
@@ -91,7 +86,6 @@ void WGlDirectory::StandardFixed()
   SetPos(0.2, 8, 0);
   SetStepMode(SM_YXZ);
   SetDx(2);  SetDy(-0.7); SetDz(1);
-  SetNx(16); SetNy(10);   SetNz(16);
   SetDrawBox(0);
   SetBoxOx(0);    SetBoxOy(0);  SetBoxOz(0);
   SetBoxDx(1);    SetBoxDy(1);  SetBoxDz(1);
@@ -105,7 +99,6 @@ void WGlDirectory::StandardPixel()
 {
   SetStepMode(SM_YXZ);
   SetDx(110); SetDy(-36); SetDz(1);
-  SetNx(16); SetNy(10); SetNz(16);
   SetDrawBox(0);
   SetBoxOx(0);   SetBoxOy(0);  SetBoxOz(0);
   SetBoxDx(1);   SetBoxDy(1);  SetBoxDz(1);
