@@ -185,7 +185,7 @@ void Amphitheatre::chair_hunt()
     bool finalp = (dx <= mGuestStep); // Guest has reached the chair.
 
     node->WriteLock();
-    node->Move3LF(x.x(), x.y(), x.z());
+    node->Move3PF(x.x(), x.y(), x.z());
     fix_guest_scale(node, finalp);
     // !! Could rotate it along travel axis.
     node->WriteUnlock();
