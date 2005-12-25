@@ -48,6 +48,7 @@ public:
     Operator(n,t) { _init(); }
 
   // Operator:
+  virtual void ResetRecursively();
   virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
 
   void AddClient(ZGlass* lens); // X{E} C{1} 7 MCWButt()

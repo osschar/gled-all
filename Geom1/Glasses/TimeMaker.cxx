@@ -11,6 +11,7 @@
 
 #include "TimeMaker.h"
 #include "TimeMaker.c7"
+#include <Glasses/ZHashList.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/ZQueen.h>
 
@@ -40,7 +41,7 @@ void TimeMaker::AddClient(ZGlass* lens)
   if(lens == 0) return;
 
   if(mClients == 0) {
-    ZList* l = new ZList("TimeMakerClients");
+    ZList* l = new ZHashList("TimeMakerClients");
     mQueen->CheckIn(l);
     SetClients(l);
   }
@@ -56,6 +57,12 @@ void TimeMaker::EmitFormulaRay()
 }
 
 /**************************************************************************/
+
+void TimeMaker::ResetRecursively()
+{
+  bLastTOK = false;
+  PARENT_GLASS::ResetRecursively();
+}
 
 void TimeMaker::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 {
