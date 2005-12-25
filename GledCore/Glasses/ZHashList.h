@@ -38,9 +38,10 @@ public:
   ZHashList(const Text_t* n="ZHashList", const Text_t* t=0) : ZList(n,t)
   { _init(); }
 
-  virtual Bool_t Has(ZGlass* lens);
-
+  virtual ElType_e el_type()             { return ET_Lens; }
   virtual bool list_insert_lens_ops()    { return true; }
+
+  virtual Bool_t Has(ZGlass* lens);
 
   virtual void RemoveAll(ZGlass* lens);
 
