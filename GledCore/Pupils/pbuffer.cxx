@@ -3,12 +3,12 @@
 // tmp:
 #include <stdio.h>
 
-PBuffer::PBuffer(int width, int height)
+PBuffer::PBuffer(int w, int h)
 {
 	initialized=false;
 
-	this->width=width;
-	this->height=height;
+	width  = w;
+	height = h;
 
 	dpy = glXGetCurrentDisplay();
 	if (dpy == NULL)

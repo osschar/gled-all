@@ -5,7 +5,7 @@ LIB_SET_ID	= 1
 REQUIRES_LIB_SETS =
 
 REGEXP_LIB_BASE  := GledCore_pcre
-REGEXP_LIB       := lib/lib${REGEXP_LIB_BASE}.so
+REGEXP_LIB        = lib/lib${REGEXP_LIB_BASE}.${LDEXT}
 
 # All this dirs expanded in make_base.inc into <type>_SRCS and _HDRS
 # Can add your own before ... or after (are += -ed into the vars)
@@ -24,7 +24,7 @@ MAINSRCS := saturn.cxx gled.cxx
 MAINOBJS := $(MAINSRCS:.cxx=.o)
 MAINEXES := bin/saturn bin/gled
 
-PUPILS_LIB     := lib/libGledCore_Pupils.so
+PUPILS_LIB      = lib/libGledCore_Pupils.${LDEXT}
 PUPILS_HDRS    := $(wildcard Pupils/*.h)
 PUPILS_SRCS    := $(wildcard Pupils/*.cxx)
 PUPILS_OBJS    := $(addsuffix .o ,$(basename ${PUPILS_SRCS}))
@@ -59,11 +59,16 @@ ${REGEXP_LIB}:
 	${MAKE} -C RegExp
 
 ${PUPILS_LIB}: ${PUPILS_OBJS}
-	${LD} -shared -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
+	${LD} ${LDSHAREDOPT} -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_targets.inc
 #--------------------------------------------------------------
+
+install::
+ifeq (${GLED_SYSTEM},Darwin)
+	fltk-config --post ${GLEDSYS}/bin/gled
+endif
 
 clean::
 	@rm -f ${MAINOBJS}
