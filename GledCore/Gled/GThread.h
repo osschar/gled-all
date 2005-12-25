@@ -11,8 +11,13 @@
 #include <Gled/GMutex.h>
 #include <map>
 
+#ifdef __CINT__
 typedef unsigned long int pthread_t;
 typedef unsigned int pthread_key_t;
+#else
+#include <pthread.h>
+#endif
+
 typedef void*   (*GThread_foo)(void*);
 typedef void (*GThread_cu_foo)(void*);
 
