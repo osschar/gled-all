@@ -617,7 +617,7 @@ void FTW_Shell::X_SetGamma(OS::ZGlassImg* img)
 
 void FTW_Shell::X_SetLink(FTW::Locator& target)
 {
-  static TString _eh("FTW_Shell::X_SetLink ");
+  static const Exc_t _eh("FTW_Shell::X_SetLink ");
 
   if(!target.is_link)		throw(_eh + "target is not a link");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
@@ -632,7 +632,7 @@ void FTW_Shell::X_SetLink(FTW::Locator& target)
 void FTW_Shell::X_ClearLink(FTW::Locator& target)
 {
   // need sink here !!!!
-  static TString _eh("FTW_Shell::X_ClearLink ");
+  static const Exc_t _eh("FTW_Shell::X_ClearLink ");
 
   if(!target.is_link) throw(_eh + "target is not a link");
 
@@ -650,7 +650,7 @@ void FTW_Shell::X_Yank(FTW::Locator& target)
   // !!!! The only operation with sink implemented.
   // !!!! With fixed push to sink as a list.
 
-  static TString _eh("FTW_Shell::X_Yank ");
+  static const Exc_t _eh("FTW_Shell::X_Yank ");
 
   if(!target.has_contents())	throw(_eh + "target has no contents");
   mSink->swallow_victim(target.get_glass());
@@ -660,7 +660,7 @@ void FTW_Shell::X_Yank(FTW::Locator& target)
 
 void FTW_Shell::X_Add(FTW::Locator& target)
 {
-  static TString _eh("FTW_Shell::X_Add ");
+  static const Exc_t _eh("FTW_Shell::X_Add ");
 
   if(!target.is_list())		throw(_eh + "target is not a list");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
@@ -673,7 +673,7 @@ void FTW_Shell::X_Add(FTW::Locator& target)
 
 void FTW_Shell::X_Push(FTW::Locator& target)
 {
-  static TString _eh("FTW_Shell::X_Push ");
+  static const Exc_t _eh("FTW_Shell::X_Push ");
 
   if(!target.is_list())		throw(_eh + "target is not a list");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
@@ -687,7 +687,7 @@ void FTW_Shell::X_Push(FTW::Locator& target)
 void FTW_Shell::X_Pop(FTW::Locator& target)
 {
   // need sink here !!!!
-  static TString _eh("FTW_Shell::X_Pop ");
+  static const Exc_t _eh("FTW_Shell::X_Pop ");
 
   if(!target.is_list())	throw(_eh + "target is not a list");
 
@@ -699,7 +699,7 @@ void FTW_Shell::X_Pop(FTW::Locator& target)
 
 void FTW_Shell::X_Unshift(FTW::Locator& target)
 {
-  static TString _eh("FTW_Shell::X_Unshift ");
+  static const Exc_t _eh("FTW_Shell::X_Unshift ");
 
   if(!target.is_list())		throw(_eh + "target is not a list");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
@@ -713,7 +713,7 @@ void FTW_Shell::X_Unshift(FTW::Locator& target)
 void FTW_Shell::X_Shift(FTW::Locator& target)
 {
   // need sink here !!!!
-  static TString _eh("FTW_Shell::X_Shift ");
+  static const Exc_t _eh("FTW_Shell::X_Shift ");
 
   if(!target.is_list())	throw(_eh + "target is not a list");
 
@@ -726,7 +726,7 @@ void FTW_Shell::X_Shift(FTW::Locator& target)
 
 void FTW_Shell::X_Insert(FTW::Locator& target)
 {
-  static TString _eh("FTW_Shell::X_Insert ");
+  static const Exc_t _eh("FTW_Shell::X_Insert ");
 
   if(!target.is_list_member)	throw(_eh + "target is not a list member");
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
@@ -745,7 +745,7 @@ void FTW_Shell::X_Insert(FTW::Locator& target)
 void FTW_Shell::X_Remove(FTW::Locator& target)
 {
   // need sink here !!!!
-  static TString _eh("FTW_Shell::X_Remove ");
+  static const Exc_t _eh("FTW_Shell::X_Remove ");
 
   if(!target.is_list_member)	throw(_eh + "target is not a list member");
 
@@ -762,7 +762,7 @@ void FTW_Shell::X_Remove(FTW::Locator& target)
 
 void FTW_Shell::Y_SendMessage(const char* msg)
 {
-  static TString _eh("FTW_Shell::Y_SendMessage ");
+  static const Exc_t _eh("FTW_Shell::Y_SendMessage ");
 
   // Need recipient FGS::LensNameBox ...
   ZMirEmittingEntity* mee = mShellInfo->GetMessageRecipient();
@@ -862,7 +862,7 @@ void FTW_Shell::RemoveMTW_Views()
 
 MCW_View* FTW_Shell::MakeMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
 {
-  static TString _eh("FTW_Shell::MakeMCW_View ");
+  static const Exc_t _eh("FTW_Shell::MakeMCW_View ");
 
   MCW_View* mcw = new MCW_View(this);
   try {
@@ -880,7 +880,7 @@ MCW_View* FTW_Shell::MakeMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
 MCW_View* FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi,
 				   bool show_p)
 {
-  static TString _eh("FTW_Shell::SpawnMCW_View ");
+  static const Exc_t _eh("FTW_Shell::SpawnMCW_View ");
 
   MCW_View* mcw = MakeMCW_View(img, cmi);
   if(mcw) {
