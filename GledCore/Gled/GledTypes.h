@@ -82,6 +82,7 @@ public:
   CID_t	cid;
 
   FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
+  virtual ~FID_t() {}
   bool operator==(FID_t r) const { return (lid == r.lid && cid == r.cid); }
   bool operator!=(FID_t r) const { return (lid != r.lid || cid != r.cid); }
   bool is_null()  const { return lid == 0 && cid == 0; }
@@ -110,6 +111,7 @@ public:
   MID_t	mid;
 
   FMID_t(LID_t l=0, CID_t c=0, MID_t m=0) : FID_t(l,c), mid(m) {}
+  virtual ~FMID_t() {}
   bool operator==(FMID_t r) { return FID_t::operator==(r) && mid == r.mid; }
   bool operator!=(FMID_t r) { return FID_t::operator!=(r) || mid != r.mid; }
 

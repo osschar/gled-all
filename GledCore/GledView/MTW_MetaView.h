@@ -28,7 +28,7 @@ protected:
 public:
   MTW_MetaView(OptoStructs::ZGlassImg* img, FTW_Shell* shell);
   MTW_MetaView(ZGlass* glass, Fl_SWM_Manager* swm_mgr);
-  ~MTW_MetaView();
+  virtual ~MTW_MetaView();
 
   void BuildByLensGraph(ZGlass* gui);
   void Rebuild();

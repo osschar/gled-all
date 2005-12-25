@@ -13,24 +13,31 @@
 #include <GledView/GledViewNS.h>
 #include <Eye/Eye.h>
 
+#include <TROOT.h>
+#include <TSystem.h>
+#include <TVirtualX.h>
+#include <TCanvas.h>
+
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_OutputPack.H>
 #include <FL/Fl_Tooltip.H>
-#include <FL/x.H>
 #include <FL/fl_draw.H>
 #include <FL/Fl_Image.H>
 
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TVirtualX.h>
-#include <TGX11.h>
-#include <TCanvas.h>
+#ifdef __APPLE__
+#define __WAS_APPLE__
+#undef __APPLE__
+#endif
 
-// #include <GL/glx.h>
-#include <X11/Xlib.h>
+#include <FL/x.H>
+
+#ifdef __WAS_APPLE__
+#define __APPLE__
+#undef __WAS_APPLE__
+#endif
 
 extern void *GledCore_GLED_init_View;
 extern void *GledCore_GLED_user_init_View;
@@ -464,8 +471,11 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 TCanvas* GledGUI::NewCanvas(const Text_t* name, const Text_t* title,
 			    int w, int h, int npx, int npy)
 {
-  XSync(fl_display, False);
-  Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
+#ifndef __APPLE__
+  XSync((Display*)fl_display, 0);
+#endif
+  //  Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
+  Display* rd = (Display*) gVirtualX->GetDisplay();
   XLockDisplay(rd);
 
   TCanvas* c = new TCanvas(name, title, w, h);
@@ -476,7 +486,7 @@ TCanvas* GledGUI::NewCanvas(const Text_t* name, const Text_t* title,
   }
   c->Update();
 
-  XSync(rd, False);
+  XSync(rd, 0);
   XUnlockDisplay(rd);
 
   return c;
