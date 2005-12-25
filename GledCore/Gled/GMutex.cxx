@@ -20,13 +20,13 @@ GMutex::GMutex(Init_e e) {
   pthread_mutexattr_init(&mAttr);
   switch(e) {
   case fast:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_FAST_NP); break;
+    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_NORMAL); break;
   case recursive:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE_NP); break;
+    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE); break;
   case error_checking:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_ERRORCHECK_NP); break;
+    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_ERRORCHECK); break;
   default:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_FAST_NP); break;
+    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_NORMAL); break;
   }
   int ret;
   if( (ret = pthread_mutex_init(&mMut, &mAttr)) ) {
