@@ -66,7 +66,7 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
 
   Float_t poly_offa = 0;
 
-  if(mText->bBackPoly) {
+  if(mText->bBackPoly || mText->bFramePoly) {
 
     float x0 = -mText->mXBorder;
     float x1 = (float)width/h_box + mText->mXBorder;
@@ -88,13 +88,14 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
       glPolygonOffset(poly_offa, poly_offa);
     }
     
-    glColor4fv(mText->mBGCol());
-    glBegin(GL_QUADS);
-    glVertex2f(x0, y0);  glVertex2f(x1, y0);
-    glVertex2f(x1, y1);  glVertex2f(x0, y1);
-    glEnd();
-
-    poly_offa -= 1;
+    if(mText->bBackPoly) {
+      glColor4fv(mText->mBGCol());
+      glBegin(GL_QUADS);
+      glVertex2f(x0, y0);  glVertex2f(x1, y0);
+      glVertex2f(x1, y1);  glVertex2f(x0, y1);
+      glEnd();
+      poly_offa -= 1;
+    }
   }
 
   if(poly_offa != 0) {
