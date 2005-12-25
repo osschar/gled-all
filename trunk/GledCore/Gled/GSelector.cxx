@@ -45,8 +45,8 @@ Int_t GSelector::Select()
     ret = select(Mfd+1, &read, &write, &except, 0);
   } else {
     struct timeval timeout;
-    timeout.tv_sec = (__time_t) fTimeOut;
-    timeout.tv_usec = (__time_t)(1000000*(fTimeOut - timeout.tv_sec));
+    timeout.tv_sec = (time_t) fTimeOut;
+    timeout.tv_usec = (time_t)(1000000*(fTimeOut - timeout.tv_sec));
     ret = select(Mfd+1, &read, &write, &except, &timeout);
   }
 

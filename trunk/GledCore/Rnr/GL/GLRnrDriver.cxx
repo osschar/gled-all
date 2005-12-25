@@ -22,10 +22,10 @@ GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
   mBelowMouse = mPushed = mFocus = 0;
 
   mMaxLamps = 8;
-  mLamps = new (A_Rnr*)[mMaxLamps];
+  mLamps = new A_Rnr* [mMaxLamps];
 
   mMaxClipPlanes = 6;
-  mClipPlanes = new (A_Rnr*)[mMaxClipPlanes];
+  mClipPlanes = new A_Rnr* [mMaxClipPlanes];
 
   bMarkupNodes = false;
 

@@ -74,6 +74,7 @@ namespace FltkGledStuff {
     Fl_Box*      fBox;
 
     PackEntryCollapsor(const char* t);
+    virtual ~PackEntryCollapsor() {}
 
     int collexp(bool resize_p=true);
     static void cb_collexp(Fl_Button* w, PackEntryCollapsor* x) {x->collexp();}
@@ -92,6 +93,7 @@ namespace FltkGledStuff {
     FID_t	fFID;
 
     LensNameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
+    virtual ~LensNameBox() {}
 
     virtual void AbsorbRay(Ray& ray);
 
@@ -116,6 +118,7 @@ namespace FltkGledStuff {
   {
   public:
     LensRepNameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
+    virtual ~LensRepNameBox() {}
 
     virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
   };
@@ -131,6 +134,7 @@ namespace FltkGledStuff {
 
   public:
     LinkNameBox(OptoStructs::ZLinkDatum* ld, int x, int y, int w, int h, const char* t=0);
+    virtual ~LinkNameBox() {}
 
     virtual void Update();
 
@@ -188,6 +192,7 @@ namespace FltkGledStuff {
 
   public:
     LensChoiceMenuBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h, const char* t=0);
+    virtual ~LensChoiceMenuBox() {}
 
     virtual void AbsorbRay(Ray& ray);
 

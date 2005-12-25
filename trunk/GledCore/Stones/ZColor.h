@@ -19,6 +19,7 @@ public:
   ZColor(Float_t r, Float_t g, Float_t b, Float_t a = 1) {
     c[0]=r; c[1]=g; c[2]=b; c[3]=a;
   }
+  virtual ~ZColor() {}
 
   Float_t r() const { return c[0]; }
   Float_t g() const { return c[1]; }

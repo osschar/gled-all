@@ -49,6 +49,7 @@ namespace FTW {
     { clear(); }
     Locator(FTW_Nest* n, FTW_Leaf* l, FTW_Ant* a=0) : nest(n)
     { clear(); set(l, a); }
+    virtual ~Locator() {}
 
     void clear();
     void clear_old();
@@ -76,6 +77,7 @@ namespace FTW {
     Locator* m_base;
 
     LocatorConsumer() : m_base(0) {}
+    virtual ~LocatorConsumer() {}
 
     virtual void set_base(Locator& loc);
     virtual void clear_base();
@@ -104,6 +106,8 @@ namespace FTW {
     NameButton(FTW_Leaf* leaf, int x, int y, int w, int h, const char* t=0);
     NameButton(FTW_Ant* ant, int x, int y, int w, int h, const char* t=0);
 
+    virtual ~NameButton() {}
+
     void set_label(const char* t) { if(t) copy_label(t); else label(0); }
     int handle(int ev);
   };
@@ -113,6 +117,7 @@ namespace FTW {
   class NameBox : public OptoStructs::A_View, public Fl_Box {
   public:
     NameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h);
+    virtual ~NameBox() {}
 
     virtual void AbsorbRay(Ray& ray);
 
@@ -135,6 +140,7 @@ namespace FTW {
 
   public:
     Top_Selector(FTW_Shell* s) : m_shell(s), m_cur_type(T_Undef) {}
+    virtual ~Top_Selector() {}
 
     FTW_Shell* get_shell() const { return m_shell; }
 
@@ -154,6 +160,7 @@ namespace FTW {
   public:
     Bot_Selector(Top_Selector* ts, Top_Selector::Type_e t)
       : m_top(ts), m_type_for_top(t) {}
+    virtual ~Bot_Selector() {}
 
     virtual void set_top() { m_top->set_type(m_type_for_top); }
 
@@ -172,7 +179,7 @@ namespace FTW {
 
   public:
     Inst_Selector(Top_Selector* ts, Top_Selector::Type_e t);
-    ~Inst_Selector();
+    virtual ~Inst_Selector();
 
     void set_lid(UInt_t l);
     void set_cid(UInt_t c);
@@ -207,6 +214,7 @@ namespace FTW {
 
   public:
     Locator_Selector(Top_Selector* ts, Top_Selector::Type_e t);
+    virtual ~Locator_Selector() {}
 
     Locator*  get_locator()	{ return m_base; }
     FTW_Nest* get_nest()	{ return m_base ? m_base->nest : 0; }
@@ -235,6 +243,7 @@ namespace FTW {
 
   public:
     Direct_Selector(Top_Selector* ts, Top_Selector::Type_e t);
+    virtual ~Direct_Selector() {}
 
     virtual void activate  ();
     virtual void deactivate();
@@ -250,6 +259,7 @@ namespace FTW {
     Fl_Button*	wTop;
   public:
     Null_Selector(Top_Selector* ts, Top_Selector::Type_e t);
+    virtual ~Null_Selector() {}
 
     void set_nest(FTW_Nest* n);
     
@@ -262,7 +272,7 @@ namespace FTW {
   /**************************************************************************/
 
   class Source_Selector : public Top_Selector, public Fl_Pack {
-    friend class FTW_Shell;
+    friend class ::FTW_Shell;
   protected:
     Locator_Selector*	wLoc_Sel;
     Inst_Selector*	wInst_Sel;
@@ -274,6 +284,7 @@ namespace FTW {
     
   public:
     Source_Selector(FTW_Shell* s, int x, int y, int dw, const char* t);
+    virtual ~Source_Selector() {}
 
     virtual void set_type(Type_e t);
     virtual Fl_Color get_light_color()   { return FL_RED; }
@@ -289,7 +300,7 @@ namespace FTW {
   /**************************************************************************/
 
   class Sink_Selector : public Top_Selector, public Fl_Pack {
-    friend class FTW_Shell;
+    friend class ::FTW_Shell;
   protected:
     Locator_Selector*	wLoc_Sel;
     Direct_Selector*	wDir_Sel;
@@ -301,6 +312,7 @@ namespace FTW {
 
   public:
     Sink_Selector(FTW_Shell* s, int x, int y, int dw, const char* t);
+    virtual ~Sink_Selector() {}
 
     virtual void set_type(Type_e t);
     virtual Fl_Color get_light_color()   { return FL_RED; }

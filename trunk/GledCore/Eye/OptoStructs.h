@@ -81,6 +81,7 @@ namespace OptoStructs {
 
   class ImageConsumer {
   public:
+    virtual ~ImageConsumer() {}
     virtual void ImageDeath(ZGlassImg* img) = 0;
   };
 
