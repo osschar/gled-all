@@ -19,12 +19,17 @@ protected:
 
 public:
   GTime(Long_t s=0, Long_t mu=0) : mSec(s), mMuSec(mu) {}
+  virtual ~GTime() {}
   GTime(Init_e i) { SetNow(); }
   GTime(const GTime& t) : mSec(t.mSec), mMuSec(t.mMuSec) {}
   static GTime Now() { return GTime(I_Now); }
 
   void  SetNow();
   GTime TimeUntilNow();
+
+  GTime& operator=(Long_t mus);
+  GTime& operator=(ULong_t mus);
+  GTime& operator=(Double_t sec);
 
   GTime& operator+=(const GTime& t);
   GTime& operator-=(const GTime& t);

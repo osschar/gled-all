@@ -31,6 +31,30 @@ GTime GTime::TimeUntilNow()
 
 /**************************************************************************/
 
+GTime& GTime::operator=(Long_t mus)
+{
+  GTime tt(mus/1000000, mus%1000000);
+  *this = tt;
+  return *this;
+}
+
+GTime& GTime::operator=(ULong_t mus)
+{
+  GTime tt(mus/1000000, mus%1000000);
+  *this = tt;
+  return *this;
+}
+
+GTime& GTime::operator=(Double_t sec)
+{
+  Long_t s = (Long_t)sec;
+  GTime tt(s, 1000000*((Long_t)(sec-s)) );
+  *this = tt;
+  return *this;
+}
+
+/**************************************************************************/
+
 GTime& GTime::operator+=(const GTime& t)
 {
   mSec   += t.mSec;
