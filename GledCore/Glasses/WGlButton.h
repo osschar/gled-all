@@ -22,6 +22,7 @@ protected:
   Float_t   mDy; // X{GST} 7 Value(-range=>[0,1000,1,1000])
 
   ZLink<ZGlass>       mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
+  ZLink<ZGlass>       mCbackBeta;       //  X{GS} L{}
   TString             mCbackMethodName; //  X{GS}     Ray{CbackReset} 7 Textor()
   GledNS::MethodInfo* mCbackMethodInfo; //!
 
@@ -34,6 +35,8 @@ public:
 
   void MenuEnter(); // X{E}
   void MenuExit();  // X{E}
+
+  void ExitGled();  // X{Ed}
 
 #include "WGlButton.h7"
   ClassDef(WGlButton, 1)
