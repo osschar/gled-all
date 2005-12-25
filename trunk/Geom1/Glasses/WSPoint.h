@@ -15,34 +15,40 @@ class WSPoint : public ZNode
   MAC_RNR_FRIENDS(WSPoint);
   MAC_RNR_FRIENDS(WSSeed);
   friend class WSSeed;
+  friend class WSTube;
 
 private:
   void _init();
 
-  TMatrixD	mCoffs;         //! X{R}
-
 protected:
-  Float_t	mW;		// Width   X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
-  Float_t	mS;		// Spread  X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
-  Float_t	mT;		// Tension X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6)
+  Float_t	mW; // Width   X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
+  Float_t	mS; // Spread  X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
+  Float_t	mT; // Tension X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6)
 
-  Float_t	mTwist;		// X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Float_t	mStretch;	// X{GS} 7 Value(-range=>[-100,100,1,1000])
+  Float_t	mTwist;   // Texture wraps X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Float_t	mStretch; // Lenght        X{GE} 7 Value(-range=>[-100,100,1,1000])
 
-  bool		bDrawAxen;	// X{GS} 7 Bool()
+  // Internal stuff for connections.
+  TMatrixD mCoffs;     //! X{R}
+  WSPoint* mCoffPoint; //!
+  WSPoint* mPrevPoint; //!
+  WSPoint* mNextPoint; //!
 
 public:
   WSPoint(const Text_t* n="WSPoint", const Text_t* t=0) : 
     ZNode(n,t), mCoffs(4,4) { _init(); }
 
-  void Coff(const WSPoint* f);
+  void Coff(WSPoint* f);
 
-  // virtuals
+  // Stamping, custom set-methods.
+
   virtual TimeStamp_t Stamp(FID_t fid, UChar_t eye_bits=0);
+
+  void SetStretch(Float_t stretch);
 
 #include "WSPoint.h7"
   ClassDef(WSPoint, 1)
-}; // endclass WSPoint
+    }; // endclass WSPoint
 
 
 #endif

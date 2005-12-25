@@ -24,15 +24,21 @@ void WSPoint::_init()
 {
   mW = 0.1; mS = 0; mT = 1;
   mTwist = 0; mStretch = 1;
-  bDrawAxen = false;
+
+  mCoffPoint = mPrevPoint = mNextPoint = 0;
 }
+
+/**************************************************************************/
 
 namespace {
   inline Double_t sqr(Double_t x) { return x*x; }
 }
 
-void WSPoint::Coff(const WSPoint* f)
+void WSPoint::Coff(WSPoint* f)
 {
+  if(f == mCoffPoint)
+    return;
+
   const ZTrans& a = RefTrans();
   const ZTrans& b = f->RefTrans();
 
@@ -61,6 +67,8 @@ void WSPoint::Coff(const WSPoint* f)
   row[1] = mS;
   row[2] = (f->mW - mW) - mS - A;
   row[3] = A;
+
+  mCoffPoint = f;
 }
 
 /**************************************************************************/
@@ -68,17 +76,33 @@ void WSPoint::Coff(const WSPoint* f)
 TimeStamp_t WSPoint::Stamp(FID_t fid, UChar_t eye_bits)
 {
   // Upon change also change parent's triangulation stamp (if it is a WSSeed).
-  // Not optimal as it forces re-computation of Coffs for all WSPoints
-  // in the symbol.
+  // Usually WSSeed is stored as a single display-list.
 
   TimeStamp_t t = PARENT_GLASS::Stamp(fid, eye_bits);
   if(fid.is_null() || fid == ZNode::FID() || fid == FID())
   {
-    mStampReqTring = t;
+    mCoffPoint = 0;
+    if(mPrevPoint)
+      mPrevPoint->mCoffPoint = 0;
 
-    WSSeed* seed = dynamic_cast<WSSeed*>(mParent.get());
-    if(seed) seed->MarkStampReqTring();
+    WSSeed* seed = dynamic_cast<WSSeed*>(*mParent);
+    if(seed)
+      seed->MarkStampReqTring();
   }
-
   return t;
+}
+
+/**************************************************************************/
+
+void WSPoint::SetStretch(Float_t stretch)
+{
+  if(stretch > 100) stretch = 100;
+  if(stretch < -100) stretch = -100;
+  if(mNextPoint) {
+    WSSeed* seed = dynamic_cast<WSSeed*>(*mParent);
+    if(seed)
+      seed->SetTrueLength(seed->GetTrueLength() + stretch - mStretch);
+  }
+  mStretch = stretch;
+  Stamp(FID());
 }
