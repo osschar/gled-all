@@ -1,7 +1,9 @@
 # $Header$
 
 $PATCH = {
-"ZImage" => {
-  'CINT_Opts' => ""
+
+"WSTube" => {
+  'Pragmas'   => "#pragma link C++ class WSTube::Traveler+;\n",
 },
+
 };
