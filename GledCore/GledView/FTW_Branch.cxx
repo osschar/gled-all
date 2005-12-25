@@ -207,17 +207,14 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 	if(bListExpanded) CollapseList();
 	wipe_leaves();
 	if(was_expanded)  ExpandList();
-	label_namebox();
 	return;
       }
 
       } // end switch ray.fRQN
 
-    } else { // leaves not created
-
-      label_namebox();
-
     }
+
+    label_namebox();
 
   } // enf if list-ray
 
