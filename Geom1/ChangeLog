@@ -1,3 +1,52 @@
+2005-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	Move guests in parent-frame, not local (that was a bug).
+
+	* Glasses/Rect.cxx:
+	* Glasses/Rect.h:
+	Minimal changes.
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	Implemented virtual ResetRecurively().
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Optimized Coff (bezier coefficients) handling; added pointers to
+	prev/next point.
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Implemented low level list operations to also perform linking of
+	points with prev/next pointers; added members m_first/last_point;
+	optimized animation (WSSeed is now also subclassed from
+	TimeMakerClient). Texture animation now done via
+	texture-matrix-stack (much faster). Added toy function
+	MakeLissajou() to create 3d curves.
+
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	Optimized connect/disconnect animation; implemented virtual
+	TimeTick (inherited from TimeMakerClient via WSSeed).
+
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	Optimized with usage of local cache-variables Double_t m_last_time
+	and ZTrans m_last_trans.
+
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Removed blending change (should be done elsewhere when needed);
+	clean-up.
+
+	* Rnr/GL/WSPoint_GL_Rnr.cxx:
+	Removed axis drawing (can be done with a rnr-mod).
+
+	* catalog.patch:
+	Added WSTube::Traveler for rootcint.
+
 2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TimeMaker.cxx:
