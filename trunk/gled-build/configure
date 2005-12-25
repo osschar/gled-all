@@ -117,14 +117,56 @@ sub collect_dependencies {
 ########################################################################
 
 sub find_x11lib {
-  my $xlib = "libX11.so";
-  my @l = `ldd $ENV{ROOTSYS}/lib/libGX11.so | grep $xlib`;
-  die "find_x11lib found several possible $xlib" if($#l != 0);
-  my $l = $l[0]; $l =~ s/^\s*//;
-  my @p = split /\s+/, $l;
-  my $p = $p[2];
-  $p =~ s!/$xlib.*!!;
-  return $p;
+  if($system eq 'Linux') {
+    my $xlib = "libX11.so";
+    my @l = `ldd $ENV{ROOTSYS}/lib/libGX11.so | grep $xlib`;
+    die "find_x11lib found several possible $xlib" if($#l != 0);
+    my $l = $l[0]; $l =~ s/^\s*//;
+    my @p = split /\s+/, $l;
+    my $p = $p[2];
+    $p =~ s!/[^/]*$!!;
+    return $p;
+  }
+  elsif($system eq 'Darwin') {
+    my $xlib = "libX11.[0-9]+.dylib";
+    my @l = `otool -L $ENV{ROOTSYS}/lib/libGX11.so | grep -E '$xlib'`;
+    die "find_x11lib found several possible $xlib" if($#l != 0);
+    my $l = $l[0]; $l =~ s/^\s*//;
+    my @p = split /\s+/, $l;
+    my $p = $p[0];
+    $p =~ s!/[^/]*$!!;
+    return $p;
+  }
+  croak "Unknown system."
+}
+
+########################################################################
+
+sub system_make_config {
+  if($system eq 'Linux') {
+    return <<"fnord";
+LD          = \${CXX}
+LDSHAREDOPT = -shared
+LDEXT       = so
+
+X11LIB      = -L\${X11LIBDIR} -lX11 -lXext -lXpm
+FLLIB       = -lfltk -lfltk_gl -lfltk-mt
+ROOTGLIBS_CONF =
+fnord
+  }
+  elsif($system eq 'Darwin') {
+    return <<"fnord";
+LD          = \${CXX}
+LDSHAREDOPT = -dynamiclib -undefined dynamic_lookup
+LDEXT       = dylib
+
+X11LIB      = -L\${X11LIBDIR} -lX11
+FLLIB       = -framework Carbon -framework ApplicationServices \\
+              -lfltk -lfltk_gl -lfltk-mt
+ROOTGLIBS_CONF = -lfreetype
+fnord
+  }
+  croak "Unknown system."
 }
 
 ########################################################################
@@ -134,6 +176,7 @@ sub find_x11lib {
 $config   = {};
 $resolver = {};
 $num_args = $#ARGV;
+$system   = 'unknown';
 
 $def_cfg = "$ENV{GLEDSYS}/configure.rc";
 
@@ -148,6 +191,15 @@ if($config->{HELP}) {
   print `cat $def_cfg`;
   exit 0;
 }
+
+$system = exec_or_die("uname -s"); chomp $system;
+if($system eq 'Linux' or $system eq 'Darwin') {
+  print "Configuring for '$system'.\n";
+} else {
+  print "Unsupported system '$system'. Reverting to 'Linux'.";
+  $system = 'Linux';
+}
+$config->{SYSTEM} = $system;
 
 croak "Environment variable ROOTSYS must be set" unless defined $ENV{ROOTSYS};
 croak "Environment variable GLEDSYS must be set" unless defined $ENV{GLEDSYS};
@@ -185,6 +237,7 @@ if($config->{RECONFIGURE} == 0) {
 
   print CH "#define GLED_VERSION_STRING    \"$config->{BUILD_VERSION}\"\n";
   print CH "#define GLED_BUILD_DATE_STRING \"$config->{BUILD_DATE}\"\n";
+  print CH "#define GLED_SYSTEM            \"$config->{SYSTEM}\"\n";
   print CH "\n";
 
   
@@ -216,6 +269,8 @@ if($config->{RECONFIGURE} == 0) {
   push @user_ld_elms, $config->{USER_LD_FLAGS} if $config->{USER_LD_FLAGS};
   my $user_ld  = join(' ', @user_ld_elms);
 
+  my $sys_specific = system_make_config();
+
   open MC, ">make/make_config.inc";
   print MC <<"fnord";
 SKIP_VIEW_LIBS := $skipview
@@ -231,6 +286,13 @@ VIEW_DIR := $config->{VIEW_DIR}
 USER_CPP_FLAGS = $user_cpp
 USER_CXX_FLAGS = $user_cxx
 USER_LD_FLAGS  = $user_ld
+
+
+################################################################
+# System '$system' specific settings
+################################################################
+GLED_SYSTEM := $config->{SYSTEM}
+$sys_specific
 fnord
   close MC;
 
@@ -244,10 +306,10 @@ fnord
     print MC "${rnr}_RNR_HDRS\t:= \$(wildcard Rnr/${rnr}/*.h) " .
       "$config->{GLUE_DIR}/\${LIB_SET_NAME}_Rnr_${rnr}_LibSet.h\n";
     print MC "${rnr}_RNR_OBJS\t:= \$(${rnr}_RNR_SRCS:.cxx=.o)\n";
-    print MC "${rnr}_RNR_LIB_NAME\t:= lib/lib\${LIB_SET_NAME}_Rnr_$rnr.so\n";
+    print MC "${rnr}_RNR_LIB_NAME\t:= lib/lib\${LIB_SET_NAME}_Rnr_$rnr.\${LDEXT}\n";
 
     print MC "\${${rnr}_RNR_LIB_NAME}:\t \${${rnr}_RNR_OBJS}\n";
-    print MC "\t\${LD} -o \${${rnr}_RNR_LIB_NAME} -shared \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib \\\n" .
+    print MC "\t\${LD} -o \${${rnr}_RNR_LIB_NAME} \${LDSHAREDOPT} \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib \\\n" .
       "\t\t\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \${LD_SURPLUS}\n";
     print MC "RNR_SRCS += \${${rnr}_RNR_SRCS}\n";
     print MC "RNR_HDRS += \${${rnr}_RNR_HDRS}\n";
@@ -405,6 +467,7 @@ for $f ((map {"$config->{GLEDBASE}/$_"} @{$resolver->{BaseLibSetList}}),
 	 'ClassName'  => $c,
 	 'LibID'      => $CATALOG->{LibID},
 	 'ClassID'    => $CATALOG->{Classes}{$c}{ClassID},
+	 'RnrClass'   => $CATALOG->{Classes}{$c}{RnrClass},
 	 'FileStem'   => $file_stem
 	};
       my $enum_defs =
@@ -427,10 +490,17 @@ for $f (@{$resolver->{LibSetList}}) {
 
 {
   my @exts = split(/:/, $config->{EXTERNAL});
-  my $extbin, $extlib, $extman;
+  my $extbin, $extlib, $extman, $ldpathenv, $sysspec_sh, $sysspec_csh;
   $extbin = join(':', (map { "$_/bin"} @exts));
   $extlib = join(':', (map { "$_/lib"} @exts));
   $extman = join(':', (map { "$_/man"} @exts));
+
+  $ldpathenv = "LD_LIBRARY_PATH";
+  if($system eq 'Darwin') {
+    $ldpathenv   = "DYLD_LIBRARY_PATH";
+    $sysspec_sh  = "export MACOSX_DEPLOYMENT_TARGET=10.4";
+    $sysspec_csh = "setenv MACOSX_DEPLOYMENT_TARGET 10.4";
+  }
 
   open SH, ">$config->{ENVSETUPSTEM}.sh";
   print SH <<"FNORD";
@@ -442,10 +512,12 @@ export ROOTSYS=$ENV{ROOTSYS}
 export GLEDSYS=$ENV{GLEDSYS}
 
 PATH=\$PATH:\$ROOTSYS/bin:$extbin:\$GLEDSYS/bin
-LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$ROOTSYS/lib:$extlib:\$GLEDSYS/lib
+$ldpathenv=\$$ldpathenv:\$ROOTSYS/lib:$extlib:\$GLEDSYS/lib
 MANPATH=\$MANPATH:$extman
 
-export PATH LD_LIBRARY_PATH MANPATH
+export PATH $ldpathenv MANPATH
+
+$sysspec_sh
 FNORD
   close SH;
 
@@ -459,16 +531,18 @@ setenv ROOTSYS $ENV{ROOTSYS}
 setenv GLEDSYS $ENV{GLEDSYS}
 
 setenv PATH \${PATH}:\${ROOTSYS}/bin:$extbin:\${GLEDSYS}/bin
-if ( \$?LD_LIBRARY_PATH ) then
-  setenv LD_LIBRARY_PATH \${LD_LIBRARY_PATH}:\${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
+if ( \$?$ldpathenv ) then
+  setenv $ldpathenv \${$ldpathenv}:\${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
 else
-  setenv LD_LIBRARY_PATH \${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
+  setenv $ldpathenv \${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
 endif
 if ( \$?MANPATH ) then 
   setenv MANPATH \${MANPATH}:$extman
 else
   setenv MANPATH $extman
 endif
+
+$sysspec_csh
 FNORD
   close CSH;
 }
