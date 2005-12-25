@@ -27,7 +27,9 @@ void PupilInfo_GL_Rnr::_init()
     def_font->SetFontFile
       (GForm("%s/lib/fontdefault.txf", gSystem->Getenv("GLEDSYS")));
     def_font_rnr = new ZRlFont_GL_Rnr(def_font);
-    def_font_rnr->LoadFont();
+    if(def_font_rnr->LoadFont() == false) {
+      throw(_eh + "default font not found.");
+    }
     font_rnrmod.fLens = def_font;
     font_rnrmod.fRnr  = def_font_rnr;
   }
