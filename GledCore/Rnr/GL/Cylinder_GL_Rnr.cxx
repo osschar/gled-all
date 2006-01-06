@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Cylinder_GL_Rnr.h"
+#include <Rnr/GL/GLRnrDriver.h>
 
 /**************************************************************************/
 
@@ -19,12 +20,13 @@ Cylinder_GL_Rnr::~Cylinder_GL_Rnr()
 {
   gluDeleteQuadric(mQuadric);
 }
+
 /**************************************************************************/
 
 void Cylinder_GL_Rnr::Render(RnrDriver* rd)
 {
   Cylinder& C = *mCylinder;
-  glColor4fv(C.mColor());
+  rd->GL()->Color(C.mColor);
   glPushMatrix();
   switch (C.mOrientation) {
   case Cylinder::O_Z: break;

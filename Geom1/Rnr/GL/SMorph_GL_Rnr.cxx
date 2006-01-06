@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "SMorph_GL_Rnr.h"
+#include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/TubeTvor_GL_Rnr.h>
 
 /**************************************************************************/
@@ -12,7 +13,7 @@
 void SMorph_GL_Rnr::Render(RnrDriver* rd)
 {
   glPushAttrib(GL_CURRENT_BIT);
-  glColor4fv(mSMorph->mColor());
+  rd->GL()->Color(mSMorph->mColor);
   if(mSMorph->pTuber) TubeTvor_GL_Rnr::Render(mSMorph->pTuber);
   glPopAttrib();
 }

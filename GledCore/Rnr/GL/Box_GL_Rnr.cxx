@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Box_GL_Rnr.h"
-
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GL/gl.h>
 
 /**************************************************************************/
@@ -25,7 +25,7 @@ namespace {
 void Box_GL_Rnr::Draw(RnrDriver* rd)
 {
   glPushAttrib(GL_CURRENT_BIT);
-  glColor4fv(mBox->mColor());
+  rd->GL()->Color(mBox->mColor);
   glPushMatrix();
   glScalef(mBox->mA, mBox->mB, mBox->mC);
 
