@@ -24,7 +24,7 @@ public:
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
 
-  void SetupGL();
+  void SetupGL(RnrDriver* rd);
 
 }; // endclass ZGlBlending_GL_Rnr
 

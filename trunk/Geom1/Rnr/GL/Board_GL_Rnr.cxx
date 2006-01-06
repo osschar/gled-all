@@ -1,5 +1,6 @@
 // $#Header$
 #include "Board_GL_Rnr.h"
+#include <Rnr/GL/GLRnrDriver.h>
 
 Board_GL_Rnr::~Board_GL_Rnr() {
   glDeleteTextures(1, &mTexture);
@@ -20,7 +21,7 @@ void Board_GL_Rnr::Draw(RnrDriver* rd)
   // glDisable(GL_LIGHTING);
 
   const GLfloat u = B.mULen/2, v = B.mVLen/2;
-  glColor4fv(B.mColor());
+  rd->GL()->Color(B.mColor);
   glNormal3f(0,0,1);
   glBegin(GL_QUADS);
   // Texture y-coordinate is increasing in up->down direction.

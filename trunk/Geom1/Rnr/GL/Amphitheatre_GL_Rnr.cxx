@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Amphitheatre_GL_Rnr.h"
+#include <Rnr/GL/GLRnrDriver.h>
 
 /**************************************************************************/
 
@@ -26,7 +27,7 @@ void Amphitheatre_GL_Rnr::Draw(RnrDriver* rd)
   Amphitheatre& A = *mAmphitheatre;
 
   if(A.bRnrStage) {
-    glColor4fv(A.mStageCol());
+    rd->GL()->Color(A.mStageCol);
     glPushMatrix();
     glRotated((0.5 + A.mStageRot) * 360 / A.mStageSides - 90, 0, 0, 1);
     gluDisk(mQuadric, 0, A.mStageSize, A.mStageSides, 1);
@@ -34,7 +35,7 @@ void Amphitheatre_GL_Rnr::Draw(RnrDriver* rd)
   }
 
   if(A.bRnrChairs) {
-    glColor4fv(A.mChairCol());
+    rd->GL()->Color(A.mChairCol);
     for(Amphitheatre::lChair_i i = A.mChairs.begin();
 	i != A.mChairs.end(); ++i) 
       {

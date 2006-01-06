@@ -6,6 +6,7 @@
 
 #include "WSSeed_GL_Rnr.h"
 #include <Rnr/GL/TubeTvor_GL_Rnr.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <Glasses/WSPoint.h>
 
 #include <GL/gl.h>
@@ -48,9 +49,8 @@ void WSSeed_GL_Rnr::Render(RnrDriver* rd)
 
   glPushAttrib(GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT);
 
-  if(mWSSeed->mLineW != 0)
-    glLineWidth(mWSSeed->mLineW);
-  glColor4fv(mWSSeed->mColor());
+  rd->GL()->LineWidth(mWSSeed->mLineW);
+  rd->GL()->Color(mWSSeed->mColor);
   if(mWSSeed->bFat) {
     if(mWSSeed->pTuber) TubeTvor_GL_Rnr::Render(mWSSeed->pTuber);
   } else {

@@ -1,5 +1,6 @@
 // $#Header$
 #include "Rect_GL_Rnr.h"
+#include <Rnr/GL/GLRnrDriver.h>
 #include "GL/gl.h"
 
 void Rect_GL_Rnr::Draw(RnrDriver* rd)
@@ -10,9 +11,8 @@ void Rect_GL_Rnr::Draw(RnrDriver* rd)
   glPushMatrix();
 
   // Strips
-  if(mRect->mWidth)
-    glLineWidth(mRect->mWidth);
-  glColor4fv(mRect->mColor());
+  rd->GL()->LineWidth(mRect->mWidth);
+  rd->GL()->Color(mRect->mColor);
   glBegin(GL_LINES);
   const Float_t mX = 0.5*mRect->mULen, mY = 0.5*mRect->mVLen;
   if(mRect->mUStrips) {

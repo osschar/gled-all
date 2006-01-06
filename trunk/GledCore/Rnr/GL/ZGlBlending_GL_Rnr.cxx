@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZGlBlending_GL_Rnr.h"
+#include "GLRnrDriver.h"
 #include <GL/gl.h>
 
 #define PARENT ZRnrModBase_GL_Rnr
@@ -22,12 +23,12 @@ void ZGlBlending_GL_Rnr::PreDraw(RnrDriver* rd)
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POINT_BIT |
                GL_LINE_BIT         | GL_FOG_BIT   |
 	       GL_DEPTH_BUFFER_BIT);
-  SetupGL();
+  SetupGL(rd);
 }
 
 void ZGlBlending_GL_Rnr::Draw(RnrDriver* rd)
 {
-  SetupGL();
+  SetupGL(rd);
 }
 
 void ZGlBlending_GL_Rnr::PostDraw(RnrDriver* rd)
@@ -38,7 +39,7 @@ void ZGlBlending_GL_Rnr::PostDraw(RnrDriver* rd)
 
 /**************************************************************************/
 
-void ZGlBlending_GL_Rnr::SetupGL()
+void ZGlBlending_GL_Rnr::SetupGL(RnrDriver* rd)
 {
   ZGlBlending& x = *mZGlBlending;
 
@@ -59,14 +60,14 @@ void ZGlBlending_GL_Rnr::SetupGL()
 
   switch(x.mAntiAliasOp) {
   case ZRnrModBase::O_On:
-    glPointSize(x.mPointSize);
+    rd->GL()->PointSize(x.mPointSize);
     glHint(GL_POINT_SMOOTH_HINT, x.mPointHint);
     if(x.bPointSmooth)
       glEnable(GL_POINT_SMOOTH);
     else
       glDisable(GL_POINT_SMOOTH);
 
-    glLineWidth(x.mLineWidth);
+    rd->GL()->LineWidth(x.mLineWidth);
     glHint(GL_LINE_SMOOTH_HINT, x.mLineHint);
     if(x.bLineSmooth)
       glEnable(GL_LINE_SMOOTH);
