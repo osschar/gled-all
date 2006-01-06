@@ -1,3 +1,27 @@
+2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* glass.list:
+	* Glasses/ZGlColorFader.cxx:
+	* Glasses/ZGlColorFader.h:
+	* Rnr/GL/ZGlColorFader_GL_Rnr.cxx:
+	* Rnr/GL/ZGlColorFader_GL_Rnr.h:
+	New glass ZGlColorFader; somewhat supports centrally scaled color,
+	point size and line width.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	Added support for ZGlColorFader rnr-mod.
+
+	* RnrBase/RnrDriver.h:
+	Added method RnrDriver::RMStack::get_active().
+
+	* Rnr/GL/Box_GL_Rnr.cxx:
+	* Rnr/GL/Cylinder_GL_Rnr.cxx:
+	* Rnr/GL/Sphere_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.cxx:
+	* Rnr/GL/ZGlBlending_GL_Rnr.h:
+	Use color/point-size/line-width from GLRnrDriver.
+
 2005-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Port to gcc-4 and OSX. Some other fixes.
