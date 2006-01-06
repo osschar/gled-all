@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZGeoOvl_GL_Rnr.h"
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GL/gl.h>
 
 /**************************************************************************/
@@ -27,7 +28,7 @@ void ZGeoOvl_GL_Rnr::Draw(RnrDriver* rd)
   Float_t* p = mZGeoOvl->mPM_p;
   if(p) {
     Int_t N = mZGeoOvl->mPM_N;
-    glColor4fv(mZGeoOvl->mPM_Col());
+    rd->GL()->Color(mZGeoOvl->mPM_Col);
     glBegin(GL_POINTS);
     for(int i = 0; i<N; ++i) {
       glVertex3fv(p);
