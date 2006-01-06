@@ -56,6 +56,13 @@ protected:
     RnrMod*        def_autogen;
     stack<RnrMod*> stack;
     RMStack() : def(0), def_autogen(0) {}
+
+    RnrMod* get_active() {
+      if(stack.empty())
+	return def ? def : def_autogen;
+      else
+	return stack.top();
+    }
   };
 
   typedef hash_map<FID_t, RMStack>           hRMStack_t;
