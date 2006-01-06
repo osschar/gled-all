@@ -688,8 +688,8 @@ void AliConverter::ConvertV0()
     mV0.fVP[2] = av->GetParamP()->Z();
 
     // daughter indices
-    mV0.fDLabels[0] = av->fLab[0];
-    mV0.fDLabels[1] = av->fLab[1];
+    mV0.fDLabels[0] = av->GetLab(0);
+    mV0.fDLabels[1] = av->GetLab(1);
 
     mV0.fPDG = av->GetPdgCode();
 
@@ -735,40 +735,48 @@ void AliConverter::ConvertKinks()
     AliESDkink* kk = fEvent->GetKink(n);
     Double_t x,y,cos,sin; 
 
-    mKK.fLabel  = kk->fLab[0];
-    mKK.fStatus = Int_t(kk->fStatus);
+    mKK.fLabel  = kk->GetLabel(0);
+    mKK.fStatus = Int_t(kk->GetStatus(1) << 8 + kk->GetStatus(2));
 
-    // reconstructed kink position
-    mKK.fKV[0] = kk->fXr[0]; mKK.fKV[1] = kk->fXr[1]; mKK.fKV[2] = kk->fXr[2];
+    { // reconstructed kink position
+      const Double_t* pos = kk->GetPosition();
+      mKK.fKV[0] = pos[0]; mKK.fKV[1] = pos[1]; mKK.fKV[2] = pos[2];
+    }
 
-    // momentum and position of mother 
-    mKK.fP[0] = kk->fParamMother.Px();
-    mKK.fP[1] = kk->fParamMother.Py();
-    mKK.fP[2] = kk->fParamMother.Pz();
-    const Double_t* par =  kk->fParamMother.GetParameter();
-    // printf("KINK Pt %f, %f \n",1/kk->fParamMother.Pt(),par[4] );
-    mKK.fSign = (par[4] < 0) ? -1 : 1;
+    { // momentum and position of mother 
+      const AliExternalTrackParam& tp_mother = kk->RefParamMother();
+      TVector3 mom = tp_mother.Momentum();
+      mKK.fP[0] = mom.x();
+      mKK.fP[1] = mom.y();
+      mKK.fP[2] = mom.z();
+      const Double_t* par =  tp_mother.GetParameter();
+      // printf("KINK Pt %f, %f \n",1/kk->fParamMother.Pt(),par[4] );
+      mKK.fSign = (par[4] < 0) ? -1 : 1;
 
-    x = kk->fParamMother.X(); 
-    y = kk->fParamMother.Y(); 
-    cos = TMath::Cos( kk->fParamMother.Alpha());
-    sin = TMath::Sin( kk->fParamMother.Alpha());
-    mKK.fV[0] = x*cos - y*sin;
-    mKK.fV[1] = x*sin + y*cos;
-    mKK.fV[2] = kk->fParamMother.Z();
-   
-    // momentum and position of daughter 
-    mKK.fDP[0]= kk->fParamDaughter.Px();
-    mKK.fDP[1]= kk->fParamDaughter.Py();
-    mKK.fDP[2]= kk->fParamDaughter.Pz();
+      x = tp_mother.X(); 
+      y = tp_mother.Y(); 
+      cos = TMath::Cos(tp_mother.Alpha());
+      sin = TMath::Sin(tp_mother.Alpha());
+      mKK.fV[0] = x*cos - y*sin;
+      mKK.fV[1] = x*sin + y*cos;
+      mKK.fV[2] = tp_mother.Z();
+    }
 
-    x = kk->fParamDaughter.X(); 
-    y = kk->fParamDaughter.Y(); 
-    cos = TMath::Cos(kk->fParamDaughter.Alpha());
-    sin = TMath::Sin( kk->fParamDaughter.Alpha());
-    mKK.fEV[0] = x*cos - y*sin;
-    mKK.fEV[1] = x*sin + y*cos;
-    mKK.fEV[2] = kk->fParamDaughter.Z();
+    { // momentum and position of daughter 
+      const AliExternalTrackParam& tp_daughter = kk->RefParamDaughter();
+      TVector3 mom = tp_daughter.Momentum();
+      mKK.fDP[0]= mom.x();
+      mKK.fDP[1]= mom.y();
+      mKK.fDP[2]= mom.z();
+
+      x = tp_daughter.X(); 
+      y = tp_daughter.Y(); 
+      cos = TMath::Cos(tp_daughter.Alpha());
+      sin = TMath::Sin(tp_daughter.Alpha());
+      mKK.fEV[0] = x*cos - y*sin;
+      mKK.fEV[1] = x*sin + y*cos;
+      mKK.fEV[2] = tp_daughter.Z();
+    }
 
     mTreeKK->Fill();
   }
