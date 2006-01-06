@@ -76,6 +76,7 @@ ZRlNodeMarkup		182	Glasses/ZRlNodeMarkup	.
 ZRlFont			183	Glasses/ZRlFont		.
 ZRlNameStack		184	Glasses/ZRlNameStack	.
 ZGlPerspective		185	Glasses/ZGlPerspective	.
+ZGlColorFader		186	Glasses/ZGlColorFader	.
 
 # Node/Cluster Monitoring
 GledMonitor		192	Glasses/GledMonitor
