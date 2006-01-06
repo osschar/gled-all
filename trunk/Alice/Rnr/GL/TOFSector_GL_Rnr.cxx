@@ -52,10 +52,15 @@ void TOFSector_GL_Rnr::RenderPlate(Int_t plate, RnrDriver* rd)
 
 
   Float_t theta,r,x,z;
-  for(Int_t strip=0; strip < nstrips; strip++){
-    theta =  90 - TMath::RadToDeg()*geom.GetStripTheta(plate,strip);     
-    r = (geom.Rmin()+ geom.Rmax())/2.+ geom.GetHeights(plate,strip);
-    z = r*TMath::Tan(0.5*TMath::Pi()- geom.GetStripTheta(plate, strip));
+  for(Int_t strip=0; strip < nstrips; strip++) {
+    // TOF geometry changed (Dec 2005, split into subclasses V4, V5).
+    // GetStripTheta only defined for V4.
+    // This is fix is questionable.
+    // theta =  90 - TMath::RadToDeg()*geom.GetStripTheta(plate,strip);     
+    theta =  90 - geom.GetAngles(plate,strip);     
+    // z = r*TMath::Tan(0.5*TMath::Pi()- geom.GetStripTheta(plate, strip));
+    z = r*TMath::Tan(0.5*TMath::Pi() - TMath::DegToRad()*geom.GetAngles(plate, strip));
+    r = 0.5*(geom.Rmin()+ geom.Rmax()) + geom.GetHeights(plate,strip);
 
     glPushMatrix();
     glTranslatef(0, r-0.25, z);
