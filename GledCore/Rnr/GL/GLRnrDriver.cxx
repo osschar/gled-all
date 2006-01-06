@@ -9,6 +9,7 @@
 //
 
 #include "GLRnrDriver.h"
+#include <Glasses/ZGlColorFader.h>
 #include <GL/gl.h>
 
 GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
@@ -30,6 +31,13 @@ GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
   bMarkupNodes = false;
 
   bRedraw = false;
+
+  mFaderStack = &mRMStacks.insert(make_pair(ZGlColorFader::FID(), RMStack())).first->second;
+  { // Make default rnrmod.
+    ZGlass* lens = GledNS::ConstructLens(ZGlColorFader::FID());
+    A_Rnr*  rnr  = lens->VGlassInfo()->SpawnRnr(mRnrName, lens);
+    mFaderStack->def_autogen = new RnrMod(lens, rnr);
+  }
 }
 
 GLRnrDriver::~GLRnrDriver()
@@ -162,3 +170,34 @@ void GLRnrDriver::ReturnClipPlane(Int_t clip)
 {
   mClipPlanes[clip] = 0;
 }
+
+/**************************************************************************/
+// Color, PointSize and LineWidth scaling
+/**************************************************************************/
+
+Float_t GLRnrDriver::Color(Float_t r, Float_t g, Float_t b, Float_t a)
+{
+  const ZColor& C = ColorFader().RefColorFac();
+  Float_t alpha = a*C.a();
+  glColor4f(r*C.r(), g*C.g(), b*C.b(), alpha);
+  return alpha;
+}
+
+Float_t GLRnrDriver::PointSize(Float_t size)
+{
+  if(size == 0)
+    return -1;
+  Float_t s = size*ColorFader().GetPointSizeFac();
+  glPointSize(s);
+  return s;
+}
+
+Float_t GLRnrDriver::LineWidth(Float_t width)
+{
+  if(width == 0)
+    return -1;
+  Float_t w = width*ColorFader().GetLineWidthFac();
+  glLineWidth(w);
+  return w;
+}
+

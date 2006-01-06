@@ -9,6 +9,8 @@
 
 #include <RnrBase/RnrDriver.h>
 
+class ZGlColorFader;
+
 class GLRnrDriver : public RnrDriver
 {
 protected:
@@ -40,6 +42,8 @@ protected:
 
   Bool_t        bRedraw;         // X{gs}
 
+  RMStack*      mFaderStack;
+
 public:
   GLRnrDriver(Eye* e, const TString& r);
   virtual ~GLRnrDriver();
@@ -70,6 +74,15 @@ public:
   A_Rnr** GetClipPlanes() { return mClipPlanes; }
   Int_t   GetClipPlane(A_Rnr* rnr);
   void    ReturnClipPlane(Int_t lamp);
+
+  // Color, PointSize and LineWidth scaling
+  Float_t Color(Float_t r, Float_t g, Float_t b, Float_t a=1);
+  Float_t Color(const ZColor& c) { return Color(c.r(), c.g(), c.b(), c.a()); }
+  Float_t PointSize(Float_t size);
+  Float_t LineWidth(Float_t width);
+
+  ZGlColorFader& ColorFader()
+  { return (ZGlColorFader&) *mFaderStack->get_active()->fLens; }
 
 #include "GLRnrDriver.h7"
 }; // endclass GLRnrDriver
