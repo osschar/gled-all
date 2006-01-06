@@ -1,3 +1,14 @@
+2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Updates for AliRoot of Dec 2005.
+
+	* Glasses/AliConverter.cxx:
+	Following changes in external track parameters.
+
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	Following changes in TOFGeometry description (possibly
+	incomplete).
+
 2005-10-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/MCTrackRnrStyle.cxx:
