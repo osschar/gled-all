@@ -1,3 +1,12 @@
+2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	Use color/point-size/line-width from GLRnrDriver.
+
 2005-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Amphitheatre.cxx:

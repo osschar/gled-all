@@ -1,3 +1,9 @@
+2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZGeoNode_GL_Rnr.cxx:
+	* Rnr/GL/ZGeoOvl_GL_Rnr.cxx:
+	Use color setters from GLRnrDriver.
+
 2005-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGeoNode.cxx:
