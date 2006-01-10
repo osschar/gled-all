@@ -100,7 +100,12 @@ public:
 		    Double_t ax, Double_t wx, Double_t dx,
 		    Double_t ay, Double_t wy, Double_t dy,
 		    Double_t az, Double_t wz, Double_t dz,
-		    Float_t def_width=0.1); // X{E} 7 MCWButt()
+		    Float_t def_width=0.1);     // X{E} 7 MCWButt()
+  void MakeFromFormulas(Double_t t_min, Double_t t_max, Int_t n_points,
+			TString fx="cos(x)",
+			TString fy="sin(x)",
+			TString fz="x",
+			Float_t def_width=0.1); // X{E} 7 MCWButt()
 
 #include "WSSeed.h7"
   ClassDef(WSSeed, 1)
