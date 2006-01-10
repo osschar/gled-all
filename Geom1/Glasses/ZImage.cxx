@@ -183,13 +183,18 @@ void ZImage::Save()
 
 /**************************************************************************/
 
+void ZImage::shadow_check(const Exc_t& eh)
+{
+  if(bUseShadowing) {
+    warn_caller(eh + "has no effect with shadowing on.");
+    return;
+  }
+}
+
 void ZImage::BlurAverage(UInt_t count)
 {
   static const Exc_t _eh("ZImage::BlurAverage ");
-  if(bUseShadowing) {
-    warn_caller(_eh + "has no effect with shadowing on.");
-    return;
-  }
+  shadow_check(_eh);
 
   sILMutex.Lock();
   bind();
@@ -202,10 +207,7 @@ void ZImage::BlurAverage(UInt_t count)
 void ZImage::BlurGaussian(UInt_t count)
 {
   static const Exc_t _eh("ZImage::BlurGaussian ");
-  if(bUseShadowing) {
-    warn_caller(_eh + "has no effect with shadowing on.");
-    return;
-  }
+  shadow_check(_eh);
 
   sILMutex.Lock();
   bind();
@@ -218,10 +220,7 @@ void ZImage::BlurGaussian(UInt_t count)
 void ZImage::Contrastify(Float_t contrast)
 {
   static const Exc_t _eh("ZImage::Contrastify ");
-  if(bUseShadowing) {
-    warn_caller(_eh + "has no effect with shadowing on.");
-    return;
-  }
+  shadow_check(_eh);
 
   if(contrast > 1.7)  contrast = 1.7;
   if(contrast < -0.5) contrast = -0.5;
@@ -236,14 +235,41 @@ void ZImage::Contrastify(Float_t contrast)
 void ZImage::Equalize()
 {
   static const Exc_t _eh("ZImage::Equalize ");
-  if(bUseShadowing) {
-    warn_caller(_eh + "has no effect with shadowing on.");
-    return;
-  }
+  shadow_check(_eh);
 
   sILMutex.Lock();
   bind();
   iluEqualize();
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::Mirror()
+{
+  // Interface to iluMirror (flip around y axis).
+
+  static const Exc_t _eh("ZImage::Mirror ");
+  shadow_check(_eh);
+
+  sILMutex.Lock();
+  bind();
+  iluMirror();
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::Rotate(Float_t angle)
+{
+  // Interface to iluRotate (which seems to be badly bugged).
+
+  static const Exc_t _eh("ZImage::Rotate ");
+  shadow_check(_eh);
+
+  sILMutex.Lock();
+  bind();
+  iluRotate(angle);
   unbind();
   sILMutex.Unlock();
   mStampReqTring = Stamp(FID());
@@ -585,6 +611,9 @@ void libGeom1_GLED_user_init()
 {
   ilInit();
   iluInit();
+
+  ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+  ilEnable(IL_ORIGIN_SET);
 }
 
 void *Geom1_GLED_user_init = (void*)libGeom1_GLED_user_init;
