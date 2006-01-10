@@ -57,6 +57,8 @@ protected:
 
   ZColor        mClearColor;    //  X{PGS} 7 ColorButt()
 
+  void shadow_check(const Exc_t& eh);
+
 public:
   ZImage(const Text_t* n="ZImage", const Text_t* t=0) : ZGlass(n,t) { _init(); }
   virtual ~ZImage();
@@ -73,6 +75,8 @@ public:
   void BlurGaussian(UInt_t count=1);      // X{E} 7 MCWButt()
   void Contrastify(Float_t contrast=1.1); // X{E} 7 MCWButt(-join=>1)
   void Equalize();                        // X{E} 7 MCWButt()
+  void Mirror();                          // X{E} 7 MCWButt(-join=>1)
+  void Rotate(Float_t angle=90);          // X{E} 7 MCWButt()
 
   void SetupAsCanvas(Int_t w=256, Int_t h=256,
 		     Int_t bpp=1, Bool_t clear_p=true); // X{E} 7 MCWButt()
