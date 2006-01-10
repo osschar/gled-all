@@ -20,25 +20,39 @@ void RectTerrain_GL_Rnr::check(double xf, double yf,
 	 xf, -yf, ret, x,y,z);
 }
 
+void RectTerrain_GL_Rnr::setup_coltex_vars()
+{
+  RectTerrain& T = *mTerrain;
+  bColP = (T.mColSep  != 0);
+  bTexP = (T.mTexture.is_set());
+  mMinX = 1; mMaxX = T.mNx; mMinY = 1; mMaxY = T.mNy;
+  if(T.bBorder) {
+    --mMinX; ++mMaxX; --mMinY; ++mMaxY;
+  }
+  mTexFx = 1.0/(mMaxX - mMinX); mTexFy = 1.0/(mMaxY - mMinY);
+  mTexDx = T.mDx*mTexFx;        mTexDy = T.mDy*mTexFy;
+}
+
 /**************************************************************************/
 
 void RectTerrain_GL_Rnr::Draw(RnrDriver* rd)
 {
-  if(mTerrain->mNx && mTerrain->mNy) {
+  RectTerrain& T = *mTerrain;
+  if(T.mNx && T.mNy) {
 
     switch(mTerrain->mOriginMode) {
     case RectTerrain::OM_Border:
-      glTranslatef(mTerrain->mDx, mTerrain->mDy, 0);
+      glTranslatef(T.mDx, T.mDy, 0);
       break;
     case RectTerrain::OM_Center:
-      glTranslatef(-0.5*mTerrain->mNx*mTerrain->mDx,
-		   -0.5*mTerrain->mNy*mTerrain->mDy, 0);
+      glTranslatef(-0.5*T.mNx*T.mDx,
+		   -0.5*T.mNy*T.mDy, 0);
       break;
     default:
       break;
     }
 
-    if(mTerrain->bStudySize) {
+    if(T.bStudySize) {
       GLdouble proj_m[16], modv_m[16];
       GLint    viewp[4];
       glGetDoublev(GL_MODELVIEW_MATRIX, modv_m);
@@ -61,17 +75,15 @@ void RectTerrain_GL_Rnr::Draw(RnrDriver* rd)
 
 void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
 {
-  switch(mTerrain->mRnrMode) {
+  RectTerrain& T = *mTerrain;
+  switch(T.mRnrMode) {
 
   case RectTerrain::RM_Histo: {
-    glColor4fv(mTerrain->mMinCol());
-    Int_t minX = 1, maxX = mTerrain->mNx, minY = 1, maxY = mTerrain->mNy;
-    if(mTerrain->bBorder) {
-      --minX; ++maxX; --minY; ++maxY;
-    }
+    setup_coltex_vars();
+    glColor4fv(T.mMinCol());
     glBegin(GL_QUADS);
-    for(Int_t i=minX; i<=maxX; ++i) {
-      for(Int_t j=minY; j<=maxY; ++j) {
+    for(Int_t i=mMinX; i<=mMaxX; ++i) {
+      for(Int_t j=mMinY; j<=mMaxY; ++j) {
 	MkBox(i, j);
       }
     }
@@ -80,15 +92,12 @@ void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
   }
 
   case RectTerrain::RM_SmoothSquare: {
-    Int_t minX = 1, maxX = mTerrain->mNx, minY = 1, maxY = mTerrain->mNy;
-    if(mTerrain->bBorder) {
-      --minX; ++maxX; --minY; ++maxY;
-    }
+    setup_coltex_vars();
     glEnable(GL_NORMALIZE);
     glColor4fv(mTerrain->mMinCol());
-    for(Int_t i=minX; i<maxX; ++i) {
+    for(Int_t i=mMinX; i<mMaxX; ++i) {
       glBegin(GL_QUAD_STRIP);
-      for(Int_t j=minY; j<=maxY; ++j) {
+      for(Int_t j=mMinY; j<=mMaxY; ++j) {
 	MkVN(i, j); MkVN(i+1, j);
       }
       glEnd();
@@ -99,10 +108,10 @@ void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
 
   case RectTerrain::RM_SmoothTring:
   case RectTerrain::RM_FlatTring:   {
-    if(mTerrain->mTTvorStamp < mTerrain->mStampReqTring)
-      mTerrain->MakeTringTvor();
-    glColor4fv(mTerrain->mMinCol());
-    TringTvor_GL_Rnr::Render(mTerrain->pTTvor);
+    if(T.mTTvorStamp < T.mStampReqTring)
+      T.MakeTringTvor();
+    glColor4fv(T.mMinCol());
+    TringTvor_GL_Rnr::Render(T.pTTvor);
 
     break;
   }
@@ -114,35 +123,42 @@ void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
 
 void RectTerrain_GL_Rnr::MkBox(Int_t i, Int_t j)
 {
-  Float_t x, y, z;
+  RectTerrain& T = *mTerrain;
 
-  x = (i-1)*mTerrain->mDx;
-  y = (j-1)*mTerrain->mDy;
-  z = mTerrain->mP(i,j);
+  Float_t x = (i-1)*T.mDx, y = (j-1)*T.mDy, z = T.mP(i,j);
 
   glNormal3f(0, 0, 1);
-  if(mTerrain->mColSep) glColor3fv(mTerrain->make_color(z)());
-  glVertex3f(x, y, z);
-  glVertex3f(x + mTerrain->mDx, y, z);
-  glVertex3f(x + mTerrain->mDx, y + mTerrain->mDy, z);
-  glVertex3f(x, y + mTerrain->mDy, z);
+  if(bColP)
+    glColor4fv(T.make_color(z)());
+
+  if(bTexP) {
+    Float_t tx = mTexFx*(i-mMinX), ty = mTexFy*(j-mMinY);
+    glTexCoord2f(tx,        ty);        glVertex3f(x, y, z);
+    glTexCoord2f(tx+mTexDx, ty);        glVertex3f(x + T.mDx, y, z);
+    glTexCoord2f(tx+mTexDx, ty+mTexDy); glVertex3f(x + T.mDx, y + T.mDy, z);
+    glTexCoord2f(tx,        ty+mTexDy); glVertex3f(x, y + T.mDy, z);
+  } else {
+    glVertex3f(x, y, z);
+    glVertex3f(x + T.mDx, y, z);
+    glVertex3f(x + T.mDx, y + T.mDy, z);
+    glVertex3f(x, y + T.mDy, z);
+  }
 }
 
 void RectTerrain_GL_Rnr::MkVN(Int_t i, Int_t j)
 {
-  Float_t x, y, z;
+  RectTerrain& T = *mTerrain;
 
-  x = (i-1)*mTerrain->mDx;
-  y = (j-1)*mTerrain->mDy;
-  z = mTerrain->mP(i,j);
+  Float_t x = (i-1)*T.mDx, y = (j-1)*T.mDy, z = T.mP(i,j);
 
-  Int_t il=i,ih=i,jh=j,jl=j;
-  if(i>0) il--; if(i<=mTerrain->mNx) ih++;
-  if(j>0) jl--; if(j<=mTerrain->mNy) jh++;
-  Float_t nx[] = { (ih-il)*mTerrain->mDx, 0, mTerrain->mP(ih,j) - mTerrain->mP(il,j) };
-  Float_t ny[] = { 0, (jh-jl)*mTerrain->mDy, mTerrain->mP(i,jh) - mTerrain->mP(i,jl) };
+  Int_t il=i, ih=i, jh=j, jl=j;
+  if(i > 0) il--; if(i <= T.mNx) ih++;
+  if(j > 0) jl--; if(j <= T.mNy) jh++;
+  Float_t nx[] = { (ih-il)*T.mDx, 0, T.mP(ih,j) - T.mP(il,j) };
+  Float_t ny[] = { 0, (jh-jl)*T.mDy, T.mP(i,jh) - T.mP(i,jl) };
 
   glNormal3f(-ny[1]*nx[2], -nx[0]*ny[2], nx[0]*ny[1]);
-  if(mTerrain->mColSep) glColor3fv(mTerrain->make_color(z)());
+  if(bColP) glColor4fv(T.make_color(z)());
+  if(bTexP) glTexCoord2f(mTexFx*(i-mMinX), mTexFy*(j-mMinY));
   glVertex3f(x, y, z);
 }

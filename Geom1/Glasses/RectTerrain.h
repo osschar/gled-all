@@ -15,7 +15,8 @@ class TringTvor;
 
 #include <TH2.h>
 
-class RectTerrain : public ZNode {
+class RectTerrain : public ZNode
+{
   MAC_RNR_FRIENDS(RectTerrain);
 
  public:
@@ -32,21 +33,24 @@ class RectTerrain : public ZNode {
  protected:
   Int_t		mNx;	// X{gS}  7 ValOut(-join=>1)
   Int_t		mNy;	// X{gS}  7 ValOut()
-  Float_t	mDx;	// X{gST} 7 Value(-range=>[0,100,1,100],-join=>1)
-  Float_t	mDy;	// X{gST} 7 Value(-range=>[0,100,1,100])
+  Float_t	mDx;	// X{gST} 7 Value(-range=>[0,1000,1,1000],-join=>1)
+  Float_t	mDy;	// X{gST} 7 Value(-range=>[0,1000,1,1000])
   TMatrixF	mP;
 
-  Float_t	mMinZ;	// X{gS}   7 ValOut(-join=>1)
-  Float_t	mMaxZ;	// X{gS}   7 ValOut()
-  ZColor	mMinCol;// X{PGST} 7 ColorButt(-join=>1)
-  ZColor	mMaxCol;// X{PGST} 7 ColorButt()
-  Float_t	mColSep;// X{gST}  7 Value(-range=>[0,100,1,100])
-  ZLink<ZRibbon>	mRibbon;// X{gST} L{}
+  Float_t	mMinZ;	 // X{gS} 7 ValOut(-join=>1)
+  Float_t	mMaxZ;	 // X{gS} 7 ValOut()
+
+  ZColor         mMinCol;  // X{PGST} 7 ColorButt(-join=>1)
+  ZColor         mMaxCol;  // X{PGST} 7 ColorButt()
+  Float_t        mColSep;  // X{gST}  7 Value(-range=>[0,100,1,1000])
+  ZLink<ZRibbon> mRibbon;  // X{gST} L{}
+
+  ZLink<ZImage>  mTexture; // X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
 
   UChar_t       mRnrMode;     // X{gST} 7 PhonyEnum(-type=>RnrMode_e)
   UChar_t       mBorderCond;  // X{gS}  7 PhonyEnum(-type=>BorderCond_e)
   UChar_t       mOriginMode;  // X{gS}  7 PhonyEnum(-type=>OriginMode_e)
-  Float_t	mBValue;      // X{gS}  7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Float_t	mBValue;      // X{gS}  7 Value(-range=>[-1000,1000,1,1000], -join=>1)
   Bool_t	bBorder;      // X{gST} 7 Bool()
 
   Float_t	mSmoothFac;   // X{gS}  7 Value(-range=>[0,1,1,1000])
@@ -81,7 +85,7 @@ class RectTerrain : public ZNode {
   static Float_t sMaxEpsilon;
 
 #include "RectTerrain.h7"
-  ClassDef(RectTerrain, 1)
+  ClassDef(RectTerrain, 1);
 }; // endclass RectTerrain
 
 
