@@ -369,6 +369,15 @@ sub AddViewInclude {
 # Parse loop
 ########################################################################
 
+# Regexps to parse method arguments.
+
+my $def_re  = "(?:\\\".*?\\\")|(?:[^,\)]+)";
+# Two options for default argument value:
+#   a) string "", can NOT contain '"'
+#   b) anything NOT containing ',' or ')'
+my $arg_re  = "(?:(?:const\\s+)?\\w+[*&]*\\s+\\w+(?:\\s*=\\s*$def_re\\s*)?)";
+my $args_re = "$arg_re?(?:\\s*,\\s*$arg_re)*";
+
 $MemberID = 1;
 $MethodID = 257;
 
@@ -550,12 +559,16 @@ while($c !~ m!\G\s*$!osgc) {
   ################################
   # Methods
   ################################
+
+  ### Old argument parser, $args_re = ...
+  ### ([-+_\w\d\s\n,~*/&=\"\.]*)   # Arguments ... w/ possible default values:
+  ###                              #   strings also possible, so we (should) match mostly anything.
+
   if($c =~ m!\G\s*
      (virtual\s)?\s*                # Must handle virtuals, too
      ((?:const\s+)?[\w:]+(?:\*|&)?)?\s+ # Return value (optional const, */&)
      (\w+)\s*                       # Name
-     \(([-+_\w\d\s,~*/&=\"\.]*)\)\s*   # Arguments ... w/ possible default values:
-                                    #   strings also possible, so we (should) match mostly anything.
+     \(\s*($args_re)\s*\)\s*        # Argument, see entrance into parse loop.
      (const\s)?\s*                  # [const]
      (throw\([\w\d_]*\))?\s*        # [throw]
      (?:(?:=\s*0\s*)?;|(?::[^{]+)?{.*?})  # ( (=0)?; | {inline def}); not greedy for *}*
