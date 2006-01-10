@@ -79,7 +79,6 @@ void slides(Bool_t start_hunt_p=true)
 
   Gled::Macro("eye.C");
 
-  g_pupil->Add(ss);
   g_pupil->SetZFov(90);
   g_pupil->SetWidth(1024);
   g_pupil->SetHeight(600);
