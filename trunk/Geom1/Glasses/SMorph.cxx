@@ -27,8 +27,8 @@ void SMorph::_init(Float_t r)
   bOpenTop = bOpenBot = bEquiSurf = false;
 
   mTexture = 0;
-  mTexX0 = mTexY0 = 0;
-  mTexXC = mTexYC = 1;
+  mTexX0 = 0; mTexY0 =  1;
+  mTexXC = 1; mTexYC = -1;
   mTexYOff = 0;
 
   pTuber = new TubeTvor;
