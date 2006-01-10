@@ -19,6 +19,8 @@
 
 #include <Gled/GThread.h>
 
+#include <TF1.h>
+
 //--- tmp ---
 #include <Glasses/ZQueen.h>
 #include <Glasses/Sphere.h>
@@ -442,12 +444,14 @@ void WSSeed::MakeLissajou(Double_t t_min, Double_t t_max, Int_t n_points,
 			  Double_t az, Double_t wz, Double_t dz,
 			  Float_t def_width)
 {
+  // Creates a WeaverSymbol following a Lissajou curve.
+  // Each coordinate specified as: x(t) = ax * sin(wx * t + dx).
+
   ClearList();
 
   using namespace TMath;
 
   Double_t step = (t_max - t_min) / (n_points - 1);
-  Double_t max  = t_max - 0.5*step;
   Double_t t    = t_min;
 
   ZTrans trans;
@@ -460,6 +464,51 @@ void WSSeed::MakeLissajou(Double_t t_min, Double_t t_max, Int_t n_points,
     Double_t der_x = ax*wx*Cos(wx*t + dx);
     Double_t der_y = ay*wy*Cos(wy*t + dy);
     Double_t der_z = az*wz*Cos(wz*t + dz);
+
+    trans.SetPos(pos_x, pos_y, pos_z);
+    trans.SetBaseVec(1, der_x, der_y, der_z);
+    trans.OrtoNorm3();
+
+    WSPoint* p = new WSPoint(GForm("Point %d", i));
+    p->SetTrans(trans);
+    p->mW = def_width;
+
+    mQueen->CheckIn(p);
+    Add(p);
+  }
+
+  mStampReqTring = Stamp(FID());
+}
+
+void WSSeed::MakeFromFormulas(Double_t t_min, Double_t t_max, Int_t n_points,
+			      TString fx, TString fy, TString fz,
+			      Float_t def_width)
+{
+  // Creates a WeaverSymbol following formulas for x, y and z.
+  // The name of the time variable in formulas is 'x' and thus one
+  // should write, eg: "0.5*x^2".
+
+  ClearList();
+
+  using namespace TMath;
+
+  Double_t step = (t_max - t_min) / (n_points - 1);
+  Double_t t    = t_min;
+
+  TF1 tfx(GForm("WSSeed_x_%d", GetSaturnID()), fx, t_min, t_max);
+  TF1 tfy(GForm("WSSeed_y_%d", GetSaturnID()), fy, t_min, t_max);
+  TF1 tfz(GForm("WSSeed_z_%d", GetSaturnID()), fz, t_min, t_max);
+
+  ZTrans trans;
+  for(Int_t i=1; i<=n_points; ++i, t+=step) {
+    if(i == n_points) t = t_max;
+
+    Double_t pos_x = tfx.Eval(t);
+    Double_t pos_y = tfy.Eval(t);
+    Double_t pos_z = tfz.Eval(t);
+    Double_t der_x = tfx.Derivative(t);
+    Double_t der_y = tfy.Derivative(t);
+    Double_t der_z = tfz.Derivative(t);
 
     trans.SetPos(pos_x, pos_y, pos_z);
     trans.SetBaseVec(1, der_x, der_y, der_z);
