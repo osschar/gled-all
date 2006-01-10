@@ -20,13 +20,13 @@ public:
   Int_t    mNVerts;
   Float_t* mVerts;        //[3*mNVert]
   Float_t* mNorms;        //[3*mNVert]
-  UChar_t* mCols;         //[3*mNVert]
-  Float_t* mTexts;        //[2*mNVert]
+  UChar_t* mCols;         //[4*mNVert]
+  Float_t* mTexs;         //[2*mNVert]
 
   Float_t* Vertex(Int_t i)  { return &(mVerts[3*i]); }
   Float_t* Normal(Int_t i)  { return &(mNorms[3*i]); }
-  UChar_t* Color(Int_t i)   { return &(mCols[3*i]);  }
-  Float_t* Texture(Int_t i) { return &(mTexts[2*i]); }
+  UChar_t* Color(Int_t i)   { return &(mCols[4*i]);  }
+  Float_t* Texture(Int_t i) { return &(mTexs[2*i]); }
 
   // Triangle data
 
@@ -37,7 +37,7 @@ public:
 
   Int_t*   Triangle(Int_t i)       { return &(mTrings[3*i]);     }
   Float_t* TriangleNormal(Int_t i) { return &(mTringNorms[3*i]); }
-  UChar_t* TriangleColor(Int_t i)  { return &(mTringCols[3*i]);  }
+  UChar_t* TriangleColor(Int_t i)  { return &(mTringCols[4*i]);  }
 
   // Triangle strip data
 

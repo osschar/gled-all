@@ -27,11 +27,11 @@ void TringTvor_GL_Rnr::Render(TringTvor* ttvor)
     glNormalPointer(GL_FLOAT, 0, TT.mNorms);
     glEnableClientState(GL_NORMAL_ARRAY);
     if(TT.bColP) {
-      glColorPointer(3, GL_UNSIGNED_BYTE, 0, TT.mCols);
+      glColorPointer(4, GL_UNSIGNED_BYTE, 0, TT.mCols);
       glEnableClientState(GL_COLOR_ARRAY);
     }
     if(TT.bTexP) {
-      glTexCoordPointer(2, GL_FLOAT, 0, TT.mTexts);
+      glTexCoordPointer(2, GL_FLOAT, 0, TT.mTexs);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 
@@ -86,7 +86,7 @@ void TringTvor_GL_Rnr::Render(TringTvor* ttvor)
 	while(n-- > 0) {
 	  glNormal3fv ( TT.TriangleNormal(*tring_idxp) );
 	  if(TT.bColP) 
-	    glColor3ubv( TT.TriangleColor(*tring_idxp) );
+	    glColor4ubv( TT.TriangleColor(*tring_idxp) );
 	  tring_idxp++;
 	  glArrayElement(*(idxp++));
 	}
@@ -101,7 +101,7 @@ void TringTvor_GL_Rnr::Render(TringTvor* ttvor)
       UChar_t* C = TT.TriangleColor(0);
       for(Int_t t=0; t<TT.mNTrings; ++t) {
 	glNormal3fv(N); N += 3;
-	if(TT.bColP) { glColor3ubv(C);  C += 3; }
+	if(TT.bColP) { glColor4ubv(C);  C += 4; }
 	glArrayElement(T[0]);
 	glArrayElement(T[1]);
 	glArrayElement(T[2]);
