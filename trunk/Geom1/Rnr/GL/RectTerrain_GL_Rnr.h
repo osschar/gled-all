@@ -16,6 +16,14 @@ protected:
 
   void check(double,double,GLdouble*,GLdouble*,GLint*);
 
+  // Vars needed for coloring/texturing in explicit rendering modes.
+  void setup_coltex_vars();
+  Bool_t  bColP,  bTexP;
+  Int_t   mMinX,  mMinY;
+  Int_t   mMaxX,  mMaxY;
+  Float_t mTexFx, mTexFy;
+  Float_t mTexDx, mTexDy;
+
 public:
   RectTerrain_GL_Rnr(RectTerrain* rt) :
     ZNode_GL_Rnr(rt), mTerrain(rt) {}

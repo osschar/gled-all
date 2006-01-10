@@ -11,6 +11,8 @@
 // mO(x|y) ~ origin, mD(x|y) ~ grid spacing.
 // Can be set from a ZImage via void SetFromImage(ZImage* image).
 //
+// If ColSep == 0, coloring is not done.
+//
 // Renderer is stupid, so expect it to be slow for large grids (512x512).
 
 #include "RectTerrain.h"
@@ -139,7 +141,7 @@ void RectTerrain::SetFromImage(ZImage* image)
   mMinZ = 1e9; mMaxZ = -1e9;
 
   for(Int_t y=1; y<=mNy; ++y) {
-    ILushort* bar = &(data[(mNy-y)*w]);
+    ILushort* bar = &(data[(y-1)*w]);
     for(Int_t x=1; x<=mNx; ++x) {
       const float z = (float)(*(bar++));
       if(z > mMaxZ) mMaxZ = z;
@@ -271,7 +273,7 @@ void RectTerrain::Boobofy()
 
 void RectTerrain::color_filler(Float_t* v, UChar_t* c, void* rt)
 {
-  ((RectTerrain*)rt)->make_color(v[2]).rgb_to_ubyte(c);
+  ((RectTerrain*)rt)->make_color(v[2]).to_ubyte(c);
 }
 
 void RectTerrain::MakeTringTvor()
@@ -282,14 +284,14 @@ void RectTerrain::MakeTringTvor()
   if(bBorder) {
     --minX; ++maxX; --minY; ++maxY;
   }
-  Int_t nx = maxX - minX + 1;
-  Int_t ny = maxY - minY + 1;
+  Int_t nx = maxX - minX + 1; Float_t tex_fx = 1.0/(maxX - minX);
+  Int_t ny = maxY - minY + 1; Float_t tex_fy = 1.0/(maxY - minY);
   
-  Bool_t colp    = (mColSep != 0);
+  Bool_t colp    = (mColSep  != 0);
+  Bool_t texp    = (mTexture != 0);
   Bool_t smoothp = (mRnrMode == RM_SmoothTring);
   delete pTTvor;
-  pTTvor = new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp,
-			 colp, false);
+  pTTvor = new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
   TringTvor& TT = *pTTvor;
 
   TVector3 normvec;
@@ -313,8 +315,14 @@ void RectTerrain::MakeTringTvor()
 	Float_t *n = TT.Normal(idx);
 	n[0] = normvec.x(); n[1] = normvec.y(); n[2] = normvec.z();
 
-	if(colp)
-	  make_color(mP[i][j]).rgb_to_ubyte(TT.Color(idx));
+	if(colp) {
+	  make_color(mP[i][j]).to_ubyte(TT.Color(idx));
+	}
+	if(texp) {
+	  Float_t* t = TT.Texture(idx);
+	  t[0] = tex_fx*(i-minX);
+	  t[1] = tex_fy*(j-minY);
+	}
       }
 
       if(i < maxX && j < maxY) {
