@@ -18,16 +18,16 @@ TringTvor::TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
   mNVerts(nv),
   mNTrings(nt)
 {
-  mVerts  = new Float_t[3*mNVerts];  mNorms = 0; mCols = 0; mTexts = 0;
+  mVerts  = new Float_t[3*mNVerts];  mNorms = 0; mCols = 0; mTexs = 0;
   mTrings = new Int_t  [3*mNTrings]; mTringNorms = 0; mTringCols = 0;
   if(bSmoothShade) {
     mNorms = new Float_t[3*mNVerts];
-    if(bColP) mCols = new UChar_t[3*mNVerts];
+    if(bColP) mCols = new UChar_t[4*mNVerts];
   } else {
     mTringNorms = new Float_t[3*mNTrings];
-    if(bColP) mTringCols = new UChar_t[3*mNTrings];
+    if(bColP) mTringCols = new UChar_t[4*mNTrings];
   }
-  if(bTexP) mTexts = new Float_t[2*mNVerts];
+  if(bTexP) mTexs = new Float_t[2*mNVerts];
 
   mStripEls    = 0;
   mStripTrings = 0;
@@ -37,7 +37,7 @@ TringTvor::TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
 
 TringTvor::~TringTvor()
 {
-  delete [] mVerts;    delete [] mNorms; delete [] mCols; delete [] mTexts;
+  delete [] mVerts;    delete [] mNorms; delete [] mCols; delete [] mTexs;
   delete [] mTrings;   delete [] mTringNorms; delete [] mTringCols;
   delete [] mStripEls; delete [] mStripBegs; delete [] mStripLens;
 }
