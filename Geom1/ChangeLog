@@ -1,3 +1,32 @@
+2006-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	Added method MakeFromFormulas() allowing creation from three
+	algebraic expressions.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Added interface to iluMirror/Rotate; in libGeom1_GLED_user_init()
+	now set origin mode to lower-left corner.
+
+	* Glasses/SMorph.cxx:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	Texture origin now in lower-left corner.
+
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Color array now 4 bytes (added alpha), renamed texture coordinate
+	array variable mTexts->mTexs.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	* Rnr/GL/RectTerrain_GL_Rnr.h:
+	Added support for textured surface and alpha layer in surface
+	colors.
+
 2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:

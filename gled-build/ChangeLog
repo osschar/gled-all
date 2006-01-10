@@ -1,3 +1,9 @@
+2006-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Method-argument parsing improved in view of default-argument-value
+	character content; it now allows '(' and ')' in strings.
+
 2005-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
