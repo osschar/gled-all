@@ -68,6 +68,10 @@ void TringTvor_GL_Rnr::Render(TringTvor* ttvor)
     glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
     glVertexPointer(3, GL_FLOAT, 0, TT.mVerts);
     glEnableClientState(GL_VERTEX_ARRAY);
+    if(TT.bTexP) {
+      glTexCoordPointer(2, GL_FLOAT, 0, TT.mTexs);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
 
     // TRandom colgen(2);
 
