@@ -1,3 +1,12 @@
+2006-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	Texture coordinate generation for TringTvor was only done for
+	smooth shading.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Texcure-coordinate-array was not enabled for flat shading.
+
 2006-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSSeed.cxx:
