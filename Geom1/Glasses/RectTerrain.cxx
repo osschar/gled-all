@@ -318,11 +318,12 @@ void RectTerrain::MakeTringTvor()
 	if(colp) {
 	  make_color(mP[i][j]).to_ubyte(TT.Color(idx));
 	}
-	if(texp) {
-	  Float_t* t = TT.Texture(idx);
-	  t[0] = tex_fx*(i-minX);
-	  t[1] = tex_fy*(j-minY);
-	}
+      }
+
+      if(texp) {
+	Float_t* t = TT.Texture(idx);
+	t[0] = tex_fx*(i-minX);
+	t[1] = tex_fy*(j-minY);
       }
 
       if(i < maxX && j < maxY) {
