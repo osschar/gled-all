@@ -62,7 +62,7 @@ VIEW_DIRS	:=
 VIEW_FL_DIRS	:=
 
 #--------------------------------------------------------------
-include ${GLEDSYS}/make/make_base.inc
+include \${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------
 
 # LIBSET_PREREQS :=
@@ -71,7 +71,7 @@ include ${GLEDSYS}/make/make_base.inc
 # user targets go here; enumerate them in LIBSET_PREREQS/TARGETS
 
 #--------------------------------------------------------------
-include ${GLEDSYS}/make/make_targets.inc
+include \${GLEDSYS}/make/make_targets.inc
 #--------------------------------------------------------------
 
 clean::
