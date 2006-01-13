@@ -1,3 +1,11 @@
+2006-01-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.h:
+	Stamping: added 'if mSaturn' prior to Ray creation. This was
+	causing segv during WSSeed::on_rebuild() (which uses stamping to
+	signal retriangulation) when called from AList::RebuildListRefs()
+	from ZComet import.
+
 2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* glass.list:
