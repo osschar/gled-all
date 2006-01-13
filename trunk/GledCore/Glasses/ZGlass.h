@@ -302,13 +302,13 @@ public:
     if(_type_* __t = dynamic_cast<_type_*>(*__iter)) { __t->_method_ } }
 
 #define IF_ZGLASS_RAY(...) { \
-  bool queenray_p = mQueen && mSaturn->AcceptsRays(); \
+  bool queenray_p = mQueen && mSaturn && mSaturn->AcceptsRays(); \
   bool absorber_p = pspRayAbsorber != 0; \
   if(queenray_p || absorber_p) { \
     auto_ptr<Ray> ray(Ray::PtrCtor(__VA_ARGS__));
 
 #define IF_ZGLASS_CHANGE_RAY(...) { \
-  bool queenray_p = mQueen && mQueen->GetStamping() && mSaturn->AcceptsRays(); \
+  bool queenray_p = mQueen && mSaturn && mQueen->GetStamping() && mSaturn->AcceptsRays(); \
   bool absorber_p = pspRayAbsorber != 0; \
   if(queenray_p || absorber_p) { \
     auto_ptr<Ray> ray(Ray::PtrCtor(__VA_ARGS__));
