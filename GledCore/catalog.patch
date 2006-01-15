@@ -14,6 +14,8 @@ $PATCH = {
   'Pragmas' => "#pragma link C++ function GForm;\n"
 },
 
+### Glasses
+
 "ZGlass" => {
   'PrePragmas' => "#pragma link C++ class ZLinkBase-;\n",
   'Pragmas'    => "#pragma link C++ class ZGlass::NameChangeCB+;\n" .
@@ -49,11 +51,15 @@ $PATCH = {
   'VirtualBase' => 1
 },
 
+### Stones
+
 "ZMIR"=> {
   'Pragmas'    => "#pragma link C++ class ZMIR_Result_Report;\n",
 },
 
 "ZComet" => { 'PragmaSuff' => "-" },
+
+"ZTrans" => { 'PragmaSuff' => "-" }, # Uses automatic schema evolution, but resets bAsOK on read.
 
 "GMutex" => 
 {

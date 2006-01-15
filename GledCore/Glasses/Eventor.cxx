@@ -30,7 +30,7 @@ ClassImp(Eventor)
 void Eventor::_init()
 {
   mTotalTime = mRunTime = 0;
-  mBeatsToDo = -1; mBeatsDone = 0;
+  mBeatsToDo = -1; mBeatsDone = 0; mLocBeatsDone = 0;
   mStampInterval = 100; mInterBeatMS = 0;
 
   mHost = 0;

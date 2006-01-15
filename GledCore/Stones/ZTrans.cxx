@@ -48,7 +48,7 @@
 #define F32 11
 #define F33 15
 
-ClassImp(ZTrans)
+ClassImp(ZTrans);
 
 /**************************************************************************/
 
@@ -547,6 +547,21 @@ Double_t ZTrans::Invert()
   return det;
 }
 
+/**************************************************************************/
+
+void ZTrans::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class ZTrans.
+
+   if (R__b.IsReading()) {
+      ZTrans::Class()->ReadBuffer(R__b, this);
+      bAsOK = false;
+   } else {
+      ZTrans::Class()->WriteBuffer(R__b, this);
+   }
+}
+
+/**************************************************************************/
 /**************************************************************************/
 
 void ZTrans::Print(Option_t* option) const
