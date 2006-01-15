@@ -54,7 +54,7 @@ void WSSeed::_init()
   mAnimStepFac = 1;
 
   pTuber = 0;     bTextured = false;
-  m_first_point = m_last_point = 0;
+  m_first_point = m_last_point = 0; m_num_points = 0;
 }
 
 WSSeed::~WSSeed() { delete pTuber; }
@@ -99,6 +99,7 @@ void WSSeed::on_insert(iterator it)
     if(p == 0)
       m_first_point  = m;
 
+    ++m_num_points;
     mTrueLength += delta_len;
 
     mStampReqTring = Stamp(FID());
@@ -128,6 +129,7 @@ void WSSeed::on_remove(iterator it)
     m->mPrevPoint = 0;
     m->mNextPoint = 0;
     
+    --m_num_points;
     mTrueLength += delta_len;
 
     mStampReqTring = Stamp(FID());
@@ -139,7 +141,7 @@ void WSSeed::on_rebuild()
   PARENT_GLASS::on_rebuild();
 
   mTrueLength = 0;
-  m_first_point = m_last_point = 0;
+  m_first_point = m_last_point = 0; m_num_points = 0;
   WSPoint *p = 0, *n = 0;
   for(iterator i=begin(); i!=end(); ++i) {
     n = dynamic_cast<WSPoint*>(i->fLens);
@@ -152,6 +154,7 @@ void WSSeed::on_rebuild()
 	m_first_point = n;
       }
       m_last_point = p = n;
+      ++m_num_points;
     }
   }
   mStampReqTring = Stamp(FID());
@@ -162,7 +165,7 @@ void WSSeed::clear_list()
   PARENT_GLASS::clear_list();
 
   mTrueLength = 0;
-  m_first_point = m_last_point = 0;
+  m_first_point = m_last_point = 0; m_num_points = 0;
 
   mStampReqTring = Stamp(FID());
 }
@@ -173,9 +176,7 @@ void WSSeed::Triangulate()
 {
   // Should be called under ReadLock.
 
-  list<WSPoint*> points; CopyListByGlass<WSPoint>(points);
-  int size = points.size();
-  if(size < 2) {
+  if(m_num_points < 2) {
     delete pTuber; pTuber = 0;
     return;
   }
@@ -188,30 +189,30 @@ void WSSeed::Triangulate()
 
   bTextured = (mTexture != 0);
   if(pTuber == 0) pTuber = new TubeTvor;
-  pTuber->Init(0, mTLevel*(size - 1) + 1, mPLevel, false, bTextured);
+  pTuber->Init(0, mTLevel*(m_num_points - 1) + 1, mPLevel, false, bTextured);
 
   Float_t len_fac = (bRenormLen) ? mLength / mTrueLength : 1;
 
   bool first = true;
-  list<WSPoint*>::iterator a, b;
-  b = points.begin();
+  WSPoint *a, *b;
+  b = m_first_point;
   ZTrans* lcfp;
-  while((a=b++, b) != points.end()) {
-    (*a)->Coff(*b);
+  while((a=b, b=b->mNextPoint, b) != 0) {
+    a->Coff(b);
     if(first) {
       first = false;
-      lcfp  = init_slide(*a);
+      lcfp  = init_slide(a);
       hTexU = 0;
       hTexV = 0;
     }
     Float_t delta = 1.0/mTLevel, max = 1 - delta/2;
     for(Float_t t=0; t<max; t+=delta) {
-      ring(*lcfp, *a, t);
-      hTexU += delta * (*a)->mStretch * len_fac;
-      hTexV += delta * (*a)->mTwist;
+      ring(*lcfp, a, t);
+      hTexU += delta * a->mStretch * len_fac;
+      hTexV += delta * a->mTwist;
     }
   }
-  ring(*lcfp, *(--a), 1);
+  ring(*lcfp, a->mPrevPoint, 1);
   delete lcfp;
 }
 
@@ -228,12 +229,12 @@ Float_t WSSeed::MeasureLength()
   GMutexHolder lstlck(mListMutex);
 
   Float_t len = 0;
-  Stepper<WSPoint> s(this);
-  s.step();
-  WSPoint* a = *s;
-  while(s.step()) {
-    len += a->mStretch;
-    a = *s;
+  if(m_num_points >= 2) {
+    WSPoint* a = m_first_point;
+    while(a->mNextPoint != 0) {
+      len += a->mStretch;
+      a = a->mNextPoint;
+    }
   }
   if(len != mTrueLength)
     SetTrueLength(len);
@@ -257,15 +258,13 @@ void WSSeed::TransAtTime(ZTrans& lcf, Double_t time, Bool_t repeat_p, Bool_t rei
 
   static const Exc_t _eh("WSSeed::TransAtTime ");
 
-  list<WSPoint*> points; CopyListByGlass<WSPoint>(points);
-  int size = points.size();
-  if(size < 2) {
-    throw(_eh + "not enough points.");
-  }
+  if(m_num_points < 2)
+    throw(_eh + "nedd at least two points.");
 
   // Here should call triangulate if mStamReqTex < mTimeStamp
   // The triangulation could measure lengths etc, store them in local data.
   // Then also don't need Coff call below.
+  // Coff is now optimised.
 
   Double_t len_fac = 1;
   Double_t len     = mTrueLength;
@@ -286,28 +285,30 @@ void WSSeed::TransAtTime(ZTrans& lcf, Double_t time, Bool_t repeat_p, Bool_t rei
   // printf("OK ... came up with time=%f\n", time);
 
   Double_t done = 0;
-  list<WSPoint*>::iterator a, b;
-  b = points.begin();
-  while((a=b++, b) != points.end()) {
-    done += (*a)->mStretch * len_fac;
+  WSPoint *a, *b;
+  b = m_first_point;
+  while((a=b, b=b->mNextPoint, b) != 0) {
+    done += a->mStretch * len_fac;
     if(done >= time) break;
   }
-  Double_t t = 1  -  (done - time) / ((*a)->mStretch * len_fac);
-
-  // printf("  limits '%s', '%s'; rel.time=%f\n",
-  //   (*a)->GetName(), (*b)->GetName(), t);
+  Double_t t;
+  if(b != 0) {
+    t = 1  -  (done - time) / (a->mStretch * len_fac);
+  } else {
+    t = 1;
+    b = a; a = b->mPrevPoint;
+  }
+  a->Coff(b);
 
   if(reinit_trans_p)
-    lcf = (*a)->RefTrans();
-
-  (*a)->Coff(*b);
+    lcf = a->RefTrans();
 
   const Double_t t2 = t*t, t3 = t2*t;
   Double_t* Pnt = lcf.ArrT();
   Double_t* Axe = lcf.ArrX();
 
   for(Int_t i=0; i<3; i++) {
-    const TMatrixDRow R( (*a)->mCoffs[i] );
+    const TMatrixDRow R( a->mCoffs[i] );
     Pnt[i] = R[0] +   R[1]*t +   R[2]*t2 + R[3]*t3;
     Axe[i] = R[1] + 2*R[2]*t + 3*R[3]*t2;
   }

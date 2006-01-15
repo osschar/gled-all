@@ -64,6 +64,7 @@ protected:
   Bool_t	bTextured;	//!
   WSPoint*      m_first_point;	//!
   WSPoint*      m_last_point;	//!
+  Int_t         m_num_points;   //!
 
   // Animation control
   //------------------
