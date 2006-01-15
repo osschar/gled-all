@@ -1,3 +1,13 @@
+2006-01-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	Added local m_num_points, use local connectivity data in all
+	iterations over seed list.
+
+	* Glasses/WSWalker.cxx:
+	Lock WSSeed during call to TransAtTime.
+
 2006-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
