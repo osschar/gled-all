@@ -33,9 +33,14 @@ void WSWalker::_init()
 void WSWalker::set_trans(Double_t t)
 {
   if(mNode != 0 && mSeed != 0) {
-    mSeed->TransAtTime(m_last_trans, t, bLoop, (t < m_last_time));
-    GLensWriteHolder node_wrlck(*mNode);
-    mNode->SetTrans(m_last_trans);
+    {
+      GLensWriteHolder node_wrlck(*mSeed);
+      mSeed->TransAtTime(m_last_trans, t, bLoop, (t < m_last_time));
+    }
+    {
+      GLensWriteHolder node_wrlck(*mNode);
+      mNode->SetTrans(m_last_trans);
+    }
     m_last_time = t;
   } 
 }
