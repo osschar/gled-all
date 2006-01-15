@@ -1,3 +1,13 @@
+2006-01-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* catalog.patch
+	* Stones/ZTrans.cxx:
+	Made custom Streamer for ZTrans: set bAsOK to false afetr
+	read. Automatic schema evolution is still used.
+
+	* Glasses/Eventor.cxx:
+	In _init(): set mLocBeatsDone to 0.
+
 2006-01-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.h:
