@@ -7,18 +7,18 @@
 
 #include <GL/gl.h>
 
-class Board_GL_Rnr : public ZNode_GL_Rnr {
+class Board_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
 
 protected:
   Board*	mBoard;
-  GLuint	mTexture;
 
 public:
-  Board_GL_Rnr(Board* b) : ZNode_GL_Rnr(b), mBoard(b), mTexture(0) {}
-  virtual ~Board_GL_Rnr();
+  Board_GL_Rnr(Board* b) : ZNode_GL_Rnr(b), mBoard(b) {}
+  virtual ~Board_GL_Rnr() {}
 
-  virtual void Draw(RnrDriver* rd);
+  virtual void Render(RnrDriver* rd);
 }; // endclass Board_GL_Rnr
 
 #endif

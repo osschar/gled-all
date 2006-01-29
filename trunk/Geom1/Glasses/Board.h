@@ -17,16 +17,18 @@ class Board : public ZNode {
 protected:
   void _init();
 
-  ZLink<ZImage>	mTexture;	// X{gS} L{} RnrBits{4,0,5,0, 0,0,0,0}
-  Float_t	mTexX0;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
-  Float_t	mTexY0;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000])
-  Float_t	mTexX1;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
-  Float_t	mTexY1;         // X{gS} 7 Value(-range=>[-1e3,1e3,1,1000])
+  ZColor	mColor;		// X{PGST} 7 ColorButt()
 
-  Float_t	mULen;		// X{gS}  7 Value(-range=>[0,1000,1,100],-join=>1)
-  Float_t	mVLen;		// X{gS}  7 Value(-range=>[0,1000,1,100])
-  bool		bFillBack;	// X{gS}  7 Bool(-join=>1);
-  ZColor	mColor;		// X{PGS} 7 ColorButt()
+  ZLink<ZImage>	mTexture;	// X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
+  Float_t	mTexX0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000])
+  Float_t	mTexX1;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexY1;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000])
+
+  Float_t	mULen;		// X{gST}  7 Value(-range=>[0,1e6,1,1000],-join=>1)
+  Float_t	mVLen;		// X{gST}  7 Value(-range=>[0,1e6,1,1000])
+  Int_t         mUDivs;         // X{GST}  7 Value(-range=>[0,1024,1], -join=>1)
+  Int_t         mVDivs;         // X{GST}  7 Value(-range=>[0,1024,1])
 
 public:
   Board(const Text_t* n="Board", const Text_t* t=0) :
@@ -37,7 +39,7 @@ public:
   { mULen = u; mVLen = v; Stamp(FID()); }  // X{E}
 
 #include "Board.h7"
-  ClassDef(Board, 1)
+  ClassDef(Board, 1); // Textured rectangle in x-y plane.
 }; // endclass Board
 
 

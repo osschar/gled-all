@@ -7,18 +7,17 @@
 #include "Board.h"
 #include "Board.c7"
 
-ClassImp(Board)
+ClassImp(Board);
 
 /**************************************************************************/
 
 void Board::_init()
 {
-  mTexture = 0;
   mTexX0 = mTexY0 = 0;
   mTexX1 = mTexY1 = 1;
 
-  mULen = mVLen = 1;
-  bFillBack = false;
+  mULen  = mVLen  = 1;
+  mUDivs = mVDivs = 0;
 }
 
 /**************************************************************************/
