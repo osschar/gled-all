@@ -1,3 +1,14 @@
+2006-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	* Rnr/GL/Board_GL_Rnr.h:
+	Added support for rendering of the board with several divisions
+	(members mUDivs, mVDivs). Needed for lightning and fog when size
+	of the board is large compared to lamp distance/fog depth. Removed
+	member bFillBack (can be done via ZGlLightModel).
+
 2006-01-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSSeed.cxx:
