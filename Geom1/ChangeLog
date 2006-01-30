@@ -1,3 +1,9 @@
+2006-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	Fixed a bug in on_insert() causing corruption of internal
+	state. Occured when WSSeed was populated by non-WSPoints.
+
 2006-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Board.cxx:
