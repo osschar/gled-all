@@ -67,43 +67,42 @@ void WSSeed::on_insert(iterator it)
   PARENT_GLASS::on_insert(it);
 
   WSPoint* m = dynamic_cast<WSPoint*>(it->fLens);
-  if(m != 0) {
-    Float_t delta_len = 0;
-    iterator i = it; ++i;
-    WSPoint* n = 0;
-    while(i != end()) {
-      n = dynamic_cast<WSPoint*>((i++)->fLens);
-      if(n != 0) {
-	n->mPrevPoint = m;
-	m->mNextPoint = n;
-	delta_len += m->mStretch;
-	break;
-      }
-    }
-    if(n == 0)
-      m_last_point  = m;
-    
-    WSPoint* p = 0;
-    while(it != begin()) {
-      p = dynamic_cast<WSPoint*>((--it)->fLens);
-      if(p != 0) {
-	m->mPrevPoint = p;
-	if(p->mNextPoint == 0)
-	  delta_len += p->mStretch;
-	p->mNextPoint = m;
-	break;
-      } else {
-	m_first_point = m;
-      }
-    }
-    if(p == 0)
-      m_first_point  = m;
+  if(m == 0)
+    return;
 
-    ++m_num_points;
-    mTrueLength += delta_len;
-
-    mStampReqTring = Stamp(FID());
+  Float_t delta_len = 0;
+  iterator i = it; ++i;
+  WSPoint* n = 0;
+  while(i != end()) {
+    n = dynamic_cast<WSPoint*>((i++)->fLens);
+    if(n != 0) {
+      n->mPrevPoint = m;
+      m->mNextPoint = n;
+      delta_len += m->mStretch;
+      break;
+    }
   }
+  if(n == 0)
+    m_last_point = m;
+    
+  WSPoint* p = 0;
+  while(it != begin()) {
+    p = dynamic_cast<WSPoint*>((--it)->fLens);
+    if(p != 0) {
+      m->mPrevPoint = p;
+      if(p->mNextPoint == 0)
+	delta_len += p->mStretch;
+      p->mNextPoint = m;
+      break;
+    }
+  }
+  if(p == 0)
+    m_first_point  = m;
+
+  ++m_num_points;
+  mTrueLength += delta_len;
+
+  mStampReqTring = Stamp(FID());
 }
 
 void WSSeed::on_remove(iterator it)
@@ -111,29 +110,30 @@ void WSSeed::on_remove(iterator it)
   PARENT_GLASS::on_remove(it);
 
   WSPoint* m = dynamic_cast<WSPoint*>(it->fLens);
-  if(m != 0) {
-    Float_t delta_len = 0;
-    if(m->mPrevPoint) {
-      if(m->mNextPoint == 0)
-	delta_len -= m->mPrevPoint->mStretch;
-      m->mPrevPoint->mNextPoint = m->mNextPoint;
-    } else {
-      m_first_point = m->mNextPoint;
-    }
-    if(m->mNextPoint) {
-      m->mNextPoint->mPrevPoint = m->mPrevPoint;
-      delta_len -= m->mStretch;
-    } else {
-      m_last_point  = m->mPrevPoint;
-    }
-    m->mPrevPoint = 0;
-    m->mNextPoint = 0;
-    
-    --m_num_points;
-    mTrueLength += delta_len;
+  if(m == 0)
+    return;
 
-    mStampReqTring = Stamp(FID());
+  Float_t delta_len = 0;
+  if(m->mPrevPoint) {
+    if(m->mNextPoint == 0)
+      delta_len -= m->mPrevPoint->mStretch;
+    m->mPrevPoint->mNextPoint = m->mNextPoint;
+  } else {
+    m_first_point = m->mNextPoint;
   }
+  if(m->mNextPoint) {
+    m->mNextPoint->mPrevPoint = m->mPrevPoint;
+    delta_len -= m->mStretch;
+  } else {
+    m_last_point  = m->mPrevPoint;
+  }
+  m->mPrevPoint = 0;
+  m->mNextPoint = 0;
+    
+  --m_num_points;
+  mTrueLength += delta_len;
+
+  mStampReqTring = Stamp(FID());
 }
 
 void WSSeed::on_rebuild()
