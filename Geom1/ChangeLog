@@ -1,3 +1,11 @@
+2006-02-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.h:
+	Allow TexXC, TexYC to be negative (thus inverting the texture).
+
+	* Glasses/WSPoint.h:
+	Increased limits on all parameters.
+
 2006-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSSeed.cxx:
