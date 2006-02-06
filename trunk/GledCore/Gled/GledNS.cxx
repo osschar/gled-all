@@ -355,7 +355,7 @@ void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 
   assert(b.IsWriting());
   b << lens->VFID();
-  // R__LOCKGUARD(ROOT_CINT_MUTEX);
+  R__LOCKGUARD(ROOT_CINT_MUTEX);
   lens->Streamer(b);
 }
 
@@ -368,7 +368,7 @@ ZGlass* GledNS::StreamLens(TBuffer& b)
   b >> fid;
   ZGlass *lens = ConstructLens(fid);
   if(lens) {
-    // R__LOCKGUARD(ROOT_CINT_MUTEX);
+    R__LOCKGUARD(ROOT_CINT_MUTEX);
     lens->Streamer(b);
   }
   return lens;
