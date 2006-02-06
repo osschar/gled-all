@@ -1,3 +1,9 @@
+2006-02-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	Use GLRnrDriver's Color function (allow color modulation and
+	fade-out).
+
 2006-02-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledNS.cxx:
