@@ -37,8 +37,8 @@ protected:
   ZLink<ZImage>	mTexture;	// X{gST} L{} RnrBits{4,0,5,0}
   Float_t	mTexX0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
   Float_t	mTexY0;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000])
-  Float_t	mTexXC;         // X{gST} 7 Value(-range=>[0,1e3,1,1000], -join=>1)
-  Float_t	mTexYC;         // X{gST} 7 Value(-range=>[0,1e3,1,1000])
+  Float_t	mTexXC;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mTexYC;         // X{gST} 7 Value(-range=>[-1e3,1e3,1,1000])
   Float_t	mTexYOff;	// X{gST} 7 Value(-range=>[-10,10,1,1000])
 
   TubeTvor*	pTuber;		//!
