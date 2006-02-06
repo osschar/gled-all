@@ -18,8 +18,8 @@ ClassImp(ZGlClipPlane)
 
 void ZGlClipPlane::_init()
 {
-  // *** Set all links to 0 ***
-  fDist = fTheta = fPhi = 0;
+  mX = mY = mZ = 0;
+  mDist = mTheta = mPhi = 0;
 
   bRnrSelf = true; bOnIfOff = true; bOffIfOn = false;
 }

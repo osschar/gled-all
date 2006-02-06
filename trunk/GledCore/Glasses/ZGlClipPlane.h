@@ -17,9 +17,12 @@ private:
   void _init();
 
 protected:
-  Float_t fDist;  // X{GS} 7 Value(-range=>[-1000,1000, 1,1000])
-  Float_t fTheta; // X{GS} 7 Value(-range=>[-90,90,     1,1000], -join=>1)
-  Float_t fPhi;   // X{GS} 7 Value(-range=>[-360,360,   1,1000])
+  Float_t mX;     // X{GS} 7 Value(-range=>[-1e3,1e3, 1,1000], -width=>6, -join=>1)
+  Float_t mY;     // X{GS} 7 Value(-range=>[-1e3,1e3, 1,1000], -width=>6, -join=>1)
+  Float_t mZ;     // X{GS} 7 Value(-range=>[-1e3,1e3, 1,1000], -width=>6)
+  Float_t mDist;  // X{GS} 7 Value(-range=>[-1e3,1e3, 1,1000], -width=>6, -join=>1)
+  Float_t mTheta; // X{GS} 7 Value(-range=>[-90,90,   1,1000], -width=>6, -join=>1)
+  Float_t mPhi;   // X{GS} 7 Value(-range=>[-360,360, 1,1000], -width=>6)
 
   Bool_t  bRnrSelf; // X{GS} 7 Bool()
   Bool_t  bOnIfOff; // X{GS} 7 Bool(-join=>1)
