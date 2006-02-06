@@ -65,17 +65,20 @@ void ZGlClipPlane_GL_Rnr::TurnOn(RnrDriver* rd)
   mClipId = rd->GL()->GetClipPlane(this);
   if(mClipId >= 0) {
     ZGlClipPlane& cp = *mZGlClipPlane;
+    glPushMatrix();
+    glTranslatef(cp.mX, cp.mY, cp.mZ);
     GLdouble plane[4];
     const Double_t
-      theta = cp.fTheta * TMath::DegToRad(),
-      phi   = cp.fPhi   * TMath::DegToRad(),
+      theta = cp.mTheta * TMath::DegToRad(),
+      phi   = cp.mPhi   * TMath::DegToRad(),
       cth   = TMath::Cos(theta);
     plane[0] = cth * TMath::Cos(phi);
     plane[1] = cth * TMath::Sin(phi);
     plane[2] = TMath::Sin(theta);
-    plane[3] = cp.fDist;
+    plane[3] = cp.mDist;
     glClipPlane(GL_CLIP_PLANE0 + mClipId, plane);
     glEnable(GL_CLIP_PLANE0 + mClipId);
+    glPopMatrix();
   }
 }
 
@@ -96,9 +99,10 @@ void ZGlClipPlane_GL_Rnr::RnrSelf()
 
   glColor3f(1, 1, 1);
   glPushMatrix();
-  glRotatef( cp.fPhi,   0, 0, 1);
-  glRotatef(-cp.fTheta, 0, 1, 0);
-  glTranslatef(-cp.fDist, 0, 0);
+  glTranslatef(cp.mX, cp.mY, cp.mZ);
+  glRotatef( cp.mPhi,   0, 0, 1);
+  glRotatef(-cp.mTheta, 0, 1, 0);
+  glTranslatef(-cp.mDist, 0, 0);
   glBegin(GL_LINE_LOOP);
   glVertex3f(0, -0.5, -0.5);
   glVertex3f(0, -0.5,  0.5);
