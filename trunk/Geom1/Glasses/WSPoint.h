@@ -21,12 +21,12 @@ private:
   void _init();
 
 protected:
-  Float_t	mW; // Width   X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
-  Float_t	mS; // Spread  X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6, -join=>1)
-  Float_t	mT; // Tension X{GS} 7 Value(-range=>[-100,100,1,1000], -width=>6)
+  Float_t	mW; // Width   X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -width=>6, -join=>1)
+  Float_t	mS; // Spread  X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -width=>6, -join=>1)
+  Float_t	mT; // Tension X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -width=>6)
 
-  Float_t	mTwist;   // Texture wraps X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Float_t	mStretch; // Lenght        X{GE} 7 Value(-range=>[-100,100,1,1000])
+  Float_t	mTwist;   // Texture wraps X{GS} 7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
+  Float_t	mStretch; // Lenght        X{GE} 7 Value(-range=>[-1e3,1e3,1,1000])
 
   // Internal stuff for connections.
   TMatrixD mCoffs;     //! X{R}
