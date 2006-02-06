@@ -6,6 +6,7 @@
 
 #include "Text_GL_Rnr.h"
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GL/gl.h>
 
 #define PARENT ZNode_GL_Rnr
@@ -74,7 +75,7 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
     float y1 =  mText->mYBorder   + float(ascent)/(h_box);
 
     if(mText->bFramePoly) {
-      glColor4fv(mText->mFrameCol());
+      rd->GL()->Color(mText->mFrameCol);
       Float_t w = mText->mFrameW;
       glBegin(GL_QUADS);
       glVertex2f(x0-w, y0-w);  glVertex2f(x1+w, y0-w);
@@ -89,7 +90,7 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
     }
     
     if(mText->bBackPoly) {
-      glColor4fv(mText->mBGCol());
+      rd->GL()->Color(mText->mBGCol);
       glBegin(GL_QUADS);
       glVertex2f(x0, y0);  glVertex2f(x1, y0);
       glVertex2f(x1, y1);  glVertex2f(x0, y1);
@@ -103,7 +104,7 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
     glPolygonOffset(poly_offa, poly_offa);
   }
 
-  glColor4fv(mText->mFGCol());
+  rd->GL()->Color(mText->mFGCol);
   glScalef(scale, scale, 1);
   glEnable(GL_TEXTURE_2D);
   GLTextNS::txfBindFontTexture(txf);
