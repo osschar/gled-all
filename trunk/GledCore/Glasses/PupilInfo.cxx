@@ -66,7 +66,9 @@ void PupilInfo::_init()
   // User interaction and feedback.
   mMSRotFac = 1; mMSMoveFac = 2; mMoveOM = -2; mAccelExp = 0.5;
 
-  mCHSize = 0.03;
+  mCHSize       = 0.03; // Cross-hair size.
+  mMPSize       = 0;    // Internal mouse-pointer size.
+  mHomeAnimTime = 2;    // Time of smooth-home animation.
 
   bShowRPS = true; bShowView = true; bRnrNames = false;
 
@@ -159,6 +161,17 @@ void PupilInfo::ImportCameraInfo(CameraInfo* cam_info)
 
   if(cam_info->GetFixCameraBase())
     EmitCameraHomeRay();
+}
+
+/**************************************************************************/
+
+void PupilInfo::SmoothCameraHome(ZNode* new_base)
+{
+  if(new_base) {
+    SetCameraBase(new_base);
+    EmitDumpImageRay(); // This forces redraw, reinitializes pupil's data.
+  }
+  EmitSmoothCameraHomeRay();
 }
 
 /**************************************************************************/
@@ -260,6 +273,15 @@ void PupilInfo::EmitCameraHomeRay()
   if(mQueen && mSaturn->AcceptsRays()) {
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_camera_home, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
+}
+
+void PupilInfo::EmitSmoothCameraHomeRay()
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_smooth_camera_home, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
 }

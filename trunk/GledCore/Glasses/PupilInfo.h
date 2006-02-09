@@ -27,6 +27,7 @@ public:
   enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
 		      PRQN_resize_window,
 		      PRQN_camera_home,
+		      PRQN_smooth_camera_home,
 		      PRQN_dump_image
   };
 
@@ -74,7 +75,9 @@ protected:
   Float_t	mMoveOM;	// X{gS} 7 Value(-range=>[-30,30,1,100], -join=>1)
   Float_t	mAccelExp;	// X{gS} 7 Value(-range=>[-10,10,1,1000])
 
-  Float_t	mCHSize;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>4)
+  Float_t	mCHSize;	// X{GS} 7 Value(-range=>[0,1,  1,1000], -width=>4, -join=>1)
+  Float_t       mMPSize;        // X{GS} 7 Value(-range=>[0,1,  1,1000], -width=>4)
+  Float_t       mHomeAnimTime;  // X{GS} 7 Value(-range=>[0,10, 1,1000])
 
   Bool_t	bShowRPS;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bShowView;	// X{gS} 7 Bool(-join=>1)
@@ -107,14 +110,17 @@ public:
 
   void ImportCameraInfo(CameraInfo* cam_info); // X{E} C{1} 7 MCWButt()
 
+  void SmoothCameraHome(ZNode* new_base=0);    // X{E} C{1} 7 MCWButt()
+
   void Zoom(Float_t delta);  // X{E}
   void ZoomFac(Float_t fac); // X{E}
 
   ZTrans* ToPupilFrame(ZNode* node);
   ZTrans* ToCameraFrame(ZNode* node);
 
-  void EmitResizeRay();     // X{E} 7 MButt(-join=>1)
-  void EmitCameraHomeRay(); // X{E} 7 MButt()
+  void EmitResizeRay();           // X{E} 7 MButt(-join=>1)
+  void EmitCameraHomeRay();       // X{E} 7 MButt()
+  void EmitSmoothCameraHomeRay(); // X{E} 7 MButt()
 
   void EmitDumpImageRay(TString filename="", Int_t n_tiles=1, Bool_t signal_p=false);
   void DumpImage(TString filename="screenshot", Int_t n_tiles=1); // X{E} 7 MCWButt(-join=>1)
