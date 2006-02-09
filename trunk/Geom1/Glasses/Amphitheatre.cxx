@@ -34,9 +34,10 @@ void Amphitheatre::_init()
   mRepXm = 0.5*mGuestSize;
   mRepXM = 5*mGuestSize;
 
-  mGuestStep    = 0.08;
+  mGuestStep    = 1;
   mStepSleepMS  = 100;
-  bChairHunt    = false;
+  bChairHunt    = false; // This is state, true if hunt is underway.
+  bInnerHunt    = true;  // True: use internal MIR-callback for hunt.
 
   bRnrStage  = true; bRnrChairs = true;
   // Stage col white.
@@ -152,8 +153,11 @@ Amphitheatre::Chair* Amphitheatre::closest_free_chair(TVector3& pos)
 
 /**************************************************************************/
 
-void Amphitheatre::chair_hunt()
+void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
 {
+  if(bChairHunt == false)
+    return;
+
   Bool_t changep = false;
 
   typedef list<ZNode*>		 lpZNode_t;
@@ -162,10 +166,12 @@ void Amphitheatre::chair_hunt()
   lpZNode_t nodes;
   mNewGuests->CopyListByGlass<ZNode>(nodes);
   
-  if(bChairHunt == false || nodes.empty() || mNumChFree <= 0) {
+  if(nodes.empty() || mNumChFree <= 0) {
     StopHunt();
     return;
   }
+
+  Double_t max_step = mGuestStep*dt;
 
   for(lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n) {
     ZNode* node = *n;
@@ -177,12 +183,12 @@ void Amphitheatre::chair_hunt()
     
     x = chair->fPos - x;
     Double_t dx = x.Mag();
-    if(dx > mGuestStep) {
-      x *= (mGuestStep/dx);
+    if(dx > max_step) {
+      x *= (max_step/dx);
     }
     // printf("Got r = %f, %f, %f; %f\n", f.x(), f.y(), f.z(), f.Mag());
 
-    bool finalp = (dx <= mGuestStep); // Guest has reached the chair.
+    bool finalp = (dx <= max_step); // Guest has reached the chair.
 
     node->WriteLock();
     node->Move3PF(x.x(), x.y(), x.z());
@@ -239,7 +245,7 @@ void Amphitheatre::chair_hunt()
 
     Double_t fmag = f.Mag();
     if(fmag != 0) {
-      if(fmag > mGuestStep/2) f *= mGuestStep/2/fmag;
+      if(fmag > max_step/2) f *= max_step/2/fmag;
       node->WriteLock();
       node->Move3LF(f.x(), f.y(), f.z());
       node->WriteUnlock();
@@ -249,13 +255,14 @@ void Amphitheatre::chair_hunt()
   if(changep)
     Stamp(FID());
 
-  chair_hunt_emit_mir();
+  if(bInnerHunt)
+    chair_hunt_emit_mir(t+dt, dt);
 }
 
-void Amphitheatre::chair_hunt_emit_mir()
+void Amphitheatre::chair_hunt_emit_mir(Double_t t, Double_t dt)
 {
-  GTime at(GTime::I_Now); at += 1000l*mStepSleepMS;
-  auto_ptr<ZMIR> mir( S_chair_hunt() );
+  GTime at(GTime::I_Now); at += (Long_t)(1000000*dt);
+  auto_ptr<ZMIR> mir( S_chair_hunt(t, dt) );
   mSaturn->DelayedShootMIR(mir, at);
 }
 
@@ -280,9 +287,11 @@ void Amphitheatre::fix_guest_scale(ZNode* guest, bool finalp)
 
 void Amphitheatre::StartHunt()
 {
-  if(bChairHunt) return;
+  if(bChairHunt)
+    return;
   bChairHunt = true;
-  chair_hunt_emit_mir();
+  if(bInnerHunt)
+    chair_hunt_emit_mir(0, mStepSleepMS/1000.0);
   Stamp(FID());
 }
 
@@ -293,7 +302,14 @@ void Amphitheatre::StopHunt()
   Stamp(FID());
 }
 
+void Amphitheatre::TimeTick(Double_t t, Double_t dt)
+{
+  if(!bChairHunt || bInnerHunt) return;
+  chair_hunt(t, dt);
+}
+
 /**************************************************************************/
+
 
 inline
 Double_t Amphitheatre::rnd(Double_t k, Double_t n)
