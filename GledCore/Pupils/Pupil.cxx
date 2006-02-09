@@ -284,6 +284,11 @@ void Pupil::AbsorbRay(Ray& ray)
     break;
   }
 
+  case PupilInfo::PRQN_smooth_camera_home: {
+    initiate_smooth_camera_home();
+    break;
+  }
+
   }
 }
 
@@ -327,7 +332,12 @@ void Pupil::SetAbsRelCamera()
 {
   static const Exc_t _eh("Pupil::SetAbsRelCamera ");
 
+  GLensReadHolder _rdlck(mInfo);
+
   ZNode* cam_base = mInfo->GetCameraBase();
+  ZNode* look_at = mInfo->GetLookAt();
+  ZNode* up_ref = mInfo->GetUpReference();
+
   if(mCamBase != cam_base) {
     if(mCamBase != 0) {
       mCamera->SetTrans(mCamBaseTrans * mCamera->RefTrans() );
@@ -372,7 +382,6 @@ void Pupil::SetAbsRelCamera()
   bool abs_cam_changed = false;
   bool look_at_p       = false;
 
-  ZNode* look_at = mInfo->GetLookAt();
   if(look_at != 0) {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(look_at) );
     if(t.get() != 0) {
@@ -391,7 +400,6 @@ void Pupil::SetAbsRelCamera()
     }
   }
 
-  ZNode* up_ref = mInfo->GetUpReference();
   if(up_ref != 0) {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
     if(t.get() != 0) {
@@ -935,18 +943,34 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glScalef(1, (float)w()/h(), 1);
+  float aspect = (float)w()/h();
+  glScalef(1, aspect, 1);
 
   GLfloat ch_size = mInfo->GetCHSize();
-  glLineWidth(1);
-  glColor3f(1,0,0);
-  glBegin(GL_LINES); {
-    glVertex2f(ch_size, 0);	glVertex2f(ch_size/3,0);
-    glVertex2f(-ch_size/3, 0);	glVertex2f(-ch_size,0);
-    glVertex2f(0, ch_size);	glVertex2f(0,ch_size/3);
-    glVertex2f(0, -ch_size/3);	glVertex2f(0,-ch_size);
-  } glEnd();
+  if(ch_size > 0) {
+    glLineWidth(1);
+    glColor3f(1,0,0);
+    glBegin(GL_LINES); {
+      glVertex2f(ch_size, 0);	 glVertex2f(ch_size/3,0);
+      glVertex2f(-ch_size/3, 0); glVertex2f(-ch_size,0);
+      glVertex2f(0, ch_size);	 glVertex2f(0,ch_size/3);
+      glVertex2f(0, -ch_size/3); glVertex2f(0,-ch_size);
+    } glEnd();
+  }
 
+  GLfloat mp_size = mInfo->GetMPSize();
+  if(bMPIn && mp_size > 0) {
+    glColor3f(0, 0.5, 0.8);
+    glPushMatrix();
+    glTranslatef(2.0*mMPX/w() - 1, (1 - 2.0*mMPY/h())/aspect, 0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(0, 0); 
+    glVertex2f(0.7*mp_size ,-mp_size); 
+    glVertex2f(mp_size, -mp_size); 
+    glVertex2f(mp_size, -0.7*mp_size); 
+    glEnd();
+    glPopMatrix();
+  }
 
   if(mInfo->GetShowRPS() == true) {
     const TString text(GForm("%.1frps", TMath::Min(1/rnr_time.ToDouble(), 999.9)));
@@ -1109,14 +1133,29 @@ int Pupil::handle(int ev)
 {    
   static const Exc_t _eh("Pupil::handle ");
 
+  int x = Fl::event_x(); int y = Fl::event_y();
+  // printf("PupilEvent %d (%d, %d)\n", ev, x, y);
+
+  if(ev == FL_ENTER) {
+    mMPX = x; mMPY = y;
+    bMPIn = true;
+  }
+  if(ev == FL_LEAVE) {
+    bMPIn = false;
+  }
+  if(ev == FL_MOVE && mInfo->mMPSize > 0) {
+    mMPX = x; mMPY = y;
+    redraw();
+  }
+
   // mEventHandlerImg - ???? reuse as fallback or as default; or split in two
   if(mOverlayImg && bShowOverlay) {
     try {
-    int ovlp = handle_overlay(ev);
-    if(ovlp) {
-      check_driver_redraw();
-      return 1;
-    }
+      int ovlp = handle_overlay(ev);
+      if(ovlp) {
+	check_driver_redraw();
+	return 1;
+      }
     } catch(Exc_t exc) {
       printf("%sexception in handle_overlay: '%s'.\n", _eh.Data(), exc.Data());
       return 1;
@@ -1128,8 +1167,6 @@ int Pupil::handle(int ev)
     return 1;
   }
 
-  int x = Fl::event_x(); int y = Fl::event_y();
-  // printf("PupilEvent %d (%d, %d)\n", ev, x, y);
 
   switch(ev) {
 
@@ -1181,6 +1218,7 @@ int Pupil::handle(int ev)
 
     bool chg = 0;
     int dx = x - mMouseX, dy = y - mMouseY;
+    mMPX += dx; mMPY += dy;
     // Invert dx/dy from "screen" to "camera" coordinates.
     dx = -dx; dy = -dy;
     mMouseX = x; mMouseY = y;
@@ -1268,7 +1306,11 @@ int Pupil::handle(int ev)
     switch(Fl::event_key()) {
 
     case FL_Home:
-      mCamera->Home(); redraw();
+      if(Fl::event_state(FL_SHIFT)) {
+	initiate_smooth_camera_home();
+      } else {
+	mCamera->Home(); redraw();
+      }
       return 1;
 
     case FL_Tab:
@@ -1371,4 +1413,46 @@ void Pupil::camera_stamp_cb::AbsorbRay(Ray& ray)
 {
   pupil->mCameraView->UpdateDataWeeds(FID_t(0,0));
   pupil->redraw();
+}
+
+/**************************************************************************/
+
+void Pupil::initiate_smooth_camera_home()
+{
+  GLensReadHolder _rdlck(mInfo);
+
+  smooth_camera_home_data* data = new smooth_camera_home_data;
+  data->pupil    = this;
+  data->distance = mCamera->ref_trans().GetPos().Mag();
+  data->time     = -0.999;
+  data->delta_t  = 2.0/(25*mInfo->GetHomeAnimTime());
+  Fl::add_timeout(0, (Fl_Timeout_Handler)smooth_camera_home_cb, data);
+}
+
+void Pupil::smooth_camera_home_cb(smooth_camera_home_data* data)
+{
+  static const float fps_25_dt = 0.04;
+  Pupil* P = data->pupil;
+
+  GLensReadHolder _rdlck(P->mInfo);
+
+  if(data->time >= 1) {
+    P->mCamera->Home(); delete data;
+  } else {
+    float    t = data->time;
+    float  pos = data->distance*(1 - 0.75*((t - t*t*t/3) + 0.666666667));
+    ZTrans&  T = P->mCamera->ref_trans();
+    TVector3 v = T.GetPos();
+    Double_t m2 = v.Mag2();
+    // printf("t=%f pos=%f dist=%f m2=%lf\n", t, pos, data->distance, m2);
+    if(m2 < 1e-5) {
+      delete data; P->mCamera->Home();
+    } else {
+      v *= pos/TMath::Sqrt(m2);
+      T.SetPos(v.x(), v.y(), v.z());
+      data->time += data->delta_t;
+      Fl::repeat_timeout(fps_25_dt, (Fl_Timeout_Handler)smooth_camera_home_cb, data);
+    }
+  }
+  P->redraw();
 }

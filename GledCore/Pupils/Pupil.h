@@ -57,6 +57,8 @@ protected:
   UInt_t*       mPickBuff;
 
   int		mMouseX, mMouseY;
+  int           mMPX,    mMPY;    // MousePointer
+  bool          bMPIn;            // MousePointer in window
 
   bool		bFullScreen;
   Fl_Window*	mFullScreenWin;
@@ -166,6 +168,17 @@ public:
   };
 
   camera_stamp_cb mCameraCB;
+
+
+  // Smooth camera home
+  struct smooth_camera_home_data {
+    Pupil*  pupil;
+    Float_t distance;
+    Float_t time;
+    Float_t delta_t;
+  };
+  void initiate_smooth_camera_home();
+  static void smooth_camera_home_cb(smooth_camera_home_data* data);
 
 #include "Pupil.h7"
 }; // endclass Pupil
