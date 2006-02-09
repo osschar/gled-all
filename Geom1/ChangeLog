@@ -1,3 +1,10 @@
+2006-02-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Amphitheatre.h:
+	Sub-classed also from TimeMakerClient, allows smooth key-frame
+	capture of chair hunt.
+
 2006-02-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SMorph.h:
