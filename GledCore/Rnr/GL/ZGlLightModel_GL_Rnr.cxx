@@ -19,7 +19,7 @@ void ZGlLightModel_GL_Rnr::_init()
 void ZGlLightModel_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   PARENT::PreDraw(rd);
-  glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT);
+  glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT | GL_DEPTH_BUFFER_BIT);
   SetupGL();
 }
 
@@ -62,6 +62,7 @@ void ZGlLightModel_GL_Rnr::SetupGL()
     glFrontFace(x.mFrontFace);
     glPolygonMode(GL_FRONT, x.mFrontMode);
     glPolygonMode(GL_BACK,  x.mBackMode);
+    glDepthMask(x.bDepthMask);
     break;
   case ZRnrModBase::O_Off:
   case ZRnrModBase::O_Nop:

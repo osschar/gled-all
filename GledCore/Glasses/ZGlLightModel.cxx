@@ -30,6 +30,7 @@ void ZGlLightModel::_init()
   mFrontFace    = GL_CCW;
   mFrontMode    = GL_FILL;
   mBackMode     = GL_FILL;
+  bDepthMask    = true;
 
   mFaceCullOp   = O_Nop;
   mFaceCullMode = GL_BACK;

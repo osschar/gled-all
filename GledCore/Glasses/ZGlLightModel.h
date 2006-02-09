@@ -35,6 +35,7 @@ protected:
   Int_t		mFrontFace;       // X{GS}  7 PhonyEnum(-vals=>[GL_CCW,CCW, GL_CW,CW])
   Int_t		mFrontMode;	  // X{GS}  7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill], -width=>8, -join=>1)
   Int_t		mBackMode;        // X{GS}  7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill], -width=>8)
+  Bool_t        bDepthMask;       // X{GS}  7 Bool()
 
   // Face culling
   ZRnrModBase::Operation_e
