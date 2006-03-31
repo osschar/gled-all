@@ -97,6 +97,7 @@ void ZImage::_init()
   mImgTyp = 0;
   mIntFmt = GL_RGB8;
 
+  mSWrap = mTWrap = GL_REPEAT;
   mMagFilter = mMinFilter = GL_NEAREST;
   mEnvMode = GL_DECAL;
 

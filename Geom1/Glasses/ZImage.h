@@ -44,6 +44,9 @@ protected:
   Int_t		mImgTyp;	//  X{GS}  7 PhonyEnum(-const=>1, -join=>1, -vals=>[0,"undef", GL_BYTE,"byte", GL_UNSIGNED_BYTE,"ubyte", GL_SHORT,"short", GL_UNSIGNED_SHORT,"ushort", GL_INT,"int", GL_UNSIGNED_INT,"uint", GL_FLOAT,"float", GL_DOUBLE,"double"])
   Int_t		mIntFmt;	//  X{GS}  7 PhonyEnum(-vals=>[GL_ALPHA4,alpha4, GL_ALPHA8,alpha8, GL_ALPHA12,alpha12, GL_ALPHA16,alpha16, GL_LUMINANCE4,lum4, GL_LUMINANCE8,lum8, GL_LUMINANCE12,lum12, GL_LUMINANCE16,lum16, GL_LUMINANCE4_ALPHA4,lum4_alpha4, GL_LUMINANCE6_ALPHA2,lum6_alpha2, GL_LUMINANCE8_ALPHA8,lum8_alpha8, GL_LUMINANCE12_ALPHA4,lum12_alpha4, GL_LUMINANCE12_ALPHA12,lum12_alpha12, GL_LUMINANCE16_ALPHA16,lum16_alpha16, GL_INTENSITY,"int", GL_INTENSITY4,int4, GL_INTENSITY8,int8, GL_INTENSITY12,int12, GL_INTENSITY16,int16, GL_R3_G3_B2,r3_g3_b2, GL_RGB4,rgb4, GL_RGB5,rgb5, GL_RGB8,rgb8, GL_RGB10,rgb10, GL_RGB12,rgb12, GL_RGB16,rgb16, GL_RGBA2,rgba2, GL_RGBA4,rgba4, GL_RGB5_A1,rgb5_a1, GL_RGBA8,rgba8, GL_RGB10_A2,rgb10_a2, GL_RGBA12,rgba12, GL_RGBA16,rgba16])
 
+  Int_t         mSWrap;         //  X{GST} 7 PhonyEnum(-vals=>[GL_CLAMP,Clamp, GL_CLAMP_TO_EDGE,ClampEdge, GL_REPEAT,Repeat], -width=>8, -join=>1)
+  Int_t         mTWrap;         //  X{GST} 7 PhonyEnum(-vals=>[GL_CLAMP,Clamp, GL_CLAMP_TO_EDGE,ClampEdge, GL_REPEAT,Repeat], -width=>8)
+
   Int_t		mMagFilter;	//  X{GST} 7 PhonyEnum(-vals=>[GL_NEAREST,Nearest, GL_LINEAR,Linear], -width=>8, -join=>1)
   Int_t		mMinFilter;	//  X{GST} 7 PhonyEnum(-vals=>[GL_NEAREST,Nearest, GL_LINEAR,Linear], -width=>8)
 
