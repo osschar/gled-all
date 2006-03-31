@@ -1,3 +1,18 @@
+2006-03-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MD2Object.cxx:
+	* Glasses/MD2Object.h:
+	* Rnr/GL/MD2Object_GL_Rnr.cxx:
+	* Rnr/GL/MD2Object_GL_Rnr.h:
+	* glass.list:
+	New glass MD2Object: import and rendering of Quake2 md2
+	files. Textures are somewhat broken.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Added members mSWrap and mTWrap.
+
 2006-02-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Amphitheatre.cxx:
