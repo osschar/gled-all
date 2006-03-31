@@ -9,7 +9,8 @@ SMorph		16	Glasses/SMorph		.
 Board		17	Glasses/Board		.
 RectTerrain	18	Glasses/RectTerrain	.
 MultiBoard	19	Glasses/MultiBoard	Board
-Amphitheatre	10	Glasses/Amphitheatre    .
+Amphitheatre	20	Glasses/Amphitheatre    .
+MD2Object	21	Glasses/MD2Object	.
 
 RelParticle	32	Glasses/RelParticle
 
