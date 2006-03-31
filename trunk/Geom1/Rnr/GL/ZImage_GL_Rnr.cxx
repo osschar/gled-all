@@ -28,14 +28,11 @@ void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
       glGenTextures(1, &mTexture);
     }
 
-    // load texture ... silly defaults ... work to do.
-    // also ... should do resizing ... or sth ...
-
     glBindTexture(GL_TEXTURE_2D, mTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mImage->mSWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mImage->mTWrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mImage->mMagFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mImage->mMinFilter);
 
