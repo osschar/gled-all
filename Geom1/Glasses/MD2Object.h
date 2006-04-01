@@ -74,23 +74,21 @@ public:
 
 private:
   void _init();
+  void _clear_data();
 
 protected:
+  TString	mFile;		// X{GS}   7 Filor()
   Float_t       mFrameTime;     // X{GS}   7 Value(-range=>[0,1000,1,100], -join=>1)
   Int_t         mMaxFrame;      // X{G}    7 ValOut()
+  Float_t       mNormFac;       // X{GS}   7 Value(-range=>[-10,10,1,100], -join=>1)
   ZColor	mColor;		// X{PGS}  7 ColorButt()
-  Float_t	mTexUOffset;	// X{GS}   7 Value(-range=>[-1e6,1e6,1,1000], -join=>1)
-  Float_t	mTexVOffset;	// X{GS}   7 Value(-range=>[-1e6,1e6,1,1000])
-  Float_t	mTexUScale;	// X{GS}   7 Value(-range=>[-1e3,1e3,1,1000], -join=>1)
-  Float_t	mTexVScale;	// X{GS}   7 Value(-range=>[-1e3,1e3,1,1000])
 
 public:
   MD2Object(const Text_t* n="MD2Object", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
   virtual ~MD2Object() {}
 
-
-  void LoadObject(const TString& rkFilename); // X{E} 7 MCWButt()
+  void Load(); // X{E} 7 MCWButt()
 
   const Vector3*          Vertices()      const { return m_akVertex; }
   const Int_t*            Normals()       const { return m_akNormal; }
