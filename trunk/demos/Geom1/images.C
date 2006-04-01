@@ -84,9 +84,11 @@ void images()
   base_plane->SetColor(0.7, 0.7, 0.7);
 
   Lamp* l = new Lamp("Lamp");
-  l->SetDiffuse(0.8, 0.8, 0.8);
+  l->SetDiffuse(0.9, 0.9, 0.7);
+  l->SetAmbient(0.11, 0.125, 0.16);
   l->SetLampScale(1);
-  l->MoveLF(3, 10); l->RotateLF(1,2, TMath::Pi());
+  l->SetPos(0, -5, 10);
+  l->RotateLF(1,2, TMath::Pi());
   g_queen->CheckIn(l); images->Add(l);
   images->GetGlobLamps()->Add(l);
 
@@ -113,6 +115,8 @@ void images()
   terrain->SetMinCol(1,0,0); terrain->SetMaxCol(0,1,1);
   terrain->SetPos(-3, -7, 0.01);
   terrain->SetRibbon(ribbon1);
+  terrain->SetRnrMode(RectTerrain::RM_FlatTring);
+  terrain->SetUseTringStrips(false);
 
   CREATE_ADD_GLASS(n1, SMorph, images, "Earth", "");
   n1->SetScale(2);
@@ -125,6 +129,37 @@ void images()
   n2->SetTLevel(20); n2->SetPLevel(20);
   n2->SetTexture(image5);
   n2->SetPos( 6, -6, 0); n2->SetRotByDegrees(0, 90, 0);
+
+  CREATE_ADD_GLASS(mod, MD2Object, images, "Rei MD2", 0);
+  mod->SetFile("md2/rei.md2");
+  mod->SetFrameTime(175);
+  mod->SetNormFac(-1); // This model has inverted normals.
+  mod->Load();
+  mod->SetScale(0.1);
+  mod->SetUseScale(true);
+  mod->SetPos(3, 2, 2.5);
+  mod->SetRotByDegrees(-90, 0, 0);
+
+  CREATE_ATT_GLASS(modtex, ZImage, mod, SetRnrMod, "Rei Texture", 0);
+  modtex->SetFile("md2/rei.png");
+  modtex->SetMagFilter(GL_LINEAR);
+  modtex->SetEnvMode(GL_MODULATE);
+  modtex->Load();
+
+  CREATE_ADD_GLASS(mod2, MD2Object, images, "Faerie MD2", 0);
+  mod2->SetFile("md2/faerie.md2");
+  mod2->SetFrameTime(107);
+  mod2->Load();
+  mod2->SetScales(0.1, 0.1, 0.08);
+  mod2->SetUseScale(true);
+  mod2->SetPos(-1, 2, 2);
+  mod2->SetRotByDegrees(-90, 0, 0);
+
+  CREATE_ATT_GLASS(modtex2, ZImage, mod2, SetRnrMod, "Faerie Texture", 0);
+  modtex2->SetFile("md2/faerie-1.png");
+  modtex2->SetMagFilter(GL_LINEAR);
+  modtex2->SetEnvMode(GL_MODULATE);
+  modtex2->Load();
 
   SMorph* morphs[3];
   for(int i=0; i<3; ++i) {
