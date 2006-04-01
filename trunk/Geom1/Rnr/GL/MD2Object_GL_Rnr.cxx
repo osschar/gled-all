@@ -187,6 +187,8 @@ MD2Object::Vector3 QNorms[] = {
 void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
 {
   MD2Object& M = *mMD2Object;
+  if(M.m_akVertex == 0)
+    return;
 
   // Get Triangles & Texture coords
   const MD2Object::MD2Header&       rkHeader   = M.Header();
@@ -196,24 +198,23 @@ void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
   const MD2Object::MD2TextureCoord* akTexture  = M.TextureCoords();
 
   float sfTime = M.mFrameTime;
-  while(sfTime >= rkHeader.iNumFrames) sfTime -= rkHeader.iNumFrames;
-  int   iCurrFrame = TMath::Floor(sfTime);
+  if(sfTime > rkHeader.iNumFrames - 1)
+    sfTime = rkHeader.iNumFrames - 1;
+  int iCurrFrame = TMath::Floor(sfTime);
+  int iNextFrame = iCurrFrame + 1;
+  if(iNextFrame >= rkHeader.iNumFrames)
+    iNextFrame = iCurrFrame;
+
   sfTime -= iCurrFrame;
-	
-  glMatrixMode(GL_TEXTURE);
-  glPushMatrix();
-  glTranslatef(M.mTexUOffset, M.mTexVOffset, 0);
-  glScalef(M.mTexUScale, M.mTexVScale, 1);
-  glMatrixMode(GL_MODELVIEW);
 
   rd->GL()->Color(M.mColor);
 
-  // Render triangles
-  const float W0 = (1.0f - sfTime), T0 = -W0;
-  const float W1 = sfTime,          T1 = -W1;
+  // Render triangles: W ~ vertex-weigts, T ~ normal-weights
+  const float W0 = 1 - sfTime, T0 = M.mNormFac*W0;
+  const float W1 = sfTime,     T1 = M.mNormFac*W1;
 
-  const float SWF = 1.0 / rkHeader.iSkinWidth;
-  const float SHF = 1.0 / rkHeader.iSkinHeight;
+  const float SWF =  1.0 / rkHeader.iSkinWidth;
+  const float SHF = -1.0 / rkHeader.iSkinHeight; // -1 ~ invert texture
   
   glBegin(GL_TRIANGLES);
   for (int iIndex = 0; iIndex < rkHeader.iNumTriangles; iIndex++) {
@@ -222,7 +223,7 @@ void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
 
     // Vertex 0
     iLookUp1 = akTriangle[iIndex].iVertexIndex[0]+iCurrFrame*rkHeader.iNumVertices;
-    iLookUp2 = akTriangle[iIndex].iVertexIndex[0]+(iCurrFrame+1)*rkHeader.iNumVertices;
+    iLookUp2 = akTriangle[iIndex].iVertexIndex[0]+iNextFrame*rkHeader.iNumVertices;
     glTexCoord2f(SWF*akTexture[akTriangle[iIndex].iTextureIndex[0]].sU,
 		 SHF*akTexture[akTriangle[iIndex].iTextureIndex[0]].sV);
     glNormal3f(T0*QNorms[akNormals[iLookUp1]].x + T1*QNorms[akNormals[iLookUp2]].x,
@@ -234,7 +235,7 @@ void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
 
     // Vertex 2 -- inversion !!!
     iLookUp1 = akTriangle[iIndex].iVertexIndex[2]+iCurrFrame*rkHeader.iNumVertices;
-    iLookUp2 = akTriangle[iIndex].iVertexIndex[2]+(iCurrFrame+1)*rkHeader.iNumVertices;
+    iLookUp2 = akTriangle[iIndex].iVertexIndex[2]+iNextFrame*rkHeader.iNumVertices;
     glTexCoord2f(SWF*akTexture[akTriangle[iIndex].iTextureIndex[2]].sU,
 		 SHF*akTexture[akTriangle[iIndex].iTextureIndex[2]].sV);
     glNormal3f(T0*QNorms[akNormals[iLookUp1]].x + T1*QNorms[akNormals[iLookUp2]].x,
@@ -246,7 +247,7 @@ void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
 
     // Vertex 1
     iLookUp1 = akTriangle[iIndex].iVertexIndex[1]+iCurrFrame*rkHeader.iNumVertices;
-    iLookUp2 = akTriangle[iIndex].iVertexIndex[1]+(iCurrFrame+1)*rkHeader.iNumVertices;
+    iLookUp2 = akTriangle[iIndex].iVertexIndex[1]+iNextFrame*rkHeader.iNumVertices;
     glTexCoord2f(SWF*akTexture[akTriangle[iIndex].iTextureIndex[1]].sU,
 		 SHF*akTexture[akTriangle[iIndex].iTextureIndex[1]].sV);
     glNormal3f(T0*QNorms[akNormals[iLookUp1]].x + T1*QNorms[akNormals[iLookUp2]].x,
@@ -257,8 +258,4 @@ void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
 	       W0*akVertices[iLookUp1].z + W1*akVertices[iLookUp2].z);
   }
   glEnd();
-
-  glMatrixMode(GL_TEXTURE);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
 }
