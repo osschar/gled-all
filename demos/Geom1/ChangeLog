@@ -1,3 +1,20 @@
+2006-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* images.C:
+	Added two md2 objects. Changed terrain to flat rendering,
+	modified lamp (more ambient, slightly colored).
+
+	* md2/faerie-1.png:
+	* md2/faerie-2.png:
+	* md2/faerie-3.png:
+	* md2/faerie-4.png:
+	* md2/faerie-5.png:
+	* md2/faerie-6.png:
+	* md2/faerie.md2:
+	* md2/rei.md2:
+	* md2/rei.png:
+	Demos for Md2Object; downloaded from fileplanet.
+
 2005-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
