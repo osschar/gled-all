@@ -1,3 +1,10 @@
+2006-04-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Added local option (Bool_t bMeasureTime) to measure time needed
+	for coarsen/refine.
+
 2005-10-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:
