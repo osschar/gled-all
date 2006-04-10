@@ -36,6 +36,9 @@ protected:
   MidvertOpts_e		mMidvertOpts; // X{gS} 7 PhonyEnum()
 
   Double_t		mMinAngleDeg; // X{gS} 7 Value(-range=>[0,180,1,1000])
+
+  Bool_t                bMeasureTime; //! X{GS} 7 Bool()
+
 public:
   GTSRetriangulator(const Text_t* n="GTSRetriangulator", const Text_t* t=0) : ZGlass(n,t) { _init(); }
 

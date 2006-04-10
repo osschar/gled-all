@@ -16,6 +16,8 @@
 
 #include <GTS/GTS.h>
 
+#include <Gled/GTime.h>
+
 /**************************************************************************/
 
 namespace GTS {
@@ -65,6 +67,8 @@ void GTSRetriangulator::_init()
   mMidvertOpts = MO_Midvert;
 
   mMinAngleDeg = 1;
+
+  bMeasureTime = false;
 }
 
 /**************************************************************************/
@@ -134,12 +138,18 @@ void GTSRetriangulator::Coarsen()
     throw(_eh + "Unknown MidvertOpts.");
   }
 
+  ::GTime start_time(::GTime::I_Now);
+
   gts_surface_coarsen(s,
 		      l_cost_func, l_cost_data,
 		      l_coarsen_func, l_coarsen_data,
 		      l_stop_func, l_stop_data,
 		      mMinAngleDeg*TMath::Pi()/180);
- 
+
+  ::GTime run_time = start_time.TimeUntilNow();
+  if(bMeasureTime)
+    printf("%s of %s took %lf s\n", _eh.Data(), target->Identify().Data(), run_time.ToDouble());
+
   target->WriteLock();
   target->ReplaceSurface(s);
   target->WriteUnlock();
@@ -199,10 +209,16 @@ void GTSRetriangulator::Refine()
     throw(_eh + "Unknown CostOpts.");
   }
 
+  ::GTime start_time(::GTime::I_Now);
+
   gts_surface_refine(s, 
 		     l_cost_func, l_cost_data,
 		     0, 0,
 		     l_stop_func, l_stop_data);
+
+  ::GTime run_time = start_time.TimeUntilNow();
+  if(bMeasureTime)
+    printf("%s of %s took %lf s\n", _eh.Data(), target->Identify().Data(), run_time.ToDouble());
 
   target->WriteLock();
   target->ReplaceSurface(s);
