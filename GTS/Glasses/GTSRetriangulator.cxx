@@ -69,6 +69,7 @@ void GTSRetriangulator::_init()
   mMinAngleDeg = 1;
 
   bMeasureTime = false;
+  mRunTime     = 0;
 }
 
 /**************************************************************************/
@@ -138,7 +139,8 @@ void GTSRetriangulator::Coarsen()
     throw(_eh + "Unknown MidvertOpts.");
   }
 
-  ::GTime start_time(::GTime::I_Now);
+  ::GTime* start_time = 0;
+  if(bMeasureTime) start_time = new ::GTime(::GTime::I_Now);
 
   gts_surface_coarsen(s,
 		      l_cost_func, l_cost_data,
@@ -146,9 +148,7 @@ void GTSRetriangulator::Coarsen()
 		      l_stop_func, l_stop_data,
 		      mMinAngleDeg*TMath::Pi()/180);
 
-  ::GTime run_time = start_time.TimeUntilNow();
-  if(bMeasureTime)
-    printf("%s of %s took %lf s\n", _eh.Data(), target->Identify().Data(), run_time.ToDouble());
+  if(bMeasureTime) SetRunTime(start_time->TimeUntilNow().ToDouble());
 
   target->WriteLock();
   target->ReplaceSurface(s);
@@ -209,16 +209,15 @@ void GTSRetriangulator::Refine()
     throw(_eh + "Unknown CostOpts.");
   }
 
-  ::GTime start_time(::GTime::I_Now);
+  ::GTime* start_time = 0;
+  if(bMeasureTime) start_time = new ::GTime(::GTime::I_Now);
 
   gts_surface_refine(s, 
 		     l_cost_func, l_cost_data,
 		     0, 0,
 		     l_stop_func, l_stop_data);
 
-  ::GTime run_time = start_time.TimeUntilNow();
-  if(bMeasureTime)
-    printf("%s of %s took %lf s\n", _eh.Data(), target->Identify().Data(), run_time.ToDouble());
+  if(bMeasureTime) SetRunTime(start_time->TimeUntilNow().ToDouble());
 
   target->WriteLock();
   target->ReplaceSurface(s);
