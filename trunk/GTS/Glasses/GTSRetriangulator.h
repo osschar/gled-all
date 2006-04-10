@@ -37,7 +37,8 @@ protected:
 
   Double_t		mMinAngleDeg; // X{gS} 7 Value(-range=>[0,180,1,1000])
 
-  Bool_t                bMeasureTime; //! X{GS} 7 Bool()
+  Bool_t                bMeasureTime; //! X{GS} 7 Bool(-join=>1)
+  Double_t              mRunTime;     //! X{GS} 7 ValOut()
 
 public:
   GTSRetriangulator(const Text_t* n="GTSRetriangulator", const Text_t* t=0) : ZGlass(n,t) { _init(); }
