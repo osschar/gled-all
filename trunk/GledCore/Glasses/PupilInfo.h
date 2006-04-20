@@ -59,8 +59,8 @@ protected:
   Float_t	mZSize;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
   Float_t	mYFac;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000], -join=>1)
   Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
-  Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
-  Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
+  Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,100000,1,1000],-join=>1)
+  Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,100000,1,1000])
   Bool_t	bZoomByFac;     // X{gS} 7 Bool()
 
   // Basic rendering options.
