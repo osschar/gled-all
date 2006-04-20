@@ -30,9 +30,8 @@ void ScreenDumper::_init()
 
 /**************************************************************************/
 
-void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)
+void ScreenDumper::DumpScreen()
 {
-  PreOperate(op_arg);
   if(mPupil != 0) {
     TString fname(GForm(mFileNameFmt.Data(), mDumpID++));
     if(bWaitDump)
@@ -40,8 +39,14 @@ void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)
     else
       mPupil->EmitDumpImageRay(fname, mNTiles);
   }
-  PostOperate(op_arg);
   Stamp(FID());
+}
+
+void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)
+{
+  PreOperate(op_arg);
+  DumpScreen();
+  PostOperate(op_arg);
 }
 
 /**************************************************************************/

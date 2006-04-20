@@ -30,6 +30,8 @@ public:
   ScreenDumper(const Text_t* n="ScreenDumper", const Text_t* t=0) :
     Operator(n,t) { _init(); }
 
+  void DumpScreen();
+
   virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
 
 #include "ScreenDumper.h7"
