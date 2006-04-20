@@ -16,6 +16,8 @@ void ZCometBag::_init()
 {
   bSmartZNodes = true;
   mDepth = 1; bFollowLinks = true; bFollowLists = true;
+
+  mKeyName = "ZComet";
 }
 
 /**************************************************************************/
@@ -69,3 +71,11 @@ ZComet* ZCometBag::MakeComet()
 }
 
 /**************************************************************************/
+void ZCometBag::WriteComet()
+{
+  ZComet* c =  MakeComet();
+  TFile f(mFile, "UPDATE");
+  // assert/create directory path
+  c->Write(mKeyName);
+  f.Close();
+}
