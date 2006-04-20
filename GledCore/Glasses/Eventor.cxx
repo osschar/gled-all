@@ -164,11 +164,17 @@ void Eventor::OnStart(Operator::Arg* op_arg)
   // ???? Does gettimeofday return the UTC time?
   // If not, must offset the epoch by correct amount on moons..
   if((op_arg->fMultix && IsSunOrFireSpace()) || !op_arg->fMultix) {
-    if(mEpochType == ET_DanceStart)
-      mTimeEpoch = op_arg->fStart.ToDouble();
 
-    if(!op_arg->fMultix)
-      OP_EXE_OR_SP_MIR(this, SetTimeEpoch, mTimeEpoch);
+    switch(mEpochType) {
+    case ET_Manual:
+      mInternalTime = mTimeEpoch;
+      break;
+    case ET_DanceStart:
+      mTimeEpoch = op_arg->fStart.ToDouble();
+      if(!op_arg->fMultix)
+	OP_EXE_OR_SP_MIR(this, SetTimeEpoch, mTimeEpoch);
+      break;
+    }
   }
 
   SetPerforming(true);
