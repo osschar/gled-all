@@ -12,7 +12,7 @@
 class ZRCStone : public TObject 
 {
 protected:
-  Int_t   mRefCount; // X{G}
+  Int_t   mRefCount; 
 
 public:
   ZRCStone() : TObject(), mRefCount(0) {}
