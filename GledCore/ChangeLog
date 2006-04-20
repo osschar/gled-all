@@ -1,3 +1,24 @@
+2006-04-20  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/Eventor.cxx:
+	Initialize mInternalTime in OnStart() for epoch-time ET_Manual (it
+	was left whatever it was before).
+
+	* Glasses/PupilInfo.h:
+	Increased range of mNear/FarClip to 100000.
+
+	* Glasses/ScreenDumper.cxx:
+	* Glasses/ScreenDumper.h:
+	Split Operate() into additional method DumpScreen() so that it can be
+	called independently from the operate-loop.
+
+	* Glasses/ZCometBag.cxx:
+	* Glasses/ZCometBag.h:
+	Added method WriteComet().
+
+	* Stones/ZRCStone.h:
+	Added X{G} pragma for mRefCount.
+
 2006-02-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PupilInfo.cxx:
@@ -32,7 +53,7 @@
 
 2006-01-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
-	* catalog.patch
+	* catalog.patch:
 	* Stones/ZTrans.cxx:
 	Made custom Streamer for ZTrans: set bAsOK to false afetr
 	read. Automatic schema evolution is still used.
