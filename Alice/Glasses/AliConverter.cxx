@@ -12,7 +12,8 @@
 #include "AliConverter.h"
 #include "AliConverter.c7"
 
-#include <AliITSLoader.h>
+#include <AliStack.h>
+#include <AliTPCTrackHitsV2.h>
 #include <AliTPCTrackHitsV2.h>
 #include <AliPDG.h>
 #include <AliHit.h>
@@ -124,7 +125,8 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   mDirectory->cd();
 
   try {
-    ConvertKinematics();
+    // ConvertKinematics();
+    ConvertKinematicsFromStack();
   } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
@@ -134,6 +136,10 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   try {
     ConvertClusters();
   } catch(Exc_t& exc) { warn_caller(exc); }
+
+  // Bugger, incompatible AliROOT for the new (12.2006) central event.
+  // printf("AliConverter::CreateVSD GREPME ... aborting forcefully with bug-squash intentions.\n");
+  // goto end_esd_processing;
 
   try {
     ConvertRecTracks();
@@ -222,6 +228,82 @@ void AliConverter::ConvertKinematics()
 
     treek->GetEntry(ent);
     vmc[idx] = tp;
+    vmc[idx].SetLabel(idx);
+  }
+
+  // read track refrences 
+  TTree* mTreeTR =  pRunLoader->TreeTR();
+
+  if(mTreeTR == 0) {
+    warn_caller(_eh + "no TrackRefs; some data will not be available.");
+  } else {
+    TClonesArray* RunArrayTR = 0;
+    mTreeTR->SetBranchAddress("AliRun", &RunArrayTR);
+
+    Int_t nPrimaries = (Int_t) mTreeTR->GetEntries();
+    for (Int_t iPrimPart = 0; iPrimPart<nPrimaries; iPrimPart++) {
+      // printf("START mTreeTR->GetEntry(%d) \n",iPrimPart);
+      mTreeTR->GetEntry(iPrimPart);
+      // printf("END mTreeTR->GetEntry(%d) \n",iPrimPart);
+    
+      for (Int_t iTrackRef = 0; iTrackRef < RunArrayTR->GetEntriesFast(); iTrackRef++) {
+	AliTrackReference *trackRef = (AliTrackReference*)RunArrayTR->At(iTrackRef); 
+	Int_t track = trackRef->GetTrack();
+	if(track < nentries && track > 0){ 
+	  MCParticle& mcp = vmc[track];	
+	  if(trackRef->TestBit(kNotDeleted)) {
+	    mcp.SetDecayed(true);
+	    mcp.fDt=trackRef->GetTime();
+	    mcp.fDx=trackRef->X(); mcp.fDy=trackRef->Y(); mcp.fDz=trackRef->Z();
+	    mcp.fDPx=trackRef->Px(); mcp.fDPy=trackRef->Py(); mcp.fDPz=trackRef->Pz();
+	    if(TMath::Abs(mcp.GetPdgCode()) == 11)  mcp.SetDecayed(false); // a bug in TreeTR
+	  }
+	}       
+      }
+    }
+  }
+
+  mTreeK->Branch("P", "MCParticle",  &mpP, 512*1024, 99);
+
+  for(vector<MCParticle>::iterator k=vmc.begin(); k!=vmc.end(); ++k) {
+    MCParticle& mcp = *k;
+    mP = mcp;
+
+    TParticle* m  = &mcp;
+    Int_t      mi = mcp.GetLabel();
+    while(m->GetMother(0) != -1) {
+      mi = m->GetMother(0);
+      m = &vmc[mi];
+    }
+    mP.SetEvaLabel(mi);
+
+    mTreeK->Fill();
+  }
+
+  mTreeK->BuildIndex("fLabel");
+}
+
+void AliConverter::ConvertKinematicsFromStack()
+{
+  static const Exc_t _eh("AliConverter::ConvertKinematicsFromStack ");
+
+  if(mTreeK != 0) 
+    throw (_eh + "kinematics already converted");
+
+  AliStack* stack = pRunLoader->Stack();
+  if(stack == 0)
+    throw(_eh + "stack is null.");
+
+  mDirectory->cd();
+  mTreeK = new TTree("Kinematics", "TParticles sorted by Label");
+ 
+  Int_t nprimary = stack->GetNprimary();
+  Int_t nentries = stack->GetNtrack();
+
+  vector<MCParticle>  vmc(nentries);
+  for (Int_t idx=0; idx<nentries; idx++) {
+    TParticle* tp = stack->Particle(idx);
+    vmc[idx] = *tp;
     vmc[idx].SetLabel(idx);
   }
 
@@ -807,7 +889,7 @@ void AliConverter::ConvertGenInfo()
     mTreeK->GetEntry(j->first);
 
     if(mTreeR) {
-      Int_t re = mTreeR->GetEntryNumberWithIndex(j->first);
+      Int_t re = mTreeR->GetEntryWithIndex(j->first); // was GetEntryNumberWithIndex
       if(re != -1) 
 	mGI.bR = 1;
     }
@@ -815,7 +897,7 @@ void AliConverter::ConvertGenInfo()
     //if (has_v0 != -1)
     //  mGI.bV0 = 1;
     if (mTreeKK){
-      Int_t has_kk =  mTreeKK->GetEntryNumberWithIndex(j->first);
+      Int_t has_kk =  mTreeKK->GetEntryWithIndex(j->first); // was GetEntryNumberWithIndex
       if (has_kk != -1)
 	mGI.bKK = 1;
     }
