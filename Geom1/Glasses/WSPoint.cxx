@@ -16,7 +16,7 @@
 #include "WSSeed.h"
 #include "WSPoint.c7"
 
-ClassImp(WSPoint)
+ClassImp(WSPoint);
 
 /**************************************************************************/
 

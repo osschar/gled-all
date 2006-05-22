@@ -11,7 +11,7 @@
 #include <TLorentzVector.h>
 #include <TRandom.h>
 
-class TMatrixD;
+#include <TMatrixD.h>
 
 class WSTube : public WSSeed
 {
@@ -31,6 +31,7 @@ public:
     Traveler() : fNode(0) {}
     Traveler(ZNode* n, Float_t p, Float_t v, void* ud=0) :
       fNode(n), fPosition(p), fVelocity(v), fUserData(0), fShown(false) {}
+    virtual ~Traveler() {}
 
     ClassDef(Traveler, 1);
   };
