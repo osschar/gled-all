@@ -12,6 +12,8 @@
 class TimeMakerClient
 {
 public:
+  virtual ~TimeMakerClient() {}
+
   virtual void TimeTick(Double_t time, Double_t delta) = 0;
 
   ClassDef(TimeMakerClient, 0);

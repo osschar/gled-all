@@ -47,8 +47,8 @@ public:
   void SetStretch(Float_t stretch);
 
 #include "WSPoint.h7"
-  ClassDef(WSPoint, 1)
-    }; // endclass WSPoint
+  ClassDef(WSPoint, 1);
+}; // endclass WSPoint
 
 
 #endif
