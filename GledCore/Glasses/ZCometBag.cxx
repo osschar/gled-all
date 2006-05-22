@@ -10,6 +10,8 @@
 #include <Glasses/ZQueen.h>
 #include <Stones/ZComet.h>
 
+#include <TFile.h>
+
 ClassImp(ZCometBag)
 
 void ZCometBag::_init()

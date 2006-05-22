@@ -10,6 +10,8 @@
 #include <Glasses/GlobalLamps.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
 
+class Lamp_GL_Rnr;
+
 class GlobalLamps_GL_Rnr : public ZGlass_GL_Rnr
 {
 private:

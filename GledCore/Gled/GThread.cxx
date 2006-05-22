@@ -7,6 +7,7 @@
 #include "GThread.h"
 
 #include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 
 ClassImp(GThread)
