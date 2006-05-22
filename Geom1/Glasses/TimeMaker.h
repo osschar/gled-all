@@ -16,7 +16,7 @@ class TimeMaker : public Operator
 {
   MAC_RNR_FRIENDS(TimeMaker);
 public:
-  enum WrapMode_e { WM_None, WM_Clip, WM_SawTooth, WM_Triangular };
+  enum WrapMode_e { WM_None, WM_Clip, WM_SawTooth, WM_Triangular, WM_SineWave };
 
 private:
   void _init();
@@ -28,6 +28,8 @@ protected:
   WrapMode_e mWrapMode; // X{GS} 7 PhonyEnum()
   Double_t   mMinT;     // X{GS} 7 Value(-join=>1)
   Double_t   mMaxT;     // X{GS} 7 Value()
+  Double_t   mOmega;    // X{GS} 7 Value(-join=>1)
+  Double_t   mDelta;    // X{GS} 7 Value()
   Double_t   mLastT;    // X{GS} 7 Value(-join=>1)
   Bool_t     bLastTOK;  // X{GS} 7 Bool()
 

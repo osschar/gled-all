@@ -24,8 +24,9 @@ void TimeMaker::_init()
   mFactor = 1;  mConstant = 0;
 
   mWrapMode = WM_None;
-  mMinT = 0; mMaxT = 1;
-  mLastT = 0; bLastTOK = false;
+  mMinT  = 0;  mMaxT  = 1;
+  mOmega = 1;  mDelta = 0;
+  mLastT = 0;  bLastTOK = false;
 
   bApplyFormula = false;
 
@@ -87,6 +88,11 @@ void TimeMaker::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
       const Double_t ft = (t - mMinT)/D;
       t = mMinT + D * (ft - TMath::Floor(ft));
       if(t > mMaxT) t -= 2*(t - mMaxT);
+      break;
+    }
+    case WM_SineWave: {
+      const Double_t D = mMaxT - mMinT;
+      t = mMinT + 0.5*D*(TMath::Sin(mOmega*t + mDelta) + 1);
       break;
     }
     default:
