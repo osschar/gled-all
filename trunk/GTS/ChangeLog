@@ -1,3 +1,8 @@
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Use pkg-config to obtain cflags/libs; use glib-2.0.
+
 2006-04-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSRetriangulator.cxx:

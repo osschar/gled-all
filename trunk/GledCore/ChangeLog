@@ -1,3 +1,16 @@
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Pupils/Pupil.cxx:
+	Added member Bool_t PupilInfo::bRnrFakeOverlayInCapture controlling
+	whether to render overlay during capture or not.
+
+	* Glasses/ZCometBag.cxx:
+	* Gled/GThread.cxx:
+	* Rnr/GL/GlobalLamps_GL_Rnr.h:
+	Compatibility updates (gcc4/FC5/ROOT).
+
 2006-04-20  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Glasses/Eventor.cxx:

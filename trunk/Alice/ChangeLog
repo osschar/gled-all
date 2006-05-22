@@ -1,3 +1,10 @@
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Use AliStack to retrieve kinematics instead of magickal juggling
+	with tree entries.
+
 2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Updates for AliRoot of Dec 2005.
