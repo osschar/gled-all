@@ -140,13 +140,13 @@ void AlSource::Play(Int_t count)
     {
       void*   wave = NULL;
       ALsizei size;
-      ALsizei bits;
       ALsizei freq;
-      ALsizei format;
-      ALboolean err;
+      ALenum  format;
+      ALboolean loop;
 
-      err = alutLoadWAV(mFile.Data(), &wave, &format, &size, &bits, &freq);
-      if(err == AL_FALSE)
+      alutLoadWAVFile((ALbyte*) mFile.Data(),
+			    &format, &wave, &size, &freq, &loop);
+      if(alutGetError())
 	throw(_eh + "could not open file.");
 
       alBufferData(mAlBuf, format, wave, size, freq );
