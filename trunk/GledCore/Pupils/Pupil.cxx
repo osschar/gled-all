@@ -831,7 +831,12 @@ void Pupil::draw()
       printf("Merge with: montage -tile %dx%d -geometry %dx%d %s-* %s.png\n",
 	     mImgNTiles, mImgNTiles, w(), h(), mImageName.Data(), mImageName.Data());
     } else {
+      GTime start_time(GTime::I_Now);
       rnr_standard();
+      GTime stop_time(GTime::I_Now);
+      GTime rnr_time = stop_time - start_time;
+      if(mInfo->bRnrFakeOverlayInCapture)
+	rnr_fake_overlay(rnr_time);
       dump_image(mImageName + ".tga");
     }
     mPBuffer->Release();
@@ -841,12 +846,9 @@ void Pupil::draw()
   } else {
 
     GTime start_time(GTime::I_Now);
-
     rnr_standard();
-
     GTime stop_time(GTime::I_Now);
     GTime rnr_time = stop_time - start_time;
-
     rnr_fake_overlay(rnr_time);
 
   }

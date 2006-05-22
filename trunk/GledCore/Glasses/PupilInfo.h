@@ -82,6 +82,7 @@ protected:
   Bool_t	bShowRPS;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bShowView;	// X{gS} 7 Bool(-join=>1)
   Bool_t	bRnrNames;	// X{gS} 7 Bool()
+  Bool_t	bRnrFakeOverlayInCapture; // X{GS} 7 Bool()
 
   UInt_t	mBuffSize;	// X{gS} 7 Value(-range=>[0,65535,1])
   Int_t		mPickR;		// X{gS} 7 Value(-range=>[0,100,1],-join=>1)

@@ -71,6 +71,7 @@ void PupilInfo::_init()
   mHomeAnimTime = 2;    // Time of smooth-home animation.
 
   bShowRPS = true; bShowView = true; bRnrNames = false;
+  bRnrFakeOverlayInCapture = false; // Does not work in multi-tile capture.
 
   mBuffSize = 4096; mPickR = 5; mPickDisp = 0; mPickMaxN = 24;
 
