@@ -80,6 +80,7 @@ class AliConverter : public ZGlass
   // Conversion functions.
 
   void ConvertKinematics();
+  void ConvertKinematicsFromStack();
   void ConvertHits();
   void ConvertClusters();
   void ConvertTPCClusters();
