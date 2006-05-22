@@ -10,12 +10,8 @@ DICT_DIRS	= Glasses Stones
 VIEW_DIRS	= FL
 VIEW_FL_DIRS	= FL
 
-ifndef GLIB_CONFIG
-GLIB_CONFIG    := glib-config
-endif
-
-CPPFLAGS	= $(shell ${GLIB_CONFIG} --cflags)
-BASE_LD_LIBS	= $(shell ${GLIB_CONFIG} --libs) -lgts
+CPPFLAGS	= $(shell pkg-config --cflags-only-I glib-2.0)
+BASE_LD_LIBS	= $(shell pkg-config --libs-only-l glib-2.0) -lgts
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
