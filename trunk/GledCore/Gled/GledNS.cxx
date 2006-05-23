@@ -955,13 +955,13 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
 	++i;
 	break;
       case '-':
-	if(url[i+1] == '>') {
+	if(i+1 < end && url[i+1] == '>') {
 	  terminal = true;
 	  next_type = url_token::link_sel;
 	  i += 2;
 	} else {
 	  part += "-";
-	  ++i;
+	  if(++i == end) terminal = true;
 	}
 	break;
       } // switch
