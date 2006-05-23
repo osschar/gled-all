@@ -1,3 +1,9 @@
+2006-05-23  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Gled/GledNS.cxx:
+	Fix tokenize_url(): it failed if the last character in path was
+	'-' (a terminal character with look-ahead for '>').
+
 2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PupilInfo.cxx:
