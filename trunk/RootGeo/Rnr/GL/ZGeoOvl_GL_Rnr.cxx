@@ -18,15 +18,12 @@ void ZGeoOvl_GL_Rnr::_init()
 
 void ZGeoOvl_GL_Rnr::Draw(RnrDriver* rd)
 { 
-  if (mZGeoOvl->GetRnrSelf()) {
+  if (mZGeoOvl->mRnrNode) {
     ZGeoNode_GL_Rnr::Draw(rd);
   }
 
-  if(mZGeoOvl->mRnrMark == false ) return;
-  
-  glPopMatrix();
   Float_t* p = mZGeoOvl->mPM_p;
-  if(p) {
+  if (mZGeoOvl->mRnrMark && p != 0) {
     Int_t N = mZGeoOvl->mPM_N;
     rd->GL()->Color(mZGeoOvl->mPM_Col);
     glBegin(GL_POINTS);
@@ -36,5 +33,4 @@ void ZGeoOvl_GL_Rnr::Draw(RnrDriver* rd)
     }
     glEnd();
   }
-  glPushMatrix();
 }
