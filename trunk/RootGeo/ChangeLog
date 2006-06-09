@@ -1,3 +1,24 @@
+2006-06-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	* Glasses/ZGeoNode.h:
+	TGeoAssembly has no medium/material and must not be rendered.
+
+	* Rnr/GL/ZGeoNode_GL_Rnr.cxx:
+	Following changes in ROOT's GL classes; removed compatibility code
+	for ROOT < 5.
+
+	* Glasses/ZGeoOvl.cxx:
+	* Glasses/ZGeoOvl.h:
+	* Rnr/GL/ZGeoOvl_GL_Rnr.cxx:
+	Added member mRnrNode controlling if the geo-node is rendered;
+	overlap markers are now provided in local coordinates.
+
+	* Glasses/ZGeoOvlMgr.cxx:
+	* Glasses/ZGeoOvlMgr.h:
+	New code for extracting overlap information (following changes in
+	ROOT).
+
 2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ZGeoNode_GL_Rnr.cxx:
