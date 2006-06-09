@@ -99,7 +99,8 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
                  SetArgs=>'const Text_t* s'
                },
   'ZColor'  => { SetMeth=>'.rgba(r,g,b,a)',
-		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1'
+		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1',
+                 ByRef  =>1
 	       }
 );
 
@@ -166,6 +167,16 @@ sub SetArgs {
     return $GetSetMap{$t}{SetArgs};
   } else {
     return "$t $a";
+  }
+}
+
+sub ByRefSetArgs {
+  my $t = shift;
+  my $a = shift;
+  if(exists $GetSetMap{$t}{ByRef}) {
+    return "const $t& $a";
+  } else {
+    return 0;
   }
 }
 
@@ -505,18 +516,33 @@ while($c !~ m!\G\s*$!osgc) {
       if(exists $member->{Link}) {
 	my ($link_type) = $member->{Type} =~ m/<(\w+)>/;
 	$member->{LinkType} = $link_type;
-	$member->{ArgStr} = &SetArgs("$link_type*", lc($methodbase));	
+	$member->{ArgStr}   = &SetArgs("$link_type*", lc($methodbase));	
       } else {
 	my $settype = $type;
 	$settype .= "&" if $member->{Xport}{s}{ref};
         $member->{ArgStr} = &SetArgs($settype, lc($methodbase));
       }
-      $member->{Args} = &MunchArgs($member->{ArgStr});
+      $member->{Args}  = &MunchArgs($member->{ArgStr});
       $member->{Local} = $localp;
 
-      $member->{ID} = $MemberID++;
+      $member->{ID}    = $MemberID++;
 
       print "$type $methodbase $localp $member->{ID}\n" if $DEBUG;
+
+      my $altmember = 0;
+      my $alt_sa = &ByRefSetArgs($type, lc($methodbase));
+      if($alt_sa) {
+        $altmember = {};
+        %$altmember = %$member;
+        $altmember->{Xport}   =~ s/[^sStT]//g;
+        $altmember->{ArgStr} = $alt_sa;
+        $altmember->{Args}    = &MunchArgs($altmember->{ArgStr});
+        $altmember->{Methodname} .= "ByRef";
+        $altmember->{ByRef}   = 1;
+        $altmember->{ID}      = $MemberID++;
+
+        print "alter $type $methodbase $localp $altmember->{ID}\n" if $DEBUG;
+      }
 
       my $weed_done = 0;
       # Go for widget/view
@@ -551,6 +577,7 @@ while($c !~ m!\G\s*$!osgc) {
       }
 
       push @Members, $member;
+      push @Members, $altmember if $altmember;
     }
 
     next;
@@ -957,7 +984,7 @@ for $r (@Members) {
 	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
     } else {
       $setit  = "  $r->{Varname}";
-      $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
+      $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth} and not $r->{ByRef}) ?
 		 $GetSetMap{$r->{Type}}->{SetMeth} :
 		 " = $r->{Args}[0][2]") . ";\n";
     }
