@@ -23,12 +23,12 @@ ClassImp(ZGeoOvlMgr)
 
 void ZGeoOvlMgr::_init()
 {
-  // !!!! Set all links to 0 !!!!
-  mMotherCol.rgba(0, 1, 0.8, 0.3);
-  mOvlCol1.rgba(1, 1, 1, 0.8);
-  mOvlCol2.rgba(1, 1, 0, 0.8);
-  mExtrCol.rgba(0.3, 0, 1, 0.8);
-  mPM_Col.rgba(1, 0, 0, 1);
+  mMotherCol.rgba(  0,   1, 0.8, 0.6);
+  mExtrCol.  rgba(0.3,   0,   1,   1);
+  mOvlpCol1. rgba(  1,   1,   1,   1);
+  mOvlpCol2. rgba(  1,   1,   0,   1);
+  mPMExtrCol.rgba(  1,   0,   0,   1);
+  mPMOvlpCol.rgba(  1,   0,   1,   1);
   mResol = 0.1;
   mMaxOvl = 100;
   mMinOvl = mResol;
@@ -68,81 +68,136 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
   static const Exc_t _eh("ZGeoOvlMgr::ImportOverlaps");
   ISdebug(1, GForm("%s, resolution %f", _eh.Data(), mResol));
 
-  //  printf("Import START %f \n", mResol);
+  // throw(_eh + "code not in sync with changes in ROOT, aborting.");
+  printf("Import START eps=%f \n", mResol);
+
   TIter next_node(lOverlaps);
-  TGeoOverlap     *ovl;
-  TGeoNode        *n1 = 0;
-  ZGeoNode        *ovlm;
-  ZGeoOvl         *ovln = 0;
-  TPolyMarker3D*   pm;
-  const Text_t    *mn;
-  TString           mt;
-  map<TString, ZGeoNode*> nmap;
+  TGeoOverlap *ovl;
+  TGeoIterator top_git   (gGeoManager->GetTopVolume());
+  TGeoNode*    top_gnode (top_git.Next());
 
   // go through the list of overlaps  locate each node in 
   // absolute coordinates
   while((ovl = (TGeoOverlap*)next_node())) {
-    TGeoVolume* motherv = ovl->GetVolume();
-    const char* mname = motherv->GetName(); 
-    // printf ("Importing %s %s Extr(%d).\n", mname, ovl->GetName(), ovl->IsExtrusion());
-    ISdebug(1, GForm("%s Importing %s %s Extr(%d)", _eh.Data(), mname, ovl->GetName(), ovl->IsExtrusion()));
+    Bool_t isExtr = ovl->IsExtrusion();
+    Bool_t isOvlp = ovl->IsOverlap();
+    ISdebug(1, GForm("%sScanning for Extp=%d, Ovlp=%d: vol1=%-12s vol2=%-12s",
+                     _eh.Data(), isExtr, isOvlp,
+                     ovl->GetFirstVolume()->GetName(),
+                     ovl->GetSecondVolume()->GetName()));
+
+  reiterate:
+    TGeoNode    *n1 =  0, *n2 =  0, *gnode;
+    TGeoVolume  *v1 =  0, *v2 =  0, *gvol;
+    Int_t        l1 = -1,  l2 = -1;
+    TGeoIterator git(top_git);
+    gnode = top_gnode;
+    do {
+      gvol = gnode->GetVolume();
+      if(gvol == ovl->GetFirstVolume()) {
+        top_git = git; top_gnode = gnode;
+        n1 = gnode; v1 = gvol; l1 = git.GetLevel();
+        ISdebug(2, GForm("  Found first  vol lvl=%d", l1));
+        if(isOvlp)
+          git.Skip();
+
+        while((gnode = git.Next()) != 0) {
+
+          gvol = gnode->GetVolume();
+          if(gvol == ovl->GetSecondVolume()) {
+            n2 = gnode; v2 = gvol; l2 = git.GetLevel();
+            ISdebug(2, GForm("  Found second vol lvl=%d", l2));
+
+            Int_t       motherl;
+            TGeoNode*   mothern;
+            TGeoVolume* motherv;
+            if(isExtr) {
+              motherl = l1;
+              mothern = n1;
+              motherv = v1;
+            } else {
+              motherl = TMath::Min(l1, l2);
+              do {
+                --motherl;
+                mothern = motherl > 0 ? git.GetNode(motherl) : top_node;
+                motherv = mothern->GetVolume();
+              } while(motherv->IsAssembly());
+
+            }
+            TGeoHMatrix motherm;
+            {
+              TGeoNode *node = git.GetTopVolume()->GetNode(git.GetIndex(1));
+              motherm.Multiply(node->GetMatrix());
+              for (Int_t i=2; i<=motherl; i++) {
+                node = node->GetDaughter(git.GetIndex(i));
+                motherm.Multiply(node->GetMatrix());
+              }
+            }
+
+            TString mname  = isExtr ? "Extr: " : "Ovlp: ";
+            mname += motherv->GetName(); 
+            TString mtitle = top_node->GetVolume()->GetName();
+            for(Int_t l=1; l<motherl; ++l) {
+              mtitle += "/";
+              mtitle += git.GetNode(l)->GetVolume()->GetName();
+            }
+
+            ISdebug(1, GForm("%sImporting %s '%s' from %s", _eh.Data(),
+                             mname.Data(), mtitle.Data(),
+                             ovl->GetName()));
     
-    map<TString, ZGeoNode*>::iterator i = nmap.find(motherv->GetName());
-    if(i == nmap.end()) {     
-      ovlm = new ZGeoNode(mname);
-      // printf("creating mother node %s \n", ovlm->GetName());
-      {
-	GLensWriteHolder wlck(this);
-	mQueen->CheckIn(ovlm);
-	Add(ovlm);
+            ZGeoOvl* zm = new ZGeoOvl(mname, mtitle);
+            zm->SetIsExtr ( isExtr );
+            zm->SetOverlap( ovl->GetOverlap() );
+
+            TPolyMarker3D* pm = ovl->GetPolyMarker();
+            zm->SetPM_N  ( pm->GetLastPoint() );
+            zm->SetPM_p  ( pm->GetP() );
+            zm->SetPM_ColByRef( isExtr ? mPMExtrCol : mPMOvlpCol );
+            zm->SetColorByRef ( mMotherCol );
+            {
+              GLensWriteHolder wlck(this);
+              mQueen->CheckIn(zm);
+              Add(zm);
+            }
+            zm->setup_ztrans(zm, &motherm);
+            zm->SetRnrNode(isExtr);
+            zm->SetTNode(mothern);
+            zm->AssertUserData();
+
+            if(isExtr) {
+              ZGeoNode* zn = create_standalone_node(v2->GetName(), 0, n2, ovl->GetSecondMatrix());
+              zn->SetColorByRef( mExtrCol );
+
+              GLensWriteHolder wlck(zm);
+              zm->Add(zn);
+            } else {
+              ZGeoNode* zn1 = create_standalone_node(v1->GetName(), 0, n1, ovl->GetFirstMatrix());
+              zn1->SetColorByRef( mOvlpCol1 );
+              ZGeoNode* zn2 = create_standalone_node(v2->GetName(), 0, n2, ovl->GetSecondMatrix());
+              zn2->SetColorByRef( mOvlpCol2 );
+
+              GLensWriteHolder wlck(zm);
+              zm->Add(zn1);
+              zm->Add(zn2);
+            }
+
+            break;
+          }
+        }
+        break;
       }
+    } while((gnode = git.Next()) != 0);
 
-      mt = setup_absolute_matrix(top_node,motherv, ovlm);
-      ovlm->setup_color(mNodeAlpha);
-      ovlm->SetTitle(mt.Data()); 
-      ovlm->AssertUserData();
-      nmap[mname] = ovlm;
-    } 
-    else {
-      // printf("mother node allrady eixist for volume %s \n", motherv->GetName());
-      ovlm = i->second;
+    if(v2 == 0) {
+      ISdebug(2, "  Could not find both volumes, resetting geo-iterator.");
+      top_git.Reset();
+      top_gnode = top_git.Next();
+      goto reiterate;
     }
 
-    if (ovl->IsExtrusion()){
-      n1 = ovl->GetNode(0);
-      // printf("is extrusion %s \n ", n1->GetVolume()->GetName());
-      // printf("number of nodes ... %d \n", ovlm->Size());
-      mn = GForm("%s::extr%d",n1->GetVolume()->GetName(), ovlm->Size());
-      ovln = create_standalone_node(mn, n1->GetName(), n1);
-      // TString tname = mt + '/' + n1->GetName();
-      // ovln->SetTitle(tname.Data());      
-      // ovln->SetTrans(get_ztrans(n1->GetMatrix()));
-      setup_ztrans(ovln, n1->GetMatrix());
-      ovln->mIsExtr = true;
-    } else {
-      mn = GForm("overlap%d",ovlm->Size());
-      ovln = create_standalone_node(mn, "holder");
-      // create the overlaping nodes
-      insert_node(ovl->GetNode(0), ovln, GForm("%s",ovl->GetNode(0)->GetName()));
-      // TString tname = mt + '/' + ovl->GetNode(0)->GetName();
-      // ovln->First()->SetTitle(tname.Data());
-      
-      insert_node(ovl->GetNode(1), ovln, GForm("%s",ovl->GetNode(1)->GetName() ));
-      // tname = mt + '/' + ovl->GetNode(1)->GetName();
-      // ovln->Last()->SetTitle(tname.Data());
-    }
-
-    pm = ovl->GetPolyMarker();
-    ovln->SetPM_N(pm->GetLastPoint());
-    ovln->SetPM_p(pm->GetP());
-    ovln->mPM_Col = mPM_Col;
-    ovln->mOverlap = ovl->GetOverlap();
-    ovlm->SetColor(mMotherCol.r(), mMotherCol.g(),mMotherCol.b(),mMotherCol.a());
-    setup_zcolor(ovln);
-    ovlm->Add(ovln);
   }  
-  // printf("Import END %f \n", mResol);
-
+  printf("Import END eps=%f \n", mResol);
 }
 
 /**************************************************************************/
@@ -152,9 +207,9 @@ void ZGeoOvlMgr::RecalculateOvl()
   RemoveLensesViaQueen(true);
 
   if (gGeoManager) {
-    gGeoManager->CheckOverlaps(mResol);
+    gGeoManager->GetTopNode()->CheckOverlaps(mResol);
     if (mMinOvl > mResol) mMinOvl=mResol;    
-    ImportOverlaps(gGeoManager->GetListOfOverlaps() , gGeoManager->GetTopNode());
+    ImportOverlaps(gGeoManager->GetListOfOverlaps(), gGeoManager->GetTopNode());
   }
 }
 
@@ -216,6 +271,9 @@ void ZGeoOvlMgr::DumpOvlMgr()
 
 /**************************************************************************/
 // Protected methods
+//
+// These are not really needed with the new overlap import code (9.6.2006).
+// Left here as their functionality might be needed in the future.
 /*************************************************************************/
 
 ZTrans ZGeoOvlMgr::get_ztrans(TGeoMatrix* gm)
@@ -279,37 +337,18 @@ TString ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol,
 
 /**************************************************************************/
 
-void ZGeoOvlMgr::setup_zcolor(ZGeoOvl* ovlm)
+ZGeoNode* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t,
+					    TGeoNode* gnode, TGeoMatrix* gmatrix)
 {
-  // Sets color to ZGeoOvl node. If node is extrusion, the color is
-  // set to mExtrCol. In case node represents overlap, the color of the 
-  // first overlaping node in ovlm is  mOvlCol1 and the color of the second
-  // is mOvlCol2.
-
-  if (ovlm->mIsExtr) {
-    ovlm->SetColor(mExtrCol.r(), mExtrCol.g(), mExtrCol.b(), mExtrCol.a());
-  } else {
-    ZGeoNode* n = (ZGeoNode*)ovlm->FrontElement();
-    n->mColor = mOvlCol1;
-
-    n = (ZGeoNode*)ovlm->BackElement();
-    n->mColor = mOvlCol2;
-  }
-}
-
-/**************************************************************************/
-
-ZGeoOvl* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t,
-					    TGeoNode* tn)
-{
-  ZGeoOvl *nn = new ZGeoOvl(n, t);
+  ZGeoNode *nn = new ZGeoNode(n, t);
  
-  if (tn) {
-    TGeoVolume* v = tn->GetVolume();
-    nn->SetTNode(tn);
+  if (gnode) {
+    TGeoVolume* v = gnode->GetVolume();
+    nn->SetTNode(gnode);
+    if (gmatrix) nn->setup_ztrans(nn, gmatrix);
     TString m = v->GetMaterial()->GetName();
     int j = m.First('$');
-    if(j != kNPOS)
+    if (j != kNPOS)
       m = m(0,j);
     nn->SetMaterial(m.Data());
     nn->AssertUserData();
