@@ -17,9 +17,12 @@ ClassImp(ZGeoOvl)
 
 void ZGeoOvl::_init()
 {
-  mPM_p = 0;
   mIsExtr  = false;
+  mOverlap = 0;
+  mPM_N = 0;
+  mPM_p = 0;
   mRnrMark = true;
+  mRnrNode = true;
 }
 
 /**************************************************************************/

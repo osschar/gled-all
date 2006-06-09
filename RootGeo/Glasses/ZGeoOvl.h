@@ -19,12 +19,13 @@ private:
   void _init();
 
 protected:
-  Bool_t    mIsExtr;    // X{G}  
+  Bool_t    mIsExtr;    // X{GS}  
   Double_t  mOverlap;   // X{GS}  7 ValOut()
   Int_t     mPM_N;      // X{GS} 
   Float_t*  mPM_p;      //[mPM_N*3] X{gS}
   ZColor    mPM_Col;    // X{GSP}
-  Bool_t    mRnrMark;   // X{GS}   7 Bool()
+  Bool_t    mRnrMark;   // X{GS}  7 Bool(-join=>1)
+  Bool_t    mRnrNode;   // X{GS}  7 Bool()
 
 public:
   ZGeoOvl(const Text_t* n="ZGeoOvl", const Text_t* t=0) : ZGeoNode(n,t)
