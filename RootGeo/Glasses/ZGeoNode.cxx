@@ -19,7 +19,7 @@
 
 #include <TFile.h>
 #include <TBuffer3D.h>
-#include <TGeoNode.h>
+#include <TGLFaceSet.h>
 #include <TColor.h>
 
 typedef list<ZGeoNode*>           lpZGeoNode_t;
@@ -48,13 +48,22 @@ void ZGeoNode::_assert_tnode(const Exc_t& _eh, bool ggeo_fallbackp)
 
 /**************************************************************************/
 
+void ZGeoNode::SetTNode(TGeoNode* n)
+{
+  mTNode = n;
+  mTNodeName = n ? n->GetName() : "";
+  Stamp(FID());
+}
+
+/**************************************************************************/
+
 void ZGeoNode::AssertUserData()
 { 
   // Creates TGLFaceSet object rendered by ZGeoNode_GL_Rnr
   // and saves it in TGeoVolume.  
 
   TGeoVolume* v = GetVolume();
-  if (v) {
+  if (v && ! v->IsAssembly()) {
     GeoUserData* userdata = dynamic_cast<GeoUserData*>(v->GetField());
 
     if (v->GetField() == 0) {
@@ -67,7 +76,7 @@ void ZGeoNode::AssertUserData()
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,0,0)
       const TBuffer3D& buff = GetVolume()->GetShape()->
 	GetBuffer3D(TBuffer3D::kRawSizes|TBuffer3D::kRaw, false);
-      TGLFaceSet* fs = new TGLFaceSet(buff, vol);
+      TGLFaceSet* fs = new TGLFaceSet(buff);
 #else
       TBuffer3D*  buff = GetVolume()->GetShape()->MakeBuffer3D();
       Float_t colorRGB[3] = {1, 0, 0};
@@ -360,7 +369,7 @@ void ZGeoNode::Restore()
 /*************************************************************************/
 
 
-void ZGeoNode::setup_ztrans(ZNode* zn, TGeoMatrix* gm)
+void ZGeoNode::setup_ztrans(ZNode* zn, const TGeoMatrix* gm)
 {
   const Double_t* rm = gm->GetRotationMatrix();
   const Double_t* tv = gm->GetTranslation();
@@ -398,7 +407,8 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
   nn->mTNode = geon;
   setup_ztrans(nn, geon->GetMatrix());
   nn->mTNodeName = geon->GetName();
-  TString m(v->GetMaterial()->GetName());
+  TGeoMaterial* gmat = v->GetMedium() ? v->GetMaterial() : 0;
+  TString m(gmat ? gmat->GetName() : "<null>");
   int j = m.First("$");
   if(j != kNPOS)
     m = m(0,j);
