@@ -6,6 +6,10 @@
 
 #include "ZGeoNode_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
+
+#include <TGLFaceSet.h>
+#include <TGLDrawFlags.h>
+
 #include <GL/gl.h>
 
 /**************************************************************************/
@@ -35,11 +39,7 @@ void ZGeoNode_GL_Rnr::Draw(RnrDriver* rd)
     glPushAttrib(GL_CURRENT_BIT);
   }
   
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,0,0)
-  fs->Draw(10); // Dummy LOD ... not sure how it's used in TGLxxx.
-#else
-  fs->GLDrawPolys();
-#endif
+  fs->Draw(TGLDrawFlags());
 
   glPopAttrib();
 }
