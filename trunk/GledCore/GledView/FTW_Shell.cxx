@@ -1046,10 +1046,11 @@ void FTW_Shell::Message(const char* msg, Eye::MType_e t)
 {
   Fl_Color c;
   switch(t) {
-  case Eye::MT_std: c = (Fl_Color)0; break;
+  case Eye::MT_std: c = FL_WHITE;  break;
   case Eye::MT_err: c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
   case Eye::MT_wrn: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
   case Eye::MT_msg: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
+  default:          c = FL_GREEN;  break;
   }
   wOutPack->add_line(msg, c);
 }
