@@ -15,7 +15,6 @@
 #include <TObject.h>
 #include <TGeoNode.h>
 #include <TGeoManager.h>
-#include <TGLSceneObject.h>
 #include <TRegexp.h>
 
 class TGeoMatrix;
@@ -40,7 +39,7 @@ protected:
   ZColor		mColor;     // X{GSP} 7 ColorButt()
   TString		mDefFile;   // X{GS} 7 Filor()
 
-  void setup_ztrans(ZNode* zn, TGeoMatrix* gm);
+  void setup_ztrans(ZNode* zn, const TGeoMatrix* gm);
   void setup_color(Float_t alpha);
 
   ZGeoNode* insert_node(TGeoNode* geon, ZNode* holder, const Text_t* name);
@@ -74,8 +73,7 @@ public:
   //--------------------------------
 
   // Manual Get/Set-methods
-  void SetTNode(TGeoNode* n)
-  { mTNode = n;  mTNodeName = n ? n->GetName() : ""; Stamp(FID()); }
+  void SetTNode(TGeoNode* n);
 
   TGeoVolume* GetVolume()
   { return mTNode ? mTNode->GetVolume() : 0; }
