@@ -14,13 +14,9 @@
 #include <TObject.h>
 #include <TGeoNode.h>
 
-typedef list<TGeoNode*>                  	 lgn_t;
-typedef list<TGeoNode*>::iterator                lgn_i;
-typedef list<TGeoNode*>::reverse_iterator        lgn_ri;
 
-
-class ZGeoOvlMgr : public ZGeoNode {
-
+class ZGeoOvlMgr : public ZGeoNode
+{
   MAC_RNR_FRIENDS(ZGeoOvlMgr);
 
 private:
@@ -28,11 +24,12 @@ private:
 
   // Overlap import / markup.
 protected:
-  ZColor		mMotherCol;        // X{GSP}
-  ZColor		mOvlCol1;          // X{GSP}
-  ZColor		mOvlCol2;          // X{GSP} 
-  ZColor                mExtrCol;          // X{GSP} 
-  ZColor                mPM_Col;           // X{GSP} 
+  ZColor		mMotherCol;        // X{GSP} 7 ColorButt()
+  ZColor                mExtrCol;          // X{GSP} 7 ColorButt()
+  ZColor		mOvlpCol1;         // X{GSP} 7 ColorButt()
+  ZColor		mOvlpCol2;         // X{GSP} 7 ColorButt()
+  ZColor                mPMExtrCol;        // X{GSP} 7 ColorButt()
+  ZColor                mPMOvlpCol;        // X{GSP} 7 ColorButt()
   Float_t               mResol;            // X{GS}  7 Value(-range=>[0,100,1,1000], -join=>1)
 public:
   void                  RecalculateOvl();  // X{Ed}  7 MButt()
@@ -44,19 +41,24 @@ protected:
 public:
   void                  RnrOvlInterval();  // X{ED}  7 MButt()
 
+  typedef list<TGeoNode*>                   lgn_t;
+  typedef list<TGeoNode*>::iterator         lgn_i;
+  typedef list<TGeoNode*>::reverse_iterator lgn_ri;
+
 protected:
   ZTrans      get_ztrans(TGeoMatrix* gm);
   Bool_t      locate_first_from_top(TGeoNode* cur_node, TGeoVolume* v,
 				    ZGeoNode* zn, lgn_t& result);
-  TString      setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v,
+  TString     setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* v,
 				    ZGeoNode* zn);
-  void        setup_zcolor(ZGeoOvl* ovlm);
-  ZGeoOvl*    create_standalone_node(const Text_t* n, const Text_t* t,
-				     TGeoNode* tn = 0);
-  void        set_tnode_by_path(TString path, TGeoNode* & gn);
+  ZGeoNode*   create_standalone_node(const Text_t* n, const Text_t* t,
+				     TGeoNode* gnode=0, TGeoMatrix* gmatrix=0);
+  void        set_tnode_by_path(TString path, TGeoNode*& gn);
 
 public:
-  ZGeoOvlMgr(const Text_t* n="ZGeoOvlMgr", const Text_t* t=0):ZGeoNode(n,t){ _init();}
+  ZGeoOvlMgr(const Text_t* n="ZGeoOvlMgr", const Text_t* t=0) :
+    ZGeoNode(n,t) { _init(); }
+  virtual ~ZGeoOvlMgr() {}
 
   void         ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node);
 
