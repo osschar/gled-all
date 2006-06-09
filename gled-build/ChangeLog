@@ -1,3 +1,11 @@
+2006-06-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Added set-by-reference option for set-methods that use the
+	GetSetMap and enabled it for ZColor. Now you can also set colors as:
+	{ ZColor x; lens->SetColorByRef(x); } and not only as: {
+	lens->SetColor(red, green, blue, alpha); }.
+
 2006-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
