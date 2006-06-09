@@ -166,12 +166,13 @@ public:
   // mir_call_data ... temporary structures (user-data) for callbacks
   /**************************************************************************/
 
-    struct mir_call_data {
+  struct mir_call_data {
     FTW_Shell* 		shell;
     GledNS::MethodInfo*	mi;
 
     mir_call_data(FTW_Shell* s, GledNS::MethodInfo* m) :
       shell(s), mi(m) {}
+    virtual ~mir_call_data() {}
 
     virtual ZGlass*                  get_lens() = 0;
     virtual OptoStructs::ZGlassImg*  get_image() = 0;
@@ -183,6 +184,7 @@ public:
 
     mir_call_data_img(OptoStructs::ZGlassImg* i, FTW_Shell* s, GledNS::MethodInfo* m) :
       mir_call_data(s, m), img(i) {}
+    virtual ~mir_call_data_img() {}
 
     virtual ZGlass*                  get_lens()       { return img->fLens; }
     virtual OptoStructs::ZGlassImg*  get_image()      { return img; }
@@ -194,6 +196,7 @@ public:
 
     mir_call_data_loc(FTW::Locator& l, FTW_Shell* s, GledNS::MethodInfo* m) :
       mir_call_data(s, m), loc(l) {}
+    virtual ~mir_call_data_loc() {}
 
     virtual ZGlass*                  get_lens()       { return loc.get_glass(); }
     virtual OptoStructs::ZGlassImg*  get_image()      { return loc.get_image(); }
