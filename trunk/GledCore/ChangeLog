@@ -1,3 +1,9 @@
+2006-06-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	Fixed compilation warnings with gcc4.
+
 2006-05-23  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* Gled/GledNS.cxx:
