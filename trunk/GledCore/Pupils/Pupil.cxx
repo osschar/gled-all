@@ -308,6 +308,7 @@ void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
   void (*set_foo)(GLdouble, GLdouble, GLdouble, GLdouble, GLdouble, GLdouble);
 
   switch(mInfo->GetProjMode()) {
+  default:
   case PupilInfo::P_Perspective:
     top     = near*TMath::Tan(TMath::DegToRad()*mInfo->GetZFov()/2);
     set_foo = glFrustum;

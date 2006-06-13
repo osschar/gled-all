@@ -52,7 +52,9 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) : mSatSocket(sock)
     catch(Exc_t& exc) {
       throw(_eh + exc);
     }
-    UInt_t ss;  *m >> ss; mSaturn = (Saturn*)ss; mSaturnInfo = mSaturn->GetSaturnInfo();
+    size_t ss;  *m >> ss;
+    mSaturn     = (Saturn*) ss;
+    mSaturnInfo = mSaturn->GetSaturnInfo();
     ID_t ei_id; *m >> ei_id;
     delete m;
     mEyeInfo = dynamic_cast<EyeInfo*>(mSaturn->DemangleID(ei_id));

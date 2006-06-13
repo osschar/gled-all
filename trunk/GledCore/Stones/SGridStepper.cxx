@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "SGridStepper.h"
+#include <Glasses/ZNode.h>
 
 //______________________________________________________________________
 // SGridStepper
@@ -14,7 +15,8 @@ ClassImp(SGridStepper)
 
 SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
 {
-  switch(Mode) { 
+  switch(Mode) {
+  default:
   case SM_XYZ:
     ls[0] = &Nx; ls[1] = &Ny; ls[2] = &Nz;
     ns[0] = &nx; ns[1] = &ny; ns[2] = &nz;
@@ -69,8 +71,6 @@ void SGridStepper::GetPosition(Float_t* p)
 {
   p[0] = Ox + nx*Dx; p[1] = Oy + ny*Dy; p[2] = Oz + nz*Dz;
 }
-
-#include <Glasses/ZNode.h>
 
 void SGridStepper::SetNode(ZNode* node)
 {

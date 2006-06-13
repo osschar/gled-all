@@ -32,12 +32,7 @@ GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
 
   bRedraw = false;
 
-  mFaderStack = &mRMStacks.insert(make_pair(ZGlColorFader::FID(), RMStack())).first->second;
-  { // Make default rnrmod.
-    ZGlass* lens = GledNS::ConstructLens(ZGlColorFader::FID());
-    A_Rnr*  rnr  = lens->VGlassInfo()->SpawnRnr(mRnrName, lens);
-    mFaderStack->def_autogen = new RnrMod(lens, rnr);
-  }
+  mFaderStack = 0;
 }
 
 GLRnrDriver::~GLRnrDriver()
@@ -53,6 +48,14 @@ GLRnrDriver::~GLRnrDriver()
 void GLRnrDriver::BeginRender()
 {
   RnrDriver::BeginRender();
+
+  if(mFaderStack == 0) {
+    // Make default rnrmod.
+    mFaderStack = &mRMStacks.insert(make_pair(ZGlColorFader::FID(), RMStack())).first->second;
+    ZGlass* lens = GledNS::ConstructLens(ZGlColorFader::FID());
+    A_Rnr*  rnr  = lens->VGlassInfo()->SpawnRnr(mRnrName, lens);
+    mFaderStack->def_autogen = new RnrMod(lens, rnr);
+  }
 
   for(int i=0; i<mMaxLamps; ++i) {
     mLamps[i] = 0;

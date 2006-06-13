@@ -106,7 +106,7 @@ namespace {
   void new_menu_cb(Fl_Menu_Button* b, void* what) {
     FTW_Shell* shell = FGS::grep_parent<FTW_Shell*>(b);
 
-    switch(int(what)) {
+    switch(GNS::CastVoidPtr2ID(what)) {
 
     case 1: { // Nest
       FID_t fid = GledNS::FindClassID("NestInfo");
@@ -143,7 +143,7 @@ namespace {
   {
     FTW_Shell* shell = FGS::grep_parent<FTW_Shell*>(b);
     bool on_p = b->mvalue()->value();
-    switch(int(what)) {
+    switch(GNS::CastVoidPtr2ID(what)) {
     case 1: shell->SourceVis(on_p); break;
     case 2: shell->SinkVis(on_p);   break;
     }

@@ -582,6 +582,18 @@ void ZGlass::SetUseDLRec(Bool_t state)
 /**************************************************************************/
 /**************************************************************************/
 
+ID_t ZLinkBase::get_id()
+{
+  return (ID_t) ((char*)_lens - (char*)0);
+}
+
+void ZLinkBase::set_id(ID_t id)
+{
+  char* ptr = 0; ptr += id;
+  _lens = (ZGlass*)ptr;
+}
+
+
 void ZLinkBase::Streamer(TBuffer &b)
 {
   if(b.IsReading()) {

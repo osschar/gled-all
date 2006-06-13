@@ -30,7 +30,8 @@ class ZLinkBase
   Bool_t   is_set()            { return  _lens != 0; }
   Bool_t   empty()             { return  _lens == 0; }
 
-  ID_t get_id() { return (ID_t) _lens; }
+  ID_t get_id();
+  void set_id(ID_t id);
 
   ZLinkBase& operator=(ZGlass* l) { _lens = l; return *this; }
 

@@ -69,7 +69,7 @@ Int_t ZList::RebuildListRefs(An_ID_Demangler* idd)
   mSize   = 0;
   mNextId = 0;
   for(iterator i=in.begin(); i!=in.end(); ++i) {
-    ZGlass* lens = idd->DemangleID(ID_t(i->fLens));
+    ZGlass* lens = idd->DemangleID(GledNS::CastLens2ID(i->fLens));
     if(lens) {
       try {
 	lens->IncRefCount(this);

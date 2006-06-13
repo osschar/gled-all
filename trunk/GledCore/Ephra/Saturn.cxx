@@ -216,7 +216,9 @@ void Saturn::tl_MIR_DetachedCleanUp(mir_router_ti* arg)
       ISerr(_eh + "entry for " + arg->mir->Alpha->Identify() + " not found in mDetachedThreadsHash.");
       return;
     }
+#ifdef DEBUG
     int l1 = i->second.size();
+#endif
     i->second.remove(arg->self);
     int l2 = i->second.size();
     ISdebug(1, GForm("%sl1=%d, l2=%d.", _eh.Data(), l1, l2));
@@ -1096,7 +1098,7 @@ void Saturn::finalize_eye_connection(EyeInfo* ei)
 
   {
     TMessage m(GledNS::MT_MEE_ConnectionGranted);
-    m << (UInt_t)this << ei->GetSaturnID();
+    m << (size_t)this << ei->GetSaturnID();
     ei->hSocket->Send(m);
   }
 
@@ -2261,7 +2263,7 @@ void Saturn::create_kings(const char* king, const char* whore_king)
 
 void Saturn::arrival_of_kings(TMessage* m)
 {
-  mSaturnInfo = (SaturnInfo*) GledNS::ReadLensID(*m); // This is ID of *this* Saturn's SaturnInfo
+  ID_t satinfo_id = GledNS::ReadLensID(*m);
   UInt_t nk; *m >> nk;
   ISmess(GForm("Saturn::arrival_of_kings %d king(s), len=%d",
 	       nk, m->BufferSize()));
@@ -2299,7 +2301,7 @@ void Saturn::arrival_of_kings(TMessage* m)
       //mSunQueen->UnfoldFrom(t);
       mSunQueen->InvokeReflection(*m);
 
-      mSaturnInfo = dynamic_cast<SaturnInfo*>(DemangleID((ID_t)mSaturnInfo));
+      mSaturnInfo = dynamic_cast<SaturnInfo*>(DemangleID(satinfo_id));
       assert(mSaturnInfo != 0);
       // Fix mSunInfo and SunKing's SaturnInfo pointer
       mSunInfo = mSunQueen->mSunInfo.get();

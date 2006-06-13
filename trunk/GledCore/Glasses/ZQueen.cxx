@@ -1093,7 +1093,7 @@ void ZQueen::InvokeReflection(TBuffer& buf)
   c.bWarnOn = true;
 
   { // remove and delete comet's Deps, wipe it from comet's queen
-    ID_t cdep_id = (ID_t)c.mQueen->GetDeps();
+    ID_t cdep_id = GledNS::CastLens2ID( c.mQueen->GetDeps() );
     assert(cdep_id == mDeps->GetSaturnID());
     ZGlass* cdep = c.DemangleID(cdep_id);
     delete cdep;
