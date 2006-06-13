@@ -40,6 +40,8 @@ void eye(Bool_t spawn_pupil=true)
 
 NestInfo* new_nest(const Text_t* name="Nest", const Text_t* layout = 0)
 {
+  if(Gled::theOne->HasGUILibs() == false) return;
+
   if(g_shell == 0) {
     printf("eye.C::new_nest g_shell is null. Returning zero.\n");
     return 0;
@@ -59,6 +61,8 @@ NestInfo* new_nest(const Text_t* name="Nest", const Text_t* layout = 0)
 
 PupilInfo* new_pupil(const Text_t* name="Pupil")
 {
+  if(Gled::theOne->HasGUILibs() == false) return;
+
   if(g_shell == 0) {
     printf("eye.C::new_pupil g_shell is null. Returning zero.\n");
     return 0;
@@ -73,6 +77,8 @@ PupilInfo* new_pupil(const Text_t* name="Pupil")
 
 void setup_pupil_up_reference(ZNode* n=0, Int_t a=3)
 {
+  if(Gled::theOne->HasGUILibs() == false) return;
+
   if(n == 0) n = g_scene;
   if(g_pupil && n) {
     g_pupil->SetUpReference(n);
@@ -85,6 +91,8 @@ void setup_pupil_up_reference(ZNode* n=0, Int_t a=3)
 
 ZList* register_GledCore_layouts(ZList* top=0)
 {
+  if(Gled::theOne->HasGUILibs() == false) return;
+
   if(top == 0) top = g_fire_queen;
   top = top->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
   ZList* l = top->AssertPath("GledCore", "ZList");
