@@ -57,7 +57,7 @@ $CATALOG->{Classes}{$cname}{PostPragmas}
 END
   close FOO;
   my $cintopts = $CATALOG->{Classes}{$cname}{CINT_Opts};
-  $exe = "rootcint -f $dict/$cname.cc -c $cintopts " .
+  $exe = "rootcint -f $dict/$cname.cc -c -p $cintopts " .
          "-I. $ENV{CPPFLAGS} -I$ENV{ROOTSYS}/include " .
 	 "$_ $dict/${cname}_LinkDef.h";
   print $exe."\n";
