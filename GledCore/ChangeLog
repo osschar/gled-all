@@ -1,5 +1,8 @@
 2006-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* macros/eye.C:
+	Added protections for execution without GUI libraries to all functions.
+
 	* Ephra/Saturn.cxx:
 	* Eye/Eye.cxx:
 	* Glasses/ZDeque.cxx:
