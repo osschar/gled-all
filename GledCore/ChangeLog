@@ -1,3 +1,24 @@
+2006-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Eye/Eye.cxx:
+	* Glasses/ZDeque.cxx:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZQueen.cxx:
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	* GledView/FTW_Nest.cxx:
+	* GledView/FTW_Shell.cxx:
+	* GledView/FltkGledStuff.cxx:
+	* Pupils/Pupil.cxx:
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Stones/SGridStepper.cxx:
+	* Stones/SGridStepper.h:
+	* Stones/ZComet.cxx:
+	Changes for 64-bit machine compilation.
+
 2006-06-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/FTW_Shell.cxx:
