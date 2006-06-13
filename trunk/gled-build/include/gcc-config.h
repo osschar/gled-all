@@ -18,7 +18,7 @@ struct hash<TString> {
 template <class T>
 struct hash<T*> {
   size_t operator()(const T* s) const {
-      hash<UInt_t> h; return h((UInt_t)s);
+      hash<size_t> h; return h((size_t)s);
   }
 };
 
@@ -35,7 +35,7 @@ struct hash<T*> {
 
 using namespace __gnu_cxx;
 
-// !! krumph ... one would expect this in stdlib ... perhaps gcc-3
+// !! krumph ... one would expect this in stdlib
 namespace __gnu_cxx {
 template <>
 struct hash<TString> {
@@ -45,7 +45,7 @@ struct hash<TString> {
 template <class T>
 struct hash<T*> {
   size_t operator()(const T* s) const {
-      hash<UInt_t> h; return h((UInt_t)s);
+      hash<size_t> h; return h((size_t)s);
   }
 };
 }
