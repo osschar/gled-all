@@ -1,3 +1,11 @@
+2006-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* include/gcc-config.h:
+	Changes for 64-bit machine compilation.
+
+	* lib-exec/mk_dict_gen.pl:
+	Use external C-preprocesor for rootcint.
+
 2006-06-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
