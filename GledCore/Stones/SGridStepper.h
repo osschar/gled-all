@@ -7,10 +7,11 @@
 #ifndef GledCore_SGridStepper_H
 #define GledCore_SGridStepper_H
 
-#include <Rtypes.h>
+#include <TObject.h>
 class ZNode;
 
-class SGridStepper {
+class SGridStepper : public TObject
+{
   Int_t *ls[3], *ns[3];
 public:
   enum StepMode_e { SM_XYZ, SM_YXZ, SM_XZY };
@@ -21,7 +22,8 @@ public:
   Float_t Dx, Dy, Dz;
   Float_t Ox, Oy, Oz;
 
-  SGridStepper(Int_t sm);
+  SGridStepper(Int_t sm=SM_XYZ);
+  virtual ~SGridStepper() {}
 
   void Reset();
   void Subtract(SGridStepper& s);

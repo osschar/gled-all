@@ -190,26 +190,28 @@ void ZComet::Streamer(TBuffer& b)
   if(b.IsReading()) {
     // Rebuild kings/queens
     if(mType == CT_Queen) {
-      mQueen = dynamic_cast<ZQueen*>(DemangleID((ID_t)mQueen));
+      ID_t qid = GledNS::CastLens2ID(mQueen);
+      mQueen = dynamic_cast<ZQueen*>(DemangleID(qid));
       if(mQueen==0) {
-	ISerr(_eh + GForm("(Queen) couldn't demangle QueenID %u.",
-			  (ID_t)(mQueen)));
+	ISerr(_eh + GForm("(Queen) couldn't demangle QueenID %u.", qid));
       }
     }
     if(mType == CT_King) {
-      mKing = dynamic_cast<ZKing*>(DemangleID((ID_t)mKing));
+      ID_t kid = GledNS::CastLens2ID(mKing);
+      mKing = dynamic_cast<ZKing*>(DemangleID(kid));
       if(mKing==0) {
-	ISerr(_eh + GForm("(King) couldn't demangle KingID %u.", (ID_t)mKing));
+	ISerr(_eh + GForm("(King) couldn't demangle KingID %u.", kid));
       }
     }
     // Reconstruct TopLevels
     for(lpZGlass_i i=mTopLevels.begin(); i!=mTopLevels.end(); ++i) {
-      mID2pZGlass_i j = mIDMap.find((ID_t)(*i));
+      ID_t id = GledNS::CastLens2ID(*i);
+      mID2pZGlass_i j = mIDMap.find(id);
       if(j != mIDMap.end()) {
 	*i = j->second;
       } else {
 	if(bWarnOn)
-	  ISwarn(_eh + GForm("(top_levels) missing ID %u.", (ID_t)(*i)));
+	  ISwarn(_eh + GForm("(top_levels) missing ID %u.", id));
       }
     }
   }
@@ -248,15 +250,15 @@ void ZComet::StreamHeader(TBuffer& b)
     case CT_CometBag:
       b >> cnt;
       for(UInt_t i=0; i<cnt; i++) {
-	mTopLevels.push_back(GledNS::ReadLensID(b));
+	mTopLevels.push_back(GledNS::ReadLensIDAsPtr(b));
       }
       break;
     case CT_Queen: {
-      mQueen = (ZQueen*) GledNS::ReadLensID(b);
+      mQueen = (ZQueen*) GledNS::ReadLensIDAsPtr(b);
       break;
     }
     case CT_King: {
-      mKing  = (ZKing*)  GledNS::ReadLensID(b);
+      mKing  = (ZKing*)  GledNS::ReadLensIDAsPtr(b);
       break;
     }
     }

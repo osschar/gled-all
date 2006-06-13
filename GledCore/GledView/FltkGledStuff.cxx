@@ -472,7 +472,7 @@ void FGS::LensChoiceMenuBox::EmitMir(ID_t beta_id)
 
 namespace {
   void lcmb_select_cb(Fl_Menu_Button* m, void* ud)
-  { ((FGS::LensChoiceMenuBox*)m->user_data())->EmitMir((ID_t)ud); }
+  { ((FGS::LensChoiceMenuBox*)m->user_data())->EmitMir(GNS::CastVoidPtr2ID(ud)); }
 }
 
 void FGS::LensChoiceMenuBox::fill_menu(ZList* list, Fl_Menu_Button& menu,

@@ -86,7 +86,7 @@ namespace {
     FTW_Shell* shell  = nest->GetShell();
     FTW::Locator& tgt = *nest->RefTargetLoc();
     try {
-      switch(int(what)) {
+      switch(GNS::CastVoidPtr2ID(what)) {
       case 1: shell->X_SetLink(tgt); break;
       case 2: shell->X_ClearLink(tgt); break;
 
@@ -116,7 +116,7 @@ namespace {
     FTW_Nest*   nest = FGS::grep_parent<FTW_Nest*>(b);
     // const Fl_Menu_Item* mi = b->mvalue();
 
-    switch(int(what)) {
+    switch(GNS::CastVoidPtr2ID(what)) {
 
     case 1: { // Toggle Link / Custom view
       if(nest->GetLinksShown()) nest->CustomView();
@@ -155,7 +155,7 @@ namespace {
   void set_menu_cb(Fl_Menu_Button* b, void* what) {
     FTW_Nest*   nest  = FGS::grep_parent<FTW_Nest*>(b);
     FTW_Shell* shell  = nest->GetShell();
-    switch(int(what)) {
+    switch(GNS::CastVoidPtr2ID(what)) {
     case 1: shell->X_SetSource(nest->RefPoint()); break;
     case 2: shell->X_SetSink(nest->RefPoint()); break;
     case 3: shell->X_SetSource(nest->RefMark()); break;

@@ -349,6 +349,30 @@ void GledNS::UnlockCINT() { ROOT_CINT_MUTEX->UnLock(); }
 
 /**************************************************************************/
 
+ZGlass* GledNS::CastID2Lens(ID_t id)
+{
+  char* ptr = 0; ptr += id;
+  return (ZGlass*)ptr;
+}
+
+ID_t GledNS::CastLens2ID(ZGlass* lens)
+{
+  return (ID_t) ((char*)lens - (char*)0);
+}
+
+void* GledNS::CastID2VoidPtr(ID_t id)
+{
+  char* ptr = 0; ptr += id;
+  return (void*)ptr;
+}
+
+ID_t GledNS::CastVoidPtr2ID(void* ptr)
+{
+  return (ID_t) ((char*)ptr - (char*)0);
+}
+
+/**************************************************************************/
+
 void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 {
   // Writes lens, prefixed by Lid/Cid to the buffer.
@@ -382,10 +406,16 @@ void GledNS::WriteLensID(TBuffer& b, ZGlass* lens)
   b << (lens ? lens->GetSaturnID() : ID_t(0));
 }
 
-ZGlass* GledNS::ReadLensID(TBuffer& b)
+ID_t GledNS::ReadLensID(TBuffer& b)
 {
-  // Reads lens ID and assign it lensref.
+  assert(b.IsReading());
+  ID_t id;
+  b >> id;
+  return id;
+}
 
+ZGlass* GledNS::ReadLensIDAsPtr(TBuffer& b)
+{
   assert(b.IsReading());
   ID_t id;
   b >> id;
@@ -921,8 +951,8 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
 {
   Ssiz_t i = 0;
   const Ssiz_t end = url.Length();
-  url_token::type_e type = url_token::list_sel;
-  url_token::type_e next_type;
+  url_token::type_e type      = url_token::list_sel;
+  url_token::type_e next_type = url_token::null;
   TString part;
   int count = 0;
 

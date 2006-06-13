@@ -346,10 +346,16 @@ namespace GledNS {
   void    LockCINT();
   void    UnlockCINT();
 
+  ZGlass* CastID2Lens(ID_t id);
+  ID_t    CastLens2ID(ZGlass* lens);
+  void*   CastID2VoidPtr(ID_t id);
+  ID_t    CastVoidPtr2ID(void* ptr);
+
   void    StreamLens(TBuffer& b, ZGlass* lens);
   ZGlass* StreamLens(TBuffer& b);
   void    WriteLensID(TBuffer& b, ZGlass* lens);
-  ZGlass* ReadLensID(TBuffer& b);
+  ID_t    ReadLensID(TBuffer& b);
+  ZGlass* ReadLensIDAsPtr(TBuffer& b);
 
   template <class GLASS>
   GLASS StreamLensByGlass(TBuffer& b) {
