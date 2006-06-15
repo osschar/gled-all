@@ -1020,13 +1020,13 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
 //{ return Exc_t((string&)s1 + (string&)s2) }
 
 Exc_t operator+(const Exc_t &s1, const string &s2)
-{ return Exc_t((string&)s1 + s2); }
+{ string r(s1); r += s2; return Exc_t(r); }
 
 Exc_t operator+(const Exc_t &s1, const TString &s2)
-{ return Exc_t((string&)s1 + s2.Data()); }
+{ string r(s1); r += s2.Data(); return Exc_t(r); }
 
 Exc_t operator+(const Exc_t &s1,  const char *s2)
-{ return Exc_t((string&)s1 + s2); }
+{ string r(s1); r += s2; return Exc_t(r); }
 
 /**************************************************************************/
 /**************************************************************************/
@@ -1056,7 +1056,7 @@ const char* GForm(const char* fmt, ...)
 
   if(n >= max_length) {
     n = max_length;
-    int l = strlen(fmt);
+    size_t l = strlen(fmt);
     if(fmt[l-1]==10) form_pos[n-2] = 10;
   } else {
     ++n;
