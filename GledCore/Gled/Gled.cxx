@@ -733,5 +733,10 @@ void InfoStream(InfoStream_e type, const TString& s)
   InfoStream(type, s.Data());
 }
 
+void InfoStream(InfoStream_e type, const string& s)
+{
+  InfoStream(type, s.c_str());
+}
+
 /**************************************************************************/
 /**************************************************************************/

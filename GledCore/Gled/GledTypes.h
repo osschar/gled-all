@@ -163,6 +163,7 @@ extern int G_DEBUG;
 enum InfoStream_e { ISoutput, ISmessage, ISwarning, ISerror };
 void InfoStream(InfoStream_e, const char* s);
 void InfoStream(InfoStream_e, const TString& s);
+void InfoStream(InfoStream_e, const string& s);
 
 #define ISout(_str_)  { InfoStream(ISoutput, _str_); }
 #define ISmess(_str_) { InfoStream(ISmessage, _str_); }
