@@ -1,3 +1,15 @@
+2006-06-15  Matevz Tadel,C091,3674,213268  <set EMAIL_ADDRESS environment variable>
+
+	* Gled/Gled.cxx:
+	* Gled/GledTypes.h:
+	Added InfoStream(const std::string&) variant.
+
+	* Gled/GledNS.cxx:
+	Expanded operators+(Exc_t + <anything>); gave weird results on
+	gentoo amd64, whatever the compiler mixture was (somebody replaced
+	gcc from 3.4.6 to 4.1.1 in the meantime, so the fix might be
+	unnecessary).
+
 2006-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* macros/eye.C:
