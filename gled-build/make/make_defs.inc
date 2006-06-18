@@ -29,11 +29,12 @@ FLUID   	= fluid
 # Flags
 LOCALINCL = -I${GLEDSYS}/include $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
 INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I${X11INCDIR}
-CPPFLAGS += -D_REENTRANT -D_GNU_SOURCE -DGL_GLEXT_PROTOTYPES ${USER_CPP_FLAGS} ${INCL}
-CXXFLAGS  = -Wall -fPIC -pipe ${USER_CXX_FLAGS}
+DEFINES   = -D_REENTRANT -D_GNU_SOURCE -DGL_GLEXT_PROTOTYPES
+CPPFLAGS += ${DEFINES} ${INCL} ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
+CXXFLAGS += -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${USER_LD_FLAGS}
 
-# LDSHAREDOPT, LDEXT set by configure
+# PCHFLAGS, LDSHAREDOPT, LDEXT set by configure
 
 # Pain ... X4 comes with somewhat broken makedepend ... perhaps fixed ??
 MKDEPFLAGS	= -Y -w 666
@@ -62,13 +63,16 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 # .cxx: std extension, .C fluid, .cc dictonary
 
 %.o: %.cc
-	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
+	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
 
 %.o: %.cxx
-	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
+	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
 
 %.o: %.css %.hss
-	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} -x c++ -o $@
+	${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
+
+%.pch.h.gch: %.pch.h
+	${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
 
 # Fluid rule with fix ... keep intermidiate files
 %.C %.H:: %.fl
