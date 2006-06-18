@@ -1,3 +1,23 @@
+2006-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support for use of pre-compiled headers.
+
+	* bin/gled-create-libset:
+	Use '+=' for assignment to LIBSET_PREREQS/TARGETS.
+
+	* configure:
+	* configure.rc:
+	Added stuff for control of make-variables needed for pre-compiled
+	headers.
+
+	* make/make_base.inc:
+	Detect USE_PCH flag, add the pre-compiled headers to
+	ALL_OBJS/SRCS; use '+=' for all assignments to ALL_* variables.
+
+	* make/make_defs.inc:
+	Added rule for build of precompiled headers, added PCHFLAGS to cxx
+	compilation rules.
+
 2006-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* include/gcc-config.h:

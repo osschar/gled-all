@@ -1,5 +1,9 @@
 2006-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* gled.pch.h:
+	New file, selection of GledCore headers for pre-compilation of
+	headers.
+
 	* Makefile:
 	Use '+=' for assignment to LIBSET_PREREQS/TARGETS; moved kerberos
 	include after including make_base.
