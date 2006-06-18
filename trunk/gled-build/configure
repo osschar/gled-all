@@ -51,7 +51,7 @@ sub deduce_libset_list {
     }
     close F;
   } elsif($config->{LIBSETS} eq '<auto>' or $config->{LIBSETS} eq '<auto-prompt>') {
-    open F, 'find . -type d -name [A-Z]\* -maxdepth 1 -printf "%P\n" | grep -v CVS |';
+    open F, 'find . -maxdepth 1 -type d -name [A-Z]\* -printf "%P\n" | grep -v CVS |';
     while($_=<F>) {
       chomp;
       push @l, $_;
@@ -248,6 +248,14 @@ if($config->{RECONFIGURE} == 0) {
   print CH "#endif\n";
   close CH;
 
+  # Pre-compiled headers
+  if ($config->{USE_PCH} eq '<auto>') {
+    my $gcc_ver = exec_or_die('echo -e "all:\n\t\${CXX} --version" | make -f -');
+    
+    my ($gcc_major, $gcc_minor) = $gcc_ver =~ m/(\d+)\.(\d+)\.\d+/;
+    $config->{USE_PCH} = $gcc_major >= 4 ? 1 : 0;
+  }
+
   # make/make_config.inc
   my $skipview = $config->{NOVIEWLIBS} ? "true" : "";
   my $skiprnr  = $config->{NORNRLIBS}  ? "true" : "";
@@ -269,6 +277,9 @@ if($config->{RECONFIGURE} == 0) {
   push @user_ld_elms, $config->{USER_LD_FLAGS} if $config->{USER_LD_FLAGS};
   my $user_ld  = join(' ', @user_ld_elms);
 
+  my $pchuse = $config->{USE_PCH} ? "yes" : "";
+  my $pchflg = $config->{USE_PCH} ? "-include gled.pch.h" : "";
+
   my $sys_specific = system_make_config();
 
   open MC, ">make/make_config.inc";
@@ -287,6 +298,10 @@ USER_CPP_FLAGS = $user_cpp
 USER_CXX_FLAGS = $user_cxx
 USER_LD_FLAGS  = $user_ld
 
+USE_PCH        = $pchuse
+PCHFLAGS       = $pchflg
+PCH_SRC_NAME   = $config->{PCH_NAME}
+PCH_OBJ_NAME   = $config->{PCH_NAME}.$config->{PCH_OBJ_SUFF}
 
 ################################################################
 # System '$system' specific settings
