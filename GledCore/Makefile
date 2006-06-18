@@ -17,7 +17,6 @@ DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView FL
 VIEW_FL_DIRS	= FL
 
-CPPFLAGS	=-I/usr/kerberos/include
 BASE_LD_LIBS	=-lssl -Llib -l${REGEXP_LIB_BASE}
 
 MAINSRCS := saturn.cxx gled.cxx
@@ -33,8 +32,10 @@ PUPILS_OBJS    := $(addsuffix .o ,$(basename ${PUPILS_SRCS}))
 include ${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------
 
-LIBSET_PREREQS := ${REGEXP_LIB}
-LIBSET_TARGETS := bin/saturn
+CPPFLAGS +=-I/usr/kerberos/include
+
+LIBSET_PREREQS += ${REGEXP_LIB}
+LIBSET_TARGETS += bin/saturn
 
 ifndef SKIP_VIEW_LIBS
   LIBSET_TARGETS   += bin/gled
