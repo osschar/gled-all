@@ -1,3 +1,9 @@
+2006-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Use '+=' for assignment to LIBSET_PREREQS/TARGETS; moved kerberos
+	include after including make_base.
+
 2006-06-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
