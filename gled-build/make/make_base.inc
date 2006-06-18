@@ -88,10 +88,18 @@ ${VIEW_LIB_NAME}: ${VIEW_LIB_OBJS}
 # Targets
 ##########################################################################
 
-ALL_SRCS = ${BLESSED_SRCS} ${BASE_SRCS} ${DICT_AUTO_SRCS}
-ALL_HDRS = ${BASE_HDRS}
-ALL_OBJS = ${BASE_LIB_OBJS}
-ALL_LIBS = base_lib
+ifdef USE_PCH
+ifeq ($(wildcard ${PCH_SRC_NAME}),${PCH_SRC_NAME})
+ALL_SRCS += ${PCH_SRC_NAME}
+ALL_OBJS += ${PCH_OBJ_NAME}
+LIBSET_PREREQS += ${PCH_OBJ_NAME}
+endif
+endif
+
+ALL_SRCS += ${BLESSED_SRCS} ${BASE_SRCS} ${DICT_AUTO_SRCS}
+ALL_HDRS += ${BASE_HDRS}
+ALL_OBJS += ${BASE_LIB_OBJS}
+ALL_LIBS += base_lib
 
 ifndef SKIP_VIEW_LIBS
 ALL_SRCS += ${VIEW_SRCS} ${VIEW_FL_SRCS} ${VIEW_AUTO_SRCS}
