@@ -9,7 +9,10 @@ envsetupstem	=s	.	ENVSETUPSTEM	"build_env"
 ### compile/link options ###
 ucpp		=s	.	USER_CPP_FLAGS	""
 ucxx		=s	.	USER_CXX_FLAGS	""
-uld		=s	.	USER_LD_FLAGS	""	
+uld		=s	.	USER_LD_FLAGS	""
+usepch		!	.	USE_PCH		"<auto>"
+pchname         =s      .       PCH_NAME        "gled.pch.h"
+pchobjsuff      =s      .       PCH_OBJ_SUFF    "gch"
 debug		!	.	DEBUG		0
 # directories where foreign software is installed (eg. /opt); ':' separated
 external	=s	.	EXTERNAL	""
