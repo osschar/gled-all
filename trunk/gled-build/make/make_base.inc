@@ -93,6 +93,7 @@ ifeq ($(wildcard ${PCH_SRC_NAME}),${PCH_SRC_NAME})
 ALL_SRCS += ${PCH_SRC_NAME}
 ALL_OBJS += ${PCH_OBJ_NAME}
 LIBSET_PREREQS += ${PCH_OBJ_NAME}
+DEPEND_TGTS    += ${PCH_OBJ_NAME}
 endif
 endif
 
