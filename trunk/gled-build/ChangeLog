@@ -1,3 +1,12 @@
+2006-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_targets.inc:
+	Modified default: target to include depend; specified full
+	dependencies for make_depend.inc.
+
+	* make/make_base.inc:
+	When pch enabled add ${PCH_OBJ_NAME} to ${DEPEND_TGTS}.
+
 2006-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Support for use of pre-compiled headers.
