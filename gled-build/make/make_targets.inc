@@ -6,8 +6,12 @@
 #
 ##########################################################################
 
-default:	${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
-		${MAKE} install
+all_targets: ${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
+
+default:
+	${MAKE} depend
+	${MAKE} all_targets
+	${MAKE} install
 
 base_lib:	${BASE_LIB_NAME}
 	@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
@@ -62,9 +66,11 @@ pre_depend:: auto_dirs catalog glue
 
 p7dep: ${BLESSED_H7} ${P7_AUTO_HDRS}
 
-depend:	p7dep ${DICT_AUTO_HDRS} ${VIEW_SECS}
+make_depend.inc: ${ALL_HDRS} ${ALL_SRCS}
 	${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- ${ALL_SRCS} \
 	  -f- > make_depend.inc 2>/dev/null
+
+depend:	p7dep ${DICT_AUTO_HDRS} ${VIEW_SECS} make_depend.inc ${DEPEND_TGTS}
 
 # Cleaners
 .PHONY:	dist clean distclean
