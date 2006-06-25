@@ -18,9 +18,7 @@ my $dict = $config->{DICT_DIR};
 
 while($_=shift) {
   ($cname) = m!/(\w+).h$!;
-  # $cname is now base name ... also class name
-
-  print "Messing $_ as $cname.\n";
+  # $cname is base name of the file and class name
 
   my $pragma_suff;
   my $pragma_link;
@@ -61,8 +59,8 @@ END
          "-I. $ENV{CPPFLAGS} -I$ENV{ROOTSYS}/include " .
 	 "$_ $dict/${cname}_LinkDef.h";
   print $exe."\n";
-  `$exe`;
-  exit($_) if($?)
+  my $ret = `$exe`;
+  croak $ret if $?
 }
 # Remove all traces
 #unlink "${cname}_LinkDef.h";
