@@ -9,7 +9,7 @@
 all_targets: ${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
 
 default:
-	${MAKE} depend
+	${MAKE} libset_depend
 	${MAKE} all_targets
 	${MAKE} install
 
@@ -48,7 +48,7 @@ bin_dist:
 	tar cf ${BIN_DIST_TAR} Readme_${LIB_SET_NAME} ${INSTALL_DIRS}
 
 # Depend and pre-depend group
-.PHONY:	auto_dirs catalog glue pre_depend depend
+.PHONY:	auto_dirs catalog glue pre_depend libset_depend depend
 
 auto_dirs:
 	@mkdir -p ${GLUE_DIR} ${DICT_DIR} ${VIEW_DIR}
@@ -64,13 +64,17 @@ pre_depend:: auto_dirs catalog glue
 	${MKP7DEP}   ${ALL_HDRS}  > make_p7.inc
 	${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
 
-p7dep: ${BLESSED_H7} ${P7_AUTO_HDRS}
+p7dep: ${BLESSED_H7} ${P7_AUTO_HDRS} ${VIEW_SECS}
 
 make_depend.inc: ${ALL_HDRS} ${ALL_SRCS}
 	${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- ${ALL_SRCS} \
 	  -f- > make_depend.inc 2>/dev/null
 
-depend:	p7dep ${DICT_AUTO_HDRS} ${VIEW_SECS} make_depend.inc ${DEPEND_TGTS}
+libset_depend: p7dep ${DICT_AUTO_HDRS} make_depend.inc ${DEPEND_TGTS}
+
+depend:
+	@rm -f make_depend.inc
+	${MAKE} libset_depend
 
 # Cleaners
 .PHONY:	dist clean distclean
