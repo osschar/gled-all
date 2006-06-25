@@ -58,7 +58,7 @@ sub deduce_libset_list {
     }
     close F;
     print "The following libsets will be configured for building:\n";
-    print "  " . join(' ', @l) . "\n";
+    print "  " . join(':', @l) . "\n";
     if($config->{LIBSETS} eq '<auto-prompt>') {
       print "Is this OK? <y or enter for ok> ";
       my $answ = <STDIN>;
