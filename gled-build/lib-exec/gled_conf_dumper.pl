@@ -18,7 +18,8 @@ if($command eq "lid2libname") {
   if(exists $resolver->{LibID2LibSetName}{$lid}) {
     print $resolver->{LibID2LibSetName}{$lid} . "\n";
   } else {
-    print "<LibSet $lid not found>\n";
+    print STDERR "$0: LibSet $lid not found!\n";
+    exit 1;
   }
 }
 
@@ -28,7 +29,8 @@ elsif($command eq "cppflags") {
   if( exists $resolver->{LibName2LibSpecs}{$lsname}{CPP_FLAGS} ) {
     print $resolver->{LibName2LibSpecs}{$lsname}{CPP_FLAGS} . "\n";
   } else {
-    print "<LibSet $lsname not found>\n";
+    print STDERR "LibSet $lsname not found!\n";
+    exit 1;
   }
 }
 
