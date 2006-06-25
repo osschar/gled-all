@@ -1,3 +1,24 @@
+2006-06-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	Print libset-list with ':' as separator (instead of ' ').
+
+	* lib-exec/gled_conf_dumper.pl:
+	Print errors to stderr, exit with non-zero status.
+
+	* lib-exec/mk_dict_dep.pl:
+	Execute rootcint without command echo.
+
+	* lib-exec/mk_dict_gen.pl:
+	Croak and die with error if rootcint execution fails.
+
+	* make/make_targets.inc:
+	Renamed depend to libset_depend and depend a special target that
+	forces regeneratgion of dependency file by removing it and calling
+	'make libset_depend'. This should be used to regenerate
+	dependencies across libsets. We need to introduce individual
+	dependencies for object files.
+
 2006-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:
