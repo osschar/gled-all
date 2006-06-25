@@ -22,5 +22,5 @@ while($hname=shift) {
   ($dir, $base) = $hname =~ m!^(\w+)/(\w+)!;
   $dbase = "$config->{DICT_DIR}/$base";
   print "$dbase.cc $dbase.h:\t$hname\n";
-  print "\t(CPPFLAGS=\"\${CPPFLAGS}\" \${MKDICTGEN} $hname)\n";
+  print "\t\@(CPPFLAGS=\"\${CPPFLAGS}\" \${MKDICTGEN} $hname)\n";
 }
