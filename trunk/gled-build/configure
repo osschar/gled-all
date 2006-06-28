@@ -278,7 +278,7 @@ if($config->{RECONFIGURE} == 0) {
   my $user_ld  = join(' ', @user_ld_elms);
 
   my $pchuse = $config->{USE_PCH} ? "yes" : "";
-  my $pchflg = $config->{USE_PCH} ? "-include gled.pch.h" : "";
+  my $pchflg = $config->{USE_PCH} ? "-Winvalid-pch -include $config->{PCH_NAME}" : "";
 
   my $sys_specific = system_make_config();
 
@@ -301,7 +301,6 @@ USER_LD_FLAGS  = $user_ld
 USE_PCH        = $pchuse
 PCHFLAGS       = $pchflg
 PCH_SRC_NAME   = $config->{PCH_NAME}
-PCH_OBJ_NAME   = $config->{PCH_NAME}.$config->{PCH_OBJ_SUFF}
 
 ################################################################
 # System '$system' specific settings
