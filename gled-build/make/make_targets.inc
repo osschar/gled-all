@@ -6,19 +6,20 @@
 #
 ##########################################################################
 
+
 all_targets: ${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
 
 default:
-	${MAKE} libset_depend
+	${MAKE} depend
 	${MAKE} all_targets
 	${MAKE} install
 
-base_lib:	${BASE_LIB_NAME}
+base_lib: ${BASE_LIB_NAME}
 	@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
 
-view_lib:	${VIEW_LIB_NAME}
+view_lib: ${VIEW_LIB_NAME}
 
-rnr_libs:	${RNR_LIBS}
+rnr_libs: ${RNR_LIBS}
 
 # Install/uninstall
 .PHONY: build_install build_uninstall install uninstall
@@ -64,17 +65,16 @@ pre_depend:: auto_dirs catalog glue
 	${MKP7DEP}   ${ALL_HDRS}  > make_p7.inc
 	${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
 
-p7dep: ${BLESSED_H7} ${P7_AUTO_HDRS} ${VIEW_SECS}
+depend:: ${BLESSED_H7} ${P7_AUTO_HDRS} ${VIEW_SECS}
 
-make_depend.inc: ${ALL_HDRS} ${ALL_SRCS}
-	${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- ${ALL_SRCS} \
-	  -f- > make_depend.inc 2>/dev/null
+depend:: ${DICT_AUTO_HDRS} 
 
-libset_depend: p7dep ${DICT_AUTO_HDRS} make_depend.inc ${DEPEND_TGTS}
+depend:: ${ALL_DEPS} ${DEPEND_TGTS}
+	@touch .depend_done
 
-depend:
-	@rm -f make_depend.inc
-	${MAKE} libset_depend
+ifneq ($(wildcard .depend_done),)
+-include ${ALL_DEPS}
+endif
 
 # Cleaners
 .PHONY:	dist clean distclean
@@ -83,7 +83,7 @@ dist:
 	(cd ..; tar czf ${LIB_SET_NAME}-`date +"%y%m%d-%H%M"`.tgz ${LIB_SET_NAME})
 
 clean::
-	@rm -f ${ALL_OBJS}
+	@rm -f ${ALL_OBJS} ${ALL_DEPS} .depend_done
 
 distclean::
 	${MAKE} uninstall
@@ -92,8 +92,7 @@ distclean::
 	@rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}
 	@rm -rf ${VIEW_FL_SECS} ${BLESSED_H7} ${BLESSED_C7}
 	@rm -rf lib/.${LIB_SET_ID} lib/lib* catalog.auto \
-		make_bless.inc make_p7.inc make_view.inc make_dict.inc \
-		make_depend.inc htmldoc
+		make_bless.inc make_p7.inc make_view.inc make_dict.inc htmldoc
 #	some .h7, .c7 may still be lurking around ... ditch 'em
 	find . -name '*.h7' -or -name '*.c7' | xargs rm -f
 
