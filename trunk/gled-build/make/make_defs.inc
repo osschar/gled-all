@@ -36,8 +36,14 @@ LDFLAGS	 += ${USER_LD_FLAGS}
 
 # PCHFLAGS, LDSHAREDOPT, LDEXT set by configure
 
-# Pain ... X4 comes with somewhat broken makedepend ... perhaps fixed ??
-MKDEPFLAGS	= -Y -w 666
+# ROOT-mkdepend is a copy of old makedepend shipped with X11.
+MKDEPFLAGS	= -Y -w 6666
+
+ifdef GLEDVERBOSE
+MUTE:=
+else
+MUTE:=@
+endif
 
 ##########################################################################
 # Basic external libraries
@@ -59,21 +65,37 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 # Rules
 ##########################################################################
 
-.SUFFIXES: .C .c .cc .cxx .css .o .fl .h .H .hgs .hss
+.SUFFIXES: .C .c .cc .cxx .o .d .fl .h .H .hgs
 # .cxx: std extension, .C fluid, .cc dictonary
 
 %.o: %.cc
-	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
+	@echo -+- Compiling $<
+	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
 
 %.o: %.cxx
-	${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
-
-%.o: %.css %.hss
-	${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
+	@echo -*- Compiling $<
+	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
 
 %.pch.h.gch: %.pch.h
-	${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
+	@echo -@- Precompiling $<
+	${MUTE} ${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
+
+%.d: %.cxx
+	@echo \<-- Mkdepend $<
+	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
+	  perl -pe "s!$*\.o!$*.d $*.o!o; s![^\s]+\.[hc]7 *!!og;" > $@
+
+%.d: %.cc
+	@echo \<-- Mkdepend $<
+	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
+	  perl -pe "s!$*\.o!$*.d $*.o!o; s![^\s]+\.[hc]7 *!!og;" > $@
+
+%.pch.h.d: %.pch.h
+	@echo \<-- Mkdepend $<
+	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
+	  perl -pe "s!$*\.pch\.o!$*.pch.h.d $*.pch.h.gch!o; s![^\s]+\.[hc]7 *!!og;" > $@
 
 # Fluid rule with fix ... keep intermidiate files
 %.C %.H:: %.fl
-	${FLUID} -c -o $(subst .fl,.C,$<) -h $(subst .fl,.H,$<) $<
+	@echo -F- Fluid $<
+	${MUTE} ${FLUID} -c -o $(subst .fl,.C,$<) -h $(subst .fl,.H,$<) $<
