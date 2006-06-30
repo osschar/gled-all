@@ -10,7 +10,7 @@ int _TA_Texture::Load(const char* fname, int w, int h)
   fW = w; fH = h;
   FILE* in = fopen(fname, "r"); if(!in) return 1;
   if(pData) delete [] pData; pData = new GLubyte[fW*fH*3]; if(!pData) return 2;
-  size_t ri = fread(pData, 3, fW*fH, in); fclose(in);
+  int ri = fread(pData, 3, fW*fH, in); fclose(in);
   if(ri != fW*fH ) {
     delete [] pData; pData = 0; fW = 0; fH = 0;
     return 3;

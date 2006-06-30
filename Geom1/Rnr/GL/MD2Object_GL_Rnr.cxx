@@ -200,7 +200,7 @@ void MD2Object_GL_Rnr::Draw(RnrDriver* rd)
   float sfTime = M.mFrameTime;
   if(sfTime > rkHeader.iNumFrames - 1)
     sfTime = rkHeader.iNumFrames - 1;
-  int iCurrFrame = TMath::Floor(sfTime);
+  int iCurrFrame = (int) TMath::Floor(sfTime);
   int iNextFrame = iCurrFrame + 1;
   if(iNextFrame >= rkHeader.iNumFrames)
     iNextFrame = iCurrFrame;

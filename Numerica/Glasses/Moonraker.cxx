@@ -23,8 +23,13 @@ void Moonraker::_init()
 {
   mODECrawler = 0;
 
-  Double_t earth_mass=5.9736e24, em_dist=383200e3, month=656*3600, kappa=6.673e-11;
-  Double_t earth_r=6378e3, day=24*3600;
+  Double_t earth_mass = 5.9736e24;
+  Double_t kappa      = 6.673e-11;
+  Double_t earth_r    = 6378e3;
+  Double_t day        = 24*3600;
+  // Double_t em_dist = 383200e3;
+  // Double_t month   = 656*3600; // 27 + 1/3 days
+
   hKappa = kappa*earth_mass*day*day/earth_r/earth_r/earth_r;
   hEscapeVelocity = TMath::Sqrt(2*hKappa);
   mT0Moon = 27.3333; mRMoon = 0.2725; mMMoon = 0.0123; mDMoon = 60.0815;

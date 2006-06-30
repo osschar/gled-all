@@ -105,14 +105,14 @@ void ZKing::BlessMIR(ZMIR& mir)
 
 void ZKing::Enthrone(ZQueen* queen)
 {
-  ID_t w = queen->GetIDSpan();
-  if(mMaxID==mMaxUsedID || mMaxID - mMaxUsedID < queen->mIDSpan) {
+  ID_t id_span = queen->GetIDSpan();
+  if(mMaxID==mMaxUsedID || mMaxID - mMaxUsedID < id_span) {
     assert(0);    
   }
   queen->mKing   = this;
   queen->mSaturn = mSaturn;
   queen->mMinID = mMaxUsedID + 1;
-  mMaxUsedID += queen->mIDSpan;
+  mMaxUsedID += id_span;
   queen->mMaxID = mMaxUsedID;
   queen->bootstrap();
   Add(queen);
