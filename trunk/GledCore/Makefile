@@ -47,12 +47,14 @@ ifndef SKIP_VIEW_LIBS
 endif
 
 bin/saturn: saturn.o ${BASE_LIB_NAME}
-	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
+	${ECHO} -X- Linking $@
+	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
 	-Llib -l${LIB_SET_NAME} -l${REGEXP_LIB_BASE} \
 	${ROOTLIBS} ${SYSLIBS}
 
 bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
-	${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
+	${ECHO} -X- Linking $@
+	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
 	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View -l${REGEXP_LIB_BASE} \
 	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
 
@@ -60,7 +62,8 @@ ${REGEXP_LIB}:
 	${MAKE} -C RegExp
 
 ${PUPILS_LIB}: ${PUPILS_OBJS}
-	${LD} ${LDSHAREDOPT} -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
+	${ECHO} -X- Linking $@
+	${MUTE} ${LD} ${LDSHAREDOPT} -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_targets.inc
