@@ -18,7 +18,8 @@ while($f=shift) {
     if(/^\s*\#include\s+\"(\w+)\.h7\"/) {
       print "$file_stem.o: $dir/$1.h7\n";
       print "$dir/$1.h7: $file_stem.h\n";
-      print "\t\${P7} -c $1 -i $f -1 $dir/$1.h7\n";
+      print "\t\${ECHO} -7- Project7 \$<\n";
+      print "\t\${MUTE} \${P7} -c $1 -i $f -1 $dir/$1.h7\n";
       push @hdrs, "$dir/$1.h7";
       push @srcs, "$dir/$1.c7";
     }

@@ -58,7 +58,7 @@ END
   $exe = "rootcint -f $dict/$cname.cc -c -p $cintopts " .
          "-I. $ENV{CPPFLAGS} -I$ENV{ROOTSYS}/include " .
 	 "$_ $dict/${cname}_LinkDef.h";
-  print $exe."\n";
+  # print $exe."\n";
   my $ret = `$exe`;
   croak $ret if $?
 }

@@ -94,7 +94,7 @@ sub collect_dependencies {
   my $libset = shift;
   my $deparr = shift;
 
-  my $deps = exec_or_die("make -s -C $libset echo_requires_libsets");
+  my $deps = exec_or_die("GLED_QUIET=1 make -s -C $libset echo_requires_libsets");
   chomp $deps;
   my @deps = split /\s+/, $deps;
   for $d (@deps) {
@@ -323,8 +323,9 @@ fnord
     print MC "${rnr}_RNR_LIB_NAME\t:= lib/lib\${LIB_SET_NAME}_Rnr_$rnr.\${LDEXT}\n";
 
     print MC "\${${rnr}_RNR_LIB_NAME}:\t \${${rnr}_RNR_OBJS}\n";
-    print MC "\t\${LD} -o \${${rnr}_RNR_LIB_NAME} \${LDSHAREDOPT} \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib \\\n" .
-      "\t\t\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \${LD_SURPLUS}\n";
+    print MC "\t\${ECHO} -X- Linking \$\@\n";
+    print MC "\t\${MUTE} \${LD} -o \$\@ \${LDSHAREDOPT} \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib " .
+             "\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \${LD_SURPLUS}\n";
     print MC "RNR_SRCS += \${${rnr}_RNR_SRCS}\n";
     print MC "RNR_HDRS += \${${rnr}_RNR_HDRS}\n";
     print MC "RNR_OBJS += \${${rnr}_RNR_OBJS}\n";

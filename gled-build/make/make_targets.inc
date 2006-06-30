@@ -55,15 +55,20 @@ auto_dirs:
 	@mkdir -p ${GLUE_DIR} ${DICT_DIR} ${VIEW_DIR}
 
 catalog:
-	${GLEDCATGEN} ${LIB_SET_NAME} ${LIB_SET_ID} ${BLESSED_DIRS}
+	${ECHO} -C- Generating glass catalog
+	${MUTE} ${GLEDCATGEN} ${LIB_SET_NAME} ${LIB_SET_ID} ${BLESSED_DIRS}
 
 glue:
-	${GLEDGLUEGEN} ${REQUIRES_LIB_SETS} :: ${RENDERERS}
+	${ECHO} -G- Generating glass glue
+	${MUTE} ${GLEDGLUEGEN} ${REQUIRES_LIB_SETS} :: ${RENDERERS}
 
 pre_depend:: auto_dirs catalog glue
-	${MKBLESSDEP}
-	${MKP7DEP}   ${ALL_HDRS}  > make_p7.inc
-	${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
+	${ECHO} -d- Generating p7 dependencies for glasses
+	${MUTE} ${MKBLESSDEP}
+	${ECHO} -d- Generating p7 dependencies for non-glasses
+	${MUTE} ${MKP7DEP}   ${ALL_HDRS}  > make_p7.inc
+	${ECHO} -d- Generating ROOT dictionary dependencies
+	${MUTE} ${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
 
 depend:: ${BLESSED_H7} ${P7_AUTO_HDRS} ${VIEW_SECS}
 
