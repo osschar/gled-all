@@ -1,5 +1,11 @@
 2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* make/make_targets.inc:
+	Added echoes and mutes to (un)install, (dist)clean and pre_build
+	targets.
+
+2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* configure:
 	* lib-exec/mk_bless_dep.pl:
 	* lib-exec/mk_dict_dep.pl:
