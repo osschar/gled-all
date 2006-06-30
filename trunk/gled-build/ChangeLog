@@ -1,3 +1,19 @@
+2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* lib-exec/mk_bless_dep.pl:
+	* lib-exec/mk_dict_dep.pl:
+	* lib-exec/mk_dict_gen.pl:
+	* lib-exec/mk_p7_dep.pl:
+	* make/make_base.inc:
+	* make/make_defs.inc:
+	* make/make_targets.inc:
+	Added echoes and mutes to all targets; make printout is controlled
+	by variables GLED_ECHO_CMDS and GLED_QUIET. Define the first to
+	enable command echoing and the second to prevent printing of short
+	messages for most targets. Additionally, use '-s' flag to turn-off
+	make's entering/leaving directory messages.
+
 2006-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Clean-up of make-files, generate separate .d dependency files for
