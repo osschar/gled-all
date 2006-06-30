@@ -25,21 +25,25 @@ rnr_libs: ${RNR_LIBS}
 .PHONY: build_install build_uninstall install uninstall
 
 build_install:
-	${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
+	${ECHO} -I- Build-install
+	${MUTE} ${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
 
 build_uninstall:
-	${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
+	${ECHO} -I- Build-uninstall
+	${MUTE} ${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
 
 install::
+	${ECHO} -I- Installing
 ifeq (${GLED_SYSTEM},Darwin)
-	cd lib; ${GLEDSYS}/lib-exec/gled_liblink.sh .dylib .so
+	${MUTE} cd lib; ${GLEDSYS}/lib-exec/gled_liblink.sh .dylib .so
 endif
-	${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
-	@echo ${LIB_SET_NAME} > ${GLEDSYS}/lib/.${LIB_SET_ID}
+	${MUTE} ${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
+	${MUTE} echo ${LIB_SET_NAME} > ${GLEDSYS}/lib/.${LIB_SET_ID}
 
 uninstall:
-	@rm -f ${GLEDSYS}/lib/.${LIB_SET_ID}
-	${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
+	${ECHO} -I- Uninstalling
+	${MUTE} rm -f ${GLEDSYS}/lib/.${LIB_SET_ID}
+	${MUTE} ${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
 
 # like install ... only into a tar file (also Readme_<libset> is added)
 # make sure to set environment variable BIN_DIST_TAR
@@ -52,7 +56,7 @@ bin_dist:
 .PHONY:	auto_dirs catalog glue pre_depend libset_depend depend
 
 auto_dirs:
-	@mkdir -p ${GLUE_DIR} ${DICT_DIR} ${VIEW_DIR}
+	${MUTE} mkdir -p ${GLUE_DIR} ${DICT_DIR} ${VIEW_DIR}
 
 catalog:
 	${ECHO} -C- Generating glass catalog
@@ -88,18 +92,18 @@ dist:
 	(cd ..; tar czf ${LIB_SET_NAME}-`date +"%y%m%d-%H%M"`.tgz ${LIB_SET_NAME})
 
 clean::
-	@rm -f ${ALL_OBJS} ${ALL_DEPS} .depend_done
+	${MUTE} rm -f ${ALL_OBJS} ${ALL_DEPS} .depend_done
 
 distclean::
 	${MAKE} uninstall
 	${MAKE} build_uninstall
 	${MAKE} clean
-	@rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}
-	@rm -rf ${VIEW_FL_SECS} ${BLESSED_H7} ${BLESSED_C7}
-	@rm -rf lib/.${LIB_SET_ID} lib/lib* catalog.auto \
+	${MUTE} rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}
+	${MUTE} rm -rf ${VIEW_FL_SECS} ${BLESSED_H7} ${BLESSED_C7}
+	${MUTE} rm -rf lib/.${LIB_SET_ID} lib/lib* catalog.auto \
 		make_bless.inc make_p7.inc make_view.inc make_dict.inc htmldoc
 #	some .h7, .c7 may still be lurking around ... ditch 'em
-	find . -name '*.h7' -or -name '*.c7' | xargs rm -f
+	${MUTE} find . -name '*.h7' -or -name '*.c7' | xargs rm -f
 
 ##########################################################################
 # echo group ... to be used w/ grep, perl, xargs ...
