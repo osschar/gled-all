@@ -37,8 +37,14 @@ TA_Unit::Load() {
   fclose(fp);
   build(this, (o3dInfo*)raw_data, raw_data);
   { // rename self from base->model name
-    char *beg = rindex(mFile.Data(), '/')+1, xx[256];
-    int i=0; while(beg[i]!='.') xx[i++] = beg[i]; xx[i] = 0;
+    char *beg = rindex(mFile.Data(), '/')+1;
+    char   xx[256];
+    int i=0;
+    while(beg[i] != '.') {
+      xx[i] = beg[i];
+      ++i;
+    }
+    xx[i] = 0;
     mName = xx;
   }
   Stamp();
