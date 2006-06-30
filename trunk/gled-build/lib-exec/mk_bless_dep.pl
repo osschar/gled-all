@@ -25,7 +25,8 @@ open V, ">make_view.inc";
 for $class (@{$CATALOG->{ClassList}}) {
   my $info = $CATALOG->{Classes}{$class};
   print B "$info->{Stem}.h7 $info->{Stem}.c7: $info->{Stem}.h\n";
-  print B "\t\${P7} -c $class -i $info->{Stem}.h -1 $info->{Stem}.h7 ".
+  print B "\t\${ECHO} -7- Project7 blessed base \$<\n";
+  print B "\t\${MUTE} \${P7} -c $class -i $info->{Stem}.h -1 $info->{Stem}.h7 ".
           "-3 $info->{Stem}.c7\n";
 
   my $dbase = "$config->{VIEW_DIR}/${class}View";
@@ -34,7 +35,8 @@ for $class (@{$CATALOG->{ClassList}}) {
   my $o = "$dbase.o";
   push @hdrs, $h; push @srcs, $c; push @objs, $o;
   print V "$c $h:\t$info->{Stem}.h\n";
-  print V "\t\${P7} -c $class -i $info->{Stem}.h -5 $h -7 $c\n";
+  print V "\t\${ECHO} -7- Project7 blessed view \$<\n";
+  print V "\t\${MUTE} \${P7} -c $class -i $info->{Stem}.h -5 $h -7 $c\n";
 }
 close B;
 print V "VIEW_AUTO_HDRS\t= ".join(' ', @hdrs)."\n";

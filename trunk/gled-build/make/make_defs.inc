@@ -39,11 +39,17 @@ LDFLAGS	 += ${USER_LD_FLAGS}
 # ROOT-mkdepend is a copy of old makedepend shipped with X11.
 MKDEPFLAGS	= -Y -w 6666
 
-ifdef GLEDVERBOSE
+ifdef GLED_ECHO_CMDS
 MUTE:=
 else
 MUTE:=@
 endif
+ifdef GLED_QUIET
+ECHO:=@echo > /dev/null
+else
+ECHO:=@echo
+endif
+export MUTE ECHO
 
 ##########################################################################
 # Basic external libraries
@@ -69,33 +75,33 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 # .cxx: std extension, .C fluid, .cc dictonary
 
 %.o: %.cc
-	@echo -+- Compiling $<
+	${ECHO} -+- Compiling $<
 	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
 
 %.o: %.cxx
-	@echo -*- Compiling $<
+	${ECHO} -*- Compiling $<
 	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
 
 %.pch.h.gch: %.pch.h
-	@echo -@- Precompiling $<
+	${ECHO} -@- Precompiling $<
 	${MUTE} ${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
 
 %.d: %.cxx
-	@echo \<-- Mkdepend $<
+	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
 	  perl -pe "s!$*\.o!$*.d $*.o!o; s![^\s]+\.[hc]7 *!!og;" > $@
 
 %.d: %.cc
-	@echo \<-- Mkdepend $<
+	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
 	  perl -pe "s!$*\.o!$*.d $*.o!o; s![^\s]+\.[hc]7 *!!og;" > $@
 
 %.pch.h.d: %.pch.h
-	@echo \<-- Mkdepend $<
+	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
 	  perl -pe "s!$*\.pch\.o!$*.pch.h.d $*.pch.h.gch!o; s![^\s]+\.[hc]7 *!!og;" > $@
 
 # Fluid rule with fix ... keep intermidiate files
 %.C %.H:: %.fl
-	@echo -F- Fluid $<
+	${ECHO} -F- Fluid $<
 	${MUTE} ${FLUID} -c -o $(subst .fl,.C,$<) -h $(subst .fl,.H,$<) $<
