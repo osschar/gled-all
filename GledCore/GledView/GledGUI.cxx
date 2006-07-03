@@ -312,7 +312,7 @@ void GledGUI::Run()
     mMessenger->Spawn();
   }
 
-  while(!bQuit) Fl::wait();
+  while(!bQuit) Fl::wait(10);
 
   Fl::unlock();
 
