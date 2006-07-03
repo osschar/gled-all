@@ -22,7 +22,8 @@ protected:
   TimeStamp_t	mStampTexture;
   GLuint	mTexture;
 
-  void init_texture();
+  void  check_rescale();
+  Int_t nearest_pow2(Int_t d);
 
 public:
   ZImage_GL_Rnr(ZImage* idol) : ZGlass_GL_Rnr(idol), mImage(idol) { _init(); }
@@ -33,6 +34,8 @@ public:
   virtual void PostDraw(RnrDriver* rd);
 
   virtual void Triangulate(RnrDriver* rd);
+
+  static Int_t sRescaleToPow2; // -1 unknown, 0 no rescale, 1
 
 }; // endclass ZImage_GL_Rnr
 

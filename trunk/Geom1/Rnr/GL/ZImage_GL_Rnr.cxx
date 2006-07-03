@@ -5,8 +5,11 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZImage_GL_Rnr.h"
+#include <Eye/Eye.h>
 
 /**************************************************************************/
+
+Int_t ZImage_GL_Rnr::sRescaleToPow2 = -1;
 
 void ZImage_GL_Rnr::_init()
 {
@@ -20,6 +23,56 @@ ZImage_GL_Rnr::~ZImage_GL_Rnr()
 }
 
 /**************************************************************************/
+
+void  ZImage_GL_Rnr::check_rescale()
+{
+  static const Exc_t _eh("ZImage_GL_Rnr::check_rescale ");
+
+  if (sRescaleToPow2 == -1) {
+    sRescaleToPow2 = 0;
+    TString vendor((const char*) glGetString(GL_VENDOR));
+
+    TString version((const char*) glGetString(GL_VERSION));
+    version.Replace(version.First(' '), 1024, 0, 0);
+    lStr_t vs; GledNS::split_string(version, vs, '.');
+    Int_t major = atoi(vs.front().Data()); vs.pop_front();
+    Int_t minor = atoi(vs.front().Data()); vs.pop_front();
+    Int_t patch = atoi(vs.front().Data()); vs.pop_front();
+
+    Exc_t mh = _eh + "enabling pow2 texture rescale: ";
+    if (major < 1 || major  == 1 && minor < 4) {
+      ISmess(mh + "GL < 1.4.");
+      sRescaleToPow2 = 1;
+    }
+    else if (vendor.BeginsWith("ATI")) {
+      if (major <= 2 && minor <= 0 && patch <= 5755) {
+        ISmess(mh + "ATI, GL <= 2.0.5755 (very slow rendering).");
+        sRescaleToPow2 = 1;
+      }
+    }
+  }
+
+  if (sRescaleToPow2 == 1) {
+    Int_t w = nearest_pow2(mImage->mW);
+    Int_t h = nearest_pow2(mImage->mH);
+    if (w != mImage->mW || h != mImage->mH) {
+      ISmess(GForm("%srescaling '%s' (%d,%d) -> (%d,%d).", _eh.Data(),
+                   mImage->GetName(), mImage->mW, mImage->mH, w, h));
+      iluImageParameter(ILU_FILTER, ILU_BILINEAR);
+      iluScale(w, h, 1);
+      mImage->mW = w;
+      mImage->mH = h;
+      auto_ptr<ZMIR> m( mImage->S_UpdateAllViews() );
+      fImg->fEye->Send(*m);
+    }
+  }
+}
+
+Int_t ZImage_GL_Rnr::nearest_pow2(Int_t d)
+{
+  Int_t np2 = (Int_t) TMath::Nint(TMath::Log2(d));
+  return 1 << np2;
+}
 
 void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 {
@@ -38,6 +91,7 @@ void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 
     ZImage::sILMutex.Lock();
     mImage->bind();
+    check_rescale();
     glTexImage2D(GL_TEXTURE_2D, 0, mImage->mIntFmt, mImage->mW, mImage->mH, 0,
 		 mImage->gl_format(), mImage->gl_type(), mImage->data());
     mImage->unbind();
