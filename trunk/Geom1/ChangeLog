@@ -1,3 +1,11 @@
+2006-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+	Added logick to automatically detect when rescaling of images to
+	pow2 is needed and apply it in such cases (GL<1.4, ATI fglrx very
+	slow for non-pow2 textures).
+
 2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GForge/Makefile:

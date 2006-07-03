@@ -1,3 +1,9 @@
+2006-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledView/GledGUI.cxx:
+	Added 10 second timeout to Fl::wait() in Run(); there was a
+	problem when running gled with no-main-window switch.
+
 2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZKing.cxx:
