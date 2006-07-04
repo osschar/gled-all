@@ -1,3 +1,32 @@
+2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Added flags bLoadAdBind and bSmartShadow to better control loading
+	and shadowing of images; new method IsBindable(); images in
+	color-index format are automatically converted to RGB8 format on
+	load.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Use IsBindable() to determine if texture-data is available.
+	
+	* GForge/Makefile:
+	Fixed type in linking message.
+
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Glasses/MultiBoard.cxx:
+	* Glasses/MultiBoard.h:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	Moved include of some link-types from .h to .cxx and replaced them
+	with forward declarations.
+
 2006-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ZImage_GL_Rnr.cxx:
