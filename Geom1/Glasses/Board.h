@@ -8,8 +8,9 @@
 #define Geom1_Board_H
 
 #include <Glasses/ZNode.h>
-#include <Glasses/ZImage.h>
 #include <Stones/ZColor.h>
+
+class ZImage;
 
 class Board : public ZNode {
   MAC_RNR_FRIENDS(Board);

@@ -15,7 +15,10 @@
 // 3) TimeMakerClient -> as given by the argument
 
 #include "WSWalker.h"
+#include <Glasses/WSSeed.h>
+#include <Glasses/ZNode.h>
 #include "WSWalker.c7"
+
 #include <Glasses/Eventor.h>
 
 ClassImp(WSWalker)

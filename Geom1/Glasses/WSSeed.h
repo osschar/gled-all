@@ -8,11 +8,11 @@
 #define Geom1_WSSeed_H
 
 #include <Glasses/ZNode.h>
-#include <Glasses/ZImage.h>
 #include <Stones/ZColor.h>
 #include <Stones/TimeMakerClient.h>
 
 class WSPoint;
+class ZImage;
 class TubeTvor;
 
 class WSSeed : public ZNode, public TimeMakerClient

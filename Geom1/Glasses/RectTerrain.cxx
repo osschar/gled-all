@@ -128,11 +128,17 @@ void RectTerrain::ApplyBorderCondition()
 
 void RectTerrain::SetFromImage(ZImage* image)
 {
+  static const Exc_t _eh("RectTerrain::SetFromImage ");
+
+  if(!image->IsBindable())
+    throw(_eh + "image '" + image->Identify() + "' not bindable.");
+    
   ZImage::sILMutex.Lock();
   image->bind();
   int w = image->w(), h = image->h();
   ILushort* data = new ILushort[w*h];
   ilCopyPixels(0,0,0, w,h,1, IL_LUMINANCE,IL_UNSIGNED_SHORT, data);
+  image->unbind();
   ZImage::sILMutex.Unlock();
 
   mNx = w; mNy = h;

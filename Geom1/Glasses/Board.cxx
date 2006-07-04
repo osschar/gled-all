@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Board.h"
+#include <Glasses/ZImage.h>
 #include "Board.c7"
 
 ClassImp(Board);

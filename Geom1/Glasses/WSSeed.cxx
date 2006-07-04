@@ -12,6 +12,7 @@
 // triangulation data.
 
 #include "WSSeed.h"
+#include "ZImage.h"
 #include "WSSeed.c7"
 #include "WSPoint.h"
 
