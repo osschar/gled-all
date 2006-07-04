@@ -76,7 +76,7 @@ Int_t ZImage_GL_Rnr::nearest_pow2(Int_t d)
 
 void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 {
-  if(mImage->bLoaded == true) {
+  if(mImage->IsBindable()) {
     if(mTexture == 0) {
       glGenTextures(1, &mTexture);
     }
