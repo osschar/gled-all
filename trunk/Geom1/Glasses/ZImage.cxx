@@ -11,7 +11,7 @@
 // It should be used for loading/saving/binding of images, as this class
 // contains a static mutex to perform locking of all IL operations.
 //
-// Some ILU image transformations are supported (blurring, contrast).
+// Some ILU image transformations are not wrapped yet.
 // Do NOT use shadowing when applying the transforms.
 
 #include "ZImage.h"
@@ -20,6 +20,8 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <GL/gl.h>
+
+#include <TSystem.h>
 
 namespace {
   /* IL reporting */
@@ -102,7 +104,9 @@ void ZImage::_init()
   mEnvMode = GL_DECAL;
 
   bLoadAdEnlight = false;
+  bLoadAdBind    = true;
   bUseShadowing  = true;
+  bSmartShadow   = true;
   bLoaded        = false;
   bShadowed      = false;
 }
@@ -141,29 +145,13 @@ void ZImage::Load()
 
   delete_image();
   bLoaded = false;
-  ilGenImages(1, &mIL_Name);
-  if(il_err("Gen images")) goto end;
 
-  ilBindImage(mIL_Name);
-  if(il_err("Bind Image")) goto end;
-
-  if (!ilLoadImage(const_cast<char *>(mFile.Data()))) {
-    il_err(GForm("Load Image <file:%s>", mFile.Data()));
-    goto end;
+  if(load_image()) {
+    bLoaded = true;
+    if(bUseShadowing && !bSmartShadow)
+      shadow();
   }
 
-  if(sVerboseLoad) il_id();
-
-  _setup();
-  mW = ilGetInteger(IL_IMAGE_WIDTH);
-  mH = ilGetInteger(IL_IMAGE_HEIGHT);
-  mImgFmt = gl_format();
-  mImgTyp = gl_type();
-  bLoaded = true;
-
-  if(bUseShadowing) shadow();
-
- end:
   mStampReqTring = Stamp(FID());
   sILMutex.Unlock();
 }
@@ -182,13 +170,24 @@ void ZImage::Save()
   // Could easily be implemented now ... that we have devil.
 }
 
+Bool_t ZImage::IsBindable()
+{
+  return bLoaded ||
+    (bLoadAdBind && mFile != "" &&
+     gSystem->AccessPathName(mFile, kReadPermission) == 0);
+}
+
 /**************************************************************************/
 
 void ZImage::shadow_check(const Exc_t& eh)
 {
-  if(bUseShadowing) {
-    warn_caller(eh + "has no effect with shadowing on.");
-    return;
+  if(IsBindable()) {
+    if(bUseShadowing && bSmartShadow) {
+      warn_caller(eh + "SmartShadow disbling shadowing on '" + Identify() + "'.");
+      bUseShadowing = false;
+    }
+  } else {
+    throw(eh + "'" + Identify() + "' not bindable.");
   }
 }
 
@@ -349,30 +348,32 @@ void ZImage::Diagonal(Float_t r, Float_t g, Float_t b)
 /**************************************************************************/
 
 // User's responsibility to lock/unlock image operations
-// and assert that image is loaded.
+// and assert that image is loaded (call IsBindable()).
 
 void ZImage::bind()
 {
-  if(bShadowed && bUseShadowing) {
+  static const Exc_t _eh("ZImage::bind ");
 
-    ilGenImages(1, &mIL_Name);
-    if(il_err("Gen images")) goto error;
-
-    ilBindImage(mIL_Name);
-    if(il_err("Bind Image")) goto error;
-
-    if (!ilLoadImage(const_cast<char *>(mFile.Data()))) {
-      il_err("Load Image");
+  if(!bLoaded && bLoadAdBind) {
+    if(load_image())
+      bLoaded = true;
+    else
       goto error;
-    }
-
-    bShadowed = false;
-
-  } else {
-
+  }
+  else if(bLoaded && bShadowed) {
+    if(load_image())
+      bShadowed = false;
+    else
+      goto error;
+  }
+  else if(bLoaded) {
     ilBindImage(mIL_Name);
-    if(il_err("Bind Image")) goto error;
-
+    if(il_err("Bind Image"))
+      goto error;
+  }
+  else {
+    warn_caller(_eh + "unexpected state for '" + Identify() + "'.");
+    goto error;
   }
   _setup();
   return;
@@ -402,6 +403,34 @@ void ZImage::delete_image()
     mIL_Name = 0;
     _reset();
   }
+}
+
+bool ZImage::load_image()
+{
+  ilGenImages(1, &mIL_Name);
+  if(il_err("Gen images")) return false;
+
+  ilBindImage(mIL_Name);
+  if(il_err("Bind Image")) return false;
+
+  if (!ilLoadImage(const_cast<char *>(mFile.Data()))) {
+    il_err(GForm("Load Image <file:%s>", mFile.Data()));
+    delete_image();
+    return false;
+  }
+
+  if(sVerboseLoad) il_id();
+
+  _setup();
+  mW = ilGetInteger(IL_IMAGE_WIDTH);
+  mH = ilGetInteger(IL_IMAGE_HEIGHT);
+  if(ilGetInteger(IL_IMAGE_FORMAT) == IL_COLOR_INDEX) {
+    ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
+  }
+  mImgFmt = gl_format();
+  mImgTyp = gl_type();
+
+  return true;
 }
 
 void ZImage::create_image(Int_t w, Int_t h, Int_t bpp)

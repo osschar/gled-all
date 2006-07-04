@@ -54,7 +54,9 @@ protected:
   ZColor	mEnvColor;	//  X{PGS} 7 ColorButt()
 
   Bool_t	bLoadAdEnlight; //  X{GS}  7 Bool(-join=>1)
-  Bool_t	bUseShadowing;  //  X{GE}  7 Bool()
+  Bool_t        bLoadAdBind;    //  X{GS}  7 Bool()
+  Bool_t	bUseShadowing;  //  X{GE}  7 Bool(-join=>1)
+  Bool_t        bSmartShadow;   //  X{GS}  7 Bool()
   Bool_t	bLoaded;	//! X{G}   7 BoolOut(-join=>1)
   Bool_t	bShadowed;	//! X{G}   7 BoolOut()
 
@@ -74,6 +76,8 @@ public:
   void Unload();  // X{E} 7 MButt(-join=>1)
   void Save();    // X{E} 7 MButt()
 
+  Bool_t IsBindable();
+
   void BlurAverage(UInt_t count=1);       // X{E} 7 MCWButt(-join=>1)
   void BlurGaussian(UInt_t count=1);      // X{E} 7 MCWButt()
   void Contrastify(Float_t contrast=1.1); // X{E} 7 MCWButt(-join=>1)
@@ -90,6 +94,7 @@ public:
   void  unbind();
   void	shadow();
   void  delete_image();
+  bool  load_image();
   void  create_image(Int_t w, Int_t h, Int_t bpp);
 
   int	w();
