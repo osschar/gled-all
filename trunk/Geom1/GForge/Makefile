@@ -19,7 +19,7 @@ GFORGE=   ../bin/gforge
 all:    ${GFORGE}
 
 ${GFORGE}: ${OBJS}
-	${ECHO} -X- Linking $<
+	${ECHO} -X- Linking $@
 	${MUTE} ${CC} -o ${GFORGE} ${OBJS} ${LIBS}
 
 ${OBJS}: %.o: %.c ${COMMON}
