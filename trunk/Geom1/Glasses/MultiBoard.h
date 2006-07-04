@@ -8,7 +8,8 @@
 #define Geom1_MultiBoard_H
 
 #include <Glasses/Board.h>
-#include <Glasses/ZHashList.h>
+
+class ZHashList;
 
 class MultiBoard : public Board
 {

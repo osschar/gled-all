@@ -10,7 +10,10 @@
 //
 
 #include "MultiBoard.h"
+#include <Glasses/ZHashList.h>
 #include "MultiBoard.c7"
+
+#include <Glasses/ZImage.h>
 #include <Glasses/ZQueen.h>
 
 ClassImp(MultiBoard)
@@ -18,10 +21,7 @@ ClassImp(MultiBoard)
 /**************************************************************************/
 
 void MultiBoard::_init()
-{
-  // !!!! Set all links to 0 !!!!
-  mSlides = 0;
-}
+{}
 
 void MultiBoard::AdEnlightenment()
 {

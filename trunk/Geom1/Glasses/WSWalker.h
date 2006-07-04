@@ -8,10 +8,11 @@
 #define Geom1_WSWalker_H
 
 #include <Glasses/Operator.h>
-#include <Glasses/WSSeed.h>
-#include <Glasses/ZNode.h>
-
+#include <Stones/ZTrans.h>
 #include <Stones/TimeMakerClient.h>
+
+class WSSeed;
+class ZNode;
 
 class WSWalker : public Operator, public TimeMakerClient
 {

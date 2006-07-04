@@ -10,8 +10,7 @@
 #include <Glasses/ZNode.h>
 #include <Stones/ZColor.h>
 
-#include <Glasses/ZImage.h>
-
+class ZImage;
 class TubeTvor;
 
 class SMorph : public ZNode
