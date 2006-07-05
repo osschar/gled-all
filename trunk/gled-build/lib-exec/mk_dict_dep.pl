@@ -20,8 +20,13 @@ Gled_ConfCat_Parser::import_build_config();
 
 while($hname=shift) {
   ($dir, $base) = $hname =~ m!^(\w+)/(\w+)!;
+  $oname = $hname; $oname =~ s/\.\w+$/.o/;
   $dbase = "$config->{DICT_DIR}/$base";
-  print "$dbase.cc $dbase.h:\t$hname\n";
+  print "$dbase.d: $hname\n";
+  print "\t\${ECHO} -d- Mk-dict-depend \$<\n";
+  print "\t\${MUTE} \${MKDEP} \${MKDEPFLAGS} -- \${LOCALINCL} -- \$< -f- 2>/dev/null | " .
+            "sed -e 's!$oname!$dbase.h $dbase.cc!; \${HC7_SED_FILTER};' > \$\@\n";
+  print "$dbase.cc $dbase.h: $hname\n";
   print "\t\${ECHO} -=- Rootcint \$<\n";
   print "\t\${MUTE} (CPPFLAGS=\"\${CPPFLAGS}\" \${MKDICTGEN} $hname)\n";
 }
