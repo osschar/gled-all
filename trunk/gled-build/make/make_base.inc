@@ -12,11 +12,10 @@ include ${GLEDSYS}/make/make_config.inc
 include ${GLEDSYS}/make/make_defs.inc
 include ${GLEDSYS}/make/make_rnr.inc
 
-# include all make_*.inc files ...
-ls_make_inc := $(wildcard make_*.inc)
-ifneq (${ls_make_inc},)
-include make_*.inc
-endif
+-include make_bless.inc
+-include make_p7.inc
+-include make_dict.inc
+-include make_view.inc
 
 LIBSET_DIR	= ${GLEDSYS}/${LIB_SET_NAME}
 ABOVE_BASE_LIBS	= $(addprefix -l, ${REQUIRES_LIB_SETS})
