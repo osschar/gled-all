@@ -31,41 +31,29 @@ void images()
   CREATE_ADD_GLASS(tex_cont, ZList, images, "Textures", 0);
 
   CREATE_ADD_GLASS(image1, ZImage, tex_cont, "GledLogo", 0);
-  image1->SetFile("gledlogo.png");
-  image1->Load();
   image1->SetEnvMode(GL_MODULATE);
-  image1->SetLoadAdEnlight(true);
+  image1->SetFile("gledlogo.png");
 
   CREATE_ADD_GLASS(image2, ZImage, tex_cont, "Orchid", 0);
   image2->SetFile("orchid.jpeg");
-  image2->Load();
-  image2->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(image3, ZImage, tex_cont, "HeightField", 0);
   image3->SetFile("terrain_128.png");
-  image3->Load();
-  image3->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(image4, ZImage, tex_cont, "Earth map", 0);
   image4->SetMagFilter(GL_LINEAR);
   image4->SetEnvMode(GL_MODULATE);
   image4->SetFile("earth.png");
-  image4->Load();
-  image4->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(image5, ZImage, tex_cont, "Moon map", 0);
   image5->SetMagFilter(GL_LINEAR);
   image5->SetEnvMode(GL_MODULATE);
   image5->SetFile("moon.jpeg");
-  image5->Load();
-  image5->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(image6, ZImage, tex_cont, "Checker", 0);
   image6->SetMagFilter(GL_LINEAR);
   image6->SetEnvMode(GL_MODULATE);
   image6->SetFile("checker_8.png");
-  image6->Load();
-  image6->SetLoadAdEnlight(true);
 
   CREATE_ADD_GLASS(ribbon1, ZRibbon, tex_cont, "Ribbon1", 0);
   ribbon1->SetPOVFile("ribbon1.pov");
@@ -144,7 +132,6 @@ void images()
   modtex->SetFile("md2/rei.png");
   modtex->SetMagFilter(GL_LINEAR);
   modtex->SetEnvMode(GL_MODULATE);
-  modtex->Load();
 
   CREATE_ADD_GLASS(mod2, MD2Object, images, "Faerie MD2", 0);
   mod2->SetFile("md2/faerie.md2");
@@ -159,7 +146,6 @@ void images()
   modtex2->SetFile("md2/faerie-1.png");
   modtex2->SetMagFilter(GL_LINEAR);
   modtex2->SetEnvMode(GL_MODULATE);
-  modtex2->Load();
 
   SMorph* morphs[3];
   for(int i=0; i<3; ++i) {
