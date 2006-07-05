@@ -117,6 +117,6 @@ ifndef SKIP_RNR_LIBS
 ALL_SRCS += ${RNR_SRCS}
 ALL_HDRS += ${RNR_HDRS}
 ALL_OBJS += ${RNR_OBJS}
-ALL_DEPS += $(BASE_LIB_OBJS:.o=.d)
+ALL_DEPS += $(RNR_OBJS:.o=.d)
 ALL_LIBS += rnr_libs
 endif
