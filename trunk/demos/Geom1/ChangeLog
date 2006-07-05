@@ -1,3 +1,10 @@
+2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* images.C:
+	* images2.C:
+	Removed Load()/SetLoadAdEnlight(true) calls for textures
+	(better handling of loading and shadowing in ZImage).
+
 2006-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* images.C:

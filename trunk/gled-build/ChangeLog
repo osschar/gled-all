@@ -1,3 +1,26 @@
+2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/mk_dict_dep.pl:
+	Added explicit rule for dictionary dependency generation (the
+	generic .d: .cc rule was problematic due to its dependence on .h7
+	files).
+
+	* lib-exec/mk_p7_dep.pl:
+	Cleanup.
+
+	* make/make_base.inc:
+	Include local make_xxx.inc files by fullname, not wildcard (order
+	matters).
+	
+	* make/make_defs.inc:
+	Removed .d: .cc dictionary rule; use sed (instead of perl) for
+	fixing of root-mkdepend generated .d files.
+
+	* make/make_targets.inc:
+	For 'default:': replaced sub-make execution of 'depend' with a
+	dependency; in 'clean:': find-and-remove .d and .o files (can
+	remain there if some files are removed/renamed).
+
 2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:
