@@ -9,8 +9,7 @@
 
 all_targets: ${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
 
-default:
-	${MAKE} depend
+default: depend
 	${MAKE} all_targets
 	${MAKE} install
 
@@ -93,6 +92,7 @@ dist:
 
 clean::
 	${MUTE} rm -f ${ALL_OBJS} ${ALL_DEPS} .depend_done
+	${MUTE} find . -name '*.d' -or -name '*.o' | xargs rm -f
 
 distclean::
 	${MAKE} uninstall
