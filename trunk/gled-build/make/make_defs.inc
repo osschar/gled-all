@@ -86,20 +86,17 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 	${ECHO} -@- Precompiling $<
 	${MUTE} ${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
 
+HC7_SED_FILTER := s![^ ]+\.[hc]7 *!!g
+
 %.d: %.cxx
 	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
-	  perl -pe "s!$*\.o!$*.d $*.o!o; s![^\s]+\.[hc]7 *!!og;" > $@
-
-%.d: %.cc
-	${ECHO} -d- Mkdepend $<
-	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
-	  perl -pe "s!$*\.o!$*.d $*.o!o; s![^\s]+\.[hc]7 *!!og;" > $@
+	  sed -re 's!$*\.o!$*.d $*.o!; ${HC7_SED_FILTER};' > $@
 
 %.pch.h.d: %.pch.h
 	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
-	  perl -pe "s!$*\.pch\.o!$*.pch.h.d $*.pch.h.gch!o; s![^\s]+\.[hc]7 *!!og;" > $@
+	  sed -re 's!$*\.pch\.o!$*.pch.h.d $*.pch.h.gch!; ${HC7_SED_FILTER};' > $@
 
 # Fluid rule with fix ... keep intermidiate files
 %.C %.H:: %.fl
