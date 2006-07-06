@@ -36,9 +36,10 @@ void  ZImage_GL_Rnr::check_rescale()
     TString version((const char*) glGetString(GL_VERSION));
     version.Replace(version.First(' '), 1024, 0, 0);
     lStr_t vs; GledNS::split_string(version, vs, '.');
-    Int_t major = atoi(vs.front().Data()); vs.pop_front();
-    Int_t minor = atoi(vs.front().Data()); vs.pop_front();
-    Int_t patch = atoi(vs.front().Data()); vs.pop_front();
+    Int_t major = 1, minor = 0, patch = 0;
+    if(!vs.empty()) { major = atoi(vs.front().Data()); vs.pop_front(); }
+    if(!vs.empty()) { minor = atoi(vs.front().Data()); vs.pop_front(); }
+    if(!vs.empty()) { patch = atoi(vs.front().Data()); vs.pop_front(); }
 
     Exc_t mh = _eh + "enabling pow2 texture rescale: ";
     if (major < 1 || major  == 1 && minor < 4) {
