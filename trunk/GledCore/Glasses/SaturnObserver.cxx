@@ -18,7 +18,6 @@ ClassImp(SaturnObserver)
 
 void SaturnObserver::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mTarget = 0;
 }
 

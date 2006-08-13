@@ -18,7 +18,6 @@ ClassImp(ZIdentityFilter)
 
 void ZIdentityFilter::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mIdentity = 0;
   mOnMatch = ZMirFilter::R_Allow;
 }

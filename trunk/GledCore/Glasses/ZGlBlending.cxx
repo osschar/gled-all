@@ -19,7 +19,6 @@ ClassImp(ZGlBlending)
 
 void ZGlBlending::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mBlendOp   = O_Nop;
   mBSrcFac   = GL_SRC_ALPHA;
   mBDstFac   = GL_ONE_MINUS_SRC_ALPHA;

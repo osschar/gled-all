@@ -18,7 +18,6 @@ ClassImp(Text)
 
 void Text::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mFont = 0;
 
   // Override settings from ZGlass

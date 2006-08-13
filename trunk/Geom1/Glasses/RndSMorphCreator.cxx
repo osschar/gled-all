@@ -22,7 +22,6 @@ ClassImp(RndSMorphCreator)
 
 void RndSMorphCreator::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mTarget = 0;
   bReportID  = true;
   bGetResult = true;

@@ -19,7 +19,6 @@ ClassImp(RelParticle)
 
 void RelParticle::_init()
 {
-  // !!!! Set all links to 0 !!!!
 }
 
 /**************************************************************************/
