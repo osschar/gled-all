@@ -52,7 +52,6 @@ ClassImp(GTSRetriangulator)
 
 void GTSRetriangulator::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mTarget = 0;
 
   mStopOpts = SO_Number;

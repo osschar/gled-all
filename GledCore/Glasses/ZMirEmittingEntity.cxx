@@ -19,7 +19,6 @@ ClassImp(ZMirEmittingEntity)
 
 void ZMirEmittingEntity::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mPrimaryIdentity  = 0;
   mActiveIdentities = 0;
 }

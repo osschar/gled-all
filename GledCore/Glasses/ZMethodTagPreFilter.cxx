@@ -20,7 +20,6 @@ ClassImp(ZMethodTagPreFilter)
 
 void ZMethodTagPreFilter::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mFilter = 0;
 }
 

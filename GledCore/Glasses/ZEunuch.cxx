@@ -19,7 +19,6 @@ ClassImp(ZEunuch)
 
 void ZEunuch::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mPrimQueen = 0;
   mSecQueen  = 0;
   mToSaturn = 0;

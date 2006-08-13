@@ -18,7 +18,6 @@ ClassImp(Box)
 
 void Box::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mA = mB = mC = 1;
 }
 

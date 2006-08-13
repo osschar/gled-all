@@ -19,7 +19,6 @@ ClassImp(ZGlMaterial)
 
 void ZGlMaterial::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mMatOp     = O_On;
   mFace      = GL_FRONT_AND_BACK;
   mShininess = 64;

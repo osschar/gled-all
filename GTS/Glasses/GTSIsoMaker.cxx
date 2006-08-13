@@ -22,7 +22,6 @@ ClassImp(GTSIsoMaker)
 
 void GTSIsoMaker::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mTarget = 0;
   mAlgo   = A_Cartesian;
   mValue  = 0;

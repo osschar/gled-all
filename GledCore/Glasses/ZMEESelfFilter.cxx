@@ -19,7 +19,6 @@ ClassImp(ZMEESelfFilter)
 
 void ZMEESelfFilter::_init()
 {
-  // !!!! Set all links to 0 !!!!
 }
 
 /**************************************************************************/

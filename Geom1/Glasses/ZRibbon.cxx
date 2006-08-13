@@ -19,7 +19,6 @@ ClassImp(ZRibbon)
 
 void ZRibbon::_init()
 {
-  // !!!! Set all links to 0 !!!!
   bLoadAdEnlight = false;
 }
 

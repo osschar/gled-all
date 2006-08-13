@@ -19,7 +19,6 @@ ClassImp(ZMirFilter)
 
 void ZMirFilter::_init()
 {
-  // !!!! Set all links to 0 !!!!
   mMapNoneTo = R_None;
 }
 

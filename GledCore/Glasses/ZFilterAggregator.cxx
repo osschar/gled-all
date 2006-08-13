@@ -19,7 +19,6 @@ ClassImp(ZFilterAggregator)
 
 void ZFilterAggregator::_init()
 {
-  // !!!! Set all links to 0 !!!!
   bStrongNone = bPreemptNone = false;
   bPreemptAllow = true;
   bPreemptDeny  = false;
