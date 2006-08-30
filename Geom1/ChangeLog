@@ -1,3 +1,15 @@
+2006-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Added method 'InsertPoint(Float_t time)' that allows insertion of
+	new points between two existing points so that the form of the
+	symbol does not change.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Implemented method 'Save(const Text_t* file)'.
+
 2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZImage.cxx:
