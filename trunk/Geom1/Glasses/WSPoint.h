@@ -46,6 +46,8 @@ public:
 
   void SetStretch(Float_t stretch);
 
+  void InsertPoint(Float_t time=0.5); // X{E} 7 MCWButt()
+
 #include "WSPoint.h7"
   ClassDef(WSPoint, 1);
 }; // endclass WSPoint
