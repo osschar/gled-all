@@ -165,9 +165,26 @@ void ZImage::Unload()
   sILMutex.Unlock();
 }
 
-void ZImage::Save()
+void ZImage::Save(const Text_t* file)
 {
-  // Could easily be implemented now ... that we have devil.
+  // Save image to file or mFile (if file not provided).
+  // Image must be loaded.
+
+  static const Exc_t _eh("ZImage::Save ");
+
+  if(!bLoaded)
+    throw(_eh + "image not loaded.");
+  if(file == 0) {
+    if(mFile.IsNull())
+      throw(_eh + "file-name not provided and mFile empty.");
+    file = mFile.Data();
+  }
+
+  sILMutex.Lock();
+  ilBindImage(mIL_Name);
+  ilSaveImage(file);
+  il_err(_eh.Data());
+  sILMutex.Unlock();
 }
 
 Bool_t ZImage::IsBindable()
@@ -245,21 +262,6 @@ void ZImage::Equalize()
   mStampReqTring = Stamp(FID());
 }
 
-void ZImage::Mirror()
-{
-  // Interface to iluMirror (flip around y axis).
-
-  static const Exc_t _eh("ZImage::Mirror ");
-  shadow_check(_eh);
-
-  sILMutex.Lock();
-  bind();
-  iluMirror();
-  unbind();
-  sILMutex.Unlock();
-  mStampReqTring = Stamp(FID());
-}
-
 void ZImage::Rotate(Float_t angle)
 {
   // Interface to iluRotate (which seems to be badly bugged).
@@ -270,6 +272,21 @@ void ZImage::Rotate(Float_t angle)
   sILMutex.Lock();
   bind();
   iluRotate(angle);
+  unbind();
+  sILMutex.Unlock();
+  mStampReqTring = Stamp(FID());
+}
+
+void ZImage::Mirror()
+{
+  // Interface to iluMirror (flip around y axis).
+
+  static const Exc_t _eh("ZImage::Mirror ");
+  shadow_check(_eh);
+
+  sILMutex.Lock();
+  bind();
+  iluMirror();
   unbind();
   sILMutex.Unlock();
   mStampReqTring = Stamp(FID());
