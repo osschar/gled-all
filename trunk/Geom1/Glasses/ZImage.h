@@ -74,16 +74,16 @@ public:
 
   void Load();    // X{E} 7 MButt(-join=>1)
   void Unload();  // X{E} 7 MButt(-join=>1)
-  void Save();    // X{E} 7 MButt()
+  void Save(const Text_t* file=0); // X{E} 7 MCWButt()
 
   Bool_t IsBindable();
 
   void BlurAverage(UInt_t count=1);       // X{E} 7 MCWButt(-join=>1)
   void BlurGaussian(UInt_t count=1);      // X{E} 7 MCWButt()
   void Contrastify(Float_t contrast=1.1); // X{E} 7 MCWButt(-join=>1)
-  void Equalize();                        // X{E} 7 MCWButt()
-  void Mirror();                          // X{E} 7 MCWButt(-join=>1)
-  void Rotate(Float_t angle=90);          // X{E} 7 MCWButt()
+  void Equalize();                        // X{E} 7 MButt()
+  void Rotate(Float_t angle=90);          // X{E} 7 MCWButt(-join=>1)
+  void Mirror();                          // X{E} 7 MButt()
 
   void SetupAsCanvas(Int_t w=256, Int_t h=256,
 		     Int_t bpp=1, Bool_t clear_p=true); // X{E} 7 MCWButt()
