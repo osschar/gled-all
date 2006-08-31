@@ -1,3 +1,8 @@
+2006-09-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* string_map.C:
+	New file: testing ground for ZStringMap container.
+
 2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* arc.C:
