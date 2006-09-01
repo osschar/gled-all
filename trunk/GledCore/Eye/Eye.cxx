@@ -33,7 +33,9 @@ void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 
 /**************************************************************************/
 
-Eye::Eye(TSocket* sock, EyeInfo* ei) : mSatSocket(sock)
+Eye::Eye(TSocket* sock, EyeInfo* ei) :
+  mNullLensImg(this),
+  mSatSocket(sock)
 {
   static const Exc_t _eh("Eye::Eye ");
 
@@ -78,9 +80,11 @@ Eye::~Eye() {
 
 /**************************************************************************/
 
-OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
+OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass, bool null_ok)
 {
-  if(glass == 0) return 0;
+  if(glass == 0)
+    return null_ok ? &mNullLensImg : 0;
+
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
   if(i != mGlass2ImgHash.end()) return i->second;
   OS::ZGlassImg* gi;
@@ -157,7 +161,7 @@ Int_t Eye::Manage(int fd)
     }
 
     if(len == 0) {
-      ISerr(_eh + "Saturn closed connection ... unregiTString fd handler.");
+      ISerr(_eh + "Saturn closed connection ... unregistring fd handler.");
       UninstallFdHandler();
       delete m; return -2;
     }
