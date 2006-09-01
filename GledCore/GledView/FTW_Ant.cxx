@@ -39,7 +39,7 @@ FTW_Ant::FTW_Ant(OS::ZLinkDatum* ld, FTW_Leaf* p) :
   wExpander->labeltype(FL_SYMBOL_LABEL);
   wExpander->callback((Fl_Callback*)cb_ant_collexp, this);
 
-  wListExpander = new Fl_Button(0,0,1,1,"@#>[]");
+  wListExpander = new Fl_Button(0,0,1,1,"@#-2>[]");
   wListExpander->color(FTW::background_color);
   wListExpander->labeltype(FL_SYMBOL_LABEL);
   wListExpander->callback((Fl_Callback*)cb_ant_list_collexp, this);
