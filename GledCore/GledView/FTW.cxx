@@ -29,14 +29,19 @@ namespace GVNS = GledViewNS;
 namespace OS   = OptoStructs;
 namespace FGS  = FltkGledStuff;
 
-Fl_Color FTW::background_color = (Fl_Color)0xbfbfbf00;
-Fl_Color FTW::separator_color  = (Fl_Color)0xb2b28000;
+Fl_Color FTW::background_color       = (Fl_Color)0xbfbfbf00;
+Fl_Color FTW::separator_color        = (Fl_Color)0xb2b28000;
+Fl_Color FTW::postnamebox_color      = (Fl_Color)0xb280b200;
+Fl_Color FTW::postnamebox_edit_color = (Fl_Color)0x80b2b200;
+Fl_Color FTW::postnamebox_textcolor      = (Fl_Color)0x52205200;
+Fl_Color FTW::postnamebox_edit_textcolor = (Fl_Color)0x20525200;
 
 Fl_Color FTW::target_modcol = (Fl_Color)0x40000000;
 Fl_Color FTW::source_modcol = (Fl_Color)0x00400000;
 Fl_Color FTW::sink_modcol   = (Fl_Color)0x00004000;
 
-Fl_Boxtype FTW::separator_box  = FL_BORDER_BOX;
+Fl_Boxtype FTW::separator_box    = FL_THIN_UP_BOX; // FL_BORDER_BOX;
+Fl_Boxtype FTW::postnamebox_box  = FL_EMBOSSED_BOX;
 
 /**************************************************************************/
 // Locator
@@ -240,6 +245,10 @@ FTW_Ant* FTW::NameButton::get_ant()
 void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 					 const char* prefix)
 {
+  if(leaf->fImg->fLens == 0) {
+    leaf->GetNest()->SetInfoBar("<null> (list element not set)");
+    return;
+  }
   GledNS::ClassInfo* ci = leaf->fImg->GetCI();
   ZGlass* lens = leaf->fImg->fLens;
   if(ant == 0) {
@@ -273,6 +282,12 @@ int FTW::NameButton::handle(int ev)
   static int x, y, dx, dy;
   FTW_Leaf* leaf = get_leaf();
   FTW_Ant*  ant  = get_ant();
+
+  if(leaf->fImg->fLens == 0) {
+    if(ev == FL_PASTE)
+      printf("FTW::NameButton::handle (maybe) should try to set the list element.\n");
+    return 1;
+  }
 
   switch(ev) {
 
@@ -398,7 +413,7 @@ int FTW::NameButton::handle(int ev)
 	if(ant == 0) {
 	  shell->X_Add(me);
 	} else {
-	  shell->X_SetLink(me);
+	  shell->X_SetLinkOrElement(me);
 	}
       }
     }
@@ -449,6 +464,80 @@ void FTW::NameBox::ChangeImage(OS::ZGlassImg* new_img)
     label("<null>");
   }
   redraw();
+}
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+/**************************************************************************/
+// ListDesignator
+/**************************************************************************/
+
+FTW::ListDesignator::ListDesignator(bool editp) :
+  Fl_Input(0, 0, 1, 1),
+  m_editable    (editp),
+  m_edit_active (false)
+{
+  if(m_editable) textcolor(FTW::postnamebox_edit_textcolor);
+  else           textcolor(FTW::postnamebox_textcolor);
+  color(FL_LIGHT2);
+}
+
+void FTW::ListDesignator::edit_active(bool ea)
+{
+  if(m_edit_active == ea || !m_editable) return;
+  if(m_edit_active) {
+    textcolor(FTW::postnamebox_edit_textcolor);
+    color(FL_LIGHT2);
+  } else {
+    textcolor(FL_BLACK);
+    color(FL_WHITE);
+  }
+  m_edit_active = ea;
+}
+
+int FTW::ListDesignator::handle(int ev)
+{
+  switch (ev) {
+  case FL_DND_ENTER: {
+    FTW_Shell *shell = FGS::grep_shell(parent());
+    if(shell == 0) return 0;
+    // could check if valid type, change cursor
+    return 1;
+  }
+
+  case FL_DND_RELEASE: {
+    return (Fl::belowmouse() == this) ? 1 : 0;
+  }
+
+  case FL_DND_LEAVE: {
+    // restore cursor
+    return 1;
+  }
+
+  case FL_PASTE: {
+    FTW_Shell *shell = FGS::grep_shell(parent());
+    if(shell == 0) return 0;
+    ID_t source_id = shell->GetSource()->get_contents();
+    ID_t pasted_id = (ID_t) strtoul(Fl::event_text(), 0, 0);
+    if(source_id == pasted_id) {
+      FTW_Leaf* l = FGS::grep_parent<FTW_Leaf*>(parent());
+      AList*        list = l->GetParent()->fImg->GetList();
+      ZGlass*       lens = shell->DemangleID(source_id)->fLens;
+      AList::ElRep elrep = l->GetElRep();
+      auto_ptr<ZMIR> mir
+        (list->MkMir_SetElement(lens, elrep));
+      l->fImg->fEye->Send(*mir);
+      return 1;
+    }
+    break;
+  }
+  }
+
+  if(m_edit_active)
+    return Fl_Input::handle(ev);
+  return 0;
 }
 
 /**************************************************************************/
@@ -1041,7 +1130,7 @@ void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
     if(!aimg->fIsList) throw(_eh + "sink is not a list");
 
     ID_t a = aimg->fLens->GetSaturnID();
-    ID_t b = beta->GetSaturnID();
+    ID_t b = beta ? beta->GetSaturnID() : 0;
     //ID_t g = gamma ? gamma->GetSaturnID() : 0;
     auto_ptr<ZMIR> mir(new ZMIR(a, b));
     GNS::MethodInfo* cmi = 
