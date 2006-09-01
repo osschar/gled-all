@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <iterator>
 
-ClassImp(ZList)
+ClassImp(ZList);
 
 /**************************************************************************/
 
@@ -32,13 +32,6 @@ void ZList::_init()
 }
 
 /**************************************************************************/
-
-void ZList::clear_list()
-{
-  mSize = 0;
-  mElements.clear();
-  mNextId = 0;
-}
 
 Int_t ZList::remove_references_to(ZGlass* lens)
 {
@@ -57,6 +50,13 @@ Int_t ZList::remove_references_to(ZGlass* lens)
   return n;
 }
 
+void ZList::clear_list()
+{
+  mSize = 0;
+  mElements.clear();
+  mNextId = 0;
+}
+
 /**************************************************************************/
 // ZGlass reference management, extensions for lists, public part.
 /**************************************************************************/
@@ -64,7 +64,7 @@ Int_t ZList::remove_references_to(ZGlass* lens)
 Int_t ZList::RebuildListRefs(An_ID_Demangler* idd)
 {
   Int_t ret = 0;
-  container in;
+  container in;        // !!! Probaly could do without copy, see ZStringMap
   mElements.swap(in);
   mSize   = 0;
   mNextId = 0;
@@ -103,7 +103,7 @@ void ZList::ClearList()
   for(iterator i=foo.begin(); i!=foo.end(); ++i) {
     i()->DecRefCount(this);
   }
-  ISdebug(1, _eh + GForm("sfinished for '%s'.", GetName()));
+  ISdebug(1, _eh + GForm("finished for '%s'.", GetName()));
 }
 
 /**************************************************************************/
@@ -286,6 +286,18 @@ void ZList::RemoveById(Int_t id_to_remove)
   mElements.erase(i); --mSize;
   l->DecRefCount(this);
   StampListRemove(l, id_to_remove);
+}
+
+Int_t ZList::FindFirst(ZGlass* lens)
+{
+  static const Exc_t _eh("ZList::FindFirst ");
+
+  GMutexHolder llck(mListMutex);
+  for(iterator i=begin(); i!=end(); ++i) {
+    if(i->fLens == lens)
+      return i->fId;
+  }
+  throw(_eh + "lens not found.");
 }
 
 /**************************************************************************/

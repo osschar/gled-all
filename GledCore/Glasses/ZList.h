@@ -15,7 +15,7 @@ class ZList : public AList
 
   // Element representation
 
- public:
+public:
   struct element
   {
     ZGlass* fLens;
@@ -48,7 +48,7 @@ class ZList : public AList
   virtual stepper_base* make_stepper_imp(bool return_zeroes=false);
 #endif
 
- protected:
+protected:
   Int_t           mNextId;
   container       mElements; //! Problem during TStreamerElement creation (it's getting created despite manual streamer).
 
@@ -56,9 +56,11 @@ private:
   void _init();
 
 protected:
+  // From AList
   virtual Int_t remove_references_to(ZGlass* lens);
   virtual void  clear_list();
 
+  // ZList
   virtual void on_insert(iterator iter) {}
   virtual void on_remove(iterator iter) {}
   virtual void on_rebuild() {}
@@ -102,6 +104,7 @@ public:
   virtual void InsertById(ZGlass* lens, Int_t before_id);      // X{E} C{1}
   virtual void RemoveById(Int_t id_to_remove);                 // X{E} C{0}
 
+  Int_t FindFirst(ZGlass* lens);
 
   // Pure ZList.
 
@@ -117,7 +120,7 @@ public:
   void Swallow(const Text_t* path, ZGlass* entry);
 
 #include "ZList.h7"
-  ClassDef(ZList, 1) // Standard list
+  ClassDef(ZList, 1); // Standard list.
 }; // endclass ZList
 
 
