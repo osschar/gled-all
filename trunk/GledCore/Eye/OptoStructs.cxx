@@ -17,10 +17,21 @@ namespace GVNS = GledViewNS;
 // ZGlassImg
 /**************************************************************************/
 
+ZGlassImg::ZGlassImg(Eye* e) : fEye(e), fLens(0)
+{
+  // Constructor for null-lens-image.
+  // One exists in every eye to denote empty list slots when needed.
+
+  fIsList       = false;
+  fElementImgs  = 0;
+  fDefRnr       = 0;
+  fFullMTW_View = 0;
+}
+
 ZGlassImg::ZGlassImg(Eye* e, ZGlass* lens) : fEye(e), fLens(lens)
 {
   fIsList = dynamic_cast<AList*>(lens) ? true : false;
-  fElementImgs   = 0;
+  fElementImgs  = 0;
   fDefRnr       = 0;
   fFullMTW_View = 0;
  
