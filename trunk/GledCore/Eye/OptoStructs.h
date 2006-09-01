@@ -11,6 +11,7 @@
 #include <Gled/GledNS.h>
 #include <Eye/Ray.h>
 
+class AList;
 class Eye;
 class A_Rnr; class RnrScheme;
 class MTW_View;
