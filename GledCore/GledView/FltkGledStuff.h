@@ -55,7 +55,7 @@ namespace FltkGledStuff {
   }
 
   FTW_Shell* grep_shell(Fl_Widget *w);
-  FTW_Shell* grep_shell_or_die(Fl_Widget *w, const TString& _eh);
+  FTW_Shell* grep_shell_or_die(Fl_Widget *w, const Exc_t& _eh);
 
   /**************************************************************************/
 
