@@ -9,9 +9,12 @@
 #include "FTW_Shell.h"
 
 #include <Eye/Eye.h>
-#include <Glasses/ZList.h>
+#include <Glasses/AList.h>
 
 #include <FL/Fl_Button.H>
+#include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Return_Button.H>
+#include <FL/Fl_Value_Input.H>
 
 namespace OS = OptoStructs;
 using namespace FTW;
@@ -20,21 +23,34 @@ typedef list<FTW_Leaf*>::iterator leaf_iterator;
 
 /**************************************************************************/
 
-static void cb_list_collexp(Fl_Button* b, FTW_Branch* l) {
-  l->CollExpList();
+namespace {
+
+void cb_list_collexp(Fl_Button* b, FTW_Branch* l)
+{ l->CollExpList(); }
+
+void cb_label_change(Fl_Input* w, FTW_Leaf* l)
+{
+  if(strcmp(l->GetListLabel(), w->value()) == 0)
+    return;
+  AList* list = l->GetParent()->fImg->GetList();
+  auto_ptr<ZMIR> mir
+    (list->MkMir_ChangeLabel(l->GetListLabel(), w->value()));
+  l->fImg->fEye->Send(*mir);
+}
+
 }
 
 /**************************************************************************/
 
 void FTW_Branch::build_leaves(int insert_pos)
 {
+  AList* list = (AList*) fImg->fLens;
+  bool has_zeroes = list->elrep_can_hold_zero();
   AList::lElRep_t d;
-  mLeavesTimeStamp = ((AList*)fImg->fLens)->CopyListElReps(d);
+  mLeavesTimeStamp = list->CopyListElReps(d, has_zeroes);
   for(AList::lElRep_i i=d.begin(); i!=d.end(); ++i) {
-    OS::ZGlassImg* img = fImg->fEye->DemanglePtr(i->get_lens());
-    FTW_Leaf*     leaf = FTW_Leaf::Construct(mNest, this, img, true, false);
-    leaf->mListId    = i->get_id();
-    leaf->mListLabel = i->get_label();
+    OS::ZGlassImg* img = fImg->fEye->DemanglePtr(i->get_lens(), has_zeroes);
+    FTW_Leaf*     leaf = create_leaf(img, *i);
     mLeaves.push_back(leaf);
     mNest->InsertLeaf(leaf, insert_pos++);
   }
@@ -52,13 +68,25 @@ void FTW_Branch::wipe_leaves()
 
 /**************************************************************************/
 
-void FTW_Branch::insert_leaf(Ray& ray, list<FTW_Leaf*>::iterator pos)
+FTW_Leaf* FTW_Branch::create_leaf(OptoStructs::ZGlassImg* img,
+                                  const AList::ElRep& el_rep)
+{
+  FTW_Leaf* leaf = FTW_Leaf::Construct(mNest, this, img, true, false);
+  leaf->mListId    = el_rep.get_id();
+  leaf->mListLabel = el_rep.ref_label();
+  if (leaf->wListDesignation != 0) {
+    leaf->label_designation();
+    leaf->wListDesignation->callback((Fl_Callback*) cb_label_change, leaf);
+    leaf->wListDesignation->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+  }
+  return leaf;
+}
+
+void FTW_Branch::insert_leaf(Ray& ray, lpFTW_Leaf_i pos)
 {
   int nest_pos = (pos == mLeaves.end()) ?
     mNest->PackPosAfter(this) : mNest->PackPos(*pos);
-  FTW_Leaf* leaf = FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false);
-  leaf->mListId    = ray.fBetaId;
-  leaf->mListLabel = ray.fBetaLabel;
+  FTW_Leaf* leaf = create_leaf(ray.fBetaImg, beta_elrep(ray));
   mLeaves.insert(pos, leaf);
   mNest->InsertLeaf(leaf, nest_pos);
 }
@@ -88,7 +116,7 @@ AList::ElRep FTW_Branch::gamma_elrep(Ray& ray)
   return AList::ElRep(ray.fGamma, ray.fGammaId, ray.fGammaLabel);
 }
 
-list<FTW_Leaf*>::iterator FTW_Branch::leaf_pos(AList::ElRep elrep)
+FTW_Branch::lpFTW_Leaf_i FTW_Branch::leaf_pos(AList::ElRep elrep)
 {
   AList::ElType_e type = ((AList*)fImg->fLens)->el_type();
   switch(type) {
@@ -99,8 +127,11 @@ list<FTW_Leaf*>::iterator FTW_Branch::leaf_pos(AList::ElRep elrep)
     return find_if(mLeaves.begin(), mLeaves.end(),
 		   FTW_Leaf::leaf_eq_id(elrep.get_id()));
   case AList::ET_Label:
-    return find_if(mLeaves.begin(), mLeaves.end(),
-		   FTW_Leaf::leaf_eq_label(elrep.get_label()));
+    if(elrep.ref_label().IsNull())
+      return mLeaves.end();
+    else
+      return find_if(mLeaves.begin(), mLeaves.end(),
+                     FTW_Leaf::leaf_eq_label(elrep.ref_label()));
   default:
     return mLeaves.end();
   }
@@ -114,7 +145,8 @@ FTW_Branch::FTW_Branch(FTW_Nest* nest, FTW_Leaf* parent,
 		       OS::ZGlassImg* img,
 		       bool is_list_member, bool is_link_desc) :
   FTW_Leaf(nest, parent, img, is_list_member, is_link_desc),
-  bLeavesCreated(false), bListExpanded(false)
+  bLeavesCreated(false), bListExpanded(false),
+  mLDShow(false), mLDEdit(false), mLDWidth(6), mLDNameMinWidth(8)
 {
   wListExpander->labelcolor(FL_BLACK);
   wListExpander->callback((Fl_Callback*)cb_list_collexp, this);
@@ -140,14 +172,12 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 	insert_leaf(ray, mLeaves.end());
 	break;
       case RQN_list_pop_back:
-	// delete mLeaves.back();
 	remove_leaf(--mLeaves.end());
 	break;
       case RQN_list_push_front:
 	insert_leaf(ray, mLeaves.begin());
 	break;
       case RQN_list_pop_front:
-	//delete mLeaves.front();
 	remove_leaf(mLeaves.begin());
 	break;
 
@@ -158,50 +188,26 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 	remove_leaf(leaf_pos(beta_elrep(ray)));
 	break;
 
-      case RQN_list_element_set:
       case RQN_list_insert_label:
+        if(ray.fBetaImg == 0)
+          ray.fBetaImg = fImg->fEye->GetNullLensImg();
+        insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
+        break;
+
       case RQN_list_remove_label:
-	cout << "Branch::AbsorbRay "<< ray << ". Not supported yet.\n";
+        remove_leaf(leaf_pos(beta_elrep(ray)));
 	break;
-	//case RQN_list_rebuild:
-	//      case RQN_list_clear:
 
-	/*
-      case RQN_list_add: {
-	lLoI_i i = ray.fGammaImg ?
-	  find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fGammaImg)) :
-	  mLeoim.end();
-
-	FTW_Leaf* leaf = FTW_Leaf::Construct(mNest, this, ray.fBetaImg, true, false);
-	if(!bListExpanded) leaf->hide();
-	if(i==mLeoim.end()) mNest->InsertLeaf(leaf, mNest->PackPosAfter(this));
-	else                mNest->InsertLeaf(leaf, i->leaf);
-
-	mLeoim.insert(i, Leaf_o_Img(ray.fBetaImg, leaf));
-
-	label_namebox();
-	return;
+      case RQN_list_element_set: {
+        lpFTW_Leaf_i pos = leaf_pos(beta_elrep(ray));
+        if(ray.fBetaImg == 0)
+          ray.fBetaImg = fImg->fEye->GetNullLensImg();
+        insert_leaf(ray, pos);
+        remove_leaf(pos);
+	break;
       }
-
-      case RQN_list_remove: {
-	lLoI_i i = find_if(mLeoim.begin(), mLeoim.end(), Leoim_img_eq(ray.fBetaImg));
-	//cout <<"FTW_Branch::AbsorbRay RQN_list_remove for "<< eximg->fLens->GetName() <<
-	//", leaf="<< i->leaf <<endl;
-	if(i == mLeoim.end()) {
-	  cout <<"FTW_Branch::AbsorbRay RQN_list_remove didn't find view to remove ...\n";
-	  return;
-	}
-	// mNest->RemoveLeaf(i->leaf); // Called in Leaf dtor.
-	delete i->leaf;
-
-	mLeoim.erase(i);
-	label_namebox();
-	return;
-      }
-	*/
 
       case RQN_list_rebuild:
-
       case RQN_list_clear: {
 	bool was_expanded = bListExpanded;
 	if(bListExpanded) CollapseList();
@@ -283,6 +289,96 @@ void FTW_Branch::HideListMembers()
 
 /**************************************************************************/
 
+void FTW_Branch::RewidthNameBoxes()
+{
+  for(leaf_iterator i=mLeaves.begin(); i!=mLeaves.end(); ++i) {
+    (*i)->resize_weeds(); // !!! should only resize namebox/designator
+  }
+  mNest->GetPack()->redraw();
+}
+
+namespace {
+class LeafDesignationCtrl : public Fl_Window
+{
+public:
+  FTW_Branch*      fBranch;
+  FTW::NameBox*    fNameBox;
+  Fl_Check_Button* fShow;
+  Fl_Check_Button* fEdit;
+  Fl_Value_Input*  fWidth;
+  Fl_Value_Input*  fNameMinWidth;
+
+  LeafDesignationCtrl() : Fl_Window(16, 5, "Leaf Designations")
+  {
+    fBranch = 0;
+    int y = 0;
+    fNameBox = new FTW::NameBox(0, y, 0, 16, 1);
+    ++y;
+    fShow = new Fl_Check_Button(0, y, 8, 1, "Show");
+    fEdit = new Fl_Check_Button(8, y, 8, 1, "Edit");
+    ++y;
+    fWidth = new Fl_Value_Input(12, y, 4, 1, "DesignationWidth");
+    fWidth->range(2, 20); fWidth->step(1);
+    ++y;
+    fNameMinWidth = new Fl_Value_Input(12, y, 4, 1, "NameMinWidth");
+    fNameMinWidth->range(4, 30); fNameMinWidth->step(1);
+    ++y;
+    Fl_Button* b;
+    b = new Fl_Button(0, y, 8, 1, "Cancel");
+    b->callback((Fl_Callback*)cancel_cb, this);
+    b = new Fl_Return_Button(8, y, 8, 1, "OK");
+    b->callback((Fl_Callback*)ok_cb, this);
+  }
+
+  void set_branch(FTW_Branch* b) {
+    fBranch = b;
+    fNameBox->ChangeImage(b->fImg);
+    fShow->value(b->GetLDShow());
+    fEdit->value(b->GetLDEdit());
+    if(fBranch->fImg->GetList()->elrep_can_edit_label())
+      fEdit->activate();
+    else
+      fEdit->deactivate();
+    fWidth->value(b->GetLDWidth());
+    fNameMinWidth->value(b->GetLDNameMinWidth());
+  }
+  void set_values() {
+    fBranch->SetLDShow(fShow->value());
+    fBranch->SetLDEdit(fEdit->value());
+    fBranch->SetLDWidth((int) fWidth->value());
+    fBranch->SetLDNameMinWidth((int) fNameMinWidth->value());
+    fBranch->RewidthNameBoxes();
+  }
+
+  static void ok_cb(Fl_Button* w, LeafDesignationCtrl* c) {
+    c->set_values();
+    cancel_cb(w, c);
+  }
+  static void cancel_cb(Fl_Button* w, LeafDesignationCtrl* c) {
+    c->hide();
+    c->fNameBox->ChangeImage(0);
+    c->fBranch = 0;
+  }
+};
+
+LeafDesignationCtrl* gLeafDesignationCtrl = 0;
+}
+
+void FTW_Branch::SpawnSeparatorDialog()
+{
+  if(gLeafDesignationCtrl == 0) {
+    gLeafDesignationCtrl = new LeafDesignationCtrl();
+    gLeafDesignationCtrl->set_non_modal();
+    mNest->GetShell()->adopt_window(gLeafDesignationCtrl);
+    
+  }
+  gLeafDesignationCtrl->set_branch(this);
+  gLeafDesignationCtrl->hotspot(gLeafDesignationCtrl);
+  gLeafDesignationCtrl->show();
+}
+
+/**************************************************************************/
+
 float FTW_Branch::LeafPosition(FTW_Leaf* leaf)
 {
   if(!bLeavesCreated) return 0;
@@ -298,7 +394,8 @@ float FTW_Branch::LeafPosition(FTW_Leaf* leaf)
 /**************************************************************************/
 /**************************************************************************/
 
-void FTW_Branch::label_namebox() {
+void FTW_Branch::label_namebox()
+{
   int s = bLeavesCreated ? mLeaves.size() : ((AList*)fImg->fLens)->Size();
   if(s) {
     wName->set_label(GForm("%s [%d]", fImg->fLens->GetName(), s));
@@ -307,7 +404,8 @@ void FTW_Branch::label_namebox() {
   }
 }
 
-void FTW_Branch::label_weeds() {
+void FTW_Branch::label_weeds()
+{
   if(bListExpanded) {
     wListExpander->label("@#-2>");
   } else {
