@@ -87,8 +87,8 @@ namespace {
     FTW::Locator& tgt = *nest->RefTargetLoc();
     try {
       switch(GNS::CastVoidPtr2ID(what)) {
-      case 1: shell->X_SetLink(tgt); break;
-      case 2: shell->X_ClearLink(tgt); break;
+      case 1: shell->X_SetLinkOrElement(tgt); break;
+      case 2: shell->X_ClearLinkOrElement(tgt); break;
 
       case 3: shell->X_Yank(tgt); break;
 
@@ -131,7 +131,7 @@ namespace {
       break;
     }
 
-    // case 3 (custom layouts)) removed
+    // case 3: not used
 
     case 4: { // Reverse order of ants for all leafs.
       nest->ReverseAnts();
@@ -176,21 +176,21 @@ namespace {
   };
 
   Fl_Menu_Item s_Set_Menu[] = {
-    { "Point as Source",	FL_F + 1,            (Fl_Callback*) set_menu_cb, (void*)1 },
-    { "Point as Sink",	FL_F + 2,            (Fl_Callback*) set_menu_cb, (void*)2 },
-    { "Mark as Source",	FL_SHIFT + FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)3 },
-    { "Mark as Sink",	FL_SHIFT + FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)4, FL_MENU_DIVIDER },
-    { "Exchange Point and Mark",	'x',            (Fl_Callback*) set_menu_cb, (void*)16 },
-    { "Exchange Source and Sink",	FL_SHIFT + 'x', (Fl_Callback*) set_menu_cb, (void*)17 },
+    { "Point as Source",                FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)1 },
+    { "Point as Sink",                  FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)2 },
+    { "Mark as Source",      FL_SHIFT + FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)3 },
+    { "Mark as Sink",        FL_SHIFT + FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)4, FL_MENU_DIVIDER },
+    { "Exchange Point and Mark",             'x', (Fl_Callback*) set_menu_cb, (void*)16 },
+    { "Exchange Source and Sink", FL_SHIFT + 'x', (Fl_Callback*) set_menu_cb, (void*)17 },
     {0}
   };
 
   Fl_Menu_Item s_Action_Menu[] = {
-    { "Set Link",		's', (Fl_Callback*) action_menu_cb, (void*)1 },
+    { "Set Link",	's', (Fl_Callback*) action_menu_cb, (void*)1 },
     { "Clear Link",	'c', (Fl_Callback*) action_menu_cb, (void*)2 },
     { "Yank",		'y', (Fl_Callback*) action_menu_cb, (void*)3 },
     { "Push",		'p', (Fl_Callback*) action_menu_cb, (void*)4 },
-    { "Unshift",		'u', (Fl_Callback*) action_menu_cb, (void*)5 },
+    { "Unshift",	'u', (Fl_Callback*) action_menu_cb, (void*)5 },
     { "Insert",		'i', (Fl_Callback*) action_menu_cb, (void*)6 },
     { "Pop",		'o', (Fl_Callback*) action_menu_cb, (void*)7 },
     { "Shift",		'h', (Fl_Callback*) action_menu_cb, (void*)8 },
@@ -769,24 +769,7 @@ int FTW_Nest::handle(int ev)
 	}
 	break;
 
-	// case 'x': ExchangePointAndMark(); break;
-
-	/*
-	  case 's': mShell->X_SetLink(*mTargetLoc); break;
-	  case 'c': mShell->X_ClearLink(*mTargetLoc); break;
-
-	  case 'y': mShell->X_Yank(*mTargetLoc); break;
-
-	  case 'p': mShell->X_Push(*mTargetLoc); break;
-	  case 'u': mShell->X_Unshift(*mTargetLoc); break;
-	  case 'i': mShell->X_Insert(*mTargetLoc); break;
-
-	  case 'o': mShell->X_Pop(*mTargetLoc); break;
-	  case 'h': mShell->X_Shift(*mTargetLoc); break;
-	  case 'e': mShell->X_Remove(*mTargetLoc); break;
-	*/
-
-      default: ret = 0;
+      default: ret = wMenuPack->handle(FL_SHORTCUT);
 
       }// end switch
 

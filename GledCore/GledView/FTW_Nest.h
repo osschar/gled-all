@@ -63,7 +63,7 @@ protected:
   Fl_Pack*	 wMainPack;
   Fl_Pack*	 wMenuPack;
   Fl_Pack*	 wTargetPack;
-  Fl_ScrollPack* mPack;
+  Fl_ScrollPack* mPack;         // X{g}
 
   bool		bLinksShown;	// X{g}
   bool		bCustomWeedsCreated;
