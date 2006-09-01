@@ -10,6 +10,7 @@
 
 #include <Eye/Eye.h>
 #include <Glasses/AList.h>
+#include <Stones/ZMIR.h>
 
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Check_Button.H>

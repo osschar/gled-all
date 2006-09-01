@@ -16,6 +16,8 @@
 #include "WSSeed.h"
 #include "WSPoint.c7"
 
+#include <Glasses/ZQueen.h>
+
 ClassImp(WSPoint);
 
 /**************************************************************************/
