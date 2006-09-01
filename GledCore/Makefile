@@ -40,8 +40,10 @@ LIBSET_TARGETS += bin/saturn
 ifndef SKIP_VIEW_LIBS
   LIBSET_TARGETS   += bin/gled
   ifndef SKIP_RNR_LIBS
+    ALL_SRCS       += ${PUPILS_SRCS}
     ALL_HDRS       += ${PUPILS_HDRS}
     ALL_OBJS       += ${PUPILS_OBJS}
+    ALL_DEPS       += $(PUPILS_OBJS:.o=.d)
     LIBSET_TARGETS += ${PUPILS_LIB}
   endif
 endif
