@@ -113,11 +113,12 @@ void MTW_Layout::Parse(int cell_w) throw (Exc_t)
   mClasses.swap(new_classes);
 }
 
-int MTW_Layout::CountSubViews(ZGlass* glass)
+int MTW_Layout::CountSubViews(ZGlass* lens)
 {
+  if(!lens) return 0;
   int cnt = 0;
   for(lClass_i i=mClasses.begin(); i!=mClasses.end(); ++i) {
-    if(GNS::IsA(glass, i->fClassInfo->fFid)) ++cnt;
+    if(GNS::IsA(lens, i->fClassInfo->fFid)) ++cnt;
   }
   return cnt;
 }
