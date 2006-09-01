@@ -1,3 +1,90 @@
+2006-09-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AList.cxx:
+	* Glasses/AList.h:
+	Finalized and implemented base-class support for labeled elements
+	(as needed for ZStringMap).
+
+	* Glasses/ZStringMap.cxx:
+	* Glasses/ZStringMap.h:
+	Implementation of functionality; this was bare bones before.
+
+	* Glasses/ZList.cxx:
+	* Glasses/ZList.h:
+	Added method FindFirst(ZGlass*). Minor format changes.
+
+	* Glasses/ZDeque.h:
+	Set element-type to ET_Nil.
+
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ShellInfo.h:
+	Renamed member bCollZList to bCollAList.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Added member mNullLensImg to represent empty list slot, added
+	optional flag to DemanglePtr() allowing the return of
+	null-lens-img if glass-pointer argument is null.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Added special constructor for null-lens-img; added 'AList*
+	ZGLassImg::GetList()'.
+
+	* Eye/Ray.h:
+	Made TString& args to ray setters const.
+
+	* GledView/FTW_Branch.cxx:
+	* GledView/FTW_Branch.h:
+	Added handling of ray quantum-numbers produced by ZStringMap;
+	implemented list-element designation control.
+
+	* GledView/FTW_Leaf.cxx:
+	* GledView/FTW_Leaf.h:
+	Added list-element designation handling.
+
+	* GledView/FTW.cxx:
+	* GledView/FTW.h:
+	Added class ListDesignator to handle list-element designations
+	within FTW_Leaf.
+
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	Extended X_Set/ClearLink to also work on list elements, renamed
+	them to X_Set/ClearLinkOrElement.
+
+	* GledView/FTW_Nest.cxx:
+	* GledView/FTW_Nest.h:
+	Force-feed key events to wMenuPack as shortcuts; call
+	FTW_Shell::Set/ClearLink by their new names from menu handlers.
+
+	* GledView/FTW_Ant.cxx:
+	Fixed size of list expander's label.
+
+	* GledView/FltkGledStuff.cxx:
+	* GledView/FltkGledStuff.h:
+	Changed argument to grep_shell_or_die from TString to Exc_t.
+
+	* GledView/GledGUI.cxx:
+	Noticed that setting font-id from command line causes segvs; print
+	warning and ignore. Set font-size for message windows as well.
+
+	* GledView/MTW_ClassView.cxx:
+	Follow rename of member in ShellInfo; do not collapse ZGlass view
+	if there are only up to two classes in the hierarchy.
+
+	* GledView/MTW_Layout.cxx:
+	* GledView/MTW_Layout.h:
+	In CountSubViews(): added protection for zero lens argument (can
+	happen for empty list slots); renamed argument from glass to lens.
+
+	* Makefile:
+	Added files from Pupils/ to variable holding all dependecies. This
+	omission was causing that dependencies were not properly rebuilt.
+
+	* catalog.patch:
+	Disabled Streamer() generation for ZStringMap.
+
 2006-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/GledGUI.cxx:

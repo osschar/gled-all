@@ -1,3 +1,10 @@
+2006-09-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_base.inc:
+	Fixed cut-n-paste bug where BASE_LIB_OBJS were added to all
+	dependencies twice and VIEW_LIB_OBJS not at all. This caused
+	that dependencies were not properly rebuilt.
+
 2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/mk_dict_dep.pl:
