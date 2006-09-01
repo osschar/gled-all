@@ -123,13 +123,13 @@ void MTW_ClassView::BuildVerticalView()
     add(*sv);
   }
 
-  // Potentially collapse ZGlass/ZList SubViews.
+  // Potentially collapse ZGlass/AList SubViews.
   if(fancy_p) {
-    if(mShell->GetShellInfo()->GetCollZGlass()) {
+    if(mShell->GetShellInfo()->GetCollZGlass() && children() > 3) {
       FGS_DECLARE_CAST(pec, child(1), FGS::PackEntryCollapsor);
       if(pec) h += pec->collexp(false);
     }
-    if(fImg->fIsList && mShell->GetShellInfo()->GetCollZList()) {
+    if(fImg->fIsList && mShell->GetShellInfo()->GetCollAList()) {
       if(children() > 5 ) { // AList
 	FGS_DECLARE_CAST(pec, child(3), FGS::PackEntryCollapsor);
 	if(pec) h += pec->collexp(false);
