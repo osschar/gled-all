@@ -20,7 +20,7 @@ class AList : public ZGlass
   friend class Saturn;
   friend class ZQueen;
 
- public:
+public:
 
   /************************************************************************/
   // ElRep - list-element representation; needed for list ops and GUI     //
@@ -38,9 +38,10 @@ class AList : public ZGlass
     ElRep(ZGlass* l, const TString& lab) : fLens(l), fId(-1), fLabel(lab) {}
     ElRep(ZGlass* l, Int_t i, const TString& lab) : fLens(l), fId(i), fLabel(lab) {}
 
-    ZGlass* get_lens()   { return fLens;  }
-    Int_t   get_id()     { return fId;    }
-    TString get_label()  { return fLabel; }
+    ZGlass* get_lens()  const { return fLens;  }
+    Int_t   get_id()    const { return fId;    }
+    TString get_label() const { return fLabel; }
+    const TString& ref_label() const { return fLabel; }
   };
 
   typedef list<ElRep>		lElRep_t;
@@ -48,6 +49,7 @@ class AList : public ZGlass
 
   // Three types of *unique* element identification.
   // Each sub-class must support *exactly* one method.
+  // 13.8.06: why is ET_Nil not ok? Setting it for ZDeque (was ET_Lens so far).
   enum ElType_e { ET_Nil, ET_Lens, ET_Id, ET_Label };
 
   /************************************************************************/
@@ -96,7 +98,7 @@ class AList : public ZGlass
     virtual ElRep   elrep() { return iter.elrep(); }
   };
 
- public:
+public:
 
   template<class G=ZGlass>
   class Stepper
@@ -132,10 +134,10 @@ class AList : public ZGlass
 
 #endif
 
- private:
+private:
   void _init();
 
- protected:
+protected:
   LID_t			mLid;		//  X{GS} 7 Value(-width=>4, -join=>1)
   CID_t			mCid;		//  X{GS} 7 Value(-width=>4, -join=>1)
   Int_t			mSize;		//  X{G}  7 ValOut(-width=>5)
@@ -145,10 +147,10 @@ class AList : public ZGlass
 
   // ZGlass reference management, extensions for lists.
 
-  virtual void reference_all();
-  virtual void unreference_all();
-  virtual void reference_list_elms();   // Override for optimization.
-  virtual void unreference_list_elms(); // Override for optimization.
+  virtual void  reference_all();
+  virtual void  unreference_all();
+  virtual void  reference_list_elms();   // Override for optimization.
+  virtual void  unreference_list_elms(); // Override for optimization.
   virtual Int_t remove_references_to(ZGlass* lens) = 0; // ?? Is this ok ?? It is declared and implemented in ZGlass.
 
   // AList methods.
@@ -156,7 +158,7 @@ class AList : public ZGlass
   virtual void new_element_check(ZGlass* lens);
   virtual void clear_list() = 0;
 
- public:
+public:
   AList(const Text_t* n="AList", const Text_t* t=0) :
     ZGlass(n,t), mListMutex(GMutex::recursive) { _init(); }
 
@@ -206,13 +208,14 @@ class AList : public ZGlass
   virtual bool elrep_has_id()            { return false; }
   virtual bool elrep_has_label()         { return false; }
   virtual bool elrep_can_hold_zero()     { return false; }
+  virtual bool elrep_can_edit_label()    { return false; }
 
   virtual bool list_deque_ops()          { return false; }
   virtual bool list_insert_lens_ops()    { return false; }
   virtual bool list_insert_id_ops()      { return false; }
   virtual bool list_set_id_ops()         { return false; }
   virtual bool list_set_label_ops()      { return false; }
-  virtual bool list_manage_label_ops()   { return false; }
+  virtual bool list_insert_label_ops()   { return false; }
 
   //----------------------------------------------------------------------
   // List element handling operations.
@@ -225,6 +228,7 @@ class AList : public ZGlass
   virtual void RemoveAll(ZGlass* lens) = 0;   // X{E} C{1}
 
   // Deque interface
+  // `````````````````````````````````````````````````````````````````````
   // Pop methods *must* return the poped element if ResultReq is set.
   // virtual ZGlass* FrontElement();          // X{E} C{0}
   // virtual ZGlass* BackElement();           // X{E} C{0}
@@ -234,24 +238,32 @@ class AList : public ZGlass
   // virtual ZGlass* PopFront();              // X{E} C{0}
 
   // Insert-by-lens-pointer interface;
+  // `````````````````````````````````````````````````````````````````````
   // virtual void Insert(ZGlass* lens, ZGlass* before);           // X{E} C{1}
   // virtual void Remove(ZGlass* lens);                           // X{E} C{1}
 
   // Insert-by-id interface
+  // `````````````````````````````````````````````````````````````````````
   // virtual void InsertById(ZGlass* lens, Int_t before_id);      // X{E} C{1}
   // virtual void RemoveById(Int_t id_to_remove);                 // X{E} C{0}
 
   // Set-by-id interface
+  // `````````````````````````````````````````````````````````````````````
   // virtual void SetElementById(ZGlass* lens, Int_t target_id);  // X{E} C{1}
 
   // Set-by-label interface
-  // virtual void SetElementByLabel(ZGlass* lens, TString label); // X{E} C{1}
-
-  // Label handling
+  // `````````````````````````````````````````````````````````````````````
+  // virtual void SetElementByLabel(ZGlass* lens, TString label,
+  //                                Bool_t create=true);          // X{E} C{1}
   // virtual void AddLabel(TString label);                        // X{E} C{0}
-  // virtual void InsertLabel(TString label, TString before);     // X{E} C{0}
   // virtual void RemoveLabel(TString label);                     // X{E} C{0}
-
+  // virtual void ChangeLabel(TString label, TString new_label);  // X{E} C{0}
+  //
+  // Insert-by-label [external/user-defined label ordering]
+  // `````````````````````````````````````````````````````````````````````
+  // virtual void InsertByLabel(ZGlass* lens, TString label,
+  //                            TString before);                  // X{E} C{1}
+  // virtual void InsertLabel(TString label, TString before);     // X{E} C{0}
 
   //----------------------------------------------------------------------
   // MIR makers. Eventually virtual.
@@ -270,9 +282,12 @@ class AList : public ZGlass
 
   ZMIR* MkMir_SetElement(ZGlass* lens, ElRep& elrep);
 
-  ZMIR* MkMir_AddLabel(TString label);
-  ZMIR* MkMir_InsertLabel(TString label, TString before);
-  ZMIR* MkMir_RemoveLabel(TString label);
+  ZMIR* MkMir_AddLabel(const TString& label);
+  ZMIR* MkMir_RemoveLabel(const TString& label);
+  ZMIR* MkMir_ChangeLabel(const TString& label, TString new_label);
+
+  ZMIR* MkMir_InsertByLabel(ZGlass* lens, const TString& label, const TString& before);
+  ZMIR* MkMir_InsertLabel(const TString& label, const TString& before);
 
   //----------------------------------------------------------------------
   // Stamping methods ... coded here for all sub-classes
@@ -293,10 +308,10 @@ class AList : public ZGlass
   virtual TimeStamp_t StampListRemove(ZGlass* lens, Int_t id);
 
   virtual TimeStamp_t StampListElementSet(ZGlass* lens, Int_t id);
-  virtual TimeStamp_t StampListElementSet(ZGlass* lens, TString label);
+  virtual TimeStamp_t StampListElementSet(ZGlass* lens, const TString& label);
 
-  virtual TimeStamp_t StampListInsertLabel(ZGlass* lens, TString label, TString before);
-  virtual TimeStamp_t StampListRemoveLabel(ZGlass* lens, TString label);
+  virtual TimeStamp_t StampListInsertLabel(ZGlass* lens, const TString& label, const TString& before);
+  virtual TimeStamp_t StampListRemoveLabel(ZGlass* lens, const TString& label);
 
   virtual TimeStamp_t StampListRebuild();
   virtual TimeStamp_t StampListClear();
@@ -305,7 +320,7 @@ class AList : public ZGlass
   // ElRep GammaElRep(Ray& ray);
 
 #include "AList.h7"
-  ClassDef(AList, 1)
+  ClassDef(AList, 1); // Abstract container base-class.
 }; // endclass AList
 
 

@@ -13,7 +13,7 @@
 #include "AList.c7"
 #include "ZQueen.h"
 
-ClassImp(AList)
+ClassImp(AList);
 
 /**************************************************************************/
 
@@ -63,7 +63,7 @@ void AList::new_element_check(ZGlass* lens)
 {
   static const Exc_t _eh("AList::new_element_check ");
 
-  if(lens == 0) {
+  if(lens == 0 && elrep_can_hold_zero() == false) {
     throw(_eh + "called with null ZGlass*.");
   }
   if(mLid && mCid) {
@@ -204,9 +204,11 @@ ZMIR* AList::MkMir_PushBack(ZGlass* lens)
 
 ZMIR* AList::MkMir_PopBack()
 {
-  TString mname = "PopBack";
+  static const Exc_t _eh("AList::MkMir_PopBack ");
+  static const TString mname = "PopBack";
+
   if(!list_deque_ops())
-    throw(mname + " not supported.");
+    throw(_eh + mname + " not supported.");
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
   return mi->MakeMir(this);
 }
@@ -224,9 +226,11 @@ ZMIR* AList::MkMir_PushFront(ZGlass* lens)
 
 ZMIR* AList::MkMir_PopFront()
 {
-  TString mname = "PopFront";
+  static const Exc_t _eh("AList::MkMir_PopFront ");
+  static const TString mname = "PopFront";
+
   if(!list_deque_ops())
-    throw(mname + " not supported.");
+    throw(_eh + mname + " not supported.");
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
   return mi->MakeMir(this);
@@ -236,20 +240,22 @@ ZMIR* AList::MkMir_PopFront()
 
 ZMIR* AList::MkMir_Insert(ZGlass* lens, ElRep& elrep)
 {
+  static const Exc_t _eh("AList::MkMir_Insert ");
+
   TString mname("Insert");
   ElType_e et = el_type();
   switch(et) {
   case ET_Lens:
     if(!list_insert_lens_ops())
-      throw(mname + " 'by-lens' not supported.");
+      throw(_eh + mname + " 'by-lens' not supported.");
     break;
   case ET_Id:
     if(!list_insert_id_ops())
-      throw(mname + " 'by-id' not supported.");
+      throw(_eh + mname + " 'by-id' not supported.");
     mname += "ById";
     break;
   default:
-    throw(mname + " not available for this container type.");
+    throw(_eh + mname + " not available for this container type.");
   }
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
@@ -261,27 +267,35 @@ ZMIR* AList::MkMir_Insert(ZGlass* lens, ElRep& elrep)
 
 ZMIR* AList::MkMir_Remove(ElRep& elrep)
 {
-  TString mname("Remove");
+  static const Exc_t _eh("AList::MkMir_Remove ");
 
+  TString mname("Remove");
   ElType_e et = el_type();
   switch(et) {
   case ET_Lens:
     if(!list_insert_lens_ops())
-      throw(mname + "'by-lens' not supported.");
+      throw(_eh + mname + "'by-lens' not supported.");
     break;
   case ET_Id:
     if(!list_insert_id_ops())
-      throw(mname + " 'by-id' not supported.");
+      throw(_eh + mname + " 'by-id' not supported.");
     mname += "ById";
     break;
+  case ET_Label:
+    if(!list_set_label_ops())
+      throw(_eh + mname + " 'by-label' not supported.");
+    mname += "Label";
+    break;
   default:
-    throw(mname + " not available for this container type.");
+    throw(_eh + mname + " not available for this container type.");
   }
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
   ZMIR* mir =  mi->MakeMir(this, et == ET_Lens ? elrep.get_lens() : 0);
   if(et == ET_Id)
     *mir << elrep.get_id();
+  else if(et == ET_Label)
+    *mir << elrep.ref_label();
   return mir;
 }
 
@@ -289,21 +303,23 @@ ZMIR* AList::MkMir_Remove(ElRep& elrep)
 
 ZMIR* AList::MkMir_SetElement(ZGlass* lens, ElRep& elrep)
 {
+  static const Exc_t _eh("AList::MkMir_SetElement ");
+
   TString mname("SetElement");
   ElType_e et = el_type();
   switch(et) {
   case ET_Id:
     if(!list_set_id_ops())
-      throw(mname + " 'by-id' not supported.");
+      throw(_eh + mname + " 'by-id' not supported.");
     mname += "ById";
     break;
   case ET_Label:
     if(!list_set_label_ops())
-      throw(mname + " 'by-label' not supported.");
+      throw(_eh + mname + " 'by-label' not supported.");
     mname += "ByLabel";
     break;
   default:
-    throw(mname + " not available for this container type.");
+    throw(_eh + mname + " not available for this container type.");
   }
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
@@ -317,11 +333,13 @@ ZMIR* AList::MkMir_SetElement(ZGlass* lens, ElRep& elrep)
 
 /**************************************************************************/
 
-ZMIR* AList::MkMir_AddLabel(TString label)
+ZMIR* AList::MkMir_AddLabel(const TString& label)
 {
-  TString mname("AddLabel");
-  if(!list_manage_label_ops())
-    throw(mname + " not supported.");
+  static const Exc_t _eh("AList::MkMir_AddLabel ");
+  static const TString mname("AddLabel");
+
+  if(!list_set_label_ops())
+    throw(_eh + mname + " not supported.");
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
   ZMIR* mir = mi->MakeMir(this);
@@ -329,11 +347,41 @@ ZMIR* AList::MkMir_AddLabel(TString label)
   return mir;
 }
 
-ZMIR* AList::MkMir_InsertLabel(TString label, TString before)
+ZMIR* AList::MkMir_RemoveLabel(const TString& label)
 {
-  TString mname("InsertLabel");
-  if(!list_manage_label_ops())
-    throw(mname + " not supported.");
+  static const Exc_t _eh("AList::MkMir_RemoveLabel ");
+  static const TString mname("RemoveLabel");
+
+  if(!list_set_label_ops())
+    throw(_eh + mname + " not supported.");
+
+  GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
+  ZMIR* mir = mi->MakeMir(this);
+  *mir << label;
+  return mir;
+}
+
+ZMIR* AList::MkMir_ChangeLabel(const TString& label, TString new_label)
+{
+  static const Exc_t _eh("AList::MkMir_ChangeLabel ");
+  static const TString mname("ChangeLabel");
+
+  if(!list_set_label_ops())
+    throw(_eh + mname + " not supported.");
+
+  GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
+  ZMIR* mir = mi->MakeMir(this);
+  *mir << label << new_label;
+  return mir;
+}
+
+ZMIR* AList::MkMir_InsertLabel(const TString& label, const TString& before)
+{
+  static const Exc_t _eh("AList::MkMir_InsertLabel ");
+  static const TString mname("InsertLabel");
+
+  if(!list_insert_label_ops())
+    throw(_eh + mname + " not supported.");
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
   ZMIR* mir = mi->MakeMir(this);
@@ -341,17 +389,20 @@ ZMIR* AList::MkMir_InsertLabel(TString label, TString before)
   return mir;
 }
 
-ZMIR* AList::MkMir_RemoveLabel(TString label)
+ZMIR* AList::MkMir_InsertByLabel(ZGlass* lens, const TString& label, const TString& before)
 {
-  TString mname("RemoveLabel");
-  if(!list_manage_label_ops())
-    throw(mname + " not supported.");
+  static const Exc_t _eh("AList::MkMir_InsertByLabel ");
+  static const TString mname("InsertByLabel");
+
+  if(!list_insert_label_ops())
+    throw(_eh + mname + " not supported.");
 
   GledNS::MethodInfo* mi = VGlassInfo()->FindMethodInfo(mname, true);
-  ZMIR* mir = mi->MakeMir(this);
-  *mir << label;
+  ZMIR* mir = mi->MakeMir(this, lens);
+  *mir << label << before;
   return mir;
 }
+
 
 /**************************************************************************/
 // Stamping.
@@ -473,7 +524,7 @@ TimeStamp_t AList::StampListElementSet(ZGlass* lens, Int_t id)
   return stamp;
 }
 
-TimeStamp_t AList::StampListElementSet(ZGlass* lens, TString label)
+TimeStamp_t AList::StampListElementSet(ZGlass* lens, const TString& label)
 {
   TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
   IF_ZGLASS_RAY(this, RayNS::RQN_list_element_set, stamp,
@@ -486,7 +537,7 @@ TimeStamp_t AList::StampListElementSet(ZGlass* lens, TString label)
   return stamp;
 }
 
-TimeStamp_t AList::StampListInsertLabel(ZGlass* lens, TString label, TString before)
+TimeStamp_t AList::StampListInsertLabel(ZGlass* lens, const TString& label, const TString& before)
 {
   TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
   IF_ZGLASS_RAY(this, RayNS::RQN_list_insert_label, stamp,
@@ -500,7 +551,7 @@ TimeStamp_t AList::StampListInsertLabel(ZGlass* lens, TString label, TString bef
   return stamp;
 }
 
-TimeStamp_t AList::StampListRemoveLabel(ZGlass* lens, TString label)
+TimeStamp_t AList::StampListRemoveLabel(ZGlass* lens, const TString& label)
 {
   TimeStamp_t stamp = mListTimeStamp = ++mTimeStamp;
   IF_ZGLASS_RAY(this, RayNS::RQN_list_remove_label, stamp,
