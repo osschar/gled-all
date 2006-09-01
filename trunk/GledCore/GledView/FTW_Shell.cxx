@@ -615,31 +615,50 @@ void FTW_Shell::X_SetGamma(OS::ZGlassImg* img)
 // X-methods ... executors of graph modificators
 /**************************************************************************/
 
-void FTW_Shell::X_SetLink(FTW::Locator& target)
+void FTW_Shell::X_SetLinkOrElement(FTW::Locator& target)
 {
-  static const Exc_t _eh("FTW_Shell::X_SetLink ");
+  static const Exc_t _eh("FTW_Shell::X_SetLinkOrElement ");
 
-  if(!target.is_link)		throw(_eh + "target is not a link");
-  if(!mSource->has_contents())	throw(_eh + "source has no contents");
+  if(!mSource->has_contents())	throw(_eh + "source has no contents.");
 
-  GNS::MethodInfo* mi = target.ant->GetLinkInfo()->fSetMethod;
-  
-  auto_ptr<ZMIR> mir ( mi->MakeMir(target.get_leaf_glass()) );
-  mSource->fix_MIR_beta(mir);
-  Send(*mir);
+  if (target.is_link) {
+    GNS::MethodInfo* mi = target.ant->GetLinkInfo()->fSetMethod;
+    auto_ptr<ZMIR> mir ( mi->MakeMir(target.get_leaf_glass()) );
+    mSource->fix_MIR_beta(mir);
+    Send(*mir);
+  }
+  else if (target.is_list_member) {
+    AList* list = target.leaf->GetParent()->fImg->GetList();
+    AList::ElRep elrep = target.leaf->GetElRep();
+    auto_ptr<ZMIR> mir ( list->MkMir_SetElement((ZGlass*)0, elrep) );
+    mSource->fix_MIR_beta(mir);
+    Send(*mir);
+  }
+  else {
+    throw(_eh + "target is neither a link nor a list element,");
+  }
 }
 
-void FTW_Shell::X_ClearLink(FTW::Locator& target)
+void FTW_Shell::X_ClearLinkOrElement(FTW::Locator& target)
 {
   // need sink here !!!!
-  static const Exc_t _eh("FTW_Shell::X_ClearLink ");
+  static const Exc_t _eh("FTW_Shell::X_ClearLinkOrElement ");
 
-  if(!target.is_link) throw(_eh + "target is not a link");
-
-  ZMIR mir(target.get_leaf_id(), 0);
-  GNS::MethodInfo* mi = target.ant->GetLinkInfo()->fSetMethod;
-  mi->ImprintMir(mir);
-  Send(mir);
+  if (target.is_link) {
+    ZMIR mir(target.get_leaf_id(), 0);
+    GNS::MethodInfo* mi = target.ant->GetLinkInfo()->fSetMethod;
+    mi->ImprintMir(mir);
+    Send(mir);
+  }
+  else if (target.is_list_member) {
+    AList* list = target.leaf->GetParent()->fImg->GetList();
+    AList::ElRep elrep = target.leaf->GetElRep();
+    auto_ptr<ZMIR> mir ( list->MkMir_SetElement((ZGlass*)0, elrep) );
+    Send(*mir);
+  }
+  else {
+    throw(_eh + "target is neither a link nor a list element,");
+  }
 }
 
 /**************************************************************************/

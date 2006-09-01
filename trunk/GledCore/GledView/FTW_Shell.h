@@ -114,8 +114,8 @@ public:
   void X_SetBeta(OptoStructs::ZGlassImg* img);
   void X_SetGamma(OptoStructs::ZGlassImg* img);
 
-  void X_SetLink(FTW::Locator& target);
-  void X_ClearLink(FTW::Locator& target);
+  void X_SetLinkOrElement(FTW::Locator& target);
+  void X_ClearLinkOrElement(FTW::Locator& target);
 
   void X_Yank(FTW::Locator& target);
   void X_Add(FTW::Locator& target);
