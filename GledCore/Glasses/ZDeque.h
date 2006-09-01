@@ -63,8 +63,6 @@ public:
   // ElRep properties and supported operations
   //----------------------------------------------------------------------
 
-  virtual ElType_e el_type()          { return ET_Lens; }
-
   virtual bool list_deque_ops()       { return true; }
 
   //----------------------------------------------------------------------
