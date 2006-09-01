@@ -11,7 +11,6 @@
 #include <Gled/GledNS.h>
 #include <Eye/Ray.h>
 
-class ZGlass;
 class Eye;
 class A_Rnr; class RnrScheme;
 class MTW_View;
@@ -55,6 +54,7 @@ namespace OptoStructs {
     A_Rnr*		fDefRnr;
     MTW_View*		fFullMTW_View;
 
+    ZGlassImg(Eye* e);
     ZGlassImg(Eye* e, ZGlass* lens);
     ~ZGlassImg();
 
@@ -67,6 +67,7 @@ namespace OptoStructs {
     void CheckOutView(A_View* v) { fViews.remove(v); }
 
     ZLinkDatum*    GetLinkDatum(const TString& lnk);
+    AList*         GetList() { return fIsList ? (AList*)fLens : 0; }
     lpZGlassImg_t* GetElementImgs();
   };
 
