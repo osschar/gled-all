@@ -41,7 +41,8 @@ protected:
   Fl_Button*		wExpander;
   Fl_Button*		wListExpander;
   FTW::NameButton*	wName;
-  Fl_Box*		wSepBox;
+  FTW::ListDesignator*  wListDesignation;
+  Fl_Button*		wSepBox;
   Fl_Pack*		wAntPack;
 
   MTW_ClassView*	wCustomView;
@@ -51,6 +52,7 @@ protected:
   void resize_weeds();
   virtual void label_namebox();
   virtual void label_weeds();
+  void label_designation();
   void recolor_name();
   void modify_box_color(Fl_Color mod, bool on_p);
 
@@ -92,12 +94,15 @@ public:
   virtual void ShowListMembers() {}
   virtual void HideListMembers() {}
 
-  bool IsList()       { return fImg->fIsList; }
-  bool IsListMember() { return bIsListMember; }
+  bool IsList()           { return fImg->fIsList; }
+  bool IsListMember()     { return bIsListMember; }
+  bool IsLinkDescendant() { return bIsLinkDescendant; }
 
   int  	   AntPos(FTW_Ant* a);
   FTW_Ant* AntAt(int i);
   FTW_Ant* LastAnt();
+
+  virtual void SpawnSeparatorDialog() {}
 
   //--------------------------------------------------------------
   // find_if structures

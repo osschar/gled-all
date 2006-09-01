@@ -19,6 +19,8 @@
 
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
+#include <FL/Fl_Int_Input.H>
+#include <FL/Fl_Output.H>
 
 namespace OS  = OptoStructs;
 namespace FGS = FltkGledStuff;
@@ -26,9 +28,13 @@ namespace FGS = FltkGledStuff;
 /**************************************************************************/
 
 namespace {
-  void cb_collex(Fl_Button* b, FTW_Leaf* l) {
-    l->CollExp();
-  }
+
+void cb_collex(Fl_Button* b, FTW_Leaf* l)
+{ l->CollExp(); }
+
+void cb_separator_dialog(Fl_Button* sep, FTW_Leaf* l)
+{ l->SpawnSeparatorDialog(); }
+
 }
 
 /**************************************************************************/
@@ -90,7 +96,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   wExpander->labeltype(FL_SYMBOL_LABEL);
   wExpander->callback((Fl_Callback*)cb_collex, this);
 
-  wListExpander = new Fl_Button(0,0,1,1,"@#>|");
+  wListExpander = new Fl_Button(0,0,1,1,"@#-2>|");
   wListExpander->color(FTW::background_color);
   wListExpander->labeltype(FL_SYMBOL_LABEL);
   wListExpander->labelcolor(FL_DARK_RED);
@@ -99,8 +105,27 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   wName->color(FTW::background_color);
   wName->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
 
-  wSepBox = new Fl_Box(FTW::separator_box,0,0,1,1,0);
-  wSepBox->color(FTW::separator_color);
+  wListDesignation = 0;
+  if(bIsListMember) {
+    AList* l = mParent->fImg->GetList();
+    AList::ElType_e eltype = l->el_type();
+    if(eltype == AList::ET_Id || eltype == AList::ET_Label)
+      wListDesignation = new FTW::ListDesignator(l->elrep_can_edit_label());
+  }
+    
+  wSepBox = new Fl_Button(0,0,1,1,0);
+  if(fImg->fIsList && fImg->GetList()->el_type() >= AList::ET_Id) {
+    wSepBox->box(FTW::postnamebox_box);
+    if(fImg->GetList()->elrep_can_edit_label())
+      wSepBox->color(FTW::postnamebox_edit_color);
+    else
+      wSepBox->color(FTW::postnamebox_color);
+    wSepBox->callback((Fl_Callback*)cb_separator_dialog, this);
+  } else {
+    wSepBox->box(FTW::separator_box);
+    wSepBox->down_box(FTW::separator_box);
+    wSepBox->color(FTW::separator_color, FTW::separator_color);
+  }
 
   wFrontPack->end();
 
@@ -292,6 +317,18 @@ void FTW_Leaf::resize_weeds() {
   wExpander->size(2, 1);
   wListExpander->size(2, 1);
   wName->size((ni->GetWName() - indent_skip - 4), 1);
+  if(wListDesignation) {
+    FTW_Branch* b = (FTW_Branch*)mParent;
+    if(b->GetLDShow() && wName->w() > b->GetLDNameMinWidth()) {
+      wListDesignation->edit_active(b->GetLDEdit());
+      Int_t dw = TMath::Min(b->GetLDWidth(), wName->w() - b->GetLDNameMinWidth());
+      wName->size(wName->w() - dw, 1);
+      wListDesignation->size(dw, 1);
+      wListDesignation->show();
+    } else {
+      wListDesignation->hide();
+    }
+  }
   wSepBox->size(ni->GetWSepBox(), 1);
   wFrontPack->size(1,1);
   
@@ -313,7 +350,12 @@ void FTW_Leaf::resize_weeds() {
 }
 
 void FTW_Leaf::label_namebox() {
-  wName->set_label(fImg->fLens->GetName());
+  if(fImg->fLens) {
+    wName->set_label(fImg->fLens->GetName());
+  } else {
+    wName->set_label("<null>");
+    wName->labelcolor(FL_DARK_RED);
+  }
 }
 
 void FTW_Leaf::label_weeds() {
@@ -328,6 +370,17 @@ void FTW_Leaf::label_weeds() {
   else
     wExpander->labelcolor(FL_BLACK);
   wExpander->redraw();
+}
+
+void FTW_Leaf::label_designation()
+{
+  if(wListDesignation != 0) {
+    AList* l = mParent->fImg->GetList();
+    if(l->el_type() == AList::ET_Id)
+      wListDesignation->value(GForm("%d", mListId));
+    else
+      wListDesignation->value(mListLabel);
+  }
 }
 
 void FTW_Leaf::recolor_name() {
