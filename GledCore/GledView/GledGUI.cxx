@@ -25,6 +25,7 @@
 #include <FL/Fl_OutputPack.H>
 #include <FL/Fl_Tooltip.H>
 #include <FL/fl_draw.H>
+#include <FL/fl_ask.H>
 #include <FL/Fl_Image.H>
 
 #ifdef __APPLE__
@@ -251,8 +252,16 @@ void GledGUI::ParseArguments(list<char*>& args)
 
   Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
   if(font) {
-    Fl::set_font((Fl_Font)FL_HELVETICA, (Fl_Font)font);
+    printf("-font option currently disabled. There were problems overriding default font with fltk-1.1.7.\n");
+    font = 0;
+    // Fl::set_font((Fl_Font)FL_HELVETICA, (Fl_Font)font);
+
+    // int n = Fl::set_fonts(); // load all iso8859-1 fonts
+    // printf("Loaded %d fonts\n", n);
+    // Fl::set_font((Fl_Font)FL_HELVETICA, "verdana");
   }
+
+  fl_message_font((Fl_Font) font, swm_fs);
 
   Fl_Tooltip::size(mSwmManager->cell_fontsize() - 1);
   Fl_Tooltip::enable();	// enable tooltips
