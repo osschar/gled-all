@@ -47,6 +47,10 @@ $PATCH = {
 # 'C7_DoNot_Gen' => { 'RebuildLinkRefs' => 1 }
 },
 
+"ZStringMap" => {
+  'PragmaSuff' => "-",
+},
+
 "ZMirEmittingEntity" => {
   'VirtualBase' => 1
 },
