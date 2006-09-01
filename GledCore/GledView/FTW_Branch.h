@@ -13,28 +13,37 @@
 
 class FTW_Branch : public FTW_Leaf
 {
- private:
+protected:
+  typedef list<FTW_Leaf*>           lpFTW_Leaf_t;
+  typedef list<FTW_Leaf*>::iterator lpFTW_Leaf_i;
+
   list<FTW_Leaf*>	mLeaves;
   TimeStamp_t		mLeavesTimeStamp;
 
   void build_leaves(int insert_pos);
   void wipe_leaves();
 
-  void insert_leaf(Ray& ray, list<FTW_Leaf*>::iterator pos);
-  void remove_leaf(list<FTW_Leaf*>::iterator pos);
+  FTW_Leaf* create_leaf(OptoStructs::ZGlassImg* img, const AList::ElRep& el_rep);
+  void      insert_leaf(Ray& ray, lpFTW_Leaf_i pos);
+  void      remove_leaf(lpFTW_Leaf_i pos);
 
   AList::ElRep beta_elrep(Ray& ray);
   AList::ElRep gamma_elrep(Ray& ray);
-  list<FTW_Leaf*>::iterator leaf_pos(AList::ElRep elrep);
+  lpFTW_Leaf_i leaf_pos(AList::ElRep elrep);
 
- protected:
   bool			bLeavesCreated;
   bool			bListExpanded;	// mLeafs shown
+
+  // Leaf Designations
+  bool                  mLDShow;  // X{gs}
+  bool                  mLDEdit;  // X{gs}
+  int                   mLDWidth; // X{gs}
+  int                   mLDNameMinWidth; // X{gs}
 
   virtual void label_namebox();
   virtual void label_weeds();
 
- public:
+public:
   FTW_Branch(FTW_Nest* nest, FTW_Leaf* parent,
 	     OptoStructs::ZGlassImg* img,
 	     bool is_list_member, bool is_link_desc);
@@ -51,6 +60,9 @@ class FTW_Branch : public FTW_Leaf
   virtual void HideListMembers();
 
   float LeafPosition(FTW_Leaf* leaf);
+
+  virtual void RewidthNameBoxes();
+  virtual void SpawnSeparatorDialog();
 
 #include "FTW_Branch.h7"
 }; // endclass FTW_Branch
