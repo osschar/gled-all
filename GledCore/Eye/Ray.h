@@ -116,22 +116,22 @@ public:
   { fBeta = b; fRayBits |= RB_Beta; }
   void SetBeta(Int_t bid)
   { fBetaId = bid; fRayBits |= RB_BetaId; }
-  void SetBeta(TString& blbl)
+  void SetBeta(const TString& blbl)
   { fBetaLabel = blbl; fRayBits |= RB_BetaLabel; }
   void SetBeta(ZGlass* b, Int_t bid)
   { SetBeta(b); SetBeta(bid); }
-  void SetBeta(ZGlass* b, Int_t bid, TString& blbl)
+  void SetBeta(ZGlass* b, Int_t bid, const TString& blbl)
   { SetBeta(b); SetBeta(bid); SetBeta(blbl); }
 
   void SetGamma(ZGlass* g)
   { fGamma = g; fRayBits |= RB_Gamma; }
   void SetGamma(Int_t gid)
   { fGammaId = gid; fRayBits |= RB_GammaId; }
-  void SetGamma(TString& glbl)
+  void SetGamma(const TString& glbl)
   { fGammaLabel = glbl; fRayBits |= RB_GammaLabel; }
   void SetGamma(ZGlass* g, Int_t gid)
   { SetGamma(g); SetGamma(gid); }
-  void SetGamma(ZGlass* g, Int_t gid, TString& glbl)
+  void SetGamma(ZGlass* g, Int_t gid, const TString& glbl)
   { SetGamma(g); SetGamma(gid); SetGamma(glbl); }
 
   void SetCustomBuffer(TBuffer& b);
