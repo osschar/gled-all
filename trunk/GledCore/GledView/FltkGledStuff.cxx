@@ -34,7 +34,7 @@ FTW_Shell* FGS::grep_shell(Fl_Widget *w)
   return grep_parent<FTW_Shell*>(w);
 }
 
-FTW_Shell* FGS::grep_shell_or_die(Fl_Widget *w, const TString& _eh)
+FTW_Shell* FGS::grep_shell_or_die(Fl_Widget *w, const Exc_t& _eh)
 {
   FTW_Shell* s = grep_shell(w);
   if(s == 0) throw(_eh + "can not reach FTW_Shell.");
