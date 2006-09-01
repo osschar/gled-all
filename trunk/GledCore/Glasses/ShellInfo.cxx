@@ -38,7 +38,7 @@ void ShellInfo::_init()
 
   mMsgOutH     = 5;
 
-  bFancyClassView       = true; bCollZGlass = bCollZList = true;
+  bFancyClassView       = true; bCollZGlass = bCollAList = true;
   bShowLinksInClassView = true;
 }
 

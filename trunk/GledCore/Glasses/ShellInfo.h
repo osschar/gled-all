@@ -33,8 +33,8 @@ private:
   void _init();
 
 protected:
-  ZLink<ZHashList>	mSubShells;	// X{gE} L{}
-  ZLink<SubShellInfo> mDefSubShell;   // X{gE} L{} 
+  ZLink<ZHashList>    mSubShells;   // X{gE} L{}
+  ZLink<SubShellInfo> mDefSubShell; // X{gE} L{} 
 
   ZLink<ZGlass>	mBeta;		// X{gS} L{}
   ZLink<ZGlass>	mGamma;		// X{gS} L{}
@@ -50,7 +50,7 @@ protected:
 
   Bool_t	bFancyClassView;       // X{GS} 7 Bool()
   Bool_t	bCollZGlass;           // X{GS} 7 Bool(-join=>1)
-  Bool_t	bCollZList;            // X{GS} 7 Bool()
+  Bool_t	bCollAList;            // X{GS} 7 Bool()
   Bool_t	bShowLinksInClassView; // X{GS} 7 Bool()
 
 public:
