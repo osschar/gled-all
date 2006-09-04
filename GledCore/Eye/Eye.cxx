@@ -34,7 +34,6 @@ void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 /**************************************************************************/
 
 Eye::Eye(TSocket* sock, EyeInfo* ei) :
-  mNullLensImg(this),
   mSatSocket(sock)
 {
   static const Exc_t _eh("Eye::Eye ");
@@ -80,10 +79,9 @@ Eye::~Eye() {
 
 /**************************************************************************/
 
-OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass, bool null_ok)
+OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
 {
-  if(glass == 0)
-    return null_ok ? &mNullLensImg : 0;
+  if(glass == 0) return 0;
 
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
   if(i != mGlass2ImgHash.end()) return i->second;
@@ -95,6 +93,12 @@ OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass, bool null_ok)
   }
   mGlass2ImgHash[glass] = gi;
   return gi;
+}
+
+ZGlass* Eye::DemangleID2Lens(ID_t id)
+{
+  OS::ZGlassImg* img = DemangleID(id);
+  return img ? img->fLens : 0;
 }
 
 OS::ZGlassImg* Eye::DemangleID(ID_t id)
