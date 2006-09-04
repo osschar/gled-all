@@ -420,6 +420,33 @@ namespace GledNS {
 
 #endif
 
+
+/**************************************************************************/
+// Inlines
+/**************************************************************************/
+
+inline ZGlass* CastID2Lens(ID_t id)
+{
+  char* ptr = 0; ptr += id;
+  return (ZGlass*)ptr;
+}
+
+inline ID_t CastLens2ID(ZGlass* lens)
+{
+  return (ID_t) ((char*)lens - (char*)0);
+}
+
+inline void* CastID2VoidPtr(ID_t id)
+{
+  char* ptr = 0; ptr += id;
+  return (void*)ptr;
+}
+
+inline ID_t CastVoidPtr2ID(void* ptr)
+{
+  return (ID_t) ((char*)ptr - (char*)0);
+}
+
 } // namespace GledNS
 
 #endif

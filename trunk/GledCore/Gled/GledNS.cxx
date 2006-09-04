@@ -349,30 +349,6 @@ void GledNS::UnlockCINT() { ROOT_CINT_MUTEX->UnLock(); }
 
 /**************************************************************************/
 
-ZGlass* GledNS::CastID2Lens(ID_t id)
-{
-  char* ptr = 0; ptr += id;
-  return (ZGlass*)ptr;
-}
-
-ID_t GledNS::CastLens2ID(ZGlass* lens)
-{
-  return (ID_t) ((char*)lens - (char*)0);
-}
-
-void* GledNS::CastID2VoidPtr(ID_t id)
-{
-  char* ptr = 0; ptr += id;
-  return (void*)ptr;
-}
-
-ID_t GledNS::CastVoidPtr2ID(void* ptr)
-{
-  return (ID_t) ((char*)ptr - (char*)0);
-}
-
-/**************************************************************************/
-
 void GledNS::StreamLens(TBuffer& b, ZGlass* lens)
 {
   // Writes lens, prefixed by Lid/Cid to the buffer.
