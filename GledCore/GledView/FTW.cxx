@@ -100,11 +100,14 @@ void FTW::Locator::revert() {
 // Call **has_contents()** before calling any of the following!
 
 ID_t FTW::Locator::get_contents() {
-  return ant ? ant->fToGlass->GetSaturnID() : leaf->fImg->fLens->GetSaturnID();
+  if(ant)
+    return ant->fToGlass ? ant->fToGlass->GetSaturnID() : 0;
+  else
+    return (leaf->fImg && leaf->fImg->fLens) ? leaf->fImg->fLens->GetSaturnID() : 0;
 }
 
 ZGlass* FTW::Locator::get_glass()
-{ return ant ? ant->fToGlass : leaf->fImg->fLens; }
+{ return ant ? ant->fToGlass : (leaf->fImg ? leaf->fImg->fLens : 0); }
 
 OS::ZGlassImg* FTW::Locator::get_image()
 { return ant ? ant->GetToImg() : leaf->fImg; }
@@ -245,7 +248,7 @@ FTW_Ant* FTW::NameButton::get_ant()
 void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 					 const char* prefix)
 {
-  if(leaf->fImg->fLens == 0) {
+  if(leaf->fImg == 0) {
     leaf->GetNest()->SetInfoBar("<null> (list element not set)");
     return;
   }
@@ -282,12 +285,6 @@ int FTW::NameButton::handle(int ev)
   static int x, y, dx, dy;
   FTW_Leaf* leaf = get_leaf();
   FTW_Ant*  ant  = get_ant();
-
-  if(leaf->fImg->fLens == 0) {
-    if(ev == FL_PASTE)
-      printf("FTW::NameButton::handle (maybe) should try to set the list element.\n");
-    return 1;
-  }
 
   switch(ev) {
 
@@ -332,6 +329,7 @@ int FTW::NameButton::handle(int ev)
 
 
   case FL_DRAG: {
+    Locator loc(leaf->GetNest(), leaf, ant);
     if(Fl::event_state(FL_BUTTON1)) {
       if(Fl::event_inside(this)) {
 	dx = abs(Fl::event_x() - x); y = abs(Fl::event_y() - y);
@@ -340,24 +338,15 @@ int FTW::NameButton::handle(int ev)
 	value(1);
       } else {
 	// we have just left the widget ... initiate dnd
-	const char* text = 0;
-	if(ant == 0) {
-	  text = GForm("%u", leaf->fImg->fLens->GetSaturnID());
-	} else {
-	  if(ant->GetToImg())
-	    text = GForm("%u", ant->GetToImg()->fLens->GetSaturnID());
-	}
-	if(text) {
-	  Locator loc(leaf->GetNest(), leaf, ant);
-	  leaf->GetNest()->GetShell()->X_SetSource(loc.get_image());
-	  Fl::copy(text, strlen(text), 0);
-	  Fl::dnd();
-	}
-	labelcolor(FL_BLACK);
+	const char* text = GForm("%u", loc.get_contents());
+        leaf->GetNest()->GetShell()->X_SetSource(loc.get_image());
+        Fl::copy(text, strlen(text), 0);
+        Fl::dnd();
+	labelcolor(loc.get_image() ? FL_BLACK : FL_DARK_RED);
 	value(0);
       }
     } else {
-      labelcolor(FL_BLACK);
+      labelcolor(loc.get_image() ? FL_BLACK : FL_DARK_RED);
       value(0);
     }
     redraw();
@@ -365,24 +354,19 @@ int FTW::NameButton::handle(int ev)
   }
 
   case FL_RELEASE: {
+    Locator loc(leaf->GetNest(), leaf, ant);
     if(Fl::event_button() == 1 && Fl::event_inside(this)) {
-      if(Fl::event_clicks() == 1) {
+      if(Fl::event_clicks() == 1 && loc.get_glass() != 0) {
 	FTW_Shell *shell = leaf->GetNest()->GetShell();
-	if(m_loc == L_Leaf) {
-	  shell->SpawnMTW_View(leaf->fImg);
-	  leaf->GetNest()->RefPoint().revert();
-	  Fl::event_clicks(0);
-	} else if(m_loc == L_Ant && ant->GetToImg() != 0) {
-	  shell->SpawnMTW_View(ant->GetToImg());
-	  leaf->GetNest()->RefPoint().revert();
-	  Fl::event_clicks(0);
-	}
+        shell->SpawnMTW_View(loc.get_image());
+        leaf->GetNest()->RefPoint().revert();
+        Fl::event_clicks(0);
       } else {
 	if(dx > w()/7) leaf->GetNest()->RefMark().set(leaf, ant);
 	else	       leaf->GetNest()->RefPoint().set(leaf, ant);
       }
     }
-    labelcolor(FL_BLACK);
+    labelcolor(loc.get_image() ? FL_BLACK : FL_DARK_RED);
     value(0);
     redraw();
     return 1;
@@ -408,13 +392,14 @@ int FTW::NameButton::handle(int ev)
   case FL_PASTE: {
     FTW_Shell* shell = leaf->GetNest()->GetShell();
     try {
-      if(shell->GetSource()->has_contents()) {
-	Locator me(leaf->GetNest(), leaf, ant);
-	if(ant == 0) {
-	  shell->X_Add(me);
-	} else {
+      Locator me(leaf->GetNest(), leaf, ant);
+      if(ant == 0) {
+        shell->X_Add(me);
+      } else {
+        if(shell->GetSource()->has_contents())
 	  shell->X_SetLinkOrElement(me);
-	}
+        else
+          shell->X_ClearLinkOrElement(me);
       }
     }
     catch(Exc_t& exc) {
@@ -500,12 +485,16 @@ void FTW::ListDesignator::edit_active(bool ea)
 int FTW::ListDesignator::handle(int ev)
 {
   switch (ev) {
-  case FL_DND_ENTER: {
-    FTW_Shell *shell = FGS::grep_shell(parent());
-    if(shell == 0) return 0;
-    // could check if valid type, change cursor
+
+  case FL_PUSH:
+    if(Fl::event_button() == 2) {
+      Fl::paste(*this);
+      return 1;
+    }
+    break;
+
+  case FL_DND_ENTER:
     return 1;
-  }
 
   case FL_DND_RELEASE: {
     return (Fl::belowmouse() == this) ? 1 : 0;
@@ -518,18 +507,19 @@ int FTW::ListDesignator::handle(int ev)
 
   case FL_PASTE: {
     FTW_Shell *shell = FGS::grep_shell(parent());
-    if(shell == 0) return 0;
-    ID_t source_id = shell->GetSource()->get_contents();
-    ID_t pasted_id = (ID_t) strtoul(Fl::event_text(), 0, 0);
-    if(source_id == pasted_id) {
-      FTW_Leaf* l = FGS::grep_parent<FTW_Leaf*>(parent());
-      AList*        list = l->GetParent()->fImg->GetList();
-      ZGlass*       lens = shell->DemangleID(source_id)->fLens;
-      AList::ElRep elrep = l->GetElRep();
-      auto_ptr<ZMIR> mir
-        (list->MkMir_SetElement(lens, elrep));
-      l->fImg->fEye->Send(*mir);
-      return 1;
+    if(shell) {
+      ID_t source_id = shell->GetSource()->get_contents();
+      ID_t pasted_id = (ID_t) strtoul(Fl::event_text(), 0, 0);
+      if(source_id == pasted_id) {
+        FTW_Leaf* l = FGS::grep_parent<FTW_Leaf*>(parent());
+        AList*        list = l->GetParent()->fImg->GetList();
+        ZGlass*       lens = shell->DemangleID2Lens(source_id);
+        AList::ElRep elrep = l->GetElRep();
+        auto_ptr<ZMIR> mir
+          (list->MkMir_SetElement(lens, elrep));
+        shell->Send(*mir);
+        return 1;
+      }
     }
     break;
   }
@@ -879,6 +869,11 @@ void FTW::Direct_Selector::set_img(OS::ZGlassImg* img)
   wNameBox->ChangeImage(img);
 }
 
+ID_t FTW::Direct_Selector::get_id()
+{
+  return wNameBox->fImg ? wNameBox->fImg->fLens->GetSaturnID() : 0;
+}
+
 /**************************************************************************/
 // /dev/null selector
 /**************************************************************************/
@@ -995,7 +990,7 @@ ID_t FTW::Source_Selector::get_contents()
     return 0;
 
   case Top_Selector::T_Direct:
-    return wDir_Sel->get_img()->fLens->GetSaturnID();
+    return wDir_Sel->get_img() ? wDir_Sel->get_img()->fLens->GetSaturnID() : 0;
 
   default:
     return 0;
@@ -1030,7 +1025,7 @@ void FTW::Source_Selector::fix_MIR_beta(auto_ptr<ZMIR>& mir)
   }
 
   case Top_Selector::T_Direct:
-    mir->BetaID = wDir_Sel->get_img()->fLens->GetSaturnID();
+    mir->BetaID = wDir_Sel->get_id();
     break;
 
   default:

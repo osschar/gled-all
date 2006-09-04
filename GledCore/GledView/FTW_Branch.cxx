@@ -36,7 +36,7 @@ void cb_label_change(Fl_Input* w, FTW_Leaf* l)
   AList* list = l->GetParent()->fImg->GetList();
   auto_ptr<ZMIR> mir
     (list->MkMir_ChangeLabel(l->GetListLabel(), w->value()));
-  l->fImg->fEye->Send(*mir);
+  l->GetParent()->fImg->fEye->Send(*mir);
 }
 
 }
@@ -50,7 +50,7 @@ void FTW_Branch::build_leaves(int insert_pos)
   AList::lElRep_t d;
   mLeavesTimeStamp = list->CopyListElReps(d, has_zeroes);
   for(AList::lElRep_i i=d.begin(); i!=d.end(); ++i) {
-    OS::ZGlassImg* img = fImg->fEye->DemanglePtr(i->get_lens(), has_zeroes);
+    OS::ZGlassImg* img = fImg->fEye->DemanglePtr(i->get_lens());
     FTW_Leaf*     leaf = create_leaf(img, *i);
     mLeaves.push_back(leaf);
     mNest->InsertLeaf(leaf, insert_pos++);
@@ -190,8 +190,6 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 	break;
 
       case RQN_list_insert_label:
-        if(ray.fBetaImg == 0)
-          ray.fBetaImg = fImg->fEye->GetNullLensImg();
         insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
         break;
 
@@ -201,8 +199,6 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 
       case RQN_list_element_set: {
         lpFTW_Leaf_i pos = leaf_pos(beta_elrep(ray));
-        if(ray.fBetaImg == 0)
-          ray.fBetaImg = fImg->fEye->GetNullLensImg();
         insert_leaf(ray, pos);
         remove_leaf(pos);
 	break;
@@ -214,7 +210,7 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 	if(bListExpanded) CollapseList();
 	wipe_leaves();
 	if(was_expanded)  ExpandList();
-	return;
+        break;
       }
 
       } // end switch ray.fRQN

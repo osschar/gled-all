@@ -73,7 +73,7 @@ public:
   virtual ~FTW_Leaf();
 
   virtual void AbsorbRay(Ray& ray);
-  AList::ElRep GetElRep() { return AList::ElRep(fImg->fLens, mListId, mListLabel); }
+  AList::ElRep GetElRep() { return AList::ElRep(fImg ? fImg->fLens : 0, mListId, mListLabel); }
 
   // General foonctionality, partially overridden in FTW_Branch.
   virtual void ExpandList() {}
@@ -94,7 +94,7 @@ public:
   virtual void ShowListMembers() {}
   virtual void HideListMembers() {}
 
-  bool IsList()           { return fImg->fIsList; }
+  bool IsList()           { return fImg ? fImg->fIsList : false; }
   bool IsListMember()     { return bIsListMember; }
   bool IsLinkDescendant() { return bIsLinkDescendant; }
 
@@ -112,7 +112,7 @@ public:
     ZGlass* lens;
     leaf_eq_lens(ZGlass* l) : lens(l) {}
     bool operator()(const FTW_Leaf* l) {
-      return l->fImg->fLens == lens;
+      return l->fImg && l->fImg->fLens == lens;
     }
   };
 
