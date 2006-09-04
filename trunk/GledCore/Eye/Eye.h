@@ -29,7 +29,6 @@ class Eye {
 protected:
   OptoStructs::hpZGlass2pZGlassImg_t mGlass2ImgHash;
   OptoStructs::lpImgConsumer_t       mImgConsumers;
-  OptoStructs::ZGlassImg             mNullLensImg;
 
   Saturn*	mSaturn;	// X{g}
   SaturnInfo*	mSaturnInfo;	// X{g}
@@ -47,12 +46,10 @@ public:
   virtual void UninstallFdHandler() = 0;
 
   // Basic ZGlassImg functionality
-  virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass, bool null_ok=false);
+  virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
   virtual OptoStructs::ZGlassImg* DemangleID(ID_t id);
+  virtual ZGlass*                 DemangleID2Lens(ID_t id);
   virtual void RemoveImage(OptoStructs::ZGlassImg* img);
-
-  virtual OptoStructs::ZGlassImg* GetNullLensImg()
-  { return &mNullLensImg; }
 
   void RegisterImageConsumer(OptoStructs::ImageConsumer* imgc)
   { mImgConsumers.push_back(imgc); }
