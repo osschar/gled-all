@@ -65,13 +65,13 @@ struct Locator {
   void set(FTW_Leaf* l, FTW_Ant* a=0);
   void revert();
 
-  ID_t		    get_contents(); // should be get_id
-  ZGlass*		    get_glass();
+  ID_t                    get_contents(); // should be get_id
+  ZGlass*                 get_glass();
   OptoStructs::ZGlassImg* get_image();
-  GledNS::ClassInfo*	    get_class_info();
+  GledNS::ClassInfo*      get_class_info();
 
-  ZGlass*		    get_leaf_glass();
-  ID_t		    get_leaf_id();
+  ZGlass*                 get_leaf_glass();
+  ID_t                    get_leaf_id();
 
   void up();
   void down();
@@ -268,7 +268,7 @@ public:
 class Direct_Selector : public Bot_Selector, public Fl_Group {
 protected:
   Fl_Button*                  wTop;
-  FltkGledStuff::LensNameBox*	wNameBox;
+  FltkGledStuff::LensNameBox* wNameBox;
 
 public:
   Direct_Selector(Top_Selector* ts, Top_Selector::Type_e t);
@@ -279,6 +279,8 @@ public:
 
   OptoStructs::ZGlassImg* get_img();
   void set_img(OptoStructs::ZGlassImg* img);
+
+  ID_t get_id();
 };
 
 /**************************************************************************/

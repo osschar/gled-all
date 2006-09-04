@@ -64,7 +64,7 @@ FTW_Leaf::Construct(FTW_Nest* nest, FTW_Leaf* parent,
 		    bool is_list_member, bool is_link_desc)
 {
   FTW_Leaf* l;
-  if(img->fIsList)
+  if(img && img->fIsList)
     l = new FTW_Branch(nest, parent, img, is_list_member, is_link_desc);
   else
     l = new FTW_Leaf(nest, parent, img, is_list_member, is_link_desc);
@@ -114,7 +114,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   }
     
   wSepBox = new Fl_Button(0,0,1,1,0);
-  if(fImg->fIsList && fImg->GetList()->el_type() >= AList::ET_Id) {
+  if(fImg && fImg->fIsList && fImg->GetList()->el_type() >= AList::ET_Id) {
     wSepBox->box(FTW::postnamebox_box);
     if(fImg->GetList()->elrep_can_edit_label())
       wSepBox->color(FTW::postnamebox_edit_color);
@@ -130,8 +130,10 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   wFrontPack->end();
 
   wAntPack = new Fl_Pack(0,0,1,1); wAntPack->type(FL_HORIZONTAL);
-  for(OS::lZLinkDatum_i l=fImg->fLinkData.begin(); l!=fImg->fLinkData.end(); ++l) {
-    new FTW_Ant(&(*l), this);
+  if(fImg) {
+    for(OS::lZLinkDatum_i l=fImg->fLinkData.begin(); l!=fImg->fLinkData.end(); ++l) {
+      new FTW_Ant(&(*l), this);
+    }
   }
   wAntPack->end();
 
@@ -350,7 +352,7 @@ void FTW_Leaf::resize_weeds() {
 }
 
 void FTW_Leaf::label_namebox() {
-  if(fImg->fLens) {
+  if(fImg) {
     wName->set_label(fImg->fLens->GetName());
   } else {
     wName->set_label("<null>");
@@ -398,6 +400,7 @@ void FTW_Leaf::modify_box_color(Fl_Color mod, bool on_p) {
 // Custom View
 
 void FTW_Leaf::create_custom_view(MTW_Layout* layout) {
+  if(fImg == 0) return;
   int n = layout->CountSubViews(fImg->fLens);
   if(n > 0) {
     FTW_Shell* shell = mNest->GetShell();

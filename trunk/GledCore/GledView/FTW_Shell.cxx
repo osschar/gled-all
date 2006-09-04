@@ -682,7 +682,6 @@ void FTW_Shell::X_Add(FTW::Locator& target)
   static const Exc_t _eh("FTW_Shell::X_Add ");
 
   if(!target.is_list())		throw(_eh + "target is not a list");
-  if(!mSource->has_contents())	throw(_eh + "source has no contents");
 
   AList* l = (AList*) target.get_glass();
   auto_ptr<ZMIR> mir( l->MkMir_Add(0) );
@@ -1012,7 +1011,7 @@ void FTW_Shell::FillLensMenu(OS::ZGlassImg* img, Fl_Menu_Button& menu,
 	{
 	  mcdl.push_back(new mir_call_data_img(img, this, *cmi));
 	  TString& mn( (*cmi)->fName );
-	  if(mn.Length() >= 4 && mn.BeginsWith("Set") == 0 && isupper(mn[3])) {
+	  if(mn.Length() >= 4 && mn.BeginsWith("Set") && isupper(mn[3])) {
 	    menu.add(GForm("%s%s/%s/%s/%s (%d; %d,%d)", prefix.Data(),
 			   p1, p2, pset,
 			   (*cmi)->fName.Data(), (*cmi)->fMid,
