@@ -169,7 +169,7 @@ void AList::DumpElements(Bool_t dump_zeros)
   Stepper<> s(this, dump_zeros);
   while(s.step()) {
     ElRep elr = s.get_elrep();
-    printf("%2d %8p <%s> %s\n", elr.fId, elr.fLens, elr.fLabel.Data(),
+    printf("%4d %10p <%s> %s\n", elr.fId, elr.fLens, elr.fLabel.Data(),
 	   elr.fLens ? elr.fLens->Identify().Data() : "<none>");
   }
 }
