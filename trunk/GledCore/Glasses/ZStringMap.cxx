@@ -31,17 +31,11 @@ Int_t ZStringMap::remove_references_to(ZGlass* lens)
 {
   Int_t n  = ZGlass::remove_references_to(lens);
   GMutexHolder llck(mListMutex);
-  iterator i = begin();
-  while(i != end()) {
+  for(iterator i=begin(); i!=end(); ++i) {
     if(i() == lens) {
-      iterator j = i++;
-      TString label = j->first;
-      on_remove(j);
-      mElements.erase(j);
-      StampListRemoveLabel(lens, label);
+      on_remove(i);
+      StampListElementSet(0, i->first);
       ++n;
-    } else {
-      ++i;
     }
   }
   return n;
@@ -60,26 +54,20 @@ void ZStringMap::clear_list()
 Int_t ZStringMap::RebuildListRefs(An_ID_Demangler* idd)
 {
   Int_t ret = 0;
-  iterator i = begin();
-  while(i != end()) {
-    ZGlass* lens = idd->DemangleID(GledNS::CastLens2ID(i->second));
-    bool ok = false;
-    if(lens) {
-      try {
-	lens->IncRefCount(this);
-        i->second = lens;
-        ok = true;
-        ++i;
+  for(iterator i = begin(); i != end(); ++i) {
+    ZGlass* lens = 0;
+    if(i->second != 0) {
+      lens = idd->DemangleID(GledNS::CastLens2ID(i->second));
+      if(lens) {
+        try {
+          lens->IncRefCount(this);
+        }
+        catch(Exc_t& exc) {
+          lens = 0;
+          ++ret;
+        }
       }
-      catch(Exc_t& exc) {
-        // !!! warn
-      }
-    }
-    if(!ok) {
-      iterator j = i++;
-      mElements.erase(j);
-      --mSize;
-      ++ret;
+      i->second = lens;
     }
   }
   on_rebuild();
@@ -129,7 +117,7 @@ void ZStringMap::Add(ZGlass* lens)
     label += GForm(mAddLensFormat, mAddLensCurId++);
     i = mElements.find(label);
   } while(i != end());
-  lens->IncRefCount(this);
+  if(lens) lens->IncRefCount(this);
   pair<iterator, bool> r = mElements.insert(element(label, lens));
   ++mSize;
   i = r.first;
@@ -142,15 +130,11 @@ void ZStringMap::RemoveAll(ZGlass* lens)
 {
   Int_t n=0;
   GMutexHolder llck(mListMutex);
-  iterator i = begin();
-  while(i != end()) {
+  for(iterator i = begin(); i != end(); ++i) {
     if(i() == lens) {
-      iterator j = i++;
-      StampListRemoveLabel(j->second, j->first);
-      mElements.erase(j); --mSize;
+      on_remove(i);
+      StampListElementSet(0, i->first);
       ++n;
-    } else {
-      ++i;
     }
   }
   if(n) lens->DecRefCount(this, n);
@@ -252,8 +236,7 @@ void ZStringMap::ChangeLabel(TString label, TString new_label)
 
   GMutexHolder llck(mListMutex);
 
-  iterator i;
-  i = mElements.find(new_label);
+  iterator i = mElements.find(new_label);
   if(i != end())
     throw(_eh + "new_label '" + new_label + "' already exists.");
   i = mElements.find(label);
@@ -268,6 +251,27 @@ void ZStringMap::ChangeLabel(TString label, TString new_label)
   on_change_label(i, label);
   ++i;
   StampListInsertLabel(lens, new_label, i != end() ? i->first : "");
+}
+
+ZGlass* ZStringMap::GetElementByLabel(TString label)
+{
+  static const Exc_t _eh("ZStringMap::GetElementByLabel ");
+
+  ZGlass* l;
+  {
+    GMutexHolder llck(mListMutex);
+    iterator i = mElements.find(label);
+    if(i == mElements.end())
+      throw(_eh + "label not found.");
+    l = i->second;
+  }
+  ZMIR* mir = get_MIR();
+  if(mir && mir->HasResultReq()) {
+    TBuffer b(TBuffer::kWrite);
+    GledNS::WriteLensID(b, l);
+    mSaturn->ShootMIRResult(b);
+  }
+  return l;
 }
 
 /**************************************************************************/
@@ -290,7 +294,7 @@ void ZStringMap::Streamer(TBuffer &b)
     container::iterator p = mElements.begin();
     for(Int_t i=0; i<mSize; ++i) {
       b >> id >> str;
-      p = mElements.insert(p, element(str, (ZGlass*)id));
+      p = mElements.insert(p, element(str, GledNS::CastID2Lens(id)));
     }
     b.CheckByteCount(R__s, R__c, ZStringMap::IsA());
 
@@ -300,7 +304,7 @@ void ZStringMap::Streamer(TBuffer &b)
     AList::Streamer(b);
     b << mAddLensPrefix << mAddLensFormat << mAddLensCurId;
     for(iterator i=begin(); i!=end(); ++i)
-      b << i()->GetSaturnID() << i->first;
+      b << (i() ? i()->GetSaturnID() : (ID_t)0) << i->first;
     b.SetByteCount(R__c, kTRUE);
 
   }

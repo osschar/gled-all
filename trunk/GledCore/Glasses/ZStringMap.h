@@ -40,12 +40,6 @@ public:
   virtual stepper_base* make_stepper_imp(bool return_zeroes=false);
 #endif
 
-protected:
-  container   mElements;
-  TString     mAddLensPrefix; // X{GS} 7 Textor()
-  TString     mAddLensFormat; // X{GS} 7 Textor(-width=>6, -join=>1)
-  Int_t       mAddLensCurId;  // X{GS} 7 Value(-width=>4)
-
 private:
   void _init();
 
@@ -60,6 +54,11 @@ protected:
   virtual void on_change(iterator iter, ZGlass* old_lens) {}
   virtual void on_change_label(iterator iter, TString old_label) {}
   virtual void on_rebuild() {}
+
+  container   mElements;
+  TString     mAddLensPrefix; // X{GS} 7 Textor()
+  TString     mAddLensFormat; // X{GS} 7 Textor(-width=>6, -join=>1)
+  Int_t       mAddLensCurId;  // X{GS} 7 Value(-width=>4)
 
 public:
   ZStringMap(const Text_t* n="ZStringMap", const Text_t* t=0) :
@@ -94,6 +93,8 @@ public:
   virtual void AddLabel(TString label);                        // X{E} C{0}
   virtual void RemoveLabel(TString label);                     // X{E} C{0}
   virtual void ChangeLabel(TString label, TString new_label);  // X{E} C{0}
+
+  virtual ZGlass* GetElementByLabel(TString label); // X{E} C{0}
 
 #include "ZStringMap.h7"
   ClassDef(ZStringMap, 1); // RB-tree with with string indexing (std::map<TString, ZGlass*>).
