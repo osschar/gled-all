@@ -1,3 +1,41 @@
+2006-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Removed null-lens-img handling introduced in previous
+	check-in. That was a mistake. Added method 'ZGlass*
+	DemangleID2Lens(ID_t id)'.
+
+	* Glasses/AList.cxx:
+	Expanded widths of some fields in DumpElements().
+
+	* Glasses/ZStringMap.cxx:
+	* Glasses/ZStringMap.h:
+	Added 'ZGlass*GetElementByLabel(TString label)'; fixed some
+	preoblems with null-lenses and reference counting.
+
+	* Glasses/ZVector.cxx:
+	* Glasses/ZVector.h:
+	Implementation of functionality; this was bare bones before.
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Inlined various CastLens/ID functions.
+
+	* GledView/FTW.cxx:
+	* GledView/FTW.h:
+	* GledView/FTW_Branch.cxx:
+	* GledView/FTW_Leaf.cxx:
+	* GledView/FTW_Leaf.h:
+	* GledView/FTW_Shell.cxx:
+	Support null fImg on FTW_Leaf.
+
+	* perllib/GLED_Widgets.pm:
+	Disable weed resize for Value and HexValue when -width is specified.
+
+	* catalog.patch:
+	Disabled Streamer() generation for ZVector.
+
 2006-09-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AList.cxx:
