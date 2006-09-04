@@ -321,8 +321,8 @@ sub new {
   $S->{CastTo} = "double";
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "false";
-  $S->{CanResizeP}   = "true";
-  $S->{-width} = $S->measure_range()  unless exists $S->{-width};
+  $S->{CanResizeP}   = exists $S->{-width} ? "false" : "true";
+  $S->{-width} = $S->measure_range() unless exists $S->{-width};
   $S->{-height} = 1 unless exists $S->{-height};
   return $S;
 }
@@ -353,8 +353,8 @@ sub new {
   $S->{Include} = "FL/Fl_Int_Input.H";
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "false";
-  $S->{CanResizeP}   = "true";
-  $S->{-width} = $S->measure_range()  unless exists $S->{-width};
+  $S->{CanResizeP}   = exists $S->{-width} ? "false" : "true";
+  $S->{-width} = $S->measure_range() unless exists $S->{-width};
   $S->{-height} = 1 unless exists $S->{-height};
   $S->{-format} = '0x%x' unless exists $S->{-format};
   return $S;
