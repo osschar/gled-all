@@ -1,3 +1,8 @@
+2006-09-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.0.6011.
+
 2006-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSPoint.cxx:
