@@ -69,18 +69,19 @@ class RectTerrain : public ZNode
   RectTerrain(Text_t* n="RectTerrain", Text_t* t=0) : ZNode(n,t) { _init(); }
   virtual ~RectTerrain();
 
-  void ApplyBorderCondition();		// X{E} 7 MButt()
+  void ApplyBorderCondition(); // X{E} 7 MButt()
 
-  void SetFromImage(ZImage* image);	// X{E} C{1} 7 MCWButt()
-  void SetFromHisto(TH2* histo);	// X{E} 
+  void SetFromImage(ZImage* image, Float_t zfac=1); // X{E} C{1} 7 MCWButt()
+  void SetFromHisto(TH2* histo);                    // X{E} 
 
-  void Smooth(Float_t fac=0);		// X{E} 7 MButt(-join=>1)
-  void RecalcMinMax();			// X{E} 7 MButt()
+  void Smooth(Float_t fac=0); // X{E} 7 MButt(-join=>1)
+  void RecalcMinMax();        // X{E} 7 MButt()
 
-  void ReTring();			// X{E} 7 MButt(-join=>1)
-  void Boobofy();			// X{E} 7 MButt()
+  void ReTring(); // X{E} 7 MButt(-join=>1)
+  void Boobofy(); // X{E} 7 MButt()
 
   void MakeTringTvor();
+  void DisownTringTvor();
 
   static Float_t sMaxEpsilon;
 
