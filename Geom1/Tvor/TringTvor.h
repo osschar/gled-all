@@ -8,6 +8,7 @@
 #define Geom1_TringTvor_H
 
 #include <Gled/GledTypes.h>
+#include <Stones/ZRCStone.h>
 
 class TringTvor {
 public:
@@ -53,6 +54,13 @@ public:
   TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
 	    Bool_t colp=false, Bool_t texp=false);
   ~TringTvor();
+
+  void SetVertex(Int_t i, Float_t x, Float_t y, Float_t z)
+  { Float_t* v = Vertex(i); v[0] = x; v[1] = y; v[2] = z; }
+  void SetTriangle(Int_t i, Int_t v0, Int_t v1, Int_t v2)
+  { Int_t* t = Triangle(i); t[0] = v0; t[1] = v1; t[2] = v2; }
+  void SetTriangleColor(Int_t i, UChar_t r, UChar_t g, UChar_t b, UChar_t a=255)
+  { UChar_t* c = TriangleColor(i); c[0] = r; c[1] = g; c[2] = b; c[3] = a; }
 
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
