@@ -1,3 +1,26 @@
+2006-10-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Added 'Float_t zfac' argument to SetFromImage() allowing vertical
+	scaling of the imported height-field; added method
+	DisownTringTvor().
+
+	* Glasses/GForger.cxx:
+	* Glasses/GForger.h:
+	Added member 'Float_t mZFactor'; used when setting terrain from
+	the image.
+
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	Added methods SetVertex/Triangle/TriangleColor; in ctor initialize
+	also mNStripEls and mNStrips data-members.
+
+	* FL/Fl_Vector3.cxx:
+	* FL/Fl_Vector3.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	New fltk weed to allow editing of TVector3.
+
 2006-09-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ZImage_GL_Rnr.cxx:
