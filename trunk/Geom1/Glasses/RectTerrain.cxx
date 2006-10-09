@@ -17,8 +17,8 @@
 
 #include "RectTerrain.h"
 #include <Glasses/ZImage.h>
-#include "RectTerrain.c7"
 #include <Tvor/TringTvor.h>
+#include "RectTerrain.c7"
 
 #include <IL/il.h>
 
@@ -126,7 +126,7 @@ void RectTerrain::ApplyBorderCondition()
 
 /**************************************************************************/
 
-void RectTerrain::SetFromImage(ZImage* image)
+void RectTerrain::SetFromImage(ZImage* image, Float_t zfac)
 {
   static const Exc_t _eh("RectTerrain::SetFromImage ");
 
@@ -158,7 +158,6 @@ void RectTerrain::SetFromImage(ZImage* image)
   delete [] data;
 
   float zoffset = 0; // set z = 0 at 0
-  float zfac = 1;    // scale not
 
   float delta = (1 + sMaxEpsilon)*(mMaxZ - mMinZ);
   for(Int_t x=1; x<=mNx; ++x) {
@@ -364,4 +363,10 @@ void RectTerrain::MakeTringTvor()
     TT.GenerateTriangleStrips(mMaxTSVerts);
 
   mTTvorStamp = mTimeStamp;
+}
+
+void RectTerrain::DisownTringTvor()
+{
+  pTTvor = 0;
+  mStampReqTring = Stamp(FID());
 }
