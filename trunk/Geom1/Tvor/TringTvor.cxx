@@ -29,8 +29,10 @@ TringTvor::TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
   }
   if(bTexP) mTexs = new Float_t[2*mNVerts];
 
+  mNStripEls = 0;
   mStripEls    = 0;
   mStripTrings = 0;
+  mNStrips   = 0;
   mStripBegs = 0;
   mStripLens = 0;
 }
