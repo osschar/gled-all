@@ -21,6 +21,7 @@ private:
 protected:
   ZLink<ZImage>       mImage;   // X{GS} L{}
   ZLink<RectTerrain>  mTerrain; // X{GS} L{}
+  Float_t             mZFactor; // X{GS} 7 Value(-range=>[0,1000,1,1000])
 
   TString mFileName;  // X{GS} 7 Textor()
 

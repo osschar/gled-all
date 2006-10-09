@@ -20,6 +20,8 @@ ClassImp(GForger)
 
 void GForger::_init()
 {
+  mZFactor = 1;
+
   mFileName = "gforge.png";
 
   mMesh  = 256;
@@ -55,7 +57,7 @@ void GForger::Forge()
     }
     if(mTerrain != 0) {
       GLensWriteHolder imglock(*mTerrain);
-      mTerrain->SetFromImage(*mImage);
+      mTerrain->SetFromImage(*mImage, mZFactor);
     }
   }
 }
