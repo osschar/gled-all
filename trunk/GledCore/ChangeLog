@@ -1,3 +1,17 @@
+2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GledNS.cxx:
+	In ClassInfo::GetRendererCI() broke up an if-statement to properly
+	navigate class-hierarchy when specified render-glass delegates
+	renedering to further base-class.
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Added some more comments, fixed alignment. To be included in Reve.
+
+	* perllib/GLED_Widgets.pm:
+	Added comments about -const switch.
+
 2006-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Eye.cxx:
