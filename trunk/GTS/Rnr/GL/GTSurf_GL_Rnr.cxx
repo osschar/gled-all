@@ -19,8 +19,8 @@ namespace {
       glVertex3d(p1.x, p1.y, p1.z);
       glVertex3d(p2.x, p2.y, p2.z);
     */
-    GTS::gdouble 	n[3];
-    GTS::GtsVertex*	vp[3];
+    GTS::gdouble     n[3];
+    GTS::GtsVertex* vp[3];
     GTS::gts_triangle_normal(&f->triangle, &n[0], &n[1], &n[2]);
     glNormal3dv(n);
     GTS::gts_triangle_vertices(&f->triangle, &vp[0], &vp[1], &vp[2]);
