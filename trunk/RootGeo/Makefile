@@ -12,7 +12,7 @@ DICT_DIRS	:= Glasses Stones RootGeo
 VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
-BASE_LD_LIBS    = -L${ROOTSYS}/lib -lGeom -lRGL -lX3d
+BASE_LD_LIBS    = -L${ROOTSYS}/lib -lGeom
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
