@@ -175,6 +175,7 @@ fnord
 
 $config   = {};
 $resolver = {};
+$cmd_line = join(' ', @ARGV);
 $num_args = $#ARGV;
 $system   = 'unknown';
 
@@ -191,6 +192,8 @@ if($config->{HELP}) {
   print `cat $def_cfg`;
   exit 0;
 }
+
+$config->{CommandLine} = "./configure $cmd_line";
 
 $system = exec_or_die("uname -s"); chomp $system;
 if($system eq 'Linux' or $system eq 'Darwin') {
