@@ -1,3 +1,9 @@
+2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	Store full configure command-line to '$config->{CommandLine};
+	variable.
+
 2006-09-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_base.inc:

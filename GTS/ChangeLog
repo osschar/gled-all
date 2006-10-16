@@ -1,3 +1,17 @@
+2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSRetriangulator.h:
+	Changed ranges/steps of some data-members to more reasonable values.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added method 'vod ExportTring(const Text_t* fname)' to dump data
+	into a trivial text-file; set 'bUseDisplayList' to true by
+	default.
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Fix indentation.
+
 2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
