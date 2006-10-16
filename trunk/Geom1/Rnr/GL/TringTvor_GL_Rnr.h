@@ -7,7 +7,7 @@
 #ifndef Geom1_TringTvor_GL_Rnr_H
 #define Geom1_TringTvor_GL_Rnr_H
 
-#include <Tvor/TringTvor.h>
+#include <Stones/TringTvor.h>
 
 class TringTvor_GL_Rnr {
 public:

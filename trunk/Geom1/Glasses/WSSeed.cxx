@@ -16,7 +16,7 @@
 #include "WSSeed.c7"
 #include "WSPoint.h"
 
-#include <Tvor/TubeTvor.h>
+#include <Stones/TubeTvor.h>
 
 #include <Gled/GThread.h>
 

@@ -3,7 +3,7 @@
 #ifndef Geom1_TubeTvor_GL_Rnr_H
 #define Geom1_TubeTvor_GL_Rnr_H
 
-#include <Tvor/TubeTvor.h>
+#include <Stones/TubeTvor.h>
 
 class TubeTvor_GL_Rnr {
 public:
