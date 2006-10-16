@@ -8,14 +8,15 @@
 #define GledCore_TubeTvor_H
 
 #include <Gled/GledTypes.h>
+#include <Stones/ZRCStone.h>
 
-class TubeTvor {
-
+class TubeTvor : public ZRCStone
+{
 public:
 
   struct RingInfo {
-    Int_t		fIndex;
-    Int_t		fNVert;
+    Int_t	fIndex;
+    Int_t	fNVert;
     Bool_t	fDrawP;
 
     RingInfo(Int_t i, Int_t n, Bool_t dp) : fIndex(i), fNVert(n), fDrawP(dp) {}
@@ -26,16 +27,15 @@ public:
 
   // --------------------------------------------------------------
 
-  Int_t		mPVI;
-  Int_t		mNP;
-  Int_t		mI;
-  vRingInfo_t	mRings;
-  Float_t*	mV;
-  Float_t*	mN;
-  UChar_t*	mC;
-  Float_t*	mT;
-  Bool_t	bColP;
-  Bool_t	bTexP;
+  Int_t		mNP;    // Number of points
+  Int_t		mI;     // Current vertex-index.
+  vRingInfo_t	mRings; // Ring infos
+  Float_t*	mV;     //[3*mNP] Vertices
+  Float_t*	mN;     //[3*mNP] Normals
+  UChar_t*	mC;     //[4*mNP] Colors
+  Float_t*	mT;     //[2*mNP] Texture-coordinates
+  Bool_t	bColP;  // Has colors
+  Bool_t	bTexP;  // Has texture data
 
   // --------------------------------------------------------------
 
@@ -46,7 +46,10 @@ public:
 	    Bool_t colp=false, Bool_t texp=false);
   void NewRing(Int_t n, Bool_t dp);
   void NewVert(Float_t *v, Float_t *n, UChar_t *c=0, Float_t* t=0);
-}; // endclass GL_TubeTvor
+
+  ClassDef(TubeTvor, 0);
+}; // endclass TubeTvor
+
 
 inline void
 TubeTvor::NewVert(Float_t *v, Float_t *n, UChar_t *c, Float_t *t) {

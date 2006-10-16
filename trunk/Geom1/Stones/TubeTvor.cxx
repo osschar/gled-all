@@ -6,11 +6,14 @@
 
 #include "TubeTvor.h"
 
+ClassImp(TubeTvor);
+
 TubeTvor::TubeTvor() : mV(0), mN(0), mC(0), mT(0),
 		       bColP(false), bTexP(false)
- {}
+{}
 
-TubeTvor::~TubeTvor() {
+TubeTvor::~TubeTvor()
+{
   delete [] mV; delete [] mN; delete [] mC; delete [] mT;
 }
 

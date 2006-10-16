@@ -10,7 +10,11 @@
 #include <Gled/GledTypes.h>
 #include <Stones/ZRCStone.h>
 
-class TringTvor {
+class TringTvor : public ZRCStone
+{
+private:
+  void _init();
+
 public:
   Bool_t   bSmoothShade;
   Bool_t   bColP;
@@ -24,6 +28,10 @@ public:
   UChar_t* mCols;         //[4*mNVert]
   Float_t* mTexs;         //[2*mNVert]
 
+  void MakeNorms() { mNorms = new Float_t[3*mNVerts]; }
+  void MakeCols()  { mCols  = new UChar_t[4*mNVerts]; }
+  void MakeTexs()  { mTexs  = new Float_t[2*mNVerts]; }
+
   Float_t* Vertex(Int_t i)  { return &(mVerts[3*i]); }
   Float_t* Normal(Int_t i)  { return &(mNorms[3*i]); }
   UChar_t* Color(Int_t i)   { return &(mCols[4*i]);  }
@@ -34,7 +42,10 @@ public:
   Int_t    mNTrings;
   Int_t*   mTrings;       //[3*mNTrings]
   Float_t* mTringNorms;   //[3*mNTrings]
-  UChar_t* mTringCols;    //[3*mNVert]
+  UChar_t* mTringCols;    //[4*mNVert]
+
+  void MakeTringNorms() { mTringNorms = new Float_t[3*mNTrings]; }
+  void MakeTringCols()  { mTringCols  = new UChar_t[4*mNTrings]; }
 
   Int_t*   Triangle(Int_t i)       { return &(mTrings[3*i]);     }
   Float_t* TriangleNormal(Int_t i) { return &(mTringNorms[3*i]); }
@@ -51,12 +62,21 @@ public:
 
   // --------------------------------------------------------------
 
+  TringTvor();
+  TringTvor(Int_t nv, Int_t nt);
   TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
 	    Bool_t colp=false, Bool_t texp=false);
   ~TringTvor();
 
+  void MakePrimaryArrays();
+  void DeletePrimaryArrays();
+  void MakeSecondaryArrays();
+  void DeleteSecondaryArrays();
+
   void SetVertex(Int_t i, Float_t x, Float_t y, Float_t z)
   { Float_t* v = Vertex(i); v[0] = x; v[1] = y; v[2] = z; }
+  void SetNormal(Int_t i, Float_t x, Float_t y, Float_t z)
+  { Float_t* v = Normal(i); v[0] = x; v[1] = y; v[2] = z; }
   void SetTriangle(Int_t i, Int_t v0, Int_t v1, Int_t v2)
   { Int_t* t = Triangle(i); t[0] = v0; t[1] = v1; t[2] = v2; }
   void SetTriangleColor(Int_t i, UChar_t r, UChar_t g, UChar_t b, UChar_t a=255)
@@ -66,8 +86,16 @@ public:
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
 					void* ud);
 
-  void GenerateTriangleStrips(Int_t max_verts=128);
+  void GenerateVertexNormals();
 
+  // Triangle strips
+  void GenerateTriangleStrips(Int_t max_verts=128);
+  void DeleteTriangleStrips();
+
+  // Export
+  void ExportPovMesh(ostream& o, Bool_t smoothp=false);
+
+  ClassDef(TringTvor, 0);
 }; // endclass TringTvor
 
 #endif
