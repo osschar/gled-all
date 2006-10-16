@@ -65,6 +65,8 @@ public:
 
   void Legendrofy(Int_t max_l, Double_t abs_scale=0.1,Double_t pow_scale=2.7); // X{E} 7 MCWButt()
 
+  void ExportTring(const Text_t* fname=0);
+
 #include "GTSurf.h7"
   ClassDef(GTSurf, 1);
 }; // endclass GTSurf

@@ -54,6 +54,9 @@ ClassImp(GTSurf)
 
 void GTSurf::_init()
 {
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   pSurf = 0; mScale = 1;
   mVerts = mEdges = mFaces = 0;
 }
@@ -362,7 +365,7 @@ Double_t LegendreP(int l, int m, Double_t x)
   int i,ll;
 
   if (m < 0 || m > l || TMath::Abs(x) > 1.0)
-    throw(Exc_t("LegendreP: bad arguments.");
+    throw(Exc_t("LegendreP: bad arguments."));
   pmm=1.0;
   if (m > 0) {
     somx2=sqrt((1.0-x)*(1.0+x));
@@ -389,3 +392,54 @@ Double_t LegendreP(int l, int m, Double_t x)
   }
 }
 */
+
+/**************************************************************************/
+
+namespace {
+
+using namespace GTS;
+
+struct extring_arg {
+  map<GtsVertex*, int> map;
+  int                  count;
+  FILE*                out;
+
+  extring_arg() : count(0), out(0) {}
+};
+
+void trivi_vdump(GtsVertex* v, extring_arg* arg) {
+  arg->map[v] = arg->count;
+  ++arg->count;
+  fprintf(arg->out, "%lf %lf %lf\n", v->p.x, v->p.y, v->p.z);
+}
+
+void trivi_fdump(GtsFace* f, extring_arg* arg) {
+  GtsVertex *a, *b, *c;
+  gts_triangle_vertices(&f->triangle, &a, &b, &c);
+  fprintf(arg->out, "%d %d %d\n", arg->map[a], arg->map[b], arg->map[c]);
+}
+
+}
+
+void GTSurf::ExportTring(const Text_t* fname)
+{
+  // Dumps vertices/triangles in a trivial format.
+
+  if(pSurf == 0)
+    return;
+
+  using namespace GTS;
+
+  FILE* f = (fname) ? fopen(fname, "w") : stdout;
+
+  fprintf(f, "%u %u\n", gts_surface_vertex_number(pSurf),
+                        gts_surface_face_number(pSurf));
+
+  extring_arg arg;
+  arg.out = f;
+
+  gts_surface_foreach_vertex(pSurf, (GtsFunc) trivi_vdump, &arg);
+  gts_surface_foreach_face  (pSurf, (GtsFunc) trivi_fdump, &arg);
+
+  if (fname) fclose(f);
+}
