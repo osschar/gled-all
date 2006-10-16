@@ -26,11 +26,11 @@ void TringTvor_GL_Rnr::Render(TringTvor* ttvor)
     glEnableClientState(GL_VERTEX_ARRAY);
     glNormalPointer(GL_FLOAT, 0, TT.mNorms);
     glEnableClientState(GL_NORMAL_ARRAY);
-    if(TT.bColP) {
+    if(TT.bColP && TT.mCols) {
       glColorPointer(4, GL_UNSIGNED_BYTE, 0, TT.mCols);
       glEnableClientState(GL_COLOR_ARRAY);
     }
-    if(TT.bTexP) {
+    if(TT.bTexP && TT.mTexs) {
       glTexCoordPointer(2, GL_FLOAT, 0, TT.mTexs);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     }
