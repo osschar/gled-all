@@ -577,8 +577,10 @@ GledNS::ClassInfo* GledNS::ClassInfo::GetRendererCI()
     TString rnr_glass = fRendererGlass;
     while(true) {
       fRendererCI = GledNS::FindClassInfo(rnr_glass);
+      if(fRendererCI == 0)
+        break;
       rnr_glass = fRendererCI->fRendererGlass;
-      if(fRendererCI == 0 || fRendererCI->fName == rnr_glass)
+      if(fRendererCI->fName == rnr_glass)
 	break;
     }
   }
