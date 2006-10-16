@@ -68,7 +68,8 @@ on previous line.
 
 =item B<< -const=>1 >>
 
-THIS IS NOT IMPLEMENTED ... but would be nice in one form or another. 
+THIS IS NOT IMPLEMENTED FOR ALL WEEDS ... in callback do update instead.
+Maybe it would be better to just deactivate the widget.
 
 make widget read-only. Done on code generation level; nothing is
 exported into GlassViewNS::MemberInfo structure. Perhaps the other way
