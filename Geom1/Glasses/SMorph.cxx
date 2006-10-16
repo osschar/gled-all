@@ -8,7 +8,7 @@
 #include <Glasses/ZImage.h>
 #include "SMorph.c7"
 
-#include <Tvor/TubeTvor.h>
+#include <Stones/TubeTvor.h>
 
 #include <TMath.h>
 

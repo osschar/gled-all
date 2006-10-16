@@ -17,7 +17,7 @@
 
 #include "RectTerrain.h"
 #include <Glasses/ZImage.h>
-#include <Tvor/TringTvor.h>
+#include <Stones/TringTvor.h>
 #include "RectTerrain.c7"
 
 #include <IL/il.h>
