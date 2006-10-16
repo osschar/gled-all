@@ -9,20 +9,26 @@
 //
 // ZTrans is a 4x4 transformation matrix for homogeneous coordinates
 // stored internaly in a column-major order to allow direct usage by
-// GL. The element type is Double32_t, chosen for speed optimization
-// (floats would be precise enough).
+// GL. The element type is Double32_t as statically the floats would
+// be precise enough but continuous operations on the matrix must
+// retain precision of column vectors.
 //
-// Cartan angles (+z, -y, +x) are stored for backward
-// compatibility and will be removed soon.
+// Cartan angles in mA[1-3] (+z, -y, +x) are stored for backward
+// compatibility and will probably be removed soon.
 //
-// Direct  element access:
+// Direct  element access (first two should be used with care):
 // operator[i]    direct access to elements,   i:0->15
-// CM(i,j)        element 4*j + i;           i,j:0->3
+// CM(i,j)        element 4*j + i;           i,j:0->3    { CM ~ c-matrix }
 // operator(i,j)  element 4*(j-1) + i - 1    i,j:1->4
+//
+// Column-vector access:
+// USet Get/SetBaseVec(), Get/SetPos() and Arr[XYZT]() methods.
 //
 // For all methods taking the matrix indices:
 // 1->X, 2->Y, 3->Z; 4->Position (if applicable). 0 reserved for time.
 //
+// Shorthands in method-names:
+// LF ~ LocalFrame; PF ~ ParentFrame; IP ~ InPlace
 
 #include "ZTrans.h"
 #include <Glasses/ZNode.h>
@@ -350,6 +356,9 @@ void ZTrans::SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3,
 
 void ZTrans::GetRotAngles(Float_t* x) const
 {
+  // Get Cardan rotation angles (pattern xYz above).
+  // This only works if no scaling has been applied.
+
   if(!bAsOK) {
     Double_t d = M[F20];
     if(d>1) d=1; else if(d<-1) d=-1; // Fix numerical errors

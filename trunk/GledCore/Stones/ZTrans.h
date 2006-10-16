@@ -68,10 +68,10 @@ public:
   // Element access
 
   Double_t* Array() { return M; }      const Double_t* Array() const { return M; }
-  Double_t* ArrX()  { return M; }      const Double_t* ArrX()  const  { return M; }
-  Double_t* ArrY()  { return M +  4; } const Double_t* ArrY()  const  { return M +  4; }
-  Double_t* ArrZ()  { return M +  8; } const Double_t* ArrZ()  const  { return M +  8; }
-  Double_t* ArrT()  { return M + 12; } const Double_t* ArrT()  const  { return M + 12; }
+  Double_t* ArrX()  { return M; }      const Double_t* ArrX()  const { return M; }
+  Double_t* ArrY()  { return M +  4; } const Double_t* ArrY()  const { return M +  4; }
+  Double_t* ArrZ()  { return M +  8; } const Double_t* ArrZ()  const { return M +  8; }
+  Double_t* ArrT()  { return M + 12; } const Double_t* ArrT()  const { return M + 12; }
 
   Double_t  operator[](Int_t i) const { return M[i]; }
   Double_t& operator[](Int_t i)       { return M[i]; }
