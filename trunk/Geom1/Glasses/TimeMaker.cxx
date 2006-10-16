@@ -33,6 +33,7 @@ void TimeMaker::_init()
   bPushToStack = bPopFromStack = true;
 
   bEmitStamps = false;
+  bPrintOut   = false;
 }
 
 /**************************************************************************/
