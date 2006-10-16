@@ -1,3 +1,30 @@
+2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TimeMaker.cxx:
+	Added missing initialization of member 'bPrintOut'.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Added additional protections before enabling color/texture arrays
+	for smooth-shade rendering.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	* Stones/TubeTvor.cxx:
+	* Stones/TubeTvor.h:
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+	Moved Tring/TubeTvor from Tvor/ to Stones/; sub-classed them from
+	ZRCStone.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/SMorph.cxx:
+	* Glasses/WSSeed.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	* Rnr/GL/TubeTvor_GL_Rnr.h:
+	Fix include directives for Tvor's (moved to Stones/ directory).
+
 2006-10-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
