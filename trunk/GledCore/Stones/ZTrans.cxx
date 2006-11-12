@@ -243,61 +243,6 @@ void ZTrans::Rotate(const ZTrans& a, Int_t i1, Int_t i2, Double_t amount)
 }
 
 /**************************************************************************/
-// Base-vector interface
-/**************************************************************************/
-
-void ZTrans::SetBaseVec(Int_t b, Double_t x, Double_t y, Double_t z)
-{
-  Double_t* C = M + 4*--b;
-  C[0] = x; C[1] = y; C[2] = z;
-  bAsOK = false;
-}
-
-void ZTrans::SetBaseVec(Int_t b, const TVector3& v)
-{
-  Double_t* C = M + 4*--b;
-  v.GetXYZ(C);
-  bAsOK = false;
-}
-
-TVector3 ZTrans::GetBaseVec(Int_t b) const
-{ return TVector3(&M[4*--b]); }
-
-void ZTrans::GetBaseVec(Int_t b, TVector3& v) const
-{
-  const Double_t* C = M + 4*--b;
-  v.SetXYZ(C[0], C[1], C[2]);
-}
-
-/**************************************************************************/
-// Position interface
-/**************************************************************************/
-
-void ZTrans::SetPos(Double_t x, Double_t y, Double_t z)
-{ M[F03] = x; M[F13] = y; M[F23] = z; }
-
-void ZTrans::SetPos(Double_t* x)
-{ M[F03] = x[0]; M[F13] = x[1]; M[F23] = x[2]; }
-
-void ZTrans::SetPos(const ZTrans& t)
-{
-  const Double_t* T = t.M;
-  M[F03] = T[F03]; M[F13] = T[F13]; M[F23] = T[F23];
-}
-
-void ZTrans::GetPos(Double_t& x, Double_t& y, Double_t& z) const
-{ x = M[F03]; y = M[F13]; z = M[F23]; }
-
-void ZTrans::GetPos(Double_t* x) const
-{ x[0] = M[F03]; x[1] = M[F13]; x[2] = M[F23]; }
-
-void ZTrans::GetPos(TVector3& v) const
-{ v.SetXYZ(M[F03], M[F13], M[F23]); }
-
-TVector3 ZTrans::GetPos() const
-{ return TVector3(M[F03], M[F13], M[F23]); }
-
-/**************************************************************************/
 // Cardan angle interface
 /**************************************************************************/
 
@@ -387,7 +332,7 @@ void ZTrans::Scale(Double_t sx, Double_t sy, Double_t sz)
   M[F02] *= sz; M[F12] *= sz; M[F22] *= sz;
 }
 
-void ZTrans::GetScale(Double_t& sx, Double_t& sy, Double_t& sz)
+void ZTrans::GetScale(Double_t& sx, Double_t& sy, Double_t& sz) const
 {
   sx = TMath::Sqrt( M[F00]*M[F00] + M[F10]*M[F10] + M[F20]*M[F20] );
   sy = TMath::Sqrt( M[F01]*M[F01] + M[F11]*M[F11] + M[F21]*M[F21] );
@@ -413,28 +358,28 @@ Double_t ZTrans::Unscale()
 // Operations on vectors
 /**************************************************************************/
 
-void ZTrans::MultiplyIP(TVector3& v, Double_t w)
+void ZTrans::MultiplyIP(TVector3& v, Double_t w) const
 {
   v.SetXYZ(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z() + M[F03]*w,
 	   M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z() + M[F13]*w,
 	   M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z() + M[F23]*w);
 }
 
-TVector3 ZTrans::Multiply(const TVector3& v, Double_t w)
+TVector3 ZTrans::Multiply(const TVector3& v, Double_t w) const
 {
   return TVector3(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z() + M[F03]*w,
 		  M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z() + M[F13]*w,
 		  M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z() + M[F23]*w);
 }
 
-void ZTrans::RotateIP(TVector3& v)
+void ZTrans::RotateIP(TVector3& v) const
 {
   v.SetXYZ(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z(),
 	   M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z(),
 	   M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z());
 }
 
-TVector3 ZTrans::Rotate(const TVector3& v)
+TVector3 ZTrans::Rotate(const TVector3& v) const
 {
   return TVector3(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z(),
 		  M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z(),
@@ -445,15 +390,15 @@ TVector3 ZTrans::Rotate(const TVector3& v)
 // Normalization, ortogonalization
 /**************************************************************************/
 
-Double_t ZTrans::norm3_column(Int_t col)
+Double_t ZTrans::Norm3Column(Int_t col)
 {
   Double_t* C = M + 4*--col;
-  const Double_t  l = TMath::Sqrt(C[0]*C[0] + C[1]*C[1] + C[2]*C[2]);
-  C[0] /= l; C[1] /= l; C[2] /= l;
+  const Double_t l = 1.0/TMath::Sqrt(C[0]*C[0] + C[1]*C[1] + C[2]*C[2]);
+  C[0] *= l; C[1] *= l; C[2] *= l;
   return l;
 }
 
-Double_t ZTrans::orto3_column(Int_t col, Int_t ref)
+Double_t ZTrans::Orto3Column(Int_t col, Int_t ref)
 {
   Double_t* C = M + 4*--col;
   Double_t* R = M + 4*--ref;
@@ -464,13 +409,36 @@ Double_t ZTrans::orto3_column(Int_t col, Int_t ref)
 
 void ZTrans::OrtoNorm3()
 {
-  norm3_column(1);
-  orto3_column(2,1); norm3_column(2);
+  Norm3Column(1);
+  Orto3Column(2,1); Norm3Column(2);
   M[F02] = M[F10]*M[F21] - M[F11]*M[F20];
   M[F12] = M[F20]*M[F01] - M[F21]*M[F00];
   M[F22] = M[F00]*M[F11] - M[F01]*M[F10];
   // cross-product faster.
-  // orto3_column(3,1); orto3_column(3,2); norm3_column(3);
+  // Orto3Column(3,1); Orto3Column(3,2); Norm3Column(3);
+}
+
+void ZTrans::SetBaseVecViaCross(Int_t i)
+{
+  switch (i) {
+  case 1:
+    M[F00] = M[F11]*M[F22] - M[F12]*M[F21];
+    M[F10] = M[F21]*M[F02] - M[F22]*M[F01];
+    M[F20] = M[F01]*M[F12] - M[F02]*M[F11];
+    break;
+  case 2:
+    M[F01] = M[F12]*M[F20] - M[F10]*M[F22];
+    M[F11] = M[F22]*M[F00] - M[F20]*M[F02];
+    M[F21] = M[F02]*M[F10] - M[F00]*M[F12];
+    break;
+  case 3:
+    M[F02] = M[F10]*M[F21] - M[F11]*M[F20];
+    M[F12] = M[F20]*M[F01] - M[F21]*M[F00];
+    M[F22] = M[F00]*M[F11] - M[F01]*M[F10];
+    break;
+  default:
+    break;
+  }
 }
 
 /**************************************************************************/
