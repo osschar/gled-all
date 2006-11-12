@@ -1,3 +1,13 @@
+2006-11-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Exposed some base-vec ortogonalize/norm methods; added method
+	SetBaseVecViaCross(); made get/set base-vec methods inline.
+
+	* Pupils/Pupil.cxx:
+	Added some comments.
+
 2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledNS.cxx:
