@@ -673,6 +673,10 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 			int  xpick,    int  ypick,
 			bool rnr_self, bool rnr_overlay)
 {
+  // Fill the 'result' list with data obtained from GL.
+  // See definition of the struct pick_lens_data in the header file.
+  // The user-data information passed to the GL-render driver is lost.
+
   static const Exc_t _eh("Pupil::PickLenses ");
 
   Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
@@ -733,6 +737,8 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 OS::ZGlassImg* Pupil::PickTopLens(int xpick, int ypick,
 				  bool rnr_self, bool rnr_overlay)
 {
+  // Return image of the closest lens that matches selection.
+
   list<pick_lens_data> gdl;
   Int_t n = PickLenses(gdl, true, false, xpick, ypick, rnr_self, rnr_overlay);
   return (n > 0) ? gdl.front().img : 0;
@@ -742,6 +748,9 @@ OS::ZGlassImg* Pupil::PickTopLens(int xpick, int ypick,
 
 void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 {
+  // Perform picking via PickLenses() and construct context menu for
+  // intersected lenses.
+
   list<pick_lens_data> gdl;
   Int_t n = PickLenses(gdl, true, true, xpick, ypick, rnr_self, rnr_overlay);
 
