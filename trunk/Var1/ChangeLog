@@ -1,5 +1,16 @@
 2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/TriMesh.cxx:
+	* Glasses/Tringula.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added missing includes (not needed with pre-compiled headers).
+
+	* Opcode/Ice/IceHPoint.h:
+	Added ifdef for cast-to-Point (gcc-3 was complaining about this
+	never being used).
+
+2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 
 2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
