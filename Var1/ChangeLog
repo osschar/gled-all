@@ -1,0 +1,35 @@
+2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	Add a cast to avoid warning on 64-bits.
+
+	* Opcode/Ice/IceContainer.cpp:
+	* Opcode/Ice/IceContainer.h:
+	* Opcode/Ice/IceTypes.h:
+	* Opcode/OPC_AABBTree.cpp:
+	* Opcode/OPC_AABBTree.h:
+	* Opcode/OPC_HybridModel.cpp:
+	* Opcode/OPC_OptimizedTree.cpp:
+	* Opcode/OPC_OptimizedTree.h:
+	* Opcode/OPC_PlanesCollider.cpp:
+	* Opcode/OPC_SphereCollider.cpp:
+	* Opcode/OPC_SweepAndPrune.cpp:
+	* Opcode/OPC_TreeBuilders.cpp:
+	* Opcode/OPC_VolumeCollider.cpp:
+	Hacked OPCODE to compile on 64-bits; not very pretty.  Introduced
+	uxword typedef in IceTypes (unsigned long) to make enoug space for
+	pointer/index representation. Not cool ... need to introduce a
+	smart memory allocator (preemptive allocation with refit after the
+	tree is built) for nodes/boxes and use indices as it was done
+	before. But then there is the wole dirty bussines with
+	bit-shifting of values and using the lsb to tag a node as used.
+	Not something that can be done in one-day (well ... done yes,
+	thought through no).
+
+2006-11-12 Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Initial import from OPCODE-1.3. I did quite some reformatting
+	(most of it automatic) to eliminate most of the 300+ character
+	lines abundantly filled with tabs. Also removed a lot of redundant
+	inlines while browsing through the code and trying to understand
+	the structure. I started doing this sometime late in August.
