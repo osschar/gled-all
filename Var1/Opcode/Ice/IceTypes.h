@@ -52,6 +52,10 @@ typedef unsigned long long	uqword;		//!< sizeof(uqword)	must be 8
 typedef float			float32;	//!< sizeof(float32)	must be 4
 typedef double			float64;	//!< sizeof(float64)	must be 4
 
+// Added by M. Tadel (needed for 64-bit port)
+typedef unsigned long		sxword;		//!< pointer-sized   signed integer
+typedef unsigned long		uxword;		//!< pointer-sized unsigned integer
+
 #define	OPC_INVALID_ID		0xffffffff	//!< Invalid dword ID (counterpart of 0 pointers)
 
 #define	INVALID_NUMBER		0xDEADBEEF	//!< Standard junk value

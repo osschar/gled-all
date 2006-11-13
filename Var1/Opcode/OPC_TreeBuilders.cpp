@@ -129,20 +129,14 @@ bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const udword* primitives, udwo
 
 //----------------------------------------------------------------------
 /**
- *	Computes the splitting value along a given axis for a given primitive.
- *	\param		index		[in] index of the primitive to split
- *	\param		axis		[in] axis index (0,1,2)
- *	\return		splitting value
+ * Computes the splitting value along a given axis for a given primitive.
+ * \param	index		[in] index of the primitive to split
+ * \param	axis		[in] axis index (0,1,2)
+ * \return	splitting value
  */
 //----------------------------------------------------------------------
 float AABBTreeOfTrianglesBuilder::GetSplittingValue(udword index, udword axis) const
 {
-  /*	// Compute center of triangle
-    Point Center;
-    mTriList[index].Center(mVerts, Center);
-    // Return value
-    return Center[axis];*/
-
   // Compute correct component from center of triangle
   //	return	(mVerts[mTriList[index].mVRef[0]][axis]
   //			+mVerts[mTriList[index].mVRef[1]][axis]
@@ -152,9 +146,9 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(udword index, udword axis) c
   mIMesh->GetTriangle(VP, index);
 
   // Compute correct component from center of triangle
-  return	((*VP.Vertex[0])[axis]
-                 +(*VP.Vertex[1])[axis]
-                 +(*VP.Vertex[2])[axis])*INV3;
+  return ((*VP.Vertex[0])[axis] +
+	  (*VP.Vertex[1])[axis] +
+	  (*VP.Vertex[2])[axis])*INV3;
 }
 
 //----------------------------------------------------------------------
@@ -216,10 +210,10 @@ bool AABBTreeOfVerticesBuilder::ComputeGlobalBox(const udword* primitives, udwor
 
 //----------------------------------------------------------------------
 /**
- *	Computes the splitting value along a given axis for a given primitive.
- *	\param		index		[in] index of the primitive to split
- *	\param		axis		[in] axis index (0,1,2)
- *	\return		splitting value
+ * Computes the splitting value along a given axis for a given primitive.
+ * \param	index		[in] index of the primitive to split
+ * \param	axis		[in] axis index (0,1,2)
+ * \return	splitting value
  */
 //----------------------------------------------------------------------
 float AABBTreeOfVerticesBuilder::GetSplittingValue(udword index, udword axis) const
@@ -230,15 +224,15 @@ float AABBTreeOfVerticesBuilder::GetSplittingValue(udword index, udword axis) co
 
 //----------------------------------------------------------------------
 /**
- *	Computes the splitting value along a given axis for a given node.
- *	\param	primitives	[in] list of indices of primitives
- *	\param	nb_prims	[in] number of indices
- *	\param	global_box	[in] global AABB enclosing the set of input primitives
- *	\param	axis		[in] axis index (0,1,2)
- *	\return	splitting value
+ *Computes the splitting value along a given axis for a given node.
+ * \param  primitives	[in] list of indices of primitives
+ * \param  nb_prims	[in] number of indices
+ * \param  global_box	[in] global AABB enclosing the set of input primitives
+ * \param  axis		[in] axis index (0,1,2)
+ * \return	splitting value
  */
 //----------------------------------------------------------------------
-float AABBTreeOfVerticesBuilder::GetSplittingValue(const udword* primitives, udword nb_prims, const AABB& global_box, udword axis)	const
+float AABBTreeOfVerticesBuilder::GetSplittingValue(const udword* primitives, udword nb_prims, const AABB& global_box, udword axis) const
 {
   if(mSettings.mRules&SPLIT_GEOM_CENTER)
     {

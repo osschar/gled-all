@@ -33,9 +33,11 @@ public:
   // Management
   //----------------------------------------------------------------------
   /**
-   *	A O(1) method to add a value in the container. The container is automatically resized if needed.
-   *	The method is inline, not the resize. The call overhead happens on resizes only, which is not a problem since the resizing operation
-   *	costs a lot more than the call overhead...
+   *	A O(1) method to add a value in the container. The container
+   *	is automatically resized if needed.  The method is inline, not
+   *	the resize. The call overhead happens on resizes only, which
+   *	is not a problem since the resizing operation costs a lot more
+   *	than the call overhead...
    *
    *	\param		entry		[in] a udword to store in the container
    *	\see		Add(float entry)
@@ -67,15 +69,17 @@ public:
 
   //----------------------------------------------------------------------
   /**
-   *	A O(1) method to add a value in the container. The container is automatically resized if needed.
-   *	The method is inline, not the resize. The call overhead happens on resizes only, which is not a problem since the resizing operation
-   *	costs a lot more than the call overhead...
+   *	A O(1) method to add a value in the container. The container
+   *	is automatically resized if needed.  The method is inline, not
+   *	the resize. The call overhead happens on resizes only, which
+   *	is not a problem since the resizing operation costs a lot more
+   *	than the call overhead...
    *
-   *	\param		entry		[in] a float to store in the container
-   *	\see		Add(udword entry)
-   *	\see		Empty()
-   *	\see		Contains(udword entry)
-   *	\return		Self-Reference
+   *	\param	entry		[in] a float to store in the container
+   *	\see	Add(udword entry)
+   *	\see	Empty()
+   *	\see	Contains(udword entry)
+   *	\return Self-Reference
    */
   //----------------------------------------------------------------------
   Container&	Add(float entry)
@@ -108,7 +112,8 @@ public:
 
   //----------------------------------------------------------------------
   /**
-   *	Clears the container. All stored values are deleted, and it frees used ram.
+   *	Clears the container. All stored values are deleted, and it
+   *	frees used ram.
    *	\see		Reset()
    *	\return		Self-Reference
    */
@@ -117,7 +122,8 @@ public:
 
   //----------------------------------------------------------------------
   /**
-   *	Resets the container. Stored values are discarded but the buffer is kept so that further calls don't need resizing again.
+   *	Resets the container. Stored values are discarded but the
+   *	buffer is kept so that further calls don't need resizing again.
    *	That's a kind of temporal coherence.
    *	\see		Empty()
    */

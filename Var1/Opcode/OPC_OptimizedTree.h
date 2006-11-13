@@ -27,15 +27,15 @@
   base_class() : mData(0) {}                            \
   ~base_class() {}                                      \
   /* Leaf test */                                       \
-  bool	IsLeaf() const { return mData&1; }              \
+  bool	IsLeaf() const { return mData & 1ul; }          \
   /* Data access */                                     \
-  const base_class* GetPos() const { return (base_class*)mData; }       \
+  const base_class* GetPos() const { return  (base_class*)mData; }      \
   const base_class* GetNeg() const { return ((base_class*)mData)+1; }   \
-  udword GetPrimitive()	const { return (mData>>1); }    \
+  uxword GetPrimitive()	const { return (mData >> 1); }  \
   /* Stats */                                           \
   udword GetNodeSize()  const { return SIZEOFOBJECT; }  \
   volume        mAABB;                                  \
-  udword	mData;
+  uxword	mData;
 
 //! Common interface for a node of a no-leaf tree
 #define IMPLEMENT_NOLEAF_NODE(base_class, volume)  \
@@ -44,19 +44,19 @@
   base_class() : mPosData(0), mNegData(0)	{} \
   ~base_class()	        			{} \
   /* Leaf tests */   \
-  bool	HasPosLeaf()	const	{ return mPosData&1; } \
-  bool	HasNegLeaf()	const	{ return mNegData&1; } \
+  bool	HasPosLeaf()	const	{ return mPosData & 1ul; } \
+  bool	HasNegLeaf()	const	{ return mNegData & 1ul; } \
   /* Data access */  \
-  const base_class*	GetPos() const { return (base_class*)mPosData;	} \
-  const base_class*	GetNeg() const { return (base_class*)mNegData;	} \
-  udword GetPosPrimitive() const { return (mPosData>>1); } \
-  udword GetNegPrimitive() const { return (mNegData>>1); } \
+  const base_class*	GetPos() const { return (base_class*)mPosData; } \
+  const base_class*	GetNeg() const { return (base_class*)mNegData; } \
+  uxword GetPosPrimitive() const { return (mPosData >> 1); } \
+  uxword GetNegPrimitive() const { return (mNegData >> 1); } \
   /* Stats */        \
   udword GetNodeSize() const { return SIZEOFOBJECT; } \
                                                       \
   volume	mAABB;      \
-  udword	mPosData;   \
-  udword	mNegData;
+  uxword	mPosData;   \
+  uxword	mNegData;
 
 
 
