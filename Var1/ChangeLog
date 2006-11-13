@@ -1,14 +1,20 @@
 2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+
+2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/TriMesh.cxx:
 	Add a cast to avoid warning on 64-bits.
 
 	* Opcode/Ice/IceContainer.cpp:
 	* Opcode/Ice/IceContainer.h:
 	* Opcode/Ice/IceTypes.h:
+	* Opcode/OPC_AABBCollider.cpp:
 	* Opcode/OPC_AABBTree.cpp:
 	* Opcode/OPC_AABBTree.h:
 	* Opcode/OPC_HybridModel.cpp:
+	* Opcode/OPC_LSSCollider.cpp:
+	* Opcode/OPC_OBBCollider.cpp:
 	* Opcode/OPC_OptimizedTree.cpp:
 	* Opcode/OPC_OptimizedTree.h:
 	* Opcode/OPC_PlanesCollider.cpp:
