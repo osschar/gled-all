@@ -138,9 +138,11 @@ public:
   bool	operator!=(const HPoint& p) const { return ( (x!=p.x)||(y!=p.y)||(z!=p.z)||(w!=p.w)); }
 
   // Cast operators
-
+  // This one makes gcc-3.2.3 spit warnings.
+#if __GNUC__ > 3
   //! Cast a HPoint to a Point. w is discarded.
   operator Point() const { return Point(x, y, z); }
+#endif
 
 public:
   float		w;
