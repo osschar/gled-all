@@ -38,7 +38,7 @@ using namespace Opcode;
 #define SET_CONTACT(prim_index, flag)	\
   /* Set contact status */              \
   mFlags |= flag;                       \
-  mTouchedPrimitives->Add(prim_index);
+  mTouchedPrimitives->Add((udword) prim_index);
 
 //! Planes-triangle test
 #define PLANES_PRIM(prim_index, flag)	\
@@ -58,8 +58,7 @@ using namespace Opcode;
 PlanesCollider::PlanesCollider() :
   mPlanes	(0),
   mNbPlanes	(0)
-{
-}
+{}
 
 //----------------------------------------------------------------------
 /**
@@ -303,15 +302,19 @@ void PlanesCollider::_Collide(const AABBCollisionNode* node, udword clip_mask)
  *	\param		node	[in] current collision node
  */
 //----------------------------------------------------------------------
-void PlanesCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node, udword clip_mask)
+void PlanesCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node,
+					     udword clip_mask)
 {
-  // Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
+  // Test the box against the planes. If the box is completely culled,
+  // so are its children, hence we exit.
   udword OutClipMask;
-  if(!PlanesAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents, OutClipMask, clip_mask))	return;
+  if(!PlanesAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents, OutClipMask, clip_mask))
+    return;
 
   TEST_CLIP_MASK
 
-    // Else the box straddles one or several planes, so we need to recurse down the tree.
+    // Else the box straddles one or several planes, so we need to
+    // recurse down the tree.
     if(node->IsLeaf())
       {
         SET_CONTACT(node->GetPrimitive(), OPC_CONTACT)
@@ -336,7 +339,7 @@ void PlanesCollider::_Collide(const AABBQuantizedNode* node, udword clip_mask)
 {
   // Dequantize box
   const QuantizedAABB& Box = node->mAABB;
-  const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y, float(Box.mCenter[2]) * mCenterCoeff.z);
+  const Point Center (float(Box.mCenter[0])  * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,    float(Box.mCenter[2])  * mCenterCoeff.z);
   const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
 
   // Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
@@ -345,19 +348,19 @@ void PlanesCollider::_Collide(const AABBQuantizedNode* node, udword clip_mask)
 
   TEST_CLIP_MASK
 
-    // Else the box straddles one or several planes, so we need to recurse down the tree.
-    if(node->IsLeaf())
-      {
-        PLANES_PRIM(node->GetPrimitive(), OPC_CONTACT)
-      }
-    else
-      {
-        _Collide(node->GetPos(), OutClipMask);
+  // Else the box straddles one or several planes, so we need to recurse down the tree.
+  if(node->IsLeaf())
+    {
+      PLANES_PRIM(node->GetPrimitive(), OPC_CONTACT)
+    }
+  else
+    {
+      _Collide(node->GetPos(), OutClipMask);
 
-        if(ContactFound()) return;
+      if(ContactFound()) return;
 
-        _Collide(node->GetNeg(), OutClipMask);
-      }
+      _Collide(node->GetNeg(), OutClipMask);
+    }
 }
 
 //----------------------------------------------------------------------
@@ -379,19 +382,19 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node, udwo
 
   TEST_CLIP_MASK
 
-    // Else the box straddles one or several planes, so we need to recurse down the tree.
-    if(node->IsLeaf())
-      {
-        SET_CONTACT(node->GetPrimitive(), OPC_CONTACT)
-      }
-    else
-      {
-        _CollideNoPrimitiveTest(node->GetPos(), OutClipMask);
+  // Else the box straddles one or several planes, so we need to recurse down the tree.
+  if(node->IsLeaf())
+    {
+      SET_CONTACT(node->GetPrimitive(), OPC_CONTACT)
+    }
+  else
+    {
+      _CollideNoPrimitiveTest(node->GetPos(), OutClipMask);
 
-        if(ContactFound()) return;
+      if(ContactFound()) return;
 
-        _CollideNoPrimitiveTest(node->GetNeg(), OutClipMask);
-      }
+      _CollideNoPrimitiveTest(node->GetNeg(), OutClipMask);
+    }
 }
 
 //----------------------------------------------------------------------
@@ -433,13 +436,13 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode* node, udword 
   TEST_CLIP_MASK
 
   // Else the box straddles one or several planes, so we need to recurse down the tree.
-  if(node->HasPosLeaf())	{ SET_CONTACT(node->GetPosPrimitive(), OPC_CONTACT) }
-  else				_CollideNoPrimitiveTest(node->GetPos(), OutClipMask);
+  if(node->HasPosLeaf()) { SET_CONTACT(node->GetPosPrimitive(), OPC_CONTACT) }
+  else			 _CollideNoPrimitiveTest(node->GetPos(), OutClipMask);
 
   if(ContactFound()) return;
 
-  if(node->HasNegLeaf())	{ SET_CONTACT(node->GetNegPrimitive(), OPC_CONTACT) }
-  else				_CollideNoPrimitiveTest(node->GetNeg(), OutClipMask);
+  if(node->HasNegLeaf()) { SET_CONTACT(node->GetNegPrimitive(), OPC_CONTACT) }
+  else			 _CollideNoPrimitiveTest(node->GetNeg(), OutClipMask);
 }
 
 //----------------------------------------------------------------------
@@ -462,13 +465,13 @@ void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode* node, udword clip_m
   TEST_CLIP_MASK
 
   // Else the box straddles one or several planes, so we need to recurse down the tree.
-  if(node->HasPosLeaf())	{ PLANES_PRIM(node->GetPosPrimitive(), OPC_CONTACT) }
-  else				_Collide(node->GetPos(), OutClipMask);
+  if(node->HasPosLeaf()) { PLANES_PRIM(node->GetPosPrimitive(), OPC_CONTACT) }
+  else			 _Collide(node->GetPos(), OutClipMask);
 
   if(ContactFound()) return;
 
-  if(node->HasNegLeaf())	{ PLANES_PRIM(node->GetNegPrimitive(), OPC_CONTACT) }
-  else				_Collide(node->GetNeg(), OutClipMask);
+  if(node->HasNegLeaf()) { PLANES_PRIM(node->GetNegPrimitive(), OPC_CONTACT) }
+  else			 _Collide(node->GetNeg(), OutClipMask);
 }
 
 //----------------------------------------------------------------------
@@ -491,13 +494,13 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node
   TEST_CLIP_MASK
 
   // Else the box straddles one or several planes, so we need to recurse down the tree.
-  if(node->HasPosLeaf())	{ SET_CONTACT(node->GetPosPrimitive(), OPC_CONTACT) }
-  else				_CollideNoPrimitiveTest(node->GetPos(), OutClipMask);
+  if(node->HasPosLeaf()) { SET_CONTACT(node->GetPosPrimitive(), OPC_CONTACT) }
+  else			 _CollideNoPrimitiveTest(node->GetPos(), OutClipMask);
 
   if(ContactFound()) return;
 
-  if(node->HasNegLeaf())	{ SET_CONTACT(node->GetNegPrimitive(), OPC_CONTACT) }
-  else				_CollideNoPrimitiveTest(node->GetNeg(), OutClipMask);
+  if(node->HasNegLeaf()) { SET_CONTACT(node->GetNegPrimitive(), OPC_CONTACT) }
+  else			 _CollideNoPrimitiveTest(node->GetNeg(), OutClipMask);
 }
 
 

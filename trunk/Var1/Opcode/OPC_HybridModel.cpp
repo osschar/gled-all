@@ -226,7 +226,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
           Data->mLeaves[Data->mNbLeaves] = *current->GetAABB();
 
           // Setup leaf data
-          udword Index = (udword(current->GetPrimitives()) - udword(Data->mBase))/sizeof(udword);
+          udword Index = (udword) (uxword(current->GetPrimitives()) - uxword(Data->mBase))/sizeof(uxword);
           Data->mTriangles[Data->mNbLeaves].SetData(current->GetNbPrimitives(), Index);
 
           Data->mNbLeaves++;

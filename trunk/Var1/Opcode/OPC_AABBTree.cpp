@@ -81,10 +81,10 @@ AABBTreeNode::~AABBTreeNode()
   const AABBTreeNode* Pos = GetPos();
   const AABBTreeNode* Neg = GetNeg();
 #ifndef OPC_NO_NEG_VANILLA_TREE
-  if(!(mPos&1))	DELETESINGLE(Pos);
-  if(!(mNeg&1))	DELETESINGLE(Neg);
+  if(!(mPos & 1ul))  DELETESINGLE(Pos);
+  if(!(mNeg & 1ul))  DELETESINGLE(Neg);
 #else
-  if(!(mPos&1))	DELETEARRAY(Pos);
+  if(!(mPos & 1ul))  DELETEARRAY(Pos);
 #endif
   mNodePrimitives = 0; // This was just a shortcut to the global list => no release
   mNbPrimitives	  = 0;
@@ -299,23 +299,23 @@ bool AABBTreeNode::Subdivide(AABBTreeBuilder* builder)
       udword Count = builder->GetCount() - 1;	// Count begins to 1...
       // Set last bit to tell it shouldn't be freed ### pretty ugly,
       // find a better way. Maybe one bit in mNbPrimitives
-      ASSERT(!(udword(&Pool[Count+0])&1));
-      ASSERT(!(udword(&Pool[Count+1])&1));
-      mPos = udword(&Pool[Count+0])|1;
+      ASSERT(!(uxword(&Pool[Count+0]) & 1ul));
+      ASSERT(!(uxword(&Pool[Count+1]) & 1ul));
+      mPos = uxword(&Pool[Count+0]) | 1ul;
 #ifndef OPC_NO_NEG_VANILLA_TREE
-      mNeg = udword(&Pool[Count+1])|1;
+      mNeg = uxword(&Pool[Count+1]) | 1ul;
 #endif
     }
   else
     {
       // Non-complete trees and/or Opcode 1.2 allocate nodes on-the-fly
 #ifndef OPC_NO_NEG_VANILLA_TREE
-      mPos = (udword)new AABBTreeNode;	CHECKALLOC(mPos);
-      mNeg = (udword)new AABBTreeNode;	CHECKALLOC(mNeg);
+      mPos = (uxword) new AABBTreeNode; CHECKALLOC(mPos);
+      mNeg = (uxword) new AABBTreeNode; CHECKALLOC(mNeg);
 #else
       AABBTreeNode* PosNeg = new AABBTreeNode[2];
       CHECKALLOC(PosNeg);
-      mPos = (udword)PosNeg;
+      mPos = (uxword) PosNeg;
 #endif
     }
 
