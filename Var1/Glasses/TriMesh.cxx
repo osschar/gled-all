@@ -26,6 +26,7 @@ ClassImp(TriMesh)
 
 void TriMesh::_init()
 {
+  mTTvor     = 0;
   mOPCModel  = 0;
   mOPCMeshIf = 0;
 }

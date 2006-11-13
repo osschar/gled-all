@@ -6,6 +6,7 @@
 
 #include "Tringula_GL_Rnr.h"
 #include <Rnr/GL/TringTvor_GL_Rnr.h>
+#include <Glasses/ZHashList.h>
 #include <Glasses/TriMesh.h>
 #include <Glasses/Dynamico.h>
 
