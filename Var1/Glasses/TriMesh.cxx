@@ -213,7 +213,7 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
       ta += 3;
     }
   }
-  printf("Counting edges => %d, map-size = %d\n", edge_cnt, edge_map.size());
+  printf("Counting edges => %d, map-size = %d\n", edge_cnt, (int)edge_map.size());
 
   // Construct surface
 
