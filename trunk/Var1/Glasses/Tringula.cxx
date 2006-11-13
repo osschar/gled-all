@@ -18,6 +18,8 @@
 #include "Dynamico.h"
 #include "Tringula.c7"
 
+#include <Glasses/ZQueen.h>
+
 #include <Opcode/Opcode.h>
 
 
