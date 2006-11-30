@@ -95,6 +95,32 @@ void TringTvor::DeleteSecondaryArrays()
 
 /**************************************************************************/
 
+void TringTvor::CalculateBoundingBox()
+{
+  if (mNVerts == 0) {
+    memset(mMinMaxBox, 0, 12*sizeof(Float_t));
+    return;
+  }
+
+  Float_t *V = mVerts, *m = mMinMaxBox, *M = m + 3;
+  m[0] = M[0] = V[0];
+  m[1] = M[1] = V[1];
+  m[2] = M[2] = V[2];
+  V += 3;
+  for (Int_t v=1; v<mNVerts; ++v) {
+    if (V[0] < m[0]) m[0] = V[0]; else if (V[0] > M[0]) M[0] = V[0];
+    if (V[1] < m[1]) m[1] = V[1]; else if (V[1] > M[1]) M[1] = V[1];
+    if (V[2] < m[2]) m[2] = V[2]; else if (V[2] > M[2]) M[2] = V[2];
+    V += 3;
+  }
+
+  Float_t *C = mCtrExtBox, *E = C + 3;
+  C[0] = 0.5f*(M[0]+m[0]); C[1] = 0.5f*(M[1]+m[1]); C[2] = 0.5f*(M[2]+m[2]);
+  E[0] = 0.5f*(M[0]-m[0]); E[1] = 0.5f*(M[1]-m[1]); E[2] = 0.5f*(M[2]-m[2]);
+}
+
+/**************************************************************************/
+
 void TringTvor::GenerateTriangleNormals()
 {
   if (!mTringNorms) MakeTringNorms();

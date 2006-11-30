@@ -28,6 +28,9 @@ public:
   UChar_t* mCols;         //[4*mNVert]
   Float_t* mTexs;         //[2*mNVert]
 
+  Float_t  mMinMaxBox[6];
+  Float_t  mCtrExtBox[6];
+
   void MakeNorms() { mNorms = new Float_t[3*mNVerts]; }
   void MakeCols()  { mCols  = new UChar_t[4*mNVerts]; }
   void MakeTexs()  { mTexs  = new Float_t[2*mNVerts]; }
@@ -81,6 +84,8 @@ public:
   { Int_t* t = Triangle(i); t[0] = v0; t[1] = v1; t[2] = v2; }
   void SetTriangleColor(Int_t i, UChar_t r, UChar_t g, UChar_t b, UChar_t a=255)
   { UChar_t* c = TriangleColor(i); c[0] = r; c[1] = g; c[2] = b; c[3] = a; }
+
+  void CalculateBoundingBox();
 
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
