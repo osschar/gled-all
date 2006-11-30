@@ -7,13 +7,15 @@
 //__________________________________________________________________________
 // TriMesh
 //
+// Wrapper over TringTvor (triangulation data) and Opcode structures.
 //
+// User is responsible for (re)creation of aabboxes in TringTvor.
+
 
 #include "TriMesh.h"
 #include <Glasses/RectTerrain.h>
 #include <Glasses/GTSurf.h>
 #include <Glasses/ZImage.h>
-#include <Stones/TringTvor.h>
 #include "TriMesh.c7"
 
 #include <GTS/GTS.h>
@@ -78,6 +80,25 @@ void TriMesh::GenerateVertexNormals()
 
   mTTvor->GenerateVertexNormals();
   mStampReqTring = Stamp(FID());
+}
+
+void TriMesh::CalculateBoundingBox()
+{
+  static const Exc_t _eh("TriMesh::CalculateBoundingBox ");
+
+  if (!mTTvor)
+    throw(_eh + "mTTvor is null.");
+
+  mTTvor->CalculateBoundingBox();
+  Float_t *b = mTTvor->mMinMaxBox, *e = mTTvor->mCtrExtBox;
+  printf("%s %s\n"
+         "  min = % 8.4f, % 8.4f, % 8.4f  max = % 8.4f, % 8.4f, % 8.4f\n"
+         "  ctr = % 8.4f, % 8.4f, % 8.4f  ext = % 8.4f, % 8.4f, % 8.4f\n",
+         _eh.Data(), Identify().Data(),
+         b[0], b[1], b[2], b[3], b[4], b[5],
+         e[0], e[1], e[2], e[3], e[4], e[5]);
+
+  // mStampReqTring = Stamp(FID());
 }
 
 /**************************************************************************/
@@ -296,6 +317,8 @@ void TriMesh::MakeTetrahedron(Float_t l1, Float_t l2, Float_t w, Float_t h)
   C.SetTriangleColor(1, 0,255,0);
   C.SetTriangleColor(2, 0,255,0);
   C.SetTriangleColor(3, 255,0,0);
+
+  C.GenerateTriangleNormals();
 
   Stamp(FID());
 }

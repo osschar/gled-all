@@ -8,15 +8,16 @@
 #define Var1_TriMesh_H
 
 #include <Glasses/ZGlass.h>
+#include <Stones/TringTvor.h>
 
 class ZImage;
 class RectTerrain;
-class TringTvor;
 class GTSurf;
 
 namespace Opcode {
 class Model;
 class MeshInterface;
+class AABB;
 }
 
 class TriMesh : public ZGlass
@@ -39,10 +40,13 @@ public:
     ZGlass(n,t) { _init(); }
   virtual ~TriMesh();
 
+  Opcode::AABB& ref_opc_aabb() { return *(Opcode::AABB*)mTTvor->mCtrExtBox; }
+
   void BuildOpcStructs();
 
   // TringTvor interface
   void GenerateVertexNormals(); // X{ED} 7 MButt()
+  void CalculateBoundingBox();  // X{ED} 7 MButt()
 
   void ImportRectTerrain(RectTerrain* rt); // X{ED} C{1} 7 MCWButt()
 
