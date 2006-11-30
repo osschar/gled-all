@@ -1,0 +1,7 @@
+2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* testfltdbl.C:
+	New file; some tests of float-double operations.
+
+	* tringula.C:
+	Added a second Dynamico to test mesh-mesh collisions.
