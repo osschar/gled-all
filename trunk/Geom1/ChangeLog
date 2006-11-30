@@ -1,3 +1,13 @@
+2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added bounding-box members and method CalculateBoundingBox().
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Increased version string of ATI driver for which non-pow-2 textures
+	are slow.
+
 2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TimeMaker.cxx:
