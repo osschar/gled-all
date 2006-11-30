@@ -27,9 +27,9 @@ namespace {
     a,a,a,    a,-a,a,   a,-a,-a,   a,a,-a,
     -a,a,a,  -a,-a,a,  -a,-a,-a,  -a,a,-a
   };
-  GLfloat V_UnitCube[] = {
-    1,1,1,  1,0,1,  1,0,0,  1,1,0,
-    0,1,1,  0,0,1,  0,0,0,  0,1,0
+  GLfloat V_UnitCube[][3] = {
+    {1,1,1},  {1,0,1},  {1,0,0},  {1,1,0},
+    {0,1,1},  {0,0,1},  {0,0,0},  {0,1,0}
   };
   GLubyte I_Cube[] = { 0,1,2,3,	3,2,6,7,	2,1,5,6,   6,5,4,7,
 		       7,4,0,3,	0,4,5,1 
@@ -111,16 +111,39 @@ void SphereTrings::UnitBox()
 {
   // Renders a flat box from (0,0,0) -> (1,1,1)
 
-  GLfloat *v   = V_UnitCube;
-  GLfloat *n   = N_Cube;
-  GLubyte *idx = I_Cube;
+  GLfloat (*v)[3] = V_UnitCube;
+  GLfloat *n      = N_Cube;
+  GLubyte *idx    = I_Cube;
   glBegin(GL_QUADS);
   for(int i=0; i<6; ++i) {
     glNormal3fv(n); n += 3;
-    glVertex3fv( & v[*(idx++) * 3]);
-    glVertex3fv( & v[*(idx++) * 3]);
-    glVertex3fv( & v[*(idx++) * 3]);
-    glVertex3fv( & v[*(idx++) * 3]);
+    glVertex3fv( v[*(idx++)]);
+    glVertex3fv( v[*(idx++)]);
+    glVertex3fv( v[*(idx++)]);
+    glVertex3fv( v[*(idx++)]);
   }
+  glEnd();
+}
+
+void SphereTrings::UnitFrameBox()
+{
+  // Renders a wire-frame box from (0,0,0) -> (1,1,1)
+
+  GLfloat (*v)[3] = V_UnitCube;
+
+  glBegin(GL_LINE_LOOP);
+  glVertex3fv(v[0]);  glVertex3fv(v[1]);
+  glVertex3fv(v[2]);  glVertex3fv(v[3]);
+  glEnd();
+  glBegin(GL_LINE_LOOP);
+  glVertex3fv(v[4]);  glVertex3fv(v[5]);
+  glVertex3fv(v[6]);  glVertex3fv(v[7]);
+  glEnd();
+    
+  glBegin(GL_LINES);
+  glVertex3fv(v[0]);  glVertex3fv(v[4]);
+  glVertex3fv(v[1]);  glVertex3fv(v[5]);
+  glVertex3fv(v[2]);  glVertex3fv(v[6]);
+  glVertex3fv(v[3]);  glVertex3fv(v[7]);
   glEnd();
 }

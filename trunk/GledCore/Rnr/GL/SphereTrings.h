@@ -25,6 +25,7 @@ namespace SphereTrings {
   void DrawAndDisableGL(int i);
 
   void UnitBox();
+  void UnitFrameBox();
 
 } // namespace SphereTrings
 
