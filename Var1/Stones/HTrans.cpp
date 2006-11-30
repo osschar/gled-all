@@ -31,6 +31,7 @@
 // LF ~ LocalFrame; PF ~ ParentFrame; IP ~ InPlace
 
 #include "HTrans.h"
+#include <Gled/GledTypes.h>
 #include <TMath.h>
 
 #define F00  0
