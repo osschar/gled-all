@@ -12,6 +12,7 @@ class TimeMaker;
 
 Tringula*    tringula = 0;
 Dynamico*    dyn1     = 0;
+Dynamico*    dyn2     = 0;
 TriMesh*     trimesh  = 0;
 TriMesh*     carmesh  = 0;
 RectTerrain* terrain  = 0;
@@ -79,9 +80,12 @@ void tringula()
 
   ASSIGN_ADD_GLASS(trimesh, TriMesh, g_scene, "Terrain TriMesh", 0);
   trimesh->ImportRectTerrain(terrain);
+  trimesh->CalculateBoundingBox();
 
   ASSIGN_ADD_GLASS(carmesh, TriMesh, g_scene, "Car TriMesh", 0);
   carmesh->MakeTetrahedron();
+  carmesh->BuildOpcStructs();
+  carmesh->CalculateBoundingBox();
 
   ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
   tringula->SetMesh(trimesh);
@@ -91,8 +95,11 @@ void tringula()
   tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetDefDynMesh(carmesh);
 
-  ASSIGN_ADD_GLASS(dyn1, Dynamico, tringula->GetDynos(), "Dynamico Primus", 0);
-  dyn1->SetMesh(carmesh);
+  dyn1 = tringula->NewDynamico("Dynus Primus");
+  dyn2 = tringula->NewDynamico("Dynus Secondus");
+  dyn2->ref_trans().Move3LF(0.2, 0.05, 0.2);
+  dyn2->ref_trans().RotateLF(1, 3, 0.4);
+  
 
   // Best coarsening:
   gtsurf->SetRnrSelf(false);
@@ -105,7 +112,7 @@ void tringula()
 
   /**************************************************************************/
   // Eventor & Operators
-  /**************************************************************************/
+  /************************g**************************************************/
 
   ASSIGN_ADD_GLASS(eventor, Eventor, g_queen, "Eventor", 0);
   eventor->SetInterBeatMS(10);
