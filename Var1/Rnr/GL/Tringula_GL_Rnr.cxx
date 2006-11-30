@@ -11,6 +11,7 @@
 #include <Glasses/Dynamico.h>
 
 #include <Rnr/GL/GLRnrDriver.h>
+#include <Rnr/GL/SphereTrings.h>
 
 #include <Opcode/Opcode.h>
 
@@ -39,6 +40,17 @@ void sphere(Float_t* v, GLUquadricObj* q)
   glPushMatrix();
   glTranslatef(v[0], v[1], v[2]);
   gluSphere(q, 0.02, 5, 5);
+  glPopMatrix();
+}
+
+void render_ceaabox(Float_t* x, Float_t f=1)
+{
+  // Render center-extents axis-aligned bounding-box
+  f *= 2;
+  glPushMatrix();
+  glTranslatef(x[0]-x[3], x[1]-x[4], x[2]-x[5]);
+  glScalef(f*x[3], f*x[4], f*x[5]);
+  SphereTrings::UnitFrameBox();
   glPopMatrix();
 }
 }
@@ -113,13 +125,26 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 
       glPushMatrix();
 
-      glMultMatrixd(D.RefTrans().Array());
-      // This name-stack stuff here is foocked !!!!
+      glMultMatrixf(D.RefTrans().Array());
       if (T.bPickDynos) rd->GL()->PushName(rd->GetLensRnr(&D));
+
       TringTvor_GL_Rnr::Render(D.GetMesh()->GetTTvor());
+
+      if (T.bRnrBBoxes) {
+        GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+        glColor3f(1, 0, 0);
+        render_ceaabox(D.GetMesh()->GetTTvor()->mCtrExtBox);
+      }
+
       if (T.bPickDynos) rd->GL()->PopName();
 
       glPopMatrix();
+
+      if (T.bRnrBBoxes) {
+        GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+        glColor3f(0, 0, 1);
+        render_ceaabox((Float_t*)&D.ref_aabb());
+      }
     }
   }
 }
