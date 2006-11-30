@@ -18,22 +18,28 @@ my $dict = $config->{DICT_DIR};
 
 while($_=shift) {
   ($cname) = m!/(\w+).h$!;
-  # $cname is base name of the file and class name
+  # $cname is base name of the file and by default also class name
 
-  my $pragma_suff;
+  my $pragma_default;
   my $pragma_link;
 
-  if(defined $CATALOG->{Classes}{$cname}{PragmaSuff}) {
-    $pragma_suff = $CATALOG->{Classes}{$cname}{PragmaSuff};
-  } else {
-    $pragma_suff = "+";
-  }
-  if(defined $resolver->{GlassName2GlassSpecs}{$cname}) {
-    $pragma_link = "#pragma link C++ class ZLink<${cname}>;";
-  }
+  if($CATALOG->{Classes}{$cname}{NoDefault} == 0) {
 
-  $token = ($cname =~ m/NS$/) ? 'namespace' : 'class';
+    my $pragma_suff;
+    if(defined $CATALOG->{Classes}{$cname}{PragmaSuff}) {
+      $pragma_suff = $CATALOG->{Classes}{$cname}{PragmaSuff};
+    } else {
+      $pragma_suff = "+";
+    }
+    if(defined $resolver->{GlassName2GlassSpecs}{$cname}) {
+      $pragma_link = "#pragma link C++ class ZLink<${cname}>;";
+    }
+    
+    my $token = ($cname =~ m/NS$/) ? 'namespace' : 'class';
 
+    $pragma_default = "#pragma link C++ ${token} ${cname}${pragma_suff};";
+
+  }
   open( FOO, ">$dict/${cname}_LinkDef.h");
   print FOO <<"END";
 #ifdef __CINT__
@@ -47,7 +53,7 @@ while($_=shift) {
 
 $CATALOG->{Classes}{$cname}{PrePragmas}
 ${pragma_link}
-#pragma link C++ ${token} ${cname}${pragma_suff};
+${pragma_default}
 $CATALOG->{Classes}{$cname}{Pragmas}
 $CATALOG->{Classes}{$cname}{PostPragmas}
 
@@ -60,7 +66,7 @@ END
 	 "$_ $dict/${cname}_LinkDef.h";
   # print $exe."\n";
   my $ret = `$exe`;
-  croak $ret if $?
+  croak $ret if $?;
 }
 # Remove all traces
 #unlink "${cname}_LinkDef.h";
