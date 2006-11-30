@@ -10,10 +10,9 @@
 //
 
 #include "Dynamico.h"
-#include <Glasses/TriMesh.h>
 #include "Dynamico.c7"
 
-#include <Opcode/Opcode.h>
+#include <Stones/TringTvor.h>
 
 ClassImp(Dynamico)
 
@@ -21,13 +20,16 @@ ClassImp(Dynamico)
 
 void Dynamico::_init()
 {
-  mTrans.SetPos(0.5, 0.5, 8);
-  Double_t oos2 = 1.0/TMath::Sqrt(2);
+  mTrans.SetPos(0.5, 0.5, 8.0);
+  Float_t oos2 = 1.0/TMath::Sqrt(2);
   mTrans.SetBaseVec(1,  oos2, oos2, 0);
-  mTrans.SetBaseVec(2,  0,    0,    1);
+  mTrans.SetBaseVec(2,  0, 0, 1);
+  mTrans.SetBaseVecViaCross(3);
 
-  mV = mW = 0;
-  mLevH = 0.1;
+  bAABBok = false;
+
+  mV = mW = 0.0f;
+  mLevH   = 0.1f;
 
   bRnrSelf = true;
 
