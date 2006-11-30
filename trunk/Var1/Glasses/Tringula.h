@@ -55,6 +55,7 @@ protected:
 
   Bool_t     bRnrDynos;  // X{GS} 7 Bool(-join=>1)
   Bool_t     bPickDynos; // X{GS} 7 Bool()
+  Bool_t     bRnrBBoxes; // X{GS} 7 Bool()
 
   Int_t            mNumEPlanes; //!
   Opcode::Plane*   mEdgePlanes; //!
@@ -81,10 +82,13 @@ public:
   void MakeOpcodeModel(); // X{ED} C{0} 7 MButt()
   void RayCollide();      // X{ED} C{0} 7 MButt()
 
+  Dynamico* NewDynamico(const Text_t* dname=0);
   Dynamico* RandomDynamico(Float_t v_min=-1, Float_t v_max=10,
                            Float_t w_max= 1); // X{E} 7 MCWButt()
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
+
+  void DoBoxPrunning(Bool_t detailed=false);  // X{E} 7 MCWButt()
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
