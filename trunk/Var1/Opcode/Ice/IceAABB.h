@@ -16,24 +16,24 @@
 class Sphere;
 
 //! Declarations of type-independent methods (most of them implemented in the .cpp)
-#define AABB_COMMON_METHODS                         \
-  AABB&			Add(const AABB& aabb);      \
-  float			MakeCube(AABB& cube) const; \
-  void			MakeSphere(Sphere& sphere) const; \
+#define AABB_COMMON_METHODS                 \
+  AABB&		Add(const AABB& aabb);      \
+  float		MakeCube(AABB& cube) const; \
+  void		MakeSphere(Sphere& sphere) const; \
   const sbyte*	ComputeOutline(const Point& local_eye, sdword& num) const; \
-  float			ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, float height, sdword& num) const; \
-  bool			IsInside(const AABB& box)	const; \
-  bool			ComputePlanes(Plane* planes)	const; \
-  bool			ComputePoints(Point* pts)	const; \
-  const Point*	GetVertexNormals()			const; \
-  const udword*	GetEdges()				const; \
-  const Point*	GetEdgeNormals()			const; \
-  bool		ContainsPoint(const Point& p)		const  \
-  {                                                            \
-    if(p.x > GetMax(0) || p.x < GetMin(0)) return false;       \
-    if(p.y > GetMax(1) || p.y < GetMin(1)) return false;       \
-    if(p.z > GetMax(2) || p.z < GetMin(2)) return false;       \
-    return true;                                               \
+  float		ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, float height, sdword& num) const; \
+  bool		IsInside(const AABB& box)	const; \
+  bool		ComputePlanes(Plane* planes)	const; \
+  bool		ComputePoints(Point* pts)	const; \
+  const Point*	GetVertexNormals()		const; \
+  const udword*	GetEdges()			const; \
+  const Point*	GetEdgeNormals()		const; \
+  bool		ContainsPoint(const Point& p)	const  \
+  {                                                    \
+    if(p.x > GetMax(0) || p.x < GetMin(0)) return false; \
+    if(p.y > GetMax(1) || p.y < GetMin(1)) return false; \
+    if(p.z > GetMax(2) || p.z < GetMin(2)) return false; \
+    return true;                                         \
   }
 
 enum AABBType
@@ -154,18 +154,15 @@ public:
   //----------------------------------------------------------------------
   /**
    *	Computes the intersection between two AABBs.
-   *	\param		a		[in] the other AABB
+   *	\param		a	[in] the other AABB
    *	\return		true on intersection
    */
   //----------------------------------------------------------------------
   bool	Intersect(const AABB& a) const
   {
-    if(mMax.x < a.mMin.x
-       || a.mMax.x < mMin.x
-       || mMax.y < a.mMin.y
-       || a.mMax.y < mMin.y
-       || mMax.z < a.mMin.z
-       || a.mMax.z < mMin.z)	return false;
+    if(mMax.x < a.mMin.x || a.mMax.x < mMin.x ||
+       mMax.y < a.mMin.y || a.mMax.y < mMin.y ||
+       mMax.z < a.mMin.z || a.mMax.z < mMin.z)	return false;
 
     return true;
   }
@@ -173,7 +170,7 @@ public:
   //----------------------------------------------------------------------
   /**
    *	Computes the 1D-intersection between two AABBs, on a given axis.
-   *	\param		a		[in] the other AABB
+   *	\param		a	[in] the other AABB
    *	\param		axis	[in] the axis (0, 1, 2)
    *	\return		true on intersection
    */
@@ -188,8 +185,8 @@ public:
   /**
    *	Recomputes the AABB after an arbitrary transform by a 4x4 matrix.
    *	Original code by Charles Bloom on the GD-Algorithm list. (I slightly modified it)
-   *	\param		mtx			[in] the transform matrix
-   *	\param		aabb		[out] the transformed AABB [can be *this]
+   *	\param		mtx	[in] the transform matrix
+   *	\param		aabb	[out] the transformed AABB [can be *this]
    */
   //----------------------------------------------------------------------
   void	Rotate(const Matrix4x4& mtx, AABB& aabb) const
@@ -278,8 +275,8 @@ public:
   //----------------------------------------------------------------------
   /**
    *	Setups an AABB from min & max vectors.
-   *	\param		min			[in] the min point
-   *	\param		max			[in] the max point
+   *	\param		min		[in] the min point
+   *	\param		max		[in] the max point
    */
   //----------------------------------------------------------------------
   void SetMinMax(const Point& min, const Point& max)
@@ -288,8 +285,8 @@ public:
   //----------------------------------------------------------------------
   /**
    *	Setups an AABB from center & extents vectors.
-   *	\param		c			[in] the center point
-   *	\param		e			[in] the extents vector
+   *	\param		c		[in] the center point
+   *	\param		e		[in] the extents vector
    */
   //----------------------------------------------------------------------
   void SetCenterExtents(const Point& c, const Point& e) { mCenter = c;	 mExtents = e; }
@@ -373,7 +370,7 @@ public:
   //----------------------------------------------------------------------
   /**
    *	Computes the intersection between two AABBs.
-   *	\param		a		[in] the other AABB
+   *	\param		a	[in] the other AABB
    *	\return		true on intersection
    */
   //----------------------------------------------------------------------
@@ -388,8 +385,9 @@ public:
 
   //----------------------------------------------------------------------
   /**
-   *	The standard intersection method from Gamasutra. Just here to check its speed against the one above.
-   *	\param		a		[in] the other AABB
+   *	The standard intersection method from Gamasutra. Just here to
+   *	check its speed against the one above.
+   *	\param		a	[in] the other AABB
    *	\return		true on intersection
    */
   //----------------------------------------------------------------------
@@ -492,16 +490,19 @@ inline_ void ComputeMinMax(const Point& p, Point& min, Point& max)
 
 inline_ void ComputeAABB(AABB& aabb, const Point* list, udword nb_pts)
 {
-  if(list)
+  if(list && nb_pts>0)
     {
-      Point Maxi(MIN_FLOAT, MIN_FLOAT, MIN_FLOAT);
-      Point Mini(MAX_FLOAT, MAX_FLOAT, MAX_FLOAT);
-      while(nb_pts--)
+      Point max(list->x, list->y, list->z);
+      Point min(list->x, list->y, list->z);
+      ++list;
+      while(--nb_pts)
         {
-          // _prefetch(list+1); // off by one ?
-          ComputeMinMax(*list++, Mini, Maxi);
+          const Point& p = *list++;
+          if(p.x > max.x) max.x = p.x; else if(p.x < min.x) min.x = p.x;
+          if(p.y > max.y) max.y = p.y; else if(p.y < min.y) min.y = p.y;
+          if(p.z > max.z) max.z = p.z; else if(p.z < min.z) min.z = p.z;
         }
-      aabb.SetMinMax(Mini, Maxi);
+      aabb.SetMinMax(min, max);
     }
 }
 

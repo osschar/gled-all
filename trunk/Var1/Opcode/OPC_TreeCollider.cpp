@@ -239,7 +239,7 @@ void AABBTreeCollider::InitQuery(const Matrix4x4* world0, const Matrix4x4* world
   Collider::InitQuery();
   mNbBVBVTests		= 0;
   mNbPrimPrimTests	= 0;
-  mNbBVPrimTests		= 0;
+  mNbBVPrimTests	= 0;
   mPairs.Reset();
 
   // Setup matrices
@@ -309,7 +309,8 @@ bool AABBTreeCollider::CheckTemporalCoherence(Pair* cache)
  * \warning SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 //----------------------------------------------------------------------
-bool AABBTreeCollider::Collide(const AABBCollisionTree* tree0, const AABBCollisionTree* tree1, const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
+bool AABBTreeCollider::Collide(const AABBCollisionTree* tree0, const AABBCollisionTree* tree1,
+                               const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
 {
   // Init collision query
   InitQuery(world0, world1);
@@ -337,7 +338,8 @@ bool AABBTreeCollider::Collide(const AABBCollisionTree* tree0, const AABBCollisi
  *	\warning SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 //----------------------------------------------------------------------
-bool AABBTreeCollider::Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree* tree1, const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
+bool AABBTreeCollider::Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree* tree1,
+                               const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
 {
   // Init collision query
   InitQuery(world0, world1);
@@ -365,7 +367,8 @@ bool AABBTreeCollider::Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree
  *	\warning SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 //----------------------------------------------------------------------
-bool AABBTreeCollider::Collide(const AABBQuantizedTree* tree0, const AABBQuantizedTree* tree1, const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
+bool AABBTreeCollider::Collide(const AABBQuantizedTree* tree0, const AABBQuantizedTree* tree1,
+                               const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
 {
   // Init collision query
   InitQuery(world0, world1);
@@ -416,7 +419,8 @@ bool AABBTreeCollider::Collide(const AABBQuantizedTree* tree0, const AABBQuantiz
  *	\warning SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 //----------------------------------------------------------------------
-bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree* tree0, const AABBQuantizedNoLeafTree* tree1, const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
+bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree* tree0, const AABBQuantizedNoLeafTree* tree1,
+                               const Matrix4x4* world0, const Matrix4x4* world1, Pair* cache)
 {
   // Init collision query
   InitQuery(world0, world1);

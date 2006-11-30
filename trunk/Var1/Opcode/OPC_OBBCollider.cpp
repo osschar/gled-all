@@ -72,8 +72,9 @@ OBBCollider::~OBBCollider()
 
 //----------------------------------------------------------------------
 /**
- *	Validates current settings. You should call this method after all the settings and callbacks have been defined.
- *	\return		0 if everything is ok, else a string describing the problem
+ * Validates current settings. You should call this method after all
+ * the settings and callbacks have been defined.
+ * \return	0 if everything is ok, else a string describing the problem
  */
 //----------------------------------------------------------------------
 const char* OBBCollider::ValidateSettings()
@@ -86,7 +87,8 @@ const char* OBBCollider::ValidateSettings()
 
 //----------------------------------------------------------------------
 /**
- *	Generic collision query for generic OPCODE models. After the call, access the results:
+ *	Generic collision query for generic OPCODE models. After the
+ *	call, access the results:
  *	- with GetContactStatus()
  *	- with GetNbTouchedPrimitives()
  *	- with GetTouchedPrimitives()
@@ -100,7 +102,8 @@ const char* OBBCollider::ValidateSettings()
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 //----------------------------------------------------------------------
-bool OBBCollider::Collide(OBBCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb, const Matrix4x4* worldm)
+bool OBBCollider::Collide(OBBCache& cache, const OBB& box, const Model& model,
+                          const Matrix4x4* worldb, const Matrix4x4* worldm)
 {
   // Checkings
   if(!Setup(&model))	return false;

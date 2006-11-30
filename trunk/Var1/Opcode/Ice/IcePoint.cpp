@@ -112,7 +112,8 @@ Point& Point::ProjectToPlane(const Plane& p)
   return *this;
 }
 
-void Point::ProjectToScreen(float halfrenderwidth, float halfrenderheight, const Matrix4x4& mat, HPoint& projected) const
+void Point::ProjectToScreen(float halfrenderwidth, float halfrenderheight,
+                            const Matrix4x4& mat, HPoint& projected) const
 {
   projected = HPoint(x, y, z, 1.0f) * mat;
   projected.w = 1.0f / projected.w;
@@ -149,7 +150,8 @@ Point& Point::Mult(const Matrix3x3& mat, const Point& a)
   return *this;
 }
 
-Point& Point::Mult2(const Matrix3x3& mat1, const Point& a1, const Matrix3x3& mat2, const Point& a2)
+Point& Point::Mult2(const Matrix3x3& mat1, const Point& a1,
+                    const Matrix3x3& mat2, const Point& a2)
 {
   x = a1.x * mat1.m[0][0] + a1.y * mat1.m[0][1] + a1.z * mat1.m[0][2] + a2.x * mat2.m[0][0] + a2.y * mat2.m[0][1] + a2.z * mat2.m[0][2];
   y = a1.x * mat1.m[1][0] + a1.y * mat1.m[1][1] + a1.z * mat1.m[1][2] + a2.x * mat2.m[1][0] + a2.y * mat2.m[1][1] + a2.z * mat2.m[1][2];

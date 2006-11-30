@@ -46,12 +46,12 @@ using namespace Opcode;
  *	This is faster and less subject to FPU errors than the generic inversion code.
  *
  *	\relates	Matrix4x4
- *	\fn			InvertPRMatrix(Matrix4x4& dest, const Matrix4x4& src)
+ *	\fn		InvertPRMatrix(Matrix4x4& dest, const Matrix4x4& src)
  *	\param		dest	[out] destination matrix
- *	\param		src		[in] source matrix
+ *	\param		src	[in]  source matrix
  */
 //----------------------------------------------------------------------
-ICEMATHS_API void InvertPRMatrix(Matrix4x4& dest, const Matrix4x4& src)
+ICEMATHS_API void Opcode::InvertPRMatrix(Matrix4x4& dest, const Matrix4x4& src)
 {
   dest.m[0][0] = src.m[0][0];
   dest.m[1][0] = src.m[0][1];

@@ -98,7 +98,6 @@ bool BaseModel::CreateTree(bool no_leaf, bool quantized)
 
   if(quantized)	mModelCode |=  OPC_QUANTIZED;
   else		mModelCode &= ~OPC_QUANTIZED;
-
   // Create the correct class
   if(mModelCode & OPC_NO_LEAF)
     {
