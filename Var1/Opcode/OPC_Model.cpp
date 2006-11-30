@@ -201,8 +201,8 @@ bool Model::Build(const OPCODECREATE& create)
       CONVEXHULLCREATE CHC;
       // ### doesn't work with strides
       CHC.NbVerts		= create.mIMesh->GetNbVertices();
-      CHC.Vertices	        = create.mIMesh->GetVerts();
-      CHC.UnifyNormals	        = true;
+      CHC.Vertices		= create.mIMesh->GetVerts();
+      CHC.UnifyNormals		= true;
       CHC.ReduceVertices	= true;
       CHC.WordFaces		= false;
       mHull->Compute(CHC);

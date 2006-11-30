@@ -47,7 +47,7 @@ struct VertexPointers
  *	\param		user_data		[in] user-defined data from SetCallback()
  */
 //----------------------------------------------------------------------
-typedef void	(*RequestCallback)	(udword triangle_index, VertexPointers& triangle, void* user_data);
+typedef void (*RequestCallback) (udword triangle_index, VertexPointers& triangle, void* user_data);
 #endif
 
 class OPCODE_API MeshInterface
@@ -172,7 +172,7 @@ private:
 #else
   // User pointers
   const	IndexedTriangle* mTris;		//!< Array of indexed triangles
-  const	Point*		 mVerts;		//!< Array of vertices
+  const	Point*		 mVerts;	//!< Array of vertices
 #ifdef OPC_USE_STRIDE
   udword		 mTriStride;	//!< Possible triangle stride in bytes [Opcode 1.3]
   udword		 mVertexStride;	//!< Possible vertex stride in bytes [Opcode 1.3]

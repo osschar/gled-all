@@ -104,7 +104,7 @@ public:
    *	\return		the collision tree
    */
   //----------------------------------------------------------------------
-  AABBOptimizedTree*	GetTree() { return mTree;	}
+  AABBOptimizedTree* GetTree() { return mTree; }
 
   //----------------------------------------------------------------------
   /**
