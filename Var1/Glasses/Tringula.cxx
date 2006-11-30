@@ -41,6 +41,7 @@ void Tringula::_init()
   mRayL = 20; mRayT = -90; mRayP = 0;
 
   bRnrDynos = bPickDynos = true;
+  bRnrBBoxes = false;
 
   mNumEPlanes = 0;
   mEdgePlanes = 0;
@@ -153,19 +154,34 @@ void Tringula::RayCollide()
 
 /**************************************************************************/
 
+Dynamico* Tringula::NewDynamico(const Text_t* dname)
+{
+  if (dname == 0)
+    dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
+
+  Dynamico* d = new Dynamico(dname);
+  place_on_terrain(*d);
+
+  mQueen->CheckIn(d);
+  d->SetMesh(*mDefDynMesh);
+  mDynos->Add(d);
+
+  return d;
+}
+
 Dynamico* Tringula::RandomDynamico(Float_t v_min, Float_t v_max, Float_t w_max)
 {
-  Double_t x = mRndGen.Uniform(mEdgePlanes[1].d, -mEdgePlanes[3].d);
-  Double_t y = mRndGen.Uniform(mEdgePlanes[0].d, -mEdgePlanes[2].d);
+  Float_t x = mRndGen.Uniform(mEdgePlanes[1].d, -mEdgePlanes[3].d);
+  Float_t y = mRndGen.Uniform(mEdgePlanes[0].d, -mEdgePlanes[2].d);
 
-  Double_t phi = mRndGen.Uniform(0, TMath::TwoPi());
-  Double_t cos = TMath::Cos(phi), sin = TMath::Sin(phi);
+  Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
+  Float_t cos = TMath::Cos(phi), sin = TMath::Sin(phi);
 
   Dynamico* d = new Dynamico(GForm("Dynamico %d", mDynos->GetSize() + 1));
-  ZTrans& t = d->ref_trans();
+  HTransF& t = d->ref_trans();
   t.SetBaseVec(1, cos,  sin, 0);
   t.SetBaseVec(2, 0,      0, 1);
-  t.SetBaseVec(1, sin, -cos, 0);
+  t.SetBaseVec(3, sin, -cos, 0);
   t.SetBaseVec(4, x, y, 0);
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
@@ -207,83 +223,153 @@ void Tringula::SetEdgePlanes(RectTerrain* rect_terr)
 
 /**************************************************************************/
 
+void Tringula::DoBoxPrunning(Bool_t detailed)
+{
+  using namespace Opcode;
+
+  UInt_t nboxes = mDynos->GetSize();
+  Dynamico    *dynarr[nboxes];
+  const AABB  *bboxes[nboxes];
+
+  {
+    int n = 0;
+    Stepper<> stepper(*mDynos);
+    while (stepper.step())
+    {
+      Dynamico* D = (Dynamico*) *stepper;
+      dynarr[n] = D;
+      bboxes[n] = & D->ref_aabb();
+      ++n;
+    }
+  }
+
+  Pairs  pairs;
+  Axes   axes(AXES_XZY); // somewhat random
+  GTime  time(GTime::I_Now);
+  Bool_t res = CompleteBoxPruning(nboxes, bboxes, pairs, axes);
+
+  printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
+         nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
+
+  if (detailed)
+  {
+    AABBTreeCollider collider;
+
+    for (UInt_t i = 0; i < pairs.GetNbPairs(); ++i)
+    {
+      const Pair *p  = pairs.GetPair(i);
+      Dynamico   *d0 = dynarr[p->id0];
+      Dynamico   *d1 = dynarr[p->id1];
+
+      BVTCache cache;
+      cache.Model0 = d0->get_opc_model();
+      cache.Model1 = d1->get_opc_model();
+
+      Bool_t s0 = collider.Collide(cache, d0->ref_trans(), d1->ref_trans());
+      Bool_t s1 = collider.GetContactStatus();
+      UInt_t np = collider.GetNbPairs();
+
+      printf("  %3u: %-15s .vs. %-15s; %d, %d, %u\n", i,
+             d0->GetName(), d1->GetName(), s0, s1, np);
+
+      const Pair* ps = collider.GetPairs();
+      for (UInt_t j = 0; j < np; ++j)
+      {
+        printf("    %2u: %3d %3d\n", j, ps[j].id0, ps[j].id1);
+      }
+
+    }
+  }
+}
+
+/**************************************************************************/
+
 void Tringula::TimeTick(Double_t t, Double_t dt)
 {
   GLensWriteHolder wlck(this);
 
+  using namespace Opcode;
+
+  //UInt_t nboxes = mDynos->GetSize(), boxcount = 0;
+  //const AABB  *bboxes[nboxes];
+
   Stepper<Dynamico> stepper(*mDynos);
   while (stepper.step()) {
 
-    using namespace Opcode;
-
     Dynamico& D = **stepper;
 
-    Point old_pos, pos;
+    if (D.mV != 0 || D.mW != 0)
+    {
+      Point old_pos, pos; // These should both be within a dynamico.
 
-    D.mTrans.GetPos(old_pos);
-
-    if (D.mV != 0) {
+      D.mTrans.GetPos(old_pos);
       D.mTrans.MoveLF(1, dt * D.mV);
-    }
-    if (D.mW != 0) {
       D.mTrans.RotateLF(3, 1, dt*D.mW);
-    }
+      D.mTrans.GetPos(pos);
+      D.touch_aabb();
 
-    D.mTrans.GetPos(pos);
+      Point vertical(0, 0, -1);
 
-    Point vertical(0, 0, -1);
-
-    // printf("  Distances: ");
-    for (Int_t p=0; p<mNumEPlanes; ++p) {
-      Float_t d = mEdgePlanes[p].Distance(pos);
-      // printf("%6.2f ", d);
-      if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
-    }
-    // printf("\n");
-
-    RayCollider&    RC = *mOPCRayCol;
-    CollisionFaces& CF = *mOPCCFaces;
-
-    static const Float_t ray_offset = 100;
-
-    Opcode::Ray R(pos, vertical);
-    R.mOrig.z += ray_offset;
-
-    UInt_t cache = D.mOPCRCCache;
-    if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) ) {
-
-      if (CF.GetNbFaces() == 1) {
-        const CollisionFace& cf = CF.GetFaces()[0];
-        pos.z += D.mLevH - cf.mDistance + ray_offset;
-
-        if (cache != D.mOPCRCCache) {
-          Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
-          D.mTrans.SetBaseVec(2, n);
-          D.mTrans.Orto3Column(1, 2);
-          D.mTrans.Norm3Column(1);
-          D.mTrans.SetBaseVecViaCross(3);
-        }
+      for (Int_t p=0; p<mNumEPlanes; ++p) {
+        Float_t d = mEdgePlanes[p].Distance(pos);
+        if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
       }
 
-    } else {
+      RayCollider&    RC = *mOPCRayCol;
+      CollisionFaces& CF = *mOPCCFaces;
 
-      printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-             RC.GetContactStatus(),
-             RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections());
+      static const Float_t ray_offset = 100;
 
-    }
+      Opcode::Ray R(pos, vertical);
+      R.mOrig.z += ray_offset;
 
-    D.mTrans.SetPos(pos);
+      UInt_t cache = D.mOPCRCCache;
+      if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) ) {
+
+        if (CF.GetNbFaces() == 1) {
+          const CollisionFace& cf = CF.GetFaces()[0];
+          pos.z += D.mLevH - cf.mDistance + ray_offset;
+
+          if (cache != D.mOPCRCCache) {
+            Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
+            D.mTrans.SetBaseVec(2, n);
+            D.mTrans.OrtoNorm3Column(1, 2);
+            D.mTrans.SetBaseVecViaCross(3);
+          }
+        }
+
+      } else {
+
+        printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
+               RC.GetContactStatus(),
+               RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
+               RC.GetNbIntersections());
+
+      }
+
+      D.mTrans.SetPos(pos);
+
+    } // if D moving
+
+    // bboxes[boxcount++] = &D.ref_aabb();
 
   } // end while dynos
 
+  //Pairs  pairs;
+  //Axes   axes(AXES_XZY); // somewhat random
+  //GTime  time(GTime::I_Now);
+  //Bool_t res = CompleteBoxPruning(nboxes, bboxes, pairs, axes);
+  //printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
+  //       nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
 }
 
 void Tringula::handle_edge_crossing
 ( Dynamico& D, Opcode::Point& old_pos, Opcode::Point& pos, 
   Int_t plane, Float_t dist )
 {
-  Opcode::Plane& P = mEdgePlanes[plane];
+  using namespace Opcode;
+
+  Plane& P = mEdgePlanes[plane];
 
   switch (mEdgeRule)
     {
@@ -295,7 +381,7 @@ void Tringula::handle_edge_crossing
       break;
     }
     case ER_Hold: {
-      Opcode::Point step = pos; step -= old_pos;
+      Point step = pos; step -= old_pos;
       Float_t depth = fabsf(P.Distance(old_pos));
       pos = old_pos + depth*step/(depth+dist);
       break;
@@ -303,13 +389,10 @@ void Tringula::handle_edge_crossing
     case ER_Bounce: {
       pos -= 2*dist*P.n;
       // Rotate accordingly
-      ZTrans& t = D.ref_trans();
-      Opcode::Point fwd;
-      t.GetBaseVec(1, (Float_t*) fwd);
+      HTransF& t = D.ref_trans();
+      Point& fwd = * (Point*) t.PtrBaseVec(1);
       fwd += -2 * (fwd | P.n) * P.n;
-      t.SetBaseVec(1, (Float_t*) fwd);
-      t.Orto3Column(2, 1);
-      t.Norm3Column(2);
+      t.OrtoNorm3Column(2, 1);
       t.SetBaseVecViaCross(3);
       break;
     }
@@ -317,7 +400,7 @@ void Tringula::handle_edge_crossing
       // Cross-over the opposite plane, assume 4 planes pre-defined
       // rectangular layout.
       Int_t opp_plane = (plane + 2) % mNumEPlanes;
-      Opcode::Plane& O = mEdgePlanes[opp_plane];
+      Plane& O = mEdgePlanes[opp_plane];
       Float_t opp_dist = O.Distance(pos);
       pos += dist * P.n - opp_dist * O.n;
       break;
@@ -332,10 +415,9 @@ void Tringula::place_on_terrain(Dynamico& D)
 {
   using namespace Opcode;
 
-  Point pos;
+  Point &pos = * (Point*) D.mTrans.PtrPos();
   Point vertical(0, 0, -1);
 
-  D.mTrans.GetPos(pos);
   RayCollider&    RC = *mOPCRayCol;
   CollisionFaces& CF = *mOPCCFaces;
 
@@ -354,9 +436,9 @@ void Tringula::place_on_terrain(Dynamico& D)
       if (cache != D.mOPCRCCache) {
         Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
         D.mTrans.SetBaseVec(2, n);
-        D.mTrans.Orto3Column(1, 2);
-        D.mTrans.Norm3Column(1);
+        D.mTrans.OrtoNorm3Column(1, 2);
         D.mTrans.SetBaseVecViaCross(3);
+        D.touch_aabb();
       }
     }
 
