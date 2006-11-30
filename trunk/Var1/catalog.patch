@@ -1,0 +1,13 @@
+$PATCH = {
+
+"HTrans" => {
+  'NoDefault'  => 1,
+  'Pragmas'    => "#pragma link C++ class HTrans<Float_t>+;\n" .
+                  "#pragma link C++ class HTrans<Double_t>+;\n" .
+                  "#pragma link C++ class HTransF+;\n" .
+                  "#pragma link C++ class HTransD+;\n"
+},
+
+};
+
+1;
