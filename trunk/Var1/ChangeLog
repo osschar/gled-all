@@ -1,3 +1,46 @@
+2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Use HTransF instead of ZTrans; added support for aa-bbox in
+	parent-frame.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added support for aa-bbox calculation.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added SweepAndPrune function and a switch for dyno-bbox rendering.
+	Dynamico now uses HTrans.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added rendering of bounding boxes for dynos.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	New files; templated homogeneous-4x4-matrix.
+
+	* catalog.patch:
+	Specify pragmas for HTrans.
+
+	* Opcode/Ice/IceAABB.h:
+	* Opcode/Ice/IceAxes.h:
+	* Opcode/Ice/IceMatrix4x4.cpp:
+	* Opcode/Ice/IceMatrix4x4.h:
+	* Opcode/Ice/IcePairs.h:
+	* Opcode/Ice/IcePoint.cpp:
+	* Opcode/Ice/IcePoint.h:
+	* Opcode/Ice/IceUtils.h:
+	* Opcode/OPC_BaseModel.cpp:
+	* Opcode/OPC_BaseModel.h:
+	* Opcode/OPC_MeshInterface.h:
+	* Opcode/OPC_Model.cpp:
+	* Opcode/OPC_OBBCollider.cpp:
+	* Opcode/OPC_TreeCollider.cpp:
+	Formatting changes.
+
 2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMesh.cxx:
@@ -8,9 +51,6 @@
 	* Opcode/Ice/IceHPoint.h:
 	Added ifdef for cast-to-Point (gcc-3 was complaining about this
 	never being used).
-
-2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
-
 
 2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
@@ -45,8 +85,9 @@
 
 2006-11-12 Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Opcode/
+
 	Initial import from OPCODE-1.3. I did quite some reformatting
-	(most of it automatic) to eliminate most of the 300+ character
-	lines abundantly filled with tabs. Also removed a lot of redundant
-	inlines while browsing through the code and trying to understand
-	the structure. I started doing this sometime late in August.
+	(most of it automatic) while browsing through the code and trying
+	to understand the structure. I started doing this sometime late in
+	August.
