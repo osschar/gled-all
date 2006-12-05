@@ -97,7 +97,7 @@ void tringula()
 
   dyn1 = tringula->NewDynamico("Dynus Primus");
   dyn2 = tringula->NewDynamico("Dynus Secondus");
-  dyn2->ref_trans().Move3LF(0.2, 0.05, 0.2);
+  dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
   dyn2->ref_trans().RotateLF(1, 3, 0.4);
   
 
