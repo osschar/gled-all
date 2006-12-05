@@ -53,6 +53,7 @@ public:
   Opcode::Model*         get_opc_model()   { return mMesh->GetOPCModel(); }
   Opcode::MeshInterface* get_opc_mesh_if() { return mMesh->GetOPCMeshIf(); }
 
+  TringTvor*             get_tring_tvor()  { return mMesh->GetTTvor(); }
 
 #include "Dynamico.h7"
   ClassDef(Dynamico, 1)
