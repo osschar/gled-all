@@ -37,6 +37,10 @@ public:
 private:
   void _init();
 
+  // Hack to carry intersection lines over to renderer.
+  vector<Float_t> mItsLines;
+  Int_t           mItsLinesIdx;
+
 protected:
   ZLink<TriMesh> mMesh;         //  X{GS} L{}
   ZColor         mColor;        //  X{GSPT} 7 ColorButt()
@@ -55,7 +59,8 @@ protected:
 
   Bool_t     bRnrDynos;  // X{GS} 7 Bool(-join=>1)
   Bool_t     bPickDynos; // X{GS} 7 Bool()
-  Bool_t     bRnrBBoxes; // X{GS} 7 Bool()
+  Bool_t     bRnrBBoxes; // X{GS} 7 Bool(-join=>1)
+  Bool_t     bRnrItsLines; // X{GS} 7 Bool() Intersection lines
 
   Int_t            mNumEPlanes; //!
   Opcode::Plane*   mEdgePlanes; //!
