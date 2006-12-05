@@ -2,8 +2,8 @@
 # name		id				[]~ZGlass, [.]~own rnr, [<glass>]
 #
 TabletReader    1       Glasses/TabletReader
-TabletImage	2	Glasses/TabletImage	.
+TabletImage     2       Glasses/TabletImage	.
 TriMesh         3       Glasses/TriMesh
 
 Tringula        16      Glasses/Tringula        .
-Dynamico          17      Glasses/Dynamico          
+Dynamico        17      Glasses/Dynamico
