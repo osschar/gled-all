@@ -1,3 +1,9 @@
+2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Added inner class GL_Float_Holder to set/restore value of a float
+	uniform variable.
+
 2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/SphereTrings.cxx:
