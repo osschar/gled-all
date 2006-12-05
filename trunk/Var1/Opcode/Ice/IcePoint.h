@@ -95,21 +95,30 @@ public:
     return *this;
   }
 
+  //! this = this + a * scalar
+  Point& TMac(const Point& a, float scalar)
+  {
+    x += a.x * scalar;
+    y += a.y * scalar;
+    z += a.z * scalar;
+    return *this;
+  }
+
+  //! this = this + a * scalar
+  Point& TMac2(const Point& a, const Point& b, float sa, float sb)
+  {
+    x += a.x * sa + b.x * sb;
+    y += a.y * sa + b.y * sb;
+    z += a.z * sa + b.z * sb;
+    return *this;
+  }
+
   //! this = a + b * scalar
   Point& Mac(const Point& a, const Point& b, float scalar)
   {
     x = a.x + b.x * scalar;
     y = a.y + b.y * scalar;
     z = a.z + b.z * scalar;
-    return *this;
-  }
-
-  //! this = this + a * scalar
-  Point& Mac(const Point& a, float scalar)
-  {
-    x += a.x * scalar;
-    y += a.y * scalar;
-    z += a.z * scalar;
     return *this;
   }
 
