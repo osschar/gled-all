@@ -117,9 +117,11 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
     }
   }
 
-  if (T.bRnrDynos) {
+  if (T.bRnrDynos)
+  {
     AList::Stepper<Dynamico> stepper(*T.mDynos);
-    while (stepper.step()) {
+    while (stepper.step())
+    {
       Dynamico& D = **stepper;
       if (!D.GetRnrSelf()) continue;
 
@@ -130,21 +132,37 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 
       TringTvor_GL_Rnr::Render(D.GetMesh()->GetTTvor());
 
-      if (T.bRnrBBoxes) {
+      if (T.bRnrBBoxes)
+      {
         GL_Capability_Switch ligt_off(GL_LIGHTING, false);
         glColor3f(1, 0, 0);
-        render_ceaabox(D.GetMesh()->GetTTvor()->mCtrExtBox);
+        render_ceaabox(D.GetMesh()->GetTTvor()->mCtrExtBox, 1.02);
       }
 
       if (T.bPickDynos) rd->GL()->PopName();
 
       glPopMatrix();
 
-      if (T.bRnrBBoxes) {
+      if (T.bRnrBBoxes)
+      {
         GL_Capability_Switch ligt_off(GL_LIGHTING, false);
         glColor3f(0, 0, 1);
-        render_ceaabox((Float_t*)&D.ref_aabb());
+        render_ceaabox((Float_t*)&D.ref_aabb(), 1.04);
       }
+    }
+
+    if (T.bRnrItsLines)
+    {
+      GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+      GL_Float_Holder      line_w(GL_LINE_WIDTH, 2, glLineWidth);
+      glColor3f(1, 0.1, 0.3);
+      glBegin(GL_LINES);
+      for (Int_t i=0; i<T.mItsLinesIdx; i+=6)
+      {
+        glVertex3fv(&T.mItsLines[i]);
+        glVertex3fv(&T.mItsLines[i+3]);
+      }
+      glEnd();
     }
   }
 }
