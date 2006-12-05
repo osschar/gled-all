@@ -130,6 +130,11 @@ void tringula()
 
   printf("Instantiating GUI ...\n");
 
+  Gled::AssertMacro("gled_view_globals.C");
+  Gled::LoadMacro("eye.C");
+
+  /**************************************************************************/
+
   //g_saturn->LockMIRShooters(true);
   g_shell = new ShellInfo("Player Shell");
   // fire_queen->CheckIn(shell); fire_queen->Add(shell);
@@ -156,11 +161,6 @@ void tringula()
 
   g_pupil->SetAutoRedraw(false);
   // g_pupil->SetOverlay(overlay);
-
-  /**************************************************************************/
-
-  Gled::AssertMacro("gled_view_globals.C");
-  Gled::LoadMacro("eye.C");
 
   /**************************************************************************/
 
