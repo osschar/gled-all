@@ -291,7 +291,8 @@ void Tringula::DoBoxPrunning(Bool_t detailed)
         Int_t* T1 = TT1->Triangle(ps[j].id1);
 
         // Transform triangle vertices to my cs.
-        // [ If we ever get proper dynamics, transform also velocities.]
+        // [ If we ever get proper dynamics, transform also velocities.
+        //   Or maybe transform the intersection lines or whatever. ]
         Point V0[3], V1[3];
         for (int k=0; k<3; ++k)
         {
@@ -420,7 +421,7 @@ void Tringula::DoBoxPrunning(Bool_t detailed)
           t[ti] = - (1 - uv[1].x - uv[1].y) / (duv.x + duv.y);
           if (t[ti] > 0 && t[ti] < 1) ++ti;
         }
-        // Second point ... fix if necessary; assume positive motion!
+        // Second point ... fix if necessary; assume positive 't[ts]'!
         if (ti > 0)
         {
           if (ti >= 2)
