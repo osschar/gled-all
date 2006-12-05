@@ -1,3 +1,31 @@
+2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.h:
+	Added get_tring_tvor().
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	DoBoxPrunning(): added code to find intersection lines for
+	triangle pairs obtained via mesh-mesh collision detection; store
+	them in 'vector<Float_t> mItsLines' to get them over to renderer.
+	This should be chopped-up and somewhat optimised.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added optional rendering of intersection lines.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Added templated MultiplyVec3() and RotateVec3() for raw TT*.
+
+	* glass.list:
+	Whitespace changes.
+
+	* Opcode/Ice/IcePoint.h:
+	Renamed Mac() that also adds *this to TMac(), added TMac2() method.
+
+	* Opcode/OPC_TriTriOverlap.h:
+	Refit whitespace.
+
 2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.cxx:
