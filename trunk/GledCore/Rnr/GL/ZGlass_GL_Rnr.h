@@ -62,6 +62,25 @@ public:
     { if(fFlip) set_state(fState); }
   };
 
+  class GL_Float_Holder
+  {
+    GLenum    fWhat;
+    GLfloat   fState;
+    bool      fFlip;
+    void    (*fFoo)(GLfloat);
+
+  public:
+    GL_Float_Holder(GLenum what, GLfloat state, void (*foo)(GLfloat)) :
+      fWhat(what), fFoo(foo)
+    {
+      glGetFloatv(fWhat, &fState);
+      fFlip = (fState != state);
+      if(fFlip) fFoo(state);
+    }
+    ~GL_Float_Holder()
+    { if(fFlip) fFoo(fState); }
+  };
+
 
 }; // endclass ZGlass_GL_Rnr
 
