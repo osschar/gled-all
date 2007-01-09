@@ -11,7 +11,10 @@
 
 class TringTvor_GL_Rnr {
 public:
-  static void Render(TringTvor* ttvor);
+  static void Render(TringTvor* ttvor, Bool_t smoothp, Bool_t colp=true, Bool_t texp=true);
+
+  static void RenderSmooth(TringTvor* ttvor, Bool_t colp=true, Bool_t texp=true);
+  static void RenderFlat(TringTvor* ttvor, Bool_t colp=true, Bool_t texp=true);
 }; // endclass TringTvor_GL_Rnr
 
 #endif
