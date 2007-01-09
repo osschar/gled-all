@@ -51,11 +51,10 @@ protected:
   Opcode::CollisionFaces* mOPCCFaces;  //!
   Opcode::RayCollider*    mOPCRayCol;  //!
 
-  Bool_t     bRnrRay; // X{GS} 7 Bool()
-  TVector3   mRayPos; // X{GSR} 7 Vector3()
-  Float_t    mRayL;   // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
-  Float_t    mRayT;   // X{GS} 7 Value(-range=>[-90,  90,  1,1000], -join=>1)
-  Float_t    mRayP;   // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
+  Bool_t     bRnrRay; // X{GS} 7 Bool(-join=>1)
+  Float_t    mRayLen; // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
+  TVector3   mRayPos; // X{GSRr} 7 Vector3()
+  TVector3   mRayDir; // X{GSRr} 7 Vector3()
 
   Bool_t     bRnrDynos;  // X{GS} 7 Bool(-join=>1)
   Bool_t     bPickDynos; // X{GS} 7 Bool()

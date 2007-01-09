@@ -38,7 +38,9 @@ void Tringula::_init()
   mOPCRayCol = 0;
 
   bRnrRay = false;
-  mRayL = 20; mRayT = -90; mRayP = 0;
+  mRayLen = 100;
+  mRayPos.SetXYZ(1, 1, 10);
+  mRayDir.SetXYZ(0, 0, -1);
 
   bRnrDynos  = bPickDynos   = true;
   bRnrBBoxes = bRnrItsLines = false;
@@ -72,14 +74,10 @@ void Tringula::AdEnlightenment()
 
 void Tringula::get_ray_dir(Float_t* d, Float_t len)
 {
-  if(len == 0) len = mRayL;
-  using namespace TMath;
-  Double_t th = DegToRad()*mRayT;
-  Double_t ph = DegToRad()*mRayP;
-  Float_t  ct = Cos(th);
-  d[0] = len * ct * Cos(ph);
-  d[1] = len * ct * Sin(ph);
-  d[2] = len * Sin(th);
+  if(len == 0) len = mRayLen;
+  d[0] = len * mRayDir.x();
+  d[1] = len * mRayDir.y();
+  d[2] = len * mRayDir.z();
 }
 
 /**************************************************************************/
@@ -93,10 +91,13 @@ void Tringula::MakeOpcodeModel()
 
   using namespace Opcode;
 
+  // Reset all collision caches in Dynos !!!!
+
   mMesh->BuildOpcStructs();
 
-  mOPCRayCol = new RayCollider;
-  {
+  if (mOPCRayCol == 0) {
+    mOPCRayCol = new RayCollider;
+
     RayCollider& RC = *mOPCRayCol;
     RC.SetFirstContact(true);
     RC.SetTemporalCoherence(true);
@@ -619,4 +620,3 @@ void Tringula::place_on_terrain(Dynamico& D)
 }
 
 /**************************************************************************/
-
