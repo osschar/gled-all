@@ -7,6 +7,15 @@
 //______________________________________________________________________
 // TringTvor
 //
+// Encapsulates low-level arrays for triangle meshes.
+// Vertex and Triangle arrays are mandatory (called primary by methods).
+// Optional:
+//   per-vertex   normals and colors | 
+//   per-triangle normals and colors +-> secondary arrays
+//   texture coords (per-vertex)     |
+//   triangle strip data
+//
+
 
 #include "TringTvor.h"
 #include <TVector3.h>
@@ -23,7 +32,6 @@ void TringTvor::_init()
 }
 
 TringTvor::TringTvor() :
-  bSmoothShade(false), bColP(false), bTexP(false),
   mNVerts  (0),
   mNTrings (0)
 {
@@ -31,7 +39,6 @@ TringTvor::TringTvor() :
 }
 
 TringTvor::TringTvor(Int_t nv, Int_t nt) :
-  bSmoothShade(false), bColP(false), bTexP(false),
   mNVerts  (nv),
   mNTrings (nt)
 {
@@ -41,13 +48,12 @@ TringTvor::TringTvor(Int_t nv, Int_t nt) :
 
 TringTvor::TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
 		     Bool_t colp, Bool_t texp) :
-  bSmoothShade(smoothp), bColP(colp), bTexP(texp),
   mNVerts  (nv),
   mNTrings (nt)
 {
   _init();
   MakePrimaryArrays();
-  MakeSecondaryArrays();
+  MakeSecondaryArrays(smoothp, colp, texp);
 }
 
 TringTvor::~TringTvor()
@@ -71,16 +77,16 @@ void TringTvor::DeletePrimaryArrays()
   delete [] mTrings; mTrings = 0;
 }
 
-void TringTvor::MakeSecondaryArrays()
+void TringTvor::MakeSecondaryArrays(Bool_t smoothp, Bool_t colp, Bool_t texp)
 {
-  if(bSmoothShade) {
+  if(smoothp) {
     mNorms = new Float_t[3*mNVerts];
-    if(bColP) mCols = new UChar_t[4*mNVerts];
+    if(colp) mCols = new UChar_t[4*mNVerts];
   } else {
     mTringNorms = new Float_t[3*mNTrings];
-    if(bColP) mTringCols = new UChar_t[4*mNTrings];
+    if(colp) mTringCols = new UChar_t[4*mNTrings];
   }
-  if(bTexP) mTexs = new Float_t[2*mNVerts];
+  if(texp && mTexs == 0) mTexs = new Float_t[2*mNVerts];
 }
 
 void TringTvor::DeleteSecondaryArrays()
@@ -125,39 +131,34 @@ void TringTvor::GenerateTriangleNormals()
 {
   if (!mTringNorms) MakeTringNorms();
 
-  TVector3 e1, e2, n;
+  Float_t e1[3], e2[3];
   for(Int_t t=0; t<mNTrings; ++t) {
     Int_t*    T = Triangle(t);
     Float_t* v0 = Vertex(T[0]);
     Float_t* v1 = Vertex(T[1]);
     Float_t* v2 = Vertex(T[2]);
-    e1.SetXYZ(v1[0]-v0[0], v1[1]-v0[1], v1[2]-v0[2]);
-    e2.SetXYZ(v2[0]-v0[0], v2[1]-v0[1], v2[2]-v0[2]);
-    n = e1.Cross(e2);
-    n.SetMag(1);
-    n.GetXYZ(TriangleNormal(t));
+    e1[0] = v1[0]-v0[0]; e1[1] = v1[1]-v0[1]; e1[2] = v1[2]-v0[2];
+    e2[0] = v2[0]-v0[0]; e2[1] = v2[1]-v0[1]; e2[2] = v2[2]-v0[2];
+    TMath::NormCross(e1, e2, TriangleNormal(t));
   }
 }
 
 void TringTvor::GenerateTriangleNormalsAndColors
   (void (*foo)(Float_t*, UChar_t*, void*), void* ud)
 {
-  if (!mTringNorms) MakeTringNorms();
-  if (!mTringCols)  MakeTringCols();
+  AssertTringNorms();
+  AssertTringCols();
 
-  TVector3 e1, e2, n;
-  Float_t  cg[3];
+  Float_t  e1[3], e2[3], cg[3];
 
   for(Int_t t=0; t<mNTrings; ++t) {
     Int_t*    T = Triangle(t);
     Float_t* v0 = Vertex(T[0]);
     Float_t* v1 = Vertex(T[1]);
     Float_t* v2 = Vertex(T[2]);
-    e1.SetXYZ(v1[0]-v0[0], v1[1]-v0[1], v1[2]-v0[2]);
-    e2.SetXYZ(v2[0]-v0[0], v2[1]-v0[1], v2[2]-v0[2]);
-    n = e1.Cross(e2);
-    n.SetMag(1);
-    n.GetXYZ(TriangleNormal(t));
+    e1[0] = v1[0]-v0[0]; e1[1] = v1[1]-v0[1]; e1[2] = v1[2]-v0[2];
+    e2[0] = v2[0]-v0[0]; e2[1] = v2[1]-v0[1]; e2[2] = v2[2]-v0[2];
+    TMath::NormCross(e1, e2, TriangleNormal(t));
 
     cg[0] = (v0[0] + v1[0] + v2[0]) / 3;
     cg[1] = (v0[1] + v1[1] + v2[1]) / 3;
@@ -177,18 +178,10 @@ void TringTvor::GenerateVertexNormals()
   // ??? Need an argument: weight normal contribution by triangle area
   // ??? or ... perhaps better ... by vertex angle.
 
-  // Should generate tring-normals if they do not exist?
-  // Depends ...
+  // Could reuse tring-normals if they do exist.
 
   vector<Int_t> *trings_per_vert = new vector<Int_t> [mNVerts];
-
-  Int_t* T = mTrings;
-  for (Int_t t=0; t<mNTrings; ++t, T+=3)
-    {
-      trings_per_vert[T[0]].push_back(t);
-      trings_per_vert[T[1]].push_back(t);
-      trings_per_vert[T[2]].push_back(t);
-    }
+  FindTrianglesPerVertex(trings_per_vert);
 
   if (!mNorms) MakeNorms();
 
@@ -196,26 +189,66 @@ void TringTvor::GenerateVertexNormals()
   Int_t   *t;
   Float_t e1[3], e2[3], n[3];
   Float_t* N = mNorms;
-  for (Int_t i=0; i<mNVerts; ++i, N+=3)
-    {
-      vector<Int_t>& v = trings_per_vert[i];
-      Int_t       size = (Int_t) v.size();
-      //printf("V=%3d : Nt = %2d : ", i, size);
-      N[0] = N[1] = N[2] = 0;
-      for (Int_t j=0; j<size; ++j) {
-        //printf("%3d ", v[j]);
-        t  = Triangle(v[j]);
-        v0 = Vertex(t[0]); v1 = Vertex(t[1]); v2 = Vertex(t[2]);
-        e1[0] = v1[0] - v0[0]; e1[1] = v1[1] - v0[1]; e1[2] = v1[2] - v0[2];
-        e2[0] = v2[0] - v0[0]; e2[1] = v2[1] - v0[1]; e2[2] = v2[2] - v0[2];
-        TMath::NormCross(e1, e2, n);
-        N[0] += n[0]; N[1] += n[1]; N[2] += n[2];
-      }
-      TMath::Normalize(N);
-      //printf(" : %f %f %f\n", N[0], N[1], N[2]);
+  for (Int_t i=0; i<mNVerts; ++i, N+=3) {
+    vector<Int_t>& v = trings_per_vert[i];
+    Int_t       size = (Int_t) v.size();
+    //printf("V=%3d : Nt = %2d : ", i, size);
+    N[0] = N[1] = N[2] = 0;
+    for (Int_t j=0; j<size; ++j) {
+      //printf("%3d ", v[j]);
+      t  = Triangle(v[j]);
+      v0 = Vertex(t[0]); v1 = Vertex(t[1]); v2 = Vertex(t[2]);
+      e1[0] = v1[0] - v0[0]; e1[1] = v1[1] - v0[1]; e1[2] = v1[2] - v0[2];
+      e2[0] = v2[0] - v0[0]; e2[1] = v2[1] - v0[1]; e2[2] = v2[2] - v0[2];
+      TMath::NormCross(e1, e2, n);
+      N[0] += n[0]; N[1] += n[1]; N[2] += n[2];
     }
+    TMath::Normalize(N);
+    //printf(" : %f %f %f\n", N[0], N[1], N[2]);
+  }
 
   delete [] trings_per_vert;
+}
+
+/**************************************************************************/
+// Intermediate structures
+/**************************************************************************/
+
+void TringTvor::FindTrianglesPerVertex(vector<Int_t>* trings_per_vert)
+{
+  // Populate array of vectors 'trings_per_vert' from triangle data.
+  // The output array must be properly allocated in advance.
+
+  Int_t* T = mTrings;
+  for (Int_t t=0; t<mNTrings; ++t, T+=3)
+  {
+    trings_per_vert[T[0]].push_back(t);
+    trings_per_vert[T[1]].push_back(t);
+    trings_per_vert[T[2]].push_back(t);
+  }
+}
+
+void TringTvor::FindNeighboursPerVertex(vector<Int_t>* neighbours)
+{
+  // Populate array of vectors 'neighbours' from triangle data.
+  // The output array must be properly allocated in advance.
+
+  static const Int_t vertPairs[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+
+  Int_t* T = mTrings;
+  for (Int_t t=0; t<mNTrings; ++t, T+=3)
+  {
+    for (Int_t vp=0; vp<3; ++vp)
+    {
+      const  Int_t   v0 = T[vertPairs[vp][0]],  v1 = T[vertPairs[vp][1]];
+      vector<Int_t> &n0 = neighbours[v0],      &n1 = neighbours[v1];
+
+      if (find(n0.begin(), n0.end(), v1) == n0.end())
+        n0.push_back(v1);
+      if (find(n1.begin(), n1.end(), v0) == n1.end())
+        n1.push_back(v0);
+    }
+  }
 }
 
 /**************************************************************************/
