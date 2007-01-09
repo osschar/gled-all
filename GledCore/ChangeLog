@@ -1,3 +1,13 @@
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Preliminary decoupling of event-handler; export some more camera
+	stuff into RnrDriver.
+
+	* RnrBase/RnrDriver.h:
+	Added some camera/projection matrix stuff as data-members.
+
 2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ZGlass_GL_Rnr.h:
