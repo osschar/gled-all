@@ -281,9 +281,12 @@ void RectTerrain::color_filler(Float_t* v, UChar_t* c, void* rt)
   ((RectTerrain*)rt)->make_color(v[2]).to_ubyte(c);
 }
 
-void RectTerrain::MakeTringTvor()
+TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
+                                       Bool_t colp,    Bool_t texp)
 {
-  static const Exc_t _eh("RectTerrain::MakeTringTvor ");
+  // Create TringTvor from height field.
+  // This can be also be called by an outside client that wants to extract
+  // triangulation of this terrain as a triangle mesh.
 
   Int_t minX = 1, maxX = mNx, minY = 1, maxY = mNy;
   if(bBorder) {
@@ -291,15 +294,12 @@ void RectTerrain::MakeTringTvor()
   }
   Int_t nx = maxX - minX + 1; Float_t tex_fx = 1.0/(maxX - minX);
   Int_t ny = maxY - minY + 1; Float_t tex_fy = 1.0/(maxY - minY);
-  
-  Bool_t colp    = (mColSep  != 0);
-  Bool_t texp    = (mTexture != 0);
-  Bool_t smoothp = (mRnrMode == RM_SmoothTring);
-  delete pTTvor;
-  pTTvor = new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
-  TringTvor& TT = *pTTvor;
 
-  TVector3 normvec;
+  TringTvor& TT = * new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
+  if (smoothp) TT.MakeSecondaryArrays(true,  colp, texp);
+  if (flatp)   TT.MakeSecondaryArrays(false, colp, texp);
+
+  //TVector3 normvec;
   Int_t          idx = 0;
   Int_t    tring_idx = 0;
 
@@ -315,10 +315,11 @@ void RectTerrain::MakeTringTvor()
 	if(j>0) jl--; if(j<=mNy) jh++;
 	Float_t dvx[] = { (ih-il)*mDx, 0, mP[ih][j] - mP[il][j] };
 	Float_t dvy[] = { 0, (jh-jl)*mDy, mP[i][jh] - mP[i][jl] };
-	normvec.SetXYZ(-dvy[1]*dvx[2], -dvx[0]*dvy[2], dvx[0]*dvy[1]);
-	normvec.SetMag(1);
 	Float_t *n = TT.Normal(idx);
-	n[0] = normvec.x(); n[1] = normvec.y(); n[2] = normvec.z();
+	n[0] = -dvy[1]*dvx[2];
+        n[1] = -dvx[0]*dvy[2];
+        n[2] =  dvx[0]*dvy[1];
+        TMath::Normalize(n);
 
 	if(colp) {
 	  make_color(mP[i][j]).to_ubyte(TT.Color(idx));
@@ -353,20 +354,30 @@ void RectTerrain::MakeTringTvor()
     }
   }
 
-  if(smoothp == false) {
+  if(flatp) {
     if(colp)
       TT.GenerateTriangleNormalsAndColors(color_filler, this);
     else
       TT.GenerateTriangleNormals();
   }
-  if(bUseTringStrips)
-    TT.GenerateTriangleStrips(mMaxTSVerts);
 
-  mTTvorStamp = mTimeStamp;
+  return &TT;
 }
 
-void RectTerrain::DisownTringTvor()
+void RectTerrain::MakeTringTvor()
 {
-  pTTvor = 0;
-  mStampReqTring = Stamp(FID());
+  // Creates TringTvor appropriate for current data-member settings.
+  
+  Bool_t smoothp = (mRnrMode == RM_SmoothTring);
+  Bool_t flatp   = ! smoothp;
+  Bool_t colp    = (mColSep  != 0);
+  Bool_t texp    = (mTexture != 0);
+
+  delete pTTvor;
+  pTTvor = SpawnTringTvor(smoothp, flatp, colp, texp);
+
+  if(bUseTringStrips)
+    pTTvor->GenerateTriangleStrips(mMaxTSVerts);
+
+  mTTvorStamp = mTimeStamp;
 }

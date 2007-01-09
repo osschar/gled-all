@@ -80,8 +80,9 @@ class RectTerrain : public ZNode
   void ReTring(); // X{E} 7 MButt(-join=>1)
   void Boobofy(); // X{E} 7 MButt()
 
+  TringTvor* SpawnTringTvor(Bool_t smoothp, Bool_t flatp, Bool_t colp, Bool_t texp);
+
   void MakeTringTvor();
-  void DisownTringTvor();
 
   static Float_t sMaxEpsilon;
 
