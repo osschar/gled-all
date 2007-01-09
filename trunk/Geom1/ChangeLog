@@ -1,3 +1,23 @@
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Removed render mode data-members (smooth-shade, colp, texp) as
+	they must be controlled from outside; added some functions to
+	facilitate creation of higher-level mesh conectivity structures.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	Provide special functions for flat/smooth rendering.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Separated function that creates a TringTvor so that it can be
+	called from ooutside.
+
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	Follow changes in TringTvor_GL_Rnr.
+
 2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.cxx:
