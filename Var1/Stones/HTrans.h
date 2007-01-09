@@ -136,6 +136,7 @@ public:
   void     RotateIP(TVector3& v) const;
   TVector3 Rotate(const TVector3& v) const;
 
+  void     MultiplyVec3IP(TT* in, TT w) const;
   void     MultiplyVec3(const TT* in, TT w, TT* out) const;
   void     RotateVec3(const TT* in, TT* out) const;
 
