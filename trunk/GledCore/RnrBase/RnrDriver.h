@@ -42,11 +42,18 @@ protected:
 
   list<PMSEntry*> mPMStack;	// X{r}
   PMSEntry        mBotPMSE;
-  ZTrans*         mAbsCamera;   // X{gs}
-  ZTrans*         mProjBase;    // X{gs}
 
-  Int_t	          mWidth;       // X{gs}
-  Int_t	          mHeight;      // X{gs}
+  ZTrans*         mCamFixTrans;  // X{gs} Transformation from camera to camera-base.
+  ZTrans*         mCamBaseTrans; // X{gs} CameraBase transformation in abs ref-frame.
+  ZTrans*         mCamAbsTrans;  // X{gs} Camera transformation in abs ref-frame.
+  ZTrans*         mProjBase;     // X{gs} Projection matrix before cam applied.
+  ZTrans*         mProjMatrix;   // X{gs} Projection matrix after cam.
+
+  Int_t	          mWidth;        // X{gs}
+  Int_t	          mHeight;       // X{gs}
+  Float_t         mZFov;         // X{gs}
+  Float_t         mNearClip;     // X{gs}
+  Float_t         mFarClip;      // X{gs}
 
   //----------------------------------------------------------------
   // RnrMod Stack
@@ -85,6 +92,7 @@ public:
   RnrDriver(Eye* e, const TString& r);
   virtual ~RnrDriver();
 
+  // ImageConsumer
   virtual void ImageDeath(OptoStructs::ZGlassImg* img);
 
   void FillRnrScheme(RnrScheme* rs, A_Rnr* rnr,
