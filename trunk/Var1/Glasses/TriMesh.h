@@ -18,11 +18,43 @@ namespace Opcode {
 class Model;
 class MeshInterface;
 class AABB;
+class Point;
 }
 
 class TriMesh : public ZGlass
 {
   MAC_RNR_FRIENDS(TriMesh);
+
+public:
+  struct VConnData
+  {
+    Int_t   fVTarget;
+    Float_t fDistance;
+    Float_t fSpread;
+    Float_t fSurface;
+    // Eventually quantize these floats.
+    Float_t fAngle;   // in some u-v coordinates from outside; sort criteria?
+    Float_t fdU, fdV; // or something like this.
+    // Somebody will surely add other stuff.
+
+    VConnData(Int_t vtarget=0) :
+      fVTarget(vtarget), fDistance(0), fSpread(0), fSurface(0) {}
+
+    bool operator<(const VConnData &v) const { return fAngle < v.fAngle; }
+  };
+
+  struct VertexData
+  {
+    // Something like 'capacity'.
+    // But then again ... need it for every field that needs to be added
+    Int_t             fNeighbourConns;
+    vector<VConnData> fVConns;
+
+    VertexData() : fNeighbourConns(0), fVConns() {}
+
+    VConnData& FindVConn(Int_t vtarget);
+    void FindTwoVConnIdcs(Int_t v1, Int_t v2, Int_t& vi1, Int_t& vi2);
+  };
 
 private:
   void _init();
@@ -34,6 +66,8 @@ protected:
 
   Opcode::Model*          mOPCModel;   //! X{g}
   Opcode::MeshInterface*  mOPCMeshIf;  //! X{g}
+
+  vector<TriMesh::VertexData>   mVDataVec;  //! X{R}
 
 public:
   TriMesh(const Text_t* n="TriMesh", const Text_t* t=0) :
@@ -57,6 +91,8 @@ public:
 
   void MakeTetrahedron(Float_t l1=0.8, Float_t l2=0.2,
                        Float_t  w=0.4, Float_t  h=0.4); // X{E} 7 MCWButt()
+
+  void BuildVertexConnections();
 
 #include "TriMesh.h7"
   ClassDef(TriMesh, 1)
