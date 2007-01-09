@@ -16,9 +16,6 @@ private:
   void _init();
 
 public:
-  Bool_t   bSmoothShade;
-  Bool_t   bColP;
-  Bool_t   bTexP;
 
   // Vertex data
 
@@ -35,6 +32,10 @@ public:
   void MakeCols()  { mCols  = new UChar_t[4*mNVerts]; }
   void MakeTexs()  { mTexs  = new Float_t[2*mNVerts]; }
 
+  void AssertNorms() { if (!mNorms) MakeNorms(); }
+  void AssertCols()  { if (!mCols)  MakeCols();  }
+  void AssertTexs()  { if (!mTexs)  MakeTexs();  }
+
   Float_t* Vertex(Int_t i)  { return &(mVerts[3*i]); }
   Float_t* Normal(Int_t i)  { return &(mNorms[3*i]); }
   UChar_t* Color(Int_t i)   { return &(mCols[4*i]);  }
@@ -50,9 +51,14 @@ public:
   void MakeTringNorms() { mTringNorms = new Float_t[3*mNTrings]; }
   void MakeTringCols()  { mTringCols  = new UChar_t[4*mNTrings]; }
 
+  void AssertTringNorms() { if (!mTringNorms) MakeTringNorms(); }
+  void AssertTringCols()  { if (!mTringCols)  MakeTringCols();  }
+
   Int_t*   Triangle(Int_t i)       { return &(mTrings[3*i]);     }
   Float_t* TriangleNormal(Int_t i) { return &(mTringNorms[3*i]); }
   UChar_t* TriangleColor(Int_t i)  { return &(mTringCols[4*i]);  }
+
+  Bool_t   TriangleOtherVertices(Int_t t, Int_t v, Int_t& v_prev, Int_t& v_next);
 
   // Triangle strip data
 
@@ -73,7 +79,7 @@ public:
 
   void MakePrimaryArrays();
   void DeletePrimaryArrays();
-  void MakeSecondaryArrays();
+  void MakeSecondaryArrays(Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
   void DeleteSecondaryArrays();
 
   void SetVertex(Int_t i, Float_t x, Float_t y, Float_t z)
@@ -93,6 +99,10 @@ public:
 
   void GenerateVertexNormals();
 
+  // Intermediate structures
+  void FindTrianglesPerVertex(vector<Int_t>* trings_per_vert);
+  void FindNeighboursPerVertex(vector<Int_t>* neighbours);
+
   // Triangle strips
   void GenerateTriangleStrips(Int_t max_verts=128);
   void DeleteTriangleStrips();
@@ -102,5 +112,21 @@ public:
 
   ClassDef(TringTvor, 0);
 }; // endclass TringTvor
+
+
+/**************************************************************************/
+// Inlines
+/**************************************************************************/
+
+inline Bool_t TringTvor::TriangleOtherVertices(Int_t t, Int_t v, 
+                                               Int_t& v_prev, Int_t& v_next)
+{
+  Int_t * T = Triangle(t);
+  if (T[0] == v) { v_prev = T[2]; v_next = T[1]; return true; }
+  if (T[1] == v) { v_prev = T[0]; v_next = T[2]; return true; }
+  if (T[2] == v) { v_prev = T[1]; v_next = T[0]; return true; }
+  return false;
+}
+
 
 #endif
