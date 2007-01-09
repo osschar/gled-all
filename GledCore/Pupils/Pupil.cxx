@@ -128,10 +128,15 @@ void Pupil::_build()
   size_range(0, 0, 4096, 4096);
 
   mDriver = new GLRnrDriver(fImg->fEye, "GL");
-  mDriver->SetProjBase(&mProjBase);
 
   mCamera     = new Camera;
   mCameraView = 0;
+
+  mDriver->SetCamFixTrans(&mCamera->ref_trans());
+  mDriver->SetCamBaseTrans(&mCamBaseTrans);
+  mDriver->SetCamAbsTrans(&mCamAbsTrans);
+  mDriver->SetProjBase(&mProjBase);
+  mDriver->SetProjMatrix(&mProjMatrix);
 
   mCamBase = mInfo->GetCameraBase();
   if(mCamBase == 0) {
@@ -157,6 +162,7 @@ void Pupil::_build()
 
   bFullScreen  = false;
   bShowOverlay = true;
+  bUseEventHandler = true;
   bDumpImage   = false;
   mPBuffer     = 0;
 
@@ -327,6 +333,8 @@ void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
     double ys = 2*top/n_tiles; top -= y_i * ys; bot  = top - ys;
   }
   set_foo(lft, rgt, bot, top, near, far);
+
+  glGetDoublev(GL_PROJECTION_MATRIX, mProjMatrix.Array());
 }
 
 void Pupil::SetAbsRelCamera()
@@ -536,8 +544,10 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
 
   mDriver->SetWidth(w());
   mDriver->SetHeight(h());
+  mDriver->SetZFov(mInfo->GetZFov());
+  mDriver->SetNearClip(mInfo->GetNearClip());
+  mDriver->SetFarClip (mInfo->GetFarClip());
   mDriver->SetMaxDepth(mInfo->GetMaxRnrDepth());
-  mDriver->SetAbsCamera(&mCamAbsTrans);
 
   mDriver->BeginRender();
   if(rnr_self) {
@@ -939,6 +949,7 @@ void Pupil::rnr_default_init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
+  glDisable(GL_FOG);
 }
 
 void Pupil::rnr_fake_overlay(GTime& rnr_time)
@@ -1024,6 +1035,24 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
 // fltk handle
 /**************************************************************************/
 
+void  Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
+{
+  e.fEvent   = ev;
+
+  e.fState   = Fl::event_state();
+  e.fKey     = Fl::event_key();
+  e.fButton  = Fl::event_button();
+  e.fButtons = Fl::event_buttons();
+  e.fClicks  = Fl::event_clicks();
+  e.fIsClick = Fl::event_is_click();
+  e.fX       = Fl::event_x();
+  e.fY       = Fl::event_y();
+  e.fText    = TString(Fl::event_text(), Fl::event_length());
+
+  e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
+		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE);
+}
+
 int Pupil::overlay_pick(A_Rnr::Fl_Event& e)
 {
   Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
@@ -1053,20 +1082,7 @@ int Pupil::overlay_pick_and_deliver(A_Rnr::Fl_Event& e)
 int Pupil::handle_overlay(int ev)
 {
   A_Rnr::Fl_Event e;
-  e.fEvent   = ev;
-
-  e.fState   = Fl::event_state();
-  e.fKey     = Fl::event_key();
-  e.fButton  = Fl::event_button();
-  e.fButtons = Fl::event_buttons();
-  e.fClicks  = Fl::event_clicks();
-  e.fIsClick = Fl::event_is_click();
-  e.fX       = Fl::event_x();
-  e.fY       = Fl::event_y();
-  e.fText    = TString(Fl::event_text(), Fl::event_length());
-
-  e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
-		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE);
+  setup_rnr_event(ev, e);
 
   if(ev == FL_ENTER) {
     overlay_pick_and_deliver(e);
@@ -1160,7 +1176,23 @@ int Pupil::handle(int ev)
     redraw();
   }
 
-  // mEventHandlerImg - ???? reuse as fallback or as default; or split in two
+  // Check for Ctrl-` -- toggle external event handler.
+  if(ev == FL_KEYBOARD && Fl::event_key() == '`' && Fl::event_state(FL_CTRL)) {
+    bUseEventHandler = !bUseEventHandler;
+    return 1;
+  }
+
+  if(mEventHandlerImg && bUseEventHandler) {
+    A_Rnr::Fl_Event e;
+    setup_rnr_event(ev, e);
+    int ehdlp = mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
+
+    // ???? This somewhat dubious
+    // Probably should handle also (at least) overlay.
+    // Or check overlay first!
+    if (ehdlp) return 1;
+  }
+
   if(mOverlayImg && bShowOverlay) {
     try {
       int ovlp = handle_overlay(ev);
@@ -1329,7 +1361,8 @@ int Pupil::handle(int ev)
       bShowOverlay = !bShowOverlay; redraw();
       return 1;
 
-    case 'f': {
+    case 'f': 
+    case FL_F+12: {
       Fl_Group* fsg = this;
       while(fsg->parent()) fsg = fsg->parent();
       if(fsg->type() >= FL_WINDOW) {
@@ -1339,6 +1372,7 @@ int Pupil::handle(int ev)
       }
       return 1;
     }
+
     case FL_F+1:
       mShell->SpawnMTW_View(fImg);
       return 1;

@@ -45,9 +45,10 @@ protected:
   MTW_View* 	mCameraView;
 
   ZNode*	mCamBase;
-  ZTrans	mCamBaseTrans;
-  ZTrans	mCamAbsTrans;
+  ZTrans	mCamBaseTrans; // Transforamtion of camera-base in absolute space
+  ZTrans	mCamAbsTrans;  // Camera transforamtion in absolute space
   ZTrans        mProjBase;
+  ZTrans        mProjMatrix;
 
   OptoStructs::ZGlassImg* mOverlayImg;
   OptoStructs::ZGlassImg* mEventHandlerImg;
@@ -65,6 +66,7 @@ protected:
   int		mFSx, mFSy, mFSw, mFSh;
 
   bool          bShowOverlay;
+  bool          bUseEventHandler;
 
   bool		bDumpImage;
   TString	mImageName;
@@ -140,6 +142,7 @@ public:
   // virtual void draw_overlay();
   virtual int  handle(int ev);
 
+  virtual void setup_rnr_event(int ev, A_Rnr::Fl_Event& e);
   virtual int  overlay_pick(A_Rnr::Fl_Event& e);
   virtual int  overlay_pick_and_deliver(A_Rnr::Fl_Event& e);
   virtual int  handle_overlay(int ev);
