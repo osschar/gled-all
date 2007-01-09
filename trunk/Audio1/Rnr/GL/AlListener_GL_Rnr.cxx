@@ -24,7 +24,7 @@ void AlListener_GL_Rnr::Draw(RnrDriver* rd)
 {
   ZTrans* tp = 0;
   switch (mAlListener->mLocationType) {
-  case AlListener::LT_Camera:   tp = rd->GetAbsCamera(); break;
+  case AlListener::LT_Camera:   tp = rd->GetCamAbsTrans(); break;
   case AlListener::LT_Absolute: tp = &rd->ToGCS();       break;
   }
   ZTrans& t = *tp;
