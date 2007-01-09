@@ -1,3 +1,8 @@
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Set-up TringuCam; set border-mode of rect-terrain to wrap.
+
 2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

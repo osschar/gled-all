@@ -1,3 +1,33 @@
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added structures to hold vertex-connectivity data and method to
+	build them.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Replace ray-direction variables with TVector3.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Follow changes in TringTvor_GL_Rnr.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	New files, camera/event-handler for tringula observation.
+
+	* glass.list:
+	Register new glass TringuCam.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Added method MultiplyVec3IP().
+
+	* Opcode/Ice/IcePoint.h:
+	Added ctor from double array.
+
 2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.h:
