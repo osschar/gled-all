@@ -35,6 +35,8 @@ public:
   Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
   //! Constructor from array
   Point(const float f[3]) : x(f[_X]), y(f[_Y]), z(f[_Z]) {}
+  //! Constructor from double array
+  Point(const double f[3]) : x(f[_X]), y(f[_Y]), z(f[_Z]) {}
   //! Copy constructor
   Point(const Point& p) : x(p.x), y(p.y), z(p.z) {}
   //! Destructor
