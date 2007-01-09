@@ -65,7 +65,7 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
   if(T.bRnrRay) {
     { // Render Ray
       glPushMatrix();
-      glTranslated(T.mRayPos.x(), T.mRayPos.y(),T.mRayPos.z());
+      glTranslated(T.mRayPos.x(), T.mRayPos.y(), T.mRayPos.z());
       glColor3f(1,0,0);
       glPointSize(10);
       glBegin(GL_POINTS); glVertex3f(0,0,0); glEnd();
@@ -79,7 +79,7 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
       glLineWidth(1);
       glPopMatrix();
     }
-    // Render stabbed triangle
+    // Render stabbed triangle(s)
     if(T.mOPCCFaces != 0) {
       using namespace Opcode;
       CollisionFaces& CF = *T.mOPCCFaces;
@@ -130,7 +130,7 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
       glMultMatrixf(D.RefTrans().Array());
       if (T.bPickDynos) rd->GL()->PushName(rd->GetLensRnr(&D));
 
-      TringTvor_GL_Rnr::Render(D.GetMesh()->GetTTvor());
+      TringTvor_GL_Rnr::Render(D.GetMesh()->GetTTvor(), false);
 
       if (T.bRnrBBoxes)
       {
@@ -175,6 +175,6 @@ void Tringula_GL_Rnr::Render(RnrDriver* rd)
   Tringula  &T  = *mTringula;
   TringTvor &TV = *T.mMesh->GetTTvor();
   glColor4fv(T.mColor());
-  TV.bSmoothShade = (TV.mNorms && (T.bPreferSmooth || TV.mTringNorms == 0));
-  TringTvor_GL_Rnr::Render(&TV);
+  Bool_t smoothp = (TV.mNorms && (T.bPreferSmooth || TV.mTringNorms == 0));
+  TringTvor_GL_Rnr::Render(&TV, smoothp);
 }
