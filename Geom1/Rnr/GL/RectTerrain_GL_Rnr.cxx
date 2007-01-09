@@ -111,7 +111,10 @@ void RectTerrain_GL_Rnr::Render(RnrDriver* rd)
     if(T.mTTvorStamp < T.mStampReqTring)
       T.MakeTringTvor();
     glColor4fv(T.mMinCol());
-    TringTvor_GL_Rnr::Render(T.pTTvor);
+    if (T.mRnrMode == RectTerrain::RM_SmoothTring)
+      TringTvor_GL_Rnr::RenderSmooth(T.pTTvor);
+    else
+      TringTvor_GL_Rnr::RenderFlat(T.pTTvor);
 
     break;
   }
