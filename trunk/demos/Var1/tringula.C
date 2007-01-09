@@ -2,6 +2,7 @@
 #include <gl_defines.h>
 
 class Tringula;
+class TringuCam;
 class Dynamico;
 class TriMesh;
 class RectTerrain;
@@ -11,6 +12,7 @@ class GTSIsoMaker;
 class TimeMaker;
 
 Tringula*    tringula = 0;
+TringuCam*   tricam   = 0;
 Dynamico*    dyn1     = 0;
 Dynamico*    dyn2     = 0;
 TriMesh*     trimesh  = 0;
@@ -59,12 +61,15 @@ void tringula()
   terrain->SetDy(2);
   terrain->SetMinCol(0.175, 0.689, 0.338);
   terrain->SetMaxCol(0.139, 0.384, 1.000);
-  //hf->SetFile("gforge.png");
-  //terrain->SetFromImage(hf, 20);
-  hf->SetFile("gforge-16x16.png");
-  terrain->SetFromImage(hf, 5);
+  hf->SetFile("gforge.png");
+  terrain->SetFromImage(hf, 20);
+  //hf->SetFile("gforge-2x2.png");
+  //terrain->SetFromImage(hf, 1);
   //terrain->SetRnrMode(RectTerrain::RM_SmoothTring);
   terrain->SetRnrMode(RectTerrain::RM_FlatTring);
+  terrain->SetBorderCond(RectTerrain::BC_Wrap);
+  terrain->ApplyBorderCondition();
+  terrain->SetBorder(true);
   terrain->SetUseTringStrips(false);
   terrain->SetRnrSelf(false);
   gforge->SetTerrain(terrain);
@@ -91,7 +96,7 @@ void tringula()
   tringula->SetMesh(trimesh);
   tringula->MakeOpcodeModel();
   tringula->SetEdgePlanes(terrain);
-  tringula->RayCollide();
+  tringula->SetRnrRay(true);
   tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetDefDynMesh(carmesh);
 
@@ -161,6 +166,18 @@ void tringula()
 
   g_pupil->SetAutoRedraw(false);
   // g_pupil->SetOverlay(overlay);
+
+  ASSIGN_ADD_GLASS(tricam, TringuCam, g_shell, "TringuCam", 0);
+  tricam->SetParent(tringula);
+  tricam->SetPos(4, 2, 10);
+  tricam->RotateLF(1, 2, 0.25*TMath::Pi());
+  g_pupil->SetEventHandler(tricam);
+  g_pupil->SetCameraBase(tricam);
+
+  tmaker->AddClient(tricam);
+
+  CREATE_ADD_GLASS(stxt1, ScreenText, g_pupil, "LftRgt", 0);
+  tricam->SetTxtLftRgt(stxt1);
 
   /**************************************************************************/
 
