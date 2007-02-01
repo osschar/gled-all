@@ -24,4 +24,5 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
-DEFAULT     $CVSROOT/CVSROOT/cvslog -a gled-cvs-commit -m %{sVv}
+DEFAULT     $CVSROOT/CVSROOT/cvslog -a gled-cvs-commit -o -m %{sVv}
+ALL         echo %{sVv} >> /tmp/foofoofoo
