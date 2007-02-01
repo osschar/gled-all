@@ -9,6 +9,8 @@ $ID = q(cvslog,v 1.54 2007-01-29 03:26:49 eagle Exp );
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
+#
+# http://archives.eyrie.org/software/cvs/
 
 ##############################################################################
 # Modules and declarations
@@ -714,7 +716,8 @@ sub load_config {
     my $mailhost = '';
     my ($sendmail) = grep { -x $_ } qw(/usr/sbin/sendmail /usr/lib/sendmail);
     $sendmail ||= '/usr/lib/sendmail';
-    my $subject = 'CVS update of ';
+    # my $subject = 'CVS update of ';
+    my $subject = '';
     if (open (CONFIG, $file)) {
         local $_;
         while (<CONFIG>) {
