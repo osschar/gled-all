@@ -105,7 +105,8 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 );
 
 # Shorthands for keys in comment field
-%X_TO_KEY = ( 'X' => 'Xport', 'L' => 'Link', 'C' => 'Ctx', 'T' => 'Tags' );
+%X_TO_KEY = ( 'X' => 'Xport', 'L' => 'Link', 'C' => 'Ctx', 'T' => 'Tags',
+              'R' => 'Ray' );
 
 # Basic types (streamed via operator <</>>)
 @SimpleTypes = 
@@ -593,12 +594,12 @@ while($c !~ m!\G\s*$!osgc) {
 
   if($c =~ m!\G\s*
      (virtual\s)?\s*                # Must handle virtuals, too
-     ((?:const\s+)?[\w:]+(?:\*|&)?)?\s+ # Return value (optional const, */&)
+     ((?:const\s+)?[\w:]+(?:\*|&)?)?\s+ # Return value (optional const, * or &)
      (\w+)\s*                       # Name
      \(\s*($args_re)\s*\)\s*        # Argument, see entrance into parse loop.
-     (const\s)?\s*                  # [const]
+     (const)?\s*                    # [const]
      (throw\([\w\d_]*\))?\s*        # [throw]
-     (?:(?:=\s*0\s*)?;|(?::[^{]+)?{.*?})  # ( (=0)?; | {inline def}); not greedy for *}*
+     (?:(?:=\s*0\s*)?;|(?::[^{]+)?{.*?})  # ( (=0)?; | ({inline def})? )?; not greedy for *}*
       !osgcx)
   {
     my $type = $2; my $methodname = $3; my $args = $4;
@@ -818,6 +819,9 @@ print H7 "static GledNS::ClassInfo* sap_${CLASSNAME}_ci;\n";
 for $r (@Members) {
   next unless exists $r->{Link};
   print H7 "static GledNS::LinkMemberInfo* sap_$r->{Methodbase}_lmi;\n";
+  if( $r->{Link} =~ m/(a|A)/ ) {
+    print H7 "void assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh);\n";
+  }
 }
 
 gen1_end:
@@ -862,7 +866,10 @@ print C7 "GledNS::ClassInfo* ${CLASSNAME}::sap_${CLASSNAME}_ci;\n";
 for $r (@Members) {
   next unless exists $r->{Link};
   print C7 "GledNS::LinkMemberInfo* ${CLASSNAME}::sap_$r->{Methodbase}_lmi;\n";
-}
+  if( $r->{Link} =~ m/(a|A)/ ) {
+    print C7 "void ${CLASSNAME}::assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh)\ " .
+      "{ if ($r->{Varname} == 0) throw(eh + \"link $r->{Varname} not set.\"); }\n";
+  }}
 print C7 "\n";
 
 # LinkList
@@ -942,7 +949,7 @@ print C7 "\n// Set methods\n//" . '-' x 72 . "\n\n";
 
 for $r (@Members) {
 
-    if( $r->{Xport} =~ m/(s|S)/ ) {
+  if( $r->{Xport} =~ m/(s|S)/ ) {
     # This shit should be split into if link / otherwise
     my ($pre, $setit, $post, $stamp);
     if($IsGlass and $LOCK_SET_METHS) {
