@@ -14,8 +14,11 @@ LockDir=/mnt/data/cvs/locks-gled-1.2
 #LogHistory=TOFEWGCMAR
 
 # Set `RereadLogAfterVerify' to `always' (the default) to allow the verifymsg
-# script to change the log message.  Set it to `stat' to force CVS to verify# that the file has changed before reading it (this can take up to an extra
+# script to change the log message.  Set it to `stat' to force CVS to verify
+# that the file has changed before reading it (this can take up to an extra
 # second per directory being committed, so it is not recommended for large
 # repositories.  Set it to `never' (the previous CVS behavior) to prevent
 # verifymsg scripts from changing the log message.
 #RereadLogAfterVerify=always
+
+UseNewInfoFmtStrings=yes
