@@ -24,5 +24,4 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
-DEFAULT     $CVSROOT/CVSROOT/cvslog -m -- %p %{sVv}
-ALL         echo %p %{sVv} >> /tmp/foofoofoo
+DEFAULT     $CVSROOT/CVSROOT/cvslog -- %p %{sVv}
