@@ -82,8 +82,8 @@
  *
  *	- You can enable or disable "closest hit" with RayCollider::SetClosestHit().
  *	- It currently only works in "all contacts" mode.
- *	- If closest hit is enabled, faces are sorted by distance on-the-fly
- *        and the closest one only is reported.
+ *	- If closest hit is enabled, only the one hit (closest so far)
+ *	  is stored during traversal.
  *
  *	BACKFACE CULLING:
  *      ================

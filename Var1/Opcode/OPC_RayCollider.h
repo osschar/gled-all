@@ -43,6 +43,9 @@ public:
 
   udword		GetNbFaces() const { return GetNbEntries()>>2; }
   const CollisionFace*	GetFaces()   const { return (const CollisionFace*)GetEntries(); }
+  // MT eventually could add:
+  // int  ClosestFaceIndex();
+  // void SortFacesByDistance();
 
   void	Reset()		{ Container::Reset(); }
 
