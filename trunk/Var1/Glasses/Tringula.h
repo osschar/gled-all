@@ -15,6 +15,7 @@
 
 class ZHashList;
 class RectTerrain;
+class RGBAPalette;
 class TringTvor;
 class TriMesh;
 class Dynamico;
@@ -30,9 +31,21 @@ class Point;
 class Tringula : public ZNode, public TimeMakerClient
 {
   MAC_RNR_FRIENDS(Tringula);
+  friend class TringuCam;
 
 public:
   enum EdgeRule_e { ER_Stop, ER_Hold, ER_Bounce, ER_Wrap };
+
+  enum ColorSource_e
+  {
+    CS_XCoord, CS_YCoord, CS_ZCoord,
+    // missing U,V,S Coord
+    CS_XNorm,  CS_YNorm,  CS_ZNorm,
+    // missing U,V,S Norm
+    // fixed
+    // external (defined by some function or vertex distribution)
+    // shaded (ligt-source, ambient color/level),
+  };
 
 private:
   void _init();
@@ -42,14 +55,14 @@ private:
   Int_t           mItsLinesIdx;
 
 protected:
-  ZLink<TriMesh> mMesh;         //  X{GS} L{}
+  ZLink<TriMesh>     mMesh;     //  X{GS} L{A}
+  ZLink<RGBAPalette> mPalette;  //  X{GS} L{A}
   ZColor         mColor;        //  X{GSPT} 7 ColorButt()
   Bool_t         bPreferSmooth; //  X{GST}  7 Bool()
 
   ZLink<ZHashList> mDynos;      //  X{GS} L{}
 
-  Opcode::CollisionFaces* mOPCCFaces;  //!
-  Opcode::RayCollider*    mOPCRayCol;  //!
+  Opcode::CollisionFaces* mRayColFaces;  //!
 
   Bool_t     bRnrRay; // X{GS} 7 Bool(-join=>1)
   Float_t    mRayLen; // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
@@ -83,8 +96,23 @@ public:
 
   virtual void AdEnlightenment();
 
-  void MakeOpcodeModel(); // X{ED} C{0} 7 MButt()
-  void RayCollide();      // X{ED} C{0} 7 MButt()
+  // Color stuff
+
+  void ColorByCoord(Int_t axis=2, Float_t fac=1, Float_t offset=0); // X{E} 7 MCWButt(-join=>1)
+  void ColorByNormal(Int_t axis=2, Float_t min=-1, Float_t max=1);  // X{E} 7 MCWButt()
+
+  void ColorByCoordFormula (const Text_t* formula="z",
+                            Float_t min=0, Float_t max=10);         // X{E} 7 MCWButt(-join=>1)
+  void ColorByNormalFormula(const Text_t* formula="sqrt(x*x+y*y)",
+                            Float_t min=0, Float_t max=1);          // X{E} 7 MCWButt()
+
+  // Collision stuff
+
+  void SetRayVectors(const TVector3& pos, const TVector3& dir);
+
+  void RayCollide();          // X{ED} C{0} 7 MButt()
+
+  void ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
 
   Dynamico* NewDynamico(const Text_t* dname=0);
   Dynamico* RandomDynamico(Float_t v_min=-1, Float_t v_max=10,
