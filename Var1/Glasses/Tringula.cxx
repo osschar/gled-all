@@ -13,6 +13,7 @@
 #include "Tringula.h"
 #include <Glasses/ZHashList.h>
 #include <Glasses/RectTerrain.h>
+#include <Glasses/RGBAPalette.h>
 #include <Stones/TringTvor.h>
 #include "TriMesh.h"
 #include "Dynamico.h"
@@ -22,6 +23,7 @@
 
 #include <Opcode/Opcode.h>
 
+#include <TF3.h>
 
 ClassImp(Tringula);
 
@@ -34,8 +36,7 @@ void Tringula::_init()
   
   bPreferSmooth = false;
 
-  mOPCCFaces = 0;
-  mOPCRayCol = 0;
+  mRayColFaces = 0;
 
   bRnrRay = false;
   mRayLen = 100;
@@ -52,10 +53,11 @@ void Tringula::_init()
   mRndGen.SetSeed(0);
 }
 
+/**************************************************************************/
+
 Tringula::~Tringula()
 {
-  delete mOPCCFaces;
-  delete mOPCRayCol;
+  delete mRayColFaces;
   delete [] mEdgePlanes;
 }
 
@@ -72,6 +74,120 @@ void Tringula::AdEnlightenment()
 
 /**************************************************************************/
 
+void Tringula::ColorByCoord(Int_t axis, Float_t fac, Float_t offset)
+{
+  static const Exc_t _eh("Tringula::ColorByCoord ");
+
+  // missing check mesh, mesh->tvor
+  // should be detached?
+  // missing locks
+
+  if(axis < 0 || axis > 2)
+    throw(_eh + "illegal axis.");
+
+  assert_palette(_eh);
+
+  TringTvor* TT = mMesh->GetTTvor();
+  TT->AssertCols();
+  TT->AssertBoundingBox();
+  Float_t min = TT->mMinMaxBox[axis];
+  Float_t max = TT->mMinMaxBox[axis + 3];
+  Float_t dlt = max - min;
+  mPalette->SetMinFlt(min);
+  mPalette->SetMaxFlt(max);
+
+  Float_t* V = TT->mVerts;
+  UChar_t* C = TT->mCols;
+  for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
+    mPalette->ColorFromValue(min + (V[axis]-min)*fac + dlt*offset, C);
+
+  TT->GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+void Tringula::ColorByNormal(Int_t axis, Float_t min, Float_t max)
+{
+  static const Exc_t _eh("Tringula::ColorByNormal ");
+
+  // missing check mesh, mesh->tvor
+  // should be detached?
+  // missing locks
+
+  if(axis < 0 || axis > 2)
+    throw(_eh + "illegal axis.");
+
+  assert_palette(_eh);
+
+  TringTvor* TT = mMesh->GetTTvor();
+  TT->AssertCols();
+  TT->AssertBoundingBox();
+  mPalette->SetMinFlt(min);
+  mPalette->SetMaxFlt(max);
+
+  Float_t* N = TT->mNorms;
+  UChar_t* C = TT->mCols;
+  for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
+    mPalette->ColorFromValue(N[axis], C);
+
+  TT->GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+/**************************************************************************/
+
+void Tringula::ColorByCoordFormula(const Text_t* formula, Float_t min, Float_t max)
+{
+  static const Exc_t _eh("Tringula::ColorByCoordFormula ");
+
+  assert_palette(_eh);
+
+  TringTvor* TT = mMesh->GetTTvor();
+  TT->AssertCols();
+  TT->AssertBoundingBox();
+  Float_t* bb = TT->mMinMaxBox;
+  TF3 tf3(GForm("Tringula_CBCF_%d", GetSaturnID()), formula, 0, 0);
+  tf3.SetRange(bb[0], bb[3], bb[1], bb[4], bb[2], bb[5]);
+  mPalette->SetMinFlt(min);
+  mPalette->SetMaxFlt(max);
+
+  Float_t* V = TT->mVerts;
+  UChar_t* C = TT->mCols;
+  for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
+    mPalette->ColorFromValue((Float_t) tf3.Eval(V[0], V[1], V[2]), C);
+
+  TT->GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+void Tringula::ColorByNormalFormula(const Text_t* formula, Float_t min, Float_t max)
+{
+  static const Exc_t _eh("Tringula::ColorByNormalFormula ");
+
+  assert_palette(_eh);
+
+  TringTvor* TT = mMesh->GetTTvor();
+  TT->AssertCols();
+  mPalette->SetMinFlt(min);
+  mPalette->SetMaxFlt(max);
+
+  TF3 tf3(GForm("Tringula_CBNF_%d", GetSaturnID()), formula, 0, 0);
+  tf3.SetRange(-1, 1, -1, 1, -1, 1);
+
+  Float_t* N = TT->mNorms;
+  UChar_t* C = TT->mCols;
+  for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
+    mPalette->ColorFromValue((Float_t) tf3.Eval(N[0], N[1], N[2]), C);
+
+  TT->GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+/**************************************************************************/
+
 void Tringula::get_ray_dir(Float_t* d, Float_t len)
 {
   if(len == 0) len = mRayLen;
@@ -82,30 +198,11 @@ void Tringula::get_ray_dir(Float_t* d, Float_t len)
 
 /**************************************************************************/
 
-void Tringula::MakeOpcodeModel()
+void Tringula::SetRayVectors(const TVector3& pos, const TVector3& dir)
 {
-  static const Exc_t _eh("Tringula::MakeOpcodeModel ");
-
-  if (mMesh == 0)
-    throw(_eh + "mMesh is null.");
-
-  using namespace Opcode;
-
-  // Reset all collision caches in Dynos !!!!
-
-  mMesh->BuildOpcStructs();
-
-  if (mOPCRayCol == 0) {
-    mOPCRayCol = new RayCollider;
-
-    RayCollider& RC = *mOPCRayCol;
-    RC.SetFirstContact(true);
-    RC.SetTemporalCoherence(true);
-
-    if(mOPCCFaces == 0)
-      mOPCCFaces = new CollisionFaces;
-    RC.SetDestination(mOPCCFaces);
-  }
+  mRayPos = pos;
+  mRayDir = dir;
+  Stamp(FID());
 }
 
 void Tringula::RayCollide()
@@ -118,15 +215,10 @@ void Tringula::RayCollide()
   using namespace Opcode;
 
   RayCollider RC;
-  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
-  RC.SetClosestHit(true);     // to sort the hits by distance
   RC.SetCulling(false);
-
-  // primitive tests on by default
-
-  if(mOPCCFaces == 0)
-    mOPCCFaces = new CollisionFaces;
-  RC.SetDestination(mOPCCFaces);
+  if(mRayColFaces == 0)
+    mRayColFaces = new CollisionFaces;
+  RC.SetDestination(mRayColFaces);
 
   Opcode::Ray R;
   mRayPos.GetXYZ((Float_t*)&R.mOrig.x);
@@ -143,14 +235,28 @@ void Tringula::RayCollide()
          status, RC.GetContactStatus(),
          RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections());
 
-  CollisionFaces& CF = *mOPCCFaces;
+  CollisionFaces& CF = *mRayColFaces;
   printf("n faces = %d\n", CF.GetNbFaces());
-  for(UInt_t f=0; f<CF.GetNbFaces(); ++f) {
+  for(UInt_t f=0; f<CF.GetNbFaces(); ++f)
+  {
     const CollisionFace& cf = CF.GetFaces()[f];
     printf("  %2d %6d  %10f  %10f %10f\n",
            f, cf.mFaceID, cf.mDistance, cf.mU, cf.mV);
   }
   Stamp(FID());
+}
+
+/**************************************************************************/
+
+void Tringula::ResetCollisionStuff()
+{
+  mMesh->BuildOpcStructs();
+
+  Stepper<Dynamico> stepper(*mDynos);
+  while (stepper.step())
+  {
+    stepper->mOPCRCCache = OPC_INVALID_ID;
+  }
 }
 
 /**************************************************************************/
@@ -461,9 +567,15 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
   //UInt_t nboxes = mDynos->GetSize(), boxcount = 0;
   //const AABB  *bboxes[nboxes];
 
-  Stepper<Dynamico> stepper(*mDynos);
-  while (stepper.step()) {
+  RayCollider    RC;
+  RC.SetFirstContact(true);
+  RC.SetTemporalCoherence(true);
+  CollisionFaces CF;
+  RC.SetDestination(&CF);
 
+  Stepper<Dynamico> stepper(*mDynos);
+  while (stepper.step())
+  {
     Dynamico& D = **stepper;
 
     if (D.mV != 0 || D.mW != 0)
@@ -482,9 +594,6 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
         Float_t d = mEdgePlanes[p].Distance(pos);
         if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
       }
-
-      RayCollider&    RC = *mOPCRayCol;
-      CollisionFaces& CF = *mOPCCFaces;
 
       static const Float_t ray_offset = 100;
 
@@ -586,8 +695,11 @@ void Tringula::place_on_terrain(Dynamico& D)
   Point &pos = * (Point*) D.mTrans.PtrPos();
   Point vertical(0, 0, -1);
 
-  RayCollider&    RC = *mOPCRayCol;
-  CollisionFaces& CF = *mOPCCFaces;
+  RayCollider    RC;
+  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
+  RC.SetClosestHit(true);     // to sort the hits by distance
+  CollisionFaces CF;
+  RC.SetDestination(&CF);
 
   static const Float_t ray_offset = 100;
 
