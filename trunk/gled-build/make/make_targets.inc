@@ -80,7 +80,7 @@ depend:: ${DICT_AUTO_HDRS}
 depend:: ${ALL_DEPS} ${DEPEND_TGTS}
 	@touch .depend_done
 
-ifneq ($(wildcard .depend_done),)
+ifdef DEPEND_DONE
 -include ${ALL_DEPS}
 endif
 
