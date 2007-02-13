@@ -61,10 +61,6 @@ public:
 public:
   ZNode(const Text_t* n="ZNode", const Text_t* t=0) : ZList(n, t) {_init();}
 
-  // ZGlass virtuals
-  virtual void SetStamps(TimeStamp_t s)
-  { ZList::SetStamps(s); mStampReqTrans = s; }
-
   Int_t	Level();
 
   // ZTrans wrappers
@@ -118,14 +114,16 @@ public:
     return p->GrepParentByGlass<GLASS>();
   }
 
+  // ZGlass virtuals
+  virtual void SetStamps(TimeStamp_t s)
+  { ZList::SetStamps(s); mStampReqTrans = s; }
+
   // Stamps
-  void MarkStampReqTrans()
-  { mStampReqTrans = ++mTimeStamp; }
-  void StampReqTrans()
-  { mStampReqTrans = Stamp(FID()); }
+  void MarkStampReqTrans() { mStampReqTrans = ++mTimeStamp; }
+  void StampReqTrans()     { mStampReqTrans = Stamp(FID()); }
 
 #include "ZNode.h7"
-  ClassDef(ZNode, 1)
+  ClassDef(ZNode, 1);
 }; // endclass ZNode
 
 #endif
