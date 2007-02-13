@@ -221,7 +221,7 @@ croak "Rnr libs require View libs"
 
 if($config->{RECONFIGURE} == 0) {
 
-  # Basic configure: write config.h, makefile includes;
+  # Basic configure: write gled-config.h, makefile includes;
   #                  read build_libsets and produce resolver   
 
   print "LIBSETS='$config->{LIBSETS}'\n";
@@ -232,11 +232,11 @@ if($config->{RECONFIGURE} == 0) {
 
   # include/config.h
   # bluntly include stuff for gcc; will need compiler option ...
-  open CH, ">include/config.h";
+  open CH, ">include/gled-config.h";
 
   print CH "#ifndef GLED_CONFIGURE_H\n";
   print CH "#define GLED_CONFIGURE_H\n\n";
-  print CH "#include \"gcc-config.h\"\n\n";
+  print CH "#include \"gled-gcc-config.h\"\n\n";
 
   print CH "#define GLED_VERSION_STRING    \"$config->{BUILD_VERSION}\"\n";
   print CH "#define GLED_BUILD_DATE_STRING \"$config->{BUILD_DATE}\"\n";
