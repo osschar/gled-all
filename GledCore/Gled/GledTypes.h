@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#include <config.h>
+#include <gled-config.h>
 
 // String type and collections of TStrings
 typedef list<TString>			lStr_t;
