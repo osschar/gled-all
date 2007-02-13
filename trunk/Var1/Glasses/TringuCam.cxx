@@ -10,7 +10,11 @@
 //
 
 #include "TringuCam.h"
+#include "TriMeshField.h"
+#include <Glasses/ScreenText.h>
 #include "TringuCam.c7"
+
+#include "TriMesh.h"
 
 ClassImp(TringuCam)
 
@@ -41,7 +45,21 @@ void TringuCam::_init()
   mSpinUp.fChangeParams = &mChgParCameraRotate;
   mKeyStateMap['q'] = &mSpinUp.fIncKey;
   mKeyStateMap['e'] = &mSpinUp.fDecKey;
- 
+
+
+  // MouseAction
+  mMouseAction  = MA_RayCollide;
+  bMouseVerbose = true;
+  bMouseDown    = false;
+  mRayLength    = 100;
+  mActionValue  = 1;
+  mActionRadius = 1;
+  mActRadFract  = 0.9;
+
+  mRayColl.SetCulling   (true);
+  mRayColl.SetClosestHit(true);
+  mRayColl.SetDestination(&mCollFaces);
+  mCollVertex = -1;
 }
 
 /**************************************************************************/
@@ -100,6 +118,157 @@ Int_t TringuCam::KeyUp(Int_t key)
 
 /**************************************************************************/
 
+void TringuCam::MouseDown()
+{
+  bMouseDown = true;
+
+  switch (mMouseAction)
+  {
+    case MA_Nothing:
+    {
+      break;
+    }
+    case MA_RayCollide:
+    {
+      CalculateMouseRayVectors();
+      GLensReadHolder _tlck(*mTringula);
+      mTringula->SetRayVectors(mMouseRayPos, mMouseRayDir);
+      mTringula->RayCollide();
+      break;
+    }
+    case MA_AddField:
+    {
+      CalculateMouseRayVectors();
+      MouseRayCollide();
+      AddField(mActionValue);
+      break;
+    }
+    case MA_SprayField:
+    {
+      // Everything done in time-tick
+      // !!!! should disable display-list for tringula until release
+      // !!!! as the mesh will change on each redraw until then.
+      break;
+    }
+    default:
+    {
+      printf("Unhandled case!!!!\n");
+      break;
+    }
+  }
+}
+
+void TringuCam::MouseUp()
+{
+  bMouseDown = false;
+}
+
+void TringuCam::CalculateMouseRayVectors()
+{
+  float yext = TMath::Tan(0.5*TMath::DegToRad()*mZFov)*mNearClp;
+  float xext = yext*mScreenW/mScreenH;
+  float xcam = xext*(2.0f*mMouseX/mScreenW - 1);
+  float ycam = yext*(2.0f*mMouseY/mScreenH - 1);
+
+  mMouseRayPos.SetXYZ(0, 0, 0);
+  mCamFix.MultiplyIP(mMouseRayPos);
+  mTrans .MultiplyIP(mMouseRayPos);
+
+  mMouseRayDir.SetXYZ(mNearClp, -xcam, -ycam);
+  mMouseRayDir.SetMag(1);
+  mCamFix.RotateIP(mMouseRayDir);
+  mTrans .RotateIP(mMouseRayDir);
+}
+
+void TringuCam::MouseRayCollide()
+{
+  Opcode::Ray ray;
+  mMouseRayPos.GetXYZ((Float_t*)&ray.mOrig.x);
+  mMouseRayDir.GetXYZ((Float_t*)&ray.mDir .x);
+  ray.mDir *= mRayLength;
+
+  Bool_t status = mRayColl.Collide(ray, *mTringula->GetMesh()->GetOPCModel());
+
+  if (bMouseVerbose)
+    printf("TringuCam::MouseRayCollide status=%d, n_faces=%d\n",
+           status, mCollFaces.GetNbFaces());
+
+  if (status && mCollFaces.GetNbFaces() > 0)
+  {
+    using namespace Opcode;
+    const CollisionFace& cf = mCollFaces.GetFaces()[0];
+
+    if (bMouseVerbose)
+      printf("  fc=%6d  d=%7.3f  u=%7.3f v=%7.3f\n",
+             cf.mFaceID, cf.mDistance, cf.mU, cf.mV);
+
+    TringTvor& TT = * mTringula->GetMesh()->GetTTvor();
+    Int_t   *t  = TT.Triangle(cf.mFaceID);
+    Float_t *v0 = TT.Vertex(t[0]);
+    Float_t *v1 = TT.Vertex(t[1]);
+    Float_t *v2 = TT.Vertex(t[2]);
+
+    Point e1(v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]);
+    Point e2(v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]);
+
+    mCollFace = cf;
+    mCollPoint.Set(v0); mCollPoint += cf.mU*e1 + cf.mV*e2;
+    Int_t ci = (cf.mU + cf.mV <= 0.5) ? 0 : (cf.mU >= cf.mV) ? 1 : 2;
+    mCollVertex = t[ci];
+    if (bMouseVerbose)
+      printf("  x=%7.3f  y=%7.3f  z=%7.3f   closest index=%d  vertex=%d\n",
+             mCollPoint.x, mCollPoint.y, mCollPoint.z, ci, mCollVertex);
+  }
+  else
+  {
+    mCollVertex = -1;
+  }
+}
+
+/**************************************************************************/
+
+void TringuCam::add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv,
+                                       Int_t v, Float_t value)
+{
+  if (v<0 || vv.find(v) != vv.end())
+    return;
+
+  vv.insert(v);
+  TringTvor& TT = * mTringula->GetMesh()->GetTTvor();
+  Opcode::Point delta(TT.Vertex(v));
+  delta -= mCollPoint;
+  Float_t dist = delta.Magnitude();
+
+  if (dist > mActionRadius)
+    return;
+
+  cv.insert(v);
+  Float_t full_r = mActionRadius*mActRadFract;
+  if (dist <= full_r)
+    mCurField->F(v) += value;
+  else
+    mCurField->F(v) += value*(1 - (dist - full_r)/(mActionRadius - full_r));
+
+  const vector<TriMesh::VertexData>& VDV = mTringula->GetMesh()->RefVDataVec();
+  const TriMesh::VertexData& VD = VDV[v];
+  vector<TriMesh::VConnData>::const_iterator vdi = VD.fVConns.begin();
+  while (vdi != VD.fVConns.end())
+  {
+    add_field_visit_vertex(vv, cv, vdi->fVTarget, value);
+    ++vdi;
+  }
+}
+
+void TringuCam::AddField(Float_t value)
+{
+  set<Int_t> vv, cv; // visited/changed vertices
+  add_field_visit_vertex(vv, cv, mCollVertex, value);
+  if (!cv.empty())
+    mCurField->PartiallyRecolorTvor(cv);
+}
+
+/**************************************************************************/
+
 void TringuCam::TimeTick(Double_t t, Double_t dt)
 {
   mFwdBck.TimeTick(dt);
@@ -114,16 +283,25 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
   mSpinUp.TimeTick(dt);
   if (mSpinUp.fValue) RotateLF(1, 2, dt*mSpinUp.fValue);
 
-  
 
   if (*mTxtLftRgt != 0)
     mTxtLftRgt->SetText
       (GForm("Des+ = %5.3f | V = %5.3f  | Des- = %5.3f\n",
              mLftRgt.fIncKey.fDesiredValue, mLftRgt.fValue, mLftRgt.fDecKey.fDesiredValue));
+
+
+  if (bMouseDown && mMouseAction == MA_SprayField)
+  {
+    CalculateMouseRayVectors();
+    MouseRayCollide();
+    AddField(dt*mActionValue);
+  }
 }
 
 
 /**************************************************************************/
+/**************************************************************************/
+
 /**************************************************************************/
 // TringuCam::ValueInfo
 /**************************************************************************/

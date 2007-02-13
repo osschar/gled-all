@@ -7,15 +7,23 @@
 #ifndef Var1_TringuCam_H
 #define Var1_TringuCam_H
 
-#include <Glasses/Camera.h>
-#include <Glasses/ScreenText.h>
+#include <Glasses/ZNode.h>
 #include <Glasses/Tringula.h>
 #include <Stones/TimeMakerClient.h>
 #include <Gled/GTime.h>
 
-class TringuCam : public Camera, public TimeMakerClient
+#include <Opcode/Opcode.h>
+
+class TriMeshField;
+class ScreenText;
+
+class TringuCam : public ZNode, public TimeMakerClient
 {
   MAC_RNR_FRIENDS(TringuCam);
+
+  //=================================================================
+  // Key-handling stuff.
+  //=================================================================
 
 public:
 
@@ -111,13 +119,70 @@ protected:
 
   ZLink<ScreenText>  mTxtLftRgt; // X{GS} L{}
 
+
+  //=================================================================
+  // Mouse-handling stuff.
+  //=================================================================
+
+public:
+  // On mouse-1 we do:
+  enum MouseAction_e { MA_Nothing, MA_RayCollide, MA_AddField, MA_SprayField,
+                       MA_AddSource };
+
+protected:
+  MouseAction_e mMouseAction;   // X{GS} 7 PhonyEnum(-join=>1)
+  Bool_t        bMouseVerbose;  // X{GS} 7 Bool()
+  Bool_t        bMouseDown;
+  Float_t       mRayLength;     // X{GS} 7 Value(-range=>[   0, 1000, 1,100])
+  Float_t       mActionValue;   // X{GS} 7 Value(-range=>[-100,  100, 1,100], -tooltip=>"value to add to field/source", -join=>1)
+  Float_t       mActionRadius;  // X{GS} 7 Value(-range=>[   0,  100, 1,100], -tooltip=>"distance of vertices for which to add field/source")
+  Float_t       mActRadFract;   // X{GS} 7 Value(-range=>[   0,    1, 1,1000])
+
+  // Missing parameters for fall-off of value with distance from coll-point.
+
+  //=================================================================
+  // Other stuff.
+  //=================================================================
+
+  ZLink<Tringula>     mTringula;    // X{GS} L{A}
+  ZLink<TriMeshField> mCurField;    // X{GS} L{A}
+
+  // Render-driver and mouse state fed in via TringuCam_GL_Rnr
+  // Draw() and Handle().
+
+  ZTrans  mCamFix;
+  Int_t   mScreenW, mScreenH;   //!
+  Float_t mNearClp, mFarClp;    //!
+  Float_t mZFov;                //!
+  Int_t   mMouseX,  mMouseY;    //!
+  Int_t   mMPushX,  mMPushY;    //!
+  Int_t   mMDrgDX,  mMDrgDY;    //!
+
+  TVector3  mMouseRayPos;
+  TVector3  mMouseRayDir;
+
+  Opcode::RayCollider    mRayColl;    //!
+  Opcode::CollisionFaces mCollFaces;  //!
+  Opcode::CollisionFace  mCollFace;   //!
+  Opcode::Point          mCollPoint;  //!
+  Int_t                  mCollVertex; //! Closest vertex, -1 if no collision.
+
 public:
   TringuCam(const Text_t* n="TringuCam", const Text_t* t=0) :
-    Camera(n,t) { _init(); }
+    ZNode(n,t) { _init(); }
 
   KeyInfo* FindKeyInfo(Int_t key);
   Int_t KeyDown(Int_t key);
   Int_t KeyUp(Int_t key);
+
+  void MouseDown();
+  void MouseUp();
+
+  void CalculateMouseRayVectors();
+  void MouseRayCollide();
+
+  void add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv, Int_t v, Float_t value);
+  void AddField(Float_t val);
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
