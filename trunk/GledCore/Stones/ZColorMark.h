@@ -25,6 +25,9 @@ public:
   Float_t m() const { return mMark; }
   void m(Float_t m) { mMark = m; }
 
+  Float_t mark() const { return mMark; }
+  void mark(Float_t m) { mMark = m; }
+
 #include "ZColorMark.h7"
   ClassDef(ZColorMark, 1)
 }; // endclass ZColorMark
