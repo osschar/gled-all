@@ -78,6 +78,12 @@ around would be smarter ...
 And ... the update should go via MTW_View, where locking is performed!!!
 Now it is not (for ValOut and BoolOut)
 
+=item B<< -tooltip=>"some text" >>
+
+Obvious.
+Not implemented for MCWButt and Link as they generate tooltip on the fly.
+Maybe should override or combine the two.
+
 =back
 
 =cut
@@ -104,9 +110,16 @@ sub make_widget_A {
     "  $S->{Widget}* o = new $S->{Widget}(0,0,0,0,\"$S->{Methodbase}\");\n";
 }
 
+sub make_widget_ttip {
+  my $S = shift;
+  return (exists $S->{-tooltip}) ? "  o->tooltip(\"$S->{-tooltip}\");\n" : "";
+}
+
 sub make_widget_B {
   my $S = shift;
-  return "  o->callback((Fl_Callback*)$S->{Methodbase}_Callback_s, this);\n" .
+  return 
+    "  o->callback((Fl_Callback*)$S->{Methodbase}_Callback_s, this);\n" .
+    $S->make_widget_ttip() .
     "  return o;\n" . "}\n\n";
 }
 
@@ -854,6 +867,7 @@ sub make_widget {
   return $S->make_widget_A() .
     "\to->on_change( (Fl_Callback*)$S->{Methodbase}_Callback_s, this );\n" .
     "\to->box(FL_EMBOSSED_FRAME);\n" .
+    $S->make_widget_ttip() .
     "  return o;\n" . "}\n\n";
 }
 
