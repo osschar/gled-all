@@ -26,6 +26,7 @@ void TringTvor::_init()
 {
   mVerts  = 0;  mNorms      = 0;  mCols      = 0;  mTexs = 0;
   mTrings = 0;  mTringNorms = 0;  mTringCols = 0;
+  mBBoxOK = false;
 
   mNStripEls   = 0;  mStripEls    = 0;  mStripTrings = 0;
   mNStrips     = 0;  mStripBegs   = 0;  mStripLens   = 0;
@@ -123,6 +124,8 @@ void TringTvor::CalculateBoundingBox()
   Float_t *C = mCtrExtBox, *E = C + 3;
   C[0] = 0.5f*(M[0]+m[0]); C[1] = 0.5f*(M[1]+m[1]); C[2] = 0.5f*(M[2]+m[2]);
   E[0] = 0.5f*(M[0]-m[0]); E[1] = 0.5f*(M[1]-m[1]); E[2] = 0.5f*(M[2]-m[2]);
+
+  mBBoxOK = true;
 }
 
 /**************************************************************************/
@@ -164,6 +167,23 @@ void TringTvor::GenerateTriangleNormalsAndColors
     cg[1] = (v0[1] + v1[1] + v2[1]) / 3;
     cg[2] = (v0[2] + v1[2] + v2[2]) / 3;
     foo(cg, TriangleColor(t), ud);
+  }
+}
+
+void TringTvor::GenerateTriangleColorsFromVertexColors()
+{
+  AssertTringCols();
+
+  Int_t*    T = mTrings;
+  UChar_t*  C = mTringCols;
+  for(Int_t t=0; t<mNTrings; ++t, T+=3, C+=4) {
+    UChar_t* c0 = Color(T[0]);
+    UChar_t* c1 = Color(T[1]);
+    UChar_t* c2 = Color(T[2]);
+    C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) / 3);
+    C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) / 3);
+    C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) / 3);
+    C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) / 3);
   }
 }
 
