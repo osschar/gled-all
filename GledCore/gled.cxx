@@ -57,6 +57,7 @@ int main(int argc, char **argv)
 			    getenv("HOME"), getenv("GLEDSYS")));
   gInterpreter->AddIncludePath(GForm("%s/.gled", getenv("HOME")));
   gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
+  gInterpreter->SetProcessLineLock(false);
 
   // Spawn Gled
   gled = new GledGUI();
