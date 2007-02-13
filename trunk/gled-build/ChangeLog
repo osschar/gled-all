@@ -1,3 +1,10 @@
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	In top-level Makefile, for clean and distclean targets, delete
+	<libset>/.depend_done files before descending into libset
+	directories.
+
 2007-02-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
