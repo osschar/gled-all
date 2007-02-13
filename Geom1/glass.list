@@ -4,6 +4,7 @@
 ZImage		1	Glasses/ZImage		.
 Rect		2	Glasses/Rect		.
 ZRibbon		3	Glasses/ZRibbon
+RGBAPalette     4       Glasses/RGBAPalette
 
 SMorph		16	Glasses/SMorph		.
 Board		17	Glasses/Board		.
