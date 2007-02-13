@@ -6,6 +6,19 @@
 
 BUILD_CONFIG	= ${GLEDSYS}/build_config
 
+ifeq ($(wildcard ${BUILD_CONFIG}),)
+CONFIG_NOT_DONE = true
+else
+CONFIG_DONE     = true
+endif
+
+ifeq ($(wildcard .depend_done),)
+DEPEND_NOT_DONE = true
+else
+DEPEND_DONE     = true
+endif
+
+
 # CXX, CC taken from environment; LD set by configure
 SHELL		= /bin/sh
 
@@ -26,8 +39,14 @@ GLED_UNINSTALL	= ${libexecdir}/gled_uninstall.pl
 
 FLUID   	= fluid
 
+
 # Flags
-LOCALINCL = -I${GLEDSYS}/include $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
+
+LOCALINCL  = -I${GLEDSYS}/include
+ifdef CONFIG_DONE
+LOCALINCL +=  $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
+endif
+
 INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I${X11INCDIR}
 DEFINES   = -D_REENTRANT -D_GNU_SOURCE -DGL_GLEXT_PROTOTYPES
 CPPFLAGS += ${DEFINES} ${INCL} ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
