@@ -44,6 +44,30 @@ TriMesh::~TriMesh()
   delete mOPCMeshIf;
 }
 
+void TriMesh::ResetTTvorDependants()
+{
+  delete mOPCModel;  mOPCModel  = 0;
+  delete mOPCMeshIf; mOPCMeshIf = 0;
+
+  mVDataVec.resize(0);
+}
+
+/**************************************************************************/
+
+void TriMesh::StdSurfacePostImport()
+{
+  CalculateBoundingBox();
+  BuildOpcStructs();
+
+  BuildVertexConnections();
+}
+
+void TriMesh::StdDynamicoPostImport()
+{
+  CalculateBoundingBox();
+  BuildOpcStructs();
+}
+
 /**************************************************************************/
 
 void TriMesh::BuildOpcStructs()
@@ -71,20 +95,15 @@ void TriMesh::BuildOpcStructs()
   printf("Build finished rstatus=%d, bytes=%d\n", status, mOPCModel->GetUsedBytes());
 }
 
+void TriMesh::AssertOpcStructs()
+{
+  if (mOPCModel == 0 || mOPCMeshIf == 0)
+    BuildOpcStructs();
+}
+
 /**************************************************************************/
 // TringTvor interface
 /**************************************************************************/
-
-void TriMesh::GenerateVertexNormals()
-{
-  static const Exc_t _eh("TriMesh::GenerateVertexNormals ");
-
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
-
-  mTTvor->GenerateVertexNormals();
-  mStampReqTring = Stamp(FID());
-}
 
 void TriMesh::CalculateBoundingBox()
 {
@@ -105,11 +124,22 @@ void TriMesh::CalculateBoundingBox()
   // mStampReqTring = Stamp(FID());
 }
 
+void TriMesh::GenerateVertexNormals()
+{
+  static const Exc_t _eh("TriMesh::GenerateVertexNormals ");
+
+  if (!mTTvor)
+    throw(_eh + "mTTvor is null.");
+
+  mTTvor->GenerateVertexNormals();
+  mStampReqTring = Stamp(FID());
+}
+
 /**************************************************************************/
 // RectTerrain import
 /**************************************************************************/
 
-void TriMesh::ImportRectTerrain(RectTerrain* rt)
+void TriMesh::ImportRectTerrain(RectTerrain* rt, Bool_t colp, Bool_t texp)
 {
   static const Exc_t _eh("TriMesh::ImportRectTerrain ");
 
@@ -119,7 +149,7 @@ void TriMesh::ImportRectTerrain(RectTerrain* rt)
   TringTvor* tt = 0;
   { GLensReadHolder _rlck(rt);
     printf("lock terrain\n");
-    tt = rt->SpawnTringTvor(true, true, true, false);
+    tt = rt->SpawnTringTvor(true, true, colp, texp);
     if(tt == 0)
       throw(_eh + "tvor null after MakeTringTvor().");
     printf("unlock terrain\n");
@@ -370,7 +400,8 @@ void TriMesh::BuildVertexConnections()
     {
       Int_t vi0, vi2;  
 
-      mTTvor->TriangleOtherVertices(t, v, vi0, vi2);
+      if (mTTvor->TriangleOtherVertices(ts[t], v, vi0, vi2) == false)
+        throw (_eh + "triangle-data inconsistent.");
 
       const Point &v0 = mTTvor->Vertex(vi0);
       const Point &v2 = mTTvor->Vertex(vi2);
@@ -405,16 +436,20 @@ void TriMesh::BuildVertexConnections()
           vcd2.fAngle += TMath::TwoPi();
       }
 
-      Float_t surf  = 0.25f * (e1 ^ e2).Magnitude();
-      Float_t sprd  = 0.5f  * acosf((e1 | e2) / (vcd0.fDistance * vcd2.fDistance));
+      // surface per half-edge ~ 1/6 * 1/2 parallelogram-surface
+      Float_t surf  = 0.5f * (e1 ^ e2).Magnitude() / 6.0f;
+      Float_t sprd  = 0.5f * acosf((e1 | e2) / (vcd0.fDistance * vcd2.fDistance));
 
-      printf("--- v=%d t=%d v0=%d v2=%d, surf=%5.2f, sprd=%5.2f\n",
-             v, t, vi0, vi2, surf, sprd);
+      //printf("--- v=%d t=%d ts[t]=%d v0=%d v2=%d, surf=%5.2f, sprd=%5.2f\n",
+      //       v, t, ts[t], vi0, vi2, surf, sprd);
 
       vcd0.fSpread  += sprd;
       vcd0.fSurface += surf;
       vcd2.fSpread  += sprd;
       vcd2.fSurface += surf;
+
+      vdata.fSpread  += 2.0f * sprd;
+      vdata.fSurface += 2.0f * surf;
 
       // Angle or dU,dV could be calculated given to two reference directions.
       // This depends on the client, really.
@@ -425,8 +460,10 @@ void TriMesh::BuildVertexConnections()
     // Sort VConns according to fAngle (default operator<()).
     sort(vdata.fVConns.begin(), vdata.fVConns.end());
 
-    printf("Vertex %2d (%5.2f, %5.2f, %5.2f) neighb-conns=%d, size=%d\n",
+    /*
+    printf("Vertex %2d (%5.2f, %5.2f, %5.2f) sprd=%5.3f surf=%5.3f, neighb-conns=%d, size=%d\n",
            v, v1.x, v1.y, v1.z,
+           vdata.fSpread, vdata.fSurface,
            vdata.fNeighbourConns, vdata.fVConns.size());
     for (Int_t n = 0; n < vdata.fNeighbourConns; ++n)
     {
@@ -435,10 +472,21 @@ void TriMesh::BuildVertexConnections()
       printf("  %d  nv=%2d  d=%5.2f, sp=%5.2f, su=%5.2f, angl=%5.2f du=%5.2f, dv=%5.2f\n",
              n, d.fVTarget, d.fDistance, d.fSpread, d.fSurface, d.fAngle, d.fdU, d.fdV);
     }
-
+    */
   }
 
   delete [] trings_per_vert;
+}
+
+void TriMesh::AssertVertexConnections()
+{
+  static const Exc_t _eh("TriMesh::AssertVertexConnections ");
+
+  if (!mTTvor)
+    throw(_eh + "mTTvor is null.");
+
+  if ((Int_t) mVDataVec.size() !=  mTTvor->mNVerts)
+    BuildVertexConnections();
 }
 
 /**************************************************************************/
