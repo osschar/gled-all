@@ -253,6 +253,8 @@ public:
 
   virtual void MarkStampReqTring()
   { mStampReqTring = ++mTimeStamp; }
+  virtual void StampReqTring(FID_t fid = FID_t(0,0))
+  { mStampReqTring = Stamp(fid); }
 
   void SetUseDLRec(Bool_t state); // X{ED} 7 MCWButt()
 
@@ -288,7 +290,7 @@ protected:
 public:
 
 #include "ZGlass.h7"
-  ClassDef(ZGlass, 1) // Base class of Gled enabled classes.
+  ClassDef(ZGlass, 1); // Base class of Gled enabled classes.
 }; // endclass ZGlass
 
 #include <Glasses/ZMirFilter.h>
