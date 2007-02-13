@@ -25,9 +25,6 @@ public:
   UChar_t* mCols;         //[4*mNVert]
   Float_t* mTexs;         //[2*mNVert]
 
-  Float_t  mMinMaxBox[6];
-  Float_t  mCtrExtBox[6];
-
   void MakeNorms() { mNorms = new Float_t[3*mNVerts]; }
   void MakeCols()  { mCols  = new UChar_t[4*mNVerts]; }
   void MakeTexs()  { mTexs  = new Float_t[2*mNVerts]; }
@@ -59,6 +56,12 @@ public:
   UChar_t* TriangleColor(Int_t i)  { return &(mTringCols[4*i]);  }
 
   Bool_t   TriangleOtherVertices(Int_t t, Int_t v, Int_t& v_prev, Int_t& v_next);
+
+  // Bounding-box stuff
+
+  Bool_t   mBBoxOK;
+  Float_t  mMinMaxBox[6];
+  Float_t  mCtrExtBox[6];
 
   // Triangle strip data
 
@@ -92,10 +95,12 @@ public:
   { UChar_t* c = TriangleColor(i); c[0] = r; c[1] = g; c[2] = b; c[3] = a; }
 
   void CalculateBoundingBox();
+  void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }
 
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
 					void* ud);
+  void GenerateTriangleColorsFromVertexColors();
 
   void GenerateVertexNormals();
 
