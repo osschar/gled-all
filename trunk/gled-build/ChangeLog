@@ -1,6 +1,26 @@
 2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
+	Rename gcc-config.h to gled-gcc-config, config.h to gled-config.h.
+
+	* include/gcc-config.h:
+	* include/gled-gcc-config.h:
+	Renamed gcc-config.h to gled-gcc-config.h.
+
+	* make/make_defs.inc:
+	Added checks if configure and depend have been run:
+	correspondingly we define one of CONFIG_DONE or CONFIG_NOT_DONE
+	and one of DEPEND_NOT_DONE or DEPEND_DONE.
+	This is somewhat relevant as we can use these to further steer
+	definitions of variables and includes.
+
+	* make/make_targets.inc:
+	Check for DEPEND_DONE variable instead of looking .depend_done
+	file.
+
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
 	In top-level Makefile, for clean and distclean targets, delete
 	<libset>/.depend_done files before descending into libset
 	directories.
