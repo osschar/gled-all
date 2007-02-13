@@ -1,5 +1,10 @@
 2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Gled/GledTypes.h:
+	config.h was renamed to gled-config.h.
+
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* gled.cxx:
 	* saturn.cxx:
 	Disable locking in CINT process line (from root-5.14.00 onwards we
