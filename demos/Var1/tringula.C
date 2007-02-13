@@ -5,20 +5,22 @@ class Tringula;
 class TringuCam;
 class Dynamico;
 class TriMesh;
+class TriMeshField;
 class RectTerrain;
 class GTSurf;
 class GTSRetriangulator;
 class GTSIsoMaker;
 class TimeMaker;
 
-Tringula*    tringula = 0;
-TringuCam*   tricam   = 0;
-Dynamico*    dyn1     = 0;
-Dynamico*    dyn2     = 0;
-TriMesh*     trimesh  = 0;
-TriMesh*     carmesh  = 0;
-RectTerrain* terrain  = 0;
-GTSurf*      gtsurf   = 0;
+Tringula*     tringula = 0;
+TringuCam*    tricam   = 0;
+Dynamico*     dyn1     = 0;
+Dynamico*     dyn2     = 0;
+TriMesh*      trimesh  = 0;
+TriMesh*      carmesh  = 0;
+TriMeshField* tmfield  = 0;
+RectTerrain * terrain  = 0;
+GTSurf*       gtsurf   = 0;
 GTSRetriangulator* gtsretring  = 0;
 GTSIsoMaker*       gtsisomaker = 0;
 
@@ -38,6 +40,16 @@ void tringula()
   // GForger
   CREATE_ADD_GLASS(gforge, GForger, texdir, "GForger", 0);
   gforge->SetImage(hf);
+  // Ribbon
+  CREATE_ADD_GLASS(ribbon, ZRibbon, texdir, "Jungle Ribbon", 0);
+  ribbon->SetPOVFile("ribbon1.pov");
+  ribbon->LoadPOV();
+  // RGBAPalette
+  CREATE_ADD_GLASS(pal, RGBAPalette, texdir, "Spectrum Palette", 0);
+  pal->SetUnderflowAction(RGBAPalette::LA_Wrap);
+  pal->SetOverflowAction (RGBAPalette::LA_Wrap);
+  gStyle->SetPalette(1, 0);
+  pal->SetMarksFromgStyle();
 
   CREATE_ADD_GLASS(sphere, Sphere, g_scene, "Sphere", "");
   sphere->SetRadius(.3);
@@ -61,8 +73,8 @@ void tringula()
   terrain->SetDy(2);
   terrain->SetMinCol(0.175, 0.689, 0.338);
   terrain->SetMaxCol(0.139, 0.384, 1.000);
-  hf->SetFile("gforge.png");
-  terrain->SetFromImage(hf, 20);
+  hf->SetFile("gforge-32x32.png");
+  terrain->SetFromImage(hf, 5); // 20 for 256x256 file "gforge.png"
   //hf->SetFile("gforge-2x2.png");
   //terrain->SetFromImage(hf, 1);
   //terrain->SetRnrMode(RectTerrain::RM_SmoothTring);
@@ -85,16 +97,15 @@ void tringula()
 
   ASSIGN_ADD_GLASS(trimesh, TriMesh, g_scene, "Terrain TriMesh", 0);
   trimesh->ImportRectTerrain(terrain);
-  trimesh->CalculateBoundingBox();
+  trimesh->StdSurfacePostImport();
 
   ASSIGN_ADD_GLASS(carmesh, TriMesh, g_scene, "Car TriMesh", 0);
   carmesh->MakeTetrahedron();
-  carmesh->BuildOpcStructs();
-  carmesh->CalculateBoundingBox();
+  carmesh->StdDynamicoPostImport();
 
   ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
   tringula->SetMesh(trimesh);
-  tringula->MakeOpcodeModel();
+  tringula->SetPalette(pal);
   tringula->SetEdgePlanes(terrain);
   tringula->SetRnrRay(true);
   tringula->SetEdgeRule(Tringula::ER_Bounce);
@@ -167,10 +178,24 @@ void tringula()
   g_pupil->SetAutoRedraw(false);
   // g_pupil->SetOverlay(overlay);
 
-  ASSIGN_ADD_GLASS(tricam, TringuCam, g_shell, "TringuCam", 0);
-  tricam->SetParent(tringula);
+  ASSIGN_ADD_GLASS(tricam, TringuCam, tringula, "TringuCam", 0);
+  tricam->SetTringula(tringula);
   tricam->SetPos(4, 2, 10);
   tricam->RotateLF(1, 2, 0.25*TMath::Pi());
+
+  ASSIGN_ADD_GLASS(tmfield, TriMeshField, tricam, "TMField", 0);
+  tmfield->SetMesh(trimesh);
+  tmfield->ResizeToMesh();
+  tmfield->SetPalette(pal);
+  tmfield->FillByXYGaussBlobs();
+  tmfield->FindMinMaxField();
+  tmfield->SetMinValue(0);
+  tmfield->SetMaxValue(TMath::Ceil(tmfield->GetMaxValue()));
+
+  tricam->SetCurField(tmfield);
+  tmfield->ColorizeTvor();
+
+  g_shell->Add(tricam);
   g_pupil->SetEventHandler(tricam);
   g_pupil->SetCameraBase(tricam);
 
