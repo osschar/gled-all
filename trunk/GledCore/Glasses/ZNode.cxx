@@ -15,7 +15,7 @@
 typedef list<ZNode*>           lpZNode_t;
 typedef list<ZNode*>::iterator lpZNode_i;
 
-ClassImp(ZNode)
+ClassImp(ZNode);
 
 namespace {
   // Limit max search depth for 
