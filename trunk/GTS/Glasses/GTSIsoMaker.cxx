@@ -63,8 +63,8 @@ void GTSIsoMaker::MakeSurface()
     throw(_eh + "Link Target should be set.");
   }
 
-  TF3 formula(GForm("GTSIsoMaker_%d", GetSaturnID()), mFormula.Data(),
-	      mXmin, mXmax, mYmin, mYmax, mZmin, mZmax);
+  TF3 formula(GForm("GTSIsoMaker_%d", GetSaturnID()), mFormula.Data(), 0, 0);
+  formula.SetRange(mXmin, mXmax, mYmin, mYmax, mZmin, mZmax);
 
   GtsCartesianGrid grid = {
     mXdiv + 1, mYdiv + 1, mZdiv + 1,
