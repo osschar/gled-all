@@ -1,3 +1,9 @@
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	In MakeSurface(): use two-step initialization of TF3 to avoid
+	warnings when not all variables x, y and z are stated.
+
 2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSRetriangulator.h:
