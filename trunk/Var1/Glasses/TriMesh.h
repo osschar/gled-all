@@ -45,12 +45,12 @@ public:
 
   struct VertexData
   {
-    // Something like 'capacity'.
-    // But then again ... need it for every field that needs to be added
+    Float_t           fSpread;    // Sum of triangle angles
+    Float_t           fSurface;   // Sum of 1/3 of triangle surfaces
     Int_t             fNeighbourConns;
     vector<VConnData> fVConns;
 
-    VertexData() : fNeighbourConns(0), fVConns() {}
+    VertexData() : fSpread(0), fSurface(0), fNeighbourConns(0), fVConns() {}
 
     VConnData& FindVConn(Int_t vtarget);
     void FindTwoVConnIdcs(Int_t v1, Int_t v2, Int_t& vi1, Int_t& vi2);
@@ -74,18 +74,26 @@ public:
     ZGlass(n,t) { _init(); }
   virtual ~TriMesh();
 
+  virtual void ResetTTvorDependants();
+
+  void StdSurfacePostImport();
+  void StdDynamicoPostImport();
+
   Opcode::AABB& ref_opc_aabb() { return *(Opcode::AABB*)mTTvor->mCtrExtBox; }
 
   void BuildOpcStructs();
+  void AssertOpcStructs();
 
   // TringTvor interface
-  void GenerateVertexNormals(); // X{ED} 7 MButt()
   void CalculateBoundingBox();  // X{ED} 7 MButt()
+  void GenerateVertexNormals(); // X{ED} 7 MButt()
 
-  void ImportRectTerrain(RectTerrain* rt); // X{ED} C{1} 7 MCWButt()
+  void ImportRectTerrain(RectTerrain* rt,
+                         Bool_t colp=true,
+                         Bool_t texp=false); // X{ED} C{1} 7 MCWButt()
 
-  void ImportGTSurf(GTSurf* gts);          // X{ED} C{1} 7 MCWButt()
-  void ExportGTSurf(GTSurf* gts);          // X{ED} C{1} 7 MCWButt()
+  void ImportGTSurf(GTSurf* gts); // X{ED} C{1} 7 MCWButt()
+  void ExportGTSurf(GTSurf* gts); // X{ED} C{1} 7 MCWButt()
 
   void ExportPovMesh(const Text_t* fname, Bool_t smoothp=false); // X{E} 7 MCWButt()
 
@@ -93,6 +101,7 @@ public:
                        Float_t  w=0.4, Float_t  h=0.4); // X{E} 7 MCWButt()
 
   void BuildVertexConnections();
+  void AssertVertexConnections();
 
 #include "TriMesh.h7"
   ClassDef(TriMesh, 1)
