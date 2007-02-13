@@ -1,3 +1,47 @@
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added methods to color the mesh by coordinate/normal values;
+	canonization of interface.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added per-vertex spread and surface (summed by edge); canonization
+	of interface.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Added mouse-handling and mesh-spraying stuff; added members to
+	hold render-state parameters needed for user-input handling
+	(copied over by gl-rnr).
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Moved most of the mouse handling to the glass; copy relevant
+	render-state parameters to glass in Draw() method.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Added member mMeshTringStamp to properly rebuild display-list when
+	the mesh changes.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	New glass: representation of a field that takes arbitrary values
+	on each mesh vertex.
+
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TriMeshLightField.h:
+	New glass: specialization of TriMeshField for calculation/storage
+	of light-maps and shade-maps; not implemented yet.
+
+	* glass.list:
+	Register new glasses TriMeshField and TriMeshLightField.
+
+	* Opcode/OPC_RayCollider.cpp:
+	* Opcode/OPC_RayCollider.h:
+	Add some notes.
+
 2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMesh.cxx:
