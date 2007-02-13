@@ -22,9 +22,12 @@
 /**************************************************************************/
 
 void Tringula_GL_Rnr::_init()
-{  mQuadric = gluNewQuadric();
+{
+  mQuadric = gluNewQuadric();
   gluQuadricDrawStyle(mQuadric, GLU_LINE);
   gluQuadricNormals(mQuadric, GLU_NONE);
+
+  mMeshTringStamp = 0;
 }
 
 Tringula_GL_Rnr::~Tringula_GL_Rnr()
@@ -60,6 +63,10 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
   Tringula&   T = *mTringula;
   TringTvor* TT =  T.mMesh->GetTTvor();
   if(TT == 0) return;
+  if(mMeshTringStamp < T.mMesh->GetStampReqTring()) {
+    bRebuildDL = true;
+    mMeshTringStamp = T.mMesh->GetStampReqTring();
+  }
   PARENT::Draw(rd);
 
   if(T.bRnrRay) {
@@ -80,10 +87,12 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
       glPopMatrix();
     }
     // Render stabbed triangle(s)
-    if(T.mOPCCFaces != 0) {
+    if(T.mRayColFaces != 0)
+    {
       using namespace Opcode;
-      CollisionFaces& CF = *T.mOPCCFaces;
-      for(UInt_t f=0; f<CF.GetNbFaces(); ++f) {
+      CollisionFaces& CF = *T.mRayColFaces;
+      for(UInt_t f=0; f<CF.GetNbFaces(); ++f)
+      {
         const CollisionFace& cf = CF.GetFaces()[f];
         Int_t   *t  = TT->Triangle(cf.mFaceID);
         Float_t *v0 = TT->Vertex(t[0]);
