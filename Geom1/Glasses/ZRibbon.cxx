@@ -7,7 +7,10 @@
 //__________________________________________________________________________
 // ZRibbon
 //
+// Interpolated color gradient.
+// Internal storage could be optimized.
 //
+// Should merge with RGBAPalette.
 
 #include "ZRibbon.h"
 #include "ZRibbon.c7"
