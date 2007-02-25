@@ -1,3 +1,12 @@
+2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZNode.cxx:
+	Use auto_ptr in BtoA().
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	Added comment about trying out different display-list creation
+	options (found no speed difference).
+
 2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledTypes.h:
