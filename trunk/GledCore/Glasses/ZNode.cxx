@@ -402,12 +402,13 @@ ZTrans* ZNode::BtoA(ZNode* a, ZNode* b, ZNode* top)
     top = FindCommonParent(a, b);
     if(top == 0) return 0;
   }
-  ZTrans* at = a->ToNode(top); if(at == 0) { return 0; }
+  auto_ptr<ZTrans> at (a->ToNode(top));
+  if(at.get() == 0) return 0;
   at->Invert();
-  ZTrans* bt = b->ToNode(top); if(bt == 0) { delete at; return 0; }
+  auto_ptr<ZTrans> bt (b->ToNode(top));
+  if(bt.get() == 0) return 0;
   *at *= *bt;
-  delete bt;
-  return at;
+  return at.release();
 }
 
 /**************************************************************************/
