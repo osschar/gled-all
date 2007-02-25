@@ -1,3 +1,30 @@
+2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	Added a flag controlling tring-color recreation to
+	tvor-colorization functions.
+
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TriMeshLightField.h:
+	Implemented cacluclation of ligt-map (including shadows, of
+	course) for positional and directional light.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Added link to TriMeshLightField and proper handling in AddField()
+	so that shades are properly cast after spraying/adding field.
+	Disable/enable display-list caching for Tringula during
+	field-spray.
+	Added members controlling verbosity of mouse/key events.	
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added 'Bool_t bLightMesh' controlling whether ligtning is on
+	during mesh rendering. When light-map is applied it should be off.
+
 2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Tringula.cxx:
