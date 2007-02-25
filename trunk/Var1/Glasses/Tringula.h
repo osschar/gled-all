@@ -58,7 +58,8 @@ protected:
   ZLink<TriMesh>     mMesh;     //  X{GS} L{A}
   ZLink<RGBAPalette> mPalette;  //  X{GS} L{A}
   ZColor         mColor;        //  X{GSPT} 7 ColorButt()
-  Bool_t         bPreferSmooth; //  X{GST}  7 Bool()
+  Bool_t         bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
+  Bool_t         bLightMesh;    //  X{GST}  7 Bool()
 
   ZLink<ZHashList> mDynos;      //  X{GS} L{}
 

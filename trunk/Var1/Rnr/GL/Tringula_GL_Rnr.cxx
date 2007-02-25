@@ -182,8 +182,9 @@ void Tringula_GL_Rnr::Render(RnrDriver* rd)
   // if(mTringula->mTTvor == 0) return;
 
   Tringula  &T  = *mTringula;
-  TringTvor &TV = *T.mMesh->GetTTvor();
+  TringTvor &TT = *T.mMesh->GetTTvor();
   glColor4fv(T.mColor());
-  Bool_t smoothp = (TV.mNorms && (T.bPreferSmooth || TV.mTringNorms == 0));
-  TringTvor_GL_Rnr::Render(&TV, smoothp);
+  GL_Capability_Switch light(GL_LIGHTING, T.bLightMesh);
+  Bool_t smoothp = (TT.mNorms && (T.bSmoothShade || TT.mTringNorms == 0));
+  TringTvor_GL_Rnr::Render(&TT, smoothp);
 }
