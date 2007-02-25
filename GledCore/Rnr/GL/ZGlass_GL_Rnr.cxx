@@ -43,16 +43,22 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 {
   // cout <<"ZGlass_GL_Rnr::Draw rendering '"<< mGlass->GetName() <<"'.\n";
 
-  if(mGlass->bUseDispList) {
+  if(mGlass->bUseDispList)
+  {
     GLRnrDriver* glrd = rd->GL();
-    if(bUsesSubPicking && glrd->PickingP()) {
+    if(bUsesSubPicking && glrd->PickingP())
+    {
       Render(rd);
     }
-    else if(bRebuildDL) {
-      if(glrd->GetInDLRebuild()) {
+    else if(bRebuildDL)
+    {
+      if(glrd->GetInDLRebuild())
+      {
 	Render(rd);
       } else {
 	glrd->SetInDLRebuild(true);
+        // Compared with GL_COMPILE and then glCallList() but there was
+        // no difference. 24.2.07, gl-version ATI 2.0.6234
 	glNewList(mDispList, GL_COMPILE_AND_EXECUTE);
 	Render(rd);
 	glEndList();
@@ -60,10 +66,13 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 	bRebuildDL = false;
       }
     }
-    else {
+    else
+    {
       glCallList(mDispList);
     }
-  } else {
+  }
+  else
+  {
     Render(rd);
   }
 }
