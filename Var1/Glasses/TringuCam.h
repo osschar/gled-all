@@ -15,11 +15,21 @@
 #include <Opcode/Opcode.h>
 
 class TriMeshField;
+class TriMeshLightField;
+
 class ScreenText;
 
 class TringuCam : public ZNode, public TimeMakerClient
 {
   MAC_RNR_FRIENDS(TringuCam);
+
+protected:
+  //=================================================================
+  // Top-level-stuff
+  //=================================================================
+
+  Bool_t        bKeysVerbose;  // X{GS} 7 Bool(-join=>1)
+  Bool_t        bMouseVerbose; // X{GS} 7 Bool()
 
   //=================================================================
   // Key-handling stuff.
@@ -130,13 +140,14 @@ public:
                        MA_AddSource };
 
 protected:
-  MouseAction_e mMouseAction;   // X{GS} 7 PhonyEnum(-join=>1)
-  Bool_t        bMouseVerbose;  // X{GS} 7 Bool()
-  Bool_t        bMouseDown;
+  MouseAction_e mMouseAction;   // X{GS} 7 PhonyEnum()
   Float_t       mRayLength;     // X{GS} 7 Value(-range=>[   0, 1000, 1,100])
   Float_t       mActionValue;   // X{GS} 7 Value(-range=>[-100,  100, 1,100], -tooltip=>"value to add to field/source", -join=>1)
   Float_t       mActionRadius;  // X{GS} 7 Value(-range=>[   0,  100, 1,100], -tooltip=>"distance of vertices for which to add field/source")
   Float_t       mActRadFract;   // X{GS} 7 Value(-range=>[   0,    1, 1,1000])
+
+  Bool_t        bMouseDown;
+  Bool_t        bEnableTringDLonMouseUp;
 
   // Missing parameters for fall-off of value with distance from coll-point.
 
@@ -144,8 +155,9 @@ protected:
   // Other stuff.
   //=================================================================
 
-  ZLink<Tringula>     mTringula;    // X{GS} L{A}
-  ZLink<TriMeshField> mCurField;    // X{GS} L{A}
+  ZLink<Tringula>          mTringula;    // X{GS} L{A}
+  ZLink<TriMeshField>      mCurField;    // X{GS} L{A}
+  ZLink<TriMeshLightField> mLightField;  // X{GS} L{A}
 
   // Render-driver and mouse state fed in via TringuCam_GL_Rnr
   // Draw() and Handle().
