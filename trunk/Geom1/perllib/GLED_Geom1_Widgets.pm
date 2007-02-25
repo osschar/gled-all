@@ -93,11 +93,11 @@ sub make_cxx_cb {
     $r .= <<"fnord";
   Eye* e = (mView->fImg) ? mView->fImg->fEye : 0;
   if(e) {
-    auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(TVector3(o->x(),o->y(),o->z())) );
+    auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(o->x(),o->y(),o->z()) );
     e->Send(*_m);
     SetUpdateTimer();
   } else {
-    mIdol->Set$S->{Methodbase}(TVector3(o->x(),o->y(),o->z()));
+    mIdol->Set$S->{Methodbase}(o->x(),o->y(),o->z());
   }
 fnord
   }
