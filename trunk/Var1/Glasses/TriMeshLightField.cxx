@@ -10,6 +10,7 @@
 //
 
 #include "TriMeshLightField.h"
+#include <Glasses/ZNode.h>
 #include "TriMeshLightField.c7"
 #include "TriMesh.h"
 
@@ -100,7 +101,7 @@ void TriMeshLightField::CalculateLightField()
   RC.SetDestination(&CF);
 
   Opcode::Ray   R;
-  Opcode::Point nrdir; // normalized ray-direction; const for directional light
+  Opcode::Point nrdir(0, 0, 0); // normalized ray-direction
 
   if (bDirectional)
   {
