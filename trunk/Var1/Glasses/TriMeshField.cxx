@@ -181,8 +181,9 @@ void TriMeshField::FindMinMaxField()
   Stamp(FID());
 }
 
+/**************************************************************************/
 
-void TriMeshField::ColorizeTvor()
+void TriMeshField::ColorizeTvor(Bool_t regen_tring_cols)
 {
   static const Exc_t _eh("TriMeshField::ColorizeTvor ");
 
@@ -243,14 +244,16 @@ void TriMeshField::ColorizeTvor()
     }
   }
 
-  TT.GenerateTriangleColorsFromVertexColors();
+  if (regen_tring_cols && TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
 
   mMesh->StampReqTring(TriMesh::FID());
 }
 
-void TriMeshField::PartiallyRecolorTvor(set<Int_t> vertices)
+void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
+                                         Bool_t regen_tring_cols)
 {
-  static const Exc_t _eh("TriMeshField::ColorizeTvor ");
+  static const Exc_t _eh("TriMeshField::PartiallyColorizeTvor ");
 
   assert_palette(_eh);
   assert_mesh(_eh);
@@ -317,7 +320,10 @@ void TriMeshField::PartiallyRecolorTvor(set<Int_t> vertices)
     }
   }
 
-  TT.GenerateTriangleColorsFromVertexColors();
+  // !!!! Very sub-optimal. Need to introduce edge-data with
+  // !!!! triangle idcs, optimised for two.
+  if (regen_tring_cols && TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
 
   mMesh->StampReqTring(TriMesh::FID());
 }
