@@ -6,6 +6,7 @@ class TringuCam;
 class Dynamico;
 class TriMesh;
 class TriMeshField;
+class TriMeshLightField;
 class RectTerrain;
 class GTSurf;
 class GTSRetriangulator;
@@ -23,6 +24,8 @@ RectTerrain * terrain  = 0;
 GTSurf*       gtsurf   = 0;
 GTSRetriangulator* gtsretring  = 0;
 GTSIsoMaker*       gtsisomaker = 0;
+
+TriMeshLightField* lightmap = 0;
 
 Eventor*     eventor  = 0;
 TimeMaker*   tmaker   = 0;
@@ -58,7 +61,7 @@ void tringula()
 
   CREATE_ADD_GLASS(lamp, Lamp, g_scene, "Lamp", "");
   lamp->SetPos(5, 5, 5);
-  lamp->SetDrawLamp(false);
+  // lamp->SetDrawLamp(false);
   // lamp->SetLampScale(1);
   // This crashes my laptop together with glDrawArrays of tringtvor ... badly.
   // Must be a weird ATI bug.
@@ -73,8 +76,8 @@ void tringula()
   terrain->SetDy(2);
   terrain->SetMinCol(0.175, 0.689, 0.338);
   terrain->SetMaxCol(0.139, 0.384, 1.000);
-  hf->SetFile("gforge-32x32.png");
-  terrain->SetFromImage(hf, 5); // 20 for 256x256 file "gforge.png"
+  hf->SetFile("gforge.png");
+  terrain->SetFromImage(hf, 40); // 5 for 32x32, 20 for 256x256 file "gforge.png"
   //hf->SetFile("gforge-2x2.png");
   //terrain->SetFromImage(hf, 1);
   //terrain->SetRnrMode(RectTerrain::RM_SmoothTring);
@@ -169,6 +172,9 @@ void tringula()
   g_pupil->SetUpReference(base_plane);
   g_pupil->SetUpRefAxis(3);
   g_pupil->SetCameraBase(0);
+  g_pupil->SetNearClip(2);
+  g_pupil->SetFarClip(200);
+
   // g_pupil->SetBackMode(GL_FILL);
   // g_pupil->SetCHSize(0);
 
@@ -195,6 +201,13 @@ void tringula()
   tricam->SetCurField(tmfield);
   tmfield->ColorizeTvor();
 
+  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "TMLightField", 0);
+  lightmap->SetMesh(trimesh);
+  lightmap->ResizeToMesh();
+  lightmap->SetLampPos(5, 5, 20);
+  lightmap->SetPalette(pal);
+  lightmap->CalculateLightField();
+
   g_shell->Add(tricam);
   g_pupil->SetEventHandler(tricam);
   g_pupil->SetCameraBase(tricam);
@@ -214,4 +227,25 @@ void tringula()
 
   dumper->SetPupil(g_pupil);
   eventor->Start();
+}
+
+void sunrise(Float_t phi=45, Float_t dt=0.005, Int_t sleep=100)
+{
+  // phi given in degrees.
+
+  phi *= TMath::DegToRad();
+
+  tringula->SetLightMesh(false);
+  lightmap->SetDirectional(true);
+
+  for (Double_t t=0.1; t<TMath::PiOver2(); t+=dt)
+  {
+    lightmap->SetupLampDir(tringula, t, phi);
+    lightmap->CalculateLightField();
+    tringula->ReadLock();
+    tmfield->ColorizeTvor();
+    lightmap->ModulateTvor();
+    tringula->ReadUnlock();
+    gSystem->Sleep(sleep);
+  }
 }
