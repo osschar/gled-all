@@ -101,7 +101,11 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
   'ZColor'  => { SetMeth=>'.rgba(r,g,b,a)',
 		 SetArgs=>'Float_t r,Float_t g,Float_t b,Float_t a=1',
                  ByRef  =>1
-	       }
+	       },
+  'TVector3'=> { SetMeth=>'.SetXYZ(x,y,z)',
+		 SetArgs=>'Double_t x, Double_t y, Double_t z',
+                 ByRef  =>1
+	       },
 );
 
 # Shorthands for keys in comment field
