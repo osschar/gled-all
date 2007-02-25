@@ -80,6 +80,7 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
         }
         
       }
+
       mMouseX = x; mMouseY = y;
       return 1;
     }
@@ -90,11 +91,13 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
       {
         TC.MouseUp();
       }
+
+      return 1;
     }
 
     case FL_KEYDOWN:
     {
-      // ev.dump();
+      if (mTringuCam->GetKeysVerbose()) ev.dump();
 
       if (mTringuCam->KeyDown(ev.fKey))
         return 1;
@@ -104,14 +107,13 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
     case FL_KEYUP:
     {
-      ev.dump();
+      if (mTringuCam->GetKeysVerbose()) ev.dump();
 
       if (mTringuCam->KeyUp(ev.fKey))
         return 1;
 
       break;
     }
-
 
   } // end switch (ev.fEvent)
 

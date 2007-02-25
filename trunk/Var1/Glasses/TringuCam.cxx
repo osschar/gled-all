@@ -11,6 +11,7 @@
 
 #include "TringuCam.h"
 #include "TriMeshField.h"
+#include "TriMeshLightField.h"
 #include <Glasses/ScreenText.h>
 #include "TringuCam.c7"
 
@@ -22,6 +23,8 @@ ClassImp(TringuCam)
 
 void TringuCam::_init()
 {
+  bKeysVerbose = bMouseVerbose = false;
+
   //                               acc/inc  | decay     | timeout
   mChgParCameraMove.SetValueParams (1, 0.5,   1.2, 0.4,   0.05);
   mChgParCameraMove.SetDesireParams(1, 0.3,   1,   0.1,   0.2);
@@ -49,12 +52,13 @@ void TringuCam::_init()
 
   // MouseAction
   mMouseAction  = MA_RayCollide;
-  bMouseVerbose = true;
-  bMouseDown    = false;
   mRayLength    = 100;
   mActionValue  = 1;
   mActionRadius = 1;
   mActRadFract  = 0.9;
+
+  bMouseDown              = false;
+  bEnableTringDLonMouseUp = false;
 
   mRayColl.SetCulling   (true);
   mRayColl.SetClosestHit(true);
@@ -145,9 +149,12 @@ void TringuCam::MouseDown()
     }
     case MA_SprayField:
     {
-      // Everything done in time-tick
-      // !!!! should disable display-list for tringula until release
-      // !!!! as the mesh will change on each redraw until then.
+      // Everything done in time-tick.
+      if (mTringula != 0 && mTringula->GetUseDispList())
+      {
+        mTringula->SetUseDispList(false);
+        bEnableTringDLonMouseUp = true;
+      }
       break;
     }
     default:
@@ -161,6 +168,11 @@ void TringuCam::MouseDown()
 void TringuCam::MouseUp()
 {
   bMouseDown = false;
+  if ( bEnableTringDLonMouseUp)
+  {
+    mTringula->SetUseDispList(true);
+    bEnableTringDLonMouseUp = false;
+  }
 }
 
 void TringuCam::CalculateMouseRayVectors()
@@ -264,7 +276,17 @@ void TringuCam::AddField(Float_t value)
   set<Int_t> vv, cv; // visited/changed vertices
   add_field_visit_vertex(vv, cv, mCollVertex, value);
   if (!cv.empty())
-    mCurField->PartiallyRecolorTvor(cv);
+  {
+    if (mLightField == 0)
+    {
+      mCurField  ->PartiallyColorizeTvor(cv, true);
+    }
+    else
+    {
+      mCurField  ->PartiallyColorizeTvor(cv, false);
+      mLightField->PartiallyModulateTvor(cv, true);
+    }
+  }
 }
 
 /**************************************************************************/
