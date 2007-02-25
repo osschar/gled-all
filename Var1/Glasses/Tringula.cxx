@@ -34,7 +34,8 @@ void Tringula::_init()
   // Override settings from ZGlass
   bUseDispList = true;
   
-  bPreferSmooth = false;
+  bSmoothShade = false;
+  bLightMesh   = true;
 
   mRayColFaces = 0;
 
