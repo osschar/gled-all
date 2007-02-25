@@ -128,6 +128,12 @@ void TringTvor::CalculateBoundingBox()
   mBBoxOK = true;
 }
 
+Float_t TringTvor::BoundingBoxDiagonal()
+{
+  Float_t *E = mCtrExtBox + 3;
+  return sqrtf(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]);
+}
+
 /**************************************************************************/
 
 void TringTvor::GenerateTriangleNormals()
@@ -197,6 +203,7 @@ void TringTvor::GenerateVertexNormals()
   //
   // ??? Need an argument: weight normal contribution by triangle area
   // ??? or ... perhaps better ... by vertex angle.
+  //     This is somewhat done in vertex-connection stuff in Var1::TriMesh.
 
   // Could reuse tring-normals if they do exist.
 

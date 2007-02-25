@@ -45,11 +45,15 @@ public:
   Float_t* mTringNorms;   //[3*mNTrings]
   UChar_t* mTringCols;    //[4*mNVert]
 
-  void MakeTringNorms() { mTringNorms = new Float_t[3*mNTrings]; }
-  void MakeTringCols()  { mTringCols  = new UChar_t[4*mNTrings]; }
+  void MakeTringNorms()   { mTringNorms = new Float_t[3*mNTrings]; }
+  void MakeTringCols()    { mTringCols  = new UChar_t[4*mNTrings]; }
 
   void AssertTringNorms() { if (!mTringNorms) MakeTringNorms(); }
   void AssertTringCols()  { if (!mTringCols)  MakeTringCols();  }
+
+  Bool_t HasTringNorms()  { return (mTringNorms != 0); }
+  Bool_t HasTringCols()   { return (mTringCols  != 0); }
+
 
   Int_t*   Triangle(Int_t i)       { return &(mTrings[3*i]);     }
   Float_t* TriangleNormal(Int_t i) { return &(mTringNorms[3*i]); }
@@ -96,6 +100,8 @@ public:
 
   void CalculateBoundingBox();
   void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }
+
+  Float_t BoundingBoxDiagonal();
 
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
