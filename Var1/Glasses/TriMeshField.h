@@ -57,9 +57,9 @@ public:
   void SetField(Float_t c0, Float_t c1, Float_t c2);
 
   void FindMinMaxField();  // X{E} 7 MCWButt()
-  void ColorizeTvor();     // X{E} 7 MCWButt()
 
-  void PartiallyRecolorTvor(set<Int_t> vertices);
+  void ColorizeTvor(Bool_t regen_tring_cols=true);  // X{E} 7 MCWButt()
+  void PartiallyColorizeTvor(set<Int_t> vertices, Bool_t regen_tring_cols=true);
 
   void FillByXYGaussBlobs(Int_t n_blobs = 20,
                           Float_t     A_min=10, Float_t     A_max=20,
