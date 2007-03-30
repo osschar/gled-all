@@ -1,5 +1,11 @@
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* make/make_targets.inc:
+	Split all_targets into a set of :: rules to enforce they're
+	processed one after another without explicit dependencies.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* configure:
 	In enumerative BUILD_FILES in auto-generated top-level Makefile
 	fix file-name include/config.h to include/gled-config.h. Missed
