@@ -6,6 +6,8 @@
 #include "TA_TextureContainer.h"
 #include <Glasses/ZQueen.h>
 
+#include <math.h>
+
 ClassImp(TA_SubUnit)
 
 struct o3dVert { long x, y, z; };
@@ -47,7 +49,7 @@ _TA_Prim::calc_normal(float* v0, float* v1, float* v2) {
   fNormal[1] = d0[2]*d1[0] - d0[0]*d1[2];
   fNormal[2] = d0[0]*d1[1] - d0[1]*d1[0];
 
-  float s = sqrt(fNormal[0]*fNormal[0] + fNormal[1]*fNormal[1] + fNormal[2]*fNormal[2]);
+  float s = sqrtf(fNormal[0]*fNormal[0] + fNormal[1]*fNormal[1] + fNormal[2]*fNormal[2]);
   fNormal[0] /= s; fNormal[1] /= s; fNormal[2] /= s;
 }
 
