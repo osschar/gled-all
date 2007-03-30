@@ -10,11 +10,13 @@
 //
 
 #include "ITSDigitsInfo.h"
-#include <AliITSresponseSDD.h>
+#include <AliITSCalibrationSDD.h>
 #include <AliITSdigit.h>
 #include <AliITSdigitSPD.h>
 
 #include <Gled/GledTypes.h>
+
+#include <TFile.h>
 
 ClassImp(ITSDigitsInfo)
 
@@ -153,8 +155,10 @@ void ITSDigitsInfo::SetITSSegmentation()
   // end of SPD geometry
   
   // SDD
-  AliITSresponseSDD *resp1 = new AliITSresponseSDD("simulated");
-  mSegSDD = new AliITSsegmentationSDD(mGeom, resp1);
+  AliITSresponseSDD *resp1 = new AliITSresponseSDD();
+  AliITSCalibrationSDD* cal1 = new AliITSCalibrationSDD;
+  cal1->SetResponse(resp1);
+  mSegSDD = new AliITSsegmentationSDD(mGeom, cal1);
 
   // SSD
   mSegSSD = new AliITSsegmentationSSD(mGeom);
