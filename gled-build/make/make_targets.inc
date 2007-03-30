@@ -7,7 +7,11 @@
 ##########################################################################
 
 
-all_targets: ${LIBSET_PREREQS} ${ALL_LIBS} ${LIBSET_TARGETS}
+all_targets:: ${LIBSET_PREREQS}
+
+all_targets:: ${ALL_LIBS}
+
+all_targets:: ${LIBSET_TARGETS}
 
 default: depend
 	${MAKE} all_targets
