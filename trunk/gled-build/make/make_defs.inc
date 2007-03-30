@@ -77,7 +77,7 @@ export MUTE ECHO
 # X11LIB, FLLIB, *_CONF set by configure
 
 GLLIB	  = -lGL -lGLU
-ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lThread -lCint \
+ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lThread -lCint -lRIO -lNet \
 		-lGraf -lGraf3d -lGpad \
 		-lHist -lHistPainter -lMatrix -lPhysics \
                 -lPostscript -lRint -lTree
