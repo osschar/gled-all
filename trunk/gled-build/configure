@@ -579,7 +579,7 @@ FNORD
   print M "SUBDIRS := ", join(' ', @{$resolver->{LibSetList}}), "\n";
   print M "BUILD_FILES := Makefile $CFGFILE \\\n";
   print M "\t$config->{ENVSETUPSTEM}.sh $config->{ENVSETUPSTEM}.csh \\\n";
-  print M "\tmake/make_config.inc make/make_rnr.inc include/config.h\n";
+  print M "\tmake/make_config.inc make/make_rnr.inc include/gled-config.h\n";
   print M "\n";
 
   print M "all:\n\n";
