@@ -476,10 +476,10 @@ sub build_filelist {
     my $output  = "$prefix files:";
     my $left    = 0;
     my $lastdir = "--no-where-dir--";
+    my $offset  = 16;
     for my $file (@files) {
         my ($dir, $subfile, $offset);
 	if ($file =~ m!/!) {
-	  $offset  = 16;
 	  ($dir, $subfile) = $file =~ m!(.*)/(.*)!;
 	  if ($dir ne $lastdir) {
 	    $lastdir = $dir;
@@ -492,7 +492,6 @@ sub build_filelist {
 	    $left = 80 - $len;
 	  }
 	} else {
-	  $offset  = 0;
 	  $dir = "";
 	  $subfile = $file;
 	}
@@ -501,12 +500,10 @@ sub build_filelist {
             $left -= length ($subfile) + 1;
         } else {
             $output .= "\n" . (' ' x $offset) . $subfile;
-            $left = 80 - $offset6 - length ($subfile);
+            $left = 80 - $offset - length ($subfile);
         }
     }
     $output =~ s/\s*$/\n/;
-    $prefix = (' ' x (8 - length ($prefix))) . $prefix;
-    $output =~ s/^ {10}/$prefix: /;
     return $output;
 }
 
