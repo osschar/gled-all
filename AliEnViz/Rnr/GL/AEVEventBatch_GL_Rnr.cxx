@@ -10,6 +10,8 @@
 #include <RnrBase/RnrDriver.h>
 #include <Glasses/ZRlNodeMarkup.h>
 
+#include <TMath.h>
+
 #include <FL/gl.h>
 
 /**************************************************************************/
