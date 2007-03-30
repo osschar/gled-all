@@ -1,3 +1,25 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	Changes for root-5-15-04 (increased modularity), remove support
+	for ROOT < 5.
+
+	* Glasses/ZGeoOvlMgr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+	
+	* Stones/TGeoShapeExtract.cxx:
+	* Stones/TGeoShapeExtract.h:
+	* Glasses/ZGeoRepacker.cxx:
+	* Glasses/ZGeoRepacker.h:
+	New stone TGeoShapeExtract and method
+	ZGeoRepacker::DumpShapeTree() allowing export of geometry as a
+	shape-tree (can be included into Reve which shares the
+	TGeoShapeExtract class).
+
+	* Makefile:
+	Changes for root-5-15-04 (increased modularity); put libRGL and
+	libGed into BASE_LD_LIBS.
+
 2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
