@@ -479,7 +479,7 @@ sub build_filelist {
     for my $file (@files) {
         my ($dir, $subfile);
 	if ($file =~ m!/!) {
-	  $file =~ m!(.*)/(.*)!;
+	  ($dir, $subfile) = $file =~ m!(.*)/(.*)!;
 	  if ($dir ne $lastdir) {
 	    $lastdir = $dir;
 	    $output .= "  $dir: ";
