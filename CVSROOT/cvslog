@@ -442,7 +442,7 @@ sub build_from {
 sub build_subject {
     my ($data, $prefix, $long) = @_;
     $prefix = "Subject: " . $prefix;
-    my $length = 78 - length ($prefix) - length ($$data{module});
+    my $length =  - length ($prefix) - length ($$data{module});
     $length = 8 if $length < 8;
     my $subject;
     if ($$data{type} eq 'directory') {
@@ -452,13 +452,16 @@ sub build_subject {
     } else {
         my @files = sort keys %{ $$data{files} };
         @files = simplify ($$data{prefix}, \@files);
-        my $files = join (' ', @files);
-        $files =~ s/[\n\r]/ /g;
-        if (!$long && length ($files) > $length) {
-            $subject = '(' . @files . (@files > 1 ? " files" : " file") . ')';
-        } else {
-            $subject = "($files)";
-        }
+	# MT just number of files
+	my $numfiles = $#files + 1;
+	$subject = "[$numfiles files changed]";
+        #my $files = join (' ', @files);
+        #$files =~ s/[\n\r]/ /g;
+        #if (!$long && length ($files) > $length) {
+        #    $subject = '(' . @files . (@files > 1 ? " files" : " file") . ')';
+        #} else {
+        #    $subject = "($files)";
+        #}
     }
     if ($$data{module}) {
         $subject = "$$data{module} $subject";
