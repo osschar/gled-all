@@ -32,8 +32,10 @@ include ${GLEDSYS}/make/make_targets.inc
 #--------------------------------------------------------------
 
 libOpcode.target:
-	make -C Opcode
+	${MAKE} -C Opcode
+
 clean::
-	make -C Opcode clean
+	${MAKE} -C Opcode clean
+
 distclean::
-	make -C Opcode distclean
+	${MAKE} -C Opcode distclean
