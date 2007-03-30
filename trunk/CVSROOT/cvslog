@@ -473,18 +473,27 @@ sub build_subject {
 # type of file they are.
 sub build_filelist {
     my ($prefix, @files) = @_;
-    my $output = ' ' x 9;
-    my $left = 69;
+    my $output  = "$prefix files:\n";
+    my $left    = 80;
+    my $lastdir = "--no-where-dir--";
     for my $file (@files) {
-        if (length ($file) + 1 < $left) {
-            $output .= ' ' . $file;
-            $left -= length ($file) + 1;
-        } elsif ($left == 69) {
-            $output .= ' ' . $file . "\n" . (' ' x 9);
+        my ($dir, $subfile) = $file =~ m!(.*)/(.*)!;
+	if ($dir ne $lastdir) {
+	  $lastdir = $dir;
+	  $output .= "  $dir: ";
+	  my $len = length ($dir) + 4;
+	  if ($len < 24) {
+	    $output .= ' ' x (24 - $len);
+	    $len = 24;
+	  }
+	  $left = 80 - $len;	  
+	}
+        if (length ($subfile) + 1 < $left) {
+            $output .= ' ' . $subfile;
+            $left -= length ($subfile) + 1;
         } else {
-            $output .= "\n" . (' ' x 9);
-            $output .= ' ' . $file;
-            $left = 69 - length ($file) - 1;
+            $output .= "\n" . (' ' x 24) . $file;
+            $left = 80 - 24 - length ($file);
         }
     }
     $output =~ s/\s*$/\n/;
