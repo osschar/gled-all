@@ -473,33 +473,35 @@ sub build_subject {
 # type of file they are.
 sub build_filelist {
     my ($prefix, @files) = @_;
-    my $output  = "$prefix files:\n";
-    my $left    = 80;
+    my $output  = "$prefix files:";
+    my $left    = 0;
     my $lastdir = "--no-where-dir--";
     for my $file (@files) {
-        my ($dir, $subfile);
+        my ($dir, $subfile, $offset);
 	if ($file =~ m!/!) {
+	  $offset  = 16;
 	  ($dir, $subfile) = $file =~ m!(.*)/(.*)!;
 	  if ($dir ne $lastdir) {
 	    $lastdir = $dir;
-	    $output .= "  $dir: ";
+	    $output .= "\n  $dir: ";
 	    my $len = length ($dir) + 4;
-	    if ($len < 16) {
-	      $output .= ' ' x (24 - $len);
-	      $len = 16;
+	    if ($len < $offset) {
+	      $output .= ' ' x ($offset - $len);
+	      $len = $offset;
 	    }
 	    $left = 80 - $len;
 	  }
 	} else {
+	  $offset  = 0;
 	  $dir = "";
 	  $subfile = $file;
 	}
-        if (length ($subfile) + 1 < $left) {
-            $output .= ' ' . $subfile;
+        if (length ($subfile) < $left) {
+            $output .= $subfile . ' ';
             $left -= length ($subfile) + 1;
         } else {
-            $output .= "\n" . (' ' x 16) . $subfile;
-            $left = 80 - 16 - length ($subfile);
+            $output .= "\n" . (' ' x $offset) . $subfile;
+            $left = 80 - $offset6 - length ($subfile);
         }
     }
     $output =~ s/\s*$/\n/;
@@ -568,6 +570,7 @@ sub build_message {
     push (@message, build_filelist ('Removed',  @removed))  if @removed;
     if (@{ $$message{text} }) {
         push (@message, "\n") if (@added || @modified || @removed);
+	push (@message, "Log entry:\n");
         push (@message, @{ $$message{text} });
     }
     return @message;
