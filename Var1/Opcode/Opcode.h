@@ -47,7 +47,7 @@
 #ifndef ASSERT
 #define	ASSERT(exp)  assert(exp)
 #endif
-#define Log  {}
+
 #define SetIceError(err, ptr) false
 
 namespace Opcode

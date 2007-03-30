@@ -174,7 +174,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 
   // Look for degenerate faces.
   udword NbDegenerate = create.mIMesh->CheckTopology();
-  if(NbDegenerate)	Log("OPCODE WARNING: found %d degenerate faces in model! Collision might report wrong results!\n", NbDegenerate);
+  if(NbDegenerate)	printf("OPCODE WARNING: found %d degenerate faces in model! Collision might report wrong results!\n", NbDegenerate);
   // We continue nonetheless.... 
 
   Release();	// Make sure previous tree has been discarded
