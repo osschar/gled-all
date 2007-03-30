@@ -1,3 +1,8 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* loadlibs.C:
+	New version of loadlibs from alice.
+
 2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliAnimator.C:
