@@ -17,6 +17,7 @@
 #include <Glasses/ZQueen.h>
 #include <Stones/ZComet.h>
 
+#include <TROOT.h>
 #include <TFile.h>
 #include <TBuffer3D.h>
 #include <TGLFaceSet.h>
@@ -73,15 +74,9 @@ void ZGeoNode::AssertUserData()
 
     if (userdata->fFaceSet == 0) {    
       TGeoVolume* vol = GetVolume();
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,0,0)
       const TBuffer3D& buff = GetVolume()->GetShape()->
 	GetBuffer3D(TBuffer3D::kRawSizes|TBuffer3D::kRaw, false);
       TGLFaceSet* fs = new TGLFaceSet(buff);
-#else
-      TBuffer3D*  buff = GetVolume()->GetShape()->MakeBuffer3D();
-      Float_t colorRGB[3] = {1, 0, 0};
-      TGLFaceSet* fs = new TGLFaceSet(*buff, colorRGB, mSaturnID, vol);
-#endif
       userdata->fFaceSet = fs;
       userdata->bIsImported = true;
       vol->SetField(userdata);
