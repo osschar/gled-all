@@ -14,6 +14,7 @@
 #include "ZGeoOvlMgr.c7"
 #include <Glasses/ZQueen.h>
 
+#include <TMath.h>
 #include <TGeoOverlap.h>
 #include <TPolyMarker3D.h>
 
