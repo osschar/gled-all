@@ -1,3 +1,19 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/GLTesterOne.cxx:
+	* Glasses/RGBAPalette.cxx:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/TimeMaker.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSSeed.cxx:
+	* Glasses/ZImage.cxx:
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/MD2Object_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Stones/TringTvor.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
 2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.cxx:

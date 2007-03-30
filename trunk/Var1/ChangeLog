@@ -1,3 +1,20 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TringuCam.cxx:
+	* Glasses/Tringula.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
+	* Opcode/OPC_HybridModel.cpp:
+	* Opcode/OPC_Model.cpp:
+	* Opcode/Opcode.cpp:
+	* Opcode/Opcode.h:
+	Removed 'define Log' and replaced all occurrences with printf.
+
 2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMeshField.cxx:
