@@ -10,6 +10,7 @@
 //
 
 #include "AliConverter.h"
+#include <TFile.h>
 #include "AliConverter.c7"
 
 #include <AliStack.h>
@@ -20,7 +21,7 @@
 #include <AliSimDigits.h>
 #include <AliKalmanTrack.h>
 #include <AliESD.h>
-#include <AliESDV0MI.h>
+#include <AliESDv0.h>
 #include <AliTPCclusterMI.h>
 #include <AliTPCClustersRow.h>
 #include <AliITS.h>
@@ -28,6 +29,8 @@
 #include <AliTrackReference.h>
 #include <AliESDkink.h>
 #include <AliITSLoader.h>
+
+#include <TMath.h>
 
 map<Int_t, GenInfo*> gimap;
 
@@ -181,10 +184,14 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   mTreeGI     = 0;
 
   pRunLoader->UnloadAll();
-  delete pRunLoader;
-  if(gAlice) {
-    delete gAlice; gAlice = 0;
-  }
+
+  // Crashing on 19.10.2006 (in deletion of tpcparamsrcrap)
+  // delete pRunLoader;
+  //if(gAlice) {
+  //  delete gAlice; gAlice = 0;
+  //}
+  gAlice = 0;
+
   pRunLoader = 0;
 }
 
@@ -297,7 +304,7 @@ void AliConverter::ConvertKinematicsFromStack()
   mDirectory->cd();
   mTreeK = new TTree("Kinematics", "TParticles sorted by Label");
  
-  Int_t nprimary = stack->GetNprimary();
+  // Int_t nprimary = stack->GetNprimary();
   Int_t nentries = stack->GetNtrack();
 
   vector<MCParticle>  vmc(nentries);
@@ -532,7 +539,9 @@ void AliConverter::ConvertTPCClusters()
   if(!tree.get())
     throw(_eh + "'TreeR' not found.");
 
-  auto_ptr<AliTPCParam> par( get_tpc_param(_eh) );
+  // Crashing on 19.10.2006 (in deletion of tpcparamsrcrap)
+  // auto_ptr<AliTPCParam> par( get_tpc_param(_eh) );
+  AliTPCParam* par ( get_tpc_param(_eh) );
 
   AliTPCClustersRow  clrow, *_clrow=&clrow;
   AliTPCclusterMI   *cl;
@@ -699,7 +708,7 @@ void AliConverter::ConvertRecTracks()
     esd_t = fEvent->GetTrack(n);
     esd_t->GetXYZ(mpR->fV);
     esd_t->GetPxPyPz(mpR->fP);
-    mpR->fSign  = esd_t->GetSign();
+    mpR->fSign  = (Int_t) esd_t->GetSign();
     mpR->fLabel = esd_t->GetLabel();
     mTreeR->Fill();
   }
@@ -734,44 +743,50 @@ void AliConverter::ConvertV0()
   tree->SetBranchAddress("ESD", &fEvent);
   tree->GetEntry(mEvent); 
 
-  for (Int_t n =0; n< fEvent->GetNumberOfV0MIs(); n++) {
-    AliESDV0MI* av = fEvent->GetV0MI(n);
+  for (Int_t n =0; n< fEvent->GetNumberOfV0s(); n++) {
+    AliESDv0* av = fEvent->GetV0(n);
+    AliESDtrack *trackN = fEvent->GetTrack(av->GetNindex()); // negative daughter
+    AliESDtrack *trackP = fEvent->GetTrack(av->GetPindex()); // positive daughter
+
     Double_t x,y,cos,sin; 
 
+    Double_t A[3];
+
     mV0.fStatus = av->GetStatus();
-    // distance to closest approach
-    mV0.fDCA[0] = av->GetXr(0); 
-    mV0.fDCA[1] = av->GetXr(1);
-    mV0.fDCA[2] = av->GetXr(2);
+    // Point of closest approach
+    av->GetXYZ(A[0], A[1], A[2]);
+    mV0.fDCA[0] = A[0];
+    mV0.fDCA[1] = A[1];
+    mV0.fDCA[2] = A[2];
     // set birth vertex of neutral particle     
-    av->GetXYZ(mV0.fV0[0],mV0.fV0[1],mV0.fV0[2]);
+    av->GetXYZ(mV0.fV0[0], mV0.fV0[1], mV0.fV0[2]);
 
     // momentum and position of negative particle
-    Double_t* pp = av->GetPMp();
-    mV0.fPM[0]=pp[0];  mV0.fPM[1]=pp[1]; mV0.fPM[2]=pp[2];
+    av->GetParamN()->GetPxPyPz(A);
+    mV0.fPM[0] = A[0]; mV0.fPM[1] = A[1]; mV0.fPM[2] = A[2];
     // read AliExternalTrackParam
-    x = av->GetParamM()->X(); 
-    y = av->GetParamM()->Y(); 
-    cos = TMath::Cos( av->GetParamM()->Alpha());
-    sin = TMath::Sin( av->GetParamM()->Alpha());
+    x = av->GetParamN()->GetX(); 
+    y = av->GetParamN()->GetY(); 
+    cos = TMath::Cos( av->GetParamN()->GetAlpha());
+    sin = TMath::Sin( av->GetParamN()->GetAlpha());
     mV0.fVM[0] = x*cos - y*sin;
     mV0.fVM[1] = x*sin + y*cos;
-    mV0.fVM[2] = av->GetParamM()->Z();
+    mV0.fVM[2] = av->GetParamN()->GetZ();
 
     // momentum and position of positive particle
-    Double_t* pm = av->GetPPp();
-    mV0.fPP[0]=pm[0];  mV0.fPP[1]=pm[1]; mV0.fPP[2]=pm[2];
-    x = av->GetParamP()->X();
-    y = av->GetParamP()->Y();
-    cos = TMath::Cos(av->GetParamP()->Alpha());
-    sin = TMath::Sin(av->GetParamP()->Alpha());
+    av->GetParamP()->GetPxPyPz(A);
+    mV0.fPP[0] = A[0]; mV0.fPP[1] = A[1]; mV0.fPP[2] = A[2];
+    x = av->GetParamP()->GetX();
+    y = av->GetParamP()->GetY();
+    cos = TMath::Cos(av->GetParamP()->GetAlpha());
+    sin = TMath::Sin(av->GetParamP()->GetAlpha());
     mV0.fVP[0] = x*cos - y*sin;
     mV0.fVP[1] = x*sin + y*cos;
-    mV0.fVP[2] = av->GetParamP()->Z();
+    mV0.fVP[2] = av->GetParamP()->GetZ();
 
     // daughter indices
-    mV0.fDLabels[0] = av->GetLab(0);
-    mV0.fDLabels[1] = av->GetLab(1);
+    mV0.fDLabels[0] = TMath::Abs(trackN->GetLabel());
+    mV0.fDLabels[1] = TMath::Abs(trackP->GetLabel());
 
     mV0.fPDG = av->GetPdgCode();
 
@@ -827,37 +842,31 @@ void AliConverter::ConvertKinks()
 
     { // momentum and position of mother 
       const AliExternalTrackParam& tp_mother = kk->RefParamMother();
-      TVector3 mom = tp_mother.Momentum();
-      mKK.fP[0] = mom.x();
-      mKK.fP[1] = mom.y();
-      mKK.fP[2] = mom.z();
+      tp_mother.GetPxPyPz(mKK.fP);
       const Double_t* par =  tp_mother.GetParameter();
       // printf("KINK Pt %f, %f \n",1/kk->fParamMother.Pt(),par[4] );
       mKK.fSign = (par[4] < 0) ? -1 : 1;
 
-      x = tp_mother.X(); 
-      y = tp_mother.Y(); 
-      cos = TMath::Cos(tp_mother.Alpha());
-      sin = TMath::Sin(tp_mother.Alpha());
+      x = tp_mother.GetX(); 
+      y = tp_mother.GetY(); 
+      cos = TMath::Cos(tp_mother.GetAlpha());
+      sin = TMath::Sin(tp_mother.GetAlpha());
       mKK.fV[0] = x*cos - y*sin;
       mKK.fV[1] = x*sin + y*cos;
-      mKK.fV[2] = tp_mother.Z();
+      mKK.fV[2] = tp_mother.GetZ();
     }
 
     { // momentum and position of daughter 
       const AliExternalTrackParam& tp_daughter = kk->RefParamDaughter();
-      TVector3 mom = tp_daughter.Momentum();
-      mKK.fDP[0]= mom.x();
-      mKK.fDP[1]= mom.y();
-      mKK.fDP[2]= mom.z();
+      tp_daughter.GetPxPyPz(mKK.fDP);
 
-      x = tp_daughter.X(); 
-      y = tp_daughter.Y(); 
-      cos = TMath::Cos(tp_daughter.Alpha());
-      sin = TMath::Sin(tp_daughter.Alpha());
+      x = tp_daughter.GetX(); 
+      y = tp_daughter.GetY(); 
+      cos = TMath::Cos(tp_daughter.GetAlpha());
+      sin = TMath::Sin(tp_daughter.GetAlpha());
       mKK.fEV[0] = x*cos - y*sin;
       mKK.fEV[1] = x*sin + y*cos;
-      mKK.fEV[2] = tp_daughter.Z();
+      mKK.fEV[2] = tp_daughter.GetZ();
     }
 
     mTreeKK->Fill();
