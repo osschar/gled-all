@@ -10,6 +10,8 @@
 #include <Glasses/ZGlass.h>
 #include <Glasses/ZGeoNode.h>
 
+class TGeoShapeExtract;
+
 class TGeoManager;
 class TGeoShape; class TGeoVolume; class TGeoNode;
 
@@ -50,12 +52,14 @@ protected:
 
   void repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume);
 
+  TGeoShapeExtract* dump_shape_tree(ZGeoNode* zgnode, TGeoShapeExtract* parent);
+
 public:
   ZGeoRepacker(const Text_t* n="ZGeoRepacker", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
 
   void RepackGeometry(); // X{Ed} 7 MButt()
-
+  void DumpShapeTree(const Text_t* name="Gentle");  // X{Ed} 7 MCWButt()
 
 #include "ZGeoRepacker.h7"
   ClassDef(ZGeoRepacker, 1)
