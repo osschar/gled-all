@@ -1,3 +1,27 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	Follow changes in AliESD.
+
+	* Stones/ITSDigitsInfo.cxx:
+	New calibration format.
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MenuDriver.cxx:
+	* Glasses/VSDSelector.cxx:
+	* Glasses/ZAliLoad.cxx:
+	* Stones/TOFDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
 2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AliConverter.cxx:
