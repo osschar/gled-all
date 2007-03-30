@@ -1,5 +1,10 @@
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Makefile:
+	Replace make with ${MAKE} for Opcode descend.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/Dynamico.cxx:
 	* Glasses/TriMesh.cxx:
 	* Glasses/TriMeshField.cxx:
