@@ -454,7 +454,7 @@ sub build_subject {
         @files = simplify ($$data{prefix}, \@files);
 	# MT just number of files
 	my $numfiles = $#files + 1;
-	$subject = "[$numfiles files changed]";
+	$subject = "[$numfiles file" . ($numfiles>1?"s":"") . " changed]";
         #my $files = join (' ', @files);
         #$files =~ s/[\n\r]/ /g;
         #if (!$long && length ($files) > $length) {
