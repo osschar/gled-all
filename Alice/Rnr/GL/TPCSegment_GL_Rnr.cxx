@@ -6,6 +6,9 @@
 
 #include "TPCSegment_GL_Rnr.h"
 #include <Glasses/TPCSegRnrMod.h>
+
+#include <TMath.h>
+
 #include <FL/gl.h>
 
 /**************************************************************************/

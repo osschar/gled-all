@@ -20,6 +20,8 @@
 #include <Glasses/WGlButton.h>
 #include <Stones/SGridStepper.h>
 
+#include <TMath.h>
+
 ClassImp(MenuDriver)
 
 /**************************************************************************/

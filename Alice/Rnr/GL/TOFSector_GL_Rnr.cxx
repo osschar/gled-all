@@ -8,8 +8,9 @@
 #include <GL/gl.h>
 #include <Rnr/GL/SphereTrings.h>
 
-#include <TMath.h>
 #include <AliTOFdigit.h>
+
+#include <TMath.h>
 
 /**************************************************************************/
 

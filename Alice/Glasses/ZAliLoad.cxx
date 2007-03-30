@@ -19,6 +19,8 @@
 
 #include <AliTPCParam.h>
 
+#include <TMath.h>
+
 ClassImp(ZAliLoad)
 
 /**************************************************************************/
