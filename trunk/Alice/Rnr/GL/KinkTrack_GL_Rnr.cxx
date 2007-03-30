@@ -7,6 +7,9 @@
 #include "KinkTrack_GL_Rnr.h"
 #include "HelixLineRnr.h"
 #include <Glasses/RecTrackRS.h>
+
+#include <TMath.h>
+
 #include <GL/gl.h>
 
 /**************************************************************************/

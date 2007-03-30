@@ -5,12 +5,16 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ITSScaledModule_GL_Rnr.h"
-#include <GL/gl.h>
 
 #include <AliITSdigit.h>
 #include <AliITSdigitSPD.h>
 #include <AliITSdigitSDD.h>
 #include <AliITSdigitSSD.h>
+
+#include <TMath.h>
+
+#include <GL/gl.h>
+
 /**************************************************************************/
 
 void ITSScaledModule_GL_Rnr::_init()

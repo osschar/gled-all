@@ -15,6 +15,8 @@
 
 #include <AliTOFdigit.h>
 
+#include <TFile.h>
+
 ClassImp(TOFDigitsInfo)
 
 /**************************************************************************/

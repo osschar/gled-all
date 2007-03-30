@@ -11,7 +11,7 @@
 
 #include "TPCDigitsInfo.h"
 #include <Gled/GledTypes.h>
-
+#include <TFile.h>
 
 ClassImp(TPCDigitsInfo)
 

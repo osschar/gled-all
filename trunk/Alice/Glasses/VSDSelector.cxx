@@ -10,6 +10,7 @@
 //
 
 #include "VSDSelector.h"
+#include <TFile.h>
 #include "VSDSelector.c7"
 
 #include <Glasses/ZGlass.h>

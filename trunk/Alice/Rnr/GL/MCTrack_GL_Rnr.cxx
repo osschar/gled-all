@@ -6,6 +6,9 @@
 
 #include "MCTrack_GL_Rnr.h"
 #include <Glasses/MCTrackRnrStyle.h>
+
+#include <TMath.h>
+
 #include <FL/gl.h>
 
 void MCTrack_GL_Rnr::_init()
