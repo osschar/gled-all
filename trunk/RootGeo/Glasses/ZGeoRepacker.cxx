@@ -12,7 +12,11 @@
 #include "ZGeoRepacker.h"
 #include "ZGeoRepacker.c7"
 
+#include <Stones/TGeoShapeExtract.h>
+
 #include <TGeoManager.h>
+
+#include <TFile.h>
 
 ClassImp(ZGeoRepacker)
 
@@ -45,8 +49,6 @@ void ZGeoRepacker::RepackGeometry()
 
   gGeoManager = mSrcGeo;
 }
-
-/**************************************************************************/
 
 void ZGeoRepacker::repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume)
 {
@@ -100,3 +102,64 @@ void ZGeoRepacker::repack_geometry(ZGeoNode* zgnode, TGeoVolume* parent_volume)
   }
 }
 
+/**************************************************************************/
+
+void ZGeoRepacker::DumpShapeTree(const Text_t* name)
+{
+  TGeoShapeExtract* gse = dump_shape_tree(*mRoot, 0);
+  TFile f(mOutFile, "UPDATE");
+  gse->Write(name);
+  f.Close();
+}
+
+TGeoShapeExtract*
+ZGeoRepacker::dump_shape_tree(ZGeoNode* zgnode, TGeoShapeExtract* parent)
+{
+  TGeoNode*   tnode   = 0;
+  TGeoVolume* tvolume = 0;
+  TGeoShape*  tshape  = 0;
+
+  tnode = zgnode->GetTNode();
+  if(tnode == 0) {
+    printf("Null node for %s; assuming it's a holder and descending.\n",
+	   zgnode->Identify().Data());
+    goto do_dump;
+  }
+
+  tvolume = tnode->GetVolume();
+  if(tvolume == 0) {
+    printf("Null volume for %s; skipping.\n", zgnode->Identify().Data());
+    return 0;
+  }
+
+  tshape  = tvolume->GetShape();
+
+do_dump:
+  ZTrans trans;
+  if (parent) trans.SetFromArray(parent->mTrans);
+  trans *= zgnode->RefTrans();
+
+  TGeoShapeExtract* gse = new TGeoShapeExtract(zgnode->GetName(),
+					       zgnode->GetTitle());
+  gse->SetTrans(trans.Array());
+  gse->SetRGBA (zgnode->PtrColor()->array());
+  gse->mRnrSelf     = zgnode->GetRnrSelf();
+  gse->mRnrElements = zgnode->GetRnrElements();
+  gse->mShape       = tshape;
+
+  if ( ! zgnode->IsEmpty())
+  {
+    gse->mElements = new TList;
+    gse->mElements->SetOwner(true);
+
+    list<ZGeoNode*> l;
+    zgnode->CopyListByGlass<ZGeoNode>(l);
+    for(list<ZGeoNode*>::iterator i=l.begin(); i!=l.end(); ++i)
+      dump_shape_tree(*i, gse);
+  }
+
+  if(parent)
+    parent->mElements->Add(gse);
+
+  return gse;
+}
