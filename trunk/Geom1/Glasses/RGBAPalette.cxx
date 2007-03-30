@@ -4,6 +4,8 @@
 #include "RGBAPalette.c7"
 
 #include <TColor.h>
+#include <TMath.h>
+#include <TROOT.h>
 #include <TStyle.h>
 #include <TSystem.h>
 

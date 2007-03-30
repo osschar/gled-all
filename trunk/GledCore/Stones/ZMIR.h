@@ -122,7 +122,7 @@ public:
 // ZMIR_Result_Report
 /**************************************************************************/
 
-class ZMIR_Result_Report : public TBuffer {
+class ZMIR_Result_Report : public TBufferFile {
 private:
    ZMIR_Result_Report(const ZMIR_Result_Report &); // not implemented
    void operator=(const ZMIR_Result_Report &);     // not implemented
@@ -133,7 +133,7 @@ public:
   UChar_t	MirRRBits;
   TString	Exception;
 
-  ZMIR_Result_Report() : TBuffer(TBuffer::kWrite) {}
+  ZMIR_Result_Report() : TBufferFile(TBuffer::kWrite) {}
   virtual ~ZMIR_Result_Report() {}
 
   Bool_t HasException()  { return MirRRBits & B_HasException; }

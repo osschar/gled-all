@@ -14,6 +14,7 @@
 #include <Glasses/RGBAPalette.h>
 #include "TriMeshField.c7"
 
+#include <TMath.h>
 #include <TRandom.h>
 #include <TF3.h>
 

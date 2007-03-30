@@ -197,7 +197,7 @@ ZGlass* ZVector::GetElementById(Int_t index)
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, l);
     mSaturn->ShootMIRResult(b);
   }

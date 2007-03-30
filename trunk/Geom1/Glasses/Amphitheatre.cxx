@@ -14,6 +14,8 @@
 #include <Glasses/ZQueen.h>
 #include <Glasses/Sphere.h>
 
+#include <TMath.h>
+
 ClassImp(Amphitheatre)
 
 /**************************************************************************/

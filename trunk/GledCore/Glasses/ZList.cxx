@@ -152,7 +152,7 @@ ZGlass* ZList::FrontElement()
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, l);
     mSaturn->ShootMIRResult(b);
   }
@@ -167,7 +167,7 @@ ZGlass* ZList::BackElement()
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, l);
     mSaturn->ShootMIRResult(b);
   }
@@ -201,7 +201,7 @@ ZGlass* ZList::PopBack()
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, l);
     mSaturn->ShootMIRResult(b);
   }
@@ -235,7 +235,7 @@ ZGlass* ZList::PopFront()
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, l);
     mSaturn->ShootMIRResult(b);
   }

@@ -14,6 +14,8 @@
 
 #include <Stones/TringTvor.h>
 
+#include <TMath.h>
+
 ClassImp(Dynamico)
 
 /**************************************************************************/

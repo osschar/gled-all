@@ -29,6 +29,8 @@ public:
   ZTrans();
   ZTrans(const ZTrans& z);
   ZTrans(const ZNode* n);
+  ZTrans(const Double_t arr[16]);
+  ZTrans(const Float_t  arr[16]);
   virtual ~ZTrans() {}
 
   // General operations
@@ -36,6 +38,8 @@ public:
   void     UnitTrans();
   void     UnitRot();
   void     SetTrans(const ZTrans& t);
+  void     SetFromArray(const Double_t arr[16]);
+  void     SetFromArray(const Float_t  arr[16]);
   ZTrans&  operator=(const ZTrans& t) { SetTrans(t); return *this; }
   void     SetupRotation(Int_t i, Int_t j, Double_t f);
 
@@ -48,6 +52,8 @@ public:
   void MultLeft(const ZTrans& t);
   void MultRight(const ZTrans& t);
   void operator*=(const ZTrans& t) { MultRight(t); }
+
+  void TransposeRotationPart();
 
   ZTrans operator*(const ZTrans& t);
 

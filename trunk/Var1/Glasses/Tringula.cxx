@@ -23,6 +23,7 @@
 
 #include <Opcode/Opcode.h>
 
+#include <TMath.h>
 #include <TF3.h>
 
 ClassImp(Tringula);

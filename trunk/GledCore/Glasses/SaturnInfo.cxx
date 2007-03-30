@@ -183,7 +183,7 @@ void SaturnInfo::TellAverages()
   gSystem->ClosePipe(p);
 
 
-  TBuffer ret(TBuffer::kWrite);
+  TBufferFile ret(TBuffer::kWrite);
   ret << l[0] << l[1] << l[2];
   mSaturn->ShootMIRResult(ret);
 }

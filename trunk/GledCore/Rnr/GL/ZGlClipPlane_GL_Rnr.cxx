@@ -7,6 +7,9 @@
 #include "ZGlClipPlane_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 #include <Rnr/GL/GLRnrDriver.h>
+
+#include <TMath.h>
+
 #include <GL/gl.h>
 
 #define PARENT ZRnrModBase_GL_Rnr

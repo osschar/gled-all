@@ -22,6 +22,8 @@
 
 #include <IL/il.h>
 
+#include <TMath.h>
+
 #include <stdio.h>
 
 ClassImp(RectTerrain)

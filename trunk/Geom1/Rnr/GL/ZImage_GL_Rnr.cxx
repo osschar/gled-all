@@ -8,6 +8,8 @@
 #include <Eye/Eye.h>
 #include <Stones/ZMIR.h> // Required by gcc-3.2 (not by gcc-4)
 
+#include <TMath.h>
+
 /**************************************************************************/
 
 Int_t ZImage_GL_Rnr::sRescaleToPow2 = -1;

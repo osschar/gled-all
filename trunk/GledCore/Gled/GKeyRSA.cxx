@@ -10,7 +10,7 @@
 // Example of trivial use:
 //
 //    GKeyRSA k1, k2;
-//    TBuffer b(TBuffer::kWrite);
+//    TBufferFile b(TBuffer::kWrite);
 //    try {
 //       k1.ReadPubKey(PubKeyFile(mSaturnIdentity));
 //       k1.GenerateSecret();

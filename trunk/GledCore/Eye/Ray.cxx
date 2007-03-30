@@ -14,7 +14,7 @@
 #include "Ray.h"
 #include <Glasses/ZGlass.h>
 #include <Glasses/AList.h>
-#include <TBuffer.h>
+#include <TBufferFile.h>
 
 /**************************************************************************/
 
@@ -71,7 +71,7 @@ void Ray::Write(TBuffer& b)
 void Ray::SetCustomBuffer(TBuffer& b)
 {
   fCustomLen = b.Length();
-  fCustomBuffer = new TBuffer(TBuffer::kWrite, fCustomLen, b.Buffer(), kTRUE);
+  fCustomBuffer = new TBufferFile(TBuffer::kWrite, fCustomLen, b.Buffer(), kTRUE);
   b.DetachBuffer();
   fCustomBuffer->SetBufferOffset(fCustomLen);
   fRayBits |= RB_CustomBuffer;
@@ -95,7 +95,7 @@ void Ray::Read(TBuffer& b)
   if(fRayBits & RB_GammaLabel) b >> fGammaLabel;
   if(fRayBits & RB_CustomBuffer) {
     b >> fCustomLen;
-    fCustomBuffer = new TBuffer(TBuffer::kRead, fCustomLen, b.Buffer() + b.Length(), kFALSE);
+    fCustomBuffer = new TBufferFile(TBuffer::kRead, fCustomLen, b.Buffer() + b.Length(), kFALSE);
   } else {
     fCustomLen = 0; fCustomBuffer = 0;
   }

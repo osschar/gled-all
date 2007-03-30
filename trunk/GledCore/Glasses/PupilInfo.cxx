@@ -27,6 +27,8 @@
 #include "PupilInfo.c7"
 #include <Glasses/ZQueen.h>
 
+#include <TMath.h>
+
 ClassImp(PupilInfo)
 
 void PupilInfo::_init()
@@ -295,7 +297,7 @@ void PupilInfo::EmitDumpImageRay(TString filename, Int_t n_tiles, Bool_t signal_
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_dump_image, mTimeStamp, FID()));
 
-    TBuffer cbuff(TBuffer::kWrite);
+    TBufferFile cbuff(TBuffer::kWrite);
     cbuff << filename;
     cbuff << n_tiles;
     cbuff << signal_p;

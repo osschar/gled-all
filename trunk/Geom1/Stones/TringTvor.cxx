@@ -16,9 +16,10 @@
 //   triangle strip data
 //
 
-
 #include "TringTvor.h"
 #include <TVector3.h>
+
+#include <TMath.h>
 
 ClassImp(TringTvor);
 

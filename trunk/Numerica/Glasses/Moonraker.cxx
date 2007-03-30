@@ -17,6 +17,8 @@
 #include "Moonraker.h"
 #include "Moonraker.c7"
 
+#include <TMath.h>
+
 ClassImp(Moonraker)
 
 void Moonraker::_init()

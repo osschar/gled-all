@@ -15,6 +15,8 @@
 #include <Glasses/Eventor.h>
 #include <Glasses/ZQueen.h>
 
+#include <TMath.h>
+
 ClassImp(TimeMaker);
 
 /**************************************************************************/
