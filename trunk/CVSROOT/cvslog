@@ -478,7 +478,7 @@ sub build_filelist {
     my $lastdir = "--no-where-dir--";
     my $offset  = 16;
     for my $file (@files) {
-        my ($dir, $subfile, $offset);
+        my ($dir, $subfile);
 	if ($file =~ m!/!) {
 	  ($dir, $subfile) = $file =~ m!(.*)/(.*)!;
 	  if ($dir ne $lastdir) {
