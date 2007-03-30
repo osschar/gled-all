@@ -33,6 +33,7 @@
 
 #include <Glasses/ZQueen.h>
 
+#include <TMath.h>
 #include <TSystem.h>
 
 ClassImp(AEVDemoDriver)

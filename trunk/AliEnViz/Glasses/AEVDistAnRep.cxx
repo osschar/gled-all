@@ -27,6 +27,8 @@
 
 #include <RegExp/TPME.h>
 
+#include <TMath.h>
+
 ClassImp(AEVDistAnRep)
 
 /**************************************************************************/
@@ -622,7 +624,7 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
 
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     b << n_left;
     mSaturn->ShootMIRResult(b);
   }
@@ -798,7 +800,7 @@ Int_t AEVDistAnRep::FakeReplayJobFromHistory()
 
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     b << n_todo;
     mSaturn->ShootMIRResult(b);
   }

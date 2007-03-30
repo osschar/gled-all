@@ -16,6 +16,8 @@
 
 #include <Glasses/ZQueen.h>
 
+#include <TMath.h>
+
 ClassImp(AEVFlatSSpace)
 
 /**************************************************************************/
