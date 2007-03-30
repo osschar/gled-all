@@ -18,6 +18,8 @@
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
 
+#include <float.h>
+
 namespace GNS = GledNS;
 namespace OS  = OptoStructs;
 namespace FGS = FltkGledStuff;

@@ -19,6 +19,7 @@
 #include <TSystem.h>
 #include <TVirtualMutex.h>
 
+#include <TROOT.h>
 #include <TClass.h>
 #include <TRealData.h>
 #include <TDataMember.h>

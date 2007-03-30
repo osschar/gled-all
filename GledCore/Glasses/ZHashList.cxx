@@ -153,7 +153,7 @@ ZGlass* ZHashList::ElementAfter(ZGlass* lens)
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, ret);
     mSaturn->ShootMIRResult(b);
   }
@@ -173,7 +173,7 @@ ZGlass* ZHashList::ElementBefore(ZGlass* lens)
   }
   ZMIR* mir = get_MIR();
   if(mir && mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     GledNS::WriteLensID(b, ret);
     mSaturn->ShootMIRResult(b);
   }

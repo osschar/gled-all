@@ -32,10 +32,10 @@
 #include <Stones/ZHistoManager.h>
 
 #include <TROOT.h>
+#include <TClass.h>
 #include <TFile.h>
 #include <TDirectory.h>
 #include <TSystem.h>
-
 
 #include <errno.h>
 #include <signal.h>

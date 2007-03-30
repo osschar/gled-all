@@ -20,6 +20,7 @@
 #include <TVirtualX.h>
 #include <TSystem.h>
 #include <TVector3.h>
+#include <TMath.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Button.H>
@@ -96,7 +97,7 @@ namespace {
       width = w; height = h; bits = 24;
     }
     void dump(FILE* fp) {
-      TBuffer b(TBuffer::kWrite);
+      TBufferFile b(TBuffer::kWrite);
       b << identsize << colourmaptype << imagetype;
       b << ss(colourmapstart) << ss(colourmaplength) << colourmapbits;
       b << ss(xstart) << ss(ystart) << ss(width) << ss(height);

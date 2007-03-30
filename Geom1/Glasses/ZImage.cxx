@@ -21,6 +21,7 @@
 #include <IL/ilu.h>
 #include <GL/gl.h>
 
+#include <TMath.h>
 #include <TSystem.h>
 
 namespace {

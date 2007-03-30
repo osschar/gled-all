@@ -7,6 +7,8 @@
 #include "Amphitheatre_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
 
+#include <TMath.h>
+
 /**************************************************************************/
 
 void Amphitheatre_GL_Rnr::_init()

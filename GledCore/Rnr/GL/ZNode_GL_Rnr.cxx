@@ -10,6 +10,8 @@
 #include <Rnr/GL/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
+#include <TMath.h>
+
 #include <GL/gl.h>
 
 namespace GNS = GledNS;

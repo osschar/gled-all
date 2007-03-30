@@ -7,6 +7,7 @@
 #include "Spheror.h"
 #include <Glasses/ZQueen.h>
 
+#include <TMath.h>
 
 
 ClassImp(Spheror)

@@ -6,6 +6,8 @@
 
 #include "Moonraker_GL_Rnr.h"
 
+#include <TMath.h>
+
 void Moonraker_GL_Rnr::_init()
 {
   mQuadric = gluNewQuadric();

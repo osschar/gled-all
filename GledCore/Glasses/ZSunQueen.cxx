@@ -371,7 +371,7 @@ void ZSunQueen::initiate_mee_connection()
   NCMData* ncmd = new NCMData(mee, req);
   UInt_t cid = mNCMasterData.insert(ncmd);
 
-  TBuffer ret(TBuffer::kWrite);
+  TBufferFile ret(TBuffer::kWrite);
   if(use_auth) {
     ret << (UChar_t)CRR_ReqAuth;
     ret << cid;
@@ -493,7 +493,7 @@ ID_t ZSunQueen::incarnate_mee(UInt_t conn_id)
 
   ID_t id;
   ZMIR* mirp = 0;
-  TBuffer streamed_mee(TBuffer::kWrite);
+  TBufferFile streamed_mee(TBuffer::kWrite);
 
   if(GledNS::IsA(ncd->fNewMEE, SaturnInfo::FID())) {
     SaturnInfo* si = (SaturnInfo*)ncd->fNewMEE;

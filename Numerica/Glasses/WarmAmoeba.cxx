@@ -6,6 +6,8 @@
 #include <Ephra/Mountain.h>
 #include <Gled/GledMirDefs.h>
 
+#include <TMath.h>
+
 ClassImp(WarmAmoeba)
 
 /**************************************************************************/

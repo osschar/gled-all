@@ -20,6 +20,7 @@
 
 #include <Gled/GThread.h>
 
+#include <TMath.h>
 #include <TF1.h>
 
 //--- tmp ---

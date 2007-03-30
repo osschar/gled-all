@@ -10,6 +10,8 @@
 #include "ZRnrModList.h"
 #include <Stones/ZComet.h>
 
+#include <TMath.h>
+
 #include <ctype.h>
 
 typedef list<ZNode*>           lpZNode_t;

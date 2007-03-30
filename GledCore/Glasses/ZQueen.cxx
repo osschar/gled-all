@@ -110,7 +110,7 @@ void ZQueen::embrace_of_life(ZComet& comet)
   assert(VFID() == queen->VFID());
 
   { // Re-stream the queen and read it back into *this*
-    TBuffer qb(TBuffer::kWrite);
+    TBufferFile qb(TBuffer::kWrite);
     queen->Streamer(qb);
     qb.SetReadMode(); qb.SetBufferOffset(0);
     ZHashList* ex_deps = mDeps.get();
@@ -527,7 +527,7 @@ ID_t ZQueen::InstantiateWAttach(LID_t new_lid, CID_t new_cid,
   }
 
   if(mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     b << lens->mSaturnID;
     mSaturn->ShootMIRResult(b);
   }
@@ -598,7 +598,7 @@ ID_t ZQueen::IncarnateWAttach()
   }
 
   if(mir->HasResultReq()) {
-    TBuffer b(TBuffer::kWrite);
+    TBufferFile b(TBuffer::kWrite);
     b << lens->mSaturnID;
     mSaturn->ShootMIRResult(b);
   }

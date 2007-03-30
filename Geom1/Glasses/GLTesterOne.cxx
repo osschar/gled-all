@@ -24,6 +24,7 @@
 
 #include <Gled/GTime.h>
 
+#include <TMath.h>
 #include <TPad.h>
 
 ClassImp(GLTesterOne)

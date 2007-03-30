@@ -7,6 +7,8 @@
 #include "MD2Object_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
 
+#include <TMath.h>
+
 #include <GL/gl.h>
 
 /**************************************************************************/

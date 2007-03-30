@@ -26,6 +26,8 @@
 
 #include <Opcode/Opcode.h>
 
+#include <TMath.h>
+
 ClassImp(TriMesh)
 
 /**************************************************************************/

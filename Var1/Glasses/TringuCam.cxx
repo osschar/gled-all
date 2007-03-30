@@ -17,6 +17,8 @@
 
 #include "TriMesh.h"
 
+#include <TMath.h>
+
 ClassImp(TringuCam)
 
 /**************************************************************************/

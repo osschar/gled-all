@@ -15,12 +15,14 @@
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
 #include <Rnr/GL/ZRlNodeMarkup_GL_Rnr.h>
 
+#include <TMath.h>
+
+#include <GL/glu.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <TString.h>
-#include <GL/glu.h>
 
 namespace GLTextNS {
 
