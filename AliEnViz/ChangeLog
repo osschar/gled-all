@@ -1,0 +1,10 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVDemoDriver.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVFlatSSpace.cxx:
+	* Glasses/AEVSphereSSpace.cxx:
+	* Rnr/GL/AEVEventBatch_GL_Rnr.cxx:
+	* Stones/AEVProofFeedback.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
