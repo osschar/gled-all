@@ -11,4 +11,5 @@
 #	[<whitespace>]<filename><whitespace><error message><end-of-line>
 #
 # comment lines begin with '#'
-cvslog Unable to check out CVS log notification script cvslog
+cvslog  Unable to check out CVS log notification script cvslog
+cvsprep Unable to check out CVS log notification script cvsprep
