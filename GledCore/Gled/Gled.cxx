@@ -18,6 +18,7 @@
 #include <TSystem.h>
 #include <TROOT.h>
 #include <TRint.h>
+#include <TMath.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
 #include <TSystemDirectory.h>
@@ -156,7 +157,7 @@ void Gled::ParseArguments(list<char*>& args)
       if(index(*i, 'e')) {
 	int m, e, num = sscanf(*i, "%de%d", &m, &e);
 	if(num != 2) { cerr <<"-sssize poor exp format: "<< *i <<endl; exit(1); }
-	mSaturnInfo->SetSunSpaceSize( ID_t(pow(double(m),e)) );
+	mSaturnInfo->SetSunSpaceSize( ID_t(TMath::Power(m, e)) );
       } else {
 	mSaturnInfo->SetSunSpaceSize( ID_t(atoll(*i)) );
       }
