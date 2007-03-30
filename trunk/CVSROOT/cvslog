@@ -477,23 +477,29 @@ sub build_filelist {
     my $left    = 80;
     my $lastdir = "--no-where-dir--";
     for my $file (@files) {
-        my ($dir, $subfile) = $file =~ m!(.*)/(.*)!;
-	if ($dir ne $lastdir) {
-	  $lastdir = $dir;
-	  $output .= "  $dir: ";
-	  my $len = length ($dir) + 4;
-	  if ($len < 24) {
-	    $output .= ' ' x (24 - $len);
-	    $len = 24;
+        my ($dir, $subfile);
+	if ($file =~ m!/!) {
+	  $file =~ m!(.*)/(.*)!;
+	  if ($dir ne $lastdir) {
+	    $lastdir = $dir;
+	    $output .= "  $dir: ";
+	    my $len = length ($dir) + 4;
+	    if ($len < 16) {
+	      $output .= ' ' x (24 - $len);
+	      $len = 16;
+	    }
+	    $left = 80 - $len;
 	  }
-	  $left = 80 - $len;	  
+	} else {
+	  $dir = "";
+	  $subfile = $file;
 	}
         if (length ($subfile) + 1 < $left) {
             $output .= ' ' . $subfile;
             $left -= length ($subfile) + 1;
         } else {
-            $output .= "\n" . (' ' x 24) . $file;
-            $left = 80 - 24 - length ($file);
+            $output .= "\n" . (' ' x 16) . $subfile;
+            $left = 80 - 16 - length ($subfile);
         }
     }
     $output =~ s/\s*$/\n/;
