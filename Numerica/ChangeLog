@@ -1,3 +1,11 @@
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Spheror.cxx:
+	* Glasses/WarmAmoeba.cxx:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
 2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Moonraker.cxx:
