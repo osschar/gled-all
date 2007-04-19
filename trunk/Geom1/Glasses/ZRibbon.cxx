@@ -69,7 +69,7 @@ void ZRibbon::LoadPOV()
     
   }
   gSystem->ClosePipe(pov);
-  printf("ZRibbon::LoadPOV loaded %lu marks from '%s'.\n",
+  printf("ZRibbon::LoadPOV loaded %zu marks from '%s'.\n",
 	 mColMarks.size(), mPOVFile.Data());
 
   mStampReqTring = Stamp(FID());
