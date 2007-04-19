@@ -165,7 +165,7 @@ void RGBAPalette::SetMarksFromPOVFile(const Text_t* file_name)
     
   }
   gSystem->ClosePipe(pov);
-  printf("%s%d marks from '%s'.\n", _eh.Data(), mColorMarks.size(), file_name);
+  printf("%s%lu marks from '%s'.\n", _eh.Data(), mColorMarks.size(), file_name);
 
   ClearColorArray();
   StampReqTring();
