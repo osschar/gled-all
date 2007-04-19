@@ -277,7 +277,7 @@ void ZVector::SetNextIdx(Int_t nextidx)
 
 void ZVector::dumpVecStat()
 {
-  printf("%s size=%lu (mSize=%d), capacity=%lu (mReserved=%d)\n",
+  printf("%s size=%zu (mSize=%d), capacity=%zu (mReserved=%d)\n",
          GetName(), mElements.size(), mSize, mElements.capacity(), mReserved);
 }
 
