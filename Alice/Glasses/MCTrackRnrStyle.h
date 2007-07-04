@@ -53,6 +53,7 @@ class MCTrackRnrStyle : public PRSBase, public TimeMakerClient
   Bool_t                   mRnrPoints;       // X{GST}  7 Bool()
   ZColor                   mSingleCol;       // X{GSPT} 7 ColorButt(-join=>1)
   ZColor                   mHeadCol;         // X{GSPT} 7 ColorButt(-join=>1)
+  Bool_t                   mTxtAll;          // X{GST}  7 Bool()
   Float_t                  mAlphaS;          // X{GST}  7 Value(-range=>[0,1, 1,1000],-join=>1)
   Float_t                  mHeadS;           // X{GST}  7 Value(-range=>[0,1, 1,1000])
   // PDG colors
