@@ -50,9 +50,7 @@ class MCTrack_GL_Rnr : public ZNode_GL_Rnr
     ZNode_GL_Rnr(idol), mMCTrack(idol), mParticleRMS(FID_t(0,0))
   { _init(); }
 
-  virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  virtual void PostDraw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
 
 }; // endclass MCTrack_GL_Rnr

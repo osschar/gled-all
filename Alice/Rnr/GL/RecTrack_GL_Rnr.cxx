@@ -21,21 +21,10 @@ void RecTrack_GL_Rnr::_init()
 
 /**************************************************************************/
 
-void RecTrack_GL_Rnr::PreDraw(RnrDriver* rd)
-{
-  // Completely ignore position information.
-  ZGlass_GL_Rnr::PreDraw(rd);
-}
-
 void RecTrack_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mTrackRMS);
   ZNode_GL_Rnr::Draw(rd);
-}
-
-void RecTrack_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-  ZGlass_GL_Rnr::PostDraw(rd);
 }
 
 /**************************************************************************/

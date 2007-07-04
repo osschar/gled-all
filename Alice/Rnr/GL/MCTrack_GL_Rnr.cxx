@@ -20,21 +20,10 @@ void MCTrack_GL_Rnr::_init()
 
 /**************************************************************************/
 
-void MCTrack_GL_Rnr::PreDraw(RnrDriver* rd)
-{
-  // Completely ignore position information.
-  ZGlass_GL_Rnr::PreDraw(rd);
-}
-
 void MCTrack_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mParticleRMS);
   ZNode_GL_Rnr::Draw(rd);
-}
-
-void MCTrack_GL_Rnr::PostDraw(RnrDriver* rd)
-{
-  ZGlass_GL_Rnr::PostDraw(rd);
 }
 
 /**************************************************************************/

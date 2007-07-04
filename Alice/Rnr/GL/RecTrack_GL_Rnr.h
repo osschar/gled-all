@@ -24,9 +24,7 @@ public:
     ZNode_GL_Rnr(idol), mRecTrack(idol), mTrackRMS(FID_t(0,0))
   { _init(); }
 
-  virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  virtual void PostDraw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
 }; // endclass RecTrack_GL_Rnr
 
