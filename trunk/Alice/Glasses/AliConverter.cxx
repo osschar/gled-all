@@ -124,7 +124,7 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   GledNS::PushFD();
 
   mFile = TFile::Open(vsd_file, "RECREATE", "ALICE VisualizationDataSummary");
-  mDirectory = new TDirectory("Event0", "");
+  mDirectory = new TDirectoryFile("Event0", "");
   mDirectory->cd();
 
   try {
