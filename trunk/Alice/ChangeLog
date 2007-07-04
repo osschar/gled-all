@@ -1,3 +1,23 @@
+2007-07-04  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/AliConverter.cxx:
+	* Stones/TPCDigitsInfo.cxx:
+	Event directory is TDirectoryFile instead of TDirectory. 
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+	Add functionality to texture all tracks.
+
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	Call SetAddress() on TPCDigitsInfo tree each time segment is rendered.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.h:
+	Do not override method PreDraw() and PostDraw() inherited from
+	ZNode so that each track can be transformed individually.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AliConverter.cxx:
