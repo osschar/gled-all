@@ -36,6 +36,7 @@ void MCTrackRnrStyle::_init()
   mUseSingleCol = true;
   mSingleCol.rgba(.6,1,.9,1.);
   mHeadCol.rgba(1,.2,.5,1.);
+  mTxtAll    = false;
   mAlphaS = 0.2;
   mHeadS  = 0.2;
 
@@ -103,6 +104,8 @@ ZColor MCTrackRnrStyle::GetPdgColor(Int_t pdg)
 
 ZImage* MCTrackRnrStyle::GetPdgTexture(Int_t pdg)
 {
+  if(mTxtAll) return *mTexture;
+
   Int_t pdga = TMath::Abs(pdg);
   if (pdga > 100 && pdga < 100000) {
     Int_t i  = pdga;
