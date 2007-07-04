@@ -54,6 +54,8 @@ void TPCSegment_GL_Rnr::Render(RnrDriver* rd)
   }
   memset(mImage, 0, ImageWidth*ImageHeight*4);
 
+  t->GetBranch("Segment")->SetAddress(&digit);
+
   ent = info->mSegEnt[mTPCSegment->mSegment];
   if(ent != -1) {
     row=0;
