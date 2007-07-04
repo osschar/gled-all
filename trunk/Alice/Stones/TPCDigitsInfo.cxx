@@ -57,7 +57,7 @@ void TPCDigitsInfo::SetData(const Text_t* data_dir, Int_t event)
     throw(_eh + "can not open TPC.Digits.root.");
 
   const Text_t* ev_dir = GForm("Event%d", event);
-  TDirectory* d = (TDirectory*)f2->Get(ev_dir);
+  TDirectoryFile* d = (TDirectoryFile*)f2->Get(ev_dir);
   if(d == 0)
     throw(_eh + "can not get directory '"+ ev_dir +"'.");
   mTree = (TTree*)d->Get("TreeD");
