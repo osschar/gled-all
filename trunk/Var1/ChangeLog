@@ -1,3 +1,8 @@
+2007-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMeshField.cxx:
+	Fix for root-5.16.00.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
