@@ -8,7 +8,7 @@
 #include <Rnr/GL/GLRnrDriver.h>
 
 #include <TGLFaceSet.h>
-#include <TGLDrawFlags.h>
+#include <TGLRnrCtx.h>
 
 #include <GL/gl.h>
 
@@ -19,6 +19,9 @@ void ZGeoNode_GL_Rnr::_init()
 
 /**************************************************************************/
 
+namespace {
+TGLRnrCtx sgRnrCtx(0);
+}
 
 void ZGeoNode_GL_Rnr::Draw(RnrDriver* rd)
 {
@@ -39,7 +42,7 @@ void ZGeoNode_GL_Rnr::Draw(RnrDriver* rd)
     glPushAttrib(GL_CURRENT_BIT);
   }
   
-  fs->Draw(TGLDrawFlags());
+  fs->Draw(sgRnrCtx);
 
   glPopAttrib();
 }

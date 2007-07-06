@@ -498,9 +498,9 @@ void WSSeed::MakeFromFormulas(Double_t t_min, Double_t t_max, Int_t n_points,
   Double_t step = (t_max - t_min) / (n_points - 1);
   Double_t t    = t_min;
 
-  TF1 tfx(GForm("WSSeed_x_%d", GetSaturnID()), fx, t_min, t_max);
-  TF1 tfy(GForm("WSSeed_y_%d", GetSaturnID()), fy, t_min, t_max);
-  TF1 tfz(GForm("WSSeed_z_%d", GetSaturnID()), fz, t_min, t_max);
+  TF1 tfx(GForm("WSSeed_x_%d", GetSaturnID()), fx.Data(), t_min, t_max);
+  TF1 tfy(GForm("WSSeed_y_%d", GetSaturnID()), fy.Data(), t_min, t_max);
+  TF1 tfz(GForm("WSSeed_z_%d", GetSaturnID()), fz.Data(), t_min, t_max);
 
   ZTrans trans;
   for(Int_t i=1; i<=n_points; ++i, t+=step) {
