@@ -150,7 +150,7 @@ void TriMeshField::FindMinMaxField()
     }
     else
     {
-      TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula, 0, 0);
+      TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula.Data(), 0, 0);
 
       switch (mDim)
       {
@@ -223,7 +223,7 @@ void TriMeshField::ColorizeTvor(Bool_t regen_tring_cols)
   }
   else
   {
-    TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula, 0, 0);
+    TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula.Data(), 0, 0);
 
     switch (mDim)
     {
@@ -293,7 +293,7 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
   }
   else
   {
-    TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula, 0, 0);
+    TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula.Data(), 0, 0);
 
     switch (mDim)
     {
