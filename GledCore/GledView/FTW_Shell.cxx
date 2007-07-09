@@ -189,7 +189,7 @@ FTW_Shell::FTW_Shell(TSocket* sock, EyeInfo* ei, const Fl_SWM_Manager* swm_copy)
 FTW_Shell::~FTW_Shell()
 {
   if(mSatSocket) {
-    Fl::remove_fd(mSatSocket->GetDescriptor());
+    Fl::remove_fd(mSatSocketFd);
   }
 }
 
@@ -337,13 +337,13 @@ void FTW_Shell::_bootstrap_subshells()
 
 void FTW_Shell::InstallFdHandler()
 {
-  Fl::add_fd(mSatSocket->GetDescriptor(), EyeFdMonitor, this);
+  Fl::add_fd(mSatSocketFd, EyeFdMonitor, this);
   //mSatSocket->SetOption(kNoBlock, 1);
 }
 
 void FTW_Shell::UninstallFdHandler()
 {
-  Fl::remove_fd(mSatSocket->GetDescriptor());
+  Fl::remove_fd(mSatSocketFd);
 }
 
 void FTW_Shell::PostManage(int ray_count)
