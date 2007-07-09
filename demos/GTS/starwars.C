@@ -44,30 +44,30 @@ void starwars()
 
   GTSurf* surf1 = new GTSurf("Station");
   surf1->SetPos(-4.1, -4.3, 0);
-  surf1->SetScale(0.4);
   surf1->SetColor(0.6, 1, 0.9);
   g_queen->CheckIn(surf1); starw->Add(surf1);
   surf1->SetFile("space_station.gts");
   surf1->Load();
   surf1->Invert(); // this gts file has unstandard orientation of faces
+  surf1->Rescale(0.4);
 
   GTSurf* surf2 = new GTSurf("X Wing");
   surf2->SetPos(4.3, -4.3, 0);
   surf2->SetRotByDegrees(110, 180, 170);
-  surf2->SetScale(0.12);
   surf2->SetColor(0.6, 1, 0.7);
   g_queen->CheckIn(surf2); starw->Add(surf2);
   surf2->SetFile("x_wing.gts");
   surf2->Load();
+  surf2->Rescale(0.12);
 
   GTSurf* surf3 = new GTSurf("Tie");
   surf3->SetPos(1, 2.3, 1);
   surf3->SetRotByDegrees(20, 10, -10);
-  surf3->SetScale(0.06);
   surf3->SetColor(1, 0.3, 0.5);
   g_queen->CheckIn(surf3); starw->Add(surf3);
   surf3->SetFile("tie.gts");
   surf3->Load();
+  surf3->Rescale(0.06);
 
   // Station rotator
   CREATE_ADD_GLASS(dynamo, Eventor, starw, "Dynamo", 0);
@@ -82,10 +82,15 @@ void starwars()
   // Spawn GUI
   Gled::Macro("eye.C");
   setup_pupil_up_reference();
+
+  Gled::theOne->LockFltk();
+
   if(g_pupil) {
     g_pupil->SetCameraBase(cambase);
     g_pupil->EmitCameraHomeRay();
   }
+
+  Gled::theOne->UnlockFltk();
 
   // Start the thread rotating the station.
   dynamo->Start();
