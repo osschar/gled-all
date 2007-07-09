@@ -449,12 +449,15 @@ while($c !~ m!\G\s*$!osgc) {
   ################################
   # Enums
   ################################
-  # does not support embedded comments at the moment
-  if($c =~ m!\G\s*enum\s+(\w*)\s*{\s*([^}]*)\s*}\s*;!mgcx) {
+  if($c =~ m!\G\s*enum\s+(\w*)\s*{\s*([^}]*)\s*}\s*;!mgcx)
+  {
     # $1 ~ enum name, $2 ~ contents
     my $enum_name = $1;
+    my $enum_text = $2;
+    # weed-off '//'-like comments
+    $enum_text =~ s!//.*?$! !mog;
+    my @en_els = split(/\s*,\s*/, $enum_text);
     my @enum;
-    my @en_els = split(/\s*,\s*/, $2);
     # remove default values and trailing ws
     map { s/\s*=.*//; s/\s+$//; } @en_els;
     for $e (@en_els) {
