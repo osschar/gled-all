@@ -84,6 +84,9 @@ public:
 
   virtual int handle(int ev);
 
+  virtual void LockFltk();
+  virtual void UnlockFltk();
+
   static GledGUI* theOne;
 
 #include "GledGUI.h7"

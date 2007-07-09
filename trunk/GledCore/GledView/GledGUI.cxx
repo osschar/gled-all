@@ -511,3 +511,16 @@ int GledGUI::handle(int ev)
   }
   return Fl_Window::handle(ev);
 }
+
+/**************************************************************************/
+
+void GledGUI::LockFltk()
+{
+  Fl::lock();
+}
+
+void GledGUI::UnlockFltk()
+{
+  Fl::awake();
+  Fl::unlock();
+}

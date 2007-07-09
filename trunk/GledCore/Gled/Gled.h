@@ -123,6 +123,9 @@ public:
   static void* TRint_runner_tl(TRint* gint);
   static void* Gled_runner_tl(Gled* gled);
 
+  virtual void LockFltk()   {}
+  virtual void UnlockFltk() {}
+
   static Gled* theOne;
 
 #include "Gled.h7"
