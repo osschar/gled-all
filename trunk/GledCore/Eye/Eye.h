@@ -35,6 +35,7 @@ protected:
   EyeInfo*	mEyeInfo;	// X{g}
 
   TSocket*	mSatSocket;
+  Int_t         mSatSocketFd;
 
   bool		bBreakManageLoop;
 

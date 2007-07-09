@@ -34,7 +34,8 @@ void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 /**************************************************************************/
 
 Eye::Eye(TSocket* sock, EyeInfo* ei) :
-  mSatSocket(sock)
+  mSatSocket   (sock),
+  mSatSocketFd (sock->GetDescriptor())
 {
   static const Exc_t _eh("Eye::Eye ");
 
@@ -146,7 +147,7 @@ Int_t Eye::Manage(int fd)
   while(1) {
 
     // Prefetch ...
-    len = recv(mSatSocket->GetDescriptor(), &length, sizeof(UInt_t),
+    len = recv(mSatSocketFd, &length, sizeof(UInt_t),
 	       MSG_PEEK|MSG_DONTWAIT);
     if(len < 0) {
       if(errno == EWOULDBLOCK) {
