@@ -59,7 +59,7 @@ void GTSurf::_init()
   // Override settings from ZGlass
   bUseDispList = true;
 
-  pSurf = 0; mScale = 1;
+  pSurf = 0;
   mVerts = mEdges = mFaces = 0;
 }
 
@@ -195,6 +195,24 @@ void GTSurf::Invert()
 
   if(pSurf) {
     gts_surface_foreach_face(pSurf, (GtsFunc)face_inverter, 0);
+    mStampReqTring = Stamp(FID());
+  }
+}
+
+/**************************************************************************/
+
+namespace {
+  void vertex_scaler(GtsVertex* v, Double_t* s) {
+    v->p.x *= *s; v->p.y *= *s; v->p.z *= *s;
+  }
+}
+
+void GTSurf::Rescale(Double_t s)
+{
+  using namespace GTS;
+
+  if(pSurf) {
+    gts_surface_foreach_vertex(pSurf, (GtsFunc)vertex_scaler, &s);
     mStampReqTring = Stamp(FID());
   }
 }
@@ -349,6 +367,7 @@ void GTSurf::Legendrofy(Int_t max_l, Double_t abs_scale, Double_t pow_scale)
     return;
 
   Legend leg(max_l, abs_scale, pow_scale);
+  leg.Coff(0,0) = 0;
 
   GTS::gts_surface_foreach_vertex(pSurf,
 				  (GTS::GtsFunc)Legend::s_vertex_displacer,

@@ -30,8 +30,7 @@ private:
 protected:
   GTS::GtsSurface*	pSurf;  //! X{g}
 
-  Float_t		mScale;	// X{GST}  7 Value(-range=>[0,1000,1,1000])
-  TString		mFile;	// X{GS}   7 Filor()
+  TString		mFile;  // X{GS}   7 Filor()
 
   bool			bPoints;// X{GS}   7 Bool()
   ZColor		mColor;	// X{PGST} 7 ColorButt()
@@ -51,14 +50,16 @@ public:
   void ReplaceSurface(GTS::GtsSurface* new_surf);
   GTS::GtsSurface* CopySurface();
 
-  void Load();		//  X{E} 7 MButt(-join=>1)
-  void Save();		//  X{E} 7 MButt()
+  void Load();                //  X{E} 7 MButt(-join=>1)
+  void Save();                //  X{E} 7 MButt()
   
-  void CalcStats();	//! X{E} 7 MButt(-join=>1)
-  void PrintStats();	//! X{E} 7 MButt()
+  void CalcStats();           //! X{E} 7 MButt(-join=>1)
+  void PrintStats();          //! X{E} 7 MButt()
 
-  void Destroy();       //  X{E} 7 MButt(-join=>1)
-  void Invert(); 	//  X{E} 7 MButt()
+  void Destroy();             //  X{E} 7 MButt(-join=>1)
+  void Invert();              //  X{E} 7 MButt()
+
+  void Rescale(Double_t s=2); // X{E} 7 MCWButt()
 
   void Tessellate(UInt_t order=1);     // X{E} 7 MCWButt(-join=>1)
   void GenerateSphere(UInt_t order=1); // X{E} 7 MCWButt()
