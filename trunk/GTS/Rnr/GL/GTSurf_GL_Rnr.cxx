@@ -34,18 +34,10 @@ namespace {
 
 void GTSurf_GL_Rnr::Render(RnrDriver* rd)
 {
-  glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT);
-
   glColor4fv(mGTSurf->mColor());
   if(mGTSurf->pSurf) {
-    glPushMatrix();
-    glScalef(mGTSurf->mScale, mGTSurf->mScale, mGTSurf->mScale);
-    glEnable(GL_NORMALIZE);
     glBegin(GL_TRIANGLES);
     GTS::gts_surface_foreach_face(mGTSurf->pSurf, (GTS::GtsFunc)face_drawer, 0);
     glEnd();
-    glPopMatrix();
   }
-
-  glPopAttrib();
 }
