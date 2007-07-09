@@ -383,3 +383,28 @@ void RectTerrain::MakeTringTvor()
 
   mTTvorStamp = mTimeStamp;
 }
+
+/**************************************************************************/
+
+Float_t RectTerrain::GetMinX(Bool_t include_border) const
+{
+  return (bBorder && include_border) ? -mDx : 0;
+}
+
+Float_t RectTerrain::GetMaxX(Bool_t include_border) const
+{
+  Int_t n = (bBorder && include_border) ? mNx : mNx-1;
+  return n*mDx;
+}
+
+Float_t RectTerrain::GetMinY(Bool_t include_border) const
+{
+  return (bBorder && include_border) ? -mDy : 0;
+}
+
+Float_t RectTerrain::GetMaxY(Bool_t include_border) const
+{
+  Int_t n = (bBorder && include_border) ? mNy : mNy-1;
+  return n*mDy;
+}
+

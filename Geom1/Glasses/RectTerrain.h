@@ -84,6 +84,11 @@ class RectTerrain : public ZNode
 
   void MakeTringTvor();
 
+  Float_t GetMinX(Bool_t include_border=true) const;
+  Float_t GetMaxX(Bool_t include_border=true) const;
+  Float_t GetMinY(Bool_t include_border=true) const;
+  Float_t GetMaxY(Bool_t include_border=true) const;
+
   static Float_t sMaxEpsilon;
 
 #include "RectTerrain.h7"
