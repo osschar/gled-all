@@ -9,6 +9,10 @@
   _glass_* _var_ = new _glass_(_name_, _title_); \
   _queen_->CheckIn(_var_)
 
+#define ASSIGN_GLASS(_var_, _glass_, _queen_, _name_, _title_) \
+  _var_ = new _glass_(_name_, _title_); \
+  _queen_->CheckIn(_var_)
+
 /**************************************************************************/
 
 #define CREATE_ADD_GLASS(_var_, _glass_, _list_, _name_, _title_) \
