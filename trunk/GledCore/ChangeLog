@@ -1,3 +1,24 @@
+2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Added virtual functions Lock/UnlockFltk().
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Added function OrtoNorm3Column(col, ref).
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	* GledView/FTW_Shell.cxx:
+	Added Int_t Eye::mSatSocketFd as ROOT now automatically closes the
+	socket when other side drops the connection and fd is no longer
+	available.
+
+	* macros/glass_defines.h:
+	Added define ASSIGN_GLASS.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:
