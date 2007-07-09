@@ -32,6 +32,26 @@ void GTSIsoMaker::_init()
 
 /**************************************************************************/
 
+void GTSIsoMaker::SetXAxis(Float_t min, Float_t max, UShort_t div)
+{
+  mXmin = min; mXmax = max; mXdiv = div;
+  Stamp(FID());
+}
+
+void GTSIsoMaker::SetYAxis(Float_t min, Float_t max, UShort_t div)
+{
+  mYmin = min; mYmax = max; mYdiv = div;
+  Stamp(FID());
+}
+
+void GTSIsoMaker::SetZAxis(Float_t min, Float_t max, UShort_t div)
+{
+  mZmin = min; mZmax = max; mZdiv = div;
+  Stamp(FID());
+}
+
+/**************************************************************************/
+
 namespace {
   void form_to_plane(GTS::gdouble **a, GTS::GtsCartesianGrid g,
 		     GTS::guint i, GTS::gpointer data)

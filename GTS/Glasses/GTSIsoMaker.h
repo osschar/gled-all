@@ -45,6 +45,10 @@ public:
 
   void MakeSurface(); // X{ED} 7 MButt()
 
+  void SetXAxis(Float_t min, Float_t max, UShort_t div); // X{E}
+  void SetYAxis(Float_t min, Float_t max, UShort_t div); // X{E}
+  void SetZAxis(Float_t min, Float_t max, UShort_t div); // X{E}
+
 #include "GTSIsoMaker.h7"
   ClassDef(GTSIsoMaker, 1)
 }; // endclass GTSIsoMaker
