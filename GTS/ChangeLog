@@ -1,3 +1,17 @@
+2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Added fucntion SetX/Y/ZAxis() to setup min,max and number of
+	divisions in one call.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Removed mScale member; added Rescale() function.
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Member mScale was removed from the model class.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSRetriangulator.cxx:
