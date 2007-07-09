@@ -1,3 +1,8 @@
+2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Support '//'-like comments in enum definitions.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:
