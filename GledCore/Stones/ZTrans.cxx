@@ -435,6 +435,25 @@ Double_t ZTrans::Orto3Column(Int_t col, Int_t ref)
   return dp;
 }
 
+Double_t ZTrans::OrtoNorm3Column(Int_t col, Int_t ref)
+{
+  // Ortogonalize col wrt ref then normalize col.
+  // Returns dot-product.
+  //
+  // Assumption that both vectors are normalized and doing the calculation
+  // in a single step resulted in slow degradation of norms.
+  // The idea was ... since i know the projection on a future orthogonal vector
+  // i also know the length after subtraction: len = sqrt(1 - dp^2).
+
+  Double_t* C = M + 4*--col;
+  Double_t* R = M + 4*--ref;
+  const Double_t dp = C[0]*R[0] + C[1]*R[1] + C[2]*R[2];
+  C[0] -= R[0]*dp; C[1] -= R[1]*dp; C[2] -= R[2]*dp;
+  const Double_t  l = 1.0/TMath::Sqrt(C[0]*C[0] + C[1]*C[1] + C[2]*C[2]);
+  C[0] *= l; C[1] *= l; C[2] *= l;
+  return dp;
+}
+
 void ZTrans::OrtoNorm3()
 {
   Norm3Column(1);

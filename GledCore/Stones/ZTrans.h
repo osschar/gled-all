@@ -45,6 +45,7 @@ public:
 
   Double_t Norm3Column(Int_t col);
   Double_t Orto3Column(Int_t col, Int_t ref);
+  Double_t OrtoNorm3Column(Int_t col, Int_t ref);
   void     OrtoNorm3();
   void     SetBaseVecViaCross(Int_t i);
   Double_t Invert();
