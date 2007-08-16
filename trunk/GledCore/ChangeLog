@@ -1,3 +1,11 @@
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/Eye.cxx:
+	* Gled/Gled.cxx:
+	* Pupils/Pupil.cxx:
+	* Stones/ZMIR.cxx:
+	Init uninitialized vars reported by valgrind.
+
 2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.h:
