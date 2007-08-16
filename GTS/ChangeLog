@@ -3,7 +3,7 @@
 	* Glasses/GTSurf.cxx:
 	* Glasses/GTSurf.h:
 	Added function GenerateTriangle();
-	in Tesselate() use mid-edge split by default. 
+	in Tesselate() use mid-edge split by default.
 
 2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
