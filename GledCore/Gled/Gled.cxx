@@ -46,15 +46,20 @@ void Gled::next_arg_or_die(list<char*>& args, list<char*>::iterator& i)
 
 /**************************************************************************/
 
-Gled::Gled() : mSaturn(0), bIsSun(false),
-	       bQuit(false),
-	       bShowSplash(true),
-	       bPreExec(false),
-	       bAutoSpawn(false),
-	       bAllowMoons(false),
-	       bRunRint(true),
-	       bRintRunning(false),
-	       mLoggingMutex(GMutex::recursive)
+Gled::Gled() :
+  mSaturn       (0),
+  bIsSun        (false),
+  bQuit         (false),
+  bShowSplash   (true),
+  bPreExec      (false),
+  bAutoSpawn    (false),
+  bAllowMoons   (false),
+  bRunRint      (true),
+  bRintRunning  (false),
+  mLoggingMutex (GMutex::recursive),
+  mLogFile      (0),
+  mOutFile      (0),
+  mExitCondVar  (0)
 {
   if(theOne) {
     cerr <<"Gled::Gled trying to instantiate another object ...\n";

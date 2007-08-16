@@ -161,11 +161,13 @@ void Pupil::_build()
   mPickBuffSize = mInfo->GetBuffSize();
   mPickBuff     = 0;
 
-  bFullScreen  = false;
-  bShowOverlay = true;
-  bUseEventHandler = true;
-  bDumpImage   = false;
-  mPBuffer     = 0;
+  bMPIn             = false;
+  bFullScreen       = false;
+  bShowOverlay      = true;
+  bUseEventHandler  = true;
+  bDumpImage        = false;
+  bSignalDumpFinish = false;
+  mPBuffer          = 0;
 
   _check_auto_redraw();
 }
@@ -189,7 +191,7 @@ void Pupil::_check_auto_redraw()
 Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
   FTW_SubShell(shell, this),
   OS::A_View(infoimg),
-  Fl_Gl_Window(w,h), 
+  Fl_Gl_Window(w,h),
   mCameraCB(this)
 {
   end();
