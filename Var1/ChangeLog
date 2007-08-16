@@ -1,3 +1,54 @@
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Grayspace.
+
+	* Glasses/PSRectangle.cxx:
+	* Glasses/PSRectangle.h:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTriangle.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	New classes for description of parametrized surfaces.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Reimplemented VertexData and introduced EdgeData structure; now
+	vertices sharing an edge point to the same data.
+	Algorithm for construction of connectivity data was changed as well.
+
+	* Glasses/TriMeshField.cxx:
+	PartiallyColorizeTvor(): optimize mesh trianlge recoloring;
+	Diffuse(): use new EdgeData structures.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added mParaSurf data-member, PlaceAboveTerrain() method;
+	use para-surf to get up-direction and edge-planes;
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Use ptr instead of ref for cam-fix; use new EdgeData structures
+	during mesh painting.
+
+	* catalog.patch:
+	Flag ParaSurf as virtual base.
+
+	* glass.list:
+	Added ParaSurf and derived classes.
+
+	* Opcode/Ice/IceFPU.h:
+	Whitespace.
+
+	* Opcode/Ice/IcePoint.h:
+	Rename Msc to TMsc to expose the fact it subtracts from *this.
+
 2007-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMeshField.cxx:
