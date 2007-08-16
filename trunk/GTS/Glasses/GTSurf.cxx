@@ -219,13 +219,24 @@ void GTSurf::Rescale(Double_t s)
 
 /**************************************************************************/
 
-void GTSurf::Tessellate(UInt_t order)
+namespace {
+using namespace GTS;
+GtsVertex* mid_edge_splitter(GtsEdge *e, GtsVertexClass *k, gpointer /*d*/)
+{
+  GtsPoint &a = e->segment.v1->p, &b = e->segment.v2->p;
+  return gts_vertex_new(k, a.x + 0.5*(b.x - a.x),
+                           a.y + 0.5*(b.y - a.y),
+                           a.z + 0.5*(b.z - a.z));
+}
+}
+
+void GTSurf::Tessellate(UInt_t order, Bool_t mid_edge)
 {
   if(pSurf == 0)
     return;
 
   while(order--)
-    gts_surface_tessellate(pSurf, 0, 0);
+    gts_surface_tessellate(pSurf, mid_edge ? mid_edge_splitter : 0, 0);
 
   mStampReqTring = Stamp(FID());
 }
@@ -237,6 +248,29 @@ void GTSurf::GenerateSphere(UInt_t order)
   pSurf = MakeDefaultSurface();
 
   gts_surface_generate_sphere(pSurf, order);
+
+  mStampReqTring = Stamp(FID());
+}
+
+void GTSurf::GenerateTriangle(Double_t s)
+{
+  if(pSurf)
+    gts_object_destroy (GTS_OBJECT (pSurf));
+  pSurf = MakeDefaultSurface();
+
+  const Double_t sqrt3 = TMath::Sqrt(3);
+  GtsVertex * v[3];
+  v[0] = gts_vertex_new(pSurf->vertex_class, -s*0.5, -s*sqrt3/6, 0);
+  v[1] = gts_vertex_new(pSurf->vertex_class,  s*0.5, -s*sqrt3/6, 0);
+  v[2] = gts_vertex_new(pSurf->vertex_class,  0,      s*sqrt3/3, 0);
+
+  GtsEdge * e[3];
+  e[0] = gts_edge_new(pSurf->edge_class, v[0], v[1]);
+  e[1] = gts_edge_new(pSurf->edge_class, v[1], v[2]);
+  e[2] = gts_edge_new(pSurf->edge_class, v[2], v[0]);
+
+  GtsFace * f = gts_face_new(pSurf->face_class, e[0], e[1], e[2]);
+  gts_surface_add_face(pSurf, f);
 
   mStampReqTring = Stamp(FID());
 }

@@ -61,8 +61,10 @@ public:
 
   void Rescale(Double_t s=2); // X{E} 7 MCWButt()
 
-  void Tessellate(UInt_t order=1);     // X{E} 7 MCWButt(-join=>1)
+  void Tessellate(UInt_t order=1, Bool_t mid_edge=true); // X{E} 7 MCWButt()
+
   void GenerateSphere(UInt_t order=1); // X{E} 7 MCWButt()
+  void GenerateTriangle(Double_t s=1); // X{E} 7 MCWButt()
 
   void Legendrofy(Int_t max_l, Double_t abs_scale=0.1,Double_t pow_scale=2.7); // X{E} 7 MCWButt()
 
