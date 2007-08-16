@@ -294,8 +294,8 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
   if(bBorder) {
     --minX; ++maxX; --minY; ++maxY;
   }
-  Int_t nx = maxX - minX + 1; Float_t tex_fx = 1.0/(maxX - minX);
-  Int_t ny = maxY - minY + 1; Float_t tex_fy = 1.0/(maxY - minY);
+  Int_t       nx = maxX - minX + 1,       ny = maxY - minY + 1; 
+  Float_t tex_fx = 1.0/(maxX - minX), tex_fy = 1.0/(maxY - minY);
 
   TringTvor& TT = * new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
   if (smoothp) TT.MakeSecondaryArrays(true,  colp, texp);
@@ -305,13 +305,15 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
   Int_t          idx = 0;
   Int_t    tring_idx = 0;
 
-  for(Int_t j=minY; j<=maxY; ++j) {
-    for(Int_t i=minX; i<=maxX; ++i) {
-
+  for(Int_t j=minY; j<=maxY; ++j)
+  {
+    for(Int_t i=minX; i<=maxX; ++i)
+    {
       Float_t *v = TT.Vertex(idx);
       v[0] = (i-1)*mDx; v[1] = (j-1)*mDy; v[2] = mP[i][j];
 
-      if(smoothp) {
+      if(smoothp)
+      {
 	Int_t il=i,ih=i,jh=j,jl=j;
 	if(i>0) il--; if(i<=mNx) ih++;
 	if(j>0) jl--; if(j<=mNy) jh++;
@@ -334,14 +336,13 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
 	t[1] = tex_fy*(j-minY);
       }
 
-      if(i < maxX && j < maxY) {
-	Float_t d1 = TMath::Abs(mP[i][j] - mP[i+1][j+1] );
-	Float_t d2 = TMath::Abs(mP[i][j+1] - mP[i+1][j] );
+      if(i < maxX && j < maxY)
+      {
+	Float_t d1 = TMath::Abs(mP[i][j]   - mP[i+1][j+1] );
+	Float_t d2 = TMath::Abs(mP[i][j+1] - mP[i+1][j]   );
 	Int_t* T = TT.Triangle(tring_idx);
-	//if(j < 2) {
-	//printf("j=%3d i=%3d idx=%4d tidx=%4d T=%p\n",
-	// j, i, idx, tring_idx, T);
-	//}
+	// printf("j=%3d i=%3d idx=%4d tidx=%4d d1=%f, d2=%f\n",
+        //        j, i, idx, tring_idx, d1, d2);
 	if(d1 > d2) {
 	  T[0] = idx;   T[1] = idx+1;    T[2] = idx+nx;   T += 3;
 	  T[0] = idx+1; T[1] = idx+nx+1; T[2] = idx+nx;
