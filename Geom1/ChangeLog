@@ -1,3 +1,17 @@
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	Whitespace.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added function for limited update of triangle colors
+	GenerateTriangleColorsFromVertexColors(set<Int_t> trings).
+	Whitespace.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.0.6650.
+
 2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
