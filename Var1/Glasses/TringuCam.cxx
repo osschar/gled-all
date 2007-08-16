@@ -16,6 +16,7 @@
 #include "TringuCam.c7"
 
 #include "TriMesh.h"
+#include "ParaSurf.h"
 
 #include <TMath.h>
 
@@ -61,6 +62,8 @@ void TringuCam::_init()
 
   bMouseDown              = false;
   bEnableTringDLonMouseUp = false;
+
+  mCamFix = 0;
 
   mRayColl.SetCulling   (true);
   mRayColl.SetClosestHit(true);
@@ -185,12 +188,12 @@ void TringuCam::CalculateMouseRayVectors()
   float ycam = yext*(2.0f*mMouseY/mScreenH - 1);
 
   mMouseRayPos.SetXYZ(0, 0, 0);
-  mCamFix.MultiplyIP(mMouseRayPos);
+  mCamFix->MultiplyIP(mMouseRayPos);
   mTrans .MultiplyIP(mMouseRayPos);
 
   mMouseRayDir.SetXYZ(mNearClp, -xcam, -ycam);
   mMouseRayDir.SetMag(1);
-  mCamFix.RotateIP(mMouseRayDir);
+  mCamFix->RotateIP(mMouseRayDir);
   mTrans .RotateIP(mMouseRayDir);
 }
 
@@ -264,12 +267,13 @@ void TringuCam::add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv,
     mCurField->F(v) += value*(1 - (dist - full_r)/(mActionRadius - full_r));
 
   const vector<TriMesh::VertexData>& VDV = mTringula->GetMesh()->RefVDataVec();
-  const TriMesh::VertexData& VD = VDV[v];
-  vector<TriMesh::VConnData>::const_iterator vdi = VD.fVConns.begin();
-  while (vdi != VD.fVConns.end())
+  const vector<TriMesh::EdgeData>  & EDV = mTringula->GetMesh()->RefEDataVec();
+
+  const TriMesh::VertexData& vd = VDV[v];
+  for (Int_t e = 0; e < vd.n_edges(); ++e)
   {
-    add_field_visit_vertex(vv, cv, vdi->fVTarget, value);
-    ++vdi;
+    const TriMesh::EdgeData& ed = EDV[vd.edge(e)];
+    add_field_visit_vertex(vv, cv, ed.other_vertex(v), value);
   }
 }
 
@@ -307,6 +311,14 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
   mSpinUp.TimeTick(dt);
   if (mSpinUp.fValue) RotateLF(1, 2, dt*mSpinUp.fValue);
 
+  { // Restore up-direction
+    Float_t pos[3], hdir[3];
+    mTrans.GetPos(pos);
+    mTringula->GetParaSurf()->pos2hdir(pos, hdir);
+    mTrans.SetBaseVec(3, hdir);
+    mTrans.OrtoNorm3Column(1, 3);
+    mTrans.SetBaseVecViaCross(2);
+  }
 
   if (*mTxtLftRgt != 0)
     mTxtLftRgt->SetText
