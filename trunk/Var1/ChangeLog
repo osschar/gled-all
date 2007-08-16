@@ -29,7 +29,7 @@
 	* Glasses/Tringula.cxx:
 	* Glasses/Tringula.h:
 	Added mParaSurf data-member, PlaceAboveTerrain() method;
-	use para-surf to get up-direction and edge-planes;
+	use para-surf to get up-direction and edge-planes.
 
 	* Glasses/TringuCam.cxx:
 	* Glasses/TringuCam.h:
