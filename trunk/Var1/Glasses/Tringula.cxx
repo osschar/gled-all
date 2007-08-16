@@ -7,8 +7,7 @@
 //__________________________________________________________________________
 // Tringula
 //
-// Many functions implicitly assume rectangular ares limited by
-// 4 edge-planes defined in SetEdgePlanes(RectTerrain*).
+// 
 
 #include "Tringula.h"
 #include <Glasses/ZHashList.h>
@@ -16,6 +15,7 @@
 #include <Glasses/RGBAPalette.h>
 #include <Stones/TringTvor.h>
 #include "TriMesh.h"
+#include "ParaSurf.h"
 #include "Dynamico.h"
 #include "Tringula.c7"
 
@@ -48,8 +48,6 @@ void Tringula::_init()
   bRnrDynos  = bPickDynos   = true;
   bRnrBBoxes = bRnrItsLines = false;
 
-  mNumEPlanes = 0;
-  mEdgePlanes = 0;
   mEdgeRule   = ER_Stop;
 
   mRndGen.SetSeed(0);
@@ -60,7 +58,6 @@ void Tringula::_init()
 Tringula::~Tringula()
 {
   delete mRayColFaces;
-  delete [] mEdgePlanes;
 }
 
 void Tringula::AdEnlightenment()
@@ -263,12 +260,48 @@ void Tringula::ResetCollisionStuff()
 
 /**************************************************************************/
 
+void Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fac)
+{
+  static const Exc_t _eh("Tringula::PlaceAboveTerrain ");
+
+  using namespace Opcode;
+
+  RayCollider    RC;
+  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
+  RC.SetClosestHit(true);     // to keep the closes hit only
+  CollisionFaces CF;
+  RC.SetDestination(&CF);
+
+  Point       pos;  trans.GetPos(pos);
+  Opcode::Ray R;
+  Float_t     ray_offset = mParaSurf->pos2hray(pos, R);
+
+  Bool_t status = RC.Collide(R, *mMesh->GetOPCModel());
+  if (status && CF.GetNbFaces() == 1)
+  {
+    const CollisionFace& cf = CF.GetFaces()[0];
+    pos.TMac(R.mDir, cf.mDistance - ray_offset - (height + dh_fac*mParaSurf->GetDeltaH()));
+    trans.SetPos(pos);
+  }
+  else
+  {
+    throw(_eh + GForm("collide status=<%s>, contact=%d, nfaces=%d; nbvt=%d, nprt=%d, ni=%d\n",
+                      status ? "ok" : "failed", RC.GetContactStatus(), CF.GetNbFaces(),
+                      RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections()));
+  }
+}
+
+/**************************************************************************/
+
 Dynamico* Tringula::NewDynamico(const Text_t* dname)
 {
   if (dname == 0)
     dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
 
   Dynamico* d = new Dynamico(dname);
+  Float_t pos[3];
+  mParaSurf->originpos(pos);
+  d->ref_trans().SetPos(pos);
   place_on_terrain(*d);
 
   mQueen->CheckIn(d);
@@ -280,8 +313,8 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
 
 Dynamico* Tringula::RandomDynamico(Float_t v_min, Float_t v_max, Float_t w_max)
 {
-  Float_t x = mRndGen.Uniform(mEdgePlanes[1].d, -mEdgePlanes[3].d);
-  Float_t y = mRndGen.Uniform(mEdgePlanes[0].d, -mEdgePlanes[2].d);
+  Float_t pos[3];
+  mParaSurf->random_pos(mRndGen, pos);
 
   Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
   Float_t cos = TMath::Cos(phi), sin = TMath::Sin(phi);
@@ -291,7 +324,7 @@ Dynamico* Tringula::RandomDynamico(Float_t v_min, Float_t v_max, Float_t w_max)
   t.SetBaseVec(1, cos,  sin, 0);
   t.SetBaseVec(2, 0,      0, 1);
   t.SetBaseVec(3, sin, -cos, 0);
-  t.SetBaseVec(4, x, y, 0);
+  t.SetBaseVec(4, pos);
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
 
@@ -302,32 +335,6 @@ Dynamico* Tringula::RandomDynamico(Float_t v_min, Float_t v_max, Float_t w_max)
   mDynos->Add(d);
 
   return d;
-}
-
-/**************************************************************************/
-
-void Tringula::SetEdgePlanes(RectTerrain* rect_terr)
-{
-  // Set bounding-planes for x/y coordinates.
-  //
-  // Assumes RectTerrain *always* stretches from 0,0 into the positive
-  // direction (which is so far true, at least for TrinTvor, rendering
-  // can be offset). Oh yess ... be carefull about the border,
-  // too, as its role is not very well defined right now.
-
-  static const Exc_t _eh("Tringula::SetEdgePlanes ");
-
-  if (rect_terr == 0)
-    throw(_eh + "null argument");
-
-  if (mEdgePlanes) delete [] mEdgePlanes;
-  mNumEPlanes = 4;
-  mEdgePlanes = new Opcode::Plane[4];
-  RectTerrain& R = *rect_terr;
-  mEdgePlanes[0].Set( 0, -1, 0, 0);
-  mEdgePlanes[1].Set(-1,  0, 0, 0);
-  mEdgePlanes[2].Set( 0,  1, 0, - (R.GetNy() - 1) * R.GetDy());
-  mEdgePlanes[3].Set( 1,  0, 0, - (R.GetNx() - 1) * R.GetDx());
 }
 
 /**************************************************************************/
@@ -590,40 +597,38 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       D.mTrans.GetPos(pos);
       D.touch_aabb();
 
-      Point vertical(0, 0, -1);
-
-      for (Int_t p=0; p<mNumEPlanes; ++p) {
-        Float_t d = mEdgePlanes[p].Distance(pos);
+      for (Int_t p=0; p<mParaSurf->n_edge_planes(); ++p)
+      {
+        Float_t d = mParaSurf->edge_planes()[p].Distance(pos);
         if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
       }
 
-      static const Float_t ray_offset = 100;
-
-      Opcode::Ray R(pos, vertical);
-      R.mOrig.z += ray_offset;
+      Opcode::Ray R;
+      Float_t     ray_offset =mParaSurf->pos2hray(pos, R);
 
       UInt_t cache = D.mOPCRCCache;
-      if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) ) {
-
-        if (CF.GetNbFaces() == 1) {
+      if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) )
+      {
+        if (CF.GetNbFaces() == 1)
+        {
           const CollisionFace& cf = CF.GetFaces()[0];
-          pos.z += D.mLevH - cf.mDistance + ray_offset;
+          pos.TMac(R.mDir, cf.mDistance - ray_offset - D.mLevH);
 
-          if (cache != D.mOPCRCCache) {
+          if (cache != D.mOPCRCCache)
+          {
             Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
             D.mTrans.SetBaseVec(2, n);
             D.mTrans.OrtoNorm3Column(1, 2);
             D.mTrans.SetBaseVecViaCross(3);
           }
         }
-
-      } else {
-
+      }
+      else
+      {
         printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
                RC.GetContactStatus(),
                RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
                RC.GetNbIntersections());
-
       }
 
       D.mTrans.SetPos(pos);
@@ -648,24 +653,39 @@ void Tringula::handle_edge_crossing
 {
   using namespace Opcode;
 
-  Plane& P = mEdgePlanes[plane];
+  Plane& P = mParaSurf->edge_planes()[plane];
 
   switch (mEdgeRule)
+  {
+    case ER_Stop:
     {
-    case ER_Stop: {
       pos -= dist*P.n;
       D.mV = 0;
       D.mW = 0;
       D.Stamp(D.FID());
       break;
     }
-    case ER_Hold: {
+
+    case ER_Hold:
+    {
       Point step = pos; step -= old_pos;
       Float_t depth = fabsf(P.Distance(old_pos));
       pos = old_pos + depth*step/(depth+dist);
       break;
     }
-    case ER_Bounce: {
+
+    case ER_Wrap:
+    {
+      if (mParaSurf->support_wrap())
+      {
+        mParaSurf->wrap(pos, plane, dist);
+        break;
+      }
+      // NO BREAK if wrap not supported, fallback to bounce.
+    }
+
+    case ER_Bounce:
+    {
       pos -= 2*dist*P.n;
       // Rotate accordingly
       HTransF& t = D.ref_trans();
@@ -675,17 +695,8 @@ void Tringula::handle_edge_crossing
       t.SetBaseVecViaCross(3);
       break;
     }
-    case ER_Wrap: {
-      // Cross-over the opposite plane, assume 4 planes pre-defined
-      // rectangular layout.
-      Int_t opp_plane = (plane + 2) % mNumEPlanes;
-      Plane& O = mEdgePlanes[opp_plane];
-      Float_t opp_dist = O.Distance(pos);
-      pos += dist * P.n - opp_dist * O.n;
-      break;
-    }
 
-    } // end switch
+  } // end switch
 }
 
 /**************************************************************************/
@@ -694,42 +705,36 @@ void Tringula::place_on_terrain(Dynamico& D)
 {
   using namespace Opcode;
 
-  Point &pos = * (Point*) D.mTrans.PtrPos();
-  Point vertical(0, 0, -1);
-
   RayCollider    RC;
   RC.SetFirstContact(false);  // true to only take first hit (not closest!)
-  RC.SetClosestHit(true);     // to sort the hits by distance
+  RC.SetClosestHit(true);     // to keep the closes hit only
   CollisionFaces CF;
   RC.SetDestination(&CF);
 
-  static const Float_t ray_offset = 100;
+  Point     & pos = * (Point*) D.mTrans.PtrPos();
+  Opcode::Ray R;
+  Float_t     ray_offset = mParaSurf->pos2hray(pos, R);
 
-  Opcode::Ray R(pos, vertical);
-  R.mOrig.z += ray_offset;
-
-  UInt_t cache = D.mOPCRCCache;
-  if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) ) {
-
-    if (CF.GetNbFaces() == 1) {
+  if ( RC.Collide(R, *mMesh->GetOPCModel()) )
+  {
+    if (CF.GetNbFaces() == 1)
+    {
       const CollisionFace& cf = CF.GetFaces()[0];
-      pos.z += D.mLevH - cf.mDistance + ray_offset;
+      pos.TMac(R.mDir, cf.mDistance - ray_offset - D.mLevH);
 
-      if (cache != D.mOPCRCCache) {
-        Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
-        D.mTrans.SetBaseVec(2, n);
-        D.mTrans.OrtoNorm3Column(1, 2);
-        D.mTrans.SetBaseVecViaCross(3);
-        D.touch_aabb();
-      }
+      Float_t* n = mMesh->GetTTvor()->TriangleNormal(cf.mFaceID);
+      D.mTrans.SetBaseVec(2, n);
+      D.mTrans.OrtoNorm3Column(1, 2);
+      D.mTrans.SetBaseVecViaCross(3);
+      D.touch_aabb();
     }
-
-  } else {
-
+    else printf("ooogaaadooga contstat=%d nfac=%d\n", RC.GetContactStatus(), CF.GetNbFaces());
+  }
+  else
+  {
     printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
            RC.GetContactStatus(),
            RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections());
-
   }
 }
 

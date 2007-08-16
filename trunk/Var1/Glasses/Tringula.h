@@ -18,6 +18,7 @@ class RectTerrain;
 class RGBAPalette;
 class TringTvor;
 class TriMesh;
+class ParaSurf;
 class Dynamico;
 
 namespace Opcode {
@@ -51,17 +52,18 @@ private:
   void _init();
 
   // Hack to carry intersection lines over to renderer.
-  vector<Float_t> mItsLines;
-  Int_t           mItsLinesIdx;
+  vector<Float_t>    mItsLines;
+  Int_t              mItsLinesIdx;
 
 protected:
-  ZLink<TriMesh>     mMesh;     //  X{GS} L{A}
-  ZLink<RGBAPalette> mPalette;  //  X{GS} L{A}
-  ZColor         mColor;        //  X{GSPT} 7 ColorButt()
-  Bool_t         bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
-  Bool_t         bLightMesh;    //  X{GST}  7 Bool()
+  ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{A}
+  ZLink<TriMesh>     mMesh;         //  X{GS} L{A}
+  ZLink<RGBAPalette> mPalette;      //  X{GS} L{A}
+  ZColor             mColor;        //  X{GSPT} 7 ColorButt()
+  Bool_t             bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
+  Bool_t             bLightMesh;    //  X{GST}  7 Bool()
 
-  ZLink<ZHashList> mDynos;      //  X{GS} L{}
+  ZLink<ZHashList>   mDynos;        //  X{GS} L{}
 
   Opcode::CollisionFaces* mRayColFaces;  //!
 
@@ -75,8 +77,6 @@ protected:
   Bool_t     bRnrBBoxes; // X{GS} 7 Bool(-join=>1)
   Bool_t     bRnrItsLines; // X{GS} 7 Bool() Intersection lines
 
-  Int_t            mNumEPlanes; //!
-  Opcode::Plane*   mEdgePlanes; //!
   EdgeRule_e       mEdgeRule;   //  X{GS} 7 PhonyEnum()
 
   TRandom          mRndGen;
@@ -114,6 +114,8 @@ public:
   void RayCollide();          // X{ED} C{0} 7 MButt()
 
   void ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
+
+  void PlaceAboveTerrain(ZTrans& trans, Float_t height=0, Float_t dh_fac=0);
 
   Dynamico* NewDynamico(const Text_t* dname=0);
   Dynamico* RandomDynamico(Float_t v_min=-1, Float_t v_max=10,
