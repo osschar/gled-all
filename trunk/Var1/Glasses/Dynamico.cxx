@@ -16,7 +16,7 @@
 
 #include <TMath.h>
 
-ClassImp(Dynamico)
+ClassImp(Dynamico);
 
 /**************************************************************************/
 

@@ -56,7 +56,7 @@ public:
   TringTvor*             get_tring_tvor()  { return mMesh->GetTTvor(); }
 
 #include "Dynamico.h7"
-  ClassDef(Dynamico, 1)
+  ClassDef(Dynamico, 1);
 }; // endclass Dynamico
 
 
