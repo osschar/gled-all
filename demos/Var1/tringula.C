@@ -1,9 +1,12 @@
 #include <glass_defines.h>
 #include <gl_defines.h>
 
+#include <exception>
+
 class Tringula;
 class TringuCam;
 class Dynamico;
+class ParaSurf;
 class TriMesh;
 class TriMeshField;
 class TriMeshLightField;
@@ -17,6 +20,8 @@ Tringula*     tringula = 0;
 TringuCam*    tricam   = 0;
 Dynamico*     dyn1     = 0;
 Dynamico*     dyn2     = 0;
+
+ParaSurf*     parasurf = 0;
 TriMesh*      trimesh  = 0;
 TriMesh*      carmesh  = 0;
 TriMeshField* tmfield  = 0;
@@ -30,7 +35,7 @@ TriMeshLightField* lightmap = 0;
 Eventor*     eventor  = 0;
 TimeMaker*   tmaker   = 0;
 
-void tringula()
+void tringula(Int_t mode=0)
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Var1");
@@ -72,66 +77,128 @@ void tringula()
   base_plane->SetColor(0.6, 0.8, 0.6);
 
   ASSIGN_ADD_GLASS(terrain, RectTerrain, g_scene, "RectTerrain", 0);
+  terrain->SetRnrSelf(false);
   terrain->SetDx(2);
   terrain->SetDy(2);
   terrain->SetMinCol(0.175, 0.689, 0.338);
   terrain->SetMaxCol(0.139, 0.384, 1.000);
   hf->SetFile("gforge.png");
-  terrain->SetFromImage(hf, 40); // 5 for 32x32, 20 for 256x256 file "gforge.png"
-  //hf->SetFile("gforge-2x2.png");
-  //terrain->SetFromImage(hf, 1);
-  //terrain->SetRnrMode(RectTerrain::RM_SmoothTring);
+  terrain->SetFromImage(hf, 30); // 5 for 32x32, 20 for 256x256 file "gforge.png"
   terrain->SetRnrMode(RectTerrain::RM_FlatTring);
   terrain->SetBorderCond(RectTerrain::BC_Wrap);
   terrain->ApplyBorderCondition();
   terrain->SetBorder(true);
   terrain->SetUseTringStrips(false);
-  terrain->SetRnrSelf(false);
   gforge->SetTerrain(terrain);
 
+
+  // GTSurface, iso-maker, retriangulator.
+
   ASSIGN_ADD_GLASS(gtsurf, GTSurf, g_scene, "GTSsurf", 0);
-  gtsurf->SetFile("torus.gts");
+  // gtsurf->SetFile("some-surface.gts");
   // gtsurf->Load();
-  ASSIGN_ADD_GLASS(gtsretring,  GTSRetriangulator, g_scene, "GTSRetriangulator", 0);
-  gtsretring->SetTarget(gtsurf);
+  gtsurf->SetRnrSelf(false);
   ASSIGN_ADD_GLASS(gtsisomaker, GTSIsoMaker, g_scene, "GTSIsoMaker", 0);
   gtsisomaker->SetTarget(gtsurf);
-
-
-  ASSIGN_ADD_GLASS(trimesh, TriMesh, g_scene, "Terrain TriMesh", 0);
-  trimesh->ImportRectTerrain(terrain);
-  trimesh->StdSurfacePostImport();
-
-  ASSIGN_ADD_GLASS(carmesh, TriMesh, g_scene, "Car TriMesh", 0);
-  carmesh->MakeTetrahedron();
-  carmesh->StdDynamicoPostImport();
-
-  ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
-  tringula->SetMesh(trimesh);
-  tringula->SetPalette(pal);
-  tringula->SetEdgePlanes(terrain);
-  tringula->SetRnrRay(true);
-  tringula->SetEdgeRule(Tringula::ER_Bounce);
-  tringula->SetDefDynMesh(carmesh);
-
-  dyn1 = tringula->NewDynamico("Dynus Primus");
-  dyn2 = tringula->NewDynamico("Dynus Secondus");
-  dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
-  dyn2->ref_trans().RotateLF(1, 3, 0.4);
-  
-
-  // Best coarsening:
-  gtsurf->SetRnrSelf(false);
-  trimesh->ExportGTSurf(gtsurf);
+  ASSIGN_ADD_GLASS(gtsretring,  GTSRetriangulator, g_scene, "GTSRetriangulator", 0);
+  gtsretring->SetTarget(gtsurf);
+  // Best coarsening
   gtsretring->SetStopNumber(800);
   gtsretring->SetCostOpts(GTSRetriangulator::CO_Volume);
   gtsretring->SetVO_ShapeWght(1e-8);
   gtsretring->SetMidvertOpts(GTSRetriangulator::MO_Volume);
-  //gtsretring->Set
+
+
+  // TriMeshes ... terrain, dyno
+
+  ASSIGN_ADD_GLASS(trimesh, TriMesh, g_scene, "Terrain TriMesh", 0);
+  // Setup mode specific.
+  ASSIGN_ADD_GLASS(carmesh, TriMesh, g_scene, "Car TriMesh", 0);
+  carmesh->MakeTetrahedron();
+  carmesh->StdDynamicoPostImport();
+
+
+  // Tringula
+
+  ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
+  tringula->SetPalette(pal);
+  tringula->SetRnrRay(true);
+  tringula->SetDefDynMesh(carmesh);
+
+  switch (mode)
+  {
+    case 0: setup_rectangle() ;     break;
+    case 1: setup_triangle();       break;
+    case 2: setup_sphere_outside(); break;
+    case 3: setup_sphere_inside();  break;
+    case 4: setup_torus_outside();  break;
+    case 5: setup_torus_inside();   break;
+  }
+
+  // Two intersecting dynos at the origin.
+  dyn1 = tringula->NewDynamico("Dynus Primus");
+  dyn2 = tringula->NewDynamico("Dynus Secondus");
+  dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
+  dyn2->ref_trans().RotateLF(1, 3, 0.4);
+
+
+  // Camera base
+
+  ASSIGN_ADD_GLASS(tricam, TringuCam, tringula, "TringuCam", 0);
+  tricam->SetTringula(tringula);
+  {
+    Float_t pos[3], fgh[3] = {0,0,0}, dir[3];
+
+    ZTrans& trans = tricam->ref_trans();
+
+    parasurf->originpos(pos);
+    trans.SetPos(pos);
+    tringula->PlaceAboveTerrain(trans, 1, 1.1);
+    printf("Pos set:\n");
+    trans.Print();
+
+    parasurf->pos2fgh (pos, fgh);
+    parasurf->fgh2hdir(fgh, dir);  trans.SetBaseVec(3, dir);
+    parasurf->fgh2gdir(fgh, dir);  trans.SetBaseVec(1, dir);
+    printf("up (3) and fwd (1) set:\n");
+    trans.Print();
+
+    trans.SetBaseVecViaCross(2);
+    printf("lft set via crossp:\n");
+    trans.Print();
+
+    tricam->StampReqTrans();
+  }
+
+
+  // Fields
+
+  ASSIGN_ADD_GLASS(tmfield, TriMeshField, tricam, "TMField", 0);
+  tmfield->SetMesh(trimesh);
+  tmfield->ResizeToMesh();
+  tmfield->SetPalette(pal);
+  tmfield->FillByXYGaussBlobs();
+  tmfield->FindMinMaxField();
+  tmfield->SetMinValue(0);
+  tmfield->SetMaxValue(TMath::Ceil(tmfield->GetMaxValue()));
+
+  tricam->SetCurField(tmfield);
+  tmfield->ColorizeTvor();
+  // Tringula is flat shaded by default, so we need triangle colors.
+  // This should be made an option or global var.
+  trimesh->GetTTvor()->GenerateTriangleColorsFromVertexColors();
+
+  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "TMLightField", 0);
+  lightmap->SetMesh(trimesh);
+  lightmap->ResizeToMesh();
+  lightmap->SetLampPos(5, 5, 20);
+  lightmap->SetPalette(pal);
+  lightmap->CalculateLightField();
+
 
   /**************************************************************************/
   // Eventor & Operators
-  /************************g**************************************************/
+  /**************************************************************************/
 
   ASSIGN_ADD_GLASS(eventor, Eventor, g_queen, "Eventor", 0);
   eventor->SetInterBeatMS(10);
@@ -142,6 +209,7 @@ void tringula()
   CREATE_ADD_GLASS(dumper, ScreenDumper, eventor, "ScreenDumper", 0);
   dumper->SetFileNameFmt("");
   dumper->SetWaitDump(true);
+
 
   /**************************************************************************/
   // Spawn the eye
@@ -169,10 +237,11 @@ void tringula()
   g_pupil->Add(g_scene);
   g_pupil->SetWidth(800); g_pupil->SetHeight(480);
   g_pupil->SetClearColor(0.06, 0.01, 0.02);
-  g_pupil->SetUpReference(base_plane);
+  g_pupil->SetUpReference(tricam);
   g_pupil->SetUpRefAxis(3);
+  g_pupil->SetUpRefMinAngle(2);
   g_pupil->SetCameraBase(0);
-  g_pupil->SetNearClip(2);
+  g_pupil->SetNearClip(0.2);
   g_pupil->SetFarClip(200);
 
   // g_pupil->SetBackMode(GL_FILL);
@@ -183,30 +252,6 @@ void tringula()
 
   g_pupil->SetAutoRedraw(false);
   // g_pupil->SetOverlay(overlay);
-
-  ASSIGN_ADD_GLASS(tricam, TringuCam, tringula, "TringuCam", 0);
-  tricam->SetTringula(tringula);
-  tricam->SetPos(4, 2, 10);
-  tricam->RotateLF(1, 2, 0.25*TMath::Pi());
-
-  ASSIGN_ADD_GLASS(tmfield, TriMeshField, tricam, "TMField", 0);
-  tmfield->SetMesh(trimesh);
-  tmfield->ResizeToMesh();
-  tmfield->SetPalette(pal);
-  tmfield->FillByXYGaussBlobs();
-  tmfield->FindMinMaxField();
-  tmfield->SetMinValue(0);
-  tmfield->SetMaxValue(TMath::Ceil(tmfield->GetMaxValue()));
-
-  tricam->SetCurField(tmfield);
-  tmfield->ColorizeTvor();
-
-  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "TMLightField", 0);
-  lightmap->SetMesh(trimesh);
-  lightmap->ResizeToMesh();
-  lightmap->SetLampPos(5, 5, 20);
-  lightmap->SetPalette(pal);
-  lightmap->CalculateLightField();
 
   g_shell->Add(tricam);
   g_pupil->SetEventHandler(tricam);
@@ -225,9 +270,203 @@ void tringula()
   // And start the time ...
   /**************************************************************************/
 
+  Gled::theOne->LockFltk();
+
   dumper->SetPupil(g_pupil);
+  tricam->GetCamFix()->RotateLF(3, 1, TMath::Pi()/4);
+
+  Gled::theOne->UnlockFltk();
+
   eventor->Start();
 }
+
+/**************************************************************************/
+
+void setup_rectangle()
+{
+  // Make parasurf
+  ASSIGN_GLASS(parasurf, PSRectangle, g_queen, "Rect ParaSurf", 0);
+  PSRectangle* psrect = dynamic_cast<PSRectangle*>(parasurf);
+  psrect->SetMinX(terrain->GetMinX());
+  psrect->SetMaxX(terrain->GetMaxX());
+  psrect->SetMinY(terrain->GetMinY());
+  psrect->SetMaxY(terrain->GetMaxY());
+  parasurf->SetupEdgePlanes();
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportRectTerrain(terrain);
+  trimesh->StdSurfacePostImport();
+
+  // Export to GTS surface.
+  trimesh->ExportGTSurf(gtsurf);
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetEdgeRule(Tringula::ER_Bounce);
+  tringula->SetMesh(trimesh);
+}
+
+void setup_triangle()
+{
+  Float_t base = 128;
+
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSTriangle, g_queen, "Tri ParaSurf", 0);
+  PSTriangle* pstri = dynamic_cast<PSTriangle*>(parasurf);
+  pstri->Scale(base);
+  parasurf->SetupEdgePlanes();
+
+  // Setup GTS surface.
+  gtsurf->GenerateTriangle(base);
+  gtsurf->Tessellate(6);
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  parasurf->RandomizeH(trimesh, 4, 1, 0.8, 0, 1.1);
+  trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetEdgeRule(Tringula::ER_Bounce);
+  tringula->SetMesh(trimesh);
+}
+
+void setup_sphere_outside()
+{
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
+  PSSphere* pssph = dynamic_cast<PSSphere*>(parasurf);
+  pssph->SetR(32);
+
+  // Setup GTS surface.
+  gtsurf->GenerateSphere(4);
+  gtsurf->Rescale(32);
+  for (int i=0; i<5; ++i)
+    gtsurf->Legendrofy(16, 0.25, 1.5);
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  trimesh->StdSurfacePostImport();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+}
+
+void setup_sphere_inside()
+{
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
+  PSSphere* pssph = dynamic_cast<PSSphere*>(parasurf);
+  pssph->SetInside(true);
+  pssph->SetR(32);
+
+  // Setup GTS surface.
+  gtsurf->GenerateSphere(4);
+  gtsurf->Rescale(32);
+  for (int i=0; i<5; ++i)
+    gtsurf->Legendrofy(16, 0.25, 1.5);
+  gtsurf->Invert();
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  trimesh->StdSurfacePostImport();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+}
+
+float tweak(TRandom& rnd, float x)
+{
+  return x + rnd.Uniform(0.001, 0.002);
+}
+
+void setup_torus_outside()
+{
+  Float_t rM = 30, rm = 15, rS = rM + rm;
+
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
+  PSTorus* pstor = dynamic_cast<PSTorus*>(parasurf);
+  pstor->SetRM(rM);
+  pstor->SetRm(rm);
+
+  // Setup GTS surface.
+  gtsisomaker->SetFormula(Form("(%f - sqrt(x^2 + y^2))^2 + z^2", rM));
+  gtsisomaker->SetValue(rm*rm);
+
+  TRandom rnd(0);
+  Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
+  gtsisomaker->SetXAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
+  gtsisomaker->SetYAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
+  gtsisomaker->SetZAxis(-tweak(rnd, rm), tweak(rnd, rm), ndivz);
+  printf("making surface ...\n");
+  gtsisomaker->MakeSurface();
+  printf("coarsening ...\n");
+  gtsretring->SetStopNumber(2000); gtsretring->Coarsen();
+  printf("done\n");
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  pstor->RandomizeH(trimesh, 20, 2, 0.7);
+  trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+}
+
+void setup_torus_inside()
+{
+  Float_t rM = 30, rm = 15, rS = rM + rm;
+
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
+  PSTorus* pstor = dynamic_cast<PSTorus*>(parasurf);
+  pstor->SetInside(true);
+  pstor->SetRM(rM);
+  pstor->SetRm(rm);
+
+  // Setup GTS surface.
+  gtsisomaker->SetFormula(Form("(%f - sqrt(x^2 + y^2))^2 + z^2", rM));
+  gtsisomaker->SetValue(rm*rm);
+
+  TRandom rnd(0);
+  Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
+  gtsisomaker->SetXAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
+  gtsisomaker->SetYAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
+  gtsisomaker->SetZAxis(-tweak(rnd, rm), tweak(rnd, rm), ndivz);
+  printf("making surface ...\n");
+  gtsisomaker->MakeSurface();
+  printf("coarsening ...\n");
+  gtsretring->SetStopNumber(2000); gtsretring->Coarsen();
+  printf("done\n");
+  gtsurf->Invert();
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  pstor->RandomizeH(trimesh, 20, 1, 0.8);
+  trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+}
+
+/**************************************************************************/
 
 void sunrise(Float_t phi=45, Float_t dt=0.005, Int_t sleep=100)
 {
