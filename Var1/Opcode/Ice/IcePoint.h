@@ -106,7 +106,7 @@ public:
     return *this;
   }
 
-  //! this = this + a * scalar
+  //! this = this + a * scalar_a + b * scalar_b
   Point& TMac2(const Point& a, const Point& b, float sa, float sb)
   {
     x += a.x * sa + b.x * sb;
@@ -134,7 +134,7 @@ public:
   }
 
   //! this = this - a * scalar
-  Point& Msc(const Point& a, float scalar)
+  Point& TMsc(const Point& a, float scalar)
   {
     x -= a.x * scalar;
     y -= a.y * scalar;
