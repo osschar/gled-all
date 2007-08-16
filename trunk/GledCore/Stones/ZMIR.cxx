@@ -62,7 +62,7 @@ void ZMIR::_init() {
  
 ZMIR::ZMIR(ID_t a, ID_t b, ID_t g) :
   TMessage(GledNS::MT_Flare),
-  Direction(D_Unknown), SuppressFlareBroadcast(false),
+  Direction(D_Unknown), SuppressFlareBroadcast(false), RequiresResult(false),
   MirBits(0), CallerID(0),
   RecipientID(0), ResultRecipientID(0), ResultReqHandle(0),
   AlphaID(a), BetaID(b), GammaID(g)
@@ -74,7 +74,7 @@ ZMIR::ZMIR(ID_t a, ID_t b, ID_t g) :
 
 ZMIR::ZMIR(ZGlass* a, ZGlass* b, ZGlass* g) :
   TMessage(GledNS::MT_Flare),
-  Direction(D_Unknown), SuppressFlareBroadcast(false),
+  Direction(D_Unknown), SuppressFlareBroadcast(false), RequiresResult(false) ,
   MirBits(0), CallerID(0),
   RecipientID(0), ResultRecipientID(0), ResultReqHandle(0),
   Alpha(a), Beta(b), Gamma(g)

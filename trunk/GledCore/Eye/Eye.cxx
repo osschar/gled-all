@@ -35,7 +35,8 @@ void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 
 Eye::Eye(TSocket* sock, EyeInfo* ei) :
   mSatSocket   (sock),
-  mSatSocketFd (sock->GetDescriptor())
+  mSatSocketFd (sock->GetDescriptor()),
+  bBreakManageLoop (false)
 {
   static const Exc_t _eh("Eye::Eye ");
 
