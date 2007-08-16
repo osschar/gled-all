@@ -17,6 +17,7 @@
 
 
 #include "TriMesh.h"
+#include <Glasses/ParaSurf.h>
 #include <Glasses/RectTerrain.h>
 #include <Glasses/GTSurf.h>
 #include <Glasses/ZImage.h>
@@ -26,7 +27,7 @@
 
 #include <Opcode/Opcode.h>
 
-#include <TMath.h>
+#include <fstream>
 
 ClassImp(TriMesh)
 
@@ -60,8 +61,8 @@ void TriMesh::StdSurfacePostImport()
 {
   CalculateBoundingBox();
   BuildOpcStructs();
-
   BuildVertexConnections();
+  mParaSurf->FindMinMaxFGH(this);
 }
 
 void TriMesh::StdDynamicoPostImport()
@@ -137,6 +138,17 @@ void TriMesh::GenerateVertexNormals()
   mStampReqTring = Stamp(FID());
 }
 
+void TriMesh::GenerateTriangleNormals()
+{
+  static const Exc_t _eh("TriMesh::GenerateTriangleNormals ");
+
+  if (!mTTvor)
+    throw(_eh + "mTTvor is null.");
+
+  mTTvor->GenerateTriangleNormals();
+  mStampReqTring = Stamp(FID());
+}
+
 /**************************************************************************/
 // RectTerrain import
 /**************************************************************************/
@@ -151,6 +163,7 @@ void TriMesh::ImportRectTerrain(RectTerrain* rt, Bool_t colp, Bool_t texp)
   TringTvor* tt = 0;
   { GLensReadHolder _rlck(rt);
     printf("lock terrain\n");
+    // Here we reques vertex (smooth) and triangle (flat) sections.
     tt = rt->SpawnTringTvor(true, true, colp, texp);
     if(tt == 0)
       throw(_eh + "tvor null after MakeTringTvor().");
@@ -221,45 +234,25 @@ void TriMesh::ImportGTSurf(GTSurf* gts)
   tt->GenerateTriangleNormals();
 
   GLensWriteHolder _wlck(this);
-  printf("lock tringula\n");
   delete mTTvor;
   mTTvor = tt;
   mStampReqTring = Stamp(FID());
-  printf("unlock tringula\n");
-}
-
-
-namespace {
-struct xx_edge
-{
-  Int_t v1, v2;
-  xx_edge(Int_t _v1, Int_t _v2) : v1(_v1), v2(_v2) {}
-  bool operator==(const xx_edge& o) const
-  { return (o.v1==v1 && o.v2==v2) || (o.v1==v2 && o.v2==v1); }
-};
-}
-namespace __gnu_cxx {
-template<> struct hash<xx_edge> {
-  size_t operator()(const xx_edge& xx) const
-  { size_t i = xx.v1 * xx.v2; return i; }
-};
 }
 
 void TriMesh::ExportGTSurf(GTSurf* gts)
 {
+  static const Exc_t _eh("TriMesh::ExportGTSurf ");
+
   using namespace GTS;
 
   // Prepare edge data
 
-  typedef hash_map<xx_edge, Int_t>           hmap_t;
-  typedef hash_map<xx_edge, Int_t>::iterator hmap_i;
-
-  hmap_t edge_map;
-  Int_t  edge_cnt = 0;
+  xx_edge_hash_t edge_map;
+  Int_t          edge_cnt = 0;
   {
     Int_t* ta = mTTvor->mTrings;
     for(Int_t t=0; t<mTTvor->mNTrings; ++t) {
-      pair<hmap_i, bool> res;
+      pair<xx_edge_hash_i, bool> res;
       res = edge_map.insert(make_pair(xx_edge(ta[0], ta[1]), edge_cnt));
       if(res.second) ++edge_cnt;
       res = edge_map.insert(make_pair(xx_edge(ta[1], ta[2]), edge_cnt));
@@ -269,7 +262,8 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
       ta += 3;
     }
   }
-  printf("Counting edges => %d, map-size = %d\n", edge_cnt, (int)edge_map.size());
+  printf("%sCounting edges => %d, map-size = %d.\n", _eh.Data(),
+         edge_cnt, (int)edge_map.size());
 
   // Construct surface
 
@@ -287,7 +281,7 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
 
   GtsEdge ** edges = new GtsEdge*[edge_cnt];
   {
-    for(hmap_i e=edge_map.begin(); e!=edge_map.end(); ++e) {
+    for(xx_edge_hash_i e=edge_map.begin(); e!=edge_map.end(); ++e) {
       edges[e->second] = gts_edge_new(surf->edge_class,
                                       vertices[e->first.v1],
                                       vertices[e->first.v2]);
@@ -314,8 +308,6 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
 /**************************************************************************/
 // POV export
 /**************************************************************************/
-
-#include <fstream>
 
 void TriMesh::ExportPovMesh(const char* fname, Bool_t smoothp)
 {
@@ -361,123 +353,165 @@ void TriMesh::MakeTetrahedron(Float_t l1, Float_t l2, Float_t w, Float_t h)
 // Vertex algorithms
 /**************************************************************************/
 
+/**************************************************************************/
+// Nuovo cimento
+
+TriMesh::EdgeData::EdgeData() :
+  fV1(-1), fV2(-1), fT1(-1), fT2(-1),
+  fDistance(0), fDh(0),   fAngle(0),
+  fSurface(0),  fSpr1(0), fSpr2(0)
+{}
+
+namespace
+{
+struct edge_sort_cmp
+{
+  const vector<TriMesh::EdgeData>& edvec;
+
+  edge_sort_cmp(const vector<TriMesh::EdgeData>& ev) : edvec(ev) {}
+
+  bool operator()(const Int_t& e1, const Int_t& e2)
+  { return edvec[e1].fAngle < edvec[e2].fAngle; }
+};
+}
+
 void TriMesh::BuildVertexConnections()
 {
   static const Exc_t _eh("TriMesh::BuildVertexConnections ");
 
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
+  if (!mTTvor) throw(_eh + "mTTvor is null.");
 
-  const Int_t nVerts = mTTvor->mNVerts;
+  const Int_t nVerts  = mTTvor->mNVerts;
+  const Int_t nTrings = mTTvor->mNTrings;
+  Int_t       nConns  = 0, nEdges = 0;
 
-  vector<Int_t> *trings_per_vert = new vector<Int_t> [nVerts];
-  mTTvor->FindTrianglesPerVertex(trings_per_vert);
+  vector<Int_t>  nconn_per_vertex(nVerts);
+  xx_edge_hash_t edge_map;
 
+  const Int_t vP[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+
+  // Initialize edge-map, count edges and connections.
+  for (Int_t tring = 0; tring < nTrings; ++tring)
+  {
+    Int_t* vts = mTTvor->Triangle(tring);
+    for (Int_t e = 0; e < 3; ++e)
+    {
+      const Int_t v1 = vts[vP[e][0]], v2 = vts[vP[e][1]];
+      if (edge_map.insert(make_pair(xx_edge(v1, v2), nEdges)).second)
+      {
+        ++nEdges;
+        ++nconn_per_vertex[v1];
+        ++nconn_per_vertex[v2];
+        nConns += 2;
+      }
+    }
+  }
+
+  printf("%snEdges=%d, nConns=%d.\n", _eh.Data(), nEdges, nConns);
+
+  // Allocate arrays, now their exact sizes are known
   vector<VertexData> vertex_data_vec(nVerts);
   mVDataVec.swap(vertex_data_vec);
 
-  for (Int_t v = 0; v < nVerts; ++v)
+  vector<TriMesh::EdgeData> edge_data_vec(nEdges);
+  mEDataVec.swap(edge_data_vec);
+
+  vector<Int_t> edge_curs_vec(nConns);
+  mECursVec.swap(edge_curs_vec);
+
+
+  // Loop over vertices, init edge-cursors
   {
-    VertexData& vdata = mVDataVec[v];
-
-    vector<Int_t>& ts = trings_per_vert[v];
-    Int_t     ts_size = (Int_t) ts.size();
-
-    using namespace Opcode;
-
-    // Vertex with loop index 'v' plays the role of v1.
-    const Point& v1 = *(Point*) mTTvor->Vertex(v);
-
-    // If one has an overall parametrization of the surface shape,
-    // the derivatives with respect to major directions can be calculated.
-    // Ideally, the principal directions can be defined as a function of
-    // vertex coordinates, like u = f(x,y,z), v=g(x,y,z).
-    // TriMesh is the right place to know about these.
-    //
-    // For now we keep them constant, as needed for x-y plane
-    Point u_vec(1, 0, 0);
-    Point v_vec(0, 1, 0);
-
-    for (Int_t t = 0; t < ts_size; ++t)
+    Int_t* edge_cur = & mECursVec[0];
+    for (Int_t v=0; v<nVerts; ++v)
     {
-      Int_t vi0, vi2;  
-
-      if (mTTvor->TriangleOtherVertices(ts[t], v, vi0, vi2) == false)
-        throw (_eh + "triangle-data inconsistent.");
-
-      const Point &v0 = mTTvor->Vertex(vi0);
-      const Point &v2 = mTTvor->Vertex(vi2);
-
-      Point e1; e1.Sub(v0, v1);
-      Point e2; e2.Sub(v2, v1);
-
-      Int_t ii0, ii2; // inner indices of VConns
-      vdata.FindTwoVConnIdcs(vi0, vi2, ii0, ii2);
-
-      VConnData &vcd0 = vdata.fVConns[ii0];
-      if (vcd0.fDistance == 0)
-      {
-        ++vdata.fNeighbourConns;
-        vcd0.fDistance = e1.Magnitude();
-        vcd0.fdU       = u_vec | e1;
-        vcd0.fdV       = v_vec | e1;
-        vcd0.fAngle    = atan2f(vcd0.fdV, vcd0.fdU);
-        if (vcd0.fAngle < 0)
-          vcd0.fAngle += TMath::TwoPi();
-      }
-
-      VConnData &vcd2 = vdata.fVConns[ii2];
-      if (vcd2.fDistance == 0)
-      {
-        ++vdata.fNeighbourConns;
-        vcd2.fDistance = e2.Magnitude();
-        vcd2.fdU       = u_vec | e2;
-        vcd2.fdV       = v_vec | e2;
-        vcd2.fAngle    = atan2f(vcd2.fdV, vcd2.fdU);
-        if (vcd2.fAngle < 0)
-          vcd2.fAngle += TMath::TwoPi();
-      }
-
-      // surface per half-edge ~ 1/6 * 1/2 parallelogram-surface
-      Float_t surf  = 0.5f * (e1 ^ e2).Magnitude() / 6.0f;
-      Float_t sprd  = 0.5f * acosf((e1 | e2) / (vcd0.fDistance * vcd2.fDistance));
-
-      //printf("--- v=%d t=%d ts[t]=%d v0=%d v2=%d, surf=%5.2f, sprd=%5.2f\n",
-      //       v, t, ts[t], vi0, vi2, surf, sprd);
-
-      vcd0.fSpread  += sprd;
-      vcd0.fSurface += surf;
-      vcd2.fSpread  += sprd;
-      vcd2.fSurface += surf;
-
-      vdata.fSpread  += 2.0f * sprd;
-      vdata.fSurface += 2.0f * surf;
-
-      // Angle or dU,dV could be calculated given to two reference directions.
-      // This depends on the client, really.
-      // External callback?
-      // This angle would also be used as a sorting criteria.
+      mVDataVec[v].fEdgeArr = edge_cur;
+      edge_cur += nconn_per_vertex[v];
     }
-
-    // Sort VConns according to fAngle (default operator<()).
-    sort(vdata.fVConns.begin(), vdata.fVConns.end());
-
-    /*
-    printf("Vertex %2d (%5.2f, %5.2f, %5.2f) sprd=%5.3f surf=%5.3f, neighb-conns=%d, size=%d\n",
-           v, v1.x, v1.y, v1.z,
-           vdata.fSpread, vdata.fSurface,
-           vdata.fNeighbourConns, vdata.fVConns.size());
-    for (Int_t n = 0; n < vdata.fNeighbourConns; ++n)
-    {
-      VConnData& d = vdata.fVConns[n];
-
-      printf("  %d  nv=%2d  d=%5.2f, sp=%5.2f, su=%5.2f, angl=%5.2f du=%5.2f, dv=%5.2f\n",
-             n, d.fVTarget, d.fDistance, d.fSpread, d.fSurface, d.fAngle, d.fdU, d.fdV);
-    }
-    */
   }
 
-  delete [] trings_per_vert;
+  // Loop over triangles, setup basic edge data
+  {
+    for (Int_t tring = 0; tring < nTrings; ++tring)
+    {
+      Int_t* vts = mTTvor->Triangle(tring);
+      for (Int_t eti = 0; eti < 3; ++eti)
+      {
+        const Int_t v1 = vts[vP[eti][0]], v2 = vts[vP[eti][1]];
+        const Int_t ei = edge_map.find(xx_edge(v1, v2))->second;
+        EdgeData& ed = mEDataVec[ei];
+        if (ed.fV1 == -1)
+        {
+          ed.fV1 = v1;  ed.fV2 = v2;  ed.fT1 = tring;
+          mVDataVec[v1].insert_edge(ei);
+          mVDataVec[v2].insert_edge(ei);
+        }
+        else
+        {
+          ed.fT2 = tring;
+        }
+      }
+    }
+  }
+
+  // From this point on the edge_map is no longer used so that the
+  // code can be easily moved to a separate function.
+
+  // Loop over triangles, calc and accumulate edge & vertex-data
+  {
+    const Int_t oE[3]    = { 2, 0, 1 }; // other-edge for spread calculation
+
+    for (Int_t tring = 0; tring < nTrings; ++tring)
+    {
+      using namespace Opcode;
+
+      Int_t* vts = mTTvor->Triangle(tring);
+      const Point* v[3] = { (Point*) mTTvor->Vertex(vts[0]), (Point*) mTTvor->Vertex(vts[1]), (Point*) mTTvor->Vertex(vts[2]) };
+      Point e[3]; e[0].Sub(*v[1], *v[0]); e[1].Sub(*v[2], *v[1]); e[2].Sub(*v[0], *v[2]);
+
+      Float_t tri_surfo3 = (e[0] ^ e[2]).Magnitude() / 6.0f;
+      Float_t mags[3]    = { e[0].Magnitude(), e[1].Magnitude(), e[2].Magnitude() };
+      Float_t spreads[3];  // half-angles per vertex
+      for (Int_t i = 0; i < 3; ++i)
+        spreads[i] = 0.5f * acosf(-(e[i] | e[oE[i]])/(mags[i]*mags[oE[i]]));
+
+      for (Int_t eti = 0; eti < 3; ++eti)
+      {
+        const Int_t v1 = vts[vP[eti][0]], v2 = vts[vP[eti][1]];
+        VertexData &vd = mVDataVec[v1];
+        EdgeData&   ed = find_edge(vd, v1, v2);
+
+        if (ed.fDistance == 0)
+        {
+          ed.fDistance = e[eti].Magnitude();
+          Point mid_edge;
+          mid_edge.Mac(*v[eti], e[eti], 0.5f);
+          Point dirs[3];
+          mParaSurf->pos2fghdir(mid_edge, dirs[0], dirs[1], dirs[2]);
+          ed.fDh = e[eti] | dirs[2];
+          ed.fAngle = atan2f(e[eti] | dirs[0], e[eti] | dirs[0]);
+          if (ed.fAngle < 0)
+            ed.fAngle += PI;
+        }
+        ed.fSurface  += tri_surfo3;
+        if (ed.is_first(v1))
+          ed.fSpr1 += spreads[vP[eti][0]], ed.fSpr2 += spreads[vP[eti][1]];
+        else
+          ed.fSpr2 += spreads[vP[eti][0]], ed.fSpr1 += spreads[vP[eti][1]];
+
+        vd.fSurface += tri_surfo3;
+        vd.fSpread  += 2.0f * spreads[eti];
+      }
+    }
+
+    // For each vertex, sort edge cursors by their angle.
+    for (Int_t v = 0; v < nVerts; ++v)
+    {
+      VertexData& vd = mVDataVec[v];
+      sort(vd.fEdgeArr, vd.fEdgeArr + vd.fNEdges, edge_sort_cmp(mEDataVec));
+    }
+  }
+
 }
 
 void TriMesh::AssertVertexConnections()
@@ -489,37 +523,4 @@ void TriMesh::AssertVertexConnections()
 
   if ((Int_t) mVDataVec.size() !=  mTTvor->mNVerts)
     BuildVertexConnections();
-}
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
-TriMesh::VConnData& TriMesh::VertexData::FindVConn(Int_t vtarget)
-{
-  vector<VConnData>::iterator i = fVConns.begin();
-  while (i != fVConns.end())
-  {
-    if (i->fVTarget == vtarget) return *i;
-    ++i;
-  }  
-  fVConns.push_back(VConnData(vtarget));
-  return fVConns.back();
-}
-
-void TriMesh::VertexData::FindTwoVConnIdcs(Int_t  v1,  Int_t  v2,
-                                           Int_t& vi1, Int_t& vi2)
-{
-  Int_t idx = 0;
-  vi1 = vi2 = -1;
-  vector<VConnData>::iterator i = fVConns.begin();
-  while (i != fVConns.end())
-  {
-    if (i->fVTarget == v1) vi1 = idx;
-    if (i->fVTarget == v2) vi2 = idx;
-    ++i; ++idx;
-  }
-  if (vi1 == -1) { fVConns.push_back(VConnData(v1)); vi1 = idx++; }
-  if (vi2 == -1) { fVConns.push_back(VConnData(v2)); vi2 = idx++; }
 }
