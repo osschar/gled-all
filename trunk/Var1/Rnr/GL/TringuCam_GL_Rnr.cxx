@@ -27,7 +27,7 @@ void TringuCam_GL_Rnr::PreDraw(RnrDriver* rd)
 void TringuCam_GL_Rnr::Draw(RnrDriver* rd)
 {
   TringuCam& TC = * mTringuCam;
-  TC.mCamFix    = * rd->GetCamFixTrans();
+  TC.mCamFix  = rd->GetCamFixTrans();
   TC.mScreenW = rd->GetWidth();
   TC.mScreenH = rd->GetHeight();
   TC.mNearClp = rd->GetNearClip();
@@ -78,7 +78,6 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
           float dyang = cfac*dy;
           mTringuCam->RotateLF(1, 2, -dxang);
           rd->GetCamFixTrans()->RotateLF(1, 3, -dyang);
-          TC.mCamFix = * rd->GetCamFixTrans();
         }
         
       }

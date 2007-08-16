@@ -162,7 +162,7 @@ protected:
   // Render-driver and mouse state fed in via TringuCam_GL_Rnr
   // Draw() and Handle().
 
-  ZTrans  mCamFix;
+  ZTrans* mCamFix;              //! X{G}
   Int_t   mScreenW, mScreenH;   //!
   Float_t mNearClp, mFarClp;    //!
   Float_t mZFov;                //!
