@@ -8,6 +8,10 @@ $PATCH = {
                   "#pragma link C++ class HTransD+;\n"
 },
 
+"ParaSurf" => {
+  'VirtualBase' => 1
+},
+
 };
 
 1;
