@@ -107,12 +107,13 @@ public:
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
 					void* ud);
   void GenerateTriangleColorsFromVertexColors();
+  void GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles);
 
   void GenerateVertexNormals();
 
   // Intermediate structures
-  void FindTrianglesPerVertex(vector<Int_t>* trings_per_vert);
-  void FindNeighboursPerVertex(vector<Int_t>* neighbours);
+  void  FindTrianglesPerVertex(vector<Int_t>* trings_per_vert);
+  Int_t FindNeighboursPerVertex(vector<Int_t>* neighbours);
 
   // Triangle strips
   void GenerateTriangleStrips(Int_t max_verts=128);
@@ -132,6 +133,10 @@ public:
 inline Bool_t TringTvor::TriangleOtherVertices(Int_t t, Int_t v, 
                                                Int_t& v_prev, Int_t& v_next)
 {
+  // Find other two vertices (than v) in triangle t.
+  // If you do: e1 = v_prev - v, e2 = v_next - v, then: e2 x e1 points
+  // in the normal direction.
+
   Int_t * T = Triangle(t);
   if (T[0] == v) { v_prev = T[2]; v_next = T[1]; return true; }
   if (T[1] == v) { v_prev = T[0]; v_next = T[2]; return true; }

@@ -194,6 +194,24 @@ void TringTvor::GenerateTriangleColorsFromVertexColors()
   }
 }
 
+void TringTvor::GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles)
+{
+  AssertTringCols();
+
+  for (set<Int_t>::iterator t = triangles.begin(); t != triangles.end(); ++t)
+  {
+    Int_t*    T = Triangle(*t);
+    UChar_t*  C = TriangleColor(*t);
+    UChar_t* c0 = Color(T[0]);
+    UChar_t* c1 = Color(T[1]);
+    UChar_t* c2 = Color(T[2]);
+    C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) / 3);
+    C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) / 3);
+    C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) / 3);
+    C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) / 3);
+  }
+}
+
 /**************************************************************************/
 
 void TringTvor::GenerateVertexNormals()
@@ -256,27 +274,31 @@ void TringTvor::FindTrianglesPerVertex(vector<Int_t>* trings_per_vert)
   }
 }
 
-void TringTvor::FindNeighboursPerVertex(vector<Int_t>* neighbours)
+Int_t TringTvor::FindNeighboursPerVertex(vector<Int_t>* neighbours)
 {
   // Populate array of vectors 'neighbours' from triangle data.
   // The output array must be properly allocated in advance.
+  // Returns total number of connections (which is 2*N_edge for closed
+  // surfaces).
 
-  static const Int_t vertPairs[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+  const Int_t vP[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
 
-  Int_t* T = mTrings;
+  Int_t  nc = 0;
+  Int_t* T  = mTrings;
   for (Int_t t=0; t<mNTrings; ++t, T+=3)
   {
-    for (Int_t vp=0; vp<3; ++vp)
+    for (Int_t eti=0; eti<3; ++eti)
     {
-      const  Int_t   v0 = T[vertPairs[vp][0]],  v1 = T[vertPairs[vp][1]];
-      vector<Int_t> &n0 = neighbours[v0],      &n1 = neighbours[v1];
+      const  Int_t   v0 = T[vP[eti][0]],   v1 = T[vP[eti][1]];
+      vector<Int_t> &n0 = neighbours[v0], &n1 = neighbours[v1];
 
       if (find(n0.begin(), n0.end(), v1) == n0.end())
-        n0.push_back(v1);
+      { n0.push_back(v1); ++nc; }
       if (find(n1.begin(), n1.end(), v0) == n1.end())
-        n1.push_back(v0);
+      { n1.push_back(v0); ++nc; }
     }
   }
+  return nc;
 }
 
 /**************************************************************************/
