@@ -301,23 +301,23 @@ enum FPUMode
 
 #ifdef WIN32
 FUNCTION ICECORE_API FPUMode	GetFPUMode();
-FUNCTION ICECORE_API void		SaveFPU();
-FUNCTION ICECORE_API void		RestoreFPU();
-FUNCTION ICECORE_API void		SetFPUFloorMode();
-FUNCTION ICECORE_API void		SetFPUCeilMode();
-FUNCTION ICECORE_API void		SetFPUBestMode();
+FUNCTION ICECORE_API void	SaveFPU();
+FUNCTION ICECORE_API void	RestoreFPU();
+FUNCTION ICECORE_API void	SetFPUFloorMode();
+FUNCTION ICECORE_API void	SetFPUCeilMode();
+FUNCTION ICECORE_API void	SetFPUBestMode();
 
-FUNCTION ICECORE_API void		SetFPUPrecision24();
-FUNCTION ICECORE_API void		SetFPUPrecision53();
-FUNCTION ICECORE_API void		SetFPUPrecision64();
-FUNCTION ICECORE_API void		SetFPURoundingChop();
-FUNCTION ICECORE_API void		SetFPURoundingUp();
-FUNCTION ICECORE_API void		SetFPURoundingDown();
-FUNCTION ICECORE_API void		SetFPURoundingNear();
+FUNCTION ICECORE_API void	SetFPUPrecision24();
+FUNCTION ICECORE_API void	SetFPUPrecision53();
+FUNCTION ICECORE_API void	SetFPUPrecision64();
+FUNCTION ICECORE_API void	SetFPURoundingChop();
+FUNCTION ICECORE_API void	SetFPURoundingUp();
+FUNCTION ICECORE_API void	SetFPURoundingDown();
+FUNCTION ICECORE_API void	SetFPURoundingNear();
 
-FUNCTION ICECORE_API int		intChop(const float& f);
-FUNCTION ICECORE_API int		intFloor(const float& f);
-FUNCTION ICECORE_API int		intCeil(const float& f);
+FUNCTION ICECORE_API int	intChop(const float& f);
+FUNCTION ICECORE_API int	intFloor(const float& f);
+FUNCTION ICECORE_API int	intCeil(const float& f);
 #endif
 
 #endif // __ICEFPU_H__
