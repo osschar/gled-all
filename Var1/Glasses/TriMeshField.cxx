@@ -293,6 +293,7 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
   }
   else
   {
+    // !!! should cache formula as data-member.
     TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula.Data(), 0, 0);
 
     switch (mDim)
@@ -321,10 +322,24 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
     }
   }
 
-  // !!!! Very sub-optimal. Need to introduce edge-data with
-  // !!!! triangle idcs, optimised for two.
+  // Regenerate changed triangles if necessary.
   if (regen_tring_cols && TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  {
+    set<Int_t> ct; // changed triangles
+    for (set<Int_t>::iterator v = vertices.begin(); v != vertices.end(); ++v)
+    {
+      const TriMesh::VertexData & vd = mMesh->RefVDataVec()[*v];
+      for (Int_t e = 0; e < vd.n_edges(); ++e)
+      {
+        const TriMesh::EdgeData& ed = mMesh->RefEDataVec()[vd.edge(e)];
+        ct.insert(ed.fT1);
+        ct.insert(ed.fT2); // Not needed for closed surfaces.
+      }
+    }
+    if (*ct.begin() == -1) // Potentially remove no-tring entry.
+      ct.erase(ct.begin());
+    TT.GenerateTriangleColorsFromVertexColors(ct);
+  }
 
   mMesh->StampReqTring(TriMesh::FID());
 }
@@ -399,17 +414,18 @@ void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df)
 
   vector<Float_t> delta(mField.size());
   const vector<TriMesh::VertexData>& vertex_data_vec = mMesh->RefVDataVec();
+  const vector<TriMesh::EdgeData>  &   edge_data_vec = mMesh->RefEDataVec();
 
   Float_t Ddt = diff_const*dt;
 
+  // !!! This could be rewritten as loop over edges, now that wwe have them.
   for (Int_t i=0; i<mNVerts; ++i)
   {
-
-    const TriMesh::VertexData&                 vdata = vertex_data_vec[i];
-    vector<TriMesh::VConnData>::const_iterator   vcd = vdata.fVConns.begin();
-    while (vcd != vdata.fVConns.end())
+    const TriMesh::VertexData&    vdata = vertex_data_vec[i];
+    for (Int_t ei = 0; ei < vdata.n_edges(); ++ei)
     {
-      Int_t   j       = vcd->fVTarget;
+      const TriMesh::EdgeData& ed = edge_data_vec[vdata.edge(ei)];
+      Int_t j = ed.other_vertex(i);
 
       if (limit_df)
       {
@@ -424,9 +440,9 @@ void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df)
         Float_t delta_f = (mField[j] - mField[i])*Ddt;
         if (delta_f < 0)
         {
-          Float_t df     = delta_f*vcd->fSpread/vcd->fDistance;
-          Float_t lim_df = TMath::Max(-mField[i]*vcd->fSurface/vdata.fSurface,
-                                      0.5f*delta_f);
+          Float_t df     = delta_f*ed.spread(i)/ed.distance();
+          Float_t lim_df = TMath::Max(-mField[i] * ed.surface() / vdata.fSurface,
+                                      0.5f * delta_f);
           if (df < lim_df)
             df = lim_df;
           delta[i] += df;
@@ -444,12 +460,11 @@ void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df)
           // to each vertex, but we take into account the spread of the
           // edge and its length.
           // These should all be optional.
-          Float_t df = (mField[j] - mField[i])*vcd->fSpread/vcd->fDistance*Ddt;
+          Float_t df = (mField[j] - mField[i])*ed.spread(i)/ed.distance()*Ddt;
           delta[i] += df;
           delta[j] -= df;
         }
       }
-      ++vcd;
     }
   }
 
