@@ -28,7 +28,7 @@ void TringuCam::_init()
 {
   bKeysVerbose = bMouseVerbose = false;
 
-  //                               acc/inc  | decay     | timeout
+  //                                acc/inc | decay,    | timeout
   mChgParCameraMove.SetValueParams (1, 0.5,   1.2, 0.4,   0.05);
   mChgParCameraMove.SetDesireParams(1, 0.3,   1,   0.1,   0.2);
 
@@ -44,9 +44,9 @@ void TringuCam::_init()
   mKeyStateMap['r'] = &mUpDown.fIncKey;
   mKeyStateMap['f'] = &mUpDown.fDecKey;
 
-  //                                 acc/inc    | decay      | timeout
-  mChgParCameraRotate.SetValueParams (0.1, 0.5,   1.2, 0.4,    0.05);
-  mChgParCameraRotate.SetDesireParams(0.1, 0.3,   0.1, 0.1,    0.2);
+  //                                  acc/inc   | decay     | timeout
+  mChgParCameraRotate.SetValueParams (0.1, 0.5,   1.2, 0.4,   0.05);
+  mChgParCameraRotate.SetDesireParams(0.1, 0.3,   0.1, 0.1,   0.2);
 
   mSpinUp.fChangeParams = &mChgParCameraRotate;
   mKeyStateMap['q'] = &mSpinUp.fIncKey;
@@ -189,12 +189,12 @@ void TringuCam::CalculateMouseRayVectors()
 
   mMouseRayPos.SetXYZ(0, 0, 0);
   mCamFix->MultiplyIP(mMouseRayPos);
-  mTrans .MultiplyIP(mMouseRayPos);
+  mTrans.MultiplyIP(mMouseRayPos);
 
   mMouseRayDir.SetXYZ(mNearClp, -xcam, -ycam);
   mMouseRayDir.SetMag(1);
   mCamFix->RotateIP(mMouseRayDir);
-  mTrans .RotateIP(mMouseRayDir);
+  mTrans.RotateIP(mMouseRayDir);
 }
 
 void TringuCam::MouseRayCollide()
@@ -320,10 +320,14 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
     mTrans.SetBaseVecViaCross(2);
   }
 
-  if (*mTxtLftRgt != 0)
-    mTxtLftRgt->SetText
-      (GForm("Des+ = %5.3f | V = %5.3f  | Des- = %5.3f\n",
-             mLftRgt.fIncKey.fDesiredValue, mLftRgt.fValue, mLftRgt.fDecKey.fDesiredValue));
+  if (*mInfoTxt != 0)
+    mInfoTxt->SetText
+      (GForm("FWD: + %5.2f | %+5.2f | - %5.2f  ||  "
+             "LFT: + %5.2f | %+5.2f | - %5.2f  || "
+             " UP: + %5.2f | %+5.2f | - %5.2f",
+             mFwdBck.fIncKey.fDesiredValue, mFwdBck.fValue, mFwdBck.fDecKey.fDesiredValue,
+             mLftRgt.fIncKey.fDesiredValue, mLftRgt.fValue, mLftRgt.fDecKey.fDesiredValue,
+             mUpDown.fIncKey.fDesiredValue, mUpDown.fValue, mUpDown.fDecKey.fDesiredValue));
 
 
   if (bMouseDown && mMouseAction == MA_SprayField)
