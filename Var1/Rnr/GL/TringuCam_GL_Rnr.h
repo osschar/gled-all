@@ -27,9 +27,7 @@ public:
     ZNode_GL_Rnr(idol), mTringuCam(idol)
   { _init(); }
 
-  virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  virtual void PostDraw(RnrDriver* rd);
 
   virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
 
