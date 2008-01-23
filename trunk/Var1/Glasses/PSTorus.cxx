@@ -47,6 +47,13 @@ inline float norm3(float x, float y, float z)
 
 /**************************************************************************/
 
+Float_t PSTorus::surface()
+{
+  return 4.0f*sPi*sPi*mRM*mRm;
+}
+
+/******************************************************************************/
+
 void PSTorus::pos2fgh(const Float_t* x, Float_t* f)
 {
   f[0] = atan2f(x[1], x[0]);
@@ -67,16 +74,21 @@ void PSTorus::fgh2pos(const Float_t* f, Float_t* x)
 
 void PSTorus::fgh2fdir(const Float_t* f, Float_t* d)
 {
-  d[0] = sinf(f[0]); if (bInside) d[0] = -d[0];
-  d[1] = cosf(f[0]); // cos is even
+  d[0] = -sinf(f[0]);
+  d[1] =  cosf(f[0]);
   d[2] =  0;
+  if (bInside) {
+    // d[0] = -d[0]; already negated by phi inversion and oddness of sin
+    d[1] = -d[1];
+    // d[2] = -d[2]; zero
+  }
 }
 
 void PSTorus::fgh2gdir(const Float_t* f, Float_t* d)
 {
   const Float_t st = -sinf(f[1]);
 
-  d[0] = st * cosf(f[0]); // cos is even
+  d[0] = st * cosf(f[0]);
   d[1] = st * sinf(f[0]); if (bInside) d[1] = -d[1];
   d[2] = cosf(f[1]);
 }
@@ -85,9 +97,14 @@ void PSTorus::fgh2hdir(const Float_t* f, Float_t* d)
 {
   const Float_t ct = cosf(f[1]);
 
-  d[0] = ct * cosf(f[0]); // cos is even
-  d[1] = ct * sinf(f[0]); if (bInside) d[1] = -d[1];
+  d[0] = ct * cosf(f[0]);
+  d[1] = ct * sinf(f[0]);
   d[2] = sinf(f[1]);
+  if (bInside) {
+    d[0] = -d[0];
+    // d[1] = -d[1]; already negated by phi inversion and oddness of sin
+    d[2] = -d[2];
+  }
 }
 
 /**************************************************************************/
@@ -103,7 +120,11 @@ void PSTorus::pos2hdir(const Float_t* x, Float_t* d)
   d[0] = ct*cosf(p);
   d[1] = ct*sinf(p);
   d[2] = sinf(t);
-  if (bInside) { d[0] = -d[0]; d[1] = -d[1]; d[2] = -d[2]; }
+  if (bInside) {
+    d[0] = -d[0];
+    d[1] = -d[1];
+    d[2] = -d[2];
+  }
 }
  
 Float_t PSTorus::pos2hray(const Float_t* x, Opcode::Ray& r)
@@ -118,17 +139,13 @@ Float_t PSTorus::pos2hray(const Float_t* x, Opcode::Ray& r)
   const Float_t ct = cosf(t);
   const Float_t sp = sinf(p), cp = cosf(p);
 
-  r.mDir.Set(ct*cp, ct*sp, sinf(t));
   Float_t dr = norm3(x[0] - mRM*cp, x[1] - mRM*sp, x[2]) - mRm;
-  Float_t dist;
+  r.mDir.Set(ct*cp, ct*sp, sinf(t));
   if (bInside) {
     r.mDir.Neg();
-    dr   = -dr;
-    dist = dr - mMinH + mEpsilon;
-  } else {
-    dist = mMaxH - dr + mEpsilon;
+    dr = -dr;
   }
-  // printf("p=%.2f, t=%.2f, dr=%.2f\n", p, t, dr);
+  Float_t dist = mMaxH - dr + mEpsilon;
 
   r.mOrig.Set(x);
   r.mOrig.TMac(r.mDir, dist);
@@ -153,6 +170,17 @@ void PSTorus::sub_fgh(Float_t* a, Float_t* b, Float_t* delta)
   delta[0] = U1Sub(a[0], b[0]);
   delta[1] = U1Sub(a[1], b[1]);
   delta[2] = a[2] - b[2];
+}
+
+void PSTorus::regularize_fg(Float_t* f)
+{
+  // Put fg values into regular intervals.
+
+  if (f[0] > sPi)       f[0] -= sTwoPi;
+  else if (f[0] < -sPi) f[0] += sTwoPi;
+
+  if (f[1] > sPi)       f[1] -= sTwoPi;
+  else if (f[1] < -sPi) f[1] += sTwoPi;
 }
 
 void PSTorus::random_fgh(TRandom& rnd, Float_t* f)

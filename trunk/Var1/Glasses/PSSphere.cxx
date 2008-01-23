@@ -41,6 +41,13 @@ void PSSphere::_init()
 
 /**************************************************************************/
 
+Float_t PSSphere::surface()
+{
+  return 4.0f*sPi*mR*mR;
+}
+
+/******************************************************************************/
+
 void PSSphere::pos2fgh(const Float_t* x, Float_t* f)
 {
   const Float_t rxysq = x[0]*x[0] + x[1]*x[1];
@@ -64,18 +71,21 @@ void PSSphere::fgh2pos(const Float_t* f, Float_t* x)
 
 void PSSphere::fgh2fdir(const Float_t* f, Float_t* d)
 {
-  const Float_t ct = cosf(f[1]);
-
-  d[0] = -ct * sinf(f[0]); if (bInside) d[1] = -d[1];
-  d[1] =  ct * cosf(f[0]); // cos is even
+  d[0] = -sinf(f[0]);
+  d[1] =  cosf(f[0]);
   d[2] =  0;
+  if (bInside) {
+    // d[0] = -d[0]; already negated by phi inversion and oddness of sin
+    d[1] = -d[1];
+    d[2] = -d[2];
+  }
 }
 
 void PSSphere::fgh2gdir(const Float_t* f, Float_t* d)
 {
   const Float_t st = -sinf(f[1]);
 
-  d[0] = st * cosf(f[0]); // cos is even
+  d[0] = st * cosf(f[0]);
   d[1] = st * sinf(f[0]); if (bInside) d[1] = -d[1];
   d[2] = cosf(f[1]);
 }
@@ -84,9 +94,14 @@ void PSSphere::fgh2hdir(const Float_t* f, Float_t* d)
 {
   const Float_t ct = cosf(f[1]);
 
-  d[0] = ct * cosf(f[0]); // cos is even
-  d[1] = ct * sinf(f[0]); if (bInside) d[1] = -d[1];
+  d[0] = ct * cosf(f[0]);
+  d[1] = ct * sinf(f[0]);
   d[2] = sinf(f[1]);
+  if (bInside) {
+    d[0] = -d[0];
+    // d[1] = -d[1]; already negated by phi inversion and oddness of sin
+    d[2] = -d[2];
+  }
 }
 
 /**************************************************************************/
@@ -114,8 +129,8 @@ Float_t PSSphere::pos2hray(const Float_t* x, Opcode::Ray& r)
 
   const Float_t a = bInside ? -1.0f : 1.0f;
   Float_t q    = sqrtf(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
-  Float_t dr   = bInside ? mR - q : q - mR;
-  Float_t dist = bInside ? dr - mMinH + mEpsilon : mMaxH - dr + mEpsilon;
+  Float_t h    = bInside ? mR - q : q - mR;
+  Float_t dist = mMaxH - h + mEpsilon;
 
   // printf("a=%f; q=%f; dr=%f; dist=%f;\n", a, q, dr, dist);
 
@@ -148,6 +163,17 @@ void PSSphere::sub_fgh(Float_t* a, Float_t* b, Float_t* delta)
   delta[0] = U1Sub(a[0], b[0]);
   delta[1] = a[1] - b[1];
   delta[2] = a[2] - b[2];
+}
+
+void PSSphere::regularize_fg(Float_t* f)
+{
+  // Put fg values into regular intervals.
+
+  if (f[0] > sPi)       f[0] -= sTwoPi;
+  else if (f[0] < -sPi) f[0] += sTwoPi;
+
+  if (f[1] < -sPiHalf)     f[1] = -sPiHalf;
+  else if (f[1] > sPiHalf) f[1] =  sPiHalf;
 }
 
 void PSSphere::random_fgh(TRandom& rnd, Float_t* f)

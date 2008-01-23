@@ -55,11 +55,24 @@ void PSRectangle::SetupEdgePlanes()
 
 /**************************************************************************/
 
-void PSRectangle::originpos(Float_t* x)
+Float_t PSRectangle::surface()
 {
-  using namespace Opcode;
+  return (mMaxX - mMinX) * (mMaxY - mMinY);
+}
+
+/******************************************************************************/
+
+void PSRectangle::origin_fgh(Float_t* f)
+{
+  f[0] = mMinX + 0.5f*(mMaxX - mMinX);
+  f[1] = mMinY + 0.5f*(mMaxY - mMinY);
+  f[2] = 0;
+}
+
+void PSRectangle::origin_pos(Float_t* x)
+{
   x[0] = mMinX + 0.5f*(mMaxX - mMinX);
-  x[0] = mMinY + 0.5f*(mMaxY - mMinY);
+  x[1] = mMinY + 0.5f*(mMaxY - mMinY);
   x[2] = 0;
 }
 

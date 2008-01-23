@@ -25,6 +25,8 @@ public:
     ParaSurf(n,t) { _init(); }
   virtual ~PSSphere() {}
 
+  virtual Float_t surface();
+
   virtual void pos2fgh(const Float_t* x, Float_t* f);
   virtual void fgh2pos(const Float_t* f, Float_t* x);
 
@@ -37,6 +39,9 @@ public:
 
   // Subtract fgh values, taking care of U(1) variables (like angles).
   virtual void sub_fgh(Float_t* a, Float_t* b, Float_t* delta);
+
+  // Put fgh values into regular intervals.
+  virtual void regularize_fg(Float_t* f);
 
   // These two return a point ABOVE the surface (at maxH + eps)
   virtual void random_fgh(TRandom& rnd, Float_t* f);
