@@ -111,9 +111,19 @@ protected:
   Opcode::Model*          mOPCModel;   //! X{g}
   Opcode::MeshInterface*  mOPCMeshIf;  //! X{g}
 
+  Float_t                 mVolume;     // X{GS} 7 ValOut(-join=>1)
+  Float_t                 mXYArea;     // X{GS} 7 ValOut()
+
   vector<TriMesh::VertexData>   mVDataVec;  //! X{R}
   vector<TriMesh::EdgeData>     mEDataVec;  //! X{R}
   vector<Int_t>                 mECursVec;  //! X{R} Cursor array, one entry per vertex.
+
+  void make_tetra(Int_t vo, Int_t to, Float_t l1, Float_t l2,
+                  Float_t z, Float_t w, Float_t h);
+  void make_cubus(Int_t vo, Int_t to,
+                  Float_t x0, Float_t y0, Float_t z0,
+                  Float_t a,  Float_t b,  Float_t c,
+                  UChar_t cr, UChar_t cg, UChar_t cb, UChar_t ca);
 
 public:
   TriMesh(const Text_t* n="TriMesh", const Text_t* t=0) :
@@ -145,6 +155,12 @@ public:
 
   void MakeTetrahedron(Float_t l1=0.8, Float_t l2=0.2,
                        Float_t  w=0.4, Float_t  h=0.4); // X{E} 7 MCWButt()
+  void MakeTetraFlyer (Float_t l1=0.8, Float_t l2=0.2,
+                       Float_t  w=0.2, Float_t  h=0.2,
+                       Float_t wing_l1=0.4, Float_t wing_l2=0.1, Float_t wing_z=0.01,
+                       Float_t wing_w=0.8,  Float_t wing_h=0.02); // X{E} 7 MCWButt()
+
+  void MakeBox(Float_t a=5, Float_t b=4, Float_t c=3);
 
   void BuildVertexConnections();
   void AssertVertexConnections();

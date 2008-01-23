@@ -36,6 +36,9 @@ ClassImp(TriMesh)
 void TriMesh::_init()
 {
   mTTvor     = 0;
+  mVolume    = 0;
+  mXYArea    = 0;
+
   mOPCModel  = 0;
   mOPCMeshIf = 0;
 }
@@ -95,7 +98,8 @@ void TriMesh::BuildOpcStructs()
   OPCC.mIMesh = mOPCMeshIf;
 
   bool status = mOPCModel->Build(OPCC);
-  printf("Build finished rstatus=%d, bytes=%d\n", status, mOPCModel->GetUsedBytes());
+
+  // printf("Build finished status=%d, bytes=%d\n", status, mOPCModel->GetUsedBytes());
 }
 
 void TriMesh::AssertOpcStructs()
@@ -116,13 +120,14 @@ void TriMesh::CalculateBoundingBox()
     throw(_eh + "mTTvor is null.");
 
   mTTvor->CalculateBoundingBox();
-  Float_t *b = mTTvor->mMinMaxBox, *e = mTTvor->mCtrExtBox;
-  printf("%s %s\n"
-         "  min = % 8.4f, % 8.4f, % 8.4f  max = % 8.4f, % 8.4f, % 8.4f\n"
-         "  ctr = % 8.4f, % 8.4f, % 8.4f  ext = % 8.4f, % 8.4f, % 8.4f\n",
-         _eh.Data(), Identify().Data(),
-         b[0], b[1], b[2], b[3], b[4], b[5],
-         e[0], e[1], e[2], e[3], e[4], e[5]);
+
+  // Float_t *b = mTTvor->mMinMaxBox, *e = mTTvor->mCtrExtBox;
+  // printf("%s %s\n"
+  //        "  min = % 8.4f, % 8.4f, % 8.4f  max = % 8.4f, % 8.4f, % 8.4f\n"
+  //        "  ctr = % 8.4f, % 8.4f, % 8.4f  ext = % 8.4f, % 8.4f, % 8.4f\n",
+  //        _eh.Data(), Identify().Data(),
+  //        b[0], b[1], b[2], b[3], b[4], b[5],
+  //        e[0], e[1], e[2], e[3], e[4], e[5]);
 
   // mStampReqTring = Stamp(FID());
 }
@@ -163,7 +168,7 @@ void TriMesh::ImportRectTerrain(RectTerrain* rt, Bool_t colp, Bool_t texp)
   TringTvor* tt = 0;
   { GLensReadHolder _rlck(rt);
     printf("lock terrain\n");
-    // Here we reques vertex (smooth) and triangle (flat) sections.
+    // Here we request vertex (smooth) and triangle (flat) sections.
     tt = rt->SpawnTringTvor(true, true, colp, texp);
     if(tt == 0)
       throw(_eh + "tvor null after MakeTringTvor().");
@@ -324,37 +329,108 @@ void TriMesh::ExportPovMesh(const char* fname, Bool_t smoothp)
 // Simple Tvors
 /**************************************************************************/
 
+void TriMesh::make_tetra(Int_t vo, Int_t to, Float_t l1, Float_t l2,
+                         Float_t z, Float_t w, Float_t h)
+{
+  TringTvor& C = *mTTvor;
+
+  C.SetVertex(vo + 0, -l2,  0.5*w, z);
+  C.SetVertex(vo + 1,  l1,  0,     z);
+  C.SetVertex(vo + 2, -l2, -0.5*w, z);
+  C.SetVertex(vo + 3,   0,  0,     z+h);
+
+  C.SetTriangle(to + 0, vo + 0, vo + 1, vo + 2);
+  C.SetTriangle(to + 1, vo + 0, vo + 3, vo + 1);
+  C.SetTriangle(to + 2, vo + 1, vo + 3, vo + 2);
+  C.SetTriangle(to + 3, vo + 0, vo + 2, vo + 3);
+
+  C.SetTriangleColor(to + 0, 0,0,255);
+  C.SetTriangleColor(to + 1, 0,255,0);
+  C.SetTriangleColor(to + 2, 0,255,0);
+  C.SetTriangleColor(to + 3, 255,0,0);
+}
+
+void TriMesh::make_cubus(Int_t vo, Int_t to,
+                         Float_t x0, Float_t y0, Float_t z0,
+                         Float_t a,  Float_t b,  Float_t c,
+                         UChar_t cr, UChar_t cg, UChar_t cb, UChar_t ca)
+{
+  TringTvor& C = *mTTvor;
+
+  C.SetVertex(vo + 0, x0,     y0,     z0);
+  C.SetVertex(vo + 1, x0,     y0 + b, z0);
+  C.SetVertex(vo + 2, x0 + a, y0 + b, z0);
+  C.SetVertex(vo + 3, x0 + a, y0,     z0);
+  C.SetVertex(vo + 4, x0,     y0,     z0 + c);
+  C.SetVertex(vo + 5, x0,     y0 + b, z0 + c);
+  C.SetVertex(vo + 6, x0 + a, y0 + b, z0 + c);
+  C.SetVertex(vo + 7, x0 + a, y0,     z0 + c);
+
+  C.SetTriangle(to +  0, vo + 0, vo + 1, vo + 2); C.SetTriangleColor(to +  0, cr, cg, cb, ca);
+  C.SetTriangle(to +  1, vo + 0, vo + 2, vo + 3); C.SetTriangleColor(to +  1, cr, cg, cb, ca);
+  C.SetTriangle(to +  2, vo + 0, vo + 4, vo + 1); C.SetTriangleColor(to +  2, cr, cg, cb, ca);
+  C.SetTriangle(to +  3, vo + 1, vo + 4, vo + 5); C.SetTriangleColor(to +  3, cr, cg, cb, ca);
+  C.SetTriangle(to +  4, vo + 1, vo + 5, vo + 2); C.SetTriangleColor(to +  4, cr, cg, cb, ca);
+  C.SetTriangle(to +  5, vo + 2, vo + 5, vo + 6); C.SetTriangleColor(to +  5, cr, cg, cb, ca);
+  C.SetTriangle(to +  6, vo + 2, vo + 6, vo + 3); C.SetTriangleColor(to +  6, cr, cg, cb, ca);
+  C.SetTriangle(to +  7, vo + 6, vo + 7, vo + 3); C.SetTriangleColor(to +  7, cr, cg, cb, ca);
+  C.SetTriangle(to +  8, vo + 3, vo + 7, vo + 0); C.SetTriangleColor(to +  8, cr, cg, cb, ca);
+  C.SetTriangle(to +  9, vo + 7, vo + 4, vo + 0); C.SetTriangleColor(to +  9, cr, cg, cb, ca);
+  C.SetTriangle(to + 10, vo + 4, vo + 7, vo + 5); C.SetTriangleColor(to + 10, cr, cg, cb, ca);
+  C.SetTriangle(to + 11, vo + 7, vo + 6, vo + 5); C.SetTriangleColor(to + 11, cr, cg, cb, ca);
+}
+
 void TriMesh::MakeTetrahedron(Float_t l1, Float_t l2, Float_t w, Float_t h)
 {
   // l1 ~ fwd length; l2 ~ bck length; w ~ width at the end; h ~ height;
 
   delete mTTvor;
   mTTvor = new TringTvor(4, 4, false, true, false);
-  TringTvor& C = *mTTvor;
-  C.SetVertex(0, -l2, 0, -0.5*w);
-  C.SetVertex(1,  l1, 0,  0);
-  C.SetVertex(2, -l2, 0,  0.5*w);
-  C.SetVertex(3,   0, h,  0);
-  C.SetTriangle(0, 0, 1, 2);
-  C.SetTriangle(1, 0, 3, 1);
-  C.SetTriangle(2, 1, 3, 2);
-  C.SetTriangle(3, 0, 2, 3);
-  C.SetTriangleColor(0, 0,0,255);
-  C.SetTriangleColor(1, 0,255,0);
-  C.SetTriangleColor(2, 0,255,0);
-  C.SetTriangleColor(3, 255,0,0);
 
-  C.GenerateTriangleNormals();
+  make_tetra(0, 0, l1, l2, 0, w, h);
+
+  mTTvor->GenerateTriangleNormals();
 
   Stamp(FID());
 }
 
+void TriMesh::MakeTetraFlyer(Float_t l1, Float_t l2, Float_t w, Float_t h,
+                             Float_t wing_l1, Float_t wing_l2, Float_t wing_z,
+                             Float_t wing_w,  Float_t wing_h)
+{
+  // l1 ~ fwd length; l2 ~ bck length; w ~ width at the end; h ~ height;
+
+  delete mTTvor;
+  mTTvor = new TringTvor(8, 8, false, true, false);
+
+  make_tetra(0, 0, l1, l2, 0, w, h);
+  make_tetra(4, 4, wing_l1, wing_l2, wing_z, wing_w, wing_h);
+
+  mTTvor->GenerateTriangleNormals();
+
+  Stamp(FID());
+}
+
+void TriMesh::MakeBox(Float_t a, Float_t b, Float_t c)
+{
+  // Create a box centered on 0 in x and y directions and going from 0
+  // to c in z.
+
+  delete mTTvor;
+  mTTvor = new TringTvor(8, 12, false, true, false);
+
+  make_cubus(0, 0, -0.5*a, -0.5*b, 0, a, b, c, 200, 200, 200, 255);
+
+  mTTvor->GenerateTriangleNormals();
+
+  Stamp(FID());
+
+}
+
+
 /**************************************************************************/
 // Vertex algorithms
 /**************************************************************************/
-
-/**************************************************************************/
-// Nuovo cimento
 
 TriMesh::EdgeData::EdgeData() :
   fV1(-1), fV2(-1), fT1(-1), fT2(-1),
