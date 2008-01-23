@@ -7,6 +7,7 @@ class Tringula;
 class TringuCam;
 class Dynamico;
 class ParaSurf;
+class PSMark;
 class TriMesh;
 class TriMeshField;
 class TriMeshLightField;
@@ -20,10 +21,16 @@ Tringula*     tringula = 0;
 TringuCam*    tricam   = 0;
 Dynamico*     dyn1     = 0;
 Dynamico*     dyn2     = 0;
+PSMark*       mark     = 0;
 
 ParaSurf*     parasurf = 0;
 TriMesh*      trimesh  = 0;
-TriMesh*      carmesh  = 0;
+TriMesh*      dynmesh  = 0;
+TriMesh*      stamesh  = 0;
+TriMesh*      flymesh  = 0;
+ZVector*      rndstatos = 0;
+ZVector*      rnddynos = 0;
+
 TriMeshField* tmfield  = 0;
 RectTerrain * terrain  = 0;
 GTSurf*       gtsurf   = 0;
@@ -35,29 +42,113 @@ TriMeshLightField* lightmap = 0;
 Eventor*     eventor  = 0;
 TimeMaker*   tmaker   = 0;
 
+Float_t      statico_surface_fraction  = 0.1;
+Int_t        num_dynamico              = 200;
+Int_t        num_flyer                 = 100;
+Float_t      max_flyer_h               = 20; // Change for some surfaces in surf-specific init.
+
+TRandom      g_rnd(0);
+
+
 void tringula(Int_t mode=0)
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Var1");
 
-  ASSIGN_ADD_GLASS(g_scene, Scene, g_queen, "Tringula Scene", "Testing functionality of Var1::Tringula glass.");
+  /**************************************************************************/
+  // Database objects.
+  /**************************************************************************/
 
-  CREATE_ADD_GLASS(texdir, ZList, g_scene, "Textures", 0);
-  // Height-field
-  CREATE_ADD_GLASS(hf, ZImage, texdir, "HeightField", 0);
-  // GForger
-  CREATE_ADD_GLASS(gforge, GForger, texdir, "GForger", 0);
-  gforge->SetImage(hf);
-  // Ribbon
-  CREATE_ADD_GLASS(ribbon, ZRibbon, texdir, "Jungle Ribbon", 0);
-  ribbon->SetPOVFile("ribbon1.pov");
-  ribbon->LoadPOV();
-  // RGBAPalette
-  CREATE_ADD_GLASS(pal, RGBAPalette, texdir, "Spectrum Palette", 0);
-  pal->SetUnderflowAction(RGBAPalette::LA_Wrap);
-  pal->SetOverflowAction (RGBAPalette::LA_Wrap);
-  gStyle->SetPalette(1, 0);
-  pal->SetMarksFromgStyle();
+  { // Textures
+
+    ZList* texdir = g_queen->AssertPath("var/textures", "ZNameMap");
+    // Height-field
+    CREATE_ADD_GLASS(hf, ZImage, texdir, "HeightField", 0);
+    // GForger
+    CREATE_ADD_GLASS(gforge, GForger, texdir, "GForger", 0);
+    gforge->SetImage(hf);
+    // Ribbon
+    CREATE_ADD_GLASS(ribbon, ZRibbon, texdir, "Jungle Ribbon", 0);
+    ribbon->SetPOVFile("ribbon1.pov");
+    ribbon->LoadPOV();
+    // RGBAPalette
+    CREATE_ADD_GLASS(pal, RGBAPalette, texdir, "Spectrum Palette", 0);
+    pal->SetUnderflowAction(RGBAPalette::LA_Wrap);
+    pal->SetOverflowAction (RGBAPalette::LA_Wrap);
+    gStyle->SetPalette(1, 0);
+    pal->SetMarksFromgStyle();
+  }
+  { // Meshes
+
+    ZList* meshes = g_queen->AssertPath("var/meshes", "ZNameMap");
+
+    // Terrain, setup mode specific.
+    ASSIGN_ADD_GLASS(trimesh, TriMesh, meshes, "Terrain", 0);
+
+    // Default extendios.
+    ASSIGN_ADD_GLASS(stamesh, TriMesh, meshes, "Statico", 0);
+    stamesh->MakeBox();
+    stamesh->StdDynamicoPostImport();
+    ASSIGN_ADD_GLASS(dynmesh, TriMesh, meshes, "Dynamico", 0);
+    dynmesh->MakeTetrahedron();
+    dynmesh->StdDynamicoPostImport();
+    ASSIGN_ADD_GLASS(flymesh, TriMesh, meshes, "Flyer", 0);
+    flymesh->MakeTetraFlyer();
+    flymesh->StdDynamicoPostImport();
+
+    // Random statos.
+    ASSIGN_ADD_GLASS(rndstatos, ZVector, meshes, "rndstatos", 0);
+    rndstatos->Reserve(20);
+
+    Float_t min_xy = 1, max_xy =  3;
+    Float_t min_h  = 5, max_h  = 15;
+    for (Int_t i=0; i<20; ++i)
+    {
+      CREATE_ADD_GLASS(m, TriMesh, rndstatos, GForm("rndstato %d", i), 0);
+      Float_t a = g_rnd.Uniform(min_xy, max_xy),
+              b = g_rnd.Uniform(min_xy, max_xy),
+              c = g_rnd.Uniform(min_h,  max_h);
+      m->MakeBox(a, b, c);
+      m->StdDynamicoPostImport();
+      m->SetVolume(a*b*c);
+      m->SetXYArea(a*b);
+
+      if (i == 0) {
+        min_xy = 1, max_xy = 5;
+        min_h  = 1, max_h  = 5;
+      }
+    }
+
+    // Random dynos.
+    ASSIGN_ADD_GLASS(rnddynos, ZVector, meshes, "rnddynos", 0);
+    rnddynos->Reserve(20);
+
+    // Float_t min_dyno_vol = TMath::Power(0.4, 3) * 0.5 * 0.5 / 6.0;
+    // Float_t max_dyno_vol = 1.4 * 1.4 * 2.1      * 1.2 * 1.2 / 6.0;
+
+    // printf("********* calculated dynamico volume min=%f, max=%f\n", min_dyno_vol, max_dyno_vol);
+
+    for (Int_t i=0; i<20; ++i)
+    {
+      CREATE_ADD_GLASS(m, TriMesh, rnddynos, GForm("rndyno %d", i), 0);
+      Float_t l1 = g_rnd.Uniform(0.4,    1.4),
+              l2 = g_rnd.Uniform(0,      0.5*l1),
+              w  = g_rnd.Uniform(0.5*l1, 1.2*l1),
+              h  = g_rnd.Uniform(0.5*l1, 1.2*l1);
+
+      m->MakeTetrahedron(l1, l2, w, h);
+      m->StdDynamicoPostImport();
+      m->SetXYArea(0.5f * (l1 + l2) * w);
+      m->SetVolume(m->GetXYArea() * h / 3.0f);
+    }
+  }
+
+
+  /**************************************************************************/
+  // Scene and scene objecs.
+  /**************************************************************************/
+
+  ASSIGN_ADD_GLASS(g_scene, Scene, g_queen, "Tringula Scene", "Testing functionality of Var1::Tringula glass.");
 
   CREATE_ADD_GLASS(sphere, Sphere, g_scene, "Sphere", "");
   sphere->SetRadius(.3);
@@ -72,9 +163,9 @@ void tringula(Int_t mode=0)
   // Must be a weird ATI bug.
   g_scene->GetGlobLamps()->Add(lamp);
 
-  CREATE_ADD_GLASS(base_plane, Rect, g_scene, "BasePlane", 0);
-  base_plane->SetUnitSquare(20);
-  base_plane->SetColor(0.6, 0.8, 0.6);
+  // CREATE_ADD_GLASS(base_plane, Rect, g_scene, "BasePlane", 0);
+  // base_plane->SetUnitSquare(20);
+  // base_plane->SetColor(0.6, 0.8, 0.6);
 
   ASSIGN_ADD_GLASS(terrain, RectTerrain, g_scene, "RectTerrain", 0);
   terrain->SetRnrSelf(false);
@@ -108,22 +199,17 @@ void tringula(Int_t mode=0)
   gtsretring->SetVO_ShapeWght(1e-8);
   gtsretring->SetMidvertOpts(GTSRetriangulator::MO_Volume);
 
-
-  // TriMeshes ... terrain, dyno
-
-  ASSIGN_ADD_GLASS(trimesh, TriMesh, g_scene, "Terrain TriMesh", 0);
-  // Setup mode specific.
-  ASSIGN_ADD_GLASS(carmesh, TriMesh, g_scene, "Car TriMesh", 0);
-  carmesh->MakeTetrahedron();
-  carmesh->StdDynamicoPostImport();
-
-
   // Tringula
+  CREATE_ADD_GLASS(light_mod, ZGlLightModel, g_scene, "Light Mod", 0);
+  light_mod->SetFaceCullOp(ZRnrModBase::O_On);
+  light_mod->SetFaceCullMode(GL_BACK);
 
   ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
   tringula->SetPalette(pal);
   tringula->SetRnrRay(true);
-  tringula->SetDefDynMesh(carmesh);
+  tringula->SetDefStaMesh(stamesh);
+  tringula->SetDefDynMesh(dynmesh);
+  tringula->SetDefFlyMesh(flymesh);
 
   switch (mode)
   {
@@ -139,37 +225,28 @@ void tringula(Int_t mode=0)
   dyn1 = tringula->NewDynamico("Dynus Primus");
   dyn2 = tringula->NewDynamico("Dynus Secondus");
   dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
-  dyn2->ref_trans().RotateLF(1, 3, 0.4);
+  dyn2->ref_trans().RotateLF(1, 2, 0.4);
 
+  sta1 = tringula->NewStatico("Statos Centrus");
+
+  ASSIGN_ADD_GLASS(mark, PSMark, tringula, "PSMark", 0);
+  mark->SetParaSurf(parasurf);
 
   // Camera base
 
   ASSIGN_ADD_GLASS(tricam, TringuCam, tringula, "TringuCam", 0);
   tricam->SetTringula(tringula);
   {
-    Float_t pos[3], fgh[3] = {0,0,0}, dir[3];
-
     ZTrans& trans = tricam->ref_trans();
 
-    parasurf->originpos(pos);
-    trans.SetPos(pos);
+    parasurf->origin_trans(trans);
     tringula->PlaceAboveTerrain(trans, 1, 1.1);
-    printf("Pos set:\n");
-    trans.Print();
-
-    parasurf->pos2fgh (pos, fgh);
-    parasurf->fgh2hdir(fgh, dir);  trans.SetBaseVec(3, dir);
-    parasurf->fgh2gdir(fgh, dir);  trans.SetBaseVec(1, dir);
-    printf("up (3) and fwd (1) set:\n");
-    trans.Print();
-
-    trans.SetBaseVecViaCross(2);
-    printf("lft set via crossp:\n");
+    trans.RotateLF(1, 2, TMath::PiOver2());
+    printf("Camera placed:\n");
     trans.Print();
 
     tricam->StampReqTrans();
   }
-
 
   // Fields
 
@@ -215,7 +292,7 @@ void tringula(Int_t mode=0)
   // Spawn the eye
   /**************************************************************************/
 
-  printf("Instantiating GUI ...\n");
+  printf("Initializing GUI "); fflush(stdout);
 
   Gled::AssertMacro("gled_view_globals.C");
   Gled::LoadMacro("eye.C");
@@ -236,7 +313,7 @@ void tringula(Int_t mode=0)
   ASSIGN_ATT_GLASS(g_pupil, PupilInfo, g_shell, AddSubShell, "Pupil of Tringula", 0);
   g_pupil->Add(g_scene);
   g_pupil->SetWidth(800); g_pupil->SetHeight(480);
-  g_pupil->SetClearColor(0.06, 0.01, 0.02);
+  g_pupil->SetClearColor(0.589, 0.601, 0.836);
   g_pupil->SetUpReference(tricam);
   g_pupil->SetUpRefAxis(3);
   g_pupil->SetUpRefMinAngle(2);
@@ -260,15 +337,17 @@ void tringula(Int_t mode=0)
   tmaker->AddClient(tricam);
 
   CREATE_ADD_GLASS(stxt1, ScreenText, g_pupil, "LftRgt", 0);
-  tricam->SetTxtLftRgt(stxt1);
+  tricam->SetInfoTxt(stxt1);
 
   /**************************************************************************/
 
   Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 
-  /**************************************************************************/
-  // And start the time ...
-  /**************************************************************************/
+  while (tricam->GetCamFix() == 0) {
+    printf("."); fflush(stdout);
+    gSystem->Sleep(50);
+  }
+  printf("\nGUI initialization complete.\n");
 
   Gled::theOne->LockFltk();
 
@@ -276,6 +355,45 @@ void tringula(Int_t mode=0)
   tricam->GetCamFix()->RotateLF(3, 1, TMath::Pi()/4);
 
   Gled::theOne->UnlockFltk();
+
+
+  /**************************************************************************/
+  // Place some random statos, dynos and flyers
+  /**************************************************************************/
+
+  // Staticos
+  {
+    Float_t desired_surface = statico_surface_fraction * tringula->GetParaSurf()->surface();
+    Float_t used_surface    = 0;
+    Int_t   count           = 0;
+    while (used_surface < desired_surface)
+    {
+      Statico* s = tringula->RandomStatico(rndstatos);
+      used_surface += s->GetMesh()->GetXYArea();
+      ++count;
+    }
+    printf("RandomStaticos cnt=%d; desired_surface=%f, used_surface=%f\n",
+           count, desired_surface, used_surface);
+  }
+
+  // Dynamicos
+  for(int i=0; i<num_dynamico; ++i)
+  {
+    Dynamico* d = tringula->RandomDynamico(rnddynos, -0.5, 5, 0.5);
+    Float_t v  = d->GetMesh()->GetVolume();
+    Float_t vf = TMath::Max(1.0 - 3*v, 0.1); // volume ~ 0.01 -> 1
+    // printf("dyno vol=%f, vf=%f\n", v, vf);
+    d->SetV(vf*d->GetV());
+    d->SetW(vf*d->GetW());
+  }
+
+  // Flyers
+  for(int i=0; i<num_flyer; ++i) tringula->RandomFlyer(2, 20, 0.5, max_flyer_h);
+
+
+  /**************************************************************************/
+  // And start the time ...
+  /**************************************************************************/
 
   eventor->Start();
 }
@@ -337,14 +455,16 @@ void setup_triangle()
 
 void setup_sphere_outside()
 {
+  Float_t R = 32;
+
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
   PSSphere* pssph = dynamic_cast<PSSphere*>(parasurf);
-  pssph->SetR(32);
+  pssph->SetR(R);
 
   // Setup GTS surface.
   gtsurf->GenerateSphere(4);
-  gtsurf->Rescale(32);
+  gtsurf->Rescale(R);
   for (int i=0; i<5; ++i)
     gtsurf->Legendrofy(16, 0.25, 1.5);
 
@@ -360,15 +480,19 @@ void setup_sphere_outside()
 
 void setup_sphere_inside()
 {
+  Float_t R = 32;
+
+  max_flyer_h = 10;
+
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
   PSSphere* pssph = dynamic_cast<PSSphere*>(parasurf);
   pssph->SetInside(true);
-  pssph->SetR(32);
+  pssph->SetR(R);
 
   // Setup GTS surface.
   gtsurf->GenerateSphere(4);
-  gtsurf->Rescale(32);
+  gtsurf->Rescale(R);
   for (int i=0; i<5; ++i)
     gtsurf->Legendrofy(16, 0.25, 1.5);
   gtsurf->Invert();
@@ -402,11 +526,10 @@ void setup_torus_outside()
   gtsisomaker->SetFormula(Form("(%f - sqrt(x^2 + y^2))^2 + z^2", rM));
   gtsisomaker->SetValue(rm*rm);
 
-  TRandom rnd(0);
   Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
-  gtsisomaker->SetXAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
-  gtsisomaker->SetYAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
-  gtsisomaker->SetZAxis(-tweak(rnd, rm), tweak(rnd, rm), ndivz);
+  gtsisomaker->SetXAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
+  gtsisomaker->SetYAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
+  gtsisomaker->SetZAxis(-tweak(g_rnd, rm), tweak(g_rnd, rm), ndivz);
   printf("making surface ...\n");
   gtsisomaker->MakeSurface();
   printf("coarsening ...\n");
@@ -430,6 +553,8 @@ void setup_torus_inside()
 {
   Float_t rM = 30, rm = 15, rS = rM + rm;
 
+  max_flyer_h = 10;
+
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
   PSTorus* pstor = dynamic_cast<PSTorus*>(parasurf);
@@ -441,11 +566,10 @@ void setup_torus_inside()
   gtsisomaker->SetFormula(Form("(%f - sqrt(x^2 + y^2))^2 + z^2", rM));
   gtsisomaker->SetValue(rm*rm);
 
-  TRandom rnd(0);
   Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
-  gtsisomaker->SetXAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
-  gtsisomaker->SetYAxis(-tweak(rnd, rS), tweak(rnd, rS), ndiv);
-  gtsisomaker->SetZAxis(-tweak(rnd, rm), tweak(rnd, rm), ndivz);
+  gtsisomaker->SetXAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
+  gtsisomaker->SetYAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
+  gtsisomaker->SetZAxis(-tweak(g_rnd, rm), tweak(g_rnd, rm), ndivz);
   printf("making surface ...\n");
   gtsisomaker->MakeSurface();
   printf("coarsening ...\n");
