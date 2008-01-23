@@ -11,11 +11,13 @@
 
 #include "Tringula.h"
 #include <Glasses/ZHashList.h>
+#include <Glasses/ZVector.h>
 #include <Glasses/RectTerrain.h>
 #include <Glasses/RGBAPalette.h>
 #include <Stones/TringTvor.h>
 #include "TriMesh.h"
 #include "ParaSurf.h"
+#include "Statico.h"
 #include "Dynamico.h"
 #include "Tringula.c7"
 
@@ -63,11 +65,23 @@ Tringula::~Tringula()
 void Tringula::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
+  if(mStatos == 0) {
+    ZHashList* l = new ZHashList("Statos", GForm("Statos of Tringula %s", GetName()));
+    l->SetElementFID(Statico::FID());
+    mQueen->CheckIn(l);
+    SetStatos(l);
+  }
   if(mDynos == 0) {
     ZHashList* l = new ZHashList("Dynos", GForm("Dynos of Tringula %s", GetName()));
     l->SetElementFID(Dynamico::FID());
     mQueen->CheckIn(l);
     SetDynos(l);
+  }
+  if(mFlyers == 0) {
+    ZHashList* l = new ZHashList("Flyers", GForm("Flyers of Tringula %s", GetName()));
+    l->SetElementFID(Dynamico::FID());
+    mQueen->CheckIn(l);
+    SetFlyers(l);
   }
 }
 
@@ -293,16 +307,91 @@ void Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fac)
 
 /**************************************************************************/
 
+Statico* Tringula::NewStatico(const Text_t* sname)
+{
+  if (sname == 0)
+    sname = GForm("Statico %d", mStatos->GetSize() + 1);
+
+  Statico* s = new Statico(sname);
+
+  mParaSurf->origin_trans(s->ref_trans());
+
+  place_on_terrain(s, *mDefStaMesh, false);
+
+  mQueen->CheckIn(s);
+  s->SetMesh(*mDefStaMesh);
+  mStatos->Add(s);
+
+  return s;
+}
+
+Statico* Tringula::RandomStatico(ZVector* mesh_list, Bool_t check_inside)
+{
+  // check_inside: make sure all corners of the bbox are within
+  //   parasurf which is relevant for planar surfaces where statos might
+  //   stick out.
+  //   The argument is passed place_on_terrain() where it supresses the
+  //   warnings about missed intersection.
+
+
+  static const Exc_t _eh("Tringula::RandomStatico ");
+
+  Statico* s = new Statico(GForm("Statico %d", mStatos->GetSize() + 1));
+
+  TriMesh* mesh;
+  if (mesh_list) {
+    mesh = dynamic_cast<TriMesh*>
+      (mesh_list->GetElementById(mRndGen.Integer(mesh_list->GetSize())));
+  } else {
+    mesh = *mDefStaMesh;
+  }
+
+  Int_t top_cnt = 0;
+place:
+  mParaSurf->random_trans(mRndGen, s->ref_trans());
+  s->ref_trans().RotateLF(1, 2, mRndGen.Uniform(0, TMath::TwoPi()));
+
+  Bool_t place_status = place_on_terrain(s, mesh, check_inside);
+
+  if (check_inside && ! place_status)
+    goto place;
+
+  Opcode::AABB bbox;
+  mDefStaMesh->ref_opc_aabb().Rotate(s->ref_trans(), bbox);
+
+  ++top_cnt;
+  Int_t cnt = 1;
+  Stepper<> stepper(*mStatos);
+  while (stepper.step())
+  {
+    Statico* S = (Statico*) *stepper;
+    if (S->ref_aabb().Intersect(bbox)) {
+      // printf("Intersection pass %d, intersecting stato %d\n", top_cnt, cnt);
+      goto place;
+    }
+    ++cnt;
+  }
+
+  if (top_cnt > 999)
+    printf("%sIntersection succ after %d\n", _eh.Data(), top_cnt);
+
+  mQueen->CheckIn(s);
+  s->SetMesh(mesh);
+  mStatos->Add(s);
+
+  return s;
+}
+
 Dynamico* Tringula::NewDynamico(const Text_t* dname)
 {
   if (dname == 0)
     dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
 
   Dynamico* d = new Dynamico(dname);
-  Float_t pos[3];
-  mParaSurf->originpos(pos);
-  d->ref_trans().SetPos(pos);
-  place_on_terrain(*d);
+  d->SetMoveMode(Dynamico::MM_Crawl);
+
+  mParaSurf->origin_trans(d->ref_trans());
+  place_on_terrain(d);
 
   mQueen->CheckIn(d);
   d->SetMesh(*mDefDynMesh);
@@ -311,28 +400,59 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
   return d;
 }
 
-Dynamico* Tringula::RandomDynamico(Float_t v_min, Float_t v_max, Float_t w_max)
+Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
+                                   Float_t v_min, Float_t v_max, Float_t w_max)
 {
-  Float_t pos[3];
-  mParaSurf->random_pos(mRndGen, pos);
+  Dynamico* d = new Dynamico(GForm("Dynamico %d", mDynos->GetSize() + 1));
+  d->SetMoveMode(Dynamico::MM_Crawl);
+  HTransF& t = d->ref_trans();
+
+  TriMesh* mesh;
+  if (mesh_list) {
+    mesh = dynamic_cast<TriMesh*>
+      (mesh_list->GetElementById(mRndGen.Integer(mesh_list->GetSize())));
+  } else {
+    mesh = *mDefDynMesh;
+  }
+
+  mParaSurf->random_trans(mRndGen, t);
 
   Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
-  Float_t cos = TMath::Cos(phi), sin = TMath::Sin(phi);
+  t.RotateLF(1, 2, phi);
 
-  Dynamico* d = new Dynamico(GForm("Dynamico %d", mDynos->GetSize() + 1));
-  HTransF& t = d->ref_trans();
-  t.SetBaseVec(1, cos,  sin, 0);
-  t.SetBaseVec(2, 0,      0, 1);
-  t.SetBaseVec(3, sin, -cos, 0);
-  t.SetBaseVec(4, pos);
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
 
-  place_on_terrain(*d);
+  place_on_terrain(d);
 
   mQueen->CheckIn(d);
-  d->SetMesh(*mDefDynMesh);
+  d->SetMesh(mesh);
   mDynos->Add(d);
+
+  return d;
+}
+
+Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
+{
+  Dynamico* d = new Dynamico(GForm("Flyer %d", mFlyers->GetSize() + 1));
+  d->SetMoveMode(Dynamico::MM_Fly);
+  HTransF& t = d->ref_trans();
+
+  mParaSurf->random_trans(mRndGen, t);
+
+  Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
+  t.RotateLF(1, 2, phi);
+
+  Float_t h = mRndGen.Uniform(0, h_max);
+  t.MoveLF(3, mParaSurf->GetMaxH() + h);
+  d->SetLevH(h); // This is a hack, honoured by Tringula when propagating flyers.
+
+  d->SetV(mRndGen.Uniform( v_min, v_max));
+  d->SetW(mRndGen.Uniform(-w_max, w_max));
+
+  mQueen->CheckIn(d);
+  d->SetMesh(*mDefFlyMesh);
+  mFlyers->Add(d);
 
   return d;
 }
@@ -516,7 +636,7 @@ void Tringula::DoBoxPrunning(Bool_t detailed)
             }
             if (t[1] > t[0]) ts = 1;
           }
-          ip[0].TMac2(e1, e2, t[ts]*duv.x, t[ts]*duv.y);
+          ip[0].TMac2(e1, t[ts]*duv.x, e2, t[ts]*duv.y);
           printf("       first pnt: ti=%d, t0=%f, t1=%f, ts=%d\n", ti, t[0], t[1], ts);
         }
         // Second point ... calculate intersection multipliers
@@ -548,7 +668,7 @@ void Tringula::DoBoxPrunning(Bool_t detailed)
             }
             if (t[1] > t[0]) ts = 1;
           }
-          ip[1].TMac2(e1, e2, -t[ts]*duv.x, -t[ts]*duv.y);
+          ip[1].TMac2(e1, -t[ts]*duv.x, e2, -t[ts]*duv.y);
           printf("       secnd pnt: ti=%d, t0=%f, t1=%f, ts=%d\n", ti, t[0], t[1], ts);
         }
 
@@ -582,10 +702,11 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
   CollisionFaces CF;
   RC.SetDestination(&CF);
 
-  Stepper<Dynamico> stepper(*mDynos);
-  while (stepper.step())
+  Stepper<Dynamico> dyno_stepper(*mDynos);
+  //if (false)
+  while (dyno_stepper.step())
   {
-    Dynamico& D = **stepper;
+    Dynamico& D = **dyno_stepper;
 
     if (D.mV != 0 || D.mW != 0)
     {
@@ -593,7 +714,7 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
 
       D.mTrans.GetPos(old_pos);
       D.mTrans.MoveLF(1, dt * D.mV);
-      D.mTrans.RotateLF(3, 1, dt*D.mW);
+      D.mTrans.RotateLF(1, 2, dt*D.mW);
       D.mTrans.GetPos(pos);
       D.touch_aabb();
 
@@ -604,7 +725,7 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       }
 
       Opcode::Ray R;
-      Float_t     ray_offset =mParaSurf->pos2hray(pos, R);
+      Float_t ray_offset = mParaSurf->pos2hray(pos, R);
 
       UInt_t cache = D.mOPCRCCache;
       if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) )
@@ -617,9 +738,9 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
           if (cache != D.mOPCRCCache)
           {
             Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
-            D.mTrans.SetBaseVec(2, n);
-            D.mTrans.OrtoNorm3Column(1, 2);
-            D.mTrans.SetBaseVecViaCross(3);
+            D.mTrans.SetBaseVec(3, n);
+            D.mTrans.OrtoNorm3Column(1, 3);
+            D.mTrans.SetBaseVecViaCross(2);
           }
         }
       }
@@ -638,6 +759,67 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
     // bboxes[boxcount++] = &D.ref_aabb();
 
   } // end while dynos
+
+
+  Stepper<Dynamico> flyo_stepper(*mFlyers);
+  while (flyo_stepper.step())
+  {
+    Dynamico& D = **flyo_stepper;
+
+    if (D.mV != 0 || D.mW != 0)
+    {
+      Point old_pos, pos; // These should both be within a dynamico.
+
+      D.mTrans.GetPos(old_pos);
+      D.mTrans.MoveLF(1, dt*D.mV);
+      D.mTrans.RotateLF(1, 2, dt*D.mW);
+      D.mTrans.GetPos(pos);
+      D.touch_aabb();
+
+      for (Int_t p=0; p<mParaSurf->n_edge_planes(); ++p)
+      {
+        Float_t d = mParaSurf->edge_planes()[p].Distance(pos);
+        if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
+      }
+
+      Opcode::Ray R;
+      Float_t ray_offset = mParaSurf->pos2hray(pos, R);
+
+      UInt_t cache = D.mOPCRCCache;
+      if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) )
+      {
+        if (CF.GetNbFaces() == 1)
+        {
+          pos.TMac(R.mDir, - ray_offset - D.mLevH);
+
+          if (cache != D.mOPCRCCache)
+          {
+            pos.TMac(R.mDir, - ray_offset - D.mLevH);
+
+            Opcode::Point p = -R.mDir;
+            p.Normalize();
+            D.mTrans.SetBaseVec(3, p);
+            D.mTrans.OrtoNorm3Column(1, 3);
+            D.mTrans.SetBaseVecViaCross(2);
+          }
+        }
+      }
+      else
+      {
+        printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
+               RC.GetContactStatus(),
+               RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
+               RC.GetNbIntersections());
+      }
+
+      D.mTrans.SetPos(pos);
+
+    } // if D moving
+
+    // bboxes[boxcount++] = &D.ref_aabb();
+
+  } // end while flyers
+
 
   //Pairs  pairs;
   //Axes   axes(AXES_XZY); // somewhat random
@@ -701,40 +883,128 @@ void Tringula::handle_edge_crossing
 
 /**************************************************************************/
 
-void Tringula::place_on_terrain(Dynamico& D)
+Bool_t Tringula::place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside)
 {
-  using namespace Opcode;
+  // Place statico on terrain so that the bounding box of the mesh
+  // touches or penetrates the terrain. The distance is sampled on a
+  // 3x3 grid.
+  //
+  // It is assumed that the statico is oriented along the local up
+  // direction with zero height. If the trans matrix were fixed here,
+  // the rotation would be somewhat poorly defined.
+  //
+  // If check_inside is true, the first miss of the terrain in the ray
+  // collision test results in a termination of the loop over sampling
+  // points. false is returned and no error message is printed.
+  //
+  // Otherwise true is returned.
 
-  RayCollider    RC;
+  static const Exc_t _eh("Tringula::place_on_terrain ");
+
+  if (M == 0) {
+    M = S->GetMesh();
+    if (M == 0)
+      throw(_eh + "TriMesh not passed as argument nor available from Statico.\n");
+  }
+
+  HTransF&      trans = S->ref_trans();
+  Opcode::AABB& aabb  = M->ref_opc_aabb();
+
+  Float_t ray_offset = mParaSurf->GetMaxH() - aabb.GetMin(Opcode::_Z) +
+    mParaSurf->GetEpsilon() +
+    0.1f*(mParaSurf->GetMaxH() - mParaSurf->GetMinH()); // !! For local curvature, 1/10 of delta_h
+  Float_t max_dist   = 0;
+
+  Opcode::Point fdir  (trans.ArrX());
+  Opcode::Point gdir  (trans.ArrY());
+  Opcode::Point center(trans.ArrT());
+  center.TMac(trans.ArrZ(), ray_offset);
+
+  Opcode::Ray R;
+  // R.mOrig set in loop
+  R.mDir.Set(trans.ArrZ()); R.mDir.Neg();
+
+  Opcode::RayCollider RC;
   RC.SetFirstContact(false);  // true to only take first hit (not closest!)
   RC.SetClosestHit(true);     // to keep the closes hit only
-  CollisionFaces CF;
+
+  Opcode::CollisionFaces CF;
   RC.SetDestination(&CF);
 
-  Point     & pos = * (Point*) D.mTrans.PtrPos();
-  Opcode::Ray R;
-  Float_t     ray_offset = mParaSurf->pos2hray(pos, R);
+  static const Float_t sample[] = { -1, 0, 1 };
+  static const Int_t   ns = 3;
 
-  if ( RC.Collide(R, *mMesh->GetOPCModel()) )
+  for (Int_t sf = 0; sf < ns; ++sf)
   {
-    if (CF.GetNbFaces() == 1)
+    for (Int_t sg = 0; sg < ns; ++sg)
     {
-      const CollisionFace& cf = CF.GetFaces()[0];
-      pos.TMac(R.mDir, cf.mDistance - ray_offset - D.mLevH);
+      R.mOrig.Mac2(center,
+                   fdir, sample[sf]*aabb.GetExtents(Opcode::_X),
+                   gdir, sample[sg]*aabb.GetExtents(Opcode::_Y));
+      Int_t cs = RC.Collide(R, *mMesh->GetOPCModel());
+      if (cs && CF.GetNbFaces() == 1)
+      {
+        max_dist = TMath::Max(max_dist, CF.GetFaces()[0].mDistance);
+      }
+      else
+      {
+        if (check_inside && cs == 1)
+          return false;
+        else
+          printf("%s(Statico*) sample_id %2d,%2d; status=%s, nfaces=%d\n"
+                 "  nbvt=%d, nprt=%d, ni=%d\n"
+                 "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
+                 _eh.Data(), sf, sg, cs ? "ok" : "failed", CF.GetNbFaces(),
+                 RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
+                 R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
+      }
+    }
+  }
+
+  // printf("ray_offset = %f, max_dist = %f; to_move = %f\n",
+  //        ray_offset, max_dist, ray_offset - max_dist);
+
+  trans.MoveLF(3, ray_offset - max_dist);
+  S->touch_aabb();
+
+  return true;
+}
+
+void Tringula::place_on_terrain(Dynamico* D)
+{
+  static const Exc_t _eh("Tringula::place_on_terrain ");
+
+  Opcode::RayCollider    RC;
+  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
+  RC.SetClosestHit(true);     // to keep the closes hit only
+  Opcode::CollisionFaces CF;
+  RC.SetDestination(&CF);
+
+  HTransF & trans = D->ref_trans();
+  Opcode::Point& pos   = * (Opcode::Point*) trans.PtrPos();
+  Opcode::Ray R;
+  Float_t ray_offset = mParaSurf->pos2hray(pos, R);
+
+  Int_t cs = RC.Collide(R, *mMesh->GetOPCModel());
+  if (cs && CF.GetNbFaces() == 1)
+  {
+      const Opcode::CollisionFace& cf = CF.GetFaces()[0];
+      pos.TMac(R.mDir, cf.mDistance - ray_offset - D->mLevH);
 
       Float_t* n = mMesh->GetTTvor()->TriangleNormal(cf.mFaceID);
-      D.mTrans.SetBaseVec(2, n);
-      D.mTrans.OrtoNorm3Column(1, 2);
-      D.mTrans.SetBaseVecViaCross(3);
-      D.touch_aabb();
-    }
-    else printf("ooogaaadooga contstat=%d nfac=%d\n", RC.GetContactStatus(), CF.GetNbFaces());
+      trans.SetBaseVec(3, n);
+      trans.OrtoNorm3Column(1, 3);
+      trans.SetBaseVecViaCross(2);
+      D->touch_aabb();
   }
   else
   {
-    printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-           RC.GetContactStatus(),
-           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections());
+    printf("%s(Dynamico*) status=%s, nfaces=%d\n"
+           "  nbvt=%d, nprt=%d, ni=%d\n"
+           "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
+           _eh.Data(), cs ? "ok" : "failed", CF.GetNbFaces(),
+           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
+           R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
   }
 }
 
