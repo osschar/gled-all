@@ -21,9 +21,6 @@ void TringuCam_GL_Rnr::_init()
 
 /**************************************************************************/
 
-void TringuCam_GL_Rnr::PreDraw(RnrDriver* rd)
-{}
-
 void TringuCam_GL_Rnr::Draw(RnrDriver* rd)
 {
   TringuCam& TC = * mTringuCam;
@@ -34,9 +31,6 @@ void TringuCam_GL_Rnr::Draw(RnrDriver* rd)
   TC.mFarClp  = rd->GetFarClip();
   TC.mZFov    = rd->GetZFov();
 }
-
-void TringuCam_GL_Rnr::PostDraw(RnrDriver* rd)
-{}
 
 /**************************************************************************/
 
@@ -79,7 +73,6 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
           mTringuCam->RotateLF(1, 2, -dxang);
           rd->GetCamFixTrans()->RotateLF(1, 3, -dyang);
         }
-        
       }
 
       mMouseX = x; mMouseY = y;
