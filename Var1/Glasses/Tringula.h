@@ -14,11 +14,14 @@
 #include <TRandom.h>
 
 class ZHashList;
+class ZVector;
 class RectTerrain;
 class RGBAPalette;
 class TringTvor;
 class TriMesh;
 class ParaSurf;
+class Extendio;
+class Statico;
 class Dynamico;
 
 namespace Opcode {
@@ -63,12 +66,14 @@ protected:
   Bool_t             bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
   Bool_t             bLightMesh;    //  X{GST}  7 Bool()
 
+  ZLink<ZHashList>   mStatos;       //  X{GS} L{}
   ZLink<ZHashList>   mDynos;        //  X{GS} L{}
+  ZLink<ZHashList>   mFlyers;       //  X{GS} L{}
 
   Opcode::CollisionFaces* mRayColFaces;  //!
 
-  Bool_t     bRnrRay; // X{GS} 7 Bool(-join=>1)
-  Float_t    mRayLen; // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
+  Bool_t     bRnrRay; // X{GS}   7 Bool(-join=>1)
+  Float_t    mRayLen; // X{GS}   7 Value(-range=>[-1000,1000,1,1000])
   TVector3   mRayPos; // X{GSRr} 7 Vector3()
   TVector3   mRayDir; // X{GSRr} 7 Vector3()
 
@@ -81,14 +86,17 @@ protected:
 
   TRandom          mRndGen;
 
+  ZLink<TriMesh>   mDefStaMesh; // X{GS} L{}
   ZLink<TriMesh>   mDefDynMesh; // X{GS} L{}
+  ZLink<TriMesh>   mDefFlyMesh; // X{GS} L{}
 
   void get_ray_dir(Float_t* d, Float_t len=0);
   void handle_edge_crossing(Dynamico& D,
                             Opcode::Point& old_pos, Opcode::Point& pos,
                             Int_t plane, Float_t dist);
 
-  void place_on_terrain(Dynamico& D);
+  Bool_t place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside);
+  void   place_on_terrain(Dynamico* D);
 
 public:
   Tringula(const Text_t* n="Tringula", const Text_t* t=0) :
@@ -117,9 +125,16 @@ public:
 
   void PlaceAboveTerrain(ZTrans& trans, Float_t height=0, Float_t dh_fac=0);
 
+  Statico* NewStatico(const Text_t* sname=0);
+  Statico* RandomStatico(ZVector* mesh_list,
+                         Bool_t check_inside=true);             // X{E} C{1} 7 MCWButt()
+
   Dynamico* NewDynamico(const Text_t* dname=0);
-  Dynamico* RandomDynamico(Float_t v_min=-1, Float_t v_max=10,
-                           Float_t w_max= 1); // X{E} 7 MCWButt()
+  Dynamico* RandomDynamico(ZVector* mesh_list,
+                           Float_t v_min=-1, Float_t v_max=5,
+                           Float_t w_max= 1);                   // X{E} C{1} 7 MCWButt()
+  Dynamico* RandomFlyer   (Float_t v_min= 2, Float_t v_max=20,
+                           Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
 
