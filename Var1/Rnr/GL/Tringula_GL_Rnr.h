@@ -12,7 +12,8 @@
 
 #include <GL/glu.h>
 
-class Tringula_GL_Rnr : public ZNode_GL_Rnr {
+class Tringula_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 
@@ -26,6 +27,9 @@ public:
     ZNode_GL_Rnr(idol), mTringula(idol)
   { _init(); }
   virtual ~Tringula_GL_Rnr();
+
+  void RenderExtendio(RnrDriver* rd, Extendio* dyno);
+  void RenderExtendios(RnrDriver* rd, AList* list);
 
   virtual void Draw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
