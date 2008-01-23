@@ -1,3 +1,10 @@
+2008-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added functions Float_t BoundingBoxXYArea() and
+	Float_t BoundingBoxVolume().
+
 2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
