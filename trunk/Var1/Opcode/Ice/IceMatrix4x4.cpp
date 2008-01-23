@@ -31,6 +31,10 @@
  *	\class		Matrix4x4
  *	\author		Pierre Terdiman
  *	\version	1.0
+ *
+ *      MT comment: This is what I'd call column major. The
+ *      multiplication rules are strange, but that's what one gets
+ *      with row-vectors.
  */
 //----------------------------------------------------------------------
 
