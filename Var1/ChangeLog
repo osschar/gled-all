@@ -1,3 +1,79 @@
+2008-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	* Glasses/Statico.cxx:
+	* Glasses/Statico.h:
+	Split dynamico into sub-class Extendio and derived Statico from
+	that as well.
+
+	* Glasses/PSMark.cxx:
+	* Glasses/PSMark.h:
+	* Rnr/GL/PSMark_GL_Rnr.cxx:
+	* Rnr/GL/PSMark_GL_Rnr.h:
+	New class: mark a point/area on a ParaSurf.
+
+	* Glasses/PSRectangle.cxx:
+	* Glasses/PSRectangle.h:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTriangle.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Added some functions:
+	- surface(),
+	- origin_fgh/pos/trans,
+	- fgh2trans (to HTrans and ZTrans),
+	- regularize_fg;
+	- random_trans().
+	Fixed a problem with pos2 calculation in PSTorus and PSSphere.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added convenience functions for creation of simple meshes, like
+	MakeBox() and MakeTetraFlyer().
+	Added data-members 'Float_t mVolume, mXYArea'.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add GL-dump for fwd/bck, up/down speeds.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added functions to create RandomStatico/Flyers().
+	Improved placement on terrain.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	Removed Pre/PostDraw(), let ZNode_GL_Rnr do its stuff.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Modularize, added rendering of flyers and statos.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Added Transpose().
+
+	* glass.list:
+	Register glasses Extendio, Statico and PSMark.
+
+	* Opcode/Ice/IcePoint.h:
+	Fix Point::TMac2(...) to have consistent signature.
+
+	* Opcode/Ice/IceAABB.h:
+	* Opcode/Ice/IceMatrix3x3.cpp:
+	* Opcode/Ice/IceMatrix4x4.cpp:
+	* Opcode/Ice/IceOBB.cpp:
+	* Opcode/OPC_RayCollider.cpp:
+	* Opcode/OPC_SweepAndPrune.cpp:
+	Some comments, formatting, whitespace.
+
 2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.cxx:
