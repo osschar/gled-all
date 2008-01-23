@@ -30,7 +30,10 @@ public:
 
   virtual void SetupEdgePlanes();
 
-  virtual void originpos(Float_t* x);
+  virtual Float_t surface();
+
+  virtual void origin_fgh(Float_t* g);
+  virtual void origin_pos(Float_t* x);
 
   virtual void pos2fgh(const Float_t* x, Float_t* f);
   virtual void fgh2pos(const Float_t* f, Float_t* x);

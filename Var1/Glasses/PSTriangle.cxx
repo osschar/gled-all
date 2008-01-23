@@ -65,13 +65,29 @@ void PSTriangle::SetupEdgePlanes()
 
 /**************************************************************************/
 
-void PSTriangle::originpos(Float_t* x)
+Float_t PSTriangle::surface()
 {
   using namespace Opcode;
   Point opos(mX0, mY0, 0);
   Point udir(mX1, mY1, 0); udir.Sub(opos);
   Point vdir(mX2, mY2, 0); vdir.Sub(opos);
-  ((Point*)x)->Mac2(opos, udir, 0.25f, vdir, 0.25f);
+  return 0.5f * opos.Cross(udir, vdir).Magnitude();
+}
+
+/******************************************************************************/
+
+void PSTriangle::origin_fgh(Float_t* f)
+{
+  f[0] = INV3*(mX0 + mX1 + mX2);
+  f[1] = INV3*(mY0 + mY1 + mY2);
+  f[2] = 0;
+}
+
+void PSTriangle::origin_pos(Float_t* x)
+{
+  x[0] = INV3*(mX0 + mX1 + mX2);
+  x[1] = INV3*(mY0 + mY1 + mY2);
+  x[2] = 0;
 }
 
 /**************************************************************************/
@@ -146,7 +162,8 @@ void PSTriangle::random_fgh(TRandom& rnd, Float_t* f)
   Point udir(mX1, mY1, 0); udir.Sub(opos);
   Point vdir(mX2, mY2, 0); vdir.Sub(opos);
   Float_t u = rnd.Uniform(0, 1);
-  Float_t v = rnd.Uniform(0, 1 - u);
+  Float_t v = rnd.Uniform(0, 1);
+  if (u + v > 1) { u = 1.0f - u; v = 1.0f - v; }
   ((Point*)f)->Mac2(opos, udir, u, vdir, v);
 }
 
@@ -157,6 +174,7 @@ void PSTriangle::random_pos(TRandom& rnd, Float_t* x)
   Point udir(mX1, mY1, 0); udir.Sub(opos);
   Point vdir(mX2, mY2, 0); vdir.Sub(opos);
   Float_t u = rnd.Uniform(0, 1);
-  Float_t v = rnd.Uniform(0, 1 - u);
+  Float_t v = rnd.Uniform(0, 1);
+  if (u + v > 1) { u = 1.0f - u; v = 1.0f - v; }
   ((Point*)x)->Mac2(opos, udir, u, vdir, v);
 }

@@ -25,6 +25,8 @@ public:
   PSTorus(const Text_t* n="PSTorus", const Text_t* t=0) :
     ParaSurf(n,t) { _init(); }
 
+  virtual Float_t surface();
+
   virtual void pos2fgh(const Float_t* x, Float_t* f);
   virtual void fgh2pos(const Float_t* f, Float_t* x);
 
@@ -37,6 +39,9 @@ public:
 
   // Subtract fgh values, taking care of U(1) variables (like angles).
   virtual void sub_fgh(Float_t* a, Float_t* b, Float_t* delta);
+
+  // Put fgh values into regular intervals.
+  virtual void regularize_fg(Float_t* f);
 
   virtual void random_fgh(TRandom& rnd, Float_t* f);
   // virtual void random_pos(TRandom& rnd, Float_t* x);
