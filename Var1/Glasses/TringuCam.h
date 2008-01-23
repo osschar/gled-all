@@ -127,7 +127,7 @@ protected:
 
   map<Int_t, KeyInfo*> mKeyStateMap;
 
-  ZLink<ScreenText>  mTxtLftRgt; // X{GS} L{}
+  ZLink<ScreenText>  mInfoTxt; // X{GS} L{}
 
 
   //=================================================================
