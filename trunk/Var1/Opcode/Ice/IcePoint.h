@@ -107,7 +107,7 @@ public:
   }
 
   //! this = this + a * scalar_a + b * scalar_b
-  Point& TMac2(const Point& a, const Point& b, float sa, float sb)
+  Point& TMac2(const Point& a, float sa, const Point& b, float sb)
   {
     x += a.x * sa + b.x * sb;
     y += a.y * sa + b.y * sb;
