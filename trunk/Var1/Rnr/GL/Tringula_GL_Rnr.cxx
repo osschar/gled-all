@@ -8,6 +8,7 @@
 #include <Rnr/GL/TringTvor_GL_Rnr.h>
 #include <Glasses/ZHashList.h>
 #include <Glasses/TriMesh.h>
+#include <Glasses/Statico.h>
 #include <Glasses/Dynamico.h>
 
 #include <Rnr/GL/GLRnrDriver.h>
@@ -38,6 +39,7 @@ Tringula_GL_Rnr::~Tringula_GL_Rnr()
 /**************************************************************************/
 
 namespace {
+
 void sphere(Float_t* v, GLUquadricObj* q)
 {
   glPushMatrix();
@@ -56,36 +58,82 @@ void render_ceaabox(Float_t* x, Float_t f=1)
   SphereTrings::UnitFrameBox();
   glPopMatrix();
 }
+
 }
+
+
+void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
+{
+  glPushMatrix();
+
+  glMultMatrixf(ext->RefTrans().Array());
+  if (mTringula->bPickDynos) rd->GL()->PushName(rd->GetLensRnr(ext));
+
+  TringTvor_GL_Rnr::Render(ext->GetMesh()->GetTTvor(), false);
+
+  if (mTringula->bRnrBBoxes)
+  {
+    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+    glColor3f(1, 0, 0);
+    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.02);
+  }
+
+  if (mTringula->bPickDynos) rd->GL()->PopName();
+
+  glPopMatrix();
+
+  if (mTringula->bRnrBBoxes)
+  {
+    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+    glColor3f(0, 0, 1);
+    render_ceaabox((Float_t*)&ext->ref_aabb(), 1.04);
+  }
+}
+
+void Tringula_GL_Rnr::RenderExtendios(RnrDriver* rd, AList* list)
+{
+  AList::Stepper<Extendio> stepper(list);
+  while (stepper.step())
+  {
+    if (! (*stepper)->GetRnrSelf()) continue;
+    RenderExtendio(rd, *stepper);
+  }
+}    
+
+/******************************************************************************/
 
 void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 {
   Tringula&   T = *mTringula;
   TringTvor* TT =  T.mMesh->GetTTvor();
   if(TT == 0) return;
-  if(mMeshTringStamp < T.mMesh->GetStampReqTring()) {
+  if(mMeshTringStamp < T.mMesh->GetStampReqTring())
+  {
     bRebuildDL = true;
     mMeshTringStamp = T.mMesh->GetStampReqTring();
   }
   PARENT::Draw(rd);
 
-  if(T.bRnrRay) {
-    { // Render Ray
-      glPushMatrix();
-      glTranslated(T.mRayPos.x(), T.mRayPos.y(), T.mRayPos.z());
+  if(T.bRnrRay)
+  {
+    // Render Ray
+    glPushMatrix();
+    glTranslated(T.mRayPos.x(), T.mRayPos.y(), T.mRayPos.z());
+    {
+      GL_Float_Holder point_size(GL_POINT_SIZE, 10, glPointSize);
       glColor3f(1,0,0);
-      glPointSize(10);
       glBegin(GL_POINTS); glVertex3f(0,0,0); glEnd();
-      glColor3f(0,1,0);
-      glLineWidth(2);
-      glBegin(GL_LINES);
-      glVertex3f(0,0,0);
-      Float_t d[3]; T.get_ray_dir(d);
-      glVertex3fv(d);
-      glEnd();
-      glLineWidth(1);
-      glPopMatrix();
     }
+    glColor3f(0,1,0);
+    glLineWidth(2);
+    glBegin(GL_LINES);
+    glVertex3f(0,0,0);
+    Float_t d[3]; T.get_ray_dir(d);
+    glVertex3fv(d);
+    glEnd();
+    glLineWidth(1);
+    glPopMatrix();
+
     // Render stabbed triangle(s)
     if(T.mRayColFaces != 0)
     {
@@ -128,37 +176,9 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 
   if (T.bRnrDynos)
   {
-    AList::Stepper<Dynamico> stepper(*T.mDynos);
-    while (stepper.step())
-    {
-      Dynamico& D = **stepper;
-      if (!D.GetRnrSelf()) continue;
-
-      glPushMatrix();
-
-      glMultMatrixf(D.RefTrans().Array());
-      if (T.bPickDynos) rd->GL()->PushName(rd->GetLensRnr(&D));
-
-      TringTvor_GL_Rnr::Render(D.GetMesh()->GetTTvor(), false);
-
-      if (T.bRnrBBoxes)
-      {
-        GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-        glColor3f(1, 0, 0);
-        render_ceaabox(D.GetMesh()->GetTTvor()->mCtrExtBox, 1.02);
-      }
-
-      if (T.bPickDynos) rd->GL()->PopName();
-
-      glPopMatrix();
-
-      if (T.bRnrBBoxes)
-      {
-        GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-        glColor3f(0, 0, 1);
-        render_ceaabox((Float_t*)&D.ref_aabb(), 1.04);
-      }
-    }
+    RenderExtendios(rd, *T.mStatos);
+    RenderExtendios(rd, *T.mDynos);
+    RenderExtendios(rd, *T.mFlyers);
 
     if (T.bRnrItsLines)
     {
@@ -178,7 +198,7 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 
 void Tringula_GL_Rnr::Render(RnrDriver* rd)
 {
-  // Checked in Draw() !!!
+  // Checked in Draw().
   // if(mTringula->mTTvor == 0) return;
 
   Tringula  &T  = *mTringula;
