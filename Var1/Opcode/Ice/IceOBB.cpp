@@ -63,7 +63,8 @@ void OBB::Create(const AABB& aabb, const Matrix4x4& mat)
 
   aabb.GetCenter(mCenter);
   aabb.GetExtents(mExtents);
-  // Here we have the same as OBB::Rotate(mat) where the obb is (mCenter, mExtents, Identity).
+  // Here we have the same as OBB::Rotate(mat) where the obb is
+  // (mCenter, mExtents, Identity).
 
   // So following what's done in Rotate:
   // - x-form the center

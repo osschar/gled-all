@@ -418,11 +418,11 @@ public:
   //----------------------------------------------------------------------
   /**
    *	Recomputes the AABB after an arbitrary transform by a 4x4 matrix.
-   *	\param		mtx	[in] the transform matrix
+   *	\param		mtx	[in]  the transform matrix
    *	\param		aabb	[out] the transformed AABB [can be *this]
    */
   //----------------------------------------------------------------------
-  void	Rotate(const Matrix4x4& mtx, AABB& aabb) const
+  void Rotate(const Matrix4x4& mtx, AABB& aabb) const
   {
     // Compute new center
     aabb.mCenter = mCenter * mtx;

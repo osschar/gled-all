@@ -240,8 +240,9 @@ RayCollider::~RayCollider()
 
 //----------------------------------------------------------------------
 /**
- *	Validates current settings. You should call this method after all the settings and callbacks have been defined.
- *	\return		0 if everything is ok, else a string describing the problem
+ *	Validates current settings. You should call this method after
+ *	all the settings and callbacks have been defined.
+ *	\return	0 if everything is ok, else a string describing the problem
  */
 //----------------------------------------------------------------------
 const char* RayCollider::ValidateSettings()
