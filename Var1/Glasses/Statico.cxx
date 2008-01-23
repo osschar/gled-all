@@ -5,36 +5,19 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// Dynamico
+// Statico
 //
 //
 
-#include "Dynamico.h"
-#include "Dynamico.c7"
+#include "Statico.h"
+#include "Statico.c7"
 
-#include <Stones/TringTvor.h>
-
-#include <TMath.h>
-
-ClassImp(Dynamico);
+ClassImp(Statico)
 
 /**************************************************************************/
 
-void Dynamico::_init()
-{
-  mTrans.SetPos(0.5, 0.5, 8.0);
-  Float_t oos2 = 1.0/TMath::Sqrt(2);
-  mTrans.SetBaseVec(1,  oos2, oos2, 0);
-  mTrans.SetBaseVec(2,  0, 0, 1);
-  mTrans.SetBaseVecViaCross(3);
-
-  mV = mW = 0.0f;
-  mLevH   = 0.1f;
-
-  mMoveMode = MM_Crawl;
-
-  mOPCRCCache = OPC_INVALID_ID;
-}
+void Statico::_init()
+{}
 
 /**************************************************************************/
 
