@@ -102,6 +102,8 @@ public:
   void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }
 
   Float_t BoundingBoxDiagonal();
+  Float_t BoundingBoxXYArea();
+  Float_t BoundingBoxVolume();
 
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),

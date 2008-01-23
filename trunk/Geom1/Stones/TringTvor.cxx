@@ -132,7 +132,19 @@ void TringTvor::CalculateBoundingBox()
 Float_t TringTvor::BoundingBoxDiagonal()
 {
   Float_t *E = mCtrExtBox + 3;
-  return sqrtf(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]);
+  return 2.0f * sqrtf(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]);
+}
+
+Float_t TringTvor::BoundingBoxXYArea()
+{
+  Float_t *E = mCtrExtBox + 3;
+  return 4.0f * E[0]*E[1];
+}
+
+Float_t TringTvor::BoundingBoxVolume()
+{
+  Float_t *E = mCtrExtBox + 3;
+  return 8.0f * E[0] * E[1] * E[2];
 }
 
 /**************************************************************************/
