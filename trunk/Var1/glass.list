@@ -8,11 +8,14 @@ TriMeshField	4	Glasses/TriMeshField
 TriMeshLightField 5	Glasses/TriMeshLightField
 
 Tringula        16      Glasses/Tringula        .
-Dynamico        17      Glasses/Dynamico
-TringuCam       18      Glasses/TringuCam       .
+TringuCam       17      Glasses/TringuCam       .
+Extendio        18      Glasses/Extendio
+Statico         19      Glasses/Statico
+Dynamico        20      Glasses/Dynamico
 
 ParaSurf        64      Glasses/ParaSurf
 PSRectangle     65      Glasses/PSRectangle
 PSTriangle      66      Glasses/PSTriangle
 PSSphere        67      Glasses/PSSphere
 PSTorus         68      Glasses/PSTorus
+PSMark          69      Glasses/PSMark          .
