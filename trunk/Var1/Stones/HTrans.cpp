@@ -13,9 +13,6 @@
 // be precise enough but continuous operations on the matrix must
 // retain precision of column vectors.
 //
-// Cartan angles in mA[1-3] (+z, -y, +x) are stored for backward
-// compatibility and will probably be removed soon.
-//
 // Direct  element access (first two should be used with care):
 // operator[i]    direct access to elements,   i:0->15
 // CM(i,j)        element 4*j + i;           i,j:0->3    { CM ~ c-matrix }
@@ -65,7 +62,7 @@ template<class TT>
 inline HTrans<TT>::HTrans(const HTrans<TT>& z) { SetTrans(z); }
 
 template<class TT>
-inline HTrans<TT>::HTrans(const Float_t*  x)
+inline HTrans<TT>::HTrans(const Float_t* x)
 {
   M[0]  = x[0];  M[1]  = x[1];  M[2]  = x[2];  M[3]  = x[3];
   M[4]  = x[4];  M[5]  = x[5];  M[6]  = x[6];  M[7]  = x[7];
@@ -518,8 +515,21 @@ inline void HTrans<TT>::SetBaseVecViaCross(Int_t i)
 }
 
 /**************************************************************************/
-// Inversions
+// Transpose & Invert
 /**************************************************************************/
+
+template<class TT>
+void HTrans<TT>::Transpose()
+{
+  TT x;
+  x = M[F01]; M[F01] = M[F10]; M[F10] = x;
+  x = M[F02]; M[F02] = M[F20]; M[F20] = x;
+  x = M[F03]; M[F03] = M[F30]; M[F30] = x;
+  x = M[F12]; M[F12] = M[F21]; M[F21] = x;
+  x = M[F13]; M[F13] = M[F31]; M[F31] = x;
+  x = M[F23]; M[F23] = M[F32]; M[F32] = x;  
+}
+
 template<class TT>
 TT HTrans<TT>::Invert()
 {

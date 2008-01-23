@@ -41,8 +41,9 @@ public:
   void OrtoNorm3();
   void SetBaseVecViaCross(Int_t i);
 
-  TT Invert();
-  TT InvertWithoutRow4();
+  void Transpose();
+  TT   Invert();
+  TT   InvertWithoutRow4();
 
   void MultLeft(const HTrans& t);
   void MultRight(const HTrans& t);
@@ -169,7 +170,7 @@ namespace Opcode { class Matrix4x4; }
 class HTransF : public HTrans<Float_t>
 {
 public:
-  HTransF() : HTrans<Float_t>() {}
+  HTransF()                          : HTrans<Float_t>()  {}
   HTransF(const HTransF& z)          : HTrans<Float_t>(z) {}
   HTransF(const HTrans<Double_t>& z) : HTrans<Float_t>(z.Array()) {}
   virtual ~HTransF() {}
