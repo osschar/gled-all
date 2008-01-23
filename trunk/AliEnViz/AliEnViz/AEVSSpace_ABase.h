@@ -9,8 +9,11 @@
 
 class AEVSite;
 
-class AEVSSpace_ABase {
+class AEVSSpace_ABase
+{
 public:
+  virtual ~AEVSSpace_ABase() {}
+
   virtual Bool_t ImportSite(AEVSite* site, Bool_t warn=false) = 0;
   virtual void   ClearSiteVizes() {}
 };
