@@ -19,6 +19,10 @@ class TriMeshLightField;
 
 class ScreenText;
 
+class PupilInfo;
+class Eventor;
+class TimeMaker;
+
 class TringuCam : public ZNode, public TimeMakerClient
 {
   MAC_RNR_FRIENDS(TringuCam);
@@ -159,6 +163,10 @@ protected:
   ZLink<TriMeshField>      mCurField;    // X{GS} L{A}
   ZLink<TriMeshLightField> mLightField;  // X{GS} L{A}
 
+  ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{A}
+  ZLink<Eventor>           mEventor;     // X{GS} L{A}
+  ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{A}
+
   // Render-driver and mouse state fed in via TringuCam_GL_Rnr
   // Draw() and Handle().
 
@@ -169,6 +177,10 @@ protected:
   Int_t   mMouseX,  mMouseY;    //!
   Int_t   mMPushX,  mMPushY;    //!
   Int_t   mMDrgDX,  mMDrgDY;    //!
+
+  Int_t     mStampInterval;     //  X{GS} 7 Value(-range=>[0,1000])
+  Int_t     mStampCount;        //!
+  Double_t  mHeight;            //  Height above tringula. X{GS} 7 Value(-range=>[-1e5, 1e5, 1, 100])
 
   TVector3  mMouseRayPos;
   TVector3  mMouseRayDir;
@@ -198,6 +210,9 @@ public:
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  void Suspend(); // X{E}
+  void Resume();  // X{E}
 
 #include "TringuCam.h7"
   ClassDef(TringuCam, 1)
