@@ -13,6 +13,9 @@
 #include "TriMeshField.h"
 #include "TriMeshLightField.h"
 #include <Glasses/ScreenText.h>
+#include <Glasses/PupilInfo.h>
+#include <Glasses/Eventor.h>
+#include <Glasses/TimeMaker.h>
 #include "TringuCam.c7"
 
 #include "TriMesh.h"
@@ -64,6 +67,10 @@ void TringuCam::_init()
   bEnableTringDLonMouseUp = false;
 
   mCamFix = 0;
+
+  mStampInterval = 25;
+  mStampCount    = 0;
+  mHeight = 0;
 
   mRayColl.SetCulling   (true);
   mRayColl.SetClosestHit(true);
@@ -306,18 +313,22 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
   if (mLftRgt.fValue) MoveLF(2, dt*mLftRgt.fValue);
 
   mUpDown.TimeTick(dt);
-  if (mUpDown.fValue) MoveLF(3, dt*mUpDown.fValue);
+  if (mUpDown.fValue) mHeight += dt*mUpDown.fValue;
 
   mSpinUp.TimeTick(dt);
   if (mSpinUp.fValue) RotateLF(1, 2, dt*mSpinUp.fValue);
 
-  { // Restore up-direction
-    Float_t pos[3], hdir[3];
+  { // Restore up-direction and heigt
+    Float_t pos[3], fgh[3], hdir[3];
     mTrans.GetPos(pos);
-    mTringula->GetParaSurf()->pos2hdir(pos, hdir);
+    mTringula->GetParaSurf()->pos2fgh (pos, fgh);
+    mTringula->GetParaSurf()->fgh2hdir(fgh, hdir);
+    // printf("pos(%.2f, %.2f, %.2f) | fgh(%.2f, %.2f, %.2f) | hdir(%.2f, %.2f, %.2f)\n",
+    //        pos[0], pos[1], pos[2], fgh[0], fgh[1], fgh[2], hdir[0],  hdir[2],  hdir[2]);
     mTrans.SetBaseVec(3, hdir);
     mTrans.OrtoNorm3Column(1, 3);
     mTrans.SetBaseVecViaCross(2);
+    mTrans.MoveLF(3, mHeight - fgh[2]);
   }
 
   if (*mInfoTxt != 0)
@@ -335,6 +346,12 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
     CalculateMouseRayVectors();
     MouseRayCollide();
     AddField(dt*mActionValue);
+  }
+
+  if (mStampInterval && --mStampCount < 0)
+  {
+    mStampCount = mStampInterval;
+    Stamp();
   }
 }
 
@@ -445,3 +462,19 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
     }
   }
 }
+
+/******************************************************************************/
+
+void TringuCam::Suspend()
+{
+  mEventor->Stop();
+  mPupilInfo->SetAutoRedraw(true);
+}
+
+void TringuCam::Resume()
+{
+  mTimeMaker->SetLastTOK(false);
+  mPupilInfo->SetAutoRedraw(false);
+  mEventor->Start();
+}
+
