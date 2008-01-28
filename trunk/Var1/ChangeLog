@@ -1,3 +1,37 @@
+2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.h:
+	* Glasses/Statico.h:
+	Make Tringula a friend.
+	Return const& to aa-bbox.
+
+	* Glasses/PSSphere.cxx:
+	Fix a bug in pos2fgh(), theta was not calculated correctly.
+
+	* Glasses/TriMesh.cxx:
+	BuildOpcStructs(): throw an exception if build fails.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add 'Float_t fHeight' data-member and honour it when correcting
+	the up-direction of camera. Until now the height was not constant
+	for curved surfaces, especially when moving very fast.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Implement split box-pruning, separating static and dynamic
+	objects.
+	When placing a random statico on the terrain use the static list
+	for box-pruning and then do mesh-mesh tests. Before only
+	inefficient, O(n) aa-bbox tests were done. So, now it is faster
+	and correct.
+
+	* Opcode/OPC_BoxPruning.cpp:
+	* Opcode/OPC_BoxPruning.h:
+	Implemented class BipartiteBoxPruner. This helps in management and
+	utilization of two object lists for box-pruning. One is meant for
+	static objects and other for dynamic ones.
+
 2008-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.cxx:
