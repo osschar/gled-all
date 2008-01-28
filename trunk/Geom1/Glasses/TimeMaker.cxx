@@ -74,69 +74,74 @@ void TimeMaker::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
 
   Double_t t = mFactor*op_arg->fEventor->GetEventTime() + mConstant;
 
-  if(mWrapMode != WM_None) {
-    switch (mWrapMode) {
-    case WM_Clip:
-      if(t < mMinT)      t = mMinT;
-      else if(t > mMaxT) t = mMaxT;
-      break;
-    case WM_SawTooth: {
-      const Double_t D  = mMaxT - mMinT;
-      const Double_t ft = (t - mMinT)/D;
-      t = mMinT + D * (ft - TMath::Floor(ft));
-      break;
-    }
-    case WM_Triangular: {
-      const Double_t D  = 2*(mMaxT - mMinT);
-      const Double_t ft = (t - mMinT)/D;
-      t = mMinT + D * (ft - TMath::Floor(ft));
-      if(t > mMaxT) t -= 2*(t - mMaxT);
-      break;
-    }
-    case WM_SineWave: {
-      const Double_t D = mMaxT - mMinT;
-      t = mMinT + 0.5*D*(TMath::Sin(mOmega*t + mDelta) + 1);
-      break;
-    }
-    default:
-      break;
+  if (mWrapMode != WM_None)
+  {
+    switch (mWrapMode)
+    {
+      case WM_Clip:
+        if(t < mMinT)      t = mMinT;
+        else if(t > mMaxT) t = mMaxT;
+        break;
+      case WM_SawTooth:
+      {
+        const Double_t D  = mMaxT - mMinT;
+        const Double_t ft = (t - mMinT)/D;
+        t = mMinT + D * (ft - TMath::Floor(ft));
+        break;
+      }
+      case WM_Triangular:
+      {
+        const Double_t D  = 2*(mMaxT - mMinT);
+        const Double_t ft = (t - mMinT)/D;
+        t = mMinT + D * (ft - TMath::Floor(ft));
+        if(t > mMaxT) t -= 2*(t - mMaxT);
+        break;
+      }
+      case WM_SineWave:
+      {
+        const Double_t D = mMaxT - mMinT;
+        t = mMinT + 0.5*D*(TMath::Sin(mOmega*t + mDelta) + 1);
+        break;
+      }
+      default:
+        break;
     }
   }
 
   Double_t dt;
-  if(bApplyFormula) {
+  if (bApplyFormula) {
     Double_t t_pf = t;
     t = mTF1.Eval(t);
     dt = bLastTOK ? t - mLastT : 0;
-    if(bPrintOut)
+    if (bPrintOut)
       printf("%s Operate t_in = %g, t_pf = %g, t = %g, dt = %g\n",
 	     Identify().Data(), op_arg->fEventor->GetEventTime(), t_pf, t, dt);
   } else {
     dt = bLastTOK ? t - mLastT : 0;
-    if(bPrintOut)
+    if (bPrintOut)
       printf("%s Operate t_in = %g, t = %g, dt = %g\n",
 	     Identify().Data(), op_arg->fEventor->GetEventTime(), t, dt); 
   }
 
-  if(mClients != 0) {
+  if (mClients != 0) {
     list<TimeMakerClient*> clients;
     mClients->CopyListByGlass<TimeMakerClient>(clients);
-    for(list<TimeMakerClient*>::iterator i=clients.begin(); i!=clients.end(); ++i)
+    for (list<TimeMakerClient*>::iterator i=clients.begin(); i!=clients.end(); ++i)
       (*i)->TimeTick(t, dt);
   }
 
-  if(bPushToStack)
+  if (bPushToStack)
     op_arg->fEventor->PushEventTime(t);
 
   Operator::PostOperate(op_arg);
 
-  if(bPopFromStack)
+  if (bPopFromStack)
     op_arg->fEventor->PopEventTime();
 
   mLastT   = t;
   bLastTOK = true;
 
-  if(bEmitStamps) Stamp(FID());
+  if (bEmitStamps) Stamp(FID());
 }
 
 /**************************************************************************/
