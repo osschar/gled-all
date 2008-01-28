@@ -25,6 +25,8 @@ class Statico;
 class Dynamico;
 
 namespace Opcode {
+class AABB;
+class BipartiteBoxPruner;
 class CollisionFaces;
 class RayCollider;
 class Plane;
@@ -90,6 +92,11 @@ protected:
   ZLink<TriMesh>   mDefDynMesh; // X{GS} L{}
   ZLink<TriMesh>   mDefFlyMesh; // X{GS} L{}
 
+  Opcode::BipartiteBoxPruner*  mBoxPruner; //!
+  TimeStamp_t                  mStatosLTS;  //!
+  TimeStamp_t                  mDynosLTS;   //!
+  TimeStamp_t                  mFlyersLTS;  //!
+
   void get_ray_dir(Float_t* d, Float_t len=0);
   void handle_edge_crossing(Dynamico& D,
                             Opcode::Point& old_pos, Opcode::Point& pos,
@@ -97,6 +104,12 @@ protected:
 
   Bool_t place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside);
   void   place_on_terrain(Dynamico* D);
+
+  void   fill_pruning_list(AList* extendios, Int_t& n, const Opcode::AABB** boxes, void** user_data);
+  void   fill_pruning_list(AList* extendios, Int_t& n, Int_t l);
+  void   setup_box_pruner();
+  void   setup_stato_pruner();
+  void   setup_dyno_pruner();
 
 public:
   Tringula(const Text_t* n="Tringula", const Text_t* t=0) :
@@ -123,7 +136,7 @@ public:
 
   void ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
 
-  void PlaceAboveTerrain(ZTrans& trans, Float_t height=0, Float_t dh_fac=0);
+  Float_t PlaceAboveTerrain(ZTrans& trans, Float_t height=0, Float_t dh_fac=0);
 
   Statico* NewStatico(const Text_t* sname=0);
   Statico* RandomStatico(ZVector* mesh_list,
@@ -138,7 +151,11 @@ public:
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
 
-  void DoBoxPrunning(Bool_t detailed=false);  // X{E} 7 MCWButt()
+  void DoDynoBoxPrunning(Bool_t detailed=false);  // X{E} 7 MCWButt()
+
+  void DoFullBoxPrunning();  // X{E} 7 MCWButt()
+
+  void DoSplitBoxPrunning(); // X{E} 7 MCWButt()
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
