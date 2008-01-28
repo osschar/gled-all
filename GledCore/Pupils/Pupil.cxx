@@ -1185,17 +1185,6 @@ int Pupil::handle(int ev)
     return 1;
   }
 
-  if(mEventHandlerImg && bUseEventHandler) {
-    A_Rnr::Fl_Event e;
-    setup_rnr_event(ev, e);
-    int ehdlp = mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
-
-    // ???? This somewhat dubious
-    // Probably should handle also (at least) overlay.
-    // Or check overlay first!
-    if (ehdlp) return 1;
-  }
-
   if(mOverlayImg && bShowOverlay) {
     try {
       int ovlp = handle_overlay(ev);
@@ -1207,6 +1196,14 @@ int Pupil::handle(int ev)
       printf("%sexception in handle_overlay: '%s'.\n", _eh.Data(), exc.Data());
       return 1;
     }
+  }
+
+  if(mEventHandlerImg && bUseEventHandler) {
+    A_Rnr::Fl_Event e;
+    setup_rnr_event(ev, e);
+    int ehdlp = mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
+
+    if (ehdlp) return 1;
   }
 
   if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
@@ -1438,9 +1435,8 @@ void Pupil::dump_image(const TString& fname)
 
 void Pupil::check_driver_redraw()
 {
-  if(mDriver->GetRedraw()) {
+  if(bAutoRedraw && mDriver->GetRedraw()) {
     Fl::add_timeout(0, (Fl_Timeout_Handler)redraw_timeout, this);
-    mDriver->SetRedraw(false);
   }
 }
 
