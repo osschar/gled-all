@@ -54,7 +54,7 @@ void PSSphere::pos2fgh(const Float_t* x, Float_t* f)
   const Float_t r     = sqrtf(rxysq + x[2]*x[2]);
 
   f[0] = atan2f(x[1], x[0]);
-  f[1] = atan2f(x[2], rxysq);
+  f[1] = atan2f(x[2], sqrt(rxysq));
   f[2] = r - mR;
   if (bInside) { f[0] = -f[0]; f[2] = -f[2]; }
 }
