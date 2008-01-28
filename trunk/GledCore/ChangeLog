@@ -1,3 +1,16 @@
+2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Eventor.cxx:
+	Realign.
+
+	* Pupils/Pupil.cxx:
+	Handle overlay events first, pass them to external event handler
+	only if they were not handled there.
+	Honour redraw from render-driver only is bAutoRedraw is set.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	Set redraw-required flag to false in BeginRender().
+
 2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/Eye.cxx:
