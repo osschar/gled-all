@@ -11,6 +11,7 @@
 
 class Statico : public Extendio
 {
+  friend class Tringula;
   MAC_RNR_FRIENDS(Statico);
 
 private:
