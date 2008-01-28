@@ -57,6 +57,8 @@ void GLRnrDriver::BeginRender()
     mFaderStack->def_autogen = new RnrMod(lens, rnr);
   }
 
+  bRedraw = false;
+
   for(int i=0; i<mMaxLamps; ++i) {
     mLamps[i] = 0;
   } 
