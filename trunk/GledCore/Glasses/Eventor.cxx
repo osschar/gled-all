@@ -88,14 +88,18 @@ void Eventor::AdUnfoldment()
 
 Operator::Arg* Eventor::PreDance(Operator::Arg* op_arg)
 {
-  // Eventor::PreDance() is called as the first thing from Mountain::OperatorBeat().
-  // It is supposed to instantiate and set Operator::Arg* op_arg to meaningfull
-  // values and return it.
+  // Eventor::PreDance() is called as the first thing from
+  // Mountain::OperatorBeat().
+  //
+  // It is supposed to instantiate and set Operator::Arg* op_arg to
+  // meaningfull values and return it.
+  //
   // If you sub-class the Operator::Arg, make sure to also perform the
-  // house-keeping tasks performed here or call this method with non-zero
-  // op_arg.
-  // Return value of 0 signifies error and results in immediate termination
-  // of the thread. No other methods are called.
+  // house-keeping tasks performed here or call this method with
+  // non-zero op_arg.
+  //
+  // Return value of 0 signifies error and results in immediate
+  // termination of the thread. No other methods are called.
 
   if(op_arg == 0) op_arg = new Operator::Arg;
 
@@ -110,8 +114,10 @@ Operator::Arg* Eventor::PreDance(Operator::Arg* op_arg)
 
 void Eventor::PostDance(Operator::Arg* op_arg)
 {
-  // Eventor::PostDance() is called from Mountain::OperatorBeat() when Eventor
-  // throws Operator::OE_Done to request termination of the thread.
+  // Eventor::PostDance() is called from Mountain::OperatorBeat() when
+  // Eventor throws Operator::OE_Done to request termination of the
+  // thread.
+  //
   // If Operator::OE_Stop or Operator::OE_Break is thrown, this method
   // is *not* called, but either OnStop() or OnBreak().
 }
@@ -120,16 +126,17 @@ void Eventor::PostDance(Operator::Arg* op_arg)
 
 void Eventor::PreBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 {
-  // Eventor::PreBeat() is called from Mountain::OperatorBeat() prior to
-  // calling Operate.
+  // Eventor::PreBeat() is called from Mountain::OperatorBeat() prior
+  // to calling Operate.
 
-  switch(mTimeSource) {
-  case TS_System:
-    mInternalTime = op_arg->fBeatStart.ToDouble() - mTimeEpoch;
-    break;
-  case TS_IntStep:
-    mInternalTime += mTimeStep;
-    break;
+  switch(mTimeSource)
+  {
+    case TS_System:
+      mInternalTime = op_arg->fBeatStart.ToDouble() - mTimeEpoch;
+      break;
+    case TS_IntStep:
+      mInternalTime += mTimeStep;
+      break;
   }
 
   mTimeStack.clear();
@@ -138,8 +145,8 @@ void Eventor::PreBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 
 void Eventor::PostBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 {
-  // Eventor::PostBeat() is called from Mountain::OperatorBeat()
-  // after Operate (unless an exception was thrown from Operate's traversal).
+  // Eventor::PostBeat() is called from Mountain::OperatorBeat() after
+  // Operate (unless an exception was thrown from Operate's traversal).
 
   ++mLocBeatsDone;
   bool done = (mBeatsToDo != -1 && mLocBeatsDone >= mBeatsToDo);
@@ -162,18 +169,19 @@ void Eventor::OnStart(Operator::Arg* op_arg)
 
   // Set epoch on start; for multix moons use the streamed value.
   // ???? Does gettimeofday return the UTC time?
-  // If not, must offset the epoch by correct amount on moons..
-  if((op_arg->fMultix && IsSunOrFireSpace()) || !op_arg->fMultix) {
-
-    switch(mEpochType) {
-    case ET_Manual:
-      mInternalTime = mTimeEpoch;
-      break;
-    case ET_DanceStart:
-      mTimeEpoch = op_arg->fStart.ToDouble();
-      if(!op_arg->fMultix)
-	OP_EXE_OR_SP_MIR(this, SetTimeEpoch, mTimeEpoch);
-      break;
+  // If not, must offset the epoch by correct amount on moons.
+  if ((op_arg->fMultix && IsSunOrFireSpace()) || !op_arg->fMultix)
+  {
+    switch(mEpochType)
+    {
+      case ET_Manual:
+        mInternalTime = mTimeEpoch;
+        break;
+      case ET_DanceStart:
+        mTimeEpoch = op_arg->fStart.ToDouble();
+        if (!op_arg->fMultix)
+          OP_EXE_OR_SP_MIR(this, SetTimeEpoch, mTimeEpoch);
+        break;
     }
   }
 
@@ -192,7 +200,7 @@ void Eventor::OnResume(Operator::Arg* op_arg)
 
 void Eventor::OnExit(Operator::Arg* op_arg)
 {
-  if(bSuspended) {
+  if (bSuspended) {
     OP_EXE_OR_SP_MIR(this, SetSuspended, false);
   }
   OP_EXE_OR_SP_MIR(this, SetRunning, false);
