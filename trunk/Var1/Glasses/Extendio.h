@@ -17,6 +17,7 @@ class TringTvor;
 
 class Extendio : public ZGlass
 {
+  friend class Tringula;
   MAC_RNR_FRIENDS(Extendio);
 
 private:
@@ -35,7 +36,9 @@ public:
   Extendio(const Text_t* n="Extendio", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
 
-  HTransF& ref_trans() { return mTrans; } // Use wisely.
+  const Opcode::AABB&     RefAABB()    { return ref_aabb(); }
+
+  HTransF&                ref_trans()  { return mTrans; } // Use wisely.
 
   void                    touch_aabb() { bAABBok = false; }
   Opcode::AABB&           ref_aabb();
