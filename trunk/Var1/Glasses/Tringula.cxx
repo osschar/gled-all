@@ -53,6 +53,9 @@ void Tringula::_init()
   mEdgeRule   = ER_Stop;
 
   mRndGen.SetSeed(0);
+
+  mBoxPruner = new Opcode::BipartiteBoxPruner;
+  mStatosLTS = mDynosLTS = mFlyersLTS = 0;
 }
 
 /**************************************************************************/
@@ -60,24 +63,25 @@ void Tringula::_init()
 Tringula::~Tringula()
 {
   delete mRayColFaces;
+  delete mBoxPruner;
 }
 
 void Tringula::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
-  if(mStatos == 0) {
+  if (mStatos == 0) {
     ZHashList* l = new ZHashList("Statos", GForm("Statos of Tringula %s", GetName()));
     l->SetElementFID(Statico::FID());
     mQueen->CheckIn(l);
     SetStatos(l);
   }
-  if(mDynos == 0) {
+  if (mDynos == 0) {
     ZHashList* l = new ZHashList("Dynos", GForm("Dynos of Tringula %s", GetName()));
     l->SetElementFID(Dynamico::FID());
     mQueen->CheckIn(l);
     SetDynos(l);
   }
-  if(mFlyers == 0) {
+  if (mFlyers == 0) {
     ZHashList* l = new ZHashList("Flyers", GForm("Flyers of Tringula %s", GetName()));
     l->SetElementFID(Dynamico::FID());
     mQueen->CheckIn(l);
@@ -270,12 +274,16 @@ void Tringula::ResetCollisionStuff()
   {
     stepper->mOPCRCCache = OPC_INVALID_ID;
   }
+
+  // mBoxPruner is not changed.
 }
 
 /**************************************************************************/
 
-void Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fac)
+Float_t Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fac)
 {
+  // Returns height to which the trans was placed.
+
   static const Exc_t _eh("Tringula::PlaceAboveTerrain ");
 
   using namespace Opcode;
@@ -290,11 +298,13 @@ void Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fac)
   Opcode::Ray R;
   Float_t     ray_offset = mParaSurf->pos2hray(pos, R);
 
+  Float_t     abs_height = height + dh_fac*mParaSurf->GetDeltaH();
+
   Bool_t status = RC.Collide(R, *mMesh->GetOPCModel());
   if (status && CF.GetNbFaces() == 1)
   {
     const CollisionFace& cf = CF.GetFaces()[0];
-    pos.TMac(R.mDir, cf.mDistance - ray_offset - (height + dh_fac*mParaSurf->GetDeltaH()));
+    pos.TMac(R.mDir, cf.mDistance - ray_offset - abs_height);
     trans.SetPos(pos);
   }
   else
@@ -303,6 +313,8 @@ void Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fac)
                       status ? "ok" : "failed", RC.GetContactStatus(), CF.GetNbFaces(),
                       RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections()));
   }
+
+  return abs_height;
 }
 
 /**************************************************************************/
@@ -347,6 +359,13 @@ Statico* Tringula::RandomStatico(ZVector* mesh_list, Bool_t check_inside)
   }
 
   Int_t top_cnt = 0;
+  // For bounding-box selection of collision candidates.
+  setup_stato_pruner();
+  // For mesh-mesh collision detection.
+  Opcode::AABBTreeCollider collider;
+  Opcode::BVTCache         cache;
+  cache.Model0 = mesh->GetOPCModel();
+
 place:
   mParaSurf->random_trans(mRndGen, s->ref_trans());
   s->ref_trans().RotateLF(1, 2, mRndGen.Uniform(0, TMath::TwoPi()));
@@ -360,16 +379,16 @@ place:
   mDefStaMesh->ref_opc_aabb().Rotate(s->ref_trans(), bbox);
 
   ++top_cnt;
-  Int_t cnt = 1;
-  Stepper<> stepper(*mStatos);
-  while (stepper.step())
+
+  Opcode::Container hits;
+  mBoxPruner->SinglePruning(hits, 0, bbox);
+  for (UInt_t i = 0; i < hits.GetNbEntries(); ++i)
   {
-    Statico* S = (Statico*) *stepper;
-    if (S->ref_aabb().Intersect(bbox)) {
-      // printf("Intersection pass %d, intersecting stato %d\n", top_cnt, cnt);
+    Statico *hit = (Statico*) mBoxPruner->GetUserData(0, hits.GetEntry(i));
+    cache.Model1 = hit->get_opc_model();
+    collider.Collide(cache, s->ref_trans(), hit->ref_trans());
+    if (collider.GetContactStatus())
       goto place;
-    }
-    ++cnt;
   }
 
   if (top_cnt > 999)
@@ -459,26 +478,20 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
 
 /**************************************************************************/
 
-void Tringula::DoBoxPrunning(Bool_t detailed)
+void Tringula::DoDynoBoxPrunning(Bool_t detailed)
 {
-  static const Exc_t _eh("Tringula::DoBoxPrunning ");
+  static const Exc_t _eh("Tringula::DoDynoBoxPrunning ");
 
   using namespace Opcode;
 
-  UInt_t nboxes = mDynos->GetSize();
+  UInt_t nboxes = mDynos->GetSize() + mFlyers->GetSize();
   Dynamico    *dynarr[nboxes];
   const AABB  *bboxes[nboxes];
 
   {
     int n = 0;
-    Stepper<> stepper(*mDynos);
-    while (stepper.step())
-    {
-      Dynamico* D = (Dynamico*) *stepper;
-      dynarr[n] = D;
-      bboxes[n] = & D->ref_aabb();
-      ++n;
-    }
+    fill_pruning_list(*mDynos,  n, bboxes, (void**)dynarr);
+    fill_pruning_list(*mFlyers, n, bboxes, (void**)dynarr);
   }
 
   Pairs  pairs;
@@ -488,6 +501,15 @@ void Tringula::DoBoxPrunning(Bool_t detailed)
 
   printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
          nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
+  /*
+  for (UInt_t i = 0; i < pairs.GetNbPairs(); ++i)
+  {
+      const Pair *p  = pairs.GetPair(i);
+      Dynamico   *d0 = dynarr[p->id0];
+      Dynamico   *d1 = dynarr[p->id1];
+      printf("    %2d %s, %s\n", i+1, d0->Identify().Data(), d1->Identify().Data());
+  }
+  */
 
   if (detailed)
   {
@@ -685,6 +707,281 @@ void Tringula::DoBoxPrunning(Bool_t detailed)
   }
 }
 
+void Tringula::DoFullBoxPrunning()
+{
+  static const Exc_t _eh("Tringula::DoFullBoxPrunning ");
+
+  using namespace Opcode;
+
+  GTime  time(GTime::I_Now);
+
+  UInt_t nboxes = mStatos->GetSize() + mDynos->GetSize() + mFlyers->GetSize();
+  Extendio    *extarr[nboxes];
+  const AABB  *bboxes[nboxes];
+
+  {
+    int n = 0;
+    fill_pruning_list(*mStatos, n, bboxes, (void**) extarr);
+    fill_pruning_list(*mDynos,  n, bboxes, (void**) extarr);
+    fill_pruning_list(*mFlyers, n, bboxes, (void**) extarr);
+  }
+
+  // printf("Box-o-pruno, fill took %fs\n", time.TimeUntilNow().ToDouble());
+
+  Pairs  pairs;
+  Axes   axes(AXES_XZY); // somewhat random
+  Bool_t res = CompleteBoxPruning(nboxes, bboxes, pairs, axes);
+
+  printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
+         nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
+  /*
+  for (UInt_t i = 0; i < pairs.GetNbPairs(); ++i)
+  {
+      const Pair *p  = pairs.GetPair(i);
+      Extendio   *d0 = extarr[p->id0];
+      Extendio   *d1 = extarr[p->id1];
+      printf("    %2d %s, %s\n", i+1, d0->Identify().Data(), d1->Identify().Data());
+  }
+  */
+
+  Bool_t detailed = false;
+  if (detailed)
+  {
+    AABBTreeCollider collider;
+    
+    mItsLinesIdx = 0;
+
+    for (UInt_t i = 0; i < pairs.GetNbPairs(); ++i)
+    {
+      const Pair *p  = pairs.GetPair(i);
+      Extendio   *d0 = extarr[p->id0];
+      Extendio   *d1 = extarr[p->id1];
+
+      BVTCache cache;
+      cache.Model0 = d0->get_opc_model();
+      cache.Model1 = d1->get_opc_model();
+
+      Bool_t s0 = collider.Collide(cache, d0->ref_trans(), d1->ref_trans());
+      Bool_t s1 = collider.GetContactStatus();
+      UInt_t np = collider.GetNbPairs();
+
+      printf("  %3u: %-15s .vs. %-15s; %d, %d, %u\n", i,
+             d0->GetName(), d1->GetName(), s0, s1, np);
+
+      mItsLines.reserve(mItsLinesIdx + 3*2*np);
+
+      // Triangle pairs
+      const Pair* ps = collider.GetPairs();
+      for (UInt_t j = 0; j < np; ++j)
+      {
+        printf("    %2u: %3d %3d\n", j, ps[j].id0, ps[j].id1);
+
+        TringTvor *TT0 = d0->get_tring_tvor();
+        TringTvor *TT1 = d1->get_tring_tvor();
+
+        Int_t* T0 = TT0->Triangle(ps[j].id0);
+        Int_t* T1 = TT1->Triangle(ps[j].id1);
+
+        // Transform triangle vertices to my cs.
+        // [ If we ever get proper dynamics, transform also velocities.
+        //   Or maybe transform the intersection lines or whatever. ]
+        Point V0[3], V1[3];
+        for (int k=0; k<3; ++k)
+        {
+          d0->mTrans.MultiplyVec3(TT0->Vertex(T0[k]), 1.0f, V0[k]);
+          d1->mTrans.MultiplyVec3(TT1->Vertex(T1[k]), 1.0f, V1[k]);
+        }
+
+        // Define plane of triangle T0
+        Plane P(V0[0], V0[1], V0[2]);
+
+        // Calculate distance of T1's vertices to plane P
+        Float_t dst[3];
+        dst[0] = P.Distance(V1[0]);
+        dst[1] = P.Distance(V1[1]);
+        dst[2] = P.Distance(V1[2]);
+
+        // Determine edges of T1 that intersect plane P
+        // Calculate intersection points
+        Point ip[2];
+        Int_t pat =  4*(dst[2] > 0) + 2*(dst[1] > 0) + (dst[0] > 0);
+        printf("       dists = %f, %f, %f; pat = %d\n", dst[0], dst[1], dst[2], pat);
+        switch (pat)
+        {
+          // void intersection_point(const Plane& P, const Point& a, const Point&b, Point& result)
+          case 1:
+            ip[0].Mac(V1[0], V1[1]-V1[0], dst[0] / (dst[0] - dst[1]));
+            ip[1].Mac(V1[0], V1[2]-V1[0], dst[0] / (dst[0] - dst[2]));
+            break;
+          case 6: 
+            ip[0].Mac(V1[1], V1[0]-V1[1], dst[1] / (dst[1] - dst[0]));
+            ip[1].Mac(V1[2], V1[0]-V1[2], dst[2] / (dst[2] - dst[0]));
+            break;
+          case 2:
+            ip[0].Mac(V1[1], V1[0]-V1[1], dst[1] / (dst[1] - dst[0]));
+            ip[1].Mac(V1[1], V1[2]-V1[1], dst[1] / (dst[1] - dst[2]));
+            break;
+          case 5:
+            ip[0].Mac(V1[0], V1[1]-V1[0], dst[0] / (dst[0] - dst[1]));
+            ip[1].Mac(V1[2], V1[1]-V1[2], dst[2] / (dst[2] - dst[1]));
+            break;
+          case 3:
+            ip[0].Mac(V1[1], V1[2]-V1[1], dst[1] / (dst[1] - dst[2]));
+            ip[1].Mac(V1[0], V1[2]-V1[0], dst[0] / (dst[0] - dst[2]));
+            break;
+          case 4:
+            ip[0].Mac(V1[2], V1[1]-V1[2], dst[2] / (dst[2] - dst[1]));
+            ip[1].Mac(V1[2], V1[0]-V1[2], dst[2] / (dst[2] - dst[0]));
+            break;
+          default:
+            continue;
+        }
+
+        // Clip line into triangle T0: 3 steps
+
+        // Define triangle coords
+        Point e1; e1.Sub(V0[1], V0[0]);
+        Point e2; e2.Sub(V0[2], V0[0]);
+        Float_t e1sq = e1.SquareMagnitude();
+        Float_t e2sq = e2.SquareMagnitude();
+        Float_t d    = e1 | e2;
+
+        // Calculate u,v coords of both points.
+        Point uv[2];
+        for (int k=0; k<2; ++k)
+        {
+          Point p; p.Sub(ip[k], V0[0]);
+          Float_t e1p  = e1 | p;
+          Float_t e2p  = e2 | p;
+          uv[k].x = (e1p * e2sq - e2p * d) / (e1sq * e2sq - d * d);
+          uv[k].y = (e2p - uv[k].x * d) / e2sq;
+          // uv[k].z = 0; // if this becomes relevant
+        }
+        Point duv; duv.Sub(uv[1], uv[0]);
+        printf("       uv0 = % 5.3f, % 5.3f; uv1 = % 5.3f, % 5.3f; duv = % 5.3f, % 5.3f\n",
+               uv[0].x, uv[0].y, uv[1].x, uv[1].y, duv.x, duv.y);
+
+        // Check if outside triangle limits
+        Float_t t[3];    // intersection times holder
+        Int_t   ti, ts;  // time index; selected (maximal) index
+        // First point ... calculate intersection multipliers
+        ti = ts = 0;
+        if (uv[0].x < 0)
+        {
+          t[ti] = -uv[0].x / duv.x;
+          if (t[ti] > 0 && t[ti] < 1) ++ti;
+        }
+        if (uv[0].y < 0 )
+        {
+          t[ti] = -uv[0].y / duv.y;
+          if (t[ti] > 0 && t[ti] < 1) ++ti;
+        }
+        if (uv[0].x+uv[0].y > 1)
+        {
+          t[ti] = (1 - uv[0].x - uv[0].y) / (duv.x + duv.y);
+          if (t[ti] > 0 && t[ti] < 1) ++ti;
+        }
+        // First point ... fix if necessary; assume positive 't[ts]'!
+        if (ti > 0)
+        {
+          if (ti >= 2)
+          {
+            if (ti == 3)
+            {
+              printf("       warning, all 3 conditions true! Ignoring last solution.\n");
+            }
+            if (t[1] > t[0]) ts = 1;
+          }
+          ip[0].TMac2(e1, t[ts]*duv.x, e2, t[ts]*duv.y);
+          printf("       first pnt: ti=%d, t0=%f, t1=%f, ts=%d\n", ti, t[0], t[1], ts);
+        }
+        // Second point ... calculate intersection multipliers
+        // Invert du, dv and at the end also sign of t[ts]
+        ti = ts = 0;
+        if (uv[1].x < 0)
+        {
+          t[ti] = uv[1].x / duv.x;
+          if (t[ti] > 0 && t[ti] < 1) ++ti;
+        }
+        if (uv[1].y < 0 )
+        {
+          t[ti] = uv[1].y / duv.y;
+          if (t[ti] > 0 && t[ti] < 1) ++ti;
+        }
+        if (uv[1].x+uv[1].y > 1)
+        {
+          t[ti] = - (1 - uv[1].x - uv[1].y) / (duv.x + duv.y);
+          if (t[ti] > 0 && t[ti] < 1) ++ti;
+        }
+        // Second point ... fix if necessary; assume positive 't[ts]'!
+        if (ti > 0)
+        {
+          if (ti >= 2)
+          {
+            if (ti == 3)
+            {
+              printf("       warning, all 3 conditions true! Ignoring last solution.\n");
+            }
+            if (t[1] > t[0]) ts = 1;
+          }
+          ip[1].TMac2(e1, -t[ts]*duv.x, e2, -t[ts]*duv.y);
+          printf("       secnd pnt: ti=%d, t0=%f, t1=%f, ts=%d\n", ti, t[0], t[1], ts);
+        }
+
+        // Copy over for renderer
+        mItsLines[mItsLinesIdx++] = ip[0].x;
+        mItsLines[mItsLinesIdx++] = ip[0].y;
+        mItsLines[mItsLinesIdx++] = ip[0].z;
+        mItsLines[mItsLinesIdx++] = ip[1].x;
+        mItsLines[mItsLinesIdx++] = ip[1].y;
+        mItsLines[mItsLinesIdx++] = ip[1].z;
+      }
+
+    }
+  }
+}
+
+void Tringula::DoSplitBoxPrunning()
+{
+  static const Exc_t _eh("Tringula::DoSplitBoxPrunning ");
+
+  using namespace Opcode;
+
+  GTime  time(GTime::I_Now);
+
+  setup_box_pruner();
+
+  Pairs ds_pairs;
+  mBoxPruner->BipartitePruning(ds_pairs, 0, 1);
+
+  Pairs dd_pairs;
+  mBoxPruner->CompletePruning(dd_pairs, 1);
+
+  printf("Box-o-pruno on %d/%d: pairs=%d (%d/%d), time=%f\n",
+         mBoxPruner->ListSize(0), mBoxPruner->ListSize(1),
+         ds_pairs.GetNbPairs() + dd_pairs.GetNbPairs(),
+         ds_pairs.GetNbPairs(),  dd_pairs.GetNbPairs(),
+         time.TimeUntilNow().ToDouble());
+  /*
+  for (UInt_t i = 0; i < ds_pairs.GetNbPairs(); ++i)
+  {
+      const Pair *p  = ds_pairs.GetPair(i);
+      Statico   *d0 = (Statico*)  mBoxPruner->GetUserData(0, p->id0);
+      Dynamico  *d1 = (Dynamico*) mBoxPruner->GetUserData(1, p->id1);
+      printf("    %2d %s, %s\n", i+1, d0->Identify().Data(), d1->Identify().Data());
+  }
+  for (UInt_t i = 0; i < dd_pairs.GetNbPairs(); ++i)
+  {
+      const Pair *p  = dd_pairs.GetPair(i);
+      Dynamico  *d0 = (Dynamico*) mBoxPruner->GetUserData(1, p->id0);
+      Dynamico  *d1 = (Dynamico*) mBoxPruner->GetUserData(1, p->id1);
+      printf("    %2d %s, %s\n", i+1, d0->Identify().Data(), d1->Identify().Data());
+  }
+  */
+  //printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
+  //       nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
+}
+
 /**************************************************************************/
 
 void Tringula::TimeTick(Double_t t, Double_t dt)
@@ -828,6 +1125,64 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
   //printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
   //       nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
 }
+
+/******************************************************************************/
+
+void Tringula::fill_pruning_list(AList* extendios, Int_t& n,
+                                 const Opcode::AABB** boxes, void** user_data)
+{
+  Stepper<> stepper(extendios);
+  while (stepper.step())
+  {
+    boxes[n]     = &((Extendio*)*stepper)->RefAABB();
+    user_data[n] = *stepper;
+    ++n;
+  }
+}
+
+void Tringula::fill_pruning_list(AList* extendios, Int_t& n, Int_t l)
+{
+  fill_pruning_list(extendios, n, mBoxPruner->BoxList(l), mBoxPruner->UserData(l));
+}
+
+void Tringula::setup_box_pruner()
+{
+  // Make sure internal representation of static and dynamic objects
+  // for box-pruning is ok.
+
+  setup_stato_pruner();
+  setup_dyno_pruner();
+}
+
+void Tringula::setup_stato_pruner()
+{
+  if (mStatosLTS < mStatos->GetListTimeStamp())
+  {
+    mBoxPruner->InitList(0, mStatos->Size());
+    int n = 0;
+    fill_pruning_list(*mStatos, n, 0);
+    mStatosLTS = mStatos->GetListTimeStamp();
+    mBoxPruner->Sort(0);
+  }
+}
+
+void Tringula::setup_dyno_pruner()
+{
+  if (mDynosLTS  < mDynos ->GetListTimeStamp() ||
+      mFlyersLTS < mFlyers->GetListTimeStamp())
+  {
+    mBoxPruner->InitList(1, mDynos->Size() + mFlyers->Size());
+    int n = 0;
+    fill_pruning_list(*mDynos,  n, 1);
+    fill_pruning_list(*mFlyers, n, 1);
+    mDynosLTS  = mDynos ->GetListTimeStamp();
+    mFlyersLTS = mFlyers->GetListTimeStamp();
+  }
+
+  mBoxPruner->Sort(1);
+}
+
+/******************************************************************************/
 
 void Tringula::handle_edge_crossing
 ( Dynamico& D, Opcode::Point& old_pos, Opcode::Point& pos, 
