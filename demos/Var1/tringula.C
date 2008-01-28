@@ -31,6 +31,8 @@ TriMesh*      flymesh  = 0;
 ZVector*      rndstatos = 0;
 ZVector*      rnddynos = 0;
 
+Scene*        overlay  = 0;
+
 TriMeshField* tmfield  = 0;
 RectTerrain * terrain  = 0;
 GTSurf*       gtsurf   = 0;
@@ -42,10 +44,10 @@ TriMeshLightField* lightmap = 0;
 Eventor*     eventor  = 0;
 TimeMaker*   tmaker   = 0;
 
-Float_t      statico_surface_fraction  = 0.1;
+Float_t      statico_surface_fraction  = 0.1; // 0.4 is about maximum, varies with surf-type.
 Int_t        num_dynamico              = 200;
 Int_t        num_flyer                 = 100;
-Float_t      max_flyer_h               = 20; // Change for some surfaces in surf-specific init.
+Float_t      max_flyer_h               = 20;   // Changed for some surfaces in surf-specific init.
 
 TRandom      g_rnd(0);
 
@@ -114,7 +116,7 @@ void tringula(Int_t mode=0)
       m->SetXYArea(a*b);
 
       if (i == 0) {
-        min_xy = 1, max_xy = 5;
+        min_xy = 2, max_xy = 5;
         min_h  = 1, max_h  = 5;
       }
     }
@@ -240,11 +242,12 @@ void tringula(Int_t mode=0)
     ZTrans& trans = tricam->ref_trans();
 
     parasurf->origin_trans(trans);
-    tringula->PlaceAboveTerrain(trans, 1, 1.1);
+    Float_t h = tringula->PlaceAboveTerrain(trans, 1, 1.1);
     trans.RotateLF(1, 2, TMath::PiOver2());
     printf("Camera placed:\n");
     trans.Print();
 
+    tricam->SetHeight(h);
     tricam->StampReqTrans();
   }
 
@@ -328,12 +331,14 @@ void tringula(Int_t mode=0)
   g_pupil->SetShowView(false);
 
   g_pupil->SetAutoRedraw(false);
-  // g_pupil->SetOverlay(overlay);
 
   g_shell->Add(tricam);
   g_pupil->SetEventHandler(tricam);
   g_pupil->SetCameraBase(tricam);
 
+  tricam->SetPupilInfo(g_pupil);
+  tricam->SetEventor(eventor);
+  tricam->SetTimeMaker(tmaker);
   tmaker->AddClient(tricam);
 
   CREATE_ADD_GLASS(stxt1, ScreenText, g_pupil, "LftRgt", 0);
@@ -352,10 +357,13 @@ void tringula(Int_t mode=0)
   Gled::theOne->LockFltk();
 
   dumper->SetPupil(g_pupil);
-  tricam->GetCamFix()->RotateLF(3, 1, TMath::Pi()/4);
+  // Look slightly down.
+  tricam->GetCamFix()->RotateLF(3, 1, TMath::Pi()/8);
 
   Gled::theOne->UnlockFltk();
 
+  make_overlay();
+  g_pupil->SetOverlay(overlay);
 
   /**************************************************************************/
   // Place some random statos, dynos and flyers
@@ -363,6 +371,7 @@ void tringula(Int_t mode=0)
 
   // Staticos
   {
+    GTime timer(GTime::I_Now);
     Float_t desired_surface = statico_surface_fraction * tringula->GetParaSurf()->surface();
     Float_t used_surface    = 0;
     Int_t   count           = 0;
@@ -372,8 +381,8 @@ void tringula(Int_t mode=0)
       used_surface += s->GetMesh()->GetXYArea();
       ++count;
     }
-    printf("RandomStaticos cnt=%d; desired_surface=%f, used_surface=%f\n",
-           count, desired_surface, used_surface);
+    printf("RandomStaticos cnt=%d; desired_surface=%f, used_surface=%f; time=%fs\n",
+           count, desired_surface, used_surface, timer.TimeUntilNow().ToDouble());
   }
 
   // Dynamicos
@@ -398,7 +407,10 @@ void tringula(Int_t mode=0)
   eventor->Start();
 }
 
-/**************************************************************************/
+
+/******************************************************************************/
+// Surface init
+/******************************************************************************/
 
 void setup_rectangle()
 {
@@ -590,7 +602,47 @@ void setup_torus_inside()
   tringula->SetMesh(trimesh);
 }
 
-/**************************************************************************/
+
+/******************************************************************************/
+// Overlay GUI
+/******************************************************************************/
+
+void make_overlay()
+{
+  ASSIGN_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
+
+  CREATE_ADD_GLASS(ovl_lm, ZGlLightModel, overlay, "LightOff", 0);
+  ovl_lm->SetLightModelOp(0);
+
+  CREATE_ADD_GLASS(pp, ZGlPerspective, overlay, "Perspective", 0);
+  pp->StandardPixel();
+
+  CREATE_ADD_GLASS(bfs, WGlFrameStyle, overlay, "Butt Frame Style", 0);
+  bfs->StandardPixel();
+  bfs->SetTileColor(0.3, 0.5, 0.5, 0.6);
+  bfs->SetBelowMColor(0.5, 0.7, 0.7, 0.8);
+
+  CREATE_ADD_GLASS(but1, WGlButton, overlay, "Suspend", 0);
+  but1->SetPos(4, 4, 0);
+  but1->SetCbackAlpha(tricam);
+  but1->SetCbackMethodName("Suspend");
+
+  CREATE_ADD_GLASS(but2, WGlButton, overlay, "Resume", 0);
+  but2->SetPos(4, 30, 0);
+  but2->SetCbackAlpha(tricam);
+  but2->SetCbackMethodName("Resume");
+
+  CREATE_ADD_GLASS(val1, WGlValuator, overlay, "Speed", 0);
+  val1->SetPos(98, 4, 0);
+  val1->SetMin(1); val1->SetMax(1000);
+  val1->SetFormat("Sleep: %.0f");
+  val1->SetCbackAlpha(eventor);
+  val1->SetCbackMemberName("InterBeatMS");
+}
+
+/******************************************************************************/
+// Various
+/******************************************************************************/
 
 void sunrise(Float_t phi=45, Float_t dt=0.005, Int_t sleep=100)
 {
