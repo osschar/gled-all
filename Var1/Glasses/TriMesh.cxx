@@ -98,8 +98,8 @@ void TriMesh::BuildOpcStructs()
   OPCC.mIMesh = mOPCMeshIf;
 
   bool status = mOPCModel->Build(OPCC);
-
-  // printf("Build finished status=%d, bytes=%d\n", status, mOPCModel->GetUsedBytes());
+  if ( ! status)
+    throw(_eh + "Build failed for " + Identify() + ".");
 }
 
 void TriMesh::AssertOpcStructs()
