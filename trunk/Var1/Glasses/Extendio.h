@@ -48,6 +48,18 @@ public:
 
   TringTvor*              get_tring_tvor()  { return mMesh->GetTTvor(); }
 
+  // --- Triangle-triangle intersection ---
+
+  static bool intersect_triangle(Extendio* ext0,  Extendio* ext1,
+                                 Int_t    tidx0,  Int_t    tidx1,
+                                 Opcode::Segment& segment,
+                                 const Text_t* debug_prefix=0);
+
+  static int  intersect_extendios(Extendio* ext0, Extendio* ext1,
+                                  Opcode::AABBTreeCollider& collider,
+                                  vector<Opcode::Segment>& segments,
+                                  const Text_t* debug_prefix=0);
+
 #include "Extendio.h7"
   ClassDef(Extendio, 1)
 }; // endclass Extendio
