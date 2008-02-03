@@ -1,3 +1,24 @@
+2008-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add static methods intersect_triangle() and intersect_extendios().
+	These now hold code for detailed inspection of mesh-mesh collision
+	status.
+
+	* Glasses/PSSphere.cxx:
+	In random_fgh() phi and theta were swapped.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Move code for detailed collision detection from DoBoxPruning()
+	functions into static functions in Extendio.
+	The intersections are now stored in vector<Opcode::Segment>.
+
+	* Opcode/OPC_TriTriOverlap.h:
+	Realign for readibility.
+
 2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Extendio.h:
