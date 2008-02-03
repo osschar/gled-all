@@ -186,10 +186,10 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
       GL_Float_Holder      line_w(GL_LINE_WIDTH, 2, glLineWidth);
       glColor3f(1, 0.1, 0.3);
       glBegin(GL_LINES);
-      for (Int_t i=0; i<T.mItsLinesIdx; i+=6)
+      for (vector<Opcode::Segment>::iterator i = T.mItsLines.begin(); i != T.mItsLines.end(); ++i)
       {
-        glVertex3fv(&T.mItsLines[i]);
-        glVertex3fv(&T.mItsLines[i+3]);
+        glVertex3fv(i->mP0);
+        glVertex3fv(i->mP1);
       }
       glEnd();
     }

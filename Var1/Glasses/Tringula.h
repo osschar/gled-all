@@ -11,6 +11,8 @@
 #include <Stones/ZColor.h>
 #include <Stones/TimeMakerClient.h>
 
+#include <Opcode/Opcode.h>
+
 #include <TRandom.h>
 
 class ZHashList;
@@ -23,15 +25,6 @@ class ParaSurf;
 class Extendio;
 class Statico;
 class Dynamico;
-
-namespace Opcode {
-class AABB;
-class BipartiteBoxPruner;
-class CollisionFaces;
-class RayCollider;
-class Plane;
-class Point;
-}
 
 
 class Tringula : public ZNode, public TimeMakerClient
@@ -57,8 +50,7 @@ private:
   void _init();
 
   // Hack to carry intersection lines over to renderer.
-  vector<Float_t>    mItsLines;
-  Int_t              mItsLinesIdx;
+  vector<Opcode::Segment>    mItsLines;    //!
 
 protected:
   ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{A}
@@ -151,9 +143,9 @@ public:
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
 
-  void DoDynoBoxPrunning(Bool_t detailed=false);  // X{E} 7 MCWButt()
+  void DoDynoBoxPrunning(Bool_t accumulate=false, Bool_t verbose=false); // X{E} 7 MCWButt()
 
-  void DoFullBoxPrunning();  // X{E} 7 MCWButt()
+  void DoFullBoxPrunning(Bool_t accumulate=false, Bool_t verbose=false); // X{E} 7 MCWButt()
 
   void DoSplitBoxPrunning(); // X{E} 7 MCWButt()
 
