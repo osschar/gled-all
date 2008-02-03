@@ -178,8 +178,8 @@ void PSSphere::regularize_fg(Float_t* f)
 
 void PSSphere::random_fgh(TRandom& rnd, Float_t* f)
 {
-  f[0] = TMath::ASin(rnd.Uniform(-1, 1));
-  f[1] = rnd.Uniform(-TMath::Pi(), TMath::Pi());
+  f[0] = rnd.Uniform(-TMath::Pi(), TMath::Pi());
+  f[1] = TMath::ASin(rnd.Uniform(-1, 1));
   f[2] = 0;
 }
 
