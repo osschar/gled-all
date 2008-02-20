@@ -12,6 +12,7 @@
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
 #include <Gled/GledNS.h>
+#include <GledView/GledGUI.h>
 #include <Rnr/GL/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
@@ -831,9 +832,12 @@ void Pupil::draw()
 
   // if (!valid()) {}
 
-  if(bDumpImage) {
+  if (bDumpImage)
+  {
+    GledGUI::theOne->LockRootDisplay();
     try {
-      if(mPBuffer == 0 || mPBuffer->get_width() != w() || mPBuffer->get_height() != h()) {
+      if (mPBuffer == 0 || mPBuffer->get_width() != w() || mPBuffer->get_height() != h())
+      {
 	delete mPBuffer;
 	mPBuffer = new PBuffer(w(), h());
       }
@@ -843,9 +847,12 @@ void Pupil::draw()
       printf("%spbuffer init failed: %s.\n", _eh.Data(), exc);
     }
 
-    if(mImgNTiles > 1) {
-      for(Int_t xi=0; xi<mImgNTiles; ++xi) {
-	for(Int_t yi=0; yi<mImgNTiles; ++yi) {
+    if (mImgNTiles > 1)
+    {
+      for (Int_t xi=0; xi<mImgNTiles; ++xi)
+      {
+	for (Int_t yi=0; yi<mImgNTiles; ++yi)
+	{
 	  rnr_standard(mImgNTiles, xi, yi);
 	  TString fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
 	  dump_image(fname);
@@ -853,30 +860,33 @@ void Pupil::draw()
       }
       printf("Merge with: montage -tile %dx%d -geometry %dx%d %s-* %s.png\n",
 	     mImgNTiles, mImgNTiles, w(), h(), mImageName.Data(), mImageName.Data());
-    } else {
+    }
+    else
+    {
       GTime start_time(GTime::I_Now);
       rnr_standard();
       GTime stop_time(GTime::I_Now);
       GTime rnr_time = stop_time - start_time;
-      if(mInfo->bRnrFakeOverlayInCapture)
+      if (mInfo->bRnrFakeOverlayInCapture)
 	rnr_fake_overlay(rnr_time);
       dump_image(mImageName + ".tga");
     }
     mPBuffer->Release();
+    GledGUI::theOne->LockRootDisplay();
 
     bDumpImage = false;
-
-  } else {
-
+  }
+  else
+  {
     GTime start_time(GTime::I_Now);
     rnr_standard();
     GTime stop_time(GTime::I_Now);
     GTime rnr_time = stop_time - start_time;
     rnr_fake_overlay(rnr_time);
-
   }
 
-  if(bSignalDumpFinish) {
+  if (bSignalDumpFinish)
+  {
     mInfo->ReceiveDumpFinishedSignal();
     bSignalDumpFinish = false;
   }
