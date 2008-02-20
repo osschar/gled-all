@@ -1,3 +1,12 @@
+2008-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGeoNode.cxx:
+	Add missing include for latest root.
+
+	* Stones/TGeoShapeExtract.cxx:
+	* Stones/TGeoShapeExtract.h:
+	Bring in sync with stuff in TEve.
+
 2007-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ZGeoNode_GL_Rnr.cxx:

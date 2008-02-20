@@ -1,3 +1,13 @@
+2008-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Add virtual functions LockRootDisplay() and UnlockRootDisplay().
+
+	* Pupils/Pupil.cxx:
+	Lock Root display before dumping an image (interfered with
+	creation of pbuffers).
+
 2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Eventor.cxx:
