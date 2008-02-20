@@ -144,6 +144,10 @@ void AliConverter::CreateVSD(const Text_t* data_dir, Int_t event,
   // printf("AliConverter::CreateVSD GREPME ... aborting forcefully with bug-squash intentions.\n");
   // goto end_esd_processing;
 
+  // Bugger, incompatible AliROOT for the new (12.2006) central event.
+  printf("AliConverter::CreateVSD new ESDEvent not supported.\n");
+  goto end_esd_processing;
+
   try {
     ConvertRecTracks();
   } catch(Exc_t& exc) {
@@ -511,7 +515,7 @@ void AliConverter::ConvertClusters()
   mTreeC->Branch("C", "Hit", &mpC, 128*1024, 1);
 
   try {
-    ConvertITSClusters();
+    // ConvertITSClusters();
   } catch(Exc_t& exc) { warn_caller(exc); }
 
   try {
@@ -615,11 +619,11 @@ void AliConverter::ConvertITSClusters()
   if(!tree.get())
     throw(_eh + "'TreeR' not found.");
 
-  AliITSLoader* ITSld =  (AliITSLoader*) pRunLoader->GetLoader("ITSLoader");
-  //AliITS* pITS = ITSld->GetITS();
-  AliITSgeom* geom = ITSld->GetITSgeom();
-  //AliITSgeom* geom = new AliITSgeom();
-  //geom->ReadNewFile("/home/aljam/ITSgeometry.det");
+  // AliITSLoader* ITSld =  (AliITSLoader*) pRunLoader->GetLoader("ITSLoader");
+  // AliITS* pITS = ITSld->GetITS();
+  // AliITSgeom* geom = ITSld->GetITSgeom();
+  AliITSgeom* geom = new AliITSgeom();
+  geom->ReadNewFile("$GLEDSYS/demos/Alice/ITSgeometry.det");
 
   //printf("alice ITS geom %p \n",geom );
 
@@ -627,7 +631,7 @@ void AliConverter::ConvertITSClusters()
     throw(_eh + "can not find ITS geometry");
 
   TClonesArray *arr = new TClonesArray("AliITSclusterV2");
-  tree->SetBranchAddress("Clusters", &arr);
+  tree->SetBranchAddress("ITSRecPoints", &arr);
   Int_t nmods = tree->GetEntries();
   Float_t gc[3];
   map<Int_t, Int_t> cmap;

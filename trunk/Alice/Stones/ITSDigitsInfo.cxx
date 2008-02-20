@@ -10,7 +10,6 @@
 //
 
 #include "ITSDigitsInfo.h"
-#include <AliITSCalibrationSDD.h>
 #include <AliITSdigit.h>
 #include <AliITSdigitSPD.h>
 
@@ -155,10 +154,7 @@ void ITSDigitsInfo::SetITSSegmentation()
   // end of SPD geometry
   
   // SDD
-  AliITSresponseSDD *resp1 = new AliITSresponseSDD();
-  AliITSCalibrationSDD* cal1 = new AliITSCalibrationSDD;
-  cal1->SetResponse(resp1);
-  mSegSDD = new AliITSsegmentationSDD(mGeom, cal1);
+  mSegSDD = new AliITSsegmentationSDD(mGeom);
 
   // SSD
   mSegSSD = new AliITSsegmentationSSD(mGeom);
