@@ -87,6 +87,9 @@ public:
   virtual void LockFltk();
   virtual void UnlockFltk();
 
+  virtual void LockRootDisplay();
+  virtual void UnlockRootDisplay();
+
   static GledGUI* theOne;
 
 #include "GledGUI.h7"

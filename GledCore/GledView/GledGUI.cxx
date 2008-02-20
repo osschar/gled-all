@@ -483,7 +483,7 @@ TCanvas* GledGUI::NewCanvas(const Text_t* name, const Text_t* title,
 #ifndef __APPLE__
   XSync((Display*)fl_display, 0);
 #endif
-  //  Display* rd = (Display*)(dynamic_cast<TGX11*>(gVirtualX)->GetDisplay());
+
   Display* rd = (Display*) gVirtualX->GetDisplay();
   XLockDisplay(rd);
 
@@ -523,4 +523,18 @@ void GledGUI::UnlockFltk()
 {
   Fl::awake();
   Fl::unlock();
+}
+
+/******************************************************************************/
+void GledGUI::LockRootDisplay()
+{
+  Display* rd = (Display*) gVirtualX->GetDisplay();
+  XLockDisplay(rd);
+}
+
+void GledGUI::UnlockRootDisplay()
+{
+  Display* rd = (Display*) gVirtualX->GetDisplay();
+  XSync(rd, 0);
+  XUnlockDisplay(rd);
 }
