@@ -17,6 +17,7 @@
 #include <Glasses/ZQueen.h>
 #include <Stones/ZComet.h>
 
+#include <TGeoMatrix.h>
 #include <TROOT.h>
 #include <TFile.h>
 #include <TBuffer3D.h>
