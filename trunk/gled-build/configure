@@ -169,6 +169,7 @@ fnord
   croak "Unknown system."
 }
 
+
 ########################################################################
 # MAIN
 ########################################################################
@@ -214,6 +215,7 @@ if($config->{NORNRLIBS} or $config->{RENDERERS} eq "") {
 
 croak "Rnr libs require View libs"
   if $config->{NOVIEWLIBS} == 1 and $config->{NORNRLIBS} == 0;
+
 
 ########################################################################
 # Basic build configure
@@ -370,6 +372,7 @@ $resolver->{LibSetList} = [];
 
 @base_dirs = split(/\s*:\s*/, $config->{GLEDBASE});
 
+
 ########################################################################
 # configure of libset dependencies and building of resolver
 ########################################################################
@@ -466,6 +469,7 @@ for $f (@{$resolver->{LibSetList}}) {
   system_or_die("make -C $f pre_depend");
 }
 
+
 ########################################################################
 # Merge libset catalogs into resolver
 ########################################################################
@@ -501,6 +505,7 @@ write_config();
 for $f (@{$resolver->{LibSetList}}) {
   system_or_die("make -C $f depend");
 }
+
 
 ########################################################################
 # Create Environment Files
@@ -603,6 +608,15 @@ FNORD
 
   close M;
 }
+
+
+########################################################################
+# Dump config.status
+########################################################################
+
+open  CS, ">config.status";
+print CS $cmd_line, "\n";
+close CS;
 
 # print Dumper(\@libsets);
 # print Dumper(\%deps);
