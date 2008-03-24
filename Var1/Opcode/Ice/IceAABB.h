@@ -363,6 +363,9 @@ public:
   float	GetWidth()	const	{ return mExtents.x * 2.0f; }
   float	GetHeight()	const	{ return mExtents.y * 2.0f; }
   float GetDepth()	const	{ return mExtents.z * 2.0f; }
+  float GetXSize()	const	{ return mExtents.x * 2.0f; }
+  float GetYSize()	const	{ return mExtents.y * 2.0f; }
+  float GetZSize()	const	{ return mExtents.z * 2.0f; }
 
   //! Volume
   float	GetVolume()	const	{ return mExtents.x * mExtents.y * mExtents.z * 8.0f; }
