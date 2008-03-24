@@ -49,8 +49,8 @@ void  ZImage_GL_Rnr::check_rescale()
       sRescaleToPow2 = 1;
     }
     else if (vendor.BeginsWith("ATI")) {
-      if (major <= 2 && minor <= 0 && patch <= 6650) {
-        ISmess(mh + "ATI, GL <= 2.0.6650 (very slow rendering).");
+      if (major <= 2 && minor <= 1 && patch <= 7276) {
+        ISmess(mh + "ATI, GL <= 2.1.7276 (very slow rendering).");
         sRescaleToPow2 = 1;
       }
     }
