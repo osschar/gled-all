@@ -1,3 +1,12 @@
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVAlienUI.cxx:
+	* Glasses/AEVDemoDriver.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVEventBatch.cxx:
+	* Rnr/GL/AEVEventBatch_GL_Rnr.cxx:
+	Fix compilation warnings.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVDemoDriver.cxx:

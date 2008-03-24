@@ -1,3 +1,21 @@
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GledTypes.h:
+	* Gled/GledNS.cxx:
+	* catalog.patch:
+	Derive Exc_t from TString instead of std::string.
+	Make it known to CINT.
+
+	* Pupils/GuiPupil.cxx:
+	Comment out unused variables in unnamed namespace.
+
+	* RegExp/Makefile:
+	Fix linking notification.
+
+	* macros/eye.C:
+	fill_GledCore_layouts() - return list that holds the layouts, not
+	the top-level container.
+
 2008-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/GledGUI.cxx:
