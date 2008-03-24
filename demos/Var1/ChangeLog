@@ -1,3 +1,13 @@
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add test mode (id=99).
+
+	When placing random staticos give up after placement fails 20
+	times.
+
+	Fiddle the constants, nitpicking.
+
 2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
