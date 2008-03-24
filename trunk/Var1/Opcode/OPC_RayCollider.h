@@ -139,6 +139,7 @@ public:
    */
   //----------------------------------------------------------------------
   void SetDestination(CollisionFaces* cf) { mStabbedFaces = cf; }
+  CollisionFaces* GetDestination() { return mStabbedFaces; }
 #endif
   // Stats
   //----------------------------------------------------------------------
