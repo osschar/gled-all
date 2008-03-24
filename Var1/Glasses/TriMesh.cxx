@@ -39,6 +39,9 @@ void TriMesh::_init()
   mVolume    = 0;
   mXYArea    = 0;
 
+  mM    = 0;
+  mSurf = 0;
+
   mOPCModel  = 0;
   mOPCMeshIf = 0;
 }
@@ -56,6 +59,123 @@ void TriMesh::ResetTTvorDependants()
   delete mOPCMeshIf; mOPCMeshIf = 0;
 
   mVDataVec.resize(0);
+}
+
+/******************************************************************************/
+
+namespace
+{
+inline void add_Js(HPointF& J, HPointF& ND, const Opcode::Point& r, Float_t m)
+{
+  const Float_t xs = r.x*r.x, ys = r.y*r.y, zs = r.z*r.z;
+  J.x += m * (ys + zs);  ND.x -= m * r.y*r.z;
+  J.y += m * (zs + xs);  ND.y -= m * r.x*r.z;
+  J.z += m * (xs + ys);  ND.z -= m * r.x*r.y;
+}
+}
+
+// For diagonalization of inertia tensor
+// #include <TVectorT.h>
+// #include <TMatrixTSym.h>
+
+void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
+{
+  // Set mass of the mesh and calculate center of mass and Jz (should
+  // extend for full matrix but let's keep it simple for now) with a
+  // simple algorithm: distribute mass_frac_on_mesh of mass over the
+  // triangles of the mesh.
+  //
+  // As J_spehere = 2/5 m*r^2, the default value for mass_frac_on_mesh = 0.4.
+
+  // !!! Doubles should be used for all accumulators when adding up
+  // quantites over vertices/triangles.
+
+  mM    = mass;
+  mSurf = 0;
+  mCOM.Set(0, 0, 0);
+  mJ  .Set(0, 0, 0);
+
+  const Int_t nTrings = mTTvor->mNTrings;
+
+  std::vector<Float_t> tri_surfs(nTrings);
+
+  mSurf = 0;
+
+  Int_t *vts;
+  { // Sum surface
+    Opcode::Point *p0, e1, e2, cp;
+    for (Int_t tring = 0; tring < nTrings; ++tring)
+    {
+      vts = mTTvor->Triangle(tring);
+
+      using namespace Opcode;
+      p0 = (Point*) mTTvor->Vertex(vts[0]);
+      e1.Set(mTTvor->Vertex(vts[1])); e1.Sub(*p0);
+      e2.Set(mTTvor->Vertex(vts[2])); e2.Sub(*p0);
+      cp.Cross(e1, e2);
+
+      tri_surfs[tring] = 0.5f * cp.Magnitude();
+      mSurf += tri_surfs[tring];
+    }
+  }
+  Opcode::Point com(0, 0, 0);
+  {
+    Float_t oneoso3 = INV3 / mSurf; // one over surface over 3
+    Float_t surfptv;                // surface per triangle vertex
+    for (Int_t tring = 0; tring < nTrings; ++tring)
+    {
+      vts     = mTTvor->Triangle(tring);
+      surfptv = oneoso3 * tri_surfs[tring];
+
+      using namespace Opcode;
+      com.TMac(* ((Point*) mTTvor->Vertex(vts[0])), surfptv);
+      com.TMac(* ((Point*) mTTvor->Vertex(vts[1])), surfptv);
+      com.TMac(* ((Point*) mTTvor->Vertex(vts[2])), surfptv);
+    }
+    mCOM.Set(com);
+  }
+  {
+    // Calculate components of inertia tensor.
+    // Should:
+    // 1. diagonalize
+    // 2. setup mesh-to-extendio transform
+    //    extendio specific, once special loads are allowed
+
+    HPointF I, J; // diagonal, off-diagonal elements
+
+    Float_t mpso3 = INV3 * mass_frac_on_mesh * mass / mSurf; // mass per surface over 3
+    Float_t mptv; // mass per triangle vertex
+    Opcode::Point r;
+    for (Int_t tring = 0; tring < nTrings; ++tring)
+    {
+      vts  = mTTvor->Triangle(tring);
+      mptv = mpso3 * tri_surfs[tring];
+
+      r.Set(mTTvor->Vertex(vts[0])); r.Sub(com); add_Js(I, J, r, mptv);
+      r.Set(mTTvor->Vertex(vts[1])); r.Sub(com); add_Js(I, J, r, mptv);
+      r.Set(mTTvor->Vertex(vts[2])); r.Sub(com); add_Js(I, J, r, mptv);
+    }
+
+    mJ = I;
+
+    /*
+    printf("TriMesh %s:\n", GetName());
+    printf("    Ixx=%.3f Iyy=%.3f Izz=%.3f\n", I.x, I.y, I.z);
+    printf("    Iyz=%.3f Ixz=%.3f Ixy=%.3f\n", J.x, J.y, J.z);
+
+    TMatrixTSym<float> m(3);
+    m(0,0) = I.x; m(0,1) = m(1,0) = J.z; m(0,2) = m(2,0) = J.y;
+    m(1,1) = I.y; m(1,2) = m(2,1) = J.x;
+    m(2,2) = I.z;
+    m.Print();
+    TVectorT<float> eval;
+    TMatrixT<float> evec = m.EigenVectors(eval);
+    printf("Eigen vals: %f, %f, %f\n", eval(0), eval(1), eval(2));
+    evec.Print();
+    */
+  }
+
+  Stamp(FID());
 }
 
 /**************************************************************************/

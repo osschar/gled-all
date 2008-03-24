@@ -9,6 +9,7 @@
 
 #include <Glasses/ZGlass.h>
 #include <Stones/TringTvor.h>
+#include <Stones/HTrans.h>
 
 class ParaSurf;
 
@@ -114,6 +115,11 @@ protected:
   Float_t                 mVolume;     // X{GS} 7 ValOut(-join=>1)
   Float_t                 mXYArea;     // X{GS} 7 ValOut()
 
+  Float_t                 mM;          // X{GS} 7 ValOut(-join=>1)
+  Float_t                 mSurf;       // X{GS} 7 ValOut()
+  HPointF                 mCOM;        // X{RS} 7 HPointF(-const=>1)
+  HPointF                 mJ;          // X{RS} 7 HPointF(-const=>1)
+
   vector<TriMesh::VertexData>   mVDataVec;  //! X{R}
   vector<TriMesh::EdgeData>     mEDataVec;  //! X{R}
   vector<Int_t>                 mECursVec;  //! X{R} Cursor array, one entry per vertex.
@@ -132,10 +138,12 @@ public:
 
   virtual void ResetTTvorDependants();
 
+  void SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh=0.4);
+
   void StdSurfacePostImport();
   void StdDynamicoPostImport();
 
-  Opcode::AABB& ref_opc_aabb() { return *(Opcode::AABB*)mTTvor->mCtrExtBox; }
+  Opcode::AABB& ref_mesh_bbox() { return *(Opcode::AABB*)mTTvor->mCtrExtBox; }
 
   void BuildOpcStructs();
   void AssertOpcStructs();
