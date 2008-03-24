@@ -84,21 +84,28 @@ inline HTrans<TT>::HTrans(const Double_t* x)
 template<class TT>
 inline void HTrans<TT>::UnitTrans()
 {
-  memset(M, 0, 16*sizeof(TT));
-  M[F00] = M[F11] = M[F22] = M[F33] = 1;
+  M[0]  = 1; M[1]  = 0; M[2]  = 0; M[3]  = 0;
+  M[4]  = 0; M[5]  = 1; M[6]  = 0; M[7]  = 0;
+  M[8]  = 0; M[9]  = 0; M[10] = 1; M[11] = 0;
+  M[12] = 0; M[13] = 0; M[14] = 0; M[15] = 1;
 }
 
 template<class TT>
 inline void HTrans<TT>::UnitRot()
 {
-  memset(M, 0, 12*sizeof(TT));
-  M[F00] = M[F11] = M[F22] = 1;
+  M[0]  = 1; M[1]  = 0; M[2]  = 0;
+  M[4]  = 0; M[5]  = 1; M[6]  = 0;
+  M[8]  = 0; M[9]  = 0; M[10] = 1;
 }
 
 template<class TT>
 inline void HTrans<TT>::SetTrans(const HTrans<TT>& t)
 {
-  memcpy(M, t.M, sizeof(M));
+  const TT* const x = t.M;
+  M[0]  = x[0];  M[1]  = x[1];  M[2]  = x[2];  M[3]  = x[3];
+  M[4]  = x[4];  M[5]  = x[5];  M[6]  = x[6];  M[7]  = x[7];
+  M[8]  = x[8];  M[9]  = x[9];  M[10] = x[10]; M[11] = x[11];
+  M[12] = x[12]; M[13] = x[13]; M[14] = x[14]; M[15] = x[15];
 }
 
 

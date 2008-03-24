@@ -7,11 +7,52 @@
 #ifndef Var1_HTrans_H
 #define Var1_HTrans_H
 
+template<class TT> class HTrans;
+
 /**************************************************************************/
-// ZTrans -- 3D transformation in generalised coordinates
+// HPoint -- a simple 3D point
 /**************************************************************************/
 
 #include <TVector3.h>
+
+template<class TT>
+class HPoint
+{
+public:
+  TT x, y, z;
+
+  HPoint() : x(0), y(0), z(0) {}
+  HPoint(TT _x, TT _y, TT _z) : x(_x), y(_y), z(_z) {}
+  HPoint(Float_t* p)  : x(p[0]), y(p[1]), z(p[2]) {}
+  HPoint(Double_t* p) : x(p[0]), y(p[1]), z(p[2]) {}
+  virtual ~HPoint() {}
+
+  void Set(TT _x, TT _y, TT _z) { x = _x; y = _y; z = _z; }
+  void Set(Float_t* p)  { x = p[0]; y = p[1]; z = p[2]; }
+  void Set(Double_t* p) { x = p[0]; y = p[1]; z = p[2]; }
+
+  HPoint& operator+=(const HPoint& a)   { x += a.x;  y += a.y;  z += a.z;  return *this; }
+  HPoint& operator+=(const Float_t*  v) { x += v[0]; y += v[1]; z += v[2]; return *this; }
+  HPoint& operator+=(const Double_t* v) { x += v[0]; y += v[1]; z += v[2]; return *this; }
+
+  HPoint& operator*=(TT f) { x *= f; y *= f; z *= f; return *this; }
+
+  operator const TT*() const { return &x; }
+  operator       TT*()       { return &x; }
+
+  ClassDef(HPoint, 1); // Simple, streamable 3D point.
+};
+
+template class HPoint<Float_t>;
+template class HPoint<Double_t>;
+
+typedef HPoint<Float_t>  HPointF;
+typedef HPoint<Double_t> HPointD;
+
+
+/******************************************************************************/
+// HTrans -- 3D transformation in generalised coordinates
+/******************************************************************************/
 
 // export (not suppored)
 template<class TT>
