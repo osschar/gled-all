@@ -1,3 +1,75 @@
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Added member pointers 'HTransF* mLastTransPtr' and 'Opcode::AABB*
+	mLastAABBPtr' to allow accessing of these members without virtual
+	calls.
+
+	Added inner class CollisionSegments to facilitate
+	collision handling.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Added members 'HTransF mLastTrans' and 'Opcode::AABB mLastAABB'.
+	These will:
+	- allow rendering to be done in parallel with collision detection;
+	- provide last position that will be needed for exact collision
+	  time determination.
+
+	Added member function handle_collision() that performs simplified
+	collision handling for a dynamico.
+
+	* Glasses/ParaSurf.cxx:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSRectangle.cxx:
+	Cosmetics.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add preliminary members for mass, surface, center-of-mass and
+	angular momentum.
+	Add function SetMassAndSpeculate() that allows setting of mass and
+	calculation of derived quantities by assuming certain fraction of
+	mass is on the shell and the rest is in the COM.
+
+	* Glasses/TringuCam.cxx:
+	Fix orto-normalization order so that forward direction is less
+	affected.
+	
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Perform dyno-stato and dyno-dyno collision detection and handling
+	on each time-tick.
+	Dyno-stato is mostly ok, using the simplest algorithm i could
+	think of.
+	Dyno-dyno uses the same algorith as dyno-stato and is thus a bit
+	awkward. This will be fixed soon.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Use last transformation/aabbox from dynamicos.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Add HPoint template class and typedef HPointF, HPointD.
+	These are minimal implementations of streamable 3d points.
+
+	* catalog.patch:
+	Add pragmas for HPointF/D classes.
+
+	* Opcode/Ice/IceAABB.h:
+	Added GetX/Y/ZSize() functions to complement
+	GetDepth/Width/Breadth which are ICE specific due to choice of y
+	as up direction.
+
+	* Opcode/Ice/IcePoint.h:
+	Added operator[](int) to access components by index.
+
+	* Opcode/OPC_RayCollider.h:
+	Added GetDestination().
+
 2008-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Extendio.cxx:
