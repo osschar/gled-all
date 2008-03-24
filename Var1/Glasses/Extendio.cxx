@@ -12,15 +12,17 @@
 #include "Extendio.h"
 #include "Extendio.c7"
 
-ClassImp(Extendio)
+ClassImp(Extendio);
 
 /**************************************************************************/
 
 void Extendio::_init()
 {
-  bAABBok = false;
+  mLastTransPtr = &mTrans;
+  mLastAABBPtr  = &mAABB;
 
-  bRnrSelf = true;
+  bRnrSelf        = true;
+  bVerboseCollide = false;
 }
 
 /**************************************************************************/
@@ -32,9 +34,10 @@ bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
 {
   // Calculate intersection line between triangle tidx0 from Extendio ext0
   // and triangle tidx1 from ext1 in parent coordinate system.
-  // Outpt: segment contains the endpoints of the intersection line.
+  // Output:
+  //   segment - contains the endpoints of the intersection line
   //
-  // Returns false if triangles actually do not intersect.
+  // Returns: false if triangles actually do not intersect.
   // !!!! This is not fully checked, only distance_pattern is.
   //
   // If debug_prefix is set, some information is dumped along the
@@ -237,9 +240,16 @@ bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
 
 int Extendio::intersect_extendios(Extendio* ext0, Extendio* ext1,
                                   Opcode::AABBTreeCollider& collider,
-                                  vector<Opcode::Segment>& segments,
+                                  vector<Opcode::Segment> & segments,
                                   const Text_t* debug_prefix)
 {
+  // Intersect extendios ext0 and ext1.
+  //
+  // Output vector 'segments' is filled with line-segments of
+  // intersecting triangles.
+  //
+  // Returns number of added segments.
+
   using namespace Opcode;
 
   int count = 0;
@@ -281,4 +291,21 @@ int Extendio::intersect_extendios(Extendio* ext0, Extendio* ext1,
   }
 
   return count;
+}
+
+
+//==============================================================================
+// Extendio::CollisionSegments
+//==============================================================================
+
+void Extendio::CollisionSegments::calculate_center()
+{
+  HPointD sum;
+  for (iterator s = begin(); s != end(); ++s)
+  {
+    sum += s->mP0;
+    sum += s->mP1;
+  }
+  sum *= 0.5 / size();
+  mCenter.Set(sum.x, sum.y, sum.z);
 }
