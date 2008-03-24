@@ -40,7 +40,7 @@ Tringula_GL_Rnr::~Tringula_GL_Rnr()
 
 namespace {
 
-void sphere(Float_t* v, GLUquadricObj* q)
+void sphere(const Float_t* v, GLUquadricObj* q)
 {
   glPushMatrix();
   glTranslatef(v[0], v[1], v[2]);
@@ -48,7 +48,7 @@ void sphere(Float_t* v, GLUquadricObj* q)
   glPopMatrix();
 }
 
-void render_ceaabox(Float_t* x, Float_t f=1)
+void render_ceaabox(const Float_t* x, Float_t f=1)
 {
   // Render center-extents axis-aligned bounding-box
   f *= 2;
@@ -66,7 +66,9 @@ void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
 {
   glPushMatrix();
 
-  glMultMatrixf(ext->RefTrans().Array());
+  glMultMatrixf(ext->RefLastTrans().Array());
+  // !!! This is a horrible hack ... hash_lookup for nothing.
+  // !!! Should use secondary selection (internal id-resolution).
   if (mTringula->bPickDynos) rd->GL()->PushName(rd->GetLensRnr(ext));
 
   TringTvor_GL_Rnr::Render(ext->GetMesh()->GetTTvor(), false);
@@ -75,7 +77,7 @@ void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(1, 0, 0);
-    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.02);
+    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01);
   }
 
   if (mTringula->bPickDynos) rd->GL()->PopName();
@@ -86,7 +88,7 @@ void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(0, 0, 1);
-    render_ceaabox((Float_t*)&ext->ref_aabb(), 1.04);
+    render_ceaabox((Float_t*)&ext->RefLastAABB(), 1.01);
   }
 }
 
