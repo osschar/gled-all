@@ -94,7 +94,16 @@ ZList* register_GledCore_layouts(ZList* top=0)
   if(Gled::theOne->HasGUILibs() == false) return;
 
   if(top == 0) top = g_fire_queen;
+
   top = top->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
+
+  fill_GledCore_layouts(top);
+
+  return top;
+}
+
+ZList* fill_GledCore_layouts(ZList* top)
+{
   ZList* l = top->AssertPath("GledCore", "ZList");
 
   l->Swallow(new ZGlass("ZGlass",         "ZGlass(Name[20],Title[20],RefCount[6])"));
@@ -106,5 +115,5 @@ ZList* register_GledCore_layouts(ZList* top=0)
   l->Swallow(new ZGlass("Eventor",        "Eventor(Running[4],Performing[4],Start[4],Stop[4])"));
   l->Swallow(new ZGlass("Saturn monitor", "SaturnInfo(LAvg1,LAvg5,LAvg15,Memory,MFree,Swap,SFree,CU_Total[6],CU_User[6])"));
 
-  return top;
+  return l;
 }
