@@ -12,6 +12,8 @@
 #include "AEVEventBatch.h"
 #include "AEVEventBatch.c7"
 
+#include <TMath.h>
+
 ClassImp(AEVEventBatch)
 
 /**************************************************************************/
@@ -64,8 +66,8 @@ void AEVEventBatch::Reinit(Int_t n_events)
 
 void AEVEventBatch::FakeInit()
 {
-  Int_t nall = mSimEvs*(0.75 + 0.5*mRnd.Rndm());
-  Int_t nx   = nall * (2*mFracFail*mRnd.Rndm());
+  Int_t nall = TMath::Nint( mSimEvs*(0.75 + 0.5*mRnd.Rndm()) );
+  // Int_t nx   = TMath::Nint( nall * (2*mFracFail*mRnd.Rndm()) );
   mEvState.SetNAll(nall);
   mEvState.SetNFail(0);
   mEvState.SetNOK(0);
@@ -78,9 +80,11 @@ void AEVEventBatch::FakeProc()
   SEvTaskState& es( mEvState );
 
   Int_t nleft = es.GetNLeft();
-  Int_t nnew  = mProcAvg*(0.75 + 0.5*mRnd.Rndm()) <? nleft;
-  Int_t nfin  = mProcAvg*(0.75 + 0.5*mRnd.Rndm()) <? es.GetNProc();
-  Int_t nfail = (mRnd.Rndm() < mFracFail ? 1 : 0)  <? nfin;
+  Int_t nnew  = TMath::Min(TMath::Nint(mProcAvg*(0.75 + 0.5*mRnd.Rndm())),
+                           nleft);
+  Int_t nfin  = TMath::Min(TMath::Nint(mProcAvg*(0.75 + 0.5*mRnd.Rndm())),
+                           es.GetNProc());
+  Int_t nfail = TMath::Min((mRnd.Rndm() < mFracFail ? 1 : 0), nfin);
 
   es.SetNOK  (es.GetNOK()   + nfin - nfail);
   es.SetNFail(es.GetNFail() + nfail);

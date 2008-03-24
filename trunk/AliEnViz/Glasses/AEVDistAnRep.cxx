@@ -364,7 +364,7 @@ void AEVDistAnRep::FakeInitJob(AEVJobRep* job)
       evbatch->Reinit(ent);
       Double_t siz = ent*100*(1 + 0.4*(gen.Rndm()-0.5));
       evbatch->SetDataSizeMB(siz);
-      evbatch->SetProcAvg(2 + 2*gen.Rndm());
+      evbatch->SetProcAvg(TMath::Nint(2 + 2*gen.Rndm()));
     }
 
     GLensWriteHolder wrlck(this);

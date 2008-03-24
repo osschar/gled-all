@@ -107,7 +107,7 @@ void AEVDemoDriver::InitAnimationStuff(Eventor* e, TimeMaker* tm)
   SetAnimTimer(tm);
   mAnimator->Add(tm);
 
-  mAnimator->SetInterBeatMS(1000.0/mRPS);
+  mAnimator->SetInterBeatMS(TMath::Nint(1000.0/mRPS));
   mAnimator->Start();
 }
 
@@ -182,7 +182,7 @@ void AEVDemoDriver::rotate(ZNode* node, Float_t time, Int_t ai, Int_t aj)
     node->WriteLock();
     node->RotateLF(ai, aj, 0.025);
     node->WriteUnlock();
-    gSystem->Sleep(1000.0/mRPS);
+    gSystem->Sleep(TMath::Nint(1000.0/mRPS));
   }
 }
 

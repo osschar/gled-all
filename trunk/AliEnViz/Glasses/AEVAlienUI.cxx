@@ -65,10 +65,10 @@ void AEVAlienUI::Connect()
 
     GMutexHolder ali_lock(hAliEnLock);
 
-    int cmdret = system
-      (GForm("aev_ui %s %s > %s/aev_log 2>&1 &",
-	    mBDP.fAtoBName.c_str(), mBDP.fBtoAName.c_str(), mBDP.fDir.c_str())
-      );
+    //int cmdret = system
+    //  (GForm("aev_ui %s %s > %s/aev_log 2>&1 &",
+    //     mBDP.fAtoBName.c_str(), mBDP.fBtoAName.c_str(), mBDP.fDir.c_str())
+    //  );
 
     mBDP.open_BtoA();  
     mBDP.read_line();
@@ -142,9 +142,9 @@ void AEVAlienUI::ImportSites(const Text_t* partition)
     try {
       mSites->Add(_s);
     }
-    catch(string exc) {
+    catch(Exc_t& exc) {
       mQueen->RemoveLens(_s);
-      ISerr(_eh + GForm("error inserting site %s (%s).", s.mName.Data(), exc.c_str()));
+      ISerr(_eh + GForm("error inserting site %s (%s).", s.mName.Data(), exc.Data()));
     }
 
     }
@@ -199,7 +199,7 @@ void AEVAlienUI::FindExCountFilesPerSite(map<string,int>& cmap,
   alien_lock();
   int n = mBDP.send_command(GForm("find_ex\n%s\n%s", path, wcard));
   if(n > 0) {
-    printf("%s found %d files ...\n", _eh.c_str(), n);
+    printf("%s found %d files ...\n", _eh.Data(), n);
     for(int i=0; i<n; ++i) {
       string lfn(mBDP.read_line());
       string site(mBDP.read_line());
