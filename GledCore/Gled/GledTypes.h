@@ -20,6 +20,7 @@
 #include <map>
 
 #include <memory>
+#include <exception>
 
 using namespace std;
 
@@ -136,20 +137,26 @@ inline TBuffer &operator<<(TBuffer& b, FMID_t fmid)
 // Exceptions, debug, warn, message stuff
 /**************************************************************************/
 
-class Exc_t : public string
+class Exc_t : public std::exception, public TString
 {
- public:
-  Exc_t(const string& s) : string(s) {}
-  Exc_t(const char* s)   : string(s) {}
+public:
+   Exc_t() {}
+   Exc_t(const TString& s) : TString(s) {}
+   Exc_t(const char* s)    : TString(s) {}
+   Exc_t(const std::string& s);
 
-  virtual ~Exc_t() throw() {}
+   virtual ~Exc_t() throw () {}
 
-  const char* Data() const { return c_str(); }
+   virtual const char* what() const throw () { return Data(); }
+
+   ClassDef(Exc_t, 1); // Exception-type thrown by Gled classes.
 };
 
-Exc_t operator+(const Exc_t &s1, const string  &s2);
+Exc_t operator+(const Exc_t &s1, const std::string  &s2);
 Exc_t operator+(const Exc_t &s1, const TString &s2);
 Exc_t operator+(const Exc_t &s1, const char    *s2);
+
+//==============================================================================
 
 const char* GForm(const char* fmt, ...);
 
