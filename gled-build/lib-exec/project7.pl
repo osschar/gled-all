@@ -106,6 +106,10 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 		 SetArgs=>'Double_t x, Double_t y, Double_t z',
                  ByRef  =>1
 	       },
+  'HPointF' => { SetMeth=>'.Set(x,y,z)',
+                 SetArgs=>'Float_t x, Float_t y, Float_t z',
+                 ByRef  =>1
+               },
 );
 
 # Shorthands for keys in comment field
