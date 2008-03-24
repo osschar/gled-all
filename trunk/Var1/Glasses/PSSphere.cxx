@@ -29,7 +29,7 @@
 #include <TMath.h>
 #include <TRandom.h>
 
-ClassImp(PSSphere)
+ClassImp(PSSphere);
 
 /**************************************************************************/
 

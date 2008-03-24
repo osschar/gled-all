@@ -20,7 +20,7 @@
 #include <TMath.h>
 #include <TRandom.h>
 
-ClassImp(ParaSurf)
+ClassImp(ParaSurf);
 
 const Float_t ParaSurf::sEpsilonFac = 1e-5;
 const Float_t ParaSurf::sPi         = 3.14159265358979323846f;
