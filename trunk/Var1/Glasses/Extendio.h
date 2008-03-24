@@ -20,15 +20,40 @@ class Extendio : public ZGlass
   friend class Tringula;
   MAC_RNR_FRIENDS(Extendio);
 
+public:
+  class CollisionSegments : public vector<Opcode::Segment>
+  {
+  private:
+    Opcode::Point           mCenter;
+
+  protected:
+    void calculate_center();
+
+  public:
+    CollisionSegments() { InvalidateDerivedQuantities(); }
+
+    void Clear() { clear(); InvalidateDerivedQuantities(); }
+
+    // Call if derived quantities have been used and new segments are
+    // added afterwards.
+    void InvalidateDerivedQuantities() { mCenter.SetNotUsed(); }
+
+    const Opcode::Point& RefCenter() 
+    { if (mCenter.IsNotUsed()) calculate_center(); return mCenter; }
+  };
+
 private:
   void _init();
 
 protected:
-  HTransF         mTrans;      // X{RPG} Transform from current master
-  Opcode::AABB    mAABB;       //        Enclosing bbox in parent frame
-  Bool_t          bAABBok;     // X{G}   Flag saying if mAABB is ok.
+  HTransF         mTrans;      // Transform from current master
+  Opcode::AABB    mAABB;       // Enclosing bbox in parent frame
 
-  Bool_t          bRnrSelf;    // X{GS}  7 Bool()
+  HTransF*        mLastTransPtr; //!
+  Opcode::AABB*   mLastAABBPtr;  //!
+
+  Bool_t          bRnrSelf;        // X{GS}  7 Bool()
+  Bool_t          bVerboseCollide; // X{GS}  7 Bool()
 
   ZLink<TriMesh>  mMesh;       // X{GS} L{}
 
@@ -36,12 +61,19 @@ public:
   Extendio(const Text_t* n="Extendio", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
 
-  const Opcode::AABB&     RefAABB()    { return ref_aabb(); }
+  const HTransF&        RefTrans()     const { return  mTrans; }
+  const HTransF&        RefLastTrans() const { return *mLastTransPtr; }
+  const Opcode::AABB&   RefAABB()      const { return  mAABB; }
+  const Opcode::AABB&   RefLastAABB()  const { return *mLastAABBPtr; }
 
-  HTransF&                ref_trans()  { return mTrans; } // Use wisely.
+  HTransF&        ref_trans()       { return  mTrans; }        // Use wisely.
+  HTransF&        ref_last_trans()  { return *mLastTransPtr; } // Use wisely.
+  Opcode::AABB&   ref_aabb()        { return  mAABB; }
+  Opcode::AABB&   ref_last_aabb()   { return *mLastAABBPtr; }
 
-  void                    touch_aabb() { bAABBok = false; }
-  Opcode::AABB&           ref_aabb();
+  void            update_aabb()     { mMesh->ref_mesh_bbox().Rotate(mTrans, mAABB); }
+
+  virtual void update_last_data() {}
 
   Opcode::Model*          get_opc_model()   { return mMesh->GetOPCModel();  }
   Opcode::MeshInterface*  get_opc_mesh_if() { return mMesh->GetOPCMeshIf(); }
@@ -57,21 +89,11 @@ public:
 
   static int  intersect_extendios(Extendio* ext0, Extendio* ext1,
                                   Opcode::AABBTreeCollider& collider,
-                                  vector<Opcode::Segment>& segments,
+                                  vector<Opcode::Segment> & segments,
                                   const Text_t* debug_prefix=0);
 
 #include "Extendio.h7"
-  ClassDef(Extendio, 1)
+  ClassDef(Extendio, 1);
 }; // endclass Extendio
-
-
-inline Opcode::AABB& Extendio::ref_aabb()
-{
-  if(!bAABBok) {
-    mMesh->ref_opc_aabb().Rotate(mTrans, mAABB);
-    bAABBok = true;
-  }
-  return mAABB;
-}
 
 #endif
