@@ -37,6 +37,7 @@ CPPFLAGSGEN	= ${libexecdir}/gled_conf_dumper.pl cppflags
 GLED_INSTALL	= ${libexecdir}/gled_install.pl
 GLED_UNINSTALL	= ${libexecdir}/gled_uninstall.pl
 
+ROOT_CONFIG     = ${ROOTSYS}/bin/root-config
 FLUID   	= fluid
 
 
@@ -77,10 +78,7 @@ export MUTE ECHO
 # X11LIB, FLLIB, *_CONF set by configure
 
 GLLIB	  = -lGL -lGLU
-ROOTLIBS  = -L${ROOTSYS}/lib -lCore -lThread -lCint -lRIO -lNet \
-		-lGraf -lGraf3d -lGpad \
-		-lHist -lHistPainter -lMatrix -lPhysics \
-                -lPostscript -lRint -lTree
+ROOTLIBS  = $(shell ${ROOT_CONFIG} --noauxlibs --libs) -lThread
 ROOTGLIBS = -lGui -lGX11 ${ROOTGLIBS_CONF}
 
 GUILIBS	= ${X11LIB} ${FLLIB} ${GLLIB}
