@@ -15,7 +15,7 @@ LIB_NAME  := ../lib/libGledCore_pcre.${LDEXT}
 all: ${LIB_NAME}
 
 ${LIB_NAME}: ${OBJS}
-	${ECHO} -X- Linking $<
+	${ECHO} -X- Linking $@
 	${MUTE} ${LD} ${LDSHAREDOPT} -o $@ $^
 
 ${PCRE_OBJS}: %.o: %.c
