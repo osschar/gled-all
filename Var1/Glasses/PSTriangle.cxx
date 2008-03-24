@@ -16,7 +16,7 @@
 
 #include <TRandom.h>
 
-ClassImp(PSTriangle)
+ClassImp(PSTriangle);
 
 /**************************************************************************/
 
