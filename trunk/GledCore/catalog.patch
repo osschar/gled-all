@@ -11,7 +11,8 @@ $PATCH = {
 },
 
 "GledNS" => {
-  'Pragmas' => "#pragma link C++ function GForm;\n"
+  'Pragmas' => "#pragma link C++ function GForm;\n" .
+               "#pragma link C++ class Exc_t+;\n"
 },
 
 ### Glasses

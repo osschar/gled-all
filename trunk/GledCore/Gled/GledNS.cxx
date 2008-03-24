@@ -995,17 +995,26 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
 /**************************************************************************/
 /**************************************************************************/
 
-//Exc_t operator+(const Exc_t &s1, const Exc_t &s2)
-//{ return Exc_t((string&)s1 + (string&)s2) }
+//______________________________________________________________________________
+//
+// Exception class thrown by Gled classes and macros.
 
-Exc_t operator+(const Exc_t &s1, const string &s2)
-{ string r(s1); r += s2; return Exc_t(r); }
+ClassImp(Exc_t)
+
+Exc_t::Exc_t(const std::string& s) : TString(s.c_str())
+{
+   // Constructor.
+}
+
+Exc_t operator+(const Exc_t &s1, const std::string &s2)
+{ Exc_t r(s1); r += s2; return r; }
 
 Exc_t operator+(const Exc_t &s1, const TString &s2)
-{ string r(s1); r += s2.Data(); return Exc_t(r); }
+{ Exc_t r(s1); r += s2; return r; }
 
 Exc_t operator+(const Exc_t &s1,  const char *s2)
-{ string r(s1); r += s2; return Exc_t(r); }
+{ Exc_t r(s1); r += s2; return r; }
+
 
 /**************************************************************************/
 /**************************************************************************/
