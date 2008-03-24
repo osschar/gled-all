@@ -1,10 +1,11 @@
 #include <glass_defines.h>
 #include <gl_defines.h>
 
-#include <exception>
+// #include <exception>
 
 class Tringula;
 class TringuCam;
+class Statico;
 class Dynamico;
 class ParaSurf;
 class PSMark;
@@ -19,6 +20,7 @@ class TimeMaker;
 
 Tringula*     tringula = 0;
 TringuCam*    tricam   = 0;
+Statico*      sta1     = 0;
 Dynamico*     dyn1     = 0;
 Dynamico*     dyn2     = 0;
 PSMark*       mark     = 0;
@@ -44,22 +46,32 @@ TriMeshLightField* lightmap = 0;
 Eventor*     eventor  = 0;
 TimeMaker*   tmaker   = 0;
 
-Float_t      statico_surface_fraction  = 0.1; // 0.4 is about maximum, varies with surf-type.
-Int_t        num_dynamico              = 200;
-Int_t        num_flyer                 = 100;
-Float_t      max_flyer_h               = 20;   // Changed for some surfaces in surf-specific init.
+ZList*       tmpdir   = 0;
+
+// Some of the parameters are modified for some modes.
+
+Float_t      statico_surface_fraction  = 0.05; // 0.05
+Int_t        num_dynamico              = 250;  // 250
+Int_t        num_flyer                 = 100;  // 100
+Float_t      max_flyer_h               = 10;   // def=10. Changed for some surfaces in surf-specific init.
 
 TRandom      g_rnd(0);
 
+const Text_t* trimesh_layout = "ZGlass(Name,Title[22]):TriMesh(M[8],Surf[8],COM,J)";
 
 void tringula(Int_t mode=0)
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Var1");
 
+  g_queen->SetName("TringulaQueen");
+  g_queen->SetTitle("Demo of Tringula");
+
   /**************************************************************************/
   // Database objects.
   /**************************************************************************/
+
+  tmpdir = g_queen->AssertPath("tmp", "ZNameMap");
 
   { // Textures
 
@@ -106,14 +118,18 @@ void tringula(Int_t mode=0)
     Float_t min_h  = 5, max_h  = 15;
     for (Int_t i=0; i<20; ++i)
     {
-      CREATE_ADD_GLASS(m, TriMesh, rndstatos, GForm("rndstato %d", i), 0);
       Float_t a = g_rnd.Uniform(min_xy, max_xy),
-              b = g_rnd.Uniform(min_xy, max_xy),
-              c = g_rnd.Uniform(min_h,  max_h);
+        b = g_rnd.Uniform(min_xy, max_xy),
+        c = g_rnd.Uniform(min_h,  max_h);
+      CREATE_ADD_GLASS(m, TriMesh, rndstatos,
+                       GForm("rndstato %d", i),
+                       GForm("a=%.2f, b=%.2f, c=%.2f", a, b, c));
+
       m->MakeBox(a, b, c);
       m->StdDynamicoPostImport();
       m->SetVolume(a*b*c);
       m->SetXYArea(a*b);
+      m->SetMassAndSpeculate(1000*m->GetVolume()); // rho = 1000 kg/m^3, say
 
       if (i == 0) {
         min_xy = 2, max_xy = 5;
@@ -132,16 +148,20 @@ void tringula(Int_t mode=0)
 
     for (Int_t i=0; i<20; ++i)
     {
-      CREATE_ADD_GLASS(m, TriMesh, rnddynos, GForm("rndyno %d", i), 0);
       Float_t l1 = g_rnd.Uniform(0.4,    1.4),
-              l2 = g_rnd.Uniform(0,      0.5*l1),
-              w  = g_rnd.Uniform(0.5*l1, 1.2*l1),
-              h  = g_rnd.Uniform(0.5*l1, 1.2*l1);
+        l2 = g_rnd.Uniform(0,      0.5*l1),
+        w  = g_rnd.Uniform(0.5*l1, 1.2*l1),
+        h  = g_rnd.Uniform(0.5*l1, 1.2*l1);
+
+      CREATE_ADD_GLASS(m, TriMesh, rnddynos,
+                       GForm("rndyno %d", i),
+                       GForm("l1=%.2f, l2=%.2f, w=%.2f, h=%.2f", l1, l2, w, h));
 
       m->MakeTetrahedron(l1, l2, w, h);
       m->StdDynamicoPostImport();
       m->SetXYArea(0.5f * (l1 + l2) * w);
       m->SetVolume(m->GetXYArea() * h / 3.0f);
+      m->SetMassAndSpeculate(1000*m->GetVolume()); // rho = 1000 kg/m^3, say
     }
   }
 
@@ -215,24 +235,37 @@ void tringula(Int_t mode=0)
 
   switch (mode)
   {
-    case 0: setup_rectangle() ;     break;
-    case 1: setup_triangle();       break;
-    case 2: setup_sphere_outside(); break;
-    case 3: setup_sphere_inside();  break;
-    case 4: setup_torus_outside();  break;
-    case 5: setup_torus_inside();   break;
+    case  0: setup_rectangle() ;     break;
+    case  1: setup_triangle();       break;
+    case  2: setup_sphere_outside(); break;
+    case  3: setup_sphere_inside();  break;
+    case  4: setup_torus_outside();  break;
+    case  5: setup_torus_inside();   break;
+    case 99: setup_test();           break;
   }
 
-  // Two intersecting dynos at the origin.
-  dyn1 = tringula->NewDynamico("Dynus Primus");
-  dyn2 = tringula->NewDynamico("Dynus Secondus");
-  dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
-  dyn2->ref_trans().RotateLF(1, 2, 0.4);
+  if (mode == 99)
+  {
+    // Two intersecting dynos at the origin.
+    Float_t oos2 = 1.0/TMath::Sqrt(2);
+    HTransF trx; // !!!! was trans, with latest cint interferes with trans below
+    trx.SetBaseVec(1,  oos2, oos2, 0);
+    trx.SetBaseVec(2,  0, 0, 1);
+    trx.SetBaseVecViaCross(3);
+    dyn1 = tringula->NewDynamico("Dynus Primus");
+    dyn1->ref_trans() = trx;
+    dyn2 = tringula->NewDynamico("Dynus Secondus");
+    dyn2->ref_trans() = trx;
+    dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
+    dyn2->ref_trans().RotateLF(1, 2, 0.4);
 
-  sta1 = tringula->NewStatico("Statos Centrus");
+    // Removed later, shields the dynos from random statos.
+    sta1 = tringula->NewStatico("Statos Centrus");
+    tmpdir->Add(sta1);
 
-  ASSIGN_ADD_GLASS(mark, PSMark, tringula, "PSMark", 0);
-  mark->SetParaSurf(parasurf);
+    ASSIGN_ADD_GLASS(mark, PSMark, tringula, "PSMark", 0);
+    mark->SetParaSurf(parasurf);
+  }
 
   // Camera base
 
@@ -312,6 +345,13 @@ void tringula(Int_t mode=0)
   g_nest->Add(g_queen);
   // g_nest->Add(g_scene);
   // g_nest->ImportKings();   // Get all Kings as top level objects
+  {
+    ZList* layouts = g_queen->AssertPath("var/layouts", "ZNameMap");
+    fill_GledCore_layouts(layouts);
+    layouts->Swallow("Var1", new ZGlass("TriMesh", trimesh_layout));
+
+    g_nest->SetLayoutList(layouts);
+  }
 
   ASSIGN_ATT_GLASS(g_pupil, PupilInfo, g_shell, AddSubShell, "Pupil of Tringula", 0);
   g_pupil->Add(g_scene);
@@ -374,21 +414,48 @@ void tringula(Int_t mode=0)
     GTime timer(GTime::I_Now);
     Float_t desired_surface = statico_surface_fraction * tringula->GetParaSurf()->surface();
     Float_t used_surface    = 0;
-    Int_t   count           = 0;
+    Int_t   stato_cnt       = 0;
+    Int_t   exc_cnt         = 0;
+    
     while (used_surface < desired_surface)
     {
+      /*
+      try
+      {
+        Statico* s = tringula->RandomStatico(rndstatos);
+        used_surface += s->GetMesh()->GetXYArea();
+        ++stato_cnt;
+      }
+      catch (Exc_t& exc)
+      {
+        printf("XYZZ %s\n", exc.Data());
+        if (++exc_cnt > 20)
+          break;
+      }
+      */
+
       Statico* s = tringula->RandomStatico(rndstatos);
-      used_surface += s->GetMesh()->GetXYArea();
-      ++count;
+      if (s != 0)
+      {
+        used_surface += s->GetMesh()->GetXYArea();
+        ++stato_cnt;
+      }
+      else
+      {
+        if (++exc_cnt > 20) {
+          printf("Statico placement failed %d-times. Moving on.\n", exc_cnt);
+          break;
+        }
+      }
     }
-    printf("RandomStaticos cnt=%d; desired_surface=%f, used_surface=%f; time=%fs\n",
-           count, desired_surface, used_surface, timer.TimeUntilNow().ToDouble());
+    printf("RandomStaticos cnt=%d, exc_cnt=%d; desired_surface=%f, used_surface=%f; time=%fs\n",
+           stato_cnt, exc_cnt, desired_surface, used_surface, timer.TimeUntilNow().ToDouble());
   }
 
   // Dynamicos
-  for(int i=0; i<num_dynamico; ++i)
+  for (int i=0; i<num_dynamico; ++i)
   {
-    Dynamico* d = tringula->RandomDynamico(rnddynos, -0.5, 5, 0.5);
+    Dynamico* d = tringula->RandomDynamico(rnddynos, 0.5, 4, 0.25);
     Float_t v  = d->GetMesh()->GetVolume();
     Float_t vf = TMath::Max(1.0 - 3*v, 0.1); // volume ~ 0.01 -> 1
     // printf("dyno vol=%f, vf=%f\n", v, vf);
@@ -397,8 +464,12 @@ void tringula(Int_t mode=0)
   }
 
   // Flyers
-  for(int i=0; i<num_flyer; ++i) tringula->RandomFlyer(2, 20, 0.5, max_flyer_h);
+  for (int i=0; i<num_flyer; ++i) tringula->RandomFlyer(2, 12, 0.5, max_flyer_h);
 
+  if (mode == 99)
+  {
+    tringula->GetStatos()->Remove(sta1);
+  }
 
   /**************************************************************************/
   // And start the time ...
@@ -599,6 +670,42 @@ void setup_torus_inside()
 
   // Setup tringula
   tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+}
+
+void setup_test()
+{
+  // A mini-version of triangle.
+
+  // Override global settings.
+  statico_surface_fraction = 0.05;
+  num_dynamico = 20;
+  num_flyer    = 10;
+  max_flyer_h  = 5;
+
+  Float_t base = 32;
+
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSTriangle, g_queen, "Tri ParaSurf", 0);
+  PSTriangle* pstri = dynamic_cast<PSTriangle*>(parasurf);
+  pstri->Scale(base);
+  parasurf->SetupEdgePlanes();
+
+  // Setup GTS surface.
+  gtsurf->GenerateTriangle(base);
+  gtsurf->Tessellate(4);
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  parasurf->RandomizeH(trimesh, 4, 1, 0.8, 0, 1.1);
+  trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetMesh(trimesh);
 }
 
