@@ -29,7 +29,7 @@ void AEVEventBatch_GL_Rnr::Draw(RnrDriver* rd)
   glPushMatrix();
   glPushAttrib(GL_TRANSFORM_BIT);
   glEnable(GL_NORMALIZE);
-  Float_t zscale = TMath::Log10(EB.mEvState.GetNAll()) >? 1e-2;
+  Float_t zscale = TMath::Max(TMath::Log10(EB.mEvState.GetNAll()), 1e-2);
   glScalef(1, EB.mHDepth, zscale);
   switch(EB.mRnrMode) {
   case AEVEventBatch::RM_Combined:
