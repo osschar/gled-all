@@ -537,6 +537,9 @@ public:
   operator const float*() const	{ return &x; }
   operator       float*()       { return &x; }
 
+  float  operator[](int i) const { return (&x)[i]; }
+  float& operator[](int i)       { return (&x)[i]; }
+
 public:
   float		x, y, z;
 };
