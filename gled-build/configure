@@ -614,9 +614,11 @@ FNORD
 # Dump config.status
 ########################################################################
 
-open  CS, ">config.status";
-print CS $cmd_line, "\n";
-close CS;
+if (not $config->{RECONFIGURE}) {
+  open  CS, ">config.status";
+  print CS $cmd_line, "\n";
+  close CS;
+}
 
 # print Dumper(\@libsets);
 # print Dumper(\%deps);
