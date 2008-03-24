@@ -94,8 +94,9 @@ protected:
                             Opcode::Point& old_pos, Opcode::Point& pos,
                             Int_t plane, Float_t dist);
 
-  Bool_t place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside);
-  void   place_on_terrain(Dynamico* D);
+  Bool_t place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
+                          Float_t min_h_above=0);
+  Bool_t place_on_terrain(Dynamico* D);
 
   void   fill_pruning_list(AList* extendios, Int_t& n, const Opcode::AABB** boxes, void** user_data);
   void   fill_pruning_list(AList* extendios, Int_t& n, Int_t l);
@@ -132,7 +133,8 @@ public:
 
   Statico* NewStatico(const Text_t* sname=0);
   Statico* RandomStatico(ZVector* mesh_list,
-                         Bool_t check_inside=true);             // X{E} C{1} 7 MCWButt()
+                         Bool_t check_inside=true,
+                         Int_t  max_tries   =1000);             // X{E} C{1} 7 MCWButt()
 
   Dynamico* NewDynamico(const Text_t* dname=0);
   Dynamico* RandomDynamico(ZVector* mesh_list,
@@ -143,14 +145,14 @@ public:
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
 
-  void DoDynoBoxPrunning(Bool_t accumulate=false, Bool_t verbose=false); // X{E} 7 MCWButt()
-
   void DoFullBoxPrunning(Bool_t accumulate=false, Bool_t verbose=false); // X{E} 7 MCWButt()
 
   void DoSplitBoxPrunning(); // X{E} 7 MCWButt()
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  void make_dyno_step(Dynamico* D, Float_t dt);
 
 #include "Tringula.h7"
   ClassDef(Tringula, 1);
