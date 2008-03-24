@@ -1,3 +1,11 @@
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Add GetSetMap entry for HPointF. This should really go to Var1.
+
+	* make/make_defs.inc:
+	Use root-config to determine which ROOT libs to link against.
+
 2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
