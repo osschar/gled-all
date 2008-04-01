@@ -103,12 +103,17 @@ void tringula(Int_t mode=0)
     ASSIGN_ADD_GLASS(stamesh, TriMesh, meshes, "Statico", 0);
     stamesh->MakeBox();
     stamesh->StdDynamicoPostImport();
+    stamesh->SetMassFromBBox(1, 1, 1000);
+
     ASSIGN_ADD_GLASS(dynmesh, TriMesh, meshes, "Dynamico", 0);
     dynmesh->MakeTetrahedron();
     dynmesh->StdDynamicoPostImport();
+    dynmesh->SetMassFromBBox(0.5, 0.33, 1000);
+
     ASSIGN_ADD_GLASS(flymesh, TriMesh, meshes, "Flyer", 0);
     flymesh->MakeTetraFlyer();
     flymesh->StdDynamicoPostImport();
+    flymesh->SetMassFromBBox(0.15, 0.33, 1000);
 
     // Random statos.
     ASSIGN_ADD_GLASS(rndstatos, ZVector, meshes, "rndstatos", 0);
@@ -679,8 +684,8 @@ void setup_test()
 
   // Override global settings.
   statico_surface_fraction = 0.05;
-  num_dynamico = 20;
-  num_flyer    = 10;
+  num_dynamico = 30;
+  num_flyer    = 15;
   max_flyer_h  = 5;
 
   Float_t base = 32;
