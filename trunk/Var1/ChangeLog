@@ -1,3 +1,19 @@
+2008-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add handle_collision(...) for dyno-dyno collision.
+	Make both handle_collision() methods static.
+
+	* Glasses/Tringula.cxx:
+	Use proper dyno-dyno collision with momentum / energy
+	conservation.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add method SetMassFromBBox(): allows easy faking of mesh's mass
+	based on bounding box and surface / height fractions.
+
 2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Extendio.cxx:

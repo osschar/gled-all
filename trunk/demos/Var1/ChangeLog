@@ -1,3 +1,10 @@
+2008-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Use TriMesh::SetMassFromBBox() to give default meshes some mass.
+
+	Increase number of dynos and flyers in testing mode (arg=99).
+
 2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
