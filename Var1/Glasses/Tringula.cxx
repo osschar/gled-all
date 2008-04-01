@@ -630,7 +630,8 @@ void Tringula::DoSplitBoxPrunning()
       R.mOrig = com_dyno;
       R.mDir  = com_dyno - com_stato;
 
-      Bool_t ok_p = dyno->handle_collision(RC, R, com_dyno, segments, stato);
+      Bool_t ok_p = Dynamico::handle_collision(dyno, stato, RC, R, com_dyno,
+                                               segments);
 
       if (!ok_p)
         printf("%sDyno-Stato dyno->handle_collision failed.\n", _eh.Data());
@@ -648,44 +649,13 @@ void Tringula::DoSplitBoxPrunning()
     Dynamico  *dyno1 = (Dynamico*) mBoxPruner->GetUserData(1, p->id1);
     // printf("    %2d %s, %s\n", i+1, dyno0->Identify().Data(), dyno1->Identify().Data());
 
-    // !!!!! This is cut'n'paste from dyno-stato case.
-    // Should keep new tranformations and apply them at the end as
-    // collision calculation depends on transf matrix.
-    // Or, even better, do some shit with momentum conservation.
-
-    Dynamico  *dyno  = (Dynamico*) mBoxPruner->GetUserData(1, p->id0);
-    Dynamico  *stato = (Dynamico*) mBoxPruner->GetUserData(1, p->id1);
-
-    Int_t ns = Extendio::intersect_extendios(stato, dyno, collider, segments);
+    Int_t ns = Extendio::intersect_extendios(dyno0, dyno1, collider, segments);
     if (ns > 0)
     {
-      // Calculate centers of mass for dyno and stato in global coordinates.
+      Point up_dir;
+      mParaSurf->pos2hdir(segments.RefCenter(), up_dir);
 
-      HTransF& t_dyno = dyno->ref_trans();
-      Point com_dyno;
-      t_dyno.MultiplyVec3(dyno->GetMesh()->RefCOM(), 1.0f, com_dyno);
-
-      HTransF& t_stato = stato->ref_trans();
-      Point com_stato;
-      t_stato.MultiplyVec3(stato->GetMesh()->RefCOM(), 1.0f, com_stato);
-
-      // Construct ray outwards from com_dyno in dir of com_dyno - com_stato.
-      Opcode::Ray R;
-      R.mOrig = com_dyno;
-      R.mDir  = com_dyno - com_stato;
-
-      Bool_t ok_p = dyno->handle_collision(RC, R, com_dyno, segments, stato);
-
-      if (!ok_p)
-        printf("%sDyno-Stato dyno->handle_collision failed.\n", _eh.Data());
-
-      R.mOrig = com_stato;
-      R.mDir  = com_stato - com_dyno;
-
-      ok_p = dyno->handle_collision(RC, R, com_dyno, segments, stato);
-
-      if (!ok_p)
-        printf("%sDyno-Stato dyno->handle_collision failed.\n", _eh.Data());
+      Dynamico::handle_collision(dyno0, dyno1, up_dir, segments);
 
       segments.Clear();
     }
