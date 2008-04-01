@@ -178,6 +178,17 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
   Stamp(FID());
 }
 
+void TriMesh::SetMassFromBBox(Float_t sfac, Float_t hfac, Float_t density,
+                              Float_t mass_frac_on_mesh)
+{
+  // Estimate XY-area, volume and mass from given parameters and
+  // bounding-box of tring-tvor.
+
+  mXYArea = sfac * mTTvor->BoundingBoxXYArea();
+  mVolume = hfac * 2.0f * mTTvor->mCtrExtBox[5] * mXYArea;
+  SetMassAndSpeculate(density * mVolume, mass_frac_on_mesh);
+}
+
 /**************************************************************************/
 
 void TriMesh::StdSurfacePostImport()
