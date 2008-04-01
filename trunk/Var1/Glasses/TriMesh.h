@@ -139,6 +139,7 @@ public:
   virtual void ResetTTvorDependants();
 
   void SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh=0.4);
+  void SetMassFromBBox(Float_t sfac, Float_t hfac, Float_t density, Float_t mass_frac_on_mesh=0.4);
 
   void StdSurfacePostImport();
   void StdDynamicoPostImport();
