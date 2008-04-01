@@ -9,6 +9,8 @@
 
 #include <Glasses/Extendio.h>
 
+class Statico;
+
 class Dynamico : public Extendio
 {
   friend class Tringula;
@@ -48,11 +50,17 @@ public:
 
   virtual void update_last_data() { mLastTrans = mTrans; mLastAABB = mLastAABB; }
 
-  bool handle_collision(Opcode::RayCollider    & ray_collider,
-                        Opcode::Ray            & ray,
-                        Opcode::Point          & com,
-                        CollisionSegments      & segments,
-                        Extendio               * extendio);
+  static bool handle_collision(Dynamico            * dyno,
+                               Statico             * stato,
+                               Opcode::RayCollider & ray_collider,
+                               Opcode::Ray         & ray,
+                               Opcode::Point       & com_dyno,
+                               CollisionSegments   & segments);
+
+  static bool handle_collision(Dynamico            * dyno0,
+                               Dynamico            * dyno1,
+                               Opcode::Point       & up_dir,
+                               CollisionSegments   & segments);
 
 #include "Dynamico.h7"
   ClassDef(Dynamico, 1);
