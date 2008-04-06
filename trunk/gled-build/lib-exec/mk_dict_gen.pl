@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # $Header$
 
-# Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -34,7 +34,7 @@ while($_=shift) {
     if(defined $resolver->{GlassName2GlassSpecs}{$cname}) {
       $pragma_link = "#pragma link C++ class ZLink<${cname}>;";
     }
-    
+
     my $token = ($cname =~ m/NS$/) ? 'namespace' : 'class';
 
     $pragma_default = "#pragma link C++ ${token} ${cname}${pragma_suff};";

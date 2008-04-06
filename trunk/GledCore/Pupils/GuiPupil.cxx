@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -36,7 +36,7 @@ GuiPupil* GuiPupil::Create_GuiPupil(FTW_Shell* sh, OS::ZGlassImg* img)
   if(ni->GetPupil() == 0) throw(_eh + "link 'Pupil' must be set.");
 
   GuiPupil* guipupil = new GuiPupil(sh, img);
-  
+
   sh->adopt_window(guipupil);
 
   return guipupil;

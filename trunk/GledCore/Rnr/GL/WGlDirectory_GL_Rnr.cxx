@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -61,14 +61,14 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
   int all_count = M.count_entries();
   int first     = M.mFirst;
   int count     = 0;
-  
+
   GledNS::ClassInfo* bci = M.GetCbackBetaClassInfo();
   lpZGlass_t cont; M.mContents->CopyList(cont);
   for(lpZGlass_i i=cont.begin(); i!=cont.end(); ++i) {
     if(bci && ! GledNS::IsA(*i, bci->fFid)) continue;
     count ++;
     if(count < first ) continue;
-    
+
     ZColor back_color = M.mBoxColor;
     bool belowmouse = (*i == m_current);
 
@@ -152,7 +152,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     glTranslatef(pcw + pio, 0, 0);
     xxx = GForm("%d/%d", M.mFirst, all_count);
     FSR.FullSymbolRender(txf, xxx, piw, M.mTextDy, false, &ptc);
-  
+
 
     glTranslatef(piw + pio, 0, 0);
     rd->GL()->PushName(this, m_next);
@@ -179,7 +179,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
 int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
   // printf("Handloo: %d %d 0x%x 0x%x %p '%s'\n", ev.fEvent,
-  // ev.fKey, ev.fButton, ev.fState, ev.fBelowMouse, 
+  // ev.fKey, ev.fButton, ev.fState, ev.fBelowMouse,
   // ev.fBelowMouse ? ev.fBelowMouse->fLens->GetName() : "-");
 
   WGlDirectory& M = *mWGlDirectory;
@@ -191,7 +191,7 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     }
     return 1;
   }
-  
+
   if(ev.fEvent == FL_ENTER || ev.fEvent == FL_MOVE) {
 
     if(ev.fCurrentNSE->fUserData != m_current) {

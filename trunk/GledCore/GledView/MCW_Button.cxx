@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -70,7 +70,7 @@ void MCW_Button::FillData(GNS::MethodInfo* mi, const char* label,
   dt.fLabel  = (dt.fDndP) ? "[]  " : "";
   dt.fLabel += label;
   dt.fLabel += (dt.fDirectP) ? " .." : " ...";
-  
+
   dt.fTooltip += GNS::join_strings(", ", args) + ")";
 }
 
@@ -106,7 +106,7 @@ int MCW_Button::handle(int ev)
       }
     }
     break;
-  }   
+  }
 
   case FL_DND_ENTER:   return 1;
   case FL_DND_RELEASE: return (Fl::event_inside(this)) ? 1 : 0;

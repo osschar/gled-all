@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -146,7 +146,7 @@ void* Saturn::tl_MIR_Router(mir_router_ti* arg)
   if(!arg->delete_mir)
     mir.release();
   delete arg;
-  
+
   GThread::DeleteIfDetached();
   GThread::Exit();
   return 0;
@@ -168,7 +168,7 @@ void* Saturn::tl_MIR_DetachedExecutor(mir_router_ti* arg)
   arg->self = GThread::TSDSelf(); // Needed in clean-up.
 
   GTHREAD_CU_PUSH;
-  
+
   {
     ISdebug(1, GForm("%sregistering a detached thread %p to '%s'.",
 		     _eh.Data(), arg->self, arg->mir->Alpha->GetName()));
@@ -224,10 +224,10 @@ void Saturn::tl_MIR_DetachedCleanUp(mir_router_ti* arg)
     ISdebug(1, GForm("%sl1=%d, l2=%d.", _eh.Data(), l1, l2));
     if(l2 == 0)
       arg->sat->mDetachedThreadsHash.erase(i);
-  } 
+  }
 
   if(arg->delete_mir) delete arg->mir;
-  delete arg;  
+  delete arg;
 }
 
 /**************************************************************************/
@@ -312,7 +312,7 @@ Saturn::Saturn() :
 
   // mVer = new Forest(this, "Ver", "Forest of Life");
   // mVer->Init();
-  
+
   mChaItOss = new Mountain(this);
 }
 
@@ -566,7 +566,7 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
       }
     }
   }
-  
+
   // Allow server thread to accept connections:
   _server_startup_cond.Lock();
   _server_startup_cond.Signal();
@@ -901,7 +901,7 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
   // Accepts connection from an Eye/Moon or handles FirstFreeID query.
   // Locks/Suspends all executions upon
   // adding fd to Selector and sending scene to the Moon.
-  // Runs in a detached thread (called from tl_SaturnAcceptor) ... 
+  // Runs in a detached thread (called from tl_SaturnAcceptor) ...
   // perhaps should timeout.
   // Handles one connection at a time.
 
@@ -1133,7 +1133,7 @@ Int_t Saturn::Manage(TSocket* sock) throw(Exc_t)
 
   int len, cnt = 0;
   TMessage *m;
-  
+
   while(1) {
   start:
     len = sock->Recv(m);
@@ -1165,8 +1165,8 @@ Int_t Saturn::Manage(TSocket* sock) throw(Exc_t)
     case kMESS_STRING:
       // ????
       break;
-      
-    case GledNS::MT_Flare: 
+
+    case GledNS::MT_Flare:
     case GledNS::MT_Beam:
       {
 	// Swallows the message 'm', deletes it and sets it to null.
@@ -1196,7 +1196,7 @@ Int_t Saturn::Manage(TSocket* sock) throw(Exc_t)
 	RouteMIR(mir);
 	break;
       }
-    
+
     default:
       throw(_eh + "unknown message type");
 
@@ -1282,7 +1282,7 @@ void Saturn::markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller)
 void Saturn::post_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller)
 {
   static const Exc_t _eh("Saturn::post_mir ");
-  
+
   ISdebug(8, GForm("%s entered ...", _eh.Data()));
 
   markup_posted_mir(*mir, caller);
@@ -1448,7 +1448,7 @@ ZMIR_RR* Saturn::ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread)
   mir->SetResultReq(mSaturnInfo, req_handle);
 
   result_cond.Lock();
-  shoot_mir(mir, 0, use_own_thread);  
+  shoot_mir(mir, 0, use_own_thread);
   result_cond.Wait(); // !!!! timed-wait
   result_cond.Unlock();
 
@@ -1537,7 +1537,7 @@ void Saturn::report_mir_post_demangling_error(ZMIR& mir, TString error)
   static const Exc_t _eh("Saturn::report_mir_post_demangling_error ");
 
   ISerr(error);
-  
+
   if(mir.Caller != 0) {
     auto_ptr<ZMIR> err( mir.Caller->S_Error(error.Data()) );
     err->SetRecipient(mir.Caller->HostingSaturn());
@@ -1600,7 +1600,7 @@ void Saturn::RouteMIR(auto_ptr<ZMIR>& mir) throw()
 	if(mir->Recipient == 0) {
 	  throw(_eh + "can't demangle recipient of a beam.");
 	}
-	
+
 	SaturnInfo* route = mir->Recipient->hRoute;
 	if(route == 0) {
 	  route = FindRouteTo(mir->Recipient);
@@ -1753,11 +1753,11 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 
     }
   }
-  catch(Exc_t& exc) {      
+  catch(Exc_t& exc) {
     report_mir_post_demangling_error(*mir, _eh + "processing failed: " + exc);
     return;
   }
-} 
+}
 
 void Saturn::ExecMIR(auto_ptr<ZMIR>& mir, bool lockp)
 {
@@ -1989,7 +1989,7 @@ open_server_socket:
   mSelector.fRead[mServerSocket->GetDescriptor()] = (void*)mServerSocket;
   ISdebug(2, GForm("%sstarting server, port=%d", _eh.Data(),
 		   mSaturnInfo->GetServerPort()));
-  
+
   mServerThread = new GThread((GThread_foo)tl_SaturnFdSucker, this, false);
   _server_startup_cond.Lock();
   if( mServerThread->Spawn() ) {
@@ -2028,7 +2028,7 @@ int Saturn::stop_server()
     (*ei)->hSocket->Close();
   }
   for(lpSaturnInfo_i si=mMoons.begin(); si!=mMoons.end(); ++si) {
-    (*si)->hSocket->Close();    
+    (*si)->hSocket->Close();
   }
 
   return 0;
@@ -2163,7 +2163,7 @@ void Saturn::wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p)
   for(SaturnInfo::spZQueen_i q=moon->hQueens.begin(); q!=moon->hQueens.end(); ++q) {
     (*q)->remove_reflector(moon);
   }
-  
+
   delete moon->hSocket; moon->hSocket = 0;
   moon->hRoute = 0; moon->hQueens.clear();
 

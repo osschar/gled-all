@@ -33,7 +33,7 @@ void setup_guest_handling(ZSunQueen* sq)
   ZIdentity* sat_guest = sq->GetOrImportIdentity("venus");
   sq->SetSaturnGuestId(sat_guest);
   ZIdentity* eye_guest = sq->GetOrImportIdentity("guest");
-  sq->SetEyeGuestId(eye_guest);  
+  sq->SetEyeGuestId(eye_guest);
 }
 
 void std_auth()
@@ -95,7 +95,7 @@ void std_auth()
 
     CREATE_GLASS(ff, ZIdentityListFilter, sun_queen, "AllowEyedSaturns", 0);
     f->SetFilter(ff);
-    ff->SetIdentities(eyed_saturns);    
+    ff->SetIdentities(eyed_saturns);
   }
 
   sun_queen->SetGuard(sq_guard); // Simple SunQueen Guard

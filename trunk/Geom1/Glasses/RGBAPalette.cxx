@@ -19,7 +19,7 @@
 //
 // This is expanded into mColorArray in steps from mMinInt to mMaxInt.
 // ColorFromValue(Int_t val) makes direct access into this array.
-// ColorFromValue(Float_t val) remaps the val 
+// ColorFromValue(Float_t val) remaps the val
 
 ClassImp(RGBAPalette);
 
@@ -162,7 +162,7 @@ void RGBAPalette::SetMarksFromPOVFile(const Text_t* file_name)
 		   &x, &r, &g, &b, &t);
     if(n != 5) continue;
     mColorMarks.push_back(ZColorMark(x,r,g,b,1-t));
-    
+
   }
   gSystem->ClosePipe(pov);
   printf("%s%zu marks from '%s'.\n", _eh.Data(), mColorMarks.size(), file_name);
@@ -209,10 +209,10 @@ void RGBAPalette::ColorFromIdx(Short_t ci, UChar_t* col, Bool_t alpha)
     return;
   }
   TColor* c = gROOT->GetColor(ci);
-  if(c) { 
-    col[0] = (UChar_t)(255*c->GetRed());  
+  if(c) {
+    col[0] = (UChar_t)(255*c->GetRed());
     col[1] = (UChar_t)(255*c->GetGreen());
-    col[2] = (UChar_t)(255*c->GetBlue()); 
+    col[2] = (UChar_t)(255*c->GetBlue());
     if (alpha) col[3] = 255;
   }
 }
@@ -222,10 +222,10 @@ void RGBAPalette::ColorFromIdx(Float_t f1, Short_t c1, Float_t f2, Short_t c2,
 {
   TColor* t1 = gROOT->GetColor(c1);
   TColor* t2 = gROOT->GetColor(c2);
-  if(t1 && t2) { 
+  if(t1 && t2) {
     col[0] = (UChar_t)(255*(f1*t1->GetRed()   + f2*t2->GetRed()));
     col[1] = (UChar_t)(255*(f1*t1->GetGreen() + f2*t2->GetGreen()));
-    col[2] = (UChar_t)(255*(f1*t1->GetBlue()  + f2*t2->GetBlue())); 
+    col[2] = (UChar_t)(255*(f1*t1->GetBlue()  + f2*t2->GetBlue()));
     if (alpha) col[3] = 255;
   }
 }

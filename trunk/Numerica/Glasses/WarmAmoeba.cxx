@@ -41,7 +41,7 @@ void WarmAmoeba::_export_algo_values(Operator::Arg* op_arg, bool bestp)
   if(bestp) {
     OP_EXE_OR_SP_MIR_SATURN(mSaturn, hTrueMaster, SetState, m_PBest);
   } else {
-    OP_EXE_OR_SP_MIR_SATURN(mSaturn, hTrueMaster, SetState, m_P[0]);    
+    OP_EXE_OR_SP_MIR_SATURN(mSaturn, hTrueMaster, SetState, m_P[0]);
   }
 }
 

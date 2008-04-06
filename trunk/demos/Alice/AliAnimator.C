@@ -1,5 +1,5 @@
 /// $Header$
-// 
+//
 //
 // vars: ZQueen* g_queen
 // libs: Geom1
@@ -79,7 +79,7 @@ void AliAnimator(const Text_t* dirname = 0,
   CREATE_ATT_GLASS(pick_off, ZRlNameStack, geo_top, SetRnrMod, "Picking Off", 0);
   pick_off->SetClearStack(true); pick_off->SetRestoreStack(true);
   pick_off->SetNameStackOp(0);
-  
+
   ZNode* var = (ZNode*) g_scene->FindLensByPath("Var");
 
   CREATE_ADD_GLASS(image, ZImage, var, "Checker", 0);
@@ -131,7 +131,7 @@ void AliAnimator(const Text_t* dirname = 0,
   etor->SetTimeSource(Eventor::TS_IntStep);
   etor->SetBeatsToDo(1750);
   etor->SetTimeStep(0.02);
-  
+
   CREATE_ADD_GLASS(tmaker, TimeMaker, etor, "TimeMaker", 0);
   tmaker->SetMinT(0);
   tmaker->SetMaxT(1000);
@@ -147,7 +147,7 @@ void AliAnimator(const Text_t* dirname = 0,
 
   Double_t fade_time = 30;
   Double_t max_time  = 35;
-  
+
 
   CREATE_ADD_GLASS(mpupil, PupilInfo, g_queen, "MoviePupil", 0);
   movie_pupil = mpupil; // assign to global
@@ -252,8 +252,8 @@ void AliAnimator(const Text_t* dirname = 0,
 
   if(dirname != 0) {
     aliload->SetDataDir(dirname);
-    // Shoot a MIR to have functional GUI during processing: 	 
-    ZMIR* setup_mir = aliload->S_LoadVSD(); 	 
+    // Shoot a MIR to have functional GUI during processing:
+    ZMIR* setup_mir = aliload->S_LoadVSD();
     g_saturn->ShootMIR(setup_mir);
   }
 }

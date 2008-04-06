@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -48,7 +48,7 @@ void GLTesterOne_GL_Rnr::Render(RnrDriver* rd)
 
       switch (T.mRAtom) {
       case GLTesterOne::RA_Point:
-	glBegin(GL_POINTS);  
+	glBegin(GL_POINTS);
 	for(int i=0; i<T.mNSteps; ++i, x+=step) glVertex2f(x, 0);
 	glEnd();
 	break;
@@ -152,7 +152,7 @@ void GLTesterOne_GL_Rnr::Render(RnrDriver* rd)
   else if(T.mTestSelection == GLTesterOne::TT_MatrixOps) {
 
     switch (T.mMatrixOps) {
-      
+
     case GLTesterOne::MO_GetFloat: {
       GLfloat m[16];
       for(int i=0; i<T.mNSteps; ++i) {

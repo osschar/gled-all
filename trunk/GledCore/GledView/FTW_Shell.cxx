@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -241,7 +241,7 @@ void FTW_Shell::_bootstrap()
   if(!src_on_p) mSource->hide();
   mSink   = new FTW::Sink_Selector(this, 0, 0, 6, "Sink");
   if(!snk_on_p) mSink->hide();
-  
+
   Fl_Box* nest_pre = new Fl_Box(FTW::separator_box,0,0,1,1, "Swallowed SubShell:");
   nest_pre->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
   nest_pre->labelfont(nest_pre->labelfont() + FL_BOLD);
@@ -282,7 +282,7 @@ void FTW_Shell::_bootstrap()
       xb->color(fl_rgb_color(200,220,200));
 
       inpp->end();
-      inpp->resizable(xb);    
+      inpp->resizable(xb);
     }
     { // Output
       wOutPack = new Fl_OutputPack(0, 0, w(), msgout_h);
@@ -406,7 +406,7 @@ void FTW_Shell::AbsorbRay(Ray& ray)
 	if(cch - delta < min_canvas_H) {
 	  size(w(), h() + (min_canvas_H - cch + delta)*cell_h());
 	}
-	
+
 	mCurCanvas->size(w(), mCurCanvas->h() - delta*cell_h());
 	wOutPack->size(w(),   wOutPack->h()   + delta*cell_h());
 	wMainPack->init_sizes();
@@ -480,7 +480,7 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
     Message(_eh + img->fLens->Identify() + " is not a SubShellInfo.", MT_wrn);
     return 0;
   }
-  
+
   TString foo_name(GForm("SubShellCreator_%s_%s",
 			ssinfo->GetCtorLibset(), ssinfo->GetCtorName()));
   long* p2foo = (long*) GledNS::FindSymbol(foo_name);
@@ -489,7 +489,7 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
     return 0;
   }
   SubShellCreator_foo ssc_foo = (SubShellCreator_foo)(*p2foo);
-  
+
   FTW_SubShell* fss = 0;
   try {
     fss = ssc_foo(this, img);
@@ -936,7 +936,7 @@ namespace {
   void set_gamma_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
     ud->shell->X_SetGamma(ud->get_image());
   }
- 
+
   /**************************************************************************/
 
   // Lens
@@ -1042,7 +1042,7 @@ void FTW_Shell::FullMenu(OS::ZGlassImg* img, int x, int y)
 
   FillShellVarsMenu(img, menu, mcdl, "");
   FillLensMenu(img, menu, mcdl, "");
-    
+
   menu.popup();
 }
 
@@ -1054,7 +1054,7 @@ void FTW_Shell::LensMenu(OS::ZGlassImg* img, int x, int y)
   mir_call_data_list mcdl;
 
   FillLensMenu(img, menu, mcdl, "");
-    
+
   menu.popup();
 }
 

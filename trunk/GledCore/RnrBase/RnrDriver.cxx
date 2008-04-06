@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -266,7 +266,7 @@ void RnrDriver::CleanUpRnrModDefaults()
 
   for(hRMStack_i i=mRMStacks.begin(); i!=mRMStacks.end(); ++i) {
     i->second.def = 0;
-    int cnt = 0; 
+    int cnt = 0;
     while( ! i->second.stack.empty()) {
       ++cnt;
       i->second.stack.pop();

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -20,7 +20,7 @@ typedef list<ZNode*>::iterator lpZNode_i;
 ClassImp(ZNode);
 
 namespace {
-  // Limit max search depth for 
+  // Limit max search depth for
   int ZNodeTransSearchMaxDepth = 100;
 }
 
@@ -267,7 +267,7 @@ void ZNode::RnrOnForDaughters()
 }
 
 void ZNode::RnrOffForDaughters()
-{ 
+{
   lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     GLensReadHolder _rlck(*i);
@@ -285,7 +285,7 @@ void ZNode::RnrElmsOnForDaughters()
 }
 
 void ZNode::RnrElmsOffForDaughters()
-{ 
+{
   lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     GLensReadHolder _rlck(*i);
@@ -315,7 +315,7 @@ void ZNode::MakeRnrModList(ZGlass* optional_element)
 void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
 {
   // If enforce_to_all also changes OM of children w/ parent != this.
-  
+
   lpZNode_t dts; CopyListByGlass<ZNode>(dts);
   for(lpZNode_i i=dts.begin(); i!=dts.end(); ++i) {
     ZNode* d = *i;
@@ -435,7 +435,7 @@ ZNode* ZNode::FindCommonParent(ZNode* a, ZNode* b)
   l[0].push_back(a); a->FillParentList(l[0]);
   l[1].push_back(b); b->FillParentList(l[1]);
   int x = 0, y = 1;
-  do {    
+  do {
     lpZNode_i i = find(l[y].begin(), l[y].end(), l[x].front());
     if(i != l[y].end()) return l[x].front();
     l[x].pop_front();

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -25,7 +25,7 @@ private:
 protected:
   HAlign_e          mHAlign;       // X{GS} 7 PhonyEnum(-join=>1)
   VAlign_e          mVAlign;       // X{GS} 7 PhonyEnum()
-  Float_t           mDefDx;        // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1) 
+  Float_t           mDefDx;        // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t           mTextFadeW;    // X{GS} 7 Value(-range=>[0,1000,1,1000])
   Float_t           mTextYSize;    // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t           mFrameW;       // X{GS} 7 Value(-range=>[0,128,1,100])
@@ -33,8 +33,8 @@ protected:
   Bool_t            bDrawTile;     // X{GS} 7 Bool(-join=>1)
   Bool_t            bMinTile;      // X{GS} 7 Bool(-join=>1)
   Bool_t            bDrawFrame;    // X{GS} 7 Bool()
-  Float_t           mXBorder;      // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1) 
-  Float_t           mYBorder;      // X{GS} 7 Value(-range=>[-100,100,1,1000]) 
+  Float_t           mXBorder;      // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Float_t           mYBorder;      // X{GS} 7 Value(-range=>[-100,100,1,1000])
 
   ZColor            mTextColor;    // X{GSP} 7 ColorButt(-join=>1)
   ZColor            mFrameColor;   // X{GSP} 7 ColorButt()

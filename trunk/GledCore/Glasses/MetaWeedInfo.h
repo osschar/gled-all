@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -14,7 +14,7 @@ class MetaWeedInfo : public ZGlass {
   MAC_RNR_FRIENDS(MetaWeedInfo);
 
 public:
-  enum BoxType_e { BT_None=0, 
+  enum BoxType_e { BT_None=0,
 		   BT_Flat, BT_Up, BT_ThinUp, BT_Engraved, BT_Border
   };
 

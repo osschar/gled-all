@@ -32,7 +32,7 @@ void ZHtml::KusKus(const char* className)
    char *htmlFile = GetHtmlFileName(classPtr);
    if (htmlFile && (strncmp(htmlFile, "http://", 7)  ||
 		    strncmp(htmlFile, "https://", 8) ||
-		    !gSystem->IsAbsoluteFileName(htmlFile)) ) 
+		    !gSystem->IsAbsoluteFileName(htmlFile)) )
      {
        Class2Html(classPtr);
        MakeTree(className);

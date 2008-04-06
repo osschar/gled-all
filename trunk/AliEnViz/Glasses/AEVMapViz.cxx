@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -73,7 +73,7 @@ void AEVMapViz::CutEarth_PDC04(ZImage* tex)
     Float_t llx = s.x0 - s.dx/2, urx = s.x0 + s.dx/2;
     Float_t lly = s.y0 - s.dy/2, ury = s.y0 + s.dy/2;
 
-    AEVFlatSSpace* fss = new 
+    AEVFlatSSpace* fss = new
       AEVFlatSSpace(s.n, GForm("SSpace chunk representing %s", s.n));
 
     fss->SetRnrMod(*mNameSwitch);
@@ -85,8 +85,8 @@ void AEVMapViz::CutEarth_PDC04(ZImage* tex)
     fss->SetTexX0((llx+Sx/2)/Sx);  fss->SetTexY0((lly+Sy/2)/Sy);
     fss->SetTexX1((urx+Sx/2)/Sx);  fss->SetTexY1((ury+Sy/2)/Sy);
     fss->SetUV(s.dx, s.dy);
-    fss->SetPhi0(360*s.x0/Sx);   fss->SetDPhi(360*s.dx/Sx); 
-    fss->SetTheta0(180*s.y0/Sy); fss->SetDTheta(180*s.dy/Sy); 
+    fss->SetPhi0(360*s.x0/Sx);   fss->SetDPhi(360*s.dx/Sx);
+    fss->SetTheta0(180*s.y0/Sy); fss->SetDTheta(180*s.dy/Sy);
 
     if(smp != sub_map_list) {
       fss->SetPos((s.x0 - o.x0 - s.ox)*s.sx, (s.y0 - o.y0 - s.oy), 0);

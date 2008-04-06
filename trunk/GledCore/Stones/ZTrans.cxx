@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -112,7 +112,7 @@ void ZTrans::SetupRotation(Int_t i, Int_t j, Double_t f)
   // Optimized versions of left/right multiplication with an elementary
   // rotation matrix are implemented in RotatePF/RotateLF.
   // Expects identity matrix.
-  
+
   if(i == j) return;
   ZTrans& M = *this;
   M(i,i) = M(j,j) = TMath::Cos(f);
@@ -338,7 +338,7 @@ void ZTrans::GetRotAngles(Float_t* x) const
     mA2 = TMath::ASin(d);
     Double_t C = TMath::Cos(mA2);
     if(TMath::Abs(C) > 8.7e-6) {
-      mA1 = TMath::ATan2(M[F10], M[F00]);      
+      mA1 = TMath::ATan2(M[F10], M[F00]);
       mA3 = TMath::ATan2(M[F21], M[F22]);
     } else {
       mA1 = TMath::ATan2(M[F10], M[F11]);
@@ -537,7 +537,7 @@ Double_t ZTrans::Invert()
   const Double_t det3_123_123 = M[F11]*det2_23_23 - M[F12]*det2_23_13 + M[F13]*det2_23_12;
 
   // Find the 4x4 det:
-  const Double_t det = M[F00]*det3_123_123 - M[F01]*det3_123_023 + 
+  const Double_t det = M[F00]*det3_123_123 - M[F01]*det3_123_023 +
                        M[F02]*det3_123_013 - M[F03]*det3_123_012;
 
   if(det == 0) {

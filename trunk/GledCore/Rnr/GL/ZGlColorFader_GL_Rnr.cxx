@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -18,7 +18,7 @@ void ZGlColorFader_GL_Rnr::_init()
 /**************************************************************************/
 
 void ZGlColorFader_GL_Rnr::PreDraw(RnrDriver* rd)
-{ 
+{
   PARENT::PreDraw(rd);
   update_tring_stamp(rd);
   rd->PushRnrMod(ZGlColorFader::FID(), mRnrMod);

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -222,8 +222,8 @@ void TriMesh::BuildOpcStructs()
   mOPCMeshIf = new MeshInterface;
   mOPCMeshIf->SetNbTriangles(mTTvor->mNTrings);
   mOPCMeshIf->SetNbVertices(mTTvor->mNVerts);
-  mOPCMeshIf->SetPointers((IndexedTriangle*) mTTvor->mTrings,
-                                    (Point*) mTTvor->mVerts);
+  mOPCMeshIf->SetPointers((IndexedTriangle*) mTTvor->Trings(),
+                          (Point*)           mTTvor->Verts());
 
   OPCODECREATE OPCC;
   OPCC.mIMesh = mOPCMeshIf;
@@ -386,7 +386,7 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
   xx_edge_hash_t edge_map;
   Int_t          edge_cnt = 0;
   {
-    Int_t* ta = mTTvor->mTrings;
+    Int_t* ta = mTTvor->Trings();
     for(Int_t t=0; t<mTTvor->mNTrings; ++t) {
       pair<xx_edge_hash_i, bool> res;
       res = edge_map.insert(make_pair(xx_edge(ta[0], ta[1]), edge_cnt));
@@ -407,7 +407,7 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
 
   GtsVertex **vertices = new GtsVertex*[mTTvor->mNVerts];
   {
-    Float_t* va = mTTvor->mVerts;
+    Float_t* va = mTTvor->Verts();
     for(Int_t v=0; v<mTTvor->mNVerts; ++v) {
       vertices[v] = gts_vertex_new(surf->vertex_class,
                                    va[0], va[1], va[2]);
@@ -425,7 +425,7 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
   }
 
   {
-    Int_t* ta = mTTvor->mTrings;
+    Int_t* ta = mTTvor->Trings();
     for(Int_t t=0; t<mTTvor->mNTrings; ++t) {
       Int_t e1, e2, e3;
       e1 = edge_map.find(xx_edge(ta[0], ta[1]))->second;

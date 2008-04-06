@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,7 +23,7 @@ void GlobalLamps_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   // Turn on all list members of glass Lamp that can be
   // traced back (via Parents) to current position matrix owner.
-  // In principle should store list of 
+  // In principle should store list of
 
   static const Exc_t _eh("GlobalLamps_GL_Rnr::PreDraw ");
 

@@ -6,7 +6,7 @@ use Data::Dumper;
 
 my $options =
 {
- 'user'       => $ENV{ALIEN_USER},    
+ 'user'       => $ENV{ALIEN_USER},
  'debug'      => 0,
  'exec'       => "",
  'token'      => "",
@@ -96,7 +96,7 @@ sub dump_sites_sql {
       # printf "%-36s [%3s,%3s] (%s,%s)\n",
       #  $name, $r->{siteId}, $r->{masterHostId}, $r->{latitude}, $r->{longitude};
       print OUT $r->{siteName}, $r->{location},     $r->{domain},
-                $r->{siteId},   $r->{masterHostId}, 
+                $r->{siteId},   $r->{masterHostId},
                 $r->{latitude}, $r->{longitude};
     }
   } else {
@@ -116,7 +116,7 @@ sub extract_site_values {
   my $a = shift;
   return ( xx($a,'ou'), xx($a,'location'), xx($a,'domain'),
 	   xx($a,'latitude'), xx($a,'longitude') );
-  
+
 }
 
 sub dump_sites {
@@ -159,7 +159,7 @@ sub dump_sites {
       my $nsq = $sq->count;
       if($nsq != 1) {
 	print "Strange ... got $nsq results for site $s.";
-	unless($nsq) { 
+	unless($nsq) {
 	  print OUT "FOO-$site_i", "Nowhereland", "foo.bar", "89", "0";
 	}
       }

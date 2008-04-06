@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -9,7 +9,7 @@
 //
 // Spawns mCommand via gSystem->PipeOpen() in write mode.
 // You can send data to be written to the pipe with SendCommand().
-// 
+//
 
 #include "PipeEventor.h"
 #include <Gled/GThread.h>
@@ -69,7 +69,7 @@ void PipeEventor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
   if(!mPipe) {
     throw(Operator::Exception(this, Operator::OE_Break, "pipe closed"));
   }
-  
+
   mSendCond.Lock();
   try {
     feed_commands();
@@ -111,7 +111,7 @@ void PipeEventor::feed_commands()
   if(ferror(mPipe)) {
     throw( Operator::Exception(this, Operator::OE_Break, "pipe closed") );
   }
-  
+
   while(!mPending.empty()) {
     int ret = fprintf(mPipe, "%s\n", mPending.front().Data());
     if(ret < 0 || ferror(mPipe)) {

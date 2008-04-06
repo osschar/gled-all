@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -10,7 +10,7 @@
 // Encapsulates low-level arrays for triangle meshes.
 // Vertex and Triangle arrays are mandatory (called primary by methods).
 // Optional:
-//   per-vertex   normals and colors | 
+//   per-vertex   normals and colors |
 //   per-triangle normals and colors +-> secondary arrays
 //   texture coords (per-vertex)     |
 //   triangle strip data
@@ -25,8 +25,6 @@ ClassImp(TringTvor);
 
 void TringTvor::_init()
 {
-  mVerts  = 0;  mNorms      = 0;  mCols      = 0;  mTexs = 0;
-  mTrings = 0;  mTringNorms = 0;  mTringCols = 0;
   mBBoxOK = false;
 
   mNStripEls   = 0;  mStripEls    = 0;  mStripTrings = 0;
@@ -48,8 +46,8 @@ TringTvor::TringTvor(Int_t nv, Int_t nt) :
   MakePrimaryArrays();
 }
 
-TringTvor::TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
-		     Bool_t colp, Bool_t texp) :
+TringTvor::TringTvor(Int_t nv, Int_t nt,
+                     Bool_t smoothp, Bool_t colp, Bool_t texp) :
   mNVerts  (nv),
   mNTrings (nt)
 {
@@ -65,40 +63,62 @@ TringTvor::~TringTvor()
   DeletePrimaryArrays();
 }
 
+void TringTvor::Reset(Int_t nv, Int_t nt)
+{
+  DeleteSecondaryArrays();
+  DeleteTriangleStrips();
+  DeletePrimaryArrays();
+  mNVerts  = nv;
+  mNTrings = nt;
+  MakePrimaryArrays();
+}
+
+void TringTvor::Reset(Int_t nv, Int_t nt,
+                      Bool_t smoothp, Bool_t colp, Bool_t texp)
+{
+  DeleteSecondaryArrays();
+  DeleteTriangleStrips();
+  DeletePrimaryArrays();
+  mNVerts  = nv;
+  mNTrings = nt;
+  MakePrimaryArrays();
+  MakeSecondaryArrays(smoothp, colp, texp);
+}
+
 /**************************************************************************/
 
 void TringTvor::MakePrimaryArrays()
 {
-  mVerts  = new Float_t[3*mNVerts];
-  mTrings = new Int_t  [3*mNTrings];
+  mVerts .resize(3*mNVerts);
+  mTrings.resize(3*mNTrings);
 }
 
 void TringTvor::DeletePrimaryArrays()
 {
-  delete [] mVerts;  mVerts  = 0;
-  delete [] mTrings; mTrings = 0;
+  WipeVerts();  mNVerts  = 0;
+  WipeTrings(); mNTrings = 0;
 }
 
 void TringTvor::MakeSecondaryArrays(Bool_t smoothp, Bool_t colp, Bool_t texp)
 {
-  if(smoothp) {
-    mNorms = new Float_t[3*mNVerts];
-    if(colp) mCols = new UChar_t[4*mNVerts];
+  if (smoothp) {
+    AssertNorms();
+    if (colp) AssertCols();
   } else {
-    mTringNorms = new Float_t[3*mNTrings];
-    if(colp) mTringCols = new UChar_t[4*mNTrings];
+    AssertTringNorms();
+    if (colp) AssertTringCols();
   }
-  if(texp && mTexs == 0) mTexs = new Float_t[2*mNVerts];
+  if (texp) AssertTexs();
 }
 
 void TringTvor::DeleteSecondaryArrays()
 {
-  delete [] mNorms; mNorms = 0;
-  delete [] mCols;  mCols  = 0;
-  delete [] mTexs;  mTexs  = 0;
+  WipeNorms();
+  WipeCols();
+  WipeTexs();
 
-  delete [] mTringNorms; mTringNorms = 0;
-  delete [] mTringCols;  mTringCols  = 0;
+  WipeTringNorms();
+  WipeTringCols();
 }
 
 /**************************************************************************/
@@ -110,7 +130,7 @@ void TringTvor::CalculateBoundingBox()
     return;
   }
 
-  Float_t *V = mVerts, *m = mMinMaxBox, *M = m + 3;
+  Float_t *V = Verts(), *m = mMinMaxBox, *M = m + 3;
   m[0] = M[0] = V[0];
   m[1] = M[1] = V[1];
   m[2] = M[2] = V[2];
@@ -151,7 +171,7 @@ Float_t TringTvor::BoundingBoxVolume()
 
 void TringTvor::GenerateTriangleNormals()
 {
-  if (!mTringNorms) MakeTringNorms();
+  AssertTringNorms();
 
   Float_t e1[3], e2[3];
   for(Int_t t=0; t<mNTrings; ++t) {
@@ -193,8 +213,8 @@ void TringTvor::GenerateTriangleColorsFromVertexColors()
 {
   AssertTringCols();
 
-  Int_t*    T = mTrings;
-  UChar_t*  C = mTringCols;
+  Int_t*    T = Trings();
+  UChar_t*  C = TringCols();
   for(Int_t t=0; t<mNTrings; ++t, T+=3, C+=4) {
     UChar_t* c0 = Color(T[0]);
     UChar_t* c1 = Color(T[1]);
@@ -241,12 +261,12 @@ void TringTvor::GenerateVertexNormals()
   vector<Int_t> *trings_per_vert = new vector<Int_t> [mNVerts];
   FindTrianglesPerVertex(trings_per_vert);
 
-  if (!mNorms) MakeNorms();
+  AssertNorms();
 
   Float_t *v0, *v1, *v2;
   Int_t   *t;
   Float_t e1[3], e2[3], n[3];
-  Float_t* N = mNorms;
+  Float_t* N = &mNorms[0];
   for (Int_t i=0; i<mNVerts; ++i, N+=3) {
     vector<Int_t>& v = trings_per_vert[i];
     Int_t       size = (Int_t) v.size();
@@ -277,7 +297,7 @@ void TringTvor::FindTrianglesPerVertex(vector<Int_t>* trings_per_vert)
   // Populate array of vectors 'trings_per_vert' from triangle data.
   // The output array must be properly allocated in advance.
 
-  Int_t* T = mTrings;
+  Int_t* T = Trings();
   for (Int_t t=0; t<mNTrings; ++t, T+=3)
   {
     trings_per_vert[T[0]].push_back(t);
@@ -296,7 +316,7 @@ Int_t TringTvor::FindNeighboursPerVertex(vector<Int_t>* neighbours)
   const Int_t vP[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
 
   Int_t  nc = 0;
-  Int_t* T  = mTrings;
+  Int_t* T  = Trings();
   for (Int_t t=0; t<mNTrings; ++t, T+=3)
   {
     for (Int_t eti=0; eti<3; ++eti)
@@ -312,6 +332,7 @@ Int_t TringTvor::FindNeighboursPerVertex(vector<Int_t>* neighbours)
   }
   return nc;
 }
+
 
 /**************************************************************************/
 // Triangle strips
@@ -347,13 +368,14 @@ void TringTvor::GenerateTriangleStrips(Int_t max_verts)
   hash_map<xx_tring, Int_t> tring_map;
 
   ACTCData *tc = actcNew();
-  if(tc == 0) throw(_eh + "failed to allocate TC structure.");
-  // actcParami(tc, ACTC_OUT_MIN_FAN_VERTS, is maxint); // 
+  if (tc == 0) throw(_eh + "failed to allocate TC structure.");
+  // actcParami(tc, ACTC_OUT_MIN_FAN_VERTS, is maxint);
   // actcParami(tc, ACTC_OUT_MAX_PRIM_VERTS, 128);
   actcParami(tc, ACTC_OUT_MAX_PRIM_VERTS, max_verts);
   actcParami(tc, ACTC_OUT_HONOR_WINDING, 1);
   actcBeginInput(tc);
-  for(Int_t t=0; t<mNTrings; ++t) {
+  for(Int_t t=0; t<mNTrings; ++t)
+  {
     Int_t* T = Triangle(t);
     tring_map[ xx_tring(T[0], T[1], T[2]) ] = t;
     actcAddTriangle(tc, T[0], T[1], T[2]);
@@ -365,21 +387,19 @@ void TringTvor::GenerateTriangleStrips(Int_t max_verts)
   int v1, v2, v3;
   int cnt = 0, cntp;
   list<vector<int>* > strip_list;
-  while((prim = actcStartNextPrim(tc, &v1, &v2)) != ACTC_DATABASE_EMPTY) {
-    // printf("%s: %d %d", prim == ACTC_PRIM_FAN ? "Fan" : "Strip", v1, v2);
+  while ((prim = actcStartNextPrim(tc, &v1, &v2)) != ACTC_DATABASE_EMPTY)
+  {
     cntp = 2;
     vector<int>* vecp = new vector<int>;
     vecp->push_back(v1); vecp->push_back(v2);
-    while(actcGetNextVert(tc, &v3) != ACTC_PRIM_COMPLETE) {
-      // printf(" %d", v3);
+    while (actcGetNextVert(tc, &v3) != ACTC_PRIM_COMPLETE)
+    {
       vecp->push_back(v3);
       ++cntp;
     }
-    // printf(" [%d]\n", cntp);
     strip_list.push_back(vecp);
     cnt += cntp;
   }
-  // printf("### %d .vs. %d\n########\n", cnt, (maxX-minX)*(maxY-minY)*2*3);
   actcEndOutput(tc);
 
   actcDelete(tc);
@@ -394,28 +414,27 @@ void TringTvor::GenerateTriangleStrips(Int_t max_verts)
   mStripBegs   = new Int_t*[mNStrips];
   mStripLens   = new Int_t [mNStrips];
 
-  //printf("Now building strip data, num_idx=%d, num_strips=%d.\n",
-  // mNStripEls, mNStrips);
-
   Int_t       idx = 0;
   Int_t strip_idx = 0;
-  while(!strip_list.empty()) {
+  while (!strip_list.empty())
+  {
     vector<int>* vecp = strip_list.front();
     Int_t s_len = vecp->size();
     mStripBegs[strip_idx] = &(mStripEls[idx]);
     mStripLens[strip_idx] = s_len;
 
-    for(Int_t i=0; i<s_len; ++i, ++idx) {
+    for (Int_t i=0; i<s_len; ++i, ++idx)
+    {
       mStripEls[idx] = (*vecp)[i];
 
-      if(i > 1) {
+      if (i > 1) {
 	xx_tring xx(mStripEls[idx-2], mStripEls[idx-1], mStripEls[idx]);
 	hash_map<xx_tring, Int_t>::iterator xi;
 	xi = tring_map.find(xx);
-	if(xi != tring_map.end()) {
+	if (xi != tring_map.end()) {
 	  mStripTrings[idx] = xi->second;
 	} else {
-	  printf("Safr: %d %d.\n", strip_list.size(), i);
+	  printf("%sSafr: %d %d.\n", _eh.Data(), strip_list.size(), i);
 	}
       }
 
@@ -425,7 +444,6 @@ void TringTvor::GenerateTriangleStrips(Int_t max_verts)
     delete vecp;
     ++strip_idx;
   }
-
 }
 
 void TringTvor::DeleteTriangleStrips()
@@ -455,7 +473,7 @@ void TringTvor::ExportPovMesh(ostream& o, Bool_t smoothp)
 
   {
     o << "  vertex_vectors { " << mNVerts << ",\n";
-    Float_t* V = mVerts;
+    Float_t* V = Verts();
     for (Int_t i=0; i<mNVerts; ++i, V+=3) {
       o << "    "; dump3vec<Float_t*>(o, V);
     }
@@ -463,25 +481,25 @@ void TringTvor::ExportPovMesh(ostream& o, Bool_t smoothp)
   }
 
   if (smoothp) {
-    Bool_t no_normals = (mNorms == 0);
+    Bool_t no_normals = ! HasNorms();
     if (no_normals) GenerateVertexNormals();
     o << "  normal_vectors { " << mNVerts << ",\n";
-    Float_t* N = mNorms;
+    Float_t* N = Norms();
     for (Int_t i=0; i<mNVerts; ++i, N+=3) {
       o << "    "; dump3vec<Float_t*>(o, N);
     }
     o << "  }\n";
-    if (no_normals) { delete [] mNorms; mNorms = 0; }
+    if (no_normals) { WipeNorms(); }
   }
 
   {
     o << "  face_indices { " << mNTrings << ",\n";
-    Int_t* T = mTrings;
+    Int_t* T = Trings();
     for (Int_t i=0; i<mNTrings; ++i, T+=3) {
       o << "    "; dump3vec<Int_t*>(o, T);
     }
     o << "  }\n";
-  }  
+  }
 
   o << "}\n";
 }

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -30,7 +30,7 @@ void WGlFrameStyle::_init()
   bMinTile   = false;
   bDrawFrame = true;
   mXBorder   = mYBorder   = 0.1;
-  
+
   mTextColor  .rgba(1, 1, 1);
   mFrameColor .rgba(1, 1, 1);
   mTileColor  .rgba(0.3, 0.3, 0.5, 0.6);

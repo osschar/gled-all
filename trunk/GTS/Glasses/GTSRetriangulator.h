@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -17,7 +17,7 @@ public:
   enum StopOpts_e    { SO_Number,  SO_Cost };
   enum CostOpts_e    { CO_Length,  CO_Volume, CO_Angle };
   enum MidvertOpts_e { MO_Midvert, MO_Volume };
-    
+
 private:
   void _init();
 

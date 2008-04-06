@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -108,7 +108,7 @@ int FGS::PackEntryCollapsor::collexp(bool resize_p)
     fBut->label("@#-2>");
     dh = mColWid->h();
   }
-  
+
   if(resize_p) {
     pg->init_sizes();
     pg->redraw();
@@ -217,7 +217,7 @@ void FGS::LensNameBox::draw()
   fl_font(labelfont(), labelsize());
   fl_push_clip(X, Y, W, H);
   fl_draw(text.Data(), X, Y, W, H, FL_ALIGN_LEFT, 0, 0);
-  fl_pop_clip();	
+  fl_pop_clip();
 }
 
 /**************************************************************************/
@@ -271,7 +271,7 @@ int FGS::LensNameBox::handle(int ev)
 
   case FL_RELEASE:
     if(fImg && Fl::event_button() == 1 && Fl::event_inside(this) &&
-       Fl::event_clicks() == 1) 
+       Fl::event_clicks() == 1)
       {
 	Fl::event_clicks(0);
 	FTW_Shell* shell = grep_shell_or_die(parent(), _eh);

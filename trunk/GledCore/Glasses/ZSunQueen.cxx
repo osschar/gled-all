@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -291,7 +291,7 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
     EyeInfo* ei = dynamic_cast<EyeInfo*>(mee);
     ei->hSocket = socket;
     mSaturn->finalize_eye_connection(ei);
-  } 
+  }
   else {
     throw(_eh + "unknow type of MEE.");
   }
@@ -386,7 +386,7 @@ void ZSunQueen::initiate_mee_connection()
 
 void ZSunQueen::handle_mee_authentication(UInt_t conn_id, TSocket* socket)
 {
-  static const Exc_t _eh("ZSunQueen::handle_mee_authentication "); 
+  static const Exc_t _eh("ZSunQueen::handle_mee_authentication ");
   TString err;
 
   NCMData* ncmd = mNCMasterData.retrieve(conn_id);
@@ -474,7 +474,7 @@ void ZSunQueen::deny_mee_connection(UInt_t conn_id)
   ncsd->fCond->Lock();
   ncsd->fState = CRR_Denied;
   ncsd->fCond->Signal();
-  ncsd->fCond->Unlock();  
+  ncsd->fCond->Unlock();
 }
 
 /**************************************************************************/
@@ -533,7 +533,7 @@ ZIdentity* ZSunQueen::GetOrImportIdentity(const char* ident)
   ZIdentity* identity = 0;
   const char* path;
   FID_t fid;
-  
+
   if(ident[0] == '@') {
     path = "Auth/Groups";
     fid = ZGroupIdentity::FID();
@@ -620,7 +620,7 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
     throw(_eh + "for now only handles group identities");
 
   CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Remove, id);
-  CALL_AND_BROADCAST(id->mActiveMEEs, Remove, mir->Caller);    
+  CALL_AND_BROADCAST(id->mActiveMEEs, Remove, mir->Caller);
 
   mir->SuppressFlareBroadcast = true;
 }
@@ -677,7 +677,7 @@ void ZSunQueen::detach_all_identities(ZMirEmittingEntity* mee)
 void ZSunQueen::HandleClientSideAuthentication(TSocket* socket, UInt_t conn_id,
 					       TString& identity)
 {
-  static const Exc_t _eh("ZSunQueen::HandleClientSideAuthentication "); 
+  static const Exc_t _eh("ZSunQueen::HandleClientSideAuthentication ");
 
   {
     TMessage m(GledNS::MT_MEE_Authenticate);

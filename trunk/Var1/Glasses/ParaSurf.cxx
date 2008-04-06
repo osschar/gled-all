@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -54,7 +54,7 @@ void ParaSurf::FindMinMaxFGH(TriMesh* mesh)
   mMaxF = mMaxG = mMaxH = -FLT_MAX;
   Double_t sumh = 0, sumh2 = 0;
 
-  Float_t * V  = TT.mVerts;
+  Float_t * V  = TT.Verts();
   Int_t     N  = TT.mNVerts;
   Float_t   F[3];
   for (Int_t i=0; i<N; ++i, V+=3)
@@ -99,7 +99,7 @@ void ParaSurf::RandomizeH(TriMesh* mesh,
   TringTvor& TT = * mesh->GetTTvor();
   Int_t  NV = TT.mNVerts;
   Int_t  NT = TT.mNTrings;
-  Point* X  = (Point*) TT.mVerts;
+  Point* X  = (Point*) TT.Verts();
   Point* U  = new Point [NV];
 
   // Calculate up-dirs for each vertex.

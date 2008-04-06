@@ -7,7 +7,7 @@
  */
 //----------------------------------------------------------------------
 inline_ bool SphereCollider::SphereAABBOverlap(const Point& center, const Point& extents)
-{ 
+{
   // Stats
   mNbVolumeBVTests++;
 

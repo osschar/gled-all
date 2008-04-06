@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -38,12 +38,12 @@ void Cylinder_GL_Rnr::Render(RnrDriver* rd)
   // inner cylinder
   if(C.mRInBase != 0 || C.mRInTop != 0) {
     gluQuadricOrientation(mQuadric,GLU_INSIDE);
-    gluCylinder(mQuadric, C.mRInBase, C.mRInTop, C.mHeight, 
+    gluCylinder(mQuadric, C.mRInBase, C.mRInTop, C.mHeight,
 		C.mLodPhi, C.mLodH);
   }
-  // outer cylinder 
+  // outer cylinder
   gluQuadricOrientation(mQuadric,GLU_OUTSIDE);
-  gluCylinder(mQuadric, C.mROutBase, C.mROutTop, C.mHeight, 
+  gluCylinder(mQuadric, C.mROutBase, C.mROutTop, C.mHeight,
 	      C.mLodPhi, C.mLodH);
   // base and top plates
   if(C.bRnrDisks){

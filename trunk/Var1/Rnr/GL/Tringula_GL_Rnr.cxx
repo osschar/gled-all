@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -100,7 +100,7 @@ void Tringula_GL_Rnr::RenderExtendios(RnrDriver* rd, AList* list)
     if (! (*stepper)->GetRnrSelf()) continue;
     RenderExtendio(rd, *stepper);
   }
-}    
+}
 
 /******************************************************************************/
 
@@ -200,13 +200,10 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 
 void Tringula_GL_Rnr::Render(RnrDriver* rd)
 {
-  // Checked in Draw().
-  // if(mTringula->mTTvor == 0) return;
-
   Tringula  &T  = *mTringula;
   TringTvor &TT = *T.mMesh->GetTTvor();
   glColor4fv(T.mColor());
   GL_Capability_Switch light(GL_LIGHTING, T.bLightMesh);
-  Bool_t smoothp = (TT.mNorms && (T.bSmoothShade || TT.mTringNorms == 0));
+  Bool_t smoothp = TT.HasNorms() && (T.bSmoothShade || TT.HasTringNorms());
   TringTvor_GL_Rnr::Render(&TT, smoothp);
 }

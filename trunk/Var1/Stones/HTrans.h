@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -129,7 +129,7 @@ public:
   { TT* C = M + 4*--b; C[0] = x; C[1] = y; C[2] = z; }
 
   void SetBaseVec(Int_t b, TT* x)
-  { TT* C = M + 4*--b; C[0] = x[0]; C[1] = x[1]; C[2] = x[2]; } 
+  { TT* C = M + 4*--b; C[0] = x[0]; C[1] = x[1]; C[2] = x[2]; }
 
   void SetBaseVec(Int_t b, const TVector3& v)
   { TT* C = M + 4*--b; v.GetXYZ(C); }
@@ -154,7 +154,7 @@ public:
   void GetPos(TT& x, TT& y, TT& z) const { x = M[12]; y = M[13]; z = M[14];  }
   void GetPos(TT* x)       const { x[0] = M[12]; x[1] = M[13]; x[2] = M[14]; }
   TT*  PtrPos()                  { return &M[12]; }
-  void GetPos(TVector3& v) const { v.SetXYZ(M[12], M[13], M[14]); } 
+  void GetPos(TVector3& v) const { v.SetXYZ(M[12], M[13], M[14]); }
   TVector3 GetPos()        const { return TVector3(M[12], M[13], M[14]); }
 
   // Cardan angle interface
@@ -197,8 +197,8 @@ ostream& operator<<(ostream& s, const HTrans<TT>& t);
 /**************************************************************************/
 /**************************************************************************/
 
-template class HTrans<Float_t>; 
-template class HTrans<Double_t>; 
+template class HTrans<Float_t>;
+template class HTrans<Double_t>;
 
 /**************************************************************************/
 // Specializations

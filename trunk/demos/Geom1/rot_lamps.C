@@ -25,7 +25,7 @@
   lamp_base->MoveLF(3, 3.5);
   g_queen->CheckIn(lamp_base);
   rot_lamps->Add(lamp_base);
-  
+
   l = new Lamp("Lamp1");
   l->SetDiffuse(1, 0.3, 0.4);
   l->MoveLF(1, 5);

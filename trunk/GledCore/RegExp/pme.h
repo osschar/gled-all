@@ -53,7 +53,7 @@ public:
 	/// s is the regular expression, opts are PCRE flags bit-wise or'd together
 	PME(const char * s, unsigned opts );
 
-	/// s is the regular expression, opts is a perl-like string of modifier letters "gi" is global and case insensitive  
+	/// s is the regular expression, opts is a perl-like string of modifier letters "gi" is global and case insensitive
 	PME ( const char * s, const std::string & opts = "" );
 
 	/// PME copy constructor
@@ -67,7 +67,7 @@ public:
 
 	/// stores results from matches
 	typedef pair<int, int> markers;
-	
+
 	/// returns options set on this object
 	unsigned				options();
 
@@ -83,7 +83,7 @@ public:
 );
 
 	/// substitutes out whatever matches the regex for the second paramter
-	std::string             sub ( const std::string & s, 
+	std::string             sub ( const std::string & s,
 								  const std::string & r,
 								  int dodollarsubstitution = 1 );
 
@@ -129,7 +129,7 @@ protected:
 
 	int m_isglobal; ///< non-pcre flag for 'g' behaviour
 	int lastglobalposition; ///< end of last match when m_isglobal != 0
-	
+
 	/// compiles the regex -- automatically called on construction
 	void compile(const std::string & s);
 
@@ -138,10 +138,10 @@ protected:
 
 	/// takes perl-style character modifiers and determines the corresponding PCRE flags
 	unsigned int DeterminePcreOptions ( const std::string & opts = "" );
-	
+
 	/// deals with $1-type constructs in the replacement string in a substitution
 	std::string UpdateReplacementString ( const std::string & r );
-	
+
 
 	/// flag as to whether this regex is valid (compiled without error)
 	int                     nValid;

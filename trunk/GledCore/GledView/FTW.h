@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -104,7 +104,7 @@ public:
 
 protected:
   Loc_e	m_loc;
-    
+
   FTW_Leaf*	get_leaf();
   FTW_Ant*	get_ant();
 
@@ -293,7 +293,7 @@ public:
   virtual ~Null_Selector() {}
 
   void set_nest(FTW_Nest* n);
-    
+
   virtual void activate  ();
   virtual void deactivate();
   virtual int handle(int ev);
@@ -312,7 +312,7 @@ protected:
   Bot_Selector*	wCurrent;
 
   //    ListOpsSelector*	wListOpsSel;
-    
+
 public:
   Source_Selector(FTW_Shell* s, int x, int y, int dw, const char* t);
   virtual ~Source_Selector() {}
@@ -360,7 +360,7 @@ public:
   public:
   Target_Selector();
 
-    
+
   };
 */
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -42,7 +42,7 @@ void cb_separator_dialog(Fl_Button* sep, FTW_Leaf* l)
 //
 // One line of FTW_Nest.
 // Provides functionality for displaying links and custom MTW_Views.
-// 
+//
 // Interface for displaying subclasses of ZList also provided, but methods
 // are virtual and trivially implemented. Overriden in FTW_Branch : pub FTW_Leaf.
 //
@@ -112,7 +112,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
     if(eltype == AList::ET_Id || eltype == AList::ET_Label)
       wListDesignation = new FTW::ListDesignator(l->elrep_can_edit_label());
   }
-    
+
   wSepBox = new Fl_Button(0,0,1,1,0);
   if(fImg && fImg->fIsList && fImg->GetList()->el_type() >= AList::ET_Id) {
     wSepBox->box(FTW::postnamebox_box);
@@ -333,7 +333,7 @@ void FTW_Leaf::resize_weeds() {
   }
   wSepBox->size(ni->GetWSepBox(), 1);
   wFrontPack->size(1,1);
-  
+
   int ant_w  = ni->GetWAnt();
   int cell_w = mNest->get_swm_manager()->cell_w();
   for(int c=0; c<wAntPack->children(); ++c) {

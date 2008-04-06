@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -88,7 +88,7 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
       glEnable(GL_POLYGON_OFFSET_FILL);
       glPolygonOffset(poly_offa, poly_offa);
     }
-    
+
     if(mText->bBackPoly) {
       rd->GL()->Color(mText->mBGCol);
       glBegin(GL_QUADS);

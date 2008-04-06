@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -24,7 +24,7 @@ void Amphitheatre::_init()
 {
   mNewGuests = 0;
 
-  mNumCh = mNumChFree = 0; 
+  mNumCh = mNumChFree = 0;
 
   mStageSides = 7; mStageRot  = 0;
   mStageSize  = 1; mChairSize = 0.15;
@@ -76,7 +76,7 @@ void Amphitheatre::CreateChairs(Float_t radius, Float_t xoffset, Float_t z,
     pos[0] += xoffset;
     mChairs.push_back(Chair(pos));
   }
-  mNumCh += nchair; mNumChFree += nchair; 
+  mNumCh += nchair; mNumChFree += nchair;
   Stamp(FID());
 }
 
@@ -167,7 +167,7 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
 
   lpZNode_t nodes;
   mNewGuests->CopyListByGlass<ZNode>(nodes);
-  
+
   if(nodes.empty() || mNumChFree <= 0) {
     StopHunt();
     return;
@@ -182,7 +182,7 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
 
     TVector3 x   = node->RefTrans().GetPos();
     Chair* chair = closest_free_chair(x);
-    
+
     x = chair->fPos - x;
     Double_t dx = x.Mag();
     if(dx > max_step) {
@@ -217,7 +217,7 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
 
   for(lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n) {
     TVector3 f;
-    ZNode* node = *n;    
+    ZNode* node = *n;
     TVector3 x(node->RefTrans().GetPos());
     // loop over rivals
     for(lpZNode_i o=nodes.begin(); o!=nodes.end(); ++o) {

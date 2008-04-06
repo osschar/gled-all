@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,7 +23,7 @@ void AEVEventBatch_GL_Rnr::_init()
 
 void AEVEventBatch_GL_Rnr::Draw(RnrDriver* rd)
 {
-  AEVEventBatch& EB = *mAEVEventBatch;  
+  AEVEventBatch& EB = *mAEVEventBatch;
   ZColor cols[4] = { EB.mColAll, EB.mColOK,  EB.mColFail,  EB.mColProc };
 
   glPushMatrix();

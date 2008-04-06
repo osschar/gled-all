@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -44,7 +44,7 @@ FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
   if(ni == 0) throw(_eh + "user-data is not NestInfo.");
 
   FTW_Nest* nest = new FTW_Nest(sh, img, ni->GetDefW(), ni->GetDefH());
-  
+
   nest->SetSWM(sh, true);
   FTW_Leaf* top_leaf = FTW_Leaf::Construct(nest, 0, img, false, false);
   nest->InsertLeaf(top_leaf);
@@ -169,7 +169,7 @@ namespace {
   Fl_Menu_Item s_View_Menu[] = {
     { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
     { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
-    { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER }, 
+    { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER },
     { "Remove Transients",             0, (Fl_Callback*) view_menu_cb, (void*)5, FL_MENU_DIVIDER },
     { "Import Kings",                  0, (Fl_Callback*) view_menu_cb, (void*)6 },
     {0}
@@ -445,7 +445,7 @@ void FTW_Nest::InsertLeaf(FTW_Leaf* newleaf, FTW_Leaf* before) {
 void FTW_Nest::RemoveLeaf(FTW_Leaf* exleaf) {
   // !!!! Check Point/Mark; if so, notify shell for Src/Sink check
   if(exleaf == mPoint.leaf) MigrateLocator(mPoint);
-  if(exleaf == mMark.leaf)  MigrateLocator(mMark);    
+  if(exleaf == mMark.leaf)  MigrateLocator(mMark);
   if(exleaf == mBelowMouse.leaf) mBelowMouse.clear();
 
   for(mpLoc2pLCon_i i=mConsumerMap.begin(); i!=mConsumerMap.end(); ++i) {
@@ -668,7 +668,7 @@ void FTW_Nest::UnregisterLocatorConsumer(FTW::LocatorConsumer* lcon)
   FTW::Locator* loc = lcon->m_base;
   mpLoc2pLCon_i i = mConsumerMap.find(loc);
   if(i != mConsumerMap.end()) {
-    list<FTW::LocatorConsumer*>::iterator j = 
+    list<FTW::LocatorConsumer*>::iterator j =
       std::find(i->second.begin(), i->second.end(), lcon);
     if(j != i->second.end()) {
       i->second.erase(j);
@@ -798,7 +798,7 @@ void FTW_Nest::resize(int x, int y, int w, int h)
 
   int dw = w - this->w(), dh = h - this->h();
   wMainPack->resizable(0);
-  
+
   Fl_Window::resize(x,y,w,h);
 
   mPack->resize(mPack->x(), mPack->y(), mPack->w()+dw, mPack->h()+dh);

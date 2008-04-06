@@ -60,7 +60,7 @@ public:
    */
   //----------------------------------------------------------------------
   bool		Collide(LSSCache& cache, const LSS& lss, const Model& model, const Matrix4x4* worldl=0, const Matrix4x4* worldm=0);
-  // 
+  //
   bool		Collide(LSSCache& cache, const LSS& lss, const AABBTree* tree);
 
 protected:

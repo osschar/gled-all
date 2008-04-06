@@ -120,15 +120,15 @@ inline_ bool AABBTreeCollider::TriBoxOverlap(const Point& center, const Point& e
 	// Stats
 	mNbBVPrimTests++;
 
-	// use separating axis theorem to test overlap between triangle and box 
-	// need to test for overlap in these directions: 
-	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle 
-	//    we do not even need to test these) 
-	// 2) normal of the triangle 
-	// 3) crossproduct(edge from tri, {x,y,z}-directin) 
-	//    this gives 3x3=9 more tests 
+	// use separating axis theorem to test overlap between triangle and box
+	// need to test for overlap in these directions:
+	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle
+	//    we do not even need to test these)
+	// 2) normal of the triangle
+	// 3) crossproduct(edge from tri, {x,y,z}-directin)
+	//    this gives 3x3=9 more tests
 
-	// move everything so that the boxcenter is in (0,0,0) 
+	// move everything so that the boxcenter is in (0,0,0)
 	Point v0, v1, v2;
 	v0.x = mLeafVerts[0].x - center.x;
 	v1.x = mLeafVerts[1].x - center.x;
@@ -206,13 +206,13 @@ inline_ bool OBBCollider::TriBoxOverlap()
 	const Point& v1 = mLeafVerts[1];
 	const Point& v2 = mLeafVerts[2];
 
-	// use separating axis theorem to test overlap between triangle and box 
-	// need to test for overlap in these directions: 
-	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle 
-	//    we do not even need to test these) 
-	// 2) normal of the triangle 
-	// 3) crossproduct(edge from tri, {x,y,z}-directin) 
-	//    this gives 3x3=9 more tests 
+	// use separating axis theorem to test overlap between triangle and box
+	// need to test for overlap in these directions:
+	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle
+	//    we do not even need to test these)
+	// 2) normal of the triangle
+	// 3) crossproduct(edge from tri, {x,y,z}-directin)
+	//    this gives 3x3=9 more tests
 
 	// Box center is already in (0,0,0)
 
@@ -265,15 +265,15 @@ inline_ bool AABBCollider::TriBoxOverlap()
 	const Point& center		= mBox.mCenter;
 	const Point& extents	= mBox.mExtents;
 
-	// use separating axis theorem to test overlap between triangle and box 
-	// need to test for overlap in these directions: 
-	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle 
-	//    we do not even need to test these) 
-	// 2) normal of the triangle 
-	// 3) crossproduct(edge from tri, {x,y,z}-directin) 
-	//    this gives 3x3=9 more tests 
+	// use separating axis theorem to test overlap between triangle and box
+	// need to test for overlap in these directions:
+	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle
+	//    we do not even need to test these)
+	// 2) normal of the triangle
+	// 3) crossproduct(edge from tri, {x,y,z}-directin)
+	//    this gives 3x3=9 more tests
 
-	// move everything so that the boxcenter is in (0,0,0) 
+	// move everything so that the boxcenter is in (0,0,0)
 	Point v0, v1, v2;
 	v0.x = mLeafVerts[0].x - center.x;
 	v1.x = mLeafVerts[1].x - center.x;

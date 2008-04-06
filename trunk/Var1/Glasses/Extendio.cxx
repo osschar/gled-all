@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -88,7 +88,7 @@ bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
       ip[0].Mac(V1[0], V1[1]-V1[0], dst[0] / (dst[0] - dst[1]));
       ip[1].Mac(V1[0], V1[2]-V1[0], dst[0] / (dst[0] - dst[2]));
       break;
-    case 6: 
+    case 6:
       ip[0].Mac(V1[1], V1[0]-V1[1], dst[1] / (dst[1] - dst[0]));
       ip[1].Mac(V1[2], V1[0]-V1[2], dst[2] / (dst[2] - dst[0]));
       break;
@@ -227,7 +227,7 @@ bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
       printf("%s(%f,%f,%f), (%f, %f,%f) -- %f\n", debug_prefix,
              ip[0].x, ip[0].y, ip[0].z,
              ip[1].x, ip[1].y, ip[1].z, (ip[1]-ip[0]).Magnitude());
-  
+
 
   // Copy the result
   segment.mP0 = ip[0];

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -25,11 +25,11 @@ void Mountain::DancerCooler(DancerInfo* di)
   static const Exc_t _eh("Mountain::DancerCooler ");
 
   ISdebug(1, _eh + GForm("thread exit for %s", di->fEventor->GetName()));
-  
+
   di->fOpArg->fStop.SetNow();
 
   GLensWriteHolder wrlck(di->fEventor);
-  
+
   DancerInfo* rdi = di->fMountain->UnregisterThread(di->fEventor);
   if(di != rdi) {
     ISerr(_eh + "mismatch between local and global thread data.");
@@ -231,7 +231,7 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
     ISerr(_eh + "Mountain suspended, stalling.");
     return;
   }
-  
+
   hStageLock.Lock();
   if(hOnStage.find(e) != hOnStage.end()) {
     hStageLock.Unlock();
@@ -373,7 +373,7 @@ DancerInfo* Mountain::UnregisterThread(Eventor* e)
     ISerr(_eh + GForm("thread of %s not found.", e->GetName()));
     return 0;
   }
-  hOnStage.erase(i);  
+  hOnStage.erase(i);
   return i->second;
 }
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -33,7 +33,7 @@ class WGlFrameStyle_GL_Rnr : public ZRnrModBase_GL_Rnr {
   void StudyText(GLTextNS::TexFont *txf, TString& label,
 		 float& scale,
 		 float& x, float& y, float& w, float& h);
-		  
+
 
   void RenderTile (float dx, float dy, bool belowmouse=false, const ZColor* col=0);
   void RenderFrame(float dx, float dy);

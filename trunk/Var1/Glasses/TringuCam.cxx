@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -449,7 +449,7 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
     if (fIncKey.fIsDown)
     {
       IncValue(fValue, fIncKey.fDesiredValue, val_acc, val_acc_dfac);
-      
+
       DecayTimeoutOrValue(fDecKey.fDecayTimeout, fDecKey.fDesiredValue,
                           dt, des_decay, des_decay_dfac);
     }

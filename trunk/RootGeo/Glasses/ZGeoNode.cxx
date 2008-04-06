@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -8,7 +8,7 @@
 // ZGeoNode
 //
 // A ZGeoNode serves for representation of root TGeoNode
-// object in Gled framework. 
+// object in Gled framework.
 //
 
 #include "ZGeoNode.h"
@@ -60,9 +60,9 @@ void ZGeoNode::SetTNode(TGeoNode* n)
 /**************************************************************************/
 
 void ZGeoNode::AssertUserData()
-{ 
+{
   // Creates TGLFaceSet object rendered by ZGeoNode_GL_Rnr
-  // and saves it in TGeoVolume.  
+  // and saves it in TGeoVolume.
 
   TGeoVolume* v = GetVolume();
   if (v && ! v->IsAssembly()) {
@@ -73,7 +73,7 @@ void ZGeoNode::AssertUserData()
       v->SetField(userdata);
     }
 
-    if (userdata->fFaceSet == 0) {    
+    if (userdata->fFaceSet == 0) {
       TGeoVolume* vol = GetVolume();
       const TBuffer3D& buff = GetVolume()->GetShape()->
 	GetBuffer3D(TBuffer3D::kRawSizes|TBuffer3D::kRaw, false);
@@ -96,7 +96,7 @@ void ZGeoNode::AssignGGeoTopNode()
 /**************************************************************************/
 
 void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
-{ 
+{
   // Imports mTGeoNode and groups the created nodes by given regular
   // expression.
 
@@ -117,14 +117,14 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
     TString sname = "<no-shp>";
 
     TGeoVolume* v = geon->GetVolume();
-    if(v) {      
+    if(v) {
       vname = v->GetName();
-      
+
       // add only nodes with volume names maching filter
       if (!vname.Contains(filter)){
 	continue;
       }
-      
+
       TGeoShape* s = v->GetShape();
       if(s) {
 	sname = s->GetName();
@@ -137,13 +137,13 @@ void ZGeoNode::ImportByRegExp(const Text_t* target, TRegexp filter)
 }
 
 void ZGeoNode::ImportByRegExp(const Text_t* target, const Text_t* filter)
-{ 
+{
   TRegexp re_filter(filter);
   ImportByRegExp(target, re_filter);
 }
 
 void ZGeoNode::ImportUnimported(const Text_t* target)
-{  
+{
   static const Exc_t _eh("ZGeoNode::ImportUnimported ");
 
   _assert_tnode(_eh, true);
@@ -155,7 +155,7 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
     mQueen->CheckIn(holder);
     Add(holder);
   }
- 
+
   TIter next_node(mTNode->GetNodes());
   TGeoNode* geon;
 
@@ -164,23 +164,23 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
     const char* sname = "<no-shp>";
 
     TGeoVolume* v = geon->GetVolume();
-    if(v) {      
+    if(v) {
       vname = v->GetName();
       TGeoShape* s = v->GetShape();
       if(s) {
 	sname = s->GetName();
       }
 
-      GeoUserData* ud = dynamic_cast<GeoUserData*> (v->GetField());     
+      GeoUserData* ud = dynamic_cast<GeoUserData*> (v->GetField());
       if (ud == 0) {
         insert_node(geon, holder, GForm("%s::%s", vname, sname));
       }
-      
+
       if (ud && ((ud->bIsImported) == false)) {
         insert_node(geon, holder, GForm("%s::%s", vname, sname));
       }
       ni++;
-    } 
+    }
   }
   if(ni) SetRnrSelf(false);
 }
@@ -191,8 +191,8 @@ void ZGeoNode::ImportUnimported(const Text_t* target)
 
 void ZGeoNode::ImportNodes()
 {
-  // Reads mTGeoNode and creates  
-  // representative ZGeoNode node. 
+  // Reads mTGeoNode and creates
+  // representative ZGeoNode node.
 
   static const Exc_t _eh("ZGeoNode::ImportNodes ");
   _assert_tnode(_eh);
@@ -208,7 +208,7 @@ void ZGeoNode::ImportNodes()
     const char* sname = "<no-shp>";
 
     TGeoVolume* v = geon->GetVolume();
-    if(v) {      
+    if(v) {
       vname = v->GetName();
       TGeoShape* s = v->GetShape();
       if(s) {
@@ -227,15 +227,15 @@ void  ZGeoNode::Collapse()
   SetRnrSelf(true);
 }
 
-void ZGeoNode::ImportNodesWCollect() 
+void ZGeoNode::ImportNodesWCollect()
 {
-  // Import mTGeoNode and groups the nodes by 
+  // Import mTGeoNode and groups the nodes by
   // mother volume name.
 
   static const Exc_t _eh("ZGeoNode::ImportNodesWCollect ");
 
   _assert_tnode(_eh);
-  
+
   RemoveLensesViaQueen(true);
 
   map<TString, ZGeoNode*> nmap;
@@ -247,7 +247,7 @@ void ZGeoNode::ImportNodesWCollect()
     const char* sname = "<no-shp>";
 
     TGeoVolume* v = geon->GetVolume();
-    if(v) {      
+    if(v) {
       vname = v->GetName();
       TGeoShape* s = v->GetShape();
       if(s) {
@@ -294,7 +294,7 @@ void ZGeoNode::SaveToFile(Bool_t as_top_level, Bool_t save_links,
 			  const Text_t* file)
 {
   static const Exc_t _eh("ZGeoNode::SaveToFile ");
-  
+
   if(file == 0 || strcmp(file,"") == 0) file = mDefFile.Data();
   ISdebug(1, _eh + "saving to '" + file + "'.");
 
@@ -391,15 +391,15 @@ void ZGeoNode::setup_color(Float_t alpha)
 
 /**************************************************************************/
 
-ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder, 
+ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
 			        const Text_t* title)
 {
-  // Creates ZGeoNode object from exported TGeoNode and adds it 
+  // Creates ZGeoNode object from exported TGeoNode and adds it
   // to mGlasses list.
 
   TGeoVolume* v = geon->GetVolume();
   ZGeoNode *nn = new ZGeoNode(geon->GetName(), title);
-    
+
   nn->mTNode = geon;
   setup_ztrans(nn, geon->GetMatrix());
   nn->mTNodeName = geon->GetName();
@@ -414,7 +414,7 @@ ZGeoNode* ZGeoNode::insert_node(TGeoNode* geon, ZNode* holder,
   holder->Add(nn);
   nn->AssertUserData();
   nn->setup_color(mNodeAlpha);
-  
+
   // printf("%-16s %-6s  [%p]\n", geon->GetName(), title,  v);
   return nn;
 }
@@ -450,7 +450,7 @@ ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
     mQueen->CheckIn(next);
     Add(next);
   }
-  
+
   node_names.pop_front();
   return next->set_holder(node_names);
 }
@@ -458,11 +458,11 @@ ZGeoNode* ZGeoNode::set_holder(lStr_t& node_names)
 /************************************************************************/
 
 Bool_t ZGeoNode::locate_tnode(ZGeoNode* zn, TGeoNode* cur_node)
-{  
+{
   // Searches TGeoNode from cur_node whith name zn->mTNodeName
   // and sets the mTNode value to zn. The function is needed when
   // restoring geometry from *.root files.
- 
+
   TGeoVolume* vol = cur_node->GetVolume();
 
   TGeoNode* n = 0;

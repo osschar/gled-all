@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -16,7 +16,7 @@ class ZEunuch : public ZHashList {
 
 public:
   enum RequestType_e   { RT_Undef, RT_Pull, RT_Push };
-  enum PushStrategy_e  { PS_Undef, PS_All, PS_Saturn, PS_SaturnList, 
+  enum PushStrategy_e  { PS_Undef, PS_All, PS_Saturn, PS_SaturnList,
 			 PS_FollowSecQueen };
 private:
   void _init();
@@ -32,7 +32,7 @@ protected:
 
   // Push subdefs. Also mToSaturn, list contents and mSecQueen
   PushStrategy_e mPushStrategy;	// X{gS} 7 PhonyEnum()
-  
+
 
 public:
   ZEunuch(const Text_t* n="ZEunuch", const Text_t* t=0) : ZHashList(n,t)

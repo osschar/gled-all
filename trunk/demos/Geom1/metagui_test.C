@@ -184,7 +184,7 @@ void metagui_test()
   CREATE_ADD_GLASS(gforge, GForger, images, "GForger", 0);
   gforge->SetImage(image3);
   gforge->SetTerrain(terrain);
-   
+
   //--------------------------------
 
   CREATE_ATT_GLASS(clipplane, ZGlClipPlane, morphs[1], SetRnrMod,
@@ -198,7 +198,7 @@ void metagui_test()
 
   CREATE_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
 
-  CREATE_ADD_GLASS(ovl_lamp, Lamp, overlay, "Ovl Lamp", 0);  
+  CREATE_ADD_GLASS(ovl_lamp, Lamp, overlay, "Ovl Lamp", 0);
   ovl_lamp->SetPos(0, -5, 10);
   ovl_lamp->SetScale(1);
   overlay->GetGlobLamps()->Add(ovl_lamp);

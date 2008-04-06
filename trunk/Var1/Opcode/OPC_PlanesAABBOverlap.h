@@ -22,7 +22,7 @@ PlanesCollider::PlanesAABBOverlap(const Point& center, const Point& extents,
 
   const Plane* p = mPlanes;
 
-  // Evaluate through all active frustum planes. We determine the relation 
+  // Evaluate through all active frustum planes. We determine the relation
   // between the AABB and a plane by using the concept of "near" and "far"
   // vertices originally described by Zhang (and later by Möller). Our
   // variant here uses 3 fabs ops, 6 muls, 7 adds and two floating point
@@ -31,7 +31,7 @@ PlanesCollider::PlanesAABBOverlap(const Point& center, const Point& extents,
   // clip mask. Most FPUs have a native single-cycle fabsf() operation.
 
   udword Mask		= 1;	// current mask index (1,2,4,8,..)
-  udword TmpOutClipMask	= 0;	// initialize output clip mask into empty. 
+  udword TmpOutClipMask	= 0;	// initialize output clip mask into empty.
 
   while(Mask <= in_clip_mask)	// keep looping while we have active planes left.
     {
@@ -41,7 +41,7 @@ PlanesCollider::PlanesAABBOverlap(const Point& center, const Point& extents,
           float NP = extents.x*fabsf(p->n.x) + extents.y*fabsf(p->n.y) + extents.z*fabsf(p->n.z);
           float MP = center.x*p->n.x + center.y*p->n.y + center.z*p->n.z + p->d;
 
-          if(NP < MP)		// near vertex behind the clip plane ... 
+          if(NP < MP)		// near vertex behind the clip plane ...
             return false;	// ... so there is no intersection.
           if((-NP) < MP)	// near and far vertices on different sides of plane..
             TmpOutClipMask |= Mask; // ... so update the clip mask.

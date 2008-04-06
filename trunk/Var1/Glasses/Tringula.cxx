@@ -1,13 +1,13 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
 // Tringula
 //
-// 
+//
 
 #include "Tringula.h"
 #include <Glasses/ZHashList.h>
@@ -36,7 +36,7 @@ void Tringula::_init()
 {
   // Override settings from ZGlass
   bUseDispList = true;
-  
+
   bSmoothShade = false;
   bLightMesh   = true;
 
@@ -113,8 +113,8 @@ void Tringula::ColorByCoord(Int_t axis, Float_t fac, Float_t offset)
   mPalette->SetMinFlt(min);
   mPalette->SetMaxFlt(max);
 
-  Float_t* V = TT->mVerts;
-  UChar_t* C = TT->mCols;
+  Float_t* V = TT->Verts();
+  UChar_t* C = TT->Cols();
   for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
     mPalette->ColorFromValue(min + (V[axis]-min)*fac + dlt*offset, C);
 
@@ -142,8 +142,8 @@ void Tringula::ColorByNormal(Int_t axis, Float_t min, Float_t max)
   mPalette->SetMinFlt(min);
   mPalette->SetMaxFlt(max);
 
-  Float_t* N = TT->mNorms;
-  UChar_t* C = TT->mCols;
+  Float_t* N = TT->Norms();
+  UChar_t* C = TT->Cols();
   for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
     mPalette->ColorFromValue(N[axis], C);
 
@@ -169,8 +169,8 @@ void Tringula::ColorByCoordFormula(const Text_t* formula, Float_t min, Float_t m
   mPalette->SetMinFlt(min);
   mPalette->SetMaxFlt(max);
 
-  Float_t* V = TT->mVerts;
-  UChar_t* C = TT->mCols;
+  Float_t* V = TT->Verts();
+  UChar_t* C = TT->Cols();
   for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
     mPalette->ColorFromValue((Float_t) tf3.Eval(V[0], V[1], V[2]), C);
 
@@ -193,8 +193,8 @@ void Tringula::ColorByNormalFormula(const Text_t* formula, Float_t min, Float_t 
   TF3 tf3(GForm("Tringula_CBNF_%d", GetSaturnID()), formula, 0, 0);
   tf3.SetRange(-1, 1, -1, 1, -1, 1);
 
-  Float_t* N = TT->mNorms;
-  UChar_t* C = TT->mCols;
+  Float_t* N = TT->Norms();
+  UChar_t* C = TT->Cols();
   for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
     mPalette->ColorFromValue((Float_t) tf3.Eval(N[0], N[1], N[2]), C);
 
@@ -340,7 +340,7 @@ Statico* Tringula::NewStatico(const Text_t* sname)
 }
 
 Statico* Tringula::RandomStatico(ZVector *mesh_list,
-                                 Bool_t   check_inside, 
+                                 Bool_t   check_inside,
                                  Int_t    max_tries)
 {
   // Randomly select a mesh for statico from mesh_list and place it on
@@ -555,7 +555,7 @@ void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)
   const Text_t* debug_prefix = verbose ? "        " : 0;
 
   AABBTreeCollider collider;
-    
+
   for (UInt_t i = 0; i < pairs.GetNbPairs(); ++i)
   {
     const Pair& p  = * pairs.GetPair(i);
@@ -659,7 +659,7 @@ void Tringula::DoSplitBoxPrunning()
 
       segments.Clear();
     }
-    
+
   }
 
   //printf("Box-o-pruno on %3u: res=%d, npairs=%3u, time=%f\n",
@@ -886,7 +886,7 @@ void Tringula::setup_dyno_pruner()
 /******************************************************************************/
 
 void Tringula::handle_edge_crossing
-( Dynamico& D, Opcode::Point& old_pos, Opcode::Point& pos, 
+( Dynamico& D, Opcode::Point& old_pos, Opcode::Point& pos,
   Int_t plane, Float_t dist )
 {
   using namespace Opcode;

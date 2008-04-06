@@ -85,7 +85,7 @@ void spheres()
   mv->SetNode(top_sphere); mv->SetRi(1); mv->SetRj(2); mv->SetRa(0.001);
   g_queen->CheckIn(mv);
   etor->Add(mv);
-  
+
   // Spawn GUI
   Gled::Macro("eye.C");
   setup_pupil_up_reference();

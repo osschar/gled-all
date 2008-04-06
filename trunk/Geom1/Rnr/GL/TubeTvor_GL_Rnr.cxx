@@ -28,7 +28,7 @@ void TubeTvor_GL_Rnr::QuadStrip(TubeTvor::vRingInfo_i r1, TubeTvor::vRingInfo_i 
     for(int j=0; j<=r1->fNVert; j++) {
       glArrayElement(r1->fIndex+j); glArrayElement(r2->fIndex+j);
     }
-    // glArrayElement(r1->fIndex); glArrayElement(r2->fIndex);	
+    // glArrayElement(r1->fIndex); glArrayElement(r2->fIndex);
   } glEnd();
 }
 

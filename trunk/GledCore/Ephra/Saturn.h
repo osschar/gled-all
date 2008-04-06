@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -106,7 +106,7 @@ protected:
   typedef hash_map<ZGlass*, list<GThread*> >           hpZGlass2lpGThread_t;
   typedef hash_map<ZGlass*, list<GThread*> >::iterator hpZGlass2lpGThread_i;
 
-  hpZGlass2lpGThread_t  mDetachedThreadsHash;  
+  hpZGlass2lpGThread_t  mDetachedThreadsHash;
 #endif
 
   // Saturn services ... preliminary
@@ -189,7 +189,7 @@ protected:
 #endif
 
   GMutex		mBeamReqHandleMutex;
-  UInt_t		mLastBeamReqHandle;			
+  UInt_t		mLastBeamReqHandle;
 
   UInt_t    register_mir_result_request(GCondition* cond);
   ZMIR_RR*  query_mir_result(UInt_t req_handle);

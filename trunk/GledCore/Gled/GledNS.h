@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -34,7 +34,7 @@ namespace GledViewNS {
 }
 
 namespace GledNS {
-  
+
   /**************************************************************************/
   // Rnr Bits and Ctrl
   /**************************************************************************/
@@ -285,7 +285,7 @@ namespace GledNS {
 
   void AssertRenderers();
   void AddRenderer(const TString& rnr);
-  
+
   A_Rnr* SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid);
 
   /**************************************************************************/
@@ -360,7 +360,7 @@ namespace GledNS {
   template <class GLASS>
   GLASS StreamLensByGlass(TBuffer& b) {
     ZGlass* lens = StreamLens(b);
-    if(lens) { 
+    if(lens) {
       GLASS ret = dynamic_cast<GLASS>(lens);
       if(ret == 0) delete lens;
       return ret;
@@ -374,7 +374,7 @@ namespace GledNS {
   /**************************************************************************/
 
   Double_t peek_value(void* addr, Int_t type);
-  void     stream_value(TBuffer& b, Int_t type, Double_t value); 
+  void     stream_value(TBuffer& b, Int_t type, Double_t value);
 
   /**************************************************************************/
   // Simple TString parser

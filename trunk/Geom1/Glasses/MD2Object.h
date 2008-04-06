@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,23 +19,23 @@ public:
   {
     int iMagic;
     int iVersion;
-    int iSkinWidth; 
-    int iSkinHeight; 
-    int iFrameSize; 
-    int iNumSkins; 
-    int iNumVertices; 
-    int iNumTexCoords; 
-    int iNumTriangles; 
-    int iNumGlCommands; 
-    int iNumFrames; 
-    int iOffsetSkins; 
-    int iOffsetTexCoords; 
-    int iOffsetTriangles; 
-    int iOffsetFrames; 
-    int iOffsetGlCommands; 
-    int iOffsetEnd; 
+    int iSkinWidth;
+    int iSkinHeight;
+    int iFrameSize;
+    int iNumSkins;
+    int iNumVertices;
+    int iNumTexCoords;
+    int iNumTriangles;
+    int iNumGlCommands;
+    int iNumFrames;
+    int iOffsetSkins;
+    int iOffsetTexCoords;
+    int iOffsetTriangles;
+    int iOffsetFrames;
+    int iOffsetGlCommands;
+    int iOffsetEnd;
   };
-	
+
   struct MD2Triangle
   {
     short iVertexIndex[3];

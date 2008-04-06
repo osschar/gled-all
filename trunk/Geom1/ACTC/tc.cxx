@@ -77,7 +77,7 @@ int tableRetrieve(int a, TableRoot *table, void **ref)
         return 0;
     if(!table->Table[i1]->Table[i2]->IsSet[i3])
         return 0;
-    if(ref != NULL) 
+    if(ref != NULL)
         *ref = table->Table[i1]->Table[i2]->Table[i3];
     return 1;
 }
@@ -176,7 +176,7 @@ int tableIterate(TableRoot *table, TableIterator *ti, int *i, void **ref)
 		ti->CheckLevel1 = 1;
 	    }
 	    continue;
-	} else 
+	} else
 	    ti->CheckLevel2 = 0;
 	if(ti->i3 == 0)
 	    ti->CurLevel3 = table->Table[ti->i1]->Table[ti->i2];
@@ -287,7 +287,7 @@ typedef struct ACTCVertex {
     struct ACTCVertex **PointsToMe;
     struct ACTCVertex *Next;
     int EdgeCount;
-    ACTCEdge *Edges;	
+    ACTCEdge *Edges;
 } ACTCVertex;
 
 /* private tokens */
@@ -538,7 +538,7 @@ static int decVertexValence(ACTCData *tc, ACTCVertex **vptr)
 	)
 	return tc->Error = ACTC_DATABASE_CORRUPT;
     }
-    
+
     if(v->PointsToMe != NULL) {
 	*v->PointsToMe = v->Next;
 	if(v->Next != NULL)

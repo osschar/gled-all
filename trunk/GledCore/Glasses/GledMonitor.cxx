@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -62,7 +62,7 @@ void GledMonitor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
     gSystem->ClosePipe(p);
 
     UInt_t dt = 0; for(int i=0; i<4; ++i) dt += j[i] - m_j[i];
-    
+
     ctot  = (Float_t)(j[0]-m_j[0] + j[1]-m_j[1] + j[2]-m_j[2])/dt;
     ctot  = int(1000*ctot)/1000.0;
     cusr  = (Float_t)(j[0]-m_j[0])/dt;

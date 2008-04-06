@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -180,7 +180,7 @@ void PupilInfo::SmoothCameraHome(ZNode* new_base)
 /**************************************************************************/
 
 void PupilInfo::Zoom(Float_t delta)
-{ 
+{
   switch(mProjMode) {
   case P_Perspective: {
     SetZFov (mZFov + 5*delta);
@@ -195,7 +195,7 @@ void PupilInfo::Zoom(Float_t delta)
 }
 
 void PupilInfo::ZoomFac(Float_t fac)
-{ 
+{
   switch(mProjMode) {
   case P_Perspective: {
     SetZFov (fac*mZFov);
@@ -244,7 +244,7 @@ ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
 
   ZTrans* n2p = ToPupilFrame(node);
   if(n2p == 0) return 0;
-  
+
   ZNode* cam_base = mCameraBase.get();
   if(cam_base) {
     ZTrans* c2p = ToPupilFrame(cam_base);

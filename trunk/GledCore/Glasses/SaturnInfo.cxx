@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -21,7 +21,7 @@
 
 ClassImp(SaturnInfo)
 
-SaturnInfo::SaturnInfo(const Text_t* n, const Text_t* t) : 
+SaturnInfo::SaturnInfo(const Text_t* n, const Text_t* t) :
   ZMirEmittingEntity(n,t)
 {
   hSocket = 0; hRoute = 0;
@@ -121,7 +121,7 @@ void SaturnInfo::handle_login(TMessage* msg)
 {
   // Called by SunAbsoulte upon receiving login request.
 
-  
+
 }
 
 void SaturnInfo::login_result()

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -68,7 +68,7 @@ public:
 
   // Connection and travelers
   //-------------------------
-protected:  
+protected:
   Float_t     mDefVelocity; // X{GS} 7 Value(-range=>[0,1e3,1,1000], -join=>1)
   Float_t     mMinWaitTime; // X{GS} 7 Value(-range=>[0,1e3,1,1000])
 

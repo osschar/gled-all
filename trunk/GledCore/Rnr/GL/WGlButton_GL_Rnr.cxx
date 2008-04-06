@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -33,7 +33,7 @@ void WGlButton_GL_Rnr::Draw(RnrDriver* rd)
 {
   obtain_rnrmod(rd, mFontRMS);
   obtain_rnrmod(rd, mFrameRMS);
-  
+
   GLTextNS::TexFont    *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
   WGlFrameStyle_GL_Rnr &FSR = *(WGlFrameStyle_GL_Rnr*)mFrameRMS.rnr();
 
@@ -53,7 +53,7 @@ int WGlButton_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     Redraw(rd);
     return 1;
   }
-  
+
   if(ev.fEvent == FL_ENTER) {
     bBelowMouse = true;
     Redraw(rd);

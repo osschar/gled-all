@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -70,7 +70,7 @@ void AEVAlienUI::Connect()
     //     mBDP.fAtoBName.c_str(), mBDP.fBtoAName.c_str(), mBDP.fDir.c_str())
     //  );
 
-    mBDP.open_BtoA();  
+    mBDP.open_BtoA();
     mBDP.read_line();
     if(strncmp(mBDP.fRB,"ERR",3) == 0) {
       mBDP.read_line();
@@ -189,7 +189,7 @@ void AEVAlienUI::LoadSites(const Text_t* file)
 
 /**************************************************************************/
 
-void AEVAlienUI::FindExCountFilesPerSite(map<string,int>& cmap, 
+void AEVAlienUI::FindExCountFilesPerSite(map<string,int>& cmap,
 					 const Text_t* path,
 					 const Text_t* wcard)
 {

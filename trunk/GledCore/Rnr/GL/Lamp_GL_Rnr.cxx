@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -22,7 +22,7 @@ void Lamp_GL_Rnr::Draw(RnrDriver* rd)
   if(mLampID == -1)
     if(mLamp->bOnIfOff)      LampOn(rd);
     else if(mLamp->bOffIfOn) LampOff(rd);
-    
+
   if(mLampID != -1 && mLamp->bDrawLamp) {
     glPushMatrix();
     glPushAttrib(GL_CURRENT_BIT | GL_TRANSFORM_BIT);

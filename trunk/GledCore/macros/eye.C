@@ -21,7 +21,7 @@ void eye(Bool_t spawn_pupil=true)
     g_fire_queen->Add(g_shell);
 
     g_nest = new_nest();
-    g_shell->SetDefSubShell(g_nest);    
+    g_shell->SetDefSubShell(g_nest);
   }
 
   if(spawn_pupil)
@@ -49,7 +49,7 @@ NestInfo* new_nest(const Text_t* name="Nest", const Text_t* layout = 0)
 
   NestInfo* ni = new NestInfo(name);
   g_fire_queen->CheckIn(ni);
-  
+
   if(layout != 0) {
     ni->SetLayout(layout);
     ni->SetLeafLayout(NestInfo::LL_Custom);
@@ -67,7 +67,7 @@ PupilInfo* new_pupil(const Text_t* name="Pupil")
     printf("eye.C::new_pupil g_shell is null. Returning zero.\n");
     return 0;
   }
- 
+
   PupilInfo* pi = new PupilInfo(name);
   g_fire_queen->CheckIn(pi);
   g_shell->AddSubShell(pi);
@@ -108,9 +108,9 @@ ZList* fill_GledCore_layouts(ZList* top)
 
   l->Swallow(new ZGlass("ZGlass",         "ZGlass(Name[20],Title[20],RefCount[6])"));
   l->Swallow(new ZGlass("ZNode",          "ZNode(Pos[18],Rot[18],UseOM[4],OM[5],UseScale[4],Sx[5],Sy[5],Sz[5],KeepParent[4])"));
-  l->Swallow(new ZGlass("ZQueen Basic state",         
+  l->Swallow(new ZGlass("ZQueen Basic state",
 		       "ZQueen(State,MinID,MaxID,IDSpan,IDsUsed,IDsPurged,IDsFree,AvgPurgLen,SgmPurgLen,PurgedMS,DeletedMS,ZeroRCPolicy)"));
-  l->Swallow(new ZGlass("ZQueen Authorization",         
+  l->Swallow(new ZGlass("ZQueen Authorization",
 		       "ZQueen(AuthMode,Alignment,MapNoneTo)"));
   l->Swallow(new ZGlass("Eventor",        "Eventor(Running[4],Performing[4],Start[4],Stop[4])"));
   l->Swallow(new ZGlass("Saturn monitor", "SaturnInfo(LAvg1,LAvg5,LAvg15,Memory,MFree,Swap,SFree,CU_Total[6],CU_User[6])"));

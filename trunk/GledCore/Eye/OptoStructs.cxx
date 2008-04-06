@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -34,7 +34,7 @@ ZGlassImg::ZGlassImg(Eye* e, ZGlass* lens) : fEye(e), fLens(lens)
   fElementImgs  = 0;
   fDefRnr       = 0;
   fFullMTW_View = 0;
- 
+
   ZGlass::lLinkRep_t lreps; lens->CopyLinkReps(lreps);
   for(ZGlass::lLinkRep_i i = lreps.begin(); i != lreps.end(); ++i) {
     fLinkData.push_back(ZLinkDatum(this, *i));
@@ -93,7 +93,7 @@ lpZGlassImg_t* ZGlassImg::GetElementImgs()
   lpZGlass_t d; l->CopyList(d);
   for(lpZGlass_i i=d.begin(); i!=d.end(); ++i) {
     fElementImgs->push_back(fEye->DemanglePtr(*i));
-  }  
+  }
   return fElementImgs;
 }
 

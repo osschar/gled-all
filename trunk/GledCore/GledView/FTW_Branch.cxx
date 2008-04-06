@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -182,7 +182,7 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 	remove_leaf(mLeaves.begin());
 	break;
 
-      case RQN_list_insert: 
+      case RQN_list_insert:
 	insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
 	break;
       case RQN_list_remove:
@@ -367,7 +367,7 @@ void FTW_Branch::SpawnSeparatorDialog()
     gLeafDesignationCtrl = new LeafDesignationCtrl();
     gLeafDesignationCtrl->set_non_modal();
     mNest->GetShell()->adopt_window(gLeafDesignationCtrl);
-    
+
   }
   gLeafDesignationCtrl->set_branch(this);
   gLeafDesignationCtrl->hotspot(gLeafDesignationCtrl);

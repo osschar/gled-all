@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -68,7 +68,7 @@ void GLTesterOne::RunTest()
 {
   h1TStat->Reset();
   h1TStat->SetBins(200, 0, 1);
-  
+
   for(int i=0; i<mNTrial; ++i) {
     mPupil->ImmediateRedraw();
   }

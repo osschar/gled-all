@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -20,7 +20,7 @@ void AEV_NS::BiDiPipe::init(const string& base) {
   if(mkdtemp((char*)fDir.c_str()) == 0) {
     throw(_eh + "mkdtemp failed.");
   }
-    
+
   fAtoBName = GForm("%s/AtoB", fDir.c_str());
   mknod(fAtoBName.c_str(), 0666 | S_IFIFO, 0);
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -41,29 +41,29 @@ class WGlDirectory : public ZNode {
   Bool_t            bDrawBox;      // X{GS} 7 Bool()
   Float_t           mBoxOx;        // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
   Float_t           mBoxOy;        // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
-  Float_t           mBoxOz;        // X{GS} 7 Value(-range=>[-1000,1000,1,1000])       
+  Float_t           mBoxOz;        // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
   Float_t           mBoxDx;        // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t           mBoxDy;        // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
-  Float_t           mBoxDz;        // X{GS} 7 Value(-range=>[0,1000,1,1000])       
+  Float_t           mBoxDz;        // X{GS} 7 Value(-range=>[0,1000,1,1000])
 
   Bool_t            bDrawText;     // X{GS} 7 Bool(-join=>1)
   Bool_t            bDrawTitle;    // X{GS} 7 Bool(-join=>1)
   Float_t           mNameFraction; // X{GS} 7 Value(-range=>[0,1,1,1000])
   Float_t           mTextOx;       // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
   Float_t           mTextOy;       // X{GS} 7 Value(-range=>[-1000,1000,1,1000], -join=>1)
-  Float_t           mTextOz;       // X{GS} 7 Value(-range=>[-1000,1000,1,1000])       
+  Float_t           mTextOz;       // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
   Float_t           mTextDx;       // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t           mTextDy;       // X{GS} 7 Value(-range=>[0,1000,1,1000])
   Float_t           mTextA1;       // X{GS} 7 Value(-range=>[-360,360,1,1000], -join=>1)
   Float_t           mTextA2;       // X{GS} 7 Value(-range=>[-360,360,1,1000], -join=>1)
-  Float_t           mTextA3;       // X{GS} 7 Value(-range=>[-360,360,1,1000])       
+  Float_t           mTextA3;       // X{GS} 7 Value(-range=>[-360,360,1,1000])
 
   ZColor            mBoxColor;     // X{GSP} 7 ColorButt(-join=>1)
   ZColor            mSelColor;     // X{GSP} 7 ColorButt()
 
   Bool_t            bDrawPageCtrl;  // X{GS} 7 Bool()
-  ZColor            mPageColor;     // X{GSP} 7 ColorButt(-join=>1) 
-  ZColor            mSymColor;      // X{GSP} 7 ColorButt() 
+  ZColor            mPageColor;     // X{GSP} 7 ColorButt(-join=>1)
+  ZColor            mSymColor;      // X{GSP} 7 ColorButt()
   Float_t           mPageCtrlWidth;           // X{GS} 7 Value(-range=>[0,1,1,1000],-join=>1)
   Float_t           mPageInfoWidth;           // X{GS} 7 Value(-range=>[0,1,1,1000])
   Float_t           mPageCtrlOff;         // X{GS} 7 Value(-range=>[0,1,1,1000],-join=>1)

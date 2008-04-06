@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -36,7 +36,7 @@ void AlContext::Open()
   if(mDevice != 0) {
     ISerr(_eh + "device already opened.");
     return;
-  } 
+  }
 
   mDevice = alcOpenDevice(0);
   if(mDevice == 0)
@@ -61,5 +61,5 @@ void AlContext::Close()
     alcMakeContextCurrent(0);
   alcDestroyContext(mContext); mContext = 0;
   alcCloseDevice(mDevice);     mDevice  = 0;
-  
+
 }

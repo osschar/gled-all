@@ -1,5 +1,5 @@
 /// $Header$
-// 
+//
 //
 // vars: ZQueen* g_queen
 // libs: Geom1
@@ -69,7 +69,7 @@ void AliLoader(const Text_t* dirname = 0,
   CREATE_ATT_GLASS(pick_off, ZRlNameStack, geo_top, SetRnrMod, "Picking Off", 0);
   pick_off->SetClearStack(true); pick_off->SetRestoreStack(true);
   pick_off->SetNameStackOp(0);
-  
+
   ZNode* var = (ZNode*) g_scene->FindLensByPath("Var");
 
   CREATE_ADD_GLASS(image, ZImage, var, "Checker", 0);
@@ -149,8 +149,8 @@ void AliLoader(const Text_t* dirname = 0,
 
   if(dirname != 0) {
     al->SetDataDir(dirname);
-    // Shoot a MIR to have functional GUI during processing: 	 
-    ZMIR* setup_mir = al->S_LoadVSD(); 	 
+    // Shoot a MIR to have functional GUI during processing:
+    ZMIR* setup_mir = al->S_LoadVSD();
     g_saturn->ShootMIR(setup_mir);
   }
 }

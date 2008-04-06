@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -13,7 +13,7 @@
 // appropriate MakeComet() method.
 // Service is rather elementary ... external references are only
 // meaningfull if Saturn layout used for writing/reading is identical.
-// A special class will be provided to make proper references into 
+// A special class will be provided to make proper references into
 // static objects.
 // Comets of type CT_Queen & CT_King are used internally for exportation
 // to connecting Moons.
@@ -103,19 +103,19 @@ ZGlass* ZComet::DemangleID(ID_t id)
 
   if(id == 0) return 0;
   mID2pZGlass_i i;
-  if((i = mIDMap.find(id)) != mIDMap.end()) 
+  if((i = mIDMap.find(id)) != mIDMap.end())
     return i->second;
 
   if(mExtDemangler != 0) {
     ZGlass* l = mExtDemangler->DemangleID(id);
-    if(l == 0 && bVerbose) 
+    if(l == 0 && bVerbose)
       ISmess(_eh + GForm("id %u not found (comet, ext-demangler).", id));
     return l;
   } else {
     if(bVerbose)
       ISmess(_eh + GForm("id %u not found (comet).", id));
     return 0;
-  } 
+  }
 }
 
 /**************************************************************************/

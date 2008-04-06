@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -36,7 +36,7 @@ public:
 
     // Symmetric operator== declared outside of TriMesh.
 
-    struct hash 
+    struct hash
     {
       size_t operator()(const xx_edge& xx) const
       { size_t i = (xx.v1 << 16) + xx.v2; return i; }
