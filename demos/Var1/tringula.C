@@ -323,7 +323,7 @@ void tringula(Int_t mode=0)
 
   ASSIGN_ADD_GLASS(tmaker, TimeMaker, eventor, "TimeMaker", 0);
   tmaker->AddClient(tringula);
-  
+
   CREATE_ADD_GLASS(dumper, ScreenDumper, eventor, "ScreenDumper", 0);
   dumper->SetFileNameFmt("");
   dumper->SetWaitDump(true);
@@ -421,7 +421,7 @@ void tringula(Int_t mode=0)
     Float_t used_surface    = 0;
     Int_t   stato_cnt       = 0;
     Int_t   exc_cnt         = 0;
-    
+
     while (used_surface < desired_surface)
     {
       /*

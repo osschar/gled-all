@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -15,7 +15,7 @@ class SEvTaskState_GL_Rnr {
 public:
   static void RenderHisto(const SEvTaskState& ts, ZColor* cols);
   static void RenderBar(const SEvTaskState& ts, ZColor* cols);
-  
+
 }; // endclass SEvTaskState_GL_Rnr
 
 #endif

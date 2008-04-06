@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -44,7 +44,7 @@ namespace AEV_NS {
 
     const char* read_line();
     string      read_string();
-    
+
     int    read_int();
     double read_double();
   };

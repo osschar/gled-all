@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -122,7 +122,7 @@ void WSTube::connect(WSPoint*& ap, WSPoint*& bp)
   bp->SetTrans(*bt);
   bp->SetW(mDefWidth/2);
   bp->SetScale(-mDefSpread);
-  bp->SetT(mDefTension);  
+  bp->SetT(mDefTension);
 }
 
 void WSTube::disconnect()
@@ -277,9 +277,9 @@ void WSTube::MakeTraveler(Float_t velocity, Float_t wait_time)
   Float_t init_pos = (velocity > 0) ? 0 : len;
 
   Sphere* s = new Sphere("Observator");
-  TransAtTime(s->ref_trans(), init_pos, true);    
+  TransAtTime(s->ref_trans(), init_pos, true);
   s->SetUseScale(true);
-  s->SetSx(2*mDefWidth); s->SetSy(mDefWidth); s->SetSz(mDefWidth); 
+  s->SetSx(2*mDefWidth); s->SetSy(mDefWidth); s->SetSz(mDefWidth);
   s->SetColor(0.2+0.8*mRnd.Rndm(), 0.2+0.8*mRnd.Rndm(), 0.2+0.8*mRnd.Rndm());
   mQueen->CheckIn(s);
   s->SetParent(this);
@@ -318,7 +318,7 @@ void WSTube::TimeTick(Double_t t, Double_t dt)
       Float_t step  = i->fVelocity*dt;
       i->fPosition += step;
       if(i->fShown == false && i->fPosition >= 0 && i->fPosition <= len) {
-	mTravelers->Add(i->fNode);	
+	mTravelers->Add(i->fNode);
 	i->fShown = true;
       }
       if((i->fVelocity < 0 && i->fPosition < 0) ||
@@ -356,7 +356,7 @@ void WSTube::TimeTick(Double_t t, Double_t dt)
 	m_conn_time       = len;
 	mConnectionStauts = CS_Connected;
       done = true;
-      } 
+      }
       conn_travel(m_last_point, m_conn_time/len);
       m_last_point->Stamp(WSPoint::FID());
     }

@@ -247,7 +247,7 @@ static float OPC_SegmentSegmentSqrDist(const Segment& rkSeg0, const Segment& rkS
                 }
             }
         }
-      else 
+      else
         {
           if ( fT >= 0.0f )
             {

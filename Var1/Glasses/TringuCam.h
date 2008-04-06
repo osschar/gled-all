@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -52,7 +52,7 @@ public:
     Float_t fDesiredValue; // Always positive.
     Float_t fDecayTimeout;
 
-    KeyInfo(ValueInfo* val_info, Bool_t is_inc) : 
+    KeyInfo(ValueInfo* val_info, Bool_t is_inc) :
       fValueInfo(val_info), fIsInc(is_inc),
       fIsDown(false), fDesiredValue(0), fDecayTimeout(0) {}
   };

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -267,7 +267,7 @@ void GledGUI::ParseArguments(list<char*>& args)
   Fl_Tooltip::enable();	// enable tooltips
   Fl::visible_focus(0); // no focus for buttons ETC
 
-  if(no_msg_window == false) {  
+  if(no_msg_window == false) {
     build_gui();
     swm_size_range = new SWM_Size_Range(40, 20, 200, 100);
     mSwmManager->adopt_window(this);
@@ -340,7 +340,7 @@ void GledGUI::Exit()
   // Shutdown Eyes, GUI ... then Gled
 
   Gled::Exit();
-  
+
   Fl::lock();
   Fl::awake();
   Fl::unlock();

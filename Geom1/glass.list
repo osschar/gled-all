@@ -22,8 +22,8 @@ WSWalker	67	Glasses/WSWalker
 
 TimeMaker	128	Glasses/TimeMaker
 Sleeper		129	Glasses/Sleeper
-## LocalMover	130	Glasses/LocalMover
-## FormulaMover	131	Glasses/FormulaMover
+LocalMover	130	Glasses/LocalMover
+FormulaMover	131	Glasses/FormulaMover
 # Mover will be removed or replaced by LocalMover. Or sth like that.
 Mover		132	Glasses/Mover
 

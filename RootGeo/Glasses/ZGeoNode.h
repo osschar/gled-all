@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -31,8 +31,8 @@ private:
 
 protected:
   TGeoNode	       *mTNode;     //! X{g}
-  // only restored reference to TGeoNode is its name 
-  TString               mTNodeName; // X{GS}          
+  // only restored reference to TGeoNode is its name
+  TString               mTNodeName; // X{GS}
   Int_t			mNNodes;    // X{G}   7 ValOut(-join=>1);
   Float_t		mNodeAlpha; // X{GS}  7 Value(-range=>[0,1,1,1000])
   TString               mMaterial;  // X{GS}  7 Textor(-join=>1)
@@ -44,7 +44,7 @@ protected:
 
   ZGeoNode* insert_node(TGeoNode* geon, ZNode* holder, const Text_t* name);
   TGeoNode* get_tnode_search_point();
-  ZGeoNode* set_holder(lStr_t& node_names); 
+  ZGeoNode* set_holder(lStr_t& node_names);
   Bool_t    locate_tnode(ZGeoNode* zn, TGeoNode* cur_node);
 
 public:

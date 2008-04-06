@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -397,7 +397,7 @@ ZGlass* GledNS::ReadLensIDAsPtr(TBuffer& b)
   ID_t id;
   b >> id;
   char* p = 0; p += id;
-  return (ZGlass*) p;  
+  return (ZGlass*) p;
 }
 
 /**************************************************************************/
@@ -639,7 +639,7 @@ GledNS::ClassInfo::FindDataMemberInfo(const TString& s, bool recurse, bool throw
 
   lpDataMemberInfo_i i = find_if(fDataMemberList.begin(), fDataMemberList.end(),
 				infobase_name_eq(s));
-  
+
   if(i != fDataMemberList.end()) return *i;
   if(recurse) {
     ClassInfo* p = GetParentCI();
@@ -658,7 +658,7 @@ GledNS::ClassInfo::FindLinkMemberInfo(const TString& s, bool recurse, bool throw
 
   lpLinkMemberInfo_i i = find_if(fLinkMemberList.begin(), fLinkMemberList.end(),
 				infobase_name_eq(s));
-  
+
   if(i != fLinkMemberList.end()) return *i;
   if(recurse) {
     ClassInfo* p = GetParentCI();
@@ -980,7 +980,7 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
 	// cout <<"tokenize_url making token " << part <<","<< (int)type <<endl;
 	l.push_back(url_token(part, type));
 	++count;
-	part = ""; 
+	part = "";
       }
       type = next_type;
     }

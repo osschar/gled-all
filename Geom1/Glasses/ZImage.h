@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -114,7 +114,7 @@ public:
 
   void set_byte(Int_t x, Int_t y, UChar_t w)  { m_data[y*mH + x] = w; }
   void get_byte(Int_t x, Int_t y, UChar_t& w) { w = m_data[y*mH + x]; }
-  
+
   void set_short(Int_t x, Int_t y, UShort_t w)  { ((UShort_t*)m_data)[y*mH + x] = w; }
   void get_short(Int_t x, Int_t y, UShort_t& w) { w = ((UShort_t*)m_data)[y*mH + x]; }
 
@@ -134,10 +134,10 @@ public:
   void add_pixel(Int_t x, Int_t y, Float_t w, Bool_t clip=true);
   void add_pixel(Int_t x, Int_t y, Float_t r, Float_t g, Float_t b, Bool_t clip=true);
   void add_pixel(Int_t x, Int_t y, Float_t r, Float_t g, Float_t b, Float_t a, Bool_t clip=true);
- 
+
   void inc_pixel(Int_t x, Int_t y, Bool_t clip=true);
   void inc_pixel_idx(Int_t idx, Int_t x, Int_t y, Bool_t clip=true);
- 
+
 #include "ZImage.h7"
   ClassDef(ZImage, 1)
 }; // endclass ZImage

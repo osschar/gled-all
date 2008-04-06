@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -208,7 +208,7 @@ void AEVDemoDriver::RunDemo()
   sleep(ss);
 
   QueryJobDetails(dynamic_cast<AEVJobRep*>(mMonaClient->FrontElement()));
-  sleep(ss);  
+  sleep(ss);
 
   ReplayJob(0);
 
@@ -368,7 +368,7 @@ void AEVDemoDriver::QueryJobDetails(AEVJobRep* job_rep)
     mMonaTube->MakeTraveler(2/mTravelTime);
   }
 
-  if(bFakeProcessing == false) { 
+  if(bFakeProcessing == false) {
     auto_ptr<ZMIR> jq( mDistAnRep->S_InitJob(job_rep) );
     mSaturn->ShootMIRWaitResult(jq);
   } else {
@@ -410,7 +410,7 @@ void AEVDemoDriver::ReplayJob(WGlButton* button)
   { GLensWriteHolder wrlck(*mDistAnRep);
     mDistAnRep->ResetJob();
   }
-  if(bFakeProcessing == false) { 
+  if(bFakeProcessing == false) {
     auto_ptr<ZMIR> jq( mDistAnRep->S_StudyJobHistory() );
     mSaturn->ShootMIRWaitResult(jq);
   }
@@ -459,7 +459,7 @@ void AEVDemoDriver::DoJobReplay()
 
   enable_menu();
 
-  if(bFakeProcessing == false) { 
+  if(bFakeProcessing == false) {
     auto_ptr<ZMIR>     jq( mDistAnRep->S_ReplayJobFromHistory() );
     auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(jq) );
     if(res->HasResult()) {
@@ -472,7 +472,7 @@ void AEVDemoDriver::DoJobReplay()
       set_text("Job replay aborted.");
       set_blurp(res->Exception);
     }
-  } else { 
+  } else {
     auto_ptr<ZMIR>     jq( mDistAnRep->S_FakeReplayJobFromHistory() );
     auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(jq) );
     if(res->HasResult()) {
@@ -566,14 +566,14 @@ void AEVDemoDriver::ConnectToProof()
 
   set_text("Logging in ...");
   setup_tube_for_travel(mProofTube, ttravel);
-  { auto_ptr<ZMIR> m( mProofTube->S_TravelAtoB() ); mSaturn->ShootMIR(m); }  
+  { auto_ptr<ZMIR> m( mProofTube->S_TravelAtoB() ); mSaturn->ShootMIR(m); }
 
   sleep(1.2 * ttravel);
 
   set_text("Authenticating ...");
-  { auto_ptr<ZMIR> m(mProofTube->S_TravelBtoA()); mSaturn->ShootMIR(m); }  
+  { auto_ptr<ZMIR> m(mProofTube->S_TravelBtoA()); mSaturn->ShootMIR(m); }
   sleep(0.5);
-  { auto_ptr<ZMIR> m(mProofTube->S_TravelAtoB()); mSaturn->ShootMIR(m); }  
+  { auto_ptr<ZMIR> m(mProofTube->S_TravelAtoB()); mSaturn->ShootMIR(m); }
 
   sleep(1.2 * ttravel);
 
@@ -595,19 +595,19 @@ void AEVDemoDriver::ConnectProofSlaves()
 
   set_text("Sending job to PROOF ...");
 
-  // { auto_ptr<ZMIR> m( mDistAnRep->S_ConnectSlaves() ); mSaturn->ShootMIR(m); }  
+  // { auto_ptr<ZMIR> m( mDistAnRep->S_ConnectSlaves() ); mSaturn->ShootMIR(m); }
 
-  { auto_ptr<ZMIR> m( mProofTube->S_TravelAtoB() ); mSaturn->ShootMIR(m); }  
-  
+  { auto_ptr<ZMIR> m( mProofTube->S_TravelAtoB() ); mSaturn->ShootMIR(m); }
+
   sleep(ttravel);
 
   list<AEVEventBatch*> ebs;
   mDistAnRep->CopyListByGlass<AEVEventBatch>(ebs);
 
-  { auto_ptr<ZMIR> m( mDistAnRep->S_SendEvBatchesToTheatre() ); mSaturn->ShootMIR(m); } 
+  { auto_ptr<ZMIR> m( mDistAnRep->S_SendEvBatchesToTheatre() ); mSaturn->ShootMIR(m); }
   mTheatre->SetStepSleepMS(mSleepMS);
-  { auto_ptr<ZMIR> m( mTheatre->S_StartHunt() ); mSaturn->ShootMIR(m); } 
-  
+  { auto_ptr<ZMIR> m( mTheatre->S_StartHunt() ); mSaturn->ShootMIR(m); }
+
   rotate(*mProof, 5, 1, 2);
 
   set_text("Connecting slaves ...");
@@ -635,8 +635,8 @@ void AEVDemoDriver::ConnectProofSlaves()
     WSTube *tubeptr = 0;
     auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(mir) );
     if(res->HasException()) {
-      cout << _eh << "got exception: " << res->Exception.Data() << endl;  
-    } 
+      cout << _eh << "got exception: " << res->Exception.Data() << endl;
+    }
     if(res->HasResult()) {
       ID_t id; *res >> id;
       tubeptr = dynamic_cast<WSTube*>(mSaturn->DemangleID(id));
@@ -740,7 +740,7 @@ void AEVDemoDriver::VisProofProgress(map<string,int>& siteevmap)
 }
 
 /**************************************************************************/
-                          
+
 void AEVDemoDriver::Report()
 {}
 

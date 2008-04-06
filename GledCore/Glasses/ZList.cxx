@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -160,7 +160,7 @@ ZGlass* ZList::FrontElement()
 }
 
 ZGlass* ZList::BackElement()
-{ 
+{
   ZGlass* l;
   { GMutexHolder _lstlck(mListMutex);
     l = mSize ? mElements.back().fLens : 0;
@@ -417,7 +417,7 @@ void ZList::Swallow(ZGlass* entry, Bool_t replace_p,
   if(ex_entry)
     if(replace_p)
       l->RemoveAll(ex_entry);
-    else 
+    else
       return;
   l->Add(entry);
 }
@@ -446,7 +446,7 @@ void ZList::Streamer(TBuffer &b)
     ID_t  id;
     mElements.clear();
     for(Int_t i=0; i<mSize; ++i) {
-      b >> id >> el_id; 
+      b >> id >> el_id;
       mElements.push_back(element((ZGlass*)id, el_id));
     }
     b.CheckByteCount(R__s, R__c, ZList::IsA());

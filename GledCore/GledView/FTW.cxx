@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -305,7 +305,7 @@ int FTW::NameButton::handle(int ev)
 
   case FL_PUSH: {
     switch(Fl::event_button()) {
-    case 1: 
+    case 1:
       x = Fl::event_x(); y = Fl::event_y(); dx = dy = 0;
       labelcolor(fl_color_cube(2,0,0)); value(1); redraw();
       return 1;
@@ -422,7 +422,7 @@ FTW::NameBox::NameBox(OS::ZGlassImg* i, int x, int y, int w, int h) :
 {
   align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   box(FL_EMBOSSED_BOX);
-  labeltype((Fl_Labeltype)GVNS::no_symbol_label); 
+  labeltype((Fl_Labeltype)GVNS::no_symbol_label);
   if(fImg) {
     label(fImg->fLens->GetName());
   }
@@ -597,7 +597,7 @@ namespace {
       int flags = (k != res.end() && k->first - j->first > 1) ? FL_MENU_DIVIDER : 0;
       menu.add(j->second.Data(), 0, (Fl_Callback*)cid_sel_cb, &datas.back(), flags);
     }
-    menu.popup();    
+    menu.popup();
 
   }
 
@@ -664,7 +664,7 @@ void FTW::Inst_Selector::set_cid(UInt_t c) {
   } else {
     ci = GNS::FindLibSetInfo(get_lid())->FirstClassInfo();
   }
-    
+
   if(ci) {
     ((Inst_SelID*)wCid->user_data())->id = ci->fFid.cid;
     wCid->label( ci->fName.Data() );
@@ -1094,7 +1094,7 @@ void FTW::Sink_Selector::set_type(Type_e t)
 void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
 {
   // Simplistic so far ... add to the list
-  // listness of 
+  // listness of
 
   static const Exc_t _eh("FTW::Sink_Selector::swallow_victim ");
 
@@ -1108,7 +1108,7 @@ void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
     ID_t b = beta->GetSaturnID();
     //ID_t g = gamma ? gamma->GetSaturnID() : 0;
     auto_ptr<ZMIR> mir(new ZMIR(a, b));
-    GNS::MethodInfo* cmi = 
+    GNS::MethodInfo* cmi =
       target->get_class_info()->FindMethodInfo("Add", true);
     if(cmi) {
       cmi->ImprintMir(*mir);
@@ -1128,7 +1128,7 @@ void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
     ID_t b = beta ? beta->GetSaturnID() : 0;
     //ID_t g = gamma ? gamma->GetSaturnID() : 0;
     auto_ptr<ZMIR> mir(new ZMIR(a, b));
-    GNS::MethodInfo* cmi = 
+    GNS::MethodInfo* cmi =
       aimg->GetCI()->FindMethodInfo("Add", true);
     if(cmi) {
       cmi->ImprintMir(*mir);

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -89,9 +89,9 @@ namespace {
     short height;             // image height in pixels
     byte  bits;               // image bits per pixel 8,16,24,32
     byte  descriptor;         // image descriptor bits (vh flip bits)
-    
+
     // pixel data follows header
-    
+
     tga_header(short w, short h) {
       memset(this, 0, sizeof(tga_header));
       imagetype = 2;
@@ -105,7 +105,7 @@ namespace {
       b << bits << descriptor;
       fwrite(b.Buffer(), 1, b.Length(), fp);
     }
-  }; 
+  };
 }
 
 /**************************************************************************/
@@ -204,7 +204,7 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
 	     int x, int y, int w, int h) :
   FTW_SubShell(shell, this),
   OS::A_View(infoimg),
-  Fl_Gl_Window(x,y,w,h), 
+  Fl_Gl_Window(x,y,w,h),
   mCameraCB(this)
 {
   end();
@@ -247,7 +247,7 @@ void Pupil::AbsorbRay(Ray& ray)
     mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
   }
 
-  switch(ray.fRQN) { 
+  switch(ray.fRQN) {
 
   case RayNS::RQN_change:
     _check_auto_redraw();
@@ -333,7 +333,7 @@ void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
   rgt = top*aspect;
   lft = -rgt;
   if(n_tiles > 1) {
-    double xs = 2*rgt/n_tiles; lft += x_i * xs; rgt  = lft + xs; 
+    double xs = 2*rgt/n_tiles; lft += x_i * xs; rgt  = lft + xs;
     double ys = 2*top/n_tiles; top -= y_i * ys; bot  = top - ys;
   }
   set_foo(lft, rgt, bot, top, near, far);
@@ -479,7 +479,7 @@ void Pupil::SetCameraView()
   const Double_t *Pos = mCamAbsTrans.ArrT();
   const Double_t *Fwd = mCamAbsTrans.ArrX();
   const Double_t *Up  = mCamAbsTrans.ArrZ();
-    
+
   gluLookAt(Pos[0],        Pos[1],        Pos[2],
 	    Pos[0]+Fwd[0], Pos[1]+Fwd[1], Pos[2]+Fwd[2],
 	    Up [0],        Up [1],        Up [2]);
@@ -559,7 +559,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
       mDriver->Render(mDriver->GetRnr(fImg));
     }
     catch(Exc_t exc) {
-      cout << _eh << "scene exception: '" << exc << "'.\n"; 
+      cout << _eh << "scene exception: '" << exc << "'.\n";
     }
   }
   if(bShowOverlay && rnr_overlay && mOverlayImg != 0) {
@@ -567,7 +567,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
       mDriver->Render(mDriver->GetRnr(mOverlayImg));
     }
     catch(Exc_t exc) {
-      cout << _eh << "overlay exception: '" << exc << "'.\n"; 
+      cout << _eh << "overlay exception: '" << exc << "'.\n";
     }
  }
   mDriver->EndRender();
@@ -602,7 +602,7 @@ namespace {
 
   void cam_at_cb(Fl_Widget* w, pick_menu_data* ud)
   { ud->pupil->TurnCamTowards(ud->img->fLens, 0); }
-  
+
   void copy_to_clipboard_cb(Fl_Widget* w, pick_menu_data* ud)
   {
     ud->pupil->GetShell()->X_SetSource(ud->img);
@@ -618,7 +618,7 @@ namespace {
     menu.add(GForm("%sJump Towards", prefix.Data()),
 	     0, (Fl_Callback*)cam_towards_cb, mcdl.back(), 0);
     menu.add(GForm("%sJump At", prefix.Data()),
-	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), FL_MENU_DIVIDER); 
+	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), FL_MENU_DIVIDER);
   }
 }
 
@@ -648,7 +648,7 @@ Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 
   if (n < 0)
     printf("Pupil::Pick overflow of selection buffer, %d entries returned.\n", (int)n);
-  
+
   return n;
 }
 
@@ -679,7 +679,7 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
       result.push_front(mDriver->NameStack(x[i]));
     }
   }
-  return n; 
+  return n;
 }
 
 Int_t Pupil::PickLenses(list<pick_lens_data>& result,
@@ -720,9 +720,9 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 
       OS::ZGlassImg* root_img = mDriver->NameStack(id).fRnr->fImg;
       ZGlass* lens = root_img->fLens;
-     
+
       pick_lens_data pld(root_img, zmin, lens->GetName());;
-      
+
       if(fill_stack) {
 	for(int j=m-2; j>=0; --j) {
 	  UInt_t p_id = x[j];
@@ -730,13 +730,13 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 	  pld.name_stack.push_back(img);
 	}
       }
-      
+
       if(sort_z) {
 	list<pick_lens_data>::iterator ins_pos = result.begin();
 	while(ins_pos != result.end() && ins_pos->z < pld.z) {
 	  ++ins_pos;
 	}
-	result.insert(ins_pos, pld);  
+	result.insert(ins_pos, pld);
       } else {
 	result.push_back(pld);
       }
@@ -777,14 +777,14 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
     for (list<pick_lens_data>::iterator gdi = gdl.begin();
 	 gdi!=gdl.end(); ++gdi)
       {
-	if(mInfo->GetPickDisp() != 0) {    
+	if(mInfo->GetPickDisp() != 0) {
 	  Float_t near = mInfo->GetNearClip();
 	  Float_t far  = mInfo->GetFarClip();
 	  Float_t zdist = near*far/(far - gdi->z/2*(far - near));
 	  if(mInfo->GetPickDisp() == 1)
-	    gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.Data()); 
+	    gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.Data());
 	  else
-	    gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.Data()); 
+	    gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.Data());
 	} else {
 	  gdi->name = GForm("%2d. %s/", loc, gdi->name.Data());
 	}
@@ -1000,10 +1000,10 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
     glPushMatrix();
     glTranslatef(2.0*mMPX/w() - 1, (1 - 2.0*mMPY/h())/aspect, 0);
     glBegin(GL_LINE_LOOP);
-    glVertex2f(0, 0); 
-    glVertex2f(0.7*mp_size ,-mp_size); 
-    glVertex2f(mp_size, -mp_size); 
-    glVertex2f(mp_size, -0.7*mp_size); 
+    glVertex2f(0, 0);
+    glVertex2f(0.7*mp_size ,-mp_size);
+    glVertex2f(mp_size, -mp_size);
+    glVertex2f(mp_size, -0.7*mp_size);
     glEnd();
     glPopMatrix();
   }
@@ -1171,7 +1171,7 @@ int Pupil::handle_overlay(int ev)
 }
 
 int Pupil::handle(int ev)
-{    
+{
   static const Exc_t _eh("Pupil::handle ");
 
   int x = Fl::event_x(); int y = Fl::event_y();
@@ -1245,7 +1245,7 @@ int Pupil::handle(int ev)
     if(Fl::event_button() == 3) {
       PickMenu(mMouseX, mMouseY);
     }
-    
+
     return 1;
   }
   case FL_DRAG: {
@@ -1279,7 +1279,7 @@ int Pupil::handle(int ev)
     Float_t move_fac = mInfo->GetMSMoveFac() *
       TMath::Power(10, mInfo->GetMoveOM());
     Float_t rot_fac  = mInfo->GetMSRotFac() * TMath::TwoPi() / 1000;
-    if(Fl::event_state(FL_BUTTON1)) { 
+    if(Fl::event_state(FL_BUTTON1)) {
       double Dy = dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp());
       if(Dy != 0) {
 	chg = 1;
@@ -1371,7 +1371,7 @@ int Pupil::handle(int ev)
       bShowOverlay = !bShowOverlay; redraw();
       return 1;
 
-    case 'f': 
+    case 'f':
     case FL_F+12: {
       Fl_Group* fsg = this;
       while(fsg->parent()) fsg = fsg->parent();
@@ -1406,7 +1406,7 @@ int Pupil::handle(int ev)
   } // case FL_KEYBOARD
 
   } // switch(ev)
-  
+
   return 0;
 }
 
@@ -1428,10 +1428,10 @@ void Pupil::dump_image(const TString& fname)
 
   tga_header header(w(), h());
   header.dump(img);
-  
+
   unsigned char* xx = new unsigned char[w()*h()*3];
   // glReadBuffer(GL_BACK);
-  glPixelStorei(GL_PACK_ALIGNMENT,1); 
+  glPixelStorei(GL_PACK_ALIGNMENT,1);
   glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
   fwrite(xx, 3, w()*h(), img);
   delete [] xx;

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -59,7 +59,7 @@ void ZMIR::_init() {
 }
 
 /**************************************************************************/
- 
+
 ZMIR::ZMIR(ID_t a, ID_t b, ID_t g) :
   TMessage(GledNS::MT_Flare),
   Direction(D_Unknown), SuppressFlareBroadcast(false), RequiresResult(false),
@@ -250,7 +250,7 @@ void ZMIR::SetCaller(ZMirEmittingEntity* caller)
     *this << CallerID;
     SetBufferOffset(pos);
   }
-  
+
 }
 
 void ZMIR::SetRecipient(SaturnInfo* recipient)
@@ -307,7 +307,7 @@ void ZMIR::SetDetachedExe(bool multix)
 
     MirBits |= (multix) ? MB_DetachedExe | MB_MultixDetachedExe :
                           MB_DetachedExe;
-    
+
 }
 
 /**************************************************************************/

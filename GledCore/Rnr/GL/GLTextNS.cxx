@@ -79,7 +79,7 @@ namespace GLTextNS {
 
     //fprintf(stderr, "texfont: tried to access unavailable font character \"%c\" (%d)\n",
     //    isprint(c) ? c : ' ', c);
-    
+
     tgvi = txf->lut[' ' - txf->min_glyph];
     if (tgvi) return tgvi;
     tgvi = txf->lut['_' - txf->min_glyph];
@@ -96,7 +96,7 @@ namespace GLTextNS {
   {
     return lastError;
   }
-  
+
   /**************************************************************************/
 
   TexFont* txfLoadFont(const char *filename)
@@ -462,7 +462,7 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  void txfRenderString(TexFont * txf, const char *TString, int len, 
+  void txfRenderString(TexFont * txf, const char *TString, int len,
 		       bool keep_pos)
   {
     int i;
@@ -473,7 +473,7 @@ namespace GLTextNS {
     if(keep_pos) glPopMatrix();
   }
 
-  void txfRenderString(TexFont * txf, const char *TString, int len, 
+  void txfRenderString(TexFont * txf, const char *TString, int len,
 		       GLfloat maxx, GLfloat fadew,
 		       bool keep_pos)
   {
@@ -546,7 +546,7 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  void txfRenderStringZW(TexFont * txf, const char *TString, int len, 
+  void txfRenderStringZW(TexFont * txf, const char *TString, int len,
 			 float z, float w, bool keep_pos)
   {
     int i;
@@ -756,7 +756,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
 	       GL_LINE_BIT      | GL_COLOR_BUFFER_BIT |
 	       GL_POLYGON_BIT);
 
-  GLfloat rp[4]; 
+  GLfloat rp[4];
   glGetFloatv(GL_CURRENT_RASTER_POSITION, rp);
   // printf("RasterPos[%s]: %f %f %f %f\n", text.Data(), rp[0], rp[1], rp[2], rp[3]);
 
@@ -861,7 +861,7 @@ void GLTextNS::RnrTextPoly(RnrDriver* rd, const TString& text)
 
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset(-1, -1);
-      
+
   float x0 = -0.1;
   float x1 = (float)width/h_box + 0.1;
   float y0 = -0.1 - float(descent)/(h_box);
@@ -945,8 +945,8 @@ void GLTextNS::RnrText(RnrDriver* rd, const TString& text,
 
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset(-1, -1);
-      
-  if(back_col != 0) {      
+
+  if(back_col != 0) {
     float x0 = -1;
     float x1 = width + 1;
     float y0 = -descent;
@@ -1024,8 +1024,8 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const TString& text,
 
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset(-1, -1);
-      
-  if(back_col != 0) {      
+
+  if(back_col != 0) {
     float x0 = -1;
     float x1 = width + 1;
     float y0 = -descent;

@@ -39,13 +39,13 @@ void check_overlaps(Float_t epsilon=1)
 
   ZGeoOvlMgr* ovl = new ZGeoOvlMgr("Overlap Mgr");
   g_queen->CheckIn(ovl);
-  g_scene->Add(ovl);  
+  g_scene->Add(ovl);
   ovl->SetResol(epsilon);
   ovl->RecalculateOvl();
   ovl->SetUseOM(1);
   ovl->SetOM(-2);
 
-  // create an empty node to test save/load from file 
+  // create an empty node to test save/load from file
   ZGeoNode* em_node = new ZGeoNode("Empty Node");
   em_node->SetOM(-2.5);
   em_node->SetPos(6.5, 0, 0);

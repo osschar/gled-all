@@ -3,7 +3,7 @@
 die "usage: $0 <commands>\n" unless $#ARGV >= 0;
 
 while ($command = shift) {
-  
+
   if ($command eq "cpuinfo") {
     open F, "/proc/cpuinfo";
     while ($_=<F>) {

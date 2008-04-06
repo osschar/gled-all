@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -57,7 +57,7 @@ void GKeyRSA::init_ssl()
   int nl = CRYPTO_num_locks();
   //printf("GKeyRSA::init_ssl setting up %d locks\n", nl);
   s_ssl_mutexen = new GMutex[nl];
-  
+
   CRYPTO_set_locking_callback(ssl_locker_foo);
   CRYPTO_set_id_callback(ssl_id_foo);
 

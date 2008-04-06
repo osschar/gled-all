@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -72,7 +72,7 @@ void ZQueen::bootstrap()
 
   assert(bRuling == false);
   assert(mIDMap.size() == 0 && mMinID && mMaxID > mMinID);
-  assert(mPurgatory.size() == 0);  
+  assert(mPurgatory.size() == 0);
 
   try {
     mQueen = this;
@@ -377,7 +377,7 @@ void ZQueen::BlessMIR(ZMIR& mir)
 
   if(!bRuling && mir.Alpha != this)
     throw(_eh + "spooky ... not ruling, but alpha demangled");
-  
+
   if(!mir.Alpha->GetMIRActive())
     throw(_eh + "alpha '" + mir.Alpha->GetName() + "' not MIR active");
 
@@ -722,7 +722,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
     auto_ptr<ZMIR> void_mir( S_PutLensToVoid(lens->mSaturnID) );
     ref_time += 1000l*mPurgedMS;
     mSaturn->delayed_shoot_mir(void_mir, si, ref_time);
-  }  
+  }
 }
 
 void ZQueen::PutLensToPurgatory(ZGlass* lens)
@@ -763,9 +763,9 @@ void ZQueen::PutListElementsToPurgatory(AList* list)
 
   // This simulates AList::ClearList but is somewhat optimized.
   lpZGlass_t foo;
-  { 
+  {
     GMutexHolder listreadlock(list->mReadMutex);
-    GMutexHolder listlistlock(list->mListMutex);    
+    GMutexHolder listlistlock(list->mListMutex);
     list->CopyList(foo);
     list->clear_list();
     list->StampListClear();
@@ -860,12 +860,12 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
     }
     if(lockp == GMutex::ok) lens->mReadMutex.Unlock();
   }
-  
+
   ISdebug(2, _eh + GForm("final removal of lens '%s'[%d].", lens->GetName(), i->first));
   i->second->mLens = 0;
   i->second->mState = LensDetails::LS_Dead;
   i->second->mDeletionTime.SetNow();
-  
+
   // Now truly delete or make a zombie.
   if(lens->mEyeRefCount == 0) {
     delete lens;
@@ -1000,7 +1000,7 @@ void ZQueen::ZeroRefCount(ZGlass* lens)
   case ZRCP_Delete: {
     RemoveLens(lens);
     break;
-  }    
+  }
   case ZRCP_ToOrphanage: {
     mOrphans->Add(lens);
     break;
@@ -1046,7 +1046,7 @@ if(mandp == bMandatory) return;
 if(mandp) {
 if(bRuling) {
 // mSaturn->BroadcastMIR(*mir, mReflectors);
-      
+
 } else {
 
 }
@@ -1162,7 +1162,7 @@ void ZQueen::AdoptComet(AList* top_dest, AList* orphan_dest, ZComet* comet)
 
   comet->AssignQueen(this);
   comet->RebuildGraph();
-  WriteLock();  
+  WriteLock();
   UInt_t free = mIDSpan - (mIDMap.size() + mPurgatory.size());
   UInt_t need = comet->mIDMap.size();
   if(free >= need) {

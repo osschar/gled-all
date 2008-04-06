@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -63,7 +63,7 @@ void ZGeoOvlMgr::RnrOvlInterval()
 
 void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
 {
-  // Creates a list of TGeoOvl objects reading 
+  // Creates a list of TGeoOvl objects reading
   // gGeoManager list fOverlaps.
 
   static const Exc_t _eh("ZGeoOvlMgr::ImportOverlaps");
@@ -77,7 +77,7 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
   TGeoIterator top_git   (gGeoManager->GetTopVolume());
   TGeoNode*    top_gnode (top_git.Next());
 
-  // go through the list of overlaps  locate each node in 
+  // go through the list of overlaps  locate each node in
   // absolute coordinates
   while((ovl = (TGeoOverlap*)next_node())) {
     Bool_t isExtr = ovl->IsExtrusion();
@@ -136,7 +136,7 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
             }
 
             TString mname  = isExtr ? "Extr: " : "Ovlp: ";
-            mname += motherv->GetName(); 
+            mname += motherv->GetName();
             TString mtitle = top_node->GetVolume()->GetName();
             for(Int_t l=1; l<motherl; ++l) {
               mtitle += "/";
@@ -146,7 +146,7 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
             ISdebug(1, GForm("%sImporting %s '%s' from %s", _eh.Data(),
                              mname.Data(), mtitle.Data(),
                              ovl->GetName()));
-    
+
             ZGeoOvl* zm = new ZGeoOvl(mname, mtitle);
             zm->SetIsExtr ( isExtr );
             zm->SetOverlap( ovl->GetOverlap() );
@@ -197,7 +197,7 @@ void ZGeoOvlMgr::ImportOverlaps(TObjArray* lOverlaps, TGeoNode* top_node)
       goto reiterate;
     }
 
-  }  
+  }
   printf("Import END eps=%f \n", mResol);
 }
 
@@ -209,7 +209,7 @@ void ZGeoOvlMgr::RecalculateOvl()
 
   if (gGeoManager) {
     gGeoManager->GetTopNode()->CheckOverlaps(mResol);
-    if (mMinOvl > mResol) mMinOvl=mResol;    
+    if (mMinOvl > mResol) mMinOvl=mResol;
     ImportOverlaps(gGeoManager->GetListOfOverlaps(), gGeoManager->GetTopNode());
   }
 }
@@ -219,7 +219,7 @@ void ZGeoOvlMgr::RecalculateOvl()
 void ZGeoOvlMgr::Restore()
 {
   // Sets UserData to nodes with mTNode set.
-  // The list was created by calling function LoadFromFile. 
+  // The list was created by calling function LoadFromFile.
 
   static const Exc_t _eh("ZGeoOvlMgr::Restore");
   ISdebug(1, GForm("%s START", _eh.Data()));
@@ -232,7 +232,7 @@ void ZGeoOvlMgr::Restore()
     // printf("search TNode for mother path: %s \n", path.Data());
     Ssiz_t end = path.Length();
     Ssiz_t pos = path.First("/");
-     
+
     TGeoNode* tn = gGeoManager->GetTopNode();
 
     // check if mother tnod is not top node , that is /ALIC
@@ -326,7 +326,7 @@ TString ZGeoOvlMgr::setup_absolute_matrix(TGeoNode* top_node, TGeoVolume* vol,
   // printf("setup_absolute_matrix zn->GetTNode()->GetName() \n", zn->GetTNode()->GetName());
   TString title;
 
-  for(lgn_ri k=path.rbegin(); k!=path.rend(); ++k) { 
+  for(lgn_ri k=path.rbegin(); k!=path.rend(); ++k) {
     gn = *k;
     mt *= get_ztrans(gn->GetMatrix());
     title += '/';
@@ -342,7 +342,7 @@ ZGeoNode* ZGeoOvlMgr::create_standalone_node(const Text_t* n, const Text_t* t,
 					    TGeoNode* gnode, TGeoMatrix* gmatrix)
 {
   ZGeoNode *nn = new ZGeoNode(n, t);
- 
+
   if (gnode) {
     TGeoVolume* v = gnode->GetVolume();
     nn->SetTNode(gnode);
@@ -390,7 +390,7 @@ void ZGeoOvlMgr::set_tnode_by_path(TString path, TGeoNode*& gn)
   } else {
     if (pos != kNPOS) {
       TString nname = path(0, pos);
-      path = path(pos, path.Length() - pos);   
+      path = path(pos, path.Length() - pos);
       // printf("temp %s \n", path.Data());
       TGeoVolume* vol = gn->GetVolume();
       if (vol->GetNodes()) {

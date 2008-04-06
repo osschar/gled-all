@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,7 +19,7 @@ protected:
 public:
   ZColorMark() : ZColor(), mMark(0) {}
   ZColorMark(Float_t m, const ZColor& c) : ZColor(c), mMark(m) {}
-  ZColorMark(Float_t m, Float_t r, Float_t g, Float_t b, Float_t a = 1) : 
+  ZColorMark(Float_t m, Float_t r, Float_t g, Float_t b, Float_t a = 1) :
     ZColor(r,g,b,a), mMark(m) {}
 
   Float_t m() const { return mMark; }

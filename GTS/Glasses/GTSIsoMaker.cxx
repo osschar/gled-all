@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -73,7 +73,7 @@ namespace {
 };
 
 void GTSIsoMaker::MakeSurface()
-{  
+{
   static const Exc_t _eh("GTSIsoMaker::MakeSurface ");
 
   using namespace GTS;
@@ -96,7 +96,7 @@ void GTSIsoMaker::MakeSurface()
   GtsSurface* s = MakeDefaultSurface();
 
   switch(mAlgo) {
-  case A_Cartesian: 
+  case A_Cartesian:
     gts_isosurface_cartesian(s, grid, form_to_plane, &formula, mValue);
     break;
   case A_Tetra:

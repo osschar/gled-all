@@ -1,9 +1,9 @@
-void loadlibs () 
+void loadlibs ()
 {
   // Macro which loads the libraries needed for simulation and reconstruction
   // Possible usage: In a Root session (no AliRoot) one does
   // root [0] .x loadlibs.C
-  // root [1] gAlice = new AliRun("gAlice","test")           
+  // root [1] gAlice = new AliRun("gAlice","test")
   // root [2] AliSimulation sim
   // root [3] sim.Run()
   // root [4] AliReconstruction rec

@@ -162,7 +162,7 @@ bool CoplanarTriTri(const Point& n, const Point& v0, const Point& v1, const Poin
  *	Journal of Graphics Tools, 2(2), 1997
  *
  *	Updated June 1999: removed the divisions -- a little faster now!
- *	Updated October 1999: added {} to CROSS and SUB macros 
+ *	Updated October 1999: added {} to CROSS and SUB macros
  *
  *	int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
  *                           float U0[3],float U1[3],float U2[3])

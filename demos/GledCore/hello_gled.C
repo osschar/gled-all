@@ -8,7 +8,7 @@ void hello_gled()
 
   Gled::AssertLibSet("Geom1");
   Gled::AssertMacro("sun_demos.C");
-  
+
   Scene* hello_gled  = new Scene("Hello Gled");
   g_queen->CheckIn(hello_gled);
   g_queen->Add(hello_gled);
@@ -48,7 +48,7 @@ void hello_gled()
   dynamo->SetStampInterval(10);
   dynamo->SetInterBeatMS(50);
   g_queen->CheckIn(dynamo); hello_gled->Add(dynamo);
- 
+
   Mover* mover1 = new Mover("Rotates first node");
   mover1->SetNode(node1);
   mover1->SetRi(1); mover1->SetRj(2); mover1->SetRa(0.01745);

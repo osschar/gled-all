@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -162,7 +162,7 @@ void TriMeshField::FindMinMaxField()
           break;
         case 2:
           mMinValue = mMaxValue = (Float_t) tf3.Eval(F[0], F[1]);
-          F += mDim;        
+          F += mDim;
           for (Int_t i=1; i<mNVerts; ++i, F+=mDim)
             check_min_max((Float_t) tf3.Eval(F[0], F[1]));
           break;
@@ -198,7 +198,7 @@ void TriMeshField::ColorizeTvor(Bool_t regen_tring_cols)
   mPalette->SetMaxFlt(mMaxValue);
 
   Float_t* F = FVec();
-  UChar_t* C = TT.mCols;
+  UChar_t* C = TT.Cols();
 
   if (mFormula.IsNull())
   {
@@ -265,7 +265,7 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
   mPalette->SetMinFlt(mMinValue);
   mPalette->SetMaxFlt(mMaxValue);
 
-  UChar_t* C = TT.mCols;
+  UChar_t* C = TT.Cols();
 
   set<Int_t>::iterator i   = vertices.begin();
   set<Int_t>::iterator end = vertices.end();
@@ -381,7 +381,7 @@ void TriMeshField::FillByXYGaussBlobs(Int_t n_blobs,
     }
   }
 
-  Float_t *V = TT.mVerts;
+  Float_t *V = TT.Verts();
   Float_t *F = FVec();
   for (Int_t v=0; v<mNVerts; ++v, V+=3, ++F)
   {

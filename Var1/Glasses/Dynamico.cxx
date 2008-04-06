@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -142,7 +142,7 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
   Point dcomp(dcom); dcomp.TMsc(up_dir, up_dir | dcom);
 
   // Velocities
-  Point v0(t0.PtrBaseVec(1)); v0 *= dyno0->mV; 
+  Point v0(t0.PtrBaseVec(1)); v0 *= dyno0->mV;
   Point v1(t1.PtrBaseVec(1)); v1 *= dyno1->mV;
   // Velocities in tangential plane
   Point v0p(v0); v0p.TMsc(up_dir, up_dir | v0);

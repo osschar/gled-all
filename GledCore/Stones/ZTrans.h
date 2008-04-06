@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -111,7 +111,7 @@ public:
   void GetPos(Double_t& x, Double_t& y, Double_t& z) const;
   void GetPos(Double_t* x) const;
   void GetPos(Float_t*  x) const;
-  void GetPos(TVector3& v) const;  
+  void GetPos(TVector3& v) const;
   TVector3 GetPos() const;
 
   // Cardan angle interface

@@ -32,7 +32,7 @@ inline_ void	ReverseBits(udword& n)
 //  Cute Code Collection)
 inline_ udword	CountBits(udword n)
 {
-  // This relies of the fact that the count of n bits can NOT overflow 
+  // This relies of the fact that the count of n bits can NOT overflow
   // an n bit interger. EG: 1 bit count takes a 1 bit interger, 2 bit counts
   // 2 bit interger, 3 bit count requires only a 2 bit interger.
   // So we add all bit pairs, then each nible, then each byte etc...
@@ -134,7 +134,7 @@ inline_	udword	LowestOneBit(udword w)		{ return ((w) & (~(w)+1)); }
 // can be computed using a SWAR algorithm that recursively "folds" the upper bits into the lower bits.
 // This process yields a bit vector with the same most significant 1 as x, but all 1's below it.
 // Bitwise AND of the original value with the complement of the "folded" value shifted down by one
-// yields the most significant bit. For a 32-bit value: 
+// yields the most significant bit. For a 32-bit value:
 inline_ udword	msb32(udword x)
 {
   x |= (x >> 1);
@@ -149,7 +149,7 @@ inline_ udword	msb32(udword x)
   "Just call it repeatedly with various input values and always with the same variable as "memory".
   The sharpness determines the degree of filtering, where 0 completely filters out the input, and 1
   does no filtering at all.
-  
+
   I seem to recall from college that this is called an IIR (Infinite Impulse Response) filter. As opposed
   to the more typical FIR (Finite Impulse Response).
 

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -27,20 +27,23 @@ void TringTvor_GL_Rnr::RenderSmooth(TringTvor* ttvor, Bool_t colp, Bool_t texp)
   TringTvor& TT = *ttvor;
 
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  glVertexPointer(3, GL_FLOAT, 0, TT.mVerts);
+  glVertexPointer(3, GL_FLOAT, 0, TT.Verts());
   glEnableClientState(GL_VERTEX_ARRAY);
-  glNormalPointer(GL_FLOAT, 0, TT.mNorms);
+  glNormalPointer(GL_FLOAT, 0, TT.Norms());
   glEnableClientState(GL_NORMAL_ARRAY);
-  if(colp && TT.mCols) {
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, TT.mCols);
+  if (colp && TT.HasCols())
+  {
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, TT.Cols());
     glEnableClientState(GL_COLOR_ARRAY);
   }
-  if(texp && TT.mTexs) {
-    glTexCoordPointer(2, GL_FLOAT, 0, TT.mTexs);
+  if (texp && TT.HasTexs())
+  {
+    glTexCoordPointer(2, GL_FLOAT, 0, TT.Texs());
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  if(TT.mStripEls != 0) {
+  if(TT.mStripEls != 0)
+  {
     // Requires GL-1.4
     // glMultiDrawElements(GL_TRIANGLE_STRIP, TT.mStripLens,
     //                     GL_UNSIGNED_INT, TT.mStripBegs, TT.mNStrips);
@@ -50,12 +53,11 @@ void TringTvor_GL_Rnr::RenderSmooth(TringTvor* ttvor, Bool_t colp, Bool_t texp)
       glDrawElements(GL_TRIANGLE_STRIP, TT.mStripLens[i],
                      GL_UNSIGNED_INT, TT.mStripBegs[i]);
     }
-
-  } else {
-
+  }
+  else
+  {
     glDrawElements(GL_TRIANGLES, TT.mNTrings*3,
-                   GL_UNSIGNED_INT, TT.mTrings);
-
+                   GL_UNSIGNED_INT, TT.Trings());
   }
 
   glPopClientAttrib();
@@ -70,48 +72,52 @@ void TringTvor_GL_Rnr::RenderFlat(TringTvor* ttvor, Bool_t colp, Bool_t texp)
   glShadeModel(GL_FLAT);
 
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  glVertexPointer(3, GL_FLOAT, 0, TT.mVerts);
+  glVertexPointer(3, GL_FLOAT, 0, TT.Verts());
   glEnableClientState(GL_VERTEX_ARRAY);
-  if(colp && TT.mTringCols == 0)
+  if (colp && ! TT.HasTringCols())
     colp = false;
-  if(texp && TT.mTexs) {
-    glTexCoordPointer(2, GL_FLOAT, 0, TT.mTexs);
+  if (texp && TT.HasTexs())
+  {
+    glTexCoordPointer(2, GL_FLOAT, 0, TT.Texs());
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
   // TRandom colgen(2);
 
-  if(TT.mStripEls) {
-
-    for(Int_t i=0; i<TT.mNStrips; ++i) {
+  if (TT.mStripEls)
+  {
+    for(Int_t i=0; i<TT.mNStrips; ++i)
+    {
       glBegin(GL_TRIANGLE_STRIP);
       Int_t* idxp = TT.mStripBegs[i];
 
       glArrayElement(*(idxp++));
       glArrayElement(*(idxp++));
-	
+
       Int_t* tring_idxp = TT.mStripTrings + (idxp - TT.mStripEls);
       Int_t  n          = TT.mStripLens[i] - 2;
       // glColor3f(0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm());
-      while(n-- > 0) {
-        glNormal3fv ( TT.TriangleNormal(*tring_idxp) );
-        if(colp) 
-          glColor4ubv( TT.TriangleColor(*tring_idxp) );
+      while (n-- > 0)
+      {
+        glNormal3fv(TT.TriangleNormal(*tring_idxp));
+        if (colp)
+          glColor4ubv(TT.TriangleColor(*tring_idxp));
         tring_idxp++;
         glArrayElement(*(idxp++));
       }
       glEnd();
     }
-
-  } else {
-      
+  }
+  else
+  {
     glBegin(GL_TRIANGLES);
-    Int_t*   T = TT.Triangle(0);
-    Float_t* N = TT.TriangleNormal(0);
-    UChar_t* C = TT.TriangleColor(0);
-    for(Int_t t=0; t<TT.mNTrings; ++t) {
+    Int_t*   T = TT.Trings();
+    Float_t* N = TT.TringNorms();
+    UChar_t* C = TT.TringCols();
+    for(Int_t t=0; t<TT.mNTrings; ++t)
+    {
       glNormal3fv(N); N += 3;
-      if(colp) { glColor4ubv(C);  C += 4; }
+      if (colp) { glColor4ubv(C);  C += 4; }
       glArrayElement(T[0]);
       glArrayElement(T[1]);
       glArrayElement(T[2]);

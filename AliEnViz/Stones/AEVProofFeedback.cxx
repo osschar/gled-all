@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -80,7 +80,7 @@ void AEVProofFeedback::SiteProgress(TList *siteinfos)
 //   while( (o = next_site()) ) {
 //     printf("  %s[%s]\n", o->GetName(), o->ClassName());
 //   }
-  
+
   // !!!! here create the map and pass it later to demo driver
   // !!!! to vizualize partial results coming back.
 
@@ -123,7 +123,7 @@ void AEVProofFeedback::Feedback(TList *objs)
 	  if(mHImg) {
 	    c = new TCanvas(name.Data(),name.Data(), 1028, 540);
 	  } else {
-	    c = new TCanvas(name.Data(),name.Data(), 640, 480);	    
+	    c = new TCanvas(name.Data(),name.Data(), 640, 480);
 	  }
 	  c->SetGrid(1, 1);
 	  c->SetLogy(1);

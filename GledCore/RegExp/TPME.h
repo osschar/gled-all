@@ -49,7 +49,7 @@ public:
 	/// s is the regular expression, opts are PCRE flags bit-wise or'd together
 	TPME(const char * s, unsigned opts );
 
-	/// s is the regular expression, opts is a perl-like TString of modifier letters "gi" is global and case insensitive  
+	/// s is the regular expression, opts is a perl-like TString of modifier letters "gi" is global and case insensitive
 	TPME ( const char * s, const TString & opts = "" );
 
 	/// TPME copy constructor
@@ -63,7 +63,7 @@ public:
 
 	/// stores results from matches
 	typedef pair<int, int> markers;
-	
+
 	/// returns options set on this object
 	unsigned				options();
 
@@ -79,7 +79,7 @@ public:
 );
 
 	/// substitutes out whatever matches the regex for the second paramter
-	TString             sub ( const TString & s, 
+	TString             sub ( const TString & s,
 				  const TString & r,
 				  int dodollarsubstitution = 1 );
 
@@ -125,7 +125,7 @@ protected:
 
 	int m_isglobal; ///< non-pcre flag for 'g' behaviour
 	int lastglobalposition; ///< end of last match when m_isglobal != 0
-	
+
 	/// compiles the regex -- automatically called on construction
 	void compile(const TString & s);
 
@@ -134,10 +134,10 @@ protected:
 
 	/// takes perl-style character modifiers and determines the corresponding PCRE flags
 	unsigned int DeterminePcreOptions ( const TString & opts = "" );
-	
+
 	/// deals with $1-type constructs in the replacement TString in a substitution
 	TString UpdateReplacementString ( const TString & r );
-	
+
 
 	/// flag as to whether this regex is valid (compiled without error)
 	int                     nValid;

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -57,7 +57,7 @@ MCW_View::CtxArg::CtxArg(TString& typ, TString& base_typ,
 			 TString& name, TString& defval,
 			 int cell_w) :
   ArgBase(typ, base_typ, name, defval, cell_w)
-{  
+{
   FGS::LensNameBox* b = new FGS::LensNameBox(0, 0, 0, 14, 1);
   b->box(FL_ENGRAVED_BOX);
   // b->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
@@ -239,7 +239,7 @@ void MCW_View::VarArg::StreamData(TBuffer& b)
 // MCW_View
 /**************************************************************************/
 
-MCW_View::MCW_View(FTW_Shell* shell) : 
+MCW_View::MCW_View(FTW_Shell* shell) :
   FTW_SubShell(shell), Fl_Window(0,0,0)
 {
   mWindow = this;
@@ -333,7 +333,7 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t)
     x += butw;
 
     bSendOnChange = new Fl_Light_Button(x, 0, wmaxs[4] - x, 1, "Send On Change");
-    bSendOnChange->tooltip("Send automatically when user changes numerical values."); 
+    bSendOnChange->tooltip("Send automatically when user changes numerical values.");
 
     butg->end();
     butg->resizable(butg->child(1));

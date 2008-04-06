@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -30,7 +30,7 @@ void Cylinder::_init()
   bRnrDisks = true;
 
   mROutBase = mROutTop = 1.0;
-  mRInBase  = mRInTop  = 0; 
+  mRInBase  = mRInTop  = 0;
 
   mLodH     = 1;
   mLodPhi   = 8;

@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -111,7 +111,7 @@ void MTW_SubView::BuildFromList(GVNS::lpWeedInfo_t& l, bool show_links)
     if((*i)->bIsLinkWeed && show_links == false)
       continue;
     CreateWeed(*i);
-    // cout <<" MTW_SubView::BuildFromList() adding member "<< (*i)->fName << endl; 
+    // cout <<" MTW_SubView::BuildFromList() adding member "<< (*i)->fName << endl;
   }
   end();
 }
@@ -162,7 +162,7 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
     int n_join = 1;
     int max_h  = i->fWeedInfo->fHeight;
     {
-      lMTW_Weed_i ii = i; 
+      lMTW_Weed_i ii = i;
       while(j != mWeeds.end() && ii->fWeedInfo->bJoinNext) {
 	MTW_Widths z = j->GetWidths(cell_w);
 	if(z.full + w.full > lim.full) break;
@@ -170,7 +170,7 @@ int MTW_SubView::ResizeByVerticalStats(MTW_Vertical_Stats& vs, int cell_w)
 	w += z; ii = j++; ++n_join;
       }
     }
-    
+
     if(n_join > 1) { // Set multiple weeds
       int  taken = 0;
       int  spare = lim.full - w.full;
@@ -294,7 +294,7 @@ void MTW_Vertical_Stats::Consolidate(float max_align_grow, float max_join_grow)
     fUse.full = fMaxFullW;
   }
   if(fUse.full % 2 != 0) ++fUse.full;
-    
+
   if(fUse.full < fMaxLabelW + fMaxOutsideLabeledW) {
     fUse.label = fUse.full - fMaxOutsideLabeledW;
     fUse.weed  = fMaxOutsideLabeledW;
@@ -311,7 +311,7 @@ void MTW_Vertical_Stats::Dump() {
        <<"fMaxLabelW="<< fMaxLabelW <<", "
        <<"bRightLabelPair="<< bRightLabelPair <<", "
        <<"Use("<< fUse.full <<","<< fUse.weed <<","<< fUse.label <<")\n";
-    
+
 }
 
 /**************************************************************************/

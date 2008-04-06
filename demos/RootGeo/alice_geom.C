@@ -47,10 +47,10 @@ void alice_geom(Int_t import_mode=0)
   rscene->Add(znode);
   znode->SetRnrSelf(false);
 
-  import_by_regexp(znode); 
+  import_by_regexp(znode);
   select_some_dets(znode);
 
-  // create an empty node to test save/load from file 
+  // create an empty node to test save/load from file
   CREATE_ADD_GLASS(em_node, ZGeoNode, rscene, "A GeoNode", "");
   em_node->SetTNode(gGeoManager->GetTopNode());
   em_node->SetOM(-2.5);
@@ -118,7 +118,7 @@ void import_by_regexp(ZGeoNode* volt)
   volt->ImportByRegExp("PHOS", "^PHOS");
   volt->ImportByRegExp("RICH", "^RICH");
   volt->ImportByRegExp("ITSV", "^ITS");
-  volt->ImportByRegExp("TPC",  "^TPC"); 
+  volt->ImportByRegExp("TPC",  "^TPC");
 
   // import, but not show
   volt->ImportByRegExp("TRD TOF", "^B"); rnr_elements(volt, "TRD TOF", false);

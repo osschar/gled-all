@@ -4,7 +4,7 @@
 # project7 pargen ... second reincarnation with bloated karma
 #                     expect improvements when perl6 is out
 
-# Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+# Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -37,7 +37,7 @@ $_=join('',@_);
 ($INDIR, $INBASE) = $INFILE =~ m!(.*/)?(\w+)\.h!;
 
 die "Class $CLASSNAME not matched ...\n" unless ($p, $c) =
-  m!class \s+ $CLASSNAME \s+ :?\s* 
+  m!class \s+ $CLASSNAME \s+ :?\s*
     ([\n\s:\w,]*?) \s*
     {(.*)} [\n\s]* ; \s*
     //\s*endclass\s+$CLASSNAME
@@ -68,7 +68,7 @@ $LibID = $CATALOG->{LibID};
 $LibSetName = $CATALOG->{LibSetName};
 # ClassID != undef asserts that we have a glass
 $ClassID = (exists $CATALOG->{Classes}{$CLASSNAME}{ClassID} ?
-	    $CATALOG->{Classes}{$CLASSNAME}{ClassID} : 
+	    $CATALOG->{Classes}{$CLASSNAME}{ClassID} :
 	    undef);
 $IsGlass = defined $ClassID;
 $VirtualBase = $CATALOG->{Classes}{$CLASSNAME}{VirtualBase};
@@ -117,7 +117,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
               'R' => 'Ray' );
 
 # Basic types (streamed via operator <</>>)
-@SimpleTypes = 
+@SimpleTypes =
   ( "char", "Char_t", "unsigned char", "UChar_t", "short", "Short_t",
     "unsigned short", "UShort_t", "long", "Int_t", "unsigned long",
     "UInt_t", "int", "Int_t", "unsigned int", "UInt_t", "int", "Seek_t",
@@ -233,7 +233,7 @@ sub BeamArgs {
 
     my $starp=""; my $arrp = ".";
     if($r->[3] =~ m/\*$/) { $starp="*"; $arrp="->"; }
-    
+
     if( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
       $ret .= "  *$bufp << ${starp}$r->[2];\n";
       next;
@@ -501,7 +501,7 @@ while($c !~ m!\G\s*$!osgc) {
     if($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o) {
       my $member = {};
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
-      
+
       # Parse out instr{args} constructs
       print "  partitions: " if $DEBUG;;
       while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
@@ -519,7 +519,7 @@ while($c !~ m!\G\s*$!osgc) {
 	}
 	print "\n"if $DEBUG;
       }
-    
+
       $member->{Type} = $type;
       $member->{Methodbase} = $methodbase;
       $member->{Methodname} = "Set$methodbase";
@@ -528,7 +528,7 @@ while($c !~ m!\G\s*$!osgc) {
       if(exists $member->{Link}) {
 	my ($link_type) = $member->{Type} =~ m/<(\w+)>/;
 	$member->{LinkType} = $link_type;
-	$member->{ArgStr}   = &SetArgs("$link_type*", lc($methodbase));	
+	$member->{ArgStr}   = &SetArgs("$link_type*", lc($methodbase));
       } else {
 	my $settype = $type;
 	$settype .= "&" if $member->{Xport}{s}{ref};
@@ -567,7 +567,7 @@ while($c !~ m!\G\s*$!osgc) {
 	push @Views, $control;
 	$weed_done = 1;
 	# range is honoured by Set methods ... if defined
-	$member->{Range} =  $control->{-range} if exists $control->{-range};      
+	$member->{Range} =  $control->{-range} if exists $control->{-range};
 	print "\tView $view\n" if $DEBUG;
       }
 
@@ -662,7 +662,7 @@ while($c !~ m!\G\s*$!osgc) {
 
       push @Methods, $member;
     }
-       
+
     if($comment =~ m!7\s+(\w+\([^)]*\))!o) {
       my $view = $1;
       # Args can contain " ... must backslash them
@@ -925,7 +925,7 @@ print C7 "}\n\n";
 # RebuildLinkRefs
 unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
   print C7 "Int_t ${CLASSNAME}::RebuildLinkRefs(An_ID_Demangler* idd) {\n";
-  print C7 "  Int_t ret" . 
+  print C7 "  Int_t ret" .
       (defined $PARENT ? "=${PARENT}::RebuildLinkRefs(idd)" : "=0") .
       ";\n";
   for $r (@Members) {
@@ -937,7 +937,7 @@ unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
     $r->{LinkType}* _pointee = dynamic_cast<$r->{LinkType}*>(idd->DemangleID(_id));
     if(_pointee) {
       try {
-        _pointee->IncRefCount(this); 
+        _pointee->IncRefCount(this);
         $r->{Varname}.set(_pointee);
         _resolved = true;
       }
@@ -998,7 +998,7 @@ for $r (@Members) {
 	unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
     }
     if(exists $r->{Link}) {
-      $setit = 
+      $setit =
 	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
     } else {
       $setit  = "  $r->{Varname}";
@@ -1208,7 +1208,7 @@ for $r (@Members) {
       print C7 "    dmip->fDefRnrBits = RnrBits($r->{RnrBits});\n";
       print C7 "    sap_$r->{Methodbase}_lmi = dmip;\n";
     }
-    print C7 "    _ci->f${Mtype}MemberList.push_back(dmip);\n";      
+    print C7 "    _ci->f${Mtype}MemberList.push_back(dmip);\n";
     print C7 "  }\n";
   }
 }

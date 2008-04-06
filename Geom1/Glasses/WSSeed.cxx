@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -86,7 +86,7 @@ void WSSeed::on_insert(iterator it)
   }
   if(n == 0)
     m_last_point = m;
-    
+
   WSPoint* p = 0;
   while(it != begin()) {
     p = dynamic_cast<WSPoint*>((--it)->fLens);
@@ -131,7 +131,7 @@ void WSSeed::on_remove(iterator it)
   }
   m->mPrevPoint = 0;
   m->mNextPoint = 0;
-    
+
   --m_num_points;
   mTrueLength += delta_len;
 
@@ -147,7 +147,7 @@ void WSSeed::on_rebuild()
   WSPoint *p = 0, *n = 0;
   for(iterator i=begin(); i!=end(); ++i) {
     n = dynamic_cast<WSPoint*>(i->fLens);
-    if(n != 0) {      
+    if(n != 0) {
       if(p != 0) {
 	n->mPrevPoint = p;
 	p->mNextPoint = n;
@@ -283,7 +283,7 @@ void WSSeed::TransAtTime(ZTrans& lcf, Double_t time, Bool_t repeat_p, Bool_t rei
       time = (time < 0) ? 0 : len;
     }
   }
-  
+
   // printf("OK ... came up with time=%f\n", time);
 
   Double_t done = 0;

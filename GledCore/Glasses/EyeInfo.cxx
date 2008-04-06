@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -11,7 +11,7 @@
 
 ClassImp(EyeInfo)
 
-EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) : 
+EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) :
   ZMirEmittingEntity(n,t)
 {
   hSocket = 0; mMaster = 0;

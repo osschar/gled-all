@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -31,7 +31,7 @@ Fl_TransPosCtrl::Fl_TransPosCtrl(int x, int y, int w,int h, const char* l) :
   if(w<3) w = 3; // at least labels; expect resize
   int iw = (w - 3) / 3;
   int rw = (w - 3) % 3;
-  
+
   int xc = x;
   for(int i=0; i<3; ++i) {
     int tw = iw; if(rw>0) { ++tw; --rw; }
@@ -83,7 +83,7 @@ Fl_TransRotCtrl::Fl_TransRotCtrl(int x, int y, int w,int h, const char* l) :
   if(w<3) w = 3; // at least labels; expect resize
   int iw = (w - 3) / 3;
   int rw = (w - 3) % 3;
-  
+
   int xc = x;
   for(int i=0; i<3; ++i) {
     int tw = iw; if(rw>0) { ++tw; --rw; }

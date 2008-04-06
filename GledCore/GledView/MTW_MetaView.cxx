@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -31,7 +31,7 @@ namespace FGS  = FltkGledStuff;
 /**************************************************************************/
 
 void MTW_MetaView::_init()
-{  
+{
   resizable(0);
   end();
   mWindow = dynamic_cast<Fl_Window*>(parent());
@@ -91,7 +91,7 @@ void MTW_MetaView::build_subview(MTW_SubView* sv, MetaSubViewInfo* msvi,
       GVNS::WeedInfo* wi = msvi_ci->fViewPart->FindWeedInfo(mwi->GetName());
       if(wi == 0)
 	throw(_eh + GForm("member '%s::%s' not found.", msvi->GetName(), mwi->GetName()));
-      
+
       // printf("    W: %s (%p) %d,%d,%d,%d\n", mwi->GetName(), wi,
       //     mwi->GetX(), mwi->GetY(), mwi->GetW(), mwi->GetH());
 
@@ -108,7 +108,7 @@ void MTW_MetaView::build_subview(MTW_SubView* sv, MetaSubViewInfo* msvi,
     }
     if(o == 0)
       throw(_eh + GForm("creation of '%s::%s' failed.", msvi->GetName(), mwi->GetName()));
-      
+
     if(mwi->GetColorP()) {
       UChar_t c[3]; mwi->PtrColor()->rgb_to_ubyte(c);
       o->color(fl_rgb_color(c[0], c[1], c[2]));
@@ -162,7 +162,7 @@ void MTW_MetaView::BuildByLensGraph(ZGlass* gui)
     mSelfRep = new SelfRep(this, 0, 0, W-8, 1);
     Fl_Button* b = new Fl_Button(W-8, 0, 8, 1, "Rebuild");
     b->callback((Fl_Callback*)rebuild_cb, this);
-    
+
     H  += 1;
     cY += 1;
   }
@@ -176,7 +176,7 @@ void MTW_MetaView::BuildByLensGraph(ZGlass* gui)
   while(subview_it != subviews.end()) {
     MetaSubViewInfo* msvi    = *subview_it;
     GNS::ClassInfo*  msvi_ci = GNS::FindClassInfo(msvi->GetName());
-    
+
     if(msvi_ci == 0)
       throw(_eh + "glass '" + msvi->GetName() + "' not found.");
     if( ! GNS::IsA(mGlass, msvi_ci->fFid))
@@ -233,7 +233,7 @@ void MTW_MetaView::Rebuild()
 
   if(mWindow) {
     Fl::atclose(mWindow, 0);
-  } else { 
+  } else {
     delete this;
   }
   w->show();

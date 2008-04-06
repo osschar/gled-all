@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -11,7 +11,7 @@
 #include <GL/gl.h>
 
 namespace {
-  ZColor def_cols[4] = { 
+  ZColor def_cols[4] = {
     ZColor( 0.1, 0.1, 0.8 ),
     ZColor( 0,   0.8, 0.2 ),
     ZColor( 0.8,   0, 0.2 ),
@@ -54,7 +54,7 @@ void SEvTaskState_GL_Rnr::RenderHisto(const SEvTaskState& ts, ZColor* cols)
   glColor4fv(cols[2]());
   glPushMatrix();
   glScalef(ak, ak, ak * ts.mNFail / nall);
-  glTranslatef(0, 0, ah);       
+  glTranslatef(0, 0, ah);
   SphereTrings::Render(1, true);
   glPopMatrix();
 
@@ -79,7 +79,7 @@ void SEvTaskState_GL_Rnr::RenderBar(const SEvTaskState& ts, ZColor* cols)
 
   Float_t nall = (ts.mNAll != 0) ? ts.mNAll : 1;
   Float_t yc, y = 0;
-  
+
 
   // If NAll==0, render outline & RETURN.
   if(ts.mNAll == 0) {
@@ -99,7 +99,7 @@ void SEvTaskState_GL_Rnr::RenderBar(const SEvTaskState& ts, ZColor* cols)
     glColor4fv(cols[2]());
     glPushMatrix();
     glScalef(ak, ak, ak * yc);
-    glTranslatef(0, 0, ah);       
+    glTranslatef(0, 0, ah);
     SphereTrings::Render(1, true);
     glPopMatrix();
     glTranslatef(0, 0, yc); y += yc;

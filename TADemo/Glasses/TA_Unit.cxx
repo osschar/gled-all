@@ -31,7 +31,7 @@ TA_Unit::Load() {
   int size = fs.st_size;
   char* raw_data = new char[size];
   printf("loading %s (%6.2fK)\n", mFile.Data(), ((float)size)/1024);
-    
+
   FILE* fp = fopen(mFile.Data(), "r");
   fread(raw_data, size, 1, fp);
   fclose(fp);

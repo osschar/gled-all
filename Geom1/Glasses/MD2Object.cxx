@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -9,7 +9,7 @@
 //
 // Quake2 MD2 object -- minimal implementation.
 // Snached from: http://www.moelhave.dk/2002/06/quake-2-md2-model-loader/
-// 
+//
 // Issues:
 // 1. Triangles are back-facing ("fixed" in rendering).
 // 2. Some models have inverted normals (fixed via mNormFac variable, set to -1).
@@ -65,7 +65,7 @@ void MD2Object::Load()
     kFile.close();
     throw(_eh + "failed opening the file.");
   }
-	
+
   //Loading header
 
   kFile.read((char *)&m_kHeader, sizeof(MD2Header));
@@ -73,12 +73,12 @@ void MD2Object::Load()
   //Check magic number
 
   if (m_kHeader.iMagic != 0x32504449 ||m_kHeader.iVersion != 8) {
-    kFile.close();	
+    kFile.close();
     throw(_eh + "wrong magic number.");
   }
 
   _clear_data();
-	
+
   //Load the frames
 
   kFile.seekg(m_kHeader.iOffsetFrames, std::ios::beg); //seek to start
@@ -94,12 +94,12 @@ void MD2Object::Load()
 
       for (int j = 0; j < m_kHeader.iNumVertices; j++) {
 
-	  int iVertexIndex = i*m_kHeader.iNumVertices + j; 
+	  int iVertexIndex = i*m_kHeader.iNumVertices + j;
 	  int iFrameIndex  = i*m_kHeader.iFrameSize;
 	  m_akVertex[iVertexIndex].x = (float)(((MD2Frame*)&m_akFrames[iFrameIndex])->akVertices[j].abVertex[0]);
 	  m_akVertex[iVertexIndex].y = (float)(((MD2Frame*)&m_akFrames[iFrameIndex])->akVertices[j].abVertex[1]);
 	  m_akVertex[iVertexIndex].z = (float)(((MD2Frame*)&m_akFrames[iFrameIndex])->akVertices[j].abVertex[2]);
-			
+
 	  m_akVertex[iVertexIndex].x *= ((MD2Frame*)&m_akFrames[iFrameIndex])->afScale[0];
 	  m_akVertex[iVertexIndex].y *= ((MD2Frame*)&m_akFrames[iFrameIndex])->afScale[1];
 	  m_akVertex[iVertexIndex].z *= ((MD2Frame*)&m_akFrames[iFrameIndex])->afScale[2];

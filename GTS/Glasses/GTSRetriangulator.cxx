@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -64,7 +64,7 @@ void GTSRetriangulator::_init()
   mVO_VolumeWght   = 0.5;
   mVO_BoundaryWght = 0.5;
   mVO_ShapeWght    = 0;
-  
+
   mMidvertOpts = MO_Midvert;
 
   mMinAngleDeg = 1;
@@ -213,7 +213,7 @@ void GTSRetriangulator::Refine()
   ::GTime* start_time = 0;
   if(bMeasureTime) start_time = new ::GTime(::GTime::I_Now);
 
-  gts_surface_refine(s, 
+  gts_surface_refine(s,
 		     l_cost_func, l_cost_data,
 		     0, 0,
 		     l_stop_func, l_stop_data);

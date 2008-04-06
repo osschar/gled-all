@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -26,7 +26,7 @@ Fl_LorentzVector::Fl_LorentzVector(int x, int y, int w, int h, const char* l) :
   if(w<4) w = 4; // at least labels; expect resize
   int iw = (w - 4) / 4;
   int rw = (w - 4) % 4;
-  
+
   int xc = x;
   for(int i=0; i<4; ++i) {
     int tw = iw; if(rw>0) { ++tw; --rw; }

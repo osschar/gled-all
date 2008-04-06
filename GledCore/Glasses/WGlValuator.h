@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -29,11 +29,11 @@ protected:
   Int_t           mStepB;  // X{GS} 7 Value()
 
   TString         mFormat; // X{GS} 7 Textor()
-  
+
   ZLink<ZGlass>   mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
   TString         mCbackMemberName; //  X{GS}     Ray{CbackReset} 7 Textor()
 
-  // Local stash 
+  // Local stash
   GledNS::DataMemberInfo* mDataMemberInfo; //!
   TDataMember*            mDataMember;     //!
 

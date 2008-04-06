@@ -147,7 +147,7 @@ inline Bool_t RGBAPalette::ColorFromValue(Int_t val, Int_t def_val, UChar_t* pix
       pix[0] = mDefaultRGBA[0];
       pix[1] = mDefaultRGBA[1];
       pix[2] = mDefaultRGBA[2];
-      if (alpha) pix[3] = mDefaultRGBA[3]; 
+      if (alpha) pix[3] = mDefaultRGBA[3];
       return true;
     } else {
       return false;

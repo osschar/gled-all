@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -124,7 +124,7 @@ void Gled::ParseArguments(list<char*>& args)
 	       "  -norint            do not run TRint (useful for batch saturns)\n"
 	       "\n"
 	       "Logging options:\n"
-	       "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n" 
+	       "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n"
 	       "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
 	       "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
 	       "\n"

@@ -76,8 +76,8 @@ inline_ float frsqrt(float f)
 //! Computes 1.0f / sqrtf(x). Comes from NVIDIA.
 inline_ float InvSqrt(const float& x)
 {
-  udword tmp = (udword(IEEE_1_0 << 1) + IEEE_1_0 - *(udword*)&x) >> 1;   
-  float y = *(float*)&tmp;                                             
+  udword tmp = (udword(IEEE_1_0 << 1) + IEEE_1_0 - *(udword*)&x) >> 1;
+  float y = *(float*)&tmp;
   return y * (1.47f - 0.47f * x * y * y);
 }
 
@@ -148,7 +148,7 @@ inline_ void SetFPU()
 // location pointed to by pwOldCW.
 {
 uword wTemp, wSave;
- 
+
 __asm fstcw wSave
 if (wSave & 0x300 ||            // Not single mode
 0x3f != (wSave & 0x3f) ||   // Exceptions enabled

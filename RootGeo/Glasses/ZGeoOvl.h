@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,9 +19,9 @@ private:
   void _init();
 
 protected:
-  Bool_t    mIsExtr;    // X{GS}  
+  Bool_t    mIsExtr;    // X{GS}
   Double_t  mOverlap;   // X{GS}  7 ValOut()
-  Int_t     mPM_N;      // X{GS} 
+  Int_t     mPM_N;      // X{GS}
   Float_t*  mPM_p;      //[mPM_N*3] X{gS}
   ZColor    mPM_Col;    // X{GSP}
   Bool_t    mRnrMark;   // X{GS}  7 Bool(-join=>1)

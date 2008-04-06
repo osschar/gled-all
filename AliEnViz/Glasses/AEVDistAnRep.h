@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -53,7 +53,7 @@ protected:
   Float_t       mTravelTime;	// X{GS} 7 Value(-range=>[0,10,1,100], -join=>1)
   Float_t       mWaitTime;      // X{GS} 7 Value(-range=>[0,10,1,100])
 
-  lMonaEntry_t     mHistory;        // 
+  lMonaEntry_t     mHistory;        //
   GTime            mProcStart;      // X{GS}
   GTime            mProcEnd;        // X{GS}
   Double_t         mProcDuration;   // X{GS} 7 ValOut(-join=>1)

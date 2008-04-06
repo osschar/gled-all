@@ -45,7 +45,7 @@ void WS_demo()
   CREATE_ADD_GLASS(sph1, Sphere, lamp1, "Sph1", 0);
   sph1->SetRadius(0.38); sph1->SetLOD(20);
 
-  CREATE_ADD_GLASS(lamp2, Lamp, lamp_base, "Lamp2", 0);  
+  CREATE_ADD_GLASS(lamp2, Lamp, lamp_base, "Lamp2", 0);
   lamp2->MoveLF(1,-5);
   lamp2->SetDiffuse(0.3, 0.3, 1);
   lamp2->SetLampScale(1);
@@ -94,7 +94,7 @@ void WS_demo()
   t2->SetColor(.2, 0.2, 0.6);
 
   CREATE_ADD_GLASS(tube1, WSTube, wsdemo, "Tube1", 0);
-  tube1->SetTLevel(30); 
+  tube1->SetTLevel(30);
   tube1->SetFat(false);
   tube1->SetTexture(image2);
   tube1->SetNodeA(t1);
@@ -102,7 +102,7 @@ void WS_demo()
   tube1->Connect();
 
   CREATE_ADD_GLASS(tube2, WSTube, wsdemo, "Tube2", 0);
-  tube2->SetTLevel(30); 
+  tube2->SetTLevel(30);
   tube2->SetFat(false);
   tube2->SetTexture(image2);
   tube2->SetNodeA(sph1);

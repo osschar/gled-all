@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -41,7 +41,7 @@ void MTW_View::_init()
 void MTW_View::auto_label()
 {
   if(mWindow && mWindow->parent() == 0) {
-    m_window_label = mGlass ? 
+    m_window_label = mGlass ?
       GForm("%s[%s]", mGlass->GetName(), mGlass->VGlassInfo()->fName.Data()) :
       "<no-glass>";
     mWindow->label(m_window_label.Data());
@@ -196,7 +196,7 @@ int MTW_View::SelfRep::handle(int ev) {
       return 1;
     }
     } // switch (ev)
-  } 
+  }
 
   return Fl_Box::handle(ev);
 }

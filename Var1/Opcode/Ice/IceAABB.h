@@ -355,7 +355,7 @@ public:
 
   //! Get component of the box's center along a given axis
   float	GetCenter(udword axis) const     { return mCenter[axis];  }
-  //! Get component of the box's extents along a given axis 
+  //! Get component of the box's extents along a given axis
   float	GetExtents(udword axis) const    { return mExtents[axis]; }
 
   //! Get box diagonal

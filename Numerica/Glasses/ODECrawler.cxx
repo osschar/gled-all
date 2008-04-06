@@ -203,7 +203,7 @@ Operator::Arg* ODECrawler::PreDance(Operator::Arg* op_arg)
 }
 
 void
-ODECrawler::Operate(Operator::Arg* op_arg) throw(Operator::Exception) { 
+ODECrawler::Operate(Operator::Arg* op_arg) throw(Operator::Exception) {
   Eventor::PreOperate(op_arg);
   Crawl();
   Eventor::PostOperate(op_arg);

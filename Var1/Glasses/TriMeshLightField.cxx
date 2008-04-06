@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -46,7 +46,7 @@ void TriMeshLightField::ModulateTvor(Bool_t regen_tring_cols)
   TringTvor& TT = * mMesh->GetTTvor();
 
   Float_t* F = FVec();
-  UChar_t* C = TT.mCols;
+  UChar_t* C = TT.Cols();
   for (Int_t i=0; i<TT.mNVerts; ++i, ++F, C+=4)
   {
     const Float_t f = * F;
@@ -120,8 +120,8 @@ void TriMeshLightField::CalculateLightField()
   }
 
   Float_t* F = FVec();
-  Float_t* V = TT.mVerts;
-  Float_t* N = TT.mNorms;
+  Float_t* V = TT.Verts();
+  Float_t* N = TT.Norms();
   for (Int_t i=0; i<TT.mNVerts; ++i, ++F, V+=3, N+=3)
   {
     using namespace Opcode;

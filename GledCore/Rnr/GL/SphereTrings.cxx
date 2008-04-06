@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -23,7 +23,7 @@ namespace {
   // Cube
   float Ca = 2/sqrt3;
   float a = Ca/2;
-  GLfloat V_Cube[] = { 
+  GLfloat V_Cube[] = {
     a,a,a,    a,-a,a,   a,-a,-a,   a,a,-a,
     -a,a,a,  -a,-a,a,  -a,-a,-a,  -a,a,-a
   };
@@ -32,10 +32,10 @@ namespace {
     {0,1,1},  {0,0,1},  {0,0,0},  {0,1,0}
   };
   GLubyte I_Cube[] = { 0,1,2,3,	3,2,6,7,	2,1,5,6,   6,5,4,7,
-		       7,4,0,3,	0,4,5,1 
+		       7,4,0,3,	0,4,5,1
   };
   GLfloat N_Cube[] = { 1,0,0,   0,0,-1,         0,-1,0,   -1,0,0,
-		       0,1,0,   0,0,1 
+		       0,1,0,   0,0,1
   };
 
   float b = sqrt2/2;
@@ -139,7 +139,7 @@ void SphereTrings::UnitFrameBox()
   glVertex3fv(v[4]);  glVertex3fv(v[5]);
   glVertex3fv(v[6]);  glVertex3fv(v[7]);
   glEnd();
-    
+
   glBegin(GL_LINES);
   glVertex3fv(v[0]);  glVertex3fv(v[4]);
   glVertex3fv(v[1]);  glVertex3fv(v[5]);

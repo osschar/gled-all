@@ -127,7 +127,7 @@ public:
   udword	ComputeDepth() const;
   udword	GetUsedBytes() const;
   udword	Walk(WalkingCallback callback, void* user_data) const;
-  
+
   bool		Refit(AABBTreeBuilder* builder);
   bool		Refit2(AABBTreeBuilder* builder);
 private:

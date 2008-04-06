@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -76,7 +76,7 @@ class GMutexAntiHolder {
 class GLensReadHolder {
   ZGlass* mLens;
  public:
-  GLensReadHolder(ZGlass* lens); 
+  GLensReadHolder(ZGlass* lens);
   virtual ~GLensReadHolder();
 
   ClassDef(GLensReadHolder, 0)
@@ -85,7 +85,7 @@ class GLensReadHolder {
 class GLensWriteHolder {
   ZGlass* mLens;
  public:
-  GLensWriteHolder(ZGlass* lens); 
+  GLensWriteHolder(ZGlass* lens);
   virtual ~GLensWriteHolder();
 
   ClassDef(GLensWriteHolder, 0)

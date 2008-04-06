@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -108,7 +108,7 @@ void AlSource::Play(Int_t count)
       perror(mFile.Data());
       throw(_eh + "stat failed.");
       }
-  
+
       int   size = sbuf.st_size;
       char* data = new char[size];
 
@@ -181,7 +181,7 @@ void AlSource::Play(Int_t count)
   GLensReadHolder _rdlck(this);
 
   alDeleteBuffers(1, &mAlBuf); mAlBuf = 0;
-  alDeleteSources(1, &mAlSrc); mAlSrc = 0;  
+  alDeleteSources(1, &mAlSrc); mAlSrc = 0;
 }
 
 /**************************************************************************/

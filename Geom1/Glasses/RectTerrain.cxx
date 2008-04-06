@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -134,7 +134,7 @@ void RectTerrain::SetFromImage(ZImage* image, Float_t zfac)
 
   if(!image->IsBindable())
     throw(_eh + "image '" + image->Identify() + "' not bindable.");
-    
+
   ZImage::sILMutex.Lock();
   image->bind();
   int w = image->w(), h = image->h();
@@ -167,7 +167,7 @@ void RectTerrain::SetFromImage(ZImage* image, Float_t zfac)
       mP(x,y) = ( (mP(x,y) - mMinZ)/delta - zoffset ) * zfac;
     }
   }
-  
+
   if(zfac > 0) {
     mMinZ = -zoffset * zfac; mMaxZ = (1 - zoffset) * zfac;
   } else {
@@ -202,7 +202,7 @@ void RectTerrain::SetFromHisto(TH2* histo)
       mP(x,y) = ( (mP(x,y) - mMinZ)/delta - zoffset ) * zfac;
     }
   }
-  
+
   if(zfac > 0) {
     mMinZ = -zoffset * zfac; mMaxZ = (1 - zoffset) * zfac;
   } else {
@@ -294,7 +294,7 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
   if(bBorder) {
     --minX; ++maxX; --minY; ++maxY;
   }
-  Int_t       nx = maxX - minX + 1,       ny = maxY - minY + 1; 
+  Int_t       nx = maxX - minX + 1,       ny = maxY - minY + 1;
   Float_t tex_fx = 1.0/(maxX - minX), tex_fy = 1.0/(maxY - minY);
 
   TringTvor& TT = * new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
@@ -370,7 +370,7 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
 void RectTerrain::MakeTringTvor()
 {
   // Creates TringTvor appropriate for current data-member settings.
-  
+
   Bool_t smoothp = (mRnrMode == RM_SmoothTring);
   Bool_t flatp   = ! smoothp;
   Bool_t colp    = (mColSep  != 0);

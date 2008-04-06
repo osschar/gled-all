@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -383,7 +383,7 @@ public:
 
     v->p.x = vec.x(); v->p.y = vec.y(); v->p.z = vec.z();
   }
-  
+
   static void s_vertex_displacer(GTS::GtsVertex* v, Legend* ud)
   {
     ud->vertex_displacer(v);

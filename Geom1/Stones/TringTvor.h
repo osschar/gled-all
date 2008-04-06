@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -19,19 +19,33 @@ public:
 
   // Vertex data
 
-  Int_t    mNVerts;
-  Float_t* mVerts;        //[3*mNVert]
-  Float_t* mNorms;        //[3*mNVert]
-  UChar_t* mCols;         //[4*mNVert]
-  Float_t* mTexs;         //[2*mNVert]
+  Int_t                mNVerts;
+  std::vector<Float_t> mVerts;  // Vertex coordinates, 3*mNVert
+  std::vector<Float_t> mNorms;  // Normals, 3*mNVert
+  std::vector<UChar_t> mCols;   // RGBA color, 4*mNVert
+  std::vector<Float_t> mTexs;   // Texture coordinates, 2*mNVert
 
-  void MakeNorms() { mNorms = new Float_t[3*mNVerts]; }
-  void MakeCols()  { mCols  = new UChar_t[4*mNVerts]; }
-  void MakeTexs()  { mTexs  = new Float_t[2*mNVerts]; }
+  bool HasNorms() { return ! mNorms.empty(); }
+  bool HasCols()  { return ! mCols .empty(); }
+  bool HasTexs()  { return ! mTexs .empty(); }
 
-  void AssertNorms() { if (!mNorms) MakeNorms(); }
-  void AssertCols()  { if (!mCols)  MakeCols();  }
-  void AssertTexs()  { if (!mTexs)  MakeTexs();  }
+  void MakeNorms() { mNorms.resize(3*mNVerts); }
+  void MakeCols()  { mCols .resize(4*mNVerts); }
+  void MakeTexs()  { mTexs .resize(2*mNVerts); }
+
+  void AssertNorms() { if ( ! HasNorms()) MakeNorms(); }
+  void AssertCols()  { if ( ! HasCols())  MakeCols();  }
+  void AssertTexs()  { if ( ! HasTexs())  MakeTexs();  }
+
+  void WipeVerts() { std::vector<Float_t> v; mVerts.swap(v); }
+  void WipeNorms() { std::vector<Float_t> v; mNorms.swap(v); }
+  void WipeCols()  { std::vector<UChar_t> v; mCols.swap(v);  }
+  void WipeTexs()  { std::vector<Float_t> v; mTexs.swap(v);  }
+
+  Float_t* Verts() { return &mVerts[0]; }
+  Float_t* Norms() { return &mNorms[0]; }
+  UChar_t* Cols()  { return &mCols[0]; }
+  Float_t* Texs()  { return &mTexs[0]; }
 
   Float_t* Vertex(Int_t i)  { return &(mVerts[3*i]); }
   Float_t* Normal(Int_t i)  { return &(mNorms[3*i]); }
@@ -40,24 +54,31 @@ public:
 
   // Triangle data
 
-  Int_t    mNTrings;
-  Int_t*   mTrings;       //[3*mNTrings]
-  Float_t* mTringNorms;   //[3*mNTrings]
-  UChar_t* mTringCols;    //[4*mNVert]
+  Int_t                mNTrings;
+  std::vector<Int_t>   mTrings;       // Vertex-indices of triangles, 3*mNTrings
+  std::vector<Float_t> mTringNorms;   // Triangle normals, 3*mNTrings
+  std::vector<UChar_t> mTringCols;    // Triangle colors, 4*mNTrings
 
-  void MakeTringNorms()   { mTringNorms = new Float_t[3*mNTrings]; }
-  void MakeTringCols()    { mTringCols  = new UChar_t[4*mNTrings]; }
+  Bool_t HasTringNorms()  { return ! mTringNorms.empty(); }
+  Bool_t HasTringCols()   { return ! mTringCols .empty(); }
 
-  void AssertTringNorms() { if (!mTringNorms) MakeTringNorms(); }
-  void AssertTringCols()  { if (!mTringCols)  MakeTringCols();  }
+  void MakeTringNorms()   { mTringNorms.resize(3*mNTrings); }
+  void MakeTringCols()    { mTringCols .resize(4*mNTrings); }
 
-  Bool_t HasTringNorms()  { return (mTringNorms != 0); }
-  Bool_t HasTringCols()   { return (mTringCols  != 0); }
+  void AssertTringNorms() { if ( ! HasTringNorms()) MakeTringNorms(); }
+  void AssertTringCols()  { if ( ! HasTringCols())  MakeTringCols();  }
 
+  void WipeTrings()     { std::vector<Int_t>   v; mTrings.swap(v);     }
+  void WipeTringNorms() { std::vector<Float_t> v; mTringNorms.swap(v); }
+  void WipeTringCols()  { std::vector<UChar_t> v; mTringCols.swap(v);  }
 
-  Int_t*   Triangle(Int_t i)       { return &(mTrings[3*i]);     }
-  Float_t* TriangleNormal(Int_t i) { return &(mTringNorms[3*i]); }
-  UChar_t* TriangleColor(Int_t i)  { return &(mTringCols[4*i]);  }
+  Int_t*   Trings()     { return &mTrings[0];     }
+  Float_t* TringNorms() { return &mTringNorms[0]; }
+  UChar_t* TringCols()  { return &mTringCols[0];  }
+
+  Int_t*   Triangle(Int_t i)       { return &mTrings[3*i];     }
+  Float_t* TriangleNormal(Int_t i) { return &mTringNorms[3*i]; }
+  UChar_t* TriangleColor(Int_t i)  { return &mTringCols[4*i];  }
 
   Bool_t   TriangleOtherVertices(Int_t t, Int_t v, Int_t& v_prev, Int_t& v_next);
 
@@ -69,20 +90,24 @@ public:
 
   // Triangle strip data
 
-  Int_t    mNStripEls;
-  Int_t*   mStripEls;     //[mNStripEls]
-  Int_t*   mStripTrings;  //[mNStripEls]
-  Int_t    mNStrips;
-  Int_t**  mStripBegs;    //[mNStrips]
-  Int_t*   mStripLens;    //[mNStrips]
+  Int_t    mNStripEls;    // Number of trianlge strip vertices (= 2*n-strips + n-of-triangles).
+  Int_t*   mStripEls;     // Vertex indices for all strips, mNStripEls.
+  Int_t*   mStripTrings;  // Indices of triangles belonging to strip vertices, mNStripEls (first two triangles of each strip are not used). Needed for flat shading.
+  Int_t    mNStrips;      // Number of trianlge strips.
+  Int_t**  mStripBegs;    // PointerBeg[mNStrips]
+  Int_t*   mStripLens;    // [mNStrips]
 
   // --------------------------------------------------------------
 
   TringTvor();
   TringTvor(Int_t nv, Int_t nt);
-  TringTvor(Int_t nv, Int_t nt, Bool_t smoothp,
-	    Bool_t colp=false, Bool_t texp=false);
+  TringTvor(Int_t nv, Int_t nt,
+            Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
   ~TringTvor();
+
+  void Reset(Int_t nv, Int_t nt);
+  void Reset(Int_t nv, Int_t nt,
+             Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
 
   void MakePrimaryArrays();
   void DeletePrimaryArrays();
@@ -124,7 +149,7 @@ public:
   // Export
   void ExportPovMesh(ostream& o, Bool_t smoothp=false);
 
-  ClassDef(TringTvor, 0);
+  ClassDef(TringTvor, 1);
 }; // endclass TringTvor
 
 
@@ -132,7 +157,7 @@ public:
 // Inlines
 /**************************************************************************/
 
-inline Bool_t TringTvor::TriangleOtherVertices(Int_t t, Int_t v, 
+inline Bool_t TringTvor::TriangleOtherVertices(Int_t t, Int_t v,
                                                Int_t& v_prev, Int_t& v_next)
 {
   // Find other two vertices (than v) in triangle t.

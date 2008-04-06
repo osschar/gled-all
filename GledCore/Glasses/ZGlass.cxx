@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -42,7 +42,7 @@ void ZGlass::_init()
   mGlassBits = 0; mSaturnID=0;
   mGuard = 0;
   bMIRActive = true; bAcceptRefs = true;
-  mRefCount = mMoonRefCount = mSunRefCount = mFireRefCount = mEyeRefCount = 0; 
+  mRefCount = mMoonRefCount = mSunRefCount = mFireRefCount = mEyeRefCount = 0;
   mTimeStamp = mStampReqTring = 0;
   pspRayAbsorber  = 0;
   pspNameChangeCB = 0;
@@ -366,7 +366,7 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
 
   if(mQueen && from->mQueen) {
     mQueen->SubjectRefCntLock();
-    
+
     hpZGlass2Int_i i = mReverseRefs.find(from);
     if(i == mReverseRefs.end()) {
       mQueen->SubjectRefCntUnlock();

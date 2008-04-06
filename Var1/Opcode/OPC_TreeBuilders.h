@@ -40,7 +40,7 @@ struct OPCODE_API BuildSettings
 {
   BuildSettings() : mLimit(1), mRules(SPLIT_FORCE_DWORD) {}
 
-  udword mLimit; //!< Limit number of primitives / node. 
+  udword mLimit; //!< Limit number of primitives / node.
                  //!< If limit is 1, build a complete tree (2*N-1 nodes)
   udword mRules; //!< Building/Splitting rules (a combination of SplittingRules flags)
 };

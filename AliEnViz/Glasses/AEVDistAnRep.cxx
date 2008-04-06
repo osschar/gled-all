@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -110,7 +110,7 @@ Int_t AEVDistAnRep::create_evbatches(map<string, int>& cmap)
     if(!placed) {
       eb->SetPos(x, y, 0); x += dx;
     }
-  
+
     ++i;
   }
   printf("Sites=%d Events=%d\n", cmap.size(), totevents);
@@ -202,7 +202,7 @@ void AEVDistAnRep::InitJob(AEVJobRep* job)
   }
 
   Int_t total_entries = 0;
-  
+
   {
     GLensWriteHolder wrlck(this);
     ResetDistAn();
@@ -239,7 +239,7 @@ void AEVDistAnRep::InitJob(AEVJobRep* job)
     if(l.size() > 1) {
       printf("multiple entries for %s, using first\n", sites[s].Data());
     }
-    
+
     TPME params("\\s*,\\s*");
     Int_t n_params = params.split(l.front().fValue);
     printf("  site=%s, n_params=%d: %s\n", sites[s].Data(), n_params,
@@ -338,14 +338,14 @@ void AEVDistAnRep::FakeInitJob(AEVJobRep* job)
   }
 
   Int_t total_entries = 0;
-  
+
   {
     GLensWriteHolder wrlck(this);
     ResetDistAn();
   }
 
   TRandom gen(0);
- 
+
   lMonaEntry_t l;
 
   Int_t n_sites = SiteDatasN;
@@ -496,7 +496,7 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
       SetInReplay(false);
       break;
     }
-    
+
     AEVMlClient::MonaEntry me = mHistory.front();
 
     if(me.fTime > mReplayTime) {
@@ -517,7 +517,7 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
 	mReplayDuration/mProcDuration;
       Stamp(FID());
     }
-    mHistory.pop_front();    
+    mHistory.pop_front();
 
     printf("processing: '%s'\n", me.StdFormat());
     mDemoDriver->set_blurp(me.fDateStr);
@@ -619,7 +619,7 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
 
   GLensWriteHolder wrlck(this);
   Int_t n_left = mHistory.size();
-  
+
   SetInReplay(false);
 
   ZMIR* mir = get_MIR();
@@ -795,7 +795,7 @@ Int_t AEVDistAnRep::FakeReplayJobFromHistory()
   }
 
   GLensWriteHolder wrlck(this);
-  
+
   SetInReplay(false);
 
   ZMIR* mir = get_MIR();
@@ -936,7 +936,7 @@ void AEVDistAnRep::FollowJob()
       TString parname = proc_parname_re[2];
       TString site    = site_subproc_re[1];
       TString subproc = site_subproc_re[2];
-      
+
       proc_map[proc].fSite = site;
       if(parname == "status")
 	proc_map[proc].fStatus = me.fValue;
@@ -997,7 +997,7 @@ void AEVDistAnRep::FollowJob()
 	    mEventState.IncNOK(delta);
 	    Stamp(FID());
 	  } else {
-	    // if in procs, disconnect 
+	    // if in procs, disconnect
 	    if(pv != 0) {
 	      { GLensWriteHolder wrlck(pv);
 		pv->AnimateDisconnect(1 / mConnectTime, true);
@@ -1088,8 +1088,8 @@ void AEVDistAnRep::Process()
   mBatchState.SetNProc(mBatchState.GetNAll());
   mBatchState.SetState('R');
   mEventState.SetNProc(nproc);
-  mEventState.SetState('R');  
-  
+  mEventState.SetState('R');
+
   Stamp(FID());
   WriteUnlock();
 
@@ -1097,7 +1097,7 @@ void AEVDistAnRep::Process()
   mProof->Exec(GForm(".include ../packages/%s", mPkgName.Data()));
 
   mDSet->Process(mSelector.Data());
-  
+
   FinalizeProcStatus();
 
   WriteLock();
@@ -1162,7 +1162,7 @@ void AEVDistAnRep::UpdateProcStatus(TList* siteinfos,
 	if(ts.GetNToDo() <= 0 && ts.GetState() != 'F') {
 	  d_sites += 1;
 	  ts.SetState('F');
-	} 
+	}
 	eb->SetEvState(ts);
 	if(siteevmap) (*siteevmap)[sitename] = delta;
       }

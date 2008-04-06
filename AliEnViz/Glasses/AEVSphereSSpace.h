@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2004, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -22,7 +22,7 @@ private:
 protected:
 
 public:
-  AEVSphereSSpace(const Text_t* n="AEVSphereSSpace", const Text_t* t=0) : 
+  AEVSphereSSpace(const Text_t* n="AEVSphereSSpace", const Text_t* t=0) :
     SMorph(n,t) { _init(); }
 
   virtual Bool_t ImportSite(AEVSite* site, Bool_t warn=false); // X{E} C{1}

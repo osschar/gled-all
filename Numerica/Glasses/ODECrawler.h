@@ -36,7 +36,7 @@ protected:
   Double_t	mStoreDx;	//  X{gS} 7 Value()
   TVectorF*	mXStored;	//! X{g}
   TVectorF*	mYStored;	//! X{g} ROOT now allows streaming ... check syntax
-  
+
   TVectorD	mY;		//! X{r}
   Int_t		mN;		// X{g}  7 ValOut(-join=>1)
   Double_t	mAcc;		// X{gS} 7 Value(-range=>[0,1])
@@ -44,7 +44,7 @@ protected:
   Double_t	mX2;		// X{gS} 7 Value()
   Double_t	mH1;		// X{gS} 7 Value(-join=>1)
   Double_t	mHmin;		// X{gS} 7 Value()
-  
+
   Int_t		Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
 		     TVectorD& yscal, Double_t& hdid, Double_t& hnext);
   void 		Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,

@@ -1,5 +1,5 @@
 // monitor in SunQueen
-// 
+//
 // vars: ZSunQueen* sun_queen
 // libs:
 {

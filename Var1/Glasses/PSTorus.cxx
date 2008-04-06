@@ -1,6 +1,6 @@
 // $Header$
 
-// Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
+// Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
@@ -126,7 +126,7 @@ void PSTorus::pos2hdir(const Float_t* x, Float_t* d)
     d[2] = -d[2];
   }
 }
- 
+
 Float_t PSTorus::pos2hray(const Float_t* x, Opcode::Ray& r)
 {
   // Setup ray r for given postition x so that the ray origin is above
