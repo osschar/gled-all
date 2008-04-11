@@ -9,7 +9,8 @@
 
 #include <Stones/TringTvor.h>
 
-class TringTvor_GL_Rnr {
+class TringTvor_GL_Rnr
+{
 public:
   static void Render(TringTvor* ttvor, Bool_t smoothp, Bool_t colp=true, Bool_t texp=true);
 
