@@ -204,6 +204,9 @@ void Tringula_GL_Rnr::Render(RnrDriver* rd)
   TringTvor &TT = *T.mMesh->GetTTvor();
   glColor4fv(T.mColor());
   GL_Capability_Switch light(GL_LIGHTING, T.bLightMesh);
-  Bool_t smoothp = TT.HasNorms() && (T.bSmoothShade || TT.HasTringNorms());
-  TringTvor_GL_Rnr::Render(&TT, smoothp);
+  if (T.bSmoothShade)
+    assert(TT.HasNorms());
+  else
+    assert(TT.HasTringNorms());
+  TringTvor_GL_Rnr::Render(&TT, T.bSmoothShade);
 }
