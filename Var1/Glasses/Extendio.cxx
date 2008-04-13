@@ -23,6 +23,8 @@ void Extendio::_init()
 
   bRnrSelf        = true;
   bVerboseCollide = false;
+
+  bSelected       = false;
 }
 
 /**************************************************************************/

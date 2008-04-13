@@ -55,6 +55,8 @@ protected:
   Bool_t          bRnrSelf;        // X{GS}  7 Bool()
   Bool_t          bVerboseCollide; // X{GS}  7 Bool()
 
+  Bool_t          bSelected;       // X{GS}  7 BoolOut()
+
   ZLink<TriMesh>  mMesh;       // X{GS} L{}
 
 public:
