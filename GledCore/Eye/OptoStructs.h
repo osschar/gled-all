@@ -74,8 +74,10 @@ namespace OptoStructs {
 
   typedef list<ZGlassImg*>			  lpZGlassImg_t;
   typedef list<ZGlassImg*>::iterator		  lpZGlassImg_i;
+#ifndef __CINT__
   typedef hash_map<ZGlass*, ZGlassImg*>		  hpZGlass2pZGlassImg_t;
   typedef hash_map<ZGlass*, ZGlassImg*>::iterator hpZGlass2pZGlassImg_i;
+#endif
 
   /**************************************************************************/
   // ImageConsumer: abstract base for str
