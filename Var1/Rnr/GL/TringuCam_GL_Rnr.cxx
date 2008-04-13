@@ -52,7 +52,7 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
       if (ev.fButton == 1)
       {
-        TC.MouseDown();
+        TC.MouseDown(ev);
       }
 
       return 1;
