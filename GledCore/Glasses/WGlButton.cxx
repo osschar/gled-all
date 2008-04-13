@@ -12,13 +12,12 @@
 #include "WGlButton.h"
 #include "WGlButton.c7"
 
-ClassImp(WGlButton)
+ClassImp(WGlButton);
 
 /**************************************************************************/
 
 void WGlButton::_init()
 {
-  // *** Set all links to 0 ***
   mDx = mDy = 0;
   mCbackAlpha = 0;
   mCbackMethodInfo = 0;
