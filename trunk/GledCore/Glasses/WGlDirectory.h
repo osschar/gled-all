@@ -11,7 +11,8 @@
 #include <Stones/ZColor.h>
 #include <Gled/GledNS.h>
 
-class WGlDirectory : public ZNode {
+class WGlDirectory : public ZNode
+{
   MAC_RNR_FRIENDS(WGlDirectory);
 
  public:
@@ -19,6 +20,7 @@ class WGlDirectory : public ZNode {
 
  private:
   void _init();
+
  protected:
   ZLink<AList>      mContents;     //  X{GE} L{}
   ZLink<ZList>      mSelection;    //  X{GS} L{}
@@ -104,8 +106,8 @@ class WGlDirectory : public ZNode {
   void StandardPixel();  //  X{E} 7 MButt()
 
 #include "WGlDirectory.h7"
-  ClassDef(WGlDirectory, 1)
-    }; // endclass WGlDirectory
+  ClassDef(WGlDirectory, 1);
+}; // endclass WGlDirectory
 
 
 #endif

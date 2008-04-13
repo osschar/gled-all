@@ -39,7 +39,7 @@ public:
   void ExitGled();  // X{Ed}
 
 #include "WGlButton.h7"
-  ClassDef(WGlButton, 1)
+  ClassDef(WGlButton, 1);
 }; // endclass WGlButton
 
 
