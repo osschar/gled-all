@@ -1,3 +1,8 @@
+2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	First steps towards hierarhic overlay menus.
+
 2008-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

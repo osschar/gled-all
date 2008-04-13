@@ -1,3 +1,32 @@
+2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.h:
+	Last aabb was not updated properly.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add member 'Bool_t bSelected'.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add inner struct PickResult.
+	Add member PickExtendios() that uses Opcode for ray-extendio
+	intersections.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add 'ZLink<ZHashList> mSelection', 'ZLink<Scene> mOverlay'.
+	Add mouse-action MA_PickExtendios and implement it in
+	MouseDown().
+	MouseDown() now takes 'A_Rnr::Fl_Event& ev' as an argument.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Render selected extendios with green bounding-box.
+
+	* Opcode/Ice/IceAABB.h:
+	Add some functions.
+
 2008-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.cxx:
