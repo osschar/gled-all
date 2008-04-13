@@ -11,7 +11,7 @@
 // SGridStepper
 //
 
-ClassImp(SGridStepper)
+ClassImp(SGridStepper);
 
 SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
 {
