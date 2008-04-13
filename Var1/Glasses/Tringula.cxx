@@ -224,6 +224,10 @@ void Tringula::SetRayVectors(const TVector3& pos, const TVector3& dir)
 
 void Tringula::RayCollide()
 {
+  // Intersect mesh with ray as given in data-members mRayPos and mRayDir.
+  //
+  // Should really take Opcode::Ray as argument.
+
   static const Exc_t _eh("Tringula::RayCollide ");
 
   if(mMesh == 0 || mMesh->GetOPCModel() == 0)
@@ -238,8 +242,8 @@ void Tringula::RayCollide()
   RC.SetDestination(mRayColFaces);
 
   Opcode::Ray R;
-  mRayPos.GetXYZ((Float_t*)&R.mOrig.x);
-  get_ray_dir((Float_t*)&R.mDir, 1);
+  mRayPos.GetXYZ(R.mOrig);
+  get_ray_dir(R.mDir, 1);
 
   const char* setval = RC.ValidateSettings();
   printf("RayCollider::ValidateSettings: %s\n", setval ? setval : "OK.");
@@ -261,6 +265,79 @@ void Tringula::RayCollide()
            f, cf.mFaceID, cf.mDistance, cf.mU, cf.mV);
   }
   Stamp(FID());
+}
+
+void Tringula::prepick_extendios(AList        * extendios,
+                                 Opcode::Ray  & ray,
+                                 lPickResult_t& candidates)
+{
+  // Select picking candiadates from among extendios.
+
+  Opcode::Point dpos;
+  Float_t       t;
+
+  Stepper<> stepper(extendios);
+  while (stepper.step())
+  {
+    Extendio* ext = (Extendio*) *stepper;
+
+    dpos.Sub(ray.mOrig, ext->ref_last_aabb().Center());
+    t = - (ray.mDir | dpos);
+
+    if (t > 0 && dpos.SquareMagnitude() - t*t <= ext->ref_last_aabb().GetSphereSquareRadius())
+    {
+      candidates.push_back(PickResult(ext, t));
+    }
+  }
+}
+
+Extendio* Tringula::PickExtendios()
+{
+  // Loop over extendios and calculate distance between ray and center
+  // point.
+  //
+  // Original idea was to sub-divide ray into boxes and do split box prunning.
+  //
+  // Could increase size of boxes further away.
+  //
+  // In fact, only need to calculate until the first contact with terrain.
+  //
+  // Check both options.
+
+  static const Exc_t _eh("Tringula::PickExtendios ");
+
+  Opcode::Ray ray;
+  mRayPos.GetXYZ(ray.mOrig);
+  get_ray_dir(ray.mDir, 1);
+
+  lPickResult_t candidates;
+
+  prepick_extendios(*mStatos, ray, candidates);
+  prepick_extendios(*mDynos,  ray, candidates);
+  prepick_extendios(*mFlyers, ray, candidates);
+
+  candidates.sort();
+
+  Opcode::RayCollider RC;
+  RC.SetFirstContact(true);
+
+  for (lPickResult_i res = candidates.begin(); res != candidates.end(); ++res)
+  {
+    Extendio *ext = res->fExtendio;
+
+    if (RC.Collide(ray, * ext->get_opc_model(), ext->RefLastTrans()))
+    {
+      if (RC.GetContactStatus())
+      {
+        return ext;
+      }
+    }
+    else
+    {
+      printf("%scollide status=<failed>, extendio='%s'.", _eh.Data(), ext->GetName());
+    }
+  }
+  return 0;
 }
 
 /**************************************************************************/
@@ -670,6 +747,8 @@ void Tringula::DoSplitBoxPrunning()
 
 void Tringula::TimeTick(Double_t t, Double_t dt)
 {
+  static const Exc_t _eh("Tringula::TimeTick ");
+
   GLensWriteHolder wlck(this);
 
   using namespace Opcode;
@@ -726,7 +805,8 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
         }
         else
         {
-          printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
+          printf("%scollide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
+                 _eh.Data(),
                  RC.GetContactStatus(),
                  RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
                  RC.GetNbIntersections());
