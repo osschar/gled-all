@@ -353,6 +353,9 @@ public:
   //! Get box extents
   void	GetExtents(Point& extents) const { extents = mExtents; }
 
+  Point Center()  const { return mCenter;  }
+  Point Extents() const { return mExtents; }
+
   //! Get component of the box's center along a given axis
   float	GetCenter(udword axis) const     { return mCenter[axis];  }
   //! Get component of the box's extents along a given axis
@@ -360,6 +363,8 @@ public:
 
   //! Get box diagonal
   void	GetDiagonal(Point& diagonal) const { diagonal = mExtents * 2.0f; }
+  float GetSphereSquareRadius()      const { return mExtents.SquareMagnitude(); }
+  float GetSphereRadius()            const { return mExtents.Magnitude(); }
   float	GetWidth()	const	{ return mExtents.x * 2.0f; }
   float	GetHeight()	const	{ return mExtents.y * 2.0f; }
   float GetDepth()	const	{ return mExtents.z * 2.0f; }
