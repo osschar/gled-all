@@ -118,6 +118,10 @@ public:
     Stepper(stepper_base* imp) : m_imp(imp) {}
     ~Stepper() { delete m_imp; }
 
+    void reset(AList* l, bool return_zeros=false) {
+      delete m_imp;
+      m_imp = l->make_stepper_imp(return_zeros);
+    }
     bool step() {
       do { if(! m_imp->step()) return false;
       } while(! is_ok());
