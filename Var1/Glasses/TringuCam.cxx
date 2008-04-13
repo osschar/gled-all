@@ -14,16 +14,20 @@
 #include "TriMeshLightField.h"
 #include <Glasses/ScreenText.h>
 #include <Glasses/PupilInfo.h>
+#include <Glasses/Scene.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/TimeMaker.h>
 #include "TringuCam.c7"
 
 #include "TriMesh.h"
 #include "ParaSurf.h"
+#include "Extendio.h"
+
+#include <RnrBase/Fl_Event_Enums.h>
 
 #include <TMath.h>
 
-ClassImp(TringuCam)
+ClassImp(TringuCam);
 
 /**************************************************************************/
 
@@ -76,6 +80,17 @@ void TringuCam::_init()
   mRayColl.SetClosestHit(true);
   mRayColl.SetDestination(&mCollFaces);
   mCollVertex = -1;
+}
+
+void TringuCam::AdEnlightenment()
+{
+  PARENT_GLASS::AdEnlightenment();
+  if (mSelection == 0) {
+    ZHashList* l = new ZHashList("Selection", "Selection of TringuCam");
+    l->SetElementFID(Extendio::FID());
+    mQueen->CheckIn(l);
+    SetSelection(l);
+  }
 }
 
 /**************************************************************************/
@@ -134,7 +149,7 @@ Int_t TringuCam::KeyUp(Int_t key)
 
 /**************************************************************************/
 
-void TringuCam::MouseDown()
+void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 {
   bMouseDown = true;
 
@@ -162,11 +177,47 @@ void TringuCam::MouseDown()
     case MA_SprayField:
     {
       // Everything done in time-tick.
-      if (mTringula != 0 && mTringula->GetUseDispList())
+      if (mTringula->GetUseDispList())
       {
+        // !!! Could repaint just the changed triangles with negative polygon offset.
         mTringula->SetUseDispList(false);
         bEnableTringDLonMouseUp = true;
       }
+      break;
+    }
+    case MA_PickExtendios:
+    {
+      CalculateMouseRayVectors();
+      GLensReadHolder _tlck(*mTringula);
+      mTringula->SetRayVectors(mMouseRayPos, mMouseRayDir);
+
+      Extendio* ext = mTringula->PickExtendios();
+
+      printf("picked %s, st=%x, ctrl=%x\n", ext ? ext->GetName() : "<none>", ev.fState, FL_CTRL);
+
+      if (ev.fState & FL_CTRL)
+      {
+        if (ext)
+        {
+          if (mSelection->Has(ext))
+            mSelection->Remove(ext);
+          else
+            mSelection->PushBack(ext);
+          ext->SetSelected(!ext->GetSelected());
+        }
+      }
+      else
+      {
+        Stepper<> stepper(*mSelection);
+        while (stepper.step())
+          ((Extendio*) *stepper)->SetSelected(false);
+        mSelection->ClearList();
+        if (ext) {
+          mSelection->PushBack(ext);
+          ext->SetSelected(true);
+        }
+      }
+
       break;
     }
     default:
@@ -180,7 +231,7 @@ void TringuCam::MouseDown()
 void TringuCam::MouseUp()
 {
   bMouseDown = false;
-  if ( bEnableTringDLonMouseUp)
+  if (bEnableTringDLonMouseUp)
   {
     mTringula->SetUseDispList(true);
     bEnableTringDLonMouseUp = false;

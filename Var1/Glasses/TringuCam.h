@@ -12,6 +12,7 @@
 #include <Stones/TimeMakerClient.h>
 #include <Gled/GTime.h>
 
+#include <RnrBase/A_Rnr.h>
 #include <Opcode/Opcode.h>
 
 class TriMeshField;
@@ -20,6 +21,8 @@ class TriMeshLightField;
 class ScreenText;
 
 class PupilInfo;
+class Scene;
+
 class Eventor;
 class TimeMaker;
 
@@ -131,7 +134,8 @@ protected:
 
   map<Int_t, KeyInfo*> mKeyStateMap;
 
-  ZLink<ScreenText>  mInfoTxt; // X{GS} L{}
+  ZLink<ZHashList>   mSelection; // X{GS} L{}
+  ZLink<ScreenText>  mInfoTxt;   // X{GS} L{}
 
 
   //=================================================================
@@ -141,7 +145,8 @@ protected:
 public:
   // On mouse-1 we do:
   enum MouseAction_e { MA_Nothing, MA_RayCollide, MA_AddField, MA_SprayField,
-                       MA_AddSource };
+                       MA_AddSource,
+                       MA_PickExtendios };
 
 protected:
   MouseAction_e mMouseAction;   // X{GS} 7 PhonyEnum()
@@ -164,6 +169,8 @@ protected:
   ZLink<TriMeshLightField> mLightField;  // X{GS} L{A}
 
   ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{A}
+  ZLink<Scene>             mOverlay;     // X{GS} L{A}
+
   ZLink<Eventor>           mEventor;     // X{GS} L{A}
   ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{A}
 
@@ -195,11 +202,13 @@ public:
   TringuCam(const Text_t* n="TringuCam", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
 
+  virtual void AdEnlightenment();
+
   KeyInfo* FindKeyInfo(Int_t key);
   Int_t KeyDown(Int_t key);
   Int_t KeyUp(Int_t key);
 
-  void MouseDown();
+  void MouseDown(A_Rnr::Fl_Event& ev);
   void MouseUp();
 
   void CalculateMouseRayVectors();
@@ -207,6 +216,9 @@ public:
 
   void add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv, Int_t v, Float_t value);
   void AddField(Float_t val);
+
+  // Overlay methods
+  
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
