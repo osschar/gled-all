@@ -48,7 +48,7 @@ public:
   Dynamico(const Text_t* n="Dynamico", const Text_t* t=0) :
     Extendio(n,t) { _init(); }
 
-  virtual void update_last_data() { mLastTrans = mTrans; mLastAABB = mLastAABB; }
+  virtual void update_last_data() { mLastTrans = mTrans; mLastAABB = mAABB; }
 
   static bool handle_collision(Dynamico            * dyno,
                                Statico             * stato,
