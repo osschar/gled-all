@@ -46,6 +46,19 @@ public:
     // shaded (ligt-source, ambient color/level),
   };
 
+  struct PickResult
+  {
+    Extendio *fExtendio;
+    Float_t   fTime;
+
+    PickResult(Extendio* ext, Float_t t) : fExtendio(ext), fTime(t) {}
+
+    bool operator<(const PickResult& o) { return fTime < o.fTime; }
+  };
+
+  typedef list<PickResult>           lPickResult_t;
+  typedef list<PickResult>::iterator lPickResult_i;
+
 private:
   void _init();
 
@@ -104,6 +117,9 @@ protected:
   void   setup_stato_pruner();
   void   setup_dyno_pruner();
 
+  void   prepick_extendios(AList* extendios, Opcode::Ray& ray,
+                           lPickResult_t& candidates);
+
 public:
   Tringula(const Text_t* n="Tringula", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
@@ -125,7 +141,8 @@ public:
 
   void SetRayVectors(const TVector3& pos, const TVector3& dir);
 
-  void RayCollide();          // X{ED} C{0} 7 MButt()
+  void      RayCollide();          // X{ED} C{0} 7 MButt()
+  Extendio* PickExtendios();       // X{ED} C{0} 7 MButt()
 
   void ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
 
