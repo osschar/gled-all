@@ -12,6 +12,7 @@
 #include "TringuCam.h"
 #include "TriMeshField.h"
 #include "TriMeshLightField.h"
+#include <Glasses/ZQueen.h>
 #include <Glasses/ScreenText.h>
 #include <Glasses/PupilInfo.h>
 #include <Glasses/Scene.h>
