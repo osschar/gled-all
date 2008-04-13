@@ -1,3 +1,20 @@
+2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Eye/OptoStructs.h:
+	Ifdef-out hash_map typedefs for CINT.
+
+	* Glasses/AList.h:
+	Add reset() to Stepper<>.
+
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	* Glasses/WGlDirectory.h:
+	Whitespace.
+
+	* Stones/SGridStepper.cxx:
+	* Stones/SGridStepper.h:
+	Add SetOs().
+
 2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledTypes.h:
