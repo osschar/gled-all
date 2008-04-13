@@ -409,6 +409,7 @@ void tringula(Int_t mode=0)
 
   make_overlay();
   g_pupil->SetOverlay(overlay);
+  tricam->SetOverlay(overlay);
 
   /**************************************************************************/
   // Place some random statos, dynos and flyers
@@ -721,6 +722,8 @@ void setup_test()
 
 void make_overlay()
 {
+  Float_t weed_dx = 100, step_dx = 120, step_dy = 26;
+
   ASSIGN_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
 
   CREATE_ADD_GLASS(ovl_lm, ZGlLightModel, overlay, "LightOff", 0);
@@ -731,26 +734,42 @@ void make_overlay()
 
   CREATE_ADD_GLASS(bfs, WGlFrameStyle, overlay, "Butt Frame Style", 0);
   bfs->StandardPixel();
+  bfs->SetDefDx(weed_dx);
   bfs->SetTileColor(0.3, 0.5, 0.5, 0.6);
   bfs->SetBelowMColor(0.5, 0.7, 0.7, 0.8);
 
-  CREATE_ADD_GLASS(but1, WGlButton, overlay, "Suspend", 0);
-  but1->SetPos(4, 4, 0);
-  but1->SetCbackAlpha(tricam);
-  but1->SetCbackMethodName("Suspend");
+  {
+    CREATE_ADD_GLASS(sim_ctrl, ZNode, overlay, "SimCtrl", 0);
+    //sim_ctrl->SetRnrMod(menufs);
+    //dd->SetMenuFrameStyle(menufs);
 
-  CREATE_ADD_GLASS(but2, WGlButton, overlay, "Resume", 0);
-  but2->SetPos(4, 30, 0);
-  but2->SetCbackAlpha(tricam);
-  but2->SetCbackMethodName("Resume");
+    SGridStepper top_step(0);
+    top_step.SetDs(step_dx, step_dy, 1);
+    top_step.SetNs(6, 4, 1);
+    top_step.SetOs(4, 4, 0);
 
-  CREATE_ADD_GLASS(val1, WGlValuator, overlay, "Speed", 0);
-  val1->SetPos(98, 4, 0);
-  val1->SetMin(1); val1->SetMax(1000);
-  val1->SetFormat("Sleep: %.0f");
-  val1->SetCbackAlpha(eventor);
-  val1->SetCbackMemberName("InterBeatMS");
+    CREATE_ADD_GLASS(but1, WGlButton, sim_ctrl, "Suspend", 0);
+    // but1->SetPos(4, 4, 0);
+    top_step.SetNodeAdvance(but1);
+    but1->SetCbackAlpha(tricam);
+    but1->SetCbackMethodName("Suspend");
+
+    CREATE_ADD_GLASS(but2, WGlButton, sim_ctrl, "Resume", 0);
+    // but2->SetPos(4, 30, 0);
+    top_step.SetNodeAdvance(but2);
+    but2->SetCbackAlpha(tricam);
+    but2->SetCbackMethodName("Resume");
+
+    CREATE_ADD_GLASS(val1, WGlValuator, sim_ctrl, "Sleep", 0);
+    //val1->SetPos(98, 4, 0);
+    top_step.SetNodeAdvance(val1);
+    val1->SetMin(1); val1->SetMax(1000);
+    val1->SetFormat("Sleep: %.0f");
+    val1->SetCbackAlpha(eventor);
+    val1->SetCbackMemberName("InterBeatMS");
+  }
 }
+
 
 /******************************************************************************/
 // Various
