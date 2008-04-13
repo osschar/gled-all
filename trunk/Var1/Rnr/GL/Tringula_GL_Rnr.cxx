@@ -73,11 +73,19 @@ void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
 
   TringTvor_GL_Rnr::Render(ext->GetMesh()->GetTTvor(), false);
 
+  if (ext->GetSelected())
+  {
+    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+    GL_Float_Holder      fat_line(GL_LINE_WIDTH, 2, glLineWidth);
+    glColor3f(0.1f, 0.9f, 0.3f);
+    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
+  }
+
   if (mTringula->bRnrBBoxes)
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(1, 0, 0);
-    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01);
+    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
   }
 
   if (mTringula->bPickDynos) rd->GL()->PopName();
@@ -88,7 +96,7 @@ void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(0, 0, 1);
-    render_ceaabox((Float_t*)&ext->RefLastAABB(), 1.01);
+    render_ceaabox((Float_t*)&ext->RefLastAABB(), 1.01f);
   }
 }
 
