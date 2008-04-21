@@ -1,3 +1,28 @@
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* RnrBase/A_Rnr.h:
+	Add fDX, fDY members to A_Rnr::Fl_Event. Needed to pass the
+	mouse-wheel events into renderers.
+
+	* Pupils/Pupil.cxx:
+	Pass also mouse-wheel and keyboard events into renderers.
+
+	* Glasses/WGlWidget.cxx:
+	* Glasses/WGlWidget.h:
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	* Glasses/WGlValuator.cxx:
+	* Glasses/WGlValuator.h:
+	Extract common base WGlWidget from WGlButton and WGlValuator.
+
+	* Rnr/GL/WGlValuator_GL_Rnr.cxx:
+	* Rnr/GL/WGlValuator_GL_Rnr.h:
+	Add support for middle/right mouse drag (like in fltk).
+	Add support for mouse-wheel value changing.
+
+	* glass.list:
+	Register new glass WGlWidget.
+
 2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Eye/OptoStructs.h:
