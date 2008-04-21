@@ -7,10 +7,10 @@
 #ifndef GledCore_WGlButton_H
 #define GledCore_WGlButton_H
 
-#include <Glasses/ZNode.h>
+#include <Glasses/WGlWidget.h>
 #include <Gled/GledNS.h>
 
-class WGlButton : public ZNode
+class WGlButton : public WGlWidget
 {
   MAC_RNR_FRIENDS(WGlButton);
 
@@ -18,20 +18,17 @@ private:
   void _init();
 
 protected:
-  Float_t   mDx; // X{GST} 7 Value(-range=>[0,1000,1,1000], -join=>1)
-  Float_t   mDy; // X{GST} 7 Value(-range=>[0,1000,1,1000])
-
-  ZLink<ZGlass>       mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
   ZLink<ZGlass>       mCbackBeta;       //  X{GS} L{}
   TString             mCbackMethodName; //  X{GS}     Ray{CbackReset} 7 Textor()
   GledNS::MethodInfo* mCbackMethodInfo; //!
 
 public:
   WGlButton(const Text_t* n="WGlButton", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
+    WGlWidget(n,t) { _init(); }
+
+  virtual void EmitCbackResetRay() { mCbackMethodInfo = 0; }
 
   GledNS::MethodInfo* GetCbackMethodInfo();
-  void EmitCbackResetRay() { mCbackMethodInfo = 0; }
 
   void MenuEnter(); // X{E}
   void MenuExit();  // X{E}

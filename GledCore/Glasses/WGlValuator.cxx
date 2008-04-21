@@ -15,20 +15,18 @@
 #include <TClass.h>
 #include <TRealData.h>
 
-ClassImp(WGlValuator)
+ClassImp(WGlValuator);
 
 /**************************************************************************/
 
 void WGlValuator::_init()
 {
-  // *** Set all links to 0 ***
-  mDx = mDy = 0;
-
   mMin   = -1000; mMax   = 1000;
   mStepA =  1;    mStepB = 1;
   mFormat = "%6.2f";
 
-  mCbackAlpha = 0;
+  bConstVal = false;
+
   mDataMemberInfo = 0; mDataMember = 0;
 }
 
