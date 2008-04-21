@@ -25,8 +25,10 @@ protected:
   Bool_t	bBelowMouse;
 
   Int_t         mX, mY;
+  Double_t      mButtFac;
 
   Double_t get_value();
+  Bool_t   send_value(Double_t step_base);
 
 public:
   WGlValuator_GL_Rnr(WGlValuator* idol) :

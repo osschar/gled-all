@@ -34,6 +34,28 @@ Double_t WGlValuator_GL_Rnr::get_value()
   return GledNS::peek_value(addr, V.mDataMember->GetDataType()->GetType());
 }
 
+Bool_t WGlValuator_GL_Rnr::send_value(Double_t step_base)
+{
+  // Returns: true if MIT was sent, false otherwise.
+
+  WGlValuator& V = *mWGlValuator;
+
+  if (V.DataOK() == false || V.GetConstVal())
+    return false;
+
+  ZMIR mir(*V.mCbackAlpha);
+  V.mDataMemberInfo->fSetMethod->ImprintMir(mir);
+  Double_t      val  = step_base*V.mStepA;
+  if (V.mStepB) val /= V.mStepB;
+  val += get_value();
+  if (val > V.mMax) val = V.mMax;
+  if (val < V.mMin) val = V.mMin;
+  GledNS::stream_value(mir, V.mDataMember->GetDataType()->GetType(), val);
+  fImg->fEye->Send(mir);
+
+  return true;
+}
+
 /**************************************************************************/
 
 void WGlValuator_GL_Rnr::Draw(RnrDriver* rd)
@@ -56,8 +78,6 @@ void WGlValuator_GL_Rnr::Draw(RnrDriver* rd)
 
 int WGlValuator_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
-  WGlValuator& V = *mWGlValuator;
-
   if(ev.fEvent == FL_LEAVE) {
     bBelowMouse = false;
     Redraw(rd);
@@ -70,29 +90,24 @@ int WGlValuator_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     return 1;
   }
 
-  if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE) {
-    if(V.DataOK()) {
-      mX = ev.fX; mY = ev.fY;
-      // printf("push at %d %d\n", mX, mY);
-      return 1;
-    } else {
-      return 0;
+  if(ev.fEvent == FL_PUSH) {
+    switch (ev.fButton)
+    {
+      case FL_LEFT_MOUSE:   mButtFac = 1;   break;
+      case FL_MIDDLE_MOUSE: mButtFac = 10;  break;
+      case FL_RIGHT_MOUSE:  mButtFac = 100; break;
     }
+    mX = ev.fX; mY = ev.fY;
+    // printf("push at %d %d\n", mX, mY);
+    return 1;
   }
+
   if(ev.fEvent == FL_DRAG) {
     Int_t dx = (ev.fX - mX) / 4;
     // printf("drag at %d %d; x=%d, d=%d\n", ev.fX, ev.fX, mX, dx);
-    if(dx !=0 && V.DataOK()) {
-      ZMIR mir(*V.mCbackAlpha);
-      V.mDataMemberInfo->fSetMethod->ImprintMir(mir);
-      Double_t     val  = dx*V.mStepA;
-      if(V.mStepB) val /= V.mStepB;
-      val += get_value();
-      if(val > V.mMax) val = V.mMax;
-      if(val < V.mMin) val = V.mMin;
-      GledNS::stream_value(mir, V.mDataMember->GetDataType()->GetType(), val);
-      fImg->fEye->Send(mir);
-
+    if (dx != 0)
+    {
+      send_value(dx*mButtFac);
       mX = ev.fX;
     }
     return 1;
@@ -104,5 +119,18 @@ int WGlValuator_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     return 1;
     }
   */
+  if(ev.fEvent == FL_MOUSEWHEEL) {
+    if(ev.fDY) {
+      Double_t step = -ev.fDY;
+      if (ev.fState & FL_SHIFT) {
+        step *= 10;
+        if (ev.fState & FL_CTRL)
+          step *= 10;
+      }
+      send_value(step);
+    }
+    return 1;
+  }
+
   return 0;
 }
