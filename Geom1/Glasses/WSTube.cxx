@@ -21,12 +21,14 @@
 
 #include <TSystem.h>
 
-ClassImp(WSTube)
+ClassImp(WSTube);
 
 /**************************************************************************/
 
 void WSTube::_init()
 {
+  mTransSource = TS_Links;
+
   bWeakConnect = true;
   mDefWidth    = 0.1;
   mDefSpread   = 0.02;
@@ -92,34 +94,57 @@ void WSTube::connect(WSPoint*& ap, WSPoint*& bp)
 {
   static const Exc_t _eh("WSTube::connect ");
 
-  if(mNodeA == 0 || mNodeB == 0)
-    throw(_eh + "node links A and B must be set.");
+  TString nameA, nameB;
 
-  ZNode* abcp = ZNode::FindCommonParent(mNodeA.get(), mNodeB.get());
-  if(abcp == 0)
-    throw(_eh + "nodes A and B have no common parent.");
+  switch (mTransSource)
+  {
+    case TS_Links:
+    {
+      if(mNodeA == 0 || mNodeB == 0)
+        throw(_eh + "node links A and B must be set.");
 
-  ZNode* top  = ZNode::FindCommonParent(this, abcp);
-  if(top == 0)
-    throw(_eh + "this WSTube does not have a common parent w/ nodes A and B.");
+      ZNode* abcp = ZNode::FindCommonParent(mNodeA.get(), mNodeB.get());
+      if(abcp == 0)
+        throw(_eh + "nodes A and B have no common parent.");
+
+      ZNode* top  = ZNode::FindCommonParent(this, abcp);
+      if(top == 0)
+        throw(_eh + "this WSTube does not have a common parent w/ nodes A and B.");
 
 
-  auto_ptr<ZTrans> at( ZNode::BtoA(this, *mNodeA, top) );
-  auto_ptr<ZTrans> bt( ZNode::BtoA(this, *mNodeB, top) );
-  at->Unscale(); // Usually helpful; should be an option?
-  bt->Unscale();
-  TVector3 dr( (bt->GetPos() - at->GetPos()).Unit() ); // vector A -> B
+      auto_ptr<ZTrans> at( ZNode::BtoA(this, *mNodeA, top) );
+      auto_ptr<ZTrans> bt( ZNode::BtoA(this, *mNodeB, top) );
+      at->Unscale(); // Usually helpful; should be an option?
+      bt->Unscale();
+      mTransA = *at;
+      mTransB = *bt;
 
-  ap = new WSPoint("TubeStart", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
-  define_direction(*at, dr, mVecA, mSgmA);
-  ap->SetTrans(*at);
+      nameA = mNodeA->GetName();
+      nameB = mNodeB->GetName();
+
+      break;
+    }
+    case TS_Transes:
+    {
+      nameA = "<ext-a>";
+      nameB = "<ext-b>";
+
+      break;
+    }
+  }
+
+  TVector3 dr( (mTransB.GetPos() - mTransA.GetPos()).Unit() ); // vector A -> B
+
+  ap = new WSPoint("TubeStart", GForm("Tube %s->%s", nameA.Data(), nameB.Data()));
+  ap->SetTrans(mTransA);
+  define_direction(ap->ref_trans(), dr, mVecA, mSgmA);
   ap->SetW(mDefWidth/2);
   ap->SetScale(mDefSpread);
   ap->SetT(mDefTension);
 
-  bp = new WSPoint("TubeEnd", GForm("Tube %s->%s", mNodeA->GetName(), mNodeB->GetName()));
-  define_direction(*bt, dr, mVecB, mSgmB);
-  bp->SetTrans(*bt);
+  bp = new WSPoint("TubeEnd", GForm("Tube %s->%s", nameA.Data(), nameB.Data()));
+  bp->SetTrans(mTransB);
+  define_direction(bp->ref_trans(), dr, mVecB, mSgmB);
   bp->SetW(mDefWidth/2);
   bp->SetScale(-mDefSpread);
   bp->SetT(mDefTension);
