@@ -1,3 +1,13 @@
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	The tube end-points can now also be given directly as ZTranses.
+	Before one had to set links to two external ZNodes.
+	
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7415.
+
 2008-03-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/ZImage_GL_Rnr.cxx:
