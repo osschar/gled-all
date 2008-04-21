@@ -18,6 +18,7 @@ private:
   void _init();
 
 protected:
+  Int_t  mNDynoColls; // X{GS} 7 ValOut()
 
 public:
   Statico(const Text_t* n="Statico", const Text_t* t=0) :
