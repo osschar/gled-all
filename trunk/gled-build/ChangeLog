@@ -1,3 +1,13 @@
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	In data-member Xport handling provide const and non-const versions
+	of Ref/Ptr methods if r and R or p and P are present.
+
+	* perllib/Gled_ConfCat_Parser.pm:
+	* lib-exec/gled_glue_gen.pl:
+	Whitespace.
+
 2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
