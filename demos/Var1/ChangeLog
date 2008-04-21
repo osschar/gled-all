@@ -1,3 +1,29 @@
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Added DynoCtrl and StatoCtrl menus.
+
+	Import color gradients on start-up.
+
+	* gradients/lin_abstract1.png:
+	* gradients/lin_abstract2.png:
+	* gradients/lin_abstract3.png:
+	* gradients/lin_aneurism.png:
+	* gradients/lin_coldsteel.png:
+	* gradients/lin_fssccw.png:
+	* gradients/lin_g2b.png:
+	* gradients/lin_goldblack.png:
+	* gradients/lin_horizon2.png:
+	* gradients/lin_landsea.png:
+	* gradients/lin_nauseatingheadache.png:
+	* gradients/lin_pastelrainbow.png:
+	* gradients/lin_r2b.png:
+	* gradients/lin_r2c.png:
+	* gradients/lin_r2y.png:
+	* gradients/lin_skyline.png:
+	* gradients/lin_yellowcontrast.png:
+	New files - gradients for tube animation taken from AliEnViz.
+
 2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
