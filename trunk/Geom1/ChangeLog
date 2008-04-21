@@ -1,5 +1,14 @@
 2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/FormulaMover.cxx:
+	* Glasses/FormulaMover.h:
+	* Glasses/LocalMover.cxx:
+	* Glasses/LocalMover.h:
+	New files - in fact old files with classes I never really got to
+	do properly.
+
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/WSTube.cxx:
 	* Glasses/WSTube.h:
 	The tube end-points can now also be given directly as ZTranses.
