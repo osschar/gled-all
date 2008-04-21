@@ -92,6 +92,28 @@ void tringula(Int_t mode=0)
     gStyle->SetPalette(1, 0);
     pal->SetMarksFromgStyle();
   }
+  { // Color gradients
+
+    ZList* graddir = g_queen->AssertPath("var/gradients", "ZNameMap");
+
+    void*   dirh = gSystem->OpenDirectory("gradients");
+    TString file;
+    TArrayI mp;
+    TPRegexp re("lin_([\\w\\d]+)\\.\\w+");
+    while ((file = gSystem->GetDirEntry(dirh)).IsNull() == kFALSE)
+    {
+      Int_t nm = re.Match(file, "", 0, 30, &mp);
+      if (nm == 2)
+      {
+        TString name(file(mp[2], mp[3] - mp[2]));
+        printf("file='%s' nm = %d, name='%s'\n", file.Data(), nm, name.Data());
+
+        CREATE_ADD_GLASS(grad, ZImage, graddir, name, 0);
+        grad->SetFile(GForm("gradients/%s", file.Data()));
+      }
+    }
+    gSystem->FreeDirectory(dirh);
+  }
   { // Meshes
 
     ZList* meshes = g_queen->AssertPath("var/meshes", "ZNameMap");
@@ -233,7 +255,7 @@ void tringula(Int_t mode=0)
 
   ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
   tringula->SetPalette(pal);
-  tringula->SetRnrRay(true);
+  // tringula->SetRnrRay(true);
   tringula->SetDefStaMesh(stamesh);
   tringula->SetDefDynMesh(dynmesh);
   tringula->SetDefFlyMesh(flymesh);
@@ -410,6 +432,8 @@ void tringula(Int_t mode=0)
   make_overlay();
   g_pupil->SetOverlay(overlay);
   tricam->SetOverlay(overlay);
+  tricam->SelectTopMenuByName("SimCtrl");
+  tricam->SetMouseAction(TringuCam::MA_PickExtendios);
 
   /**************************************************************************/
   // Place some random statos, dynos and flyers
@@ -722,7 +746,7 @@ void setup_test()
 
 void make_overlay()
 {
-  Float_t weed_dx = 100, step_dx = 120, step_dy = 26;
+  Float_t weed_dx = 130, step_dx = 140, step_dy = 26;
 
   ASSIGN_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
 
@@ -735,38 +759,84 @@ void make_overlay()
   CREATE_ADD_GLASS(bfs, WGlFrameStyle, overlay, "Butt Frame Style", 0);
   bfs->StandardPixel();
   bfs->SetDefDx(weed_dx);
-  bfs->SetTileColor(0.3, 0.5, 0.5, 0.6);
-  bfs->SetBelowMColor(0.5, 0.7, 0.7, 0.8);
+  bfs->SetTileColor(0.5, 0.15, 0.25, 0.7);
+  bfs->SetBelowMColor(0.3, 0.08, 0.14, 0.9);
+
+  SGridStepper gs(0);
+  gs.SetDs(step_dx, step_dy, 1);
+  gs.SetNs(6, 4, 1);
+  gs.SetOs(4, 4, 0);
 
   {
-    CREATE_ADD_GLASS(sim_ctrl, ZNode, overlay, "SimCtrl", 0);
+    CREATE_ADD_GLASS(sim_ctrl, WGlWidget, overlay, "SimCtrl", 0);
+    sim_ctrl->SetRnrElements(false);
     //sim_ctrl->SetRnrMod(menufs);
     //dd->SetMenuFrameStyle(menufs);
 
-    SGridStepper top_step(0);
-    top_step.SetDs(step_dx, step_dy, 1);
-    top_step.SetNs(6, 4, 1);
-    top_step.SetOs(4, 4, 0);
-
     CREATE_ADD_GLASS(but1, WGlButton, sim_ctrl, "Suspend", 0);
-    // but1->SetPos(4, 4, 0);
-    top_step.SetNodeAdvance(but1);
+    gs.SetNodeAdvance(but1);
     but1->SetCbackAlpha(tricam);
     but1->SetCbackMethodName("Suspend");
 
     CREATE_ADD_GLASS(but2, WGlButton, sim_ctrl, "Resume", 0);
-    // but2->SetPos(4, 30, 0);
-    top_step.SetNodeAdvance(but2);
+    gs.SetNodeAdvance(but2);
     but2->SetCbackAlpha(tricam);
     but2->SetCbackMethodName("Resume");
 
     CREATE_ADD_GLASS(val1, WGlValuator, sim_ctrl, "Sleep", 0);
-    //val1->SetPos(98, 4, 0);
-    top_step.SetNodeAdvance(val1);
+    gs.SetNodeAdvance(val1);
     val1->SetMin(1); val1->SetMax(1000);
     val1->SetFormat("Sleep: %.0f");
     val1->SetCbackAlpha(eventor);
     val1->SetCbackMemberName("InterBeatMS");
+  }
+
+  gs.Reset();
+
+  {
+    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, overlay, "DynoCtrl", 0);
+    dyno_ctrl->SetRnrElements(false);
+
+    CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
+    gs.SetNodeAdvance(but1);
+    but1->SetCbackAlpha(tricam);
+    but1->SetCbackMethodName("DynoDetails");
+
+    CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
+    gs.SetNodeAdvance(val1);
+    val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
+    val1->SetFormat("Speed: %.2f");
+    val1->SetCbackMemberName("V");
+
+    CREATE_ADD_GLASS(val2, WGlValuator, dyno_ctrl, "Rot", "LensAlpha");
+    gs.SetNodeAdvance(val2);
+    val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
+    val2->SetFormat("Rot: %.2f");
+    val2->SetCbackMemberName("W");
+
+    CREATE_ADD_GLASS(val3, WGlValuator, dyno_ctrl, "LevH", "LensAlpha");
+    gs.SetNodeAdvance(val3);
+    val3->SetMin(-10); val3->SetMax(100); val3->SetStepB(100);
+    val3->SetFormat("LevH: %.2f");
+    val3->SetCbackMemberName("LevH");
+  }
+
+  gs.Reset();
+
+  {
+    CREATE_ADD_GLASS(stato_ctrl, WGlWidget, overlay, "StatoCtrl", 0);
+    stato_ctrl->SetRnrElements(false);
+
+    CREATE_ADD_GLASS(but1, WGlButton, stato_ctrl, "<undef>", "LensName:LensBeta");
+    gs.SetNodeAdvance(but1);
+    but1->SetCbackAlpha(tricam);
+    but1->SetCbackMethodName("StatoDetails");
+
+    CREATE_ADD_GLASS(val1, WGlValuator, stato_ctrl, "Spd", "LensAlpha");
+    gs.SetNodeAdvance(val1);
+    val1->SetConstVal(true);
+    val1->SetFormat("Dyno colls: %.0f");
+    val1->SetCbackMemberName("NDynoColls");
   }
 }
 
