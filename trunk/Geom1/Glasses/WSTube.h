@@ -21,6 +21,8 @@ public:
   enum ConnState_e { CS_Disconnected, CS_Connecting,
 		     CS_Connected,    CS_Disconnecting };
 
+  enum TransSource_e { TS_Links, TS_Transes };
+
   struct Traveler {
     ZNode*  fNode;
     Float_t fPosition;
@@ -40,18 +42,23 @@ private:
   void _init();
 
 protected:
+  TransSource_e mTransSource;   // X{GS} 7 PhonyEnum()
+
   ZLink<ZNode>	mNodeA;		// X{GS} L{}
   ZLink<ZNode>	mNodeB;		// X{GS} L{}
+
+  ZTrans        mTransA;        // X{r}
+  ZTrans        mTransB;        // X{r}
 
   Bool_t        bWeakConnect;   // X{GS} 7 Bool()
   Float_t	mDefWidth;	// X{GS} 7 Value(-range=>[  0,1000, 1,1000], join=>1)
   Float_t	mDefSpread;	// X{GS} 7 Value(-range=>[-180,180, 1,1000], join=>1)
   Float_t	mDefTension;	// X{GS} 7 Value(-range=>[-10,10,1,100])
 
-  TLorentzVector mVecA;		// X{GSR} 7 LorentzVector()
-  TLorentzVector mSgmA;		// X{GSR} 7 LorentzVector()
-  TLorentzVector mVecB;		// X{GSR} 7 LorentzVector()
-  TLorentzVector mSgmB;		// X{GSR} 7 LorentzVector()
+  TLorentzVector mVecA;		// X{GSRr} 7 LorentzVector()
+  TLorentzVector mSgmA;		// X{GSRr} 7 LorentzVector()
+  TLorentzVector mVecB;		// X{GSRr} 7 LorentzVector()
+  TLorentzVector mSgmB;		// X{GSRr} 7 LorentzVector()
 
   TRandom       mRnd;
 
