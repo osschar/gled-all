@@ -81,7 +81,7 @@ print C <<"fnord";
 }
 fnord
 
-# DEF_Construct
+# libset_Lens_Constructor
 print C <<"fnord";
 ZGlass* lib${libname}_Lens_Constructor(CID_t cid) {
   switch(cid) {
@@ -96,7 +96,7 @@ print C <<"fnord";
 }
 fnord
 
-# IS_A
+# Is_A_Glass
 print C <<"fnord";
 bool lib${libname}_Is_A_Glass(ZGlass* g, CID_t cid) {
   switch(cid) {
@@ -134,6 +134,7 @@ for $c (@{ $CATALOG->{ClassList} }) {
 print C "}\n\n";
 print C "void *${libname}_GLED_init = (void*)lib${libname}_GLED_init;\n";
 close C;
+
 
 ########################################################################
 # View stuff ...
@@ -180,6 +181,7 @@ print C "void *${libname}_GLED_init_View = (void*)lib${libname}_GLED_init_View;\
 
 close C;
 
+
 ########################################################################
 # Rnrs
 ########################################################################
@@ -218,8 +220,8 @@ for $r (keys %existing_rnrs) {
 
 print C <<"fnord";
 
-A_Rnr*
-lib${libname}_Rnr_${rnr}_Construct(ZGlass* n, CID_t cid) {
+A_Rnr* lib${libname}_Rnr_${rnr}_Construct(ZGlass* n, CID_t cid)
+{
   A_Rnr* v=0;
   switch(cid) {
 fnord
@@ -238,7 +240,8 @@ print C <<"fnord";
   return v;
 }
 
-void lib${libname}_GLED_init_Rnr_${rnr}() {
+void lib${libname}_GLED_init_Rnr_${rnr}()
+{
   GledNS::BootstrapRnrSet("$libname", $libid, "$rnr", lib${libname}_Rnr_${rnr}_Construct);
 }
 
@@ -247,4 +250,4 @@ fnord
 
 close C;
 
-}
+} # end for @Rnrs

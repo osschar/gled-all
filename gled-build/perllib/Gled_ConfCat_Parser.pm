@@ -9,7 +9,7 @@ package Gled_ConfCat_Parser;
 
 use Carp;
 
-$CFGFILE     = "$ENV{GLEDSYS}/build_config";
+$CFGFILE = "$ENV{GLEDSYS}/build_config";
 
 sub import_build_config {
   # imports $GLEDSYS/build_config
