@@ -77,7 +77,7 @@ void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     GL_Float_Holder      fat_line(GL_LINE_WIDTH, 2, glLineWidth);
-    glColor3f(0.1f, 0.9f, 0.3f);
+    glColor3fv(mTringula->PtrSelColor()->array());
     render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
   }
 

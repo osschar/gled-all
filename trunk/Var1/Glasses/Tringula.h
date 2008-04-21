@@ -89,6 +89,8 @@ protected:
   Bool_t     bRnrBBoxes; // X{GS} 7 Bool(-join=>1)
   Bool_t     bRnrItsLines; // X{GS} 7 Bool() Intersection lines
 
+  ZColor     mSelColor;  // X{GSPT} 7 ColorButt()
+
   EdgeRule_e       mEdgeRule;   //  X{GS} 7 PhonyEnum()
 
   TRandom          mRndGen;
@@ -159,6 +161,8 @@ public:
                            Float_t w_max= 1);                   // X{E} C{1} 7 MCWButt()
   Dynamico* RandomFlyer   (Float_t v_min= 2, Float_t v_max=20,
                            Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
+
+  void ConnectStaticos(Statico* stato0, Statico* stato1);  // X{E} C{2} 7 MCWButt()
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
 

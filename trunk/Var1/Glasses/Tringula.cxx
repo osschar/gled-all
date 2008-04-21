@@ -19,7 +19,10 @@
 #include "ParaSurf.h"
 #include "Statico.h"
 #include "Dynamico.h"
+
 #include "Tringula.c7"
+
+#include <Glasses/WSTube.h>
 
 #include <Glasses/ZQueen.h>
 
@@ -49,6 +52,8 @@ void Tringula::_init()
 
   bRnrDynos  = bPickDynos   = true;
   bRnrBBoxes = bRnrItsLines = false;
+
+  mSelColor.rgba(1, 0.125, 0.25);
 
   mEdgeRule   = ER_Stop;
 
@@ -580,6 +585,30 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
   return d;
 }
 
+//==============================================================================
+
+void Tringula::ConnectStaticos(Statico* stato0, Statico* stato1)
+{
+  WSTube* tube = new WSTube("Oooga");
+  tube->SetTransSource(WSTube::TS_Transes);
+
+  const HTransF& tA = stato0->ref_last_trans();
+  const HTransF& tB = stato1->ref_last_trans();
+
+  tube->RefTransA().SetFromArray(tA);
+  tube->RefTransA().MoveLF(3, 2.0*stato0->get_tring_tvor()->mCtrExtBox[5]);
+  tube->RefTransB().SetFromArray(tB);
+  tube->RefTransB().MoveLF(3, 2.0*stato1->get_tring_tvor()->mCtrExtBox[5]);
+
+  tube->RefVecA().SetXYZT(0, 0,  2, 1);
+  tube->RefVecB().SetXYZT(0, 0, -2, 1);
+
+  mQueen->CheckIn(tube);
+  Add(tube);
+
+  tube->AnimateConnect();
+}
+
 /**************************************************************************/
 
 void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)
@@ -693,6 +722,8 @@ void Tringula::DoSplitBoxPrunning()
     if (ns > 0)
     {
       // Calculate centers of mass for dyno and stato in global coordinates.
+
+      ++stato->mNDynoColls;
 
       HTransF& t_dyno = dyno->ref_trans();
       Point com_dyno;
@@ -897,6 +928,13 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       D.update_aabb();
       D.update_last_data();
     }
+  }
+
+  // Loop over TimeMakerClient children 
+  {
+    Stepper<TimeMakerClient> tcl(this);
+    while (tcl.step())
+      tcl->TimeTick(t, dt);
   }
 }
 
