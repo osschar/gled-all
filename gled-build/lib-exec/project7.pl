@@ -781,13 +781,17 @@ for $r (@Members) {
     }
   }
 
-  if( $r->{Xport} =~ m/(r|R)/ ) {
-    my $const = ($1 eq 'R') ? 'const ' : '';
-    print H7 "${const}$r->{Type}& Ref$r->{Methodbase}() ${const}\{ return $r->{Varname}; }\n";
+  if( $r->{Xport} =~ m/R/ ) {
+    print H7 "const $r->{Type}& Ref$r->{Methodbase}() const { return $r->{Varname}; }\n";
   }
-  if( $r->{Xport} =~ m/(p|P)/ ) {
-    my $const = ($1 eq 'P') ? 'const ' : '';
-    print H7 "${const}$r->{Type}* Ptr$r->{Methodbase}() ${const}\{ return &$r->{Varname}; }\n";
+  if( $r->{Xport} =~ m/r/ ) {
+    print H7 "$r->{Type}& Ref$r->{Methodbase}() { return $r->{Varname}; }\n";
+  }
+  if( $r->{Xport} =~ m/P/ ) {
+    print H7 "const $r->{Type}* Ptr$r->{Methodbase}() const { return &$r->{Varname}; }\n";
+  }
+  if( $r->{Xport} =~ m/p/ ) {
+    print H7 "$r->{Type}* Ptr$r->{Methodbase}() { return &$r->{Varname}; }\n";
   }
 }
 print H7 "\n";
