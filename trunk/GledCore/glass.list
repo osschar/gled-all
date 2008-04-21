@@ -96,3 +96,4 @@ WGlDirectory		288	Glasses/WGlDirectory	.
 WGlButton		289	Glasses/WGlButton	.
 WGlFrameStyle		290	Glasses/WGlFrameStyle	.
 WGlValuator		291	Glasses/WGlValuator	.
+WGlWidget               292     Glasses/WGlWidget       ZNode
