@@ -12,17 +12,22 @@
 #include "TringuCam.h"
 #include "TriMeshField.h"
 #include "TriMeshLightField.h"
+#include "Extendio.h"
+#include "Statico.h"
+#include "Dynamico.h"
+
 #include <Glasses/ZQueen.h>
 #include <Glasses/ScreenText.h>
+#include <Glasses/WGlWidget.h>
 #include <Glasses/PupilInfo.h>
 #include <Glasses/Scene.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/TimeMaker.h>
+
 #include "TringuCam.c7"
 
 #include "TriMesh.h"
 #include "ParaSurf.h"
-#include "Extendio.h"
 
 #include <RnrBase/Fl_Event_Enums.h>
 
@@ -194,7 +199,7 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 
       Extendio* ext = mTringula->PickExtendios();
 
-      printf("picked %s, st=%x, ctrl=%x\n", ext ? ext->GetName() : "<none>", ev.fState, FL_CTRL);
+      printf("picked %s, state=0x%x\n", ext ? ext->GetName() : "<none>", ev.fState);
 
       if (ev.fState & FL_CTRL)
       {
@@ -217,6 +222,30 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
           mSelection->PushBack(ext);
           ext->SetSelected(true);
         }
+      }
+
+      // Should handle multiple selection?
+      Statico*  stato = dynamic_cast<Statico*>(ext);
+      Dynamico* dyno  = dynamic_cast<Dynamico*>(ext);
+      if (stato)
+      {
+        WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("StatoCtrl"));
+        if (weed)
+        {
+          weed->SetDaughterCbackStuff(stato);
+          SelectTopMenu(weed);
+        }
+      }
+      else if (dyno)
+      {
+        WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("DynoCtrl"));
+        if (weed)
+        {
+          weed->SetDaughterCbackStuff(dyno);
+          SelectTopMenu(weed);
+        }
+      } else {
+        SelectTopMenuByName("SimCtrl");
       }
 
       break;
@@ -516,6 +545,37 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
 }
 
 /******************************************************************************/
+
+void TringuCam::SelectTopMenu(WGlWidget* weed)
+{
+  if (mLastMenu.is_set()) {
+    mLastMenu->SetRnrElements(false);
+  }
+  if (weed)
+    weed->SetRnrElements(true);
+  SetLastMenu(weed);
+}
+
+void TringuCam::SelectTopMenuByName(const Text_t* weed_name)
+{
+  SelectTopMenu(dynamic_cast<WGlWidget*>(mOverlay->GetElementByName(weed_name)));
+}
+
+void TringuCam::StatoDetails(Statico* stato)
+{
+  // Should show detailed stato UI, just Dump data for now,
+
+  if (stato)
+    stato->Dump();
+}
+
+void TringuCam::DynoDetails(Dynamico* dyno)
+{
+  // Should show detailed dyno UI, just Dump data for now,
+
+  if (dyno)
+    dyno->Dump();
+}
 
 void TringuCam::Suspend()
 {
