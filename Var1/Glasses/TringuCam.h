@@ -19,6 +19,7 @@ class TriMeshField;
 class TriMeshLightField;
 
 class ScreenText;
+class WGlWidget;
 
 class PupilInfo;
 class Scene;
@@ -154,11 +155,10 @@ protected:
   Float_t       mActionValue;   // X{GS} 7 Value(-range=>[-100,  100, 1,100], -tooltip=>"value to add to field/source", -join=>1)
   Float_t       mActionRadius;  // X{GS} 7 Value(-range=>[   0,  100, 1,100], -tooltip=>"distance of vertices for which to add field/source")
   Float_t       mActRadFract;   // X{GS} 7 Value(-range=>[   0,    1, 1,1000])
+  // Missing parameters for fall-off of value with distance from coll-point.
 
   Bool_t        bMouseDown;
   Bool_t        bEnableTringDLonMouseUp;
-
-  // Missing parameters for fall-off of value with distance from coll-point.
 
   //=================================================================
   // Other stuff.
@@ -170,6 +170,7 @@ protected:
 
   ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{A}
   ZLink<Scene>             mOverlay;     // X{GS} L{A}
+  ZLink<WGlWidget>         mLastMenu;    // X{GS} L{A}
 
   ZLink<Eventor>           mEventor;     // X{GS} L{A}
   ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{A}
@@ -217,18 +218,21 @@ public:
   void add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv, Int_t v, Float_t value);
   void AddField(Float_t val);
 
-  // Overlay methods
-  
-
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  // Overlay methods
+  void SelectTopMenu(WGlWidget* weed);               // X{E} C{1} 7 MCWButt()
+  void SelectTopMenuByName(const Text_t* weed_name); // X{E}      7 MCWButt()
+
+  void StatoDetails(Statico* stato); // X{E} C{1} 7 MCWButt()
+  void DynoDetails(Dynamico* dyno); // X{E} C{1} 7 MCWButt()
 
   void Suspend(); // X{E}
   void Resume();  // X{E}
 
 #include "TringuCam.h7"
-  ClassDef(TringuCam, 1)
+  ClassDef(TringuCam, 1);
 }; // endclass TringuCam
-
 
 #endif
