@@ -35,6 +35,7 @@ public:
     int     fClicks;
     int     fIsClick;
     int     fX, fY;
+    int     fDX, fDY;
     TString fText;
 
     bool   bIsMouse;
