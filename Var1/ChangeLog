@@ -1,3 +1,29 @@
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Statico.cxx:
+	* Glasses/Statico.h:
+	Add member 'Int_t  mNDynoColls', mostly to have something to show
+	in the stato-overlay.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add menu / dyno / stato view handling functions.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Add member 'ZColor mSelColor' for marking selected extendios.
+
+	Add method 'void ConnectStaticos()' to build a tube among two
+	staticos.
+
+	In TimeTick() descend into all children that are
+	TimeMakerClients. Temporary fix for tube animation.
+
+	* Stones/HTrans.h:
+	Add cast operators to TT*, const TT*.
+	Add const version of PtrBaseVec() method.
+
 2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.h:
