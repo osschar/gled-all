@@ -1060,10 +1060,13 @@ void  Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
   e.fIsClick = Fl::event_is_click();
   e.fX       = Fl::event_x();
   e.fY       = Fl::event_y();
+  e.fDX      = Fl::event_dx();
+  e.fDY      = Fl::event_dy();
   e.fText    = TString(Fl::event_text(), Fl::event_length());
 
   e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
-		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE);
+		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE ||
+                ev == FL_MOUSEWHEEL);
 }
 
 int Pupil::overlay_pick(A_Rnr::Fl_Event& e)
@@ -1161,10 +1164,12 @@ int Pupil::handle_overlay(int ev)
     }
   }
   else if(ev == FL_MOUSEWHEEL) {
-
+    if (mDriver->GetBelowMouse())
+      return mDriver->GetBelowMouse()->Handle(mDriver, e);
   }
   else if(ev == FL_KEYDOWN || ev == FL_KEYUP) {
-
+    if (mDriver->GetBelowMouse())
+      return mDriver->GetBelowMouse()->Handle(mDriver, e);
   }
 
   return 0;
