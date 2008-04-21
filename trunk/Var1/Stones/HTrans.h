@@ -134,7 +134,8 @@ public:
   void SetBaseVec(Int_t b, const TVector3& v)
   { TT* C = M + 4*--b; v.GetXYZ(C); }
 
-  TT* PtrBaseVec(Int_t b) { return &M[4*(b-1)]; }
+  TT*       PtrBaseVec(Int_t b)       { return &M[4*(b-1)]; }
+  const TT* PtrBaseVec(Int_t b) const { return &M[4*(b-1)]; }
 
   void GetBaseVec(Int_t b, TT* x) const
   { const TT* C = M + 4*--b; x[0] = C[0], x[1] = C[1], x[2] = C[2]; }
@@ -183,6 +184,9 @@ public:
   void     RotateVec3(const TT* in, TT* out) const;
 
   virtual void Print(Option_t* option = "") const;
+
+  operator const TT*() const { return M; }
+  operator       TT*()       { return M; }
 
   ClassDef(HTrans, 1);
 };
