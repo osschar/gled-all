@@ -7,12 +7,12 @@
 #ifndef GledCore_WGlValuator_H
 #define GledCore_WGlValuator_H
 
-#include <Glasses/ZNode.h>
+#include <Glasses/WGlWidget.h>
 #include <Gled/GledNS.h>
 
 class TRealData;
 
-class WGlValuator : public ZNode
+class WGlValuator : public WGlWidget
 {
   MAC_RNR_FRIENDS(WGlValuator);
 
@@ -20,9 +20,6 @@ private:
   void _init();
 
 protected:
-  Float_t   mDx; // X{GST} 7 Value(-range=>[0,1000,1,1000], -join=>1)
-  Float_t   mDy; // X{GST} 7 Value(-range=>[0,1000,1,1000])
-
   Double_t        mMin;    // X{GS} 7 Value(-join=>1)
   Double_t        mMax;    // X{GS} 7 Value()
   Int_t           mStepA;  // X{GS} 7 Value(-join=>1)
@@ -30,8 +27,9 @@ protected:
 
   TString         mFormat; // X{GS} 7 Textor()
 
-  ZLink<ZGlass>   mCbackAlpha;      //  X{GS} L{} Ray{CbackReset}
-  TString         mCbackMemberName; //  X{GS}     Ray{CbackReset} 7 Textor()
+  Bool_t          bConstVal;  // X{GS} 7 Bool()
+
+  TString         mCbackMemberName; // X{GS} Ray{CbackReset} 7 Textor()
 
   // Local stash
   GledNS::DataMemberInfo* mDataMemberInfo; //!
@@ -39,9 +37,9 @@ protected:
 
 public:
   WGlValuator(const Text_t* n="WGlValuator", const Text_t* t=0) :
-    ZNode(n,t) { _init(); }
+    WGlWidget(n,t) { _init(); }
 
-  void EmitCbackResetRay() { mDataMemberInfo = 0; mDataMember = 0; }
+  virtual void EmitCbackResetRay() { mDataMemberInfo = 0; mDataMember = 0; }
 
   GledNS::DataMemberInfo* GetDataMemberInfo();
   TDataMember*            GetDataMember();
@@ -49,7 +47,7 @@ public:
   Bool_t DataOK();
 
 #include "WGlValuator.h7"
-  ClassDef(WGlValuator, 1)
+  ClassDef(WGlValuator, 1);
 }; // endclass WGlValuator
 
 #endif

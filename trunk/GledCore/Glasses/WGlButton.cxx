@@ -18,8 +18,6 @@ ClassImp(WGlButton);
 
 void WGlButton::_init()
 {
-  mDx = mDy = 0;
-  mCbackAlpha = 0;
   mCbackMethodInfo = 0;
 }
 
