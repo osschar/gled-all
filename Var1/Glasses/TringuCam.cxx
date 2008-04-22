@@ -195,10 +195,13 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     case MA_PickExtendios:
     {
       CalculateMouseRayVectors();
-      GLensReadHolder _tlck(*mTringula);
-      mTringula->SetRayVectors(mMouseRayPos, mMouseRayDir);
 
-      Extendio* ext = mTringula->PickExtendios();
+      Extendio* ext = 0;
+      {
+	GLensReadHolder _tlck(*mTringula);
+	mTringula->SetRayVectors(mMouseRayPos, mMouseRayDir);
+	ext = mTringula->PickExtendios();
+      }
 
       printf("picked %s, state=0x%x\n", ext ? ext->GetName() : "<none>", ev.fState);
 
@@ -228,12 +231,16 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       // Should handle multiple selection?
       Statico*  stato = dynamic_cast<Statico*>(ext);
       Dynamico* dyno  = dynamic_cast<Dynamico*>(ext);
-      if (stato && mExpectBeta == EB_ConnectStaticos)
+
+      if (mExpectBeta == EB_ConnectStaticos)
       {
-        Statico* beta = dynamic_cast<Statico*>(*mPrepBeta);
-        if (beta) {
-	  GLensWriteHolder _wlck(*mTringula);
-          mTringula->ConnectStaticos(beta, stato);
+	if (stato)
+	{
+	  Statico* beta = dynamic_cast<Statico*>(*mPrepBeta);
+	  if (beta) {
+	    GLensWriteHolder _wlck(*mTringula);
+	    mTringula->ConnectStaticos(beta, stato);
+	  }
 	}
         mExpectBeta = EB_Nothing;
         SetPrepBeta(0);
