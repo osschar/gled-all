@@ -68,6 +68,7 @@ void TringuCam::_init()
 
   // MouseAction
   mMouseAction  = MA_RayCollide;
+  mExpectBeta   = EB_Nothing;
   mRayLength    = 100;
   mActionValue  = 1;
   mActionRadius = 1;
@@ -230,8 +231,10 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       if (stato && mExpectBeta == EB_ConnectStaticos)
       {
         Statico* beta = dynamic_cast<Statico*>(*mPrepBeta);
-        if (beta)
+        if (beta) {
+	  GLensWriteHolder _wlck(*mTringula);
           mTringula->ConnectStaticos(beta, stato);
+	}
         mExpectBeta = EB_Nothing;
         SetPrepBeta(0);
       }
