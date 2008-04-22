@@ -832,11 +832,16 @@ void make_overlay()
     but1->SetCbackAlpha(tricam);
     but1->SetCbackMethodName("StatoDetails");
 
-    CREATE_ADD_GLASS(val1, WGlValuator, stato_ctrl, "Spd", "LensAlpha");
+    CREATE_ADD_GLASS(val1, WGlValuator, stato_ctrl, "CollCount", "LensAlpha");
     gs.SetNodeAdvance(val1);
     val1->SetConstVal(true);
     val1->SetFormat("Dyno colls: %.0f");
     val1->SetCbackMemberName("NDynoColls");
+
+    CREATE_ADD_GLASS(but2, WGlButton, stato_ctrl, "Connect", "LensBeta");
+    gs.SetNodeAdvance(but2);
+    but2->SetCbackAlpha(tricam);
+    but2->SetCbackMethodName("PrepConnectStatos");
   }
 }
 
