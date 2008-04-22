@@ -614,7 +614,7 @@ FNORD
 # Dump config.status
 ########################################################################
 
-if (not $config->{RECONFIGURE}) {
+if ($config->{RECONFIGURE} == 0) {
   open  CS, ">config.status";
   print CS $cmd_line, "\n";
   close CS;
