@@ -1,3 +1,10 @@
+2008-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add a hacky way to handle requests for connecting two statos from
+	the overlay.
+
 2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Statico.cxx:
