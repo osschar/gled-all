@@ -227,6 +227,14 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       // Should handle multiple selection?
       Statico*  stato = dynamic_cast<Statico*>(ext);
       Dynamico* dyno  = dynamic_cast<Dynamico*>(ext);
+      if (stato && mExpectBeta == EB_ConnectStaticos)
+      {
+        Statico* beta = dynamic_cast<Statico*>(*mPrepBeta);
+        if (beta)
+          mTringula->ConnectStaticos(beta, stato);
+        mExpectBeta = EB_Nothing;
+        SetPrepBeta(0);
+      }
       if (stato)
       {
         WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("StatoCtrl"));
@@ -576,6 +584,16 @@ void TringuCam::DynoDetails(Dynamico* dyno)
   if (dyno)
     dyno->Dump();
 }
+
+//==============================================================================
+
+void TringuCam::PrepConnectStatos(Statico* stato)
+{
+  SetPrepBeta(stato);
+  mExpectBeta = EB_ConnectStaticos;
+}
+
+//==============================================================================
 
 void TringuCam::Suspend()
 {

@@ -149,8 +149,11 @@ public:
                        MA_AddSource,
                        MA_PickExtendios };
 
+  enum ExpectBeta_e { EB_Nothing, EB_ConnectStaticos };
+
 protected:
   MouseAction_e mMouseAction;   // X{GS} 7 PhonyEnum()
+  ExpectBeta_e  mExpectBeta;    // X{G}  7 PhonyEnum(-const=>1)
   Float_t       mRayLength;     // X{GS} 7 Value(-range=>[   0, 1000, 1,100])
   Float_t       mActionValue;   // X{GS} 7 Value(-range=>[-100,  100, 1,100], -tooltip=>"value to add to field/source", -join=>1)
   Float_t       mActionRadius;  // X{GS} 7 Value(-range=>[   0,  100, 1,100], -tooltip=>"distance of vertices for which to add field/source")
@@ -174,6 +177,8 @@ protected:
 
   ZLink<Eventor>           mEventor;     // X{GS} L{A}
   ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{A}
+
+  ZLink<ZGlass>            mPrepBeta;    // X{GS} L{A}
 
   // Render-driver and mouse state fed in via TringuCam_GL_Rnr
   // Draw() and Handle().
@@ -226,7 +231,9 @@ public:
   void SelectTopMenuByName(const Text_t* weed_name); // X{E}      7 MCWButt()
 
   void StatoDetails(Statico* stato); // X{E} C{1} 7 MCWButt()
-  void DynoDetails(Dynamico* dyno); // X{E} C{1} 7 MCWButt()
+  void DynoDetails(Dynamico* dyno);  // X{E} C{1} 7 MCWButt()
+
+  void PrepConnectStatos(Statico* stato); // X{E} C{1} 7 MCWButt()
 
   void Suspend(); // X{E}
   void Resume();  // X{E}
