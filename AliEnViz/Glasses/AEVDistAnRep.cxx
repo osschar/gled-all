@@ -25,11 +25,10 @@
 #include <Glasses/Eventor.h>
 #include <Stones/ZComet.h>
 
-#include <RegExp/TPME.h>
-
+#include <TPRegexp.h>
 #include <TMath.h>
 
-ClassImp(AEVDistAnRep)
+ClassImp(AEVDistAnRep);
 
 /**************************************************************************/
 
@@ -223,8 +222,8 @@ void AEVDistAnRep::InitJob(AEVJobRep* job)
   // Setup query time.
   mQueryTime = l.front().fTime;
 
-  TPME sites("\\s*:|,\\s*");
-  Int_t n_sites = sites.split(l.front().fValue);
+  TPMERegexp sites("\\s*:|,\\s*");
+  Int_t n_sites = sites.Split(l.front().fValue);
   printf("n_sites=%d: %s\n", n_sites, l.front().fValue.Data());
 
   for(int s=0; s<n_sites; ++s) {
@@ -240,17 +239,17 @@ void AEVDistAnRep::InitJob(AEVJobRep* job)
       printf("multiple entries for %s, using first\n", sites[s].Data());
     }
 
-    TPME params("\\s*,\\s*");
-    Int_t n_params = params.split(l.front().fValue);
+    TPMERegexp params("\\s*,\\s*");
+    Int_t n_params = params.Split(l.front().fValue);
     printf("  site=%s, n_params=%d: %s\n", sites[s].Data(), n_params,
 	   l.front().fValue.Data());
 
     AEVSite*       site    = new AEVSite(sites[s]);
     AEVEventBatch* evbatch = new AEVEventBatch(sites[s], GForm("EvBatch for %s", sites[s].Data()));
 
-    TPME keyval("\\s*:\\s*");
+    TPMERegexp keyval("\\s*:\\s*");
     for(int p=0; p<n_params; ++p) {
-      Int_t n = keyval.split(params[p]);
+      Int_t n = keyval.Split(params[p]);
       if(n != 2) {
 	printf("split problems with %s\n", params[p].Data());
 	continue;
@@ -487,8 +486,8 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
     mReplayTime = mHistory.front().fTime;
   }
 
-  TPME proc_parname_re("([^:]+:[^:]+:[^:]+):([^:]+)");
-  TPME site_subproc_re("([^:]+):([^:]+:[^:]+)");
+  TPMERegexp proc_parname_re("([^:]+:[^:]+:[^:]+):([^:]+)");
+  TPMERegexp site_subproc_re("([^:]+):([^:]+:[^:]+)");
   while(true) {
     if(mHistory.empty()) {
       GLensWriteHolder wrlck(this);
@@ -538,14 +537,14 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
       }
 
       Int_t m1, m2;
-      m1 = proc_parname_re.match(me.fParam);
+      m1 = proc_parname_re.Match(me.fParam);
       if(m1 != 3) {
 	printf("  m1=%d trouble, skipping\n", m1);
 	continue;
       }
       printf("  proc_id='%s', subparam='%s'\n",
 	     proc_parname_re[1].Data(), proc_parname_re[2].Data());
-      m2 = site_subproc_re.match(proc_parname_re[1]);
+      m2 = site_subproc_re.Match(proc_parname_re[1]);
       if(m2 != 3) {
 	printf("  m2=%d trouble, skipping\n", m2);
 	continue;
@@ -887,8 +886,8 @@ void AEVDistAnRep::FollowJob()
   mona_client->SetNode(mJobId);
   mona_client->SetParam("*");
 
-  TPME proc_parname_re("([^:]+:[^:]+:[^:]+):([^:]+)");
-  TPME site_subproc_re("([^:]+):([^:]+:[^:]+)");
+  TPMERegexp proc_parname_re("([^:]+:[^:]+:[^:]+):([^:]+)");
+  TPMERegexp site_subproc_re("([^:]+):([^:]+:[^:]+)");
 
   map<TString, ProcInfo> proc_map;
   Bool_t first_entry = true;
@@ -917,14 +916,14 @@ void AEVDistAnRep::FollowJob()
       }
 
       Int_t m1, m2;
-      m1 = proc_parname_re.match(me.fParam);
+      m1 = proc_parname_re.Match(me.fParam);
       if(m1 != 3) {
 	printf("  m1=%d trouble, skipping\n", m1);
 	continue;
       }
       printf("  proc_id='%s', subparam='%s'\n",
 	     proc_parname_re[1].Data(), proc_parname_re[2].Data());
-      m2 = site_subproc_re.match(proc_parname_re[1]);
+      m2 = site_subproc_re.Match(proc_parname_re[1]);
       if(m2 != 3) {
 	printf("  m2=%d trouble, skipping\n", m2);
 	continue;

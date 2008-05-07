@@ -16,8 +16,6 @@
 
 #include <Glasses/ZQueen.h>
 
-#include <RegExp/TPME.h>
-
 #include <TSystem.h>
 #include <TRandom.h>
 
