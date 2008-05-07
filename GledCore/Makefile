@@ -4,9 +4,6 @@ LIB_SET_NAME	= GledCore
 LIB_SET_ID	= 1
 REQUIRES_LIB_SETS =
 
-REGEXP_LIB_BASE  := GledCore_pcre
-REGEXP_LIB        = lib/lib${REGEXP_LIB_BASE}.${LDEXT}
-
 # All this dirs expanded in make_base.inc into <type>_SRCS and _HDRS
 # Can add your own before ... or after (are += -ed into the vars)
 
@@ -17,7 +14,7 @@ DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView FL
 VIEW_FL_DIRS	= FL
 
-BASE_LD_LIBS	=-lssl -Llib -l${REGEXP_LIB_BASE}
+BASE_LD_LIBS	=-lssl -Llib
 
 MAINSRCS := saturn.cxx gled.cxx
 MAINOBJS := $(MAINSRCS:.cxx=.o)
@@ -34,7 +31,6 @@ include ${GLEDSYS}/make/make_base.inc
 
 CPPFLAGS +=-I/usr/kerberos/include
 
-LIBSET_PREREQS += ${REGEXP_LIB}
 LIBSET_TARGETS += bin/saturn
 
 ifndef SKIP_VIEW_LIBS
@@ -51,17 +47,14 @@ endif
 bin/saturn: saturn.o ${BASE_LIB_NAME}
 	${ECHO} -X- Linking $@
 	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
-	-Llib -l${LIB_SET_NAME} -l${REGEXP_LIB_BASE} \
-	${ROOTLIBS} ${SYSLIBS}
+	-Llib -l${LIB_SET_NAME} ${ROOTLIBS} ${SYSLIBS}
 
 bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
 	${ECHO} -X- Linking $@
 	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
-	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View -l${REGEXP_LIB_BASE} \
+	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
 	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
 
-${REGEXP_LIB}:
-	${MAKE} -C RegExp
 
 ${PUPILS_LIB}: ${PUPILS_OBJS}
 	${ECHO} -X- Linking $@
@@ -78,8 +71,6 @@ endif
 
 clean::
 	@rm -f ${MAINOBJS}
-	${MAKE} -C RegExp clean
 
 distclean::
 	@rm -f ${MAINEXES}
-	${MAKE} -C RegExp distclean
