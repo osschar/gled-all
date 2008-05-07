@@ -11,8 +11,6 @@
 #include <Gled/GMutex.h>
 #include <Gled/Gled.h>
 
-#include <RegExp/TPME.h>
-
 #include <TMessage.h>
 #include <TDirectory.h>
 #include <TFile.h>
@@ -23,6 +21,8 @@
 #include <TClass.h>
 #include <TRealData.h>
 #include <TDataMember.h>
+#include <TPRegexp.h>
+
 
 #include <stack>
 
@@ -461,8 +461,8 @@ GledNS::MethodInfo* GledNS::DeduceMethodInfo(ZGlass* alpha, const TString& name)
 {
   // 'name' can be FQ, eg. "SomeGlass::Foo".
 
-  TPME re("::");
-  int  ret = re.split(name);
+  TPMERegexp re("::");
+  int  ret = re.Split(name);
   if(ret == 2) {
     ClassInfo* ci = FindClassInfo(re[0]);
     if(ci == 0)  return 0;
@@ -479,8 +479,8 @@ GledNS::DataMemberInfo* GledNS::DeduceDataMemberInfo(ZGlass* alpha, const TStrin
 {
   // 'name' can be FQ, eg. "SomeGlass::Foo".
 
-  TPME re("::");
-  int  ret = re.split(name);
+  TPMERegexp re("::");
+  int  ret = re.Split(name);
   if(ret == 2) {
     ClassInfo* ci = FindClassInfo(re[0]);
     if(ci == 0)  return 0;

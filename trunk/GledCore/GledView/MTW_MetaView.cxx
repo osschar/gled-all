@@ -17,7 +17,7 @@
 #include <Glasses/MetaSubViewInfo.h>
 #include <Glasses/MetaWeedInfo.h>
 
-#include <RegExp/TPME.h>
+#include <TPRegexp.h>
 
 #include <FL/Fl.H>
 
@@ -83,8 +83,8 @@ void MTW_MetaView::build_subview(MTW_SubView* sv, MetaSubViewInfo* msvi,
     MetaWeedInfo*  mwi = *weed_it;
 
     TString wname(mwi->GetName());
-    TPME      re("<(.*)>", "o");
-    int rec = re.match(wname);
+    TPMERegexp re("<(.*)>", "o");
+    int rec = re.Match(wname);
 
     Fl_Widget* o = 0;
     if(rec == 0) {
