@@ -101,7 +101,7 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 
 %.pch.h.gch: %.pch.h
 	${ECHO} -@- Precompiling $<
-	${MUTE} ${CXX} -x c++ -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
+	${MUTE} ${CXX} -x c++-header -c $< ${CPPFLAGS} ${CXXFLAGS} -o $@
 
 HC7_SED_FILTER := s![^ ]+\.[hc]7 *!!g
 
