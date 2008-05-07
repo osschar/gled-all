@@ -1,3 +1,27 @@
+2008-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	* Gled/GledNS.cxx:
+	* GledView/MTW_MetaView.cxx:
+	* RegExp/Makefile:
+	* RegExp/TPME.h:
+	* RegExp/TPME/TPME.cxx:
+	* RegExp/TPME/config.h:
+	* RegExp/pcre.h:
+	* RegExp/pcre/chartables.c:
+	* RegExp/pcre/config.h:
+	* RegExp/pcre/get.c:
+	* RegExp/pcre/internal.h:
+	* RegExp/pcre/pcre.c:
+	* RegExp/pcre/study.c:
+	* RegExp/pme.h:
+	* RegExp/pme/config.h:
+	* RegExp/pme/pme.cpp:
+	Use TPMERegexp class from ROOT instead of internal PME/pcre.
+	The Regexp/ sub-directory has been cleaned-up.
+
+	This requires the latest ROOT (r23681).
+
 2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* RnrBase/A_Rnr.h:

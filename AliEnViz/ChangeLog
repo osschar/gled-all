@@ -1,3 +1,9 @@
+2008-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVMlClient.cxx:
+	Use TPMERegexp class instead of TPME.
+
 2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVAlienUI.cxx:
