@@ -1,0 +1,31 @@
+=head1 Document id
+
+=head2 Title
+
+\gled object-space layout for running \greedworld
+
+=head2 Author
+
+Matevz Tadel
+
+=head2 Date
+
+12.5.2008
+
+=head2 Document history
+
+
+
+=head1 Introduction
+
+Document plan:
+
+=over enum
+
+=item Discuss separation between servers and interchange of specific
+data among them. Storage of suspended worlds.
+
+=item Discuss separation between server and clients. Clients have a
+limited view of objects not owned by identities assigned to their MEE.
+
+=back
