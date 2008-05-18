@@ -4,8 +4,11 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//______________________________________________________________________
+//==============================================================================
 // TringTvor
+//==============================================================================
+
+//______________________________________________________________________
 //
 // Encapsulates low-level arrays for triangle meshes.
 // Vertex and Triangle arrays are mandatory (called primary by methods).
@@ -15,11 +18,20 @@
 //   texture coords (per-vertex)     |
 //   triangle strip data
 //
+// Serialization should mostly work. Secondary data is streamed as
+// well.  As triangle-attributes (normals, colors) are usually
+// calculated from vertex-attributes, some provision might be necessary to
+// streamline this. Anyway ... this should really be managed by the lens
+// using the tring-tvor as it also has the AdEnlightenment() virtual where
+// post-serialization / pre-usage chores can be performed.
+//
+// Strip-data is not saved, nor is there any indication if it was used.
 
 #include "TringTvor.h"
 #include <TVector3.h>
 
 #include <TMath.h>
+#include <TRandom.h>
 
 ClassImp(TringTvor);
 
@@ -58,15 +70,15 @@ TringTvor::TringTvor(Int_t nv, Int_t nt,
 
 TringTvor::~TringTvor()
 {
-  DeleteSecondaryArrays();
   DeleteTriangleStrips();
+  DeleteSecondaryArrays();
   DeletePrimaryArrays();
 }
 
 void TringTvor::Reset(Int_t nv, Int_t nt)
 {
-  DeleteSecondaryArrays();
   DeleteTriangleStrips();
+  DeleteSecondaryArrays();
   DeletePrimaryArrays();
   mNVerts  = nv;
   mNTrings = nt;
@@ -76,8 +88,8 @@ void TringTvor::Reset(Int_t nv, Int_t nt)
 void TringTvor::Reset(Int_t nv, Int_t nt,
                       Bool_t smoothp, Bool_t colp, Bool_t texp)
 {
-  DeleteSecondaryArrays();
   DeleteTriangleStrips();
+  DeleteSecondaryArrays();
   DeletePrimaryArrays();
   mNVerts  = nv;
   mNTrings = nt;
@@ -241,6 +253,33 @@ void TringTvor::GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles)
     C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) / 3);
     C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) / 3);
     C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) / 3);
+  }
+}
+
+void TringTvor::GenerateTriangleColorsFromTriangleStrips()
+{
+  // Assign random colors to different triangle strips.
+
+  if (!HasTrianlgeStrips())
+    return;
+  AssertTringCols();
+
+  TRandom rnd(0);
+
+  for (Int_t i = 0; i < mNStrips; ++i)
+  {
+    UChar_t r = (UChar_t) rnd.Integer(256);
+    UChar_t g = (UChar_t) rnd.Integer(256);
+    UChar_t b = (UChar_t) rnd.Integer(256);
+
+    Int_t* tring_idxp = mStripTrings + (mStripBegs[i] - mStripEls) + 2;
+    Int_t  n          = mStripLens[i] - 2;
+    while (n-- > 0)
+    {
+      UChar_t* tc = TriangleColor(*tring_idxp);
+      tc[0] = r; tc[1] = g; tc[2] = b;
+      ++tring_idxp;
+    }
   }
 }
 
@@ -448,9 +487,12 @@ void TringTvor::GenerateTriangleStrips(Int_t max_verts)
 
 void TringTvor::DeleteTriangleStrips()
 {
-  delete [] mStripEls;   mStripEls  = 0;
-  delete [] mStripBegs;  mStripBegs = 0;
-  delete [] mStripLens;  mStripLens = 0;
+  mNStripEls = 0;
+  delete [] mStripEls;    mStripEls  = 0;
+  delete [] mStripTrings; mStripTrings = 0;
+  mNStrips = 0;
+  delete [] mStripBegs;   mStripBegs = 0;
+  delete [] mStripLens;   mStripLens = 0;
 }
 
 /**************************************************************************/
