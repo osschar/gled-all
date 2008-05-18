@@ -104,7 +104,6 @@ void images()
   terrain->SetPos(-3, -7, 0.01);
   terrain->SetRibbon(ribbon1);
   terrain->SetRnrMode(RectTerrain::RM_FlatTring);
-  terrain->SetUseTringStrips(false);
 
   CREATE_ADD_GLASS(n1, SMorph, images, "Earth", "");
   n1->SetScale(2);
