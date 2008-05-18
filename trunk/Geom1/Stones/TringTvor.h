@@ -90,12 +90,14 @@ public:
 
   // Triangle strip data
 
-  Int_t    mNStripEls;    // Number of trianlge strip vertices (= 2*n-strips + n-of-triangles).
-  Int_t*   mStripEls;     // Vertex indices for all strips, mNStripEls.
-  Int_t*   mStripTrings;  // Indices of triangles belonging to strip vertices, mNStripEls (first two triangles of each strip are not used). Needed for flat shading.
-  Int_t    mNStrips;      // Number of trianlge strips.
-  Int_t**  mStripBegs;    // PointerBeg[mNStrips]
-  Int_t*   mStripLens;    // [mNStrips]
+  Int_t    mNStripEls;    //! Number of trianlge strip vertices (= 2*n-strips + n-of-triangles).
+  Int_t*   mStripEls;     //! [mNStripEls] Vertex indices for all strips.
+  Int_t*   mStripTrings;  //! [mNStripEls] Indices of triangles belonging to strip vertices, mNStripEls (first two triangles of each strip are not used). Needed for flat shading.
+  Int_t    mNStrips;      //! Number of trianlge strips.
+  Int_t**  mStripBegs;    //! [mNStrips] Pointers to strip beginnings into mStripEls, needed for glMultiDrawElements.
+  Int_t*   mStripLens;    //! [mNStrips] Lengths of strips.  
+
+  Bool_t   HasTrianlgeStrips() const { return mNStripEls != 0; }
 
   // --------------------------------------------------------------
 
@@ -135,6 +137,8 @@ public:
 					void* ud);
   void GenerateTriangleColorsFromVertexColors();
   void GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles);
+
+  void GenerateTriangleColorsFromTriangleStrips();
 
   void GenerateVertexNormals();
 
