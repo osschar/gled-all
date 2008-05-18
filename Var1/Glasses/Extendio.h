@@ -46,9 +46,8 @@ private:
   void _init();
 
 protected:
-  HTransF         mTrans;      // Transform from current master
-  Opcode::AABB    mAABB;       // Enclosing bbox in parent frame
-
+  HTransF         mTrans;        //  Transform from current master
+  Opcode::AABB    mAABB;         //! Enclosing bbox in parent frame
   HTransF*        mLastTransPtr; //!
   Opcode::AABB*   mLastAABBPtr;  //!
 
