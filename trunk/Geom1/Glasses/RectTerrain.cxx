@@ -53,12 +53,13 @@ void RectTerrain::_init()
 
   mSmoothFac = 0.2;
 
-  bStudySize   = false;
+  bStudySize = false;
 
-  pTTvor = 0;
+  pTTvor      = 0;
   mTTvorStamp = 0;
-  bUseTringStrips = true;
-  mMaxTSVerts     = 256;
+  bUseTringStrips    = false;
+  mMaxTSVerts        = 256;
+  bRndColTringStrips = false;
 }
 
 RectTerrain::~RectTerrain()
@@ -379,8 +380,12 @@ void RectTerrain::MakeTringTvor()
   delete pTTvor;
   pTTvor = SpawnTringTvor(smoothp, flatp, colp, texp);
 
-  if(bUseTringStrips)
+  if(bUseTringStrips) {
     pTTvor->GenerateTriangleStrips(mMaxTSVerts);
+    if(bRndColTringStrips) {
+      pTTvor->GenerateTriangleColorsFromTriangleStrips();
+    }
+  }
 
   mTTvorStamp = mTimeStamp;
 }
