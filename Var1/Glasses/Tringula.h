@@ -99,7 +99,8 @@ protected:
   ZLink<TriMesh>   mDefDynMesh; // X{GS} L{}
   ZLink<TriMesh>   mDefFlyMesh; // X{GS} L{}
 
-  Opcode::BipartiteBoxPruner*  mBoxPruner; //!
+  Opcode::BipartiteBoxPruner*  mBoxPruner;  //!
+  // List-time-stamps for pruning sources.
   TimeStamp_t                  mStatosLTS;  //!
   TimeStamp_t                  mDynosLTS;   //!
   TimeStamp_t                  mFlyersLTS;  //!
@@ -161,8 +162,6 @@ public:
                            Float_t w_max= 1);                   // X{E} C{1} 7 MCWButt()
   Dynamico* RandomFlyer   (Float_t v_min= 2, Float_t v_max=20,
                            Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
-
-  void ConnectStaticos(Statico* stato0, Statico* stato1);  // X{E} C{2} 7 MCWButt()
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
 

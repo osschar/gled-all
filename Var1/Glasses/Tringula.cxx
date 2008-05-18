@@ -14,6 +14,7 @@
 #include <Glasses/ZVector.h>
 #include <Glasses/RectTerrain.h>
 #include <Glasses/RGBAPalette.h>
+#include <Glasses/ZImage.h>
 #include <Stones/TringTvor.h>
 #include "TriMesh.h"
 #include "ParaSurf.h"
@@ -123,7 +124,8 @@ void Tringula::ColorByCoord(Int_t axis, Float_t fac, Float_t offset)
   for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
     mPalette->ColorFromValue(min + (V[axis]-min)*fac + dlt*offset, C);
 
-  TT->GenerateTriangleColorsFromVertexColors();
+  if (TT->HasTringCols())
+    TT->GenerateTriangleColorsFromVertexColors();
 
   StampReqTring(FID());
 }
@@ -152,7 +154,8 @@ void Tringula::ColorByNormal(Int_t axis, Float_t min, Float_t max)
   for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
     mPalette->ColorFromValue(N[axis], C);
 
-  TT->GenerateTriangleColorsFromVertexColors();
+  if (TT->HasTringCols())
+    TT->GenerateTriangleColorsFromVertexColors();
 
   StampReqTring(FID());
 }
@@ -179,7 +182,8 @@ void Tringula::ColorByCoordFormula(const Text_t* formula, Float_t min, Float_t m
   for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
     mPalette->ColorFromValue((Float_t) tf3.Eval(V[0], V[1], V[2]), C);
 
-  TT->GenerateTriangleColorsFromVertexColors();
+  if (TT->HasTringCols())
+    TT->GenerateTriangleColorsFromVertexColors();
 
   StampReqTring(FID());
 }
@@ -203,7 +207,8 @@ void Tringula::ColorByNormalFormula(const Text_t* formula, Float_t min, Float_t 
   for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
     mPalette->ColorFromValue((Float_t) tf3.Eval(N[0], N[1], N[2]), C);
 
-  TT->GenerateTriangleColorsFromVertexColors();
+  if (TT->HasTringCols())
+    TT->GenerateTriangleColorsFromVertexColors();
 
   StampReqTring(FID());
 }
@@ -586,30 +591,6 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
 }
 
 //==============================================================================
-
-void Tringula::ConnectStaticos(Statico* stato0, Statico* stato1)
-{
-  WSTube* tube = new WSTube("Oooga");
-  tube->SetTransSource(WSTube::TS_Transes);
-
-  const HTransF& tA = stato0->ref_last_trans();
-  const HTransF& tB = stato1->ref_last_trans();
-
-  tube->RefTransA().SetFromArray(tA);
-  tube->RefTransA().MoveLF(3, 2.0*stato0->get_tring_tvor()->mCtrExtBox[5]);
-  tube->RefTransB().SetFromArray(tB);
-  tube->RefTransB().MoveLF(3, 2.0*stato1->get_tring_tvor()->mCtrExtBox[5]);
-
-  tube->RefVecA().SetXYZT(0, 0,  2, 1);
-  tube->RefVecB().SetXYZT(0, 0, -2, 1);
-
-  mQueen->CheckIn(tube);
-  Add(tube);
-
-  tube->AnimateConnect();
-}
-
-/**************************************************************************/
 
 void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)
 {
