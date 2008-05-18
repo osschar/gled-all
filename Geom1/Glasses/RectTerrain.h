@@ -61,6 +61,7 @@ class RectTerrain : public ZNode
   TimeStamp_t	mTTvorStamp;     //!
   Bool_t        bUseTringStrips; //  X{GST} 7 Bool(-join=>1)
   Int_t         mMaxTSVerts;     //  X{GST} 7 Value(-range=>[3,32767,1])
+  Bool_t        bRndColTringStrips; //  X{GST} 7 Bool()
 
   ZColor make_color(Float_t z);
   static void color_filler(Float_t* v, UChar_t* c, void* rt);
