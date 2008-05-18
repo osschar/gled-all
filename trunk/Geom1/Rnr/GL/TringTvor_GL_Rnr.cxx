@@ -42,17 +42,16 @@ void TringTvor_GL_Rnr::RenderSmooth(TringTvor* ttvor, Bool_t colp, Bool_t texp)
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  if(TT.mStripEls != 0)
+  if (TT.HasTrianlgeStrips())
   {
-    // Requires GL-1.4
-    // glMultiDrawElements(GL_TRIANGLE_STRIP, TT.mStripLens,
-    //                     GL_UNSIGNED_INT, TT.mStripBegs, TT.mNStrips);
+    // Requires GL-1.4.
+    glMultiDrawElements(GL_TRIANGLE_STRIP, TT.mStripLens, GL_UNSIGNED_INT,
+                        (const GLvoid**) TT.mStripBegs, TT.mNStrips);
 
-    for(Int_t i=0; i<TT.mNStrips; ++i) {
-      // glColor3f(0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm());
-      glDrawElements(GL_TRIANGLE_STRIP, TT.mStripLens[i],
-                     GL_UNSIGNED_INT, TT.mStripBegs[i]);
-    }
+    // for(Int_t i=0; i<TT.mNStrips; ++i) {
+    //   glDrawElements(GL_TRIANGLE_STRIP, TT.mStripLens[i],
+    //                 GL_UNSIGNED_INT, TT.mStripBegs[i]);
+    // }
   }
   else
   {
@@ -82,11 +81,9 @@ void TringTvor_GL_Rnr::RenderFlat(TringTvor* ttvor, Bool_t colp, Bool_t texp)
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  // TRandom colgen(2);
-
-  if (TT.mStripEls)
+  if (TT.HasTrianlgeStrips())
   {
-    for(Int_t i=0; i<TT.mNStrips; ++i)
+    for (Int_t i=0; i<TT.mNStrips; ++i)
     {
       glBegin(GL_TRIANGLE_STRIP);
       Int_t* idxp = TT.mStripBegs[i];
@@ -96,13 +93,12 @@ void TringTvor_GL_Rnr::RenderFlat(TringTvor* ttvor, Bool_t colp, Bool_t texp)
 
       Int_t* tring_idxp = TT.mStripTrings + (idxp - TT.mStripEls);
       Int_t  n          = TT.mStripLens[i] - 2;
-      // glColor3f(0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm(), 0.2+0.8*colgen.Rndm());
       while (n-- > 0)
       {
         glNormal3fv(TT.TriangleNormal(*tring_idxp));
         if (colp)
           glColor4ubv(TT.TriangleColor(*tring_idxp));
-        tring_idxp++;
+        ++tring_idxp;
         glArrayElement(*(idxp++));
       }
       glEnd();
@@ -114,7 +110,7 @@ void TringTvor_GL_Rnr::RenderFlat(TringTvor* ttvor, Bool_t colp, Bool_t texp)
     Int_t*   T = TT.Trings();
     Float_t* N = TT.TringNorms();
     UChar_t* C = TT.TringCols();
-    for(Int_t t=0; t<TT.mNTrings; ++t)
+    for (Int_t t=0; t<TT.mNTrings; ++t)
     {
       glNormal3fv(N); N += 3;
       if (colp) { glColor4ubv(C);  C += 4; }
