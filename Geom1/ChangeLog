@@ -1,3 +1,19 @@
+2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added GenerateTriangleColorsFromTriangleStrips().
+	Add some docs.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Use glMultiDrawElements() for smooth rendering when using triangle
+	strips.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Added option to colorize triangle strips with random colors.
+	Do not use triangle strips by default.
+
 2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/FormulaMover.cxx:
