@@ -228,7 +228,6 @@ void tringula(Int_t mode=0)
   terrain->SetBorderCond(RectTerrain::BC_Wrap);
   terrain->ApplyBorderCondition();
   terrain->SetBorder(true);
-  terrain->SetUseTringStrips(false);
   gforge->SetTerrain(terrain);
 
 
@@ -838,10 +837,15 @@ void make_overlay()
     val1->SetFormat("Dyno colls: %.0f");
     val1->SetCbackMemberName("NDynoColls");
 
-    CREATE_ADD_GLASS(but2, WGlButton, stato_ctrl, "Connect", "LensBeta");
+    CREATE_ADD_GLASS(but2, WGlButton, stato_ctrl, "Connect Energy", "LensBeta");
     gs.SetNodeAdvance(but2);
     but2->SetCbackAlpha(tricam);
-    but2->SetCbackMethodName("PrepConnectStatos");
+    but2->SetCbackMethodName("PrepConnectStatosEnergy");
+
+    CREATE_ADD_GLASS(but3, WGlButton, stato_ctrl, "Connec Matter", "LensBeta");
+    gs.SetNodeAdvance(but3);
+    but3->SetCbackAlpha(tricam);
+    but3->SetCbackMethodName("PrepConnectStatosMatter");
   }
 }
 
