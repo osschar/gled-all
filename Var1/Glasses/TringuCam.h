@@ -18,6 +18,8 @@
 class TriMeshField;
 class TriMeshLightField;
 
+class WSTube;
+
 class ScreenText;
 class WGlWidget;
 
@@ -204,6 +206,10 @@ protected:
   Opcode::Point          mCollPoint;  //!
   Int_t                  mCollVertex; //! Closest vertex, -1 if no collision.
 
+  TString                mGradName;   //! Current gradient for connect - hack.
+
+  WSTube* make_tube(Statico* stato0, Statico* stato1, const TString& grad_name);
+
 public:
   TringuCam(const Text_t* n="TringuCam", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
@@ -233,7 +239,8 @@ public:
   void StatoDetails(Statico* stato); // X{E} C{1} 7 MCWButt()
   void DynoDetails(Dynamico* dyno);  // X{E} C{1} 7 MCWButt()
 
-  void PrepConnectStatos(Statico* stato); // X{E} C{1} 7 MCWButt()
+  void PrepConnectStatosEnergy(Statico* stato); // X{E} C{1} 7 MCWButt()
+  void PrepConnectStatosMatter(Statico* stato); // X{E} C{1} 7 MCWButt()
 
   void Suspend(); // X{E}
   void Resume();  // X{E}
