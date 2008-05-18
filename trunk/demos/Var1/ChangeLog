@@ -1,3 +1,8 @@
+2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Separate buttons for energy/matter connections.
+
 2008-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

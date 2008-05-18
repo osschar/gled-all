@@ -1,3 +1,19 @@
+2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.h:
+	Whitespace.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Make connection tube in the TringuCam.
+	Hack in two different connect methods so that the demo looks more
+	interesting.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Remove method ConnectStaticos() as it did not belong here (now
+	done in TringuCam).
+
 2008-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TringuCam.cxx:
