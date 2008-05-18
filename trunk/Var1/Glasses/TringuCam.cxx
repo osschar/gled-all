@@ -23,6 +23,7 @@
 #include <Glasses/Scene.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/TimeMaker.h>
+#include <Glasses/WSTube.h>
 
 #include "TringuCam.c7"
 
@@ -98,6 +99,40 @@ void TringuCam::AdEnlightenment()
     mQueen->CheckIn(l);
     SetSelection(l);
   }
+}
+
+/**************************************************************************/
+
+WSTube* TringuCam::make_tube(Statico* stato0, Statico* stato1, const TString& grad_name)
+{
+  WSTube* tube = new WSTube(GForm("Tube %s - %s; %s", stato0->GetName(), stato1->GetName(), grad_name.Data()));
+
+  tube->SetTransSource(WSTube::TS_Transes);
+
+  const HTransF& tA = stato0->ref_last_trans();
+  const HTransF& tB = stato1->ref_last_trans();
+
+  tube->RefTransA().SetFromArray(tA);
+  tube->RefTransA().MoveLF(3, 2.0*stato0->get_tring_tvor()->mCtrExtBox[5]);
+  tube->RefTransB().SetFromArray(tB);
+  tube->RefTransB().MoveLF(3, 2.0*stato1->get_tring_tvor()->mCtrExtBox[5]);
+
+  tube->RefVecA().SetXYZT(0, 0,  2, 1);
+  tube->RefVecB().SetXYZT(0, 0, -2, 1);
+
+  tube->SetTexture((ZImage*) mQueen->FindLensByPath(GForm("var/gradients/%s",
+                                                          grad_name.Data())));
+
+  tube->SetFat(false);
+  tube->SetLineW(1.6);
+  tube->SetTLevel(30);
+  tube->SetPLevel(3);
+  tube->SetDefWidth(0.04);
+  tube->SetDefTension(1.5);
+  tube->SetTexUScale(2);
+  tube->SetDtexU(-0.3);
+
+  return tube;
 }
 
 /**************************************************************************/
@@ -238,8 +273,13 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 	{
 	  Statico* beta = dynamic_cast<Statico*>(*mPrepBeta);
 	  if (beta) {
-	    GLensWriteHolder _wlck(*mTringula);
-	    mTringula->ConnectStaticos(beta, stato);
+	    WSTube* tube = make_tube(beta, stato, mGradName);
+            mQueen->CheckIn(tube);
+            {
+              GLensWriteHolder _wlck(*mTringula);
+              mTringula->Add(tube);
+            }
+            tube->AnimateConnect();
 	  }
 	}
         mExpectBeta = EB_Nothing;
@@ -597,10 +637,18 @@ void TringuCam::DynoDetails(Dynamico* dyno)
 
 //==============================================================================
 
-void TringuCam::PrepConnectStatos(Statico* stato)
+void TringuCam::PrepConnectStatosEnergy(Statico* stato)
 {
   SetPrepBeta(stato);
   mExpectBeta = EB_ConnectStaticos;
+  mGradName = "r2y";
+}
+
+void TringuCam::PrepConnectStatosMatter(Statico* stato)
+{
+  SetPrepBeta(stato);
+  mExpectBeta = EB_ConnectStaticos;
+  mGradName = "coldsteel";
 }
 
 //==============================================================================
