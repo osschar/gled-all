@@ -70,7 +70,7 @@ public:
                Bool_t limit_df=false); // X{E} 7 MCWButt()
 
 #include "TriMeshField.h7"
-  ClassDef(TriMeshField, 1) // N-dimensional field spawning over tri-mesh vertices.
+  ClassDef(TriMeshField, 1); // N-dimensional field spawning over tri-mesh vertices.
 }; // endclass TriMeshField
 
 
