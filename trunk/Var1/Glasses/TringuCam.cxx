@@ -23,6 +23,7 @@
 #include <Glasses/Scene.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/TimeMaker.h>
+#include <Glasses/RGBAPalette.h>
 #include <Glasses/WSTube.h>
 
 #include "TringuCam.c7"
@@ -303,7 +304,7 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
           SelectTopMenu(weed);
         }
       } else {
-        SelectTopMenuByName("SimCtrl");
+        SelectTopMenuByName("MainMenu");
       }
 
       break;
@@ -637,18 +638,46 @@ void TringuCam::DynoDetails(Dynamico* dyno)
 
 //==============================================================================
 
-void TringuCam::PrepConnectStatosEnergy(Statico* stato)
+void TringuCam::SetAndApplyCurField(TriMeshField* field)
 {
-  SetPrepBeta(stato);
-  mExpectBeta = EB_ConnectStaticos;
-  mGradName = "r2y";
+  SetCurField(field);
+  if (mCurField != 0)
+    mCurField->ColorizeTvor();
+  if (mLightField != 0)
+    mLightField->ModulateTvor();
 }
 
-void TringuCam::PrepConnectStatosMatter(Statico* stato)
+void TringuCam::ColorByTerrainProps(Int_t mode)
 {
+  // Colorize terrain mesh based on mode:
+  // 0 - height
+  // 1 - normal | up-vector
+
+  static const Exc_t _eh("TringuCam::ColorByTerrainProps ");
+
+  assert_palette(_eh);
+
+  TriMesh* mesh = mTringula->GetMesh();
+  switch (mode)
+  {
+    case 0:
+      mesh->ColorByParaSurfCoord(*mPalette, 2);
+      break;
+    case 1:
+      mesh->ColorByParaSurfNormal(*mPalette, 2, 0.5, 1);
+      break;
+    default:
+      ISwarn(_eh + "Unsupported mode.");
+  }
+}
+
+void TringuCam::PrepConnectStatos(Statico* stato, Int_t id, const TString& grad)
+{
+  // printf("TringuCam::PrepConnectStatos id=%d grad='%s'\n", id, grad.Data());
+
   SetPrepBeta(stato);
   mExpectBeta = EB_ConnectStaticos;
-  mGradName = "coldsteel";
+  mGradName = grad;
 }
 
 //==============================================================================

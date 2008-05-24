@@ -19,7 +19,7 @@ class TriMeshField;
 class TriMeshLightField;
 
 class WSTube;
-
+class RGBAPalette;
 class ScreenText;
 class WGlWidget;
 
@@ -172,6 +172,7 @@ protected:
   ZLink<Tringula>          mTringula;    // X{GS} L{A}
   ZLink<TriMeshField>      mCurField;    // X{GS} L{A}
   ZLink<TriMeshLightField> mLightField;  // X{GS} L{A}
+  ZLink<RGBAPalette>       mPalette;     // X{GS} L{A}
 
   ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{A}
   ZLink<Scene>             mOverlay;     // X{GS} L{A}
@@ -239,8 +240,9 @@ public:
   void StatoDetails(Statico* stato); // X{E} C{1} 7 MCWButt()
   void DynoDetails(Dynamico* dyno);  // X{E} C{1} 7 MCWButt()
 
-  void PrepConnectStatosEnergy(Statico* stato); // X{E} C{1} 7 MCWButt()
-  void PrepConnectStatosMatter(Statico* stato); // X{E} C{1} 7 MCWButt()
+  void SetAndApplyCurField(TriMeshField* field); // X{E} C{1} 7 MCWButt()
+  void ColorByTerrainProps(Int_t mode=0);        // X{E}      7 MCWButt()
+  void PrepConnectStatos(Statico* stato, Int_t id, const TString& grad); // X{E} C{1} 7 MCWButt()
 
   void Suspend(); // X{E}
   void Resume();  // X{E}
