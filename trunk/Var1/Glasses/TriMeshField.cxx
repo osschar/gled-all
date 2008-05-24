@@ -4,11 +4,6 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// TriMeshField
-//
-//
-
 #include "TriMeshField.h"
 #include <Glasses/TriMesh.h>
 #include <Glasses/RGBAPalette.h>
@@ -18,7 +13,15 @@
 #include <TRandom.h>
 #include <TF3.h>
 
-ClassImp(TriMeshField)
+//==============================================================================
+// TriMeshField
+//==============================================================================
+
+//__________________________________________________________________________
+//
+// mDim-dimensional field defined on vertices of a mesh.
+
+ClassImp(TriMeshField);
 
 /**************************************************************************/
 
@@ -354,6 +357,12 @@ void TriMeshField::FillByXYGaussBlobs(Int_t n_blobs,
                                       Float_t sigma_min, Float_t sigma_max,
                                       Bool_t minmax_p,   Bool_t  recolor_p)
 {
+  // Generate random gaussian blobs and initialize field with the
+  // sum of contributions from blobs.
+  // Should also have an option to add the field values to an existing
+  // field.
+  // gRandom is used for generation of the blob parameters.
+
   static const Exc_t _eh("TriMeshField::FillByXYGaussBlobs ");
 
   ResizeToMesh(1);
@@ -366,14 +375,13 @@ void TriMeshField::FillByXYGaussBlobs(Int_t n_blobs,
 
   vector<GaussBlob> blobs(n_blobs);
   {
-    TRandom  r(0);
     for (Int_t i=0; i<n_blobs; ++i)
     {
       GaussBlob& B = blobs[i];
-      B.x   = r.Uniform(bbox[0], bbox[3]);
-      B.y   = r.Uniform(bbox[1], bbox[4]);
-      B.A   = r.Uniform(A_min, A_max);
-      B.sgm = r.Uniform(sigma_min, sigma_max);
+      B.x   = gRandom->Uniform(bbox[0], bbox[3]);
+      B.y   = gRandom->Uniform(bbox[1], bbox[4]);
+      B.A   = gRandom->Uniform(A_min, A_max);
+      B.sgm = gRandom->Uniform(sigma_min, sigma_max);
       B.efc = -0.5f/(B.sgm*B.sgm);       // exp-factor
       B.nfc =  B.A /(2.50662827f*B.sgm); // norm-factor, sqrt(2pi)=2.50662827463100024
       // printf("Blob %3d: x,y=(%f,%f); A,sgm=(%f,%f); efc,nfc=(%f,%f)\n",
