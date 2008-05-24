@@ -35,7 +35,8 @@ ZVector*      rnddynos = 0;
 
 Scene*        overlay  = 0;
 
-TriMeshField* tmfield  = 0;
+TriMeshField* engfield = 0;
+TriMeshField* matfield = 0;
 RectTerrain * terrain  = 0;
 GTSurf*       gtsurf   = 0;
 GTSRetriangulator* gtsretring  = 0;
@@ -55,12 +56,12 @@ Int_t        num_dynamico              = 250;  // 250
 Int_t        num_flyer                 = 100;  // 100
 Float_t      max_flyer_h               = 10;   // def=10. Changed for some surfaces in surf-specific init.
 
-TRandom      g_rnd(0);
-
 const Text_t* trimesh_layout = "ZGlass(Name,Title[22]):TriMesh(M[8],Surf[8],COM,J)";
 
 void tringula(Int_t mode=0)
 {
+  gRandom = new TRandom3(0);
+
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Var1");
 
@@ -98,18 +99,15 @@ void tringula(Int_t mode=0)
 
     void*   dirh = gSystem->OpenDirectory("gradients");
     TString file;
-    TArrayI mp;
-    TPRegexp re("lin_([\\w\\d]+)\\.\\w+");
+    TPMERegexp re("lin_([\\w\\d]+)\\.\\w+");
     while ((file = gSystem->GetDirEntry(dirh)).IsNull() == kFALSE)
     {
-      Int_t nm = re.Match(file, "", 0, 30, &mp);
-      if (nm == 2)
-      {
-        TString name(file(mp[2], mp[3] - mp[2]));
-        printf("file='%s' nm = %d, name='%s'\n", file.Data(), nm, name.Data());
-
-        CREATE_ADD_GLASS(grad, ZImage, graddir, name, 0);
+      Int_t nm = re.Match(file);
+      if (nm == 2) {
+        CREATE_ADD_GLASS(grad, ZImage, graddir, re[1], 0);
         grad->SetFile(GForm("gradients/%s", file.Data()));
+      } else {
+        // printf("Load gradients: error matching file='%s', nmatch=%d.\n", file.Data(), nm);
       }
     }
     gSystem->FreeDirectory(dirh);
@@ -145,9 +143,9 @@ void tringula(Int_t mode=0)
     Float_t min_h  = 5, max_h  = 15;
     for (Int_t i=0; i<20; ++i)
     {
-      Float_t a = g_rnd.Uniform(min_xy, max_xy),
-        b = g_rnd.Uniform(min_xy, max_xy),
-        c = g_rnd.Uniform(min_h,  max_h);
+      Float_t a = gRandom->Uniform(min_xy, max_xy),
+        b = gRandom->Uniform(min_xy, max_xy),
+        c = gRandom->Uniform(min_h,  max_h);
       CREATE_ADD_GLASS(m, TriMesh, rndstatos,
                        GForm("rndstato %d", i),
                        GForm("a=%.2f, b=%.2f, c=%.2f", a, b, c));
@@ -175,10 +173,10 @@ void tringula(Int_t mode=0)
 
     for (Int_t i=0; i<20; ++i)
     {
-      Float_t l1 = g_rnd.Uniform(0.4,    1.4),
-        l2 = g_rnd.Uniform(0,      0.5*l1),
-        w  = g_rnd.Uniform(0.5*l1, 1.2*l1),
-        h  = g_rnd.Uniform(0.5*l1, 1.2*l1);
+      Float_t l1 = gRandom->Uniform(0.4,    1.4),
+        l2 = gRandom->Uniform(0,      0.5*l1),
+        w  = gRandom->Uniform(0.5*l1, 1.2*l1),
+        h  = gRandom->Uniform(0.5*l1, 1.2*l1);
 
       CREATE_ADD_GLASS(m, TriMesh, rnddynos,
                        GForm("rndyno %d", i),
@@ -253,7 +251,6 @@ void tringula(Int_t mode=0)
   light_mod->SetFaceCullMode(GL_BACK);
 
   ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
-  tringula->SetPalette(pal);
   // tringula->SetRnrRay(true);
   tringula->SetDefStaMesh(stamesh);
   tringula->SetDefDynMesh(dynmesh);
@@ -285,7 +282,7 @@ void tringula(Int_t mode=0)
     dyn2->ref_trans().Move3LF(0.2, 0.01, 0.05);
     dyn2->ref_trans().RotateLF(1, 2, 0.4);
 
-    // Removed later, shields the dynos from random statos.
+    // Removed later, shields two test-dynos from random statos.
     sta1 = tringula->NewStatico("Statos Centrus");
     tmpdir->Add(sta1);
 
@@ -297,6 +294,7 @@ void tringula(Int_t mode=0)
 
   ASSIGN_ADD_GLASS(tricam, TringuCam, tringula, "TringuCam", 0);
   tricam->SetTringula(tringula);
+  tricam->SetPalette(pal);
   {
     ZTrans& trans = tricam->ref_trans();
 
@@ -312,28 +310,37 @@ void tringula(Int_t mode=0)
 
   // Fields
 
-  ASSIGN_ADD_GLASS(tmfield, TriMeshField, tricam, "TMField", 0);
-  tmfield->SetMesh(trimesh);
-  tmfield->ResizeToMesh();
-  tmfield->SetPalette(pal);
-  tmfield->FillByXYGaussBlobs();
-  tmfield->FindMinMaxField();
-  tmfield->SetMinValue(0);
-  tmfield->SetMaxValue(TMath::Ceil(tmfield->GetMaxValue()));
+  ASSIGN_ADD_GLASS(engfield, TriMeshField, tricam, "Energy Field", 0);
+  engfield->SetMesh(trimesh);
+  engfield->ResizeToMesh();
+  engfield->SetPalette(pal);
+  engfield->FillByXYGaussBlobs();
+  engfield->FindMinMaxField();
+  engfield->SetMinValue(0);
+  engfield->SetMaxValue(TMath::Ceil(engfield->GetMaxValue()));
 
-  tricam->SetCurField(tmfield);
-  tmfield->ColorizeTvor();
-  // Tringula is flat shaded by default, so we need triangle colors.
-  // This should be made an option or global var.
-  trimesh->GetTTvor()->GenerateTriangleColorsFromVertexColors();
+  ASSIGN_ADD_GLASS(matfield, TriMeshField, tricam, "Matter Field", 0);
+  matfield->SetMesh(trimesh);
+  matfield->ResizeToMesh();
+  matfield->SetPalette(pal);
+  matfield->FillByXYGaussBlobs();
+  matfield->FindMinMaxField();
+  matfield->SetMinValue(0);
+  matfield->SetMaxValue(TMath::Ceil(matfield->GetMaxValue()));
 
-  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "TMLightField", 0);
+  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "LightMap Field", 0);
   lightmap->SetMesh(trimesh);
   lightmap->ResizeToMesh();
   lightmap->SetLampPos(5, 5, 20);
   lightmap->SetPalette(pal);
   lightmap->CalculateLightField();
 
+  // tricam->SetLightField(lightmap);
+  tricam->SetAndApplyCurField(engfield);
+
+  // Tringula is flat shaded by default, so we need triangle colors.
+  // This should be made an option or global var.
+  trimesh->GetTTvor()->GenerateTriangleColorsFromVertexColors();
 
   /**************************************************************************/
   // Eventor & Operators
@@ -431,7 +438,7 @@ void tringula(Int_t mode=0)
   make_overlay();
   g_pupil->SetOverlay(overlay);
   tricam->SetOverlay(overlay);
-  tricam->SelectTopMenuByName("SimCtrl");
+  tricam->SelectTopMenuByName("MainMenu");
   tricam->SetMouseAction(TringuCam::MA_PickExtendios);
 
   /**************************************************************************/
@@ -575,10 +582,13 @@ void setup_sphere_outside()
   pssph->SetR(R);
 
   // Setup GTS surface.
-  gtsurf->GenerateSphere(4);
+  // gtsurf->GenerateSphere(4);
+  gtsurf->GenerateSphere(5);
   gtsurf->Rescale(R);
-  for (int i=0; i<5; ++i)
-    gtsurf->Legendrofy(16, 0.25, 1.5);
+  for (int i=0; i<5; ++i) {
+    //gtsurf->Legendrofy(16, 0.25, 1.5);
+    gtsurf->Legendrofy(24, 0.25, 1.25);
+  }
 
   // Setup trimesh
   trimesh->SetParaSurf(parasurf);
@@ -619,7 +629,7 @@ void setup_sphere_inside()
   tringula->SetMesh(trimesh);
 }
 
-float tweak(TRandom& rnd, float x)
+float tweak(TRandom* rnd, float x)
 {
   return x + rnd.Uniform(0.001, 0.002);
 }
@@ -639,9 +649,9 @@ void setup_torus_outside()
   gtsisomaker->SetValue(rm*rm);
 
   Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
-  gtsisomaker->SetXAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
-  gtsisomaker->SetYAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
-  gtsisomaker->SetZAxis(-tweak(g_rnd, rm), tweak(g_rnd, rm), ndivz);
+  gtsisomaker->SetXAxis(-tweak(gRandom, rS), tweak(gRandom, rS), ndiv);
+  gtsisomaker->SetYAxis(-tweak(gRandom, rS), tweak(gRandom, rS), ndiv);
+  gtsisomaker->SetZAxis(-tweak(gRandom, rm), tweak(gRandom, rm), ndivz);
   printf("making surface ...\n");
   gtsisomaker->MakeSurface();
   printf("coarsening ...\n");
@@ -679,9 +689,9 @@ void setup_torus_inside()
   gtsisomaker->SetValue(rm*rm);
 
   Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
-  gtsisomaker->SetXAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
-  gtsisomaker->SetYAxis(-tweak(g_rnd, rS), tweak(g_rnd, rS), ndiv);
-  gtsisomaker->SetZAxis(-tweak(g_rnd, rm), tweak(g_rnd, rm), ndivz);
+  gtsisomaker->SetXAxis(-tweak(gRandom, rS), tweak(gRandom, rS), ndiv);
+  gtsisomaker->SetYAxis(-tweak(gRandom, rS), tweak(gRandom, rS), ndiv);
+  gtsisomaker->SetZAxis(-tweak(gRandom, rm), tweak(gRandom, rm), ndivz);
   printf("making surface ...\n");
   gtsisomaker->MakeSurface();
   printf("coarsening ...\n");
@@ -767,27 +777,81 @@ void make_overlay()
   gs.SetOs(4, 4, 0);
 
   {
-    CREATE_ADD_GLASS(sim_ctrl, WGlWidget, overlay, "SimCtrl", 0);
+    CREATE_ADD_GLASS(main_menu, WGlWidget, overlay, "MainMenu", 0);
+
+    CREATE_ADD_GLASS(sim_ctrl, WGlButton, main_menu, "SimCtrl", 0);
+    gs.SetNode(sim_ctrl);
+    sim_ctrl->SetCbackAlpha(sim_ctrl);
+    sim_ctrl->SetCbackMethodName("MenuEnter");
+
     sim_ctrl->SetRnrElements(false);
-    //sim_ctrl->SetRnrMod(menufs);
-    //dd->SetMenuFrameStyle(menufs);
+    {
+      SGridStepper step(gs, true);
 
-    CREATE_ADD_GLASS(but1, WGlButton, sim_ctrl, "Suspend", 0);
-    gs.SetNodeAdvance(but1);
-    but1->SetCbackAlpha(tricam);
-    but1->SetCbackMethodName("Suspend");
+      CREATE_ADD_GLASS(but1, WGlButton, sim_ctrl, "Suspend", 0);
+      step.SetNodeAdvance(but1);
+      but1->SetCbackAlpha(tricam);
+      but1->SetCbackMethodName("Suspend");
 
-    CREATE_ADD_GLASS(but2, WGlButton, sim_ctrl, "Resume", 0);
-    gs.SetNodeAdvance(but2);
-    but2->SetCbackAlpha(tricam);
-    but2->SetCbackMethodName("Resume");
+      CREATE_ADD_GLASS(but2, WGlButton, sim_ctrl, "Resume", 0);
+      step.SetNodeAdvance(but2);
+      but2->SetCbackAlpha(tricam);
+      but2->SetCbackMethodName("Resume");
 
-    CREATE_ADD_GLASS(val1, WGlValuator, sim_ctrl, "Sleep", 0);
-    gs.SetNodeAdvance(val1);
-    val1->SetMin(1); val1->SetMax(1000);
-    val1->SetFormat("Sleep: %.0f");
-    val1->SetCbackAlpha(eventor);
-    val1->SetCbackMemberName("InterBeatMS");
+      CREATE_ADD_GLASS(val1, WGlValuator, sim_ctrl, "Sleep", 0);
+      step.SetNodeAdvance(val1);
+      val1->SetMin(1); val1->SetMax(1000);
+      val1->SetFormat("Sleep: %.0f");
+      val1->SetCbackAlpha(eventor);
+      val1->SetCbackMemberName("InterBeatMS");
+
+      CREATE_ADD_GLASS(back, WGlButton, sim_ctrl, " << ", 0);
+      step.SetNodeAdvance(back);
+      back->SetCbackAlpha(sim_ctrl);
+      back->SetCbackMethodName("MenuExit");
+    }
+    gs.Step();
+
+    CREATE_ADD_GLASS(ter_ctrl, WGlButton, main_menu, "TerrainCtrl", 0);
+    gs.SetNode(ter_ctrl);
+    ter_ctrl->SetCbackAlpha(ter_ctrl);
+    ter_ctrl->SetCbackMethodName("MenuEnter");
+
+    ter_ctrl->SetRnrElements(false);
+    {
+      SGridStepper step(gs, true);
+
+      CREATE_ADD_GLASS(but1, WGlButton, ter_ctrl, "Height", 0);
+      step.SetNodeAdvance(but1);
+      but1->SetCbackAlpha(tricam);
+      but1->SetCbackMethodName("ColorByTerrainProps");
+      but1->SetCbackValue(0);
+
+      CREATE_ADD_GLASS(but2, WGlButton, ter_ctrl, "Flatness", 0);
+      step.SetNodeAdvance(but2);
+      but2->SetCbackAlpha(tricam);
+      but2->SetCbackMethodName("ColorByTerrainProps");
+      but2->SetCbackValue(1);
+
+      CREATE_ADD_GLASS(but3, WGlButton, ter_ctrl, "Energy Field", 0);
+      step.SetNodeAdvance(but3);
+      but3->SetCbackAlpha(tricam);
+      but3->SetCbackMethodName("SetAndApplyCurField");
+      but3->SetCbackBeta(engfield);
+
+      CREATE_ADD_GLASS(but4, WGlButton, ter_ctrl, "Matter Field", 0);
+      step.SetNodeAdvance(but4);
+      but4->SetCbackAlpha(tricam);
+      but4->SetCbackMethodName("SetAndApplyCurField");
+      but4->SetCbackBeta(matfield);
+
+      CREATE_ADD_GLASS(back, WGlButton, ter_ctrl, " << ", 0);
+      step.SetNodeAdvance(back);
+      back->SetCbackAlpha(ter_ctrl);
+      back->SetCbackMethodName("MenuExit");
+    }
+    gs.Step();
+
   }
 
   gs.Reset();
@@ -840,12 +904,16 @@ void make_overlay()
     CREATE_ADD_GLASS(but2, WGlButton, stato_ctrl, "Connect Energy", "LensBeta");
     gs.SetNodeAdvance(but2);
     but2->SetCbackAlpha(tricam);
-    but2->SetCbackMethodName("PrepConnectStatosEnergy");
+    but2->SetCbackMethodName("PrepConnectStatos");
+    but2->SetCbackValue(0);
+    but2->SetCbackString("r2y");
 
     CREATE_ADD_GLASS(but3, WGlButton, stato_ctrl, "Connec Matter", "LensBeta");
     gs.SetNodeAdvance(but3);
     but3->SetCbackAlpha(tricam);
-    but3->SetCbackMethodName("PrepConnectStatosMatter");
+    but3->SetCbackMethodName("PrepConnectStatos");
+    but3->SetCbackValue(1);
+    but3->SetCbackString("coldsteel");
   }
 }
 
@@ -868,7 +936,7 @@ void sunrise(Float_t phi=45, Float_t dt=0.005, Int_t sleep=100)
     lightmap->SetupLampDir(tringula, t, phi);
     lightmap->CalculateLightField();
     tringula->ReadLock();
-    tmfield->ColorizeTvor();
+    tricam->GetCurField()->ColorizeTvor();
     lightmap->ModulateTvor();
     tringula->ReadUnlock();
     gSystem->Sleep(sleep);
