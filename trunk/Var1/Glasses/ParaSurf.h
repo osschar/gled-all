@@ -59,6 +59,9 @@ public:
 
   Float_t GetDeltaH() const { return mMaxH - mMinH; }
 
+  void GetMinFGH(Float_t fgh[3]) const { fgh[0] = mMinF; fgh[1] = mMinG; fgh[2] = mMinH; }
+  void GetMaxFGH(Float_t fgh[3]) const { fgh[0] = mMaxF; fgh[1] = mMaxG; fgh[2] = mMaxH; }
+
   virtual void SetupEdgePlanes() {}
 
   // !!! some/most of those should be abstract
