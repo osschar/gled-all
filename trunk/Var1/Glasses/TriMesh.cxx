@@ -21,15 +21,18 @@
 #include <Glasses/RectTerrain.h>
 #include <Glasses/GTSurf.h>
 #include <Glasses/ZImage.h>
+#include <Glasses/RGBAPalette.h>
 #include "TriMesh.c7"
 
 #include <GTS/GTS.h>
 
 #include <Opcode/Opcode.h>
 
+#include <TF3.h>
+
 #include <fstream>
 
-ClassImp(TriMesh)
+ClassImp(TriMesh);
 
 /**************************************************************************/
 
@@ -730,4 +733,195 @@ void TriMesh::AssertVertexConnections()
 
   if ((Int_t) mVDataVec.size() !=  mTTvor->mNVerts)
     BuildVertexConnections();
+}
+
+
+//==============================================================================
+// TriMesh colorizers
+//==============================================================================
+
+void TriMesh::ColorByCoord(RGBAPalette* pal, Int_t axis,
+                           Float_t fac, Float_t offset)
+{
+  static const Exc_t _eh("TriMesh::ColorByCoord ");
+
+  if (!pal)                 throw (_eh + "Palette argument null.");
+  if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
+  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+
+  TringTvor& TT = *mTTvor;
+  TT.AssertCols();
+  TT.AssertBoundingBox();
+  Float_t min = TT.mMinMaxBox[axis];
+  Float_t max = TT.mMinMaxBox[axis + 3];
+  Float_t dlt = max - min;
+
+  pal->SetMinFlt(min);
+  pal->SetMaxFlt(max);
+
+  Float_t* V = TT.Verts();
+  UChar_t* C = TT.Cols();
+  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4)
+    pal->ColorFromValue(min + (V[axis]-min)*fac + dlt*offset, C);
+
+  if (TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+void TriMesh::ColorByNormal(RGBAPalette* pal, Int_t axis,
+                            Float_t min, Float_t max)
+{
+  static const Exc_t _eh("TriMesh::ColorByNormal ");
+
+  if (!pal)                 throw (_eh + "Palette argument null.");
+  if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
+  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+
+  TringTvor& TT = *mTTvor;
+  TT.AssertCols();
+
+  pal->SetMinFlt(min);
+  pal->SetMaxFlt(max);
+
+  Float_t* N = TT.Norms();
+  UChar_t* C = TT.Cols();
+  for (Int_t i=0; i<TT.mNVerts; ++i, N+=3, C+=4)
+    pal->ColorFromValue(N[axis], C);
+
+  if (TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+/**************************************************************************/
+
+void TriMesh::ColorByParaSurfCoord(RGBAPalette* pal, Int_t axis,
+                                   Float_t fac, Float_t offset)
+{
+  static const Exc_t _eh("TriMesh::ColorByParaSurfCoord ");
+
+  if (!pal)                 throw (_eh + "Palette argument null.");
+  if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
+  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+  assert_parasurf(_eh);
+
+  Float_t  fgh[3];
+
+  TringTvor& TT = *mTTvor;
+  TT.AssertCols();
+
+  mParaSurf->GetMinFGH(fgh);
+  Float_t min = fgh[axis];
+  mParaSurf->GetMaxFGH(fgh);
+  Float_t max = fgh[axis];
+  Float_t dlt = max - min;
+
+  pal->SetMinFlt(min);
+  pal->SetMaxFlt(max);
+
+  Float_t* V = TT.Verts();
+  UChar_t* C = TT.Cols();
+  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4) {
+    mParaSurf->pos2fgh(V, fgh);
+    pal->ColorFromValue(min + (fgh[axis]-min)*fac + dlt*offset, C);
+  }
+
+  if (TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+void TriMesh::ColorByParaSurfNormal(RGBAPalette* pal, Int_t axis,
+                                    Float_t min, Float_t max)
+{
+  static const Exc_t _eh("TriMesh::ColorByParaSurfNormal ");
+
+  if (!pal)                 throw (_eh + "Palette argument null.");
+  if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
+  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+  assert_parasurf(_eh);
+
+  TringTvor& TT = *mTTvor;
+  TT.AssertCols();
+
+  pal->SetMinFlt(min);
+  pal->SetMaxFlt(max);
+
+  Float_t* V = TT.Verts();
+  Float_t* N = TT.Norms();
+  UChar_t* C = TT.Cols();
+  Float_t  fgh_dirs[3][3];
+  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, N+=3, C+=4) {
+    mParaSurf->pos2fghdir(V, fgh_dirs[0], fgh_dirs[1], fgh_dirs[2]);
+    Float_t dotp = N[0]*fgh_dirs[axis][0] + N[1]*fgh_dirs[axis][1] + N[2]*fgh_dirs[axis][2];
+    pal->ColorFromValue(dotp, C);
+  }
+
+  if (TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+/**************************************************************************/
+
+void TriMesh::ColorByCoordFormula(RGBAPalette* pal, const Text_t* formula,
+                                  Float_t min, Float_t max)
+{
+  static const Exc_t _eh("TriMesh::ColorByCoordFormula ");
+
+  if (!pal)    throw (_eh + "Palette argument null.");
+  if (!mTTvor) throw (_eh + "TTvor not initialized.");
+
+  TringTvor& TT = *mTTvor;
+  TT.AssertCols();
+  TT.AssertBoundingBox();
+  Float_t* bb = TT.mMinMaxBox;
+  TF3 tf3(GForm("TriMesh_CBCF_%d", GetSaturnID()), formula, 0, 0);
+  tf3.SetRange(bb[0], bb[3], bb[1], bb[4], bb[2], bb[5]);
+
+  pal->SetMinFlt(min);
+  pal->SetMaxFlt(max);
+
+  Float_t* V = TT.Verts();
+  UChar_t* C = TT.Cols();
+  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4)
+    pal->ColorFromValue((Float_t) tf3.Eval(V[0], V[1], V[2]), C);
+
+  if (TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
+}
+
+void TriMesh::ColorByNormalFormula(RGBAPalette* pal, const Text_t* formula,
+                                   Float_t min, Float_t max)
+{
+  static const Exc_t _eh("TriMesh::ColorByNormalFormula ");
+
+  if (!pal)    throw (_eh + "Palette argument null.");
+  if (!mTTvor) throw (_eh + "TTvor not initialized.");
+
+  TringTvor& TT = *mTTvor;
+  TT.AssertCols();
+
+  pal->SetMinFlt(min);
+  pal->SetMaxFlt(max);
+
+  TF3 tf3(GForm("TriMesh_CBNF_%d", GetSaturnID()), formula, 0, 0);
+  tf3.SetRange(-1, 1, -1, 1, -1, 1);
+
+  Float_t* N = TT.Norms();
+  UChar_t* C = TT.Cols();
+  for (Int_t i=0; i<TT.mNVerts; ++i, N+=3, C+=4)
+    pal->ColorFromValue((Float_t) tf3.Eval(N[0], N[1], N[2]), C);
+
+  if (TT.HasTringCols())
+    TT.GenerateTriangleColorsFromVertexColors();
+
+  StampReqTring(FID());
 }

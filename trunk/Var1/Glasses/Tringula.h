@@ -18,7 +18,6 @@
 class ZHashList;
 class ZVector;
 class RectTerrain;
-class RGBAPalette;
 class TringTvor;
 class TriMesh;
 class ParaSurf;
@@ -68,7 +67,6 @@ private:
 protected:
   ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{A}
   ZLink<TriMesh>     mMesh;         //  X{GS} L{A}
-  ZLink<RGBAPalette> mPalette;      //  X{GS} L{A}
   ZColor             mColor;        //  X{GSPT} 7 ColorButt()
   Bool_t             bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
   Bool_t             bLightMesh;    //  X{GST}  7 Bool()
@@ -129,16 +127,6 @@ public:
   virtual ~Tringula();
 
   virtual void AdEnlightenment();
-
-  // Color stuff
-
-  void ColorByCoord(Int_t axis=2, Float_t fac=1, Float_t offset=0); // X{E} 7 MCWButt(-join=>1)
-  void ColorByNormal(Int_t axis=2, Float_t min=-1, Float_t max=1);  // X{E} 7 MCWButt()
-
-  void ColorByCoordFormula (const Text_t* formula="z",
-                            Float_t min=0, Float_t max=10);         // X{E} 7 MCWButt(-join=>1)
-  void ColorByNormalFormula(const Text_t* formula="sqrt(x*x+y*y)",
-                            Float_t min=0, Float_t max=1);          // X{E} 7 MCWButt()
 
   // Collision stuff
 
