@@ -1,3 +1,16 @@
+2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WGlButton.cxx:
+	* Glasses/WGlButton.h:
+	* Rnr/GL/WGlButton_GL_Rnr.cxx:
+	Add optional Int_t and TString members that are passed as
+	arguments with the callback-MIR.
+
+	* Stones/SGridStepper.cxx:
+	* Stones/SGridStepper.h:
+	Add copy-like constructor that makes initialization of secondary
+	steppers cleaner.
+
 2008-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
