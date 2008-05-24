@@ -4,16 +4,10 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// Tringula
-//
-//
-
 #include "Tringula.h"
 #include <Glasses/ZHashList.h>
 #include <Glasses/ZVector.h>
 #include <Glasses/RectTerrain.h>
-#include <Glasses/RGBAPalette.h>
 #include <Glasses/ZImage.h>
 #include <Stones/TringTvor.h>
 #include "TriMesh.h"
@@ -30,7 +24,11 @@
 #include <Opcode/Opcode.h>
 
 #include <TMath.h>
-#include <TF3.h>
+
+//__________________________________________________________________________
+// Tringula
+//
+//
 
 ClassImp(Tringula);
 
@@ -93,124 +91,6 @@ void Tringula::AdEnlightenment()
     mQueen->CheckIn(l);
     SetFlyers(l);
   }
-}
-
-/**************************************************************************/
-
-void Tringula::ColorByCoord(Int_t axis, Float_t fac, Float_t offset)
-{
-  static const Exc_t _eh("Tringula::ColorByCoord ");
-
-  // missing check mesh, mesh->tvor
-  // should be detached?
-  // missing locks
-
-  if(axis < 0 || axis > 2)
-    throw(_eh + "illegal axis.");
-
-  assert_palette(_eh);
-
-  TringTvor* TT = mMesh->GetTTvor();
-  TT->AssertCols();
-  TT->AssertBoundingBox();
-  Float_t min = TT->mMinMaxBox[axis];
-  Float_t max = TT->mMinMaxBox[axis + 3];
-  Float_t dlt = max - min;
-  mPalette->SetMinFlt(min);
-  mPalette->SetMaxFlt(max);
-
-  Float_t* V = TT->Verts();
-  UChar_t* C = TT->Cols();
-  for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
-    mPalette->ColorFromValue(min + (V[axis]-min)*fac + dlt*offset, C);
-
-  if (TT->HasTringCols())
-    TT->GenerateTriangleColorsFromVertexColors();
-
-  StampReqTring(FID());
-}
-
-void Tringula::ColorByNormal(Int_t axis, Float_t min, Float_t max)
-{
-  static const Exc_t _eh("Tringula::ColorByNormal ");
-
-  // missing check mesh, mesh->tvor
-  // should be detached?
-  // missing locks
-
-  if(axis < 0 || axis > 2)
-    throw(_eh + "illegal axis.");
-
-  assert_palette(_eh);
-
-  TringTvor* TT = mMesh->GetTTvor();
-  TT->AssertCols();
-  TT->AssertBoundingBox();
-  mPalette->SetMinFlt(min);
-  mPalette->SetMaxFlt(max);
-
-  Float_t* N = TT->Norms();
-  UChar_t* C = TT->Cols();
-  for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
-    mPalette->ColorFromValue(N[axis], C);
-
-  if (TT->HasTringCols())
-    TT->GenerateTriangleColorsFromVertexColors();
-
-  StampReqTring(FID());
-}
-
-/**************************************************************************/
-
-void Tringula::ColorByCoordFormula(const Text_t* formula, Float_t min, Float_t max)
-{
-  static const Exc_t _eh("Tringula::ColorByCoordFormula ");
-
-  assert_palette(_eh);
-
-  TringTvor* TT = mMesh->GetTTvor();
-  TT->AssertCols();
-  TT->AssertBoundingBox();
-  Float_t* bb = TT->mMinMaxBox;
-  TF3 tf3(GForm("Tringula_CBCF_%d", GetSaturnID()), formula, 0, 0);
-  tf3.SetRange(bb[0], bb[3], bb[1], bb[4], bb[2], bb[5]);
-  mPalette->SetMinFlt(min);
-  mPalette->SetMaxFlt(max);
-
-  Float_t* V = TT->Verts();
-  UChar_t* C = TT->Cols();
-  for (Int_t i=0; i<TT->mNVerts; ++i, V+=3, C+=4)
-    mPalette->ColorFromValue((Float_t) tf3.Eval(V[0], V[1], V[2]), C);
-
-  if (TT->HasTringCols())
-    TT->GenerateTriangleColorsFromVertexColors();
-
-  StampReqTring(FID());
-}
-
-void Tringula::ColorByNormalFormula(const Text_t* formula, Float_t min, Float_t max)
-{
-  static const Exc_t _eh("Tringula::ColorByNormalFormula ");
-
-  assert_palette(_eh);
-
-  TringTvor* TT = mMesh->GetTTvor();
-  TT->AssertCols();
-  mPalette->SetMinFlt(min);
-  mPalette->SetMaxFlt(max);
-
-  TF3 tf3(GForm("Tringula_CBNF_%d", GetSaturnID()), formula, 0, 0);
-  tf3.SetRange(-1, 1, -1, 1, -1, 1);
-
-  Float_t* N = TT->Norms();
-  UChar_t* C = TT->Cols();
-  for (Int_t i=0; i<TT->mNVerts; ++i, N+=3, C+=4)
-    mPalette->ColorFromValue((Float_t) tf3.Eval(N[0], N[1], N[2]), C);
-
-  if (TT->HasTringCols())
-    TT->GenerateTriangleColorsFromVertexColors();
-
-  StampReqTring(FID());
 }
 
 /**************************************************************************/

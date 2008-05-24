@@ -14,6 +14,7 @@
 class ParaSurf;
 
 class ZImage;
+class RGBAPalette;
 class RectTerrain;
 class GTSurf;
 
@@ -40,7 +41,6 @@ public:
     {
       size_t operator()(const xx_edge& xx) const
       { size_t i = (xx.v1 << 16) + xx.v2; return i; }
-
     };
   };
 
@@ -105,7 +105,7 @@ private:
 
 protected:
   ZLink<ZImage>           mDefTexture; //  X{GS} L{}
-  ZLink<ParaSurf>         mParaSurf;   //  X{GS} L{}
+  ZLink<ParaSurf>         mParaSurf;   //  X{GS} L{A}
 
   TringTvor*              mTTvor;      //! X{gs}
 
@@ -130,6 +130,8 @@ protected:
                   Float_t x0, Float_t y0, Float_t z0,
                   Float_t a,  Float_t b,  Float_t c,
                   UChar_t cr, UChar_t cg, UChar_t cb, UChar_t ca);
+
+  EdgeData& find_edge(const VertexData& vd, Int_t v1, Int_t v2);
 
 public:
   TriMesh(const Text_t* n="TriMesh", const Text_t* t=0) :
@@ -174,22 +176,40 @@ public:
   void BuildVertexConnections();
   void AssertVertexConnections();
 
-  EdgeData& find_edge(const VertexData& vd, Int_t v1, Int_t v2)
-  {
-    for (Int_t i=0; i<vd.fNEdges; ++i)
-    {
-      EdgeData& ed = mEDataVec[vd.edge(i)];
-      if (ed.is_first(v1) ? ed.fV2 == v2 : ed.fV1 == v2)
-        return ed;
-    }
-    ZGlass* g=0; g->Print();
-    throw(Exc_t("Safertundhell ... edge not found."));
-  }
+
+  // Colorizers
+
+  void ColorByCoord (RGBAPalette* pal, Int_t axis=2,
+                     Float_t fac=1, Float_t offset=0); // X{E} C{1} 7 MCWButt(-join=>1)
+  void ColorByNormal(RGBAPalette* pal, Int_t axis=2,
+                     Float_t min=-1, Float_t max=1);   // X{E} C{1} 7 MCWButt()
+
+  void ColorByParaSurfCoord (RGBAPalette* pal, Int_t axis=2,
+                     Float_t fac=1, Float_t offset=0); // X{E} C{1} 7 MCWButt(-join=>1)
+  void ColorByParaSurfNormal(RGBAPalette* pal, Int_t axis=2,
+                     Float_t min=-1, Float_t max=1);   // X{E} C{1} 7 MCWButt()
+
+  void ColorByCoordFormula (RGBAPalette* pal, const Text_t* formula="z",
+                     Float_t min=0, Float_t max=10);   // X{E} C{1} 7 MCWButt(-join=>1)
+  void ColorByNormalFormula(RGBAPalette* pal, const Text_t* formula="sqrt(x*x+y*y)",
+                     Float_t min=0, Float_t max=1);    // X{E} C{1} 7 MCWButt()
 
 #include "TriMesh.h7"
-  ClassDef(TriMesh, 1)
+  ClassDef(TriMesh, 1);
 }; // endclass TriMesh
 
+
+inline TriMesh::EdgeData& TriMesh::find_edge(const VertexData& vd,
+                                             Int_t v1, Int_t v2)
+{
+  for (Int_t i=0; i<vd.fNEdges; ++i)
+  {
+    EdgeData& ed = mEDataVec[vd.edge(i)];
+    if (ed.is_first(v1) ? ed.fV2 == v2 : ed.fV1 == v2)
+      return ed;
+  }
+  throw (Exc_t("Safertundhell ... edge not found."));
+}
 
 inline bool operator==(const TriMesh::xx_edge& a, const TriMesh::xx_edge& b)
 { return a.v1 == b.v1 && a.v2 == b.v2; }
