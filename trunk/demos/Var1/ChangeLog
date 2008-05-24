@@ -1,3 +1,17 @@
+2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Create another field over terrain (energy .vs. matter, or sth).
+
+	Create new main-menu, put sim-str in as sub-menu. Add new sub-menu
+	for terrain coloration control.
+
+	Use gRandom for generation of random numbers.
+
+	For sphere_outside mode decreased relative scaling of higher
+	frequencies and increased triangulation order. It is more lively
+	this way.
+
 2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
