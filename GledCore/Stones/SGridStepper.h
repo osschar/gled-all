@@ -12,9 +12,15 @@ class ZNode;
 
 class SGridStepper : public TObject
 {
-  Int_t *ls[3], *ns[3];
 public:
   enum StepMode_e { SM_XYZ, SM_YXZ, SM_XZY };
+  
+protected:
+  Int_t *ls[3], *ns[3];
+
+  void _init_internals(StepMode_e mode);
+
+public:
   StepMode_e Mode;
 
   Int_t   nx, ny, nz;
@@ -23,10 +29,11 @@ public:
   Float_t Ox, Oy, Oz;
 
   SGridStepper(Int_t sm=SM_XYZ);
+  SGridStepper(const SGridStepper& s, Bool_t as_parent=false);
   virtual ~SGridStepper() {}
 
   void Reset();
-  void Subtract(SGridStepper& s);
+  void Subtract(const SGridStepper& s);
   void SetNs(Int_t nx, Int_t ny, Int_t nz=1)
   { Nx = nx; Ny = ny; Nz = nz; }
   void SetDs(Float_t dx, Float_t dy, Float_t dz=0)
@@ -40,7 +47,7 @@ public:
   void SetNode(ZNode* node);
   void SetNodeAdvance(ZNode* node);
 
-  ClassDef(SGridStepper, 1);
+  ClassDef(SGridStepper, 1); // Provides iteration over node positions of a rectangular grid.
 }; // endclass SGridStepper
 
 #endif

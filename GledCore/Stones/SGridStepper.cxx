@@ -7,14 +7,20 @@
 #include "SGridStepper.h"
 #include <Glasses/ZNode.h>
 
-//______________________________________________________________________
+//==============================================================================
 // SGridStepper
+//==============================================================================
+
+//______________________________________________________________________
 //
+// Provides iteration over node positions of a rectangular grid.
 
 ClassImp(SGridStepper);
 
-SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
+void SGridStepper::_init_internals(StepMode_e mode)
 {
+  Mode = mode;
+
   switch(Mode) {
   default:
   case SM_XYZ:
@@ -30,6 +36,11 @@ SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
     ns[0] = &nx; ns[1] = &nz; ns[2] = &ny;
     break;
   }
+}
+
+SGridStepper::SGridStepper(Int_t sm)
+{
+  _init_internals(StepMode_e(sm));
 
   nx = ny = nz = 0;
   Nx = Ny = Nz = 16;
@@ -37,16 +48,32 @@ SGridStepper::SGridStepper(Int_t sm) : Mode(StepMode_e(sm))
   Ox = Oy = Oz = 0;
 }
 
+SGridStepper::SGridStepper(const SGridStepper& s, Bool_t as_parent)
+{
+  _init_internals(s.Mode);
+
+  Nx = s.Nx; Ny = s.Ny; Nz = s.Nz;
+  Dx = s.Dx; Dy = s.Dy; Dz = s.Dz;
+
+  if (as_parent) {
+    nx = ny = nz = 0;
+    Ox = -s.nx*s.Dx; Oy = -s.ny*s.Dy; Oz = -s.nz*s.Dz;
+  } else {
+    nx = s.nx; ny = s.ny; nz = s.nz;
+    Ox = s.Ox; Oy = s.Oy; Oz = s.Oz;
+  }
+}
+
 void SGridStepper::Reset()
 {
   nx = ny = nz = 0;
 }
 
-void SGridStepper::Subtract(SGridStepper& s)
+void SGridStepper::Subtract(const SGridStepper& s)
 {
-  Ox = -(s.Ox + s.nx*s.Dx);
-  Oy = -(s.Oy + s.ny*s.Dy);
-  Oz = -(s.Oz + s.nz*s.Dz);
+  Ox -= s.nx*s.Dx;
+  Oy -= s.ny*s.Dy;
+  Oz -= s.nz*s.Dz;
 }
 /**************************************************************************/
 
