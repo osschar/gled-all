@@ -1,3 +1,32 @@
+2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ParaSurf.h:
+	Add functions GetMin/MaxFGH(Float_t fgh[3]).
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Moved functions ColorByCoord/Normal[Formula] from Tringula to
+	TriMesh.
+
+	Added functions ColorByParaSurfCoord/Normal to TriMesh.
+
+	Removed link-member RGBAPalette from Tringula.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	In FillByXYGaussBlobs() use gRandom instead of local TRandom(0).
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Clean-up the hack for two tube-types, use callback-arguments that
+	are now available from WGlButton to steer new-tube creation.
+
+	Added methods for terrain mesh colorization:
+	- void SetAndApplyCurField(TriMeshField* field);
+	- void ColorByTerrainProps(Int_t mode=0);
+
 2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Extendio.h:
