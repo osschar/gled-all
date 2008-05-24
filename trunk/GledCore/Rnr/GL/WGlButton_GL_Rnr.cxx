@@ -65,6 +65,8 @@ int WGlButton_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     if(mi == 0) return 0;
     ZMIR mir(*B.mCbackAlpha, *B.mCbackBeta);
     mi->ImprintMir(mir);
+    mir << B.mCbackValue;
+    mir << B.mCbackString;
     fImg->fEye->Send(mir);
 
     bBelowMouse = false;
