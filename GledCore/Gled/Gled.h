@@ -20,6 +20,7 @@ class Mountain;
 class Eye;
 
 class GCondition;
+class GThread;
 
 class Fl_SWM_Manager;
 class Fl_Window;
@@ -60,6 +61,7 @@ protected:
   TString	mRenderers;      // X{GS}
 
   GCondition*	mExitCondVar;
+  GThread*      mRintThread;     // X{g}
 
 public:
   Gled();

@@ -59,7 +59,8 @@ Gled::Gled() :
   mLoggingMutex (GMutex::recursive),
   mLogFile      (0),
   mOutFile      (0),
-  mExitCondVar  (0)
+  mExitCondVar  (0),
+  mRintThread   (0)
 {
   if(theOne) {
     cerr <<"Gled::Gled trying to instantiate another object ...\n";
@@ -681,28 +682,50 @@ void Gled::LoadMacro(const Text_t* mac)
 // Thread foos
 /**************************************************************************/
 
+#include <TSysEvtHandler.h>
+
+namespace
+{
+class GExceptionHandler : public TStdExceptionHandler
+{
+public:
+  GExceptionHandler() : TStdExceptionHandler() { Add(); }
+  virtual ~GExceptionHandler()                 { Remove(); }
+
+  virtual EStatus  Handle(std::exception& exc)
+  {
+    // Handle exceptions deriving from TEveException.
+
+    Exc_t* ex = dynamic_cast<Exc_t*>(&exc);
+    if (ex) {
+      cout <<"TRint runner caught exception: "<< ex << endl;
+      cout <<"TRint runner reentering event loop ...\n";
+      return kSEHandled;
+    } else {
+      cout <<"TRint runner caught std exception: "<< exc.what() <<endl;
+      return kSEProceed;
+    }
+  }
+};
+}
+
 void* Gled::TRint_runner_tl(TRint* gint)
 {
   // Runs the ROOT application. Ownership set to mSaturnInfo.
 
   GThread::setup_tsd(Gled::theOne->mSaturnInfo);
 
+  Gled::theOne->mRintThread = GThread::Self();
+
+  GExceptionHandler root_exc_handler;
+
   Gled::theOne->bRintRunning = true;
-  while(Gled::theOne->bRintRunning) {
-    // !!! Attempt to catch exceptions from root.
-    // !!! Does not work.
-    try {
-      gint->TApplication::Run(true);
-      Gled::theOne->bRintRunning = false;
-      cout << "Gint terminated ...\n";
-    }
-    catch(Exc_t& exc) {
-      cout <<"TRint runner caught exception: "<< exc << endl;
-      cout <<"TRint runner reentering event loop ...\n";
-    }
-  }
+  gint->TApplication::Run(true);
+  Gled::theOne->bRintRunning = false;
+  cout << "Gint terminated ...\n";
 
   if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
+  Gled::theOne->mRintThread = 0;
   GThread::Exit();
   return 0;
 }
