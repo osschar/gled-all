@@ -735,6 +735,92 @@ void TriMesh::AssertVertexConnections()
     BuildVertexConnections();
 }
 
+//******************************************************************************
+
+Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_t xyz_out[3],
+                                 Float_t* h_out, Int_t* triangle_idx)
+{
+  // Find world-point corresponding to the passed fgh coordinates and return it
+  // in the xyz_out array.
+  // Flag absolute_h determines how the input h-coordinate is interpreted and
+  // also what will be returned in h_out:
+  //   true  - h is absolute, h_out is relative to the surface;
+  //   false - h is relative to the surface, h_out is absolute h of .
+  // trianlge_idx (optional) is index of the triangle on the surface that was
+  // hit by the ray used to find the surface point. If you need vertex index as
+  // well, call 'Int_t FindClosestVertex(xyz_out, triangle_idx)'.
+  //
+  // Returns false if ray-mesh intersection fails.
+
+  static const Exc_t _eh("TriMesh::FindPointFromFGH ");
+
+  assert_parasurf(_eh);
+
+  Opcode::Point& pos = *(Opcode::Point*)xyz_out;
+  mParaSurf->fgh2pos(fgh, pos);
+
+  Opcode::RayCollider    RC;
+  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
+  RC.SetClosestHit(true);     // to keep the closes hit only
+  Opcode::CollisionFaces CF;
+  RC.SetDestination(&CF);
+
+  Opcode::Ray R;
+  Float_t ray_offset = mParaSurf->pos2hray(pos, R);
+
+  Int_t cs = RC.Collide(R, *mOPCModel);
+  if (cs && CF.GetNbFaces() == 1)
+  {
+      const Opcode::CollisionFace& cf = CF.GetFaces()[0];
+      if (absolute_h)
+      {
+        if (h_out) *h_out = cf.mDistance - ray_offset;
+      }
+      else
+      {
+        pos.TMac(R.mDir, cf.mDistance - ray_offset - fgh[2]);
+        if (h_out) *h_out = mParaSurf->GetMaxH() + mParaSurf->GetEpsilon() - cf.mDistance + fgh[2];
+      }
+      if (triangle_idx) *triangle_idx = cf.mFaceID;
+      return true;
+  }
+  else
+  {
+    printf("%sstatus=%s, nfaces=%d\n"
+           "  nbvt=%d, nprt=%d, ni=%d\n"
+           "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
+           _eh.Data(), cs ? "ok" : "failed", CF.GetNbFaces(),
+           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
+           R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
+    return false;
+  }
+}
+
+//******************************************************************************
+
+Int_t TriMesh::FindClosestVertex(Int_t triangle, const Float_t xyz[3],
+                                 Float_t* sqr_dist)
+{
+  // Find vertex of triangle that is closest to point given by xyz.
+  // If sqr_dist is passed, it is filled with square distance of the returned
+  // vertex.
+  // Trianlge index is not checked, neither is tvor's presence.
+
+  TringTvor& TT = *mTTvor;
+
+  Int_t  *t     = TT.Triangle(triangle);
+  Float_t minsq = TT.SqrDistanceToVertex(t[0], xyz);
+  Int_t   vi    = t[0];
+  for (int i=1; i<3; ++i) {
+    const Float_t d = TT.SqrDistanceToVertex(t[i], xyz);
+    if (d < minsq) {
+      minsq = d;
+      vi    = t[1];
+    }
+  }
+  if (sqr_dist) *sqr_dist = minsq;
+  return vi;
+}
 
 //==============================================================================
 // TriMesh colorizers
