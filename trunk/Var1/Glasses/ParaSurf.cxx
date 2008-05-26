@@ -4,11 +4,6 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// ParaSurf
-//
-//
-
 #include "ParaSurf.h"
 #include "TriMesh.h"
 #include "ParaSurf.c7"
@@ -19,6 +14,20 @@
 
 #include <TMath.h>
 #include <TRandom.h>
+
+//==============================================================================
+// ParaSurf
+//==============================================================================
+
+//__________________________________________________________________________
+//
+// Virtual base-class for describing the coordinate system of a 2D
+// parametric surface. The surface is described with two parameters
+// (f, g) and the third one accounts for distance in the normal
+// direction (h, height).
+//
+// Methods in this class allow for mapping between parametric (f,g,h)
+// space and world (x,y,z) space.
 
 ClassImp(ParaSurf);
 
@@ -89,6 +98,8 @@ void ParaSurf::RandomizeH(TriMesh* mesh,
   // Randomize vertex heights by fractional brownian rules.
   // Does random selection of vertex-pairs, number of edges visited in
   // each pass is estimated as 3 * Nvert.
+  // fg_chr_len - characteristic length in f,g direction
+  // h_chr_len  - characteristic length in h direction
 
   static const Exc_t _eh("ParaSurf::RandomizeH ");
 
@@ -116,6 +127,7 @@ void ParaSurf::RandomizeH(TriMesh* mesh,
     Int_t  *vs  = TT.Triangle( rnd.Integer(NT) );
     Int_t   v1  = vs[ rnd.Integer(3) ];
     Int_t   v2  = vs[ v1 < 2 ? v1 + 1 : 0 ];
+
     Point   n   = U[v1] + U[v2];  n.Normalize();
     Point   dx  = X[v2] - X[v1];
     Float_t odh = dx | n;

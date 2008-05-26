@@ -94,7 +94,7 @@ public:
   // Put fgh values into regular intervals.
   virtual void regularize_fg(Float_t* f);
 
-  // These two return a point ABOVE the surface (at maxH + eps)
+  // These all return point with h=0, which might not be above surface.
   virtual void random_fgh(TRandom& rnd, Float_t* f) = 0;
   virtual void random_pos(TRandom& rnd, Float_t* x);
   virtual void random_trans(TRandom& rnd, HTransF& t);
@@ -111,7 +111,7 @@ public:
   static Float_t U1Sub(Float_t a, Float_t b) { Float_t x = a - b; U1Wrap(x); return x; }
 
 #include "ParaSurf.h7"
-  ClassDef(ParaSurf, 1)
+  ClassDef(ParaSurf, 1); // Parametric surface - abstract base-class.
 }; // endclass ParaSurf
 
 
