@@ -48,7 +48,7 @@ public:
   virtual void random_pos(TRandom& rnd, Float_t* x);
 
 #include "PSSphere.h7"
-  ClassDef(PSSphere, 1)
+  ClassDef(PSSphere, 1); // Parametric-surface sphere.
 }; // endclass PSSphere
 
 

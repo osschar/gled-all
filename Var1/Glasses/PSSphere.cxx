@@ -4,8 +4,19 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
+#include "PSSphere.h"
+#include "PSSphere.c7"
+
+#include <Opcode/Opcode.h>
+
+#include <TMath.h>
+#include <TRandom.h>
+
+//==============================================================================
 // PSSphere
+//==============================================================================
+
+//__________________________________________________________________________
 //
 // Parametric sphere surface.
 // bInside ~ false: 'world' on outer surface, like a planet.
@@ -19,15 +30,6 @@
 //
 // f,g,h vectors form a right-handed ortho-normal base.
 // 'outside' -> 'inside' : { f -> -f, h -> -h. }
-
-
-#include "PSSphere.h"
-#include "PSSphere.c7"
-
-#include <Opcode/Opcode.h>
-
-#include <TMath.h>
-#include <TRandom.h>
 
 ClassImp(PSSphere);
 
