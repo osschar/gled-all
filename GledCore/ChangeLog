@@ -1,3 +1,18 @@
+2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Use sub-class of TStdExceptionHandler to handle gled exceptions
+	making it all the way to root's system loop.
+	Add member 'GThread* mRintThread' which I hoped would help me
+	somehow make the bastard exit its event-loop.
+
+	* gled.cxx:
+	* saturn.cxx:
+	Avoid the problem with uncaught exception in TSystem::Run() after
+	gled cancels the TRint thread. The temporary hack is just to skip
+	thread cancelation and call exit().
+
 2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WGlButton.cxx:
