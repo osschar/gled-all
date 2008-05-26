@@ -6,6 +6,7 @@
 
 #include "TriMeshField.h"
 #include <Glasses/TriMesh.h>
+#include <Glasses/ParaSurf.h>
 #include <Glasses/RGBAPalette.h>
 #include "TriMeshField.c7"
 
@@ -349,19 +350,21 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
 
 /**************************************************************************/
 
-namespace { struct GaussBlob { Float_t x, y, A, sgm, efc, nfc; }; }
+namespace { struct GaussBlob { Float_t x, y, z, A, sgm, efc; }; }
 
 
-void TriMeshField::FillByXYGaussBlobs(Int_t n_blobs,
-                                      Float_t     A_min, Float_t     A_max,
-                                      Float_t sigma_min, Float_t sigma_max,
-                                      Bool_t minmax_p,   Bool_t  recolor_p)
+void TriMeshField::FillByGaussBlobs(Int_t   n_blobs,
+                                    Float_t A_min,     Float_t A_max,
+                                    Float_t sigma_min, Float_t sigma_max,
+                                    Bool_t  minmax_p,  Bool_t  recolor_p)
 {
-  // Generate random gaussian blobs and initialize field with the
-  // sum of contributions from blobs.
+  // Generate random 3D gaussian blobs on the surface of the mesh and
+  // initialize field with the sum of contributions from all the blobs.
   // Should also have an option to add the field values to an existing
   // field.
   // gRandom is used for generation of the blob parameters.
+
+  // !!! This must be optimized once TriMesh::VisitVerticec() is written.
 
   static const Exc_t _eh("TriMeshField::FillByXYGaussBlobs ");
 
@@ -370,22 +373,19 @@ void TriMeshField::FillByXYGaussBlobs(Int_t n_blobs,
 
   TringTvor& TT = * mMesh->GetTTvor();
 
-  TT.AssertBoundingBox();
-  Float_t* bbox = TT.mMinMaxBox;
-
   vector<GaussBlob> blobs(n_blobs);
   {
+    Float_t fgh[3];
     for (Int_t i=0; i<n_blobs; ++i)
     {
       GaussBlob& B = blobs[i];
-      B.x   = gRandom->Uniform(bbox[0], bbox[3]);
-      B.y   = gRandom->Uniform(bbox[1], bbox[4]);
+      mMesh->GetParaSurf()->random_fgh(*gRandom, fgh);
+      mMesh->FindPointFromFGH(fgh, false, &B.x);
       B.A   = gRandom->Uniform(A_min, A_max);
       B.sgm = gRandom->Uniform(sigma_min, sigma_max);
       B.efc = -0.5f/(B.sgm*B.sgm);       // exp-factor
-      B.nfc =  B.A /(2.50662827f*B.sgm); // norm-factor, sqrt(2pi)=2.50662827463100024
-      // printf("Blob %3d: x,y=(%f,%f); A,sgm=(%f,%f); efc,nfc=(%f,%f)\n",
-      //        i, B.x, B.y, B.A, B.sgm, B.efc, B.nfc);
+      // printf("Blob %3d: x,y=(%f,%f); A,sgm=(%f,%f); efc=(%f)\n",
+      //        i, B.x, B.y, B.A, B.sgm, B.efc);
     }
   }
 
@@ -396,9 +396,8 @@ void TriMeshField::FillByXYGaussBlobs(Int_t n_blobs,
     for (Int_t i=0; i<n_blobs; ++i)
     {
       GaussBlob& B = blobs[i];
-      Float_t dx = V[0] - B.x;
-      Float_t dy = V[1] - B.y;
-      F[0] += B.nfc * expf((dx*dx + dy*dy)*B.efc);
+      const Float_t dx = V[0] - B.x, dy = V[1] - B.y, dz = V[2] - B.z;
+      F[0] += expf((dx*dx + dy*dy + dz*dz)*B.efc);
     }
   }
 
