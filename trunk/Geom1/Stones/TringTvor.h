@@ -142,7 +142,7 @@ public:
 
   void GenerateVertexNormals();
 
-  // Intermediate structures
+  // Helper function for determining vertex connectivity
   void  FindTrianglesPerVertex(vector<Int_t>* trings_per_vert);
   Int_t FindNeighboursPerVertex(vector<Int_t>* neighbours);
 
@@ -153,7 +153,10 @@ public:
   // Export
   void ExportPovMesh(ostream& o, Bool_t smoothp=false);
 
-  ClassDef(TringTvor, 1);
+  // FUQ (frequently used queries)
+  Float_t SqrDistanceToVertex(Int_t vi, const Float_t p[3]);
+
+  ClassDef(TringTvor, 1); // Tvor of triangles, a triangle mesh.
 }; // endclass TringTvor
 
 
@@ -175,5 +178,13 @@ inline Bool_t TringTvor::TriangleOtherVertices(Int_t t, Int_t v,
   return false;
 }
 
+inline Float_t TringTvor::SqrDistanceToVertex(Int_t vi, const Float_t p[3])
+{
+  // Returns square distance from vertex vi to fiven point p.
+
+  const Float_t* v = Vertex(vi);
+  const Float_t dx = p[0] - v[0], dy = p[1] - v[1], dz = p[2] - v[2];
+  return dx*dx + dy*dy + dz*dz;
+}
 
 #endif
