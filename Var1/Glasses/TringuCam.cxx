@@ -239,7 +239,9 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 	ext = mTringula->PickExtendios();
       }
 
-      printf("picked %s, state=0x%x\n", ext ? ext->GetName() : "<none>", ev.fState);
+      if (bMouseVerbose)
+        printf("TringuCam::MouseDown picked %s, state=0x%x\n",
+               ext ? ext->GetName() : "<none>", ev.fState);
 
       if (ev.fState & FL_CTRL)
       {
@@ -347,8 +349,8 @@ void TringuCam::CalculateMouseRayVectors()
 void TringuCam::MouseRayCollide()
 {
   Opcode::Ray ray;
-  mMouseRayPos.GetXYZ((Float_t*)&ray.mOrig.x);
-  mMouseRayDir.GetXYZ((Float_t*)&ray.mDir .x);
+  mMouseRayPos.GetXYZ(ray.mOrig);
+  mMouseRayDir.GetXYZ(ray.mDir);
   ray.mDir *= mRayLength;
 
   Bool_t status = mRayColl.Collide(ray, *mTringula->GetMesh()->GetOPCModel());
