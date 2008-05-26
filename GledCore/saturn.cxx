@@ -26,12 +26,8 @@
 #include <errno.h>
 #include <signal.h>
 
-VoidFuncPtr_t initfuncs[] = { 0 };
-
 TRint*		gint;
 Gled*		gled;
-
-TROOT root("Root", "ROOT of GLED", initfuncs);
 
 /**************************************************************************/
 
@@ -131,12 +127,17 @@ int main(int argc, char **argv)
   gled_exit.Wait();
   gled_exit.Unlock();
   if(gled->GetRintRunning()) {
-    app_thread.Cancel();
     gint->Terminate(0);
+    // It seems ROOT's thread does not like to be canceled anymore as it
+    // exits with an uncought, unknown exception.
+    // app_thread.Cancel();
+    // Tried this, but it didn't wake up the event-loop.
+    // gSystem->AddTimer(new TTimer());
   } else {
     Getlinem(kCleanUp, 0);
   }
-  app_thread.Join();
+  // Don't wait ... see above.
+  // app_thread.Join();
 
   delete gint;
   gled->StopLogging();
