@@ -1028,7 +1028,7 @@ Bool_t Tringula::place_on_terrain(Dynamico* D)
   RC.SetDestination(&CF);
 
   HTransF & trans = D->ref_trans();
-  Opcode::Point& pos   = * (Opcode::Point*) trans.PtrPos();
+  Opcode::Point& pos = * (Opcode::Point*) trans.PtrPos();
   Opcode::Ray R;
   Float_t ray_offset = mParaSurf->pos2hray(pos, R);
 
