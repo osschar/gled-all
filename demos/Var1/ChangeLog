@@ -1,3 +1,14 @@
+2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Rename "Matter" to "Metal" for connections and fields.
+
+	Add Exit button.
+
+	Make torus_outside mode somewhat more hilly, leave more triangles
+	in the terrain mesh when coarsening it from parametric
+	triangulation.
+
 2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

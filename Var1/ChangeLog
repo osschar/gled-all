@@ -1,3 +1,28 @@
+2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Add some docs.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added functions:
+	Bool_t FindPointFromFGH(const Float_t fgh[3], ...);
+	Int_t  FindClosestVertex(Int_t triangle, const Float_t xyz[3],...);
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	Rename FillByXYGaussBlobs() to FillByGaussBlobs() and fix it.
+	Before it was really just using x and y coordinates in scene space.
+	Now it generates the blob positions by using parametric surface
+	f,g coordinates and is thus suitable for any topology.
+	
+	* Glasses/TringuCam.cxx:
+	* Glasses/Tringula.cxx:
+	Minor changes.
+
 2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ParaSurf.h:
