@@ -36,7 +36,7 @@ ZVector*      rnddynos = 0;
 Scene*        overlay  = 0;
 
 TriMeshField* engfield = 0;
-TriMeshField* matfield = 0;
+TriMeshField* metfield = 0;
 RectTerrain * terrain  = 0;
 GTSurf*       gtsurf   = 0;
 GTSRetriangulator* gtsretring  = 0;
@@ -60,7 +60,7 @@ const Text_t* trimesh_layout = "ZGlass(Name,Title[22]):TriMesh(M[8],Surf[8],COM,
 
 void tringula(Int_t mode=0)
 {
-  gRandom = new TRandom3(0);
+  gRandom = new TRandom3(0); // Seed 0 means seed with TUUID.
 
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Var1");
@@ -314,19 +314,15 @@ void tringula(Int_t mode=0)
   engfield->SetMesh(trimesh);
   engfield->ResizeToMesh();
   engfield->SetPalette(pal);
-  engfield->FillByXYGaussBlobs();
+  engfield->FillByGaussBlobs();
   engfield->FindMinMaxField();
-  engfield->SetMinValue(0);
-  engfield->SetMaxValue(TMath::Ceil(engfield->GetMaxValue()));
 
-  ASSIGN_ADD_GLASS(matfield, TriMeshField, tricam, "Matter Field", 0);
-  matfield->SetMesh(trimesh);
-  matfield->ResizeToMesh();
-  matfield->SetPalette(pal);
-  matfield->FillByXYGaussBlobs();
-  matfield->FindMinMaxField();
-  matfield->SetMinValue(0);
-  matfield->SetMaxValue(TMath::Ceil(matfield->GetMaxValue()));
+  ASSIGN_ADD_GLASS(metfield, TriMeshField, tricam, "Metal Field", 0);
+  metfield->SetMesh(trimesh);
+  metfield->ResizeToMesh();
+  metfield->SetPalette(pal);
+  metfield->FillByGaussBlobs();
+  metfield->FindMinMaxField();
 
   ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "LightMap Field", 0);
   lightmap->SetMesh(trimesh);
@@ -631,7 +627,7 @@ void setup_sphere_inside()
 
 float tweak(TRandom* rnd, float x)
 {
-  return x + rnd.Uniform(0.001, 0.002);
+  return x + rnd->Uniform(0.001, 0.002);
 }
 
 void setup_torus_outside()
@@ -648,20 +644,20 @@ void setup_torus_outside()
   gtsisomaker->SetFormula(Form("(%f - sqrt(x^2 + y^2))^2 + z^2", rM));
   gtsisomaker->SetValue(rm*rm);
 
-  Int_t ndiv = 25, ndivz = 8; // TMath::Nint(ndiv*rS/rm);
+  Int_t ndiv = 50, ndivz = 16; // TMath::Nint(ndiv*rS/rm);
   gtsisomaker->SetXAxis(-tweak(gRandom, rS), tweak(gRandom, rS), ndiv);
   gtsisomaker->SetYAxis(-tweak(gRandom, rS), tweak(gRandom, rS), ndiv);
   gtsisomaker->SetZAxis(-tweak(gRandom, rm), tweak(gRandom, rm), ndivz);
   printf("making surface ...\n");
   gtsisomaker->MakeSurface();
   printf("coarsening ...\n");
-  gtsretring->SetStopNumber(2000); gtsretring->Coarsen();
+  gtsretring->SetStopNumber(10000); gtsretring->Coarsen();
   printf("done\n");
 
   // Setup trimesh
   trimesh->SetParaSurf(parasurf);
   trimesh->ImportGTSurf(gtsurf);
-  pstor->RandomizeH(trimesh, 20, 2, 0.7);
+  pstor->RandomizeH(trimesh, 20, 2, 0.5);
   trimesh->StdSurfacePostImport();
   trimesh->GenerateVertexNormals();
   trimesh->GenerateTriangleNormals();
@@ -809,6 +805,13 @@ void make_overlay()
       step.SetNodeAdvance(back);
       back->SetCbackAlpha(sim_ctrl);
       back->SetCbackMethodName("MenuExit");
+
+      CREATE_ADD_GLASS(exit_but, WGlButton, sim_ctrl, "Exit", 0);
+      step.SetNode(exit_but);
+      exit_but->MoveLF(1, 40);
+      exit_but->SetCbackAlpha(exit_but);
+      exit_but->SetCbackMethodName("ExitGled");
+
     }
     gs.Step();
 
@@ -839,11 +842,11 @@ void make_overlay()
       but3->SetCbackMethodName("SetAndApplyCurField");
       but3->SetCbackBeta(engfield);
 
-      CREATE_ADD_GLASS(but4, WGlButton, ter_ctrl, "Matter Field", 0);
+      CREATE_ADD_GLASS(but4, WGlButton, ter_ctrl, "Metal Field", 0);
       step.SetNodeAdvance(but4);
       but4->SetCbackAlpha(tricam);
       but4->SetCbackMethodName("SetAndApplyCurField");
-      but4->SetCbackBeta(matfield);
+      but4->SetCbackBeta(metfield);
 
       CREATE_ADD_GLASS(back, WGlButton, ter_ctrl, " << ", 0);
       step.SetNodeAdvance(back);
@@ -908,7 +911,7 @@ void make_overlay()
     but2->SetCbackValue(0);
     but2->SetCbackString("r2y");
 
-    CREATE_ADD_GLASS(but3, WGlButton, stato_ctrl, "Connec Matter", "LensBeta");
+    CREATE_ADD_GLASS(but3, WGlButton, stato_ctrl, "Connect Metal", "LensBeta");
     gs.SetNodeAdvance(but3);
     but3->SetCbackAlpha(tricam);
     but3->SetCbackMethodName("PrepConnectStatos");
