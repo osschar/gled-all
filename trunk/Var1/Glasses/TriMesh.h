@@ -18,7 +18,8 @@ class RGBAPalette;
 class RectTerrain;
 class GTSurf;
 
-namespace Opcode {
+namespace Opcode
+{
 class Model;
 class MeshInterface;
 class AABB;
@@ -176,8 +177,13 @@ public:
   void BuildVertexConnections();
   void AssertVertexConnections();
 
+  Bool_t FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_t xyz_out[3],
+                          Float_t* h_out=0, Int_t* triangle_idx=0);
+  // Could also have FindPointFromXYZ(...);
 
-  // Colorizers
+  Int_t FindClosestVertex(Int_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
+
+  // Colorizers 
 
   void ColorByCoord (RGBAPalette* pal, Int_t axis=2,
                      Float_t fac=1, Float_t offset=0); // X{E} C{1} 7 MCWButt(-join=>1)
