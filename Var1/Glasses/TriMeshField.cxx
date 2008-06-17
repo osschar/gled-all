@@ -115,6 +115,8 @@ inline Float_t std_val_3d(Float_t* F) { return sqrtf(F[0]*F[0] + F[1]*F[1] + F[2
 
 void TriMeshField::FindMinMaxField()
 {
+  // Find min/max field values.
+
   static const Exc_t _eh("TriMeshField::FindMinMaxField ");
 
   if (mNVerts <= 0)
@@ -175,6 +177,76 @@ void TriMeshField::FindMinMaxField()
           F += mDim;
           for (Int_t i=1; i<mNVerts; ++i, F+=mDim)
             check_min_max((Float_t) tf3.Eval(F[0], F[1], F[2]));
+          break;
+        default:
+          throw(_eh + "unsupported dimension.");
+          break;
+      }
+    }
+  }
+
+  Stamp(FID());
+}
+
+void TriMeshField::UpdateMinMaxField(set<Int_t> vertices)
+{
+  // Iterate over specified vertices and update global min/max values.
+
+  static const Exc_t _eh("TriMeshField::ParitallyFindMinMaxField ");
+
+  if (mNVerts <= 0)
+  {
+    mMinValue = mMaxValue = 0;
+  }
+  else
+  {
+    set<Int_t>::iterator i   = vertices.begin();
+    set<Int_t>::iterator end = vertices.end();
+
+    if (mFormula.IsNull())
+    {
+      switch (mDim)
+      {
+        case 1:
+          for ( ; i != end; ++i)
+            check_min_max(std_val_1d(FVec(*i)));
+          break;
+        case 2:
+          for ( ; i != end; ++i)
+            check_min_max(std_val_2d(FVec(*i)));
+          break;
+        case 3:
+          for ( ; i != end; ++i)
+            check_min_max(std_val_3d(FVec(*i)));
+          break;
+        default:
+          throw(_eh + "unsupported dimension.");
+          break;
+      }
+    }
+    else
+    {
+      TF3 tf3(GForm("TriMeshField_CT_%d", GetSaturnID()), mFormula.Data(), 0, 0);
+
+      switch (mDim)
+      {
+        case 1:
+          for ( ; i != end; ++i) {
+            Float_t* F = FVec(*i);
+            check_min_max((Float_t) tf3.Eval(F[0]));
+          }
+          break;
+        case 2:
+          for ( ; i != end; ++i) {
+            Float_t* F = FVec(*i);
+            check_min_max((Float_t) tf3.Eval(F[0], F[1]));
+          }
+          break;
+        case 3:
+          for ( ; i != end; ++i) {
+            Float_t* F = FVec(*i);
+            check_min_max((Float_t) tf3.Eval(F[0], F[1], F[2]));
+          }
           break;
         default:
           throw(_eh + "unsupported dimension.");
@@ -350,59 +422,91 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
 
 /**************************************************************************/
 
-namespace { struct GaussBlob { Float_t x, y, z, A, sgm, efc; }; }
+namespace {
 
+struct GaussBlob { Float_t x, y, z, A, sgm, efc; };
 
-void TriMeshField::FillByGaussBlobs(Int_t   n_blobs,
-                                    Float_t A_min,     Float_t A_max,
-                                    Float_t sigma_min, Float_t sigma_max,
-                                    Bool_t  minmax_p,  Bool_t  recolor_p)
+struct GaussSprayer : public TriMesh::VertexVisitorMaxDist
+{
+  TriMeshField *mField;
+  Float_t       mA, mExpFac;
+
+  GaussSprayer(TriMesh* m, const Float_t origin[3], Float_t max_dist,
+              TriMeshField* mf, Float_t a, Float_t exp_fac) :
+    TriMesh::VertexVisitorMaxDist(m, origin, max_dist),
+    mField (mf),
+    mA     (a),
+    mExpFac(exp_fac)
+  {}
+  virtual ~GaussSprayer() {}
+
+  virtual Bool_t VisitVertex(Int_t vertex)
+  {
+    if (TriMesh::VertexVisitorMaxDist::VisitVertex(vertex))
+    {
+      mField->F(vertex) += mA * expf(mExpFac*mLastDistSqr);
+      return kTRUE;
+    }
+    else
+    {
+      return kFALSE;
+    }
+  }
+};
+
+}
+
+void TriMeshField::FillByGaussBlobs(Bool_t  reset_field, Int_t   n_blobs,
+                                    Float_t A_min,       Float_t A_max,
+                                    Float_t sigma_min,   Float_t sigma_max,
+                                    Bool_t  minmax_p,    Bool_t  recolor_p)
 {
   // Generate random 3D gaussian blobs on the surface of the mesh and
   // initialize field with the sum of contributions from all the blobs.
-  // Should also have an option to add the field values to an existing
-  // field.
+  //
   // gRandom is used for generation of the blob parameters.
-
-  // !!! This must be optimized once TriMesh::VisitVerticec() is written.
 
   static const Exc_t _eh("TriMeshField::FillByXYGaussBlobs ");
 
-  ResizeToMesh(1);
-  SetField(0);
-
-  TringTvor& TT = * mMesh->GetTTvor();
-
-  vector<GaussBlob> blobs(n_blobs);
+  if (reset_field)
   {
-    Float_t fgh[3];
-    for (Int_t i=0; i<n_blobs; ++i)
-    {
-      GaussBlob& B = blobs[i];
-      mMesh->GetParaSurf()->random_fgh(*gRandom, fgh);
-      mMesh->FindPointFromFGH(fgh, false, &B.x);
-      B.A   = gRandom->Uniform(A_min, A_max);
-      B.sgm = gRandom->Uniform(sigma_min, sigma_max);
-      B.efc = -0.5f/(B.sgm*B.sgm);       // exp-factor
-      // printf("Blob %3d: x,y=(%f,%f); A,sgm=(%f,%f); efc=(%f)\n",
-      //        i, B.x, B.y, B.A, B.sgm, B.efc);
-    }
+    ResizeToMesh(1);
+    SetField(0);
   }
 
-  Float_t *V = TT.Verts();
-  Float_t *F = FVec();
-  for (Int_t v=0; v<mNVerts; ++v, V+=3, ++F)
+  set<Int_t> all_changed;
+
+  Float_t fgh[3], h_out;
+  Int_t   triangle, vertex;
+  for (Int_t i=0; i<n_blobs; ++i)
   {
-    for (Int_t i=0; i<n_blobs; ++i)
-    {
-      GaussBlob& B = blobs[i];
-      const Float_t dx = V[0] - B.x, dy = V[1] - B.y, dz = V[2] - B.z;
-      F[0] += expf((dx*dx + dy*dy + dz*dz)*B.efc);
-    }
+    GaussBlob B;
+    B.A   = gRandom->Uniform(A_min, A_max);
+    B.sgm = gRandom->Uniform(sigma_min, sigma_max);
+    B.efc = -0.5f/(B.sgm*B.sgm);       // exp-factor
+    //printf("Blob %3d: x,y,z=(%f,%f,%f); A,sgm=(%f,%f); efc=(%f)\n",
+    //       i, B.x, B.y, B.z, B.A, B.sgm, B.efc);
+
+    mMesh->GetParaSurf()->random_fgh(*gRandom, fgh);
+    mMesh->FindPointFromFGH(fgh, false, &B.x, &h_out, &triangle);
+    vertex = mMesh->FindClosestVertex(triangle, &B.x);
+
+    GaussSprayer gs(*mMesh, &B.x, 3*B.sgm, this, B.A, B.efc);
+
+    set<Int_t> visited;
+    mMesh->VisitVertices(vertex, gs, visited, all_changed);
   }
 
-  if (minmax_p)  FindMinMaxField();
-  if (recolor_p) ColorizeTvor();
+  if (reset_field)
+  {
+    if (minmax_p)  FindMinMaxField();
+    if (recolor_p) ColorizeTvor();
+  }
+  else
+  {
+    if (minmax_p)  UpdateMinMaxField(all_changed);
+    if (recolor_p) PartiallyColorizeTvor(all_changed);
+  }
 }
 
 /**************************************************************************/

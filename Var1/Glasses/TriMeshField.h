@@ -57,14 +57,15 @@ public:
   void SetField(Float_t c0, Float_t c1, Float_t c2);
 
   void FindMinMaxField();  // X{E} 7 MCWButt()
+  void UpdateMinMaxField(set<Int_t> vertices);
 
   void ColorizeTvor(Bool_t regen_tring_cols=true);  // X{E} 7 MCWButt()
   void PartiallyColorizeTvor(set<Int_t> vertices, Bool_t regen_tring_cols=true);
 
-  void FillByGaussBlobs(Int_t   n_blobs=40,
-                        Float_t A_min=5,       Float_t A_max=20,
-                        Float_t sigma_min=2,    Float_t sigma_max=10,
-                        Bool_t  minmax_p=false, Bool_t  recolor_p=false); // X{E} 7 MCWButt()
+  void FillByGaussBlobs(Bool_t  reset_field=true, Int_t   n_blobs=40,
+                        Float_t A_min=5,          Float_t A_max=20,
+                        Float_t sigma_min=2,      Float_t sigma_max=10,
+                        Bool_t  minmax_p=false,   Bool_t  recolor_p=false); // X{E} 7 MCWButt()
 
   void Diffuse(Float_t diff_const=1, Float_t dt=0.1,
                Bool_t limit_df=false); // X{E} 7 MCWButt()
