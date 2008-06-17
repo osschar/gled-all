@@ -85,7 +85,9 @@ depend:: ${ALL_DEPS} ${DEPEND_TGTS}
 	@touch .depend_done
 
 ifdef DEPEND_DONE
+ifeq ($(filter clean distclean, ${MAKECMDGOALS}),)
 -include ${ALL_DEPS}
+endif
 endif
 
 # Cleaners
