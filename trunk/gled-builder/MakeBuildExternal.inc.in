@@ -47,7 +47,13 @@ else
 ECHO:=@echo
 endif
 
-include make-config.inc
+ifeq ($(filter clean distclean, ${MAKECMDGOALS}),)
+  include make-config.inc
+else
+  ifneq ($(wildcard unpack),)
+    TARDIR := $(shell cat unpack)
+  endif
+endif
 
 ########################################################################
 # Common rules
@@ -71,9 +77,9 @@ show-pkg:
 
 unpack:
 	${ECHO} -U- Unpacking ${PACKAGE}, tar-file ${SRCTARFILE}
-	${MUTE} rm -rf ${TARDIR}
+	${MUTE} rm -rf ${TARDIR} unpack
 	${MUTE} tar xzf ${CACHE_DIR}/${SRCTARFILE}
-	${MUTE} touch unpack
+	${MUTE} echo ${TARDIR} > unpack
 
 # configure
 
@@ -109,7 +115,9 @@ install:
 
 clean:
 	${ECHO} -X- Cleaning  ${PACKAGE}
+ifdef TARDIR
 	${MUTE} rm -fr ${TARDIR}
+endif
 	${MUTE} rm -f  unpack configure build install
 
 distclean: clean

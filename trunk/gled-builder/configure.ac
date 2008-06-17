@@ -51,7 +51,7 @@ AC_ARG_CONF_VAR([CACHE_DIR],
 
 AC_ARG_CONF_VAR([CACHE_URL],
                 [remote source package cache],
-		[rsync://ftp.gled.org/\${RELEASE}/required-software/source])
+		[rsync://rsync.gled.org/cache/\${RELEASE}])
 
 
 AC_PROG_CPP

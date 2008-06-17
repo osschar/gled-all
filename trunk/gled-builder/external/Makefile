@@ -1,14 +1,20 @@
-PACKAGES := root fltk fltk-mt lcms DevIL gts openal freealut
+PACKAGES := root fltk fltk-mt DevIL gts openal freealut
 
-.PHONY: ${PACKAGES}
+.PHONY: ${PACKAGES} all all-but-root
+
+# Currently disabled packages:
+#
+# lcms - there was really no need for it.
+# DevIL:    lcms
+
 
 all: ${PACKAGES}
+
+all-but-root: $(filter-out root, ${PACKAGES})
 
 # Package dependencies
 
 fltk-mt:  fltk
-
-DevIL:    lcms
 
 freealut: openal
 
