@@ -20,7 +20,7 @@ setup_package($package);
 my $cppfl = "-I\${PREFIX}/include";
 my $cfl   = "-O2 -fPIC";
 my $ldfl  = "-L\${PREFIX}/lib";
-if ($CC eq 'gcc' and CC_MAJOR == 4 and CC_MINOR >= 2) {
+if ($CC eq 'gcc' and $CC_MAJOR == 4 and $CC_MINOR >= 2) {
   $cfl .= " -fgnu89-inline";
 }
 if ($DISTRO_VENDOR eq 'gentoo') {
