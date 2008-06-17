@@ -426,10 +426,54 @@ void TringuCam::add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv,
   }
 }
 
+namespace
+{
+struct FieldSprayer : public TriMesh::VertexVisitorMaxDist
+{
+  TringuCam* mTriCam;
+  Float_t    mValue;
+  Float_t    mFullRadius;
+  Float_t    mFracFactor;
+
+  FieldSprayer(TriMesh* m, const Float_t origin[3], Float_t max_dist,
+               TringuCam* tricam, Float_t value) :
+    VertexVisitorMaxDist(m, origin, max_dist),
+    mTriCam     (tricam),
+    mValue      (value),
+    mFullRadius (tricam->GetActionRadius()*tricam->GetActRadFract()),
+    mFracFactor (1.0f / (mTriCam->GetActionRadius() - mFullRadius))
+  {}
+  virtual ~FieldSprayer() {}
+
+  virtual Bool_t VisitVertex(Int_t vertex)
+  {
+    if (TriMesh::VertexVisitorMaxDist::VisitVertex(vertex))
+    {
+      Float_t dist   = TMath::Sqrt(mLastDistSqr);
+      Float_t value  = mValue;
+      if (dist > mFullRadius)
+        value *= (1 - (dist - mFullRadius))*mFracFactor;
+
+      mTriCam->GetCurField()->F(vertex) += mValue;
+
+      return kTRUE;
+    }
+    else
+    {
+      return kFALSE;
+    }
+  }
+};
+}
+
 void TringuCam::AddField(Float_t value)
 {
-  set<Int_t> vv, cv; // visited/changed vertices
-  add_field_visit_vertex(vv, cv, mCollVertex, value);
+  FieldSprayer sprayer(mTringula->GetMesh(), mCollPoint, mActionRadius,
+                       this, value);
+  set<Int_t>   vv, cv; // visited/changed vertices
+
+  mTringula->GetMesh()->VisitVertices(mCollVertex, sprayer, vv, cv);
+
   if (!cv.empty())
   {
     if (mLightField == 0)
