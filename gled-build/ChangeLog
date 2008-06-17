@@ -1,3 +1,8 @@
+2008-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_targets.inc:
+	Do not include the depenecy files for clean, distclean targets.
+
 2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:

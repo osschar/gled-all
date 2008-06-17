@@ -1,3 +1,22 @@
+2008-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add inner public structure VertexVisitor (and its sub-class
+	VertexVisitorMaxDist) that together with a new member-function
+	VisitVertices() allow for somewhat painless interation over
+	vertices with custom acceptance condition and operation performed
+	for each vertex.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	Use TriMesh::VisitVertices() for FillByGaussBlobs().
+	Add method UpdateMinMaxField(set<Int_t> vertices) allowing update
+	of global min/max values from specified vertices only.
+
+	* Glasses/TringuCam.cxx:
+	Use TriMesh::VisitVertices() for field spraying.
+
 2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PSSphere.cxx:
