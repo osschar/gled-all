@@ -145,11 +145,8 @@ FNORD
 sub download_package {
   my $pkg = shift;
 
-  die "Package download not supported yet. Called for package $pkg.";
-
-  # should run something like:
-  # (cd cache-dir; rsync -av cache-url/$pkg-\* .)
-  # recreate package list
+  system_or_die("cd $CACHE_DIR; rsync -av $CACHE_URL/$pkg-*.tar.gz . 1>&2");
+  @FILES_IN_CACHE_DIR = slurp_dir("$CACHE_DIR");
 }
 
 sub deduce_tardir_name {

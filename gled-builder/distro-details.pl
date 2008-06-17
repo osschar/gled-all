@@ -23,6 +23,9 @@ sub check_linux
     if ($r =~ /fedora/i) {
       $name = "fedora";
     }
+    elsif ($r =~ /scientific linux cern/i) {
+      $name = "slc";
+    }
     else {
       $name = "unknown";
     }
