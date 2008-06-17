@@ -822,6 +822,52 @@ Int_t TriMesh::FindClosestVertex(Int_t triangle, const Float_t xyz[3],
   return vi;
 }
 
+//******************************************************************************
+
+Int_t TriMesh::VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
+                             set<Int_t>& visited_vertices,
+                             set<Int_t>& accepted_vertices)
+{
+  // Visits vertex by calling VertexVisitor::VisitVertex(vertex). If
+  // this returns true, the neighbouring vertices are visited in order
+  // specified in the vertex edge-array.
+  //
+  // Set visited_vertices holds already visited vertices, they will
+  // not be visited twice.
+  //
+  // Set accepted_vertices holds the verices for which the visitor
+  // returned true.
+  //
+  // Returns the maximum depth of recursion.
+
+  Int_t max_depth = 0;
+
+  visited_vertices.insert(vertex);
+
+  if (vertex_visitor.VisitVertex(vertex))
+  {
+    accepted_vertices.insert(vertex);
+
+    const VertexData& vd = mVDataVec[vertex];
+    for (Int_t e = 0; e < vd.n_edges(); ++e)
+    {
+      Int_t next_vertex = mEDataVec[vd.edge(e)].other_vertex(vertex);
+
+      if (next_vertex >= 0 &&
+          visited_vertices.find(next_vertex) == visited_vertices.end())
+      {
+        Int_t depth = VisitVertices(next_vertex, vertex_visitor,
+                                    visited_vertices, accepted_vertices);
+        if (depth > max_depth)
+          max_depth = depth;
+      }
+    }
+    ++max_depth;
+  }
+
+  return max_depth;
+}
+
 //==============================================================================
 // TriMesh colorizers
 //==============================================================================
@@ -1010,4 +1056,29 @@ void TriMesh::ColorByNormalFormula(RGBAPalette* pal, const Text_t* formula,
     TT.GenerateTriangleColorsFromVertexColors();
 
   StampReqTring(FID());
+}
+
+
+//==============================================================================
+// TriMesh::VertexVisitorMaxDist
+//==============================================================================
+
+TriMesh::VertexVisitorMaxDist::
+VertexVisitorMaxDist(TriMesh* m, const Float_t origin[3], Float_t max_dist) :
+  VertexVisitor(m),
+  mMaxDistSqr(max_dist*max_dist),
+  mLastDistSqr(-1)
+{
+  mOrigin[0] = origin[0]; mOrigin[1] = origin[1]; mOrigin[2] = origin[2];
+}
+
+Bool_t TriMesh::VertexVisitorMaxDist::VisitVertex(Int_t vertex)
+{
+  Float_t* v = mMesh->GetTTvor()->Vertex(vertex);
+  Float_t  d[3];
+  d[0] = v[0] - mOrigin[0];
+  d[1] = v[1] - mOrigin[1];
+  d[2] = v[2] - mOrigin[2];
+  mLastDistSqr = d[0]*d[0] + d[1]*d[1] + d[2]*d[2];
+  return (mLastDistSqr <= mMaxDistSqr);
 }

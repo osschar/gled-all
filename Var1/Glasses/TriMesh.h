@@ -101,6 +101,27 @@ public:
     void insert_edge(Int_t ei) { fEdgeArr[fNEdges++] = ei; }
   };
 
+  struct VertexVisitor
+  {
+    TriMesh* mMesh;
+
+    VertexVisitor(TriMesh* m) : mMesh(m) {}
+    virtual ~VertexVisitor() {}
+
+    virtual Bool_t VisitVertex(Int_t vertex) = 0;
+  };
+
+  struct VertexVisitorMaxDist : public VertexVisitor
+  {
+    Float_t mOrigin[3];
+    Float_t mMaxDistSqr;
+    Float_t mLastDistSqr;
+
+    VertexVisitorMaxDist(TriMesh* m, const Float_t origin[3], Float_t max_dist);
+
+    virtual Bool_t VisitVertex(Int_t vertex);
+  };
+
 private:
   void _init();
 
@@ -179,9 +200,12 @@ public:
 
   Bool_t FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_t xyz_out[3],
                           Float_t* h_out=0, Int_t* triangle_idx=0);
-  // Could also have FindPointFromXYZ(...);
 
-  Int_t FindClosestVertex(Int_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
+  Int_t  FindClosestVertex(Int_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
+
+  Int_t  VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
+                       set<Int_t>& visited_vertices,
+                       set<Int_t>& accepted_vertices);
 
   // Colorizers 
 
