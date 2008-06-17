@@ -22,7 +22,7 @@ FNORD
 
 target('install', <<"FNORD");
 make install
-(cd \${PREFIX}/include; ln -s . lcms)
+(cd \${PREFIX}/include; rm -rf lcms; ln -s . lcms)
 FNORD
 
 use_defaults_for_remaining_targets();
