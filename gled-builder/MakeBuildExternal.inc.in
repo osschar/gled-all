@@ -65,7 +65,7 @@ make-config.inc: ${TOPDIR}/GledBuildExternal.pm
 make-config.inc: ${TOPDIR}/MakeBuildExternal.inc
 make-config.inc: ${PACKAGE}.pl
 	${ECHO} -M- Creating platform specific make-config.inc for ${PACKAGE}
-	${MUTE} ${PACKAGE}.pl > $@ || (rm -f $@ && exit 1)
+	${MUTE} ./${PACKAGE}.pl > $@ || (rm -f $@ && exit 1)
 
 show-pkg:
 	@echo "Package ${PACKAGE}, version ${VERSION}"
