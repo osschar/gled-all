@@ -49,6 +49,12 @@ sub check_linux
   }
 }
 
+sub check_windows
+{
+  $vendor = "Microsoft";
+  ($name, $version) = `cmd /c ver` =~
+     m/windows\s+([^[]+?)\s+\[version\s+([\d\.]+)/i;
+}
 
 ########################################################################
 # main
@@ -59,11 +65,14 @@ $os = shift;
 if ($os =~ /linux-gnu/)
 {
   check_linux();
-  break;
+}
+elsif ($os =~ /cygwin/)
+{
+  check_windows();
 }
 else
 {
-  die "unknown os"
+  die "unknown os '$os'"
 }
 
 print <<"FNORD"

@@ -6,8 +6,11 @@ if ($cc =~ /gcc/) {
   $ver = `$cc -dumpversion`;
   chomp $ver;
 }
+elsif ($cc =~ /cl/) {
+  ($ver) = `$cc /help 2>&1 | head -n 1` =~ m/version\s+([\d\.]+)/i;
+}
 else {
-  die "unknown compiler";
+  die "unknown compiler '$cc'";
 }
 
 split /\./, $ver;
