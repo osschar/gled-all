@@ -31,8 +31,8 @@ data-transfers and file-sharing.
 =back
 
 
-
 =cut========================================================================
+
 
 =head1 Introduction
 
@@ -42,7 +42,7 @@ They are accessed by:
 
 =over list
 
-=item \greedhome and \gridworld servers;
+=item \greedhome and \greedworld servers;
 
 =item VO's participating in \greedhome;
 
