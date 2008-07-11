@@ -1,0 +1,528 @@
+=head1 Document id
+
+=head2 Title
+
+Task-list for \greedworld prototype
+
+=head2 Author
+
+Matevz Tadel
+
+=head2 Date
+
+21.6.2008
+
+
+=cut========================================================================
+
+
+=head1 Introduction
+
+
+Current implementation of \greedworld in \gled is at the stage of a
+medium-level, limited-scope, technology demo. While it was somehow
+possible to drag it all this way up single-handedly, it is impossible
+to continue the development without active engagement of several
+people. In particular, the core features of the existing framework
+need to be expanded and most of the higher-level features require
+further development. So, ideally, a developer would take over one of
+these features (or more) and at the same time partake in the design and
+extension of the underlaying framework.
+
+In this document, focus is set on tasks related to rendering, world
+creation, world mechanics and user interaction -- in short, to
+game-oriented aspects of \greedworld. Server-client data-separation
+and data-exchange are not on the table yet: \gled provides mechanisms for
+that and it's up to me to provide the first prototype. Nevertheless,
+some of the tasks described here require the server-client
+architecture to be specified and will thus also help in its
+clarification.
+
+First, one posssible vision of the prototype is presented in a
+relatively short and dry manner. Its purpose is not to be a definitive guide,
+it's rather an attempt at helping the reader to get a feel for what
+could be achieved and to form his own vision, maybe entirely
+different from the presented one. 
+
+Next section is a catalogue of game/engine components, their current
+status and their possible extensions, described as ideas or as tasks,
+if the things seem relatively obvious. If you have another idea, or a
+specific interest in one of the fields described in \greed manifesto,
+you are more than welcome to come forward with it.
+
+All of the described tasks require basic knowledge of C++, some
+understaning of the L<\root|http://root.cern.ch/> system and
+wilingness to learn L<\gled|http://www.gled.org/>.  The documentation
+for \gled is somewhat rudimentary (an implementation paper and a
+quick-start guide). But, for a one-developer project, writing
+documentation somewhat defies the purpose. If you want to get on-board
+in a specific area, I'll be glad to provide guidence and write the
+most sorely missing docs as my first priority. GNU/linux is currently
+the only supported platform. Windows and MacOSX support is planned.
+
+
+=cut========================================================================
+
+
+=head1 A vision of \greedworld prototype 
+
+
+[ Read \greed manifesto, in particular description of \greed-words in
+section 2. ]
+
+The \greedworld prototype is a minimal implementation of ideas
+presented in \greed manifesto. Focus is set on getting the things
+going, on building the base the will make the full, persistent \greed
+universe a more likely possibility.
+
+This document will, I hope, serve as a basis for first
+discussions about how to really structure the prototype elements and
+how to get it done reasonably fast. Therefore, I will try to describe it as
+plainly as possible, defining a couple of terms that I found
+useful while thinking about \greedworld.
+
+Anyway ... I'm beginning to realize that describing a game prototype
+requires some discipline. The problem is that one is at the same time
+trying to explain what happens within the game code and,
+simultaneously, how the game is seen by the user, how elements of the
+game are mapped via the user-interface, or, simply, how the games
+looks and feels. I will try to take the middle road, describing the
+game as a rule based system.
+
+
+
+=cut------------------------------------------------------------------------
+
+=head2 General description
+
+On the highest level there is a set of solar systems. Each solar
+system is driven by a set of computers organized in a hierarhic
+server-client system. Travel between solar systems is possible but not
+common.
+
+Solar systems are further populated with planets, moons, asteroids,
+comets and all that. Their surfaces will not be overly compex or
+structured, unless somebody walks in with an incredibly scalable
+terrain engine. Realistic solar-systems tend to be mostly empty - it
+seems reasonable to consider also less conventional celestial
+arrangements. The same holds also for movement and distribution of
+solar systems (Henon-Heiles potential with repulsive core).
+
+Large colonization mother-ships are being flinged from Earth into
+these solar systems (say, by using Higgs-field inudced worm-holes or
+teleporters). Control and communication link between Earth and the
+ship remains open and a user can exercise control over the
+mother-ship, its sub-systems and units that it has on board.
+
+=over enum
+
+=item Energy generators, propulsion systems with basic hyperdrive
+capabilites.
+
+=item Basic resource processing, resource routing and fabrication
+stations.
+
+=item Some planetary landers / transporters.
+
+=item Some exploration vessels and vehicles.
+
+=item Some land / space construction units.
+
+=back
+
+With this starting-kit a player engages in exploration of surrounding
+space to discover B<natural resources> that are distributed throughout
+space but normally clustered near solar and planetary bodies. They
+represent the intrinsic value of some region of space and determine
+its strategic importance. A resource is anything that can be converted
+into something useful, e.g., hydrogen, carbon, oxygen, water, methane,
+silicon, uranium, various ores, bio-matter, etc. When location of the
+resources is known, player sends out construction units to build
+B<resource acquisition infrastructure>.
+
+=over enum
+
+=item B<Resource extraction units>, like mining bots, scoopers and
+harvesters, operate in some resource-rich region and perform the first
+stage of separation of resources from the environment.
+
+=item B<Resource processing plants> process and purify raw resources
+and convert them into B<juiceware> -- a common term for B<raw materials>,
+B<chemicals> and B<fuels>. Each plant can handle several inputs and
+outputs at the same time but is limited with the combined throughput.
+
+=item B<Resource depots>. Can be part of a processing plant, a
+separate unit or part of a larger unit, like mother-ship. Each depot
+has certain capacity.
+
+=back
+
+Processing plants are connected to their inputs and outputs via
+B<matter transfer links> - quantum devices allowing cheap
+teleportative streaming of homogeneous media at short distances.
+
+Juiceware is consumed for further construction and for fabrication of
+derived goods.
+
+=over enum
+
+=item B<Infrastructure> -- mines, processing plants, factories,
+teleportation/routing stations, orbital stations -- built by
+B<construction units>.
+
+=item B<Techware> -- engines, vehicles, space-ships, equipment and
+devices -- built in B<fabrication plants>.
+
+=back
+
+Construction and fabrication will in principle require blueprints (but
+let us drop this from the prototype).
+
+Construction units and fabrication plants are connected with
+processing plants and depots via matter and energy transfer links.
+
+The acquired resources, raw-materials and goods can be used for
+support or extension of existing infrastructure or for further
+exploration and colonization.
+
+In \greed manifesto there is a lot of talk about simulation of human
+population and the role of NPC specialists in R&D activities of a
+colony. I decided to completely drop this aspect from the prototype:
+there are no humans on the other side, it is just technology,
+automatons and robots. All R&D activities are assumed to take place in
+the real world and the results are sent to the colonies via their
+communication links.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Juiceware, where it comes from and where it goes
+
+=over enum
+
+=item B<Hydrogen>
+
+I<Sources:> scooping of stars and gas-giants, electrolysis of water,
+bio-production.
+
+I<Consumers:> fusion reactors.
+
+=item B<Uranium>
+
+I<Sources:> mining of planets, moons, and asteroids.
+
+I<Consumers:> fission reactors.
+
+=item B<Metal>
+
+I<Sources:> mining.
+
+I<Consumers:> building units for all construction, fabrication
+plants for production of most techware.
+
+=item B<Rare metal>
+
+I<Sources:> mining.
+
+I<Consumers:> fabrication plants for production of fancier stuff, like
+electronic equipment and quantum devices.
+
+=item B<Super-heavy elements>
+
+I<Sources:> processing plant equipped with a low-energy particle
+accelerator, requires also uranium and rare metal.
+
+I<Consumers:> operation of gravity-manipulation devices and hyper-drive
+engines.
+
+=item B<Energy>
+
+I<Sources:> fusion plant (requires hydrogen), fission plant (requires
+uranium).
+
+I<Consumers:> everything that does something.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Resource and juicware processing
+
+Processing plants take as input natural resources and juiceware and
+produce juicware as output.
+
+Juiceware quantities are determined by mass and by volume (gasses) or
+by density (liquids and solids).
+
+=over enum
+
+=item Resource extraction units and buildings:
+
+=over enum
+
+=item Maximum extraction speed per juice.
+
+=item Maximum output bandwith.
+
+=item Range of extraction per juice.
+
+=back
+
+
+=item Processing plants:
+
+=over enum
+
+=item Number of input/output matter transfer links, their spatial
+range and bandwidth.
+
+=item Capacity of internal depots.
+
+=item Maximum output bandwidth for each juice.
+
+=back
+
+=item Depots:
+
+=over enum
+
+=item Capacity per juice type.
+
+=back
+
+=back
+
+Each matter transfer link connects a processing plant with one unit
+or depot and allows transfer of a single resource or juice.
+
+User controls:
+
+=over enum
+
+=item connections to acquisition units and depots
+
+=item ongoing process and their priorities
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Fabrication plants
+
+Products of fabrication are actual objects, determined by number, mass
+and volume.
+
+Fabrication plant characteristics:
+
+=over enum
+
+=item Juiceware input bandwidth -- determines production speed.
+
+=item Number of production lines.
+
+=item Installed/available blueprints.
+
+=back
+
+User controls production-lines, assigning the active blueprint to each
+of them.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Comm device
+
+Quantum communication device -- B<q-comm device> -- is a fictitious
+interface between a user and its units. Initially, a single q-comm
+device is available, integrated with the mother ship, allowing control
+over all units and facilities.
+
+Additional q-comm devices can be built and assigned to any number of
+units. The q-comm link access can then be granted to another user, thus
+allowing unit-sharing, delegation of tasks and cooperation.
+
+This should be relatively expensive, maybe even requiring a monthly
+research credits fee.
+
+=cut------------------------------------------------------------------------
+
+=head2 Units
+
+Stuff that moves around and does something.
+
+=head3 Characteristics of all units
+
+=over enum
+
+=item maximum speed / acceleration
+
+=item range and bandwidth of matter / energy transfer links
+
+=item internal storage / depots
+
+=item shield / health status, or something like this
+
+=item some sort of weapon
+
+=back
+
+
+=head3 Unit separation by task
+
+=over enum
+
+=item exploration units -- detection range per juice
+
+=item resource-extraction units -- discussed under L<"Resource and
+juicware processing">.
+
+=item transport units -- nothing special, but have large depot capacity
+
+=item construction units -- construction speed
+
+=item military units -- additional weapons, shields
+
+=back
+
+
+=head3 Unit sepratation by medium where they operate
+
+=over enum
+
+=item land units -- max terrain tilt
+
+=item space units -- propulsion system, warp capability
+
+=back
+
+
+=head3 Control of units
+
+=over enum
+
+=item B<Direct control> -- manipulate unit directly, giving it commands
+where to go and what to do. For some units, like space-ships and
+tanks, this could also mean operating the engines and control systems
+in first-person view.
+
+=item B<Task control> -- manipulate some semi-intelligent control agent
+that further steers the unit. The agent is typically given a task
+and region on which this task should be pursued. One agent can control
+several units.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+
+=head2 Mega-units
+
+Mega-units can encompass processing plants, fabrication plants and
+depots. Other units and techware can be stationed inside. Usually that
+would be a space-station, a large space-ship (like mother-ship) or a
+military installation.
+
+Buildings and units within a mega-unit are simulated independently.
+
+Each mega-unit has a hull, an arbitrary mesh defining the extent of
+the unit. Either side of the hull can be used for placement of
+buildings and smaller units can be placed there to crawl about.
+
+Central B<energy bus> is embedded in the hull and structure of a
+mega-unit. Energy-bus is a fictitous device that allows free energy
+transfer between hosted facilities and units. So, one could imagine,
+that fusion and fission reactors are connected as energy producers in
+the center of the structure and processing plants, fabrication plants,
+warp engines and shield devices are connected as consumers.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Research and development
+
+As said earlier, this aspect of the game will not make it into the
+prototype. But this would be the gist of any persistent world, so let
+us investigate the possibilities just a little. In short, the role of
+R&D is to improve existing processes and blueprints as well as to
+invent new technologies and products. Let us introduce four categories
+of such activities:
+
+=over enum
+
+=item Basic research - leads to discovery of new scineces and
+technologies including fusion among previously unrelated sciences and
+technologies.
+
+=item Applicative research - improvement of existing technologies and
+creation of conceptual designs.
+
+=item Engineering research - using technologies to produce or improve
+blueprints, thus improving the overall capabilities of techware.
+
+=item Engineering practice - using blueprints to build techware as
+well as to upgrade and fix existing one.
+
+=back
+
+Points 3. and 4. from the above list could be trivially simulated
+with research credit spending by the player, without the need of
+introducing humans into the other side of the game.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Conclusion of prototype vision
+
+Well, this degraded a little, but I really prefer to write code than
+English text about non-existing code. The intention here was to
+structure the problem space and say how the prototype could function
+and be at least somewhat engaging. Feel free to fill the gaps to your
+liking and to expand the proto-ideas described here. And let me know ...
+
+
+=cut========================================================================
+
+=head1 Current status of code and possible tasks
+
+The division of this section follows decomposition of engine
+components and game code.
+
+=head2 Rendering
+
+=head2 Terrain
+
+=head2 Unit movement on terrain
+
+=head2 Resource distribution and representation
+
+=head2 Entities for resource processing and enity production
+
+=head2 Space representation - solar/galactic maps
+
+=head2 Semi-automatic generation of solar-systems
+
+=head2 Unit movement through space
+
+=head2 User interaction layer
+
+
+=cut========================================================================
+
+
+=head1 Retroduction
+
+
+As promised, the number and extent of tasks in the list looks somewhat
+forbidding. It is obvious that the \greedworld prototype will not
+include all of these things, at least not in their full scope. People
+who join the project, their interests and capacity, will determine the
+direction of the actual development and the accent of the final
+outcome.
+
+If nobody shows up in about a year I'll slowly give up on the
+big-scale project and descope it tremendously, keeping only the
+aspects that made me start working on \gled and then, later, on
+\greed.
