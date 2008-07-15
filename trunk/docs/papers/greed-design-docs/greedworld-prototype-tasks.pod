@@ -417,7 +417,6 @@ several units.
 
 =cut------------------------------------------------------------------------
 
-
 =head2 Mega-units
 
 Mega-units can encompass processing plants, fabrication plants and
@@ -483,30 +482,526 @@ and be at least somewhat engaging. Feel free to fill the gaps to your
 liking and to expand the proto-ideas described here. And let me know ...
 
 
+
 =cut========================================================================
+
 
 =head1 Current status of code and possible tasks
 
-The division of this section follows decomposition of engine
-components and game code.
+
+The topics in this section deal with subsystems and components of the
+game engine and with algorithms for world creation. Some of these
+issues overlap or depend on one another. Also, the descriptions
+are relatively terse -- I can provide more details if somebody is
+interested.
+
+Eventually read [Tadel-GledIHSCM].
+
+
+=head2 \gled crash course
+
+This should help to relating the tasks to existing code.
+
+=over enum
+
+=item \gled is, essentially, an object management framework.  Classes
+of these objects can be divided, by the role they play in \gled, into
+the following categories:
+
+=over enum
+
+=item B<Glasses> -- classes of objects that can be shared throughout a
+\gled cluster and execute \gled method-invocation requests (I<MIR>,
+\gled's RPC). They can be put into containers and be pointed to by
+other objects via I<links> (glass-members that serve as
+smart-pointers).
+
+Base-class for all glasses is C<ZGlass>. Instances of glasses are
+called I<lenses>.
+
+Dictionaries are generated for glasses, so you can call their methods
+via the interpreter and run CINT macros for their creation and
+configuraton.
+
+=item B<Stones> -- classes of serializable objects with dictionaries
+(if you know ROOT: stones are derived from C<TObject>) and usually
+serve as data containers. They can be glass data-members or appear as
+arguments in glass member-functions.
+
+=item B<Views> -- classes of objects that represent a lens in some
+way, their abstract base class is C<A_View>. There are two main
+sub-types of views:
+
+=over enum
+
+=item Classes using FLTK widgets -- browsers and containers are
+handwritten, object-view elements are auto-generated.
+
+=item GL-rendering classes -- handwritten, optional (classes can use
+base-class renderers).
+
+=back
+
+=back
+
+=item \gled modules are called B<libsets>. Each libset is composed of
+three shared libraries: base (Glasses/, Stones/), GUI (Views/) and GL
+renderers (C<Rnr/GL/>). Base classes of \gled and the implementation
+of \gled itself is in libset C<GledCore>. \greedworld demo is mostly
+implemented in libset C<Var1> and requires the following libsets:
+C<Geom1> (geometric primitive classes), C<GTS> (interface to GNU
+Triangulated Surfaces library) and C<Audio1> (interface to
+OpenAL, not yet used). All libsets require C<GledCore>.
+
+=back
+
+Class names are given in the following notation:
+
+  Libset/Category/ClassName
+
+That's also where they are in the source-tree (usually, sometimes
+several classes share the same file).
+
+
+=cut------------------------------------------------------------------------
 
 =head2 Rendering
 
+=head3 Status
+
+\gled has a relatively flexible high-level rendering
+infrastructure. Initial goal was to support both OpenGL and POVRay
+rendering but so far only GL sub-infrastructure has been
+implemented. Object hierarchy is mapped automatically into a parallel
+structure of object renderers. Rendering classes have to be written
+manually. Arbitrary state-objects can be attached into the renderer
+graph -- rendering classes can query this state and act accordingly.
+This gives the rendering process a very large degree of flexibility
+and configurability. Object picking is implemented via
+GL-selection. Overlay rendering and overlay event-handling is
+supported.
+
+However, \gled's renderer-graph is not a scene-graph. Nodes do not
+have any bounding-box information and the renderer graph is blindly
+traversed during each draw-operation.
+
+One option out of this is to import an external scene-graph/rendering
+library into the \gled rendering pipeline. Thus \gled would offer the
+high-level rendering support and low-level rendering of the game
+objects would be performed by an optimized scene-graph library.
+
+=head3 Tasks
+
+=over enum
+
+=item Add bounding-box information into \gled classes and use it
+during rendering to perform view-frustum culling and, on request, LOD
+calculations.
+
+=item Consinder existing scene-graph and rendering engines (like
+SauerBratten, G3D, OpenSceneGraph, Ogre3D, Blender) and open-source
+projects (like Celestia, TA-Spring and FlightGear). Try to
+answer the following questions:
+
+What do they have that we need?
+
+Can we use their code? How hard would it be? Can it be snateched out
+or needs to be integrated into \gled or into \greedworld client?
+
+Shall we try to join forces with them in some aspect or another?
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
 =head2 Terrain
+
+=head3 Status
+
+Terrain is represented as a triangle mesh. The functionality of
+terrain code is spread over several classes.
+
+=over list
+
+=item B<C<Geom1/Stones/TringTvor>> -- a simple mesh container holding
+vertex (3f) and triangle (3i) arrays.
+
+Attributes per vertex: RGBA color (4ub), normal (3f), texture coords
+(2f).
+
+Attributes per triangle: RGBA color (4ub), normal (3f)
+
+All attributes are optional; they are also stored in arrays.
+
+Supports creation of triangle-strips (using ACTC) but this
+seems to do more harm than good with current hardware.
+
+Rendering class C<TringTvor_GL_Rnr> supports smooth (using vertex
+attributes) and flat (using triangle attributes) shading. Coloring and
+texturing of the mesh are optional.
+
+=item B<C<Var1/Glasses/TriMesh>> -- triangle mesh class with stuff
+needed for collision detection with OPCODE [Terdiman-OPCODE]. Also
+supports creation of vertex connectivity data that is required for
+mesh traversal algorithms. Can be created from a GTS surface object.
+
+Moving units (C<Dynamico>) and buildings (C<Statico>) all link to a
+C<TriMesh> object. In their case tri-mesh is used for collision
+detection and rendering. Connectivity information for unit meshes is
+not generated by default.
+
+=item B<C<Var1/Glasses/TriMeshField>> -- a field defined on mesh
+vertices. Field value can be mapped to color (link to C<RGBAPalette>
+glass) and assigned into underlying color-arrays of the mesh.
+
+1D fields are used to represent distributions of metal and energy in
+the demo (sum of random gaussian blobs).
+
+=item B<C<Var1/Glasses/TriMeshLightField>> -- sub-class of
+C<TriMeshField> that can calculate shades from a given light source
+and store the light intensity in itself as a 1D field.
+
+=item B<C<Var1/Glasses/ParaSurf>> -- base-class for describing
+parametric surfaces. Used for determination of up-direction and for
+generation of random points on a surface. Supported geometries /
+sub-classes: C<PSRectangle>, C<PSTriangle>, C<PSSphere> and
+C<PSTorus>.
+
+=item B<C<Var1/Glasses/Tringula>> -- basically the demo driver class,
+linking together terrain with lists of static and dynamic objects. Has
+methods for time-propagation and high-level collision detection.
+
+=back
+
+=head3 Tasks
+
+=over enum
+
+=item Should we use some other mesh representation? I recently read
+[Eberly-3DGED] that using per vertex grouping makes more sense
+lately. But then again, I kind of like flat shading.
+
+=item Usage of VBOs and shaders for terrain/mesh rendering. Now GL-1.4
+stuff is used.
+
+=item Import from other formats. Which? I have code for MD2,
+Total Anihillation and 3DS (no textures).
+
+=item Implement field-on-mesh optimized for fields that are mostly
+zero (e.g., as gaussian-blobs at specified vertices).
+
+=item Consider recursive terrain subdivision -- this is a big one and
+there are several issues.
+
+=over list
+
+=item Terrain must be well representable on server side for world
+simulation and on client side for rendering. This means it must be
+both compact and factorizable.
+
+=item Floats are used for vertex positions (to keep vertex data
+smaller). Requiring absolute precision of about 10cm makes the
+maximum mesh extent about 10km.
+
+Imagine that the terrain mesh that we have now represents a rough
+tesselation of the planet surface. It is never used for collsion
+detection, only rendering. Each of the triangles on this mesh is in
+fact a full C<TriMesh> with a triangular parametric surface
+determining its up-direction. Units are always steered in a local
+coordinate system of a given 10km triangle. Their position is
+transformed into coordinate system of the neighbouring triangle when
+they cross the separating plane (using double precision, if this makes
+any difference).
+
+This is quite unlike in open space where units are attached into a
+floating coordinate system where they are at rest. But, when space
+units approach each other, a relative coordinate system is created and
+units are transformed into it. As this involves large distances we
+explicitly require double precision for location of space units. This
+tells us that transformation matrix precision of a unit depends on the
+type of the spatial node it is currently attached to. Thus the spatial
+node itself should take care of transformation matrices of attached
+nodes.
+
+This was a long way of saying that unit motion across sub-terrain
+boundaries should be reasonable.
+
+=item What happens with tri-mesh-fields? Sparse representation seems
+the only way.
+
+=item Transform terrain triangulation into a height-field texture for
+fast rendering in close-up views (Carmack's terrain technique using
+pixel shaders). Does this make sense? Curvature can still be
+significant for asteroids and comets, so we can not use "one big
+texture approach" but need, at least, one level of triangultion (like
+the one we have now).
+
+=back
+
+=back
+
+=head3 End of terrain
+
+In principle, we could roughly get by with what we already have. But if
+somebody is into such stuff, miracles can be done.
+
+
+=cut------------------------------------------------------------------------
 
 =head2 Unit movement on terrain
 
+=head3 Status
+
+Dynos (objects of glass C<Dynamico>) slide over terrain with given
+forward velocity, angular velocity around unit's up-vector and
+levitation height above the terrain (like hovercrafts). At each time
+step the triangle below the center of the unit's mesh is found and
+unit's up direction is aligned with the triangle's normal. There is no
+check for edges/corners of the dyno penetrating the terrain so this
+happens on transitions between triangles that have significantly
+different normal vectors.
+
+Collision with statos (static objects, buildings) is implemented in
+
+ static bool Dynamico::handle_collision(Dynamico*, Statico*, ...)
+
+The unit is bounced-off if it is still getting closer to the center of
+the stato, otherwise it is deflected.
+
+Dyno-dyno collision is done in
+
+  static bool Dynamico::handle_collision(Dynamico*, Dynamico*, ...)
+
+If the units are coming closer, they are elastically scattered with conservation of
+energy and momentum in horizontal plane. If they are going apart, they
+are just displaced to avoid further contact.
+
+
+=head3 Tasks
+
+=over enum
+
+=item Implement some kind of unit health status and decrease it when the
+unit collides. Show health-bar for units. Draw special effects like
+smoke, fire, explosions, etc. 
+
+=item Improve terrain contact implementation, use several points of contact.
+
+=item Use proper rigid-body mechanics for unit movement with forces and
+torques allowing lateral sliding of a unit on a steep terrain and
+jumping off elevated terrain edges. I was thinking of using geometric
+algebra for this task.
+
+=item Collision prediction and collision evasion.
+
+=item Path finding.
+
+=item Unit steering in "go to somewhere" mode.
+
+=item Steering of a unit group in march, patrol, guard and attack modes.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
 =head2 Resource distribution and representation
+
+=head3 Status
+
+In the demo we generate "energy" and "metal" fields that serve no
+other purpose than to colorize the terrain. A set of random
+gaussian blobs is generated and the fields are initialized by the sum
+of blob contributions.
+
+=head3 Tasks
+
+=over enum
+
+=item Consider abundance of individual resources and their
+distribution patterns. Prepare algorithms for random resource
+distribution that can be used in different circumstances, preferably
+steerable with a comprehensive set of parameters.
+
+=item Are mesh-fields really suitable? Use some sparse representation
+instead.
+
+=item Do some sort of balancing so that we know reasonable generation
+parameters for planets, moons and asteroids.
+
+=item Rendering of resources. Now a selected resource abundance is
+mapped to terrain color. Can we use (multi-)texturing or shaders for
+the job? Anyway ... if resources are sparse, the resource-rich regions
+are better defined and have few overlaps.
+
+=back
+
+
+=cut------------------------------------------------------------------------
 
 =head2 Entities for resource processing and enity production
 
+=head3 Status
+
+There is nothing, well, there are buildings and we know how to animate
+their matter transfer links (tubes in the demo). And there are dynos
+that can crawl about.
+
+=head3 Tasks
+
+=over enum
+
+=item Implement units or devices for resource discovery and resource
+acquisition.
+
+=item Implement resource processing plants and depots.
+
+=item Implement fabrication plants.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
 =head2 Space representation - solar/galactic maps
+
+=head3 Status
+
+Not much status, just some pointers.
+
+=over enum
+
+=item C<GledCore/Glasses/ZNode> -- a node in hierarchic object graph,
+holding grouping and geometry data.
+
+=item C<Numerica/Glasses/ODECrawler> -- an implementation of ODE
+solver.
+
+=item ROOT has a limited interface to GSL (in package
+C<math/mathmore>).
+
+=back
+
+=head3 Tasks
+
+=over enum
+
+=item Consider node hierarchy for describing a solar system with
+planets, moons and asteroids. Make it all move in time.
+
+=item Implement a "map view" for a solar system.
+
+=item Implement interface for trajectory plotting and calculation.
+
+=back
+
+
+=cut------------------------------------------------------------------------
 
 =head2 Semi-automatic generation of solar-systems
 
+=head3 Status
+
+There is some basic stuff for generation of random terrains and planets.
+
+=over list
+
+=item Rectangular regions can be created with 2D inverse FFT of 1/f
+noise, see C<Geom1/GForge>. This produces 16-bit png that can be
+imported into C<TriMesh> via C<Geom1/Glasses/RectTerrain>.
+
+Used for creation of rectangular terrain.
+
+=item C<GTS/Glasses/GTSurf> supports generation of randomized spheres
+using 1/f noise for coefficients of Legendre polynomials to given
+order. This can be directly imported into C<TriMesh>.
+
+Used for creation of spherical terrain.
+
+=item C<Var1/Glasses/ParaSurf> supports randomization of vertex
+heights by using fractional brownian rules. Doing randomization on an
+already constructed mesh somewhat misses the purpose ... it should be
+done during recursive sub-division.
+
+Used for randomization of triangular and toroidal terrains.
+
+=back
+
+=head3 Tasks
+
+=over enum
+
+=item Prepare algorithms and parameters for generation of solar systems.
+It should be possible to regenrate whole solar-system from a
+relatively few parameters and random seeds.
+
+=item Try playing with non-realistic solar systems.
+
+=item Consolidate terrain generation algorithms.
+
+=item Support recursive / fractal sub-triangulation down to basic level.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
 =head2 Unit movement through space
 
+=head3 Status
+
+Nothing. The flyers in the demo trivially keep at the same height
+above the terrain.
+
+=head3 Tasks
+
+=over enum
+
+=item Implement dynamics for movement of spece units with engine trust
+and gravity.
+
+=item Think how to present this data to users. Think about spacepship
+controls in command-mode and in 1st-person-mode.
+
+=item Fake some kind of anti-grav unit and warp engine.
+
+=item Implement algorithms for entering into specific orbits.
+
+=item Think about landing / docking procedures.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
 =head2 User interaction layer
+
+=head3 Status
+
+There are some GL-widgets: buttons, menus (using button hierarchy),
+valuators and list-views. Implemented using overlay event-handling.
+
+In FLTK we have detailed object views and object browsers.
+
+=head3 Tasks
+
+=over enum
+
+=item Design the interaction hierarchy. Determine which parts of
+UI should be done with FLTK and which with GL. How to achieve
+interoperability between different elements?
+
+=item Implement controls and detailed views for specific
+unit and building types (processing plants, fabrication plants,
+exploration units).
+
+=item Think about switching between different views (1st person unit
+view, detailed entity view, planetary map, etc). How many views can
+there be in parallel? Blame deficiencies on the q-comm device
+throughput.
+
+=back
 
 
 =cut========================================================================
@@ -515,14 +1010,27 @@ components and game code.
 =head1 Retroduction
 
 
-As promised, the number and extent of tasks in the list looks somewhat
+As you see, the number and extent of tasks in the list looks somewhat
 forbidding. It is obvious that the \greedworld prototype will not
 include all of these things, at least not in their full scope. People
 who join the project, their interests and capacity, will determine the
 direction of the actual development and the accent of the final
 outcome.
 
-If nobody shows up in about a year I'll slowly give up on the
-big-scale project and descope it tremendously, keeping only the
-aspects that made me start working on \gled and then, later, on
-\greed.
+
+=cut========================================================================
+
+
+=head1 References
+
+=over def
+
+=item<Eberly-3DGED> Eberly D.H., 3D Game Engine Design, 2nd edition.
+
+=item<Tadel-GledIHSCM> Tadel M., \gled -- an Implementation of a
+Hierarchic Server--Client Model, L<http://www.gled.org/docs/>.
+
+=item<Terdiman-OPCODE> Terdiman P., OPCODE -- Optimized Collision
+Detection library.
+
+=back
