@@ -17,10 +17,14 @@ PBuffer::PBuffer(int w, int h)
 	}
 	scrnum = DefaultScreen( dpy );
 	FBRC = glXGetCurrentContext();
+	if (!FBRC)
+	{
+		throw "unable to get render context";
+	}
 	FBDC = glXGetCurrentDrawable();
 	if (!FBDC)
 	{
-		throw "unable to get render context";
+		throw "unable to get drawable";
 	}
 
 	Create();
@@ -134,7 +138,7 @@ void PBuffer::Create()
 	  unsigned int w,h;
 	  glXQueryDrawable(dpy, PBDC, GLX_WIDTH,  &w);
 	  glXQueryDrawable(dpy, PBDC, GLX_HEIGHT, &h);
-	  printf("GLX Pbuffer w=%u h=%u\n", w, h);
+          printf("GLX Pbuffer w=%u h=%u\n", w, h);
 	}
 
 	XFree(config);
