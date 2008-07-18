@@ -22,7 +22,7 @@ class MTW_ClassView;
 #include <FL/Fl_Gl_Window.H>
 
 class PBuffer;
-
+class FBO;
 
 class Pupil : public FTW_SubShell,
 	      public OptoStructs::A_View,
@@ -73,6 +73,7 @@ protected:
   Int_t		mImgNTiles;
   bool          bSignalDumpFinish;
   PBuffer*      mPBuffer;
+  FBO*          mFBO;
   void		dump_image(const TString& fname);
 
   // rendering elements

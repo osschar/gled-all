@@ -33,6 +33,7 @@
 
 // exp!
 #include "pbuffer.h"
+#include "FBO.h"
 
 namespace OS = OptoStructs;
 
@@ -169,6 +170,7 @@ void Pupil::_build()
   bDumpImage        = false;
   bSignalDumpFinish = false;
   mPBuffer          = 0;
+  mFBO              = 0;
 
   _check_auto_redraw();
 }
@@ -219,6 +221,7 @@ Pupil::~Pupil() {
   delete [] mPickBuff;
 #ifndef __APPLE__
   delete mPBuffer;
+  delete mFBO;
 #endif
 }
 
@@ -834,17 +837,16 @@ void Pupil::draw()
 
   if (bDumpImage)
   {
-    GledGUI::theOne->LockRootDisplay();
     try {
-      if (mPBuffer == 0 || mPBuffer->get_width() != w() || mPBuffer->get_height() != h())
+      if (mFBO == 0)
       {
-	delete mPBuffer;
-	mPBuffer = new PBuffer(w(), h());
+	mFBO = new FBO();
       }
-      mPBuffer->Use();
+      if (mFBO->fW != w() || mFBO->fH != h())
+        mFBO->init(w(), h());
     }
     catch(const char* exc) {
-      printf("%spbuffer init failed: %s.\n", _eh.Data(), exc);
+      printf("%sFBO init failed: %s.\n", _eh.Data(), exc);
     }
 
     if (mImgNTiles > 1)
@@ -853,9 +855,14 @@ void Pupil::draw()
       {
 	for (Int_t yi=0; yi<mImgNTiles; ++yi)
 	{
+          mFBO->bind();
 	  rnr_standard(mImgNTiles, xi, yi);
+          mFBO->unbind();
+
+          mFBO->bind_texture();
 	  TString fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
 	  dump_image(fname);
+          mFBO->unbind_texture();
 	}
       }
       printf("Merge with: montage -tile %dx%d -geometry %dx%d %s-* %s.png\n",
@@ -864,15 +871,18 @@ void Pupil::draw()
     else
     {
       GTime start_time(GTime::I_Now);
+      mFBO->bind();
       rnr_standard();
       GTime stop_time(GTime::I_Now);
       GTime rnr_time = stop_time - start_time;
       if (mInfo->bRnrFakeOverlayInCapture)
 	rnr_fake_overlay(rnr_time);
+      mFBO->unbind();
+
+      mFBO->bind_texture();
       dump_image(mImageName + ".tga");
+      mFBO->unbind_texture();
     }
-    mPBuffer->Release();
-    GledGUI::theOne->LockRootDisplay();
 
     bDumpImage = false;
   }
