@@ -1,3 +1,18 @@
+2008-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Pupils/FBO.cxx:
+	* Pupils/FBO.h:
+	New class for management of framebuffer objects.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Usage FBO for screen dumps.
+	The pbuffer code is still there but will be removed when FBOs are
+	confirmed to work manywhere.
+
+	* Pupils/pbuffer.cxx:
+	Better error reporting during pbuffer construction.
+
 2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
