@@ -70,7 +70,7 @@ void GLTesterOne::RunTest()
   h1TStat->SetBins(200, 0, 1);
 
   for(int i=0; i<mNTrial; ++i) {
-    mPupil->ImmediateRedraw();
+    mPupil->Redraw();
   }
   while(h1TStat->GetEntries() < mNTrial) GTime::SleepMiliSec(10);
 
@@ -83,7 +83,7 @@ void GLTesterOne::RunTest()
   h1TStat->SetBins(nbins, min, max);
 
   for(int i=0; i<mNRedraws; ++i) {
-    mPupil->ImmediateRedraw();
+    mPupil->Redraw();
   }
   while(h1TStat->GetEntries() < mNRedraws) GTime::SleepMiliSec(10);
   h1TStat->DrawCopy();
