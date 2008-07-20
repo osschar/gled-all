@@ -1,3 +1,12 @@
+2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GLTesterOne.cxx:
+	Follow changes in PupilInfo.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7659.
+	Whitespace.
+
 2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.h:
