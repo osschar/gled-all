@@ -140,8 +140,9 @@ void AliAnimator(const Text_t* dirname = 0,
   etor->Add(g_scene->FindLensByPath("Lamp Origin/Dynamo/Lamp Origin Rotator"));
 
   CREATE_ADD_GLASS(sdumper, ScreenDumper, etor, "ScreenDumper", 0);
+  sdumper->SetDumpImage(true);
   sdumper->SetFileNameFmt("/foo/kabl/mXXX/img-%04d");
-  sdumper->SetWaitDump(true);
+  sdumper->SetWaitSignal(true);
 
   /**************************************************************************/
 
