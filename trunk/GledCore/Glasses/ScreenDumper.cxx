@@ -19,11 +19,11 @@ ClassImp(ScreenDumper)
 
 void ScreenDumper::_init()
 {
-  mPupil       = 0;
-  mFileNameFmt = "screendumper/img%04d.tga";
-
-  mNTiles   = 1;
-  bWaitDump = false;
+  bWaitSignal   = false;
+  bDumpImage    = false;
+  mFileNameFmt  = "screendumper/img%04d";
+  mNTiles       = 1;
+  bCopyToScreen = false;
 
   mDumpID = 0;
 }
@@ -32,14 +32,25 @@ void ScreenDumper::_init()
 
 void ScreenDumper::DumpScreen()
 {
-  if(mPupil != 0) {
-    TString fname(GForm(mFileNameFmt.Data(), mDumpID++));
-    if(bWaitDump)
-      mPupil->DumpImageWaitSignal(fname, mNTiles);
+  if(mPupil != 0)
+  {
+    if (bDumpImage)
+    {
+      TString fname(GForm(mFileNameFmt.Data(), mDumpID++));
+      if (bWaitSignal)
+        mPupil->DumpImageWaitSignal(fname, mNTiles, bCopyToScreen);
+      else
+        mPupil->DumpImage(fname, mNTiles, bCopyToScreen);
+    }
     else
-      mPupil->EmitDumpImageRay(fname, mNTiles);
+    {
+      if (bWaitSignal)
+        mPupil->RedrawWaitSignal();
+      else
+      mPupil->Redraw();
+    }
+    Stamp(FID());
   }
-  Stamp(FID());
 }
 
 void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)

@@ -18,13 +18,15 @@ private:
   void _init();
 
 protected:
-  ZLink<PupilInfo> mPupil;       // X{gS} L{}
-  TString          mFileNameFmt; // X{GS} 7 Textor()
+  ZLink<PupilInfo> mPupil;        // X{gS} L{}
 
-  Int_t            mNTiles;      // X{GS} 7 Value(-range=>[1,4,1], -join=>1)
-  Bool_t           bWaitDump;    // X{GS} 7 Bool()
+  Bool_t           bWaitSignal;   // X{GS} 7 Bool(-join=>1)
+  Bool_t           bDumpImage;    // X{GS} 7 Bool()
+  TString          mFileNameFmt;  // X{GS} 7 Textor()
+  Int_t            mNTiles;       // X{GS} 7 Value(-range=>[1,4,1], -join=>1)
+  Bool_t           bCopyToScreen; // X{GS} 7 Bool()
 
-  Int_t            mDumpID;      // X{GS} 7 Value()
+  Int_t            mDumpID;       // X{GS} 7 Value()
 
 public:
   ScreenDumper(const Text_t* n="ScreenDumper", const Text_t* t=0) :
