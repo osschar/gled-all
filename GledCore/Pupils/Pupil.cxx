@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Pupil.h"
+#include "FBO.h"
 #include <Eye/Eye.h>
 #include <GledView/MTW_ClassView.h>
 #include <GledView/FTW_Shell.h>
@@ -12,7 +13,6 @@
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
 #include <Gled/GledNS.h>
-#include <GledView/GledGUI.h>
 #include <Rnr/GL/GLTextNS.h>
 #include <Ephra/Saturn.h>
 
@@ -30,10 +30,6 @@
 #include <GL/glu.h>
 
 #include <math.h>
-
-// exp!
-#include "pbuffer.h"
-#include "FBO.h"
 
 namespace OS = OptoStructs;
 
@@ -64,14 +60,8 @@ void *SubShellCreator_GledCore_Pupil = (void*)Pupil::Create_Pupil;
 /**************************************************************************/
 /**************************************************************************/
 
-namespace {
-
-  short ss(short s) {
-    short r; char* c = (char*)&s, *b = (char*)&r;;
-    b[0] = c[1]; b[1] = c[0];
-    return r;
-  }
-
+namespace
+{
   struct tga_header
   {
     typedef unsigned char byte;
@@ -101,8 +91,8 @@ namespace {
     void dump(FILE* fp) {
       TBufferFile b(TBuffer::kWrite);
       b << identsize << colourmaptype << imagetype;
-      b << ss(colourmapstart) << ss(colourmaplength) << colourmapbits;
-      b << ss(xstart) << ss(ystart) << ss(width) << ss(height);
+      b << host2net(colourmapstart) << host2net(colourmaplength) << colourmapbits;
+      b << host2net(xstart) << host2net(ystart) << host2net(width) << host2net(height);
       b << bits << descriptor;
       fwrite(b.Buffer(), 1, b.Length(), fp);
     }
@@ -168,8 +158,8 @@ void Pupil::_build()
   bShowOverlay      = true;
   bUseEventHandler  = true;
   bDumpImage        = false;
+  bCopyToScreen     = false;
   bSignalDumpFinish = false;
-  mPBuffer          = 0;
   mFBO              = 0;
 
   _check_auto_redraw();
@@ -219,16 +209,15 @@ Pupil::~Pupil() {
   delete mCameraView;
   delete mCamera;
   delete [] mPickBuff;
-#ifndef __APPLE__
-  delete mPBuffer;
   delete mFBO;
-#endif
 }
 
 /**************************************************************************/
 
 void Pupil::AbsorbRay(Ray& ray)
 {
+  static const Exc_t _eh("Pupil::AbsorbRay ");
+
   using namespace RayNS;
 
   if(ray.IsBasic()) {
@@ -250,58 +239,80 @@ void Pupil::AbsorbRay(Ray& ray)
     mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
   }
 
-  switch(ray.fRQN) {
-
-  case RayNS::RQN_change:
-    _check_auto_redraw();
-    if(mInfo->GetBuffSize() != mPickBuffSize) {
-      mPickBuffSize = mInfo->GetBuffSize();
-      delete [] mPickBuff;
-      mPickBuff     = 0;
-    }
-    break;
-
-  case RayNS::RQN_link_change: {
-    OS::ZGlassImg* oo = mOverlayImg;
-    mOverlayImg = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
-    if(oo != mOverlayImg) bShowOverlay = true;
-    mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
-    break;
-  }
-  case PupilInfo::PRQN_dump_image: {
-    if(ray.fRayBits & Ray::RB_CustomBuffer) {
-      *ray.fCustomBuffer >> mImageName;
-      *ray.fCustomBuffer >> mImgNTiles;
-      *ray.fCustomBuffer >> bSignalDumpFinish;
-      ray.ResetCustomBuffer();
-      if(mImageName != "") {
-	bDumpImage = true;
+  switch(ray.fRQN)
+  {
+    case RayNS::RQN_change:
+    {
+      _check_auto_redraw();
+      if(mInfo->GetBuffSize() != mPickBuffSize) {
+        mPickBuffSize = mInfo->GetBuffSize();
+        delete [] mPickBuff;
+        mPickBuff     = 0;
       }
+      break;
     }
-    fImg->fEye->BreakManageLoop();
-    redraw();
-    break;
-  }
 
-  case PupilInfo::PRQN_resize_window: {
-    if(parent() == 0) {
-      size(mInfo->GetWidth(), mInfo->GetHeight());
+    case RayNS::RQN_link_change:
+    {
+      OS::ZGlassImg* oo = mOverlayImg;
+      mOverlayImg = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
+      if(oo != mOverlayImg) bShowOverlay = true;
+      mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
+      break;
     }
-    break;
-  }
 
-  case PupilInfo::PRQN_camera_home: {
-    SetAbsRelCamera();
-    mCamera->Home();
-    redraw();
-    break;
-  }
+    case PupilInfo::PRQN_resize_window:
+    {
+      if(parent() == 0) {
+        size(mInfo->GetWidth(), mInfo->GetHeight());
+      }
+      break;
+    }
 
-  case PupilInfo::PRQN_smooth_camera_home: {
-    initiate_smooth_camera_home();
-    break;
-  }
+    case PupilInfo::PRQN_camera_home:
+    {
+      SetAbsRelCamera();
+      mCamera->Home();
+      redraw();
+      break;
+    }
 
+    case PupilInfo::PRQN_smooth_camera_home:
+    {
+      initiate_smooth_camera_home();
+      break;
+    }
+
+    case PupilInfo::PRQN_redraw:
+    {
+      if(ray.fRayBits & Ray::RB_CustomBuffer) {
+        *ray.fCustomBuffer >> bSignalDumpFinish;
+        ray.ResetCustomBuffer();
+      }
+      fImg->fEye->BreakManageLoop();
+      redraw();
+      break;
+    }
+
+    case PupilInfo::PRQN_dump_image:
+    {
+      if(ray.fRayBits & Ray::RB_CustomBuffer) {
+        *ray.fCustomBuffer >> mImageName;
+        *ray.fCustomBuffer >> mImgNTiles;
+        *ray.fCustomBuffer >> bCopyToScreen;
+        *ray.fCustomBuffer >> bSignalDumpFinish;
+        ray.ResetCustomBuffer();
+        bDumpImage = true;
+        if (bCopyToScreen && mImgNTiles > 1) {
+          printf("%sdump-image-ray: copy-to-screen requested but n-tiles > 1. Disabling copy-to-screen.\n",
+                 _eh.Data());
+          bCopyToScreen = false;
+        }
+      }
+      fImg->fEye->BreakManageLoop();
+      redraw();
+      break;
+    }
   }
 }
 
@@ -857,12 +868,9 @@ void Pupil::draw()
 	{
           mFBO->bind();
 	  rnr_standard(mImgNTiles, xi, yi);
-          mFBO->unbind();
-
-          mFBO->bind_texture();
 	  TString fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
 	  dump_image(fname);
-          mFBO->unbind_texture();
+          mFBO->unbind();
 	}
       }
       printf("Merge with: montage -tile %dx%d -geometry %dx%d %s-* %s.png\n",
@@ -877,11 +885,34 @@ void Pupil::draw()
       GTime rnr_time = stop_time - start_time;
       if (mInfo->bRnrFakeOverlayInCapture)
 	rnr_fake_overlay(rnr_time);
+      dump_image(mImageName + ".tga");
       mFBO->unbind();
 
-      mFBO->bind_texture();
-      dump_image(mImageName + ".tga");
-      mFBO->unbind_texture();
+      if (bCopyToScreen)
+      {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        {
+          // rnr_default_init();
+
+          glDisable(GL_LIGHTING);
+          glDisable(GL_BLEND);
+          glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
+          glMatrixMode(GL_MODELVIEW);  glPushMatrix(); glLoadIdentity();
+          mFBO->bind_texture();
+          glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+          glBegin(GL_QUADS);
+          glTexCoord2f(0,0);  glVertex3f(-1, -1, -1);
+          glTexCoord2f(1,0);  glVertex3f( 1, -1, -1);
+          glTexCoord2f(1,1);  glVertex3f( 1,  1, -1);
+          glTexCoord2f(0,1);  glVertex3f(-1,  1, -1);
+          glEnd();
+          mFBO->unbind_texture();
+          glMatrixMode(GL_PROJECTION); glPopMatrix();
+          glMatrixMode(GL_MODELVIEW);  glPopMatrix();
+        }
+
+        bCopyToScreen = false;
+      }
     }
 
     bDumpImage = false;
@@ -971,6 +1002,8 @@ void Pupil::rnr_default_init()
   if(mInfo->GetBlend()) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  } else {
+    glDisable(GL_BLEND);
   }
   glDisable(GL_FOG);
 }
@@ -1445,8 +1478,7 @@ void Pupil::dump_image(const TString& fname)
   header.dump(img);
 
   unsigned char* xx = new unsigned char[w()*h()*3];
-  // glReadBuffer(GL_BACK);
-  glPixelStorei(GL_PACK_ALIGNMENT,1);
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glReadPixels(0, 0, w(), h(), GL_BGR, GL_UNSIGNED_BYTE, xx);
   fwrite(xx, 3, w()*h(), img);
   delete [] xx;
