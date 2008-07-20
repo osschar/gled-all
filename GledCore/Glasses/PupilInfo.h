@@ -28,6 +28,7 @@ public:
 		      PRQN_resize_window,
 		      PRQN_camera_home,
 		      PRQN_smooth_camera_home,
+		      PRQN_redraw,
 		      PRQN_dump_image
   };
 
@@ -123,11 +124,18 @@ public:
   void EmitCameraHomeRay();       // X{E} 7 MButt()
   void EmitSmoothCameraHomeRay(); // X{E} 7 MButt()
 
-  void EmitDumpImageRay(TString filename="", Int_t n_tiles=1, Bool_t signal_p=false);
-  void DumpImage(TString filename="screenshot", Int_t n_tiles=1); // X{E} 7 MCWButt(-join=>1)
-  void ImmediateRedraw();                                         // X{E} 7 MButt()
+  void EmitRedrawRay(Bool_t signal_p=false);
+  void EmitDumpImageRay(const TString& filename, Int_t n_tiles=1,
+                        Bool_t copy_p=false, Bool_t signal_p=false);
 
-  void DumpImageWaitSignal(TString filename="", Int_t n_tiles=1);
+  void Redraw();                                  // X{E} 7 MButt(-join=>1)
+  void RedrawWaitSignal();
+
+  void DumpImage(const TString& filename="screenshot", Int_t n_tiles=1,
+                 Bool_t copy_p=false);            // X{E} 7 MCWButt()
+  void DumpImageWaitSignal(const TString& filename="screenshot", Int_t n_tiles=1,
+                           Bool_t copy_p=false);
+
   void ReceiveDumpFinishedSignal();
 
 #include "PupilInfo.h7"
