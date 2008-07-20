@@ -44,8 +44,9 @@ GTSIsoMaker*       gtsisomaker = 0;
 
 TriMeshLightField* lightmap = 0;
 
-Eventor*     eventor  = 0;
-TimeMaker*   tmaker   = 0;
+Eventor*      eventor  = 0;
+TimeMaker*    tmaker   = 0;
+ScreenDumper* dumper   = 0;
 
 ZList*       tmpdir   = 0;
 
@@ -348,9 +349,8 @@ void tringula(Int_t mode=0)
   ASSIGN_ADD_GLASS(tmaker, TimeMaker, eventor, "TimeMaker", 0);
   tmaker->AddClient(tringula);
 
-  CREATE_ADD_GLASS(dumper, ScreenDumper, eventor, "ScreenDumper", 0);
-  dumper->SetFileNameFmt("");
-  dumper->SetWaitDump(true);
+  ASSIGN_ADD_GLASS(dumper, ScreenDumper, eventor, "ScreenDumper", 0);
+  dumper->SetWaitSignal(true);
 
 
   /**************************************************************************/
@@ -384,7 +384,7 @@ void tringula(Int_t mode=0)
 
   ASSIGN_ATT_GLASS(g_pupil, PupilInfo, g_shell, AddSubShell, "Pupil of Tringula", 0);
   g_pupil->Add(g_scene);
-  g_pupil->SetWidth(800); g_pupil->SetHeight(480);
+  g_pupil->SetWidth(800); g_pupil->SetHeight(500);
   g_pupil->SetClearColor(0.589, 0.601, 0.836);
   g_pupil->SetUpReference(tricam);
   g_pupil->SetUpRefAxis(3);
@@ -394,8 +394,8 @@ void tringula(Int_t mode=0)
   g_pupil->SetFarClip(200);
 
   // g_pupil->SetBackMode(GL_FILL);
-  // g_pupil->SetCHSize(0);
 
+  g_pupil->SetCHSize(0);
   g_pupil->SetShowRPS(false);
   g_pupil->SetShowView(false);
 
@@ -924,6 +924,31 @@ void make_overlay()
 /******************************************************************************/
 // Various
 /******************************************************************************/
+
+void start_recording()
+{
+  eventor->Stop();
+  gSystem->Sleep(100);
+
+  eventor->ResetRecursively();
+  eventor->SetInterBeatMS(0);
+  eventor->SetEpochType(Eventor::ET_Manual);
+  eventor->SetTimeSource(Eventor::TS_IntStep);
+  eventor->SetTimeEpoch(0);
+  eventor->SetTimeStep(0.04); // 25 fps
+
+  gSystem->Exec("rm -rf capture; mkdir capture");
+
+  dumper->SetWaitSignal(true);
+  dumper->SetDumpImage(true);
+  dumper->SetCopyToScreen(true);
+  dumper->SetFileNameFmt("capture/img%05d"); // .tga added on dump
+  dumper->SetDumpID(0);
+
+  g_pupil->SetCHSize(0);
+  g_pupil->SetMPSize(0.05);
+  g_pupil->SetRnrFakeOverlayInCapture(true);
+}
 
 void sunrise(Float_t phi=45, Float_t dt=0.005, Int_t sleep=100)
 {
