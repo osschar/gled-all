@@ -9,20 +9,20 @@
 
 #include <Glasses/ZNode.h>
 #include <Glasses/Camera.h>
-class GTime;
 
 #include <Eye/OptoStructs.h>
 #include <GledView/FTW_SubShell.h>
-class PupilInfo;
-class MTW_ClassView;
 
 #include <RnrBase/RnrDriver.h>
+
+class GTime;
+class PupilInfo;
+class MTW_ClassView;
+class FBO;
 
 #include <FL/gl.h>
 #include <FL/Fl_Gl_Window.H>
 
-class PBuffer;
-class FBO;
 
 class Pupil : public FTW_SubShell,
 	      public OptoStructs::A_View,
@@ -69,11 +69,12 @@ protected:
   bool          bUseEventHandler;
 
   bool		bDumpImage;
+  bool          bCopyToScreen;
+  bool          bSignalDumpFinish;
   TString	mImageName;
   Int_t		mImgNTiles;
-  bool          bSignalDumpFinish;
-  PBuffer*      mPBuffer;
   FBO*          mFBO;
+
   void		dump_image(const TString& fname);
 
   // rendering elements
