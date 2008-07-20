@@ -15,20 +15,22 @@
 
 class MCW_View;
 
-class MCW_Button : public Fl_Button {
+class MCW_Button : public Fl_Button
+{
 public:
-  struct Data {
-    TString              fLabel;
-    TString              fTooltip;
-    GledNS::MethodInfo* fMInfo;
-    bool fDirectP;
-    bool fDndP;
+  struct Data
+  {
+    TString               fLabel;
+    TString               fTooltip;
+    GledNS::MethodInfo   *fMInfo;
+    bool                  fDirectP;
+    bool                  fDndP;
 
     Data() : fMInfo(0), fDirectP(false), fDndP(false) {}
   };
 
 protected:
-  OptoStructs::ZGlassImg* fImg;
+  OptoStructs::ZGlassImg *fImg;
   Data&                   fData;
 
 public:
