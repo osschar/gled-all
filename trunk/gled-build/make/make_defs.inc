@@ -78,7 +78,7 @@ export MUTE ECHO
 # X11LIB, FLLIB, *_CONF set by configure
 
 GLLIB	  = -lGL -lGLU
-ROOTLIBS  = $(shell ${ROOT_CONFIG} --noauxlibs --libs) -lThread
+ROOTLIBS  = $(shell ${ROOT_CONFIG} --noauxlibs --libs)
 ROOTGLIBS = -lGui -lGX11 ${ROOTGLIBS_CONF}
 
 GUILIBS	= ${X11LIB} ${FLLIB} ${GLLIB}
