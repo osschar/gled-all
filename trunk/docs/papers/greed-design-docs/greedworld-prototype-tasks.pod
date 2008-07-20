@@ -596,7 +596,7 @@ objects would be performed by an optimized scene-graph library.
 
 =item Add bounding-box information into \gled classes and use it
 during rendering to perform view-frustum culling and, on request, LOD
-calculations.
+calculations. See [Moller-OVFCA]
 
 =item Consinder existing scene-graph and rendering engines (like
 SauerBratten, G3D, OpenSceneGraph, Ogre3D, Blender) and open-source
@@ -687,6 +687,9 @@ stuff is used.
 
 =item Import from other formats. Which? I have code for MD2,
 Total Anihillation and 3DS (no textures).
+
+=item Implement gravitational potentials for all supported parametric
+surfaces.
 
 =item Implement field-on-mesh optimized for fields that are mostly
 zero (e.g., as gaussian-blobs at specified vertices).
@@ -1025,12 +1028,15 @@ outcome.
 
 =over def
 
-=item<Eberly-3DGED> Eberly D.H., 3D Game Engine Design, 2nd edition.
+=item<Eberly-3DGED> Eberly D.H., I<3D Game Engine Design>, 2nd edition.
 
-=item<Tadel-GledIHSCM> Tadel M., \gled -- an Implementation of a
-Hierarchic Server--Client Model, L<http://www.gled.org/docs/>.
+=item<Moller-OVFCA> Assarsson U. and Moller T., I<Optimized ViewFrustum
+Culling Algorithms>, 1999, search web.
 
-=item<Terdiman-OPCODE> Terdiman P., OPCODE -- Optimized Collision
-Detection library.
+=item<Tadel-GledIHSCM> Tadel M., I<\gled -- an Implementation of a
+Hierarchic Server--Client Model>, L<http://www.gled.org/docs/>.
+
+=item<Terdiman-OPCODE> Terdiman P., I<OPCODE -- Optimized Collision
+Detection library>.
 
 =back
