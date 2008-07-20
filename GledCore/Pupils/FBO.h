@@ -17,6 +17,11 @@ public:
   // UInt_t  fStencilBuffer;
   Int_t   fW, fH;
 
+  Bool_t  fIsRescaled;
+  Float_t fWScale, fHScale;
+
+  static Bool_t sRescaleToPow2;
+
 public:
   FBO();
   ~FBO();
