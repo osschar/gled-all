@@ -1,3 +1,34 @@
+2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Reorganized redraw/dump-image ray handling.
+	When dumping to a file, added optional copying of the image on the
+	screen (useful for movie capture).
+
+	* Glasses/ScreenDumper.cxx:
+	* Glasses/ScreenDumper.h:
+	Follow changes in PupilInfo.
+
+	* Pupils/FBO.cxx:
+	* Pupils/FBO.h:
+	Added flag that enforces allocation of framebuffer with power-2
+	dimensions. Helps on ATI when the buffer is used for texturing.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Follow changes in pupil info.
+	Support copy-to-screen after render-to-FBO, dump-image.
+	Remove pbuffer code.
+	When dumping tga files use host2net() to write image props.
+
+	* Pupils/pbuffer.cxx:
+	* Pupils/pbuffer.h:
+	Removed files. FBOs are used now.
+
+	* GledView/MCW_Button.h:
+	Whitespace.
+
 2008-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Pupils/FBO.cxx:

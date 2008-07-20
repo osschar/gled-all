@@ -1,3 +1,10 @@
+2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add global object 'ScreenDumper* dumper'.
+	Add function start_recording() - set up eventor and dumper for
+	movie capture.
+
 2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
