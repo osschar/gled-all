@@ -49,8 +49,8 @@ void  ZImage_GL_Rnr::check_rescale()
       sRescaleToPow2 = 1;
     }
     else if (vendor.BeginsWith("ATI")) {
-      if (major <= 2 && minor <= 1 && patch <= 7537) {
-        ISmess(mh + "ATI, GL <= 2.1.7537 (very slow rendering).");
+      if (major <= 2 && minor <= 1 && patch <= 7659) {
+        ISmess(mh + "ATI, GL <= 2.1.7659 (very slow rendering).");
         sRescaleToPow2 = 1;
       }
     }
@@ -74,16 +74,16 @@ void  ZImage_GL_Rnr::check_rescale()
 
 Int_t ZImage_GL_Rnr::nearest_pow2(Int_t d)
 {
-  Int_t np2 = (Int_t) TMath::Nint(TMath::Log2(d));
+  Int_t np2 = TMath::Nint(TMath::Log2(d));
   return 1 << np2;
 }
 
 void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 {
-  if(mImage->IsBindable()) {
-    if(mTexture == 0) {
+  if (mImage->IsBindable())
+  {
+    if (mTexture == 0)
       glGenTextures(1, &mTexture);
-    }
 
     glBindTexture(GL_TEXTURE_2D, mTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -100,9 +100,11 @@ void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 		 mImage->gl_format(), mImage->gl_type(), mImage->data());
     mImage->unbind();
     ZImage::sILMutex.Unlock();
-
-  } else {
-    if(mTexture) {
+  }
+  else
+  {
+    if(mTexture)
+    {
       glDeleteTextures(1, &mTexture);
       mTexture = 0;
     }
