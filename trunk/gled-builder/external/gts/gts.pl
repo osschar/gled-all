@@ -19,11 +19,14 @@ setup_package($package);
 
 my $cppfl;
 if ($DISTRO_VENDOR eq 'gentoo') {
-  $cppfl .= "-I/usr/include/netpbm";
-}
-target('configure', <<"FNORD");
-./configure   CXXFLAGS=-O2 CPPFLAGS="$cppfl" \\
-            --prefix=\${PREFIX}
+  target('configure', <<"FNORD");
+bash autogen.sh
+./configure CPPFLAGS=-I/usr/include/netpbm  CXXFLAGS=-O2 --prefix=\${PREFIX}
 FNORD
+} else {
+  target('configure', <<"FNORD");
+./configure CXXFLAGS=-O2 --prefix=\${PREFIX}
+FNORD
+}
 
 use_defaults_for_remaining_targets();
