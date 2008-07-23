@@ -170,20 +170,24 @@ void FTW::Locator::right() {
 
 void FTW::Locator::mod_old_box_color(Fl_Color mod, bool on_p)
 {
-  if(old_leaf)
-    if(old_ant)
+  if (old_leaf)
+  {
+    if (old_ant)
       old_ant->modify_box_color(mod, on_p);
     else
       old_leaf->modify_box_color(mod, on_p);
+  }
 }
 
 void FTW::Locator::mod_box_color(Fl_Color mod, bool on_p)
 {
-  if(leaf)
-    if(ant)
+  if (leaf)
+  {
+    if (ant)
       ant->modify_box_color(mod, on_p);
     else
       leaf->modify_box_color(mod, on_p);
+  }
 }
 
 /**************************************************************************/

@@ -44,7 +44,7 @@ void  ZImage_GL_Rnr::check_rescale()
     if(!vs.empty()) { patch = atoi(vs.front().Data()); vs.pop_front(); }
 
     Exc_t mh = _eh + "enabling pow2 texture rescale: ";
-    if (major < 1 || major  == 1 && minor < 4) {
+    if (major < 1 || (major == 1 && minor < 4)) {
       ISmess(mh + "GL < 1.4.");
       sRescaleToPow2 = 1;
     }

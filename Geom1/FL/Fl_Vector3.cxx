@@ -14,7 +14,7 @@ namespace {
   void master_cb(Fl_Widget* o, Fl_Widget* m)
   { m->do_callback(); }
 
-  char *sub_labels[] = { "x", "y", "z" };
+  const char *sub_labels[] = { "x", "y", "z" };
 }
 
 /**************************************************************************/

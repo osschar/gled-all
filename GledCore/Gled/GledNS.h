@@ -219,7 +219,7 @@ namespace GledNS {
 
   struct LibSetInfo : public InfoBase {
     LID_t		fLid;
-    char**		fDeps;
+    const char**	fDeps;
 
 #ifndef __CINT__
     hCid2pCI_t		Cid2CInfo;

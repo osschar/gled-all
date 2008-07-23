@@ -333,28 +333,28 @@ void TriMesh::ImportGTSurf(GTSurf* gts)
 
   struct Dumper
   {
-    map<GtsVertex*, int>  map;
-    TringTvor            *tvor;
-    int                   vcount;
-    int                   tcount;
+    map<GtsVertex*, int>  m_map;
+    TringTvor            *m_tvor;
+    int                   m_vcount;
+    int                   m_tcount;
 
-    Dumper(TringTvor* t) : tvor(t), vcount(0), tcount(0) {}
+    Dumper(TringTvor* t) : m_tvor(t), m_vcount(0), m_tcount(0) {}
 
     static void vdump(GtsVertex* v, Dumper* arg)
     {
-      arg->map[v] = arg->vcount;
-      Float_t *q = arg->tvor->Vertex(arg->vcount);
+      arg->m_map[v] = arg->m_vcount;
+      Float_t *q = arg->m_tvor->Vertex(arg->m_vcount);
       q[0] = v->p.x; q[1] = v->p.y; q[2] = v->p.z;
-      ++arg->vcount;
+      ++arg->m_vcount;
     }
 
     static void fdump(GtsFace* f, Dumper* arg)
     {
       GtsVertex *a, *b, *c;
       gts_triangle_vertices(&f->triangle, &a, &b, &c);
-      Int_t *q = arg->tvor->Triangle(arg->tcount);
-      q[0] = arg->map[a]; q[1] = arg->map[b]; q[2] = arg->map[c];
-      ++arg->tcount;
+      Int_t *q = arg->m_tvor->Triangle(arg->m_tcount);
+      q[0] = arg->m_map[a]; q[1] = arg->m_map[b]; q[2] = arg->m_map[c];
+      ++arg->m_tcount;
     }
 
   };

@@ -415,10 +415,12 @@ void ZList::Swallow(ZGlass* entry, Bool_t replace_p,
   if(entry->GetSaturnID() == 0) mQueen->CheckIn(entry);
   ZGlass* ex_entry = l->GetElementByName(entry->GetName());
   if(ex_entry)
+  {
     if(replace_p)
       l->RemoveAll(ex_entry);
     else
       return;
+  }
   l->Add(entry);
 }
 

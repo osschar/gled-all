@@ -19,10 +19,10 @@
 
 void Lamp_GL_Rnr::Draw(RnrDriver* rd)
 {
-  if(mLampID == -1)
+  if(mLampID == -1) {
     if(mLamp->bOnIfOff)      LampOn(rd);
     else if(mLamp->bOffIfOn) LampOff(rd);
-
+  }
   if(mLampID != -1 && mLamp->bDrawLamp) {
     glPushMatrix();
     glPushAttrib(GL_CURRENT_BIT | GL_TRANSFORM_BIT);

@@ -59,16 +59,16 @@ protected:
   // RnrMod Stack
 
   struct RMStack {
-    RnrMod*        def;
-    RnrMod*        def_autogen;
-    stack<RnrMod*> stack;
-    RMStack() : def(0), def_autogen(0) {}
+    RnrMod*        m_def;
+    RnrMod*        m_def_autogen;
+    stack<RnrMod*> m_stack;
+    RMStack() : m_def(0), m_def_autogen(0) {}
 
     RnrMod* get_active() {
-      if(stack.empty())
-	return def ? def : def_autogen;
+      if(m_stack.empty())
+	return m_def ? m_def : m_def_autogen;
       else
-	return stack.top();
+	return m_stack.top();
     }
   };
 

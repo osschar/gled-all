@@ -692,7 +692,7 @@ int actcBeginOutput(ACTCData *tc)
     chartedSetLabel("vertex bins");
     tc->VertexBins = (ACTCVertex **)calloc(sizeof(ACTCVertex *), tc->CurMaxVertValence + 1);
     if(tc->VertexBins == NULL) {
-	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput : couldn't allocate %d bytes "
+	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput : couldn't allocate %lu bytes "
 	    "for Vertex Bins\n",
 	    sizeof(ACTCVertex *) * tc->CurMaxVertValence);)
 	return tc->Error = ACTC_ALLOC_FAILED;
@@ -771,7 +771,7 @@ ACTCData *actcNew(void)
     tc = (ACTCData *)calloc(sizeof(*tc), 1);
 
     if(tc == NULL) {
-	ACTC_DEBUG(fprintf(stderr, "actcNew : couldn't allocate %d bytes "
+	ACTC_DEBUG(fprintf(stderr, "actcNew : couldn't allocate %lu bytes "
 	    "for new ACTCData\n", sizeof(*tc));)
 	return NULL;
     }
@@ -1013,7 +1013,7 @@ static int mapEdgeTriangle(ACTCData *tc, ACTCEdge *edge, ACTCVertex *v3)
         sizeof(tmp), &tmp);
     if(r == NULL) {
 	ACTC_DEBUG(fprintf(stderr, "ACTC::mapEdgeTriangle : Couldn't allocate "
-	    "%d bytes for triangles\n", sizeof(tmp) *
+	    "%lu bytes for triangles\n", sizeof(tmp) *
 	    (edge->TriangleCount + 1));)
 	return tc->Error = ACTC_ALLOC_FAILED;
     }
@@ -1068,7 +1068,7 @@ static int mapVertexEdge(ACTCData *tc, ACTCVertex *v1, ACTCVertex *v2, ACTCEdge 
 	    sizeof(tmp), &tmp);
 	if(r == NULL) {
 	    ACTC_DEBUG(fprintf(stderr, "ACTC::mapVertexEdge : Couldn't reallocate "
-	        "to %d bytes for vertex's edge list\n", sizeof(tmp) *
+	        "to %lu bytes for vertex's edge list\n", sizeof(tmp) *
 		v1->EdgeCount);)
 	    return tc->Error = ACTC_ALLOC_FAILED;
 	}

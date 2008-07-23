@@ -25,7 +25,7 @@ protected:
   ZColor	mColor;		// X{PGS} 7 ColorButt()
 
 public:
-  Rect(Text_t* n="Rect", Text_t* t=0) : ZNode(n,t) { _init(); }
+  Rect(const Text_t* n="Rect", const Text_t* t=0) : ZNode(n,t) { _init(); }
 
   void SetUV(Float_t u, Float_t v)
   { mULen = u; mVLen = v; Stamp(FID()); }
