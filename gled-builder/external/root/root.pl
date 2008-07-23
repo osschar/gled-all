@@ -19,7 +19,7 @@ setup_package($package);
 
 my $config_args;
 if ($DISTRO_VENDOR eq 'gentoo') {
-  $config_args .= " --enable-gsl-shared";
+  $config_args .= " --enable-gsl-shared --with-pgsql-incdir=/usr/include/postgres";
 }
 target('configure', <<"FNORD");
 ./configure $config_args
