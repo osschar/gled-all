@@ -931,13 +931,13 @@ void start_recording()
   gSystem->Sleep(100);
 
   eventor->ResetRecursively();
-  eventor->SetInterBeatMS(0);
+  eventor->SetInterBeatMS(40);
   eventor->SetEpochType(Eventor::ET_Manual);
   eventor->SetTimeSource(Eventor::TS_IntStep);
   eventor->SetTimeEpoch(0);
   eventor->SetTimeStep(0.04); // 25 fps
 
-  gSystem->Exec("rm -rf capture; mkdir capture");
+  gSystem->Exec("rm -rf capture/*; mkdir -p capture");
 
   dumper->SetWaitSignal(true);
   dumper->SetDumpImage(true);
