@@ -473,7 +473,7 @@ void TringTvor::GenerateTriangleStrips(Int_t max_verts)
 	if (xi != tring_map.end()) {
 	  mStripTrings[idx] = xi->second;
 	} else {
-	  printf("%sSafr: %d %d.\n", _eh.Data(), strip_list.size(), i);
+	  printf("%sSafr: %zu %d.\n", _eh.Data(), strip_list.size(), i);
 	}
       }
 

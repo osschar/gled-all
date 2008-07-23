@@ -90,9 +90,9 @@ namespace GLTextNS {
 
   /**************************************************************************/
 
-  static char *lastError;
+  static const char *lastError;
 
-  char* txfErrorString(void)
+  const char* txfErrorString(void)
   {
     return lastError;
   }

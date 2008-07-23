@@ -67,7 +67,7 @@ class RectTerrain : public ZNode
   static void color_filler(Float_t* v, UChar_t* c, void* rt);
 
  public:
-  RectTerrain(Text_t* n="RectTerrain", Text_t* t=0) : ZNode(n,t) { _init(); }
+  RectTerrain(const Text_t* n="RectTerrain", const Text_t* t=0) : ZNode(n,t) { _init(); }
   virtual ~RectTerrain();
 
   void ApplyBorderCondition(); // X{E} 7 MButt()

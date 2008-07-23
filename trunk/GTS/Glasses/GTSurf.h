@@ -45,7 +45,7 @@ protected:
   SGTSRange		mEdgeAngle;   //! X{RGS} 7 StoneOutput(Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
 
 public:
-  GTSurf(Text_t* n="GTSurf", Text_t* t=0) : ZNode(n,t) { _init(); }
+  GTSurf(const Text_t* n="GTSurf", const Text_t* t=0) : ZNode(n,t) { _init(); }
 
   void ReplaceSurface(GTS::GtsSurface* new_surf);
   GTS::GtsSurface* CopySurface();

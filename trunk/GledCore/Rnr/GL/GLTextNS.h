@@ -64,7 +64,7 @@ namespace GLTextNS {
     TexGlyphVertexInfo **lut;
   };
 
-  extern char *txfErrorString(void);
+  extern const char *txfErrorString(void);
 
   extern TexFont *txfLoadFont(const char *filename);
 

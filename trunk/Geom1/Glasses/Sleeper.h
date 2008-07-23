@@ -14,8 +14,8 @@ protected:
   UInt_t	mMSec;	// X{GS} 7 Value(-range=>[0,1e9,1,1])
 
 public:
-  Sleeper(Text_t* n="Sleeper", Text_t* t=0) : Operator(n,t) {}
-  Sleeper(UInt_t ms, Text_t* n="Sleeper", Text_t* t=0) :
+  Sleeper(const Text_t* n="Sleeper", const Text_t* t=0) : Operator(n,t) {}
+  Sleeper(UInt_t ms, const Text_t* n="Sleeper", const Text_t* t=0) :
     Operator(n,t), mMSec(ms) {}
 
   // virtuals

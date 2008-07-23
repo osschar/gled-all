@@ -85,7 +85,7 @@ void A_Rnr::DropRnrScheme()
 // A_Rnr::Fl_Event
 
 namespace {
-  char* fl_event_names[] = {
+  const char* fl_event_names[] = {
     "NO_EVENT",
     "PUSH",
     "RELEASE",

@@ -455,23 +455,23 @@ namespace {
 using namespace GTS;
 
 struct extring_arg {
-  map<GtsVertex*, int> map;
-  int                  count;
-  FILE*                out;
+  map<GtsVertex*, int> m_map;
+  int                  m_count;
+  FILE*                m_out;
 
-  extring_arg() : count(0), out(0) {}
+  extring_arg() : m_count(0), m_out(0) {}
 };
 
 void trivi_vdump(GtsVertex* v, extring_arg* arg) {
-  arg->map[v] = arg->count;
-  ++arg->count;
-  fprintf(arg->out, "%lf %lf %lf\n", v->p.x, v->p.y, v->p.z);
+  arg->m_map[v] = arg->m_count;
+  ++arg->m_count;
+  fprintf(arg->m_out, "%lf %lf %lf\n", v->p.x, v->p.y, v->p.z);
 }
 
 void trivi_fdump(GtsFace* f, extring_arg* arg) {
   GtsVertex *a, *b, *c;
   gts_triangle_vertices(&f->triangle, &a, &b, &c);
-  fprintf(arg->out, "%d %d %d\n", arg->map[a], arg->map[b], arg->map[c]);
+  fprintf(arg->m_out, "%d %d %d\n", arg->m_map[a], arg->m_map[b], arg->m_map[c]);
 }
 
 }
@@ -491,7 +491,7 @@ void GTSurf::ExportTring(const Text_t* fname)
                         gts_surface_face_number(pSurf));
 
   extring_arg arg;
-  arg.out = f;
+  arg.m_out = f;
 
   gts_surface_foreach_vertex(pSurf, (GtsFunc) trivi_vdump, &arg);
   gts_surface_foreach_face  (pSurf, (GtsFunc) trivi_fdump, &arg);

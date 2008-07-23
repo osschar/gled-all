@@ -28,8 +28,8 @@ protected:
   Bool_t        bRotParentFrame; // X{GS} 7 Bool()
 
 public:
-  Mover(Text_t* n="Mover", Text_t* t=0) : Operator(n,t) { _init(); }
-  Mover(ZNode* m, Text_t* n="Mover", Text_t* t=0) :
+  Mover(const Text_t* n="Mover", const Text_t* t=0) : Operator(n,t) { _init(); }
+  Mover(ZNode* m, const Text_t* n="Mover", const Text_t* t=0) :
     Operator(n,t), mNode(m) { _init(); }
 
   void SetRotateParams(UInt_t i, UInt_t j, Float_t a); // X{E}

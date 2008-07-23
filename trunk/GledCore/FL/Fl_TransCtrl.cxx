@@ -18,8 +18,8 @@ namespace {
   bool df_cmp(double a, double b)
   { return (Float_t) a==(Float_t) b; }
 
-  char *pos_labels[] = { "x", "y", "z" };
-  char *rot_labels[] = { "a", "b", "c" };
+  const char *pos_labels[] = { "x", "y", "z" };
+  const char *rot_labels[] = { "a", "b", "c" };
 }
 
 /**************************************************************************/

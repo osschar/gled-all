@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
   // Prepare remaining args for ROOT, weed out remaining options
   int   rargc = 1;
-  char* rargv[args.size() + 3];
+  const char* rargv[args.size() + 3];
   rargv[0] = argv[0];
   // Enforce return from Run; trick root so that it only processes macros
   rargv[rargc++] = "-q";
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
   // Spawn TRint
   if(gled->GetShowSplash())
     cout <<"Staring ROOT command-line interpreter ...\n";
-  gint = new TRint("TRint", &rargc, rargv);
+  gint = new TRint("TRint", &rargc, (char**) rargv);
   gint->SetPrompt("gled[%d] ");
   printf("Use context menu in Nest to import lenses as CINT variables.\n");
 

@@ -158,7 +158,7 @@ void GledNS::BootstrapSoSet(LibSetInfo* lsi)
   Lid2LSInfo[lsi->fLid] = lsi;
   Name2Lid[lsi->fName] = lsi->fLid;
   // Init deps as well ... loaded by link-time dependence
-  char** dep = lsi->fDeps;
+  const char** dep = lsi->fDeps;
   while(*dep) {
     if(Name2Lid.find(*dep) == Name2Lid.end()) {
       Int_t ini = InitSoSet(*dep);
@@ -847,7 +847,7 @@ void GledNS::deparen_string(const TString& in, TString& n, TString& a,
   int cp_pos = in.Length()-1;
   char o = in(op_pos);
   char c = in(cp_pos);
-  if(o=='('&&c!=')' || o=='['&&c!=']' || o=='{'&&c!='}') {
+  if((o=='(' && c!=')') || (o=='[' && c!=']') || (o=='{' && c!='}')) {
     throw _eh + "no close paren.";
   }
   n = in;

@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
   // Prepare remaining args for ROOT, weed out remaining options
   int   rargc = 1;
-  char* rargv[args.size() + 4];
+  const char* rargv[args.size() + 4];
   rargv[0] = argv[0];
   rargv[rargc++] = "-q";
   rargv[rargc++] = "-b"; // batch-mode, no graphics
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
   // Spawn TRint
   if(gled->GetShowSplash())
     cout <<"Staring ROOT command-line interpreter ...\n";
-  gint = new TRint("TRint", &rargc, rargv);
+  gint = new TRint("TRint", &rargc, (char**)rargv);
   gint->SetPrompt("saturn[%d] ");
 
   // Prepare gled exit condition & Spawn saturn

@@ -34,29 +34,29 @@ namespace {
     }
     return (er != 0);
   }
-  char* fmt2name(ILint fmt) {
+  const char* fmt2name(ILint fmt) {
     switch(fmt) {
-    case IL_COLOR_INDEX: return "COLOR_INDEX";
-    case IL_RGB: return "RGB";
-    case IL_RGBA: return "RGBA";
-    case IL_BGR: return "BGR";
-    case IL_BGRA: return "BGRA";
-    case IL_LUMINANCE: return "LUMINANCE";
+    case IL_COLOR_INDEX:     return "COLOR_INDEX";
+    case IL_RGB:             return "RGB";
+    case IL_RGBA:            return "RGBA";
+    case IL_BGR:             return "BGR";
+    case IL_BGRA:            return "BGRA";
+    case IL_LUMINANCE:       return "LUMINANCE";
     case IL_LUMINANCE_ALPHA: return "LUMINANCE_ALPHA";
-    default: return "unknown";
+    default:                 return "unknown";
     }
   }
-  char* typ2name(ILint typ) {
+  const char* typ2name(ILint typ) {
     switch(typ) {
-    case IL_BYTE: return "BYTE";
-    case IL_UNSIGNED_BYTE: return "UNSIGNED_BYTE";
-    case IL_SHORT: return "SHORT";
+    case IL_BYTE:           return "BYTE";
+    case IL_UNSIGNED_BYTE:  return "UNSIGNED_BYTE";
+    case IL_SHORT:          return "SHORT";
     case IL_UNSIGNED_SHORT: return "UNSIGNED_SHORT";
-    case IL_INT: return "INT";
-    case IL_UNSIGNED_INT: return "UNSIGNED_INT";
-    case IL_FLOAT: return "FLOAT";
-    case IL_DOUBLE: return "DOUBLE";
-    default: return "unknown";
+    case IL_INT:            return "INT";
+    case IL_UNSIGNED_INT:   return "UNSIGNED_INT";
+    case IL_FLOAT:          return "FLOAT";
+    case IL_DOUBLE:         return "DOUBLE";
+    default:                return "unknown";
     }
   }
   void il_id() {

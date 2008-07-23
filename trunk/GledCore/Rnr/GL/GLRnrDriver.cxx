@@ -54,7 +54,7 @@ void GLRnrDriver::BeginRender()
     mFaderStack = &mRMStacks.insert(make_pair(ZGlColorFader::FID(), RMStack())).first->second;
     ZGlass* lens = GledNS::ConstructLens(ZGlColorFader::FID());
     A_Rnr*  rnr  = lens->VGlassInfo()->SpawnRnr(mRnrName, lens);
-    mFaderStack->def_autogen = new RnrMod(lens, rnr);
+    mFaderStack->m_def_autogen = new RnrMod(lens, rnr);
   }
 
   bRedraw = false;

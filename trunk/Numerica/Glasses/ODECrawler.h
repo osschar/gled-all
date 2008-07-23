@@ -52,7 +52,7 @@ protected:
   void		Crawl();
 
 public:
-  ODECrawler(Text_t* n="ODECrawler", Text_t* t=0) :
+  ODECrawler(const Text_t* n="ODECrawler", const Text_t* t=0) :
     Eventor(n,t), mODEMaster(0) { _init(); }
   ODECrawler(ZGlass* m, const Text_t* n="ODECrawler", const Text_t* t=0) :
     Eventor(n,t), mODEMaster(m) { _init(); }

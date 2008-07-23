@@ -54,7 +54,7 @@ for $c (@{ $CATALOG->{ClassList} }) {
 
 {
   my $xx = ($#Deps>-1) ? "\"".join("\", \"",@Deps)."\"," : "";
-  print C "\nstatic char* _deplist[] = { $xx 0 };\n\n";
+  print C "\nstatic const char* _deplist[] = { $xx 0 };\n\n";
 }
 
 # E_Demangle

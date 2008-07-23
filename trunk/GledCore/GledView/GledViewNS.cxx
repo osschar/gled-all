@@ -83,7 +83,7 @@ void GledViewNS::BootstrapViewSet(LID_t lid, const TString& libset)
 
   gns_lsi->fViewPart = new LibSetInfo();
   // Init deps as well ... loaded by link-time dependence
-  char** dep = gns_lsi->fDeps;
+  const char** dep = gns_lsi->fDeps;
   while(*dep) {
     GledNS::LibSetInfo* dlsi = GledNS::FindLibSetInfo(*dep);
     if(dlsi == 0) {

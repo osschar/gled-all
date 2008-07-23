@@ -14,7 +14,7 @@ class ZGod : public ZHashList {
 private:
 protected:
 public:
-  ZGod(Text_t* n="ZGod", Text_t* t=0) : ZHashList(n,t) {}
+  ZGod(const Text_t* n="ZGod", const Text_t* t=0) : ZHashList(n,t) {}
 
 
 #include "ZGod.h7"

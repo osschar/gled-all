@@ -28,7 +28,7 @@ ClassImp(WSWalker)
 void WSWalker::_init()
 {
   bLoop = false;
-  m_last_time = 1e500;
+  m_last_time = 1e30;
 }
 
 /**************************************************************************/
