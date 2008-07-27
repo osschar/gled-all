@@ -19,3 +19,6 @@ PSTriangle      66      Glasses/PSTriangle
 PSSphere        67      Glasses/PSSphere
 PSTorus         68      Glasses/PSTorus
 PSMark          69      Glasses/PSMark          .
+
+SolarSystem     80      Glasses/SolarSystem     .
+CosmicBall      81      Glasses/CosmicBall      .
