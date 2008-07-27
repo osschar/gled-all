@@ -66,7 +66,7 @@ public:
     AList(n,t) { _init(); }
 
   virtual Int_t RebuildListRefs(An_ID_Demangler* idd);
-  virtual void ClearList();
+  virtual void  ClearList();
 
   //----------------------------------------------------------------------
   // ElRep properties and supported operations.
@@ -98,6 +98,9 @@ public:
   virtual void ClipReserve();          // X{E} C{0}
 
   void SetNextIdx(Int_t nextidx);
+
+  // direct access for owned vectors
+  virtual ZGlass* operator[](Int_t index) const { return mElements[index]; }
 
   // debug
   void dumpVecStat();
