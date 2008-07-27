@@ -24,7 +24,7 @@ public:
 
 
 #include "CLASSNAME.h7"
-  ClassDef(CLASSNAME, 1)
+  ClassDef(CLASSNAME, 1);
 }; // endclass CLASSNAME
 
 
