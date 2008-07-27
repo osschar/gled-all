@@ -1,3 +1,8 @@
+2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_system.C:
+	New macro - setup proto solar-system generator/simulator.
+
 2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

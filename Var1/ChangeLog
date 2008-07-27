@@ -1,3 +1,17 @@
+2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CosmicBall.cxx:
+	* Glasses/CosmicBall.h:
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	* Rnr/GL/CosmicBall_GL_Rnr.cxx:
+	* Rnr/GL/CosmicBall_GL_Rnr.h:
+	* Rnr/GL/SolarSystem_GL_Rnr.cxx:
+	* Rnr/GL/SolarSystem_GL_Rnr.h:
+	* glass.list:
+	New proto glasses SolarSystem and CosmicBall for
+	generation/simulation of a solar system.
+
 2008-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMesh.cxx:
