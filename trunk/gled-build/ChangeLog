@@ -1,3 +1,11 @@
+2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* cfg/Glass_SKEL.cxx:
+	* cfg/Glass_SKEL.h:
+	* cfg/Stone_SKEL.cxx:
+	* cfg/Stone_SKEL.h:
+	Whitespace, semicolons after root/cint defines.
+
 2008-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:
