@@ -1,3 +1,14 @@
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Implement ODEMaster virtuals.
+	Add inheritance from TimeMakerClient and implement TimeTick().
+	Cosmic balls now wander around.
+
+	* Rnr/GL/SolarSystem_GL_Rnr.h:
+	Whitespace.
+
 2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/CosmicBall.cxx:
