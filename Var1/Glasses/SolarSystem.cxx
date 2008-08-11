@@ -9,13 +9,19 @@
 
 #include "CosmicBall.h"
 
+#include <Gled/GThread.h>
+
 #include <TVectorT.h>
 #include <TRandom.h>
 #include <TMath.h>
+#include <TSystem.h>
+
 
 // SolarSystem
 
 //__________________________________________________________________________
+//
+// Simple simulation of (unrealistic) solar system.
 //
 //
 
@@ -25,6 +31,9 @@ ClassImp(SolarSystem);
 
 void SolarSystem::_init()
 {
+  mTime    = 0;
+  mTimeFac = 1;
+
   mStarMass   = 0;
   mBallKappa  = 1e-6;
 
@@ -34,6 +43,14 @@ void SolarSystem::_init()
   mOrbitMaxR  = 1000;
   mMaxTheta   = 20;
   mMaxEcc     = 0.1;
+
+  mIntegratorThread = 0;
+}
+
+SolarSystem::~SolarSystem()
+{
+  if (mIntegratorThread)
+    mIntegratorThread->Cancel();
 }
 
 /**************************************************************************/
@@ -82,7 +99,7 @@ void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& 
 
     delta.SetXYZ(-y(i), -y(i+1), -y(i+2));
     rfac = delta.Mag2();
-    rfac = 1.0 / (rfac*TMath::Sqrt(rfac));
+    rfac = mStarMass / (rfac*TMath::Sqrt(rfac));
     d(i+3) = mBallKappa * delta.x() * rfac;
     d(i+4) = mBallKappa * delta.y() * rfac;
     d(i+5) = mBallKappa * delta.z() * rfac;
@@ -103,8 +120,123 @@ void SolarSystem::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
   }
 
   assert(i == (Int_t) ODEOrder());
+}
 
-  x1 = 0; x2 = 1000;
+/**************************************************************************/
+
+void SolarSystem::TimeTick(Double_t t, Double_t dt)
+{
+  GLensWriteHolder wrlck(this);
+
+  Double_t new_time = mTime + mTimeFac*dt;
+  ODEStorageD* S = get_storage();
+  if (new_time > S->GetMaxXStored())
+  {
+    SetTime(S->GetMaxXStored());
+    mODECrawler->AdvanceXLimits();
+    mODECrawler->Crawl();
+  }
+  SetTime(new_time);
+}
+
+/**************************************************************************/
+
+void SolarSystem::StartStorageManager()
+{
+  // not finished.
+  //
+  // check if already running
+  // initialize crawler
+  // crawl - forewer
+
+  static const Exc_t _eh("SolarSystem::StartStorageManager ");
+
+  assert_MIR_presence(_eh, MC_IsBeam);
+
+  if (mIntegratorThread)
+    throw (_eh + "already running.");
+
+  mIntegratorThread = GThread::TSDSelf();
+
+  while (1)
+  {
+    printf("Fujfufjf\n");
+    gSystem->Sleep(1000);
+  }
+}
+
+void SolarSystem::StopStorageManager()
+{
+  // not finished
+
+  static const Exc_t _eh("SolarSystem::StopStorageManager ");
+
+  if (mIntegratorThread == 0)
+    throw (_eh + "not running.");
+
+  mIntegratorThread->Cancel();
+  mIntegratorThread = 0;
+}
+
+/**************************************************************************/
+
+void SolarSystem::SetTime(Double_t t)
+{
+  // Place balls into position for time t.
+  // Linear extrapolation between to stored points is made.
+
+  static const Exc_t _eh("SolarSystem::SetTime ");
+
+  ODEStorageD*    S = get_storage();
+  const Int_t     N = S->Size();
+  const Double_t* T = S->GetXArr();
+
+  Int_t i0;
+  if (t <= T[0])
+  {
+    if (t < T[0])
+      ISwarn(_eh + GForm("given time %f below minimum %f. Using min", t, T[0]));
+    i0 = 0;
+    t  = T[0];
+  }
+  else if (t >= T[N-1])
+  {
+    if (t > T[N-1])
+      ISwarn(_eh + GForm("given time %f above maximum %f. Using max", t, T[N-1]));
+    i0 = N - 2;
+    t  = T[N-1];
+  }
+  else
+  {
+    i0 = TMath::BinarySearch<Double_t>(N, T, t);
+    if (i0 < 0 || i0 > N - 1)
+      throw(_eh + "index out of range.");
+    if (i0 == N - 1) // Happens as storage is in floats.
+      i0 = N - 2;
+  }
+
+  const Double_t  f0 = (T[i0+1] - t) / (T[i0+1] - T[i0]);
+  const Double_t  f1 = 1.0 - f0;
+
+  const Double_t* P0 = S->GetY(i0);
+  const Double_t* P1 = S->GetY(i0+1);
+
+  Int_t ri = 0;
+  Stepper<CosmicBall> stepper(*mBalls);
+  while (stepper.step())
+  {
+    stepper->SetPos(f0*P0[ri]     + f1*P1[ri],
+                    f0*P0[ri + 1] + f1*P1[ri + 1],
+                    f0*P0[ri + 2] + f1*P1[ri + 2]);
+    ri += 3;
+    stepper->SetV  (f0*P0[ri]     + f1*P1[ri],
+                    f0*P0[ri + 1] + f1*P1[ri + 1],
+                    f0*P0[ri + 2] + f1*P1[ri + 2]);
+    ri += 3;
+  }
+
+  mTime = t;
+  Stamp(FID());
 }
 
 /**************************************************************************/
@@ -118,6 +250,7 @@ void SolarSystem::MakeStar()
   CosmicBall* cb = new CosmicBall("Stella");
   cb->SetColor(1, 1, 0);
   cb->SetRadius(100);
+  cb->SetLOD(20);
 
   // !!!! missing mass (add to mStarMass).
   Double_t mass = 1e9;
@@ -143,6 +276,7 @@ void SolarSystem::MakePlanetoid()
   Double_t mass_planet = 4.0*Pi()*r_planet*r_planet*r_planet/3.0;
   cb->SetM(mass_planet);
   cb->SetRadius(r_planet);
+  cb->SetLOD(16);
   cb->SetColor(0, 0.5, 0.7);
 
   Double_t r_orb     = gRandom->Uniform(mOrbitMinR, mOrbitMaxR);
