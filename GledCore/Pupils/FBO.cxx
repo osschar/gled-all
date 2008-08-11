@@ -45,7 +45,6 @@ void FBO::init(int w, int h)
     {
       fWScale = ((Float_t)w) / nw;
       fHScale = ((Float_t)h) / nh;
-      printf("w,h=%d,%d; nw,nh=%d,%d; wscl,hscl=%f,%f\n", w,h,nw,nh,fWScale,fHScale);
       w = nw; h = nh;
       fIsRescaled = true;
     }
