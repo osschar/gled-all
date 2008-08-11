@@ -23,9 +23,9 @@ protected:
   Float_t	mSpotExp;		// X{GS} 7 Value(-range=>[0,500,1,1000], -join=>1);
   Float_t	mSpotCutOff;		// X{GS} 7 Value(-range=>[0,180,1,10]);
 
-  Float_t	mConstAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000], -width=>5, -join=>1);
-  Float_t	mLinAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000], -width=>5, -join=>1);
-  Float_t	mQuadAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000], -width=>5);
+  Float_t	mConstAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000000], -width=>8, -join=>1);
+  Float_t	mLinAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000000], -width=>8);
+  Float_t	mQuadAtt;		// X{GS} 7 Value(-range=>[0,100,1,1000000], -width=>8);
 
   // How/When to draw the lamp, turn on/off the light
   Bool_t	bDrawLamp;		// X{GS} 7 Bool()
