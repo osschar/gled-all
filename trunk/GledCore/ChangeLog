@@ -1,3 +1,17 @@
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Lamp.h:
+	Increase step precision for attenuation parameters.
+
+	* Glasses/PupilInfo.cxx:
+	When changing FOV via Zoom(), set maximum to 160 degrees.
+
+	* Pupils/FBO.cxx:
+	Remove debug printout.
+
+	* Pupils/Pupil.cxx:
+	Decrease scroll-wheel sensitivity.
+
 2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Sphere.h:
