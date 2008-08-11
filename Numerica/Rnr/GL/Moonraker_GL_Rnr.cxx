@@ -24,58 +24,71 @@ Moonraker_GL_Rnr::~Moonraker_GL_Rnr()
 
 void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
 {
+  Moonraker      &M = *mMoonraker;
+  const Double_t  T =  M.mT;
+
   glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_LIGHTING_BIT);
   glPushMatrix();
-  glScalef(mMoonraker->mScale, mMoonraker->mScale, mMoonraker->mScale);
-  glColor4fv(mMoonraker->mEColor());
+  glScalef(M.mScale, M.mScale, M.mScale);
+  glColor4fv(M.mEColor());
 
-  gluSphere(mQuadric, 1, mMoonraker->mLOD, mMoonraker->mLOD);
+  gluSphere(mQuadric, 1, M.mLOD, M.mLOD);
 
   // Moon
   glPushMatrix();
-  Double_t mp[3]; mMoonraker->MoonPos(mp, mMoonraker->mT);
+  Double_t mp[3]; M.MoonPos(mp, T);
   glTranslated(mp[0], mp[1], mp[2]);
-  glColor4fv(mMoonraker->mMColor());
-  gluSphere(mQuadric, mMoonraker->mRMoon, mMoonraker->mLOD, mMoonraker->mLOD);
+  glColor4fv(M.mMColor());
+  gluSphere(mQuadric, M.mRMoon, M.mLOD, M.mLOD);
   glPopMatrix();
 
   // Trajectory
-  if(*mMoonraker->mODECrawler && mMoonraker->mODECrawler->GetStored()) {
-    UInt_t M = mMoonraker->mODECrawler->GetStored();
-    TVectorF *x = mMoonraker->mODECrawler->GetXStored();
-    TVectorF *y = mMoonraker->mODECrawler->GetYStored();
+  
+  if (*M.mODECrawler)
+  {
+    ODEStorageD* S = dynamic_cast<ODEStorageD*>(M.mODECrawler->GetStorage());
+    if (S && S->Size() > 0)
+    {
+      UInt_t N = S->Size();
+      const Double_t *X = S->GetXArr();
 
-    // Shell at mT
-    if(mMoonraker->mT>=(*x)(0u) && mMoonraker->mT<=(*x)(M-1)) {
-      // Bisect
-      UInt_t l=0, h=M-1;
-      while(h-l > 1) {
-	UInt_t m = TMath::Nint((mMoonraker->mT-(*x)(l))/((*x)(h)-(*x)(l))*(h-l)) + l;
-	if(m==l) m++; if(m==h) m--;
-	if((*x)(m) <= mMoonraker->mT) l = m; else h = m;
+      // Shell at mT
+      if (T >= X[0] && T <= X[N-1])
+      {
+        // Bisect
+        Int_t l = 0, h = N-1;
+        while (h-l > 1)
+        {
+          Int_t m = TMath::Nint((T - X[l]) / (X[h] - X[l])*(h-l)) + l;
+          if (m==l) m++;
+          if (m==h) m--;
+          if (X[m] <= T) l = m; else h = m;
+        }
+        Float_t f = (T - X[l]) / (X[h] - X[l]); // assume linear
+        glColor4fv(M.mSColor());
+        glPushMatrix();
+        TVectorD yl; S->AssignY(l, yl);
+        TVectorD yh; S->AssignY(h, yh);
+        TVectorD p(yh); p -= yl; p *= f; p += yl;
+        glTranslated(p(0), p(1), p(2));
+        gluSphere(mQuadric, M.mRShell, M.mLOD, M.mLOD);
+        glPopMatrix();
       }
-      Float_t f = (mMoonraker->mT-(*x)(l))/((*x)(h)-(*x)(l)); // assume linear
-      glColor4fv(mMoonraker->mSColor());
-      glPushMatrix();
-      TVectorF p(y[h]); p -= y[l]; p *= f; p += y[l];
-      glTranslatef(p(0u), p(1u), p(2u));
-      gluSphere(mQuadric, mMoonraker->mRShell, mMoonraker->mLOD, mMoonraker->mLOD);
-      glPopMatrix();
-    }
 
-    // Trajectory
-    glDisable(GL_LIGHTING);
-    glLineWidth(mMoonraker->mTWidth);
-    glColor4fv(mMoonraker->mTColor());
-    glBegin(GL_LINE_STRIP);
-    for(UInt_t i=0; i<M; i++) {
-      //printf("\t%u\t%f\t%f\t%f\t%f\n", i, (*x)(i), (y[i])(0u), (y[i])(1u), (y[i])(2u));
-      glVertex3fv(y[i].GetMatrixArray());
+      // Trajectory
+      glDisable(GL_LIGHTING);
+      glLineWidth(M.mTWidth);
+      glColor4fv(M.mTColor());
+      glBegin(GL_LINE_STRIP);
+      for (UInt_t i=0; i<N; ++i)
+      {
+        //printf("\t%u\t%f\t%f\t%f\t%f\n", i, (*x)(i), (y[i])(0u), (y[i])(1u), (y[i])(2u));
+        glVertex3dv(S->GetY(i));
+      }
+      glEnd();
     }
-    glEnd();
   }
 
   glPopMatrix();
-
   glPopAttrib();
 }
