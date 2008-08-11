@@ -26,6 +26,8 @@ protected:
   Int_t      mSize;
 
 public:
+  ODEStorage() : 
+    mOrder(0), mSize(0) {}
   ODEStorage(Int_t order, Int_t capacity=128) :
     mOrder(order), mSize(0) {}
   virtual ~ODEStorage() {}
