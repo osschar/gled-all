@@ -1389,8 +1389,8 @@ int Pupil::handle(int ev)
     if(Fl::event_dy() != 0) {
       Float_t delta = Fl::event_dy();
       if(mInfo->GetZoomByFac()) {
-	Float_t base = 1.25;
-	if(Fl::event_state(FL_CTRL)) base = 1.05;
+	Float_t base = 1.2;
+	if(Fl::event_state(FL_CTRL)) base = 1.04;
 	else if(Fl::event_state(FL_SHIFT)) base = 2;
 	auto_ptr<ZMIR> mir( mInfo->S_ZoomFac(TMath::Power(base,delta)) );
 	mShell->Send(*mir);
