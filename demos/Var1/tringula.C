@@ -18,37 +18,37 @@ class GTSRetriangulator;
 class GTSIsoMaker;
 class TimeMaker;
 
-Tringula*     tringula = 0;
-TringuCam*    tricam   = 0;
-Statico*      sta1     = 0;
-Dynamico*     dyn1     = 0;
-Dynamico*     dyn2     = 0;
-PSMark*       mark     = 0;
+Tringula     *tringula = 0;
+TringuCam    *tricam   = 0;
+Statico      *sta1     = 0;
+Dynamico     *dyn1     = 0;
+Dynamico     *dyn2     = 0;
+PSMark       *mark     = 0;
 
-ParaSurf*     parasurf = 0;
-TriMesh*      trimesh  = 0;
-TriMesh*      dynmesh  = 0;
-TriMesh*      stamesh  = 0;
-TriMesh*      flymesh  = 0;
-ZVector*      rndstatos = 0;
-ZVector*      rnddynos = 0;
+ParaSurf     *parasurf  = 0;
+TriMesh      *trimesh   = 0;
+TriMesh      *dynmesh   = 0;
+TriMesh      *stamesh   = 0;
+TriMesh      *flymesh   = 0;
+ZVector      *rndstatos  = 0;
+ZVector      *rnddynos  = 0;
 
-Scene*        overlay  = 0;
+Scene        *overlay  = 0;
 
-TriMeshField* engfield = 0;
-TriMeshField* metfield = 0;
-RectTerrain * terrain  = 0;
-GTSurf*       gtsurf   = 0;
-GTSRetriangulator* gtsretring  = 0;
-GTSIsoMaker*       gtsisomaker = 0;
+TriMeshField      *engfield    = 0;
+TriMeshField      *metfield    = 0;
+RectTerrain       *terrain     = 0;
+GTSurf            *gtsurf      = 0;
+GTSRetriangulator *gtsretring  = 0;
+GTSIsoMaker       *gtsisomaker = 0;
 
-TriMeshLightField* lightmap = 0;
+TriMeshLightField *lightmap = 0;
 
-Eventor*      eventor  = 0;
-TimeMaker*    tmaker   = 0;
-ScreenDumper* dumper   = 0;
+Eventor      *eventor  = 0;
+TimeMaker    *tmaker   = 0;
+ScreenDumper *dumper   = 0;
 
-ZList*       tmpdir   = 0;
+ZList        *tmpdir   = 0;
 
 // Some of the parameters are modified for some modes.
 

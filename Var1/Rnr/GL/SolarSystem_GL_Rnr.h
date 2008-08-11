@@ -10,7 +10,8 @@
 #include <Glasses/SolarSystem.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class SolarSystem_GL_Rnr : public ZNode_GL_Rnr {
+class SolarSystem_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 
