@@ -183,12 +183,12 @@ void PupilInfo::Zoom(Float_t delta)
 {
   switch(mProjMode) {
   case P_Perspective: {
-    SetZFov (mZFov + 5*delta);
+    SetZFov (TMath::Min(mZFov + delta, 160.0f));
     SetZSize(2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2));
     break;
   }
   case P_Orthographic: {
-    SetZSize(mZSize += 0.5*delta);
+    SetZSize(mZSize + delta);
     SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
   }
   }
@@ -198,7 +198,7 @@ void PupilInfo::ZoomFac(Float_t fac)
 {
   switch(mProjMode) {
   case P_Perspective: {
-    SetZFov (fac*mZFov);
+    SetZFov (TMath::Min(fac*mZFov, 160.0f));
     SetZSize(2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2));
     break;
   }
