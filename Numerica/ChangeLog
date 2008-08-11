@@ -1,3 +1,18 @@
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	* catalog.patch:
+	Add new class ODEStorage with specializations for float and
+	double. This allows external management of arrays for trajectory
+	storage.
+
+	Remove inheritance from Eventor. Use detached thread execution
+	instead.
+
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	Use new ODEStorage classes.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Moonraker.cxx:
