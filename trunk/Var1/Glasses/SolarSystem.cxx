@@ -8,6 +8,7 @@
 #include "SolarSystem.c7"
 
 #include "CosmicBall.h"
+#include <Glasses/ZQueen.h>
 
 #include <Gled/GThread.h>
 
