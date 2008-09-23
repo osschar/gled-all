@@ -27,8 +27,8 @@ class MCW_View : public FTW_SubShell,
   public:
     TString         _typ, _base_typ, _name;
 
-    ArgBase(TString& typ, TString& base_typ,
-	    TString& name, TString& defval, int cell_w);
+    ArgBase(const TString& typ,  const TString& base_typ,
+	    const TString& name, const TString& defval, int cell_w);
 
     virtual void StreamData(TBuffer& b) {}
 
@@ -40,8 +40,8 @@ class MCW_View : public FTW_SubShell,
   public:
     FID_t	_carg_fid;
 
-    CtxArg(TString& typ, TString& base_typ,
-	   TString& name, TString& defval, int cell_w);
+    CtxArg(const TString& typ,  const TString& base_typ,
+	   const TString& name, const TString& defval, int cell_w);
 
     void SetImage(OptoStructs::ZGlassImg* img);
     OptoStructs::ZGlassImg* GetImage();
@@ -56,8 +56,8 @@ class MCW_View : public FTW_SubShell,
     int  _typ_idx;
 
   public:
-    VarArg(TString& typ, TString& base_typ,
-	   TString& name, TString& defval, int cell_w);
+    VarArg(const TString& typ,  const TString& base_typ,
+	   const TString& name, const TString& defval, int cell_w);
 
     virtual void StreamData(TBuffer& b);
 
@@ -85,6 +85,8 @@ class MCW_View : public FTW_SubShell,
   void ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t);
   void SetABG(ZGlass* alpha, ZGlass* beta=0, ZGlass* gamma=0);
   void SetABG(ID_t alpha, ID_t beta=0, ID_t gamma=0);
+  void SetRecipient(SaturnInfo* si=0);
+  void SetRecipient(ID_t si);
 
   void Send();
   void ChangeCallback();

@@ -26,8 +26,8 @@ class SaturnInfo;
 // ZMIR
 /**************************************************************************/
 
-class ZMIR : public TMessage {
-
+class ZMIR : public TMessage
+{
 public:
   enum Direction_e { D_Unknown=0, D_Up, D_Down };
 
@@ -46,33 +46,33 @@ protected:
   char         *fTrueBuffer;	//!
 
 public:
-  Direction_e	Direction;	        //!
-  Bool_t	SuppressFlareBroadcast; //!
-  Bool_t	RequiresResult;         //!
+  Direction_e	fDirection;	         //!
+  Bool_t	fSuppressFlareBroadcast; //!
+  Bool_t	fRequiresResult;         //!
 
-  UChar_t	MirBits;
-  ID_t		CallerID;
+  UChar_t	fMirBits;
+  ID_t		fCallerID;
 
-  ID_t		RecipientID;		// Must be set via SetRecipient(id)
-  ID_t		ResultRecipientID;	// \_ Must be set via
-  UInt_t	ResultReqHandle;	// /    SetResultReq(id, handle)
+  ID_t		fRecipientID;		// Must be set via SetRecipient(id)
+  ID_t		fResultRecipientID;	// \_ Must be set via
+  UInt_t	fResultReqHandle;	// /    SetResultReq(id, handle)
 
-  ID_t		AlphaID;
-  ID_t		BetaID;
-  ID_t		GammaID;
+  ID_t		fAlphaID;
+  ID_t		fBetaID;
+  ID_t		fGammaID;
 
-  LID_t		Lid;
-  CID_t		Cid;
-  MID_t		Mid;
+  LID_t		fLid;
+  CID_t		fCid;
+  MID_t		fMid;
 
   // Demangled SaturnIDs; used only on the receiving side.
 
-  ZMirEmittingEntity*	Caller;		 //!
-  SaturnInfo*		Recipient;	 //!
-  SaturnInfo*		ResultRecipient; //!
-  ZGlass*		Alpha;		 //!
-  ZGlass*		Beta;		 //!
-  ZGlass*		Gamma;		 //!
+  ZMirEmittingEntity*	fCaller;	  //!
+  SaturnInfo*		fRecipient;	  //!
+  SaturnInfo*		fResultRecipient; //!
+  ZGlass*		fAlpha;		  //!
+  ZGlass*		fBeta;		  //!
+  ZGlass*		fGamma;		  //!
 
   ZMIR(ID_t a=0, ID_t b=0, ID_t g=0);
   ZMIR(ZGlass* a, ZGlass* b=0, ZGlass* g=0);
@@ -80,13 +80,16 @@ public:
   ZMIR(void* buf, Int_t size);
   virtual ~ZMIR();
 
-  Bool_t HasRecipient()	{ return (MirBits & MB_HasRecipient); }
-  Bool_t HasResultReq()	{ return (MirBits & MB_HasResultReq); }
+  Bool_t HasRecipient()	{ return (fMirBits & MB_HasRecipient); }
+  Bool_t HasResultReq()	{ return (fMirBits & MB_HasResultReq); }
   Bool_t IsFlare()      { return !HasRecipient(); }
   Bool_t IsBeam()       { return HasRecipient(); }
-  Bool_t ShouldExeDetached()   { return (MirBits & MB_DetachedExe); }
-  Bool_t IsDetachedExeMultix() { return (MirBits & MB_MultixDetachedExe); }
-  Bool_t HasChainedMIR()       { return (MirBits & MB_HasChainedMIR); }
+  Bool_t ShouldExeDetached()   { return (fMirBits & MB_DetachedExe); }
+  Bool_t IsDetachedExeMultix() { return (fMirBits & MB_MultixDetachedExe); }
+  Bool_t HasChainedMIR()       { return (fMirBits & MB_HasChainedMIR); }
+
+  Bool_t IsMatching(const FID_t& fid) const;
+  Bool_t IsMatching(const FID_t& fid, MID_t mid) const;
 
   Int_t HeaderLength();
   Int_t RoutingHeaderLength();
@@ -98,11 +101,11 @@ public:
 
   // virtual void Reset(); // restore buff from true buf;
 
-  void Demangle(An_ID_Demangler* s) throw(TString);
-  void DemangleRecipient(An_ID_Demangler* s) throw(TString);
-  void DemangleResultRecipient(An_ID_Demangler* s) throw(TString);
+  void Demangle(An_ID_Demangler* s) throw(Exc_t);
+  void DemangleRecipient(An_ID_Demangler* s) throw(Exc_t);
+  void DemangleResultRecipient(An_ID_Demangler* s) throw(Exc_t);
 
-  void SetLCM_Ids(LID_t l, CID_t c, MID_t m) { Lid=l; Cid=c; Mid=m; }
+  void SetLCM_Ids(LID_t l, CID_t c, MID_t m) { fLid=l; fCid=c; fMid=m; }
   void SetCaller(ZMirEmittingEntity* caller);
   void SetRecipient(SaturnInfo* recipient);
   void ClearRecipient();
@@ -115,36 +118,47 @@ public:
   void  ChainMIR(ZMIR* mir);
   ZMIR* UnchainMIR(An_ID_Demangler* s=0);
 
-  ClassDef(ZMIR, 0)
+  ClassDef(ZMIR, 0);
 };
+
+inline Bool_t ZMIR::IsMatching(const FID_t& fid) const
+{
+  return fid.fLid == fLid && fid.fCid == fCid;
+}
+
+inline Bool_t ZMIR::IsMatching(const FID_t& fid, MID_t mid) const
+{
+  return fid.fLid == fLid && fid.fCid == fCid && mid == fMid;
+}
 
 /**************************************************************************/
 // ZMIR_Result_Report
 /**************************************************************************/
 
-class ZMIR_Result_Report : public TBufferFile {
+class ZMIR_Result_Report : public TBufferFile
+{
 private:
    ZMIR_Result_Report(const ZMIR_Result_Report &); // not implemented
    void operator=(const ZMIR_Result_Report &);     // not implemented
 
 public:
-  enum Bits_e { B_HasException = 1, B_HasResult = 2};
+  enum Bits_e { B_HasException = 1, B_HasResult = 2 };
 
-  UChar_t	MirRRBits;
-  TString	Exception;
+  UChar_t	fMirRRBits;
+  TString	fException;
 
   ZMIR_Result_Report() : TBufferFile(TBuffer::kWrite) {}
   virtual ~ZMIR_Result_Report() {}
 
-  Bool_t HasException()  { return MirRRBits & B_HasException; }
-  Bool_t HasResult()     { return MirRRBits & B_HasResult; }
-  Bool_t Exec_OK()       { return (MirRRBits & B_HasException) == 0; }
-  Bool_t Flare_OK()      { return Exec_OK(); }
+  Bool_t HasException()  { return  fMirRRBits & B_HasException; }
+  Bool_t HasResult()     { return  fMirRRBits & B_HasResult; }
+  Bool_t Exec_OK()       { return (fMirRRBits & B_HasException) == 0; }
+  Bool_t Flare_OK()      { return  Exec_OK(); }
   Bool_t BeamResult_OK() { return (Exec_OK() && HasResult()); }
 
   const char* GenError(bool report_buffer=true);
 
-  ClassDef(ZMIR_Result_Report, 0)
+  ClassDef(ZMIR_Result_Report, 0);
 }; // endclass ZMIR_Result_Report
 
 typedef ZMIR_Result_Report ZMIR_RR;

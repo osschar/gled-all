@@ -156,19 +156,19 @@ void ZGlass::WriteUnlock()
 
 ZMIR* ZGlass::get_MIR()
 {
-  return GThread::get_mir();
+  return GThread::MIR();
 }
 
-ZMIR* ZGlass::assert_MIR_presence(const TString& header, int what)
+ZMIR* ZGlass::assert_MIR_presence(const Exc_t& header, int what)
 {
-  ZMIR* mir = GThread::get_mir();
-  if(mir == 0) {
+  ZMIR* mir = GThread::MIR();
+  if (mir == 0) {
     throw(header + "must be called via a MIR.");
   }
-  if((what & MC_IsFlare) && mir->HasRecipient()) {
+  if ((what & MC_IsFlare) && mir->HasRecipient()) {
     throw(header + "must be called via a flared MIR.");
   }
-  if((what & MC_IsBeam) && !mir->HasRecipient()) {
+  if ((what & MC_IsBeam) && !mir->HasRecipient()) {
     throw(header + "must be called via a beamed MIR.");
   }
   if((what & MC_HasResultReq) && !mir->HasResultReq()) {
@@ -177,20 +177,20 @@ ZMIR* ZGlass::assert_MIR_presence(const TString& header, int what)
   return mir;
 }
 
-ZMIR* ZGlass::suggest_MIR_presence(const TString& header, int what)
+ZMIR* ZGlass::suggest_MIR_presence(const Exc_t& header, int what)
 {
-  ZMIR* mir = GThread::get_mir();
-  if(mir == 0) {
+  ZMIR* mir = GThread::MIR();
+  if (mir == 0) {
     ISwarn(header + "should be called via a MIR.");
     return 0;
   }
-  if((what & MC_IsFlare) && mir->HasRecipient()) {
+  if ((what & MC_IsFlare) && mir->HasRecipient()) {
     ISwarn(header + "should be called via a flared MIR.");
   }
-  if((what & MC_IsBeam) && !mir->HasRecipient()) {
+  if ((what & MC_IsBeam) && !mir->HasRecipient()) {
     ISwarn(header + "should be called via a beamed MIR.");
   }
-  if((what & MC_HasResultReq) && !mir->HasResultReq()) {
+  if ((what & MC_HasResultReq) && !mir->HasResultReq()) {
     ISwarn(header + "should be called with a result request set.");
   }
   return mir;
@@ -198,10 +198,10 @@ ZMIR* ZGlass::suggest_MIR_presence(const TString& header, int what)
 
 void ZGlass::warn_caller(const TString& warning)
 {
-  ZMIR* mir = GThread::get_mir();
-  if(mir && mir->Caller) {
-    auto_ptr<ZMIR> wrn( mir->Caller->S_Warning(warning.Data()) );
-    wrn->SetRecipient(mir->Caller->HostingSaturn());
+  ZMIR* mir = GThread::MIR();
+  if (mir && mir->fCaller) {
+    auto_ptr<ZMIR> wrn( mir->fCaller->S_Warning(warning.Data()) );
+    wrn->SetRecipient(mir->fCaller->HostingSaturn());
     mSaturn->ShootMIR(wrn);
   } else {
     ISwarn(warning);

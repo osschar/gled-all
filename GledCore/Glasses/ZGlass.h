@@ -183,8 +183,8 @@ protected:
 			 MC_HasResultReq=4 };
 
   ZMIR* get_MIR();
-  ZMIR* assert_MIR_presence(const TString& header, int what=0);
-  ZMIR* suggest_MIR_presence(const TString& header, int what=0);
+  ZMIR* assert_MIR_presence (const Exc_t& header, int what=0);
+  ZMIR* suggest_MIR_presence(const Exc_t& header, int what=0);
 
   void  warn_caller(const TString& warning);
 
@@ -222,6 +222,8 @@ public:
   // Saturnalia
   bool IsSunSpace();
   bool IsSunOrFireSpace();
+ 
+  virtual Int_t DetachedThreadNice(const ZMIR* mir) const { return 0; }
 
   // RefCount
   Short_t IncRefCount(ZGlass* from);

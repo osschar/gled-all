@@ -18,8 +18,8 @@ class ZGlass;
 // GMutex
 /**************************************************************************/
 
-class GMutex {
-
+class GMutex
+{
 protected:
 #ifndef __CINT__
   pthread_mutex_t	mMut;	// X{P}
@@ -40,7 +40,7 @@ public:
 #ifndef __CINT__
 #include "GMutex.h7"
 #endif
-  ClassDef(GMutex, 0)
+  ClassDef(GMutex, 0);
 }; // endclass GMutex
 
 
@@ -48,47 +48,51 @@ public:
 // GMutexHolder / AntiHolder
 /**************************************************************************/
 
-class GMutexHolder {
+class GMutexHolder
+{
   GMutex& mMutex;
- public:
+public:
   GMutexHolder(GMutex& m) : mMutex(m) { mMutex.Lock();   }
   virtual ~GMutexHolder()             { mMutex.Unlock(); }
 
-  ClassDef(GMutexHolder, 0)
+  ClassDef(GMutexHolder, 0);
 };
 
 // Usability of AntiHolder limited to cases when you're sure
 // the mutex is locked exactly once.
 
-class GMutexAntiHolder {
+class GMutexAntiHolder
+{
   GMutex& mMutex;
- public:
+public:
   GMutexAntiHolder(GMutex& m) : mMutex(m) { mMutex.Unlock();   }
   virtual ~GMutexAntiHolder()             { mMutex.Lock(); }
 
-  ClassDef(GMutexAntiHolder, 0)
+  ClassDef(GMutexAntiHolder, 0);
 };
 
 /**************************************************************************/
 // GLensRead/WriteHolders
 /**************************************************************************/
 
-class GLensReadHolder {
+class GLensReadHolder
+{
   ZGlass* mLens;
- public:
+public:
   GLensReadHolder(ZGlass* lens);
   virtual ~GLensReadHolder();
 
-  ClassDef(GLensReadHolder, 0)
+  ClassDef(GLensReadHolder, 0);
 };
 
-class GLensWriteHolder {
+class GLensWriteHolder
+{
   ZGlass* mLens;
- public:
+public:
   GLensWriteHolder(ZGlass* lens);
   virtual ~GLensWriteHolder();
 
-  ClassDef(GLensWriteHolder, 0)
+  ClassDef(GLensWriteHolder, 0);
 };
 
 #endif

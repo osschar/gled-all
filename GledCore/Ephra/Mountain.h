@@ -15,10 +15,8 @@
 
 class Mountain;
 
-struct DancerInfo {
-
-  ZMirEmittingEntity* 	fOwner;
-
+struct DancerInfo
+{
   GThread*		fThread;
   Eventor*		fEventor;
   Mountain*		fMountain;
@@ -29,14 +27,13 @@ struct DancerInfo {
   bool			fShouldSuspend;
   bool			fShouldExit;
 
-  DancerInfo(ZMirEmittingEntity* o, GThread* t, Eventor* e, Mountain* m) :
-    fOwner(o), fThread(t), fEventor(e), fMountain(m), fOpArg(0),
+  DancerInfo(GThread* t, Eventor* e, Mountain* m) :
+    fThread(t), fEventor(e), fMountain(m), fOpArg(0),
     fSuspended(false), fSleeping(false),
     fShouldSuspend(false), fShouldExit(false)
   {}
 
-  ~DancerInfo()
-  { delete fThread; }
+  ~DancerInfo() {}
 };
 
 #ifndef __CINT__

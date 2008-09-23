@@ -9,13 +9,19 @@
 #include <Glasses/ZGlass.h>
 #include <errno.h>
 
-ClassImp(GMutex)
+//______________________________________________________________________________
+//
+// POSIX mutex wrapper class.
+//
+
+ClassImp(GMutex);
 
 //extern int pthread_mutexattr_settype(pthread_mutexattr_t*, int);
 //#define pthread_mutexattr_settype __pthread_mutexattr_settype
 // safr ... ADAPTIVE not in glibc b4 rh7 ... falling back to FAST
 
-GMutex::GMutex(Init_e e) {
+GMutex::GMutex(Init_e e)
+{
   // This can't fail ... so says the pthread man
   pthread_mutexattr_init(&mAttr);
   switch(e) {
@@ -34,7 +40,10 @@ GMutex::GMutex(Init_e e) {
   }
 }
 
-GMutex::~GMutex() { pthread_mutex_destroy(&mMut); }
+GMutex::~GMutex()
+{
+  pthread_mutex_destroy(&mMut);
+}
 
 GMutex::Lock_e GMutex::Lock()
 {

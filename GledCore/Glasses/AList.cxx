@@ -102,7 +102,7 @@ void AList::RemoveLensesViaQueen(Bool_t recurse)
   auto_ptr<ZMIR>    mir( mQueen->S_RemoveLenses(this, recurse) );
   auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(mir) );
   if(res->HasException())
-    throw(Exc_t(res->Exception.Data()));
+    throw(Exc_t(res->fException.Data()));
 }
 
 /**************************************************************************/
@@ -111,7 +111,7 @@ void AList::RemoveLensesViaQueen(Bool_t recurse)
 
 void AList::SetElementFID(FID_t fid)
 {
-  mLid = fid.lid; mCid = fid.cid;
+  mLid = fid.fLid; mCid = fid.fCid;
   Stamp(FID());
 }
 

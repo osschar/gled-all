@@ -5,6 +5,8 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "EyeInfo.h"
+#include "EyeInfo.c7"
+
 #include <Eye/Ray.h>
 #include <Stones/ZMIR.h>
 #include <Ephra/Saturn.h>
@@ -23,7 +25,7 @@ void EyeInfo::Message(const Text_t* s)
 {
   ZMIR* mir = get_MIR();
   if(mir == 0) return;
-  TextMessage tm(mir->Caller, TextMessage::TM_Message, s);
+  TextMessage tm(mir->fCaller, TextMessage::TM_Message, s);
   mSaturn->DeliverTextMessage(this, tm);
 }
 
@@ -31,7 +33,7 @@ void EyeInfo::Warning(const Text_t* s)
 {
   ZMIR* mir = get_MIR();
   if(mir == 0) return;
-  TextMessage tm(mir->Caller, TextMessage::TM_Warning, s);
+  TextMessage tm(mir->fCaller, TextMessage::TM_Warning, s);
   mSaturn->DeliverTextMessage(this, tm);
 }
 
@@ -39,10 +41,6 @@ void EyeInfo::Error(const Text_t* s)
 {
   ZMIR* mir = get_MIR();
   if(mir == 0) return;
-  TextMessage tm(mir->Caller, TextMessage::TM_Error, s);
+  TextMessage tm(mir->fCaller, TextMessage::TM_Error, s);
   mSaturn->DeliverTextMessage(this, tm);
 }
-
-/**************************************************************************/
-
-#include "EyeInfo.c7"

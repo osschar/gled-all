@@ -21,7 +21,7 @@ protected:
 public:
   SaturnObserver(const Text_t* n="SaturnObserver", const Text_t* t=0) : Operator(n,t) { _init(); }
 
-  virtual void Operate(Operator::Arg* op_arg)	 throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "SaturnObserver.h7"
   ClassDef(SaturnObserver, 1)

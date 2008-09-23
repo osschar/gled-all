@@ -67,6 +67,7 @@ public:
   virtual void	OnWait(Operator::Arg* op_arg, Operator::Exception& op_exc);
   virtual void	OnStop(Operator::Arg* op_arg, Operator::Exception& op_exc);
   virtual void	OnBreak(Operator::Arg* op_arg, Operator::Exception& op_exc);
+  virtual void	OnBreak(Operator::Arg* op_arg, const TString& msg);
 
   virtual void	Start();	// X{E} 7 MButt(-join=>1)
   virtual void	Stop();		// X{E} 7 MButt()

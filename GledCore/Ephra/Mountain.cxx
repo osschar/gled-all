@@ -31,7 +31,8 @@ void Mountain::DancerCooler(DancerInfo* di)
   GLensWriteHolder wrlck(di->fEventor);
 
   DancerInfo* rdi = di->fMountain->UnregisterThread(di->fEventor);
-  if(di != rdi) {
+  if (di != rdi)
+  {
     ISerr(_eh + "mismatch between local and global thread data.");
   }
   di->fEventor->OnExit(di->fOpArg);
@@ -41,8 +42,10 @@ void Mountain::DancerCooler(DancerInfo* di)
 
 /**************************************************************************/
 
-namespace {
-  void sh_DancerSuspender(int sig) {
+namespace
+{
+  void sh_DancerSuspender(int sig)
+  {
     int recsig;
     sigset_t set;
     sigemptyset(&set);
@@ -53,6 +56,10 @@ namespace {
 
 void* Mountain::DancerBeat(DancerInfo* di)
 {
+  static const Exc_t _eh("Mountain::DancerBeat ");
+
+  void* err_ret = (void*) 1;
+
   GThread::SetCancelState(GThread::CS_Enable);
   GThread::SetCancelType(GThread::CT_Async);
   //GThread::SetCancelType(GThread::CT_Deferred);
@@ -75,18 +82,15 @@ void* Mountain::DancerBeat(DancerInfo* di)
     sigaction(SIGUSR1, &sac, 0);
   }
 
-  { // Initialize thread ownership
-    GThread::setup_tsd(di->fOwner);
-  }
-
   Operator::Arg* op_arg;
   {
     GLensWriteHolder wrlck(di->fEventor);
     op_arg = di->fEventor->PreDance();
   }
-  if(op_arg == 0) GThread::Exit();
+  if (op_arg == 0) return err_ret;
 
-  GTHREAD_CU_PUSH;
+  di->fThread->SetEndFoo((GThread_cu_foo)DancerCooler);
+  di->fThread->SetEndArg((void*)di);
 
   di->fOpArg = op_arg;
   op_arg->fStart.SetNow();
@@ -98,7 +102,8 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
   bool exc_p = false, exit_p = false, suspend_p = false;
 
-  if(di->fShouldSuspend) {
+  if (di->fShouldSuspend)
+  {
     // Hack: allows connecting moons to properly initialize multix
     // suspended threads.
     // Time difference is wrong, but this shouldn't matter for multixen.
@@ -112,7 +117,8 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
     op_arg->fBeatStart.SetNow();
     ++op_arg->fBeatID;
-    try {
+    try
+    {
       {
 	GLensWriteHolder wrlck(di->fEventor);
 	di->fEventor->PreBeat(op_arg);
@@ -124,47 +130,81 @@ void* Mountain::DancerBeat(DancerInfo* di)
 	di->fEventor->PostBeat(op_arg);
       }
     }
-    catch(Operator::Exception op_exc) {
+    catch(Operator::Exception& op_exc)
+    {
       exc_p = true;
 
-      switch(op_exc.fExc) {
-
-      case Operator::OE_Done: {
-	GLensWriteHolder wrlck(di->fEventor);
-	di->fEventor->PostDance(op_arg);
-	exit_p = true;
-	break;
-      }
-      case Operator::OE_Continue: {
-	GLensWriteHolder wrlck(di->fEventor);
-	di->fEventor->OnContinue(op_arg, op_exc);
-	break;
-      }
-      case Operator::OE_Wait: {
-	GLensWriteHolder wrlck(di->fEventor);
-	di->fEventor->OnWait(op_arg, op_exc);
-	suspend_p = true;
-	break;
-      }
-      case Operator::OE_Stop: {
-	GLensWriteHolder wrlck(di->fEventor);
-	di->fEventor->OnStop(op_arg, op_exc);
-	exit_p = true;
-	break;
-      }
-      case Operator::OE_Break: {
-	ISerr(GForm("Mountain::DancerBeat [%s] Exit with Break",
-		    di->fEventor->GetName()));
-	GLensWriteHolder wrlck(di->fEventor);
-	di->fEventor->OnBreak(op_arg, op_exc);
-	exit_p = true;
-	break;
-      }
+      switch(op_exc.fExc)
+      {
+        case Operator::OE_Done:
+        {
+          GLensWriteHolder wrlck(di->fEventor);
+          di->fEventor->PostDance(op_arg);
+          exit_p = true;
+          break;
+        }
+        case Operator::OE_Continue:
+        {
+          GLensWriteHolder wrlck(di->fEventor);
+          di->fEventor->OnContinue(op_arg, op_exc);
+          break;
+        }
+        case Operator::OE_Wait:
+        {
+          GLensWriteHolder wrlck(di->fEventor);
+          di->fEventor->OnWait(op_arg, op_exc);
+          suspend_p = true;
+          break;
+        }
+        case Operator::OE_Stop:
+        {
+          GLensWriteHolder wrlck(di->fEventor);
+          di->fEventor->OnStop(op_arg, op_exc);
+          exit_p = true;
+          break;
+        }
+        case Operator::OE_Break:
+        {
+          ISerr(_eh + GForm("[%s] Exit with Break", di->fEventor->GetName()));
+          GLensWriteHolder wrlck(di->fEventor);
+          di->fEventor->OnBreak(op_arg, op_exc);
+          exit_p = true;
+          break;
+        }
       }
     }
+    catch (Exc_t& exc)
+    {
+      exc_p = true;
+      ISerr(_eh + GForm("[%s] Unhandled exception, breaking event loop, Exc_t: '%s'",
+                        di->fEventor->GetName(), exc.Data()));
+      GLensWriteHolder wrlck(di->fEventor);
+      di->fEventor->OnBreak(op_arg, exc);
+      exit_p = true;
+    }
+    catch (exception& exc)
+    {
+      exc_p = true;
+      ISerr(_eh + GForm("[%s] Unhandled exception, breaking event loop, std::exception: '%s'",
+                        di->fEventor->GetName(), exc.what()));
+      GLensWriteHolder wrlck(di->fEventor);
+      di->fEventor->OnBreak(op_arg, exc.what());
+      exit_p = true;
+    }
+    catch (...)
+    {
+      exc_p = true;
+      ISerr(_eh + GForm("[%s] Unhandled unknown exception, breaking event loop.",
+                        di->fEventor->GetName()));
+      GLensWriteHolder wrlck(di->fEventor);
+      di->fEventor->OnBreak(op_arg, "");
+      exit_p = true;
+      throw;
+    }
+
     op_arg->fBeatStop.SetNow();
     op_arg->fBeatSum += op_arg->fBeatStop - op_arg->fBeatStart;
-    if(!exc_p && !op_arg->fContinuous) {
+    if (!exc_p && !op_arg->fContinuous) {
       GLensWriteHolder wrlck(di->fEventor);
       di->fEventor->PostDance(op_arg);
       exit_p = true;
@@ -172,15 +212,18 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
   suspend_exit_check:
     di->fOpArg->fSuspendidor.Lock();
-    if(exit_p || di->fShouldExit) {
+    if (exit_p || di->fShouldExit)
+    {
       di->fOpArg->fSuspendidor.Unlock();
-      GThread::Exit();
+      return 0;
     }
 
-    if(suspend_p || di->fShouldSuspend) {
+    if (suspend_p || di->fShouldSuspend)
+    {
       di->fEventor->OnSuspend(op_arg);
       di->fSuspended = true;
-      if(op_arg->fSignalSafe) {
+      if (op_arg->fSignalSafe)
+      {
 	di->fOpArg->fSuspendidor.Unlock();
 	di->fThread->Kill(GThread::SigUSR1);
       } else {
@@ -188,10 +231,12 @@ void* Mountain::DancerBeat(DancerInfo* di)
 	di->fOpArg->fSuspendidor.Unlock();
       }
       // Check again for exit during suspend
-      if(di->fShouldExit) {
-	GThread::Exit();
+      if(di->fShouldExit)
+      {
+	return 0;
       }
-    } else {
+    } else
+    {
       di->fOpArg->fSuspendidor.Unlock();
     }
 
@@ -199,8 +244,10 @@ void* Mountain::DancerBeat(DancerInfo* di)
     since_start -= op_arg->fBeatStart;
 
     Int_t sleep_time = di->fEventor->GetInterBeatMS() - since_start.ToMiliSec();
-    if(sleep_time > 0) {
-      if(op_arg->fSignalSafe) {
+    if (sleep_time > 0)
+    {
+      if (op_arg->fSignalSafe)
+      {
 	gSystem->Sleep(UInt_t(sleep_time));
       } else {
 	di->fOpArg->fSuspendidor.Lock();
@@ -208,14 +255,16 @@ void* Mountain::DancerBeat(DancerInfo* di)
 	int timed_out = di->fOpArg->fSuspendidor.TimedWaitMS(sleep_time);
 	di->fSleeping = false;
 	di->fOpArg->fSuspendidor.Unlock();
-	if(!timed_out) {
+	if (!timed_out)
+        {
 	  goto suspend_exit_check;
 	}
       }
     }
   } // end forever
 
-  GTHREAD_CU_POP;
+  ISerr(_eh + "Got to the end of function ... not expected to end here.");
+  return err_ret;
 }
 
 /**************************************************************************/
@@ -226,7 +275,9 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
 {
   static const Exc_t _eh("Mountain::Start ");
 
- if(bInSuspend) { // !!! should use mutex ... rethink suspend all !!!
+  if (bInSuspend)
+  {
+    // !!! should use mutex ... rethink suspend all !!!
     // In fact ... should add it to on stage w/ fThread=0 ...
     ISerr(_eh + "Mountain suspended, stalling.");
     return;
@@ -239,16 +290,15 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
     return;
   }
 
-  ZMirEmittingEntity* o = GThread::get_owner();
-  GThread* t = new GThread((GThread_foo)DancerBeat, 0, true);
-  DancerInfo* di = new DancerInfo(o, t, e, this);
-  t->SetArg((void*)di);
+  GThread* t = new GThread("Mountain-DancerBeat",
+                           (GThread_foo) DancerBeat, 0,
+                           true);
+  DancerInfo* di = new DancerInfo(t, e, this);
   hOnStage[e] = di;
+  t->SetStartArg((void*) di);
   hStageLock.Unlock();
 
-  t->SetEndFoo((GThread_cu_foo)DancerCooler);
-  t->SetEndArg((void*)di);
-  if(suspend_immediately) di->fShouldSuspend = true;
+  if (suspend_immediately) di->fShouldSuspend = true;
   t->Spawn();
 }
 
@@ -373,8 +423,9 @@ DancerInfo* Mountain::UnregisterThread(Eventor* e)
     ISerr(_eh + GForm("thread of %s not found.", e->GetName()));
     return 0;
   }
+  DancerInfo* ret = i->second;
   hOnStage.erase(i);
-  return i->second;
+  return ret;
 }
 
 void Mountain::WipeThread(Eventor* e)

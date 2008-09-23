@@ -13,7 +13,8 @@
 #include <pthread.h>
 #endif
 
-class GCondition : public GMutex {
+class GCondition : public GMutex
+{
 private:
 #ifndef __CINT__
   pthread_cond_t	mCond;
@@ -31,7 +32,7 @@ public:
   Int_t LockBroadcast();
 
 #include "GCondition.h7"
-  ClassDef(GCondition,0)
+  ClassDef(GCondition,0);
 }; // endclass GCondition
 
 #endif

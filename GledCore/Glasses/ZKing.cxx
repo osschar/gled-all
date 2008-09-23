@@ -68,16 +68,16 @@ void ZKing::BlessMIR(ZMIR& mir)
   // Dependency check
   // Mild version ... just assert args in moon or sun space.
   // Further could restrict args to queens + lenses of mandatory queens.
-  if(mir.Beta) {
-    if(mir.BetaID > mMaxID) {
+  if(mir.fBeta) {
+    if(mir.fBetaID > mMaxID) {
       throw(_eh + GForm("beta '%s', id=%d: dependency check failed.",
-			mir.Beta->GetName(), mir.BetaID));
+			mir.fBeta->GetName(), mir.fBetaID));
     }
   }
-  if(mir.Gamma) {
-    if(mir.GammaID > mMaxID) {
+  if(mir.fGamma) {
+    if(mir.fGammaID > mMaxID) {
       throw(_eh + GForm("gamma '%s', id=%d: dependency check failed.",
-			    mir.Gamma->GetName(), mir.GammaID));
+			    mir.fGamma->GetName(), mir.fGammaID));
     }
   }
 
@@ -89,7 +89,7 @@ void ZKing::BlessMIR(ZMIR& mir)
   }
 
   // Always allow SunAbsolute access
-  if(mir.Caller->HasIdentity(mSaturn->mSunInfo->GetPrimaryIdentity())) {
+  if(mir.fCaller->HasIdentity(mSaturn->mSunInfo->GetPrimaryIdentity())) {
     return;
   }
 

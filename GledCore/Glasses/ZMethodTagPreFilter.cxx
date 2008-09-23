@@ -34,8 +34,8 @@ ZMirFilter::Result_e ZMethodTagPreFilter::FilterMIR(ZMIR& mir)
   lStr_t tags;
   int cnt = GledNS::split_string(mTags.Data(), tags, ',');
   if(cnt) {
-    GledNS::ClassInfo* ci = GledNS::FindClassInfo(FID_t(mir.Lid, mir.Cid));
-    GledNS::MethodInfo* mi = ci->FindMethodInfo(mir.Mid);
+    GledNS::ClassInfo* ci = GledNS::FindClassInfo(FID_t(mir.fLid, mir.fCid));
+    GledNS::MethodInfo* mi = ci->FindMethodInfo(mir.fMid);
     for(lStr_i i=tags.begin(); i!=tags.end(); ++i) {
       for(lStr_i j=mi->fTags.begin(); j!=mi->fTags.end(); ++j) {
 	if(*i == *j) {

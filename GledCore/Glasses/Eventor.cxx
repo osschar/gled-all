@@ -233,6 +233,12 @@ void Eventor::OnBreak(Operator::Arg* op_arg, Operator::Exception& op_exc)
   // Called from Mountain::DancerBeat() upon catching "break" exception.
 }
 
+void Eventor::OnBreak(Operator::Arg* op_arg, const TString& msg)
+{
+  // Called from Mountain::DancerBeat() upon catching an un-native
+  // exception.
+}
+
 /**************************************************************************/
 // User interface for thread control
 /**************************************************************************/

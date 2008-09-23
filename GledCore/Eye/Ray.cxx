@@ -137,7 +137,7 @@ const char* Ray::EventName() const
 
 void Ray::Dump(ostream& s) const {
   s << EventName() <<" "<< fStamp << " ";
-  s << fAlpha->GetSaturnID() <<", ("<< fFID.lid <<","<< fFID.cid <<")";
+  s << fAlpha->GetSaturnID() <<", ("<< fFID.fLid <<","<< fFID.fCid <<")";
 }
 
 ostream& operator<<(ostream& s, const Ray& r) {

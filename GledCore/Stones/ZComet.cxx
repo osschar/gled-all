@@ -68,7 +68,7 @@ Int_t ZComet::AddGlass(ZGlass* g, Bool_t do_links, Bool_t do_lists, Int_t depth)
   if(mIDMap.find(id) == mIDMap.end()) {
     ++num_new;
     mIDMap[id] = g;
-    mLibSets.insert(g->VFID().lid);
+    mLibSets.insert(g->VFID().fLid);
     ISdebug(D_STREAM, GForm("ZComet::AddGlass added lens %s, id=%u",
 			    g->GetName(), id));
   }

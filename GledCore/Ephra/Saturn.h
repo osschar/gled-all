@@ -236,6 +236,7 @@ protected:
 
   void RouteMIR(auto_ptr<ZMIR>& mir)  throw();
   void UnfoldMIR(auto_ptr<ZMIR>& mir) throw();
+  void ExecMIR(ZMIR* mir, bool lockp=true);
   void ExecMIR(auto_ptr<ZMIR>& mir, bool lockp=true);
   void ExecDetachedMIR(auto_ptr<ZMIR>& mir);
 
@@ -278,22 +279,13 @@ private:
     new_connection_ti(Saturn* s, TSocket* so) : sat(s), sock(so) {}
   };
 
-  struct mir_router_ti {
-    Saturn*		sat;
-    ZMIR*		mir;
-    bool		delete_mir;
-    GThread*		self;
-    mir_router_ti(Saturn* s, ZMIR* m, bool d=true) :
-      sat(s), mir(m), delete_mir(d), self(0) {}
-  };
-
   // Thread functions
 
   static void* tl_SaturnFdSucker(Saturn *s);
   static void* tl_SaturnAcceptor(new_connection_ti *ss);
-  static void* tl_MIR_Router(mir_router_ti* arg);
-  static void* tl_MIR_DetachedExecutor(mir_router_ti* arg);
-  static void  tl_MIR_DetachedCleanUp(mir_router_ti* arg);
+  static void* tl_MIR_Router(Saturn* sat);
+  static void* tl_MIR_DetachedExecutor(Saturn* sat);
+  static void  tl_MIR_DetachedCleanUp(Saturn* sat);
 
   static void* tl_MIR_Shooter(Saturn* s);
   static void* tl_Delayed_MIR_Shooter(Saturn* s);

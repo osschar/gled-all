@@ -182,14 +182,14 @@ void FGS::LensNameBox::auto_label()
 {
   if(fImg) {
     GNS::ClassInfo*   ci = fImg->GetCI();
-    GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(ci->fFid.lid);
+    GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(ci->fFid.fLid);
     mToName = fImg->fLens->GetName();
     set_tooltip(GForm("%s::%s* [%d]", lsi->fName.Data(), ci->fName.Data(),
 		      fImg->fLens->GetSaturnID()));
   } else {
-    FID_t fid(fFID); if(fid.is_null()) fid.lid = fid.cid = 1;
+    FID_t fid(fFID); if(fid.is_null()) fid.fLid = fid.fCid = 1;
     GNS::ClassInfo*   ci = GNS::FindClassInfo(fid);
-    GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(fid.lid);
+    GNS::LibSetInfo* lsi = GNS::FindLibSetInfo(fid.fLid);
     mToName = "<null>";
     set_tooltip(GForm("%s::%s*", lsi->fName.Data(), ci->fName.Data()));
   }

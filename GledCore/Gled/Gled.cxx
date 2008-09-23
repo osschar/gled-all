@@ -17,15 +17,18 @@
 
 #include <TSystem.h>
 #include <TROOT.h>
+#include <TInterpreter.h>
 #include <TRint.h>
 #include <TMath.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
 #include <TSystemDirectory.h>
+#include <TThread.h>
+#include <Getline.h>
 
 extern void *GledCore_GLED_init;
 
-ClassImp(Gled)
+ClassImp(Gled);
 
 /**************************************************************************/
 
@@ -34,15 +37,32 @@ Gled* gGled        = 0;
 
 /**************************************************************************/
 
-void Gled::next_arg_or_die(list<char*>& args, list<char*>::iterator& i)
+void Gled::next_arg_or_die(lStr_t& args, lStr_i& i)
 {
-  list<char*>::iterator j = i;
-  if(++j == args.end()) {
+  lStr_i j = i;
+  if (++j == args.end())
+  {
     cerr <<"Option "<< *i <<" requires an argument\n";
     exit(1);
   }
   i = j;
 }
+
+/**************************************************************************/
+
+void Gled::InitStatics()
+{
+  GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
+  GledNS::InitFD(0, GledNS::GledRoot);
+
+  gROOT->SetMacroPath(GForm(".:%s/.gled:%s/macros",
+			    getenv("HOME"), getenv("GLEDSYS")));
+  gInterpreter->AddIncludePath(GForm("%s/.gled", getenv("HOME")));
+  gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
+  gInterpreter->SetProcessLineLock(false);
+
+  TThread a_root_thread; // Enforce ROOT thread init.
+}  
 
 /**************************************************************************/
 
@@ -56,18 +76,20 @@ Gled::Gled() :
   bAllowMoons   (false),
   bRunRint      (true),
   bRintRunning  (false),
+  mRint         (0),
   mLoggingMutex (GMutex::recursive),
   mLogFile      (0),
   mOutFile      (0),
   mExitCondVar  (0),
   mRintThread   (0)
 {
-  if(theOne) {
-    cerr <<"Gled::Gled trying to instantiate another object ...\n";
+  if (theOne)
+  {
+    fprintf(stderr, "Gled::Gled trying to instantiate another Gled object.\n");
     exit(1);
   }
+
   gGled = theOne = this;
-  GThread::init_tsd();
 
   // Set-up SaturnInfo, set defaults
 
@@ -94,71 +116,71 @@ Gled::Gled() :
   mDefEyeIdentity = "guest";
 }
 
-void Gled::ParseArguments(list<char*>& args)
+void Gled::ParseArguments(lStr_t& args)
 {
   // Parse command-line arguments.
 
-  list<char*>::iterator i = args.begin();
-  while(i != args.end()) {
-    list<char*>::iterator start = i;
+  lStr_i i  = args.begin();
+  while (i != args.end())
+  {
+    lStr_i start = i;
 
-    if(strcmp(*i, "-h")==0 || strcmp(*i, "-help")==0 ||
-       strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
-      {
-	printf(
-	       "Arguments: [options] [dir] [file(s)]\n"
-	       "                     dir   ~ cd to dir prior to exec of files\n"
-	       "                     files ~ ROOT macro scripts to process\n"
-	       "Gled options:\n"
-	       "-------------\n"
-	       "  -preexec <m1:m2..> pre-exec specified macros\n"
-	       "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
-	       "                     Saturn if -master is specified, Sun otherwise\n"
-	       "  -allowmoons        accept moon connections\n"
-	       "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
-	       "  -p[ort]    <num>   specify server port (def: 9061)\n"
-	       "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
-	       "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
-	       "  -n[ame]    <str>   name of Saturn\n"
-	       "  -t[itle]   <str>   title of Saturn\n"
-	       "  -l                 no splash info\n"
-	       "  -norint            do not run TRint (useful for batch saturns)\n"
-	       "\n"
-	       "Logging options:\n"
-	       "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n"
-	       "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
-	       "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
-	       "\n"
-	       "Authentication options:\n"
-	       "  -auth              use authentication\n"
-	       "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
-	       "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
-	       "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
-	       "Renderer loading options:\n"
-	       "  -rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n"
-	       );
-	bQuit = true;
-	return;
-      }
-
-    else if(strcmp(*i, "-preexec")==0) {
+    if(*i == "-h" || *i == "-help" || *i == "--help" || *i == "-?")
+    {
+      printf(
+             "Arguments: [options] [dir] [file(s)]\n"
+             "                     dir   ~ cd to dir prior to exec of files\n"
+             "                     files ~ ROOT macro scripts to process\n"
+             "Gled options:\n"
+             "-------------\n"
+             "  -preexec <m1:m2..> pre-exec specified macros\n"
+             "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
+             "                     Saturn if -master is specified, Sun otherwise\n"
+             "  -allowmoons        accept moon connections\n"
+             "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
+             "  -p[ort]    <num>   specify server port (def: 9061)\n"
+             "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
+             "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
+             "  -n[ame]    <str>   name of Saturn\n"
+             "  -t[itle]   <str>   title of Saturn\n"
+             "  -l                 no splash info\n"
+             "  -norint            do not run TRint (useful for batch saturns)\n"
+             "\n"
+             "Logging options:\n"
+             "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n"
+             "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
+             "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
+             "\n"
+             "Authentication options:\n"
+             "  -auth              use authentication\n"
+             "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
+             "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
+             "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
+             "Renderer loading options:\n"
+             "  -rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n"
+             );
+      bQuit = true;
+      return;
+    }
+    else if (*i == "-preexec")
+    {
       next_arg_or_die(args, i);
       bPreExec = true;
       mPreExecString   = *i;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-r")==0 || strcmp(*i, "-run")==0) {
+    else if (*i ==  "-r" || *i == "-run")
+    {
       bAutoSpawn = true;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-allowmoons")==0) {
+    else if (*i == "-allowmoons")
+    {
       bAllowMoons = true;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-s")==0 || strcmp(*i, "-sssize")==0) {
+    else if (*i == "-s" || *i == "-sssize")
+    {
       next_arg_or_die(args, i);
       if(index(*i, 'e')) {
 	int m, e, num = sscanf(*i, "%de%d", &m, &e);
@@ -169,20 +191,20 @@ void Gled::ParseArguments(list<char*>& args)
       }
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-p")==0 || strcmp(*i, "-port")==0) {
+    else if (*i == "-p" || *i == "-port")
+    {
       next_arg_or_die(args, i);
       mSaturnInfo->SetServerPort( atoi(*i) );
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-portscan")==0) {
+    else if (*i == "-portscan")
+    {
       next_arg_or_die(args, i);
       mSaturnInfo->SetServPortScan( atoi(*i) );
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-m")==0 || strcmp(*i, "-master")==0) {
+    else if (*i == "-m" || *i == "-master")
+    {
       next_arg_or_die(args, i);
       char* col = index(*i, ':');
       if(col) {
@@ -193,50 +215,61 @@ void Gled::ParseArguments(list<char*>& args)
       mSaturnInfo->SetMasterName(*i);
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-n")==0 || strcmp(*i, "-name")==0) {
+    else if (*i == "-n" || *i == "-name")
+    {
       next_arg_or_die(args, i);
       mSaturnInfo->SetName(*i);
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-t")==0 || strcmp(*i, "-title")==0) {
+    else if (*i == "-t" || *i == "-title")
+    {
       next_arg_or_die(args, i);
       mSaturnInfo->SetTitle(*i);
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-l")==0) {
+    else if (*i == "-l")
+    {
       bShowSplash = false;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-norint")==0) {
+    else if (*i == "-norint")
+    {
       bRunRint = false;
       args.erase(start, ++i);
     }
 
     // Logging options
 
-    else if(strcmp(*i, "-log")==0 || strcmp(*i, "-logfile")==0) {
+    else if (*i == "-log" || *i == "-logfile")
+    {
       next_arg_or_die(args, i);
-      if(strcmp(*i, "-")==0 || strcmp(*i, "<null>")==0) {
+      if (*i == "-" || *i == "<null>")
+      {
 	mLogFileName = "<null>";
-      } else if(strcmp(*i, "+")==0 || strcmp(*i, "<stdout>")==0) {
+      }
+      else if (*i == "+" || *i == "<stdout>")
+      {
 	mLogFileName = "<stdout>";
-      } else {
+      }
+      else
+      {
 	mLogFileName = *i;
       }
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-out")==0 || strcmp(*i, "-outfile")==0) {
+    else if (*i == "-out" || *i == "-outfile")
+    {
       next_arg_or_die(args, i);
-      if(strcmp(*i, "-")==0 || strcmp(*i, "<null>")==0) {
+      if (*i == "-" || *i == "<null>")
+      {
 	mOutFileName = "<null>";
-      } else if(strcmp(*i, "+")==0 || strcmp(*i, "<stdout>")==0) {
+      }
+      else if (*i == "+" || *i == "<stdout>")
+      {
 	mOutFileName = "<stdout>";
-      } else {
+      }
+      else
+      {
 	mOutFileName = *i;
       }
       args.erase(start, ++i);
@@ -244,24 +277,25 @@ void Gled::ParseArguments(list<char*>& args)
 
     // Authentication options
 
-    else if(strcmp(*i, "-auth")==0) {
+    else if (*i == "-auth")
+    {
       mSaturnInfo->SetUseAuth(true);
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-authdir")==0) {
+    else if (*i == "-authdir")
+    {
       next_arg_or_die(args, i);
       mAuthDir = *i;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-saturnid")==0) {
+    else if (*i == "-saturnid")
+    {
       next_arg_or_die(args, i);
       mSaturnInfo->SetLogin(*i);;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-eyeid")==0) {
+    else if (*i == "-eyeid")
+    {
       next_arg_or_die(args, i);
       mDefEyeIdentity = *i;
       args.erase(start, ++i);
@@ -269,51 +303,49 @@ void Gled::ParseArguments(list<char*>& args)
 
     // Renderer loading options
 
-    else if(strcmp(*i, "-rnr")==0) {
+    else if (*i == "-rnr")
+    {
       next_arg_or_die(args, i);
       mRenderers = *i;
       args.erase(start, ++i);
     }
-
-    else {
+    else
+    {
       ++i;
     }
-
   }
-
 }
 
 void Gled::InitLogging()
 {
-  if(mLogFileName.CompareTo("<null>") == 0)
+  if (mLogFileName == "<null>")
     mLogFile = 0;
-  else if(mLogFileName.CompareTo("<stdout>") == 0)
+  else if (mLogFileName = "<stdout>")
     mLogFile = stdout;
-  else {
-    mLogFile = fopen(mLogFileName.Data(), "w");
-    if(mLogFile == 0) {
+  else
+  {
+    mLogFile = fopen(mLogFileName, "w");
+    if (mLogFile == 0) {
       perror("Gled::InitLogging opening of log file failed");
       exit(1);
     }
   }
 
-  if(mOutFileName.CompareTo("<null>") == 0)
+  if (mOutFileName =="<null>")
     mOutFile = 0;
-  else if (mOutFileName.CompareTo("<stdout>") == 0)
+  else if (mOutFileName == "<stdout>")
     mOutFile = stdout;
-  else if(mOutFileName.CompareTo(mLogFileName) == 0)
+  else if (mOutFileName == mLogFileName)
     mOutFile = mLogFile;
-  else {
-    mOutFile = fopen(mOutFileName.Data(), "w");
-    if(mLogFile == 0) {
+  else
+  {
+    mOutFile = fopen(mOutFileName, "w");
+    if (mLogFile == 0) {
       perror("Gled::InitLogging opening of output file failed");
       exit(1);
     }
   }
-}
 
-void Gled::InitGledCore()
-{
   if(bShowSplash) {
     int len = strlen(GLED_VERSION_STRING) + strlen(GLED_BUILD_DATE_STRING) + 4;
     GMutexHolder mh(mLoggingMutex);
@@ -325,16 +357,93 @@ void Gled::InitGledCore()
     message("+----------------------------------------------------------+");
     message("Gled now bootstraping.");
   }
+}
 
+void Gled::InitGledCore()
+{
   ((void(*)())GledCore_GLED_init)();
 
-  if(mRenderers != "") {
+  if (mRenderers != "")
+  {
     lStr_t rnrs;
     GledNS::split_string(mRenderers.Data(), rnrs, ':');
-    for(lStr_i r=rnrs.begin(); r!=rnrs.end(); ++r)
+    for (lStr_i r = rnrs.begin(); r != rnrs.end(); ++r)
       GledNS::AddRenderer(*r);
 
     GledNS::AssertRenderers();
+  }
+}
+
+void Gled::ProcessCmdLineMacros(const TString& exe, lStr_t& args)
+{
+  // Prepare remaining args for ROOT, weed out remaining options
+
+  static const Exc_t _eh("Gled::ProcessCmdLineMacros ");
+
+  // Argument count and strings to be passed to root.
+  int         rargc = 0;
+  const char* rargv[args.size() + 3];
+
+  rargv[rargc++] = exe;
+  rargv[rargc++] = "-q"; // This enforces return from TRint::Run() after macro processing
+  if (!bShowSplash)
+    rargv[rargc++] = "-l";
+  for (lStr_i i = args.begin(); i != args.end(); ++i)
+  {
+    if ((*i)[0] == '-')
+    {
+      warning(GForm("Ignoring option '%s'.", i->Data()));
+    } else {
+      rargv[rargc++] = i->Data();
+    }
+  }
+
+  // Call pre-exec macros if any.
+  if (bPreExec)
+  {
+    PreExec();
+  }
+
+  // Spawn TRint
+  if (bShowSplash)
+  {
+    printf("Staring ROOT command-line interpreter ...\n");
+  }
+
+  mRint = new TRint("TRint", &rargc, (char**) rargv);
+  mRint->SetPrompt(exe + "[%d] ");
+
+  // Spawn saturn
+  if (bAutoSpawn)
+  {
+    SpawnSunOrSaturn();
+  }
+
+  // Process macros; -q added to options, so it exits after macro processing
+  try
+  {
+    GThread::OwnerChanger _chown(mSaturnInfo);
+
+    mRint->Run(true);
+  }
+  catch(exception& exc)
+  {
+    fprintf(stderr, "%sexception caught during macro processing:\n%s\n",
+	    _eh.Data(), exc.what());
+    exit(1);
+  }
+
+  if (mRint->InputFiles())
+  {
+    mRint->ClearInputFiles();
+  } else {
+    Getlinem(kCleanUp, 0);
+  }
+  Getlinem(kInit, mRint->GetPrompt());
+
+  if (bAllowMoons)
+  {
+    AllowMoonConnections();
   }
 }
 
@@ -353,8 +462,10 @@ void Gled::StopLogging()
   mOutFile = mLogFile = 0;
 }
 
-Gled::~Gled() {
+Gled::~Gled()
+{
   delete mSaturn;
+  delete mRint;
 }
 
 /**************************************************************************/
@@ -369,7 +480,8 @@ void Gled::PreExec()
 
 /**************************************************************************/
 
-void Gled::SpawnSunOrSaturn() {
+void Gled::SpawnSunOrSaturn()
+{
   if(mSaturnInfo->RefMasterName().IsNull()) {
     SpawnSun();
   } else {
@@ -444,7 +556,8 @@ void Gled::SpawnSaturn()
 
 /**************************************************************************/
 
-void Gled::CheckAuthDir() {
+void Gled::CheckAuthDir()
+{
   if(gSystem->AccessPathName(mAuthDir.Data(), kReadPermission)) {
     printf(GForm("Gled::SpawnSaturn: auth dir '%s' not accessible\n", mAuthDir.Data()));
     printf("Gled::SpawnSaturn: use gled-auth-init command to create one\n");
@@ -565,7 +678,8 @@ Int_t Gled::LoadLibSet(LID_t lid)
 
 /**************************************************************************/
 
-void Gled::SetDebugLevel(Int_t d) {
+void Gled::SetDebugLevel(Int_t d)
+{
   if(d<0) d=0;
   G_DEBUG = d;
 }
@@ -574,9 +688,10 @@ void Gled::SetDebugLevel(Int_t d) {
 // Info Stream methods
 /**************************************************************************/
 
-void Gled::output(const char* s) {
+void Gled::output(const char* s)
+{
   if(mOutFile) {
-    GThreadKeepAlive tka;
+    GThread::CancelDisabler tka;
     GMutexHolder     mh(mLoggingMutex);
     if(mOutFile == mLogFile)
       fputs("OUT: ", mOutFile);
@@ -585,21 +700,21 @@ void Gled::output(const char* s) {
   }
 }
 
-void Gled::message(const char* s) {
-  GThread::SetCancelState(GThread::CS_Disable);
+void Gled::message(const char* s)
+{
   if(mLogFile) {
-    GThreadKeepAlive tka;
+    GThread::CancelDisabler tka;
     GMutexHolder     mh(mLoggingMutex);
     fputs("MSG: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
   }
-  GThread::SetCancelState(GThread::CS_Enable);
 }
 
-void Gled::warning(const char* s) {
+void Gled::warning(const char* s)
+{
   if(mLogFile) {
-    GThreadKeepAlive tka;
+    GThread::CancelDisabler tka;
     GMutexHolder     mh(mLoggingMutex);
     fputs("WRN: ", mLogFile);
     fputs(s, mLogFile);
@@ -607,9 +722,10 @@ void Gled::warning(const char* s) {
   }
 }
 
-void Gled::error(const char* s) {
+void Gled::error(const char* s)
+{
   if(mLogFile) {
-    GThreadKeepAlive tka;
+    GThread::CancelDisabler tka;
     GMutexHolder     mh(mLoggingMutex);
     fputs("ERR: ", mLogFile);
     fputs(s, mLogFile);
@@ -711,11 +827,14 @@ public:
 
 void* Gled::TRint_runner_tl(TRint* gint)
 {
-  // Runs the ROOT application. Ownership set to mSaturnInfo.
+  // Runs the ROOT application.
+  // Ownership set to mSaturnInfo.
 
-  GThread::setup_tsd(Gled::theOne->mSaturnInfo);
+  GThread* self = GThread::Self();
 
-  Gled::theOne->mRintThread = GThread::Self();
+  self->set_owner(Gled::theOne->mSaturnInfo);
+
+  Gled::theOne->mRintThread = self;
 
   GExceptionHandler root_exc_handler;
 
@@ -724,17 +843,22 @@ void* Gled::TRint_runner_tl(TRint* gint)
   Gled::theOne->bRintRunning = false;
   cout << "Gint terminated ...\n";
 
-  if(Gled::theOne->GetQuit()==false) Gled::theOne->Exit();
+  if (Gled::theOne->GetQuit() == false)
+    Gled::theOne->Exit();
+
   Gled::theOne->mRintThread = 0;
-  GThread::Exit();
+
   return 0;
 }
 
 void* Gled::Gled_runner_tl(Gled* gled)
 {
   // Runs Gled UI. Only spawned from gled.cxx.
+  // Ownership set to mSaturnInfo.
 
-  GThread::setup_tsd(Gled::theOne->mSaturnInfo);
+  GThread* self = GThread::Self();
+
+  self->set_owner(Gled::theOne->mSaturnInfo);
 
   gled->Run();
   GThread::Exit();

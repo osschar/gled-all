@@ -586,7 +586,7 @@ namespace {
     for(GNS::hCid2pCI_i j = lsi->Cid2CInfo.begin();
 	j != lsi->Cid2CInfo.end(); ++j)
       {
-	res[j->second->fFid.cid] = j->second->fName;
+	res[j->second->fFid.fCid] = j->second->fName;
       }
 
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
@@ -670,7 +670,7 @@ void FTW::Inst_Selector::set_cid(UInt_t c) {
   }
 
   if(ci) {
-    ((Inst_SelID*)wCid->user_data())->id = ci->fFid.cid;
+    ((Inst_SelID*)wCid->user_data())->id = ci->fFid.fCid;
     wCid->label( ci->fName.Data() );
     wCid->redraw();
   }
@@ -1008,15 +1008,15 @@ void FTW::Source_Selector::fix_MIR_beta(auto_ptr<ZMIR>& mir)
   switch (m_cur_type) {
 
   case Top_Selector::T_Locator:
-    mir->BetaID = get_contents();
+    mir->fBetaID = get_contents();
     break;
 
   case Top_Selector::T_Inst: {
     // !!! Need fixed queen option in Instantiator
     static const Exc_t _eh("Creator: ");
-    if(mir->Alpha == 0)
+    if(mir->fAlpha == 0)
       throw(_eh + "alpha not set, can't deduce queen.");
-    ZQueen* q = mir->Alpha->GetQueen();
+    ZQueen* q = mir->fAlpha->GetQueen();
     if(q==0)
       throw(_eh + "target has no Queen");
 
@@ -1029,7 +1029,7 @@ void FTW::Source_Selector::fix_MIR_beta(auto_ptr<ZMIR>& mir)
   }
 
   case Top_Selector::T_Direct:
-    mir->BetaID = wDir_Sel->get_id();
+    mir->fBetaID = wDir_Sel->get_id();
     break;
 
   default:

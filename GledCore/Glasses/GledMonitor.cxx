@@ -44,7 +44,7 @@ void GledMonitor::AdEnlightenment()
   InitHistoGroups();
 }
 
-void GledMonitor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void GledMonitor::Operate(Operator::Arg* op_arg)
 {
   Operator::PreOperate(op_arg);
 

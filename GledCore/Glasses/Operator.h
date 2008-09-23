@@ -68,9 +68,9 @@ public:
   // virtuals
   virtual void ResetRecursively();
 
-  virtual void PreOperate(Operator::Arg* op_arg)  throw(Operator::Exception);
-  virtual void Operate(Operator::Arg* op_arg)     throw(Operator::Exception);
-  virtual void PostOperate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void PreOperate(Operator::Arg* op_arg);
+  virtual void Operate(Operator::Arg* op_arg);
+  virtual void PostOperate(Operator::Arg* op_arg);
 
 #include "Operator.h7"
   ClassDef(Operator, 1)

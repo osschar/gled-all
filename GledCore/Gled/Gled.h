@@ -30,10 +30,10 @@ class Fl_Browser;
 class TRint;
 class TCanvas;
 
-class Gled {
-
+class Gled
+{
 protected:
-  void next_arg_or_die(list<char*>& args, list<char*>::iterator& i);
+  void next_arg_or_die(lStr_t& args, lStr_i& i);
 
   SaturnInfo*	mSaturnInfo;	// X{g}
   Saturn*	mSaturn;	// X{g}
@@ -48,6 +48,7 @@ protected:
 
   Bool_t	bRunRint;	// X{G}
   Bool_t	bRintRunning;	// X{G}
+  TRint        *mRint;          // X{g}
 
   GMutex	mLoggingMutex;
   TString	mLogFileName;
@@ -64,11 +65,13 @@ protected:
   GThread*      mRintThread;     // X{g}
 
 public:
+  static  void InitStatics();
+
   Gled();
-  virtual void ParseArguments(list<char*>& args);
+  virtual void ParseArguments(lStr_t& args);
   virtual void InitLogging();
   virtual void InitGledCore();
-
+  virtual void ProcessCmdLineMacros(const TString& exe, lStr_t& args);
   virtual void StopLogging();
   virtual ~Gled();
 

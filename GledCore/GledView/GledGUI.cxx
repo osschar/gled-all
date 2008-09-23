@@ -47,11 +47,11 @@ extern void *GledCore_GLED_user_init_View;
 // callback handlers
 /**************************************************************************/
 
-namespace {
-
-  void* MessageLoop_tl(GledGUI* gui) {
+namespace
+{
+  void* MessageLoop_tl(GledGUI* gui)
+  {
     gui->MessageLoop();
-    GThread::Exit();
     return 0;
   }
 
@@ -155,7 +155,7 @@ void GledGUI::build_gui()
 
   // Output pack
   wOutPack = new Fl_OutputPack(0,2,60,28);
-  wOutPack->base_skip_mod(-4);
+  wOutPack->base_skip_mod(-2);
   wOutPack->bg_color((Fl_Color)0x20202000);
   wOutPack->fg_color((Fl_Color)0xf0f0f000);
 
@@ -189,7 +189,7 @@ GledGUI::GledGUI() : Gled(), Fl_Window(60, 30, "Gled"),
   mRenderers   = "GL";
 }
 
-void GledGUI::ParseArguments(list<char*>& args)
+void GledGUI::ParseArguments(lStr_t& args)
 {
   Gled::ParseArguments(args);
 
@@ -198,50 +198,49 @@ void GledGUI::ParseArguments(list<char*>& args)
   int   font = 0;
   bool  start_iconized = false, no_msg_window = false;
 
-  list<char*>::iterator i = args.begin();
-  while(i != args.end()) {
-    list<char*>::iterator start = i;
+  lStr_i i  = args.begin();
+  while (i != args.end())
+  {
+    lStr_i start = i;
 
-    if(strcmp(*i, "-h")==0 || strcmp(*i, "-help")==0 ||
-       strcmp(*i, "--help")==0 || strcmp(*i, "-?")==0)
-      {
-	cout << "\n"
-	  "GledGUI options:\n"
-	  "----------------\n"
-	  "  -swm   fs:dh:dw    specify font-size, vert-space and char width\n"
-	  "                     default: 12:6:0 (dw~0 means measure font)\n"
-	  "  -font  font-id     use fltk's font-id as default font\n"
-	  "  -iconize           iconize main window on start-up\n"
-	  "  -nomsgwin | -nomw  start gled without the message window (consider '-log +')\n";
-	return;
-      }
-
-    else if(strcmp(*i, "-swm")==0) {
+    if (*i == "-h" || *i == "-help" || *i == "--help" || *i == "-?")
+    {
+      cout << "\n"
+        "GledGUI options:\n"
+        "----------------\n"
+        "  -swm   fs:dh:dw    specify font-size, vert-space and char width\n"
+        "                     default: 12:6:0 (dw~0 means measure font)\n"
+        "  -font  font-id     use fltk's font-id as default font\n"
+        "  -iconize           iconize main window on start-up\n"
+        "  -nomsgwin | -nomw  start gled without the message window (consider '-log +')\n";
+      return;
+    }
+    else if (*i == "-swm")
+    {
       next_arg_or_die(args, i);
       sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-font")==0) {
+    else if (*i == "-font")
+    {
       next_arg_or_die(args, i);
       font = atoi(*i);
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-iconize")==0) {
+    else if (*i == "-iconize")
+    {
       start_iconized = true;
       args.erase(start, ++i);
     }
-
-    else if(strcmp(*i, "-nomw")==0 || strcmp(*i, "-nomsgwin")==0) {
+    else if (*i == "-nomw" || *i == "-nomsgwin")
+    {
       no_msg_window = true;
       args.erase(start, ++i);
     }
-
-    else {
+    else
+    {
       ++i;
     }
-
   }
 
   // Init starts here ... should be moved to InitLogging ?
@@ -251,7 +250,8 @@ void GledGUI::ParseArguments(list<char*>& args)
   GledViewNS::no_symbol_label = FL_FREE_LABELTYPE;
 
   Fl::set_labeltype((Fl_Labeltype)GledViewNS::no_symbol_label, fl_nosymbol_label, fl_nosymbol_measure);
-  if(font) {
+  if (font)
+  {
     printf("-font option currently disabled. There were problems overriding default font with fltk-1.1.7.\n");
     font = 0;
     // Fl::set_font((Fl_Font)FL_HELVETICA, (Fl_Font)font);
@@ -267,13 +267,16 @@ void GledGUI::ParseArguments(list<char*>& args)
   Fl_Tooltip::enable();	// enable tooltips
   Fl::visible_focus(0); // no focus for buttons ETC
 
-  if(no_msg_window == false) {
+  if (no_msg_window == false)
+  {
     build_gui();
     swm_size_range = new SWM_Size_Range(40, 20, 200, 100);
     mSwmManager->adopt_window(this);
     set_swm_hotspot_cb(wSwmResizer);
-    if(start_iconized)  iconize();
-    else                show();
+    if(start_iconized)
+      iconize();
+    else
+      show();
     bGuiUp = true;
   }
 }
@@ -316,18 +319,24 @@ void GledGUI::Run()
   // printf("GledGUI::Run entering GUI event loop.\n");
   Fl::lock();		// init thread support
 
-  if(bGuiUp) {
-    mMessenger = new GThread((GThread_foo)MessageLoop_tl, this, false);
+  if (bGuiUp)
+  {
+    mMessenger = new GThread("GledGUI-MessageLoop",
+                             (GThread_foo) MessageLoop_tl, this,
+                             false);
     mMessenger->Spawn();
   }
 
-  while(!bQuit) Fl::wait(10);
+  while (!bQuit) Fl::wait(10);
 
   Fl::unlock();
 
-  if(bGuiUp) {
+  if (bGuiUp) 
+  {
+    mMsgCond.Lock();
     bGuiUp = false;
     mMsgCond.Signal();
+    mMsgCond.Unlock();
     mMessenger->Join();
     delete mMessenger; mMessenger = 0;
     mMsgQueue.clear();
@@ -356,10 +365,11 @@ Int_t GledGUI::LoadLibSet(const Text_t* lib_set)
 
 /**************************************************************************/
 
-void GledGUI::SetDebugLevel(Int_t d) {
-  if(d<0) d=0;
+void GledGUI::SetDebugLevel(Int_t d)
+{
+  if (d < 0) d = 0;
   Gled::SetDebugLevel(d);
-  if(bGuiUp) wDebugLevel->value(d);
+  if (bGuiUp) wDebugLevel->value(d);
 }
 
 /**************************************************************************/
@@ -371,14 +381,17 @@ void GledGUI::SetDebugLevel(Int_t d) {
 
 void GledGUI::MessageLoop()
 {
-  while(bGuiUp) {
+  while (bGuiUp)
+  {
     mMsgCond.Lock();
     mMsgCond.Wait();
-    if(mMsgQueue.begin() != mMsgQueue.end()) {
+    if (mMsgQueue.begin() != mMsgQueue.end())
+    {
       mMsgCond.Unlock();
       Fl::lock();
       mMsgCond.Lock();
-      while(mMsgQueue.begin() != mMsgQueue.end()) {
+      while (mMsgQueue.begin() != mMsgQueue.end())
+      {
 	Message& msg = mMsgQueue.front();
 	wOutPack->add_line(msg.fMsg.Data(), msg.fCol);
 	mMsgQueue.pop_front();
@@ -389,6 +402,7 @@ void GledGUI::MessageLoop()
     }
     mMsgCond.Unlock();
   }
+  printf("exiting GledGUI::MessageLoop()\n");
 }
 
 void GledGUI::PostMessage(const char* m, Fl_Color c)
@@ -526,6 +540,7 @@ void GledGUI::UnlockFltk()
 }
 
 /******************************************************************************/
+
 void GledGUI::LockRootDisplay()
 {
   Display* rd = (Display*) gVirtualX->GetDisplay();

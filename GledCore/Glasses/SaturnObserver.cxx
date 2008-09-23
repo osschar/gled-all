@@ -23,7 +23,7 @@ void SaturnObserver::_init()
 
 /**************************************************************************/
 
-void SaturnObserver::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void SaturnObserver::Operate(Operator::Arg* op_arg)
 {
   Operator::PreOperate(op_arg);
 

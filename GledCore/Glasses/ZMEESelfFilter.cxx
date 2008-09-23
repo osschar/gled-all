@@ -31,9 +31,9 @@ ZMirFilter::Result_e ZMEESelfFilter::FilterMIR(ZMIR& mir)
 
   const TString mee_self_tag("MEE::Self");
 
-  if(mir.Caller == mir.Alpha) {
-    GledNS::ClassInfo* ci = GledNS::FindClassInfo(FID_t(mir.Lid, mir.Cid));
-    GledNS::MethodInfo* mi = ci->FindMethodInfo(mir.Mid);
+  if(mir.fCaller == mir.fAlpha) {
+    GledNS::ClassInfo* ci = GledNS::FindClassInfo(FID_t(mir.fLid, mir.fCid));
+    GledNS::MethodInfo* mi = ci->FindMethodInfo(mir.fMid);
     for(lStr_i i=mi->fTags.begin(); i!=mi->fTags.end(); ++i) {
       if(*i == mee_self_tag)
 	return ZMirFilter::R_Allow;

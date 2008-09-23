@@ -18,15 +18,28 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-ClassImp(GCondition)
+//______________________________________________________________________________
+//
+// POSIX condition-variable wrapper class.
+//
+// Inherits from GMutex so that is automatically associated with this
+// condition. So, simply lock/unlock the condition variable object to
+// ensure that no signals are missed.
+//
+
+ClassImp(GCondition);
 
 /**************************************************************************/
 
-GCondition::GCondition(GMutex::Init_e e) : GMutex(e) {
+GCondition::GCondition(GMutex::Init_e e) : GMutex(e)
+{
   pthread_cond_init(&mCond, 0);
 }
 
-GCondition::~GCondition() { pthread_cond_destroy(&mCond); }
+GCondition::~GCondition()
+{
+  pthread_cond_destroy(&mCond);
+}
 
 /**************************************************************************/
 

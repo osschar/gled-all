@@ -376,12 +376,12 @@ ZList* ZList::AssertPath(const Text_t* path, const Text_t* new_el_type)
 	  auto_ptr<ZMIR> att_mir( l->S_Add(0) );
 	  auto_ptr<ZMIR> inst_mir
 	    ( mQueen->S_InstantiateWAttach
-	      (new_el_fid.lid, new_el_fid.cid, i->Data()) );
+	      (new_el_fid.fLid, new_el_fid.fCid, i->Data()) );
 	  inst_mir->ChainMIR(att_mir.get());
 
 	  auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(inst_mir) );
 	  if(res->HasException())
-	    throw(_eh + "got exception: " + res->Exception.Data());
+	    throw(_eh + "got exception: " + res->fException.Data());
 	  if(res->HasResult()) {
 	    ID_t id; *res >> id;
 	    l = dynamic_cast<ZList*>(mSaturn->DemangleID(id));

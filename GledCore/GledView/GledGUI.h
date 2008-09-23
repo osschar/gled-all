@@ -54,7 +54,7 @@ protected:
 
 public:
   GledGUI();
-  virtual void ParseArguments(list<char*>& args);
+  virtual void ParseArguments(lStr_t& args);
   // virtual void InitLogging();
   virtual void InitGledCore();
   virtual ~GledGUI();
