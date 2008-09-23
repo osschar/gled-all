@@ -31,7 +31,8 @@ void  ZImage_GL_Rnr::check_rescale()
 {
   static const Exc_t _eh("ZImage_GL_Rnr::check_rescale ");
 
-  if (sRescaleToPow2 == -1) {
+  if (sRescaleToPow2 == -1)
+  {
     sRescaleToPow2 = 0;
     TString vendor((const char*) glGetString(GL_VENDOR));
 
@@ -49,8 +50,8 @@ void  ZImage_GL_Rnr::check_rescale()
       sRescaleToPow2 = 1;
     }
     else if (vendor.BeginsWith("ATI")) {
-      if (major <= 2 && minor <= 1 && patch <= 7659) {
-        ISmess(mh + "ATI, GL <= 2.1.7659 (very slow rendering).");
+      if (major <= 2 && minor <= 1) {
+        ISmess(mh + "ATI, GL <= 2.1.xyzz (very slow rendering).");
         sRescaleToPow2 = 1;
       }
     }
