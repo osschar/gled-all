@@ -42,7 +42,7 @@ public:
   void SetTime(Double_t t);   // X{E} 7 MCWButt()
 
   // Operator
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);

@@ -38,7 +38,7 @@ Double_t RndSMorphCreator::rnd(Double_t k, Double_t n)
 
 /**************************************************************************/
 
-void RndSMorphCreator::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void RndSMorphCreator::Operate(Operator::Arg* op_arg)
 {
   static const Exc_t _eh("RndSMorphCreator::Operate ");
 
@@ -60,7 +60,7 @@ void RndSMorphCreator::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
     if(bGetResult) {
       auto_ptr<ZMIR_RR> res( mSaturn->ShootMIRWaitResult(mir) );
       if(res->HasException()) {
-	cout << _eh << "got exception: " << res->Exception.Data() << endl;
+	cout << _eh << "got exception: " << res->fException.Data() << endl;
 
       }
       if(res->HasResult()) {
