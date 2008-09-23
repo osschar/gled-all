@@ -7,6 +7,8 @@
 #include "CosmicBall_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
 
+typedef ZNode_GL_Rnr PARENT_CLASS;
+
 /**************************************************************************/
 
 GLUquadricObj* CosmicBall_GL_Rnr::sQuadric = 0;
@@ -35,4 +37,17 @@ void CosmicBall_GL_Rnr::Draw(RnrDriver* rd)
   glPopAttrib();
 }
 
-//void CosmicBall_GL_Rnr::PostDraw(RnrDriver* rd){}
+void CosmicBall_GL_Rnr::PostDraw(RnrDriver* rd)
+{
+  PARENT_CLASS::PostDraw(rd);
+
+  CosmicBall& CB = *mCosmicBall;
+
+  glColor3f(0, 1, 0);
+  glBegin(GL_LINE_STRIP);
+  for (list<CosmicBall::Point>::iterator i=CB.mHistory.begin(); i!=CB.mHistory.end(); ++i)
+  {
+    glVertex3fv(*i);
+  }
+  glEnd();
+}

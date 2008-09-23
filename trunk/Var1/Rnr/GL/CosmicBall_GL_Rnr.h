@@ -13,14 +13,15 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-class CosmicBall_GL_Rnr : public ZNode_GL_Rnr {
+class CosmicBall_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 
 protected:
   CosmicBall*	mCosmicBall;
 
-  static GLUquadricObj* sQuadric;
+  static GLUquadricObj* sQuadric;  
 
 public:
   CosmicBall_GL_Rnr(CosmicBall* idol) :
@@ -29,7 +30,7 @@ public:
 
   //virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  //virtual void PostDraw(RnrDriver* rd);
+  virtual void PostDraw(RnrDriver* rd);
 
 }; // endclass CosmicBall_GL_Rnr
 
