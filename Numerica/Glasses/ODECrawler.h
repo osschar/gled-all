@@ -57,8 +57,9 @@ public:
 
   virtual void AddEntry(Double_t x, Double_t* y) = 0;
 
-  virtual Double_t GetMinXStored() const = 0;
-  virtual Double_t GetMaxXStored() const = 0;
+  virtual Double_t GetMinXStored()   const = 0;
+  virtual Double_t GetMaxXStored()   const = 0;
+  virtual Double_t GetDeltaXStored() const { return GetMaxXStored() -  GetMinXStored(); }
 
   ClassDef(ODEStorage, 1);
 };
@@ -96,8 +97,9 @@ public:
     ++mSize;
   }
 
-  virtual Double_t GetMinXStored() const { return mSize > 0 ? mX[0]       : 0; }
-  virtual Double_t GetMaxXStored() const { return mSize > 0 ? mX[mSize-1] : 0; }
+  virtual Double_t GetMinXStored()   const { return mSize > 0 ? mX[0]       : 0; }
+  virtual Double_t GetMaxXStored()   const { return mSize > 0 ? mX[mSize-1] : 0; }
+  virtual Double_t GetDeltaXStored() const { return mSize > 0 ? mX[mSize-1] - mX[0] : 0; }
 
   TT        GetX(Int_t i) const { return  mX[i];        }
   const TT* GetY(Int_t i) const { return &mY[mOrder*i]; }
@@ -160,7 +162,7 @@ public:
 
   virtual ~ODECrawler();
 
-  void        AdvanceXLimits();
+  void        AdvanceXLimits(Double_t delta_x=0);
 
   void        SetStorage(ODEStorage* s);
   void        DetachStorage();

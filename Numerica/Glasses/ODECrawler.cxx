@@ -66,14 +66,15 @@ ODECrawler::~ODECrawler()
 
 /**************************************************************************/
 
-void ODECrawler::AdvanceXLimits()
+void ODECrawler::AdvanceXLimits(Double_t delta_x)
 {
-  // Advance x limits forward, so that X1 becomes X2 and integration
-  // interval length is preserved.
+  // Advance x limits forward, so that X1 becomes X2 and new integration
+  // interval is delta_x.
+  // If delta_x is 0, length of the interval is preserved.
 
-  Double_t d = mX2 - mX1;
+  if (delta_x == 0) delta_x = mX2 - mX1;
   mX1  = mX2;
-  mX2 += d;
+  mX2 += delta_x;
 }
 
 void ODECrawler::SetStorage(ODEStorage* s)
@@ -131,6 +132,8 @@ Int_t
 ODECrawler::Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
 		 TVectorD& yscal, Double_t& hdid, Double_t& hnext)
 {
+  static const Exc_t _eh("ODECrawler::Rkqs ");
+
   Double_t errmax,htemp,xnew;
 
   TVectorD yerr(mN), ytemp(mN);
@@ -148,8 +151,7 @@ ODECrawler::Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
     xnew = x + h;
     if (xnew == x)
     {
-      ISerr(GForm("ODECrawler::Rkqs stepsize underflow, errmax=%f", errmax));
-      return 1;
+      throw(_eh + GForm("stepsize underflow, errmax=%f.", errmax));
     }
   }
   if (errmax > hERRCON)
@@ -204,6 +206,8 @@ void ODECrawler::Integrate()
 {
   // Integrate ODE with derivatives provided by mODEMaster from X1 to X2.
 
+  static const Exc_t _eh("ODECrawler::Integrate ");
+
   Double_t x, xsav, h, hdid, hnext;
 
   x = mX1;
@@ -249,12 +253,11 @@ void ODECrawler::Integrate()
     }
     if (TMath::Abs(hnext) <= mHmin)
     {
-      ISerr(GForm("ODECrawler::Integrate Step size too small, hnext=%g", hnext));
-      return;
+      throw (_eh + GForm("Step size too small, hnext=%g.", hnext));
     }
     h = hnext;
   }
-  ISerr("ODECrawler::Crawl Too many steps ...");
+  throw (_eh + GForm("Too many steps, MaxSteps=%d.", mMaxSteps));
 }
 
 /**************************************************************************/
