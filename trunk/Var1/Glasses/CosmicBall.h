@@ -13,6 +13,7 @@
 class CosmicBall : public Sphere
 {
   MAC_RNR_FRIENDS(CosmicBall);
+  friend class SolarSystem;
 
 private:
   void _init();
@@ -21,10 +22,25 @@ protected:
   Double_t      mM; // X{GS}   7 Value()
   TVector3      mV; // X{GSRr} 7 Vector3()
 
+  struct Point
+  {
+    Float_t x, y, z;
+
+    Point(Float_t a=0, Float_t b=0, Float_t c=0) : x(a), y(b), z(c) {}
+    Point(const Double_t* a) : x(a[0]), y(a[1]), z(a[2]) {}
+
+    operator const Float_t*() const { return &x; }
+    operator       Float_t*()       { return &x; }
+  };
+
+  list<Point>   mHistory;
+
 public:
   CosmicBall(const Text_t* n="CosmicBall", const Text_t* t=0) :
     Sphere(n,t) { _init(); }
 
+  void ResizeHistory(Int_t max_size);
+  void StorePos(Int_t max_size);
 
 #include "CosmicBall.h7"
   ClassDef(CosmicBall, 1);
