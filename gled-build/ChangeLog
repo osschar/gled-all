@@ -1,3 +1,12 @@
+2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/gled_glue_gen.pl:
+	* lib-exec/project7.pl:
+	Follow changes in ZMIR member naming.
+
+	* lib-exec/mk_bless_dep.pl:
+	Generate explicit dependency  xx.o: xx.h7 xx.c7
+
 2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* cfg/Glass_SKEL.cxx:
