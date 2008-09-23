@@ -1,3 +1,26 @@
+2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx:
+	* Glasses/Mover.h:
+	* Glasses/RndSMorphCreator.cxx:
+	* Glasses/RndSMorphCreator.h:
+	* Glasses/Sleeper.cxx:
+	* Glasses/Sleeper.h:
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	Operator::Operate() does not have exception specifier anymore.
+	
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Give up on ATI ever supporting non-pow-2 textures.
+	Use image-rescale-to-pow2 for all 2.1 drivers.
+
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7769.
+
 2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GLTesterOne.cxx:
