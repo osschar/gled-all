@@ -1089,7 +1089,7 @@ if($IsGlass) {
 void ${CLASSNAME}::ExecuteMir(ZMIR& mir) {
   static const Exc_t _eh("${CLASSNAME}::ExecuteMir ");
   static const Exc_t _bad_ctx("ctx argument of wrong type");
-  switch(mir.Mid) {
+  switch(mir.fMid) {
 fnord
 
   # Set stuff
@@ -1099,8 +1099,8 @@ fnord
 
       print C7 << "fnordlink";
   case $r->{ID}: {
-    $r->{LinkType}* _beta = dynamic_cast<$r->{LinkType}*>(mir.Beta);
-    if(mir.Beta != 0 && _beta == 0)
+    $r->{LinkType}* _beta = dynamic_cast<$r->{LinkType}*>(mir.fBeta);
+    if(mir.fBeta != 0 && _beta == 0)
       throw(_eh + "[$r->{Methodname}] " + _bad_ctx);
     ${CLASSNAME}::$r->{Methodname}(_beta);
     break;
@@ -1124,7 +1124,7 @@ fnordlink
     my $c = exists $r->{Ctx} ? substr($r->{Ctx},0,1) : 0;
     my $C = $#{$r->{Args}};
     if(exists $r->{Ctx}) {
-      my $cc = 0; my @names = ("Beta", "Gamma", "_context_too_long_");
+      my $cc = 0; my @names = ("fBeta", "fGamma", "_context_too_long_");
       while($cc < $c) {
 	$ar = $r->{Args}[$cc];
 	print C7 << "fnord";
