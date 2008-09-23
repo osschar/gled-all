@@ -18,11 +18,13 @@
 #include <TSystem.h>
 
 
+//==============================================================================
 // SolarSystem
+//==============================================================================
 
 //__________________________________________________________________________
 //
-// Simple simulation of (unrealistic) solar system.
+// Simple simulation of a most unrealistic solar system.
 //
 //
 
@@ -32,18 +34,26 @@ ClassImp(SolarSystem);
 
 void SolarSystem::_init()
 {
+  hWarnTimeOutOfRange = true;
+
   mTime    = 0;
   mTimeFac = 1;
+
+  mBallHistorySize = 0;
 
   mStarMass   = 0;
   mBallKappa  = 1e-6;
 
   mPlanetMinR = 20;
   mPlanetMaxR = 40;
-  mOrbitMinR  = 150;
+  mOrbitMinR  = 200;
   mOrbitMaxR  = 1000;
   mMaxTheta   = 20;
-  mMaxEcc     = 0.1;
+  mMaxEcc     = 0.2;
+
+  mTimePerChunk  = 1000;
+  mKeepPast      = 2000;
+  mCalcFuture    = 5000;
 
   mIntegratorThread = 0;
 }
@@ -85,26 +95,66 @@ UInt_t SolarSystem::ODEOrder()
 
 void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d)
 {
-  // Stella moves not.
-  d(0) = d(1) = d(2) = d(3) = d(4) = d(5) = 0;
+  const Int_t max_i = ODEOrder();
 
-  // For the rest, just take Stella at origin for now.
-  TVector3 delta;
-  Double_t rfac;
-  Int_t    max_i = ODEOrder();
-  for (Int_t i = 6; i < max_i; i += 6)
+  for (Int_t i = 0; i < max_i; i += 6)
   {
     d(i)   = y(i+3);
     d(i+1) = y(i+4);
     d(i+2) = y(i+5);
 
-    delta.SetXYZ(-y(i), -y(i+1), -y(i+2));
-    rfac = delta.Mag2();
-    rfac = mStarMass / (rfac*TMath::Sqrt(rfac));
-    d(i+3) = mBallKappa * delta.x() * rfac;
-    d(i+4) = mBallKappa * delta.y() * rfac;
-    d(i+5) = mBallKappa * delta.z() * rfac;
+    d(i+3) = 0;
+    d(i+4) = 0;
+    d(i+5) = 0;
   }
+
+  TVector3 delta;
+
+  // Between cosmic balls: m * kappa / r^2
+  // Sum contributions from the tail of mBalls as the biggest
+  // contribution will come from Stella, which is usually at position 0.
+
+  Int_t iMax = mBalls->Size() - 1;
+  for (Int_t i = iMax; i >= 0; --i)
+  {
+    const Int_t    a  = 6*i;
+    CosmicBall*    Bi = (CosmicBall*) (**mBalls)[i];
+
+    for (Int_t j = iMax; j > i; --j)
+    {
+      const Int_t    b  = 6*j;
+      CosmicBall*    Bj = (CosmicBall*) (**mBalls)[j];
+
+      delta.SetXYZ(y(b) - y(a), y(b+1) - y(a+1), y(b+2) - y(a+2));
+
+      const Double_t rsqr  = delta.Mag2();
+      const Double_t R     = Bi->mRadius + Bi->mRadius;
+      const Double_t Rsqr  = R * R;
+      Double_t rftot;
+      if (rsqr > Rsqr)
+      {
+        rftot = mBallKappa / (rsqr*TMath::Sqrt(rsqr));
+      }
+      else
+      {
+        rftot = mBallKappa * TMath::Sqrt(rsqr) / (Rsqr*Rsqr);
+      }
+
+      const Double_t fi = Bj->mM * rftot;
+      d(a+3) += fi * delta.x();
+      d(a+4) += fi * delta.y();
+      d(a+5) += fi * delta.z();
+      const Double_t fj = Bi->mM * rftot;
+      d(b+3) -= fj * delta.x();
+      d(b+4) -= fj * delta.y();
+      d(b+5) -= fj * delta.z();
+    }
+  }
+
+  // Brutal fix - keep Stella at the origin.
+  // Should calculate SS speed and put this into its gallactic node.
+  // Assumes a single star at index 0.
+  d(0) = d(1) = d(2) = d(3) = d(4) = d(5) = 0;
 }
 
 void SolarSystem::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
@@ -130,85 +180,79 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
   GLensWriteHolder wrlck(this);
 
   Double_t new_time = mTime + mTimeFac*dt;
-  ODEStorageD* S = get_storage();
-  if (new_time > S->GetMaxXStored())
-  {
-    SetTime(S->GetMaxXStored());
-    mODECrawler->AdvanceXLimits();
-    mODECrawler->Crawl();
-  }
-  SetTime(new_time);
+
+  // Here we could check how much time has elapsed since last position store
+  // and decide whether to store this time.
+  // But need store dt, last_store_t members.
+  mTime = set_time(new_time, true);
+  Stamp(FID());
 }
 
 /**************************************************************************/
 
-void SolarSystem::StartStorageManager()
+SolarSystem::Storage* SolarSystem::find_storage_from_time(Double_t t)
 {
-  // not finished.
-  //
-  // check if already running
-  // initialize crawler
-  // crawl - forewer
+  Storage* s = mCurrentStorage->second;
+  if (t >= s->GetMinXStored() && t <= s->GetMaxXStored())
+    return s;
 
-  static const Exc_t _eh("SolarSystem::StartStorageManager ");
-
-  assert_MIR_presence(_eh, MC_IsBeam);
-
-  if (mIntegratorThread)
-    throw (_eh + "already running.");
-
-  mIntegratorThread = GThread::TSDSelf();
-
-  while (1)
   {
-    printf("Fujfufjf\n");
-    gSystem->Sleep(1000);
+    GMutexHolder lock_storage(mStorageCond);
+
+    mCurrentStorage = mStorageMap.lower_bound(t);
+    if (mCurrentStorage != mStorageMap.begin())
+    {
+      --mCurrentStorage;
+      mStorageCond.Signal();
+    }
+    else
+    {
+      // We are at the beginning.
+      // As we don't have backward-propagation, it makes no
+      // sense to signal storage condition.
+    }
   }
+
+  return mCurrentStorage->second;
 }
 
-void SolarSystem::StopStorageManager()
-{
-  // not finished
-
-  static const Exc_t _eh("SolarSystem::StopStorageManager ");
-
-  if (mIntegratorThread == 0)
-    throw (_eh + "not running.");
-
-  mIntegratorThread->Cancel();
-  mIntegratorThread = 0;
-}
-
-/**************************************************************************/
-
-void SolarSystem::SetTime(Double_t t)
+Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
 {
   // Place balls into position for time t.
-  // Linear extrapolation between to stored points is made.
+  // Linear extrapolation between two stored points is made.
+  //
+  // When from_timetick is true the history of the balls is updated.
+  // Otherwise it is reset to 0.
 
   static const Exc_t _eh("SolarSystem::SetTime ");
 
-  ODEStorageD*    S = get_storage();
+  Storage        *S = find_storage_from_time(t);
+  const Double_t *T = S->GetXArr();
   const Int_t     N = S->Size();
-  const Double_t* T = S->GetXArr();
 
   Int_t i0;
   if (t <= T[0])
   {
-    if (t < T[0])
-      ISwarn(_eh + GForm("given time %f below minimum %f. Using min", t, T[0]));
+    if (t < T[0] && hWarnTimeOutOfRange) {
+      ISwarn(_eh + GForm("given time %f below minimum %f. Using minimum.", t, T[0]));
+      hWarnTimeOutOfRange = false;
+    }
     i0 = 0;
     t  = T[0];
   }
   else if (t >= T[N-1])
   {
-    if (t > T[N-1])
-      ISwarn(_eh + GForm("given time %f above maximum %f. Using max", t, T[N-1]));
+    if (t > T[N-1] && hWarnTimeOutOfRange) {
+      ISwarn(_eh + GForm("given time %f above maximum %f. Using maximum", t, T[N-1]));
+      hWarnTimeOutOfRange = false;
+    }
     i0 = N - 2;
     t  = T[N-1];
   }
   else
   {
+    hWarnTimeOutOfRange = true;
+
     i0 = TMath::BinarySearch<Double_t>(N, T, t);
     if (i0 < 0 || i0 > N - 1)
       throw(_eh + "index out of range.");
@@ -233,11 +277,152 @@ void SolarSystem::SetTime(Double_t t)
     stepper->SetV  (f0*P0[ri]     + f1*P1[ri],
                     f0*P0[ri + 1] + f1*P1[ri + 1],
                     f0*P0[ri + 2] + f1*P1[ri + 2]);
+
+    if (from_timetick)
+    {
+      stepper->StorePos(mBallHistorySize);
+    }
+    else
+    {
+      stepper->ResizeHistory(0);
+    }
+
     ri += 3;
   }
 
-  mTime = t;
+  return t;
+}
+
+void SolarSystem::SetTime(Double_t t)
+{
+  mTime = set_time(t, false);
   Stamp(FID());
+}
+
+void SolarSystem::SetBallHistorySize(Int_t history_size)
+{
+  if (history_size < 0)    history_size = 0;
+  if (history_size > 4096) history_size = 4096;
+  mBallHistorySize = history_size;
+
+  Stepper<CosmicBall> stepper(*mBalls);
+  while (stepper.step())
+    stepper->ResizeHistory(mBallHistorySize);
+
+  Stamp(FID());
+}
+
+/**************************************************************************/
+
+void* SolarSystem::tl_IntegratorThread(SolarSystem* ss)
+{
+  ss->IntegratorThread();
+  return 0;
+}
+
+void SolarSystem::IntegratorThread()
+{
+  static const Exc_t _eh("SolarSystem::IntegratorThread ");
+
+  while (true)
+  {
+    Storage* old_storage = (Storage*) mODECrawler->GetStorage();
+    Storage* new_storage = new Storage(*old_storage);
+
+    mODECrawler->SwapStorage(new_storage);
+    mODECrawler->AdvanceXLimits(mTimePerChunk);
+
+    mODECrawler->Crawl(false);
+
+    {
+      GMutexHolder lock_storage(mStorageCond);
+
+      mStorageMap.insert(make_pair(new_storage->GetMinXStored(),
+                                       new_storage));
+
+      bool calc_needed = false;
+      while (!calc_needed)
+      {
+        Double_t t_min = mTime - mKeepPast;
+        while (mStorageMap.begin()->second->GetMaxXStored() < t_min)
+        {
+          printf("%sRemoving storage [%f, %f], t=%f, t_min=%f\n",
+                 _eh.Data(),
+                 mStorageMap.begin()->second->GetMinXStored(),
+                 mStorageMap.begin()->second->GetMaxXStored(),
+                 mTime, t_min);
+          mStorageMap.erase(mStorageMap.begin());
+        }
+
+        Double_t t_max = mTime + mCalcFuture;
+        if (mStorageMap.rbegin()->second->GetMinXStored() < t_max)
+        {
+          calc_needed = true;
+          printf("%sRequesting calculation, max_available=%f t_max=%f...\n",
+                 _eh.Data(),
+                 mStorageMap.rbegin()->second->GetMaxXStored(),
+                 t_max);
+        }
+        else
+        {
+          printf("%sNothing to be done ... waiting.\n", _eh.Data());
+          mStorageCond.Wait();
+          printf("%sSignal received ... let's see ...\n", _eh.Data());
+        }
+      }
+    }
+  }
+}
+
+void SolarSystem::StartIntegratorThread()
+{
+  // Start the ODE integrator thread.
+  // Throws an exception if the thread is already running.
+  //
+  // This expects that the CosmicBalls are registered into this object.
+  // All existing storage is dropped, the time starts at zero.
+  // ODECrawler is initialized and the first chunk is calculated in the
+  // calling thread.
+  // After that, a new thread is spawned with nice value of 10.
+
+  static const Exc_t _eh("SolarSystem::StartIntegratorThread ");
+
+  assert_odecrawler(_eh);
+
+  if (mIntegratorThread)
+    throw (_eh + "already running.");
+
+  mStorageMap.clear();
+  mCurrentStorage = mStorageMap.end();
+
+  mODECrawler->SetX1(0);
+  mODECrawler->SetX2(mTimePerChunk);
+
+  Storage* s = new Storage(ODEOrder());
+  mODECrawler->SetStorage(s);
+  mODECrawler->Crawl();
+
+  mCurrentStorage = mStorageMap.insert(make_pair(0, s)).first;
+
+  mIntegratorThread = new GThread("SolarSystem-Integrator",
+                                  (GThread_foo) (tl_IntegratorThread), this,
+                                  false);
+  mIntegratorThread->SetNice(10);
+  mIntegratorThread->Spawn();
+}
+
+void SolarSystem::StopIntegratorThread()
+{
+  // not finished
+
+  static const Exc_t _eh("SolarSystem::StopIntegratorThread ");
+
+  if (mIntegratorThread == 0)
+    throw (_eh + "not running.");
+
+  mIntegratorThread->Cancel();
+  mIntegratorThread->Join();
+  mIntegratorThread = 0;
 }
 
 /**************************************************************************/
@@ -253,7 +438,6 @@ void SolarSystem::MakeStar()
   cb->SetRadius(100);
   cb->SetLOD(20);
 
-  // !!!! missing mass (add to mStarMass).
   Double_t mass = 1e9;
   mStarMass += mass;
   cb->SetM(mass);
@@ -289,18 +473,21 @@ void SolarSystem::MakePlanetoid()
 	       r_orb * cos_theta * Sin(phi_orb),
 	       r_orb * Sin(theta_orb));
   cb->SetPos(pos.x(), pos.y(), pos.z());
-  pos.SetMag(1);
 
-  TVector3 xplane(pos.Orthogonal());
-  TVector3 yplane(pos.Cross(xplane));
   Double_t ecc     = gRandom->Uniform(0, mMaxEcc);
-  Double_t phi_vel = gRandom->Uniform(0, TwoPi());
   Double_t vel_mag = Sqrt(mBallKappa*mStarMass/r_orb*(1 - ecc));
 
-  xplane *= vel_mag * Cos(phi_vel);
-  yplane *= vel_mag * Sin(phi_vel);
+  const Double_t vfac = vel_mag / pos.Mag();
+  cb->SetV(-pos.y()*vfac, pos.x()*vfac, 0);
 
-  cb->SetV(xplane.x() + yplane.x(), xplane.y() + yplane.y(), xplane.z() + yplane.z());
+  // Older calculation with random phi velocity.
+  //
+  // Double_t phi_vel = gRandom->Uniform(0, TwoPi());
+  // TVector3 xplane(pos.Orthogonal());
+  // TVector3 yplane(pos.Cross(xplane));
+  // xplane *= vel_mag * Cos(phi_vel);
+  // yplane *= vel_mag * Sin(phi_vel);
+  // cb->SetV(xplane.x() + yplane.x(), xplane.y() + yplane.y(), xplane.z() + yplane.z());
 
   mQueen->CheckIn(cb);
   mBalls->Add(cb);
