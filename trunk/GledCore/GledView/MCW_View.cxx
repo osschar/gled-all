@@ -11,6 +11,7 @@
 
 #include <Eye/Eye.h>
 #include <Stones/ZMIR.h>
+#include <Glasses/SaturnInfo.h>
 
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Light_Button.H>

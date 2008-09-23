@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "GThread.h"
+#include <Glasses/ZMirEmittingEntity.h>
 
 #include <pthread.h>
 #include <signal.h>
@@ -13,13 +14,9 @@
 
 //______________________________________________________________________________
 //
-// POSIX thread wrapper class.
+// POSIX thread wrapper class - Gled specific as it provides
+// data members required for authorization and MIR processing.
 //
-// !!!! Aug 2008, Fedora 7, linux-2.6.23
-// It seems that priority is bluntly ignored. Tried setting it to weird
-// values and not even an error is generated.
-// Must investigate. Maybe needs to be enabled by the process or in kernel?
-// It works ok for process (only as root, can not change ulimit -e / -r as user).
 
 ClassImp(GThread);
 
@@ -256,7 +253,6 @@ ZMirEmittingEntity* GThread::Owner()
 
   return Self()->mOwner;
 }
-
 
 ZMIR* GThread::MIR()
 {
