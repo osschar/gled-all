@@ -24,6 +24,7 @@ open V, ">make_view.inc";
 
 for $class (@{$CATALOG->{ClassList}}) {
   my $info = $CATALOG->{Classes}{$class};
+  print B "$info->{Stem}.o: $info->{Stem}.h7 $info->{Stem}.c7\n";
   print B "$info->{Stem}.h7 $info->{Stem}.c7: $info->{Stem}.h\n";
   print B "\t\${ECHO} -7- Project7 blessed base \$<\n";
   print B "\t\${MUTE} \${P7} -c $class -i $info->{Stem}.h -1 $info->{Stem}.h7 ".
