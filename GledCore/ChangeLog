@@ -1,3 +1,75 @@
+2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	* Eye/Ray.cxx:
+	* Glasses/AList.cxx:
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	* Glasses/EyeInfo.cxx:
+	* Glasses/GledMonitor.cxx:
+	* Glasses/GledMonitor.h:
+	* Glasses/Operator.cxx:
+	* Glasses/Operator.h:
+	* Glasses/PerfMeterOperator.cxx:
+	* Glasses/PerfMeterOperator.h:
+	* Glasses/PipeEventor.cxx:
+	* Glasses/PipeEventor.h:
+	* Glasses/SaturnObserver.cxx:
+	* Glasses/SaturnObserver.h:
+	* Glasses/ScreenDumper.cxx:
+	* Glasses/ScreenDumper.h:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZIdentityFilter.cxx:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.cxx:
+	* Glasses/ZKing.cxx:
+	* Glasses/ZList.cxx:
+	* Glasses/ZMEESelfFilter.cxx:
+	* Glasses/ZMethodTagPreFilter.cxx:
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZSunQueen.cxx:
+	* Gled/GCondition.cxx:
+	* Gled/GCondition.h:
+	* Gled/GKeyRSA.cxx:
+	* Gled/GMutex.cxx:
+	* Gled/GMutex.h:
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* Gled/GledNS.cxx:
+	* Gled/GledTypes.h:
+	* GledView/FTW.cxx:
+	* GledView/FTW_Shell.cxx:
+	* GledView/FltkGledStuff.cxx:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* GledView/MCW_Button.cxx:
+	* GledView/MCW_View.cxx:
+	* GledView/MCW_View.h:
+	* Stones/ZComet.cxx:
+	* Stones/ZMIR.cxx:
+	* Stones/ZMIR.h:
+	* catalog.patch:
+	* gled.cxx:
+	* saturn.cxx:
+	GThread now wraps the passed thread function into its own
+	static wrapper function. This allows us to do better thread
+	management as well as to specify thread cleanup function at
+	runtime.
+	Add support for setting of "nice" value for a thread.
+	Put owner and MIR from TSD into thread as data-members. This
+	allows printing of all threads from a static function
+	GThread::ListThreads().
+	Each thread has a name now.
+
+	Prefix members in FID_t, FMID_t and MIR with 'f' and capitalize
+	them.
+
 2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Lamp.h:
