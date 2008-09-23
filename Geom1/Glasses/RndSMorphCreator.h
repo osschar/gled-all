@@ -31,7 +31,7 @@ public:
   RndSMorphCreator(const Text_t* n="RndSMorphCreator", const Text_t* t=0) : Operator(n,t) { _init(); }
 
   // virtuals
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "RndSMorphCreator.h7"
   ClassDef(RndSMorphCreator, 1)

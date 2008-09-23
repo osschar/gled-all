@@ -57,7 +57,7 @@ void WSWalker::SetTime(Double_t t)
 
 /**************************************************************************/
 
-void WSWalker::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void WSWalker::Operate(Operator::Arg* op_arg)
 {
   Operator::PreOperate(op_arg);
   set_trans(op_arg->fEventor->GetEventTime());

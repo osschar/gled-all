@@ -37,7 +37,7 @@ void Mover::SetRotateParams(UInt_t i, UInt_t j, Float_t a)
 
 /**************************************************************************/
 
-void Mover::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void Mover::Operate(Operator::Arg* op_arg)
 {
   Operator::PreOperate(op_arg);
   if(mNode != 0) {

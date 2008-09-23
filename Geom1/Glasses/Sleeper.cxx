@@ -9,7 +9,7 @@
 
 ClassImp(Sleeper)
 
-void Sleeper::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void Sleeper::Operate(Operator::Arg* op_arg)
 {
   gSystem->Sleep(mMSec);
 }

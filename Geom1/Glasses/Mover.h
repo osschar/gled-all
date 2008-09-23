@@ -35,7 +35,7 @@ public:
   void SetRotateParams(UInt_t i, UInt_t j, Float_t a); // X{E}
 
   // Operator:
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "Mover.h7"
   ClassDef(Mover, 1);

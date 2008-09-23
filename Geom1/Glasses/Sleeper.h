@@ -19,7 +19,7 @@ public:
     Operator(n,t), mMSec(ms) {}
 
   // virtuals
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "Sleeper.h7"
   ClassDef(Sleeper, 1)
