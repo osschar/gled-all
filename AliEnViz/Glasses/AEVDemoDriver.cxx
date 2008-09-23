@@ -470,7 +470,7 @@ void AEVDemoDriver::DoJobReplay()
 	set_text("Job replay done.");
     } else if(res->HasException()) {
       set_text("Job replay aborted.");
-      set_blurp(res->Exception);
+      set_blurp(res->fException);
     }
   } else {
     auto_ptr<ZMIR>     jq( mDistAnRep->S_FakeReplayJobFromHistory() );
@@ -483,7 +483,7 @@ void AEVDemoDriver::DoJobReplay()
 	set_text("Job replay done.");
     } else if(res->HasException()) {
       set_text("Job replay aborted.");
-      set_blurp(res->Exception);
+      set_blurp(res->fException);
     }
   }
 
