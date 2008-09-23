@@ -61,7 +61,7 @@ for $c (@{ $CATALOG->{ClassList} }) {
 print C <<"fnord";
 void lib${libname}_Mir_Exec(ZGlass *lens, ZMIR& mir) {
   static const string _eh("lib${libname}_Mir_Exec dynamic_cast to ");
-  switch(mir.Cid) {
+  switch(mir.fCid) {
 fnord
 
 for $c (@{ $CATALOG->{ClassList} }) {
