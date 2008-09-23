@@ -214,7 +214,7 @@ void WarmAmoeba::PostBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 
 /**************************************************************************/
 
-void WarmAmoeba::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void WarmAmoeba::Operate(Operator::Arg* op_arg)
 {
   Eventor::PreOperate(op_arg);
 

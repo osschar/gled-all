@@ -82,7 +82,7 @@ public:
 
   virtual void	PostBeat(Operator::Arg* op_arg)	 throw(Operator::Exception);
 
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "WarmAmoeba.h7"
   ClassDef(WarmAmoeba, 1)
