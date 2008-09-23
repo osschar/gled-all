@@ -30,7 +30,7 @@ ZMirFilter::Result_e ZIdentityListFilter::FilterMIR(ZMIR& mir)
     GMutexHolder ids_lock(mIdentities->RefListMutex());
     AList::Stepper<> s(*mIdentities);
     while(s.step()) {
-      if(mir.Caller->HasIdentity((ZIdentity*)*s))
+      if(mir.fCaller->HasIdentity((ZIdentity*)*s))
 	return (Result_e)mOnMatch;
     }
     return NegateResult((Result_e)mOnMatch);

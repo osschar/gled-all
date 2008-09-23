@@ -36,7 +36,7 @@ public:
     Operator(n,t) { _init(); }
 
   virtual void AdEnlightenment();
-  virtual void Operate(Operator::Arg* op_arg)	 throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "GledMonitor.h7"
   ClassDef(GledMonitor, 1)

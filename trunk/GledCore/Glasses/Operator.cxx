@@ -40,18 +40,18 @@ void Operator::ResetRecursively()
 
 /**************************************************************************/
 
-void Operator::PreOperate(Operator::Arg* op_arg) throw(Exception)
+void Operator::PreOperate(Operator::Arg* op_arg)
 {
 }
 
-void Operator::Operate(Operator::Arg* op_arg) throw(Exception)
+void Operator::Operate(Operator::Arg* op_arg)
 {
   PreOperate(op_arg);
   // { ... do your stuff ... }
   PostOperate(op_arg);
 }
 
-void Operator::PostOperate(Operator::Arg* op_arg) throw(Exception)
+void Operator::PostOperate(Operator::Arg* op_arg)
 {
   if(bOpRecurse) {
     lpZGlass_t l; CopyList(l);

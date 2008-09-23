@@ -11,6 +11,7 @@
 #include <Gled/GMutex.h>
 #include <map>
 
+// This wrong ... need internal state class.
 #ifdef __CINT__
 typedef unsigned long int pthread_t;
 typedef unsigned int pthread_key_t;
@@ -22,11 +23,11 @@ typedef void*   (*GThread_foo)(void*);
 typedef void (*GThread_cu_foo)(void*);
 
 class SaturnInfo;
-class ZMIR;
 class ZMirEmittingEntity;
+class ZMIR;
 
-class GThread {
-
+class GThread
+{
   friend class Gled;
   friend class Saturn;
   friend class Mountain;
@@ -36,45 +37,93 @@ class GThread {
 public:
   enum CState { CS_Enable, CS_Disable };
   enum CType  { CT_Async, CT_Deferred };
-  enum Signal { SigHUP=1, SigINT=2, SigQUIT=3, SigILL=4, SigTRAP=5, SigABRT=6,
-		SigIOT=6, SigBUS=7, SigFPE=8, SigKILL=9, SigUSR1=10, SigSEGV=11,
-		SigUSR2=12, SigPIPE=13, SigALRM=14, SigTERM=15, SigSTKFLT=16,
-		SigCLD=17, SigCHLD=17, SigCONT=18, SigSTOP=19, SigTSTP=20,
-		SigTTIN=21, SigTTOU=22, SigURG=23, SigXCPU=24, SigXFSZ=25,
-		SigVTALRM=26, SigPROF=27, SigWINCH=28, SigPOLL=29, SigIO=29,
-		SigPWR=30, SigUNUSED=31 }; // from signum.h
+  enum Signal { SigHUP   =  1, SigINT   =  2, SigQUIT  =  3, SigILL   =  4,
+                SigTRAP  =  5, SigABRT  =  6, SigIOT   =  6, SigBUS   =  7,
+                SigFPE   =  8, SigKILL  =  9, SigUSR1  = 10, SigSEGV  = 11,
+		SigUSR2  = 12, SigPIPE  = 13, SigALRM  = 14, SigTERM  = 15,
+                SigSTKFLT= 16, SigCLD   = 17, SigCHLD  = 17, SigCONT  = 18,
+                SigSTOP  = 19, SigTSTP  = 20, SigTTIN  = 21, SigTTOU  = 22,
+                SigURG   = 23, SigXCPU  = 24, SigXFSZ  = 25, SigVTALRM= 26,
+                SigPROF  = 27, SigWINCH = 28, SigPOLL  = 29, SigIO    = 29,
+		SigPWR   = 30, SigUNUSED= 31
+  }; // from signum.h
+  enum RState { RS_Incubating, RS_Spawning,
+                RS_Running,
+                RS_Terminating, RS_Finished,
+                RS_ErrorSpawning
+  };
+
+  class CancelDisabler
+  {
+    CState mExCancelState;
+  public:
+    CancelDisabler()  { mExCancelState = CancelOff(); }
+    ~CancelDisabler() { SetCancelState(mExCancelState); }
+  };
 
 private:
-  static 	map<pthread_t, GThread*>	sIdMap;
-  static	GMutex				sIDLock;
+  class OwnerChanger
+  {
+    ZMirEmittingEntity* m_owner;
+  public:
+    OwnerChanger(ZMirEmittingEntity* o) { GThread* s = Self(); m_owner = s->get_owner(); s->set_owner(o); }
+    ~OwnerChanger()                     { GThread::Self()->set_owner(m_owner); }
+  };
+  class MIRChanger
+  {
+    ZMIR* m_mir;
+  public:
+    MIRChanger(ZMIR* m) { GThread* s = Self(); m_mir = s->get_mir(); s->set_mir(m); }
+    ~MIRChanger()       { GThread::Self()->set_mir(m_mir); }
+  };
 
-  pthread_t	 mId;		// X{g}
+
+  typedef map<pthread_t, GThread*>           mPThr2GThr_t;
+  typedef map<pthread_t, GThread*>::iterator mPThr2GThr_i;
+
+  typedef list<GThread*>           lpGThread_t;
+  typedef list<GThread*>::iterator lpGThread_i;
+
+  static GThread      *sMainThread;
+  static bool          sMainInitDone;
+  static int           sThreadCount;
+  static mPThr2GThr_t  sThreadMap;
+  static lpGThread_t   sThreadList;
+  static GMutex        sContainerLock;
+
+  // Thread state / internals
+  RState         mRunningState; // X{g}
+  int            mIndex;        // X{g}
+  lpGThread_i    mThreadListIt;
+  pthread_t	 mId;           // X{g} This will become GThreadInternalRep*
+
+  // Parameters of thread to be spawned.
+  TString        mName;         // X{Gs}
   GThread_foo	 mStartFoo;	// X{gs}
-  void*		 mArg;		// X{gs}
+  void*		 mStartArg;	// X{gs}
   GThread_cu_foo mEndFoo;	// X{gs}
   void*		 mEndArg;	// X{gs}
-  bool		 bRunning;	// X{g}
   bool		 bDetached;	// X{g}
+  int            mNice;         // X{gs}
 
-  static GThread* wrap_and_register_self(ZMirEmittingEntity* owner);
+  // TSD-like members
+  ZMirEmittingEntity   *mOwner;
+  ZMIR                 *mMIR;
 
-  static void                init_tsd();
-  static void                setup_tsd(ZMirEmittingEntity* owner);
-  static void                cleanup_tsd();
-  static GThread*            get_self();
-  static void                set_owner(ZMirEmittingEntity* owner);
-  static ZMirEmittingEntity* get_owner();
-  static void                set_mir(ZMIR* mir);
+  void                set_owner(ZMirEmittingEntity* owner) { mOwner = owner; }
+  ZMirEmittingEntity* get_owner() const                    { return mOwner;  }
+  void                set_mir(ZMIR* mir)                   { mMIR = mir;  }
+  ZMIR*               get_mir()   const                    { return mMIR; }
 
   static pthread_key_t TSD_Self;
-  static pthread_key_t TSD_Owner;
-  static pthread_key_t TSD_MIR;
 
+  static void* thread_spawner(void* arg);
+  static void  thread_reaper(void* arg);
+
+  GThread(const Text_t* name);
 public:
-  GThread(GThread_foo f, void* a=0, bool d=false);
+  GThread(const Text_t* name, GThread_foo foo, void* arg=0, bool detached=false);
   virtual ~GThread();
-
-  static void DeleteIfDetached();
 
   int	Spawn();
   int	Join(void** tret=0);
@@ -91,31 +140,18 @@ public:
   static void   TestCancel();
   static void   Exit(void* ret=0);
 
-  static ZMIR*  get_mir();
+  static GThread*            Self();
+  static ZMirEmittingEntity* Owner();
+  static ZMIR*               MIR();
 
-  static GThread* Self();
-  static GThread* TSDSelf();
-  static unsigned long RawSelf();
+  static const char* RunningStateName(RState state);
+  static void        ListThreads();
+
+  static GThread* InitMain();
+  static void     FiniMain();
 
 #include "GThread.h7"
-  ClassDef(GThread,0)
+  ClassDef(GThread, 0);
 }; // endclass GThread
-
-#ifndef __CINT__
-#define GTHREAD_CU_PUSH pthread_cleanup_push(GThread::Self()->GetEndFoo(), \
-                                             GThread::Self()->GetEndArg())
-#define GTHREAD_CU_POP  pthread_cleanup_pop(0)
-#endif
-
-/**************************************************************************/
-// GThreadKeepAlive
-/**************************************************************************/
-
-class GThreadKeepAlive {
-  GThread::CState mExCancelState;
-public:
-  GThreadKeepAlive()  { mExCancelState = GThread::CancelOff(); }
-  ~GThreadKeepAlive() { GThread::SetCancelState(mExCancelState); }
-};
 
 #endif

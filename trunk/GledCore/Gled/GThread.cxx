@@ -8,130 +8,176 @@
 
 #include <pthread.h>
 #include <signal.h>
+#include <unistd.h>
 #include <stdio.h>
 
-ClassImp(GThread)
+//______________________________________________________________________________
+//
+// POSIX thread wrapper class.
+//
+// !!!! Aug 2008, Fedora 7, linux-2.6.23
+// It seems that priority is bluntly ignored. Tried setting it to weird
+// values and not even an error is generated.
+// Must investigate. Maybe needs to be enabled by the process or in kernel?
+// It works ok for process (only as root, can not change ulimit -e / -r as user).
 
-map<pthread_t, GThread*> GThread::sIdMap;
-GMutex GThread::sIDLock;
+ClassImp(GThread);
+
+GThread*                 GThread::sMainThread   = 0;
+bool                     GThread::sMainInitDone = false;
+int                      GThread::sThreadCount  = 0;
+map<pthread_t, GThread*> GThread::sThreadMap;
+list<GThread*>           GThread::sThreadList;
+GMutex                   GThread::sContainerLock;
 
 pthread_key_t GThread::TSD_Self;
-pthread_key_t GThread::TSD_Owner;
-pthread_key_t GThread::TSD_MIR;
 
 /**************************************************************************/
+GThread::GThread(const Text_t* name) :
+  mRunningState (RS_Running),
+  mIndex        (-1),
+  mThreadListIt (),
+  mId           (0),
 
-GThread::GThread(GThread_foo f, void* a, bool d) :
-  mStartFoo(f), mArg(a), bDetached(d)
+  mName     (name),
+  mStartFoo (0), mStartArg (0),
+  mEndFoo   (0), mEndArg   (0),
+  bDetached (false),
+  mNice (0),
+
+  mOwner(0), mMIR(0)
 {
-  mId = 0;
+  // Private constructor for wrapping of existing threads.
+  // Thread is put into 'Running' state, registered into the thread list
+  // and assigned an internal thread-index.
+  // The owner of the thread is set to 0.
+
+  sContainerLock.Lock();
+  mThreadListIt = sThreadList.insert(sThreadList.end(), this);
+  mIndex        = ++sThreadCount;
+  sContainerLock.Unlock();
+}
+
+GThread::GThread(const Text_t* name, GThread_foo foo, void* arg, bool detached) :
+  mRunningState (RS_Incubating),
+  mIndex        (-1),
+  mThreadListIt (),
+  mId           (0),
+
+  mName     (name),
+  mStartFoo (foo), mStartArg (arg),
+  mEndFoo   (0),   mEndArg   (0),
+  bDetached (detached),
+  mNice (0),
+
+  mOwner(Owner()), mMIR(0)
+{
+  // Normal constructor.
+  // Thread is put into 'Incubating' state, registered into the thread list
+  // and assigned an internal thread-index.
+  // The owner of the thread is set be the same as the owner of the calling thread.
+
+  static const Exc_t _eh("GThread::GThread ");
+
+  if (!sMainThread)
+    throw(_eh + "InitMain() not called.");
+
+  sContainerLock.Lock();
+  mThreadListIt = sThreadList.insert(sThreadList.end(), this);
+  mIndex        = ++sThreadCount;
+  sContainerLock.Unlock();
 }
 
 GThread::~GThread()
 {
-  // This should be clean up foo; Thread can die b4 object does
-  // but ... as well ... object can die b4 thread does
+  // Destructor.
+  // Thread is unregistered from the thread list.
 
-  sIDLock.Lock(); sIdMap.erase(mId); sIDLock.Unlock();
+  sContainerLock.Lock();
+  sThreadList.erase(mThreadListIt);
+  sContainerLock.Unlock();
 }
 
-void GThread::DeleteIfDetached()
+/**************************************************************************/
+
+void* GThread::thread_spawner(void* arg)
 {
-  GThread* self = GThread::get_self();
-  if(self->GetDetached()) {
-    pthread_setspecific(TSD_Self, 0);
-    delete self;
+  GThread* self = (GThread*) arg;
+
+  pthread_setspecific(TSD_Self, self);
+
+  if (self->mNice)
+  {
+    nice(self->mNice);
   }
+
+  self->mId = pthread_self();
+
+  sContainerLock.Lock();
+  sThreadMap[self->mId] = self;
+  self->mRunningState   = RS_Running;
+  sContainerLock.Unlock();
+
+  void* ret = 0;
+
+  pthread_cleanup_push(thread_reaper, self);
+
+  ret = (self->mStartFoo)(self->mStartArg);
+
+  pthread_cleanup_pop(1);
+
+  return ret;
 }
 
-/**************************************************************************/
-
-GThread* GThread::wrap_and_register_self(ZMirEmittingEntity* owner)
+void GThread::thread_reaper(void* arg)
 {
-  GThread* t = new GThread(0,0,false);
-  t->mId = pthread_self();
-  sIDLock.Lock();
-  sIdMap[ t->mId ] = t;
-  sIDLock.Unlock();
-  setup_tsd(owner);
-  return t;
+  GThread* self = (GThread*) arg;
+
+  sContainerLock.Lock();
+  self->mRunningState = RS_Terminating;
+  sContainerLock.Unlock();
+
+  if (self->mEndFoo != 0)
+  {
+    (self->mEndFoo)(self->mEndArg);
+  }
+
+  sContainerLock.Lock();
+  sThreadMap.erase(self->mId);
+  self->mRunningState = RS_Finished;
+  sContainerLock.Unlock();
+
+  if (self->bDetached)
+    delete self;
 }
-
-/**************************************************************************/
-
-void GThread::init_tsd()
-{
-  pthread_key_create(&TSD_Self, 0);
-  pthread_key_create(&TSD_Owner, 0);
-  pthread_key_create(&TSD_MIR, 0);
-}
-
-void GThread::setup_tsd(ZMirEmittingEntity* owner)
-{
-  pthread_setspecific(TSD_Self, Self());
-  set_owner(owner);
-  set_mir(0);
-}
-
-void GThread::cleanup_tsd()
-{
-  set_mir(0);
-  set_owner(0);
-  pthread_setspecific(TSD_Self, 0);
-}
-
-GThread* GThread::get_self()
-{
-  return (GThread*)pthread_getspecific(TSD_Self);
-}
-
-void GThread::set_owner(ZMirEmittingEntity* owner)
-{
-  pthread_setspecific(TSD_Owner, owner);
-}
-
-ZMirEmittingEntity* GThread::get_owner()
-{
-  return (ZMirEmittingEntity*)pthread_getspecific(TSD_Owner);
-}
-
-void GThread::set_mir(ZMIR* mir)
-{
-  pthread_setspecific(TSD_MIR, mir);
-}
-
-ZMIR* GThread::get_mir()
-{
-  return (ZMIR*)pthread_getspecific(TSD_MIR);
-}
-
-/**************************************************************************/
 
 int GThread::Spawn()
 {
   pthread_attr_t attr;
   pthread_attr_init(&attr);
-  if(bDetached)
+  if (bDetached)
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  int ret;
-  sIDLock.Lock();
-  if( (ret = pthread_create(&mId, &attr, mStartFoo, mArg)) ) {
+
+  sContainerLock.Lock();
+  mRunningState = RS_Spawning;
+  sContainerLock.Unlock();
+
+  int ret =  pthread_create(&mId, &attr, thread_spawner, this);
+  if (ret)
+  {
+    sContainerLock.Lock();
+    mRunningState = RS_ErrorSpawning;
+    sContainerLock.Unlock();
     perror("GThread::Spawn");
-    goto end;
   }
-  bRunning = true;
-  ISdebug(D_THRMUT, GForm("GThread::Spawn Setting id %u to %p",  mId, this));
-  sIdMap[mId] = this;
- end:
-  sIDLock.Unlock();
+
   return ret;
 }
 
 int GThread::Join(void** tret)
 {
-
   int ret = pthread_join(mId, tret);
-  if(ret) perror("GThread::Join");
+  if (ret) perror("GThread::Join");
   return ret;
 }
 
@@ -192,8 +238,6 @@ void GThread::TestCancel()
 
 void GThread::Exit(void* ret)
 {
-  GThread* self = get_self();
-  if(self) self->bRunning = false;
   pthread_exit(ret);
 }
 
@@ -201,20 +245,118 @@ void GThread::Exit(void* ret)
 
 GThread* GThread::Self()
 {
-  //ISdebug(D_THRMUT,_s<<"Self gives " << pthread_self() <<" w/ "<< mIdMap[ pthread_self() ]));
-  int foo;
-  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &foo);
-  sIDLock.Lock(); GThread* t = sIdMap[ pthread_self() ]; sIDLock.Unlock();
-  pthread_setcancelstate(foo, 0);
-  return t;
+  // Static - returns current thread.
+
+  return (GThread*) pthread_getspecific(TSD_Self);
 }
 
-GThread* GThread::TSDSelf()
+ZMirEmittingEntity* GThread::Owner()
 {
-  return get_self();
+  // Static - returns owner of current thread.
+
+  return Self()->mOwner;
 }
 
-unsigned long GThread::RawSelf()
+
+ZMIR* GThread::MIR()
 {
-  return (unsigned long) pthread_self();
+  // Static - returns MIR processed in current thread.
+
+  return Self()->mMIR;
+}
+
+/**************************************************************************/
+
+const char* GThread::RunningStateName(RState state)
+{
+  switch (state)
+  {
+    case RS_Incubating:    return "Incubating";
+    case RS_Spawning:      return "Spawning";
+    case RS_Running:       return "Running";
+    case RS_Terminating:   return "Terminating";
+    case RS_Finished:      return "Finished";
+    case RS_ErrorSpawning: return "ErrorSpawning";
+    default:               return "<unknown>";
+  }
+}
+
+void GThread::ListThreads()
+{
+  if (sMainThread == 0)
+  {
+    printf("Threads not initialized.");
+    return;
+  }
+
+  printf("+------------------------------------------------------------------------+\n");
+  sContainerLock.Lock();
+  Int_t count = 0;
+  for (lpGThread_i i = sThreadList.begin(); i != sThreadList.end(); ++i)
+  {
+    const GThread& t = **i;
+    printf("| %2d | %4d | %-24s | %-14s | %-14s |\n", ++count,
+           t.mIndex, t.mName.Data(), RunningStateName(t.mRunningState),
+           t.get_owner() ? t.get_owner()->GetName() : "<null>");
+  }
+  sContainerLock.Unlock();
+  printf("+------------------------------------------------------------------------+\n");
+
+}
+
+/**************************************************************************/
+
+GThread* GThread::InitMain()
+{
+  // This will create a GThread wrapper around the calling thread.
+  // To be called from ::main thread, somewhere early during the
+  // system initialization.
+
+  static const Exc_t _eh("GThread::InitMain ");
+
+  if (sMainThread)
+  {
+    throw(_eh + " already called.");
+  }
+
+  pthread_key_create(&TSD_Self, 0);
+
+  sMainThread = new GThread("main");
+
+  pthread_setspecific(TSD_Self, sMainThread);
+
+  sMainThread->mId = pthread_self();
+
+  sContainerLock.Lock();
+  sThreadMap[sMainThread->mId]  = sMainThread;
+  sContainerLock.Unlock();
+
+  return sMainThread;
+}
+
+void GThread::FiniMain()
+{
+  static const Exc_t _eh("GThread::FiniMain ");
+
+  if (! sMainThread)
+  {
+    throw(_eh + "InitMain() not called.");
+  }
+  if (Self() != sMainThread)
+  {
+    throw(_eh + "not called from main thread.");
+  }
+
+  sContainerLock.Lock();
+
+  sThreadMap.erase(sMainThread->mId);
+
+  sMainThread->mId = 0;
+  sMainThread->mRunningState = RS_Finished;
+  pthread_setspecific(TSD_Self, 0);
+
+  sContainerLock.Unlock();
+
+  delete sMainThread;
+  sMainThread = 0;
 }

@@ -27,7 +27,7 @@ void PerfMeterOperator::_init()
 
 /**************************************************************************/
 
-void PerfMeterOperator::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void PerfMeterOperator::Operate(Operator::Arg* op_arg)
 {
   Operator::PreOperate(op_arg);
 

@@ -187,8 +187,8 @@ void GledNS::BootstrapClass(GledNS::ClassInfo* ci)
   // !!!! no check done if class already registered
   // As well ... perhaps should separate them by LID
   // will be thinking of that later ...
-  LibSetInfo* lsi = FindLibSetInfo(ci->fFid.lid);
-  lsi->Cid2CInfo[ci->fFid.cid] = ci;
+  LibSetInfo* lsi = FindLibSetInfo(ci->fFid.fLid);
+  lsi->Cid2CInfo[ci->fFid.fCid] = ci;
   Name2Fid.insert(pair<TString,FID_t>(ci->fName, ci->fFid));
 }
 
@@ -296,9 +296,9 @@ A_Rnr* GledNS::SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid)
 {
   static const Exc_t _eh("GledNS::SpawnRnr ");
 
-  LibSetInfo* lsi = FindLibSetInfo(fid.lid);
+  LibSetInfo* lsi = FindLibSetInfo(fid.fLid);
   if(lsi == 0) {
-    ISerr(_eh + GForm("can't demangle lib id=%u.", fid.lid));
+    ISerr(_eh + GForm("can't demangle lib id=%u.", fid.fLid));
     return 0;
   }
   hRnr2RCFoo_i j = lsi->Rnr2RCFoo.find(rnr);
@@ -306,7 +306,7 @@ A_Rnr* GledNS::SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid)
     ISerr(_eh + GForm("can't find Rnr Constructor for %s.", rnr.Data()));
     return 0;
   }
-  return (j->second)(d, fid.cid);
+  return (j->second)(d, fid.fCid);
 }
 
 /**************************************************************************/
@@ -314,14 +314,14 @@ A_Rnr* GledNS::SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid)
 
 ZGlass* GledNS::ConstructLens(FID_t fid)
 {
-  LibSetInfo* lsi = FindLibSetInfo(fid.lid);
+  LibSetInfo* lsi = FindLibSetInfo(fid.fLid);
   if(lsi == 0) {
-    ISerr(GForm("GledNS::ConstructLens lib set %u not found", fid.lid));
+    ISerr(GForm("GledNS::ConstructLens lib set %u not found", fid.fLid));
     return 0;
   }
-  ZGlass* g = (lsi->fLC_Foo)(fid.cid);
+  ZGlass* g = (lsi->fLC_Foo)(fid.fCid);
   if(g == 0) {
-    ISerr(GForm("GledNS::ConstructLens default ctor for FID_t(%u,%u) returned 0", fid.lid, fid.cid));
+    ISerr(GForm("GledNS::ConstructLens default ctor for FID_t(%u,%u) returned 0", fid.fLid, fid.fCid));
     return 0;
   }
   return g;
@@ -330,9 +330,9 @@ ZGlass* GledNS::ConstructLens(FID_t fid)
 bool GledNS::IsA(ZGlass* glass, FID_t fid)
 {
   if(fid.is_null()) return true;
-  LibSetInfo* lsi = FindLibSetInfo(fid.lid);
+  LibSetInfo* lsi = FindLibSetInfo(fid.fLid);
   if(lsi == 0) return false;
-  return (lsi->fISA_Foo)(glass, fid.cid);
+  return (lsi->fISA_Foo)(glass, fid.fCid);
 }
 
 /**************************************************************************/
@@ -436,12 +436,12 @@ void GledNS::ProduceLibSetInfoList(lpLSI_t& li_list)
 GledNS::ClassInfo* GledNS::FindClassInfo(FID_t fid)
 {
   if(fid.is_null()) return 0;
-  hLid2pLSI_i i = Lid2LSInfo.find(fid.lid);
+  hLid2pLSI_i i = Lid2LSInfo.find(fid.fLid);
   if(i == GledNS::Lid2LSInfo.end()) {
-    ISerr(GForm("GledNS::FindClassInfo can't demangle lib id=%u", fid.lid));
+    ISerr(GForm("GledNS::FindClassInfo can't demangle lib id=%u", fid.fLid));
     return 0;
   }
-  return i->second->FindClassInfo(fid.cid);
+  return i->second->FindClassInfo(fid.fCid);
 }
 
 FID_t GledNS::FindClassID(const TString& name)
@@ -506,7 +506,7 @@ ZMIR* GledNS::MethodInfo::MakeMir(ZGlass* a, ZGlass* b, ZGlass* g)
 
 void GledNS::MethodInfo::ImprintMir(ZMIR& mir) const
 {
-  mir.SetLCM_Ids(fClassInfo->fFid.lid, fClassInfo->fFid.cid, fMid);
+  mir.SetLCM_Ids(fClassInfo->fFid.fLid, fClassInfo->fFid.fCid, fMid);
   if(bLocal)       mir.SetRecipient(0);
   if(bDetachedExe) mir.SetDetachedExe(bMultixDetachedExe);
 }
@@ -514,7 +514,7 @@ void GledNS::MethodInfo::ImprintMir(ZMIR& mir) const
 void GledNS::MethodInfo::StreamIds(TBuffer& b) const
 {
   assert(b.IsWriting());
-  b << fClassInfo->fFid.lid << fClassInfo->fFid.cid << fMid;
+  b << fClassInfo->fFid.fLid << fClassInfo->fFid.fCid << fMid;
 }
 
 /**************************************************************************/
@@ -674,7 +674,7 @@ GledNS::ClassInfo::FindLinkMemberInfo(const TString& s, bool recurse, bool throw
 
 GledNS::LibSetInfo* GledNS::ClassInfo::GetLibSetInfo()
 {
-  if(!fLibSetInfo) fLibSetInfo = FindLibSetInfo(fFid.lid);
+  if(!fLibSetInfo) fLibSetInfo = FindLibSetInfo(fFid.fLid);
   return fLibSetInfo;
 }
 

@@ -32,7 +32,7 @@
 #include <Gled/GThread.h>
 #include <TSystem.h>
 
-ClassImp(ZQueen)
+ClassImp(ZQueen);
 
 /**************************************************************************/
 
@@ -336,25 +336,25 @@ void ZQueen::DepCheckMIR(ZMIR& mir)
 
   static const Exc_t _eh("ZQueen::DepCheckMIR ");
 
-  if(mir.Beta) {
-    if(! DependsOn(mir.Beta->mQueen) && (mir.Alpha!=this || mir.Beta!=mir.Beta->mQueen))
+  if(mir.fBeta) {
+    if(! DependsOn(mir.fBeta->mQueen) && (mir.fAlpha!=this || mir.fBeta!=mir.fBeta->mQueen))
       {
 	if(bFollowDeps) {
 	  // !!!! missing code to add the dependency etc.
 	} else {
 	  throw(_eh + GForm("beta '%s', id=%d: dependency check failed.",
-			    mir.Beta->GetName(), mir.BetaID));
+			    mir.fBeta->GetName(), mir.fBetaID));
 	}
       }
   }
-  if(mir.Gamma) {
-    if(! DependsOn(mir.Gamma->mQueen) && (mir.Alpha!=this || mir.Gamma!=mir.Gamma->mQueen))
+  if(mir.fGamma) {
+    if(! DependsOn(mir.fGamma->mQueen) && (mir.fAlpha!=this || mir.fGamma!=mir.fGamma->mQueen))
       {
 	if(bFollowDeps) {
 	  // !!!! missing code to add the dependency etc.
 	} else {
 	  throw(_eh + GForm("gamma '%s', id=%d: dependency check failed.",
-			    mir.Gamma->GetName(), mir.GammaID));
+			    mir.fGamma->GetName(), mir.fGammaID));
 	}
       }
   }
@@ -375,11 +375,11 @@ void ZQueen::BlessMIR(ZMIR& mir)
 
   static TString _eh("ZQueen::BlessMIR() ");
 
-  if(!bRuling && mir.Alpha != this)
+  if(!bRuling && mir.fAlpha != this)
     throw(_eh + "spooky ... not ruling, but alpha demangled");
 
-  if(!mir.Alpha->GetMIRActive())
-    throw(_eh + "alpha '" + mir.Alpha->GetName() + "' not MIR active");
+  if(!mir.fAlpha->GetMIRActive())
+    throw(_eh + "alpha '" + mir.fAlpha->GetName() + "' not MIR active");
 
   // Dependency check
   DepCheckMIR(mir);
@@ -394,7 +394,7 @@ void ZQueen::BlessMIR(ZMIR& mir)
   }
 
   // Always allow SunAbsolute access
-  if(mir.Caller->HasIdentity(mSaturn->mSunInfo->GetPrimaryIdentity())) {
+  if(mir.fCaller->HasIdentity(mSaturn->mSunInfo->GetPrimaryIdentity())) {
     return;
   }
 
@@ -406,14 +406,14 @@ void ZQueen::BlessMIR(ZMIR& mir)
       fs[0] = mProtector.get();
       break;
     case AM_Lens:
-      fs[0] = mir.Alpha->mGuard.get();
+      fs[0] = mir.fAlpha->mGuard.get();
       break;
     case AM_QueenThenLens:
       fs[0] = mProtector.get();
-      fs[1] = mir.Alpha->mGuard.get();
+      fs[1] = mir.fAlpha->mGuard.get();
       break;
     case AM_LensThenQueen:
-      fs[0] = mir.Alpha->mGuard.get();
+      fs[0] = mir.fAlpha->mGuard.get();
       fs[1] = mProtector.get();
       break;
     }
@@ -488,7 +488,7 @@ ID_t ZQueen::InstantiateWAttach(LID_t new_lid, CID_t new_cid,
     throw(_eh + "attachemnt mir is not supplied.");
 
   auto_ptr<ZMIR> att_mir( mir->UnchainMIR(this) );
-  ZGlass* attach_to = att_mir->Alpha;
+  ZGlass* attach_to = att_mir->fAlpha;
 
   if(attach_to->GetQueen() != this)
     throw(_eh + "can only attach to my own subjects.");
@@ -510,8 +510,8 @@ ID_t ZQueen::InstantiateWAttach(LID_t new_lid, CID_t new_cid,
   if(name)  lens->SetName(name);
   if(title) lens->SetTitle(title);
 
-  att_mir->Beta   = lens;
-  att_mir->BetaID = lens->mSaturnID;
+  att_mir->fBeta   = lens;
+  att_mir->fBetaID = lens->mSaturnID;
   try {
     // Should Bless? Yess ... but before lens construction ... then fix beta.
     // Or ... in this case ... could Request blessing by another queen.
@@ -555,7 +555,7 @@ ID_t ZQueen::IncarnateWAttach()
   if(lens == 0) throw(_eh + "lens unstreaming failed.");
 
   auto_ptr<ZMIR> att_mir( mir->UnchainMIR(this) );
-  ZGlass* attach_to = att_mir->Alpha;
+  ZGlass* attach_to = att_mir->fAlpha;
 
   if(attach_to->GetQueen() != this) {
     delete lens;
@@ -583,8 +583,8 @@ ID_t ZQueen::IncarnateWAttach()
     throw(_eh + exc);
   }
 
-  att_mir->Beta   = lens;
-  att_mir->BetaID = lens->mSaturnID;
+  att_mir->fBeta   = lens;
+  att_mir->fBetaID = lens->mSaturnID;
   try {
     mSaturn->ExecMIR(att_mir);
   }
@@ -901,9 +901,9 @@ void ZQueen::RemoveLens(ZGlass* lens)
   if(lens == this)
     throw(_eh + "attempt to delete ZQueen " + Identify() + ".");
 
-  ZMIR* mir = GThread::get_mir();
+  ZMIR* mir = GThread::MIR();
   if(mir && mir->IsFlare())
-    mir->SuppressFlareBroadcast = true;
+    mir->fSuppressFlareBroadcast = true;
 
   remove_lens(lens);
 }
@@ -1268,11 +1268,11 @@ void ZQueen::BasicQueenChange(ZMIR& mir)
 {
   static const Exc_t _eh("ZQueen::BasicQueenChange ");
 
-  if(mir.Alpha != this)  throw(_eh + "alpha is not *this* queen.");
+  if(mir.fAlpha != this)  throw(_eh + "alpha is not *this* queen.");
   if(mir.HasRecipient()) throw(_eh + "MIR is a beam, should be flare.");
-  if( FID_t(mir.Lid, mir.Cid) != ZGlass::FID() )
+  if( FID_t(mir.fLid, mir.fCid) != ZGlass::FID() )
     throw(_eh + "FID does not correspond to ZGlass.");
-  if(mir.Mid != ZGlass::Mid_SetName() && mir.Mid != ZGlass::Mid_SetTitle())
+  if(mir.fMid != ZGlass::Mid_SetName() && mir.fMid != ZGlass::Mid_SetTitle())
     throw(_eh + "MID does not correspond to SetName or SetTitle.");
 
   BroadcastMIRToNonRulingReflections(mir);

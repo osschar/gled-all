@@ -77,7 +77,7 @@ void GKeyRSA::ssl_locker_foo(int mode, int n, const char *file, int line)
 
 unsigned long GKeyRSA::ssl_id_foo()
 {
-  return GThread::RawSelf();
+  return (unsigned long) GThread::Self();
 }
 
 /**************************************************************************/

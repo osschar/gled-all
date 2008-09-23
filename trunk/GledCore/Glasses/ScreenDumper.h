@@ -34,7 +34,7 @@ public:
 
   void DumpScreen();
 
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "ScreenDumper.h7"
   ClassDef(ScreenDumper, 1);

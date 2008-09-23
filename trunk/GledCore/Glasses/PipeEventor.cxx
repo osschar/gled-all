@@ -64,7 +64,7 @@ void PipeEventor::OnExit(Operator::Arg* op_arg)
 
 /**************************************************************************/
 
-void PipeEventor::Operate(Operator::Arg* op_arg) throw(Operator::Exception)
+void PipeEventor::Operate(Operator::Arg* op_arg)
 {
   if(!mPipe) {
     throw(Operator::Exception(this, Operator::OE_Break, "pipe closed"));

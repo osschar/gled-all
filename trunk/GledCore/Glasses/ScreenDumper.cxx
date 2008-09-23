@@ -53,7 +53,7 @@ void ScreenDumper::DumpScreen()
   }
 }
 
-void ScreenDumper::Operate(Operator::Arg* op_arg) throw(Exception)
+void ScreenDumper::Operate(Operator::Arg* op_arg)
 {
   PreOperate(op_arg);
   DumpScreen();

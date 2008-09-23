@@ -35,7 +35,7 @@ protected:
 public:
   PerfMeterOperator(const Text_t* n="PerfMeterOperator", const Text_t* t=0) : Operator(n,t) { _init(); }
 
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
 #include "PerfMeterOperator.h7"
   ClassDef(PerfMeterOperator, 1)

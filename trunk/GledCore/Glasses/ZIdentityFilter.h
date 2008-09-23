@@ -10,14 +10,15 @@
 #include <Glasses/ZMirFilter.h>
 #include <Glasses/ZIdentity.h>
 
-class ZIdentityFilter : public ZMirFilter {
+class ZIdentityFilter : public ZMirFilter
+{
   MAC_RNR_FRIENDS(ZIdentityFilter);
 
 private:
   void _init();
 
 protected:
-  ZLink<ZIdentity>		mIdentity;	// X{gS} L{}
+  ZLink<ZIdentity>	mIdentity;	// X{gS} L{}
   UChar_t		mOnMatch;	// X{gS} 7 PhonyEnum(-type=>ZMirFilter::Result_e, -names=>[R_Allow,R_Deny], -width=>6)
 
 public:
@@ -27,7 +28,7 @@ public:
   virtual Result_e FilterMIR(ZMIR& mir);
 
 #include "ZIdentityFilter.h7"
-  ClassDef(ZIdentityFilter, 1)
+  ClassDef(ZIdentityFilter, 1);
 }; // endclass ZIdentityFilter
 
 

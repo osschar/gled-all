@@ -78,53 +78,56 @@ typedef hash_map<ID_t, ID_t>::iterator		IdiOm_i;
 // FID_t : Full libset/class ID & FMID_t: Full-method ID
 /**************************************************************************/
 
-class FID_t {
+class FID_t
+{
 public:
-  LID_t	lid;
-  CID_t	cid;
+  LID_t	fLid;
+  CID_t	fCid;
 
-  FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
+  FID_t(LID_t l=0, CID_t c=0) : fLid(l), fCid(c) {}
   virtual ~FID_t() {}
-  bool operator==(FID_t r) const { return (lid == r.lid && cid == r.cid); }
-  bool operator!=(FID_t r) const { return (lid != r.lid || cid != r.cid); }
-  bool is_null()  const { return lid == 0 && cid == 0; }
-  bool is_basic() const { return is_null() || (lid == 1 && cid == 1); }
-  void clear() { lid = 0; cid = 0; }
+  bool operator==(FID_t r) const { return (fLid == r.fLid && fCid == r.fCid); }
+  bool operator!=(FID_t r) const { return (fLid != r.fLid || fCid != r.fCid); }
+  bool is_null()  const { return fLid == 0 && fCid == 0; }
+  bool is_basic() const { return is_null() || (fLid == 1 && fCid == 1); }
+  void clear() { fLid = 0; fCid = 0; }
 
-  ClassDef(FID_t, 1)
+  ClassDef(FID_t, 1);
 };
 
 namespace __gnu_cxx {
   template<>
-  struct hash<FID_t> {
+  struct hash<FID_t>
+  {
     size_t operator()(const FID_t& fid) const
-    { size_t i = fid.lid; i <<= 16; i |= fid.cid; return i; }
+    { size_t i = fid.fLid; i <<= 16; i |= fid.fCid; return i; }
   };
 }
 
 inline TBuffer &operator>>(TBuffer& b, FID_t& fid)
-{ b >> fid.lid >> fid.cid; return b; }
+{ b >> fid.fLid >> fid.fCid; return b; }
 
 inline TBuffer &operator<<(TBuffer& b, FID_t fid)
-{ b << fid.lid << fid.cid; return b; }
+{ b << fid.fLid << fid.fCid; return b; }
 
-class FMID_t : public FID_t {
+class FMID_t : public FID_t
+{
 public:
-  MID_t	mid;
+  MID_t	fMid;
 
-  FMID_t(LID_t l=0, CID_t c=0, MID_t m=0) : FID_t(l,c), mid(m) {}
+  FMID_t(LID_t l=0, CID_t c=0, MID_t m=0) : FID_t(l,c), fMid(m) {}
   virtual ~FMID_t() {}
-  bool operator==(FMID_t r) { return FID_t::operator==(r) && mid == r.mid; }
-  bool operator!=(FMID_t r) { return FID_t::operator!=(r) || mid != r.mid; }
+  bool operator==(FMID_t r) { return FID_t::operator==(r) && fMid == r.fMid; }
+  bool operator!=(FMID_t r) { return FID_t::operator!=(r) || fMid != r.fMid; }
 
-  ClassDef(FMID_t, 1)
+  ClassDef(FMID_t, 1);
 };
 
 inline TBuffer &operator>>(TBuffer& b, FMID_t& fmid)
-{ b >> (FID_t&)fmid >> fmid.mid; return b; }
+{ b >> (FID_t&)fmid >> fmid.fMid; return b; }
 
 inline TBuffer &operator<<(TBuffer& b, FMID_t fmid)
-{ b << (FID_t&)fmid << fmid.mid; return b; }
+{ b << (FID_t&)fmid << fmid.fMid; return b; }
 
 /**************************************************************************/
 // Defines

@@ -1004,7 +1004,7 @@ void FTW_Shell::FillLensMenu(OS::ZGlassImg* img, Fl_Menu_Button& menu,
     GNS::ClassInfo* ci = img->GetCI();
     const char* pset = "Set methods";
     while(ci) {
-      TString s2(GForm("%s (%d,%d)", ci->fName.Data(), ci->fFid.lid, ci->fFid.cid));
+      TString s2(GForm("%s (%d,%d)", ci->fName.Data(), ci->fFid.fLid, ci->fFid.fCid));
       const char* p2 = s2.Data();
       for(GNS::lpMethodInfo_i cmi=ci->fMethodList.begin();
 	  cmi!=ci->fMethodList.end(); ++cmi)

@@ -328,7 +328,7 @@ void ZSunQueen::initiate_mee_connection()
 
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
-  SaturnInfo* req = dynamic_cast<SaturnInfo*>(mir->Caller);
+  SaturnInfo* req = dynamic_cast<SaturnInfo*>(mir->fCaller);
   if(req == 0)
     throw(_eh + "caller not a Saturn");
 
@@ -578,24 +578,24 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
 
   if(id == 0)
     throw(_eh + "null identity");
-  if(mir->Caller->HasIdentity(id))
-    throw(_eh + GForm("%s already has %s", mir->Caller->GetName(), id->GetName()));
+  if(mir->fCaller->HasIdentity(id))
+    throw(_eh + GForm("%s already has %s", mir->fCaller->GetName(), id->GetName()));
 
   ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(id);
   if(gid == 0)
     throw(_eh + "for now only handles group identities");
 
   lpZGlass_t mee_ids;
-  mee_ids.push_back(mir->Caller->mPrimaryIdentity.get());
-  mir->Caller->mActiveIdentities->CopyList(mee_ids);
+  mee_ids.push_back(mir->fCaller->mPrimaryIdentity.get());
+  mir->fCaller->mActiveIdentities->CopyList(mee_ids);
   for(lpZGlass_i i=mee_ids.begin(); i!=mee_ids.end(); ++i) {
 
     if(Gled::theOne->IsIdentityInGroup((*i)->GetName(), id->GetName())) {
 
-      CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Add, id);
-      CALL_AND_BROADCAST(id->mActiveMEEs, Add, mir->Caller);
+      CALL_AND_BROADCAST(mir->fCaller->mActiveIdentities, Add, id);
+      CALL_AND_BROADCAST(id->mActiveMEEs, Add, mir->fCaller);
 
-      mir->SuppressFlareBroadcast = true;
+      mir->fSuppressFlareBroadcast = true;
       return;
     }
 
@@ -610,19 +610,19 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
   ZMIR* mir = assert_MIR_presence(_eh);
   if(id == 0)
     throw(_eh + "null identity");
-  if(!mir->Caller->HasIdentity(id))
-    throw(_eh + GForm("%s does not posses identity %s", mir->Caller->GetName(), id->GetName()));
-  if(mir->Caller->mPrimaryIdentity == id)
-    throw(_eh + GForm("primary identity %s can not be detached from %s",id->GetName(), mir->Caller->GetName()));
+  if(!mir->fCaller->HasIdentity(id))
+    throw(_eh + GForm("%s does not posses identity %s", mir->fCaller->GetName(), id->GetName()));
+  if(mir->fCaller->mPrimaryIdentity == id)
+    throw(_eh + GForm("primary identity %s can not be detached from %s",id->GetName(), mir->fCaller->GetName()));
 
   ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(id);
   if(gid == 0)
     throw(_eh + "for now only handles group identities");
 
-  CALL_AND_BROADCAST(mir->Caller->mActiveIdentities, Remove, id);
-  CALL_AND_BROADCAST(id->mActiveMEEs, Remove, mir->Caller);
+  CALL_AND_BROADCAST(mir->fCaller->mActiveIdentities, Remove, id);
+  CALL_AND_BROADCAST(id->mActiveMEEs, Remove, mir->fCaller);
 
-  mir->SuppressFlareBroadcast = true;
+  mir->fSuppressFlareBroadcast = true;
 }
 
 /**************************************************************************/

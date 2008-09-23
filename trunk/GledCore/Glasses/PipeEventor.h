@@ -36,7 +36,7 @@ public:
   virtual void OnStart(Operator::Arg* op_arg);
   virtual void OnExit(Operator::Arg* op_arg);
 
-  virtual void Operate(Operator::Arg* op_arg) throw(Operator::Exception);
+  virtual void Operate(Operator::Arg* op_arg);
 
   void PostCommand(TString& command);	// X{E}
   void ClearPendingCommands();		// X{E}

@@ -29,8 +29,8 @@ namespace FGS = FltkGledStuff;
 // MCW_View's inner classes
 /**************************************************************************/
 
-MCW_View::ArgBase::ArgBase(TString& typ, TString& base_typ,
-			   TString& name, TString& defval,
+MCW_View::ArgBase::ArgBase(const TString& typ,  const TString& base_typ,
+			   const TString& name, const TString& defval,
 			   int cell_w) :
   Fl_Pack(0,0,0,1),
   _typ(typ), _base_typ(base_typ), _name(name)
@@ -53,8 +53,8 @@ void MCW_View::ArgBase::insert_box(int w, const char* l)
 
 /**************************************************************************/
 
-MCW_View::CtxArg::CtxArg(TString& typ, TString& base_typ,
-			 TString& name, TString& defval,
+MCW_View::CtxArg::CtxArg(const TString& typ,  const TString& base_typ,
+			 const TString& name, const TString& defval,
 			 int cell_w) :
   ArgBase(typ, base_typ, name, defval, cell_w)
 {
@@ -124,8 +124,8 @@ namespace {
   };
 }
 
-MCW_View::VarArg::VarArg(TString& typ, TString& base_typ,
-			 TString& name, TString& defval,
+MCW_View::VarArg::VarArg(const TString& typ,  const TString& base_typ,
+			 const TString& name, const TString& defval,
 			 int cell_w) :
   ArgBase(typ, base_typ, name, defval, cell_w)
 {
@@ -192,16 +192,16 @@ void MCW_View::VarArg::StreamData(TBuffer& b)
     {
       Fl_Value_Input* w = (Fl_Value_Input*)child(2);
       switch(_typ_idx) {
-      case 0: { Char_t   x = (Char_t)w->value(); b << x; break; }
-      case 1: { UChar_t  x = (UChar_t)w->value(); b << x; break; }
-      case 2: { Short_t  x = (Short_t)w->value(); b << x; break; }
-      case 3: { UShort_t x = (UShort_t)w->value(); b << x; break; }
-      case 4: { Int_t    x = (Int_t)w->value(); b << x; break; }
-      case 5: { UInt_t   x = (UInt_t)w->value(); b << x; break; }
-      case 6: { Long_t   x = (Long_t)w->value(); b << x; break; }
-      case 7: { ULong_t  x = (ULong_t)w->value(); b << x; break; }
-      case 8: { Float_t  x = (Float_t)w->value(); b << x; break; }
-      case 9: { Double_t x = (Double_t)w->value(); b << x; break; }
+      case 0: { Char_t   x = (Char_t)   w->value(); b << x; break; }
+      case 1: { UChar_t  x = (UChar_t)  w->value(); b << x; break; }
+      case 2: { Short_t  x = (Short_t)  w->value(); b << x; break; }
+      case 3: { UShort_t x = (UShort_t) w->value(); b << x; break; }
+      case 4: { Int_t    x = (Int_t)    w->value(); b << x; break; }
+      case 5: { UInt_t   x = (UInt_t)   w->value(); b << x; break; }
+      case 6: { Long_t   x = (Long_t)   w->value(); b << x; break; }
+      case 7: { ULong_t  x = (ULong_t)  w->value(); b << x; break; }
+      case 8: { Float_t  x = (Float_t)  w->value(); b << x; break; }
+      case 9: { Double_t x = (Double_t) w->value(); b << x; break; }
       default:{ printf("%sunexpected valuator type.", _eh.Data()); break; }
 
       }
@@ -269,6 +269,10 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t)
   mCtxPack = new Fl_Pack(0,0,0,0);
   mCtxPack->type(FL_VERTICAL);
 
+  t = "SaturnInfo"; bt = t; t += "*"; n = "<recipient>"; d = "0";
+  new CtxArg(t, bt, n, d, cell_w);
+  hctx++;
+
   t = mMInfo->fClassInfo->fName; bt = t; t += "*"; n = "<alpha>"; d = "";
   new CtxArg(t, bt, n, d, cell_w);
   hctx++;
@@ -306,7 +310,7 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t)
   memset(wmaxs, 0, 5*sizeof(int));
   deduce_max_widths(mCtxPack, wmaxs);
   deduce_max_widths(mVarPack, wmaxs);
-  for(int i=0;i<4;++i) wmaxs[4]+=wmaxs[i];
+  for(int i=0;i<4;++i) wmaxs[4] += wmaxs[i];
   apply_max_widths(mCtxPack, wmaxs);
   apply_max_widths(mVarPack, wmaxs);
 
@@ -346,8 +350,8 @@ void MCW_View::ParseMethodInfo(GledNS::MethodInfo* mi) throw(Exc_t)
 
 void MCW_View::SetABG(ZGlass* alpha, ZGlass* beta, ZGlass* gamma)
 {
-  ZGlass* xx[] = { alpha, beta, gamma };
-  for(int c=0; c<mCtxPack->children() && c<3; ++c) {
+  ZGlass* xx[] = { 0, alpha, beta, gamma };
+  for(int c=1; c<mCtxPack->children() && c<=3; ++c) {
     CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(c) );
     if(a)   a->SetImage(mShell->DemanglePtr(xx[c]));
   }
@@ -355,36 +359,52 @@ void MCW_View::SetABG(ZGlass* alpha, ZGlass* beta, ZGlass* gamma)
 
 void MCW_View::SetABG(ID_t alpha, ID_t beta, ID_t gamma)
 {
-  ID_t xx[] = { alpha, beta, gamma };
-  for(int c=0; c<mCtxPack->children() && c<3; ++c) {
+  ID_t xx[] = { 0, alpha, beta, gamma };
+  for(int c=1; c<mCtxPack->children() && c<=3; ++c) {
     CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(c) );
     if(a)   a->SetImage(mShell->DemangleID(xx[c]));
   }
+}
+
+void MCW_View::SetRecipient(SaturnInfo* si)
+{
+  CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(0) );
+  if(a)   a->SetImage(mShell->DemanglePtr(si));
+}
+
+void MCW_View::SetRecipient(ID_t si)
+{
+  CtxArg* a = dynamic_cast<CtxArg*>( mCtxPack->child(0) );
+  if(a)   a->SetImage(mShell->DemangleID(si));
 }
 
 /**************************************************************************/
 
 void MCW_View::Send()
 {
-  ID_t ctx[] = { 0,0,0 };
+  ID_t ctx[] = { 0,0,0,0 };
   for(int i=0; i<mCtxPack->children(); ++i) {
     OS::ZGlassImg* img = ((CtxArg*)(mCtxPack->child(i)))->GetImage();
     if(img) {
       ctx[i] = img->fLens->GetSaturnID();
     }
   }
-  if(ctx[0] == 0) {
+  if(ctx[1] == 0) {
     mShell->Message("MCW_View::Send attempt to emit MIR with alpha==null blocked.",
 		    FTW_Shell::MT_wrn);
     return;
   }
 
-  auto_ptr<ZMIR> mir( new ZMIR(ctx[0], ctx[1], ctx[2]) );
+  auto_ptr<ZMIR> mir( new ZMIR(ctx[1], ctx[2], ctx[3]) );
   mMInfo->ImprintMir(*mir);
 
   for(int i=0; i<mVarPack->children(); ++i) {
     VarArg* va = (VarArg*)(mVarPack->child(i));
     va->StreamData(*mir);
+  }
+
+  if(ctx[0] != 0) {
+    mir->SetRecipient(dynamic_cast<SaturnInfo*>(((CtxArg*)(mCtxPack->child(0)))->GetImage()->fLens));
   }
 
   mShell->Send(*mir);
