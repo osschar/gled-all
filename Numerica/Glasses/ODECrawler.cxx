@@ -50,6 +50,7 @@ void ODECrawler::_init()
 {
   hTINY = 1e-30; hSAFETY = 0.9; hPGROW = -0.2; hPSHRNK = -0.25; hERRCON = 1.89e-4;
   hTrueMaster = 0;
+  hCrawling   = false;
 
   mGuessesOK = mGuessesBad = mStored = 0;
   mMaxSteps  = 1000000; mStoreDx = 0.001; mStoreMax = -1;
@@ -271,15 +272,28 @@ void ODECrawler::Crawl(Bool_t call_ode_start)
 
   static const Exc_t _eh("ODECrawler::Crawl ");
 
-  assert_odemaster(_eh);
-  hTrueMaster = dynamic_cast<ODECrawlerMaster*>(*mODEMaster);
-  if (!hTrueMaster)
-    throw(_eh + "master not an ODECrawlerMaster.");
+  {
+    GLensReadHolder rdlock(this);
 
-  GLensReadHolder rdlock(this);
+    if (hCrawling)
+      throw(_eh + "already crawling.");
+
+    assert_odemaster(_eh);
+
+    hTrueMaster = dynamic_cast<ODECrawlerMaster*>(*mODEMaster);
+    if (!hTrueMaster)
+      throw(_eh + "master not an ODECrawlerMaster.");
+
+    hCrawling = true;
+  }
 
   init_integration(call_ode_start);
   Integrate();
 
-  Stamp(FID());
+  {
+    GLensReadHolder rdlock(this);
+
+    hCrawling = false;
+    Stamp(FID());
+  }
 }
