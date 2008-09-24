@@ -179,7 +179,12 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 {
   GLensWriteHolder wrlck(this);
 
-  Double_t new_time = mTime + mTimeFac*dt;
+  Double_t tdt = mTimeFac*dt;
+
+  if (tdt == 0)
+    return;
+
+  Double_t new_time = mTime + tdt;
 
   // Here we could check how much time has elapsed since last position store
   // and decide whether to store this time.
@@ -266,7 +271,8 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
   const Double_t* P0 = S->GetY(i0);
   const Double_t* P1 = S->GetY(i0+1);
 
-  Int_t ri = 0;
+  Int_t  ri        = 0;
+  Bool_t store_pos = from_timetick && mBallHistorySize > 0;
   Stepper<CosmicBall> stepper(*mBalls);
   while (stepper.step())
   {
@@ -278,13 +284,9 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
                     f0*P0[ri + 1] + f1*P1[ri + 1],
                     f0*P0[ri + 2] + f1*P1[ri + 2]);
 
-    if (from_timetick)
+    if (store_pos)
     {
-      stepper->StorePos(mBallHistorySize);
-    }
-    else
-    {
-      stepper->ResizeHistory(0);
+      stepper->StorePos();
     }
 
     ri += 3;
@@ -296,6 +298,11 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
 void SolarSystem::SetTime(Double_t t)
 {
   mTime = set_time(t, false);
+  Stepper<CosmicBall> stepper(*mBalls);
+  while (stepper.step())
+  {
+    stepper->ClearHistory();
+  }
   Stamp(FID());
 }
 

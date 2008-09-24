@@ -27,20 +27,29 @@ protected:
     Float_t x, y, z;
 
     Point(Float_t a=0, Float_t b=0, Float_t c=0) : x(a), y(b), z(c) {}
+    Point(const Float_t*  a) : x(a[0]), y(a[1]), z(a[2]) {}
     Point(const Double_t* a) : x(a[0]), y(a[1]), z(a[2]) {}
+
+    void Set(const Float_t*  a) { x = a[0]; y = a[1]; z = a[2]; }
+    void Set(const Double_t* a) { x = a[0]; y = a[1]; z = a[2]; }
 
     operator const Float_t*() const { return &x; }
     operator       Float_t*()       { return &x; }
   };
 
-  list<Point>   mHistory;
+  vector<Point> mHistory;       //!
+  Int_t         mHistorySize;   //!
+  Int_t         mHistoryFirst;  //!
+  Int_t         mHistoryStored; //!
+  GMutex        mHistoryMoo;    //!
 
 public:
   CosmicBall(const Text_t* n="CosmicBall", const Text_t* t=0) :
     Sphere(n,t) { _init(); }
 
-  void ResizeHistory(Int_t max_size);
-  void StorePos(Int_t max_size);
+  void StorePos();
+  void ClearHistory();
+  void ResizeHistory(Int_t size);
 
 #include "CosmicBall.h7"
   ClassDef(CosmicBall, 1);
