@@ -1,3 +1,13 @@
+2008-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CosmicBall.cxx:
+	* Glasses/CosmicBall.h:
+	* Glasses/SolarSystem.cxx:
+	* Rnr/GL/CosmicBall_GL_Rnr.cxx:
+	In CosmicBall use vector<Point> instead of list<Point> for storage
+	of ball history. Nitpicking to avoid memory fragmentation.
+
+
 2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:
