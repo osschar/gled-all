@@ -43,11 +43,34 @@ void CosmicBall_GL_Rnr::PostDraw(RnrDriver* rd)
 
   CosmicBall& CB = *mCosmicBall;
 
-  glColor3f(0, 1, 0);
-  glBegin(GL_LINE_STRIP);
-  for (list<CosmicBall::Point>::iterator i=CB.mHistory.begin(); i!=CB.mHistory.end(); ++i)
+  GMutexHolder histo_lock(CB.mHistoryMoo);
+
+  if (CB.mHistoryStored > 0)
   {
-    glVertex3fv(*i);
+    glColor3f(0, 1, 0);
+    glBegin(GL_LINE_STRIP);
+
+    Int_t n_to_draw = CB.mHistoryStored;
+
+    CosmicBall::Point* p;
+    p = &CB.mHistory[CB.mHistoryFirst];
+    Int_t lim_up = TMath::Min(CB.mHistoryFirst + n_to_draw, CB.mHistorySize);
+    Int_t n_draw = lim_up - CB.mHistoryFirst;
+    for (Int_t i = n_draw; i != 0; --i, ++p)
+    {
+      glVertex3fv(*p);
+    }
+    n_to_draw -= n_draw;
+
+    if (n_to_draw > 0)
+    {
+      p = &CB.mHistory[0];
+      for(Int_t i = n_to_draw; i != 0; --i, ++p)
+      {
+        glVertex3fv(*p);
+      }
+    }
+
+    glEnd();
   }
-  glEnd();
 }

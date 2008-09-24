@@ -18,30 +18,65 @@ ClassImp(CosmicBall);
 /**************************************************************************/
 
 void CosmicBall::_init()
-{}
+{
+  mHistorySize = mHistoryFirst = mHistoryStored = 0;
+}
 
 /**************************************************************************/
 
-void CosmicBall::ResizeHistory(Int_t max_size)
+void CosmicBall::StorePos()
 {
-  if (max_size < 1)
+  GMutexHolder histo_lock(mHistoryMoo);
+
+  if (mHistoryFirst == 0)
   {
-    if ( ! mHistory.empty())
-      mHistory.clear();
+    mHistoryFirst = mHistorySize;
   }
-  else
-  {
-    if (mHistory.size() > max_size)
-      mHistory.resize(max_size);
-  }
+  --mHistoryFirst;
+
+  mHistory[mHistoryFirst].Set(mTrans.ArrT());
+
+  if (mHistoryStored < mHistorySize)
+    ++mHistoryStored;
 }
 
-void CosmicBall::StorePos(Int_t max_size)
+void CosmicBall::ResizeHistory(Int_t size)
 {
-  mHistory.push_front(Point(mTrans.ArrT()));
+  GMutexHolder histo_lock(mHistoryMoo);
 
-  if (mHistory.size() > max_size)
-    mHistory.resize(max_size);
+  if (size == mHistorySize)
+    return;
+
+  vector<Point> hist(size);
+
+  Int_t n_to_copy = TMath::Min(mHistoryStored, size);
+
+  if (n_to_copy > 0)
+  {
+    Int_t lim_up = TMath::Min(mHistoryFirst + n_to_copy, mHistorySize);
+    Int_t n_copy = lim_up - mHistoryFirst;
+    memcpy(&hist[0], &mHistory[mHistoryFirst], n_copy * sizeof(Point));
+
+    n_to_copy -= n_copy;
+
+    if (n_to_copy > 0)
+    {
+      memcpy(&hist[n_copy], &mHistory[0], n_to_copy * sizeof(Point));
+    }
+  }
+
+  mHistory.swap(hist);
+
+  mHistorySize   = size;
+  mHistoryFirst  = 0;
+  mHistoryStored = TMath::Min(mHistoryStored, size);
+}
+
+void CosmicBall::ClearHistory()
+{
+  GMutexHolder histo_lock(mHistoryMoo);
+
+  mHistoryStored = 0;
 }
 
 /**************************************************************************/
