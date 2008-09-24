@@ -17,6 +17,9 @@ public:
   ClassDef(ODECrawlerMaster, 1);
 };
 
+
+//==============================================================================
+// ODEStorage, ODEStorageT and typedefs
 //==============================================================================
 
 class ODEStorage
@@ -117,13 +120,17 @@ template class ODEStorageT<Double_t>;
 typedef ODEStorageT<Float_t>  ODEStorageF;
 typedef ODEStorageT<Double_t> ODEStorageD;
 
+
+//==============================================================================
+// ODECrawler
 //==============================================================================
 
 class ODECrawler : public ZGlass
 {
 private:
   Double_t          hTINY, hSAFETY, hPGROW, hPSHRNK, hERRCON; //!
-  ODECrawlerMaster *hTrueMaster;
+  ODECrawlerMaster *hTrueMaster; //!
+  Bool_t            hCrawling;   //!
 
   void _init();
 
