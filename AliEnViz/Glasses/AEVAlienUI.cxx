@@ -33,7 +33,7 @@ AEVAlienUI::~AEVAlienUI()
   if(bConnected) {
     mBDP.close_fifos();
   }
-  system(GForm("rm -rf %s", mBDP.fDir.c_str()));
+  system(GForm("rm -rf %s", mBDP.fDir.Data()));
 }
 
 /**************************************************************************/
@@ -149,7 +149,7 @@ void AEVAlienUI::ImportSites(const Text_t* partition)
 
     }
   } else {
-    printf("ERROR: %s\n", mBDP.fError.c_str());
+    printf("ERROR: %s\n", mBDP.fError.Data());
   }
   alien_unlock();
 }
@@ -207,7 +207,7 @@ void AEVAlienUI::FindExCountFilesPerSite(map<string,int>& cmap,
     }
   } else {
     if(mBDP.bError) {
-      printf("ERROR: %s\n", mBDP.fError.c_str());
+      printf("ERROR: %s\n", mBDP.fError.Data());
     } else {
       printf("No matching files found.\n");
     }

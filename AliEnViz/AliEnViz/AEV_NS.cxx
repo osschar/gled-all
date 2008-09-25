@@ -9,47 +9,52 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-const int AEV_NS::BiDiPipe::sRBSize = 256;
+const int AEV_NS::BiDiPipe::sRBSize = 1024;
 
 /**************************************************************************/
 
-void AEV_NS::BiDiPipe::init(const string& base) {
+void AEV_NS::BiDiPipe::init(const TString& base)
+{
   static const Exc_t _eh("AEV_NS::BiDiPipe::init ");
 
-  fDir = GForm("/tmp/%s_XXXXXX", base.c_str());
-  if(mkdtemp((char*)fDir.c_str()) == 0) {
+  fDir = GForm("/tmp/%s_XXXXXX", base.Data());
+  if(mkdtemp((char*) fDir.Data()) == 0) {
     throw(_eh + "mkdtemp failed.");
   }
 
-  fAtoBName = GForm("%s/AtoB", fDir.c_str());
-  mknod(fAtoBName.c_str(), 0666 | S_IFIFO, 0);
+  fAtoBName = GForm("%s/AtoB", fDir.Data());
+  mknod(fAtoBName, 0666 | S_IFIFO, 0);
 
-  fBtoAName = GForm("%s/BtoA", fDir.c_str());
-  mknod(fBtoAName.c_str(), 0666 | S_IFIFO, 0);
+  fBtoAName = GForm("%s/BtoA", fDir.Data());
+  mknod(fBtoAName, 0666 | S_IFIFO, 0);
 }
 
-void AEV_NS::BiDiPipe::open_BtoA() {
-  fBtoA = fopen(fBtoAName.c_str(), "r");
+void AEV_NS::BiDiPipe::open_BtoA()
+{
+  fBtoA = fopen(fBtoAName, "r");
 }
 
-void AEV_NS::BiDiPipe::open_AtoB() {
-  fAtoB = fopen(fAtoBName.c_str(), "w");
+void AEV_NS::BiDiPipe::open_AtoB()
+{
+  fAtoB = fopen(fAtoBName, "w");
   setlinebuf(fAtoB);
 }
 
-void AEV_NS::BiDiPipe::close_fifos() {
+void AEV_NS::BiDiPipe::close_fifos()
+{
   if(fAtoB) { fclose(fAtoB); fAtoB = 0; }
   if(fBtoA) { fclose(fBtoA); fBtoA = 0; }
 }
 
 /**************************************************************************/
 
-int AEV_NS::BiDiPipe::send_command(const char* cmd)
+int AEV_NS::BiDiPipe::send_command(const TString& cmd)
 {
   // Returns 0 on error, positive int on success (num of records).
 
-  if(bDebug) {
-    printf("BiDiPipe send_command: %s\n", cmd);
+  if(bDebug)
+  {
+    printf("BiDiPipe send_command: %s\n", cmd.Data());
   }
 
   reset_error();
@@ -66,7 +71,7 @@ int AEV_NS::BiDiPipe::send_command(const char* cmd)
 
 /**************************************************************************/
 
-const char* AEV_NS::BiDiPipe::read_line()
+TString AEV_NS::BiDiPipe::read_line()
 {
   fgets(fRB, sRBSize, fBtoA);
   int s = strlen(fRB);
@@ -78,10 +83,10 @@ const char* AEV_NS::BiDiPipe::read_line()
   return fRB;
 }
 
-string AEV_NS::BiDiPipe::read_string()
+TString AEV_NS::BiDiPipe::read_string()
 {
   read_line();
-  return string(fRB);
+  return fRB;
 }
 
 /**************************************************************************/

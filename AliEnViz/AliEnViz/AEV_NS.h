@@ -8,25 +8,25 @@
 #define AliEnViz_AEV_NS_H
 
 #include <Gled/GledTypes.h>
-class ZList;
-class ZImage;
 
-namespace AEV_NS {
+namespace AEV_NS
+{
 
-  struct BiDiPipe {
-    string fDir;
-    string fAtoBName;
-    string fBtoAName;
-    FILE*  fAtoB;
-    FILE*  fBtoA;
+  struct BiDiPipe
+  {
+    TString fDir;
+    TString fAtoBName;
+    TString fBtoAName;
+    FILE*   fAtoB;
+    FILE*   fBtoA;
 
-    char*  fRB;
+    char*   fRB;
     static const int sRBSize;
 
-    bool   bError;
-    string fError;
+    bool    bError;
+    TString fError;
 
-    bool   bDebug;
+    bool    bDebug;
 
     BiDiPipe() : fAtoB(0), fBtoA(0), bDebug(false)
     { fRB = new char[sRBSize]; reset_error(); }
@@ -34,16 +34,16 @@ namespace AEV_NS {
     ~BiDiPipe()
     { delete [] fRB; }
 
-    void init(const string& base);
+    void init(const TString& base);
     void open_BtoA();
     void open_AtoB();
     void close_fifos();
 
     void reset_error() { bError = false; fError = "<no-error>"; }
-    int  send_command(const char* cmd);
+    int  send_command(const TString& cmd);
 
-    const char* read_line();
-    string      read_string();
+    TString  read_line();
+    TString  read_string();
 
     int    read_int();
     double read_double();
