@@ -124,7 +124,7 @@ void ZNode_GL_Rnr::PreDraw(RnrDriver* rd)
   glPushMatrix();
   glMultMatrixd(mPMSE.fLocal.Array());
   if(bNormP) {
-    Bool_t bNormWasOffP = !glIsEnabled(GL_NORMALIZE);
+    bNormWasOffP = !glIsEnabled(GL_NORMALIZE);
     if(bNormWasOffP) glEnable(GL_NORMALIZE);
   }
 
