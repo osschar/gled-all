@@ -232,6 +232,11 @@ if($config->{RECONFIGURE} == 0) {
   my @Rnrs = split(/:/, $config->{RENDERERS});
   my $renderers = join(' ', @Rnrs);
 
+  # config.status
+  open  CS, ">config.status";
+  print CS $cmd_line, "\n";
+  close CS;
+
   # include/config.h
   # bluntly include stuff for gcc; will need compiler option ...
   open CH, ">include/gled-config.h";
@@ -609,16 +614,6 @@ FNORD
   close M;
 }
 
-
-########################################################################
-# Dump config.status
-########################################################################
-
-if ($config->{RECONFIGURE} == 0) {
-  open  CS, ">config.status";
-  print CS $cmd_line, "\n";
-  close CS;
-}
 
 # print Dumper(\@libsets);
 # print Dumper(\%deps);
