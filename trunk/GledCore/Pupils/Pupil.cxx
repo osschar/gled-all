@@ -567,10 +567,11 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
   mDriver->SetFarClip (mInfo->GetFarClip());
   mDriver->SetMaxDepth(mInfo->GetMaxRnrDepth());
 
+  A_Rnr* pupil_rnr = mDriver->GetRnr(fImg);
   mDriver->BeginRender();
   if(rnr_self) {
     try {
-      mDriver->Render(mDriver->GetRnr(fImg));
+      mDriver->Render(pupil_rnr);
     }
     catch(Exc_t exc) {
       cout << _eh << "scene exception: '" << exc << "'.\n";
@@ -578,12 +579,18 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
   }
   if(bShowOverlay && rnr_overlay && mOverlayImg != 0) {
     try {
+      // !!!! Manually call pupil_rnr->Pre/PostDraw().
+      // Somewhat hacky ... but can happen that handle is called
+      // before first draw is done and then font is undefined.
+      // Should do this in GLRnrDriver::BeginRender()?
+      pupil_rnr->PreDraw(mDriver);
       mDriver->Render(mDriver->GetRnr(mOverlayImg));
+      pupil_rnr->PostDraw(mDriver);
     }
     catch(Exc_t exc) {
       cout << _eh << "overlay exception: '" << exc << "'.\n";
     }
- }
+  }
   mDriver->EndRender();
 
   if(mDriver->SizePM() > 0) {
