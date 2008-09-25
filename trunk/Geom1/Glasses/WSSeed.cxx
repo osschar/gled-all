@@ -48,15 +48,16 @@ void WSSeed::_init()
 
   mTexture = 0;
 
-  mDtexU = 0;      mDtexV = 0;
+  mDtexU = mDtexV = 0;
+
+  pTuber = 0;     bTextured = false;
+  m_first_point = m_last_point = 0; m_num_points = 0;
 
   bAnimRunning = false;
   mAnimSleepMS = 50;
   mAnimTime    = 0;
   mAnimStepFac = 1;
-
-  pTuber = 0;     bTextured = false;
-  m_first_point = m_last_point = 0; m_num_points = 0;
+  m_anim_tick  = 0;
 }
 
 WSSeed::~WSSeed() { delete pTuber; }
@@ -399,14 +400,12 @@ void WSSeed::StartAnimation()
     bAnimRunning = true;
     Stamp(FID());
   }
-  m_anim_tick = 0;
   Double_t dt = 0;
   while(bAnimRunning) {
     TimeTick(mAnimTime, dt);
     dt = 0.001*mAnimSleepMS*mAnimStepFac;
     GTime::SleepMiliSec(mAnimSleepMS);
     mAnimTime += dt;
-    ++m_anim_tick;
   }
 }
 
@@ -426,7 +425,7 @@ void WSSeed::TimeTick(Double_t t, Double_t dt)
   if(mDtexU != 0 || mDtexV != 0) {
     mTexUOffset += dt*mDtexU;
     mTexVOffset += dt*mDtexV;
-    if(m_anim_tick % 1000 == 0) {
+    if(++m_anim_tick % 1000 == 0) {
       if(mTexUOffset >  100) mTexUOffset -= 200;
       if(mTexUOffset < -100) mTexUOffset += 200;
       if(mTexVOffset >  100) mTexVOffset -= 200;
