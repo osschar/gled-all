@@ -80,17 +80,13 @@ int main(int argc, char **argv)
   gled_thread.Join();
   if (gled->GetRintRunning())
   {
-    gled->GetRint()->Terminate(0);
-    // It seems ROOT's thread does not like to be canceled anymore as it
-    // exits with an uncought, unknown exception.
-    // app_thread.Cancel();
-    // Tried this, but it didn't wake up the event-loop.
-    // gSystem->AddTimer(new TTimer());
-  } else {
+    app_thread.Kill(GThread::SigTERM);
+  }
+  else
+  {
     Getlinem(kCleanUp, 0);
   }
-  // Don't wait ... see above.
-  // app_thread.Join();
+  app_thread.Join();
 
   gled->StopLogging();
   delete gled;
