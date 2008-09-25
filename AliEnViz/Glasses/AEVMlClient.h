@@ -63,6 +63,7 @@ public:
   AEVMlClient(const Text_t* n="AEVMlClient", const Text_t* t=0) :
     ZNameMap(n,t),  hMonaLock(GMutex::recursive)
   { _init(); }
+  virtual ~AEVMlClient() {}
 
   void OpenConn();  // X{E} 7 MButt(-join=>1)
   void CloseConn(); // X{E} 7 MButt()

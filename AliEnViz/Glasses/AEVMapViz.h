@@ -29,6 +29,7 @@ protected:
 
 public:
   AEVMapViz(const Text_t* n="AEVMapViz", const Text_t* t=0) : ZNode(n,t) { _init(); }
+  virtual ~AEVMapViz() {}
 
   // Meant as initialization.
   void CutEarth_PDC04(ZImage* tex);       // X{E} C{1}
@@ -43,7 +44,7 @@ public:
   AEVSiteViz* FindSiteViz(const Text_t* name);
 
 #include "AEVMapViz.h7"
-  ClassDef(AEVMapViz, 1)
+  ClassDef(AEVMapViz, 1);
 }; // endclass AEVMapViz
 
 
