@@ -84,15 +84,15 @@ void AEVMlClient::OpenConn()
   // Perl client
   //   system(GForm("mona_client.pl %s %s %s > %s/ml_log 2>&1 &",
   // 	       mServer.Data(),
-  // 	       mBDP.fAtoBName.c_str(), mBDP.fBtoAName.c_str(),
-  // 	       mBDP.fDir.c_str())
+  // 	       mBDP.fAtoBName.Data(), mBDP.fBtoAName.Data(),
+  // 	       mBDP.fDir.Data())
   // 	 );
 
   // Java client
   system(GForm("java MonaClient %s %s %s > %s/ml_log 2>&1 &",
 	       mServer.Data(),
-	       mBDP.fAtoBName.c_str(), mBDP.fBtoAName.c_str(),
-	       mBDP.fDir.c_str())
+	       mBDP.fAtoBName.Data(), mBDP.fBtoAName.Data(),
+	       mBDP.fDir.Data())
 	 );
 
   mBDP.open_BtoA();
