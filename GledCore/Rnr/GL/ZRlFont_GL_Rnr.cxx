@@ -22,8 +22,12 @@ void ZRlFont_GL_Rnr::_init()
 
 void ZRlFont_GL_Rnr::AbsorbRay(Ray& ray)
 {
-  if(ray.fFID == ZRlFont::FID() && ray.fRQN == ZRlFont::PRQN_font_change) {
-    LoadFont();
+  static const Exc_t _eh("ZRlFont_GL_Rnr::AbsorbRay ");
+
+  if (ray.fFID == ZRlFont::FID() && ray.fRQN == ZRlFont::PRQN_font_change)
+  {
+    if (LoadFont() == false)
+      throw(_eh + "loading of font '" + mZRlFont->mFontFile + "' failed.");
   }
 }
 
