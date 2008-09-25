@@ -655,6 +655,11 @@ void Gled::Exit()
 
 Int_t Gled::LoadLibSet(const Text_t* lib_set)
 {
+  if (lib_set == 0 || strlen(lib_set) == 0)
+  {
+    warning("Gled::LoadLibSet() called with an empty argument. Ignoring.");
+    return 9;
+  }
   return GledNS::LoadSoSet(lib_set);
 }
 
@@ -823,6 +828,15 @@ public:
     }
   }
 };
+
+class GTerminateHandler : public TSignalHandler
+{
+public:
+  GTerminateHandler() : TSignalHandler(kSigTermination, kTRUE) { Add(); }
+  virtual ~GTerminateHandler() {}
+
+  virtual Bool_t Notify() { gSystem->ExitLoop(); return kFALSE; }
+};
 }
 
 void* Gled::TRint_runner_tl(TRint* gint)
@@ -836,12 +850,20 @@ void* Gled::TRint_runner_tl(TRint* gint)
 
   Gled::theOne->mRintThread = self;
 
-  GExceptionHandler root_exc_handler;
+  // Those two will be deleted in ~TROOT().
+  new GTerminateHandler;
+  new GExceptionHandler;
+
+  self->SetEndFoo((GThread_cu_foo) TRint_cleanup_tl);
+  self->SetEndArg(gint);
 
   Gled::theOne->bRintRunning = true;
   gint->TApplication::Run(true);
   Gled::theOne->bRintRunning = false;
   cout << "Gint terminated ...\n";
+
+  self->SetEndFoo(0);
+  self->SetEndArg(0);
 
   if (Gled::theOne->GetQuit() == false)
     Gled::theOne->Exit();
@@ -849,6 +871,12 @@ void* Gled::TRint_runner_tl(TRint* gint)
   Gled::theOne->mRintThread = 0;
 
   return 0;
+}
+
+void Gled::TRint_cleanup_tl(TRint* gint)
+{
+  cout << "Gint canceled ... expect trouble.\n";
+  gint->Terminate(0);
 }
 
 void* Gled::Gled_runner_tl(Gled* gled)
@@ -861,7 +889,7 @@ void* Gled::Gled_runner_tl(Gled* gled)
   self->set_owner(Gled::theOne->mSaturnInfo);
 
   gled->Run();
-  GThread::Exit();
+
   return 0;
 }
 
