@@ -22,11 +22,11 @@ class ShellInfo;
 
 /**************************************************************************/
 
-class GledGUI : public Gled, public Fl_Window, public Fl_SWM_Client {
-private:
-
+class GledGUI : public Gled, public Fl_Window, public Fl_SWM_Client
+{
 protected:
-  struct Message {
+  struct Message
+  {
     TString	fMsg;
     Fl_Color	fCol;
     Message(const char* m, Fl_Color c=(Fl_Color)0) : fMsg(m), fCol(c) {}

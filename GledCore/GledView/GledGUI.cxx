@@ -55,27 +55,38 @@ namespace
     return 0;
   }
 
-  void quit_cb(Fl_Widget* o, void* ud) { GledGUI::theOne->Exit(); }
+  void quit_cb(Fl_Widget* o, void* ud)
+  {
+    GledGUI::theOne->Exit();
+  }
 
   void debuglevel_cb(Fl_Value_Input* o, void* ud)
-  { Gled::theOne->SetDebugLevel((Int_t)(o->value())); }
+  {
+    Gled::theOne->SetDebugLevel((Int_t)(o->value()));
+  }
 
   void loadlibset_cb(Fl_Widget* o, void* ud)
-  { Gled::theOne->LoadLibSet(GledGUI::theOne->GetLibSetName()->value()); }
+  {
+    Gled::theOne->LoadLibSet(GledGUI::theOne->GetLibSetName()->value());
+  }
 
   void spawneye_cb(Fl_Widget* o, void* ud)
-  { Gled::theOne->SpawnEye("GledCore", GledGUI::theOne->GetEyeName()->value()); }
+  {
+    Gled::theOne->SpawnEye("GledCore", GledGUI::theOne->GetEyeName()->value());
+  }
 
   void keeppos_cb(Fl_Button* o, Fl_OutputPack* ud)
-  { ud->keep_pos(o->value()); }
-
+  {
+    ud->keep_pos(o->value());
+  }
 }
 
 /**************************************************************************/
 // GLED_LABEL_TYPE
 /**************************************************************************/
 
-namespace {
+namespace
+{
   void fl_nosymbol_label(const Fl_Label* o, int X, int Y, int W, int H, Fl_Align align)
   {
     fl_font(o->font, o->size);
@@ -83,8 +94,8 @@ namespace {
     fl_draw(o->value, X, Y, W, H, align, o->image, 0);
   }
 
-  void
-  fl_nosymbol_measure(const Fl_Label* o, int& W, int& H) {
+  void fl_nosymbol_measure(const Fl_Label* o, int& W, int& H)
+  {
     fl_font(o->font, o->size);
     fl_measure(o->value, W, H, 0);
     if (o->image) {
@@ -92,7 +103,6 @@ namespace {
       H += o->image->h();
     }
   }
-
 }
 
 /**************************************************************************/
