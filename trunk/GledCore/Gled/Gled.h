@@ -126,6 +126,7 @@ public:
   static void LoadMacro(const Text_t* mac);
 
   static void* TRint_runner_tl(TRint* gint);
+  static void  TRint_cleanup_tl(TRint* gint);
   static void* Gled_runner_tl(Gled* gled);
 
   virtual void LockFltk()   {}
