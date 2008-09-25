@@ -19,13 +19,11 @@ private:
 protected:
 
 public:
-  CLASSNAME(const Text_t* n="CLASSNAME", const Text_t* t=0) :
-    BASENAME(n,t) { _init(); }
-
+  CLASSNAME(const Text_t* n="CLASSNAME", const Text_t* t=0);
+  virtual ~CLASSNAME();
 
 #include "CLASSNAME.h7"
   ClassDef(CLASSNAME, 1);
 }; // endclass CLASSNAME
-
 
 #endif
