@@ -1,3 +1,10 @@
+2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	Data-member m_anim_tick was only increased when running in
+	auto-anim mode (not from outside time-source).
+	Thanks valgrind.
+
 2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Mover.cxx:

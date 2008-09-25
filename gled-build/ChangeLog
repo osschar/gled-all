@@ -1,5 +1,17 @@
 2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* configure:
+	Move dumping of config.status file to the beginning of configure.
+	The config hash-ref is reloaded during operation and so
+	the config.status was overwriten even in case of --reconf.
+
+	* lib-exec/project7.pl:
+	When generating code for unstreaming of char* or Text_t* function
+	arguments use std::vector<type> instead of auto_ptr<type>.
+	This caused mismatched new[] / delete (thanks valgrind).
+
+2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* cfg/Glass_SKEL.cxx:
 	* cfg/Glass_SKEL.h:
 	* cfg/Stone_SKEL.cxx:

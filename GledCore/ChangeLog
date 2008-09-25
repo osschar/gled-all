@@ -1,3 +1,38 @@
+2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	Do not accept rays after the raw-emitting thread is canceled.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	New class GTerminateHandler : public TSignalHandler to handle
+	sig-term gracefully, shutting down the ROOT's event loop.
+	Instantiate and register GTerminateHandler before calling
+	TRint::Run().
+	Add cleanup function do detect if somebody is trying to cancel the
+	TRint thread.
+
+	* gled.cxx:
+	When Gled::Run() finishes before TRint, use sig-term to terminate
+	TRint.
+
+	* Pupils/Pupil.cxx:
+	When rendering overlay, manually call pupil_rnr->Pre/PostDraw(mDriver).
+	This clears the rnr-mod stacks and loads the default font.
+	Need some more structure here.
+	
+	* Rnr/GL/ZNode_GL_Rnr.cxx:
+	Bugfix - the old state of auto-normal-scaling was stored in
+	local variable with the same name as the data-member.
+	Thanks valgrind.
+
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	In AbsorbRay() throw an exception if loading of a new font fails.
+
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Whitespace.
+
 2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Mountain.cxx:
