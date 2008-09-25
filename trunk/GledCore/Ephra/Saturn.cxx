@@ -1948,11 +1948,10 @@ void Saturn::ray_emitter()
 
 void Saturn::Shine(auto_ptr<Ray>& ray)
 {
+  GMutexHolder raw_lock(mRayEmittingCnd);
   if(!bAcceptsRays) return;
-  mRayEmittingCnd.Lock();
   mRayEmittingQueue.push_back(ray.release());
   mRayEmittingCnd.Signal();
-  mRayEmittingCnd.Unlock();
 }
 
 void Saturn::DeliverTextMessage(EyeInfo* eye, TextMessage& tm)
@@ -2110,6 +2109,10 @@ int Saturn::stop_shooters()
 
   if (mRayEmittingThread)
   {
+    {
+      GMutexHolder ray_lock(mRayEmittingCnd);
+      bAcceptsRays = false;
+    }
     mRayEmittingThread->Cancel();
     mRayEmittingThread->Join();
     delete mRayEmittingThread;
