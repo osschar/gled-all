@@ -221,10 +221,8 @@ sub BeamArgs {
   # Returns code that streams function arguments
 
   my $bufp = shift;
-  my $ar = shift;
-  # This is slightly complex
-  # Due to brain-damaged templates in eggs 1.1  must resolve this in some way.
-  my $ret = "";
+  my $ar   = shift;
+  my $ret  = "";
   for $r (@$ar) {
     if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
       $ret .= "  $bufp->WriteArray($r->[2], $r->[2] ? strlen($r->[2])+1 : 0);\n";
@@ -271,9 +269,11 @@ sub QeamArgs {
     $ret .= "${prefix}";
 
     if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
-      $ret .= "$r->[3] $r->[2]_raw=0; $bufvar.ReadArray($r->[2]_raw); ".
-	      "auto_ptr<$puretype> $r->[2]($r->[2]_raw);\n";
-      $r->[5] = "$r->[2].get()";
+      $ret .= "Int_t $r->[2]_size; $bufvar >> $r->[2]_size;\n${prefix}".
+	      "std::vector<$puretype> $r->[2]($r->[2]_size + 1);\n${prefix}".
+	      "$bufvar.ReadFastArray(\&$r->[2]\[0\], $r->[2]_size);\n${prefix}".
+              "$r->[2]\[$r->[2]_size\] = 0;\n";
+      $r->[5] = "\&$r->[2]\[0\]";
       next;
     }
 
