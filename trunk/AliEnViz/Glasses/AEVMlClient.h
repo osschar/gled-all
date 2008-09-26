@@ -17,7 +17,8 @@ class AEVMlClient : public ZNameMap
   friend class AEVDemoDriver;
 
 public:
-  struct MonaEntry {
+  struct MonaEntry
+  {
     TString fFarm, fCluster, fNode, fParam, fValue;
     GTime   fTime;
     TString fDateStr;
@@ -28,13 +29,17 @@ public:
     ClassDef(MonaEntry, 1);
   };
 
-  struct monaentry_time_lt {
+  struct monaentry_time_lt
+  {
     bool operator()(const MonaEntry& a, const MonaEntry& b) const
-    { return a.fTime < b.fTime; } };
+    { return a.fTime < b.fTime; }
+  };
 
-  struct monaentry_time_gt {
+  struct monaentry_time_gt
+  {
     bool operator()(const MonaEntry& a, const MonaEntry& b) const
-    { return a.fTime > b.fTime; } };
+    { return a.fTime > b.fTime; }
+  };
 
   enum SortMode_e { SM_Ascending=-1, SM_None, SM_Descending };
 
@@ -78,8 +83,8 @@ public:
   void FakeFindJobs();  //  X{Ed}
 
 #include "AEVMlClient.h7"
-  ClassDef(AEVMlClient, 1)
-    }; // endclass AEVMlClient
+  ClassDef(AEVMlClient, 1);
+}; // endclass AEVMlClient
 
 
 #endif
