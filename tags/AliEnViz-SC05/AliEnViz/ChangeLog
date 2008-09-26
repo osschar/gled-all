@@ -1,0 +1,44 @@
+2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliEnViz/AEV_NS.cxx:
+	* AliEnViz/AEV_NS.h:
+	* Glasses/AEVAlienUI.cxx:
+	* Glasses/AEVMlClient.cxx:
+	In BiDiPipe use TString instead of string.
+
+	* Glasses/AEVMapViz.h:
+	* Glasses/AEVMlClient.h:
+	Implement empty virtual destructors to make gcc-3.4.6 happy.
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	New glass - read from new monalisa data-dumper.
+
+	* glass.list:
+	Register AEVMlSucker.
+
+2008-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVMlClient.cxx:
+	Use TPMERegexp class instead of TPME.
+
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVAlienUI.cxx:
+	* Glasses/AEVDemoDriver.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVEventBatch.cxx:
+	* Rnr/GL/AEVEventBatch_GL_Rnr.cxx:
+	Fix compilation warnings.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVDemoDriver.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVFlatSSpace.cxx:
+	* Glasses/AEVSphereSSpace.cxx:
+	* Rnr/GL/AEVEventBatch_GL_Rnr.cxx:
+	* Stones/AEVProofFeedback.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
