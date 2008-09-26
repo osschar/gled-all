@@ -1,9 +1,0 @@
-# $Header$
-class		=s	.	CLASSNAME	"CLASSNAME"
-base		=s	.	BASENAME	"BASENAME"
-skel		=s	.	SKELBASE	"<std>"
-sufh		=s	.	SUF_H		"h"
-sufc		=s	.	SUF_C		"cxx"
-dir		=s	.	OUTDIR		"<std>"
-libset		=s	.	LIBSETNAME	"<std>"
-dumpinfo	b	.	DUMPINFO	1

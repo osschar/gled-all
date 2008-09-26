@@ -1,3 +1,0 @@
-help		!	.	HELP		0
-outdir		=s	.	OUTDIR		"classdoc"
-macro		=s	.	MKDOC_MACRO	"mk_html.C"

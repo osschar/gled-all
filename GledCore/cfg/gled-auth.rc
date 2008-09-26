@@ -1,5 +1,0 @@
-help		!	.	HELP		0
-dryrun		!	.	DRYRUN		0
-dir		=s	.	AUTHDIR		"$ENV{HOME}/.gled/auth"
-keysize		=i	.	KEYSIZE		1024
-name		=s	.	NAME		'<null>'

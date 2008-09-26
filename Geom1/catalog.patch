@@ -1,9 +1,0 @@
-# $Header$
-
-$PATCH = {
-
-"WSTube" => {
-  'Pragmas'   => "#pragma link C++ class WSTube::Traveler+;\n",
-},
-
-};
