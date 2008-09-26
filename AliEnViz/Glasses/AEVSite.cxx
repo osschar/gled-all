@@ -12,12 +12,13 @@
 #include "AEVSite.h"
 #include "AEVSite.c7"
 
-ClassImp(AEVSite)
+ClassImp(AEVSite);
 
 /**************************************************************************/
 
 void AEVSite::_init()
 {
+  mLatitude = mLongitude = 0;
 }
 
 /**************************************************************************/

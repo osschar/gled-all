@@ -10,7 +10,8 @@
 #include <Glasses/ZNode.h>
 #include <Stones/ZColor.h>
 
-class AEVSiteViz : public ZNode {
+class AEVSiteViz : public ZNode
+{
   MAC_RNR_FRIENDS(AEVSiteViz);
 
 private:
@@ -22,10 +23,10 @@ protected:
 public:
   AEVSiteViz(const Text_t* n="AEVSiteViz", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
-
+  virtual ~AEVSiteViz() {}
 
 #include "AEVSiteViz.h7"
-  ClassDef(AEVSiteViz, 1)
+  ClassDef(AEVSiteViz, 1);
 }; // endclass AEVSiteViz
 
 

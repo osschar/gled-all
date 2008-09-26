@@ -12,7 +12,7 @@
 #include "AEVSiteViz.h"
 #include "AEVSiteViz.c7"
 
-ClassImp(AEVSiteViz)
+ClassImp(AEVSiteViz);
 
 /**************************************************************************/
 

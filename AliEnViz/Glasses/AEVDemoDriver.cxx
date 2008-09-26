@@ -333,7 +333,8 @@ void AEVDemoDriver::QueryJobs()
     sleep(ttravel);
     rotate(*mGledViz, ntravel*mWaitTime, 1, 2);
   }
-  else {
+  else
+  {
     auto_ptr<ZMIR> jq( mMonaClient->S_FakeFindJobs() );
     mSaturn->ShootMIRWaitResult(jq);
     int ntravel = TMath::Min(mMonaClient->Size(), 20);
@@ -364,14 +365,18 @@ void AEVDemoDriver::QueryJobDetails(AEVJobRep* job_rep)
   set_text("Querying job details ...");
   set_blurp("");
 
-  { GLensWriteHolder wrlck(*mMonaTube);
+  {
+    GLensWriteHolder wrlck(*mMonaTube);
     mMonaTube->MakeTraveler(2/mTravelTime);
   }
 
-  if(bFakeProcessing == false) {
+  if(bFakeProcessing == false)
+  {
     auto_ptr<ZMIR> jq( mDistAnRep->S_InitJob(job_rep) );
     mSaturn->ShootMIRWaitResult(jq);
-  } else {
+  }
+  else
+  {
     auto_ptr<ZMIR> jq( mDistAnRep->S_FakeInitJob(job_rep) );
     mSaturn->ShootMIRWaitResult(jq);
   }
@@ -379,8 +384,10 @@ void AEVDemoDriver::QueryJobDetails(AEVJobRep* job_rep)
   set_text("Importing job info ...");
 
   int ntravel = TMath::Min(mDistAnRep->GetSites()->Size(), 5);
-  { GLensWriteHolder wrlck(*mMonaTube);
-    for(int i=0; i<ntravel; ++i) {
+  {
+    GLensWriteHolder wrlck(*mMonaTube);
+    for(int i=0; i<ntravel; ++i)
+    {
       mMonaTube->MakeTraveler(-2/mTravelTime);
     }
   }

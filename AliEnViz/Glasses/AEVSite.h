@@ -30,9 +30,10 @@ protected:
 
 public:
   AEVSite(const Text_t* n="AEVSite", const Text_t* t=0) : ZGlass(n,t) { _init(); }
+  virtual ~AEVSite() {}
 
 #include "AEVSite.h7"
-  ClassDef(AEVSite, 1)
+  ClassDef(AEVSite, 1);
 }; // endclass AEVSite
 
 

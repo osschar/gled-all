@@ -230,12 +230,12 @@ void AEVMlClient::PrintValues()
   int n = mes.size();
   printf("%s entries=%d\n", _eh.Data(), n);
 
-  for(lMonaEntry_i i=mes.begin(); i!=mes.end(); ++i) {
+  for(lMonaEntry_i i=mes.begin(); i!=mes.end(); ++i)
+  {
     MonaEntry& m = *i;
     printf("/%s/%s/%s/%-32s %12s (%s)\n", m.fFarm.Data(), m.fCluster.Data(),
 	   m.fNode.Data(), m.fParam.Data(), m.fValue.Data(), m.fDateStr.Data());
   }
-
 }
 
 void AEVMlClient::PrintFLValues()
@@ -351,11 +351,13 @@ void AEVMlClient::FakeFindJobs()
   }
   sort(times.begin(), times.end(), greater_equal<time_t>());
 
-  { GLensWriteHolder wrlck(this);
+  {
+    GLensWriteHolder wrlck(this);
     ClearList();
 
     char tstr[26];
-    for(Int_t n=0; n<n_fake; ++n) {
+    for(Int_t n=0; n<n_fake; ++n)
+    {
       AEVJobRep* job = new AEVJobRep;
 
       job->SetName(GForm("Aid-%06d", Int_t(1e6*gen.Rndm())));
@@ -368,7 +370,6 @@ void AEVMlClient::FakeFindJobs()
 
       mQueen->CheckIn(job);
       Add(job);
-
     }
   }
 }
