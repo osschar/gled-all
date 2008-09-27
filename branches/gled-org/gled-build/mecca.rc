@@ -1,5 +1,0 @@
-# $Header$
-
-target		=s	.	TARGET		"all"
-libset		=s	.	LIBSET		"<all>"
-makeopts	=s	.	MAKEOPTS	"-j2"

@@ -1,2 +1,0 @@
-convert GridKA-2004-PROOF-GLite.ps -rotate 90 -geometry 1024x512! png:page
-for a in page*; do mv $a $a.png; done

@@ -1,7 +1,0 @@
-GledCore
-
-GledCore libset provides the core of Gled framework (base classes,
-server/client code) and basic GUI elements.
-
-License: GNU GPL v2
-Info: http://www.gled.org/

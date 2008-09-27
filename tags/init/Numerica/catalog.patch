@@ -1,6 +1,0 @@
-# $Header$
-$PATCH = {
-"WarmAmoeba" => { 'Pragmas' => "#pragma link C++ class WarmAmoebaMaster;" },
-"ODECrawler" => { 'Pragmas' => "#pragma link C++ class ODECrawlerMaster;" },
-#"MEMLizator" => { 'Pragmas' => "#pragma link C++ class MEMLizatorMaster;" }
-};

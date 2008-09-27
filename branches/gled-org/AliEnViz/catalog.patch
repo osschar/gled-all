@@ -1,9 +1,0 @@
-$PATCH = {
-
-"AEVMlClient" => {
-  'Pragmas'    => "#pragma link C++ class AEVMlClient::MonaEntry+;\n",
-},
-
-};
-
-1;
