@@ -1,3 +1,27 @@
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVSiteList.h:
+	* Glasses/AEVSiteList.cxx:
+	New glass - container for AEVSites.
+
+	* glass.list:
+	Register AEVSiteList.
+
+	* Glasses/AEVFlatSSpace.cxx:
+	Use new path for "Sites".
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	Basic reading of site info.
+	Add stream parsing functions and regexps.
+	Warning - latest root needed.
+
+	* Glasses/AEVMapViz.cxx:
+	Sanitize chunk position variables and their interpretation.
+	Fix map-chunks for the current situation:
+	- extend Europe to include Russia and Greece,
+	- add India.
+
 2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliEnViz/AEV_NS.cxx:

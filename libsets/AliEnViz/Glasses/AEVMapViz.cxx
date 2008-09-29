@@ -19,7 +19,7 @@
 #include <Glasses/AEVSite.h>
 #include <Glasses/ZQueen.h>
 
-ClassImp(AEVMapViz)
+ClassImp(AEVMapViz);
 
 /**************************************************************************/
 
@@ -33,17 +33,18 @@ namespace {
   struct sub_map {
     const char* n;
     float x0, y0, dx, dy;
-    float sx;
+    // These are for placement only.
+    float sx, sy;
     float ox, oy;
   };
 
   // Due to cosmic interferences this is scaled as (xs,ys) = (7,3.5).
   sub_map sub_map_list[] = {
-    { "Europe",	 0.14,  0.95, 0.55, 0.55, 0,    0,    0 },
-    { "Russia",	 0.66,  1.12, 0.25, 0.20, 1,    0,    0 },
-    { "NE-USA",	-1.62,  0.82, 0.20, 0.20, 0.5, -0.8, -0.2 },
-    { "SE-USA",	-1.83,  0.60, 0.20, 0.20, 0.5, -0.8, -0.2 },
-    { "NW-USA",	-2.39,  0.73, 0.20, 0.20, 0.5, -0.8, -0.2 },
+    { "Europe",	 0.30,  0.95, 1.10, 0.70, 0,   0,   0,   0   },
+    { "India",	 1.60,  0.35, 0.60, 0.50, 0.8, 0.8, 0,   0.5 },
+    { "NE-USA",	-1.62,  0.82, 0.20, 0.20, 0.5, 1,   0.2, 0.2 },
+    { "SE-USA",	-1.83,  0.60, 0.20, 0.20, 0.5, 1,   0.2, 0.2 },
+    { "NW-USA",	-2.39,  0.73, 0.20, 0.20, 0.5, 1,   0.2, 0.2 },
     { 0 }
   };
 
@@ -89,7 +90,7 @@ void AEVMapViz::CutEarth_PDC04(ZImage* tex)
     fss->SetTheta0(180*s.y0/Sy); fss->SetDTheta(180*s.dy/Sy);
 
     if(smp != sub_map_list) {
-      fss->SetPos((s.x0 - o.x0 - s.ox)*s.sx, (s.y0 - o.y0 - s.oy), 0);
+      fss->SetPos((s.x0 - o.x0)*s.sx + s.ox, (s.y0 - o.y0)*s.sy + s.oy, 0);
     }
 
     // Here use ZQueen::IncarnateWAttach & suppress flare broadcast.

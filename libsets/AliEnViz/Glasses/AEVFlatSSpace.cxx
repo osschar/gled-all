@@ -76,7 +76,7 @@ void AEVFlatSSpace::ImportAllSites()
   static const Exc_t _eh("AEVFlatSSpace::ImportAllSites ");
 
   ZList* sites = dynamic_cast<ZList*>
-    (mQueen->FindLensByPath("AlienUI->Sites"));
+    (mQueen->FindLensByPath("Sites"));
   if(sites == 0) {
     throw(_eh + "could not retrive the site list.");
   }

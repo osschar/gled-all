@@ -1,0 +1,9 @@
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	New file.
+
+	* alienviz_common_foos.C:
+	* fake_replay.C:
+	* suck.C:
+	Move much of the common initialization into common-foos.
