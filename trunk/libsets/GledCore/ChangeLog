@@ -1,3 +1,11 @@
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* macros/eye.C:
+	Fix missing return values when exiting due to an error.
+
+	* Glasses/ZQueen.cxx:
+	Typo in comment.
+
 2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:

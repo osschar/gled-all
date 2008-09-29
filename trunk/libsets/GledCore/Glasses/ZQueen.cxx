@@ -550,7 +550,7 @@ ID_t ZQueen::IncarnateWAttach()
   if(mir->HasChainedMIR() == false)
     throw(_eh + "attachemnt mir is not supplied.");
 
-  // Must read full buffer befure unchaining the attachment mir.
+  // Must read full buffer before unchaining the attachment mir.
   ZGlass* lens = GledNS::StreamLens(*mir);
   if(lens == 0) throw(_eh + "lens unstreaming failed.");
 
