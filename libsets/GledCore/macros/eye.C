@@ -61,7 +61,7 @@ NestInfo* new_nest(const Text_t* name="Nest", const Text_t* layout = 0)
 
 PupilInfo* new_pupil(const Text_t* name="Pupil")
 {
-  if(Gled::theOne->HasGUILibs() == false) return;
+  if(Gled::theOne->HasGUILibs() == false) return 0;
 
   if(g_shell == 0) {
     printf("eye.C::new_pupil g_shell is null. Returning zero.\n");
@@ -91,7 +91,7 @@ void setup_pupil_up_reference(ZNode* n=0, Int_t a=3)
 
 ZList* register_GledCore_layouts(ZList* top=0)
 {
-  if(Gled::theOne->HasGUILibs() == false) return;
+  if(Gled::theOne->HasGUILibs() == false) return 0;
 
   if(top == 0) top = g_fire_queen;
 
