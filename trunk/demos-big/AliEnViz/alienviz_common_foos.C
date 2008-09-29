@@ -125,6 +125,7 @@ void alienviz_setup_scene()
   g_scene = aev_scene;
 
   CREATE_ADD_GLASS(l, Lamp, aev_scene, "Lamp", 0);
+  l->SetRnrSelf(false);
   l->SetLampScale(0);
   l->SetPos(0, 2, 10);
   l->SetAmbient(0.5, 0.5, 0.5);
@@ -136,7 +137,7 @@ void alienviz_setup_scene()
 
   CREATE_ADD_GLASS(cam_base, Sphere, bases, "Home", 0);
   cam_base->SetPos(0, -6.5, 5);
-  cam_base->SetRotByDegrees(90, -35, 90);
+  cam_base->SetRotByDegrees(90, -30, 90);
   cam_base->SetRadius(0.01);
   cam_base->SetRnrSelf(false);
 

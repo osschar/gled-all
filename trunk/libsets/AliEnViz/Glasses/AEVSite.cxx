@@ -19,6 +19,8 @@ ClassImp(AEVSite);
 void AEVSite::_init()
 {
   mLatitude = mLongitude = 0;
+
+  mJobsStarted = mJobsRunning = mJobsSaving = mJobsDone = mJobsErrorAll = 0;
 }
 
 /**************************************************************************/

@@ -1,5 +1,15 @@
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* alienviz_common_foos.C:
+	Do not draw lamp.
+	Fix default camera position slightly.
+
+	* suck.C:
+	Add an Eventor and TimeMaker.
+	Add old Gled avatar featuring as 'Central Services'.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* ChangeLog:
 	New file.
 

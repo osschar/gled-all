@@ -13,6 +13,7 @@
 
 #include <Gled/GThread.h>
 
+#include <TMath.h>
 #include <TSystem.h>
 
 // AEVMlSucker
@@ -25,8 +26,46 @@ ClassImp(AEVMlSucker);
 
 /**************************************************************************/
 
+namespace
+{
+bool s_map_init_done = false;
+
+// Site Int_t and Float_t setters
+
+typedef void (AEVSite::*site_set_int_foo)  (Int_t);
+typedef void (AEVSite::*site_set_float_foo)(Float_t);
+
+map<TString, site_set_int_foo>     s_site_set_int_map;
+map<TString, site_set_float_foo>   s_site_set_float_map;
+
+void call_foo(AEVSite* site, const TString& key, Int_t val)
+{
+  site_set_int_foo foo = s_site_set_int_map[key];
+  if (foo == 0)
+    throw(Exc_t("site_set_int - unknown key '") + key + "'.");
+
+  printf("Calling setter for key '%s'\n", key.Data());
+  GLensWriteHolder lock(site);
+  (site->*foo)(val);
+}
+
+void call_foo(AEVSite* site, const TString& key, Float_t val)
+{
+  site_set_float_foo foo = s_site_set_float_map[key];
+  if (foo == 0)
+    throw(Exc_t("site_set_float - unknown key '") + key + "'.");
+
+  printf("Calling setter for key '%s'\n", key.Data());
+  GLensWriteHolder lock(site);
+  (site->*foo)(val);
+}
+
+}
+
 void AEVMlSucker::_init()
 {
+  // from local dump: "cat nc-dump"
+  mSuckCmd  = "nc pcalimonitor2.cern.ch 7014";
   mFooSleep = 1000;
 
   mSuckerThread = 0;
@@ -34,6 +73,18 @@ void AEVMlSucker::_init()
   mGlobWordRE.Reset("([-\\w]+)\\s+", "g");
   mGlobVarRE .Reset("([-_\\w]+)=([\\d\\.eE]+)(?:[,\\s]*)", "g");
   mUScoreRE  .Reset("(\\w+)_([-\\w]+)");
+
+  if ( ! s_map_init_done)
+  {
+    s_site_set_int_map["jobs_STARTED"]   = &AEVSite::SetJobsStarted;
+    s_site_set_int_map["jobs_RUNNING"]   = &AEVSite::SetJobsRunning;
+    s_site_set_int_map["jobs_SAVING"]    = &AEVSite::SetJobsSaving;
+    s_site_set_int_map["jobs_DONE"]      = &AEVSite::SetJobsDone;
+    s_site_set_int_map["jobs_ERROR_ALL"] = &AEVSite::SetJobsErrorAll;
+
+    s_site_set_float_map["geo_LAT"] = &AEVSite::SetLatitude;
+    s_site_set_float_map["geo_LON"] = &AEVSite::SetLongitude;
+  }
 }
 
 /**************************************************************************/
@@ -68,7 +119,7 @@ bool AEVMlSucker::next_var(const TString& s, TString& var, TString& val)
   return true;
 }
 
-bool AEVMlSucker::next_var(const TString& s, TString& var, Double_t& val)
+bool AEVMlSucker::next_var(const TString& s, TString& var, Float_t& val)
 {
   TString v;
   bool ret = next_var(s, var, v);
@@ -80,13 +131,10 @@ void AEVMlSucker::Suck()
 {
   static const Exc_t _eh("AEVMlSucker::Suck ");
 
-  // static const TString cmd("nc pcalimonitor2.cern.ch 7014");
-  static const TString cmd("cat nc-dump");
-
-  FILE* s = gSystem->OpenPipe(cmd, "r");
+  FILE* s = gSystem->OpenPipe(mSuckCmd, "r");
   if (s == 0)
   {
-    perror(GForm("PipeOpen of '%s' failed:", cmd.Data()));
+    perror(GForm("PipeOpen of '%s' failed:", mSuckCmd.Data()));
     return;
   }
 
@@ -114,7 +162,6 @@ void AEVMlSucker::Suck()
     {
       TString l1 = next_word(l);
 
-      // Sucked: site Madrid geo_LAT=40.455470,geo_LON=-3.724864
       if (l1 == "site")
       {
         TString name = next_word(l);
@@ -132,21 +179,20 @@ void AEVMlSucker::Suck()
         }
 
         mGlobVarRE.AssignGlobalState(mGlobWordRE);
-        TString  var;
-        Double_t val;
+        TString var;
+        Float_t val;
         Bool_t   reposition = false;
         while (next_var(l, var, val))
         {
-          if (var == "geo_LAT")
+          if (var.BeginsWith("geo_"))
           {
-            site->SetLatitude(val);
+	    call_foo(site, var, val);
             reposition = true;
           }
-          else if (var == "geo_LON")
-          {
-            site->SetLongitude(val);
-            reposition = true;
-          }
+	  else if (var.BeginsWith("jobs_"))
+	  {
+	    call_foo(site, var, TMath::Nint(val));
+	  }
           else
           {
             // printf("site - unhandled variable '%s'.\n", var.Data());

@@ -28,6 +28,12 @@ protected:
   Float_t	mLatitude;	// X{GS} 7 ValOut()
   Float_t	mLongitude;	// X{GS} 7 ValOut()
 
+  Int_t         mJobsStarted;   // X{GS} 7 ValOut()
+  Int_t         mJobsRunning;   // X{GS} 7 ValOut()
+  Int_t         mJobsSaving;    // X{GS} 7 ValOut()
+  Int_t         mJobsDone;      // X{GS} 7 ValOut()
+  Int_t         mJobsErrorAll;  // X{GS} 7 ValOut()
+
 public:
   AEVSite(const Text_t* n="AEVSite", const Text_t* t=0) : ZGlass(n,t) { _init(); }
   virtual ~AEVSite() {}
