@@ -11,5 +11,6 @@ void gled_view_globals()
 {
   // Needed to determine if the script has been already loaded.
 
-  GledNS::LoadSo("libGledCore_Pupils.so");
+  TString pupil_lib("libGledCore_Pupils.so");
+  GledNS::LoadSo(pupil_lib);
 }
