@@ -9,6 +9,7 @@ AEVMlSucker	4	Glasses/AEVMlSucker
 
 AEVSite		16      Glasses/AEVSite
 AEVCompElRep	17	Glasses/AEVCompElRep	.
+AEVSiteList     18      Glasses/AEVSiteList
 
 AEVDistAnRep	32	Glasses/AEVDistAnRep	.
 AEVEventBatch   33	Glasses/AEVEventBatch	.

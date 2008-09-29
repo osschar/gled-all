@@ -27,53 +27,17 @@ void fake_replay()
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("AliEnViz");
 
-  ZQueen* ali_queen = new ZQueen(128*1024, "AliQueen", "Goddess of Ver");
-  g_sun_king->Enthrone(ali_queen);
-  ali_queen->SetMandatory(true);
-  g_queen = ali_queen;
-
   Gled::LoadMacro("alienviz_common_foos.C");
 
-  alienviz_setup_lib_objects();
+  alienviz_setup_lib_objects(128*1024);
+
+  ASSIGN_ADD_GLASS(ml_client, AEVMlClient, aev_queen, "MonaLisa Client", 0);
 
   /**************************************************************************/
 
-  // Top-levels
-  //------------
+  alienviz_setup_scene();
 
-  // ASSIGN_ADD_GLASS(alien_ui, AEVAlienUI, ali_queen, "AlienUI", 0);
-
-  ASSIGN_ADD_GLASS(ml_client, AEVMlClient, ali_queen, "MonaLisa Client", 0);
-
-  ASSIGN_ADD_GLASS(g_scene, Scene, g_queen, "Sites Scene", 0);
   Scene* ss = g_scene;
-
-
-  // Basic scene elements
-  //----------------------
-
-  CREATE_ADD_GLASS(cam_base, Sphere, ss, "CameraBase", 0);
-  cam_base->SetPos(0, -6.5, 4);
-  cam_base->SetRotByDegrees(90, -35, 90);
-  cam_base->SetRadius(0.01);
-  cam_base->SetRnrSelf(false);
-
-  CREATE_ADD_GLASS(view_base_1, Sphere, ss, "ViewBase1", 0);
-  view_base_1->SetPos(2.6, -4.95, 0.9);
-  view_base_1->SetRadius(0.01);
-  view_base_1->SetRnrSelf(false);
-
-  CREATE_ADD_GLASS(view_base_2, Sphere, ss, "ViewBase2", 0);
-  view_base_2->SetPos(5.8, -2.25, 0.7);
-  view_base_2->SetRadius(0.01);
-  view_base_2->SetRnrSelf(false);
-
-
-  CREATE_ADD_GLASS(l, Lamp, ss, "Lamp", 0);
-  l->SetLampScale(0);
-  l->SetPos(0, 2, 10);
-  l->SetAmbient(0.5, 0.5, 0.5);
-  ss->GetGlobLamps()->Add(l);
 
   CREATE_ADD_GLASS(blend, ZGlBlending, ss, "GL Blending", 0);
   blend->SetBlendOp(ZRnrModBase::O_On);
@@ -389,96 +353,28 @@ void fake_replay()
     exit_but->SetCbackMethodName("ExitGled");
 
     top_step.Step();
-    //--
-    ////////////////////////////////////////////////////////////////
   }
 
+  /**************************************************************************/
+
   /*
-    {
-    CREATE_ADD_GLASS(top_options_menu, ZNode, overlay, "OptionsMenu", 0);
-    CREATE_ADD_GLASS(options_menu, WGlButton, top_options_menu, "Options", 0);
-    top_step.SetNode(options_menu);
-    options_menu->SetRnrElements(false);
-    options_menu->SetCbackAlpha(options_menu);
-    options_menu->SetCbackMethodName("MenuEnter");
-    {
-    SGridStepper step(1);
-    step.Subtract(top_step);
+    CREATE_ADD_GLASS(etor, Eventor, aev_queen, "Movie Maker", 0);
+    etor->SetBeatsToDo(-1);
+    etor->SetInterBeatMS(100); etor->SetStampInterval(10);
+    CREATE_ADD_GLASS(sdumper, ScreenDumper, etor, "DumpRayEmitter", 0);
+    sdumper->SetPupil(pupil);
+    // sdumper->SetFileNameFmt("someplace/img%05d.tga");
+    */
 
-    CREATE_ADD_GLASS(reply, WGlValuator, options_menu, "ReplyTime", 0);
-    options_menu->SetPos(4.,4.,0);
-    step.SetNodeAdvance(reply);
-    reply->SetMin(-10); reply->SetMax(10);
-    reply->SetStepA(1); reply->SetStepB(10000);
-    reply->SetFormat("Speed: %.3f");
-    // reply->SetCbackAlpha(rot_op);
-    // reply->SetCbackMemberName("Ra");
-
-    CREATE_ADD_GLASS(querry, WGlValuator, options_menu, "QuerryInterval", 0);
-    step.SetNodeAdvance(querry);
-    querry->SetMin(-10); querry->SetMax(10);
-    querry->SetStepA(1); querry->SetStepB(10000);
-    querry->SetFormat("Speed: %.3f");
-    // querry->SetCbackAlpha(rot_op);
-    // querry->SetCbackMemberName("Ra");
-
-    CREATE_ADD_GLASS(connect, WGlValuator, options_menu, "ConnectTime", 0);
-    step.SetNodeAdvance(connect);
-    connect->SetMin(-10); connect->SetMax(10);
-    connect->SetStepA(1); connect->SetStepB(10000);
-    connect->SetFormat("Speed: %.3f");
-    // connect->SetCbackAlpha(rot_op);
-    // connect->SetCbackMemberName("Ra");
-
-    CREATE_ADD_GLASS(travel, WGlValuator, options_menu, "TravelTime", 0);
-    step.SetNodeAdvance(travel);
-    travel->SetMin(-10); travel->SetMax(10);
-    travel->SetStepA(1); travel->SetStepB(10000);
-    travel->SetFormat("Speed: %.3f");
-    // travel->SetCbackAlpha(rot_op);
-    // travel->SetCbackMemberName("Ra");
-
-    CREATE_ADD_GLASS(options_back, WGlButton, options_menu, " << ", 0);
-    step.SetNodeAdvance(options_back);
-    options_back->SetCbackAlpha(options_menu);
-    options_back->SetCbackMethodName("MenuExit");
-    }
-    top_step.Step();
-    }
-  */
+  dd->ResetDemo();
 
   /**************************************************************************/
   // Spawn the eye
   /**************************************************************************/
 
-  printf("Instantiating GUI ...\n");
-  Gled::AssertMacro("gled_view_globals.C");
+  alienviz_spawn_eye();
 
-  //g_saturn->LockMIRShooters(true);
-  g_shell = new ShellInfo("AliEnViz Shell");
-  // fire_queen->CheckIn(shell); fire_queen->Add(shell);
-  g_queen->CheckIn(g_shell);
-  g_queen->Add(g_shell);
-
-  ASSIGN_ATT_GLASS(g_nest, NestInfo, g_shell, SetDefSubShell, "Nest", 0);
-  g_nest->Add(g_queen);
-  // g_nest->Add(g_scene);
-  // g_nest->ImportKings();   // Get all Kings as top level objects
-
-  ASSIGN_ATT_GLASS(g_pupil, PupilInfo, g_shell, AddSubShell, "Pupil of AliEn", 0);
-  g_pupil->Add(g_scene);
-  g_pupil->SetWidth(800); g_pupil->SetHeight(600);
-  g_pupil->SetClearColor(0.209, 0.269, 0.248);
-  g_pupil->SetUpReference(plane_xy);
-  g_pupil->SetUpRefAxis(3);
-  g_pupil->SetCameraBase(cam_base);
-  g_pupil->SetLookAt(distan_rep);
-  g_pupil->SetBackMode(GL_FILL);
-  g_pupil->SetCHSize(0);
-
-  g_pupil->SetShowRPS(false);
-  g_pupil->SetShowView(false);
-
+  g_pupil->SetLookAt(aev_scene);
   g_pupil->SetOverlay(overlay);
 
   movie_dumper->SetPupil(g_pupil);
@@ -494,7 +390,7 @@ void fake_replay()
     CREATE_ADD_GLASS(locfs, WGlFrameStyle, overlay, "CameraNavStyle", 0);
     locfs->StandardPixel();
     locfs->SetDefDx(weed_dx/2.5);
-    locfs->SetTextYSize(16);
+    locfs->SetTextYSize(18);
     locfs->SetYBorder(2);
 
     SGridStepper step(0);
@@ -504,59 +400,21 @@ void fake_replay()
     CREATE_ADD_GLASS(b_home, WGlButton, overlay, "Home", 0);
     step.SetNodeAdvance(b_home);
     b_home->SetCbackAlpha(g_pupil);
-    b_home->SetCbackBeta(cam_base);
+    b_home->SetCbackBeta(find_cambase("Home"));
     b_home->SetCbackMethodName("SmoothCameraHome");
 
     CREATE_ADD_GLASS(b_pos_1, WGlButton, overlay, "Pos A", 0);
     step.SetNodeAdvance(b_pos_1);
     b_pos_1->SetCbackAlpha(g_pupil);
-    b_pos_1->SetCbackBeta(view_base_1);
+    b_pos_1->SetCbackBeta(find_cambase("View1"));
     b_pos_1->SetCbackMethodName("SmoothCameraHome");
 
     CREATE_ADD_GLASS(b_pos_2, WGlButton, overlay, "Pos B", 0);
     step.SetNodeAdvance(b_pos_2);
     b_pos_2->SetCbackAlpha(g_pupil);
-    b_pos_2->SetCbackBeta(view_base_2);
+    b_pos_2->SetCbackBeta(find_cambase("View2"));
     b_pos_2->SetCbackMethodName("SmoothCameraHome");
   }
-
-  /**************************************************************************/
-
-  Gled::AssertMacro("gled_view_globals.C");
-  Gled::LoadMacro("eye.C");
-  {
-    ZList* laytop = register_GledCore_layouts(g_shell);
-
-    laytop->Swallow("AliEnViz", new ZGlass("Jobs", "ZGlass(Name[12],Title[32])"));
-
-    laytop->Swallow("AliEnViz", new ZGlass("Sites", "ZGlass(Name):AEVSite(*)"));
-
-    laytop->Swallow("AliEnViz", new ZGlass("FlatSpace",
-					   "Board(ULen[5],VLen[5],TexX0,TexY0,TexX1,TexY1):"
-					   "AEVFlatSSpace(Theta0,DTheta,Phi0,DPhi)"));
-
-    laytop->Swallow("AliEnViz", new ZGlass("ProcessingMonitor",
-					   "AEVEventBatch(EvState,NWorkers,DataSizeMB)"));
-
-    laytop->Swallow("WeaverSymbols", new ZGlass("ZNode:WS_Point",
-						"ZNode(Pos[18],Rot[18]):"
-						"WSPoint(W[4],S[4],T[4],Twist[4],Stretch[4])" ));
-  }
-
-  /**************************************************************************/
-
-  /*
-    CREATE_ADD_GLASS(etor, Eventor, ali_queen, "Movie Maker", 0);
-    etor->SetBeatsToDo(-1);
-    etor->SetInterBeatMS(100); etor->SetStampInterval(10);
-    CREATE_ADD_GLASS(sdumper, ScreenDumper, etor, "DumpRayEmitter", 0);
-    sdumper->SetPupil(pupil);
-    // sdumper->SetFileNameFmt("someplace/img%05d.tga");
-    */
-
-  dd->ResetDemo();
-
-  Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 
   // x1();
   // x2();

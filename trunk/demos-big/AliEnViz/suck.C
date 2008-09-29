@@ -12,6 +12,7 @@ class AEVMlSucker;
 //------------------------------------------------------------------------------
 
 AEVMlSucker   *ml_sucker = 0;
+ZNameMap      *sites     = 0;
 
 //==============================================================================
 
@@ -21,36 +22,35 @@ void suck()
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("AliEnViz");
 
-  ZQueen* ali_queen = new ZQueen(128*1024, "AliQueen", "Goddess of Ver");
-  g_sun_king->Enthrone(ali_queen);
-  ali_queen->SetMandatory(true);
-  g_queen = ali_queen;
+  Gled::LoadMacro("alienviz_common_foos.C");
 
-  ASSIGN_ADD_GLASS(ml_sucker, AEVMlSucker, ali_queen, "MonaLisa Sucker", 0);
+  alienviz_setup_lib_objects(128*1024);
 
-  ASSIGN_ADD_GLASS(g_scene, Scene, g_queen, "Scene", "Testing AEVMlSucker.");
+  ASSIGN_ADD_GLASS(ml_sucker, AEVMlSucker, aev_queen, "MonaLisa Sucker", 0);
 
-  //==============================================================================
+  ASSIGN_ADD_GLASS(sites, AEVSiteList, aev_queen, "Sites", 0);
 
-  Gled::Macro("eye.C");
+  //============================================================================
 
-  g_nest->PushFront(g_queen);
-  {
-    ZList* layouts = g_queen->AssertPath("var/layouts", "ZNameMap");
-    fill_GledCore_layouts(layouts);
+  alienviz_setup_scene();
 
-    layouts->Swallow("AliEnViz", new ZGlass("Jobs", "ZGlass(Name[12],Title[32])"));
-    layouts->Swallow("AliEnViz", new ZGlass("Sites", "ZGlass(Name):AEVSite(*)"));
-    layouts->Swallow("AliEnViz", new ZGlass("FlatSpace",
-					    "Board(ULen[5],VLen[5],TexX0,TexY0,TexX1,TexY1):"
-					    "AEVFlatSSpace(Theta0,DTheta,Phi0,DPhi)"));
-    layouts->Swallow("AliEnViz", new ZGlass("ProcessingMonitor",
-					    "AEVEventBatch(EvState,NWorkers,DataSizeMB)"));
-    layouts->Swallow("WeaverSymbols", new ZGlass("ZNode:WS_Point",
-						 "ZNode(Pos[18],Rot[18]):"
-						 "WSPoint(W[4],S[4],T[4],Twist[4],Stretch[4])" ));
+  CREATE_ADD_GLASS(c_mapviz, AEVMapViz, g_scene, "MapViz", 0);
+  c_mapviz->SetPos(0, -3, 0);
+  c_mapviz->SetScale(6); c_mapviz->SetUseScale(true);
+  c_mapviz->CutEarth_PDC04(find_texture("Earth"));
+  c_mapviz->SetSites(sites);
 
-    g_nest->SetLayoutList(layouts);
-  }
+  AEVMapViz* g_mapviz = globe_map();
+  g_mapviz->SetSites(sites);
 
+  AEVMapViz* m_mapviz = mercator_map();
+  m_mapviz->SetSites(sites);
+
+  //============================================================================
+
+  alienviz_spawn_eye();
+
+  //============================================================================
+
+  ml_sucker->StartSucker();
 }
