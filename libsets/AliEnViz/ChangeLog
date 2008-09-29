@@ -1,5 +1,16 @@
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/AEVSite.h:
+	* Glasses/AEVSite.cxx:
+	Add data members for counting jobs at given site.
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	Use pointers to member functions stored in a map to execute set-methods.
+	Add processing of site job data.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/AEVMlSucker.h:
 	Add include required when not building with PCH.
 

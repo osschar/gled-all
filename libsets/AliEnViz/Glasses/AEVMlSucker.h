@@ -20,6 +20,7 @@ private:
   void _init();
 
 protected:
+  TString    mSuckCmd;      // X{GS} 7 Textor()
   Int_t      mFooSleep;     // X{GS} 7 Value(-range=>[0,1e4,1])
 
   GThread   *mSuckerThread; //!
@@ -30,7 +31,7 @@ protected:
 
   TString next_word(const TString& s);
   bool    next_var (const TString& s, TString& var, TString& val);
-  bool    next_var (const TString& s, TString& var, Double_t& val);
+  bool    next_var (const TString& s, TString& var, Float_t& val);
 
   static void* tl_Suck(AEVMlSucker* s);
   void Suck();
