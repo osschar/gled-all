@@ -1,3 +1,10 @@
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Include '-ljpeg -ltiff -lmng' to BASE_LD_LIBS - the latest DevIL
+	seems even more screwed up than before.
+	Add a comment explaining this.
+
 2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSSeed.cxx:

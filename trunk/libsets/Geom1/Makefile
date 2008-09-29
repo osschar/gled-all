@@ -10,7 +10,11 @@ DICT_DIRS	= Glasses Stones
 VIEW_DIRS	= FL
 VIEW_FL_DIRS	= FL
 
-BASE_LD_LIBS    = -lIL -lILU
+# libIL used to be linked against image libs (on most systems).
+# The latest version (1.7.2) is not, also whre it was before.
+# So ... until this is solved, I add the libs here.
+# BASE_LD_LIBS    = -lIL -lILU
+BASE_LD_LIBS    = -ljpeg -ltiff -lmng -lIL -lILU
 
 GFORGE_EXE      = bin/gforge
 
