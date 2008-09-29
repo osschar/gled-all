@@ -1,5 +1,11 @@
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* macros/gled_view_globals.C:
+	Latest cint seems to have trouble converting character arrays to
+	TString - so define a TString for the call to 'GledNS::LoadSo()'.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* macros/eye.C:
 	Fix missing return values when exiting due to an error.
 

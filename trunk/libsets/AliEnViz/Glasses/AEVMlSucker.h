@@ -8,6 +8,7 @@
 #define AliEnViz_AEVMlSucker_H
 
 #include <Glasses/ZNameMap.h>
+#include <Glasses/ZQueen.h>
 
 #include <TPRegexp.h>
 

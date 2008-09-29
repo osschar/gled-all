@@ -1,3 +1,11 @@
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	When searching for libsets to build, look for simbolic links
+	instead of directories.
+	One should use the new check-out method now - as provided by the
+	latest version of the 'gled-build-checkout' script.
+
 2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:

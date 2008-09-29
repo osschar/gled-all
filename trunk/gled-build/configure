@@ -51,7 +51,7 @@ sub deduce_libset_list {
     }
     close F;
   } elsif($config->{LIBSETS} eq '<auto>' or $config->{LIBSETS} eq '<auto-prompt>') {
-    open F, 'find . -maxdepth 1 -type d -name [A-Z]\* -printf "%P\n" | grep -v CVS |';
+    open F, 'find . -maxdepth 1 -type l -name [A-Z]\* -printf "%P\n" | grep -v CVS |';
     while($_=<F>) {
       chomp;
       push @l, $_;
