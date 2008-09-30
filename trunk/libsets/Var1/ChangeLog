@@ -1,3 +1,17 @@
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Implement another integration mode, controlled with 'CrawlMode_e
+	mCrawlMode' which can be CM_ChunkedStorage (old one, still
+	default) or CM_DirectStep (do the time step in parallel with
+	rendering, still in a dedicated thread).
+
+	CM_DirectStep allows magickal things to happen to the
+	solar-system, like planets popping out of nowhere, disapearing
+	into void or simply being victims to unexplainable forces. In
+	short ... badly needed for the AliEn visualization demo.
+
 2008-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/CosmicBall.cxx:

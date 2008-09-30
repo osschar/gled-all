@@ -99,8 +99,10 @@ public:
 
   void SetNextIdx(Int_t nextidx);
 
-  // direct access for owned vectors
+  // Direct access for owned vectors
   virtual ZGlass* operator[](Int_t index) const { return mElements[index]; }
+  Int_t           FindFirstEmptyId(Int_t index=0);
+  Int_t           CountEmptyIds();
 
   // debug
   void dumpVecStat();

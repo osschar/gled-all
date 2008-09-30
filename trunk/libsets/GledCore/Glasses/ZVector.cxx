@@ -157,7 +157,6 @@ void ZVector::RemoveAll(ZGlass* lens)
     }
   }
   if(n) lens->DecRefCount(this, n);
-  mListMutex.Unlock();
 }
 
 /**************************************************************************/
@@ -274,6 +273,34 @@ void ZVector::SetNextIdx(Int_t nextidx)
   mNextIdx = nextidx;
   Stamp(FID());
 }
+
+Int_t ZVector::FindFirstEmptyId(Int_t index)
+{
+  // Returns the first empty id (with 0 lens pointer) at or after index.
+  // Default value for index = 0, so it starts at the beginning.
+  // Returns -1 if there are no empty ids.
+
+  while (index < mSize)
+  {
+    if (mElements[index] == 0) return index;
+    ++index;
+  }
+  return -1;
+}
+
+Int_t ZVector::CountEmptyIds()
+{
+  // Returns number of empty ids (with 0 lens pointer).
+
+  Int_t count = 0;
+  for (Int_t i=0; i<mSize; ++i)
+  {
+    if (mElements[i] == 0) ++count;
+  }
+  return count;
+}
+
+/**************************************************************************/
 
 void ZVector::dumpVecStat()
 {

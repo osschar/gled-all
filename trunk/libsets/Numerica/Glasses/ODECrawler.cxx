@@ -54,8 +54,7 @@ void ODECrawler::_init()
 
   mGuessesOK = mGuessesBad = mStored = 0;
   mMaxSteps  = 1000000; mStoreDx = 0.001; mStoreMax = -1;
-  mStorage   = new ODEStorageD(0);
-  mXStored   = mYStored = 0;
+  mStorage   = 0;
   mAcc = 1e-8; mH1 = 1e-2; mHmin = 1e-18;
   mX1 = 0; mX2 = 0;
 }
@@ -106,7 +105,9 @@ void ODECrawler::init_integration(Bool_t call_ode_start)
   // hTrueMaster must be set.
 
   mN = hTrueMaster->ODEOrder();
-  mY.ResizeTo(mN);
+  if (mY.GetNoElements() != mN)
+    mY.ResizeTo(mN);
+
   if (mStoreMax != 0)
   {
     if (mStorage == 0)
@@ -296,4 +297,16 @@ void ODECrawler::Crawl(Bool_t call_ode_start)
     hCrawling = false;
     Stamp(FID());
   }
+}
+
+void ODECrawler::ChangeOrderInPlace(Int_t order)
+{
+  mN = order;
+  if (mY.GetNoElements() != mN)
+    mY.ResizeTo(mN);
+}
+
+Double_t* ODECrawler::RawYArray()
+{
+  return mY.GetMatrixArray();
 }

@@ -1,7 +1,7 @@
 # $Header$
 LIB_SET_NAME	:= AliEnViz
 LIB_SET_ID	:= 66
-REQUIRES_LIB_SETS := GledCore Geom1 # add
+REQUIRES_LIB_SETS := GledCore Geom1 Var1
 
 #export MLCLIENT_BASE := AliEnViz_mlclient
 #export MLCLIENT_LIB  := lib/lib${MLCLIENT_BASE}.${LDEXT}
