@@ -1,3 +1,16 @@
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZVector.h:
+	* Glasses/ZVector.cxx:
+	Add specialized methods for owned/contained ZVectors:
+	  Int_t  FindFirstEmptyId(Int_t index=0);
+	  Int_t  CountEmptyIds();
+
+	Remove a forgotten mutex unlock (ups).
+
+	* Stones/ZTrans.h:
+	Make double*/float* args to SetPos() and SetBaseVec() const.
+
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* macros/gled_view_globals.C:

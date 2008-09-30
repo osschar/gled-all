@@ -1,3 +1,8 @@
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Add dependency on the Var1 libset.
+
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVSite.h:

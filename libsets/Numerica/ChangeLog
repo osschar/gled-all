@@ -1,3 +1,13 @@
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	Add expert commands for screwing around with the integration buffer:
+	  void      ChangeOrderInPlace(Int_t order);
+	  Double_t* RawYArray();
+
+	Removed obsolete members TVectorF *mX/YStored.
+
 2008-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ODECrawler.cxx:

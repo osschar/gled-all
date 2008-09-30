@@ -144,8 +144,6 @@ protected:
   Int_t 	mStoreMax;	//  X{gS} 7 Value(-join=>1)
   Double_t	mStoreDx;	//  X{gS} 7 Value()
   ODEStorage   *mStorage;       //  X{g}
-  TVectorF*	mXStored;	//! X{g}
-  TVectorF*	mYStored;	//! X{g} ROOT now allows streaming ... check syntax
 
   TVectorD	mY;		//! X{r}
   Int_t		mN;		//  X{g}  7 ValOut(-join=>1)
@@ -176,6 +174,10 @@ public:
   ODEStorage* SwapStorage(ODEStorage* s);
 
   void        Crawl(Bool_t call_ode_start=true); // X{ED} 7 MCWButt()
+
+  // If you really (really) know what you're doing.
+  void        ChangeOrderInPlace(Int_t order);
+  Double_t*   RawYArray();
 
 #include "ODECrawler.h7"
   ClassDef(ODECrawler, 1);

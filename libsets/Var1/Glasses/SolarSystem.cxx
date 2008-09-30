@@ -26,7 +26,24 @@
 //
 // Simple simulation of a most unrealistic solar system.
 //
+// The integration of the system can be performed in two modes.
 //
+// 1) ChunkedStorage
+//
+//    The integrator runs in a separate thread and stores the results
+//    for given past/future in the storage map (see members mKeepPast
+//    and mCalcFuture). The time can be selected from outside by
+//    calling SetTime().
+//
+// 2) DirectStep
+//
+//    The calculation is performed on each TimeTick and results are
+//    put directly back into the CosmicBalls. There is no way to set
+//    the time otherwise.
+//
+// Do NOT change the mode after the processing has started ... or you
+// will be sorry. Anyway ... they require a completely different setup
+// for an efficient update-render loop.
 
 ClassImp(SolarSystem);
 
@@ -35,6 +52,9 @@ ClassImp(SolarSystem);
 void SolarSystem::_init()
 {
   hWarnTimeOutOfRange = true;
+  hStepIntegratorDt   = 0;
+
+  mCrawlMode = CM_ChunkedStorage;
 
   mTime    = 0;
   mTimeFac = 1;
@@ -44,6 +64,7 @@ void SolarSystem::_init()
   mStarMass   = 0;
   mBallKappa  = 1e-6;
 
+  mPlanetRnd.SetSeed(0);
   mPlanetMinR = 20;
   mPlanetMaxR = 40;
   mOrbitMinR  = 200;
@@ -56,6 +77,12 @@ void SolarSystem::_init()
   mCalcFuture    = 5000;
 
   mIntegratorThread = 0;
+}
+
+SolarSystem::SolarSystem(const Text_t* n, const Text_t* t) :
+  ZNode(n, t)
+{
+  _init();
 }
 
 SolarSystem::~SolarSystem()
@@ -72,6 +99,7 @@ void SolarSystem::AdEnlightenment()
   if (mBalls == 0) {
     ZVector* l = new ZVector("Balls", GForm("Balls of SolarSystem %s", GetName()));
     l->SetElementFID(CosmicBall::FID());
+    l->SetMIRActive(false);
     mQueen->CheckIn(l);
     SetBalls(l);
   }
@@ -117,13 +145,19 @@ void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& 
   Int_t iMax = mBalls->Size() - 1;
   for (Int_t i = iMax; i >= 0; --i)
   {
-    const Int_t    a  = 6*i;
-    CosmicBall*    Bi = (CosmicBall*) (**mBalls)[i];
+    CosmicBall *Bi = (CosmicBall*) (**mBalls)[i];
+    if (Bi == 0)
+      continue;
+
+    const Int_t a = 6*i;
 
     for (Int_t j = iMax; j > i; --j)
     {
-      const Int_t    b  = 6*j;
-      CosmicBall*    Bj = (CosmicBall*) (**mBalls)[j];
+      CosmicBall *Bj = (CosmicBall*) (**mBalls)[j];
+      if (Bj == 0)
+	continue;
+
+      const Int_t b = 6*j;
 
       delta.SetXYZ(y(b) - y(a), y(b+1) - y(a+1), y(b+2) - y(a+2));
 
@@ -184,13 +218,90 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
   if (tdt == 0)
     return;
 
-  Double_t new_time = mTime + tdt;
+  switch (mCrawlMode)
+  {
+    case CM_ChunkedStorage:
+    {
+      Double_t new_time = mTime + tdt;
 
-  // Here we could check how much time has elapsed since last position store
-  // and decide whether to store this time.
-  // But need store dt, last_store_t members.
-  mTime = set_time(new_time, true);
-  Stamp(FID());
+      // Here we could check how much time has elapsed since last position store
+      // and decide whether to store this time.
+      // But need store dt, last_store_t members.
+      mTime = set_time(new_time, true);
+      Stamp(FID());
+      break;
+    }
+    case CM_DirectStep:
+    {
+      {
+	GMutexHolder lock_storage(mStorageCond);
+
+	const Double_t* P = mODECrawler->RefY().GetMatrixArray();
+
+	Int_t  ri        = 0;
+	Bool_t store_pos = mBallHistorySize > 0;
+	Stepper<CosmicBall> stepper(*mBalls);
+	while (stepper.step())
+	{
+	  stepper->SetPos(P[ri], P[ri + 1], P[ri + 2]);
+	  ri += 3;
+	  stepper->SetV  (P[ri], P[ri + 1], P[ri + 2]);
+
+	  if (store_pos)
+	  {
+	    stepper->StorePos();
+	  }
+
+	  ri += 3;
+	}
+
+	{
+	  GMutexHolder    lock_switcher(mBallSwitchMutex);
+	  GLensReadHolder lock_balls   (*mBalls);
+
+	  while ( ! mBallsToRemove.empty())
+	  {
+	    mBalls->RemoveAll(mBallsToRemove.front());
+	    mBallsToRemove.pop_front();
+	  }
+	  if ( ! mBallsToAdd.empty())
+	  {
+	    Int_t miss = mBallsToAdd.size() - mBalls->CountEmptyIds();
+	    if (miss > 0)
+	    {
+	      mBalls->Resize(mBalls->Size() + miss);
+	      mODECrawler->ChangeOrderInPlace(6*mBalls->Size());
+	    }
+
+	    Double_t* arr = mODECrawler->RawYArray();
+	    Int_t     idx = 0;
+	    while ( ! mBallsToAdd.empty())
+	    {
+	      idx = mBalls->FindFirstEmptyId(idx);
+	      assert(idx != -1);
+	      CosmicBall* cb = mBallsToAdd.front();
+	      mBalls->SetElementById(cb, idx);
+
+	      const Double_t* P = cb->RefTrans().ArrT();
+	      const TVector3& V = cb->RefV();
+	      const Int_t     i = 6*idx;
+	      arr[i]   = P[0];  arr[i+1] = P[1];  arr[i+2] = P[2];
+	      arr[i+3] = V.x(); arr[i+4] = V.y(); arr[i+5] = V.z();
+
+	      mBallsToAdd.pop_front();
+	    }
+	  }
+	}
+
+	mTime += hStepIntegratorDt;
+	hStepIntegratorDt = tdt;
+
+	mStorageCond.Signal();
+      }
+      Stamp(FID());
+      break;
+    }
+  }
 }
 
 /**************************************************************************/
@@ -297,6 +408,11 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
 
 void SolarSystem::SetTime(Double_t t)
 {
+  static const Exc_t _eh("SolarSystem::SetTime ");
+
+  if (mCrawlMode == CM_DirectStep)
+    throw(_eh + "Not available in direct-step mode.");
+
   mTime = set_time(t, false);
   Stepper<CosmicBall> stepper(*mBalls);
   while (stepper.step())
@@ -323,13 +439,21 @@ void SolarSystem::SetBallHistorySize(Int_t history_size)
 
 void* SolarSystem::tl_IntegratorThread(SolarSystem* ss)
 {
-  ss->IntegratorThread();
+  switch (ss->mCrawlMode)
+  {
+    case CM_ChunkedStorage:
+      ss->ChunkIntegratorThread();
+      break;
+    case CM_DirectStep:
+      ss->StepIntegratorThread();
+      break;
+  }
   return 0;
 }
 
-void SolarSystem::IntegratorThread()
+void SolarSystem::ChunkIntegratorThread()
 {
-  static const Exc_t _eh("SolarSystem::IntegratorThread ");
+  static const Exc_t _eh("SolarSystem::ChunkIntegratorThread ");
 
   while (true)
   {
@@ -381,7 +505,24 @@ void SolarSystem::IntegratorThread()
   }
 }
 
-void SolarSystem::StartIntegratorThread()
+void SolarSystem::StepIntegratorThread()
+{
+  static const Exc_t _eh("SolarSystem::StepIntegratorThread ");
+
+  GMutexHolder lock_storage(mStorageCond);
+
+  while (true)
+  {
+    mStorageCond.Wait();
+
+    mODECrawler->AdvanceXLimits(hStepIntegratorDt);
+    mODECrawler->Crawl(false);
+  }
+}
+
+//==============================================================================
+
+void SolarSystem::StartChunkIntegratorThread()
 {
   // Start the ODE integrator thread.
   // Throws an exception if the thread is already running.
@@ -392,18 +533,21 @@ void SolarSystem::StartIntegratorThread()
   // calling thread.
   // After that, a new thread is spawned with nice value of 10.
 
-  static const Exc_t _eh("SolarSystem::StartIntegratorThread ");
+  static const Exc_t _eh("SolarSystem::StartChunkIntegratorThread ");
 
   assert_odecrawler(_eh);
 
+  if (mCrawlMode != CM_ChunkedStorage)
+    throw(_eh + "Not in ChunkedStorage mode.");
+
   if (mIntegratorThread)
-    throw (_eh + "already running.");
+    throw (_eh + "Integrator thread already running.");
 
   mStorageMap.clear();
   mCurrentStorage = mStorageMap.end();
 
-  mODECrawler->SetX1(0);
-  mODECrawler->SetX2(mTimePerChunk);
+  mODECrawler->SetX1(mTime);
+  mODECrawler->SetX2(mTime + mTimePerChunk);
 
   Storage* s = new Storage(ODEOrder());
   mODECrawler->SetStorage(s);
@@ -411,11 +555,45 @@ void SolarSystem::StartIntegratorThread()
 
   mCurrentStorage = mStorageMap.insert(make_pair(0, s)).first;
 
-  mIntegratorThread = new GThread("SolarSystem-Integrator",
+  mIntegratorThread = new GThread("SolarSystem-ChunkIntegrator",
                                   (GThread_foo) (tl_IntegratorThread), this,
                                   false);
   mIntegratorThread->SetNice(10);
   mIntegratorThread->Spawn();
+}
+
+void SolarSystem::StartStepIntegratorThread()
+{
+  static const Exc_t _eh("SolarSystem::StartStepIntegratorThread ");
+
+  assert_odecrawler(_eh);
+
+  if (mCrawlMode == CM_DirectStep)
+    throw(_eh + "Already in direct-step mode.");
+
+  if (mIntegratorThread)
+    throw(_eh + "Integrator thread already running.");
+
+  mCrawlMode = CM_DirectStep;
+  {
+    GLensReadHolder rdlock(*mODECrawler);
+
+    mODECrawler->SetX1(mTime);
+    mODECrawler->SetX2(mTime);
+    mODECrawler->SetStoreMax(0);
+  }
+  // Make a phony step ... with initialization from the balls.
+  mODECrawler->Crawl();
+
+  hStepIntegratorDt = 0;
+
+  mIntegratorThread = new GThread("SolarSystem-StepIntegrator",
+                                  (GThread_foo) (tl_IntegratorThread), this,
+                                  false);
+  mIntegratorThread->SetNice(10);
+  mIntegratorThread->Spawn();
+
+  Stamp(FID());
 }
 
 void SolarSystem::StopIntegratorThread()
@@ -434,8 +612,54 @@ void SolarSystem::StopIntegratorThread()
 
 /**************************************************************************/
 
+CosmicBall* SolarSystem::RandomPlanetoid(const TString& name)
+{
+  // Generate a random planetoid with given name.
+
+  using namespace TMath;
+
+  CosmicBall* cb = new CosmicBall(name);
+
+  Double_t r_planet    = mPlanetRnd.Uniform(mPlanetMinR, mPlanetMaxR);
+  Double_t mass_planet = 4.0*Pi()*r_planet*r_planet*r_planet/3.0;
+
+  cb->SetM(mass_planet);
+  cb->SetRadius(r_planet);
+  cb->SetLOD(16);
+  cb->SetColor(0, 0.5, 0.7);
+
+  Double_t r_orb     = mPlanetRnd.Uniform(mOrbitMinR, mOrbitMaxR);
+  Double_t phi_orb   = mPlanetRnd.Uniform(0, TwoPi());
+  Double_t theta_orb = DegToRad() * mPlanetRnd.Uniform(-mMaxTheta, mMaxTheta);
+  Double_t cos_theta = Cos(theta_orb);
+
+  TVector3 pos(r_orb * cos_theta * Cos(phi_orb),
+	       r_orb * cos_theta * Sin(phi_orb),
+	       r_orb * Sin(theta_orb));
+  cb->SetPos(pos.x(), pos.y(), pos.z());
+
+  Double_t ecc     = mPlanetRnd.Uniform(0, mMaxEcc);
+  Double_t vel_mag = Sqrt(mBallKappa*mStarMass/r_orb*(1 - ecc));
+
+  const Double_t vfac = vel_mag / pos.Mag();
+  cb->SetV(-pos.y()*vfac, pos.x()*vfac, 0);
+
+  // Older calculation with random phi velocity.
+  //
+  // Double_t phi_vel = mPlanetRnd.Uniform(0, TwoPi());
+  // TVector3 xplane(pos.Orthogonal());
+  // TVector3 yplane(pos.Cross(xplane));
+  // xplane *= vel_mag * Cos(phi_vel);
+  // yplane *= vel_mag * Sin(phi_vel);
+  // cb->SetV(xplane.x() + yplane.x(), xplane.y() + yplane.y(), xplane.z() + yplane.z());
+
+  return cb;
+}
+
 void SolarSystem::MakeStar()
 {
+  // Not cluster safe.
+
   static const string _eh("SolarSystem::MakeStar ");
 
   assert_balls(_eh);
@@ -455,47 +679,50 @@ void SolarSystem::MakeStar()
 
 void SolarSystem::MakePlanetoid()
 {
+  // Not cluster safe.
+
   static const string _eh("SolarSystem::MakePlanetoid ");
 
   assert_balls(_eh);
 
-  using namespace TMath;
-
   Int_t idx = mBalls->Size();
-  CosmicBall* cb = new CosmicBall(GForm("Planet %d", idx));
-
-  Double_t r_planet    = gRandom->Uniform(mPlanetMinR, mPlanetMaxR);
-  Double_t mass_planet = 4.0*Pi()*r_planet*r_planet*r_planet/3.0;
-  cb->SetM(mass_planet);
-  cb->SetRadius(r_planet);
-  cb->SetLOD(16);
-  cb->SetColor(0, 0.5, 0.7);
-
-  Double_t r_orb     = gRandom->Uniform(mOrbitMinR, mOrbitMaxR);
-  Double_t phi_orb   = gRandom->Uniform(0, TwoPi());
-  Double_t theta_orb = DegToRad() * gRandom->Uniform(-mMaxTheta, mMaxTheta);
-  Double_t cos_theta = Cos(theta_orb);
-
-  TVector3 pos(r_orb * cos_theta * Cos(phi_orb),
-	       r_orb * cos_theta * Sin(phi_orb),
-	       r_orb * Sin(theta_orb));
-  cb->SetPos(pos.x(), pos.y(), pos.z());
-
-  Double_t ecc     = gRandom->Uniform(0, mMaxEcc);
-  Double_t vel_mag = Sqrt(mBallKappa*mStarMass/r_orb*(1 - ecc));
-
-  const Double_t vfac = vel_mag / pos.Mag();
-  cb->SetV(-pos.y()*vfac, pos.x()*vfac, 0);
-
-  // Older calculation with random phi velocity.
-  //
-  // Double_t phi_vel = gRandom->Uniform(0, TwoPi());
-  // TVector3 xplane(pos.Orthogonal());
-  // TVector3 yplane(pos.Cross(xplane));
-  // xplane *= vel_mag * Cos(phi_vel);
-  // yplane *= vel_mag * Sin(phi_vel);
-  // cb->SetV(xplane.x() + yplane.x(), xplane.y() + yplane.y(), xplane.z() + yplane.z());
+  CosmicBall *cb = RandomPlanetoid(GForm("Planet %d", idx));
 
   mQueen->CheckIn(cb);
   mBalls->Add(cb);
+}
+
+void SolarSystem::AddPlanetoid(CosmicBall* cb)
+{
+  // Add planetoid cb.
+  // If integrator thread is already running, this is only possible
+  // in the direct-step mode.
+  // The ball should be already checked-in.
+
+  static const Exc_t _eh("SolarSystem::AddPlanetoid ");
+
+  if (mIntegratorThread && mCrawlMode != CM_DirectStep)
+    throw(_eh + "Balls can be added during thread operation only in direct-step mode.");
+
+  GMutexHolder ball_lock(mBallSwitchMutex);
+
+  mBallsToAdd.push_back(cb);
+}
+
+void SolarSystem::RemovePlanetoid(CosmicBall* cb)
+{
+  // Remove planetoid cb.
+  // If integrator thread is already running, this is only possible
+  // in the direct-step mode.
+  // If the ball is not referenced from anywhere else it is at risk
+  // of being auto-destructed.
+
+  static const Exc_t _eh("SolarSystem::RemovePlanetoid ");
+
+  if (mIntegratorThread && mCrawlMode != CM_DirectStep)
+    throw(_eh + "Balls can be removed during thread operation only in direct-step mode.");
+
+  GMutexHolder ball_lock(mBallSwitchMutex);
+
+  mBallsToRemove.push_back(cb);
 }

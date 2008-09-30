@@ -17,8 +17,10 @@ ScreenDumper *dumper   = 0;
 const Text_t* ball_layout = "ZGlass(Name,Title):CosmicBall(M[8]):"
   "Sphere(Radius, LOD, Color)";
 
-void solar_system()
+void solar_system(Int_t mode=0, Int_t n_planets=30)
 {
+  // mode: 0 - chunked-storage; 1 - direct-step
+
   gRandom = new TRandom3(0); // Seed 0 means seed with TUUID.
 
   Gled::AssertMacro("sun_demos.C");
@@ -50,7 +52,7 @@ void solar_system()
   CREATE_ATT_GLASS(emission, ZGlMaterial, stella, SetRnrMod, "Emission", 0);
   emission->SetEmission(1, 1, 0.4);
 
-  for (Int_t i = 0; i < 30; ++i)
+  for (Int_t i = 0; i < n_planets; ++i)
   {
     ss->MakePlanetoid();
   }
@@ -84,11 +86,27 @@ void solar_system()
     g_nest->SetLayoutList(layouts);
   }
 
-  ode->SetStoreDx(10);
-  ode->SetAcc(1e-8);
   ode->SetH1(1); ode->SetHmin(1e-8);
 
-  ss->StartIntegratorThread();
+  if (mode == 0)
+  {
+    ode->SetAcc(1e-8);
+    ode->SetStoreDx(10);
+    ss->StartChunkIntegratorThread();
+  }
+  else if (mode == 1)
+  {
+    if (n_planets > 60)
+      ode->SetAcc(1e-1);
+    else if (n_planets > 30)
+      ode->SetAcc(1e-3);      
+    ss->StartStepIntegratorThread();
+  }
+  else
+  {
+    printf("Unsupported mode '%d' - exiting.\n", mode);
+    Gled::theOne->Exit();
+  }
 
   eventor->Start();
 }

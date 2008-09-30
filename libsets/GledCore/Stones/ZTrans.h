@@ -93,8 +93,8 @@ public:
 
   void SetBaseVec(Int_t b, Double_t x, Double_t y, Double_t z);
   void SetBaseVec(Int_t b, const TVector3& v);
-  void SetBaseVec(Int_t b, Double_t* x);
-  void SetBaseVec(Int_t b, Float_t*  x);
+  void SetBaseVec(Int_t b, const Double_t* x);
+  void SetBaseVec(Int_t b, const Float_t*  x);
 
   TVector3 GetBaseVec(Int_t b) const;
   void     GetBaseVec(Int_t b, TVector3& v) const;
@@ -104,8 +104,8 @@ public:
   // Position interface
 
   void SetPos(Double_t x, Double_t y, Double_t z);
-  void SetPos(Double_t* x);
-  void SetPos(Float_t*  x);
+  void SetPos(const Double_t* x);
+  void SetPos(const Float_t*  x);
   void SetPos(const ZTrans& t);
 
   void GetPos(Double_t& x, Double_t& y, Double_t& z) const;
@@ -162,14 +162,14 @@ inline void ZTrans::SetBaseVec(Int_t b, const TVector3& v)
   bAsOK = false;
 }
 
-inline void ZTrans::SetBaseVec(Int_t b, Double_t* x)
+inline void ZTrans::SetBaseVec(Int_t b, const Double_t* x)
 {
   Double_t* C = M + 4*--b;
   C[0] = x[0]; C[1] = x[1]; C[2] = x[2];
   bAsOK = false;
 }
 
-inline void ZTrans::SetBaseVec(Int_t b, Float_t* x)
+inline void ZTrans::SetBaseVec(Int_t b, const Float_t* x)
 {
   Double_t* C = M + 4*--b;
   C[0] = x[0]; C[1] = x[1]; C[2] = x[2];
@@ -204,10 +204,10 @@ inline void ZTrans::GetBaseVec(Int_t b, Float_t* x) const
 inline void ZTrans::SetPos(Double_t x, Double_t y, Double_t z)
 { M[12] = x; M[13] = y; M[14] = z; }
 
-inline void ZTrans::SetPos(Double_t* x)
+inline void ZTrans::SetPos(const Double_t* x)
 { M[12] = x[0]; M[13] = x[1]; M[14] = x[2]; }
 
-inline void ZTrans::SetPos(Float_t* x)
+inline void ZTrans::SetPos(const Float_t* x)
 { M[12] = x[0]; M[13] = x[1]; M[14] = x[2]; }
 
 inline void ZTrans::SetPos(const ZTrans& t)

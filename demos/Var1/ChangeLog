@@ -1,3 +1,9 @@
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_system.C:
+	Add support for the 'direct-step' mode of the SolarSystem.
+	Mode and number of planets to generate are now script arguments.
+
 2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* solar_system.C:
