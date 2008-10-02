@@ -58,12 +58,12 @@ public:
 
 #ifndef __CINT__
 
-  class stepper_base {
+  class stepper_base
+  {
   protected:
-    bool first_p;
-    bool return_zeros;
+    bool m_first_p;
   public:
-    stepper_base(bool rz=false) : first_p(true), return_zeros(rz) {}
+    stepper_base() : m_first_p(true) {}
     virtual ~stepper_base() {}
     virtual bool    step()  = 0;
     virtual ZGlass* lens()  = 0;
@@ -76,26 +76,22 @@ public:
   protected:
     typedef typename Cont::iterator iterator_type;
 
-    iterator_type iter, end;
+    iterator_type m_iter, m_end;
 
   public:
-    stepper_imp(iterator_type b, iterator_type e, bool return_zeros=false) :
-      stepper_base(return_zeros), iter(b), end(e) {}
+    stepper_imp(iterator_type b, iterator_type e) :
+      stepper_base(), m_iter(b), m_end(e) {}
 
     virtual bool step() {
-      if(iter == end) return false;
-      if(first_p)
-	first_p = false;
+      if(m_iter == m_end) return false;
+      if(m_first_p)
+	m_first_p = false;
       else
-	++iter;
-      while(iter != end) {
-	if(lens() || return_zeros) return true;
-	++iter;
-      }
-      return false;
+	++m_iter;
+      return (m_iter != m_end);
     }
-    virtual ZGlass* lens()  { return iter.lens();  }
-    virtual ElRep   elrep() { return iter.elrep(); }
+    virtual ZGlass* lens()  { return m_iter.lens();  }
+    virtual ElRep   elrep() { return m_iter.elrep(); }
   };
 
 public:
@@ -104,37 +100,44 @@ public:
   class Stepper
   {
   protected:
-    stepper_base* m_imp;
-    G*            m_cur;
+    stepper_base* m_stepper_imp;
+    G*            m_current;
+    bool          m_return_zeros;
 
     bool is_ok()
     {
-      m_cur = dynamic_cast<G*>(get_lens());
-      return (m_cur != 0);
+      m_current = dynamic_cast<G*>(get_lens());
+      return (m_current != 0 || m_return_zeros);
     }
   public:
     Stepper(AList* l, bool return_zeros=false) :
-      m_imp(l->make_stepper_imp(return_zeros)) {}
-    Stepper(stepper_base* imp) : m_imp(imp) {}
-    ~Stepper() { delete m_imp; }
+      m_stepper_imp(l->make_stepper_imp()), m_current(0),
+      m_return_zeros(return_zeros) {}
+    Stepper(stepper_base* imp, bool return_zeros=false) :
+      m_stepper_imp(imp), m_current(0),
+      m_return_zeros(return_zeros) {}
+    ~Stepper() { delete m_stepper_imp; }
 
     void reset(AList* l, bool return_zeros=false) {
-      delete m_imp;
-      m_imp = l->make_stepper_imp(return_zeros);
+      delete m_stepper_imp;
+      m_stepper_imp = l->make_stepper_imp();
+      m_current = 0;
+      m_return_zeros = return_zeros;
     }
     bool step() {
-      do { if(! m_imp->step()) return false;
+      do {
+	if(! m_stepper_imp->step()) return false;
       } while(! is_ok());
       return true;
     }
-    ZGlass*      get_lens()  { return m_imp->lens();  }
-    AList::ElRep get_elrep() { return m_imp->elrep(); }
+    ZGlass*      get_lens()  { return m_stepper_imp->lens();  }
+    AList::ElRep get_elrep() { return m_stepper_imp->elrep(); }
 
-    G* operator->() { return m_cur; }
-    G* operator*()  { return m_cur; }
+    G* operator->() { return m_current; }
+    G* operator*()  { return m_current; }
   };
 
-  virtual stepper_base* make_stepper_imp(bool return_zeros=false) { return 0; }
+  virtual stepper_base* make_stepper_imp() { return 0; }
 
 #endif
 
@@ -228,8 +231,8 @@ public:
   //----------------------------------------------------------------------
 
   // General interface
-  virtual void Add      (ZGlass* lens) = 0;   // X{E} C{1}
-  virtual void RemoveAll(ZGlass* lens) = 0;   // X{E} C{1}
+  virtual void  Add      (ZGlass* lens) = 0;   // X{E} C{1}
+  virtual Int_t RemoveAll(ZGlass* lens) = 0;   // X{E} C{1}
 
   // Deque interface
   // `````````````````````````````````````````````````````````````````````
@@ -330,7 +333,9 @@ public:
 
 
 #ifndef __CINT__
-/* inline template */ template <> inline bool AList::Stepper<ZGlass>::is_ok() { m_cur = get_lens(); return true; }
+/* inline template */
+template <> inline bool AList::Stepper<ZGlass>::is_ok()
+{ m_current = get_lens(); return (m_current != 0 || m_return_zeros); }
 #endif
 
 #endif

@@ -1,3 +1,18 @@
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	* glass.list:
+	New glass - take care of all the site changes and provide an API
+	for selecting visible sites based on the number of running/failed
+	jobs.
+
+	* Glasses/AEVSite.h:
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVSite.cxx:
+	* Glasses/AEVMlSucker.h:
+	Minor mods needed by the AEVManager class.
+
 2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:

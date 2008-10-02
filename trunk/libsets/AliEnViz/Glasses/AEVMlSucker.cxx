@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "AEVMlSucker.h"
+#include "AEVManager.h"
 #include "AEVMlSucker.c7"
 
 #include "AEVMapViz.h"
@@ -44,7 +45,7 @@ void call_foo(AEVSite* site, const TString& key, Int_t val)
   if (foo == 0)
     throw(Exc_t("site_set_int - unknown key '") + key + "'.");
 
-  printf("Calling setter for key '%s'\n", key.Data());
+  // printf("Calling setter for key '%s'\n", key.Data());
   GLensWriteHolder lock(site);
   (site->*foo)(val);
 }
@@ -55,7 +56,7 @@ void call_foo(AEVSite* site, const TString& key, Float_t val)
   if (foo == 0)
     throw(Exc_t("site_set_float - unknown key '") + key + "'.");
 
-  printf("Calling setter for key '%s'\n", key.Data());
+  // printf("Calling setter for key '%s'\n", key.Data());
   GLensWriteHolder lock(site);
   (site->*foo)(val);
 }
@@ -66,7 +67,7 @@ void AEVMlSucker::_init()
 {
   // from local dump: "cat nc-dump"
   mSuckCmd  = "nc pcalimonitor2.cern.ch 7014";
-  mFooSleep = 1000;
+  mFooSleep = 100;
 
   mSuckerThread = 0;
 
@@ -166,7 +167,6 @@ void AEVMlSucker::Suck()
       {
         TString name = next_word(l);
 
-        AEVMapViz   *mapviz = find_lens<AEVMapViz>  ("AEVScene/MapViz");
         AEVSiteList *sites  = find_lens<AEVSiteList>("Sites");
 
         bool new_site = false;
@@ -208,16 +208,15 @@ void AEVMlSucker::Suck()
           sites->Add(site);
         }
 
-        if (reposition)
-        {
-          GLensWriteHolder wrlck(mapviz);
+	assert_manager(_eh);
 
-          // !!!! Should remove it first - but no foos in aevmapfix/sspace
-          if ( ! mapviz->ImportSite(site))
-          {
-            printf("Failed placing site '%s'.\n", name.Data());
-          }
-        }
+	GLensWriteHolder wrlck(*mManager);
+
+	if (new_site)
+	  mManager->SiteNew(site);
+        if (reposition)
+	  mManager->SitePositionChanged(site);
+	mManager->SiteChanged(site);
       }
     }
     catch(Exc_t exc)

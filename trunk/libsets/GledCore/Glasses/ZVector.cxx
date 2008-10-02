@@ -100,9 +100,9 @@ void ZVector::ClearList()
 // AList methods, public part.
 /**************************************************************************/
 
-AList::stepper_base* ZVector::make_stepper_imp(bool return_zeros)
+AList::stepper_base* ZVector::make_stepper_imp()
 {
-  return new stepper_imp<ZVector>(begin(), end(), return_zeros);
+  return new stepper_imp<ZVector>(begin(), end());
 }
 
 /**************************************************************************/
@@ -144,7 +144,7 @@ void ZVector::Add(ZGlass* lens)
   Stamp();
 }
 
-void ZVector::RemoveAll(ZGlass* lens)
+Int_t ZVector::RemoveAll(ZGlass* lens)
 {
   Int_t n=0;
   GMutexHolder llck(mListMutex);
@@ -157,6 +157,7 @@ void ZVector::RemoveAll(ZGlass* lens)
     }
   }
   if(n) lens->DecRefCount(this, n);
+  return n;
 }
 
 /**************************************************************************/

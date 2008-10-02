@@ -390,6 +390,10 @@ void FTW_Shell::AbsorbRay(Ray& ray)
       kill_subshell(ray.fBetaImg);
       break;
 
+    case ShellInfo::PRQN_spawn_classview:
+      SpawnMTW_View(ray.fBetaImg, true);
+      break;
+
     case ShellInfo::PRQN_spawn_metagui:
       // printf("Shell spawning metagui of %s, template %s\n",
       //    ray.fBeta->Identify().Data(), ray.fGamma->Identify().Data());

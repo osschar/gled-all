@@ -1,3 +1,13 @@
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	During update of ball positions in direct-step mode one should
+	also loop over empty ball-slots to stay in sync with the internal
+	state-vector of the ODE crawler.
+
+	Add member 'ZColor mPlanetColor'.
+
 2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:

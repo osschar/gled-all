@@ -28,6 +28,7 @@ protected:
 
   //----------------------------------------------------------------------
 
+  Bool_t      bKeepSorted;      // X{GE} 7 Bool()
   Bool_t      bReplaceOnInsert; // X{GS} 7 Bool(-join=>1)
   Bool_t      bReplaceOnRename; // X{GS} 7 Bool()
 
@@ -41,6 +42,10 @@ protected:
 public:
   ZNameMap(const Text_t* n="ZNameMap", const Text_t* t=0) : ZList(n,t)
   { _init(); }
+
+  void SetKeepSorted(Bool_t keep_sorted);
+
+  virtual void    Add(ZGlass* lens); // Exported in AList
 
   virtual ZGlass* GetElementByName(const TString& name);
 

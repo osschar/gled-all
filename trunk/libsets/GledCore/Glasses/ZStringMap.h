@@ -37,7 +37,7 @@ public:
   iterator end()   { return mElements.end(); }
 
 #ifndef __CINT__
-  virtual stepper_base* make_stepper_imp(bool return_zeroes=false);
+  virtual stepper_base* make_stepper_imp();
 #endif
 
 private:
@@ -85,8 +85,8 @@ public:
   //----------------------------------------------------------------------
 
   // General interface
-  virtual void Add      (ZGlass* lens);
-  virtual void RemoveAll(ZGlass* lens);
+  virtual void  Add      (ZGlass* lens);
+  virtual Int_t RemoveAll(ZGlass* lens);
 
   // Set-by-label interface
   virtual void SetElementByLabel(ZGlass* lens, TString label); // X{E} C{1}

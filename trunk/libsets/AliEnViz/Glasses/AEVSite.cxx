@@ -10,6 +10,7 @@
 //
 
 #include "AEVSite.h"
+#include <Glasses/CosmicBall.h>
 #include "AEVSite.c7"
 
 ClassImp(AEVSite);
@@ -21,6 +22,8 @@ void AEVSite::_init()
   mLatitude = mLongitude = 0;
 
   mJobsStarted = mJobsRunning = mJobsSaving = mJobsDone = mJobsErrorAll = 0;
+
+  bBallOnStage = false;
 }
 
 /**************************************************************************/

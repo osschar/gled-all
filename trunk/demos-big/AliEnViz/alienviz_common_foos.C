@@ -81,7 +81,7 @@ void alienviz_setup_lib_objects(Int_t queen_size)
 
   CREATE_ADD_GLASS(nameson, ZRlNodeMarkup, aev_rnrmods, "NamesOn", 0);
   nameson->SetNodeMarkupOp(1);
-  nameson->SetTileCol(0, 0.2, 0.7, 0.7);
+  nameson->SetTileCol(0, 0.2, 0.7, 0.5);
   nameson->SetTilePos("t");
   CREATE_ADD_GLASS(namesoff, ZRlNodeMarkup, aev_rnrmods, "NamesOff", 0);
   namesoff->SetNodeMarkupOp(0);

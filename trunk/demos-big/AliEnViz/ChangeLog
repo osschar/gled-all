@@ -1,3 +1,12 @@
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_suck.C:
+	New macro - run ml sucker with the Var1::SolarSystem, controlled
+	by AEVManager class.
+
+	* alienviz_common_foos.C:
+	Increase name-tile transparency.
+
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* alienviz_common_foos.C:

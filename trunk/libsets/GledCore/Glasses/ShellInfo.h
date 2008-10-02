@@ -25,6 +25,7 @@ public:
 		      PRQN_set_def_subshell,
 		      PRQN_add_subshell,
 		      PRQN_remove_subshell,
+		      PRQN_spawn_classview,
 		      PRQN_spawn_metagui,
 		      PRQN_resize_window
   };
@@ -67,6 +68,7 @@ public:
   void SetDefSubShell(SubShellInfo* ss);
   void SetSubShells(ZHashList* ss);
 
+  void SpawnClassView(ZGlass* source); // X{E} C{1} 7 MCWButt()
   void SpawnMetaGui(ZGlass* source, MetaViewInfo* gui_template); // X{E} C{2} 7 MCWButt()
 
   void EmitResizeRay();

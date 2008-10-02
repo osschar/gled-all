@@ -110,9 +110,9 @@ void ZList::ClearList()
 // AList methods, public part.
 /**************************************************************************/
 
-AList::stepper_base* ZList::make_stepper_imp(bool return_zeros)
+AList::stepper_base* ZList::make_stepper_imp()
 {
-  return new stepper_imp<ZList>(begin(), end(), return_zeros);
+  return new stepper_imp<ZList>(begin(), end());
 }
 
 /**************************************************************************/
@@ -124,10 +124,10 @@ void ZList::Add(ZGlass* lens)
   PushBack(lens);
 }
 
-void ZList::RemoveAll(ZGlass* lens)
+Int_t ZList::RemoveAll(ZGlass* lens)
 {
   Int_t n  = 0;
-  mListMutex.Lock();
+  GMutexHolder llck(mListMutex);
   for(iterator i=begin(); i!=end(); ++i) {
     if(i() == lens) {
       iterator j = i; --i;
@@ -136,8 +136,8 @@ void ZList::RemoveAll(ZGlass* lens)
       ++n;
     }
   }
-  mListMutex.Unlock();
   if(n) lens->DecRefCount(this, n);
+  return n;
 }
 
 /**************************************************************************/
@@ -162,7 +162,7 @@ ZGlass* ZList::FrontElement()
 ZGlass* ZList::BackElement()
 {
   ZGlass* l;
-  { GMutexHolder _lstlck(mListMutex);
+  { GMutexHolder llck(mListMutex);
     l = mSize ? mElements.back().fLens : 0;
   }
   ZMIR* mir = get_MIR();

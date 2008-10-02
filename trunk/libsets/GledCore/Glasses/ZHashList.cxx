@@ -91,7 +91,7 @@ Bool_t ZHashList::Has(ZGlass* lens)
 
 /**************************************************************************/
 
-void ZHashList::RemoveAll(ZGlass* lens)
+Int_t ZHashList::RemoveAll(ZGlass* lens)
 {
   GMutexHolder llck(mListMutex);
   hpLens2Iter_i i = mItHash.find(lens);
@@ -101,6 +101,9 @@ void ZHashList::RemoveAll(ZGlass* lens)
     mElements.erase(l); --mSize;
     lens->DecRefCount(this);
     StampListRemove(lens);
+    return 1;
+  } else {
+    return 0;
   }
 }
 

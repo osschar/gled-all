@@ -9,9 +9,13 @@
 
 #include <Glasses/ZGlass.h>
 
-class AEVSite : public ZGlass {
+class CosmicBall;
+
+class AEVSite : public ZGlass
+{
   MAC_RNR_FRIENDS(AEVSite);
 
+  friend class AEVManager;
   friend class AEVAlienUI;
 
 private:
@@ -33,6 +37,9 @@ protected:
   Int_t         mJobsSaving;    // X{GS} 7 ValOut()
   Int_t         mJobsDone;      // X{GS} 7 ValOut()
   Int_t         mJobsErrorAll;  // X{GS} 7 ValOut()
+
+  ZLink<CosmicBall> mBallViz;   // X{GS} L{}
+  Bool_t            bBallOnStage; //!
 
 public:
   AEVSite(const Text_t* n="AEVSite", const Text_t* t=0) : ZGlass(n,t) { _init(); }
