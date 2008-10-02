@@ -71,6 +71,7 @@ void SolarSystem::_init()
   mOrbitMaxR  = 1000;
   mMaxTheta   = 20;
   mMaxEcc     = 0.2;
+  mPlanetColor.rgba(0, 0.7, 1);
 
   mTimePerChunk  = 1000;
   mKeepPast      = 2000;
@@ -142,7 +143,7 @@ void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& 
   // Sum contributions from the tail of mBalls as the biggest
   // contribution will come from Stella, which is usually at position 0.
 
-  Int_t iMax = mBalls->Size() - 1;
+  const Int_t iMax = mBalls->Size() - 1;
   for (Int_t i = iMax; i >= 0; --i)
   {
     CosmicBall *Bi = (CosmicBall*) (**mBalls)[i];
@@ -240,19 +241,20 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 
 	Int_t  ri        = 0;
 	Bool_t store_pos = mBallHistorySize > 0;
-	Stepper<CosmicBall> stepper(*mBalls);
+	Stepper<CosmicBall> stepper(*mBalls, true);
 	while (stepper.step())
 	{
-	  stepper->SetPos(P[ri], P[ri + 1], P[ri + 2]);
-	  ri += 3;
-	  stepper->SetV  (P[ri], P[ri + 1], P[ri + 2]);
-
-	  if (store_pos)
+	  if (stepper.get_lens() != 0)
 	  {
-	    stepper->StorePos();
-	  }
+	    stepper->SetPos(P[ri],   P[ri+1], P[ri+2]);
+	    stepper->SetV  (P[ri+3], P[ri+4], P[ri+5]);
 
-	  ri += 3;
+	    if (store_pos)
+	    {
+	      stepper->StorePos();
+	    }
+	  }
+	  ri += 6;
 	}
 
 	{
@@ -269,8 +271,9 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 	    Int_t miss = mBallsToAdd.size() - mBalls->CountEmptyIds();
 	    if (miss > 0)
 	    {
-	      mBalls->Resize(mBalls->Size() + miss);
-	      mODECrawler->ChangeOrderInPlace(6*mBalls->Size());
+	      const Int_t new_size = mBalls->Size() + miss;
+	      mBalls->Resize(new_size);
+	      mODECrawler->ChangeOrderInPlace(6*new_size);
 	    }
 
 	    Double_t* arr = mODECrawler->RawYArray();
@@ -282,10 +285,10 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 	      CosmicBall* cb = mBallsToAdd.front();
 	      mBalls->SetElementById(cb, idx);
 
-	      const Double_t* P = cb->RefTrans().ArrT();
+	      const Double_t* T = cb->RefTrans().ArrT();
 	      const TVector3& V = cb->RefV();
 	      const Int_t     i = 6*idx;
-	      arr[i]   = P[0];  arr[i+1] = P[1];  arr[i+2] = P[2];
+	      arr[i]   = T[0];  arr[i+1] = T[1];  arr[i+2] = T[2];
 	      arr[i+3] = V.x(); arr[i+4] = V.y(); arr[i+5] = V.z();
 
 	      mBallsToAdd.pop_front();
@@ -298,6 +301,7 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 
 	mStorageCond.Signal();
       }
+
       Stamp(FID());
       break;
     }
@@ -382,6 +386,7 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
   const Double_t* P0 = S->GetY(i0);
   const Double_t* P1 = S->GetY(i0+1);
 
+  // Assumes contiguous population of balls!
   Int_t  ri        = 0;
   Bool_t store_pos = from_timetick && mBallHistorySize > 0;
   Stepper<CosmicBall> stepper(*mBalls);
@@ -626,7 +631,7 @@ CosmicBall* SolarSystem::RandomPlanetoid(const TString& name)
   cb->SetM(mass_planet);
   cb->SetRadius(r_planet);
   cb->SetLOD(16);
-  cb->SetColor(0, 0.5, 0.7);
+  cb->SetColorByRef(mPlanetColor);
 
   Double_t r_orb     = mPlanetRnd.Uniform(mOrbitMinR, mOrbitMaxR);
   Double_t phi_orb   = mPlanetRnd.Uniform(0, TwoPi());

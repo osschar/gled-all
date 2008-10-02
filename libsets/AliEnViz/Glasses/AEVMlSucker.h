@@ -12,6 +12,8 @@
 
 #include <TPRegexp.h>
 
+class AEVManager;
+
 class AEVMlSucker : public ZNameMap
 {
   MAC_RNR_FRIENDS(AEVMlSucker);
@@ -20,6 +22,8 @@ private:
   void _init();
 
 protected:
+  ZLink<AEVManager>  mManager; // X{GS} L{A}
+
   TString    mSuckCmd;      // X{GS} 7 Textor()
   Int_t      mFooSleep;     // X{GS} 7 Value(-range=>[0,1e4,1])
 

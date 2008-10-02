@@ -1,3 +1,35 @@
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AList.h:
+	* Glasses/AList.cxx:
+	* Glasses/ZVector.h:
+	* Glasses/ZVector.cxx:
+	* Glasses/ZList.h:
+	* Glasses/ZList.cxx:
+	* Glasses/ZDeque.h:
+	* Glasses/ZDeque.cxx:
+	* Glasses/ZNameMap.h:
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZHashList.h:
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZStringMap.h:
+	* Glasses/ZStringMap.cxx:
+	Move member return_zeros from AList::stepper_base to the
+	Stepper class template. Prefix all data-member names in stepper
+	stuff with 'm_'.
+
+	AList::RemoveAll(lens) now returns an integer (number of elements
+	removed).
+
+	* Glasses/ShellInfo.h:
+	* Glasses/ShellInfo.cxx:
+	* GledView/FTW_Shell.cxx:
+	Add method ShellInfo::SpawnClassView() with appropriate private
+	raq quantum number and handler in FTW_Shell.
+
+	* Glasses/WGlButton.cxx:
+	Fix comment typo.
+
 2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZVector.h:

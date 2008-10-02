@@ -6,6 +6,7 @@ AEVAlienUI      1       Glasses/AEVAlienUI
 AEVDemoDriver	2	Glasses/AEVDemoDriver	Text
 AEVMlClient	3	Glasses/AEVMlClient
 AEVMlSucker	4	Glasses/AEVMlSucker
+AEVManager	5	Glasses/AEVManager
 
 AEVSite		16      Glasses/AEVSite
 AEVCompElRep	17	Glasses/AEVCompElRep	.

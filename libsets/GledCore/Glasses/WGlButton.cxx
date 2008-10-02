@@ -15,7 +15,7 @@
 //
 // A button that sends MIRs as callbacks.
 //
-// Three are three options for setting of user data:
+// There are three options for setting of user data:
 // a) mCbackBeta   - a lens that will be sent as beta of the MIR;
 // b) mCbackValue  - an int
 // c) mCbackString - a string
@@ -26,7 +26,7 @@
 // both must be decalred in the callback method.
 //
 // Maybe b) and c) should be optional, but they are now as well, in a
-// more abstract sense.
+// more pragmatic sense.
 
 ClassImp(WGlButton);
 

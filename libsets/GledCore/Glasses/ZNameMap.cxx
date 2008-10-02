@@ -11,6 +11,8 @@
 // the map to receive name-change callback.
 // All add methods are overridden to the Insert() method.
 //
+// The bKeepSorted flag enforces that the list remains sorted by name
+// as long as only Add() is used for adding elements.
 
 #include "ZNameMap.h"
 #include "ZNameMap.c7"
@@ -23,6 +25,7 @@ ClassImp(ZNameMap)
 
 void ZNameMap::_init()
 {
+  bKeepSorted      = false;
   bReplaceOnInsert = true;
   bReplaceOnRename = false;
 }
@@ -93,6 +96,29 @@ void ZNameMap::on_rebuild()
 }
 
 /**************************************************************************/
+
+void ZNameMap::SetKeepSorted(Bool_t keep_sorted)
+{
+  if(keep_sorted == bKeepSorted)
+    return;
+
+  if (keep_sorted)
+    SortByName();
+
+  bKeepSorted = keep_sorted;
+
+  Stamp(FID());
+}
+
+/**************************************************************************/
+
+void ZNameMap::Add(ZGlass* lens)
+{
+  ZList::Add(lens);
+  // !!!! A more optimized version cshould be implemented.
+  if(bKeepSorted)
+    SortByName();
+}
 
 ZGlass* ZNameMap::GetElementByName(const TString& name)
 {
@@ -166,4 +192,7 @@ void ZNameMap::name_change_cb(ZGlass* g, const TString& new_name)
       StampListRemove(lens, id);
     }
   }
+  // !!!! A more optimized version cshould be implemented.
+  if(bKeepSorted)
+    SortByName();
 }

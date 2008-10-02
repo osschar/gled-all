@@ -45,7 +45,7 @@ public:
   iterator end()   { return mElements.end(); }
 
 #ifndef __CINT__
-  virtual stepper_base* make_stepper_imp(bool return_zeroes=false);
+  virtual stepper_base* make_stepper_imp();
 #endif
 
 protected:
@@ -89,8 +89,8 @@ public:
   //----------------------------------------------------------------------
 
   // General interface
-  virtual void Add      (ZGlass* lens);    // Exported in AList
-  virtual void RemoveAll(ZGlass* lens);    // -"-
+  virtual void    Add      (ZGlass* lens); // Exported in AList
+  virtual Int_t   RemoveAll(ZGlass* lens); // -"-
 
   // Deque interface
   virtual ZGlass* FrontElement();          // X{E} C{0}

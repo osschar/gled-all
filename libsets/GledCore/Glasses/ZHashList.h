@@ -43,10 +43,10 @@ public:
 
   virtual Bool_t Has(ZGlass* lens);
 
-  virtual void RemoveAll(ZGlass* lens);
+  virtual Int_t  RemoveAll(ZGlass* lens);
 
-  virtual void Insert(ZGlass* lens, ZGlass* before);           // X{E} C{1}
-  virtual void Remove(ZGlass* lens);                           // X{E} C{1}
+  virtual void   Insert(ZGlass* lens, ZGlass* before);         // X{E} C{1}
+  virtual void   Remove(ZGlass* lens);                         // X{E} C{1}
 
   ZGlass* ElementAfter(ZGlass* lens);
   ZGlass* ElementBefore(ZGlass* lens);

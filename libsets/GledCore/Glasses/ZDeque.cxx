@@ -54,9 +54,9 @@ Int_t ZDeque::remove_references_to(ZGlass* lens)
 // AList methods, public part.
 /**************************************************************************/
 
-AList::stepper_base* ZDeque::make_stepper_imp(bool return_zeros)
+AList::stepper_base* ZDeque::make_stepper_imp()
 {
-  return new stepper_imp<ZDeque>(begin(), end(), return_zeros);
+  return new stepper_imp<ZDeque>(begin(), end());
 }
 
 /**************************************************************************/
@@ -114,7 +114,7 @@ void ZDeque::Add(ZGlass* lens)
   PushBack(lens);
 }
 
-void ZDeque::RemoveAll(ZGlass* lens)
+Int_t ZDeque::RemoveAll(ZGlass* lens)
 {
   Int_t n  = 0;
   mListMutex.Lock();
@@ -130,6 +130,7 @@ void ZDeque::RemoveAll(ZGlass* lens)
     lens->DecRefCount(this, n);
     StampListRebuild();
   }
+  return n;
 }
 
 /**************************************************************************/

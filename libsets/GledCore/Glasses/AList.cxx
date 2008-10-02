@@ -66,9 +66,9 @@ void AList::new_element_check(ZGlass* lens)
   if(lens == 0 && elrep_can_hold_zero() == false) {
     throw(_eh + "called with null ZGlass*.");
   }
-  if(mLid && mCid) {
+  if(mLid && mCid && lens != 0) {
     if(!GledNS::IsA(lens, FID_t(mLid, mCid))) {
-      throw(_eh + "lens of wrong FID_t.");
+      throw(_eh + "list=" + Identify() + "lens=" + lens->Identify() + " has wrong FID_t.");
     }
   }
 }

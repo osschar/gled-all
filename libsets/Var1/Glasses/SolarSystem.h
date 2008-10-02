@@ -59,6 +59,7 @@ protected:
   Double_t           mOrbitMaxR;  // X{GS}   7 Value(-range=>[1,10000, 1,10])
   Double_t           mMaxTheta;   // X{GS}   7 Value(-range=>[0,90,    1,100])
   Double_t           mMaxEcc;     // X{GS}   7 Value(-range=>[0,1,     1,1000])
+  ZColor             mPlanetColor;// X{PRGS} 7 ColorButt()
 
   // Chunked-storage stuff.
 

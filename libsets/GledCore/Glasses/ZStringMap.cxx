@@ -94,9 +94,9 @@ void ZStringMap::ClearList()
   ISdebug(0, _eh + GForm("finished for '%s'.", GetName()));
 }
 
-AList::stepper_base* ZStringMap::make_stepper_imp(bool return_zeros)
+AList::stepper_base* ZStringMap::make_stepper_imp()
 {
-  return new stepper_imp<ZStringMap>(begin(), end(), return_zeros);
+  return new stepper_imp<ZStringMap>(begin(), end());
 }
 
 /**************************************************************************/
@@ -126,7 +126,7 @@ void ZStringMap::Add(ZGlass* lens)
   StampListInsertLabel(lens, label, i != end() ? i->first : "");
 }
 
-void ZStringMap::RemoveAll(ZGlass* lens)
+Int_t ZStringMap::RemoveAll(ZGlass* lens)
 {
   Int_t n=0;
   GMutexHolder llck(mListMutex);
@@ -138,7 +138,7 @@ void ZStringMap::RemoveAll(ZGlass* lens)
     }
   }
   if(n) lens->DecRefCount(this, n);
-  mListMutex.Unlock();
+  return n;
 }
 
 /**************************************************************************/

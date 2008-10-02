@@ -123,6 +123,16 @@ void ShellInfo::SetSubShells(ZHashList* ss)
 
 /**************************************************************************/
 
+void ShellInfo::SpawnClassView(ZGlass* source)
+{
+  if(mQueen && mSaturn->AcceptsRays()) {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_spawn_classview, mTimeStamp, FID()));
+    ray->SetBeta(source);
+    mQueen->EmitRay(ray);
+  }
+}
+
 void ShellInfo::SpawnMetaGui(ZGlass* source, MetaViewInfo* gui_template)
 {
   if(mQueen && mSaturn->AcceptsRays()) {
