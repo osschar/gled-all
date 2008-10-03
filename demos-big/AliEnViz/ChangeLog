@@ -1,3 +1,15 @@
+2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alienviz_common_foos.C:
+	Add new nest layout Sites-Small.
+
+	* solar_suck.C:
+	Put in commands for use of new features:
+	- desired radius of planets;
+	- hostname/port of the data-dumper host.
+
+	Add overlay button for invoking SolarSystem class-view.
+
 2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* solar_suck.C:

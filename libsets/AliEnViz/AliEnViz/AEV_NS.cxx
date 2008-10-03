@@ -46,6 +46,11 @@ void AEV_NS::BiDiPipe::close_fifos()
   if(fBtoA) { fclose(fBtoA); fBtoA = 0; }
 }
 
+bool AEV_NS::BiDiPipe::eof_BtoA()
+{
+  return (feof(fBtoA) != 0);
+}
+
 /**************************************************************************/
 
 int AEV_NS::BiDiPipe::send_command(const TString& cmd)

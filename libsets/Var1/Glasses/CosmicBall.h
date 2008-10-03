@@ -22,6 +22,9 @@ protected:
   Double_t      mM; // X{GS}   7 Value()
   TVector3      mV; // X{GSRr} 7 Vector3()
 
+  // Hack for orbit switching.
+  Double_t      mDesiredR; // X{GS} 7 Value()
+
   struct Point
   {
     Float_t x, y, z;

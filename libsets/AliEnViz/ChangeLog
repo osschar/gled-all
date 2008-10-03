@@ -1,3 +1,33 @@
+2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVSite.h:
+	* Glasses/AEVSite.cxx:
+	Add member 'Int_t mSiteSize' that is translated into planet's
+	radius.
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	Add support for setting time-window over which the site statistics
+	is accumulated (forwarded to Costin's data-dumper).
+
+	When adding a new planet set radius and mass corresponding to
+	site's size. Also, set it a random color.
+
+	Support desired planet's radius ... so that distance from the Sun
+	maps directly into the selected range of observed values.
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	Use TSocket to talk to data-dumper directly.
+
+	Add member function
+	  void SendLine(const TString& cmd)
+	that allows to send requests back to the dumper.
+
+	* AliEnViz/AEV_NS.h:
+	* AliEnViz/AEV_NS.cxx:
+	Add feof check to BiDiPipe.
+
 2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVManager.cxx:

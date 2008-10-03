@@ -7,12 +7,16 @@
 #ifndef AliEnViz_AEVMlSucker_H
 #define AliEnViz_AEVMlSucker_H
 
+#include <AliEnViz/AEV_NS.h>
+
 #include <Glasses/ZNameMap.h>
 #include <Glasses/ZQueen.h>
 
 #include <TPRegexp.h>
 
 class AEVManager;
+
+class TSocket;
 
 class AEVMlSucker : public ZNameMap
 {
@@ -24,7 +28,8 @@ private:
 protected:
   ZLink<AEVManager>  mManager; // X{GS} L{A}
 
-  TString    mSuckCmd;      // X{GS} 7 Textor()
+  TString    mSuckHost;     // X{GS} 7 Textor()
+  Int_t      mSuckPort;     // X{GS} 7 Value()
   Int_t      mFooSleep;     // X{GS} 7 Value(-range=>[0,1e4,1])
 
   GThread   *mSuckerThread; //!
@@ -49,6 +54,8 @@ protected:
     return lens;
   }
 
+  TSocket    *mSock;     //!
+
 public:
   AEVMlSucker(const Text_t* n="AEVMlSucker", const Text_t* t=0) :
     ZNameMap(n,t) { _init(); }
@@ -56,6 +63,8 @@ public:
 
   void StartSucker(); // X{E} 7 MButt()
   void StopSucker();  // X{E} 7 MButt()
+
+  void SendLine(const TString& cmd);
 
 #include "AEVMlSucker.h7"
   ClassDef(AEVMlSucker, 1);

@@ -182,13 +182,17 @@ void solar_suck()
 
   ode->SetH1(1); ode->SetHmin(1e-8);
   ode->SetAcc(1e-3);
+
+  ss->SetDesiredRHack(true);
+  ss->SetDesiredRHackT0(5);
   ss->StartStepIntegratorThread();
 
   animator->SetInterBeatMS(TMath::Nint(1000.0/g_rps));
   animator->Start();
 
-  // ml_sucker->SetSuckCmd("cat nc-dump");
-  ml_sucker->SetFooSleep(5);
+  // ml_sucker->SetSuckHost("localhost");
+  // ml_sucker->SetSuckPort(6666);
+  // ml_sucker->SetFooSleep(1000);
   ml_sucker->StartSucker();
 }
 
@@ -224,9 +228,15 @@ void make_overlay()
     CREATE_ADD_GLASS(main_menu, WGlWidget, overlay, "MainMenu", 0);
 
     ASSIGN_ADD_GLASS(b, WGlButton, main_menu, "Manager", 0);
-    gs.SetNode(b);
+    gs.SetNodeAdvance(b);
     b->SetCbackAlpha(g_shell);
     b->SetCbackBeta (manager);
+    b->SetCbackMethodName("SpawnClassView");
+
+    ASSIGN_ADD_GLASS(b, WGlButton, main_menu, "SolarSystem", 0);
+    gs.SetNodeAdvance(b);
+    b->SetCbackAlpha(g_shell);
+    b->SetCbackBeta (ss);
     b->SetCbackMethodName("SpawnClassView");
   }
 }

@@ -66,8 +66,9 @@ void call_foo(AEVSite* site, const TString& key, Float_t val)
 void AEVMlSucker::_init()
 {
   // from local dump: "cat nc-dump"
-  mSuckCmd  = "nc pcalimonitor2.cern.ch 7014";
-  mFooSleep = 100;
+  mSuckHost  = "pcalimonitor2.cern.ch";
+  mSuckPort  = 7014;
+  mFooSleep = 0;
 
   mSuckerThread = 0;
 
@@ -75,27 +76,25 @@ void AEVMlSucker::_init()
   mGlobVarRE .Reset("([-_\\w]+)=([\\d\\.eE]+)(?:[,\\s]*)", "g");
   mUScoreRE  .Reset("(\\w+)_([-\\w]+)");
 
+  mSock = 0;
+
   if ( ! s_map_init_done)
   {
+    s_site_set_int_map["max_RUNNING"]    = &AEVSite::SetSiteSize;
+
     s_site_set_int_map["jobs_STARTED"]   = &AEVSite::SetJobsStarted;
     s_site_set_int_map["jobs_RUNNING"]   = &AEVSite::SetJobsRunning;
     s_site_set_int_map["jobs_SAVING"]    = &AEVSite::SetJobsSaving;
     s_site_set_int_map["jobs_DONE"]      = &AEVSite::SetJobsDone;
-    s_site_set_int_map["jobs_ERROR_ALL"] = &AEVSite::SetJobsErrorAll;
+    s_site_set_int_map["jobs_ERROR_ALL"] = &AEVSite::SetJobsError;
+    s_site_set_int_map["jobs_ERR"]       = &AEVSite::SetJobsError;
 
     s_site_set_float_map["geo_LAT"] = &AEVSite::SetLatitude;
     s_site_set_float_map["geo_LON"] = &AEVSite::SetLongitude;
   }
 }
 
-/**************************************************************************/
-
-void* AEVMlSucker::tl_Suck(AEVMlSucker* s)
-{
-  s->Suck();
-  s->mSuckerThread = 0;
-  return 0;
-}
+//==============================================================================
 
 TString AEVMlSucker::next_word(const TString& s)
 {
@@ -128,31 +127,54 @@ bool AEVMlSucker::next_var(const TString& s, TString& var, Float_t& val)
   return ret;
 }
 
+//==============================================================================
+
+void* AEVMlSucker::tl_Suck(AEVMlSucker* s)
+{
+  s->Suck();
+  delete s->mSock; s->mSock = 0;
+  s->mSuckerThread = 0;
+  return 0;
+}
+
 void AEVMlSucker::Suck()
 {
   static const Exc_t _eh("AEVMlSucker::Suck ");
 
-  FILE* s = gSystem->OpenPipe(mSuckCmd, "r");
-  if (s == 0)
+  mSock = new TSocket(mSuckHost, mSuckPort);
+  if (mSock->IsValid() == kFALSE)
   {
-    perror(GForm("PipeOpen of '%s' failed:", mSuckCmd.Data()));
+    printf("%sfailed opening the socket.\n", _eh.Data());
     return;
   }
 
+  const Int_t buf_size = 1024;
+  char        buf[buf_size];
+
   Int_t count = 0;
-  char buff[1024];
+
   while (true)
   {
-    if (fgets(buff, 1024, s) == 0)
     {
-      perror(Form("Error sucking next line (prev-line=%d)", count));
-      break;
+      Int_t len = 0;
+      while (1)
+      {
+	Int_t ret = mSock->RecvRaw(&buf[len], 1);
+	if (ret < 0) {
+	  printf("%sError sucking %d.\n", _eh.Data(), ret);
+	  mSock->Close();
+	  return;
+	}
+	if (buf[len] == 10) {
+	  buf[len] = 0;
+	  break;
+	}
+	++len;
+      }
     }
-    int len = strlen(buff);
-    // chomp
-    if (len && buff[len-1] == 10) buff[len-1] = 0;
 
-    TString l(buff);
+    TString l(buf);
+
     mGlobWordRE.ResetGlobalState();
 
     ++count;
@@ -165,48 +187,48 @@ void AEVMlSucker::Suck()
 
       if (l1 == "site")
       {
-        TString name = next_word(l);
+	TString name = next_word(l);
 
-        AEVSiteList *sites  = find_lens<AEVSiteList>("Sites");
+	AEVSiteList *sites  = find_lens<AEVSiteList>("Sites");
 
-        bool new_site = false;
-        AEVSite *site = sites->FindSite(name);
-        if (site == 0)
-        {
-          printf("New site '%s'.\n", name.Data());
-          new_site = true;
-          site = new AEVSite(name);
-        }
+	bool new_site = false;
+	AEVSite *site = sites->FindSite(name);
+	if (site == 0)
+	{
+	  printf("New site '%s'.\n", name.Data());
+	  new_site = true;
+	  site = new AEVSite(name);
+	}
 
-        mGlobVarRE.AssignGlobalState(mGlobWordRE);
-        TString var;
-        Float_t val;
-        Bool_t   reposition = false;
-        while (next_var(l, var, val))
-        {
-          if (var.BeginsWith("geo_"))
-          {
+	mGlobVarRE.AssignGlobalState(mGlobWordRE);
+	TString var;
+	Float_t val;
+	Bool_t   reposition = false;
+	while (next_var(l, var, val))
+	{
+	  if (var.BeginsWith("geo_"))
+	  {
 	    call_foo(site, var, val);
-            reposition = true;
-          }
-	  else if (var.BeginsWith("jobs_"))
+	    reposition = true;
+	  }
+	  else if (var.BeginsWith("jobs_") || var.BeginsWith("max_"))
 	  {
 	    call_foo(site, var, TMath::Nint(val));
 	  }
-          else
-          {
-            // printf("site - unhandled variable '%s'.\n", var.Data());
-          }
-        }
+	  else
+	  {
+	    // printf("site - unhandled variable '%s'.\n", var.Data());
+	  }
+	}
 
-        if (new_site)
-        {
-          // !!! For cluster op, should IncarnateWAttach();
-          GLensWriteHolder wrlck(sites);
+	if (new_site)
+	{
+	  // !!! For cluster op, should IncarnateWAttach();
+	  GLensWriteHolder wrlck(sites);
 
-          mQueen->CheckIn(site);
-          sites->Add(site);
-        }
+	  mQueen->CheckIn(site);
+	  sites->Add(site);
+	}
 
 	assert_manager(_eh);
 
@@ -214,7 +236,7 @@ void AEVMlSucker::Suck()
 
 	if (new_site)
 	  mManager->SiteNew(site);
-        if (reposition)
+	if (reposition)
 	  mManager->SitePositionChanged(site);
 	mManager->SiteChanged(site);
       }
@@ -224,7 +246,8 @@ void AEVMlSucker::Suck()
       printf("Error sucking line %d: '%s'\n  Exception='%s'\n", count, l.Data(), exc.Data());
     }
 
-    gSystem->Sleep(mFooSleep);
+    if (mFooSleep > 0)
+      gSystem->Sleep(mFooSleep);
   }
 }
 
@@ -239,7 +262,7 @@ void AEVMlSucker::StartSucker()
   mSuckerThread = new GThread("AEVMlSucker-Sucker",
 			      (GThread_foo) tl_Suck, this,
 			      false);
-  mSuckerThread->SetNice(10);
+  mSuckerThread->SetNice(20);
   mSuckerThread->Spawn();
 }
 
@@ -255,4 +278,18 @@ void AEVMlSucker::StopSucker()
   mSuckerThread = 0;
 }
 
-/**************************************************************************/
+//==============================================================================
+
+void AEVMlSucker::SendLine(const TString& cmd)
+{
+  static const Exc_t _eh("AEVMlSucker::SendLine ");
+
+  if (mSock == 0)
+    throw(_eh + "socket not open.");
+
+  Int_t ret = mSock->SendRaw(cmd.Data(), cmd.Length());
+  if (ret < 0)
+  {
+    printf("%serror sending command %d.\n", _eh.Data(), ret);
+  }
+}
