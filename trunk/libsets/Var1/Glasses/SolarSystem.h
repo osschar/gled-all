@@ -109,6 +109,12 @@ protected:
   void         ChunkIntegratorThread();
   void         StepIntegratorThread();
 
+  // Hack for orbit switching - in direct-step mode only.
+  Bool_t             bDesiredRHack;   // X{GS}   7 Bool();
+  Double_t           mDesiredRHackT0; // X{GS}   7 Value(-range=>[0,20, 1,100])
+
+  void hack_desired_r(Double_t dt);
+
 public:
   SolarSystem(const Text_t* n="SolarSystem", const Text_t* t=0);
   virtual ~SolarSystem();

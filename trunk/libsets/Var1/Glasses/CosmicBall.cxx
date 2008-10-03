@@ -19,6 +19,8 @@ ClassImp(CosmicBall);
 
 void CosmicBall::_init()
 {
+  mDesiredR = 0;
+
   mHistorySize = mHistoryFirst = mHistoryStored = 0;
 }
 

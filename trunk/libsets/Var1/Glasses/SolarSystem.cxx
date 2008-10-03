@@ -65,8 +65,8 @@ void SolarSystem::_init()
   mBallKappa  = 1e-6;
 
   mPlanetRnd.SetSeed(0);
-  mPlanetMinR = 20;
-  mPlanetMaxR = 40;
+  mPlanetMinR = 10;
+  mPlanetMaxR = 50;
   mOrbitMinR  = 200;
   mOrbitMaxR  = 1000;
   mMaxTheta   = 20;
@@ -78,6 +78,9 @@ void SolarSystem::_init()
   mCalcFuture    = 5000;
 
   mIntegratorThread = 0;
+
+  bDesiredRHack   = false;
+  mDesiredRHackT0 = 5; // This is in real time, time-fac is ignored!
 }
 
 SolarSystem::SolarSystem(const Text_t* n, const Text_t* t) :
@@ -237,24 +240,29 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
       {
 	GMutexHolder lock_storage(mStorageCond);
 
-	const Double_t* P = mODECrawler->RefY().GetMatrixArray();
-
-	Int_t  ri        = 0;
-	Bool_t store_pos = mBallHistorySize > 0;
-	Stepper<CosmicBall> stepper(*mBalls, true);
-	while (stepper.step())
+	if (bDesiredRHack)
 	{
-	  if (stepper.get_lens() != 0)
-	  {
-	    stepper->SetPos(P[ri],   P[ri+1], P[ri+2]);
-	    stepper->SetV  (P[ri+3], P[ri+4], P[ri+5]);
+	  hack_desired_r(dt);
+	}
 
-	    if (store_pos)
+	{
+	  const Double_t *Y = mODECrawler->RefY().GetMatrixArray();
+	  Bool_t store_pos  = mBallHistorySize > 0;
+	  Stepper<CosmicBall> stepper(*mBalls, true);
+	  while (stepper.step())
+	  {
+	    if (stepper.get_lens() != 0)
 	    {
-	      stepper->StorePos();
+	      stepper->SetPos(Y[0], Y[1], Y[2]);
+	      stepper->SetV  (Y[3], Y[4], Y[5]);
+
+	      if (store_pos)
+	      {
+		stepper->StorePos();
+	      }
 	    }
+	    Y += 6;
 	  }
-	  ri += 6;
 	}
 
 	{
@@ -730,4 +738,40 @@ void SolarSystem::RemovePlanetoid(CosmicBall* cb)
   GMutexHolder ball_lock(mBallSwitchMutex);
 
   mBallsToRemove.push_back(cb);
+}
+
+//==============================================================================
+
+void SolarSystem::hack_desired_r(Double_t dt)
+{
+  const Double_t eps = 0.01;
+  const Double_t tf  = dt / mDesiredRHackT0;
+
+  Double_t *Y  = mODECrawler->RawYArray();
+
+  Stepper<CosmicBall> stepper(*mBalls, true);
+  while (stepper.step())
+  {
+    if (stepper.get_lens() != 0 && stepper->GetDesiredR() != 0)
+    {
+      const Double_t r_des = stepper->GetDesiredR();
+      const Double_t r_mag = TMath::Sqrt(Y[0]*Y[0] + Y[1]*Y[1] + Y[2]*Y[2]);
+
+      Double_t d = (r_des - r_mag) / r_des;
+      if (d < -eps || d > eps)
+      {
+	d *= tf;
+	Y[0] += d*Y[0]; Y[1] += d*Y[1]; Y[2] += d*Y[2];
+
+	d = 1.0 / TMath::Sqrt(1 + d);
+	Y[3] *= d; Y[4] *= d; Y[5] *= d;
+      }
+      else
+      {
+	stepper->SetDesiredR(0);
+      }
+    }
+    Y += 6;
+  }
+
 }

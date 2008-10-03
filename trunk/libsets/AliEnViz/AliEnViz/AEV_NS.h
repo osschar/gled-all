@@ -39,6 +39,8 @@ namespace AEV_NS
     void open_AtoB();
     void close_fifos();
 
+    bool eof_BtoA();
+
     void reset_error() { bError = false; fError = "<no-error>"; }
     int  send_command(const TString& cmd);
 

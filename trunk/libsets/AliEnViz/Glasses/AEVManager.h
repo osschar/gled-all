@@ -31,13 +31,19 @@ protected:
   ZLink<AEVSiteList>    mSites;       // X{GS} L{A}
   ZLink<AEVMlSucker>    mSucker;      // X{GS} L{A}
 
-  SiteViz_e             mSiteVizMode; // X{GS} Ray{SiteViz} 7 PhonyEnum()
-  Int_t                 mSiteMinVal;  // X{G}  7 ValOut(-join=>1)
-  Int_t                 mSiteMaxVal;  // X{G}  7 ValOut()
-  Int_t                 mSiteMinCut;  // X{GE} 7 Value(-range=>[0,10000, 1], -join=>1)
-  Int_t                 mSiteMaxCut;  // X{GE} 7 Value(-range=>[0,10000, 1])
+  Int_t                 mTimeWindow;  // X{G}  7 ValOut(-join=>1)
+public:
+  void SetTimeWindow(Int_t time);            // X{ED} 7 MCWButt()
+  void RescanLimits(Bool_t drop_cuts=false); // X{E}  7 MCWButt()
+protected:
 
-  UserViz_e             mUserVizMode; // X{GS} Ray{UserViz} 7 PhonyEnum()
+  SiteViz_e             mSiteVizMode; // X{GS} Ray{SiteViz} 7 PhonyEnum()
+  Int_t                 mSiteMinVal;  // X{G}  7 ValOut(-join=>1, -width=>6)
+  Int_t                 mSiteMaxVal;  // X{G}  7 ValOut(-width=>6)
+  Int_t                 mSiteMinCut;  // X{GE} 7 Value(-range=>[0,10000, 1], -join=>1, -width=>6)
+  Int_t                 mSiteMaxCut;  // X{GE} 7 Value(-range=>[0,10000, 1], -width=>6)
+
+  UserViz_e             mUserVizMode; // X{GS} Ray{UserViz} 7 PhonyEnum(-const=>1)
 
 #ifndef __CINT__
   typedef Int_t AEVSite::*SiteInt_t;
@@ -59,7 +65,7 @@ protected:
 
   void update_sv_current();
   void select_sv_current();
-  void update_sv_current(AEVSite* site);
+  bool update_sv_current(AEVSite* site);
   void select_sv_current(AEVSite* site);
 
 public:

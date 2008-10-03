@@ -1,3 +1,14 @@
+2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CosmicBall.h:
+	* Glasses/CosmicBall.cxx:
+	* Glasses/SolarSystem.h:
+	* Glasses/SolarSystem.cxx:
+	Add support for setting desired-radius for each cosmic-ball.
+	Solar-system then exponentially translates the ball to the desired
+	orbit.
+	This only works in direct-step integration mode.
+
 2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:

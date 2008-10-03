@@ -21,7 +21,8 @@ void AEVSite::_init()
 {
   mLatitude = mLongitude = 0;
 
-  mJobsStarted = mJobsRunning = mJobsSaving = mJobsDone = mJobsErrorAll = 0;
+  mSiteSize = 0; // expected number of cpus, 0 - 2500
+  mJobsStarted = mJobsRunning = mJobsSaving = mJobsDone = mJobsError = 0;
 
   bBallOnStage = false;
 }

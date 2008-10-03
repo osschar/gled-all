@@ -32,11 +32,13 @@ protected:
   Float_t	mLatitude;	// X{GS} 7 ValOut()
   Float_t	mLongitude;	// X{GS} 7 ValOut()
 
+  Int_t         mSiteSize;      // X{GS} 7 ValOut()
+
   Int_t         mJobsStarted;   // X{GS} 7 ValOut()
   Int_t         mJobsRunning;   // X{GS} 7 ValOut()
   Int_t         mJobsSaving;    // X{GS} 7 ValOut()
   Int_t         mJobsDone;      // X{GS} 7 ValOut()
-  Int_t         mJobsErrorAll;  // X{GS} 7 ValOut()
+  Int_t         mJobsError;     // X{GS} 7 ValOut()
 
   ZLink<CosmicBall> mBallViz;   // X{GS} L{}
   Bool_t            bBallOnStage; //!

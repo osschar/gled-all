@@ -201,6 +201,7 @@ void alienviz_spawn_eye()
 
   layouts->Swallow("AliEnViz", new ZGlass("Jobs", "ZGlass(Name[12],Title[32])"));
   layouts->Swallow("AliEnViz", new ZGlass("Sites", "ZGlass(Name):AEVSite(*)"));
+  layouts->Swallow("AliEnViz", new ZGlass("Sites-Small", "AEVSite(JobsStarted,JobsRunning,JobsSaving,JobsDone,JobsError)"));
   layouts->Swallow("AliEnViz", new ZGlass("FlatSpace",
                                           "Board(ULen[5],VLen[5],TexX0,TexY0,TexX1,TexY1):"
                                           "AEVFlatSSpace(Theta0,DTheta,Phi0,DPhi)"));
