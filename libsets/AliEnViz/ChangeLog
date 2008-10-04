@@ -1,3 +1,8 @@
+2008-10-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVMlClient.cxx:
+	Fix compilation warnings that appeared with gcc-4.2.
+
 2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVSite.h:

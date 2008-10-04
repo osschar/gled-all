@@ -358,8 +358,8 @@ static void dumpEdges(ACTCVertex *vert, FILE *fp)
     int i;
 
     for(i = 0; i < vert->EdgeCount; i++) {
-	fprintf(fp, "    %u->%u (%d times)\n", vert->V, vert->Edges[i].V2->V,
-	    vert->Edges[i].Count);
+	fprintf(fp, "    %u->%u (%d times)\n",
+                vert->V, vert->Edges[i].V2->V, vert->Edges[i].Count);
 	dumpTriangles(&vert->Edges[i], fp);
     }
     fputs("\n", fp);
@@ -378,8 +378,8 @@ static void dumpVertices(ACTCData *tc, FILE *fp)
         for(i = 0; i < tc->VertRange; i++) {
 	    v = &tc->StaticVerts[i];
 	    if(v->Count > 0) {
-		fprintf(fp, "  vertex %u, valence %d, %d edges\n", v->V,
-		    v->Count, v->EdgeCount);
+		fprintf(fp, "  vertex %u, valence %d, %d edges\n",
+                        v->V, v->Count, v->EdgeCount);
 		dumpEdges(v, fp);
 	    }
 	}
@@ -494,9 +494,7 @@ static int incVertexValence(ACTCData *tc, int v, ACTCVertex **found)
     } else {
 	if(tableRetrieve(v, tc->Vertices, (void **)&vertex) == 1) {
 	    if(vertex->V != v) {
-		ACTC_DEBUG(
-		    fprintf(stderr, "ACTC::incVertexValence : Got vertex %d when "
-			"looking for vertex %d?!?\n", vertex->V, v);
+		ACTC_DEBUG(fprintf(stderr, "ACTC::incVertexValence: Got vertex %d when looking for vertex %d?!?\n", vertex->V, v);
 		    abortWithOptionalDump(tc);
 		)
 		return tc->Error = ACTC_DATABASE_CORRUPT;
@@ -510,8 +508,7 @@ static int incVertexValence(ACTCData *tc, int v, ACTCVertex **found)
 	    vertex->Edges = NULL;
 	    vertex->EdgeCount = 0;
 	    if(tableInsert(v, tc->Vertices, vertex) == 0) {
-		ACTC_DEBUG(fprintf(stderr, "ACTC::incVertexValence : Failed "
-		    "to insert vertex into table\n");)
+		ACTC_DEBUG(fprintf(stderr, "ACTC::incVertexValence: Failed to insert vertex into table\n");)
 		return tc->Error = ACTC_ALLOC_FAILED;
 	    }
 	    tc->VertexCount++;
@@ -531,9 +528,7 @@ static int decVertexValence(ACTCData *tc, ACTCVertex **vptr)
 
     v->Count--;
     if(v->Count < 0) {
-	ACTC_DEBUG(
-	    fprintf(stderr, "ACTC::decVertexValence : Valence went "
-		"negative?!?\n");
+	ACTC_DEBUG(fprintf(stderr, "ACTC::decVertexValence: Valence went negative?!?\n");
 	    abortWithOptionalDump(tc);
 	)
 	return tc->Error = ACTC_DATABASE_CORRUPT;
@@ -579,8 +574,7 @@ static int findNextFanVertex(ACTCData *tc, ACTCVertex **vert)
 	tc->CurMaxVertValence--;
 	if(tc->CurMaxVertValence < tc->CurMinVertValence) {
 	    if(tc->VertexCount > 0) {
-		ACTC_DEBUG(fprintf(stderr, "tc::findNextFanVertex : no more "
-		    "vertices in bins but VertexCount > 0\n");)
+		ACTC_DEBUG(fprintf(stderr, "tc::findNextFanVertex: no more vertices in bins but VertexCount > 0\n");)
 		return tc->Error = ACTC_DATABASE_CORRUPT;
 	    }
 	    return ACTC_NO_MATCHING_VERT;
@@ -596,8 +590,7 @@ static int findNextStripVertex(ACTCData *tc, ACTCVertex **vert)
 	tc->CurMinVertValence++;
 	if(tc->CurMinVertValence > tc->CurMaxVertValence) {
 	    if(tc->VertexCount > 0) {
-		ACTC_DEBUG(fprintf(stderr, "tc::findNextStripVertex : no more "
-		    "vertices in bins but VertexCount > 0\n");)
+		ACTC_DEBUG(fprintf(stderr, "tc::findNextStripVertex: no more vertices in bins but VertexCount > 0\n");)
 		return tc->Error = ACTC_DATABASE_CORRUPT;
 	    }
 	    return ACTC_NO_MATCHING_VERT;
@@ -614,14 +607,12 @@ int actcGetIsDuringInput(ACTCData *tc) {
 int actcBeginInput(ACTCData *tc)
 {
     if(tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcBeginInput : called within "
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcBeginInput: called within BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
 
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcBeginInput : called within "
-	    "BeginInput/EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcBeginInput: called within BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
 
@@ -636,8 +627,7 @@ int actcBeginInput(ACTCData *tc)
 	chartedSetLabel("static verts");
 	tc->StaticVerts = (ACTCVertex *)calloc(sizeof(ACTCVertex), tc->VertRange);
 	if(tc->StaticVerts == NULL) {
-	    ACTC_INFO(printf("Couldn't allocate static %d vert block of %u "
-		"bytes\n", tc->VertRange, byteCount);)
+	    ACTC_INFO(printf("Couldn't allocate static %d vert block of %u bytes\n", tc->VertRange, byteCount);)
 	    tc->UsingStaticVerts = 0;
 	}
     } else
@@ -649,14 +639,12 @@ int actcBeginInput(ACTCData *tc)
 int actcEndInput(ACTCData *tc)
 {
     if(tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcEndInput : called within "
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcEndInput: called within BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_DURING_OUTPUT;
     }
 
     if(!tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcEndInput : called outside "
-	    "BeginInput/EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcEndInput: called outside BeginInput/EndInput\n");)
 	return tc->Error = ACTC_IDLE;
     }
 
@@ -675,14 +663,12 @@ int actcBeginOutput(ACTCData *tc)
     int i;
 
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput : called within "
-	    "BeginInput/EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput: called within BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
 
     if(tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput : called within "
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput: called within BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_DURING_OUTPUT;
     }
 
@@ -692,9 +678,8 @@ int actcBeginOutput(ACTCData *tc)
     chartedSetLabel("vertex bins");
     tc->VertexBins = (ACTCVertex **)calloc(sizeof(ACTCVertex *), tc->CurMaxVertValence + 1);
     if(tc->VertexBins == NULL) {
-	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput : couldn't allocate %lu bytes "
-	    "for Vertex Bins\n",
-	    sizeof(ACTCVertex *) * tc->CurMaxVertValence);)
+	ACTC_DEBUG(fprintf(stderr, "actcBeginOutput: couldn't allocate %u bytes for Vertex Bins\n",
+                           sizeof(ACTCVertex *) * tc->CurMaxVertValence);)
 	return tc->Error = ACTC_ALLOC_FAILED;
     }
 
@@ -718,8 +703,7 @@ int actcBeginOutput(ACTCData *tc)
 	for(i = 0; i < tc->VertexCount; i++) {
 	    if(tableIterate(tc->Vertices, tc->VertexIterator, NULL, (void **)&v)
 		== 0) {
-		ACTC_DEBUG(fprintf(stderr, "actcBeginOutput : fewer vertices in "
-		    "the table than we expected!\n");)
+		ACTC_DEBUG(fprintf(stderr, "actcBeginOutput: fewer vertices in the table than we expected!\n");)
 		return tc->Error = ACTC_DATABASE_CORRUPT;
 	    }
 	    v->Next = tc->VertexBins[v->Count];
@@ -738,14 +722,12 @@ int actcBeginOutput(ACTCData *tc)
 int actcEndOutput(ACTCData *tc)
 {
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcEndOutput : called within "
-	    "BeginInput/EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcEndOutput: called within BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
 
     if(!tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcEndOutput : called outside "
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcEndOutput: called outside BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_IDLE;
     }
 
@@ -771,8 +753,7 @@ ACTCData *actcNew(void)
     tc = (ACTCData *)calloc(sizeof(*tc), 1);
 
     if(tc == NULL) {
-	ACTC_DEBUG(fprintf(stderr, "actcNew : couldn't allocate %lu bytes "
-	    "for new ACTCData\n", sizeof(*tc));)
+	ACTC_DEBUG(fprintf(stderr, "actcNew: couldn't allocate %u bytes for new ACTCData\n", sizeof(*tc));)
 	return NULL;
     }
 
@@ -881,12 +862,12 @@ void actcDelete(ACTCData *tc)
 int actcParami(ACTCData *tc, int param, int value)
 {
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcParami : within BeginInput/"
+	ACTC_DEBUG(fprintf(stderr, "actcParami: within BeginInput/"
 	    "EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
     if(tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcParami : within BeginOutput/"
+	ACTC_DEBUG(fprintf(stderr, "actcParami: within BeginOutput/"
 	    "EndOutput\n");)
 	return tc->Error = ACTC_DURING_OUTPUT;
     }
@@ -897,7 +878,7 @@ int actcParami(ACTCData *tc, int param, int value)
 
 	case ACTC_IN_MAX_VERT:
 	    if(value < tc->MinInputVert) {
-		ACTC_DEBUG(fprintf(stderr, "actcParami : tried to set "
+		ACTC_DEBUG(fprintf(stderr, "actcParami: tried to set "
 		    "MAX_INPUT_VERT to %d, less than MIN_INPUT_VERT (%d)\n",
 		    value, tc->MinInputVert);)
 		return tc->Error = ACTC_INVALID_VALUE;
@@ -907,7 +888,7 @@ int actcParami(ACTCData *tc, int param, int value)
 
 	case ACTC_IN_MIN_VERT:
 	    if(value > tc->MaxInputVert) {
-		ACTC_DEBUG(fprintf(stderr, "actcParami : tried to set "
+		ACTC_DEBUG(fprintf(stderr, "actcParami: tried to set "
 		    "MIN_INPUT_VERT to %d, greater than MAX_INPUT_VERT (%d)\n",
 		    value, tc->MaxInputVert);)
 		return tc->Error = ACTC_INVALID_VALUE;
@@ -929,7 +910,7 @@ int actcParami(ACTCData *tc, int param, int value)
 
 	case ACTC_OUT_MAX_PRIM_VERTS:
 	    if(value < 3) {
-		ACTC_DEBUG(fprintf(stderr, "actcParami : tried to set "
+		ACTC_DEBUG(fprintf(stderr, "actcParami: tried to set "
 		    "MAX_PRIM_VERTS to %d (needed to be 3 or more)\n", value);)
 		return tc->Error = ACTC_INVALID_VALUE;
 	    }
@@ -1012,9 +993,8 @@ static int mapEdgeTriangle(ACTCData *tc, ACTCEdge *edge, ACTCVertex *v3)
     r = reallocAndAppend((void **)&edge->Triangles, &edge->TriangleCount,
         sizeof(tmp), &tmp);
     if(r == NULL) {
-	ACTC_DEBUG(fprintf(stderr, "ACTC::mapEdgeTriangle : Couldn't allocate "
-	    "%lu bytes for triangles\n", sizeof(tmp) *
-	    (edge->TriangleCount + 1));)
+	ACTC_DEBUG(fprintf(stderr, "ACTC::mapEdgeTriangle: Couldn't allocate %u bytes for triangles\n",
+                           sizeof(tmp) * (edge->TriangleCount + 1));)
 	return tc->Error = ACTC_ALLOC_FAILED;
     }
 
@@ -1031,8 +1011,7 @@ static int unmapEdgeTriangle(ACTCData *tc, ACTCEdge *edge, ACTCVertex *v3)
 
     if(i == edge->TriangleCount) {
 	ACTC_DEBUG(
-	    fprintf(stderr, "ACTC::unmapEdgeTriangle : Couldn't find third vertex"
-	        " from edge in order to delete it?!?\n");
+	    fprintf(stderr, "ACTC::unmapEdgeTriangle: Couldn't find third vertex from edge in order to delete it?!?\n");
 	    abortWithOptionalDump(tc);
 	)
 	return tc->Error = ACTC_DATABASE_CORRUPT;
@@ -1067,9 +1046,8 @@ static int mapVertexEdge(ACTCData *tc, ACTCVertex *v1, ACTCVertex *v2, ACTCEdge 
 	r = reallocAndAppend((void **)&v1->Edges, &v1->EdgeCount,
 	    sizeof(tmp), &tmp);
 	if(r == NULL) {
-	    ACTC_DEBUG(fprintf(stderr, "ACTC::mapVertexEdge : Couldn't reallocate "
-	        "to %lu bytes for vertex's edge list\n", sizeof(tmp) *
-		v1->EdgeCount);)
+	    ACTC_DEBUG(fprintf(stderr, "ACTC::mapVertexEdge: Couldn't reallocate to %u bytes for vertex's edge list\n",
+                               sizeof(tmp) * v1->EdgeCount);)
 	    return tc->Error = ACTC_ALLOC_FAILED;
 	}
     }
@@ -1088,8 +1066,8 @@ static int unmapVertexEdge(ACTCData *tc, ACTCVertex *v1, ACTCVertex *v2)
 
     if(i == v1->EdgeCount) {
 	ACTC_DEBUG(
-	    fprintf(stderr, "ACTC::unmapVertexEdge : Couldn't find edge %d,%d"
-	        " from vertex in order to unmap it?!?\n", v1->V, v2->V);
+	    fprintf(stderr, "ACTC::unmapVertexEdge: Couldn't find edge %d,%d from vertex in order to unmap it?!?\n",
+                    v1->V, v2->V);
 	    abortWithOptionalDump(tc);
 	)
 	return tc->Error = ACTC_DATABASE_CORRUPT;
@@ -1117,13 +1095,11 @@ int actcAddTriangle(ACTCData *tc, int v1, int v2, int v3)
     ACTCEdge *edge31;
 
     if(tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcAddTriangle : inside "
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcAddTriangle: inside BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_IDLE;
     }
     if(!tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcAddTriangle : outside "
-	    "BeginInput/EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcAddTriangle: outside BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
 
@@ -1179,13 +1155,11 @@ int actcStartNextPrim(ACTCData *tc, int *v1Return, int *v2Return)
     int findResult;
 
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim : within "
-	    "BeginInput/EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim: within BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
     if(!tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim : outside "
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim: outside BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_IDLE;
     }
 
@@ -1193,14 +1167,12 @@ int actcStartNextPrim(ACTCData *tc, int *v1Return, int *v2Return)
     if(findResult == ACTC_NO_ERROR)
 	tc->PrimType = ACTC_PRIM_FAN;
     else if(findResult != ACTC_NO_MATCHING_VERT) {
-	ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim : internal "
-	    "error finding next appropriate vertex\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim  internal error finding next appropriate vertex\n");)
 	return tc->Error = findResult;
     } else {
 	findResult = findNextStripVertex(tc, &v1);
 	if(findResult != ACTC_NO_ERROR && findResult != ACTC_NO_MATCHING_VERT) {
-	    ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim : internal "
-		"error finding next appropriate vertex\n");)
+	    ACTC_DEBUG(fprintf(stderr, "actcStartNextPrim  internal error finding next appropriate vertex\n");)
 	    return tc->Error = findResult;
 	}
 	tc->PrimType = ACTC_PRIM_STRIP;
@@ -1258,18 +1230,15 @@ int actcGetNextVert(ACTCData *tc, int *vertReturn)
     int wasFoundReversed;
 
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcGetNextVert : within BeginInput/"
-	    "EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcGetNextVert: within BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
     if(!tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcGetNextVert : outside BeginOutput/"
-	    "EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcGetNextVert: outside BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_IDLE;
     }
     if(tc->PrimType == -1) {
-	ACTC_DEBUG(fprintf(stderr, "actcGetNextVert : Asked for next vertex "
-	    "without a primitive (got last\n    vertex already?)\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcGetNextVert: Asked for next vertex without a primitive (got last\n    vertex already?)\n");)
 	return tc->Error = ACTC_INVALID_VALUE;
     }
 
@@ -1354,13 +1323,11 @@ int actcTrianglesToPrimitives(ACTCData *tc, int triangleCount,
     int trisSoFar;
 
     if(tc->IsInputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcTrianglesToPrimitives : within BeginInput/"
-	    "EndInput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcTrianglesToPrimitives: within BeginInput/EndInput\n");)
 	return tc->Error = ACTC_DURING_INPUT;
     }
     if(tc->IsOutputting) {
-	ACTC_DEBUG(fprintf(stderr, "actcTrianglesToPrimitives : within"
-	    "BeginOutput/EndOutput\n");)
+	ACTC_DEBUG(fprintf(stderr, "actcTrianglesToPrimitives: within BeginOutput/EndOutput\n");)
 	return tc->Error = ACTC_DURING_OUTPUT;
     }
     curTriangle = 0;

@@ -1,3 +1,13 @@
+2008-10-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/tc.cxx:
+	Fix compilation warnings.
+	Consolidate debug output commands.
+
+	* GForge/Makefile:
+	Explicitly link agains image libs that are sometimes not linked
+	with libIL.
+
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
