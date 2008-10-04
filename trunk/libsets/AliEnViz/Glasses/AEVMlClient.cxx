@@ -327,13 +327,13 @@ void AEVMlClient::FindJobs()
 
 namespace {
 
-char* Jobnames[] = { "Anal-PiK", "Cal-QvsZ", "Fed-MacTest", "test", "CPU-burner" };
+const char* Jobnames[] = { "Anal-PiK", "Cal-QvsZ", "Fed-MacTest", "test", "CPU-burner" };
 Int_t JobnamesN  = 5;
 
-char* Usernames[] = { "apeters", "carminati", "alimaster", "feynmann", "buncic" };
+const char* Usernames[] = { "apeters", "carminati", "alimaster", "feynmann", "buncic" };
 Int_t UsernamesN  = 5;
 
-char* Statuses[] = { "FINISHED", "FINISHED", "FINISHED", "RUNNING", "QUEUED", "WAITING" };
+const char* Statuses[] = { "FINISHED", "FINISHED", "FINISHED", "RUNNING", "QUEUED", "WAITING" };
 Int_t StatusesN  = 6;
 }
 
