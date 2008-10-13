@@ -48,6 +48,7 @@ void solar_suck()
   alienviz_setup_lib_objects(128*1024);
 
   ASSIGN_ADD_GLASS(manager, AEVManager, aev_queen, "AEVManager", 0);
+  aev_queen->SetKeepSorted(true);
 
   ASSIGN_ADD_GLASS(ml_sucker, AEVMlSucker, aev_queen, "MonaLisa Sucker", 0);
   ml_sucker->SetManager(manager);
@@ -178,6 +179,8 @@ void solar_suck()
   make_overlay();
   g_pupil->SetOverlay(overlay);
 
+  manager->MakeInfoText();
+
   //============================================================================
 
   ode->SetH1(1); ode->SetHmin(1e-8);
@@ -187,12 +190,18 @@ void solar_suck()
   ss->SetDesiredRHackT0(5);
   ss->StartStepIntegratorThread();
 
+  ss->SetTimeFac(50);
+  ss->SetBallHistorySize(200);
+
   animator->SetInterBeatMS(TMath::Nint(1000.0/g_rps));
   animator->Start();
 
+  // To be used without network, in conjuction with:
+  //   nc -l localhost 9999 < nc-dump
   // ml_sucker->SetSuckHost("localhost");
-  // ml_sucker->SetSuckPort(6666);
-  // ml_sucker->SetFooSleep(1000);
+  // ml_sucker->SetSuckPort(9999);
+  // ml_sucker->SetFooSleep(10);
+
   ml_sucker->StartSucker();
 }
 
@@ -204,10 +213,33 @@ void make_overlay()
 {
   Float_t weed_dx = 130, step_dx = 140, step_dy = 26;
 
-  ASSIGN_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
+  ASSIGN_ADD_GLASS(overlay, Scene, g_queen, "AEVOverlay", 0);
 
   CREATE_ADD_GLASS(ovl_lm, ZGlLightModel, overlay, "LightOff", 0);
   ovl_lm->SetLightModelOp(0);
+
+  //----------------------------------------------------------------------------
+
+  CREATE_ADD_GLASS(ibpp, ZGlPerspective, overlay, "InfoPerspective", 0);
+  ibpp->StandardFixed();
+
+  CREATE_ADD_GLASS(info_bar, Text, overlay, "InfoText", 0);
+  info_bar->SetPos(5, 9.4, 0);
+  info_bar->SetScales(0.5, 0.8, 1);
+  info_bar->SetFont(find_font("LargeFont"));
+  info_bar->SetBackPoly(false);
+  info_bar->SetFramePoly(false);
+  info_bar->SetFGCol(0.6, 1, 0.6);
+
+  CREATE_ADD_GLASS(blurp_bar, Text, overlay, "SubInfoText", 0);
+  blurp_bar->SetPos(5, 8.9, 0);
+  blurp_bar->SetScales(0.25, 0.4, 1);
+  // blurp_bar->SetFont(find_font("LargeFont"));
+  blurp_bar->SetBackPoly(false);
+  blurp_bar->SetFramePoly(false);
+  blurp_bar->SetFGCol(0.6, 0.6, 1);
+
+  //----------------------------------------------------------------------------
 
   CREATE_ADD_GLASS(pp, ZGlPerspective, overlay, "Perspective", 0);
   pp->StandardPixel();

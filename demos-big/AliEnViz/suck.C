@@ -74,7 +74,7 @@ void suck()
 			 0.5, 3, 0,
 			 0.5, 2, TMath::Pi()/2,
 			 0.1);
-  gled_viz->SetDtexU(0.05);
+  gled_viz->SetDtexU(0.1);
   gled_viz->SetRenormLen(true);
 
   timemaker->AddClient(gled_viz);
@@ -94,6 +94,11 @@ void suck()
   animator->SetInterBeatMS(TMath::Nint(1000.0/g_rps));
   animator->Start();
 
-  // ml_sucker->SetSuckCmd("cat nc-dump");
+  // To be used without network, in conjuction with:
+  //   nc -l localhost 9999 < nc-dump
+  // ml_sucker->SetSuckHost("localhost");
+  // ml_sucker->SetSuckPort(9999);
+  // ml_sucker->SetFooSleep(10);
+
   ml_sucker->StartSucker();
 }

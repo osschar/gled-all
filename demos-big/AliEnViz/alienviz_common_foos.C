@@ -172,7 +172,7 @@ void alienviz_spawn_eye()
   Gled::AssertMacro("gled_view_globals.C");
 
   //g_saturn->LockMIRShooters(true);
-  g_shell = new ShellInfo("AliEnViz Shell");
+  g_shell = new ShellInfo("AEVShell");
   // fire_queen->CheckIn(shell); fire_queen->Add(shell);
   g_queen->CheckIn(g_shell);
   g_queen->Add(g_shell);

@@ -291,6 +291,7 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 	      idx = mBalls->FindFirstEmptyId(idx);
 	      assert(idx != -1);
 	      CosmicBall* cb = mBallsToAdd.front();
+              cb->ResizeHistory(mBallHistorySize);
 	      mBalls->SetElementById(cb, idx);
 
 	      const Double_t* T = cb->RefTrans().ArrT();
@@ -700,6 +701,7 @@ void SolarSystem::MakePlanetoid()
 
   Int_t idx = mBalls->Size();
   CosmicBall *cb = RandomPlanetoid(GForm("Planet %d", idx));
+  cb->ResizeHistory(mBallHistorySize);
 
   mQueen->CheckIn(cb);
   mBalls->Add(cb);

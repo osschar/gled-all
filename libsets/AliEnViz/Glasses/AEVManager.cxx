@@ -12,6 +12,7 @@
 #include "AEVManager.c7"
 
 #include <Glasses/CosmicBall.h>
+#include <Glasses/Text.h>
 
 #include <Glasses/ZQueen.h>
 
@@ -71,6 +72,7 @@ void AEVManager::SetTimeWindow(Int_t time)
   GLensWriteHolder wrlck(this); 
   mTimeWindow = time;
   Stamp(FID());
+  MakeInfoText();
 }
 
 void AEVManager::RescanLimits(Bool_t drop_cuts)
@@ -275,6 +277,8 @@ void AEVManager::EmitSiteVizRay()
       break;
     }
   }
+
+  MakeInfoText();
 }
 
 void AEVManager::EmitUserVizRay()
@@ -301,6 +305,7 @@ void AEVManager::SetSiteMinCut(Int_t min)
   }
 
   Stamp(FID());
+  MakeInfoText();
 }
 
 void AEVManager::SetSiteMaxCut(Int_t max)
@@ -319,6 +324,7 @@ void AEVManager::SetSiteMaxCut(Int_t max)
   }
 
   Stamp(FID());
+  MakeInfoText();
 }
 
 //==============================================================================
@@ -383,6 +389,56 @@ void AEVManager::SiteChanged(AEVSite* site)
     {
       select_sv_current();
       Stamp(FID());
+      MakeInfoText();
     }
+  }
+}
+
+//==============================================================================
+
+void AEVManager::MakeInfoText()
+{
+  Bool_t  show_sub = false;
+
+  Text* info = dynamic_cast<Text*>(mQueen->FindLensByPath("AEVOverlay/InfoText"));
+  if (info)
+  {
+    TString txt;
+
+    txt += "Sites - ";
+    switch (mSiteVizMode)
+    {
+      case SV_None:        txt += "none"; break;
+      case SV_All:         txt += "all";  break;
+      case SV_RunningJobs: txt += "running jobs"; show_sub = true; break;
+      case SV_ErrorJobs:   txt += "errors";       show_sub = true; break;
+    }
+    info->SetText(txt);
+  }
+
+  Text* sub_info = dynamic_cast<Text*>(mQueen->FindLensByPath("AEVOverlay/SubInfoText"));
+  if (sub_info && show_sub)
+  {
+    TString txt;
+
+    txt += Form("Range: %d - %d, Shown: %d - %d", mSiteMinVal, mSiteMaxVal, mSiteMinCut, mSiteMaxCut);
+
+    if (mTimeWindow > 0)
+    {
+      Int_t min, hour, day;
+      min  = mTimeWindow % 60;
+      hour = mTimeWindow / 60;
+      day  = hour / 24;
+      hour = hour % 24;
+      txt += "; Time: ";
+      if (day)
+        txt += Form("%dd ", day);
+      if (hour || (day && min))
+        txt += Form("%dh ", hour);
+      if (min)
+        txt += Form("%dm ", min);
+    }
+
+    sub_info->SetText(txt);
   }
 }
