@@ -1,3 +1,19 @@
+2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alienviz_common_foos.C:
+	Rename "AliEnViz Shell" object to "AEVShell" - for consistency
+	with other objects.
+
+	* solar_suck.C:
+	Add overlay text-info objects.
+	Change defaults: double solar-system time factor, show planet
+	tails.
+	Keep elements sorted in AEVQueen.
+
+	* suck.C:
+	Add eg-commands for running in local mode.
+	Increase speed of texture animation.
+
 2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* alienviz_common_foos.C:

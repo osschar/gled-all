@@ -82,6 +82,8 @@ public:
   void SitePositionChanged(AEVSite* site);
   void SiteChanged(AEVSite* site);
 
+  void MakeInfoText();
+
 #include "AEVManager.h7"
   ClassDef(AEVManager, 1);
 }; // endclass AEVManager

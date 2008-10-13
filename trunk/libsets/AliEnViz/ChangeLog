@@ -1,3 +1,11 @@
+2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	Add new member function MakeInfoText() that populates info-text
+	bars in the overlay with current setting.
+	Call it when changing display mode, limits or time-window.
+
 2008-10-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVMlClient.cxx:
