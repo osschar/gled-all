@@ -1085,7 +1085,8 @@ and then there is no need to have the C<E> field present for data members.
 
 =item C<Link> (shorthand C<L>)
 
-Declares a data member as I<link>. Takes no arguments, just C<L{}>.
+Declares a data member as I<link>. If or C<aA> is specified a method
+C<< void assert_<link-name>(const Exc_t& exc_header) >> is also generated.
 
 =item C<Stamp>
 

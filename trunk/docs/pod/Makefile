@@ -14,10 +14,11 @@ man1dir=	$(mandir)/man1
 man7dir=	$(mandir)/man7
 htmldir=	$(prefix)/shared/docs/$(GLEDRELEASE)
 
-POMPREFIX=	Pod-POM-0.15/
-#PERL5LIB:=	$(POMPREFIX)lib/:$(PERL5LIB)
-POMBIN=		$(POMPREFIX)bin/
-POM2=		perl -I$(POMPREFIX)/lib $(POMBIN)pom2
+# POMPREFIX=	Pod-POM-0.15/
+# PERL5LIB:=	$(POMPREFIX)lib/:$(PERL5LIB)
+# POMBIN=	$(POMPREFIX)bin/
+# POM2=		perl -I$(POMPREFIX)/lib $(POMBIN)pom2
+POM2          = pom2
 
 HTMLTITLE= 	"Gled system documentation"
 MANTITLE= 	"Gled system manual pages"
@@ -35,7 +36,7 @@ HTMLS	:= $(PODS:.pod=.html)
 PDFS	:= $(PODS:.pod=.pdf)
 
 # all : 	html pdf man gleddocs.pdf gled_docs.html.tgz dist
-all : 	html pdf gled_docs.html.tgz dist
+all : 	html
 
 man :	${MANS}
 
