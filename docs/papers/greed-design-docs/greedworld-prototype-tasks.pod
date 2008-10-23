@@ -8,9 +8,11 @@ Task-list for \greedworld prototype
 
 Matevz Tadel
 
-=head2 Date
+=head2 Document history
 
-21.6.2008
+B<21.6.2008> - first version.
+
+B<22.10.2008> - update for the developments in solar-system integration.
 
 
 =cut========================================================================
@@ -500,11 +502,11 @@ Eventually read [Tadel-GledIHSCM].
 
 =head2 \gled crash course
 
-This should help to relating the tasks to existing code.
+This should help with relating the tasks to existing code.
 
 =over enum
 
-=item \gled is, essentially, an object management framework.  Classes
+=item \gled is, essentially, an object management framework. Classes
 of these objects can be divided, by the role they play in \gled, into
 the following categories:
 
@@ -545,13 +547,15 @@ base-class renderers).
 =back
 
 =item \gled modules are called B<libsets>. Each libset is composed of
-three shared libraries: base (Glasses/, Stones/), GUI (Views/) and GL
+three shared libraries: base (Glasses/, Stones/, dictionaries + any
+other stuff central to libset functionality), GUI (Views/) and GL
 renderers (C<Rnr/GL/>). Base classes of \gled and the implementation
 of \gled itself is in libset C<GledCore>. \greedworld demo is mostly
 implemented in libset C<Var1> and requires the following libsets:
 C<Geom1> (geometric primitive classes), C<GTS> (interface to GNU
-Triangulated Surfaces library) and C<Audio1> (interface to
-OpenAL, not yet used). All libsets require C<GledCore>.
+Triangulated Surfaces library), C<Numerica> (interface to numerical
+algorithms) and C<Audio1> (interface to OpenAL, not yet used). All
+libsets require C<GledCore>.
 
 =back
 
@@ -671,6 +675,10 @@ C<PSTorus>.
 =item B<C<Var1/Glasses/Tringula>> -- basically the demo driver class,
 linking together terrain with lists of static and dynamic objects. Has
 methods for time-propagation and high-level collision detection.
+
+The demo script is C<demos/Var1/tringula.C>. It can generate random
+terrain on flat surface (rectangle or trianlge), sphere
+(outside/inside) or torus (outside/inside).
 
 =back
 
@@ -871,7 +879,16 @@ acquisition.
 
 =head3 Status
 
-Not much status, just some pointers.
+C<Var1/Glasses/SolarSystem> implements solar-system time
+propagation. The generation parameters are tweaked so as to make the
+solar-system unrealistically small, with large planets. The intention
+is to make inter-planetary travel much shorter and to make the
+planet-movement relevant in travel calculation. Planet-planet
+collisions are not handled.
+
+See <demos/Var1/solar_system.C> script.
+
+Some other relevant points:
 
 =over enum
 
@@ -879,10 +896,10 @@ Not much status, just some pointers.
 holding grouping and geometry data.
 
 =item C<Numerica/Glasses/ODECrawler> -- an implementation of ODE
-solver.
+integrator. It is used by the solar-system.
 
 =item ROOT has a limited interface to GSL (in package
-C<math/mathmore>).
+C<math/mathmore>). But this is not used (yet) in \gled.
 
 =back
 
@@ -892,6 +909,10 @@ C<math/mathmore>).
 
 =item Consider node hierarchy for describing a solar system with
 planets, moons and asteroids. Make it all move in time.
+
+The C<SolarSystem> class runs in global coordinate system. The C<ZNodes>
+should be attached to these points to allow for higher precision
+tracking of objects in local coordinate systems.
 
 =item Implement a "map view" for a solar system.
 
@@ -930,6 +951,10 @@ done during recursive sub-division.
 Used for randomization of triangular and toroidal terrains.
 
 =back
+
+The creation of planets (C<CosmicBall> glass) is purely random and has
+few parameters (min/max orbit radius, eccentricity, inclination;
+min-max planet radius/mass).
 
 =head3 Tasks
 
