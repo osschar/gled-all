@@ -75,21 +75,21 @@ namespace GLTextNS {
 
   extern void txfBindFontTexture(TexFont* txf);
 
-  extern void txfGetStringMetrics(TexFont* txf, const char *TString, int len,
+  extern void txfGetStringMetrics(TexFont* txf, const char *string, int len,
 				  int &width, int &max_ascent, int &max_descent);
 
   extern void txfRenderGlyph(TexFont* txf, int c);
-  extern void txfRenderString(TexFont* txf, const char *TString, int len,
+  extern void txfRenderString(TexFont* txf, const char *string, int len,
 			      bool keep_pos=true);
-  extern void txfRenderString(TexFont* txf, const char *TString, int len,
+  extern void txfRenderString(TexFont* txf, const char *string, int len,
 			      GLfloat maxx, GLfloat fadew,
 			      bool keep_pos=true);
 
   extern void txfRenderGlyphZW(TexFont* txf, int c, float z, float w);
-  extern void txfRenderStringZW(TexFont* txf, const char *TString, int len,
+  extern void txfRenderStringZW(TexFont* txf, const char *string, int len,
 				float z, float w, bool keep_pos=true);
 
-  extern void txfRenderFancyString(TexFont* txf, char *TString, int len);
+  extern void txfRenderFancyString(TexFont* txf, char *string, int len);
 
 
   /**************************************************************************/
@@ -115,7 +115,7 @@ namespace GLTextNS {
   };
 
   struct TextLineData {
-    int    width, ascent, descent, hfull;
+    int     width, ascent, descent, hfull;
     TString text;
 
     TextLineData(TexFont *txf, TString line);
