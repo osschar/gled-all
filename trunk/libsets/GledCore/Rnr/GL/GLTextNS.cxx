@@ -404,7 +404,7 @@ namespace GLTextNS {
 
   /**************************************************************************/
 
-  void txfGetStringMetrics(TexFont * txf, const char *TString, int len,
+  void txfGetStringMetrics(TexFont * txf, const char *string, int len,
 			   int &width, int &max_ascent, int &max_descent)
   {
     TexGlyphVertexInfo *tgvi;
@@ -413,8 +413,8 @@ namespace GLTextNS {
 
     w = 0;
     for (i = 0; i < len; i++) {
-      if (TString[i] == 27) {
-	switch (TString[i + 1]) {
+      if (string[i] == 27) {
+	switch (string[i + 1]) {
 	case 'M':
 	  i += 4;
 	  break;
@@ -429,7 +429,7 @@ namespace GLTextNS {
 	  break;
 	}
       } else {
-	tgvi = getTCVI(txf, TString[i]);
+	tgvi = getTCVI(txf, string[i]);
 	w += int(tgvi->advance);
 	ma = TMath::Max(ma, (int)( tgvi->v3[1]));
 	md = TMath::Max(md, (int)(-tgvi->v0[1]));
@@ -462,18 +462,18 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  void txfRenderString(TexFont * txf, const char *TString, int len,
+  void txfRenderString(TexFont * txf, const char *string, int len,
 		       bool keep_pos)
   {
     int i;
     if(keep_pos) glPushMatrix();
     for (i = 0; i < len; i++) {
-      txfRenderGlyph(txf, TString[i]);
+      txfRenderGlyph(txf, string[i]);
     }
     if(keep_pos) glPopMatrix();
   }
 
-  void txfRenderString(TexFont * txf, const char *TString, int len,
+  void txfRenderString(TexFont * txf, const char *string, int len,
 		       GLfloat maxx, GLfloat fadew,
 		       bool keep_pos)
   {
@@ -489,7 +489,7 @@ namespace GLTextNS {
 
       TexGlyphVertexInfo *tgvi;
 
-      tgvi = getTCVI(txf, TString[i]);
+      tgvi = getTCVI(txf, string[i]);
 
       xg0 = x + tgvi->v0[0];
       xg1 = x + tgvi->v1[0];
@@ -501,7 +501,7 @@ namespace GLTextNS {
 	f1 = 1 - (xg1-xfade)/fadew;
 
 	// printf("XX %s %c %f %f x(%f,%f) y(%f,%f)\n",
-	//        TString, TString[i], f0, f1,
+	//        string, string[i], f0, f1,
 	//        xg0, xg1,yg0, yg1);
 
 	glColor4f(f0*col[0], f0*col[1], f0*col[2], f0*col[3]);
@@ -546,14 +546,14 @@ namespace GLTextNS {
     glTranslatef(tgvi->advance, 0.0, 0.0);
   }
 
-  void txfRenderStringZW(TexFont * txf, const char *TString, int len,
+  void txfRenderStringZW(TexFont * txf, const char *string, int len,
 			 float z, float w, bool keep_pos)
   {
     int i;
 
     if(keep_pos) glPushMatrix();
     for (i = 0; i < len; i++) {
-      txfRenderGlyphZW(txf, TString[i], z, w);
+      txfRenderGlyphZW(txf, string[i], z, w);
     }
     if(keep_pos) glPopMatrix();
   }
@@ -566,7 +566,7 @@ namespace GLTextNS {
 
   /**************************************************************************/
 
-  void txfRenderFancyString(TexFont * txf, char *TString, int len)
+  void txfRenderFancyString(TexFont * txf, char *string, int len)
   {
     TexGlyphVertexInfo *tgvi;
     GLubyte c[4][3];
@@ -574,36 +574,36 @@ namespace GLTextNS {
     int i;
 
     for (i = 0; i < len; i++) {
-      if (TString[i] == 27) {
-	switch (TString[i + 1]) {
+      if (string[i] == 27) {
+	switch (string[i + 1]) {
 	case 'M':
 	  mode = MONO;
-	  glColor3ubv((GLubyte *) & TString[i + 2]);
+	  glColor3ubv((GLubyte *) & string[i + 2]);
 	  i += 4;
 	  break;
 	case 'T':
 	  mode = TOP_BOTTOM;
-	  memcpy(c, &TString[i + 2], 6);
+	  memcpy(c, &string[i + 2], 6);
 	  i += 7;
 	  break;
 	case 'L':
 	  mode = LEFT_RIGHT;
-	  memcpy(c, &TString[i + 2], 6);
+	  memcpy(c, &string[i + 2], 6);
 	  i += 7;
 	  break;
 	case 'F':
 	  mode = FOUR;
-	  memcpy(c, &TString[i + 2], 12);
+	  memcpy(c, &string[i + 2], 12);
 	  i += 13;
 	  break;
 	}
       } else {
 	switch (mode) {
 	case MONO:
-	  txfRenderGlyph(txf, TString[i]);
+	  txfRenderGlyph(txf, string[i]);
 	  break;
 	case TOP_BOTTOM:
-	  tgvi = getTCVI(txf, TString[i]);
+	  tgvi = getTCVI(txf, string[i]);
 	  glBegin(GL_QUADS);
 	  glColor3ubv(c[0]);
 	  glTexCoord2fv(tgvi->t0);
@@ -619,7 +619,7 @@ namespace GLTextNS {
 	  glTranslatef(tgvi->advance, 0.0, 0.0);
 	  break;
 	case LEFT_RIGHT:
-	  tgvi = getTCVI(txf, TString[i]);
+	  tgvi = getTCVI(txf, string[i]);
 	  glBegin(GL_QUADS);
 	  glColor3ubv(c[0]);
 	  glTexCoord2fv(tgvi->t0);
@@ -637,7 +637,7 @@ namespace GLTextNS {
 	  glTranslatef(tgvi->advance, 0.0, 0.0);
 	  break;
 	case FOUR:
-	  tgvi = getTCVI(txf, TString[i]);
+	  tgvi = getTCVI(txf, string[i]);
 	  glBegin(GL_QUADS);
 	  glColor3ubv(c[0]);
 	  glTexCoord2fv(tgvi->t0);
@@ -984,8 +984,8 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const TString& text,
   // x    - num pixels from the left border (right if x < 0)
   // yrow - line number in up-down order; 0 is the first/top line
   // z    - z coordinate in depth-buffer coordinates (0 -> 1)
-  // If front_col == 0 renders uses white pen.
-  // If back_col  != 0 renders a square of that color behind the text.
+  // If front_col == 0 text is drawn in white.
+  // If back_col  != 0 renders a rectangle of that color behind the text.
 
   RNRDRIVER_GET_RNRMOD_BOTH(font, rd, ZRlFont);
   TexFont *txf = font_rnr->GetFont();
@@ -994,7 +994,6 @@ void GLTextNS::RnrTextAt(RnrDriver* rd, const TString& text,
 	       GL_LIGHTING_BIT     |
 	       GL_COLOR_BUFFER_BIT |
 	       GL_POLYGON_BIT);
-
 
   glPolygonMode(GL_FRONT, GL_FILL);
   glDisable(GL_LIGHTING);
