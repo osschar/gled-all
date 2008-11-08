@@ -1,0 +1,12 @@
+2008-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	New file.
+
+	* external/DevIL/DevIL.pl:
+	Always explicitly link against jpeg, tiff and mng.
+
+	* external/gts/gts.pl:
+	Always run autogen.sh during configure.
+	The new gts tarball (put in rsync repo) does not contain any
+	secondary auto-tools files.

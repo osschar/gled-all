@@ -24,12 +24,10 @@ if ($CC eq 'gcc' and $CC_MAJOR == 4 and $CC_MINOR >= 2) {
   $cfl .= " -fgnu89-inline";
 }
 if ($BUILD_OS eq 'linux-gnu') {
-  if ($DISTRO_VENDOR eq 'gentoo') {
-    $ldfl .= " -ljpeg -ltiff -lmng";
-  }
   if ($DISTRO_VENDOR eq 'redhat' and $DISTRO_NAME eq 'slc') {
-    $ldfl .= " -L/usr/X11R6/lib -ljpeg -ltiff -lmng";
+    $ldfl .= " -L/usr/X11R6/lib";
   }
+  $ldfl .= " -ljpeg -ltiff -lmng";
 }
 target('configure', <<"FNORD");
 ./configure CPPFLAGS="$cppfl" \\
