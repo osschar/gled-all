@@ -7,7 +7,7 @@ include ${GLEDSYS}/make/make_defs.inc
 
 CFLAGS  = -DFFT_NODOUBLE -c -O2 ${USER_CPP_FLAGS} 
 
-LIBS    = -lm ${USER_LD_FLAGS} -ljpeg -ltiff -lmng -lIL -lILU
+LIBS    = -lm ${USER_LD_FLAGS} -lIL -lILU
 
 SRCS    =  gforge.c crater.c rand.c fftn.c
 OBJS    =  $(SRCS:.c=.o)
