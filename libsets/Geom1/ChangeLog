@@ -1,3 +1,10 @@
+2008-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GForge/Makefile:
+	* Makefile:
+	Remove explicit link against -ljpeg -ltiff -lmng -- this is now
+	done during linking of libIL and libILU in gled-builder.
+
 2008-10-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* ACTC/tc.cxx:
