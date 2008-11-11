@@ -1,16 +1,25 @@
-all:
-	@echo No resonable default target ... yet.
+all: external gled
+
+.PHONY: external external-no-root gled clean distclean
 
 external:
 	${MAKE} -C external
 
-#gled: external
-#	${MAKE} -C gled
+external-no-root:
+	${MAKE} -C external all-but-root
+
+gled:
+	${MAKE} -C gled
+
+clean:
+	${MAKE} -C external $@
+	${MAKE} -C gled $@
 
 distclean::
 	${MAKE} -C external $@
-#	${MAKE} -C gled $@
+	${MAKE} -C gled $@
 
 distclean::
-	rm -f  configure config.status config.log GledBuildExternal.pm MakeBuildExternal.inc
+	rm -f  GledBuildExternal.pm MakeBuildExternal.inc MakeBuildGled.inc
+	rm -f  configure config.status config.log
 	rm -rf autom4te.cache

@@ -75,5 +75,5 @@ AC_SUBST(distro_name)
 AC_SUBST(distro_version)
 
 
-AC_CONFIG_FILES([GledBuildExternal.pm MakeBuildExternal.inc])
+AC_CONFIG_FILES([GledBuildExternal.pm MakeBuildExternal.inc MakeBuildGled.inc])
 AC_OUTPUT
