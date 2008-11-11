@@ -1,10 +1,124 @@
-Prototype of external software building framework for Gled.
+==============================================================================
+= INTRO
+==============================================================================
 
-Tested on a minimal set of platforms and, so far, only with gcc.
+Prototype of hihg-level building framework for Gled - primarily
+intended for developers. It suppports building of:
 
-Expect "unknown xyzz" messages and be ready to add knowledge into the
-system.
+ - external software (mostly libraries that Gled libsets depend on
+   directly and one might be forced to use pre-releases or patched
+   versions);
 
+ - Gled itself, with arbitrary selection of libsets (default libsets
+   are the ones needed for the \greed prototype, that is Var1 libset
+   with all the dependencies).
+
+Tested on a minimal set of platforms (various GNU/Linuxes) and
+compilers (gcc). Expect "unknown xyzz" messages and be ready to add
+knowledge into the system or communicate with the developers.
+
+
+==============================================================================
+= USAGE
+==============================================================================
+
+Install the following software with your package manager:
+
+1. subversion, autoconf, automake, libtool
+
+   autoconf is needed by gled-builder itself, other two are required
+   for external package building.
+
+2. fltk, DevIL, gts, openal and frealut, *all* with accompanying devel
+   packages.
+
+This will insure you have all the lower-level dependencies installed
+on your system. The build should in principle succeed.
+
+To do this, run appropriate command as root:
+
+  PKGS="subversion autoconf automake libtool \
+        fltk DevIL gts openal freealut \
+        fltk-devel DevIL-devel gts-devel openal-devel freealut-devel"
+
+  apt-get install $PKGS
+
+  yum install $PKGS
+
+  ??? what should one do on gentoo, suse ???
+
+With all this, in principle, all you need to build from the external
+software are fltk-mt and root.
+
+Probably \greed will soon also need fftw3 and gsl (wrappers for these
+exist in root so they should be installed before configuring root).
+
+
+Building
+========
+
+In principle:
+
+  autoconf
+  ./configure [--prefix=/opt/gled] # but check --help anyway
+  make
+
+One can interact with the build on a lower level.
+
+External
+--------
+  # To build everything:
+  make external
+  # To build everything but root (but then symlink root into prefix):
+  make external-no-root
+
+  # To build individual packages (dependencies still apply):
+  cd external
+  make fltk | gts | ...
+
+  # To work with individual packages:
+  cd external/<package>
+  make unpack | configure | build | install
+
+  # To 
+
+Gled
+----
+  # To build gled:
+  make gled
+
+  # High-level gled building steps:
+  cd gled
+  make checkout
+  make configure
+  make build
+
+  # Low-level fun, after chackout is done:
+  cd gled/gled-build
+  ./configure --help
+  ./configure --external=/some/path --debug --libsets=GledCore:Geom1
+
+
+Running
+=======
+
+Gled is not yet installed properly ... it should be run from the build
+directory itself and some environment variables should be set.
+
+  cd gled/gled-build
+  . binenv.sh
+  cd demos/Var1
+  gled  tringula.C
+  gled 'tringula.C(2)'
+  gled 'tringula.C(4)'
+  gled  solar_system.C
+
+
+
+
+==============================================================================
+= CONFIGURE HELPER SCRIPTS
+==============================================================================
 
 compiler-version.pl
 ===================
@@ -13,10 +127,46 @@ Recognizes:
 
 1. gcc
 
-
 distro-details.pl
 =================
 
 Recognizes:
 
 1. gnu-linux: redhat, debian, gentoo
+
+
+==============================================================================
+Notes
+==============================================================================
+
+External software
+=================
+
+fltk & fltk-mt
+--------------
+We provide a newer version of fltk (1.1.9) then the one usually
+available (1.1.8).
+fltk-mt is not available elsewhere.
+
+gts
+---
+Newer, non-released version is built.
+
+DevIL
+-----
+We provide a newer one (1.6.9) than most distros (1.6.8).
+A couple new releases have been made since summer 2008, latest is
+1.7.2, but they are somewhat screwed up for building on linux.
+I complained on the mailing list but nothing happened yet.
+
+openal
+------
+We build 0.8, most distros provide 0.9; can't find 0.9.0 source anywhere.
+Latest openal (1.5, OpenAl-1.1, taken over by Creative) requires cmake
+and nobody seems to be using the it.
+
+  # unpack, cd there
+  cd CMakeConf
+  cmake -D CMAKE_INSTALL_PREFIX:PATH=$PREFIX ..
+  make
+  make install

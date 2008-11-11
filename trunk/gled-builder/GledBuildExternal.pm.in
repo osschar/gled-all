@@ -169,9 +169,9 @@ sub deduce_tardir_name {
 @required_tgts = ( 'configure', 'build', 'install' );
 %done_tgts     = ();
 %default_cmds  = (
-  'configure' => './configure --prefix=%i/%p',
-  'build'     => 'make',
-  'install'   => 'make install'
+  'configure' => "./configure --prefix=$PREFIX",
+  'build'     => "make",
+  'install'   => "make install"
 );
 
 sub target {

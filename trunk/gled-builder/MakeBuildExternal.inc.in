@@ -77,9 +77,9 @@ show-pkg:
 
 unpack:
 	${ECHO} -U- Unpacking ${PACKAGE}, tar-file ${SRCTARFILE}
-	${MUTE} rm -rf ${TARDIR} unpack
+	${MUTE} rm -rf ${TARDIR} $@
 	${MUTE} tar xzf ${CACHE_DIR}/${SRCTARFILE}
-	${MUTE} echo ${TARDIR} > unpack
+	${MUTE} echo ${TARDIR} > $@
 
 # configure
 
@@ -87,9 +87,9 @@ configure: unpack
 
 configure:
 	${ECHO} -C- Configuring ${PACKAGE}
-	${MUTE} rm -f configure
+	${MUTE} rm -f $@
 	${MUTE} cd ${TARDIR}; $(configure-cmds)
-	${MUTE} touch configure
+	${MUTE} touch $@
 
 # build
 
@@ -97,9 +97,9 @@ build: configure
 
 build:
 	${ECHO} -B- Building ${PACKAGE}
-	${MUTE} rm -f build
+	${MUTE} rm -f $@
 	${MUTE} cd ${TARDIR}; $(build-cmds)
-	${MUTE} touch build
+	${MUTE} touch $@
 
 # install
 
@@ -107,11 +107,13 @@ install: build
 
 install:
 	${ECHO} -I- Installing ${PACKAGE}
-	${MUTE} rm -f install
+	${MUTE} rm -f $@
 	${MUTE} cd ${TARDIR}; $(install-cmds)
-	${MUTE} touch install
+	${MUTE} touch $@
 
 # clean, distclean
+
+.PHONY: clean distclean
 
 clean:
 	${ECHO} -X- Cleaning  ${PACKAGE}

@@ -1,30 +1,58 @@
-CVSROOT=":pserver:anonymous@cvs.gled.org:/u/cvs/gled-1.2"
+include ../MakeBuildGled.inc
 
-default:
-	echo OoogaDooga nema gleda
+PACKAGE  := gled
+gled_dir := gled-build
 
-all: cvs-co configure build install
+all: build
 
-cvs-co: gled-build
+### checkout
 
-gled-build:
-	cvs -d ${CVSROOT} login
-	cvs -d ${CVSROOT} co gled-build
-	cd gled-build; cvs -d ${CVSROOT} co GledCore Geom1 Numerica Audio1 GTS Var1
+checkout:
+	${ECHO} -G- Checking out ${PACKAGE}
+	${MUTE} rm -rf ${gled_dir} gled-build-checkout $@
+	${MUTE} svn export http://svn.gled.org/gled/trunk/gled-build-checkout
+	${MUTE} ./gled-build-checkout trunk
+	${MUTE} touch $@
 
-# Something like this for configure:
+### configure
+
 define configure-cmds
-cd gled-build
-ln -s $PREFIX external
-ln -s external/root .
-./configure --external=$PREFIX
+ln -sf ${PREFIX} external;\
+source binenv.sh;\
+./configure --external=`pwd`/external --libsets='<auto>'
 endef
 
-# Would be nice to have:
-#  - included top level make
-#  - available calls to make-maker in GledBuildExternal
-#
-# Why the hell do we need to run rootcint during configure?
-# Some dependency issues? Yes, but I could bypass them somehow.
+configure: checkout
 
 configure:
+	${ECHO} -C- Configuring ${PACKAGE}
+	${MUTE} rm -f $@
+	${MUTE} cd ${gled_dir}; $(configure-cmds)
+	${MUTE} touch $@
+
+### build
+
+define build-cmds
+source binenv.sh;\
+${MAKE}
+endef
+
+build: configure
+
+build:
+	${ECHO} -B- Building ${PACKAGE}
+	${MUTE} rm -f $@
+	${MUTE} cd ${gled_dir}; $(build-cmds)
+	${MUTE} touch $@
+
+### clean, distclean
+
+.PHONY: clean distclean
+
+clean:
+	${ECHO} -X- Cleaning  ${PACKAGE}
+	${MUTE} rm -f configure build
+
+distclean: clean
+	${MUTE} rm -f checkout gled-build-checkout
+	${MUTE} rm -fr ${gled_dir}

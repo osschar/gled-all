@@ -1,3 +1,35 @@
+2008-11-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for building gled from svn via the top-level makefile.
+	Extended README.
+
+	* MakeBuildGled.inc.in:
+	New config file used for building of gled.
+
+	* GledBuildExternal.pm.in:
+	Fix default configure command - prefix was wrong.
+	All packages override this target so the bug did not manifest.
+
+	* MakeBuildExternal.inc.in:
+	Use '$@' instead of excplicit target names.
+
+	* Makefile:
+	Write gled target.
+	Add target 'external-no-root'.
+	Add clean and distclean targets.
+	Default target now builds 'external' and 'gled'.
+
+	* README:
+	Write usage information.
+	Write notes about external software.
+
+	* configure.ac:
+	Register/generate new config file MakeBuildGled.inc.
+
+	* gled/Makefile:
+	Write proper gled building makefile.
+	Use svn for gled checkout.
+
 2008-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* ChangeLog:
