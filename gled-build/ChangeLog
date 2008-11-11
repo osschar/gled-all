@@ -1,3 +1,10 @@
+2008-11-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	Add '--no-print-directory' to invocations of make that query for
+	libset details (deps, id). This was causing trouble when calling
+	configure from a higher level make in gled-builder.
+
 2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:

@@ -94,7 +94,7 @@ sub collect_dependencies {
   my $libset = shift;
   my $deparr = shift;
 
-  my $deps = exec_or_die("GLED_QUIET=1 make -s -C $libset echo_requires_libsets");
+  my $deps = exec_or_die("GLED_QUIET=1 make -s --no-print-directory -C $libset echo_requires_libsets 2>/dev/null");
   chomp $deps;
   my @deps = split /\s+/, $deps;
   for $d (@deps) {
@@ -440,7 +440,7 @@ ls_loop:
 %libid_check = ();
 
 for $f (@ok_libsets, @base_libsets) {
-  my $lid = exec_or_die("make -s -C $f echo_libset_id");
+  my $lid = exec_or_die("make -s --no-print-directory -C $f echo_libset_id");
   chomp $lid;
   die "LibId conflict for $f" if exists $libid_check{$lid};
   $libid_check{$lid} = 1;
