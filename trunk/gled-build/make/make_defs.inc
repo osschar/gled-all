@@ -54,6 +54,10 @@ CPPFLAGS += ${DEFINES} ${INCL} ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
 CXXFLAGS += -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${USER_LD_FLAGS}
 
+# Dictionaries must be compiled without optimization, debug not needed.
+# Drop USER_CXX_FLAGS, they should not matter.
+DICTCXXFLAGS	= -Wall -fPIC -pipe
+
 # PCHFLAGS, LDSHAREDOPT, LDEXT set by configure
 
 # ROOT-mkdepend is a copy of old makedepend shipped with X11.
@@ -93,7 +97,7 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 
 %.o: %.cc
 	${ECHO} -+- Compiling $<
-	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${CXXFLAGS} ${PCHFLAGS} -o $@
+	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${DICTCXXFLAGS} ${PCHFLAGS} -o $@
 
 %.o: %.cxx
 	${ECHO} -*- Compiling $<
