@@ -1,3 +1,16 @@
+2008-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/ParseConfig.pm:
+	* external/build-config:
+	* external/build.pl:
+	* external/build.rc:
+	Removed files - they were part of the old building tools.
+
+2008-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled/Makefile:
+	On clean, descend into gled-build and make clean.
+
 2008-11-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for building gled from svn via the top-level makefile.
