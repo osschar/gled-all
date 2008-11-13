@@ -97,7 +97,7 @@ SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 
 %.o: %.cc
 	${ECHO} -+- Compiling $<
-	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${DICTCXXFLAGS} ${PCHFLAGS} -o $@
+	${MUTE} ${CXX} -c $< ${CPPFLAGS} ${DICTCXXFLAGS} -o $@
 
 %.o: %.cxx
 	${ECHO} -*- Compiling $<
