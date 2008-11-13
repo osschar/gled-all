@@ -3,7 +3,11 @@ HTMLS = $(SRCS:.pod=.html)
 PDFS  = $(SRCS:.pod=.pdf)
 PSS   = $(SRCS:.pod=.ps)
 
-all: ${HTMLS} ${PDFS}
+all: html pdf
+
+html: ${HTMLS}
+
+pdf: ${PDFS}
 
 %.html: %.pod
 	pom2 html $< > $@
@@ -21,3 +25,6 @@ all: ${HTMLS} ${PDFS}
 
 clean:
 	rm -f *.html *.tex *.toc *.aux *.log *.dvi *.ps *.pdf
+
+publish:
+	scp *.html www.gled.org:/u/www/docs/greed-design-docs
