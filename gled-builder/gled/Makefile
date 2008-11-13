@@ -49,8 +49,15 @@ build:
 
 .PHONY: clean distclean
 
+define clean-cmds
+source binenv.sh;\
+${MAKE} clean
+endef
+
+
 clean:
 	${ECHO} -X- Cleaning  ${PACKAGE}
+	${MUTE} cd ${gled_dir}; $(clean-cmds)
 	${MUTE} rm -f configure build
 
 distclean: clean
