@@ -3,6 +3,9 @@ HTMLS = $(SRCS:.pod=.html)
 PDFS  = $(SRCS:.pod=.pdf)
 PSS   = $(SRCS:.pod=.ps)
 
+WEBHOST := www.gled.org
+WEBDIR  := /u/www/docs/greed-design-docs
+
 all: html pdf
 
 html: ${HTMLS}
@@ -27,4 +30,4 @@ clean:
 	rm -f *.html *.tex *.toc *.aux *.log *.dvi *.ps *.pdf
 
 publish:
-	scp *.html www.gled.org:/u/www/docs/greed-design-docs
+	scp *.html ${WEBHOST}:${WEBDIR}
