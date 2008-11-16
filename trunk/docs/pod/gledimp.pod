@@ -29,7 +29,7 @@ of the topics is covered in the necessary level of detail.
 
 =head1 Installing Gled
 
-Currently, C<Gled> only compiles and runs on C<GNU/linux>. In
+Currently, C<Gled> only compiles and runs on C<GNU/Linux>. In
 principle, it should be possible to make it run on any platform that
 has POSIX threads. C<gcc> is the only supported compiler.
 
@@ -38,25 +38,28 @@ L<ftp://ftp.gled.org/>gled-<major>.<minor>.<patch>. The link C<current>
 points to the latest release.
 
 
-C<Gled> is usually not installed in the usual sense of the word. It
+C<Gled> is not (yet!) installed in the usual sense of the word. It
 resides in its own directory and user's environment needs to be
-configured for its use (C<ROOT> follows the same principle). This is
-good, when you need to have several versions of the same package
-lurking around and you don't want to burden yourself with messy
-un-installs (here C<rm> is your friend).
+configured for its use (C<ROOT> does the some (but can now also be
+installed properly)). This is good, when you need to have several
+versions of the same package lurking around and you don't want to
+burden yourself with messy un-installs (here C<rm> is your friend).
 
-The C<Gled> system can be extended via C<libsets>. Each libset is a
-combination of several libraries (base, GUI, GL rendering) and possibly
-also executables. The core of the C<Gled> system itself is contained
-in the C<GledCore> libset. The C<gled_base> distribution contains
-four libsets: C<GledCore>, C<Geom1>, C<Numerica> and C<GTS>.
+The C<Gled> system can be extended via B<C<libsets>>. Each libset
+contains three libraries (base, GUI, GL rendering) and possibly also
+executables and additional libraries. The core of the C<Gled> system
+itself is contained in the C<GledCore> libset. The default
+C<gled_base> distribution contains seven libsets: C<GledCore>,
+C<Geom1>, C<Numerica>, C<GTS>, C<Audio1>, C<RootGeo> and C<Var1>.
 
-Each libset can depend on external software, some of which might not
-be widely available. To minimize the fuss, such software packages are
-available in binary format. You can download them separately,
-tar-balled in C<required_software_base> package or as a part of full C<Gled>
-binary distribution C<gled_base_and_required_software>. If you want to
-build foreign software yourself, see L<"Required software">.
+
+=head2 BINARY DISTRIBUTION IS ABOUT TO CHANGE (16.11.2008)
+
+=head2 THE REST OF THIS SECTION IS OBSOLETE
+
+Unless you want 3-year old stuff :)
+
+=head2 INSTALL FROM SOURCE IS OK AND QUITE SIMPLE, SEE L<"Building Gled">
 
 
 =head2 Full binary install: C<gled_base_and_required_software>
@@ -72,14 +75,8 @@ L<ftp://ftp.gled.org/current/>binary-<BUILD>/gled_base_and_required_software.tar
 
 Untar it (it will unpack into C<gled> directory) and C<cd> into it.
 
-( As C<ROOT> is the largest package, a version without C<ROOT> is also
-available as C<gled_base_and_required_software_no_root>. )
-
 =item
 Initialize the environment: 'C<. binenv.sh>' or 'C<source binenv.csh>'.
-
-( If you took the C<no-root>) package, fix the script so that $ROOTSYS
-points to the C<ROOT> instalation. )
 
 =item
 Cd to C<demos/GledCore> and run: C<gled hello_gled.C>
@@ -100,91 +97,13 @@ Reading section L<"Running Gled"> is recommended. Instructions for
 running demos are also there.
 
 
-=head2 Partial binary install: C<gled_base>
-
-The partial binary install only provides binaries and libraries for
-C<Gled> base libsets. It is your responsibility to provide proper
-versions of external software (all of it is also available from
-L<ftp://ftp.gled.org/current/required_software/>) and to properly
-configure the environment. Sources are in C<source/> and binaries in
-C<< binary-<BUILD>/ >> directory.
-
-For example, assume you already have C<ROOT> and C<DevIL> but would
-like to get binary versions of C<FLTK> and C<fltk-mt>:
-
-=over list
-
-=item
-Get L<ftp://ftp.gled.org/current/>binary-<BUILD>/gled_base.tar.gz and unpack
-it.
-
-=item
-C<cd> into C<gled/external> and unpack the needed binary
-packages. In this case get:
-
- fltk-<VER>.tar.gz and fltk-mt-<VER>.tar.gz
-
-from L<ftp://ftp.gled.org/current/required_software/>binary-<BUILD>/ and
-extract them.
-
-=item
-Fix C<binenv.[c]sh>: correct the location of C<$ROOTSYS> and if
-C<DevIL> is installed in a nonstandard location make sure that its
-libraries are reachable by the dynamic linker (either via
-C</etc/ld.so.conf> or C<LD_LIBRARY_PATH>).
-
-C<source> this script (or initialize your environment
-accordingly). Now you're ready to run:
-
- cd demos/GledCore
- gled hello_gled.C
-
-=back
-
-Reading section L<"Running Gled"> is recommended.
-
-
-=head2 Installing additional libsets
-
-All libsets are available as binary tarballs from
-L<ftp://ftp.gled.org/current/libsets/>binary-<BUILD>/ directory. To install
-them, simply unpack them in the top-level C<Gled> directory (the one
-that environment variable $GLEDSYS is set to).
-
-In principle, you can install all libsets from scratch. In this case,
-you should first get and unpack the
-L<ftp://ftp.gled.org/current/libsets/gled.tar.gz> file.
-
-Then you will need the C<GledCore> libset (as it provides the C<gled>
-executable and basic libraries) and any other libsets that you might
-want (see L<http://www.gled.org/libsets/> for a list). For example,
-the following script will get you the equivalent of what C<gled_base>
-provides.
-
- wget -q ftp://ftp.gled.org/current/libsets/gled.tar.gz
- tar xzf gled.tar.gz
- cd gled
- b=x86-rh7.3-gcc2.96
- for a in GledCore Geom1 Numerica ; do
-   wget -q ftp://ftp.gled.org/current/libsets/binary-$b/$a.tar.gz
-   wget -q ftp://ftp.gled.org/current/demos/$a.tar.gz
- done
- ls *.tar.gz | xargs -i tar xzf {}
- rm -rf *.tar.gz
-
-=head3 Demos
-
-Note that the C<gled_base> distribution already contains demos for the
-base libsets.
-
-Demos are available for each libset. The tarballs can be downloaded
-from L<ftp://ftp.gled.org/current/demos/><libset-name>.tar.gz. Each demo
-tarball unpacks into C<< demos/<libset-name> >> and contains CINT macro
-scripts and possibly some data files. The location where you unpack
-them is irrelevant.
-
-
 =head2 Required software
+
+Each libset can depend on external software, some of which might not
+be widely available. To minimize the fuss, such software packages are
+available in binary format. You can download them separately,
+tar-balled in C<required_software_base> package or as a part of full C<Gled>
+binary distribution C<gled_base_and_required_software>.
 
 Basic distribution of C<Gled> depends on the following software:
 
@@ -573,7 +492,8 @@ or call
 
  Gled::theOne->AllowMoonConnections()
 
-from the command line. Consider using the authentication as well.
+from the command line or server initialization script. Consider using
+the authentication as well.
 
 To connect to an already running gled, use:
 
@@ -639,21 +559,25 @@ displays.
 =back
 
 
-=head2 Known issues
+=head2 When things go wrong
 
-Sometimes C<Gled> dies quite horribly. It's a very generic
-multi-threaded application which has not undergone rigorous
-testing. Besides, there are quite some things that can be done to
-C<gled> to make it die. Be patient ... it will get better.
+Sometimes, C<Gled> can die quite horribly. It's a very generic
+multi-threaded application, allowing libsets to perform just about
+anything - and not all of them have undergone rigorous
+testing. And there are quite some things that can be done to
+C<gled> to make it spill its guts.
 
 C<ROOT>'s interactive application (interface to CINT) that handles the
-terminal input pretends to be able to handle most of the signals (like
-SIGSEGV). This is not always true and there is a high probability
-that your terminal will lock up and you will not be able to kill
-C<gled> in any other way than to C<kill> it (as in C<killall gled>).
-This can be `fixed' by adding
-C<< gSystem->IgnoreSignal(kSigSegmentationViolation, true) >> somewhere in
-the initialization script or to your C<.rootrc> or C<rootlogon.C> file.
+terminal input thread is by default set to handle most of the signals
+(like SIGSEGV) - it attaches gdb, dumps the stack, and pretends
+everything is fine. This is not always true and there is a high
+probability that your terminal will lock up and you will not be able
+to kill C<gled> in any other way than to C<kill> it (as in C<killall
+-9 gled>).  This behaviour can be switched off by adding C<<
+gSystem->IgnoreSignal(kSigSegmentationViolation, true) >> somewhere in
+the initialization script or to your C<.rootrc> or C<rootlogon.C>
+file. Then C<gled> will crash properly, dumping the core if
+environment allows it. See also script C<isegv.C>. 
 
 
 =cut
@@ -661,48 +585,93 @@ the initialization script or to your C<.rootrc> or C<rootlogon.C> file.
 
 =head1 Building Gled
 
-=head2 Getting sources, setting up the environment
 
-To build C<Gled>, you must get the C<gled> package and sources
-of all desired libsets and their dependencies. Information about
-libsets can be found at http://www.gled.org/libsets/ .
+=head2 Building C<Gled> and external software
 
-=head3 Source tarballs
+There is a special module in C<Gled> SVN repository that does all the
+work.
 
-The source packages are available from
-ftp://ftp.gled.org/current/libsets/ . To get the base
-sources, do:
+  svn co https://svn.gled.org/gled/trunk/gled-builder
+  cd gled-builder
+  autoconf
+  ./configure          # default prefix is `pwd`/install
+  make
 
- wget -q ftp://ftp.gled.org/current/libsets/gled.tar.gz
- tar xzf gled.tar.gz
- cd gled
- for a in GledCore Geom1 Numerica ; do
-   wget -q ftp://ftp.gled.org/current/libsets/$a-src.tar.gz
- done
- ls *.tar.gz | xargs -i tar xzf {}
- # rm -rf *.tar.gz
+Note, that this will get all the sources from the web (rsync and
+svn servers at C<www.gled.org>) so network connection is
+required. Obviously, you will need C<subversion> client and C<GNU
+autotools>. Further, as the external software gets configured and
+built, it will require presence of several low level libraries. The
+easiest way to ensure you have all this stuff is to run:
 
-=head3 CVS
+  PKGS="subversion autoconf automake libtool \
+        fltk DevIL gts openal freealut \
+        fltk-devel DevIL-devel gts-devel openal-devel freealut-devel"
 
- CVSROOT=":pserver:anonymous@cvs.gled.org:/mnt/data/cvs/gled-1.2"
- cvs login # empty password
- cvs co gled
- cd gled
- cvs co GledCore Numerica Geom1 # GTS RootGeo
- # demos
- cvs co demos/GledCore demos/Geom1 demos/Numerica # demos/GTS demos/RootGeo
+  [apt-get | yum | <whatever>] install $PKGS
 
-The repository can be browsed at L<http://www.gled.org/cgi-bin/viewcvs.cgi>.
+C<gled-builder> will build its own versions of C<fltk>, C<DevIL>,
+C<gts>, C<openal> and C<freealut> but their system-level install will
+ensure you have all the dependencies. Eventually we will check if
+appropriate versions of those are available and skip them during the
+build. However, C<Gled> requires the latest versions of some
+libraries that are not shipped even with the latest distributions
+(C<fltk-1.1.9>, C<gts-HEAD>).
 
-=head3 External software and environment
+C<Gled> is not put into the install directory, it remains in the build
+directory C<gled/gled-build> (this will change soon). To test, first
+setup the environment:
 
-The development files of required external software must be available.
-All binary versions of external software provided on
-L<ftp://ftp.gled.org/current/required_software/>binary-E<lt>BUILDE<gt>/
-are in fact developers packages, i.e. they also contain the relevant
-header files. If you have downloaded the base external binaries, you
-can sym-link the C<external/> directory from that installation
-here. In this case, you can also use the C<binenv.(c)sh> script.
+  cd gled/gled-build
+  . binenv.sh
+
+choose the demo to run and fire it up:
+
+  cd demos/Var1
+  gled tringula.C 
+
+For details see the C<README> file provided in C<gled-builder>.
+
+
+=head2 Bulding C<Gled>
+
+=head3 Getting the sources
+
+All C<Gled> sources reside in a SVN repository at
+L<http://svn.gled.org/gled/> (or via the viewcvs at
+L<http://www.gled.org/cgi-bin/viewcvs.cgi/>). The build directories,
+libsets, demos and the documentaion are all stored there. To allow for
+builds with specific sub-set of libsets, the repository structure is
+not entirely standard ... usually one does not checkout the whole
+trunk and some top-level directories need to be checked-out
+separately. All this is encoded in the helper checkout script
+available from the SVN:
+
+  svn export http://svn.gled.org/gled/trunk/gled-build-checkout
+
+Inscpect it for details, or simply run it as:
+
+  ./gled-build-checkout trunk
+
+to get the default libsets or as:
+
+  ./gled-build-checkout trunk GledCore Geom1
+
+if you want to explicitly specify which libsets to checkout.
+
+By default, this will create directory C<gled-build>; use
+C<--dir=<my-gled-dir>> to override it.
+
+=head3 Setting up the build environment
+
+The header files of all required external software must be accessible.
+Further, C<$ROOTSYS> and C<$GLEDSYS> variables must be set
+appropriately and corresponding entries added into C<$PATH> and
+C<$LD_LIBRARY_PATH>.
+
+There are several environment scripts in the C<gled-build> directory,
+in particular see C<binenv.sh> and C<hereenv.sh>. Use / modify one of
+those or roll your own ... then source it.
 
 Anyway, the build environment is exactly the same as the run-time
 environment. So the environment set-up can be done as described in the
@@ -712,7 +681,18 @@ C<build_env.csh> which can be used to easily access an existing
 C<Gled> build.
 
 
-=head2 Configuring
+=head3 Configuring
+
+B<NOTE:> This is not standard configure! It determines particularities
+of the C<Gled> build itself:
+
+=over list
+
+=item order of libset building;
+
+=item creation of top-level libset and class catalogues.
+
+=back
 
 The command-line options for C<configure> script and their default
 values are stored in the C<configure.rc> file.  You can edit the file
@@ -740,7 +720,8 @@ libset names.
 
 C<< -external <search-path> >>: C<search-path> is a ':' separated list
 of directories to include/link from; each C<dir> implies
-C<< -IE<lt>dirE<gt>/include >> and C<< -LE<lt>dirE<gt>/lib >>,
+C<< -IE<lt>dirE<gt>/include >> and C<< -LE<lt>dirE<gt>/lib >>. It is
+empty by default.
 
 C<< -base <search-path> >>: C<search-path> is a ':' separated list of
 existing C<Gled> build directories in which build has been
@@ -757,15 +738,24 @@ The C<configure> script also creates all auto-generated files and runs
 C<make depend> in all lib-set directories.
 
 
-=head2 Building
+=head3 Building
 
-In principle, just run C<make>.
+In principle ... just run C<make>.
 
 The default target builds all libraries and executables and installs
 them into C<$GLEDSYS/lib> and C<bin> directories.
 
-Make process uses the default compiler. Export the C<CXX> variable if you
-want to use some other compiler or, perhaps, C<distcc>.
+The C<make> process uses the default compiler. Export the C<CXX>
+variable if you want to use some other compiler or, perhaps,
+C<distcc>.
+
+
+=head3 Testing
+
+As the environment is already setup, just choose the demo and run it:
+
+  cd demos/Geom1
+  gled images.C
 
 
 =cut
@@ -774,48 +764,28 @@ want to use some other compiler or, perhaps, C<distcc>.
 =head1 Extending Gled
 
 In principle, C<Gled> should be extended by creating new
-libsets. However, the C<Gled> project is young and many indispensable
-classes are missing from the base release. See
-http://www.gled.org/status/ and http://www.gled.org/contributing/ for
-details on development status/plans and other information for
-developers/contributors.
+libsets. However, the C<Gled> project is still young and some
+functionality is still missing in the core libsets. See
+L<http://www.gled.org/status/>, L<http://www.gled.org/libsets/> and
+L<http://www.gled.org/contributing/> for details on development
+status/plans and other information for developers/contributors.
 
 =head2 Creating a libset
 
 To create a libset directory, you can use the C<gled-create-libset>
 script. You need to decide on the libset's name and select an unused
-library id (C<unsigned int>; it can be trivially changed so you don't
-need to worry). Then you need a build directory. This can either be:
+library id (C<unsigned short int>; it can be trivially changed as long
+as you don't save any objects into files you want to use later).
 
-=over enum
-
-=item an already existing build directory of C<Gled>
-
-=item a new directory where this libset will be compiled and an existing
-build of C<Gled> will be used to satisfy the libset dependencies. The
-C<configure> script has a C<-base> option which specifies the
-location(s) of existing builds.
-
- wget -q ftp://ftp.gled.org/current/libsets/gled.tar.gz
- tar xzf gled.tar.gz
- # mv gled some-dir
-
-or if you're using cvs:
-
- cvs co gled
- # mv gled some-dir
-
-=back
-
-In any case, all libsets that the new libset will depend upon and
-their dependencies must be available (all libsets depend on
+Then you need an existing C<Gled> build containing all the libsets
+that the new libset will depend upon (note that all libsets depend on
 C<GledCore>). Also, you need to set-up the environment.
 
-To create a libset C<FooSet> with id 101, use
+To create a libset C<FooSet> with id 129, use
 
- gled-create-libset FooSet 101
+ gled-create-libset FooSet 129
 
-This will create directory C<FooSet> containing all standard
+This will create directory C<libsets/FooSet> containing all standard
 directories and files. Edit the Makefile and add all libset
 dependencies of C<FooSet> to C<REQUIRES_LIB_SETS> line near the
 beginning. If your libset will not contain any executables and does
@@ -829,32 +799,27 @@ is a simple catalog of all C<Gled> classes (or C<glasses>) in this
 libset. Initially it is empty (containing some commented examples from
 C<GledCore>).
 
-Another thing to do is to edit C<build_libsets> in the top build
-directory and append C<FooSet> to the list.
+Now you have to reconfigure C<Gled> build so that the top-level libset
+and class catalogues get built properly.
 
-Now you can run, depending of your build directory (enumeration as
-above):
+If you explicitly enumerated the list of libsets to be built, you have
+to either: a) edit C<build_libsets> in the C<gled-build> directory and
+append C<FooSet> to the list; or b) pass the new libset list or
+C<<auto>> or C<<auto-prompt>> to the reconfigure command.
 
-=over enum
+ ./configure --reconfigure [libset-list]
 
-=item With a full-build directory:
-
- ./configure --reconfigure [libset-spec]
- make
-
-The C<--reconfigure> option must be, if used, the only option to
+The C<--reconfigure> option must be the only option to
 C<configure>. It takes an optional argument specifying which libsets
-to build (the syntax is the same as for C<--libsets>.
+to build (the syntax is the same as for option C<--libsets>). It
+defaults to the old value.
 
-=item With a build based on an existing one:
+And now we're ready to go:
 
- ./configure --external=<paths-to-ext-soft> --base=<paths-to-base-installs>
  make
 
-=back
-
-but this will produce libset C<FooSet> with glue code only. Creation of
-classes is described in the next section. 
+This will produce libset C<FooSet> with glue code only - you will be
+able to load it, but it will not contain any classes.
 
 
 =head2 Adding classes to a libset
@@ -905,7 +870,7 @@ To get a skeleton code of a glass C<cd> to libset directory and type:
  gled-create-glass -class <new-glass-name> -base <base-glass-name>
 
 There are quite some conventions that a glass header file should
-conform to. The basic ones are fulfilled automatically by the above
+conform to. All the basic ones are fulfilled automatically by the above
 script.
 
 Edit the C<glass.list> file and add a line describing
@@ -1214,14 +1179,17 @@ C<project7> parser/code generator and stored into the class catalog.
 Let's decode this data for C<Geom1/Board> glass which
 renders a textured rectangle:
 
- class Board : public ZNode {
-                         // self     list members
-			 // render   render
+ class Board : public ZNode
+ {
+   //                      render   render
+   //                      self     list members
    // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,5))
    MAC_RNR_FRIENDS(Board);
  protected:
    ZImage*       mTexture;       // X{GS} L{} RnrBits{2,0,4,0, 0,0,0,0}
-                                                   // self     list members
+                                 //                   self     list members
+   ...
+ };
 
 C<RnrBits> constructor takes eight render levels, divided in two
 groups of four. The first group pertains to self-rendering (or
