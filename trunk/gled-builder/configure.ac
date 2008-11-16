@@ -31,12 +31,12 @@ AC_DEFUN([AC_EXEC_AND_EVAL],
 ])
 
 
-AC_INIT(gled-build, 0)
+AC_INIT(gled-builder, 0)
 
 
 AC_PROG_INSTALL
 
-AC_PREFIX_DEFAULT("/opt/gled")
+AC_PREFIX_DEFAULT("`pwd`/install")
 
 AC_CANONICAL_BUILD
 
@@ -75,5 +75,5 @@ AC_SUBST(distro_name)
 AC_SUBST(distro_version)
 
 
-AC_CONFIG_FILES([GledBuildExternal.pm MakeBuildExternal.inc MakeBuildGled.inc])
+AC_CONFIG_FILES([GledBuildConf.pm MakeBuildConf.inc])
 AC_OUTPUT

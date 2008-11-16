@@ -1,3 +1,39 @@
+2008-11-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move configuration make-include and perl-module to a separate
+	file. Thus we can reduce the number of files modified by the
+	configure script.
+
+	The default installation prefix is now `pwd`/install.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	New files containing all configuration variables.
+
+	* GledBuildExternal.pm.in:
+	* MakeBuildExternal.inc.in:
+	* MakeBuildGled.inc.in:
+	* GledBuildExternal.pm:
+	* MakeBuildGled.inc:
+	* MakeBuildExternal.inc:
+	Renamed the above '.in' files to names without the extension as
+	they are not modified by configure anymore.
+	The new versions include the GledBuildConf.pm or MakeBuildConf.inc.
+	
+	* Makefile:
+	On distclean remove new config files.
+
+	* configure.ac:
+	Register new config files.
+	Change default installation prefix to `pwd`/install.
+
+	* README:
+	Document the new default prefix.
+	Some typos and clarifications.
+
+	* gled/Makefile:
+	On clean check if gled-build dir exists before descending.
+
 2008-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/ParseConfig.pm:

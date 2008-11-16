@@ -57,7 +57,7 @@ endef
 
 clean:
 	${ECHO} -X- Cleaning  ${PACKAGE}
-	${MUTE} cd ${gled_dir}; $(clean-cmds)
+	${MUTE} if test -d ${gled_dir}; then cd ${gled_dir}; $(clean-cmds); fi
 	${MUTE} rm -f configure build
 
 distclean: clean
