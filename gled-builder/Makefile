@@ -20,6 +20,6 @@ distclean::
 	${MAKE} -C gled $@
 
 distclean::
-	rm -f  GledBuildExternal.pm MakeBuildExternal.inc MakeBuildGled.inc
+	rm -f  GledBuildConf.pm MakeBuildConf.inc
 	rm -f  configure config.status config.log
 	rm -rf autom4te.cache

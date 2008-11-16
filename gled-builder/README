@@ -2,7 +2,7 @@
 = INTRO
 ==============================================================================
 
-Prototype of hihg-level building framework for Gled - primarily
+Prototype of high-level building framework for Gled - primarily
 intended for developers. It suppports building of:
 
  - external software (mostly libraries that Gled libsets depend on
@@ -50,8 +50,9 @@ To do this, run appropriate command as root:
 With all this, in principle, all you need to build from the external
 software are fltk-mt and root.
 
-Probably \greed will soon also need fftw3 and gsl (wrappers for these
-exist in root so they should be installed before configuring root).
+Probably libset Numerica will soon require fftw3 and gsl (wrappers
+for these exist in root so they should be installed before configuring
+root).
 
 
 Building
@@ -62,6 +63,9 @@ In principle:
   autoconf
   ./configure [--prefix=/opt/gled] # but check --help anyway
   make
+
+The default prefix / install location is `pwd`/install. The intention is
+to minimize the impact on the rest of the system.
 
 One can interact with the build on a lower level.
 

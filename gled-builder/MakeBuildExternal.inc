@@ -5,47 +5,9 @@
 
 TOPDIR = ../..
 
-########################################################################
-# Configuration variables, mostly unused
-########################################################################
-
-PREFIX  := @prefix@
-RELEASE := @RELEASE@
-
-CACHE_DIR := @CACHE_DIR@
-CACHE_URL := @CACHE_URL@
-
-BUILD        := @build@
-BUILD_CPU    := @build_cpu@
-BUILD_VENDOR := @build_vendor@
-BUILD_OS     := @build_os@
-
-DISTRO_VENDOR  := @distro_vendor@
-DISTRO_NAME    := @distro_name@
-DISTRO_VERSION := @distro_version@
-
-CC  := @CC@
-CXX := @CXX@
-CPP := @CPP@
-
-CC_VERSION := @CC_VERSION@
-CC_MAJOR   := @CC_MAJOR@
-CC_MINOR   := @CC_MINOR@
+include ${TOPDIR}/MakeBuildConf.inc
 
 ########################################################################
-# Common variables
-########################################################################
-
-ifdef GLED_ECHO_CMDS
-MUTE:=
-else
-MUTE:=@
-endif
-ifdef GLED_QUIET
-ECHO:=@echo > /dev/null
-else
-ECHO:=@echo
-endif
 
 ifeq ($(filter clean distclean, ${MAKECMDGOALS}),)
   include make-config.inc

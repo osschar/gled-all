@@ -1,12 +1,5 @@
 ########################################################################
-# Configuration, variables and rules for gled build
-# This is included from one level below.
-#########################################################################
-
-TOPDIR = ..
-
-########################################################################
-# Configuration variables, mostly unused
+# Configuration variables
 ########################################################################
 
 PREFIX  := @prefix@
