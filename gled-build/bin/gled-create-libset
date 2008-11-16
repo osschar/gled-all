@@ -16,7 +16,7 @@ if(not(defined $lsname and defined $lsid)) {
 
 die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
 
-chdir "$ENV{GLEDSYS}";
+chdir "$ENV{GLEDSYS}/libsets" or die "GLEDSYS/libsets directory does not exist";
 die "$lsname exists" if -e $lsname;
 
 @TopDirs1 = ( $lsname, "Glasses", "Stones" );
@@ -29,7 +29,6 @@ for $d (@TopDirs1) {
 }
 for $d (@TopDirs2) {
   mkdir $d, 0755;
-  open C, ">$d/.cvskeep"; close C;
 }
 
 open G, ">glass.list";
@@ -51,12 +50,15 @@ LIB_SET_NAME	:= $lsname
 LIB_SET_ID	:= $lsid
 REQUIRES_LIB_SETS := GledCore # add
 
-# Nice, friendly woozies that don't need special treatment
+# Directories containing glasses - full Gled enabled classes.
 BLESSED_DIRS	:= Glasses
+# Directories to be included in base library.
 BASE_DIRS	:= Stones $lsname 
 
+# Directories for which dictionaries will be generates.
 DICT_DIRS	:= Glasses Stones $lsname
 
+# Directories to go into the View / GUI library.
 VIEW_DIRS	:=
 # files from ${VIEW_FL_DIRS}/*.fl are processed by fluid
 VIEW_FL_DIRS	:=
