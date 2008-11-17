@@ -1,0 +1,437 @@
+=head1 Document id
+
+=head2 Title
+
+\greed: Technological overview and Workplan
+
+=head2 Author
+
+Matevz Tadel
+
+=head2 Document history
+
+B<16.11.2008> - moved the text from B<Greed Mainfesto>
+
+
+=for html
+<hr>
+
+=cut========================================================================
+
+
+=head1 Introduction
+
+This document consists of two main sections, I<"Technological
+overview"> and I<"Work-plan towards minimal implementation">, both
+taken from the preliminary version of the I<"Greed Manifesto">. There
+they were obscuring the main message ... that people should, in
+general, work together to make this world a better place and, in
+particular, consider \greed as a possible limited-scope means towards
+this goal.
+
+Further, both sections were, and still are, somewhat
+inarticulate. They are asking for input from people, who are
+interested in contributing to the project. As the issues presented
+here are not final and require further discussions and clarifications,
+they do not belong into the manifesto.
+
+In any case, this document should still be considered as a direct
+extension of the I<"Greed Manifesto"> ... as a concrete proposal
+towards fulfillment of the ideas presented there.
+
+
+=for html
+<hr>
+
+=cut========================================================================
+
+
+=head1 Technological overview
+
+This section begins with a short overview of existing technologies,
+projects and products that could be relevant for \greed. After that,
+sub-elements of \greed are individually reviewed in terms of
+software and hardware requirements.
+
+
+=head2 Existing solutions
+
+B<\root> The \root system is a versatile, multi-platform OO
+framework. It supports object serialization and provides operating
+system interface, as well as interfaces for all relevant mass-storage
+systems and data-base engines. All these are necessary for
+implementation of \greed programs, from basic local computing clients
+to complex world simulation executors.
+
+On another level, \root is a toolkit for scientific data analysis and
+can be used for processing of all data related to \greed functioning,
+e.g., analysis of infrastructure performance data or preparation of
+in-world statistics. As users will be required to analyse world data to
+fully understand and explore the possibilities of individual worlds,
+\root could also be used as the primary platform for statistical
+presentation of world data to general public.
+
+B<\alien> is a complete \grid solution, providing user and VO
+management, job scheduling and execution, file catalogue and storage
+element management.
+
+B<\xrootd.> Mass-storage system \& file transfer protocol.
+
+B<Virtualization technologies.> Provide virtual machines (VM)
+for execution of jobs on users' machines.
+
+B<\bittorrent> Transfer of large data-files among users'
+machines. E.g. virtual machine images, world data files, but also hot
+files required for distributed analysis.
+
+Storage of hot data-files can also be awarded with research credit.
+Long-term storage with special bonus if holding the file for a long
+time. However, upload bandwidth is usually quite low.
+
+B<\gled> \gled a is high-level \root-based framework for
+distributed computing and dynamic visualization offering an
+implementation of hierarchic server-client model that perfectly fits
+the requirements of the multi-user worlds with possible proxy nodes
+serving as data-transfer concentrators that also perform common world
+dynamics to minimize data transfer while still retaining top-level
+control over low-level world dynamics away from the client machines.
+
+B<Open-source commercial-grade rendering engines and
+  libraries.> E.g., Ogre, OpenSceneGraph or SauerBratten. Could be
+potentially plugged into \gled rendering pipeline or even replace it
+altogether.
+
+B<Blender.> Open-source 3D modeling and animation program.
+Creation of 3D models for \greed-world entities. The Blender
+community also seem to be interested in using \greedhome for
+distributed rendering of high-quality movies.
+
+
+=head2 Basic \greed components
+
+The \greed components and infrastructure can be divided on those
+needed for operation of C<computing@home> and \greed-worlds
+sub-projects. There is practically no overlap among them, only an
+accounting system for contributed CPU/disk and its transfer into
+\greed-world resources is required.
+
+Both sub-projects, \greedhome and \greed-worlds can be sub-divided by
+operational level: a) server code and infrastructure that is in
+constant operation, and b) users' clients that randomly connect into
+the system. External software code to be run on \greedhome clients
+needs to be provided by external institutions. Obviously it must meet
+certain requirements in terms of consumed CPU/RAM and network.
+
+These components are discussed in more detail in the following
+sub-sections.
+
+
+=head3 \greedhome core infrastructure
+
+Most of the software is already compiled into \alien middleware. A
+special implementation of I<computing element> (CE) that manages
+connecting \greedhome clients is needed. It would seem reasonable to
+have several instances of such CE running, probably on the level of
+Tier-1 or large Tier-2 center. That will allow for seamless
+integration of distributed clients into the existing LHC \grid.
+
+The following components are needed on top of \alien: user management
+system, \greed certificate authority for issuing user and client
+certificates and user activity accounting database.  A custom solution
+(possibly based on LDAP with Postgres back-end and a web-based CA
+front-end) will have to be implemented, especially since it will be
+accessed by almost all elements of \greed computing: community web
+portals, \greedhome and \greed-world servers and clients as well as
+\alien and \greed accounting systems.
+
+With all this a thin top-level server-layer can be spawned that
+provides an interface between \greedhome clients and \greedhome
+computing elements. In principle it only needs to provide information
+about which CE's are currently running, which projects are available
+and what are their system requirements and associated \greed-world
+bonuses. Based on that, the user chooses the project to run, the
+\greedhome server makes sure that the client has the appropriate
+virtual machine image and commands the client to execute it and thus
+process jobs from the selected source. \greed CE reports jobs status
+to \greedhome server which does accounting of users' contributions.
+\gled with a database back-end seems the natural solution.
+
+
+=head3 \greedhome client
+
+Standard configuration of home PCs: multi-core CPU, 500GB disk, 2GB
+RAM (thanks to M\$), some also have powerful GPUs.
+
+The client needs to do management of user and VM certificates and be
+able to communicate with \greedhome server to display status of
+currently available queues, running jobs and user statistics.
+Additionally, it needs to manage locally installed VMs and ideally also
+the local copies of experiment's data-files. It is almost mandatory
+for all these to reside on some sub-directory on a local disk as
+this allows the \bittorrent client to run also when no VM is in
+operation. As the \bittorrent configuration must be actively managed
+by the \greedhome client, it has to operate in the background as
+well, doing negotiation with the \greedhome server and choosing which
+files to download or to discard, based on their current value and
+users' retention and acquisition policies.
+
+If the \greedhome servers are implemented in \gled, the client
+implementation in \gled should be trivial.
+
+Short report from installing C<folding@home>. One executable to
+download and run; specify user-name and there it goes, running at nice
+20 all the time. One job takes about 24 hours (P4, 3.2\,GHz) and uses
+7\,MB RAM.
+
+
+=head3 \greedhome experiment software
+
+This is the software that runs inside of VMs and does actual
+computation.
+
+While this is in principle not really a \greed problem, the CPU usage
+against required input / output data-sizes, in particular regarding
+the network transfers, needs to be carefully considered.
+
+Eventually, some of the data can a) remain stationary on the local
+disk and be analysed there, or b) be dropped and regenerated on demand
+if it is unlikely it will actually be required (e.g., for a full
+simulation--reconstruction job only return kinematics, random seeds
+and ESD).
+
+CPU speed, network bandwidth and available RAM of a client must be
+taken into account during job assignment. VM check-pointing only makes sense
+for dumps onto local disk (for HEP jobs).
+
+
+=head3 \greed-world core infrastructure
+
+\greed-worlds are operated by a set of loosely connected servers, each
+of them steering a particular region of a world, ranging in size from
+a solar system to a well defined region of a given planet or moon.
+While a single server per planet can be used initially, it is of great
+importance to consider the hierarhical structure of world servers from
+the very beginning as this will enforce thinking about world
+management and inter-server data transfers in the right way.
+
+\gled was designed to do just that. \xrootd and \bittorrent can be
+used to propagate world data-files among servers and also to make them
+available for download by clients.
+
+Part of world maintenance could also run on user-contributed computing
+resources (creation, AI operation, time-propagation of worlds that are
+in fast-forward mode or are currently not occupied by human actors).
+
+
+=head3 \greed-world client
+
+The \greed-world client must allow two main usages:
+
+=over enum
+
+=item Immersive interaction with the world entities. This is the
+  interface for users and should have a distinct virtual world
+  flavour. 3D rendering and internal, in-world GUI must be provided.
+
+=item Interaction with the world objects and algorithms. World
+  creation and maintenance is performed in this command mode. While 3D
+  rendering presents a convenient way of data-presentation and
+  object-selection, it must be extended with standard object-oriented
+  GUI allowing access to all data-members and methods of a given
+  object.
+
+=back
+
+All client requests must be forwarded to the server which performs
+access authorization checks, executes them and propagates them to
+relevant clients. It would be great if both client roles could be
+implemented in a common program. Additional elements required by the
+maintainer interface should be available as plug-ins.
+
+This is in fact another aspect of \gled: a distributed rendering
+and object-control system with advanced authorization and remote
+method execution capabilities. Further, hierarhical structure of \gled
+allows for an easy inclusion of intermediate proxy nodes that reduce
+the long-distance network traffic.
+
+The fact that both client and server programs will be using the same
+core libraries and object databases makes things much simpler.
+However, some level of splitting among world-entity representations on
+server and client sides is still required in order to simulate the
+difference between actual world and reality as perceived via user's
+observation devices. Object-space partitioning and access restrictions
+of \gled provide for such separation while still allowing
+administrator access do data on all levels.
+
+Potentially, \greed-world client could also be used to present the
+\greedhome status and allow users to operate their computing client
+via a virtual-world interface.
+
+
+=head2 Conclusion
+
+Many things are already available. Much can done by just connecting
+them together.
+
+
+=for html
+<hr>
+
+=cut========================================================================
+
+
+=head1 Work-plan towards minimal implementation
+
+The ideas presented so far must be clarified and elaborated in a
+larger group of people that will allow a clearer definition of the
+project's scope and developer commitments. Currently it seems
+reasonable to set the goals to the level that would allow a group of
+four developers to provide an initial implementation in about half a
+year.
+
+With the LHC start-up right behind the corner, the next year seems to
+be lost for any serious work. Still, this time can be used for
+specification of general principles, determination of goals for the
+initial implementation and for doing the groundwork on involved
+software systems.
+
+Regardless of all that, some concrete tasks can be defined. Again, the
+division between \greedhome and \greed-world is used to separate them.
+But first, the tasks shared among both sub-projects are discussed.
+
+
+=head2 Common elements
+
+=head3 Central management
+
+B<User, group and resource management.>
+Probably LDAP with Postgres back-end. \alien and \grid identity
+management components can be reused to a large extent. Due to specific
+needs extension of DB schemas might be necessary.
+
+B<Certificate authority(ies).>
+Two levels of security are needed.
+
+=over enum
+
+=item Standard security level for developers, world maintainers and
+\greed servers. The regular EUGridPMA distribution and certificate
+chain could be used. (How about national certificates?)
+
+=item Relaxed security level for users, their machines and VMs.
+User-certificate allows users to create virtual world accounts and to
+request server certificates for their machines (for \greedhome client
+running natively) and any VMs that they activate (for contributing to
+a specific project).
+
+For this the \greed-CA needs to be linked with the user/resource
+management DBs. OpenCA (or whatever people use these days) could be
+reused and extended if needed.
+
+=back
+
+B<Banking system.> Performs accounting of user contributed
+computing resources and issuing of research credits.  Probably easiest
+if data is included in central databases.  Transactions should be
+archived.
+
+
+=head3 Community \web portal(s) 
+
+This is first needed for developers and only at a later stage also for
+users and general public. For both groups, a set of purposes must be
+fulfilled by the \web front-ends.
+
+=over enum
+
+=item Providing general information about the project.
+
+=item Communication among members.
+
+=item Software distribution.
+
+=item Data-base interfaces.
+
+=back
+
+
+=head3 Software management and distribution
+
+B<Build and distribution system.>
+\alien BITS build infrastructure seems reasonable. Build for various
+platforms can be performed in a set of VMs. Debian and RedHat packages
+must be available.
+
+B<Portability issues.>
+
+=over list
+
+=item Port \gled to Windows.
+
+=item Make \root use native window-system interface on Mac.
+
+=back
+
+=head2 \greedhome
+
+The main goal is to have functional VM images that can be executed on
+arbitrary machines and then report as slaves to a dedicated \alien CE. They
+must be able to return some data. The processing must be logged.
+
+=over enum
+
+=item VM distribution (\bittorrent).
+
+=item VM control and execution system (\gled?).
+
+=item Implementation of \alien CE that links \grid with \greed.
+
+=item Access of \greed clients to relevant storage elements for
+  retreiving (e.g. accessing condition databases) and storing of data.
+  This is a potential problem due to high level of paranoia in HEP
+  computing centers. One could get away with port-forwarding on
+  VO-boxes or by deploying a set of dedicated SEs.
+
+=back
+
+
+=head2 \greed-world
+
+The goal is to demonstrate feasibility of real-time evolution of
+simple worlds in a distributed environment. Servers running a
+particular world should perform time-evolution, process client requests
+and send relevant data back to clients so that they can perform world
+visualization and real-time feed-back in world-entity controls.
+The initial world will look like the \alien/Proof demos shown at the
+SuperComputing '04 and '05 with added details on planetary and
+inter-planetary scale.
+
+=over enum
+
+=item Determination of basic world mechanics. Tools for world creation and
+maintenance.
+
+=item Design of world entities, including resources and technologies.
+
+=item Algorithms for time evolution, potentially allowing different speeds
+of time.
+
+=item Rendering engine. Initially start with simple entity representations
+and work slowly towards more complex ones. World dynamics should guarantee
+that client-updates can be performed at a relatively low frequency.
+
+=item In world interaction layer. Entity selection and manipulation.
+  In-world and window-system driven GUIs.
+
+=back
+
+
+=for html
+<hr>
+
+=cut========================================================================
+
+=head1 Conclusion
+
+Please disucss / comment these proposal at \greed forums:
+L<http://greed.gled.org/>.
