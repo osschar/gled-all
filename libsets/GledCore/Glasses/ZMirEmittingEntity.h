@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -40,7 +40,7 @@ public:
   Bool_t HasIdentity(ZIdentity* ident);
 
 #include "ZMirEmittingEntity.h7"
-  ClassDef(ZMirEmittingEntity, 1)
+  ClassDef(ZMirEmittingEntity, 1);
 }; // endclass ZMirEmittingEntity
 
 

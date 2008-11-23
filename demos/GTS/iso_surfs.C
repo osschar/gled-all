@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // A simple scene demonstrating GTSIsoMaker.
 

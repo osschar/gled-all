@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -33,7 +33,7 @@ public:
   { mULen = mVLen = size; mUStrips = mVStrips = size; Stamp(FID()); }
 
 #include "Rect.h7"
-  ClassDef(Rect, 1)
+  ClassDef(Rect, 1);
 }; // endclass Rect
 
 

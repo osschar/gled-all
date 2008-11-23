@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -138,7 +138,7 @@ public:
 
   virtual void Print(Option_t* option = "") const;
 
-  ClassDef(ZTrans, 1) // Column-major 4x4 matrix for homogeneous coordinates.
+  ClassDef(ZTrans, 1); // Column-major 4x4 matrix for homogeneous coordinates.
 };
 
 ostream& operator<<(ostream& s, const ZTrans& t);

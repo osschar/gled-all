@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -31,7 +31,7 @@ public:
   void RequestQueenShattering(ZQueen* queen_to_leave);	// X{E} C{1}
 
 #include "ZFireKing.h7"
-  ClassDef(ZFireKing, 1) // Ruler of fire space and queen mirroring broker.
+  ClassDef(ZFireKing, 1); // Ruler of fire space and queen mirroring broker.
 }; // endclass ZFireKing
 
 

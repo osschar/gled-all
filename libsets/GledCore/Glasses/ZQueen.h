@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -218,7 +218,7 @@ public:
   void ListAll();		 //! X{E} 7 MButt()
 
 #include "ZQueen.h7"
-  ClassDef(ZQueen, 1)
+  ClassDef(ZQueen, 1);
 }; // endclass ZQueen
 
 

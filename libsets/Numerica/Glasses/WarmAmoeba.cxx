@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #include "WarmAmoeba.h"
 #include "WarmAmoeba.c7"
@@ -8,7 +8,7 @@
 
 #include <TMath.h>
 
-ClassImp(WarmAmoeba)
+ClassImp(WarmAmoeba);
 
 /**************************************************************************/
 // private

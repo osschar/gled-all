@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // The following implementation is based on TexFont API,
 // implementation and accompanying programs by Mark J. Kilgard.

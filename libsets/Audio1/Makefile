@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 LIB_SET_NAME	:= Audio1
 LIB_SET_ID	:= 4
 REQUIRES_LIB_SETS := GledCore # add

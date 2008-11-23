@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Spheror example: navigate Single Spheror->Amoeba->Start() to activate
 //   minimization thread.

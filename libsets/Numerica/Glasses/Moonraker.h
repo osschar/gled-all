@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef Numerica_Moonraker_H
 #define Numerica_Moonraker_H
@@ -56,7 +56,7 @@ public:
   virtual void ODEStart(TVectorD& v, Double_t& x1, Double_t& x2);
 
 #include "Moonraker.h7"
-  ClassDef(Moonraker, 1)
+  ClassDef(Moonraker, 1);
 }; // endclass Moonraker
 
 

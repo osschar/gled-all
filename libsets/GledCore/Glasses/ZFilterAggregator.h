@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -33,7 +33,7 @@ public:
   virtual Result_e FilterMIR(ZMIR& mir);
 
 #include "ZFilterAggregator.h7"
-  ClassDef(ZFilterAggregator, 1)
+  ClassDef(ZFilterAggregator, 1);
 }; // endclass ZFilterAggregator
 
 

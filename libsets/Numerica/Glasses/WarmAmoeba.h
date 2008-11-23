@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef Numerica_WarmAmoeba_H
 #define Numerica_WarmAmoeba_H
@@ -17,7 +17,7 @@ public:
   virtual void		SetState(const TVectorF& x) = 0;
   virtual ZMIR*		S_SetState(const TVectorF& x) = 0;
 
-  ClassDef(WarmAmoebaMaster,1)
+  ClassDef(WarmAmoebaMaster,1);
 };
 
 class WarmAmoeba : public Eventor {
@@ -85,7 +85,7 @@ public:
   virtual void Operate(Operator::Arg* op_arg);
 
 #include "WarmAmoeba.h7"
-  ClassDef(WarmAmoeba, 1)
+  ClassDef(WarmAmoeba, 1);
 }; // endclass WarmAmoeba
 
 

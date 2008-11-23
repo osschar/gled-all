@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef GledCore_GLTextNS_H
 #define GledCore_GLTextNS_H

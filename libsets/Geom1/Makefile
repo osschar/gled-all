@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 LIB_SET_NAME	= Geom1
 LIB_SET_ID	= 2
 REQUIRES_LIB_SETS = GledCore # add

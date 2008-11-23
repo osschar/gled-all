@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Top-level script that starts a Moon (client) connected to the Sun
 // specified with -master argument of gled.

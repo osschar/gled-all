@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -43,7 +43,7 @@ public:
   void Touch(Int_t x=0, Int_t y=0, Int_t p=1); // X{E} 7 MCWButt()
 
 #include "TabletImage.h7"
-  ClassDef(TabletImage, 1)
+  ClassDef(TabletImage, 1);
 }; // endclass TabletImage
 
 

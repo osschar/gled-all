@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -48,7 +48,7 @@ public:
   TGeoShape* GetShape()       { return mShape;    }
   TList*     GetElements()    { return mElements; }
 
-  ClassDef(TGeoShapeExtract, 1)
+  ClassDef(TGeoShapeExtract, 1);
 }; // endclass TGeoShapeExtract
 
 #endif

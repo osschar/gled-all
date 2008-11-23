@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #include "RGBAPalette.h"
 #include "RGBAPalette.c7"

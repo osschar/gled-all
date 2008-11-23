@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // simple scene with some GTS models; more available from http://gts.sf.net/
 

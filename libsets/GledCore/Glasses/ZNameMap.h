@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -57,7 +57,7 @@ public:
   virtual void name_change_cb(ZGlass* g, const TString& new_name);
 
 #include "ZNameMap.h7"
-  ClassDef(ZNameMap, 1)
+  ClassDef(ZNameMap, 1);
 }; // endclass ZNameMap
 
 

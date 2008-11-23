@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -40,7 +40,7 @@ public:
 
 
 #include "ZGlMaterial.h7"
-  ClassDef(ZGlMaterial, 1) // Control of GL material colors and mode of application of current color
+  ClassDef(ZGlMaterial, 1); // Control of GL material colors and mode of application of current color
 }; // endclass ZGlMaterial
 
 

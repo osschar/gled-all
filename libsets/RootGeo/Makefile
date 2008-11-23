@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 LIB_SET_NAME	:= RootGeo
 LIB_SET_ID	:= 64
 REQUIRES_LIB_SETS := GledCore # add

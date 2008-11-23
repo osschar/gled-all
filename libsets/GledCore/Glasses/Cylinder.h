@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -37,7 +37,7 @@ public:
     ZNode(n,t) { _init(); }
 
 #include "Cylinder.h7"
-  ClassDef(Cylinder, 1) // Simple cylinder, possibly hollow.
+  ClassDef(Cylinder, 1); // Simple cylinder, possibly hollow.
 }; // endclass Cylinder
 
 

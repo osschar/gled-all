@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // simple scene with rotating lamps
 // type dynamo->Start() (or use GUI) to start the thread

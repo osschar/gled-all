@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -21,7 +21,7 @@ public:
   void DecRefCount() { --mRefCount; if(mRefCount <= 0) delete this; }
 
 #include "ZRCStone.h7"
-  ClassDef(ZRCStone, 1)
+  ClassDef(ZRCStone, 1);
 }; // endclass ZRCStone
 
 #endif

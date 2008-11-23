@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -24,7 +24,7 @@ public:
     ZIdentity(n,t) { _init(); }
 
 #include "ZGroupIdentity.h7"
-  ClassDef(ZGroupIdentity, 1) // Representation of a group identity
+  ClassDef(ZGroupIdentity, 1); // Representation of a group identity
 }; // endclass ZGroupIdentity
 
 

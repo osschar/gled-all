@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -83,7 +83,7 @@ public:
   static void* DancerBeat(DancerInfo* di);
 
 #include "Mountain.h7"
-  ClassDef(Mountain, 0)
+  ClassDef(Mountain, 0);
 }; // endclass Mountain
 
 #endif

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef Geom1_RGBAPalette_H
 #define Geom1_RGBAPalette_H

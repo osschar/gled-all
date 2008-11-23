@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef RT_FUNCTIONS_H
 #define RT_FUNCTIONS_H

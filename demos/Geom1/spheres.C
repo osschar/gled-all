@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Spheres: a bunch of spheres with a rotator
 //

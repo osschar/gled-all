@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -29,7 +29,7 @@ public:
   void mark(Float_t m) { mMark = m; }
 
 #include "ZColorMark.h7"
-  ClassDef(ZColorMark, 1)
+  ClassDef(ZColorMark, 1);
 }; // endclass ZColorMark
 
 #endif

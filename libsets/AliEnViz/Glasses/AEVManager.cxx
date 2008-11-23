@@ -69,7 +69,7 @@ void AEVManager::SetTimeWindow(Int_t time)
 
   mSucker->SendLine(GForm("timewindow %d\n", time));
 
-  GLensWriteHolder wrlck(this); 
+  GLensWriteHolder wrlck(this);
   mTimeWindow = time;
   Stamp(FID());
   MakeInfoText();

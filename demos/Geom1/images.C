@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // simple scene with images and RectTerrain
 //

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -50,7 +50,7 @@ public:
   void StandardPixel();  //  X{E} 7 MButt()
 
 #include "WGlFrameStyle.h7"
-  ClassDef(WGlFrameStyle, 1)
+  ClassDef(WGlFrameStyle, 1);
 }; // endclass WGlFrameStyle
 
 

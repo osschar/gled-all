@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Simple setup for GL speed tests.
 

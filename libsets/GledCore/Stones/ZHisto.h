@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -30,7 +30,7 @@ public:
   virtual void ResetHistos() = 0;
 
 #include "ZHisto.h7"
-  ClassDef(ZHisto, 1)
+  ClassDef(ZHisto, 1);
 }; // endclass ZHisto
 
 #endif

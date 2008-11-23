@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -62,7 +62,7 @@ public:
   void DumpShapeTree(const Text_t* name="Gentle");  // X{Ed} 7 MCWButt()
 
 #include "ZGeoRepacker.h7"
-  ClassDef(ZGeoRepacker, 1)
+  ClassDef(ZGeoRepacker, 1);
 }; // endclass ZGeoRepacker
 
 

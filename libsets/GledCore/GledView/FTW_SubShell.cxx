@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #include "FTW_SubShell.h"
 #include <FL/Fl_Window.H>

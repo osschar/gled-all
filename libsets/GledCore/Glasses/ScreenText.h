@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -30,7 +30,7 @@ public:
 
 
 #include "ScreenText.h7" // Text display in window coordinates.
-  ClassDef(ScreenText, 1)
+  ClassDef(ScreenText, 1);
 }; // endclass ScreenText
 
 

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Spawn a standard GUI.
 //

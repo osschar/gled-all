@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -81,7 +81,7 @@ public:
   { return mTNode && mTNode->GetVolume() ? mTNode->GetVolume()->GetField() : 0; }
 
 #include "ZGeoNode.h7"
-  ClassDef(ZGeoNode, 1)
+  ClassDef(ZGeoNode, 1);
 }; // endclass ZGeoNode
 
 

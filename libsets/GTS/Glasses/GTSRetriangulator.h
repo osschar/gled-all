@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -47,7 +47,7 @@ public:
   void Refine();  // X{ED} 7 MButt()
 
 #include "GTSRetriangulator.h7"
-  ClassDef(GTSRetriangulator, 1) // Coarsen or refine GTSurf
+  ClassDef(GTSRetriangulator, 1); // Coarsen or refine GTSurf
 }; // endclass GTSRetriangulator
 
 

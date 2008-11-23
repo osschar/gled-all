@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // check_overlaps: visualization of overlaps in ALICE geometry
 //

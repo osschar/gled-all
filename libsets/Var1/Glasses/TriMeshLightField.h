@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -41,7 +41,7 @@ public:
   void SetupLampDir(ZNode* mesh, Float_t theta, Float_t phi); // X{E} C{1} 7 MCWButt()
 
 #include "TriMeshLightField.h7"
-  ClassDef(TriMeshLightField, 1) // TriMeshFiled with support for light-map tracing.
+  ClassDef(TriMeshLightField, 1); // TriMeshFiled with support for light-map tracing.
 }; // endclass TriMeshLightField
 
 
