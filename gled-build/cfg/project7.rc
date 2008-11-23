@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 # project7.rc cfg file
 debug		!	main		DEBUG		0
 classname	=s	main		CLASSNAME	undef
