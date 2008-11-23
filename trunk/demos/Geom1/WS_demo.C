@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // simple scene with a Weaver Symbol
 // Use "ZNode(Pos,Rot):WSPoint(W,S,T)" as custom view for best performance.

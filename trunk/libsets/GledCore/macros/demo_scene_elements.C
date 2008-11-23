@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Complex scene elements used in demos.
 

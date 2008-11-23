@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Simple set-up for performance measurements.
 // Spawns Eye automatically.

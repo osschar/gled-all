@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef Numerica_ODECrawler_H
 #define Numerica_ODECrawler_H
@@ -29,7 +29,7 @@ protected:
   Int_t      mSize;
 
 public:
-  ODEStorage() : 
+  ODEStorage() :
     mOrder(0), mSize(0) {}
   ODEStorage(Int_t order, Int_t capacity=128) :
     mOrder(order), mSize(0) {}

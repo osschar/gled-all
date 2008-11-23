@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 // #define macros for construction of object graphs from INTERPRETED
 // cint scripts
 

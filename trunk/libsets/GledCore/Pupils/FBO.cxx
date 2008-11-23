@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2005, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -89,7 +89,7 @@ void FBO::init(int w, int h)
     // initialize stencil renderbuffer
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fStencilBuffer);
     glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_STENCIL_INDEX, fW, fH);
-  
+
     glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
     GL_RENDERBUFFER_EXT, fStencilBuffer);
   */

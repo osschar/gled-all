@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -72,7 +72,7 @@ public:
   // void reflect_queen_to_list(ZQueen* queen, ZList* list); // X{E} C{2}
 
 #include "ZKing.h7"
-  ClassDef(ZKing, 1) // Ruler of top-level object-spaces
+  ClassDef(ZKing, 1); // Ruler of top-level object-spaces
 }; // endclass ZKing
 
 

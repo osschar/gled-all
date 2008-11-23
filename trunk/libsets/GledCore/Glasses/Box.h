@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -27,7 +27,7 @@ public:
   void SetABC(Float_t a, Float_t b, Float_t c); // X{E}
 
 #include "Box.h7"
-  ClassDef(Box, 1)
+  ClassDef(Box, 1);
 }; // endclass Box
 
 

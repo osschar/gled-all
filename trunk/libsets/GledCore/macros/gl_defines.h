@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*
  * Snatch of constants from GL/gl.h for import into a running CINT.

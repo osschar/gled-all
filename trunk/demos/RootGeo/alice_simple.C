@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // alice_simple: simplified ALICE geometry for event visualization
 //

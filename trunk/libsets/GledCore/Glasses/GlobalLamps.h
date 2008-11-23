@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -23,7 +23,7 @@ public:
   GlobalLamps(const Text_t* n="GlobalLamps", const Text_t* t=0) : ZHashList(n,t) { _init(); }
 
 #include "GlobalLamps.h7"
-  ClassDef(GlobalLamps, 1)
+  ClassDef(GlobalLamps, 1);
 }; // endclass GlobalLamps
 
 

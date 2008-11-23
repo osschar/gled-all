@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #include <glass_defines.h>
 #include <gl_defines.h>

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Generick initialization of top level script variables for Sun.
 // Can be called from other scripts, as a command-line option or from

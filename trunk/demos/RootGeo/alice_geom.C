@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // alice_geom: prototype of ALICE detector visualization
 //

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -57,7 +57,7 @@ public:
   static const Text_t* sLayoutPath;
 
 #include "NestInfo.h7"
-  ClassDef(NestInfo, 1) // Glass representation of GUI browser 'FTW_Nest'.
+  ClassDef(NestInfo, 1); // Glass representation of GUI browser 'FTW_Nest'.
 }; // endclass NestInfo
 
 

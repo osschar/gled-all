@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Scene to test ZQueen::RemoveLenses() method.
 //

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -52,7 +52,7 @@ public:
   void Box(BoxType_e box, Bool_t downp=false, Bool_t framep=false); // X{E}
 
 #include "MetaWeedInfo.h7"
-  ClassDef(MetaWeedInfo, 1)
+  ClassDef(MetaWeedInfo, 1);
 }; // endclass MetaWeedInfo
 
 

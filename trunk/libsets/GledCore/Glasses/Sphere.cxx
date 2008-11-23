@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -11,5 +11,5 @@ void Sphere::_init()
   mLOD = 8;
 }
 
-ClassImp(Sphere)
+ClassImp(Sphere);
 #include "Sphere.c7"

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Simple scene with a Moonraker (shooting from earth in earth/moon system)
 // properly attached to/with ODE_Crawler (ODE integrator).

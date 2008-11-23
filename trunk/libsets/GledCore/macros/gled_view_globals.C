@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Common global variables related to GUI and viewers.
 

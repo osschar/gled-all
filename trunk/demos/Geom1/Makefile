@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 CXX		= g++
 CC		= gcc

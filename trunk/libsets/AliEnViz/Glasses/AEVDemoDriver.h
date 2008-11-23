@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -118,7 +118,7 @@ protected:
 
 public:
 #include "AEVDemoDriver.h7"
-  ClassDef(AEVDemoDriver, 1)
+  ClassDef(AEVDemoDriver, 1);
 }; // endclass AEVDemoDriver
 
 

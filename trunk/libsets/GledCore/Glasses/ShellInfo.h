@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -74,7 +74,7 @@ public:
   void EmitResizeRay();
 
 #include "ShellInfo.h7"
-  ClassDef(ShellInfo, 1) // Glass representation of GUI shell 'FTW_Shell'.
+  ClassDef(ShellInfo, 1); // Glass representation of GUI shell 'FTW_Shell'.
 }; // endclass ShellInfo
 
 

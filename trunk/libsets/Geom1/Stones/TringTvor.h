@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -95,7 +95,7 @@ public:
   Int_t*   mStripTrings;  //! [mNStripEls] Indices of triangles belonging to strip vertices, mNStripEls (first two triangles of each strip are not used). Needed for flat shading.
   Int_t    mNStrips;      //! Number of trianlge strips.
   Int_t**  mStripBegs;    //! [mNStrips] Pointers to strip beginnings into mStripEls, needed for glMultiDrawElements.
-  Int_t*   mStripLens;    //! [mNStrips] Lengths of strips.  
+  Int_t*   mStripLens;    //! [mNStrips] Lengths of strips.
 
   Bool_t   HasTrianlgeStrips() const { return mNStripEls != 0; }
 

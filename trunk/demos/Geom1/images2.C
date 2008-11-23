@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Simple scene with images and RectTerrain.
 // Like images.C but with severeal queens (test of queen dependencies).

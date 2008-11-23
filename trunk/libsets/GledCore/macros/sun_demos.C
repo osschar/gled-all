@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Generick initialization of top level script variables for Sun.
 // Also creates global queen ZQueen("Scenes"), then used by demo-scripts

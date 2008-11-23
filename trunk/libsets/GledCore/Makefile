@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 LIB_SET_NAME	= GledCore
 LIB_SET_ID	= 1

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -28,7 +28,7 @@ public:
   void Size(int w, int h);  // X{E}
 
 #include "MetaViewInfo.h7"
-  ClassDef(MetaViewInfo, 1)
+  ClassDef(MetaViewInfo, 1);
 }; // endclass MetaViewInfo
 
 

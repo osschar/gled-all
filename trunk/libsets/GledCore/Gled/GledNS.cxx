@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -999,7 +999,7 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
 //
 // Exception class thrown by Gled classes and macros.
 
-ClassImp(Exc_t)
+ClassImp(Exc_t);
 
 Exc_t::Exc_t(const std::string& s) : TString(s.c_str())
 {

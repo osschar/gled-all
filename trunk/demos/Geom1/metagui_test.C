@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // copy of images.C with added metagui example
 //

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 #ifndef Geom1_TubeTvor_GL_Rnr_H
 #define Geom1_TubeTvor_GL_Rnr_H

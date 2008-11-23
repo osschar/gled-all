@@ -196,10 +196,10 @@ void solar_suck()
   animator->SetInterBeatMS(TMath::Nint(1000.0/g_rps));
   animator->Start();
 
-  // To be used without network, in conjuction with:
-  //   nc -l localhost 9999 < nc-dump
+  // To be used under special conditions. Default is pcalimonitor2.cern.ch:7014
   // ml_sucker->SetSuckHost("localhost");
-  // ml_sucker->SetSuckPort(9999);
+  // ml_sucker->SetSuckPort(9999); // nc -l localhost 9999 < nc-dump
+  // ml_sucker->SetSuckPort(7777); // ssh tunnel
   // ml_sucker->SetFooSleep(10);
 
   ml_sucker->StartSucker();

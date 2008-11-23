@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -60,7 +60,7 @@ public:
   static void SleepMiliSec(UInt_t ms);
 
 #include "GTime.h7"
-  ClassDef(GTime, 1)
+  ClassDef(GTime, 1);
 }; // endclass GTime
 
 #endif

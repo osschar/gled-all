@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Common functions for ROOT geometry demos.
 

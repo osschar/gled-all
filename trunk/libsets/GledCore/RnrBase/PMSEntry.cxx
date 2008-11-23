@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 #include "PMSEntry.h"
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.

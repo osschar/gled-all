@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 LIB_SET_NAME	:= Var1
 LIB_SET_ID	:= 33
 REQUIRES_LIB_SETS := GledCore Geom1 GTS Numerica Audio1

@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -42,7 +42,7 @@ public:
   void Forge(); // X{ED} 7 MButt()
 
 #include "GForger.h7"
-  ClassDef(GForger, 1)
+  ClassDef(GForger, 1);
 }; // endclass GForger
 
 

@@ -1,5 +1,5 @@
 /*
- * $Header$
+ * $Id$
  */
 
 #if !defined(_ACTC_H_)

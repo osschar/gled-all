@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -35,7 +35,7 @@ class ZLinkBase
 
   ZLinkBase& operator=(ZGlass* l) { _lens = l; return *this; }
 
-  ClassDef(ZLinkBase, 0)
+  ClassDef(ZLinkBase, 0);
 };
 
 template <class T>
@@ -92,7 +92,7 @@ class An_ID_Demangler
  public:
   virtual ~An_ID_Demangler() {}
   virtual ZGlass* DemangleID(ID_t) = 0;
-  ClassDef(An_ID_Demangler, 0)
+  ClassDef(An_ID_Demangler, 0);
 };
 
 class MIR_Priest
@@ -102,7 +102,7 @@ public:
   virtual ~MIR_Priest () {}
 protected:
   virtual void BlessMIR(ZMIR& mir) = 0;
-  ClassDef(MIR_Priest, 0)
+  ClassDef(MIR_Priest, 0);
 };
 
 /**************************************************************************/
@@ -222,7 +222,7 @@ public:
   // Saturnalia
   bool IsSunSpace();
   bool IsSunOrFireSpace();
- 
+
   virtual Int_t DetachedThreadNice(const ZMIR* mir) const { return 0; }
 
   // RefCount
@@ -270,7 +270,7 @@ public:
   public:
     virtual ~RayAbsorber() {}
     virtual void AbsorbRay(Ray& ray) = 0;
-    ClassDef(RayAbsorber, 0)
+    ClassDef(RayAbsorber, 0);
   };
   void register_ray_absorber  (RayAbsorber* ra);
   void unregister_ray_absorber(RayAbsorber* ra);
@@ -280,7 +280,7 @@ public:
   public:
     virtual ~NameChangeCB() {}
     virtual void name_change_cb(ZGlass* g, const TString& new_name) = 0;
-    ClassDef(NameChangeCB, 0)
+    ClassDef(NameChangeCB, 0);
   };
   void register_name_change_cb  (NameChangeCB* nccb);
   void unregister_name_change_cb(NameChangeCB* nccb);

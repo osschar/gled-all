@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 // std_auth.C ~ set-up of standard Gled auth mechanisms
 // requires: spawned saturn
 

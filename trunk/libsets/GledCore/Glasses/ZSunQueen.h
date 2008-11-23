@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -112,7 +112,7 @@ public:
 					     TString& identity);
 
 #include "ZSunQueen.h7"
-  ClassDef(ZSunQueen, 1) // The first queen of the Sun Absolute; handles authentication, identities and MEEs
+  ClassDef(ZSunQueen, 1); // The first queen of the Sun Absolute; handles authentication, identities and MEEs
 }; // endclass ZSunQueen
 
 

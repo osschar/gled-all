@@ -1,4 +1,4 @@
-// $Header$
+// $Id$
 
 // Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
 // This file is part of GLED, released under GNU General Public License version 2.
@@ -207,7 +207,7 @@ public:
                        set<Int_t>& visited_vertices,
                        set<Int_t>& accepted_vertices);
 
-  // Colorizers 
+  // Colorizers
 
   void ColorByCoord (RGBAPalette* pal, Int_t axis=2,
                      Float_t fac=1, Float_t offset=0); // X{E} C{1} 7 MCWButt(-join=>1)
