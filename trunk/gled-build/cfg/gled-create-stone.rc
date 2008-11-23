@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 class		=s	.	CLASSNAME	"CLASSNAME"
 base		=s	.	BASENAME	"BASENAME"
 skel		=s	.	SKELBASE	"<std>"

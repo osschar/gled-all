@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header$
+# $Id$
 # project7 pargen ... second reincarnation with bloated karma
 #                     expect improvements when perl6 is out
 
