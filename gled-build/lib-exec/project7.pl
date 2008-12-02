@@ -200,10 +200,13 @@ sub MunchArgs {
   for $a (@a) {
     my $sa = [];
 
-    # 0~whole type, 1~argname, 2~arg wo/ def value,
-    # 3~type wo/ const, 4~type wo/ const but with & sign, if it applies
-    # 5~actual text to be used as argument to the call in E_Exec (defaults
-    #   to argument name itself).
+    # 0 ~ Whole type.
+    # 1 ~ Argname.
+    # 2 ~ Arg wo/ def value.
+    # 3 ~ Type wo/ const.
+    # 4 ~ Type wo/ const but with & sign, if it applies.
+    # 5 ~ Actual text to be used as argument to the call in E_Exec, defaults
+    #     to argument name itself.
     # This is getting relly cludgy here
 
     @$sa = $a =~ m/(.*?\S)\s+(\S+\s*(?:=\s*.+)?)$/;
@@ -225,7 +228,7 @@ sub BeamArgs {
   my $ret  = "";
   for $r (@$ar) {
     if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
-      $ret .= "  $bufp->WriteArray($r->[2], $r->[2] ? strlen($r->[2])+1 : 0);\n";
+      $ret .= "  $bufp->WriteArray($r->[2], $r->[2] ? strlen($r->[2])+1 : -1);\n";
       next;
     }
 
@@ -269,11 +272,16 @@ sub QeamArgs {
     $ret .= "${prefix}";
 
     if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
-      $ret .= "Int_t $r->[2]_size; $bufvar >> $r->[2]_size;\n${prefix}".
-	      "std::vector<$puretype> $r->[2]($r->[2]_size + 1);\n${prefix}".
-	      "$bufvar.ReadFastArray(\&$r->[2]\[0\], $r->[2]_size);\n${prefix}".
-              "$r->[2]\[$r->[2]_size\] = 0;\n";
-      $r->[5] = "\&$r->[2]\[0\]";
+      $ret .= "$r->[3] $r->[2] = 0;\n${prefix}".
+              "Int_t _$r->[2]_size; $bufvar >> _$r->[2]_size;\n${prefix}".
+	      "std::vector<$puretype> _$r->[2]_vec;\n${prefix}".
+              "if (_$r->[2]_size >= 0) {\n${prefix}".
+              "  _$r->[2]_vec.resize(_$r->[2]_size + 1);\n${prefix}".
+	      "  $bufvar.ReadFastArray(\&_$r->[2]_vec\[0\], _$r->[2]_size);\n${prefix}".
+              "  _$r->[2]_vec\[_$r->[2]_size\] = 0;\n${prefix}".
+              "  name = \&_$r->[2]_vec\[0\];\n${prefix}".
+              "}\n";
+      ### $r->[5] = "\&$r->[2]\[0\]";
       next;
     }
 

@@ -96,18 +96,16 @@ Gled::Gled() :
   mSaturnInfo = new SaturnInfo;
   mSaturnInfo->SetHostName(gSystem->HostName());
 
-  FILE* p = gSystem->OpenPipe("GledNodeReport.pl cpuinfo meminfo", "r");
-  if(p != 0) {
-    char buf[80]; UShort_t frq, num, mem, swp;
-    fgets(buf, 80, p); char* nl = rindex(buf, 10); if(nl) *nl = 0;
-    fscanf(p, "%hu %hu %hu %hu", &frq, &num, &mem, &swp);
-    mSaturnInfo->SetCPU_Model(buf);
-    mSaturnInfo->SetCPU_Freq(frq);
-    mSaturnInfo->SetCPU_Num(num);
-    mSaturnInfo->SetMemory(mem);
-    mSaturnInfo->SetSwap(swp);
-    gSystem->ClosePipe(p);
-  }
+  SysInfo_t sys; gSystem->GetSysInfo(&sys);
+  MemInfo_t mem; gSystem->GetMemInfo(&mem);
+
+  mSaturnInfo->SetOS        (sys.fOS);
+  mSaturnInfo->SetCPU_Model (sys.fModel);
+  mSaturnInfo->SetCPU_Type  (sys.fCpuType);
+  mSaturnInfo->SetCPU_Freq  (sys.fCpuSpeed);
+  mSaturnInfo->SetCPU_Num   (sys.fCpus);
+  mSaturnInfo->SetMemory    (mem.fMemTotal);
+  mSaturnInfo->SetSwap      (mem.fSwapTotal);
 
   mLogFileName = "<stdout>"; mLogFile = 0;
   mOutFileName = "<stdout>"; mOutFile = 0;

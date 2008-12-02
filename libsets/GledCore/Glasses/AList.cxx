@@ -158,6 +158,20 @@ ZGlass* AList::GetElementByName(const TString& name)
   return 0;
 }
 
+Int_t AList::GetElementsByName(const TString& name, lpZGlass_t& dest)
+{
+  Int_t n = 0;
+  GMutexHolder lck(mListMutex);
+  Stepper<> s(this);
+  while(s.step()) {
+    if(name == s->RefName()) {
+      dest.push_back(*s);
+      ++n;
+    }
+  }
+  return n;
+}
+
 /**************************************************************************/
 
 void AList::DumpElements(Bool_t dump_zeros)

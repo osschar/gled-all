@@ -17,12 +17,10 @@ class GledMonitor : public Operator, public ZHisto
   MAC_RNR_FRIENDS(GledMonitor);
 
 private:
-  UInt_t	m_j[4];	//!
-
   void _init();
-  void _get_jiffies(UInt_t* j);
 
 protected:
+  Int_t         mCpuSampleTime; // X{GS} 7 Value(-range=>[0, 10000, 1])
   Bool_t	bFillHistos;	// X{GS} 7 Bool()
 
   // 7777 InstallHandler(GLED::Histo);

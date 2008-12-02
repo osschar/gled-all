@@ -1,3 +1,41 @@
+2008-12-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	This update requires 'make clean', if possible prior to update.
+
+	* bin/GledNodeReport.pl:
+	Removed obsolete helper-script - information now obtained via
+	TSystem.
+
+	* Glasses/AList.cxx:
+	* Glasses/AList.h:
+	Add new interface function that returns all elements with given
+	name:
+	  virtual Int_t GetElementsByName(const TString& name, lpZGlass_t& dest);
+	
+	* Glasses/GledMonitor.cxx:
+	* Glasses/GledMonitor.h:
+	Use TSystem to retrieve cpu and memory info.
+
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+	Sanitize GUI p7 pragmas to make layout clearer.
+
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	Replace internal map with multimap. This is a major change as it
+	removes the need for guessing what to do when an element with an
+	existing name is added into the container or an element is renamed
+	to another existing name.
+	Bool_t members bReplaceOnInsert and bReplaceOnRename have been
+	removed.
+	Bool_t member bWarnEqualName has been added.
+	When bKeepSorted is true, shoot a MIR to request sorting of the
+	parent list instead of calling it directly.
+	Added function member DumpNameMap().
+
+	* Gled/Gled.cxx:
+	Use TSystem to retrieve system and memory info.
+
 2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AList.h:

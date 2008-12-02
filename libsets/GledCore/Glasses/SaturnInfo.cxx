@@ -4,11 +4,6 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//______________________________________________________________________
-// SaturnInfo
-//
-// Saturnnfo glass represents a Saturn within a Gled cluster.
-
 #include "SaturnInfo.c7"
 #include "SaturnInfo.h"
 
@@ -18,6 +13,13 @@
 
 #include <TSocket.h>
 #include <TSystem.h>
+
+//______________________________________________________________________
+//
+// SaturnInfo glass represents a Saturn within a Gled cluster.
+//
+// It is mostly a data-holder, functionality mostly in Saturn, Kings
+// and Queens.
 
 ClassImp(SaturnInfo);
 
@@ -32,10 +34,11 @@ SaturnInfo::SaturnInfo(const Text_t* n, const Text_t* t) :
   mSunSpaceSize = mKingID = mFireKingID = 0;
   bUseAuth = false;
 
-  mCPU_Model = "<unknown>"; mCPU_Freq = mCPU_Num = 0;
+  mOS = mCPU_Model = mCPU_Type = "<unknown>";
+  mCPU_Freq = mCPU_Num = 0;
   mMemory = mSwap = mMFree = mSFree = 0;
   mLAvg1 = mLAvg5 = mLAvg15 = 0;
-  mCU_Total = mCU_User = mCU_Nice = mCU_Sys = 0;
+  mCU_Total = mCU_User = mCU_Nice = mCU_Sys = mCU_Idle = 0;
 
   mMaster = 0; mMoons = 0; mEyes = 0;
 }
@@ -165,27 +168,18 @@ void SaturnInfo::ReceiveBeamResult(UInt_t req_handle)
 
 /**************************************************************************/
 
-void SaturnInfo::TellAverages()
+void SaturnInfo::TellAverages(Int_t sample_time)
 {
   // Sort-of-a demo for Beam Result facility.
+  // Executes in a detached thread.
 
   static const Exc_t _eh("SaturnInfo::TellAverages ");
 
   assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
-  UInt_t  j[4];
-  Float_t l[3] = {0,0,0};
-  FILE* p = gSystem->OpenPipe("GledNodeReport.pl cpureport", "r");
-  if(p != 0) {
-    fscanf(p, "%u %u %u %u", &j[0], &j[1], &j[2], &j[3]);
-    fscanf(p, "%f %f %f", &l[0], &l[1], &l[2]);
-  }
-  gSystem->ClosePipe(p);
-
+  CpuInfo_t cpu; gSystem->GetCpuInfo(&cpu, sample_time);
 
   TBufferFile ret(TBuffer::kWrite);
-  ret << l[0] << l[1] << l[2];
+  ret << cpu.fLoad1m << cpu.fLoad5m << cpu.fLoad15m;
   mSaturn->ShootMIRResult(ret);
 }
-
-/**************************************************************************/
