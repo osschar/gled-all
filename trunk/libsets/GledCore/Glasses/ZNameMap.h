@@ -28,16 +28,19 @@ protected:
 
   //----------------------------------------------------------------------
 
-  Bool_t      bKeepSorted;      // X{GE} 7 Bool()
-  Bool_t      bReplaceOnInsert; // X{GS} 7 Bool(-join=>1)
-  Bool_t      bReplaceOnRename; // X{GS} 7 Bool()
+  Bool_t      bKeepSorted;      // X{GE} 7 Bool(-join=>1)
+  Bool_t      bWarnEqualName;   // X{GS} 7 Bool()
 
 #ifndef __CINT__
-  typedef map<TString, ZList::iterator>           mName2Iter_t;
-  typedef map<TString, ZList::iterator>::iterator mName2Iter_i;
+  typedef multimap<TString, ZList::iterator>           mName2Iter_t;
+  typedef multimap<TString, ZList::iterator>::iterator mName2Iter_i;
+  typedef pair<TString, ZList::iterator>               mName2Iter_pair;
+  typedef pair<mName2Iter_i, mName2Iter_i>             mName2Iter_i_pair;
 
   mName2Iter_t mItMap; //!
 #endif
+
+  void shoot_sort_mir();
 
 public:
   ZNameMap(const Text_t* n="ZNameMap", const Text_t* t=0) : ZList(n,t)
@@ -45,16 +48,17 @@ public:
 
   void SetKeepSorted(Bool_t keep_sorted);
 
-  virtual void    Add(ZGlass* lens); // Exported in AList
-
-  virtual ZGlass* GetElementByName(const TString& name);
+  virtual ZGlass* GetElementByName (const TString& name);
+  virtual Int_t   GetElementsByName(const TString& name, lpZGlass_t& dest);
 
   virtual void SortByName();
+
+  void DumpNameMap(); // X{E} 7 MButt()
 
   //----------------------------------------------------------------------
 
   // ZGlass::NameChangeCB
-  virtual void name_change_cb(ZGlass* g, const TString& new_name);
+  virtual void name_change_cb(ZGlass* lens, const TString& new_name);
 
 #include "ZNameMap.h7"
   ClassDef(ZNameMap, 1);

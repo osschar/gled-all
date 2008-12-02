@@ -201,7 +201,8 @@ public:
   }
 
   // Searching of elements by name.
-  virtual ZGlass* GetElementByName(const TString& name);
+  virtual ZGlass* GetElementByName (const TString& name);
+  virtual Int_t   GetElementsByName(const TString& name, lpZGlass_t& dest);
 
   void DumpElements(Bool_t dump_zeros=false); //! X{E} 7 MCWButt()
 

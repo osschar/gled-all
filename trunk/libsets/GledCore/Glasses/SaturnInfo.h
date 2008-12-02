@@ -17,7 +17,8 @@ class EyeInfo;
 class Saturn;
 class TSocket;
 
-class SaturnInfo : public ZMirEmittingEntity {
+class SaturnInfo : public ZMirEmittingEntity
+{
   MAC_RNR_FRIENDS(SaturnInfo);
 
   friend class ZKing; friend class ZSunQueen; friend class ZQueen;
@@ -39,41 +40,43 @@ protected:
 
   // Saturn config
 
-  TString	mHostName;	// X{GSR} 7 TextOut(-join=>1)
-  Int_t		mServerPort;	// X{GS}  7 ValOut(-range=>[0,65535,1])
+  TString	mHostName;	// X{GSR} 7 TextOut()
+  Int_t		mServerPort;	// X{GS}  7 ValOut(-range=>[0,65535,1], -join=>1)
   Int_t         mServPortScan;  // X{GS}  7 Value(-range=>[0,256,1])
 
-  TString	mMasterName;	// X{GSR} 7 TextOut(-join=>1)
+  TString	mMasterName;	// X{GSR} 7 TextOut()
   Int_t		mMasterPort;	// X{GS}  7 ValOut(-range=>[0,65535,1,1])
 
   ID_t		mSunSpaceSize;	// X{GS}  7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
-  ID_t		mKingID;	// X{G}   7 ValOut(-range=>[0,MAX_ID,1,0],
-                                //                -width=>10, -join=>1)
-  ID_t		mFireKingID;	// X{G}   7 ValOut(-range=>[0,MAX_ID,1,0],
-                                //                -width=>10)
-  Bool_t	bUseAuth;	// Only relevant for Sun Absolute; set for all SaturnInfos on mee incarnation
-				// X{GS}  7 BoolOut()
+  ID_t		mKingID;	// X{G}   7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
+  ID_t		mFireKingID;	// X{G}   7 ValOut(-range=>[0,MAX_ID,1,0], -width=>10)
+
+  // Only relevant for Sun Absolute; set for all SaturnInfos on mee incarnation.
+  Bool_t	bUseAuth;	// X{GS}  7 BoolOut()
 
   // Node info
 
+  TString       mOS;            // X{GS} 7 TextOut()
   TString	mCPU_Model;	// X{GS} 7 TextOut()
-  UShort_t	mCPU_Freq;	// X{GS} 7 ValOut(-width=>4, -join=>1)
-  UShort_t	mCPU_Num;	// X{GS} 7 ValOut(-width=>4)
+  TString	mCPU_Type;	// X{GS} 7 TextOut()
+  UShort_t	mCPU_Freq;	// X{GS} 7 ValOut(-width=>6, -join=>1)
+  UShort_t	mCPU_Num;	// X{GS} 7 ValOut(-width=>6)
 
-  UShort_t	mMemory;	// X{GS} 7 ValOut(-width=>4, -join=>1)
-  UShort_t	mSwap;		// X{GS} 7 ValOut(-width=>4)
+  UShort_t	mMemory;	// X{GS} 7 ValOut(-width=>6, -join=>1)
+  UShort_t	mSwap;		// X{GS} 7 ValOut(-width=>6)
 
-  UShort_t	mMFree;		// X{GS} 7 ValOut(-width=>4, -join=>1)
-  UShort_t	mSFree;		// X{GS} 7 ValOut(-width=>4)
+  UShort_t	mMFree;		// X{GS} 7 ValOut(-width=>6, -join=>1)
+  UShort_t	mSFree;		// X{GS} 7 ValOut(-width=>6)
 
-  Float_t	mLAvg1;		// X{GS} 7 ValOut(-width=>4, -join=>1)
-  Float_t	mLAvg5;		// X{GS} 7 ValOut(-width=>4, -join=>1)
-  Float_t	mLAvg15;	// X{GS} 7 ValOut(-width=>4)
+  Float_t	mLAvg1;		// X{GS} 7 ValOut(-width=>5, -join=>1)
+  Float_t	mLAvg5;		// X{GS} 7 ValOut(-width=>5, -join=>1)
+  Float_t	mLAvg15;	// X{GS} 7 ValOut(-width=>5)
 
-  Float_t	mCU_Total;	// X{GS} 7 ValOut(-width=>4, -join=>1)
-  Float_t	mCU_User;	// X{GS} 7 ValOut(-width=>4)
-  Float_t	mCU_Nice;	// X{GS} 7 ValOut(-width=>4, -join=>1)
-  Float_t	mCU_Sys;	// X{GS} 7 ValOut(-width=>4)
+  Float_t	mCU_Total;	// X{GS} 7 ValOut(-width=>6, -join=>1)
+  Float_t	mCU_User;	// X{GS} 7 ValOut(-width=>6)
+  Float_t	mCU_Nice;	// X{GS} 7 ValOut(-width=>6, -join=>1)
+  Float_t	mCU_Sys;	// X{GS} 7 ValOut(-width=>6)
+  Float_t	mCU_Idle;	// X{GS} 7 ValOut(-width=>6)
 
   // Cluster structure
 
@@ -99,12 +102,11 @@ public:
 
   void ReceiveBeamResult(UInt_t req_handle); // X{E} T{MEE::Self}
 
-  void TellAverages(); // X{E}
+  void TellAverages(Int_t sample_time=500); // X{Ed}
 
 #include "SaturnInfo.h7"
   ClassDef(SaturnInfo, 1);
 }; // endclass SaturnInfo
-
 
 typedef list<SaturnInfo*>		lpSaturnInfo_t;
 typedef list<SaturnInfo*>::iterator	lpSaturnInfo_i;
