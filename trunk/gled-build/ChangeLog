@@ -1,3 +1,15 @@
+2008-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Fix incomplete code template from previous commit.
+
+2008-12-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec/project7.pl:
+	Modify handling of "char*" arguments so that value 0 is passed
+	across correctly - with the previous change here it was passed as
+	an empty string "".
+
 2008-11-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:

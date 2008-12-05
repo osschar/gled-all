@@ -279,7 +279,7 @@ sub QeamArgs {
               "  _$r->[2]_vec.resize(_$r->[2]_size + 1);\n${prefix}".
 	      "  $bufvar.ReadFastArray(\&_$r->[2]_vec\[0\], _$r->[2]_size);\n${prefix}".
               "  _$r->[2]_vec\[_$r->[2]_size\] = 0;\n${prefix}".
-              "  name = \&_$r->[2]_vec\[0\];\n${prefix}".
+              "  $r->[2] = \&_$r->[2]_vec\[0\];\n${prefix}".
               "}\n";
       ### $r->[5] = "\&$r->[2]\[0\]";
       next;
