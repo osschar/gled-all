@@ -1,3 +1,14 @@
+2008-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	Write Makefile.config instead of Makefile which is now
+	hand-written.
+	This should make it easier to properly write install targets.
+
+	* Makefile:
+	New file - contains gled-build targets, Makefile.config generated
+	by configure is included to pick up build specific settings.
+
 2008-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* lib-exec/project7.pl:
