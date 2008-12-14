@@ -21,7 +21,7 @@ LIBSET_DIR	= ${GLEDSYS}/${LIB_SET_NAME}
 ABOVE_BASE_LIBS	= $(addprefix -l, ${REQUIRES_LIB_SETS})
 ABOVE_VIEW_LIBS	= $(addsuffix _View, $(addprefix -l, ${REQUIRES_LIB_SETS}))
 
-BUILD_INSTALL_DIRS += perllib cfg lib-exec
+BUILD_INSTALL_DIRS += perllib cfg libexec
 INSTALL_DIRS	   += lib bin macros cfg perllib
 
 ##########################################################################

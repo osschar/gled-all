@@ -4,7 +4,7 @@ use lib "$ENV{GLEDSYS}/perllib";
 use Gled_ConfCat_Parser;
 use ParseConfig;
 
-my $def_cfg = "$ENV{GLEDSYS}/cfg/gled-htmldoc-create.rc";
+my $def_cfg = "$ENV{GLEDSYS}/cfg/gled-generate-htmldoc.rc";
 my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg);
 $cfg_parser->parse();
 

@@ -22,12 +22,12 @@ endif
 # CXX, CC taken from environment; LD set by configure
 SHELL		= /bin/sh
 
-libexecdir 	= ${GLEDSYS}/lib-exec
+libexecdir 	= ${GLEDSYS}/libexec
 MKDEP		= ${ROOTSYS}/bin/rmkdepend
-MKBLESSDEP	= ${libexecdir}/mk_bless_dep.pl
-MKP7DEP		= ${libexecdir}/mk_p7_dep.pl
-MKDICTDEP	= ${libexecdir}/mk_dict_dep.pl
-MKDICTGEN	= ${libexecdir}/mk_dict_gen.pl
+MKBLESSDEP	= ${libexecdir}/gled_mk_bless_dep.pl
+MKP7DEP		= ${libexecdir}/gled_mk_p7_dep.pl
+MKDICTDEP	= ${libexecdir}/gled_mk_dict_dep.pl
+MKDICTGEN	= ${libexecdir}/gled_mk_dict_gen.pl
 P7		= ${libexecdir}/project7.pl
 GLEDCATGEN	= ${libexecdir}/gled_cat_gen.pl
 GLEDGLUEGEN	= ${libexecdir}/gled_glue_gen.pl
