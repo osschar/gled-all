@@ -1,3 +1,16 @@
+2008-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* lib-exec:
+	* libexec:
+	Renamed directory.
+
+	* perllib/GLED_Widgets.pm:
+	* perllib/GLED_GledCore_Widgets.pm:
+	Renamed for consistency.
+
+	* perllib/Weed.p7:
+	Removed obsolete file.
+
 2008-12-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	This update requires 'make clean', if possible prior to update.
