@@ -38,7 +38,7 @@ build_uninstall:
 install::
 	${ECHO} -I- Installing
 ifeq (${GLED_SYSTEM},Darwin)
-	${MUTE} cd lib; ${GLEDSYS}/lib-exec/gled_liblink.sh .dylib .so
+	${MUTE} cd lib; ${GLEDSYS}/libexec/gled_liblink.sh .dylib .so
 endif
 	${MUTE} ${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
 	${MUTE} echo ${LIB_SET_NAME} > ${GLEDSYS}/lib/.${LIB_SET_ID}

@@ -1,3 +1,10 @@
+2008-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Rename all lib-exec/ directories to libexec/, fix affected build
+	files.
+
+	Use cannonical names for scripts and perl-modules.
+
 2008-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
