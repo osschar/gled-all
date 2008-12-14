@@ -486,7 +486,7 @@ for $f ((map {"$config->{GLEDBASE}/$_"} @{$resolver->{BaseLibSetList}}),
     Gled_ConfCat_Parser::parse_catalog($f);
     $resolver->{LibID2LibSetName}{$CATALOG->{LibID}} = $CATALOG->{LibSetName};
     for $c (@{$CATALOG->{ClassList}}) {
-      my $p7_path   = "$ENV{GLEDSYS}/lib-exec/project7.pl";
+      my $p7_path   = "$ENV{GLEDSYS}/libexec/project7.pl";
       my $file_stem = "$ENV{GLEDSYS}/$f/$CATALOG->{Classes}{$c}{Stem}";
       $resolver->{GlassName2GlassSpecs}{$c} =
 	{
