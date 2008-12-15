@@ -115,7 +115,8 @@ public:
   { return 0; }
 
   virtual TCanvas*
-  NewCanvas(const Text_t* name="Canvas", const Text_t* title=0,
+  NewCanvas(const Text_t* name ="Gled Canvas",
+            const Text_t* title="Default Gled Canvas",
 	    int w=640, int h=480, int npx=1, int npy=1)
   { return 0; }
 

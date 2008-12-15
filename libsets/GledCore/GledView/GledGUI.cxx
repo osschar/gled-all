@@ -15,7 +15,6 @@
 
 #include <TROOT.h>
 #include <TSystem.h>
-#include <TVirtualX.h>
 #include <TCanvas.h>
 
 #include <FL/Fl.H>
@@ -504,23 +503,20 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 TCanvas* GledGUI::NewCanvas(const Text_t* name, const Text_t* title,
 			    int w, int h, int npx, int npy)
 {
-#ifndef __APPLE__
-  XSync((Display*)fl_display, 0);
-#endif
+  // This does not seem to be working perfectly.
+  // Suspect this should really be called via timer and
+  // an additional method that would make the canvas, put it in some
+  // location and signal a condition that would return here.
 
-  Display* rd = (Display*) gVirtualX->GetDisplay();
-  XLockDisplay(rd);
-
-  TCanvas* c = new TCanvas(name, title, w, h);
+  TCanvas* c = dynamic_cast<TCanvas*>((TObject*)
+     gROOT->ProcessLineFast(GForm("new TCanvas(\"%s\", \"%s\", %d, %d); ",
+                                  name, title, w, h)));
 
   if(c && (npx>1 || npy>1)) {
     c->Divide(npx,npy);
     c->cd(1);
+    c->Update();
   }
-  c->Update();
-
-  XSync(rd, 0);
-  XUnlockDisplay(rd);
 
   return c;
 }
@@ -547,19 +543,4 @@ void GledGUI::UnlockFltk()
 {
   Fl::awake();
   Fl::unlock();
-}
-
-/******************************************************************************/
-
-void GledGUI::LockRootDisplay()
-{
-  Display* rd = (Display*) gVirtualX->GetDisplay();
-  XLockDisplay(rd);
-}
-
-void GledGUI::UnlockRootDisplay()
-{
-  Display* rd = (Display*) gVirtualX->GetDisplay();
-  XSync(rd, 0);
-  XUnlockDisplay(rd);
 }

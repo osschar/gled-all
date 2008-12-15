@@ -79,16 +79,14 @@ public:
 			    const char* libset, const char* eyector);
 
   virtual TCanvas*
-  NewCanvas(const Text_t* name="Canvas", const Text_t* title=0,
+  NewCanvas(const Text_t* name ="Gled Canvas",
+            const Text_t* title="Default Gled Canvas",
 	    int w=640, int h=480, int npx=1, int npy=1);
 
   virtual int handle(int ev);
 
   virtual void LockFltk();
   virtual void UnlockFltk();
-
-  virtual void LockRootDisplay();
-  virtual void UnlockRootDisplay();
 
   static GledGUI* theOne;
 
