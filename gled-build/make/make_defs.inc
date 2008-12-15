@@ -35,9 +35,11 @@ GLEDGLUEGEN	= ${libexecdir}/gled_glue_gen.pl
 CPPFLAGSGEN	= ${libexecdir}/gled_conf_dumper.pl cppflags
 
 GLED_INSTALL	= ${libexecdir}/gled_install.pl
+GLED_SYMLINK	= ${libexecdir}/gled_symlink.pl
 GLED_UNINSTALL	= ${libexecdir}/gled_uninstall.pl
 
 ROOT_CONFIG     = ${ROOTSYS}/bin/root-config
+FLTK_CONFIG     = fltk-config
 FLUID   	= fluid
 
 
@@ -48,7 +50,9 @@ ifdef CONFIG_DONE
 LOCALINCL +=  $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
 endif
 
-INCL	  = ${LOCALINCL} -I${ROOTSYS}/include -I${X11INCDIR}
+ROOTINCL  = -I$(shell ${ROOT_CONFIG} --incdir)
+
+INCL	  = ${LOCALINCL} ${ROOTINCL}
 DEFINES   = -D_REENTRANT -D_GNU_SOURCE -DGL_GLEXT_PROTOTYPES
 CPPFLAGS += ${DEFINES} ${INCL} ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
 CXXFLAGS += -Wall -fPIC -pipe ${USER_CXX_FLAGS}
@@ -79,13 +83,12 @@ export MUTE ECHO
 # Basic external libraries
 ##########################################################################
 
-# X11LIB, FLLIB, *_CONF set by configure
-
-GLLIB	  = -lGL -lGLU
 ROOTLIBS  = $(shell ${ROOT_CONFIG} --noauxlibs --libs)
-ROOTGLIBS = -lGui -lGX11 ${ROOTGLIBS_CONF}
+ROOTGLIBS = $(shell ${ROOT_CONFIG} --noauxlibs --glibs)
 
-GUILIBS	= ${X11LIB} ${FLLIB} ${GLLIB}
+FLTKLIBS  = $(shell ${FLTK_CONFIG} --ldflags --use-gl) -lfltk-mt
+GUILIBS	  = ${FLTKLIBS}
+
 SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
 
 ##########################################################################
