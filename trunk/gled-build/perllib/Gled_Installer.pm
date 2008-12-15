@@ -47,6 +47,39 @@ sub install_dirs {
   }
 }
 
+sub symlink_dirs {
+  my $dest_dir   = shift;
+  my $source_dir = shift;
+  my @dirs = @_;
+
+  # For each $dir in @dirs, symlink all files found in $source/$dir
+  # to $dest/$dir
+
+  for $d (@dirs) {
+    unless( opendir D, "$source_dir/$d" ) {
+      # print "Gled_Installer::install_dirs $source_dir/$d not found ... skipping\n";
+      next;
+    }
+    my @files = readdir D;
+    closedir D;
+    @files = grep (-f "$source_dir/$d/$_", @files);
+    @files = filter_files(@files);
+    @files = map  ("$source_dir/$d/$_", @files);
+
+    if($#files < 0) {
+      # print "Gled_Installer::install_dirs $source_dir/$d empty ... skipping\n";
+      next;
+    }
+
+    unless(-d "$dest_dir/$d") {
+      system("mkdir $dest_dir/$d")
+	and croak "creation of $dest_dir/$d failed";
+    }
+    system("ln", "-sf", @files, "$dest_dir/$d")
+      and croak "copy to $dest_dir/$d failed";
+  }
+}
+
 sub uninstall_dirs {
   my $dest_dir   = shift;
   my $source_dir = shift;

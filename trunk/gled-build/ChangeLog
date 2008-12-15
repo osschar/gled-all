@@ -1,3 +1,17 @@
+2008-12-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/gled_symlink.pl:
+	New script - make files available via symlinking.
+
+	* configure:
+	Remove search for X11 and related output to make_config.inc.
+
+	* make/make_defs.inc:
+	Use fltk-config and root-config to determine cpp and ld flags.
+
+	* perllib/Gled_Installer.pm:
+	Add sub symlink_dirs.
+
 2008-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Rename all lib-exec/ directories to libexec/, fix affected build

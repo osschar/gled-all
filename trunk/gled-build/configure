@@ -116,42 +116,12 @@ sub collect_dependencies {
 
 ########################################################################
 
-sub find_x11lib {
-  if($system eq 'Linux') {
-    my $xlib = "libX11.so";
-    my @l = `ldd $ENV{ROOTSYS}/lib/libGX11.so | grep $xlib`;
-    die "find_x11lib found several possible $xlib" if($#l != 0);
-    my $l = $l[0]; $l =~ s/^\s*//;
-    my @p = split /\s+/, $l;
-    my $p = $p[2];
-    $p =~ s!/[^/]*$!!;
-    return $p;
-  }
-  elsif($system eq 'Darwin') {
-    my $xlib = "libX11.[0-9]+.dylib";
-    my @l = `otool -L $ENV{ROOTSYS}/lib/libGX11.so | grep -E '$xlib'`;
-    die "find_x11lib found several possible $xlib" if($#l != 0);
-    my $l = $l[0]; $l =~ s/^\s*//;
-    my @p = split /\s+/, $l;
-    my $p = $p[0];
-    $p =~ s!/[^/]*$!!;
-    return $p;
-  }
-  croak "Unknown system."
-}
-
-########################################################################
-
 sub system_make_config {
   if($system eq 'Linux') {
     return <<"fnord";
 LD          = \${CXX}
 LDSHAREDOPT = -shared
 LDEXT       = so
-
-X11LIB      = -L\${X11LIBDIR} -lX11 -lXext -lXpm
-FLLIB       = -lfltk -lfltk_gl -lfltk-mt
-ROOTGLIBS_CONF =
 fnord
   }
   elsif($system eq 'Darwin') {
@@ -159,11 +129,6 @@ fnord
 LD          = \${CXX}
 LDSHAREDOPT = -dynamiclib -undefined dynamic_lookup
 LDEXT       = dylib
-
-X11LIB      = -L\${X11LIBDIR} -lX11
-FLLIB       = -framework Carbon -framework ApplicationServices \\
-              -lfltk -lfltk_gl -lfltk-mt
-ROOTGLIBS_CONF = -lfreetype
 fnord
   }
   croak "Unknown system."
@@ -270,9 +235,6 @@ if($config->{RECONFIGURE} == 0) {
   my $skipview = $config->{NOVIEWLIBS} ? "true" : "";
   my $skiprnr  = $config->{NORNRLIBS}  ? "true" : "";
 
-  my $x11inc = "/usr/X11R6/include";
-  my $x11lib = find_x11lib();
-
   my @ext_areas = split(':', $config->{EXTERNAL});
   my @user_cpp_elms;
   push @user_cpp_elms, "-DDEBUG" if($config->{DEBUG});
@@ -296,9 +258,6 @@ if($config->{RECONFIGURE} == 0) {
   print MC <<"fnord";
 SKIP_VIEW_LIBS := $skipview
 SKIP_RNR_LIBS  := $skiprnr
-
-X11INCDIR := $x11inc
-X11LIBDIR := $x11lib
 
 GLUE_DIR := $config->{GLUE_DIR}
 DICT_DIR := $config->{DICT_DIR}
