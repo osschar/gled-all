@@ -1,3 +1,83 @@
+2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Removed files - use VSD created from alieve.
+
+	* Glasses/ITSDigRnrMod.cxx:
+	* Glasses/ITSDigRnrMod.h:
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+	* Glasses/ITSScaledModule.cxx:
+	* Glasses/ITSScaledModule.h:
+	* Glasses/Menu.cxx:
+	* Glasses/Menu.h:
+	* Glasses/MenuDriver.cxx:
+	* Glasses/MenuDriver.h:
+	* Glasses/TOFDigRnrMod.cxx:
+	* Glasses/TOFDigRnrMod.h:
+	* Glasses/TOFSector.cxx:
+	* Glasses/TOFSector.h:
+	* Glasses/TPCPadRow.cxx:
+	* Glasses/TPCPadRow.h:
+	* Glasses/TPCSegFrame.cxx:
+	* Glasses/TPCSegFrame.h:
+	* Glasses/TPCSegRnrMod.cxx:
+	* Glasses/TPCSegRnrMod.h:
+	* Glasses/TPCSegment.cxx:
+	* Glasses/TPCSegment.h:
+	* Glasses/UINodeLink.cxx:
+	* Glasses/UINodeLink.h:
+	* Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/ITSDigRnrMod_GL_Rnr.h:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.h:
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.h:
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	* Rnr/GL/TOFSector_GL_Rnr.h:
+	* Rnr/GL/TPCPadRow_GL_Rnr.cxx:
+	* Rnr/GL/TPCPadRow_GL_Rnr.h:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.h:
+	* Rnr/GL/TPCSegRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegRnrMod_GL_Rnr.h:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+	* Rnr/GL/UINodeLink_GL_Rnr.cxx:
+	* Rnr/GL/UINodeLink_GL_Rnr.h:
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+	* Stones/TOFDigitsInfo.cxx:
+	* Stones/TOFDigitsInfo.h:
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+	Removed files - raw data visualization dropped from gled.
+
+	* Stones/MCParticle.cxx:
+	* Stones/MCParticle.h:
+	Removed - TEveMCTrack used now. In fact TEveMCTrack was made
+	from MCParticle once.
+
+	* Makefile:
+	Remove all ALICE cruft - AliRoot not needed anymore.
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+	Adapt to the above changes.
+
+	* glass.list:
+	Unregister removed glasses.
+
 2007-07-04  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/AliConverter.cxx:

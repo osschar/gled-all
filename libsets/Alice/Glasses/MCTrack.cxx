@@ -27,7 +27,7 @@ void MCTrack::_init()
   mNDaughters = 0;
 }
 
-MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t) :
+MCTrack::MCTrack(TEveMCTrack* p, const Text_t* n, const Text_t* t) :
   TrackBase(n,t) 
 {
   _init();
@@ -37,10 +37,10 @@ MCTrack::MCTrack(MCParticle* p, const Text_t* n, const Text_t* t) :
     p->ResetPdgCode(); pdgp = p->GetPDG();
   }
   mParticle = p;
-  SetName(GForm("%s %d", pdgp->GetName(),p->GetLabel()));
+  SetName(GForm("%s %d", pdgp->GetName(), p->fLabel));
 
   mNDaughters = p->GetNDaughters();
-  if(mParticle->bDecayed) mVDecay = GForm("% 4.f, % 4.f, % 4.f", mParticle->fDx, mParticle->fDy, mParticle->fDz);
+  if(mParticle->fDecayed) mVDecay = GForm("% 4.f, % 4.f, % 4.f", mParticle->fVDecay.fX, mParticle->fVDecay.fY, mParticle->fVDecay.fZ);
   mV = GForm("% 4.f, % 4.f, % 4.f", mParticle->Vx(), mParticle->Vy(), mParticle->Vz());
   mP = GForm("% 6.3f, % 6.3f, % 6.3f", mParticle->Px(), mParticle->Py(), mParticle->Pz());
 }
@@ -57,7 +57,7 @@ void MCTrack::ImportDaughters(VSDSelector* sel)
   Int_t d0 =  mParticle->GetDaughter(0), d1 = mParticle->GetDaughter(1);
   if ( mParticle->GetNDaughters() == 0 ) return;
   for(int i=d0; i<=d1; ++i) {
-    MCParticle* tp = sel->Particle(i);
+    TEveMCTrack* tp = sel->Particle(i);
     MCTrack* p = new MCTrack(tp, GForm("%d %s", i, tp->GetName())); 
     mQueen->CheckIn(p);Add(p);
   }
@@ -76,7 +76,7 @@ void MCTrack::ImportDaughtersRec(VSDSelector* sel)
   if ( mParticle->GetNDaughters() == 0 ) return;
   for(int i=d0; i<=d1; ++i) {
     // printf("%s ImportDaughtersRec :: new particle idx %d \n",GetName(), i);
-    MCParticle* tp = sel->Particle(i);
+    TEveMCTrack* tp = sel->Particle(i);
     MCTrack* p = new MCTrack(tp, GForm("%d %s", i, tp->GetName())); 
     mQueen->CheckIn(p);Add(p);
     p->ImportDaughtersRec(sel);
@@ -86,7 +86,7 @@ void MCTrack::ImportDaughtersRec(VSDSelector* sel)
 
 /**************************************************************************/
 
-void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
+void MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 {
   static const Exc_t _eh("MCTrack::ImportHits ");
   if (sel == 0) {
@@ -104,7 +104,7 @@ void  MCTrack::ImportHits(VSDSelector* sel, Bool_t from_primary)
 
 /**************************************************************************/
 
-void  MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
+void MCTrack::ImportClusters(VSDSelector* sel, Bool_t from_primary)
 {
   static const Exc_t _eh("MCTrack::ImportClusters ");
   if (sel == 0) {
@@ -126,19 +126,19 @@ void MCTrack::SetDecayFromDaughter()
 {
   MCTrack* last_d = dynamic_cast<MCTrack*>(BackElement());
   if(last_d) {
-    mParticle->SetDecayed(true);
-    mParticle->fDx = last_d->mParticle->Vx();
-    mParticle->fDy = last_d->mParticle->Vy();
-    mParticle->fDz = last_d->mParticle->Vz();
+    mParticle->fDecayed = true;
+    mParticle->fVDecay.fX = last_d->mParticle->Vx();
+    mParticle->fVDecay.fY = last_d->mParticle->Vy();
+    mParticle->fVDecay.fZ = last_d->mParticle->Vz();
   } else {
-    mParticle->SetDecayed(false);
+    mParticle->fDecayed = false;
   }
   mStampReqTring = Stamp(FID());
 }
 
 void MCTrack::ClearDecay()
 {
-  mParticle->SetDecayed(false);
+  mParticle->fDecayed = false;
   mStampReqTring = Stamp(FID());
 }
 
@@ -155,9 +155,9 @@ void MCTrack::Dump()
   
   printf("MCTrack %s, decay  v(%3.f, %3.f, %3.f), p(%6.4f, %6.4f, %6.4f), t(%f) \n",
 	 GetName(),
-	 mParticle->fDx,  mParticle->fDy,  mParticle->fDz,
-	 mParticle->fDPx, mParticle->fDPy, mParticle->fDPz,
-	 mParticle->fDt);
+	 mParticle->fVDecay.fX, mParticle->fVDecay.fY, mParticle->fVDecay.fZ,
+	 mParticle->fPDecay.fX, mParticle->fPDecay.fY, mParticle->fPDecay.fZ,
+	 mParticle->fTDecay);
  
 }
 

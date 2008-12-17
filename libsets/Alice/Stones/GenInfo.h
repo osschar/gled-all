@@ -7,9 +7,6 @@
 #ifndef Alice_GenInfo_H
 #define Alice_GenInfo_H
 
-#include <Stones/MCParticle.h>
-#include <Stones/ESDParticle.h>
-
 #include <TObject.h>
 
 class GenInfo : public TObject {

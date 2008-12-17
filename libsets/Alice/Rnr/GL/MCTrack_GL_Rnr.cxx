@@ -39,7 +39,7 @@ namespace {
 
 void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 {
-  MCParticle* p = mMCTrack->mParticle;
+  TEveMCTrack* p = mMCTrack->mParticle;
   Bool_t show_p = true;
 
   MCTrackRnrStyle& RS = * (MCTrackRnrStyle*) mParticleRMS.lens();
@@ -149,7 +149,7 @@ void MCTrack_GL_Rnr::Render(RnrDriver* rd)
 
 void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
 {
-  MCParticle* p = mMCTrack->mParticle;
+  TEveMCTrack* p = mMCTrack->mParticle;
   Float_t px = p->Px(), py=p->Py(), pz=p->Pz();  
   MCVertex  mc_v0;
   mc_v0.x = p->Vx();
@@ -170,7 +170,7 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
       mMCTrack->CopyListByGlass<MCTrack>(dts);
       for(list<MCTrack*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
 	GLensReadHolder _rlck(*i);
-	MCParticle* d = (*i)->mParticle;
+	TEveMCTrack* d = (*i)->mParticle;
 	if (in_bounds) {
 	  helix.init(TMath::Sqrt(px*px+py*py), pz);
 	  in_bounds = helix.loop_to_vertex(px,py,pz, d->Vx(),d->Vy(),d->Vz());
@@ -188,15 +188,15 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
     }
 
     //case 2
-    if(RS.mFitDecay && p->bDecayed) {
+    if(RS.mFitDecay && p->fDecayed) {
       helix.init(TMath::Sqrt(px*px+py*py), pz);
-      helix.loop_to_vertex(px, py, pz, p->fDx, p->fDy, p->fDz);
+      helix.loop_to_vertex(px, py, pz, p->fVDecay.fX, p->fVDecay.fY, p->fVDecay.fZ);
       //printf("%s decay offset(%f,%f), steps %d \n",mMCTrack->GetName(),helix.x_off, helix.y_off, helix.fN);
     }
 
     // case 3
     if((RS.mFitDaughters == false && RS.mFitDecay == false) ||
-       p->bDecayed == false) 
+       p->fDecayed == false) 
       {
 	helix.init(TMath::Sqrt(px*px + py*py), pz);
 	helix.loop_to_bounds(px, py, pz);
@@ -212,7 +212,7 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
       Bool_t inside = true;
       for(list<MCTrack*>::iterator i=dts.begin(); i!=dts.end(); ++i) {
 	GLensReadHolder _rlck(*i);
-	MCParticle* d = (*i)->mParticle;
+	TEveMCTrack* d = (*i)->mParticle;
         if(inside) {
 	  inside = line.in_bounds(d->Vx(),d->Vy(), d->Vz());
 	  line.goto_vertex(d->Vx(), d->Vy(), d->Vz());
@@ -229,9 +229,9 @@ void MCTrack_GL_Rnr::make_track(RnrDriver* rd)
     }
 
     // draw line to the final point if daugter has not reached the boundaries
-    if(RS.mFitDecay && p->bDecayed) {
-      if(line.in_bounds(p->fDx, p->fDy, p->fDz)) {
-	line.goto_vertex(p->fDx, p->fDy, p->fDz);
+    if(RS.mFitDecay && p->fDecayed) {
+      if(line.in_bounds(p->fVDecay.fX, p->fVDecay.fY, p->fVDecay.fZ)) {
+	line.goto_vertex(p->fVDecay.fX, p->fVDecay.fY, p->fVDecay.fZ);
 	return;
       }
     }

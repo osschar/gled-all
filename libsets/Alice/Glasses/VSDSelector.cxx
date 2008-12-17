@@ -10,6 +10,7 @@
 //
 
 #include "VSDSelector.h"
+#include <TTree.h>
 #include <TFile.h>
 #include "VSDSelector.c7"
 
@@ -44,7 +45,7 @@ void VSDSelector::_init()
   mpGI = &mGI;
   mImportMode = 0;
 
-  mParticleSelection = "fMother[0] == -1";
+  mParticleSelection = "fEvaLabel[0] == -1";
   mHitSelection      = "fDetID < 5";
   mClusterSelection  = "fDetID == 1";
   mRecSelection      = "Pt() > 0.1";
@@ -77,8 +78,11 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
     printf("%s Kinematics not available in mDirectory %s.\n", 
 	   _eh.Data(), mDirectory->GetName());
   } else {
-    mTreeK->SetBranchAddress("P", &mpP);
+    mTreeK->SetBranchAddress("K", &mpP);
   }
+
+  /*
+
   printf("Reading hits.\n");  
   mTreeH = (TTree*) mDirectory->Get("Hits");
   if (mTreeH == 0) {
@@ -135,6 +139,8 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
     mTreeGI->SetBranchAddress("K.", &mpP);
     mTreeGI->SetBranchAddress("R.", &mpR);
   }
+
+  */
 }
 
 /**************************************************************************/
@@ -161,7 +167,7 @@ void VSDSelector::ResetEvent()
 
 /**************************************************************************/
 
-MCParticle* VSDSelector::Particle(Int_t i)
+TEveMCTrack* VSDSelector::Particle(Int_t i)
 {
   static const Exc_t _eh("VSDSelector::Particle ");
   if(mTreeK == 0) 
@@ -169,7 +175,7 @@ MCParticle* VSDSelector::Particle(Int_t i)
   
   Int_t re = mTreeK->GetEntryNumberWithIndex(i);
   mTreeK->GetEntry(re);
-  MCParticle* p = new MCParticle(mP); 
+  TEveMCTrack* p = new TEveMCTrack(mP); 
   return p;
 }
 
@@ -206,7 +212,7 @@ void VSDSelector::SelectParticles(ZNode* holder, const Text_t* selection,
     for(Int_t i=0; i<n; i++) {
       Int_t label = evl.GetEntry(i);
       mTreeK->GetEntry(label);
-      MCParticle* p = new MCParticle(*mpP); 
+      TEveMCTrack* p = new TEveMCTrack(*mpP); 
       MCTrack* zp = new MCTrack(p, GForm("%d %s", label, p->GetName()));
       mQueen->CheckIn(zp);
       if(import_daughters) zp->ImportDaughtersRec(this);
@@ -386,18 +392,18 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
       if(import_kine){
 	holder->SetName(GForm("V0&Kine %s", selection));
 	// minus kine daughter
-	MCParticle* mk = Particle(mV0.fDLabels[0]);
+	TEveMCTrack* mk = Particle(mV0.fDLabels[0]);
 	MCTrack* mc_mk = new MCTrack(mk);
 	mQueen->CheckIn(mc_mk);
 	tV0->Add(mc_mk);
 	// plus kine daughter
-	MCParticle* pk = Particle(mV0.fDLabels[1]);
+	TEveMCTrack* pk = Particle(mV0.fDLabels[1]);
 	MCTrack* mc_pk = new MCTrack(pk);
 	mQueen->CheckIn(mc_pk);
 	tV0->Add(mc_pk);
 	// check for kine mother
 	if (mk->GetFirstMother() == pk->GetFirstMother()){
-	  MCParticle* k = Particle(pk->GetFirstMother());
+	  TEveMCTrack* k = Particle(pk->GetFirstMother());
 	  MCTrack* mc_k = new MCTrack(k);
 	  mQueen->CheckIn(mc_k);
 	  tV0->Add(mc_k);
@@ -450,7 +456,7 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
       //kinematics
       if(import_kine){
 	//  kine mother
-	MCParticle* mk = Particle(k->fLabel);
+	TEveMCTrack* mk = Particle(k->fLabel);
 	MCTrack* mc_mk = new MCTrack(mk);
 	mQueen->CheckIn(mc_mk);
 	kt->Add(mc_mk);
@@ -460,7 +466,7 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
 	//  kine daughter
 	// !!!! MT: DLabel  wrong ... always the same as fLabel
 	/*
-	MCParticle* pk = Particle(k->fDLabel);
+	TEveMCTrack* pk = Particle(k->fDLabel);
 	MCTrack* mc_pk = new MCTrack(pk);
 	mQueen->CheckIn(mc_pk);
 	kt->Add(mc_pk);
@@ -520,7 +526,7 @@ void VSDSelector::SelectGenInfo( ZNode* holder, const Text_t* selection)
     mTreeGI->GetEntry(evl.GetEntry(i));
     labels.insert(mGI.fLabel);
     if( mImportMode->mImportKine){
-      MCParticle* p = new MCParticle(mP); // check if gimap exists
+      TEveMCTrack* p = new TEveMCTrack(mP); // check if gimap exists
       MCTrack* zp  = new MCTrack(p);
       mQueen->CheckIn(zp);
       mc_holder->Add(zp); 
