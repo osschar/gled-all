@@ -10,9 +10,9 @@
 
 #include <Glasses/TrackBase.h>
 #include <Stones/ZColor.h>
-#include <Stones/MCParticle.h>
 
 #include <TParticle.h>
+#include <TEveVSDStructs.h>
 #include <AliHit.h>
 
 class VSDSelector;
@@ -24,7 +24,7 @@ class MCTrack : public TrackBase
  private:
   void _init();
  protected:
-  MCParticle*		   mParticle; 	   // X{GST}  
+  TEveMCTrack*		   mParticle; 	   // X{GST}  
   TString                  mVDecay;        // X{GS}  7 TextOut()
   Int_t                    mNDaughters;    // X{GS}  7 ValOut()
 
@@ -32,7 +32,7 @@ class MCTrack : public TrackBase
   MCTrack(const Text_t* n="MCTrack", const Text_t* t=0) :
     TrackBase(n,t) { _init(); }
 
-  MCTrack(MCParticle* p, const Text_t* n="MCTrack", const Text_t* t=0);
+  MCTrack(TEveMCTrack* p, const Text_t* n="MCTrack", const Text_t* t=0);
   virtual ~MCTrack() { delete mParticle; }
 
   // particles

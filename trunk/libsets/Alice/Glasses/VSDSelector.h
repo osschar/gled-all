@@ -11,17 +11,20 @@
 #include <Glasses/MCTrack.h>
 #include <Glasses/HitContainer.h>
 #include <Glasses/RecTrack.h>
-#include <Glasses/TPCSegment.h>
 #include <Glasses/GIImportStyle.h>
 
 #include <Stones/TTreeTools.h>
-#include <Stones/MCParticle.h>
 #include <Stones/V0.h>
 #include <Stones/GenInfo.h>
 #include <Stones/Hit.h>
 #include <Stones/Kink.h>
 
 #include <Glasses/ZNode.h>
+
+#include <TEveVSDStructs.h>
+
+class TFile;
+class TDirectory;
 
 class VSDSelector : public ZNode
 {
@@ -40,7 +43,7 @@ class VSDSelector : public ZNode
   TTree*                         mTreeKK;  // X{g}
   TTree*                         mTreeGI;  // X{g}
   Hit                            mH, *mpH;     // needed for selection in mTreeH
-  MCParticle                     mP, *mpP;     // needed for selection in mTreeK
+  TEveMCTrack                    mP, *mpP;     // needed for selection in mTreeK
   Hit                            mC, *mpC;     // needed for selection in mTreeC    
   ESDParticle                    mR, *mpR;     // needed for selection in mTreeR  
   V0                             mV0,*mpV0;    // needed for selection in mTreeV0  
@@ -64,11 +67,11 @@ class VSDSelector : public ZNode
  protected:
   TString    mParticleSelection;    // X{GS} 7 Textor(-whenchanged=>1)
  public:
-  void SelectParticles( ZNode* holder=0, const Text_t* selection=0,
-			Bool_t import_daughters=false
-			);           // X{Ed} C{1} 7 MCWButt()
+  void SelectParticles(ZNode* holder=0, const Text_t* selection=0,
+		       Bool_t import_daughters=false
+		       );           // X{Ed} C{1} 7 MCWButt()
 
-  MCParticle* Particle(Int_t i);
+  TEveMCTrack* Particle(Int_t i);
   // --------------------------------------------------------------
   // Hits 
 
@@ -124,8 +127,8 @@ class VSDSelector : public ZNode
 		     );         // X{Ed} C{1} 7 MCWButt()
 
 #include "VSDSelector.h7"
-  ClassDef(VSDSelector, 1)
-    }; // endclass VSDSelector
+  ClassDef(VSDSelector, 1);
+}; // endclass VSDSelector
 
 
 #endif

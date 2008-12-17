@@ -11,11 +11,11 @@
 
 #include "GenInfo.h"
 
-ClassImp(GenInfo)
+ClassImp(GenInfo);
 
 /**************************************************************************/
 
-  void GenInfo::_init()
+void GenInfo::_init()
 {
   bR =  false;
   bV0 = false;
