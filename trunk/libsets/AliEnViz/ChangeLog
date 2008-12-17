@@ -1,3 +1,24 @@
+2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/aev-monaclasspath.sh:
+	* bin/aev_ui:
+	* bin/aev_ui.pl:
+	* java:
+	* java/ML_WS.jar:
+	* java/MonaClient.class:
+	* java/MonaClient.java:
+	* java/axis.jar:
+	* java/commons-discovery.jar:
+	* java/commons-logging.jar:
+	* java/jaxrpc.jar:
+	* java/log4j-1.2.8.jar:
+	* java/saaj.jar:
+	* java/wsdl4j.jar:
+	Removed files - this stuff was obsolete like hell.
+
+	* Makefile:
+	Remove monalisa stuff.
+
 2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVManager.cxx:
