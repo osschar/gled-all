@@ -1,3 +1,9 @@
+2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_defs.inc:
+	Define ROOT_LD_DIR for the libsets that require linking against
+	root libs.
+
 2008-12-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/gled_symlink.pl:
