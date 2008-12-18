@@ -4,7 +4,7 @@
 
 MetaViewInfo* make_zaliload_metagui()
 {
-  int Y = 0, W = 40, H = 32;
+  int Y = 0, W = 40, H = 27;
 
   CREATE_ADD_GLASS(mv, MetaViewInfo, g_fire_queen, "MetaGui for ZAliLoad", 0);
   mv->Size(W, H);
@@ -26,11 +26,6 @@ MetaViewInfo* make_zaliload_metagui()
   w11->Resize(6, y, W-12-6, 1);
   CREATE_ADD_GLASS(w12, MetaWeedInfo, ms1, "Event", 0);
   w12->Resize(W-6, y, 6, 1);
-  y++;
-  CREATE_ADD_GLASS(w16, MetaWeedInfo, ms1, "KineType", 0);
-  w16->Resize(8, y, W-8-12, 1);
-  CREATE_ADD_GLASS(w13, MetaWeedInfo, ms1, "CreateVSD", 0);
-  w13->Resize(W-12, y, 12, 1);
   y++;
   CREATE_ADD_GLASS(w17, MetaWeedInfo, ms1, "VSDFile", 0);
   w17->Resize(6, y, W-12-6, 1);
@@ -199,31 +194,6 @@ MetaViewInfo* make_zaliload_metagui()
   w72->Resize(W-12, y, 12, 1);
   w72->Label("Run selection ..");
   ++y;
-
-  Y += y; y=0;
-
-  // TPC digits
-  CREATE_ADD_GLASS(ms4, MetaSubViewInfo, mv, "ZAliLoad", 0);
-  ms4->Position(0, Y);
-  // Intro
-  CREATE_ADD_GLASS(w40, MetaWeedInfo, ms4, "<box>", "Digits:");
-  w40->Resize(0, y, W, 1);
-  w40->Color(0.7, 0.85, 0.7);
-  w40->Align(true, -1, 0);
-  w40->Box(MetaWeedInfo::BT_Engraved);
-  y++;
-  CREATE_ADD_GLASS(w41, MetaWeedInfo, ms4, "ShowITSDet", 0);
-  w41->Resize(0, y, W, 1);
-  w41->Label("Show ITS Digits ..");
-  y++;
-  CREATE_ADD_GLASS(w42, MetaWeedInfo, ms4, "ShowTPCPlate", 0);
-  w42->Resize(0, y, W, 1);
-  w42->Label("Show TPC Digits ..");
-  y++;
-  CREATE_ADD_GLASS(w42, MetaWeedInfo, ms4, "ShowTOFSector", 0);
-  w42->Resize(0, y, W, 1);
-  w42->Label("Show TOF Digits ..");
-  y++;
 
   return mv;
 }
