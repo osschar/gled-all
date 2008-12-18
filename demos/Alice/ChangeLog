@@ -1,3 +1,17 @@
+2008-12-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* images/lin_coldsteel.png:
+	* images/lin_r2y.png:
+	New gradients for tracks.
+
+	* AliLoader.C:
+	* alice_simple.C:
+	* zaliload_metagui.C:
+	Modify for running without AliRoot / RAW visualization.
+
+	* def_geoview.root:
+	New version - ZColor streamer has been changed.
+
 2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* loadlibs.C:

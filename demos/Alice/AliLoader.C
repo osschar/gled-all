@@ -38,8 +38,7 @@ class ZImage;
 
 /**************************************************************************/
 
-void AliLoader(const Text_t* dirname = 0,
-	       Bool_t use_aliroot    = false)
+void AliLoader(const Text_t* dirname = 0)
 {
   // gSystem->IgnoreSignal(kSigSegmentationViolation, true);
   Gled::AssertMacro("sun.C");
@@ -53,9 +52,6 @@ void AliLoader(const Text_t* dirname = 0,
 
   Gled::AssertLibSet("Geom1");
   Gled::AssertLibSet("RootGeo");
-
-  //gROOT->Macro("loadlibs.C");
-  Gled::AssertMacro("loadlibs.C");
   Gled::AssertLibSet("Alice");
 
   // gROOT->LoadMacro("alice_simple.C");
@@ -106,23 +102,6 @@ void AliLoader(const Text_t* dirname = 0,
 
 
   ZList* aliconf = g_scene->GetQueen()->AssertPath("Etc/Alice", "ZNameMap");
-  CREATE_ATT_GLASS(tpclist, ZRnrModList, aliconf, Swallow, "TPC_RM_list", 0);
-
-  CREATE_ADD_GLASS(lightmod, ZGlLightModel, tpclist, "TPC Light Model", 0);
-  lightmod->SetShadeModelOp(1);
-  lightmod->SetFaceCullOp(0);
-
-  CREATE_ADD_GLASS(tpcrnrmod, TPCSegRnrMod, tpclist, "TPC RnrMod", 0);
-  tpcrnrmod->SetRnrFrame(1);
-  tpcrnrmod->SetRibbon(ribbon1);
-
-  CREATE_ADD_GLASS(itsrnrmod, ITSDigRnrMod, var, "ITS RnrMod", 0);
-  itsrnrmod->SetRnrFrame(1);
-  itsrnrmod->SetRibbon(ribbon1);
-
-  CREATE_ADD_GLASS(tofrnrmod, TOFDigRnrMod, var, "TOF RnrMod", 0);
-  tofrnrmod->SetRnrModFrame(1);
-  tofrnrmod->SetRibbon(ribbon1);
 
   //--------------------------------------------------------------
 
