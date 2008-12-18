@@ -75,15 +75,28 @@ void AliLoader(const Text_t* dirname = 0)
   image->Load();
   image->SetLoadAdEnlight(true);
 
-  CREATE_ADD_GLASS(image2, ZImage, var, "LineTex", 0);
+  CREATE_ADD_GLASS(image2, ZImage, var, "LineDefault", 0);
   image2->SetMagFilter(GL_LINEAR);
   image2->SetEnvMode(GL_MODULATE);
   image2->SetFile(file_grep("images/lin_fssccw.png"));
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
+  CREATE_ADD_GLASS(image3, ZImage, var, "LineTrackExplosion", 0);
+  image3->SetMagFilter(GL_LINEAR);
+  image3->SetFile(file_grep("images/lin_track_explosion-3.png"));
+  image3->Load();
+  image3->SetLoadAdEnlight(true);
+
+  CREATE_ADD_GLASS(image4, ZImage, var, "LineColdsteel", 0);
+  image4->SetMagFilter(GL_LINEAR);
+  image4->SetEnvMode(GL_MODULATE);
+  image4->SetFile(file_grep("images/lin_coldsteel.png"));
+  image4->Load();
+  image4->SetLoadAdEnlight(true);
+
   CREATE_ADD_GLASS(mcrst, MCTrackRnrStyle, var, "MC Track RnrStyle", 0);
-  mcrst->SetTexture(image2);
+  mcrst->SetTexture(image3);
   CREATE_ADD_GLASS(recrst, RecTrackRS, var, "Rec Track RnrStyle", 0);
 
   CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
