@@ -1,3 +1,9 @@
+2008-12-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledView/GledGUI.cxx:
+	Another attempt at TCanvas instantiation, mostly failed. Add
+	comments what to try next.
+
 2008-12-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.h:
