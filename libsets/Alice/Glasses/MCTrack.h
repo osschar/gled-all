@@ -13,7 +13,6 @@
 
 #include <TParticle.h>
 #include <TEveVSDStructs.h>
-#include <AliHit.h>
 
 class VSDSelector;
 
