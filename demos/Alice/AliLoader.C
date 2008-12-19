@@ -31,6 +31,16 @@ const Text_t* particle_layout =
 
 */
 
+/*
+  Racoon import:
+
+aliload->SelectParticles("fStatusCode <= 1 && Pt() > 1 && abs(Eta()) < 2 && GetPDG()->Charge() != 0")
+aliload->SelectParticles("fStatusCode <= 1 && P() > 1 && Eta() > 2")
+aliload->SelectParticles("fStatusCode <= 1 && Pt() > 0.5 && abs(Eta()) < 2 && GetPDG()->Charge() != 0")
+aliload->SelectParticles("fStatusCode <= 1 && Pt() > 0.5 && abs(Eta()) < 3 && GetPDG()->Charge() != 0")
+
+*/
+
 /**************************************************************************/
 
 class MultiBoard;
@@ -97,6 +107,8 @@ void AliLoader(const Text_t* dirname = 0)
 
   CREATE_ADD_GLASS(mcrst, MCTrackRnrStyle, var, "MC Track RnrStyle", 0);
   mcrst->SetTexture(image3);
+  CREATE_ADD_GLASS(mcrst2, MCTrackRnrStyle, var, "MC Track RnrStyle 2", 0);
+  mcrst2->SetTexture(image4);
   CREATE_ADD_GLASS(recrst, RecTrackRS, var, "Rec Track RnrStyle", 0);
 
   CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
