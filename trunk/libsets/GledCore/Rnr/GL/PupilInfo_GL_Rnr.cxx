@@ -10,7 +10,7 @@
 #include <Rnr/GL/GLTextNS.h>
 #include <GL/gl.h>
 
-#include <TSystem.h>
+#include <Gled/Gled.h>
 
 namespace {
   ZRlFont*        def_font = 0;
@@ -25,7 +25,7 @@ void PupilInfo_GL_Rnr::_init()
   if(def_font == 0) {
     def_font = new ZRlFont();
     def_font->SetFontFile
-      (GForm("%s/lib/fontdefault.txf", gSystem->Getenv("GLEDSYS")));
+      (GForm("%s/fontdefault.txf", Gled::theOne->GetLibDir()));
     def_font_rnr = new ZRlFont_GL_Rnr(def_font);
     if(def_font_rnr->LoadFont() == false) {
       throw(_eh + "default font not found.");

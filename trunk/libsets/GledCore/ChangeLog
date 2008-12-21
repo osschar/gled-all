@@ -1,3 +1,42 @@
+2008-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Add TString members mLibDir, mDataDir, mHomeDir.
+
+	Initialize them from GLEDSYS (if defined), from data passed to
+	configure (stored in gled-config.h) or via command-line
+	arguments. If they remain undefined, die a horrible death.
+
+	Reshuffle initialization a bit - we have to parse command-line
+	arguments before setting up some paths as lib/datadir might be
+	passed in.
+
+	Remove 'static void InitStatics()'.
+
+	* gled.cxx:
+	* saturn.cxx:
+	Remove call to Gled::InitStatics().
+	Make gled pointer local to main().
+	Add a todo comment - bitching about XInitThreads() in gled.cxx.
+
+	* GledView/GledGUI.cxx:
+	Remove some cruft, leave note the XInitThreads() was called once.
+
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	Use gled-libdir to retrieve default font file.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Add member 'Bool_t bAllowHandlerSwitchInPupil'.
+
+	* Pupils/Pupil.cxx:
+	Only allow switching of event handler if
+	bAllowHandlerSwitchInPupil is true.
+
+	* Makefile:
+	Remove superfluous '-Llib' directive.
+
 2008-12-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/GledGUI.cxx:
