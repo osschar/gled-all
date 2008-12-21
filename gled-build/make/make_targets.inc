@@ -18,7 +18,7 @@ default: depend
 	${MAKE} install
 
 base_lib: ${BASE_LIB_NAME}
-	@echo ${LIB_SET_NAME} > lib/.${LIB_SET_ID}
+	@echo ${LIB_SET_NAME} > lib/gled_lid_${LIB_SET_ID}
 
 view_lib: ${VIEW_LIB_NAME}
 
@@ -41,11 +41,9 @@ ifeq (${GLED_SYSTEM},Darwin)
 	${MUTE} cd lib; ${GLEDSYS}/libexec/gled_liblink.sh .dylib .so
 endif
 	${MUTE} ${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
-	${MUTE} echo ${LIB_SET_NAME} > ${GLEDSYS}/lib/.${LIB_SET_ID}
 
 uninstall:
 	${ECHO} -I- Uninstalling
-	${MUTE} rm -f ${GLEDSYS}/lib/.${LIB_SET_ID}
 	${MUTE} ${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
 
 # like install ... only into a tar file (also Readme_<libset> is added)

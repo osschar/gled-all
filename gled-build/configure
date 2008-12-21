@@ -215,7 +215,12 @@ if($config->{RECONFIGURE} == 0) {
   print CH "#define GLED_SYSTEM            \"$config->{SYSTEM}\"\n";
   print CH "\n";
 
-  
+  unless ($config->{PREFIX} eq '<gledsys>') {
+    print CH "#define GLED_PREFIX         \"$config->{PREFIX}\"\n";
+    print CH "#define GLED_LIB_DIR        \"$config->{LIBDIR}\"\n";
+    print CH "#define GLED_DATA_DIR       \"$config->{DATADIR}\"\n";
+  }
+
   $ch_line = "#define MAC_RNR_FRIENDS(_xx_) ";
   $ch_line .= join('; ', map(" friend class _xx_ ## _${_}_Rnr", @Rnrs));
   print CH $ch_line."\n\n";

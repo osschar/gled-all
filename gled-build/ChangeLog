@@ -1,3 +1,16 @@
+2008-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure.rc:
+	Add command-line options prefix, libdir and datadir.
+	Change default version to 1.3.0-rc1-svn.
+
+	* configure:
+	If prefix was specified, put appropriate defines into gled-config.h.
+
+	* make/make_targets.inc:
+	Dump libset name into lib/gled_lid_<id> instead of lib/.<id>. Thus
+	it is installed automatically.
+
 2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_defs.inc:
