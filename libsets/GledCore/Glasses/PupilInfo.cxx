@@ -82,6 +82,7 @@ void PupilInfo::_init()
 
   mOverlay      = 0;
   mEventHandler = 0;
+  bAllowHandlerSwitchInPupil = true;
 }
 
 /**************************************************************************/

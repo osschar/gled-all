@@ -15,14 +15,11 @@
 #include <TRint.h>
 #include <Getline.h>
 
-#include <X11/Xlib.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <signal.h>
 
-GledGUI*	gled;
+#include <X11/Xlib.h>
 
 /**************************************************************************/
 
@@ -30,6 +27,13 @@ int main(int argc, char **argv)
 {
   static const Exc_t _eh("gled::main() ");
 
+  // This is not so beautiful, but needs to be called first.
+  // See also the X include above.
+  // This is principle called from TApplication constructor, we call it
+  // much later - in principle should really sub-class Gled from TRint or
+  // have a TRint derived class as i used to (Gint).
+  // Also - GledGUI should NOT inherit from Fl_Window.
+  // !!!!
   if (XInitThreads() == 0)
   {
     fprintf(stderr, "XThreads not enabled ... might get into a mess.\n");
@@ -37,9 +41,7 @@ int main(int argc, char **argv)
 
   GThread::InitMain();
 
-  Gled::InitStatics();
-
-  gled = new GledGUI();
+  GledGUI* gled = new GledGUI();
 
   lStr_t args; for (int i=1; i<argc; ++i) args.push_back(argv[i]);
   gled->ParseArguments(args);

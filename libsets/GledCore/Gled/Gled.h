@@ -56,6 +56,10 @@ protected:
   TString	mOutFileName;
   FILE*		mOutFile;
 
+  TString       mLibDir;        // X{G}
+  TString       mDataDir;       // X{G}
+  TString       mHomeDir;       // X{G}
+
   TString	mAuthDir;	 // X{GS}
   TString	mDefEyeIdentity; // X{GS}
 
@@ -65,8 +69,6 @@ protected:
   GThread*      mRintThread;     // X{g}
 
 public:
-  static  void InitStatics();
-
   Gled();
   virtual void ParseArguments(lStr_t& args);
   virtual void InitLogging();

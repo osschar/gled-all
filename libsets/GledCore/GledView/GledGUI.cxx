@@ -27,18 +27,6 @@
 #include <FL/fl_ask.H>
 #include <FL/Fl_Image.H>
 
-#ifdef __APPLE__
-#define __WAS_APPLE__
-#undef __APPLE__
-#endif
-
-#include <FL/x.H>
-
-#ifdef __WAS_APPLE__
-#define __APPLE__
-#undef __WAS_APPLE__
-#endif
-
 extern void *GledCore_GLED_init_View;
 extern void *GledCore_GLED_user_init_View;
 
@@ -300,22 +288,6 @@ void GledGUI::InitGledCore()
   Gled::InitGledCore();
   ((void(*)())GledCore_GLED_init_View)();
   ((void(*)())GledCore_GLED_user_init_View)();
-
-  /*
-  printf("SAFR1.\n");
-  void * l = dlopen("libGledCore_View.so", RTLD_NOW);
-  printf("SAFR2 %p.\n", l);
-  void * s = dlsym(l, "EyeCreator_GledCore_FTW_Shell");
-  printf("SAFR3 %p.\n", s);
-  s = dlsym(RTLD_DEFAULT, "EyeCreator_GledCore_FTW_Shell");
-  printf("SAFR3 %p.\n", s);
-  int dlclose(void *handle);
-  printf("SAFR4.\n");
-  */
-  //GledNS::LoadSo(GledViewNS::FabricateViewLibName("GledCore"));
-  //int i = gSystem->Load("libGledCore_View.so",
-  //		"EyeCreator_GledCore_FTW_Shell", 1);
-  //printf("SAFR: %d.\n", i);
 }
 
 /**************************************************************************/

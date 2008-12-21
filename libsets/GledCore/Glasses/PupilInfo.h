@@ -97,6 +97,7 @@ protected:
 
   ZLink<ZGlass> mOverlay;       // X{GS} L{}
   ZLink<ZGlass> mEventHandler;  // X{GS} L{}
+  Bool_t        bAllowHandlerSwitchInPupil; // X{GS} 7 Bool()
 
   // Direct dump hack.
   GCondition mDirectDumpCond; //!

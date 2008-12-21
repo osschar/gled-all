@@ -21,8 +21,6 @@
 #include <errno.h>
 #include <signal.h>
 
-Gled*		gled;
-
 /**************************************************************************/
 
 int main(int argc, char **argv)
@@ -31,9 +29,7 @@ int main(int argc, char **argv)
 
   GThread::InitMain();
 
-  Gled::InitStatics();
-
-  gled = new Gled();
+  Gled* gled = new Gled();
 
   lStr_t args; for (int i=1; i<argc; ++i) args.push_back(argv[i]);
   gled->ParseArguments(args);

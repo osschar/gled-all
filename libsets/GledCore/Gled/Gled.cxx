@@ -50,22 +50,6 @@ void Gled::next_arg_or_die(lStr_t& args, lStr_i& i)
 
 /**************************************************************************/
 
-void Gled::InitStatics()
-{
-  GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
-  GledNS::InitFD(0, GledNS::GledRoot);
-
-  gROOT->SetMacroPath(GForm(".:%s/.gled:%s/macros",
-			    getenv("HOME"), getenv("GLEDSYS")));
-  gInterpreter->AddIncludePath(GForm("%s/.gled", getenv("HOME")));
-  gInterpreter->AddIncludePath(GForm("%s/macros", getenv("GLEDSYS")));
-  gInterpreter->SetProcessLineLock(false);
-
-  TThread a_root_thread; // Enforce ROOT thread init.
-}
-
-/**************************************************************************/
-
 Gled::Gled() :
   mSaturn       (0),
   bIsSun        (false),
@@ -110,7 +94,23 @@ Gled::Gled() :
   mLogFileName = "<stdout>"; mLogFile = 0;
   mOutFileName = "<stdout>"; mOutFile = 0;
 
-  mAuthDir = GForm("%s/.gled/auth", gSystem->Getenv("HOME"));
+  // Figure out libdir and datadir, can also be passed as arguments later.
+  TString gsys(gSystem->Getenv("GLEDSYS"));
+  if (gsys.IsNull())
+  {
+#ifdef GLED_PREFIX
+    mLibDir  = GLED_LIB_DIR;
+    mDataDir = GLED_DATA_DIR;
+#endif
+  }
+  else
+  {
+    mLibDir  = gsys + "/lib";
+    mDataDir = gsys;
+  }
+  mHomeDir = gSystem->HomeDirectory();
+
+  mAuthDir = GForm("%s/.gled/auth", mHomeDir.Data());
   mDefEyeIdentity = "guest";
 }
 
@@ -131,6 +131,8 @@ void Gled::ParseArguments(lStr_t& args)
              "                     files ~ ROOT macro scripts to process\n"
              "Gled options:\n"
              "-------------\n"
+             "  -datadir   <dir>   directory containing Gled data\n"
+             "  -libdir    <dir>   directory containing Gled libraries\n"
              "  -preexec <m1:m2..> pre-exec specified macros\n"
              "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
              "                     Saturn if -master is specified, Sun otherwise\n"
@@ -159,6 +161,18 @@ void Gled::ParseArguments(lStr_t& args)
              );
       bQuit = true;
       return;
+    }
+    else if (*i == "-datadir")
+    {
+      next_arg_or_die(args, i);
+      mDataDir = *i;
+      args.erase(start, ++i);
+    }
+    else if (*i == "-libdir")
+    {
+      next_arg_or_die(args, i);
+      mLibDir = *i;
+      args.erase(start, ++i);
     }
     else if (*i == "-preexec")
     {
@@ -312,6 +326,12 @@ void Gled::ParseArguments(lStr_t& args)
       ++i;
     }
   }
+
+  if (mLibDir.IsNull() || mDataDir.IsNull())
+  {
+    cerr << "libdir or datadir unknown.\n";
+    exit(1);
+  }
 }
 
 void Gled::InitLogging()
@@ -359,6 +379,16 @@ void Gled::InitLogging()
 
 void Gled::InitGledCore()
 {
+  gROOT->SetMacroPath(GForm(".:%s/.gled:%s/macros", mHomeDir.Data(), mDataDir.Data()));
+  gInterpreter->AddIncludePath(GForm("%s/.gled",  mHomeDir.Data()));
+  gInterpreter->AddIncludePath(GForm("%s/macros", mDataDir.Data()));
+  gInterpreter->SetProcessLineLock(false);
+
+  GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
+  GledNS::InitFD(0, GledNS::GledRoot);
+
+  TThread a_root_thread; // Enforce ROOT thread init.
+
   ((void(*)())GledCore_GLED_init)();
 
   if (mRenderers != "")
@@ -667,7 +697,7 @@ Int_t Gled::LoadLibSet(LID_t lid)
     return 0;
   } else {
     Text_t buf[80];
-    FILE* f = fopen(GForm("%s/lib/.%u", gSystem->Getenv("GLEDSYS"), lid), "r");
+    FILE* f = fopen(GForm("%s/gled_lid_%u", mLibDir.Data(), lid), "r");
     if(f == 0) {
       ISerr(GForm("Gled::LoadLibSet lid %u can not be demangled", lid));
       return -1;

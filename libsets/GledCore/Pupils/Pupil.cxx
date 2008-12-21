@@ -1245,7 +1245,9 @@ int Pupil::handle(int ev)
   }
 
   // Check for Ctrl-` -- toggle external event handler.
-  if(ev == FL_KEYBOARD && Fl::event_key() == '`' && Fl::event_state(FL_CTRL)) {
+  if(ev == FL_KEYBOARD && Fl::event_key() == '`' && Fl::event_state(FL_CTRL) &&
+     mInfo->bAllowHandlerSwitchInPupil)
+  {
     bUseEventHandler = !bUseEventHandler;
     return 1;
   }
