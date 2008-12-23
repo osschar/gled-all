@@ -15,7 +15,7 @@ all_targets:: ${LIBSET_TARGETS}
 
 default: depend
 	${MAKE} all_targets
-	${MAKE} install
+	${MAKE} post_build_install
 
 base_lib: ${BASE_LIB_NAME}
 	@echo ${LIB_SET_NAME} > lib/gled_lid_${LIB_SET_ID}
@@ -24,27 +24,60 @@ view_lib: ${VIEW_LIB_NAME}
 
 rnr_libs: ${RNR_LIBS}
 
-# Install/uninstall
-.PHONY: build_install build_uninstall install uninstall
+# Build-install
+.PHONY: pre_build_install post_build_install build_install build_uninstall
 
-build_install:
-	${ECHO} -I- Build-install
-	${MUTE} ${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
+pre_build_install::
+	${ECHO} -I- Pre-build-install
+	${MUTE} ${GLED_INSTALL_DIRS} -rs ${GLEDSYS} ${LIBSET_DIR} ${PRE_BUILD_INSTALL_DIRS}
 
-build_uninstall:
-	${ECHO} -I- Build-uninstall
-	${MUTE} ${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
-
-install::
-	${ECHO} -I- Installing
+post_build_install::
+	${ECHO} -I- Post-build-install
 ifeq (${GLED_SYSTEM},Darwin)
 	${MUTE} cd lib; ${GLEDSYS}/libexec/gled_liblink.sh .dylib .so
 endif
-	${MUTE} ${GLED_INSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
+	${MUTE} ${GLED_INSTALL_DIRS} -rs ${GLEDSYS} ${LIBSET_DIR} ${POST_BUILD_INSTALL_DIRS}
 
-uninstall:
-	${ECHO} -I- Uninstalling
-	${MUTE} ${GLED_UNINSTALL} ${GLEDSYS} ${LIBSET_DIR} ${INSTALL_DIRS}
+build_install::
+	${ECHO} -I- Build-install
+	${MUTE} ${GLED_INSTALL_DIRS} -rs ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
+
+build_uninstall::
+	${ECHO} -I- Build-uninstall
+	${MUTE} ${GLED_UNINSTALL_DIRS} -rs ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
+
+#### XXXX !!!!! FOO HERE
+#### write blob-install and install, also in top-level makefile
+#### decide what to do with INSTALL_DIRS - seems we need separation
+#### for bindir, libdir, datadir?
+
+# Blob install
+.PHONY: blob_install blob_uninstall
+
+blob_install::
+	${ECHO} -I- Blob-install
+	${MUTE} ${GLED_INSTALL_DIRS} -r ${GLED_BLOB_DIR} ${LIBSET_DIR} ${BLOB_INSTALL_DIRS}
+
+blob_uninstall::
+	${ECHO} -I- Blob-uninstall
+	${MUTE} ${GLED_UNINSTALL_DIRS} -r ${GLED_BLOB_DIR} ${LIBSET_DIR} ${BLOB_INSTALL_DIRS}
+
+# Install
+ifneq (${GLED_PREFIX},<none>)
+.PHONY: install uninstall
+
+install::	
+	${ECHO} -I- Install
+	${MUTE} ${GLED_INSTALL_FILES} -r ${GLED_BIN_DIR}  ${LIBSET_DIR}/bin
+	${MUTE} ${GLED_INSTALL_FILES} -r ${GLED_LIB_DIR}  ${LIBSET_DIR}/lib
+	${MUTE} ${GLED_INSTALL_DIRS}  -r ${GLED_DATA_DIR} ${LIBSET_DIR} ${INSTALL_DATA_DIRS}
+
+uninstall::
+	${ECHO} -I- Uninstall
+	${MUTE} ${GLED_UNINSTALL_FILES} -r ${GLED_BIN_DIR}  ${LIBSET_DIR}/bin
+	${MUTE} ${GLED_UNINSTALL_FILES} -r ${GLED_LIB_DIR}  ${LIBSET_DIR}/lib
+	${MUTE} ${GLED_UNINSTALL_DIRS}  -r ${GLED_DATA_DIR} ${LIBSET_DIR} ${INSTALL_DATA_DIRS}
+endif
 
 # like install ... only into a tar file (also Readme_<libset> is added)
 # make sure to set environment variable BIN_DIST_TAR
@@ -99,7 +132,6 @@ clean::
 	${MUTE} find . -name '*.d' -or -name '*.o' | xargs rm -f
 
 distclean::
-	${MAKE} uninstall
 	${MAKE} build_uninstall
 	${MAKE} clean
 	${MUTE} rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}

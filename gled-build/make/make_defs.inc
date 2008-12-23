@@ -34,9 +34,10 @@ GLEDGLUEGEN	= ${libexecdir}/gled_glue_gen.pl
 
 CPPFLAGSGEN	= ${libexecdir}/gled_conf_dumper.pl cppflags
 
-GLED_INSTALL	= ${libexecdir}/gled_install.pl
-GLED_SYMLINK	= ${libexecdir}/gled_symlink.pl
-GLED_UNINSTALL	= ${libexecdir}/gled_uninstall.pl
+GLED_INSTALL_FILES   = ${libexecdir}/gled_install_files.pl
+GLED_UNINSTALL_FILES = ${libexecdir}/gled_uninstall_files.pl
+GLED_INSTALL_DIRS    = ${libexecdir}/gled_install_dirs.pl
+GLED_UNINSTALL_DIRS  = ${libexecdir}/gled_uninstall_dirs.pl
 
 ROOT_CONFIG     = ${ROOTSYS}/bin/root-config
 FLTK_CONFIG     = fltk-config

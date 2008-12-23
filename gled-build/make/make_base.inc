@@ -21,8 +21,22 @@ LIBSET_DIR	= ${GLEDSYS}/${LIB_SET_NAME}
 ABOVE_BASE_LIBS	= $(addprefix -l, ${REQUIRES_LIB_SETS})
 ABOVE_VIEW_LIBS	= $(addsuffix _View, $(addprefix -l, ${REQUIRES_LIB_SETS}))
 
-BUILD_INSTALL_DIRS += perllib cfg libexec
-INSTALL_DIRS	   += lib bin macros cfg perllib
+
+##########################################################################
+# Directories to be installed in different contexts
+##########################################################################
+
+# Install directories for pre/post-build - symlinked into GLEDSYS
+PRE_BUILD_INSTALL_DIRS  += cfg libexec perllib
+POST_BUILD_INSTALL_DIRS += bin cfg lib macros perllib
+BUILD_INSTALL_DIRS       = $(sort ${PRE_BUILD_INSTALL_DIRS} ${POST_BUILD_INSTALL_DIRS})
+
+# Directories to be installed for blob-install
+BLOB_INSTALL_DIRS += lib bin macros cfg perllib
+
+# Directories for proper install
+# bin/ and lib/ are handled separately.
+INSTALL_DATA_DIRS += cfg macros perllib
 
 ##########################################################################
 # Sources ... different levels of processing

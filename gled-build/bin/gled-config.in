@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+
+if ($#ARGV < 0 or $ARGV[0] eq '-h' or $ARGV[0] eq '--help') {
+  print <<"FNORD";
+Usage: gled-config [--follow] [--prefix[=dir]] [--bindir[=dir]]
+                   [--libdir[=dir]] [--datadir[=dir]]
+
+  --follow      Follow symlinks to this program for path determination.
+                Relevant 
+  --prefix      Print (or set) installation prefix; if this was not set during
+                configure, the path to this command will be used.
+  --bindir      Print (or set) binary directory.
+  --libdir      Print (or set) library directory.
+  --datadir     Print (or set) data directory.
+FNORD
+  exit 0;
+}
+
+########################################################################
+# Configuration variables
+########################################################################
+
+$GLED_PREFIX   = "@prefix@";
+$GLED_BIN_DIR  = "@bindir@";
+$GLED_LIB_DIR  = "@libdir@";
+$GLED_DATA_DIR = "@datadir@";
+
+########################################################################
+# Determine where the script was run from.
+########################################################################
+
+my $path = $0;
+
+if (grep(/^--follow$/, @ARGV)) {
+  while (-l $path) {
+    $path = readlink $path;
+  }
+}
+
+my $progdir = $path; $progdir =~ s!/[^/]*$!!;
+my $rundir  = `pwd`; chomp $rundir;
+my $topdir;
+
+if ($progdir =~ m!^/! or $progdir =~ m!^~!) {
+  # absolute path
+  $topdir="$progdir";
+} else {
+  # relative path
+  $topdir="$rundir/$progdir";
+}
+$topdir =~ s!/bin$!!;
+
+########################################################################
+# Setup the default paths
+########################################################################
+
+if (defined $ENV{"GLEDSYS"}) {
+  $PREFIX  = $ENV{"GLEDSYS"};
+  $BINDIR  = "$PREFIX/bin";
+  $LIBDIR  = "$PREFIX/lib";
+  $DATADIR = "$PREFIX";
+}
+elsif ($GLED_PREFIX eq "<none>") {
+  $PREFIX  = $topdir;
+  $BINDIR  = "$topdir/bin";
+  $LIBDIR  = "$topdir/lib";
+  $DATADIR = "$topdir";
+}
+else {
+  $PREFIX  = $GLED_PREFIX;
+  $BINDIR  = $GLED_BIN_DIR;
+  $LIBDIR  = $GLED_LIB_DIR;
+  $DATADIR = $GLED_DATA_DIR;
+}
+
+########################################################################
+# Parse and process command-line options
+########################################################################
+
+my @out;
+
+for $a (@ARGV) {
+  if ($a =~ m/--([-\w]+)(?:=([-\w]+))?/) {
+    if (not defined $2) {
+      if    ($1 eq 'prefix')  { push @out, $PREFIX;  }
+      elsif ($1 eq 'bindir')  { push @out, $BINDIR;  }
+      elsif ($1 eq 'libdir')  { push @out, $LIBDIR;  }
+      elsif ($1 eq 'datadir') { push @out, $DATADIR; }
+      else {
+        my $var = uc $1;
+        $var =~ s/-/_/g;
+        eval("\$$var = 1;");
+      }
+    } else {
+      my $var = uc $1;
+      $var =~ s/-/_/g;
+      my $val = $2;
+      eval("\$$var = '$val';");
+    }
+  }
+}
+
+print join(' ', @out), "\n";
