@@ -5,13 +5,13 @@
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-die "GLEDSYS not defined" if not exists $ENV{GLEDSYS};
+$DATADIR = `gled-config --datadir` or die "gled-config not found";
 
-use lib "$ENV{GLEDSYS}/perllib";
+use lib "$DATADIR/perllib";
 use ParseConfig;
 require Gled_Shell_Wrappers;
 
-$def_cfg = "$ENV{GLEDSYS}/cfg/gled-auth.rc";
+$def_cfg = "$DATADIR/cfg/gled-auth.rc";
 
 my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg, -useenv=>1);
 $cfg_parser->parse();

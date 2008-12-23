@@ -1,3 +1,13 @@
+2008-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-auth-genkeypair:
+	* bin/gled-auth-init:
+	Use gled-config to obtain data-dir and thus perllib location.
+	This removes dependence on GLEDSYS environment variable.
+
+	* Makefile:
+	Fiddle a bit with Darwin hacks - needs to be revisited everywhere.
+
 2008-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
