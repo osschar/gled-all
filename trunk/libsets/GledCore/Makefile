@@ -54,6 +54,9 @@ bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
 	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
 	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
 	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
+ifeq (${GLED_SYSTEM},Darwin)
+	${FLTK_CONFIG} --post $@
+endif
 
 
 ${PUPILS_LIB}: ${PUPILS_OBJS}
@@ -63,11 +66,6 @@ ${PUPILS_LIB}: ${PUPILS_OBJS}
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_targets.inc
 #--------------------------------------------------------------
-
-install::
-ifeq (${GLED_SYSTEM},Darwin)
-	fltk-config --post ${GLEDSYS}/bin/gled
-endif
 
 clean::
 	@rm -f ${MAINOBJS}
