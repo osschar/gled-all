@@ -1,3 +1,48 @@
+2008-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-config.in:
+	New file - template for gled-config executable.
+
+	* libexec/gled_symlink.pl:
+	Removed - use 'gled_install.pl -s'.
+
+	* libexec/gled_install.pl:
+	* libexec/gled_uninstall.pl:
+	Removed - superseded by files/dirs variants.
+
+	* libexec/gled_install_dirs.pl:
+	* libexec/gled_uninstall_dirs.pl:
+	* libexec/gled_install_files.pl:
+	* libexec/gled_uninstall_files.pl:
+	New versions of install/unistall scripts.
+
+	* Makefile:
+	Add placeholders for top-level blob_install and install targets.
+
+	* configure:
+	Initialize sub-prefix vars if prefix is set and they are not.
+	Write out bin/gled-config.
+	Dump prefix/blob stuff to make/make_config.inc.
+	Dump prefix/blob stuff to top-level Makefile.config.
+
+	* configure.rc:
+	Change default value of all prefix related vars to <none>.
+	Add blobdir option / var.
+
+	* make/make_base.inc:
+	Properly define directories for various install types.
+
+	* make/make_defs.inc:
+	Define GLED_(UN)INSTALL_FILES/DIRS command variables.
+
+	* make/make_targets.inc:
+	Redefine all install targets.
+
+	* perllib/Gled_Installer.pm:
+	Complete rewrite - provide (un)install_files/dirs functions and
+	command-line argument parsing to support symlink-install,
+	recursive-install and dry-run (dump commands).
+
 2008-12-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure.rc:
