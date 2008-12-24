@@ -58,7 +58,7 @@ void ZAliLoad::_init()
   mDefVSDName = "AliVSD.root";
   mVSDFile    = "";
 
-  mParticleSelection = "fMother[0] == -1";
+  mParticleSelection = "fStatusCode <= 1 && Pt() > 0.5";
   mHitSelection      = "fDetID < 5";
   mClusterSelection  = "fDetID == 1";
   mRecSelection      = "Pt() > 0.1";
