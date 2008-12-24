@@ -1,3 +1,23 @@
+2008-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/gled_install.pl:
+	* libexec/gled_uninstall.pl:
+	New scripts for installation of individual files.
+
+	* Makefile:
+	Install also top-level stuff for install and blob-install
+	targets. As it turns out there are only two files to install:
+	gled-config and ParseConfig.pl.
+
+	Add some variable definitions from make_defs.inc - should really
+	have a common source for those.
+
+	* configure:
+	Remove unnecessary use statement.
+
+	* make/make_defs.inc:
+	Define GLED_(UN)INSTALL command variables.
+
 2008-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* bin/gled-config.in:
