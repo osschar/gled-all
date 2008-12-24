@@ -10,7 +10,6 @@ use Carp;
 use lib "$ENV{GLEDSYS}/perllib";
 use ParseConfig;
 use Gled_ConfCat_Parser;
-use Gled_Installer;
 
 $CFGFILE = "build_config";
 
