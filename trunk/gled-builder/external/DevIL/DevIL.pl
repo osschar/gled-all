@@ -33,7 +33,7 @@ target('configure', <<"FNORD");
 ./configure CPPFLAGS="$cppfl" \\
             CFLAGS="$cfl" \\
             LDFLAGS="$ldfl" \\
-          --prefix=\${PREFIX}
+          --prefix=\${PREFIX} --enable-ILU --enable-ILUT
 FNORD
 
 use_defaults_for_remaining_targets();
