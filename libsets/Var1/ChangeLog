@@ -1,3 +1,24 @@
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add function extrude_triangle().
+	Add function make_tetra_blade() for creation of individual
+	tetrahedrons.
+	Add function MakeTetraChopper() to create a dragon-fly like flyer.
+	
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add function RandomChopper().
+
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Modified files.
+
 2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:

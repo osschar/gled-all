@@ -146,12 +146,21 @@ protected:
   vector<TriMesh::EdgeData>     mEDataVec;  //! X{R}
   vector<Int_t>                 mECursVec;  //! X{R} Cursor array, one entry per vertex.
 
-  void make_tetra(Int_t vo, Int_t to, Float_t l1, Float_t l2,
+  void make_tetra(Int_t vo, Int_t to,
+                  Float_t l1, Float_t l2,
                   Float_t z, Float_t w, Float_t h);
+  void make_tetra_blade(Int_t vo, Int_t to,
+                        const Float_t* org, const Float_t* dir,
+                        Float_t w, Float_t h);
   void make_cubus(Int_t vo, Int_t to,
                   Float_t x0, Float_t y0, Float_t z0,
-                  Float_t a,  Float_t b,  Float_t c,
-                  UChar_t cr, UChar_t cg, UChar_t cb, UChar_t ca);
+                  Float_t a,  Float_t b,  Float_t c);
+
+  void extrude_triangle(Int_t ti, Float_t h);
+  void extrude_triangle(Int_t ti, Float_t x, Float_t y, Float_t z);
+
+  void colorize_trings_std();
+  void colorize_trings_single(UChar_t r, UChar_t g, UChar_t b, UChar_t a);
 
   EdgeData& find_edge(const VertexData& vd, Int_t v1, Int_t v2);
 
@@ -192,8 +201,15 @@ public:
                        Float_t  w=0.2, Float_t  h=0.2,
                        Float_t wing_l1=0.4, Float_t wing_l2=0.1, Float_t wing_z=0.01,
                        Float_t wing_w=0.8,  Float_t wing_h=0.02); // X{E} 7 MCWButt()
+  void MakeTetraChopper(Float_t l1=0.3, Float_t l2=0, Float_t l3=0.2, Float_t l4=0.8,
+                        Float_t w=0.2, Float_t h=0.2,
+                        Float_t wing_l1=0.4, Float_t wing_l2=0.8,
+                        Float_t wing_w=0.12, Float_t wing_h=0.02); // X{E} 7 MCWButt()
 
   void MakeBox(Float_t a=5, Float_t b=4, Float_t c=3);
+
+  void ExtrudeTriangle(Int_t ti, Float_t h);
+  void ExtrudeTriangle(Int_t ti, Float_t x, Float_t y, Float_t z);
 
   void BuildVertexConnections();
   void AssertVertexConnections();

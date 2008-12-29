@@ -33,6 +33,8 @@
 #include <TMath.h>
 #include <TRandom.h>
 
+#define INV3                    0.33333333333333333333f
+
 ClassImp(TringTvor);
 
 void TringTvor::_init()
@@ -135,6 +137,29 @@ void TringTvor::DeleteSecondaryArrays()
 
 /**************************************************************************/
 
+Int_t TringTvor::AddVertices(Int_t nv)
+{
+  Int_t nold = mNVerts;
+  mNVerts += nv;
+  mVerts.resize(3*mNVerts);
+  if (HasNorms()) MakeNorms();
+  if (HasCols())  MakeCols();
+  if (HasTexs())  MakeTexs();
+  return nold;
+}
+
+Int_t TringTvor::AddTriangles(Int_t nt)
+{
+  Int_t nold = mNTrings;
+  mNTrings += nt;
+  mTrings.resize(3*mNTrings);
+  if (HasTringNorms()) MakeTringNorms();
+  if (HasTringCols())  MakeTringCols();
+  return nold;
+}
+
+/**************************************************************************/
+
 void TringTvor::CalculateBoundingBox()
 {
   if (mNVerts == 0) {
@@ -181,19 +206,56 @@ Float_t TringTvor::BoundingBoxVolume()
 
 /**************************************************************************/
 
+Float_t TringTvor::CalculateTriangleNormal(Int_t ti, Float_t normal[3])
+{
+  // Calculates triangle normal from vertex-data and stores it into 'normal'.
+  // Returns original norm of the vector.
+  //
+  // This is to be used when triangle normals are not stored or during
+  // construction of the tvor.
+
+  const Int_t*    T = Triangle(ti);
+  const Float_t* v0 = Vertex(T[0]);
+  const Float_t* v1 = Vertex(T[1]);
+  const Float_t* v2 = Vertex(T[2]);
+  Float_t e1[3], e2[3];
+  e1[0] = v1[0]-v0[0]; e1[1] = v1[1]-v0[1]; e1[2] = v1[2]-v0[2];
+  e2[0] = v2[0]-v0[0]; e2[1] = v2[1]-v0[1]; e2[2] = v2[2]-v0[2];
+
+  return TMath::NormCross(e1, e2, normal);
+}
+
+Float_t TringTvor::CalculateTriangleNormalAndCog(Int_t ti, Float_t normal[3], Float_t cog[3])
+{
+  // Calculates triangle normal from vertex-data and stores it into
+  // 'normal'. Returns original norm of the vector. Center-of-gravity
+  // of the triangle is returned in 'cog'.
+  //
+  // This is to be used when triangle normals are not stored or during
+  // construction of the tvor.
+
+  const Int_t*    T = Triangle(ti);
+  const Float_t* v0 = Vertex(T[0]);
+  const Float_t* v1 = Vertex(T[1]);
+  const Float_t* v2 = Vertex(T[2]);
+  Float_t e1[3], e2[3];
+  e1[0] = v1[0]-v0[0]; e1[1] = v1[1]-v0[1]; e1[2] = v1[2]-v0[2];
+  e2[0] = v2[0]-v0[0]; e2[1] = v2[1]-v0[1]; e2[2] = v2[2]-v0[2];
+
+  cog[0] = (v0[0] + v1[0] + v2[0]) * INV3;
+  cog[1] = (v0[1] + v1[1] + v2[1]) * INV3;
+  cog[2] = (v0[2] + v1[2] + v2[2]) * INV3;
+
+  return TMath::NormCross(e1, e2, normal);
+}
+
 void TringTvor::GenerateTriangleNormals()
 {
   AssertTringNorms();
 
-  Float_t e1[3], e2[3];
-  for(Int_t t=0; t<mNTrings; ++t) {
-    Int_t*    T = Triangle(t);
-    Float_t* v0 = Vertex(T[0]);
-    Float_t* v1 = Vertex(T[1]);
-    Float_t* v2 = Vertex(T[2]);
-    e1[0] = v1[0]-v0[0]; e1[1] = v1[1]-v0[1]; e1[2] = v1[2]-v0[2];
-    e2[0] = v2[0]-v0[0]; e2[1] = v2[1]-v0[1]; e2[2] = v2[2]-v0[2];
-    TMath::NormCross(e1, e2, TriangleNormal(t));
+  for(Int_t t=0; t<mNTrings; ++t) 
+  {
+    CalculateTriangleNormal(t, TriangleNormal(t));
   }
 }
 
@@ -203,21 +265,12 @@ void TringTvor::GenerateTriangleNormalsAndColors
   AssertTringNorms();
   AssertTringCols();
 
-  Float_t  e1[3], e2[3], cg[3];
+  Float_t  cog[3];
 
-  for(Int_t t=0; t<mNTrings; ++t) {
-    Int_t*    T = Triangle(t);
-    Float_t* v0 = Vertex(T[0]);
-    Float_t* v1 = Vertex(T[1]);
-    Float_t* v2 = Vertex(T[2]);
-    e1[0] = v1[0]-v0[0]; e1[1] = v1[1]-v0[1]; e1[2] = v1[2]-v0[2];
-    e2[0] = v2[0]-v0[0]; e2[1] = v2[1]-v0[1]; e2[2] = v2[2]-v0[2];
-    TMath::NormCross(e1, e2, TriangleNormal(t));
-
-    cg[0] = (v0[0] + v1[0] + v2[0]) / 3;
-    cg[1] = (v0[1] + v1[1] + v2[1]) / 3;
-    cg[2] = (v0[2] + v1[2] + v2[2]) / 3;
-    foo(cg, TriangleColor(t), ud);
+  for(Int_t t=0; t<mNTrings; ++t)
+  {
+    CalculateTriangleNormalAndCog(t, TriangleNormal(t), cog);
+    foo(cog, TriangleColor(t), ud);
   }
 }
 
@@ -231,10 +284,10 @@ void TringTvor::GenerateTriangleColorsFromVertexColors()
     UChar_t* c0 = Color(T[0]);
     UChar_t* c1 = Color(T[1]);
     UChar_t* c2 = Color(T[2]);
-    C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) / 3);
-    C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) / 3);
-    C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) / 3);
-    C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) / 3);
+    C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) * INV3);
+    C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) * INV3);
+    C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) * INV3);
+    C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) * INV3);
   }
 }
 
@@ -249,10 +302,10 @@ void TringTvor::GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles)
     UChar_t* c0 = Color(T[0]);
     UChar_t* c1 = Color(T[1]);
     UChar_t* c2 = Color(T[2]);
-    C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) / 3);
-    C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) / 3);
-    C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) / 3);
-    C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) / 3);
+    C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) * INV3);
+    C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) * INV3);
+    C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) * INV3);
+    C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) * INV3);
   }
 }
 

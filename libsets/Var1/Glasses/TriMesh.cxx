@@ -4,18 +4,6 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// TriMesh
-//
-// Wrapper over TringTvor (triangulation data) and Opcode structures.
-//
-// User is responsible for (re)creation of aabboxes in TringTvor.
-//
-// Structure VConnData must be reduced (possibly use quantization to shorts.
-// Structure VertexData should be extended with per-point values.
-// I guess something like gl uniform varibles (including vector forms).
-
-
 #include "TriMesh.h"
 #include <Glasses/ParaSurf.h>
 #include <Glasses/RectTerrain.h>
@@ -28,9 +16,20 @@
 
 #include <Opcode/Opcode.h>
 
+#include <TMath.h>
 #include <TF3.h>
 
 #include <fstream>
+
+//__________________________________________________________________________
+//
+// Wrapper over TringTvor (triangulation data) and Opcode structures.
+//
+// User is responsible for (re)creation of aabboxes in TringTvor.
+//
+// Structure VConnData must be reduced (possibly use quantization to shorts.
+// Structure VertexData should be extended with per-point values.
+// I guess something like gl uniform varibles (including vector forms).
 
 ClassImp(TriMesh);
 
@@ -468,26 +467,48 @@ void TriMesh::make_tetra(Int_t vo, Int_t to, Float_t l1, Float_t l2,
 {
   TringTvor& C = *mTTvor;
 
-  C.SetVertex(vo + 0, -l2,  0.5*w, z);
-  C.SetVertex(vo + 1,  l1,  0,     z);
-  C.SetVertex(vo + 2, -l2, -0.5*w, z);
-  C.SetVertex(vo + 3,   0,  0,     z+h);
+  w *= 0.5f;
+
+  C.SetVertex(vo + 0, -l2,  w, z);
+  C.SetVertex(vo + 1,  l1,  0, z);
+  C.SetVertex(vo + 2, -l2, -w, z);
+  C.SetVertex(vo + 3,   0,  0, z+h);
 
   C.SetTriangle(to + 0, vo + 0, vo + 1, vo + 2);
   C.SetTriangle(to + 1, vo + 0, vo + 3, vo + 1);
   C.SetTriangle(to + 2, vo + 1, vo + 3, vo + 2);
   C.SetTriangle(to + 3, vo + 0, vo + 2, vo + 3);
+}
 
-  C.SetTriangleColor(to + 0, 0,0,255);
-  C.SetTriangleColor(to + 1, 0,255,0);
-  C.SetTriangleColor(to + 2, 0,255,0);
-  C.SetTriangleColor(to + 3, 255,0,0);
+void TriMesh::make_tetra_blade(Int_t vo, Int_t to,
+                               const Float_t* org, const Float_t* dir,
+                               Float_t w, Float_t h)
+{
+  TringTvor& C = *mTTvor;
+
+  Opcode::Point up(0, 0, 1);
+  Opcode::Point right;
+  TMath::NormCross(dir, (Float_t*) up, (Float_t*)right);
+
+  right *= 0.5f * w;
+  up    *= h;
+
+  Opcode::Point sec(org); sec += dir;
+
+  C.SetVertex(vo + 0, sec + right);
+  C.SetVertex(vo + 1, org);
+  C.SetVertex(vo + 2, sec - right);
+  C.SetVertex(vo + 3, sec + up);
+
+  C.SetTriangle(to + 0, vo + 0, vo + 1, vo + 2);
+  C.SetTriangle(to + 1, vo + 0, vo + 3, vo + 1);
+  C.SetTriangle(to + 2, vo + 1, vo + 3, vo + 2);
+  C.SetTriangle(to + 3, vo + 0, vo + 2, vo + 3);
 }
 
 void TriMesh::make_cubus(Int_t vo, Int_t to,
                          Float_t x0, Float_t y0, Float_t z0,
-                         Float_t a,  Float_t b,  Float_t c,
-                         UChar_t cr, UChar_t cg, UChar_t cb, UChar_t ca)
+                         Float_t a,  Float_t b,  Float_t c)
 {
   TringTvor& C = *mTTvor;
 
@@ -500,19 +521,95 @@ void TriMesh::make_cubus(Int_t vo, Int_t to,
   C.SetVertex(vo + 6, x0 + a, y0 + b, z0 + c);
   C.SetVertex(vo + 7, x0 + a, y0,     z0 + c);
 
-  C.SetTriangle(to +  0, vo + 0, vo + 1, vo + 2); C.SetTriangleColor(to +  0, cr, cg, cb, ca);
-  C.SetTriangle(to +  1, vo + 0, vo + 2, vo + 3); C.SetTriangleColor(to +  1, cr, cg, cb, ca);
-  C.SetTriangle(to +  2, vo + 0, vo + 4, vo + 1); C.SetTriangleColor(to +  2, cr, cg, cb, ca);
-  C.SetTriangle(to +  3, vo + 1, vo + 4, vo + 5); C.SetTriangleColor(to +  3, cr, cg, cb, ca);
-  C.SetTriangle(to +  4, vo + 1, vo + 5, vo + 2); C.SetTriangleColor(to +  4, cr, cg, cb, ca);
-  C.SetTriangle(to +  5, vo + 2, vo + 5, vo + 6); C.SetTriangleColor(to +  5, cr, cg, cb, ca);
-  C.SetTriangle(to +  6, vo + 2, vo + 6, vo + 3); C.SetTriangleColor(to +  6, cr, cg, cb, ca);
-  C.SetTriangle(to +  7, vo + 6, vo + 7, vo + 3); C.SetTriangleColor(to +  7, cr, cg, cb, ca);
-  C.SetTriangle(to +  8, vo + 3, vo + 7, vo + 0); C.SetTriangleColor(to +  8, cr, cg, cb, ca);
-  C.SetTriangle(to +  9, vo + 7, vo + 4, vo + 0); C.SetTriangleColor(to +  9, cr, cg, cb, ca);
-  C.SetTriangle(to + 10, vo + 4, vo + 7, vo + 5); C.SetTriangleColor(to + 10, cr, cg, cb, ca);
-  C.SetTriangle(to + 11, vo + 7, vo + 6, vo + 5); C.SetTriangleColor(to + 11, cr, cg, cb, ca);
+  C.SetTriangle(to +  0, vo + 0, vo + 1, vo + 2);
+  C.SetTriangle(to +  1, vo + 0, vo + 2, vo + 3);
+  C.SetTriangle(to +  2, vo + 0, vo + 4, vo + 1);
+  C.SetTriangle(to +  3, vo + 1, vo + 4, vo + 5);
+  C.SetTriangle(to +  4, vo + 1, vo + 5, vo + 2);
+  C.SetTriangle(to +  5, vo + 2, vo + 5, vo + 6);
+  C.SetTriangle(to +  6, vo + 2, vo + 6, vo + 3);
+  C.SetTriangle(to +  7, vo + 6, vo + 7, vo + 3);
+  C.SetTriangle(to +  8, vo + 3, vo + 7, vo + 0);
+  C.SetTriangle(to +  9, vo + 7, vo + 4, vo + 0);
+  C.SetTriangle(to + 10, vo + 4, vo + 7, vo + 5);
+  C.SetTriangle(to + 11, vo + 7, vo + 6, vo + 5);
 }
+
+//------------------------------------------------------------------------------
+
+void TriMesh::extrude_triangle(Int_t ti, Float_t h)
+{
+  // Extrude triangle with index 'ti' and place apex of the new tetra
+  // at height 'h' above the triangle's cog.
+
+  TringTvor& C = *mTTvor;
+
+  Float_t norm[3], cog[3];
+
+  C.CalculateTriangleNormalAndCog(ti, norm, cog);
+
+  ExtrudeTriangle(ti, cog[0] + h*norm[0], cog[1] + h*norm[1], cog[2] + h*norm[2]);
+}
+
+void TriMesh::extrude_triangle(Int_t ti, Float_t x, Float_t y, Float_t z)
+{
+  // Extrude triangle with index 'ti' and place apex of the new tetra
+  // at the given position.
+
+  TringTvor& C = *mTTvor;
+
+  Int_t nvi = C.AddVertices(1);
+  C.SetVertex(nvi, x, y, z);
+
+  Int_t nti = C.AddTriangles(2);
+
+  Int_t* t = C.Triangle(ti);
+
+  C.SetTriangle(nti,     t[1], t[2], nvi);
+  C.SetTriangle(nti + 1, t[2], t[0], nvi);
+  t[2] = nvi;
+}
+
+//------------------------------------------------------------------------------
+
+void TriMesh::colorize_trings_std()
+{
+  // Colorize the triangles in a standard way.
+  // Downwards - blue, otherwise - green.
+  // It is assumed that the triangle normals have been calculated.
+
+  const Int_t nTrings = mTTvor->mNTrings;
+
+  const Opcode::Point down(0,0,-1);
+  const Opcode::Point back(-1,0,0);
+
+  const Float_t limit = 0.5 * TMath::Sqrt(3);
+
+  for (Int_t t = 0; t < nTrings; ++t)
+  {
+    Float_t* N = mTTvor->TriangleNormal(t);
+    if ((down | N) > limit)
+      mTTvor->SetTriangleColor(t, 0, 0, 255);
+    else if ((back | N) > limit)
+      mTTvor->SetTriangleColor(t, 255, 0, 0);
+    else
+      mTTvor->SetTriangleColor(t, 0, 255, 0, 0);
+  }
+}
+
+void TriMesh::colorize_trings_single(UChar_t r, UChar_t g, UChar_t b, UChar_t a)
+{
+  // Colorize the triangles with given color.
+
+  const Int_t nTrings = mTTvor->mNTrings;
+
+  for (Int_t t = 0; t < nTrings; ++t)
+  {
+    mTTvor->SetTriangleColor(t, r, g, b, a);
+  }
+}
+
+//==============================================================================
 
 void TriMesh::MakeTetrahedron(Float_t l1, Float_t l2, Float_t w, Float_t h)
 {
@@ -524,6 +621,8 @@ void TriMesh::MakeTetrahedron(Float_t l1, Float_t l2, Float_t w, Float_t h)
   make_tetra(0, 0, l1, l2, 0, w, h);
 
   mTTvor->GenerateTriangleNormals();
+  colorize_trings_std();
+  mTTvor->SetTriangleColor(3, 255, 0, 0);
 
   Stamp(FID());
 }
@@ -541,6 +640,46 @@ void TriMesh::MakeTetraFlyer(Float_t l1, Float_t l2, Float_t w, Float_t h,
   make_tetra(4, 4, wing_l1, wing_l2, wing_z, wing_w, wing_h);
 
   mTTvor->GenerateTriangleNormals();
+  colorize_trings_std();
+  mTTvor->SetTriangleColor(3, 255, 0, 0);
+
+  Stamp(FID());
+}
+
+void TriMesh::MakeTetraChopper(Float_t l1, Float_t l2, Float_t l3, Float_t l4,
+                               Float_t w, Float_t h,
+                               Float_t wing_l1, Float_t wing_l2,
+                               Float_t wing_w,  Float_t wing_h)
+{
+  delete mTTvor;
+  mTTvor = new TringTvor(4, 4, false, true, false);
+
+  make_tetra(0, 0, l1, l2, 0, w, h);
+
+  extrude_triangle(3, -l3, 0, 0.5f  * h);
+  extrude_triangle(3, -l4, 0, 0.75f * h);
+  extrude_triangle(3, -l3, 0, 0.f * h);
+
+  Float_t dir[3] = { wing_l1, wing_l2, 0 };
+
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+
+  dir[1] = - dir[1];
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+
+  dir[0] = - dir[0];
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+
+  dir[1] = - dir[1];
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+
+  mTTvor->GenerateTriangleNormals();
+  colorize_trings_std();
+  mTTvor->SetTriangleColor(3, 255, 0, 0);
 
   Stamp(FID());
 }
@@ -553,9 +692,10 @@ void TriMesh::MakeBox(Float_t a, Float_t b, Float_t c)
   delete mTTvor;
   mTTvor = new TringTvor(8, 12, false, true, false);
 
-  make_cubus(0, 0, -0.5*a, -0.5*b, 0, a, b, c, 200, 200, 200, 255);
+  make_cubus(0, 0, -0.5*a, -0.5*b, 0, a, b, c);
 
   mTTvor->GenerateTriangleNormals();
+  colorize_trings_single(200, 200, 200, 255);
 
   Stamp(FID());
 

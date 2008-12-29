@@ -1,3 +1,16 @@
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Add functions AddVertices(Int_t nv) and AddTriangles(Int_t
+	nt). They allow the tvor to be extended with new vertices and
+	triangles.
+
+	Add functions:
+	  Float_t CalculateTriangleNormal(Int_t ti, Float_t normal[3])
+	  Float_t CalculateTriangleNormalAndCog(Int_t ti, Float_t normal[3], Float_t cog[3]);
+	that simplify some calculations.
+
 2008-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GForge/Makefile:

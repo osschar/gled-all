@@ -1,3 +1,8 @@
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add some choppers.
+
 2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* solar_system.C:
