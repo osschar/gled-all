@@ -470,6 +470,34 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
   return d;
 }
 
+Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
+{
+  Dynamico* d = new Dynamico(GForm("Chopper %d", mFlyers->GetSize() + 1));
+  d->SetMoveMode(Dynamico::MM_Fly);
+  HTransF& t = d->ref_trans();
+
+  mParaSurf->random_trans(mRndGen, t);
+
+  Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
+  t.RotateLF(1, 2, phi);
+
+  Float_t h = mRndGen.Uniform(0, h_max);
+  t.MoveLF(3, mParaSurf->GetMaxH() + h);
+  d->SetLevH(h); // This is a hack, honoured by Tringula when propagating flyers.
+
+  d->SetV(mRndGen.Uniform( v_min, v_max));
+  d->SetW(mRndGen.Uniform(-w_max, w_max));
+
+  mQueen->CheckIn(d);
+  d->SetMesh(*mDefChopMesh);
+  mFlyers->Add(d);
+
+  d->update_aabb();
+  d->update_last_data();
+
+  return d;
+}
+
 //==============================================================================
 
 void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)

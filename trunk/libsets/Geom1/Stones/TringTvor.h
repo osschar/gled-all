@@ -116,8 +116,13 @@ public:
   void MakeSecondaryArrays(Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
   void DeleteSecondaryArrays();
 
+  Int_t AddVertices(Int_t nv);
+  Int_t AddTriangles(Int_t nt);
+
   void SetVertex(Int_t i, Float_t x, Float_t y, Float_t z)
   { Float_t* v = Vertex(i); v[0] = x; v[1] = y; v[2] = z; }
+  void SetVertex(Int_t i, const Float_t q[3])
+  { Float_t* v = Vertex(i); v[0] = q[0]; v[1] = q[1]; v[2] = q[2]; }
   void SetNormal(Int_t i, Float_t x, Float_t y, Float_t z)
   { Float_t* v = Normal(i); v[0] = x; v[1] = y; v[2] = z; }
   void SetTriangle(Int_t i, Int_t v0, Int_t v1, Int_t v2)
@@ -131,6 +136,9 @@ public:
   Float_t BoundingBoxDiagonal();
   Float_t BoundingBoxXYArea();
   Float_t BoundingBoxVolume();
+
+  Float_t CalculateTriangleNormal(Int_t ti, Float_t normal[3]);
+  Float_t CalculateTriangleNormalAndCog(Int_t ti, Float_t normal[3], Float_t cog[3]);
 
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),

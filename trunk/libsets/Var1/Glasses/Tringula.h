@@ -93,9 +93,10 @@ protected:
 
   TRandom          mRndGen;
 
-  ZLink<TriMesh>   mDefStaMesh; // X{GS} L{}
-  ZLink<TriMesh>   mDefDynMesh; // X{GS} L{}
-  ZLink<TriMesh>   mDefFlyMesh; // X{GS} L{}
+  ZLink<TriMesh>   mDefStaMesh;  // X{GS} L{}
+  ZLink<TriMesh>   mDefDynMesh;  // X{GS} L{}
+  ZLink<TriMesh>   mDefFlyMesh;  // X{GS} L{}
+  ZLink<TriMesh>   mDefChopMesh; // X{GS} L{}
 
   Opcode::BipartiteBoxPruner*  mBoxPruner;  //!
   // List-time-stamps for pruning sources.
@@ -149,6 +150,8 @@ public:
                            Float_t v_min=-1, Float_t v_max=5,
                            Float_t w_max= 1);                   // X{E} C{1} 7 MCWButt()
   Dynamico* RandomFlyer   (Float_t v_min= 2, Float_t v_max=20,
+                           Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
+  Dynamico* RandomChopper (Float_t v_min= 2, Float_t v_max=20,
                            Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
 
   void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()

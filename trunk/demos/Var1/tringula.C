@@ -30,6 +30,7 @@ TriMesh      *trimesh   = 0;
 TriMesh      *dynmesh   = 0;
 TriMesh      *stamesh   = 0;
 TriMesh      *flymesh   = 0;
+TriMesh      *chopmesh  = 0;
 ZVector      *rndstatos  = 0;
 ZVector      *rnddynos  = 0;
 
@@ -54,7 +55,8 @@ ZList        *tmpdir   = 0;
 
 Float_t      statico_surface_fraction  = 0.05; // 0.05
 Int_t        num_dynamico              = 250;  // 250
-Int_t        num_flyer                 = 100;  // 100
+Int_t        num_flyer                 = 70;   // 70
+Int_t        num_chopper               = 30;   // 30
 Float_t      max_flyer_h               = 10;   // def=10. Changed for some surfaces in surf-specific init.
 
 const Text_t* trimesh_layout = "ZGlass(Name,Title[22]):TriMesh(M[8],Surf[8],COM,J)";
@@ -135,6 +137,11 @@ void tringula(Int_t mode=0)
     flymesh->MakeTetraFlyer();
     flymesh->StdDynamicoPostImport();
     flymesh->SetMassFromBBox(0.15, 0.33, 1000);
+
+    ASSIGN_ADD_GLASS(chopmesh, TriMesh, meshes, "Chopper", 0);
+    chopmesh->MakeTetraChopper();
+    chopmesh->StdDynamicoPostImport();
+    chopmesh->SetMassFromBBox(0.15, 0.33, 1000);
 
     // Random statos.
     ASSIGN_ADD_GLASS(rndstatos, ZVector, meshes, "rndstatos", 0);
@@ -256,6 +263,7 @@ void tringula(Int_t mode=0)
   tringula->SetDefStaMesh(stamesh);
   tringula->SetDefDynMesh(dynmesh);
   tringula->SetDefFlyMesh(flymesh);
+  tringula->SetDefChopMesh(chopmesh);
 
   switch (mode)
   {
@@ -496,7 +504,10 @@ void tringula(Int_t mode=0)
   }
 
   // Flyers
-  for (int i=0; i<num_flyer; ++i) tringula->RandomFlyer(2, 12, 0.5, max_flyer_h);
+  for (int i=0; i<num_flyer; ++i) tringula->RandomFlyer(6, 12, 0.5, max_flyer_h);
+
+  // Choppers
+  for (int i=0; i<num_chopper; ++i) tringula->RandomChopper(1, 8, 0.8, 0.5*max_flyer_h);
 
   if (mode == 99)
   {
