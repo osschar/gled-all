@@ -8,6 +8,7 @@ class TringuCam;
 class Statico;
 class Dynamico;
 class ParaSurf;
+class GravPlotter;
 class PSMark;
 class TriMesh;
 class TriMeshField;
@@ -452,7 +453,7 @@ void tringula(Int_t mode=0)
   // Staticos
   {
     GTime timer(GTime::I_Now);
-    Float_t desired_surface = statico_surface_fraction * tringula->GetParaSurf()->surface();
+    Float_t desired_surface = statico_surface_fraction * tringula->GetParaSurf()->Surface();
     Float_t used_surface    = 0;
     Int_t   stato_cnt       = 0;
     Int_t   exc_cnt         = 0;
@@ -645,6 +646,8 @@ void setup_torus_outside()
 {
   Float_t rM = 30, rm = 15, rS = rM + rm;
 
+  max_flyer_h = 5;
+
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
   PSTorus* pstor = dynamic_cast<PSTorus*>(parasurf);
@@ -682,7 +685,7 @@ void setup_torus_inside()
 {
   Float_t rM = 30, rm = 15, rS = rM + rm;
 
-  max_flyer_h = 10;
+  max_flyer_h = 5;
 
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
@@ -980,4 +983,11 @@ void sunrise(Float_t phi=45, Float_t dt=0.005, Int_t sleep=100)
     tringula->ReadUnlock();
     gSystem->Sleep(sleep);
   }
+}
+
+GravPlotter* plot_grav()
+{
+  GravPlotter* gp = new GravPlotter(parasurf);
+  gp->StandardCanvas();
+  return gp;
 }
