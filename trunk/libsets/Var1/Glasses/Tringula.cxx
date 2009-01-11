@@ -14,6 +14,10 @@
 #include "ParaSurf.h"
 #include "Statico.h"
 #include "Dynamico.h"
+#include "Crawler.h"
+#include "Flyer.h"
+#include "Airplane.h"
+#include "Chopper.h"
 
 #include "Tringula.c7"
 
@@ -300,6 +304,7 @@ Statico* Tringula::NewStatico(const Text_t* sname)
   mQueen->CheckIn(s);
   s->SetMesh(*mDefStaMesh);
   mStatos->Add(s);
+  s->SetTringula(this);
 
   s->update_aabb();
 
@@ -380,6 +385,7 @@ place:
   mQueen->CheckIn(s);
   s->SetMesh(mesh);
   mStatos->Add(s);
+  s->SetTringula(this);
 
   s->update_aabb();
 
@@ -391,8 +397,7 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
   if (dname == 0)
     dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
 
-  Dynamico* d = new Dynamico(dname);
-  d->SetMoveMode(Dynamico::MM_Crawl);
+  Dynamico* d = new Crawler(dname);
 
   mParaSurf->origin_trans(d->ref_trans());
   place_on_terrain(d);
@@ -400,6 +405,7 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
   mQueen->CheckIn(d);
   d->SetMesh(*mDefDynMesh);
   mDynos->Add(d);
+  d->SetTringula(this);
 
   d->update_aabb();
   d->update_last_data();
@@ -410,8 +416,7 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
 Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
                                    Float_t v_min, Float_t v_max, Float_t w_max)
 {
-  Dynamico* d = new Dynamico(GForm("Dynamico %d", mDynos->GetSize() + 1));
-  d->SetMoveMode(Dynamico::MM_Crawl);
+  Dynamico* d = new Crawler(GForm("Dynamico %d", mDynos->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   TriMesh* mesh;
@@ -435,6 +440,7 @@ Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
   mQueen->CheckIn(d);
   d->SetMesh(mesh);
   mDynos->Add(d);
+  d->SetTringula(this);
 
   d->update_aabb();
   d->update_last_data();
@@ -444,8 +450,7 @@ Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
 
 Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
 {
-  Dynamico* d = new Dynamico(GForm("Flyer %d", mFlyers->GetSize() + 1));
-  d->SetMoveMode(Dynamico::MM_Fly);
+  Dynamico* d = new Airplane(GForm("Flyer %d", mFlyers->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   mParaSurf->random_trans(mRndGen, t);
@@ -463,6 +468,7 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
   mQueen->CheckIn(d);
   d->SetMesh(*mDefFlyMesh);
   mFlyers->Add(d);
+  d->SetTringula(this);
 
   d->update_aabb();
   d->update_last_data();
@@ -472,8 +478,7 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
 
 Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
 {
-  Dynamico* d = new Dynamico(GForm("Chopper %d", mFlyers->GetSize() + 1));
-  d->SetMoveMode(Dynamico::MM_Fly);
+  Dynamico* d = new Chopper(GForm("Chopper %d", mFlyers->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   mParaSurf->random_trans(mRndGen, t);
@@ -491,11 +496,53 @@ Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, F
   mQueen->CheckIn(d);
   d->SetMesh(*mDefChopMesh);
   mFlyers->Add(d);
+  d->SetTringula(this);
 
   d->update_aabb();
   d->update_last_data();
 
   return d;
+}
+
+//==============================================================================
+
+Bool_t Tringula::CheckBoundaries(Dynamico* dyno, Float_t& safety)
+{
+  // Checks if dyno crossed some important boundary and handles that.
+  // This means that Dyno's velocity and transformation matrix might be
+  // modified.
+  //
+  // Distance to the closest boundary is returned in safety argument.
+  //
+  // Returns true if transformation matrix of the dynos gets changed.
+  //
+  // In future, when an inter-tringula boundary is crossed this will
+  // also pass the dyno to neighbouring tringula.
+
+  Bool_t trans_changed = false;
+
+  Int_t np = mParaSurf->n_edge_planes();
+
+  Float_t min_d = 1e5;
+  for (Int_t p = 0; p < np; ++p)
+  {
+    Opcode::Point& pos     = * (Opcode::Point*) dyno->ref_trans().ArrT();
+    Opcode::Point& old_pos = * (Opcode::Point*) dyno->ref_last_trans().ArrT();
+    Float_t d = mParaSurf->edge_planes()[p].Distance(pos);
+    if (d > 0)
+    {
+      trans_changed = true;
+      handle_edge_crossing(*dyno, old_pos, pos, p, d);
+      d = mParaSurf->edge_planes()[p].Distance(pos);
+    }
+    d = -d;
+    if (d < min_d)
+      min_d = d;
+  }
+
+  safety = min_d;
+
+  return trans_changed;
 }
 
 //==============================================================================
@@ -671,127 +718,21 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
 
   GLensWriteHolder wlck(this);
 
-  using namespace Opcode;
-
   // Make time step for dynos, flyers
   {
-    RayCollider    RC;
-    RC.SetFirstContact(true);
-    RC.SetTemporalCoherence(true);
-    CollisionFaces CF;
-    RC.SetDestination(&CF);
-
     Stepper<> dyno_stepper(*mDynos);
     while (dyno_stepper.step())
     {
       Dynamico& D = * (Dynamico*) *dyno_stepper;
-
-      if ( ! D.bParked)
-      {
-        Point old_pos, pos; // These should both be within a dynamico.
-
-        D.mTrans.GetPos(old_pos);
-        D.mTrans.MoveLF(1, dt * D.mV);
-        D.mTrans.RotateLF(1, 2, dt*D.mW);
-        D.mTrans.GetPos(pos);
-
-        for (Int_t p=0; p<mParaSurf->n_edge_planes(); ++p)
-        {
-          Float_t d = mParaSurf->edge_planes()[p].Distance(pos);
-          if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
-        }
-
-        Opcode::Ray R;
-        Float_t ray_offset = mParaSurf->pos2hray(pos, R);
-        // !!! This is potentially expensive, e.g., for torus.
-        // Should cache down direction while in the same triangle.
-
-        UInt_t cache = D.mOPCRCCache;
-        if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) )
-        {
-          if (CF.GetNbFaces() == 1)
-          {
-            const CollisionFace& cf = CF.GetFaces()[0];
-            pos.TMac(R.mDir, cf.mDistance - ray_offset - D.mLevH);
-
-            if (cache != D.mOPCRCCache)
-            {
-              Float_t* n = mMesh->GetTTvor()->TriangleNormal(D.mOPCRCCache);
-              D.mTrans.SetBaseVec(3, n);
-              D.mTrans.OrtoNorm3Column(2, 3);
-              D.mTrans.SetBaseVecViaCross(1);
-            }
-          }
-        }
-        else
-        {
-          printf("%scollide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-                 _eh.Data(),
-                 RC.GetContactStatus(),
-                 RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
-                 RC.GetNbIntersections());
-        }
-
-        D.mTrans.SetPos(pos);
-      } // if D not parked
-
-    } // end while dynos
-
+      D.TimeTick(t, dt);
+    }
 
     Stepper<> flyo_stepper(*mFlyers);
     while (flyo_stepper.step())
     {
       Dynamico& D = * (Dynamico*) *flyo_stepper;
-
-      if ( ! D.bParked)
-      {
-        Point old_pos, pos; // These should both be within a dynamico.
-
-        D.mTrans.GetPos(old_pos);
-        D.mTrans.MoveLF(1, dt*D.mV);
-        D.mTrans.RotateLF(1, 2, dt*D.mW);
-        D.mTrans.GetPos(pos);
-
-        for (Int_t p=0; p<mParaSurf->n_edge_planes(); ++p)
-        {
-          Float_t d = mParaSurf->edge_planes()[p].Distance(pos);
-          if (d > 0) handle_edge_crossing(D, old_pos, pos, p, d);
-        }
-
-        Opcode::Ray R;
-        Float_t ray_offset = mParaSurf->pos2hray(pos, R);
-
-        UInt_t cache = D.mOPCRCCache;
-        if ( RC.Collide(R, *mMesh->GetOPCModel(), 0, &D.mOPCRCCache) )
-        {
-          if (CF.GetNbFaces() == 1)
-          {
-            pos.TMac(R.mDir, - ray_offset - D.mLevH);
-
-            if (cache != D.mOPCRCCache)
-            {
-              pos.TMac(R.mDir, - ray_offset - D.mLevH);
-
-              Opcode::Point p = -R.mDir;
-              p.Normalize();
-              D.mTrans.SetBaseVec(3, p);
-              D.mTrans.OrtoNorm3Column(2, 3);
-              D.mTrans.SetBaseVecViaCross(1);
-            }
-          }
-        }
-        else
-        {
-          printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-                 RC.GetContactStatus(),
-                 RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
-                 RC.GetNbIntersections());
-        }
-
-        D.mTrans.SetPos(pos);
-      } // if D not parked
-
-    } // end while flyers
+      D.TimeTick(t, dt);
+    }
   }
 
   // Box-pruning, minimalistic collision handling.
@@ -826,13 +767,6 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       tcl->TimeTick(t, dt);
   }
 }
-
-void Tringula::make_dyno_step(Dynamico* D, Float_t dt)
-{
-  // @@@@@
-}
-
-
 
 /******************************************************************************/
 

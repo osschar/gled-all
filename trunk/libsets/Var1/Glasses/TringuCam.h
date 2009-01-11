@@ -100,6 +100,7 @@ public:
     KeyValueChangeParams* fChangeParams;
 
     Float_t fValue;
+    Float_t fMinValue, fMaxValue;
     Float_t fDecayTimeout;
     KeyInfo fIncKey;
     KeyInfo fDecKey;
@@ -108,6 +109,8 @@ public:
       fChangeParams(chg_prm),
       fValue(0), fDecayTimeout(0),
       fIncKey(this, true), fDecKey(this, false) {}
+
+    void SetMinMax(Float_t min, Float_t max) { fMinValue = min; fMaxValue = max; }
 
     void IncValue(Float_t& value, Float_t desire, Float_t step, Float_t delta_fac);
     void DecValue(Float_t& value, Float_t desire, Float_t step, Float_t delta_fac);
@@ -119,8 +122,6 @@ public:
 
     void TimeTick(Float_t dt);
   };
-
-  enum KeyPairs_e { KP_StrafeLR };
 
 private:
   void _init();

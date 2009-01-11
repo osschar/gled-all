@@ -8,6 +8,7 @@
 #define Var1_Dynamico_H
 
 #include <Glasses/Extendio.h>
+#include <Stones/GravData.h>
 
 class Statico;
 
@@ -15,9 +16,6 @@ class Dynamico : public Extendio
 {
   friend class Tringula;
   MAC_RNR_FRIENDS(Dynamico);
-
-public:
-  enum MoveMode_e { MM_Crawl, MM_Fly };
 
 private:
   void _init();
@@ -28,8 +26,8 @@ protected:
 
   Bool_t          bParked;     // X{GS}  7 Bool()
 
-  Float_t         mV;          // X{GS}  7 Value(-range=>[-100,100, 1,1000], -join=>1)
-  Float_t         mW;          // X{GS}  7 Value(-range=>[  -5,  5, 1,1000])
+  Float_t         mV;          // X{GE}  7 Value(-range=>[-100,100, 1,1000], -join=>1)
+  Float_t         mW;          // X{GE}  7 Value(-range=>[  -5,  5, 1,1000])
   Float_t         mLevH;       // X{GS}  7 Value(-range=>[   0,200, 1,1000])
 
   // Float_t         mPowPerM;    // X{GS}  7 Value(-range=>[-10,10, 1,1000])
@@ -37,16 +35,25 @@ protected:
   // No ... force ... mass is eventually variable.
   // Then need "engine type"; min/max F, max dF/dt
 
-  //HPointF         mVVec;       // X{RS}  7 HPointF(-const=>1)
-  //HPointF         mWVec;       // X{RS}  7 HPointF(-const=>1)
+  HPointF         mVVec;       // X{RS}  7 HPointF()
+  HPointF         mWVec;       // X{RS}  7 HPointF()
 
-  UChar_t         mMoveMode;   // X{GS}  7 PhonyEnum(-type=>MoveMode_e)
+  Float_t         mSafety;     //! Safe distance to tringula boundaries.
+
+  GravData        mGrav;
 
   UInt_t          mOPCRCCache; //!
 
 public:
   Dynamico(const Text_t* n="Dynamico", const Text_t* t=0) :
     Extendio(n,t) { _init(); }
+
+  virtual void SetTringula(Tringula* tring);
+
+  void SetV(Float_t v);
+  void SetW(Float_t w);
+
+  virtual void TimeTick(Double_t t, Double_t dt) {}
 
   virtual void update_last_data() { mLastTrans = mTrans; mLastAABB = mAABB; }
 

@@ -162,6 +162,68 @@ inline HTrans<TT> HTrans<TT>::operator*(const HTrans<TT>& t)
   return b;
 }
 
+template<class TT>
+inline void HTrans<TT>::MultLeft3x3(const TT* m)
+{
+  // Multiply from left with a column-major 3x3 matrix.
+
+  TT  B[3];
+  TT* C = M;
+  for(int c=0; c<3; ++c, C+=4) {
+    const TT* T = m;
+    for(int r=0; r<3; ++r, ++T)
+      B[r] = T[0]*C[0] + T[3]*C[1] + T[6]*C[2];
+    C[0] = B[0]; C[1] = B[1]; C[2] = B[2];
+  }
+}
+
+template<class TT>
+inline void HTrans<TT>::MultRight3x3(const TT* m)
+{
+  // Multiply from right with a column-major 3x3 matrix.
+
+  TT  B[3];
+  TT* C = M;
+  for(int r=0; r<3; ++r, ++C) {
+    const TT* T = m;
+    for(int c=0; c<3; ++c, T+=3)
+      B[c] = C[0]*T[0] + C[4]*T[1] + C[8]*T[2];
+    C[0] = B[0]; C[4] = B[1]; C[8] = B[2];
+  }
+}
+
+template<class TT>
+inline void HTrans<TT>::MultLeft3x3transposed(const TT* m)
+{
+  // Multiply from left with the transpose of a column-major 3x3 matrix.
+  // Alternatively - multiply from left with a row-major 3x3 matrix.
+
+  TT  B[3];
+  TT* C = M;
+  for(int c=0; c<3; ++c, C+=4) {
+    const TT* T = m;
+    for(int r=0; r<3; ++r, T+=3)
+      B[r] = T[0]*C[0] + T[1]*C[1] + T[2]*C[2];
+    C[0] = B[0]; C[1] = B[1]; C[2] = B[2];
+  }
+}
+
+template<class TT>
+inline void HTrans<TT>::MultRight3x3transposed(const TT* m)
+{
+  // Multiply from right with the transpose of a column-major 3x3 matrix.
+  // Alternatively - multiply from right with a row-major 3x3 matrix.
+
+  TT  B[3];
+  TT* C = M;
+  for(int r=0; r<3; ++r, ++C) {
+    const TT* T = m;
+    for(int c=0; c<3; ++c, ++T)
+      B[c] = C[0]*T[0] + C[4]*T[3] + C[8]*T[6];
+    C[0] = B[0]; C[4] = B[1]; C[8] = B[2];
+  }
+}
+
 /**************************************************************************/
 // Move & Rotate
 /**************************************************************************/

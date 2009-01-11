@@ -240,19 +240,6 @@ public:
   Matrix4x4&	Invert();
   //Matrix&	ComputeAxisMatrix(Point& axis, float angle);
 
-  // Cast operators
-  //! Casts a Matrix4x4 to a Matrix3x3.
-  operator Matrix3x3() const
-  {
-    return Matrix3x3(m[0][0], m[0][1], m[0][2],
-                     m[1][0], m[1][1], m[1][2],
-                     m[2][0], m[2][1], m[2][2]);
-  }
-  //! Casts a Matrix4x4 to a Quat.
-  operator Quat() const;
-  //! Casts a Matrix4x4 to a PR.
-  operator PR()   const;
-
   // Arithmetic operators
   //! Operator for Matrix4x4 Plus = Matrix4x4 + Matrix4x4;
   Matrix4x4	operator+(const Matrix4x4& mat)	const
@@ -422,8 +409,24 @@ public:
     return	*this;
   }
 
+  // Cast operators
+  //! Casts a Matrix4x4 to a Matrix3x3.
+  operator Matrix3x3() const
+  {
+    return Matrix3x3(m[0][0], m[0][1], m[0][2],
+                     m[1][0], m[1][1], m[1][2],
+                     m[2][0], m[2][1], m[2][2]);
+  }
+  //! Casts a Matrix4x4 to a Quat.
+  operator Quat() const;
+  //! Casts a Matrix4x4 to a PR.
+  operator PR()   const;
+
   const HPoint&	operator[](int row) const { return *(const HPoint*)&m[row][0]; }
   HPoint&	operator[](int row)       { return *(HPoint*)&m[row][0]; }
+
+  operator const float*() const	{ return &m[0][0]; }
+  operator       float*()       { return &m[0][0]; }
 
 public:
 

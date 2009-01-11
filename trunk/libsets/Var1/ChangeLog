@@ -1,3 +1,87 @@
+2009-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Airplane.cxx:
+	* Glasses/Airplane.h:
+	* Glasses/Chopper.cxx:
+	* Glasses/Chopper.h:
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	New glasses - break up Dynamico for finer control over movement
+	parameters and mechanics.
+
+	* Stones/GravData.cxx:
+	* Stones/GravData.h:
+	New stone - information about gravitational field at given point.
+
+	* Stones/GravPlotter.cxx:
+	* Stones/GravPlotter.h:
+	New stone - helper for plotting gravitational field functions.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add members for velocity / angular velocity vectors.
+	Add member for storing current GravData.
+	Implement virtual TimeTick() to do movement.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Subclass from TimeMakerClient.
+	Add virtual SetTringula() and Tringula* member.
+
+	* Glasses/PSRectangle.cxx:
+	* Glasses/PSRectangle.h:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTriangle.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Add virtual functions:
+	  Float_t CharacteristicLength();
+	  void    pos2grav(const Float_t* x, GravData& gd);
+
+	* Glasses/Statico.cxx:
+	* Glasses/Statico.h:
+	Add empty implementation of TimeTick().
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add min/max value limits to struct ValueInfo.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	In functions for creating dynos use the new sub-classes.
+	Remove code for handling od dyno time-steps - now in individual
+	classes.
+	Remove obsolete function SetEdgePlanes().
+	Add function Bool_t CheckBoundaries() to determine safe distance
+	for a given dynamico before hitting a tringula related boundary.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Make HPointF/D are now classes, not typedefs.
+
+	* catalog.patch:
+	Extendio now abstract.
+	HPointF/D are now classes, not typedefs.
+
+	* glass.list:
+	Register new stones.
+
+	* Opcode/Ice/IceMatrix3x3.cpp:
+	* Opcode/Ice/IceMatrix3x3.h:
+	Add function FromTo(point1, point2) to calculate rotation matrix
+	for rotating point1 into point2.
+
+	* Opcode/Ice/IceMatrix4x4.cpp:
+	* Opcode/Ice/IceMatrix4x4.h:
+	* Opcode/Ice/IcePoint.h:
+	New helper functions, comments.	
+
 2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMesh.cxx:

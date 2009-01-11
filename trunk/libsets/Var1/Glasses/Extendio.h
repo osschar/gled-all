@@ -10,14 +10,16 @@
 #include <Glasses/ZGlass.h>
 #include <Glasses/TriMesh.h>
 #include <Stones/HTrans.h>
+#include <Stones/TimeMakerClient.h>
 
 #include <Opcode/Opcode.h>
 
 class TringTvor;
+class Tringula;
 
-class Extendio : public ZGlass
+class Extendio : public ZGlass,
+                 public TimeMakerClient
 {
-  friend class Tringula;
   MAC_RNR_FRIENDS(Extendio);
 
 public:
@@ -58,9 +60,13 @@ protected:
 
   ZLink<TriMesh>  mMesh;       // X{GS} L{}
 
+  Tringula       *mTringula;   //!
+
 public:
   Extendio(const Text_t* n="Extendio", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
+
+  virtual void SetTringula(Tringula* tring);
 
   const HTransF&        RefTrans()     const { return  mTrans; }
   const HTransF&        RefLastTrans() const { return *mLastTransPtr; }

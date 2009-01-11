@@ -154,7 +154,7 @@ public:
   Dynamico* RandomChopper (Float_t v_min= 2, Float_t v_max=20,
                            Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
 
-  void SetEdgePlanes(RectTerrain* rect_terr); // X{E} C{1} 7 MCWButt()
+  Bool_t CheckBoundaries(Dynamico* dyno, Float_t& safety);
 
   void DoFullBoxPrunning(Bool_t accumulate=false, Bool_t verbose=false); // X{E} 7 MCWButt()
 
@@ -163,11 +163,8 @@ public:
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
 
-  void make_dyno_step(Dynamico* D, Float_t dt);
-
 #include "Tringula.h7"
   ClassDef(Tringula, 1);
 }; // endclass Tringula
-
 
 #endif

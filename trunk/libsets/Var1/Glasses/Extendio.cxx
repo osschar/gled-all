@@ -25,6 +25,18 @@ void Extendio::_init()
   bVerboseCollide = false;
 
   bSelected       = false;
+
+  mTringula = 0;
+}
+
+/**************************************************************************/
+
+void Extendio::SetTringula(Tringula* tring)
+{
+  // Set tringula to which the extendio is attached.
+  // Sub-classes override this to reinitialize cached data.
+
+  mTringula = tring;
 }
 
 /**************************************************************************/

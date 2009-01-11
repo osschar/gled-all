@@ -13,6 +13,8 @@
 #include "Dynamico.c7"
 
 #include "Statico.h"
+#include "Tringula.h"
+#include "ParaSurf.h"
 
 #include <Stones/TringTvor.h>
 
@@ -32,9 +34,45 @@ void Dynamico::_init()
   mV = mW = 0.0f;
   mLevH   = 0.1f;
 
-  mMoveMode = MM_Crawl;
+  mSafety = 0;
 
   mOPCRCCache = OPC_INVALID_ID;
+}
+
+/**************************************************************************/
+
+void Dynamico::SetTringula(Tringula* tring)
+{
+  // Set tringula to which the extendio is attached.
+  // Sub-classes override this to reinitialize cached data.
+
+  PARENT_GLASS::SetTringula(tring);
+
+  mTringula->GetParaSurf()->pos2grav(mTrans.ArrT(), mGrav);
+}
+
+/**************************************************************************/
+
+void Dynamico::SetV(Float_t v)
+{
+  // Like autogen but also set mVVec.
+
+  if(v > 100) v = 100;
+  if(v < -100) v = -100;
+  mV = v;
+  mVVec.x = v;
+  Stamp(FID());
+}
+
+void Dynamico::SetW(Float_t w)
+{
+  // Like autogen but also set mWVec.
+
+  if(w > 5) w = 5;
+  if(w < -5) w = -5;
+  mW = w;
+  mWVec.x = w;
+  Stamp(FID());
 }
 
 /**************************************************************************/

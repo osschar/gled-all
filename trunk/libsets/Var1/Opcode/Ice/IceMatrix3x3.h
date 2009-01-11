@@ -473,6 +473,7 @@ public:
   }
 
   // Cast operators
+
   //! Cast a Matrix3x3 to a Matrix4x4.
   operator Matrix4x4()	const;
   //! Cast a Matrix3x3 to a Quat.
@@ -480,6 +481,9 @@ public:
 
   const Point&	operator[](int row) const { return *(const Point*)&m[row][0]; }
   Point&	operator[](int row)       { return *(Point*)&m[row][0]; }
+
+  operator const float*() const	{ return &m[0][0]; }
+  operator       float*()       { return &m[0][0]; }
 
 public:
 
