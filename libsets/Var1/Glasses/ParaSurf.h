@@ -11,7 +11,10 @@
 
 class ZTrans;
 class HTransF;
+class GravData;
 class TriMesh;
+
+class TRandom;
 
 namespace Opcode
 {
@@ -19,8 +22,6 @@ class Plane;
 class Point;
 class Ray;
 }
-
-class TRandom;
 
 
 class ParaSurf : public ZGlass
@@ -40,7 +41,9 @@ protected:
   Float_t  mMeanH;   // X{G} 7 ValOut(-join=>1)
   Float_t  mSigmaH;  // X{G} 7 ValOut()
 
-  Float_t  mEpsilon; // X{G}
+  Float_t  mGravAtSurface; // X{GS} 7 Value(-range=>[0,20,1,1000])
+
+  Float_t  mEpsilon;     // X{G}
 
   static const Float_t  sEpsilonFac;
   static const Float_t  sPi, sTwoPi, sPiHalf;;
@@ -64,9 +67,8 @@ public:
 
   virtual void SetupEdgePlanes() {}
 
-  // !!! some/most of those should be abstract
-
-  virtual Float_t surface() = 0;
+  virtual Float_t Surface() = 0;
+  virtual Float_t CharacteristicLength();
 
   virtual void origin_fgh(Float_t* g);
   virtual void origin_pos(Float_t* x);
@@ -87,6 +89,9 @@ public:
   virtual Float_t pos2hray(const Float_t* x, Opcode::Ray& r) = 0;
   virtual void    pos2fghdir(const Float_t* x,
                              Float_t* fdir, Float_t* gdir, Float_t* hdir);
+
+  // Gravity and MSL height data.
+  virtual void    pos2grav(const Float_t* x, GravData& gd) {}
 
   // Subtract fgh values, taking care of U(1) variables (like angles).
   virtual void sub_fgh(Float_t* a, Float_t* b, Float_t* delta);

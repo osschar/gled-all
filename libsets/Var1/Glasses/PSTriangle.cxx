@@ -11,6 +11,7 @@
 
 #include "PSTriangle.h"
 #include "PSTriangle.c7"
+#include <Stones/GravData.h>
 
 #include <Opcode/Opcode.h>
 
@@ -65,7 +66,7 @@ void PSTriangle::SetupEdgePlanes()
 
 /**************************************************************************/
 
-Float_t PSTriangle::surface()
+Float_t PSTriangle::Surface()
 {
   using namespace Opcode;
   Point opos(mX0, mY0, 0);
@@ -151,6 +152,24 @@ Float_t PSTriangle::pos2hray(const Float_t* x, Opcode::Ray& r)
   r.mOrig.TMac(r.mDir, dist);
   r.mDir.Neg();
   return dist;
+}
+
+/**************************************************************************/
+
+void PSTriangle::pos2grav(const Float_t* x, GravData& gd)
+{
+  // Here we could have three vectors at the vertices of the triangle
+  // and interpolate.
+  // Then would need also intepolated height, or what?
+
+  gd.fPos[0] = x[0]; gd.fPos[1] = x[1]; gd.fPos[2] = x[2];
+  gd.fDir[0] = 0;    gd.fDir[1] = 0;    gd.fDir[2] = -1;
+
+  gd.fMag  = mGravAtSurface;
+  gd.fLDer = 0;
+  gd.fTDer = 0;
+  gd.fH    = x[2];
+  gd.fDown[0] = gd.fDown[1] = 0; gd.fDown[2] = -1;
 }
 
 /**************************************************************************/

@@ -48,14 +48,17 @@ void TringuCam::_init()
   mChgParCameraMove.SetDesireParams(1, 0.3,   1,   0.1,   0.2);
 
   mFwdBck.fChangeParams = &mChgParCameraMove;
+  mFwdBck.SetMinMax(-20, 100);
   mKeyStateMap['w'] = &mFwdBck.fIncKey;
   mKeyStateMap['s'] = &mFwdBck.fDecKey;
 
   mLftRgt.fChangeParams = &mChgParCameraMove;
+  mLftRgt.SetMinMax(-10, 10);
   mKeyStateMap['a'] = &mLftRgt.fIncKey;
   mKeyStateMap['d'] = &mLftRgt.fDecKey;
 
   mUpDown.fChangeParams = &mChgParCameraMove;
+  mUpDown.SetMinMax(-30, 30);
   mKeyStateMap['r'] = &mUpDown.fIncKey;
   mKeyStateMap['f'] = &mUpDown.fDecKey;
 
@@ -64,6 +67,7 @@ void TringuCam::_init()
   mChgParCameraRotate.SetDesireParams(0.1, 0.3,   0.1, 0.1,   0.2);
 
   mSpinUp.fChangeParams = &mChgParCameraRotate;
+  mSpinUp.SetMinMax(-TMath::Pi(), TMath::Pi());
   mKeyStateMap['q'] = &mSpinUp.fIncKey;
   mKeyStateMap['e'] = &mSpinUp.fDecKey;
 
@@ -164,6 +168,18 @@ Int_t TringuCam::KeyDown(Int_t key)
     } else {
     // else round-up.
       ki->fDesiredValue = TMath::Ceil(ki->fDesiredValue + 0.001);
+    }
+
+    // Make sure we do not exceed limits.
+    if (ki->fIsInc)
+    {
+      if (ki->fDesiredValue > vi->fMaxValue)
+        ki->fDesiredValue = vi->fMaxValue;
+    }
+    else
+    {
+      if (ki->fDesiredValue > -vi->fMinValue)
+        ki->fDesiredValue = - vi->fMinValue;
     }
   }
   return 1;
@@ -549,7 +565,7 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
 // TringuCam::ValueInfo
 /**************************************************************************/
 
-inline void
+void
 TringuCam::ValueInfo::IncValue(Float_t& value, Float_t desire,
                                Float_t  step,  Float_t delta_fac)
 {
@@ -561,7 +577,7 @@ TringuCam::ValueInfo::IncValue(Float_t& value, Float_t desire,
   }
 }
 
-inline void
+void
 TringuCam::ValueInfo::DecValue(Float_t& value, Float_t desire,
                                Float_t  step,  Float_t delta_fac)
 {
@@ -574,7 +590,7 @@ TringuCam::ValueInfo::DecValue(Float_t& value, Float_t desire,
   }
 }
 
-inline void
+void
 TringuCam::ValueInfo::DecayValue(Float_t& value, Float_t decay,
                                  Float_t delta_fac)
 {
@@ -592,7 +608,7 @@ TringuCam::ValueInfo::DecayValue(Float_t& value, Float_t decay,
   }
 }
 
-inline void
+void
 TringuCam::ValueInfo::DecayTimeoutOrValue(Float_t& timeout, Float_t& value,
                                           Float_t  dt,      Float_t  decay,
                                           Float_t  delta_fac)

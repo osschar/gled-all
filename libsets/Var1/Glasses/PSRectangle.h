@@ -30,7 +30,7 @@ public:
 
   virtual void SetupEdgePlanes();
 
-  virtual Float_t surface();
+  virtual Float_t Surface();
 
   virtual void origin_fgh(Float_t* g);
   virtual void origin_pos(Float_t* x);
@@ -44,6 +44,8 @@ public:
 
   virtual void    pos2hdir(const Float_t* x, Float_t* d);
   virtual Float_t pos2hray(const Float_t* x, Opcode::Ray& r);
+
+  virtual void    pos2grav(const Float_t* x, GravData& gd);
 
   virtual void random_fgh(TRandom& rnd, Float_t* f);
   virtual void random_pos(TRandom& rnd, Float_t* x);

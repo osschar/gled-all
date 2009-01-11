@@ -25,7 +25,8 @@ public:
     ParaSurf(n,t) { _init(); }
   virtual ~PSSphere() {}
 
-  virtual Float_t surface();
+  virtual Float_t Surface();
+  virtual Float_t CharacteristicLength() { return mR; }
 
   virtual void pos2fgh(const Float_t* x, Float_t* f);
   virtual void fgh2pos(const Float_t* f, Float_t* x);
@@ -37,6 +38,8 @@ public:
   virtual void    pos2hdir(const Float_t* x, Float_t* d);
   virtual Float_t pos2hray(const Float_t* x, Opcode::Ray& r);
 
+  virtual void    pos2grav(const Float_t* x, GravData& gd);
+
   // Subtract fgh values, taking care of U(1) variables (like angles).
   virtual void sub_fgh(Float_t* a, Float_t* b, Float_t* delta);
 
@@ -46,6 +49,12 @@ public:
   // These two return a point ABOVE the surface (at maxH + eps)
   virtual void random_fgh(TRandom& rnd, Float_t* f);
   virtual void random_pos(TRandom& rnd, Float_t* x);
+
+
+  // Generalizations also used by other code.
+
+  static void fill_spherical_grav(Float_t g0, Float_t R, Bool_t inside,
+                                  const Float_t* x, GravData& gd);
 
 #include "PSSphere.h7"
   ClassDef(PSSphere, 1); // Parametric-surface sphere.

@@ -24,6 +24,9 @@
 #include "PSTorus.h"
 #include "PSTorus.c7"
 
+#include "PSSphere.h"
+#include <Stones/GravData.h>
+
 #include <Opcode/Opcode.h>
 
 #include <TMath.h>
@@ -47,7 +50,7 @@ inline float norm3(float x, float y, float z)
 
 /**************************************************************************/
 
-Float_t PSTorus::surface()
+Float_t PSTorus::Surface()
 {
   return 4.0f*sPi*sPi*mRM*mRm;
 }
@@ -121,9 +124,7 @@ void PSTorus::pos2hdir(const Float_t* x, Float_t* d)
   d[1] = ct*sinf(p);
   d[2] = sinf(t);
   if (bInside) {
-    d[0] = -d[0];
-    d[1] = -d[1];
-    d[2] = -d[2];
+    d[0] = -d[0]; d[1] = -d[1]; d[2] = -d[2];
   }
 }
 
@@ -158,6 +159,50 @@ Float_t PSTorus::pos2hray(const Float_t* x, Opcode::Ray& r)
          dist);
   */
   return dist;
+}
+
+/**************************************************************************/
+
+void PSTorus::pos2grav(const Float_t* x, GravData& gd)
+{
+  // The gravity is always composed from two spherical contributions
+  // of two "gravity centers" on the ring - the first one on the
+  // closest point and the second on the opposite side.
+  //
+  // This is not trully toroidal field - but is easy to calculate and
+  // I guess it does not deviate significantly from the true one.
+  //
+  // If somebody feels adventurous enough to try implementing the true
+  // gravitational field of the torus - be my guest.
+
+  gd.fPos[0] = x[0]; gd.fPos[1] = x[1]; gd.fPos[2] = x[2];
+
+  const Float_t q  = sqrtf(x[0]*x[0] + x[1]*x[1]);
+
+  // This trick below, the subtraction of phi-R-shift is neat. Could
+  // also reuse it in pos2hdir and pos2hray?
+
+  // Shift from origin to the closest point at the center-line of the torus.
+  Opcode::Point phi_R_shift(x[0], x[1], 0);
+  phi_R_shift *= mRM / q;
+
+  Opcode::Point near(x); near -= phi_R_shift;
+  Opcode::Point far (x); far  += phi_R_shift;
+
+  GravData gd1, gd2;
+  GravData::lGravFraction_t gf_list;
+
+  PSSphere::fill_spherical_grav(mGravAtSurface, mRm, bInside, near, gd1);
+  gf_list.push_back(make_pair(1.0f, &gd1));
+
+  PSSphere::fill_spherical_grav(mGravAtSurface, mRm, bInside, far,  gd2);
+  gf_list.push_back(make_pair(1.0f, &gd2));
+
+  gd.Combine(gf_list);
+
+  // Fix height to the closest point on the ring.
+  gd.fH     = gd1.fH;
+  gd.Down() = gd1.Down();
 }
 
 /**************************************************************************/

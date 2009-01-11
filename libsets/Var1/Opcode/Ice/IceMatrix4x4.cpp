@@ -35,6 +35,9 @@
  *      MT comment: This is what I'd call column major. The
  *      multiplication rules are strange, but that's what one gets
  *      with row-vectors.
+ *      All left/right multiplications need to be substituted for
+ *      right/left.
+ *      See Point::operator*(Matrix3x3) and Matrix3x3::operator*(Point).
  */
 //----------------------------------------------------------------------
 

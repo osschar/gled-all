@@ -12,6 +12,10 @@ TringuCam       17      Glasses/TringuCam       .
 Extendio        18      Glasses/Extendio
 Statico         19      Glasses/Statico
 Dynamico        20      Glasses/Dynamico
+Crawler         21      Glasses/Crawler
+Flyer           22      Glasses/Flyer
+Airplane        23      Glasses/Airplane
+Chopper         24      Glasses/Chopper
 
 ParaSurf        64      Glasses/ParaSurf
 PSRectangle     65      Glasses/PSRectangle

@@ -6,6 +6,7 @@
 
 #include "PSSphere.h"
 #include "PSSphere.c7"
+#include <Stones/GravData.h>
 
 #include <Opcode/Opcode.h>
 
@@ -43,7 +44,7 @@ void PSSphere::_init()
 
 /**************************************************************************/
 
-Float_t PSSphere::surface()
+Float_t PSSphere::Surface()
 {
   return 4.0f*sPi*mR*mR;
 }
@@ -157,6 +158,45 @@ Float_t PSSphere::pos2hray(const Float_t* x, Opcode::Ray& r)
 
 /**************************************************************************/
 
+void PSSphere::pos2grav(const Float_t* x, GravData& gd)
+{
+  gd.fPos[0] = x[0]; gd.fPos[1] = x[1]; gd.fPos[2] = x[2];
+
+  fill_spherical_grav(mGravAtSurface, mR, bInside, x, gd);
+
+  /*
+  const Float_t rr = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
+  const Float_t r  = sqrtf(rr);
+
+  if (r > mR) {
+    gd.fMag   = mGravAtSurface * mR * mR / rr;
+    gd.fLDer  = gd.fTDer = gd.fMag / r;
+    gd.fLDer *= 2.0f;    
+  } else {
+    gd.fLDer = gd.fTDer = mGravAtSurface / mR;
+    gd.fMag  = gd.fLDer * r;
+  }
+
+  Float_t a;
+  if (bInside) {
+    gd.fH = mR - r;
+    a     = 1.0f;
+  } else {
+    gd.fH =  r - mR;
+    a     = -1.0f;
+  }
+
+  if (r != 0) {
+    const Float_t q = a / r;
+    gd.fDir[0] = q * x[0];  gd.fDir[1] = q * x[1];  gd.fDir[2] = q * x[2];
+  } else {
+    gd.fDir[0] = gd.fDir[1] = gd.fDir[2] = 0;
+  }
+  */
+}
+
+/**************************************************************************/
+
 void PSSphere::sub_fgh(Float_t* a, Float_t* b, Float_t* delta)
 {
   // Subtract fgh values, taking care of U(1) variables (like angles).
@@ -197,3 +237,41 @@ void PSSphere::random_pos(TRandom& rnd, Float_t* x)
 }
 
 /**************************************************************************/
+
+void PSSphere::fill_spherical_grav(Float_t g0, Float_t R, Bool_t inside,
+                                   const Float_t* x, GravData& gd)
+{
+  // Fills passed GravData as determined by other parameters.
+  // GravData::fPos is not set.
+
+  const Float_t rr = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
+  const Float_t r  = sqrtf(rr);
+
+  if (r > R) {
+    gd.fMag   = g0 * R * R / rr;
+    gd.fLDer  = gd.fTDer = gd.fMag / r;
+    gd.fLDer *= 2.0f;    
+  } else {
+    gd.fLDer = gd.fTDer = g0 / R;
+    gd.fMag  = gd.fLDer * r;
+  }
+
+  Float_t a;
+  if (inside) {
+    gd.fH = R - r;
+    a     = 1.0f;
+  } else {
+    gd.fH =  r - R;
+    a     = -1.0f;
+  }
+
+  if (r != 0) {
+    const Float_t q = a / r;
+    gd.fDir[0] = q * x[0];  gd.fDir[1] = q * x[1];  gd.fDir[2] = q * x[2];
+  } else {
+    gd.fDir[0] = gd.fDir[1] = gd.fDir[2] = 0;
+  }
+
+  // Copy down direction.
+  gd.fDown[0] = gd.fDir[0]; gd.fDown[1] = gd.fDir[1]; gd.fDown[2] = gd.fDir[2];
+}

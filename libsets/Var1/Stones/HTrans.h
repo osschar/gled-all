@@ -7,6 +7,14 @@
 #ifndef Var1_HTrans_H
 #define Var1_HTrans_H
 
+#ifndef __CINT__
+namespace Opcode
+{
+  class Point;
+  class Matrix4x4;
+}
+#endif
+
 template<class TT> class HTrans;
 
 /**************************************************************************/
@@ -22,9 +30,9 @@ public:
   TT x, y, z;
 
   HPoint() : x(0), y(0), z(0) {}
-  HPoint(TT _x, TT _y, TT _z) : x(_x), y(_y), z(_z) {}
   HPoint(Float_t* p)  : x(p[0]), y(p[1]), z(p[2]) {}
   HPoint(Double_t* p) : x(p[0]), y(p[1]), z(p[2]) {}
+  HPoint(TT _x, TT _y, TT _z) : x(_x), y(_y), z(_z) {}
   virtual ~HPoint() {}
 
   void Set(TT _x, TT _y, TT _z) { x = _x; y = _y; z = _z; }
@@ -46,9 +54,36 @@ public:
 template class HPoint<Float_t>;
 template class HPoint<Double_t>;
 
-typedef HPoint<Float_t>  HPointF;
-typedef HPoint<Double_t> HPointD;
+class HPointF : public HPoint<Float_t>
+{
+public:
+  HPointF()            : HPoint<Float_t>() {}
+  HPointF(Float_t* p)  : HPoint<Float_t>(p) {}
+  HPointF(Double_t* p) : HPoint<Float_t>(p) {}
+  HPointF(Float_t _x, Float_t _y, Float_t _z) : HPoint<Float_t>(_x, _y, _z) {}
+  virtual ~HPointF() {}
 
+#ifndef __CINT__
+  operator Opcode::Point* () { return  (Opcode::Point*) &x; }
+  operator Opcode::Point& () { return *(Opcode::Point*) &x; }
+  operator const Opcode::Point* () const { return  (Opcode::Point*) &x; }
+  operator const Opcode::Point& () const { return *(Opcode::Point*) &x; }
+#endif
+
+  ClassDef(HPointF, 1); // Simple, streamable 3D point.
+};
+
+class HPointD : public HPoint<Double_t>
+{
+public:
+  HPointD()            : HPoint<Double_t>() {}
+  HPointD(Float_t* p)  : HPoint<Double_t>(p) {}
+  HPointD(Double_t* p) : HPoint<Double_t>(p) {}
+  HPointD(Double_t _x, Double_t _y, Double_t _z) : HPoint<Double_t>(_x, _y, _z) {}
+  virtual ~HPointD() {}
+
+  ClassDef(HPointD, 1); // Simple, streamable 3D point.
+};
 
 /******************************************************************************/
 // HTrans -- 3D transformation in generalised coordinates
@@ -91,6 +126,12 @@ public:
   void operator*=(const HTrans& t) { MultRight(t); }
 
   HTrans operator*(const HTrans& t);
+
+  void MultLeft3x3(const TT* m);
+  void MultRight3x3(const TT* m);
+
+  void MultLeft3x3transposed(const TT* m);
+  void MultRight3x3transposed(const TT* m);
 
   // Move & Rotate
 
@@ -172,7 +213,7 @@ public:
   TT   Unscale();
 
 
-  // Operations on vectors; missing TT* ops !!!
+  // Operations on vectors
 
   void     MultiplyIP(TVector3& v, TT w=1) const;
   TVector3 Multiply(const TVector3& v, TT w=1) const;
@@ -207,10 +248,6 @@ template class HTrans<Double_t>;
 /**************************************************************************/
 // Specializations
 /**************************************************************************/
-
-#ifndef __CINT__
-namespace Opcode { class Matrix4x4; }
-#endif
 
 class HTransF : public HTrans<Float_t>
 {

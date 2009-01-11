@@ -277,17 +277,22 @@ public:
     Dummy        = (IR(z)&TWEAKNOTMASK); if(IS_NEGATIVE_FLOAT(z)) Dummy+=TWEAKMASK+1; z = FR(Dummy);
   }
 
+  //! Normalizes the vector, returns old length.
+  float		NormalizeAndReport()
+  {
+    const float M = sqrtf(x*x + y*y + z*z);
+    if(M)
+    {
+      const float N = 1.0f / M;
+      x *= N;  y *= N;  z *= N;
+    }
+    return M;
+  }
+
   //! Normalizes the vector
   Point&	Normalize()
   {
-    float M = x*x + y*y + z*z;
-    if(M)
-      {
-        M = 1.0f / sqrtf(M);
-        x *= M;
-        y *= M;
-        z *= M;
-      }
+    NormalizeAndReport();
     return *this;
   }
 
@@ -305,17 +310,17 @@ public:
   Point&	ClampLength(float limit_length)
   {
     if(limit_length>=0.0f)	// Magnitude must be positive
-      {
-        float CurrentSquareLength = SquareMagnitude();
+    {
+      float CurrentSquareLength = SquareMagnitude();
 
-        if(CurrentSquareLength > limit_length * limit_length)
-          {
-            float Coeff = limit_length / sqrtf(CurrentSquareLength);
-            x *= Coeff;
-            y *= Coeff;
-            z *= Coeff;
-          }
+      if(CurrentSquareLength > limit_length * limit_length)
+      {
+        float Coeff = limit_length / sqrtf(CurrentSquareLength);
+        x *= Coeff;
+        y *= Coeff;
+        z *= Coeff;
       }
+    }
     return *this;
   }
 

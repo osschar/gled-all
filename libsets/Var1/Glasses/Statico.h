@@ -24,10 +24,10 @@ public:
   Statico(const Text_t* n="Statico", const Text_t* t=0) :
     Extendio(n,t) { _init(); }
 
+  virtual void TimeTick(Double_t t, Double_t dt) {}
 
 #include "Statico.h7"
   ClassDef(Statico, 1);
 }; // endclass Statico
-
 
 #endif

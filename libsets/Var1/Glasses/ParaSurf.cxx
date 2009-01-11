@@ -15,6 +15,7 @@
 #include <TMath.h>
 #include <TRandom.h>
 
+
 //==============================================================================
 // ParaSurf
 //==============================================================================
@@ -31,16 +32,17 @@
 
 ClassImp(ParaSurf);
 
-const Float_t ParaSurf::sEpsilonFac = 1e-5;
-const Float_t ParaSurf::sPi         = 3.14159265358979323846f;
-const Float_t ParaSurf::sTwoPi      = 6.28318530717958647692f;
-const Float_t ParaSurf::sPiHalf     = 1.57079632679489661923f;
+const Float_t ParaSurf::sEpsilonFac  = 1e-5;
+const Float_t ParaSurf::sPi          = 3.14159265358979323846f;
+const Float_t ParaSurf::sTwoPi       = 6.28318530717958647692f;
+const Float_t ParaSurf::sPiHalf      = 1.57079632679489661923f;
 
 /**************************************************************************/
 
 void ParaSurf::_init()
 {
   mMinF = mMaxF = mMinG = mMaxG = mMinH = mMaxH = mMeanH = mSigmaH = 0;
+  mGravAtSurface = 10.0;
   mEpsilon = sEpsilonFac;
 }
 
@@ -142,6 +144,13 @@ void ParaSurf::RandomizeH(TriMesh* mesh,
   }
 
   delete [] U;
+}
+
+/**************************************************************************/
+
+Float_t ParaSurf::CharacteristicLength()
+{
+  return sqrtf(Surface());
 }
 
 /**************************************************************************/
