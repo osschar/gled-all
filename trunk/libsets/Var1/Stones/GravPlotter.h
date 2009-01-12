@@ -55,7 +55,7 @@ public:
 
 public:
   GravPlotter(const Text_t* n="GravPlotter", const Text_t* t=0);
-  GravPlotter(ParaSurf* ps, Float_t fac=2, Int_t n_div=120);
+  GravPlotter(ParaSurf* ps, Float_t fac=2, Int_t n_div=512);
 
   virtual ~GravPlotter();
 

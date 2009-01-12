@@ -74,8 +74,15 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
   // down (towards closes ring) and gravity are not parallel.
   // With current state of flight mechanics I have to use down direction
   // to properly apply the correction.
+  //
   // This doesn't conserve the potential energy ... so revisit this once
   // better control for flight parameters is available (auto-steering, corrections).
+  //
+  // In particular, the flyers could internally strive towards straight flight. As
+  // we have the gravity direction, we can calculate which angular velocities
+  // (in local frame) need to be tweaked for stabilization of flight. This should
+  // be damped critically ... or even more.
+  //
   // There are several spots in this function marked with XXXYY.
 
   // XXXYY mGravHChange -= (mGrav.Dir() | velocity) * dt;
