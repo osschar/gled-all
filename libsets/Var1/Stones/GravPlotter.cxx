@@ -57,7 +57,7 @@ GravPlotter::GravPlotter(ParaSurf* ps, Float_t fac, Int_t n_div) :
 
   fMag   = make_tf2("grav_mag",   "Magnitude", &GravPlotter::grav_mag);
   fH     = make_tf2("grav_h",     "h",         &GravPlotter::grav_h);
-  fAngle = make_tf2("grav_angle", "Cos(angle) from Radial vector", &GravPlotter::grav_angle);
+  fAngle = make_tf2("grav_angle", "Down-Grav angle", &GravPlotter::grav_angle);
   fXDir  = make_tf2("grav_xdir",  "x-dir",     &GravPlotter::grav_xdir);
   fZDir  = make_tf2("grav_zdir",  "z-dir",     &GravPlotter::grav_zdir);
   fGrad  = make_tf2("grav_grad",   "gradient", &GravPlotter::grav_grad);
@@ -117,9 +117,7 @@ Double_t GravPlotter::grav_h(Double_t *x, Double_t *params)
 Double_t GravPlotter::grav_angle(Double_t *x, Double_t *params)
 {
   fill_gd(x);
-  Opcode::Point p(-x[0], 0, -x[1]);
-  p.Normalize();
-  return p | fGD.Dir();
+  return TMath::RadToDeg() * TMath::ACos(fGD.Dir() | fGD.Down());
 }
 
 Double_t GravPlotter::grav_xdir(Double_t *x, Double_t *params)

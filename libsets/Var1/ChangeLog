@@ -1,3 +1,15 @@
+2009-01-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Flyer.cxx:
+	Add comment about how flyers should achieve stable convergence
+	towards straight flight.
+
+	* Stones/GravPlotter.cxx:
+	* Stones/GravPlotter.h:
+	Angle function now plots dot product between parametric
+	down-direction and direction of gravity (in degrees).
+	Increase number of sampling points.
+
 2009-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Airplane.cxx:
