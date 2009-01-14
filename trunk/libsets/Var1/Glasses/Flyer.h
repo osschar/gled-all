@@ -17,6 +17,8 @@ private:
   void _init();
 
 protected:
+  Float_t  mHeight;       // X{GS} 7 ValOut()
+
   Float_t  mGravHChange;
   Bool_t   bGravFixUpDir; // X{GS} 7 Bool()
 

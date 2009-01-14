@@ -28,7 +28,6 @@ protected:
 
   Float_t         mV;          // X{GE}  7 Value(-range=>[-100,100, 1,1000], -join=>1)
   Float_t         mW;          // X{GE}  7 Value(-range=>[  -5,  5, 1,1000])
-  Float_t         mLevH;       // X{GS}  7 Value(-range=>[   0,200, 1,1000])
 
   // Float_t         mPowPerM;    // X{GS}  7 Value(-range=>[-10,10, 1,1000])
   // Force per mass, perchance?

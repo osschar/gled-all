@@ -15,6 +15,9 @@
 #include "Extendio.h"
 #include "Statico.h"
 #include "Dynamico.h"
+#include "Crawler.h"
+#include "Flyer.h"
+// This is going too far ...
 
 #include <Glasses/ZQueen.h>
 #include <Glasses/ScreenText.h>
@@ -315,7 +318,12 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       }
       else if (dyno)
       {
-        WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("DynoCtrl"));
+        // !!! This is fooed ... need better glass -> gl-weeds infrastructure.
+        TString cls("Dyno");
+        if (dynamic_cast<Crawler*>(dyno))    cls = "Crawler";
+        else if (dynamic_cast<Flyer*>(dyno)) cls = "Flyer";
+
+        WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName(cls + "Ctrl"));
         if (weed)
         {
           weed->SetDaughterCbackStuff(dyno);

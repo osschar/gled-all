@@ -23,6 +23,8 @@ ClassImp(Flyer);
 
 void Flyer::_init()
 {
+  mHeight       = 0;    // Height above current surface - there always is one for now.
+
   mGravHChange  = 0;    // Integrated up/down path between gravity changes.
   bGravFixUpDir = true; // Rotate after change in gravity direction.
 }
@@ -85,8 +87,10 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
   //
   // There are several spots in this function marked with XXXYY.
 
-  // XXXYY mGravHChange -= (mGrav.Dir() | velocity) * dt;
-  mGravHChange -= (mGrav.Down() | velocity) * dt;
+  const Float_t dh = (mGrav.Down() | velocity) * dt;
+  // XXXYY const Float_t dh = (mGrav.Dir() | velocity) * dt;
+  mHeight      -= dh;
+  mGravHChange -= dh;
 
   // Use velocity - is needed afterwards, too.
   // [But can be changed by CheckBoundaries()!]
@@ -187,6 +191,7 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
     // XXXYY mTrans.Move3PF(mGrav.fDir[0] * dh, mGrav.fDir[1] * dh, mGrav.fDir[2] * dh);
     mTrans.Move3PF(mGrav.fDown[0] * dh, mGrav.fDown[1] * dh, mGrav.fDown[2] * dh);
 
+    mHeight      = assumed_h;
     mGrav.fH     = assumed_h;
     mGravHChange = 0;
 
@@ -209,42 +214,4 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
              mGrav.fSafeDistance / velocity_mag);
     }
   }
-
-  /*
-    Opcode::Point& pos = * (Opcode::Point*) ref_trans().ArrT();
-
-    Opcode::Ray R;
-    Float_t ray_offset = mTringula->GetParaSurf()->pos2hray(pos, R);
-    // !!! This is potentially expensive, e.g., for torus.
-    // Should cache down direction while in the same triangle.
-
-    TriMesh* terrain_mesh = mTringula->GetMesh();
-
-    UInt_t cache = mOPCRCCache;
-    if (RC.Collide(R, *terrain_mesh->GetOPCModel(), 0, &mOPCRCCache))
-    {
-    if (CF.GetNbFaces() == 1)
-    {
-    // pos.TMac(R.mDir, - ray_offset - mLevH);
-
-    if (cache != mOPCRCCache)
-    {
-    pos.TMac(R.mDir, - ray_offset - mLevH);
-
-    Opcode::Point p = -R.mDir;
-    p.Normalize();
-    mTrans.SetBaseVec(3, p);
-    mTrans.OrtoNorm3Column(2, 3);
-    mTrans.SetBaseVecViaCross(1);
-    }
-    }
-    }
-    else
-    {
-    printf("collide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-    RC.GetContactStatus(),
-    RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
-    RC.GetNbIntersections());
-    }
-  */
 }

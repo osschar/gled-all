@@ -21,7 +21,9 @@ ClassImp(Crawler);
 //==============================================================================
 
 void Crawler::_init()
-{}
+{
+  mLevH   = 0.1f;
+}
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :
   Dynamico(n, t)
