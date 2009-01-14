@@ -111,7 +111,7 @@ protected:
 
   Bool_t place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
                           Float_t min_h_above=0);
-  Bool_t place_on_terrain(Dynamico* D);
+  Bool_t place_on_terrain(Dynamico* D, Float_t h_above);
 
   void   fill_pruning_list(AList* extendios, Int_t& n, const Opcode::AABB** boxes, void** user_data);
   void   fill_pruning_list(AList* extendios, Int_t& n, Int_t l);

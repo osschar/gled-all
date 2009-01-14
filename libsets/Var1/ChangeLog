@@ -1,3 +1,25 @@
+2009-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Move member 'Float_t mLevH' from Dynamico to Crawler.
+
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	Add data-member 'Float_t mHeight' to record current height.
+	Remove old/inactive movement code.
+
+	* Glasses/TringuCam.cxx:
+	Differentiate between Crawler and Flyer - they have different
+	glgui now.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Place-dyno-on-terrain now takes additional height argument.
+	Modify RandomDynamico/Flyer/Chopper() accordingly.
+
 2009-01-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Flyer.cxx:

@@ -32,7 +32,6 @@ void Dynamico::_init()
   bParked = false;
 
   mV = mW = 0.0f;
-  mLevH   = 0.1f;
 
   mSafety = 0;
 

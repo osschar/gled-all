@@ -397,10 +397,10 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
   if (dname == 0)
     dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
 
-  Dynamico* d = new Crawler(dname);
+  Crawler* d = new Crawler(dname);
 
   mParaSurf->origin_trans(d->ref_trans());
-  place_on_terrain(d);
+  place_on_terrain(d, d->GetLevH());
 
   mQueen->CheckIn(d);
   d->SetMesh(*mDefDynMesh);
@@ -416,7 +416,7 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
 Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
                                    Float_t v_min, Float_t v_max, Float_t w_max)
 {
-  Dynamico* d = new Crawler(GForm("Dynamico %d", mDynos->GetSize() + 1));
+  Crawler* d = new Crawler(GForm("Dynamico %d", mDynos->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   TriMesh* mesh;
@@ -435,7 +435,7 @@ Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
 
-  place_on_terrain(d);
+  place_on_terrain(d, d->GetLevH());
 
   mQueen->CheckIn(d);
   d->SetMesh(mesh);
@@ -450,7 +450,7 @@ Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
 
 Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
 {
-  Dynamico* d = new Airplane(GForm("Flyer %d", mFlyers->GetSize() + 1));
+  Flyer* d = new Airplane(GForm("Flyer %d", mFlyers->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   mParaSurf->random_trans(mRndGen, t);
@@ -458,9 +458,9 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
   Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
   t.RotateLF(1, 2, phi);
 
-  Float_t h = mRndGen.Uniform(0, h_max);
+  const Float_t h = mRndGen.Uniform(0, h_max);
   t.MoveLF(3, mParaSurf->GetMaxH() + h);
-  d->SetLevH(h); // This is a hack, honoured by Tringula when propagating flyers.
+  d->SetHeight(h);
 
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
@@ -478,7 +478,7 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
 
 Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
 {
-  Dynamico* d = new Chopper(GForm("Chopper %d", mFlyers->GetSize() + 1));
+  Flyer* d = new Chopper(GForm("Chopper %d", mFlyers->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   mParaSurf->random_trans(mRndGen, t);
@@ -486,9 +486,9 @@ Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, F
   Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
   t.RotateLF(1, 2, phi);
 
-  Float_t h = mRndGen.Uniform(0, h_max);
+  const Float_t h = mRndGen.Uniform(0, h_max);
   t.MoveLF(3, mParaSurf->GetMaxH() + h);
-  d->SetLevH(h); // This is a hack, honoured by Tringula when propagating flyers.
+  d->SetHeight(h);
 
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
@@ -979,7 +979,7 @@ Bool_t Tringula::place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
   return true;
 }
 
-Bool_t Tringula::place_on_terrain(Dynamico* D)
+Bool_t Tringula::place_on_terrain(Dynamico* D, Float_t h_above)
 {
   static const Exc_t _eh("Tringula::place_on_terrain ");
 
@@ -998,7 +998,7 @@ Bool_t Tringula::place_on_terrain(Dynamico* D)
   if (cs && CF.GetNbFaces() == 1)
   {
       const Opcode::CollisionFace& cf = CF.GetFaces()[0];
-      pos.TMac(R.mDir, cf.mDistance - ray_offset - D->mLevH);
+      pos.TMac(R.mDir, cf.mDistance - ray_offset - h_above);
 
       Float_t* n = mMesh->GetTTvor()->TriangleNormal(cf.mFaceID);
       trans.SetBaseVec(3, n);

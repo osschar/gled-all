@@ -17,6 +17,7 @@ private:
   void _init();
 
 protected:
+  Float_t         mLevH;       // X{GS}  7 Value(-range=>[   0,200, 1,1000])
 
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);

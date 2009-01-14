@@ -893,12 +893,67 @@ void make_overlay()
     val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
     val2->SetFormat("Rot: %.2f");
     val2->SetCbackMemberName("W");
+  }
+
+  gs.Reset();
+
+  {
+    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, overlay, "CrawlerCtrl", 0);
+    dyno_ctrl->SetRnrElements(false);
+
+    CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
+    gs.SetNodeAdvance(but1);
+    but1->SetCbackAlpha(tricam);
+    but1->SetCbackMethodName("DynoDetails");
+
+    CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
+    gs.SetNodeAdvance(val1);
+    val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
+    val1->SetFormat("Speed: %.2f");
+    val1->SetCbackMemberName("V");
+
+    CREATE_ADD_GLASS(val2, WGlValuator, dyno_ctrl, "Rot", "LensAlpha");
+    gs.SetNodeAdvance(val2);
+    val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
+    val2->SetFormat("Rot: %.2f");
+    val2->SetCbackMemberName("W");
 
     CREATE_ADD_GLASS(val3, WGlValuator, dyno_ctrl, "LevH", "LensAlpha");
     gs.SetNodeAdvance(val3);
     val3->SetMin(-10); val3->SetMax(100); val3->SetStepB(100);
     val3->SetFormat("LevH: %.2f");
     val3->SetCbackMemberName("LevH");
+  }
+
+  gs.Reset();
+
+  {
+    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, overlay, "FlyerCtrl", 0);
+    dyno_ctrl->SetRnrElements(false);
+
+    CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
+    gs.SetNodeAdvance(but1);
+    but1->SetCbackAlpha(tricam);
+    but1->SetCbackMethodName("DynoDetails");
+
+    CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
+    gs.SetNodeAdvance(val1);
+    val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
+    val1->SetFormat("Speed: %.2f");
+    val1->SetCbackMemberName("V");
+
+    CREATE_ADD_GLASS(val2, WGlValuator, dyno_ctrl, "Rot", "LensAlpha");
+    gs.SetNodeAdvance(val2);
+    val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
+    val2->SetFormat("Rot: %.2f");
+    val2->SetCbackMemberName("W");
+
+    CREATE_ADD_GLASS(val3, WGlValuator, dyno_ctrl, "Height", "LensAlpha");
+    gs.SetNodeAdvance(val3);
+    val3->SetMin(-10); val3->SetMax(100); val3->SetStepB(100);
+    val3->SetFormat("H: %.2f");
+    val3->SetCbackMemberName("Height");
+    val3->SetConstVal(true);
   }
 
   gs.Reset();
