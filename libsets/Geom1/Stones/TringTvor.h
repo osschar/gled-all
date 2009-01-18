@@ -87,6 +87,8 @@ public:
   Bool_t   mBBoxOK;
   Float_t  mMinMaxBox[6];
   Float_t  mCtrExtBox[6];
+  Float_t  mMinEdgeLen;
+  Float_t  mMaxEdgeLen;
 
   // Triangle strip data
 
@@ -163,6 +165,8 @@ public:
 
   // FUQ (frequently used queries)
   Float_t SqrDistanceToVertex(Int_t vi, const Float_t p[3]);
+  Float_t SqrLen(const Float_t a[3], const Float_t b[3]);
+  void    SqrMinMaxEdgeLen(Int_t ti, Float_t& min, Float_t& max);
 
   ClassDef(TringTvor, 1); // Tvor of triangles, a triangle mesh.
 }; // endclass TringTvor
@@ -193,6 +197,31 @@ inline Float_t TringTvor::SqrDistanceToVertex(Int_t vi, const Float_t p[3])
   const Float_t* v = Vertex(vi);
   const Float_t dx = p[0] - v[0], dy = p[1] - v[1], dz = p[2] - v[2];
   return dx*dx + dy*dy + dz*dz;
+}
+
+inline Float_t TringTvor::SqrLen(const Float_t a[3], const Float_t b[3])
+{
+  // Returns square length of line between a and b.
+
+  Float_t c[3] = { b[0] - a[0], b[1] - a[1], b[2] - a[2] };
+  return c[0]*c[0] + c[1]*c[1] + c[2]*c[2];
+}
+
+inline void TringTvor::SqrMinMaxEdgeLen(Int_t ti, Float_t& min, Float_t& max)
+{
+  // Stores min and max edge lengths into the passed refs.
+
+  const Int_t    *t   = Triangle(ti);
+  const Float_t *v[3] = { Vertex(t[0]), Vertex(t[1]), Vertex(t[2]) };
+  const float ab = SqrLen(v[0], v[1]);
+  const float ac = SqrLen(v[0], v[2]);
+  const float bc = SqrLen(v[1], v[2]);
+
+  if (ab > ac) { min = ac; max = ab; }
+  else         { min = ab; max = ac; }
+
+  if (bc > max)      max = bc;
+  else if (bc < min) min = bc;
 }
 
 #endif

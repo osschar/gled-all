@@ -38,11 +38,16 @@ ClassImp(TriMesh);
 void TriMesh::_init()
 {
   mTTvor     = 0;
-  mVolume    = 0;
-  mXYArea    = 0;
 
-  mM    = 0;
-  mSurf = 0;
+  mVolume    = 0;  // Assumed volume, set by user.
+  mXYArea    = 0;  // Assumed surface covered on ground, set by user.
+
+  mM         = 0;  // Assumed mass of the mesh or object it represents.
+  mSurface   = 0;  // Sum of trianlge surfaces.
+  mSection.Zero(); // Sections / side-view areas of the mesh. This is sum of
+                   // front-facing triangle projections, so can be wrong.
+  mCOM.Zero();     // Center-of-mass
+  mJ.Zero();       // Angular-inertia along major axes / insufficient.
 
   mOPCModel  = 0;
   mOPCMeshIf = 0;
@@ -76,10 +81,6 @@ inline void add_Js(HPointF& J, HPointF& ND, const Opcode::Point& r, Float_t m)
 }
 }
 
-// For diagonalization of inertia tensor
-// #include <TVectorT.h>
-// #include <TMatrixTSym.h>
-
 void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
 {
   // Set mass of the mesh and calculate center of mass and Jz (should
@@ -92,16 +93,15 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
   // !!! Doubles should be used for all accumulators when adding up
   // quantites over vertices/triangles.
 
-  mM    = mass;
-  mSurf = 0;
-  mCOM.Set(0, 0, 0);
-  mJ  .Set(0, 0, 0);
+  mM       = mass;
+  mSurface = 0;
+  mSection.Zero();
+  mCOM.Zero();
+  mJ.Zero();
 
   const Int_t nTrings = mTTvor->mNTrings;
 
   std::vector<Float_t> tri_surfs(nTrings);
-
-  mSurf = 0;
 
   Int_t *vts;
   { // Sum surface
@@ -117,13 +117,17 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
       cp.Cross(e1, e2);
 
       tri_surfs[tring] = 0.5f * cp.Magnitude();
-      mSurf += tri_surfs[tring];
+      mSurface += tri_surfs[tring];
+
+      if (cp.x > 0) mSection.x += 0.5f * cp.x;
+      if (cp.y > 0) mSection.y += 0.5f * cp.y;
+      if (cp.z > 0) mSection.z += 0.5f * cp.z;
     }
   }
   Opcode::Point com(0, 0, 0);
   {
-    Float_t oneoso3 = INV3 / mSurf; // one over surface over 3
-    Float_t surfptv;                // surface per triangle vertex
+    Float_t oneoso3 = INV3 / mSurface; // one over surface over 3
+    Float_t surfptv;                   // surface per triangle vertex
     for (Int_t tring = 0; tring < nTrings; ++tring)
     {
       vts     = mTTvor->Triangle(tring);
@@ -145,7 +149,7 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
 
     HPointF I, J; // diagonal, off-diagonal elements
 
-    Float_t mpso3 = INV3 * mass_frac_on_mesh * mass / mSurf; // mass per surface over 3
+    Float_t mpso3 = INV3 * mass_frac_on_mesh * mass / mSurface; // mass per surface over 3
     Float_t mptv; // mass per triangle vertex
     Opcode::Point r;
     for (Int_t tring = 0; tring < nTrings; ++tring)
@@ -161,7 +165,10 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
     mJ = I;
 
     /*
-    printf("TriMesh %s:\n", GetName());
+    // Diagonalization of inertia tensor, just trying it as it is not used.
+    // #include <TVectorT.h>
+    // #include <TMatrixTSym.h>
+    printf("Diagonalizing inertia tensor of TriMesh %s:\n", GetName());
     printf("    Ixx=%.3f Iyy=%.3f Izz=%.3f\n", I.x, I.y, I.z);
     printf("    Iyz=%.3f Ixz=%.3f Ixy=%.3f\n", J.x, J.y, J.z);
 
@@ -247,6 +254,8 @@ void TriMesh::AssertOpcStructs()
 
 void TriMesh::CalculateBoundingBox()
 {
+  // Calculates bounding box of the mesh.
+
   static const Exc_t _eh("TriMesh::CalculateBoundingBox ");
 
   if (!mTTvor)

@@ -48,6 +48,7 @@ void Dynamico::SetTringula(Tringula* tring)
   PARENT_GLASS::SetTringula(tring);
 
   mTringula->GetParaSurf()->pos2grav(mTrans.ArrT(), mGrav);
+  mOPCRCCache = OPC_INVALID_ID;
 }
 
 /**************************************************************************/
@@ -56,7 +57,7 @@ void Dynamico::SetV(Float_t v)
 {
   // Like autogen but also set mVVec.
 
-  if(v > 100) v = 100;
+  if(v >  100) v =  100;
   if(v < -100) v = -100;
   mV = v;
   mVVec.x = v;
@@ -67,12 +68,72 @@ void Dynamico::SetW(Float_t w)
 {
   // Like autogen but also set mWVec.
 
-  if(w > 5) w = 5;
+  if(w >  5) w =  5;
   if(w < -5) w = -5;
   mW = w;
   mWVec.x = w;
   Stamp(FID());
 }
+
+/**************************************************************************/
+
+void Dynamico::update_grav_safeties(Float_t vl, Float_t vt)
+{
+  // Calculate time and distance over which we can keep this gravity data.
+  // There hard-coded limits here!
+  //
+  // Safe time:
+  // ----------
+  // For non-accelerated motion this is:
+  //   t = (6 epsilon / g' v)^1/3
+  // Where epsilon is precision in position and "g' v" is the product of
+  // gravitational acceleration derivative and corresponding velocity.
+  // Thus we search for maximal one.
+  // Epsilon is set to 0.1m - this could be more, probably.
+  //
+  // Problem is, if the unit accelerates during the period. This
+  // is not handled at all. Maybe could take current / max accel
+  // into account - or use distance instead of time!
+  //
+  // Also - some limits need to be imposed.
+  // 1. Maximal time is set to max_time. This is somewhat arbitrary.
+  //    This way we enforce re-checking of the field periodically.
+  // 2. Minimal time we bother to calculate is min_time which should be
+  //    about the order of dt.
+  //
+  // Safe distance:
+  // --------------
+  // Maximum distance - where gravity changes for more then certain
+  // value eta:
+  //   L = eta / g'
+
+  static const Float_t epsilon    = 6 * 0.1;  // Precision of position.
+  static const Float_t max_time   = 10;
+  static const Float_t min_time   = 0.01;
+  static const Float_t lim_gv_low = epsilon / (max_time*max_time*max_time);
+  static const Float_t lim_gv_hi  = epsilon / (min_time*min_time*min_time);
+
+  static const Float_t eta        = 0.1;
+  static const Float_t max_dist   = 1000;
+  static const Float_t lim_g_low  = eta / max_dist;
+
+  Float_t max_gv = TMath::Max(mGrav.fLDer * vl, mGrav.fTDer * vt);
+
+  if (max_gv < lim_gv_low)
+    mGrav.fSafeTime = max_time;
+  else if (max_gv > lim_gv_hi)
+    mGrav.fSafeTime = 0;
+  else
+    mGrav.fSafeTime = powf(epsilon / max_gv, 0.3333333333f);
+
+  Float_t max_g = TMath::Max(mGrav.fLDer, mGrav.fTDer);
+
+  if (max_g < lim_g_low)
+    mGrav.fSafeDistance = max_dist;
+  else
+    mGrav.fSafeDistance = eta / max_g;
+}
+
 
 /**************************************************************************/
 
