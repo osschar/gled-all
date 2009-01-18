@@ -1,3 +1,36 @@
+2009-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Rewrite time-step code to use full velocity and angular velocity
+	vectors. Also, cache gravity-data as long as it is valid.
+
+	Add member 'Float_t mRayOffset' that allows us to reuse
+	gravity-data from the previous step.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add function:
+	  void update_grav_safeties(Float_t vl, Float_t vt);
+	that is common to flyers and crawlers.
+
+	* Glasses/Flyer.cxx:
+	Move code for gravity safety calculation to Dynamico.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add member 'HPointF mSection' that holds side-view areas of the mesh.
+	Calculate it in SetMassAndSpeculate().
+
+	* Stones/HTrans.h:
+	Add function Zero().
+
+	* Opcode/Ice/IcePoint.h:
+	Add static functions:
+	  float MaxDistance(const Point& a, const Point& b, const Point& c);
+	  float MaxSquareDistance(const Point& a, const Point& b, const Point& c);
+
+
 2009-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Crawler.cxx:

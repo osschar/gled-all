@@ -22,7 +22,9 @@ ClassImp(Crawler);
 
 void Crawler::_init()
 {
-  mLevH   = 0.1f;
+  mLevH = 0.1f;
+
+  mRayOffset = 0;
 }
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :
@@ -33,6 +35,18 @@ Crawler::Crawler(const Text_t* n, const Text_t* t) :
 
 Crawler::~Crawler()
 {}
+
+//==============================================================================
+
+void Crawler::SetTringula(Tringula* tring)
+{
+  // Set tringula to which the extendio is attached.
+  // Sub-classes override this to reinitialize cached data.
+
+  PARENT_GLASS::SetTringula(tring);
+
+  mRayOffset = 2.0f * mTringula->GetMesh()->GetTTvor()->mMaxEdgeLen;
+}
 
 //==============================================================================
 
@@ -51,12 +65,25 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   CollisionFaces CF;
   RC.SetDestination(&CF);
 
-  Float_t path = dt * mV;
+  Opcode::Point velocity; // Velocity in master frame.
+  Float_t       velocity_mag2, velocity_mag, step_length;
 
-  mTrans.MoveLF(1, path);
-  mTrans.RotateLF(1, 2, dt*mW);
+  mTrans.RotateVec3(mVVec, velocity);
+  velocity_mag2 = velocity.SquareMagnitude();
+  velocity_mag  = sqrtf(velocity_mag2);
 
-  mSafety -= path;
+  step_length   = velocity_mag * dt;
+
+  // Use velocity - is needed afterwards, too.
+  // [But can be changed by CheckBoundaries()!]
+  // mTrans.Move3LF(mVVec.x * dt, mVVec.y * dt, mVVec.z * dt);
+  mTrans.Move3PF(velocity.x * dt, velocity.y * dt, velocity.z * dt);
+
+  mTrans.RotateLF(1, 2, dt*mWVec.x);
+  mTrans.RotateLF(2, 3, dt*mWVec.y);
+  mTrans.RotateLF(3, 1, dt*mWVec.z);
+
+  mSafety -= step_length;
   if (mSafety < 0)
   {
     // Check boundaries - this can result in tringula switch.
@@ -64,17 +91,43 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
 
     if (trans_changed)
     {
+      // Recalculate velocity
+      mTrans.RotateVec3(mVVec, velocity);
+      velocity_mag2 = velocity.SquareMagnitude();
+      velocity_mag  = sqrtf(velocity_mag2);
+
       // Invalidate position dependant caches.
-      // GravData should be fine, but could force recalc, too.
+      // GravData should be fine as it is supposedly smooth.
+      // Terrain safety ok, too, we should check neighbouring meshes
+      // when calculating it.
     }
   }
 
   Opcode::Point& pos = * (Opcode::Point*) ref_trans().ArrT();
 
+  if (mGrav.DecaySafeties(dt, step_length))
+  {
+    mTringula->GetParaSurf()->pos2grav(pos, mGrav);
+
+    Float_t vl = mGrav.Dir() | velocity;  if (vl < 0) vl = -vl;
+    Float_t vt = sqrtf(velocity_mag2 - vl*vl);
+
+    update_grav_safeties(vl, vt);
+
+    // Testing printout.
+    if (bSelected)
+    {
+      mGrav.Print();
+      printf("  v_mag=%f, vl=%f, vt=%f, t_safe=%f, d_safe=%f (d/v)=%f\n",
+             velocity_mag, vl, vt,  mGrav.fSafeTime, mGrav.fSafeDistance,
+             mGrav.fSafeDistance / velocity_mag);
+    }
+  }
+
   Opcode::Ray R;
-  Float_t ray_offset = mTringula->GetParaSurf()->pos2hray(pos, R);
-  // !!! This is potentially expensive, e.g., for torus.
-  // Should cache down direction while in the same triangle.
+  R.mDir  = mGrav.Dir();
+reoffset:
+  R.mOrig.Msc(pos, R.mDir, mRayOffset);;
 
   TriMesh* terrain_mesh = mTringula->GetMesh();
 
@@ -84,7 +137,7 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
     if (CF.GetNbFaces() == 1)
     {
       const CollisionFace& cf = CF.GetFaces()[0];
-      pos.TMac(R.mDir, cf.mDistance - ray_offset - mLevH);
+      pos.TMac(R.mDir, cf.mDistance - mRayOffset - mLevH);
 
       if (cache != mOPCRCCache)
       {
@@ -102,5 +155,8 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
            RC.GetContactStatus(),
            RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
            RC.GetNbIntersections());
+    printf("\tIncreasing ray-offset.\n");
+    mRayOffset *= 2;
+    goto reoffset;
   }
 }

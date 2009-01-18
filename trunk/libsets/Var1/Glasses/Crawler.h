@@ -19,9 +19,13 @@ private:
 protected:
   Float_t         mLevH;       // X{GS}  7 Value(-range=>[   0,200, 1,1000])
 
+  Float_t         mRayOffset;  //!
+
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);
   virtual ~Crawler();
+
+  virtual void SetTringula(Tringula* tring);
 
   virtual void TimeTick(Double_t t, Double_t dt);
 

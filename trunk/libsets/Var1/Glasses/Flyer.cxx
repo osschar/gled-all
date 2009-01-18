@@ -54,14 +54,6 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
   if (bParked)
     return;
 
-  using namespace Opcode;
-
-  RayCollider    RC;
-  RC.SetFirstContact(true);
-  RC.SetTemporalCoherence(true);
-  CollisionFaces CF;
-  RC.SetDestination(&CF);
-
   Opcode::Point velocity; // Velocity in master frame.
   Float_t       velocity_mag2, velocity_mag, step_length;
 
@@ -115,14 +107,12 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
       velocity_mag  = sqrtf(velocity_mag2);
 
       // Invalidate position dependant caches.
-      // GravData should be fine as it is supposedly smooth.
+      // GravData should be fine as it is supposedly smooth. But anyway,
+      // it is reset via SetTringula() which leaves safeties at 0.
       // Terrain safety ok, too, we should check neighbouring meshes
-      // when calculating it.
+      // when calculating it anyway.
     }
   }
-
-  Opcode::Point& pos = * (Opcode::Point*) ref_trans().ArrT();
-  // Opcode::Point& up  = * (Opcode::Point*) ref_trans().ArrZ();
 
   if (mGrav.DecaySafeties(dt, step_length))
   {
@@ -131,58 +121,12 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
     // XXXYY Opcode::Point old_grav_dir(mGrav.fDir);
     Opcode::Point old_grav_dir(mGrav.fDown);
 
-    mTringula->GetParaSurf()->pos2grav(pos, mGrav);
-
-    // Calculate time we can keep this gravity data.
-    // For non-accelerated motion this is:
-    //   t = (6 epsilon / g' v)^1/3
-    // Where epsilon is precision in position and "g' v" is the product of
-    // gravitational acceleration derivative and corresponding velocity.
-    // Thus we search for maximal one.
-    // Epsilon is set to 0.1m - this could be more, probably.
-    //
-    // Problem is, if the unit accelerates during the period. This
-    // is not handled at all. Maybe could take current / max accel
-    // into account - or use distance instead of time!
-    //
-    // Also - some limits need to be imposed.
-    // 1. Maximal time is set to max_time. This is somewhat arbitrary.
-    //    This way we enforce re-checking of the field periodically.
-    // 2. Minimal time we bother to calculate is min_time which should be
-    //    about the order of dt.
-
-    static const Float_t epsilon    = 6 * 0.1;  // Precision of position.
-    static const Float_t max_time   = 10;
-    static const Float_t min_time   = 0.01;
-    static const Float_t lim_gv_low = epsilon / (max_time*max_time*max_time);
-    static const Float_t lim_gv_hi  = epsilon / (min_time*min_time*min_time);
-
-    // But also, have a maximum distance - where gravity changes for
-    // more then certain value eta:
-    //   L = eta / g'
-
-    static const Float_t eta        = 0.1;
-    static const Float_t max_dist   = 1000;
-    static const Float_t lim_g_low  = eta / max_dist;
+    mTringula->GetParaSurf()->pos2grav(ref_trans().ArrT(), mGrav);
 
     Float_t vl = mGrav.Dir() | velocity;  if (vl < 0) vl = -vl;
     Float_t vt = sqrtf(velocity_mag2 - vl*vl);
 
-    Float_t max_gv = TMath::Max(mGrav.fLDer * vl, mGrav.fTDer * vt);
-
-    if (max_gv < lim_gv_low)
-      mGrav.fSafeTime = max_time;
-    else if (max_gv > lim_gv_hi)
-      mGrav.fSafeTime = 0;
-    else
-      mGrav.fSafeTime = powf(epsilon / max_gv, 0.3333333333f);
-
-    Float_t max_g = TMath::Max(mGrav.fLDer, mGrav.fTDer);
-
-    if (max_g < lim_g_low)
-      mGrav.fSafeDistance = max_dist;
-    else
-      mGrav.fSafeDistance = eta / max_g;
+    update_grav_safeties(vl, vt);
 
     // Fix height difference due to change in gravity direction.
     // This assures we keep proper potential energy.
@@ -209,8 +153,8 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
     if (bSelected)
     {
       mGrav.Print();
-      printf("  v_mag=%f, vl=%f, vt=%f, max_gv=%f, t_safe=%f, d_safe=%f (d/v)=%f\n",
-             velocity_mag, vl, vt, max_gv, mGrav.fSafeTime, mGrav.fSafeDistance,
+      printf("  v_mag=%f, vl=%f, vt=%f, t_safe=%f, d_safe=%f (d/v)=%f\n",
+             velocity_mag, vl, vt, mGrav.fSafeTime, mGrav.fSafeDistance,
              mGrav.fSafeDistance / velocity_mag);
     }
   }

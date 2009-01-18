@@ -138,7 +138,8 @@ protected:
   Float_t                 mXYArea;     // X{GS} 7 ValOut()
 
   Float_t                 mM;          // X{GS} 7 ValOut(-join=>1)
-  Float_t                 mSurf;       // X{GS} 7 ValOut()
+  Float_t                 mSurface;    // X{GS} 7 ValOut()
+  HPointF                 mSection;    // X{RS} 7 HPointF(-const=>1)
   HPointF                 mCOM;        // X{RS} 7 HPointF(-const=>1)
   HPointF                 mJ;          // X{RS} 7 HPointF(-const=>1)
 
@@ -158,6 +159,8 @@ protected:
 
   void extrude_triangle(Int_t ti, Float_t h);
   void extrude_triangle(Int_t ti, Float_t x, Float_t y, Float_t z);
+
+  void calculate_surface_and_areas();
 
   void colorize_trings_std();
   void colorize_trings_single(UChar_t r, UChar_t g, UChar_t b, UChar_t a);

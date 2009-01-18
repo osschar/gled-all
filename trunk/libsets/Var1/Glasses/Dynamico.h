@@ -56,6 +56,8 @@ public:
 
   virtual void update_last_data() { mLastTrans = mTrans; mLastAABB = mAABB; }
 
+  virtual void update_grav_safeties(Float_t vl, Float_t vt);
+
   static bool handle_collision(Dynamico            * dyno,
                                Statico             * stato,
                                Opcode::RayCollider & ray_collider,

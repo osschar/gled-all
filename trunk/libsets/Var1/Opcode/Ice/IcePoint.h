@@ -336,6 +336,19 @@ public:
     return ((x - b.x)*(x - b.x) + (y - b.y)*(y - b.y) + (z - b.z)*(z - b.z));
   }
 
+  static float MaxDistance(const Point& a, const Point& b, const Point& c)
+  {
+    return sqrtf(MaxSquareDistance(a, b, c));
+  }
+
+  static float MaxSquareDistance(const Point& a, const Point& b, const Point& c)
+  {
+    const float ab = a.SquareDistance(b);
+    const float ac = a.SquareDistance(c);
+    const float bc = b.SquareDistance(c);
+    return MAXMAX(ab, ac, bc);
+  }
+
   //! Dot product dp = this|a
   float	Dot(const Point& p) const { return p.x * x + p.y * y + p.z * z; }
 

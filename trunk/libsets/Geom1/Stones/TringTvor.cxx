@@ -40,6 +40,7 @@ ClassImp(TringTvor);
 void TringTvor::_init()
 {
   mBBoxOK = false;
+  mMinEdgeLen = mMaxEdgeLen = 0;
 
   mNStripEls   = 0;  mStripEls    = 0;  mStripTrings = 0;
   mNStrips     = 0;  mStripBegs   = 0;  mStripLens   = 0;
@@ -162,8 +163,10 @@ Int_t TringTvor::AddTriangles(Int_t nt)
 
 void TringTvor::CalculateBoundingBox()
 {
-  if (mNVerts == 0) {
-    memset(mMinMaxBox, 0, 12*sizeof(Float_t));
+  if (mNVerts == 0 || mNTrings == 0) {
+    memset(mMinMaxBox, 0, 6*sizeof(Float_t));
+    memset(mCtrExtBox, 0, 6*sizeof(Float_t));
+    mMinEdgeLen = mMaxEdgeLen = 0;
     return;
   }
 
@@ -172,7 +175,7 @@ void TringTvor::CalculateBoundingBox()
   m[1] = M[1] = V[1];
   m[2] = M[2] = V[2];
   V += 3;
-  for (Int_t v=1; v<mNVerts; ++v) {
+  for (Int_t v = 1; v < mNVerts; ++v) {
     if (V[0] < m[0]) m[0] = V[0]; else if (V[0] > M[0]) M[0] = V[0];
     if (V[1] < m[1]) m[1] = V[1]; else if (V[1] > M[1]) M[1] = V[1];
     if (V[2] < m[2]) m[2] = V[2]; else if (V[2] > M[2]) M[2] = V[2];
@@ -182,6 +185,18 @@ void TringTvor::CalculateBoundingBox()
   Float_t *C = mCtrExtBox, *E = C + 3;
   C[0] = 0.5f*(M[0]+m[0]); C[1] = 0.5f*(M[1]+m[1]); C[2] = 0.5f*(M[2]+m[2]);
   E[0] = 0.5f*(M[0]-m[0]); E[1] = 0.5f*(M[1]-m[1]); E[2] = 0.5f*(M[2]-m[2]);
+
+  // Find min/max edge length.
+  // Not optimal, we visit most of the edges twice.
+  SqrMinMaxEdgeLen(0, mMinEdgeLen, mMaxEdgeLen);
+  for (Int_t t = 1; t < mNTrings; ++t) {
+    Float_t min, max;
+    SqrMinMaxEdgeLen(t, min, max);
+    if (min < mMinEdgeLen) mMinEdgeLen = min;
+    if (max > mMaxEdgeLen) mMaxEdgeLen = max;
+  }
+  mMinEdgeLen = sqrtf(mMinEdgeLen);
+  mMaxEdgeLen = sqrtf(mMaxEdgeLen);
 
   mBBoxOK = true;
 }
