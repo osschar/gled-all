@@ -1,3 +1,6 @@
+=cut
+=$Id$ 
+
 =head1 Document id
 
 =head2 Title
@@ -14,6 +17,8 @@ B<21.6.2008> - first version.
 
 B<22.10.2008> - update for the developments in solar-system integration.
 
+B<19.01.2009> - update for the developments in gravitational field and
+C<Dynamico> movement (for both C<Crawlers> and C<Flyers>).
 
 =cut========================================================================
 
@@ -699,6 +704,14 @@ Total Anihillation and 3DS (no textures).
 =item Implement gravitational potentials for all supported parametric
 surfaces.
 
+I<19.1.2009> Done ... C<ParaSurf>s can fill C<GravData> stone that
+includes the derivatives in 'up' and transverse direction. C<Dynamico>
+can deduce safe time and safe distance. See:
+
+  virtual void update_grav_safeties(Float_t vl, Float_t vt);
+
+in C<Dynamico>.
+
 =item Implement field-on-mesh optimized for fields that are mostly
 zero (e.g., as gaussian-blobs at specified vertices).
 
@@ -764,7 +777,7 @@ somebody is into such stuff, miracles can be done.
 
 =head3 Status
 
-Dynos (objects of glass C<Dynamico>) slide over terrain with given
+Crawlers (objects of glass C<Crawler>) slide over terrain with given
 forward velocity, angular velocity around unit's up-vector and
 levitation height above the terrain (like hovercrafts). At each time
 step the triangle below the center of the unit's mesh is found and
@@ -784,9 +797,9 @@ Dyno-dyno collision is done in
 
   static bool Dynamico::handle_collision(Dynamico*, Dynamico*, ...)
 
-If the units are coming closer, they are elastically scattered with conservation of
-energy and momentum in horizontal plane. If they are going apart, they
-are just displaced to avoid further contact.
+If the units are coming closer, they are elastically scattered with
+conservation of energy and momentum in horizontal plane. If they are
+going apart, they are just displaced to avoid further contact.
 
 
 =head3 Tasks
@@ -804,11 +817,16 @@ torques allowing lateral sliding of a unit on a steep terrain and
 jumping off elevated terrain edges. I was thinking of using geometric
 algebra for this task.
 
+This is somewhat done - velocity and angular velocity vectors are
+available so at least lateral slides would be trivial to implement.
+
 =item Collision prediction and collision evasion.
 
 =item Path finding.
 
 =item Unit steering in "go to somewhere" mode.
+
+=item Unit steering in "first person" or "drive" mode.
 
 =item Steering of a unit group in march, patrol, guard and attack modes.
 
@@ -975,19 +993,29 @@ relatively few parameters and random seeds.
 
 =cut------------------------------------------------------------------------
 
-=head2 Unit movement through space
+=head2 Unit movement through space / air
 
 =head3 Status
 
-Nothing. The flyers in the demo trivially keep at the same height
-above the terrain.
+A little done. C<Flyer>s in the demo follow the gravitational
+potential, keeping the energy intact. 'Up' direction is maintained
+when C<GravData> is updated. This doesn't work too well in the regions
+where gravity is close to zero and can thus change direction
+significantly over a small distance (e.g.: center of a sphere or
+torus).
+
+Space travel is not touched.
+
+Atmosphere density is not available.
 
 =head3 Tasks
 
 =over enum
 
-=item Implement dynamics for movement of spece units with engine trust
-and gravity.
+=item Implement dynamics for movement of space units with engine trust
+and gravity. Prepare flight stabilization scheme that can handle
+sudden changes in direction of gravity (this is relevant for "small
+worlds").
 
 =item Think how to present this data to users. Think about spacepship
 controls in command-mode and in 1st-person-mode.
