@@ -765,3 +765,39 @@ void TringuCam::Resume()
   mEventor->Start();
 }
 
+//==============================================================================
+
+namespace {
+
+const char* help_text =
+  "\n"
+  "================================================================================\n"
+  "HELP FOR GREED-WORLD TECH-DEMO\n"
+  "================================================================================\n"
+  "Movement keys\n"
+  "--------------------------------------------------------------------------------\n"
+  "w, s - move forward / backward\n"
+  "q, e - turn left / right\n"
+  "a, d - move left / right\n"
+  "r, f - move up / down\n"
+  "Press a key several times to move faster.\n"
+  "================================================================================\n"
+  "Mouse buttons\n"
+  "--------------------------------------------------------------------------------\n"
+  "Mouse-1 - select objects\n"
+  "Mouse-2 - rotate up/down, left/right\n"
+  "Number-widgets can be manipulated by Mouse-drag (M2 - x10, M3 - x100)\n"
+  "================================================================================\n"
+  "Camera / screen controls\n"
+  "--------------------------------------------------------------------------------\n"
+  "Home     - look horizontally / return camera home\n"
+  "Ctrl-F12 - fullscreen mode\n"
+  "Ctrl-`   - go to native gled event handling (or switch back)\n"
+  "--------------------------------------------------------------------------------\n";
+}
+
+void TringuCam::Help()
+{
+  printf(help_text);
+
+}

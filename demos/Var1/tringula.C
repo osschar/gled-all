@@ -62,7 +62,7 @@ Float_t      max_flyer_h               = 10;   // def=10. Changed for some surfa
 
 const Text_t* trimesh_layout = "ZGlass(Name,Title[22]):TriMesh(M[8],Surf[8],COM,J)";
 
-void tringula(Int_t mode=0)
+void tringula(Int_t mode=2)
 {
   gRandom = new TRandom3(0); // Seed 0 means seed with TUUID.
 
@@ -869,6 +869,10 @@ void make_overlay()
     }
     gs.Step();
 
+    CREATE_ADD_GLASS(help_but, WGlButton, main_menu, "Help", 0);
+    gs.SetNode(help_but);
+    help_but->SetCbackAlpha(tricam);
+    help_but->SetCbackMethodName("Help");
   }
 
   gs.Reset();
