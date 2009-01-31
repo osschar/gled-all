@@ -1,3 +1,14 @@
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add "Help" button in main menu.
+	Change default mode to 2 - sphere outside.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Modified files.
+
 2009-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

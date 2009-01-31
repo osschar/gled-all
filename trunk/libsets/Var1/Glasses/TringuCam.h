@@ -248,6 +248,8 @@ public:
   void Suspend(); // X{E}
   void Resume();  // X{E}
 
+  void Help(); // X{E}
+
 #include "TringuCam.h7"
   ClassDef(TringuCam, 1);
 }; // endclass TringuCam
