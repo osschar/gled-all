@@ -1,5 +1,16 @@
 2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	Only dump grav-info when G_DEBUG > 0.
+
+	* Glasses/TringuCam.cxx:
+	When up-dir changes, ortonorm forward direction first. This keeps
+	forward direction more constant - and makes it easier to fly
+	through the center of torus.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/TringuCam.cxx:
 	* Glasses/TringuCam.h:
 	Add function 'Help()' to print basic usage info.

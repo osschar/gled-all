@@ -535,9 +535,10 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
     mTringula->GetParaSurf()->fgh2hdir(fgh, hdir);
     // printf("pos(%.2f, %.2f, %.2f) | fgh(%.2f, %.2f, %.2f) | hdir(%.2f, %.2f, %.2f)\n",
     //        pos[0], pos[1], pos[2], fgh[0], fgh[1], fgh[2], hdir[0],  hdir[2],  hdir[2]);
+
     mTrans.SetBaseVec(3, hdir);
-    mTrans.OrtoNorm3Column(2, 3);
-    mTrans.SetBaseVecViaCross(1);
+    mTrans.OrtoNorm3Column(1, 3);
+    mTrans.SetBaseVecViaCross(2);
     mTrans.MoveLF(3, mHeight - fgh[2]);
   }
 
