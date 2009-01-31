@@ -1,6 +1,11 @@
 2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
+	Add button to open class-view for all extendios.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
 	Add "Help" button in main menu.
 	Change default mode to 2 - sphere outside.
 

@@ -886,6 +886,11 @@ void make_overlay()
     but1->SetCbackAlpha(tricam);
     but1->SetCbackMethodName("DynoDetails");
 
+    CREATE_ADD_GLASS(butd, WGlButton, dyno_ctrl, "Detailed View", "LensBeta");
+    gs.SetNodeAdvance(butd);
+    butd->SetCbackAlpha(g_shell);
+    butd->SetCbackMethodName("SpawnClassView");
+
     CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
     gs.SetNodeAdvance(val1);
     val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
@@ -909,6 +914,11 @@ void make_overlay()
     gs.SetNodeAdvance(but1);
     but1->SetCbackAlpha(tricam);
     but1->SetCbackMethodName("DynoDetails");
+
+    CREATE_ADD_GLASS(butd, WGlButton, dyno_ctrl, "Detailed View", "LensBeta");
+    gs.SetNodeAdvance(butd);
+    butd->SetCbackAlpha(g_shell);
+    butd->SetCbackMethodName("SpawnClassView");
 
     CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
     gs.SetNodeAdvance(val1);
@@ -940,6 +950,11 @@ void make_overlay()
     but1->SetCbackAlpha(tricam);
     but1->SetCbackMethodName("DynoDetails");
 
+    CREATE_ADD_GLASS(butd, WGlButton, dyno_ctrl, "Detailed View", "LensBeta");
+    gs.SetNodeAdvance(butd);
+    butd->SetCbackAlpha(g_shell);
+    butd->SetCbackMethodName("SpawnClassView");
+
     CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
     gs.SetNodeAdvance(val1);
     val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
@@ -970,6 +985,11 @@ void make_overlay()
     gs.SetNodeAdvance(but1);
     but1->SetCbackAlpha(tricam);
     but1->SetCbackMethodName("StatoDetails");
+
+    CREATE_ADD_GLASS(butd, WGlButton, stato_ctrl, "Detailed View", "LensBeta");
+    gs.SetNodeAdvance(butd);
+    butd->SetCbackAlpha(g_shell);
+    butd->SetCbackMethodName("SpawnClassView");
 
     CREATE_ADD_GLASS(val1, WGlValuator, stato_ctrl, "CollCount", "LensAlpha");
     gs.SetNodeAdvance(val1);
