@@ -1,3 +1,10 @@
+2009-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* testfltdbl.C:
+	Modify the test to actually measure someting even when compiled as
+	optimized code.
+	Add running instructions.
+
 2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
