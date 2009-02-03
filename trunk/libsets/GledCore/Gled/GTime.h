@@ -20,7 +20,7 @@ protected:
 public:
   GTime(Long_t s=0, Long_t mu=0) : mSec(s), mMuSec(mu) {}
   virtual ~GTime() {}
-  GTime(Init_e i) { SetNow(); }
+  GTime(Init_e /*i*/) { SetNow(); }
   GTime(const GTime& t) : mSec(t.mSec), mMuSec(t.mMuSec) {}
   static GTime Now() { return GTime(I_Now); }
 

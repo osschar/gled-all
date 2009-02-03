@@ -42,10 +42,12 @@ void ZGeoNode::_init()
 void ZGeoNode::_assert_tnode(const Exc_t& _eh, bool ggeo_fallbackp)
 {
   if(mTNode == 0)
-    if(ggeo_fallbackp && gGeoManager &&  gGeoManager->GetTopNode() )
+  {
+    if(ggeo_fallbackp && gGeoManager && gGeoManager->GetTopNode())
       mTNode = gGeoManager->GetTopNode();
     else
       throw(_eh + "top-node can not be resolved.");
+  }
 }
 
 /**************************************************************************/

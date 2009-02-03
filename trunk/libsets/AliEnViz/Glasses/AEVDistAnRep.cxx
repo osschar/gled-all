@@ -112,7 +112,7 @@ Int_t AEVDistAnRep::create_evbatches(map<string, int>& cmap)
 
     ++i;
   }
-  printf("Sites=%d Events=%d\n", cmap.size(), totevents);
+  printf("Sites=%zd Events=%d\n", cmap.size(), totevents);
   return totevents;
 }
 
@@ -298,13 +298,15 @@ void AEVDistAnRep::InitJob(AEVJobRep* job)
   Stamp(FID());
 }
 
-namespace {
+namespace
+{
 
-struct SiteData {
-  char* name;
-  char* location;
-  float longitude;
-  float latitude;
+struct SiteData
+{
+  const char* name;
+  const char* location;
+  float       longitude;
+  float       latitude;
 };
 
 SiteData SiteDatas[] = {
@@ -417,7 +419,7 @@ void AEVDistAnRep::StudyJobHistory(Bool_t dump_p)
   Stamp(FID());
 
   if(dump_p) {
-    printf("%sjobname='%s' jobid='%s' entries=%d\n", _eh.Data(),
+    printf("%sjobname='%s' jobid='%s' entries=%zd\n", _eh.Data(),
 	   mJobName.Data(), mJobId.Data(), mHistory.size());
     for(lMonaEntry_i i=mHistory.begin(); i!=mHistory.end(); ++i)
       printf("  %-32s %12s %s\n", i->fParam.Data(), i->fValue.Data(), i->fDateStr.Data());
