@@ -30,6 +30,10 @@ struct hash<T*> {
 
 #include <sstream>
 
+  #if __GNUC__ == 4 && __GNUC_MINOR__ > 1
+  #undef __DEPRECATED
+  #endif
+
 #ifndef __CINT__
 #include <ext/hash_map>
 

@@ -1,3 +1,9 @@
+2009-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* include/gled-gcc-config.h:
+	Silence the gcc-4.3 warnings about usage of hash_map.
+	This needs to be fixed properly at some point.
+
 2008-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/gled_install.pl:
