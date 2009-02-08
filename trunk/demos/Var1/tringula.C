@@ -550,7 +550,7 @@ void setup_rectangle()
   tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetMesh(trimesh);
 
-  tringula->SetMaxFlyerH (0.2 * parasurf->CharacteristicLength());
+  tringula->SetMaxFlyerH (0.3 * parasurf->CharacteristicLength());
   tringula->SetMaxCameraH(parasurf->CharacteristicLength());
 }
 
