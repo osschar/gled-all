@@ -24,8 +24,8 @@ protected:
   void add(Float_t f, GravData& gd);
 
 public:
-  Float_t fPos[3];
-  Float_t fDir[3];
+  Float_t fPos[3];  // Position where this data was calculated.
+  Float_t fDir[3];  // Direction of gravity.
   Float_t fMag;
   Float_t fLDer;    // Derivative in longitudinal direction (direction of gravity).
   Float_t fTDer;    // Derivative in tangential plane.

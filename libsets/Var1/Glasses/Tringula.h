@@ -68,6 +68,8 @@ protected:
   ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{A}
   ZLink<TriMesh>     mMesh;         //  X{GS} L{A}
   ZColor             mColor;        //  X{GSPT} 7 ColorButt()
+  Float_t            mMaxFlyerH;    //  X{GS}   7 Value(-const=>1,-join=>1)
+  Float_t            mMaxCameraH;   //  X{GS}   7 Value()
   Bool_t             bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
   Bool_t             bLightMesh;    //  X{GST}  7 Bool()
 
@@ -109,18 +111,20 @@ protected:
                             Opcode::Point& old_pos, Opcode::Point& pos,
                             Int_t plane, Float_t dist);
 
+  Bool_t terrain_height(const Opcode::Point& pos, Float_t& point_h, Float_t& terrain_h);
+
   Bool_t place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
                           Float_t min_h_above=0);
   Bool_t place_on_terrain(Dynamico* D, Float_t h_above);
 
-  void   fill_pruning_list(AList* extendios, Int_t& n, const Opcode::AABB** boxes, void** user_data);
-  void   fill_pruning_list(AList* extendios, Int_t& n, Int_t l);
-  void   setup_box_pruner();
-  void   setup_stato_pruner();
-  void   setup_dyno_pruner();
+  void fill_pruning_list(AList* extendios, Int_t& n, const Opcode::AABB** boxes, void** user_data);
+  void fill_pruning_list(AList* extendios, Int_t& n, Int_t l);
+  void setup_box_pruner();
+  void setup_stato_pruner();
+  void setup_dyno_pruner();
 
-  void   prepick_extendios(AList* extendios, Opcode::Ray& ray,
-                           lPickResult_t& candidates);
+  void prepick_extendios(AList* extendios, Opcode::Ray& ray,
+                         lPickResult_t& candidates);
 
 public:
   Tringula(const Text_t* n="Tringula", const Text_t* t=0) :
@@ -148,11 +152,15 @@ public:
   Dynamico* NewDynamico(const Text_t* dname=0);
   Dynamico* RandomDynamico(ZVector* mesh_list,
                            Float_t v_min=-1, Float_t v_max=5,
-                           Float_t w_max= 1);                   // X{E} C{1} 7 MCWButt()
-  Dynamico* RandomFlyer   (Float_t v_min= 2, Float_t v_max=20,
-                           Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
+                           Float_t w_max= 1);                      // X{E} C{1} 7 MCWButt()
+  Dynamico* RandomAirplane(Float_t v_min= 2, Float_t v_max=20,
+                           Float_t w_max= 1,
+                           Float_t h_min_fac=0.3,
+                           Float_t h_max_fac=1);                   // X{E} 7 MCWButt()
   Dynamico* RandomChopper (Float_t v_min= 2, Float_t v_max=20,
-                           Float_t w_max= 1, Float_t h_max=50); // X{E} 7 MCWButt()
+                           Float_t w_max= 1,
+                           Float_t h_min_fac=0.1,
+                           Float_t h_max_fac=0.5);                 // X{E} 7 MCWButt()
 
   Bool_t CheckBoundaries(Dynamico* dyno, Float_t& safety);
 

@@ -58,7 +58,6 @@ Float_t      statico_surface_fraction  = 0.05; // 0.05
 Int_t        num_dynamico              = 250;  // 250
 Int_t        num_flyer                 = 70;   // 70
 Int_t        num_chopper               = 30;   // 30
-Float_t      max_flyer_h               = 10;   // def=10. Changed for some surfaces in surf-specific init.
 
 const Text_t* trimesh_layout = "ZGlass(Name,Title[22]):TriMesh(M[8],Surf[8],COM,J)";
 
@@ -395,9 +394,9 @@ void tringula(Int_t mode=2)
   g_pupil->Add(g_scene);
   g_pupil->SetWidth(800); g_pupil->SetHeight(500);
   g_pupil->SetClearColor(0.589, 0.601, 0.836);
-  g_pupil->SetUpReference(tricam);
-  g_pupil->SetUpRefAxis(3);
-  g_pupil->SetUpRefMinAngle(2);
+  // g_pupil->SetUpReference(tricam);
+  // g_pupil->SetUpRefAxis(3);
+  // g_pupil->SetUpRefMinAngle(2);
   g_pupil->SetCameraBase(0);
   g_pupil->SetNearClip(0.2);
   g_pupil->SetFarClip(200);
@@ -505,10 +504,10 @@ void tringula(Int_t mode=2)
   }
 
   // Flyers
-  for (int i=0; i<num_flyer; ++i) tringula->RandomFlyer(6, 12, 0.5, max_flyer_h);
+  for (int i=0; i<num_flyer; ++i) tringula->RandomAirplane(6, 12, 0.5);
 
   // Choppers
-  for (int i=0; i<num_chopper; ++i) tringula->RandomChopper(1, 8, 0.8, 0.5*max_flyer_h);
+  for (int i=0; i<num_chopper; ++i) tringula->RandomChopper(1, 8, 0.8);
 
   if (mode == 99)
   {
@@ -550,6 +549,9 @@ void setup_rectangle()
   tringula->SetParaSurf(parasurf);
   tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.2 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(parasurf->CharacteristicLength());
 }
 
 void setup_triangle()
@@ -578,6 +580,9 @@ void setup_triangle()
   tringula->SetParaSurf(parasurf);
   tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.3 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(parasurf->CharacteristicLength());
 }
 
 void setup_sphere_outside()
@@ -606,13 +611,14 @@ void setup_sphere_outside()
   // Setup tringula
   tringula->SetParaSurf(parasurf);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.5 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(2 * parasurf->CharacteristicLength());
 }
 
 void setup_sphere_inside()
 {
   Float_t R = 32;
-
-  max_flyer_h = 10;
 
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
@@ -623,8 +629,10 @@ void setup_sphere_inside()
   // Setup GTS surface.
   gtsurf->GenerateSphere(4);
   gtsurf->Rescale(R);
-  for (int i=0; i<5; ++i)
-    gtsurf->Legendrofy(16, 0.25, 1.5);
+  for (int i=0; i<5; ++i) {
+    // gtsurf->Legendrofy(16, 0.25, 1.5);
+    gtsurf->Legendrofy(24, 0.25, 1.25);
+  }
   gtsurf->Invert();
 
   // Setup trimesh
@@ -635,6 +643,9 @@ void setup_sphere_inside()
   // Setup tringula
   tringula->SetParaSurf(parasurf);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.5 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(0.9 * parasurf->CharacteristicLength());
 }
 
 float tweak(TRandom* rnd, float x)
@@ -645,8 +656,6 @@ float tweak(TRandom* rnd, float x)
 void setup_torus_outside()
 {
   Float_t rM = 30, rm = 15, rS = rM + rm;
-
-  max_flyer_h = 5;
 
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
@@ -679,13 +688,14 @@ void setup_torus_outside()
   // Setup tringula
   tringula->SetParaSurf(parasurf);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.5 * (rM - rm));
+  tringula->SetMaxCameraH(0.9 * (rM - rm));
 }
 
 void setup_torus_inside()
 {
   Float_t rM = 30, rm = 15, rS = rM + rm;
-
-  max_flyer_h = 5;
 
   // Create parasurf
   ASSIGN_GLASS(parasurf, PSTorus, g_queen, "Tor ParaSurf", 0);
@@ -720,6 +730,9 @@ void setup_torus_inside()
   // Setup tringula
   tringula->SetParaSurf(parasurf);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.5 * rm);
+  tringula->SetMaxCameraH(0.9 * rm);
 }
 
 void setup_test()
@@ -730,7 +743,7 @@ void setup_test()
   statico_surface_fraction = 0.05;
   num_dynamico = 30;
   num_flyer    = 15;
-  max_flyer_h  = 5;
+  num_chopper  =  7;
 
   Float_t base = 32;
 
@@ -756,6 +769,9 @@ void setup_test()
   tringula->SetParaSurf(parasurf);
   tringula->SetEdgeRule(Tringula::ER_Bounce);
   tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.4 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(parasurf->CharacteristicLength());
 }
 
 

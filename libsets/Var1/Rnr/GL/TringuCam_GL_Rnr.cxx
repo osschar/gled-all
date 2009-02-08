@@ -66,12 +66,36 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
       if (ev.fState & FL_BUTTON2)
       {
-        if (dx != 0 || dy != 0) {
-          float cfac  = TMath::DegToRad()*rd->GetZFov()/rd->GetHeight();
-          float dxang = cfac*dx;
-          float dyang = cfac*dy;
+        float cfac  = TMath::DegToRad()*rd->GetZFov()/rd->GetHeight();
+        if (dx != 0)
+        {
+          float dxang =  cfac*dx;
           mTringuCam->RotateLF(1, 2, -dxang);
-          rd->GetCamFixTrans()->RotateLF(1, 3, -dyang);
+        }
+        if (dy != 0)
+        {
+          float dyang = -cfac*dy;
+          ZTrans& t = * rd->GetCamFixTrans();
+          // Do not rotate beyond vertical.
+          Float_t d = t.ArrX()[2];
+          if (d > 1) d = 1; else if(d < -1) d = -1; // Fix numerical errors
+          Float_t a = TMath::ASin(d) + dyang;
+          if (a >= TMath::PiOver2() && dyang > 0)
+          {
+            t.SetBaseVec(1, 0, 0, 1);
+            t.OrtoNorm3Column(3, 1);
+            t.SetBaseVecViaCross(2);
+          }
+          else if (a <= -TMath::PiOver2() && dyang < 0)
+          {
+            t.SetBaseVec(1, 0, 0, -1);
+            t.OrtoNorm3Column(3, 1);
+            t.SetBaseVecViaCross(2);
+          }
+          else
+          {
+            rd->GetCamFixTrans()->RotateLF(1, 3, dyang);
+          }
         }
       }
 

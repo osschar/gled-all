@@ -78,6 +78,8 @@ public:
   Opcode::AABB&   ref_aabb()        { return  mAABB; }
   Opcode::AABB&   ref_last_aabb()   { return *mLastAABBPtr; }
 
+  Opcode::Point&  ref_pos()         { return * (Opcode::Point*) mTrans.PtrPos(); }
+
   void            update_aabb()     { mMesh->ref_mesh_bbox().Rotate(mTrans, mAABB); }
 
   virtual void update_last_data() {}
@@ -89,8 +91,9 @@ public:
 
   // --- Triangle-triangle intersection ---
 
-  static bool intersect_triangle(Extendio* ext0,  Extendio* ext1,
-                                 Int_t    tidx0,  Int_t    tidx1,
+  static bool intersect_triangle(TringTvor* TT0, TringTvor* TT1,
+                                 HTransF  & HT0, HTransF  & HT1,
+                                 Int_t    tidx0, Int_t     tidx1,
                                  Opcode::Segment& segment,
                                  const Text_t* debug_prefix=0);
 

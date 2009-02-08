@@ -43,6 +43,14 @@ void Tringula::_init()
   // Override settings from ZGlass
   bUseDispList = true;
 
+  // This is a temporary hack needed because the flyer dynamic is too simple.
+  // It prevents flyers from flying into regions where gravity changes
+  // direction abruptly.
+  // There can be no reasonable default, so it is set to 0 to make
+  // it rather obvious when it is not set.
+  mMaxFlyerH   = 0;
+  mMaxCameraH  = 0;
+
   bSmoothShade = false;
   bLightMesh   = true;
 
@@ -448,9 +456,13 @@ Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
   return d;
 }
 
-Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
+Dynamico* Tringula::RandomAirplane(Float_t v_min, Float_t v_max,
+                                   Float_t w_max,
+                                   Float_t h_min_fac, Float_t h_max_fac)
 {
-  Flyer* d = new Airplane(GForm("Flyer %d", mFlyers->GetSize() + 1));
+  static const Exc_t _eh("Tringula::RandomAirplane ");
+
+  Flyer* d = new Airplane(GForm("Airplane %d", mFlyers->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
   mParaSurf->random_trans(mRndGen, t);
@@ -458,9 +470,17 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
   Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
   t.RotateLF(1, 2, phi);
 
-  const Float_t h = mRndGen.Uniform(0, h_max);
-  t.MoveLF(3, mParaSurf->GetMaxH() + h);
+  Float_t point_h, terrain_h;
+  if ( ! terrain_height(t.ref_pos(), point_h, terrain_h))
+    throw _eh + "problem determining terrain height.";
+
+  Float_t h = mRndGen.Uniform(h_min_fac * mMaxFlyerH, h_max_fac * mMaxFlyerH);
+  h = TMath::Max(h, terrain_h + mDefFlyMesh->GetTTvor()->BoundingBoxDiagonal());
+  t.MoveLF(3, h);
   d->SetHeight(h);
+  // printf("Set height=%+6.2f for flyer '%12s', th=%+6.2f, ph=%+6.2f, maxfh=%+6.2f; %+6.2f-%+6.2f\n",
+  //        h, d->GetName(), terrain_h, point_h, mMaxFlyerH,
+  //        h_min_fac * mMaxFlyerH, h_max_fac * mMaxFlyerH);
 
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
@@ -476,8 +496,12 @@ Dynamico* Tringula::RandomFlyer(Float_t v_min, Float_t v_max, Float_t w_max, Flo
   return d;
 }
 
-Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, Float_t h_max)
+Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max,
+                                  Float_t w_max,
+                                  Float_t h_min_fac, Float_t h_max_fac)
 {
+  static const Exc_t _eh("Tringula::RandomChopper ");
+
   Flyer* d = new Chopper(GForm("Chopper %d", mFlyers->GetSize() + 1));
   HTransF& t = d->ref_trans();
 
@@ -486,9 +510,17 @@ Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max, Float_t w_max, F
   Float_t phi = mRndGen.Uniform(0, TMath::TwoPi());
   t.RotateLF(1, 2, phi);
 
-  const Float_t h = mRndGen.Uniform(0, h_max);
-  t.MoveLF(3, mParaSurf->GetMaxH() + h);
+  Float_t point_h, terrain_h;
+  if ( ! terrain_height(t.ref_pos(), point_h, terrain_h))
+    throw _eh + "problem determining terrain height.";
+
+  Float_t h = mRndGen.Uniform(h_min_fac * mMaxFlyerH, h_max_fac * mMaxFlyerH);
+  h = TMath::Max(h, terrain_h + mDefChopMesh->GetTTvor()->BoundingBoxDiagonal());
+  t.MoveLF(3, h);
   d->SetHeight(h);
+  // printf("Set height=%+6.2f for flyer '%12s', th=%+6.2f, ph=%+6.2f, maxfh=%+6.2f; %+6.2f-%+6.2f\n",
+  //        h, d->GetName(), terrain_h, point_h, mMaxFlyerH,
+  //        h_min_fac * mMaxFlyerH, h_max_fac * mMaxFlyerH);
 
   d->SetV(mRndGen.Uniform( v_min, v_max));
   d->SetW(mRndGen.Uniform(-w_max, w_max));
@@ -880,6 +912,50 @@ void Tringula::handle_edge_crossing
 
 /**************************************************************************/
 
+Bool_t Tringula::terrain_height(const Opcode::Point& pos, Float_t& point_h, Float_t& terrain_h)
+{
+  // Calculates height of given point and of the terrain at given pos.
+  // Return true if all went ok.
+
+  static const Exc_t _eh("Tringula::place_on_terrain ");
+
+  Opcode::RayCollider    RC;
+  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
+  RC.SetClosestHit(true);     // to keep the closes hit only
+  Opcode::CollisionFaces CF;
+  RC.SetDestination(&CF);
+
+  Opcode::Point fgh;
+  Opcode::Point hzero_pos;
+
+  mParaSurf->pos2fgh(pos, fgh);
+  point_h = fgh.z;
+  fgh.z   = 0;
+  mParaSurf->fgh2pos(fgh, hzero_pos);
+
+  Opcode::Ray R;
+  Float_t ray_offset = mParaSurf->pos2hray(hzero_pos, R);
+
+  Int_t cs = RC.Collide(R, *mMesh->GetOPCModel());
+  if (cs && CF.GetNbFaces() == 1)
+  {
+    const Opcode::CollisionFace& cf = CF.GetFaces()[0];
+    terrain_h = ray_offset - cf.mDistance;
+    return true;
+  }
+  else
+  {
+    printf("%s status=%s, nfaces=%d\n"
+           "  nbvt=%d, nprt=%d, ni=%d\n"
+           "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
+           _eh.Data(), cs ? "ok" : "failed", CF.GetNbFaces(),
+           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
+           R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
+    return false;
+  }
+
+}
+
 Bool_t Tringula::place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
                                   Float_t min_h_above)
 {
@@ -989,8 +1065,7 @@ Bool_t Tringula::place_on_terrain(Dynamico* D, Float_t h_above)
   Opcode::CollisionFaces CF;
   RC.SetDestination(&CF);
 
-  HTransF & trans = D->ref_trans();
-  Opcode::Point& pos = * (Opcode::Point*) trans.PtrPos();
+  Opcode::Point& pos = D->ref_pos();
   Opcode::Ray R;
   Float_t ray_offset = mParaSurf->pos2hray(pos, R);
 
@@ -1001,6 +1076,8 @@ Bool_t Tringula::place_on_terrain(Dynamico* D, Float_t h_above)
       pos.TMac(R.mDir, cf.mDistance - ray_offset - h_above);
 
       Float_t* n = mMesh->GetTTvor()->TriangleNormal(cf.mFaceID);
+
+      HTransF& trans = D->ref_trans();
       trans.SetBaseVec(3, n);
       trans.OrtoNorm3Column(1, 3);
       trans.SetBaseVecViaCross(2);
