@@ -22,11 +22,18 @@ protected:
   Float_t  mGravHChange;
   Bool_t   bGravFixUpDir; // X{GS} 7 Bool()
 
+  Float_t  mTerrainSafety;      //! Safe distance from the terrain.
+  Float_t  mTerrainProbeRadius; //! Radius of the last terrain probe.
+
 public:
   Flyer(const Text_t* n="Flyer", const Text_t* t=0);
   virtual ~Flyer();
 
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  Float_t height_above_terrain();
+
+  Int_t   collide_with_tringula(CollisionSegments& segments);
 
 #include "Flyer.h7"
   ClassDef(Flyer, 1);

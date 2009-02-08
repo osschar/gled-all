@@ -41,7 +41,8 @@ void Extendio::SetTringula(Tringula* tring)
 
 /**************************************************************************/
 
-bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
+bool Extendio::intersect_triangle(TringTvor* TT0, TringTvor* TT1,
+                                  HTransF  & HT0, HTransF  & HT1,
                                   Int_t    tidx0, Int_t    tidx1,
                                   Opcode::Segment& segment,
                                   const Text_t* debug_prefix)
@@ -61,9 +62,6 @@ bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
 
   using namespace Opcode;
 
-  TringTvor *TT0 = ext0->get_tring_tvor();
-  TringTvor *TT1 = ext1->get_tring_tvor();
-
   Int_t* T0 = TT0->Triangle(tidx0);
   Int_t* T1 = TT1->Triangle(tidx1);
 
@@ -73,8 +71,8 @@ bool Extendio::intersect_triangle(Extendio* ext0, Extendio* ext1,
   Point V0[3], V1[3];
   for (int k=0; k<3; ++k)
   {
-    ext0->mTrans.MultiplyVec3(TT0->Vertex(T0[k]), 1.0f, V0[k]);
-    ext1->mTrans.MultiplyVec3(TT1->Vertex(T1[k]), 1.0f, V1[k]);
+    HT0.MultiplyVec3(TT0->Vertex(T0[k]), 1.0f, V0[k]);
+    HT1.MultiplyVec3(TT1->Vertex(T1[k]), 1.0f, V1[k]);
   }
 
   // Define plane of triangle T0
@@ -290,13 +288,20 @@ int Extendio::intersect_extendios(Extendio* ext0, Extendio* ext1,
   // Triangle pairs
   const Pair* ps = collider.GetPairs();
   Segment     segment;
+
+  TringTvor* TT0 = ext0->GetMesh()->GetTTvor();
+  TringTvor* TT1 = ext1->GetMesh()->GetTTvor();
+  HTransF  & HT0 = ext0->ref_trans();
+  HTransF  & HT1 = ext1->ref_trans();
+
   for (UInt_t j = 0; j < np; ++j)
   {
     if (debug_prefix)
       printf("%s%2u: tri_idx0=%3d tri_idx1=%3d\n", debug_prefix,
              j, ps[j].id0, ps[j].id1);
 
-    if (Extendio::intersect_triangle(ext0, ext1, ps[j].id0, ps[j].id1,
+    if (Extendio::intersect_triangle(TT0, TT1, HT0, HT1,
+                                     ps[j].id0, ps[j].id1,
                                      segment, sec_debug_prefix))
     {
       segments.push_back(segment);

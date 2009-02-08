@@ -290,6 +290,10 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
     dcomp *= 0.1f;
     t0.Move3PF(-dcomp.x, -dcomp.y, -dcomp.z);
     t1.Move3PF( dcomp.x,  dcomp.y,  dcomp.z);
+
+    // XXXX When a dyno is moved in collision fix, safeties might
+    // be wrong ... need member "extra path" that is added in next
+    // time step. Or sth.
   }
 
   return true;

@@ -516,6 +516,10 @@ void TringuCam::AddField(Float_t value)
 
 void TringuCam::TimeTick(Double_t t, Double_t dt)
 {
+  // Handle currently pressed keys.
+  //
+  // Mouse-2 camera rotation is handled in GL_Rnr.
+
   mFwdBck.TimeTick(dt);
   if (mFwdBck.fValue) MoveLF(1, dt*mFwdBck.fValue);
 
@@ -524,11 +528,13 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
 
   mUpDown.TimeTick(dt);
   if (mUpDown.fValue) mHeight += dt*mUpDown.fValue;
+  if (mHeight > mTringula->GetMaxCameraH())
+    mHeight = mTringula->GetMaxCameraH();
 
   mSpinUp.TimeTick(dt);
   if (mSpinUp.fValue) RotateLF(1, 2, dt*mSpinUp.fValue);
 
-  { // Restore up-direction and heigt
+  { // Restore up-direction and height
     Float_t pos[3], fgh[3], hdir[3];
     mTrans.GetPos(pos);
     mTringula->GetParaSurf()->pos2fgh (pos, fgh);

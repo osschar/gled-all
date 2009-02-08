@@ -136,6 +136,7 @@ public:
   void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }
 
   Float_t BoundingBoxDiagonal();
+  Float_t BoundingBoxHalfDiagonal();
   Float_t BoundingBoxXYArea();
   Float_t BoundingBoxVolume();
 

@@ -1,3 +1,45 @@
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	Add a comment about safety handling.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Generalize function bool intersect_triangle(...) so that it can be
+	used for arbitrary triangle-tvors, not only for Extendios.
+
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	Add terrain collision handling in TimeTick().
+	Calculate safe distance by using sphere-terraing collision test.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add members Float_t mMaxFlyerH, mMaxCameraH.
+
+	Add function:
+	  Bool_t terrain_height(pos, pos_h, terrain_h);
+
+	When placing random flyers make sure they are above the terrain
+	and within passed min/max limits (unless terrain is higher).
+
+	* Glasses/TringuCam.cxx:
+	Limit maximum height.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Do not allow free-look to cross vertical direction.
+	This caused flipping of the view and swapped fwd/bck directions.
+
+	* Stones/GravData.h:
+	Add comments.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Add function to HTrans<TT>:
+	  void RotateBackVec3(const TT* in, TT* out) const;
+
+	Add some convenience functions to HPoint.
+
 2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Crawler.cxx:

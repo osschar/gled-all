@@ -40,6 +40,8 @@ public:
   void Set(Double_t* p) { x = p[0]; y = p[1]; z = p[2]; }
   void Zero()           { x = y = z = 0; }
 
+  void Neg() { x = -x; y = -y; z = -z; }
+
   HPoint& operator+=(const HPoint& a)   { x += a.x;  y += a.y;  z += a.z;  return *this; }
   HPoint& operator+=(const Float_t*  v) { x += v[0]; y += v[1]; z += v[2]; return *this; }
   HPoint& operator+=(const Double_t* v) { x += v[0]; y += v[1]; z += v[2]; return *this; }
@@ -224,6 +226,7 @@ public:
   void     MultiplyVec3IP(TT* in, TT w) const;
   void     MultiplyVec3(const TT* in, TT w, TT* out) const;
   void     RotateVec3(const TT* in, TT* out) const;
+  void     RotateBackVec3(const TT* in, TT* out) const;
 
   virtual void Print(Option_t* option = "") const;
 
@@ -275,6 +278,8 @@ public:
   void GetPos(Double_t* x) const { x[0] = M[12]; x[1] = M[13]; x[2] = M[14]; }
 
 #ifndef __CINT__
+  Opcode::Point& ref_pos()       { return * (Opcode::Point*) PtrPos(); }
+
   operator Opcode::Matrix4x4* () { return  (Opcode::Matrix4x4*)M; }
   operator Opcode::Matrix4x4& () { return *(Opcode::Matrix4x4*)M; }
   operator const Opcode::Matrix4x4* () const { return  (Opcode::Matrix4x4*)M; }
