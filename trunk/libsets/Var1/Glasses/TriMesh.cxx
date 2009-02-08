@@ -309,19 +309,15 @@ void TriMesh::ImportRectTerrain(RectTerrain* rt, Bool_t colp, Bool_t texp)
 
   TringTvor* tt = 0;
   { GLensReadHolder _rlck(rt);
-    printf("lock terrain\n");
     // Here we request vertex (smooth) and triangle (flat) sections.
     tt = rt->SpawnTringTvor(true, true, colp, texp);
     if(tt == 0)
       throw(_eh + "tvor null after MakeTringTvor().");
-    printf("unlock terrain\n");
   }
   GLensWriteHolder _wlck(this);
-  printf("lock tringula\n");
   delete mTTvor;
   mTTvor = tt;
   mStampReqTring = Stamp(FID());
-  printf("unlock tringula\n");
 }
 
 /**************************************************************************/
