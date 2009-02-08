@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-if ($#ARGV < 0 or $ARGV[0] eq '-h' or $ARGV[0] eq '--help') {
+if ($#ARGV < 0 or $ARGV[0] eq '-h' or $ARGV[0] eq '--help')
+{
   print <<"FNORD";
 Usage: gled-config [--follow] [--prefix[=dir]] [--bindir[=dir]]
                    [--libdir[=dir]] [--datadir[=dir]]
@@ -31,8 +32,10 @@ $GLED_DATA_DIR = "@datadir@";
 
 my $path = $0;
 
-if (grep(/^--follow$/, @ARGV)) {
-  while (-l $path) {
+if (grep(/^--follow$/, @ARGV))
+{
+  while (-l $path)
+  {
     $path = readlink $path;
   }
 }
@@ -41,10 +44,13 @@ my $progdir = $path; $progdir =~ s!/[^/]*$!!;
 my $rundir  = `pwd`; chomp $rundir;
 my $topdir;
 
-if ($progdir =~ m!^/! or $progdir =~ m!^~!) {
+if ($progdir =~ m!^/! or $progdir =~ m!^~!)
+{
   # absolute path
   $topdir="$progdir";
-} else {
+}
+else
+{
   # relative path
   $topdir="$rundir/$progdir";
 }
@@ -54,19 +60,22 @@ $topdir =~ s!/bin$!!;
 # Setup the default paths
 ########################################################################
 
-if (defined $ENV{"GLEDSYS"}) {
+if (defined $ENV{"GLEDSYS"})
+{
   $PREFIX  = $ENV{"GLEDSYS"};
   $BINDIR  = "$PREFIX/bin";
   $LIBDIR  = "$PREFIX/lib";
   $DATADIR = "$PREFIX";
 }
-elsif ($GLED_PREFIX eq "<none>") {
+elsif ($GLED_PREFIX eq "<none>")
+{
   $PREFIX  = $topdir;
   $BINDIR  = "$topdir/bin";
   $LIBDIR  = "$topdir/lib";
   $DATADIR = "$topdir";
 }
-else {
+else
+{
   $PREFIX  = $GLED_PREFIX;
   $BINDIR  = $GLED_BIN_DIR;
   $LIBDIR  = $GLED_LIB_DIR;
@@ -79,19 +88,25 @@ else {
 
 my @out;
 
-for $a (@ARGV) {
-  if ($a =~ m/--([-\w]+)(?:=([-\w]+))?/) {
-    if (not defined $2) {
+for $a (@ARGV)
+{
+  if ($a =~ m/--([-\w]+)(?:=([-\w]+))?/)
+  {
+    if (not defined $2)
+    {
       if    ($1 eq 'prefix')  { push @out, $PREFIX;  }
       elsif ($1 eq 'bindir')  { push @out, $BINDIR;  }
       elsif ($1 eq 'libdir')  { push @out, $LIBDIR;  }
       elsif ($1 eq 'datadir') { push @out, $DATADIR; }
-      else {
+      else
+      {
         my $var = uc $1;
         $var =~ s/-/_/g;
         eval("\$$var = 1;");
       }
-    } else {
+    }
+    else
+    {
       my $var = uc $1;
       $var =~ s/-/_/g;
       my $val = $2;

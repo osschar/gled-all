@@ -1,6 +1,7 @@
 # $Id$
 
-## install options ###
+### Install options ###
+#
 # Default value "<none>" means no default location will be
 # specified and gled will require either: a) GLEDSYS envrionment
 # variable to be set; or b) passing of datadir and libdir options to
@@ -18,12 +19,14 @@ datadir         =s      .       DATADIR         "<none>"
 blobdir         =s      .       BLOBDIR         "/opt/gled-1.3.0"
 
 ### configure options ###
+#
 confdebug	!	.	CONFDEBUG	0
 reconfigure	!	.	RECONFIGURE	0
 help		!	.	HELP		0
 envsetupstem	=s	.	ENVSETUPSTEM	"build_env"
 
 ### compile/link options ###
+#
 ucpp		=s	.	USER_CPP_FLAGS	""
 ucxx		=s	.	USER_CXX_FLAGS	""
 uld		=s	.	USER_LD_FLAGS	""
@@ -34,12 +37,15 @@ debug		!	.	DEBUG		0
 external	=s	.	EXTERNAL	""
 
 ### build configuration ###
+#
 buildversion	=s	.	BUILD_VERSION	"1.3.0-rc1-svn"
 builddate	=s	.	BUILD_DATE	{ my $d=`date +%F`; chomp $d; $d; }
 noviewlibs	!	.	NOVIEWLIBS	0
 nornrlibs	!	.	NORNRLIBS	0
 rnr		=s	.	RENDERERS	"GL"
 
+### libset configuration ###
+#
 # Libsets to build; can be <file:[filename]>, <auto>, <auto-prompt> or
 # ':' separated list of libset names
 libsets		=s	.	LIBSETS		"<auto-prompt>"
@@ -48,8 +54,8 @@ libsets		=s	.	LIBSETS		"<auto-prompt>"
 # If found they are sim-linked into the GLEDSYS.
 base		=s	.	GLEDBASE	""
 
-### libset configuration ###
 ### names of auto-generated files and directories
+#
 glasslist	=s	.	GLASS_LIST	"glass.list"
 catalog		=s	.	CATALOG		"catalog"
 gluedir		=s	.	GLUE_DIR	"glue"
