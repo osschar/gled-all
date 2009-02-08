@@ -1,3 +1,11 @@
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/gled-config.in:
+	* configure:
+	* configure.rc:
+	* libexec/project7.pl:
+	Beautify code.
+
 2009-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* include/gled-gcc-config.h:

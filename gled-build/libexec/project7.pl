@@ -24,7 +24,7 @@ die "must use -c option" unless defined $CLASSNAME;
 ########################################################################
 
 $INFILE =~ s!^(\./)?!!;
-if($INFILE eq '-' or not defined $INFILE) {
+if ($INFILE eq '-' or not defined $INFILE) {
   @_=<>;
 } else {
   open(INFILE,$INFILE) or die "can't open $INFILE";
@@ -78,10 +78,11 @@ print "LibID $LibID, ClassID $ClassID, VirtualBase $VirtualBase\n" if $DEBUG;
 # Loading of existing Widget.pm's
 ########################################################################
 
-for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
+for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName)
+{
   my $weed_pm = "$ENV{GLEDSYS}/perllib/GLED_${ls}_Widgets.pm";
   print "Trying $weed_pm\n" if $DEBUG;
-  if(-r $weed_pm) {
+  if (-r $weed_pm) {
     print "Importing $weed_pm\n" if $DEBUG;
     eval "use GLED_${ls}_Widgets";
   }
@@ -139,25 +140,29 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName) {
 # Subs
 ########################################################################
 
-sub SlurpComments {
+sub SlurpComments
+{
   # collects contiguous comment lines, stripping off the initial //
   # uses the wonderful $c global
   my $ret;
-  while($c =~ m!\G[ \t]*//(.*)\n!omgc) {
+  while ($c =~ m!\G[ \t]*//(.*)\n!omgc)
+  {
     $ret .= $1;
   }
   return $ret;
 }
 
-sub hashofy_string {
+sub hashofy_string
+{
   # chomps string into hashref, e.g. (output by Dumper):
   # "pepe, woofko, lojz=>7" -> { 'pepe' => 1, 'woofko' => 1, 'lojz' => '7' };
 
   my $l = shift;
   my @l = split(/\s*,\s*/, $l);
   my $r = {};
-  for $e (@l) {
-    if( $e =~ m/(.+)\s*=>\s*(.+)/ ) {
+  for $e (@l)
+  {
+    if ( $e =~ m/(.+)\s*=>\s*(.+)/ ) {
       $r->{$1} = $2;
     } else {
       $r->{$e} = 1;
@@ -168,27 +173,30 @@ sub hashofy_string {
 
 ########################################################################
 
-sub SetArgs {
+sub SetArgs
+{
   my $t = shift;
   my $a = shift;
-  if(exists $GetSetMap{$t}{SetArgs}) {
+  if (exists $GetSetMap{$t}{SetArgs}) {
     return $GetSetMap{$t}{SetArgs};
   } else {
     return "$t $a";
   }
 }
 
-sub ByRefSetArgs {
+sub ByRefSetArgs
+{
   my $t = shift;
   my $a = shift;
-  if(exists $GetSetMap{$t}{ByRef}) {
+  if (exists $GetSetMap{$t}{ByRef}) {
     return "const $t& $a";
   } else {
     return 0;
   }
 }
 
-sub MunchArgs {
+sub MunchArgs
+{
   # Transforms argument part of function declaration into an
   # array-ref of argument data as needed for streaming of method requests
   my $argument_string = shift;
@@ -196,7 +204,8 @@ sub MunchArgs {
   $argument_string =~ s/\s*$//o;
   my @a = split(/\s*,\s*/, $argument_string);
   my $r = [];
-  for $a (@a) {
+  for $a (@a)
+  {
     my $sa = [];
 
     # 0 ~ Whole type.
@@ -219,38 +228,40 @@ sub MunchArgs {
   return $r;
 }
 
-sub BeamArgs {
+sub BeamArgs
+{
   # Returns code that streams function arguments
 
   my $bufp = shift;
   my $ar   = shift;
   my $ret  = "";
-  for $r (@$ar) {
-    if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
+  for $r (@$ar)
+  {
+    if ($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
       $ret .= "  $bufp->WriteArray($r->[2], $r->[2] ? strlen($r->[2])+1 : -1);\n";
       next;
     }
 
     my $starp=""; my $arrp = ".";
-    if($r->[3] =~ m/\*$/) { $starp="*"; $arrp="->"; }
+    if ($r->[3] =~ m/\*$/) { $starp="*"; $arrp="->"; }
 
-    if( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
+    if ( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
       $ret .= "  *$bufp << ${starp}$r->[2];\n";
       next;
     }
 
-    if( exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
+    if ( exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
       $ret .= "  *$bufp << $r->[2]\->GetSaturnID();\n";
       next;
     }
 
     # Stream enums as Int_t
-    if($r->[3] =~ m/_e$/) {
+    if ($r->[3] =~ m/_e$/) {
       $ret .= "  *$bufp << (Int_t)$r->[2];\n";
       next;
     }
 
-    if($r->[0] eq $r->[4]) {
+    if ($r->[0] eq $r->[4]) {
       $ret .= "   $r->[2]${arrp}Streamer(*$bufp);\n";
     } else {
       $ret .= "   const_cast<$r->[4]>($r->[2])${arrp}Streamer(*$bufp);\n";
@@ -259,18 +270,20 @@ sub BeamArgs {
   return $ret;
 }
 
-sub QeamArgs {
+sub QeamArgs
+{
   # Returns code that un-streams arguments and assigns them to
   # given variable names
 
   my ($ar, $bufvar, $prefix) = @_;
   my $ret = "";
-  for $r (@$ar) {
+  for $r (@$ar)
+  {
     my $pointerp = ($r->[3] =~ m/(.*)\*$/);
     my $puretype = $1;
     $ret .= "${prefix}";
 
-    if($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
+    if ($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
       $ret .= "$r->[3] $r->[2] = 0;\n${prefix}".
               "Int_t _$r->[2]_size; $bufvar >> _$r->[2]_size;\n${prefix}".
 	      "std::vector<$puretype> _$r->[2]_vec;\n${prefix}".
@@ -284,8 +297,8 @@ sub QeamArgs {
       next;
     }
 
-    if( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
-      if($pointerp) {
+    if ( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
+      if ($pointerp) {
         $ret .= "auto_ptr<$puretype> $r->[2] (new $puretype); $bufvar >> *$r->[2];\n";
 	$r->[5] = "$r->[2].get()";
       } else {
@@ -294,18 +307,18 @@ sub QeamArgs {
       next;
     }
 
-    if( exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
+    if ( exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
       $ret .= "{ ID_t _x; $bufvar >> _x; $r->[2] = dynamic_cast<$r->[3]>(${SUNPTRVAR}->DemangleID(_x)); }\n";
       next;
     }
 
     # Stream enums as Int_t
-    if($r->[3] =~ m/_e$/) {
+    if ($r->[3] =~ m/_e$/) {
       $ret .= "$r->[3] $r->[2]; { Int_t _e; $bufvar >> _e; $r->[2] = ($r->[3])_e; }\n";
       next;
     }
 
-    if($pointerp) {
+    if ($pointerp) {
       $ret .= "auto_ptr<$puretype> $r->[2](new $puretype); $r->[2]\->Streamer($bufvar);\n";
       $r->[5] = "$r->[2].get()";
     } else {
@@ -317,7 +330,8 @@ sub QeamArgs {
 
 ########################################################################
 
-sub produce_tags {
+sub produce_tags
+{
   my ($list, $tag_string) = @_;
   my $ret = "";
   my @tags = split(/\s*,\s*/, $tag_string);
@@ -340,11 +354,11 @@ sub stone_set_method
   $r->{Type} =~ /(.)/; my $arg = lc $1;
   my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
   $X .= "void $r->{Methodname}($r->{ArgStr}) {\n";
-  if(exists $r->{Range}) { # Check if range is set ... make if stuff
+  if (exists $r->{Range}) { # Check if range is set ... make if stuff
     my $arg = $r->{Args}[0][2]; # assume single argument
     my $rr = $r->{Range};
-    $X .= "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
-    $X .= "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
+    $X .= "  if ($arg > $rr->[1]) $arg = $rr->[1];\n";
+    $X .= "  if ($arg < $rr->[0]) $arg = $rr->[0];\n"
       unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
   }
   $setit  = "  $r->{Varname}";
@@ -359,7 +373,8 @@ sub stone_set_method
 # External handler registration
 ########################################################################
 
-sub InstallHandler {
+sub InstallHandler
+{
   my $pm = shift;
   my $pp = $pm; $pp =~ s!::!_!o;
   print "InstallHandler w/ $pm $pp\n" if $DEBUG;
@@ -377,7 +392,9 @@ sub InstallHandler {
 
 # Init for RnrCtrl
 $RnrCtrl_ctor = "";
-sub RnrCtrl {
+
+sub RnrCtrl
+{
   $RnrCtrl_ctor = shift;
   print "RnrCtrl($RnrCtrl_ctor)\n" if $DEBUG;
   return 1;
@@ -385,7 +402,9 @@ sub RnrCtrl {
 
 # Additional includes for views
 @AdditionalViewIncludes = ();
-sub AddViewInclude {
+
+sub AddViewInclude
+{
   $incl = shift;
   push @AdditionalViewIncludes, $incl;
   print "AddViewInclude($incl)\n" if $DEBUG;
@@ -414,10 +433,11 @@ $Enums   = {};
 
 $state = 'private';
 
-while($c !~ m!\G\s*$!osgc) {
+while ($c !~ m!\G\s*$!osgc)
+{
   # print "Enterring at ", pos $c, ", len ", length $c, "\n" if $DEBUG;
   # Check for 7777 instructions
-  if($c =~ m!\G\s*//\s*
+  if ($c =~ m!\G\s*//\s*
              7777\s*(\w+)\s*\(\s*([^\n]*)\s*\)
             !omgcx)
   {
@@ -426,7 +446,7 @@ while($c !~ m!\G\s*$!osgc) {
     next;
   }
   # Check for 777 widgets (Explicit)
-  if($c =~ m!\G\s*//\s+
+  if ($c =~ m!\G\s*//\s+
              777\s+(\w+\([^)]*\))*\n
             !omgcx)
   {
@@ -439,20 +459,20 @@ while($c !~ m!\G\s*$!osgc) {
     next;
   }
   # Skip comment lines.
-  if($c =~ m!\G\s*//.*$!omgcx) {
+  if ($c =~ m!\G\s*//.*$!omgcx) {
     next;
   }
 
   # Protection-level changes.
-  if($c =~ m!\G\s*public:!osgc) {
+  if ($c =~ m!\G\s*public:!osgc) {
     print "Going public ...\n" if $DEBUG;
     $state = 'public'; next;
   }
-  if($c =~ m!\G\s*protected:!osgc) {
+  if ($c =~ m!\G\s*protected:!osgc) {
     print "Going protected ...\n" if $DEBUG;
     $state = 'protected'; next;
   }
-  if($c =~ m!\G\s*private:!osgc) {
+  if ($c =~ m!\G\s*private:!osgc) {
     print "Going private ...\n" if $DEBUG;
     $state = 'private'; next;
   }
@@ -460,7 +480,7 @@ while($c !~ m!\G\s*$!osgc) {
   ################################
   # Enums
   ################################
-  if($c =~ m!\G\s*enum\s+(\w*)\s*{\s*([^}]*)\s*}\s*;!mgcx)
+  if ($c =~ m!\G\s*enum\s+(\w*)\s*{\s*([^}]*)\s*}\s*;!mgcx)
   {
     # $1 ~ enum name, $2 ~ contents
     my $enum_name = $1;
@@ -471,7 +491,8 @@ while($c !~ m!\G\s*$!osgc) {
     my @enum;
     # remove default values and trailing ws
     map { s/\s*=.*//; s/\s+$//; } @en_els;
-    for $e (@en_els) {
+    for $e (@en_els)
+    {
       my $e_label = $e;
       $e_label =~ s/^([A-Za-z]*_)//; # remove 'FOO_'-like prefix
       push @enum, { 'label' => $e_label, 'name' => $e };
@@ -488,7 +509,7 @@ while($c !~ m!\G\s*$!osgc) {
   ################################
   # Data members
   ################################
-  if($c =~ m!\G\s*(?:static\s+)?(?:mutable\s+)?
+  if ($c =~ m!\G\s*(?:static\s+)?(?:mutable\s+)?
              ((?:const\s+)?[\w:<>]+\*?\&?)\s+  # type
              (\*?\w+)\s*;                      # varname
             !mgcx)
@@ -505,20 +526,23 @@ while($c !~ m!\G\s*$!osgc) {
 
     # Go for Key{Value} construts ... assert Xport exists before parsing on
     print "Trying for $varname: $comment\n" if $DEBUG;;
-    if($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o) {
+    if ($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o)
+    {
       my $member = {};
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
 
       # Parse out instr{args} constructs
       print "  partitions: " if $DEBUG;;
-      while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
+      while ($comment =~ m!(\w+)\s*\{([^}]*)\}!g)
+      {
 	my $key = $1;
 	my $val = $2;
 	$key = $X_TO_KEY{$key} if exists $X_TO_KEY{$key};
 	$member->{$key} = $val;
 
 	print "  $key:$val => " if $DEBUG;
-	while($val =~ m!(\w)\[([^\]]*)\]!g) {
+	while ($val =~ m!(\w)\[([^\]]*)\]!g)
+	{
 	  my $arg = lc($1);
 	  my $hash = hashofy_string($2);
 	  $member->{$key}{$arg} = $hash;
@@ -532,11 +556,15 @@ while($c !~ m!\G\s*$!osgc) {
       $member->{Methodname} = "Set$methodbase";
       $member->{Prefix}     = $mprefix;
       $member->{Varname}    = $varname;
-      if(exists $member->{Link}) {
+
+      if (exists $member->{Link})
+      {
 	my ($link_type) = $member->{Type} =~ m/<(\w+)>/;
 	$member->{LinkType} = $link_type;
 	$member->{ArgStr}   = &SetArgs("$link_type*", lc($methodbase));
-      } else {
+      }
+      else
+      {
 	my $settype = $type;
 	$settype .= "&" if $member->{Xport}{s}{ref};
         $member->{ArgStr} = &SetArgs($settype, lc($methodbase));
@@ -550,7 +578,8 @@ while($c !~ m!\G\s*$!osgc) {
 
       my $altmember = 0;
       my $alt_sa = &ByRefSetArgs($type, lc($methodbase));
-      if($alt_sa) {
+      if ($alt_sa)
+      {
         $altmember = {};
         %$altmember = %$member;
         $altmember->{Xport}   =~ s/[^sStT]//g;
@@ -565,7 +594,8 @@ while($c !~ m!\G\s*$!osgc) {
 
       my $weed_done = 0;
       # Go for widget/view
-      if($comment =~ m!7\s+(\w+\([^)]*\))!o) {
+      if ($comment =~ m!7\s+(\w+\([^)]*\))!o)
+      {
 	my $view = $1;
 	$view =~ s/\(/(Type=>'$type',Methodbase=>'$methodbase',Methodname=>"Set$methodbase",/;
 	$view =~ s/,\)/)/;
@@ -579,7 +609,8 @@ while($c !~ m!\G\s*$!osgc) {
       }
 
       # Enforce view for Links.
-      if(defined $member->{Link} && not $weed_done){
+      if (defined $member->{Link} && not $weed_done)
+      {
 	my $view = "Link()";
 	$view =~ s/\(/(Type=>'$type',Methodbase=>'$methodbase',Methodname=>"Set$methodbase",/;
 	$view =~ s/,\)/)/;
@@ -591,7 +622,8 @@ while($c !~ m!\G\s*$!osgc) {
 	print "\tView $view\n" if $DEBUG;
       }
 
-      for $h (@HANDLERS) {
+      for $h (@HANDLERS)
+      {
         $h->parse($member, $comment);
       }
 
@@ -610,7 +642,7 @@ while($c !~ m!\G\s*$!osgc) {
   ### ([-+_\w\d\s\n,~*/&=\"\.]*)   # Arguments ... w/ possible default values:
   ###                              #   strings also possible, so we (should) match mostly anything.
 
-  if($c =~ m!\G\s*
+  if ($c =~ m!\G\s*
      (virtual\s)?\s*                # Must handle virtuals, too
      ((?:const\s+)?[\w:]+(?:\*|&)?)?\s+ # Return value (optional const, * or &)
      (\w+)\s*                       # Name
@@ -628,18 +660,23 @@ while($c !~ m!\G\s*$!osgc) {
 
     my $comment = SlurpComments();
     my $ar = MunchArgs($args);
-    if($DEBUG) {
+    if ($DEBUG)
+    {
       for $x (@$ar) {
 	print "\t$x->[0]\t$x->[1]\n";
       }
     }
     my $member = {};
-    if($methodname eq $CLASSNAME && not $VirtualBase) {
+    if ($methodname eq $CLASSNAME && not $VirtualBase)
+    {
       # Here was constructor-glue.
-    } elsif($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o) {
+    }
+    elsif ($comment =~ m!X|(?:Xport)\{[^\}.]*\}!o)
+    {
       my $localp = ($comment=~m/^\!/) ? 1 : 0;
 
-      while($comment =~ m!(\w+)\s*\{([^}]*)\}!g) {
+      while ($comment =~ m!(\w+)\s*\{([^}]*)\}!g)
+      {
         my $key = $1;
 	my $val = $2;
 	$key = $X_TO_KEY{$key} if exists $X_TO_KEY{$key};
@@ -650,7 +687,8 @@ while($c !~ m!\G\s*$!osgc) {
 
       my $detexe = 0;
       my $multix_detexe = 0;
-      if($member->{Xport} =~ m/d|D/o ) {
+      if ($member->{Xport} =~ m/d|D/o)
+      {
 	$detexe = 1;
 	$multix_detexe = 1 if $& eq "D";
       }
@@ -670,7 +708,8 @@ while($c !~ m!\G\s*$!osgc) {
       push @Methods, $member;
     }
 
-    if($comment =~ m!7\s+(\w+\([^)]*\))!o) {
+    if ($comment =~ m!7\s+(\w+\([^)]*\))!o)
+    {
       my $view = $1;
       # Args can contain " ... must backslash them
       $args =~ s/"/\\"/og;
@@ -693,7 +732,8 @@ while($c !~ m!\G\s*$!osgc) {
 }
 
 # Check if all links are pointers.
-for $r (@Members) {
+for $r (@Members)
+{
   next unless exists $r->{Link};
   my ($pure_type) = $r->{Type} =~ m/(.*?)\*/;
   die "Link $r->{Methodbase} should be a pointer!" if $pure_type eq $r->{Type};
@@ -703,9 +743,9 @@ for $r (@Members) {
 # OUT0FILE, option -0file: resolver hash. for now just enums
 ########################################################################
 gen0:
-goto gen1 if($OUT0FILE eq 'skip') or not $IsGlass;
+goto gen1 if ($OUT0FILE eq 'skip') or not $IsGlass;
 
-if($OUT0FILE eq '-') {
+if ($OUT0FILE eq '-') {
   *P0 = *STDOUT;
 } else {
   $OUT0FILE = "${INDIR}${INBASE}.p0" if $OUT0FILE eq "def";
@@ -726,16 +766,17 @@ close P0 unless *P0==*STDOUT;
 # OUT1FILE, option -1file; .h7 file ... to be included in <Class>.h
 ########################################################################
 gen1:
-goto gen3 if($OUT1FILE eq 'skip');
+goto gen3 if ($OUT1FILE eq 'skip');
 
-if($OUT1FILE eq '-') {
+if ($OUT1FILE eq '-') {
   *H7 = *STDOUT;
 } else {
   $OUT1FILE = "${INDIR}${INBASE}.h7" if $OUT1FILE eq "def";
   die "can't open $OUT1FILE" unless open(H7,">$OUT1FILE");
 }
 
-if($IsGlass) {
+if ($IsGlass)
+{
   print H7 "// ID methods\n";
   print H7 "static  FID_t  FID() { return FID_t($LibID,$ClassID); }\n";
   print H7 "virtual FID_t VFID() const { return FID_t($LibID,$ClassID); }\n";
@@ -747,15 +788,20 @@ if($IsGlass) {
   print H7 "\n";
 }
 
-for $r (@Members) {
+for $r (@Members)
+{
   # Get methods
-  if( $r->{Xport} =~ m/(g|G)/ ) {
+  if ( $r->{Xport} =~ m/(g|G)/ )
+  {
     my ($type, $val, $constret, $const, $lock);
-    if(exists $r->{Link}) {
+    if (exists $r->{Link})
+    {
       $type = "$r->{LinkType}*";
       $val  = "$r->{Varname}.get()";
-    } else {
-      if(exists $GetSetMap{$r->{Type}}{GetType}) {
+    }
+    else
+    {
+      if (exists $GetSetMap{$r->{Type}}{GetType}) {
 	my $h = $GetSetMap{$r->{Type}};
 	$type = "$h->{GetType}";
 	$val = "$r->{Varname}$h->{GetMeth}";
@@ -763,47 +809,53 @@ for $r (@Members) {
 	$type = "$r->{Type}";
 	$val = "$r->{Varname}";
       }
-      if($1 eq 'G') {
+      if ($1 eq 'G') {
 	$const    = ' const';
 	$constret = 'const ' if $type =~ /(?:&|\*)$/;
       }
-      if($IsGlass && $LOCK_GET_METHS) {
+      if ($IsGlass && $LOCK_GET_METHS) {
 	$lock = "GLensReadHolder _rdlck(this); ";
       }
     }
     print H7 "${constret}${type} Get$r->{Methodbase}()${const} " .
              "{ ${lock}return ${val}; }\n";
-    if($r->{Type} eq "TString") {
+    if ($r->{Type} eq "TString") {
       print H7 "TString Str$r->{Methodbase}()${const} " .
              "{ ${lock}return $r->{Varname}; }\n";
     }
   }
 
   # Set methods defined in c7 file.
-  if( $r->{Xport} =~ m/(s|S)/ ) {
-    if($IsGlass) {
+  if ( $r->{Xport} =~ m/(s|S)/ )
+  {
+    if ($IsGlass) {
       print H7 "void $r->{Methodname}($r->{ArgStr});\n";
     } else {
       print H7 stone_set_method($r);
     }
   }
 
-  if( $r->{Xport} =~ m/R/ ) {
+  if ( $r->{Xport} =~ m/R/ )
+  {
     print H7 "const $r->{Type}& Ref$r->{Methodbase}() const { return $r->{Varname}; }\n";
   }
-  if( $r->{Xport} =~ m/r/ ) {
+  if ( $r->{Xport} =~ m/r/ )
+  {
     print H7 "$r->{Type}& Ref$r->{Methodbase}() { return $r->{Varname}; }\n";
   }
-  if( $r->{Xport} =~ m/P/ ) {
+  if ( $r->{Xport} =~ m/P/ )
+  {
     print H7 "const $r->{Type}* Ptr$r->{Methodbase}() const { return &$r->{Varname}; }\n";
   }
-  if( $r->{Xport} =~ m/p/ ) {
+  if ( $r->{Xport} =~ m/p/ )
+  {
     print H7 "$r->{Type}* Ptr$r->{Methodbase}() { return &$r->{Varname}; }\n";
   }
 }
 print H7 "\n";
 
-for $h (@HANDLERS) {
+for $h (@HANDLERS)
+{
   $h->spit_h7(*H7);
 }
 
@@ -821,13 +873,15 @@ print H7 "\n";
 print H7 "// Declarations of remote-exec methods\n";
 print H7 "void ExecuteMir(ZMIR& mir);\n";
 
-for $r (@Members) {
+for $r (@Members)
+{
   next unless $r->{Xport} =~ m/s|S|e|E/o;
   print H7 "ZMIR* S_$r->{Methodname}($r->{ArgStr});\n";
   print H7 "static MID_t Mid_$r->{Methodname}() { return $r->{ID}; }\n";
 }
 
-for $r (@Methods) {
+for $r (@Methods)
+{
   print H7 "virtual " if $r->{Virtual};
   print H7 "ZMIR* S_$r->{Methodbase}($r->{ArgStr});\n";
   print H7 "static MID_t Mid_$r->{Methodbase}() { return $r->{ID}; }\n";
@@ -838,10 +892,12 @@ print H7 "static void _gled_catalog_init();\n\n";
 
 print H7 "protected:\n";
 print H7 "static GledNS::ClassInfo* sap_${CLASSNAME}_ci;\n";
-for $r (@Members) {
+for $r (@Members)
+{
   next unless exists $r->{Link};
   print H7 "static GledNS::LinkMemberInfo* sap_$r->{Methodbase}_lmi;\n";
-  if( $r->{Link} =~ m/(a|A)/ ) {
+  if ( $r->{Link} =~ m/(a|A)/ )
+  {
     print H7 "void assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh);\n";
   }
 }
@@ -853,16 +909,17 @@ close H7 unless *H7==*STDOUT;
 # OUT3FILE, option -3file; .c7 file ... to be included in <Class>.cxx
 ########################################################################
 gen3:
-goto gen5 if($OUT3FILE eq 'skip');
+goto gen5 if ($OUT3FILE eq 'skip');
 
-if($OUT3FILE eq '-') {
+if ($OUT3FILE eq '-') {
   *C7 = *STDOUT;
 } else {
   $OUT3FILE = "${INDIR}${INBASE}.c7" if $OUT3FILE eq "def";
   die "can't open $OUT3FILE" unless open(C7,">$OUT3FILE");
 }
 
-for $h (@HANDLERS) {
+for $h (@HANDLERS)
+{
   $h->spit_c7(*C7);
 }
 
@@ -873,7 +930,8 @@ print C7 "#include <Gled/GledNS.h>\n";
 print C7 "#include <Stones/ZMIR.h>\n";
 print C7 "\n";
 
-unless($CLASSNAME eq $BASECLASS) {
+unless($CLASSNAME eq $BASECLASS)
+{
   print C7 "#define PARENT_GLASS ${PARENT}\n\n";
 }
 
@@ -885,13 +943,16 @@ print C7 "// Link Stuff\n//" . '-' x 72 . "\n\n";
 
 # Protected, static data members
 print C7 "GledNS::ClassInfo* ${CLASSNAME}::sap_${CLASSNAME}_ci;\n";
-for $r (@Members) {
+for $r (@Members)
+{
   next unless exists $r->{Link};
   print C7 "GledNS::LinkMemberInfo* ${CLASSNAME}::sap_$r->{Methodbase}_lmi;\n";
-  if( $r->{Link} =~ m/(a|A)/ ) {
+  if ( $r->{Link} =~ m/(a|A)/ )
+  {
     print C7 "void ${CLASSNAME}::assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh)\ " .
       "{ if ($r->{Varname} == 0) throw(eh + \"link $r->{Varname} not set.\"); }\n";
-  }}
+  }
+}
 print C7 "\n";
 
 # LinkList
@@ -921,10 +982,12 @@ print C7 "}\n\n";
 
 # LinkReps
 print C7 "void ${CLASSNAME}::CopyLinkReps(ZGlass::lLinkRep_t& link_rep_list) {\n";
-unless($CLASSNAME eq $BASECLASS) {
+unless($CLASSNAME eq $BASECLASS)
+{
   print C7 "  ${PARENT}::CopyLinkReps(link_rep_list);\n"
 }
-for $r (@Members) {
+for $r (@Members)
+{
   next unless exists $r->{Link};
   # my $glass_var = "*(ZGlass**)(&$r->{Varname})";
   my $glass_var = "$r->{Varname}.ref_link()";
@@ -934,19 +997,21 @@ for $r (@Members) {
 print C7 "}\n\n";
 
 # RebuildLinkRefs
-unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
+unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs})
+{
   print C7 "Int_t ${CLASSNAME}::RebuildLinkRefs(An_ID_Demangler* idd) {\n";
   print C7 "  Int_t ret" .
       (defined $PARENT ? "=${PARENT}::RebuildLinkRefs(idd)" : "=0") .
       ";\n";
-  for $r (@Members) {
+  for $r (@Members)
+  {
     next unless exists $r->{Link};
     print C7 <<"fnord"
-  if($r->{Varname}.is_set()) {
+  if ($r->{Varname}.is_set()) {
     bool _resolved = false;
     ID_t _id = $r->{Varname}.get_id();
     $r->{LinkType}* _pointee = dynamic_cast<$r->{LinkType}*>(idd->DemangleID(_id));
-    if(_pointee) {
+    if (_pointee) {
       try {
         _pointee->IncRefCount(this);
         $r->{Varname}.set(_pointee);
@@ -954,7 +1019,7 @@ unless($CATALOG->{Classes}{$CLASSNAME}{C7_DoNot_Gen}{RebuildLinkRefs}) {
       }
       catch(...) {}
     }
-    if(!_resolved) {
+    if (!_resolved) {
       $r->{Varname}.set(0); ++ret;
     }
   }
@@ -969,28 +1034,38 @@ fnord
 
 print C7 "\n// Set methods\n//" . '-' x 72 . "\n\n";
 
-for $r (@Members) {
-
-  if( $r->{Xport} =~ m/(s|S)/ ) {
+for $r (@Members)
+{
+  if ( $r->{Xport} =~ m/(s|S)/ )
+  {
     # This shit should be split into if link / otherwise
     my ($pre, $setit, $post, $stamp);
-    if($IsGlass and $LOCK_SET_METHS) {
+    if ($IsGlass and $LOCK_SET_METHS)
+    {
       $pre  .= "  GLensReadHolder _wrlck(this);\n";
     }
-    if( $r->{Xport} =~ m/(S|E)/ and $IsGlass) {
+    if ( $r->{Xport} =~ m/(S|E)/ and $IsGlass)
+    {
       $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
       $stamp .= "mStampReqTring = " if $r->{Xport} =~ m/T/;
-      if(exists $r->{Stamp}) {
-	for $f (split(/\s*,\s*/, $r->{Stamp})) {
+      if (exists $r->{Stamp})
+      {
+	for $f (split(/\s*,\s*/, $r->{Stamp}))
+	{
 	  $stamp .= "mStamp${f} = ";
 	}
       }
 
-      if(exists $r->{Link}) {
+      if (exists $r->{Link})
+      {
 	# Links are stanped in ZGlass::set_link_or_die
-	if($stamp) { $stamp = "  " . $stamp . "mTimeStamp;\n"; }
-      } else {
-	if($r->{Xport} =~ m/x/) {
+	if ($stamp) {
+	  $stamp = "  " . $stamp . "mTimeStamp;\n";
+	}
+      }
+      else
+      {
+	if ($r->{Xport} =~ m/x/) {
 	  $stamp = "  ". $stamp ."Stamp(FID(), 0x1);\n";
 	} else {
 	  $stamp = "  ". $stamp ."Stamp(FID());\n";
@@ -1001,26 +1076,33 @@ for $r (@Members) {
     $r->{Type} =~ /(.)/; my $arg = lc $1;
     my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
     print C7 "void ${CLASSNAME}::$r->{Methodname}($args1) {\n";
-    if(exists $r->{Range}) { # Check if range is set ... make if stuff
+    # Check if range is set ... make if stuff
+    if (exists $r->{Range})
+    {
       my $arg = $r->{Args}[0][2]; # assume single argument
       my $rr = $r->{Range};
-      print C7 "  if($arg > $rr->[1]) $arg = $rr->[1];\n";
-      print C7 "  if($arg < $rr->[0]) $arg = $rr->[0];\n"
+      print C7 "  if ($arg > $rr->[1]) $arg = $rr->[1];\n";
+      print C7 "  if ($arg < $rr->[0]) $arg = $rr->[0];\n"
 	unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
     }
-    if(exists $r->{Link}) {
+    if (exists $r->{Link})
+    {
       $setit =
 	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
-    } else {
+    }
+    else
+    {
       $setit  = "  $r->{Varname}";
       $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth} and not $r->{ByRef}) ?
 		 $GetSetMap{$r->{Type}}->{SetMeth} :
 		 " = $r->{Args}[0][2]") . ";\n";
     }
 
-    if(exists $r->{Ray}) {
+    if (exists $r->{Ray})
+    {
       $post = "  ";
-      for $f (split(/\s*,\s*/, $r->{Ray})) {
+      for $f (split(/\s*,\s*/, $r->{Ray}))
+      {
 	$post .= "Emit${f}Ray(); ";
       }
       $post .= "\n";
@@ -1037,9 +1119,12 @@ for $r (@Members) {
 print C7 "\n// Remote-exec methods\n//" . '-' x 72 . "\n\n";
 
 ### Set methods
-for $r (@Members) {
+for $r (@Members)
+{
   next unless $r->{Xport} =~ m/s|S|E|e/o;
-  if(exists $r->{Link}) {
+
+  if (exists $r->{Link})
+  {
     print C7 <<"fnordlink";
 ZMIR* ${CLASSNAME}::S_$r->{Methodname}($r->{ArgStr}) {
   ZMIR* _mir = new ZMIR(mSaturnID, ($r->{Args}[0][1] ? $r->{Args}[0][1]\->GetSaturnID() : 0));
@@ -1054,32 +1139,39 @@ ZMIR* ${CLASSNAME}::S_$r->{Methodname}($args1) {
 fnord
     print C7 BeamArgs("_mir", $r->{Args});
   } # end if Link
-  if($r->{Local}) {
+  if ($r->{Local})
+  {
     print C7 "  _mir->SetRecipient(mSaturn->GetSaturnInfo());\n";
   }
   print C7 "  return _mir;\n}\n\n";
 }
 
 ### Others/Explicit/Exported/Executable Methods
-for $r (@Methods) {
+for $r (@Methods)
+{
   my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
   my $c = exists $r->{Ctx} ? substr($r->{Ctx},0,1) : 0;
   my $C = $#{$r->{Args}};
   print C7 "ZMIR*\n${CLASSNAME}::S_$r->{Methodbase}($args1) {\n";
-  if(exists $r->{Ctx}) {
+  if (exists $r->{Ctx})
+  {
     print C7 "  ZMIR* _mir = new ZMIR(this" . ($c>0 ? ", " : " ") .
       join(", ", map( { "$_->[2]" } @{$r->{Args}}[0 .. $c-1])) . ");\n";
-  } else {
+  }
+  else
+  {
     print C7 "  ZMIR* _mir = new ZMIR(this);\n";
   }
   print C7 "  _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});\n";
-  if($r->{DetachedExe}) {
+  if ($r->{DetachedExe})
+  {
     my $arg = ($r->{MultixDetachedExe}) ? "true" : "false";
     print C7 "  _mir->SetDetachedExe($arg);\n";
   }
   my @aa = @{$r->{Args}}[$c .. $C];
   print C7 BeamArgs("_mir", \@aa);
-  if($r->{Local}) {
+  if ($r->{Local})
+  {
     print C7 "  _mir->SetRecipient(mSaturn->GetSaturnInfo());\n";
   }
   print C7 "  return _mir;\n}\n\n";
@@ -1091,7 +1183,8 @@ for $r (@Methods) {
 
 print C7 "\n// Execute Mir\n//" . '-' x 72 . "\n\n";
 
-if($IsGlass) {
+if ($IsGlass)
+{
   print C7<<"fnord";
 void ${CLASSNAME}::ExecuteMir(ZMIR& mir) {
   static const Exc_t _eh("${CLASSNAME}::ExecuteMir ");
@@ -1100,22 +1193,23 @@ void ${CLASSNAME}::ExecuteMir(ZMIR& mir) {
 fnord
 
   # Set stuff
-  for $r (@Members) {
+  for $r (@Members)
+  {
     next unless $r->{Xport} =~ m/s|S|e|E/o;
-    if(exists $r->{Link}) {
-
+    if (exists $r->{Link})
+    {
       print C7 << "fnordlink";
   case $r->{ID}: {
     $r->{LinkType}* _beta = dynamic_cast<$r->{LinkType}*>(mir.fBeta);
-    if(mir.fBeta != 0 && _beta == 0)
+    if (mir.fBeta != 0 && _beta == 0)
       throw(_eh + "[$r->{Methodname}] " + _bad_ctx);
     ${CLASSNAME}::$r->{Methodname}(_beta);
     break;
   }
 fnordlink
-
-    } else {
-
+    }
+    else
+    {
       print C7 "  case $r->{ID}: {\n";
       print C7 QeamArgs($r->{Args}, "mir", "    ");
       my @ca = map { $_->[5] } (@{$r->{Args}});
@@ -1126,31 +1220,38 @@ fnordlink
   }
 
   # Others
-  for $r (@Methods) {
+  for $r (@Methods)
+  {
     print C7 "  case $r->{ID}: {\n";
     my $c = exists $r->{Ctx} ? substr($r->{Ctx},0,1) : 0;
     my $C = $#{$r->{Args}};
-    if(exists $r->{Ctx}) {
+    if (exists $r->{Ctx})
+    {
       my $cc = 0; my @names = ("fBeta", "fGamma", "_context_too_long_");
-      while($cc < $c) {
+      while ($cc < $c) {
 	$ar = $r->{Args}[$cc];
 	print C7 << "fnord";
     $ar->[0] $ar->[2] = dynamic_cast<$ar->[0]>(mir.$names[$cc]);
-    if($ar->[2] == 0 && mir.$names[$cc] != 0)
+    if ($ar->[2] == 0 && mir.$names[$cc] != 0)
       throw(_eh + "[${CLASSNAME}::$r->{Methodbase}] " + _bad_ctx + ":$ar->[2] [$names[$cc]]");
 fnord
 	++$cc;
       }
       my @aa = @{$r->{Args}}[$c .. $C];
       print C7 QeamArgs(\@aa, "mir", "    ");
-    } else {
+    }
+    else
+    {
       print C7 QeamArgs($r->{Args}, "mir", "    ");
     }
     my @ca = map { $_->[5] } (@{$r->{Args}});
-    if($r->{Virtual}) {
+    if ($r->{Virtual})
+    {
       print C7 "    // Allow virtual method execution via parent FID,MID.\n";
       print C7 "    $r->{Methodbase}(". join(", ", @ca) .");\n";
-    } else {
+    }
+    else
+    {
       print C7 "    ${CLASSNAME}::$r->{Methodbase}(". join(", ", @ca) .");\n";
     }
     print C7 "    break;\n  }\n";
@@ -1173,7 +1274,7 @@ void ${CLASSNAME}::_gled_catalog_init() {
 
   GledNS::ClassInfo*& _ci = sap_${CLASSNAME}_ci;
 
-  if(_ci) return;
+  if (_ci) return;
   _ci = new ClassInfo("${CLASSNAME}", FID());
   _ci->fParentName = "$PARENT";
   _ci->fRendererGlass = "$CATALOG->{Classes}{$CLASSNAME}{RnrClass}";
@@ -1184,23 +1285,30 @@ fnord
 ### Member/MethodInfo
 #####################
 
-for $r (@Members) {
-  if($r->{Xport} =~ m/s|S|e|E/o) {
+for $r (@Members)
+{
+  if ($r->{Xport} =~ m/s|S|e|E/o)
+  {
     print C7 "  {\n    MethodInfo* mip = new MethodInfo(\"$r->{Methodname}\", $r->{ID});\n";
-    if(exists $r->{Link}) {
+    if (exists $r->{Link})
+    {
       print C7 "    mip->fContextArgs.push_back(\"$r->{Args}[0][0] $r->{Args}[0][1]\");\n";
-    } else {
+    }
+    else
+    {
       # Due to type-mapping can translate a single composite type into
       # list of basic types (eg. ZColor->(4 x float)).
       my $C = $#{$r->{Args}};
-      for($i=0; $i<=$C; ++$i) {
+      for($i=0; $i<=$C; ++$i)
+      {
 	# must backslash-o-fy the "s
 	my $xxarg = $r->{Args}[$i][1];
 	$xxarg =~ s/"/\\"/g;
 	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $xxarg\");\n";
       }
     }
-    if(exists $r->{Tags}) {
+    if (exists $r->{Tags})
+    {
       print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
     }
     print C7 "    mip->bLocal = " . ($r->{Local} ? "true" : "false") . ";\n";
@@ -1215,7 +1323,8 @@ for $r (@Members) {
     print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";
     print C7 "    dmip->fSetMethod = mip;\n";
     print C7 "    dmip->fClassInfo = _ci;\n";
-    if(exists $r->{Link}) {
+    if (exists $r->{Link})
+    {
       print C7 "    dmip->fDefRnrBits = RnrBits($r->{RnrBits});\n";
       print C7 "    sap_$r->{Methodbase}_lmi = dmip;\n";
     }
@@ -1224,22 +1333,29 @@ for $r (@Members) {
   }
 }
 
-for $r (@Methods) {
-  if($r->{Xport} =~ m/s|S|e|E/o) {
+for $r (@Methods)
+{
+  if ($r->{Xport} =~ m/s|S|e|E/o)
+  {
     print C7 "  {\n    MethodInfo* mip = new MethodInfo(\"$r->{Methodname}\", $r->{ID});\n";
     my $c = exists $r->{Ctx} ? substr($r->{Ctx}, 0, 1) : 0;
     my $C = $#{$r->{Args}};
-    for($i=0; $i<=$C; ++$i) {
-      if($i < $c) {
+    for($i=0; $i<=$C; ++$i)
+    {
+      if ($i < $c)
+      {
 	print C7 "    mip->fContextArgs.push_back(\"$r->{Args}[$i][0] $r->{Args}[$i][1]\");\n";
-      } else {
+      }
+      else
+      {
 	# must backslash-o-fy the "s
 	my $xxarg = $r->{Args}[$i][1];
 	$xxarg =~ s/"/\\"/g;
 	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $xxarg\");\n";
       }
     }
-    if(exists $r->{Tags}) {
+    if (exists $r->{Tags})
+    {
       print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
     }
     print C7 "    mip->bLocal = " . ($r->{Local} ? "true" : "false") . ";\n";
@@ -1260,9 +1376,9 @@ close C7 unless *C7==*STDOUT;
 # OUT5FILE, option -5file; In fact .h file for class <Class>View
 ########################################################################
 gen5:
-goto gen7 if($OUT5FILE eq 'skip');
+goto gen7 if ($OUT5FILE eq 'skip');
 
-if($OUT5FILE eq '-') {
+if ($OUT5FILE eq '-') {
   *H = *STDOUT;
 } else {
   $OUT5FILE = "Views/${CLASSNAME}View.h" if $OUT5FILE eq "def";
@@ -1284,8 +1400,10 @@ fnord
 {
   my %done = ();
   my @incs = map {$_->{Include} } @Views;
-  for $r (@incs, @AdditionalViewIncludes) {
-    if(not exists $done{$r}) {
+  for $r (@incs, @AdditionalViewIncludes)
+  {
+    if (not exists $done{$r})
+    {
       print H "#include <$r>\n";
       $done{$r} = 1;
     }
@@ -1294,7 +1412,8 @@ fnord
 
 print H "\nclass ${CLASSNAME}View : public MTW_SubView {\n";
 
-for $r (@Views) {
+for $r (@Views)
+{
   print H $r->make_header_ccbu();
 }
 
@@ -1316,9 +1435,9 @@ close H unless *H==*STDOUT;
 # OUT7FILE, option -7file; In fact .cxx file for class <Class>View
 ########################################################################
 gen7:
-goto heaven if($OUT7FILE eq 'skip');
+goto heaven if ($OUT7FILE eq 'skip');
 
-if($OUT7FILE eq '-') {
+if ($OUT7FILE eq '-') {
   *C = *STDOUT;
 } else {
   $OUT7FILE = "Views/${CLASSNAME}View.cxx" if $OUT7FILE eq "def";
@@ -1338,7 +1457,8 @@ fnord
 ### Creator, Callback and Update foos
 #####################################
 
-for $r (@Views) {
+for $r (@Views)
+{
   print C $r->make_widget();
   print C $r->make_cxx_cb();
   print C $r->make_weed_update();
@@ -1351,7 +1471,7 @@ print C <<"fnord";
 MTW_SubView*
 ${CLASSNAME}View::Construct(GledNS::ClassInfo* ci, MTW_View* v, ZGlass* g) {
   ${CLASSNAME}* tg = dynamic_cast<${CLASSNAME}*>(g);
-  if(!tg) return 0;
+  if (!tg) return 0;
   return new ${CLASSNAME}View(ci, v, tg);
 }
 
@@ -1366,7 +1486,7 @@ namespace { GledViewNS::ClassInfo* _ci=0; }
 
 void ${CLASSNAME}View::_gled_catalog_init() {
   using namespace GledViewNS;
-  if(_ci) return;
+  if (_ci) return;
   _ci = new ClassInfo;
   _ci->fooSVCreator = &Construct;
   GledNS::ClassInfo* master = GledNS::FindClassInfo(FID_t($LibID, $ClassID));
@@ -1379,7 +1499,8 @@ fnord
 # Views -> Weeds
 ################
 
-for $r (@Views) {
+for $r (@Views)
+{
   print C <<"fnord";
   {
     WeedInfo* wi = new WeedInfo("$r->{Methodbase}");
