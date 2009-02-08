@@ -1,6 +1,22 @@
 2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	New member 'Float_t mExtraStep' - it contains extra distance
+	travelled during collision handling etc and allows proper
+	calculation of various safety distances.
+	Properly set this in:
+	  handle_collision(Dynamico*, Statico*, ...) and
+	  handle_collision(Dynamico*, Dynamico*, ...).
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	Take mExtraStep into account in TimeTick() when decreasing the
+	safeties.
+
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
 	Add a comment about safety handling.
 
 	* Glasses/Extendio.cxx:

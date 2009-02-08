@@ -65,7 +65,8 @@ calculate_velocity:
   velocity_mag2 = velocity.SquareMagnitude();
   velocity_mag  = sqrtf(velocity_mag2);
 
-  step_length   = velocity_mag * dt;
+  step_length   = velocity_mag * dt + mExtraStep;
+  mExtraStep    = 0;
 
   // XXXYY Here I was using gravity direction for calculation of
   // height correction - but this didn't work very well on torus as
@@ -227,16 +228,14 @@ calculate_velocity:
         // Do this trivially ... if it is coming closer to the collision
         // point, turn it around, otherwise do nothing.
 
-        // XXXX When a dyno is moved in collision fix, safeties might
-        // be wrong ... need member "extra path" that is added in next
-        // time step. Or sth.
-
         Opcode::Point dr(segments.RefCenter());
         dr.Sub(ref_pos());
         if ((dr | velocity) > 0)
         {
           mTrans.RotateLF(1, 2, TMath::Pi());
         }
+
+        // If extra move of flyer is done, also add it to mExtraStep.
       }
       mTerrainSafety      = 0;
       mTerrainProbeRadius = min_r;
