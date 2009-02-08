@@ -38,6 +38,7 @@ protected:
   HPointF         mWVec;       // X{RS}  7 HPointF()
 
   Float_t         mSafety;     //! Safe distance to tringula boundaries.
+  Float_t         mExtraStep;  //! Extra distance traveled due collisions etc.
 
   GravData        mGrav;
 

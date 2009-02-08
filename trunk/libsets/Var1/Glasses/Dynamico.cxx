@@ -31,9 +31,9 @@ void Dynamico::_init()
 
   bParked = false;
 
-  mV = mW = 0.0f;
+  mV = mW = 0;
 
-  mSafety = 0;
+  mSafety = mExtraStep = 0;
 
   mOPCRCCache = OPC_INVALID_ID;
 }
@@ -204,6 +204,9 @@ bool Dynamico::handle_collision(Dynamico            * dyno,
         // !!! 0.1 should be replaced with a ray from cv back towards com_dyno.
         com2cv *= -0.1f;
         t_dyno.Move3PF(com2cv.x, com2cv.y, com2cv.z);
+
+        // When a dyno is moved in collision, safeties need to be updated, too.
+        dyno->mExtraStep += com2cv.Magnitude();
       }
     }
     return true;
@@ -291,9 +294,10 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
     t0.Move3PF(-dcomp.x, -dcomp.y, -dcomp.z);
     t1.Move3PF( dcomp.x,  dcomp.y,  dcomp.z);
 
-    // XXXX When a dyno is moved in collision fix, safeties might
-    // be wrong ... need member "extra path" that is added in next
-    // time step. Or sth.
+    // When a dyno is moved in collision, safeties need to be updated, too.
+    const Float_t extra_step = dcomp.Magnitude();
+    dyno0->mExtraStep += extra_step;
+    dyno1->mExtraStep += extra_step;
   }
 
   return true;

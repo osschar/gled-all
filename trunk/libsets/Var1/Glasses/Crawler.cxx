@@ -72,7 +72,8 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   velocity_mag2 = velocity.SquareMagnitude();
   velocity_mag  = sqrtf(velocity_mag2);
 
-  step_length   = velocity_mag * dt;
+  step_length   = velocity_mag * dt + mExtraStep;
+  mExtraStep    = 0;
 
   // Use velocity - is needed afterwards, too.
   // [But can be changed by CheckBoundaries()!]
