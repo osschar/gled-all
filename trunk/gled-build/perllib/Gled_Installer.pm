@@ -78,7 +78,7 @@ sub find_files_and_dirs($\@\@)
   @$subdirs = grep (-d "$path/$_", @dirlist);
   @$subdirs = filter_hidden(@$subdirs);
 
-  return $#$files >= 0 or $#$subdirs >= 0;
+  return ($#$files >= 0 or $#$subdirs >= 0);
 }
 
 
@@ -157,14 +157,14 @@ sub install_dirs
   my $source_dir = shift;
   my @dirs       = @_;
 
-  # For each $dir in @dirs, installs all files found in $source/$dir
-  # to $dest/$dir.
+  # For each dir in @dirs, installs all files found in $source_dir
+  # to $dest_dir.
   # If recurse is true, the directories found in source directories
   # are installed recursively.
 
   for $d (@dirs)
   {
-    my @files, @subdirs;
+    my (@files, @subdirs);
 
     if (find_files_and_dirs("$source_dir/$d", @files, @subdirs))
     {
@@ -174,7 +174,7 @@ sub install_dirs
       }
       if ($RECURSE and $#subdirs >= 0)
       {
-        install_dirs("$destdir/$d", "$source_dir/$d", @subdirs);
+        install_dirs("$dest_dir/$d", "$source_dir/$d", @subdirs);
       }
     }
   }
@@ -188,8 +188,8 @@ sub uninstall_dirs
   my $source_dir = shift;
   my @dirs       = @_;
 
-  # For each $dir in @dirs, uninstalls all files found in $source/$dir
-  # from $dest/$dir.
+  # For each dir in @dirs, uninstalls all files found in $source_dir
+  # from $dest_dir.
   # If recurse is true, the directories found in source directories
   # are uninstalled recursively.
   # No check is done if the directories remain empty afterwards -
@@ -197,7 +197,7 @@ sub uninstall_dirs
 
   for $d (@dirs)
   {
-    my @files, @subdirs;
+    my (@files, @subdirs);
 
     if (find_files_and_dirs("$source_dir/$d", @files, @subdirs))
     {
@@ -207,7 +207,7 @@ sub uninstall_dirs
       }
       if ($RECURSE and $#subdirs >= 0)
       {
-        uninstall_dirs("$destdir/$d", "$source_dir/$d", @subdirs);
+        uninstall_dirs("$dest_dir/$d", "$source_dir/$d", @subdirs);
       }
     }
   }
@@ -225,11 +225,11 @@ sub install_files
   my $dest_dir   = shift;
   my $source_dir = shift;
 
-  # Installs all files in $source_dir to $dest/$dir.
+  # Installs all files in $source_dir to $dest_dir.
   # If recurse is true, the directories found in $source_dir
   # are installed recursively.
 
-  my @files, @subdirs;
+  my (@files, @subdirs);
 
   if (find_files_and_dirs("$source_dir", @files, @subdirs))
   {
@@ -241,7 +241,7 @@ sub install_files
     {
       for $d (@subdirs)
       {
-        install_files("$destdir/$d", "$source_dir/$d");
+        install_files("$dest_dir/$d", "$source_dir/$d");
       }
     }
   }
@@ -254,11 +254,11 @@ sub uninstall_files
   my $dest_dir   = shift;
   my $source_dir = shift;
 
-  # Uninstalls all files in $source_dir to $dest/$dir.
+  # Uninstalls all files in $source_dir to $dest_dir.
   # If recurse is true, the directories found in $source_dir
   # are uninstalled recursively.
 
-  my @files, @subdirs;
+  my (@files, @subdirs);
 
   if (find_files_and_dirs("$source_dir", @files, @subdirs))
   {
@@ -266,11 +266,11 @@ sub uninstall_files
     {
       uninstall($dest_dir, @files);
     }
-    if ($recurse and $#subdirs >= 0)
+    if ($RECURSE and $#subdirs >= 0)
     {
       for $d (@subdirs)
       {
-        uninstall_files("$destdir/$d", "$source_dir/$d");
+        uninstall_files("$dest_dir/$d", "$source_dir/$d");
       }
     }
   }
