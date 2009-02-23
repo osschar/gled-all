@@ -56,9 +56,6 @@ topdir=`dirname $fullpath1`
 # Setup the default paths
 ########################################################################
 
-# Rewrite this to check if GLED_PREFIX is non-nill
-# write warnings if install-type not in accordance
-
 if [ -n "$GLEDSYS" ]; then
     PREFIX=$GLEDSYS;
     BINDIR=$PREFIX/bin
