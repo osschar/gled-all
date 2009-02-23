@@ -1,118 +1,113 @@
-#!/usr/bin/perl
+#!/bin/sh
 
-if ($#ARGV < 0 or $ARGV[0] eq '-h' or $ARGV[0] eq '--help')
-{
-  print <<"FNORD";
-Usage: gled-config [--follow] [--prefix[=dir]] [--bindir[=dir]]
-                   [--libdir[=dir]] [--datadir[=dir]]
+if [ $# -eq 0 ] || [ $1 = '-h' ] || [ $1 = '--help' ]; then
+    cat <<"END"
+Usage: gled-config [--prefix] [--bindir] [--libdir] [--datadir]
 
-  --follow      Follow symlinks to this program for path determination.
-                Relevant 
-  --prefix      Print (or set) installation prefix; if this was not set during
+  --prefix      Print installation prefix; if this was not set during
                 configure, the path to this command will be used.
-  --bindir      Print (or set) binary directory.
-  --libdir      Print (or set) library directory.
-  --datadir     Print (or set) data directory.
-FNORD
-  exit 0;
-}
+  --bindir      Print binary directory.
+  --libdir      Print library directory.
+  --datadir     Print data directory.
+
+  --help, -h    Print usage information.
+END
+    exit 0
+fi
 
 ########################################################################
 # Configuration variables
 ########################################################################
 
-$GLED_PREFIX   = "@prefix@";
-$GLED_BIN_DIR  = "@bindir@";
-$GLED_LIB_DIR  = "@libdir@";
-$GLED_DATA_DIR = "@datadir@";
+INSTALL_TYPE="@install_type@"
+
+GLED_PREFIX="@prefix@"
+GLED_BIN_DIR="@bindir@"
+GLED_LIB_DIR="@libdir@"
+GLED_DATA_DIR="@datadir@"
 
 ########################################################################
 # Determine where the script was run from.
 ########################################################################
 
-my $path = $0;
-
-if (grep(/^--follow$/, @ARGV))
-{
-  while (-l $path)
-  {
-    $path = readlink $path;
-  }
-}
-
-my $progdir = $path; $progdir =~ s!/[^/]*$!!;
-my $rundir  = `pwd`; chomp $rundir;
-my $topdir;
-
-if ($progdir =~ m!^/! or $progdir =~ m!^~!)
-{
-  # absolute path
-  $topdir="$progdir";
-}
+# work around readlink versions not having -f option
+fullpath1=`readlink $0`
+if [ $? -ne 0 ]; then
+   fullpath1=$0
+fi
+progdir=`dirname $fullpath1`
+runningdir=`pwd`
+if echo $progdir | grep "^/" > /dev/null 2>& 1 || \
+   echo $progdir | grep "^~" > /dev/null 2>& 1; then
+   # absolute path
+   fullpath=$progdir
 else
-{
-  # relative path
-  $topdir="$rundir/$progdir";
-}
-$topdir =~ s!/bin$!!;
+   # relative path
+   fullpath=$runningdir/$progdir
+fi
+# work around readlink versions not having -f option
+fullpath1=`readlink $fullpath`
+if [ $? -ne 0 ]; then
+   fullpath1=$fullpath
+fi
+topdir=`dirname $fullpath1`
 
 ########################################################################
 # Setup the default paths
 ########################################################################
 
-if (defined $ENV{"GLEDSYS"})
-{
-  $PREFIX  = $ENV{"GLEDSYS"};
-  $BINDIR  = "$PREFIX/bin";
-  $LIBDIR  = "$PREFIX/lib";
-  $DATADIR = "$PREFIX";
-}
-elsif ($GLED_PREFIX eq "<none>")
-{
-  $PREFIX  = $topdir;
-  $BINDIR  = "$topdir/bin";
-  $LIBDIR  = "$topdir/lib";
-  $DATADIR = "$topdir";
-}
+# Rewrite this to check if GLED_PREFIX is non-nill
+# write warnings if install-type not in accordance
+
+if [ -n "$GLEDSYS" ]; then
+    PREFIX=$GLEDSYS;
+    BINDIR=$PREFIX/bin
+    LIBDIR=$PREFIX/lib
+    DATADIR=$PREFIX
+elif [ "$GLED_PREFIX" = "<none>" ]; then
+    PREFIX=$topdir
+    BINDIR=$topdir/bin
+    LIBDIR=$topdir/lib
+    DATADIR=$topdir
 else
-{
-  $PREFIX  = $GLED_PREFIX;
-  $BINDIR  = $GLED_BIN_DIR;
-  $LIBDIR  = $GLED_LIB_DIR;
-  $DATADIR = $GLED_DATA_DIR;
-}
+    PREFIX=$GLED_PREFIX
+    BINDIR=$GLED_BIN_DIR
+    LIBDIR=$GLED_LIB_DIR
+    DATADIR=$GLED_DATA_DIR
+fi
 
 ########################################################################
 # Parse and process command-line options
 ########################################################################
 
-my @out;
+out=""
 
-for $a (@ARGV)
-{
-  if ($a =~ m/--([-\w]+)(?:=([-\w]+))?/)
-  {
-    if (not defined $2)
-    {
-      if    ($1 eq 'prefix')  { push @out, $PREFIX;  }
-      elsif ($1 eq 'bindir')  { push @out, $BINDIR;  }
-      elsif ($1 eq 'libdir')  { push @out, $LIBDIR;  }
-      elsif ($1 eq 'datadir') { push @out, $DATADIR; }
-      else
-      {
-        my $var = uc $1;
-        $var =~ s/-/_/g;
-        eval("\$$var = 1;");
-      }
-    }
-    else
-    {
-      my $var = uc $1;
-      $var =~ s/-/_/g;
-      my $val = $2;
-      eval("\$$var = '$val';");
-    }
-  }
-}
+while [ $# -gt 0 ]; do
+  case $1 in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *)    optarg= ;;
+  esac
 
-print join(' ', @out), "\n";
+  case $1 in
+    --prefix)
+      out="$out $PREFIX"
+      ;;
+    --bindir)
+      out="$out $BINDIR"
+      ;;
+    --libdir)
+      out="$out $LIBDIR"
+      ;;
+    --datadir)
+      out="$out $DATADIR"
+      ;;
+    *)
+      ### Give an error
+      echo "Unknown argument \"$1\"!" 1>&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+echo $out
