@@ -14,8 +14,9 @@ ECHO:=@echo
 endif
 export MUTE ECHO
 
-libexecdir 	= ${GLEDSYS}/libexec
+libexecdir           = ${GLEDSYS}/libexec
 
+GLED_CONFIG_WRITER   = ${libexecdir}/gled_config_writer.pl
 GLED_INSTALL         = ${libexecdir}/gled_install.pl
 GLED_UNINSTALL       = ${libexecdir}/gled_uninstall.pl
 GLED_INSTALL_FILES   = ${libexecdir}/gled_install_files.pl
@@ -29,9 +30,11 @@ GLED_UNINSTALL_DIRS  = ${libexecdir}/gled_uninstall_dirs.pl
 
 blob_install::
 	${ECHO} -I- Blob-install
-	${MUTE} ${GLED_INSTALL} ${GLED_BLOB_DIR}/bin     bin     gled-config
 	${MUTE} ${GLED_INSTALL} ${GLED_BLOB_DIR}/perllib perllib ParseConfig.pm
 blob_install::
+blob_install::
+	${ECHO} -I- Writing \'gled-config\'
+	${MUTE} ${GLED_CONFIG_WRITER} ${GLED_BLOB_DIR}/bin/gled-config BLOB
 
 blob_uninstall::
 blob_uninstall::
@@ -47,7 +50,8 @@ ifneq (${GLED_PREFIX},<none>)
 
 install::	
 	${ECHO} -I- Install
-	${MUTE} ${GLED_INSTALL} ${GLED_BIN_DIR} bin gled-config
+	${MUTE} ${GLED_CONFIG_WRITER} ${GLED_BIN_DIR}/bin/gled-config PREFIX \
+	        ${GLED_PREFIX} ${GLED_BIN_DIR} ${GLED_LIB_DIR} ${GLED_DATA_DIR}
 	${MUTE} ${GLED_INSTALL} ${GLED_DATA_DIR}/perllib perllib ParseConfig.pm
 install::
 

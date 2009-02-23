@@ -1,3 +1,23 @@
+2009-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add gled_config_writer.pl script. Minor changes.
+
+	* libexec/gled_config_writer.pl:
+	New helper - write gled-config script.
+
+	* Makefile:
+	Use gled_config_writer to create gled-config on install and
+	blob_install. This way gled-config is tailored to install type.
+
+	* bin/gled-config.in:
+	Reincarnate as shell-script.
+
+	* configure:
+	Use gled_config_writer to create gled-config for build.
+
+	* libexec/project7.pl:
+	Use 'eq' instead of '==' when comparing typeglobs.
+
 2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* bin/gled-config.in:

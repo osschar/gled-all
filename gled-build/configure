@@ -223,22 +223,8 @@ if ($config->{RECONFIGURE} == 0)
 
   ########################################################################
   # bin/gled-config
-  # preliminary version
-  my $gconfig;
-  {
-    local $/; undef $/;
-    open GCIN, "bin/gled-config.in" or die "can not read bin/gled-config.in";
-    $gconfig = <GCIN>;
-    close GCIN;
-  }
-  $gconfig =~ s/\@prefix\@/$config->{PREFIX}/g;
-  $gconfig =~ s/\@bindir\@/$config->{BINDIR}/g;
-  $gconfig =~ s/\@libdir\@/$config->{LIBDIR}/g;
-  $gconfig =~ s/\@datadir\@/$config->{DATADIR}/g;
-  open GC, ">bin/gled-config";
-  print GC $gconfig;
-  close GC;
-  chmod 0777 & ~umask, "bin/gled-config";
+  system_or_die("$ENV{GLEDSYS}/libexec/gled_config_writer.pl " .
+                "bin/gled-config BLOB");
 
   ########################################################################
   # include/config.h
