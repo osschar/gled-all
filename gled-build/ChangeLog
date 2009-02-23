@@ -1,5 +1,18 @@
 2009-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Improving install stuff.
+
+	* Makefile:
+	Install demos/ recursively when doing install and blob_install.
+
+	* libexec/gled_install_files.pl:
+	Fix wrong usage info.
+
+	* perllib/Gled_Installer.pm:
+	Fix a couple of bugs.
+
+2009-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Add gled_config_writer.pl script. Minor changes.
 
 	* libexec/gled_config_writer.pl:

@@ -9,7 +9,7 @@ my ($d, $s) = @ARGV;
 
 if ($Gled_Installer::HELP or not defined $d or not defined $s)
 {
-  print "usage: gled_install_files [options] <destination_dir> <source dirs>\n" .
+  print "usage: gled_install_files [options] <destination_dir> <source dir>\n" .
     Gled_Installer::option_string();
   exit 0;
 }

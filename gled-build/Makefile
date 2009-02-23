@@ -31,6 +31,7 @@ GLED_UNINSTALL_DIRS  = ${libexecdir}/gled_uninstall_dirs.pl
 blob_install::
 	${ECHO} -I- Blob-install
 	${MUTE} ${GLED_INSTALL} ${GLED_BLOB_DIR}/perllib perllib ParseConfig.pm
+	${MUTE} ${GLED_INSTALL_FILES} -r ${GLED_BLOB_DIR}/demos demos
 blob_install::
 blob_install::
 	${ECHO} -I- Writing \'gled-config\'
@@ -39,8 +40,9 @@ blob_install::
 blob_uninstall::
 blob_uninstall::
 	${ECHO} -I- Blob-uninstall
-	${MUTE} ${GLED_UNINSTALL} ${GLED_BLOB_DIR}/bin     gled-config
 	${MUTE} ${GLED_UNINSTALL} ${GLED_BLOB_DIR}/perllib ParseConfig.pm
+	${MUTE} ${GLED_UNINSTALL_FILES} -r ${GLED_BLOB_DIR}/demos demos
+	${MUTE} ${GLED_UNINSTALL} ${GLED_BLOB_DIR}/bin gled-config
 
 ########################################################################
 # Install
@@ -53,6 +55,7 @@ install::
 	${MUTE} ${GLED_CONFIG_WRITER} ${GLED_BIN_DIR}/bin/gled-config PREFIX \
 	        ${GLED_PREFIX} ${GLED_BIN_DIR} ${GLED_LIB_DIR} ${GLED_DATA_DIR}
 	${MUTE} ${GLED_INSTALL} ${GLED_DATA_DIR}/perllib perllib ParseConfig.pm
+	${MUTE} ${GLED_INSTALL_FILES} -r ${GLED_DATA_DIR}/demos demos
 install::
 
 uninstall::
@@ -60,6 +63,7 @@ uninstall::
 	${ECHO} -I- Uninstall
 	${MUTE} ${GLED_UNINSTALL} ${GLED_BIN_DIR} gled-config
 	${MUTE} ${GLED_UNINSTALL} ${GLED_DATA_DIR}/perllib ParseConfig.pm
+	${MUTE} ${GLED_UNINSTALL_FILES} -r ${GLED_DATA_DIR}/demos demos
 
 endif
 
