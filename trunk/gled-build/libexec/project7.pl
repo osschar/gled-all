@@ -760,7 +760,7 @@ if ($OUT0FILE eq '-') {
     );
 }
 
-close P0 unless *P0==*STDOUT;
+close P0 unless *P0 eq *STDOUT;
 
 ########################################################################
 # OUT1FILE, option -1file; .h7 file ... to be included in <Class>.h
@@ -903,7 +903,7 @@ for $r (@Members)
 }
 
 gen1_end:
-close H7 unless *H7==*STDOUT;
+close H7 unless *H7 eq *STDOUT;
 
 ########################################################################
 # OUT3FILE, option -3file; .c7 file ... to be included in <Class>.cxx
@@ -1370,7 +1370,7 @@ for $r (@Methods)
 print C7 "  GledNS::BootstrapClass(_ci);\n}\n\n";
 
 gen3_end:
-close C7 unless *C7==*STDOUT;
+close C7 unless *C7 eq *STDOUT;
 
 ########################################################################
 # OUT5FILE, option -5file; In fact .h file for class <Class>View
@@ -1429,7 +1429,7 @@ public:
 
 #endif
 fnord
-close H unless *H==*STDOUT;
+close H unless *H eq *STDOUT;
 
 ########################################################################
 # OUT7FILE, option -7file; In fact .cxx file for class <Class>View
@@ -1522,7 +1522,7 @@ fnord
 
 print C "  GledViewNS::BootstrapClassInfo(_ci);\n}\n\n";
 
-close C unless *C==*STDOUT;
+close C unless *C eq *STDOUT;
 
 ########################################################################
 heaven:
