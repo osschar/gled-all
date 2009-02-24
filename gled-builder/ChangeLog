@@ -1,5 +1,24 @@
 2009-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add new top-level target 'greed'.
+
+	* greed:
+	* greed/Makefile:
+	* greed/top-blob:
+	* greed/top-blob/README:
+	* greed/top-blob/gled-env.sh:
+	* greed/top-blob/gled.env:
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	New package 'greed'.
+	For now it contains top-level distribution files and installs them
+	to $PREFIX.
+
+	* Makefile:
+	Add target 'greed'.
+
+2009-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Proper install of gled. Parallel build support.
 
 	* configure.ac:
