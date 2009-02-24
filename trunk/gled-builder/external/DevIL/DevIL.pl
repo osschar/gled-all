@@ -14,6 +14,7 @@ Developers Image Library: supports many image operations.
 Released under GNU LGPL v2.1.
 FNORD
 
+$parallel = 1;
 
 setup_package($package);
 

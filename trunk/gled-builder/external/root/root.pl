@@ -14,6 +14,7 @@ OO framework for data analysis, storage and more.
 Released under LGPL-2.1.
 FNORD
 
+$parallel = 1;
 
 setup_package($package);
 
@@ -23,10 +24,6 @@ if ($DISTRO_VENDOR eq 'gentoo') {
 }
 target('configure', <<"FNORD");
 ./configure $config_args
-FNORD
-
-target('build', <<"FNORD");
-make -j4
 FNORD
 
 target('install', <<"FNORD");

@@ -3,7 +3,7 @@ include ../MakeBuildGled.inc
 PACKAGE  := gled
 gled_dir := gled-build
 
-all: build
+all: install
 
 ### checkout
 
@@ -19,7 +19,7 @@ checkout:
 define configure-cmds
 ln -sf ${PREFIX} external;\
 source binenv.sh;\
-./configure --external=`pwd`/external --libsets='<auto>'
+./configure --blobdir=${PREFIX}/gled --external=`pwd`/external --libsets='<auto>'
 endef
 
 configure: checkout
@@ -34,7 +34,7 @@ configure:
 
 define build-cmds
 source binenv.sh;\
-${MAKE}
+${MAKE} ${MAKE_J_OPT}
 endef
 
 build: configure
@@ -43,6 +43,21 @@ build:
 	${ECHO} -B- Building ${PACKAGE}
 	${MUTE} rm -f $@
 	${MUTE} cd ${gled_dir}; $(build-cmds)
+	${MUTE} touch $@
+
+### install
+
+define install-cmds
+source binenv.sh;\
+${MAKE} blob_install
+endef
+
+install: build
+
+install:
+	${ECHO} -I- Installing ${PACKAGE}
+	${MUTE} rm -f $@
+	${MUTE} cd ${gled_dir}; $(install-cmds)
 	${MUTE} touch $@
 
 ### clean, distclean
@@ -58,7 +73,7 @@ endef
 clean:
 	${ECHO} -X- Cleaning  ${PACKAGE}
 	${MUTE} if test -d ${gled_dir} -a -e configure; then cd ${gled_dir}; $(clean-cmds); fi
-	${MUTE} rm -f configure build
+	${MUTE} rm -f configure build install
 
 distclean: clean
 	${MUTE} rm -f checkout gled-build-checkout

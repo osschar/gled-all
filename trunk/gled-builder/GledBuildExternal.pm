@@ -20,9 +20,10 @@ $TAR_RE    = '(?:tar\.gz|tgz)';
 # System functions
 ########################################################################
 
-sub exec_or_die {
+sub exec_or_die
+{
   my $cmd = shift;
-  if($DRYRUN) {
+  if ($DRYRUN) {
     print "EXEC: $cmd\n";
   } else {
     my $ret = `$cmd`;
@@ -31,18 +32,20 @@ sub exec_or_die {
   }
 }
 
-sub system_or_die {
+sub system_or_die
+{
   my $cmd = shift;
-  if($DRYRUN) {
+  if ($DRYRUN) {
     print "SYST: $cmd\n";
   } else {
     system "$cmd" and die "$cmd died";
   }    
 }
 
-sub cd {
+sub cd
+{
   my $dir = shift;
-  if($DRYRUN) {
+  if ($DRYRUN) {
     print "CD: $dir\n";
     return 1;
   } else {
@@ -50,7 +53,8 @@ sub cd {
   }
 }
 
-sub slurp_dir {
+sub slurp_dir
+{
   my $dir = shift;
   opendir D, $dir;
   my @files = readdir D;
@@ -64,7 +68,8 @@ sub slurp_dir {
 # Package functions
 ########################################################################
 
-sub setup_package {
+sub setup_package
+{
   # Find source-tarball for package in cache-dir or attempt to
   # download it from cache-url.
   #
@@ -82,10 +87,12 @@ sub setup_package {
 
   my $file;
 
-  if ($#files == 0) {
+  if ($#files == 0)
+  {
     $file = $files[0];
   }
-  elsif ($#files < 0) {
+  elsif ($#files < 0)
+  {
     if ($download_tried) {
       die "Download of package $pkg seemed to succeed but the file still not found."
     }
@@ -94,7 +101,8 @@ sub setup_package {
     download_package($pkg);
     goto entry;
   }
-  elsif ($#files > 0) {
+  elsif ($#files > 0)
+  {
     die "Several matching packeges found in cache:\n  ",
         join("\n  ", @files),
         "\nAborting.";
@@ -115,7 +123,8 @@ TARDIR     := $tardir
 FNORD
 }
 
-sub download_package {
+sub download_package
+{
   my $pkg = shift;
 
   if (not -e $CACHE_DIR) {
@@ -125,7 +134,8 @@ sub download_package {
   @FILES_IN_CACHE_DIR = slurp_dir("$CACHE_DIR");
 }
 
-sub deduce_tardir_name {
+sub deduce_tardir_name
+{
   my $tar = shift;
   open F, "tar tzf $tar|" or die "failed listing tar file $tar";
   my $dir = <F>; chomp $dir;
@@ -141,13 +151,9 @@ sub deduce_tardir_name {
 
 @required_tgts = ( 'configure', 'build', 'install' );
 %done_tgts     = ();
-%default_cmds  = (
-  'configure' => "./configure --prefix=$PREFIX",
-  'build'     => "make",
-  'install'   => "make install"
-);
 
-sub target {
+sub target
+{
   # Register commands to be run for target.
   # The commands can be like this:
   # echo command
@@ -172,8 +178,16 @@ FNORD
   ++$done_tgts{$tgt};
 }
 
-sub use_defaults_for_remaining_targets {
-  for $tgt (@required_tgts) {
+sub use_defaults_for_remaining_targets
+{
+  my %default_cmds  = (
+    'configure' => "./configure --prefix=$PREFIX",
+    'build'     => $parallel ? "make ${MAKE_J_OPT}" : "make",
+    'install'   => "make install"
+  );
+
+  for $tgt (@required_tgts)
+  {
     target($tgt, $default_cmds{$tgt}) unless exists  $done_tgts{$tgt};
   }
 }

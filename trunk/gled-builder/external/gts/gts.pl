@@ -14,6 +14,7 @@ GNU Triangulated Surface Library.
 Released under GNU LGPL.
 FNORD
 
+$parallel = 1;
 
 setup_package($package);
 
