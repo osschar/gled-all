@@ -8,6 +8,8 @@ $RELEASE      = "@RELEASE@";
 $CACHE_DIR    = "@CACHE_DIR@";
 $CACHE_URL    = "@CACHE_URL@";
 
+$MAKE_J_OPT   = "@MAKE_J_OPT@";
+
 $BUILD        = "@build@";
 $BUILD_CPU    = "@build_cpu@";
 $BUILD_VENDOR = "@build_vendor@";

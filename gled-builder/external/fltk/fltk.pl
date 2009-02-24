@@ -14,8 +14,7 @@ Fast Light ToolKit: a C++ widget library.
 Released under FLTK license (mostly GNU LGPL v2).
 FNORD
 
-# print STDERR "Read config, files in cache-dir:\n";
-# print STDERR "  ", join("\n  ", @FILES_IN_CACHE_DIR), "\n";
+$parallel = 1;
 
 setup_package($package);
 

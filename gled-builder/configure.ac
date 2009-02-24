@@ -53,6 +53,9 @@ AC_ARG_CONF_VAR([CACHE_URL],
                 [remote source package cache],
 		[rsync://rsync.gled.org/cache/\${RELEASE}])
 
+AC_ARG_CONF_VAR([MAKE_J_OPT],
+		[parallel build option (for packages that support it)],
+		[-j4])
 
 AC_PROG_CPP
 AC_PROG_CC

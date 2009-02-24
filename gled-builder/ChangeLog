@@ -1,3 +1,33 @@
+2009-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proper install of gled. Parallel build support.
+
+	* configure.ac:
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	Add config variable MAKE_J_OPT to build stuff in parallel (default
+	value '-j4').
+	
+	* GledBuildExternal.pm:
+	Add support for parallel build - <package>.pl must set
+	  $parallel = 1;
+	White-space beautification.
+
+	* gled/Makefile:
+	Add install target - now gled gets properly blob-installed into
+	$PREFIX/gled.
+	Use MAKE_J_OPT for build.
+
+	* external/DevIL/DevIL.pl:
+	* external/fltk-mt/fltk-mt.pl:
+	* external/fltk/fltk.pl:
+	* external/freealut/freealut.pl:
+	* external/gts/gts.pl:
+	* external/lcms/lcms.pl:
+	* external/openal/openal.pl:
+	* external/root/root.pl:
+	Enable parallel build.
+
 2008-11-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Move configuration make-include and perl-module to a separate

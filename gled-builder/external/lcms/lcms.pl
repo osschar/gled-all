@@ -13,6 +13,7 @@ $comment  = <<"FNORD";
 Little CMS: a small, speed optimized color management engine.
 FNORD
 
+$parallel = 1;
 
 setup_package($package);
 

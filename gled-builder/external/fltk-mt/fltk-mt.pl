@@ -14,6 +14,7 @@ A collection of FLTK widgets and utilities.
 Free software ... must keep licenses in source.
 FNORD
 
+$parallel = 1;
 
 setup_package($package);
 

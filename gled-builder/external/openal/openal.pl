@@ -14,6 +14,7 @@ Cross-platform 3D audio library.
 Released under GNU LGPL.
 FNORD
 
+$parallel = 1;
 
 setup_package($package);
 
