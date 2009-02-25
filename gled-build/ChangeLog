@@ -1,3 +1,14 @@
+2009-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix issues with MIR function-argument serialization.
+
+	* libexec/project7.pl:
+	Stream TObject-type arguments via TObject::Write/ReadObjectAny()
+	instead of calling Streamer() directly. This is particularly
+	important for pointers and references which are polymorphic.
+
+	Fix a gcc-3.4 warning in generated code.
+
 2009-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improving install stuff.

@@ -211,16 +211,18 @@ sub MunchArgs
     # 0 ~ Whole type.
     # 1 ~ Argname.
     # 2 ~ Arg wo/ def value.
-    # 3 ~ Type wo/ const.
-    # 4 ~ Type wo/ const but with & sign, if it applies.
+    # 3 ~ Type wo/ const and '&'
+    # 4 ~ As above, but also without a '*'
     # 5 ~ Actual text to be used as argument to the call in E_Exec, defaults
     #     to argument name itself.
-    # This is getting relly cludgy here
+    #
+    # This is getting relly cludgy here, should rewrite it, ideally
+    # into a class.
 
     @$sa = $a =~ m/(.*?\S)\s+(\S+\s*(?:=\s*.+)?)$/;
     $sa->[0] =~ s/$/*/ if $sa->[1] =~ s/^\*//;
-    $sa->[3] = $sa->[0]; $sa->[3] =~ s/^const\s+//;
-    $sa->[4] = $sa->[3]; $sa->[3] =~ s/&//;
+    $sa->[3] = $sa->[0]; $sa->[3] =~ s/^const\s+//; $sa->[3] =~ s/&//;
+    $sa->[4] = $sa->[3]; $sa->[4] =~ s/\*//;
     $sa->[2] = $sa->[1]; $sa->[2] =~ s/=.*//;
     $sa->[5] = $sa->[2];
     push @$r, $sa;
@@ -237,20 +239,21 @@ sub BeamArgs
   my $ret  = "";
   for $r (@$ar)
   {
-    if ($r->[3] eq "Text_t*" || $r->[3] eq "char*") {
-      $ret .= "  $bufp->WriteArray($r->[2], $r->[2] ? strlen($r->[2])+1 : -1);\n";
+    if ($r->[3] eq "Text_t*" || $r->[3] eq "Char_t*" || $r->[3] eq "char*")
+    {
+      $ret .= "  $bufp->WriteArray($r->[2], $r->[2] ? (Int_t)strlen($r->[2])+1 : -1);\n";
       next;
     }
 
-    my $starp=""; my $arrp = ".";
-    if ($r->[3] =~ m/\*$/) { $starp="*"; $arrp="->"; }
+    my $starp=""; my $arrp = "."; my $addrp = "&";
+    if ($r->[3] =~ m/\*$/) { $starp="*"; $arrp="->"; $addrp = ""; }
 
-    if ( grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
+    if (grep { $r->[3] =~ /^$_/ } @SimpleTypes) {
       $ret .= "  *$bufp << ${starp}$r->[2];\n";
       next;
     }
 
-    if ( exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
+    if (exists $resolver->{GlassName2GlassSpecs}{$r->[3]} ) {
       $ret .= "  *$bufp << $r->[2]\->GetSaturnID();\n";
       next;
     }
@@ -261,11 +264,8 @@ sub BeamArgs
       next;
     }
 
-    if ($r->[0] eq $r->[4]) {
-      $ret .= "   $r->[2]${arrp}Streamer(*$bufp);\n";
-    } else {
-      $ret .= "   const_cast<$r->[4]>($r->[2])${arrp}Streamer(*$bufp);\n";
-    }
+    # A TObject
+    $ret .= "   ${bufp}->WriteObjectAny(${addrp}$r->[2], $r->[4]::Class());\n";
   }
   return $ret;
 }
@@ -318,11 +318,12 @@ sub QeamArgs
       next;
     }
 
+    # A TObject
+    $ret .= "auto_ptr<$r->[4]> $r->[2](($r->[4]*)${bufvar}.ReadObjectAny($r->[4]::Class()));\n";
     if ($pointerp) {
-      $ret .= "auto_ptr<$puretype> $r->[2](new $puretype); $r->[2]\->Streamer($bufvar);\n";
       $r->[5] = "$r->[2].get()";
     } else {
-      $ret .= "$r->[3] $r->[2]; $r->[2]\.Streamer($bufvar);\n";
+      $r->[5] = "*$r->[2].get()";
     }
   }
   return $ret;
