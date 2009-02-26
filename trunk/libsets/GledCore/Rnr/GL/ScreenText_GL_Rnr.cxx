@@ -6,7 +6,7 @@
 
 #include "ScreenText_GL_Rnr.h"
 #include <Rnr/GL/GLTextNS.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

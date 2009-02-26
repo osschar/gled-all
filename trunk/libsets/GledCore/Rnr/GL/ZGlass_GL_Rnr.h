@@ -11,7 +11,7 @@
 #include <RnrBase/A_Rnr.h>
 class RnrDriver;
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 class ZGlass_GL_Rnr : public A_Rnr {
 private:

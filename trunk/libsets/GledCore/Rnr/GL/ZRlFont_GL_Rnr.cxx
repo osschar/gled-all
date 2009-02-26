@@ -6,7 +6,7 @@
 
 #include "ZRlFont_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #define PARENT ZRnrModBase_GL_Rnr
 

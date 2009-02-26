@@ -17,7 +17,7 @@
 typedef unsigned int ILuint;
 #endif
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 class ZImage : public ZGlass
 {

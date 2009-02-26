@@ -26,8 +26,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Button.H>
 
-#include <FL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 
 #include <math.h>
 
@@ -104,11 +103,14 @@ namespace
 void Pupil::_build()
 {
   // Hack to keep the same GL context opened all the time.
+  // GLEW initialization is also sneaked in here.
   if(gl_ctx_holder == 0) {
     gl_ctx_holder = new pupils_gl_ctx_holder;
     gl_ctx_holder->end();
     gl_ctx_holder->show();
     // gl_ctx_holder->iconize();
+
+    glewInit();
   }
 
   mInfo = dynamic_cast<PupilInfo*>(fImg->fLens);

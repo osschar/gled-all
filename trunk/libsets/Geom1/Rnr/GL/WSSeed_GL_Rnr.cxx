@@ -9,7 +9,7 @@
 #include <Rnr/GL/GLRnrDriver.h>
 #include <Glasses/WSPoint.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #define PARENT ZNode_GL_Rnr
 

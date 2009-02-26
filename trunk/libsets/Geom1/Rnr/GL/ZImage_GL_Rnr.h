@@ -10,7 +10,7 @@
 #include <Glasses/ZImage.h>
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 class ZImage_GL_Rnr : public ZGlass_GL_Rnr
 {

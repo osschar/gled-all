@@ -1,3 +1,10 @@
+2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use GLEW includes instead of system ones.
+
+	* Pupils/Pupil.cxx:
+	Call 'glewInit()' when creating the gl-context holder.
+
 2008-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* bin/gled-auth-genkeypair:

@@ -13,7 +13,7 @@
 #include <Stones/ZMIR.h>
 #include <Eye/Eye.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

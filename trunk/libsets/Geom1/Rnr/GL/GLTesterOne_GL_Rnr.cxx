@@ -6,7 +6,7 @@
 
 #include "GLTesterOne_GL_Rnr.h"
 #include <Gled/GTime.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

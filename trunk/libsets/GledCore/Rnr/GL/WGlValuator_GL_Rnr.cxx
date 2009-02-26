@@ -16,7 +16,7 @@
 #include <TDataMember.h>
 #include <TDataType.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

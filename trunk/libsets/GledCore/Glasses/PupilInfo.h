@@ -15,7 +15,7 @@
 
 #include <Stones/ZColor.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 
 class PupilInfo : public SubShellInfo {

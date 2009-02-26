@@ -17,8 +17,6 @@
 
 #include <TMath.h>
 
-#include <GL/glu.h>
-
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>

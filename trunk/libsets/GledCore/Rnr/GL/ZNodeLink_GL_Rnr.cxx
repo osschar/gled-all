@@ -7,7 +7,7 @@
 #include "ZNodeLink_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 namespace OS   = OptoStructs;
 

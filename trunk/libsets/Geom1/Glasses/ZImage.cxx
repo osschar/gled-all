@@ -19,7 +19,7 @@
 
 #include <IL/il.h>
 #include <IL/ilu.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #include <TMath.h>
 #include <TSystem.h>

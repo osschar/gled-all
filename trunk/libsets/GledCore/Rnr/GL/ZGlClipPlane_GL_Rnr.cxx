@@ -10,7 +10,7 @@
 
 #include <TMath.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #define PARENT ZRnrModBase_GL_Rnr
 

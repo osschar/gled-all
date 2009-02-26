@@ -10,7 +10,7 @@
 #include <TGLFaceSet.h>
 #include <TGLRnrCtx.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

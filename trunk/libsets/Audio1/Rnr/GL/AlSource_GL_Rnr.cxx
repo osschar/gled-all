@@ -10,7 +10,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 
