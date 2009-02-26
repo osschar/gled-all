@@ -210,7 +210,8 @@ void ODECrawler::Integrate()
 
   static const Exc_t _eh("ODECrawler::Integrate ");
 
-  Double_t x, xsav, h, hdid, hnext;
+  Double_t x, h, hdid, hnext;
+  Double_t xsav = 0;
 
   x = mX1;
   h = TMath::Sign(mH1, mX2-mX1);
