@@ -5,7 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "AEVCompElRep_GL_Rnr.h"
-#include <FL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

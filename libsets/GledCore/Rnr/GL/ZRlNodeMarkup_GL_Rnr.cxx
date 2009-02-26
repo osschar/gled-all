@@ -7,7 +7,7 @@
 #include "ZRlNodeMarkup_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
 #include <TSystem.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #define PARENT ZRnrModBase_GL_Rnr
 

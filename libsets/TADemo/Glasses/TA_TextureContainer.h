@@ -6,7 +6,7 @@
 
 #ifndef __CINT__
 
-#include <FL/gl.h>
+#include <GL/glew.h>
 
 struct _TA_Texture {
   GLubyte*	pData;

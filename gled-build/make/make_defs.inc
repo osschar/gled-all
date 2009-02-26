@@ -91,7 +91,7 @@ export MUTE ECHO
 ROOTLIBS  = $(shell ${ROOT_CONFIG} --noauxlibs --libs)
 ROOTGLIBS = $(shell ${ROOT_CONFIG} --noauxlibs --glibs)
 
-FLTKLIBS  = $(shell ${FLTK_CONFIG} --ldflags --use-gl) -lfltk-mt
+FLTKLIBS  = $(shell ${FLTK_CONFIG} --ldflags --use-gl) -lGLEW -lfltk-mt
 GUILIBS	  = ${FLTKLIBS}
 
 SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl

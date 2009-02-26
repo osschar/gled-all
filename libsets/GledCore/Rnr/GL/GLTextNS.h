@@ -13,7 +13,7 @@
    program is -not- in the public domain. */
 
 #include <Gled/GledTypes.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 class RnrDriver;
 class ZColor;

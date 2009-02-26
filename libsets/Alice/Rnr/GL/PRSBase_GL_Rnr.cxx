@@ -6,7 +6,7 @@
 
 #include "PRSBase_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
-#include <FL/gl.h>
+#include <GL/glew.h>
 
 #define PARENT ZRnrModBase_GL_Rnr
 

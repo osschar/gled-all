@@ -12,7 +12,7 @@
 
 #include <TMath.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 namespace GNS = GledNS;
 namespace OS  = OptoStructs;

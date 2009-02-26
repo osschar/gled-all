@@ -8,7 +8,7 @@
 #include <Rnr/GL/GLRnrDriver.h>
 #include <Rnr/GL/SphereTrings.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 //__________________________________________________________________________
 // Lamp_GL_Rnr

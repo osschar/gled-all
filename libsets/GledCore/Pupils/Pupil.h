@@ -20,7 +20,7 @@ class PupilInfo;
 class MTW_ClassView;
 class FBO;
 
-#include <FL/gl.h>
+#include <GL/glew.h>
 #include <FL/Fl_Gl_Window.H>
 
 

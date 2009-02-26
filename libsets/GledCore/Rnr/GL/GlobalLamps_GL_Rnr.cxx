@@ -8,7 +8,7 @@
 #include <RnrBase/RnrDriver.h>
 #include <Rnr/GL/Lamp_GL_Rnr.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 namespace OS = OptoStructs;
 

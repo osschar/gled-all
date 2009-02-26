@@ -8,7 +8,7 @@
 #include <Stones/ZColor.h>
 #include <Rnr/GL/SphereTrings.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 namespace {
   ZColor def_cols[4] = {

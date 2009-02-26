@@ -2,8 +2,6 @@
 #include "RectTerrain_GL_Rnr.h"
 #include "TringTvor_GL_Rnr.h"
 
-#include <GL/glu.h>
-
 #define PARENT ZNode_GL_Rnr
 
 /**************************************************************************/

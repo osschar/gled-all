@@ -9,7 +9,7 @@
 //
 
 #include "TringTvor_GL_Rnr.h"
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 void TringTvor_GL_Rnr::Render(TringTvor* ttvor, Bool_t smoothp, Bool_t colp, Bool_t texp)
 {

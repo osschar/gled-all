@@ -9,7 +9,7 @@
 
 #include <TMath.h>
 
-#include <FL/gl.h>
+#include <GL/glew.h>
 
 void MCTrack_GL_Rnr::_init()
 {

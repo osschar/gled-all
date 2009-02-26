@@ -8,7 +8,7 @@
 
 #include <TMath.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 #include <GL/glext.h>
 
 //______________________________________________________________________

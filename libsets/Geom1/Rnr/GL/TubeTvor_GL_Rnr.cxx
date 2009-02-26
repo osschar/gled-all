@@ -1,7 +1,7 @@
 // $Id$
 
 #include "TubeTvor_GL_Rnr.h"
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 

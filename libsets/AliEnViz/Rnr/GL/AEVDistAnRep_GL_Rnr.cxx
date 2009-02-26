@@ -11,7 +11,7 @@
 #include <RnrBase/RnrDriver.h>
 #include <Glasses/ZRlNodeMarkup.h>
 
-#include <FL/gl.h>
+#include <GL/glew.h>
 
 namespace {
   ZColor batch_cols[4] = {

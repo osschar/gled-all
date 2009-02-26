@@ -16,7 +16,7 @@
 
 #include <Opcode/Opcode.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #define PARENT ZNode_GL_Rnr
 

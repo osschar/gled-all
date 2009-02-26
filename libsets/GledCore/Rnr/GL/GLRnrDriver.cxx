@@ -10,7 +10,7 @@
 
 #include "GLRnrDriver.h"
 #include <Glasses/ZGlColorFader.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
 {

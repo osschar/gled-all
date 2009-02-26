@@ -7,7 +7,7 @@
 #ifndef Gled_SphereTrings
 #define Gled_SphereTrings
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 namespace SphereTrings {
   extern GLfloat  CubeA;

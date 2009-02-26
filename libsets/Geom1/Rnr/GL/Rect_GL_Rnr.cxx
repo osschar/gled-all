@@ -1,7 +1,7 @@
 // $#Header$
 #include "Rect_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
-#include "GL/gl.h"
+#include "GL/glew.h"
 
 void Rect_GL_Rnr::Draw(RnrDriver* rd)
 {

@@ -10,7 +10,7 @@
 #include <Glasses/ZRnrModBase.h>
 #include <Stones/ZColor.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 class ZGlMaterial : public ZRnrModBase {
   // 7777 RnrCtrl(RnrBits(0,4,0,0))

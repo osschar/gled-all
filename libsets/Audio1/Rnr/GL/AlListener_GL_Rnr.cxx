@@ -8,7 +8,7 @@
 #include <RnrBase/RnrDriver.h>
 
 #include <AL/al.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 /**************************************************************************/
 
