@@ -199,7 +199,7 @@ void WSSeed::Triangulate()
   bool first = true;
   WSPoint *a, *b;
   b = m_first_point;
-  ZTrans* lcfp;
+  ZTrans* lcfp = 0;
   while((a=b, b=b->mNextPoint, b) != 0) {
     a->Coff(b);
     if(first) {

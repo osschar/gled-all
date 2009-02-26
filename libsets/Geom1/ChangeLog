@@ -1,3 +1,10 @@
+2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/tc.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSSeed.cxx:
+	Fix compilation warnings.
+
 2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.cxx:
