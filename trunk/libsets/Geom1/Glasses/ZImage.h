@@ -17,10 +17,9 @@
 typedef unsigned int ILuint;
 #endif
 
-#include <GL/glew.h>
-
 class ZImage : public ZGlass
 {
+  // 7777 AddViewInclude(GL/glew.h)
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZImage);
 
