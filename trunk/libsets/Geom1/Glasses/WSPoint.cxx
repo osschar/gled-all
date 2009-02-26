@@ -135,7 +135,7 @@ void WSPoint::InsertPoint(Float_t time)
   if(mNextPoint == 0)
     throw(_eh + "can not insert at last point.");
 
-  Int_t insert_id;
+  Int_t insert_id = -1;
   { bool found = false;
     GMutexHolder llck(mParent->RefListMutex());
     for(ZList::iterator i=mParent->begin(); i!=mParent->end(); ++i) {
