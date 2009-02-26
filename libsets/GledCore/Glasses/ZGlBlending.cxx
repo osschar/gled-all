@@ -10,8 +10,9 @@
 //
 
 #include "ZGlBlending.h"
-
 #include "ZGlBlending.c7"
+
+#include <GL/glew.h>
 
 ClassImp(ZGlBlending);
 

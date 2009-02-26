@@ -10,8 +10,9 @@
 //
 
 #include "ZGlMaterial.h"
-
 #include "ZGlMaterial.c7"
+
+#include <GL/glew.h>
 
 ClassImp(ZGlMaterial);
 

@@ -10,9 +10,9 @@
 #include <Glasses/ZRnrModBase.h>
 #include <Stones/ZColor.h>
 
-#include <GL/glew.h>
-
-class ZGlLightModel : public ZRnrModBase {
+class ZGlLightModel : public ZRnrModBase
+{
+  // 7777 AddViewInclude(GL/glew.h)
   // 7777 RnrCtrl(RnrBits(0,4,0,0))
   MAC_RNR_FRIENDS(ZGlLightModel);
 

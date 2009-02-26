@@ -15,10 +15,9 @@
 
 #include <Stones/ZColor.h>
 
-#include <GL/glew.h>
-
-
-class PupilInfo : public SubShellInfo {
+class PupilInfo : public SubShellInfo
+{
+  // 7777 AddViewInclude(GL/glew.h)
   MAC_RNR_FRIENDS(PupilInfo);
   friend class Pupil;
 

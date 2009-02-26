@@ -29,6 +29,8 @@
 
 #include <TMath.h>
 
+#include <GL/glew.h>
+
 ClassImp(PupilInfo);
 
 void PupilInfo::_init()

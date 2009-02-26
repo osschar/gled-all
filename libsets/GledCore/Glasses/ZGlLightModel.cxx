@@ -10,8 +10,9 @@
 //
 
 #include "ZGlLightModel.h"
-
 #include "ZGlLightModel.c7"
+
+#include <GL/glew.h>
 
 ClassImp(ZGlLightModel);
 
