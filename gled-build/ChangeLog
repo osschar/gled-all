@@ -1,3 +1,13 @@
+2009-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix order of path-like environment variables.
+
+	* binenv.csh:
+	* binenv.sh:
+	* configure:
+	Set path, ldpath and manpath of gled, root and externals before
+	the current values.
+
 2009-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix issues with MIR function-argument serialization.

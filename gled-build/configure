@@ -585,9 +585,9 @@ for $f (@{$resolver->{LibSetList}})
 export ROOTSYS=$ENV{ROOTSYS}
 export GLEDSYS=$ENV{GLEDSYS}
 
-PATH=\$PATH:\$ROOTSYS/bin:$extbin:\$GLEDSYS/bin
-$ldpathenv=\$$ldpathenv:\$ROOTSYS/lib:$extlib:\$GLEDSYS/lib
-MANPATH=\$MANPATH:$extman
+PATH=\$GLEDSYS/bin:\$ROOTSYS/bin:$extbin:\$PATH
+$ldpathenv=\$GLEDSYS/lib:\$ROOTSYS/lib:$extlib:\$$ldpathenv
+MANPATH=$extman:\$MANPATH
 
 export PATH $ldpathenv MANPATH
 
@@ -604,14 +604,14 @@ FNORD
 setenv ROOTSYS $ENV{ROOTSYS}
 setenv GLEDSYS $ENV{GLEDSYS}
 
-setenv PATH \${PATH}:\${ROOTSYS}/bin:$extbin:\${GLEDSYS}/bin
+setenv PATH \${GLEDSYS}/bin:\${ROOTSYS}/bin:$extbin:\${PATH}
 if ( \$?$ldpathenv ) then
-  setenv $ldpathenv \${$ldpathenv}:\${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
+  setenv $ldpathenv \${GLEDSYS}/lib:\${ROOTSYS}/lib:$extlib:\${$ldpathenv}
 else
-  setenv $ldpathenv \${ROOTSYS}/lib:$extlib:\${GLEDSYS}/lib
+  setenv $ldpathenv \${GLEDSYS}/lib:\${ROOTSYS}/lib:$extlib
 endif
 if ( \$?MANPATH ) then 
-  setenv MANPATH \${MANPATH}:$extman
+  setenv MANPATH $extman:\${MANPATH}
 else
   setenv MANPATH $extman
 endif

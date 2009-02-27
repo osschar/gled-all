@@ -7,17 +7,10 @@ dir=`pwd`
 export ROOTSYS=$dir/external/root
 export GLEDSYS=$dir
 
-# ROOT
-PATH=$PATH:$ROOTSYS/bin
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ROOTSYS/lib
+PATH=$GLEDSYS/bin:$ROOTSYS/bin:$dir/external/bin:$PATH
 
-# External
-PATH=$PATH:$dir/external/bin
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$dir/external/lib
-MANPATH=$MANPATH:$dir/external/man
+LD_LIBRARY_PATH=$GLEDSYS/lib:$ROOTSYS/lib:$dir/external/lib:$LD_LIBRARY_PATH
 
-# Gled
-PATH=$PATH:$GLEDSYS/bin
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GLEDSYS/lib
+MANPATH=$dir/external/man:$MANPATH
 
 export PATH LD_LIBRARY_PATH MANPATH
