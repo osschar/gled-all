@@ -31,7 +31,7 @@ the only supported compiler. In principle, it should be possible to
 make it run on any platform that has POSIX threads.
 
 
-=head2 Full binary install: C<gled_base_and_required_software>
+=head2 Binary install
 
 Distributions of C<Gled> are available from
 L<ftp://ftp.gled.org/><major>.<minor>.<patch>. The link C<current>
