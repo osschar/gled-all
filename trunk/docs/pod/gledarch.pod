@@ -1,3 +1,10 @@
+=cut
+$Id$
+
+=head1 STATUS
+
+Utterly incomplete and neglected - last edit was around 2003.
+
 =head1 NAME
 
 gledarch - Architectural Elements of C<Gled>
@@ -1309,33 +1316,6 @@ See http://root.cern.ch/.
 
 C<ROOT> is great software. Without it, writing C<Gled> would be a
 never-ending nightmare.
-
-Following is just a list of some strongest feelings I have about
-C<ROOT>.
-
-=head2 Positive
-
-Works well, compiles everywhere (not that this would matter to a
-linux-centric software).
-
-Sturdy and fast object IO. Files with inner directory structure and on
-the fly compression.
-
-Very good data analysis and visualization classes.
-
-Provides good interface to sockets / network messages.
-
-=head2 Negative
-
-CINT, as long as it is the only interpreter and strongly coupled to
-the C<ROOT> system. While it's great when everything is OK it can
-cause unpredictable behaviour when errors are encountered.
-
-Object IO coupled to CINT dictionary. Not exactly sure if I really
-like the schema evolution, either.
-
-ROOT encapsulates signal handlers, fd selectors and global files. A
-bit problematic in a multi-threaded environment.
 
 
 =cut

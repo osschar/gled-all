@@ -1,5 +1,5 @@
 =cut
-$Header$
+$Id$
 
 =head1 NAME
 
@@ -21,77 +21,55 @@ This document covers four main topics:
 
 =back
 
-As this is guide for the impatient, it is far from complete and none
-of the topics is covered in the necessary level of detail.
-
 =cut
 ########################################################################
 
 =head1 Installing Gled
 
-Currently, C<Gled> only compiles and runs on C<GNU/Linux>. In
-principle, it should be possible to make it run on any platform that
-has POSIX threads. C<gcc> is the only supported compiler.
+Currently, C<Gled> only compiles and runs on C<GNU/Linux>, C<gcc> is
+the only supported compiler. In principle, it should be possible to
+make it run on any platform that has POSIX threads.
+
+
+=head2 Full binary install: C<gled_base_and_required_software>
 
 Distributions of C<Gled> are available from
-L<ftp://ftp.gled.org/>gled-<major>.<minor>.<patch>. The link C<current>
+L<ftp://ftp.gled.org/><major>.<minor>.<patch>. The link C<current>
 points to the latest release.
 
-
-C<Gled> is not (yet!) installed in the usual sense of the word. It
+The binary distribution of C<Gled> provides a tarball blob install: it
 resides in its own directory and user's environment needs to be
-configured for its use (C<ROOT> does the some (but can now also be
-installed properly)). This is good, when you need to have several
-versions of the same package lurking around and you don't want to
-burden yourself with messy un-installs (here C<rm> is your friend).
+configured for its use. Some top-level scripts for running demos will
+set it up for you, otherwise one just needs to source the environment
+setting script that resides in the top-level directory. A C<README>
+file giving the details is also there.
+
+In short:
+
+ v=1.3.0-rc1
+ b=slc4-x86
+ wget ftp://ftp.gled.org/$v/gled-$v-$b.tar.gz
+ tar xzf gled-$v-$b.tar.gz
+ cd gled-$v
+ ./greed-demo-menu.sh
 
 The C<Gled> system can be extended via B<C<libsets>>. Each libset
 contains three libraries (base, GUI, GL rendering) and possibly also
 executables and additional libraries. The core of the C<Gled> system
 itself is contained in the C<GledCore> libset. The default
-C<gled_base> distribution contains seven libsets: C<GledCore>,
+C<gled> distribution contains seven libsets: C<GledCore>,
 C<Geom1>, C<Numerica>, C<GTS>, C<Audio1>, C<RootGeo> and C<Var1>.
 
+To run other demos one needs to setup the environment:
 
-=head2 BINARY DISTRIBUTION IS ABOUT TO CHANGE (16.11.2008)
-
-=head2 THE REST OF THIS SECTION IS OBSOLETE
-
-Unless you want 3-year old stuff :)
-
-=head2 INSTALL FROM SOURCE IS OK AND QUITE SIMPLE, SEE L<"Building Gled">
-
-
-=head2 Full binary install: C<gled_base_and_required_software>
-
-The full binary install contains all the libraries and executables needed
-to run C<Gled> as well as the demos. All you need to do is:
-
-=over list
-
-=item 
-Get the current full base package:
-L<ftp://ftp.gled.org/current/>binary-<BUILD>/gled_base_and_required_software.tar.gz
-
-Untar it (it will unpack into C<gled> directory) and C<cd> into it.
-
-=item
-Initialize the environment: 'C<. binenv.sh>' or 'C<source binenv.csh>'.
-
-=item
-Cd to C<demos/GledCore> and run: C<gled hello_gled.C>
-
-=back
-
-In short:
-
- b=x86-fc1-gcc3.3.2
- wget -q ftp://ftp.gled.org/current/binary-$b/gled_base_and_required_software.tar.gz
- tar xzf gled_base_and_required_software.tar.gz
- cd gled
- . binenv.sh
- cd demos/GledCore
- gled hello_gled.C
+ # Setup the environment
+ . gled-env.sh
+ # Go to demos directory
+ cd gled/demos
+ # Choose libset / module
+ cd Geom1
+ # Run the chosen demo
+ gled images.C
 
 Reading section L<"Running Gled"> is recommended. Instructions for
 running demos are also there.
@@ -101,9 +79,7 @@ running demos are also there.
 
 Each libset can depend on external software, some of which might not
 be widely available. To minimize the fuss, such software packages are
-available in binary format. You can download them separately,
-tar-balled in C<required_software_base> package or as a part of full C<Gled>
-binary distribution C<gled_base_and_required_software>.
+shipped within the binary distribution.
 
 Basic distribution of C<Gled> depends on the following software:
 
@@ -149,8 +125,8 @@ as transforming in a simple, C<GL>-like manner.
 Homepage: L<http://www.littlecms.com/>
 
 Optionally used by C<DevIL> as a color management engine. Since
-C<gled-1.2.4> C<lcms> is included in with the distribution of C<Gled>
-but is not required for its operation.
+C<gled-1.3.0> C<lcms> is not provided in the distribution of C<Gled>,
+but can be activated in the build-system.
 
 =back
 
@@ -208,7 +184,7 @@ switch:
 
 But usually, at least for first-time usage, the following will do:
 
- gled some_scene.C
+ gled some_demo.C
 
 This starts C<gled> without authentication and executes C<c++> macro
 script C<some_scene.C>. Most macros in the demo section 
@@ -231,46 +207,22 @@ window or type C<.q> on the C<ROOT> prompt.
 
 =head2 Setting-up the environment
 
-If you downloaded the full binary packet, then the script C<binenv.sh> (or
-C<binenv.csh>) should do the job:
+If you downloaded the full binary packet, then sourcing the script
+C<gled-env.sh> (or C<gled-env.csh>) should do the job:
 
- cd <gled-top-dir>
- . binenv.sh	      # for sh-s
- source binenv.csh    # for csh-s
+ source gled-env.sh     # for sh
+ source gled-env.csh    # for csh
 
-The scripts sets the environment variables C<GLEDSYS> (set to
-current directory) and C<ROOTSYS> (set to C<$GLEDSYS/external/root>) and extend the C<PATH> and
-C<LD_LIBRARY_PATH>.
+The scripts sets the environment variables C<GLEDSYS>
+and C<ROOTSYS> and extends the C<PATH> and
+C<LD_LIBRARY_PATH> appropriately.
 
-Further, it expects that other external software is installed in
-C<$GLEDSYS/external/> directory with further sub-structure of
-C<lib/>, C<include/>, etc.
+To dump the environment script, one can use:
 
- # This is environment for binary gled base distribution.
- # Use as: . binenv.sh
- # Should be run from top Gled directory
- 
- dir=`pwd`
- 
- export ROOTSYS=$dir/external/root
- export GLEDSYS=$dir
- 
- # ROOT
- PATH=$PATH:$ROOTSYS/bin
- LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ROOTSYS/lib
- 
- # External
- PATH=$PATH:$dir/external/bin
- LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$dir/external/lib
- MANPATH=$MANPATH:$dir/external/man
- 
- # Gled
- PATH=$PATH:$GLEDSYS/bin
- LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GLEDSYS/lib
- 
- export PATH LD_LIBRARY_PATH MANPATH
+ ./gled-env-dump.sh     # dumps env for sh
+ ./gled-env-dump.csh    # dumps env for csh
 
-Please modify the scripts to suit your needs.
+and store its output to a file or login script.
 
 
 =head2 Configuration of Gled authentication
@@ -336,11 +288,6 @@ Note that you will need the C<-auth> option to enable authentication
 and C<-eyeid sun.absolute> to spawn GUI with the adminstrator
 privileges. Most demo scripts do not setup any authorization scheme
 and GUI requests to top-level objects would be refused.
-
-To check for demo updates:
-
- cd demos/Geom1 # or just demos to update all libset-demos
- cvs update -d
 
 
 =head2 The C<Gled> GUI
@@ -564,17 +511,16 @@ displays.
 Sometimes, C<Gled> can die quite horribly. It's a very generic
 multi-threaded application, allowing libsets to perform just about
 anything - and not all of them have undergone rigorous
-testing. And there are quite some things that can be done to
-C<gled> to make it spill its guts.
+testing.
 
 C<ROOT>'s interactive application (interface to CINT) that handles the
 terminal input thread is by default set to handle most of the signals
 (like SIGSEGV) - it attaches gdb, dumps the stack, and pretends
-everything is fine. This is not always true and there is a high
+everything is fine. This is rarely true and there is a high
 probability that your terminal will lock up and you will not be able
 to kill C<gled> in any other way than to C<kill> it (as in C<killall
 -9 gled>).  This behaviour can be switched off by adding C<<
-gSystem->IgnoreSignal(kSigSegmentationViolation, true) >> somewhere in
+gSystem->IgnoreSignal(kSigSegmentationViolation, kTRUE) >> somewhere in
 the initialization script or to your C<.rootrc> or C<rootlogon.C>
 file. Then C<gled> will crash properly, dumping the core if
 environment allows it. See also script C<isegv.C>. 
@@ -605,6 +551,7 @@ built, it will require presence of several low level libraries. The
 easiest way to ensure you have all this stuff is to run:
 
   PKGS="subversion autoconf automake libtool \
+        glew glew-devel \
         fltk DevIL gts openal freealut \
         fltk-devel DevIL-devel gts-devel openal-devel freealut-devel"
 
@@ -612,23 +559,45 @@ easiest way to ensure you have all this stuff is to run:
 
 C<gled-builder> will build its own versions of C<fltk>, C<DevIL>,
 C<gts>, C<openal> and C<freealut> but their system-level install will
-ensure you have all the dependencies. Eventually we will check if
-appropriate versions of those are available and skip them during the
-build. However, C<Gled> requires the latest versions of some
-libraries that are not shipped even with the latest distributions
-(C<fltk-1.1.9>, C<gts-HEAD>).
+ensure you have all the dependencies. Eventually (and optionally) we
+will check if appropriate versions of those are available and skip
+them during the build. However, C<Gled> requires the latest versions
+of some libraries that are not shipped even with the latest
+distributions (C<fltk-1.1.9>, C<gts-HEAD>).
 
-C<Gled> is not put into the install directory, it remains in the build
-directory C<gled/gled-build> (this will change soon). To test, first
-setup the environment:
+C<Gled> is also put into the install directory ... but one can also
+run it from the build directory itself.
+
+
+=head3 Running from the install directory
+
+This is meant for normal usage. The install directory is fully
+relocatable - you can tarball it and use it on any compatible machine.
+
+To setup the environment:
+
+  cd install-dir
+  . gled-env.sh
+
+Run demos:
+
+  cd gled/demos
+  cd Var1
+  gled tringula.C
+
+
+=head3 Running from the build directory
+
+This is to be used if you intend to do development. C<Gled> sources
+are downloaded via C<subversion>, so you have a working development
+environment.
+
+Setup the environment:
 
   cd gled/gled-build
-  . binenv.sh
+  . build_env.sh
 
-choose the demo to run and fire it up:
-
-  cd demos/Var1
-  gled tringula.C 
+The demos are in the C<demos/> directory.
 
 For details see the C<README> file provided in C<gled-builder>.
 
