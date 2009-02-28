@@ -1,6 +1,7 @@
-# This is environment for binary gled base distribution.
-# Use as: source binenv.csh
-# Should be run from top Gled directory
+# This is environment for standard gled build.
+# It expects external software in external/ and ROOT in external/root/.
+# Usage: source binenv.csh
+# Should be run from 'gled-build' directory.
 
 set dir = `pwd`
 
