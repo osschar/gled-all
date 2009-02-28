@@ -14,14 +14,15 @@ if [ $? -ne 0 ]; then
     fullpath1=$0
 fi
 progdir=`dirname $fullpath1`
-runningdir=`pwd`
-if echo $progdir | grep "^/" > /dev/null 2>& 1 || \
-   echo $progdir | grep "^~" > /dev/null 2>& 1; then
+if [ $progdir = "." ]; then
+    fullpath=`pwd`
+elif echo $progdir | grep "^/" > /dev/null 2>& 1 || \
+     echo $progdir | grep "^~" > /dev/null 2>& 1; then
     # absolute path
     fullpath=$progdir
 else
     # relative path
-    fullpath=$runningdir/$progdir
+    fullpath=`pwd`/$progdir
 fi
 # work around readlink versions not having -f option
 fullpath1=`readlink $fullpath`

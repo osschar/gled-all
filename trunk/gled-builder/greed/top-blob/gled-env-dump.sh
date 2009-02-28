@@ -1,19 +1,15 @@
 #!/bin/sh
 
-# Run the default greed-demo
+# Write environment for 'sh' shells to stdout.
 #
-# Usage: greed-demo.sh [arguments-for-the-demo]
-#   The arguments are passed to the demo script tringula.C.
-#   Supported modes:
-#       0 "Rectangle"
-#       1 "Triangle"
-#       2 "Sphere outside"
-#       3 "Sphere inside"
-#       4 "Torus outside"
-#       5 "Torus inside"
+# Usage:
+#   a) dump to a file (to either source it or add it to .profile)
+#      /path/to/gled-blob/gled-env-dump.sh > somefile
+#   b) direct setting of environment vie eval
+#      eval `/path/to/gled-blob/gled-env-dump.sh`
 
 ########################################################################
-# Determine where the script was run from.
+# Determine the top-directory
 ########################################################################
 
 # work around readlink versions not having -f option
@@ -40,16 +36,16 @@ fi
 topdir=$fullpath1
 
 ########################################################################
-# Setup env
+# Setup the variables
 ########################################################################
 
-if [ -z "$GLEDSYS" ]; then
-    source $topdir/gled.env $topdir
-fi
+rsys=$topdir/root
+gsys=$topdir/gled
 
-########################################################################
-# Run
-########################################################################
-
-cd $topdir/gled/demos/Var1
-gled tringula.C\($*\)
+cat <<EOF
+export ROOTSYS=$rsys
+export GLEDSYS=$gsys
+PATH=$gsys/bin:$rsys/bin:$topdir/bin:\$PATH
+export LD_LIBRARY_PATH=$gsys/lib:$rsys/lib:$topdir/lib:\$LD_LIBRARY_PATH
+export MANPATH=$rsys/man:$topdir/man:\$MANPATH
+EOF
