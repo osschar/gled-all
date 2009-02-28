@@ -1,49 +1,26 @@
 #!/bin/sh
 
-# Write environment setup to stdout.
+# Setup environment for sh.
 #
-# Usage:
-#   a) dump to a file (to either source it or add it to .profile)
-#      /path/to/gled-blob/gled-env.sh > somefile
-#   b) direct setting of environment vie eval
-#      eval `/path/to/gled-blob/gled-env.sh`
+# Usage: source gled-env.sh [blob-directory]
+#   if blob-directory is not given, current directory is used.
 
 ########################################################################
 # Determine the top-directory
 ########################################################################
 
-# work around readlink versions not having -f option
-fullpath1=`readlink $0`
-if [ $? -ne 0 ]; then
-    fullpath1=$0
-fi
-progdir=`dirname $fullpath1`
-runningdir=`pwd`
-if echo $progdir | grep "^/" > /dev/null 2>& 1 || \
-   echo $progdir | grep "^~" > /dev/null 2>& 1; then
-    # absolute path
-    fullpath=$progdir
+if [ $# -eq 0 ]; then
+  topdir=`pwd`
 else
-    # relative path
-    fullpath=$runningdir/$progdir
+  topdir=$1
 fi
-# work around readlink versions not having -f option
-fullpath1=`readlink $fullpath`
-if [ $? -ne 0 ]; then
-    fullpath1=$fullpath
-fi
-topdir=$fullpath1
 
 ########################################################################
 # Setup the variables
 ########################################################################
 
-rsys=$topdir/root
-gsys=$topdir/gled
-
-cat <<EOF
-export ROOTSYS=$rsys
-export GLEDSYS=$gsys
-PATH=$gsys/bin:$rsys/bin:$topdir/bin:\$PATH
-export LD_LIBRARY_PATH=$gsys/lib:$rsys/lib:$topdir/lib:\$LD_LIBRARY_PATH
-EOF
+export ROOTSYS=$topdir/root
+export GLEDSYS=$topdir/gled
+PATH=$GLEDSYS/bin:$ROOTSYS/bin:$topdir/bin:$PATH
+export LD_LIBRARY_PATH=$GLEDSYS/lib:$ROOTSYS/lib:$topdir/lib:$LD_LIBRARY_PATH
+export MANPATH=$ROOTSYS/man:$topdir/man:$MANPATH
