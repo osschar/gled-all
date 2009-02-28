@@ -44,7 +44,7 @@ topdir=$fullpath1
 ########################################################################
 
 if [ -z "$GLEDSYS" ]; then
-    source $topdir/gled.env $topdir
+    source $topdir/gled-env.sh $topdir
 fi
 
 ########################################################################
