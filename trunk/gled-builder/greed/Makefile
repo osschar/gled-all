@@ -9,7 +9,7 @@ all: install
 install:
 	${ECHO} -I- Installing ${PACKAGE}
 	${MUTE} rm -f $@
-	${MUTE} rsync -r top-blob/ ${PREFIX}
+	${MUTE} rsync -r --exclude '.svn/' top-blob/ ${PREFIX}
 	${MUTE} touch $@
 
 ### clean, distclean
