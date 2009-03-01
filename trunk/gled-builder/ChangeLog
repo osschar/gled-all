@@ -1,5 +1,10 @@
 2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* external/glew/glew.pl:
+	Install libs into lib/ also on 64-bit systems (avoid lib64/).
+
+2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Include glew among externals.
 
 	* external/glew:
