@@ -1,3 +1,45 @@
+2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Include glew among externals.
+
+	* external/glew:
+	* external/glew/Makefile:
+	* external/glew/glew.pl:
+	New files for building glew.
+
+	* external/Makefile:
+	Register glew as package.
+	Temporarily set as the first target - for easier testing.
+
+2009-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	Fix environment script invocation - the file name has changed.
+
+2009-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add csh support. Cleanup of stuff.
+
+	* greed/top-blob/gled-env-dump.sh:
+	* greed/top-blob/gled-env.sh:
+	Rename gled-env.sh to gled-env-dump.sh (to make it clear it dumps).
+	Rename gled.env to gled-env.sh (to allow csh distinction).
+
+	* greed/top-blob/README:
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	Update for new script names.
+
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env-dump.csh:
+	New files for csh setup.
+
+2009-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* greed/Makefile:
+	Exclude '.svn/' when installing top-blob stuff.
+
 2009-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add new top-level target 'greed'.
