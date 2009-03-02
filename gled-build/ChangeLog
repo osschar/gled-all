@@ -8,6 +8,16 @@
 	Set path, ldpath and manpath of gled, root and externals before
 	the current values.
 
+2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use GLEW includes instead of system ones.
+
+	* make/make_defs.inc:
+	Add '-lGLEW' to FLTKLIBS.
+
+	* cfg/Rnr_GL_SKEL.cxx:
+	Include 'GL/glew.h' instead of 'GL/gl.h' or 'FL/gl.h'.
+
 2009-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix issues with MIR function-argument serialization.
