@@ -23,6 +23,7 @@ target('configure', "echo Configure not needed.");
 target('install', <<"FNORD");
 GLEW_DEST=${PREFIX} make install
 if [ -d ${PREFIX}/lib64 ]; then \\
+  mkdir -p ${PREFIX}/lib
   mv ${PREFIX}/lib64/* ${PREFIX}/lib
   rm -rf ${PREFIX}/lib64
 fi
