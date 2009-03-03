@@ -1,3 +1,15 @@
+2009-03-03  Matevz Tadel  <matevz.tadel@ijs.si
+
+	* external/glew/glew.pl:
+	Make sure lib/ exists before copying stuff from lib64/.
+
+2009-03-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/root/root.pl:
+	Disable usage of built-in freetype.
+	It conflicts with the system-one (used by fltk) - at least on
+	ubuntu-8.10.
+
 2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/glew/glew.pl:
