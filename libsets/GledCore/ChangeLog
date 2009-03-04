@@ -1,3 +1,20 @@
+2009-03-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	With Jona: fixes for the Intel/Mesa 3D driver.
+
+	* Pupils/Pupil.cxx:
+	Intel/Mesa 3D driver crashes when trying to use non-existing (or
+	null) GL context (ATI and NVIDIA drivers seem to survive
+	this). So, make sure that GL-context is initialized before trying
+	to use it:
+	
+	1. Call glewInit() from the draw() function of the GL context-holder
+	window.
+
+	2. In handle() we need to make the context current as renderes can be
+	instantiated while querying for an object renderer. Return
+	immediately if the GL-window is not in valid() state.
+
 2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Use GLEW includes instead of system ones.
