@@ -40,11 +40,22 @@ Fl_Gl_Window* Pupil::gl_ctx_holder = 0;
 
 namespace {
   class pupils_gl_ctx_holder : public Fl_Gl_Window {
+    bool m_need_glew_init;
   public:
     pupils_gl_ctx_holder() :
-      Fl_Gl_Window(0, 0, 1, 1, "GL context holder")
-    { clear_border(); }
-    virtual void draw() {}
+      Fl_Gl_Window(0, 0, 1, 1, "GL context holder"),
+      m_need_glew_init(true)
+    {
+      clear_border();
+    }
+
+    virtual void draw()
+    {
+      if(m_need_glew_init) {
+	glewInit();
+	m_need_glew_init = false;
+      }
+    }
   };
 }
 
@@ -103,14 +114,13 @@ namespace
 void Pupil::_build()
 {
   // Hack to keep the same GL context opened all the time.
-  // GLEW initialization is also sneaked in here.
+  // GLEW init is done in the draw() of the context holder.
+
   if(gl_ctx_holder == 0) {
     gl_ctx_holder = new pupils_gl_ctx_holder;
     gl_ctx_holder->end();
     gl_ctx_holder->show();
     // gl_ctx_holder->iconize();
-
-    glewInit();
   }
 
   mInfo = dynamic_cast<PupilInfo*>(fImg->fLens);
@@ -1230,6 +1240,12 @@ int Pupil::handle_overlay(int ev)
 int Pupil::handle(int ev)
 {
   static const Exc_t _eh("Pupil::handle ");
+
+  // Maybe should check for something else?
+  if(!valid())
+    return 0;
+
+  make_current();
 
   int x = Fl::event_x(); int y = Fl::event_y();
   // printf("PupilEvent %d (%d, %d)\n", ev, x, y);
