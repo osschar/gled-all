@@ -27,7 +27,6 @@ ClassImp(ODECrawlerMaster);
 //______________________________________________________________________________
 //
 // ODE integrator built upon adaptive step 4th order runge-kutta.
-// Based on odeint from numerical recipes.
 // X corresponds to time (scalar).
 // Y corresponds to state vector at a given time.
 // Final state can be obtained from mY.

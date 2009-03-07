@@ -27,9 +27,13 @@ void WarmAmoeba::_init()
 
 void WarmAmoeba::_calc_psum()
 {
-  for(Int_t i=0; i<m_n; i++) {
+  for (Int_t i = 0; i < m_n; ++i)
+  {
     m_Psum(i) = 0;
-    for(Int_t j=0; j<=m_n; j++) m_Psum(i) += P(j,i);
+    for(Int_t j = 0; j <= m_n; ++j)
+    {
+      m_Psum(i) += P(j,i);
+    }
   }
 }
 
@@ -38,9 +42,12 @@ void WarmAmoeba::_export_algo_values(Operator::Arg* op_arg, bool bestp)
   OP_EXE_OR_SP_MIR(this, SetT, m_T);
   OP_EXE_OR_SP_MIR(this, SetYLast, m_Y(0u));
   OP_EXE_OR_SP_MIR(this, SetYBest, m_y_best);
-  if(bestp) {
+  if (bestp)
+  {
     OP_EXE_OR_SP_MIR_SATURN(mSaturn, hTrueMaster, SetState, m_PBest);
-  } else {
+  }
+  else
+  {
     OP_EXE_OR_SP_MIR_SATURN(mSaturn, hTrueMaster, SetState, m_P[0]);
   }
 }
@@ -53,7 +60,7 @@ void WarmAmoeba::InitZStuff()
   m_Psum.ResizeTo(m_n);
   delete [] m_P;
   m_P = new TVectorF[m_n+1];
-  for(Int_t i=0; i<=m_n; i++) (m_P[i]).ResizeTo(m_n);
+  for (Int_t i = 0; i <= m_n; ++i)  (m_P[i]).ResizeTo(m_n);
   m_Y.ResizeTo(m_n+1);
   m_PBest.ResizeTo(m_n);
 }
@@ -63,16 +70,22 @@ Float_t WarmAmoeba::Ooze(Int_t ihi, Float_t& yhi, Float_t fac)
   TVectorF ptry(m_n);
   Float_t fac1 = (1-fac)/m_n;
   Float_t fac2 = fac1 - fac;
-  for(Int_t j=0; j<m_n; j++) { ptry(j) = m_Psum(j)*fac1 - P(ihi,j)*fac2; }
+  for (Int_t j = 0; j < m_n; ++j)
+  {
+    ptry(j) = m_Psum(j)*fac1 - P(ihi,j)*fac2;
+  }
   Float_t ytry = hTrueMaster->Foon(ptry);
-  if(ytry <= m_y_best) {
+  if (ytry <= m_y_best)
+  {
     m_PBest = ptry;
     m_y_best = ytry;
   }
   Float_t yflu = ytry + m_T*TMath::Log(mRanGen.Rndm());
-  if(yflu  < yhi) {
+  if (yflu  < yhi)
+  {
     m_Y(ihi) = ytry; yhi = yflu;
-    for(Int_t j=0; j<m_n; j++) {
+    for (Int_t j = 0; j < m_n; ++j)
+    {
       m_Psum(j) += ptry(j) - P(ihi,j);
       P(ihi,j) = ptry(j);
     }
@@ -84,36 +97,60 @@ void WarmAmoeba::WAMove()
 {
   Float_t ynhi, ylo, yhi, yt;
   _calc_psum();
-  while(1) {
+  while(true)
+  {
     Int_t ilo=0, ihi=1;
     ynhi = ylo = m_Y(0u) - m_T*TMath::Log(mRanGen.Rndm());
     yhi = m_Y(1u) - m_T*TMath::Log(mRanGen.Rndm());
-    if(ylo > yhi) { ihi=0; ilo=1; ynhi=yhi; yhi=ylo; ylo=ynhi; }
-    for(Int_t i=2; i<=m_n; i++) {
+    if (ylo > yhi)
+    {
+      ihi = 0; ilo = 1;
+      ynhi = yhi; yhi = ylo; ylo = ynhi;
+    }
+    for (Int_t i = 2; i <= m_n; ++i)
+    {
       yt = m_Y(i) - m_T*TMath::Log(mRanGen.Rndm());
-      if(yt <= ylo) { ilo=i; ylo = yt; }
-      if(yt > yhi) { ynhi=yhi; ihi=i; yhi=yt; }
-      else { ynhi = yt; }
+      if (yt <= ylo)
+      {
+        ilo = i; ylo = yt;
+      }
+      if (yt > yhi)
+      {
+        ihi = i; ynhi = yhi; yhi = yt;
+      }
+      else
+      {
+        ynhi = yt;
+      }
     }
     Float_t rtol = 2*TMath::Abs(yhi-ylo) / (TMath::Abs(yhi) + TMath::Abs(ylo));
-    if(rtol < mFTol || m_iter<0) {
-      Float_t swap=m_Y(0u); m_Y(0u)=m_Y(ilo); m_Y(ilo)=swap;
-      for(Int_t n=0; n<m_n; n++) {
-	swap=P(0u,n); P(0u,n)=P(ilo,n); P(ilo,n)=swap;
+    if (rtol < mFTol || m_iter < 0)
+    {
+      Float_t swap = m_Y(0u); m_Y(0u) = m_Y(ilo); m_Y(ilo) = swap;
+      for (Int_t n = 0; n < m_n; ++n)
+      {
+	swap = P(0u,n); P(0u,n) = P(ilo,n); P(ilo,n) = swap;
       }
       break;
     }
     m_iter -= 2;
     Float_t ytry = Ooze(ihi, yhi, -1);
-    if(ytry <= ylo) {
+    if (ytry <= ylo)
+    {
       ytry = Ooze(ihi, yhi, 2);
-    } else if(ytry >- ynhi) {
+    }
+    else if (ytry >- ynhi)
+    {
       Float_t ysave = yhi;
       ytry = Ooze(ihi, yhi, 0.5);
-      if(ytry >= ysave) {
-	for(Int_t i=0; i<m_n; i++) {
-	  if(i!=ilo) {
-	    for(Int_t j=0; j<m_n; j++) {
+      if (ytry >= ysave)
+      {
+	for (Int_t i = 0; i < m_n; ++i)
+        {
+	  if (i != ilo)
+          {
+	    for (Int_t j = 0; j < m_n; ++j)
+            {
 	      m_Psum(j) = 0.5*(P(i,j) + P(ilo,j));
 	      P(i,j) = m_Psum(j);
 	    }
@@ -123,7 +160,11 @@ void WarmAmoeba::WAMove()
 	m_iter -= m_n;
 	_calc_psum();
       }
-    } else { m_iter++; }
+    }
+    else
+    {
+      m_iter++;
+    }
   }
 }
 
@@ -173,7 +214,8 @@ Operator::Arg* WarmAmoeba::PreDance(Operator::Arg* op_arg)
   }
   { // Get perturbations
     TVectorF *v = hTrueMaster->InitialPerturbations(mRanGen);
-    for(Int_t i=1; i<=m_n; i++) {
+    for (Int_t i = 1; i <= m_n; ++i)
+    {
       m_P[i] = m_P[0]; P(i, i-1) += (*v)(i-1);
       m_Y(i) = hTrueMaster->Foon(m_P[i]);
     }
@@ -181,7 +223,7 @@ Operator::Arg* WarmAmoeba::PreDance(Operator::Arg* op_arg)
   }
   // Estimate temperature
   Float_t t=0;
-  for(Int_t i=1; i<=m_n; i++) t += TMath::Abs(m_Y(0u) - m_Y(i));
+  for (Int_t i = 1; i <= m_n; ++i) t += TMath::Abs(m_Y(0u) - m_Y(i));
   m_T = t/m_n;
   m_y_best = mYBest = 10*m_Y(0u); // Large enough
   mYLast = m_Y(0u);
@@ -207,8 +249,9 @@ void WarmAmoeba::PostDance(Operator::Arg* op_arg)
 void WarmAmoeba::PostBeat(Operator::Arg* op_arg) throw(Operator::Exception)
 {
   Eventor::PostBeat(op_arg);
-  if(mStampInterval == 0 || mLocBeatsDone % mStampInterval == 0) {
-      _export_algo_values(op_arg);
+  if (mStampInterval == 0 || mLocBeatsDone % mStampInterval == 0)
+  {
+    _export_algo_values(op_arg);
   }
 }
 
