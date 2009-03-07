@@ -1,3 +1,9 @@
+2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_defs.inc:
+	Remove -DGL_GLEXT_PROTOTYPES from CPPFLAGS.
+	This was a fix for some weirdness with glext.h in NVIDIA.
+
 2009-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix order of path-like environment variables.
