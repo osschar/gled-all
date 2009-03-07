@@ -45,7 +45,7 @@
   ode_c->SetODEMaster(moon);
   moon->SetODECrawler(ode_c);
 
-  ode_c->Start();
+  g_saturn->ShootMIR( ode_c->S_Crawl() );
 
 
   // Spawn GUI
