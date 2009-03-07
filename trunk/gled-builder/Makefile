@@ -1,3 +1,5 @@
+SHELL = /bin/bash
+
 all: external gled greed
 
 .PHONY: external external-no-root gled greed clean distclean

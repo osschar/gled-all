@@ -1,3 +1,5 @@
+SHELL = /bin/bash
+
 PACKAGES := glew root fltk fltk-mt DevIL gts openal freealut
 
 .PHONY: ${PACKAGES} all all-but-root

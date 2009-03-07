@@ -1,5 +1,3 @@
-#!/bin/csh
-
 # Setup environment for csh.
 #
 # Usage: source gled-env.csh [blob-directory]
@@ -12,15 +10,15 @@
 if ($#argv == 0) then
     set topdir = `pwd`
 else
-    set topdir = $argv[1]
+    set topdir = "$argv[1]"
 endif
 
 ########################################################################
 # Setup the variables
 ########################################################################
 
-setenv ROOTSYS ${topdir}/root
-setenv GLEDSYS ${topdir}/gled
+setenv ROOTSYS "${topdir}/root"
+setenv GLEDSYS "${topdir}/gled"
 
 setenv PATH ${GLEDSYS}/bin:${ROOTSYS}/bin:${topdir}/bin:${PATH}
 

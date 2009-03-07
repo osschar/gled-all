@@ -3,6 +3,8 @@
 # This is included from two levels below
 #########################################################################
 
+SHELL  = /bin/bash
+
 TOPDIR = ../..
 
 include ${TOPDIR}/MakeBuildConf.inc

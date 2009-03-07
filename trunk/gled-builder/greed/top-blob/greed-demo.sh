@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Run the default greed-demo
 #
@@ -17,39 +17,39 @@
 ########################################################################
 
 # work around readlink versions not having -f option
-fullpath1=`readlink $0`
+fullpath1=`readlink "$0"`
 if [ $? -ne 0 ]; then
-    fullpath1=$0
+    fullpath1="$0"
 fi
-progdir=`dirname $fullpath1`
-if [ $progdir = "." ]; then
+progdir=`dirname "$fullpath1"`
+if [ "$progdir" = "." ]; then
     fullpath=`pwd`
 elif echo $progdir | grep "^/" > /dev/null 2>& 1 || \
      echo $progdir | grep "^~" > /dev/null 2>& 1; then
     # absolute path
-    fullpath=$progdir
+    fullpath="$progdir"
 else
     # relative path
-    fullpath=`pwd`/$progdir
+    fullpath=`pwd`/"$progdir"
 fi
 # work around readlink versions not having -f option
-fullpath1=`readlink $fullpath`
+fullpath1=`readlink "$fullpath"`
 if [ $? -ne 0 ]; then
-    fullpath1=$fullpath
+    fullpath1="$fullpath"
 fi
-topdir=$fullpath1
+topdir="$fullpath1"
 
 ########################################################################
 # Setup env
 ########################################################################
 
 if [ -z "$GLEDSYS" ]; then
-    source $topdir/gled-env.sh $topdir
+    . "$topdir/gled-env.sh" "$topdir"
 fi
 
 ########################################################################
 # Run
 ########################################################################
 
-cd $topdir/gled/demos/Var1
+cd "$topdir/gled/demos/Var1"
 gled tringula.C\($*\)

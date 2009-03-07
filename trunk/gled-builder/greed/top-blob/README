@@ -10,7 +10,7 @@ Trying other Gled demos
 =======================
 
 # Setup the environment
-  source gled-env.sh # or .csh
+  . gled-env.sh # source gled-env.csh
 
 # Go to demos directory
   cd gled/demos
@@ -27,7 +27,7 @@ Trying other ROOT demos
 =======================
 
 # Setup the environment
-  source gled-env.sh # or .csh
+  . gled-env.sh # source gled-env.csh
 
 # Go to demos directory
   cd root/tutorials
