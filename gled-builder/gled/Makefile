@@ -18,7 +18,7 @@ checkout:
 
 define configure-cmds
 ln -sf ${PREFIX} external;\
-source binenv.sh;\
+. binenv.sh;\
 ./configure --blobdir=${PREFIX}/gled --external=`pwd`/external --libsets='<auto>'
 endef
 
@@ -33,7 +33,7 @@ configure:
 ### build
 
 define build-cmds
-source binenv.sh;\
+. binenv.sh;\
 ${MAKE} ${MAKE_J_OPT}
 endef
 
@@ -48,7 +48,7 @@ build:
 ### install
 
 define install-cmds
-source binenv.sh;\
+. binenv.sh;\
 ${MAKE} blob_install
 endef
 
@@ -65,7 +65,7 @@ install:
 .PHONY: clean distclean
 
 define clean-cmds
-source binenv.sh;\
+. binenv.sh;\
 ${MAKE} clean
 endef
 

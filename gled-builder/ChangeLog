@@ -1,4 +1,31 @@
-2009-03-03  Matevz Tadel  <matevz.tadel@ijs.si
+2009-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Explicit usage of bash, quote vulnerable constructs in shell scripts.
+
+	* Makefile:
+	* MakeBuildExternal.inc:
+	* MakeBuildGled.inc:
+	* external/Makefile:
+	Specify SHELL=/bin/bash.
+
+	* gled/Makefile:
+	Replace 'source' with '.' in canned target commands.
+
+	* greed/top-blob/README:
+	In instructions for bash, replace 'source' with '.'.
+	Format the instructions so that they can be cut-n-pasted for both
+	shell-types.
+
+	* greed/top-blob/gled-env-dump.csh:
+	* greed/top-blob/gled-env-dump.sh:
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env.sh:
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	Quote all constructs where ' ' in path could lead to problems.
+	Where relevant, replace 'source' with '.'.
+
+2009-03-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/glew/glew.pl:
 	Make sure lib/ exists before copying stuff from lib64/.
