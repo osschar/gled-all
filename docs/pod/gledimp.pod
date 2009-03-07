@@ -210,7 +210,7 @@ window or type C<.q> on the C<ROOT> prompt.
 If you downloaded the full binary packet, then sourcing the script
 C<gled-env.sh> (or C<gled-env.csh>) should do the job:
 
- source gled-env.sh     # for sh
+ . gled-env.sh          # for sh
  source gled-env.csh    # for csh
 
 The scripts sets the environment variables C<GLEDSYS>
@@ -595,7 +595,7 @@ environment.
 Setup the environment:
 
   cd gled/gled-build
-  . build_env.sh
+  . build_env.sh # source  build_env.csh
 
 The demos are in the C<demos/> directory.
 
