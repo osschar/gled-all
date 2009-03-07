@@ -572,8 +572,8 @@ for $f (@{$resolver->{LibSetList}})
   if($system eq 'Darwin')
   {
     $ldpathenv   = "DYLD_LIBRARY_PATH";
-    $sysspec_sh  = "export MACOSX_DEPLOYMENT_TARGET=10.4";
-    $sysspec_csh = "setenv MACOSX_DEPLOYMENT_TARGET 10.4";
+    $sysspec_sh  = "export MACOSX_DEPLOYMENT_TARGET=10.5";
+    $sysspec_csh = "setenv MACOSX_DEPLOYMENT_TARGET 10.5";
   }
 
   open SH, ">$config->{ENVSETUPSTEM}.sh";
@@ -582,12 +582,12 @@ for $f (@{$resolver->{LibSetList}})
 # Use as: . $config->{ENVSETUPSTEM}.sh
 # Can be run from anywhere
 
-export ROOTSYS=$ENV{ROOTSYS}
-export GLEDSYS=$ENV{GLEDSYS}
+export ROOTSYS="$ENV{ROOTSYS}"
+export GLEDSYS="$ENV{GLEDSYS}"
 
-PATH=\$GLEDSYS/bin:\$ROOTSYS/bin:$extbin:\$PATH
-$ldpathenv=\$GLEDSYS/lib:\$ROOTSYS/lib:$extlib:\$$ldpathenv
-MANPATH=$extman:\$MANPATH
+PATH="\$GLEDSYS"/bin:"\$ROOTSYS"/bin:"$extbin":\$PATH
+$ldpathenv="\$GLEDSYS"/lib:"\$ROOTSYS"/lib:"$extlib":\$$ldpathenv
+MANPATH="$extman":\$MANPATH
 
 export PATH $ldpathenv MANPATH
 
@@ -601,19 +601,19 @@ FNORD
 # Use as: . $config->{ENVSETUPSTEM}.csh
 # Can be run from anywhere
 
-setenv ROOTSYS $ENV{ROOTSYS}
-setenv GLEDSYS $ENV{GLEDSYS}
+setenv ROOTSYS "$ENV{ROOTSYS}"
+setenv GLEDSYS "$ENV{GLEDSYS}"
 
-setenv PATH \${GLEDSYS}/bin:\${ROOTSYS}/bin:$extbin:\${PATH}
+setenv PATH "\$GLEDSYS"/bin:"\$ROOTSYS"/bin:"$extbin":\${PATH}
 if ( \$?$ldpathenv ) then
-  setenv $ldpathenv \${GLEDSYS}/lib:\${ROOTSYS}/lib:$extlib:\${$ldpathenv}
+  setenv $ldpathenv "\$GLEDSYS"/lib:"\$ROOTSYS"/lib:"$extlib":\${$ldpathenv}
 else
-  setenv $ldpathenv \${GLEDSYS}/lib:\${ROOTSYS}/lib:$extlib
+  setenv $ldpathenv "\$GLEDSYS"/lib:"\$ROOTSYS"/lib:"$extlib"
 endif
 if ( \$?MANPATH ) then 
-  setenv MANPATH $extman:\${MANPATH}
+  setenv MANPATH "$extman":\${MANPATH}
 else
-  setenv MANPATH $extman
+  setenv MANPATH "$extman"
 endif
 
 $sysspec_csh

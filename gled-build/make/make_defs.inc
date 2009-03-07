@@ -20,7 +20,7 @@ endif
 
 
 # CXX, CC taken from environment; LD set by configure
-SHELL		= /bin/sh
+SHELL		= /bin/bash
 
 libexecdir 	= ${GLEDSYS}/libexec
 MKDEP		= ${ROOTSYS}/bin/rmkdepend
