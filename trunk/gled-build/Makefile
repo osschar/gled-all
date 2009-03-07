@@ -14,6 +14,8 @@ ECHO:=@echo
 endif
 export MUTE ECHO
 
+SHELL                = /bin/bash
+
 libexecdir           = ${GLEDSYS}/libexec
 
 GLED_CONFIG_WRITER   = ${libexecdir}/gled_config_writer.pl
