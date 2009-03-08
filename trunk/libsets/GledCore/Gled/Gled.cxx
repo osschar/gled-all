@@ -5,6 +5,8 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Gled.h"
+#include "gled-config-build.h"
+
 #include <Gled/GledNS.h>
 #include <Gled/GMutex.h>
 #include <Gled/GCondition.h>
@@ -365,13 +367,14 @@ void Gled::InitLogging()
   }
 
   if(bShowSplash) {
-    int len = strlen(GLED_VERSION_STRING) + strlen(GLED_BUILD_DATE_STRING) + 4;
     GMutexHolder mh(mLoggingMutex);
     message("+----------------------------------------------------------+");
-    message(GForm("| This is Gled, version %s, %s %*s |",
-		  GLED_VERSION_STRING, GLED_BUILD_DATE_STRING, 35 - len, "" ));
-    message("| Gled is free software, released under GNU GPL version 2. |");
-    message("| For further information visit http://www.gled.org/       |");
+    message(GForm("| This is Gled, version %s", GLED_VERSION_STRING));
+    message(GForm("|   Build date: %s", GLED_BUILD_DATE_STRING));
+    message(GForm("|      SVN Rev: %s", GLED_SVN_REV_STRING));
+    message(GForm("|      SVN URL: %s", GLED_SVN_URL_STRING));
+    message("| Gled is free software, released under GNU GPL version 2");
+    message("| For further information visit http://www.gled.org/");
     message("+----------------------------------------------------------+");
     message("Gled now bootstraping.");
   }

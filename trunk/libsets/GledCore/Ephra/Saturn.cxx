@@ -13,6 +13,7 @@
 //
 
 #include "Saturn.h"
+#include "gled-config-build.h"
 
 #include <Gled/GledNS.h>
 #include <Ephra/Forest.h>

@@ -231,12 +231,10 @@ if ($config->{RECONFIGURE} == 0)
   # bluntly include stuff for gcc; will need compiler option ...
   open CH, ">include/gled-config.h";
 
-  print CH "#ifndef GLED_CONFIGURE_H\n";
-  print CH "#define GLED_CONFIGURE_H\n\n";
+  print CH "#ifndef GLED_CONFIG_H\n";
+  print CH "#define GLED_CONFIG_H\n\n";
   print CH "#include \"gled-gcc-config.h\"\n\n";
 
-  print CH "#define GLED_VERSION_STRING    \"$config->{BUILD_VERSION}\"\n";
-  print CH "#define GLED_BUILD_DATE_STRING \"$config->{BUILD_DATE}\"\n";
   print CH "#define GLED_SYSTEM            \"$config->{SYSTEM}\"\n";
   print CH "\n";
 
@@ -377,6 +375,48 @@ else
   print "BASE='$config->{GLEDBASE}', SYS='$ENV{GLEDSYS}', CFG='$CFGFILE'\n";
 
 }
+
+
+########################################################################
+# dump include/gled-config-build.h
+########################################################################
+
+my ($svninfo, $svnrev, $svnurl, $today);
+
+$svninfo = `svn info`;
+
+($svnrev) = $svninfo =~ m!^Revision:\s+(\d+)!m;
+($svnurl) = $svninfo =~ m!^URL:\s+(.+)/[^/]+$!m;
+
+$today = `date +%F`; chomp $today;
+
+for $var ("SVN_REV", "SVN_URL", "BUILD_VERSION", "BUILD_DATE")
+{
+  my $varin = "${var}_IN";
+  $config->{$var} = $config->{$varin};
+
+  $config->{$var} =~ s/<svnrev>/$svnrev/g;
+  $config->{$var} =~ s/<svnurl>/$svnurl/g;
+  $config->{$var} =~ s/<today>/$today/g;
+}
+
+open CBH, ">include/gled-config-build.h";
+print CBH << "FNORD";
+#ifndef GLED_CONFIG_BUILD_H
+#define GLED_CONFIG_BUILD_H
+
+#define GLED_SVN_REV_STRING    "$config->{SVN_REV}"
+#define GLED_SVN_URL_STRING    "$config->{SVN_URL}"
+#define GLED_VERSION_STRING    "$config->{BUILD_VERSION}"
+#define GLED_BUILD_DATE_STRING "$config->{BUILD_DATE}"
+
+#endif
+FNORD
+close CBH;
+
+########################################################################
+# initialize resolver and dependecy processing vars
+########################################################################
 
 $resolver = {};
 $resolver->{LibSetList} = [];

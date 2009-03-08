@@ -1,3 +1,14 @@
+2009-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Intruduce new config header gled-config-build.h.
+
+	* Ephra/Saturn.cxx:
+	Include the new config header.
+
+	* Gled/Gled.cxx:
+	Include the new config header.
+	In InitLogging() dump also svn revision and URL.
+
 2009-03-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	With Jona: fixes for the Intel/Mesa 3D driver.
