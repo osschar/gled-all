@@ -1,5 +1,10 @@
 2009-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* INSTALL:
+	Update - fix some really obsolete stuff.
+
+2009-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Intruduce new config header gled-config-build.h.
 
 	It looks like:
