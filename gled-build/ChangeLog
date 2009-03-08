@@ -1,3 +1,36 @@
+2009-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Intruduce new config header gled-config-build.h.
+
+	It looks like:
+
+	#ifndef GLED_CONFIG_BUILD_H
+	#define GLED_CONFIG_BUILD_H
+
+	#define GLED_SVN_REV_STRING    "2166"
+	#define GLED_SVN_URL_STRING    "https://svn.gled.org/gled/trunk"
+	#define GLED_VERSION_STRING    "1.3.0-rc1-r2166"
+	#define GLED_BUILD_DATE_STRING "2009-03-08"
+
+	#endif
+
+	Corresponding variables are stored in perl build_config.
+
+	This file is also written out during reconfigure as the above data
+	might have changed.
+
+	* configure:
+	Add dumping of include/gled-config-build.h.
+
+	* configure.rc:
+	Add new config options svnrev and svnurl. They default to
+	automatic determination via svn info.
+
+	Postfix the build description variables (the above two plus
+	buildversion and builddate) with '_IN'. Calculate the true values
+	dutring configure and reconfigure by replacing certain tags with
+	current values. See comments in the file for details.
+
 2009-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Explicit usage of bash, quote vulnerable constructs in shell scripts.

@@ -38,8 +38,16 @@ external	=s	.	EXTERNAL	""
 
 ### build configuration ###
 #
-buildversion	=s	.	BUILD_VERSION	"1.3.0-rc1-svn"
-builddate	=s	.	BUILD_DATE	{ my $d=`date +%F`; chomp $d; $d; }
+# These variables get re-evaluated on reconfigure. The following
+# substitutions are performed:
+# <svnrev> gets replaced with the current svn revision of '.'.
+# <svnurl> gets replaced with the current svn URL of '.', without /gled-build.
+# <today>  gets replaced by { my $d=`date +%F`; chomp $d; $d; }
+svnrev          =s      .       SVN_REV_IN        "<svnrev>"
+svnurl          =s      .       SVN_URL_IN        "<svnurl>"
+buildversion	=s	.	BUILD_VERSION_IN  "1.3.0-rc1-r<svnrev>"
+builddate	=s	.	BUILD_DATE_IN	  "<today>"
+# And these are fixed at first configure.
 noviewlibs	!	.	NOVIEWLIBS	0
 nornrlibs	!	.	NORNRLIBS	0
 rnr		=s	.	RENDERERS	"GL"
