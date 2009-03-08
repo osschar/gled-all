@@ -18,10 +18,10 @@ External software
 
 For base instalation the following packages are needed:
 
-1) ROOT v3      compiled with thread support (see http://root.cern.ch/)
-2) FLTK v1.1    also with thread support     (see http://www.fltk.org/)
-3) fltk-mt v0.1                     (see http://www.gled.org/download/)
-4) DevIL v1.6.5	                        (see: http://www.imagelib.org/)
+ ROOT    5.22                             (see http://root.cern.ch/)
+ FLTK    1.1.9 with thread support        (see http://www.fltk.org/)
+ fltk-mt 2.1                              (see http://www.gled.org/download/)
+ DevIL   1.7.4	                          (see: http://www.imagelib.org/)
 
 Other libsets might need additional libraries.
 
@@ -110,19 +110,22 @@ installs all stuff needed for building into the local directory.
 Getting additional libsets
 --------------------------
 
-Source packs are available from:
+Sources are available from SVN:
 
-ftp://ftp.gled.org/gled/<version>/libsets/src/<libset-name>-src.tar.gz
+  https://svn.gled.org/gled/trunk/libsets/
 
-Tarballs unpack into <libset-name> directory.
-Edit build_libsets and run ./configure. If you have an existing build,
-./configure --reconf will do.
+Run ./configure. If you have an existing build, ./configure --reconf
+will do (optionally listing the libsets, if auto-determination is
+switched off).
 
 If additional external software is installed in a non standard location
-(given to previous full configure), hand-hack the build_config ... or just do
-./mecca -t distclean
-./configure --ext=<whatever>:<new-location>
-./mecca
+(given to previous full configure), hand-hack the build_config ... or
+rebuild from scratch:
+
+ ./make distclean
+ ./configure `cat config.status` --ext=<old-path>:<new-location>
+ ./make
+
 Remember to also set PATH / LD_LIBRARY_PATH (or /etc/ld.conf.so) in
 your execution environment.
 
@@ -133,7 +136,7 @@ Getting sources of external packages
 For most external packages the source packages are also available
 from:
 
-ftp://ftp.gled.org/gled/<version>/external/src
+  ftp://ftp.gled.org/cache/
 
 This is for completeness only. If you intend to use/compile those
 packages it is still a good idea to visit homepages of given projets.
