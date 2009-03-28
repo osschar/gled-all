@@ -369,10 +369,10 @@ void Gled::InitLogging()
   if(bShowSplash) {
     GMutexHolder mh(mLoggingMutex);
     message("+----------------------------------------------------------+");
-    message(GForm("| This is Gled, version %s", GLED_VERSION_STRING));
-    message(GForm("|   Build date: %s", GLED_BUILD_DATE_STRING));
-    message(GForm("|      SVN Rev: %s", GLED_SVN_REV_STRING));
-    message(GForm("|      SVN URL: %s", GLED_SVN_URL_STRING));
+    message(GForm("| This is Gled, version %s", GLED_BUILD_VERSION));
+    message(GForm("|   Build date: %s", GLED_BUILD_DATE));
+    message(GForm("|      SVN Rev: %s", GLED_BUILD_SVN_REV));
+    message(GForm("|      SVN URL: %s", GLED_BUILD_SVN_URL));
     message("| Gled is free software, released under GNU GPL version 2");
     message("| For further information visit http://www.gled.org/");
     message("+----------------------------------------------------------+");
