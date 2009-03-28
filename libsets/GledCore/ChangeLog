@@ -1,3 +1,9 @@
+2009-03-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Gled/Gled.cxx:
+	Cannonize GLED_BUILD defines.
+
 2009-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Intruduce new config header gled-config-build.h.
