@@ -235,7 +235,7 @@ if ($config->{RECONFIGURE} == 0)
   print CH "#define GLED_CONFIG_H\n\n";
   print CH "#include \"gled-gcc-config.h\"\n\n";
 
-  print CH "#define GLED_SYSTEM            \"$config->{SYSTEM}\"\n";
+  print CH "#define GLED_SYSTEM           \"$config->{SYSTEM}\"\n";
   print CH "\n";
 
   unless ($config->{PREFIX} eq '<none>')
@@ -405,10 +405,10 @@ print CBH << "FNORD";
 #ifndef GLED_CONFIG_BUILD_H
 #define GLED_CONFIG_BUILD_H
 
-#define GLED_SVN_REV_STRING    "$config->{SVN_REV}"
-#define GLED_SVN_URL_STRING    "$config->{SVN_URL}"
-#define GLED_VERSION_STRING    "$config->{BUILD_VERSION}"
-#define GLED_BUILD_DATE_STRING "$config->{BUILD_DATE}"
+#define GLED_BUILD_SVN_REV    "$config->{SVN_REV}"
+#define GLED_BUILD_SVN_URL    "$config->{SVN_URL}"
+#define GLED_BUILD_VERSION    "$config->{BUILD_VERSION}"
+#define GLED_BUILD_DATE       "$config->{BUILD_DATE}"
 
 #endif
 FNORD

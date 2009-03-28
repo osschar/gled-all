@@ -901,7 +901,7 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
   char msgbuf[256];
   int  len = snprintf(msgbuf, 256,
 		      "This is Saturn \"%s\", Gled version %s (%s). Hello ...",
-		      mSaturnInfo->GetName(), GLED_VERSION_STRING, GLED_BUILD_DATE_STRING);
+		      mSaturnInfo->GetName(), GLED_BUILD_VERSION, GLED_BUILD_DATE);
   if(len > 255) len = 255;
   newsocket->SendRaw(msgbuf, len);
 
