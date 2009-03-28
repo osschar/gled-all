@@ -1,3 +1,8 @@
+2009-03-28  Matevz Tadel  <mtadel@greed>
+
+	* configure:
+	Cannonize GLED_BUILD defines.
+
 2009-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* INSTALL:
