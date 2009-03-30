@@ -3,7 +3,9 @@
 ########################################################################
 
 use Carp;
+use Data::Dumper;
 use GledBuildConf;
+
 
 ########################################################################
 # Common variables
@@ -12,8 +14,6 @@ use GledBuildConf;
 $VER_RE    = '\d+\.\d+(?:\.\d+)?(?:-[\w\d]+)??';
 $SOURCE_RE = '(?:src|source|gled)';
 $TAR_RE    = '(?:tar\.gz|tgz)';
-
-@FILES_IN_CACHE_DIR = slurp_dir("$CACHE_DIR");
 
 
 ########################################################################
@@ -53,16 +53,6 @@ sub cd
   }
 }
 
-sub slurp_dir
-{
-  my $dir = shift;
-  opendir D, $dir;
-  my @files = readdir D;
-  closedir D;
-  @files = grep { -f "$dir/$_" and !/^\./ } @files; # grep out .files, . and ..
-  return @files;
-}
-
 
 ########################################################################
 # Package functions
@@ -79,33 +69,31 @@ sub setup_package
   # If this can not be achieved it dies with an appropriate error.
 
   my $pkg = shift;
-
-  my $download_tried = 0;
- entry:
-  my @files = grep { /^${pkg}-${VER_RE}(?:-${SOURCE_RE})?\.${TAR_RE}$/ }
-                   @FILES_IN_CACHE_DIR;
-
   my $file;
 
-  if ($#files == 0)
+  my %cachelist  = list_files($CACHE_DIR);
+
+  if (defined $cachelist{$pkg})
   {
-    $file = $files[0];
+    $file = $cachelist{$pkg}{'file'};
   }
-  elsif ($#files < 0)
+  else
   {
-    if ($download_tried) {
-      die "Download of package $pkg seemed to succeed but the file still not found."
+    my %serverlist = read_or_create_serverlist();
+
+    if (defined $serverlist{$pkg})
+    {
+      $file =$serverlist{$pkg}{'file'};
+      download_file($file);
     }
-    print STDERR "Package $pkg not found in local cache ... attempting download.\n";
-    $download_tried = 1;
-    download_package($pkg);
-    goto entry;
-  }
-  elsif ($#files > 0)
-  {
-    die "Several matching packeges found in cache:\n  ",
-        join("\n  ", @files),
-        "\nAborting.";
+    else
+    {
+      print STDERR <<"FNORD";
+Tarball for package $pkg not found in cache nor in the current serverlist.
+Maybe "update_cache.pl" in gled-builder/ could help.
+FNORD
+      exit 1;
+    }
   }
 
   $file =~ m/$pkg-(${VER_RE})(?:-${SOURCE_RE})?\.${TAR_RE}$/;
@@ -123,15 +111,14 @@ TARDIR     := $tardir
 FNORD
 }
 
-sub download_package
+sub download_file
 {
-  my $pkg = shift;
+  my $file = shift;
 
   if (not -e $CACHE_DIR) {
     system_or_die("mkdir -p $CACHE_DIR");
   }
-  system_or_die("cd $CACHE_DIR; rsync -av $CACHE_URL/$pkg-*.tar.gz . 1>&2");
-  @FILES_IN_CACHE_DIR = slurp_dir("$CACHE_DIR");
+  system_or_die("cd $CACHE_DIR; rsync -av $CACHE_URL/$file . 1>&2");
 }
 
 sub deduce_tardir_name
@@ -142,6 +129,107 @@ sub deduce_tardir_name
   close F;
   $dir =~ s!/.*$!!o;
   return $dir;
+}
+
+
+########################################################################
+# Filemap and severlist handling functions
+########################################################################
+
+sub list_files
+{
+  # Given a directory path, lists the files existing there (via rsync)
+  # and returns them as a hash.
+
+  my ($dir) = @_;
+
+  my @ls = `rsync --list-only $dir/*-*.* 2>/dev/null`;
+
+  my %map;
+
+  for $l (@ls)
+  {
+    my @fs = split(/\s+/, $l);
+    my $datime = "$fs[2]-$fs[3]";
+    my $file   = $fs[4];
+    my ($package) = $file =~ m/^([\w-]+)-${VER_RE}(?:-${SOURCE_RE})?\.${TAR_RE}$/;
+
+    if (not defined $map{$package} or $map{$package}{'datime'} lt $datime)
+    {
+      $map{$package} = { 'datime' => $datime, 'file' => $file };
+    }
+  }
+
+  return %map;
+}
+
+sub write_serverlist
+{
+  my ($map) = @_;
+
+  if (not -e $CACHE_DIR) {
+    system_or_die("mkdir -p $CACHE_DIR");
+  }
+
+  $Data::Dumper::Indent = 1;
+  $Data::Dumper::Purity = 1;
+
+  open C, ">$CACHE_DIR/serverlist" or die "Can't open serverlist for writing.";
+
+  print C Dumper($map);
+
+  close C;
+}
+
+sub read_serverlist
+{
+  do "$CACHE_DIR/serverlist" or die "Eval of serverlist failed.";
+
+  return %$VAR1;
+}
+
+sub read_or_create_serverlist
+{
+  if (-e "$CACHE_DIR/serverlist")
+  {
+    return read_serverlist();
+  }
+  else
+  {
+    my %files_on_server = list_files($CACHE_URL);
+    write_serverlist(\%files_on_server);
+    return %files_on_server;
+  }
+}
+
+sub update_cache
+{
+  # Updates the 'serverlist' file.
+  # Compares server directory with local cache and if a newer version
+  # of an existin package is found does the following:
+  #  - removes local copy;
+  #  - downloads the latest tarball;
+  #  - calls 'make distclean' in affected package.
+  # Returns a list of updated packages.
+
+  my %files_on_server = list_files($CACHE_URL);
+  write_serverlist(\%files_on_server);
+
+  my %files_in_cache  = list_files($CACHE_DIR);
+
+  my @updated_pkgs;
+
+  for $k (sort keys %files_in_cache)
+  {
+    if ($files_in_cache{$k}{'datime'} lt $files_on_server{$k}{'datime'})
+    {
+      unlink "$CACHE_DIR/$files_in_cache{$k}{'file'}";
+      exec_or_die("rsync $CACHE_URL/$files_on_server{$k}{'file'} $CACHE_DIR");
+      exec_or_die("make -C external/$k distclean");
+      push @updated_pkgs, $k;
+    }
+  }
+  return @updated_pkgs;
 }
 
 

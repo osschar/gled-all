@@ -1,3 +1,15 @@
+2009-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve management of external-package cache.
+
+	* GledBuildExternal.pm:
+	Add functions for cache handling and interaction.
+	Use them also when setting up and downloading a package.
+
+	* update_cache.pl:
+	New script - updates the cache state, downloads new versions and
+	optionally rebuilds the affected packages.
+
 2009-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Explicit usage of bash, quote vulnerable constructs in shell scripts.
