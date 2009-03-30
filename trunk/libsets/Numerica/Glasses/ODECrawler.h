@@ -156,7 +156,7 @@ protected:
   void          init_integration(Bool_t call_ode_start);
 
   Int_t		Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
-		     TVectorD& yscal, Double_t& hdid, Double_t& hnext);
+		     TVectorD& yscal, Double_t& h_last, Double_t& h_next);
   void 		Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,
 		     TVectorD& yout, TVectorD& yerr);
   void		Integrate();
