@@ -42,20 +42,40 @@ AC_CANONICAL_BUILD
 
 
 AC_ARG_CONF_VAR([RELEASE],
-                [Gled release],
-		[HEAD])
+                [Gled release version],
+		["1.3.x-r<svnrev>"])
 
 AC_ARG_CONF_VAR([CACHE_DIR],
                 [local source package cache],
-		[\${PREFIX}/cache])
+		["\${PREFIX}/cache"])
+
+AC_ARG_CONF_VAR([CACHE_TAG],
+                [Tag for external software],
+		["HEAD"])
 
 AC_ARG_CONF_VAR([CACHE_URL],
                 [remote source package cache],
-		[rsync://rsync.gled.org/cache/\${RELEASE}])
+		["rsync://rsync.gled.org/cache/\${CACHE_TAG}"])
+
+AC_ARG_CONF_VAR([SVN_BASE],
+                [SVN base URL],
+		["https://svn.gled.org/gled"])
+
+AC_ARG_CONF_VAR([SVN_DIR],
+                [SVN directory],
+		["trunk"])
+
+AC_ARG_CONF_VAR([SVN_REV],
+                [SVN revison],
+		["HEAD"])
+
+AC_ARG_CONF_VAR([SVN_USER],
+                [SVN username],
+		["$USER"])
 
 AC_ARG_CONF_VAR([MAKE_J_OPT],
 		[parallel build option (for packages that support it)],
-		[-j4])
+		["-j4"])
 
 AC_PROG_CPP
 AC_PROG_CC
