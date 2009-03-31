@@ -1,3 +1,26 @@
+2009-03-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for proper propagation of build params into gled-build.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	* configure.ac:
+	Add new configuration variables allowing full control over what
+	SVN version of Gled and what external software is used:
+	  CACHE_TAG  tag for external software;
+	  SVN_BASE   SVN base URL;
+	  SVN_DIR    SVN directory;
+	  SVN_REV    SVN revison;
+	  SVN_USER   SVN username.
+
+	* gled/Makefile:
+	Pass the new configuration variables to gled-build-checkout and to
+	configure.
+
+	* configure-branch.sh:
+	* configure-tag.sh:
+	New scripts - helpers for configuring tag / branch builds.
+
 2009-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve management of external-package cache.

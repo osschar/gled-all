@@ -10,8 +10,8 @@ all: install
 checkout:
 	${ECHO} -G- Checking out ${PACKAGE}
 	${MUTE} rm -rf ${gled_dir} gled-build-checkout $@
-	${MUTE} svn export http://svn.gled.org/gled/trunk/gled-build-checkout
-	${MUTE} ./gled-build-checkout trunk
+	${MUTE} svn export ${SVN_BASE}/${SVN_DIR}/gled-build-checkout
+	${MUTE} ./gled-build-checkout --svn-base=${SVN_BASE} --svn-user=${SVN_USER} ${SVN_DIR}
 	${MUTE} touch $@
 
 ### configure
@@ -19,7 +19,7 @@ checkout:
 define configure-cmds
 ln -sf ${PREFIX} external;\
 . binenv.sh;\
-./configure --blobdir=${PREFIX}/gled --external=`pwd`/external --libsets='<auto>'
+./configure --buildversion="${RELEASE}" --blobdir=${PREFIX}/gled --external=`pwd`/external --libsets='<auto>'
 endef
 
 configure: checkout
