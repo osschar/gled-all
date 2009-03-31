@@ -143,7 +143,8 @@ sub list_files
 
   my ($dir) = @_;
 
-  my @ls = `rsync --list-only $dir/*-*.* 2>/dev/null`;
+  # --list-only not supported on older rsyncs.
+  my @ls = `rsync $dir/*-*.* 2>/dev/null`;
 
   my %map;
 
