@@ -9,11 +9,11 @@ $SVN_REV  = "HEAD";
 
 @def_libsets = qw{ GledCore Audio1 GTS Geom1 Numerica RootGeo Var1 };
 
-while ($ARGV[0] =~ m/--([-\w]+)=([-:/\w]+)/)
+while ($ARGV[0] =~ m/^--([-\w]+)=(.+)$/)
 {
   my $var = uc $1;
-  $var =~ s/-/_/g;
   my $val = $2;
+  $var =~ s/-/_/g;
   eval("\$$var = '$val';");
   shift @ARGV;
 }
