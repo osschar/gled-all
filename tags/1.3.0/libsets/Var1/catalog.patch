@@ -1,0 +1,25 @@
+$PATCH = {
+
+"HTrans" => {
+  'NoDefault'  => 1,
+  'Pragmas'    => "#pragma link C++ class HPoint<Float_t>+;\n" .
+                  "#pragma link C++ class HPoint<Double_t>+;\n" .
+                  "#pragma link C++ class HPointF+;\n" .
+                  "#pragma link C++ class HPointD+;\n" .
+                  "#pragma link C++ class HTrans<Float_t>+;\n" .
+                  "#pragma link C++ class HTrans<Double_t>+;\n" .
+                  "#pragma link C++ class HTransF+;\n" .
+                  "#pragma link C++ class HTransD+;\n"
+},
+
+"ParaSurf" => {
+  'VirtualBase' => 1
+},
+
+"Extendio" => {
+  'VirtualBase' => 1
+},
+
+};
+
+1;

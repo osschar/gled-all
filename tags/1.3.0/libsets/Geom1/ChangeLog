@@ -1,0 +1,1000 @@
+2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/tc.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSSeed.cxx:
+	Fix compilation warnings.
+
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Add function:
+	  Float_t BoundingBoxHalfDiagonal();
+
+2009-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Add members:
+	  Float_t mMinEdgeLen, mMaxEdgeLen;
+	and calculate them in CalculateBoundingBox().
+
+	Add functions:
+	  Float_t SqrLen(const Float_t a[3], const Float_t b[3]);
+	  void    SqrMinMaxEdgeLen(Int_t ti, Float_t& min, Float_t& max);
+
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Add functions AddVertices(Int_t nv) and AddTriangles(Int_t
+	nt). They allow the tvor to be extended with new vertices and
+	triangles.
+
+	Add functions:
+	  Float_t CalculateTriangleNormal(Int_t ti, Float_t normal[3])
+	  Float_t CalculateTriangleNormalAndCog(Int_t ti, Float_t normal[3], Float_t cog[3]);
+	that simplify some calculations.
+
+2008-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GForge/Makefile:
+	* Makefile:
+	Remove explicit link against -ljpeg -ltiff -lmng -- this is now
+	done during linking of libIL and libILU in gled-builder.
+
+2008-10-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/tc.cxx:
+	Fix compilation warnings.
+	Consolidate debug output commands.
+
+	* GForge/Makefile:
+	Explicitly link agains image libs that are sometimes not linked
+	with libIL.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Include '-ljpeg -ltiff -lmng' to BASE_LD_LIBS - the latest DevIL
+	seems even more screwed up than before.
+	Add a comment explaining this.
+
+2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	Data-member m_anim_tick was only increased when running in
+	auto-anim mode (not from outside time-source).
+	Thanks valgrind.
+
+2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx:
+	* Glasses/Mover.h:
+	* Glasses/RndSMorphCreator.cxx:
+	* Glasses/RndSMorphCreator.h:
+	* Glasses/Sleeper.cxx:
+	* Glasses/Sleeper.h:
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	Operator::Operate() does not have exception specifier anymore.
+	
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Give up on ATI ever supporting non-pow-2 textures.
+	Use image-rescale-to-pow2 for all 2.1 drivers.
+
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7769.
+
+2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GLTesterOne.cxx:
+	Follow changes in PupilInfo.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7659.
+	Whitespace.
+
+2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.h:
+	Add function 'Float_t SqrDistanceToVertex(Int_t vi, const Float_t p[3])'.
+
+2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7537.
+
+2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added GenerateTriangleColorsFromTriangleStrips().
+	Add some docs.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Use glMultiDrawElements() for smooth rendering when using triangle
+	strips.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Added option to colorize triangle strips with random colors.
+	Do not use triangle strips by default.
+
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/FormulaMover.cxx:
+	* Glasses/FormulaMover.h:
+	* Glasses/LocalMover.cxx:
+	* Glasses/LocalMover.h:
+	New files - in fact old files with classes I never really got to
+	do properly.
+
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	The tube end-points can now also be given directly as ZTranses.
+	Before one had to set links to two external ZNodes.
+	
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7415.
+
+2008-03-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7412.
+
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.1.7276.
+
+2008-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added functions Float_t BoundingBoxXYArea() and
+	Float_t BoundingBoxVolume().
+
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	Whitespace.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added function for limited update of triangle colors
+	GenerateTriangleColorsFromVertexColors(set<Int_t> trings).
+	Whitespace.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.0.6650.
+
+2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Added functions GetMin/MaxX/Y().
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.0.6474.
+
+2007-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	Fix for root-5.16.00.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/GLTesterOne.cxx:
+	* Glasses/RGBAPalette.cxx:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/TimeMaker.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSSeed.cxx:
+	* Glasses/ZImage.cxx:
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/MD2Object_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Stones/TringTvor.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
+2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added functions Float_t BoundingBoxDiagonal() and Bool_t
+	HasTringNorms/Cols().
+
+	* perllib/GLED_Geom1_Widgets.pm:
+	Use the set mapping for TVector3 in weed callback.
+	Should move the TVector3 widget stuff to GledCore.
+
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RGBAPalette.cxx:
+	* Glasses/RGBAPalette.h:
+	New glass: a speed optimised color palette.
+
+	* Glasses/ZRibbon.cxx:
+	Add comments about merging with RGBAPallete.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Increase version number of ati drivers that are slow with non
+	pow-two textures.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added axis-aligned bounding-box memers/methods; new method
+	GenerateTriangleColorsFromVertexColors().
+
+	* glass.list:
+	Register new glass RGBAPalette;
+
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Removed render mode data-members (smooth-shade, colp, texp) as
+	they must be controlled from outside; added some functions to
+	facilitate creation of higher-level mesh conectivity structures.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	Provide special functions for flat/smooth rendering.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Separated function that creates a TringTvor so that it can be
+	called from ooutside.
+
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	Follow changes in TringTvor_GL_Rnr.
+
+2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Added bounding-box members and method CalculateBoundingBox().
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Increased version string of ATI driver for which non-pow-2 textures
+	are slow.
+
+2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TimeMaker.cxx:
+	Added missing initialization of member 'bPrintOut'.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Added additional protections before enabling color/texture arrays
+	for smooth-shade rendering.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	* Stones/TubeTvor.cxx:
+	* Stones/TubeTvor.h:
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+	Moved Tring/TubeTvor from Tvor/ to Stones/; sub-classed them from
+	ZRCStone.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/SMorph.cxx:
+	* Glasses/WSSeed.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	* Rnr/GL/TubeTvor_GL_Rnr.h:
+	Fix include directives for Tvor's (moved to Stones/ directory).
+
+2006-10-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	Added 'Float_t zfac' argument to SetFromImage() allowing vertical
+	scaling of the imported height-field; added method
+	DisownTringTvor().
+
+	* Glasses/GForger.cxx:
+	* Glasses/GForger.h:
+	Added member 'Float_t mZFactor'; used when setting terrain from
+	the image.
+
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	Added methods SetVertex/Triangle/TriangleColor; in ctor initialize
+	also mNStripEls and mNStrips data-members.
+
+	* FL/Fl_Vector3.cxx:
+	* FL/Fl_Vector3.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	New fltk weed to allow editing of TVector3.
+
+2006-09-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Extended image-rescale-to-pow2 for ATI to GL version 2.0.6011.
+
+2006-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Added method 'InsertPoint(Float_t time)' that allows insertion of
+	new points between two existing points so that the form of the
+	symbol does not change.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Implemented method 'Save(const Text_t* file)'.
+
+2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Added flags bLoadAdBind and bSmartShadow to better control loading
+	and shadowing of images; new method IsBindable(); images in
+	color-index format are automatically converted to RGB8 format on
+	load.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Use IsBindable() to determine if texture-data is available.
+	
+	* GForge/Makefile:
+	Fixed type in linking message.
+
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Glasses/MultiBoard.cxx:
+	* Glasses/MultiBoard.h:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	Moved include of some link-types from .h to .cxx and replaced them
+	with forward declarations.
+
+2006-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+	Added logick to automatically detect when rescaling of images to
+	pow2 is needed and apply it in such cases (GL<1.4, ATI fglrx very
+	slow for non-pow2 textures).
+
+2006-06-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GForge/Makefile:
+	Added echoes and mutes; clean-up.
+
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	Added sine-wave option to wrap-mode and controlling parameters
+	(omega, delta).
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSTube.h:
+	* Stones/TimeMakerClient.h:
+	Compatibility updates (gcc4/ROOT) and beautifications.
+
+2006-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MD2Object.cxx:
+	* Glasses/MD2Object.h:
+	* Rnr/GL/MD2Object_GL_Rnr.cxx:
+	Removed texture scale/offset controls, added normal scale as some
+	models have inverted normals. Some improvements/generalizations.
+
+2006-03-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MD2Object.cxx:
+	* Glasses/MD2Object.h:
+	* Rnr/GL/MD2Object_GL_Rnr.cxx:
+	* Rnr/GL/MD2Object_GL_Rnr.h:
+	* glass.list:
+	New glass MD2Object: import and rendering of Quake2 md2
+	files. Textures are somewhat broken.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Added members mSWrap and mTWrap.
+
+2006-02-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Amphitheatre.h:
+	Sub-classed also from TimeMakerClient, allows smooth key-frame
+	capture of chair hunt.
+
+2006-02-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.h:
+	Allow TexXC, TexYC to be negative (thus inverting the texture).
+
+	* Glasses/WSPoint.h:
+	Increased limits on all parameters.
+
+2006-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	Fixed a bug in on_insert() causing corruption of internal
+	state. Occured when WSSeed was populated by non-WSPoints.
+
+2006-01-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	* Rnr/GL/Board_GL_Rnr.h:
+	Added support for rendering of the board with several divisions
+	(members mUDivs, mVDivs). Needed for lightning and fog when size
+	of the board is large compared to lamp distance/fog depth. Removed
+	member bFillBack (can be done via ZGlLightModel).
+
+2006-01-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	Added local m_num_points, use local connectivity data in all
+	iterations over seed list.
+
+	* Glasses/WSWalker.cxx:
+	Lock WSSeed during call to TransAtTime.
+
+2006-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	Texture coordinate generation for TringTvor was only done for
+	smooth shading.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Texcure-coordinate-array was not enabled for flat shading.
+
+2006-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	Added method MakeFromFormulas() allowing creation from three
+	algebraic expressions.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Added interface to iluMirror/Rotate; in libGeom1_GLED_user_init()
+	now set origin mode to lower-left corner.
+
+	* Glasses/SMorph.cxx:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	Texture origin now in lower-left corner.
+
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Color array now 4 bytes (added alpha), renamed texture coordinate
+	array variable mTexts->mTexs.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	* Rnr/GL/RectTerrain_GL_Rnr.h:
+	Added support for textured surface and alpha layer in surface
+	colors.
+
+2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	Use color/point-size/line-width from GLRnrDriver.
+
+2005-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	Move guests in parent-frame, not local (that was a bug).
+
+	* Glasses/Rect.cxx:
+	* Glasses/Rect.h:
+	Minimal changes.
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	Implemented virtual ResetRecurively().
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Optimized Coff (bezier coefficients) handling; added pointers to
+	prev/next point.
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Implemented low level list operations to also perform linking of
+	points with prev/next pointers; added members m_first/last_point;
+	optimized animation (WSSeed is now also subclassed from
+	TimeMakerClient). Texture animation now done via
+	texture-matrix-stack (much faster). Added toy function
+	MakeLissajou() to create 3d curves.
+
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	Optimized connect/disconnect animation; implemented virtual
+	TimeTick (inherited from TimeMakerClient via WSSeed).
+
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	Optimized with usage of local cache-variables Double_t m_last_time
+	and ZTrans m_last_trans.
+
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Removed blending change (should be done elsewhere when needed);
+	clean-up.
+
+	* Rnr/GL/WSPoint_GL_Rnr.cxx:
+	Removed axis drawing (can be done with a rnr-mod).
+
+	* catalog.patch:
+	Added WSTube::Traveler for rootcint.
+
+2005-10-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	Added method AddClient (creates client list if it does not exist).
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Optimised mCoffs access (change in TMatrixD).
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	New methods MesureLength and WSSeed::MeasureAndSetLength;
+	optimized WSPoint::mCoffs access in TransAtTime; added method
+	Travel (slightly modified copy from WSTube).
+
+	* Glasses/WSWalker.cxx:
+	* Glasses/WSWalker.h:
+	* glass.list:
+	New glass WSWalker: moves ZNode along a WeaverSymbol.
+
+	* GForge/Makefile:
+	Missing '-f' in distclean rm command.
+
+2005-10-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx:
+	* Glasses/Mover.h:
+	Added option to move/rotate in parent frame.
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	Added option to apply an arbitrary formula to time.
+
+	* Glasses/TimeScreenText.cxx:
+	* Glasses/TimeScreenText.h:
+	* glass.list:
+	New glass TimeScreenText: a TimeMakerClient that displays current
+	time (subclass of ScreenText).
+
+2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TimeMaker.cxx:
+	* Glasses/TimeMaker.h:
+	* Stones/TimeMakerClient.cxx:
+	* Stones/TimeMakerClient.h:
+	New files: TimeMaker is an operator that makes time from Eventor's
+	internal time representation, stores it on Eventor's time-stack
+	and possibly delivers it to clients (that must subclass abstract
+	base TimeMakerClient).
+
+	* Glasses/GLTesterOne.cxx:
+	Follow-up changes in PupilInfo redraw stuff.
+
+	* Glasses/Mover.h:
+	* Glasses/WSSeed.h:
+	Cosmetics.
+
+2005-10-03  Matevz TADEL  <matevz.tadel@ijs.si>
+
+	* Glasses/GForger.cxx:
+	* Glasses/GForger.h:
+	* GForge/*:
+	New files; gforge executable and a glass wrapper for
+	execution. GForger can be told about a ZImage and RectTerrain to
+	perform automatic image reloads and updates of terrain.
+
+2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Added wrappers for ILU's blur, contrast and equalize.
+
+2005-06-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.cxx:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Consolidation of rendering into display lists.
+
+2005-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/tc.cxx:
+	Removed printout of tc version on first operation.
+
+	* Makefile:
+	Added directory Tvor to base directories.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	Moved triangle rendering code into TringTvor class.
+
+	* Tvor/TringTvor.cxx:
+	* Tvor/TringTvor.h:
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	New files: triangle mesh rendering structure. See RectTerrain for
+	example of its use.
+
+	* Tvor/TubeTvor.cxx:
+	* Tvor/TubeTvor.h:
+	* Rnr/GL/TubeTvor_GL_Rnr.cxx:
+	* Rnr/GL/TubeTvor_GL_Rnr.h:
+	Moved here from GledCore.
+
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ACTC/COPYRIGHT:
+	* ACTC/tc.cxx:
+	* ACTC/tc.h:
+	Import of ACTC triangle consolidator by Brad Grantham.
+
+	* Makefile:
+	Included ACTC in base-lib directories.
+
+	* Readme_Geom1:
+	Added ACTC as external software and its copright.
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	Added triangle-based rendering modes. Should be moved somewhere
+	else and only the basic implementation left here.
+
+2005-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Rect.cxx:
+	Formatting changes.
+
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	Disabled default usage of display lists; made mColor request
+	re-triangulation (needed when using display lists). I know this
+	sounds somewhat silly.
+
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Use 'glBlendFunc(GL_SRC_ALPHA, GL_ZERO)' if transparent. 
+
+2005-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.h:
+	Member bUseDispList now in ZGlass; GL-renderer can rely on
+	parent's renderer to regenerate display list when needed.
+
+2005-02-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Board.h:
+	* Glasses/SMorph.h:
+	* Glasses/WSSeed.h:
+	Fixed RnrBits of links to textures in accordance with new rnr
+	order.
+
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.h:
+	* Glasses/Board.h:
+	* Glasses/GLTesterOne.h:
+	* Glasses/MultiBoard.h:
+	* Glasses/Rect.h:
+	* Glasses/RectTerrain.h:
+	* Glasses/RelParticle.h:
+	* Glasses/RndSMorphCreator.h:
+	* Glasses/SMorph.h:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.h:
+	* Glasses/WSTube.h:
+	* Glasses/ZImage.h:
+	* Glasses/ZRibbon.h:
+	Clean-up of RnrCtrl constructors; in most cases they are not
+	needed anymore.
+
+2005-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GLTesterOne.cxx:
+	* Glasses/GLTesterOne.h:
+	* Rnr/GL/GLTesterOne_GL_Rnr.cxx:
+	* Rnr/GL/GLTesterOne_GL_Rnr.h:
+	New files: speed tests for some GL operations.
+
+	* glass.list:
+	New entry for GLTesterOne.
+
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.h:
+	* Glasses/Board.h:
+	* Glasses/Mover.h:
+	* Glasses/MultiBoard.h:
+	* Glasses/RectTerrain.h:
+	* Glasses/RndSMorphCreator.h:
+	* Glasses/SMorph.h:
+	* Glasses/WSSeed.h:
+	* Glasses/WSTube.h:
+	Const-correctness changes (project7 now properly generates const
+	Get methods).
+
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Board.h:
+	* Glasses/Rect.h:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSTube.cxx:
+	* Glasses/ZImage.cxx:
+	* Glasses/ZRibbon.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
+2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+        ==================================================
+        Check-in of major changes from 1.2.3 towards 1.2.4
+        ==================================================
+
+	Changes that influence several groups of files:
+        ===============================================
+        
+        [RD7] RnrDriver now uses exactly 7 rnr levels
+        ---------------------------------------------
+        This allowed for a simplification in declaration of RnrCtrl in a
+        glass header. Most glasses are affected by this; the files with
+        *only* this change are not listed in in this entry.
+
+	* FL/Fl_LorentzVector.cxx:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	Changed variable ordering to be in accordance with TLorentzVector
+	(x,y,z,t).
+	
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/Amphitheatre.h:
+	* Rnr/GL/Amphitheatre_GL_Rnr.cxx:
+	* Rnr/GL/Amphitheatre_GL_Rnr.h:
+	New files: implementation of amphitheatre for placing of ZNode
+	descendants. Includes methods for automatic placement of assigned
+	nodes with traveling towards the nearest free chair.
+	
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+	* Rnr/GL/Board_GL_Rnr.cxx:
+	Selection of arbitrary texture coordinate limits (offers
+	subviews and repeated tiling).
+
+	* Glasses/MultiBoard.cxx:
+	* Glasses/MultiBoard.h:
+	New files; sub class of Board with a list of ZImages and Next/Prev
+	methods. Useful for slide shows.
+	
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	Selection of arbitrary texture coordinate limits (offers
+	subviews and repeated tiling).
+
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Texture animation, methods for obtaining transformation matrix at
+	a given time.
+	
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	New files; subclass of WSSeed for connecting two nodes (supports
+	animated connect and traveling of spheres along the path).
+	
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+	Can specify internal GL image format, support for shadowing (load
+	on demand, usefull for textures that are stored in GL anyway).
+	
+	* glass.list:
+	New glasses: Amphitheatre, MultiBoard, WSTube.
+	
+	* Glasses/Mover.h:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	Minor beautifications.
+	
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Rect.h:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	Width 0 now prevents rendering.
+
+	* Makefile:
+	Minor beautification.
+	
+2004-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* Rnr/GL/RectTerrain_GL_Rnr.cxx:
+	* Rnr/GL/RectTerrain_GL_Rnr.h:
+	Improvements and extensions of rendering, creation from
+	TH2, custom color gradient for z-value coloration (see ZRibbon).
+
+	* Glasses/ZRibbon.cxx:
+	* Glasses/ZRibbon.h:
+	New files; color gradient, loadable from POV-Ray color_map.
+
+	* glass.list:
+	New glasses added.
+
+	* Glasses/RndSMorphCreator.cxx:
+	* Glasses/RndSMorphCreator.h:
+	New files; Operator creating new random SMorphs. Used for testing
+	of lens-delition mechanism.
+
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.h:
+	Now uses display-list infrastructure from ZGlass.
+	
+	* Glasses/Board.h:
+	* Glasses/Mover.h:
+	* Glasses/Rect.h:
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Glasses/ZImage.h:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+	* Rnr/GL/Rect_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+2003-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* glass.list:
+	* Glasses/RelParticle.cxx:
+	* Glasses/RelParticle.h:
+	* FL/Fl_LorentzVector.cxx:
+	* FL/Fl_LorentzVector.h:
+	* perllib/GLED_Geom1_Widgets.pm:
+
+	New files; wrappers for TLorentzVector.
+	
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h: 
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	
+	Simplified due to scaling support in ZNode. 
+	
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+
+	Weaver symbols can now be textured.
+	
+	* Makefile: Introduced double-colon rules for standard targets.
+
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx: Include clean-up.
+	
+	* Glasses/WSPoint.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+
+	Brought in accordance with the new stamping mechanism.
+
+2003-07-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx: Proper Stamping for Load/Unload methods.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	* Rnr/GL/ZImage_GL_Rnr.h:
+
+	_init() was not called from ctor.
+
+2003-07-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	
+	Allow texturing and follow-up on TubeTvor changes.
+
+	SMorph can now be textured by a ZImage holding mercator
+	projection of surface image.
+
+	* Glasses/WSSeed.cxx: Follow-up on TubeTvor changes.
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+
+	Addition of glTexEnv and GL_TEXTURE_MAG/MIN_FILTER parameters.
+
+	The image can now apply in Decal, Replace, Modulate and Blend
+	modes (was always Decal before). GL_TEXTURE_ENV_COLOR can also be
+	specified for Blend mode.
+
+	GL_TEXTURE_MAG/MIN_FILTER can now be Nearest or Linear (was always
+	Nearest before).
+	
+	* Glasses/Board.cxx:
+	* Glasses/Board.h:
+
+	Minor code clean-up.
+
+2003-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx: The Operate() method did not invoke
+	Pre/PostOperate methods.
+
+2003-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSPoint.h:
+	* Glasses/WSSeed.cxx:
+	* Glasses/WSSeed.h:
+	* Rnr/GL/WSPoint_GL_Rnr.cxx:
+	* Rnr/GL/WSPoint_GL_Rnr.h:
+	* Rnr/GL/WSSeed_GL_Rnr.cxx:
+	* Rnr/GL/WSSeed_GL_Rnr.h:
+	* glass.list:
+
+	Added new glasses WSSeed and WSPoint
+
+	* Rnr/GL/SMorph_GL_Rnr.cxx:
+	* Rnr/GL/SMorph_GL_Rnr.h:
+
+	Minor changes
+

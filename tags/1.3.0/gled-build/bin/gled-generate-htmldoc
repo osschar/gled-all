@@ -1,0 +1,166 @@
+#!/usr/bin/perl
+
+use lib "$ENV{GLEDSYS}/perllib";
+use Gled_ConfCat_Parser;
+use ParseConfig;
+
+my $def_cfg = "$ENV{GLEDSYS}/cfg/gled-generate-htmldoc.rc";
+my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg);
+$cfg_parser->parse();
+
+Gled_ConfCat_Parser::import_build_config();
+
+chdir $ENV{GLEDSYS};
+
+`mkdir -p $OUTDIR`;
+
+open HTML, ">$OUTDIR/index.html";
+print HTML <<"fnord";
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>gled/docs/classdoc</title>
+<link href="/gled_site1.css" rel="stylesheet" type="text/css">
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+<meta http-equiv="Content-Language" content="en-english">
+<link REL="icon" HREF="/img/gledicon-rotated-16x16.png" TYPE="image/png">
+
+<!--#include virtual="/head-specs.html" -->
+</head>
+	
+<body
+  BGCOLOR="#FFFFFF"
+  TEXT="#000000"
+  LINK="#0000FF"
+  VLINK="#000080"
+  ALINK="#FF0000"
+>
+
+<!--#include virtual="/top-bar.html" -->
+
+<h2><code>gled/docs/classdoc</code></h2>
+
+<div class="body">
+
+<ul>
+
+<li><font size=+1>
+<a href="ClassIndex.html"><code>class_index:</code>
+</a></font>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+alphabetically sorted list of all TObject descendants
+
+<li><font size=+1>
+<a href="ClassHierarchy.html"><code>class_hierarchy:</code></a>
+</font>
+hierarchy of <code>Gled</code> classes
+
+<li><font size=+1>
+<a href="ListOfTypes.html"><code>list_of_types:</code></a>
+</font>&nbsp&nbsp&nbsp
+list of common typedefs
+
+</ul>
+
+</div>
+
+<h2><code>gled/docs/classdoc/classes_by_libset_and_category</code></h2>
+
+<div class="body">
+
+fnord
+
+open S, ">$MKDOC_MACRO";
+print S "{\n";
+
+# for $ls (@{$resolver->{LibSetList}}) {
+#   print S "  Gled::theOne->AssertLibSet(\"$ls\");\n";
+# }
+
+print S "  gSystem->IgnoreSignal(kSigSegmentationViolation, true);\n";
+print S "  if(gROOT->LoadMacro(\"macros/gled_html_doc.C++\")) gSystem->Exit(1);\n\n";
+
+print S "  gEnv->SetValue(\"Root.Html.Header\", \"\");\n";
+print S "  gEnv->SetValue(\"Root.Html.Footer\", \"\");\n";
+print S "  gEnv->SetValue(\"Root.Html.HomePage\", \"http://www.gled.org/\");\n";
+
+print S "  ZHtml html;\n";
+print S "  html->SetOutputDir(\"$OUTDIR\");\n";
+print S "  html->SetSourceDir(\"" .
+  join(':', @{$resolver->{LibSetList}}) . "\");\n";
+
+@all_classes = ();
+
+for $ls (@{$resolver->{LibSetList}}) {
+  # print S "  Gled::theOne->AssertLibSet(\"$ls\");\n";
+  print S "  gSystem->Load(\"$ENV{GLEDSYS}/lib/lib${ls}\");\n";
+
+  print HTML "\n\n<hr>\n";
+  print HTML "<h3><code>$ls</code></h3>\n\n";
+
+  my $ds = `cd $ls; make echo_dict_dirs`;
+  chomp $ds;
+  my @dirs = split(/\s+/, $ds);
+
+  for $d (@dirs) {
+    my @classes;
+    open C, "find $ls/$d -name \\*.h | xargs grep -h ClassDef |";
+
+    # !!!! Should sort glasses by ClassID and others alphabetically !!!!
+
+    while($_ = <C>) {
+      chomp;
+      my $cnt = m/ClassDef\(([\w:]+)\s*,\s*(\d+)\)/;
+      # !!!! Several classes per header file SOMEWHAT supported !!!!
+      unless($cnt) {
+	print "SAFR: $_\n";
+	next;
+      }
+      push @classes, $1;
+      print S "  printf(\"Generating for class $1\\n\");\n";
+#      print S "  html->MakeClass(\"$1\", false);\n";
+      print S "  html->KusKus(\"$1\");\n";
+      print S "  printf(\"Done for class $1\\n\");\n";
+    }
+    close C;
+    if($#classes >= 0) {
+      print HTML "<h4><code>$d</code></h4>\n\n";
+      print HTML join(", ",
+        map { 
+	  my $file = $_;
+	  $file =~ s/:/_/og;	  
+	  "<a href=\"${file}.html\">$_</a>"
+	} @classes) . "\n\n";
+      push @all_classes, @classes;
+    }
+  }
+
+}
+
+print S "  html->gen_list_of_types();\n";
+
+push @all_classes, "TObject";
+@all_classes = sort @all_classes;
+$num_all_classes = $#all_classes + 1;
+print S "  char* names[$num_all_classes];\n";
+my $i = 0;
+for $c (@all_classes) {
+  print S "  names[$i] = \"$c\";\n";
+  ++$i;
+}
+print S "  html->create_hierarchy(names, $num_all_classes);\n";
+print S "  html->create_index(names, $num_all_classes);\n";
+print S "  gSystem->Exit(0);\n";
+print S "}\n";
+
+close S;
+
+print HTML "</div>\n</body>\n</html>\n";
+`chmod a+x $OUTDIR/index.html`;
+
+system "root -l $MKDOC_MACRO";
+#`rm $MKDOC_MACRO`;
+
+print '*' x 80 . "\n";
+print "* Html docs generated in $ENV{GLEDSYS}/$OUTDIR\n";
+print '*' x 80 . "\n";

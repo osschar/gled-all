@@ -1,0 +1,168 @@
+2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* bin/aev-monaclasspath.sh:
+	* bin/aev_ui:
+	* bin/aev_ui.pl:
+	* java:
+	* java/ML_WS.jar:
+	* java/MonaClient.class:
+	* java/MonaClient.java:
+	* java/axis.jar:
+	* java/commons-discovery.jar:
+	* java/commons-logging.jar:
+	* java/jaxrpc.jar:
+	* java/log4j-1.2.8.jar:
+	* java/saaj.jar:
+	* java/wsdl4j.jar:
+	Removed files - this stuff was obsolete like hell.
+
+	* Makefile:
+	Remove monalisa stuff.
+
+2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	Add new member function MakeInfoText() that populates info-text
+	bars in the overlay with current setting.
+	Call it when changing display mode, limits or time-window.
+
+2008-10-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVMlClient.cxx:
+	Fix compilation warnings that appeared with gcc-4.2.
+
+2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVSite.h:
+	* Glasses/AEVSite.cxx:
+	Add member 'Int_t mSiteSize' that is translated into planet's
+	radius.
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	Add support for setting time-window over which the site statistics
+	is accumulated (forwarded to Costin's data-dumper).
+
+	When adding a new planet set radius and mass corresponding to
+	site's size. Also, set it a random color.
+
+	Support desired planet's radius ... so that distance from the Sun
+	maps directly into the selected range of observed values.
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	Use TSocket to talk to data-dumper directly.
+
+	Add member function
+	  void SendLine(const TString& cmd)
+	that allows to send requests back to the dumper.
+
+	* AliEnViz/AEV_NS.h:
+	* AliEnViz/AEV_NS.cxx:
+	Add feof check to BiDiPipe.
+
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	* glass.list:
+	New glass - take care of all the site changes and provide an API
+	for selecting visible sites based on the number of running/failed
+	jobs.
+
+	* Glasses/AEVSite.h:
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVSite.cxx:
+	* Glasses/AEVMlSucker.h:
+	Minor mods needed by the AEVManager class.
+
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Add dependency on the Var1 libset.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVSite.h:
+	* Glasses/AEVSite.cxx:
+	Add data members for counting jobs at given site.
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	Use pointers to member functions stored in a map to execute set-methods.
+	Add processing of site job data.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVMlSucker.h:
+	Add include required when not building with PCH.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVSiteList.h:
+	* Glasses/AEVSiteList.cxx:
+	New glass - container for AEVSites.
+
+	* glass.list:
+	Register AEVSiteList.
+
+	* Glasses/AEVFlatSSpace.cxx:
+	Use new path for "Sites".
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	Basic reading of site info.
+	Add stream parsing functions and regexps.
+	Warning - latest root needed.
+
+	* Glasses/AEVMapViz.cxx:
+	Sanitize chunk position variables and their interpretation.
+	Fix map-chunks for the current situation:
+	- extend Europe to include Russia and Greece,
+	- add India.
+
+2008-09-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliEnViz/AEV_NS.cxx:
+	* AliEnViz/AEV_NS.h:
+	* Glasses/AEVAlienUI.cxx:
+	* Glasses/AEVMlClient.cxx:
+	In BiDiPipe use TString instead of string.
+
+	* Glasses/AEVMapViz.h:
+	* Glasses/AEVMlClient.h:
+	Implement empty virtual destructors to make gcc-3.4.6 happy.
+
+	* Glasses/AEVMlSucker.cxx:
+	* Glasses/AEVMlSucker.h:
+	New glass - read from new monalisa data-dumper.
+
+	* glass.list:
+	Register AEVMlSucker.
+
+2008-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVMlClient.cxx:
+	Use TPMERegexp class instead of TPME.
+
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVAlienUI.cxx:
+	* Glasses/AEVDemoDriver.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVEventBatch.cxx:
+	* Rnr/GL/AEVEventBatch_GL_Rnr.cxx:
+	Fix compilation warnings.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVDemoDriver.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	* Glasses/AEVFlatSSpace.cxx:
+	* Glasses/AEVSphereSSpace.cxx:
+	* Rnr/GL/AEVEventBatch_GL_Rnr.cxx:
+	* Stones/AEVProofFeedback.cxx:
+	Changes for root-5-15-04 (increased modularity).
+

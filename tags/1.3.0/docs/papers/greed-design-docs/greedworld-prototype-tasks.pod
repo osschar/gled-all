@@ -1,0 +1,1095 @@
+=cut
+=$Id$ 
+
+=head1 Document id
+
+=head2 Title
+
+Task-list for \greedworld prototype
+
+=head2 Author
+
+Matevz Tadel
+
+=head2 Document history
+
+B<21.6.2008> - first version.
+
+B<22.10.2008> - update for the developments in solar-system integration.
+
+B<19.01.2009> - update for the developments in gravitational field and
+C<Dynamico> movement (for both C<Crawlers> and C<Flyers>).
+
+=cut========================================================================
+
+
+=head1 Introduction
+
+
+Current implementation of \greedworld in \gled is at the stage of a
+medium-level, limited-scope, technology demo. While it was somehow
+possible to drag it all this way up single-handedly, it is impossible
+to continue the development without active engagement of several
+people. In particular, the core features of the existing framework
+need to be expanded and most of the higher-level features require
+further development. So, ideally, a developer would take over one of
+these features (or more) and at the same time partake in the design and
+extension of the underlaying framework.
+
+In this document, focus is set on tasks related to rendering, world
+creation, world mechanics and user interaction -- in short, to
+game-oriented aspects of \greedworld. Server-client data-separation
+and data-exchange are not on the table yet: \gled provides mechanisms for
+that and it's up to me to provide the first prototype. Nevertheless,
+some of the tasks described here require the server-client
+architecture to be specified and will thus also help in its
+clarification.
+
+First, one posssible vision of the prototype is presented in a
+relatively short and dry manner. Its purpose is not to be a definitive guide,
+it's rather an attempt at helping the reader to get a feel for what
+could be achieved and to form his own vision, maybe entirely
+different from the presented one. 
+
+Next section is a catalogue of game/engine components, their current
+status and their possible extensions, described as ideas or as tasks,
+if the things seem relatively obvious. If you have another idea, or a
+specific interest in one of the fields described in \greed manifesto,
+you are more than welcome to come forward with it.
+
+All of the described tasks require basic knowledge of C++, some
+understaning of the L<\root|http://root.cern.ch/> system and
+wilingness to learn L<\gled|http://www.gled.org/>.  The documentation
+for \gled is somewhat rudimentary (an implementation paper and a
+quick-start guide). But, for a one-developer project, writing
+documentation somewhat defies the purpose. If you want to get on-board
+in a specific area, I'll be glad to provide guidence and write the
+most sorely missing docs as my first priority. GNU/linux is currently
+the only supported platform. Windows and MacOSX support is planned.
+
+
+=cut========================================================================
+
+
+=head1 A vision of \greedworld prototype 
+
+
+[ Read \greed manifesto, in particular description of \greed-words in
+section 2. ]
+
+The \greedworld prototype is a minimal implementation of ideas
+presented in \greed manifesto. Focus is set on getting the things
+going, on building the base the will make the full, persistent \greed
+universe a more likely possibility.
+
+This document will, I hope, serve as a basis for first
+discussions about how to really structure the prototype elements and
+how to get it done reasonably fast. Therefore, I will try to describe it as
+plainly as possible, defining a couple of terms that I found
+useful while thinking about \greedworld.
+
+Anyway ... I'm beginning to realize that describing a game prototype
+requires some discipline. The problem is that one is at the same time
+trying to explain what happens within the game code and,
+simultaneously, how the game is seen by the user, how elements of the
+game are mapped via the user-interface, or, simply, how the games
+looks and feels. I will try to take the middle road, describing the
+game as a rule based system.
+
+
+
+=cut------------------------------------------------------------------------
+
+=head2 General description
+
+On the highest level there is a set of solar systems. Each solar
+system is driven by a set of computers organized in a hierarhic
+server-client system. Travel between solar systems is possible but not
+common.
+
+Solar systems are further populated with planets, moons, asteroids,
+comets and all that. Their surfaces will not be overly compex or
+structured, unless somebody walks in with an incredibly scalable
+terrain engine. Realistic solar-systems tend to be mostly empty - it
+seems reasonable to consider also less conventional celestial
+arrangements. The same holds also for movement and distribution of
+solar systems (Henon-Heiles potential with repulsive core).
+
+Large colonization mother-ships are being flinged from Earth into
+these solar systems (say, by using Higgs-field inudced worm-holes or
+teleporters). Control and communication link between Earth and the
+ship remains open and a user can exercise control over the
+mother-ship, its sub-systems and units that it has on board.
+
+=over enum
+
+=item Energy generators, propulsion systems with basic hyperdrive
+capabilites.
+
+=item Basic resource processing, resource routing and fabrication
+stations.
+
+=item Some planetary landers / transporters.
+
+=item Some exploration vessels and vehicles.
+
+=item Some land / space construction units.
+
+=back
+
+With this starting-kit a player engages in exploration of surrounding
+space to discover B<natural resources> that are distributed throughout
+space but normally clustered near solar and planetary bodies. They
+represent the intrinsic value of some region of space and determine
+its strategic importance. A resource is anything that can be converted
+into something useful, e.g., hydrogen, carbon, oxygen, water, methane,
+silicon, uranium, various ores, bio-matter, etc. When location of the
+resources is known, player sends out construction units to build
+B<resource acquisition infrastructure>.
+
+=over enum
+
+=item B<Resource extraction units>, like mining bots, scoopers and
+harvesters, operate in some resource-rich region and perform the first
+stage of separation of resources from the environment.
+
+=item B<Resource processing plants> process and purify raw resources
+and convert them into B<juiceware> -- a common term for B<raw materials>,
+B<chemicals> and B<fuels>. Each plant can handle several inputs and
+outputs at the same time but is limited with the combined throughput.
+
+=item B<Resource depots>. Can be part of a processing plant, a
+separate unit or part of a larger unit, like mother-ship. Each depot
+has certain capacity.
+
+=back
+
+Processing plants are connected to their inputs and outputs via
+B<matter transfer links> - quantum devices allowing cheap
+teleportative streaming of homogeneous media at short distances.
+
+Juiceware is consumed for further construction and for fabrication of
+derived goods.
+
+=over enum
+
+=item B<Infrastructure> -- mines, processing plants, factories,
+teleportation/routing stations, orbital stations -- built by
+B<construction units>.
+
+=item B<Techware> -- engines, vehicles, space-ships, equipment and
+devices -- built in B<fabrication plants>.
+
+=back
+
+Construction and fabrication will in principle require blueprints (but
+let us drop this from the prototype).
+
+Construction units and fabrication plants are connected with
+processing plants and depots via matter and energy transfer links.
+
+The acquired resources, raw-materials and goods can be used for
+support or extension of existing infrastructure or for further
+exploration and colonization.
+
+In \greed manifesto there is a lot of talk about simulation of human
+population and the role of NPC specialists in R&D activities of a
+colony. I decided to completely drop this aspect from the prototype:
+there are no humans on the other side, it is just technology,
+automatons and robots. All R&D activities are assumed to take place in
+the real world and the results are sent to the colonies via their
+communication links.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Juiceware, where it comes from and where it goes
+
+=over enum
+
+=item B<Hydrogen>
+
+I<Sources:> scooping of stars and gas-giants, electrolysis of water,
+bio-production.
+
+I<Consumers:> fusion reactors.
+
+=item B<Uranium>
+
+I<Sources:> mining of planets, moons, and asteroids.
+
+I<Consumers:> fission reactors.
+
+=item B<Metal>
+
+I<Sources:> mining.
+
+I<Consumers:> building units for all construction, fabrication
+plants for production of most techware.
+
+=item B<Rare metal>
+
+I<Sources:> mining.
+
+I<Consumers:> fabrication plants for production of fancier stuff, like
+electronic equipment and quantum devices.
+
+=item B<Super-heavy elements>
+
+I<Sources:> processing plant equipped with a low-energy particle
+accelerator, requires also uranium and rare metal.
+
+I<Consumers:> operation of gravity-manipulation devices and hyper-drive
+engines.
+
+=item B<Energy>
+
+I<Sources:> fusion plant (requires hydrogen), fission plant (requires
+uranium).
+
+I<Consumers:> everything that does something.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Resource and juicware processing
+
+Processing plants take as input natural resources and juiceware and
+produce juicware as output.
+
+Juiceware quantities are determined by mass and by volume (gasses) or
+by density (liquids and solids).
+
+=over enum
+
+=item Resource extraction units and buildings:
+
+=over enum
+
+=item Maximum extraction speed per juice.
+
+=item Maximum output bandwith.
+
+=item Range of extraction per juice.
+
+=back
+
+
+=item Processing plants:
+
+=over enum
+
+=item Number of input/output matter transfer links, their spatial
+range and bandwidth.
+
+=item Capacity of internal depots.
+
+=item Maximum output bandwidth for each juice.
+
+=back
+
+=item Depots:
+
+=over enum
+
+=item Capacity per juice type.
+
+=back
+
+=back
+
+Each matter transfer link connects a processing plant with one unit
+or depot and allows transfer of a single resource or juice.
+
+User controls:
+
+=over enum
+
+=item connections to acquisition units and depots
+
+=item ongoing process and their priorities
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Fabrication plants
+
+Products of fabrication are actual objects, determined by number, mass
+and volume.
+
+Fabrication plant characteristics:
+
+=over enum
+
+=item Juiceware input bandwidth -- determines production speed.
+
+=item Number of production lines.
+
+=item Installed/available blueprints.
+
+=back
+
+User controls production-lines, assigning the active blueprint to each
+of them.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Comm device
+
+Quantum communication device -- B<q-comm device> -- is a fictitious
+interface between a user and its units. Initially, a single q-comm
+device is available, integrated with the mother ship, allowing control
+over all units and facilities.
+
+Additional q-comm devices can be built and assigned to any number of
+units. The q-comm link access can then be granted to another user, thus
+allowing unit-sharing, delegation of tasks and cooperation.
+
+This should be relatively expensive, maybe even requiring a monthly
+research credits fee.
+
+=cut------------------------------------------------------------------------
+
+=head2 Units
+
+Stuff that moves around and does something.
+
+=head3 Characteristics of all units
+
+=over enum
+
+=item maximum speed / acceleration
+
+=item range and bandwidth of matter / energy transfer links
+
+=item internal storage / depots
+
+=item shield / health status, or something like this
+
+=item some sort of weapon
+
+=back
+
+
+=head3 Unit separation by task
+
+=over enum
+
+=item exploration units -- detection range per juice
+
+=item resource-extraction units -- discussed under L<"Resource and
+juicware processing">.
+
+=item transport units -- nothing special, but have large depot capacity
+
+=item construction units -- construction speed
+
+=item military units -- additional weapons, shields
+
+=back
+
+
+=head3 Unit sepratation by medium where they operate
+
+=over enum
+
+=item land units -- max terrain tilt
+
+=item space units -- propulsion system, warp capability
+
+=back
+
+
+=head3 Control of units
+
+=over enum
+
+=item B<Direct control> -- manipulate unit directly, giving it commands
+where to go and what to do. For some units, like space-ships and
+tanks, this could also mean operating the engines and control systems
+in first-person view.
+
+=item B<Task control> -- manipulate some semi-intelligent control agent
+that further steers the unit. The agent is typically given a task
+and region on which this task should be pursued. One agent can control
+several units.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Mega-units
+
+Mega-units can encompass processing plants, fabrication plants and
+depots. Other units and techware can be stationed inside. Usually that
+would be a space-station, a large space-ship (like mother-ship) or a
+military installation.
+
+Buildings and units within a mega-unit are simulated independently.
+
+Each mega-unit has a hull, an arbitrary mesh defining the extent of
+the unit. Either side of the hull can be used for placement of
+buildings and smaller units can be placed there to crawl about.
+
+Central B<energy bus> is embedded in the hull and structure of a
+mega-unit. Energy-bus is a fictitous device that allows free energy
+transfer between hosted facilities and units. So, one could imagine,
+that fusion and fission reactors are connected as energy producers in
+the center of the structure and processing plants, fabrication plants,
+warp engines and shield devices are connected as consumers.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Research and development
+
+As said earlier, this aspect of the game will not make it into the
+prototype. But this would be the gist of any persistent world, so let
+us investigate the possibilities just a little. In short, the role of
+R&D is to improve existing processes and blueprints as well as to
+invent new technologies and products. Let us introduce four categories
+of such activities:
+
+=over enum
+
+=item Basic research - leads to discovery of new scineces and
+technologies including fusion among previously unrelated sciences and
+technologies.
+
+=item Applicative research - improvement of existing technologies and
+creation of conceptual designs.
+
+=item Engineering research - using technologies to produce or improve
+blueprints, thus improving the overall capabilities of techware.
+
+=item Engineering practice - using blueprints to build techware as
+well as to upgrade and fix existing one.
+
+=back
+
+Points 3. and 4. from the above list could be trivially simulated
+with research credit spending by the player, without the need of
+introducing humans into the other side of the game.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Conclusion of prototype vision
+
+Well, this degraded a little, but I really prefer to write code than
+English text about non-existing code. The intention here was to
+structure the problem space and say how the prototype could function
+and be at least somewhat engaging. Feel free to fill the gaps to your
+liking and to expand the proto-ideas described here. And let me know ...
+
+
+
+=cut========================================================================
+
+
+=head1 Current status of code and possible tasks
+
+
+The topics in this section deal with subsystems and components of the
+game engine and with algorithms for world creation. Some of these
+issues overlap or depend on one another. Also, the descriptions
+are relatively terse -- I can provide more details if somebody is
+interested.
+
+Eventually read [Tadel-GledIHSCM].
+
+
+=head2 \gled crash course
+
+This should help with relating the tasks to existing code.
+
+=over enum
+
+=item \gled is, essentially, an object management framework. Classes
+of these objects can be divided, by the role they play in \gled, into
+the following categories:
+
+=over enum
+
+=item B<Glasses> -- classes of objects that can be shared throughout a
+\gled cluster and execute \gled method-invocation requests (I<MIR>,
+\gled's RPC). They can be put into containers and be pointed to by
+other objects via I<links> (glass-members that serve as
+smart-pointers).
+
+Base-class for all glasses is C<ZGlass>. Instances of glasses are
+called I<lenses>.
+
+Dictionaries are generated for glasses, so you can call their methods
+via the interpreter and run CINT macros for their creation and
+configuraton.
+
+=item B<Stones> -- classes of serializable objects with dictionaries
+(if you know ROOT: stones are derived from C<TObject>) and usually
+serve as data containers. They can be glass data-members or appear as
+arguments in glass member-functions.
+
+=item B<Views> -- classes of objects that represent a lens in some
+way, their abstract base class is C<A_View>. There are two main
+sub-types of views:
+
+=over enum
+
+=item Classes using FLTK widgets -- browsers and containers are
+handwritten, object-view elements are auto-generated.
+
+=item GL-rendering classes -- handwritten, optional (classes can use
+base-class renderers).
+
+=back
+
+=back
+
+=item \gled modules are called B<libsets>. Each libset is composed of
+three shared libraries: base (Glasses/, Stones/, dictionaries + any
+other stuff central to libset functionality), GUI (Views/) and GL
+renderers (C<Rnr/GL/>). Base classes of \gled and the implementation
+of \gled itself is in libset C<GledCore>. \greedworld demo is mostly
+implemented in libset C<Var1> and requires the following libsets:
+C<Geom1> (geometric primitive classes), C<GTS> (interface to GNU
+Triangulated Surfaces library), C<Numerica> (interface to numerical
+algorithms) and C<Audio1> (interface to OpenAL, not yet used). All
+libsets require C<GledCore>.
+
+=back
+
+Class names are given in the following notation:
+
+  Libset/Category/ClassName
+
+That's also where they are in the source-tree (usually, sometimes
+several classes share the same file).
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Rendering
+
+=head3 Status
+
+\gled has a relatively flexible high-level rendering
+infrastructure. Initial goal was to support both OpenGL and POVRay
+rendering but so far only GL sub-infrastructure has been
+implemented. Object hierarchy is mapped automatically into a parallel
+structure of object renderers. Rendering classes have to be written
+manually. Arbitrary state-objects can be attached into the renderer
+graph -- rendering classes can query this state and act accordingly.
+This gives the rendering process a very large degree of flexibility
+and configurability. Object picking is implemented via
+GL-selection. Overlay rendering and overlay event-handling is
+supported.
+
+However, \gled's renderer-graph is not a scene-graph. Nodes do not
+have any bounding-box information and the renderer graph is blindly
+traversed during each draw-operation.
+
+One option out of this is to import an external scene-graph/rendering
+library into the \gled rendering pipeline. Thus \gled would offer the
+high-level rendering support and low-level rendering of the game
+objects would be performed by an optimized scene-graph library.
+
+=head3 Tasks
+
+=over enum
+
+=item Add bounding-box information into \gled classes and use it
+during rendering to perform view-frustum culling and, on request, LOD
+calculations. See [Moller-OVFCA]
+
+=item Consinder existing scene-graph and rendering engines (like
+SauerBratten, G3D, OpenSceneGraph, Ogre3D, Blender) and open-source
+projects (like Celestia, TA-Spring and FlightGear). Try to
+answer the following questions:
+
+What do they have that we need?
+
+Can we use their code? How hard would it be? Can it be snateched out
+or needs to be integrated into \gled or into \greedworld client?
+
+Shall we try to join forces with them in some aspect or another?
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Terrain
+
+=head3 Status
+
+Terrain is represented as a triangle mesh. The functionality of
+terrain code is spread over several classes.
+
+=over list
+
+=item B<C<Geom1/Stones/TringTvor>> -- a simple mesh container holding
+vertex (3f) and triangle (3i) arrays.
+
+Attributes per vertex: RGBA color (4ub), normal (3f), texture coords
+(2f).
+
+Attributes per triangle: RGBA color (4ub), normal (3f)
+
+All attributes are optional; they are also stored in arrays.
+
+Supports creation of triangle-strips (using ACTC) but this
+seems to do more harm than good with current hardware.
+
+Rendering class C<TringTvor_GL_Rnr> supports smooth (using vertex
+attributes) and flat (using triangle attributes) shading. Coloring and
+texturing of the mesh are optional.
+
+=item B<C<Var1/Glasses/TriMesh>> -- triangle mesh class with stuff
+needed for collision detection with OPCODE [Terdiman-OPCODE]. Also
+supports creation of vertex connectivity data that is required for
+mesh traversal algorithms. Can be created from a GTS surface object.
+
+Moving units (C<Dynamico>) and buildings (C<Statico>) all link to a
+C<TriMesh> object. In their case tri-mesh is used for collision
+detection and rendering. Connectivity information for unit meshes is
+not generated by default.
+
+=item B<C<Var1/Glasses/TriMeshField>> -- a field defined on mesh
+vertices. Field value can be mapped to color (link to C<RGBAPalette>
+glass) and assigned into underlying color-arrays of the mesh.
+
+1D fields are used to represent distributions of metal and energy in
+the demo (sum of random gaussian blobs).
+
+=item B<C<Var1/Glasses/TriMeshLightField>> -- sub-class of
+C<TriMeshField> that can calculate shades from a given light source
+and store the light intensity in itself as a 1D field.
+
+=item B<C<Var1/Glasses/ParaSurf>> -- base-class for describing
+parametric surfaces. Used for determination of up-direction and for
+generation of random points on a surface. Supported geometries /
+sub-classes: C<PSRectangle>, C<PSTriangle>, C<PSSphere> and
+C<PSTorus>.
+
+=item B<C<Var1/Glasses/Tringula>> -- basically the demo driver class,
+linking together terrain with lists of static and dynamic objects. Has
+methods for time-propagation and high-level collision detection.
+
+The demo script is C<demos/Var1/tringula.C>. It can generate random
+terrain on flat surface (rectangle or trianlge), sphere
+(outside/inside) or torus (outside/inside).
+
+=back
+
+=head3 Tasks
+
+=over enum
+
+=item Should we use some other mesh representation? I recently read
+[Eberly-3DGED] that using per vertex grouping makes more sense
+lately. But then again, I kind of like flat shading.
+
+=item Usage of VBOs and shaders for terrain/mesh rendering. Now GL-1.4
+stuff is used.
+
+=item Import from other formats. Which? I have code for MD2,
+Total Anihillation and 3DS (no textures).
+
+=item Implement gravitational potentials for all supported parametric
+surfaces.
+
+I<19.1.2009> Done ... C<ParaSurf>s can fill C<GravData> stone that
+includes the derivatives in 'up' and transverse direction. C<Dynamico>
+can deduce safe time and safe distance. See:
+
+  virtual void update_grav_safeties(Float_t vl, Float_t vt);
+
+in C<Dynamico>.
+
+=item Implement field-on-mesh optimized for fields that are mostly
+zero (e.g., as gaussian-blobs at specified vertices).
+
+=item Consider recursive terrain subdivision -- this is a big one and
+there are several issues.
+
+=over list
+
+=item Terrain must be well representable on server side for world
+simulation and on client side for rendering. This means it must be
+both compact and factorizable.
+
+=item Floats are used for vertex positions (to keep vertex data
+smaller). Requiring absolute precision of about 10cm makes the
+maximum mesh extent about 10km.
+
+Imagine that the terrain mesh that we have now represents a rough
+tesselation of the planet surface. It is never used for collsion
+detection, only rendering. Each of the triangles on this mesh is in
+fact a full C<TriMesh> with a triangular parametric surface
+determining its up-direction. Units are always steered in a local
+coordinate system of a given 10km triangle. Their position is
+transformed into coordinate system of the neighbouring triangle when
+they cross the separating plane (using double precision, if this makes
+any difference).
+
+This is quite unlike in open space where units are attached into a
+floating coordinate system where they are at rest. But, when space
+units approach each other, a relative coordinate system is created and
+units are transformed into it. As this involves large distances we
+explicitly require double precision for location of space units. This
+tells us that transformation matrix precision of a unit depends on the
+type of the spatial node it is currently attached to. Thus the spatial
+node itself should take care of transformation matrices of attached
+nodes.
+
+This was a long way of saying that unit motion across sub-terrain
+boundaries should be reasonable.
+
+=item What happens with tri-mesh-fields? Sparse representation seems
+the only way.
+
+=item Transform terrain triangulation into a height-field texture for
+fast rendering in close-up views (Carmack's terrain technique using
+pixel shaders). Does this make sense? Curvature can still be
+significant for asteroids and comets, so we can not use "one big
+texture approach" but need, at least, one level of triangultion (like
+the one we have now).
+
+=back
+
+=back
+
+=head3 End of terrain
+
+In principle, we could roughly get by with what we already have. But if
+somebody is into such stuff, miracles can be done.
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Unit movement on terrain
+
+=head3 Status
+
+Crawlers (objects of glass C<Crawler>) slide over terrain with given
+forward velocity, angular velocity around unit's up-vector and
+levitation height above the terrain (like hovercrafts). At each time
+step the triangle below the center of the unit's mesh is found and
+unit's up direction is aligned with the triangle's normal. There is no
+check for edges/corners of the dyno penetrating the terrain so this
+happens on transitions between triangles that have significantly
+different normal vectors.
+
+Collision with statos (static objects, buildings) is implemented in
+
+ static bool Dynamico::handle_collision(Dynamico*, Statico*, ...)
+
+The unit is bounced-off if it is still getting closer to the center of
+the stato, otherwise it is deflected.
+
+Dyno-dyno collision is done in
+
+  static bool Dynamico::handle_collision(Dynamico*, Dynamico*, ...)
+
+If the units are coming closer, they are elastically scattered with
+conservation of energy and momentum in horizontal plane. If they are
+going apart, they are just displaced to avoid further contact.
+
+
+=head3 Tasks
+
+=over enum
+
+=item Implement some kind of unit health status and decrease it when the
+unit collides. Show health-bar for units. Draw special effects like
+smoke, fire, explosions, etc. 
+
+=item Improve terrain contact implementation, use several points of contact.
+
+=item Use proper rigid-body mechanics for unit movement with forces and
+torques allowing lateral sliding of a unit on a steep terrain and
+jumping off elevated terrain edges. I was thinking of using geometric
+algebra for this task.
+
+This is somewhat done - velocity and angular velocity vectors are
+available so at least lateral slides would be trivial to implement.
+
+=item Collision prediction and collision evasion.
+
+=item Path finding.
+
+=item Unit steering in "go to somewhere" mode.
+
+=item Unit steering in "first person" or "drive" mode.
+
+=item Steering of a unit group in march, patrol, guard and attack modes.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Resource distribution and representation
+
+=head3 Status
+
+In the demo we generate "energy" and "metal" fields that serve no
+other purpose than to colorize the terrain. A set of random
+gaussian blobs is generated and the fields are initialized by the sum
+of blob contributions.
+
+=head3 Tasks
+
+=over enum
+
+=item Consider abundance of individual resources and their
+distribution patterns. Prepare algorithms for random resource
+distribution that can be used in different circumstances, preferably
+steerable with a comprehensive set of parameters.
+
+=item Are mesh-fields really suitable? Use some sparse representation
+instead.
+
+=item Do some sort of balancing so that we know reasonable generation
+parameters for planets, moons and asteroids.
+
+=item Rendering of resources. Now a selected resource abundance is
+mapped to terrain color. Can we use (multi-)texturing or shaders for
+the job? Anyway ... if resources are sparse, the resource-rich regions
+are better defined and have few overlaps.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Entities for resource processing and enity production
+
+=head3 Status
+
+There is nothing, well, there are buildings and we know how to animate
+their matter transfer links (tubes in the demo). And there are dynos
+that can crawl about.
+
+=head3 Tasks
+
+=over enum
+
+=item Implement units or devices for resource discovery and resource
+acquisition.
+
+=item Implement resource processing plants and depots.
+
+=item Implement fabrication plants.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Space representation - solar/galactic maps
+
+=head3 Status
+
+C<Var1/Glasses/SolarSystem> implements solar-system time
+propagation. The generation parameters are tweaked so as to make the
+solar-system unrealistically small, with large planets. The intention
+is to make inter-planetary travel much shorter and to make the
+planet-movement relevant in travel calculation. Planet-planet
+collisions are not handled.
+
+See <demos/Var1/solar_system.C> script.
+
+Some other relevant points:
+
+=over enum
+
+=item C<GledCore/Glasses/ZNode> -- a node in hierarchic object graph,
+holding grouping and geometry data.
+
+=item C<Numerica/Glasses/ODECrawler> -- an implementation of ODE
+integrator. It is used by the solar-system.
+
+=item ROOT has a limited interface to GSL (in package
+C<math/mathmore>). But this is not used (yet) in \gled.
+
+=back
+
+=head3 Tasks
+
+=over enum
+
+=item Consider node hierarchy for describing a solar system with
+planets, moons and asteroids. Make it all move in time.
+
+The C<SolarSystem> class runs in global coordinate system. The C<ZNodes>
+should be attached to these points to allow for higher precision
+tracking of objects in local coordinate systems.
+
+=item Implement a "map view" for a solar system.
+
+=item Implement interface for trajectory plotting and calculation.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Semi-automatic generation of solar-systems
+
+=head3 Status
+
+There is some basic stuff for generation of random terrains and planets.
+
+=over list
+
+=item Rectangular regions can be created with 2D inverse FFT of 1/f
+noise, see C<Geom1/GForge>. This produces 16-bit png that can be
+imported into C<TriMesh> via C<Geom1/Glasses/RectTerrain>.
+
+Used for creation of rectangular terrain.
+
+=item C<GTS/Glasses/GTSurf> supports generation of randomized spheres
+using 1/f noise for coefficients of Legendre polynomials to given
+order. This can be directly imported into C<TriMesh>.
+
+Used for creation of spherical terrain.
+
+=item C<Var1/Glasses/ParaSurf> supports randomization of vertex
+heights by using fractional brownian rules. Doing randomization on an
+already constructed mesh somewhat misses the purpose ... it should be
+done during recursive sub-division.
+
+Used for randomization of triangular and toroidal terrains.
+
+=back
+
+The creation of planets (C<CosmicBall> glass) is purely random and has
+few parameters (min/max orbit radius, eccentricity, inclination;
+min-max planet radius/mass).
+
+=head3 Tasks
+
+=over enum
+
+=item Prepare algorithms and parameters for generation of solar systems.
+It should be possible to regenrate whole solar-system from a
+relatively few parameters and random seeds.
+
+=item Try playing with non-realistic solar systems.
+
+=item Consolidate terrain generation algorithms.
+
+=item Support recursive / fractal sub-triangulation down to basic level.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 Unit movement through space / air
+
+=head3 Status
+
+A little done. C<Flyer>s in the demo follow the gravitational
+potential, keeping the energy intact. 'Up' direction is maintained
+when C<GravData> is updated. This doesn't work too well in the regions
+where gravity is close to zero and can thus change direction
+significantly over a small distance (e.g.: center of a sphere or
+torus).
+
+Space travel is not touched.
+
+Atmosphere density is not available.
+
+=head3 Tasks
+
+=over enum
+
+=item Implement dynamics for movement of space units with engine trust
+and gravity. Prepare flight stabilization scheme that can handle
+sudden changes in direction of gravity (this is relevant for "small
+worlds").
+
+=item Think how to present this data to users. Think about spacepship
+controls in command-mode and in 1st-person-mode.
+
+=item Fake some kind of anti-grav unit and warp engine.
+
+=item Implement algorithms for entering into specific orbits.
+
+=item Think about landing / docking procedures.
+
+=back
+
+
+=cut------------------------------------------------------------------------
+
+=head2 User interaction layer
+
+=head3 Status
+
+There are some GL-widgets: buttons, menus (using button hierarchy),
+valuators and list-views. Implemented using overlay event-handling.
+
+In FLTK we have detailed object views and object browsers.
+
+=head3 Tasks
+
+=over enum
+
+=item Design the interaction hierarchy. Determine which parts of
+UI should be done with FLTK and which with GL. How to achieve
+interoperability between different elements?
+
+=item Implement controls and detailed views for specific
+unit and building types (processing plants, fabrication plants,
+exploration units).
+
+=item Think about switching between different views (1st person unit
+view, detailed entity view, planetary map, etc). How many views can
+there be in parallel? Blame deficiencies on the q-comm device
+throughput.
+
+=back
+
+
+=cut========================================================================
+
+
+=head1 Retroduction
+
+
+As you see, the number and extent of tasks in the list looks somewhat
+forbidding. It is obvious that the \greedworld prototype will not
+include all of these things, at least not in their full scope. People
+who join the project, their interests and capacity, will determine the
+direction of the actual development and the accent of the final
+outcome.
+
+
+=cut========================================================================
+
+
+=head1 References
+
+=over def
+
+=item<Eberly-3DGED> Eberly D.H., I<3D Game Engine Design>, 2nd edition.
+
+=item<Moller-OVFCA> Assarsson U. and Moller T., I<Optimized ViewFrustum
+Culling Algorithms>, 1999, search web.
+
+=item<Tadel-GledIHSCM> Tadel M., I<\gled -- an Implementation of a
+Hierarchic Server--Client Model>, L<http://www.gled.org/docs/>.
+
+=item<Terdiman-OPCODE> Terdiman P., I<OPCODE -- Optimized Collision
+Detection library>.
+
+=back

@@ -1,0 +1,205 @@
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Set max-flyer-h and max-camera-h for all terrain topologies.
+
+2009-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* testfltdbl.C:
+	Modify the test to actually measure someting even when compiled as
+	optimized code.
+	Add running instructions.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add button to open class-view for all extendios.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add "Help" button in main menu.
+	Change default mode to 2 - sphere outside.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Modified files.
+
+2009-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add specialized glguis for Crawler and Flyer.
+
+2009-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add function plot_grav() to display gravity plots of the current
+	surface.
+	Set maximum flyer height for toruses to 5.
+
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add some choppers.
+
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_system.C:
+	Add support for the 'direct-step' mode of the SolarSystem.
+	Mode and number of planets to generate are now script arguments.
+
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_system.C:
+	Add stuff needed to animate the cosmic-balls moving around.
+	Add a lamp at stella center.
+	Set high emission for star material.
+
+	* tringula.C:
+	Whitespace.
+
+2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_system.C:
+	New macro - setup proto solar-system generator/simulator.
+
+2008-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add global object 'ScreenDumper* dumper'.
+	Add function start_recording() - set up eventor and dumper for
+	movie capture.
+
+2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Rename "Matter" to "Metal" for connections and fields.
+
+	Add Exit button.
+
+	Make torus_outside mode somewhat more hilly, leave more triangles
+	in the terrain mesh when coarsening it from parametric
+	triangulation.
+
+2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Create another field over terrain (energy .vs. matter, or sth).
+
+	Create new main-menu, put sim-str in as sub-menu. Add new sub-menu
+	for terrain coloration control.
+
+	Use gRandom for generation of random numbers.
+
+	For sphere_outside mode decreased relative scaling of higher
+	frequencies and increased triangulation order. It is more lively
+	this way.
+
+2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Separate buttons for energy/matter connections.
+
+2008-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add menu entry for connecting two statos.
+
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Added DynoCtrl and StatoCtrl menus.
+
+	Import color gradients on start-up.
+
+	* gradients/lin_abstract1.png:
+	* gradients/lin_abstract2.png:
+	* gradients/lin_abstract3.png:
+	* gradients/lin_aneurism.png:
+	* gradients/lin_coldsteel.png:
+	* gradients/lin_fssccw.png:
+	* gradients/lin_g2b.png:
+	* gradients/lin_goldblack.png:
+	* gradients/lin_horizon2.png:
+	* gradients/lin_landsea.png:
+	* gradients/lin_nauseatingheadache.png:
+	* gradients/lin_pastelrainbow.png:
+	* gradients/lin_r2b.png:
+	* gradients/lin_r2c.png:
+	* gradients/lin_r2y.png:
+	* gradients/lin_skyline.png:
+	* gradients/lin_yellowcontrast.png:
+	New files - gradients for tube animation taken from AliEnViz.
+
+2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	First steps towards hierarhic overlay menus.
+
+2008-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Use TriMesh::SetMassFromBBox() to give default meshes some mass.
+
+	Increase number of dynos and flyers in testing mode (arg=99).
+
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add test mode (id=99).
+
+	When placing random staticos give up after placement fails 20
+	times.
+
+	Fiddle the constants, nitpicking.
+
+2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add a simple overlay GUI.
+
+2008-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Make proper queen, with var/ directory for world-object storage.
+	Generate some random staticos and flyers.
+	Create a collection of random meshes for dynos and statos,
+	place them into var/.
+	Use global random generator g_rnd.
+
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Modularize start-up, macro argument now selects type of surface
+	(rectangle, triangle, sphere (in/out), torus (in/out)).
+
+2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Added stuff to test TriMeshLightField; added function sunrise() to
+	demonstrate usage of directional lamp.
+
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Incorporate new features (TringuCam and TriMeshField), use new
+	interfaces when appropriate.
+
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Set-up TringuCam; set border-mode of rect-terrain to wrap.
+
+2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Move the second Dynamico to make the collision more interesting.
+
+2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* testfltdbl.C:
+	New file; some tests of float-double operations.
+
+	* tringula.C:
+	Added a second Dynamico to test mesh-mesh collisions.

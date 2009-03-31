@@ -1,0 +1,71 @@
+# $Id$
+
+### Install options ###
+#
+# Default value "<none>" means no default location will be
+# specified and gled will require either: a) GLEDSYS envrionment
+# variable to be set; or b) passing of datadir and libdir options to
+# executables.
+# If prefix is set BINDIR, LIBDIR and DATADIR will be set to proper
+# values unless you override them, too.
+# One should define prefix even if all the paths are overriden - gled build
+# uses special prefix value <none> to block install targets.
+prefix          =s      .       PREFIX          "<none>"
+bindir          =s      .       BINDIR          "<none>"
+libdir          =s      .       LIBDIR          "<none>"
+datadir         =s      .       DATADIR         "<none>"
+
+# Default blob-install location.
+blobdir         =s      .       BLOBDIR         "/opt/gled"
+
+### configure options ###
+#
+confdebug	!	.	CONFDEBUG	0
+reconfigure	!	.	RECONFIGURE	0
+help		!	.	HELP		0
+envsetupstem	=s	.	ENVSETUPSTEM	"build_env"
+
+### compile/link options ###
+#
+ucpp		=s	.	USER_CPP_FLAGS	""
+ucxx		=s	.	USER_CXX_FLAGS	""
+uld		=s	.	USER_LD_FLAGS	""
+usepch		!	.	USE_PCH		"<auto>"
+pchname         =s      .       PCH_NAME        "gled.pch.h"
+debug		!	.	DEBUG		0
+# directories where foreign software is installed (eg. /opt); ':' separated
+external	=s	.	EXTERNAL	""
+
+### build configuration ###
+#
+# These variables get re-evaluated on reconfigure. The following
+# substitutions are performed:
+# <svnrev> gets replaced with the current svn revision of '.'.
+# <svnurl> gets replaced with the current svn URL of '.', without /gled-build.
+# <today>  gets replaced by { my $d=`date +%F`; chomp $d; $d; }
+svnrev          =s      .       SVN_REV_IN        "<svnrev>"
+svnurl          =s      .       SVN_URL_IN        "<svnurl>"
+buildversion	=s	.	BUILD_VERSION_IN  "1.3.x-r<svnrev>"
+builddate	=s	.	BUILD_DATE_IN	  "<today>"
+# And these are fixed at first configure.
+noviewlibs	!	.	NOVIEWLIBS	0
+nornrlibs	!	.	NORNRLIBS	0
+rnr		=s	.	RENDERERS	"GL"
+
+### libset configuration ###
+#
+# Libsets to build; can be <file:[filename]>, <auto>, <auto-prompt> or
+# ':' separated list of libset names
+libsets		=s	.	LIBSETS		"<auto-prompt>"
+
+# Directories to search for more basic libsets; ':' separated
+# If found they are sim-linked into the GLEDSYS.
+base		=s	.	GLEDBASE	""
+
+### names of auto-generated files and directories
+#
+glasslist	=s	.	GLASS_LIST	"glass.list"
+catalog		=s	.	CATALOG		"catalog"
+gluedir		=s	.	GLUE_DIR	"glue"
+dictdir		=s	.	DICT_DIR	"dict"
+viewdir		=s	.	VIEW_DIR	"Views"

@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+# $Id$
+
+# Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+$DATADIR = `gled-config --datadir` or die "gled-config not found";
+
+use lib "$DATADIR/perllib";
+use ParseConfig;
+require Gled_Shell_Wrappers;
+
+$def_cfg = "$DATADIR/cfg/gled-auth.rc";
+
+my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg, -useenv=>1);
+$cfg_parser->parse();
+
+if($HELP) {
+  print <<"fnord";
+usage: gled-auth-init <options>
+
+Initializes authentication directory <dir>for gled and creates
+standard identities.
+
+config file: $cfg_parser->{Config}
+options:
+fnord
+  print `cat $def_cfg`;
+  exit 0;
+}
+
+die "auth dir $AUTHDIR already exists"
+  if -x $AUTHDIR;
+
+system_or_die("mkdir -p $AUTHDIR");
+cd($AUTHDIR);
+system_or_die("mkdir private_keys public_keys groups");
+
+system_or_die("gled-auth-genkeypair -name sun.absolute -dir $AUTHDIR -keysize $KEYSIZE");
+system_or_die("gled-auth-genkeypair -name saturn       -dir $AUTHDIR -keysize $KEYSIZE");
+system_or_die("gled-auth-genkeypair -name mercury      -dir $AUTHDIR -keysize $KEYSIZE");
+system_or_die("gled-auth-genkeypair -name venus        -dir $AUTHDIR -keysize $KEYSIZE");
+system_or_die("gled-auth-genkeypair -name neptune      -dir $AUTHDIR -keysize $KEYSIZE");

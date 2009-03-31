@@ -1,0 +1,130 @@
+=head1 Document id
+
+=head2 Title
+
+Somewhat urgent \gled developments
+
+=head2 Author
+
+Matevz Tadel
+
+=head2 Date
+
+20.7.2008
+
+
+=cut========================================================================
+=cut========================================================================
+
+=head1 External software, build and portability
+
+
+=head2 Build on freebsd, macosx, windows
+
+=head3 Major issues
+
+=over enum
+
+=item \gled uses posix-threads. Make sure windows version is ok.
+
+=item Build relies heavily on GNUmake and perl - use cygwin to build.
+
+=item Makefiles are written for gcc - generalize that.
+
+=item need portable hash_map and hash_set, both with multi variants.
+
+=item \gled opens another X display and lets root run its own
+one. Each run in separate thread and things mostly work. One needs to
+lock root display when opening root windows from fltk.
+
+On mac root uses X11 and fltk uses quartz (I managed to compile fltk
+with X on mac and \gled somewhat worked).
+
+On windows root uses gdk. I have no clue what this means for parallel
+running of fltk.
+
+=back
+
+=cut========================================================================
+
+=head2 Reconsider usage of DevIL as image library
+
+DevIL is not thread safe. Someone should investigate this.
+
+=head3 Tasks
+
+=over enum
+
+=item Make DevIL thread-safe by using TLD. Either use posix-threads or
+implement separate solution for windows.
+
+=item Evaluate ROOT's after-step image library. My major complain
+against it was that it stores image internally as a set of float
+arrays and copies them to byte-formats on demand. Check if this is
+still so and if there is a reasonable way to bypass this. Is it
+thread-safe?
+
+=item Evaluate other options (also g3d). Consider portability and
+thread-safety.
+
+=item Move image library into GledCore. Use it for screen dumping.
+
+=item Use GL functions for image rescaling. While at it, optionally
+generate mipmaps in ZImage_GL_Rnr.
+
+=back
+
+
+
+=cut========================================================================
+=cut========================================================================
+
+=head1 Central \gled
+
+
+=head2 Do not stream rays.
+
+Store in ray:
+
+a) Raw array of Eye*s to which it was delivered. Each Eye sets its
+value to zero.
+   
+b) Pointer to next/prev ray (global).
+
+c) Add a mutex for access to I<custom buffer>.
+
+Thus we can cleanup the mess if some Eye goes banana.
+
+Eyes should connect to each queen individually. Then, queens can send
+rays only to eyes that observe them.
+
+=head2 class/libset ids.
+
+better management of those
+
+what about method ids?
+
+=head2 lens ids
+
+ make each king (queen?) an independent object space.
+
+=head2 should we use namespaces for libsets?
+
+class-naming consistency. now we have a mess (well, I have a mess).
+
+=head2 Object instantiation.
+
+Especially for glasses and stones.
+
+Check what root does lately with operator new for TObject.
+
+Check Hoard.
+
+
+=cut========================================================================
+=cut========================================================================
+
+=head1 Minor annoyances
+
+
+text rendering - try to use ftgl from root

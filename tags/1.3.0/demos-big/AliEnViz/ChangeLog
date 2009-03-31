@@ -1,0 +1,56 @@
+2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alienviz_common_foos.C:
+	Rename "AliEnViz Shell" object to "AEVShell" - for consistency
+	with other objects.
+
+	* solar_suck.C:
+	Add overlay text-info objects.
+	Change defaults: double solar-system time factor, show planet
+	tails.
+	Keep elements sorted in AEVQueen.
+
+	* suck.C:
+	Add eg-commands for running in local mode.
+	Increase speed of texture animation.
+
+2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alienviz_common_foos.C:
+	Add new nest layout Sites-Small.
+
+	* solar_suck.C:
+	Put in commands for use of new features:
+	- desired radius of planets;
+	- hostname/port of the data-dumper host.
+
+	Add overlay button for invoking SolarSystem class-view.
+
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_suck.C:
+	New macro - run ml sucker with the Var1::SolarSystem, controlled
+	by AEVManager class.
+
+	* alienviz_common_foos.C:
+	Increase name-tile transparency.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* alienviz_common_foos.C:
+	Do not draw lamp.
+	Fix default camera position slightly.
+
+	* suck.C:
+	Add an Eventor and TimeMaker.
+	Add old Gled avatar featuring as 'Central Services'.
+
+2008-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	New file.
+
+	* alienviz_common_foos.C:
+	* fake_replay.C:
+	* suck.C:
+	Move much of the common initialization into common-foos.

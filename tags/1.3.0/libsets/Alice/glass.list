@@ -1,0 +1,19 @@
+# glass			class	location			rnr-class
+# name			id					[]~ZGlass, [.]~own rnr, [<glass>]
+
+ZAliLoad                1       Glasses/ZAliLoad		ZNode
+VSDSelector        	3	Glasses/VSDSelector		ZNode
+
+TrackBase               62      Glasses/TrackBase
+PRSBase                 63      Glasses/PRSBase                 .
+MCTrack       	        64	Glasses/MCTrack		        .
+MCTrackRnrStyle         65	Glasses/MCTrackRnrStyle	        .
+
+HitContainer		70	Glasses/HitContainer		.
+
+GIImportStyle           86      Glasses/GIImportStyle
+
+RecTrack                100     Glasses/RecTrack                .
+RecTrackRS              101     Glasses/RecTrackRS              .
+V0Track                 102     Glasses/V0Track                 .
+KinkTrack		103	Glasses/KinkTrack		.
