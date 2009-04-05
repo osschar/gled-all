@@ -1,3 +1,14 @@
+2009-04-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Minor fixes.
+
+	* Gled/Gled.cxx:
+	Fix dump of 'auth-dir not found' warning.
+
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.cxx:
+	Modify polgon-offset handling - on some nvidias the frame was
+	hidden under the tile.
+
 2009-03-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:

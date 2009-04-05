@@ -113,7 +113,7 @@ void WGlFrameStyle_GL_Rnr::RenderTile(float dx, float dy, bool belowmouse, const
        glColor4fv(FS.mBelowMColor());
      } else {
        if(col) glColor4fv((*col)());
-       else         glColor4fv(FS.mTileColor());
+       else    glColor4fv(FS.mTileColor());
      }
      glBegin(GL_QUADS);
      glVertex2f(0, 0);   glVertex2f(dx, 0);
@@ -174,17 +174,15 @@ void WGlFrameStyle_GL_Rnr::FullRender(GLTextNS::TexFont *txf, TString& label,
     dx -= (x + w) - (xt + wt);
 
   glNormal3f(0, 0, 1);
-  glEnable(GL_POLYGON_OFFSET_FILL);
 
-  glPolygonOffset(1, 1);
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  glPolygonOffset(2, 2);
   RenderTile(dx, dy, belowmouse);
+  glDisable(GL_POLYGON_OFFSET_FILL);
 
   RenderFrame(dx, dy);
 
-  glPolygonOffset(-1, -1);
   RenderText(txf, label, scale, xt, yt, w);
-
-  glDisable(GL_POLYGON_OFFSET_FILL);
 
   glPopAttrib();
 }
