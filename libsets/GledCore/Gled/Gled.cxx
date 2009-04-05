@@ -590,8 +590,8 @@ void Gled::SpawnSaturn()
 void Gled::CheckAuthDir()
 {
   if(gSystem->AccessPathName(mAuthDir.Data(), kReadPermission)) {
-    printf(GForm("Gled::SpawnSaturn: auth dir '%s' not accessible\n", mAuthDir.Data()));
-    printf("Gled::SpawnSaturn: use gled-auth-init command to create one\n");
+    printf("Gled::CheckAuthDir auth dir '%s' not accessible\n", mAuthDir.Data());
+    printf("Gled::CheckAuthDir use gled-auth-init command to create one\n");
   }
 }
 
