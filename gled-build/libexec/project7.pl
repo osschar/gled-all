@@ -740,28 +740,6 @@ for $r (@Members)
   die "Link $r->{Methodbase} should be a pointer!" if $pure_type eq $r->{Type};
 }
 
-########################################################################
-# OUT0FILE, option -0file: resolver hash. for now just enums
-########################################################################
-gen0:
-goto gen1 if ($OUT0FILE eq 'skip') or not $IsGlass;
-
-if ($OUT0FILE eq '-') {
-  *P0 = *STDOUT;
-} else {
-  $OUT0FILE = "${INDIR}${INBASE}.p0" if $OUT0FILE eq "def";
-  die "can't open $OUT0FILE" unless open(P0,">$OUT0FILE");
-}
-
-{
-  local $Data::Dumper::Indent = 1;
-  print P0 Data::Dumper->Dump
-    ( [$Enums],
-      ["\$resolver->{'GlassName2GlassSpecs'}{'$CLASSNAME'}{'Enums'}"]
-    );
-}
-
-close P0 unless *P0 eq *STDOUT;
 
 ########################################################################
 # OUT1FILE, option -1file; .h7 file ... to be included in <Class>.h
@@ -1368,6 +1346,20 @@ for $r (@Methods)
     print C7 "  }\n";
   }
 }
+
+for $e (sort keys %$Enums)
+{
+  my $esize = $#{$Enums->{$e}} + 1;
+  print C7 "  {\n    EnumInfo* eip = new EnumInfo(\"$e\", $esize);\n";
+  for $ee (@{$Enums->{$e}})
+  {
+    print C7 "    eip->AddEntry(\"$ee->{'name'}\", \"$ee->{'label'}\", $ee->{'name'});\n";
+  }
+  print C7 "    eip->fClassInfo = _ci;\n";
+  print C7 "    _ci->fEnumList.push_back(eip);\n";
+  print C7 "  }\n";
+}
+
 print C7 "  GledNS::BootstrapClass(_ci);\n}\n\n";
 
 gen3_end:

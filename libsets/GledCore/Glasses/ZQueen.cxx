@@ -202,7 +202,7 @@ void ZQueen::release_purgatory(ID_t n_needed)
     QueenIDMap_i i = mIDMap.find(id);
     assert(i != mIDMap.end());
 
-    if(i->second->mState != LensDetails::LS_Dead)
+    if(i->second->mState != LS_Dead)
       break;
 
     GTime dt = now - i->second->mDeletionTime;
@@ -654,7 +654,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
     map_it = mIDMap.find(lens->mSaturnID);
     if(map_it == mIDMap.end())
       throw(_eh + "lens " + lens->Identify() + " not found in my subject list.");
-    if(map_it->second->mState != LensDetails::LS_Alive)
+    if(map_it->second->mState != LS_Alive)
       throw(_eh + "lens " + lens->Identify() + " has already been put to death-bed.");
   }
 
@@ -712,7 +712,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
     (Ray::PtrCtor(lens, RayNS::RQN_death, ++(lens->mTimeStamp), Ray::EB_StructuralChange));
   mSaturn->Shine(death_ray);
 
-  map_it->second->mState = LensDetails::LS_Purged;
+  map_it->second->mState = LS_Purged;
   mPurgatory.push_back(lens->mSaturnID);
   --mIDsUsed; ++mIDsPurged;
 
@@ -817,8 +817,8 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
 	return;
       }
       assert(i->second->mLens == 0);
-      assert(i->second->mState == LensDetails::LS_Purged);
-      i->second->mState = LensDetails::LS_Dead;
+      assert(i->second->mState == LS_Purged);
+      i->second->mState = LS_Dead;
       i->second->mDeletionTime.SetNow();
       return;
     } else {
@@ -838,7 +838,7 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
   if(i == mIDMap.end()) {
     throw(_eh + "LensDetails of " + lens->Identify() + " not found in queen's ID map.");
   }
-  if(i->second->mState != LensDetails::LS_Purged) {
+  if(i->second->mState != LS_Purged) {
     ISwarn(_eh + "lens has not been put to purged state ... expect trouble.");
   }
   if(i->second->mLens != lens) {
@@ -863,7 +863,7 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
 
   ISdebug(2, _eh + GForm("final removal of lens '%s'[%d].", lens->GetName(), i->first));
   i->second->mLens = 0;
-  i->second->mState = LensDetails::LS_Dead;
+  i->second->mState = LS_Dead;
   i->second->mDeletionTime.SetNow();
 
   // Now truly delete or make a zombie.
@@ -1139,7 +1139,7 @@ ZComet* ZQueen::MakeComet()
   comet->mQueen = this;
 
   for(QueenIDMap_i i=mIDMap.begin(); i!=mIDMap.end(); ++i) {
-    if(i->second->mState == LensDetails::LS_Alive)
+    if(i->second->mState == LS_Alive)
       comet->AddGlass(i->second->mLens);
   }
 
@@ -1207,7 +1207,7 @@ void ZQueen::UnfoldFrom(ZComet& comet)
   { // Create dummy entries for lenses in purgatory.
     for(lID_i i=mPurgatory.begin(); i!=mPurgatory.end(); ++i) {
       LensDetails* ls = produce_lens_details(*i, 0);
-      ls->mState = LensDetails::LS_Purged;
+      ls->mState = LS_Purged;
       mIDMap.insert(pair<ID_t, LensDetails*>(*i, ls));
     }
   }

@@ -5,7 +5,6 @@ classname	=s	main		CLASSNAME	undef
 baseclass	=s	main		BASECLASS	"ZGlass"
 sunptrvar	=s	.		SUNPTRVAR	"mSaturn"
 infile		=s	main		INFILE		undef
-0file		=s	main		OUT0FILE	'skip'
 1file		=s	main		OUT1FILE	'skip'
 3file		=s	main		OUT3FILE	'skip'
 5file		=s	main		OUT5FILE	'skip'

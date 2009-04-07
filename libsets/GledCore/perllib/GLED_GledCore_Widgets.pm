@@ -547,14 +547,18 @@ sub make_cxx_cb { my $S = shift; $S->make_text_widget_cb(); }
 
 package GLED::Widgets::PhonyEnum; @ISA = ('GLED::Widgets');
 
+# Give explicit values and labels:
 # -vals    [(<val>,<label>)*]
-# -seqvals [<labels>] values from zero with given label
-# Otherwise auto deduce from catalog based on $S->{Type} or -type
-# -type    <string>
-# -labels  [<string>*]
-# -names   [<string>*]
+# -seqvals [<labels>] values ascending from zero with given labels
+# The largest label width + 2 is taken for widget width.
 
-sub new {
+# Otherwise auto deduce from class catalog based on $S->{Type} or -type
+# -type    <string>     - specify enum type for catalog search
+# -names   [<string>*]  - only show specified names
+# The maximum width of all labels +2 is taken for widget width.
+
+sub new
+{
   my $proto = shift;
   my $S = $proto->SUPER::new(@_);
   $S->{Widget} = "Fl_PhonyEnum";
@@ -562,7 +566,7 @@ sub new {
   $S->{LabelP}       = "true";
   $S->{LabelInsideP} = "false";
   $S->{CanResizeP}   = "true";
-  $S->{-width} =  0 unless exists $S->{-width};
+  $S->{-width}  = 0 unless exists $S->{-width};
   $S->{-height} = 1 unless exists $S->{-height};
 
   $S->{calced_width} = 0;
@@ -570,39 +574,41 @@ sub new {
   return $S;
 }
 
-sub check_calced_width {
+sub check_calced_width
+{
   my $S   = shift;
   my $str = shift;
   my $w = length $str;
   $S->{calced_width} = $w if $w > $S->{calced_width};
 }
 
-sub enum_details {
+sub enum_details
+{
   my $S = shift;
   my $E = {};
   my $_eh = "GLED::Widgets::PhonyEnum::enum_details ";
 
-  if(defined $S->{-vals} or defined $S->{-seqvals}) {
+  if (defined $S->{-vals} or defined $S->{-seqvals}) {
     $E->{EnumCastType} = $S->{Type};
   } else {
     my $type  = (defined $S->{-type}) ? $S->{-type} : $S->{Type};
     my ($class, $enum) = $type =~ m/(\w+)(?:::(\w+))?/;
     # print "For type='$type' got class='$class', enum='$enum'\n";
     unless(defined $enum) { $enum = $class; $class = $::CLASSNAME; }
-    die "$_eh resolver entry not present for enum ${class}::${enum}"
-      unless defined $::resolver->{'GlassName2GlassSpecs'}{$class}{'Enums'}{$enum};
-    if(defined $S->{-type}) {
+
+    if (defined $S->{-type}) {
       $E->{EnumCastType} = $S->{Type};
     } else {
       $E->{EnumCastType} = $class .'::'. $enum;
     }
-    $E->{EnumSrcClass} = $class;
-    $E->{EnumInfo}  = $::resolver->{'GlassName2GlassSpecs'}{$class}{'Enums'}{$enum};
+    $E->{Enum}      = $enum;
+    $E->{EnumClass} = $class;
   }
   return $E;
 }
 
-sub make_widget {
+sub make_widget
+{
   my $S = shift;
   my $eh = "GLED::Widgets::PhonyEnum ($S->{Methodbase})";
   my $r = $S->make_widget_A();
@@ -611,47 +617,66 @@ sub make_widget {
     $r .= "  o->labelcolor(fl_color_cube(2,0,0));\n";
   }
 
-  if(defined $S->{-vals}) {
+  if (defined $S->{-vals})
+  {
     die "$eh uneven number of arguments for -vals"
       if ($#{$S->{-vals}} + 1) % 2 != 0;
-    for($i=0; $i<$#{$S->{-vals}}; $i+=2) {
-      $r .= "  o->Bruh($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
+    for ($i=0; $i<$#{$S->{-vals}}; $i+=2)
+    {
+      $r .= "  o->AddEntry($S->{-vals}[$i], \"$S->{-vals}[$i+1]\");\n";
       $S->check_calced_width($S->{-vals}[$i+1]);
     }
-
-  } elsif(defined $S->{-seqvals}) {
-    for($i=0; $i<=$#{$S->{-seqvals}}; ++$i) {
-      $r .= "  o->Bruh($i, \"$S->{-seqvals}[$i]\");\n";
+    if ($S->{-width} == 0)
+    {
+      $S->{-width} = $S->{calced_width} + 2
+    }
+  }
+  elsif (defined $S->{-seqvals})
+  {
+    for ($i=0; $i<=$#{$S->{-seqvals}}; ++$i)
+    {
+      $r .= "  o->AddEntry($i, \"$S->{-seqvals}[$i]\");\n";
       $S->check_calced_width($S->{-seqvals}[$i]);
     }
-
-  } else {
+    if ($S->{-width} == 0)
+    {
+      $S->{-width} = $S->{calced_width} + 2
+    }
+  }
+  else
+  {
     my $E = $S->enum_details();
-    my $labp = (defined $S->{-labels} and ref($S->{-labels}) eq "ARRAY");
-    my $namp = (defined $S->{-names}  and ref($S->{-names})  eq "ARRAY");
-    for $h (@{$E->{EnumInfo}}) {
-      my $add = 0;
-      if($labp or $namp) {
-	$add = 1 if(($labp and grep $h->{label}, @{$S->{-labels}}) or
-		    ($namp and grep $h->{name},  @{$S->{-names}}));
-      } else {
-	$add = 1;
+    $r .= <<"fnord";
+  GledNS::ClassInfo *ci = GledNS::FindClassInfo("$E->{EnumClass}");
+  GledNS::EnumInfo  *ei = ci->FindEnumInfo("$E->{Enum}", true);
+fnord
+    if (defined $S->{-names} and ref($S->{-names})  eq "ARRAY")
+    {
+      $r .= "  { GledNS::EnumEntry *ee;\n";
+      for $n (@{$S->{-names}})
+      {
+	$r .= "    ee = ei->FindEntry(\"$n\");\n";
+	$r .= "    o->AddEntry(ee->fValue, ee->fLabel);\n";
       }
-      if($add) {
-	$r .= "  o->Bruh($E->{EnumSrcClass}::$h->{name}, \"$h->{label}\");\n";
-	$S->check_calced_width($h->{label});
-      }
+      $r .= "  }\n";
+    }
+    else
+    {
+      $r .= "  for (GledNS::vEnumEntry_i i=ei->fEntries.begin(); i!=ei->fEntries.end(); ++i)\n";
+      $r .= "  { o->AddEntry(i->fValue, i->fLabel); }\n";
+    }
+    if ($S->{-width} == 0)
+    {
+      $S->{-width} = "GledNS::FindClassInfo(\"$E->{EnumClass}\")->FindEnumInfo(\"$E->{Enum}\", true)->fMaxLabelWidth + 2";
     }
   }
   $r .= $S->make_widget_B();
 
-  $S->{-width} = $S->{calced_width} + 2 if $S->{-width} == 0;
-
   $r;
 }
 
-
-sub make_cxx_cb {
+sub make_cxx_cb
+{
   my $S = shift;
   my $E = $S->enum_details();
   my $r = "void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {\n";
@@ -673,7 +698,8 @@ fnord
   return $r;
 }
 
-sub make_weed_update {
+sub make_weed_update
+{
   my $S = shift;
   $S->make_weed_update_A().
   "  w->Update(mIdol->Get$S->{Methodbase}());\n".

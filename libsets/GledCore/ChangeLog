@@ -1,3 +1,23 @@
+2009-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for enum info in Gled class catalogs.
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Add structures EnumEntry and EnumInfo.
+	Add a list of EnumInfos to Class info and provide query methods.
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Rewrite GLED::Widgets::PhonyEnum to use new GledNS structures.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Move LensState_e from nested class LensDetails up into ZQueen.
+
+	* FL/Fl_PhonyEnum.cxx:
+	* FL/Fl_PhonyEnum.h:
+	Rename method Bruh() to AddEntry().
+
 2009-04-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Minor fixes.
