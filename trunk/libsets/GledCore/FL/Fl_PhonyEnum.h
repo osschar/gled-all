@@ -20,7 +20,7 @@ protected:
 public:
   Fl_PhonyEnum(int x=0, int y=0, int w=200,int h=80, const char* l= 0);
 
-  void Bruh(int val, const char* label);
+  void AddEntry(int val, const char* label);
   void Update(int val);
 
 #include "Fl_PhonyEnum.h7"

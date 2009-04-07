@@ -82,8 +82,9 @@ namespace GledNS {
 
   struct InfoBase {
     TString		fName;
+    ClassInfo*		fClassInfo;
 
-    InfoBase(const TString& s) : fName(s) {}
+    InfoBase(const TString& s) : fName(s), fClassInfo(0) {}
     bool operator==(const TString& s) const { return (fName == s); }
   };
 
@@ -95,33 +96,29 @@ namespace GledNS {
     bool		bLocal;
     bool		bDetachedExe;
     bool		bMultixDetachedExe;
-    ClassInfo*		fClassInfo;
 
     MethodInfo(const TString& s, MID_t m) :
       InfoBase(s), fMid(m),
-      bDetachedExe(false), bMultixDetachedExe(false),
-      fClassInfo(0)
+      bDetachedExe(false), bMultixDetachedExe(false)
     {}
     ZMIR* MakeMir(ZGlass* a, ZGlass* b=0, ZGlass* g=0);
     void  ImprintMir(ZMIR& mir) const;
     void  StreamIds(TBuffer& b) const;
   };
 
-
   struct DataMemberInfo : public InfoBase {
     TString             fPrefix;
     TString		fType;
     MethodInfo*		fSetMethod;
-    ClassInfo*		fClassInfo;
+    TRealData*          fTRealData;
 
     DataMemberInfo(const TString& s) :
-      InfoBase(s), fClassInfo(0), fTRealData(0) {}
+      InfoBase(s), fSetMethod(0), fTRealData(0) {}
 
     TString CName();
     TString FullName();
     TString FullCName();
 
-    TRealData*   fTRealData;
     TRealData*   GetTRealData();
     TDataMember* GetTDataMember();
   };
@@ -131,6 +128,32 @@ namespace GledNS {
 
     LinkMemberInfo(const TString& s) : DataMemberInfo(s) {}
   };
+
+  struct EnumEntry
+  {
+    TString   fName;
+    TString   fLabel;
+    Int_t     fValue;
+
+    EnumEntry(const TString& n, const TString& l, Int_t v) :
+      fName(n), fLabel(l), fValue(v) {}
+  };
+
+  typedef vector<EnumEntry>           vEnumEntry_t;
+  typedef vector<EnumEntry>::iterator vEnumEntry_i;
+
+  struct EnumInfo : public InfoBase
+  {
+    vEnumEntry_t  fEntries;
+    Int_t         fMaxLabelWidth;
+
+    EnumInfo(const TString& s, Int_t size);
+
+    void AddEntry(const TString& n, const TString& l, Int_t v);
+
+    EnumEntry* FindEntry(const TString& name);
+  };
+
 
   // List typedefs
 
@@ -143,10 +166,14 @@ namespace GledNS {
   typedef list<LinkMemberInfo*>			lpLinkMemberInfo_t;
   typedef list<LinkMemberInfo*>::iterator	lpLinkMemberInfo_i;
 
+  typedef list<EnumInfo*>			lpEnumInfo_t;
+  typedef list<EnumInfo*>::iterator		lpEnumInfo_i;
+
 #ifndef __CINT__
   typedef hash_map<MID_t, MethodInfo*>           hMid2pMethodInfo_t;
   typedef hash_map<MID_t, MethodInfo*>::iterator hMid2pMethodInfo_i;
 #endif
+
 
   /**************************************************************************/
   /**************************************************************************/
@@ -161,6 +188,7 @@ namespace GledNS {
     lpMethodInfo_t		fMethodList;
     lpDataMemberInfo_t		fDataMemberList;
     lpLinkMemberInfo_t		fLinkMemberList;
+    lpEnumInfo_t		fEnumList;
 #ifndef __CINT__
     hMid2pMethodInfo_t		fMethodHash;
 #endif
@@ -184,10 +212,11 @@ namespace GledNS {
     lpDataMemberInfo_t*	ProduceFullDataMemberInfoList();
     lpLinkMemberInfo_t*	ProduceFullLinkMemberInfoList();
 
-    MethodInfo*		FindMethodInfo(MID_t mid);
-    MethodInfo*		FindMethodInfo(const TString& func_name, bool recurse, bool throwp=true);
-    DataMemberInfo*	FindDataMemberInfo(const TString& mmb,   bool recurse, bool throwp=true);
-    LinkMemberInfo*	FindLinkMemberInfo(const TString& mmb,   bool recurse, bool throwp=true);
+    MethodInfo*		FindMethodInfo    (MID_t mid);
+    MethodInfo*		FindMethodInfo    (const TString& name, bool recurse, bool throwp=true);
+    DataMemberInfo*	FindDataMemberInfo(const TString& name, bool recurse, bool throwp=true);
+    LinkMemberInfo*	FindLinkMemberInfo(const TString& name, bool recurse, bool throwp=true);
+    EnumInfo*           FindEnumInfo      (const TString& name, bool recurse, bool throwp=true);
 
     LibSetInfo*		GetLibSetInfo();
     ClassInfo*		GetParentCI();

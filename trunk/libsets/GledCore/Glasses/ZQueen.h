@@ -42,9 +42,10 @@ public:
 
   enum ZeroRCPolicy_e { ZRCP_Delete, ZRCP_ToOrphanage, ZRCP_Ignore };
 
+  enum LensState_e    { LS_Undef, LS_Alive, LS_Purged, LS_Dead };
+
   class LensDetails {
   public:
-    enum        LensState_e    { LS_Undef, LS_Alive, LS_Purged, LS_Dead };
     ZGlass*	mLens;
     LensState_e mState;
     GTime	mCreationTime;

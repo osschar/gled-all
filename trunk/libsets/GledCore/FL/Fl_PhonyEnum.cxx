@@ -15,7 +15,7 @@ Fl_PhonyEnum::Fl_PhonyEnum(int x, int y, int w,int h, const char* l) :
   Fl_Choice(x,y,w,h,l), mHiIdx(-1)
 {}
 
-void Fl_PhonyEnum::Bruh(int val, const char* label)
+void Fl_PhonyEnum::AddEntry(int val, const char* label)
 {
   mHiIdx++;
   mVal2Idx[val] = mHiIdx;

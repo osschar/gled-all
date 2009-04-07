@@ -543,6 +543,39 @@ TDataMember* GledNS::DataMemberInfo::GetTDataMember()
 }
 
 /**************************************************************************/
+// GledNS::EnumInfo
+/**************************************************************************/
+
+GledNS::EnumInfo::EnumInfo(const TString& s, Int_t size) :
+  InfoBase(s), fMaxLabelWidth(0)
+{
+  fEntries.reserve(size);
+}
+
+void GledNS::EnumInfo::AddEntry(const TString& n, const TString& l, Int_t v)
+{
+  fEntries.push_back(EnumEntry(n, l, v));
+  fMaxLabelWidth = TMath::Max((Int_t) l.Length(), fMaxLabelWidth);
+}
+
+GledNS::EnumEntry* GledNS::EnumInfo::FindEntry(const TString& name)
+{
+  // Find entry with given name.
+  // Throws an exception if it is not found.
+
+  static const Exc_t _eh("GledNS::EnumInfo::FindEntry ");
+
+  vEnumEntry_i i = fEntries.begin();
+  while (i != fEntries.end())
+  {
+    if (i->fName == name)
+      return &(*i);
+    ++i;
+  }
+  throw _eh + "entry '" + name + "' not found.";
+}
+
+/**************************************************************************/
 // GledNS::ClassInfo
 /**************************************************************************/
 
@@ -598,12 +631,14 @@ A_Rnr* GledNS::ClassInfo::SpawnRnr(const TString& rnr, ZGlass* g)
 
 /**************************************************************************/
 
-namespace {
-  struct infobase_name_eq : public unary_function<GledNS::InfoBase*, bool> {
+namespace
+{
+  struct infobase_name_eq : public unary_function<GledNS::InfoBase*, bool>
+  {
     TString name;
     infobase_name_eq(const TString& s) : name(s) {}
-    bool operator()(const GledNS::InfoBase* ib) {
-      return ib->fName == name; }
+    bool operator()(const GledNS::InfoBase* ib)
+    { return ib->fName == name; }
   };
 }
 
@@ -615,58 +650,77 @@ GledNS::ClassInfo::FindMethodInfo(MID_t mid)
 }
 
 GledNS::MethodInfo*
-GledNS::ClassInfo::FindMethodInfo(const TString& func_name, bool recurse, bool throwp)
+GledNS::ClassInfo::FindMethodInfo(const TString& name, bool recurse, bool throwp)
 {
   static const Exc_t _eh("GledNS::ClassInfo::FindMethodInfo ");
 
   lpMethodInfo_i i = find_if(fMethodList.begin(), fMethodList.end(),
-			     infobase_name_eq(func_name));
+			     infobase_name_eq(name));
   if(i != fMethodList.end()) return *i;
   if(recurse) {
     ClassInfo* p = GetParentCI();
-    if(p) return p->FindMethodInfo(func_name, recurse);
+    if(p) return p->FindMethodInfo(name, recurse);
   }
   if(throwp)
     throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
-		      func_name.Data(), fName.Data(), recurse));
+		      name.Data(), fName.Data(), recurse));
   return 0;
 }
 
 GledNS::DataMemberInfo*
-GledNS::ClassInfo::FindDataMemberInfo(const TString& s, bool recurse, bool throwp)
+GledNS::ClassInfo::FindDataMemberInfo(const TString& name, bool recurse, bool throwp)
 {
   static const Exc_t _eh("GledNS::ClassInfo::FindDataMemberInfo ");
 
   lpDataMemberInfo_i i = find_if(fDataMemberList.begin(), fDataMemberList.end(),
-				infobase_name_eq(s));
+				infobase_name_eq(name));
 
   if(i != fDataMemberList.end()) return *i;
   if(recurse) {
     ClassInfo* p = GetParentCI();
-    if(p) return p->FindDataMemberInfo(s, recurse);
+    if(p) return p->FindDataMemberInfo(name, recurse);
   }
   if(throwp)
     throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
-		      s.Data(), fName.Data(), recurse));
+		      name.Data(), fName.Data(), recurse));
   return 0;
 }
 
 GledNS::LinkMemberInfo*
-GledNS::ClassInfo::FindLinkMemberInfo(const TString& s, bool recurse, bool throwp)
+GledNS::ClassInfo::FindLinkMemberInfo(const TString& name, bool recurse, bool throwp)
 {
   static const Exc_t _eh("GledNS::ClassInfo::FindLinkMemberInfo ");
 
   lpLinkMemberInfo_i i = find_if(fLinkMemberList.begin(), fLinkMemberList.end(),
-				infobase_name_eq(s));
+				infobase_name_eq(name));
 
   if(i != fLinkMemberList.end()) return *i;
   if(recurse) {
     ClassInfo* p = GetParentCI();
-    if(p) return p->FindLinkMemberInfo(s, recurse);
+    if(p) return p->FindLinkMemberInfo(name, recurse);
   }
   if(throwp)
     throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
-		      s.Data(), fName.Data(), recurse));
+		      name.Data(), fName.Data(), recurse));
+  return 0;
+}
+
+GledNS::EnumInfo*
+GledNS::ClassInfo::FindEnumInfo(const TString& name, bool recurse, bool throwp)
+{
+  static const Exc_t _eh("GledNS::ClassInfo::FindEnumInfo ");
+
+  lpEnumInfo_i i = find_if(fEnumList.begin(), fEnumList.end(),
+			   infobase_name_eq(name));
+
+  if(i != fEnumList.end()) return *i;
+  if(recurse) {
+    ClassInfo* p = GetParentCI();
+    if(p) return p->FindEnumInfo(name, recurse);
+  }
+  if(throwp)
+    throw(_eh + GForm("'%s' not found in glass %s (recurse=%d).",
+		      name.Data(), fName.Data(), recurse));
   return 0;
 }
 
