@@ -25,6 +25,8 @@ public:
     ParaSurf(n,t) { _init(); }
   virtual ~PSSphere() {}
 
+  virtual void FindMinMaxFGH(TriMesh* mesh); // Exported in ParaSurf.
+
   virtual Float_t Surface();
   virtual Float_t CharacteristicLength() { return mR; }
 

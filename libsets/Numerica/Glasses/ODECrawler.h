@@ -135,7 +135,7 @@ private:
   void _init();
 
 protected:
-  ZLink<ZGlass> mODEMaster;     // X{GS} L{A}
+  ZLink<ZGlass> mODEMaster;     // X{GS} L{a}
 
   Int_t 	mGuessesOK;	//! X{g}  7 ValOut(-join=>1)
   Int_t 	mGuessesBad;	//! X{g}  7 ValOut()

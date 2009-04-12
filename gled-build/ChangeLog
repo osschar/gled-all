@@ -1,3 +1,28 @@
+2009-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Add targets echo_subdirs and echo_svn_modified.
+
+	* bin/gled-create-libset:
+	Fix comments in auto-generated glass.list.
+
+	* libexec/gled_cat_gen.pl:
+	Remove useless code trying to deduce existing glasses - this was
+	never used and couldn't replace hand-written glass.list anyway.
+
+	* libexec/gled_glue_gen.pl:
+	Determine which renderers to instantiate according to the new
+	convention.
+
+	* libexec/project7.pl:
+	Modify interpretation of L{a} and L{A}. Before they were synonyms,
+	now they do this:
+	  a - generate protected assert_<linkname>;
+	  A - generate public Assert<linkname> returning the object ptr.
+
+	* make/make_targets.inc:
+	Fix inconsistent names of some echo targets.
+
 2009-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* cfg/project7.rc:

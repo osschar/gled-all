@@ -25,6 +25,8 @@ public:
   PSTorus(const Text_t* n="PSTorus", const Text_t* t=0) :
     ParaSurf(n,t) { _init(); }
 
+  virtual void FindMinMaxFGH(TriMesh* mesh); // Exported in ParaSurf.
+
   virtual Float_t Surface();
   virtual Float_t CharacteristicLength() { return mRM + mRm; }
 

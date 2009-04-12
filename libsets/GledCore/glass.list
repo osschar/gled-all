@@ -1,5 +1,5 @@
 # glass			class	location		rnr-class
-# name			id				[]~ZGlass, [.]~own rnr, [<glass>]
+# name			id			[]~parent, [.]~own rnr, [<glass>]
 
 # Base glasses
 ZGlass			1	Glasses/ZGlass		.
@@ -96,4 +96,4 @@ WGlDirectory		288	Glasses/WGlDirectory	.
 WGlButton		289	Glasses/WGlButton	.
 WGlFrameStyle		290	Glasses/WGlFrameStyle	.
 WGlValuator		291	Glasses/WGlValuator	.
-WGlWidget               292     Glasses/WGlWidget       ZNode
+WGlWidget               292     Glasses/WGlWidget

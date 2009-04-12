@@ -854,9 +854,16 @@ print H7 "void ExecuteMir(ZMIR& mir);\n";
 
 for $r (@Members)
 {
-  next unless $r->{Xport} =~ m/s|S|e|E/o;
-  print H7 "ZMIR* S_$r->{Methodname}($r->{ArgStr});\n";
-  print H7 "static MID_t Mid_$r->{Methodname}() { return $r->{ID}; }\n";
+  if ($r->{Xport} =~ m/s|S|e|E/o)
+  {
+    print H7 "ZMIR* S_$r->{Methodname}($r->{ArgStr});\n";
+    print H7 "static MID_t Mid_$r->{Methodname}() { return $r->{ID}; }\n";
+  }
+  if ( $r->{Link} =~ m/(A)/ )
+  {
+    print H7 "$r->{LinkType}* Assert" . $r->{Methodbase} . "(const Exc_t& eh);\n";
+  }
+
 }
 
 for $r (@Methods)
@@ -875,7 +882,7 @@ for $r (@Members)
 {
   next unless exists $r->{Link};
   print H7 "static GledNS::LinkMemberInfo* sap_$r->{Methodbase}_lmi;\n";
-  if ( $r->{Link} =~ m/(a|A)/ )
+  if ( $r->{Link} =~ m/(a)/ )
   {
     print H7 "void assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh);\n";
   }
@@ -926,7 +933,12 @@ for $r (@Members)
 {
   next unless exists $r->{Link};
   print C7 "GledNS::LinkMemberInfo* ${CLASSNAME}::sap_$r->{Methodbase}_lmi;\n";
-  if ( $r->{Link} =~ m/(a|A)/ )
+  if ( $r->{Link} =~ m/(A)/ )
+  {
+    print C7 "$r->{LinkType}* ${CLASSNAME}::Assert" . $r->{Methodbase} . "(const Exc_t& eh)\ " .
+      "{ $r->{LinkType}* ret = *$r->{Varname}; if (ret == 0) throw(eh + \"link $r->{Varname} not set.\"); return ret; }\n";
+  }
+  if ( $r->{Link} =~ m/(a)/ )
   {
     print C7 "void ${CLASSNAME}::assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh)\ " .
       "{ if ($r->{Varname} == 0) throw(eh + \"link $r->{Varname} not set.\"); }\n";

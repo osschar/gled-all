@@ -805,6 +805,5 @@ const char* help_text =
 
 void TringuCam::Help()
 {
-  printf(help_text);
-
+  fputs(help_text, stdout);
 }

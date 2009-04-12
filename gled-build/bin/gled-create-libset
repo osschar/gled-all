@@ -34,8 +34,8 @@ for $d (@TopDirs2) {
 open G, ">glass.list";
 print G <<"fnord";
 # glass		class	location		rnr-class
-# name		id				[]~ZGlass, [.]~own rnr, [<glass>]
-#
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
 #ZGlass		1	Glasses/ZGlass		.
 #ZList		2	Glasses/ZList
 #ZNode		3	Glasses/ZNode		.

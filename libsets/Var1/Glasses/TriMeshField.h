@@ -22,7 +22,7 @@ private:
 protected:
   // Field: definition mesh, dimensions, values.
 
-  ZLink<TriMesh>     mMesh;     // X{GS} L{A}
+  ZLink<TriMesh>     mMesh;     // X{GS} L{a}
   Int_t              mNVerts;   // X{G} 7 ValOut(-join=>1)
   Int_t              mDim;      // X{G} 7 ValOut()
   vector<Float_t>    mField;    //
@@ -30,7 +30,7 @@ protected:
 
   // Color mapping of field values.
 
-  ZLink<RGBAPalette> mPalette;  // X{GS} L{A}
+  ZLink<RGBAPalette> mPalette;  // X{GS} L{a}
   TString            mFormula;  // X{GS} 7 Textor()
   Float_t            mMinValue; // X{GS} 7 Value(-range=>[-1e6,1e6,1,100], -join=>1)
   Float_t            mMaxValue; // X{GS} 7 Value(-range=>[-1e6,1e6,1,100])

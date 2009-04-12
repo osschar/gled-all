@@ -1,3 +1,11 @@
+2009-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.h:
+	Fix for changes in L{aA} p7 pragma.
+
+	* glass.list:
+	Fix for new render-class specification.
+
 2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ODECrawler.cxx:

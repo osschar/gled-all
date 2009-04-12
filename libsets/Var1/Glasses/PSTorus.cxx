@@ -43,6 +43,18 @@ void PSTorus::_init()
   mRm = 0.5;
 }
 
+/**************************************************************************/
+
+void PSTorus::FindMinMaxFGH(TriMesh* mesh)
+{
+  PARENT_GLASS::FindMinMaxH(mesh);
+
+  mMinF = -sPi; mMaxF = sPi;
+  mMinG = -sPi; mMaxG = sPi;
+}
+
+/**************************************************************************/
+
 namespace {
 inline float norm3(float x, float y, float z)
 { return sqrtf(x*x + y*y + z*z); }

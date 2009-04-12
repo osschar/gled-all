@@ -53,8 +53,9 @@ public:
     ZGlass(n,t) { _init(); }
   virtual ~ParaSurf() {}
 
-  void FindMinMaxFGH(TriMesh* mesh);  // X{E} C{1} 7 MCWButt()
-  void FindMinMaxH  (TriMesh* mesh);  // X{E} C{1} 7 MCWButt()
+  virtual void FindMinMaxFGH(TriMesh* mesh);  // X{E} C{1} 7 MCWButt()
+  virtual void FindMinMaxH  (TriMesh* mesh);  // X{E} C{1} 7 MCWButt()
+
   void RandomizeH(TriMesh* mesh,
                   Float_t  fg_chr_len, Float_t h_chr_len,
                   Float_t  alpha=0.8,  Bool_t  accum_dh=false,
@@ -96,7 +97,7 @@ public:
   // Subtract fgh values, taking care of U(1) variables (like angles).
   virtual void sub_fgh(Float_t* a, Float_t* b, Float_t* delta);
 
-  // Put fgh values into regular intervals.
+  // Put fg values into regular intervals.
   virtual void regularize_fg(Float_t* f);
 
   // These all return point with h=0, which might not be above surface.

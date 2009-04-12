@@ -607,15 +607,26 @@ GledNS::ClassInfo::ProduceFullLinkMemberInfoList()
 
 GledNS::ClassInfo* GledNS::ClassInfo::GetRendererCI()
 {
-  if(!fRendererCI && !fRendererGlass.IsNull()) {
-    TString rnr_glass = fRendererGlass;
-    while(true) {
-      fRendererCI = GledNS::FindClassInfo(rnr_glass);
-      if(fRendererCI == 0)
-        break;
-      rnr_glass = fRendererCI->fRendererGlass;
-      if(fRendererCI->fName == rnr_glass)
-	break;
+  if (!fRendererCI)
+  {
+    if (fRendererGlass == fName)
+    {
+      fRendererCI = this;
+    }
+    else
+    {
+      ClassInfo *ci;
+      if (fRendererGlass.IsNull())
+	ci = GetParentCI();
+      else
+	ci = GledNS::FindClassInfo(fRendererGlass);
+      while (ci != ci->GetRendererCI())
+      {
+	ci = ci->GetRendererCI();
+      }
+
+      fRendererGlass = ci->fName;
+      fRendererCI    = ci;
     }
   }
   return fRendererCI;
@@ -623,8 +634,8 @@ GledNS::ClassInfo* GledNS::ClassInfo::GetRendererCI()
 
 A_Rnr* GledNS::ClassInfo::SpawnRnr(const TString& rnr, ZGlass* g)
 {
-  if(fRendererCI == 0) GetRendererCI();
-  //cout <<"GledNS::ClassInfo::SpawnRnr rnr="<< rnr <<", lens="<< g->GetName() <<
+  if (fRendererCI == 0) GetRendererCI();
+  // cout <<"GledNS::ClassInfo::SpawnRnr rnr="<< rnr <<", lens="<< g->GetName() <<
   //  "["<< fRendererCI->fName <<"]\n";
   return GledNS::SpawnRnr(rnr, g, fRendererCI->fFid);
 }

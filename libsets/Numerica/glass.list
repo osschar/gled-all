@@ -1,8 +1,6 @@
-# $Id$
-
 # glass		class	location		rnr-class
-# name		id				[]~ZGlass, [.]~own rnr, [<glass>]
-#
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
 # ODE solving
 ODECrawler	1	Glasses/ODECrawler
 Moonraker	2	Glasses/Moonraker	.

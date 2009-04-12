@@ -26,7 +26,7 @@ private:
   void _init();
 
 protected:
-  ZLink<AEVManager>  mManager; // X{GS} L{A}
+  ZLink<AEVManager>  mManager; // X{GS} L{a}
 
   TString    mSuckHost;     // X{GS} 7 Textor()
   Int_t      mSuckPort;     // X{GS} 7 Value()

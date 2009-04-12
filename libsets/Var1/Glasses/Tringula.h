@@ -65,8 +65,8 @@ private:
   vector<Opcode::Segment>    mItsLines;    //!
 
 protected:
-  ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{A}
-  ZLink<TriMesh>     mMesh;         //  X{GS} L{A}
+  ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{aA}
+  ZLink<TriMesh>     mMesh;         //  X{GS} L{aA}
   ZColor             mColor;        //  X{GSPT} 7 ColorButt()
   Float_t            mMaxFlyerH;    //  X{GS}   7 Value(-const=>1,-join=>1)
   Float_t            mMaxCameraH;   //  X{GS}   7 Value()

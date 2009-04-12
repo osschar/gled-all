@@ -27,9 +27,9 @@ public:
   enum UserViz_e { UV_None, UV_All, UV_RunningJobs, UV_ErrorJobs };
 
 protected:
-  ZLink<SolarSystem>    mSolarSystem; // X{GS} L{A}
-  ZLink<AEVSiteList>    mSites;       // X{GS} L{A}
-  ZLink<AEVMlSucker>    mSucker;      // X{GS} L{A}
+  ZLink<SolarSystem>    mSolarSystem; // X{GS} L{a}
+  ZLink<AEVSiteList>    mSites;       // X{GS} L{a}
+  ZLink<AEVMlSucker>    mSucker;      // X{GS} L{a}
 
   Int_t                 mTimeWindow;  // X{G}  7 ValOut(-join=>1)
 public:

@@ -1,3 +1,23 @@
+2009-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Change render-class determination and handling of L{aA} pragma.
+
+	* Gled/GledNS.cxx:
+	Change logic for determination of rendering class: find it at
+	run-time, so that catalog generators don't need information about
+	other libsets.
+
+	Before empty render specification meant use 'ZGlass' renderer.
+	Now it means take the first existing renderer in the glass
+	hierarchy.
+	
+	* glass.list:
+	Fix for new render-class specification
+
+	* RnrBase/A_Rnr.cxx:
+	* RnrBase/A_Rnr.h:
+	Gray-space changes.
+
 2009-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for enum info in Gled class catalogs.

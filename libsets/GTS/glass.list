@@ -1,5 +1,5 @@
 # glass		class	location		rnr-class
-# name		id				[]~ZGlass, [.]~own rnr, [<glass>]
+# name		id			[]~parent, [.]~own rnr, [<glass>]
 
 # Base glasses
 GTSurf		1	Glasses/GTSurf		.

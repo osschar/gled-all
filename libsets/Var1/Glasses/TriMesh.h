@@ -127,7 +127,7 @@ private:
 
 protected:
   ZLink<ZImage>           mDefTexture; //  X{GS} L{}
-  ZLink<ParaSurf>         mParaSurf;   //  X{GS} L{A}
+  ZLink<ParaSurf>         mParaSurf;   //  X{GS} L{a}
 
   TringTvor*              mTTvor;      //! X{gs}
 
