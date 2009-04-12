@@ -44,6 +44,16 @@ void PSSphere::_init()
 
 /**************************************************************************/
 
+void PSSphere::FindMinMaxFGH(TriMesh* mesh)
+{
+  PARENT_GLASS::FindMinMaxH(mesh);
+
+  mMinF = -sPi;     mMaxF = sPi;
+  mMinG = -sPiHalf; mMaxG = sPiHalf;
+}
+
+/**************************************************************************/
+
 Float_t PSSphere::Surface()
 {
   return 4.0f*sPi*mR*mR;

@@ -170,19 +170,19 @@ protected:
   // Other stuff.
   //=================================================================
 
-  ZLink<Tringula>          mTringula;    // X{GS} L{A}
-  ZLink<TriMeshField>      mCurField;    // X{GS} L{A}
-  ZLink<TriMeshLightField> mLightField;  // X{GS} L{A}
-  ZLink<RGBAPalette>       mPalette;     // X{GS} L{A}
+  ZLink<Tringula>          mTringula;    // X{GS} L{a}
+  ZLink<TriMeshField>      mCurField;    // X{GS} L{a}
+  ZLink<TriMeshLightField> mLightField;  // X{GS} L{a}
+  ZLink<RGBAPalette>       mPalette;     // X{GS} L{a}
 
-  ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{A}
-  ZLink<Scene>             mOverlay;     // X{GS} L{A}
-  ZLink<WGlWidget>         mLastMenu;    // X{GS} L{A}
+  ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{a}
+  ZLink<Scene>             mOverlay;     // X{GS} L{a}
+  ZLink<WGlWidget>         mLastMenu;    // X{GS} L{a}
 
-  ZLink<Eventor>           mEventor;     // X{GS} L{A}
-  ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{A}
+  ZLink<Eventor>           mEventor;     // X{GS} L{a}
+  ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{a}
 
-  ZLink<ZGlass>            mPrepBeta;    // X{GS} L{A}
+  ZLink<ZGlass>            mPrepBeta;    // X{GS} L{a}
 
   // Render-driver and mouse state fed in via TringuCam_GL_Rnr
   // Draw() and Handle().

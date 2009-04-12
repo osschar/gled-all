@@ -84,3 +84,19 @@ distclean::
 distclean::
 	rm -f ${BUILD_FILES}
 	rm -rf htmldoc/ classdoc/ macros/*.so
+
+
+########################################################################
+# Helpers
+########################################################################
+
+echo_subdirs:
+	@echo ${SUBDIRS}
+
+svn_update:
+	@svn update
+	@svn update libsets
+	@svn update demos
+
+echo_svn_modified:
+	@(svn status -q; svn status -q libsets demos) | perl -pe 's/.+[ \t]+//g;'

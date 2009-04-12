@@ -13,7 +13,8 @@ class ZGlass;
 class RnrDriver;
 class RnrScheme;
 
-class A_Rnr : public OptoStructs::A_View {
+class A_Rnr : public OptoStructs::A_View
+{
   friend class RnrDriver;
 
 public:
@@ -26,7 +27,8 @@ public:
   typedef list<NameStack_Entry>::iterator lNSE_i;
   typedef vector<NameStack_Entry>         vNSE_t;
 
-  struct Fl_Event {
+  struct Fl_Event
+  {
     int     fEvent;
     int     fState;
     int     fKey;

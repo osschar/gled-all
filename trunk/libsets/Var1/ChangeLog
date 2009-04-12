@@ -1,3 +1,35 @@
+2009-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Minor consistency issues.
+
+	* Glasses/LandMark.cxx:
+	* Glasses/LandMark.h:
+	New glass - preliminary check-in.
+
+	* glass.list:
+	Fix for new render-class specification.
+
+	* Glasses/PSMark.cxx:
+	* Glasses/PSMark.h:
+	Use para-surf limits in setters.
+
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	FindMinMaxFGH() is now virtual and returns parametric limits for
+	sphere and torus.
+
+	* Glasses/SolarSystem.h:
+	* Glasses/TriMesh.h:
+	* Glasses/TriMeshField.h:
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Glasses/Tringula.h:
+	Fix for changes in L{aA} p7 pragma.
+
 2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Dynamico.cxx:

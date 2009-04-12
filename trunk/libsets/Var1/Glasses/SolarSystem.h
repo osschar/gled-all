@@ -36,8 +36,8 @@ public:
   enum CrawlMode_e { CM_ChunkedStorage, CM_DirectStep };
 
 protected:
-  ZLink<ZVector>     mBalls;      // X{GS} L{A} RnrBits{0,0,0,0, 0,0,0,5}
-  ZLink<ODECrawler>  mODECrawler; // X{GS} L{A}
+  ZLink<ZVector>     mBalls;      // X{GS} L{a} RnrBits{0,0,0,0, 0,0,0,5}
+  ZLink<ODECrawler>  mODECrawler; // X{GS} L{a}
 
   CrawlMode_e        mCrawlMode;  // X{G}    7 PhonyEnum(-const=>1)
 

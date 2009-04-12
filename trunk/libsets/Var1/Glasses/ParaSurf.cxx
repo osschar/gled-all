@@ -89,7 +89,31 @@ void ParaSurf::FindMinMaxH(TriMesh* mesh)
 
   if (mesh == 0) throw(_eh + "mesh null.");
 
-  throw(_eh + "not implemented!");
+  TringTvor & TT = * mesh->GetTTvor();
+  if (TT.mNVerts < 1)
+  {
+    mMinH = mMaxH = mMeanH = mSigmaH = 0;
+    return;
+  }
+
+  mMinH =  FLT_MAX;
+  mMaxH = -FLT_MAX;
+  Double_t sumh = 0, sumh2 = 0;
+
+  Float_t * V  = TT.Verts();
+  Int_t     N  = TT.mNVerts;
+  Float_t   F[3];
+  for (Int_t i=0; i<N; ++i, V+=3)
+  {
+    pos2fgh(V, F);
+    if (F[2] < mMinH) mMinH = F[2]; else if (F[2] > mMaxH) mMaxH = F[2];
+    sumh += F[2]; sumh2 += F[2]*F[2];
+  }
+  mMeanH   = sumh/N;
+  mSigmaH  = TMath::Sqrt(TMath::Abs(sumh2/N - sumh*sumh/N/N));
+  mEpsilon = sEpsilonFac*(mMaxH - mMinH);
+
+  Stamp(FID());
 }
 
 void ParaSurf::RandomizeH(TriMesh* mesh,

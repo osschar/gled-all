@@ -153,13 +153,13 @@ echo_libset_id:
 echo_cppflags:
 	@echo ${CPPFLAGS}
 
-echo_blessh:
+echo_bless_hdrs:
 	@echo ${BLESSED_HDRS}
-echo_blesss:
+echo_bless_srcs:
 	@echo ${BLESSED_SRCS}
-echo_blessh7:
+echo_bless_h7:
 	@echo ${BLESSED_H7}
-echo_blesss7:
+echo_bless_c7:
 	@echo ${BLESSED_C7}
 
 echo_baseh:

@@ -186,16 +186,20 @@ close C;
 # Rnrs
 ########################################################################
 
-%existing_rnrs;
-for $c (@{ $CATALOG->{ClassList} }) {
-  my $rnr_class = $CATALOG->{Classes}{$c}{RnrClass};
-  $existing_rnrs{$rnr_class} = 1 if exists $CATALOG->{Classes}{$rnr_class};
+@class_rnrs = ();
+
+for $c (@{$CATALOG->{ClassList}})
+{
+  if ($CATALOG->{Classes}{$c}{RnrClass} eq $c)
+  {
+    push @class_rnrs, $c;
+  }
 }
 
-for $rnr (@Rnrs) {
-
-open H, ">$config->{GLUE_DIR}/${libname}_Rnr_${rnr}_LibSet.h";
-print H <<"fnord";
+for $rnr (@Rnrs)
+{
+  open H, ">$config->{GLUE_DIR}/${libname}_Rnr_${rnr}_LibSet.h";
+  print H <<"fnord";
 #ifndef GLED_${libname}_Rnr_${rnr}_LibSet
 #define GLED_${libname}_Rnr_${rnr}_LibSet
 
@@ -204,21 +208,22 @@ void lib${libname}_GLED_init_Rnr_${rnr}();
 #endif
 fnord
 
-close H;
+  close H;
 
-open C, ">$config->{GLUE_DIR}/${libname}_Rnr_${rnr}_LibSet.cxx";
-print C <<"fnord";
+  open C, ">$config->{GLUE_DIR}/${libname}_Rnr_${rnr}_LibSet.cxx";
+  print C <<"fnord";
 #include "${libname}_Rnr_${rnr}_LibSet.h"
 #include <Gled/GledNS.h>
 #include <Glasses/ZGlass.h>
 
 fnord
 
-for $r (keys %existing_rnrs) {
-  print C "#include <Rnr/${rnr}/${r}_${rnr}_Rnr.h>\n";
-}
+  for $c (@class_rnrs)
+  {
+    print C "#include <Rnr/${rnr}/${c}_${rnr}_Rnr.h>\n";
+  }
 
-print C <<"fnord";
+  print C <<"fnord";
 
 A_Rnr* lib${libname}_Rnr_${rnr}_Construct(ZGlass* n, CID_t cid)
 {
@@ -226,16 +231,17 @@ A_Rnr* lib${libname}_Rnr_${rnr}_Construct(ZGlass* n, CID_t cid)
   switch(cid) {
 fnord
 
-for $c (keys %existing_rnrs) {
-  print C <<"fnord";
+  for $c (@class_rnrs)
+  {
+    print C <<"fnord";
   case $CATALOG->{Classes}{$c}{ClassID}: {
     v = new ${c}_${rnr}_Rnr(dynamic_cast<$c*>(n));
     break;
   }
 fnord
-}
+  }
 
-print C <<"fnord";
+  print C <<"fnord";
   } // switch
   return v;
 }
@@ -248,6 +254,6 @@ void lib${libname}_GLED_init_Rnr_${rnr}()
 void *${libname}_GLED_init_Rnr_${rnr} = (void*)lib${libname}_GLED_init_Rnr_${rnr};
 fnord
 
-close C;
+  close C;
 
 } # end for @Rnrs

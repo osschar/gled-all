@@ -71,8 +71,6 @@ void A_Rnr::CreateRnrScheme(RnrDriver* rd)
   crs_elements(rd, mRnrScheme);
 }
 
-
-
 void A_Rnr::DropRnrScheme()
 {
   if(mRnrScheme) {
