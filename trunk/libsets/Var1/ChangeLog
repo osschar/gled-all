@@ -1,3 +1,38 @@
+2009-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve rendering of Extendios.
+
+	The explicit rendering of extendios in Tringula has been
+	off-loaded to the render-driver infrastructure and a dedicated
+	Extendio-renderer.
+
+	Before explicit loops over contents of links-to-list were made for
+	Statos, Dynos and Flyers. Now the links to these lists are
+	assigned proper rnr-bits and the descent is handled by the
+	render-driver.
+
+	For this to work, the rendering code was moved from
+	Tringula_GL_Rnr to new class Extendio_GL_Rnr. This has the added
+	benefit of being able to do funny stuff in specialized sub-classes
+	of extendio-renderer.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+	New files - code moved from Tringula_GL_Rnr.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Remove code for rendering of extendios.
+
+	* glass.list:
+	Mark Extendio as having its own renderer.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Properly set RnrBits for links to hash-lists holding Statos, Dynos
+	and Flyers.
+
+	Remove obsolete members 'Bool_t bRnrDynos, bPickDynos'.
+
 2009-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Minor consistency issues.

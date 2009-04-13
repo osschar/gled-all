@@ -5,14 +5,9 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Tringula_GL_Rnr.h"
-#include <Rnr/GL/TringTvor_GL_Rnr.h>
-#include <Glasses/ZHashList.h>
-#include <Glasses/TriMesh.h>
-#include <Glasses/Statico.h>
-#include <Glasses/Dynamico.h>
 
-#include <Rnr/GL/GLRnrDriver.h>
-#include <Rnr/GL/SphereTrings.h>
+#include <Glasses/TriMesh.h>
+#include <Rnr/GL/TringTvor_GL_Rnr.h>
 
 #include <Opcode/Opcode.h>
 
@@ -38,8 +33,8 @@ Tringula_GL_Rnr::~Tringula_GL_Rnr()
 
 /**************************************************************************/
 
-namespace {
-
+namespace
+{
 void sphere(const Float_t* v, GLUquadricObj* q)
 {
   glPushMatrix();
@@ -47,67 +42,6 @@ void sphere(const Float_t* v, GLUquadricObj* q)
   gluSphere(q, 0.02, 5, 5);
   glPopMatrix();
 }
-
-void render_ceaabox(const Float_t* x, Float_t f=1)
-{
-  // Render center-extents axis-aligned bounding-box
-  f *= 2;
-  glPushMatrix();
-  glTranslatef(x[0]-x[3], x[1]-x[4], x[2]-x[5]);
-  glScalef(f*x[3], f*x[4], f*x[5]);
-  SphereTrings::UnitFrameBox();
-  glPopMatrix();
-}
-
-}
-
-
-void Tringula_GL_Rnr::RenderExtendio(RnrDriver* rd, Extendio* ext)
-{
-  glPushMatrix();
-
-  glMultMatrixf(ext->RefLastTrans().Array());
-  // !!! This is a horrible hack ... hash_lookup for nothing.
-  // !!! Should use secondary selection (internal id-resolution).
-  if (mTringula->bPickDynos) rd->GL()->PushName(rd->GetLensRnr(ext));
-
-  TringTvor_GL_Rnr::Render(ext->GetMesh()->GetTTvor(), false);
-
-  if (ext->GetSelected())
-  {
-    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-    GL_Float_Holder      fat_line(GL_LINE_WIDTH, 2, glLineWidth);
-    glColor3fv(mTringula->PtrSelColor()->array());
-    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
-  }
-
-  if (mTringula->bRnrBBoxes)
-  {
-    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-    glColor3f(1, 0, 0);
-    render_ceaabox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
-  }
-
-  if (mTringula->bPickDynos) rd->GL()->PopName();
-
-  glPopMatrix();
-
-  if (mTringula->bRnrBBoxes)
-  {
-    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-    glColor3f(0, 0, 1);
-    render_ceaabox((Float_t*)&ext->RefLastAABB(), 1.01f);
-  }
-}
-
-void Tringula_GL_Rnr::RenderExtendios(RnrDriver* rd, AList* list)
-{
-  AList::Stepper<Extendio> stepper(list);
-  while (stepper.step())
-  {
-    if (! (*stepper)->GetRnrSelf()) continue;
-    RenderExtendio(rd, *stepper);
-  }
 }
 
 /******************************************************************************/
@@ -116,15 +50,15 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
 {
   Tringula&   T = *mTringula;
   TringTvor* TT =  T.mMesh->GetTTvor();
-  if(TT == 0) return;
-  if(mMeshTringStamp < T.mMesh->GetStampReqTring())
+  if (TT == 0) return;
+  if (mMeshTringStamp < T.mMesh->GetStampReqTring())
   {
     bRebuildDL = true;
     mMeshTringStamp = T.mMesh->GetStampReqTring();
   }
   PARENT::Draw(rd);
 
-  if(T.bRnrRay)
+  if (T.bRnrRay)
   {
     // Render Ray
     glPushMatrix();
@@ -184,25 +118,18 @@ void Tringula_GL_Rnr::Draw(RnrDriver* rd)
     }
   }
 
-  if (T.bRnrDynos)
+  if (T.bRnrItsLines)
   {
-    RenderExtendios(rd, *T.mStatos);
-    RenderExtendios(rd, *T.mDynos);
-    RenderExtendios(rd, *T.mFlyers);
-
-    if (T.bRnrItsLines)
+    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+    GL_Float_Holder      line_w(GL_LINE_WIDTH, 2, glLineWidth);
+    glColor3f(1, 0.1, 0.3);
+    glBegin(GL_LINES);
+    for (vector<Opcode::Segment>::iterator i = T.mItsLines.begin(); i != T.mItsLines.end(); ++i)
     {
-      GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-      GL_Float_Holder      line_w(GL_LINE_WIDTH, 2, glLineWidth);
-      glColor3f(1, 0.1, 0.3);
-      glBegin(GL_LINES);
-      for (vector<Opcode::Segment>::iterator i = T.mItsLines.begin(); i != T.mItsLines.end(); ++i)
-      {
-        glVertex3fv(i->mP0);
-        glVertex3fv(i->mP1);
-      }
-      glEnd();
+      glVertex3fv(i->mP0);
+      glVertex3fv(i->mP1);
     }
+    glEnd();
   }
 }
 

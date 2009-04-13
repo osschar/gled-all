@@ -61,7 +61,6 @@ void Tringula::_init()
   mRayPos.SetXYZ(1, 1, 10);
   mRayDir.SetXYZ(0, 0, -1);
 
-  bRnrDynos  = bPickDynos   = true;
   bRnrBBoxes = bRnrItsLines = false;
 
   mSelColor.rgba(1, 0.125, 0.25);
