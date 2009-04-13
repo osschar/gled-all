@@ -73,9 +73,9 @@ protected:
   Bool_t             bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
   Bool_t             bLightMesh;    //  X{GST}  7 Bool()
 
-  ZLink<ZHashList>   mStatos;       //  X{GS} L{}
-  ZLink<ZHashList>   mDynos;        //  X{GS} L{}
-  ZLink<ZHashList>   mFlyers;       //  X{GS} L{}
+  ZLink<ZHashList>   mStatos;       //  X{GS} L{} RnrBits{0,0,0,5}
+  ZLink<ZHashList>   mDynos;        //  X{GS} L{} RnrBits{0,0,0,5}
+  ZLink<ZHashList>   mFlyers;       //  X{GS} L{} RnrBits{0,0,0,5}
 
   Opcode::CollisionFaces* mRayColFaces;  //!
 
@@ -84,8 +84,6 @@ protected:
   TVector3   mRayPos; // X{GSRr} 7 Vector3()
   TVector3   mRayDir; // X{GSRr} 7 Vector3()
 
-  Bool_t     bRnrDynos;  // X{GS} 7 Bool(-join=>1)
-  Bool_t     bPickDynos; // X{GS} 7 Bool()
   Bool_t     bRnrBBoxes; // X{GS} 7 Bool(-join=>1)
   Bool_t     bRnrItsLines; // X{GS} 7 Bool() Intersection lines
 
