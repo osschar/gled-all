@@ -13,8 +13,8 @@ class RnrDriver;
 
 #include <GL/glew.h>
 
-class ZGlass_GL_Rnr : public A_Rnr {
-private:
+class ZGlass_GL_Rnr : public A_Rnr
+{
 protected:
   ZGlass*	mGlass;
   TimeStamp_t	mStampTring;

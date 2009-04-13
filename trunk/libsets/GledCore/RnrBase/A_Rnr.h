@@ -18,7 +18,8 @@ class A_Rnr : public OptoStructs::A_View
   friend class RnrDriver;
 
 public:
-  struct NameStack_Entry {
+  struct NameStack_Entry
+  {
     A_Rnr* fRnr;
     void*  fUserData;
   };

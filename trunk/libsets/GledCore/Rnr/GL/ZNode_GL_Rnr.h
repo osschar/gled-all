@@ -12,7 +12,8 @@
 #include <RnrBase/PMSEntry.h>
 class RnrDriver;
 
-class ZNode_GL_Rnr : public ZGlass_GL_Rnr {
+class ZNode_GL_Rnr : public ZGlass_GL_Rnr
+{
   void _init();
   void _setup_rnrmod();
 protected:
