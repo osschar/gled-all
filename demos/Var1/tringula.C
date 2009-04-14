@@ -273,6 +273,7 @@ void tringula(Int_t mode=2)
     case  3: setup_sphere_inside();  break;
     case  4: setup_torus_outside();  break;
     case  5: setup_torus_inside();   break;
+    case  9: setup_large_sphere();   break;
     case 99: setup_test();           break;
   }
 
@@ -733,6 +734,38 @@ void setup_torus_inside()
 
   tringula->SetMaxFlyerH (0.5 * rm);
   tringula->SetMaxCameraH(0.9 * rm);
+}
+
+void setup_large_sphere()
+{
+  Float_t R = 100;
+  statico_surface_fraction = 0.01;
+
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
+  PSSphere* pssph = dynamic_cast<PSSphere*>(parasurf);
+  pssph->SetR(R);
+
+  // Setup GTS surface.
+  // gtsurf->GenerateSphere(4);
+  gtsurf->GenerateSphere(6);
+  gtsurf->Rescale(R);
+  for (int i=0; i<5; ++i) {
+    //gtsurf->Legendrofy(16, 0.25, 1.5);
+    gtsurf->Legendrofy(24, 0.25, 1.25);
+  }
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->ImportGTSurf(gtsurf);
+  trimesh->StdSurfacePostImport();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.5 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(2 * parasurf->CharacteristicLength());
 }
 
 void setup_test()
