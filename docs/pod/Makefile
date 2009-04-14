@@ -13,15 +13,15 @@ html: ${HTMLS}
 pdf: ${PDFS}
 
 %.html: %.pod
-	pom2 html $< > $@
+	pod3 html --toc $< > $@
 
 %.pdf: %.pod
-	pom2 latex $< > $*.tex
+	pod3 latex $< > $*.tex
 	latex $*.tex
 	pdflatex $*.tex
 
 %.ps: %.pod
-	pom2 latex $< > $*.tex
+	pod3 latex $< > $*.tex
 	latex $*.tex
 	latex $*.tex
 	dvips $*.dvi -o
