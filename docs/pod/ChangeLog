@@ -1,0 +1,14 @@
+2009-04-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve descriptions of link pragma and RnrBits infrastructure.
+
+	* gledimp.pod:
+	Document difference between L{A} and L{a} link-pragmas.
+
+	Explain RnrBits in some more detail. Fix the Board example - it
+	was outdated and wrong.
+
+	Beautify some links to Gled web.
+
+	* ChangeLog:
+	New file.
