@@ -606,15 +606,15 @@ For details see the C<README> file provided in C<gled-builder>.
 
 =head3 Getting the sources
 
-All C<Gled> sources reside in a SVN repository at
-L<http://svn.gled.org/gled/> (or via the viewcvs at
-L<http://www.gled.org/cgi-bin/viewcvs.cgi/>). The build directories,
-libsets, demos and the documentaion are all stored there. To allow for
-builds with specific sub-set of libsets, the repository structure is
-not entirely standard ... usually one does not checkout the whole
-trunk and some top-level directories need to be checked-out
-separately. All this is encoded in the helper checkout script
-available from the SVN:
+All C<Gled> sources reside in a L<SVN
+repository|http://svn.gled.org/gled/> (with
+L<viewcvs|http://www.gled.org/cgi-bin/viewcvs.cgi/>). The build
+directories, libsets, demos and the documentaion are all stored
+there. To allow for builds with specific sub-set of libsets, the
+repository structure is not entirely standard ... usually one does not
+checkout the whole trunk and some top-level directories need to be
+checked-out separately. All this is encoded in the helper checkout
+script available from the SVN:
 
   svn export http://svn.gled.org/gled/trunk/gled-build-checkout
 
@@ -735,9 +735,11 @@ As the environment is already setup, just choose the demo and run it:
 In principle, C<Gled> should be extended by creating new
 libsets. However, the C<Gled> project is still young and some
 functionality is still missing in the core libsets. See
-L<http://www.gled.org/status/>, L<http://www.gled.org/libsets/> and
-L<http://www.gled.org/contributing/> for details on development
-status/plans and other information for developers/contributors.
+L<status|http://www.gled.org/status/>,
+L<libsets|http://www.gled.org/libsets/> and
+L<contributing|http://www.gled.org/contributing/> for details on
+development status/plans and other information for
+developers/contributors.
 
 =head2 Creating a libset
 
@@ -1019,8 +1021,18 @@ and then there is no need to have the C<E> field present for data members.
 
 =item C<Link> (shorthand C<L>)
 
-Declares a data member as I<link>. If or C<aA> is specified a method
-C<< void assert_<link-name>(const Exc_t& exc_header) >> is also generated.
+Declares a data member as I<link>. If or C<aA> is specified the
+following methods that can be used to assert that a link is set are
+auto-generated:
+
+=over def
+
+=item<a> C<< protected: void assert_<lower-case-link-name>(const Exc_t& exc_header); >>
+
+=item<A> C<< public: <link-type>* Assert<link-name>(const Exc_t& exc_header); >>
+
+=back
+
 
 =item C<Stamp>
 
@@ -1133,17 +1145,45 @@ C<GledViewNS::RnrBits> structures.
 C<RnrDriver> performs rendering of a lens on seven (7) levels and on
 each level it executes the drawing functions specified by the
 render-bits (in fact a C<rnr-bit> is just a specification of level at
-which the method should be called). At each level the execution begins
-with methods of the lens itself, then the links and finally the
-list-members.
+which the method should be called). At each level the execution is
+done in the following order:
 
-Each glass with its own renderer has a C<RnrCtrl> declaration in
-comments at the top of the glass declaration. It contains the overall
-C<RnrBits> for the glass (self rendering and list rendering) and two
-rnr-steering flags: C<fRnrSelf> and C<fRnrLinks>. Each link has a
-separate collection of C<RnrBits> which specify at which levels the
-links draw-methods will be called. This data is parsed by the
-C<project7> parser/code generator and stored into the class catalog.
+=over enum
+
+=item links that are marked for rendering, in order of declaration,
+starting from base-classes;
+
+=item the lens itself;
+
+=item the list-members.
+
+=back
+
+This is the default behaviour ... it can be changed by re-implementing
+virtual method C<CreateRnrScheme()> in the render-class. See C<ZNode>
+and C<ZNode_GL_Rnr> for an example. The logic for invoking link
+rendering before the lens rendering is that most often the links are
+used for two purposes in rendering.
+
+=over enum
+
+=item To temporarily setup some GL-state - in this case the the
+C<PreDraw()> method of the link can be called on the same level as the
+C<Draw()> method of the lens. The C<PostDraw()> of link can be called
+on the next level.
+
+=item 
+
+=back
+
+Each glass with its own renderer can have a C<RnrCtrl> declaration in
+comments at the top of the glass declaration (or the default values
+are used, see the example below). It contains the overall C<RnrBits>
+for the glass (self rendering and list rendering) and two rnr-steering
+flags: C<fRnrSelf> and C<fRnrLinks>. Each link has a separate
+collection of C<RnrBits> which specify at which levels the links
+draw-methods will be called. This data is parsed by the C<project7>
+parser/code generator and stored into the class catalog.
 
 Let's decode this data for C<Geom1/Board> glass which
 renders a textured rectangle:
@@ -1155,7 +1195,7 @@ renders a textured rectangle:
    // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,5))
    MAC_RNR_FRIENDS(Board);
  protected:
-   ZImage*       mTexture;       // X{GS} L{} RnrBits{2,0,4,0, 0,0,0,0}
+   ZImage*       mTexture;       // X{GS} L{} RnrBits{4,0,5,0, 0,0,0,0}
                                  //                   self     list members
    ...
  };
@@ -1176,22 +1216,45 @@ render-levels:
 
 =over def
 
-=item<lvl 2:> First own C<PreDraw> is called (in fact, by virtuality,
-C<ZNode_GL_Rnr::PreDraw>, which sets up transformation matrix), then
-C<PreDraw> of C<mTexture> (bind texture/enable texturing).
+=item<lvl 2:>
+
+=over enum
+
+=item Own C<PreDraw> is called (in fact, by virtuality,
+C<ZNode_GL_Rnr::PreDraw>, which sets up transformation matrix).
+
+=back
 
 =item<lvl 4:>
-Own C<Draw> (just a rectangle with texture coordinates), then
-C<PostDraw> of C<mTexture> (unbind texture / disable texturing).
+
+=over enum
+
+=item C<PreDraw> of C<mTexture> (bind texture/enable texturing).
+
+=item Own C<Draw> (just a rectangle with texture coordinates).
+
+=back
 
 =item<lvl 5:>
-Full render descent is made for all list members. Notice, that local
+
+=over enum
+
+=item C<PostDraw> of C<mTexture> (unbind texture / disable texturing).
+
+=item Full render descent is made for all list members. Notice, that local
 transformation matrix is still in order as required by the hierachical
 model.
 
+=back
+
 =item<lvl 6:>
-Own C<PostDraw> is called (in fact C<ZNode_GL_Rnr::PostDraw>; pop
+
+=over enum
+
+=item Own C<PostDraw> is called (in fact C<ZNode_GL_Rnr::PostDraw>; pop
 transformation matrix).
+
+=back
 
 =back
 
