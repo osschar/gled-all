@@ -1,3 +1,8 @@
+2009-04-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add new test mode 9 - for a larger planet.
+
 2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
