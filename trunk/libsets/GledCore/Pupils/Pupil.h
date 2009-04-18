@@ -75,6 +75,8 @@ protected:
   Int_t		mImgNTiles;
   FBO*          mFBO;
 
+  GThread*      mCreationThread;
+
   void		dump_image(const TString& fname);
 
   // rendering elements
