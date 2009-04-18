@@ -1,3 +1,14 @@
+2009-04-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid FLTK issue with calling Pupil::handle() from another thread.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Add data-member 'GThread* mCreationThread' and only process
+	handle() if called from the same thread.
+	FLTK can call this quite unexpectedly when any Fl_Widget
+	destructor is called in another thread.
+
 2009-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Formatting changes.

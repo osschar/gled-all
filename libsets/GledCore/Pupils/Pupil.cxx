@@ -18,6 +18,8 @@
 
 #include <Rnr/GL/GLRnrDriver.h>
 
+#include <Gled/GThread.h>
+
 #include <TVirtualX.h>
 #include <TSystem.h>
 #include <TVector3.h>
@@ -173,6 +175,8 @@ void Pupil::_build()
   bCopyToScreen     = false;
   bSignalDumpFinish = false;
   mFBO              = 0;
+
+  mCreationThread   = 0;
 
   _check_auto_redraw();
 }
@@ -865,6 +869,9 @@ void Pupil::draw()
 
   // if (!valid()) {}
 
+  if (mCreationThread == 0)
+    mCreationThread = GThread::Self();
+
   if (bDumpImage)
   {
     try {
@@ -1244,6 +1251,15 @@ int Pupil::handle(int ev)
   // Maybe should check for something else?
   if(!valid())
     return 0;
+
+  // It can happen that we get called from another thread as ~Fl_Widget()
+  // calls fl_throw_focus() which in turn calls handle() on current widget.
+  // This seems utterly wrong.
+  if(GThread::Self() != mCreationThread) {
+    // printf("%scalled from *another* thread:\n", _eh.Data());
+    // printf("  creation='%s' calling='%s'.\n", mCreationThread->GetName(), GThread::Self()->GetName());
+    return 0;
+  }
 
   make_current();
 
