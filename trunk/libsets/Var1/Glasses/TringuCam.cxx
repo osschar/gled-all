@@ -17,6 +17,7 @@
 #include "Dynamico.h"
 #include "Crawler.h"
 #include "Flyer.h"
+#include "LandMark.h"
 // This is going too far ...
 
 #include <Glasses/ZQueen.h>
@@ -288,6 +289,7 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       // Should handle multiple selection?
       Statico*  stato = dynamic_cast<Statico*>(ext);
       Dynamico* dyno  = dynamic_cast<Dynamico*>(ext);
+      LandMark* lmark = dynamic_cast<LandMark*>(ext);
 
       if (mExpectBeta == EB_ConnectStaticos)
       {
@@ -329,10 +331,39 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
           weed->SetDaughterCbackStuff(dyno);
           SelectTopMenu(weed);
         }
-      } else {
+      }
+      else if (lmark)
+      {
+	WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("LandMarkCtrl"));
+        if (weed)
+        {
+          weed->SetDaughterCbackStuff(lmark);
+          SelectTopMenu(weed);
+        }
+      }
+      else
+      {
         SelectTopMenuByName("MainMenu");
       }
 
+      break;
+    }
+    case MA_NewLandMark:
+    {
+      printf ("Sucking new landmark\n");
+
+      CalculateMouseRayVectors();
+      MouseRayCollide();
+
+      if (mCollVertex != -1)
+      {
+	TriMesh *mesh = dynamic_cast<TriMesh*>(mQueen->FindLensByPath("var/meshes/LandMark"));
+	GLensReadHolder _tlck(*mTringula);
+	mTringula->AddLandMark(mesh, mCollPoint);
+      }
+
+      mMouseAction = mPrevAction;
+      Stamp(FID());
       break;
     }
     default:
@@ -806,4 +837,34 @@ const char* help_text =
 void TringuCam::Help()
 {
   fputs(help_text, stdout);
+}
+
+//==============================================================================
+
+#include <Glasses/ZVector.h>
+
+void TringuCam::RandomStatico()
+{
+  static const Exc_t _eh("TringuCam::RandomStatico ");
+
+  ZVector *statos = dynamic_cast<ZVector*>
+    (mQueen->FindLensByPath("var/meshes/rndstatos"));
+
+  if (!statos)
+    throw _eh + "stato-mesh vector not found.";
+
+  GLensReadHolder _tlck(*mTringula);
+  Statico* s = mTringula->RandomStatico(statos);
+  if (s == 0)
+    throw _eh + "placement seems to have failed.";
+  else
+    printf("%screated '%s'\n", _eh.Data(), s->GetName());
+}
+
+void TringuCam::MakeLandMark()
+{
+  mPrevAction = mMouseAction;
+  mMouseAction = MA_NewLandMark;
+
+  Stamp(FID());
 }

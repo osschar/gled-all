@@ -8,6 +8,7 @@
 #define Var1_LandMark_H
 
 #include <Glasses/Extendio.h>
+#include <Stones/ZColor.h>
 
 class LandMark : public Extendio
 {
@@ -28,7 +29,11 @@ protected:
 
   HeightMode_e mHeightMode; //  X{GS}  7 PhonyEnum()
 
-  Float_t mRadius;
+  Float_t mPhi;  //  X{GE}  7 Value(-range=>[-1e3,1e3,1,10])
+  Float_t mSx;   //  X{GST} 7 Value(-range=>[0.1,100,1,10])
+  Float_t mSy;   //  X{GST} 7 Value(-range=>[0.1,100,1,10])
+
+  ZColor  mColor; // X{PRGST} 7 ColorButt()
 
   void retrans(ParaSurf* ps);
 
@@ -45,6 +50,10 @@ public:
   void SetG(Float_t g);
   void SetH(Float_t h);
   void SetHRel(Float_t hr);
+
+  void SetFGH(Float_t f, Float_t g, Float_t h);
+
+  void SetPhi(Float_t p);
 
 #include "LandMark.h7"
   ClassDef(LandMark, 1);

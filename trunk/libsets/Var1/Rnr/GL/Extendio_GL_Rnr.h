@@ -23,9 +23,10 @@ public:
     ZGlass_GL_Rnr(idol), mExtendio(idol)
   { _init(); }
 
-  // virtual void PreDraw(RnrDriver* rd);
+  virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  // virtual void PostDraw(RnrDriver* rd);
+  virtual void Render(RnrDriver* rd);
+  virtual void PostDraw(RnrDriver* rd);
 
   static void render_ceaabox(const Float_t* x, Float_t f=1);
 

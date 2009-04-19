@@ -1,3 +1,12 @@
+2009-04-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Basic support for land-mark management and rendering.
+
+	* tringula.C:
+	Generate land-mark mesh.
+	Add Test-Menu (entries "Rnd Statos", "New LandMark").
+	Add LandMark sub-menu.
+
 2009-04-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
