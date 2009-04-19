@@ -208,6 +208,8 @@ public:
                         Float_t w=0.2, Float_t h=0.2,
                         Float_t wing_l1=0.4, Float_t wing_l2=0.8,
                         Float_t wing_w=0.12, Float_t wing_h=0.02); // X{E} 7 MCWButt()
+  void MakeTetraMark(Float_t r0=0.5, Float_t h0=2,
+		     Float_t r1=3,   Float_t w1=1, Float_t h1=0.05); // X{E} 7 MCWButt()
 
   void MakeBox(Float_t a=5, Float_t b=4, Float_t c=3);
 

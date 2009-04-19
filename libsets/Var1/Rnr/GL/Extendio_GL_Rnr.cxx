@@ -8,12 +8,13 @@
 
 #include <Glasses/Tringula.h>
 
-#include <Glasses/TriMesh.h>
 #include <Rnr/GL/TringTvor_GL_Rnr.h>
 
 #include <Rnr/GL/SphereTrings.h>
 
 #include <GL/glew.h>
+
+#define PARENT ZGlass_GL_Rnr
 
 /**************************************************************************/
 
@@ -37,18 +38,21 @@ void Extendio_GL_Rnr::render_ceaabox(const Float_t* x, Float_t f)
 
 /**************************************************************************/
 
-// void Extendio_GL_Rnr::PreDraw(RnrDriver* rd) {}
-
-void Extendio_GL_Rnr::Draw(RnrDriver* rd)
+void Extendio_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  Extendio &E = * mExtendio;
-  Tringula &T = * mExtendio->mTringula;
+  PARENT::PreDraw(rd);
 
   glPushMatrix();
 
-  glMultMatrixf(E.RefLastTrans().Array());
+  glMultMatrixf(mExtendio->RefLastTrans().Array());
+}
 
-  TringTvor_GL_Rnr::Render(E.GetMesh()->GetTTvor(), false);
+void Extendio_GL_Rnr::Draw(RnrDriver* rd)
+{
+  PARENT::Draw(rd);
+
+  Extendio &E = * mExtendio;
+  Tringula &T = * mExtendio->mTringula;
 
   if (E.GetSelected())
   {
@@ -64,8 +68,19 @@ void Extendio_GL_Rnr::Draw(RnrDriver* rd)
     glColor3f(1, 0, 0);
     render_ceaabox(E.GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
   }
+}
 
+void Extendio_GL_Rnr::Render(RnrDriver* rd)
+{
+  TringTvor_GL_Rnr::Render(mExtendio->GetMesh()->GetTTvor(), false);
+}
+
+void Extendio_GL_Rnr::PostDraw(RnrDriver* rd)
+{
   glPopMatrix();
+
+  Extendio &E = * mExtendio;
+  Tringula &T = * mExtendio->mTringula;
 
   if (T.GetRnrBBoxes())
   {
@@ -73,6 +88,6 @@ void Extendio_GL_Rnr::Draw(RnrDriver* rd)
     glColor3f(0, 0, 1);
     render_ceaabox((Float_t*)&E.RefLastAABB(), 1.01f);
   }
-}
 
-// void Extendio_GL_Rnr::PostDraw(RnrDriver* rd) {}
+  PARENT::PostDraw(rd);
+}

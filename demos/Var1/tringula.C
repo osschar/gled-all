@@ -143,6 +143,13 @@ void tringula(Int_t mode=2)
     chopmesh->StdDynamicoPostImport();
     chopmesh->SetMassFromBBox(0.15, 0.33, 1000);
 
+    ASSIGN_ADD_GLASS(landmarkmesh, TriMesh, meshes, "LandMark", 0);
+    // landmarkmesh->MakeTetraMark();
+    landmarkmesh->MakeTetraMark(0.5, 1, 1, 1, 0.05);
+
+    landmarkmesh->StdDynamicoPostImport();
+    landmarkmesh->SetMassFromBBox(0.15, 0.33, 1000);
+
     // Random statos.
     ASSIGN_ADD_GLASS(rndstatos, ZVector, meshes, "rndstatos", 0);
     rndstatos->Reserve(20);
@@ -460,18 +467,24 @@ void tringula(Int_t mode=2)
 
     while (used_surface < desired_surface)
     {
+      // This does not work well ... the exception never reaches
+      // the catch.
+      // Need to investigate with Axel.
       /*
       try
       {
         Statico* s = tringula->RandomStatico(rndstatos);
+	if (s == 0) printf("SAGR!!!!\n");
         used_surface += s->GetMesh()->GetXYArea();
         ++stato_cnt;
       }
       catch (Exc_t& exc)
       {
         printf("XYZZ %s\n", exc.Data());
-        if (++exc_cnt > 20)
+        if (++exc_cnt > 20) {
+          printf("Statico placement failed %d-times. Moving on.\n", exc_cnt);
           break;
+	}
       }
       */
 
@@ -773,7 +786,7 @@ void setup_test()
   // A mini-version of triangle.
 
   // Override global settings.
-  statico_surface_fraction = 0.05;
+  statico_surface_fraction = 0.1;
   num_dynamico = 30;
   num_flyer    = 15;
   num_chopper  =  7;
@@ -914,6 +927,41 @@ void make_overlay()
       CREATE_ADD_GLASS(back, WGlButton, ter_ctrl, " << ", 0);
       step.SetNodeAdvance(back);
       back->SetCbackAlpha(ter_ctrl);
+      back->SetCbackMethodName("MenuExit");
+    }
+    gs.Step();
+
+    CREATE_ADD_GLASS(test_menu, WGlButton, main_menu, "TestMenu", 0);
+    gs.SetNode(test_menu);
+    test_menu->SetCbackAlpha(test_menu);
+    test_menu->SetCbackMethodName("MenuEnter");
+
+    test_menu->SetRnrElements(false);
+    {
+      SGridStepper step(gs, true);
+
+      CREATE_ADD_GLASS(but1, WGlButton, test_menu, "Rnd Statico", 0);
+      step.SetNodeAdvance(but1);
+      but1->SetCbackAlpha(tricam);
+      but1->SetCbackMethodName("RandomStatico");
+
+      CREATE_ADD_GLASS(but2, WGlButton, test_menu, "New LandMark", 0);
+      step.SetNodeAdvance(but2);
+      but2->SetCbackAlpha(tricam);
+      but2->SetCbackMethodName("MakeLandMark");
+
+      /*
+      CREATE_ADD_GLASS(val1, WGlValuator, test_menu, "Sleep", 0);
+      step.SetNodeAdvance(val1);
+      val1->SetMin(1); val1->SetMax(1000);
+      val1->SetFormat("Sleep: %.0f");
+      val1->SetCbackAlpha(eventor);
+      val1->SetCbackMemberName("InterBeatMS");
+      */
+
+      CREATE_ADD_GLASS(back, WGlButton, test_menu, " << ", 0);
+      step.SetNodeAdvance(back);
+      back->SetCbackAlpha(test_menu);
       back->SetCbackMethodName("MenuExit");
     }
     gs.Step();
@@ -1059,6 +1107,41 @@ void make_overlay()
     but3->SetCbackMethodName("PrepConnectStatos");
     but3->SetCbackValue(1);
     but3->SetCbackString("coldsteel");
+  }
+
+  gs.Reset();
+
+  {
+    CREATE_ADD_GLASS(lmark_ctrl, WGlWidget, overlay, "LandMarkCtrl", 0);
+    lmark_ctrl->SetRnrElements(false);
+
+    CREATE_ADD_GLASS(but1, WGlButton, lmark_ctrl, "<undef>", "LensName:LensBeta");
+    gs.SetNodeAdvance(but1);
+    but1->SetCbackAlpha(tricam);
+    but1->SetCbackMethodName("LandMarkDetails");
+
+    CREATE_ADD_GLASS(butd, WGlButton, lmark_ctrl, "Detailed View", "LensBeta");
+    gs.SetNodeAdvance(butd);
+    butd->SetCbackAlpha(g_shell);
+    butd->SetCbackMethodName("SpawnClassView");
+
+    CREATE_ADD_GLASS(val1, WGlValuator, lmark_ctrl, "Phi", "LensAlpha");
+    gs.SetNodeAdvance(val1);
+    val1->SetStepA(1); val1->SetStepB(10);
+    val1->SetFormat("Phi: %.1f");
+    val1->SetCbackMemberName("Phi");
+
+    CREATE_ADD_GLASS(val2, WGlValuator, lmark_ctrl, "Sx", "LensAlpha");
+    gs.SetNodeAdvance(val2);
+    val2->SetStepA(1); val2->SetStepB(10);
+    val2->SetFormat("Sx: %.1f");
+    val2->SetCbackMemberName("Sx");
+
+    CREATE_ADD_GLASS(val3, WGlValuator, lmark_ctrl, "Sy", "LensAlpha");
+    gs.SetNodeAdvance(val3);
+    val3->SetStepA(1); val3->SetStepB(10);
+    val3->SetFormat("Sy: %.1f");
+    val3->SetCbackMemberName("Sy");
   }
 }
 

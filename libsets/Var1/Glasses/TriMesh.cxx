@@ -689,6 +689,36 @@ void TriMesh::MakeTetraChopper(Float_t l1, Float_t l2, Float_t l3, Float_t l4,
   Stamp(FID());
 }
 
+void TriMesh::MakeTetraMark(Float_t r0, Float_t h0,
+			    Float_t r1, Float_t w1, Float_t h1)
+{
+  delete mTTvor;
+  mTTvor = new TringTvor(4, 4, false, false, false);
+
+  make_tetra(0, 0, 2*r0/3, r0/3, 0, r0, h0);
+
+  Float_t dir[3] = { r1, 0, 0 };
+
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, w1, h1);
+
+  dir[0] = - dir[0];
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, w1, h1);
+
+  dir[1] = dir[0]; dir[0] = 0;
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, w1, h1);
+
+  dir[1] = - dir[1];
+  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
+                   mTTvor->Vertex(3), dir, w1, h1);
+
+  mTTvor->GenerateTriangleNormals();
+
+  Stamp(FID());
+}
+
 void TriMesh::MakeBox(Float_t a, Float_t b, Float_t c)
 {
   // Create a box centered on 0 in x and y directions and going from 0
@@ -703,7 +733,6 @@ void TriMesh::MakeBox(Float_t a, Float_t b, Float_t c)
   colorize_trings_single(200, 200, 200, 255);
 
   Stamp(FID());
-
 }
 
 

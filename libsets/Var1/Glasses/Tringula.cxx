@@ -18,6 +18,7 @@
 #include "Flyer.h"
 #include "Airplane.h"
 #include "Chopper.h"
+#include "LandMark.h"
 
 #include "Tringula.c7"
 
@@ -101,6 +102,12 @@ void Tringula::AdEnlightenment()
     l->SetElementFID(Dynamico::FID());
     mQueen->CheckIn(l);
     SetFlyers(l);
+  }
+  if (mLandMarks == 0) {
+    ZHashList* l = new ZHashList("LandMarks", GForm("LandMarks of Tringula %s", GetName()));
+    l->SetElementFID(LandMark::FID());
+    mQueen->CheckIn(l);
+    SetLandMarks(l);
   }
 }
 
@@ -213,9 +220,10 @@ Extendio* Tringula::PickExtendios()
 
   lPickResult_t candidates;
 
-  prepick_extendios(*mStatos, ray, candidates);
-  prepick_extendios(*mDynos,  ray, candidates);
-  prepick_extendios(*mFlyers, ray, candidates);
+  prepick_extendios(*mStatos,    ray, candidates);
+  prepick_extendios(*mDynos,     ray, candidates);
+  prepick_extendios(*mFlyers,    ray, candidates);
+  prepick_extendios(*mLandMarks, ray, candidates);
 
   candidates.sort();
 
@@ -365,6 +373,9 @@ Statico* Tringula::RandomStatico(ZVector *mesh_list,
 place:
   if (++top_cnt > max_tries)
     // throw (_eh + "max_tries reached.");
+  // This is temporary solution to bypass the problem with exceptions 
+  // not being deliver into interpreted code.
+  // Using semi-functional solution now for further investigation.
     return 0;
 
   mParaSurf->random_trans(mRndGen, s->ref_trans());
@@ -528,6 +539,27 @@ Dynamico* Tringula::RandomChopper(Float_t v_min, Float_t v_max,
   d->SetMesh(*mDefChopMesh);
   mFlyers->Add(d);
   d->SetTringula(this);
+
+  d->update_aabb();
+  d->update_last_data();
+
+  return d;
+}
+
+LandMark* Tringula::AddLandMark(TriMesh* mesh, const Float_t* pos)
+{
+  LandMark* d = new LandMark(GForm("LandMark %d", mLandMarks->GetSize() + 1));
+  HTransF& t = d->ref_trans();
+
+  Float_t fgh[3];
+  mParaSurf->pos2fgh(pos, fgh);
+  mParaSurf->fgh2trans(fgh, t);
+
+  mQueen->CheckIn(d);
+  d->SetMesh(mesh);
+  mLandMarks->Add(d);
+  d->SetTringula(this);
+  d->SetFGH(fgh[0], fgh[1], fgh[2]);
 
   d->update_aabb();
   d->update_last_data();
@@ -916,7 +948,7 @@ Bool_t Tringula::terrain_height(const Opcode::Point& pos, Float_t& point_h, Floa
   // Calculates height of given point and of the terrain at given pos.
   // Return true if all went ok.
 
-  static const Exc_t _eh("Tringula::place_on_terrain ");
+  static const Exc_t _eh("Tringula::terrain_height ");
 
   Opcode::RayCollider    RC;
   RC.SetFirstContact(false);  // true to only take first hit (not closest!)

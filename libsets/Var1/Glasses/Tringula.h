@@ -24,7 +24,7 @@ class ParaSurf;
 class Extendio;
 class Statico;
 class Dynamico;
-
+class LandMark;
 
 class Tringula : public ZNode, public TimeMakerClient
 {
@@ -76,6 +76,7 @@ protected:
   ZLink<ZHashList>   mStatos;       //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mDynos;        //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mFlyers;       //  X{GS} L{} RnrBits{0,0,0,5}
+  ZLink<ZHashList>   mLandMarks;    //  X{GS} L{} RnrBits{0,0,0,5}
 
   Opcode::CollisionFaces* mRayColFaces;  //!
 
@@ -159,6 +160,8 @@ public:
                            Float_t w_max= 1,
                            Float_t h_min_fac=0.1,
                            Float_t h_max_fac=0.5);                 // X{E} 7 MCWButt()
+
+  LandMark* AddLandMark(TriMesh* mesh, const Float_t* pos);
 
   Bool_t CheckBoundaries(Dynamico* dyno, Float_t& safety);
 

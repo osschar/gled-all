@@ -150,12 +150,15 @@ public:
   // On mouse-1 we do:
   enum MouseAction_e { MA_Nothing, MA_RayCollide, MA_AddField, MA_SprayField,
                        MA_AddSource,
-                       MA_PickExtendios };
+                       MA_PickExtendios,
+		       MA_NewLandMark
+  };
 
   enum ExpectBeta_e { EB_Nothing, EB_ConnectStaticos };
 
 protected:
   MouseAction_e mMouseAction;   // X{GS} 7 PhonyEnum()
+  MouseAction_e mPrevAction;    //!
   ExpectBeta_e  mExpectBeta;    // X{G}  7 PhonyEnum(-const=>1)
   Float_t       mRayLength;     // X{GS} 7 Value(-range=>[   0, 1000, 1,100])
   Float_t       mActionValue;   // X{GS} 7 Value(-range=>[-100,  100, 1,100], -tooltip=>"value to add to field/source", -join=>1)
@@ -249,6 +252,11 @@ public:
   void Resume();  // X{E}
 
   void Help(); // X{E}
+
+  // --- Test Menu Functions ---
+
+  void RandomStatico(); // X{E}
+  void MakeLandMark();  // X{E}
 
 #include "TringuCam.h7"
   ClassDef(TringuCam, 1);
