@@ -19,7 +19,7 @@ $parallel = 1;
 setup_package($package);
 
 target('configure', <<"FNORD");
-./configure --prefix=\${PREFIX} --external=\${PREFIX} --ucxx=-fPIC
+./configure --prefix=\${PREFIX} --external=\${PREFIX}
 FNORD
 
 use_defaults_for_remaining_targets();
