@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# Returns vendor, name and version of the OS distribution
+
 ########################################################################
 # foos
 ########################################################################
@@ -56,6 +58,14 @@ sub check_windows
      m/windows\s+([^[]+?)\s+\[version\s+([\d\.]+)/i;
 }
 
+sub check_mac
+{
+  $name   = "darwin";
+  $vendor = "ApfelZoft";
+  ($version) = $os =~ m/([\d\.]+)
+$/;
+}
+
 ########################################################################
 # main
 ########################################################################
@@ -69,6 +79,10 @@ if ($os =~ /linux-gnu/)
 elsif ($os =~ /cygwin/)
 {
   check_windows();
+}
+elsif ($os =~ /darwin/)
+{
+  check_mac();
 }
 else
 {

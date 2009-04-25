@@ -1,3 +1,14 @@
+2009-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First step towards darwin build; minor fix of fltk-mt.
+
+	* distro-details.pl:
+	Add preliminary support for darwin.
+
+	* external/fltk-mt/fltk-mt.pl:
+	No need tp pass '--ucxx=-fPIC' to configure - proper cxx-flags are
+	obtained from flt-config.
+
 2009-03-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for proper propagation of build params into gled-build.
