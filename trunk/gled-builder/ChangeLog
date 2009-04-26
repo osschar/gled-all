@@ -1,3 +1,16 @@
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use latest OpenAL.
+
+	* GledBuildExternal.pm:
+	Add optional argument pre-command to
+	use_defaults_for_remaining_targets(). This makes it easier to
+	specify targets that require stuff like "cd build-dir" or
+	". build.env" to be executed.
+
+	* external/openal/openal.pl:
+	Modify to build the latest OpenAL which uses CMake.
+
 2009-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First step towards darwin build; minor fix of fltk-mt.

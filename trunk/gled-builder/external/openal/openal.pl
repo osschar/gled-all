@@ -19,8 +19,13 @@ $parallel = 1;
 setup_package($package);
 
 # Had once also: --enable-vorbis --enable-capture --enable-paranoid-locks
+
+# Eventually also specfy build-type as Release, default is:
+# CMAKE_BUILD_TYPEFIX              RelWithDebInfo
+
 target('configure', <<"FNORD");
-./configure CFLAGS="-fPIC -O2" --prefix=\${PREFIX}
+cd CMakeConf
+cmake -DCMAKE_INSTALL_PREFIX:PATH=\${PREFIX} ..
 FNORD
 
-use_defaults_for_remaining_targets();
+use_defaults_for_remaining_targets("cd CMakeConf");
