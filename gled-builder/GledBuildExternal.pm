@@ -269,6 +269,15 @@ FNORD
 
 sub use_defaults_for_remaining_targets
 {
+  # Optional argument - pre-command.
+  # Useful for specifying "cd build-dir" or doing some environment setup.
+
+  my $precmd = shift;
+  if (defined $precmd)
+  {
+    $precmd .= "\n" unless $precmd =~ m/\n$/;
+  }
+
   my %default_cmds  = (
     'configure' => "./configure --prefix=$PREFIX",
     'build'     => $parallel ? "make ${MAKE_J_OPT}" : "make",
@@ -277,7 +286,7 @@ sub use_defaults_for_remaining_targets
 
   for $tgt (@required_tgts)
   {
-    target($tgt, $default_cmds{$tgt}) unless exists  $done_tgts{$tgt};
+    target($tgt, $precmd . $default_cmds{$tgt}) unless exists  $done_tgts{$tgt};
   }
 }
 
