@@ -1,3 +1,14 @@
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for mac build.
+
+	* configure:
+	When searching for existing libsets with 'auto' option, run 'find'
+	command so that its failure can be detected.
+
+	* make/make_defs.inc:
+	Pull in some cflags via 'root-config --auxcflags'.
+
 2009-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
