@@ -53,24 +53,25 @@ ifdef CONFIG_DONE
 LOCALINCL +=  $(shell ${CPPFLAGSGEN} ${LIB_SET_NAME})
 endif
 
-ROOT_CPP_DIR = -I$(shell ${ROOT_CONFIG} --incdir)
-ROOT_LD_DIR  = -L$(shell ${ROOT_CONFIG} --libdir)
+ROOT_CFLAGS  := $(shell ${ROOT_CONFIG} --auxcflags)
+ROOT_CPP_DIR := -I$(shell ${ROOT_CONFIG} --incdir)
+ROOT_LD_DIR  := -L$(shell ${ROOT_CONFIG} --libdir)
 
-DEFINES   = -D_REENTRANT -D_GNU_SOURCE
+DEFINES  := -D_GNU_SOURCE
 
 CPPFLAGS += ${DEFINES} ${LOCALINCL} ${ROOT_CPP_DIR} \
             ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
-CXXFLAGS += -Wall -fPIC -pipe ${USER_CXX_FLAGS}
+CXXFLAGS += ${ROOT_CFLAGS} -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${USER_LD_FLAGS}
 
 # Dictionaries must be compiled without optimization, debug not needed.
 # Drop USER_CXX_FLAGS, they should not matter.
-DICTCXXFLAGS	= -Wall -fPIC -pipe
+DICTCXXFLAGS := ${ROOT_CFLAGS} -Wall -fPIC -pipe
 
 # PCHFLAGS, LDSHAREDOPT, LDEXT set by configure
 
 # ROOT-mkdepend is a copy of old makedepend shipped with X11.
-MKDEPFLAGS	= -Y -w 6666
+MKDEPFLAGS   := -Y -w 6666
 
 ifdef GLED_ECHO_CMDS
 MUTE:=
@@ -94,7 +95,7 @@ ROOTGLIBS = $(shell ${ROOT_CONFIG} --noauxlibs --glibs)
 FLTKLIBS  = $(shell ${FLTK_CONFIG} --ldflags --use-gl) -lGLEW -lfltk-mt
 GUILIBS	  = ${FLTKLIBS}
 
-SYSLIBS	= -lcrypto -lssl -lpthread -lm -ldl
+SYSLIBS	= -lcrypto -lssl -lm -ldl
 
 ##########################################################################
 # Rules

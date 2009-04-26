@@ -45,36 +45,38 @@ sub system_or_die
 sub deduce_libset_list
 {
   my @l;
-  if($config->{LIBSETS} =~ m/^<file:([\w\.]+)>$/) {
+  if ($config->{LIBSETS} =~ m/^<file:([\w\.]+)>$/)
+  {
     open F, $1 or croak "libset list file \"$1\" not found";
-    while($_=<F>) {
+    while ($_ = <F>)
+    {
       next if /^\#/ or /^\s*$/;
       chomp;
       push @l, $_;
     }
     close F;
-  } elsif($config->{LIBSETS} eq '<auto>' or $config->{LIBSETS} eq '<auto-prompt>') {
-    open F, 'find . -maxdepth 1 -type l -name [A-Z]\* -printf "%P\n" | grep -v CVS |';
-    while($_=<F>) {
-      chomp;
-      push @l, $_;
-    }
-    close F;
+  }
+  elsif($config->{LIBSETS} eq '<auto>' or $config->{LIBSETS} eq '<auto-prompt>')
+  {
+    my $lss = exec_or_die('find . -maxdepth 1 -type l -name [A-Z]\* -printf "%P\n"');
+    @l = split(/\n/, $lss);
     print "The following libsets will be configured for building:\n";
     print "  " . join(':', @l) . "\n";
-    if($config->{LIBSETS} eq '<auto-prompt>') {
+    if ($config->{LIBSETS} eq '<auto-prompt>') {
       print "Is this OK? <y or enter for ok> ";
       my $answ = <STDIN>;
-      unless($answ eq "\n" or $answ =~ m/^[yY]/) {
+      unless ($answ eq "\n" or $answ =~ m/^[yY]/) {
 	print "aborting then ...\n";
 	exit 0;
       }
     }
-  } else {
+  }
+  else
+  {
     @l = split(/:/, $config->{LIBSETS});
     map { s!/$!! } @l; # filter off trailing '/'s
     my @sl = grep { m!/! } @l;
-    if($#sl >= 0) {
+    if ($#sl >= 0) {
       die "specified libset list contains '/' (" . join(', ', @sl) . ") ... not good";
     }
   }
