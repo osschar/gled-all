@@ -1,3 +1,8 @@
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/Amphitheatre_GL_Rnr.h:
+	Do not include glu.h - done by glew.h.
+
 2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* ACTC/tc.cxx:

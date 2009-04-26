@@ -10,8 +10,6 @@
 #include <Glasses/Tringula.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-#include <GL/glu.h>
-
 class Tringula_GL_Rnr : public ZNode_GL_Rnr
 {
 private:

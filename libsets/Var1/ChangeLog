@@ -1,3 +1,9 @@
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/CosmicBall_GL_Rnr.h:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Do not include glu.h - done by glew.h.
+
 2009-04-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Basic support for land-mark management and rendering.

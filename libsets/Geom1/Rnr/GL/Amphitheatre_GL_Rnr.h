@@ -10,8 +10,6 @@
 #include <Glasses/Amphitheatre.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-#include <GL/glu.h>
-
 class Amphitheatre_GL_Rnr : public ZNode_GL_Rnr {
 private:
   void _init();
