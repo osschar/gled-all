@@ -37,12 +37,13 @@
 
 #define inline_ inline
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <float.h>
-#include <math.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
+#include <cfloat>
+#include <cmath>
+
+#include <string>
 
 #ifndef ASSERT
 #define	ASSERT(exp)  assert(exp)

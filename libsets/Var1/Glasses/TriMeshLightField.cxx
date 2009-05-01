@@ -146,7 +146,7 @@ void TriMeshLightField::CalculateLightField()
     if (cos_alpha > 0)
     { // front-facing
       if ( ! RC.Collide(R, *mMesh->GetOPCModel()) )
-        throw(_eh + "collider failed.");
+        throw _eh + "collider failed:" + RC.CollideInfo(false, R);
       if (CF.GetNbFaces() == 0 || CF.GetFaces()[0].mDistance > 0.999f)
         *F = TMath::Max(cos_alpha, mAmbiLit);
       else

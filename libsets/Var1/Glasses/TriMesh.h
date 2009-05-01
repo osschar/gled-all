@@ -224,6 +224,8 @@ public:
 
   Int_t  FindClosestVertex(Int_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
 
+  // XXXX Int_t  CalcTriangleEdgeDistance(const Float_t xyz[3],...);
+
   Int_t  VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
                        set<Int_t>& visited_vertices,
                        set<Int_t>& accepted_vertices);

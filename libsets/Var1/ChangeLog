@@ -1,3 +1,22 @@
+2009-05-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Consolidate mesh-ray collider error reporting.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/Tringula.cxx:
+	Use RayCollider::CollideInfo() to format error messages.
+
+	* Opcode/OPC_RayCollider.cpp:
+	* Opcode/OPC_RayCollider.h:
+	Add function 'string CollideInfo()'.
+
+	* Opcode/Opcode.h:
+	Correctly include C-headers.
+
 2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/CosmicBall_GL_Rnr.h:

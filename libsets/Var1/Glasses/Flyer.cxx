@@ -257,7 +257,7 @@ Float_t Flyer::height_above_terrain()
 
   Opcode::Ray R(ref_pos(), mGrav.Dir());
 
-  Int_t cs = RC.Collide(R, *mTringula->GetMesh()->GetOPCModel());
+  bool cs = RC.Collide(R, *mTringula->GetMesh()->GetOPCModel());
   if (cs && CF.GetNbFaces() == 1)
   {
       const Opcode::CollisionFace& cf = CF.GetFaces()[0];
@@ -265,12 +265,7 @@ Float_t Flyer::height_above_terrain()
   }
   else
   {
-    printf("%s status=%s, nfaces=%d\n"
-           "  nbvt=%d, nprt=%d, ni=%d\n"
-           "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
-           _eh.Data(), cs ? "ok" : "failed", CF.GetNbFaces(),
-           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
-           R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
+    ISwarn(_eh + RC.CollideInfo(cs, R));
     return 0;
   }
 

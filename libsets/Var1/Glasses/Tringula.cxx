@@ -295,9 +295,7 @@ Float_t Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fa
   }
   else
   {
-    throw(_eh + GForm("collide status=<%s>, contact=%d, nfaces=%d; nbvt=%d, nprt=%d, ni=%d\n",
-                      status ? "ok" : "failed", RC.GetContactStatus(), CF.GetNbFaces(),
-                      RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections()));
+    throw _eh + RC.CollideInfo(status, R);
   }
 
   return abs_height;
@@ -967,7 +965,7 @@ Bool_t Tringula::terrain_height(const Opcode::Point& pos, Float_t& point_h, Floa
   Opcode::Ray R;
   Float_t ray_offset = mParaSurf->pos2hray(hzero_pos, R);
 
-  Int_t cs = RC.Collide(R, *mMesh->GetOPCModel());
+  Bool_t cs = RC.Collide(R, *mMesh->GetOPCModel());
   if (cs && CF.GetNbFaces() == 1)
   {
     const Opcode::CollisionFace& cf = CF.GetFaces()[0];
@@ -976,12 +974,7 @@ Bool_t Tringula::terrain_height(const Opcode::Point& pos, Float_t& point_h, Floa
   }
   else
   {
-    printf("%s status=%s, nfaces=%d\n"
-           "  nbvt=%d, nprt=%d, ni=%d\n"
-           "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
-           _eh.Data(), cs ? "ok" : "failed", CF.GetNbFaces(),
-           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
-           R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
+    ISwarn(_eh + RC.CollideInfo(cs, R));
     return false;
   }
 

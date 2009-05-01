@@ -88,6 +88,8 @@ public:
   //
   bool	Collide(const Ray& world_ray, const AABBTree* tree, Container& box_indices);
 
+  std::string CollideInfo(bool status, const Ray& ray);
+
   // Settings
 
 #ifndef OPC_RAYHIT_CALLBACK

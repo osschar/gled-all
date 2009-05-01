@@ -339,6 +339,25 @@ bool RayCollider::Collide(const Ray& world_ray,   const Model& model,
   return true;
 }
 
+//----------------------------------------------------------------------
+/**
+ *	Format information about the last query.
+ *
+ *	\param		ray	[in] stabbing ray in world space
+ *	\return		string containg information about last query
+ */
+//----------------------------------------------------------------------
+std::string RayCollider::CollideInfo(bool status, const Ray& ray)
+{
+  char buf[256];
+  sprintf(buf, "Ray-Collide-Info: status=%s, nfaces=%d, nbvt=%d, nprt=%d, ni=%d\n"
+	  "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f.",
+	  status ? "ok" : "failed", mStabbedFaces->GetNbFaces(),
+	  mNbRayBVTests, mNbRayPrimTests, mNbIntersections,
+	  ray.mOrig.x, ray.mOrig.y, ray.mOrig.z,
+	  ray.mDir.x, ray.mDir.y, ray.mDir.z);
+  return std::string(buf);
+}
 
 //----------------------------------------------------------------------
 /**
