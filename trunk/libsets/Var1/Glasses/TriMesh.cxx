@@ -942,7 +942,7 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_
   Opcode::Ray R;
   Float_t ray_offset = mParaSurf->pos2hray(pos, R);
 
-  Int_t cs = RC.Collide(R, *mOPCModel);
+  bool cs = RC.Collide(R, *mOPCModel);
   if (cs && CF.GetNbFaces() == 1)
   {
       const Opcode::CollisionFace& cf = CF.GetFaces()[0];
@@ -960,12 +960,7 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_
   }
   else
   {
-    printf("%sstatus=%s, nfaces=%d\n"
-           "  nbvt=%d, nprt=%d, ni=%d\n"
-           "  ray_orig = %6.2f, %6.2f, %6.2f; ray_dir = %6.2f, %6.2f, %6.2f\n",
-           _eh.Data(), cs ? "ok" : "failed", CF.GetNbFaces(),
-           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections(),
-           R.mOrig.x, R.mOrig.y, R.mOrig.z, R.mDir.x, R.mDir.y, R.mDir.z);
+    ISwarn(_eh + RC.CollideInfo(cs, R));
     return false;
   }
 }

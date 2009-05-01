@@ -148,16 +148,15 @@ reoffset:
         mTrans.SetBaseVecViaCross(1);
       }
     }
+    else
+    {
+      ISmess(_eh + RC.CollideInfo(true, R) + "\nIncreasing ray-offset.");
+      mRayOffset *= 2;
+      goto reoffset;
+    }
   }
   else
   {
-    printf("%scollide status=<failed>, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-           _eh.Data(),
-           RC.GetContactStatus(),
-           RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(),
-           RC.GetNbIntersections());
-    printf("\tIncreasing ray-offset.\n");
-    mRayOffset *= 2;
-    goto reoffset;
+    ISwarn(_eh + RC.CollideInfo(false, R));
   }
 }
