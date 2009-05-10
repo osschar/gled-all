@@ -1,3 +1,77 @@
+2009-05-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement terrain-tracking for land-mark perimeter line.
+
+	There is an issue with Int_t/UInt_t triangle indices - Opcode uses
+	UInt_t, TringTvor Int_t. Need to see how hierarhical tringula will
+	be implemented.
+
+	Had another creepy idea - to use doubles everywhere - in TriMesh and
+	in Opcode. This requires more memory, but allows to run a large
+	planet on a single tringula! Memory could be regained completely by
+	quantizing the vertex and triangle normals into shorts.
+	Anyway, could start with making a type-defed Opcode and
+	templating the TriMesh.
+
+	* Glasses/Crawler.cxx:
+	Use closest-hit instead of first-contact for terrain tracking.
+
+	* Glasses/LandMark.cxx:
+	* Glasses/LandMark.h:
+	Add members for controlling how the perimeter-line of the
+	land-mark region gets calculated and rendered:
+	  Float_t mLineHeight    - height above terrain;
+	  Int_t   mNLineSegments - number of main-divisions;
+	  Bool_t  bDetailedLine  - sub-divide on triangle-crossing;
+	  Bool_t  bRnrIdealLine  - render also line that is not projected on terrain.
+
+	Consolidate stamping calls.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add function Bool_t FindPointFromXYZH(...) - it determines the
+	vertical vector at given position and returns point at given
+	relative height above the terrain.
+
+	Add function Bool_t FindTriangleExitPoint(...) - given a point
+	(presumably within the triangle) and direction, determine the
+	exit-point of line determined by input data.
+
+	Consolidate all triangle query functions to use UInt_t. This is a
+	bit weak - but is requirement from Opcode. Needs to be revisited,
+	and maybe changed in Opcode as well.
+
+	* Glasses/TriMeshField.cxx:
+	Use UInt_t for triangle queries.
+
+	* Glasses/TringuCam.cxx:
+	In MakeLandmark activated, only store previous mouse-action if
+	not already in 
+	* Glasses/Tringula.cxx:
+
+	* Rnr/GL/LandMark_GL_Rnr.cxx:
+	* Rnr/GL/LandMark_GL_Rnr.h:
+	Add code for almost correct tracing of land-mark region over
+	terrain triangles.
+
+	Activate PostDraw() - the land-line is calculated in parent's
+	coordinate frame. The points are calculated during Render() and
+	stored in member-vector. As display-lists are used for LandMark,
+	this vector is only regenerated when required.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Define PARENT class.
+
+	* Stones/HTrans.h:
+	Add explicit PtrPAseVecX/Y/Z() and ref_base_vec_x/y/z() methods.
+
+	* Opcode/OPC_RayCollider.cpp:
+	Allow temporal coherence to be used also when not in first-contact mode.
+	White-space changes.
+
+	* Opcode/OPC_Collider.h:
+	White-space.
+
 2009-05-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Consolidate mesh-ray collider error reporting.

@@ -22,22 +22,24 @@ private:
   void _init();
 
 protected:
-  Float_t mF;    //  X{GE}  7 Value(-range=>[-1e5,1e5,1,1000], -join=>1)
-  Float_t mG;    //  X{GE}  7 Value(-range=>[-1e5,1e5,1,1000])
-  Float_t mH;    //  X{GE}  7 Value(-range=>[-1e5,1e5,1,1000], -join=>1)
-  Float_t mHRel; //  X{GE}  7 Value(-range=>[-1e5,1e5,1,1000])
+  Float_t mF;    //  X{GET} 7 Value(-range=>[-1e5,1e5,1,1000], -join=>1)
+  Float_t mG;    //  X{GET} 7 Value(-range=>[-1e5,1e5,1,1000])
+  Float_t mH;    //  X{GET} 7 Value(-range=>[-1e5,1e5,1,1000], -join=>1)
+  Float_t mHRel; //  X{GET} 7 Value(-range=>[-1e5,1e5,1,1000])
 
   HeightMode_e mHeightMode; //  X{GS}  7 PhonyEnum()
 
-  Float_t mPhi;  //  X{GE}  7 Value(-range=>[-1e3,1e3,1,10])
+  Float_t mPhi;  //  X{GET} 7 Value(-range=>[-1e3,1e3,1,10])
   Float_t mSx;   //  X{GST} 7 Value(-range=>[0.1,100,1,10])
   Float_t mSy;   //  X{GST} 7 Value(-range=>[0.1,100,1,10])
 
-  ZColor  mColor; // X{PRGST} 7 ColorButt()
+  ZColor  mColor;          // X{PRGST} 7 ColorButt()
+  Float_t mLineHeight;     // X{GST}   7 Value(-range=>[0,10,1,1000])
+  Int_t   mNLineSegments;  // X{GST}   7 Value(-range=>[4,1000,1]);
+  Bool_t  bDetailedLine;   // X{GST}   7 Bool()
+  Bool_t  bRnrIdealLine;   // X{GST}   7 Bool()
 
   void retrans(ParaSurf* ps);
-
-  void measure_height();
 
 public:
   LandMark(const Text_t* n="LandMark", const Text_t* t=0);

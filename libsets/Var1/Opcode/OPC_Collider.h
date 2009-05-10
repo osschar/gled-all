@@ -65,7 +65,7 @@ public:
    *	\return		true if temporal coherence is on
    */
   //----------------------------------------------------------------------
-  bool	TemporalCoherenceEnabled() const { return mFlags & OPC_TEMPORAL_COHERENCE;				}
+  bool	TemporalCoherenceEnabled() const { return mFlags & OPC_TEMPORAL_COHERENCE; }
 
   //----------------------------------------------------------------------
   /**
@@ -73,7 +73,7 @@ public:
    *	\return		true if a first contact has been found and we can stop a query
    */
   //----------------------------------------------------------------------
-  bool	ContactFound() const { return (mFlags&OPC_CONTACT_FOUND)==OPC_CONTACT_FOUND;	}
+  bool	ContactFound() const { return (mFlags&OPC_CONTACT_FOUND)==OPC_CONTACT_FOUND; }
 
   //----------------------------------------------------------------------
   /**

@@ -863,7 +863,8 @@ void TringuCam::RandomStatico()
 
 void TringuCam::MakeLandMark()
 {
-  mPrevAction = mMouseAction;
+  if (mMouseAction != MA_NewLandMark)
+    mPrevAction = mMouseAction;
   mMouseAction = MA_NewLandMark;
 
   Stamp(FID());

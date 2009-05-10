@@ -60,8 +60,8 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   using namespace Opcode;
 
   RayCollider    RC;
-  RC.SetFirstContact(true);
   RC.SetTemporalCoherence(true);
+  RC.SetClosestHit(true);
   CollisionFaces CF;
   RC.SetDestination(&CF);
 
@@ -128,7 +128,7 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   Opcode::Ray R;
   R.mDir  = mGrav.Dir();
 reoffset:
-  R.mOrig.Msc(pos, R.mDir, mRayOffset);;
+  R.mOrig.Msc(pos, R.mDir, mRayOffset);
 
   TriMesh* terrain_mesh = mTringula->GetMesh();
 
@@ -150,9 +150,12 @@ reoffset:
     }
     else
     {
-      ISmess(_eh + RC.CollideInfo(true, R) + "\nIncreasing ray-offset.");
-      mRayOffset *= 2;
-      goto reoffset;
+      ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Parking, offset was %f for '%s'.", mRayOffset, GetName()));
+      bParked = true;
+
+      //ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Increasing ray-offset from %f for '%s'.", mRayOffset, GetName()));
+      //mRayOffset *= 2;
+      //goto reoffset;
     }
   }
   else

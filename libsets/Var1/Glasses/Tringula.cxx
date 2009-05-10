@@ -275,7 +275,6 @@ Float_t Tringula::PlaceAboveTerrain(ZTrans& trans, Float_t height, Float_t dh_fa
   using namespace Opcode;
 
   RayCollider    RC;
-  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
   RC.SetClosestHit(true);     // to keep the closes hit only
   CollisionFaces CF;
   RC.SetDestination(&CF);
@@ -949,7 +948,6 @@ Bool_t Tringula::terrain_height(const Opcode::Point& pos, Float_t& point_h, Floa
   static const Exc_t _eh("Tringula::terrain_height ");
 
   Opcode::RayCollider    RC;
-  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
   RC.SetClosestHit(true);     // to keep the closes hit only
   Opcode::CollisionFaces CF;
   RC.SetDestination(&CF);
@@ -1029,7 +1027,6 @@ Bool_t Tringula::place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
   R.mDir.Set(trans.ArrZ()); R.mDir.Neg();
 
   Opcode::RayCollider RC;
-  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
   RC.SetClosestHit(true);     // to keep the closes hit only
 
   Opcode::CollisionFaces CF;
@@ -1084,7 +1081,6 @@ Bool_t Tringula::place_on_terrain(Dynamico* D, Float_t h_above)
   static const Exc_t _eh("Tringula::place_on_terrain ");
 
   Opcode::RayCollider    RC;
-  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
   RC.SetClosestHit(true);     // to keep the closes hit only
   Opcode::CollisionFaces CF;
   RC.SetDestination(&CF);
