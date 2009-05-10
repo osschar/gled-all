@@ -27,6 +27,10 @@ void LandMark::_init()
   mPhi = 0;
   mSx = mSy = 1;
   mColor.rgba(1, 0, 0.3, 0.5);
+  mLineHeight    = 0.1;
+  mNLineSegments = 64;
+  bDetailedLine  = true;
+  bRnrIdealLine  = true;
 
   bUseDispList = true;
 }
@@ -49,6 +53,8 @@ void LandMark::retrans(ParaSurf* ps)
   mTrans.RotateLF(1, 2, TMath::DegToRad()*mPhi);
 }
 
+//==============================================================================
+
 void LandMark::SetF(Float_t f)
 {
   ParaSurf* ps = mTringula->GetParaSurf();
@@ -58,7 +64,7 @@ void LandMark::SetF(Float_t f)
   mF = f;
 
   retrans(ps);
-  Stamp();
+  StampReqTring(FID()); 
 }
 
 void LandMark::SetG(Float_t g)
@@ -70,7 +76,7 @@ void LandMark::SetG(Float_t g)
   mG = g;
 
   retrans(ps);
-  Stamp();
+  StampReqTring(FID()); 
 }
 
 void LandMark::SetH(Float_t h)
@@ -80,7 +86,7 @@ void LandMark::SetH(Float_t h)
   mH = h;
 
   retrans(ps);
-  Stamp();
+  StampReqTring(FID()); 
 }
 
 void LandMark::SetHRel(Float_t hr)
@@ -90,7 +96,7 @@ void LandMark::SetHRel(Float_t hr)
   mHRel = hr;
 
   retrans(ps);
-  Stamp();
+  StampReqTring(FID()); 
 }
 
 void LandMark::SetFGH(Float_t f, Float_t g, Float_t h)
@@ -108,7 +114,7 @@ void LandMark::SetFGH(Float_t f, Float_t g, Float_t h)
   mH = h;
 
   retrans(ps);
-  Stamp(); 
+  StampReqTring(FID()); 
 }
 
 void LandMark::SetPhi(Float_t p)
@@ -120,5 +126,5 @@ void LandMark::SetPhi(Float_t p)
   mPhi = p;
 
   retrans(ps);
-  Stamp();
+  StampReqTring(FID()); 
 }

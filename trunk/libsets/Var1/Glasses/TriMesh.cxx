@@ -878,7 +878,7 @@ void TriMesh::BuildVertexConnections()
             ed.fAngle += PI;
         }
         ed.fSurface  += tri_surfo3;
-        if (ed.is_first(v1))
+        if (ed.fV1 == v1)
           ed.fSpr1 += spreads[vP[eti][0]], ed.fSpr2 += spreads[vP[eti][1]];
         else
           ed.fSpr2 += spreads[vP[eti][0]], ed.fSpr1 += spreads[vP[eti][1]];
@@ -895,31 +895,32 @@ void TriMesh::BuildVertexConnections()
       sort(vd.fEdgeArr, vd.fEdgeArr + vd.fNEdges, edge_sort_cmp(mEDataVec));
     }
   }
-
 }
 
 void TriMesh::AssertVertexConnections()
 {
-  static const Exc_t _eh("TriMesh::AssertVertexConnections ");
-
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
-
-  if ((Int_t) mVDataVec.size() !=  mTTvor->mNVerts)
+  if (! HasVertexConnections())
     BuildVertexConnections();
+}
+
+Bool_t TriMesh::HasVertexConnections()
+{
+  return mTTvor != 0 && (Int_t) mVDataVec.size() == mTTvor->mNVerts;
 }
 
 //******************************************************************************
 
-Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_t xyz_out[3],
-                                 Float_t* h_out, Int_t* triangle_idx)
+Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h,
+				 Float_t xyz_out[3], Float_t* h_out, UInt_t* triangle_idx)
 {
   // Find world-point corresponding to the passed fgh coordinates and return it
   // in the xyz_out array.
+  //
   // Flag absolute_h determines how the input h-coordinate is interpreted and
   // also what will be returned in h_out:
   //   true  - h is absolute, h_out is relative to the surface;
-  //   false - h is relative to the surface, h_out is absolute h of .
+  //   false - h is relative to the surface, h_out is absolute h.
+  //
   // trianlge_idx (optional) is index of the triangle on the surface that was
   // hit by the ray used to find the surface point. If you need vertex index as
   // well, call 'Int_t FindClosestVertex(xyz_out, triangle_idx)'.
@@ -930,8 +931,8 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_
 
   assert_parasurf(_eh);
 
-  Opcode::Point& pos = *(Opcode::Point*)xyz_out;
-  mParaSurf->fgh2pos(fgh, pos);
+  Opcode::Point& xyz = *(Opcode::Point*)xyz_out;
+  mParaSurf->fgh2pos(fgh, xyz);
 
   Opcode::RayCollider    RC;
   RC.SetFirstContact(false);  // true to only take first hit (not closest!)
@@ -940,9 +941,9 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_
   RC.SetDestination(&CF);
 
   Opcode::Ray R;
-  Float_t ray_offset = mParaSurf->pos2hray(pos, R);
+  Float_t ray_offset = mParaSurf->pos2hray(xyz, R);
 
-  bool cs = RC.Collide(R, *mOPCModel);
+  bool cs = RC.Collide(R, *mOPCModel, 0,triangle_idx );
   if (cs && CF.GetNbFaces() == 1)
   {
       const Opcode::CollisionFace& cf = CF.GetFaces()[0];
@@ -952,7 +953,7 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_
       }
       else
       {
-        pos.TMac(R.mDir, cf.mDistance - ray_offset - fgh[2]);
+        xyz.TMac(R.mDir, cf.mDistance - ray_offset - fgh[2]);
         if (h_out) *h_out = mParaSurf->GetMaxH() + mParaSurf->GetEpsilon() - cf.mDistance + fgh[2];
       }
       if (triangle_idx) *triangle_idx = cf.mFaceID;
@@ -965,9 +966,62 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_
   }
 }
 
+Bool_t TriMesh::FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
+				  Float_t xyz_out[3], Float_t* h_out, UInt_t* triangle_idx)
+{
+  // Given world-point xyz_in and relative height h_in, find the
+  // corresponding point xyz_out at specified height. The point is
+  // only translated in vertical direction. xyz_in and xyz_out can
+  // point to the same location.
+  //
+  // h_out (if non-null) is set to relative height of the xyz_in point.
+  //
+  // trianlge_idx (optional) is index of the triangle on the surface that was
+  // hit by the ray used to find the surface point. If you need vertex index as
+  // well, call 'Int_t FindClosestVertex(xyz_out, triangle_idx)'.
+  //
+  // Returns false if ray-mesh intersection fails.
+
+  static const Exc_t _eh("TriMesh::FindPointFromXYZH ");
+
+  assert_parasurf(_eh);
+
+  Opcode::Point xyz(xyz_in);
+
+  Opcode::RayCollider    RC;
+  RC.SetClosestHit(true);
+  RC.SetTemporalCoherence(true);
+  Opcode::CollisionFaces CF;
+  RC.SetDestination(&CF);
+
+  Opcode::Ray R;
+  Float_t ray_offset = mParaSurf->pos2hray(xyz, R);
+
+  bool cs = RC.Collide(R, *mOPCModel, 0, triangle_idx);
+  if (cs && CF.GetNbFaces() == 1)
+  {
+    const Opcode::CollisionFace& cf = CF.GetFaces()[0];
+
+    xyz.TMac(R.mDir, cf.mDistance - ray_offset - h_in);
+
+    if (h_out) *h_out = cf.mDistance - ray_offset;
+
+    xyz_out[0] = xyz.x; xyz_out[1] = xyz.y; xyz_out[2] = xyz.z;
+
+    if (triangle_idx) *triangle_idx = cf.mFaceID;
+    return true;
+  }
+  else
+  {
+    if (triangle_idx) *triangle_idx = OPC_INVALID_ID;
+    // ISwarn(_eh + RC.CollideInfo(cs, R));
+    return false;
+  }
+}
+
 //******************************************************************************
 
-Int_t TriMesh::FindClosestVertex(Int_t triangle, const Float_t xyz[3],
+Int_t TriMesh::FindClosestVertex(UInt_t triangle, const Float_t xyz[3],
                                  Float_t* sqr_dist)
 {
   // Find vertex of triangle that is closest to point given by xyz.
@@ -989,6 +1043,171 @@ Int_t TriMesh::FindClosestVertex(Int_t triangle, const Float_t xyz[3],
   }
   if (sqr_dist) *sqr_dist = minsq;
   return vi;
+}
+
+//******************************************************************************
+
+namespace
+{
+Bool_t check_uv(Opcode::Point& uv, Opcode::Point& duv, Float_t t, Bool_t printp=false)
+{
+  static const Float_t lim0 = -0.005;
+  static const Float_t lim1 =  1.01;
+
+  Float_t u  = uv.x + t*duv.x;
+  Float_t v  = uv.y + t*duv.y;
+  Float_t s  = u + v;
+
+  if (printp)
+    printf("  %f, u=%f, s=%f, v=%f\n", t, u, s, v);
+
+  return (u > lim0 && u < lim1 && v > lim0 && v < lim1 && s > lim0 && s < lim1);
+}
+}
+
+Bool_t TriMesh::FindTriangleExitPoint(UInt_t triangle, const Float_t xyz[3], const Float_t dir[3],
+				      Float_t xyz_out[3], UInt_t* next_triangle)
+{
+  // Given triangle, position xyz and direction dir, find the exit point from the
+  // triangle.
+  // If next_triangle is non-null, the triangle bordering the crossed edge is
+  // returned there.
+  //
+  // There are very many ways this can go wrong ... still working on the interface
+  // and the return value.
+  //
+  // Now, a hack was added to also succeed when the triangle edge has just
+  // been passed: the function is re-entered with the new triangle. Again this
+  // can go wrong, so a set of triangles that have already been tried is
+  // cross-checked before re-entry to avoid infinite loop.
+
+  static const Exc_t _eh("TriMesh::FindTriangleExitPoint ");
+
+  static const Int_t s_idcs[3][2] = { {0,1}, {1,2}, {2,0} };
+
+  if (! HasVertexConnections())
+    throw _eh + "No vertex connections on '" + mName + "'.";
+
+  using namespace Opcode;
+
+  TringTvor& TT = *mTTvor;
+
+  std::set<UInt_t> tried_triangles;
+reentry:
+
+  Int_t* t = TT.Triangle(triangle);
+  Point V[3] = { TT.Vertex(t[0]), TT.Vertex(t[1]), TT.Vertex(t[2]) };
+
+  // Define triangle coords
+  Point e1; e1.Sub(V[1], V[0]);
+  Point e2; e2.Sub(V[2], V[0]);
+  Float_t e1sq = e1.SquareMagnitude();
+  Float_t e2sq = e2.SquareMagnitude();
+  Float_t d    = e1 | e2;
+
+  // Calculate u,v coords of both points.
+  Point uv;
+  Point p(xyz); p -= V[0];
+  Float_t e1p  = e1 | p;
+  Float_t e2p  = e2 | p;
+  uv.x = (e1p * e2sq - e2p * d) / (e1sq * e2sq - d * d);
+  uv.y = (e2p - uv.x * d) / e2sq;
+  uv.z = 0;
+
+  Point duv;
+  Point q(dir);
+  Float_t e1q  = e1 | q;
+  Float_t e2q  = e2 | q;
+  duv.x = (e1q * e2sq - e2q * d) / (e1sq * e2sq - d * d);
+  duv.y = (e2q - duv.x * d) / e2sq;
+  duv.z = 0;
+
+  Float_t duv_norm = duv.NormalizeAndReport();
+  if (duv_norm > 1e-6)
+  {
+    // The direction has sufficient u,v components.
+
+    Float_t t_max = -1, t_neg_max = -1;
+    Int_t   t_i   = -1, t_neg_i   =  0;
+
+    Float_t t_u  = - uv.y / duv.y;
+    if (check_uv(uv, duv, t_u) && t_u > t_max) {
+      t_max = t_u; t_i = 0;
+    }
+    if (t_u < 0 && t_u > t_neg_max) {
+      t_neg_max = t_u; t_neg_i = 0;
+    }
+
+    Float_t t_uv = (1.0f - uv.x - uv.y) / (duv.x + duv.y);
+    if (check_uv(uv, duv, t_uv) && t_uv > t_max) {
+      t_max = t_uv; t_i = 1;
+    }
+    if (t_uv < 0 && t_uv > t_neg_max) {
+      t_neg_max = t_uv; t_neg_i = 1;
+    }
+
+    Float_t t_v  = - uv.x / duv.x;
+    if (check_uv(uv, duv, t_v) && t_v > t_max) {
+      t_max = t_v; t_i = 2;
+    }
+    if (t_v < 0 && t_v > t_neg_max) {
+      t_neg_max = t_v; t_neg_i = 2;
+    }
+
+    if (t_i == -1)
+    {
+      // The line is not crossing the triangle.
+
+      // Some old, high-quality debug crap.
+      // printf("No cross, times: %f, %f, %f; t_max=%f, t_i=%d;t_neg_max=%f, t_neg_i=%d\n",
+      //        t_u, t_uv, t_v, t_max, t_i, t_neg_max, t_neg_i);
+      // check_uv(uv, duv, t_u, true);
+      // check_uv(uv, duv, t_uv, true);
+      // check_uv(uv, duv, t_v, true);
+
+      // There is still the chance that we just crossed it ... so look
+      // for negative time closest to zero (the limit in time is -1).
+      if (t_neg_i != -1)
+      {
+	Int_t vi_0 = t[s_idcs[t_neg_i][0]], vi_1 = t[s_idcs[t_neg_i][1]];
+	triangle = find_edge(vi_0, vi_1).right_triangle(vi_0);
+	// printf("  new_tring=%u ... %s reentering - wish me luck :)\n",
+	//        triangle, tried_triangles.find(triangle) == tried_triangles.end() ? "yes" : "no");
+	if (triangle != -1 && tried_triangles.find(triangle) == tried_triangles.end())
+	{
+	  tried_triangles.insert(triangle);
+	  goto reentry;
+	}
+      }
+      return false;
+    }
+
+    Point o(xyz);
+    o.TMac2(e1, duv.x*t_max, e2, duv.y*t_max);
+    xyz_out[0] = o.x;
+    xyz_out[1] = o.y;
+    xyz_out[2] = o.z;
+
+    if (next_triangle)
+    {
+      Int_t vi_0 = t[s_idcs[t_i][0]], vi_1 = t[s_idcs[t_i][1]];
+      *next_triangle = find_edge(vi_0, vi_1).right_triangle(vi_0);
+    }
+
+    return true;
+  }
+  else
+  {
+    // The direction is perpendicular to the triangle.
+    // Cross to the "other side" of the triangle - to the most distant
+    // edge center.
+
+    printf("Degenerate crap, duv_norm=%f; uv=%f,%f\n", duv_norm, uv.x, uv.y);
+
+    // find closest vertex, take opposite edge.
+
+    return false;
+  }
 }
 
 //******************************************************************************

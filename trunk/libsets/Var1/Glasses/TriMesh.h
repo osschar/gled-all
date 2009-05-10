@@ -65,8 +65,7 @@ public:
 
     EdgeData();
 
-    Bool_t is_first(Int_t v)     const { return v == fV1;  }
-    Bool_t has_second_triangle() const  { return fT2 != -1; }
+    Bool_t has_second_triangle() const { return fT2 != -1; }
 
     Int_t other_vertex(Int_t v)   const { return v == fV1 ? fV2 : fV1; }
     Int_t left_triangle(Int_t v)  const { return v == fV1 ? fT1 : fT2; }
@@ -166,6 +165,7 @@ protected:
   void colorize_trings_single(UChar_t r, UChar_t g, UChar_t b, UChar_t a);
 
   EdgeData& find_edge(const VertexData& vd, Int_t v1, Int_t v2);
+  EdgeData& find_edge(Int_t v1, Int_t v2);
 
 public:
   TriMesh(const Text_t* n="TriMesh", const Text_t* t=0) :
@@ -216,15 +216,20 @@ public:
   void ExtrudeTriangle(Int_t ti, Float_t h);
   void ExtrudeTriangle(Int_t ti, Float_t x, Float_t y, Float_t z);
 
-  void BuildVertexConnections();
-  void AssertVertexConnections();
+  void   BuildVertexConnections();
+  void   AssertVertexConnections();
+  Bool_t HasVertexConnections();
 
-  Bool_t FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h, Float_t xyz_out[3],
-                          Float_t* h_out=0, Int_t* triangle_idx=0);
+  Bool_t FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h,
+			  Float_t xyz_out[3], Float_t* h_out=0, UInt_t* triangle_idx=0);
 
-  Int_t  FindClosestVertex(Int_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
+  Bool_t FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
+			   Float_t xyz_out[3], Float_t* h_out=0, UInt_t* triangle_idx=0);
 
-  // XXXX Int_t  CalcTriangleEdgeDistance(const Float_t xyz[3],...);
+  Int_t  FindClosestVertex(UInt_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
+
+  Bool_t FindTriangleExitPoint(UInt_t triangle, const Float_t xyz[3], const Float_t dir[3],
+			       Float_t xyz_out[3], UInt_t* next_triangle=0);
 
   Int_t  VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
                        set<Int_t>& visited_vertices,
@@ -258,10 +263,16 @@ inline TriMesh::EdgeData& TriMesh::find_edge(const VertexData& vd,
   for (Int_t i=0; i<vd.fNEdges; ++i)
   {
     EdgeData& ed = mEDataVec[vd.edge(i)];
-    if (ed.is_first(v1) ? ed.fV2 == v2 : ed.fV1 == v2)
+    if ((ed.fV1 == v1 && ed.fV2 == v2) || (ed.fV1 == v2 && ed.fV2 == v1))
       return ed;
   }
   throw (Exc_t("Safertundhell ... edge not found."));
+}
+
+inline TriMesh::EdgeData& TriMesh::find_edge(Int_t v1, Int_t v2)
+{
+  VertexData& vd = mVDataVec[v1];
+  return find_edge(vd, v1, v2);
 }
 
 inline bool operator==(const TriMesh::xx_edge& a, const TriMesh::xx_edge& b)

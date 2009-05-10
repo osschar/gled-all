@@ -14,6 +14,8 @@
 
 #include <GL/glew.h>
 
+#define PARENT ZNode_GL_Rnr
+
 /**************************************************************************/
 
 void TringuCam_GL_Rnr::_init()

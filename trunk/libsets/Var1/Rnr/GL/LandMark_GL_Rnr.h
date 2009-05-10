@@ -18,6 +18,8 @@ private:
 protected:
   LandMark*	mLandMark;
 
+  std::vector<Opcode::Point> mLandLinePoints;
+
 public:
   LandMark_GL_Rnr(LandMark* idol) :
     Extendio_GL_Rnr(idol), mLandMark(idol)
@@ -26,7 +28,7 @@ public:
   //virtual void PreDraw(RnrDriver* rd);
   //virtual void Draw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
-  //virtual void PostDraw(RnrDriver* rd);
+  virtual void PostDraw(RnrDriver* rd);
 
 }; // endclass LandMark_GL_Rnr
 

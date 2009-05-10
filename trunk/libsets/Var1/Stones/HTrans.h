@@ -180,6 +180,12 @@ public:
 
   TT*       PtrBaseVec(Int_t b)       { return &M[4*(b-1)]; }
   const TT* PtrBaseVec(Int_t b) const { return &M[4*(b-1)]; }
+  TT*       PtrBaseVecX()             { return &M[0]; }
+  const TT* PtrBaseVecX()       const { return &M[0]; }
+  TT*       PtrBaseVecY()             { return &M[4]; }
+  const TT* PtrBaseVecY()       const { return &M[4]; }
+  TT*       PtrBaseVecZ()             { return &M[8]; }
+  const TT* PtrBaseVecZ()       const { return &M[8]; }
 
   void GetBaseVec(Int_t b, TT* x) const
   { const TT* C = M + 4*--b; x[0] = C[0], x[1] = C[1], x[2] = C[2]; }
@@ -278,7 +284,11 @@ public:
   void GetPos(Double_t* x) const { x[0] = M[12]; x[1] = M[13]; x[2] = M[14]; }
 
 #ifndef __CINT__
-  Opcode::Point& ref_pos()       { return * (Opcode::Point*) PtrPos(); }
+  Opcode::Point& ref_base_vec(Int_t i) { return * (Opcode::Point*) PtrBaseVec(i); }
+  Opcode::Point& ref_base_vec_x()      { return * (Opcode::Point*) PtrBaseVecX(); }
+  Opcode::Point& ref_base_vec_y()      { return * (Opcode::Point*) PtrBaseVecY(); }
+  Opcode::Point& ref_base_vec_z()      { return * (Opcode::Point*) PtrBaseVecZ(); }
+  Opcode::Point& ref_pos()             { return * (Opcode::Point*) PtrPos(); }
 
   operator Opcode::Matrix4x4* () { return  (Opcode::Matrix4x4*)M; }
   operator Opcode::Matrix4x4& () { return *(Opcode::Matrix4x4*)M; }

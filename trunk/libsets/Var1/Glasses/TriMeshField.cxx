@@ -10,6 +10,8 @@
 #include <Glasses/RGBAPalette.h>
 #include "TriMeshField.c7"
 
+#include <Opcode/Opcode.h>
+
 #include <TMath.h>
 #include <TRandom.h>
 #include <TF3.h>
@@ -477,7 +479,7 @@ void TriMeshField::FillByGaussBlobs(Bool_t  reset_field, Int_t   n_blobs,
   set<Int_t> all_changed;
 
   Float_t fgh[3], h_out;
-  Int_t   triangle, vertex;
+  UInt_t   triangle = OPC_INVALID_ID;
   for (Int_t i=0; i<n_blobs; ++i)
   {
     GaussBlob B;
@@ -489,7 +491,7 @@ void TriMeshField::FillByGaussBlobs(Bool_t  reset_field, Int_t   n_blobs,
 
     mMesh->GetParaSurf()->random_fgh(*gRandom, fgh);
     mMesh->FindPointFromFGH(fgh, false, &B.x, &h_out, &triangle);
-    vertex = mMesh->FindClosestVertex(triangle, &B.x);
+    Int_t vertex = mMesh->FindClosestVertex(triangle, &B.x);
 
     GaussSprayer gs(*mMesh, &B.x, 3*B.sgm, this, B.A, B.efc);
 
