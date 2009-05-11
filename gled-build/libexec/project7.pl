@@ -552,6 +552,10 @@ while ($c !~ m!\G\s*$!osgc)
 	print "\n"if $DEBUG;
       }
 
+      # If a reference, parse '&' off the type.
+      # Reference data-members are only used in Var1/Dynamico.
+      $type =~ s/&$//;
+
       $member->{Type} = $type;
       $member->{Methodbase} = $methodbase;
       $member->{Methodname} = "Set$methodbase";
