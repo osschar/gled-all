@@ -1,3 +1,31 @@
+2009-05-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for dynamico/crawler movement handling.
+
+	* Glasses/Crawler.cxx:
+	Reactivate increase in ray-offset when terrain ray-touching fails,
+	but only when f,g coordinates are still within the limits of
+	parametric surface.
+	Otherwise park the bastard and dump a warning.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Consistent handling of velocity and angular velocity vectors.
+	Data-members mV and mW are now references into the first
+	components of respective vectors - to allow GL GUI via WGlValuator
+	to function properly.
+	Use full velocity vector in handle_collision() functions. The
+	final velocities are still forced to forward direction - but this
+	could be improved now.
+
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Add methods IsValidFGH(...) and IsValidPos().
+
+	* Glasses/Tringula.cxx:
+	When edge is reached and edge-stop is required, set mVVec and mWVec
+	to zero, not mV and mW (which are now refs anyway).
+
 2009-05-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Implement terrain-tracking for land-mark perimeter line.

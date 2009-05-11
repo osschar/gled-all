@@ -172,6 +172,24 @@ void ParaSurf::RandomizeH(TriMesh* mesh,
 
 /**************************************************************************/
 
+Bool_t ParaSurf::IsValidFGH(const Float_t f[3], Bool_t check_h)
+{
+  if (f[0] < mMinF || f[0] > mMaxF || f[1] < mMinG || f[1] > mMaxG)
+    return false;
+  if (check_h && (f[2] < mMinH || f[2] > mMaxH))
+    return false;
+  return true;
+}
+
+Bool_t ParaSurf::IsValidPos(const Float_t x[3], Bool_t check_h)
+{
+  Float_t f[3];
+  pos2fgh(x, f);
+  return IsValidFGH(f);
+}
+
+/**************************************************************************/
+
 Float_t ParaSurf::CharacteristicLength()
 {
   return sqrtf(Surface());
