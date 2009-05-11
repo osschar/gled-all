@@ -26,8 +26,8 @@ protected:
 
   Bool_t          bParked;     // X{GS}  7 Bool()
 
-  Float_t         mV;          // X{GE}  7 Value(-range=>[-100,100, 1,1000], -join=>1)
-  Float_t         mW;          // X{GE}  7 Value(-range=>[  -5,  5, 1,1000])
+  Float_t&        mV;          // X{GS}  7 Value(-range=>[-100,100, 1,1000], -join=>1)
+  Float_t&        mW;          // X{GS}  7 Value(-range=>[  -5,  5, 1,1000])
 
   // Float_t         mPowPerM;    // X{GS}  7 Value(-range=>[-10,10, 1,1000])
   // Force per mass, perchance?
@@ -45,13 +45,9 @@ protected:
   UInt_t          mOPCRCCache; //!
 
 public:
-  Dynamico(const Text_t* n="Dynamico", const Text_t* t=0) :
-    Extendio(n,t) { _init(); }
+  Dynamico(const Text_t* n="Dynamico", const Text_t* t=0);
 
   virtual void SetTringula(Tringula* tring);
-
-  void SetV(Float_t v);
-  void SetW(Float_t w);
 
   virtual void TimeTick(Double_t t, Double_t dt) {}
 

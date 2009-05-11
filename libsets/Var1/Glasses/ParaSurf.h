@@ -66,6 +66,9 @@ public:
   void GetMinFGH(Float_t fgh[3]) const { fgh[0] = mMinF; fgh[1] = mMinG; fgh[2] = mMinH; }
   void GetMaxFGH(Float_t fgh[3]) const { fgh[0] = mMaxF; fgh[1] = mMaxG; fgh[2] = mMaxH; }
 
+  Bool_t IsValidFGH(const Float_t f[3], Bool_t check_h=false);
+  Bool_t IsValidPos(const Float_t x[3], Bool_t check_h=false);
+
   virtual void SetupEdgePlanes() {}
 
   virtual Float_t Surface() = 0;

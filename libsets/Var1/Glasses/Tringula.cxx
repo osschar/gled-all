@@ -899,8 +899,8 @@ void Tringula::handle_edge_crossing
     case ER_Stop:
     {
       pos -= dist*P.n;
-      D.mV = 0;
-      D.mW = 0;
+      D.mVVec.Zero();
+      D.mWVec.Zero();
       D.Stamp(D.FID());
       break;
     }

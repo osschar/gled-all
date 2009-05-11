@@ -150,12 +150,17 @@ reoffset:
     }
     else
     {
-      ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Parking, offset was %f for '%s'.", mRayOffset, GetName()));
-      bParked = true;
-
-      //ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Increasing ray-offset from %f for '%s'.", mRayOffset, GetName()));
-      //mRayOffset *= 2;
-      //goto reoffset;
+      if (mTringula->GetParaSurf()->IsValidPos(pos))
+      {
+	ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Increasing ray-offset from %f for '%s'.", mRayOffset, GetName()));
+	mRayOffset *= 2;
+	goto reoffset;
+      }
+      else
+      {
+	ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Fallen off - parking, ray-offset was %f for '%s'.", mRayOffset, GetName()));
+	bParked = true;
+      }
     }
   }
   else

@@ -7,7 +7,9 @@
 //__________________________________________________________________________
 // Dynamico
 //
-//
+// We have those reference data-members mV and mW here ... they are needed so
+// that we can have WGlValuator widgets that pick up all the stuff from the
+// dictionaries. 
 
 #include "Dynamico.h"
 #include "Dynamico.c7"
@@ -31,11 +33,17 @@ void Dynamico::_init()
 
   bParked = false;
 
-  mV = mW = 0;
-
   mSafety = mExtraStep = 0;
 
   mOPCRCCache = OPC_INVALID_ID;
+}
+
+Dynamico:: Dynamico(const Text_t* n, const Text_t* t) :
+  Extendio(n,t),
+  mV(mVVec.x),
+  mW(mWVec.x)
+{
+  _init();
 }
 
 /**************************************************************************/
@@ -49,30 +57,6 @@ void Dynamico::SetTringula(Tringula* tring)
 
   mTringula->GetParaSurf()->pos2grav(mTrans.ArrT(), mGrav);
   mOPCRCCache = OPC_INVALID_ID;
-}
-
-/**************************************************************************/
-
-void Dynamico::SetV(Float_t v)
-{
-  // Like autogen but also set mVVec.
-
-  if(v >  100) v =  100;
-  if(v < -100) v = -100;
-  mV = v;
-  mVVec.x = v;
-  Stamp(FID());
-}
-
-void Dynamico::SetW(Float_t w)
-{
-  // Like autogen but also set mWVec.
-
-  if(w >  5) w =  5;
-  if(w < -5) w = -5;
-  mW = w;
-  mWVec.x = w;
-  Stamp(FID());
 }
 
 /**************************************************************************/
@@ -177,9 +161,10 @@ bool Dynamico::handle_collision(Dynamico            * dyno,
 
       HTransF& t_dyno = dyno->mTrans;
 
-      Point& fwd = * (Point*) t_dyno.PtrBaseVec(1);
+      Point vel;      t_dyno.RotateVec3(dyno->mVVec, vel);
+      Point fwd(vel); fwd.Normalize();
 
-      if ((fwd | com2cv) * dyno->mV > 0 && segments.size() > 1)
+      if ((vel | com2cv) > 0 && segments.size() > 1)
       {
         // CV is in front - turn to be parallel with collision plane
         // or a bit further as plane normal is not projected into xy
@@ -243,8 +228,10 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
   Point dcomp(dcom); dcomp.TMsc(up_dir, up_dir | dcom);
 
   // Velocities
-  Point v0(t0.PtrBaseVec(1)); v0 *= dyno0->mV;
-  Point v1(t1.PtrBaseVec(1)); v1 *= dyno1->mV;
+  // Point v0(t0.PtrBaseVec(1)); v0 *= dyno0->mV;
+  // Point v1(t1.PtrBaseVec(1)); v1 *= dyno1->mV;
+  Point v0; t0.RotateVec3(dyno0->mVVec, v0);
+  Point v1; t0.RotateVec3(dyno1->mVVec, v1);
   // Velocities in tangential plane
   Point v0p(v0); v0p.TMsc(up_dir, up_dir | v0);
   Point v1p(v1); v1p.TMsc(up_dir, up_dir | v1);
@@ -271,23 +258,26 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
     Float_t w1p = -0.5f * (b + sqrtf(b*b - 4.0f*a*c)) / a;
     Float_t w0p = (P - m1*w1p) / m0;
 
+    // XXXX New velocities and transformations, calculated and assigned below,
+    // put all velocity in the x/forward direction. In principle could also assign
+    // slide-velocities, but these are not decayed in TimeTick() so the thing
+    // would go sour soon.
+
     v0.TMac(dv_dir, w0p);
     Float_t vm0 = v0.Magnitude();
     v0 *= 1.0f / vm0;
-    // if (dyno0->mV < 0) { v0.Neg(), vm0 = -vm0; }
     t0.SetBaseVec(1, v0);
     t0.OrtoNorm3Column(1, 3);
     t0.SetBaseVecViaCross(2);
-    dyno0->mV = vm0;
+    dyno0->mVVec.Set(vm0, 0, 0);
 
     v1.TMac(dv_dir, w1p - w1);
     Float_t vm1 = v1.Magnitude();
     v1 *= 1.0f / vm1;
-    // if (dyno1->mV < 0) { v1.Neg(), vm1 = -vm1; }
     t1.SetBaseVec(1, v1);
     t1.OrtoNorm3Column(1, 3);
     t1.SetBaseVecViaCross(2);
-    dyno1->mV = vm1;
+    dyno1->mVVec.Set(vm1, 0, 0);
   } else {
     // they are moving apart, just separate them some more
     dcomp *= 0.1f;
