@@ -1,3 +1,9 @@
+2009-05-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/project7.pl:
+	If exported data-member is a reference, parse '&' off the type.
+	This is mostly a hack - for reference data members in Var1/Dynamico.
+
 2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for mac build.
