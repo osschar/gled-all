@@ -1,0 +1,16 @@
+There is an issue with Int_t/UInt_t triangle indices - Opcode uses
+UInt_t, TringTvor Int_t. Need to see how hierarhical tringula will be
+implemented.
+
+At some point I changed all methods that call Opcode to take UInt_t
+arguments for triangle indices. I like this less and less now.
+
+Anyway, -1 and OPC_INVALID_ID are both 0xffffffff.
+
+------------------------------------------------------------------------
+
+Had another creepy idea - to use doubles everywhere - in TriMesh and
+in Opcode. This requires more memory, but allows to run a large planet
+on a single tringula! Memory could be regained completely by
+quantizing the vertex and triangle normals into shorts. Anyway, could
+start with making a type-defed Opcode and templating the TriMesh.

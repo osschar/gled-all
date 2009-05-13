@@ -1068,13 +1068,17 @@ Bool_t check_uv(Opcode::Point& uv, Opcode::Point& duv, Float_t t, Bool_t printp=
 Bool_t TriMesh::FindTriangleExitPoint(UInt_t triangle, const Float_t xyz[3], const Float_t dir[3],
 				      Float_t xyz_out[3], UInt_t* next_triangle)
 {
-  // Given triangle, position xyz and direction dir, find the exit point from the
-  // triangle.
+  // Given triangle, position xyz and direction dir, find the exit point from
+  // the triangle.
   // If next_triangle is non-null, the triangle bordering the crossed edge is
   // returned there.
   //
-  // There are very many ways this can go wrong ... still working on the interface
-  // and the return value.
+  // There are very many ways this can go wrong ... still working on the
+  // interface and the return value.
+  // 1. The direction is orthogonal to triangle normal.
+  // 2. All intersection points are either outside of triangle or at negative
+  //    times.
+  // 3. Next triangle index is -1 - the end of the world is hit.
   //
   // Now, a hack was added to also succeed when the triangle edge has just
   // been passed: the function is re-entered with the new triangle. Again this
