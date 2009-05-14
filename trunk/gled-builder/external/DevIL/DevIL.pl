@@ -24,17 +24,27 @@ my $ldfl  = "-L\${PREFIX}/lib";
 if ($CC eq 'gcc' and $CC_MAJOR == 4 and $CC_MINOR >= 2) {
   $cfl .= " -fgnu89-inline";
 }
-if ($BUILD_OS eq 'linux-gnu') {
+
+my $config_args;
+if ($BUILD_OS =~ /linux/)
+{
   if ($DISTRO_VENDOR eq 'redhat' and $DISTRO_NAME eq 'slc') {
     $ldfl .= " -L/usr/X11R6/lib";
   }
   $ldfl .= " -ljpeg -ltiff -lmng";
+  $config_args .= "--enable-ILU --enable-ILUT";
 }
+elsif ($BUILD_OS =~ /darwin/)
+{
+  # ILUT has trouble linking against GL. Not used in Gled anyway.
+  $config_args .= "--enable-ILU";
+}
+
 target('configure', <<"FNORD");
 ./configure CPPFLAGS="$cppfl" \\
             CFLAGS="$cfl" \\
             LDFLAGS="$ldfl" \\
-          --prefix=\${PREFIX} --enable-ILU --enable-ILUT
+          --prefix=\${PREFIX} $config_args
 FNORD
 
 use_defaults_for_remaining_targets();

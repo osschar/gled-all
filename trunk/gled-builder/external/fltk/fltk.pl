@@ -20,10 +20,20 @@ setup_package($package);
 
 # print STDERR "Package setup, srctar=$srctarfile, ver=$version, tardir=$tardir\n";
 
+my $config_args;
+if ($BUILD_OS =~ /linux/)
+{
+  $config_args .= "--enable-xft";
+}
+elsif ($BUILD_OS =~ /darwin/)
+{
+  $config_args .= "--enable-quartz";
+}
+
 target('configure', <<"FNORD");
-./configure   CXXFLAGS="-fPIC -O2" \\
+./configure   CXXFLAGS="-fPIC -O0 -g" \\
             --prefix=\${PREFIX} \\
-            --enable-shared --enable-threads --enable-xft
+            --enable-shared --enable-threads $config_args
 FNORD
 
 use_defaults_for_remaining_targets();
