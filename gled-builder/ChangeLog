@@ -1,3 +1,21 @@
+2009-05-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for mac build.
+
+	* distro-details.pl:
+	Politically correct vendor name spelling.
+	Fix version regexp.
+
+	* external/DevIL/DevIL.pl:
+	Do not build ILUT - has problems with GL.
+
+	* external/fltk/fltk.pl:
+	Do not use xft. Configure wih enable-quartz.
+
+	* external/root/root.pl:
+	Enforce 32-bit build - all other software (and whatever comes from
+	fink) is built in 32-bit mode, too.
+
 2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Use latest OpenAL.

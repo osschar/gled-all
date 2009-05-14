@@ -61,9 +61,8 @@ sub check_windows
 sub check_mac
 {
   $name   = "darwin";
-  $vendor = "ApfelZoft";
-  ($version) = $os =~ m/([\d\.]+)
-$/;
+  $vendor = "apple";
+  ($version) = $os =~ m/([\d\.]+)$/;
 }
 
 ########################################################################

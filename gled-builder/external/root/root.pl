@@ -18,10 +18,22 @@ $parallel = 1;
 
 setup_package($package);
 
-my $config_args = "--disable-builtin-freetype";
-if ($DISTRO_VENDOR eq 'gentoo') {
-  $config_args .= " --enable-gsl-shared --with-pgsql-incdir=/usr/include/postgres";
+my $config_args;
+if ($BUILD_OS =~ /linux/)
+{
+  $config_args .= "--disable-builtin-freetype";
+  if ($DISTRO_VENDOR eq 'gentoo') {
+    $config_args .= " --enable-gsl-shared --with-pgsql-incdir=/usr/include/postgres";
+  }
 }
+elsif ($BUILD_OS =~ /darwin/)
+{
+  # Enforce 32-bit build ... other externals build in 32-bit mode.
+  # Another option would be to enforce 64-bit mode for them, too.
+  # But then would need to detect the cpu type ... or sth.
+  $config_args .= "macosx";
+}
+
 target('configure', <<"FNORD");
 ./configure $config_args
 FNORD
