@@ -136,7 +136,6 @@ public:
 
   static void* TRint_runner_tl(void*);
   static void  TRint_cleanup_tl(void*);
-  static void* Gled_runner_tl(Gled* gled);
 
   virtual void LockFltk()   {}
   virtual void UnlockFltk() {}
