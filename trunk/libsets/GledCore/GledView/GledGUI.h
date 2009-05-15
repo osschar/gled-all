@@ -52,6 +52,17 @@ protected:
 
   void build_gui();
 
+  struct GuiThreadRequest
+  {
+    GCondition fCondy;
+
+    virtual void Execute() = 0;
+  };
+  std::list<GuiThreadRequest*> fGTRQueue;
+  GMutex                       fGTRQueueMoo;
+
+  void exec_gui_thread_request(GuiThreadRequest* gtr);
+
 public:
   GledGUI();
   virtual void ParseArguments(lStr_t& args);

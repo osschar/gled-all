@@ -167,9 +167,11 @@ void GledGUI::build_gui()
 
 /**************************************************************************/
 
-GledGUI::GledGUI() : Gled(), Fl_Window(60, 30, "Gled"),
-		     mMsgCond(GMutex::recursive),
-		     mNumShells(0)
+GledGUI::GledGUI() :
+  Gled(), Fl_Window(60, 30, "Gled"),
+  mMsgCond(GMutex::recursive),
+  mNumShells(0),
+  mSwmManager(0)
 {
   end();
 
@@ -292,6 +294,17 @@ void GledGUI::InitGledCore()
 
 /**************************************************************************/
 
+void GledGUI::exec_gui_thread_request(GuiThreadRequest* gtr)
+{
+  gtr->fCondy.Lock();
+  fGTRQueueMoo.Lock();
+  fGTRQueue.push_back(gtr);
+  fGTRQueueMoo.Unlock();
+  Fl::awake();
+  printf("GledGUI::exec_gui_thread_request waiting ...\n");
+  gtr->fCondy.Wait();
+}
+
 void GledGUI::Run()
 {
   // Runs in dedicated thread spawned from gled.cxx.
@@ -308,7 +321,23 @@ void GledGUI::Run()
     mMessenger->Spawn();
   }
 
-  while (!bQuit) Fl::wait(10);
+  while (!bQuit)
+  {
+    fGTRQueueMoo.Lock();
+    while (!fGTRQueue.empty())
+    {
+      GuiThreadRequest* gtr = fGTRQueue.front(); fGTRQueue.pop_front();
+      printf("Execing ... \n");
+      gtr->fCondy.Lock();
+      gtr->Execute();
+      printf("Signaling ...\n");
+      gtr->fCondy.Signal();
+      gtr->fCondy.Unlock();
+    }
+    fGTRQueueMoo.Unlock();
+
+    Fl::wait(10);
+  }
 
   Fl::unlock();
 
@@ -425,18 +454,55 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 
   static const Exc_t _eh("GledGUI::SpawnEye ");
 
+  struct EyeCreationRequest : public GuiThreadRequest
+  {
+    // Input:
+    EyeInfo::EyeCreator_foo     fECFoo;
+    EyeInfo                    *fEyeInfo;
+    ZGlass                     *fUserData;
+    // Internals
+    TSocket                    *fSocket;
+    // Output
+    Eye                        *fEye;
+
+    EyeCreationRequest(EyeInfo::EyeCreator_foo foo, EyeInfo* ei, ZGlass* ud) :
+      fECFoo(foo), fEyeInfo(ei), fUserData(ud), fSocket(0), fEye(0) {}
+
+    void CreateSocket(Int_t port)
+    {
+      fSocket = new TSocket("localhost", port);
+    }
+
+    virtual void Execute()
+    {
+      try
+      {
+	fEye = fECFoo(fSocket, fEyeInfo, fUserData);
+      }
+      catch(Exc_t& exc)
+      {
+	delete fSocket;
+	ISerr(_eh + "Eye creation failed: '" + exc + "'.");
+      }
+    }
+
+    EyeInfo* TrueEyeInfo() { return fEye ? fEye->GetEyeInfo() : 0; }
+  };
+
   bool wipe_ei = false;
 
   TString eye_name = GForm("%s@%s", mDefEyeIdentity.Data(), gSystem->HostName());
 
-  if(ei == 0) {
+  if (ei == 0)
+  {
     ei = new EyeInfo(eye_name.Data());
     wipe_ei = true;
   }
-  if(strlen(ei->GetLogin()) == 0)
+  if (strlen(ei->GetLogin()) == 0)
     ei->SetLogin(mDefEyeIdentity);
 
-  if(ud==0 && strcmp(libset,"GledCore")==0 && strcmp(eyector,"FTW_Shell")==0) {
+  if (ud==0 && strcmp(libset,"GledCore")==0 && strcmp(eyector,"FTW_Shell")==0)
+  {
     ZFireQueen* fq = mSaturn->GetFireQueen();
     ShellInfo* si = new ShellInfo
       (GForm("Shell[%d] of %s", ++mNumShells, eye_name.Data()),
@@ -448,26 +514,20 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 
   TString foo_name = GForm("EyeCreator_%s_%s", libset, eyector);
   long* p2foo = (long*) GledNS::FindSymbol(foo_name);
-  if(!p2foo) {
+  if (!p2foo)
+  {
     ISerr(_eh +"can't find symbol '"+ foo_name +"'.");
     return 0;
   }
-  EyeInfo::EyeCreator_foo ec_foo = (EyeInfo::EyeCreator_foo)(*p2foo);
 
+  EyeCreationRequest ecr((EyeInfo::EyeCreator_foo)(*p2foo), ei, ud);
+  ecr.CreateSocket(mSaturnInfo->GetServerPort());
+  exec_gui_thread_request(&ecr);
 
-  TSocket* sock = new TSocket("localhost", mSaturnInfo->GetServerPort());
-  Eye* e = 0;
-  try {
-    e = ec_foo(sock, ei, ud);
-  }
-  catch(Exc_t& exc) {
-    delete sock;
-    ISerr(_eh + "Eye creation failed: '" + exc + "'.");
-  }
+  if (wipe_ei)
+    delete ei;
 
-  if(wipe_ei) delete ei;
-
-  return e ? e->GetEyeInfo() : 0;
+  return ecr.TrueEyeInfo();
 }
 
 /**************************************************************************/
