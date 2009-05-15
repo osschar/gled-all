@@ -60,7 +60,6 @@ Gled::Gled() :
   bPreExec      (false),
   bAutoSpawn    (false),
   bAllowMoons   (false),
-  bRunRint      (true),
   bRintRunning  (false),
   mRint         (0),
   mLoggingMutex (GMutex::recursive),
@@ -116,12 +115,31 @@ Gled::Gled() :
   mDefEyeIdentity = "guest";
 }
 
-void Gled::ParseArguments(lStr_t& args)
+void Gled::AddArgument(const char* arg)
+{
+  // Add a command-line argument.
+
+  mArgs.push_back(arg);
+}
+
+void Gled::ReadArguments(int argc, char **argv)
+{
+  // Read given command-line arguments, zeroth argument is taken as
+  // command name.
+
+  mCmdName = argv[0];
+  for (int i = 1; i < argc; ++i)
+  {
+    mArgs.push_back(argv[i]);
+  }
+}
+
+void Gled::ParseArguments()
 {
   // Parse command-line arguments.
 
-  lStr_i i  = args.begin();
-  while (i != args.end())
+  lStr_i i  = mArgs.begin();
+  while (i != mArgs.end())
   {
     lStr_i start = i;
 
@@ -146,7 +164,6 @@ void Gled::ParseArguments(lStr_t& args)
              "  -n[ame]    <str>   name of Saturn\n"
              "  -t[itle]   <str>   title of Saturn\n"
              "  -l                 no splash info\n"
-             "  -norint            do not run TRint (useful for batch saturns)\n"
              "\n"
              "Logging options:\n"
              "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n"
@@ -166,36 +183,36 @@ void Gled::ParseArguments(lStr_t& args)
     }
     else if (*i == "-datadir")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mDataDir = *i;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-libdir")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mLibDir = *i;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-preexec")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       bPreExec = true;
       mPreExecString   = *i;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i ==  "-r" || *i == "-run")
     {
       bAutoSpawn = true;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-allowmoons")
     {
       bAllowMoons = true;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-s" || *i == "-sssize")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       if(index(*i, 'e')) {
 	int m, e, num = sscanf(*i, "%de%d", &m, &e);
 	if(num != 2) { cerr <<"-sssize poor exp format: "<< *i <<endl; exit(1); }
@@ -203,23 +220,23 @@ void Gled::ParseArguments(lStr_t& args)
       } else {
 	mSaturnInfo->SetSunSpaceSize( ID_t(atoll(*i)) );
       }
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-p" || *i == "-port")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mSaturnInfo->SetServerPort( atoi(*i) );
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-portscan")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mSaturnInfo->SetServPortScan( atoi(*i) );
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-m" || *i == "-master")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       char* col = index(*i, ':');
       if(col) {
 	*(col++) = 0;
@@ -227,36 +244,31 @@ void Gled::ParseArguments(lStr_t& args)
 	mSaturnInfo->SetMasterPort(p);
       }
       mSaturnInfo->SetMasterName(*i);
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-n" || *i == "-name")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mSaturnInfo->SetName(*i);
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-t" || *i == "-title")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mSaturnInfo->SetTitle(*i);
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-l")
     {
       bShowSplash = false;
-      args.erase(start, ++i);
-    }
-    else if (*i == "-norint")
-    {
-      bRunRint = false;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
 
     // Logging options
 
     else if (*i == "-log" || *i == "-logfile")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       if (*i == "-" || *i == "<null>")
       {
 	mLogFileName = "<null>";
@@ -269,11 +281,11 @@ void Gled::ParseArguments(lStr_t& args)
       {
 	mLogFileName = *i;
       }
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-out" || *i == "-outfile")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       if (*i == "-" || *i == "<null>")
       {
 	mOutFileName = "<null>";
@@ -286,7 +298,7 @@ void Gled::ParseArguments(lStr_t& args)
       {
 	mOutFileName = *i;
       }
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
 
     // Authentication options
@@ -294,34 +306,34 @@ void Gled::ParseArguments(lStr_t& args)
     else if (*i == "-auth")
     {
       mSaturnInfo->SetUseAuth(true);
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-authdir")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mAuthDir = *i;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-saturnid")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mSaturnInfo->SetLogin(*i);;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-eyeid")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mDefEyeIdentity = *i;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
 
     // Renderer loading options
 
     else if (*i == "-rnr")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       mRenderers = *i;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else
     {
@@ -405,7 +417,7 @@ void Gled::InitGledCore()
   }
 }
 
-void Gled::ProcessCmdLineMacros(const TString& exe, lStr_t& args)
+void Gled::ProcessCmdLineMacros()
 {
   // Prepare remaining args for ROOT, weed out remaining options
 
@@ -413,13 +425,13 @@ void Gled::ProcessCmdLineMacros(const TString& exe, lStr_t& args)
 
   // Argument count and strings to be passed to root.
   int         rargc = 0;
-  const char* rargv[args.size() + 3];
+  const char* rargv[mArgs.size() + 3];
 
-  rargv[rargc++] = exe;
+  rargv[rargc++] = mCmdName;
   rargv[rargc++] = "-q"; // This enforces return from TRint::Run() after macro processing
   if (!bShowSplash)
     rargv[rargc++] = "-l";
-  for (lStr_i i = args.begin(); i != args.end(); ++i)
+  for (lStr_i i = mArgs.begin(); i != mArgs.end(); ++i)
   {
     if ((*i)[0] == '-')
     {
@@ -442,7 +454,7 @@ void Gled::ProcessCmdLineMacros(const TString& exe, lStr_t& args)
   }
 
   mRint = new TRint("TRint", &rargc, (char**) rargv);
-  mRint->SetPrompt(exe + "[%d] ");
+  mRint->SetPrompt(mCmdName + "[%d] ");
 
   // Spawn saturn
   if (bAutoSpawn)
@@ -870,7 +882,7 @@ public:
 };
 }
 
-void* Gled::TRint_runner_tl(TRint* gint)
+void* Gled::TRint_runner_tl(void*)
 {
   // Runs the ROOT application.
   // Ownership set to mSaturnInfo.
@@ -886,12 +898,15 @@ void* Gled::TRint_runner_tl(TRint* gint)
   new GExceptionHandler;
 
   self->SetEndFoo((GThread_cu_foo) TRint_cleanup_tl);
-  self->SetEndArg(gint);
+  self->SetEndArg(0);
+
+  Gled::theOne->ProcessCmdLineMacros();
 
   Gled::theOne->bRintRunning = true;
-  gint->TApplication::Run(true);
+  Gled::theOne->mRint->TApplication::Run(true);
   Gled::theOne->bRintRunning = false;
   cout << "Gint terminated ...\n";
+
 
   self->SetEndFoo(0);
   self->SetEndArg(0);
@@ -904,10 +919,10 @@ void* Gled::TRint_runner_tl(TRint* gint)
   return 0;
 }
 
-void Gled::TRint_cleanup_tl(TRint* gint)
+void Gled::TRint_cleanup_tl(void*)
 {
   cout << "Gint canceled ... expect trouble.\n";
-  gint->Terminate(0);
+  Gled::theOne->mRint->Terminate(0);
 }
 
 void* Gled::Gled_runner_tl(Gled* gled)

@@ -188,17 +188,17 @@ GledGUI::GledGUI() :
   mRenderers   = "GL";
 }
 
-void GledGUI::ParseArguments(lStr_t& args)
+void GledGUI::ParseArguments()
 {
-  Gled::ParseArguments(args);
+  Gled::ParseArguments();
 
   // Defaults that can be overridden by options.
   int   swm_fs = 12, swm_vskip = 6, swm_hwidth = 0;
   int   font = 0;
   bool  start_iconized = false, no_msg_window = false;
 
-  lStr_i i  = args.begin();
-  while (i != args.end())
+  lStr_i i  = mArgs.begin();
+  while (i != mArgs.end())
   {
     lStr_i start = i;
 
@@ -216,25 +216,25 @@ void GledGUI::ParseArguments(lStr_t& args)
     }
     else if (*i == "-swm")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       sscanf(*i, "%d:%d:%d", &swm_fs, &swm_vskip, &swm_hwidth);
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-font")
     {
-      next_arg_or_die(args, i);
+      next_arg_or_die(mArgs, i);
       font = atoi(*i);
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-iconize")
     {
       start_iconized = true;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else if (*i == "-nomw" || *i == "-nomsgwin")
     {
       no_msg_window = true;
-      args.erase(start, ++i);
+      mArgs.erase(start, ++i);
     }
     else
     {

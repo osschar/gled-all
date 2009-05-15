@@ -30,9 +30,8 @@ int main(int argc, char **argv)
   GThread::InitMain();
 
   Gled* gled = new Gled();
-
-  lStr_t args; for (int i=1; i<argc; ++i) args.push_back(argv[i]);
-  gled->ParseArguments(args);
+  gled->ReadArguments(argc, argv);
+  gled->ParseArguments();
 
   if (gled->GetQuit())
   {
@@ -46,19 +45,13 @@ int main(int argc, char **argv)
   gled_exit.Lock();
   gled->SetExitCondVar(&gled_exit);
 
-  gled->ProcessCmdLineMacros("saturn", args);
-
   // Run TRint
   GThread app_thread("saturn.cxx-TRintRunner",
-                     (GThread_foo)Gled::TRint_runner_tl, gled->GetRint(),
-                     false);
-  if (gled->GetRunRint())
+                     (GThread_foo)Gled::TRint_runner_tl, 0, false);
+  if (app_thread.Spawn())
   {
-    if (app_thread.Spawn())
-    {
-      perror(GForm("%scan't create Rint thread", _eh.Data()));
-      exit(1);
-    }
+    perror(GForm("%scan't create Rint thread", _eh.Data()));
+    exit(1);
   }
 
   gled_exit.Wait();
