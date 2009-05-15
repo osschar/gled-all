@@ -1,3 +1,17 @@
+2009-05-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add command-queue executed within the GUI event-loop.
+
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Add base-struct GuiThreadRequest and a queue containing the
+	requests. They are executed within the main loop, in Run() method.
+	Execution helper function is also available:
+	  void exec_gui_thread_request(GuiThreadRequest* gtr);
+
+	Rewrite SpawnEye() to use the command-queue instead of directly
+	instantiating the Eye - and all the sub-shells.
+
 2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Pupils/FBO.cxx:
