@@ -42,9 +42,8 @@ int main(int argc, char **argv)
   GThread::InitMain();
 
   GledGUI* gled = new GledGUI();
-
-  lStr_t args; for (int i=1; i<argc; ++i) args.push_back(argv[i]);
-  gled->ParseArguments(args);
+  gled->ReadArguments(argc, argv);
+  gled->ParseArguments();
 
   if (gled->GetQuit())
   {
@@ -54,32 +53,18 @@ int main(int argc, char **argv)
   gled->InitLogging();
   gled->InitGledCore();
 
-  // Run Gled ... FLTK event loop for GledGUI. [ This is somewhat silly. ]
-  GThread gled_thread("gled.cxx-GledRunner",
-                      (GThread_foo) Gled::Gled_runner_tl, gled,
-                      false);
-  if (gled_thread.Spawn())
+  // Run TRint
+  GThread app_thread("gled.cxx-TRintRunner",
+                     (GThread_foo) Gled::TRint_runner_tl, 0, false);
+  if (app_thread.Spawn())
   {
-    perror(GForm("%scan't create Gled thread", _eh.Data()));
+    perror(GForm("%scan't create Rint thread.", _eh.Data()));
     exit(1);
   }
 
-  gled->ProcessCmdLineMacros("gled", args);
+  // Run Gled ... FLTK event loop for GledGUI. [ This is somewhat silly. ]
+  Gled::Gled_runner_tl(gled);
 
-  // Run TRint
-  GThread app_thread("gled.cxx-TRintRunner",
-                     (GThread_foo) Gled::TRint_runner_tl, gled->GetRint(),
-                     false);
-  if (gled->GetRunRint())
-  {
-    if (app_thread.Spawn())
-    {
-      perror(GForm("%scan't create Rint thread.", _eh.Data()));
-      exit(1);
-    }
-  }
-
-  gled_thread.Join();
   if (gled->GetRintRunning())
   {
     app_thread.Kill(GThread::SigTERM);

@@ -35,6 +35,9 @@ class Gled
 protected:
   void next_arg_or_die(lStr_t& args, lStr_i& i);
 
+  TString       mCmdName;       // X{GS}
+  lStr_t        mArgs;
+
   SaturnInfo*	mSaturnInfo;	// X{g}
   Saturn*	mSaturn;	// X{g}
   Bool_t	bIsSun;		// X{G}
@@ -46,7 +49,6 @@ protected:
   Bool_t	bAutoSpawn;	// X{G}
   Bool_t	bAllowMoons;	// X{G}
 
-  Bool_t	bRunRint;	// X{G}
   Bool_t	bRintRunning;	// X{G}
   TRint        *mRint;          // X{g}
 
@@ -70,10 +72,14 @@ protected:
 
 public:
   Gled();
-  virtual void ParseArguments(lStr_t& args);
+
+  void AddArgument(const char* arg);
+  void ReadArguments(int argc, char **argv);
+
+  virtual void ParseArguments();
   virtual void InitLogging();
   virtual void InitGledCore();
-  virtual void ProcessCmdLineMacros(const TString& exe, lStr_t& args);
+  virtual void ProcessCmdLineMacros();
   virtual void StopLogging();
   virtual ~Gled();
 
@@ -128,8 +134,8 @@ public:
   static void Macro(const Text_t* mac);
   static void LoadMacro(const Text_t* mac);
 
-  static void* TRint_runner_tl(TRint* gint);
-  static void  TRint_cleanup_tl(TRint* gint);
+  static void* TRint_runner_tl(void*);
+  static void  TRint_cleanup_tl(void*);
   static void* Gled_runner_tl(Gled* gled);
 
   virtual void LockFltk()   {}
