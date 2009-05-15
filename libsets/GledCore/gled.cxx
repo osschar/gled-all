@@ -63,7 +63,7 @@ int main(int argc, char **argv)
   }
 
   // Run Gled ... FLTK event loop for GledGUI. [ This is somewhat silly. ]
-  Gled::Gled_runner_tl(gled);
+  gled->Run();
 
   if (gled->GetRintRunning())
   {

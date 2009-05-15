@@ -907,7 +907,6 @@ void* Gled::TRint_runner_tl(void*)
   Gled::theOne->bRintRunning = false;
   cout << "Gint terminated ...\n";
 
-
   self->SetEndFoo(0);
   self->SetEndArg(0);
 
@@ -923,20 +922,6 @@ void Gled::TRint_cleanup_tl(void*)
 {
   cout << "Gint canceled ... expect trouble.\n";
   Gled::theOne->mRint->Terminate(0);
-}
-
-void* Gled::Gled_runner_tl(Gled* gled)
-{
-  // Runs Gled UI. Only spawned from gled.cxx.
-  // Ownership set to mSaturnInfo.
-
-  GThread* self = GThread::Self();
-
-  self->set_owner(Gled::theOne->mSaturnInfo);
-
-  gled->Run();
-
-  return 0;
 }
 
 /**************************************************************************/

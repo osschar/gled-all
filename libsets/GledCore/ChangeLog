@@ -1,3 +1,10 @@
+2009-05-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* gled.cxx:
+	Remove all traces of GUI thread-foo.
+
 2009-05-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Reshuffle bootstrap so that FLTK runs in main thread.
