@@ -1,3 +1,11 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/ODECrawler.h:
+	Explicit template instantiation causes trouble on mac.
+	Need to see with Axel.
+
 2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/Moonraker_GL_Rnr.h:

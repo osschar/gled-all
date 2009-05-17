@@ -56,6 +56,7 @@ protected:
   {
     GCondition fCondy;
 
+    virtual ~GuiThreadRequest() {}
     virtual void Execute() = 0;
   };
   std::list<GuiThreadRequest*> fGTRQueue;

@@ -1,3 +1,15 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Fix compilation warnings - add virtual dtors for GuiThreadRequest
+	classes.
+
+	* gled.cxx:
+	Do not initialize X-threads on mac.
+
 2009-05-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:

@@ -13,17 +13,15 @@ VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
 
-LIBSET_CPPFLAGS = $(shell pkg-config --cflags-only-I glib-2.0)
+LIBSET_CPPFLAGS = $(shell pkg-config --cflags glib-2.0)
 BASE_LD_LIBS    = -Llib -lOpcode
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------
 
-LIBSET_PREREQS += libOpcode.target
+LIBSET_PREREQS += lib/libOpcode.${LDEXT}
 #LIBSET_TARGETS += 
-
-.PHONY: libOpcode.target
 
 # user targets go here; enumerate them in LIBSET_PREREQS/TARGETS
 
@@ -31,7 +29,7 @@ LIBSET_PREREQS += libOpcode.target
 include ${GLEDSYS}/make/make_targets.inc
 #--------------------------------------------------------------
 
-libOpcode.target:
+lib/libOpcode.${LDEXT}:
 	${MAKE} -C Opcode
 
 clean::

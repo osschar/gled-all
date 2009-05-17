@@ -1,3 +1,10 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Stones/TringTvor.cxx:
+	Add missing include (for mac).
+
 2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/Amphitheatre_GL_Rnr.h:

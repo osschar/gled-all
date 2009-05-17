@@ -327,10 +327,8 @@ void GledGUI::Run()
     while (!fGTRQueue.empty())
     {
       GuiThreadRequest* gtr = fGTRQueue.front(); fGTRQueue.pop_front();
-      printf("Execing ... \n");
       gtr->fCondy.Lock();
       gtr->Execute();
-      printf("Signaling ...\n");
       gtr->fCondy.Signal();
       gtr->fCondy.Unlock();
     }
@@ -467,6 +465,8 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 
     EyeCreationRequest(EyeInfo::EyeCreator_foo foo, EyeInfo* ei, ZGlass* ud) :
       fECFoo(foo), fEyeInfo(ei), fUserData(ud), fSocket(0), fEye(0) {}
+
+    virtual ~EyeCreationRequest() {}
 
     void CreateSocket(Int_t port)
     {
