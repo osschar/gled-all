@@ -1,12 +1,15 @@
+include ${GLEDSYS}/make/make_config.inc
+include ${GLEDSYS}/make/make_defs.inc
+
 SRCS := $(wildcard *.cpp) $(wildcard Ice/*.cpp)
 OBJS := $(SRCS:.cpp=.o)
 
-LIB  := ../lib/libOpcode.so
+LIB  := ../lib/libOpcode.${LDEXT}
 
 all: ${LIB}
 
 ${LIB}: ${OBJS}
-	g++ -shared -o $@ ${OBJS}
+	${LD} ${LDSHAREDOPT} -o $@ ${OBJS}
 
 clean:
 	@rm -f ${OBJS}
@@ -18,9 +21,9 @@ distclean: clean
 # For example, RayCollider returns zero primitives intersected, so it must
 # be that triangle-ray tests are over optimized. Should investigate further.
 ifndef OPCODE_DEBUG
-CXXFLAGS := -O -fPIC
+CXXFLAGS := -O -fPIC ${ROOT_CFLAGS}
 else
-CXXFLAGS := -g -fPIC
+CXXFLAGS := -g -fPIC ${ROOT_CFLAGS}
 endif
 
 %.o: %.cpp

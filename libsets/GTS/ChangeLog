@@ -1,3 +1,14 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/GTSRetriangulator.cxx:
+	Add missing include (for mac).
+
+	* Makefile:
+	Generalize glib-2.0 pkg-config invocation for cpp/ld flags - need
+	to cross check on linux.
+
 2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:

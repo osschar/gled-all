@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#ifndef __APPLE__
 #include <X11/Xlib.h>
+#endif
 
 /**************************************************************************/
 
@@ -34,10 +36,12 @@ int main(int argc, char **argv)
   // have a TRint derived class as i used to (Gint).
   // Also - GledGUI should NOT inherit from Fl_Window.
   // !!!!
+#ifndef __APPLE__
   if (XInitThreads() == 0)
   {
     fprintf(stderr, "XThreads not enabled ... might get into a mess.\n");
   }
+#endif
 
   GThread::InitMain();
 

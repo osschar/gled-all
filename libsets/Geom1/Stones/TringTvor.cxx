@@ -33,6 +33,8 @@
 #include <TMath.h>
 #include <TRandom.h>
 
+#include <cmath>
+
 #define INV3                    0.33333333333333333333f
 
 ClassImp(TringTvor);

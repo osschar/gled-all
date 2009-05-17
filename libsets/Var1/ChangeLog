@@ -1,3 +1,23 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/TriMeshField.cxx:
+	Add missing include (for mac).
+
+	* Makefile:
+	Generalize glib-2.0 pkg-config invocation for cppflags.
+	Simplify target for building of libOpcode and make it
+	cross-platform.
+
+	* Opcode/Makefile:
+	Import central make_config and make_defs. Use stuff from there to
+	properly build on mac.
+
+	* Stones/HTrans.h:
+	Explicit template instantiation causes trouble on mac.
+	Need to see with Axel.
+
 2009-05-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for dynamico/crawler movement handling.

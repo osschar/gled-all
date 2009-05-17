@@ -142,10 +142,16 @@ void AlSource::Play(Int_t count)
       ALsizei size;
       ALsizei freq;
       ALenum  format;
-      ALboolean loop;
 
+#ifdef __APPLE__
+      alutLoadWAVFile((ALbyte*) mFile.Data(),
+			    &format, &wave, &size, &freq);
+#else
+      ALboolean loop;
       alutLoadWAVFile((ALbyte*) mFile.Data(),
 			    &format, &wave, &size, &freq, &loop);
+#endif
+
       if(alutGetError())
 	throw(_eh + "could not open file.");
 

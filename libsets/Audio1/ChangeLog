@@ -1,3 +1,10 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/AlSource.cxx:
+	alutLoadWAVFile has a different signatures on mac.
+
 2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AlSource.cxx:
