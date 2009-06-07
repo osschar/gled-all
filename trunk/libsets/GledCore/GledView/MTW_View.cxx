@@ -58,8 +58,9 @@ void MTW_View::auto_label()
 
 MTW_View::MTW_View(OS::ZGlassImg* img, FTW_Shell* shell) :
   OS::A_View(img),
-  FTW_SubShell(shell),
-  Fl_SWM_Client(shell)
+  Fl_SWM_Client(shell),
+  mShell(shell),
+  mWindow(0), mFltkRep(0)
 {
   mGlass = fImg->fLens;
   _init();
@@ -67,8 +68,9 @@ MTW_View::MTW_View(OS::ZGlassImg* img, FTW_Shell* shell) :
 
 MTW_View::MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
   OS::A_View(0),
-  FTW_SubShell(0),
-  Fl_SWM_Client(swm_mgr)
+  Fl_SWM_Client(swm_mgr),
+  mShell(0),
+  mWindow(0), mFltkRep(0)
 {
   mGlass = glass;
   _init();

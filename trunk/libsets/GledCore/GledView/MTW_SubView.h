@@ -10,7 +10,8 @@
 #include <Gled/GledTypes.h>
 #include <Gled/GledNS.h>
 #include <GledView/GledViewNS.h>
-#include <FL/Fl_RelGroup.H>
+
+#include <FL/Fl_Group.H>
 
 class Eye;
 class MTW_SubView; class MTW_View;
@@ -20,7 +21,8 @@ namespace OptoStructs {
 
 class Fl_Widget;
 
-struct MTW_Widths {
+struct MTW_Widths
+{
   int	full, weed, label;
   MTW_Widths(int i=0, int j=0, int k=0) : full(i), weed(j), label(k) {}
   MTW_Widths& operator+=(MTW_Widths& r);
@@ -53,8 +55,8 @@ typedef list<MTW_Weed>::iterator	lMTW_Weed_i;
 // MTW_SubView
 /**************************************************************************/
 
-class MTW_SubView : public Fl_RelGroup {
-
+class MTW_SubView : public Fl_Group
+{
 protected:
   GledNS::ClassInfo*	mClassInfo; // X{g}
   MTW_View*		mView;	    // Access to ZGlassImg, Eye

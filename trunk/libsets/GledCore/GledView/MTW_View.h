@@ -9,7 +9,6 @@
 
 #include <Gled/GledTypes.h>
 #include <Eye/OptoStructs.h>
-#include "FTW_SubShell.h"
 
 #include <FL/Fl_SWM.H>
 #include <FL/Fl_Box.H>
@@ -17,6 +16,7 @@
 class MTW_SubView;
 class ZGlass;
 class Eye;
+class FTW_Shell;
 
 typedef list<MTW_SubView*>		lpMTW_SubView_t;
 typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
@@ -24,7 +24,6 @@ typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
 class Fl_SWM_Manager;
 
 class MTW_View : public OptoStructs::A_View,
-		 public FTW_SubShell,
 		 public Fl_SWM_Client
 {
 private:
@@ -34,14 +33,17 @@ protected:
   TString  m_window_label;
   virtual void auto_label();
 
+  FTW_Shell*            mShell;
   ZGlass*		mGlass;
   lpMTW_SubView_t	mSubViews;
 
+  Fl_Window*            mWindow;
   Fl_Group*		mFltkRep;
   bool			bShown;
 
   // Self representation
-  class SelfRep : public Fl_Box {
+  class SelfRep : public Fl_Box
+  {
     MTW_View* fView;
   public:
     SelfRep(MTW_View* v, int x, int y, int w, int h);
@@ -56,6 +58,9 @@ public:
   // Direct view for non enlightened lenses:
   MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr);
   ~MTW_View();
+
+          FTW_Shell* GetShell()  const { return mShell; }
+  virtual Fl_Window* GetWindow() const { return mWindow; }
 
   void Labelofy();
 
