@@ -29,14 +29,15 @@ const Text_t* MTW_SubView::sTextorTooltip = "press Enter to send data";
 /**************************************************************************/
 
 MTW_SubView::MTW_SubView(GNS::ClassInfo* ci, MTW_View* v) :
-  Fl_RelGroup(0,0,0,0,0), mClassInfo(ci), mView(v)
+  Fl_Group(0,0,0,0,0), mClassInfo(ci), mView(v)
 {
   // end() called from BuildFromList()
 
   resizable(0);
 }
 
-MTW_SubView::~MTW_SubView() {
+MTW_SubView::~MTW_SubView()
+{
   // weeds deleted by Fl_Group
   RemoveUpdateTimer();
 }

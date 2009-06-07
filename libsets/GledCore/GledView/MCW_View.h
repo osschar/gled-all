@@ -10,14 +10,14 @@
 #include <Gled/GledTypes.h>
 #include <Gled/GledNS.h>
 #include <Eye/OptoStructs.h>
-#include "FTW_SubShell.h"
+
+class FTW_Shell;
 
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_SWM.H>
 
-class MCW_View : public FTW_SubShell,
-		 public Fl_Window, public Fl_SWM_Client
+class MCW_View : public Fl_Window, public Fl_SWM_Client
 {
 
  public:
@@ -65,6 +65,7 @@ class MCW_View : public FTW_SubShell,
   };
 
  protected:
+  FTW_Shell*            mShell;
   TString		mTitle;
 
   GledNS::MethodInfo*	mMInfo;

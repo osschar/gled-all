@@ -1,3 +1,18 @@
+2009-06-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Sanitize inheritance scheme of MTW and MCW widget classes.
+
+	* GledView/MCW_View.cxx:
+	* GledView/MCW_View.h:
+	* GledView/MTW_ClassView.h:
+	* GledView/MTW_View.cxx:
+	* GledView/MTW_View.h:
+	Do not sub-class from FTW_SubShell - only some data-members were
+	used and this introduced an unnecessary dependency.
+
+	* GledView/MTW_SubView.cxx: * GledView/MTW_SubView.h: Subclass
+	from Fl_Group directly - Fl_RelGroup will be removed from fltk-mt.
+
 2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Mac compilation changes.

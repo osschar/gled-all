@@ -12,7 +12,8 @@
 
 class MTW_Layout;
 
-class MTW_ClassView : public MTW_View, public Fl_Pack {
+class MTW_ClassView : public MTW_View, public Fl_Pack
+{
 private:
   void _init();
 
