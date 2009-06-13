@@ -63,7 +63,7 @@ namespace {
 
 Pupil* Pupil::Create_Pupil(FTW_Shell* sh, OS::ZGlassImg* img)
 {
-  Pupil* p = new Pupil(sh, img);
+  Pupil* p = new Pupil(sh, img, 640, 480);
   return p;
 }
 
@@ -198,7 +198,7 @@ void Pupil::_check_auto_redraw()
 /**************************************************************************/
 
 Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
-  FTW_SubShell(shell, this),
+  FTW_SubShell(shell, this, this),
   OS::A_View(infoimg),
   Fl_Gl_Window(w,h),
   mCameraCB(this)
@@ -208,18 +208,8 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
   size(mInfo->GetWidth(), mInfo->GetHeight());
 }
 
-Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg,
-	     int x, int y, int w, int h) :
-  FTW_SubShell(shell, this),
-  OS::A_View(infoimg),
-  Fl_Gl_Window(x,y,w,h),
-  mCameraCB(this)
+Pupil::~Pupil()
 {
-  end();
-  _build();
-}
-
-Pupil::~Pupil() {
   if(bAutoRedraw) mShell->UnregisterROARWindow(this);
   delete mDriver;
   delete mCameraView;
@@ -1247,6 +1237,9 @@ int Pupil::handle_overlay(int ev)
 int Pupil::handle(int ev)
 {
   static const Exc_t _eh("Pupil::handle ");
+
+  if(ev == FL_HIDE || ev == FL_SHOW)
+    return Fl_Gl_Window::handle(ev);
 
   // Maybe should check for something else?
   if(!valid())

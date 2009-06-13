@@ -8,26 +8,30 @@
 #define GledCore_FTW_SubShell_H
 
 #include <TString.h>
+#include "FTW_ShellClient.h"
 
-class FTW_Shell;
 class Fl_Window;
+class Fl_Group;
+class Fl_Widget;
 
-class FTW_SubShell {
+class FTW_SubShell : public FTW_ShellClient
+{
 protected:
-  FTW_Shell*    mShell;
   Fl_Window*    mWindow;
+  Fl_Widget*    mContents;
 
   TString       mWindowLabel;
 
 public:
-  FTW_SubShell(FTW_Shell* s=0, Fl_Window* w=0) : mShell(s), mWindow(w) {}
-  virtual ~FTW_SubShell() {}
+  FTW_SubShell(FTW_Shell* s, Fl_Window* w, Fl_Widget* c);
+  virtual ~FTW_SubShell();
 
-  FTW_Shell* GetShell()          { return mShell;  }
-  virtual Fl_Window* GetWindow() { return mWindow; }
+  Fl_Window* GetWindow() { return mWindow; }
 
   virtual void label_window(const char* l=0);
 
+  virtual void dock(Fl_Group* g);
+  virtual void undock();
 }; // endclass FTW_SubShell
 
 #endif

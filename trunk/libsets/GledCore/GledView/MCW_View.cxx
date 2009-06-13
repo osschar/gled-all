@@ -242,7 +242,7 @@ void MCW_View::VarArg::StreamData(TBuffer& b)
 
 MCW_View::MCW_View(FTW_Shell* shell) :
   Fl_Window(0,0,0),
-  mShell(shell)
+  FTW_ShellClient(shell)
 {
   // Watch out ... end() is not called ... all done in ParseMethodInfo.
   bSendOnChange = 0;

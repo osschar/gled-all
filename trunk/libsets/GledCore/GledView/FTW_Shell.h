@@ -45,6 +45,7 @@ private:
 
 protected:
   ShellInfo*	mShellInfo;	 // X{g}
+  TString       mWindowLabel;
 
   // Standalone full-class views (MTW_Views) ... transients.
   set<OptoStructs::ZGlassImg*> mMTW_Views;
@@ -71,8 +72,8 @@ protected:
   Fl_Pack*	 wMainPack;
   Fl_Pack*       wMenuPack;
   Fl_Pack*       wMsgPack;
-  Fl_Window*     mEmptyCanvas;   // X{g}
-  Fl_Window*     mCurCanvas;     // X{g}
+  Fl_Group*      wCanvas;
+  FTW_SubShell*  mCurSubShell;
   Fl_OutputPack* wOutPack;
   OptoStructs::ZLinkView*        wMsgRecipient;
 

@@ -29,7 +29,7 @@ namespace GVNS = GledViewNS;
 
 FTW_Shell* FGS::grep_shell(Fl_Widget *w)
 {
-  FTW_SubShell* c = grep_parent<FTW_SubShell*>(w);
+  FTW_ShellClient* c = grep_parent<FTW_ShellClient*>(w);
   if(c) return c->GetShell();
   return grep_parent<FTW_Shell*>(w);
 }
