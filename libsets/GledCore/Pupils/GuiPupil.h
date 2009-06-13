@@ -13,13 +13,12 @@
 class Pupil;
 class GuiPupilInfo;
 
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Pack.H>
-#include <FL/Fl_SWM.H>
+#include <FL/Fl_Group.H>
+class Fl_Pack;
 
 class GuiPupil : public FTW_SubShell,
-                 public OptoStructs::A_View,
-                 public Fl_Window, public Fl_SWM_Client
+		 public OptoStructs::A_View,
+                 public Fl_Group
 {
 private:
 
@@ -35,8 +34,7 @@ public:
 
   static GuiPupil* Create_GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
 
-  GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w=64, int h=30);
-  GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h);
+  GuiPupil(FTW_Shell* sh, Fl_Window* win, OptoStructs::ZGlassImg* img, int w, int h);
   ~GuiPupil();
 
   virtual void AbsorbRay(Ray& ray);

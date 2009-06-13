@@ -101,7 +101,7 @@ void ShellInfo::RemoveSubShell(SubShellInfo* sub_shell)
 void ShellInfo::SetDefSubShell(SubShellInfo* ss)
 {
   static const Exc_t _eh("ShellInfo::SetDefSubShell ");
-  if(!mSubShells->Has(ss)) {
+  if(ss && !mSubShells->Has(ss)) {
     AddSubShell(ss);
   }
   set_link_or_die(mDefSubShell.ref_link(), ss, FID());

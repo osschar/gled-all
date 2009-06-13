@@ -1,3 +1,54 @@
+2009-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Rewrite sub-shell handling so that it might work on mac.
+
+	* GledView/FTW_ShellClient.cxx:
+	* GledView/FTW_ShellClient.h:
+	* GledView/FTW_Window.cxx:
+	* GledView/FTW_Window.h:
+	New classes FTW_Window and FTW_ShellClient needed for
+	generalization of FTW_SubShell concept.
+
+	* GledView/FTW_SubShell.cxx:
+	* GledView/FTW_SubShell.h:
+	Add support for docking/undocking of sub-shells.
+	Sub-class from FTW_ShellClient.
+
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	Rewrite handling of sub-shells, especially docking/undocking.
+
+	* GledView/FTW_Nest.cxx:
+	* GledView/FTW_Nest.h:
+	* Pupils/GuiPupil.cxx:
+	* Pupils/GuiPupil.h:
+	Do not sub-class from Fl_Window.
+	Rewrite construction - create encompassing FTW_Window in static
+	constructors and pass them into FTW_SubShell.
+	Remove constructors taking x, y position.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Remove constructor taking x, y position.
+	Let base-class handle hide/show events.
+
+	* GledView/MCW_View.cxx:
+	* GledView/MCW_View.h:
+	* GledView/MTW_View.cxx:
+	* GledView/MTW_View.h:
+	Sub-class from FTW_ShellClient - this allows low-level GUI
+	components from FltkGledStuff to find shell if they need it.
+	
+	* GledView/FltkGledStuff.cxx:
+	In grep_shell(), search for FTW_ShellClient, not FTW_SubShell.
+
+	* GledView/FTW_Branch.cxx:
+	* GledView/FTW_Leaf.cxx:
+	Small changes required by the stuff above.
+
+	* Glasses/ShellInfo.cxx:
+	Fixed SetDefSubShell() to support null argument.
+
 2009-06-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Sanitize inheritance scheme of MTW and MCW widget classes.
@@ -10,8 +61,10 @@
 	Do not sub-class from FTW_SubShell - only some data-members were
 	used and this introduced an unnecessary dependency.
 
-	* GledView/MTW_SubView.cxx: * GledView/MTW_SubView.h: Subclass
-	from Fl_Group directly - Fl_RelGroup will be removed from fltk-mt.
+	* GledView/MTW_SubView.cxx:
+	* GledView/MTW_SubView.h:
+	Subclass from Fl_Group directly - Fl_RelGroup will be removed from
+	fltk-mt.
 
 2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 

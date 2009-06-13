@@ -11,15 +11,16 @@
 #include <Gled/GledNS.h>
 #include <Eye/OptoStructs.h>
 
-class FTW_Shell;
+#include "FTW_ShellClient.h"
 
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_SWM.H>
 
-class MCW_View : public Fl_Window, public Fl_SWM_Client
+class MCW_View : public Fl_Window,
+		 public Fl_SWM_Client,
+		 public FTW_ShellClient
 {
-
  public:
 
   class ArgBase : public Fl_Pack
@@ -65,7 +66,6 @@ class MCW_View : public Fl_Window, public Fl_SWM_Client
   };
 
  protected:
-  FTW_Shell*            mShell;
   TString		mTitle;
 
   GledNS::MethodInfo*	mMInfo;

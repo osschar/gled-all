@@ -16,12 +16,28 @@
 
 #include <GledView/GledViewNS.h>
 #include <GledView/FTW_Shell.h>
+#include <GledView/FTW_Window.h>
 #include <GledView/FltkGledStuff.h>
 
 namespace OS   = OptoStructs;
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 namespace FGS  = FltkGledStuff;
+
+namespace
+{
+  /**************************************************************************/
+  // Configs
+  /**************************************************************************/
+
+  int def_W = 64;
+  int def_H = 30;
+
+  int min_W = 30;
+  int max_W = 240;
+  int min_H = 16;
+  int max_H = 120;
+}
 
 /**************************************************************************/
 // creator foo
@@ -35,9 +51,13 @@ GuiPupil* GuiPupil::Create_GuiPupil(FTW_Shell* sh, OS::ZGlassImg* img)
   if(ni == 0) throw(_eh + "user-data is not GuiPupilInfo.");
   if(ni->GetPupil() == 0) throw(_eh + "link 'Pupil' must be set.");
 
-  GuiPupil* guipupil = new GuiPupil(sh, img);
+  
+  FTW_Window *win      = new FTW_Window(def_W, def_H);
+  GuiPupil   *guipupil = new GuiPupil(sh, win, img, def_W, def_H);
+  win->end();
+  win->set_size_range(new SWM_Size_Range(min_W, min_H, max_W, max_H));
 
-  sh->adopt_window(guipupil);
+  sh->adopt_window(win);
 
   return guipupil;
 }
@@ -47,28 +67,10 @@ void *SubShellCreator_GledCore_GuiPupil = (void*)GuiPupil::Create_GuiPupil;
 /**************************************************************************/
 /**************************************************************************/
 
-namespace
-{
-  /**************************************************************************/
-  // Configs
-  /**************************************************************************/
-
-  // int def_W = 80;
-  // int def_H = 16;
-
-  int min_W = 30;
-  int max_W = 240;
-  int min_H = 16;
-  int max_H = 120;
-}
-
-/**************************************************************************/
-/**************************************************************************/
-
-GuiPupil::GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
-  FTW_SubShell(sh, this),
+GuiPupil::GuiPupil(FTW_Shell* sh, Fl_Window* win, OptoStructs::ZGlassImg* img, int w, int h) :
+  FTW_SubShell(sh, win, this),
   OS::A_View(img),
-  Fl_Window(w, h)
+  Fl_Group(0, 0, w, h)
 {
   mInfo = dynamic_cast<GuiPupilInfo*>(fImg->fLens);
   assert(mInfo);
@@ -103,7 +105,7 @@ GuiPupil::GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
   wMainPack->end();
   end();
 
-  wPupil = new Pupil(mShell, pupil_img, 0, 0, w, h-2);
+  wPupil = new Pupil(mShell, pupil_img, w, h-2);
 
   wPupil->show();
   wPupil->hide();
@@ -111,7 +113,6 @@ GuiPupil::GuiPupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
 
   wMainPack->resizable(wPupil);
   resizable(wMainPack);
-  swm_size_range = new SWM_Size_Range(min_W, min_H, max_W, max_H);
   label_window();
 }
 
@@ -159,7 +160,7 @@ int GuiPupil::handle(int ev)
 
   }
 
-  return Fl_Window::handle(ev);
+  return Fl_Group::handle(ev);
 }
 
 /**************************************************************************/

@@ -17,11 +17,8 @@ class NestInfo;
 class FTW_Leaf;
 class FTW_Nest;
 
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Pack.H>
-#include <FL/Fl_ScrollPack.H>
-#include <FL/Fl_SWM.H>
 #include <FL/Fl_Group.H>
+class Fl_Pack; class Fl_ScrollPack;
 class Fl_Input; class Fl_Output; class Fl_Menu_Item;
 class Fl_Box;
 
@@ -33,7 +30,7 @@ class FooPack;
 
 class FTW_Nest : public FTW_SubShell,
                  public OptoStructs::A_View,
-                 public Fl_Window, public Fl_SWM_Client
+                 public Fl_Group
 {
   friend class FTW_Shell;
 
@@ -86,15 +83,13 @@ public:
 
   static FTW_Nest* Create_FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
 
-  FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w=64, int h=30);
-  FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h);
+  FTW_Nest(FTW_Shell* sh, Fl_Window* win, OptoStructs::ZGlassImg* img, int w, int h);
   ~FTW_Nest();
 
   virtual void AbsorbRay(Ray& ray);
 
   virtual void Rewidth();
   virtual void AdInsertio(FTW_Leaf* newleaf);
-  virtual void SetSWM(Fl_SWM_Manager* swm, bool self_p=true);
 
   void InsertLeaf(FTW_Leaf* newleaf, int at);
   void InsertLeaf(FTW_Leaf* newleaf, FTW_Leaf* before=0);

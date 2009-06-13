@@ -7,6 +7,8 @@
 #ifndef GledCore_MTW_View_H
 #define GledCore_MTW_View_H
 
+#include "FTW_ShellClient.h"
+
 #include <Gled/GledTypes.h>
 #include <Eye/OptoStructs.h>
 
@@ -16,7 +18,6 @@
 class MTW_SubView;
 class ZGlass;
 class Eye;
-class FTW_Shell;
 
 typedef list<MTW_SubView*>		lpMTW_SubView_t;
 typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
@@ -24,7 +25,8 @@ typedef list<MTW_SubView*>::iterator	lpMTW_SubView_i;
 class Fl_SWM_Manager;
 
 class MTW_View : public OptoStructs::A_View,
-		 public Fl_SWM_Client
+		 public Fl_SWM_Client,
+		 public FTW_ShellClient
 {
 private:
   void _init();
@@ -33,7 +35,6 @@ protected:
   TString  m_window_label;
   virtual void auto_label();
 
-  FTW_Shell*            mShell;
   ZGlass*		mGlass;
   lpMTW_SubView_t	mSubViews;
 

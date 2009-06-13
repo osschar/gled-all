@@ -13,6 +13,7 @@
 #include <Eye/Eye.h>
 
 #include "FTW_Shell.h"
+#include "FTW_Window.h"
 #include "FTW_Nest.h"
 #include "FTW_Leaf.h"
 #include "FTW_Ant.h"
@@ -20,6 +21,7 @@
 #include "FltkGledStuff.h"
 
 #include <FL/Fl.H>
+#include <FL/Fl_ScrollPack.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Input.H>
@@ -43,9 +45,15 @@ FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
   NestInfo* ni = dynamic_cast<NestInfo*>(img->fLens);
   if(ni == 0) throw(_eh + "user-data is not NestInfo.");
 
-  FTW_Nest* nest = new FTW_Nest(sh, img, ni->GetDefW(), ni->GetDefH());
+  FTW_Window *win  = new FTW_Window(ni->GetDefW(), ni->GetDefH());
+  FTW_Nest   *nest = new FTW_Nest(sh, win, img, ni->GetDefW(), ni->GetDefH());
+  win->end();
+  win->set_size_range(new SWM_Size_Range(min_W, min_H, max_W, max_H));
 
-  nest->SetSWM(sh, true);
+  sh->adopt_window(win);
+  sh->adopt_window(nest->pLayout);
+  nest->Rewidth();
+
   FTW_Leaf* top_leaf = FTW_Leaf::Construct(nest, 0, img, false, false);
   nest->InsertLeaf(top_leaf);
   if(ni->GetShowSelf() == false) {
@@ -304,8 +312,6 @@ void FTW_Nest::_build(int w, int h)
   {
     mPack = new Fl_ScrollPack(0, 0, w, h-5);
     mPack->end();
-
-    swm_size_range = new SWM_Size_Range(min_W, min_H, max_W, max_H);
   }
 
   wInfoBar = new Fl_Output(0,h-1,w,1);
@@ -328,21 +334,10 @@ void FTW_Nest::_finalize_build()
 
 /**************************************************************************/
 
-FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int w, int h) :
-  FTW_SubShell(sh, this),
+FTW_Nest::FTW_Nest(FTW_Shell* sh, Fl_Window* win, OptoStructs::ZGlassImg* img, int w, int h) :
+  FTW_SubShell(sh, win, this),
   OS::A_View(img),
-  Fl_Window(w, h),
-  mW(w),
-  mPoint(this), mMark(this), mBelowMouse(this)
-{
-  end();
-  _build(w, h);
-}
-
-FTW_Nest::FTW_Nest(FTW_Shell* sh, OptoStructs::ZGlassImg* img, int x, int y, int w, int h) :
-  FTW_SubShell(sh, this),
-  OS::A_View(img),
-  Fl_Window(x, y, w, h),
+  Fl_Group(0, 0, w, h),
   mW(w),
   mPoint(this), mMark(this), mBelowMouse(this)
 {
@@ -397,8 +392,8 @@ void FTW_Nest::Rewidth()
   mPack->redraw();
 
   // And fix CustomWeed offset
-  int cw = swm_manager->cell_w();
-  int ch = swm_manager->cell_h();
+  int cw = mShell->cell_w();
+  int ch = mShell->cell_h();
 
   int gw1 = (mNestInfo->GetWName() - 7) / 3;
   int gw2 = mNestInfo->GetWName() - 7 - 2*gw1;
@@ -419,13 +414,6 @@ void FTW_Nest::AdInsertio(FTW_Leaf* newleaf)
   if(!bLinksShown) {
     newleaf->show_custom_view();
   }
-}
-
-void FTW_Nest::SetSWM(Fl_SWM_Manager* swm, bool self_p)
-{
-  if(self_p) swm->adopt_window(this);
-  swm->adopt_window(pLayout);
-  Rewidth();
 }
 
 /**************************************************************************/
@@ -562,7 +550,7 @@ void FTW_Nest::EnactLayout(const char* layout)
 
   if(layout) { pLayout->GetLaySpecs()->value(layout); pLayout->GetLaySpecs()->redraw(); }
   try {
-    pLayout->Parse(swm_manager->cell_w());
+    pLayout->Parse(mShell->cell_w());
   }
   catch(Exc_t& exc) {
     mShell->Message(_eh + "parse failed: '" + exc + "'.", FTW_Shell::MT_err);
@@ -734,8 +722,8 @@ void FTW_Nest::label_window(const char* l)
 
 int FTW_Nest::handle(int ev)
 {
-  if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
-    iconize();
+  if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == mWindow) {
+    mWindow->iconize();
     return 1;
   }
   if(ev == FL_ENTER || ev == FL_PUSH) { Fl::focus(this); }
@@ -781,7 +769,7 @@ int FTW_Nest::handle(int ev)
 
   }
 
-  if(ret == 0) ret = Fl_Window::handle(ev);
+  if(ret == 0) ret = Fl_Group::handle(ev);
 
   return ret;
 }
@@ -792,14 +780,14 @@ void FTW_Nest::resize(int x, int y, int w, int h)
   //   x,y,w,h,mShell->in_rescale_p(),parent());
 
   if(mShell->in_rescale_p() || parent() == 0) {
-    Fl_Window::resize(x,y,w,h);
+    Fl_Group::resize(x,y,w,h);
     return;
   }
 
   int dw = w - this->w(), dh = h - this->h();
   wMainPack->resizable(0);
 
-  Fl_Window::resize(x,y,w,h);
+  Fl_Group::resize(x,y,w,h);
 
   mPack->resize(mPack->x(), mPack->y(), mPack->w()+dw, mPack->h()+dh);
   wMainPack->resizable(mPack);
@@ -819,7 +807,7 @@ void FTW_Nest::create_custom_weeds()
   // create new child ... or better ... let pLayout produce a Fl_Group
   // hide it
   wCustomLabels = pLayout->CreateLabelGroup();
-  swm_manager->prepare_group(wCustomLabels);
+  mShell->prepare_group(wCustomLabels);
   wMidPack->add(wCustomLabels);
   wCustomLabels->hide();
 }

@@ -247,9 +247,9 @@ void FTW_Shell::_bootstrap()
   nest_pre->labelfont(nest_pre->labelfont() + FL_BOLD);
   nest_pre->color(fl_rgb_color(200,220,200));
 
-  mEmptyCanvas = new Fl_Window(0, top_h + src_snk_h, w(), def_sshell_h);
-  mEmptyCanvas->end();
-  mCurCanvas = mEmptyCanvas;
+  wCanvas = new Fl_Group(0, top_h + src_snk_h, w(), def_sshell_h);
+  wCanvas->end();
+  mCurSubShell = 0;
 
   // Message Input/Output
 
@@ -303,7 +303,7 @@ void FTW_Shell::_bootstrap()
   wMainPack->end();
   end();
 
-  wMainPack->resizable(mCurCanvas);
+  wMainPack->resizable(wCanvas);
   resizable(wMainPack);
 
   swm_size_range = new SWM_Size_Range(min_W, min_H + min_canvas_H + wOutPack->h(),
@@ -406,15 +406,14 @@ void FTW_Shell::AbsorbRay(Ray& ray)
       int delta = nmoh - cmoh;
       // printf("cur=%d new=%d delta=%d\n", cmoh, nmoh, delta);
       if(delta != 0) {
-	int cch = mCurCanvas->h()/cell_h();
+	int cch = wCanvas->h()/cell_h();
 	if(cch - delta < min_canvas_H) {
 	  size(w(), h() + (min_canvas_H - cch + delta)*cell_h());
 	}
 
-	mCurCanvas->size(w(), mCurCanvas->h() - delta*cell_h());
-	wOutPack->size(w(),   wOutPack->h()   + delta*cell_h());
+	wCanvas ->size(w(), wCanvas->h()  - delta*cell_h());
+	wOutPack->size(w(), wOutPack->h() + delta*cell_h());
 	wMainPack->init_sizes();
-	wMainPack->resizable(mCurCanvas);
 	wMsgPack->init_sizes();
 	set_size_range();
 	redraw();
@@ -469,7 +468,7 @@ void FTW_Shell::RemoveSubShell(OptoStructs::ZGlassImg* img)
 
 }
 
-// View cretors
+// View creators
 
 FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
 {
@@ -526,40 +525,30 @@ void FTW_Shell::set_canvased_subshell(OptoStructs::ZGlassImg* img)
 {
   static const Exc_t _eh("FTW_Shell::set_canvased_subshell ");
 
-  Fl_Window* new_canvas = 0;
-  if(img == 0) {
-    new_canvas = mEmptyCanvas;
-  } else {
+  FTW_SubShell *new_sshell = 0;
+  if (img) {
     hpImg2pSShell_i i = mImg2SShell.find(img);
     if(i == mImg2SShell.end()) {
       Message(_eh + img->fLens->Identify() + " not found.", MT_wrn);
       return;
     }
-    new_canvas = i->second->GetWindow();
+    new_sshell = i->second;
   }
-  if(new_canvas == mCurCanvas) return;
+  if(new_sshell == mCurSubShell) return;
 
-  mCurCanvas->hide();
-  if(mCurCanvas != mEmptyCanvas) {
-    wMainPack->remove(mCurCanvas);
-  }
+  hide();
 
-  new_canvas->hide();
-  if(new_canvas != mEmptyCanvas) {
-    Fl_SWM_Manager::remove_window(new_canvas);
-    wMainPack->insert(*new_canvas, mEmptyCanvas);
-  }
-  new_canvas->resize(mCurCanvas->x(), mCurCanvas->y(),
-		     mCurCanvas->w(), mCurCanvas->h());
-  new_canvas->show();
-
-  if(mCurCanvas != mEmptyCanvas) {
-    Fl_SWM_Manager::add_window(mCurCanvas);
-    mCurCanvas->free_position();
-    mCurCanvas->show();
+  if(mCurSubShell) {
+    mCurSubShell->undock();
   }
 
-  mCurCanvas = new_canvas;
+  if (new_sshell) {
+    new_sshell->dock(wCanvas);
+  }
+
+  show();
+
+  mCurSubShell = new_sshell;
 }
 
 /**************************************************************************/
@@ -1101,14 +1090,14 @@ int FTW_Shell::handle(int ev)
     return 1;
   }
 
-  if(ev == FL_ENTER) Fl::focus(mCurCanvas);
+  if(ev == FL_ENTER) Fl::focus(wCanvas->children() ? wCanvas->child(0) : this);
 
   int ret = Fl_Window::handle(ev);
   if(ret) return ret;
 
   if(ev == FL_KEYBOARD) {
     // pass kbd events to swallowed nest
-    if(!Fl::event_inside(mCurCanvas)) ret = mCurCanvas->handle(ev);
+    if(!Fl::event_inside(wCanvas)) ret = wCanvas->handle(ev);
   }
 
   return ret;
@@ -1119,8 +1108,8 @@ int FTW_Shell::handle(int ev)
 
 void FTW_Shell::label_shell()
 {
-  label(GForm("shell: %s; eye: %s", mShellInfo->GetName(),
-	                            GetEyeInfo()->GetName()) );
+  mWindowLabel = GForm("shell: %s; eye: %s", mShellInfo->GetName(), GetEyeInfo()->GetName());
+  label(mWindowLabel.Data());
   redraw();
 }
 
@@ -1137,9 +1126,8 @@ void FTW_Shell::set_vis_of_vertical_component(Fl_Widget* w, bool on_p)
   if(w->visible() == on_p) return;
   if(on_p) w->show(); else w->hide();
   int dh = w->h()*(on_p ? -1 : 1);
-  mCurCanvas->resize(mCurCanvas->x(), mCurCanvas->y() - dh,
-		     mCurCanvas->w(), mCurCanvas->h() + dh);
+  wCanvas->resize(wCanvas->x(), wCanvas->y() - dh,
+		  wCanvas->w(), wCanvas->h() + dh);
   wMainPack->init_sizes();
-  wMainPack->resizable(mCurCanvas);
   redraw();
 }

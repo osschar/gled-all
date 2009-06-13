@@ -12,6 +12,7 @@
 #include <Glasses/AList.h>
 #include <Stones/ZMIR.h>
 
+#include <FL/Fl_ScrollPack.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Return_Button.H>

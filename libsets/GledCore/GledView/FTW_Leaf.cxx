@@ -309,8 +309,8 @@ FTW_Ant* FTW_Leaf::LastAnt() {
 void FTW_Leaf::resize_weeds() {
   NestInfo* ni = mNest->GetNestInfo();
   int indent_skip = mLevel*ni->GetWIndent();
-  int cw = mNest->get_swm_manager()->cell_w();
-  int ch = mNest->get_swm_manager()->cell_h();
+  int cw = mNest->GetShell()->cell_w();
+  int ch = mNest->GetShell()->cell_h();
 
   if(indent_skip + 4 > ni->GetWName())
     indent_skip = ni->GetWName() - 4;
@@ -335,7 +335,7 @@ void FTW_Leaf::resize_weeds() {
   wFrontPack->size(1,1);
 
   int ant_w  = ni->GetWAnt();
-  int cell_w = mNest->get_swm_manager()->cell_w();
+  int cell_w = mNest->GetShell()->cell_w();
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>(wAntPack->child(c));
     int name_w = ant_w ? ant_w :
@@ -345,8 +345,8 @@ void FTW_Leaf::resize_weeds() {
   wAntPack->size(1,1);
   wTailBox->size(FTW_Nest::max_W*cw, ch);
 
-  mNest->get_swm_manager()->prepare_group(wFrontPack);
-  mNest->get_swm_manager()->prepare_group(wAntPack);
+  mNest->GetShell()->prepare_group(wFrontPack);
+  mNest->GetShell()->prepare_group(wAntPack);
   size(1, ch);
   init_sizes();
 }
