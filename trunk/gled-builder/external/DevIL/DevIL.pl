@@ -38,6 +38,8 @@ elsif ($BUILD_OS =~ /darwin/)
 {
   # ILUT has trouble linking against GL. Not used in Gled anyway.
   $config_args .= "--enable-ILU";
+  $cppfl .= " -I/sw/include";
+  $ldfl  .= " -L/sw/lib";
 }
 
 target('configure', <<"FNORD");
