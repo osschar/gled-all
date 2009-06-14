@@ -28,6 +28,12 @@ else
   setenv LD_LIBRARY_PATH ${GLEDSYS}/lib:${ROOTSYS}/lib:${topdir}/lib
 endif
 
+if ( $?DYLD_LIBRARY_PATH ) then
+  setenv DYLD_LIBRARY_PATH ${GLEDSYS}/lib:${ROOTSYS}/lib:${topdir}/lib:${DYLD_LIBRARY_PATH}
+else
+  setenv DYLD_LIBRARY_PATH ${GLEDSYS}/lib:${ROOTSYS}/lib:${topdir}/lib
+endif
+
 if ( $?MANPATH ) then 
   setenv MANPATH ${ROOTSYS}/man:${topdir}/man:${MANPATH}
 else
