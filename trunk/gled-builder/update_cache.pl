@@ -14,11 +14,11 @@ FNORD
   exit 0;
 }
 
-my @update_pkgs = update_cache();
+my @updated_pkgs = update_cache();
 
-my $make_cmd = "make -C external ", join(" ", @update_pkgs);
+my $make_cmd = "make -C external " . join(" ", @updated_pkgs);
 
-if (@update_pkgs)
+if (@updated_pkgs)
 {
   if ($ARGV[0] eq '--rebuild')
   {

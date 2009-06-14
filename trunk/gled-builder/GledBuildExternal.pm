@@ -143,8 +143,8 @@ sub list_files
 
   my ($dir) = @_;
 
-  # --list-only not supported on older rsyncs.
-  my @ls = `rsync $dir/*-*.* 2>/dev/null`;
+  # --list-only not supported on older rsyncs, so can't use '/*-*.*'.
+  my @ls = `rsync $dir/ 2>/dev/null`;
 
   my %map;
 
@@ -153,7 +153,9 @@ sub list_files
     my @fs = split(/\s+/, $l);
     my $datime = "$fs[2]-$fs[3]";
     my $file   = $fs[4];
-    my ($package) = $file =~ m/^([\w-]+)-${VER_RE}(?:-${SOURCE_RE})?\.${TAR_RE}$/;
+
+    next unless $file =~ m/^([\w-]+)-${VER_RE}(?:-${SOURCE_RE})?\.${TAR_RE}$/;
+    my $package = $1;
 
     if (not defined $map{$package} or $map{$package}{'datime'} lt $datime)
     {

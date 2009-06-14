@@ -1,3 +1,14 @@
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix cache update code.
+
+	* GledBuildExternal.pm:
+	Do not require directory listing with wildard as it does not work
+	on local directories. Filter results instead.
+
+	* update_cache.pl:
+	make_cmd was not contructed properly after cache update.
+
 2009-05-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for mac build.
