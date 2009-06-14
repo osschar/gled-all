@@ -45,7 +45,7 @@ namespace {
     bool m_need_glew_init;
   public:
     pupils_gl_ctx_holder() :
-      Fl_Gl_Window(0, 0, 1, 1, "GL context holder"),
+      Fl_Gl_Window(1, 1, "GL context holder"),
       m_need_glew_init(true)
     {
       clear_border();
@@ -119,8 +119,11 @@ void Pupil::_build()
   // GLEW init is done in the draw() of the context holder.
 
   if(gl_ctx_holder == 0) {
+    Fl_Group *cur = Fl_Group::current();
+    Fl_Group::current(0);
     gl_ctx_holder = new pupils_gl_ctx_holder;
     gl_ctx_holder->end();
+    Fl_Group::current(cur);
     gl_ctx_holder->show();
     // gl_ctx_holder->iconize();
   }
@@ -206,6 +209,16 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
   end();
   _build();
   size(mInfo->GetWidth(), mInfo->GetHeight());
+}
+
+Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int x, int y, int w, int h) :
+  FTW_SubShell(shell, this, this),
+  OS::A_View(infoimg),
+  Fl_Gl_Window(x, y, w, h),
+  mCameraCB(this)
+{
+  end();
+  _build();
 }
 
 Pupil::~Pupil()
