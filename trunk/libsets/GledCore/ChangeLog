@@ -1,3 +1,16 @@
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Make GuiPupil mostly work on mac.
+
+	* Pupils/GuiPupil.cxx:
+	Create pupil in-place instead of creating it as a top-level window
+	and then swallowing it.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Add constructor taking x, y position.
+	Restore Fl_Group::current() when creating gl_ctx_holder window.
+
 2009-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Rewrite sub-shell handling so that it might work on mac.

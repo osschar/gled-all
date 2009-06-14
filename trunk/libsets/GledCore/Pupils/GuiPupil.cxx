@@ -102,17 +102,14 @@ GuiPupil::GuiPupil(FTW_Shell* sh, Fl_Window* win, OptoStructs::ZGlassImg* img, i
     wMenuPack->resizable(0);
   }
 
+  wPupil = new Pupil(mShell, pupil_img, 0, 0, w, h-2);
+
   wMainPack->end();
-  end();
-
-  wPupil = new Pupil(mShell, pupil_img, w, h-2);
-
-  wPupil->show();
-  wPupil->hide();
-  wMainPack->add(wPupil);
-
   wMainPack->resizable(wPupil);
+
+  end();
   resizable(wMainPack);
+
   label_window();
 }
 

@@ -88,8 +88,8 @@ public:
 
   static Pupil* Create_Pupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
 
-
   Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int w, int h);
+  Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int x, int y, int w, int h);
   virtual ~Pupil();
 
   virtual void AbsorbRay(Ray& ray);
