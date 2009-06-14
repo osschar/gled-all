@@ -144,7 +144,9 @@ sub list_files
   my ($dir) = @_;
 
   # --list-only not supported on older rsyncs, so can't use '/*-*.*'.
-  my @ls = `rsync $dir/ 2>/dev/null`;
+  my $rsync = "rsync";
+  $rsync .= " -r" if $DISTRO_VENDOR eq "apple";
+  my @ls = `$rsync $dir/ 2>/dev/null`;
 
   my %map;
 

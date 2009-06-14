@@ -1,5 +1,10 @@
 2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* GledBuildExternal.pm:
+	Make rsync listing work on mac.
+
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Fix cache update code.
 
 	* GledBuildExternal.pm:
