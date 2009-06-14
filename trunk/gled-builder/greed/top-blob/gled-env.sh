@@ -21,4 +21,5 @@ export ROOTSYS="$topdir/root"
 export GLEDSYS="$topdir/gled"
 PATH=$GLEDSYS/bin:$ROOTSYS/bin:$topdir/bin:$PATH
 export LD_LIBRARY_PATH=$GLEDSYS/lib:$ROOTSYS/lib:$topdir/lib:$LD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=$GLEDSYS/lib:$ROOTSYS/lib:$topdir/lib:$DYLD_LIBRARY_PATH
 export MANPATH=$ROOTSYS/man:$topdir/man:$MANPATH

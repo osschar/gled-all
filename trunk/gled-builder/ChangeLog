@@ -1,10 +1,27 @@
 2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Changes to make greed-demo run on mac.
+
+	* greed/top-blob/gled-env-dump.csh:
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env.sh:
+	Set also DYLD_LIBRARY_PATH.
+
+	* greed/top-blob/gled-env-dump.sh:
+	Restore the file that somehow got zeroed in last check-in.
+	Set also DYLD_LIBRARY_PATH.
+
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for mac build of DevIL.
+
 	* external/DevIL/DevIL.pl:
 	For mac, add /sw to CPPFLAGS and LDFLAGS - libpng and libjpeg are
 	there.
 
 2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for mac rsync specifics.
 
 	* GledBuildExternal.pm:
 	Make rsync listing work on mac.

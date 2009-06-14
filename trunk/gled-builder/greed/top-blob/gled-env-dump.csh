@@ -54,6 +54,12 @@ else
   setenv LD_LIBRARY_PATH "$gsys"/lib:"$rsys"/lib:"$topdir"/lib
 endif
 
+if ( \$?DYLD_LIBRARY_PATH ) then
+  setenv DYLD_LIBRARY_PATH "$gsys"/lib:"$rsys"/lib:"$topdir"/lib:\$DYLD_LIBRARY_PATH
+else
+  setenv DYLD_LIBRARY_PATH "$gsys"/lib:"$rsys"/lib:"$topdir"/lib
+endif
+
 if ( \$?MANPATH ) then 
   setenv MANPATH "$rsys"/man:"$topdir"/man:\$MANPATH
 else
