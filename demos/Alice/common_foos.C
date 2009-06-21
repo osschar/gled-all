@@ -107,7 +107,7 @@ void setup_default_gui()
   CREATE_ATT_GLASS(gui_pupil, GuiPupilInfo, g_shell, AddSubShell, "GuiPupil", "");
 
   CREATE_ATT_GLASS(pupil, PupilInfo, gui_pupil, SetPupil, pupil_name, "");
-  pupil->SetZFov(80);
+  pupil->SetupZFov(80);
   pupil->SetCHSize(0.03);
   pupil->SetBlend(1);
   pupil->Add(g_scene);
