@@ -57,10 +57,13 @@ void PupilInfo::_init()
   mUpRefMinAngle = 10;
 
   mProjMode = P_Perspective;
-  mZFov     = 90;   mZSize   = 20;
-  mYFac     = 1;    mXDist   = 10;
-  mNearClip = 0.01; mFarClip = 100;
-  bZoomByFac = true;
+  mZFov     = 90;   mZSize    = 20;
+  mYFac     = 1;    mXDist    = 10;
+  mNearClip = 0.01; mFarClip  = 100;
+  mZoomFac  = 1.1; // if fac = 1, linear zooming is used (see Pupil::handle())
+  mDefZFov  = 90;   mDefZSize = 20;
+  mMinZFov  = 0;
+  mMaxZFov  = 160;
 
   // Basic rendering options.
   mFrontMode = GL_FILL; mBackMode = GL_LINE;
@@ -156,12 +159,14 @@ void PupilInfo::ImportCameraInfo(CameraInfo* cam_info)
     mUpRefMinAngle = cam_info->GetUpRefMinAngle();
   }
   mProjMode = (Projection_e) cam_info->GetProjMode();
-  mZFov = cam_info->GetZFov();
-  mZSize = cam_info->GetZSize();
-  mYFac = cam_info->GetYFac();
-  mXDist = cam_info->GetXDist();
+  mZFov     = cam_info->GetZFov();
+  mZSize    = cam_info->GetZSize();
+  mYFac     = cam_info->GetYFac();
+  mXDist    = cam_info->GetXDist();
   mNearClip = cam_info->GetNearClip();
-  mFarClip = cam_info->GetFarClip();
+  mFarClip  = cam_info->GetFarClip();
+  mDefZFov  = cam_info->GetDefZFov();
+  mDefZSize = cam_info->GetDefZSize();
 
   Stamp(FID());
 
@@ -186,8 +191,11 @@ void PupilInfo::Zoom(Float_t delta)
 {
   switch(mProjMode) {
   case P_Perspective: {
-    SetZFov (TMath::Min(mZFov + delta, 160.0f));
-    SetZSize(2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2));
+    Float_t fov = mZFov + delta;
+    if (fov < mMinZFov) fov = mMinZFov;
+    if (fov > mMaxZFov) fov = mMaxZFov;
+    SetZFov (fov);
+    SetZSize(2*mXDist*TMath::Tan(0.5*TMath::DegToRad()*fov));
     break;
   }
   case P_Orthographic: {
@@ -201,8 +209,11 @@ void PupilInfo::ZoomFac(Float_t fac)
 {
   switch(mProjMode) {
   case P_Perspective: {
-    SetZFov (TMath::Min(fac*mZFov, 160.0f));
-    SetZSize(2*mXDist*TMath::Tan(TMath::DegToRad()*mZFov/2));
+    Float_t fov = fac*mZFov;
+    if (fov < mMinZFov) fov = mMinZFov;
+    if (fov > mMaxZFov) fov = mMaxZFov;
+    SetZFov (fov);
+    SetZSize(2*mXDist*TMath::Tan(0.5*TMath::DegToRad()*mZFov));
     break;
   }
   case P_Orthographic: {
@@ -210,6 +221,40 @@ void PupilInfo::ZoomFac(Float_t fac)
     SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
   }
   }
+}
+
+void PupilInfo::Home(Bool_t smooth)
+{
+  switch(mProjMode)
+  {
+    case P_Perspective:
+    {
+      if (mDefZFov && mDefZFov != mZFov) {
+	SetZFov (mDefZFov);
+	SetZSize(2*mXDist*TMath::Tan(0.5*TMath::DegToRad()*mZFov));
+      }
+    }
+    case P_Orthographic: {
+      SetZSize(mDefZSize);
+      SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
+    }
+  }
+  if (smooth)
+    EmitSmoothCameraHomeRay();
+  else
+    EmitCameraHomeRay();
+}
+
+void PupilInfo::SetupZFov(Float_t zfov)
+{
+  SetZFov(zfov);
+  SetDefZFov(zfov);
+}
+
+void PupilInfo::SetupZSize(Float_t zsize)
+{
+  SetZSize(zsize);
+  SetDefZSize(zsize);
 }
 
 /**************************************************************************/

@@ -41,11 +41,15 @@ protected:
   Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,1000,1,1000])
+  Float_t   	mDefZFov;	// X{gS}
+  Float_t   	mDefZSize;	// X{gS}
 
 public:
   CameraInfo(const Text_t* n="CameraInfo", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
 
+  void SetupZFov (Float_t zfov);
+  void SetupZSize(Float_t zsize);
 
 #include "CameraInfo.h7"
   ClassDef(CameraInfo, 1);

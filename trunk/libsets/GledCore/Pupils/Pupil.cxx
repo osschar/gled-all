@@ -1319,188 +1319,153 @@ int Pupil::handle(int ev)
   }
 
 
-  switch(ev) {
+  switch(ev)
+  {
+    case FL_PUSH:
+    {
+      mMouseX = x; mMouseY = y; // reset the drag location
 
-  case FL_PUSH: {
-    mMouseX = x; mMouseY = y; // reset the drag location
-
-    // Raise on click.
-    if(Fl::event_button() == 1) {
-      show();
-    }
-
-    if(Fl::event_button() == 1 && Fl::event_clicks() == 1) {
-      Fl::event_clicks(0);
-      OS::ZGlassImg* img = PickTopLens(mMouseX, mMouseY);
-      if(img) {
-	int x = Fl::event_x_root() + mInfo->GetPopupDx();
-	int y = Fl::event_y_root() + mInfo->GetPopupDy();
-	mShell->SpawnMTW_View(img, x, y, mInfo->GetPopupFx(), mInfo->GetPopupFy());
-      }
-    }
-
-    if(Fl::event_button() == 3) {
-      PickMenu(mMouseX, mMouseY);
-    }
-
-    return 1;
-  }
-  case FL_DRAG: {
-    // ZNode* target = mCamera;
-    /*
-      if(bJustCamera) {
-      target = mCamera;
-      } else {
-      target = mMir[0] ? mForestView->GetSelected(mMir[0]) : mBase;
-      if(target == 0) target = mCamera;
+      // Raise on click.
+      if(Fl::event_button() == 1) {
+	show();
       }
 
-      // Beta check
-      Text_t *move_cmd, *rotate_cmd;
-      UInt_t beta = 0;
-      if(Fl::event_state(FL_SHIFT)) {
-      move_cmd = "Move"; rotate_cmd = "Rotate";
-      ZNode* n = mForestView->GetSelected(mMir[1]); // returns 0 if empty or multiple
-      if(n) beta = n->GetSunID();
-      } else {
-      move_cmd = "MoveLF"; rotate_cmd = "RotateLF";
-      }
-    */
-
-    bool chg = 0;
-    int dx = x - mMouseX, dy = y - mMouseY;
-    mMPX += dx; mMPY += dy;
-    // Invert dx/dy from "screen" to "camera" coordinates.
-    dx = -dx; dy = -dy;
-    mMouseX = x; mMouseY = y;
-    Float_t move_fac = mInfo->GetMSMoveFac() *
-      TMath::Power(10, mInfo->GetMoveOM());
-    Float_t rot_fac  = mInfo->GetMSRotFac() * TMath::TwoPi() / 1000;
-    if(Fl::event_state(FL_BUTTON1)) {
-      double Dy = dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp());
-      if(Dy != 0) {
-	chg = 1;
-	if(!Fl::event_state(FL_CTRL)) {
-	  mCamera->MoveLF(1, Dy);
-	  //printf("1,%g\n", Dy);
-	  //mEye->Send(move_cmd, x, target, beta);
-	} else {
-	  mCamera->MoveLF(3, Dy);
-	  //printf("3,%g\n", Dy);
-	  //mEye->Send(move_cmd, x, target, beta);
+      if(Fl::event_button() == 1 && Fl::event_clicks() == 1) {
+	Fl::event_clicks(0);
+	OS::ZGlassImg* img = PickTopLens(mMouseX, mMouseY);
+	if(img) {
+	  int x = Fl::event_x_root() + mInfo->GetPopupDx();
+	  int y = Fl::event_y_root() + mInfo->GetPopupDy();
+	  mShell->SpawnMTW_View(img, x, y, mInfo->GetPopupFx(), mInfo->GetPopupFy());
 	}
       }
-      double Dx = dx*move_fac*TMath::Power(abs(dx), mInfo->GetAccelExp());
-      if(Dx != 0) {
-	chg = 1;
-	mCamera->MoveLF(2, Dx);
-	//printf("2,%g\n", Dx);
-	//mEye->Send(move_cmd, x, target, beta);
+
+      if(Fl::event_button() == 3) {
+	PickMenu(mMouseX, mMouseY);
       }
-    }
 
-    /*
-    // Kbd Moves
-    if(Fl::event_key(' ')) { mEye->Send(move_cmd, "2, 0.1", target, beta); chg=1; }
-    if(Fl::event_key('c')) { mEye->Send(move_cmd, "2, -0.1", target, beta); chg=1; }
-    if(Fl::event_key('x')) { mEye->Send(move_cmd, "3, 0.1", target, beta); chg=1; }
-    if(Fl::event_key('z')) { mEye->Send(move_cmd, "3, -0.1", target, beta); chg=1; }
-
-    if(Fl::event_key('a')) { mEye->Send(rotate_cmd, "2,3,0.1", target, beta); chg=1; }
-    if(Fl::event_key('s')) { mEye->Send(rotate_cmd, "2, 3, -0.1", target, beta); chg=1; }
-    */
-
-    // cout << mMouseX << " " << mMouseY << " " << dx << " " << dy << endl;
-    if(Fl::event_state(FL_BUTTON2) && dy!=0) {
-      if(!Fl::event_state(FL_CTRL)) {
-	mCamera->RotateLF(1,3,dy*rot_fac);
-      } else {
-	mCamera->RotateLF(1,3,-dy*rot_fac);
-      }
-      chg=1;
-    }
-    if(Fl::event_state(FL_BUTTON2) && dx!=0) {
-      if(!Fl::event_state(FL_CTRL)) {
-	mCamera->RotateLF(1, 2, dx*rot_fac);
-	//sprintf(foo,"3,1,%8g", dx/mInfo->GetMSRotFac());
-      } else {
-	mCamera->RotateLF(2, 3, -dx*rot_fac);
-	//sprintf(foo,"2,3,%8g", -dx/mInfo->GetMSRotFac());
-      }
-      //mEye->Send(rotate_cmd, foo, target, beta);
-      chg=1;
-    }
-    if(chg) redraw();
-    return 1;
-  }
-
-  case FL_MOUSEWHEEL: {
-    if(Fl::event_dy() != 0) {
-      Float_t delta = Fl::event_dy();
-      if(mInfo->GetZoomByFac()) {
-	Float_t base = 1.2;
-	if(Fl::event_state(FL_CTRL)) base = 1.04;
-	else if(Fl::event_state(FL_SHIFT)) base = 2;
-	auto_ptr<ZMIR> mir( mInfo->S_ZoomFac(TMath::Power(base,delta)) );
-	mShell->Send(*mir);
-      } else {
-	if(Fl::event_state(FL_CTRL)) delta *= 0.2;
-	else if(Fl::event_state(FL_SHIFT)) delta *= 5;
-	auto_ptr<ZMIR> mir( mInfo->S_Zoom(delta) );
-	mShell->Send(*mir);
-      }
-    }
-    return 1;
-  }
-
-  case FL_KEYBOARD: {
-    switch(Fl::event_key()) {
-
-    case FL_Home:
-      if(Fl::event_state(FL_SHIFT)) {
-	initiate_smooth_camera_home();
-      } else {
-	mCamera->Home(); redraw();
-      }
       return 1;
+    }
 
-    case FL_Tab:
-      bShowOverlay = !bShowOverlay; redraw();
+    case FL_DRAG:
+    {
+      bool chg = 0;
+      int dx = x - mMouseX, dy = y - mMouseY;
+      mMPX += dx; mMPY += dy;
+      // Invert dx/dy from "screen" to "camera" coordinates.
+      dx = -dx; dy = -dy;
+      mMouseX = x; mMouseY = y;
+      Float_t move_fac = mInfo->GetMSMoveFac() *
+	TMath::Power(10, mInfo->GetMoveOM());
+      Float_t rot_fac  = mInfo->GetMSRotFac() * TMath::TwoPi() / 1000;
+      if(Fl::event_state(FL_BUTTON1)) {
+	double Dy = dy*move_fac*TMath::Power(abs(dy), mInfo->GetAccelExp());
+	if(Dy != 0) {
+	  chg = 1;
+	  if(!Fl::event_state(FL_CTRL)) {
+	    mCamera->MoveLF(1, Dy);
+	  } else {
+	    mCamera->MoveLF(3, Dy);
+	  }
+	}
+	double Dx = dx*move_fac*TMath::Power(abs(dx), mInfo->GetAccelExp());
+	if(Dx != 0) {
+	  chg = 1;
+	  mCamera->MoveLF(2, Dx);
+	}
+      }
+
+      if(Fl::event_state(FL_BUTTON2) && dy!=0) {
+	if(!Fl::event_state(FL_CTRL)) {
+	  mCamera->RotateLF(1,3,dy*rot_fac);
+	} else {
+	  mCamera->RotateLF(1,3,-dy*rot_fac);
+	}
+	chg=1;
+      }
+      if(Fl::event_state(FL_BUTTON2) && dx!=0) {
+	if(!Fl::event_state(FL_CTRL)) {
+	  mCamera->RotateLF(1, 2, dx*rot_fac);
+	} else {
+	  mCamera->RotateLF(2, 3, -dx*rot_fac);
+	}
+	chg=1;
+      }
+      if(chg) redraw();
       return 1;
+    }
 
-    case 'f':
-    case FL_F+12: {
-      Fl_Group* fsg = this;
-      while(fsg->parent()) fsg = fsg->parent();
-      if(fsg->type() >= FL_WINDOW) {
-	Fl_Window* fsw = (Fl_Window*)fsg;
-	FullScreen(fsw);
-	fsw->redraw();
+    case FL_MOUSEWHEEL:
+    {
+      if(Fl::event_dy() != 0) {
+	Float_t delta = Fl::event_dy();
+	Float_t fac = mInfo->GetZoomFac();
+	if(fac != 1) {
+	  if(Fl::event_state(FL_CTRL))       fac = TMath::Power(fac, 0.25);
+	  else if(Fl::event_state(FL_SHIFT)) fac = TMath::Power(fac, 4);
+	  auto_ptr<ZMIR> mir( mInfo->S_ZoomFac(TMath::Power(fac, delta)) );
+	  mShell->Send(*mir);
+	} else {
+	  if(Fl::event_state(FL_CTRL))       delta *= 0.2;
+	  else if(Fl::event_state(FL_SHIFT)) delta *= 5;
+	  auto_ptr<ZMIR> mir( mInfo->S_Zoom(delta) );
+	  mShell->Send(*mir);
+	}
       }
       return 1;
     }
 
-    case FL_F+1:
-      mShell->SpawnMTW_View(fImg);
+    case FL_KEYBOARD:
+    {
+      switch(Fl::event_key())
+      {
+	case FL_Home:
+	{
+	  bool smooth = Fl::event_state(FL_SHIFT);
+	  auto_ptr<ZMIR> mir( mInfo->S_Home(smooth) );
+	  mShell->Send(*mir);
+	  return 1;
+	}
+	case FL_Tab:
+	{
+	  bShowOverlay = !bShowOverlay; redraw();
+	  return 1;
+	}
+	case 'f':
+	case FL_F+12:
+	{
+	  Fl_Group* fsg = this;
+	  while(fsg->parent()) fsg = fsg->parent();
+	  if(fsg->type() >= FL_WINDOW) {
+	    Fl_Window* fsw = (Fl_Window*)fsg;
+	    FullScreen(fsw);
+	    fsw->redraw();
+	  }
+	  return 1;
+	}
+	case FL_F+1:
+	{
+	  mShell->SpawnMTW_View(fImg);
+	  return 1;
+	}
+	case FL_F+2:
+	{
+	  if(mCameraView == 0) {
+	    Fl_Window* w = new Fl_Window(0,0);
+	    MTW_ClassView* cv = new MTW_ClassView(mCamera, mShell);
+	    mCameraView = cv;
+	    w->end();
+	    cv->BuildVerticalView();
+	    mShell->adopt_window(w);
+	    mCamera->register_ray_absorber(&mCameraCB);
+	  }
+	  mCameraView->GetWindow()->show();
+	  return 1;
+	}
+      } // end switch(Fl::event_key())
+
       return 1;
-
-    case FL_F+2:
-      if(mCameraView == 0) {
-	Fl_Window* w = new Fl_Window(0,0);
-	MTW_ClassView* cv = new MTW_ClassView(mCamera, mShell);
-	mCameraView = cv;
-	w->end();
-	cv->BuildVerticalView();
-	mShell->adopt_window(w);
-	mCamera->register_ray_absorber(&mCameraCB);
-      }
-      mCameraView->GetWindow()->show();
-      return 1;
-
-    } // switch(Fl::event_key())
-
-    return 1;
-  } // case FL_KEYBOARD
+    } // case FL_KEYBOARD
 
   } // switch(ev)
 

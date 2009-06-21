@@ -35,12 +35,23 @@ void CameraInfo::_init()
   mUpRefMinAngle = 10;
 
   mProjMode = P_Perspective;
-  mZFov     = 90;   mZSize   = 20;
-  mYFac     = 1;    mXDist   = 10;
-  mNearClip = 0.01; mFarClip = 100;
+  mZFov     = 90;   mZSize    = 20;
+  mYFac     = 1;    mXDist    = 10;
+  mNearClip = 0.01; mFarClip  = 100;
+  mDefZFov  = 90;   mDefZSize = 20;
 }
 
 /**************************************************************************/
 
+void CameraInfo::SetupZFov(Float_t zfov)
+{
+  SetZFov(zfov);
+  SetDefZFov(zfov);
+}
 
-/**************************************************************************/
+void CameraInfo::SetupZSize(Float_t zsize)
+{
+  SetZSize(zsize);
+  SetDefZSize(zsize);
+}
+
