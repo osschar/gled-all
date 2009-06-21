@@ -1,3 +1,21 @@
+2009-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve handling of fov, z-size and home-command in Pupil.
+
+	* Glasses/CameraInfo.cxx:
+	* Glasses/CameraInfo.h:
+	Add data-members mDefZFov and mDefZSize.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Add data-members mDefZFov and mDefZSize.
+	Add data-members mZoomFac, mMinZFov and mMaxZFov.
+	Add method Home(Bool_t smooth).
+
+	* Pupils/Pupil.cxx:
+	When home key is pressed, call PupilInfo::Home() via MIR.
+	Remove some old commented code.
+
 2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Make GuiPupil mostly work on mac.

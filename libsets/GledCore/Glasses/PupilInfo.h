@@ -61,7 +61,11 @@ protected:
   Float_t	mXDist;		// X{gS} 7 Value(-width=>6, -range=>[1e-6,1000, 1,1000])
   Float_t	mNearClip;	// X{gS} 7 Value(-width=>6, -range=>[0,100000,1,1000],-join=>1)
   Float_t	mFarClip;	// X{gS} 7 Value(-width=>6, -range=>[0,100000,1,1000])
-  Bool_t	bZoomByFac;     // X{gS} 7 Bool()
+  Float_t	mZoomFac;       // X{gS} 7 Value(-width=>6, -range=>[1,2,1,10000])
+  Float_t   	mDefZFov;	// X{gS}
+  Float_t   	mDefZSize;	// X{gS}
+  Float_t       mMinZFov;	// X{gS}
+  Float_t       mMaxZFov;	// X{gS}
 
   // Basic rendering options.
   Int_t		mFrontMode;	// X{gS} 7 PhonyEnum(-vals=>[GL_POINT,Point, GL_LINE,Line, GL_FILL,Fill],-width=>6,-join=>1)
@@ -114,8 +118,12 @@ public:
 
   void SmoothCameraHome(ZNode* new_base=0);    // X{E} C{1} 7 MCWButt()
 
-  void Zoom(Float_t delta);  // X{E}
-  void ZoomFac(Float_t fac); // X{E}
+  void Zoom(Float_t delta);       // X{E}
+  void ZoomFac(Float_t fac);      // X{E}
+  void Home(Bool_t smooth=false); // X{E}
+
+  void SetupZFov (Float_t zfov);
+  void SetupZSize(Float_t zsize);
 
   ZTrans* ToPupilFrame(ZNode* node);
   ZTrans* ToCameraFrame(ZNode* node);
