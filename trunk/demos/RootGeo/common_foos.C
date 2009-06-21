@@ -76,7 +76,7 @@ Scene* create_basic_scene()
     info->SetUpReference(rscene);
     info->SetUpRefAxis(2);
     info->SetProjMode(CameraInfo::P_Perspective);
-    info->SetZFov(80);
+    info->SetupZFov(80);
   }
 
   { // Z-views
@@ -88,7 +88,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Z+", "");
     info->SetCameraBase(base);
     info->SetProjMode(CameraInfo::P_Orthographic);
-    info->SetZSize(12);
+    info->SetupZSize(12);
   }{
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Z-", "");
     base->SetPos(0, 0, -ZCam);
@@ -98,7 +98,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Z-", "");
     info->SetCameraBase(base);
     info->SetProjMode(CameraInfo::P_Orthographic);
-    info->SetZSize(12);
+    info->SetupZSize(12);
   }
   { // Y-views
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Y+", "");
@@ -109,7 +109,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Y+", "");
     info->SetCameraBase(base);
     info->SetProjMode(CameraInfo::P_Orthographic);
-    info->SetZSize(12);
+    info->SetupZSize(12);
   }{
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "Y-", "");
     base->SetPos(0, -YCam, 0);
@@ -119,7 +119,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto Y-", "");
     info->SetCameraBase(base);
     info->SetProjMode(CameraInfo::P_Orthographic);
-    info->SetZSize(12);
+    info->SetupZSize(12);
   }
   { // X-views
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "X+", "");
@@ -130,7 +130,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto X+", "");
     info->SetCameraBase(base);
     info->SetProjMode(CameraInfo::P_Orthographic);
-    info->SetZSize(12);
+    info->SetupZSize(12);
   }{
     CREATE_ADD_GLASS(base, Sphere, cam_bases, "X-", "");
     base->SetPos(-XCam, 0, 0);
@@ -140,7 +140,7 @@ Scene* create_basic_scene()
     CREATE_ADD_GLASS(info, CameraInfo, cams, "Orto X-", "");
     info->SetCameraBase(base);
     info->SetProjMode(CameraInfo::P_Orthographic);
-    info->SetZSize(12);
+    info->SetupZSize(12);
   }
 
   // Var.
@@ -197,7 +197,7 @@ void setup_default_gui()
   CREATE_ATT_GLASS(gui_pupil, GuiPupilInfo, g_shell, AddSubShell, "GuiPupil", "");
 
   CREATE_ATT_GLASS(pupil, PupilInfo, gui_pupil, SetPupil, pupil_name, "");
-  pupil->SetZFov(80);
+  pupil->SetupZFov(80);
   pupil->SetCHSize(0.03);
   pupil->SetBlend(1);
   pupil->Add(g_scene);

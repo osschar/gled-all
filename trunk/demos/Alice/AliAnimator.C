@@ -153,7 +153,7 @@ void AliAnimator(const Text_t* dirname = 0,
   CREATE_ADD_GLASS(mpupil, PupilInfo, g_queen, "MoviePupil", 0);
   movie_pupil = mpupil; // assign to global
   mpupil->SetAutoRedraw(false);
-  mpupil->SetZFov(65);
+  mpupil->SetupZFov(65);
   mpupil->SetBlend(true);
   mpupil->SetShowView(false);
   mpupil->Add(g_scene);
