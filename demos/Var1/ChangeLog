@@ -1,3 +1,8 @@
+2009-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Set min/max fov of the pupil.
+
 2009-04-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Basic support for land-mark management and rendering.
