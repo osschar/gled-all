@@ -408,6 +408,8 @@ void tringula(Int_t mode=2)
   g_pupil->SetCameraBase(0);
   g_pupil->SetNearClip(0.2);
   g_pupil->SetFarClip(200);
+  g_pupil->SetMinZFov(5);
+  g_pupil->SetMaxZFov(145);
 
   // g_pupil->SetBackMode(GL_FILL);
 
