@@ -543,14 +543,15 @@ work.
   ./configure          # default prefix is `pwd`/install
   make
 
-Note, that this will get all the sources from the web (rsync and
-svn servers at C<www.gled.org>) so network connection is
+Note, that this will get all the sources from the web (rsync and svn
+servers at C<www.gled.org>) so network connection is
 required. Obviously, you will need C<subversion> client and C<GNU
-autotools>. Further, as the external software gets configured and
-built, it will require presence of several low level libraries. The
-easiest way to ensure you have all this stuff is to run:
+autotools>. C<CMake> is also needed for building of C<OpenAL>. Further,
+as the external software gets configured and built, it will require
+presence of several low level libraries. The easiest way to ensure you
+have all this stuff is to run:
 
-  PKGS="subversion autoconf automake libtool \
+  PKGS="subversion autoconf automake libtool cmake \
         glew glew-devel \
         fltk DevIL gts openal freealut \
         fltk-devel DevIL-devel gts-devel openal-devel freealut-devel"
