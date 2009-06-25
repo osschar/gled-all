@@ -5,7 +5,11 @@
 # This file is part of GLED, released under GNU General Public License version 2.
 # For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-$DATADIR = `gled-config --datadir` or die "gled-config not found";
+BEGIN
+{
+  $DATADIR = `gled-config --datadir` or die "gled-config not found";
+  chomp $DATADIR;
+}
 
 use lib "$DATADIR/perllib";
 use ParseConfig;

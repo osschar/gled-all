@@ -1,3 +1,11 @@
+2009-06-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix perl library path setup.
+
+	* bin/gled-auth-genkeypair:
+	* bin/gled-auth-init:
+	Put extraction of $DATADIR into BEGIN block.
+
 2009-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve handling of fov, z-size and home-command in Pupil.
