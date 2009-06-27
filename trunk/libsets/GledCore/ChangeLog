@@ -1,3 +1,19 @@
+2009-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Rewrite socket selector handling.
+	Due to changes is TSocket the file descriptor is not available
+	after the other side has closed a connection.
+
+	* Gled/GSelector.cxx:
+	* Gled/GSelector.h:
+	Reverse key-value roles in map that stores file descriptor to
+	user-data (socket pointer) correspondence.
+	Introduce helper struct GFdSet to encapsulate adding and removing
+	of fd-set entries via Add/Remove() functions.
+
+	* Ephra/Saturn.cxx:
+	Adapt for changes in GSelector.
+
 2009-06-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix perl library path setup.

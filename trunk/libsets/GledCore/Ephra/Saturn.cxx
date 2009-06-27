@@ -527,7 +527,7 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
   mSaturnInfo->hRoute = 0;
   mSaturnInfo->GetMaster()->hSocket = sock;
   mSaturnInfo->GetMaster()->hRoute  = mSaturnInfo->GetMaster();
-  mSelector.fRead[sock->GetDescriptor()] = (void*)sock;
+  mSelector.fRead.Add(sock);
   //sock->SetOption(kNoBlock, 1);
 
   GThread::OwnerChanger _chown(mSaturnInfo);
@@ -815,29 +815,29 @@ Int_t Saturn::SockSuck()
   Int_t s_stat = mSelector.Select();
 
   ISdebug(9, GForm("Saturn::SockSuck got %d", s_stat));
-  if(s_stat<0) return s_stat;
-  if(s_stat==0) return 0;
+  if (s_stat <  0) return s_stat;
+  if (s_stat == 0) return 0;
 
-  for(mFdUD_i i=mSelector.fReadOut.begin(); i!=mSelector.fReadOut.end(); i++) {
-    TSocket* s = (TSocket*) i->second;
-    if(s==mServerSocket) {
+  for (GFdSet_i i=mSelector.fReadOut.begin(); i!=mSelector.fReadOut.end(); i++)
+  {
+    TSocket* s = (TSocket*) i->first;
+    if (s == mServerSocket)
+    {
       TSocket* newsocket = mServerSocket->Accept();
       new_connection_ti* ncti = new new_connection_ti(this, newsocket);
       GThread* at = new GThread("Saturn-Acceptor", (GThread_foo)tl_SaturnAcceptor, ncti, true);
       at->Spawn();
       continue;
     }
-    try {
+    try
+    {
       Manage(s);
     }
-    catch(Exc_t& exc) {
+    catch(Exc_t& exc)
+    {
       ISerr(GForm("Saturn::SockSuck caught exception: %s", exc.Data()));
     }
   }
-
-  // !! upon accept should interrupt the select and add new descriptor.
-  // threads highly magickal wrt signals.
-  // now have to wait till timeout.
 
   return 0;
 }
@@ -906,7 +906,7 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
   newsocket->SendRaw(msgbuf, len);
 
   GSelector sel;
-  sel.fRead[newsocket->GetDescriptor()] = (void*)newsocket;
+  sel.fRead.Add(newsocket);
   sel.fTimeOut = 20; // close connection after 20s of inactivity
 
   bool loop_done  = false;
@@ -1064,7 +1064,7 @@ void Saturn::finalize_moon_connection(SaturnInfo* si)
 
   mMoonLock.Lock();
   mSelector.Lock();
-  mSelector.fRead[si->hSocket->GetDescriptor()] = (void*)si->hSocket;
+  mSelector.fRead.Add(si->hSocket);
   mServerThread->Kill(GThread::SigUSR2);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
@@ -1091,7 +1091,7 @@ void Saturn::finalize_eye_connection(EyeInfo* ei)
 
   mEyeLock.Lock();
   mSelector.Lock();
-  mSelector.fRead[ei->hSocket->GetDescriptor()] = (void*)ei->hSocket;
+  mSelector.fRead.Add(ei->hSocket);
   mServerThread->Kill(GThread::SigUSR2);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
@@ -1999,7 +1999,7 @@ open_server_socket:
     ISerr(_eh +"can't create server socket ... dying.");
     return err;
   }
-  mSelector.fRead[mServerSocket->GetDescriptor()] = (void*)mServerSocket;
+  mSelector.fRead.Add(mServerSocket);
   ISdebug(2, GForm("%sstarting server, port=%d", _eh.Data(),
 		   mSaturnInfo->GetServerPort()));
 
@@ -2172,9 +2172,9 @@ void Saturn::wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p)
 
   mMoonLock.Lock();
 
-  if(mServerThread) mServerThread->Kill(GThread::SigUSR2);
   mSelector.Lock();
-  mSelector.fRead.erase(moon->hSocket->GetDescriptor());
+  if(mServerThread) mServerThread->Kill(GThread::SigUSR2);
+  mSelector.fRead.Remove(moon->hSocket);
   mSelector.Unlock();
 
   hSock2SocketInfo_i h = mSock2InfoHash.find(moon->hSocket);
@@ -2221,7 +2221,7 @@ void Saturn::wipe_eye(EyeInfo* eye, bool notify_sunqueen_p)
 
   if(mServerThread) mServerThread->Kill(GThread::SigUSR2);
   mSelector.Lock();
-  mSelector.fRead.erase(eye->hSocket->GetDescriptor());
+  mSelector.fRead.Remove(eye->hSocket);
   mSelector.Unlock();
 
   hSock2SocketInfo_i h = mSock2InfoHash.find(eye->hSocket);
