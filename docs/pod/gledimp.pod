@@ -46,7 +46,7 @@ file giving the details is also there.
 
 In short:
 
- v=1.3.0-rc1
+ v=1.3.0
  b=slc4-x86
  wget ftp://ftp.gled.org/$v/gled-$v-$b.tar.gz
  tar xzf gled-$v-$b.tar.gz
@@ -989,18 +989,23 @@ C<t =~ ReqTrans>, C<T =~ ReqTring>.
 
 =item<x>
 
-mark that a structural change has occured (link and list operations do
+Mark that a structural change has occured (link and list operations do
 that automatically). This results in rebuilding of render-scheme for
 the lens, but can also be used for other purposes by custom handlers
 (A_View::AbsorbRay()).
 
 =item<eE> 
 
-auto-generate MIR producing C<MIR* S_SetBar(Foo_t bar)>, the
+Auto-generate MIR producing C<MIR* S_SetBar(Foo_t bar)>, the
 actual set method needs to be declared and implemented by the user.
 C<E> and C<e> are equivalent.
 
-=item<dD> specifyies that the method needs to be executed in a
+I<For methods only:> If the first character on the comment line is
+'C<!>' the method will be tagged as I<local>: MIR will be sent to the
+local saturn only. This is useful for updating or printing of local
+data members.
+
+=item<dD> Specifyies that the method needs to be executed in a
 dedicated thread. Only relevant for member functions, ignored for
 data members.
 
