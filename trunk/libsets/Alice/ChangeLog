@@ -1,3 +1,9 @@
+2009-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MCTrack.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	Add missing includes for root 5.24.
+
 2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AliConverter.cxx:
