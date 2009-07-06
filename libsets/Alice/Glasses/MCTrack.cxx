@@ -14,6 +14,8 @@
 #include "MCTrack.c7"
 #include <Glasses/ZQueen.h>
 
+#include <TParticlePDG.h>
+
 ClassImp(MCTrack);
 
 typedef list<MCTrack*>                   lpMCTrack_t;

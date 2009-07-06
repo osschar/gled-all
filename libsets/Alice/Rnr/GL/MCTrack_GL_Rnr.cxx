@@ -8,6 +8,7 @@
 #include <Glasses/MCTrackRnrStyle.h>
 
 #include <TMath.h>
+#include <TParticlePDG.h>
 
 #include <GL/glew.h>
 
