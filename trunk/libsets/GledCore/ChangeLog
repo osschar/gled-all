@@ -1,3 +1,20 @@
+2009-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes required to support shaders.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Initialize GLEW from Pupil::draw(), not from the context-holder
+	window.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Add function 'bool check_gl_error(const TString& msg)'.
+
+	* macros/gl_defines.h:
+	Add tokens for GL 1.4 and 1.5.
+	Add selected tokens for GL 2.0.
+
 2009-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Rewrite socket selector handling.

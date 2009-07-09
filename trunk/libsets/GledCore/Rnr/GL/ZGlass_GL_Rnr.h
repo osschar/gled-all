@@ -25,6 +25,7 @@ protected:
   bool		bSuppressNameLabel;
 
   void obtain_rnrmod(RnrDriver* rd, RnrModStore& rms);
+  bool check_gl_error(const TString& msg);
 
 public:
   ZGlass_GL_Rnr(ZGlass* d=0);

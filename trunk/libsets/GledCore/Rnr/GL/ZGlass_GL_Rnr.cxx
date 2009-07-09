@@ -106,3 +106,20 @@ void ZGlass_GL_Rnr::obtain_rnrmod(RnrDriver* rd, RnrModStore& rms)
     rms.fTringTS = rm->fTringTS;
   }
 }
+
+bool ZGlass_GL_Rnr::check_gl_error(const TString& msg)
+{
+  // Checks if GL error has occured.
+  // Returns true if it did.
+
+  GLenum gl_err = glGetError();
+  if (gl_err)
+  {
+    cout << "GL error in " << mGlass->Identify() << ": " << msg << endl
+	 << "  " << gluErrorString(gl_err) << endl;
+    return true;
+  }
+  return false;
+}
+
+/**************************************************************************/
