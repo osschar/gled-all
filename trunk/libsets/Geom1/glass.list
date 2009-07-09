@@ -5,6 +5,8 @@ ZImage		1	Glasses/ZImage		.
 Rect		2	Glasses/Rect		.
 ZRibbon		3	Glasses/ZRibbon
 RGBAPalette     4       Glasses/RGBAPalette
+ZGlProgram      5       Glasses/ZGlProgram      .
+ZGlShader       6       Glasses/ZGlShader       .
 
 SMorph		16	Glasses/SMorph		.
 Board		17	Glasses/Board		.
