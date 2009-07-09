@@ -39,24 +39,15 @@ namespace OS = OptoStructs;
 /**************************************************************************/
 
 Fl_Gl_Window* Pupil::gl_ctx_holder = 0;
+bool          Pupil::glew_init_needed = true;
 
 namespace {
-  class pupils_gl_ctx_holder : public Fl_Gl_Window {
-    bool m_need_glew_init;
+  class pupils_gl_ctx_holder : public Fl_Gl_Window
+  {
   public:
-    pupils_gl_ctx_holder() :
-      Fl_Gl_Window(1, 1, "GL context holder"),
-      m_need_glew_init(true)
+    pupils_gl_ctx_holder() : Fl_Gl_Window(1, 1, "GL context holder")
     {
       clear_border();
-    }
-
-    virtual void draw()
-    {
-      if(m_need_glew_init) {
-	glewInit();
-	m_need_glew_init = false;
-      }
     }
   };
 }
@@ -869,6 +860,15 @@ void Pupil::label_window(const char* l)
 void Pupil::draw()
 {
   static const Exc_t _eh("Pupil::draw ");
+
+  if(glew_init_needed) {
+    GLenum status = glewInit();
+    if (status != GLEW_OK)
+      cout << "glewInit - GLEW initalization failed.\n";
+    else
+      cout << "glewInit - GLEW initalization successful.\n";
+    glew_init_needed = false;
+  }
 
   // if (!valid()) {}
 

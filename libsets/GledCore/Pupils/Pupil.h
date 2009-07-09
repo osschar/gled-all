@@ -30,6 +30,7 @@ class Pupil : public FTW_SubShell,
 {
 private:
   static Fl_Gl_Window* gl_ctx_holder;
+  static bool          glew_init_needed;
 
   void _build();
   void _check_auto_redraw();
