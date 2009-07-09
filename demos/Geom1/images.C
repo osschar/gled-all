@@ -23,46 +23,69 @@ void images()
   g_queen->Add(images);
   g_scene = images;
 
+  //----------------------------------------------------------------------------
+  // Fonts
+
+  ZList* fontdir = g_queen->AssertPath("var/fonts", "ZNameMap");
+
   CREATE_ADD_GLASS(lucida34, ZRlFont, g_queen, "LucidaBright 34", 0);
   lucida34->SetFontFile("lucidabright34.txf");
 
-  // Images
+  //----------------------------------------------------------------------------
+  // Images, textures
 
-  CREATE_ADD_GLASS(tex_cont, ZList, images, "Textures", 0);
+  ZList* texdir = g_queen->AssertPath("var/textures", "ZNameMap");
 
-  CREATE_ADD_GLASS(image1, ZImage, tex_cont, "GledLogo", 0);
+  CREATE_ADD_GLASS(image1, ZImage, texdir, "GledLogo", 0);
   image1->SetEnvMode(GL_MODULATE);
   image1->SetFile("gledlogo.png");
 
-  CREATE_ADD_GLASS(image2, ZImage, tex_cont, "Orchid", 0);
+  CREATE_ADD_GLASS(image2, ZImage, texdir, "Orchid", 0);
   image2->SetFile("orchid.jpeg");
 
-  CREATE_ADD_GLASS(image3, ZImage, tex_cont, "HeightField", 0);
+  CREATE_ADD_GLASS(image3, ZImage, texdir, "HeightField", 0);
   image3->SetFile("terrain_128.png");
 
-  CREATE_ADD_GLASS(image4, ZImage, tex_cont, "Earth map", 0);
+  CREATE_ADD_GLASS(image4, ZImage, texdir, "Earth map", 0);
   image4->SetMagFilter(GL_LINEAR);
   image4->SetEnvMode(GL_MODULATE);
   image4->SetFile("earth.png");
 
-  CREATE_ADD_GLASS(image5, ZImage, tex_cont, "Moon map", 0);
+  CREATE_ADD_GLASS(image5, ZImage, texdir, "Moon map", 0);
   image5->SetMagFilter(GL_LINEAR);
   image5->SetEnvMode(GL_MODULATE);
   image5->SetFile("moon.jpeg");
 
-  CREATE_ADD_GLASS(image6, ZImage, tex_cont, "Checker", 0);
+  CREATE_ADD_GLASS(image6, ZImage, texdir, "Checker", 0);
   image6->SetMagFilter(GL_LINEAR);
   image6->SetEnvMode(GL_MODULATE);
   image6->SetFile("checker_8.png");
 
-  CREATE_ADD_GLASS(ribbon1, ZRibbon, tex_cont, "Ribbon1", 0);
+  CREATE_ADD_GLASS(ribbon1, ZRibbon, texdir, "Ribbon1", 0);
   ribbon1->SetPOVFile("ribbon1.pov");
   ribbon1->LoadPOV();
 
-  CREATE_ADD_GLASS(ribbon2, ZRibbon, tex_cont, "Ribbon2", 0);
+  CREATE_ADD_GLASS(ribbon2, ZRibbon, texdir, "Ribbon2", 0);
   ribbon2->SetPOVFile("booby.pov");
   ribbon2->LoadPOV();
 
+  //----------------------------------------------------------------------------
+  // Shaders
+
+  ZList* shdrdir = g_queen->AssertPath("var/shaders", "ZNameMap");
+
+  CREATE_ADD_GLASS(brick_p, ZGlProgram, shdrdir, "Brick Program", 0);
+  CREATE_ADD_GLASS(brick_v, ZGlShader,  brick_p, "Brick Vertex",  0);
+  brick_v->Load("brick.vert");
+  CREATE_ADD_GLASS(brick_f, ZGlShader,  brick_p, "Brick Fragment",  0);
+  brick_f->Load("brick.frag");
+
+  CREATE_ADD_GLASS(feigen_p, ZGlProgram, shdrdir, "Feigen Program", 0);
+  CREATE_ADD_GLASS(feigen_f, ZGlShader,  feigen_p, "Feigen Fragment",  0);
+  feigen_f->Load("feigen.frag");
+
+
+  //============================================================================
   // Geom elements
 
   Rect* base_plane = new Rect("BasePlane");
@@ -146,8 +169,8 @@ void images()
   modtex2->SetMagFilter(GL_LINEAR);
   modtex2->SetEnvMode(GL_MODULATE);
 
-  SMorph* morphs[3];
-  for(int i=0; i<3; ++i) {
+  SMorph* morphs[5];
+  for(int i = 0; i < 5; ++i) {
     morphs[i] = new SMorph(Form("Morph %d", i+1));
     g_queen->CheckIn(morphs[i]); images->Add(morphs[i]);
     morphs[i]->SetTLevel(30); morphs[i]->SetPLevel(30);
@@ -158,6 +181,14 @@ void images()
   morphs[0]->SetTx(1);  morphs[0]->SetCx(0.5);  morphs[0]->SetRz(-0.25);
   morphs[1]->SetTx(0);  morphs[1]->SetCx(-0.5); morphs[1]->SetRz(0.25);
   morphs[2]->SetTx(-1); morphs[2]->SetCx(0.25); morphs[2]->SetRz(0.25);
+
+  morphs[3]->SetPos(-3, 8, 3);
+  morphs[3]->SetRotByDegrees(0, 0, 90);
+  morphs[3]->SetRnrMod(brick_p);
+
+  morphs[4]->SetPos(3, 8, 3);
+  morphs[4]->SetRotByDegrees(45, -30, 0);
+  morphs[4]->SetRnrMod(feigen_p);
 
   CREATE_ADD_GLASS(txt1, Text, images, "Text1", 0);
   txt1->SetText("GLED");
@@ -183,8 +214,10 @@ void images()
   rs_op->SetTarget(rs_node);
 
 
+  //============================================================================
   // Spawn GUI
+
   Gled::Macro("eye.C");
   setup_pupil_up_reference();
-
+  g_nest->Add(g_queen->FindLensByPath("var"));
 }

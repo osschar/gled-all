@@ -1,3 +1,15 @@
+2009-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add demos of shaders.
+
+	* brick.frag:
+	* brick.vert:
+	* feigen.frag:
+	New files - trivial vertex/fragment shaders.
+
+	* images.C:
+	Add two more smorphs, painted with shaders.
+
 2006-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* images.C:
