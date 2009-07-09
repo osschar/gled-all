@@ -1,3 +1,9 @@
+2009-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* cfg/Rnr_GL_SKEL.cxx:
+	* cfg/Rnr_GL_SKEL.h:
+	Improve layout, place ctor and dtor in cxx file.
+
 2009-05-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/project7.pl:

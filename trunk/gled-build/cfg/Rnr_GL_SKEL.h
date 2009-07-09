@@ -10,7 +10,8 @@
 #include <Glasses/CLASSNAME.h>
 #include <Rnr/GL/BASENAME_GL_Rnr.h>
 
-class CLASSNAME_GL_Rnr : public BASENAME_GL_Rnr {
+class CLASSNAME_GL_Rnr : public BASENAME_GL_Rnr
+{
 private:
   void _init();
 
@@ -18,13 +19,14 @@ protected:
   CLASSNAME*	mCLASSNAME;
 
 public:
-  CLASSNAME_GL_Rnr(CLASSNAME* idol) :
-    BASENAME_GL_Rnr(idol), mCLASSNAME(idol)
-  { _init(); }
+  CLASSNAME_GL_Rnr(CLASSNAME* idol);
+  virtual ~CLASSNAME_GL_Rnr();
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
+
+  virtual void Render(RnrDriver* rd);
 
 }; // endclass CLASSNAME_GL_Rnr
 
