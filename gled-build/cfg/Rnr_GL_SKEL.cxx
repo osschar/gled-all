@@ -7,18 +7,27 @@
 #include "CLASSNAME_GL_Rnr.h"
 #include <GL/glew.h>
 
-/**************************************************************************/
+//==============================================================================
 
 void CLASSNAME_GL_Rnr::_init()
 {}
 
-/**************************************************************************/
+CLASSNAME_GL_Rnr::CLASSNAME_GL_Rnr(CLASSNAME* idol) :
+  BASENAME_GL_Rnr(idol),
+  mCLASSNAME(idol)
+{
+  _init();
+}
 
-void CLASSNAME_GL_Rnr::PreDraw(RnrDriver* rd)
+CLASSNAME_GL_Rnr::~CLASSNAME_GL_Rnr()
 {}
 
-void CLASSNAME_GL_Rnr::Draw(RnrDriver* rd)
-{}
+//==============================================================================
 
-void CLASSNAME_GL_Rnr::PostDraw(RnrDriver* rd)
-{}
+void CLASSNAME_GL_Rnr::PreDraw(RnrDriver* rd) {}
+
+void CLASSNAME_GL_Rnr::Draw(RnrDriver* rd) {}
+
+void CLASSNAME_GL_Rnr::PostDraw(RnrDriver* rd) {}
+
+void CLASSNAME_GL_Rnr::Render(RnrDriver* rd) {}
