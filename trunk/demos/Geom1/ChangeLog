@@ -1,3 +1,16 @@
+2009-07-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Preliminary handling of uniform variables.
+
+	* brick.frag:
+	* brick.vert:
+	Use all uniform variables from the original and add reasonable
+	defaults in trailing comments.
+	Extend to support 3D brick pattern.
+
+	* images.C:
+	Replace brick-textured smorph with a box.
+
 2009-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add demos of shaders.

@@ -9,24 +9,23 @@
 // See 3Dlabs-License.txt for license information
 //
 
-// uniform vec3 LightPosition;
-vec3 LightPosition = vec3(0, -5, 10);
+uniform vec3 LightPosition; // (0, 0, 10)
 
 const float SpecularContribution = 0.3;
 const float DiffuseContribution  = 1.0 - SpecularContribution;
 
 varying float LightIntensity;
-varying vec2  MCposition;
+varying vec3  MCposition;
 
 void main()
 {
-    vec3 ecPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
-    vec3 tnorm      = normalize(gl_NormalMatrix * gl_Normal);
-    vec3 lightVec   = normalize(LightPosition - ecPosition);
-    vec3 reflectVec = reflect(-lightVec, tnorm);
-    vec3 viewVec    = normalize(-ecPosition);
-    float diffuse   = max(dot(lightVec, tnorm), 0.0);
-    float spec      = 0.0;
+    vec3  ecPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
+    vec3  tnorm      = normalize(gl_NormalMatrix * gl_Normal);
+    vec3  lightVec   = normalize(LightPosition - ecPosition);
+    vec3  reflectVec = reflect(-lightVec, tnorm);
+    vec3  viewVec    = normalize(-ecPosition);
+    float diffuse    = max(dot(lightVec, tnorm), 0.1);
+    float spec       = 0.0;
 
     if (diffuse > 0.0)
     {
@@ -37,6 +36,6 @@ void main()
     LightIntensity  = DiffuseContribution * diffuse +
                       SpecularContribution * spec;
 
-    MCposition      = gl_Vertex.xy;
+    MCposition      = gl_Vertex.xyz;
     gl_Position     = ftransform();
 }

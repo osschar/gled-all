@@ -89,7 +89,7 @@ void images()
   // Geom elements
 
   Rect* base_plane = new Rect("BasePlane");
-  base_plane->SetUnitSquare(16);
+  base_plane->SetUnitSquare(20);
   g_queen->CheckIn(base_plane);
   images->Add(base_plane);
   base_plane->SetColor(0.7, 0.7, 0.7);
@@ -169,8 +169,8 @@ void images()
   modtex2->SetMagFilter(GL_LINEAR);
   modtex2->SetEnvMode(GL_MODULATE);
 
-  SMorph* morphs[5];
-  for(int i = 0; i < 5; ++i) {
+  SMorph* morphs[4];
+  for(int i = 0; i < 4; ++i) {
     morphs[i] = new SMorph(Form("Morph %d", i+1));
     g_queen->CheckIn(morphs[i]); images->Add(morphs[i]);
     morphs[i]->SetTLevel(30); morphs[i]->SetPLevel(30);
@@ -182,13 +182,14 @@ void images()
   morphs[1]->SetTx(0);  morphs[1]->SetCx(-0.5); morphs[1]->SetRz(0.25);
   morphs[2]->SetTx(-1); morphs[2]->SetCx(0.25); morphs[2]->SetRz(0.25);
 
-  morphs[3]->SetPos(-3, 8, 3);
-  morphs[3]->SetRotByDegrees(0, 0, 90);
-  morphs[3]->SetRnrMod(brick_p);
+  morphs[3]->SetPos(3, 10, 4);
+  morphs[3]->SetRotByDegrees(45, -30, 0);
+  morphs[3]->SetRnrMod(feigen_p);
 
-  morphs[4]->SetPos(3, 8, 3);
-  morphs[4]->SetRotByDegrees(45, -30, 0);
-  morphs[4]->SetRnrMod(feigen_p);
+  CREATE_ADD_GLASS(box, Box, images, "Brick Box", 0);
+  box->SetPos(-3, 10, 4);
+  box->SetABC(3.68, 2.92, 1.54); // Chosen to avoid artefacts ...
+  box->SetRnrMod(brick_p);
 
   CREATE_ADD_GLASS(txt1, Text, images, "Text1", 0);
   txt1->SetText("GLED");

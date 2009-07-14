@@ -24,6 +24,13 @@ protected:
 
   GLuint        mProgID;
 
+  const char* unitype_to_name(GLenum t);
+  Int_t       unitype_to_size(GLenum t);
+  Bool_t      unitype_is_float(GLenum t);
+
+  void build_program(RnrDriver* rd);
+  void extract_uniform_vars();
+
 public:
   ZGlProgram_GL_Rnr(ZGlProgram* idol);
   virtual ~ZGlProgram_GL_Rnr();
