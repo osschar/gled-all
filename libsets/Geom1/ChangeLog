@@ -1,3 +1,33 @@
+2009-07-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Preliminary handling of uniform variables.
+
+	* Rnr/GL/SGlUniform_GL_Rnr.cxx:
+	* Rnr/GL/SGlUniform_GL_Rnr.h:
+	* Stones/SGlUniform.cxx:
+	* Stones/SGlUniform.h:
+	New stone holding data about an active uniform variable and
+	class for basic setting of GL state.
+
+	* Glasses/ZGlProgram.cxx:
+	* Glasses/ZGlProgram.h:
+	Add members to handle uniform variable reps:
+	- map from var-name to SGlUniform;
+	- mutex locking the map during access;
+	- flag specifying if uniform variable defaults should be loaded.
+
+	* Rnr/GL/ZGlProgram_GL_Rnr.cxx:
+	* Rnr/GL/ZGlProgram_GL_Rnr.h:
+	Add code to query for active uniforms and extract possible default
+	values from the shader sources. Comments followinf the uniform
+	declaration are parsed.
+	Modularize program build.
+
+	* Glasses/ZGlShader.cxx:
+	* Glasses/ZGlShader.h:
+	* Rnr/GL/ZGlShader_GL_Rnr.cxx:
+	Add mutex to protect shader code during compilation.
+
 2009-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add shader support.

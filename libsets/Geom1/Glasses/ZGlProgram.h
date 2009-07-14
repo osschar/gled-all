@@ -8,8 +8,11 @@
 #define Geom1_ZGlProgram_H
 
 #include <Glasses/ZList.h>
+#include <Stones/SGlUniform.h>
 
 #include <Eye/Ray.h>
+
+class SGlUniform;
 
 class ZGlProgram : public ZList
 {
@@ -24,12 +27,23 @@ public:
     PRQN_rebuild
   };
 
+  typedef map<TString, SGlUniform*>        mName2pUniform_t;
+  typedef mName2pUniform_t::iterator       mName2pUniform_i;
+  typedef mName2pUniform_t::const_iterator mName2pUniform_ci;
+
 private:
   void _init();
 
 protected:
-  Bool_t        bLinked;   //! X{GS} 7 BoolOut();
-  TString       mLog;      //! X{S}
+  Bool_t            bSetUniDefaults;  //  X{GS} 7 Bool()
+
+  Bool_t            bLinked;          //! X{GS} 7 BoolOut();
+  TString           mLog;             //! X{S}
+
+  GMutex            mUniMutex;        //! X{R}
+  mName2pUniform_t  mUniMap;          //! X{R}
+
+  void swap_unimap(mName2pUniform_t& umap);
 
 public:
   ZGlProgram(const Text_t* n="ZGlProgram", const Text_t* t=0);
@@ -40,6 +54,8 @@ public:
   void ReloadAndRebuild(); // X{ED} 7 MButt()
 
   void PrintLog(); //! X{E} 7 MButt()
+
+  void PrintUniforms(); //! X{E} 7 MButt()
 
 #include "ZGlProgram.h7"
   ClassDef(ZGlProgram, 1);

@@ -16,6 +16,7 @@ class ZGlShader : public ZGlass
   // 7777 AddViewInclude(GL/glew.h)
   // 7777 RnrCtrl(RnrBits(0,0,0,0, 0,0,0,0))
   MAC_RNR_FRIENDS(ZGlShader);
+  MAC_RNR_FRIENDS(ZGlProgram);
 
 public:
   enum PrivRayQN_e 
@@ -35,6 +36,8 @@ protected:
 
   Bool_t        bCompiled;  //! X{GS} 7 BoolOut();
   TString       mLog;       //! X{S}
+
+  GMutex        mProgMutex; //! Lock program text (used from GL).
 
   TString type_as_string();
 

@@ -72,9 +72,12 @@ void ZGlShader::Load(const Text_t* file)
       mType = 0;
   }
 
-  ifstream f(mFile);
-  mProgram.ReadFile(f);
-  f.close();
+  {
+    GMutexHolder prog_lock(mProgMutex);
+    ifstream f(mFile);
+    mProgram.ReadFile(f);
+    f.close();
+  }
 
   Stamp(FID());
 }

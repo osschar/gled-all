@@ -20,6 +20,8 @@ ClassImp(ZGlProgram);
 
 void ZGlProgram::_init()
 {
+  bSetUniDefaults = true;
+
   bLinked = false;
 }
 
@@ -32,6 +34,23 @@ ZGlProgram::ZGlProgram(const Text_t* n, const Text_t* t) :
 
 ZGlProgram::~ZGlProgram()
 {}
+
+//==============================================================================
+
+void ZGlProgram::swap_unimap(mName2pUniform_t& umap)
+{
+  GMutexHolder uni_lock(mUniMutex);
+
+  for (mName2pUniform_i i = mUniMap.begin(); i != mUniMap.end(); ++i)
+  {
+    i->second->DecRefCount();
+  }
+  mUniMap.swap(umap);
+  for (mName2pUniform_i i = mUniMap.begin(); i != mUniMap.end(); ++i)
+  {
+    i->second->IncRefCount();
+  }
+}
 
 //==============================================================================
 
@@ -72,4 +91,12 @@ void ZGlProgram::ReloadAndRebuild()
 void ZGlProgram::PrintLog()
 {
   cout << "Link log for " << Identify() << "\n" << mLog;
+}
+
+void ZGlProgram::PrintUniforms()
+{
+  for (mName2pUniform_i i = mUniMap.begin(); i != mUniMap.end(); ++i)
+  {
+    cout << i->first << "  " << i->second->fDefaults << endl;
+  }
 }

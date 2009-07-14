@@ -86,8 +86,11 @@ GLuint ZGlShader_GL_Rnr::Compile()
     }
   }
 
-  const char* program =  mZGlShader->mProgram.Data();
-  glShaderSource(mShaderID, 1, &program, 0);
+  {
+    GMutexHolder prog_lock(mZGlShader->mProgMutex);
+    const char* program =  mZGlShader->mProgram.Data();
+    glShaderSource(mShaderID, 1, &program, 0);
+  }
 
   glCompileShader(mShaderID);
 
