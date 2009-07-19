@@ -8,7 +8,6 @@
 #define Geom1_ZGlProgram_H
 
 #include <Glasses/ZList.h>
-#include <Stones/SGlUniform.h>
 
 #include <Eye/Ray.h>
 

@@ -7,12 +7,39 @@
 #include "ZGlProgram.h"
 #include "ZGlProgram.c7"
 #include "ZGlShader.h"
+#include <Stones/SGlUniform.h>
 
 // ZGlProgram
 
 //______________________________________________________________________________
 //
+// Representation of a GLSL program.
+// Children are enforced to be ZGLShader instances.
 //
+// ZGlProgram_GL_Rnr compiles all the shaders and links the program.
+//
+// Unifrom variables are extracted and information is stored in the local
+// map. Defaults are parsed out of the shader source and stored as string.
+//   uniform vec3  BrickColor;  // (1.0, 0.3, 0.2)
+// If bSetUniDefaults is set (default), these values are assigned to
+// appropriate GL uniform variables when the program is activated.
+// See also SGlUniform and SGlUniform_GL_Rnr.
+//
+//
+// TODO:
+// 1. GL_Rnr::Draw() does nothing - can only be via state-modifier link.
+// 2. Add class for holding alternate uniform variable values.
+//    One could have a ZList (or ZNameMap) and use name, title of elements
+//    for variable name, value string - but that is burning memory.
+//    Better to have glass ZGlUniformValues that holds the lot in a list
+//    and marks in the GL_Rnr which are really available.
+//    ZGlProgram would have to become ZGlRnrMod for that, to allow for
+//    optimized detection of program state via time-stamps.
+//    Special Fltk class would have to be written.
+//    In any case, the univorm-values could be populated from a succesfully
+//    compiled program - all information is already available in mUniMap.
+// 3. Why is ZImage not a RnrMod? Should we separate ZTexture and ZImage?
+//    This might become relevant for sampler uniform varaibles.
 
 ClassImp(ZGlProgram);
 

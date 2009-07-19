@@ -1,3 +1,29 @@
+2009-07-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improved handling of uniform GLSL variables.
+
+	* Glasses/ZGlProgram.cxx:
+	* Glasses/ZGlProgram.h:
+	Add class documentation and todo list.
+	Move SGlUniform.h include into source file.
+
+	* Stones/SGlUniform.cxx:
+	* Stones/SGlUniform.h:
+	Change order of variables in data-ptr union.
+	Remove debug printout.
+
+	* Rnr/GL/SGlUniform_GL_Rnr.cxx:
+	* Rnr/GL/SGlUniform_GL_Rnr.h:
+	* Rnr/GL/ZGlProgram_GL_Rnr.cxx:
+	* Rnr/GL/ZGlProgram_GL_Rnr.h:
+	Optimize processing of uniform variables with default values.
+	Maintain a list of SGlUniform_GL_Rnr objects.
+	Parse the default values string only once, after a successful build.
+
+	Move 'unitype_xxxx()' functions to SGlUniform_GL_Rnr (as static
+	functions). Use GL defines, not explicit token values (what was
+	wrong with me?)
+
 2009-07-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Preliminary handling of uniform variables.
