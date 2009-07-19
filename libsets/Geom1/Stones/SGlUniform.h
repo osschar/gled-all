@@ -25,8 +25,8 @@ public:
 
   union DataPtr_u
   {
-    Float_t *fFloat;
     Int_t   *fInt;
+    Float_t *fFloat;
   };
 
 public:

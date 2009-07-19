@@ -39,9 +39,7 @@ SGlUniform::SGlUniform(const Text_t* name, const Text_t* defs, Bool_t is_float,
 {}
 
 SGlUniform::~SGlUniform()
-{
-  printf("Auto destrukta - %s\n", fName.Data());
-}
+{}
 
 //==============================================================================
 

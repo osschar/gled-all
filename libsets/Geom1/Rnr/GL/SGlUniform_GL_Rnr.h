@@ -9,25 +9,36 @@
 
 #include <Stones/SGlUniform.h>
 
+#include <GL/glew.h>
+
 class RnrDriver;
+class TPMERegexp;
 
 class SGlUniform_GL_Rnr
 {
-private:
-  void _init();
-
 protected:
   SGlUniform            *mUni;
   SGlUniform::DataPtr_u  mData;
 
-public:
-  SGlUniform_GL_Rnr(SGlUniform* u);
-  virtual ~SGlUniform_GL_Rnr();
-
   void alloc();
   void dealloc();
+  void realloc();
 
-  void parse_and_apply(const TString& vals);
+  static TPMERegexp *s_valuesep_re;
+
+public:
+  SGlUniform_GL_Rnr(SGlUniform* u);
+  SGlUniform_GL_Rnr(const SGlUniform_GL_Rnr &a);
+  virtual ~SGlUniform_GL_Rnr();
+
+  void parse(const TString& vals);
+  void parse_defaults();
+
+  void apply();
+
+  static const char* unitype_to_name(GLenum t);
+  static Int_t       unitype_to_size(GLenum t);
+  static Bool_t      unitype_is_float(GLenum t);
 
 }; // endclass SGlUniform_GL_Rnr
 
