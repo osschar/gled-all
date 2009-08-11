@@ -1,5 +1,13 @@
 2009-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Proper rebuild of fltk - fltk-mt was left uninstalled.
+
+	* external/fltk/fltk.pl:
+	After install, reinstall fltk-mt if it was already installed.
+	fltk install wipes include/FL.
+
+2009-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Add some scripts for extracting source tarballs of externals.
 
 	* external/fltk/make-fltk-src-dist.sh:

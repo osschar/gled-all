@@ -36,4 +36,15 @@ target('configure', <<"FNORD");
             --enable-shared --enable-threads $config_args
 FNORD
 
+
+# Install of fltk wipes include/FL - so fltk-mt needs to be
+# reinstalled after install of fltk.
+$xxdir  = "../../fltk-mt";
+$xxfile = "$xxdir/install";
+
+target('install', <<"FNORD");
+make install
+if test -e $xxfile; then rm $xxfile; make -C $xxdir install; fi
+FNORD
+
 use_defaults_for_remaining_targets();
