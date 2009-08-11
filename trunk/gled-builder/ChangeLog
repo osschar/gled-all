@@ -1,3 +1,11 @@
+2009-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add some scripts for extracting source tarballs of externals.
+
+	* external/fltk/make-fltk-src-dist.sh:
+	* external/root/make-root-src-dist.sh:
+	New files.
+
 2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes to make greed-demo run on mac.
