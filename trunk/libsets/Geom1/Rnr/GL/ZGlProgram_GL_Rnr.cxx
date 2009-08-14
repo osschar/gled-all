@@ -205,9 +205,16 @@ void ZGlProgram_GL_Rnr::extract_uniform_vars()
   mZGlProgram->swap_unimap(umap);
 }
 
+void ZGlProgram_GL_Rnr::clean_program()
+{
+  glDeleteProgram(mProgID);
+  mProgID = 0;
+  // !!!! wipe uniform stashes, also on the lens side.
+}
+
 //==============================================================================
 
-void ZGlProgram_GL_Rnr::PreDraw(RnrDriver* rd)
+void ZGlProgram_GL_Rnr::check_program_state(RnrDriver* rd)
 {
   if (bBuildFailed)
   {
@@ -216,42 +223,59 @@ void ZGlProgram_GL_Rnr::PreDraw(RnrDriver* rd)
 
   if (bRelink && mProgID)
   {
-    glDeleteProgram(mProgID);
-    mProgID = 0;
+    clean_program();
   }
 
-  if (mProgID == 0)
+  if (mProgID == 0 && !mZGlProgram->IsEmpty())
   {
     build_program(rd);
   }
+}
 
-  if (mProgID)
+//==============================================================================
+
+void ZGlProgram_GL_Rnr::bind_program()
+{
+  // !!!! Figure out what program was active before - reinstate in postdraw.
+  // maybe conditional? Is program activation expensive?
+
+  glUseProgram(mProgID);
+
+  if (mProgID && mZGlProgram->bSetUniDefaults)
   {
-    // PUSH ?
-    glUseProgram(mProgID);
-
-    if (mZGlProgram->bSetUniDefaults)
+    for (lUniGl_i i = mUniDefaults.begin(); i != mUniDefaults.end(); ++i)
     {
-      for (lUniGl_i i = mUniDefaults.begin(); i != mUniDefaults.end(); ++i)
-      {
-	i->apply();
-      }
+      i->apply();
     }
   }
+}
 
-  check_gl_error("PreDraw()");
+void ZGlProgram_GL_Rnr::unbind_program()
+{
+  glUseProgram(0);
+}
+
+//==============================================================================
+
+void ZGlProgram_GL_Rnr::PreDraw(RnrDriver* rd)
+{
+  check_program_state(rd);
+
+  bind_program();
+
+  check_gl_error("ZGlProgram_GL_Rnr::PreDraw()");
 }
 
 void ZGlProgram_GL_Rnr::Draw(RnrDriver* rd)
 {
-  printf("draw program - should not be called\n");
+  check_program_state(rd);
+
+  bind_program();
+
+  check_gl_error("ZGlProgram_GL_Rnr::Draw()");
 }
 
 void ZGlProgram_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if (mProgID)
-  {
-    glUseProgram(0); // POP instead?
-  }
-  check_gl_error("PostDraw()");
+  unbind_program();
 }
