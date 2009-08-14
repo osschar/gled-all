@@ -14,6 +14,22 @@
 #include <errno.h>
 #include <pthread.h>
 
+#include <ucontext.h>
+#include <fenv.h> // requires _GNU_SOURCE to be defined for trap control
+
+class MountainThread : public GThread
+{
+public:
+  MountainThread(const Text_t* name, GThread_foo foo, void* arg=0, bool detached=false) :
+    GThread(name, foo, arg, detached),
+    fTerminalSignalId(0)
+  {}
+  virtual ~MountainThread() {}
+
+  ucontext_t   fTerminalSignalRetourContext;
+  int          fTerminalSignalId;
+};
+
 ClassImp(Mountain);
 
 /**************************************************************************/
@@ -52,6 +68,52 @@ namespace
     sigaddset(&set, GThread::SigUSR2);
     sigwait(&set, &recsig);
   }
+
+  void sh_TerminalSigHandler(int sid, siginfo_t* sinfo, void* sfoo)
+  {
+    // ucontext_t *sctx = (ucontext_t*) sfoo;
+
+    fprintf(stderr, "Terminal signal handler entered ...\n");
+
+    MountainThread* mt = (MountainThread*) GThread::Self();
+    fprintf(stderr, "thread id=%d name='%s' state=%s.\n", mt->GetIndex(), mt->GetName(),
+	    GThread::RunningStateName(mt->GetRunningState()));
+
+    switch (sid)
+    {
+      case SIGILL:
+	fprintf(stderr, "Illegal instruction.\n");
+	break;
+      case SIGBUS:
+	fprintf(stderr, "Bus error.\n");
+	break;
+      case SIGSEGV:
+	fprintf(stderr, "Segmentation violation.\n");
+	break;
+      case SIGFPE:
+	fprintf(stderr, "Floating-point exception.\n");
+	// The bits are not set ... seems trap setting overrides it.
+	// {
+	//   int foo = fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+	//   printf(" FE: DIVBYZERO=%d, INVALID=%d, OVERFLOW=%d\n", foo & FE_DIVBYZERO, foo & FE_INVALID, foo & FE_OVERFLOW);
+	// }
+	// Clear excepts - no need.
+	break;
+
+      default:
+	fprintf(stderr, "Unexpected signal %d\n", sid);
+	break;
+    }
+
+    gSystem->StackTrace();
+
+    mt->fTerminalSignalId = sid;
+
+    if (setcontext(&mt->fTerminalSignalRetourContext))
+    {
+      perror("setcontext failed in signal handler ... not good:");
+    }
+  }
 }
 
 void* Mountain::DancerBeat(DancerInfo* di)
@@ -76,6 +138,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
     pthread_sigmask(SIG_BLOCK, &set, 0);
 
     struct sigaction sac;
+
     sac.sa_handler = sh_DancerSuspender;
     sigemptyset(&sac.sa_mask);
     sac.sa_flags = 0;
@@ -100,6 +163,72 @@ void* Mountain::DancerBeat(DancerInfo* di)
     di->fEventor->OnStart(op_arg);
   }
 
+  {
+    sigset_t set;
+    sigemptyset(&set);
+
+    struct sigaction sac;
+
+    if (di->fEventor->GetTrapILL())
+    {
+      sac.sa_sigaction = sh_TerminalSigHandler;
+      sigemptyset(&sac.sa_mask);
+      sac.sa_flags = 0;
+      sigaction(SIGILL, &sac, 0);
+      sigaddset(&set, SIGILL);
+    }
+
+    if (di->fEventor->GetTrapBUS())
+    {
+      sac.sa_sigaction = sh_TerminalSigHandler;
+      sigemptyset(&sac.sa_mask);
+      sac.sa_flags = 0;
+      sigaction(SIGBUS, &sac, 0);
+      sigaddset(&set, SIGBUS);
+    }
+
+    if (di->fEventor->GetTrapSEGV())
+    {
+      sac.sa_sigaction = sh_TerminalSigHandler;
+      sigemptyset(&sac.sa_mask);
+      sac.sa_flags = 0;
+      sigaction(SIGSEGV, &sac, 0);
+      sigaddset(&set, SIGSEGV);
+    }
+
+    if (di->fEventor->GetTrapFPE())
+    {
+      sac.sa_sigaction = sh_TerminalSigHandler;
+      sigemptyset(&sac.sa_mask);
+      sac.sa_flags = 0;
+      sigaction(SIGFPE, &sac, 0);
+      sigaddset(&set, SIGFPE);
+
+      // This is platform dependant.
+      feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+    }
+
+    pthread_sigmask(SIG_UNBLOCK, &set, 0);
+
+
+    MountainThread *mt = (MountainThread*) di->fThread;
+
+    if (getcontext(&mt->fTerminalSignalRetourContext))
+    {
+      perror("getcontext failed:");
+      return err_ret;
+    }
+
+    if (mt->fTerminalSignalId != 0)
+    {
+      printf("Strange strange -- who was dead now walks again. And the number of his cross was %d.\n", mt->fTerminalSignalId);
+      int foo = fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+      printf(" FE: DIVBYZERO=%d, INVALID=%d, OVERFLOW=%d\n", foo & FE_DIVBYZERO, foo & FE_INVALID, foo & FE_OVERFLOW);
+      di->fEventor->OnTerminalSignal(op_arg, mt->fTerminalSignalId);
+      return err_ret;
+    }
+  }
+
   bool exc_p = false, exit_p = false, suspend_p = false;
 
   if (di->fShouldSuspend)
@@ -112,7 +241,8 @@ void* Mountain::DancerBeat(DancerInfo* di)
     goto suspend_exit_check;
   }
 
-  while(1) {
+  while (true)
+  {
     exc_p = exit_p = suspend_p = false;
 
     op_arg->fBeatStart.SetNow();
@@ -130,11 +260,11 @@ void* Mountain::DancerBeat(DancerInfo* di)
 	di->fEventor->PostBeat(op_arg);
       }
     }
-    catch(Operator::Exception& op_exc)
+    catch (Operator::Exception& op_exc)
     {
       exc_p = true;
 
-      switch(op_exc.fExc)
+      switch (op_exc.fExc)
       {
         case Operator::OE_Done:
         {
@@ -204,7 +334,8 @@ void* Mountain::DancerBeat(DancerInfo* di)
 
     op_arg->fBeatStop.SetNow();
     op_arg->fBeatSum += op_arg->fBeatStop - op_arg->fBeatStart;
-    if (!exc_p && !op_arg->fContinuous) {
+    if (!exc_p && !op_arg->fContinuous)
+    {
       GLensWriteHolder wrlck(di->fEventor);
       di->fEventor->PostDance(op_arg);
       exit_p = true;
@@ -231,11 +362,12 @@ void* Mountain::DancerBeat(DancerInfo* di)
 	di->fOpArg->fSuspendidor.Unlock();
       }
       // Check again for exit during suspend
-      if(di->fShouldExit)
+      if (di->fShouldExit)
       {
 	return 0;
       }
-    } else
+    }
+    else
     {
       di->fOpArg->fSuspendidor.Unlock();
     }
@@ -249,7 +381,9 @@ void* Mountain::DancerBeat(DancerInfo* di)
       if (op_arg->fSignalSafe)
       {
 	gSystem->Sleep(UInt_t(sleep_time));
-      } else {
+      }
+      else
+      {
 	di->fOpArg->fSuspendidor.Lock();
 	di->fSleeping = true;
 	int timed_out = di->fOpArg->fSuspendidor.TimedWaitMS(sleep_time);
@@ -290,9 +424,9 @@ void Mountain::Start(Eventor* e, bool suspend_immediately)
     return;
   }
 
-  GThread* t = new GThread("Mountain-DancerBeat",
-                           (GThread_foo) DancerBeat, 0,
-                           true);
+  GThread* t = new MountainThread("Mountain-DancerBeat",
+				  (GThread_foo) DancerBeat, 0,
+				  true);
   DancerInfo* di = new DancerInfo(t, e, this);
   hOnStage[e] = di;
   t->SetStartArg((void*) di);
