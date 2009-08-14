@@ -37,7 +37,8 @@ TA_Unit::Load() {
   fclose(fp);
   build(this, (o3dInfo*)raw_data, raw_data);
   { // rename self from base->model name
-    char *beg = rindex(mFile.Data(), '/')+1;
+    // !!! Cast required by gcc-4.4.1-1ubuntu3, Aug 2009. Seems strange.
+    char *beg = (char*) strrchr(mFile.Data(), '/')+1;
     char   xx[256];
     int i=0;
     while(beg[i] != '.') {
