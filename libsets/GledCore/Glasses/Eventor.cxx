@@ -35,8 +35,10 @@ void Eventor::_init()
 
   mHost = 0;
 
-  bUseDynCast = true; bSignalSafe = false;
-  bContinuous = true; bMultix = false;
+  bMultix     = false; bSignalSafe = false;
+  bContinuous = true;  bUseDynCast = true;
+  bTrapILL = bTrapBUS = bTrapFPE = bTrapSEGV = false;
+
   bRunning = bSuspended = bPerforming = bXMultix = false;
 
   mEventID      = 0;
@@ -239,6 +241,13 @@ void Eventor::OnBreak(Operator::Arg* op_arg, const TString& msg)
   // exception.
 }
 
+void Eventor::OnTerminalSignal(Operator::Arg* op_arg, Int_t sid)
+{
+  // Called from Mountain::DancerBeat() upon receiving a terminal
+  // signal. FPE, BUS, SEGV, ILL
+
+}
+
 /**************************************************************************/
 // User interface for thread control
 /**************************************************************************/
@@ -373,6 +382,11 @@ void Eventor::SetHost(SaturnInfo* host)
   WriteUnlock();
 }
 
+void Eventor::SetTrapAll()
+{
+  bTrapILL = bTrapBUS = bTrapFPE = bTrapSEGV = true;
+  Stamp(FID());
+}
 
 /**************************************************************************/
 // Time service for operators

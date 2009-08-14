@@ -34,6 +34,10 @@ protected:
   Bool_t	bSignalSafe;	//  X{gS} 7 Bool()
   Bool_t	bContinuous;	//  X{gS} 7 Bool(-join=>1)
   Bool_t	bUseDynCast;	//  X{gS} 7 Bool()
+  Bool_t        bTrapILL;       //  X{gS} 7 Bool(-join=>1)
+  Bool_t        bTrapBUS;       //  X{gS} 7 Bool()
+  Bool_t        bTrapSEGV;      //  X{gS} 7 Bool(-join=>1)
+  Bool_t        bTrapFPE;       //  X{gS} 7 Bool()
 
   // Thread running status
   Bool_t	bRunning;	//  X{gS} 7 BoolOut(-join=>1)
@@ -68,6 +72,7 @@ public:
   virtual void	OnStop(Operator::Arg* op_arg, Operator::Exception& op_exc);
   virtual void	OnBreak(Operator::Arg* op_arg, Operator::Exception& op_exc);
   virtual void	OnBreak(Operator::Arg* op_arg, const TString& msg);
+  virtual void	OnTerminalSignal(Operator::Arg* op_arg, Int_t sid);
 
   virtual void	Start();	// X{E} 7 MButt(-join=>1)
   virtual void	Stop();		// X{E} 7 MButt()
@@ -80,6 +85,7 @@ public:
 
   void SetHost(SaturnInfo* host);
 
+  void SetTrapAll(); // X{E} 7 MButt()
 
   //-------------------------------------
   // Time service for operators

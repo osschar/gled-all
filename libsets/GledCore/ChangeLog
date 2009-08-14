@@ -1,3 +1,33 @@
+2009-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for handling of some terminal signals (ILL, BUS, SEGV
+	and FPE) in Eventor/Mountain threads.
+
+	For FPE only trap on FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW.
+
+	This will require another pass to work on mac.
+
+	* Ephra/Mountain.cxx:
+	Use special class MountainThread : public GThread for running
+	Eventors. MountainThread has additional members for signal
+	handling.
+
+	In DancerBeat() initialize signal handler as requested by Eventor
+	flags.
+
+	If signal is caught, notifiy Eventor via OnTerminalSignal() and
+	terminate the thread.
+
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	Add flags for specifying which signals to handle during execution:
+	  Bool_t bTrapILL, bTrapBUS, bTrapFPE, bTrapSEGV;
+	All disabled by default, use SetTrapAll() to enable all.
+
+	Add virtual member function:
+	  void OnTerminalSignal(Operator::Arg* op_arg, Int_t sid);
+	that is called when one of the above signals is caught.
+
 2009-07-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Draw box so that shaders get correct vertex positions.
