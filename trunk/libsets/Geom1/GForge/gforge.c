@@ -114,7 +114,7 @@ static double lpcut, lporder;        /* low-pass cutoff frequency, order */
 void il_err(const char* s) {
   ILenum er = ilGetError();
   if(er) {
-    printf("%s error: %s\n", iluErrorString(er));
+    printf("IL error at %s: %s\n", s, iluErrorString(er));
   }
 }
 char* fmt2name(ILint fmt) {
