@@ -237,7 +237,8 @@ void Gled::ParseArguments()
     else if (*i == "-m" || *i == "-master")
     {
       next_arg_or_die(mArgs, i);
-      char* col = index(*i, ':');
+      // !!! Cast required by gcc-4.4.1-1ubuntu3, Aug 2009. Seems strange.
+      char* col = (char*) strchr(*i, ':');
       if(col) {
 	*(col++) = 0;
 	UShort_t p = UShort_t(atoi(col));
