@@ -1,3 +1,16 @@
+2009-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ZGlProgram_GL_Rnr.cxx:
+	* Rnr/GL/ZGlProgram_GL_Rnr.h:
+	Restructure shader program code by introducing helper methods:
+	  void clean_program();
+	  void check_program_state(RnrDriver* rd);
+	  void bind_program();
+	  void unbind_program();
+
+	* GForge/gforge.c:
+	Add missing argument to a printf.
+
 2009-07-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improved handling of uniform GLSL variables.

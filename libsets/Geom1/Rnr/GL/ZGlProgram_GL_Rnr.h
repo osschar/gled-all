@@ -37,6 +37,12 @@ protected:
 
   void build_program(RnrDriver* rd);
   void extract_uniform_vars();
+  void clean_program();
+
+  void check_program_state(RnrDriver* rd);
+
+  void bind_program();
+  void unbind_program();
 
 public:
   ZGlProgram_GL_Rnr(ZGlProgram* idol);
