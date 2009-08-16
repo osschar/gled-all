@@ -1,3 +1,12 @@
+2009-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Preliminary mac support for handling of some terminal signals (ILL, BUS, SEGV
+	and FPE) in Eventor/Mountain threads.
+
+	* Ephra/Mountain.cxx:
+	Add ifdefs for mac - this seems uber weird and there are no docs
+	anywhere other than for ppc.
+
 2009-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for handling of some terminal signals (ILL, BUS, SEGV
