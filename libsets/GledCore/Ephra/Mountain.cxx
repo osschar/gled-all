@@ -205,7 +205,21 @@ void* Mountain::DancerBeat(DancerInfo* di)
       sigaddset(&set, SIGFPE);
 
       // This is platform dependant.
+#ifdef __APPLE__
+      fenv_t fe;
+      fegetenv(&fe);
+#if (defined(__ppc__) || defined(__ppc64__))
+      fe |= (FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#elif (defined (__i386__) || defined( __x86_64__ ))
+      fe.__control |= (FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+      fe.__mxcsr   |= (FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#else
+#error Unknown architecture
+#endif
+      fesetenv(&fe);
+#else
       feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
     }
 
     pthread_sigmask(SIG_UNBLOCK, &set, 0);
