@@ -7,6 +7,8 @@
 #include "ZGlShader.h"
 #include "ZGlShader.c7"
 
+#include <Glasses/ZQueen.h>
+
 #include <GL/glew.h>
 
 #include <fstream>

@@ -9,6 +9,8 @@
 #include "ZGlShader.h"
 #include <Stones/SGlUniform.h>
 
+#include <Glasses/ZQueen.h>
+
 // ZGlProgram
 
 //______________________________________________________________________________
