@@ -104,11 +104,16 @@ public:
     Float_t fDecayTimeout;
     KeyInfo fIncKey;
     KeyInfo fDecKey;
+    Bool_t  fSustain;
+    Bool_t  fSustainSet;
+    Float_t fSustainDesire;
 
     ValueInfo(KeyValueChangeParams* chg_prm=0) :
       fChangeParams(chg_prm),
       fValue(0), fDecayTimeout(0),
-      fIncKey(this, true), fDecKey(this, false) {}
+      fIncKey(this, true), fDecKey(this, false),
+      fSustain(false), fSustainDesire(0)
+    {}
 
     void SetMinMax(Float_t min, Float_t max) { fMinValue = min; fMaxValue = max; }
 
@@ -119,6 +124,10 @@ public:
 
     void DecayTimeoutOrValue(Float_t& timeout, Float_t& value, Float_t dt,
                              Float_t decay, Float_t delta_fac);
+
+    void ApproachValue(Float_t& value, Float_t desire,
+		       Float_t inc_step, Float_t inc_delta_fac,
+		       Float_t dec_step, Float_t dec_delta_fac);
 
     void TimeTick(Float_t dt);
   };
