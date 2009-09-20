@@ -1,3 +1,23 @@
+2009-09-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some fiddling with key controllers.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	In ValueInfo add support for sustained values - where key press
+	increases the value and it remains at this level until decreased
+	with the opposing key.
+	This is meant for something like throttle control. Tried it with
+	forward-backwards controls but would need to be tuned for this usage.
+
+	* Stones/VelocityVar.cxx:
+	* Stones/VelocityVar.h:
+	New stone for holding of a velocity variable.
+	Preliminary - only contains some comments.
+
+	* Opcode/Ice/IceMatrix3x3.cpp:
+	Somewhat optimize FromTo() function.
+
 2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Mac compilation changes.

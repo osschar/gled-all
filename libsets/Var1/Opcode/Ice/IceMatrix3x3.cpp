@@ -67,10 +67,8 @@ Matrix3x3& Matrix3x3::FromTo(const Point& from, const Point& to)
 {
   static const float FROM_TO_EPSILON = 0.000001f;
 
-  Point v;
-  float e, h, f;
+  float e, f;
 
-  v.Cross(from, to);
   e = from | to;
   f = (e < 0.0f) ? -e : e;
   if (f > 1.0f - FROM_TO_EPSILON) /* "from" and "to"-vector almost parallel */
@@ -78,7 +76,6 @@ Matrix3x3& Matrix3x3::FromTo(const Point& from, const Point& to)
     Point u, v;       /* temporary storage vectors */
     Point x;          /* vector most nearly orthogonal to "from" */
     float c1, c2, c3; /* coefficients for later use */
-    int i, j;
 
     x.x = (from.x > 0.0f) ? from.x : -from.x;
     x.y = (from.y > 0.0f) ? from.y : -from.y;
@@ -125,6 +122,10 @@ Matrix3x3& Matrix3x3::FromTo(const Point& from, const Point& to)
   }
   else  /* the most common case, unless "from"="to", or "from"=-"to" */
   {
+    Float_t h;
+    Point   v;
+    v.Cross(from, to);
+
 #if 0
     /* unoptimized version - a good compiler will optimize this. */
     /* h = (1.0 - e)/DOT(v, v); old code */

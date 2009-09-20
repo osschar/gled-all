@@ -56,12 +56,19 @@ void TringuCam::_init()
   mKeyStateMap['w'] = &mFwdBck.fIncKey;
   mKeyStateMap['s'] = &mFwdBck.fDecKey;
 
+  // Sustain mode ... in this case happens too fast.
+  // Should really be attached to:
+  // a) throttle controls;
+  // b) use different change params - no exponential approach.
+  // mFwdBck.fSustain = true;
+
   mLftRgt.fChangeParams = &mChgParCameraMove;
   mLftRgt.SetMinMax(-10, 10);
   mKeyStateMap['a'] = &mLftRgt.fIncKey;
   mKeyStateMap['d'] = &mLftRgt.fDecKey;
 
   mUpDown.fChangeParams = &mChgParCameraMove;
+
   mUpDown.SetMinMax(-30, 30);
   mKeyStateMap['r'] = &mUpDown.fIncKey;
   mKeyStateMap['f'] = &mUpDown.fDecKey;
@@ -144,7 +151,7 @@ WSTube* TringuCam::make_tube(Statico* stato0, Statico* stato1, const TString& gr
   return tube;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 inline TringuCam::KeyInfo* TringuCam::FindKeyInfo(Int_t key)
 {
@@ -152,26 +159,57 @@ inline TringuCam::KeyInfo* TringuCam::FindKeyInfo(Int_t key)
   return (i != mKeyStateMap.end()) ? i->second : 0;
 }
 
+//------------------------------------------------------------------------------
+
 Int_t TringuCam::KeyDown(Int_t key)
 {
   KeyInfo* ki = FindKeyInfo(key);
   if (ki == 0) return 0;
+
   if (ki->fIsDown == false)
   {
     ki->fIsDown = true;
 
-    ValueInfo* vi = ki->fValueInfo;
-    KeyValueChangeParams& C = * vi->fChangeParams;
+    ValueInfo            *vi =   ki->fValueInfo;
+    KeyValueChangeParams &C  = * vi->fChangeParams;
     // KeyInfo*  oki = ki->fIsInc ? &vi->fDecKey : &vi->fIncKey;
 
-    // If pressed during timeout: inc + delta_factor
-    if (ki->fDecayTimeout > 0)
+    if (vi->fSustain)
     {
-      ki->fDesiredValue += C.fDesireIncDeltaFactor * ki->fDesiredValue;
-      ki->fDesiredValue += C.fDesireIncStep;
-    } else {
-    // else round-up.
-      ki->fDesiredValue = TMath::Ceil(ki->fDesiredValue + 0.001);
+      if (ki->fDecayTimeout > 0)
+      {
+	// if pressed during timeout, set sustain-desire
+	vi->fSustainSet = true;
+	if (ki->fIsInc)
+	{
+	  if (vi->fSustainDesire < 0) vi->fSustainDesire = 0;
+	  else                        vi->fSustainDesire = vi->fMaxValue;
+	}
+	else
+	{
+	  if (vi->fSustainDesire > 0) vi->fSustainDesire = 0;
+	  else                        vi->fSustainDesire = vi->fMinValue;
+	}
+      }
+      else
+      {
+	// else ... hmmh, set key desire, for no apparent reason.
+	ki->fDesiredValue = ki->fIsInc ? vi->fMaxValue : - vi->fMinValue;
+      }      
+    }
+    else
+    {
+      if (ki->fDecayTimeout > 0)
+      {
+	// if pressed during timeout: inc + delta_factor
+	ki->fDesiredValue += C.fDesireIncDeltaFactor * ki->fDesiredValue;
+	ki->fDesiredValue += C.fDesireIncStep;
+      }
+      else
+      {
+	// else round-up.
+	ki->fDesiredValue = TMath::Ceil(ki->fDesiredValue + 0.001);
+      }
     }
 
     // Make sure we do not exceed limits.
@@ -186,6 +224,7 @@ Int_t TringuCam::KeyDown(Int_t key)
         ki->fDesiredValue = - vi->fMinValue;
     }
   }
+
   return 1;
 }
 
@@ -193,6 +232,7 @@ Int_t TringuCam::KeyUp(Int_t key)
 {
   KeyInfo* ki = FindKeyInfo(key);
   if (ki == 0) return 0;
+
   if (ki->fIsDown == true)
   {
     ki->fIsDown = false;
@@ -204,13 +244,23 @@ Int_t TringuCam::KeyUp(Int_t key)
     ki->fDecayTimeout = C.fDesireDecayTimeout;
     if (oki->fIsDown == false)
     {
-      vi->fDecayTimeout = C.fValueDecayTimeout;
+      if (vi->fSustain)
+      {
+	if (!vi->fSustainSet)
+	  vi->fSustainDesire = vi->fValue;
+	vi->fSustainSet = false;
+      }
+      else
+      {
+	vi->fDecayTimeout = C.fValueDecayTimeout;
+      }
     }
   }
+
   return 1;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 {
@@ -665,6 +715,19 @@ TringuCam::ValueInfo::DecayTimeoutOrValue(Float_t& timeout, Float_t& value,
     DecayValue(value, decay, delta_fac);
 }
 
+void
+TringuCam::ValueInfo::ApproachValue(Float_t& value, Float_t desire,
+				    Float_t inc_step, Float_t inc_delta_fac,
+				    Float_t dec_step, Float_t dec_delta_fac)
+{
+  if (value < desire)
+    IncValue(value, desire, inc_step, inc_delta_fac);
+  else if (value > desire)
+    DecValue(value, -desire, dec_step, dec_delta_fac);
+  // !!! the -desire is hack, together with -desire in DecValue
+  // need better encapsulation of all this shit.
+}
+
 // ------------------------------------------------------------------------
 
 void TringuCam::ValueInfo::TimeTick(Float_t dt)
@@ -679,34 +742,71 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
   Float_t des_decay      = dt*C.fDesireDecay;
   Float_t des_decay_dfac = dt*0.1; // !!! KONST
 
-  if (fIncKey.fIsDown && fDecKey.fIsDown)
+  if (fSustain)
   {
-    if (fValue != 0) DecayValue(fValue, val_decay+val_acc, val_decay_dfac+val_acc_dfac);
-  }
-  else if ( ! fIncKey.fIsDown && ! fDecKey.fIsDown)
-  {
-    DecayTimeoutOrValue(fDecayTimeout, fValue, dt, val_decay, val_decay_dfac);
-
-    DecayTimeoutOrValue(fIncKey.fDecayTimeout, fIncKey.fDesiredValue,
-                        dt, des_decay, des_decay_dfac);
-    DecayTimeoutOrValue(fDecKey.fDecayTimeout, fDecKey.fDesiredValue,
-                        dt, des_decay, des_decay_dfac);
-  }
-  else
-  {
-    if (fIncKey.fIsDown)
+    if (fIncKey.fIsDown && fDecKey.fIsDown)
     {
-      IncValue(fValue, fIncKey.fDesiredValue, val_acc, val_acc_dfac);
+      // do nothing ... it seems
+    }
+    else if ( ! fIncKey.fIsDown && ! fDecKey.fIsDown)
+    {
+      ApproachValue(fValue, fSustainDesire, val_acc, val_acc_dfac, val_decay, val_decay_dfac);
 
+      DecayTimeoutOrValue(fIncKey.fDecayTimeout, fIncKey.fDesiredValue,
+			  dt, des_decay, des_decay_dfac);
       DecayTimeoutOrValue(fDecKey.fDecayTimeout, fDecKey.fDesiredValue,
-                          dt, des_decay, des_decay_dfac);
+			  dt, des_decay, des_decay_dfac);
     }
     else
     {
-      DecValue(fValue, fDecKey.fDesiredValue, val_acc, val_acc_dfac);
+      if (fIncKey.fIsDown)
+      {
+	ApproachValue(fValue, fMaxValue, val_acc, val_acc_dfac, val_decay, val_decay_dfac);
+
+	DecayTimeoutOrValue(fDecKey.fDecayTimeout, fDecKey.fDesiredValue,
+			    dt, des_decay, des_decay_dfac);
+      }
+      else
+      {
+	ApproachValue(fValue, fMinValue, val_acc, val_acc_dfac, val_decay, val_decay_dfac);
+
+	DecayTimeoutOrValue(fIncKey.fDecayTimeout, fIncKey.fDesiredValue,
+			    dt, des_decay, des_decay_dfac);
+      }
+    }
+
+  }
+  else
+  {
+    if (fIncKey.fIsDown && fDecKey.fIsDown)
+    {
+      if (fValue != 0) DecayValue(fValue, val_decay+val_acc, val_decay_dfac+val_acc_dfac);
+    }
+    else if ( ! fIncKey.fIsDown && ! fDecKey.fIsDown)
+    {
+      DecayTimeoutOrValue(fDecayTimeout, fValue, dt, val_decay, val_decay_dfac);
 
       DecayTimeoutOrValue(fIncKey.fDecayTimeout, fIncKey.fDesiredValue,
-                          dt, des_decay, des_decay_dfac);
+			  dt, des_decay, des_decay_dfac);
+      DecayTimeoutOrValue(fDecKey.fDecayTimeout, fDecKey.fDesiredValue,
+			  dt, des_decay, des_decay_dfac);
+    }
+    else
+    {
+      if (fIncKey.fIsDown)
+      {
+	IncValue(fValue, fIncKey.fDesiredValue, val_acc, val_acc_dfac);
+
+	DecayTimeoutOrValue(fDecKey.fDecayTimeout, fDecKey.fDesiredValue,
+			    dt, des_decay, des_decay_dfac);
+      }
+      else
+      {
+	DecValue(fValue, fDecKey.fDesiredValue, val_acc, val_acc_dfac);
+
+	DecayTimeoutOrValue(fIncKey.fDecayTimeout, fIncKey.fDesiredValue,
+			    dt, des_decay, des_decay_dfac);
+      }
     }
   }
 }
