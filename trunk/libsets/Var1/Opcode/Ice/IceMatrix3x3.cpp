@@ -122,8 +122,8 @@ Matrix3x3& Matrix3x3::FromTo(const Point& from, const Point& to)
   }
   else  /* the most common case, unless "from"="to", or "from"=-"to" */
   {
-    Float_t h;
-    Point   v;
+    float h;
+    Point v;
     v.Cross(from, to);
 
 #if 0
