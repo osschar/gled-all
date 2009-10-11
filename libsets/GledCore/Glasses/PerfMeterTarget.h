@@ -20,7 +20,7 @@ private:
 protected:
   UInt_t	mCount;		// X{GS} 7 Value()
 
-  TVector	mVector;	// X{GRS[ref]}
+  TVector	mVector;	// X{GRSQ}
 
 public:
   PerfMeterTarget(const Text_t* n="PerfMeterTarget", const Text_t* t=0) : ZList(n,t) { _init(); }

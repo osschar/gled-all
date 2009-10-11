@@ -123,17 +123,21 @@ sub make_widget_B {
     "  return o;\n" . "}\n\n";
 }
 
-#################
-sub make_widget {
-#################
+###############
+sub make_widget
+###############
+{
   my $S = shift;
   return $S->make_widget_A() . $S->make_widget_B();
 }
 
-sub make_range {
+##############
+sub make_range
+##############
+{
   my $S = shift;
   if(exists $S->{-range}) {
-    $rr = $S->{-range};
+    my $rr = $S->{-range};
     my $steparg = "$rr->[2]";
     $steparg .= ",$rr->[3]" if defined $rr->[3];
     return "  o->minimum($rr->[0]); o->maximum($rr->[1]); o->step($steparg);\n";
@@ -177,7 +181,7 @@ fnord
 
 sub make_var_widget_cb {
   my $S = shift;
-  my $valuestr = (not exists $S->{CastTo}) ? "o->value()" : "(($S->{Type})(o->value()))";
+  my $valuestr = (not exists $S->{CastTo}) ? "o->value()" : "(($S->{CastTo})(o->value()))";
   return <<"fnord";
 void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
   Eye* e = (mView->fImg) ? mView->fImg->fEye : 0;
@@ -434,6 +438,87 @@ sub make_widget {
 }
 
 sub make_cxx_cb { my $S = shift; $S->make_varout_widget_cb(); }
+
+########################################################################
+
+package GLED::Widgets::MinMaxVar; @ISA = ('GLED::Widgets');
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget}  = "Fl_SMinMaxVar";
+  $S->{Include} = "FL/Fl_SVars.h";
+  # $S->{CastTo}  = "double";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = exists $S->{-width} ? "false" : "true";
+  $S->{-width}  = 8 unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  return $S;
+}
+
+sub make_widget
+{
+  my $S = shift;
+  $S->make_widget_A() . $S->make_range() . $S->make_widget_B();
+}
+
+sub make_cxx_cb
+{
+  my $S = shift;
+  $S->make_var_widget_cb();
+}
+
+sub make_weed_update
+{
+  my $S = shift;
+  $S->make_weed_update_A() .
+"  const $S->{Type}& v = mIdol->Ref$S->{Methodbase}();\n" .
+"  w->set(v.Get(), v.GetMin(), v.GetMax());\n" .
+  $S->make_weed_update_B();
+}
+
+########################################################################
+
+package GLED::Widgets::DesireVar; @ISA = ('GLED::Widgets');
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget}  = "Fl_SDesireVar";
+  $S->{Include} = "FL/Fl_SVars.h";
+  # $S->{CastTo}  = "double";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = exists $S->{-width} ? "false" : "true";
+  $S->{-width}  = 8 unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  return $S;
+}
+
+sub make_widget
+{
+  my $S = shift;
+  $S->make_widget_A() . $S->make_range() . $S->make_widget_B();
+}
+
+sub make_cxx_cb
+{
+  my $S = shift;
+  $S->make_var_widget_cb();
+}
+
+sub make_weed_update
+{
+  my $S = shift;
+  $S->make_weed_update_A() .
+"  const $S->{Type}& v = mIdol->Ref$S->{Methodbase}();\n" .
+"  w->set(v.Get(), v.GetMin(), v.GetMax(), v.GetDesire());\n" .
+"  if (!v.IsDesireSatisfied()) SetUpdateTimer();\n" .
+  $S->make_weed_update_B();
+}
 
 ########################################################################
 
