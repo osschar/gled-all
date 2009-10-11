@@ -7,6 +7,7 @@ class Tringula;
 class TringuCam;
 class Statico;
 class Dynamico;
+class Crawler;
 class ParaSurf;
 class GravPlotter;
 class PSMark;
@@ -22,8 +23,8 @@ class TimeMaker;
 Tringula     *tringula = 0;
 TringuCam    *tricam   = 0;
 Statico      *sta1     = 0;
-Dynamico     *dyn1     = 0;
-Dynamico     *dyn2     = 0;
+Crawler      *dyn1     = 0;
+Crawler      *dyn2     = 0;
 PSMark       *mark     = 0;
 
 ParaSurf     *parasurf  = 0;
@@ -292,7 +293,8 @@ void tringula(Int_t mode=2)
     trx.SetBaseVec(1,  oos2, oos2, 0);
     trx.SetBaseVec(2,  0, 0, 1);
     trx.SetBaseVecViaCross(3);
-    dyn1 = tringula->NewDynamico("Dynus Primus");
+    dyn1 = new XXXCart("XXXCart Primus");
+    tringula->RegisterCrawler(dyn1);
     dyn1->ref_trans() = trx;
     dyn2 = tringula->NewDynamico("Dynus Secondus");
     dyn2->ref_trans() = trx;
