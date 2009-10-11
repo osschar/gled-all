@@ -127,6 +127,7 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
 
   Opcode::Ray R;
   R.mDir  = mGrav.Dir();
+  Int_t reoffset_count = 0;
 reoffset:
   R.mOrig.Msc(pos, R.mDir, mRayOffset);
 
@@ -152,15 +153,36 @@ reoffset:
     {
       if (mTringula->GetParaSurf()->IsValidPos(pos))
       {
-	ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Increasing ray-offset from %f for '%s'.", mRayOffset, GetName()));
-	mRayOffset *= 2;
-	goto reoffset;
+	if (reoffset_count < 5)
+	{
+	  ISmess(_eh + RC.CollideInfo(true, R) + GForm(" Increasing ray-offset from %f for '%s'.", mRayOffset, GetName()));
+	  mRayOffset *= 2;
+	  ++reoffset_count;
+	  goto reoffset;
+	}
+	else
+	{
+	  // This probably means Crawler has fallen off but opcode
+	  // and parasurf perceive this somewhat differently.
+	  // This happens in tringula test case (tringula.C(99)).
+	  // Could move the edge planes slightly more inwards.
+	  // But then again, the idea is that triangular patches bind into
+	  // hierarchy of tringulas where such case would mean we are entering
+	  // a new patch.
+	  ISmess(_eh + RC.CollideInfo(true, R) + GForm(" Increasing ray-offset did not help - parking '%s'", GetName()));
+	  bParked = true;
+	}
       }
       else
       {
-	ISmess(_eh + RC.CollideInfo(true, R) + GForm("\n  Fallen off - parking, ray-offset was %f for '%s'.", mRayOffset, GetName()));
+	ISmess(_eh + RC.CollideInfo(true, R) + GForm(" Fallen off - parking, ray-offset was %f for '%s'.", mRayOffset, GetName()));
 	bParked = true;
       }
+    }
+
+    if (reoffset_count != 0)
+    {
+      mRayOffset = 2.0f * mTringula->GetMesh()->GetTTvor()->mMaxEdgeLen;
     }
   }
   else

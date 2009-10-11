@@ -1,5 +1,17 @@
 2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Avoid rare infinite loop in Crawler::TimeTick().
+
+	* Glasses/Crawler.cxx:
+	Add protecton against going into an infinite loop when tringula
+	and para-surf disagree over whether crawler is on or off the
+	surface limits.
+
+	This rarely happened for tringula.C(99) - the test case with small
+	triangular patch.
+
+2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Some prerequisites for crawler driving.
 
 	* Glasses/XXXCart.cxx:
