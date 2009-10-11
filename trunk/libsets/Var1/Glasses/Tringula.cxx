@@ -407,13 +407,8 @@ place:
   return s;
 }
 
-Dynamico* Tringula::NewDynamico(const Text_t* dname)
+void Tringula::RegisterCrawler(Crawler* d)
 {
-  if (dname == 0)
-    dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
-
-  Crawler* d = new Crawler(dname);
-
   mParaSurf->origin_trans(d->ref_trans());
   place_on_terrain(d, d->GetLevH());
 
@@ -424,11 +419,21 @@ Dynamico* Tringula::NewDynamico(const Text_t* dname)
 
   d->update_aabb();
   d->update_last_data();
+}
+
+Crawler* Tringula::NewDynamico(const Text_t* dname)
+{
+  if (dname == 0)
+    dname = GForm("Dynamico %d", mDynos->GetSize() + 1);
+
+  Crawler* d = new Crawler(dname);
+
+  RegisterCrawler(d);
 
   return d;
 }
 
-Dynamico* Tringula::RandomDynamico(ZVector* mesh_list,
+Crawler* Tringula::RandomDynamico(ZVector* mesh_list,
                                    Float_t v_min, Float_t v_max, Float_t w_max)
 {
   Crawler* d = new Crawler(GForm("Dynamico %d", mDynos->GetSize() + 1));

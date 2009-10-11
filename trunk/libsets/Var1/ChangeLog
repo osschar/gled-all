@@ -1,3 +1,24 @@
+2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some prerequisites for crawler driving.
+
+	* Glasses/XXXCart.cxx:
+	* Glasses/XXXCart.h:
+	New glass to hold future experimental code.
+
+	* Glasses/Crawler.h:
+	Reduce maximum levitation-height.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add RegisterCrawler() so that one can register a Crawler of
+	different sub-class.
+	Most functions with Dynamico in their name should use Crawler
+	instead.
+
+	* glass.list:
+	Add XXXCart.
+
 2009-09-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Some fiddling with key controllers.

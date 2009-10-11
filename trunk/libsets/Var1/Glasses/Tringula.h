@@ -24,6 +24,7 @@ class ParaSurf;
 class Extendio;
 class Statico;
 class Dynamico;
+class Crawler;
 class LandMark;
 
 class Tringula : public ZNode, public TimeMakerClient
@@ -148,8 +149,9 @@ public:
                          Bool_t check_inside=true,
                          Int_t  max_tries   =1000);             // X{E} C{1} 7 MCWButt()
 
-  Dynamico* NewDynamico(const Text_t* dname=0);
-  Dynamico* RandomDynamico(ZVector* mesh_list,
+  void      RegisterCrawler(Crawler* d);
+  Crawler*  NewDynamico(const Text_t* dname=0);
+  Crawler*  RandomDynamico(ZVector* mesh_list,
                            Float_t v_min=-1, Float_t v_max=5,
                            Float_t w_max= 1);                      // X{E} C{1} 7 MCWButt()
   Dynamico* RandomAirplane(Float_t v_min= 2, Float_t v_max=20,
