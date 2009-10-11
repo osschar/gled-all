@@ -110,6 +110,20 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName)
                  SetArgs=>'Float_t x, Float_t y, Float_t z',
                  ByRef  =>1
                },
+  'SMinMaxVarF' => { GetType=>'Float_t',
+		     GetMeth=>'.Get()',
+		     SetMeth=>'.Set(x)',
+		     SetArgs=>'Float_t x',
+		     DeltaMeth=>'.Delta(x)',
+		     DeltaArgs=>'Float_t x'
+                   },
+  'SDesireVarF' => { GetType=>'Float_t',
+		     GetMeth=>'.Get()',
+		     SetMeth=>'.SetDesire(x)',
+		     SetArgs=>'Float_t x',
+		     DeltaMeth=>'.DeltaDesire(x)',
+		     DeltaArgs=>'Float_t x'
+                   },
 );
 
 # Shorthands for keys in comment field
@@ -349,7 +363,6 @@ sub produce_tags
 sub stone_set_method
 {
   my $r = shift; # member info
-  my ($pre, $setit, $post, $stamp);
   my $X;
 
   $r->{Type} =~ /(.)/; my $arg = lc $1;
@@ -362,11 +375,40 @@ sub stone_set_method
     $X .= "  if ($arg < $rr->[0]) $arg = $rr->[0];\n"
       unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
   }
-  $setit  = "  $r->{Varname}";
-  $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
+  $X .= "  $r->{Varname}";
+  $X .= ((exists $GetSetMap{$r->{Type}}{SetMeth}) ?
 	     $GetSetMap{$r->{Type}}->{SetMeth} :
 	     " = $r->{Args}[0][2]") . ";\n";
-  $X .= "${pre}${setit}${stamp}${post}}\n\n";
+  $X .= "}\n\n";
+  return $X;
+}
+
+sub stone_delta_method
+{
+  my $r = shift; # member info
+  my $X;
+
+  $r->{Type} =~ /(.)/; my $arg = lc $1;
+  my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
+  $X .= "void Delta$r->{Methodbase}($r->{ArgStr}) {\n";
+
+  if (exists $GetSetMap{$r->{Type}}{DeltaMeth})
+  {
+    $X .= "  $r->{Varname}$GetSetMap{$r->{Type}}->{DeltaMeth};\n";
+  }
+  else
+  {
+    my $arg = $r->{Args}[0][2]; # assume single argument
+    $X .= "  $arg += $r->{Varname};\n";
+    if (exists $r->{Range}) { # Check if range is set ... make if stuff
+      my $rr = $r->{Range};
+      $X .= "  if ($arg > $rr->[1]) $arg = $rr->[1];\n";
+      $X .= "  if ($arg < $rr->[0]) $arg = $rr->[0];\n"
+	  unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
+    }
+    $X .= "  $r->{Varname} = $arg;\n";
+  }
+  $X .= "}\n\n";
   return $X;
 }
 
@@ -571,13 +613,18 @@ while ($c !~ m!\G\s*$!osgc)
       else
       {
 	my $settype = $type;
-	$settype .= "&" if $member->{Xport}{s}{ref};
+	$settype .= "&" if $member->{Xport} =~ /q|Q/;
         $member->{ArgStr} = &SetArgs($settype, lc($methodbase));
       }
       $member->{Args}  = &MunchArgs($member->{ArgStr});
       $member->{Local} = $localp;
 
       $member->{ID}    = $MemberID++;
+
+      if ($member->{Xport} =~ m/d|D|f|F/o)
+      {
+	$member->{DeltaID} = $MemberID++;
+      }
 
       print "$type $methodbase $localp $member->{ID}\n" if $DEBUG;
 
@@ -808,13 +855,21 @@ for $r (@Members)
     }
   }
 
-  # Set methods defined in c7 file.
+  # Set and Delta methods defined in c7 file.
   if ( $r->{Xport} =~ m/(s|S)/ )
   {
     if ($IsGlass) {
       print H7 "void $r->{Methodname}($r->{ArgStr});\n";
     } else {
       print H7 stone_set_method($r);
+    }
+  }
+  if ( $r->{Xport} =~ m/(d|D)/ )
+  {
+    if ($IsGlass) {
+      print H7 "void Delta$r->{Methodbase}($r->{ArgStr});\n";
+    } else {
+      print H7 stone_delta_method($r);
     }
   }
 
@@ -862,6 +917,11 @@ for $r (@Members)
   {
     print H7 "ZMIR* S_$r->{Methodname}($r->{ArgStr});\n";
     print H7 "static MID_t Mid_$r->{Methodname}() { return $r->{ID}; }\n";
+  }
+  if ($r->{Xport} =~ m/d|D|f|F/o)
+  {
+    print H7 "ZMIR* S_Delta$r->{Methodbase}($r->{ArgStr});\n";
+    print H7 "static MID_t Mid_Delta$r->{Methodbase}() { return $r->{DeltaID}; }\n";
   }
   if ( $r->{Link} =~ m/(A)/ )
   {
@@ -925,9 +985,9 @@ unless($CLASSNAME eq $BASECLASS)
   print C7 "#define PARENT_GLASS ${PARENT}\n\n";
 }
 
-##############
-### Link stuff
-##############
+##################
+### Link stuff ###
+##################
 
 print C7 "// Link Stuff\n//" . '-' x 72 . "\n\n";
 
@@ -1023,9 +1083,9 @@ fnord
   print C7 "  return ret;\n}\n\n";
 }
 
-##############
-### SetMethods
-##############
+#############################
+### Set and Delta Methods ###
+#############################
 
 print C7 "\n// Set methods\n//" . '-' x 72 . "\n\n";
 
@@ -1033,13 +1093,14 @@ for $r (@Members)
 {
   if ( $r->{Xport} =~ m/(s|S)/ )
   {
-    # This shit should be split into if link / otherwise
+    # This shit should be split into if link / otherwise.
+    # Also ... it basically repeats itself for Delta just below.
     my ($pre, $setit, $post, $stamp);
     if ($IsGlass and $LOCK_SET_METHS)
     {
       $pre  .= "  GLensReadHolder _wrlck(this);\n";
     }
-    if ( $r->{Xport} =~ m/(S|E)/ and $IsGlass)
+    if ( $r->{Xport} =~ m/(S)/ and $IsGlass)
     {
       $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
       $stamp .= "mStampReqTring = " if $r->{Xport} =~ m/T/;
@@ -1053,7 +1114,7 @@ for $r (@Members)
 
       if (exists $r->{Link})
       {
-	# Links are stanped in ZGlass::set_link_or_die
+	# Links are stamped in ZGlass::set_link_or_die
 	if ($stamp) {
 	  $stamp = "  " . $stamp . "mTimeStamp;\n";
 	}
@@ -1089,7 +1150,7 @@ for $r (@Members)
     {
       $setit  = "  $r->{Varname}";
       $setit .= ((exists $GetSetMap{$r->{Type}}{SetMeth} and not $r->{ByRef}) ?
-		 $GetSetMap{$r->{Type}}->{SetMeth} :
+		 $GetSetMap{$r->{Type}}{SetMeth} :
 		 " = $r->{Args}[0][2]") . ";\n";
     }
 
@@ -1105,6 +1166,67 @@ for $r (@Members)
     print C7 "${pre}${setit}${stamp}${post}}\n\n";
   }
 
+  if ( $r->{Xport} =~ m/(d|D)/ )
+  {
+    my ($pre, $setit, $post, $stamp);
+    if ($IsGlass and $LOCK_SET_METHS)
+    {
+      $pre  .= "  GLensReadHolder _wrlck(this);\n";
+    }
+    if ( $r->{Xport} =~ m/(D)/ and $IsGlass)
+    {
+      $stamp .= "mStampReqTrans = " if $r->{Xport} =~ m/t/;
+      $stamp .= "mStampReqTring = " if $r->{Xport} =~ m/T/;
+      if (exists $r->{Stamp})
+      {
+	for $f (split(/\s*,\s*/, $r->{Stamp}))
+	{
+	  $stamp .= "mStamp${f} = ";
+	}
+      }
+
+      if ($r->{Xport} =~ m/x/) {
+	$stamp = "  ". $stamp ."Stamp(FID(), 0x1);\n";
+      } else {
+	$stamp = "  ". $stamp ."Stamp(FID());\n";
+      }
+    }
+
+    $r->{Type} =~ /(.)/; my $arg = lc $1;
+    my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
+    print C7 "void ${CLASSNAME}::Delta$r->{Methodbase}($args1) {\n";
+
+    if (exists $GetSetMap{$r->{Type}}{DeltaMeth})
+    {
+      print C7 "  $r->{Varname}$GetSetMap{$r->{Type}}{DeltaMeth};\n";
+    }
+    else
+    {
+      my $arg = $r->{Args}[0][2]; # assume single argument
+      print C7 "  $arg += $r->{Varname};\n";
+      # Check if range is set ... make if stuff
+      if (exists $r->{Range})
+      {
+	my $rr = $r->{Range};
+	print C7 "  if ($arg > $rr->[1]) $arg = $rr->[1];\n";
+	print C7 "  if ($arg < $rr->[0]) $arg = $rr->[0];\n"
+	    unless(grep(/^$r->{Type}$/, @UnsignedTypes) and $rr->[0] == 0);
+      }
+
+      $setit  = "  $r->{Varname} = $arg;\n";
+    }
+
+    if (exists $r->{Ray})
+    {
+      $post = "  ";
+      for $f (split(/\s*,\s*/, $r->{Ray}))
+      {
+	$post .= "Emit${f}Ray(); ";
+      }
+      $post .= "\n";
+    }
+    print C7 "${pre}${setit}${stamp}${post}}\n\n";
+  }
 }
 
 #######################
@@ -1118,27 +1240,50 @@ for $r (@Members)
 {
   next unless $r->{Xport} =~ m/s|S|E|e/o;
 
-  if (exists $r->{Link})
+  if ($r->{Xport} =~ m/s|S|E|e/o)
   {
-    print C7 <<"fnordlink";
+    if (exists $r->{Link})
+    {
+      print C7 <<"fnordlink";
 ZMIR* ${CLASSNAME}::S_$r->{Methodname}($r->{ArgStr}) {
   ZMIR* _mir = new ZMIR(mSaturnID, ($r->{Args}[0][1] ? $r->{Args}[0][1]\->GetSaturnID() : 0));
   _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});
 fnordlink
-  } else {
-    my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
-    print C7 <<"fnord";
+    }
+    else
+    {
+      my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
+      print C7 <<"fnord";
 ZMIR* ${CLASSNAME}::S_$r->{Methodname}($args1) {
   ZMIR* _mir = new ZMIR(mSaturnID);
   _mir->SetLCM_Ids($LibID, $ClassID, $r->{ID});
 fnord
-    print C7 BeamArgs("_mir", $r->{Args});
-  } # end if Link
-  if ($r->{Local})
-  {
-    print C7 "  _mir->SetRecipient(mSaturn->GetSaturnInfo());\n";
+      print C7 BeamArgs("_mir", $r->{Args});
+    }
+
+    if ($r->{Local})
+    {
+      print C7 "  _mir->SetRecipient(mSaturn->GetSaturnInfo());\n";
+    }
+    print C7 "  return _mir;\n}\n\n";
   }
-  print C7 "  return _mir;\n}\n\n";
+
+  if ($r->{Xport} =~ m/d|D|f|F/o)
+  {
+    my $args1 = join(", ", map( { "$_->[0] $_->[2]" } @{$r->{Args}}));
+    print C7 <<"fnord";
+ZMIR* ${CLASSNAME}::S_Delta$r->{Methodbase}($args1) {
+  ZMIR* _mir = new ZMIR(mSaturnID);
+  _mir->SetLCM_Ids($LibID, $ClassID, $r->{DeltaID});
+fnord
+    print C7 BeamArgs("_mir", $r->{Args});
+
+    if ($r->{Local})
+    {
+      print C7 "  _mir->SetRecipient(mSaturn->GetSaturnInfo());\n";
+    }
+    print C7 "  return _mir;\n}\n\n";
+  }
 }
 
 ### Others/Explicit/Exported/Executable Methods
@@ -1172,9 +1317,9 @@ for $r (@Methods)
   print C7 "  return _mir;\n}\n\n";
 }
 
-##############
-### ExecuteMir
-##############
+##################
+### ExecuteMir ###
+##################
 
 print C7 "\n// Execute Mir\n//" . '-' x 72 . "\n\n";
 
@@ -1190,10 +1335,11 @@ fnord
   # Set stuff
   for $r (@Members)
   {
-    next unless $r->{Xport} =~ m/s|S|e|E/o;
-    if (exists $r->{Link})
+    if ($r->{Xport} =~ m/s|S|e|E/o)
     {
-      print C7 << "fnordlink";
+      if (exists $r->{Link})
+      {
+	print C7 << "fnordlink";
   case $r->{ID}: {
     $r->{LinkType}* _beta = dynamic_cast<$r->{LinkType}*>(mir.fBeta);
     if (mir.fBeta != 0 && _beta == 0)
@@ -1202,16 +1348,25 @@ fnord
     break;
   }
 fnordlink
+      }
+      else
+      {
+	print C7 "  case $r->{ID}: {\n";
+	print C7 QeamArgs($r->{Args}, "mir", "    ");
+	my @ca = map { $_->[5] } (@{$r->{Args}});
+	print C7 "    ${CLASSNAME}::$r->{Methodname}(" . join(", ", @ca) .");\n";
+	print C7 "    break;\n  }\n";
+      }
     }
-    else
+
+    if ($r->{Xport} =~ m/d|D|f|F/o)
     {
-      print C7 "  case $r->{ID}: {\n";
+      print C7 "  case $r->{DeltaID}: {\n";
       print C7 QeamArgs($r->{Args}, "mir", "    ");
       my @ca = map { $_->[5] } (@{$r->{Args}});
-      print C7 "    ${CLASSNAME}::$r->{Methodname}(" . join(", ", @ca) .");\n";
+      print C7 "    ${CLASSNAME}::Delta$r->{Methodbase}(" . join(", ", @ca) .");\n";
       print C7 "    break;\n  }\n";
-
-    } # end if Link
+    }
   }
 
   # Others
@@ -1256,9 +1411,9 @@ fnord
   print C7 " } // end switch\n}\n\n";
 }
 
-#####################
-### Catalog generator
-#####################
+#########################
+### Catalog generator ###
+#########################
 
 print C7 "\n// Catalog\n//" . '-' x 72 . "\n\n";
 
@@ -1276,14 +1431,16 @@ void ${CLASSNAME}::_gled_catalog_init() {
   _ci->fDefRnrCtrl = RnrCtrl(${RnrCtrl_ctor});
 fnord
 
-#####################
-### Member/MethodInfo
-#####################
+#########################
+### Member/MethodInfo ###
+#########################
 
 for $r (@Members)
 {
   if ($r->{Xport} =~ m/s|S|e|E/o)
   {
+    my $isdelta = $r->{Xport} =~ m/d|D|f|F/o;
+
     print C7 "  {\n    MethodInfo* mip = new MethodInfo(\"$r->{Methodname}\", $r->{ID});\n";
     if (exists $r->{Link})
     {
@@ -1291,25 +1448,38 @@ for $r (@Members)
     }
     else
     {
+      print C7 "    MethodInfo* deltamip = new MethodInfo(\"Delta$r->{Methodbase}\", $r->{DeltaID});\n"
+	  if ($isdelta);
+
       # Due to type-mapping can translate a single composite type into
       # list of basic types (eg. ZColor->(4 x float)).
       my $C = $#{$r->{Args}};
-      for($i=0; $i<=$C; ++$i)
+      for ($i = 0; $i <= $C; ++$i)
       {
 	# must backslash-o-fy the "s
 	my $xxarg = $r->{Args}[$i][1];
 	$xxarg =~ s/"/\\"/g;
 	print C7 "    mip->fArgs.push_back(\"$r->{Args}[$i][0] $xxarg\");\n";
+	print C7 "    deltamip->fArgs.push_back(\"$r->{Args}[$i][0] $xxarg\");\n" if ($isdelta);
       }
     }
     if (exists $r->{Tags})
     {
       print C7 "    " .  produce_tags("mip->fTags", $r->{Tags}) . "\n";
+      print C7 "    " .  produce_tags("deltamip->fTags", $r->{Tags}) . "\n" if ($isdelta);
     }
     print C7 "    mip->bLocal = " . ($r->{Local} ? "true" : "false") . ";\n";
     print C7 "    mip->fClassInfo = _ci;\n";
     print C7 "    _ci->fMethodList.push_back(mip);\n";
-    print C7 "    _ci->fMethodHash[$r->{ID}] = mip;\n\n";
+    print C7 "    _ci->fMethodHash[$r->{ID}] = mip;\n";
+    if ($isdelta)
+    {
+      print C7 "    deltamip->bLocal = " . ($r->{Local} ? "true" : "false") . ";\n";
+      print C7 "    deltamip->fClassInfo = _ci;\n";
+      print C7 "    _ci->fMethodList.push_back(deltamip);\n";
+      print C7 "    _ci->fMethodHash[$r->{DeltaID}] = deltamip;\n";
+    }
+    print C7 "\n";
 
     my $Mtype = (exists $r->{Link}) ? "Link" : "Data";
 
@@ -1317,6 +1487,7 @@ for $r (@Members)
     print C7 "    dmip->fPrefix = \"$r->{Prefix}\";\n";
     print C7 "    dmip->fType = \"$r->{Args}[0][0]\";\n";
     print C7 "    dmip->fSetMethod = mip;\n";
+    print C7 "    dmip->fDeltaMethod = deltamip;\n" if ($isdelta);
     print C7 "    dmip->fClassInfo = _ci;\n";
     if (exists $r->{Link})
     {

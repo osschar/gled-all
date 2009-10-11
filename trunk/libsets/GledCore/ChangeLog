@@ -1,7 +1,35 @@
+2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PerfMeterTarget.h:
+	In Xport pragma replace '[ref]' by 'Q' (changed in p7).
+
+	* Gled/GledNS.h:
+	Add member 'MethodInfo *fDeltaMethod' to DataMemberInfo.
+	Somewhat beautify.
+
+	* GledView/FTW_Shell.cxx:
+	In context menu also put delta-method under "Set methods".
+
+	* catalog.patch:
+	Add pragmas for stones declared in SVars.h: SMinMaxVar, SInertVar,
+	SDesireVar and SExpDesireVar.
+
+	* Stones/SVars.cxx:
+	* Stones/SVars.h:
+	* FL/Fl_SVars.cxx:
+	* FL/Fl_SVars.h:
+	New stones for ranged (SMinMaxVar), step-limited (SInertVar)
+	and value-converging (SDesireVar, SExpDesireVar(not
+	implemented)) variables.
+	Fl classes that go with them.
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Add weeds MinMaxVar and DesireVar.
+
 2009-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
-	Preliminary mac support for handling of some terminal signals (ILL, BUS, SEGV
-	and FPE) in Eventor/Mountain threads.
+	Preliminary mac support for handling of some terminal
+	signals (ILL, BUS, SEGV and FPE) in Eventor/Mountain threads.
 
 	* Ephra/Mountain.cxx:
 	Add ifdefs for mac - this seems uber weird and there are no docs

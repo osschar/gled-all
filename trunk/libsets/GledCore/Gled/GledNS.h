@@ -25,7 +25,8 @@ class TClass;
 class TRealData;
 class TDataMember;
 
-namespace GledViewNS {
+namespace GledViewNS
+{
   class MethodInfo;
   class DataMemberInfo;
   class LinkMemberInfo;
@@ -33,14 +34,16 @@ namespace GledViewNS {
   class LibSetInfo;
 }
 
-namespace GledNS {
+namespace GledNS
+{
 
   /**************************************************************************/
   // Rnr Bits and Ctrl
   /**************************************************************************/
   // Or move them to RnrBase something ...
 
-  struct RnrBits {
+  struct RnrBits
+  {
     // At which RenderLevel to call a specific rendering
     // Values of fX are RenderLevels at which to invoke the method
     // 0 ~ PreDraw, 1 ~ Draw, 2 ~ PostDraw; 3 ~ FullDescent
@@ -65,7 +68,8 @@ namespace GledNS {
     bool ListOnDirect() const { return fList[0]!=0 || fList[1]!=0 || fList[2]!=0; }
   };
 
-  struct RnrCtrl {
+  struct RnrCtrl
+  {
     RnrBits		fRnrBits;
 
     RnrCtrl() : fRnrBits(2,4,6,0, 0,0,0,5) {}
@@ -80,7 +84,8 @@ namespace GledNS {
   class ClassInfo;
   class LibSetInfo;
 
-  struct InfoBase {
+  struct InfoBase
+  {
     TString		fName;
     ClassInfo*		fClassInfo;
 
@@ -88,7 +93,8 @@ namespace GledNS {
     bool operator==(const TString& s) const { return (fName == s); }
   };
 
-  struct MethodInfo : public InfoBase {
+  struct MethodInfo : public InfoBase
+  {
     MID_t		fMid;
     lStr_t		fContextArgs;
     lStr_t		fArgs;
@@ -106,14 +112,16 @@ namespace GledNS {
     void  StreamIds(TBuffer& b) const;
   };
 
-  struct DataMemberInfo : public InfoBase {
+  struct DataMemberInfo : public InfoBase
+  {
     TString             fPrefix;
     TString		fType;
     MethodInfo*		fSetMethod;
+    MethodInfo*		fDeltaMethod;
     TRealData*          fTRealData;
 
     DataMemberInfo(const TString& s) :
-      InfoBase(s), fSetMethod(0), fTRealData(0) {}
+      InfoBase(s), fSetMethod(0), fDeltaMethod(0), fTRealData(0) {}
 
     TString CName();
     TString FullName();
@@ -123,7 +131,8 @@ namespace GledNS {
     TDataMember* GetTDataMember();
   };
 
-  struct LinkMemberInfo : public DataMemberInfo {
+  struct LinkMemberInfo : public DataMemberInfo
+  {
     RnrBits		fDefRnrBits;
 
     LinkMemberInfo(const TString& s) : DataMemberInfo(s) {}
@@ -178,7 +187,8 @@ namespace GledNS {
   /**************************************************************************/
   /**************************************************************************/
 
-  struct ClassInfo : public InfoBase {
+  struct ClassInfo : public InfoBase
+  {
     FID_t			fFid;
     LibSetInfo*			fLibSetInfo;
 
@@ -246,7 +256,8 @@ namespace GledNS {
   typedef hash_map<TString, A_Rnr_Creator_foo>::iterator  hRnr2RCFoo_i;
 #endif
 
-  struct LibSetInfo : public InfoBase {
+  struct LibSetInfo : public InfoBase
+  {
     LID_t		fLid;
     const char**	fDeps;
 
@@ -387,7 +398,8 @@ namespace GledNS {
   ZGlass* ReadLensIDAsPtr(TBuffer& b);
 
   template <class GLASS>
-  GLASS StreamLensByGlass(TBuffer& b) {
+  GLASS StreamLensByGlass(TBuffer& b)
+  {
     ZGlass* lens = StreamLens(b);
     if(lens) {
       GLASS ret = dynamic_cast<GLASS>(lens);
@@ -432,7 +444,8 @@ namespace GledNS {
 
   // url_tokenizator
 
-  class url_token : public TString {
+  class url_token : public TString
+  {
   public:
     enum type_e { null, link_sel, list_sel };
   protected:

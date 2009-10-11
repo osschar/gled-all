@@ -79,4 +79,28 @@ $PATCH = {
   "#pragma link C++ class GLensWriteHolder;\n"	
 },
 
+"SVars" => {
+  'NoDefault'  => 1,
+  'Pragmas'    =>
+   "#pragma link C++ class   SMinMaxVar<Float_t>+;\n" .
+   "#pragma link C++ class   SMinMaxVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SMinMaxVarF;\n" .
+   "#pragma link C++ typedef SMinMaxVarD;\n" .
+
+   "#pragma link C++ class   SInertVar<Float_t>+;\n" .
+   "#pragma link C++ class   SInertVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SInertVarF;\n" .
+   "#pragma link C++ typedef SInertVarD;\n" .
+
+   "#pragma link C++ class   SDesireVar<Float_t>+;\n" .
+   "#pragma link C++ class   SDesireVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SDesireVarF;\n" .
+   "#pragma link C++ typedef SDesireVarD;\n" .
+
+   "#pragma link C++ class   SExpDesireVar<Float_t>+;\n" .
+   "#pragma link C++ class   SExpDesireVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SExpDesireVarF;\n" .
+   "#pragma link C++ typedef SExpDesireVarD;\n"
+},
+
 };

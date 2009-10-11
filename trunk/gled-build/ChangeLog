@@ -1,3 +1,13 @@
+2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/project7.pl:
+	Add support for Delta methods.
+	For Xport key remove support for S[ref] - it is replaced by q|Q	flag.
+
+	Should either:
+	- provide methods to do equivalent of $r->{Xport} =~ /s|S|e|E/; or
+	- remove parsing of [] sub-options.
+
 2009-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* cfg/Rnr_GL_SKEL.cxx:

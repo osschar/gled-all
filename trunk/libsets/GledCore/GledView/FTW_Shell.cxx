@@ -1004,7 +1004,9 @@ void FTW_Shell::FillLensMenu(OS::ZGlassImg* img, Fl_Menu_Button& menu,
 	{
 	  mcdl.push_back(new mir_call_data_img(img, this, *cmi));
 	  TString& mn( (*cmi)->fName );
-	  if(mn.Length() >= 4 && mn.BeginsWith("Set") && isupper(mn[3])) {
+	  if ((mn.Length() >= 4 && mn.BeginsWith("Set") && isupper(mn[3])) ||
+	      (mn.Length() >= 6 && mn.BeginsWith("Delta") && isupper(mn[5])))
+	  {
 	    menu.add(GForm("%s%s/%s/%s/%s (%d; %d,%d)", prefix.Data(),
 			   p1, p2, pset,
 			   (*cmi)->fName.Data(), (*cmi)->fMid,
