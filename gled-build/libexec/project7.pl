@@ -612,8 +612,10 @@ while ($c !~ m!\G\s*$!osgc)
       }
       else
       {
-	my $settype = $type;
-	$settype .= "&" if $member->{Xport} =~ /q|Q/;
+	my $settype;
+	if    ($member->{Xport} =~ /q/) { $settype = "${type}&"; }
+	elsif ($member->{Xport} =~ /Q/) { $settype = "const ${type}&"; }
+	else                            { $settype = "$type"; }
         $member->{ArgStr} = &SetArgs($settype, lc($methodbase));
       }
       $member->{Args}  = &MunchArgs($member->{ArgStr});
