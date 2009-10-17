@@ -9,7 +9,8 @@
 #include <Rnr/GL/SphereTrings.h>
 #include <Ephra/Saturn.h>
 
-/**************************************************************************/
+
+//==============================================================================
 
 ZGlass_GL_Rnr::ZGlass_GL_Rnr(ZGlass* d) : A_Rnr(), mGlass(d)
 {
@@ -26,13 +27,48 @@ ZGlass_GL_Rnr::~ZGlass_GL_Rnr()
   glDeleteLists(mDispList, 1);
 }
 
-/**************************************************************************/
+
+//==============================================================================
+// Protected methods
+//==============================================================================
+
+void ZGlass_GL_Rnr::obtain_rnrmod(RnrDriver* rd, RnrModStore& rms)
+{
+  RnrMod* rm = rd->GetRnrMod(rms.fFid);
+  if (rm != rms.fRnrMod || rm->fTringTS > rms.fTringTS)
+  {
+    bRebuildDL   = true;
+    rms.fRnrMod  = rm;
+    rms.fTringTS = rm->fTringTS;
+  }
+}
+
+bool ZGlass_GL_Rnr::check_gl_error(const TString& msg)
+{
+  // Checks if GL error has occured.
+  // Returns true if it did.
+
+  GLenum gl_err = glGetError();
+  if (gl_err)
+  {
+    cout << "GL error in " << mGlass->Identify() << ": " << msg << endl
+	 << "  " << gluErrorString(gl_err) << endl;
+    return true;
+  }
+  return false;
+}
+
+
+//==============================================================================
+// Draw commands and its specializations.
+//==============================================================================
 
 void ZGlass_GL_Rnr::PreDraw(RnrDriver* rd)
 {
-  if(mGlass->bUseNameStack) rd->GL()->PushName(this);
+  if (mGlass->bUseNameStack) rd->GL()->PushName(this);
 
-  if(mGlass->mStampReqTring > mStampTring) {
+  if (mGlass->mStampReqTring > mStampTring)
+  {
     Triangulate(rd);
     mStampTring = mGlass->mTimeStamp;
     bRebuildDL  = true;
@@ -43,19 +79,21 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 {
   // cout <<"ZGlass_GL_Rnr::Draw rendering '"<< mGlass->GetName() <<"'.\n";
 
-  if(mGlass->bUseDispList)
+  if (mGlass->bUseDispList)
   {
     GLRnrDriver* glrd = rd->GL();
-    if(bUsesSubPicking && glrd->PickingP())
+    if (bUsesSubPicking && glrd->PickingP())
     {
       Render(rd);
     }
-    else if(bRebuildDL)
+    else if (bRebuildDL)
     {
-      if(glrd->GetInDLRebuild())
+      if (glrd->GetInDLRebuild())
       {
 	Render(rd);
-      } else {
+      }
+      else
+      {
 	glrd->SetInDLRebuild(true);
         // Compared with GL_COMPILE and then glCallList() but there was
         // no difference. 24.2.07, gl-version ATI 2.0.6234
@@ -79,15 +117,15 @@ void ZGlass_GL_Rnr::Draw(RnrDriver* rd)
 
 void ZGlass_GL_Rnr::PostDraw(RnrDriver* rd)
 {
-  if(mGlass->bUseNameStack) rd->GL()->PopName();
+  if (mGlass->bUseNameStack) rd->GL()->PopName();
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZGlass_GL_Rnr::Render(RnrDriver* rd)
 {}
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZGlass_GL_Rnr::Redraw(RnrDriver* rd)
 {
@@ -95,31 +133,32 @@ void ZGlass_GL_Rnr::Redraw(RnrDriver* rd)
   rd->GL()->SetRedraw(true);
 }
 
-/**************************************************************************/
 
-void ZGlass_GL_Rnr::obtain_rnrmod(RnrDriver* rd, RnrModStore& rms)
+//==============================================================================
+// Event handling
+//==============================================================================
+
+int ZGlass_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
-  RnrMod* rm = rd->GetRnrMod(rms.fFid);
-  if(rm != rms.fRnrMod || rm->fTringTS > rms.fTringTS) {
-    bRebuildDL   = true;
-    rms.fRnrMod  = rm;
-    rms.fTringTS = rm->fTringTS;
-  }
-}
+  // Check if the lens is a list and calls forwards Handle() to
+  // list elements.
+  // Returns 1 when one of the elements returns 1, otherwise 0.
+  //
+  // This is implemented here to avoid AList_GL_Rnr -- as list rendering
+  // is already implemented in base classes.
 
-bool ZGlass_GL_Rnr::check_gl_error(const TString& msg)
-{
-  // Checks if GL error has occured.
-  // Returns true if it did.
-
-  GLenum gl_err = glGetError();
-  if (gl_err)
+  if (fImg->fIsList)
   {
-    cout << "GL error in " << mGlass->Identify() << ": " << msg << endl
-	 << "  " << gluErrorString(gl_err) << endl;
-    return true;
-  }
-  return false;
-}
+    namespace OS = OptoStructs;
 
-/**************************************************************************/
+    OS::lpZGlassImg_t *imgs = fImg->GetElementImgs();
+    for (OS::lpZGlassImg_i i = imgs->begin(); i != imgs->end(); ++i)
+    {
+      A_Rnr *rnr = rd->GetRnr(*i);
+      if (rnr->Handle(rd, ev));
+      return 1;
+    }
+  }
+
+  return 0;
+}

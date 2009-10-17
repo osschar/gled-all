@@ -1,3 +1,37 @@
+2009-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Pupil / GL event handling changes.
+
+	* Pupils/Pupil.cxx:
+	Fix sporadic occurance of key-up events when key is
+	auto-repeating. This requires a trip back to X ... but still
+	better than unexpected key events coming in.
+
+	White-space.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Implement virtual Handle() from A_Rnr.
+	Check if lens is list and try delivering the event to all
+	elements. This can be done here as ZGlassImg already has all the
+	information.
+	Remove method GetGlass() - apparently it was not used.
+
+	White-space.
+
+	* RnrBase/A_Rnr.h:
+	Rename inner class NameStack_Entry to NameStackEntry.
+
+	White-space.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	* RnrBase/RnrDriver.h:
+	* Rnr/GL/GLRnrDriver.h:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/PupilInfo_GL_Rnr.h:
+	White-space.
+
 2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PerfMeterTarget.h:

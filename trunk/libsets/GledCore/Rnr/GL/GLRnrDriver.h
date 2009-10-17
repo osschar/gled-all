@@ -59,8 +59,8 @@ public:
   { if(i>mPickCount) i=0; return mPickVector[i]; }
 
   Bool_t PickingP()                     { return bInPicking && bDoPickOps; }
-  void PushName(A_Rnr* rnr, void* ud=0) { if(PickingP()) push_name(rnr, ud); }
-  void PopName()                        { if(PickingP()) pop_name(); }
+  void PushName(A_Rnr* rnr, void* ud=0) { if (PickingP()) push_name(rnr, ud); }
+  void PopName()                        { if (PickingP()) pop_name(); }
 
   void ClearNameStack();
   void RestoreNameStack();

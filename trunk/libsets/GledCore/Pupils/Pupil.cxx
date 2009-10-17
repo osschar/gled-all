@@ -560,7 +560,7 @@ void Pupil::FullScreen(Fl_Window* fsw)
 }
 
 /**************************************************************************/
-// Render & Pick
+// Render
 /**************************************************************************/
 
 void Pupil::Render(bool rnr_self, bool rnr_overlay)
@@ -579,16 +579,21 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
 
   A_Rnr* pupil_rnr = mDriver->GetRnr(fImg);
   mDriver->BeginRender();
-  if(rnr_self) {
-    try {
+  if (rnr_self)
+  {
+    try
+    {
       mDriver->Render(pupil_rnr);
     }
-    catch(Exc_t exc) {
+    catch(Exc_t exc)
+    {
       cout << _eh << "scene exception: '" << exc << "'.\n";
     }
   }
-  if(bShowOverlay && rnr_overlay && mOverlayImg != 0) {
-    try {
+  if (bShowOverlay && rnr_overlay && mOverlayImg != 0)
+  {
+    try
+    {
       // !!!! Manually call pupil_rnr->Pre/PostDraw().
       // Somewhat hacky ... but can happen that handle is called
       // before first draw is done and then font is undefined.
@@ -597,19 +602,22 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
       mDriver->Render(mDriver->GetRnr(mOverlayImg));
       pupil_rnr->PostDraw(mDriver);
     }
-    catch(Exc_t exc) {
+    catch (Exc_t exc)
+    {
       cout << _eh << "overlay exception: '" << exc << "'.\n";
     }
   }
   mDriver->EndRender();
 
-  if(mDriver->SizePM() > 0) {
+  if (mDriver->SizePM() > 0)
+  {
     printf("%sposition stack not empty (%d).\n", _eh.Data(), mDriver->SizePM());
     mDriver->ClearPM();
   }
 
   GLenum gl_err = glGetError();
-  if(gl_err) {
+  if (gl_err)
+  {
     printf("%sGL error: %s.\n", _eh.Data(), gluErrorString(gl_err));
   }
 
@@ -619,8 +627,10 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
 // Picking
 /**************************************************************************/
 
-namespace {
-  struct pick_menu_data : public FTW_Shell::mir_call_data_img {
+namespace
+{
+  struct pick_menu_data : public FTW_Shell::mir_call_data_img
+  {
     Pupil* pupil;
 
     pick_menu_data(Pupil* p, OS::ZGlassImg* i) :
@@ -1139,15 +1149,28 @@ void  Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
   e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
 		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE ||
                 ev == FL_MOUSEWHEEL);
+
+  // Fltk sometimes still sends keyup events from auto-repeat --
+  // transform them to keydown. Apparently this only happens when
+  // running with multiple threads as I could not reproduce this
+  // behaviour in a minimal fltk program.
+  //
+  // This requires round trip to X server, so should prefereably fixed
+  // in fltk (or wherever).
+  if (ev == FL_KEYUP && Fl::get_key(e.fKey))
+    e.fEvent = FL_KEYDOWN;
 }
 
 int Pupil::overlay_pick(A_Rnr::Fl_Event& e)
 {
   Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
-  if(n > 0) {
+  if (n > 0)
+  {
     e.fCurrentNSE    = e.fNameStack.begin();
     e.fNameStackSize = n;
-  } else {
+  }
+  else
+  {
     e.fCurrentNSE    = e.fNameStack.end();
     e.fNameStackSize = 0;
   }

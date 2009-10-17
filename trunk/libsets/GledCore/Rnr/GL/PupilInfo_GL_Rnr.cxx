@@ -12,7 +12,8 @@
 
 #include <Gled/Gled.h>
 
-namespace {
+namespace
+{
   ZRlFont*        def_font = 0;
   ZRlFont_GL_Rnr* def_font_rnr = 0;
   RnrMod          font_rnrmod;

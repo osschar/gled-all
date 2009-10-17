@@ -16,8 +16,8 @@ class Eye;
 class A_Rnr; class RnrScheme;
 class MTW_View;
 
-namespace OptoStructs {
-
+namespace OptoStructs
+{
   struct ZGlassImg;
   typedef list<ZGlassImg*>                   lpZGlassImg_t;
   typedef list<ZGlassImg*>::iterator         lpZGlassImg_i;
@@ -40,20 +40,21 @@ namespace OptoStructs {
   // ZGlassImg: complete image of a glass in an eye
   /**************************************************************************/
 
-  class ZGlassImg {
+  class ZGlassImg
+  {
   protected:
-    lpZGlassImg_t*	fElementImgs; // List-of-images for ALists. Cache.
+    lpZGlassImg_t      *fElementImgs; // List-of-images for ALists. Cache.
 
   public:
-    Eye*		fEye;
-    ZGlass*		fLens;
+    Eye                *fEye;
+    ZGlass             *fLens;
 
     bool		fIsList;
     lZLinkDatum_t	fLinkData;
     lpA_View_t		fViews;
 
-    A_Rnr*		fDefRnr;
-    MTW_View*		fFullMTW_View;
+    A_Rnr              *fDefRnr;
+    MTW_View           *fFullMTW_View;
 
     ZGlassImg(Eye* e);
     ZGlassImg(Eye* e, ZGlass* lens);
@@ -83,7 +84,8 @@ namespace OptoStructs {
   // ImageConsumer: abstract base for str
   /**************************************************************************/
 
-  class ImageConsumer {
+  class ImageConsumer
+  {
   public:
     virtual ~ImageConsumer() {}
     virtual void ImageDeath(ZGlassImg* img) = 0;
@@ -96,11 +98,12 @@ namespace OptoStructs {
   // ZLinkDatum: information provided for links of each lens
   /**************************************************************************/
 
-  struct ZLinkDatum {
-    ZGlassImg*      fImg;
+  struct ZLinkDatum
+  {
+    ZGlassImg      *fImg;
     ZGlass::LinkRep fLinkRep;
-    ZGlass*         fToGlass;
-    ZGlassImg*      fToImg;
+    ZGlass         *fToGlass;
+    ZGlassImg      *fToImg;
 
     ZLinkDatum(ZGlassImg* img, ZGlass::LinkRep& lrep) :
       fImg(img),
@@ -117,8 +120,9 @@ namespace OptoStructs {
   // A_View: base of all lens views
   /**************************************************************************/
 
-  struct A_View {
-    ZGlassImg*	fImg;
+  struct A_View
+  {
+    ZGlassImg	*fImg;
 
     A_View(ZGlassImg* i) : fImg(i) { if(fImg) fImg->CheckInView(this);  }
     virtual ~A_View()              { if(fImg) fImg->CheckOutView(this); }
@@ -132,9 +136,10 @@ namespace OptoStructs {
   // ZLinkView: A link representation with state.
   /**************************************************************************/
 
-  struct ZLinkView {
-    ZLinkDatum*	fLinkDatum;
-    ZGlass*	fToGlass; // Glass pointing to last.
+  struct ZLinkView
+  {
+    ZLinkDatum	*fLinkDatum;
+    ZGlass      *fToGlass; // Glass pointing to last.
 
     ZLinkView(ZLinkDatum* ld) : fLinkDatum(ld), fToGlass(0) { Update(); }
     virtual ~ZLinkView() {}

@@ -31,18 +31,22 @@ public:
   ZGlass_GL_Rnr(ZGlass* d=0);
   virtual ~ZGlass_GL_Rnr();
 
-  virtual ZGlass* GetGlass() { return mGlass; }
+  // Virtuals from A_Rnr
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
+
+  virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
+
+  // New virtuals
 
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd) {}
 
   virtual void Redraw(RnrDriver* rd);
 
-  /**************************************************************************/
+  //----------------------------------------------------------------------------
 
   class GL_Capability_Switch {
     GLenum    fWhat;
