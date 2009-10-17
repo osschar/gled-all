@@ -18,15 +18,15 @@ class A_Rnr : public OptoStructs::A_View
   friend class RnrDriver;
 
 public:
-  struct NameStack_Entry
+  struct NameStackEntry
   {
     A_Rnr* fRnr;
     void*  fUserData;
   };
-  typedef NameStack_Entry                 NSE_t;
-  typedef list<NameStack_Entry>           lNSE_t;
-  typedef list<NameStack_Entry>::iterator lNSE_i;
-  typedef vector<NameStack_Entry>         vNSE_t;
+  typedef NameStackEntry                 NSE_t;
+  typedef list<NameStackEntry>           lNSE_t;
+  typedef list<NameStackEntry>::iterator lNSE_i;
+  typedef vector<NameStackEntry>         vNSE_t;
 
   struct Fl_Event
   {
@@ -88,7 +88,8 @@ typedef void (A_Rnr::*RnrSubDraw_foo)(RnrDriver*); // missing throw (?)
 // ListChangeObserver
 /**************************************************************************/
 
-struct ListChangeObserver : public OptoStructs::A_View {
+struct ListChangeObserver : public OptoStructs::A_View
+{
   A_Rnr* mRnr;
 
   ListChangeObserver(OptoStructs::ZGlassImg* list, A_Rnr* client) :
@@ -101,7 +102,8 @@ struct ListChangeObserver : public OptoStructs::A_View {
 // RnrElement
 /**************************************************************************/
 
-struct RnrElement {
+struct RnrElement
+{
   A_Rnr*		    fRnr;
   RnrSubDraw_foo	    fRnrFoo; // If 0, do full descent.
 
@@ -122,7 +124,8 @@ typedef vector<lRnrElement_t>::iterator	vlRnrElement_i;
 // into fSelfScheme, fListScheme, fLinksScheme.
 // then different rays would invalidate only the pertinent sub-schemes.
 
-class RnrScheme {
+class RnrScheme
+{
 public:
   list<OptoStructs::A_View*>  fListObservers;
   vlRnrElement_t              fScheme;
@@ -139,7 +142,8 @@ public:
 // RnrMod & RnrModStore
 /**************************************************************************/
 
-struct RnrMod {
+struct RnrMod
+{
   ZGlass*     fLens;
   A_Rnr*      fRnr;
   TimeStamp_t fTringTS;
@@ -148,7 +152,8 @@ struct RnrMod {
     fLens(l), fRnr(r), fTringTS(ts) {}
 };
 
-struct RnrModStore {
+struct RnrModStore
+{
   FID_t	fFid;
   RnrMod*     fRnrMod;
   TimeStamp_t fTringTS;

@@ -22,7 +22,8 @@
 
 class GLRnrDriver;
 
-class RnrDriver : public OptoStructs::ImageConsumer {
+class RnrDriver : public OptoStructs::ImageConsumer
+{
 private:
   void _init();
 
@@ -58,14 +59,16 @@ protected:
   //----------------------------------------------------------------
   // RnrMod Stack
 
-  struct RMStack {
+  struct RMStack
+  {
     RnrMod*        m_def;
     RnrMod*        m_def_autogen;
     stack<RnrMod*> m_stack;
     RMStack() : m_def(0), m_def_autogen(0) {}
 
-    RnrMod* get_active() {
-      if(m_stack.empty())
+    RnrMod* get_active()
+    {
+      if (m_stack.empty())
 	return m_def ? m_def : m_def_autogen;
       else
 	return m_stack.top();
@@ -100,7 +103,7 @@ public:
   void FillRnrScheme(RnrScheme* rs, OptoStructs::lpZGlassImg_t* imgs,
 		     const GledNS::RnrBits& bits);
 
-  virtual A_Rnr* GetLensRnr(ZGlass*lens);
+  virtual A_Rnr* GetLensRnr(ZGlass* lens);
   virtual A_Rnr* AssertDefRnr(OptoStructs::ZGlassImg* img);
   virtual A_Rnr* GetRnr(OptoStructs::ZGlassImg* img)
   { return img->fDefRnr ? img->fDefRnr : AssertDefRnr(img); }
@@ -111,10 +114,8 @@ public:
   virtual void EndRender();
 
   // Position Matrix Stack
-  void PushPM(PMSEntry& pmse)
-  { pmse.fPrev = mPMStack.back(); mPMStack.push_back(&pmse); }
-  void PopPM()
-  { mPMStack.pop_back(); }
+  void PushPM(PMSEntry& pmse) { pmse.fPrev = mPMStack.back(); mPMStack.push_back(&pmse); }
+  void PopPM()                { mPMStack.pop_back(); }
 
   PMSEntry& TopPM() 	{ return *mPMStack.back(); }
   ZNode*    TopPMNode() { return  mPMStack.back()->fNode; }
@@ -151,12 +152,17 @@ public:
 
 inline bool RnrDriver::find_rnrmod(FID_t fid)
 {
-  if(fid == mRMFid) return true;
+  if (fid == mRMFid) return true;
   mRMI = mRMStacks.find(fid);
-  if(mRMI == mRMStacks.end()) {
-    mRMFid.clear(); return false;
-  } else {
-    mRMFid = fid;   return true;
+  if (mRMI == mRMStacks.end())
+  {
+    mRMFid.clear();
+    return false;
+  }
+  else
+  {
+    mRMFid = fid;
+    return true;
   }
 }
 

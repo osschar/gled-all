@@ -41,7 +41,8 @@ ZGlassImg::ZGlassImg(Eye* e, ZGlass* lens) : fEye(e), fLens(lens)
   }
 }
 
-ZGlassImg::~ZGlassImg() {
+ZGlassImg::~ZGlassImg()
+{
   delete fElementImgs;
 
   while(!fViews.empty()) {
