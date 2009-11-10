@@ -23,7 +23,7 @@ private:
   void _init();
 
 public:
-  enum SiteViz_e { SV_None, SV_All, SV_RunningJobs, SV_ErrorJobs };
+  enum SiteViz_e { SV_None, SV_All, SV_RunningJobs, SV_ErrorJobs, SV_EventsDone, SV_EventsFrac };
   enum UserViz_e { UV_None, UV_All, UV_RunningJobs, UV_ErrorJobs };
 
 protected:
@@ -59,6 +59,8 @@ protected:
 
   SiteVar       mSVJobsRunning; //!
   SiteVar       mSVJobsError;   //!
+  SiteVar       mSVEventsDone;  //!
+  SiteVar       mSVEventsFrac;  //!
 
   SiteVar      *mSVCurrent;     //!
 #endif

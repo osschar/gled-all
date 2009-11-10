@@ -40,12 +40,21 @@ protected:
   Int_t         mJobsDone;      // X{GS} 7 ValOut()
   Int_t         mJobsError;     // X{GS} 7 ValOut()
 
+  Int_t         mEventsAll;     // X{GE} 7 ValOut()
+  Int_t         mEventsDone;    // X{GE} 7 ValOut()
+  Int_t         mEventsFrac;    // X{G}  7 ValOut()
+
   ZLink<CosmicBall> mBallViz;   // X{GS} L{}
   Bool_t            bBallOnStage; //!
+
+  void set_event_frac();
 
 public:
   AEVSite(const Text_t* n="AEVSite", const Text_t* t=0) : ZGlass(n,t) { _init(); }
   virtual ~AEVSite() {}
+
+  void SetEventsAll(Int_t ea);
+  void SetEventsDone(Int_t ed);
 
 #include "AEVSite.h7"
   ClassDef(AEVSite, 1);

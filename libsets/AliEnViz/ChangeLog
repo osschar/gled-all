@@ -1,3 +1,20 @@
+2009-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support display of "events" per site in solar view.
+	This is for supercomputing-09 demo.
+
+	* Glasses/AEVManager.cxx:
+	* Glasses/AEVManager.h:
+	Add two new site-viz modes: SV_EventsDone and SV_EventsFrac.
+	
+	* Glasses/AEVMlSucker.cxx:
+	Add parsing of "totevents" and "events" keywords.
+	Relax word regexp to include '.'.
+	
+	* Glasses/AEVSite.cxx:
+	* Glasses/AEVSite.h:
+	Add members needed for display of (fraction of) events done.
+
 2009-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVManager.h:
