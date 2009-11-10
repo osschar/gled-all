@@ -72,7 +72,7 @@ void AEVMlSucker::_init()
 
   mSuckerThread = 0;
 
-  mGlobWordRE.Reset("([-\\w]+)\\s+", "g");
+  mGlobWordRE.Reset("([-\\w\\.]+)\\s+", "g");
   mGlobVarRE .Reset("([-_\\w]+)=([\\d\\.eE]+)(?:[,\\s]*)", "g");
   mUScoreRE  .Reset("(\\w+)_([-\\w]+)");
 
@@ -88,6 +88,9 @@ void AEVMlSucker::_init()
     s_site_set_int_map["jobs_DONE"]      = &AEVSite::SetJobsDone;
     s_site_set_int_map["jobs_ERROR_ALL"] = &AEVSite::SetJobsError;
     s_site_set_int_map["jobs_ERR"]       = &AEVSite::SetJobsError;
+
+    s_site_set_int_map["totevents"]      = &AEVSite::SetEventsAll;
+    s_site_set_int_map["events"]         = &AEVSite::SetEventsDone;
 
     s_site_set_float_map["geo_LAT"] = &AEVSite::SetLatitude;
     s_site_set_float_map["geo_LON"] = &AEVSite::SetLongitude;
@@ -211,7 +214,7 @@ void AEVMlSucker::Suck()
 	    call_foo(site, var, val);
 	    reposition = true;
 	  }
-	  else if (var.BeginsWith("jobs_") || var.BeginsWith("max_"))
+	  else if (var.BeginsWith("jobs_") || var.BeginsWith("max_") || var.Contains("events"))
 	  {
 	    call_foo(site, var, TMath::Nint(val));
 	  }

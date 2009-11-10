@@ -43,6 +43,9 @@ void AEVManager::_init()
 
   mSVJobsRunning.fVarPtr = &AEVSite::mJobsRunning;
   mSVJobsError  .fVarPtr = &AEVSite::mJobsError;
+  mSVEventsDone .fVarPtr = &AEVSite::mEventsDone;
+  mSVEventsFrac .fVarPtr = &AEVSite::mEventsFrac;
+
   mSVCurrent = 0;
 
   mUserVizMode = UV_None;
@@ -276,6 +279,32 @@ void AEVManager::EmitSiteVizRay()
       select_sv_current();
       break;
     }
+    case SV_EventsDone:
+    {
+      if (mSites->Size() == 0)
+      {
+	mSiteVizMode = SV_All;
+	break;
+      }
+
+      mSVCurrent = &mSVEventsDone;
+      update_sv_current();
+      select_sv_current();
+      break;
+    }
+    case SV_EventsFrac:
+    {
+      if (mSites->Size() == 0)
+      {
+	mSiteVizMode = SV_All;
+	break;
+      }
+
+      mSVCurrent = &mSVEventsFrac;
+      update_sv_current();
+      select_sv_current();
+      break;
+    }
   }
 
   MakeInfoText();
@@ -412,6 +441,8 @@ void AEVManager::MakeInfoText()
       case SV_All:         txt += "all";  break;
       case SV_RunningJobs: txt += "running jobs"; show_sub = true; break;
       case SV_ErrorJobs:   txt += "errors";       show_sub = true; break;
+      case SV_EventsDone:  txt += "events done";  show_sub = true; break;
+      case SV_EventsFrac:  txt += "event fraction x 1000"; show_sub = true; break;
     }
     info->SetText(txt);
   }
