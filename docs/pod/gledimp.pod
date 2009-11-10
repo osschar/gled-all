@@ -1284,6 +1284,8 @@ Auto-generate MIR producing C<MIR* S_DeltaBar(Foo_t bar)> but NOT the
 C<void DeltaBar(Foo_t bar)> method -- it needs to be declared and
 implemented by the user. C<F> and C<f> are equivalent.
 
+This is not applicable for link data-members.
+
 Same comments as for B<eE> apply.
 
 =back
@@ -1313,9 +1315,18 @@ auto-generated:
 
 =over def
 
-=item<a> C<< protected: void assert_<lower-case-link-name>(const Exc_t& exc_header); >>
+=item<aA> Generate assert methods that check if link is set.
 
-=item<A> C<< public: <link-type>* Assert<link-name>(const Exc_t& exc_header); >>
+B<a> -- C<< protected: void assert_<lower-case-link-name>(const Exc_t& exc_header); >>
+
+B<A> -- C<< public: <link-type>* Assert<link-name>(const Exc_t& exc_header); >>
+
+=item<fF> Assumes that data-member C<mLinkName_fid> exists. The link set
+method does additional check if the argument matches to this C<FID>. By
+convention, if B<f> is given the C<fid>-variable is not streamed and should be
+set in C<_init()> method (or constructor). If C<F> is given, the
+C<fid>-variable is streamed and it should be set in C<AdEnlightenment()>. This
+convention is not enforced by auto-generated code.
 
 =back
 
