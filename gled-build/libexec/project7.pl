@@ -648,11 +648,12 @@ while ($c !~ m!\G\s*$!osgc)
 
       my $weed_done = 0;
       # Go for widget/view
-      if ($comment =~ m!7\s+(\w+\([^)]*\))!o)
+      if ($comment =~ m!7\s+(\w+\(.*\))!o)
       {
 	my $view = $1;
 	$view =~ s/\(/(Type=>'$type',Methodbase=>'$methodbase',Methodname=>"Set$methodbase",/;
 	$view =~ s/,\)/)/;
+	print " evaling: new GLED::Widgets::$view\n" if $DEBUG;
 	my $control = eval("new GLED::Widgets::".$view);
 	die "$view can not be instantiated ..." unless defined $control;
 	push @Views, $control;
@@ -1145,8 +1146,12 @@ for $r (@Members)
     }
     if (exists $r->{Link})
     {
-      $setit =
-	"  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
+      if ($r->{Link} =~ m/f|F/)
+      {
+	$setit = "  if (!$r->{Varname}_fid.is_null() && !GledNS::IsA($r->{Args}[0][2], $r->{Varname}_fid))\n" .
+	         "    throw Exc_t(GForm(\"${CLASSNAME}::$r->{Methodname} Argument is not of requested FID(%hu,%hu).\", $r->{Varname}_fid.fLid, $r->{Varname}_fid.fCid));\n";
+      }
+      $setit  .= "  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";
     }
     else
     {

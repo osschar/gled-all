@@ -1,3 +1,17 @@
+2009-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for L{fF}, relax regexp for weed ctor parsing.
+
+	* libexec/project7.pl:
+	L{fF} does an additional check in SetLink() method by using
+	an implied 'FID_t LinkName_fid' variable. This can be set
+	by sub-classes or specific lenses to restrict link contents to
+	sub-classes of specified fid.
+
+	The weed ctor parsing now allows parenthesis to be included. This
+	is needed when the constructor needs to call functions on lens
+	data.
+
 2009-10-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/project7.pl:
