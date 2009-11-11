@@ -119,7 +119,7 @@ void SolarSystem::AdEnlightenment()
 
 UInt_t SolarSystem::ODEOrder()
 {
-  static const string _eh("SolarSystem::ODEOrder ");
+  static const Exc_t _eh("SolarSystem::ODEOrder ");
 
   assert_balls(_eh);
   return 6 * mBalls->Size();
@@ -674,7 +674,7 @@ void SolarSystem::MakeStar()
 {
   // Not cluster safe.
 
-  static const string _eh("SolarSystem::MakeStar ");
+  static const Exc_t _eh("SolarSystem::MakeStar ");
 
   assert_balls(_eh);
 
@@ -695,7 +695,7 @@ void SolarSystem::MakePlanetoid()
 {
   // Not cluster safe.
 
-  static const string _eh("SolarSystem::MakePlanetoid ");
+  static const Exc_t _eh("SolarSystem::MakePlanetoid ");
 
   assert_balls(_eh);
 
