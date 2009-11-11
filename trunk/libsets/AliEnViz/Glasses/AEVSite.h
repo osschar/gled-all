@@ -27,8 +27,10 @@ protected:
 
   TString	mLocation;	// X{GS} 7 TextOut()
   TString	mDomain;	// X{GS} 7 TextOut()
-  // Int_t		mSiteId;	// X{GS} 7 ValOut()
-  // Int_t		mMasterHostId;	// X{GS} 7 ValOut()
+
+  // Int_t	mSiteId;	// X{GS} 7 ValOut()
+  // Int_t	mMasterHostId;	// X{GS} 7 ValOut()
+
   Float_t	mLatitude;	// X{GS} 7 ValOut()
   Float_t	mLongitude;	// X{GS} 7 ValOut()
 
