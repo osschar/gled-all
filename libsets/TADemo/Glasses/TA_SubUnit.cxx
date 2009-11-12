@@ -40,7 +40,8 @@ struct o3dInfo {
 };
 
 void
-_TA_Prim::calc_normal(float* v0, float* v1, float* v2) {
+_TA_Prim::calc_normal(float* v0, float* v1, float* v2)
+{
   float d0[3], d1[3];
   d0[0] = v1[0] - v0[0]; d1[0] = v2[0] - v0[0];
   d0[1] = v1[1] - v0[1]; d1[1] = v2[1] - v0[1];
@@ -55,7 +56,8 @@ _TA_Prim::calc_normal(float* v0, float* v1, float* v2) {
 
 /**************************************************************************/
 
-namespace {
+namespace
+{
   float SAFR = 1e-6;
 }
 
@@ -66,7 +68,7 @@ TA_SubUnit::build(TA_Unit* u, o3dInfo* i, char* data)
   // Transform to Gled coordinate system: x-forward, y-left, z-up.
 
   mUnit = u; mInfo = i;
-  mName = (char*)(data + mInfo->OffsetToObjectName);
+  mName = (const char*)(data + mInfo->OffsetToObjectName);
   mXoff = -SAFR * mInfo->ZFromParent;
   mYoff = -SAFR * mInfo->XFromParent;
   mZoff =  SAFR * mInfo->YFromParent;

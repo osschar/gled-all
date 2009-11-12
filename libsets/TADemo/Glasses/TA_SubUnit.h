@@ -25,14 +25,15 @@ typedef vector<_TA_Prim>		v_TA_Prim_t;
 typedef vector<_TA_Prim>::iterator	v_TA_Prim_i;
 //#endif
 
-class TA_SubUnit : public ZNode {
+class TA_SubUnit : public ZNode
+{
   MAC_RNR_FRIENDS(TA_SubUnit);
 
 protected:
   TA_Unit*	mUnit;		//! X{gS}
   o3dInfo*	mInfo;		//!
   int		mNVert;		//!
-  // Latest Gled does not produce S_ methods for !-commented members
+
   int		mNPrim;		// X{GS} 7 ValOut()
   Int_t		mNPBeg;		// X{GS} 7 Value(-range=>[0,100,1])
   int		mNPEnd;		// X{GS} 7 Value(-range=>[0,100,1])
@@ -47,7 +48,7 @@ protected:
   void build(TA_Unit* u, o3dInfo* i, char* data);
 
 public:
-  TA_SubUnit(Text_t* n="TA_SubUnit", Text_t* t=0) :
+  TA_SubUnit(const Text_t* n="TA_SubUnit", const Text_t* t=0) :
     ZNode(n,t), mNPBeg(0), mNPEnd(0) {}
 
 #include "TA_SubUnit.h7"
