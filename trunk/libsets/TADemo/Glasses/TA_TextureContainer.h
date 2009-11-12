@@ -8,7 +8,8 @@
 
 #include <GL/glew.h>
 
-struct _TA_Texture {
+struct _TA_Texture
+{
   GLubyte*	pData;
   int		fW, fH;
   GLuint	fTexture;
@@ -31,7 +32,8 @@ class _TA_Texture;
 
 /**************************************************************************/
 
-class TA_TextureContainer : public ZGlass {
+class TA_TextureContainer : public ZGlass
+{
 private:
   void _init();
 
@@ -42,7 +44,7 @@ protected:
 #endif
 
 public:
-  TA_TextureContainer(Text_t* n="TA_TextureContainer", Text_t* t=0) :
+  TA_TextureContainer(const Text_t* n="TA_TextureContainer", const Text_t* t=0) :
     ZGlass(n,t) { _init(); }
 
   void ProcessDescFile(); // X{E} 7 MButt()

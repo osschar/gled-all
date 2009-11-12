@@ -7,7 +7,8 @@
 #include "TA_SubUnit.h"
 #include "TA_TextureContainer.h"
 
-class TA_Unit : public TA_SubUnit {
+class TA_Unit : public TA_SubUnit
+{
   MAC_RNR_FRIENDS(TA_Unit);
   friend class TA_SubUnit;
 
@@ -22,7 +23,7 @@ protected:
   Int_t		mJ;	  // X{GS} 7 Value(-range=>[0,3,1])
 
 public:
-  TA_Unit(Text_t* n="TA_Unit", Text_t* t=0) :
+  TA_Unit(const Text_t* n="TA_Unit", const Text_t* t=0) :
     TA_SubUnit(n,t) { _init(); }
   ~TA_Unit();
 
