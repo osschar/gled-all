@@ -54,6 +54,7 @@ protected:
 
   // Set T to T_0 times TFactor:
   Float_t	mTFactor;	// X{gS} 7 Value(-range=>[0,100], join=>1)
+
   // T_n = T_0(1 - n/NumSteps)^alpha
   Float_t	mAlpha;		// X{gS} 7 Value(-range=>[1e-2,100,1,100])
 
