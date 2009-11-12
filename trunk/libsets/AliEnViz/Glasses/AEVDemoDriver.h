@@ -47,8 +47,8 @@ protected:
   Float_t       mTravelTime;	// X{GS} 7 Value(-range=>[0,10,1,100], -join=>1)
   Float_t       mWaitTime;      // X{GS} 7 Value(-range=>[0,10,1,100])
 
-  Int_t		mFPS;   	// X{GS} 7 Value(-range=>[1,100,1]), -join=>1)
-  Int_t		mRPS;   	// X{GS} 7 Value(-range=>[1,100,1]))
+  Int_t		mFPS;   	// X{GS} 7 Value(-range=>[1,100,1], -join=>1)
+  Int_t		mRPS;   	// X{GS} 7 Value(-range=>[1,100,1])
 
   ZLink<AList>          mTexCont;	 // X{GS} L{}
   ZLink<WGlDirectory>   mJobDirectory;	 // X{GS} L{}
