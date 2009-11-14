@@ -9,7 +9,8 @@
 
 #include <Glasses/ZNode.h>
 
-class AlListener : public ZNode {
+class AlListener : public ZNode
+{
   MAC_RNR_FRIENDS(AlListener);
 
 public:

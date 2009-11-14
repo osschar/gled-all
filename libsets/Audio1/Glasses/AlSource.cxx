@@ -23,8 +23,7 @@ ClassImp(AlSource);
 
 void AlSource::_init()
 {
-  // *** Set all links to 0 ***
-  mFile = "boom.wav";
+  mFile = "";
 
   mGain    = 1;
   mMinGain = 0;
@@ -59,18 +58,18 @@ ALboolean SourceIsPlaying(ALuint sid)
 {
   ALint state;
 
-  if(alIsSource(sid) == AL_FALSE) {
+  if (alIsSource(sid) == AL_FALSE)
     return AL_FALSE;
-  }
 
   state = AL_INITIAL;
   alGetSourceiv(sid, AL_SOURCE_STATE, &state);
-  switch(state) {
-  case AL_PLAYING:
-  case AL_PAUSED:
-    return AL_TRUE;
-  default:
-    break;
+  switch (state)
+  {
+    case AL_PLAYING:
+    case AL_PAUSED:
+      return AL_TRUE;
+    default:
+      break;
   }
 
   return AL_FALSE;
@@ -91,83 +90,36 @@ void AlSource::Play(Int_t count)
   {
     GLensReadHolder _rdlck(this);
 
-    if(mAlBuf == 0) alGenBuffers(1, &mAlBuf);
-    if(mAlSrc == 0) {
+    // if(mAlBuf == 0) alGenBuffers(1, &mAlBuf);
+    if (mAlSrc == 0)
+    {
       alGenSources(1, &mAlSrc);
       EmitSourceRay();
       EmitConeRay();
     }
 
     // --------------------------------------------------------------
-    // ogg loader
-    /*
-      {
-      struct stat sbuf;
-
-      if(stat(mFile.Data(), &sbuf) == -1) {
-      perror(mFile.Data());
-      throw(_eh + "stat failed.");
-      }
-
-      int   size = sbuf.st_size;
-      char* data = new char[size];
-
-      FILE* fh = fopen(mFile.Data(), "r");
-      if(fh == NULL) {
-      delete [] data;
-      throw(_eh + "could not open file.");
-      }
-      fread(data, size, 1, fh);
-
-      vorbisLoader *alutLoadVorbisp =
-      (vorbisLoader *) alGetProcAddress((ALubyte *) "alutLoadVorbis_LOKI");
-      if(alutLoadVorbisp == 0) {
-      delete [] data;
-      throw(_eh + "could not GetProc.");
-      }
-
-      if(alutLoadVorbisp(mAlBuf, data, size) != AL_TRUE) {
-      delete [] data;
-      throw(_eh + "alutLoadVorbis failed.");
-      }
-
-      delete [] data;
-      }
-    */
-
-    // --------------------------------------------------------------
     // wav loader
     {
-      void*   wave = NULL;
-      ALsizei size;
-      ALsizei freq;
-      ALenum  format;
+      mAlBuf = alutCreateBufferFromFile(mFile);
 
-#ifdef __APPLE__
-      alutLoadWAVFile((ALbyte*) mFile.Data(),
-			    &format, &wave, &size, &freq);
-#else
-      ALboolean loop;
-      alutLoadWAVFile((ALbyte*) mFile.Data(),
-			    &format, &wave, &size, &freq, &loop);
-#endif
-
-      if(alutGetError())
-	throw(_eh + "could not open file.");
-
-      alBufferData(mAlBuf, format, wave, size, freq );
-      free(wave); /* openal makes a local copy of wave data */
+      if (mAlBuf == AL_NONE)
+	printf("Error in alutCreateBufferFromFile: %s\n", alutGetErrorString(alutGetError()));
     }
 
     // --------------------------------------------------------------
 
-    if(count > 0) {
+    if (count > 0)
+    {
       alSourcei(mAlSrc, AL_LOOPING, AL_FALSE);
-      while(count--) {
+      while (count--)
+      {
 	alSourceQueueBuffers(mAlSrc, 1, &mAlBuf);
 	// alQueuei(mAlSrc, 1, mAlBuf);
       }
-    } else {
+    }
+    else
+    {
       alSourcei(mAlSrc, AL_LOOPING, AL_TRUE);
       alSourcei(mAlSrc, AL_BUFFER, mAlBuf);
     }
@@ -176,7 +128,8 @@ void AlSource::Play(Int_t count)
   // GTime time(GTime::I_Now);
   alSourcePlay(mAlSrc);
   // source_info(mAlSrc, "play.");
-  while(SourceIsPlaying(mAlSrc) == AL_TRUE) {
+  while (SourceIsPlaying(mAlSrc) == AL_TRUE)
+  {
     // source_info(mAlSrc, "sleep.");
     gSystem->Sleep(100);
   }
@@ -194,7 +147,8 @@ void AlSource::Play(Int_t count)
 
 void AlSource::EmitSourceRay()
 {
-  if(mAlSrc) {
+  if (mAlSrc)
+  {
     alSourcef(mAlSrc, AL_GAIN, mGain);
     alSourcef(mAlSrc, AL_MIN_GAIN, mMinGain);
     alSourcef(mAlSrc, AL_MAX_GAIN, mMaxGain);
@@ -204,7 +158,8 @@ void AlSource::EmitSourceRay()
 
 void AlSource::EmitConeRay()
 {
-  if(mAlSrc) {
+  if (mAlSrc)
+  {
     alSourcef(mAlSrc, AL_CONE_INNER_ANGLE, mConeInnerAngle);
     alSourcef(mAlSrc, AL_CONE_OUTER_ANGLE, mConeOuterAngle);
     alSourcef(mAlSrc, AL_CONE_OUTER_GAIN,  mConeOuterGain);

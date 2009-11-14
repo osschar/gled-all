@@ -1,3 +1,25 @@
+2009-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid deprecated functions. Code beautification.
+
+	* Glasses/AlContext.cxx:
+	* Glasses/AlContext.h:
+	Add libAudio1_GLED_user_init() and do alutInitWithoutContext()
+	there.
+	Beautify.
+
+	* Glasses/AlListener.cxx:
+	* Glasses/AlListener.h:
+	Beautify only.
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	Properly load from file using alutCreateBufferFromFile() instead
+	of deprecated alutLoadWAVFile().
+	Remove ogg code that never worked -- with ogg support compiled in
+	this should just work now. But I can't figure out how to enable it.
+	Beautify.
+
 2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Mac compilation changes.
