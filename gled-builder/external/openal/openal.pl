@@ -24,8 +24,18 @@ setup_package($package);
 # CMAKE_BUILD_TYPEFIX              RelWithDebInfo
 
 target('configure', <<"FNORD");
-cd CMakeConf
+cd build
 cmake -DCMAKE_INSTALL_PREFIX:PATH=\${PREFIX} ..
+FNORD
+
+target('build', <<"FNORD");
+cd build
+\${MAKE}
+FNORD
+
+target('install', <<"FNORD");
+cd build
+\${MAKE} install
 FNORD
 
 use_defaults_for_remaining_targets("cd CMakeConf");
