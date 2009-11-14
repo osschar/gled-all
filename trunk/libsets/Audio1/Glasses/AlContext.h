@@ -11,7 +11,8 @@
 
 #include <AL/alc.h>
 
-class AlContext : public ZNode {
+class AlContext : public ZNode
+{
   MAC_RNR_FRIENDS(AlContext);
 
 private:

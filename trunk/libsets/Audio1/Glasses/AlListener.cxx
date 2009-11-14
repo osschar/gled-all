@@ -20,7 +20,6 @@ ClassImp(AlListener);
 
 void AlListener::_init()
 {
-  // *** Set all links to 0 ***
   mLocationType = LT_Camera;
   mGain = 1;
 }
