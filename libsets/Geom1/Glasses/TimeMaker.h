@@ -53,7 +53,8 @@ public:
   virtual void ResetRecursively();
   virtual void Operate(Operator::Arg* op_arg);
 
-  void AddClient(ZGlass* lens); // X{E} C{1} 7 MCWButt()
+  void AddClient(ZGlass* lens);    // X{E} C{1} 7 MCWButt()
+  void RemoveClient(ZGlass* lens); // X{E} C{1} 7 MCWButt()
 
   void EmitFormulaRay();
 

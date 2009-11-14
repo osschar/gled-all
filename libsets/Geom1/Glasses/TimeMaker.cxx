@@ -53,6 +53,11 @@ void TimeMaker::AddClient(ZGlass* lens)
   mClients->Add(lens);
 }
 
+void TimeMaker::RemoveClient(ZGlass* lens)
+{
+  mClients->RemoveAll(lens);
+}
+
 /**************************************************************************/
 
 void TimeMaker::EmitFormulaRay()

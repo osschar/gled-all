@@ -142,6 +142,8 @@ void TringTvor::DeleteSecondaryArrays()
 
 Int_t TringTvor::AddVertices(Int_t nv)
 {
+  // Returns old number of vertices.
+
   Int_t nold = mNVerts;
   mNVerts += nv;
   mVerts.resize(3*mNVerts);
@@ -153,6 +155,8 @@ Int_t TringTvor::AddVertices(Int_t nv)
 
 Int_t TringTvor::AddTriangles(Int_t nt)
 {
+  // Returns old number of triangles.
+
   Int_t nold = mNTrings;
   mNTrings += nt;
   mTrings.resize(3*mNTrings);
