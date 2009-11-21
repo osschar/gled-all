@@ -1,31 +1,38 @@
-# glass		class	location		rnr-class
-# name		id			[]~parent, [.]~own rnr, [<glass>]
+# glass	              class     location                        rnr-class
+# name	                 id                                     []~parent, [.]~own rnr, [<glass>]
 
-TabletReader    1       Glasses/TabletReader
-TabletImage     2       Glasses/TabletImage	.
-TriMesh         3       Glasses/TriMesh
-TriMeshField	4	Glasses/TriMeshField
-TriMeshLightField 5	Glasses/TriMeshLightField
+TriMesh                   1     Glasses/TriMesh
+TriMeshField	          2     Glasses/TriMeshField
+TriMeshLightField         3     Glasses/TriMeshLightField
 
-Tringula        16      Glasses/Tringula        .
-TringuCam       17      Glasses/TringuCam       .
-Extendio        18      Glasses/Extendio        .
-Statico         19      Glasses/Statico
-Dynamico        20      Glasses/Dynamico
-Crawler         21      Glasses/Crawler
-Flyer           22      Glasses/Flyer
-Airplane        23      Glasses/Airplane
-Chopper         24      Glasses/Chopper
-LandMark        25      Glasses/LandMark        .
+ParaSurf                 20     Glasses/ParaSurf
+PSRectangle              21     Glasses/PSRectangle
+PSTriangle               22     Glasses/PSTriangle
+PSSphere                 23     Glasses/PSSphere
+PSTorus                  24     Glasses/PSTorus
+PSMark                   25     Glasses/PSMark                  .
 
-ParaSurf        64      Glasses/ParaSurf
-PSRectangle     65      Glasses/PSRectangle
-PSTriangle      66      Glasses/PSTriangle
-PSSphere        67      Glasses/PSSphere
-PSTorus         68      Glasses/PSTorus
-PSMark          69      Glasses/PSMark          .
+Tringula                 40     Glasses/Tringula                .
 
-SolarSystem     80      Glasses/SolarSystem     .
-CosmicBall      81      Glasses/CosmicBall      .
+TringuCam                50     Glasses/TringuCam               .
 
-XXXCart         666     Glasses/XXXCart
+TSPupilInfo              60     Glasses/TSPupilInfo             .
+
+Extendio                100     Glasses/Extendio                .
+Statico                 101     Glasses/Statico
+Dynamico                102     Glasses/Dynamico
+Crawler                 120     Glasses/Crawler
+Flyer                   140     Glasses/Flyer
+Airplane                141     Glasses/Airplane
+Chopper                 142     Glasses/Chopper
+
+LandMark                150     Glasses/LandMark                .
+TringuObserver          160     Glasses/TringuObserver
+
+Spiritio                200     Glasses/Spiritio                .
+ExtendioSpiritio        201     Glasses/ExtendioSpiritio
+CrawlerSpiritio         202     Glasses/CrawlerSpiritio         .
+TringuObserverSpiritio  260     Glasses/TringuObserverSpiritio  .
+
+SolarSystem            1000     Glasses/SolarSystem             .
+CosmicBall             1001     Glasses/CosmicBall              .

@@ -33,6 +33,8 @@
 
 ClassImp(PupilInfo);
 
+Bool_t PupilInfo::sStereoDefault = false;
+
 void PupilInfo::_init()
 {
   // Override from SubShellInfo:
@@ -85,9 +87,9 @@ void PupilInfo::_init()
   mPopupDx = 200; mPopupDy = 0;
   mPopupFx = 0;   mPopupFy = -0.5;
 
-  mOverlay      = 0;
-  mEventHandler = 0;
   bAllowHandlerSwitchInPupil = true;
+
+  bStereo = sStereoDefault;
 }
 
 /**************************************************************************/

@@ -15,7 +15,7 @@ class ZGlPerspective : public ZRnrModBase
   MAC_RNR_FRIENDS(ZGlPerspective);
 
 public:
-  enum ViewMode_e { VM_Nop, VM_OrthoPixel, VM_OrthoFixed };
+  enum ViewMode_e { VM_Nop, VM_OrthoPixel, VM_OrthoFixed, VM_OrthoTrueAspect };
 
 private:
   void _init();
@@ -35,9 +35,10 @@ public:
   ZGlPerspective(const Text_t* n="ZGlPerspective", const Text_t* t=0) :
     ZRnrModBase(n,t) { _init(); }
 
-  void StandardPersp();  //  X{E} 7 MButt(-join=>1)
-  void StandardFixed();  //  X{E} 7 MButt(-join=>1)
-  void StandardPixel();  //  X{E} 7 MButt()
+  void StandardPersp();      //  X{E} 7 MButt(-join=>1)
+  void StandardFixed();      //  X{E} 7 MButt()
+  void StandardTrueAspect(); //  X{E} 7 MButt(-join=>1)
+  void StandardPixel();      //  X{E} 7 MButt()
 
 #include "ZGlPerspective.h7"
   ClassDef(ZGlPerspective, 1);

@@ -11,8 +11,11 @@ typedef pair<TString,lpZGlass_i>           Name2LIter_p;
 
 //__________________________________________________________________________
 //
-// Keeps elements sorted by their name. Registers self to each element of
-// the map to receive name-change callback.
+// Keeps a parallel multi-map with elements sorted by their name.
+// This is used both to have faster "by-name" search and to
+// allow for lists sorted by name.
+// Registers itself to each element of the map to receive name-change
+// callback.
 //
 // The bKeepSorted flag enforces that the list remains sorted by name
 // most of the time (the request is sent via a MIR). This is primarily

@@ -41,11 +41,12 @@ public:
     int     fDX, fDY;
     TString fText;
 
-    bool   bIsMouse;
+    bool    fIsKey;
+    bool    fIsMouse;
 
-    lNSE_t fNameStack;
-    lNSE_i fCurrentNSE;
-    int    fNameStackSize;
+    lNSE_t  fNameStack;
+    lNSE_i  fCurrentNSE;
+    int     fNameStackSize;
 
     bool ns_empty() { return fNameStackSize > 0; }
     int  ns_size()  { return fNameStackSize;  }

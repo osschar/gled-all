@@ -98,6 +98,15 @@ lpZGlassImg_t* ZGlassImg::GetElementImgs()
   return fElementImgs;
 }
 
+void ZGlassImg::DumpLinkData()
+{
+  printf("Dumping list of ZLinkDatum's -- size = %lu\n", fLinkData.size());
+  for(lZLinkDatum_i i=fLinkData.begin(); i!=fLinkData.end(); ++i) {
+    printf("  img=%p, linkref=%p, linkinfo=%p\n",
+	   i->fImg, i->fLinkRep.fLinkRef, i->fLinkRep.fLinkInfo);
+  }
+}
+
 /**************************************************************************/
 // ZLinkDatum
 /**************************************************************************/

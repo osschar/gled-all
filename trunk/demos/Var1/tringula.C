@@ -3,6 +3,7 @@
 
 // #include <exception>
 
+class TSPupilInfo;
 class Tringula;
 class TringuCam;
 class Statico;
@@ -36,7 +37,7 @@ TriMesh      *chopmesh  = 0;
 ZVector      *rndstatos  = 0;
 ZVector      *rnddynos  = 0;
 
-Scene        *overlay  = 0;
+TSPupilInfo  *tspupil  = 0;
 
 TriMeshField      *engfield    = 0;
 TriMeshField      *metfield    = 0;
@@ -77,6 +78,24 @@ void tringula(Int_t mode=2)
   /**************************************************************************/
 
   tmpdir = g_queen->AssertPath("tmp", "ZNameMap");
+
+  { // Rnr-mods
+    ZList* moddir = g_queen->AssertPath("var/rnrmods", "ZNameMap");
+    // Lights-off
+    CREATE_ADD_GLASS(loff, ZGlLightModel, moddir, "LightsOff", 0);
+    loff->SetLightModelOp(0);
+  }
+
+  { // Glass mappings
+    ZList* uidir = g_queen->AssertPath("var/glassui", "ZNameMap");
+
+    ZList    *gdir;
+    Spiritio *spiritio;
+
+    gdir = uidir->AssertPath("Crawler");
+    ASSIGN_ADD_GLASS(spiritio, CrawlerSpiritio, gdir, "spiritio", 0);
+
+  }
 
   { // Textures
 
@@ -293,7 +312,7 @@ void tringula(Int_t mode=2)
     trx.SetBaseVec(1,  oos2, oos2, 0);
     trx.SetBaseVec(2,  0, 0, 1);
     trx.SetBaseVecViaCross(3);
-    dyn1 = new XXXCart("XXXCart Primus");
+    dyn1 = new Crawler("Dynus Primus");
     tringula->RegisterCrawler(dyn1);
     dyn1->ref_trans() = trx;
     dyn2 = tringula->NewDynamico("Dynus Secondus");
@@ -400,7 +419,8 @@ void tringula(Int_t mode=2)
     g_nest->SetLayoutList(layouts);
   }
 
-  ASSIGN_ATT_GLASS(g_pupil, PupilInfo, g_shell, AddSubShell, "Pupil of Tringula", 0);
+  ASSIGN_ATT_GLASS(tspupil, TSPupilInfo, g_shell, AddSubShell, "Pupil of Tringula", 0);
+  g_pupil = tspupil;
   g_pupil->Add(g_scene);
   g_pupil->SetWidth(800); g_pupil->SetHeight(500);
   g_pupil->SetClearColor(0.589, 0.601, 0.836);
@@ -422,10 +442,12 @@ void tringula(Int_t mode=2)
   g_pupil->SetAutoRedraw(false);
 
   g_shell->Add(tricam);
-  g_pupil->SetEventHandler(tricam);
+  tspupil->AddEventHandler(tricam);
   g_pupil->SetCameraBase(tricam);
 
-  tricam->SetPupilInfo(g_pupil);
+  tspupil->SetTimeMaker(tmaker);
+
+  tricam->SetPupilInfo(tspupil);
   tricam->SetEventor(eventor);
   tricam->SetTimeMaker(tmaker);
   tmaker->AddClient(tricam);
@@ -451,10 +473,11 @@ void tringula(Int_t mode=2)
 
   Gled::theOne->UnlockFltk();
 
+  setup_tspupil();
   make_overlay();
-  g_pupil->SetOverlay(overlay);
-  tricam->SetOverlay(overlay);
-  tricam->SelectTopMenuByName("MainMenu");
+
+  tspupil->SelectTopMenuByName("MainMenu");
+
   tricam->SetMouseAction(TringuCam::MA_PickExtendios);
 
   /**************************************************************************/
@@ -530,6 +553,16 @@ void tringula(Int_t mode=2)
   if (mode == 99)
   {
     tringula->GetStatos()->Remove(sta1);
+
+    Scene *spiritio_scene = tspupil->GetSpiritioScene();
+
+    CREATE_ATT_GLASS(tcs, CrawlerSpiritio, spiritio_scene, Add, "Crawler Spritio", 0);
+    tcs->SetExtendio(dyn1);
+
+    // This sould go via InstallSpiritio, or sth.
+    // tspupil->RemoveEventHandler(tricam);
+    tspupil->AddEventHandler(tcs);
+    tmaker->AddClient(tcs);
   }
 
   /**************************************************************************/
@@ -826,26 +859,50 @@ void setup_test()
 
 
 /******************************************************************************/
+// TSPupil setup
+/******************************************************************************/
+
+void setup_tspupil()
+{
+  Float_t weed_dx = 130;
+
+  Scene *menu_scene = tspupil->GetMenuScene();
+
+  menu_scene->AddRnrMod(g_queen->FindLensByPath("var/rnrmods/LightsOff"));
+
+  CREATE_ATT_GLASS(pp, ZGlPerspective, menu_scene, AddRnrMod, "Perspective - Ortho Pixel", 0);
+  pp->StandardPixel();
+
+  CREATE_ATT_GLASS(bfs, WGlFrameStyle, menu_scene, AddRnrMod, "Butt Frame Style", 0);
+  bfs->StandardPixel();
+  bfs->SetDefDx(weed_dx);
+  bfs->SetTileColor(0.5, 0.15, 0.25, 0.7);
+  bfs->SetBelowMColor(0.3, 0.08, 0.14, 0.9);
+
+  // ----------------------------------------------------------------
+
+  Scene *spiritio_scene = tspupil->GetSpiritioScene();
+
+  spiritio_scene->AddRnrMod(g_queen->FindLensByPath("var/rnrmods/LightsOff"));
+
+  CREATE_ATT_GLASS(bb, ZGlBlending, spiritio_scene, AddRnrMod, "Blending", 0);
+  bb->SetBlendOp(ZRnrModBase::O_On);
+
+  CREATE_ATT_GLASS(pp, ZGlPerspective, spiritio_scene, AddRnrMod, "Perspective - Ortho True Aspect", 0);
+  pp->StandardTrueAspect();
+  pp->SetOrthoW(1); pp->SetOrthoH(1);
+}
+
+
+/******************************************************************************/
 // Overlay GUI
 /******************************************************************************/
 
 void make_overlay()
 {
-  Float_t weed_dx = 130, step_dx = 140, step_dy = 26;
-
-  ASSIGN_ADD_GLASS(overlay, Scene, g_queen, "Overlay", 0);
-
-  CREATE_ADD_GLASS(ovl_lm, ZGlLightModel, overlay, "LightOff", 0);
-  ovl_lm->SetLightModelOp(0);
-
-  CREATE_ADD_GLASS(pp, ZGlPerspective, overlay, "Perspective", 0);
-  pp->StandardPixel();
-
-  CREATE_ADD_GLASS(bfs, WGlFrameStyle, overlay, "Butt Frame Style", 0);
-  bfs->StandardPixel();
-  bfs->SetDefDx(weed_dx);
-  bfs->SetTileColor(0.5, 0.15, 0.25, 0.7);
-  bfs->SetBelowMColor(0.3, 0.08, 0.14, 0.9);
+  Float_t step_dx = 140, step_dy = 26;
+  
+  Scene *menu_scene = tspupil->GetMenuScene();
 
   SGridStepper gs(0);
   gs.SetDs(step_dx, step_dy, 1);
@@ -853,7 +910,7 @@ void make_overlay()
   gs.SetOs(4, 4, 0);
 
   {
-    CREATE_ADD_GLASS(main_menu, WGlWidget, overlay, "MainMenu", 0);
+    CREATE_ADD_GLASS(main_menu, WGlWidget, menu_scene, "MainMenu", 0);
 
     CREATE_ADD_GLASS(sim_ctrl, WGlButton, main_menu, "SimCtrl", 0);
     gs.SetNode(sim_ctrl);
@@ -979,7 +1036,7 @@ void make_overlay()
   gs.Reset();
 
   {
-    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, overlay, "DynoCtrl", 0);
+    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, menu_scene, "DynoCtrl", 0);
     dyno_ctrl->SetRnrElements(false);
 
     CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
@@ -1008,8 +1065,13 @@ void make_overlay()
   gs.Reset();
 
   {
-    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, overlay, "CrawlerCtrl", 0);
+    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, menu_scene, "CrawlerCtrl", 0);
     dyno_ctrl->SetRnrElements(false);
+
+    CREATE_ADD_GLASS(but0, WGlButton, dyno_ctrl, "Drive", "LensBeta");
+    gs.SetNodeAdvance(but0);
+    but0->SetCbackAlpha(tricam);
+    but0->SetCbackMethodName("DynoDrive");
 
     CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
     gs.SetNodeAdvance(but1);
@@ -1043,8 +1105,14 @@ void make_overlay()
   gs.Reset();
 
   {
-    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, overlay, "FlyerCtrl", 0);
+    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, menu_scene, "FlyerCtrl", 0);
     dyno_ctrl->SetRnrElements(false);
+
+    // Here experimetally, to check ClassInfo descend
+    CREATE_ADD_GLASS(but0, WGlButton, dyno_ctrl, "Drive", "LensBeta");
+    gs.SetNodeAdvance(but0);
+    but0->SetCbackAlpha(tricam);
+    but0->SetCbackMethodName("DynoDrive");
 
     CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
     gs.SetNodeAdvance(but1);
@@ -1079,7 +1147,7 @@ void make_overlay()
   gs.Reset();
 
   {
-    CREATE_ADD_GLASS(stato_ctrl, WGlWidget, overlay, "StatoCtrl", 0);
+    CREATE_ADD_GLASS(stato_ctrl, WGlWidget, menu_scene, "StatoCtrl", 0);
     stato_ctrl->SetRnrElements(false);
 
     CREATE_ADD_GLASS(but1, WGlButton, stato_ctrl, "<undef>", "LensName:LensBeta");
@@ -1116,7 +1184,7 @@ void make_overlay()
   gs.Reset();
 
   {
-    CREATE_ADD_GLASS(lmark_ctrl, WGlWidget, overlay, "LandMarkCtrl", 0);
+    CREATE_ADD_GLASS(lmark_ctrl, WGlWidget, menu_scene, "LandMarkCtrl", 0);
     lmark_ctrl->SetRnrElements(false);
 
     CREATE_ADD_GLASS(but1, WGlButton, lmark_ctrl, "<undef>", "LensName:LensBeta");

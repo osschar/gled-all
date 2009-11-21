@@ -10,9 +10,12 @@
 // Sets-up GL projection and modelview matrices for orthographic
 // viewing in fixed or pixel-based coordinates.
 //
-// TODO:
-// a) handling of negative offsets (need origin mode, or some flags)
-// b) for fixed mode, set w/h in accordance with window size (optional)
+// Negative offsets are handled specially in OrthoPixel mode - they are
+// interpreted as distance from right / upper edge.
+//
+// Mode OrthoTrueAspect takes the smaller of actual w/h as a unit and
+// creates a (-1,1) view with center at the screen center.
+// For now mOrthoW/H and mOx/y/z are ignored.
 
 #include "ZGlPerspective.h"
 #include "ZGlPerspective.c7"
@@ -44,6 +47,13 @@ void ZGlPerspective::StandardFixed()
   ZGlPerspective& X = *this;
   X.SetViewMode(VM_OrthoFixed);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
+  X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
+}
+
+void ZGlPerspective::StandardTrueAspect()
+{
+  ZGlPerspective& X = *this;
+  X.SetViewMode(VM_OrthoTrueAspect);
   X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
 }
 

@@ -71,6 +71,8 @@ namespace OptoStructs
     ZLinkDatum*    GetLinkDatum(const TString& lnk);
     AList*         GetList() { return fIsList ? (AList*)fLens : 0; }
     lpZGlassImg_t* GetElementImgs();
+
+    void DumpLinkData();
   };
 
   typedef list<ZGlassImg*>			  lpZGlassImg_t;

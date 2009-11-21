@@ -4,40 +4,30 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "XXXCart.h"
-#include "XXXCart.c7"
+#include "ExtendioSpiritio.h"
+#include <Glasses/Extendio.h>
+#include "ExtendioSpiritio.c7"
 
-// XXXCart
+// ExtendioSpiritio
 
 //______________________________________________________________________________
 //
 //
 
-ClassImp(XXXCart);
+ClassImp(ExtendioSpiritio);
 
 //==============================================================================
 
-void XXXCart::_init()
-{
-  mWheel   .SetMinMaxDelta(-5, 5, 2.5);
-  mThrottle.SetMinMaxDelta(0, 100, 10);
-}
+void ExtendioSpiritio::_init()
+{}
 
-XXXCart::XXXCart(const Text_t* n, const Text_t* t) :
-  Crawler(n, t)
+ExtendioSpiritio::ExtendioSpiritio(const Text_t* n, const Text_t* t) :
+  Spiritio(n, t)
 {
   _init();
 }
 
-XXXCart::~XXXCart()
+ExtendioSpiritio::~ExtendioSpiritio()
 {}
 
 //==============================================================================
-
-void XXXCart::TimeTick(Double_t t, Double_t dt)
-{
-  mWheel.   TimeTick(dt);
-  mThrottle.TimeTick(dt);
-
-  PARENT_GLASS::TimeTick(t, dt);
-}

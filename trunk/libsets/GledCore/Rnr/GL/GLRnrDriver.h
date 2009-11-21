@@ -29,6 +29,16 @@ protected:
   A_Rnr*                    mPushed;     // X{gs}
   A_Rnr*                    mFocus;      // X{gs}
 
+  Int_t                     mMouseX;     // X{g}
+  Int_t                     mMouseY;     // X{g}
+  Int_t                     mMPushX[4];
+  Int_t                     mMPushY[4];
+  Int_t                     mMDrgDX;     // X{g}
+  Int_t                     mMDrgDY;     // X{g}
+
+  TVector3                  mMouseRayPos; // X{R}
+  TVector3                  mMouseRayDir; // X{R}
+
   //--------------------------------
 
   Int_t		mMaxLamps;	 // X{g}
@@ -64,6 +74,12 @@ public:
 
   void ClearNameStack();
   void RestoreNameStack();
+
+  // Event handling
+  void  PreEventHandling(A_Rnr::Fl_Event& e);
+
+  Int_t GetMPushX(Int_t b) const { return mMPushX[b]; }
+  Int_t GetMPushY(Int_t b) const { return mMPushY[b]; }
 
   // Lamps
   A_Rnr** GetLamps() { return mLamps; }

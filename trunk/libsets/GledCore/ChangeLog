@@ -1,3 +1,106 @@
+2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Extensions for incarnation of proto Spiritios.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Add function ZGlassImg::DumpLinkData() to simplify debugging of
+	registered link data.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Use L{f} pragma for links mOverlay and mEventHandler. Thus
+	sub-classes can restrict the FID of assigned lenses.
+
+	Add local members holding last-render (cam-fix-trans, true window
+	widt and height) and last-event (mouse pos, ray vectors defined by
+	the mouse position) info. These are copied in by the
+	PupilInfo_GL_Rnr.
+
+	* Glasses/ZGlPerspective.cxx:
+	* Glasses/ZGlPerspective.h:
+	Add new ViewMode_e entry, VM_OrthoTrueAspect, to make it easy to
+	define "square" coordinate systems (where unit in horizontal and
+	vertical direction has the same lenght). Add function:
+	  void StandardTrueAspect(); // X{E}
+	to make it easy to setup.
+
+	* Glasses/ZHashList.cxx:
+	* Glasses/ZHashList.h:
+	Add functions:
+	  virtual void MoveToFront(ZGlass* lens); // X{E} C{1}
+	  virtual void MoveToBack (ZGlass* lens); // X{E} C{1}
+	They allow easy movement of lenses in the list.
+
+	Improve some element handling functions (don't use unnecessary
+	temporary iterators.).
+
+	Beautify layout.
+
+	* Glasses/ZNameMap.cxx:
+	Improve class-docs.
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Add function:
+	  void AddRnrMod(ZGlass* el); // X{E} C{1}
+	to simplify adding of a rnr-mod.
+
+	* Gled/GTime.h:
+	Add version of ToMiliSec() taking max-time argument:
+	  ULong_t ToMiliSec(Long_t max);
+
+	* Gled/GledNS.cxx:
+	* Gled/GledTypes.h:
+	Add Exc_t operator+(const Exc_t &s1, char c).
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Call PupilInfo_GL_Rnr::InitRendering() at the start of Render().
+
+	Call RnrDriver::PreEventHandling() and PupilInfo_GL_Rnr::Hanlde()
+	before doing any other event handling.
+
+	Beautify layout.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	Add:
+	  void  PreEventHandling(A_Rnr::Fl_Event& e)
+	that copies some event data into local variables.
+
+	Add members to store position of mouse, positions at last button
+	press for each button, last drag dx/dy and mouse ray vectors.
+
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/PupilInfo_GL_Rnr.h:
+	Add:
+	  virtual void InitRendering(RnrDriver* rd);
+	  virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
+	They copy some data to the lens side.
+
+	* Rnr/GL/ZGlPerspective_GL_Rnr.cxx:
+	* Rnr/GL/ZGlPerspective_GL_Rnr.h:
+	Add handling of view-mode VM_OrthoTrueAspect.
+
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	Bug-fix in passing event to list elements (extra ; after if).
+
+	* RnrBase/A_Rnr.h:
+	Add bool fIsKey to A_Rnr::Fl_Event.
+
+	* Stones/SVars.h:
+	SDesireVar: add methods DesireToValue(), IsAbove/BelowDesire().
+
+	Make mDesire and bDesireSatisfied mutable to achieve const
+	correctness.
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Add sub make_step() to package Widget - it calls only
+	Fl_Valuator::step(), assuming min/max are set from elsewhere.
+
+	Use this in Widgets::DesireVar - min/max are stored in the SVar.
+
 2009-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Pupil / GL event handling changes.

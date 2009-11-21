@@ -22,30 +22,58 @@ void ZGlPerspective_GL_Rnr::setup_matrices(RnrDriver* rd, bool push_p)
 {
   ZGlPerspective& M = *mZGlPerspective;
 
-  if(M.mViewMode != ZGlPerspective::VM_Nop) {
-    if(push_p) glPushMatrix();
+  if (M.mViewMode != ZGlPerspective::VM_Nop)
+  {
+    if (push_p)
+      glPushMatrix();
     glLoadIdentity();
+
     glMatrixMode(GL_PROJECTION);
-    if(push_p) glPushMatrix();
+    if (push_p)
+      glPushMatrix();
     glLoadMatrixd(rd->GetProjBase()->Array());
-    switch(M.mViewMode) {
-    case ZGlPerspective::VM_OrthoPixel:
-      glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), M.mOrthoNear, M.mOrthoFar);
-      break;
-    case ZGlPerspective::VM_OrthoFixed:
-      glOrtho(0, M.mOrthoW, 0, M.mOrthoH, M.mOrthoNear, M.mOrthoFar);
-      break;
-    default:
-      break;
+
+    switch(M.mViewMode)
+    {
+      case ZGlPerspective::VM_OrthoPixel:
+      {
+	glOrtho(0, rd->GetWidth(), 0, rd->GetHeight(), M.mOrthoNear, M.mOrthoFar);
+	break;
+      }
+      case ZGlPerspective::VM_OrthoFixed:
+      {
+	glOrtho(0, M.mOrthoW, 0, M.mOrthoH, M.mOrthoNear, M.mOrthoFar);
+	break;
+      }
+      case ZGlPerspective::VM_OrthoTrueAspect:
+      {
+	Int_t w = rd->GetWidth(), h = rd->GetHeight();
+	if (w > h)
+	{
+	  Float_t ww = (Float_t) w / h;
+	  glOrtho(-ww, ww, -1, 1, M.mOrthoNear, M.mOrthoFar);
+	}
+	else
+	{
+	  Float_t hh = (Float_t) h / w;
+	  glOrtho(-1, 1, -hh, hh, M.mOrthoNear, M.mOrthoFar);
+	}
+	break;
+      }
+      default:
+	break;
     }
     glMatrixMode(GL_MODELVIEW);
   }
 
-  if(M.mViewMode == ZGlPerspective::VM_OrthoPixel) {
-    Float_t x = M.mOx; if(x < 0) x += rd->GetWidth();
-    Float_t y = M.mOy; if(y < 0) y += rd->GetHeight();
+  if (M.mViewMode == ZGlPerspective::VM_OrthoPixel)
+  {
+    Float_t x = M.mOx; if (x < 0) x += rd->GetWidth();
+    Float_t y = M.mOy; if (y < 0) y += rd->GetHeight();
     glTranslatef(x, y, M.mOz);
-  } else {
+  }
+  else
+  {
     glTranslatef(M.mOx, M.mOy, M.mOz);
   }
 }
@@ -64,7 +92,8 @@ void ZGlPerspective_GL_Rnr::Draw(RnrDriver* rd)
 void ZGlPerspective_GL_Rnr::PostDraw(RnrDriver* rd)
 {
   ZGlPerspective& M = *mZGlPerspective;
-  if(M.mViewMode != ZGlPerspective::VM_Nop) {
+  if (M.mViewMode != ZGlPerspective::VM_Nop)
+  {
     glMatrixMode(GL_PROJECTION); glPopMatrix();
     glMatrixMode(GL_MODELVIEW);  glPopMatrix();
   }

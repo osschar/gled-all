@@ -23,13 +23,13 @@ class RGBAPalette;
 class ScreenText;
 class WGlWidget;
 
-class PupilInfo;
-class Scene;
+class TSPupilInfo;
 
 class Eventor;
 class TimeMaker;
 
-class TringuCam : public ZNode, public TimeMakerClient
+class TringuCam : public ZNode,
+		  public TimeMakerClient
 {
   MAC_RNR_FRIENDS(TringuCam);
 
@@ -187,9 +187,7 @@ protected:
   ZLink<TriMeshLightField> mLightField;  // X{GS} L{a}
   ZLink<RGBAPalette>       mPalette;     // X{GS} L{a}
 
-  ZLink<PupilInfo>         mPupilInfo;   // X{GS} L{a}
-  ZLink<Scene>             mOverlay;     // X{GS} L{a}
-  ZLink<WGlWidget>         mLastMenu;    // X{GS} L{a}
+  ZLink<TSPupilInfo>       mPupilInfo;   // X{GS} L{a}
 
   ZLink<Eventor>           mEventor;     // X{GS} L{a}
   ZLink<TimeMaker>         mTimeMaker;   // X{GS} L{a}
@@ -247,11 +245,10 @@ public:
   virtual void TimeTick(Double_t t, Double_t dt);
 
   // Overlay methods
-  void SelectTopMenu(WGlWidget* weed);               // X{E} C{1} 7 MCWButt()
-  void SelectTopMenuByName(const Text_t* weed_name); // X{E}      7 MCWButt()
 
   void StatoDetails(Statico* stato); // X{E} C{1} 7 MCWButt()
   void DynoDetails(Dynamico* dyno);  // X{E} C{1} 7 MCWButt()
+  void DynoDrive(Dynamico* dyno);    // X{E} C{1} 7 MCWButt()
 
   void SetAndApplyCurField(TriMeshField* field); // X{E} C{1} 7 MCWButt()
   void ColorByTerrainProps(Int_t mode=0);        // X{E}      7 MCWButt()

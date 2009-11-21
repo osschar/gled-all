@@ -78,6 +78,8 @@ protected:
 
   GThread*      mCreationThread;
 
+  Bool_t        bStereo;
+
   void		dump_image(const TString& fname);
 
   // rendering elements
@@ -148,7 +150,7 @@ public:
   virtual void setup_rnr_event(int ev, A_Rnr::Fl_Event& e);
   virtual int  overlay_pick(A_Rnr::Fl_Event& e);
   virtual int  overlay_pick_and_deliver(A_Rnr::Fl_Event& e);
-  virtual int  handle_overlay(int ev);
+  virtual int  handle_overlay(A_Rnr::Fl_Event& e);
 
   //--------------------------------------------------------------
   // Driver redraw: combo of GLRnrDriver, draw and handle_overlay

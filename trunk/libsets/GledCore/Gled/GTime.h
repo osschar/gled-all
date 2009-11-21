@@ -9,7 +9,8 @@
 
 #include <Rtypes.h>
 
-class GTime {
+class GTime
+{
 public:
   enum Init_e { I_Now };
 
@@ -54,13 +55,14 @@ public:
 
   Double_t ToDouble()  { return mSec + 1e-6*mMuSec; }
   ULong_t  ToMiliSec() { return mSec*1000 + mMuSec/1000; }
+  ULong_t  ToMiliSec(Long_t max) { return mSec >= max ? max*1000 : mSec*1000 + mMuSec/1000; }
 
   void Sleep();
 
   static void SleepMiliSec(UInt_t ms);
 
 #include "GTime.h7"
-  ClassDef(GTime, 1);
+  ClassDefNV(GTime, 1);
 }; // endclass GTime
 
 #endif

@@ -9,7 +9,11 @@
 //
 
 #include "GLRnrDriver.h"
+#include <RnrBase/Fl_Event_Enums.h>
 #include <Glasses/ZGlColorFader.h>
+
+#include <TMath.h>
+
 #include <GL/glew.h>
 
 GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
@@ -142,6 +146,46 @@ void GLRnrDriver::pop_name()
 {
   mStackCopy.pop_back();
   glPopName();
+}
+
+/**************************************************************************/
+// Mouse event handling
+/**************************************************************************/
+
+void GLRnrDriver::PreEventHandling(A_Rnr::Fl_Event& e)
+{
+  // Store some details into data members so that further event
+  // handling cat pick them from here.
+
+  if (e.fIsMouse)
+  {
+    if (e.fEvent == FL_DRAG)
+    {
+      mMDrgDX = e.fX - mMouseX;
+      mMDrgDY = e.fY - mMouseY;
+    }
+
+    mMouseX = e.fX;
+    mMouseY = e.fY;
+
+    if (e.fEvent == FL_PUSH && e.fButton < 4)
+    {
+      mMPushX[e.fButton] = mMouseX;
+      mMPushY[e.fButton] = mMouseY;
+    }
+  }
+
+  float yext = TMath::Tan(0.5*TMath::DegToRad()*mZFov)*mNearClip;
+  float xext = yext*mWidth/mHeight;
+  float xcam = xext*(2.0f*mMouseX/mWidth  - 1.0f);
+  float ycam = yext*(2.0f*mMouseY/mHeight - 1.0f);
+
+  mMouseRayPos.SetXYZ(0, 0, 0);
+  mCamFixTrans->MultiplyIP(mMouseRayPos);
+
+  mMouseRayDir.SetXYZ(mNearClip, -xcam, -ycam);
+  mMouseRayDir.SetMag(1);
+  mCamFixTrans->RotateIP(mMouseRayDir);
 }
 
 /**************************************************************************/

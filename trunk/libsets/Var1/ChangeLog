@@ -1,3 +1,84 @@
+2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Incarnate proto Spiritios.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Move in desire-vars mThrottle and mWheel from deceased XXXCart.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Proper implementation of ctor and dtor.
+
+	* Glasses/TriMesh.cxx:
+	Bugfix: calls to make_tetra_blade() were assuming left-to-right
+	evaluation of function arguments.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Move some menu-handling links and functions into new glass
+	TSPupilInfo.
+
+	Add semi-functional DynoDrive(Dynamico* dyno).
+
+	* catalog.patch:
+	Add entries for new glass Spiritio and new stone-file KeyHandling.
+
+	* glass.list:
+	Register a bunch of new glasses, see below.
+	Remove XXXCart, TabletReader and TabletImage.
+	Change glass numbering -- rather drastically.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	* Rnr/GL/TSPupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/TSPupilInfo_GL_Rnr.h:
+	New glass - Tringu-Sol PupilInfo.
+	Provides handling of stuff connected with a GL window.
+	Holds lists of overlay-elements, event-handlers and spiritios.
+	Provides top menu management (taken out of TringuCam).
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	* Glasses/ExtendioSpiritio.cxx:
+	* Glasses/ExtendioSpiritio.h:
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.h:
+	Preliminary implementation of Spiritio and its proto-incarnation
+	in CrawlerSpiritio.
+
+	* Glasses/TringuObserver.cxx:
+	* Glasses/TringuObserver.h:
+	* Glasses/TringuObserverSpiritio.cxx:
+	* Glasses/TringuObserverSpiritio.h:
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.h:
+	Conglomerat of new glasses/rnrs that is to take over currently
+	default "fly-over-tringula-and-do-fun-stuff" mode.
+	Some of the stuff in TringCam will be moved here.
+
+	* Stones/KeyHandling.cxx:
+	* Stones/KeyHandling.h:
+	New file holding multiple stones in namespace KeyHandling.
+	Key-handling structures for lens and rnr side, including
+	callbacks into lens methods.
+
+	* Glasses/XXXCart.cxx:
+	* Glasses/XXXCart.h:
+	Removed -- functionality moved into Crawler.
+
+	* Glasses/TabletImage.cxx:
+	* Glasses/TabletImage.h:
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	* Rnr/GL/TabletImage_GL_Rnr.cxx:
+	* Rnr/GL/TabletImage_GL_Rnr.h:
+	Removed -- never really implemented.
+
 2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Avoid rare infinite loop in Crawler::TimeTick().

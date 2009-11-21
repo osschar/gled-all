@@ -155,10 +155,9 @@ int ZGlass_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     for (OS::lpZGlassImg_i i = imgs->begin(); i != imgs->end(); ++i)
     {
       A_Rnr *rnr = rd->GetRnr(*i);
-      if (rnr->Handle(rd, ev));
-      return 1;
+      if (rnr->Handle(rd, ev))
+	return 1;
     }
   }
-
   return 0;
 }

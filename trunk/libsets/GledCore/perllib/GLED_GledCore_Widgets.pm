@@ -146,6 +146,21 @@ sub make_range
   }
 }
 
+##############
+sub make_step
+##############
+{
+  my $S = shift;
+  if(exists $S->{-range}) {
+    my $rr = $S->{-range};
+    my $steparg = "$rr->[2]";
+    $steparg .= ",$rr->[3]" if defined $rr->[3];
+    return "  o->step($steparg);\n";
+  } else {
+    return "";
+  }
+}
+
 # make_widget_type would come handy ... for groups, [] of types ...
 # like o->type(FL_HOR_FILL_SLIDER);
 
@@ -501,7 +516,7 @@ sub new
 sub make_widget
 {
   my $S = shift;
-  $S->make_widget_A() . $S->make_range() . $S->make_widget_B();
+  $S->make_widget_A() . $S->make_step() . $S->make_widget_B();
 }
 
 sub make_cxx_cb
