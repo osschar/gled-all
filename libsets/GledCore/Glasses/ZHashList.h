@@ -45,11 +45,16 @@ public:
 
   virtual Int_t  RemoveAll(ZGlass* lens);
 
-  virtual void   Insert(ZGlass* lens, ZGlass* before);         // X{E} C{1}
-  virtual void   Remove(ZGlass* lens);                         // X{E} C{1}
+  virtual void   Insert(ZGlass* lens, ZGlass* before); // X{E} C{1}
+  virtual void   Remove(ZGlass* lens);                 // X{E} C{1}
 
-  ZGlass* ElementAfter(ZGlass* lens);
-  ZGlass* ElementBefore(ZGlass* lens);
+  // For those two, we have no alist-mir-generators and special stamps.
+  // Could be added ... either or both.
+  virtual void   MoveToFront(ZGlass* lens);            // X{E} C{1}
+  virtual void   MoveToBack (ZGlass* lens);            // X{E} C{1}
+
+  ZGlass* ElementAfter (ZGlass* lens);                 // X{E} C{1}
+  ZGlass* ElementBefore(ZGlass* lens);                 // X{E} C{1}
 
 #include "ZHashList.h7"
   ClassDef(ZHashList, 1);

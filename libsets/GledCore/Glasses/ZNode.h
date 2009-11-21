@@ -56,7 +56,7 @@ protected:
   Bool_t	bModElements;	// X{GSx} 7 Bool()
 public:
   void MakeRnrModList(ZGlass* optional_element=0); // X{E} C{1} 7 MCWButt()
-
+  void AddRnrMod(ZGlass* el);                      // X{E} C{1}
 
 public:
   ZNode(const Text_t* n="ZNode", const Text_t* t=0) : ZList(n, t) {_init();}

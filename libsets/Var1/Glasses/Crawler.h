@@ -8,6 +8,7 @@
 #define Var1_Crawler_H
 
 #include <Glasses/Dynamico.h>
+#include <Stones/SVars.h>
 
 class Crawler : public Dynamico
 {
@@ -20,6 +21,9 @@ protected:
   Float_t         mLevH;       // X{RGS} 7 Value(-range=>[0,2, 1,100])
 
   Float_t         mRayOffset;  //!
+
+  SDesireVarF   mThrottle; // X{RGSD} 7 DesireVar(-range=>["mThrottle.GetMin()", "mThrottle.GetMax()", 1, 10])
+  SDesireVarF   mWheel;    // X{RGSD} 7 DesireVar(-range=>["mWheel.GetMin()",    "mWheel.GetMax()",    1, 50])
 
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);

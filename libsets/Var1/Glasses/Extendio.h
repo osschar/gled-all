@@ -63,8 +63,8 @@ protected:
   Tringula       *mTringula;   //!
 
 public:
-  Extendio(const Text_t* n="Extendio", const Text_t* t=0) :
-    ZGlass(n,t) { _init(); }
+  Extendio(const Text_t* n="Extendio", const Text_t* t=0);
+  virtual ~Extendio();
 
   virtual void SetTringula(Tringula* tring);
 

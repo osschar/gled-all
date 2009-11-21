@@ -17,6 +17,7 @@
 #include <Ephra/Saturn.h>
 
 #include <Rnr/GL/GLRnrDriver.h>
+#include <Rnr/GL/PupilInfo_GL_Rnr.h>
 
 #include <Gled/GThread.h>
 
@@ -122,9 +123,10 @@ void Pupil::_build()
   mInfo = dynamic_cast<PupilInfo*>(fImg->fLens);
   assert(mInfo);
   bAutoRedraw = false;
+  bStereo = mInfo->bStereo;
 
   label_window();
-  mode(FL_RGB | FL_DOUBLE | FL_DEPTH);
+  mode(FL_RGB | FL_DOUBLE | FL_DEPTH | (bStereo ? FL_STEREO : 0));
   resizable(this);
   size_range(0, 0, 4096, 4096);
 
@@ -577,7 +579,8 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
   mDriver->SetFarClip (mInfo->GetFarClip());
   mDriver->SetMaxDepth(mInfo->GetMaxRnrDepth());
 
-  A_Rnr* pupil_rnr = mDriver->GetRnr(fImg);
+  PupilInfo_GL_Rnr* pupil_rnr = dynamic_cast<PupilInfo_GL_Rnr*>(mDriver->GetRnr(fImg));
+  pupil_rnr->InitRendering(mDriver);
   mDriver->BeginRender();
   if (rnr_self)
   {
@@ -596,7 +599,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
     {
       // !!!! Manually call pupil_rnr->Pre/PostDraw().
       // Somewhat hacky ... but can happen that handle is called
-      // before first draw is done and then font is undefined.
+      // before the first draw is done and then font is undefined.
       // Should do this in GLRnrDriver::BeginRender()?
       pupil_rnr->PreDraw(mDriver);
       mDriver->Render(mDriver->GetRnr(mOverlayImg));
@@ -1130,7 +1133,7 @@ void Pupil::rnr_fake_overlay(GTime& rnr_time)
 // fltk handle
 /**************************************************************************/
 
-void  Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
+void Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
 {
   e.fEvent   = ev;
 
@@ -1146,7 +1149,9 @@ void  Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
   e.fDY      = Fl::event_dy();
   e.fText    = TString(Fl::event_text(), Fl::event_length());
 
-  e.bIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
+  e.fIsKey   = (ev == FL_KEYDOWN || ev == FL_KEYUP);
+
+  e.fIsMouse = (ev == FL_ENTER || ev == FL_MOVE || ev == FL_LEAVE ||
 		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE ||
                 ev == FL_MOUSEWHEEL);
 
@@ -1190,42 +1195,50 @@ int Pupil::overlay_pick_and_deliver(A_Rnr::Fl_Event& e)
   return 0;
 }
 
-int Pupil::handle_overlay(int ev)
+int Pupil::handle_overlay(A_Rnr::Fl_Event& e)
 {
-  A_Rnr::Fl_Event e;
-  setup_rnr_event(ev, e);
+  int ev = e.fEvent;
 
-  if(ev == FL_ENTER) {
+  if (ev == FL_ENTER)
+  {
     overlay_pick_and_deliver(e);
     return 1; // always return 1 to keep getting move events
   }
-  else if(ev == FL_MOVE) {
+  else if (ev == FL_MOVE)
+  {
     A_Rnr* below_mouse = mDriver->GetBelowMouse();
     Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
-    if(n > 0) {
+    if (n > 0)
+    {
       // Simulate ENTER / LEAVE events.
       e.fEvent = FL_ENTER;
       e.fCurrentNSE = e.fNameStack.begin();
-      while(e.fCurrentNSE != e.fNameStack.end() &&
-	    e.fCurrentNSE->fRnr != below_mouse)
+      while (e.fCurrentNSE != e.fNameStack.end() &&
+	     e.fCurrentNSE->fRnr != below_mouse)
+      {
+	if (e.fCurrentNSE->fRnr->Handle(mDriver, e))
 	{
-	  if( e.fCurrentNSE->fRnr->Handle(mDriver, e) ) {
-	    if(below_mouse) {
-	      e.fEvent = FL_LEAVE;
-	      below_mouse->Handle(mDriver, e);
-	    }
-	    mDriver->SetBelowMouse(e.fCurrentNSE->fRnr);
-	    return 1;
+	  if (below_mouse)
+	  {
+	    e.fEvent = FL_LEAVE;
+	    below_mouse->Handle(mDriver, e);
 	  }
-	  ++e.fCurrentNSE;
+	  mDriver->SetBelowMouse(e.fCurrentNSE->fRnr);
+	  return 1;
 	}
+	++e.fCurrentNSE;
+      }
       // Deliver MOVE
       e.fEvent = FL_MOVE;
-      if(below_mouse) {
+      if (below_mouse)
+      {
 	return below_mouse->Handle(mDriver, e);
       }
-    } else {
-      if(below_mouse) {
+    }
+    else
+    {
+      if (below_mouse)
+      {
 	e.fEvent = FL_LEAVE;
 	below_mouse->Handle(mDriver, e);
 	mDriver->SetBelowMouse(0);
@@ -1234,35 +1247,45 @@ int Pupil::handle_overlay(int ev)
     }
     return 0;
   }
-  else if(ev == FL_LEAVE) {
-    if(mDriver->GetBelowMouse()) {
+  else if (ev == FL_LEAVE)
+  {
+    if (mDriver->GetBelowMouse())
+    {
       mDriver->GetBelowMouse()->Handle(mDriver, e);
     }
     return 1;
   }
-  else if(ev == FL_PUSH || ev == FL_RELEASE || ev == FL_DRAG) {
+  else if (ev == FL_PUSH || ev == FL_RELEASE || ev == FL_DRAG)
+  {
     A_Rnr* pushed = mDriver->GetPushed();
-    if(pushed) {
+    if (pushed)
+    {
       overlay_pick(e);
       pushed->Handle(mDriver, e);
       if(ev == FL_RELEASE) { // as in fltk; would prefer "&& e.fButtons == 0"
 	mDriver->SetPushed(0);
       }
       return 1;
-    } else {
-      if(ev == FL_PUSH) {
-	if( overlay_pick_and_deliver(e) ) {
+    }
+    else
+    {
+      if (ev == FL_PUSH)
+      {
+	if (overlay_pick_and_deliver(e))
+	{
 	  mDriver->SetPushed(e.fCurrentNSE->fRnr);
 	  return 1;
 	}
       }
     }
   }
-  else if(ev == FL_MOUSEWHEEL) {
+  else if (ev == FL_MOUSEWHEEL)
+  {
     if (mDriver->GetBelowMouse())
       return mDriver->GetBelowMouse()->Handle(mDriver, e);
   }
-  else if(ev == FL_KEYDOWN || ev == FL_KEYUP) {
+  else if (ev == FL_KEYDOWN || ev == FL_KEYUP)
+  {
     if (mDriver->GetBelowMouse())
       return mDriver->GetBelowMouse()->Handle(mDriver, e);
   }
@@ -1274,17 +1297,18 @@ int Pupil::handle(int ev)
 {
   static const Exc_t _eh("Pupil::handle ");
 
-  if(ev == FL_HIDE || ev == FL_SHOW)
+  if (ev == FL_HIDE || ev == FL_SHOW)
     return Fl_Gl_Window::handle(ev);
 
   // Maybe should check for something else?
-  if(!valid())
+  if (!valid())
     return 0;
 
   // It can happen that we get called from another thread as ~Fl_Widget()
   // calls fl_throw_focus() which in turn calls handle() on current widget.
   // This seems utterly wrong.
-  if(GThread::Self() != mCreationThread) {
+  if (GThread::Self() != mCreationThread)
+  {
     // printf("%scalled from *another* thread:\n", _eh.Data());
     // printf("  creation='%s' calling='%s'.\n", mCreationThread->GetName(), GThread::Self()->GetName());
     return 0;
@@ -1295,52 +1319,69 @@ int Pupil::handle(int ev)
   int x = Fl::event_x(); int y = Fl::event_y();
   // printf("PupilEvent %d (%d, %d)\n", ev, x, y);
 
-  if(ev == FL_ENTER) {
+  if (ev == FL_ENTER)
+  {
     mMPX = x; mMPY = y;
     bMPIn = true;
   }
-  if(ev == FL_LEAVE) {
+  if (ev == FL_LEAVE)
+  {
     bMPIn = false;
   }
-  if(ev == FL_MOVE && mInfo->mMPSize > 0) {
+  if (ev == FL_MOVE && mInfo->mMPSize > 0)
+  {
     mMPX = x; mMPY = y;
     redraw();
   }
 
   // Check for Ctrl-` -- toggle external event handler.
-  if(ev == FL_KEYBOARD && Fl::event_key() == '`' && Fl::event_state(FL_CTRL) &&
+  if (ev == FL_KEYBOARD && Fl::event_key() == '`' && Fl::event_state(FL_CTRL) &&
      mInfo->bAllowHandlerSwitchInPupil)
   {
     bUseEventHandler = !bUseEventHandler;
     return 1;
   }
 
-  if(mOverlayImg && bShowOverlay) {
-    try {
-      int ovlp = handle_overlay(ev);
-      if(ovlp) {
+  A_Rnr::Fl_Event e;
+  setup_rnr_event(ev, e);
+  mDriver->PreEventHandling(e);
+
+  // Call handle in PupilInfo_GL_Rnr ... this should mostly return 0
+  // but can process some keyboard shortcuts.
+  // It also copies some variables to the other side.
+  {
+    if (mDriver->GetRnr(fImg)->Handle(mDriver, e))
+      return 1;
+  }
+
+  if (mOverlayImg && bShowOverlay)
+  {
+    try
+    {
+      int ovlp = handle_overlay(e);
+      if (ovlp) {
 	check_driver_redraw();
 	return 1;
       }
-    } catch(Exc_t exc) {
+    }
+    catch (Exc_t exc)
+    {
       printf("%sexception in handle_overlay: '%s'.\n", _eh.Data(), exc.Data());
       return 1;
     }
   }
 
-  if(mEventHandlerImg && bUseEventHandler) {
-    A_Rnr::Fl_Event e;
-    setup_rnr_event(ev, e);
-    int ehdlp = mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e);
-
-    if (ehdlp) return 1;
+  if (mEventHandlerImg && bUseEventHandler)
+  {
+    if (mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e))
+      return 1;
   }
 
-  if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0) {
+  if (ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0)
+  {
     iconize();
     return 1;
   }
-
 
   switch(ev)
   {

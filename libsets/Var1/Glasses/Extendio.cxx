@@ -29,6 +29,15 @@ void Extendio::_init()
   mTringula = 0;
 }
 
+Extendio::Extendio(const Text_t* n, const Text_t* t) :
+  ZGlass(n,t)
+{
+  _init();
+}
+
+Extendio::~Extendio()
+{}
+
 /**************************************************************************/
 
 void Extendio::SetTringula(Tringula* tring)

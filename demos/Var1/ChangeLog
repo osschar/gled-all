@@ -1,3 +1,10 @@
+2009-11-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Changes for Spiritio handling. So far only activated in test mode.
+	Only very basic functionality - controls work but the Crawlers do
+	not obey them.
+
 2009-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

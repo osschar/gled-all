@@ -155,9 +155,10 @@ public:
    ClassDef(Exc_t, 1); // Exception-type thrown by Gled classes.
 };
 
-Exc_t operator+(const Exc_t &s1, const std::string  &s2);
-Exc_t operator+(const Exc_t &s1, const TString &s2);
-Exc_t operator+(const Exc_t &s1, const char    *s2);
+Exc_t operator+(const Exc_t &s1, const std::string& s2);
+Exc_t operator+(const Exc_t &s1, const TString& s2);
+Exc_t operator+(const Exc_t &s1, const char* s2);
+Exc_t operator+(const Exc_t &s1,       char  c);
 
 //==============================================================================
 

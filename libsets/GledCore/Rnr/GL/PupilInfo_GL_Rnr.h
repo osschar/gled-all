@@ -16,11 +16,15 @@ private:
   void _init();
 
 protected:
-  PupilInfo*	     mPupilInfo;
+  PupilInfo    *mPupilInfo;
 
 public:
   PupilInfo_GL_Rnr(PupilInfo* idol) : ZGlass_GL_Rnr(idol), mPupilInfo(idol)
   { _init();}
+
+  virtual void InitRendering(RnrDriver* rd);
+
+  virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

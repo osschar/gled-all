@@ -19,7 +19,7 @@ class SMinMaxVar
 protected:
   T mVal, mMin, mMax;
 
-  T valminmax(T v)
+  T valminmax(T v) const
   {
     return v > mMax ? mMax : (v < mMin ? mMin : v);
   }
@@ -91,11 +91,11 @@ class SInertVar : public SMinMaxVar<T>
 protected:
   T mDelta;
 
-  T deltaminmax(T d)
+  T deltaminmax(T d) const
   {
     return d > mDelta ? mDelta : (d < -mDelta ? -mDelta : d);
   }
-  T deltaminmax(T d, T dt)
+  T deltaminmax(T d, T dt) const
   {
     T lim = mDelta * dt;
     return d > lim ? lim : (d < -lim ? -lim : d);
@@ -158,8 +158,8 @@ class SDesireVar : public SInertVar<T>
   typedef SInertVar<T>  IV;
 
 protected:
-  T      mDesire;
-  Bool_t bDesireSatisfied;
+  mutable T      mDesire;
+  mutable Bool_t bDesireSatisfied;
 
 public:
   SDesireVar() :
@@ -193,10 +193,11 @@ public:
     return MMV::Delta(d);
   }
 
-  T    GetDesire() const { return mDesire; }
-  void SetDesire(T d)    { bDesireSatisfied = false; mDesire = valminmax(d); }
+  T    GetDesire()     const { return mDesire; }
+  void SetDesire(T d)  const { bDesireSatisfied = false; mDesire = valminmax(d); }
+  void DesireToValue() const { bDesireSatisfied = true;  mDesire = MMV::mVal; }
 
-  T DeltaDesire(T d)
+  T DeltaDesire(T d) const
   {
     bDesireSatisfied = false;
     mDesire = valminmax(mDesire + d);
@@ -204,6 +205,9 @@ public:
   }
 
   Bool_t IsDesireSatisfied() const { return bDesireSatisfied; }
+
+  Bool_t IsAboveDesire() const { return MMV::mVal > mDesire; }
+  Bool_t IsBelowDesire() const { return MMV::mVal < mDesire; }
 
   void SetMinMaxDeltaDesire(T min, T max, T delta, T desire)
   {

@@ -1080,6 +1080,9 @@ Exc_t operator+(const Exc_t &s1, const TString &s2)
 Exc_t operator+(const Exc_t &s1,  const char *s2)
 { Exc_t r(s1); r += s2; return r; }
 
+Exc_t operator+(const Exc_t &s1, char c)
+{ Exc_t r(s1); r += c; return r; }
+
 
 /**************************************************************************/
 /**************************************************************************/

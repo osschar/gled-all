@@ -36,7 +36,40 @@ void PupilInfo_GL_Rnr::_init()
   }
 }
 
-/**************************************************************************/
+//==============================================================================
+
+void PupilInfo_GL_Rnr::InitRendering(RnrDriver* rd)
+{
+  // Virtual method called before rendering starts.
+  // GL is already initialized and camera is set-up.
+  // Thus this is a good place to extract values from RnrDriver.
+
+  // Extract camera params and copy them to the other side.
+
+  PupilInfo& PI = * mPupilInfo;
+  PI.mRnrCamFix  = rd->GetCamFixTrans();
+  PI.mRnrScreenW = rd->GetWidth();
+  PI.mRnrScreenH = rd->GetHeight();
+}
+
+//==============================================================================
+
+int PupilInfo_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
+{
+  // Handle event -- just copy some data over to the other side.
+  // Always return 0 so that the event will be processed further.
+
+  PupilInfo& PI = * mPupilInfo;
+
+  PI.mMouseX      = rd->GL()->GetMouseX();
+  PI.mMouseY      = rd->GL()->GetMouseY();
+  PI.mMouseRayPos = rd->GL()->RefMouseRayPos();
+  PI.mMouseRayDir = rd->GL()->RefMouseRayDir();
+
+  return 0;
+}
+
+//==============================================================================
 
 void PupilInfo_GL_Rnr::PreDraw(RnrDriver* rd)
 {

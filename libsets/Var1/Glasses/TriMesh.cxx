@@ -666,21 +666,26 @@ void TriMesh::MakeTetraChopper(Float_t l1, Float_t l2, Float_t l3, Float_t l4,
   extrude_triangle(3, -l3, 0, 0.f * h);
 
   Float_t dir[3] = { wing_l1, wing_l2, 0 };
+  Int_t   nv, nt;
 
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, wing_w, wing_h);
 
   dir[1] = - dir[1];
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, wing_w, wing_h);
 
   dir[0] = - dir[0];
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, wing_w, wing_h);
 
   dir[1] = - dir[1];
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, wing_w, wing_h);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, wing_w, wing_h);
 
   mTTvor->GenerateTriangleNormals();
   colorize_trings_std();
@@ -698,21 +703,26 @@ void TriMesh::MakeTetraMark(Float_t r0, Float_t h0,
   make_tetra(0, 0, 2*r0/3, r0/3, 0, r0, h0);
 
   Float_t dir[3] = { r1, 0, 0 };
+  Int_t   nv, nt;
 
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, w1, h1);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, w1, h1);
 
   dir[0] = - dir[0];
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, w1, h1);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, w1, h1);
 
   dir[1] = dir[0]; dir[0] = 0;
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, w1, h1);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, w1, h1);
 
   dir[1] = - dir[1];
-  make_tetra_blade(mTTvor->AddVertices(4), mTTvor->AddTriangles(4),
-                   mTTvor->Vertex(3), dir, w1, h1);
+  nv = mTTvor->AddVertices(4);
+  nt = mTTvor->AddTriangles(4);
+  make_tetra_blade(nv, nt, mTTvor->Vertex(3), dir, w1, h1);
 
   mTTvor->GenerateTriangleNormals();
 

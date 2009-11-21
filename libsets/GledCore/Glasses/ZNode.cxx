@@ -312,6 +312,21 @@ void ZNode::MakeRnrModList(ZGlass* optional_element)
     rml->Add(optional_element);
 }
 
+void ZNode::AddRnrMod(ZGlass* el)
+{
+  // Add el to the rnr-mods if it is a list.
+  // Throws an exception if rnr-mod is not a list.
+
+  static const Exc_t _eh("ZNode::AddRnrMod ");
+
+  ZRnrModList* rml = dynamic_cast<ZRnrModList*>(mRnrMod.get());
+  if(rml == 0)
+    throw _eh + "link RnrMod is not a list.";
+  rml->Add(el);
+}
+
+//==============================================================================
+
 void ZNode::SetOMofDaughters(Float_t om, Bool_t enforce_to_all)
 {
   // If enforce_to_all also changes OM of children w/ parent != this.

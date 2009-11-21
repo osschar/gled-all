@@ -10,6 +10,7 @@
 //
 
 #include "TringuCam.h"
+#include "Glasses/TSPupilInfo.h"
 #include "TriMeshField.h"
 #include "TriMeshLightField.h"
 #include "Extendio.h"
@@ -23,8 +24,6 @@
 #include <Glasses/ZQueen.h>
 #include <Glasses/ScreenText.h>
 #include <Glasses/WGlWidget.h>
-#include <Glasses/PupilInfo.h>
-#include <Glasses/Scene.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/TimeMaker.h>
 #include <Glasses/RGBAPalette.h>
@@ -34,6 +33,8 @@
 
 #include "TriMesh.h"
 #include "ParaSurf.h"
+
+#include "ExtendioSpiritio.h"
 
 #include <RnrBase/Fl_Event_Enums.h>
 
@@ -361,11 +362,11 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       }
       if (stato)
       {
-        WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("StatoCtrl"));
+        WGlWidget* weed = mPupilInfo->FindMenuEntry("StatoCtrl");
         if (weed)
         {
           weed->SetDaughterCbackStuff(stato);
-          SelectTopMenu(weed);
+          mPupilInfo->SelectTopMenu(weed);
         }
       }
       else if (dyno)
@@ -375,25 +376,25 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
         if (dynamic_cast<Crawler*>(dyno))    cls = "Crawler";
         else if (dynamic_cast<Flyer*>(dyno)) cls = "Flyer";
 
-        WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName(cls + "Ctrl"));
+	WGlWidget* weed = mPupilInfo->FindMenuEntry(cls + "Ctrl");
         if (weed)
         {
           weed->SetDaughterCbackStuff(dyno);
-          SelectTopMenu(weed);
+          mPupilInfo->SelectTopMenu(weed);
         }
       }
       else if (lmark)
       {
-	WGlWidget* weed = dynamic_cast<WGlWidget*>(mOverlay->GetElementByName("LandMarkCtrl"));
+        WGlWidget* weed = mPupilInfo->FindMenuEntry("LandMarkCtrl");
         if (weed)
         {
           weed->SetDaughterCbackStuff(lmark);
-          SelectTopMenu(weed);
+          mPupilInfo->SelectTopMenu(weed);
         }
       }
       else
       {
-        SelectTopMenuByName("MainMenu");
+        mPupilInfo->SelectTopMenuByName("MainMenu");
       }
 
       break;
@@ -813,21 +814,6 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
 
 /******************************************************************************/
 
-void TringuCam::SelectTopMenu(WGlWidget* weed)
-{
-  if (mLastMenu.is_set()) {
-    mLastMenu->SetRnrElements(false);
-  }
-  if (weed)
-    weed->SetRnrElements(true);
-  SetLastMenu(weed);
-}
-
-void TringuCam::SelectTopMenuByName(const Text_t* weed_name)
-{
-  SelectTopMenu(dynamic_cast<WGlWidget*>(mOverlay->GetElementByName(weed_name)));
-}
-
 void TringuCam::StatoDetails(Statico* stato)
 {
   // Should show detailed stato UI, just Dump data for now,
@@ -842,6 +828,45 @@ void TringuCam::DynoDetails(Dynamico* dyno)
 
   if (dyno)
     dyno->Dump();
+}
+
+void TringuCam::DynoDrive(Dynamico* dyno)
+{
+  // Install dyno handlers etc
+
+  static const Exc_t _eh("TringuCam::DynoDrive ");
+
+  ZGlass *uidir = mQueen->FindLensByPath("var/glassui");
+  if (!uidir)
+    throw _eh + "uidir not found.";
+
+  GledNS::ClassInfo *ci = dyno->VGlassInfo();
+
+  while (ci)
+  {
+    printf("Trying for '%s'\n", ci->fName.Data());
+    ZGlass *gdir = uidir->FindLensByPath(ci->fName);
+    if (gdir)
+    {
+      ExtendioSpiritio *s = dynamic_cast<ExtendioSpiritio*>(gdir->FindLensByPath("spiritio"));
+      if (s)
+      {
+	printf("Wow ... survived! Spiritio=%p, '%s'.\n", s, s->ClassName());
+
+	if (s->GetExtendio())
+	  throw _eh + "Spiritio already in use.";
+
+	s->SetExtendio(dyno);
+
+	mPupilInfo->InstallSpiritio(s);
+
+	return;
+      }
+    }
+    ci = ci->GetParentCI();
+  };
+
+  throw _eh + "No suitable spiritio found.";
 }
 
 //==============================================================================

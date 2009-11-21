@@ -20,6 +20,16 @@ $PATCH = {
   'VirtualBase' => 1
 },
 
+"Spiritio" => {
+  'VirtualBase' => 1
+},
+
+"KeyHandling" => {
+  'NoDefault'  => 1,
+  'Pragmas'    => "#pragma link C++ namespace KeyHandling;\n" .
+                  "#pragma link C++ class KeyHandling::KeyInfo+;\n"
+},
+
 };
 
 1;

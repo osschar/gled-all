@@ -42,7 +42,6 @@ protected:
   Int_t		mHeight;        // X{gS} Ray{Resize} 7 Value(-range=>[0,4096,1])
   ZColor	mClearColor;	// X{PRGS} 7 ColorButt()
 
-
   // CameraInfo.
   ZLink<ZNode>	mCameraBase;	// X{gE} L{}
 
@@ -98,9 +97,28 @@ protected:
   Float_t	mPopupFx;	// X{GS} 7 Value(-range=>[-10,10,1,10], -join=>1)
   Float_t	mPopupFy;	// X{GS} 7 Value(-range=>[-10,10,1,10])
 
-  ZLink<ZGlass> mOverlay;       // X{GS} L{}
-  ZLink<ZGlass> mEventHandler;  // X{GS} L{}
+  ZLink<ZGlass> mOverlay;       // X{GS} L{f}
+  FID_t         mOverlay_fid;   //!
+
+  ZLink<ZGlass> mEventHandler;     // X{GS} L{f}
+  FID_t         mEventHandler_fid; //!
+
   Bool_t        bAllowHandlerSwitchInPupil; // X{GS} 7 Bool()
+
+  Bool_t        bStereo;        // X{GS}
+
+  // Locals where GL renderer stores actual parameters used for last render.
+  // Protect with a lock?
+  // Should this be passed in some struct when in event-handling?
+  // Store last / current with a lock?
+  ZTrans*  mRnrCamFix;   //! X{G}
+  Int_t    mRnrScreenW;  //! X{G}
+  Int_t    mRnrScreenH;  //! X{G}
+
+  Int_t    mMouseX;      //! X{G}
+  Int_t    mMouseY;      //! X{G}
+  TVector3 mMouseRayPos; //! X{R}
+  TVector3 mMouseRayDir; //! X{R}
 
   // Direct dump hack.
   GCondition mDirectDumpCond; //!
@@ -145,6 +163,8 @@ public:
                            Bool_t copy_p=false);
 
   void ReceiveDumpFinishedSignal();
+
+  static Bool_t sStereoDefault;
 
 #include "PupilInfo.h7"
   ClassDef(PupilInfo, 1);

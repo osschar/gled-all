@@ -10,7 +10,8 @@
 #include <Glasses/ZGlPerspective.h>
 #include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 
-class ZGlPerspective_GL_Rnr : public ZRnrModBase_GL_Rnr {
+class ZGlPerspective_GL_Rnr : public ZRnrModBase_GL_Rnr
+{
 private:
   void _init();
 

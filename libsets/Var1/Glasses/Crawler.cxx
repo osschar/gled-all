@@ -25,6 +25,9 @@ void Crawler::_init()
   mLevH = 0.1f;
 
   mRayOffset = 0;
+
+  mThrottle.SetMinMaxDelta(-20, 100, 10);
+  mWheel   .SetMinMaxDelta(-5, 5, 1);
 }
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :
@@ -189,4 +192,9 @@ reoffset:
   {
     ISwarn(_eh + RC.CollideInfo(false, R));
   }
+
+
+  // Controllers
+  mThrottle.TimeTick(dt);
+  mWheel.   TimeTick(dt);
 }

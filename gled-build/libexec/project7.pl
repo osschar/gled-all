@@ -951,7 +951,7 @@ for $r (@Members)
   print H7 "static GledNS::LinkMemberInfo* sap_$r->{Methodbase}_lmi;\n";
   if ( $r->{Link} =~ m/(a)/ )
   {
-    print H7 "void assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh);\n";
+    print H7 "$r->{LinkType}* assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh);\n";
   }
 }
 
@@ -1007,8 +1007,8 @@ for $r (@Members)
   }
   if ( $r->{Link} =~ m/(a)/ )
   {
-    print C7 "void ${CLASSNAME}::assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh)\ " .
-      "{ if ($r->{Varname} == 0) throw(eh + \"link $r->{Varname} not set.\"); }\n";
+    print C7 "$r->{LinkType}* ${CLASSNAME}::assert_" . lc($r->{Methodbase}) . "(const Exc_t& eh)\ " .
+      "{ $r->{LinkType}* ret = *$r->{Varname}; if (ret == 0) throw(eh + \"link $r->{Varname} not set.\"); return ret; }\n";
   }
 }
 print C7 "\n";
