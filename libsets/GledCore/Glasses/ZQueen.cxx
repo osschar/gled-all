@@ -146,7 +146,7 @@ ID_t ZQueen::next_free_id(QueenIDMap_i i)
       i = j; ++j;
     } else {
       if(i->first < mMaxID) break;
-      if(wrapp) throw(_eh + "looped twice over the end ... dying.");
+      if(wrapp) throw _eh + "looped twice over the end ... dying.";
       wrapp = true;
       i = mIDMap.begin(); j = i; ++j;
     }
@@ -300,7 +300,7 @@ ID_t ZQueen::CheckIn(ZGlass* lens)
   GLensWriteHolder _wrlck(this);
   if(mKing->GetLightType() != ZKing::LT_Moon) {
     if( ! has_free_ids(1) ) {
-      throw(_eh + "no ID space available.");
+      throw _eh + "no ID space available.";
     }
   }
   ID_t new_id;
@@ -342,8 +342,8 @@ void ZQueen::DepCheckMIR(ZMIR& mir)
 	if(bFollowDeps) {
 	  // !!!! missing code to add the dependency etc.
 	} else {
-	  throw(_eh + GForm("beta '%s', id=%d: dependency check failed.",
-			    mir.fBeta->GetName(), mir.fBetaID));
+	  throw _eh + GForm("beta '%s', id=%d: dependency check failed.",
+			    mir.fBeta->GetName(), mir.fBetaID);
 	}
       }
   }
@@ -353,8 +353,8 @@ void ZQueen::DepCheckMIR(ZMIR& mir)
 	if(bFollowDeps) {
 	  // !!!! missing code to add the dependency etc.
 	} else {
-	  throw(_eh + GForm("gamma '%s', id=%d: dependency check failed.",
-			    mir.fGamma->GetName(), mir.fGammaID));
+	  throw _eh + GForm("gamma '%s', id=%d: dependency check failed.",
+			    mir.fGamma->GetName(), mir.fGammaID);
 	}
       }
   }
@@ -373,13 +373,13 @@ void ZQueen::BlessMIR(ZMIR& mir)
   // subjects. Eg, when bMIRActive of alpha is false.
   // Per queen access control can be implemented here.
 
-  static TString _eh("ZQueen::BlessMIR() ");
+  static const Exc_t _eh("ZQueen::BlessMIR() ");
 
   if(!bRuling && mir.fAlpha != this)
-    throw(_eh + "spooky ... not ruling, but alpha demangled");
+    throw _eh + "spooky ... not ruling, but alpha demangled";
 
   if(!mir.fAlpha->GetMIRActive())
-    throw(_eh + "alpha '" + mir.fAlpha->GetName() + "' not MIR active");
+    throw _eh + "alpha '" + mir.fAlpha->GetName() + "' not MIR active";
 
   // Dependency check
   DepCheckMIR(mir);
@@ -428,7 +428,7 @@ void ZQueen::BlessMIR(ZMIR& mir)
   if( result & ZMirFilter::R_Deny ||
       (result == ZMirFilter::R_None && mMapNoneTo == ZMirFilter::R_Deny))
     {
-      throw(_eh + "access denied");
+      throw _eh + "access denied";
     }
 }
 
@@ -461,7 +461,7 @@ ZGlass* ZQueen::instantiate(FID_t fid, const Text_t* name, const Text_t* title)
   Exc_t _eh("ZQueen::instantiate ");
 
   ZGlass* g = GledNS::ConstructLens(fid);
-  if(g == 0) throw(_eh + "failed lens instantiation");
+  if(g == 0) throw _eh + "failed lens instantiation";
   if(name)  g->mName  = name;
   if(title) g->mTitle = title;
   CheckIn(g);
@@ -479,33 +479,33 @@ ID_t ZQueen::InstantiateWAttach(LID_t new_lid, CID_t new_cid,
   // alpha ~ attach_to, beta ~ new glass, gamma ~ attach_gamma
   // Returns ID to the caller (also via MirResult if set in MIR).
 
-  static TString _eh("ZQueen::InstantiateWAttach ");
+  static const Exc_t _eh("ZQueen::InstantiateWAttach ");
 
   assert(bRuling);
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(mir->HasChainedMIR() == false)
-    throw(_eh + "attachemnt mir is not supplied.");
+    throw _eh + "attachemnt mir is not supplied.";
 
   auto_ptr<ZMIR> att_mir( mir->UnchainMIR(this) );
   ZGlass* attach_to = att_mir->fAlpha;
 
   if(attach_to->GetQueen() != this)
-    throw(_eh + "can only attach to my own subjects.");
+    throw _eh + "can only attach to my own subjects.";
 
   if(attach_to->GetMIRActive() == false)
-    throw(_eh + "attach_to is not MIR active.");
+    throw _eh + "attach_to is not MIR active.";
 
 
   ZGlass* lens = GledNS::ConstructLens(FID_t(new_lid, new_cid));
-  if(lens == 0) throw(_eh + "failed lens instantiation");
+  if(lens == 0) throw _eh + "failed lens instantiation.";
 
   try {
     CheckIn(lens);
   }
   catch(Exc_t& exc) {
     delete lens;
-    throw(_eh + exc);
+    throw _eh + exc;
   }
   if(name)  lens->SetName(name);
   if(title) lens->SetTitle(title);
@@ -542,28 +542,28 @@ ID_t ZQueen::IncarnateWAttach()
   // Links and list contents are rebuilt in accordance with queen's dependency
   // state.
 
-  static TString _eh("ZQueen::IncarnateWAttach ");
+  static const Exc_t _eh("ZQueen::IncarnateWAttach ");
 
   assert(bRuling);
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(mir->HasChainedMIR() == false)
-    throw(_eh + "attachemnt mir is not supplied.");
+    throw _eh + "attachemnt mir is not supplied.";
 
   // Must read full buffer before unchaining the attachment mir.
   ZGlass* lens = GledNS::StreamLens(*mir);
-  if(lens == 0) throw(_eh + "lens unstreaming failed.");
+  if(lens == 0) throw _eh + "lens unstreaming failed.";
 
   auto_ptr<ZMIR> att_mir( mir->UnchainMIR(this) );
   ZGlass* attach_to = att_mir->fAlpha;
 
   if(attach_to->GetQueen() != this) {
     delete lens;
-    throw(_eh + "can only attach to my own subjects.");
+    throw _eh + "can only attach to my own subjects.";
   }
   if(attach_to->GetMIRActive() == false) {
     delete lens;
-    throw(_eh + "attach_to is not MIR active.");
+    throw _eh + "attach_to is not MIR active.";
   }
 
   { // Rebuild link/list refs
@@ -580,7 +580,7 @@ ID_t ZQueen::IncarnateWAttach()
   catch(Exc_t& exc) {
     lens->unreference_all();
     delete lens;
-    throw(_eh + exc);
+    throw _eh + exc;
   }
 
   att_mir->fBeta   = lens;
@@ -617,10 +617,10 @@ void ZQueen::MIRActivateLens(ZGlass* lens)
   assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(lens->mQueen != this)
-    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+    throw _eh + "lens " + lens->Identify() + " is not my subject.";
 
   if(lens == this)
-    throw(_eh + "will not apply to myself " + Identify() + ".");
+    throw _eh + "will not apply to myself " + Identify() + ".";
 
   lens->SetMIRActive(true);
 }
@@ -632,10 +632,10 @@ void ZQueen::MIRDeactivateLens(ZGlass* lens)
   assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(lens->mQueen != this)
-    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+    throw _eh + "lens " + lens->Identify() + " is not my subject.";
 
   if(lens == this)
-    throw(_eh + "will not apply to myself " + Identify() + ".");
+    throw _eh + "will not apply to myself " + Identify() + ".";
 
   lens->SetMIRActive(false);
 }
@@ -653,9 +653,9 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
   { // Check lens state consistency.
     map_it = mIDMap.find(lens->mSaturnID);
     if(map_it == mIDMap.end())
-      throw(_eh + "lens " + lens->Identify() + " not found in my subject list.");
+      throw _eh + "lens " + lens->Identify() + " not found in my subject list.";
     if(map_it->second->mState != LS_Alive)
-      throw(_eh + "lens " + lens->Identify() + " has already been put to death-bed.");
+      throw _eh + "lens " + lens->Identify() + " has already been put to death-bed.";
   }
 
   { // Stop threads.
@@ -737,7 +737,7 @@ void ZQueen::PutLensToPurgatory(ZGlass* lens)
   assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(lens->mQueen != this)
-    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+    throw _eh + "lens " + lens->Identify() + " is not my subject.";
 
   GMutexHolder refcnt_lck(mSubjectRefCntMutex);
   put_lens_to_purgatory(lens);
@@ -757,7 +757,7 @@ void ZQueen::PutListElementsToPurgatory(AList* list)
   assert_MIR_presence(_eh, ZGlass::MC_IsFlare);
 
   if(list->mQueen != this)
-    throw(_eh + "lens " + list->Identify() + " is not my subject.");
+    throw _eh + "lens " + list->Identify() + " is not my subject.";
 
   GMutexHolder refcnt_lck(mSubjectRefCntMutex);
 
@@ -822,12 +822,12 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
       i->second->mDeletionTime.SetNow();
       return;
     } else {
-      throw(_eh + GForm("lens id=%d not elightened.", lens_id));
+      throw _eh + GForm("lens id=%d not elightened.", lens_id);
     }
   }
 
   if(lens->mQueen != this)
-    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+    throw _eh + "lens " + lens->Identify() + " is not my subject.";
 
   // printf("%s %s RC=%d, MRC=%d, SRC=%d, FRC=%d\n", _eh.Data(), lens->Identify().Data(),
   //	    lens->mRefCount, lens->mMoonRefCount, lens->mSunRefCount, lens->mFireRefCount);
@@ -836,7 +836,7 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
 
   QueenIDMap_i i = mIDMap.find(lens_id);
   if(i == mIDMap.end()) {
-    throw(_eh + "LensDetails of " + lens->Identify() + " not found in queen's ID map.");
+    throw _eh + "LensDetails of " + lens->Identify() + " not found in queen's ID map.";
   }
   if(i->second->mState != LS_Purged) {
     ISwarn(_eh + "lens has not been put to purged state ... expect trouble.");
@@ -856,7 +856,7 @@ void ZQueen::PutLensToVoid(ID_t lens_id)
     }
     catch(Exc_t& exc) {
       if(lockp == GMutex::ok) lens->mReadMutex.Unlock();
-      throw(_eh + "endarkenment failed: " + exc + " Doing nothing.");
+      throw _eh + "endarkenment failed: " + exc + " Doing nothing.";
     }
     if(lockp == GMutex::ok) lens->mReadMutex.Unlock();
   }
@@ -890,16 +890,16 @@ void ZQueen::RemoveLens(ZGlass* lens)
   static const Exc_t _eh("ZQueen::RemoveLens ");
 
   if(mKing->GetLightType() == ZKing::LT_Moon)
-    throw(_eh + "can not be called at a moon.");
+    throw _eh + "can not be called at a moon.";
 
   if(lens == 0)
-    throw(_eh + "called with null argument.");
+    throw _eh + "called with null argument.";
 
   if(lens->mQueen != this)
-    throw(_eh + "lens " + lens->Identify() + " is not my subject.");
+    throw _eh + "lens " + lens->Identify() + " is not my subject.";
 
   if(lens == this)
-    throw(_eh + "attempt to delete ZQueen " + Identify() + ".");
+    throw _eh + "attempt to delete ZQueen " + Identify() + ".";
 
   ZMIR* mir = GThread::MIR();
   if(mir && mir->IsFlare())
@@ -916,10 +916,10 @@ void ZQueen::RemoveLenses(AList* list, Bool_t recurse)
   static const Exc_t _eh("ZQueen::RemoveLenses ");
 
   if(mKing->GetLightType() == ZKing::LT_Moon)
-    throw(_eh + "can not be called at a moon.");
+    throw _eh + "can not be called at a moon.";
 
   if(list == 0)
-    throw(_eh + "called with null argument.");
+    throw _eh + "called with null argument.";
 
   ZMIR* mir = assert_MIR_presence(_eh);
 
@@ -1038,7 +1038,7 @@ void ZQueen::CleanOrphanage()
 
 void ZQueen::SetMandatory(Bool_t mandp)
 {
-static TString _eh("ZQueen::SetMandatory");
+static const Exc_t _eh("ZQueen::SetMandatory");
 ZMIR* mir = assert_MIR_presence(_eh);
 
 if(mandp == bMandatory) return;
@@ -1086,7 +1086,7 @@ void ZQueen::InvokeReflection(TBuffer& buf)
   static const Exc_t _eh("ZQueen::InvokeReflection ");
 
   ZComet c; c.Streamer(buf);
-  if(c.GetType() != ZComet::CT_Queen) throw(_eh + "wrong comet type.");
+  if(c.GetType() != ZComet::CT_Queen) throw _eh + "wrong comet type.";
 
   c.AssignQueen(this);
   c.SetExtDemangler(this);
@@ -1174,7 +1174,7 @@ void ZQueen::AdoptComet(AList* top_dest, AList* orphan_dest, ZComet* comet)
       orphan_dest->Add(*i);
   } else {
     WriteUnlock();
-    throw(_eh + "(comet=" + comet->GetName() + ") ID shortage.");
+    throw _eh + "(comet=" + comet->GetName() + ") ID shortage.";
   }
   WriteUnlock();
 }
@@ -1268,12 +1268,12 @@ void ZQueen::BasicQueenChange(ZMIR& mir)
 {
   static const Exc_t _eh("ZQueen::BasicQueenChange ");
 
-  if(mir.fAlpha != this)  throw(_eh + "alpha is not *this* queen.");
-  if(mir.HasRecipient()) throw(_eh + "MIR is a beam, should be flare.");
+  if(mir.fAlpha != this) throw _eh + "alpha is not *this* queen.";
+  if(mir.HasRecipient()) throw _eh + "MIR is a beam, should be flare.";
   if( FID_t(mir.fLid, mir.fCid) != ZGlass::FID() )
-    throw(_eh + "FID does not correspond to ZGlass.");
+    throw _eh + "FID does not correspond to ZGlass.";
   if(mir.fMid != ZGlass::Mid_SetName() && mir.fMid != ZGlass::Mid_SetTitle())
-    throw(_eh + "MID does not correspond to SetName or SetTitle.");
+    throw _eh + "MID does not correspond to SetName or SetTitle.";
 
   BroadcastMIRToNonRulingReflections(mir);
 }
