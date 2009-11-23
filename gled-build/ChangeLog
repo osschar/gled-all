@@ -1,3 +1,9 @@
+2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/project7.pl:
+	Make assert_linkname return the pointer the lens pointed
+	to (auto-generated via L{a} pragma).
+
 2009-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for L{fF}, relax regexp for weed ctor parsing.
