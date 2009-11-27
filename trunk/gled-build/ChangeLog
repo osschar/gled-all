@@ -1,3 +1,14 @@
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Allow configure to run make in parallel mode.
+
+	* configure.rc:
+	Add config variable MAKEJOPT, default "<auto>".
+
+	* configure:
+	In build system detection, if MAKEJOPT == <auto>, determine number
+	of cores and use them all via "-j" when doing pre_depend and depend.
+	
 2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/project7.pl:
