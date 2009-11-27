@@ -14,7 +14,13 @@
 	* configure:
 	In build system detection, if MAKEJOPT == <auto>, determine number
 	of cores and use them all via "-j" when doing pre_depend and depend.
-	
+
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/project7.pl:
+	In auto-generated set-link method with L{f} do not apply the check
+	if argument is null.
+
 2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/project7.pl:
