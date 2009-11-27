@@ -1,5 +1,11 @@
 2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* configure:
+	Write out Makefile.config as soon as possible. Thus, even if
+	configure dies, make distclean can still be called.
+
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* make/make_targets.inc:
 	Proper dependencies between auto_dirs, catalog, glue and
 	pre_depend targets.
