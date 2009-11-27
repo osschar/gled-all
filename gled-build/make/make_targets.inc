@@ -92,15 +92,15 @@ bin_dist:
 auto_dirs:
 	${MUTE} mkdir -p ${GLUE_DIR} ${DICT_DIR} ${VIEW_DIR}
 
-catalog:
+catalog: auto_dirs
 	${ECHO} -C- Generating glass catalog
 	${MUTE} ${GLEDCATGEN} ${LIB_SET_NAME} ${LIB_SET_ID} ${BLESSED_DIRS}
 
-glue:
+glue: catalog
 	${ECHO} -G- Generating glass glue
 	${MUTE} ${GLEDGLUEGEN} ${REQUIRES_LIB_SETS} :: ${RENDERERS}
 
-pre_depend:: auto_dirs catalog glue
+pre_depend:: glue
 	${ECHO} -d- Generating p7 dependencies for glasses
 	${MUTE} ${MKBLESSDEP}
 	${ECHO} -d- Generating p7 dependencies for non-glasses
