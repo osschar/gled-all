@@ -24,6 +24,7 @@ confdebug	!	.	CONFDEBUG	0
 reconfigure	!	.	RECONFIGURE	0
 help		!	.	HELP		0
 envsetupstem	=s	.	ENVSETUPSTEM	"build_env"
+makejopt	=s	.	MAKEJOPT	"<auto>"
 
 ### compile/link options ###
 #

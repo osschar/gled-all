@@ -179,6 +179,27 @@ $system = exec_or_die("uname -s"); chomp $system;
 if($system eq 'Linux' or $system eq 'Darwin')
 {
   print "Configuring for '$system'.\n";
+
+  if ($config->{MAKEJOPT} eq "<auto>")
+  {
+    if ($system eq 'Linux')
+    {
+      $MAKEJOPT = "-j" . exec_or_die("grep -cE '^processor' /proc/cpuinfo");
+    }
+    elsif ($system eq 'Darwin')
+    {
+      $MAKEJOPT = "-j" . exec_or_die("sysctl -n machdep.cpu.thread_count");
+    }
+    else
+    {
+      $MAKEJOPT = "";
+    }
+    chomp $MAKEJOPT;
+  }
+  else
+  {
+    $MAKEJOPT = $config->{MAKEJOPT};
+  }
 }
 else
 {
@@ -554,7 +575,7 @@ for $f (@{$resolver->{LibSetList}})
 # Generate catalogs, dictionaries, views and Rnr bindings
 for $f (@{$resolver->{LibSetList}})
 {
-  system_or_die("make -C $f pre_depend");
+  system_or_die("make ${MAKEJOPT} -C $f pre_depend");
 }
 
 
@@ -591,7 +612,7 @@ write_config();
 # Now run make depend
 for $f (@{$resolver->{LibSetList}})
 {
-  system_or_die("make -C $f depend");
+  system_or_die("make ${MAKEJOPT} -C $f depend");
 }
 
 
