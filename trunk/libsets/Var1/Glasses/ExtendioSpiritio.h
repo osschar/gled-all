@@ -26,7 +26,7 @@ public:
   ExtendioSpiritio(const Text_t* n="ExtendioSpiritio", const Text_t* t=0);
   virtual ~ExtendioSpiritio();
 
-  // Should keep abstract?
+  // Should keep abstract? If yes, tag in catalog.patch and remove the line.
   virtual void TimeTick(Double_t t, Double_t dt) {}
 
 #include "ExtendioSpiritio.h7"

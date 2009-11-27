@@ -8,6 +8,7 @@
 #define Var1_TSPupilInfo_H
 
 #include <Glasses/PupilInfo.h>
+#include <Stones/TimeMakerClient.h>
 
 class Scene;
 class WGlWidget;
@@ -16,7 +17,8 @@ class TimeMaker;
 
 class Spiritio;
 
-class TSPupilInfo : public PupilInfo
+class TSPupilInfo : public PupilInfo,
+		    public TimeMakerClient
 {
   MAC_RNR_FRIENDS(TSPupilInfo);
 
@@ -24,18 +26,24 @@ private:
   void _init();
 
 protected:
-  ZLink<TimeMaker>  mTimeMaker;     // X{GS} L{}
+  ZLink<TimeMaker>  mTimeMaker;       // X{GS} L{}
 
-  ZLink<Scene>      mMenuScene;     // X{GS} L{}
-  ZLink<Scene>      mSpiritioScene; // X{GS} L{}
+  ZLink<Spiritio>   mDefaultSpiritio; // X{GS} L{}
+  ZLink<Spiritio>   mCurrentSpiritio; // X{GE} L{}
 
-  ZLink<WGlWidget>  mLastMenu;      // X{GS} L{}
+  // Menus / overlays.
+  ZLink<Scene>      mMenuScene;       // X{GS} L{}
+  ZLink<Scene>      mSpiritioScene;   // X{GS} L{}
+  ZLink<WGlWidget>  mLastMenu;        // X{GS} L{}
 
 public:
   TSPupilInfo(const Text_t* n="TSPupilInfo", const Text_t* t=0);
   virtual ~TSPupilInfo();
 
   virtual void AdEnlightenment();
+
+  // TimeMakerClient
+  virtual void TimeTick(Double_t t, Double_t dt);
 
   // Overlay
   void AddOverlayElement(ZGlass* l);
@@ -46,8 +54,7 @@ public:
   void RemoveEventHandler(ZGlass* l);
 
   // Spiritios
-  void InstallSpiritio(Spiritio* s);
-  void UninstallSpiritio(Spiritio* s);
+  void SetCurrentSpiritio(Spiritio* s);
 
   // Menu handling.
   WGlWidget* FindMenuEntry(const TString& name);

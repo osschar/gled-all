@@ -7,6 +7,8 @@
 #include "CrawlerSpiritio.h"
 #include "Crawler.h"
 #include "CrawlerSpiritio.c7"
+#include <Glasses/Camera.h>
+#include <Glasses/Tringula.h>
 #include <Stones/KeyHandling.h>
 
 // CrawlerSpiritio
@@ -44,7 +46,7 @@ CrawlerSpiritio::CrawlerSpiritio(const Text_t* n, const Text_t* t) :
 CrawlerSpiritio::~CrawlerSpiritio()
 {}
 
-//==============================================================================
+//------------------------------------------------------------------------------
 
 Crawler* CrawlerSpiritio::get_crawler()
 {
@@ -53,9 +55,64 @@ Crawler* CrawlerSpiritio::get_crawler()
 
 //==============================================================================
 
+void CrawlerSpiritio::AdEnlightenment()
+{
+  // Create the camera.
+
+  PARENT_GLASS::AdEnlightenment();
+
+  if (mCameraBase == 0)
+  {
+    ZNode* cb = new ZNode("CrawlerCameraBase", "CameraBase of CrawlerSpiritio");
+    cb->SetMIRActive(false);
+    mQueen->CheckIn(cb);
+    SetCameraBase(cb);
+  }
+  if (mCamera == 0)
+  {
+    Camera* c = new Camera("CrawlerCamera", "Camera of CrawlerSpiritio");
+    c->SetMIRActive(false);
+    mQueen->CheckIn(c);
+    SetCamera(c);
+    mCameraBase->Add(c);
+  }
+}
+
+//==============================================================================
+
+void CrawlerSpiritio::Activate()
+{
+  // Called when TSPupilInfo installs the spiritio.
+
+  mCameraBase->SetParent(mExtendio->GetTringula());
+  mCameraBase->ref_trans().SetFromArray(mExtendio->ref_last_trans());
+
+  mCamera->Home();
+
+  // Move camera slightly off.
+  // These factors seem to work ok with simple Crawlers.
+  // Should really have a marked point in the mesh.
+  // And draw something special when driving a unit.
+
+  Float_t *minmax = mExtendio->GetMesh()->GetTTvor()->mMinMaxBox;
+  mCamera->MoveLF(1, 0.20f * minmax[0]); // min_x
+  mCamera->MoveLF(3, 1.30f * minmax[5]); // max_z
+  mCamera->RotateLF(3, 1, 0.2);
+}
+
+void CrawlerSpiritio::Deactivate()
+{
+  // SetExtendio(0);
+  mCameraBase->SetParent(0);
+}
+
+//==============================================================================
+
 void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
 {
   Crawler &C = * (Crawler*) *mExtendio;
+
+  mCameraBase->ref_trans().SetFromArray(mExtendio->ref_last_trans());
 
   // Throttle
   Int_t tdc = mKeyIncThrottle.fDownCount - mKeyDecThrottle.fDownCount;

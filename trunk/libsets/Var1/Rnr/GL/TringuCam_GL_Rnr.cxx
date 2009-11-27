@@ -23,6 +23,7 @@ void TringuCam_GL_Rnr::_init()
 
 /**************************************************************************/
 
+/*
 void TringuCam_GL_Rnr::Draw(RnrDriver* rd)
 {
   TringuCam& TC = * mTringuCam;
@@ -33,25 +34,22 @@ void TringuCam_GL_Rnr::Draw(RnrDriver* rd)
   TC.mFarClp  = rd->GetFarClip();
   TC.mZFov    = rd->GetZFov();
 }
+*/
 
 /**************************************************************************/
 
 int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
-  int x = ev.fX, y = ev.fY;
+  // int x = ev.fX, y = ev.fY;
 
+  /*
   TringuCam& TC = *mTringuCam;
-  TC.mMouseX = x;
-  TC.mMouseY = y;
 
   switch (ev.fEvent)
   {
 
     case FL_PUSH:
     {
-      TC.mMPushX = mMouseX = x;
-      TC.mMPushY = mMouseY = y; // reset the drag location
-
       if (ev.fButton == 1)
       {
         TC.MouseDown(ev);
@@ -62,22 +60,20 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
     case FL_DRAG:
     {
-      int dx = x - mMouseX, dy = y - mMouseY;
-      TC.mMDrgDX = dx;
-      TC.mMDrgDY = dy;
-
       if (ev.fState & FL_BUTTON2)
       {
-        float cfac  = TMath::DegToRad()*rd->GetZFov()/rd->GetHeight();
+	int dx = rd->GL()->GetMDragDX();
+	int dy = rd->GL()->GetMDragDY();
+        float cfac = TMath::DegToRad()*rd->GetZFov()/rd->GetHeight();
         if (dx != 0)
         {
-          float dxang =  cfac*dx;
+          float dxang =  cfac * dx;
           mTringuCam->RotateLF(1, 2, -dxang);
         }
         if (dy != 0)
         {
-          float dyang = -cfac*dy;
-          ZTrans& t = * rd->GetCamFixTrans();
+          float dyang = -cfac * dy;
+          ZTrans& t = * mTringuCam->GetCamera()->ref_trans();
           // Do not rotate beyond vertical.
           Float_t d = t.ArrX()[2];
           if (d > 1) d = 1; else if(d < -1) d = -1; // Fix numerical errors
@@ -100,8 +96,6 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
           }
         }
       }
-
-      mMouseX = x; mMouseY = y;
       return 1;
     }
 
@@ -136,6 +130,7 @@ int TringuCam_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     }
 
   } // end switch (ev.fEvent)
+  */
 
   // Return 1 to block further processing.
   return 0;

@@ -90,6 +90,8 @@ void PupilInfo::_init()
   bAllowHandlerSwitchInPupil = true;
 
   bStereo = sStereoDefault;
+
+  mRnrCamFix = 0;
 }
 
 /**************************************************************************/
@@ -308,6 +310,35 @@ ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
     return c2p;
   }
   return n2p;
+}
+
+Bool_t PupilInfo::TransformMouseRayVectors(ZNode* ref, TVector3& pos, TVector3& dir)
+{
+  // Transforms last mouse-ray vectors into the frame of ref.
+  // This multiples transformation matrices from camera-base upwards
+  // until ref is reached -- the transformation of ref is not applied.
+
+  pos = mMouseRayPos;
+  dir = mMouseRayDir;
+
+  // CamFix rotation is done in GLRnrDriver.
+  // mRnrCamFix->MultiplyIP(pos);
+  // mRnrCamFix->RotateIP  (dir);
+
+  ZNode *node = *mCameraBase;
+  while (node != ref)
+  {
+    if (!node)
+      return false;
+
+    GLensReadHolder rd_lck(node);
+
+    node->ref_trans().MultiplyIP(pos);
+    node->ref_trans().RotateIP  (dir);
+
+    node = node->GetParent();
+  }
+  return true;
 }
 
 /**************************************************************************/

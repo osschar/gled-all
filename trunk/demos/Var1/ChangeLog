@@ -1,3 +1,8 @@
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Changes needed for new TringuCam / Spiritio stuff.
+
 2009-11-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

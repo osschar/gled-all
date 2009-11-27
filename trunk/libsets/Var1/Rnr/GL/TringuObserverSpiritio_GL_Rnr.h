@@ -22,7 +22,7 @@ public:
   TringuObserverSpiritio_GL_Rnr(TringuObserverSpiritio* idol);
   virtual ~TringuObserverSpiritio_GL_Rnr();
 
-  virtual void Draw(RnrDriver* rd);
+  // virtual void Draw(RnrDriver* rd);
 
   virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
 

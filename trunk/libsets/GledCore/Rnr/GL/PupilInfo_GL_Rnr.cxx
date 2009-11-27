@@ -63,6 +63,8 @@ int PupilInfo_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
   PI.mMouseX      = rd->GL()->GetMouseX();
   PI.mMouseY      = rd->GL()->GetMouseY();
+  PI.mMouseDragDX = rd->GL()->GetMDragDX();
+  PI.mMouseDragDY = rd->GL()->GetMDragDY();
   PI.mMouseRayPos = rd->GL()->RefMouseRayPos();
   PI.mMouseRayDir = rd->GL()->RefMouseRayDir();
 

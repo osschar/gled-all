@@ -11,6 +11,8 @@
 
 #include <Stones/SVars.h>
 
+class TringuCam;
+
 class ZNode;
 
 class TringuObserverSpiritio : public Spiritio
@@ -21,6 +23,8 @@ private:
   void _init();
 
 protected:
+  ZLink<TringuCam>  mTringuCam; // X{GS} L{}
+
   SDesireVarF mFwdBck;
   SDesireVarF mLftRgt;
   SDesireVarF mUpDown;
@@ -35,9 +39,14 @@ public:
   TringuObserverSpiritio(const Text_t* n="TringuObserverSpiritio", const Text_t* t=0);
   virtual ~TringuObserverSpiritio();
 
-  virtual void TimeTick(Double_t t, Double_t dt);
+  virtual void AdEnlightenment();
 
-  virtual void Install(TSPupilInfo* pi);
+  // Spiritio
+  virtual void Activate();
+  virtual void Deactivate();
+
+  // TimeMakerClient
+  virtual void TimeTick(Double_t t, Double_t dt);
 
 #include "TringuObserverSpiritio.h7"
   ClassDef(TringuObserverSpiritio, 1);

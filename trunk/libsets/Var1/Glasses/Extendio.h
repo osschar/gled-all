@@ -58,9 +58,9 @@ protected:
 
   Bool_t          bSelected;       // X{GS}  7 BoolOut()
 
-  ZLink<TriMesh>  mMesh;       // X{GS} L{}
+  ZLink<TriMesh>  mMesh;       //  X{GS} L{}
 
-  Tringula       *mTringula;   //!
+  Tringula       *mTringula;   //! X{g}
 
 public:
   Extendio(const Text_t* n="Extendio", const Text_t* t=0);

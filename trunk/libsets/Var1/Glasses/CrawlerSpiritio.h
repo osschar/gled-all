@@ -29,11 +29,22 @@ protected:
   KeyHandling::KeyInfo mKeyLeftWheel;   //!
   KeyHandling::KeyInfo mKeyRightWheel;  //!
 
+  ZLink<ZNode>   mCameraBase; // X{GS} L{}
+
 public:
   CrawlerSpiritio(const Text_t* n="CrawlerSpiritio", const Text_t* t=0);
   virtual ~CrawlerSpiritio();
 
+  virtual void AdEnlightenment();
+
+  // Spiritio
+  virtual void Activate();
+  virtual void Deactivate();
+
+  // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  // ----------------------------------------------------------------
 
   void IncThrottle(Int_t, Bool_t downp, UInt_t time_elapsed);
   void DecThrottle(Int_t, Bool_t downp, UInt_t time_elapsed);
