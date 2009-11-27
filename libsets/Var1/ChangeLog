@@ -1,5 +1,16 @@
 2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Remove obsolete render-class TringuCam_GL_Rnr.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	Removed files.
+
+	* glass.list:
+	TringuCam no longer has it's own renderer.
+
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Spiritio attachement works!
 
 	* Glasses/CrawlerSpiritio.cxx:
