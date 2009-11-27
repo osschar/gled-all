@@ -161,8 +161,13 @@ void GLRnrDriver::PreEventHandling(A_Rnr::Fl_Event& e)
   {
     if (e.fEvent == FL_DRAG)
     {
-      mMDrgDX = e.fX - mMouseX;
-      mMDrgDY = e.fY - mMouseY;
+      mMDragDX = e.fX - mMouseX;
+      mMDragDY = e.fY - mMouseY;
+    }
+    else
+    {
+      mMDragDX = 0;
+      mMDragDY = 0;
     }
 
     mMouseX = e.fX;

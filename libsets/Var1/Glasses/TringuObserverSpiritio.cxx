@@ -6,22 +6,23 @@
 
 #include "TringuObserverSpiritio.h"
 #include <Glasses/ZNode.h>
+#include "TringuCam.h"
 #include "TringuObserverSpiritio.c7"
+#include <Glasses/Camera.h>
 
 // TringuObserverSpiritio
 
 //______________________________________________________________________________
 //
-//
+// Right now ... just forward all to TringuCam, also in GL-Rnr.
+// Some functionality of TringuCam will come here.
 
 ClassImp(TringuObserverSpiritio);
 
 //==============================================================================
 
 void TringuObserverSpiritio::_init()
-{
-
-}
+{}
 
 TringuObserverSpiritio::TringuObserverSpiritio(const Text_t* n, const Text_t* t) :
   Spiritio(n, t)
@@ -34,17 +35,37 @@ TringuObserverSpiritio::~TringuObserverSpiritio()
 
 //==============================================================================
 
-void TringuObserverSpiritio::TimeTick(Double_t t, Double_t dt)
+void TringuObserverSpiritio::AdEnlightenment()
 {
+  // Create the camera.
 
+  PARENT_GLASS::AdEnlightenment();
+
+  if (mCamera == 0)
+  {
+    Camera* c = new Camera("TringuObserverCamera", "Camera of TringuObserverSpiritio");
+    c->SetMIRActive(false);
+    mQueen->CheckIn(c);
+    SetCamera(c);
+  }
 }
 
-void TringuObserverSpiritio::Install(TSPupilInfo* pi)
-{
-  // This is potentially a tricky one.
-  // Spiritios usually operate on the Sun, but the tringu-observer
-  // is somewhat special as it is supposed to run locally.
-  //
-  // So, probably, TSPupilInfo will have to allow for local spiritios.
+//==============================================================================
 
+void TringuObserverSpiritio::Activate()
+{
+  mCamera->SetParent(*mTringuCam);
+  // mCamera->Home();
+}
+
+void TringuObserverSpiritio::Deactivate()
+{
+  mCamera->SetParent(0);
+}
+
+//==============================================================================
+
+void TringuObserverSpiritio::TimeTick(Double_t t, Double_t dt)
+{
+  mTringuCam->TimeTick(t, dt);
 }

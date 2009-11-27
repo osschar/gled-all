@@ -22,6 +22,8 @@ public:
   TSPupilInfo_GL_Rnr(TSPupilInfo* idol);
   virtual ~TSPupilInfo_GL_Rnr();
 
+  virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
+
   // virtual void PreDraw(RnrDriver* rd);
   // virtual void Draw(RnrDriver* rd);
   // virtual void PostDraw(RnrDriver* rd);

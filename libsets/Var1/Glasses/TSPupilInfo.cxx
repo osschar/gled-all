@@ -11,6 +11,7 @@
 #include "Spiritio.h"
 #include "TSPupilInfo.c7"
 
+#include <Glasses/Camera.h>
 
 // TSPupilInfo
 
@@ -41,6 +42,8 @@ TSPupilInfo::TSPupilInfo(const Text_t* n, const Text_t* t) :
 TSPupilInfo::~TSPupilInfo()
 {}
 
+//==============================================================================
+
 void TSPupilInfo::AdEnlightenment()
 {
   // Create overlay and event-handler lists.
@@ -56,6 +59,7 @@ void TSPupilInfo::AdEnlightenment()
   if (mMenuScene == 0)
   {
     Scene* s = new Scene("MenuScene", "Menu overlay of TSPupilInfo");
+    s->SetMIRActive(false);
     mQueen->CheckIn(s);
     SetMenuScene(s);
     AddOverlayElement(s);
@@ -64,6 +68,7 @@ void TSPupilInfo::AdEnlightenment()
   if (mSpiritioScene == 0)
   {
     Scene* s = new Scene("SpiritioScene", "Spiritio overlay of TSPupilInfo");
+    s->SetMIRActive(false);
     mQueen->CheckIn(s);
     SetSpiritioScene(s);
     AddOverlayElement(s);
@@ -76,6 +81,14 @@ void TSPupilInfo::AdEnlightenment()
     mQueen->CheckIn(l);
     SetEventHandler(l);
   }
+}
+
+//==============================================================================
+
+void TSPupilInfo::TimeTick(Double_t t, Double_t dt)
+{
+  if (*mCurrentSpiritio)
+    mCurrentSpiritio->TimeTick(t, dt);
 }
 
 //==============================================================================
@@ -108,14 +121,52 @@ void TSPupilInfo::RemoveEventHandler(ZGlass* l)
 
 //==============================================================================
 
-void TSPupilInfo::InstallSpiritio(Spiritio* s)
-{
-  
-}
+// Maybe we need a list of spiritios?
+// Who knows ... only one can have camera though.
+// Then it can be called SpiritioVisionario, or sth.
 
-void TSPupilInfo::UninstallSpiritio(Spiritio* s)
+void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
 {
+  if (s == 0)
+    s = *mDefaultSpiritio;
 
+  Spiritio *exs = *mCurrentSpiritio;
+
+  set_link_or_die(mCurrentSpiritio.ref_link(), 0, FID());
+
+  if (exs)
+  {
+    mSpiritioScene->RemoveAll(exs);
+    RemoveEventHandler(exs);
+
+    {
+      GLensReadHolder slck(exs);
+      exs->Deactivate();
+      exs->SetPupilInfo(0);
+    }
+  }
+
+  if (s)
+  {
+    mSpiritioScene->PushFront(s);
+    AddEventHandler(s);
+
+    {
+      GLensReadHolder slck(s);
+      s->SetPupilInfo(this);
+      s->Activate();
+    }
+
+    SetCameraBase(s->GetCamera());
+    SetUpReference(0);
+    EmitCameraHomeRay();
+  }
+  else
+  {
+    SetCameraBase(0);
+  }
+
+  set_link_or_die(mCurrentSpiritio.ref_link(), s, FID());
 }
 
 //==============================================================================

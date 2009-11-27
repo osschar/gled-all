@@ -1,3 +1,57 @@
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Spiritio attachement works!
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Add member ZLink<ZNode> mCameraBase.
+	Implement AdEnlightenment() -- create camera and camera-base.
+	Implement Spiritio virtuals Activate()/Deactivate() to set up
+	camera and camera-base for attached Crawler.
+
+	* Glasses/Extendio.h:
+	* Glasses/ExtendioSpiritio.h:
+	Gray-space.
+
+	* Glasses/Spiritio.h:
+	Add virtuals Activate()/Deactivate().
+	Gray-space.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Sub-class from TimeMakerClient.
+	Add link-members ZLink<Spiritio> mDefaultCurrentSpiritio.
+	SetCurrentSpiritio() is hand-written -- should really be called in
+	a detached thread. And we need a render-lock (condition) to
+	broadcast end-of frame to blocked threads.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Remove data-members that were storing render/gl-event state. This
+	is now handled in TringuObserverSpiritio(GL).
+	Simplify CalculateMouseRayVectors() -- use new function
+	TransformMouseRayVectors() from pupil-info.
+
+	* Glasses/TringuObserverSpiritio.cxx:
+	* Glasses/TringuObserverSpiritio.h:
+	Add member ZLink<TringuCam> mTringuCam.
+	Implement AdEnlightenment() -- create camera.
+	Implement Spiritio virtuals Activate()/Deactivate() to set
+	camera-parent.
+
+	* Rnr/GL/TSPupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/TSPupilInfo_GL_Rnr.h:
+	Implement Handle() -- to set back the default spiritio on 'Esc'.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	All still relevant stuff moved to TringuObserverSpiritio_GL_Rnr.
+	This rnr-class will be removed.
+
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.h:
+	Moved in Handle() stuff from TringuCam_GL_Rnr.
+
 2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Incarnate proto Spiritios.

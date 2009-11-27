@@ -1148,7 +1148,7 @@ for $r (@Members)
     {
       if ($r->{Link} =~ m/f|F/)
       {
-	$setit = "  if (!$r->{Varname}_fid.is_null() && !GledNS::IsA($r->{Args}[0][2], $r->{Varname}_fid))\n" .
+	$setit = "  if ($r->{Args}[0][2] && !$r->{Varname}_fid.is_null() && !GledNS::IsA($r->{Args}[0][2], $r->{Varname}_fid))\n" .
 	         "    throw Exc_t(GForm(\"${CLASSNAME}::$r->{Methodname} Argument is not of requested FID(%hu,%hu).\", $r->{Varname}_fid.fLid, $r->{Varname}_fid.fCid));\n";
       }
       $setit  .= "  set_link_or_die($r->{Varname}.ref_link(), $r->{Args}[0][2], FID());\n";

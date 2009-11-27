@@ -194,17 +194,6 @@ protected:
 
   ZLink<ZGlass>            mPrepBeta;    // X{GS} L{a}
 
-  // Render-driver and mouse state fed in via TringuCam_GL_Rnr
-  // Draw() and Handle().
-
-  ZTrans* mCamFix;              //! X{G}
-  Int_t   mScreenW, mScreenH;   //!
-  Float_t mNearClp, mFarClp;    //!
-  Float_t mZFov;                //!
-  Int_t   mMouseX,  mMouseY;    //!
-  Int_t   mMPushX,  mMPushY;    //!
-  Int_t   mMDrgDX,  mMDrgDY;    //!
-
   Int_t     mStampInterval;     //  X{GS} 7 Value(-range=>[0,1000])
   Int_t     mStampCount;        //!
   Double_t  mHeight;            //  Height above tringula. X{GS} 7 Value(-range=>[-1e5, 1e5, 1, 100])

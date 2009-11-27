@@ -33,8 +33,8 @@ protected:
   Int_t                     mMouseY;     // X{g}
   Int_t                     mMPushX[4];
   Int_t                     mMPushY[4];
-  Int_t                     mMDrgDX;     // X{g}
-  Int_t                     mMDrgDY;     // X{g}
+  Int_t                     mMDragDX;    // X{g}
+  Int_t                     mMDragDY;    // X{g}
 
   TVector3                  mMouseRayPos; // X{R}
   TVector3                  mMouseRayDir; // X{R}

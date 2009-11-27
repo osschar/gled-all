@@ -95,8 +95,6 @@ void TringuCam::_init()
   bMouseDown              = false;
   bEnableTringDLonMouseUp = false;
 
-  mCamFix = 0;
-
   mStampInterval = 25;
   mStampCount    = 0;
   mHeight = 0;
@@ -437,19 +435,7 @@ void TringuCam::MouseUp()
 
 void TringuCam::CalculateMouseRayVectors()
 {
-  float yext = TMath::Tan(0.5*TMath::DegToRad()*mZFov)*mNearClp;
-  float xext = yext*mScreenW/mScreenH;
-  float xcam = xext*(2.0f*mMouseX/mScreenW - 1);
-  float ycam = yext*(2.0f*mMouseY/mScreenH - 1);
-
-  mMouseRayPos.SetXYZ(0, 0, 0);
-  mCamFix->MultiplyIP(mMouseRayPos);
-  mTrans.MultiplyIP(mMouseRayPos);
-
-  mMouseRayDir.SetXYZ(mNearClp, -xcam, -ycam);
-  mMouseRayDir.SetMag(1);
-  mCamFix->RotateIP(mMouseRayDir);
-  mTrans.RotateIP(mMouseRayDir);
+  mPupilInfo->TransformMouseRayVectors(*mTringula, mMouseRayPos, mMouseRayDir);
 }
 
 void TringuCam::MouseRayCollide()
@@ -853,12 +839,14 @@ void TringuCam::DynoDrive(Dynamico* dyno)
       {
 	printf("Wow ... survived! Spiritio=%p, '%s'.\n", s, s->ClassName());
 
-	if (s->GetExtendio())
-	  throw _eh + "Spiritio already in use.";
-
-	s->SetExtendio(dyno);
-
-	mPupilInfo->InstallSpiritio(s);
+	{
+	  GLensReadHolder slck(s);
+	  s->SetExtendio(dyno);
+	}
+	{
+	  GLensReadHolder slck(*mPupilInfo);
+	  mPupilInfo->SetCurrentSpiritio(s);
+	}
 
 	return;
       }

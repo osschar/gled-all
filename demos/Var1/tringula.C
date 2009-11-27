@@ -384,7 +384,6 @@ void tringula(Int_t mode=2)
   eventor->SetInterBeatMS(10);
 
   ASSIGN_ADD_GLASS(tmaker, TimeMaker, eventor, "TimeMaker", 0);
-  tmaker->AddClient(tringula);
 
   ASSIGN_ADD_GLASS(dumper, ScreenDumper, eventor, "ScreenDumper", 0);
   dumper->SetWaitSignal(true);
@@ -442,15 +441,16 @@ void tringula(Int_t mode=2)
   g_pupil->SetAutoRedraw(false);
 
   g_shell->Add(tricam);
-  tspupil->AddEventHandler(tricam);
-  g_pupil->SetCameraBase(tricam);
+
+  CREATE_ATT_GLASS(tricam_spiritio, TringuObserverSpiritio, tspupil, SetDefaultSpiritio,
+		   "TringuObserverSpiritio", "Default Spiritio");
+  tricam_spiritio->SetTringuCam(tricam);
 
   tspupil->SetTimeMaker(tmaker);
 
   tricam->SetPupilInfo(tspupil);
   tricam->SetEventor(eventor);
   tricam->SetTimeMaker(tmaker);
-  tmaker->AddClient(tricam);
 
   CREATE_ADD_GLASS(stxt1, ScreenText, g_pupil, "LftRgt", 0);
   tricam->SetInfoTxt(stxt1);
@@ -459,7 +459,7 @@ void tringula(Int_t mode=2)
 
   Gled::theOne->SpawnEye(0, g_shell, "GledCore", "FTW_Shell");
 
-  while (tricam->GetCamFix() == 0) {
+  while (tspupil->GetRnrCamFix() == 0) {
     printf("."); fflush(stdout);
     gSystem->Sleep(50);
   }
@@ -468,8 +468,6 @@ void tringula(Int_t mode=2)
   Gled::theOne->LockFltk();
 
   dumper->SetPupil(g_pupil);
-  // Look slightly down.
-  tricam->GetCamFix()->RotateLF(3, 1, TMath::Pi()/8);
 
   Gled::theOne->UnlockFltk();
 
@@ -554,20 +552,30 @@ void tringula(Int_t mode=2)
   {
     tringula->GetStatos()->Remove(sta1);
 
+    /*
     Scene *spiritio_scene = tspupil->GetSpiritioScene();
 
     CREATE_ATT_GLASS(tcs, CrawlerSpiritio, spiritio_scene, Add, "Crawler Spritio", 0);
     tcs->SetExtendio(dyn1);
 
-    // This sould go via InstallSpiritio, or sth.
+    // This sould go via SetSpiritio, or sth.
     // tspupil->RemoveEventHandler(tricam);
-    tspupil->AddEventHandler(tcs);
+    //tspupil->AddEventHandler(tcs);
     tmaker->AddClient(tcs);
+    */
   }
 
   /**************************************************************************/
-  // And start the time ...
+  // Populate the time-maker and start the time ...
   /**************************************************************************/
+
+  // This will install the default spiritio.
+  tspupil->SetCurrentSpiritio(0);
+  tspupil->GetCameraBase()->RotateLF(3, 1, TMath::Pi()/8);
+
+  tmaker->AddClient(tringula);
+  tmaker->AddClient(tricam);
+  tmaker->AddClient(tspupil);
 
   eventor->Start();
 }

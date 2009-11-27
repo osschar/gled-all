@@ -1,3 +1,18 @@
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Add function:
+	  Bool_t TransformMouseRayVectors(ZNode* ref, TVector3& pos, TVector3& dir)
+	that transforms mouse-ray vectors into given frame.
+
+	Add data-members Int_t mMouseDragDX, mMouseDragDY.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	Rename data-members mMDrgDX/Y to mMDragDX/Y;
+
 2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Extensions for incarnation of proto Spiritios.

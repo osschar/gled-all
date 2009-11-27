@@ -25,9 +25,12 @@ private:
 protected:
   // Do we need pupil-info? Or TSPupilInfo even.
   // Yes, if we want to modify global scene, overlay, ...
-  ZLink<TSPupilInfo> mPupilInfo;
+  // Or ... to get mouse ray vectors!
+  // But heym if/when Camera is done right, the info should be
+  // put there!
+  ZLink<TSPupilInfo> mPupilInfo; // X{GS} L{}
 
-  // link or virtual to get camera (ZCamera or ZNode).
+  // link or virtual to get camera (Camera or ZNode?).
   ZLink<Camera>   mCamera; // X{GS} L{}
 
   Bool_t          mEatNonBoundKeyEvents; // X{GS} 7 Bool()
@@ -45,6 +48,9 @@ protected:
 public:
   Spiritio(const Text_t* n="Spiritio", const Text_t* t=0);
   virtual ~Spiritio();
+
+  virtual void Activate() {}
+  virtual void Deactivate() {}
 
   virtual void HandleKey(Int_t key_idx, Bool_t downp, UInt_t time_elapsed); // X{E}
 
