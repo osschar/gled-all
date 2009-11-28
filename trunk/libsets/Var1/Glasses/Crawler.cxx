@@ -22,11 +22,13 @@ ClassImp(Crawler);
 
 void Crawler::_init()
 {
+  mDriveMode = DM_ConstVelocities;
+
   mLevH = 0.1f;
 
   mRayOffset = 0;
 
-  mThrottle.SetMinMaxDelta(-20, 100, 10);
+  mThrottle.SetMinMaxDelta(-5, 20, 4);
   mWheel   .SetMinMaxDelta(-5, 5, 1);
 }
 
@@ -57,8 +59,26 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
 {
   static const Exc_t _eh("Crawler::TimeTick ");
 
-  if (bParked)
-    return;
+  // Controllers
+  mThrottle.TimeTick(dt);
+  mWheel.   TimeTick(dt);
+
+
+  switch (mDriveMode)
+  {
+    case DM_Parked:
+      mVVec.Set(0,0,0);
+      break;
+
+    case DM_ConstVelocities:
+      break;
+
+    case DM_Controllers:
+      // This is uber fake ... just to get stuff connected.
+      mVVec.Set(mThrottle.Get(), 0, 0);
+      mWVec.Set(mWheel.Get(), 0, 0);
+      break;
+  }
 
   using namespace Opcode;
 
@@ -192,9 +212,4 @@ reoffset:
   {
     ISwarn(_eh + RC.CollideInfo(false, R));
   }
-
-
-  // Controllers
-  mThrottle.TimeTick(dt);
-  mWheel.   TimeTick(dt);
 }

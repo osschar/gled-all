@@ -14,16 +14,20 @@ class Crawler : public Dynamico
 {
   MAC_RNR_FRIENDS(Crawler);
 
+public:
+  enum DriveMode_e { DM_Parked, DM_ConstVelocities, DM_Controllers };
+
 private:
   void _init();
 
 protected:
-  Float_t         mLevH;       // X{RGS} 7 Value(-range=>[0,2, 1,100])
+  DriveMode_e   mDriveMode; // X{GS}   7 PhonyEnum()
+  Float_t       mLevH;      // X{RGS}  7 Value(-range=>[0,2, 1,100])
 
-  Float_t         mRayOffset;  //!
+  Float_t       mRayOffset; //!
 
-  SDesireVarF   mThrottle; // X{RGSD} 7 DesireVar(-range=>["mThrottle.GetMin()", "mThrottle.GetMax()", 1, 10])
-  SDesireVarF   mWheel;    // X{RGSD} 7 DesireVar(-range=>["mWheel.GetMin()",    "mWheel.GetMax()",    1, 50])
+  SDesireVarF   mThrottle;  // X{RGSD} 7 DesireVar(-range=>["mThrottle.GetMin()", "mThrottle.GetMax()", 1, 10])
+  SDesireVarF   mWheel;     // X{RGSD} 7 DesireVar(-range=>["mWheel.GetMin()",    "mWheel.GetMax()",    1, 50])
 
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);
