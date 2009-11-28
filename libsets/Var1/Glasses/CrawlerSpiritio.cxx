@@ -98,12 +98,17 @@ void CrawlerSpiritio::Activate()
   mCamera->MoveLF(1, 0.20f * minmax[0]); // min_x
   mCamera->MoveLF(3, 1.30f * minmax[5]); // max_z
   mCamera->RotateLF(3, 1, 0.2);
+
+  Crawler &C = * (Crawler*) *mExtendio;
+  C.SetDriveMode(Crawler:: DM_Controllers);
 }
 
 void CrawlerSpiritio::Deactivate()
 {
-  // SetExtendio(0);
   mCameraBase->SetParent(0);
+
+  Crawler &C = * (Crawler*) *mExtendio;
+  C.SetDriveMode(Crawler::DM_ConstVelocities);
 }
 
 //==============================================================================

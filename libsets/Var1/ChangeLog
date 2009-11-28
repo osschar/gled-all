@@ -1,5 +1,19 @@
 2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Connect throttle/wheels controls to velocities.
+	Should really calculate accelerations.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add enum DriveMode_e to support different modes of steering.
+	Preliminary.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	In Activate() / Deactivate() put crawler into DM_Controllers /
+	DM_ConstVelocities drive-mode.
+
+2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/TringuCam.cxx:
 	* Glasses/TringuCam.h:
 	Execute DynoDrive() in a detached thread.
