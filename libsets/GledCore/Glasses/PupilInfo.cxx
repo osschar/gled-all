@@ -266,26 +266,44 @@ void PupilInfo::SetupZSize(Float_t zsize)
 ZTrans* PupilInfo::ToPupilFrame(ZNode* node)
 {
   // Returns transformation from node->pupil reference frame.
+  //
+  // In general, it is a bad idea to call this function under a lens lock.
 
-  // This should use parental-list, like similar stuff in ZNode.
+  if (node == 0) return 0;
 
-  if(node == 0) return 0;
+  ZTrans *ret;
+  {
+    GLensReadHolder rd_lck(node);
+    ret = new ZTrans(node->RefTrans());
+  }
 
-  GMutexHolder lst_lck(mListMutex);
-  Stepper<ZNode> s(this);
-  while(s.step()) {
-    if(*s == node) {
-      return new ZTrans(s->RefTrans());
-    } else {
-      ZTrans* t = node->ToNode(*s);
-      if(t != 0) {
-	ZTrans* ret = new ZTrans(s->RefTrans());
-	*ret *= *t;
-	delete t;
+  set<ZGlass*> top_levels;
+  {
+    GMutexHolder lst_lck(mListMutex);
+    Stepper<ZNode> s(this);
+    while (s.step())
+    {
+      if (*s == node)
 	return ret;
-      }
+      top_levels.insert(*s);
     }
   }
+
+  node = node->GetParent();
+  while (node)
+  {
+    {
+      GLensReadHolder rd_lck(node);
+      ret->MultLeft(node->RefTrans());
+    }
+
+    if (top_levels.find(node) != top_levels.end())
+      return ret;
+
+    node = node->GetParent();
+  }
+
+  delete ret;
   return 0;
 }
 

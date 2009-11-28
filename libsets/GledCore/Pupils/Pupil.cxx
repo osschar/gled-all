@@ -232,23 +232,17 @@ void Pupil::AbsorbRay(Ray& ray)
 
   using namespace RayNS;
 
-  if(ray.IsBasic()) {
+  if (ray.IsBasic())
     label_window();
-  }
 
-  if(ray.fFID != PupilInfo::FID())
+  if (ray.fFID != PupilInfo::FID())
     return;
 
-  if(ray.IsChangeOf(PupilInfo::FID()) && mInfo->GetBuffSize() != mPickBuffSize) {
+  if (ray.IsChangeOf(PupilInfo::FID()) && mInfo->GetBuffSize() != mPickBuffSize)
+  {
     mPickBuffSize = mInfo->GetBuffSize();
     delete [] mPickBuff;
     mPickBuff     = 0;
-  }
-
-
-  if(ray.fRQN == RayNS::RQN_link_change) {
-    mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
-    mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
   }
 
   switch(ray.fRQN)
@@ -256,7 +250,8 @@ void Pupil::AbsorbRay(Ray& ray)
     case RayNS::RQN_change:
     {
       _check_auto_redraw();
-      if(mInfo->GetBuffSize() != mPickBuffSize) {
+      if (mInfo->GetBuffSize() != mPickBuffSize)
+      {
         mPickBuffSize = mInfo->GetBuffSize();
         delete [] mPickBuff;
         mPickBuff     = 0;
@@ -268,14 +263,16 @@ void Pupil::AbsorbRay(Ray& ray)
     {
       OS::ZGlassImg* oo = mOverlayImg;
       mOverlayImg = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
-      if(oo != mOverlayImg) bShowOverlay = true;
+      if (oo != mOverlayImg)
+	bShowOverlay = true;
       mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
       break;
     }
 
     case PupilInfo::PRQN_resize_window:
     {
-      if(parent() == 0) {
+      if(parent() == 0)
+      {
         size(mInfo->GetWidth(), mInfo->GetHeight());
       }
       break;
@@ -297,7 +294,8 @@ void Pupil::AbsorbRay(Ray& ray)
 
     case PupilInfo::PRQN_redraw:
     {
-      if(ray.fRayBits & Ray::RB_CustomBuffer) {
+      if (ray.fRayBits & Ray::RB_CustomBuffer)
+      {
         *ray.fCustomBuffer >> bSignalDumpFinish;
         ray.ResetCustomBuffer();
       }
@@ -308,14 +306,16 @@ void Pupil::AbsorbRay(Ray& ray)
 
     case PupilInfo::PRQN_dump_image:
     {
-      if(ray.fRayBits & Ray::RB_CustomBuffer) {
+      if (ray.fRayBits & Ray::RB_CustomBuffer)
+      {
         *ray.fCustomBuffer >> mImageName;
         *ray.fCustomBuffer >> mImgNTiles;
         *ray.fCustomBuffer >> bCopyToScreen;
         *ray.fCustomBuffer >> bSignalDumpFinish;
         ray.ResetCustomBuffer();
         bDumpImage = true;
-        if (bCopyToScreen && mImgNTiles > 1) {
+        if (bCopyToScreen && mImgNTiles > 1)
+	{
           printf("%sdump-image-ray: copy-to-screen requested but n-tiles > 1. Disabling copy-to-screen.\n",
                  _eh.Data());
           bCopyToScreen = false;
@@ -328,9 +328,10 @@ void Pupil::AbsorbRay(Ray& ray)
   }
 }
 
-/**************************************************************************/
-// Magick
-/**************************************************************************/
+
+//==============================================================================
+// Projection / Model-View matrix methods
+//==============================================================================
 
 void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
@@ -371,27 +372,35 @@ void Pupil::SetAbsRelCamera()
 {
   static const Exc_t _eh("Pupil::SetAbsRelCamera ");
 
-  GLensReadHolder _rdlck(mInfo);
+  ZNode *cam_base, *look_at, *up_ref;
+  {
+    GLensReadHolder rd_lck(mInfo);
 
-  ZNode* cam_base = mInfo->GetCameraBase();
-  ZNode* look_at = mInfo->GetLookAt();
-  ZNode* up_ref = mInfo->GetUpReference();
+    cam_base = mInfo->GetCameraBase();
+    look_at  = mInfo->GetLookAt();
+    up_ref   = mInfo->GetUpReference();
+  }
 
-  if(mCamBase != cam_base) {
-    if(mCamBase != 0) {
-      mCamera->SetTrans(mCamBaseTrans * mCamera->RefTrans() );
-    }
+  if (mCamBase != cam_base)
+  {
+    if (mCamBase != 0)
+      mCamera->SetTrans(mCamBaseTrans * mCamera->RefTrans());
+
     mCamBase = 0;
     mCamBaseTrans.UnitTrans();
-    if(cam_base != 0) {
+    if (cam_base != 0)
+    {
       auto_ptr<ZTrans> t( mInfo->ToPupilFrame(cam_base) );
-      if(t.get() != 0) {
+      if (t.get() != 0)
+      {
 	mCamBase = cam_base;
 	mCamBaseTrans = *t;
 	t->Invert();
 	*t *= mCamera->RefTrans();
 	mCamera->SetTrans(*t);
-      } else {
+      }
+      else
+      {
 	cout << _eh + "CameraBase is not connected ... ignoring.\n";
       }
     }
@@ -399,17 +408,23 @@ void Pupil::SetAbsRelCamera()
 
   // Begin set-up of CamAbsTrans in 'z'.
   ZTrans z;
-  if(mCamBase) {
+  if (mCamBase)
+  {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(mCamBase) );
-    if(t.get() != 0) {
+    if (t.get() != 0)
+    {
       mCamBaseTrans = *t;
       z = *t;
-    } else {
+    }
+    else
+    {
       mCamBaseTrans.UnitTrans();
       cout << _eh << "CameraBase is not connected ... ignoring.\n";
     }
     z *= mCamera->RefTrans();
-  } else {
+  }
+  else
+  {
     z = mCamera->RefTrans();
   }
 
@@ -421,46 +436,58 @@ void Pupil::SetAbsRelCamera()
   bool abs_cam_changed = false;
   bool look_at_p       = false;
 
-  if(look_at != 0) {
+  if (look_at != 0)
+  {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(look_at) );
-    if(t.get() != 0) {
+    if (t.get() != 0)
+    {
       TVector3 o_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
       x_vec = (o_pos - c_pos);
       Double_t min_dist = mInfo->GetLookAtMinDist();
-      if(min_dist != 0) {
+      if (min_dist != 0)
+      {
 	Double_t dist = x_vec.Mag();
-	if(dist < min_dist)
+	if (dist < min_dist)
 	  c_pos = o_pos - min_dist/dist*x_vec;
       }
       abs_cam_changed = true;
       look_at_p       = true;
-    } else {
+    }
+    else
+    {
       cout << _eh << "LookAt is not connected ... ignoring.\n";
     }
   }
 
-  if(up_ref != 0) {
+  if (up_ref != 0)
+  {
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(up_ref) );
-    if(t.get() != 0) {
+    if (t.get() != 0)
+    {
       z_vec = t->GetBaseVec( mInfo->GetUpRefAxis() );
       abs_cam_changed = true;
-    } else {
+    }
+    else
+    {
       cout << _eh << "UpReference not connected ... ignoring.\n";
     }
   }
 
   // Ortonormalize the vectors.
-  if(abs_cam_changed) {
-    if(x_vec.Mag2() == 0) {
+  if (abs_cam_changed)
+  {
+    if (x_vec.Mag2() == 0)
       x_vec = mCamAbsTrans.GetBaseVec(1);
-    }
+
     x_vec = x_vec.Unit();
     z_vec = z_vec.Unit();
 
     Double_t xz_dp  = z_vec.Dot(x_vec);
     Double_t max_dp = TMath::Cos(TMath::DegToRad()*mInfo->GetUpRefMinAngle());
-    if(TMath::Abs(xz_dp) > max_dp) {
-      if(mInfo->GetUpRefLockDir() && look_at_p == false) {
+    if (TMath::Abs(xz_dp) > max_dp)
+    {
+      if (mInfo->GetUpRefLockDir() && look_at_p == false)
+      {
 	Double_t sgn_mdp = TMath::Sign(max_dp, xz_dp);
 	TVector3 ortog = (x_vec - xz_dp*z_vec).Unit();
 	x_vec  = sgn_mdp*z_vec + TMath::Sqrt(1 - max_dp*max_dp)*ortog;
@@ -468,13 +495,17 @@ void Pupil::SetAbsRelCamera()
 	xz_dp  = z_vec.Dot(x_vec);
 	z_vec -= xz_dp*x_vec;
 	z_vec  = z_vec.Unit();
-      } else {
+      }
+      else
+      {
 	z_vec  = mCamAbsTrans.GetBaseVec(3);
 	xz_dp  = z_vec.Dot(x_vec);
 	z_vec -= xz_dp*x_vec;
 	z_vec  = z_vec.Unit();
       }
-    } else {
+    }
+    else
+    {
       z_vec -= xz_dp*x_vec;
       z_vec  = z_vec.Unit();
     }
@@ -489,15 +520,17 @@ void Pupil::SetAbsRelCamera()
   mCamAbsTrans.SetBaseVec(4, c_pos);
 
   // Multiply-out the CamBaseTrans to get true camera for local controls.
-  if(mCamBase != 0) {
+  if (mCamBase != 0)
+  {
     ZTrans t(mCamBaseTrans);
     t.Invert();
     t *= mCamAbsTrans;
     mCamera->SetTrans(t);
-  } else {
+  }
+  else
+  {
     mCamera->SetTrans(mCamAbsTrans);
   }
-
 }
 
 void Pupil::SetCameraView()

@@ -818,9 +818,12 @@ void TringuCam::DynoDetails(Dynamico* dyno)
 
 void TringuCam::DynoDrive(Dynamico* dyno)
 {
-  // Install dyno handlers etc
+  // Install dyno handlers etc.
+  // Called in deteached thread!
 
   static const Exc_t _eh("TringuCam::DynoDrive ");
+
+  assert_MIR_presence(_eh, MC_IsDetached);
 
   ZGlass *uidir = mQueen->FindLensByPath("var/glassui");
   if (!uidir)

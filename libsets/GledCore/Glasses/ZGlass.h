@@ -178,9 +178,13 @@ protected:
   virtual void AdUnfoldment() {}	// called by Queen after comet unpacking
 
   // MIR stuff
-  enum MirComponents_e { MC_Any=0,
-			 MC_IsFlare=1, MC_IsBeam=2,
-			 MC_HasResultReq=4 };
+  enum MirComponents_e {
+    MC_Any          = 0,
+    MC_IsFlare      = 1,
+    MC_IsBeam       = 2,
+    MC_HasResultReq = 4,
+    MC_IsDetached   = 8
+  };
 
   ZMIR* get_MIR();
   ZMIR* assert_MIR_presence (const Exc_t& header, int what=0);

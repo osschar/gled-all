@@ -1,3 +1,9 @@
+2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Explicitly rotate tringu-observer's camera downwards at creation
+	time.
+
 2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
