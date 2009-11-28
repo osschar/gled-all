@@ -1,3 +1,21 @@
+2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Add MC_IsDetached bit to MirComponents_e and handle it in
+	assert_MIR_presence().
+
+	* Glasses/PupilInfo.cxx:
+	Rewrite ToPupilFrame(ZNode*) to use a set of top-level nodes and
+	check it when going up following the parent links.
+
+	* Pupils/Pupil.cxx:
+	Do not hold the PupilInfo read-lock throughout SetAbsRelCamera().
+	Beautify it.
+
+	Remove double RQN_link_change check in AbsorbRay().
+	Beautify it.
+
 2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/PupilInfo.cxx:

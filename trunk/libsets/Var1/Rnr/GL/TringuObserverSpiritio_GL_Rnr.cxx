@@ -89,7 +89,7 @@ int TringuObserverSpiritio_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
           }
           else
           {
-            rd->GetCamFixTrans()->RotateLF(1, 3, dyang);
+            t.RotateLF(1, 3, dyang);
           }
         }
       }

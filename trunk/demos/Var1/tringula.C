@@ -444,6 +444,7 @@ void tringula(Int_t mode=2)
 
   CREATE_ATT_GLASS(tricam_spiritio, TringuObserverSpiritio, tspupil, SetDefaultSpiritio,
 		   "TringuObserverSpiritio", "Default Spiritio");
+  tricam_spiritio->GetCamera()->RotateLF(3, 1, TMath::Pi()/8);
   tricam_spiritio->SetTringuCam(tricam);
 
   tspupil->SetTimeMaker(tmaker);
@@ -571,7 +572,6 @@ void tringula(Int_t mode=2)
 
   // This will install the default spiritio.
   tspupil->SetCurrentSpiritio(0);
-  tspupil->GetCameraBase()->RotateLF(3, 1, TMath::Pi()/8);
 
   tmaker->AddClient(tringula);
   tmaker->AddClient(tricam);
