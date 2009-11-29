@@ -4,18 +4,22 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// AlSource
-//
-//
-
 #include "AlSource.h"
+#include "AlBuffer.h"
 #include "AlSource.c7"
-#include <RnrBase/RnrDriver.h>
+
+#include <Audio1/Audio1.h>
 
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
+
+#include <TSystem.h>
+
+//__________________________________________________________________________
+// AlSource
+//
+//
 
 ClassImp(AlSource);
 
@@ -23,8 +27,6 @@ ClassImp(AlSource);
 
 void AlSource::_init()
 {
-  mFile = "";
-
   mGain    = 1;
   mMinGain = 0;
   mMaxGain = 1;
@@ -34,116 +36,77 @@ void AlSource::_init()
   mConeOuterAngle = 360;
   mConeOuterGain  = 0;
 
-  mAlBuf = 0;
-  mAlSrc = 0;
+  alGenSources(1, &mAlSrc);
+  EmitSourceRay();
+  EmitConeRay();
 }
 
 AlSource::~AlSource()
 {
-  if(mAlSrc) alDeleteSources(1, &mAlSrc);
-  if(mAlBuf) alDeleteBuffers(1, &mAlBuf);
+  if (mAlSrc) alDeleteSources(1, &mAlSrc);
 }
 
-/**************************************************************************/
+//==============================================================================
 
-typedef ALboolean (vorbisLoader)(ALuint, ALvoid *, ALint);
-
-#include <TSystem.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-ALboolean SourceIsPlaying(ALuint sid)
+Bool_t AlSource::IsPlaying()
 {
-  ALint state;
-
-  if (alIsSource(sid) == AL_FALSE)
-    return AL_FALSE;
-
-  state = AL_INITIAL;
-  alGetSourceiv(sid, AL_SOURCE_STATE, &state);
-  switch (state)
-  {
-    case AL_PLAYING:
-    case AL_PAUSED:
-      return AL_TRUE;
-    default:
-      break;
-  }
-
-  return AL_FALSE;
+  ALint state = AL_INITIAL;
+  alGetSourceiv(mAlSrc, AL_SOURCE_STATE, &state);
+  return state == AL_PLAYING || state == AL_PAUSED;
 }
 
-void source_info(ALuint vorbsource, const Text_t* foo)
+//==============================================================================
+
+void AlSource::QueueBuffer(AlBuffer* buf, Int_t count)
 {
-  int nq, np;
-  alGetSourcei(vorbsource, AL_BUFFERS_QUEUED, &nq);
-  alGetSourcei(vorbsource, AL_BUFFERS_PROCESSED, &np);
-  printf("%d %s (%d,%d)\n", vorbsource, foo, nq, np);
+  static const Exc_t _eh("AlSource::QueueBuffer ");
+
+  if (buf == 0)
+    buf = *mDefaultBuffer;
+
+  UInt_t al_buf = 0;
+  if (buf != 0)
+    al_buf = buf->GetAlBuf();
+
+  while (--count >= 0)
+    alSourceQueueBuffers(mAlSrc, 1, &al_buf);
+
+  Audio1::CheckAlError(_eh);
 }
 
-void AlSource::Play(Int_t count)
+void AlSource::Play()
 {
   static const Exc_t _eh("AlContext::Play ");
 
-  {
-    GLensReadHolder _rdlck(this);
+  if (IsPlaying())
+      throw _eh + "Already playing.";
 
-    // if(mAlBuf == 0) alGenBuffers(1, &mAlBuf);
-    if (mAlSrc == 0)
-    {
-      alGenSources(1, &mAlSrc);
-      EmitSourceRay();
-      EmitConeRay();
-    }
-
-    // --------------------------------------------------------------
-    // wav loader
-    {
-      mAlBuf = alutCreateBufferFromFile(mFile);
-
-      if (mAlBuf == AL_NONE)
-	printf("Error in alutCreateBufferFromFile: %s\n", alutGetErrorString(alutGetError()));
-    }
-
-    // --------------------------------------------------------------
-
-    if (count > 0)
-    {
-      alSourcei(mAlSrc, AL_LOOPING, AL_FALSE);
-      while (count--)
-      {
-	alSourceQueueBuffers(mAlSrc, 1, &mAlBuf);
-	// alQueuei(mAlSrc, 1, mAlBuf);
-      }
-    }
-    else
-    {
-      alSourcei(mAlSrc, AL_LOOPING, AL_TRUE);
-      alSourcei(mAlSrc, AL_BUFFER, mAlBuf);
-    }
-  }
-
-  // GTime time(GTime::I_Now);
+  alSourcei(mAlSrc, AL_LOOPING, AL_FALSE);
   alSourcePlay(mAlSrc);
-  // source_info(mAlSrc, "play.");
-  while (SourceIsPlaying(mAlSrc) == AL_TRUE)
-  {
-    // source_info(mAlSrc, "sleep.");
-    gSystem->Sleep(100);
-  }
-  // time = time.TimeUntilNow();
-  // printf("Time used %lfs.\n", time.ToDouble());
-  // source_info(mAlSrc, "done.");
-
-  GLensReadHolder _rdlck(this);
-
-  alDeleteBuffers(1, &mAlBuf); mAlBuf = 0;
-  alDeleteSources(1, &mAlSrc); mAlSrc = 0;
 }
 
-/**************************************************************************/
+void AlSource::Loop()
+{
+  static const Exc_t _eh("AlSource::Loop ");
+
+  if (IsPlaying())
+      throw _eh + "Already playing.";
+
+  alSourcei(mAlSrc, AL_LOOPING, AL_TRUE);
+  alSourcePlay(mAlSrc);
+}
+
+void AlSource::Stop()
+{
+  static const Exc_t _eh("AlSource::Stop ");
+
+  if (!IsPlaying())
+    throw _eh + "Not playing.";
+
+  alSourceStop(mAlSrc);
+}
+
+//==============================================================================
 
 void AlSource::EmitSourceRay()
 {
@@ -164,4 +127,44 @@ void AlSource::EmitConeRay()
     alSourcef(mAlSrc, AL_CONE_OUTER_ANGLE, mConeOuterAngle);
     alSourcef(mAlSrc, AL_CONE_OUTER_GAIN,  mConeOuterGain);
   }
+}
+
+//==============================================================================
+
+void AlSource::PrintSourceInfo()
+{
+  TString out("AlSource::PrintSourceInfo() ");
+  out += Identify() + "\n";
+
+  {
+    int ii;
+    alGetSourcei(mAlSrc, AL_SOURCE_TYPE, &ii);
+    TString st;
+    if (ii == AL_UNDETERMINED) st = "UNDETERMINED";
+    else if (ii == AL_STATIC) st = "STATIC";
+    else if (ii == AL_STREAMING) st = "STREAMING";
+    else  st = "UNKNOWN";
+
+    TString ss;
+    alGetSourcei(mAlSrc, AL_SOURCE_STATE, &ii);
+    if      (ii == AL_INITIAL) ss = "INITIAL";
+    else if (ii == AL_PLAYING) ss = "PLAYING";
+    else if (ii == AL_PAUSED)  ss = "PAUSED";
+    else if (ii == AL_STOPPED) ss = "STOPPED";
+    else                       ss = "UNKNOWN";
+
+    int lp;
+    alGetSourcei(mAlSrc, AL_LOOPING,       &lp);
+
+    out += "  SOURCE_TYPE = " + st + ",  SOURCE_STATE = " + ss + ",  LOOPING = " +
+      (lp ? "TRUE" : "FALSE") + "\n";
+  }
+  {
+    int nq, np;
+    alGetSourcei(mAlSrc, AL_BUFFERS_QUEUED,    &nq);
+    alGetSourcei(mAlSrc, AL_BUFFERS_PROCESSED, &np);
+    out += Form("  BUFFERS_QUEUED = %d,  BUFFERS_PROCESSED = %d\n", nq, np);
+  }
+
+  cout << out;
 }
