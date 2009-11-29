@@ -583,6 +583,9 @@ void Saturn::Shutdown()
   ISmess(_eh + "stopping ChaItOss (thread manager).");
   mChaItOss->Shutdown();
 
+  ISmess(_eh + "stopping detached threads.");
+  stop_detached_threads();
+
   ISmess(_eh + "stopping MIR shooters.");
   stop_shooters();
   ISmess(_eh + "stopping server thread.");
@@ -686,14 +689,16 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
   int ok = 0, failed = 0;
   // !! Could be rewritten into two loops: Cancel, then Join those that
   // were successfully cancelled.
-  while (true) {
+  while (true)
+  {
     GThread* thr = 0;
     {
       GMutexHolder mh(_detached_mir_mgmnt_lock);
       hpZGlass2lpGThread_i i = mDetachedThreadsHash.find(lens);
       if (i == mDetachedThreadsHash.end())
 	break;
-      if( i->second.empty() ) {
+      if (i->second.empty())
+      {
 	mDetachedThreadsHash.erase(i);
 	break;
       }
@@ -705,25 +710,32 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
     int retc = thr->Cancel();
     ISdebug(2, GForm("%scancellation of thread of lens '%s' returned %d.",
 		     _eh.Data(), lens->GetName(), retc));
-    if(retc) {
+    if (retc)
+    {
       ISerr(_eh + "having problems cancelling a detached thread of " + lens->GetName() + ".");
       ++failed;
-    } else {
+    }
+    else
+    {
       ISdebug(2, GForm("%sattempting join on a detached MIR thread of lens '%s'.",
 		       _eh.Data(), lens->GetName()));
       int retj = thr->Join();
       ISdebug(2, GForm("%sjoin on thread of lens '%s' returned %d.",
 		       _eh.Data(), lens->GetName(), retj));
-      if(retj) {
+      if (retj)
+      {
 	ISerr(_eh + "having problems joining a detached thread of " + lens->GetName() + ".");
 	++failed;
-      } else {
+      }
+      else
+      {
 	delete thr;
 	++ok;
       }
     }
   }
-  if(ok > 0 || failed > 0) {
+  if (ok > 0 || failed > 0)
+  {
     ISdebug(1, GForm("%ssuccessfully canceled %d (failed for %d) detached MIR threads of lens '%s'.",
 		     _eh.Data(), ok, failed, lens->GetName()));
   }
@@ -2121,6 +2133,23 @@ int Saturn::stop_shooters()
   }
 
   return 0;
+}
+
+int Saturn::stop_detached_threads()
+{
+  // Stop all detached threads.
+
+  while (true)
+  {
+    hpZGlass2lpGThread_i i;
+    {
+      GMutexHolder mh(_detached_mir_mgmnt_lock);
+      if (mDetachedThreadsHash.empty())
+	return 0;
+      i = mDetachedThreadsHash.begin();
+    }
+    Freeze(i->first);
+  }
 }
 
 /**************************************************************************/

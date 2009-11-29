@@ -117,6 +117,8 @@ protected:
   int  start_shooters();
   int  stop_shooters();
 
+  int  stop_detached_threads();
+
   void socket_closed(TSocket* sock);
   void wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p);
   void wipe_eye(EyeInfo* eye, bool notify_sunqueen_p);
