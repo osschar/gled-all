@@ -7,7 +7,7 @@ REQUIRES_LIB_SETS := GledCore # add
 BLESSED_DIRS	:= Glasses
 BASE_DIRS	:= Stones Audio1 
 
-DICT_DIRS	:= Glasses Stones Audio1
+DICT_DIRS	:= Glasses Stones
 
 VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
