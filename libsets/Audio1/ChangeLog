@@ -1,3 +1,17 @@
+2009-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.h:
+	Add LocationType_e enum - source can be placed into scene
+	according to its parental position (LT_FollowParents, default) or
+	relative to the camera (LT_CamDelta).
+
+	* Rnr/GL/AlListener_GL_Rnr.cxx:
+	* Rnr/GL/AlListener_GL_Rnr.h:
+	White-space.
+
 2009-11-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Separate AL-buffer from AL-source.

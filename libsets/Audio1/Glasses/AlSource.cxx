@@ -19,7 +19,12 @@
 //__________________________________________________________________________
 // AlSource
 //
-//
+// mLocationType determines how the source will be placed into scene.
+//   LT_FollowParents - Transformation along the parents will be done into the
+//                      global coordinate system [default].
+//   LT_CamDelta      - Transformation matrix of the source will be taken as relative
+//                      to the camera. This is useful to place sources around the
+//                      listener in Camera mode.
 
 ClassImp(AlSource);
 
@@ -27,6 +32,8 @@ ClassImp(AlSource);
 
 void AlSource::_init()
 {
+  mLocationType = LT_FollowParents;
+
   mGain    = 1;
   mMinGain = 0;
   mMaxGain = 1;

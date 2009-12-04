@@ -15,11 +15,16 @@ class AlSource : public ZNode
 {
   MAC_RNR_FRIENDS(AlSource);
 
+public:
+  enum LocationType_e { LT_FollowParents, LT_CamDelta };
+
 private:
   void _init();
 
 protected:
   ZLink<AlBuffer>  mDefaultBuffer; // X{GS} L{}
+
+  LocationType_e   mLocationType; // X{GS} 7 PhonyEnum()
 
   Float_t     mGain;    // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000])
   Float_t     mMinGain; // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000], -join=>1)

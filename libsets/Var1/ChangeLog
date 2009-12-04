@@ -1,3 +1,20 @@
+2009-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	Change (decrease) maximum throttle/wheel values.
+
+	* Glasses/Spiritio.cxx:
+	Do not eat non-bound keys by default.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Add link member AlSource.
+	Loop/Stop AL-source in Activate/Deactivate.
+	iN TimeTick set pitch of AL-source accoring to value of Throttle.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	In Draw() set AL source position.
+
 2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Connect throttle/wheels controls to velocities.

@@ -6,6 +6,7 @@
 
 #include "CrawlerSpiritio.h"
 #include "Crawler.h"
+#include <Glasses/AlSource.h>
 #include "CrawlerSpiritio.c7"
 #include <Glasses/Camera.h>
 #include <Glasses/Tringula.h>
@@ -15,7 +16,7 @@
 
 //______________________________________________________________________________
 //
-//
+// AlSource should be set to LT_CamDelta mode and buffer should be set.
 
 ClassImp(CrawlerSpiritio);
 
@@ -101,10 +102,20 @@ void CrawlerSpiritio::Activate()
 
   Crawler &C = * (Crawler*) *mExtendio;
   C.SetDriveMode(Crawler:: DM_Controllers);
+
+  if (*mAlSource)
+  {
+    mAlSource->Loop();
+  }
 }
 
 void CrawlerSpiritio::Deactivate()
 {
+  if (*mAlSource)
+  {
+    mAlSource->Stop();
+  }
+
   mCameraBase->SetParent(0);
 
   Crawler &C = * (Crawler*) *mExtendio;
@@ -158,6 +169,14 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
       wv.SetDesire(0);
       --mKeyRightWheel.fDownCount;
     }
+  }
+
+  if (*mAlSource)
+  {
+    const SDesireVarF& tv = C.RefThrottle();
+    Float_t p = 0.2f + 0.8f*TMath::Abs(tv.Get())/tv.GetMax();
+    if (p != mAlSource->GetPitch())
+      mAlSource->SetPitch(p);
   }
 }
 

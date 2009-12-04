@@ -12,6 +12,7 @@
 #include <Stones/KeyHandling.h>
 
 class Crawler;
+class AlSource;
 
 class CrawlerSpiritio : public ExtendioSpiritio
 {
@@ -29,7 +30,8 @@ protected:
   KeyHandling::KeyInfo mKeyLeftWheel;   //!
   KeyHandling::KeyInfo mKeyRightWheel;  //!
 
-  ZLink<ZNode>   mCameraBase; // X{GS} L{}
+  ZLink<ZNode>    mCameraBase; // X{GS} L{}
+  ZLink<AlSource> mAlSource;   // X{GS} L{}
 
 public:
   CrawlerSpiritio(const Text_t* n="CrawlerSpiritio", const Text_t* t=0);

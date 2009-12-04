@@ -10,7 +10,8 @@
 #include <Glasses/AlListener.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class AlListener_GL_Rnr : public ZNode_GL_Rnr {
+class AlListener_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 
