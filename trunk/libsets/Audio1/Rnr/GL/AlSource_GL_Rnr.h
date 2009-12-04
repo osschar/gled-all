@@ -10,7 +10,8 @@
 #include <Glasses/AlSource.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class AlSource_GL_Rnr : public ZNode_GL_Rnr {
+class AlSource_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 

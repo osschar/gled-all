@@ -23,9 +23,10 @@ void AlListener_GL_Rnr::_init()
 void AlListener_GL_Rnr::Draw(RnrDriver* rd)
 {
   ZTrans* tp = 0;
-  switch (mAlListener->mLocationType) {
-  case AlListener::LT_Camera:   tp = rd->GetCamAbsTrans(); break;
-  case AlListener::LT_Absolute: tp = &rd->ToGCS();       break;
+  switch (mAlListener->mLocationType)
+  {
+    case AlListener::LT_Camera:   tp = rd->GetCamAbsTrans(); break;
+    case AlListener::LT_Absolute: tp = &rd->ToGCS();         break;
   }
   ZTrans& t = *tp;
   Float_t orient[6] = { t(1,1), t(2,1), t(3,1),  t(1,3), t(2,3), t(3,3) };

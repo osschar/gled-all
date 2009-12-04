@@ -23,7 +23,7 @@ UInt_t Spiritio::sDoubleClickTime = 300;
 
 void Spiritio::_init()
 {
-  mEatNonBoundKeyEvents = true;
+  mEatNonBoundKeyEvents = false;
 }
 
 Spiritio::Spiritio(const Text_t* n, const Text_t* t) :

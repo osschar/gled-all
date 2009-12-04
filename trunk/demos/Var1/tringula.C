@@ -73,6 +73,10 @@ void tringula(Int_t mode=2)
   g_queen->SetName("TringulaQueen");
   g_queen->SetTitle("Demo of Tringula");
 
+  // AlContext -- need it to load the sounds.
+  CREATE_ADD_GLASS(alctx, AlContext, g_queen, "AlContext", 0);
+  alctx->Open();
+
   /**************************************************************************/
   // Database objects.
   /**************************************************************************/
@@ -86,15 +90,33 @@ void tringula(Int_t mode=2)
     loff->SetLightModelOp(0);
   }
 
+  { // AL buffers
+    ZList* bufdir = g_queen->AssertPath("var/sounds", "ZNameMap");
+
+    CREATE_ADD_GLASS(albuf1, AlBuffer, bufdir, "Diesel", 0);
+    // albuf1->SetFile("cuckoo.wav");
+    albuf1->SetFile("../Audio1/diesel-loop.wav");
+    albuf1->Load();
+
+    CREATE_ADD_GLASS(albuf2, AlBuffer, bufdir, "PewPew", 0);
+    albuf2->SetFile("../Audio1/boom.wav");
+    albuf2->Load();
+  }
+
   { // Glass mappings
     ZList* uidir = g_queen->AssertPath("var/glassui", "ZNameMap");
 
     ZList    *gdir;
-    Spiritio *spiritio;
+    CrawlerSpiritio *spiritio;
 
     gdir = uidir->AssertPath("Crawler");
     ASSIGN_ADD_GLASS(spiritio, CrawlerSpiritio, gdir, "spiritio", 0);
 
+    CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetAlSource, "Voice of Crawler Spiritio", 0);
+    alsource->SetLocationType(AlSource::LT_CamDelta);
+    alsource->SetPitch(0.5);
+    alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/Diesel"));
+    alsource->QueueBuffer();
   }
 
   { // Textures
@@ -248,6 +270,8 @@ void tringula(Int_t mode=2)
   // CREATE_ADD_GLASS(base_plane, Rect, g_scene, "BasePlane", 0);
   // base_plane->SetUnitSquare(20);
   // base_plane->SetColor(0.6, 0.8, 0.6);
+
+  CREATE_ADD_GLASS(allis, AlListener, g_scene, "AlListener", 0);
 
   ASSIGN_ADD_GLASS(terrain, RectTerrain, g_scene, "RectTerrain", 0);
   terrain->SetRnrSelf(false);
@@ -497,21 +521,21 @@ void tringula(Int_t mode=2)
       // the catch.
       // Need to investigate with Axel.
       /*
-      try
-      {
+	try
+	{
         Statico* s = tringula->RandomStatico(rndstatos);
 	if (s == 0) printf("SAGR!!!!\n");
         used_surface += s->GetMesh()->GetXYArea();
         ++stato_cnt;
-      }
-      catch (Exc_t& exc)
-      {
+	}
+	catch (Exc_t& exc)
+	{
         printf("XYZZ %s\n", exc.Data());
         if (++exc_cnt > 20) {
-          printf("Statico placement failed %d-times. Moving on.\n", exc_cnt);
-          break;
+	printf("Statico placement failed %d-times. Moving on.\n", exc_cnt);
+	break;
 	}
-      }
+	}
       */
 
       Statico* s = tringula->RandomStatico(rndstatos);
@@ -552,18 +576,6 @@ void tringula(Int_t mode=2)
   if (mode == 99)
   {
     tringula->GetStatos()->Remove(sta1);
-
-    /*
-    Scene *spiritio_scene = tspupil->GetSpiritioScene();
-
-    CREATE_ATT_GLASS(tcs, CrawlerSpiritio, spiritio_scene, Add, "Crawler Spritio", 0);
-    tcs->SetExtendio(dyn1);
-
-    // This sould go via SetSpiritio, or sth.
-    // tspupil->RemoveEventHandler(tricam);
-    //tspupil->AddEventHandler(tcs);
-    tmaker->AddClient(tcs);
-    */
   }
 
   /**************************************************************************/

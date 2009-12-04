@@ -7,7 +7,11 @@
 #include "CrawlerSpiritio_GL_Rnr.h"
 #include <RnrBase/Fl_Event_Enums.h>
 
+#include <RnrBase/RnrDriver.h>
+
 #include <Glasses/Crawler.h>
+#include <Glasses/Camera.h>
+#include <Glasses/AlSource.h>
 
 #include <GL/glew.h>
 
@@ -52,6 +56,17 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
   glScalef(-0.5f, -0.22f, 1.0f); // Smaller height then width of throttle ... looks better.
   draw_horizontal_desirevar(C.RefWheel());
   glPopMatrix();
+
+  AlSource *as = mCrawlerSpiritio->GetAlSource();
+  if (as)
+  {
+    ZTrans& t = as->ref_trans();
+    t.SetTrans(mCrawlerSpiritio->GetCamera()->RefTrans());
+    t.MultRight(*rd->GetCamFixTrans());
+    t.Invert();
+
+    rd->GetLensRnr(as)->Draw(rd);
+  }
 }
 
 //==============================================================================
