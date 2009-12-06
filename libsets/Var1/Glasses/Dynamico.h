@@ -24,8 +24,6 @@ protected:
   HTransF         mLastTrans;  // Last transform from current master.
   Opcode::AABB    mLastAABB;   // Last enclosing bbox in parent frame.
 
-  Bool_t          bParked;     // X{GS}  7 Bool()
-
   Float_t&        mV;          // X{GS}  7 Value(-range=>[-100,100, 1,1000], -join=>1)
   Float_t&        mW;          // X{GS}  7 Value(-range=>[  -5,  5, 1,1000])
 

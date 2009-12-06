@@ -101,7 +101,7 @@ void CrawlerSpiritio::Activate()
   mCamera->RotateLF(3, 1, 0.2);
 
   Crawler &C = * (Crawler*) *mExtendio;
-  C.SetDriveMode(Crawler:: DM_Controllers);
+  C.SetDriveMode(Crawler::DM_Controllers);
 
   if (*mAlSource)
   {
