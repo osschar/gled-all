@@ -1,3 +1,24 @@
+2009-12-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid division by zero in dyno-dyno collisions.
+
+	* Glasses/Crawler.cxx:
+	Use DM_Parked mode instead of obsolete flag in Dynamico.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	White-space.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add check for magnitude of new velocity after dyno-dyno collision
+	-- this could be near zero or even exactly zero when one of the
+	dynos is parked.
+
+	Remove bParked member.
+
+	* Glasses/Flyer.cxx:
+	Remove consideration of obsolete parked flag in dynamico.
+
 2009-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Crawler.cxx:

@@ -31,8 +31,6 @@ void Dynamico::_init()
   mLastTransPtr = &mLastTrans;
   mLastAABBPtr  = &mLastAABB;
 
-  bParked = false;
-
   mSafety = mExtraStep = 0;
 
   mOPCRCCache = OPC_INVALID_ID;
@@ -193,6 +191,9 @@ bool Dynamico::handle_collision(Dynamico            * dyno,
         // When a dyno is moved in collision, safeties need to be updated, too.
         dyno->mExtraStep += com2cv.Magnitude();
       }
+
+      // Check for nan's.
+      // assert(!isnan(t_dyno[12]) && !isnan(t_dyno[0]) && !isnan(t_dyno[4]) && !isnan(t_dyno[8]));
     }
     return true;
   }
@@ -262,22 +263,29 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
     // put all velocity in the x/forward direction. In principle could also assign
     // slide-velocities, but these are not decayed in TimeTick() so the thing
     // would go sour soon.
+    // Need an epsilon for min. new velocity magnitude ... see hardcoded 1e-5 below.
 
     v0.TMac(dv_dir, w0p);
     Float_t vm0 = v0.Magnitude();
-    v0 *= 1.0f / vm0;
-    t0.SetBaseVec(1, v0);
-    t0.OrtoNorm3Column(1, 3);
-    t0.SetBaseVecViaCross(2);
-    dyno0->mVVec.Set(vm0, 0, 0);
+    if (vm0 > 1e-5)
+    {
+      v0 *= 1.0f / vm0;
+      t0.SetBaseVec(1, v0);
+      t0.OrtoNorm3Column(1, 3);
+      t0.SetBaseVecViaCross(2);
+      dyno0->mVVec.Set(vm0, 0, 0);
+    }
 
     v1.TMac(dv_dir, w1p - w1);
     Float_t vm1 = v1.Magnitude();
-    v1 *= 1.0f / vm1;
-    t1.SetBaseVec(1, v1);
-    t1.OrtoNorm3Column(1, 3);
-    t1.SetBaseVecViaCross(2);
-    dyno1->mVVec.Set(vm1, 0, 0);
+    if (vm1 > 1e-5)
+    {
+      v1 *= 1.0f / vm1;
+      t1.SetBaseVec(1, v1);
+      t1.OrtoNorm3Column(1, 3);
+      t1.SetBaseVecViaCross(2);
+      dyno1->mVVec.Set(vm1, 0, 0);
+    }
   } else {
     // they are moving apart, just separate them some more
     dcomp *= 0.1f;
@@ -289,6 +297,10 @@ bool Dynamico::handle_collision(Dynamico          * dyno0,
     dyno0->mExtraStep += extra_step;
     dyno1->mExtraStep += extra_step;
   }
+
+  // Check for nan's.
+  // assert(!isnan(t0[12]) && !isnan(t0[0]) && !isnan(t0[4]) && !isnan(t0[8]));
+  // assert(!isnan(t1[12]) && !isnan(t1[0]) && !isnan(t1[4]) && !isnan(t1[8]));
 
   return true;
 }

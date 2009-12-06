@@ -54,9 +54,6 @@ void Flyer::TimeTick(Double_t t, Double_t dt)
 
   static const Exc_t _eh("Flyer::TimeTick ");
 
-  if (bParked)
-    return;
-
   Opcode::Point velocity; // Velocity in master frame.
   Float_t       velocity_mag2, velocity_mag, step_length;
 

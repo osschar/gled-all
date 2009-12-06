@@ -63,7 +63,6 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   mThrottle.TimeTick(dt);
   mWheel.   TimeTick(dt);
 
-
   switch (mDriveMode)
   {
     case DM_Parked:
@@ -193,13 +192,13 @@ reoffset:
 	  // hierarchy of tringulas where such case would mean we are entering
 	  // a new patch.
 	  ISmess(_eh + RC.CollideInfo(true, R) + GForm(" Increasing ray-offset did not help - parking '%s'", GetName()));
-	  bParked = true;
+	  SetDriveMode(DM_Parked);
 	}
       }
       else
       {
 	ISmess(_eh + RC.CollideInfo(true, R) + GForm(" Fallen off - parking, ray-offset was %f for '%s'.", mRayOffset, GetName()));
-	bParked = true;
+	SetDriveMode(DM_Parked);
       }
     }
 
