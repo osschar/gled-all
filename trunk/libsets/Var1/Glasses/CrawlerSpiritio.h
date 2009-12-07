@@ -31,7 +31,8 @@ protected:
   KeyHandling::KeyInfo mKeyRightWheel;  //!
 
   ZLink<ZNode>    mCameraBase; // X{GS} L{}
-  ZLink<AlSource> mAlSource;   // X{GS} L{}
+  ZLink<AlSource> mEngineSrc;  // X{GS} L{}
+  ZLink<AlSource> mGunSrc;     // X{GS} L{}
 
 public:
   CrawlerSpiritio(const Text_t* n="CrawlerSpiritio", const Text_t* t=0);
@@ -55,6 +56,8 @@ public:
   void LeftWheel(Int_t, Bool_t downp, UInt_t time_elapsed);
   void RightWheel(Int_t, Bool_t downp, UInt_t time_elapsed);
   void SetWheel(Float_t w);    // X{E}
+
+  void FireGun(Int_t, Bool_t downp, UInt_t time_elapsed);
 
 #include "CrawlerSpiritio.h7"
   ClassDef(CrawlerSpiritio, 1);
