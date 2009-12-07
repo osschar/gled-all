@@ -1,3 +1,22 @@
+2009-12-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	When driving a crawler make a pew sound when space is pressed.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Rename link mAlSource to mEngineSrc.
+	Add link mGunSrc.
+	Add function FireGun() and register it for key handling. It only
+	plays the gun sound.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	Subscribe space-key to fire gun action.
+	Update engine and gun sources.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Add function update_al_src() to update AL-source position.
+
 2009-12-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Avoid division by zero in dyno-dyno collisions.

@@ -36,6 +36,8 @@ void CrawlerSpiritio::_init()
 
   RegisterKey(KeyInfo("LeftWheel",   "Turn wheel left",   KEY_CALLBACK(LeftWheel)));
   RegisterKey(KeyInfo("RightWheel",  "Turn wheel right",  KEY_CALLBACK(RightWheel)));
+
+  RegisterKey(KeyInfo("FireGun",     "Fire gun",          KEY_CALLBACK(FireGun)));
 }
 
 CrawlerSpiritio::CrawlerSpiritio(const Text_t* n, const Text_t* t) :
@@ -103,17 +105,17 @@ void CrawlerSpiritio::Activate()
   Crawler &C = * (Crawler*) *mExtendio;
   C.SetDriveMode(Crawler::DM_Controllers);
 
-  if (*mAlSource)
+  if (*mEngineSrc)
   {
-    mAlSource->Loop();
+    mEngineSrc->Loop();
   }
 }
 
 void CrawlerSpiritio::Deactivate()
 {
-  if (*mAlSource)
+  if (*mEngineSrc)
   {
-    mAlSource->Stop();
+    mEngineSrc->Stop();
   }
 
   mCameraBase->SetParent(0);
@@ -171,12 +173,12 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
     }
   }
 
-  if (*mAlSource)
+  if (*mEngineSrc)
   {
     const SDesireVarF& tv = C.RefThrottle();
     Float_t p = 0.2f + 0.8f*TMath::Abs(tv.Get())/tv.GetMax();
-    if (p != mAlSource->GetPitch())
-      mAlSource->SetPitch(p);
+    if (p != mEngineSrc->GetPitch())
+      mEngineSrc->SetPitch(p);
   }
 }
 
@@ -303,4 +305,14 @@ void CrawlerSpiritio::SetWheel(Float_t w)
   Crawler &C = * (Crawler*) *mExtendio;
 
   C.RefWheel().SetDesire(w);
+}
+
+//------------------------------------------------------------------------------
+
+void CrawlerSpiritio::FireGun(Int_t, Bool_t downp, UInt_t time_elapsed)
+{
+  if (downp && *mGunSrc && ! mGunSrc->IsPlaying())
+  {
+    mGunSrc->Play();
+  }
 }

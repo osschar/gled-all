@@ -12,6 +12,8 @@
 
 #include <Stones/SVars.h>
 
+class AlSource;
+
 class Spiritio_GL_Rnr : public ZNode_GL_Rnr
 {
 private:
@@ -29,6 +31,8 @@ protected:
 
   void draw_vertical_desirevar(const SDesireVarF& v);
   void draw_horizontal_desirevar(const SDesireVarF& v);
+
+  void update_al_src(AlSource* src, const ZTrans& t, RnrDriver* rd);
 
 public:
   Spiritio_GL_Rnr(Spiritio* idol);

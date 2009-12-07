@@ -5,7 +5,9 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "Spiritio_GL_Rnr.h"
+#include <RnrBase/RnrDriver.h>
 #include <RnrBase/Fl_Event_Enums.h>
+#include <Glasses/AlSource.h>
 
 #include <GL/glew.h>
 
@@ -242,4 +244,15 @@ void Spiritio_GL_Rnr::draw_horizontal_desirevar(const SDesireVarF& v)
   glVertex2f(-0.5f,  bar_hh); glVertex2f(-0.5f, -bar_hh);
   glVertex2f( 0.5f, -bar_hh); glVertex2f( 0.5f,  bar_hh);
   glEnd();
+}
+
+//==============================================================================
+
+void Spiritio_GL_Rnr::update_al_src(AlSource* src, const ZTrans& t, RnrDriver* rd)
+{
+  if (src)
+  {
+    src->ref_trans().SetTrans(t);
+    rd->GetLensRnr(src)->Draw(rd);
+  }
 }

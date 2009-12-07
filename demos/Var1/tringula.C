@@ -112,10 +112,15 @@ void tringula(Int_t mode=2)
     gdir = uidir->AssertPath("Crawler");
     ASSIGN_ADD_GLASS(spiritio, CrawlerSpiritio, gdir, "spiritio", 0);
 
-    CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetAlSource, "Voice of Crawler Spiritio", 0);
+    CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetEngineSrc, "Engine of Crawler Spiritio", 0);
     alsource->SetLocationType(AlSource::LT_CamDelta);
     alsource->SetPitch(0.5);
     alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/Diesel"));
+    alsource->QueueBuffer();
+
+    CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetGunSrc, "Gun of Crawler Spiritio", 0);
+    alsource->SetLocationType(AlSource::LT_CamDelta);
+    alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/PewPew"));
     alsource->QueueBuffer();
   }
 

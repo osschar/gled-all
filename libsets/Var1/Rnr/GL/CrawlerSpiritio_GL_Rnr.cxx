@@ -24,6 +24,8 @@ void CrawlerSpiritio_GL_Rnr::_init()
 
   RegisterKey('q', "LeftWheel");
   RegisterKey('e', "RightWheel");
+
+  RegisterKey(' ', "FireGun");
 }
 
 CrawlerSpiritio_GL_Rnr::CrawlerSpiritio_GL_Rnr(CrawlerSpiritio* idol) :
@@ -57,16 +59,14 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
   draw_horizontal_desirevar(C.RefWheel());
   glPopMatrix();
 
-  AlSource *as = mCrawlerSpiritio->GetAlSource();
-  if (as)
-  {
-    ZTrans& t = as->ref_trans();
-    t.SetTrans(mCrawlerSpiritio->GetCamera()->RefTrans());
-    t.MultRight(*rd->GetCamFixTrans());
-    t.Invert();
 
-    rd->GetLensRnr(as)->Draw(rd);
-  }
+  ZTrans dyno2cam;
+  dyno2cam.SetTrans(mCrawlerSpiritio->GetCamera()->RefTrans());
+  dyno2cam.MultRight(*rd->GetCamFixTrans());
+  dyno2cam.Invert();
+
+  update_al_src(mCrawlerSpiritio->GetEngineSrc(), dyno2cam, rd);
+  update_al_src(mCrawlerSpiritio->GetGunSrc(),    dyno2cam, rd);
 }
 
 //==============================================================================
