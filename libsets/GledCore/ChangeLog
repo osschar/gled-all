@@ -1,3 +1,16 @@
+2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix problem with resizing of Pupils.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	After receiving a PRQN_redraw ray manually call draw(). This
+	prevents a lock-up in tringula demo when the window is made
+	smaller with the window-manager controls.
+	This is uber weird.
+
+	Change inheritance order -- make Fl_Gl_Window the primary base.
+
 2009-11-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Stop detached threads during Saturn shutdown.

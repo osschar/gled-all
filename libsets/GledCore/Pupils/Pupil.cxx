@@ -53,10 +53,10 @@ namespace {
   };
 }
 
-Pupil* Pupil::Create_Pupil(FTW_Shell* sh, OS::ZGlassImg* img)
+FTW_SubShell* Pupil::Create_Pupil(FTW_Shell* sh, OS::ZGlassImg* img)
 {
   Pupil* p = new Pupil(sh, img, 640, 480);
-  return p;
+  return dynamic_cast<FTW_SubShell*>(p);
 }
 
 void *SubShellCreator_GledCore_Pupil = (void*)Pupil::Create_Pupil;
@@ -194,9 +194,9 @@ void Pupil::_check_auto_redraw()
 /**************************************************************************/
 
 Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
+  Fl_Gl_Window(w,h),
   FTW_SubShell(shell, this, this),
   OS::A_View(infoimg),
-  Fl_Gl_Window(w,h),
   mCameraCB(this)
 {
   end();
@@ -205,9 +205,9 @@ Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int w, int h) :
 }
 
 Pupil::Pupil(FTW_Shell* shell, OS::ZGlassImg* infoimg, int x, int y, int w, int h) :
+  Fl_Gl_Window(x, y, w, h),
   FTW_SubShell(shell, this, this),
   OS::A_View(infoimg),
-  Fl_Gl_Window(x, y, w, h),
   mCameraCB(this)
 {
   end();
@@ -299,8 +299,18 @@ void Pupil::AbsorbRay(Ray& ray)
         *ray.fCustomBuffer >> bSignalDumpFinish;
         ray.ResetCustomBuffer();
       }
-      fImg->fEye->BreakManageLoop();
-      redraw();
+
+      if (visible_r())
+      {
+	make_current();
+	draw();
+	swap_buffers();
+      }
+      else if (bSignalDumpFinish)
+      {
+	mInfo->ReceiveDumpFinishedSignal();
+	bSignalDumpFinish = false;
+      }
       break;
     }
 
@@ -1018,7 +1028,7 @@ void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glViewport(0,0,w(),h());
+  glViewport(0, 0, w(), h());
   SetProjection(n_tiles, x_i, y_i);
 
   glMatrixMode(GL_MODELVIEW);
