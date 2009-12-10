@@ -24,9 +24,9 @@ class FBO;
 #include <FL/Fl_Gl_Window.H>
 
 
-class Pupil : public FTW_SubShell,
-	      public OptoStructs::A_View,
-	      public Fl_Gl_Window
+class Pupil : public Fl_Gl_Window,
+	      public FTW_SubShell,
+	      public OptoStructs::A_View
 {
 private:
   static Fl_Gl_Window* gl_ctx_holder;
@@ -89,7 +89,7 @@ protected:
 
 public:
 
-  static Pupil* Create_Pupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
+  static FTW_SubShell* Create_Pupil(FTW_Shell* sh, OptoStructs::ZGlassImg* img);
 
   Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int w, int h);
   Pupil(FTW_Shell* shell, OptoStructs::ZGlassImg* infoimg, int x, int y, int w, int h);
