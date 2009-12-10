@@ -1,3 +1,8 @@
+2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Set home position of the camera when activating the spiritio.
+
 2009-12-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	When driving a crawler make a pew sound when space is pressed.

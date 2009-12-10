@@ -1,5 +1,13 @@
 2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/Camera.cxx:
+	* Glasses/Camera.h:
+	Add member ZTrans mHomeTrans.
+	Add functions Identity(), SetHomeTrans(), ResetHomeTrans().
+	This allows to set home position of the camera.
+
+2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Fix problem with resizing of Pupils.
 
 	* Pupils/Pupil.cxx:

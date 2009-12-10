@@ -98,9 +98,11 @@ void CrawlerSpiritio::Activate()
   // And draw something special when driving a unit.
 
   Float_t *minmax = mExtendio->GetMesh()->GetTTvor()->mMinMaxBox;
+  mCamera->Identity();
   mCamera->MoveLF(1, 0.20f * minmax[0]); // min_x
   mCamera->MoveLF(3, 1.30f * minmax[5]); // max_z
   mCamera->RotateLF(3, 1, 0.2);
+  mCamera->SetHomeTrans();
 
   Crawler &C = * (Crawler*) *mExtendio;
   C.SetDriveMode(Crawler::DM_Controllers);
