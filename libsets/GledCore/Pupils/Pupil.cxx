@@ -302,6 +302,13 @@ void Pupil::AbsorbRay(Ray& ray)
 
       if (visible_r())
       {
+        // This used to be:
+        //   fImg->fEye->BreakManageLoop();
+        //   redraw();
+        // But then draw() never got called when window was resized to a
+        // smaller(!) width/height and ScreenDumper was running in an
+        // update thread (Var1, tringula.C demo).
+
 	make_current();
 	draw();
 	swap_buffers();
