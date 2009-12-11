@@ -1,3 +1,23 @@
+2009-12-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for stereo rendering.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	Add members for controlling stereo rendering:
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Add new function rnr_stereo().
+	Slightly modify rnr_standard() so that fake-overlay gets
+	rendered within it.
+	Add members for frustum limits needed for setting of left/right
+	camera/perspective parameters and set them up in SetProjection().
+
+	* GledView/GledGUI.cxx:
+	Add command-line option -stereo - this makes stereo GL visuals the
+	default.
+
 2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Camera.cxx:

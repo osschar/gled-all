@@ -105,7 +105,10 @@ protected:
 
   Bool_t        bAllowHandlerSwitchInPupil; // X{GS} 7 Bool()
 
-  Bool_t        bStereo;        // X{GS}
+  Bool_t        bStereo;               // X{GS}
+  Double_t      mStereoZeroParallax;   // X{GS} 7 Value(-range=>[-1,1, 1,1000])
+  Double_t      mStereoEyeOffsetFac;   // X{GS} 7 Value(-range=>[ 0,2, 1,1000])
+  Double_t      mStereoFrustumAsymFac; // X{GS} 7 Value(-range=>[ 0,2, 1,1000])
 
   // Locals where GL renderer stores actual parameters used for last render.
   // Protect with a lock?

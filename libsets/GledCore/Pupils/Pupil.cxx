@@ -354,33 +354,38 @@ void Pupil::SetProjection(Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
   glGetDoublev(GL_PROJECTION_MATRIX, mProjBase.Array());
 
-  double aspect = mInfo->GetYFac() * w()/h();
-  double near   = TMath::Max(mInfo->GetNearClip(), 1e-5l);
-  double far    = mInfo->GetFarClip();
+  mFAspect = mInfo->GetYFac() * w()/h();
+  mFNear   = TMath::Max(mInfo->GetNearClip(), 1e-5f);
+  mFFar    = mInfo->GetFarClip();
 
-  double top, bot, rgt, lft;
   void (*set_foo)(GLdouble, GLdouble, GLdouble, GLdouble, GLdouble, GLdouble);
 
-  switch(mInfo->GetProjMode()) {
-  default:
-  case PupilInfo::P_Perspective:
-    top     = near*TMath::Tan(TMath::DegToRad()*mInfo->GetZFov()/2);
-    set_foo = glFrustum;
-    break;
-  case PupilInfo::P_Orthographic:
-    top     = mInfo->GetZSize()/2;
-    set_foo = glOrtho;
-    break;
+  switch(mInfo->GetProjMode())
+  {
+    default:
+    case PupilInfo::P_Perspective:
+    {
+      mFTop   = mFNear * TMath::Tan(0.5*TMath::DegToRad()*mInfo->GetZFov());
+      set_foo = glFrustum;
+      break;
+    }
+    case PupilInfo::P_Orthographic:
+    {
+      mFTop   = 0.5 * mInfo->GetZSize();
+      set_foo = glOrtho;
+      break;
+    }
   }
 
-  bot = -top;
-  rgt = top*aspect;
-  lft = -rgt;
-  if(n_tiles > 1) {
-    double xs = 2*rgt/n_tiles; lft += x_i * xs; rgt  = lft + xs;
-    double ys = 2*top/n_tiles; top -= y_i * ys; bot  = top - ys;
+  mFBot = -mFTop;
+  mFRgt =  mFTop * mFAspect;
+  mFLft = -mFRgt;
+  if (n_tiles > 1)
+  {
+    double xs = 2*mFRgt/n_tiles; mFLft += x_i * xs; mFRgt = mFLft + xs;
+    double ys = 2*mFTop/n_tiles; mFTop -= y_i * ys; mFBot = mFTop - ys;
   }
-  set_foo(lft, rgt, bot, top, near, far);
+  set_foo(mFLft, mFRgt, mFBot, mFTop, mFNear, mFFar);
 
   glGetDoublev(GL_PROJECTION_MATRIX, mProjMatrix.Array());
 }
@@ -959,7 +964,7 @@ void Pupil::draw()
 	for (Int_t yi=0; yi<mImgNTiles; ++yi)
 	{
           mFBO->bind();
-	  rnr_standard(mImgNTiles, xi, yi);
+	  rnr_standard(false, mImgNTiles, xi, yi);
 	  TString fname(GForm("%s-%d-%d.tga", mImageName.Data(), yi, xi));
 	  dump_image(fname);
           mFBO->unbind();
@@ -970,13 +975,8 @@ void Pupil::draw()
     }
     else
     {
-      GTime start_time(GTime::I_Now);
       mFBO->bind();
-      rnr_standard();
-      GTime stop_time(GTime::I_Now);
-      GTime rnr_time = stop_time - start_time;
-      if (mInfo->bRnrFakeOverlayInCapture)
-	rnr_fake_overlay(rnr_time);
+      rnr_standard(mInfo->bRnrFakeOverlayInCapture);
       dump_image(mImageName + ".tga");
       mFBO->unbind();
 
@@ -1011,11 +1011,14 @@ void Pupil::draw()
   }
   else
   {
-    GTime start_time(GTime::I_Now);
-    rnr_standard();
-    GTime stop_time(GTime::I_Now);
-    GTime rnr_time = stop_time - start_time;
-    rnr_fake_overlay(rnr_time);
+    if (bStereo)
+    {
+      rnr_stereo(true);
+    }
+    else
+    {
+      rnr_standard(true);
+    }
   }
 
   if (bSignalDumpFinish)
@@ -1029,7 +1032,7 @@ void Pupil::draw()
 
 /**************************************************************************/
 
-void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
+void Pupil::rnr_standard(bool rnr_overlay_p, Int_t n_tiles, Int_t x_i, Int_t y_i)
 {
   static const Exc_t _eh("Pupil::rnr_standard ");
 
@@ -1040,7 +1043,8 @@ void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  try {
+  try
+  {
     SetAbsRelCamera();
     SetCameraView();
   }
@@ -1050,7 +1054,94 @@ void Pupil::rnr_standard(Int_t n_tiles, Int_t x_i, Int_t y_i)
 
   rnr_default_init();
 
+  GTime start_time(GTime::I_Now);
   Render();
+  GTime stop_time(GTime::I_Now);
+
+  if (rnr_overlay_p)
+  {
+    GTime rnr_time = stop_time - start_time;
+    rnr_fake_overlay(rnr_time);
+  }
+}
+
+void Pupil::rnr_stereo(bool rnr_overlay_p)
+{
+  static const Exc_t _eh("Pupil::rnr_stereo ");
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glViewport(0, 0, w(), h());
+  SetProjection();
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  try
+  {
+    SetAbsRelCamera();
+    SetCameraView();
+  }
+  catch(Exc_t& exc) {
+    cerr << _eh << "exception during camera setup: " << exc << endl;
+  }
+
+  Double_t zero_p_dist   = mFNear + mInfo->GetStereoZeroParallax() * (mFFar - mFNear);
+  Double_t x_len_zero_p  = (mFRgt - mFLft) * zero_p_dist / mFNear;
+  Double_t stereo_offset = 0.035 * x_len_zero_p * mInfo->GetStereoEyeOffsetFac();
+  Double_t frustum_asym  = stereo_offset * mFNear / zero_p_dist * mInfo->GetStereoFrustumAsymFac();
+
+  GTime start_time(GTime::I_Now);
+
+  // --- Left ---
+
+  glDrawBuffer(GL_BACK_LEFT);
+
+  glPushMatrix();
+  glTranslated(0, stereo_offset, 0);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadMatrixd(mProjBase.Array());
+  glFrustum(mFLft + frustum_asym, mFRgt + frustum_asym,
+	    mFBot, mFTop, mFNear, mFFar);
+  glMatrixMode(GL_MODELVIEW);
+
+  rnr_default_init();
+  Render();
+
+  glPopMatrix();
+
+  // --- Right ---
+
+  glDrawBuffer(GL_BACK_RIGHT);
+
+  glPushMatrix();
+  glTranslated(0, -stereo_offset, 0);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadMatrixd(mProjBase.Array());
+  glFrustum(mFLft - frustum_asym, mFRgt - frustum_asym,
+	    mFBot, mFTop, mFNear, mFFar);
+  glMatrixMode(GL_MODELVIEW);
+
+  rnr_default_init();
+  Render();
+
+  glPopMatrix();
+
+  // --- End stuff
+
+  GTime stop_time(GTime::I_Now);
+
+  if (rnr_overlay_p)
+  {
+    GTime rnr_time = stop_time - start_time;
+
+    glDrawBuffer(GL_BACK_LEFT);
+    rnr_fake_overlay(rnr_time);
+
+    glDrawBuffer(GL_BACK_RIGHT);
+    rnr_fake_overlay(rnr_time);
+  }
 }
 
 void Pupil::rnr_default_init()

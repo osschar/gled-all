@@ -89,7 +89,10 @@ void PupilInfo::_init()
 
   bAllowHandlerSwitchInPupil = true;
 
-  bStereo = sStereoDefault;
+  bStereo               = sStereoDefault;
+  mStereoZeroParallax   = 0.03;
+  mStereoEyeOffsetFac   = 1;
+  mStereoFrustumAsymFac = 1;
 
   mRnrCamFix = 0;
 }

@@ -36,7 +36,6 @@ private:
   void _check_auto_redraw();
 
 protected:
-
   PupilInfo*    mInfo;
   Bool_t        bAutoRedraw;
 
@@ -79,13 +78,15 @@ protected:
   GThread*      mCreationThread;
 
   Bool_t        bStereo;
+  Double_t      mFAspect, mFNear, mFFar, mFTop, mFBot, mFLft, mFRgt;
 
   void		dump_image(const TString& fname);
 
   // rendering elements
   void rnr_default_init();
   void rnr_fake_overlay(GTime& rnr_time);
-  void rnr_standard(Int_t n_tiles=1, Int_t x_i=0, Int_t y_i=0);
+  void rnr_standard(bool rnr_overlay_p, Int_t n_tiles=1, Int_t x_i=0, Int_t y_i=0);
+  void rnr_stereo(bool rnr_overlay_p);
 
 public:
 
