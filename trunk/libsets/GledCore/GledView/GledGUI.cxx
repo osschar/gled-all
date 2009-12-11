@@ -7,6 +7,7 @@
 #include "GledGUI.h"
 #include <Ephra/Saturn.h>
 #include <Glasses/ShellInfo.h>
+#include <Glasses/PupilInfo.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZFireQueen.h>
 #include <Gled/GledNS.h>
@@ -211,7 +212,8 @@ void GledGUI::ParseArguments()
         "                     default: 12:6:0 (dw~0 means measure font)\n"
         "  -font  font-id     use fltk's font-id as default font\n"
         "  -iconize           iconize main window on start-up\n"
-        "  -nomsgwin | -nomw  start gled without the message window (consider '-log +')\n";
+        "  -nomsgwin | -nomw  start gled without the message window (consider '-log +')\n"
+        "  -stereo            use stereo GL visuals by default\n";
       return;
     }
     else if (*i == "-swm")
@@ -234,6 +236,11 @@ void GledGUI::ParseArguments()
     else if (*i == "-nomw" || *i == "-nomsgwin")
     {
       no_msg_window = true;
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "-stereo")
+    {
+      PupilInfo::sStereoDefault = true;
       mArgs.erase(start, ++i);
     }
     else
