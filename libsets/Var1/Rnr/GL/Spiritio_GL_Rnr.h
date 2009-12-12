@@ -38,11 +38,13 @@ public:
   Spiritio_GL_Rnr(Spiritio* idol);
   virtual ~Spiritio_GL_Rnr();
 
-  virtual int Handle(RnrDriver* rd, Fl_Event& ev);
+  virtual void AbsorbRay(Ray& ray);
+
+  virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
 
   // New virtuals.
-  virtual int HandleKey  (RnrDriver* rd, Fl_Event& ev);
-  virtual int HandleMouse(RnrDriver* rd, Fl_Event& ev) { return 0; }
+  virtual int  HandleKey  (RnrDriver* rd, Fl_Event& ev);
+  virtual int  HandleMouse(RnrDriver* rd, Fl_Event& ev) { return 0; }
 
 }; // endclass Spiritio_GL_Rnr
 

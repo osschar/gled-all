@@ -1,3 +1,45 @@
+2009-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve key handling.
+
+	* Glasses/Crawler.cxx:
+	Better limits/deltas for throttle/wheel.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Make key-info members references and initialize them appropriately.
+	Double-press of throttle keys sets desire to max/min.
+	Call parent's class Activate/Deactivate.
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	Add member bActive.
+	Make the key-info vector of pointers to key-infos.
+	Implement Activate/Deactivate.
+	In Deactivate loop over all the keys and make sure the release
+	callbacks are invoked. Emit also a release_keys ray so that the GL
+	renderers can drop their key state.
+	Change signature of RegisterKey() to match the KeyInfo
+	constructor. Instantiate the key-info there and destroy them in
+	the destructor.
+
+	* Glasses/TSPupilInfo.cxx:
+	When swapping current spiritio, first deactivate the old one, then
+	remove it from scenes and key-handlers.
+
+	* Glasses/TringuObserverSpiritio.cxx:
+	Call parent's class Activate/Deactivate.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Implement vitual AbsorbRay() to handle release_keys custom ray.
+
+	* Stones/KeyHandling.cxx:
+	* Stones/KeyHandling.h:
+	Clean-up member declarations and comments of KeyInfo.
+	Remove default constructor.
+	Delete callback in destructor (this was done in Spiritio before).
+
 2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/CrawlerSpiritio.cxx:

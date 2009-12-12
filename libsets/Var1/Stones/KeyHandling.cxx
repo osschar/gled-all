@@ -8,13 +8,11 @@
 
 using namespace KeyHandling;
 
-KeyInfo::KeyInfo() :
-  fCallback(0), fIndex(-1), fDownCount(0)
-{}
-
 KeyInfo::KeyInfo(const TString& tag, const TString& desc, AKeyCallback* foo) :
   fKeyTag(tag), fKeyDesc(desc), fCallback(foo), fIndex(-1), fDownCount(0)
 {}
 
 KeyInfo::~KeyInfo()
-{}
+{
+  delete fCallback;
+}

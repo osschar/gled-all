@@ -10,6 +10,7 @@
 #include <Glasses/ZNode.h>
 #include <Stones/TimeMakerClient.h>
 #include <Stones/KeyHandling.h>
+#include <Eye/Ray.h>
 
 class Camera;
 class TSPupilInfo;
@@ -18,6 +19,11 @@ class Spiritio : public ZNode,
                  public TimeMakerClient
 {
   MAC_RNR_FRIENDS(Spiritio);
+
+public:
+  enum PrivRayQN_e  { PRQN_offset = RayNS::RQN_user_0,
+		      PRQN_release_keys
+  };
 
 private:
   void _init();
@@ -33,14 +39,17 @@ protected:
   // link or virtual to get camera (Camera or ZNode?).
   ZLink<Camera>   mCamera; // X{GS} L{}
 
+  Bool_t          bActive;               // X{G}  7 BoolOut();
   Bool_t          mEatNonBoundKeyEvents; // X{GS} 7 Bool()
 
-  typedef vector<KeyHandling::KeyInfo> vKeyInfo_t;
-  typedef vKeyInfo_t::iterator         vKeyInfo_i;
+  typedef vector<KeyHandling::KeyInfo*> vpKeyInfo_t;
+  typedef vpKeyInfo_t::iterator         vpKeyInfo_i;
 
-  vKeyInfo_t mKeys; //!
+  vpKeyInfo_t mKeys; //!
 
-  void  RegisterKey(KeyHandling::KeyInfo ki);
+  KeyHandling::KeyInfo& RegisterKey(const TString& tag, const TString& desc,
+				    KeyHandling::AKeyCallback* foo);
+
   Int_t FindKey(const TString& tag);
 
   static UInt_t sDoubleClickTime;
@@ -49,8 +58,8 @@ public:
   Spiritio(const Text_t* n="Spiritio", const Text_t* t=0);
   virtual ~Spiritio();
 
-  virtual void Activate() {}
-  virtual void Deactivate() {}
+  virtual void Activate();
+  virtual void Deactivate();
 
   virtual void HandleKey(Int_t key_idx, Bool_t downp, UInt_t time_elapsed); // X{E}
 

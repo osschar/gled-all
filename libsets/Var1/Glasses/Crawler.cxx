@@ -28,8 +28,8 @@ void Crawler::_init()
 
   mRayOffset = 0;
 
-  mThrottle.SetMinMaxDelta(-1, 5, 2);
-  mWheel   .SetMinMaxDelta(-1, 1, 0.25);
+  mThrottle.SetMinMaxDelta(-1, 4, 1);
+  mWheel   .SetMinMaxDelta(-1, 1, 0.4);
 }
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :

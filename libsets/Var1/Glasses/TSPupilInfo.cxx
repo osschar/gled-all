@@ -136,14 +136,14 @@ void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
 
   if (exs)
   {
-    mSpiritioScene->RemoveAll(exs);
-    RemoveEventHandler(exs);
-
     {
       GLensReadHolder slck(exs);
       exs->Deactivate();
       exs->SetPupilInfo(0);
     }
+
+    mSpiritioScene->RemoveAll(exs);
+    RemoveEventHandler(exs);
   }
 
   if (s)

@@ -24,15 +24,15 @@ private:
 protected:
   Crawler* get_crawler();
 
-  KeyHandling::KeyInfo mKeyIncThrottle; //!
-  KeyHandling::KeyInfo mKeyDecThrottle; //!
+  KeyHandling::KeyInfo &mKeyIncThrottle; //!
+  KeyHandling::KeyInfo &mKeyDecThrottle; //!
 
-  KeyHandling::KeyInfo mKeyLeftWheel;   //!
-  KeyHandling::KeyInfo mKeyRightWheel;  //!
+  KeyHandling::KeyInfo &mKeyLeftWheel;   //!
+  KeyHandling::KeyInfo &mKeyRightWheel;  //!
 
-  ZLink<ZNode>    mCameraBase; // X{GS} L{}
-  ZLink<AlSource> mEngineSrc;  // X{GS} L{}
-  ZLink<AlSource> mGunSrc;     // X{GS} L{}
+  ZLink<ZNode>          mCameraBase;     // X{GS} L{}
+  ZLink<AlSource>       mEngineSrc;      // X{GS} L{}
+  ZLink<AlSource>       mGunSrc;         // X{GS} L{}
 
 public:
   CrawlerSpiritio(const Text_t* n="CrawlerSpiritio", const Text_t* t=0);

@@ -22,27 +22,23 @@ ClassImp(CrawlerSpiritio);
 
 //==============================================================================
 
-#define KEY_CALLBACK(FOO) new KeyCallback<CrawlerSpiritio>(&CrawlerSpiritio::FOO)
+#define KEY_CALLBACK(FOO) new KeyHandling::KeyCallback<CrawlerSpiritio>(&CrawlerSpiritio::FOO)
 
 void CrawlerSpiritio::_init()
 {
   // From ExtendioSpiritio -- restric extendio fid.
   mExtendio_fid = Crawler::FID();
-
-  using namespace KeyHandling;
-
-  RegisterKey(KeyInfo("IncThrottle", "Increase throttle", KEY_CALLBACK(IncThrottle)));
-  RegisterKey(KeyInfo("DecThrottle", "Decrease throttle", KEY_CALLBACK(DecThrottle)));
-
-  RegisterKey(KeyInfo("LeftWheel",   "Turn wheel left",   KEY_CALLBACK(LeftWheel)));
-  RegisterKey(KeyInfo("RightWheel",  "Turn wheel right",  KEY_CALLBACK(RightWheel)));
-
-  RegisterKey(KeyInfo("FireGun",     "Fire gun",          KEY_CALLBACK(FireGun)));
 }
 
 CrawlerSpiritio::CrawlerSpiritio(const Text_t* n, const Text_t* t) :
-  ExtendioSpiritio(n, t)
+  ExtendioSpiritio(n, t),
+  mKeyIncThrottle(RegisterKey("IncThrottle", "Increase throttle", KEY_CALLBACK(IncThrottle))),
+  mKeyDecThrottle(RegisterKey("DecThrottle", "Decrease throttle", KEY_CALLBACK(DecThrottle))),
+  mKeyLeftWheel  (RegisterKey("LeftWheel",   "Turn wheel left",   KEY_CALLBACK(LeftWheel))),
+  mKeyRightWheel (RegisterKey("RightWheel",  "Turn wheel right",  KEY_CALLBACK(RightWheel)))
 {
+  RegisterKey("FireGun", "Fire gun", KEY_CALLBACK(FireGun));
+
   _init();
 }
 
@@ -111,10 +107,14 @@ void CrawlerSpiritio::Activate()
   {
     mEngineSrc->Loop();
   }
+
+  PARENT_GLASS::Activate();
 }
 
 void CrawlerSpiritio::Deactivate()
 {
+  PARENT_GLASS::Deactivate();
+
   if (*mEngineSrc)
   {
     mEngineSrc->Stop();
@@ -197,8 +197,10 @@ void CrawlerSpiritio::IncThrottle(Int_t, Bool_t downp, UInt_t time_elapsed)
       const SDesireVarF& tv = C.RefThrottle();
       if (tv.IsAboveDesire())
 	tv.DesireToValue();
+      else if (tv.GetDesire() < 0)
+	tv.SetDesire(0);
       else
-	tv.DeltaDesire(2.0f*tv.GetDelta());
+	tv.SetDesire(tv.GetMax());
     }
     else
     {
@@ -208,7 +210,9 @@ void CrawlerSpiritio::IncThrottle(Int_t, Bool_t downp, UInt_t time_elapsed)
   else
   {
     if (mKeyIncThrottle.fDownCount > 0)
+    {
       --mKeyIncThrottle.fDownCount;
+    }
   }
 }
 
@@ -224,8 +228,10 @@ void CrawlerSpiritio::DecThrottle(Int_t, Bool_t downp, UInt_t time_elapsed)
 
       if (tv.IsBelowDesire())
 	tv.DesireToValue();
+      else if (tv.GetDesire() > 0)
+	tv.SetDesire(0);
       else
-	tv.DeltaDesire(-2.0f*tv.GetDelta());
+	tv.SetDesire(tv.GetMin());
     }
     else
     {
