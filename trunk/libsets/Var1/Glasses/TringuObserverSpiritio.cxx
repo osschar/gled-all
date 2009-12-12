@@ -56,10 +56,14 @@ void TringuObserverSpiritio::Activate()
 {
   mCamera->SetParent(*mTringuCam);
   // mCamera->Home();
+
+  PARENT_GLASS::Activate();
 }
 
 void TringuObserverSpiritio::Deactivate()
 {
+  PARENT_GLASS::Deactivate();
+
   mCamera->SetParent(0);
 }
 

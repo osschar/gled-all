@@ -28,8 +28,28 @@ Spiritio_GL_Rnr::~Spiritio_GL_Rnr()
 
 //==============================================================================
 
+void Spiritio_GL_Rnr::AbsorbRay(Ray& ray)
+{
+  if (ray.fRQN == Spiritio::PRQN_release_keys)
+  {
+    for (mK2KIRep_i i = mKeyReps.begin(); i != mKeyReps.end(); ++i)
+    {
+      if (i->second.fIsDown)
+	i->second.fIsDown = false;
+    }
+    return;
+  }
+
+  ZNode_GL_Rnr::AbsorbRay(ray);
+}
+
+//==============================================================================
+
 int Spiritio_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
+  if ( ! mSpiritio->bActive)
+    return 0;
+
   if (ev.fIsKey)
   {
     return HandleKey(rd, ev);

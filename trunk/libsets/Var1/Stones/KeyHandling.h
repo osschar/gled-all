@@ -79,25 +79,14 @@ namespace KeyHandling
   class KeyInfo
   {
   public:
-    // short, unique tag used in GL to build tag - index
-    // map. maybe another way is possible.
-    TString fKeyTag;
-
-    // long description, to be displayed in key setup dialog.
-    TString fKeyDesc;
-
-    // pointer to member function, or what?
+    TString         fKeyTag;    // Unique tag used in GL to build tag - index map.
+    TString         fKeyDesc;   // Description to be displayed in key setup dialog.
     AKeyCallback   *fCallback;
 
-    // in "compressed" key/action list; set on init()
-    Int_t           fIndex;
+    Int_t           fIndex;     // Index in "compressed" key/action list in Spiritio.
 
-    // how many times the key has been activated. this
-    // hopes to account for different ways of activation,
-    // e.g. key, overlay button, gesture (haha).
-    UChar_t         fDownCount;
+    UChar_t         fDownCount; // Number of activations (key, overlay button, ...).
 
-    KeyInfo();
     KeyInfo(const TString& tag, const TString& desc, AKeyCallback* foo);
 
     ~KeyInfo();
