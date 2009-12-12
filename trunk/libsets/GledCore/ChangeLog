@@ -1,3 +1,14 @@
+2009-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix stereo rendering for all camera orientations.
+
+	* Glasses/PupilInfo.cxx:
+	Put zero-parallax plane at near clipping distance by default.
+
+	* Pupils/Pupil.cxx:
+	Properly displace camera by left/right vector from absolute camera
+	transformation.
+
 2009-12-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for stereo rendering.
