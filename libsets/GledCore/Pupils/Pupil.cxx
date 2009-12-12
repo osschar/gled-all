@@ -1092,12 +1092,14 @@ void Pupil::rnr_stereo(bool rnr_overlay_p)
 
   GTime start_time(GTime::I_Now);
 
+  const Double_t *left_vec = mCamAbsTrans.ArrY();
+
   // --- Left ---
 
   glDrawBuffer(GL_BACK_LEFT);
 
   glPushMatrix();
-  glTranslated(0, stereo_offset, 0);
+  glTranslated(stereo_offset*left_vec[0], stereo_offset*left_vec[1], stereo_offset*left_vec[2]);
 
   glMatrixMode(GL_PROJECTION);
   glLoadMatrixd(mProjBase.Array());
@@ -1115,7 +1117,7 @@ void Pupil::rnr_stereo(bool rnr_overlay_p)
   glDrawBuffer(GL_BACK_RIGHT);
 
   glPushMatrix();
-  glTranslated(0, -stereo_offset, 0);
+  glTranslated(-stereo_offset*left_vec[0], -stereo_offset*left_vec[1], -stereo_offset*left_vec[2]);
 
   glMatrixMode(GL_PROJECTION);
   glLoadMatrixd(mProjBase.Array());
