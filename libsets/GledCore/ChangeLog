@@ -1,5 +1,18 @@
 2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Fix handling of leave/enter events. In particular, X sends fake
+	events on button press as grabbing is on. Needed to access
+	directly the X event to detect that (properly if-defed).
+	Set  Fl_Event::fIsOverlay when doing overlay handling.
+	Remove unused member mBelowMouseImg.
+
+	* RnrBase/A_Rnr.h:
+	Add member fIsOverlay to struct Fl_Event.
+
+2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/ZGlPerspective.cxx:
 	In ortho modes use 0, 1 for near, far (instead of -1, 1).
 

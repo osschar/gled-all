@@ -1,5 +1,18 @@
 2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	Add function ReleaseAllKeys(). This is called on deactivation and
+	when mouse leaves the pupil.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	On handle overlay events for now.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	Send MIR requesting release of all keys when mouse leaves pupil.
+
+2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Support setting of desire-vars via mouse-click on gl overlay bars.
 
 	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:

@@ -82,6 +82,23 @@ void Spiritio::Deactivate()
   bActive = false;
   Stamp(FID());
 
+  ReleaseAllKeys();
+}
+
+//==============================================================================
+
+void Spiritio::HandleKey(Int_t key_idx, Bool_t downp, UInt_t time_elapsed)
+{
+  if (bActive)
+  {
+    mKeys[key_idx]->fCallback->Invoke(this, key_idx, downp, time_elapsed);
+  }
+}
+
+//==============================================================================
+
+void Spiritio::ReleaseAllKeys()
+{
   for (vpKeyInfo_i i = mKeys.begin(); i != mKeys.end(); ++i)
   {
     while ((*i)->fDownCount)
@@ -95,15 +112,5 @@ void Spiritio::Deactivate()
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_release_keys, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
-  }
-}
-
-//==============================================================================
-
-void Spiritio::HandleKey(Int_t key_idx, Bool_t downp, UInt_t time_elapsed)
-{
-  if (bActive)
-  {
-    mKeys[key_idx]->fCallback->Invoke(this, key_idx, downp, time_elapsed);
   }
 }

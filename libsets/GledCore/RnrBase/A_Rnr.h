@@ -44,6 +44,8 @@ public:
     bool    fIsKey;
     bool    fIsMouse;
 
+    bool    fIsOverlay;
+
     lNSE_t  fNameStack;
     lNSE_i  fCurrentNSE;
     int     fNameStackSize;

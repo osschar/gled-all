@@ -77,7 +77,8 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
 
 int CrawlerSpiritio_GL_Rnr::HandleMouse(RnrDriver* rd, Fl_Event& ev)
 {
-  if (ev.fCurrentNSE ==  ev.fNameStack.end())
+  // If not called from handle_overlay do nothing for now.
+  if (!ev.fIsOverlay)
     return 0;
 
   CrawlerSpiritio &S = * mCrawlerSpiritio;

@@ -28,6 +28,7 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Button.H>
+#include <FL/x.H>
 
 #include <GL/glew.h>
 
@@ -158,7 +159,6 @@ void Pupil::_build()
 
   mOverlayImg      = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
   mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
-  mBelowMouseImg   = 0;
 
   mPickBuffSize = mInfo->GetBuffSize();
   mPickBuff     = 0;
@@ -1303,6 +1303,7 @@ void Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
 		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE ||
                 ev == FL_MOUSEWHEEL);
 
+  e.fIsOverlay  = false;
   e.fCurrentNSE = e.fNameStack.end();
   e.fZMin = e.fZMax = 0;
 
@@ -1354,8 +1355,24 @@ int Pupil::handle_overlay(A_Rnr::Fl_Event& e)
 
   if (ev == FL_ENTER)
   {
-    overlay_pick_and_deliver(e);
-    return 1; // always return 1 to keep getting move events
+    if (overlay_pick_and_deliver(e))
+    {
+      mDriver->SetBelowMouse(e.fCurrentNSE->fRnr);
+    }
+    // handle() will always return 1 on FL_ENTER to keep getting move events.
+    // We return 0 so that event-handler can get it, too.
+    return 0;
+  }
+  else if (ev == FL_LEAVE)
+  {
+    if (mDriver->GetBelowMouse())
+    {
+      mDriver->GetBelowMouse()->Handle(mDriver, e);
+      mDriver->SetBelowMouse(0);
+    }
+    // handle() will always return 1 on FL_LEAVE.
+    // We return 0 so that event-handler can get it, too.
+    return 0;
   }
   else if (ev == FL_MOVE)
   {
@@ -1400,14 +1417,6 @@ int Pupil::handle_overlay(A_Rnr::Fl_Event& e)
     }
     return 0;
   }
-  else if (ev == FL_LEAVE)
-  {
-    if (mDriver->GetBelowMouse())
-    {
-      mDriver->GetBelowMouse()->Handle(mDriver, e);
-    }
-    return 1;
-  }
   else if (ev == FL_PUSH || ev == FL_RELEASE || ev == FL_DRAG)
   {
     A_Rnr* pushed = mDriver->GetPushed();
@@ -1415,7 +1424,8 @@ int Pupil::handle_overlay(A_Rnr::Fl_Event& e)
     {
       overlay_pick(e);
       pushed->Handle(mDriver, e);
-      if(ev == FL_RELEASE) { // as in fltk; would prefer "&& e.fButtons == 0"
+      if (ev == FL_RELEASE) // as in fltk; would prefer "&& e.fButtons == 0"
+      {
 	mDriver->SetPushed(0);
       }
       return 1;
@@ -1474,11 +1484,21 @@ int Pupil::handle(int ev)
 
   if (ev == FL_ENTER)
   {
+    // Button events also cause enter/leave due to pointer grab (at least on X)
+#if !defined(__APPPLE_) and !defined(WIN32)
+    if (fl_xevent->xcrossing.mode != 0)
+      return 1;
+#endif
     mMPX = x; mMPY = y;
     bMPIn = true;
   }
   if (ev == FL_LEAVE)
   {
+    // Button events also cause enter/leave due to pointer grab (at least on X)
+#if !defined(__APPPLE_) and !defined(WIN32)
+    if (fl_xevent->xcrossing.mode != 0)
+      return 1;
+#endif
     bMPIn = false;
   }
   if (ev == FL_MOVE && mInfo->mMPSize > 0)
@@ -1511,11 +1531,15 @@ int Pupil::handle(int ev)
   {
     try
     {
-      int ovlp = handle_overlay(e);
-      if (ovlp) {
+      e.fIsOverlay = true;
+      if (handle_overlay(e))
+      {
 	check_driver_redraw();
 	return 1;
       }
+      // Restore event-type - handle_overlay() can change MOVE to ENTER/LEAVE.
+      e.fEvent     = ev;
+      e.fIsOverlay = false;
     }
     catch (Exc_t exc)
     {
@@ -1528,6 +1552,11 @@ int Pupil::handle(int ev)
   {
     if (mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e))
       return 1;
+  }
+
+  if (ev == FL_ENTER || ev == FL_LEAVE)
+  {
+    return 1;
   }
 
   if (ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == 0)
