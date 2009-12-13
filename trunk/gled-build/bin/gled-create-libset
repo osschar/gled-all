@@ -20,7 +20,7 @@ chdir "$ENV{GLEDSYS}/libsets" or die "GLEDSYS/libsets directory does not exist";
 die "$lsname exists" if -e $lsname;
 
 @TopDirs1 = ( $lsname, "Glasses", "Stones" );
-@TopDirs2 = ( "lib", "bin", "macros", "cfg", "lib-exec", "perllib" );
+@TopDirs2 = ( "lib", "bin", "macros", "cfg", "libexec", "perllib" );
 
 mkdir $lsname, 0755;
 chdir $lsname;
