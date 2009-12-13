@@ -63,6 +63,8 @@ public:
 
   virtual void HandleKey(Int_t key_idx, Bool_t downp, UInt_t time_elapsed); // X{E}
 
+  virtual void ReleaseAllKeys(); // X{E}
+
 #include "Spiritio.h7"
   ClassDef(Spiritio, 1);
 }; // endclass Spiritio

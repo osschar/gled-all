@@ -52,7 +52,6 @@ protected:
 
   OptoStructs::ZGlassImg* mOverlayImg;
   OptoStructs::ZGlassImg* mEventHandlerImg;
-  OptoStructs::ZGlassImg* mBelowMouseImg;
 
   UInt_t        mPickBuffSize;
   UInt_t*       mPickBuff;
