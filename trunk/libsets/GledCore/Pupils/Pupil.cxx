@@ -751,30 +751,35 @@ Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
   return n;
 }
 
-Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result,
+Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result, float& min_z, float& max_z,
 			      int  xpick,    int  ypick,
 			      bool rnr_self, bool rnr_overlay)
 {
   Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
 
-  if (n > 0) {
-    float   min_z = 1e10;
+  if (n > 0)
+  {
+    min_z = 1e10;
     UInt_t* min_p = 0;
     UInt_t*     x = mPickBuff;
 
-    for(int i=0; i<n; i++) {
+    for (int i=0; i<n; i++)
+    {
       float zmin = (float) *(x+1)/0x7fffffff;
-      if(zmin < min_z) {
+      if (zmin < min_z)
+      {
 	min_z = zmin;
+	max_z = (float) *(x+2)/0x7fffffff;
 	min_p = x;
       }
       x += 3 + *x;
     }
-    if(min_p == 0) return 0;
+    if (min_p == 0) return 0;
 
     x = min_p;
     int m = *x; x += 3;
-    for(int i=0; i<m; ++i) {
+    for (int i=0; i<m; ++i)
+    {
       result.push_front(mDriver->NameStack(x[i]));
     }
   }
@@ -1298,12 +1303,15 @@ void Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
 		ev == FL_PUSH  || ev == FL_DRAG || ev == FL_RELEASE ||
                 ev == FL_MOUSEWHEEL);
 
+  e.fCurrentNSE = e.fNameStack.end();
+  e.fZMin = e.fZMax = 0;
+
   // Fltk sometimes still sends keyup events from auto-repeat --
   // transform them to keydown. Apparently this only happens when
   // running with multiple threads as I could not reproduce this
   // behaviour in a minimal fltk program.
   //
-  // This requires round trip to X server, so should prefereably fixed
+  // This requires round trip to X server, so the thing should be fixed
   // in fltk (or wherever).
   if (ev == FL_KEYUP && Fl::get_key(e.fKey))
     e.fEvent = FL_KEYDOWN;
@@ -1311,7 +1319,7 @@ void Pupil::setup_rnr_event(int ev, A_Rnr::Fl_Event& e)
 
 int Pupil::overlay_pick(A_Rnr::Fl_Event& e)
 {
-  Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
+  Int_t n = PickTopNameStack(e.fNameStack, e.fZMin, e.fZMax, e.fX, e.fY, false, true);
   if (n > 0)
   {
     e.fCurrentNSE    = e.fNameStack.begin();
@@ -1328,9 +1336,11 @@ int Pupil::overlay_pick(A_Rnr::Fl_Event& e)
 int Pupil::overlay_pick_and_deliver(A_Rnr::Fl_Event& e)
 {
   Int_t n = overlay_pick(e);
-  if(n > 0) {
-    while(e.fCurrentNSE != e.fNameStack.end()) {
-      if( e.fCurrentNSE->fRnr->Handle(mDriver, e) )
+  if (n > 0)
+  {
+    while (e.fCurrentNSE != e.fNameStack.end())
+    {
+      if (e.fCurrentNSE->fRnr->Handle(mDriver, e))
 	return 1;
       ++e.fCurrentNSE;
     }
@@ -1350,7 +1360,7 @@ int Pupil::handle_overlay(A_Rnr::Fl_Event& e)
   else if (ev == FL_MOVE)
   {
     A_Rnr* below_mouse = mDriver->GetBelowMouse();
-    Int_t n = PickTopNameStack(e.fNameStack, e.fX, e.fY, false, true);
+    Int_t n = PickTopNameStack(e.fNameStack, e.fZMin, e.fZMax, e.fX, e.fY, false, true);
     if (n > 0)
     {
       // Simulate ENTER / LEAVE events.

@@ -6,6 +6,7 @@
 
 #include "Spiritio_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 #include <RnrBase/Fl_Event_Enums.h>
 #include <Glasses/AlSource.h>
 
@@ -137,13 +138,29 @@ void Spiritio_GL_Rnr::RegisterKey(Int_t k, const TString& tag)
 
 //==============================================================================
 
-void Spiritio_GL_Rnr::draw_vertical_desirevar(const SDesireVarF& v)
+void Spiritio_GL_Rnr::draw_vertical_desirevar(const SDesireVarF& v, RnrDriver* rd, bool pick)
 {
   // Draws into unit box x(-0.5, 0.5), y (-0.5, 0.5).  
   // Blending should be enabled from outside.
+  //
+  // If pick is true an invisible, z-tilted polygon is also drawn so that
+  // the picking position can deduced from the max depth od the selection hit.
+  // The z-offset at the bottom is 0 and -1 at the top which translates
+  // to depth buffer values of 0 and 2 respectively.
 
   static const Float_t bar_hw  = 0.1f;  // bar half-width
   static const Float_t line_hw = 0.25f; // line half-width for val / des marks
+
+  if (pick)
+  {
+    rd->GL()->PushName(this, (void*) &v);
+    glBegin(GL_QUADS);
+    glVertex3f(-bar_hw, -0.5f,  0.0f); glVertex3f( bar_hw, -0.5f,  0.0f);
+    glVertex3f( bar_hw,  0.5f, -1.0f); glVertex3f(-bar_hw,  0.5f, -1.0f);
+    glEnd();
+    rd->GL()->PopName();
+    return;
+  }
 
   const Float_t min = v.GetMin(), max = v.GetMax();
   const Float_t val = v.Get(),    des = v.GetDesire();
@@ -202,12 +219,25 @@ void Spiritio_GL_Rnr::draw_vertical_desirevar(const SDesireVarF& v)
   glEnd();
 }
 
-void Spiritio_GL_Rnr::draw_horizontal_desirevar(const SDesireVarF& v)
+void Spiritio_GL_Rnr::draw_horizontal_desirevar(const SDesireVarF& v, RnrDriver* rd, bool pick)
 {
-  // Draws into unit box x(-0.5, 0.5), y (-0.5, 0.5).  
+  // Draws into unit box x(-0.5, 0.5), y (-0.5, 0.5).
+  //
+  // See comments in draw_vertical_desirevar.
 
   static const Float_t bar_hh  = 0.1f;  // bar half-width
   static const Float_t line_hh = 0.25f; // line half-width for val / des marks
+
+  if (pick)
+  {
+    rd->GL()->PushName(this, (void*) &v);
+    glBegin(GL_QUADS);
+    glVertex3f(-0.5f,  bar_hh,  0.0f); glVertex3f(-0.5f, -bar_hh,  0.0f);
+    glVertex3f( 0.5f, -bar_hh, -1.0f); glVertex3f( 0.5f,  bar_hh, -1.0f);
+    glEnd();
+    rd->GL()->PopName();
+    return;
+  }
 
   const Float_t min = v.GetMin(), max = v.GetMax();
   const Float_t val = v.Get(),    des = v.GetDesire();

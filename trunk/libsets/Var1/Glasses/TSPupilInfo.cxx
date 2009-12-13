@@ -132,8 +132,6 @@ void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
 
   Spiritio *exs = *mCurrentSpiritio;
 
-  set_link_or_die(mCurrentSpiritio.ref_link(), 0, FID());
-
   if (exs)
   {
     {
@@ -145,6 +143,8 @@ void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
     mSpiritioScene->RemoveAll(exs);
     RemoveEventHandler(exs);
   }
+
+  set_link_or_die(mCurrentSpiritio.ref_link(), s, FID());
 
   if (s)
   {
@@ -165,8 +165,6 @@ void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
   {
     SetCameraBase(0);
   }
-
-  set_link_or_die(mCurrentSpiritio.ref_link(), s, FID());
 }
 
 //==============================================================================

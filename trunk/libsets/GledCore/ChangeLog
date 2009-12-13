@@ -1,3 +1,15 @@
+2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlPerspective.cxx:
+	In ortho modes use 0, 1 for near, far (instead of -1, 1).
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Add zmin/max output args to PickTopNameStack().
+
+	* RnrBase/A_Rnr.h:
+	Add fZMin/Max members to struct Fl_Event.
+
 2009-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix stereo rendering for all camera orientations.

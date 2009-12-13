@@ -1,3 +1,20 @@
+2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support setting of desire-vars via mouse-click on gl overlay bars.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.h:
+	Implement HandleMouse() and set throttle / wheel desire accordingly.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Add pick flag to desire-var bar rendering functions - in this case
+	only plot a quad reclining in depth so that location can be
+	deduced from the depth values of the gl selection record.
+
+	* Glasses/TSPupilInfo.cxx:
+	Set current spiritio link only once.
+
 2009-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve key handling.
