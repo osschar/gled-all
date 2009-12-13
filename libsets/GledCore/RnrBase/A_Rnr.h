@@ -48,6 +48,8 @@ public:
     lNSE_i  fCurrentNSE;
     int     fNameStackSize;
 
+    float   fZMin, fZMax;
+
     bool ns_empty() { return fNameStackSize > 0; }
     int  ns_size()  { return fNameStackSize;  }
 

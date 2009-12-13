@@ -8,6 +8,7 @@
 #include <RnrBase/Fl_Event_Enums.h>
 
 #include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 
 #include <Glasses/Crawler.h>
 #include <Glasses/Camera.h>
@@ -46,17 +47,20 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
 
   Crawler &C = * mCrawlerSpiritio->get_crawler();
 
+  bool picking = rd->GL()->PickingP();
+
   // Throttle bar
   glPushMatrix();
   glTranslatef(0.5f, 0.0f, 0.0f);
   glScalef(0.25f, 0.5f, 1.0f);
-  draw_vertical_desirevar(C.RefThrottle());
+  draw_vertical_desirevar(C.RefThrottle(), rd, picking);
   glPopMatrix();
 
+  // Wheel bar
   glPushMatrix();
   glTranslatef(0.0f, -0.5f, 0.0f);
   glScalef(-0.5f, -0.22f, 1.0f); // Smaller height then width of throttle ... looks better.
-  draw_horizontal_desirevar(C.RefWheel());
+  draw_horizontal_desirevar(C.RefWheel(), rd, picking);
   glPopMatrix();
 
 
@@ -71,10 +75,31 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
 
 //==============================================================================
 
-// This not needed now ... KeyHandling is done in Spiritio_GL_Rnr.
-// We pass it all the data it needs in _init().
+int CrawlerSpiritio_GL_Rnr::HandleMouse(RnrDriver* rd, Fl_Event& ev)
+{
+  if (ev.fCurrentNSE ==  ev.fNameStack.end())
+    return 0;
 
-// int CrawlerSpiritio_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
-// {
-//   CrawlerSpiritio &S = * mCrawlerSpiritio;
-// }
+  CrawlerSpiritio &S = * mCrawlerSpiritio;
+  Crawler         &C = * S.get_crawler();
+
+  if (ev.fEvent == FL_PUSH || ev.fEvent == FL_DRAG)
+  {
+    Float_t norm_z = 0.25f * (ev.fZMin + ev.fZMax);
+
+    if (ev.fCurrentNSE->fUserData == &C.RefThrottle())
+    {
+      const SDesireVarF &d = C.RefThrottle();
+      S.SetThrottle(d.GetMin() + norm_z * (d.GetMax() - d.GetMin()));
+      return 1;
+    }
+    else if (ev.fCurrentNSE->fUserData == &C.RefWheel())
+    {
+      const SDesireVarF &d = C.RefWheel();
+      S.SetWheel(d.GetMin() + norm_z * (d.GetMax() - d.GetMin()));
+      return 1;
+    }
+  }
+
+  return 0;
+}

@@ -24,7 +24,7 @@ public:
 
   virtual void Draw(RnrDriver* rd);
 
-  // virtual int Handle(RnrDriver* rd, Fl_Event& ev);
+  virtual int HandleMouse(RnrDriver* rd, Fl_Event& ev);
 
 }; // endclass CrawlerSpiritio_GL_Rnr
 

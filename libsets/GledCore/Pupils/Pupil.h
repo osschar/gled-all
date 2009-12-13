@@ -124,7 +124,7 @@ public:
   Int_t Pick(int xpick, int ypick,
 	     bool rnr_self=true, bool rnr_overlay=true);
 
-  Int_t PickTopNameStack(A_Rnr::lNSE_t& result,
+  Int_t PickTopNameStack(A_Rnr::lNSE_t& result, float& min_z, float& max_z,
 			 int  xpick,    int  ypick,
 			 bool rnr_self, bool rnr_overlay);
 

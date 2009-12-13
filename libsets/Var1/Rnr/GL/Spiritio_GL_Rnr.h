@@ -29,8 +29,8 @@ protected:
 
   void RegisterKey(Int_t k, const TString& tag);
 
-  void draw_vertical_desirevar(const SDesireVarF& v);
-  void draw_horizontal_desirevar(const SDesireVarF& v);
+  void draw_vertical_desirevar  (const SDesireVarF& v, RnrDriver* rd, bool pick);
+  void draw_horizontal_desirevar(const SDesireVarF& v, RnrDriver* rd, bool pick);
 
   void update_al_src(AlSource* src, const ZTrans& t, RnrDriver* rd);
 

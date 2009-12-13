@@ -28,7 +28,7 @@ void ZGlPerspective::_init()
 {
   mViewMode  = VM_Nop;
   mOrthoW    = 10; mOrthoH   = 10;
-  mOrthoNear = -1; mOrthoFar = 1;
+  mOrthoNear =  0; mOrthoFar = 1;
   mOx = mOy = mOz = 0;
 }
 
@@ -39,7 +39,7 @@ void ZGlPerspective::StandardPersp()
   ZGlPerspective& X = *this;
   X.SetViewMode(VM_Nop);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
-  X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
+  X.SetOrthoNear(0); X.SetOrthoFar(1);
 }
 
 void ZGlPerspective::StandardFixed()
@@ -47,14 +47,14 @@ void ZGlPerspective::StandardFixed()
   ZGlPerspective& X = *this;
   X.SetViewMode(VM_OrthoFixed);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
-  X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
+  X.SetOrthoNear(0); X.SetOrthoFar(1);
 }
 
 void ZGlPerspective::StandardTrueAspect()
 {
   ZGlPerspective& X = *this;
   X.SetViewMode(VM_OrthoTrueAspect);
-  X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
+  X.SetOrthoNear(0); X.SetOrthoFar(1);
 }
 
 void ZGlPerspective::StandardPixel()
@@ -62,7 +62,7 @@ void ZGlPerspective::StandardPixel()
   ZGlPerspective& X = *this;
   X.SetViewMode(VM_OrthoPixel);
   X.SetOrthoW(10.000000); X.SetOrthoH(10.000000);
-  X.SetOrthoNear(-1.000000); X.SetOrthoFar(1.000000);
+  X.SetOrthoNear(0); X.SetOrthoFar(1);
 }
 
 /**************************************************************************/
