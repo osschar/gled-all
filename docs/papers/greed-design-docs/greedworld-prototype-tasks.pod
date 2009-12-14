@@ -13,12 +13,14 @@ Matevz Tadel
 
 =head2 Document history
 
-B<21.6.2008> - first version.
+B<21.06.2008> -- First version.
 
-B<22.10.2008> - update for the developments in solar-system integration.
+B<22.10.2008> -- Update for the developments in solar-system integration.
 
-B<19.01.2009> - update for the developments in gravitational field and
+B<19.01.2009> -- Update for the developments in gravitational field and
 C<Dynamico> movement (for both C<Crawlers> and C<Flyers>).
+
+B<14.12.2009> -- Describe briefely C<Spiritio> classes under L<Unit movement on terrain>.
 
 =cut========================================================================
 
@@ -502,7 +504,8 @@ issues overlap or depend on one another. Also, the descriptions
 are relatively terse -- I can provide more details if somebody is
 interested.
 
-Eventually read [Tadel-GledIHSCM].
+See [Tadel-GledIHSCM] -- this is an overview / implementation paper about
+\gled.
 
 
 =head2 \gled crash course
@@ -605,7 +608,7 @@ objects would be performed by an optimized scene-graph library.
 
 =item Add bounding-box information into \gled classes and use it
 during rendering to perform view-frustum culling and, on request, LOD
-calculations. See [Moller-OVFCA]
+calculations. See [Moller-OVFCA].
 
 =item Consinder existing scene-graph and rendering engines (like
 SauerBratten, G3D, OpenSceneGraph, Ogre3D, Blender) and open-source
@@ -827,6 +830,12 @@ available so at least lateral slides would be trivial to implement.
 =item Unit steering in "go to somewhere" mode.
 
 =item Unit steering in "first person" or "drive" mode.
+
+I<14.12.2009> -- This is somewhat done for C<Crawler>'s. See glasses
+C<Spiritio> and C<CrawlerSpiritio> and their GL renderers. The
+observer/commander camera movement is fed from C<TringuObserverSpiritio>. The
+C<Spiritio> classes combine unit control steering, key-handling and
+overlay/mouse interaction.
 
 =item Steering of a unit group in march, patrol, guard and attack modes.
 
