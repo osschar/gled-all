@@ -10,7 +10,9 @@ Matevz Tadel
 
 =head2 Date
 
-20.7.2008
+B<20.07.2008> -- Initial version
+
+B<14.12.2009> -- Small updates: OSX build, DevIL.
 
 
 =cut========================================================================
@@ -18,8 +20,16 @@ Matevz Tadel
 
 =head1 External software, build and portability
 
+=cut========================================================================
 
-=head2 Build on freebsd, macosx, windows
+
+=head2 Build on FreeBSD, MacOSX, Windows
+
+I succeeded building on OSX 10.5 with several packages installed via fink in
+May 2009. At the moment (14.12.2009) this build is broken again (fails in
+OpenAL). Somebody who knows more about OSX should decide whether to use fink
+or MacPorts and check build options for \gled and external software.
+
 
 =head3 Major issues
 
@@ -37,19 +47,23 @@ Matevz Tadel
 one. Each run in separate thread and things mostly work. One needs to
 lock root display when opening root windows from fltk.
 
-On mac root uses X11 and fltk uses quartz (I managed to compile fltk
-with X on mac and \gled somewhat worked).
+On mac root uses X11 and fltk uses quartz. As already said, this worked OK at
+some point. Fltk had to be put into the main thread.
 
-On windows root uses gdk. I have no clue what this means for parallel
+=item On windows root uses gdk. I have no clue what this means for parallel
 running of fltk.
 
 =back
 
 =cut========================================================================
 
+
 =head2 Reconsider usage of DevIL as image library
 
-DevIL is not thread safe. Someone should investigate this.
+DevIL is not thread-safe but there were rumors on the list that somebody is
+beginning to work on that (Dayton, from the top of my head). Someone should
+investigate this. For now all DevIL access is protected with a global mutex.
+
 
 =head3 Tasks
 
@@ -81,6 +95,8 @@ generate mipmaps in ZImage_GL_Rnr.
 
 =head1 Central \gled
 
+=cut========================================================================
+
 
 =head2 Do not stream rays.
 
@@ -98,19 +114,31 @@ Thus we can cleanup the mess if some Eye goes banana.
 Eyes should connect to each queen individually. Then, queens can send
 rays only to eyes that observe them.
 
+
+=cut========================================================================
+
 =head2 class/libset ids.
 
 better management of those
 
 what about method ids?
 
+
+=cut========================================================================
+
 =head2 lens ids
 
  make each king (queen?) an independent object space.
 
+
+=cut========================================================================
+
 =head2 should we use namespaces for libsets?
 
 class-naming consistency. now we have a mess (well, I have a mess).
+
+
+=cut========================================================================
 
 =head2 Object instantiation.
 
@@ -126,5 +154,6 @@ Check Hoard.
 
 =head1 Minor annoyances
 
+=cut========================================================================
 
-text rendering - try to use ftgl from root
+GL text rendering -- use ftgl from \root.
