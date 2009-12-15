@@ -5,8 +5,8 @@
 # Modified version of root/build/unix/makedistsrc.sh
 # Fix the following variables before running:
 
-svnurl="https://root.cern.ch/svn/root/branches/v5-24-00-patches"
-version="5.24.01"
+svnurl="https://root.cern.ch/svn/root/branches/v5-26-00-patches"
+version="5.26.00"
 dir="root"
 tarfile="root-$version-gled.tar"
 
@@ -16,12 +16,11 @@ rm -rf $dir
 mkdir $dir
 svn co $svnurl $dir
 
-echo "Fixing version crap ..."
-
-# generate etc/svninfo.txt
+echo "Generating etc/svninfo.txt"
 cd $dir
 build/unix/svninfo.sh
-# remove .svn directories containing extra copy of the code
+
+echo "Remove .svn directories ..."
 find . -depth -name .svn -exec rm -rf {} \;
 cd ..
 
