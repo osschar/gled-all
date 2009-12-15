@@ -1,3 +1,16 @@
+2009-12-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix compilation issue of root on debian.
+
+	* external/root/root.pl:
+	Debian also requires --enable-gsl-shared config option.
+	This is required when libgsldev is installed and root
+	automatically enables building of math-more package.
+	libgslcblas.a library is compiled without the -fPIC option.
+
+	* external/root/make-root-src-dist.sh:
+	Use root-5.26 branch when making a tarball.
+
 2009-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for latest openal.

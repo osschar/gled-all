@@ -25,6 +25,9 @@ if ($BUILD_OS =~ /linux/)
   if ($DISTRO_VENDOR eq 'gentoo') {
     $config_args .= " --enable-gsl-shared --with-pgsql-incdir=/usr/include/postgres";
   }
+  elsif ($DISTRO_VENDOR eq 'debian') {
+    $config_args .= " --enable-gsl-shared";
+  }
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
