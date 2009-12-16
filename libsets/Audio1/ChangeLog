@@ -1,3 +1,8 @@
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	Bugfix - LT_FollowParents was taking wrong transformation.
+
 2009-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AlSource.cxx:

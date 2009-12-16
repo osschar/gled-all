@@ -31,7 +31,7 @@ void AlSource_GL_Rnr::Draw(RnrDriver* rd)
     switch (mAlSource->mLocationType)
     {
       case AlSource::LT_FollowParents:
-	tp = rd->GetCamAbsTrans();
+	tp = &rd->ToGCS();
 	break;
       case AlSource::LT_CamDelta:
 	tp = new ZTrans(*rd->GetCamAbsTrans());
