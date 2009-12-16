@@ -10,17 +10,19 @@
 #include <Stones/ZTrans.h>
 class ZNode;
 
-struct PMSEntry {
-  PMSEntry*   fPrev;
-  ZNode*      fNode;
+struct PMSEntry
+{
+  PMSEntry   *fPrev;
+  ZNode      *fNode;
 
-  ZTrans     fLocal;
-  ZTrans*    fToGCS;
-  ZTrans*    fFromGCS;
+  ZTrans      fLocal;
+  ZTrans     *fToGCS;
+  ZTrans     *fFromGCS;
   Bool_t      bTo, bFrom;
 
   PMSEntry() : fPrev(0), fNode(0),
-	       fToGCS(0), fFromGCS(0), bTo(0), bFrom(0) {}
+	       fToGCS(0), fFromGCS(0), bTo(0), bFrom(0)
+  {}
 
   ~PMSEntry()
   { delete fToGCS; delete fFromGCS; }
