@@ -291,7 +291,6 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
       // Everything done in time-tick.
       if (mTringula->GetUseDispList())
       {
-        // !!! Could repaint just the changed triangles with negative polygon offset.
         mTringula->SetUseDispList(false);
         bEnableTringDLonMouseUp = true;
       }
@@ -819,7 +818,7 @@ void TringuCam::DynoDetails(Dynamico* dyno)
 void TringuCam::DynoDrive(Dynamico* dyno)
 {
   // Install dyno handlers etc.
-  // Called in deteached thread!
+  // Called in a deteached thread!
 
   static const Exc_t _eh("TringuCam::DynoDrive ");
 
@@ -858,6 +857,81 @@ void TringuCam::DynoDrive(Dynamico* dyno)
   };
 
   throw _eh + "No suitable spiritio found.";
+}
+
+#include <Glasses/AlBuffer.h>
+#include <Glasses/AlSource.h>
+
+#include <TSystem.h>
+
+void TringuCam::DynoExplode(Dynamico* dyno)
+{
+  // Terminate a dyno.
+  // Called in a deteached thread!
+  //
+  // This is all wrong ... but want to try this.
+
+  static const Exc_t _eh("TringuCam::DynoExplode ");
+
+  assert_MIR_presence(_eh, MC_IsDetached);
+
+  printf("Dyno '%s' exploding at your command!\n", dyno->GetName());
+
+  AlBuffer *buf;
+  AlSource *src;
+
+  {
+    GLensWriteHolder lck(*mTringula);
+
+    buf = dynamic_cast<AlBuffer*>(mQueen->FindLensByPath("var/sounds/BigExplosion"));
+    if (!buf)
+      throw _eh + "explode buffer not found.";
+
+    src = new AlSource("TmpExploder");
+    src->ref_trans().SetFromArray(dyno->RefLastTrans());
+
+    mQueen->CheckIn(src);
+
+    mTringula->Add(src);
+  }
+
+  {
+    GLensWriteHolder lck(src);
+    src->QueueBuffer(buf);
+    src->Play();
+  }
+
+  do
+  {
+    gSystem->Sleep(200);
+  } while (src->IsPlaying());
+
+  {
+    GLensWriteHolder lck(*mPupilInfo);
+    ExtendioSpiritio *es = dynamic_cast<ExtendioSpiritio*>(mPupilInfo->GetCurrentSpiritio());
+    printf("Blowupa es=%p, ext=%p, dyno=%p\n", es, es ? es->GetExtendio() : 0, dyno);
+    if (es && es->GetExtendio() == dyno)
+      mPupilInfo->SetCurrentSpiritio(0);
+  }
+
+  {
+    bool menuswitch;
+    {
+      GLensReadHolder lck(this);
+      menuswitch = mSelection->Has(dyno);
+    }
+    if (menuswitch)
+    {
+      GLensWriteHolder lck(*mPupilInfo);
+      mPupilInfo->SelectTopMenuByName("MainMenu");
+    }
+  }
+
+  {
+    GLensWriteHolder lck(mQueen);
+    mQueen->RemoveLens(src);
+    mQueen->RemoveLens(dyno);
+  }
 }
 
 //==============================================================================

@@ -101,6 +101,10 @@ void tringula(Int_t mode=2)
     CREATE_ADD_GLASS(albuf2, AlBuffer, bufdir, "PewPew", 0);
     albuf2->SetFile("../Audio1/boom.wav");
     albuf2->Load();
+
+    CREATE_ADD_GLASS(albuf3, AlBuffer, bufdir, "BigExplosion", 0);
+    albuf3->SetFile("sounds/big_explosion.wav");
+    albuf3->Load();
   }
 
   { // Glass mappings
@@ -1125,6 +1129,11 @@ void make_overlay()
     val3->SetMin(-10); val3->SetMax(100); val3->SetStepB(100);
     val3->SetFormat("LevH: %.2f");
     val3->SetCbackMemberName("LevH");
+
+    CREATE_ADD_GLASS(bute, WGlButton, dyno_ctrl, "Explode", "LensBeta");
+    gs.SetNodeAdvance(bute);
+    bute->SetCbackAlpha(tricam);
+    bute->SetCbackMethodName("DynoExplode");
   }
 
   gs.Reset();

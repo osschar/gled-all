@@ -1,3 +1,13 @@
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* sounds:
+	* sounds/big_explosion.wav:
+	New dir/file.
+
+	* tringula.C:
+	Add al-buffer for explosion.
+	Add overlay button to initiate crawler explosion.
+
 2009-12-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
