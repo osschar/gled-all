@@ -311,6 +311,7 @@ void Pupil::AbsorbRay(Ray& ray)
 
 	make_current();
 	draw();
+	valid(1);
 	swap_buffers();
       }
       else if (bSignalDumpFinish)
@@ -1460,25 +1461,6 @@ int Pupil::handle(int ev)
 {
   static const Exc_t _eh("Pupil::handle ");
 
-  if (ev == FL_HIDE || ev == FL_SHOW)
-    return Fl_Gl_Window::handle(ev);
-
-  // Maybe should check for something else?
-  if (!valid())
-    return 0;
-
-  // It can happen that we get called from another thread as ~Fl_Widget()
-  // calls fl_throw_focus() which in turn calls handle() on current widget.
-  // This seems utterly wrong.
-  if (GThread::Self() != mCreationThread)
-  {
-    // printf("%scalled from *another* thread:\n", _eh.Data());
-    // printf("  creation='%s' calling='%s'.\n", mCreationThread->GetName(), GThread::Self()->GetName());
-    return 0;
-  }
-
-  make_current();
-
   int x = Fl::event_x(); int y = Fl::event_y();
   // printf("PupilEvent %d (%d, %d)\n", ev, x, y);
 
@@ -1514,6 +1496,29 @@ int Pupil::handle(int ev)
     bUseEventHandler = !bUseEventHandler;
     return 1;
   }
+
+  if (ev == FL_HIDE || ev == FL_SHOW)
+  {
+    return Fl_Gl_Window::handle(ev);
+  }
+
+  // Maybe should check for something else?
+  if (!valid())
+  {
+    return 1;
+  }
+
+  // It can happen that we get called from another thread as ~Fl_Widget()
+  // calls fl_throw_focus() which in turn calls handle() on current widget.
+  // This seems utterly wrong.
+  if (GThread::Self() != mCreationThread)
+  {
+    // printf("%scalled from *another* thread:\n", _eh.Data());
+    // printf("  creation='%s' calling='%s'.\n", mCreationThread->GetName(), GThread::Self()->GetName());
+    return 0;
+  }
+
+  make_current();
 
   A_Rnr::Fl_Event e;
   setup_rnr_event(ev, e);

@@ -1,5 +1,11 @@
 2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Pupils/Pupil.cxx:
+	Forgot to call valid(1) in handling of PRQN_redraw.
+	Move handling of basic events (enter/leave/show/hide) to the top.
+
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/ZQueen.cxx:
 	Change order of lens disentanglement in put_lens_to_purgatory() -
 	first remove references to lens and later references from the lens
