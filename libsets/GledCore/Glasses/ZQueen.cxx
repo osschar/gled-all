@@ -670,12 +670,6 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
     lens->mGlassBits |= ZGlassBits::kDying;
   }
 
-  { // Remove all references from lens.
-    ISdebug(2, _eh + "removing all refs from " + lens->Identify() + ".");
-    GLensReadHolder rdlck(lens);
-    lens->ClearAllReferences();
-  }
-
   // printf("%s %s RC=%d, MRC=%d, SRC=%d, FRC=%d\n", _eh.Data(), lens->Identify().Data(),
   //        lens->mRefCount, lens->mMoonRefCount, lens->mSunRefCount, lens->mFireRefCount);
 
@@ -705,6 +699,12 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
 		  lens->mRefCount, lens->mMoonRefCount,
 		  lens->mSunRefCount, lens->mFireRefCount));
     }
+  }
+
+  { // Remove all references from lens.
+    ISdebug(2, _eh + "removing all refs from " + lens->Identify() + ".");
+    GLensReadHolder rdlck(lens);
+    lens->ClearAllReferences();
   }
 
   // Emit the death Ray.

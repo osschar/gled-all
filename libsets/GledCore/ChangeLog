@@ -1,5 +1,19 @@
 2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZQueen.cxx:
+	Change order of lens disentanglement in put_lens_to_purgatory() -
+	first remove references to lens and later references from the lens
+	that is being redeemed.
+
+	* Rnr/GL/WGlValuator_GL_Rnr.cxx:
+	Always check if link to alpha lens is set.
+
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Add defines for obtaining values of links that can be potentially
+	zero.
+
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* RnrBase/PMSEntry.cxx:
 	* RnrBase/PMSEntry.h:
 	Add some docs. White-space.

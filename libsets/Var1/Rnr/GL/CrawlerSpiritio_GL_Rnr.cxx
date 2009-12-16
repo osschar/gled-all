@@ -45,7 +45,7 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
 {
   // Assume we are in -1, 1 mapping with origin at center.
 
-  Crawler &C = * mCrawlerSpiritio->get_crawler();
+  REF_OR_RET(Crawler, C, mCrawlerSpiritio->get_crawler());
 
   bool picking = rd->GL()->PickingP();
 
@@ -82,7 +82,8 @@ int CrawlerSpiritio_GL_Rnr::HandleMouse(RnrDriver* rd, Fl_Event& ev)
     return 0;
 
   CrawlerSpiritio &S = * mCrawlerSpiritio;
-  Crawler         &C = * S.get_crawler();
+
+  REF_OR_RET_VAL(Crawler, C, S.get_crawler(), 0);
 
   if (ev.fEvent == FL_PUSH || ev.fEvent == FL_DRAG)
   {

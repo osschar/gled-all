@@ -235,9 +235,10 @@ public:
 
   // Overlay methods
 
-  void StatoDetails(Statico* stato); // X{E} C{1} 7 MCWButt()
-  void DynoDetails(Dynamico* dyno);  // X{E} C{1} 7 MCWButt()
+  void StatoDetails(Statico* stato); // X{E}  C{1} 7 MCWButt()
+  void DynoDetails(Dynamico* dyno);  // X{E}  C{1} 7 MCWButt()
   void DynoDrive(Dynamico* dyno);    // X{ED} C{1} 7 MCWButt()
+  void DynoExplode(Dynamico* dyno);  // X{ED} C{1} 7 MCWButt()
 
   void SetAndApplyCurField(TriMeshField* field); // X{E} C{1} 7 MCWButt()
   void ColorByTerrainProps(Int_t mode=0);        // X{E}      7 MCWButt()

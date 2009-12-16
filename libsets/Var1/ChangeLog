@@ -1,3 +1,17 @@
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add method DynoExplode() in a most brutal way so that it fucks up
+	the screwed up relation between pupil and tringula even further.
+	Besides playing the explode sound it actually also destroys the
+	crawler after the explosion playback is done.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	Check if links to other lenses are non-zero and store them in
+	local variables.
+
 2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Spiritio.cxx:

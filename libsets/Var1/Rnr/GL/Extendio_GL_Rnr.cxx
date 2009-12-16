@@ -49,6 +49,8 @@ void Extendio_GL_Rnr::PreDraw(RnrDriver* rd)
 
 void Extendio_GL_Rnr::Draw(RnrDriver* rd)
 {
+  GET_OR_RET(TriMesh, mesh, mExtendio->GetMesh());
+
   PARENT::Draw(rd);
 
   Extendio &E = * mExtendio;
@@ -59,20 +61,22 @@ void Extendio_GL_Rnr::Draw(RnrDriver* rd)
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     GL_Float_Holder      fat_line(GL_LINE_WIDTH, 2, glLineWidth);
     glColor3fv(T.PtrSelColor()->array());
-    render_ceaabox(E.GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
+    render_ceaabox(mesh->GetTTvor()->mCtrExtBox, 1.01f);
   }
 
   if (T.GetRnrBBoxes())
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(1, 0, 0);
-    render_ceaabox(E.GetMesh()->GetTTvor()->mCtrExtBox, 1.01f);
+    render_ceaabox(mesh->GetTTvor()->mCtrExtBox, 1.01f);
   }
 }
 
 void Extendio_GL_Rnr::Render(RnrDriver* rd)
 {
-  TringTvor_GL_Rnr::Render(mExtendio->GetMesh()->GetTTvor(), false);
+  GET_OR_RET(TriMesh, mesh, mExtendio->GetMesh());
+
+  TringTvor_GL_Rnr::Render(mesh->GetTTvor(), false);
 }
 
 void Extendio_GL_Rnr::PostDraw(RnrDriver* rd)
