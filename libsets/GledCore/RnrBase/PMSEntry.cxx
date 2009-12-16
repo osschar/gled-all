@@ -6,8 +6,16 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //______________________________________________________________________
-// PMSEntry
 //
+// PMSEntry -- Position-Matrix-Stack Entry
+//
+// Used within RnrDriver to store matrices that are used
+// and during lens-graph traversal.
+// It also caches transformation matrices to/from GCS - they are
+// created on request when needed and invalidated when changed
+// from the ZNode_GL_Rnr.
+//
+// In principle non-ZNodes could also use this service.
 
 ZTrans& PMSEntry::ToGCS()
 {

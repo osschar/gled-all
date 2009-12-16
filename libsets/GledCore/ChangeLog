@@ -1,3 +1,9 @@
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* RnrBase/PMSEntry.cxx:
+	* RnrBase/PMSEntry.h:
+	Add some docs. White-space.
+
 2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Pupils/Pupil.cxx:
