@@ -1,3 +1,13 @@
+2009-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/ZColor.cxx:
+	* Stones/ZColor.h:
+	* Stones/ZColorMark.cxx:
+	* Stones/ZColorMark.h:
+	Use ClassDefNV (non-virtual) to reduce memory size.
+	Add some docs.
+	White-space changes.
+
 2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Pupils/Pupil.cxx:

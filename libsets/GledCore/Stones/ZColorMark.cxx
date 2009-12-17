@@ -4,20 +4,11 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// ZColorMark
-//
-//
-
 #include "ZColorMark.h"
 
+//__________________________________________________________________________
+//
+// Adds an additional floating-point mark to ZColor.
+// This is used in palettes to do interpolation.
+
 ClassImp(ZColorMark);
-
-/**************************************************************************/
-
-
-/**************************************************************************/
-
-
-
-/**************************************************************************/
