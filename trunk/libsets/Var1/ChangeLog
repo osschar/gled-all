@@ -1,3 +1,16 @@
+2009-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	New glass TringuRep -- representation of Tringula.
+
+	* Glasses/TringuRep.cxx:
+	* Glasses/TringuRep.h:
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	New files.
+
+	* glass.list:
+	Register TringuRep.
+
 2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TringuCam.cxx:
