@@ -8,8 +8,9 @@
 #define Geom1_RectTerrain_H
 
 #include <Glasses/ZNode.h>
-#include <Glasses/ZRibbon.h>
 #include <Stones/ZColor.h>
+#include <Glasses/RGBAPalette.h>
+
 class ZImage;
 class TringTvor;
 
@@ -43,7 +44,7 @@ class RectTerrain : public ZNode
   ZColor         mMinCol;  // X{PGST} 7 ColorButt(-join=>1)
   ZColor         mMaxCol;  // X{PGST} 7 ColorButt()
   Float_t        mColSep;  // X{gST}  7 Value(-range=>[0,100,1,1000])
-  ZLink<ZRibbon> mRibbon;  // X{gST} L{}
+  ZLink<RGBAPalette> mRibbon;  // X{gST} L{}
 
   ZLink<ZImage>  mTexture; // X{gST} L{} RnrBits{4,0,5,0, 0,0,0,0}
 

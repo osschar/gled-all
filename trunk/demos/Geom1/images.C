@@ -61,13 +61,11 @@ void images()
   image6->SetEnvMode(GL_MODULATE);
   image6->SetFile("checker_8.png");
 
-  CREATE_ADD_GLASS(ribbon1, ZRibbon, texdir, "Ribbon1", 0);
-  ribbon1->SetPOVFile("ribbon1.pov");
-  ribbon1->LoadPOV();
+  CREATE_ADD_GLASS(ribbon1, RGBAPalette, texdir, "Ribbon1", 0);
+  ribbon1->SetMarksFromPOVFile("ribbon1.pov");
 
-  CREATE_ADD_GLASS(ribbon2, ZRibbon, texdir, "Ribbon2", 0);
-  ribbon2->SetPOVFile("booby.pov");
-  ribbon2->LoadPOV();
+  CREATE_ADD_GLASS(ribbon2, RGBAPalette, texdir, "Ribbon2", 0);
+  ribbon2->SetMarksFromPOVFile("booby.pov");
 
   //----------------------------------------------------------------------------
   // Shaders

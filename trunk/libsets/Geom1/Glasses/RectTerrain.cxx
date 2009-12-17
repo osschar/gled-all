@@ -43,7 +43,6 @@ void RectTerrain::_init()
   mMinZ = 0; mMaxZ = 0;
   mMinCol.gray(0.2); mMaxCol.gray(1);
   mColSep = 1;
-  mRibbon = 0;
 
   mRnrMode    = RM_Histo;
   mBorderCond = BC_Zero;

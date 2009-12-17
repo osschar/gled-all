@@ -111,9 +111,8 @@ void AliLoader(const Text_t* dirname = 0)
   mcrst2->SetTexture(image4);
   CREATE_ADD_GLASS(recrst, RecTrackRS, var, "Rec Track RnrStyle", 0);
 
-  CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
-  ribbon1->SetPOVFile(file_grep("images/romania.pov"));
-  ribbon1->LoadPOV();
+  CREATE_ADD_GLASS(ribbon1, RGBAPalette, var, "Ribbon1", 0);
+  ribbon1->SetMarksFromPOVFile("images/romania.pov");
 
   CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
 
