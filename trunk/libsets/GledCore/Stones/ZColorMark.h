@@ -9,10 +9,8 @@
 
 #include <Stones/ZColor.h>
 
-class ZColorMark : public ZColor {
-
-private:
-
+class ZColorMark : public ZColor
+{
 protected:
   Float_t	mMark;
 
@@ -29,7 +27,7 @@ public:
   void mark(Float_t m) { mMark = m; }
 
 #include "ZColorMark.h7"
-  ClassDef(ZColorMark, 1);
+  ClassDefNV(ZColorMark, 1); // Color with additional floating-point mark.
 }; // endclass ZColorMark
 
 #endif

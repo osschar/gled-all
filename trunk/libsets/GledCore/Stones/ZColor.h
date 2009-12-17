@@ -49,12 +49,14 @@ public:
   Float_t  operator[](int i) const { return mC[i]; }
   Float_t& operator[](int i) { return mC[i]; }
 
-  ZColor& operator*=(Float_t a) {
+  ZColor& operator*=(Float_t a)
+  {
     mC[0]*=a; mC[1]*=a; mC[2]*=a; mC[3]*=a;
     return *this;
   }
 
-  ZColor& operator+=(ZColor& x) {
+  ZColor& operator+=(ZColor& x)
+  {
     mC[0] += x[0]; mC[1] += x[1]; mC[2] += x[2]; mC[3] += x[3];
     return *this;
   }
@@ -66,50 +68,66 @@ public:
 
   friend ostream& operator<<(ostream& s, ZColor& c);
 
-  ClassDef(ZColor,1);
+  ClassDefNV(ZColor,1); // Color as RGBA float quadruple.
 };
 
-/**************************************************************************/
+ostream& operator<<(ostream& s, ZColor& c);
+
+
+//------------------------------------------------------------------------------
+// Inlines
+//------------------------------------------------------------------------------
 
 inline void ZColor::to_ubyte(UChar_t* ub, bool wrap) const
 {
-  if(wrap) {
-    for(int i=0; i<4; ++i)
+  if (wrap)
+  {
+    for (int i=0; i<4; ++i)
       ub[i] = (UChar_t)(255*mC[i]);
-  } else {
-    for(int i=0; i<4; ++i)
+  }
+  else
+  {
+    for (int i=0; i<4; ++i)
       ub[i] = mC[i] >= 1 ? 255 : (mC[i] <= 0 ? 0 : (UChar_t)(255*mC[i]));
   }
 }
 
 inline void ZColor::rgb_to_ubyte(UChar_t* ub, bool wrap) const
 {
-  if(wrap) {
-    for(int i=0; i<3; ++i)
+  if (wrap)
+  {
+    for (int i=0; i<3; ++i)
       ub[i] = (UChar_t)(255*mC[i]);
-  } else {
-    for(int i=0; i<3; ++i)
+  }
+  else
+  {
+    for (int i=0; i<3; ++i)
       ub[i] = mC[i] >= 1 ? 255 : (mC[i] <= 0 ? 0 : (UChar_t)(255*mC[i]));
   }
 }
 
-/**************************************************************************/
 
-ostream& operator<<(ostream& s, ZColor& c);
+//------------------------------------------------------------------------------
+// Inline operators
+//------------------------------------------------------------------------------
 
-inline ZColor operator*(float a, const ZColor& x) {
+inline ZColor operator*(float a, const ZColor& x)
+{
   return ZColor(a*x.mC[0], a*x.mC[1], a*x.mC[2], a*x.mC[3]);
 }
 
-inline ZColor operator+(const ZColor& x, const ZColor& y) {
+inline ZColor operator+(const ZColor& x, const ZColor& y)
+{
   return ZColor(x.mC[0]+y.mC[0], x.mC[1]+y.mC[1], x.mC[2]+y.mC[2], x.mC[3]+y.mC[3]);
 }
 
-inline ZColor operator-(const ZColor& x, const ZColor& y) {
+inline ZColor operator-(const ZColor& x, const ZColor& y)
+{
   return ZColor(x.mC[0]-y.mC[0], x.mC[1]-y.mC[1], x.mC[2]-y.mC[2], x.mC[3]-y.mC[3]);
 }
 
-inline ZColor operator/(const ZColor& x, const ZColor& y) {
+inline ZColor operator/(const ZColor& x, const ZColor& y)
+{
   // Average color
   return ZColor((x.mC[0]+y.mC[0])/2, (x.mC[1]+y.mC[1])/2,
 		(x.mC[2]+y.mC[2])/2, (x.mC[3]+y.mC[3])/2);
