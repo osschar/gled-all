@@ -76,6 +76,8 @@ public:
   const UChar_t* ColorFromValue(Float_t val) const;
   void  ColorFromValue(Float_t val, UChar_t* pix, Bool_t alpha=true) const;
 
+  ZColor MarkToCol(Float_t mark);
+
   // ================================================================
 
   static void ColorFromIdx(Short_t ci, UChar_t* col, Bool_t alpha=true);
@@ -106,7 +108,8 @@ inline const UChar_t* RGBAPalette::ColorFromValue(Int_t val) const
   // for LA_Wrap and LA_Clip otherwise we proceed as for LA_Mark.
 
   if (!mColorArray)  SetupColorArray();
-  if (val < mMinInt) {
+  if (val < mMinInt)
+  {
     if (mUnderflowAction == LA_Wrap)
       val = (val+1-mMinInt)%mNBins + mMaxInt;
     else if (mUnderflowAction == LA_Clip)
@@ -114,7 +117,8 @@ inline const UChar_t* RGBAPalette::ColorFromValue(Int_t val) const
     else
       return mUnderRGBA;
   }
-  else if(val > mMaxInt) {
+  else if (val > mMaxInt)
+  {
     if (mOverflowAction == LA_Wrap)
       val = (val-1-mMaxInt)%mNBins + mMinInt;
     else if (mOverflowAction == LA_Clip)
@@ -142,7 +146,8 @@ inline void RGBAPalette::ColorFromValue(Int_t val, UChar_t* pix, Bool_t alpha) c
 
 inline Bool_t RGBAPalette::ColorFromValue(Int_t val, Int_t def_val, UChar_t* pix, Bool_t alpha) const
 {
-  if (val == def_val) {
+  if (val == def_val)
+  {
     if (mShowDefValue) {
       pix[0] = mDefaultRGBA[0];
       pix[1] = mDefaultRGBA[1];
@@ -154,10 +159,13 @@ inline Bool_t RGBAPalette::ColorFromValue(Int_t val, Int_t def_val, UChar_t* pix
     }
   }
 
-  if (WithinVisibleRange(val)) {
+  if (WithinVisibleRange(val))
+  {
     ColorFromValue(val, pix, alpha);
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
@@ -169,11 +177,28 @@ inline const UChar_t* RGBAPalette::ColorFromValue(Float_t val) const
   return ColorFromValue(vint);
 }
 
-inline void  RGBAPalette::ColorFromValue(Float_t val, UChar_t* pix, Bool_t alpha) const
+inline void RGBAPalette::ColorFromValue(Float_t val, UChar_t* pix, Bool_t alpha) const
 {
   const UChar_t* c = ColorFromValue(val);
   pix[0] = c[0]; pix[1] = c[1]; pix[2] = c[2];
   if (alpha) pix[3] = c[3];
+}
+
+inline ZColor RGBAPalette::MarkToCol(Float_t mark)
+{
+  // The old version from ZRibbon - should at least use binary search.
+
+  if(mColorMarks.empty()) return ZColor();
+  vector<ZColorMark>::iterator i = mColorMarks.begin();
+  if (mark < i->m()) return ZColor(mColorMarks.front());
+  ++i;
+  while (i != mColorMarks.end() && mark > i->m()) ++i;
+  if (i == mColorMarks.end()) return ZColor(mColorMarks.back());
+  vector<ZColorMark>::iterator j = i;
+  --j;
+  if (j == mColorMarks.end()) return ZColor(mColorMarks.back());
+  Float_t fi = (mark - j->m())/(i->m() - j->m());
+  return fi * ZColor(*i) + (1 - fi) * ZColor(*j);
 }
 
 #endif

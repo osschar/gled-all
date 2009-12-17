@@ -101,9 +101,8 @@ void AliAnimator(const Text_t* dirname = 0,
   mcrst->SetTexture(image2);
   CREATE_ADD_GLASS(recrst, RecTrackRS, var, "Rec Track RnrStyle", 0);
 
-  CREATE_ADD_GLASS(ribbon1, ZRibbon, var, "Ribbon1", 0);
-  ribbon1->SetPOVFile(file_grep("images/romania.pov"));
-  ribbon1->LoadPOV();
+  CREATE_ADD_GLASS(ribbon1, RGBAPalette, var, "Ribbon1", 0);
+  ribbon1->SetMarksFromPOVFile("images/romania.pov");
 
   CREATE_ADD_GLASS(giis, GIImportStyle, var, "ImportMode", 0);
 
@@ -213,18 +212,6 @@ void AliAnimator(const Text_t* dirname = 0,
   CREATE_ADD_GLASS(lightmod, ZGlLightModel, tpclist, "TPC Light Model", 0);
   lightmod->SetShadeModelOp(1);
   lightmod->SetFaceCullOp(0);
-
-  CREATE_ADD_GLASS(tpcrnrmod, TPCSegRnrMod, tpclist, "TPC RnrMod", 0);
-  tpcrnrmod->SetRnrFrame(1);
-  tpcrnrmod->SetRibbon(ribbon1);
-
-  CREATE_ADD_GLASS(itsrnrmod, ITSDigRnrMod, var, "ITS RnrMod", 0);
-  itsrnrmod->SetRnrFrame(1);
-  itsrnrmod->SetRibbon(ribbon1);
-
-  CREATE_ADD_GLASS(tofrnrmod, TOFDigRnrMod, var, "TOF RnrMod", 0);
-  tofrnrmod->SetRnrModFrame(1);
-  tofrnrmod->SetRibbon(ribbon1);
 
   //--------------------------------------------------------------
 

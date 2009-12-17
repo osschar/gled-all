@@ -136,10 +136,6 @@ void tringula(Int_t mode=2)
     // GForger
     CREATE_ADD_GLASS(gforge, GForger, texdir, "GForger", 0);
     gforge->SetImage(hf);
-    // Ribbon
-    CREATE_ADD_GLASS(ribbon, ZRibbon, texdir, "Jungle Ribbon", 0);
-    ribbon->SetPOVFile("ribbon1.pov");
-    ribbon->LoadPOV();
     // RGBAPalette
     CREATE_ADD_GLASS(pal, RGBAPalette, texdir, "Spectrum Palette", 0);
     pal->SetUnderflowAction(RGBAPalette::LA_Wrap);

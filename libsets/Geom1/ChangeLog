@@ -1,3 +1,16 @@
+2009-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZRibbon.cxx:
+	* Glasses/ZRibbon.h:
+	Remove obsolete glass.
+
+	* Glasses/RGBAPalette.cxx:
+	* Glasses/RGBAPalette.h:
+	* Glasses/RectTerrain.cxx:
+	* Glasses/RectTerrain.h:
+	* glass.list:
+	Updates to account for removal of ZRibbon.
+
 2009-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Allow un-registration of time-maker clients.
