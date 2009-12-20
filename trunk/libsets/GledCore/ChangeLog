@@ -1,3 +1,8 @@
+2009-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	Add handling of MC_IsDetached bit to suggest_MIR_presence().
+
 2009-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/ZColor.cxx:

@@ -172,10 +172,10 @@ ZMIR* ZGlass::assert_MIR_presence(const Exc_t& header, int what)
   if ((what & MC_IsBeam) && !mir->HasRecipient())
     throw header + "must be called via a beamed MIR.";
 
-  if((what & MC_HasResultReq) && !mir->HasResultReq())
+  if ((what & MC_HasResultReq) && !mir->HasResultReq())
     throw header + "must be called with a result request set.";
 
-  if((what & MC_IsDetached) && !mir->ShouldExeDetached())
+  if ((what & MC_IsDetached) && !mir->ShouldExeDetached())
     throw header + "must be called in a deteched thread.";
 
   return mir;
@@ -184,19 +184,25 @@ ZMIR* ZGlass::assert_MIR_presence(const Exc_t& header, int what)
 ZMIR* ZGlass::suggest_MIR_presence(const Exc_t& header, int what)
 {
   ZMIR* mir = GThread::MIR();
-  if (mir == 0) {
+
+  if (mir == 0)
+  {
     ISwarn(header + "should be called via a MIR.");
     return 0;
   }
-  if ((what & MC_IsFlare) && mir->HasRecipient()) {
+
+  if ((what & MC_IsFlare) && mir->HasRecipient())
     ISwarn(header + "should be called via a flared MIR.");
-  }
-  if ((what & MC_IsBeam) && !mir->HasRecipient()) {
+
+  if ((what & MC_IsBeam) && !mir->HasRecipient())
     ISwarn(header + "should be called via a beamed MIR.");
-  }
-  if ((what & MC_HasResultReq) && !mir->HasResultReq()) {
+
+  if ((what & MC_HasResultReq) && !mir->HasResultReq())
     ISwarn(header + "should be called with a result request set.");
-  }
+
+  if ((what & MC_IsDetached) && !mir->ShouldExeDetached())
+    ISwarn(header + "must be called in a deteched thread.");
+
   return mir;
 }
 
