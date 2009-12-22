@@ -1,3 +1,31 @@
+2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Sanitize GL variable holder/switch classes.
+
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Add GL_Int_Holder and GL_Enum_Holder.
+	Move all the holder/switch classes out of ZGlass_GL_Rnr class.
+
+2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Run Gled termination in a dedicated thread.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Protect against Shotdown() being called twice.
+	Initialize most members in constructor.
+	White-space.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	When Exit() is called, spawn a dedicated thread that calls
+	virtual ExitVirtual().
+
+	* Glasses/WGlButton.h:
+	Tag ExitGled() as local.
+
 2009-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.cxx:

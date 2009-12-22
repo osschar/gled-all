@@ -48,43 +48,6 @@ public:
 
   //----------------------------------------------------------------------------
 
-  class GL_Capability_Switch {
-    GLenum    fWhat;
-    GLboolean fState;
-    bool      fFlip;
-
-    void set_state(GLboolean s)
-    { if(s) glEnable(fWhat); else glDisable(fWhat); }
-
-  public:
-    GL_Capability_Switch(GLenum what, GLboolean state) : fWhat(what)
-    {
-      fState = glIsEnabled(fWhat);
-      fFlip  = (fState != state);
-      if(fFlip)	set_state(state);
-    }
-    ~GL_Capability_Switch()
-    { if(fFlip) set_state(fState); }
-  };
-
-  class GL_Float_Holder
-  {
-    GLenum    fWhat;
-    GLfloat   fState;
-    bool      fFlip;
-    void    (*fFoo)(GLfloat);
-
-  public:
-    GL_Float_Holder(GLenum what, GLfloat state, void (*foo)(GLfloat)) :
-      fWhat(what), fFoo(foo)
-    {
-      glGetFloatv(fWhat, &fState);
-      fFlip = (fState != state);
-      if(fFlip) fFoo(state);
-    }
-    ~GL_Float_Holder()
-    { if(fFlip) fFoo(fState); }
-  };
 
 }; // endclass ZGlass_GL_Rnr
 
@@ -94,5 +57,87 @@ public:
 
 #define REF_OR_RET(_t, _v, _p)         _t & _v = *_p; if (!&_v) return;
 #define REF_OR_RET_VAL(_t, _v, _p, _r) _t & _v = *_p; if (!&_v) return _r;
+
+
+//==============================================================================
+// GL state holders
+//==============================================================================
+
+class GL_Capability_Switch
+{
+  GLenum    fWhat;
+  GLboolean fState;
+  bool      fFlip;
+
+  void set_state(GLboolean s)
+  { if(s) glEnable(fWhat); else glDisable(fWhat); }
+
+public:
+  GL_Capability_Switch(GLenum what, GLboolean state) : fWhat(what)
+  {
+    fState = glIsEnabled(fWhat);
+    fFlip  = (fState != state);
+    if(fFlip)	set_state(state);
+  }
+  ~GL_Capability_Switch()
+  { if(fFlip) set_state(fState); }
+};
+
+class GL_Float_Holder
+{
+  GLenum    fWhat;
+  GLfloat   fState;
+  bool      fFlip;
+  void    (*fFoo)(GLfloat);
+
+public:
+  GL_Float_Holder(GLenum what, GLfloat state, void (*foo)(GLfloat)) :
+    fWhat(what), fFoo(foo)
+  {
+    glGetFloatv(fWhat, &fState);
+    fFlip = (fState != state);
+    if(fFlip) fFoo(state);
+  }
+  ~GL_Float_Holder()
+  { if(fFlip) fFoo(fState); }
+};
+
+class GL_Int_Holder
+{
+  GLenum    fWhat;
+  GLint     fState;
+  bool      fFlip;
+  void    (*fFoo)(GLint);
+
+public:
+  GL_Int_Holder(GLenum what, GLint state, void (*foo)(GLint)) :
+    fWhat(what), fFoo(foo)
+  {
+    glGetIntegerv(fWhat, &fState);
+    fFlip = (fState != state);
+    if(fFlip) fFoo(state);
+  }
+  ~GL_Int_Holder()
+  { if(fFlip) fFoo(fState); }
+};
+
+class GL_Enum_Holder
+{
+  GLenum    fWhat;
+  GLint     fState;
+  bool      fFlip;
+  void    (*fFoo)(GLenum);
+
+public:
+  GL_Enum_Holder(GLenum what, GLint state, void (*foo)(GLenum)) :
+    fWhat(what), fFoo(foo)
+  {
+    glGetIntegerv(fWhat, &fState);
+    fFlip = (fState != state);
+    if(fFlip) fFoo(state);
+  }
+  ~GL_Enum_Holder()
+  { if(fFlip) fFoo(fState); }
+};
 
 #endif
