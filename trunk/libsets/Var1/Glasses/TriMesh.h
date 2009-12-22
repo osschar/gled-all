@@ -20,13 +20,26 @@ class GTSurf;
 
 namespace Opcode
 {
-class Model;
-class MeshInterface;
-class AABB;
-class Point;
+  class Model;
+  class MeshInterface;
+  class AABB;
+  class Point;
 }
 
-class TriMesh : public ZGlass
+class TriMeshColorArraySource
+{
+public:
+  virtual void     AssertVertexColorArray() = 0;
+  virtual UChar_t* GetVertexColorArray()    = 0;
+  virtual UChar_t* GetTriangleColorArray()  = 0;
+  virtual void     ColorArraysModified()    = 0;
+
+  static TriMeshColorArraySource* CastLens(const Exc_t& eh, ZGlass* lens, Bool_t null_ok);
+};
+
+
+class TriMesh : public ZGlass,
+		public TriMeshColorArraySource
 {
   MAC_RNR_FRIENDS(TriMesh);
 
@@ -172,6 +185,12 @@ public:
     ZGlass(n,t) { _init(); }
   virtual ~TriMesh();
 
+  // Virtuals from TriMeshColorArraySource.
+  virtual void     AssertVertexColorArray();
+  virtual UChar_t* GetVertexColorArray();
+  virtual UChar_t* GetTriangleColorArray();
+  virtual void     ColorArraysModified();
+
   virtual void ResetTTvorDependants();
 
   void SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh=0.4);
@@ -237,20 +256,24 @@ public:
 
   // Colorizers
 
-  void ColorByCoord (RGBAPalette* pal, Int_t axis=2,
-                     Float_t fac=1, Float_t offset=0); // X{E} C{1} 7 MCWButt(-join=>1)
-  void ColorByNormal(RGBAPalette* pal, Int_t axis=2,
-                     Float_t min=-1, Float_t max=1);   // X{E} C{1} 7 MCWButt()
+  void ColorByCoord (RGBAPalette* pal, ZGlass* carr_src_lens=0,
+		     Int_t axis=2, Float_t fac=1, Float_t offset=0); // X{E} C{2} 7 MCWButt(-join=>1)
+  void ColorByNormal(RGBAPalette* pal, ZGlass* carr_src_lens=0,
+		     Int_t axis=2, Float_t min=-1, Float_t max=1);   // X{E} C{2} 7 MCWButt()
 
-  void ColorByParaSurfCoord (RGBAPalette* pal, Int_t axis=2,
-                     Float_t fac=1, Float_t offset=0); // X{E} C{1} 7 MCWButt(-join=>1)
-  void ColorByParaSurfNormal(RGBAPalette* pal, Int_t axis=2,
-                     Float_t min=-1, Float_t max=1);   // X{E} C{1} 7 MCWButt()
+  void ColorByParaSurfCoord (RGBAPalette* pal, ZGlass* carr_src_lens=0,
+			     Int_t axis=2,
+			     Float_t fac=1, Float_t offset=0);       // X{E} C{2} 7 MCWButt(-join=>1)
+  void ColorByParaSurfNormal(RGBAPalette* pal, ZGlass* carr_src_lens=0,
+			     Int_t axis=2,
+			     Float_t min=-1, Float_t max=1);         // X{E} C{2} 7 MCWButt()
 
-  void ColorByCoordFormula (RGBAPalette* pal, const Text_t* formula="z",
-                     Float_t min=0, Float_t max=10);   // X{E} C{1} 7 MCWButt(-join=>1)
-  void ColorByNormalFormula(RGBAPalette* pal, const Text_t* formula="sqrt(x*x+y*y)",
-                     Float_t min=0, Float_t max=1);    // X{E} C{1} 7 MCWButt()
+  void ColorByCoordFormula (RGBAPalette* pal, ZGlass* carr_src_lens=0,
+			    const Text_t* formula="z",
+			    Float_t min=0, Float_t max=10);          // X{E} C{2} 7 MCWButt(-join=>1)
+  void ColorByNormalFormula(RGBAPalette* pal, ZGlass* carr_src_lens=0,
+			    const Text_t* formula="sqrt(x*x+y*y)",
+			    Float_t min=0, Float_t max=1);           // X{E} C{2} 7 MCWButt()
 
 #include "TriMesh.h7"
   ClassDef(TriMesh, 1);

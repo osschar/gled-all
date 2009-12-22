@@ -22,9 +22,9 @@ public:
   TringuRep_GL_Rnr(TringuRep* idol);
   virtual ~TringuRep_GL_Rnr();
 
-  virtual void PreDraw(RnrDriver* rd);
+  //virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);
-  virtual void PostDraw(RnrDriver* rd);
+  //virtual void PostDraw(RnrDriver* rd);
 
   virtual void Render(RnrDriver* rd);
 

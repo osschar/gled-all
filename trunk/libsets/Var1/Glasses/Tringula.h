@@ -30,6 +30,7 @@ class LandMark;
 class Tringula : public ZNode, public TimeMakerClient
 {
   MAC_RNR_FRIENDS(Tringula);
+  MAC_RNR_FRIENDS(TringuRep);
   friend class TringuCam;
 
 public:
@@ -68,11 +69,9 @@ private:
 protected:
   ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{aA}
   ZLink<TriMesh>     mMesh;         //  X{GS} L{aA}
-  ZColor             mColor;        //  X{GSPT} 7 ColorButt()
+  ZColor             mColor;        //  X{GSPRT} 7 ColorButt()
   Float_t            mMaxFlyerH;    //  X{GS}   7 Value(-const=>1,-join=>1)
   Float_t            mMaxCameraH;   //  X{GS}   7 Value()
-  Bool_t             bSmoothShade;  //  X{GST}  7 Bool(-join=>1)
-  Bool_t             bLightMesh;    //  X{GST}  7 Bool()
 
   ZLink<ZHashList>   mStatos;       //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mDynos;        //  X{GS} L{} RnrBits{0,0,0,5}

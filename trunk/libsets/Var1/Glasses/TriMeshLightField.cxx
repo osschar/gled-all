@@ -36,52 +36,89 @@ void TriMeshLightField::_init()
 
 /**************************************************************************/
 
-void TriMeshLightField::ModulateTvor(Bool_t regen_tring_cols)
+void TriMeshLightField::ModulateColors(Bool_t regen_tring_cols)
 {
-  static const Exc_t _eh("TriMeshLightField::ModulateTvor ");
+  static const Exc_t _eh("TriMeshLightField::ModulateColors ");
 
-  if (mDim != 1) throw(_eh + "unsupported dimension.");
+  if (mDim != 1) throw _eh + "unsupported dimension.";
+
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, *mColorArraySource, false);
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  if (!VCA)
+    throw _eh + "color-array-source has no vertex-color-array.";
 
   assert_mesh(_eh);
-  TringTvor& TT = * mMesh->GetTTvor();
 
-  Float_t* F = FVec();
-  UChar_t* C = TT.Cols();
+  TringTvor &TT = * mMesh->GetTTvor();
+  Float_t   *F  = FVec();
+  UChar_t   *C  = VCA;
   for (Int_t i=0; i<TT.mNVerts; ++i, ++F, C+=4)
   {
     const Float_t f = * F;
-    C[0] = UChar_t(f*C[0]);  C[1] = UChar_t(f*C[1]);  C[2] = UChar_t(f*C[2]);
+    C[0] = UChar_t(f*C[0]);
+    C[1] = UChar_t(f*C[1]);
+    C[2] = UChar_t(f*C[2]);
   }
 
-  if (regen_tring_cols && TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  // Regenerate changed triangles if necessary.
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+  if (regen_tring_cols && TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  mMesh->StampReqTring(TriMesh::FID());
+  carr_src->ColorArraysModified();
 }
 
-void TriMeshLightField::PartiallyModulateTvor(set<Int_t> vertices,
-                                              Bool_t regen_tring_cols)
+void TriMeshLightField::PartiallyModulateColors(set<Int_t> vertices,
+						Bool_t regen_tring_cols)
 {
-  static const Exc_t _eh("TriMeshLightField::PartiallyModulateTvor ");
+  static const Exc_t _eh("TriMeshLightField::PartiallyModulateColors ");
 
-  if (mDim != 1) throw(_eh + "unsupported dimension.");
+  if (mDim != 1) throw _eh + "unsupported dimension.";
+
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, *mColorArraySource, false);
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  if (!VCA)
+    throw _eh + "color-array-source has no vertex-color-array.";
 
   assert_mesh(_eh);
-  TringTvor& TT = * mMesh->GetTTvor();
 
   for (set<Int_t>::iterator i=vertices.begin(); i!=vertices.end(); ++i)
   {
     const Float_t f = * FVec(*i);
-    UChar_t* C = TT.Color(*i);
-    C[0] = UChar_t(f*C[0]);  C[1] = UChar_t(f*C[1]);  C[2] = UChar_t(f*C[2]);
+    UChar_t* C = VCA + *i*4;
+    C[0] = UChar_t(f*C[0]);
+    C[1] = UChar_t(f*C[1]);
+    C[2] = UChar_t(f*C[2]);
   }
 
-  // !!!! Very sub-optimal. Need to introduce edge-data with
-  // !!!! triangle idcs, optimised for two.
-  if (regen_tring_cols && TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  // Regenerate changed triangles if necessary.
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+  if (regen_tring_cols && TCA != 0)
+  {
+    set<Int_t> ct; // changed triangles
+    for (set<Int_t>::iterator v = vertices.begin(); v != vertices.end(); ++v)
+    {
+      const TriMesh::VertexData & vd = mMesh->RefVDataVec()[*v];
+      for (Int_t e = 0; e < vd.n_edges(); ++e)
+      {
+        const TriMesh::EdgeData& ed = mMesh->RefEDataVec()[vd.edge(e)];
+        ct.insert(ed.fT1);
+        ct.insert(ed.fT2); // Not needed for closed surfaces.
+      }
+    }
+    if (*ct.begin() == -1) // Potentially remove no-tring entry.
+      ct.erase(ct.begin());
 
-  mMesh->StampReqTring(TriMesh::FID());
+    mMesh->GetTTvor()->GenerateTriangleColorsFromVertexColors(ct, VCA, TCA);
+  }
+
+  carr_src->ColorArraysModified();
 }
 
 /**************************************************************************/

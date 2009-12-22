@@ -6,6 +6,7 @@
 class TSPupilInfo;
 class Tringula;
 class TringuCam;
+class TringuRep;
 class Statico;
 class Dynamico;
 class Crawler;
@@ -23,6 +24,7 @@ class TimeMaker;
 
 Tringula     *tringula = 0;
 TringuCam    *tricam   = 0;
+TringuRep    *trirep   = 0;
 Statico      *sta1     = 0;
 Crawler      *dyn1     = 0;
 Crawler      *dyn2     = 0;
@@ -314,7 +316,7 @@ void tringula(Int_t mode=2)
   light_mod->SetFaceCullOp(ZRnrModBase::O_On);
   light_mod->SetFaceCullMode(GL_BACK);
 
-  ASSIGN_ADD_GLASS(tringula, Tringula, g_scene, "Tringula 1", 0);
+  ASSIGN_ADD_GLASS(tringula, Tringula, g_queen, "Tringula 1", 0);
   // tringula->SetRnrRay(true);
   tringula->SetDefStaMesh(stamesh);
   tringula->SetDefDynMesh(dynmesh);
@@ -357,11 +359,47 @@ void tringula(Int_t mode=2)
     mark->SetParaSurf(parasurf);
   }
 
-  // Camera base
+  // TringuRep
 
-  ASSIGN_ADD_GLASS(tricam, TringuCam, tringula, "TringuCam", 0);
+  ASSIGN_ADD_GLASS(trirep, TringuRep, g_scene, "TringuRep", 0);
+  trirep->SetTringula(tringula);
+  trirep->SetPalette(pal);
+
+  // Fields
+
+  ASSIGN_ADD_GLASS(engfield, TriMeshField, trirep, "Energy Field", 0);
+  engfield->SetMesh(trimesh);
+  engfield->ResizeToMesh();
+  engfield->SetPalette(pal);
+  engfield->FillByGaussBlobs();
+  engfield->FindMinMaxField();
+
+  ASSIGN_ADD_GLASS(metfield, TriMeshField, trirep, "Metal Field", 0);
+  metfield->SetMesh(trimesh);
+  metfield->ResizeToMesh();
+  metfield->SetPalette(pal);
+  metfield->FillByGaussBlobs();
+  metfield->FindMinMaxField();
+
+  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, trirep, "LightMap Field", 0);
+  lightmap->SetMesh(trimesh);
+  lightmap->ResizeToMesh();
+  lightmap->SetPalette(pal);
+  lightmap->SetLampPos(5, 5, 5);
+  lightmap->SetDirectional(true);
+  lightmap->CalculateLightField();
+  lightmap->Diffuse(); lightmap->Diffuse();
+  lightmap->Diffuse(); lightmap->Diffuse();
+
+  // This has to be called after tringula is fully initialized.
+  trirep->ActivateField(engfield);
+  // trirep->ActivateLightField(lightmap);
+
+  // TringuCam base
+
+  ASSIGN_ADD_GLASS(tricam, TringuCam, trirep, "TringuCam", 0);
   tricam->SetTringula(tringula);
-  tricam->SetPalette(pal);
+  tricam->SetTringuRep(trirep);
   {
     ZTrans& trans = tricam->ref_trans();
 
@@ -375,35 +413,6 @@ void tringula(Int_t mode=2)
     tricam->StampReqTrans();
   }
 
-  // Fields
-
-  ASSIGN_ADD_GLASS(engfield, TriMeshField, tricam, "Energy Field", 0);
-  engfield->SetMesh(trimesh);
-  engfield->ResizeToMesh();
-  engfield->SetPalette(pal);
-  engfield->FillByGaussBlobs();
-  engfield->FindMinMaxField();
-
-  ASSIGN_ADD_GLASS(metfield, TriMeshField, tricam, "Metal Field", 0);
-  metfield->SetMesh(trimesh);
-  metfield->ResizeToMesh();
-  metfield->SetPalette(pal);
-  metfield->FillByGaussBlobs();
-  metfield->FindMinMaxField();
-
-  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, tricam, "LightMap Field", 0);
-  lightmap->SetMesh(trimesh);
-  lightmap->ResizeToMesh();
-  lightmap->SetLampPos(5, 5, 20);
-  lightmap->SetPalette(pal);
-  lightmap->CalculateLightField();
-
-  // tricam->SetLightField(lightmap);
-  tricam->SetAndApplyCurField(engfield);
-
-  // Tringula is flat shaded by default, so we need triangle colors.
-  // This should be made an option or global var.
-  trimesh->GetTTvor()->GenerateTriangleColorsFromVertexColors();
 
   /**************************************************************************/
   // Eventor & Operators
@@ -450,7 +459,7 @@ void tringula(Int_t mode=2)
   ASSIGN_ATT_GLASS(tspupil, TSPupilInfo, g_shell, AddSubShell, "Pupil of Tringula", 0);
   g_pupil = tspupil;
   g_pupil->Add(g_scene);
-  g_pupil->SetWidth(800); g_pupil->SetHeight(500);
+  g_pupil->SetWidth(1024); g_pupil->SetHeight(768);
   g_pupil->SetClearColor(0.589, 0.601, 0.836);
   // g_pupil->SetUpReference(tricam);
   // g_pupil->SetUpRefAxis(3);
@@ -470,6 +479,7 @@ void tringula(Int_t mode=2)
   g_pupil->SetAutoRedraw(false);
 
   g_shell->Add(tricam);
+  g_shell->Add(trirep);
 
   CREATE_ATT_GLASS(tricam_spiritio, TringuObserverSpiritio, tspupil, SetDefaultSpiritio,
 		   "TringuObserverSpiritio", "Default Spiritio");
@@ -477,6 +487,7 @@ void tringula(Int_t mode=2)
   tricam_spiritio->SetTringuCam(tricam);
 
   tspupil->SetTimeMaker(tmaker);
+  tspupil->SetTringuRep(trirep);
 
   tricam->SetPupilInfo(tspupil);
   tricam->SetEventor(eventor);
@@ -615,7 +626,7 @@ void setup_rectangle()
 
   // Setup trimesh
   trimesh->SetParaSurf(parasurf);
-  trimesh->ImportRectTerrain(terrain);
+  trimesh->ImportRectTerrain(terrain, false);
   trimesh->StdSurfacePostImport();
 
   // Export to GTS surface.
@@ -671,8 +682,8 @@ void setup_sphere_outside()
   pssph->SetR(R);
 
   // Setup GTS surface.
-  // gtsurf->GenerateSphere(4);
-  gtsurf->GenerateSphere(5);
+  // gtsurf->GenerateSphere(5);
+  gtsurf->GenerateSphere(7);
   gtsurf->Rescale(R);
   for (int i=0; i<5; ++i) {
     //gtsurf->Legendrofy(16, 0.25, 1.5);
@@ -988,27 +999,38 @@ void make_overlay()
 
       CREATE_ADD_GLASS(but1, WGlButton, ter_ctrl, "Height", 0);
       step.SetNodeAdvance(but1);
-      but1->SetCbackAlpha(tricam);
+      but1->SetCbackAlpha(trirep);
       but1->SetCbackMethodName("ColorByTerrainProps");
       but1->SetCbackValue(0);
 
       CREATE_ADD_GLASS(but2, WGlButton, ter_ctrl, "Flatness", 0);
       step.SetNodeAdvance(but2);
-      but2->SetCbackAlpha(tricam);
+      but2->SetCbackAlpha(trirep);
       but2->SetCbackMethodName("ColorByTerrainProps");
       but2->SetCbackValue(1);
 
       CREATE_ADD_GLASS(but3, WGlButton, ter_ctrl, "Energy Field", 0);
       step.SetNodeAdvance(but3);
-      but3->SetCbackAlpha(tricam);
-      but3->SetCbackMethodName("SetAndApplyCurField");
+      but3->SetCbackAlpha(trirep);
+      but3->SetCbackMethodName("ActivateField");
       but3->SetCbackBeta(engfield);
 
       CREATE_ADD_GLASS(but4, WGlButton, ter_ctrl, "Metal Field", 0);
       step.SetNodeAdvance(but4);
-      but4->SetCbackAlpha(tricam);
-      but4->SetCbackMethodName("SetAndApplyCurField");
+      but4->SetCbackAlpha(trirep);
+      but4->SetCbackMethodName("ActivateField");
       but4->SetCbackBeta(metfield);
+
+      CREATE_ADD_GLASS(but5, WGlButton, ter_ctrl, "Flip Shadows", 0);
+      step.SetNodeAdvance(but5);
+      but5->SetCbackAlpha(trirep);
+      but5->SetCbackMethodName("SwitchLightField");
+      but5->SetCbackBeta(lightmap);
+
+      CREATE_ADD_GLASS(but6, WGlButton, ter_ctrl, "Smooth/Flat", 0);
+      step.SetNodeAdvance(but6);
+      but6->SetCbackAlpha(trirep);
+      but6->SetCbackMethodName("SwitchSmoothShading");
 
       CREATE_ADD_GLASS(back, WGlButton, ter_ctrl, " << ", 0);
       step.SetNodeAdvance(back);

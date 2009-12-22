@@ -9,6 +9,7 @@
 #include <Glasses/WGlWidget.h>
 #include <Glasses/TimeMaker.h>
 #include "Spiritio.h"
+#include "TringuRep.h"
 #include "TSPupilInfo.c7"
 
 #include <Glasses/Camera.h>
@@ -21,6 +22,9 @@
 // camera, overlay and event-handlers in greed demo.
 //
 // TS ~ TringuSol
+//
+// The role of TringuRep link is half cooked. It should in principle point to
+// the primary Tringula.
 
 ClassImp(TSPupilInfo);
 

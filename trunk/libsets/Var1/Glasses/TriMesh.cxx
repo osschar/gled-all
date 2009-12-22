@@ -21,6 +21,25 @@
 
 #include <fstream>
 
+
+TriMeshColorArraySource*
+TriMeshColorArraySource::CastLens(const Exc_t& eh, ZGlass* lens, Bool_t null_ok)
+{
+  if (lens == 0)
+  {
+    if (null_ok)
+      return 0;
+    else
+      throw eh + "null lens that should be trimesh-color-array-source.";
+  }
+  TriMeshColorArraySource *cas = dynamic_cast<TriMeshColorArraySource*>(lens);
+  if (cas)
+    return cas;
+  else
+    throw eh + "lens is supposed to be a TriMeshColorArraySource.";
+}
+
+
 //__________________________________________________________________________
 //
 // Wrapper over TringTvor (triangulation data) and Opcode structures.
@@ -60,6 +79,30 @@ TriMesh::~TriMesh()
   delete mOPCMeshIf;
 }
 
+//==============================================================================
+
+void TriMesh::AssertVertexColorArray()
+{
+  mTTvor->AssertCols();
+}
+
+UChar_t* TriMesh::GetVertexColorArray()
+{
+  return mTTvor->HasCols() ? mTTvor->Cols() : 0;
+}
+
+UChar_t* TriMesh::GetTriangleColorArray()
+{
+  return mTTvor->HasTringCols() ? mTTvor->TringCols() : 0;
+}
+
+void TriMesh::ColorArraysModified()
+{
+  StampReqTring(FID());
+}
+
+//==============================================================================
+
 void TriMesh::ResetTTvorDependants()
 {
   delete mOPCModel;  mOPCModel  = 0;
@@ -68,7 +111,7 @@ void TriMesh::ResetTTvorDependants()
   mVDataVec.resize(0);
 }
 
-/******************************************************************************/
+//==============================================================================
 
 namespace
 {
@@ -198,7 +241,7 @@ void TriMesh::SetMassFromBBox(Float_t sfac, Float_t hfac, Float_t density,
   SetMassAndSpeculate(density * mVolume, mass_frac_on_mesh);
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void TriMesh::StdSurfacePostImport()
 {
@@ -371,8 +414,6 @@ void TriMesh::ImportGTSurf(GTSurf* gts)
   gts_surface_foreach_vertex(surf, (GtsFunc) Dumper::vdump, &arg);
   gts_surface_foreach_face  (surf, (GtsFunc) Dumper::fdump, &arg);
 
-  // tt->MakeSecondaryArrays(true,  true, false);
-  // tt->MakeSecondaryArrays(false, true, false);
   tt->GenerateVertexNormals();
   tt->GenerateTriangleNormals();
 
@@ -1274,17 +1315,24 @@ Int_t TriMesh::VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
 // TriMesh colorizers
 //==============================================================================
 
-void TriMesh::ColorByCoord(RGBAPalette* pal, Int_t axis,
-                           Float_t fac, Float_t offset)
+void TriMesh::ColorByCoord(RGBAPalette* pal, ZGlass* carr_src_lens,
+			   Int_t axis, Float_t fac, Float_t offset)
 {
   static const Exc_t _eh("TriMesh::ColorByCoord ");
 
-  if (!pal)                 throw (_eh + "Palette argument null.");
-  if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
-  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+  if (!pal)                 throw _eh + "Palette argument null.";
+  if (axis < 0 || axis > 2) throw _eh + "illegal axis.";
+  if (!mTTvor)              throw _eh + "TTvor not initialized.";
 
-  TringTvor& TT = *mTTvor;
-  TT.AssertCols();
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
+  if (carr_src == 0) carr_src = this;
+  carr_src->AssertVertexColorArray();
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+
+  TringTvor &TT = *mTTvor;
   TT.AssertBoundingBox();
   Float_t min = TT.mMinMaxBox[axis];
   Float_t max = TT.mMinMaxBox[axis + 3];
@@ -1294,18 +1342,20 @@ void TriMesh::ColorByCoord(RGBAPalette* pal, Int_t axis,
   pal->SetMaxFlt(max);
 
   Float_t* V = TT.Verts();
-  UChar_t* C = TT.Cols();
+  UChar_t* C = VCA;
   for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4)
     pal->ColorFromValue(min + (V[axis]-min)*fac + dlt*offset, C);
 
-  if (TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  if (TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  StampReqTring(FID());
+  carr_src->ColorArraysModified();
 }
 
-void TriMesh::ColorByNormal(RGBAPalette* pal, Int_t axis,
-                            Float_t min, Float_t max)
+void TriMesh::ColorByNormal(RGBAPalette* pal, ZGlass* carr_src_lens,
+			    Int_t axis, Float_t min, Float_t max)
 {
   static const Exc_t _eh("TriMesh::ColorByNormal ");
 
@@ -1313,27 +1363,37 @@ void TriMesh::ColorByNormal(RGBAPalette* pal, Int_t axis,
   if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
   if (!mTTvor)              throw (_eh + "TTvor not initialized.");
 
-  TringTvor& TT = *mTTvor;
-  TT.AssertCols();
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
+  if (carr_src == 0) carr_src = this;
+  carr_src->AssertVertexColorArray();
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
 
   pal->SetMinFlt(min);
   pal->SetMaxFlt(max);
 
-  Float_t* N = TT.Norms();
-  UChar_t* C = TT.Cols();
+  TringTvor &TT = *mTTvor;
+  Float_t   *N  = TT.Norms();
+  UChar_t   *C  = VCA;
   for (Int_t i=0; i<TT.mNVerts; ++i, N+=3, C+=4)
+  {
     pal->ColorFromValue(N[axis], C);
+  }
 
-  if (TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  if (TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  StampReqTring(FID());
+  carr_src->ColorArraysModified();
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
-void TriMesh::ColorByParaSurfCoord(RGBAPalette* pal, Int_t axis,
-                                   Float_t fac, Float_t offset)
+void TriMesh::ColorByParaSurfCoord(RGBAPalette* pal, ZGlass* carr_src_lens,
+				   Int_t axis, Float_t fac, Float_t offset)
 {
   static const Exc_t _eh("TriMesh::ColorByParaSurfCoord ");
 
@@ -1342,10 +1402,15 @@ void TriMesh::ColorByParaSurfCoord(RGBAPalette* pal, Int_t axis,
   if (!mTTvor)              throw (_eh + "TTvor not initialized.");
   assert_parasurf(_eh);
 
-  Float_t  fgh[3];
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
+  if (carr_src == 0) carr_src = this;
+  carr_src->AssertVertexColorArray();
 
-  TringTvor& TT = *mTTvor;
-  TT.AssertCols();
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+
+  Float_t  fgh[3];
 
   mParaSurf->GetMinFGH(fgh);
   Float_t min = fgh[axis];
@@ -1356,21 +1421,25 @@ void TriMesh::ColorByParaSurfCoord(RGBAPalette* pal, Int_t axis,
   pal->SetMinFlt(min);
   pal->SetMaxFlt(max);
 
-  Float_t* V = TT.Verts();
-  UChar_t* C = TT.Cols();
-  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4) {
+  TringTvor &TT = *mTTvor;
+  Float_t   *V  = TT.Verts();
+  UChar_t   *C  = VCA;
+  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4)
+  {
     mParaSurf->pos2fgh(V, fgh);
     pal->ColorFromValue(min + (fgh[axis]-min)*fac + dlt*offset, C);
   }
 
-  if (TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  if (TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  StampReqTring(FID());
+  carr_src->ColorArraysModified();
 }
 
-void TriMesh::ColorByParaSurfNormal(RGBAPalette* pal, Int_t axis,
-                                    Float_t min, Float_t max)
+void TriMesh::ColorByParaSurfNormal(RGBAPalette* pal, ZGlass* carr_src_lens,
+				    Int_t axis, Float_t min, Float_t max)
 {
   static const Exc_t _eh("TriMesh::ColorByParaSurfNormal ");
 
@@ -1379,40 +1448,56 @@ void TriMesh::ColorByParaSurfNormal(RGBAPalette* pal, Int_t axis,
   if (!mTTvor)              throw (_eh + "TTvor not initialized.");
   assert_parasurf(_eh);
 
-  TringTvor& TT = *mTTvor;
-  TT.AssertCols();
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
+  if (carr_src == 0) carr_src = this;
+  carr_src->AssertVertexColorArray();
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
 
   pal->SetMinFlt(min);
   pal->SetMaxFlt(max);
 
-  Float_t* V = TT.Verts();
-  Float_t* N = TT.Norms();
-  UChar_t* C = TT.Cols();
-  Float_t  fgh_dirs[3][3];
-  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, N+=3, C+=4) {
+  TringTvor &TT = *mTTvor;
+  Float_t   *V  = TT.Verts();
+  Float_t   *N  = TT.Norms();
+  UChar_t   *C  = VCA;
+  Float_t    fgh_dirs[3][3];
+  for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, N+=3, C+=4)
+  {
     mParaSurf->pos2fghdir(V, fgh_dirs[0], fgh_dirs[1], fgh_dirs[2]);
     Float_t dotp = N[0]*fgh_dirs[axis][0] + N[1]*fgh_dirs[axis][1] + N[2]*fgh_dirs[axis][2];
     pal->ColorFromValue(dotp, C);
   }
 
-  if (TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  if (TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  StampReqTring(FID());
+  carr_src->ColorArraysModified();
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
-void TriMesh::ColorByCoordFormula(RGBAPalette* pal, const Text_t* formula,
-                                  Float_t min, Float_t max)
+void TriMesh::ColorByCoordFormula(RGBAPalette* pal, ZGlass* carr_src_lens,
+				  const Text_t* formula, Float_t min, Float_t max)
 {
   static const Exc_t _eh("TriMesh::ColorByCoordFormula ");
 
   if (!pal)    throw (_eh + "Palette argument null.");
   if (!mTTvor) throw (_eh + "TTvor not initialized.");
 
-  TringTvor& TT = *mTTvor;
-  TT.AssertCols();
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
+  if (carr_src == 0) carr_src = this;
+  carr_src->AssertVertexColorArray();
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+
+  TringTvor &TT = *mTTvor;
   TT.AssertBoundingBox();
   Float_t* bb = TT.mMinMaxBox;
   TF3 tf3(GForm("TriMesh_CBCF_%d", GetSaturnID()), formula, 0, 0);
@@ -1422,26 +1507,35 @@ void TriMesh::ColorByCoordFormula(RGBAPalette* pal, const Text_t* formula,
   pal->SetMaxFlt(max);
 
   Float_t* V = TT.Verts();
-  UChar_t* C = TT.Cols();
+  UChar_t* C = VCA;
   for (Int_t i=0; i<TT.mNVerts; ++i, V+=3, C+=4)
+  {
     pal->ColorFromValue((Float_t) tf3.Eval(V[0], V[1], V[2]), C);
+  }
 
-  if (TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  if (TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  StampReqTring(FID());
+  carr_src->ColorArraysModified();
 }
 
-void TriMesh::ColorByNormalFormula(RGBAPalette* pal, const Text_t* formula,
-                                   Float_t min, Float_t max)
+void TriMesh::ColorByNormalFormula(RGBAPalette* pal, ZGlass* carr_src_lens,
+				   const Text_t* formula, Float_t min, Float_t max)
 {
   static const Exc_t _eh("TriMesh::ColorByNormalFormula ");
 
   if (!pal)    throw (_eh + "Palette argument null.");
   if (!mTTvor) throw (_eh + "TTvor not initialized.");
 
-  TringTvor& TT = *mTTvor;
-  TT.AssertCols();
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
+  if (carr_src == 0) carr_src = this;
+  carr_src->AssertVertexColorArray();
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
 
   pal->SetMinFlt(min);
   pal->SetMaxFlt(max);
@@ -1449,15 +1543,20 @@ void TriMesh::ColorByNormalFormula(RGBAPalette* pal, const Text_t* formula,
   TF3 tf3(GForm("TriMesh_CBNF_%d", GetSaturnID()), formula, 0, 0);
   tf3.SetRange(-1, 1, -1, 1, -1, 1);
 
-  Float_t* N = TT.Norms();
-  UChar_t* C = TT.Cols();
+  TringTvor &TT = *mTTvor;
+  Float_t   *N  = TT.Norms();
+  UChar_t   *C  = VCA;
   for (Int_t i=0; i<TT.mNVerts; ++i, N+=3, C+=4)
+  {
     pal->ColorFromValue((Float_t) tf3.Eval(N[0], N[1], N[2]), C);
+  }
 
-  if (TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  if (TCA)
+  {
+    TT.GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  StampReqTring(FID());
+  carr_src->ColorArraysModified();
 }
 
 

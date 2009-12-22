@@ -17,6 +17,8 @@ class TimeMaker;
 
 class Spiritio;
 
+class TringuRep;
+
 class TSPupilInfo : public PupilInfo,
 		    public TimeMakerClient
 {
@@ -35,6 +37,8 @@ protected:
   ZLink<Scene>      mMenuScene;       // X{GS} L{}
   ZLink<Scene>      mSpiritioScene;   // X{GS} L{}
   ZLink<WGlWidget>  mLastMenu;        // X{GS} L{}
+
+  ZLink<TringuRep>  mTringuRep;       // X{GS} L{}
 
 public:
   TSPupilInfo(const Text_t* n="TSPupilInfo", const Text_t* t=0);

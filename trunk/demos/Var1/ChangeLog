@@ -1,3 +1,11 @@
+2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Use TringuRep as primary/only representation of Tringula.
+	Add buttons to switch shadows and flat/smooth shading to
+	terrain-control menu.
+	Increase initial pupil window size to 1024x768.
+
 2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* sounds:

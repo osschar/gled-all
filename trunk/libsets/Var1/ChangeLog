@@ -1,3 +1,55 @@
+2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Major update of Tringula rendering / management.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Attach to TringuRep on activation -- Tringula is not in render
+	path anymore.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add link to TringuRep.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add abstract interace TriMeshColorArraySource.
+	Subclass from it.
+	Allow external color-array-source to be passed into
+	ColorBySomeTerrainProp(). These should really go to TriMeshField.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TriMeshLightField.h:
+	Add link to ZGlass that plays the role of TriMeshColorArraySource.
+	Use it when colorizing/modulating color arrays.
+	Beautify most of the code.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Remove all field / field-spraying code and code for colorization
+	of terrain based on its height/normal -- moved to TringuRep.
+
+	* Glasses/TringuRep.cxx:
+	* Glasses/TringuRep.h:
+	Subclass from TriMeshColorArraySource.
+	Move in code for managing fields / terrain coloration from TringuCam.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Remove some obsolete members for rendering control.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Render tringula with tringu-rep's internal color arrays. New
+	TRingTvor renderer allows that.
+
+	Render all extendios by direct calls to RnrDriver. This could be
+	improved -- see comments in the code.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Simplify -- now mostly obsolete. Probably should be even removed.
+
 2009-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	New glass TringuRep -- representation of Tringula.
