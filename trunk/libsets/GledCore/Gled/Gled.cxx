@@ -66,7 +66,8 @@ Gled::Gled() :
   mLogFile      (0),
   mOutFile      (0),
   mExitCondVar  (0),
-  mRintThread   (0)
+  mRintThread   (0),
+  mExitThread   (0)
 {
   if (theOne)
   {
@@ -686,9 +687,31 @@ void Gled::AllowMoonConnections()
 
 void Gled::Exit()
 {
-  if(mSaturn) mSaturn->Shutdown();
+  static GMutex exit_moo;
+  {
+    GMutexHolder lck(exit_moo);
+    if (mExitThread)
+      return;
+    mExitThread = new GThread("Gled Terminator", Exit_tl, 0, true);
+  }
+  mExitThread->Spawn();
+}
+
+void* Gled::Exit_tl(void*)
+{
+  theOne->ExitVirtual();
+  return 0;
+}
+
+void Gled::ExitVirtual()
+{
+  if (mSaturn)
+  {
+    mSaturn->Shutdown();
+  }
   bQuit = true;
-  if(mExitCondVar) {
+  if (mExitCondVar)
+  {
     mExitCondVar->Lock();
     mExitCondVar->Signal();
     mExitCondVar->Unlock();

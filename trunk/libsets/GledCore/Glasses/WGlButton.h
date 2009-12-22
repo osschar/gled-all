@@ -36,7 +36,7 @@ public:
   void MenuEnter(); // X{E}
   void MenuExit();  // X{E}
 
-  void ExitGled();  // X{Ed}
+  void ExitGled();  //! X{Ed}
 
 #include "WGlButton.h7"
   ClassDef(WGlButton, 1);

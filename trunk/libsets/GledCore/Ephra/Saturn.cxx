@@ -59,7 +59,8 @@ ClassImp(Saturn);
 // Thread invocators
 /**************************************************************************/
 
-namespace {
+namespace
+{
   GCondition	_server_startup_cond;
 
   GMutex	_detached_mir_mgmnt_lock;
@@ -261,18 +262,17 @@ Saturn::Saturn() :
   mMasterLock(GMutex::recursive),
   mRulingLock(GMutex::recursive),
   mSelector(GMutex::recursive),
-  mSunInfo(0), mSaturnInfo(0),
+  mGod(0), mSunKing(0), mSunQueen(0), mKing(0), mFireKing(0), mFireQueen(0),
+  mSunInfo(0), mSaturnInfo(0), bSunAbsolute(false),
   mQueenLoadNum(0), mQueenLoadCnd(GMutex::recursive),
+  mVer(0), mChaItOss(0),
+  mServerSocket(0), mServerThread(0), mShutdownThread(0),
+  bAllowMoons(false),
+  pZHistoManager(0),
   mBeamReqHandleMutex(GMutex::recursive), mLastBeamReqHandle(0),
   mMIRShootingCnd(GMutex::recursive), mDelayedMIRShootingCnd(GMutex::recursive),
   bAcceptsRays(false), mRayEmittingCnd()
 {
-  bAllowMoons = false;
-
-  mVer = 0; mChaItOss = 0;
-
-  pZHistoManager = 0;
-
   // GOD
   mGod = new ZGod("God", "I do nothing ... I only am.");
   Enlight(mGod, MAX_ID);
@@ -283,7 +283,8 @@ Saturn::Saturn() :
   mChaItOss = new Mountain(this);
 }
 
-Saturn::~Saturn() {
+Saturn::~Saturn()
+{
   delete mChaItOss;
   delete mVer;
   delete mServerSocket; // Close is called by dtor
@@ -578,6 +579,14 @@ void Saturn::Shutdown()
 
   static const Exc_t _eh("Saturn::Shutdown ");
 
+  static GMutex shd_moo;
+  {
+    GMutexHolder lck(shd_moo);
+    if (mShutdownThread)
+      throw _eh + "already in progress.";
+    mShutdownThread = GThread::Self();
+  }
+
   ISmess(_eh + "commencing.");
 
   ISmess(_eh + "stopping ChaItOss (thread manager).");
@@ -592,14 +601,14 @@ void Saturn::Shutdown()
   stop_server();
 
   ISmess(_eh + "stopping services.");
-  if(pZHistoManager) {
+  if (pZHistoManager)
+  {
     pZHistoManager->Write();
     pZHistoManager->Close();
     delete pZHistoManager; pZHistoManager = 0;
   }
 
   ISmess(_eh + "done.");
-
 }
 
 /**************************************************************************/

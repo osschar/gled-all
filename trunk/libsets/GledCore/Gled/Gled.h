@@ -69,6 +69,7 @@ protected:
 
   GCondition*	mExitCondVar;
   GThread*      mRintThread;     // X{g}
+  GThread*      mExitThread;
 
 public:
   Gled();
@@ -102,8 +103,10 @@ public:
   void WaitUntillQueensLoaded();
   void AllowMoonConnections();
 
-  virtual void Run() {}
-  virtual void Exit();
+  virtual void  Run() {}
+          void  Exit();
+  static  void* Exit_tl(void*);
+  virtual void  ExitVirtual();
 
   virtual Int_t LoadLibSet(const Text_t* lib_set);
   virtual Int_t LoadLibSet(LID_t lid);

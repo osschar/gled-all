@@ -72,7 +72,7 @@ public:
   virtual ~GledGUI();
 
   virtual void Run();
-  virtual void Exit();
+  virtual void ExitVirtual();
 
   virtual Int_t LoadLibSet(const Text_t* lib_set);
 
