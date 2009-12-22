@@ -359,11 +359,11 @@ void GledGUI::Run()
   // printf("GledGUI::Run exiting GUI event loop.\n");
 }
 
-void GledGUI::Exit()
+void GledGUI::ExitVirtual()
 {
   // Shutdown Eyes, GUI ... then Gled
 
-  Gled::Exit();
+  Gled::ExitVirtual();
 
   Fl::lock();
   Fl::awake();

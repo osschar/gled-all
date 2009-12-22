@@ -71,8 +71,6 @@ protected:
   GMutex		mMasterLock;	// sending to master
   GMutex		mRulingLock;	// Exec in kings & queens
 
-  bool			bAllowMoons;	// X{g}
-
   GSelector		mSelector;	// fd select wrapper for sockets
 
   ZGod*			mGod;		// X{g}
@@ -100,6 +98,9 @@ protected:
 
   // Server Thread
   GThread*		mServerThread;
+  GThread*              mShutdownThread;
+
+  Bool_t		bAllowMoons;	// X{g}
 
   // Detached lens threads
 #ifndef __CINT__
@@ -275,7 +276,8 @@ private:
 
   // ThreadInfo structures (passed via void* to threads)
 
-  struct new_connection_ti {
+  struct new_connection_ti
+  {
     Saturn*		sat;
     TSocket*		sock;
     new_connection_ti(Saturn* s, TSocket* so) : sat(s), sock(so) {}
@@ -302,8 +304,8 @@ public:
 
 #ifndef __CINT__
 
-inline ZGlass*
-Saturn::DemangleID(ID_t id) {
+inline ZGlass* Saturn::DemangleID(ID_t id)
+{
   mIDLock.Lock();
   hID2pZGlass_i i = mIDHash.find(id);
   ZGlass *ret = (i != mIDHash.end()) ? i->second : 0;
