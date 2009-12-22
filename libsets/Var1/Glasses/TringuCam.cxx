@@ -11,8 +11,7 @@
 
 #include "TringuCam.h"
 #include "Glasses/TSPupilInfo.h"
-#include "TriMeshField.h"
-#include "TriMeshLightField.h"
+#include "TringuRep.h"
 #include "Extendio.h"
 #include "Statico.h"
 #include "Dynamico.h"
@@ -26,7 +25,6 @@
 #include <Glasses/WGlWidget.h>
 #include <Glasses/Eventor.h>
 #include <Glasses/TimeMaker.h>
-#include <Glasses/RGBAPalette.h>
 #include <Glasses/WSTube.h>
 
 #include "TringuCam.c7"
@@ -88,12 +86,8 @@ void TringuCam::_init()
   mMouseAction  = MA_RayCollide;
   mExpectBeta   = EB_Nothing;
   mRayLength    = 100;
-  mActionValue  = 1;
-  mActionRadius = 1;
-  mActRadFract  = 0.9;
 
   bMouseDown              = false;
-  bEnableTringDLonMouseUp = false;
 
   mStampInterval = 25;
   mStampCount    = 0;
@@ -283,17 +277,13 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     {
       CalculateMouseRayVectors();
       MouseRayCollide();
-      AddField(mActionValue);
+      mTringuRep->AddField(mCollPoint, mCollVertex, 1.0f);
       break;
     }
     case MA_SprayField:
     {
-      // Everything done in time-tick.
-      if (mTringula->GetUseDispList())
-      {
-        mTringula->SetUseDispList(false);
-        bEnableTringDLonMouseUp = true;
-      }
+      mTringuRep->BeginSprayField();
+      // Field is add in time-tick.
       break;
     }
     case MA_PickExtendios:
@@ -425,10 +415,10 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 void TringuCam::MouseUp()
 {
   bMouseDown = false;
-  if (bEnableTringDLonMouseUp)
+ 
+  if (mMouseAction == MA_SprayField)
   {
-    mTringula->SetUseDispList(true);
-    bEnableTringDLonMouseUp = false;
+    mTringuRep->EndSprayField();
   }
 }
 
@@ -482,104 +472,7 @@ void TringuCam::MouseRayCollide()
   }
 }
 
-/**************************************************************************/
-
-void TringuCam::add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv,
-                                       Int_t v, Float_t value)
-{
-  if (v<0 || vv.find(v) != vv.end())
-    return;
-
-  vv.insert(v);
-  TringTvor& TT = * mTringula->GetMesh()->GetTTvor();
-  Opcode::Point delta(TT.Vertex(v));
-  delta -= mCollPoint;
-  Float_t dist = delta.Magnitude();
-
-  if (dist > mActionRadius)
-    return;
-
-  cv.insert(v);
-  Float_t full_r = mActionRadius*mActRadFract;
-  if (dist <= full_r)
-    mCurField->F(v) += value;
-  else
-    mCurField->F(v) += value*(1 - (dist - full_r)/(mActionRadius - full_r));
-
-  const vector<TriMesh::VertexData>& VDV = mTringula->GetMesh()->RefVDataVec();
-  const vector<TriMesh::EdgeData>  & EDV = mTringula->GetMesh()->RefEDataVec();
-
-  const TriMesh::VertexData& vd = VDV[v];
-  for (Int_t e = 0; e < vd.n_edges(); ++e)
-  {
-    const TriMesh::EdgeData& ed = EDV[vd.edge(e)];
-    add_field_visit_vertex(vv, cv, ed.other_vertex(v), value);
-  }
-}
-
-namespace
-{
-struct FieldSprayer : public TriMesh::VertexVisitorMaxDist
-{
-  TringuCam* mTriCam;
-  Float_t    mValue;
-  Float_t    mFullRadius;
-  Float_t    mFracFactor;
-
-  FieldSprayer(TriMesh* m, const Float_t origin[3], Float_t max_dist,
-               TringuCam* tricam, Float_t value) :
-    VertexVisitorMaxDist(m, origin, max_dist),
-    mTriCam     (tricam),
-    mValue      (value),
-    mFullRadius (tricam->GetActionRadius()*tricam->GetActRadFract()),
-    mFracFactor (1.0f / (mTriCam->GetActionRadius() - mFullRadius))
-  {}
-  virtual ~FieldSprayer() {}
-
-  virtual Bool_t VisitVertex(Int_t vertex)
-  {
-    if (TriMesh::VertexVisitorMaxDist::VisitVertex(vertex))
-    {
-      Float_t dist   = TMath::Sqrt(mLastDistSqr);
-      Float_t value  = mValue;
-      if (dist > mFullRadius)
-        value *= (1 - (dist - mFullRadius))*mFracFactor;
-
-      mTriCam->GetCurField()->F(vertex) += mValue;
-
-      return kTRUE;
-    }
-    else
-    {
-      return kFALSE;
-    }
-  }
-};
-}
-
-void TringuCam::AddField(Float_t value)
-{
-  FieldSprayer sprayer(mTringula->GetMesh(), mCollPoint, mActionRadius,
-                       this, value);
-  set<Int_t>   vv, cv; // visited/changed vertices
-
-  mTringula->GetMesh()->VisitVertices(mCollVertex, sprayer, vv, cv);
-
-  if (!cv.empty())
-  {
-    if (mLightField == 0)
-    {
-      mCurField  ->PartiallyColorizeTvor(cv, true);
-    }
-    else
-    {
-      mCurField  ->PartiallyColorizeTvor(cv, false);
-      mLightField->PartiallyModulateTvor(cv, true);
-    }
-  }
-}
-
-/**************************************************************************/
+//==============================================================================
 
 void TringuCam::TimeTick(Double_t t, Double_t dt)
 {
@@ -629,7 +522,7 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
   {
     CalculateMouseRayVectors();
     MouseRayCollide();
-    AddField(dt*mActionValue);
+    mTringuRep->AddField(mCollPoint, mCollVertex, dt);
   }
 
   if (mStampInterval && --mStampCount < 0)
@@ -797,7 +690,7 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
   }
 }
 
-/******************************************************************************/
+//==============================================================================
 
 void TringuCam::StatoDetails(Statico* stato)
 {
@@ -892,7 +785,7 @@ void TringuCam::DynoExplode(Dynamico* dyno)
 
     mQueen->CheckIn(src);
 
-    mTringula->Add(src);
+    mTringuRep->Add(src);
   }
 
   {
@@ -935,39 +828,6 @@ void TringuCam::DynoExplode(Dynamico* dyno)
 }
 
 //==============================================================================
-
-void TringuCam::SetAndApplyCurField(TriMeshField* field)
-{
-  SetCurField(field);
-  if (mCurField != 0)
-    mCurField->ColorizeTvor();
-  if (mLightField != 0)
-    mLightField->ModulateTvor();
-}
-
-void TringuCam::ColorByTerrainProps(Int_t mode)
-{
-  // Colorize terrain mesh based on mode:
-  // 0 - height
-  // 1 - normal | up-vector
-
-  static const Exc_t _eh("TringuCam::ColorByTerrainProps ");
-
-  assert_palette(_eh);
-
-  TriMesh* mesh = mTringula->GetMesh();
-  switch (mode)
-  {
-    case 0:
-      mesh->ColorByParaSurfCoord(*mPalette, 2);
-      break;
-    case 1:
-      mesh->ColorByParaSurfNormal(*mPalette, 2, 0.5, 1);
-      break;
-    default:
-      ISwarn(_eh + "Unsupported mode.");
-  }
-}
 
 void TringuCam::PrepConnectStatos(Statico* stato, Int_t id, const TString& grad)
 {

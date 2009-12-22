@@ -1,12 +1,12 @@
-// $#Header$
+// $Header$
 #ifndef Geom1_RectTerrain_GL_Rnr_H
 #define Geom1_RectTerrain_GL_Rnr_H
 
 #include <Glasses/RectTerrain.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class RectTerrain_GL_Rnr : public ZNode_GL_Rnr {
-
+class RectTerrain_GL_Rnr : public ZNode_GL_Rnr
+{
 protected:
   RectTerrain*		mTerrain;
 

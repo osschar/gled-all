@@ -22,13 +22,19 @@
 // TriMeshField
 //==============================================================================
 
-//__________________________________________________________________________
+//______________________________________________________________________________
 //
 // mDim-dimensional field defined on vertices of a mesh.
+// Dimensions up to 3 are supported.
+//
+// Link mColorArraySource is dyn-casted to TriMeshColorArraySource and used to
+// get color arrays for update. If 0 is returned for vertex color-array no
+// update is done. If 0 is returned for triangle color-array triangle colors
+// are not updated.
 
 ClassImp(TriMeshField);
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void TriMeshField::_init()
 {
@@ -58,22 +64,21 @@ void TriMeshField::ResizeToMesh(Int_t dim)
 
   assert_mesh(_eh);
   if (mMesh->GetTTvor() == 0)
-    throw(_eh + "TringTvor does not exist.");
+    throw _eh + "TringTvor does not exist.";
 
   if (dim <= 0) dim = mDim;
 
   Resize(mMesh->GetTTvor()->mNVerts, dim);
 }
 
-
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void TriMeshField::SetField(Float_t c0)
 {
   static const Exc_t _eh("TriMeshField::SetField ");
 
   if (mDim != 1)
-    throw(_eh + "argument count incompatible with field dimension");
+    throw _eh + "argument count incompatible with field dimension";
 
   Float_t* F = FVec();
   for (Int_t i=0; i<mNVerts; ++i, ++F)
@@ -85,7 +90,7 @@ void TriMeshField::SetField(Float_t c0, Float_t c1)
   static const Exc_t _eh("TriMeshField::SetField ");
 
   if (mDim != 2)
-    throw(_eh + "argument count incompatible with field dimension");
+    throw _eh + "argument count incompatible with field dimension";
 
   Float_t* F = FVec();
   for (Int_t i=0; i<mNVerts; ++i, F+=mDim)
@@ -99,7 +104,7 @@ void TriMeshField::SetField(Float_t c0, Float_t c1, Float_t c2)
   static const Exc_t _eh("TriMeshField::SetField ");
 
   if (mDim != 3)
-    throw(_eh + "argument count incompatible with field dimension");
+    throw _eh + "argument count incompatible with field dimension";
 
   Float_t* F = FVec();
   for (Int_t i=0; i<mNVerts; ++i, F+=mDim)
@@ -108,13 +113,13 @@ void TriMeshField::SetField(Float_t c0, Float_t c1, Float_t c2)
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 namespace
 {
-inline Float_t std_val_1d(Float_t* F) { return F[0]; }
-inline Float_t std_val_2d(Float_t* F) { return sqrtf(F[0]*F[0] + F[1]*F[1]); }
-inline Float_t std_val_3d(Float_t* F) { return sqrtf(F[0]*F[0] + F[1]*F[1] + F[2]*F[2]); }
+  inline Float_t std_val_1d(Float_t* F) { return F[0]; }
+  inline Float_t std_val_2d(Float_t* F) { return sqrtf(F[0]*F[0] + F[1]*F[1]); }
+  inline Float_t std_val_3d(Float_t* F) { return sqrtf(F[0]*F[0] + F[1]*F[1] + F[2]*F[2]); }
 }
 
 void TriMeshField::FindMinMaxField()
@@ -154,7 +159,7 @@ void TriMeshField::FindMinMaxField()
             check_min_max(std_val_3d(F));
           break;
         default:
-          throw(_eh + "unsupported dimension.");
+          throw _eh + "unsupported dimension.";
           break;
       }
     }
@@ -183,7 +188,7 @@ void TriMeshField::FindMinMaxField()
             check_min_max((Float_t) tf3.Eval(F[0], F[1], F[2]));
           break;
         default:
-          throw(_eh + "unsupported dimension.");
+          throw _eh + "unsupported dimension.";
           break;
       }
     }
@@ -224,7 +229,7 @@ void TriMeshField::UpdateMinMaxField(set<Int_t> vertices)
             check_min_max(std_val_3d(FVec(*i)));
           break;
         default:
-          throw(_eh + "unsupported dimension.");
+          throw _eh + "unsupported dimension.";
           break;
       }
     }
@@ -253,7 +258,7 @@ void TriMeshField::UpdateMinMaxField(set<Int_t> vertices)
           }
           break;
         default:
-          throw(_eh + "unsupported dimension.");
+          throw _eh + "unsupported dimension.";
           break;
       }
     }
@@ -262,42 +267,46 @@ void TriMeshField::UpdateMinMaxField(set<Int_t> vertices)
   Stamp(FID());
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
-void TriMeshField::ColorizeTvor(Bool_t regen_tring_cols)
+void TriMeshField::ApplyColors(Bool_t regen_tring_cols)
 {
-  static const Exc_t _eh("TriMeshField::ColorizeTvor ");
+  static const Exc_t _eh("TriMeshField::ApplyColors ");
+
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, *mColorArraySource, false);
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  if (!VCA)
+    throw _eh + "color-array-source has no vertex-color-array.";
 
   assert_palette(_eh);
   assert_mesh(_eh);
 
-  TringTvor& TT = * mMesh->GetTTvor();
-  TT.AssertCols();
-
   mPalette->SetMinFlt(mMinValue);
   mPalette->SetMaxFlt(mMaxValue);
 
-  Float_t* F = FVec();
-  UChar_t* C = TT.Cols();
+  Float_t *F = FVec();
+  UChar_t *C = VCA;
 
   if (mFormula.IsNull())
   {
     switch (mDim)
     {
       case 1:
-        for (Int_t i=0; i<TT.mNVerts; ++i, ++F, C+=4)
+        for (Int_t i=0; i<mNVerts; ++i, ++F, C+=4)
           mPalette->ColorFromValue(std_val_1d(F), C);
         break;
       case 2:
-        for (Int_t i=0; i<TT.mNVerts; ++i, F+=mDim, C+=4)
+        for (Int_t i=0; i<mNVerts; ++i, F+=mDim, C+=4)
           mPalette->ColorFromValue(std_val_2d(F), C);
         break;
       case 3:
-        for (Int_t i=0; i<TT.mNVerts; ++i, F+=mDim, C+=4)
+        for (Int_t i=0; i<mNVerts; ++i, F+=mDim, C+=4)
           mPalette->ColorFromValue(std_val_3d(F), C);
         break;
       default:
-        throw(_eh + "unsupported dimension.");
+        throw _eh + "unsupported dimension.";
         break;
     }
   }
@@ -308,44 +317,52 @@ void TriMeshField::ColorizeTvor(Bool_t regen_tring_cols)
     switch (mDim)
     {
       case 1:
-        for (Int_t i=0; i<TT.mNVerts; ++i, ++F, C+=4)
+        for (Int_t i=0; i<mNVerts; ++i, ++F, C+=4)
           mPalette->ColorFromValue((Float_t) tf3.Eval(F[0]), C);
         break;
       case 2:
-        for (Int_t i=0; i<TT.mNVerts; ++i, F+=mDim, C+=4)
+        for (Int_t i=0; i<mNVerts; ++i, F+=mDim, C+=4)
           mPalette->ColorFromValue((Float_t) tf3.Eval(F[0], F[1]), C);
         break;
       case 3:
-        for (Int_t i=0; i<TT.mNVerts; ++i, F+=mDim, C+=4)
+        for (Int_t i=0; i<mNVerts; ++i, F+=mDim, C+=4)
           mPalette->ColorFromValue((Float_t) tf3.Eval(F[0], F[1], F[2]), C);
         break;
       default:
-        throw(_eh + "unsupported dimension.");
+        throw _eh + "unsupported dimension.";
         break;
     }
   }
 
-  if (regen_tring_cols && TT.HasTringCols())
-    TT.GenerateTriangleColorsFromVertexColors();
+  // Regenerate changed triangles if necessary.
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+  if (regen_tring_cols && TCA != 0)
+  {
+    mMesh->GetTTvor()->GenerateTriangleColorsFromVertexColors(VCA, TCA);
+  }
 
-  mMesh->StampReqTring(TriMesh::FID());
+  carr_src->ColorArraysModified();
 }
 
-void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
-                                         Bool_t regen_tring_cols)
+void TriMeshField::PartiallyApplyColors(set<Int_t> vertices,
+					Bool_t regen_tring_cols)
 {
-  static const Exc_t _eh("TriMeshField::PartiallyColorizeTvor ");
+  static const Exc_t _eh("TriMeshField::PartiallyApplyColors ");
+
+  TriMeshColorArraySource *carr_src =
+    TriMeshColorArraySource::CastLens(_eh, *mColorArraySource, false);
+
+  UChar_t *VCA = carr_src->GetVertexColorArray();
+  if (!VCA)
+    throw _eh + "color-array-source has no vertex-color-array.";
 
   assert_palette(_eh);
   assert_mesh(_eh);
 
-  TringTvor& TT = * mMesh->GetTTvor();
-  TT.AssertCols();
-
   mPalette->SetMinFlt(mMinValue);
   mPalette->SetMaxFlt(mMaxValue);
 
-  UChar_t* C = TT.Cols();
+  UChar_t *C = VCA;
 
   set<Int_t>::iterator i   = vertices.begin();
   set<Int_t>::iterator end = vertices.end();
@@ -403,7 +420,8 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
   }
 
   // Regenerate changed triangles if necessary.
-  if (regen_tring_cols && TT.HasTringCols())
+  UChar_t *TCA = carr_src->GetTriangleColorArray();
+  if (regen_tring_cols && TCA != 0)
   {
     set<Int_t> ct; // changed triangles
     for (set<Int_t>::iterator v = vertices.begin(); v != vertices.end(); ++v)
@@ -418,46 +436,46 @@ void TriMeshField::PartiallyColorizeTvor(set<Int_t> vertices,
     }
     if (*ct.begin() == -1) // Potentially remove no-tring entry.
       ct.erase(ct.begin());
-    TT.GenerateTriangleColorsFromVertexColors(ct);
+
+    mMesh->GetTTvor()->GenerateTriangleColorsFromVertexColors(ct, VCA, TCA);
   }
 
-  mMesh->StampReqTring(TriMesh::FID());
+  carr_src->ColorArraysModified();
 }
 
 /**************************************************************************/
 
-namespace {
-
-struct GaussBlob { Float_t x, y, z, A, sgm, efc; };
-
-struct GaussSprayer : public TriMesh::VertexVisitorMaxDist
+namespace
 {
-  TriMeshField *mField;
-  Float_t       mA, mExpFac;
+  struct GaussBlob { Float_t x, y, z, A, sgm, efc; };
 
-  GaussSprayer(TriMesh* m, const Float_t origin[3], Float_t max_dist,
-              TriMeshField* mf, Float_t a, Float_t exp_fac) :
-    TriMesh::VertexVisitorMaxDist(m, origin, max_dist),
-    mField (mf),
-    mA     (a),
-    mExpFac(exp_fac)
-  {}
-  virtual ~GaussSprayer() {}
-
-  virtual Bool_t VisitVertex(Int_t vertex)
+  struct GaussSprayer : public TriMesh::VertexVisitorMaxDist
   {
-    if (TriMesh::VertexVisitorMaxDist::VisitVertex(vertex))
-    {
-      mField->F(vertex) += mA * expf(mExpFac*mLastDistSqr);
-      return kTRUE;
-    }
-    else
-    {
-      return kFALSE;
-    }
-  }
-};
+    TriMeshField *mField;
+    Float_t       mA, mExpFac;
 
+    GaussSprayer(TriMesh* m, const Float_t origin[3], Float_t max_dist,
+		 TriMeshField* mf, Float_t a, Float_t exp_fac) :
+      TriMesh::VertexVisitorMaxDist(m, origin, max_dist),
+      mField (mf),
+      mA     (a),
+      mExpFac(exp_fac)
+    {}
+    virtual ~GaussSprayer() {}
+
+    virtual Bool_t VisitVertex(Int_t vertex)
+    {
+      if (TriMesh::VertexVisitorMaxDist::VisitVertex(vertex))
+      {
+	mField->F(vertex) += mA * expf(mExpFac*mLastDistSqr);
+	return kTRUE;
+      }
+      else
+      {
+	return kFALSE;
+      }
+    }
+  };
 }
 
 void TriMeshField::FillByGaussBlobs(Bool_t  reset_field, Int_t   n_blobs,
@@ -504,23 +522,23 @@ void TriMeshField::FillByGaussBlobs(Bool_t  reset_field, Int_t   n_blobs,
   if (reset_field)
   {
     if (minmax_p)  FindMinMaxField();
-    if (recolor_p) ColorizeTvor();
+    if (recolor_p) ApplyColors();
   }
   else
   {
     if (minmax_p)  UpdateMinMaxField(all_changed);
-    if (recolor_p) PartiallyColorizeTvor(all_changed);
+    if (recolor_p) PartiallyApplyColors(all_changed);
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
-void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df)
+void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df, Bool_t recolor_p)
 {
   static const Exc_t _eh("TriMeshField::Diffuse ");
 
   if (mDim != 1)
-    throw(_eh + "unsupported dimension.");
+    throw _eh + "unsupported dimension.";
 
   assert_mesh(_eh);
   mMesh->AssertVertexConnections();
@@ -533,7 +551,7 @@ void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df)
 
   Float_t Ddt = diff_const*dt;
 
-  // !!! This could be rewritten as loop over edges, now that wwe have them.
+  // !!! This could be rewritten as loop over edges, now that we have them.
   for (Int_t i=0; i<mNVerts; ++i)
   {
     const TriMesh::VertexData&    vdata = vertex_data_vec[i];
@@ -589,5 +607,5 @@ void TriMeshField::Diffuse(Float_t diff_const, Float_t dt, Bool_t limit_df)
     if (limit_df && mField[i] < 0) mField[i] = 0;
   }
 
-  ColorizeTvor();
+  if (recolor_p) ApplyColors();
 }

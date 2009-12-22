@@ -52,9 +52,6 @@ void Tringula::_init()
   mMaxFlyerH   = 0;
   mMaxCameraH  = 0;
 
-  bSmoothShade = false;
-  bLightMesh   = true;
-
   mRayColFaces = 0;
 
   bRnrRay = false;

@@ -146,8 +146,11 @@ public:
   void GenerateTriangleNormals();
   void GenerateTriangleNormalsAndColors(void (*foo)(Float_t*, UChar_t*, void*),
 					void* ud);
+
   void GenerateTriangleColorsFromVertexColors();
+  void GenerateTriangleColorsFromVertexColors(UChar_t* VCA, UChar_t* TCA);
   void GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles);
+  void GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles, UChar_t* VCA, UChar_t* TCA);
 
   void GenerateTriangleColorsFromTriangleStrips();
 
@@ -168,6 +171,8 @@ public:
   Float_t SqrDistanceToVertex(Int_t vi, const Float_t p[3]);
   Float_t SqrLen(const Float_t a[3], const Float_t b[3]);
   void    SqrMinMaxEdgeLen(Int_t ti, Float_t& min, Float_t& max);
+
+  // ----------------------------------------------------------------
 
   ClassDef(TringTvor, 1); // Tvor of triangles, a triangle mesh.
 }; // endclass TringTvor

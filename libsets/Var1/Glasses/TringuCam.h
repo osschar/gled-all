@@ -15,14 +15,11 @@
 #include <RnrBase/A_Rnr.h>
 #include <Opcode/Opcode.h>
 
-class TriMeshField;
-class TriMeshLightField;
-
 class WSTube;
-class RGBAPalette;
 class ScreenText;
 class WGlWidget;
 
+class TringuRep;
 class TSPupilInfo;
 
 class Eventor;
@@ -170,22 +167,16 @@ protected:
   MouseAction_e mPrevAction;    //!
   ExpectBeta_e  mExpectBeta;    // X{G}  7 PhonyEnum(-const=>1)
   Float_t       mRayLength;     // X{GS} 7 Value(-range=>[   0, 1000, 1,100])
-  Float_t       mActionValue;   // X{GS} 7 Value(-range=>[-100,  100, 1,100], -tooltip=>"value to add to field/source", -join=>1)
-  Float_t       mActionRadius;  // X{GS} 7 Value(-range=>[   0,  100, 1,100], -tooltip=>"distance of vertices for which to add field/source")
-  Float_t       mActRadFract;   // X{GS} 7 Value(-range=>[   0,    1, 1,1000])
-  // Missing parameters for fall-off of value with distance from coll-point.
 
   Bool_t        bMouseDown;
-  Bool_t        bEnableTringDLonMouseUp;
 
   //=================================================================
   // Other stuff.
   //=================================================================
 
   ZLink<Tringula>          mTringula;    // X{GS} L{a}
-  ZLink<TriMeshField>      mCurField;    // X{GS} L{a}
-  ZLink<TriMeshLightField> mLightField;  // X{GS} L{a}
-  ZLink<RGBAPalette>       mPalette;     // X{GS} L{a}
+
+  ZLink<TringuRep>         mTringuRep;   // X{GS} L{a}
 
   ZLink<TSPupilInfo>       mPupilInfo;   // X{GS} L{a}
 
@@ -227,7 +218,6 @@ public:
   void CalculateMouseRayVectors();
   void MouseRayCollide();
 
-  void add_field_visit_vertex(set<Int_t>& vv, set<Int_t>& cv, Int_t v, Float_t value);
   void AddField(Float_t val);
 
   // TimeMakerClient
@@ -240,8 +230,6 @@ public:
   void DynoDrive(Dynamico* dyno);    // X{ED} C{1} 7 MCWButt()
   void DynoExplode(Dynamico* dyno);  // X{ED} C{1} 7 MCWButt()
 
-  void SetAndApplyCurField(TriMeshField* field); // X{E} C{1} 7 MCWButt()
-  void ColorByTerrainProps(Int_t mode=0);        // X{E}      7 MCWButt()
   void PrepConnectStatos(Statico* stato, Int_t id, const TString& grad); // X{E} C{1} 7 MCWButt()
 
   void Suspend(); // X{E}

@@ -32,8 +32,8 @@ public:
   TriMeshLightField(const Text_t* n="TriMeshLightField", const Text_t* t=0) :
     TriMeshField(n,t) { _init(); }
 
-  void ModulateTvor(Bool_t regen_tring_cols=true);  // X{E} 7 MCWButt()
-  void PartiallyModulateTvor(set<Int_t> vertices, Bool_t regen_tring_cols=true);
+  void ModulateColors(Bool_t regen_tring_cols=true);  // X{E} 7 MCWButt()
+  void PartiallyModulateColors(set<Int_t> vertices, Bool_t regen_tring_cols=true);
 
   void CalculateLightField(); // X{E} 7 MButt()
 

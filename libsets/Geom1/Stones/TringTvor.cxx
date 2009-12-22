@@ -301,16 +301,23 @@ void TringTvor::GenerateTriangleNormalsAndColors
   }
 }
 
+//------------------------------------------------------------------------------
+
 void TringTvor::GenerateTriangleColorsFromVertexColors()
 {
   AssertTringCols();
+  GenerateTriangleColorsFromVertexColors(Cols(), TringCols());
+}
 
-  Int_t*    T = Trings();
-  UChar_t*  C = TringCols();
-  for(Int_t t=0; t<mNTrings; ++t, T+=3, C+=4) {
-    UChar_t* c0 = Color(T[0]);
-    UChar_t* c1 = Color(T[1]);
-    UChar_t* c2 = Color(T[2]);
+void TringTvor::GenerateTriangleColorsFromVertexColors(UChar_t* VCA, UChar_t* TCA)
+{
+  Int_t   *T = Trings();
+  UChar_t *C = TCA;
+  for (Int_t t=0; t<mNTrings; ++t, T+=3, C+=4)
+  {
+    UChar_t *c0 = &VCA[4*T[0]];
+    UChar_t *c1 = &VCA[4*T[1]];
+    UChar_t *c2 = &VCA[4*T[2]];
     C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) * INV3);
     C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) * INV3);
     C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) * INV3);
@@ -321,20 +328,26 @@ void TringTvor::GenerateTriangleColorsFromVertexColors()
 void TringTvor::GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles)
 {
   AssertTringCols();
+  GenerateTriangleColorsFromVertexColors(triangles, Cols(), TringCols());
+}
 
+void TringTvor::GenerateTriangleColorsFromVertexColors(set<Int_t>& triangles, UChar_t* VCA, UChar_t* TCA)
+{
   for (set<Int_t>::iterator t = triangles.begin(); t != triangles.end(); ++t)
   {
-    Int_t*    T = Triangle(*t);
-    UChar_t*  C = TriangleColor(*t);
-    UChar_t* c0 = Color(T[0]);
-    UChar_t* c1 = Color(T[1]);
-    UChar_t* c2 = Color(T[2]);
+    Int_t   *T  = Triangle(*t);
+    UChar_t *C  = &TCA[4*(*t)];
+    UChar_t *c0 = &VCA[4*T[0]];
+    UChar_t *c1 = &VCA[4*T[1]];
+    UChar_t *c2 = &VCA[4*T[2]];
     C[0] = (UChar_t) (((UInt_t) c0[0] + c1[0] + c2[0]) * INV3);
     C[1] = (UChar_t) (((UInt_t) c0[1] + c1[1] + c2[1]) * INV3);
     C[2] = (UChar_t) (((UInt_t) c0[2] + c1[2] + c2[2]) * INV3);
     C[3] = (UChar_t) (((UInt_t) c0[3] + c1[3] + c2[3]) * INV3);
   }
 }
+
+//------------------------------------------------------------------------------
 
 void TringTvor::GenerateTriangleColorsFromTriangleStrips()
 {
@@ -363,7 +376,7 @@ void TringTvor::GenerateTriangleColorsFromTriangleStrips()
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void TringTvor::GenerateVertexNormals()
 {

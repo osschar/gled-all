@@ -8,8 +8,11 @@
 #include "Crawler.h"
 #include <Glasses/AlSource.h>
 #include "CrawlerSpiritio.c7"
+
+#include "TSPupilInfo.h"
+#include "TringuRep.h"
+#include "Tringula.h"
 #include <Glasses/Camera.h>
-#include <Glasses/Tringula.h>
 #include <Stones/KeyHandling.h>
 
 // CrawlerSpiritio
@@ -83,7 +86,7 @@ void CrawlerSpiritio::Activate()
 {
   // Called when TSPupilInfo installs the spiritio.
 
-  mCameraBase->SetParent(mExtendio->GetTringula());
+  mCameraBase->SetParent(mPupilInfo->GetTringuRep());
   mCameraBase->ref_trans().SetFromArray(mExtendio->ref_last_trans());
 
   mCamera->Home();
