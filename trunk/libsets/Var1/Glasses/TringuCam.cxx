@@ -15,10 +15,6 @@
 #include "Extendio.h"
 #include "Statico.h"
 #include "Dynamico.h"
-#include "Crawler.h"
-#include "Flyer.h"
-#include "LandMark.h"
-// This is going too far ...
 
 #include <Glasses/ZQueen.h>
 #include <Glasses/ScreenText.h>
@@ -326,8 +322,6 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 
       // Should handle multiple selection?
       Statico*  stato = dynamic_cast<Statico*>(ext);
-      Dynamico* dyno  = dynamic_cast<Dynamico*>(ext);
-      LandMark* lmark = dynamic_cast<LandMark*>(ext);
 
       if (mExpectBeta == EB_ConnectStaticos)
       {
@@ -337,7 +331,7 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 	  if (beta) {
 	    WSTube* tube = make_tube(beta, stato, mGradName);
             mQueen->CheckIn(tube);
-            {ube
+            {
               GLensWriteHolder _wlck(*mTringula);
               mTringula->GetTubes()->Add(tube);
             }
@@ -347,43 +341,8 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
         mExpectBeta = EB_Nothing;
         SetPrepBeta(0);
       }
-      if (stato)
-      {
-        WGlWidget* weed = mPupilInfo->FindMenuEntry("StatoCtrl");
-        if (weed)
-        {
-          weed->SetDaughterCbackStuff(stato);
-          mPupilInfo->SelectTopMenu(weed);
-        }
-      }
-      else if (dyno)
-      {
-        // !!! This is fooed ... need better glass -> gl-weeds infrastructure.
-        TString cls("Dyno");
-        if (dynamic_cast<Crawler*>(dyno))    cls = "Crawler";
-        else if (dynamic_cast<Flyer*>(dyno)) cls = "Flyer";
 
-	WGlWidget* weed = mPupilInfo->FindMenuEntry(cls + "Ctrl");
-        if (weed)
-        {
-          weed->SetDaughterCbackStuff(dyno);
-          mPupilInfo->SelectTopMenu(weed);
-        }
-      }
-      else if (lmark)
-      {
-        WGlWidget* weed = mPupilInfo->FindMenuEntry("LandMarkCtrl");
-        if (weed)
-        {
-          weed->SetDaughterCbackStuff(lmark);
-          mPupilInfo->SelectTopMenu(weed);
-        }
-      }
-      else
-      {
-        mPupilInfo->SelectTopMenuByName("MainMenu");
-      }
-
+      mPupilInfo->SelectTopMenuForLens(ext);
       break;
     }
     case MA_NewLandMark:
@@ -722,18 +681,16 @@ void TringuCam::DynoDrive(Dynamico* dyno)
     throw _eh + "uidir not found.";
 
   GledNS::ClassInfo *ci = dyno->VGlassInfo();
-
   while (ci)
   {
-    printf("Trying for '%s'\n", ci->fName.Data());
+    // printf("Trying to get spiritio for class '%s'\n", ci->fName.Data());
     ZGlass *gdir = uidir->FindLensByPath(ci->fName);
     if (gdir)
     {
       ExtendioSpiritio *s = dynamic_cast<ExtendioSpiritio*>(gdir->FindLensByPath("spiritio"));
       if (s)
       {
-	printf("Wow ... survived! Spiritio=%p, '%s'.\n", s, s->ClassName());
-
+	// printf("Found spiritio: %p, class='%s'.\n", s, s->ClassName());
 	{
 	  GLensReadHolder slck(s);
 	  s->SetExtendio(dyno);
@@ -747,7 +704,7 @@ void TringuCam::DynoDrive(Dynamico* dyno)
       }
     }
     ci = ci->GetParentCI();
-  };
+  }
 
   throw _eh + "No suitable spiritio found.";
 }

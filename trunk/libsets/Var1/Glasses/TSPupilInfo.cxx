@@ -191,3 +191,56 @@ void TSPupilInfo::SelectTopMenuByName(const TString& name)
 {
   SelectTopMenu(FindMenuEntry(name));
 }
+
+void TSPupilInfo::SelectTopMenuForLens(ZGlass* lens)
+{
+  static const Exc_t _eh("TSPupilInfo::SelectTopMenuForLens ");
+
+  if (lens == 0)
+  {
+    SelectTopMenuByName("MainMenu");
+    return;
+  }
+
+  WGlWidget *lm = FindMenuEntry("LensMenu");
+  if (lm == 0)
+    throw _eh + "can not get lens menu.";
+
+  ZGlass *uidir = mQueen->FindLensByPath("var/glassui");
+  if (!uidir)
+    throw _eh + "uidir not found.";
+
+  lm->ClearList();
+
+  // Descend towards parent classes, merge elements.
+  GledNS::ClassInfo *ci = lens->VGlassInfo();
+  while (ci)
+  {
+    ZGlass *gdir = uidir->FindLensByPath(ci->fName);
+    if (gdir)
+    {
+      ZList *l = dynamic_cast<ZList*>(gdir->FindLensByPath("menu"));
+      if (l)
+      {
+	lpZGlass_t mes;
+	l->CopyList(mes);
+	for (lpZGlass_ri i = mes.rbegin(); i != mes.rend(); ++i)
+	{
+	  lm->PushFront(*i);
+	}
+      }
+    }
+    ci = ci->GetParentCI();
+  }
+  lm->SetDaughterCbackStuff(lens);
+
+  // Organize them on the grid.
+  mGridStepper.Reset();
+  Stepper<ZNode> s(lm);
+  while (s.step())
+  {
+    mGridStepper.SetNodeAdvance(*s);
+  }
+
+  SelectTopMenu(lm);
+}

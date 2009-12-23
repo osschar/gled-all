@@ -110,24 +110,24 @@ void tringula(Int_t mode=2)
   }
 
   { // Glass mappings
-    ZList* uidir = g_queen->AssertPath("var/glassui", "ZNameMap");
+    ZList *uidir = g_queen->AssertPath("var/glassui", "ZNameMap");
+    ZList *gdir;
 
-    ZList    *gdir;
-    CrawlerSpiritio *spiritio;
+    {
+      gdir = uidir->AssertPath("Crawler");
+      CREATE_ADD_GLASS(spiritio, CrawlerSpiritio, gdir, "spiritio", 0);
 
-    gdir = uidir->AssertPath("Crawler");
-    ASSIGN_ADD_GLASS(spiritio, CrawlerSpiritio, gdir, "spiritio", 0);
+      CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetEngineSrc, "Engine of Crawler Spiritio", 0);
+      alsource->SetLocationType(AlSource::LT_CamDelta);
+      alsource->SetPitch(0.5);
+      alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/Diesel"));
+      alsource->QueueBuffer();
 
-    CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetEngineSrc, "Engine of Crawler Spiritio", 0);
-    alsource->SetLocationType(AlSource::LT_CamDelta);
-    alsource->SetPitch(0.5);
-    alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/Diesel"));
-    alsource->QueueBuffer();
-
-    CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetGunSrc, "Gun of Crawler Spiritio", 0);
-    alsource->SetLocationType(AlSource::LT_CamDelta);
-    alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/PewPew"));
-    alsource->QueueBuffer();
+      CREATE_ATT_GLASS(alsource, AlSource, spiritio, SetGunSrc, "Gun of Crawler Spiritio", 0);
+      alsource->SetLocationType(AlSource::LT_CamDelta);
+      alsource->SetDefaultBuffer((AlBuffer*)g_queen->FindLensByPath("var/sounds/PewPew"));
+      alsource->QueueBuffer();
+    }
   }
 
   { // Textures
@@ -940,7 +940,7 @@ void make_overlay()
   
   Scene *menu_scene = tspupil->GetMenuScene();
 
-  SGridStepper gs(0);
+  SGridStepper& gs = tspupil->RefGridStepper();
   gs.SetDs(step_dx, step_dy, 1);
   gs.SetNs(6, 4, 1);
   gs.SetOs(4, 4, 0);
@@ -1080,192 +1080,127 @@ void make_overlay()
     help_but->SetCbackMethodName("Help");
   }
 
-  gs.Reset();
 
-  {
-    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, menu_scene, "DynoCtrl", 0);
-    dyno_ctrl->SetRnrElements(false);
+  // ================================================================
+  // Put menu components into class data.
+  // --------------------------------------------------------------
+  // This still sets tricam and tspupil as Alpha to some callbacks.
+  // Should be properly handled from titles at menu activation time.
+  // Also, one should clone the relevant menu entries then.
 
-    CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
-    gs.SetNodeAdvance(but1);
-    but1->SetCbackAlpha(tricam);
-    but1->SetCbackMethodName("DynoDetails");
+  CREATE_ADD_GLASS(lens_menu, WGlWidget, menu_scene, "LensMenu", 0);
+  lens_menu->SetRnrElements(false);
 
-    CREATE_ADD_GLASS(butd, WGlButton, dyno_ctrl, "Detailed View", "LensBeta");
-    gs.SetNodeAdvance(butd);
-    butd->SetCbackAlpha(g_shell);
-    butd->SetCbackMethodName("SpawnClassView");
+  { // Glass mappings
+    ZList *uidir = g_queen->AssertPath("var/glassui", "ZNameMap");
+    ZList *gdir;
+    WGlButton   *but;
+    WGlValuator *val;
 
-    CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
-    gs.SetNodeAdvance(val1);
-    val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
-    val1->SetFormat("Speed: %.2f");
-    val1->SetCbackMemberName("V");
+    {
+      gdir = uidir->AssertPath("Extendio");
+      CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-    CREATE_ADD_GLASS(val2, WGlValuator, dyno_ctrl, "Rot", "LensAlpha");
-    gs.SetNodeAdvance(val2);
-    val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
-    val2->SetFormat("Rot: %.2f");
-    val2->SetCbackMemberName("W");
-  }
+      CREATE_ADD_GLASS(but, WGlButton, menu, "<undef>", "LensName:LensBeta:PupilAlpha");
+      but->SetCbackAlpha(tspupil);
+      but->SetCbackMethodName("ExtendioDetails");
 
-  gs.Reset();
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Detailed View", "LensBeta");
+      but->SetCbackAlpha(g_shell);
+      but->SetCbackMethodName("SpawnClassView");
+    }
 
-  {
-    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, menu_scene, "CrawlerCtrl", 0);
-    dyno_ctrl->SetRnrElements(false);
+    {
+      gdir = uidir->AssertPath("Statico");
+      CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-    CREATE_ADD_GLASS(but0, WGlButton, dyno_ctrl, "Drive", "LensBeta");
-    gs.SetNodeAdvance(but0);
-    but0->SetCbackAlpha(tricam);
-    but0->SetCbackMethodName("DynoDrive");
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "CollCount", "LensAlpha");
+      val->SetConstVal(true);
+      val->SetFormat("Dyno colls: %.0f");
+      val->SetCbackMemberName("NDynoColls");
 
-    CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
-    gs.SetNodeAdvance(but1);
-    but1->SetCbackAlpha(tricam);
-    but1->SetCbackMethodName("DynoDetails");
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Connect Energy", "LensBeta:TringuCamAlpha");
+      but->SetCbackAlpha(tricam);
+      but->SetCbackMethodName("PrepConnectStatos");
+      but->SetCbackValue(0);
+      but->SetCbackString("r2y");
 
-    CREATE_ADD_GLASS(butd, WGlButton, dyno_ctrl, "Detailed View", "LensBeta");
-    gs.SetNodeAdvance(butd);
-    butd->SetCbackAlpha(g_shell);
-    butd->SetCbackMethodName("SpawnClassView");
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Connect Metal", "LensBeta:TringuCamAlpha");
+      but->SetCbackAlpha(tricam);
+      but->SetCbackMethodName("PrepConnectStatos");
+      but->SetCbackValue(1);
+      but->SetCbackString("coldsteel");
+    }
 
-    CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
-    gs.SetNodeAdvance(val1);
-    val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
-    val1->SetFormat("Speed: %.2f");
-    val1->SetCbackMemberName("V");
+    {
+      gdir = uidir->AssertPath("Dynamico");
+      CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-    CREATE_ADD_GLASS(val2, WGlValuator, dyno_ctrl, "Rot", "LensAlpha");
-    gs.SetNodeAdvance(val2);
-    val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
-    val2->SetFormat("Rot: %.2f");
-    val2->SetCbackMemberName("W");
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "Speed", "LensAlpha");
+      val->SetMin(-10); val->SetMax(100); val->SetStepB(100);
+      val->SetFormat("Speed: %.2f");
+      val->SetCbackMemberName("V");
 
-    CREATE_ADD_GLASS(val3, WGlValuator, dyno_ctrl, "LevH", "LensAlpha");
-    gs.SetNodeAdvance(val3);
-    val3->SetMin(-10); val3->SetMax(100); val3->SetStepB(100);
-    val3->SetFormat("LevH: %.2f");
-    val3->SetCbackMemberName("LevH");
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "Rot", "LensAlpha");
+      val->SetMin(-10); val->SetMax(100); val->SetStepB(100);
+      val->SetFormat("Rot: %.2f");
+      val->SetCbackMemberName("W");
+    }
 
-    CREATE_ADD_GLASS(bute, WGlButton, dyno_ctrl, "Explode", "LensBeta");
-    gs.SetNodeAdvance(bute);
-    bute->SetCbackAlpha(tricam);
-    bute->SetCbackMethodName("DynoExplode");
-  }
+    {
+      gdir = uidir->AssertPath("Crawler");
+      CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-  gs.Reset();
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "LevH", "LensAlpha");
+      gs.SetNodeAdvance(val);
+      val->SetMin(-10); val->SetMax(100); val->SetStepB(100);
+      val->SetFormat("LevH: %.2f");
+      val->SetCbackMemberName("LevH");
 
-  {
-    CREATE_ADD_GLASS(dyno_ctrl, WGlWidget, menu_scene, "FlyerCtrl", 0);
-    dyno_ctrl->SetRnrElements(false);
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Drive", "LensBeta:TringuCamAlpha");
+      but->SetCbackAlpha(tricam);
+      but->SetCbackMethodName("DynoDrive");
 
-    // Here experimetally, to check ClassInfo descend
-    CREATE_ADD_GLASS(but0, WGlButton, dyno_ctrl, "Drive", "LensBeta");
-    gs.SetNodeAdvance(but0);
-    but0->SetCbackAlpha(tricam);
-    but0->SetCbackMethodName("DynoDrive");
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Explode", "LensBeta:TringuCamAlpha");
+      but->SetCbackAlpha(tricam);
+      but->SetCbackMethodName("DynoExplode");
+    }
 
-    CREATE_ADD_GLASS(but1, WGlButton, dyno_ctrl, "<undef>", "LensName:LensBeta");
-    gs.SetNodeAdvance(but1);
-    but1->SetCbackAlpha(tricam);
-    but1->SetCbackMethodName("DynoDetails");
+    {
+      gdir = uidir->AssertPath("Flyer");
+      CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-    CREATE_ADD_GLASS(butd, WGlButton, dyno_ctrl, "Detailed View", "LensBeta");
-    gs.SetNodeAdvance(butd);
-    butd->SetCbackAlpha(g_shell);
-    butd->SetCbackMethodName("SpawnClassView");
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "Height", "LensAlpha");
+      gs.SetNodeAdvance(val);
+      val->SetMin(-10); val->SetMax(100); val->SetStepB(100);
+      val->SetFormat("H: %.2f");
+      val->SetCbackMemberName("Height");
+      val->SetConstVal(true);
 
-    CREATE_ADD_GLASS(val1, WGlValuator, dyno_ctrl, "Speed", "LensAlpha");
-    gs.SetNodeAdvance(val1);
-    val1->SetMin(-10); val1->SetMax(100); val1->SetStepB(100);
-    val1->SetFormat("Speed: %.2f");
-    val1->SetCbackMemberName("V");
+    }
 
-    CREATE_ADD_GLASS(val2, WGlValuator, dyno_ctrl, "Rot", "LensAlpha");
-    gs.SetNodeAdvance(val2);
-    val2->SetMin(-10); val2->SetMax(100); val2->SetStepB(100);
-    val2->SetFormat("Rot: %.2f");
-    val2->SetCbackMemberName("W");
+    {
+      gdir = uidir->AssertPath("LandMark");
+      CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-    CREATE_ADD_GLASS(val3, WGlValuator, dyno_ctrl, "Height", "LensAlpha");
-    gs.SetNodeAdvance(val3);
-    val3->SetMin(-10); val3->SetMax(100); val3->SetStepB(100);
-    val3->SetFormat("H: %.2f");
-    val3->SetCbackMemberName("Height");
-    val3->SetConstVal(true);
-  }
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "Phi", "LensAlpha");
+      gs.SetNodeAdvance(val);
+      val->SetStepA(1); val->SetStepB(10);
+      val->SetFormat("Phi: %.1f");
+      val->SetCbackMemberName("Phi");
 
-  gs.Reset();
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "Sx", "LensAlpha");
+      gs.SetNodeAdvance(val);
+      val->SetStepA(1); val->SetStepB(10);
+      val->SetFormat("Sx: %.1f");
+      val->SetCbackMemberName("Sx");
 
-  {
-    CREATE_ADD_GLASS(stato_ctrl, WGlWidget, menu_scene, "StatoCtrl", 0);
-    stato_ctrl->SetRnrElements(false);
-
-    CREATE_ADD_GLASS(but1, WGlButton, stato_ctrl, "<undef>", "LensName:LensBeta");
-    gs.SetNodeAdvance(but1);
-    but1->SetCbackAlpha(tricam);
-    but1->SetCbackMethodName("StatoDetails");
-
-    CREATE_ADD_GLASS(butd, WGlButton, stato_ctrl, "Detailed View", "LensBeta");
-    gs.SetNodeAdvance(butd);
-    butd->SetCbackAlpha(g_shell);
-    butd->SetCbackMethodName("SpawnClassView");
-
-    CREATE_ADD_GLASS(val1, WGlValuator, stato_ctrl, "CollCount", "LensAlpha");
-    gs.SetNodeAdvance(val1);
-    val1->SetConstVal(true);
-    val1->SetFormat("Dyno colls: %.0f");
-    val1->SetCbackMemberName("NDynoColls");
-
-    CREATE_ADD_GLASS(but2, WGlButton, stato_ctrl, "Connect Energy", "LensBeta");
-    gs.SetNodeAdvance(but2);
-    but2->SetCbackAlpha(tricam);
-    but2->SetCbackMethodName("PrepConnectStatos");
-    but2->SetCbackValue(0);
-    but2->SetCbackString("r2y");
-
-    CREATE_ADD_GLASS(but3, WGlButton, stato_ctrl, "Connect Metal", "LensBeta");
-    gs.SetNodeAdvance(but3);
-    but3->SetCbackAlpha(tricam);
-    but3->SetCbackMethodName("PrepConnectStatos");
-    but3->SetCbackValue(1);
-    but3->SetCbackString("coldsteel");
-  }
-
-  gs.Reset();
-
-  {
-    CREATE_ADD_GLASS(lmark_ctrl, WGlWidget, menu_scene, "LandMarkCtrl", 0);
-    lmark_ctrl->SetRnrElements(false);
-
-    CREATE_ADD_GLASS(but1, WGlButton, lmark_ctrl, "<undef>", "LensName:LensBeta");
-    gs.SetNodeAdvance(but1);
-    but1->SetCbackAlpha(tricam);
-    but1->SetCbackMethodName("LandMarkDetails");
-
-    CREATE_ADD_GLASS(butd, WGlButton, lmark_ctrl, "Detailed View", "LensBeta");
-    gs.SetNodeAdvance(butd);
-    butd->SetCbackAlpha(g_shell);
-    butd->SetCbackMethodName("SpawnClassView");
-
-    CREATE_ADD_GLASS(val1, WGlValuator, lmark_ctrl, "Phi", "LensAlpha");
-    gs.SetNodeAdvance(val1);
-    val1->SetStepA(1); val1->SetStepB(10);
-    val1->SetFormat("Phi: %.1f");
-    val1->SetCbackMemberName("Phi");
-
-    CREATE_ADD_GLASS(val2, WGlValuator, lmark_ctrl, "Sx", "LensAlpha");
-    gs.SetNodeAdvance(val2);
-    val2->SetStepA(1); val2->SetStepB(10);
-    val2->SetFormat("Sx: %.1f");
-    val2->SetCbackMemberName("Sx");
-
-    CREATE_ADD_GLASS(val3, WGlValuator, lmark_ctrl, "Sy", "LensAlpha");
-    gs.SetNodeAdvance(val3);
-    val3->SetStepA(1); val3->SetStepB(10);
-    val3->SetFormat("Sy: %.1f");
-    val3->SetCbackMemberName("Sy");
+      CREATE_ADD_GLASS(val, WGlValuator, menu, "Sy", "LensAlpha");
+      gs.SetNodeAdvance(val);
+      val->SetStepA(1); val->SetStepB(10);
+      val->SetFormat("Sy: %.1f");
+      val->SetCbackMemberName("Sy");
+    }
   }
 }
 

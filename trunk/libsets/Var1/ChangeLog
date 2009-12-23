@@ -1,5 +1,20 @@
 2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Make proper lens-overlay-menu composition by following class hierarchy.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add memeber SGridStepper.
+	Add method SelectTopMenuForLens(). This traverses the class
+	hierarchy towards parent-class and assembles the full menu for
+	given lens.
+
+	* Glasses/TringuCam.cxx:
+	Remove includes for Crawler, Flyer and LandMark and some silly
+	code that was needed for menu handling.
+
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Improve handling and fix rendering of tubes.
 
 	* Glasses/Tringula.cxx:
