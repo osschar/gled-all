@@ -1,5 +1,15 @@
 2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Allow all extentios to be blown up.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Replace DynoExplode() with ExtendioExplode() - now all extendios
+	can be blown up.
+	Replace StatoDetails() and DynoDetails() with common ExtendioDetails().
+
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Make proper lens-overlay-menu composition by following class hierarchy.
 
 	* Glasses/TSPupilInfo.cxx:

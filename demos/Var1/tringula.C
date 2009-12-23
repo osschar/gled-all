@@ -1101,13 +1101,17 @@ void make_overlay()
       gdir = uidir->AssertPath("Extendio");
       CREATE_ADD_GLASS(menu, ZList, gdir, "menu", 0);
 
-      CREATE_ADD_GLASS(but, WGlButton, menu, "<undef>", "LensName:LensBeta:PupilAlpha");
-      but->SetCbackAlpha(tspupil);
+      CREATE_ADD_GLASS(but, WGlButton, menu, "<undef>", "LensName:LensBeta:TringuCamAlpha");
+      but->SetCbackAlpha(tricam);
       but->SetCbackMethodName("ExtendioDetails");
 
       CREATE_ADD_GLASS(but, WGlButton, menu, "Detailed View", "LensBeta");
       but->SetCbackAlpha(g_shell);
       but->SetCbackMethodName("SpawnClassView");
+
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Explode", "LensBeta:TringuCamAlpha");
+      but->SetCbackAlpha(tricam);
+      but->SetCbackMethodName("ExtendioExplode");
     }
 
     {
@@ -1160,10 +1164,6 @@ void make_overlay()
       CREATE_ADD_GLASS(but, WGlButton, menu, "Drive", "LensBeta:TringuCamAlpha");
       but->SetCbackAlpha(tricam);
       but->SetCbackMethodName("DynoDrive");
-
-      CREATE_ADD_GLASS(but, WGlButton, menu, "Explode", "LensBeta:TringuCamAlpha");
-      but->SetCbackAlpha(tricam);
-      but->SetCbackMethodName("DynoExplode");
     }
 
     {
