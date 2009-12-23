@@ -106,6 +106,12 @@ void Tringula::AdEnlightenment()
     mQueen->CheckIn(l);
     SetLandMarks(l);
   }
+  if (mTubes == 0) {
+    ZHashList* l = new ZHashList("Tubes", GForm("Tubes of Tringula %s", GetName()));
+    l->SetElementFID(WSTube::FID());
+    mQueen->CheckIn(l);
+    SetTubes(l);
+  }
 }
 
 /**************************************************************************/
@@ -793,6 +799,13 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
     while (flyo_stepper.step())
     {
       Dynamico& D = * (Dynamico*) *flyo_stepper;
+      D.TimeTick(t, dt);
+    }
+
+    Stepper<> tube_stepper(*mTubes);
+    while (tube_stepper.step())
+    {
+      WSTube& D = * (WSTube*) *tube_stepper;
       D.TimeTick(t, dt);
     }
   }

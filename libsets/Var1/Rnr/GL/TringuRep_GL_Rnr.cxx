@@ -53,6 +53,7 @@ void TringuRep_GL_Rnr::Draw(RnrDriver* rd)
   rd->Render(rd->GetLensRnr(*T.mDynos));
   rd->Render(rd->GetLensRnr(*T.mFlyers));
   rd->Render(rd->GetLensRnr(*T.mLandMarks));
+  rd->Render(rd->GetLensRnr(*T.mTubes));
 }
 
 //void TringuRep_GL_Rnr::PostDraw(RnrDriver* rd) {}

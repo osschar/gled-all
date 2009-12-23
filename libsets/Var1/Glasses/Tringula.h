@@ -77,6 +77,7 @@ protected:
   ZLink<ZHashList>   mDynos;        //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mFlyers;       //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mLandMarks;    //  X{GS} L{} RnrBits{0,0,0,5}
+  ZLink<ZHashList>   mTubes;        //  X{GS} L{} RnrBits{0,0,0,5}
 
   Opcode::CollisionFaces* mRayColFaces;  //!
 
