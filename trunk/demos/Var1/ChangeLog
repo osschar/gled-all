@@ -1,6 +1,11 @@
 2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
+	Move explode button to Extendio (from Crawler).
+
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
 	Put extendio menues into "var/glassui".
 	Add entry for Extendio.
 	Remove repeated entries - class structure is traversed now.

@@ -651,20 +651,12 @@ void TringuCam::ValueInfo::TimeTick(Float_t dt)
 
 //==============================================================================
 
-void TringuCam::StatoDetails(Statico* stato)
+void TringuCam::ExtendioDetails(Extendio* ext)
 {
-  // Should show detailed stato UI, just Dump data for now,
+  // Should show detailed UI, just Dump data for now,
 
-  if (stato)
-    stato->Dump();
-}
-
-void TringuCam::DynoDetails(Dynamico* dyno)
-{
-  // Should show detailed dyno UI, just Dump data for now,
-
-  if (dyno)
-    dyno->Dump();
+  if (ext)
+    ext->Dump();
 }
 
 void TringuCam::DynoDrive(Dynamico* dyno)
@@ -714,18 +706,18 @@ void TringuCam::DynoDrive(Dynamico* dyno)
 
 #include <TSystem.h>
 
-void TringuCam::DynoExplode(Dynamico* dyno)
+void TringuCam::ExtendioExplode(Extendio* ext)
 {
   // Terminate a dyno.
   // Called in a deteached thread!
   //
   // This is all wrong ... but want to try this.
 
-  static const Exc_t _eh("TringuCam::DynoExplode ");
+  static const Exc_t _eh("TringuCam::ExtendioExplode ");
 
   assert_MIR_presence(_eh, MC_IsDetached);
 
-  printf("Dyno '%s' exploding at your command!\n", dyno->GetName());
+  printf("Extendio '%s' exploding at your command!\n", ext->GetName());
 
   AlBuffer *buf;
   AlSource *src;
@@ -738,7 +730,7 @@ void TringuCam::DynoExplode(Dynamico* dyno)
       throw _eh + "explode buffer not found.";
 
     src = new AlSource("TmpExploder");
-    src->ref_trans().SetFromArray(dyno->RefLastTrans());
+    src->ref_trans().SetFromArray(ext->RefLastTrans());
 
     mQueen->CheckIn(src);
 
@@ -759,8 +751,8 @@ void TringuCam::DynoExplode(Dynamico* dyno)
   {
     GLensWriteHolder lck(*mPupilInfo);
     ExtendioSpiritio *es = dynamic_cast<ExtendioSpiritio*>(mPupilInfo->GetCurrentSpiritio());
-    printf("Blowupa es=%p, ext=%p, dyno=%p\n", es, es ? es->GetExtendio() : 0, dyno);
-    if (es && es->GetExtendio() == dyno)
+    printf("Blowupa es=%p, ext=%p, ext=%p\n", es, es ? es->GetExtendio() : 0, ext);
+    if (es && es->GetExtendio() == ext)
       mPupilInfo->SetCurrentSpiritio(0);
   }
 
@@ -768,7 +760,7 @@ void TringuCam::DynoExplode(Dynamico* dyno)
     bool menuswitch;
     {
       GLensReadHolder lck(this);
-      menuswitch = mSelection->Has(dyno);
+      menuswitch = mSelection->Has(ext);
     }
     if (menuswitch)
     {
@@ -780,7 +772,7 @@ void TringuCam::DynoExplode(Dynamico* dyno)
   {
     GLensWriteHolder lck(mQueen);
     mQueen->RemoveLens(src);
-    mQueen->RemoveLens(dyno);
+    mQueen->RemoveLens(ext);
   }
 }
 
