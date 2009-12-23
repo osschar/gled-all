@@ -1,3 +1,18 @@
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve handling and fix rendering of tubes.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add link to list of tubes. Before they were normal children.
+	Call TimeTick() on tubes directly.
+
+	* Glasses/TringuCam.cxx:
+	Add tubes to the tube-list.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Redner tubes, too.
+
 2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Major update of Tringula rendering / management.

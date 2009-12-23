@@ -283,7 +283,7 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     case MA_SprayField:
     {
       mTringuRep->BeginSprayField();
-      // Field is add in time-tick.
+      // Field is added in time-tick.
       break;
     }
     case MA_PickExtendios:
@@ -337,9 +337,9 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 	  if (beta) {
 	    WSTube* tube = make_tube(beta, stato, mGradName);
             mQueen->CheckIn(tube);
-            {
+            {ube
               GLensWriteHolder _wlck(*mTringula);
-              mTringula->Add(tube);
+              mTringula->GetTubes()->Add(tube);
             }
             tube->AnimateConnect();
 	  }
