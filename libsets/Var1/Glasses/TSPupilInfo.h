@@ -9,6 +9,7 @@
 
 #include <Glasses/PupilInfo.h>
 #include <Stones/TimeMakerClient.h>
+#include <Stones/SGridStepper.h>
 
 class Scene;
 class WGlWidget;
@@ -40,6 +41,8 @@ protected:
 
   ZLink<TringuRep>  mTringuRep;       // X{GS} L{}
 
+  SGridStepper      mGridStepper;     // X{r}
+
 public:
   TSPupilInfo(const Text_t* n="TSPupilInfo", const Text_t* t=0);
   virtual ~TSPupilInfo();
@@ -65,6 +68,7 @@ public:
 
   void SelectTopMenu(WGlWidget* weed);           // X{E} C{1} 7 MCWButt()
   void SelectTopMenuByName(const TString& name); // X{E}      7 MCWButt()
+  void SelectTopMenuForLens(ZGlass* lens);       // X{E} C{1} 7 MCWButt()
 
 #include "TSPupilInfo.h7"
   ClassDef(TSPupilInfo, 1); // TringuSol PupilInfo.

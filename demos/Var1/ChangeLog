@@ -1,3 +1,10 @@
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Put extendio menues into "var/glassui".
+	Add entry for Extendio.
+	Remove repeated entries - class structure is traversed now.
+
 2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:
