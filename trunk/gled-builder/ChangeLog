@@ -1,5 +1,11 @@
 2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* external/DevIL/DevIL.pl:
+	* external/freealut/freealut.pl:
+	Pass PREFIX escaped so that it only expands in final make invocation.
+
+2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Allow passing of XXXFLAGS to inferior configures.
 	Improve build procedure -- less has to be written in package pl files.
 
