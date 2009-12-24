@@ -33,7 +33,7 @@ public:
   HPoint(Float_t* p)  : x(p[0]), y(p[1]), z(p[2]) {}
   HPoint(Double_t* p) : x(p[0]), y(p[1]), z(p[2]) {}
   HPoint(TT _x, TT _y, TT _z) : x(_x), y(_y), z(_z) {}
-  virtual ~HPoint() {}
+  ~HPoint() {}
 
   void Set(TT _x, TT _y, TT _z) { x = _x; y = _y; z = _z; }
   void Set(Float_t* p)  { x = p[0]; y = p[1]; z = p[2]; }
@@ -51,7 +51,7 @@ public:
   operator const TT*() const { return &x; }
   operator       TT*()       { return &x; }
 
-  ClassDef(HPoint, 1); // Simple, streamable 3D point.
+  ClassDefNV(HPoint, 1); // Simple, streamable 3D point.
 };
 
 // Axel.
@@ -67,7 +67,7 @@ public:
   HPointF(Float_t* p)  : HPoint<Float_t>(p) {}
   HPointF(Double_t* p) : HPoint<Float_t>(p) {}
   HPointF(Float_t _x, Float_t _y, Float_t _z) : HPoint<Float_t>(_x, _y, _z) {}
-  virtual ~HPointF() {}
+  ~HPointF() {}
 
 #ifndef __CINT__
   operator Opcode::Point* () { return  (Opcode::Point*) &x; }
@@ -76,7 +76,7 @@ public:
   operator const Opcode::Point& () const { return *(Opcode::Point*) &x; }
 #endif
 
-  ClassDef(HPointF, 1); // Simple, streamable 3D point.
+  ClassDefNV(HPointF, 1); // Simple, streamable 3D point.
 };
 
 class HPointD : public HPoint<Double_t>
@@ -86,9 +86,9 @@ public:
   HPointD(Float_t* p)  : HPoint<Double_t>(p) {}
   HPointD(Double_t* p) : HPoint<Double_t>(p) {}
   HPointD(Double_t _x, Double_t _y, Double_t _z) : HPoint<Double_t>(_x, _y, _z) {}
-  virtual ~HPointD() {}
+  ~HPointD() {}
 
-  ClassDef(HPointD, 1); // Simple, streamable 3D point.
+  ClassDefNV(HPointD, 1); // Simple, streamable 3D point.
 };
 
 /******************************************************************************/
@@ -107,7 +107,7 @@ public:
   HTrans(const HTrans& z);
   HTrans(const Float_t*  x);
   HTrans(const Double_t* x);
-  virtual ~HTrans() {}
+  ~HTrans() {}
 
   // General operations
 
@@ -237,12 +237,12 @@ public:
   void     RotateVec3(const TT* in, TT* out) const;
   void     RotateBackVec3(const TT* in, TT* out) const;
 
-  virtual void Print(Option_t* option = "") const;
+  void Print(Option_t* option = "") const;
 
   operator const TT*() const { return M; }
   operator       TT*()       { return M; }
 
-  ClassDef(HTrans, 1);
+  ClassDefNV(HTrans, 1);
 };
 
 // Include "less inline" members (export keyword not supported).
@@ -271,7 +271,7 @@ public:
   HTransF()                          : HTrans<Float_t>()  {}
   HTransF(const HTransF& z)          : HTrans<Float_t>(z) {}
   HTransF(const HTrans<Double_t>& z) : HTrans<Float_t>(z.Array()) {}
-  virtual ~HTransF() {}
+  ~HTransF() {}
 
   using HTrans<Float_t>::SetBaseVec;
   using HTrans<Float_t>::GetBaseVec;
@@ -302,7 +302,7 @@ public:
   operator const Opcode::Matrix4x4& () const { return *(Opcode::Matrix4x4*)M; }
 #endif
 
-  ClassDef(HTransF, 1);
+  ClassDefNV(HTransF, 1);
 };
 
 
@@ -312,7 +312,7 @@ public:
   HTransD() : HTrans<Double_t>() {}
   HTransD(const HTransD& z)         : HTrans<Double_t>(z) {}
   HTransD(const HTrans<Float_t>& z) : HTrans<Double_t>(z.Array()) {}
-  virtual ~HTransD() {}
+  ~HTransD() {}
 
   using HTrans<Double_t>::SetBaseVec;
   using HTrans<Double_t>::GetBaseVec;
@@ -326,10 +326,10 @@ public:
   using HTrans<Double_t>::SetPos;
   using HTrans<Double_t>::GetPos;
 
-  void SetPos(Float_t* x) { M[12] = x[0]; M[13] = x[1]; M[14] = x[2]; }
-  void GetPos(Float_t* x) const { x[0 ] = M[12]; x[1] = M[13]; x[2] = M[14]; }
+  void SetPos(Float_t* x)       { M[12] = x[0]; M[13] = x[1]; M[14] = x[2]; }
+  void GetPos(Float_t* x) const { x[0] = M[12]; x[1] = M[13]; x[2] = M[14]; }
 
-  ClassDef(HTransD, 1);
+  ClassDefNV(HTransD, 1);
 };
 
 #endif

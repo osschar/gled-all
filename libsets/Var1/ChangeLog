@@ -1,3 +1,8 @@
+2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/HTrans.h:
+	Make all methods in HPoint/HTrans non-virtual, use ClassDefNV.
+
 2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Allow all extentios to be blown up.
