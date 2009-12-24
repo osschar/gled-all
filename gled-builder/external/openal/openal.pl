@@ -21,11 +21,16 @@ setup_package($package);
 # Had once also: --enable-vorbis --enable-capture --enable-paranoid-locks
 
 # Eventually also specfy build-type as Release, default is:
-# CMAKE_BUILD_TYPEFIX              RelWithDebInfo
+# CMAKE_BUILD_TYPE Debug Release RelWithDebInfo MinSizeRel
 
 target('configure', <<"FNORD");
 cd build
-cmake -DCMAKE_INSTALL_PREFIX:PATH=\${PREFIX} ..
+cmake -DCMAKE_INSTALL_PREFIX:PATH=\${PREFIX} \\
+      -DCMAKE_BUILD_TYPE=Release \\
+      -DCMAKE_C_FLAGS=$CFLAGS \\
+      -DCMAKE_EXE_LINKER_FLAGS=$LDFLAGS \\
+      -DCMAKE_SHARED_LINKER_FLAGS=$LDFLAGS \\
+      ..
 FNORD
 
 target('build', <<"FNORD");

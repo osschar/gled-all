@@ -17,6 +17,51 @@ $TAR_RE    = '(?:tar\.gz|tgz)';
 
 
 ########################################################################
+# Configure environment variables
+########################################################################
+
+$CPPFLAGS = $GB_CPPFLAGS;
+$CFLAGS   = $GB_CFLAGS;
+$CXXFLAGS = $GB_CXXFLAGS;
+$LDFLAGS  = $GB_LDFLAGS;
+
+$CFGFLAGS = "--prefix=\${PREFIX}";
+
+sub add_flags
+{
+  my $var = shift;
+  if ($$var eq "")
+  {
+    $$var = join(" ", @_);
+  } else {
+    $$var = join(" ", $$var, @_);
+  }
+}
+
+sub add_cppflags { add_flags(\$CPPFLAGS, @_); }
+sub add_cflags   { add_flags(\$CFLAGS,   @_); }
+sub add_cxxflags { add_flags(\$CXXFLAGS, @_); }
+sub add_ldflags  { add_flags(\$LDFLAGS,  @_); }
+sub add_cfgflags { add_flags(\$CFGFLAGS, @_); }
+
+sub add_search_path
+{
+  my $path = shift;
+
+  add_cppflags("-I${path}/include");
+  add_ldflags ("-L${path}/lib");
+}
+
+# Add extra paths into CPP/LD FLAGS right away.
+my @eps = split(/:/, $EXTRA_PATHS);
+if ($#eps >= 0)
+{
+  add_cppflags(map { "-I${_}/include" } @eps);
+  add_ldflags (map { "-L${_}/lib"     } @eps);
+}
+
+
+########################################################################
 # System functions
 ########################################################################
 
@@ -245,16 +290,8 @@ sub update_cache
 @required_tgts = ( 'configure', 'build', 'install' );
 %done_tgts     = ();
 
-sub target
+sub output_target
 {
-  # Register commands to be run for target.
-  # The commands can be like this:
-  # echo command
-  # echo a very long command that \\
-  #    is split already here
-  # echo and yet another one
-  # echo `pwd`
-  
   my $tgt = shift;
   my $cmd = shift;
 
@@ -271,26 +308,80 @@ FNORD
   ++$done_tgts{$tgt};
 }
 
+sub target
+{
+  # Register commands to be run for target.
+  # The commands can be like this:
+  # echo command
+  # echo a very long command that \\
+  #    is split already here
+  # echo and yet another one
+  # echo `pwd`
+  
+  my $tgt = shift;
+  my $cmd = shift;
+
+  if ($tgt eq 'configure' and $cmd eq '<std>')
+  {
+    target_configure();
+    return;
+  }
+
+  output_target($tgt, $cmd);
+}
+
+sub target_configure
+{
+  # Special form for invoking configure taking into account value
+  # of CPPFLAGS, CFLAGS, CXXFLAGS and LDFLAGS.
+
+  # All WITHOUT trailing \n
+  my $prefix   = shift; # prefix lines
+  my $postfix  = shift; # postfix lines
+
+  my $conf = "./configure ";
+  $conf .= "CPPFLAGS='$CPPFLAGS' " if ($CPPFLAGS ne "");
+  $conf .= "CFLAGS='$CFLAGS' "     if ($CFLAGS   ne "");
+  $conf .= "CXXFLAGS='$CXXFLAGS' " if ($CXXFLAGS ne "");
+  $conf .= "LDFLAGS='$LDFLAGS' "   if ($LDFLAGS  ne "");
+  $conf .= $CFGFLAGS;
+
+  my @args;
+  push(@args, $prefix)  if ($prefix  ne "");
+  push(@args, $conf);
+  push(@args, $postfix) if ($postfix ne "");
+  output_target('configure', join("\n", @args));
+
+  # print STDERR "CPPFLAGS = $CPPFLAGS\n";
+  # print STDERR "CFLAGS   = $CFLAGS\n";
+  # print STDERR "CXXFLAGS = $CXXFLAGS\n";
+  # print STDERR "LDFLAGS  = $LDFLAGS\n";
+  # print STDERR "CFGFLAGS = $CFGFLAGS\n";
+}
+
 sub use_defaults_for_remaining_targets
 {
   # Optional argument - pre-command.
   # Useful for specifying "cd build-dir" or doing some environment setup.
 
   my $precmd = shift;
-  if (defined $precmd)
+  if (defined $precmd and not $precmd =~ m/\n$/)
   {
-    $precmd .= "\n" unless $precmd =~ m/\n$/;
+    $precmd .= "\n";
   }
 
   my %default_cmds  = (
-    'configure' => "./configure --prefix=$PREFIX",
+    'configure' => "<std>",
     'build'     => $parallel ? "make ${MAKE_J_OPT}" : "make",
     'install'   => "make install"
   );
 
   for $tgt (@required_tgts)
   {
-    target($tgt, $precmd . $default_cmds{$tgt}) unless exists  $done_tgts{$tgt};
+    unless (exists $done_tgts{$tgt})
+    {
+      target($tgt, $precmd . $default_cmds{$tgt});
+    }
   }
 }
 

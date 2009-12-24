@@ -1,3 +1,38 @@
+2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Allow passing of XXXFLAGS to inferior configures.
+	Improve build procedure -- less has to be written in package pl files.
+
+	* configure.ac:
+	If no CFLAGS, CXXFLAGS were passed, make sure they remain empty.
+	Add EXTRA_PATHS config var to allow passing of additional
+	installation directories to all sub-configures.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	Set GB_XXXFLAGS variables to corresponding XXXFLAGS.
+	Set EXTRA_PATHS variable.
+
+	* GledBuildExternal.pm:
+	Add handling of XXXFLAGS variables.
+	Add functions add_xxxflags().
+	Add function add_search_path().
+	The configure target is now generated in a sophisticated way so
+	that all XXXFLAGS get propagated if they are not empty.
+	Special function target_configure() was added to perform this.
+
+	* README:
+	Add a note about XXXFLAGS passing and EXTRA_PATHS.
+
+	* external/DevIL/DevIL.pl:
+	* external/fltk-mt/fltk-mt.pl:
+	* external/fltk/fltk.pl:
+	* external/freealut/freealut.pl:
+	* external/gts/gts.pl:
+	* external/lcms/lcms.pl:
+	* external/openal/openal.pl:
+	Simplify and improve using new features.
+
 2009-12-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix compilation issue of root on debian.

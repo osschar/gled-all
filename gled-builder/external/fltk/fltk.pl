@@ -20,22 +20,17 @@ setup_package($package);
 
 # print STDERR "Package setup, srctar=$srctarfile, ver=$version, tardir=$tardir\n";
 
-my $config_args;
+add_cxxflags("-fPIC -O2");
+add_cfgflags("--enable-shared --enable-threads");
+
 if ($BUILD_OS =~ /linux/)
 {
-  $config_args .= "--enable-xft";
+  add_cfgflags("--enable-xft");
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
-  $config_args .= "--enable-quartz";
+  add_cfgflags("--enable-quartz");
 }
-
-target('configure', <<"FNORD");
-./configure   CXXFLAGS="-fPIC -O0 -g" \\
-            --prefix=\${PREFIX} \\
-            --enable-shared --enable-threads $config_args
-FNORD
-
 
 # Install of fltk wipes include/FL - so fltk-mt needs to be
 # reinstalled after install of fltk.

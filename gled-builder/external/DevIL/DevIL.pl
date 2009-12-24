@@ -18,35 +18,29 @@ $parallel = 1;
 
 setup_package($package);
 
-my $cppfl = "-I\${PREFIX}/include";
-my $cfl   = "-O2 -fPIC";
-my $ldfl  = "-L\${PREFIX}/lib";
-if ($CC eq 'gcc' and $CC_MAJOR == 4 and $CC_MINOR >= 2) {
-  $cfl .= " -fgnu89-inline";
+add_search_path($PREFIX);
+
+add_cflags  ("-fPIC");
+
+if ($CC eq 'gcc' and $CC_MAJOR == 4 and $CC_MINOR >= 2)
+{
+  add_cflags("-fgnu89-inline");
 }
 
-my $config_args;
 if ($BUILD_OS =~ /linux/)
 {
   if ($DISTRO_VENDOR eq 'redhat' and $DISTRO_NAME eq 'slc') {
-    $ldfl .= " -L/usr/X11R6/lib";
+    add_ldflags ("-L/usr/X11R6/lib");
   }
-  $ldfl .= " -ljpeg -ltiff -lmng";
-  $config_args .= "--enable-ILU --enable-ILUT";
+  add_ldflags ("-ljpeg -ltiff -lmng");
+  add_cfgflags("--enable-ILU --enable-ILUT");
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
   # ILUT has trouble linking against GL. Not used in Gled anyway.
-  $config_args .= "--enable-ILU";
-  $cppfl .= " -I/sw/include";
-  $ldfl  .= " -L/sw/lib";
+  add_cfgflags("--enable-ILU");
 }
 
-target('configure', <<"FNORD");
-./configure CPPFLAGS="$cppfl" \\
-            CFLAGS="$cfl" \\
-            LDFLAGS="$ldfl" \\
-          --prefix=\${PREFIX} $config_args
-FNORD
+target_configure($config_args);
 
 use_defaults_for_remaining_targets();

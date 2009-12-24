@@ -33,6 +33,13 @@ CC_VERSION := @CC_VERSION@
 CC_MAJOR   := @CC_MAJOR@
 CC_MINOR   := @CC_MINOR@
 
+GB_CPPFLAGS := @CPPFLAGS@
+GB_CFLAGS   := @CFLAGS@
+GB_CXXFLAGS := @CXXFLAGS@
+GB_LDFLAGS  := @LDFLAGS@
+
+EXTRA_PATHS := @EXTRA_PATHS@
+
 ########################################################################
 # Common variables
 ########################################################################

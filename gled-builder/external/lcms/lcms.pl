@@ -17,9 +17,7 @@ $parallel = 1;
 
 setup_package($package);
 
-target('configure', <<"FNORD");
-./configure   CFLAGS="-O2 -fPIC" --prefix=\${PREFIX}
-FNORD
+add_cflags("-O2 -fPIC");
 
 target('install', <<"FNORD");
 make install
