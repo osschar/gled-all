@@ -69,6 +69,13 @@ to minimize the impact on the rest of the system.
 
 One can interact with the build on a lower level.
 
+CPPFLAGS, CFLAGS, CXXFLAGS and LDFLAGS passed to configure are stored into
+corresponding 'GB_'-prefixed variables so that they don't interfere with
+recursive make invocation. If set, they are passed to configure of each
+package (not to gled yet -- it could be).
+
+EXTRA_PATHS are split on ':' and added to CPP (-I) and LD (-L) flags.
+
 External
 --------
   # To build everything:

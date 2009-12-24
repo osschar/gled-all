@@ -77,6 +77,21 @@ AC_ARG_CONF_VAR([MAKE_J_OPT],
 		[parallel build option (for packages that support it)],
 		["-j4"])
 
+AC_ARG_CONF_VAR([EXTRA_PATHS],
+		[':' separated list of directories to use for build],
+		[""])
+
+# Redefine CFLAGS to empty if not set by user.
+AC_ARG_CONF_VAR([CFLAGS],
+                [Flags for C compiler],
+		[""])
+
+# Redefine CXXFLAGS to empty if not set by user.
+AC_ARG_CONF_VAR([CXXFLAGS],
+                [Flags for C++ compiler],
+		[""])
+
+
 AC_PROG_CPP
 AC_PROG_CC
 AC_PROG_CXX

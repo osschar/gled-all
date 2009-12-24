@@ -18,6 +18,12 @@ $parallel = 1;
 
 setup_package($package);
 
+my $ext = "\${PREFIX}";
+if ($EXTRA_PATHS ne "")
+{
+  $ext .= ":${EXTRA_PATHS}";
+}
+
 target('configure', <<"FNORD");
 ./configure --prefix=\${PREFIX} --external=\${PREFIX}
 FNORD

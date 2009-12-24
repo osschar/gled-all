@@ -18,14 +18,13 @@ $parallel = 1;
 
 setup_package($package);
 
-my $cppflags;
-if ($DISTRO_VENDOR eq 'gentoo') {
-  $cppflags = "CPPFLAGS=-I/usr/include/netpbm";
+if ($DISTRO_VENDOR eq 'gentoo')
+{
+  add_cppflags("-I/usr/include/netpbm");
 }
 
-target('configure', <<"FNORD");
-NOCONFIGURE=true bash autogen.sh
-./configure $cppflags CXXFLAGS=-O2 --prefix=\${PREFIX}
-FNORD
+add_cxxflags("-O2");
+
+target_configure("NOCONFIGURE=true bash autogen.sh");
 
 use_defaults_for_remaining_targets();

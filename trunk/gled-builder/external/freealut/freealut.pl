@@ -18,11 +18,8 @@ $parallel = 1;
 
 setup_package($package);
 
-target('configure', <<"FNORD");
-./configure   CPPFLAGS=-I\${PREFIX}/include \\
-              CFLAGS="-O2 -fPIC" \\
-              LDFLAGS=-L\${PREFIX}/lib \\
-            --prefix=\${PREFIX}
-FNORD
+add_search_path($PREFIX);
+
+add_cflags("-O2 -fPIC");
 
 use_defaults_for_remaining_targets();
