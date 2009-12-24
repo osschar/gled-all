@@ -18,7 +18,7 @@ $parallel = 1;
 
 setup_package($package);
 
-add_search_path($PREFIX);
+add_search_path("\${PREFIX}");
 
 add_cflags("-O2 -fPIC");
 
