@@ -1,3 +1,25 @@
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for OSX build.
+
+	* configure:
+	Add sub deduce_libset_dirs to avoid invoking external find. OSX
+	find is inferior to GNU find.
+	Add LDFLAGS to link command for rnr-lib and remove LD_SURPLUS -
+	this is not defined anywhere anymore.
+
+	* make/make_base.inc:
+	Add LDFLAGS to link command for base-lib and view-lib.
+
+	* make/make_defs.inc:
+	Capture root-ld-flags into ROOT_LDFLAGS, add them to LDFLAGS.
+
+	When cleaning up dependencies use perl instead of sed. OSX sed is
+	inferior to GNU sed.
+
+	* make/make_targets.inc:
+	Remove apostrophe in comment - it confuses xcode parser.
+
 2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:
