@@ -1,3 +1,20 @@
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for OSX build. Better Crawler steering in FP mode.
+
+	* Opcode/Makefile:
+	Add ROOT_LDFLAGS to link command.
+
+	* Stones/HTrans.h:
+	Add all possible variants of Dot() to HPoint.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add member 'HPointF mTerrainUp'.
+
+	When in DM_Controllers drive-mode approach alignment with terrain
+	vertical direction more smoothly.
+
 2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/HTrans.h:

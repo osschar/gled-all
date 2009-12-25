@@ -1,3 +1,11 @@
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for OSX build.
+
+	* GForge/Makefile:
+	Add ROOT_CFLAGS to CFLAGS.
+	Add LDFLAGS to link command.
+
 2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.cxx:

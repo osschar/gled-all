@@ -59,9 +59,11 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
 {
   static const Exc_t _eh("Crawler::TimeTick ");
 
+  const Float_t dtf = dt;
+
   // Controllers
-  mThrottle.TimeTick(dt);
-  mWheel.   TimeTick(dt);
+  mThrottle.TimeTick(dtf);
+  mWheel.   TimeTick(dtf);
 
   switch (mDriveMode)
   {
@@ -94,17 +96,30 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   velocity_mag2 = velocity.SquareMagnitude();
   velocity_mag  = sqrtf(velocity_mag2);
 
-  step_length   = velocity_mag * dt + mExtraStep;
+  step_length   = velocity_mag * dtf + mExtraStep;
   mExtraStep    = 0;
+
+  if (mDriveMode == DM_Controllers)
+  {
+    // !!!! The factor 2 below should really be inertia tensor dependant and the force
+    // should be calculated and go into mWVec ... or sth.
+    Float_t dp;
+    dp = mTerrainUp.Dot(mTrans.PtrBaseVecX());
+    if (fabsf(dp) > 0.001f)
+      mTrans.RotateLF(1, 3, 2.0f*dtf*(acosf(dp) - HALFPI));
+    dp = mTerrainUp.Dot(mTrans.PtrBaseVecY());
+    if (fabsf(dp) > 0.001f)
+      mTrans.RotateLF(2, 3, 2.0f*dtf*(acosf(dp) - HALFPI));
+  }
 
   // Use velocity - is needed afterwards, too.
   // [But can be changed by CheckBoundaries()!]
-  // mTrans.Move3LF(mVVec.x * dt, mVVec.y * dt, mVVec.z * dt);
-  mTrans.Move3PF(velocity.x * dt, velocity.y * dt, velocity.z * dt);
+  // mTrans.Move3LF(mVVec.x * dtf, mVVec.y * dtf, mVVec.z * dtf);
+  mTrans.Move3PF(velocity.x * dtf, velocity.y * dtf, velocity.z * dtf);
 
-  mTrans.RotateLF(1, 2, dt*mWVec.x);
-  mTrans.RotateLF(2, 3, dt*mWVec.y);
-  mTrans.RotateLF(3, 1, dt*mWVec.z);
+  mTrans.RotateLF(1, 2, dtf*mWVec.x);
+  mTrans.RotateLF(2, 3, dtf*mWVec.y);
+  mTrans.RotateLF(3, 1, dtf*mWVec.z);
 
   mSafety -= step_length;
   if (mSafety < 0)
@@ -128,7 +143,7 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
 
   Opcode::Point& pos = * (Opcode::Point*) ref_trans().ArrT();
 
-  if (mGrav.DecaySafeties(dt, step_length))
+  if (mGrav.DecaySafeties(dtf, step_length))
   {
     mTringula->GetParaSurf()->pos2grav(pos, mGrav);
 
@@ -165,10 +180,13 @@ reoffset:
 
       if (cache != mOPCRCCache)
       {
-        Float_t* n = terrain_mesh->GetTTvor()->TriangleNormal(mOPCRCCache);
-        mTrans.SetBaseVec(3, n);
-        mTrans.OrtoNorm3Column(2, 3);
-        mTrans.SetBaseVecViaCross(1);
+        mTerrainUp.Set(terrain_mesh->GetTTvor()->TriangleNormal(mOPCRCCache));
+	if (mDriveMode != DM_Controllers)
+	{
+	  mTrans.SetBaseVec(3, mTerrainUp);
+	  mTrans.OrtoNorm3Column(2, 3);
+	  mTrans.SetBaseVecViaCross(1);
+	}
       }
     }
     else

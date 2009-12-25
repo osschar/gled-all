@@ -9,7 +9,12 @@
 
 #include <Glasses/ZNode.h>
 
-#include <AL/alc.h>
+#ifndef __CINT__
+#include <AL/alut.h>
+#else
+class ALCdevice;
+class ALCcontext;
+#endif
 
 class AlContext : public ZNode
 {

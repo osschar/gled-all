@@ -13,11 +13,16 @@ VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
 
-BASE_LD_LIBS:= -lopenal -lalut
-
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------
+
+ifeq (${GLED_SYSTEM},Darwin)
+  BASE_LD_LIBS := -framework OpenAL
+else
+  BASE_LD_LIBS := -lopenal
+endif
+BASE_LD_LIBS += -lalut
 
 LIBSET_TARGETS := # define additional targets (libraires built by default)
 

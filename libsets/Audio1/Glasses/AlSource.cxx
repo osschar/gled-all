@@ -10,8 +10,6 @@
 
 #include <Audio1/Audio1.h>
 
-#include <AL/al.h>
-#include <AL/alc.h>
 #include <AL/alut.h>
 
 #include <TSystem.h>
