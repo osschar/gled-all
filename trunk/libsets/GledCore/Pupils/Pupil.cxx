@@ -1467,7 +1467,7 @@ int Pupil::handle(int ev)
   if (ev == FL_ENTER)
   {
     // Button events also cause enter/leave due to pointer grab (at least on X)
-#if !defined(__APPPLE_) and !defined(WIN32)
+#if !defined(__APPLE__) and !defined(WIN32)
     if (fl_xevent->xcrossing.mode != 0)
       return 1;
 #endif
@@ -1477,7 +1477,7 @@ int Pupil::handle(int ev)
   if (ev == FL_LEAVE)
   {
     // Button events also cause enter/leave due to pointer grab (at least on X)
-#if !defined(__APPPLE_) and !defined(WIN32)
+#if !defined(__APPLE__) and !defined(WIN32)
     if (fl_xevent->xcrossing.mode != 0)
       return 1;
 #endif

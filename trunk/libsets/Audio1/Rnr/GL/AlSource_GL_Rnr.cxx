@@ -7,8 +7,6 @@
 #include "AlSource_GL_Rnr.h"
 #include <RnrBase/RnrDriver.h>
 
-#include <AL/al.h>
-#include <AL/alc.h>
 #include <AL/alut.h>
 #include <GL/glew.h>
 

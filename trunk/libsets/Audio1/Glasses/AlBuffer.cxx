@@ -7,8 +7,6 @@
 #include "AlBuffer.h"
 #include "AlBuffer.c7"
 
-#include <AL/al.h>
-#include <AL/alc.h>
 #include <AL/alut.h>
 
 // AlBuffer

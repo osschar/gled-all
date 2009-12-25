@@ -48,6 +48,10 @@ public:
 
   HPoint& operator*=(TT f) { x *= f; y *= f; z *= f; return *this; }
 
+  TT Dot(const HPoint& v)   const { return x*v.x  + y*v.y  + z*v.z;  }
+  TT Dot(const Float_t* v)  const { return x*v[0] + y*v[1] + z*v[2]; }
+  TT Dot(const Double_t* v) const { return x*v[0] + y*v[1] + z*v[2]; }
+
   operator const TT*() const { return &x; }
   operator       TT*()       { return &x; }
 

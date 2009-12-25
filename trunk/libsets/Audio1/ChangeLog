@@ -1,3 +1,22 @@
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for OSX build.
+
+	* Audio1/Audio1.cxx:
+	* Glasses/AlBuffer.cxx:
+	* Glasses/AlContext.cxx:
+	* Glasses/AlContext.h:
+	* Glasses/AlListener.cxx:
+	* Glasses/AlSource.cxx:
+	* Rnr/GL/AlListener_GL_Rnr.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	Always just include alut.h. On OSX AL includes are in OpenAL and
+	we really don't care that much.
+	Hide alut.h from CINT.
+
+	* Makefile:
+	On OSX use '-framework OpenAL' instead of '-lopenal'.
+
 2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/AlSource_GL_Rnr.cxx:

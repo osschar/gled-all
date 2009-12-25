@@ -12,7 +12,7 @@
 #include "AlListener.h"
 #include "AlListener.c7"
 
-#include <AL/al.h>
+#include <AL/alut.h>
 
 ClassImp(AlListener);
 

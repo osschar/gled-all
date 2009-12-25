@@ -5,7 +5,7 @@
 include ${GLEDSYS}/make/make_config.inc
 include ${GLEDSYS}/make/make_defs.inc
 
-CFLAGS  = -DFFT_NODOUBLE -c -O2 ${USER_CPP_FLAGS} 
+CFLAGS  = -DFFT_NODOUBLE -c -O2 ${ROOT_CFLAGS} ${USER_CPP_FLAGS} 
 
 LIBS    = -lm ${USER_LD_FLAGS} -lIL -lILU
 
@@ -20,7 +20,7 @@ all:    ${GFORGE}
 
 ${GFORGE}: ${OBJS}
 	${ECHO} -X- Linking $@
-	${MUTE} ${CC} -o ${GFORGE} ${OBJS} ${LIBS}
+	${MUTE} ${CC} -o ${GFORGE} ${LDFLAGS} ${OBJS} ${LIBS}
 
 ${OBJS}: %.o: %.c ${COMMON}
 	${ECHO} -c- Compiling $<

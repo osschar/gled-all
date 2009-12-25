@@ -1,3 +1,10 @@
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for OSX build.
+
+	* Pupils/Pupil.cxx:
+	ifdef __APPLE__ was badly mis-spelled.
+
 2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Sanitize GL variable holder/switch classes.

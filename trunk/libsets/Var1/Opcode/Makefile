@@ -9,7 +9,7 @@ LIB  := ../lib/libOpcode.${LDEXT}
 all: ${LIB}
 
 ${LIB}: ${OBJS}
-	${LD} ${LDSHAREDOPT} -o $@ ${OBJS}
+	${LD} ${LDSHAREDOPT} ${ROOT_LDFLAGS} -o $@ ${OBJS}
 
 clean:
 	@rm -f ${OBJS}

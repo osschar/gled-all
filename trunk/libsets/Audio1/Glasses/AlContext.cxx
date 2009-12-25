@@ -12,8 +12,6 @@
 #include "AlContext.h"
 #include "AlContext.c7"
 
-#include <AL/al.h>
-#include <AL/alc.h>
 #include <AL/alut.h>
 
 ClassImp(AlContext);
