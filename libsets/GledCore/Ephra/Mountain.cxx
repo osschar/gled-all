@@ -14,6 +14,9 @@
 #include <errno.h>
 #include <pthread.h>
 
+#ifdef __APPLE__
+#define _XOPEN_SOURCE
+#endif
 #include <ucontext.h>
 #include <fenv.h> // requires _GNU_SOURCE to be defined for trap control
 
