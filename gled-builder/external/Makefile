@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-PACKAGES := glew root fltk fltk-mt DevIL gts openal freealut
+PACKAGES := root fltk fltk-mt DevIL gts openal freealut
 
 .PHONY: ${PACKAGES} all all-but-root
 
@@ -8,7 +8,8 @@ PACKAGES := glew root fltk fltk-mt DevIL gts openal freealut
 #
 # lcms - there was really no need for it.
 # DevIL:    lcms
-
+#
+# glew - used from root (or from system)
 
 all: ${PACKAGES}
 
