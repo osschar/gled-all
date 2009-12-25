@@ -42,6 +42,14 @@ sub system_or_die
 
 ########################################################################
 
+sub deduce_libset_dirs
+{
+  opendir(my $dh, ".") or die "can’t opendir top-directory: $!";
+  my @dirs = grep { /^[A-Z]/ and -l "$_" } readdir($dh);
+  closedir $dh;
+  return @dirs;
+}
+
 sub deduce_libset_list
 {
   my @l;
@@ -58,8 +66,7 @@ sub deduce_libset_list
   }
   elsif($config->{LIBSETS} eq '<auto>' or $config->{LIBSETS} eq '<auto-prompt>')
   {
-    my $lss = exec_or_die('find . -maxdepth 1 -type l -name [A-Z]\* -printf "%P\n"');
-    @l = split(/\n/, $lss);
+    @l = deduce_libset_dirs();
     print "The following libsets will be configured for building:\n";
     print "  " . join(':', @l) . "\n";
     if ($config->{LIBSETS} eq '<auto-prompt>') {
@@ -360,8 +367,8 @@ fnord
 
     print MC "\${${rnr}_RNR_LIB_NAME}:\t \${${rnr}_RNR_OBJS}\n";
     print MC "\t\${ECHO} -X- Linking \$\@\n";
-    print MC "\t\${MUTE} \${LD} -o \$\@ \${LDSHAREDOPT} \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib " .
-             "\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \${LD_SURPLUS}\n";
+    print MC "\t\${MUTE} \${LD} -o \$\@ \${LDSHAREDOPT} \${LDFLAGS} \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib " .
+             "\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS}\n";
     print MC "RNR_SRCS += \${${rnr}_RNR_SRCS}\n";
     print MC "RNR_HDRS += \${${rnr}_RNR_HDRS}\n";
     print MC "RNR_OBJS += \${${rnr}_RNR_OBJS}\n";

@@ -56,13 +56,14 @@ endif
 ROOT_CFLAGS  := $(shell ${ROOT_CONFIG} --auxcflags)
 ROOT_CPP_DIR := -I$(shell ${ROOT_CONFIG} --incdir)
 ROOT_LD_DIR  := -L$(shell ${ROOT_CONFIG} --libdir)
+ROOT_LDFLAGS := $(shell ${ROOT_CONFIG} --ldflags)
 
 DEFINES  := -D_GNU_SOURCE
 
 CPPFLAGS += ${DEFINES} ${LOCALINCL} ${ROOT_CPP_DIR} \
             ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
 CXXFLAGS += ${ROOT_CFLAGS} -Wall -fPIC -pipe ${USER_CXX_FLAGS}
-LDFLAGS	 += ${USER_LD_FLAGS}
+LDFLAGS	+= ${ROOT_LDFLAGS} ${USER_LD_FLAGS}
 
 # Dictionaries must be compiled without optimization, debug not needed.
 # Drop USER_CXX_FLAGS, they should not matter.
@@ -121,12 +122,12 @@ HC7_SED_FILTER := s![^ ]+\.[hc]7 *!!g
 %.d: %.cxx
 	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
-	  sed -re 's!$*\.o!$*.d $*.o!; ${HC7_SED_FILTER};' > $@
+	  perl -pe 's!$*\.o!$*.d $*.o!; ${HC7_SED_FILTER};' > $@
 
 %.pch.h.d: %.pch.h
 	${ECHO} -d- Mkdepend $<
 	${MUTE} ${MKDEP} ${MKDEPFLAGS} -- ${LOCALINCL} -- $< -f- 2>/dev/null | \
-	  sed -re 's!$*\.pch\.o!$*.pch.h.d $*.pch.h.gch!; ${HC7_SED_FILTER};' > $@
+	  perl -pe 's!$*\.pch\.o!$*.pch.h.d $*.pch.h.gch!; ${HC7_SED_FILTER};' > $@
 
 # Fluid rule with fix ... keep intermidiate files
 %.C %.H:: %.fl
