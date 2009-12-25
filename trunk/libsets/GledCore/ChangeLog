@@ -3,12 +3,12 @@
 	Fixes for OSX build and running.
 
 	* Ephra/Mountain.cxx:
-	Define _XOPEN_SOURCE on osx. Otherwise some functions from ucontext.h do
-   not get exported.
+	Define _XOPEN_SOURCE on osx. Otherwise some functions from
+	ucontext.h do not get exported.
 
-   * macros/mac_hack.C:
-   Hackish macro that attempts to bypass issues with CINT and dynamic library
-   loading on osx.
+	* macros/mac_hack.C:
+	Hackish macro that attempts to bypass issues with CINT and dynamic
+	library loading on osx.
 
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
