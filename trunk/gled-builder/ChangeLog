@@ -1,3 +1,24 @@
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for OSX build. Use GLEW from ROOT.
+
+	* external/glew:
+	* external/lcms:
+	* external/attic/glew:
+	* external/attic/lcms:
+	Move glew and lcms to attic.
+	GLEW from ROOT (or system) is used now.
+	lcms was not being used / built.
+
+	* external/Makefile:
+	Remove glew from package list.
+
+	* external/freealut/freealut.pl
+	Use cmake build.
+
+	* external/openal/openal.pl:
+	Do not build for OSX - OpenAL is provided as framework.
+
 2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/DevIL/DevIL.pl:

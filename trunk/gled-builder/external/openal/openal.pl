@@ -18,10 +18,19 @@ $parallel = 1;
 
 setup_package($package);
 
+# OSX ships with OpenAL framework, do nothing.
+if ($BUILD_OS =~ /darwin/)
+{
+  target('configure', "");
+  target('build', "");
+  target('install', "");
+  `touch unpack configure build install`;
+  exit 0;
+}
+
 # Had once also: --enable-vorbis --enable-capture --enable-paranoid-locks
 
-# Eventually also specfy build-type as Release, default is:
-# CMAKE_BUILD_TYPE Debug Release RelWithDebInfo MinSizeRel
+# CMAKE_BUILD_TYPE: Debug Release RelWithDebInfo MinSizeRel
 
 target('configure', <<"FNORD");
 cd build
@@ -33,14 +42,4 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=\${PREFIX} \\
       ..
 FNORD
 
-target('build', <<"FNORD");
-cd build
-\${MAKE}
-FNORD
-
-target('install', <<"FNORD");
-cd build
-\${MAKE} install
-FNORD
-
-use_defaults_for_remaining_targets("cd CMakeConf");
+use_defaults_for_remaining_targets("cd build");
