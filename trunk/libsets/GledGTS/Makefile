@@ -1,5 +1,5 @@
 # $Id$
-LIB_SET_NAME	= GTS
+LIB_SET_NAME	= GledGTS
 LIB_SET_ID	= 16
 REQUIRES_LIB_SETS = GledCore # add
 
