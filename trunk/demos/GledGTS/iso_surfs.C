@@ -10,7 +10,7 @@
 void iso_surfs()
 {
   Gled::theOne->AssertLibSet("Geom1");
-  Gled::theOne->AssertLibSet("GTS");
+  Gled::theOne->AssertLibSet("GledGTS");
 
   Gled::AssertMacro("sun_demos.C");
 
