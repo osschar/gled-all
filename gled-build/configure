@@ -367,7 +367,7 @@ fnord
 
     print MC "\${${rnr}_RNR_LIB_NAME}:\t \${${rnr}_RNR_OBJS}\n";
     print MC "\t\${ECHO} -X- Linking \$\@\n";
-    print MC "\t\${MUTE} \${LD} -o \$\@ \${LDSHAREDOPT} \${LDFLAGS} \${${rnr}_RNR_OBJS} -L\${GLEDSYS}/lib " .
+    print MC "\t\${MUTE} \${LD} -o \$\@ \${LDSHAREDOPT} -L\${GLEDSYS}/lib \${LDFLAGS} \${${rnr}_RNR_OBJS} " .
              "\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS}\n";
     print MC "RNR_SRCS += \${${rnr}_RNR_SRCS}\n";
     print MC "RNR_HDRS += \${${rnr}_RNR_HDRS}\n";
