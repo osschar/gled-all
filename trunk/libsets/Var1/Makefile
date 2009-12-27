@@ -14,7 +14,7 @@ VIEW_DIRS	:=
 VIEW_FL_DIRS	:=
 
 LIBSET_CPPFLAGS = $(shell pkg-config --cflags glib-2.0)
-BASE_LD_LIBS    = -lOpcode
+BASE_LD_LIBS    = -Llib -lOpcode
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
