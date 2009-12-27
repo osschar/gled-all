@@ -1,3 +1,10 @@
+2009-12-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* make/make_base.inc:
+	Move -L${GLEDSYS}lib before LDFLAGS which might include other lib
+	directiories.
+
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for OSX build.

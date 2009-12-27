@@ -89,13 +89,13 @@ VIEW_LIB_OBJS	= ${VIEW_OBJS} ${VIEW_FL_OBJS} ${VIEW_AUTO_OBJS}
 
 ${BASE_LIB_NAME}: ${BASE_LIB_OBJS}
 	${ECHO} -X- Linking $@
-	${MUTE} ${LD} -o $@ ${LDSHAREDOPT} ${LDFLAGS} ${BASE_LIB_OBJS} \
-	  -L${GLEDSYS}/lib ${ABOVE_BASE_LIBS} ${USER_LD_FLAGS} ${BASE_LD_LIBS}
+	${MUTE} ${LD} -o $@ ${LDSHAREDOPT} -L${GLEDSYS}/lib ${LDFLAGS} ${BASE_LIB_OBJS} \
+     ${ABOVE_BASE_LIBS} ${USER_LD_FLAGS} ${BASE_LD_LIBS}
 
 ${VIEW_LIB_NAME}: ${VIEW_LIB_OBJS}
 	${ECHO} -X- Linking $@
-	${MUTE} ${LD} -o $@ ${LDSHAREDOPT} ${LDFLAGS} ${VIEW_LIB_OBJS} \
-	  -L${GLEDSYS}/lib ${ABOVE_VIEW_LIBS} ${VIEW_LD_LIBS}
+	${MUTE} ${LD} -o $@ ${LDSHAREDOPT} -L${GLEDSYS}/lib ${LDFLAGS} ${VIEW_LIB_OBJS} \
+     ${ABOVE_VIEW_LIBS} ${VIEW_LD_LIBS}
 
 ##########################################################################
 # Targets
