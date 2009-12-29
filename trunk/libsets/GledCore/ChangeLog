@@ -1,3 +1,9 @@
+2009-12-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* macros/mac_hack.C:
+	Remove extra libset loading - this was solved by renaming libset GTS
+	to GledGTS.
+
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for OSX build and running.
