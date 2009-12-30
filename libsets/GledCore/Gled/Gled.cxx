@@ -700,6 +700,8 @@ void Gled::Exit()
 void* Gled::Exit_tl(void*)
 {
   theOne->ExitVirtual();
+  GledNS::ShutdownLibSets();
+  // Shutdown GledCore manually, when needed.
   return 0;
 }
 

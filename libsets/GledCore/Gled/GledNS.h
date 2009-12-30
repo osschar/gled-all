@@ -253,7 +253,7 @@ namespace GledNS
   typedef hash_map<CID_t, ClassInfo*>::iterator		 hCid2pCI_i;
 
   typedef hash_map<TString, A_Rnr_Creator_foo>		 hRnr2RCFoo_t;
-  typedef hash_map<TString, A_Rnr_Creator_foo>::iterator  hRnr2RCFoo_i;
+  typedef hash_map<TString, A_Rnr_Creator_foo>::iterator hRnr2RCFoo_i;
 #endif
 
   struct LibSetInfo : public InfoBase
@@ -373,11 +373,17 @@ namespace GledNS
   bool	IsLoaded(const TString& lib_set);
   bool	IsLoaded(LID_t lid);
 
+  void  ShutdownLibSet(const TString& lib_set);
+  void  ShutdownLibSets();
+
+  // ----------------------------------------------------------------
+
   void  BootstrapClass(ClassInfo* ci);
 
   TString FabricateLibName(const TString& libset);
   TString FabricateInitFoo(const TString& libset);
   TString FabricateUserInitFoo(const TString& libset);
+  TString FabricateUserShutdownFoo(const TString& libset);
 
   ZGlass* ConstructLens(FID_t fid);
   bool	  IsA(ZGlass* glass, FID_t fid);

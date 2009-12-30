@@ -32,23 +32,25 @@
 
 /**************************************************************************/
 
-int		G_DEBUG = 0;
+int G_DEBUG = 0;
 
-struct FD_pair {
+struct FD_pair
+{
   TFile* file; TDirectory* dir;
   FD_pair(TFile* f, TDirectory* d) : file(f), dir(d) {}
 };
 
-namespace GledNS {
-
+namespace GledNS
+{
   TDirectory* GledRoot = 0;
 
   stack<FD_pair>	FDstack;
   GMutex		FDmutex(GMutex::recursive);
 
-  hLid2pLSI_t	Lid2LSInfo;	// Catalog of libsets by LibSet ID
-  hName2Lid_t	Name2Lid;	// Catalog of libsets by name
-  hName2Fid_t	Name2Fid;	// Catalog of glasses by name
+  lStr_t        LibSetList;     // List of libsets in reverse init order.
+  hLid2pLSI_t	Lid2LSInfo;	// Catalog of libsets by LibSet ID.
+  hName2Lid_t	Name2Lid;	// Catalog of libsets by name.
+  hName2Fid_t	Name2Fid;	// Catalog of glasses by name.
 
 } // namespace GledNS
 
@@ -83,24 +85,32 @@ Int_t GledNS::LoadSoSet(const TString& lib_set)
 {
   TString libname = FabricateLibName(lib_set);
   Int_t ret = LoadSo(libname);
-  if(ret) {
+  if (ret)
+  {
     ISmess(GForm("GledNS::LoadSoSet loading %s as %s returned %d",
 		  lib_set.Data(), libname.Data(), ret));
   }
-  if(ret < 0) return ret;
+  if (ret < 0) return ret;
+
   ret = InitSoSet(lib_set);
-  if(ret) return ret;
+
+  if (ret) return ret;
+
   AssertRenderers();
+
   return ret;
 }
 
 Int_t GledNS::InitSoSet(const TString& lib_set)
 {
+  static const Exc_t _eh("GledNS::InitSoSet ");
+
   { // init
     TString cmd = FabricateInitFoo(lib_set);
     long* p2foo = (long*) FindSymbol(cmd);
-    if(!p2foo) {
-      ISerr(GForm("GledNS::InitSoSet can't find %s. Safr!", cmd.Data()));
+    if (!p2foo)
+    {
+      ISerr(_eh + GForm("can't find %s. Safr!", cmd.Data()));
       return 2;
     }
     void (*foo)() = (void(*)())(*p2foo);
@@ -109,16 +119,18 @@ Int_t GledNS::InitSoSet(const TString& lib_set)
   { // user_init
     TString cmd = FabricateUserInitFoo(lib_set);
     long* p2foo = (long*) FindSymbol(cmd);
-    if(!p2foo) {
-      ISmess(GForm("GledNS::InitSoSet no user initialization for %s.",
-		   lib_set.Data()));
-    } else {
-      ISmess(GForm("GledNS::InitSoSet execing user initialization for %s.",
-		   lib_set.Data()));
+    if (!p2foo)
+    {
+      ISmess(_eh + "no user initialization for '" + lib_set + "'.");
+    }
+    else
+    {
+      ISmess(_eh + "execing user initialization for '" + lib_set + "'.");
       void (*foo)() = (void(*)())(*p2foo);
       foo();
     }
   }
+  LibSetList.push_back(lib_set);
   return 0;
 }
 
@@ -126,7 +138,8 @@ Int_t GledNS::LoadSo(const TString& full_lib_name)
 {
   G__Set_RTLD_LAZY();
   Int_t ret = gSystem->Load(full_lib_name.Data());
-  if(ret) {
+  if (ret)
+  {
     ISmess(GForm("GledNS::LoadSo loading %s returned %d",
 		 full_lib_name.Data(), ret));
   }
@@ -147,28 +160,32 @@ void* GledNS::FindSymbol(const TString& sym)
 
 void GledNS::BootstrapSoSet(LibSetInfo* lsi)
 {
+  static const Exc_t _eh("GledNS::BootstrapSoSet ");
+
   hLid2pLSI_i i = Lid2LSInfo.find(lsi->fLid);
-  if(i != Lid2LSInfo.end()) {
-    ISwarn(GForm("GledNS::BootstrapSoSet %s(id=%u) already loaded ...",
-		 i->second->fName.Data(), lsi->fLid));
+  if (i != Lid2LSInfo.end())
+  {
+    ISwarn(_eh + GForm("%s(id=%u) already loaded.", i->second->fName.Data(), lsi->fLid));
     return;
   }
-  ISmess(GForm("GledNS::BootstrapSoSet installing %s(id=%u) ...",
-	       lsi->fName.Data(), lsi->fLid));
+  ISmess(_eh + GForm("installing %s(id=%u) ...", lsi->fName.Data(), lsi->fLid));
   Lid2LSInfo[lsi->fLid] = lsi;
   Name2Lid[lsi->fName] = lsi->fLid;
-  // Init deps as well ... loaded by link-time dependence
+  // Init libsets the new one depends on.
+  // The libs are loaded by link-time dependence.
   const char** dep = lsi->fDeps;
-  while(*dep) {
-    if(Name2Lid.find(*dep) == Name2Lid.end()) {
+  while (*dep)
+  {
+    if (Name2Lid.find(*dep) == Name2Lid.end())
+    {
       Int_t ini = InitSoSet(*dep);
-      if(ini) return;
+      if (ini) return;
     }
     ++dep;
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 bool GledNS::IsLoaded(const TString& lib_set)
 {
@@ -180,7 +197,36 @@ bool GledNS::IsLoaded(LID_t lid)
   return (Lid2LSInfo.find(lid) != Lid2LSInfo.end());
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
+
+void GledNS::ShutdownLibSet(const TString& lib_set)
+{
+  static const Exc_t _eh("GledNS::ShutdownLibSet ");
+
+  TString cmd = FabricateUserShutdownFoo(lib_set);
+  long* p2foo = (long*) FindSymbol(cmd);
+  if (!p2foo)
+  {
+    ISmess(_eh + "no user shutdown for '" + lib_set + "'.");
+  }
+  else
+  {
+    ISmess(_eh + "execing user shutdown for '" + lib_set + "'.");
+    void (*foo)() = (void(*)())(*p2foo);
+    foo();
+  }
+}
+
+void GledNS::ShutdownLibSets()
+{
+  while (!LibSetList.empty())
+  {
+    ShutdownLibSet(LibSetList.back());
+    LibSetList.pop_back();
+  }
+}
+
+//==============================================================================
 
 void GledNS::BootstrapClass(GledNS::ClassInfo* ci)
 {
@@ -213,9 +259,17 @@ TString GledNS::FabricateUserInitFoo(const TString& libset)
   return libset + "_GLED_user_init";
 }
 
+TString GledNS::FabricateUserShutdownFoo(const TString& libset)
+{
+  // Returns name of void* pointing to user_shutdown_foo
+
+  return libset + "_GLED_user_shutdown";
+}
+
 /**************************************************************************/
 
-namespace GledNS {
+namespace GledNS
+{
   set<TString>	RnrNames;
 }
 
@@ -258,21 +312,21 @@ void GledNS::AssertRenderers()
 
   lpLSI_t ls_list;
   ProduceLibSetInfoList(ls_list);
-  for(lpLSI_i lsi=ls_list.begin(); lsi!=ls_list.end(); ++lsi) {
+  for (lpLSI_i lsi=ls_list.begin(); lsi!=ls_list.end(); ++lsi) {
     TString libset = (*lsi)->fName;
-    for(set<TString>::iterator rnr=RnrNames.begin(); rnr!=RnrNames.end(); ++rnr) {
-      if((*lsi)->Rnr2RCFoo.find(*rnr) == (*lsi)->Rnr2RCFoo.end()) {
+    for (set<TString>::iterator rnr=RnrNames.begin(); rnr!=RnrNames.end(); ++rnr) {
+      if ((*lsi)->Rnr2RCFoo.find(*rnr) == (*lsi)->Rnr2RCFoo.end()) {
 	TString cmd = FabricateRnrInitFoo(libset, *rnr);
 	long* p2foo = (long*) FindSymbol(cmd);
-	if(!p2foo) {
+	if (!p2foo) {
 	  TString libname = FabricateRnrLibName(libset, *rnr);
 	  int ret = LoadSo(libname);
-	  if(ret < 0) {
+	  if (ret < 0) {
 	    ISerr(_eh + libname + " not existing.");
 	    return;
 	  }
 	  p2foo = (long*) FindSymbol(cmd);
-	  if(!p2foo) {
+	  if (!p2foo) {
 	    ISerr(_eh + cmd + " not existing in " + libname + ".");
 	    return;
 	  }
@@ -286,7 +340,8 @@ void GledNS::AssertRenderers()
 
 void GledNS::AddRenderer(const TString& rnr)
 {
-  if(RnrNames.find(rnr) == RnrNames.end()) {
+  if (RnrNames.find(rnr) == RnrNames.end())
+  {
     RnrNames.insert(rnr);
     AssertRenderers();
   }
@@ -297,12 +352,14 @@ A_Rnr* GledNS::SpawnRnr(const TString& rnr, ZGlass* d, FID_t fid)
   static const Exc_t _eh("GledNS::SpawnRnr ");
 
   LibSetInfo* lsi = FindLibSetInfo(fid.fLid);
-  if(lsi == 0) {
+  if (lsi == 0)
+  {
     ISerr(_eh + GForm("can't demangle lib id=%u.", fid.fLid));
     return 0;
   }
   hRnr2RCFoo_i j = lsi->Rnr2RCFoo.find(rnr);
-  if(j == lsi->Rnr2RCFoo.end()) {
+  if (j == lsi->Rnr2RCFoo.end())
+  {
     ISerr(_eh + GForm("can't find Rnr Constructor for %s.", rnr.Data()));
     return 0;
   }
