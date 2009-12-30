@@ -1,3 +1,14 @@
+2009-12-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Shutdown OpenAL at libset shutdown.
+
+	* Glasses/AlContext.cxx:
+	Add function
+	  void libAudio1_GLED_user_shutdown();
+	that calls alutExit() and a pointer variable pointing to it:
+	  void* Audio1_GLED_user_shutdown;
+	that is needed to demangle it.
+
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for OSX build.
