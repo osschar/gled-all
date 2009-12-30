@@ -72,3 +72,13 @@ void libAudio1_GLED_user_init()
 }
 
 void *Audio1_GLED_user_init = (void*)libAudio1_GLED_user_init;
+
+//------------------------------------------------------------------------------
+
+void libAudio1_GLED_user_shutdown()
+{
+  if ( ! alutExit())
+    ISwarn("libAudio1_GLED_user_shutdown alutExit() failed.");
+}
+
+void *Audio1_GLED_user_shutdown = (void*)libAudio1_GLED_user_shutdown;
