@@ -1,3 +1,24 @@
+2009-12-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for user libset shutdown functions.
+	The same naming conventions apply as for user libset init
+	functions.
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Add the following functions namespace GledNS:
+	  void  ShutdownLibSet(const TString& lib_set);
+	  void  ShutdownLibSets();
+	  TString FabricateUserShutdownFoo(const TString& libset);
+	In InitSoSet() push the newly initialized libset to a global list
+	'LibSetList' of initialized libsets. GledCore is not in this list.
+
+	Beautify code somewhat.
+
+	* Gled/Gled.cxx:
+	Call GledNS::ShutdownLibSets() at the end of shutdown thread
+	function.
+
 2009-12-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* macros/mac_hack.C:
