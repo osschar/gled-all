@@ -908,6 +908,26 @@ public:
 };
 }
 
+
+GThread* Gled::SpawnTRintThread(const TString& name_prefix)
+{
+  // Spawns thread running ROOT's main event loop.
+  // Makes sure the stack size is at least 8MB.
+
+  static const Exc_t _eh("Gled::SpawnTRintThread ");
+
+  GThread* thr = new GThread(name_prefix + "-TRintRunner",
+                    (GThread_foo) TRint_runner_tl, 0, false);
+  thr->SetStackSize(8*1024*1024);
+  if (thr->Spawn())
+  {
+    perror(_eh + "can not create Rint thread, aborting.");
+    exit(1);
+    return 0;
+  }
+  return thr;
+}
+
 void* Gled::TRint_runner_tl(void*)
 {
   // Runs the ROOT application.

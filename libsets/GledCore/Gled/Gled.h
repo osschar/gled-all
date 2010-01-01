@@ -137,6 +137,7 @@ public:
   static void Macro(const Text_t* mac);
   static void LoadMacro(const Text_t* mac);
 
+  GThread*     SpawnTRintThread(const TString& name_prefix);
   static void* TRint_runner_tl(void*);
   static void  TRint_cleanup_tl(void*);
 

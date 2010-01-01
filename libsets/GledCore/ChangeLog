@@ -1,3 +1,25 @@
+2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Make sure TRint thread has at least 8MB of stack. It didn't on OSX.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Add static data-member 'int sMinStackSize' and data member 'int
+	mStackSize'. The static one is initialized to zero first and the
+	non-static is initialized to the values of the static one in
+	constructor.
+	If mStackSize is non-zero in Spawn() function and the default
+	stack size is below its value the stack-size is increased for the
+	spawning thread.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* gled.cxx:
+	* saturn.cxx:
+	Move common TRint-thread spawning code from gled.cxx and
+	saturn.cxx to class Gled.
+	Make sure TRint thread runs with at least 8MB of stack.
+
 2009-12-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for user libset shutdown functions.
