@@ -46,13 +46,8 @@ int main(int argc, char **argv)
   gled->SetExitCondVar(&gled_exit);
 
   // Run TRint
-  GThread app_thread("saturn.cxx-TRintRunner",
-                     (GThread_foo)Gled::TRint_runner_tl, 0, false);
-  if (app_thread.Spawn())
-  {
-    perror(GForm("%scan't create Rint thread", _eh.Data()));
-    exit(1);
-  }
+  // GThread *app_thread =
+  gled->SpawnTRintThread("saturn.cxx");
 
   gled_exit.Wait();
   gled_exit.Unlock();
@@ -61,14 +56,14 @@ int main(int argc, char **argv)
     gled->GetRint()->Terminate(0);
     // It seems ROOT's thread does not like to be canceled anymore as it
     // exits with an uncought, unknown exception.
-    // app_thread.Cancel();
+    // app_thread->Cancel();
     // Tried this, but it didn't wake up the event-loop.
     // gSystem->AddTimer(new TTimer());
   } else {
     Getlinem(kCleanUp, 0);
   }
   // Don't wait ... see above.
-  // app_thread.Join();
+  // app_thread->Join();
 
   gled->StopLogging();
   delete gled;

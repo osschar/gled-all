@@ -90,6 +90,7 @@ private:
   static mPThr2GThr_t  sThreadMap;
   static lpGThread_t   sThreadList;
   static GMutex        sContainerLock;
+  static int           sMinStackSize;
 
   // Thread state / internals
   RState         mRunningState; // X{g}
@@ -105,6 +106,7 @@ private:
   void*		 mEndArg;	// X{gs}
   bool		 bDetached;	// X{g}
   int            mNice;         // X{gs}
+  int            mStackSize;    // X{gs}
 
   // TSD-like members
   ZMirEmittingEntity   *mOwner;
@@ -149,6 +151,9 @@ public:
 
   static GThread* InitMain();
   static void     FiniMain();
+
+  static int      GetMinStackSize();
+  static void     SetMinStackSize(int ss);
 
 #include "GThread.h7"
   ClassDef(GThread, 0);

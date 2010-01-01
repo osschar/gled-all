@@ -58,26 +58,20 @@ int main(int argc, char **argv)
   gled->InitGledCore();
 
   // Run TRint
-  GThread app_thread("gled.cxx-TRintRunner",
-                     (GThread_foo) Gled::TRint_runner_tl, 0, false);
-  if (app_thread.Spawn())
-  {
-    perror(GForm("%scan't create Rint thread.", _eh.Data()));
-    exit(1);
-  }
+  GThread *app_thread = gled->SpawnTRintThread("gled.cxx");
 
   // Run Gled ... FLTK event loop for GledGUI. [ This is somewhat silly. ]
   gled->Run();
 
   if (gled->GetRintRunning())
   {
-    app_thread.Kill(GThread::SigTERM);
+    app_thread->Kill(GThread::SigTERM);
   }
   else
   {
     Getlinem(kCleanUp, 0);
   }
-  app_thread.Join();
+  app_thread->Join();
 
   gled->StopLogging();
   delete gled;

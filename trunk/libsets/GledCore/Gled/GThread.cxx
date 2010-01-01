@@ -26,6 +26,7 @@ int                      GThread::sThreadCount  = 0;
 map<pthread_t, GThread*> GThread::sThreadMap;
 list<GThread*>           GThread::sThreadList;
 GMutex                   GThread::sContainerLock;
+int                      GThread::sMinStackSize = 0;
 
 pthread_key_t GThread::TSD_Self;
 
@@ -40,7 +41,8 @@ GThread::GThread(const Text_t* name) :
   mStartFoo (0), mStartArg (0),
   mEndFoo   (0), mEndArg   (0),
   bDetached (false),
-  mNice (0),
+  mNice     (0),
+  mStackSize(0),
 
   mOwner(0), mMIR(0)
 {
@@ -65,7 +67,8 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg, bool detached) 
   mStartFoo (foo), mStartArg (arg),
   mEndFoo   (0),   mEndArg   (0),
   bDetached (detached),
-  mNice (0),
+  mNice     (0),
+  mStackSize(sMinStackSize),
 
   mOwner(Owner()), mMIR(0)
 {
@@ -150,16 +153,27 @@ void GThread::thread_reaper(void* arg)
 
 int GThread::Spawn()
 {
+  static const Exc_t _eh("GThread::Spawn ");
+
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   if (bDetached)
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
+  size_t stacksize;
+  pthread_attr_getstacksize(&attr, &stacksize);
+  if (mStackSize && (Int_t) stacksize < mStackSize)
+  {
+    ISmess(_eh + "increasing stack size for thread '" + mName +"' to " +
+	   GForm("%dkB (was %dkB).", mStackSize/1024, (Int_t)stacksize/1024));
+    pthread_attr_setstacksize(&attr, mStackSize);
+  }
+
   sContainerLock.Lock();
   mRunningState = RS_Spawning;
   sContainerLock.Unlock();
 
-  int ret =  pthread_create(&mId, &attr, thread_spawner, this);
+  int ret = pthread_create(&mId, &attr, thread_spawner, this);
   if (ret)
   {
     sContainerLock.Lock();
@@ -300,7 +314,7 @@ void GThread::ListThreads()
 
 }
 
-/**************************************************************************/
+//==============================================================================
 
 GThread* GThread::InitMain()
 {
@@ -312,7 +326,7 @@ GThread* GThread::InitMain()
 
   if (sMainThread)
   {
-    throw(_eh + " already called.");
+    throw _eh + " already called.";
   }
 
   pthread_key_create(&TSD_Self, 0);
@@ -336,11 +350,11 @@ void GThread::FiniMain()
 
   if (! sMainThread)
   {
-    throw(_eh + "InitMain() not called.");
+    throw _eh + "InitMain() not called.";
   }
   if (Self() != sMainThread)
   {
-    throw(_eh + "not called from main thread.");
+    throw _eh + "not called from main thread.";
   }
 
   sContainerLock.Lock();
@@ -356,3 +370,16 @@ void GThread::FiniMain()
   delete sMainThread;
   sMainThread = 0;
 }
+
+//==============================================================================
+
+int GThread::GetMinStackSize()
+{
+  return sMinStackSize;
+}
+
+void GThread::SetMinStackSize(int ss)
+{
+  sMinStackSize = ss;
+}
+
