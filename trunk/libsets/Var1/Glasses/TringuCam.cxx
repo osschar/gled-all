@@ -477,7 +477,8 @@ void TringuCam::TimeTick(Double_t t, Double_t dt)
              mUpDown.fIncKey.fDesiredValue, mUpDown.fValue, mUpDown.fDecKey.fDesiredValue));
 
 
-  if (bMouseDown && mMouseAction == MA_SprayField)
+  // This should be handled elsewhere, elsewise.
+  if (bMouseDown && mMouseAction == MA_SprayField && mTringuRep->GetField() != 0)
   {
     CalculateMouseRayVectors();
     MouseRayCollide();
