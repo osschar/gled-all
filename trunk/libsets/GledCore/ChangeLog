@@ -1,5 +1,10 @@
 2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* macros/mac_hack.C:
+	Removed obsolete file - the real problem was too small stack size.
+
+2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Make sure TRint thread has at least 8MB of stack. It didn't on OSX.
 
 	* Gled/GThread.cxx:
