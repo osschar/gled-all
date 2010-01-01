@@ -183,7 +183,7 @@ calculate_velocity:
     static const Float_t probe_inc_fac = 1.414;
     static const Float_t probe_dec_fac = 0.707;
 
-    Float_t min_r = mMesh->GetTTvor()->BoundingBoxHalfDiagonal();
+    Float_t min_r = mMesh->GetTTvor()->GetMaxVertexDistance();
 
     Opcode::SphereCache    SCache;
     Opcode::SphereCollider SC;

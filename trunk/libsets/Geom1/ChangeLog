@@ -1,3 +1,11 @@
+2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Add data-member 'Float_t mMaxVertexDistance' holding maximum
+	distance from origin to any vertex.
+	Calculate it in CalculateBoundingBox().
+
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for OSX build.
