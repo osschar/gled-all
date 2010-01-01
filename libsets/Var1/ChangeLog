@@ -1,3 +1,10 @@
+2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Flyer.cxx:
+	Use max-vertex-distance of TringTvor instead of bbox-half-diagonal
+	to determine minimal sphere radius for doing terrain proximity
+	queries.
+
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for OSX build. Better Crawler steering in FP mode.

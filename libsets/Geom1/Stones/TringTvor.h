@@ -87,6 +87,7 @@ public:
   Bool_t   mBBoxOK;
   Float_t  mMinMaxBox[6];
   Float_t  mCtrExtBox[6];
+  Float_t  mMaxVertexDistance; // Maximum distance of any vertex from the origin.
   Float_t  mMinEdgeLen;
   Float_t  mMaxEdgeLen;
 
@@ -135,6 +136,7 @@ public:
   void CalculateBoundingBox();
   void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }
 
+  Float_t GetMaxVertexDistance() const { return mMaxVertexDistance; }
   Float_t BoundingBoxDiagonal();
   Float_t BoundingBoxHalfDiagonal();
   Float_t BoundingBoxXYArea();
