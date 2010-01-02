@@ -1,3 +1,22 @@
+2010-01-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move some generally useful intersection functions from Flyer to Extendio.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	Move the following functions from Flyer to Extendio:
+	  Float_t height_above_terrain(const Opcode::Point& down_dir);
+	  Int_t   collide_with_tringula(CollisionSegments& segments);
+	height_above_terrain() now takes down-direction as argument,
+	before it used local down direction from GravData available in
+	Dynamicos.
+
+	* Glasses/Dynamico.h:
+	Add wrapper for height_above_terrain() that uses local direction of
+	gravity.
+
 2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Flyer.cxx:
