@@ -89,7 +89,10 @@ public:
 
   TringTvor*              get_tring_tvor()  { return mMesh->GetTTvor(); }
 
-  // --- Triangle-triangle intersection ---
+  // --- Intersection utilities ---
+
+  Float_t height_above_terrain(const Opcode::Point& down_dir);
+  Int_t   collide_with_tringula(CollisionSegments& segments);
 
   static bool intersect_triangle(TringTvor* TT0, TringTvor* TT1,
                                  HTransF  & HT0, HTransF  & HT1,

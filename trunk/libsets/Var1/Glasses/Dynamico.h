@@ -53,6 +53,9 @@ public:
 
   virtual void update_grav_safeties(Float_t vl, Float_t vt);
 
+  using Extendio::height_above_terrain;
+  Float_t height_above_terrain() { return height_above_terrain(mGrav.Dir()); }
+
   static bool handle_collision(Dynamico            * dyno,
                                Statico             * stato,
                                Opcode::RayCollider & ray_collider,

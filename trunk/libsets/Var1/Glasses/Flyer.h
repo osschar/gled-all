@@ -31,10 +31,6 @@ public:
 
   virtual void TimeTick(Double_t t, Double_t dt);
 
-  Float_t height_above_terrain();
-
-  Int_t   collide_with_tringula(CollisionSegments& segments);
-
 #include "Flyer.h7"
   ClassDef(Flyer, 1);
 }; // endclass Flyer

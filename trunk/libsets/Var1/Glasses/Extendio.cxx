@@ -12,6 +12,8 @@
 #include "Extendio.h"
 #include "Extendio.c7"
 
+#include "Tringula.h"
+
 ClassImp(Extendio);
 
 /**************************************************************************/
@@ -48,7 +50,84 @@ void Extendio::SetTringula(Tringula* tring)
   mTringula = tring;
 }
 
-/**************************************************************************/
+
+//==============================================================================
+// Intersection utilities
+//==============================================================================
+
+Float_t Extendio::height_above_terrain(const Opcode::Point& down_dir)
+{
+  static const Exc_t _eh("Extendio::height_above_terrain ");
+
+  Opcode::RayCollider    RC;
+  RC.SetFirstContact(false);  // true to only take first hit (not closest!)
+  RC.SetClosestHit(true);     // to keep the closes hit only
+  Opcode::CollisionFaces CF;
+  RC.SetDestination(&CF);
+
+  Opcode::Ray R(ref_pos(), down_dir);
+
+  bool cs = RC.Collide(R, *mTringula->GetMesh()->GetOPCModel());
+  if (cs && CF.GetNbFaces() == 1)
+  {
+      const Opcode::CollisionFace& cf = CF.GetFaces()[0];
+      return cf.mDistance;
+  }
+  else
+  {
+    ISwarn(_eh + RC.CollideInfo(cs, R));
+    return 0;
+  }
+
+}
+
+Int_t Extendio::collide_with_tringula(CollisionSegments& segments)
+{
+  static const Exc_t _eh("Extendio::collide_with_tringula ");
+
+  Int_t count = 0;
+
+  Opcode::AABBTreeCollider collider;
+  Opcode::BVTCache         cache;
+  cache.Model0 = mTringula->GetMesh()->GetOPCModel();
+  cache.Model1 = get_opc_model();
+
+  TringTvor *TT0 = mTringula->GetMesh()->GetTTvor();
+  TringTvor *TT1 = GetMesh()->GetTTvor();
+  HTransF    HT0;  // identity
+  HTransF   &HT1 = ref_trans();
+
+  Bool_t s0 = collider.Collide(cache, 0, HT1);
+  Bool_t s1 = collider.GetContactStatus();
+  UInt_t np = collider.GetNbPairs();
+
+  if (!s0)
+  {
+    printf("%scrappy collision status - result=%d, contact=%d, n_pairs=%u!\n",
+           _eh.Data(), s0, s1, np);
+  }
+
+  const Opcode::Pair *ps = collider.GetPairs();
+  Opcode::Segment     segment;
+
+  for (UInt_t j = 0; j < np; ++j)
+  {
+    if (intersect_triangle(TT0, TT1, HT0, HT1,
+			   ps[j].id0, ps[j].id1,
+			   segment))
+    {
+      segments.push_back(segment);
+      ++count;
+    }
+  }
+
+  return count;
+}
+
+
+//------------------------------------------------------------------------------
+// Static intersection utilities
+//------------------------------------------------------------------------------
 
 bool Extendio::intersect_triangle(TringTvor* TT0, TringTvor* TT1,
                                   HTransF  & HT0, HTransF  & HT1,
@@ -257,7 +336,7 @@ bool Extendio::intersect_triangle(TringTvor* TT0, TringTvor* TT1,
   return true;
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 int Extendio::intersect_extendios(Extendio* ext0, Extendio* ext1,
                                   Opcode::AABBTreeCollider& collider,
