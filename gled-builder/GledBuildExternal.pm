@@ -163,7 +163,7 @@ sub download_file
   if (not -e $CACHE_DIR) {
     system_or_die("mkdir -p $CACHE_DIR");
   }
-  system_or_die("cd $CACHE_DIR; rsync -av $CACHE_URL/$file . 1>&2");
+  system_or_die("cd $CACHE_DIR; rsync -tv $CACHE_URL/$file . 1>&2");
 }
 
 sub deduce_tardir_name

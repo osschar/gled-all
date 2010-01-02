@@ -1,3 +1,8 @@
+2010-01-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledBuildExternal.pm:
+	Use rsync option -t instead of -a when downloading a package.
+
 2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for OSX build. Use GLEW from ROOT.
