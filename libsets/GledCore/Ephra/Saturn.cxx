@@ -79,18 +79,18 @@ void* Saturn::tl_SaturnFdSucker(Saturn *s)
   GThread::SetCancelType(GThread::CT_Deferred);
 
   { // Signals init;
-    // return from select on USR2 to allow additions of new socket fd's
+    // return from select on INT to allow additions of new socket fd's
     sigset_t set;
 
     sigemptyset(&set);
-    sigaddset(&set, GThread::SigUSR2);
+    sigaddset(&set, GThread::SigINT);
     pthread_sigmask(SIG_UNBLOCK, &set, 0);
 
     struct sigaction sac;
     sac.sa_handler = sh_SaturnFdSucker;
     sigemptyset(&sac.sa_mask);
     sac.sa_flags = 0;
-    sigaction(SIGUSR2, &sac, 0);
+    sigaction(SIGINT,  &sac, 0);
   }
 
   _server_startup_cond.Lock();
@@ -1086,7 +1086,7 @@ void Saturn::finalize_moon_connection(SaturnInfo* si)
   mMoonLock.Lock();
   mSelector.Lock();
   mSelector.fRead.Add(si->hSocket);
-  mServerThread->Kill(GThread::SigUSR2);
+  mServerThread->Kill(GThread::SigINT);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
 			(si->hSocket, SocketInfo(SocketInfo::OS_Moon, si)));
@@ -1113,7 +1113,7 @@ void Saturn::finalize_eye_connection(EyeInfo* ei)
   mEyeLock.Lock();
   mSelector.Lock();
   mSelector.fRead.Add(ei->hSocket);
-  mServerThread->Kill(GThread::SigUSR2);
+  mServerThread->Kill(GThread::SigINT);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
 			(ei->hSocket, SocketInfo(SocketInfo::OS_Eye, ei)));
@@ -2211,7 +2211,7 @@ void Saturn::wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p)
   mMoonLock.Lock();
 
   mSelector.Lock();
-  if(mServerThread) mServerThread->Kill(GThread::SigUSR2);
+  if(mServerThread) mServerThread->Kill(GThread::SigINT);
   mSelector.fRead.Remove(moon->hSocket);
   mSelector.Unlock();
 
@@ -2257,7 +2257,7 @@ void Saturn::wipe_eye(EyeInfo* eye, bool notify_sunqueen_p)
 
   mEyeLock.Lock();
 
-  if(mServerThread) mServerThread->Kill(GThread::SigUSR2);
+  if(mServerThread) mServerThread->Kill(GThread::SigINT);
   mSelector.Lock();
   mSelector.fRead.Remove(eye->hSocket);
   mSelector.Unlock();
