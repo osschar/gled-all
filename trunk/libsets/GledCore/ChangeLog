@@ -1,3 +1,9 @@
+2010-01-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	Use SigINT to interrupt select thread instead of SigUSR2.
+	SigUSR2 caused phony error message on OSX.
+
 2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* macros/mac_hack.C:
