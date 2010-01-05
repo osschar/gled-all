@@ -6,7 +6,6 @@
 
 #include "Flyer.h"
 #include "Flyer.c7"
-#include <Stones/GravData.h>
 
 #include "Tringula.h"
 #include "ParaSurf.h"
