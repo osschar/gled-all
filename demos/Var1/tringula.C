@@ -488,6 +488,7 @@ void tringula(Int_t mode=2)
 
   tspupil->SetTimeMaker(tmaker);
   tspupil->SetTringuRep(trirep);
+  trirep->SetPupilInfo(tspupil);
 
   tricam->SetPupilInfo(tspupil);
   tricam->SetEventor(eventor);

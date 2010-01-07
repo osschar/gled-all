@@ -15,30 +15,30 @@
 #define USE_HANDLE_MANAGER
 
 // Constants
-#define	PI			3.14159265358979323846f	//!< PI
-#define	HALFPI			1.57079632679489661923f	//!< 0.5 * PI
-#define	TWOPI			6.28318530717958647692f	//!< 2.0 * PI
-#define	INVPI			0.31830988618379067154f	//!< 1.0 / PI
+const float PI		= 3.14159265358979323846f;	//!< PI
+const float HALFPI	= 1.57079632679489661923f;	//!< 0.5 * PI
+const float TWOPI	= 6.28318530717958647692f;	//!< 2.0 * PI
+const float INVPI	= 0.31830988618379067154f;	//!< 1.0 / PI
 
-#define	RADTODEG		57.2957795130823208768f	//!< 180.0 / PI
-#define	DEGTORAD		0.01745329251994329577f	//!< PI / 180.0
+const float RADTODEG	= 57.2957795130823208768f;	//!< 180.0 / PI
+const float DEGTORAD	= 0.01745329251994329577f;	//!< PI / 180.0
 
-#define	EXP			2.71828182845904523536f	//!< e
-#define	INVLOG2			3.32192809488736234787f	//!< 1.0 / log10(2)
-#define	LN2			0.693147180559945f	//!< ln(2)
-#define	INVLN2			1.44269504089f		//!< 1.0f / ln(2)
+const float EXP		= 2.71828182845904523536f;	//!< e
+const float INVLOG2	= 3.32192809488736234787f;	//!< 1.0 / log10(2)
+const float LN2		= 0.693147180559945f;		//!< ln(2)
+const float INVLN2	= 1.44269504089f;		//!< 1.0f / ln(2)
 
-#define	INV3			0.33333333333333333333f	//!< 1/3
-#define	INV6			0.16666666666666666666f	//!< 1/6
-#define	INV7			0.14285714285714285714f	//!< 1/7
-#define	INV9			0.11111111111111111111f	//!< 1/9
-#define	INV255			0.00392156862745098039f	//!< 1/255
+const float INV3	= 0.33333333333333333333f;	//!< 1/3
+const float INV6	= 0.16666666666666666666f;	//!< 1/6
+const float INV7	= 0.14285714285714285714f;	//!< 1/7
+const float INV9	= 0.11111111111111111111f;	//!< 1/9
+const float INV255	= 0.00392156862745098039f;	//!< 1/255
 
-#define	SQRT2			1.41421356237f		//!< sqrt(2)
-#define	INVSQRT2		0.707106781188f		//!< 1 / sqrt(2)
+const float SQRT2	= 1.41421356237f;		//!< sqrt(2)
+const float INVSQRT2	= 0.707106781188f;		//!< 1 / sqrt(2)
 
-#define	SQRT3			1.73205080757f		//!< sqrt(3)
-#define	INVSQRT3		0.577350269189f		//!< 1 / sqrt(3)
+const float SQRT3	= 1.73205080757f;		//!< sqrt(3)
+const float INVSQRT3	= 0.577350269189f;		//!< 1 / sqrt(3)
 
 // Custom types used in ICE
 typedef signed char		sbyte;		//!< sizeof(sbyte)	must be 1
@@ -56,44 +56,46 @@ typedef double			float64;	//!< sizeof(float64)	must be 4
 typedef unsigned long		sxword;		//!< pointer-sized   signed integer
 typedef unsigned long		uxword;		//!< pointer-sized unsigned integer
 
-#define	OPC_INVALID_ID		0xffffffff	//!< Invalid dword ID (counterpart of 0 pointers)
-
-#define	INVALID_NUMBER		0xDEADBEEF	//!< Standard junk value
+const udword OPC_INVALID_ID	= 0xffffffff;	//!< Invalid dword ID (counterpart of 0 pointers)
+const udword INVALID_NUMBER	= 0xDEADBEEF;	//!< Standard junk value
 
 //! Union of a float and a sdword
-typedef union {
+typedef union
+{
   float	        f;	//!< The float
   sdword	d;	//!< The integer
 } scell;
 
 //! Union of a float and a udword
-typedef union {
+typedef union
+{
   float 	f;	//!< The float
   udword	d;	//!< The integer
-}ucell;
+} ucell;
 
 // Type ranges
-#define	MAX_SBYTE		0x7f		//!< max possible sbyte value
-#define	MIN_SBYTE		0x80		//!< min possible sbyte value
-#define	MAX_UBYTE		0xff		//!< max possible ubyte value
-#define	MIN_UBYTE		0x00		//!< min possible ubyte value
-#define	MAX_SWORD		0x7fff		//!< max possible sword value
-#define	MIN_SWORD		0x8000		//!< min possible sword value
-#define	MAX_UWORD		0xffff		//!< max possible uword value
-#define	MIN_UWORD		0x0000		//!< min possible uword value
-#define	MAX_SDWORD		0x7fffffff	//!< max possible sdword value
-#define	MIN_SDWORD		0x80000000	//!< min possible sdword value
-#define	MAX_UDWORD		0xffffffff	//!< max possible udword value
-#define	MIN_UDWORD		0x00000000	//!< min possible udword value
-#define	MAX_FLOAT		FLT_MAX		//!< max possible float value
-#define	MIN_FLOAT		(-FLT_MAX)	//!< min possible loat value
-#define IEEE_1_0		0x3f800000	//!< integer representation of 1.0
-#define IEEE_255_0		0x437f0000	//!< integer representation of 255.0
-#define IEEE_MAX_FLOAT	        0x7f7fffff	//!< integer representation of MAX_FLOAT
-#define IEEE_MIN_FLOAT		0xff7fffff	//!< integer representation of MIN_FLOAT
-#define IEEE_UNDERFLOW_LIMIT	0x1a000000
+const sbyte  MAX_SBYTE		= 0x7f;		//!< max possible sbyte value
+const sbyte  MIN_SBYTE		= 0x80;		//!< min possible sbyte value
+const ubyte  MAX_UBYTE		= 0xff;		//!< max possible ubyte value
+const ubyte  MIN_UBYTE		= 0x00;		//!< min possible ubyte value
+const sword  MAX_SWORD		= 0x7fff;	//!< max possible sword value
+const sword  MIN_SWORD		= 0x8000;	//!< min possible sword value
+const uword  MAX_UWORD		= 0xffff;	//!< max possible uword value
+const uword  MIN_UWORD		= 0x0000;	//!< min possible uword value
+const sdword MAX_SDWORD		= 0x7fffffff;	//!< max possible sdword value
+const sdword MIN_SDWORD		= 0x80000000;	//!< min possible sdword value
+const udword MAX_UDWORD		= 0xffffffff;	//!< max possible udword value
+const udword MIN_UDWORD		= 0x00000000;	//!< min possible udword value
 
-#define ONE_OVER_RAND_MAX	(1.0f / float(RAND_MAX)) //!< Inverse of the max possible value returned by rand()
+const float  MAX_FLOAT		=  FLT_MAX;	//!< max possible float value
+const float  MIN_FLOAT		= -FLT_MAX;	//!< min possible loat value
+const float  ONE_OVER_RAND_MAX	= 1.0f / float(RAND_MAX); //!< Inverse of the max possible value returned by rand()
+
+const udword IEEE_1_0		  = 0x3f800000;	//!< integer representation of 1.0
+const udword IEEE_255_0		  = 0x437f0000;	//!< integer representation of 255.0
+const udword IEEE_MAX_FLOAT	  = 0x7f7fffff;	//!< integer representation of MAX_FLOAT
+const udword IEEE_MIN_FLOAT	  = 0xff7fffff;	//!< integer representation of MIN_FLOAT
+const udword IEEE_UNDERFLOW_LIMIT = 0x1a000000;
 
 #undef	MIN
 #undef	MAX

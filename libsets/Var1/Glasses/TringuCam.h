@@ -144,7 +144,6 @@ protected:
 
   map<Int_t, KeyInfo*> mKeyStateMap;
 
-  ZLink<ZHashList>   mSelection; // X{GS} L{}
   ZLink<ScreenText>  mInfoTxt;   // X{GS} L{}
 
 
@@ -205,8 +204,6 @@ protected:
 public:
   TringuCam(const Text_t* n="TringuCam", const Text_t* t=0) :
     ZNode(n,t) { _init(); }
-
-  virtual void AdEnlightenment();
 
   KeyInfo* FindKeyInfo(Int_t key);
   Int_t KeyDown(Int_t key);

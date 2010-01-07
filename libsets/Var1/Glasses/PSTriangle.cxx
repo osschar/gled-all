@@ -23,9 +23,9 @@ ClassImp(PSTriangle);
 
 void PSTriangle::_init()
 {
-  mX0 = -0.5f; mY0 = -SQRT3/6.0f;
+  mX0 = -0.5f; mY0 = -Opcode::SQRT3/6.0f;
   mX1 =  0.5f; mY1 =  mY0;
-  mX2 =  0.0f; mY2 =  SQRT3/3.0f;
+  mX2 =  0.0f; mY2 =  Opcode::SQRT3/3.0f;
 
   mEdgePlanes = new Opcode::Plane[3];
 }
@@ -79,15 +79,15 @@ Float_t PSTriangle::Surface()
 
 void PSTriangle::origin_fgh(Float_t* f)
 {
-  f[0] = INV3*(mX0 + mX1 + mX2);
-  f[1] = INV3*(mY0 + mY1 + mY2);
+  f[0] = Opcode::INV3*(mX0 + mX1 + mX2);
+  f[1] = Opcode::INV3*(mY0 + mY1 + mY2);
   f[2] = 0;
 }
 
 void PSTriangle::origin_pos(Float_t* x)
 {
-  x[0] = INV3*(mX0 + mX1 + mX2);
-  x[1] = INV3*(mY0 + mY1 + mY2);
+  x[0] = Opcode::INV3*(mX0 + mX1 + mX2);
+  x[1] = Opcode::INV3*(mY0 + mY1 + mY2);
   x[2] = 0;
 }
 

@@ -8,6 +8,7 @@
 #include <Glasses/Scene.h>
 #include <Glasses/WGlWidget.h>
 #include <Glasses/TimeMaker.h>
+#include "Extendio.h"
 #include "Spiritio.h"
 #include "TringuRep.h"
 #include "TSPupilInfo.c7"
@@ -35,6 +36,8 @@ void TSPupilInfo::_init()
   // From PupilInfo -- restrict Overlay and EventHandler fids.
   mOverlay_fid      = ZHashList::FID();
   mEventHandler_fid = ZHashList::FID();
+
+  mSelectionColor.rgba(1, 0.125, 0.25);
 }
 
 TSPupilInfo::TSPupilInfo(const Text_t* n, const Text_t* t) :
@@ -54,6 +57,12 @@ void TSPupilInfo::AdEnlightenment()
 
   PARENT_GLASS::AdEnlightenment();
 
+  if (mSelection == 0) {
+    ZHashList* l = new ZHashList("Selection", "Selection of TSPupilInfo");
+    l->SetElementFID(Extendio::FID());
+    mQueen->CheckIn(l);
+    SetSelection(l);
+  }
   if (mOverlay == 0)
   {
     ZHashList* l = new ZHashList("Overlay", "Overlay list of TSPupilInfo");
@@ -93,6 +102,33 @@ void TSPupilInfo::TimeTick(Double_t t, Double_t dt)
 {
   if (*mCurrentSpiritio)
     mCurrentSpiritio->TimeTick(t, dt);
+}
+
+//==============================================================================
+
+void TSPupilInfo::SelectExtendio(Extendio* ext, Bool_t multiple)
+{
+  if (multiple)
+  {
+    if (ext)
+    {
+      if (mSelection->Has(ext))
+	mSelection->Remove(ext);
+      else
+	mSelection->PushBack(ext);
+      //ext->SetSelected(!ext->GetSelected());
+    }
+  }
+  else
+  {
+    mSelection->ClearList();
+    if (ext)
+    {
+      mSelection->PushBack(ext);
+    }
+  }
+
+  SelectTopMenuForLens(ext);
 }
 
 //==============================================================================

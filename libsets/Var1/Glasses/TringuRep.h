@@ -11,6 +11,7 @@
 #include "TriMesh.h"
 
 class Tringula;
+class TSPupilInfo;
 class TriMeshField;
 class TriMeshLightField;
 class RGBAPalette;
@@ -25,6 +26,7 @@ private:
 
 protected:
   ZLink<Tringula>          mTringula;    // X{GE} L{a}
+  ZLink<TSPupilInfo>       mPupilInfo;   // X{GS} L{a}
 
   ZLink<TriMeshField>      mField;       // X{GE} L{a}
   ZLink<TriMeshLightField> mLightField;  // X{GE} L{a}

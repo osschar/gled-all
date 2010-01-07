@@ -95,17 +95,6 @@ void TringuCam::_init()
   mCollVertex = -1;
 }
 
-void TringuCam::AdEnlightenment()
-{
-  PARENT_GLASS::AdEnlightenment();
-  if (mSelection == 0) {
-    ZHashList* l = new ZHashList("Selection", "Selection of TringuCam");
-    l->SetElementFID(Extendio::FID());
-    mQueen->CheckIn(l);
-    SetSelection(l);
-  }
-}
-
 /**************************************************************************/
 
 WSTube* TringuCam::make_tube(Statico* stato0, Statico* stato1, const TString& grad_name)
@@ -297,34 +286,9 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
         printf("TringuCam::MouseDown picked %s, state=0x%x\n",
                ext ? ext->GetName() : "<none>", ev.fState);
 
-      if (ev.fState & FL_CTRL)
-      {
-        if (ext)
-        {
-          if (mSelection->Has(ext))
-            mSelection->Remove(ext);
-          else
-            mSelection->PushBack(ext);
-          ext->SetSelected(!ext->GetSelected());
-        }
-      }
-      else
-      {
-        Stepper<> stepper(*mSelection);
-        while (stepper.step())
-          ((Extendio*) *stepper)->SetSelected(false);
-        mSelection->ClearList();
-        if (ext) {
-          mSelection->PushBack(ext);
-          ext->SetSelected(true);
-        }
-      }
-
-      // Should handle multiple selection?
-      Statico*  stato = dynamic_cast<Statico*>(ext);
-
       if (mExpectBeta == EB_ConnectStaticos)
       {
+	Statico* stato = dynamic_cast<Statico*>(ext);
 	if (stato)
 	{
 	  Statico* beta = dynamic_cast<Statico*>(*mPrepBeta);
@@ -341,8 +305,11 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
         mExpectBeta = EB_Nothing;
         SetPrepBeta(0);
       }
+      else
+      {
+	mPupilInfo->SelectExtendio(ext, ev.fState & FL_CTRL);
+      }
 
-      mPupilInfo->SelectTopMenuForLens(ext);
       break;
     }
     case MA_NewLandMark:
@@ -761,7 +728,7 @@ void TringuCam::ExtendioExplode(Extendio* ext)
     bool menuswitch;
     {
       GLensReadHolder lck(this);
-      menuswitch = mSelection->Has(ext);
+      menuswitch = mPupilInfo->GetSelection()->Has(ext);
     }
     if (menuswitch)
     {

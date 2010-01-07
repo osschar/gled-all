@@ -153,7 +153,7 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
     update_grav_safeties(vl, vt);
 
     // Testing printout.
-    if (bSelected && G_DEBUG > 0)
+    if (mDebugBits & DB_GravData)
     {
       mGrav.Print();
       printf("  v_mag=%f, vl=%f, vt=%f, t_safe=%f, d_safe=%f (d/v)=%f\n",

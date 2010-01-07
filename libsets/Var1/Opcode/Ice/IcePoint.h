@@ -18,8 +18,6 @@ class Plane;
 class Matrix3x3;
 class Matrix4x4;
 
-#define CROSS2D(a, b)	(a.x*b.y - b.x*a.y)
-
 const float EPSILON2 = 1.0e-20f;
 
 class ICEMATHS_API Point

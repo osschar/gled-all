@@ -1,3 +1,58 @@
+2010-01-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Code stucture improvements.
+
+	Migrate selection into TSPupilInfo.
+	Replace most Opcode defines with const variables.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Remove obsolete members bRnrSelf, bVerboseCollide and bSelected.
+	Add debug-bits enum, data-member and access methods.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	Use debug-bits from extendio.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add selection management (moved in from TringuCam).
+	Add member mSelectionColor.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Move selection managememt to TSPupilInfo.
+
+	* Glasses/TringuRep.cxx:
+	* Glasses/TringuRep.h:
+	Add link to TSPupilInfo - needed for selection display.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Remove member mSelColor.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+	Move render_ceaabox() to TringTvor_GL_Rnr.
+	Remove code for rendering boxes around selected extendios - this
+	is now done by TringuRep_GL_Rnr.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Render boxes around selected extendios.
+
+	* Opcode/Ice/IcePoint.h:
+	Remove unused define.
+
+	* Opcode/Ice/IceTypes.h:
+	Replace defines with const variables in Opcode namespace.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMeshField.cxx:
+	* Rnr/GL/LandMark_GL_Rnr.cxx:
+	Opcode defines are now namespace variables.
+
 2010-01-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Move some generally useful intersection functions from Flyer to Extendio.

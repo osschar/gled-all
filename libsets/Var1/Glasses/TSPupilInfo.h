@@ -11,13 +11,14 @@
 #include <Stones/TimeMakerClient.h>
 #include <Stones/SGridStepper.h>
 
+class ZHashList;
 class Scene;
 class WGlWidget;
 
 class TimeMaker;
 
+class Extendio;
 class Spiritio;
-
 class TringuRep;
 
 class TSPupilInfo : public PupilInfo,
@@ -30,6 +31,9 @@ private:
 
 protected:
   ZLink<TimeMaker>  mTimeMaker;       // X{GS} L{}
+
+  ZLink<ZHashList>  mSelection;       // X{GS} L{}
+  ZColor            mSelectionColor;  // X{GSPT} 7 ColorButt()
 
   ZLink<Spiritio>   mDefaultSpiritio; // X{GS} L{}
   ZLink<Spiritio>   mCurrentSpiritio; // X{GE} L{}
@@ -51,6 +55,9 @@ public:
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  // Selection
+  void SelectExtendio(Extendio* ext, Bool_t multiple); // X{E} C{1}
 
   // Overlay
   void AddOverlayElement(ZGlass* l);

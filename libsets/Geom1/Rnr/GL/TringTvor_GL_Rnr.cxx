@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 
 #include <Rnr/GL/ZGlass_GL_Rnr.h>
+#include <Rnr/GL/SphereTrings.h>
 
 //______________________________________________________________________________
 // TringTvor_GL_Rnr
@@ -158,4 +159,19 @@ void TringTvor_GL_Rnr::Render(TringTvor* ttvor, Bool_t smoothp, Bool_t colp, Boo
   rnr.Render();
 
   rnr.EndRender();
+}
+
+//------------------------------------------------------------------------------
+
+void TringTvor_GL_Rnr::RenderCEBBox(const Float_t* x, Float_t f, Bool_t pushpop)
+{
+  // Render center-extents axis-aligned bounding-box.
+  // f is additional scale of the extents.
+
+  f *= 2;
+  if (pushpop) glPushMatrix();
+  glTranslatef(x[0]-x[3], x[1]-x[4], x[2]-x[5]);
+  glScalef(f*x[3], f*x[4], f*x[5]);
+  SphereTrings::UnitFrameBox();
+  if (pushpop) glPopMatrix();
 }

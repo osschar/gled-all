@@ -5,6 +5,8 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "TringuRep_GL_Rnr.h"
+#include <Glasses/Extendio.h>
+#include <Glasses/TSPupilInfo.h>
 #include <Glasses/Tringula.h>
 #include <Glasses/TriMesh.h>
 #include <RnrBase/RnrDriver.h>
@@ -44,7 +46,7 @@ void TringuRep_GL_Rnr::Draw(RnrDriver* rd)
     PARENT::Draw(rd);
   }
 
-  // Brutally descend Tringula's extendios.
+  // Brutally descend into Tringula's extendios and tubes.
   // Could use render scheme.
   // Even better, could be a bit smart about what needs to be drawn.
   // Results of the last collision detection pass could be used.
@@ -54,6 +56,26 @@ void TringuRep_GL_Rnr::Draw(RnrDriver* rd)
   rd->Render(rd->GetLensRnr(*T.mFlyers));
   rd->Render(rd->GetLensRnr(*T.mLandMarks));
   rd->Render(rd->GetLensRnr(*T.mTubes));
+
+  // Render selected Extendios.
+  TSPupilInfo &PI = * TR.GetPupilInfo();
+  ZList *sel = PI.GetSelection();
+  if (sel && ! sel->IsEmpty())
+  {
+    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+    GL_Float_Holder      fat_line(GL_LINE_WIDTH, 2, glLineWidth);
+    glColor3fv(PI.PtrSelectionColor()->array());
+
+    AList::Stepper<> stepper(sel);
+    while (stepper.step())
+    {
+      Extendio* ext = (Extendio*) *stepper;
+      glPushMatrix();
+      glMultMatrixf(ext->RefLastTrans().Array());
+      TringTvor_GL_Rnr::RenderCEBBox(ext->GetMesh()->GetTTvor()->mCtrExtBox, 1.01f, false);
+      glPopMatrix();
+    }
+  }
 }
 
 //void TringuRep_GL_Rnr::PostDraw(RnrDriver* rd) {}
