@@ -167,7 +167,7 @@ calculate_velocity:
     }
 
     // Testing printout.
-    if (bSelected && G_DEBUG > 0)
+    if (mDebugBits & DB_GravData)
     {
       mGrav.Print();
       printf("  v_mag=%f, vl=%f, vt=%f, t_safe=%f, d_safe=%f (d/v)=%f\n",

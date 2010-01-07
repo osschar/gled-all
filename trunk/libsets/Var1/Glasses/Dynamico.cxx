@@ -33,7 +33,7 @@ void Dynamico::_init()
 
   mSafety = mExtraStep = 0;
 
-  mOPCRCCache = OPC_INVALID_ID;
+  mOPCRCCache = Opcode::OPC_INVALID_ID;
 }
 
 Dynamico:: Dynamico(const Text_t* n, const Text_t* t) :
@@ -54,7 +54,7 @@ void Dynamico::SetTringula(Tringula* tring)
   PARENT_GLASS::SetTringula(tring);
 
   mTringula->GetParaSurf()->pos2grav(mTrans.ArrT(), mGrav);
-  mOPCRCCache = OPC_INVALID_ID;
+  mOPCRCCache = Opcode::OPC_INVALID_ID;
 }
 
 /**************************************************************************/
@@ -144,10 +144,6 @@ bool Dynamico::handle_collision(Dynamico            * dyno,
     using namespace Opcode;
 
     Opcode::CollisionFaces& CF = * ray_collider.GetDestination();
-
-    if (dyno->bVerboseCollide)
-      printf("%sCollide shooting ray outwards at the hit mesh from COM, ni=%d.\n",
-             _eh.Data(), CF.GetNbFaces());
 
     // Do fixing only when nfaces is even, i.e., dyno's com_dyno is outside.
     if (CF.GetNbFaces() % 2 == 0)

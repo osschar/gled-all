@@ -499,7 +499,7 @@ void TriMeshField::FillByGaussBlobs(Bool_t  reset_field, Int_t   n_blobs,
   set<Int_t> all_changed;
 
   Float_t fgh[3], h_out;
-  UInt_t   triangle = OPC_INVALID_ID;
+  UInt_t   triangle = Opcode::OPC_INVALID_ID;
   for (Int_t i=0; i<n_blobs; ++i)
   {
     GaussBlob B;

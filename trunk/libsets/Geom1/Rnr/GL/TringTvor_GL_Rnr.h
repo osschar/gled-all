@@ -44,6 +44,8 @@ public:
 
   static void Render(TringTvor* ttvor, Bool_t smoothp, Bool_t colp=true, Bool_t texp=true);
 
+  static void RenderCEBBox(const Float_t* x, Float_t f=1.0f, Bool_t pushpop=true);
+
 }; // endclass TringTvor_GL_Rnr
 
 #endif

@@ -10,8 +10,6 @@
 
 #include <Rnr/GL/TringTvor_GL_Rnr.h>
 
-#include <Rnr/GL/SphereTrings.h>
-
 #include <GL/glew.h>
 
 #define PARENT ZGlass_GL_Rnr
@@ -20,21 +18,6 @@
 
 void Extendio_GL_Rnr::_init()
 {}
-
-/**************************************************************************/
-
-void Extendio_GL_Rnr::render_ceaabox(const Float_t* x, Float_t f)
-{
-  // Render center-extents axis-aligned bounding-box.
-  // f is additional scale of the extents.
-
-  f *= 2;
-  glPushMatrix();
-  glTranslatef(x[0]-x[3], x[1]-x[4], x[2]-x[5]);
-  glScalef(f*x[3], f*x[4], f*x[5]);
-  SphereTrings::UnitFrameBox();
-  glPopMatrix();
-}
 
 /**************************************************************************/
 
@@ -56,19 +39,11 @@ void Extendio_GL_Rnr::Draw(RnrDriver* rd)
   Extendio &E = * mExtendio;
   Tringula &T = * mExtendio->mTringula;
 
-  if (E.GetSelected())
-  {
-    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
-    GL_Float_Holder      fat_line(GL_LINE_WIDTH, 2, glLineWidth);
-    glColor3fv(T.PtrSelColor()->array());
-    render_ceaabox(mesh->GetTTvor()->mCtrExtBox, 1.01f);
-  }
-
   if (T.GetRnrBBoxes())
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(1, 0, 0);
-    render_ceaabox(mesh->GetTTvor()->mCtrExtBox, 1.01f);
+    TringTvor_GL_Rnr::RenderCEBBox(mesh->GetTTvor()->mCtrExtBox, 1.01f);
   }
 }
 
@@ -90,7 +65,7 @@ void Extendio_GL_Rnr::PostDraw(RnrDriver* rd)
   {
     GL_Capability_Switch ligt_off(GL_LIGHTING, false);
     glColor3f(0, 0, 1);
-    render_ceaabox((Float_t*)&E.RefLastAABB(), 1.01f);
+    TringTvor_GL_Rnr::RenderCEBBox((Float_t*)&E.RefLastAABB(), 1.01f);
   }
 
   PARENT::PostDraw(rd);

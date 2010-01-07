@@ -1,3 +1,9 @@
+2010-01-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	Add static function RenderCEBBox() (moved in from Extendio_GL_Rnr).
+
 2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.cxx:

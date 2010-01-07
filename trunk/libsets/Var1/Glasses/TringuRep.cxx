@@ -6,6 +6,7 @@
 
 #include "TringuRep.h"
 #include "Tringula.h"
+#include "TSPupilInfo.h"
 #include "TriMeshLightField.h"
 #include <Glasses/RGBAPalette.h>
 #include "TringuRep.c7"
@@ -276,6 +277,9 @@ void TringuRep::ColorByTerrainProps(Int_t mode)
   }
 }
 
+
+//==============================================================================
+// Field adding / spraying
 //==============================================================================
 
 namespace

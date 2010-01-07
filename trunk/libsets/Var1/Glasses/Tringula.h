@@ -89,8 +89,6 @@ protected:
   Bool_t     bRnrBBoxes; // X{GS} 7 Bool(-join=>1)
   Bool_t     bRnrItsLines; // X{GS} 7 Bool() Intersection lines
 
-  ZColor     mSelColor;  // X{GSPT} 7 ColorButt()
-
   EdgeRule_e       mEdgeRule;   //  X{GS} 7 PhonyEnum()
 
   TRandom          mRndGen;

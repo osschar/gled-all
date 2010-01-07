@@ -61,8 +61,6 @@ void Tringula::_init()
 
   bRnrBBoxes = bRnrItsLines = false;
 
-  mSelColor.rgba(1, 0.125, 0.25);
-
   mEdgeRule   = ER_Stop;
 
   mRndGen.SetSeed(0);
@@ -261,7 +259,7 @@ void Tringula::ResetCollisionStuff()
   Stepper<Dynamico> stepper(*mDynos);
   while (stepper.step())
   {
-    stepper->mOPCRCCache = OPC_INVALID_ID;
+    stepper->mOPCRCCache = Opcode::OPC_INVALID_ID;
   }
 
   // mBoxPruner is not changed.

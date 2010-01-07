@@ -20,13 +20,10 @@ ClassImp(Extendio);
 
 void Extendio::_init()
 {
+  mDebugBits = 0;
+
   mLastTransPtr = &mTrans;
   mLastAABBPtr  = &mAABB;
-
-  bRnrSelf        = true;
-  bVerboseCollide = false;
-
-  bSelected       = false;
 
   mTringula = 0;
 }

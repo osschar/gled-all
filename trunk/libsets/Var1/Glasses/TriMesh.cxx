@@ -169,7 +169,7 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
   }
   Opcode::Point com(0, 0, 0);
   {
-    Float_t oneoso3 = INV3 / mSurface; // one over surface over 3
+    Float_t oneoso3 = Opcode::INV3 / mSurface; // one over surface over 3
     Float_t surfptv;                   // surface per triangle vertex
     for (Int_t tring = 0; tring < nTrings; ++tring)
     {
@@ -192,7 +192,7 @@ void TriMesh::SetMassAndSpeculate(Float_t mass, Float_t mass_frac_on_mesh)
 
     HPointF I, J; // diagonal, off-diagonal elements
 
-    Float_t mpso3 = INV3 * mass_frac_on_mesh * mass / mSurface; // mass per surface over 3
+    Float_t mpso3 = Opcode::INV3 * mass_frac_on_mesh * mass / mSurface; // mass per surface over 3
     Float_t mptv; // mass per triangle vertex
     Opcode::Point r;
     for (Int_t tring = 0; tring < nTrings; ++tring)
@@ -1064,7 +1064,7 @@ Bool_t TriMesh::FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
   }
   else
   {
-    if (triangle_idx) *triangle_idx = OPC_INVALID_ID;
+    if (triangle_idx) *triangle_idx = Opcode::OPC_INVALID_ID;
     // ISwarn(_eh + RC.CollideInfo(cs, R));
     return false;
   }

@@ -28,8 +28,6 @@ public:
   virtual void Render(RnrDriver* rd);
   virtual void PostDraw(RnrDriver* rd);
 
-  static void render_ceaabox(const Float_t* x, Float_t f=1);
-
 }; // endclass Extendio_GL_Rnr
 
 #endif

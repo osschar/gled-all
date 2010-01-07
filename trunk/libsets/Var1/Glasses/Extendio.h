@@ -23,6 +23,11 @@ class Extendio : public ZGlass,
   MAC_RNR_FRIENDS(Extendio);
 
 public:
+  enum DebugBits_e
+  {
+    DB_GravData = 1
+  };
+
   class CollisionSegments : public vector<Opcode::Segment>
   {
   private:
@@ -53,14 +58,11 @@ protected:
   HTransF*        mLastTransPtr; //!
   Opcode::AABB*   mLastAABBPtr;  //!
 
-  Bool_t          bRnrSelf;        // X{GS}  7 Bool()
-  Bool_t          bVerboseCollide; // X{GS}  7 Bool()
+  ZLink<TriMesh>  mMesh;         //  X{GS} L{}
 
-  Bool_t          bSelected;       // X{GS}  7 BoolOut()
+  Tringula       *mTringula;     //! X{g}
 
-  ZLink<TriMesh>  mMesh;       //  X{GS} L{}
-
-  Tringula       *mTringula;   //! X{g}
+  UChar_t         mDebugBits;    //!
 
 public:
   Extendio(const Text_t* n="Extendio", const Text_t* t=0);
@@ -88,6 +90,12 @@ public:
   Opcode::MeshInterface*  get_opc_mesh_if() { return mMesh->GetOPCMeshIf(); }
 
   TringTvor*              get_tring_tvor()  { return mMesh->GetTTvor(); }
+
+  // --- Debug bits ---
+
+  Bool_t GetDebugBit(DebugBits_e b) const { return TESTBIT(mDebugBits, b); }
+  void   SetDebugBit(DebugBits_e b)       { SETBIT(mDebugBits, b); }
+  void   ClearDebugBit(DebugBits_e b)     { CLRBIT(mDebugBits, b); }
 
   // --- Intersection utilities ---
 
