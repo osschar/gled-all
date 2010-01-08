@@ -63,9 +63,6 @@ public:
 private:
   void _init();
 
-  // Hack to carry intersection lines over to renderer.
-  vector<Opcode::Segment>    mItsLines;    //!
-
 protected:
   ZLink<ParaSurf>    mParaSurf;     //  X{GS} L{aA}
   ZLink<TriMesh>     mMesh;         //  X{GS} L{aA}
@@ -79,17 +76,9 @@ protected:
   ZLink<ZHashList>   mLandMarks;    //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mTubes;        //  X{GS} L{} RnrBits{0,0,0,5}
 
-  Opcode::CollisionFaces* mRayColFaces;  //!
+  Bool_t           bRnrBBoxes;   // X{GS} 7 Bool(-join=>1)
 
-  Bool_t     bRnrRay; // X{GS}   7 Bool(-join=>1)
-  Float_t    mRayLen; // X{GS}   7 Value(-range=>[-1000,1000,1,1000])
-  TVector3   mRayPos; // X{GSRr} 7 Vector3()
-  TVector3   mRayDir; // X{GSRr} 7 Vector3()
-
-  Bool_t     bRnrBBoxes; // X{GS} 7 Bool(-join=>1)
-  Bool_t     bRnrItsLines; // X{GS} 7 Bool() Intersection lines
-
-  EdgeRule_e       mEdgeRule;   //  X{GS} 7 PhonyEnum()
+  EdgeRule_e       mEdgeRule;    //  X{GS} 7 PhonyEnum()
 
   TRandom          mRndGen;
 
@@ -104,7 +93,6 @@ protected:
   TimeStamp_t                  mDynosLTS;   //!
   TimeStamp_t                  mFlyersLTS;  //!
 
-  void get_ray_dir(Float_t* d, Float_t len=0);
   void handle_edge_crossing(Dynamico& D,
                             Opcode::Point& old_pos, Opcode::Point& pos,
                             Int_t plane, Float_t dist);
@@ -121,7 +109,7 @@ protected:
   void setup_stato_pruner();
   void setup_dyno_pruner();
 
-  void prepick_extendios(AList* extendios, Opcode::Ray& ray,
+  void prepick_extendios(AList* extendios, const Opcode::Ray& ray,
                          lPickResult_t& candidates);
 
 public:
@@ -133,10 +121,10 @@ public:
 
   // Collision stuff
 
-  void SetRayVectors(const TVector3& pos, const TVector3& dir);
+  Bool_t    RayCollide(const Opcode::Ray& ray, Float_t ray_length,
+		       Opcode::CollisionFaces& col_faces);
 
-  void      RayCollide();          // X{ED} C{0} 7 MButt()
-  Extendio* PickExtendios();       // X{ED} C{0} 7 MButt()
+  Extendio* PickExtendios(const Opcode::Ray& ray);
 
   void ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
 
@@ -165,7 +153,8 @@ public:
 
   Bool_t CheckBoundaries(Dynamico* dyno, Float_t& safety);
 
-  void DoFullBoxPrunning(Bool_t accumulate=false, Bool_t verbose=false); // X{E} 7 MCWButt()
+  void DoFullBoxPrunning(vector<Opcode::Segment>& its_lines,
+			 Bool_t accumulate=false, Bool_t verbose=false);
 
   void DoSplitBoxPrunning(); // X{E} 7 MCWButt()
 

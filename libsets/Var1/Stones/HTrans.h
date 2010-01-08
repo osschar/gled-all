@@ -30,15 +30,15 @@ public:
   TT x, y, z;
 
   HPoint() : x(0), y(0), z(0) {}
-  HPoint(Float_t* p)  : x(p[0]), y(p[1]), z(p[2]) {}
-  HPoint(Double_t* p) : x(p[0]), y(p[1]), z(p[2]) {}
+  HPoint(const Float_t* p)  : x(p[0]), y(p[1]), z(p[2]) {}
+  HPoint(const Double_t* p) : x(p[0]), y(p[1]), z(p[2]) {}
   HPoint(TT _x, TT _y, TT _z) : x(_x), y(_y), z(_z) {}
   ~HPoint() {}
 
   void Set(TT _x, TT _y, TT _z) { x = _x; y = _y; z = _z; }
-  void Set(Float_t* p)  { x = p[0]; y = p[1]; z = p[2]; }
-  void Set(Double_t* p) { x = p[0]; y = p[1]; z = p[2]; }
-  void Zero()           { x = y = z = 0; }
+  void Set(const Float_t* p)    { x = p[0]; y = p[1]; z = p[2]; }
+  void Set(const Double_t* p)   { x = p[0]; y = p[1]; z = p[2]; }
+  void Zero()                   { x = y = z = 0; }
 
   void Neg() { x = -x; y = -y; z = -z; }
 
@@ -67,9 +67,9 @@ template class HPoint<Double_t>;
 class HPointF : public HPoint<Float_t>
 {
 public:
-  HPointF()            : HPoint<Float_t>() {}
-  HPointF(Float_t* p)  : HPoint<Float_t>(p) {}
-  HPointF(Double_t* p) : HPoint<Float_t>(p) {}
+  HPointF() : HPoint<Float_t>() {}
+  HPointF(const Float_t* p)  : HPoint<Float_t>(p) {}
+  HPointF(const Double_t* p) : HPoint<Float_t>(p) {}
   HPointF(Float_t _x, Float_t _y, Float_t _z) : HPoint<Float_t>(_x, _y, _z) {}
   ~HPointF() {}
 
@@ -86,9 +86,9 @@ public:
 class HPointD : public HPoint<Double_t>
 {
 public:
-  HPointD()            : HPoint<Double_t>() {}
-  HPointD(Float_t* p)  : HPoint<Double_t>(p) {}
-  HPointD(Double_t* p) : HPoint<Double_t>(p) {}
+  HPointD() : HPoint<Double_t>() {}
+  HPointD(const Float_t* p)  : HPoint<Double_t>(p) {}
+  HPointD(const Double_t* p) : HPoint<Double_t>(p) {}
   HPointD(Double_t _x, Double_t _y, Double_t _z) : HPoint<Double_t>(_x, _y, _z) {}
   ~HPointD() {}
 

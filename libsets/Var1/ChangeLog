@@ -1,3 +1,36 @@
+2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Cleanup Tringula, put some debugging aids into new glass TringulaTester.
+
+	* Glasses/TringulaTester.cxx:
+	* Glasses/TringulaTester.h:
+	* Rnr/GL/TringulaTester_GL_Rnr.cxx:
+	* Rnr/GL/TringulaTester_GL_Rnr.h:
+	* glass.list:
+	New glass TringulaTester that supports plotting of ray-terrain
+	intersection and of extendio-extendio intersection lines.
+
+	* Glasses/TringuCam.cxx:
+	Modify for TringulaTester.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Remove debugging aids for ray-terrain intersection and
+	extendio-extendio intersection lines (moved to TringulaTester).
+
+	Add Ray argument to RayCollide() and to PickExtendios().
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	Fix compilation warning.
+
+	* Stones/HTrans.h:
+	Improve const correctness.
+
+	* Opcode/Ice/IceRay.h:
+	Add constructors with float/double arrays.
+
 2010-01-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Code stucture improvements.

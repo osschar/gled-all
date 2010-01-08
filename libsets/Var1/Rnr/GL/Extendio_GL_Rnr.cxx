@@ -37,7 +37,7 @@ void Extendio_GL_Rnr::Draw(RnrDriver* rd)
   PARENT::Draw(rd);
 
   Extendio &E = * mExtendio;
-  Tringula &T = * mExtendio->mTringula;
+  Tringula &T = * E.mTringula;
 
   if (T.GetRnrBBoxes())
   {
@@ -59,7 +59,7 @@ void Extendio_GL_Rnr::PostDraw(RnrDriver* rd)
   glPopMatrix();
 
   Extendio &E = * mExtendio;
-  Tringula &T = * mExtendio->mTringula;
+  Tringula &T = * E.mTringula;
 
   if (T.GetRnrBBoxes())
   {

@@ -52,14 +52,7 @@ void Tringula::_init()
   mMaxFlyerH   = 0;
   mMaxCameraH  = 0;
 
-  mRayColFaces = 0;
-
-  bRnrRay = false;
-  mRayLen = 100;
-  mRayPos.SetXYZ(1, 1, 10);
-  mRayDir.SetXYZ(0, 0, -1);
-
-  bRnrBBoxes = bRnrItsLines = false;
+  bRnrBBoxes = false;
 
   mEdgeRule   = ER_Stop;
 
@@ -69,13 +62,12 @@ void Tringula::_init()
   mStatosLTS = mDynosLTS = mFlyersLTS = 0;
 }
 
-/**************************************************************************/
-
 Tringula::~Tringula()
 {
-  delete mRayColFaces;
   delete mBoxPruner;
 }
+
+//==============================================================================
 
 void Tringula::AdEnlightenment()
 {
@@ -112,72 +104,36 @@ void Tringula::AdEnlightenment()
   }
 }
 
-/**************************************************************************/
+//==============================================================================
 
-void Tringula::get_ray_dir(Float_t* d, Float_t len)
+Bool_t Tringula::RayCollide(const Opcode::Ray& ray, Float_t ray_length,
+			    Opcode::CollisionFaces& col_faces)
 {
-  if(len == 0) len = mRayLen;
-  d[0] = len * mRayDir.x();
-  d[1] = len * mRayDir.y();
-  d[2] = len * mRayDir.z();
-}
-
-/**************************************************************************/
-
-void Tringula::SetRayVectors(const TVector3& pos, const TVector3& dir)
-{
-  mRayPos = pos;
-  mRayDir = dir;
-  Stamp(FID());
-}
-
-void Tringula::RayCollide()
-{
-  // Intersect mesh with ray as given in data-members mRayPos and mRayDir.
-  //
-  // Should really take Opcode::Ray as argument.
+  // Intersect terrain mesh with given ray and stores result in col_faces.
+  // If ray_length is larger then 0 it is used to limit the maximum distance.
 
   static const Exc_t _eh("Tringula::RayCollide ");
 
-  if(mMesh == 0 || mMesh->GetOPCModel() == 0)
-    throw(_eh + "Opcode model not created.");
+  if (mMesh == 0 || mMesh->GetOPCModel() == 0)
+    throw _eh + "Opcode model not created.";
 
   using namespace Opcode;
 
   RayCollider RC;
   RC.SetCulling(false);
-  if(mRayColFaces == 0)
-    mRayColFaces = new CollisionFaces;
-  RC.SetDestination(mRayColFaces);
-
-  Opcode::Ray R;
-  mRayPos.GetXYZ(R.mOrig);
-  get_ray_dir(R.mDir, 1);
+  RC.SetDestination(&col_faces);
+  if (ray_length > 0) RC.SetMaxDist(ray_length);
 
   const char* setval = RC.ValidateSettings();
-  printf("RayCollider::ValidateSettings: %s\n", setval ? setval : "OK.");
+  if (setval != 0)
+    throw _eh + "setting validation failed: " + setval;
 
-  bool status;
-  status = RC.Collide(R, *mMesh->GetOPCModel());
-           // default-args: const Matrix4x4* world=null, udword* cache=null);
-
-  printf("collide status=%d, contact=%d; nbvt=%d, nprt=%d, ni=%d\n",
-         status, RC.GetContactStatus(),
-         RC.GetNbRayBVTests(), RC.GetNbRayPrimTests(), RC.GetNbIntersections());
-
-  CollisionFaces& CF = *mRayColFaces;
-  printf("n faces = %d\n", CF.GetNbFaces());
-  for(UInt_t f=0; f<CF.GetNbFaces(); ++f)
-  {
-    const CollisionFace& cf = CF.GetFaces()[f];
-    printf("  %2d %6d  %10f  %10f %10f\n",
-           f, cf.mFaceID, cf.mDistance, cf.mU, cf.mV);
-  }
-  Stamp(FID());
+  return RC.Collide(ray, *mMesh->GetOPCModel());
 }
 
-void Tringula::prepick_extendios(AList        * extendios,
-                                 Opcode::Ray  & ray,
+//==============================================================================
+
+void Tringula::prepick_extendios(AList* extendios, const Opcode::Ray& ray,
                                  lPickResult_t& candidates)
 {
   // Select picking candiadates from among extendios.
@@ -200,7 +156,7 @@ void Tringula::prepick_extendios(AList        * extendios,
   }
 }
 
-Extendio* Tringula::PickExtendios()
+Extendio* Tringula::PickExtendios(const Opcode::Ray& ray)
 {
   // Loop over extendios and calculate distance between ray and center
   // point.
@@ -214,10 +170,6 @@ Extendio* Tringula::PickExtendios()
   // Check both options.
 
   static const Exc_t _eh("Tringula::PickExtendios ");
-
-  Opcode::Ray ray;
-  mRayPos.GetXYZ(ray.mOrig);
-  get_ray_dir(ray.mDir, 1);
 
   lPickResult_t candidates;
 
@@ -613,7 +565,8 @@ Bool_t Tringula::CheckBoundaries(Dynamico* dyno, Float_t& safety)
 
 //==============================================================================
 
-void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)
+void Tringula::DoFullBoxPrunning(vector<Opcode::Segment>& its_lines,
+				 Bool_t accumulate, Bool_t verbose)
 {
   // Du full box-prunning step:
   // - fill prunning list with statos, dynos and flyers,
@@ -652,12 +605,12 @@ void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)
 
   if (accumulate)
   {
-    mItsLines.reserve(mItsLines.size() + 2*pairs.GetNbPairs());
+    its_lines.reserve(its_lines.size() + 2*pairs.GetNbPairs());
   }
   else
   {
-    mItsLines.clear();
-    mItsLines.reserve(2*pairs.GetNbPairs());
+    its_lines.clear();
+    its_lines.reserve(2*pairs.GetNbPairs());
   }
 
   const Text_t* debug_prefix = verbose ? "        " : 0;
@@ -671,10 +624,10 @@ void Tringula::DoFullBoxPrunning(Bool_t accumulate, Bool_t verbose)
       printf("  %3u:", i);
 
     Extendio::intersect_extendios(extarr[p.id0], extarr[p.id1], collider,
-                                  mItsLines, debug_prefix);
+                                  its_lines, debug_prefix);
   }
   printf(" Vector size = %zu, segments per pair = %f\n",
-         mItsLines.size(), (float)mItsLines.size()/pairs.GetNbPairs());
+         its_lines.size(), (float)its_lines.size()/pairs.GetNbPairs());
 }
 
 void Tringula::DoSplitBoxPrunning()
