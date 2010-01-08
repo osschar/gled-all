@@ -42,7 +42,8 @@ ClassImp(TringTvor);
 void TringTvor::_init()
 {
   mBBoxOK = false;
-  mMaxVertexDistance = mMinEdgeLen = mMaxEdgeLen = 0;
+  mMaxVertexDistance = mBBoxHalfDiagonal = 0;
+  mMinEdgeLen = mMaxEdgeLen = 0;
 
   mNStripEls   = 0;  mStripEls    = 0;  mStripTrings = 0;
   mNStrips     = 0;  mStripBegs   = 0;  mStripLens   = 0;
@@ -88,6 +89,7 @@ void TringTvor::Reset(Int_t nv, Int_t nt)
   mNVerts  = nv;
   mNTrings = nt;
   MakePrimaryArrays();
+  mBBoxOK = false;
 }
 
 void TringTvor::Reset(Int_t nv, Int_t nt,
@@ -100,6 +102,7 @@ void TringTvor::Reset(Int_t nv, Int_t nt,
   mNTrings = nt;
   MakePrimaryArrays();
   MakeSecondaryArrays(smoothp, colp, texp);
+  mBBoxOK = false;
 }
 
 /**************************************************************************/
@@ -150,6 +153,7 @@ Int_t TringTvor::AddVertices(Int_t nv)
   if (HasNorms()) MakeNorms();
   if (HasCols())  MakeCols();
   if (HasTexs())  MakeTexs();
+  mBBoxOK = false;
   return nold;
 }
 
@@ -162,6 +166,7 @@ Int_t TringTvor::AddTriangles(Int_t nt)
   mTrings.resize(3*mNTrings);
   if (HasTringNorms()) MakeTringNorms();
   if (HasTringCols())  MakeTringCols();
+  mBBoxOK = false;
   return nold;
 }
 

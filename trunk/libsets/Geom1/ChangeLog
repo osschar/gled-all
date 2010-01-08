@@ -1,6 +1,11 @@
 2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/TringTvor.cxx:
+	Invalidate bbox on Reset() and when adding vertices/triangles.
+
+2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
 	* Stones/TringTvor.h:
 	Cache half-diagonal of the bounding-box.
 	Bounding-box diagonal getters are now inline.
