@@ -169,7 +169,8 @@ Int_t TringTvor::AddTriangles(Int_t nt)
 
 void TringTvor::CalculateBoundingBox()
 {
-  if (mNVerts == 0 || mNTrings == 0) {
+  if (mNVerts == 0 || mNTrings == 0)
+  {
     memset(mMinMaxBox, 0, 6*sizeof(Float_t));
     memset(mCtrExtBox, 0, 6*sizeof(Float_t));
     mMaxVertexDistance = mMinEdgeLen = mMaxEdgeLen = 0;
@@ -198,10 +199,13 @@ void TringTvor::CalculateBoundingBox()
   C[0] = 0.5f*(M[0]+m[0]); C[1] = 0.5f*(M[1]+m[1]); C[2] = 0.5f*(M[2]+m[2]);
   E[0] = 0.5f*(M[0]-m[0]); E[1] = 0.5f*(M[1]-m[1]); E[2] = 0.5f*(M[2]-m[2]);
 
+  mBBoxHalfDiagonal = sqrtf(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]);
+
   // Find min/max edge length.
   // Not optimal, we visit most of the edges twice.
   SqrMinMaxEdgeLen(0, mMinEdgeLen, mMaxEdgeLen);
-  for (Int_t t = 1; t < mNTrings; ++t) {
+  for (Int_t t = 1; t < mNTrings; ++t)
+  {
     Float_t min, max;
     SqrMinMaxEdgeLen(t, min, max);
     if (min < mMinEdgeLen) mMinEdgeLen = min;
@@ -213,27 +217,15 @@ void TringTvor::CalculateBoundingBox()
   mBBoxOK = true;
 }
 
-Float_t TringTvor::BoundingBoxDiagonal()
+Float_t TringTvor::BoundingBoxXYArea() const
 {
-  Float_t *E = mCtrExtBox + 3;
-  return 2.0f * sqrtf(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]);
-}
-
-Float_t TringTvor::BoundingBoxHalfDiagonal()
-{
-  Float_t *E = mCtrExtBox + 3;
-  return sqrtf(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]);
-}
-
-Float_t TringTvor::BoundingBoxXYArea()
-{
-  Float_t *E = mCtrExtBox + 3;
+  const Float_t *E = mCtrExtBox + 3;
   return 4.0f * E[0]*E[1];
 }
 
-Float_t TringTvor::BoundingBoxVolume()
+Float_t TringTvor::BoundingBoxVolume() const
 {
-  Float_t *E = mCtrExtBox + 3;
+  const Float_t *E = mCtrExtBox + 3;
   return 8.0f * E[0] * E[1] * E[2];
 }
 
