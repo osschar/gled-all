@@ -1,3 +1,12 @@
+2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Cache half-diagonal of the bounding-box.
+	Bounding-box diagonal getters are now inline.
+	Improve const correctness.
+	Add getters for min/max edge length.
+
 2010-01-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/TringTvor_GL_Rnr.cxx:

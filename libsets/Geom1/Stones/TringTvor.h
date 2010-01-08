@@ -88,6 +88,7 @@ public:
   Float_t  mMinMaxBox[6];
   Float_t  mCtrExtBox[6];
   Float_t  mMaxVertexDistance; // Maximum distance of any vertex from the origin.
+  Float_t  mBBoxHalfDiagonal;  // Half-length of bounding-box diagonal.
   Float_t  mMinEdgeLen;
   Float_t  mMaxEdgeLen;
 
@@ -106,13 +107,11 @@ public:
 
   TringTvor();
   TringTvor(Int_t nv, Int_t nt);
-  TringTvor(Int_t nv, Int_t nt,
-            Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
+  TringTvor(Int_t nv, Int_t nt, Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
   ~TringTvor();
 
   void Reset(Int_t nv, Int_t nt);
-  void Reset(Int_t nv, Int_t nt,
-             Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
+  void Reset(Int_t nv, Int_t nt, Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
 
   void MakePrimaryArrays();
   void DeletePrimaryArrays();
@@ -136,11 +135,13 @@ public:
   void CalculateBoundingBox();
   void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }
 
-  Float_t GetMaxVertexDistance() const { return mMaxVertexDistance; }
-  Float_t BoundingBoxDiagonal();
-  Float_t BoundingBoxHalfDiagonal();
-  Float_t BoundingBoxXYArea();
-  Float_t BoundingBoxVolume();
+  Float_t GetMaxVertexDistance()    const { return mMaxVertexDistance; }
+  Float_t BoundingBoxDiagonal()     const { return 2.0f * mBBoxHalfDiagonal; }
+  Float_t BoundingBoxHalfDiagonal() const { return mBBoxHalfDiagonal; }
+  Float_t BoundingBoxXYArea()       const;
+  Float_t BoundingBoxVolume()       const;
+  Float_t GetMinEdgeLen()           const { return mMinEdgeLen; }
+  Float_t GetMaxEdgeLen()           const { return mMaxEdgeLen; }
 
   Float_t CalculateTriangleNormal(Int_t ti, Float_t normal[3]);
   Float_t CalculateTriangleNormalAndCog(Int_t ti, Float_t normal[3], Float_t cog[3]);
