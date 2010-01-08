@@ -18,7 +18,9 @@ public:
   //! Constructor
   Ray() {}
   //! Constructor
-  Ray(const Point& orig, const Point& dir) : mOrig(orig), mDir(dir) {}
+  Ray(const Point& orig,    const Point& dir)    : mOrig(orig), mDir(dir) {}
+  Ray(const float  orig[3], const float  dir[3]) : mOrig(orig), mDir(dir) {}
+  Ray(const double orig[3], const double dir[3]) : mOrig(orig), mDir(dir) {}
   //! Copy constructor
   Ray(const Ray& ray) : mOrig(ray.mOrig), mDir(ray.mDir) {}
   //! Destructor

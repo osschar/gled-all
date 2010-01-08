@@ -481,6 +481,9 @@ void tringula(Int_t mode=2)
   g_shell->Add(tricam);
   g_shell->Add(trirep);
 
+  CREATE_ADD_GLASS(tringu_tester, TringulaTester, trirep, "TringulaTester", 0);
+  tringu_tester->SetTringula(tringula);
+
   CREATE_ATT_GLASS(tricam_spiritio, TringuObserverSpiritio, tspupil, SetDefaultSpiritio,
 		   "TringuObserverSpiritio", "Default Spiritio");
   tricam_spiritio->GetCamera()->RotateLF(3, 1, TMath::Pi()/8);

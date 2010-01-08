@@ -1,3 +1,8 @@
+2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Create a TringulaTester instance.
+
 2010-01-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

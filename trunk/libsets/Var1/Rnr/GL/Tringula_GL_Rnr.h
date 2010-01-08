@@ -17,7 +17,6 @@ private:
 
 protected:
   Tringula*	 mTringula;
-  GLUquadricObj* mQuadric;
   TimeStamp_t    mMeshTringStamp;
 
 public:

@@ -25,6 +25,8 @@
 
 #include "TringuCam.c7"
 
+#include "TringulaTester.h"
+
 #include "TriMesh.h"
 #include "ParaSurf.h"
 
@@ -79,11 +81,11 @@ void TringuCam::_init()
 
 
   // MouseAction
-  mMouseAction  = MA_RayCollide;
+  mMouseAction  = MA_PickExtendios;
   mExpectBeta   = EB_Nothing;
-  mRayLength    = 100;
+  mRayLength    = 0;
 
-  bMouseDown              = false;
+  bMouseDown    = false;
 
   mStampInterval = 25;
   mStampCount    = 0;
@@ -242,6 +244,8 @@ Int_t TringuCam::KeyUp(Int_t key)
 
 void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
 {
+  static const Exc_t _eh("TringuCam::MouseDown ");
+
   bMouseDown = true;
 
   switch (mMouseAction)
@@ -252,10 +256,17 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     }
     case MA_RayCollide:
     {
-      CalculateMouseRayVectors();
-      GLensReadHolder _tlck(*mTringula);
-      mTringula->SetRayVectors(mMouseRayPos, mMouseRayDir);
-      mTringula->RayCollide();
+      TringulaTester *tt = dynamic_cast<TringulaTester*>(mTringuRep->GetElementByName("TringulaTester"));
+      if (tt)
+      {
+	CalculateMouseRayVectors();
+	tt->SetRayVectors(mMouseRayPos, mMouseRayDir);
+	tt->RayCollideTerrain();
+      }
+      else
+      {
+	ISwarn(_eh + "can not get TringulaTester as child of TringuRep.");
+      }
       break;
     }
     case MA_AddField:
@@ -274,13 +285,8 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     case MA_PickExtendios:
     {
       CalculateMouseRayVectors();
-
-      Extendio* ext = 0;
-      {
-	GLensReadHolder _tlck(*mTringula);
-	mTringula->SetRayVectors(mMouseRayPos, mMouseRayDir);
-	ext = mTringula->PickExtendios();
-      }
+      Opcode::Ray ray(&mMouseRayPos[0], &mMouseRayDir[0]);
+      Extendio*	ext = mTringula->PickExtendios(ray);
 
       if (bMouseVerbose)
         printf("TringuCam::MouseDown picked %s, state=0x%x\n",
@@ -348,6 +354,8 @@ void TringuCam::MouseUp()
   }
 }
 
+//==============================================================================
+
 void TringuCam::CalculateMouseRayVectors()
 {
   mPupilInfo->TransformMouseRayVectors(*mTringula, mMouseRayPos, mMouseRayDir);
@@ -358,7 +366,8 @@ void TringuCam::MouseRayCollide()
   Opcode::Ray ray;
   mMouseRayPos.GetXYZ(ray.mOrig);
   mMouseRayDir.GetXYZ(ray.mDir);
-  ray.mDir *= mRayLength;
+
+  mRayColl.SetMaxDist(mRayLength > 0 ? mRayLength : Opcode::MAX_FLOAT);
 
   Bool_t status = mRayColl.Collide(ray, *mTringula->GetMesh()->GetOPCModel());
 
