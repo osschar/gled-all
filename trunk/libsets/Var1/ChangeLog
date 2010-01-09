@@ -1,6 +1,14 @@
 2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Crawler.cxx:
+	Set StdDesireDelta for throttle and wheel.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Use StdDesireDelta instead of hard-coded factors.
+
+2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
 	* Glasses/Crawler.h:
 	Make throttle and wheel variables decrease faster than they
 	increase.

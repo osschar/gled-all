@@ -133,6 +133,8 @@ void CrawlerSpiritio::Deactivate()
 
 void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
 {
+  const Float_t dtf = dt;
+
   Crawler &C = * (Crawler*) *mExtendio;
 
   mCameraBase->ref_trans().SetFromArray(mExtendio->ref_last_trans());
@@ -143,9 +145,8 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
   if (tdc)
   {
     const SDesireVarF& tv = C.RefThrottle();
-    const Float_t ddt = (2.0f * tdc) * dt;
     Float_t d0 = tv.GetDesire();
-    Float_t d1 = tv.DeltaDesire(tv.GetDeltaInc()*ddt);
+    Float_t d1 = tv.DeltaDesire(tv.GetStdDesireDelta() * dtf * tdc);
     if (d0 < 0 && d1 > 0 && tdc > 0)
     {
       tv.SetDesire(0);
@@ -163,9 +164,8 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
   if (wdc)
   {
     const SDesireVarF& wv = C.RefWheel();
-    const Float_t ddt = (2.0f * wdc) * dt;
     Float_t d0 = wv.GetDesire();
-    Float_t d1 = wv.DeltaDesire(wv.GetDeltaInc()*ddt);
+    Float_t d1 = wv.DeltaDesire(wv.GetStdDesireDelta() * dtf * wdc);
     if (d0 < 0 && d1 > 0 && wdc > 0)
     {
       wv.SetDesire(0);
@@ -270,7 +270,7 @@ void CrawlerSpiritio::LeftWheel(Int_t, Bool_t downp, UInt_t time_elapsed)
       if (wv.GetDesire() < 0)
 	wv.SetDesire(0);
       else
-	wv.DeltaDesire(2.0f*wv.GetDeltaInc());
+	wv.DeltaDesire(wv.GetStdDesireDelta());
     }
     else
     {
@@ -297,7 +297,7 @@ void CrawlerSpiritio::RightWheel(Int_t, Bool_t downp, UInt_t time_elapsed)
       if (wv.GetDesire() > 0)
 	wv.SetDesire(0);
       else
-	wv.DeltaDesire(-2.0f*wv.GetDeltaInc());
+	wv.DeltaDesire(-wv.GetStdDesireDelta());
     }
     else
     {
