@@ -83,31 +83,65 @@ typedef SMinMaxVar<Double_t> SMinMaxVarD;
 // SInertVar
 //==============================================================================
 
+// Inert variable with limited maximum change (per unit time).
+// Two deltas must be specified:
+//   1. DeltaInc - applied when absolute value is increasing,
+//   2. DeltaDec - applied when absolute value is decreasing.
+// They should both be positive.
+
 template<typename T>
 class SInertVar : public SMinMaxVar<T>
 {
   typedef SMinMaxVar<T> MMV;
 
 protected:
-  T mDelta;
+  T mDeltaInc, mDeltaDec;
 
   T deltaminmax(T d) const
   {
-    return d > mDelta ? mDelta : (d < -mDelta ? -mDelta : d);
+    if (d > 0)
+    {
+      T lim = MMV::mVal >= 0 ? mDeltaInc : mDeltaDec;
+      return d > lim ? lim : d;
+    } else {
+      T lim = MMV::mVal <= 0 ? -mDeltaInc : -mDeltaDec;
+      return d < lim ? lim : d;
+    }
   }
+
   T deltaminmax(T d, T dt) const
   {
-    T lim = mDelta * dt;
-    return d > lim ? lim : (d < -lim ? -lim : d);
+    if (d > 0)
+    {
+      T lim = MMV::mVal >= 0 ?  mDeltaInc*dt :  mDeltaDec*dt;
+      return d > lim ? lim : d;
+    } else {
+      T lim = MMV::mVal <= 0 ? -mDeltaInc*dt : -mDeltaDec*dt;
+      return d < lim ? lim : d;
+    }
+  }
+
+  T deltamaxpos(T dt) const
+  {
+    return MMV::mVal >= 0 ?  mDeltaInc*dt :  mDeltaDec*dt;
+  }
+
+  T deltamaxneg(T dt) const
+  {
+    return MMV::mVal <= 0 ? -mDeltaInc*dt : -mDeltaDec*dt;
   }
 
 public:
   SInertVar()
-    : MMV(), mDelta(1)
+    : MMV(), mDeltaInc(1), mDeltaDec(-1)
   {}
 
-  SInertVar(T val, T min, T max, T max_delta) :
-    MMV(val, min, max), mDelta(max_delta)
+  SInertVar(T val, T min, T max, T delta) :
+    MMV(val, min, max), mDeltaInc(delta), mDeltaDec(-delta)
+  {}
+
+  SInertVar(T val, T min, T max, T delta_i, T delta_d) :
+    MMV(val, min, max), mDeltaInc(delta_i), mDeltaDec(delta_d)
   {}
 
   T operator=(T v) { return Set(v); }
@@ -130,14 +164,27 @@ public:
     return MMV::Delta(d);
   }
 
-  T    GetDelta() const { return mDelta; }
-  void SetDelta(T d)    { mDelta = d;    }
+  T DeltaMaxPositive(T dt)
+  {
+    return MMV::Delta(deltamaxpos(dt));
+  }
 
-  void SetMinMaxDelta(T min, T max, T delta) { SetMinMax(min, max); mDelta = delta; }
+  T DeltaMaxNegative(T dt)
+  {
+    return MMV::Delta(deltamaxneg(dt));
+  }
+
+  T    GetDeltaInc() const { return mDeltaInc; }
+  void SetDeltaInc(T d)    { mDeltaInc = d;    }
+  T    GetDeltaDec() const { return mDeltaDec; }
+  void SetDeltaDec(T d)    { mDeltaDec = d;    }
+
+  void SetMinMaxDelta(T min, T max, T delta_i, T delta_d)
+  { SetMinMax(min, max); mDeltaInc = delta_i; mDeltaDec = delta_d; }
 
   void Print() const
   {
-    printf("%f [%f, %f; %f]\n", MMV::mVal, MMV::mMin, MMV::mMax, mDelta); 
+    printf("%f [%f, %f; %f, %f]\n", MMV::mVal, MMV::mMin, MMV::mMax, mDeltaInc, mDeltaDec); 
   }
 
   ClassDefNV(SInertVar, 1);
@@ -168,6 +215,10 @@ public:
 
   SDesireVar(T val, T min, T max, T delta) :
     IV(val, min, max, delta), mDesire(val), bDesireSatisfied(true)
+  {}
+
+  SDesireVar(T val, T min, T max, T delta_i, T delta_d) :
+    IV(val, min, max, delta_i, delta_d), mDesire(val), bDesireSatisfied(true)
   {}
 
   T operator=(T v) { return Set(v); }
@@ -209,9 +260,9 @@ public:
   Bool_t IsAboveDesire() const { return MMV::mVal > mDesire; }
   Bool_t IsBelowDesire() const { return MMV::mVal < mDesire; }
 
-  void SetMinMaxDeltaDesire(T min, T max, T delta, T desire)
+  void SetMinMaxDeltaDesire(T min, T max, T delta_i, T delta_d, T desire)
   {
-    SetMinMaxDelta(min, max, delta);
+    SetMinMaxDelta(min, max, delta_i, delta_d);
     SetDesire(desire);
   }
 
@@ -222,7 +273,7 @@ public:
 
     if (MMV::mVal < mDesire)
     {
-      Delta(IV::mDelta, dt);
+      DeltaMaxPositive(dt);
       if (MMV::mVal > mDesire)
       {
 	MMV::mVal = mDesire;
@@ -231,7 +282,7 @@ public:
     }
     else if (MMV::mVal > mDesire)
     {
-      Delta(-IV::mDelta, dt);
+      DeltaMaxNegative(dt);
       if (MMV::mVal < mDesire)
       {
 	MMV::mVal = mDesire;
@@ -246,7 +297,8 @@ public:
 
   void Print() const
   {
-    printf("%f -> %f [%f, %f; %f]\n", MMV::mVal, mDesire, MMV::mMin, MMV::mMax, IV::mDelta); 
+    printf("%f -> %f [%f, %f; %f, %f]\n", MMV::mVal, mDesire,
+	   MMV::mMin, MMV::mMax, IV::mDeltaInc, IV::mDeltaDec); 
   }
 
   ClassDefNV(SDesireVar, 1);

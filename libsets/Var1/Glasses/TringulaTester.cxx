@@ -68,11 +68,7 @@ void TringulaTester::RayCollideTerrain()
     bRnrRay = false;
   }
 
-  Bool_t status;
-  {
-    GLensReadHolder _lck(*mTringula);
-    status = mTringula->RayCollide(ray, mRayLen, mRayColFaces);
-  }
+  Bool_t status = mTringula->RayCollide(ray, mRayLen, mRayColFaces);
 
   printf("  status=%d, n faces = %d\n", status, mRayColFaces.GetNbFaces());
   for (UInt_t f=0; f<mRayColFaces.GetNbFaces(); ++f)

@@ -1,3 +1,21 @@
+2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Make throttle and wheel variables decrease faster than they
+	increase.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Changes for new SInertVar syntax.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Reorder data-members.
+	Add proto hit-points and TakeDamage() virtual.
+
+	* Glasses/TringulaTester.cxx:
+	Don't lock tringula during ray-collide -- this should be thread safe.
+
 2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Cleanup Tringula, put some debugging aids into new glass TringulaTester.

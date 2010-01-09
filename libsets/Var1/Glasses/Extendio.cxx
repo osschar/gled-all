@@ -20,16 +20,17 @@ ClassImp(Extendio);
 
 void Extendio::_init()
 {
-  mDebugBits = 0;
+  mTringula = 0;
 
   mLastTransPtr = &mTrans;
   mLastAABBPtr  = &mAABB;
 
-  mTringula = 0;
+  mDebugBits = 0;
 }
 
 Extendio::Extendio(const Text_t* n, const Text_t* t) :
-  ZGlass(n,t)
+  ZGlass(n,t),
+  mHitPoints(100, 0, 100)
 {
   _init();
 }
@@ -37,7 +38,7 @@ Extendio::Extendio(const Text_t* n, const Text_t* t) :
 Extendio::~Extendio()
 {}
 
-/**************************************************************************/
+//==============================================================================
 
 void Extendio::SetTringula(Tringula* tring)
 {
@@ -47,6 +48,12 @@ void Extendio::SetTringula(Tringula* tring)
   mTringula = tring;
 }
 
+//==============================================================================
+
+void Extendio::TakeDamage(Float_t damage)
+{
+  mHitPoints.Delta(-damage);
+}
 
 //==============================================================================
 // Intersection utilities

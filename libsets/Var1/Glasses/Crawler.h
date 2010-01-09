@@ -8,7 +8,6 @@
 #define Var1_Crawler_H
 
 #include <Glasses/Dynamico.h>
-#include <Stones/SVars.h>
 
 class Crawler : public Dynamico
 {
