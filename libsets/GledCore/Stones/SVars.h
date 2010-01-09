@@ -7,7 +7,7 @@
 #ifndef GledCore_SVars_H
 #define GledCore_SVars_H
 
-#include <Rtypes.h>
+#include <TMath.h>
 
 //==============================================================================
 // SVars
@@ -205,20 +205,25 @@ class SDesireVar : public SInertVar<T>
   typedef SInertVar<T>  IV;
 
 protected:
+  T              mStdDesireDelta;  // Standard delta of desire.
   mutable T      mDesire;
   mutable Bool_t bDesireSatisfied;
 
 public:
   SDesireVar() :
-    IV(), mDesire(0), bDesireSatisfied(true)
+    IV(), mStdDesireDelta(1), mDesire(0), bDesireSatisfied(true)
   {}
 
   SDesireVar(T val, T min, T max, T delta) :
-    IV(val, min, max, delta), mDesire(val), bDesireSatisfied(true)
+    IV(val, min, max, delta),
+    mStdDesireDelta(delta),
+    mDesire(val), bDesireSatisfied(true)
   {}
 
   SDesireVar(T val, T min, T max, T delta_i, T delta_d) :
-    IV(val, min, max, delta_i, delta_d), mDesire(val), bDesireSatisfied(true)
+    IV(val, min, max, delta_i, delta_d),
+    mStdDesireDelta(TMath::Max(delta_i, delta_d)),
+    mDesire(val), bDesireSatisfied(true)
   {}
 
   T operator=(T v) { return Set(v); }
@@ -243,6 +248,9 @@ public:
     d = deltaminmax(d, dt);
     return MMV::Delta(d);
   }
+
+  T    GetStdDesireDelta() const { return mStdDesireDelta; }
+  void SetStdDesireDelta(T sdd)  { mStdDesireDelta = sdd; }
 
   T    GetDesire()     const { return mDesire; }
   void SetDesire(T d)  const { bDesireSatisfied = false; mDesire = valminmax(d); }
