@@ -9,6 +9,7 @@
 
 #include <Glasses/ZGlass.h>
 #include <Glasses/TriMesh.h>
+#include <Stones/SVars.h>
 #include <Stones/HTrans.h>
 #include <Stones/TimeMakerClient.h>
 
@@ -53,14 +54,16 @@ private:
   void _init();
 
 protected:
+  Tringula       *mTringula;     //! X{g}
+
+  ZLink<TriMesh>  mMesh;         //  X{GS} L{}
+
+  SMinMaxVarF     mHitPoints;    //  X{G} 7 ValOut()
+
   HTransF         mTrans;        //  Transform from current master
   Opcode::AABB    mAABB;         //! Enclosing bbox in parent frame
   HTransF*        mLastTransPtr; //!
   Opcode::AABB*   mLastAABBPtr;  //!
-
-  ZLink<TriMesh>  mMesh;         //  X{GS} L{}
-
-  Tringula       *mTringula;     //! X{g}
 
   UChar_t         mDebugBits;    //!
 
@@ -69,6 +72,8 @@ public:
   virtual ~Extendio();
 
   virtual void SetTringula(Tringula* tring);
+
+  virtual void TakeDamage(Float_t damage);
 
   const HTransF&        RefTrans()     const { return  mTrans; }
   const HTransF&        RefLastTrans() const { return *mLastTransPtr; }

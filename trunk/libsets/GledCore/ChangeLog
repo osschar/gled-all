@@ -1,3 +1,9 @@
+2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SVars.h:
+	SInertVar now takes two delta limits - one for increasing and
+	another for decreasing of absolute value of the variable.
+
 2010-01-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:
