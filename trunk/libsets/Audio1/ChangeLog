@@ -1,3 +1,21 @@
+2010-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve handling of AL buffers and sources.
+
+	* Glasses/AlBuffer.cxx:
+	* Glasses/AlBuffer.h:
+	Add data-members that hold buffer frequency, size, number of bits,
+	number of channels, and default duration of the sample.
+	Fill them after loading.
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	Add functions:
+	  void UnqueueBuffers(Int_t count=1);
+	  void UnqueueAllBuffers();
+	Allow mPitch to be set up to 1000 (was limited to 1 before).
+	Turn off looping when source is stopped.
+
 2009-12-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Shutdown OpenAL at libset shutdown.

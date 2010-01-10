@@ -79,6 +79,31 @@ void AlSource::QueueBuffer(AlBuffer* buf, Int_t count)
   Audio1::CheckAlError(_eh);
 }
 
+void AlSource::UnqueueBuffers(Int_t count)
+{
+  static const Exc_t _eh("AlSource::UnqueueBuffers ");
+
+  int np;
+  alGetSourcei(mAlSrc, AL_BUFFERS_PROCESSED, &np);
+  if (count > np)
+    throw _eh + "Not enough processed buffers.";
+
+  if (count == 0)
+    count = np;
+
+  vector<ALuint> ubufs(count);
+  alSourceUnqueueBuffers(mAlSrc, count, &ubufs[0]);
+
+  Audio1::CheckAlError(_eh);
+}
+
+void AlSource::UnqueueAllBuffers()
+{
+  UnqueueBuffers(0);
+}
+
+//==============================================================================
+
 void AlSource::Play()
 {
   static const Exc_t _eh("AlContext::Play ");
@@ -109,6 +134,7 @@ void AlSource::Stop()
     throw _eh + "Not playing.";
 
   alSourceStop(mAlSrc);
+  alSourcei(mAlSrc, AL_LOOPING, AL_FALSE);
 }
 
 //==============================================================================
