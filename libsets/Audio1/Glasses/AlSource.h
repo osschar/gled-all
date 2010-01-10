@@ -29,7 +29,7 @@ protected:
   Float_t     mGain;    // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000])
   Float_t     mMinGain; // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000], -join=>1)
   Float_t     mMaxGain; // X{GS} Ray{Source} 7 Value(-range=>[0,100,1,1000])
-  Float_t     mPitch;   // X{GS} Ray{Source} 7 Value(-range=>[0.001,1,1,1000])
+  Float_t     mPitch;   // X{GS} Ray{Source} 7 Value(-range=>[0.001,1000,1,1000])
 
   Float_t     mConeInnerAngle; // X{GS} Ray{Cone} 7 Value(-range=>[0,360,1,1000])
   Float_t     mConeOuterAngle; // X{GS} Ray{Cone} 7 Value(-range=>[0,360,1,1000])
@@ -45,6 +45,8 @@ public:
   Bool_t IsPlaying();
 
   void QueueBuffer(AlBuffer* buf=0, Int_t count=1); // X{E} C{1} 7 MCWButt()
+  void UnqueueBuffers(Int_t count=1);               // X{E} 7 MCWButt()
+  void UnqueueAllBuffers();                         // X{E} 7 MCWButt()
 
   void Play();     // X{E} 7 MCWButt(-join=>1)
   void Loop();     // X{E} 7 MCWButt(-join=>1)

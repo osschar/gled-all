@@ -19,9 +19,16 @@ ClassImp(AlBuffer);
 
 //==============================================================================
 
+void AlBuffer::clear_buffer_props()
+{
+  mFrequency = mSize = mBits = mChannels = 0;
+  mDuration = 0;
+}
+
 void AlBuffer::_init()
 {
   mAlBuf = 0;
+  clear_buffer_props();
 }
 
 AlBuffer::AlBuffer(const Text_t* n, const Text_t* t) :
@@ -41,13 +48,28 @@ void AlBuffer::Load()
 {
   if (mAlBuf)
   {
-    // !!! Should check use count.
+    // !!! Should check use count - the call fails if buffer is still used.
+    // !!! But it is not set from AlSource, so think a bit.
 
     alDeleteBuffers(1, &mAlBuf);
     mAlBuf = 0;
   }
 
   mAlBuf = alutCreateBufferFromFile(mFile);
-  if (mAlBuf == AL_NONE)
+
+  if (mAlBuf != AL_NONE)
+  {
+    alGetBufferi(mAlBuf, AL_FREQUENCY, &mFrequency);
+    alGetBufferi(mAlBuf, AL_SIZE,      &mSize);
+    alGetBufferi(mAlBuf, AL_BITS,      &mBits);
+    alGetBufferi(mAlBuf, AL_CHANNELS,  &mChannels);
+    mDuration = (8.0f * mSize) / (mFrequency * mBits * mChannels);
+  }
+  else
+  {
+    clear_buffer_props();
     printf("Error in alutCreateBufferFromFile: %s\n", alutGetErrorString(alutGetError()));
+  }
+
+  Stamp(FID());
 }
