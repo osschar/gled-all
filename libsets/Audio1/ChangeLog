@@ -1,3 +1,14 @@
+2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for reading ogg files.
+
+	* Glasses/AlBuffer.cxx:
+	Check file type by extension (wav, ogg).
+	Add code for reading of ogg files.
+
+	* Makefile:
+	Link also against libvorbisfile.
+
 2010-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve handling of AL buffers and sources.

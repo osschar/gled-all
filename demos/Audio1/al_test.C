@@ -41,11 +41,11 @@ void al_test() {
 
   CREATE_ADD_GLASS(albuf1, AlBuffer, sc, "AlBuffer Diesel", 0);
   // albuf1->SetFile("cuckoo.wav");
-  albuf1->SetFile("diesel-loop.wav");
+  albuf1->SetFile("diesel-loop.ogg");
   albuf1->Load();
 
   CREATE_ADD_GLASS(albuf2, AlBuffer, sc, "AlBuffer Pew", 0);
-  albuf2->SetFile("boom.wav");
+  albuf2->SetFile("boom.ogg");
   albuf2->Load();
 
   CREATE_ADD_GLASS(sphere_src, AlSource, sc, "Omnidirectional AlSource", 0);

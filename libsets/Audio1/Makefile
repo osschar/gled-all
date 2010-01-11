@@ -22,7 +22,7 @@ ifeq (${GLED_SYSTEM},Darwin)
 else
   BASE_LD_LIBS := -lopenal
 endif
-BASE_LD_LIBS += -lalut
+BASE_LD_LIBS += -lalut -lvorbisfile
 
 LIBSET_TARGETS := # define additional targets (libraires built by default)
 
