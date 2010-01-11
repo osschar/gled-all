@@ -1,3 +1,11 @@
+2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix configure of gled screwed up in last commit.
+
+	* gled/Makefile:
+	Fix the external paths passed to gled configure.
+	Put back the creation of the external/ symlink.
+
 2010-01-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* gled/Makefile:
