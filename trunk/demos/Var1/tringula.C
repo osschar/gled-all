@@ -96,16 +96,16 @@ void tringula(Int_t mode=2)
     ZList* bufdir = g_queen->AssertPath("var/sounds", "ZNameMap");
 
     CREATE_ADD_GLASS(albuf1, AlBuffer, bufdir, "Diesel", 0);
-    // albuf1->SetFile("cuckoo.wav");
-    albuf1->SetFile("../Audio1/diesel-loop.wav");
+    // albuf1->SetFile("cuckoo.ogg");
+    albuf1->SetFile("../Audio1/diesel-loop.ogg");
     albuf1->Load();
 
     CREATE_ADD_GLASS(albuf2, AlBuffer, bufdir, "PewPew", 0);
-    albuf2->SetFile("../Audio1/boom.wav");
+    albuf2->SetFile("../Audio1/boom.ogg");
     albuf2->Load();
 
     CREATE_ADD_GLASS(albuf3, AlBuffer, bufdir, "BigExplosion", 0);
-    albuf3->SetFile("sounds/big_explosion.wav");
+    albuf3->SetFile("sounds/big_explosion.ogg");
     albuf3->Load();
   }
 
