@@ -154,7 +154,17 @@ protected:
   UShort_t	mFireRefCount;	//! X{G}  7 ValOut(-width=>4)
   UShort_t	mEyeRefCount;	//!
 
+  void queen_check_in(ZGlass* l);
   void set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid);
+
+  template <class GLASS>
+  void assign_link(ZLinkBase& link, FID_t stamp_fid, const char* name, const char* title=0)
+  {
+    // Instantiate a lens and set link. To be used in AdEnlightenment().
+    GLASS *l = new GLASS(name, title);
+    queen_check_in(l);
+    set_link_or_die(link.ref_link(), l, stamp_fid);
+  }
 
   virtual void reference_all();
   virtual void unreference_all();

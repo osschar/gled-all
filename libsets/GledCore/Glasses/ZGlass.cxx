@@ -53,6 +53,14 @@ void ZGlass::_init()
 
 /**************************************************************************/
 
+void ZGlass::queen_check_in(ZGlass* l)
+{
+  // Needed to be able to check-in lenses from inline functions without
+  // including ZQueen.h.
+
+  mQueen->CheckIn(l);
+}
+
 void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid)
 {
   if(link == new_val) return;

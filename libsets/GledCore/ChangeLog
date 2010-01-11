@@ -1,3 +1,15 @@
+2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add utility function assign_link().
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	Add protected, templated assign_link() function to reduce code in
+	AdEnlightenment().
+
+	Add protected queen_check_in() so that ZGlass.h does not have to
+	include ZQueen.h.
+
 2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/SVars.h:
