@@ -24,9 +24,7 @@ void Extendio_GL_Rnr::_init()
 void Extendio_GL_Rnr::PreDraw(RnrDriver* rd)
 {
   PARENT::PreDraw(rd);
-
   glPushMatrix();
-
   glMultMatrixf(mExtendio->RefLastTrans().Array());
 }
 

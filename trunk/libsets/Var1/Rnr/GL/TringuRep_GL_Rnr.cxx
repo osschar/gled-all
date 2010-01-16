@@ -6,30 +6,46 @@
 
 #include "TringuRep_GL_Rnr.h"
 #include <Glasses/Extendio.h>
+#include "Glasses/ExtendioSpiritio.h"
+#include <Glasses/ExtendioExplosion.h>
 #include <Glasses/TSPupilInfo.h>
 #include <Glasses/Tringula.h>
 #include <Glasses/TriMesh.h>
 #include <RnrBase/RnrDriver.h>
 #include <Rnr/GL/TringTvor_GL_Rnr.h>
 
+#include <Eye/Eye.h>
+
+#include <Glasses/AlBuffer.h>
+#include <Glasses/AlSource.h>
+
 #include <GL/glew.h>
+
 
 #define PARENT ZNode_GL_Rnr
 
 //==============================================================================
 
-void TringuRep_GL_Rnr::_init()
-{}
-
 TringuRep_GL_Rnr::TringuRep_GL_Rnr(TringuRep* idol) :
   ZNode_GL_Rnr(idol),
-  mTringuRep(idol)
-{
-  _init();
-}
+  mTringuRep(idol),
+  mTringulaSpy(0)
+{}
 
 TringuRep_GL_Rnr::~TringuRep_GL_Rnr()
-{}
+{
+  delete mTringulaSpy;
+}
+
+void TringuRep_GL_Rnr::SetImg(OptoStructs::ZGlassImg* newimg)
+{
+  PARENT::SetImg(newimg);
+  mTringulaSpy = new TringulaSpy(fImg->fEye->DemanglePtr(mTringuRep->GetTringula()), this); 
+}
+
+// In principle also need AbsorbRay() to check if Tringula link changes.
+// This should not really happen, but then again, it might.
+// Then also check for null tringula link.
 
 //==============================================================================
 
@@ -76,6 +92,34 @@ void TringuRep_GL_Rnr::Draw(RnrDriver* rd)
       glPopMatrix();
     }
   }
+
+  {
+    GL_Capability_Switch ligt_off(GL_LIGHTING, false);
+    GL_Capability_Switch blnd_on (GL_BLEND,    true);
+    GL_Boolean_Holder    dbuf_off(GL_DEPTH_WRITEMASK, false, glDepthMask);
+    GL_Enum_Holder       beq_max (GL_BLEND_EQUATION_RGB, GL_MAX, glBlendEquation);
+    rd->Render(rd->GetLensRnr(*T.mExplosions));
+  }
+
+  // Handle Extendio sound-effects.
+  {
+    hExt2AlSrc_i i = mExtendioSounds.begin();
+    while (i != mExtendioSounds.end())
+    {
+      if (i->second->IsPlaying())
+      {
+	i->second->ref_trans().SetFromArray(i->first->RefLastTrans());
+	rd->Render(rd->GetLensRnr(i->second));
+	++i;
+      }
+      else
+      {
+	hExt2AlSrc_i j = i++;
+	PI.RelinquishAlSource(j->second);
+	mExtendioSounds.erase(j);
+      }
+    }
+  }
 }
 
 //void TringuRep_GL_Rnr::PostDraw(RnrDriver* rd) {}
@@ -100,4 +144,99 @@ void TringuRep_GL_Rnr::Render(RnrDriver* rd)
   rnr.Render();
 
   rnr.EndRender();
+}
+
+//==============================================================================
+
+void TringuRep_GL_Rnr::ExtendioExploding(Extendio* ext, ExtendioExplosion* exp)
+{
+  static const Exc_t _eh("TringuRep_GL_Rnr::ExtendioExploding ");
+
+  // printf("%sextendio %s, explosion %s.\n", _eh.Data(), ext->Identify().Data(), exp->Identify().Data());
+
+  // Need to do better:
+  AlBuffer *buf = dynamic_cast<AlBuffer*>(mTringuRep->GetQueen()->FindLensByPath("var/sounds/BigExplosion"));
+  if (!buf)
+    throw _eh + "explode buffer not found.";
+
+  // Check if pupil is visible / has focus !!!
+
+  TSPupilInfo &PI  = * mTringuRep->GetPupilInfo();
+  AlSource    *src = PI.AcquireAlSource();
+  if (src)
+  {
+    src->ref_trans().SetFromArray(ext->RefLastTrans());
+    src->QueueBuffer(buf);
+    src->SetPitch(buf->GetDuration() / exp->GetExplodeDuration());
+    src->Play();
+  }
+
+  // This should really go somewhere else -- in TringuRep and in TSPupilInfo.
+  // Tringula needs to do direct notification about Extendio destruction
+  // to TringuRep -> which can then pass stuf to TSPupilInfo.
+  //
+  // Normal camera should probably switch to somewhere above the dying extendio.
+  {
+    GLensWriteHolder lck(&PI);
+    ExtendioSpiritio *es = dynamic_cast<ExtendioSpiritio*>(PI.GetCurrentSpiritio());
+    if (es && es->GetExtendio() == ext)
+      PI.SetCurrentSpiritio(0);
+
+    if (PI.GetSelection()->Has(ext))
+    {
+      PI.SelectTopMenuByName("MainMenu");
+      PI.GetSelection()->Remove(ext);
+    }
+  }
+}
+
+void TringuRep_GL_Rnr::ExtendioDying(Extendio* ext)
+{
+  // printf("TringuRep_GL_Rnr::ExtendioDying %s.\n", ext->Identify().Data());
+
+  TSPupilInfo  &PI = * mTringuRep->GetPupilInfo();
+  hExt2AlSrc_ip ip = mExtendioSounds.equal_range(ext);
+  for (hExt2AlSrc_i i = ip.first; i != ip.second; ++i)
+  {
+    PI.RelinquishAlSource(i->second);
+  }
+  mExtendioSounds.erase(ip.first, ip.second);
+}
+
+//==============================================================================
+// TringulaSpy
+//==============================================================================
+
+TringuRep_GL_Rnr::TringulaSpy::TringulaSpy(OptoStructs::ZGlassImg* i, TringuRep_GL_Rnr* m) :
+  OptoStructs::A_View(i), mMaster(m)
+{}
+
+TringuRep_GL_Rnr::TringulaSpy::~TringulaSpy()
+{
+  mMaster->mTringulaSpy = 0;
+}
+
+void TringuRep_GL_Rnr::TringulaSpy::AbsorbRay(Ray& ray)
+{
+  if (ray.fRQN < RayNS::RQN_user_0)
+    return;
+
+  if (ray.fRQN == Tringula::PRQN_extendio_exploding)
+  {
+    ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
+    ID_t expid = GledNS::ReadLensID(*ray.fCustomBuffer);
+    ray.ResetCustomBuffer();
+
+    Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
+    ExtendioExplosion *exp = dynamic_cast<ExtendioExplosion*>(fImg->fEye->DemangleID2Lens(expid));
+    mMaster->ExtendioExploding(ext, exp);
+  }
+  else if (ray.fRQN == Tringula::PRQN_extendio_dying)
+  {
+    ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
+    ray.ResetCustomBuffer();
+
+    Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
+    mMaster->ExtendioDying(ext);
+  }
 }

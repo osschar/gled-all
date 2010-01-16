@@ -83,6 +83,25 @@ public:
   { if(fFlip) set_state(fState); }
 };
 
+class GL_Boolean_Holder
+{
+  GLenum    fWhat;
+  GLboolean fState;
+  bool      fFlip;
+  void    (*fFoo)(GLboolean);
+
+public:
+  GL_Boolean_Holder(GLenum what, GLboolean state, void (*foo)(GLboolean)) :
+    fWhat(what), fFoo(foo)
+  {
+    glGetBooleanv(fWhat, &fState);
+    fFlip = (fState != state);
+    if(fFlip) fFoo(state);
+  }
+  ~GL_Boolean_Holder()
+  { if(fFlip) fFoo(fState); }
+};
+
 class GL_Float_Holder
 {
   GLenum    fWhat;

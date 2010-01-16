@@ -5,6 +5,8 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "TSPupilInfo.h"
+#include <Glasses/ZDeque.h>
+#include <Glasses/ZVector.h>
 #include <Glasses/Scene.h>
 #include <Glasses/WGlWidget.h>
 #include <Glasses/TimeMaker.h>
@@ -14,6 +16,7 @@
 #include "TSPupilInfo.c7"
 
 #include <Glasses/Camera.h>
+#include <Glasses/AlSource.h>
 
 // TSPupilInfo
 
@@ -28,6 +31,8 @@
 // the primary Tringula.
 
 ClassImp(TSPupilInfo);
+
+Int_t TSPupilInfo::sNMaxAlSources = 16;
 
 //==============================================================================
 
@@ -58,41 +63,53 @@ void TSPupilInfo::AdEnlightenment()
   PARENT_GLASS::AdEnlightenment();
 
   if (mSelection == 0) {
-    ZHashList* l = new ZHashList("Selection", "Selection of TSPupilInfo");
-    l->SetElementFID(Extendio::FID());
-    mQueen->CheckIn(l);
-    SetSelection(l);
+    assign_link<ZHashList>(mSelection, FID(), "Selection", "Selection of TSPupilInfo");
+    mSelection->SetElementFID(Extendio::FID());
   }
   if (mOverlay == 0)
   {
-    ZHashList* l = new ZHashList("Overlay", "Overlay list of TSPupilInfo");
-    mQueen->CheckIn(l);
-    SetOverlay(l);
+    assign_link<ZHashList>(mOverlay, FID(), "Overlay", "Overlay list of TSPupilInfo");
   }
   if (mMenuScene == 0)
   {
-    Scene* s = new Scene("MenuScene", "Menu overlay of TSPupilInfo");
-    s->SetMIRActive(false);
-    mQueen->CheckIn(s);
-    SetMenuScene(s);
-    AddOverlayElement(s);
-    s->MakeRnrModList();
+    assign_link<Scene>(mMenuScene, FID(), "MenuScene", "Menu overlay of TSPupilInfo");
+    mMenuScene->SetMIRActive(false);
+    AddOverlayElement(*mMenuScene);
+    mMenuScene->MakeRnrModList();
   }
   if (mSpiritioScene == 0)
   {
-    Scene* s = new Scene("SpiritioScene", "Spiritio overlay of TSPupilInfo");
-    s->SetMIRActive(false);
-    mQueen->CheckIn(s);
-    SetSpiritioScene(s);
-    AddOverlayElement(s);
-    s->MakeRnrModList();
+    assign_link<Scene>(mSpiritioScene, FID(), "SpiritioScene", "Spiritio overlay of TSPupilInfo");
+    mSpiritioScene->SetMIRActive(false);
+    AddOverlayElement(*mSpiritioScene);
+    mSpiritioScene->MakeRnrModList();
   }
 
+  // Local AlSources.
+  mNAlSources = 0;
+  if (mAlSources == 0)
+  {
+    assign_link<ZVector>(mAlSources, FID(), "AlSources");
+    mAlSources->SetMIRActive(false);
+    mAlSources->SetElementFID(AlSource::FID());
+  }
+  if (mAlSourcesFree == 0)
+  {
+    assign_link<ZDeque>(mAlSourcesFree, FID(), "FreeAlSources");
+    mAlSourcesFree->SetMIRActive(false);
+    mAlSourcesFree->SetElementFID(AlSource::FID());
+  }
+  if (mAlSourcesUsed == 0)
+  {
+    assign_link<ZHashList>(mAlSourcesUsed, FID(), "UsedAlSources");
+    mAlSourcesUsed->SetMIRActive(false);
+    mAlSourcesUsed->SetElementFID(AlSource::FID());
+  }
+
+  // From PupilInfo
   if (mEventHandler == 0)
   {
-    ZHashList* l = new ZHashList("Event handlers", "Event handlers of TSPupilInfo");
-    mQueen->CheckIn(l);
-    SetEventHandler(l);
+    assign_link<ZHashList>(mEventHandler, FID(), "Event handlers", "Event handlers of TSPupilInfo");
   }
 }
 
@@ -279,4 +296,59 @@ void TSPupilInfo::SelectTopMenuForLens(ZGlass* lens)
   }
 
   SelectTopMenu(lm);
+}
+
+
+//==============================================================================
+// Local AlSource management
+//==============================================================================
+
+// Locking is not strictly necessary as access is only expected from the
+// fltk thread.
+
+AlSource* TSPupilInfo::AcquireAlSource()
+{
+  static const Exc_t _eh("TSPupilInfo::AcquireAlSource ");
+
+  GMutexHolder _lck(mAlSourceMutex);
+
+  AlSource *src = 0;
+  if (mAlSourcesFree->IsEmpty())
+  {
+    if (mNAlSources < sNMaxAlSources)
+    {
+      GLensWriteHolder _wlck(this);
+      src = new AlSource(GForm("AlSource %d", mNAlSources));
+      mQueen->CheckIn(src);
+      mAlSources->Add(src);
+    }
+    else
+    {
+      // Could take a used one and recylcle it:
+      //   src->Stop();
+      //   src->UnqueueAllBuffers();
+      // Need transient source category ... and a way to steal it
+      // back from whoever has it.
+      // Still, returning 0 is some cases seems unavoidable.
+      ISwarn(_eh + "No free AlSources, maximum number reached.");
+      return 0;
+    }
+  }
+  else
+  {
+    src = (AlSource*) mAlSourcesFree->PopFront();
+  }
+  mAlSourcesUsed->PushBack(src);
+  return src;
+}
+
+void TSPupilInfo::RelinquishAlSource(AlSource* src)
+{
+  GMutexHolder _lck(mAlSourceMutex);
+
+  src->Stop();
+  src->UnqueueAllBuffers();
+  src->SetPitch(1);
+  
+  mAlSourcesUsed->Remove(src);
 }

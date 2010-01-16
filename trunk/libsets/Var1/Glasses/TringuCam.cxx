@@ -678,17 +678,13 @@ void TringuCam::DynoDrive(Dynamico* dyno)
   throw _eh + "No suitable spiritio found.";
 }
 
-#include <Glasses/AlBuffer.h>
-#include <Glasses/AlSource.h>
-
-#include <TSystem.h>
-
 void TringuCam::ExtendioExplode(Extendio* ext)
 {
   // Terminate a dyno.
-  // Called in a deteached thread!
+  // Called in a deteached thread.
   //
   // This is all wrong ... but want to try this.
+  // This is much better now.
 
   static const Exc_t _eh("TringuCam::ExtendioExplode ");
 
@@ -696,61 +692,7 @@ void TringuCam::ExtendioExplode(Extendio* ext)
 
   printf("Extendio '%s' exploding at your command!\n", ext->GetName());
 
-  AlBuffer *buf;
-  AlSource *src;
-
-  {
-    GLensWriteHolder lck(*mTringula);
-
-    buf = dynamic_cast<AlBuffer*>(mQueen->FindLensByPath("var/sounds/BigExplosion"));
-    if (!buf)
-      throw _eh + "explode buffer not found.";
-
-    src = new AlSource("TmpExploder");
-    src->ref_trans().SetFromArray(ext->RefLastTrans());
-
-    mQueen->CheckIn(src);
-
-    mTringuRep->Add(src);
-  }
-
-  {
-    GLensWriteHolder lck(src);
-    src->QueueBuffer(buf);
-    src->Play();
-  }
-
-  do
-  {
-    gSystem->Sleep(200);
-  } while (src->IsPlaying());
-
-  {
-    GLensWriteHolder lck(*mPupilInfo);
-    ExtendioSpiritio *es = dynamic_cast<ExtendioSpiritio*>(mPupilInfo->GetCurrentSpiritio());
-    printf("Blowupa es=%p, ext=%p, ext=%p\n", es, es ? es->GetExtendio() : 0, ext);
-    if (es && es->GetExtendio() == ext)
-      mPupilInfo->SetCurrentSpiritio(0);
-  }
-
-  {
-    bool menuswitch;
-    {
-      GLensReadHolder lck(this);
-      menuswitch = mPupilInfo->GetSelection()->Has(ext);
-    }
-    if (menuswitch)
-    {
-      GLensWriteHolder lck(*mPupilInfo);
-      mPupilInfo->SelectTopMenuByName("MainMenu");
-    }
-  }
-
-  {
-    GLensWriteHolder lck(mQueen);
-    mQueen->RemoveLens(src);
-    mQueen->RemoveLens(ext);
-  }
+  ext->TakeDamage(1000);
 }
 
 //==============================================================================

@@ -22,6 +22,8 @@ void Extendio::_init()
 {
   mTringula = 0;
 
+  bExploding = false;
+
   mLastTransPtr = &mTrans;
   mLastAABBPtr  = &mAABB;
 
@@ -30,7 +32,7 @@ void Extendio::_init()
 
 Extendio::Extendio(const Text_t* n, const Text_t* t) :
   ZGlass(n,t),
-  mHitPoints(100, 0, 100)
+  mHitPoints(100, -100, 100)
 {
   _init();
 }
@@ -52,7 +54,13 @@ void Extendio::SetTringula(Tringula* tring)
 
 void Extendio::TakeDamage(Float_t damage)
 {
+  Bool_t was_exploding = bExploding;
   mHitPoints.Delta(-damage);
+  if (mHitPoints.Get() < 0 && !was_exploding)
+  {
+    bExploding = true;
+    mTringula->ExtendioExploding(this);
+  }
 }
 
 //==============================================================================

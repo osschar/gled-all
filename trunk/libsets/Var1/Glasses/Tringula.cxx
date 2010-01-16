@@ -19,6 +19,7 @@
 #include "Airplane.h"
 #include "Chopper.h"
 #include "LandMark.h"
+#include "ExtendioExplosion.h"
 
 #include "Tringula.c7"
 
@@ -72,35 +73,35 @@ Tringula::~Tringula()
 void Tringula::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
+
   if (mStatos == 0) {
-    ZHashList* l = new ZHashList("Statos", GForm("Statos of Tringula %s", GetName()));
-    l->SetElementFID(Statico::FID());
-    mQueen->CheckIn(l);
-    SetStatos(l);
+    assign_link<ZHashList>(mStatos, FID(), "Statos", GForm("Statos of Tringula %s", GetName()));
+    mStatos->SetElementFID(Statico::FID());
   }
   if (mDynos == 0) {
-    ZHashList* l = new ZHashList("Dynos", GForm("Dynos of Tringula %s", GetName()));
-    l->SetElementFID(Dynamico::FID());
-    mQueen->CheckIn(l);
-    SetDynos(l);
+    assign_link<ZHashList>(mDynos, FID(), "Dynos", GForm("Dynos of Tringula %s", GetName()));
+    mDynos->SetElementFID(Dynamico::FID());
   }
   if (mFlyers == 0) {
-    ZHashList* l = new ZHashList("Flyers", GForm("Flyers of Tringula %s", GetName()));
-    l->SetElementFID(Dynamico::FID());
-    mQueen->CheckIn(l);
-    SetFlyers(l);
+    assign_link<ZHashList>(mFlyers, FID(), "Flyers", GForm("Flyers of Tringula %s", GetName()));
+    mFlyers->SetElementFID(Dynamico::FID());
   }
   if (mLandMarks == 0) {
-    ZHashList* l = new ZHashList("LandMarks", GForm("LandMarks of Tringula %s", GetName()));
-    l->SetElementFID(LandMark::FID());
-    mQueen->CheckIn(l);
-    SetLandMarks(l);
+    assign_link<ZHashList>(mLandMarks, FID(), "LandMarks", GForm("LandMarks of Tringula %s", GetName()));
+    mLandMarks->SetElementFID(LandMark::FID());
   }
   if (mTubes == 0) {
-    ZHashList* l = new ZHashList("Tubes", GForm("Tubes of Tringula %s", GetName()));
-    l->SetElementFID(WSTube::FID());
-    mQueen->CheckIn(l);
-    SetTubes(l);
+    assign_link<ZHashList>(mTubes, FID(), "Tubes", GForm("Tubes of Tringula %s", GetName()));
+    mTubes->SetElementFID(WSTube::FID());
+  }
+
+  if (mExplodios == 0) {
+    assign_link<ZHashList>(mExplodios, FID(), "Explodios", GForm("Exploding Extendios of Tringula %s", GetName()));
+    mExplodios->SetElementFID(Extendio::FID());
+  }
+  if (mExplosions == 0) {
+    assign_link<ZHashList>(mExplosions, FID(), "Explosions", GForm("Explosions of Tringula %s", GetName()));
+    mExplosions->SetElementFID(Explosion::FID());
   }
 }
 
@@ -729,7 +730,8 @@ void Tringula::DoSplitBoxPrunning()
   //       nboxes, res, pairs.GetNbPairs(), time.TimeUntilNow().ToDouble());
 }
 
-/**************************************************************************/
+
+//==============================================================================
 
 void Tringula::TimeTick(Double_t t, Double_t dt)
 {
@@ -759,6 +761,67 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       WSTube& D = * (WSTube*) *tube_stepper;
       D.TimeTick(t, dt);
     }
+
+    // Weapons -- rays, grenades, rockets come here ... maybe.
+
+    Stepper<> explosion_stepper(*mExplosions);
+    while (explosion_stepper.step())
+    {
+      Explosion& E = * (Explosion*) *explosion_stepper;
+      E.TimeTick(t, dt);
+    }
+
+    Stepper<> explodio_stepper(*mExplodios);
+    while (explodio_stepper.step())
+    {
+      Extendio& E = * (Extendio*) *explodio_stepper;
+      E.TimeTick(t, dt);
+    }
+  }
+
+  // Process explosidios.
+  {
+    // !!!! This should happen under some kind of lock.
+
+    for (lpZGlass_i i = mFreshExplodios.begin(); i != mFreshExplodios.end(); ++i)
+    {
+      Extendio *ext = (Extendio*) *i;
+      ExtendioExplosion *exp = new ExtendioExplosion;
+      mQueen->CheckIn(exp);
+      exp->SetExplodeDuration(1.0f + TMath::Log10(ext->GetMesh()->GetM() + 1.0f));
+      exp->SetExtendio(ext);
+      mExplosions->Add(exp);
+      mExplodios->Add(ext);
+      // Remove extendio from whatever list it is in ... this should be done better.
+      // Eg, have a ZVector of extendio lists and a field in Extendio that allows
+      // Tringula to mark where it currently is.
+      if (mDynos->RemoveAll(ext) == 0)
+      {
+	if (mFlyers->RemoveAll(ext) == 0)
+	  mStatos->RemoveAll(ext);
+      }
+      EmitExtendioExplodingRay(ext, exp);
+    }
+    mFreshExplodios.clear();
+
+    for (lpZGlass_i i = mFinishedExplosions.begin(); i != mFinishedExplosions.end(); ++i)
+    {
+      ExtendioExplosion *exp = (ExtendioExplosion*) *i;
+      Extendio *ext = exp->GetExtendio();
+      EmitExtendioDyingRay(ext);
+
+      exp->SetExtendio(0);
+      mExplosions->RemoveAll(exp);
+      mExplodios->RemoveAll(ext);
+
+      // Request deletion in queen not strictly needed - should auto-destruct.
+      // Here we expect to be on the Sun of Tringula and Extendios.
+      auto_ptr<ZMIR> d1(mQueen->S_RemoveLens(exp));
+      mSaturn->ShootMIR(d1);
+      auto_ptr<ZMIR> d2(mQueen->S_RemoveLens(ext));
+      mSaturn->ShootMIR(d2);
+    }
+    mFinishedExplosions.clear();
   }
 
   // Box-pruning, minimalistic collision handling.
@@ -784,6 +847,14 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       D.update_aabb();
       D.update_last_data();
     }
+
+    Stepper<> explodio_stepper(*mExplodios);
+    while (explodio_stepper.step())
+    {
+      Extendio& E = * (Extendio*) *explodio_stepper;
+      E.update_aabb();
+      E.update_last_data();
+    }
   }
 
   // Loop over TimeMakerClient children
@@ -794,7 +865,27 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
   }
 }
 
-/******************************************************************************/
+
+//==============================================================================
+// Explosions, effects and who knows what else
+//==============================================================================
+
+void Tringula::ExtendioExploding(Extendio* ext)
+{
+  GMutexHolder _lck(mInternalMutex);
+  mFreshExplodios.push_back(ext);
+}
+
+void Tringula::ExplosionFinished(Explosion* exp)
+{
+  GMutexHolder _lck(mInternalMutex);
+  mFinishedExplosions.push_back(exp);
+}
+
+
+//==============================================================================
+// Protected methods
+//==============================================================================
 
 void Tringula::fill_pruning_list(AList* extendios, Int_t& n,
                                  const Opcode::AABB** boxes, void** user_data)
@@ -1081,4 +1172,36 @@ Bool_t Tringula::place_on_terrain(Dynamico* D, Float_t h_above)
   }
 }
 
-/**************************************************************************/
+
+//==============================================================================
+
+void Tringula::EmitExtendioExplodingRay(Extendio* ext, Explosion* exp)
+{
+  if (mQueen && mSaturn->AcceptsRays())
+  {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_extendio_exploding, mTimeStamp, FID()));
+
+    TBufferFile cbuff(TBuffer::kWrite);
+    GledNS::WriteLensID(cbuff, ext);
+    GledNS::WriteLensID(cbuff, exp);
+    ray->SetCustomBuffer(cbuff);
+
+    mQueen->EmitRay(ray);
+  }
+}
+
+void Tringula::EmitExtendioDyingRay(Extendio* ext)
+{
+  if (mQueen && mSaturn->AcceptsRays())
+  {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_extendio_dying, mTimeStamp, FID()));
+
+    TBufferFile cbuff(TBuffer::kWrite);
+    GledNS::WriteLensID(cbuff, ext);
+    ray->SetCustomBuffer(cbuff);
+
+    mQueen->EmitRay(ray);
+  }
+}

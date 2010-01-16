@@ -365,31 +365,35 @@ void tringula(Int_t mode=2)
   trirep->SetTringula(tringula);
   trirep->SetPalette(pal);
 
-  // Fields
+  { // Fields. Should go somewhere else as they are tringula specific.
+    // But then also need to differentiate true fields and field known
+    // to a player (measured fields).
+    ZList* meshes = g_queen->AssertPath("var/fields", "ZNameMap");
 
-  ASSIGN_ADD_GLASS(engfield, TriMeshField, trirep, "Energy Field", 0);
-  engfield->SetMesh(trimesh);
-  engfield->ResizeToMesh();
-  engfield->SetPalette(pal);
-  engfield->FillByGaussBlobs();
-  engfield->FindMinMaxField();
+    ASSIGN_ADD_GLASS(engfield, TriMeshField, meshes, "Energy Field", 0);
+    engfield->SetMesh(trimesh);
+    engfield->ResizeToMesh();
+    engfield->SetPalette(pal);
+    engfield->FillByGaussBlobs();
+    engfield->FindMinMaxField();
 
-  ASSIGN_ADD_GLASS(metfield, TriMeshField, trirep, "Metal Field", 0);
-  metfield->SetMesh(trimesh);
-  metfield->ResizeToMesh();
-  metfield->SetPalette(pal);
-  metfield->FillByGaussBlobs();
-  metfield->FindMinMaxField();
+    ASSIGN_ADD_GLASS(metfield, TriMeshField, meshes, "Metal Field", 0);
+    metfield->SetMesh(trimesh);
+    metfield->ResizeToMesh();
+    metfield->SetPalette(pal);
+    metfield->FillByGaussBlobs();
+    metfield->FindMinMaxField();
 
-  ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, trirep, "LightMap Field", 0);
-  lightmap->SetMesh(trimesh);
-  lightmap->ResizeToMesh();
-  lightmap->SetPalette(pal);
-  lightmap->SetLampPos(5, 5, 5);
-  lightmap->SetDirectional(true);
-  lightmap->CalculateLightField();
-  lightmap->Diffuse(); lightmap->Diffuse();
-  lightmap->Diffuse(); lightmap->Diffuse();
+    ASSIGN_ADD_GLASS(lightmap, TriMeshLightField, meshes, "LightMap Field", 0);
+    lightmap->SetMesh(trimesh);
+    lightmap->ResizeToMesh();
+    lightmap->SetPalette(pal);
+    lightmap->SetLampPos(5, 5, 5);
+    lightmap->SetDirectional(true);
+    lightmap->CalculateLightField();
+    lightmap->Diffuse(); lightmap->Diffuse();
+    lightmap->Diffuse(); lightmap->Diffuse();
+  }
 
   // This has to be called after tringula is fully initialized.
   trirep->ActivateField(engfield);
