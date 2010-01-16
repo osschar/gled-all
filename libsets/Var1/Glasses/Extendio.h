@@ -59,6 +59,7 @@ protected:
   ZLink<TriMesh>  mMesh;         //  X{GS} L{}
 
   SMinMaxVarF     mHitPoints;    //  X{G} 7 ValOut()
+  Bool_t          bExploding;    //  X{G} 7 BoolOut()
 
   HTransF         mTrans;        //  Transform from current master
   Opcode::AABB    mAABB;         //! Enclosing bbox in parent frame

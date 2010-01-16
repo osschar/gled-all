@@ -1,3 +1,77 @@
+2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement explosions and their handling.
+
+	A bit more work is needed to properly handle signaling from
+	Tringula: now tringula emits custom rays and TringuRep_GL_Rnr
+	handles them. Tringula should really hold a list of its TringuReps
+	and notify them directly -- and TringuReps should then emit the
+	rays to their renderers.
+
+	* Glasses/Explosion.cxx:
+	* Glasses/Explosion.h:
+	* Glasses/ExtendioExplosion.cxx:
+	* Glasses/ExtendioExplosion.h:
+	* Rnr/GL/Explosion_GL_Rnr.cxx:
+	* Rnr/GL/Explosion_GL_Rnr.h:
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.cxx:
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.h:
+	New classes for representation of explosions.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add flag 'Bool_t bExploding'.
+	Extend minimum hit-points to -100.
+	Call Tringula::ExtendioExploding() when hit-points go below zero.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add pool of AlSources associated with this pupil and access functions:
+	  AlSource* AcquireAlSource();
+	  void      RelinquishAlSource(AlSource* src);
+	This requires a vector of sources, a hash-list of used sources and
+	a queue of free ones. Maximum number of sources is limited by a
+	static variable (16 at the moment).
+	All this should really go to Audio1::AlSourcePool glass.
+
+	* Glasses/TringuCam.cxx:
+	Remove all the crap from ExtendioExplode(), just call
+	Extendio::TakeDamage(1000).
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add handling of explosions. This requires:
+	- two links to ZHashLists (mExplodios - currently exploding
+	  Extendios and mExplosions current explosions);
+	- two plain STL lists for storing new and finished explosions;
+	- handling of those in TimeTick();
+	- registration functions called from extendios/explosions:
+	    void ExtendioExploding(Extendio* ext);
+	    void ExplosionFinished(Explosion* exp);
+	- two custom raw quantum-numbers PRQN_extendio_exploding and
+	  PRQN_extendio_dying with associated emit functions:
+	    void EmitExtendioExplodingRay(Extendio* ext, Explosion* exp);
+	    void EmitExtendioDyingRay(Extendio* ext);
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Handle explosions and dying extendios.
+	- Special A_View sub-class that pretends to be a view of tringula
+	  to receive its rays and forwards them to TringuRep_GL_Rnr functions:
+	    void ExtendioExploding(Extendio* ext, ExtendioExplosion* exp);
+	    void ExtendioDying(Extendio* ext);
+	- hash_multimap from Extendio* to AlSource* -- this could be
+	  extended to handle any kind of effects.
+	- Draw() now also draws all the explosions and sets positions of
+	  AlSources assigned to Extendios. The AlSources are taken from
+	  TSPupilInfo's pool and returned there when not playback is finished.
+
+	* glass.list:
+	Register new glasses Explosion and ExtendioExplosion.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	White-space.
+
 2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Crawler.cxx:

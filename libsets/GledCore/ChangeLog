@@ -1,3 +1,11 @@
+2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Pupils/Pupil.cxx:
+	Set blend funcion/euation even if blending is disabled.
+
+	* Rnr/GL/ZGlass_GL_Rnr.h:
+	Add GL_Boolean_Holder class.
+
 2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add utility function assign_link().

@@ -29,7 +29,11 @@ Airplane                141     Glasses/Airplane
 Chopper                 142     Glasses/Chopper
 
 LandMark                150     Glasses/LandMark                .
+
 TringuObserver          160     Glasses/TringuObserver
+
+Explosion               170     Glasses/Explosion               .
+ExtendioExplosion       171     Glasses/ExtendioExplosion       .
 
 Spiritio                200     Glasses/Spiritio                .
 ExtendioSpiritio        201     Glasses/ExtendioSpiritio

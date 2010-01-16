@@ -1,3 +1,10 @@
+2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Put tringula fields under "var/fields". This is not perfect as
+	they really depend on what player knows but is better then to have
+	them as children of TringuRep.
+
 2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* sounds/big_explosion.ogg:

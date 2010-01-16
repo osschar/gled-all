@@ -11,11 +11,15 @@
 #include <Stones/TimeMakerClient.h>
 #include <Stones/SGridStepper.h>
 
+class ZDeque;
 class ZHashList;
+class ZVector;
 class Scene;
 class WGlWidget;
 
 class TimeMaker;
+
+class AlSource;
 
 class Extendio;
 class Spiritio;
@@ -47,6 +51,19 @@ protected:
 
   SGridStepper      mGridStepper;     // X{r}
 
+  // Collection of AlSources to be used by the renderers.
+  // These variables are entirely managed by the renderers and are not
+  // locked as rendering is done from a single thread.
+  //
+  // This should all go into a AlSourcePool glass in Audio1.
+  // Static should be a parameter.
+  static Int_t      sNMaxAlSources;
+  Int_t             mNAlSources;      //!	
+  ZLink<ZVector>    mAlSources;       //! X{GS} L{}
+  ZLink<ZDeque>     mAlSourcesFree;   //!
+  ZLink<ZHashList>  mAlSourcesUsed;   //!
+  GMutex            mAlSourceMutex;   //!
+
 public:
   TSPupilInfo(const Text_t* n="TSPupilInfo", const Text_t* t=0);
   virtual ~TSPupilInfo();
@@ -76,6 +93,10 @@ public:
   void SelectTopMenu(WGlWidget* weed);           // X{E} C{1} 7 MCWButt()
   void SelectTopMenuByName(const TString& name); // X{E}      7 MCWButt()
   void SelectTopMenuForLens(ZGlass* lens);       // X{E} C{1} 7 MCWButt()
+
+  // Local AlSource management
+  AlSource* AcquireAlSource();
+  void      RelinquishAlSource(AlSource* src);
 
 #include "TSPupilInfo.h7"
   ClassDef(TSPupilInfo, 1); // TringuSol PupilInfo.

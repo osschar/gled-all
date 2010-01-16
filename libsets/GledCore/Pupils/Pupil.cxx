@@ -1190,9 +1190,10 @@ void Pupil::rnr_default_init()
   glPointSize(1);
   glLineWidth(1);
 
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
   if(mInfo->GetBlend()) {
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   } else {
     glDisable(GL_BLEND);
   }

@@ -10,6 +10,7 @@
 #include <Glasses/ZNode.h>
 #include <Stones/ZColor.h>
 #include <Stones/TimeMakerClient.h>
+#include <Eye/Ray.h>
 
 #include <Opcode/Opcode.h>
 
@@ -26,6 +27,7 @@ class Statico;
 class Dynamico;
 class Crawler;
 class LandMark;
+class Explosion;
 
 class Tringula : public ZNode, public TimeMakerClient
 {
@@ -34,6 +36,13 @@ class Tringula : public ZNode, public TimeMakerClient
   friend class TringuCam;
 
 public:
+  enum PrivRayQN_e 
+  {
+    PRQN_offset = RayNS::RQN_user_0,
+    PRQN_extendio_exploding,
+    PRQN_extendio_dying
+  };
+
   enum EdgeRule_e { ER_Stop, ER_Hold, ER_Bounce, ER_Wrap };
 
   enum ColorSource_e
@@ -75,6 +84,13 @@ protected:
   ZLink<ZHashList>   mFlyers;       //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mLandMarks;    //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mTubes;        //  X{GS} L{} RnrBits{0,0,0,5}
+
+  ZLink<ZHashList>   mExplodios;    //  X{GS} L{} RnrBits{0,0,0,5}
+  ZLink<ZHashList>   mExplosions;   //  X{GS} L{} RnrBits{0,0,0,5}
+
+  GMutex             mInternalMutex;      //!
+  lpZGlass_t         mFreshExplodios;     //!
+  lpZGlass_t         mFinishedExplosions; //!
 
   Bool_t           bRnrBBoxes;   // X{GS} 7 Bool(-join=>1)
 
@@ -126,9 +142,9 @@ public:
 
   Extendio* PickExtendios(const Opcode::Ray& ray);
 
-  void ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
+  void      ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
 
-  Float_t PlaceAboveTerrain(ZTrans& trans, Float_t height=0, Float_t dh_fac=0);
+  Float_t   PlaceAboveTerrain(ZTrans& trans, Float_t height=0, Float_t dh_fac=0);
 
   Statico* NewStatico(const Text_t* sname=0);
   Statico* RandomStatico(ZVector* mesh_list,
@@ -158,8 +174,15 @@ public:
 
   void DoSplitBoxPrunning(); // X{E} 7 MCWButt()
 
+  void ExtendioExploding(Extendio* ext);
+  void ExplosionFinished(Explosion* exp);
+
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  // Private Rays
+  void EmitExtendioExplodingRay(Extendio* ext, Explosion* exp);
+  void EmitExtendioDyingRay(Extendio* ext);
 
 #include "Tringula.h7"
   ClassDef(Tringula, 1);
