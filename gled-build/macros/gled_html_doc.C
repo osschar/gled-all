@@ -3,10 +3,25 @@
 #include <THtml.h>
 #include <TSystem.h>
 
-#include <string.h>
+class ZModDef : public THtml::TModuleDefinition
+{
+public:
+  TString fModule;
 
-class ZHtml : public THtml {
+  ZModDef() {}
 
+  virtual bool GetModule(TClass* cl, THtml::TFileSysEntry* fse,
+			 TString& out_modulename) const
+  {
+    out_modulename = fModule;
+    return true;
+  }
+
+  ClassDef(ZModDef, 1);
+};
+
+class ZHtml : public THtml
+{
 public:
   ZHtml() : THtml() {}
 
@@ -14,28 +29,37 @@ public:
   { CreateListOfTypes(); }
 
   void create_hierarchy(const char** classNames, Int_t numberOfClasses)
-  { CreateHierarchy(classNames, numberOfClasses); }
+  {
+    // This does not exist any more. Axel?
+    // CreateHierarchy(classNames, numberOfClasses);
+    CreateHierarchy();
+  }
 
   void create_index(const char** classNames, Int_t numberOfClasses)
-  { CreateIndex(classNames, numberOfClasses); }
+  {
+    // CreateIndex(classNames, numberOfClasses);
+    MakeIndex();
+  }
 
-  void KusKus(const char* className);
+  void KusKus(const char* className)
+  {
+    // TClass *classPtr = GetClass(className);
+    TClass *classPtr = TClass::GetClass(className);
+    TString htmlFile;
+    GetHtmlFileName(classPtr, htmlFile);
 
-  ClassDef(ZHtml, 1)
+    printf("KusKus -- cname=%s, hname=%s\n", className, htmlFile.Data());
+    
+    if (!htmlFile.IsNull() &&
+	(htmlFile.BeginsWith("http://")  ||
+	 htmlFile.BeginsWith("https://") ||
+	 !gSystem->IsAbsoluteFileName(htmlFile)) )
+    {
+      // Class2Html(classPtr);
+      MakeClass(className);
+      MakeTree(className);
+    }
+  }
+
+  ClassDef(ZHtml, 1);
 }; // endclass ZHtml
-
-ClassImp(ZHtml)
-
-void ZHtml::KusKus(const char* className)
-{
-   TClass *classPtr = GetClass(className);
-   char *htmlFile = GetHtmlFileName(classPtr);
-   if (htmlFile && (strncmp(htmlFile, "http://", 7)  ||
-		    strncmp(htmlFile, "https://", 8) ||
-		    !gSystem->IsAbsoluteFileName(htmlFile)) )
-     {
-       Class2Html(classPtr);
-       MakeTree(className);
-     }
-   delete[]htmlFile;
-}
