@@ -16,6 +16,8 @@ public:
 
   virtual Bool_t ImportSite(AEVSite* site, Bool_t warn=false) = 0;
   virtual void   ClearSiteVizes() {}
-};
+
+  ClassDef(AEVSSpace_ABase, 0); // Abstract interface - site-management API for space representations.
+}; // endclass AEVSSpace_ABase
 
 #endif
