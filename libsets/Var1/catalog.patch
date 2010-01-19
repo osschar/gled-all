@@ -24,6 +24,10 @@ $PATCH = {
   'VirtualBase' => 1
 },
 
+"TriMesh" => {
+  'Pragmas'    => "#pragma link C++ class TriMeshColorArraySource+;\n"
+},
+
 "KeyHandling" => {
   'NoDefault'  => 1,
   'Pragmas'    => "#pragma link C++ namespace KeyHandling;\n" .

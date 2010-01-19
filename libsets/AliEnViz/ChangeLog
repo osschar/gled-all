@@ -1,3 +1,9 @@
+2010-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* AliEnViz/AEVSSpace_ABase.cxx:
+	* AliEnViz/AEVSSpace_ABase.h:
+	Make dictionary for TriMeshColorArraySource to get it into html docs.
+
 2009-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Support display of "events" per site in solar view.
@@ -6,11 +12,11 @@
 	* Glasses/AEVManager.cxx:
 	* Glasses/AEVManager.h:
 	Add two new site-viz modes: SV_EventsDone and SV_EventsFrac.
-	
+
 	* Glasses/AEVMlSucker.cxx:
 	Add parsing of "totevents" and "events" keywords.
 	Relax word regexp to include '.'.
-	
+
 	* Glasses/AEVSite.cxx:
 	* Glasses/AEVSite.h:
 	Add members needed for display of (fraction of) events done.

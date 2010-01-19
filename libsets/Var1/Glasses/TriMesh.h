@@ -29,12 +29,17 @@ namespace Opcode
 class TriMeshColorArraySource
 {
 public:
+  TriMeshColorArraySource() {}
+  virtual ~TriMeshColorArraySource() {}
+
   virtual void     AssertVertexColorArray() = 0;
   virtual UChar_t* GetVertexColorArray()    = 0;
   virtual UChar_t* GetTriangleColorArray()  = 0;
   virtual void     ColorArraysModified()    = 0;
 
   static TriMeshColorArraySource* CastLens(const Exc_t& eh, ZGlass* lens, Bool_t null_ok);
+
+  ClassDef(TriMeshColorArraySource, 0); // Abstract interface - provide color arrays for TriMesh vertices and triangles.
 };
 
 

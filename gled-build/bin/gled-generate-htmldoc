@@ -95,6 +95,7 @@ print S <<"FNORD";
   html.SetInputDir("$lsets");
 
   ZModDef moddef;
+  html.SetModuleDefinition(moddef);
 FNORD
 
 @all_classes = ();
@@ -102,10 +103,7 @@ FNORD
 for $ls (@{$resolver->{LibSetList}})
 {
   print S <<"FNORD";
-  // Gled::theOne->AssertLibSet("$ls");
-  moddef.fModule = "$ls";
-  html.SetModuleDefinition(moddef);
-  // html.SetInputDir("libsets/$ls");
+  html.SetViewCVS("http://www.gled.org/cgi-bin/viewcvs.cgi/trunk/libsets/$ls/%f?view=log");
 FNORD
 
   print HTML "\n\n<hr><hr>\n";
@@ -119,29 +117,31 @@ FNORD
   {
     my @classes;
 
-    open C, "find $ls/$d -name \\*.h | xargs grep -h ClassDef |";
-    while ($_ = <C>)
+    opendir HFS, "$ls/$d";
+    my @hfiles = map { s/\.h//; $_ } (grep { /\.h$/ } readdir HFS);
+    closedir HFS;
+    for $hf (@hfiles)
     {
-      chomp;
-      my $cnt = m/ClassDef(?:NV)?\(([\w:<>]+)\s*,\s*(\d+)\)/;
-      # !!!! Several classes per header file SOMEWHAT supported !!!!
-      unless ($cnt)
-      {
-	print "SAFR: $_\n";
-	next;
-      }
-      push @classes, $1;
+      print "Processing $hf ... $ls/dict/${hf}_LinkDef.h\n";
+      open LDF, "$ls/dict/${hf}_LinkDef.h";
+      my @lines = <LDF>;
+      close LDF;
+      @lines = grep { /#pragma link C\+\+ class / } @lines;
+      @lines = map  { /class\s+([:\w<>*]+)/; $1 } @lines;
+      @lines = grep { not /^ZLink</ and not /list</ } @lines;
+      @lines = map  { s/Double_t/double/g; s/Float_t/float/g; $_ } @lines;
+      print "  ", join(", ", @lines), "\n";
+      push @classes, @lines;
     }
-    close C;
 
     @classes = sort @classes;
 
     for $cls (@classes)
     {
-      print S "  printf(\"Generating for class $cls\\n\");\n";
-      # print S "  html->MakeClass(\"$cls\", false);\n";
+      ### print S "  html->MakeClass(\"$cls\", false);\n";
+      # print S "  printf(\"Generating for class $cls\\n\");\n";
       print S "  html->KusKus(\"$cls\");\n";
-      print S "  printf(\"Done for class $cls\\n\");\n";
+      # print S "  printf(\"Done for class $cls\\n\");\n";
     }
 
     if ($#classes >= 0)
@@ -150,8 +150,11 @@ FNORD
       print HTML join(", ",
         map { 
 	  my $file = $_;
-	  $file =~ s/:/_/og;	  
-	  "<a href=\"${file}.html\">$_</a>"
+	  $file =~ s/[:<>]/_/og;
+	  my $name = $_;
+	  $name =~ s/</\&lt;/og;
+	  $name =~ s/>/\&gt;/og;
+	  "<a href=\"${file}.html\">${name}</a>"
 	} @classes) . "\n\n";
       push @all_classes, @classes;
     }
@@ -159,22 +162,25 @@ FNORD
 
 }
 
-print S "  html->gen_list_of_types();\n";
+print S <<"FNORD";
+  TIter iClass(html.GetListOfClasses());
+  TClassDocInfo* cdi = 0;
+  while ((cdi = (TClassDocInfo*)iClass()))
+  {
+    TString clsname(cdi->GetClass()->GetName());
+    if (clsname.BeginsWith("ZLink<"))
+    {
+      cdi->SetDeclFileSysName("");
+      cdi->SetSelected(kFALSE);
+    }
+  }
 
-push @all_classes, "TObject";
-@all_classes = sort @all_classes;
-$num_all_classes = $#all_classes + 1;
-print S "  char* names[$num_all_classes];\n";
-my $i = 0;
-for $c (@all_classes)
-{
-  print S "  names[$i] = \"$c\";\n";
-  ++$i;
+  html.create_list_of_types();
+  html.create_hierarchy();
+  html.MakeIndex();
+  gSystem->Exit(0);
 }
-print S "  html->create_hierarchy(names, $num_all_classes);\n";
-print S "  html->create_index(names, $num_all_classes);\n";
-print S "  gSystem->Exit(0);\n";
-print S "}\n";
+FNORD
 
 close S;
 
