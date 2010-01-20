@@ -62,13 +62,6 @@ class ZLink : public ZLinkBase
 
 /**************************************************************************/
 
-namespace ZGlassBits {
-  extern UShort_t kFixedName;
-  extern UShort_t kDying;
-}
-
-/**************************************************************************/
-
 class Saturn;
 class ZMIR;
 class Ray;
@@ -78,7 +71,8 @@ class ZComet;
 class GThread;
 class TBuffer;	class TMessage;
 
-namespace GledNS {
+namespace GledNS
+{
   class ClassInfo;
   class LinkMemberInfo;
 }
@@ -128,6 +122,12 @@ public:
   typedef list<LinkRep>           lLinkRep_t;
   typedef list<LinkRep>::iterator lLinkRep_i;
 
+  enum Bits_e
+  {
+    kFixedNameBit = 0x1,
+    kDyingBit     = 0x2
+  };
+
 private:
   void		_init();
 
@@ -135,7 +135,7 @@ protected:
   Saturn*	mSaturn;	//! X{g}
   ZQueen*	mQueen;		//! X{g}
 
-  UShort_t	mGlassBits;	//
+  UInt_t	mGlassBits;	//  X{g}
   TString	mName;		//  X{RGE} 7 Textor()
   TString	mTitle;		//  X{RGE} 7 Textor()
   ID_t		mSaturnID;	//  X{G}   7 ValOut(-range=>[0,MAX_ID,1], -width=>10)
@@ -224,6 +224,8 @@ protected:
   Bool_t bUseDispList;      // X{GST} 7 Bool(-join=>1)
   Bool_t bUseNameStack;     // X{GS}  7 Bool()
 public:
+
+  Bool_t  CheckBit(Bits_e bit) const { return mGlassBits & bit; }
 
   TString Identify() const;
 

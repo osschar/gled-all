@@ -148,6 +148,150 @@ void Spiritio_GL_Rnr::RegisterKey(Int_t k, const TString& tag)
 
 //==============================================================================
 
+void Spiritio_GL_Rnr::draw_vertical_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick)
+{
+  // Draws into unit box x(-0.5, 0.5), y (-0.5, 0.5).  
+  // Blending should be enabled from outside.
+  //
+  // If pick is true an invisible, z-tilted polygon is also drawn so that
+  // the picking position can deduced from the max depth od the selection hit.
+  // The z-offset at the bottom is 0 and -1 at the top which translates
+  // to depth buffer values of 0 and 2 respectively.
+
+  static const Float_t bar_hw  = 0.1f;  // bar half-width
+  static const Float_t line_hw = 0.25f; // line half-width for val / des marks
+
+  if (pick)
+  {
+    rd->GL()->PushName(this, (void*) &v);
+    glBegin(GL_QUADS);
+    glVertex3f(-bar_hw, -0.5f,  0.0f); glVertex3f( bar_hw, -0.5f,  0.0f);
+    glVertex3f( bar_hw,  0.5f, -1.0f); glVertex3f(-bar_hw,  0.5f, -1.0f);
+    glEnd();
+    rd->GL()->PopName();
+    return;
+  }
+
+  const Float_t min = v.GetMin(), max = v.GetMax();
+  const Float_t val = v.Get();
+
+  const Float_t dinv = 1.0f / (max - min);
+
+  const Float_t yzero = -0.5f - min * dinv;
+  const Float_t yval  = -0.5f + (val - min) * dinv;
+
+  glEnable(GL_POLYGON_OFFSET_FILL);
+
+  glPolygonOffset(4, 4);
+  glColor4f(0.8, 0.8, 0.8, 0.4);
+  glBegin(GL_QUADS);
+  glVertex2f(-bar_hw, -0.5f); glVertex2f( bar_hw, -0.5f);
+  glVertex2f( bar_hw,  0.5f); glVertex2f(-bar_hw,  0.5f);
+  glEnd();
+
+  glPolygonOffset(2, 2);
+  glColor4f(0.8, 0.4, 0.4, 0.8);
+  glBegin(GL_QUADS);
+  if (val >= 0)
+  {
+    glVertex2f(-bar_hw, yzero); glVertex2f( bar_hw, yzero);
+    glVertex2f( bar_hw, yval);  glVertex2f(-bar_hw, yval);
+  }
+  else
+  {
+    glVertex2f(-bar_hw, yval);  glVertex2f( bar_hw, yval);
+    glVertex2f( bar_hw, yzero); glVertex2f(-bar_hw, yzero);
+  }
+  glEnd();
+
+  glDisable(GL_POLYGON_OFFSET_FILL);
+
+  glLineWidth(4);
+  glColor4f(0.4, 0.4, 0.8, 1.0);
+  glBegin(GL_LINES);
+  glVertex2f(-bar_hw,  yval);
+  glVertex2f( line_hw, yval);  
+  glEnd();
+
+  glLineWidth(1);
+  glColor4f(1.0, 0.4, 0.4, 1.0);
+  glBegin(GL_LINE_LOOP);
+  glVertex2f(-bar_hw, -0.5f); glVertex2f( bar_hw, -0.5f);
+  glVertex2f( bar_hw,  0.5f); glVertex2f(-bar_hw,  0.5f);
+  glEnd();
+}
+
+void Spiritio_GL_Rnr::draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick)
+{
+  // Draws into unit box x(-0.5, 0.5), y (-0.5, 0.5).
+  //
+  // See comments in draw_vertical_desirevar.
+
+  static const Float_t bar_hh  = 0.1f;  // bar half-width
+  static const Float_t line_hh = 0.25f; // line half-width for val / des marks
+
+  if (pick)
+  {
+    rd->GL()->PushName(this, (void*) &v);
+    glBegin(GL_QUADS);
+    glVertex3f(-0.5f,  bar_hh,  0.0f); glVertex3f(-0.5f, -bar_hh,  0.0f);
+    glVertex3f( 0.5f, -bar_hh, -1.0f); glVertex3f( 0.5f,  bar_hh, -1.0f);
+    glEnd();
+    rd->GL()->PopName();
+    return;
+  }
+
+  const Float_t min = v.GetMin(), max = v.GetMax();
+  const Float_t val = v.Get();
+
+  const Float_t dinv = 1.0f / (max - min);
+
+  const Float_t xzero = -0.5f - min * dinv;
+  const Float_t xval  = -0.5f + (val - min) * dinv;
+
+  glEnable(GL_POLYGON_OFFSET_FILL);
+
+  glPolygonOffset(4, 4);
+  glColor4f(0.8, 0.8, 0.8, 0.4);
+  glBegin(GL_QUADS);
+  glVertex2f(-0.5f,  bar_hh); glVertex2f(-0.5f, -bar_hh);
+  glVertex2f( 0.5f, -bar_hh); glVertex2f( 0.5f,  bar_hh);
+  glEnd();
+
+  glPolygonOffset(2, 2);
+  glColor4f(0.8, 0.4, 0.4, 0.8);
+  glBegin(GL_QUADS);
+  if (val >= 0)
+  {
+    glVertex2f(xzero, bar_hh); glVertex2f(xzero, -bar_hh);
+    glVertex2f(xval, -bar_hh); glVertex2f(xval,   bar_hh);
+  }
+  else
+  {
+    glVertex2f(xval,   bar_hh); glVertex2f(xval, -bar_hh);
+    glVertex2f(xzero, -bar_hh); glVertex2f(xzero, bar_hh);
+  }
+  glEnd();
+
+  glDisable(GL_POLYGON_OFFSET_FILL);
+
+  glLineWidth(4);
+  glColor4f(0.4, 0.4, 0.8, 1.0);
+  glBegin(GL_LINES);
+  glVertex2f(xval, -bar_hh);
+  glVertex2f(xval,  line_hh);  
+  glEnd();
+
+  glLineWidth(1);
+  glColor4f(1.0, 0.4, 0.4, 1.0);
+  glBegin(GL_LINE_LOOP);
+  glVertex2f(-0.5f,  bar_hh); glVertex2f(-0.5f, -bar_hh);
+  glVertex2f( 0.5f, -bar_hh); glVertex2f( 0.5f,  bar_hh);
+  glEnd();
+}
+
+//==============================================================================
+
 void Spiritio_GL_Rnr::draw_vertical_desirevar(const SDesireVarF& v, RnrDriver* rd, bool pick)
 {
   // Draws into unit box x(-0.5, 0.5), y (-0.5, 0.5).  
@@ -313,6 +457,7 @@ void Spiritio_GL_Rnr::update_al_src(AlSource* src, const ZTrans& t, RnrDriver* r
   if (src)
   {
     src->ref_trans().SetTrans(t);
-    rd->GetLensRnr(src)->Draw(rd);
+    src->MarkStampReqTrans();
+    rd->Render(rd->GetLensRnr(src));
   }
 }

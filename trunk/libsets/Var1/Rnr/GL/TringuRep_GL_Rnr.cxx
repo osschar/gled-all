@@ -29,7 +29,8 @@
 TringuRep_GL_Rnr::TringuRep_GL_Rnr(TringuRep* idol) :
   ZNode_GL_Rnr(idol),
   mTringuRep(idol),
-  mTringulaSpy(0)
+  mTringulaSpy(0),
+  mSoundDir(0)
 {}
 
 TringuRep_GL_Rnr::~TringuRep_GL_Rnr()
@@ -41,11 +42,18 @@ void TringuRep_GL_Rnr::SetImg(OptoStructs::ZGlassImg* newimg)
 {
   PARENT::SetImg(newimg);
   mTringulaSpy = new TringulaSpy(fImg->fEye->DemanglePtr(mTringuRep->GetTringula()), this); 
+  mSoundDir = dynamic_cast<AList*>(mTringuRep->GetQueen()->FindLensByPath("var/sounds"));
 }
 
 // In principle also need AbsorbRay() to check if Tringula link changes.
 // This should not really happen, but then again, it might.
 // Then also check for null tringula link.
+
+
+AlBuffer* TringuRep_GL_Rnr::find_sound(const TString& effect)
+{
+  return (AlBuffer*) mSoundDir->GetElementByName(effect);
+}
 
 //==============================================================================
 
@@ -109,12 +117,13 @@ void TringuRep_GL_Rnr::Draw(RnrDriver* rd)
       if (i->second->IsPlaying())
       {
 	i->second->ref_trans().SetFromArray(i->first->RefLastTrans());
+	i->second->MarkStampReqTrans();
 	rd->Render(rd->GetLensRnr(i->second));
 	++i;
       }
       else
       {
-	hExt2AlSrc_i j = i++;
+	hExt2AlSrc_i j = i; ++i;
 	PI.RelinquishAlSource(j->second);
 	mExtendioSounds.erase(j);
       }
@@ -155,7 +164,7 @@ void TringuRep_GL_Rnr::ExtendioExploding(Extendio* ext, ExtendioExplosion* exp)
   // printf("%sextendio %s, explosion %s.\n", _eh.Data(), ext->Identify().Data(), exp->Identify().Data());
 
   // Need to do better:
-  AlBuffer *buf = dynamic_cast<AlBuffer*>(mTringuRep->GetQueen()->FindLensByPath("var/sounds/BigExplosion"));
+  AlBuffer *buf = find_sound("BigExplosion");
   if (!buf)
     throw _eh + "explode buffer not found.";
 
@@ -169,6 +178,7 @@ void TringuRep_GL_Rnr::ExtendioExploding(Extendio* ext, ExtendioExplosion* exp)
     src->QueueBuffer(buf);
     src->SetPitch(buf->GetDuration() / exp->GetExplodeDuration());
     src->Play();
+    mExtendioSounds.insert(make_pair(ext, src));
   }
 
   // This should really go somewhere else -- in TringuRep and in TSPupilInfo.
@@ -203,6 +213,31 @@ void TringuRep_GL_Rnr::ExtendioDying(Extendio* ext)
   mExtendioSounds.erase(ip.first, ip.second);
 }
 
+void TringuRep_GL_Rnr::ExtendioSound(Extendio* ext, const TString& effect)
+{
+  static const Exc_t _eh("TringuRep_GL_Rnr::ExtendioSound ");
+
+  printf("%sNew sound for %s, %s\n", _eh.Data(), ext->Identify().Data(), effect.Data());
+
+  AlBuffer *buf = find_sound(effect);
+  if (!buf)
+    throw _eh + "explode buffer not found.";
+
+  // Check if pupil is visible / has focus !!!
+
+  TSPupilInfo &PI  = * mTringuRep->GetPupilInfo();
+  AlSource    *src = PI.AcquireAlSource();
+  if (src)
+  {
+    src->ref_trans().SetFromArray(ext->RefLastTrans());
+    src->QueueBuffer(buf);
+    // src->SetPitch(buf->GetDuration() / exp->GetExplodeDuration());
+    src->Play();
+    mExtendioSounds.insert(make_pair(ext, src));
+  }
+}
+
+
 //==============================================================================
 // TringulaSpy
 //==============================================================================
@@ -221,22 +256,40 @@ void TringuRep_GL_Rnr::TringulaSpy::AbsorbRay(Ray& ray)
   if (ray.fRQN < RayNS::RQN_user_0)
     return;
 
-  if (ray.fRQN == Tringula::PRQN_extendio_exploding)
+  switch (ray.fRQN)
   {
-    ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
-    ID_t expid = GledNS::ReadLensID(*ray.fCustomBuffer);
-    ray.ResetCustomBuffer();
+    case Tringula::PRQN_extendio_exploding:
+    {
+      ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
+      ID_t expid = GledNS::ReadLensID(*ray.fCustomBuffer);
+      ray.ResetCustomBuffer();
 
-    Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
-    ExtendioExplosion *exp = dynamic_cast<ExtendioExplosion*>(fImg->fEye->DemangleID2Lens(expid));
-    mMaster->ExtendioExploding(ext, exp);
-  }
-  else if (ray.fRQN == Tringula::PRQN_extendio_dying)
-  {
-    ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
-    ray.ResetCustomBuffer();
+      Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
+      ExtendioExplosion *exp = dynamic_cast<ExtendioExplosion*>(fImg->fEye->DemangleID2Lens(expid));
+      mMaster->ExtendioExploding(ext, exp);
+      break;
+    }
+    case Tringula::PRQN_extendio_dying:
+    {
+      ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
+      ray.ResetCustomBuffer();
 
-    Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
-    mMaster->ExtendioDying(ext);
+      Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
+      mMaster->ExtendioDying(ext);
+      break;
+    }
+    case Tringula::PRQN_extendio_sound:
+    {
+      ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
+      TString effect;
+      *ray.fCustomBuffer >> effect;
+      ray.ResetCustomBuffer();
+
+      Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
+      mMaster->ExtendioSound(ext, effect);
+      break;
+    }
+    default:
+      break;
   }
 }

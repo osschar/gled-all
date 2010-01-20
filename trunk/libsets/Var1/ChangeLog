@@ -1,3 +1,90 @@
+2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement laser shooting: damage dealing, laser-trace and sound.
+
+	* Glasses/LaserTraceExplosion.cxx:
+	* Glasses/LaserTraceExplosion.h:
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.cxx:
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.h:
+	New glass and its GL renderer. Shows fading white line.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add data-memebr 'SMinMaxVar mLaserCharge' that determines the
+	power of laser when shooting.
+	Add function ShootLaser() -- calling Tringula::LaserShot().
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Shoot laser via Crawler.
+	Remove link 'ZLink<AlSource> mGunSrc'.
+
+	* Glasses/Explosion.cxx:
+	* Glasses/Explosion.h:
+	Add data-member 'Tringula *mTringula'. Not a link.
+	Implement generic TimeTick(), just telling to tringula when the
+	explosion is finished.
+
+	* Glasses/ExtendioExplosion.cxx:
+	* Glasses/ExtendioExplosion.h:
+	Make mExtendio normal pointer (not a link).
+
+	* Glasses/TSPupilInfo.cxx:
+	Fix some issues with AlSource-pool.
+
+	* Glasses/TringuCam.cxx:
+	Tringula::PickExtendios() requires an extra argument.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add lists for fresh / finished explosions -- they are processed on
+	every TimeTick().
+
+	Add new custom ray PRQN_extendio_sound with emit function
+	  void EmitExtendioSoundRay(Extendio* ext, const TString& effect);
+
+	New argument ray_length for prepick_extendios() and PickExtendios.
+	RayCollide() takes two more flags: cull_p and closest_p.
+
+	New function for instantiation of laser-trace:
+	  LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power);
+
+	New function 'void delete_lens_if_alive(ZGlass* lens)'.
+
+	* Glasses/TringulaTester.cxx:
+	Tringula::RayCollide() requires addition arguments.
+
+	* Glasses/Dynamico.cxx:
+	Greyspace.
+
+	* glass.list:
+	Register new glass LaserTraceExplosion.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	Draw bar for laser-charge.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Add functions:
+	  void draw_vertical_minmaxvar  (const SMinMaxVarF& v, RnrDriver* rd, bool pick);
+	  void draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick);
+	These are shameless cut-n-paste of the similar desire-var
+	functions. Should make them use common code for most of the stuff.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Add data-member 'AList* mSoundDir' to cache sound directory.
+	Add function:
+	  AlBuffer* find_sound(const TString& effect);
+	Add function:
+	  void ExtendioSound(Extendio* ext, const TString& effect);
+	that plays specified sound-effect on the extendio.
+
+	Handle Tringula::PRQN_extendio_sound in TringulaSpy::AbsorbRay().
+
+	* Opcode/OPC_RayCollider.h:
+	Add operator[] to CollisionFaces class.
+
 2010-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMesh.h:

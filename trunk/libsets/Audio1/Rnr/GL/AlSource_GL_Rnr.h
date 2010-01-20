@@ -12,16 +12,13 @@
 
 class AlSource_GL_Rnr : public ZNode_GL_Rnr
 {
-private:
-  void _init();
-
 protected:
   AlSource*	mAlSource;
 
 public:
   AlSource_GL_Rnr(AlSource* idol) :
     ZNode_GL_Rnr(idol), mAlSource(idol)
-  { _init(); }
+  {}
 
   //virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

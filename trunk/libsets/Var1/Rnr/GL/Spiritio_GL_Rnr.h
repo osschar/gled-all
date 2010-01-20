@@ -29,6 +29,9 @@ protected:
 
   void RegisterKey(Int_t k, const TString& tag);
 
+  void draw_vertical_minmaxvar  (const SMinMaxVarF& v, RnrDriver* rd, bool pick);
+  void draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick);
+
   void draw_vertical_desirevar  (const SDesireVarF& v, RnrDriver* rd, bool pick);
   void draw_horizontal_desirevar(const SDesireVarF& v, RnrDriver* rd, bool pick);
 

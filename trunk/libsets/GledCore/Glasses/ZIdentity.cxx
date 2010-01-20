@@ -20,7 +20,7 @@ ClassImp(ZIdentity);
 
 void ZIdentity::_init()
 {
-  mGlassBits |= ZGlassBits::kFixedName;
+  mGlassBits |= kFixedNameBit;
   mActiveMEEs = 0;
   mAllowThis = 0;
 }

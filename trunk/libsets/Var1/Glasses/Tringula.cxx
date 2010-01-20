@@ -20,6 +20,7 @@
 #include "Chopper.h"
 #include "LandMark.h"
 #include "ExtendioExplosion.h"
+#include "LaserTraceExplosion.h"
 
 #include "Tringula.c7"
 
@@ -108,10 +109,13 @@ void Tringula::AdEnlightenment()
 //==============================================================================
 
 Bool_t Tringula::RayCollide(const Opcode::Ray& ray, Float_t ray_length,
+			    Bool_t cull_p, Bool_t closest_p,
 			    Opcode::CollisionFaces& col_faces)
 {
   // Intersect terrain mesh with given ray and stores result in col_faces.
-  // If ray_length is larger then 0 it is used to limit the maximum distance.
+  //  ray_length - if larger then 0, used as maximum hit distance.
+  //  cull_p     - enable / disable triangle culling.
+  //  closest_p  - return closest hit only / all hits.
 
   static const Exc_t _eh("Tringula::RayCollide ");
 
@@ -121,7 +125,8 @@ Bool_t Tringula::RayCollide(const Opcode::Ray& ray, Float_t ray_length,
   using namespace Opcode;
 
   RayCollider RC;
-  RC.SetCulling(false);
+  RC.SetCulling(cull_p);
+  RC.SetClosestHit(closest_p);
   RC.SetDestination(&col_faces);
   if (ray_length > 0) RC.SetMaxDist(ray_length);
 
@@ -134,7 +139,7 @@ Bool_t Tringula::RayCollide(const Opcode::Ray& ray, Float_t ray_length,
 
 //==============================================================================
 
-void Tringula::prepick_extendios(AList* extendios, const Opcode::Ray& ray,
+void Tringula::prepick_extendios(AList* extendios, const Opcode::Ray& ray, Float_t ray_length,
                                  lPickResult_t& candidates)
 {
   // Select picking candiadates from among extendios.
@@ -150,17 +155,20 @@ void Tringula::prepick_extendios(AList* extendios, const Opcode::Ray& ray,
     dpos.Sub(ray.mOrig, ext->ref_last_aabb().Center());
     t = - (ray.mDir | dpos);
 
-    if (t > 0 && dpos.SquareMagnitude() - t*t <= ext->ref_last_aabb().GetSphereSquareRadius())
+    if (t > 0 && t < ray_length && dpos.SquareMagnitude() - t*t <= ext->ref_last_aabb().GetSphereSquareRadius())
     {
       candidates.push_back(PickResult(ext, t));
     }
   }
 }
 
-Extendio* Tringula::PickExtendios(const Opcode::Ray& ray)
+Extendio* Tringula::PickExtendios(const Opcode::Ray& ray, Float_t ray_length,
+				  Float_t* ext_distance)
 {
   // Loop over extendios and calculate distance between ray and center
   // point.
+  //  ray_length   - if larger than 0, limits the maximum extendio distance.
+  //  ext_distance - if non 0, set to the distance of extendio.
   //
   // Original idea was to sub-divide ray into boxes and do split box prunning.
   //
@@ -172,12 +180,13 @@ Extendio* Tringula::PickExtendios(const Opcode::Ray& ray)
 
   static const Exc_t _eh("Tringula::PickExtendios ");
 
-  lPickResult_t candidates;
+  if (ray_length <= 0) ray_length = Opcode::MAX_FLOAT;
 
-  prepick_extendios(*mStatos,    ray, candidates);
-  prepick_extendios(*mDynos,     ray, candidates);
-  prepick_extendios(*mFlyers,    ray, candidates);
-  prepick_extendios(*mLandMarks, ray, candidates);
+  lPickResult_t candidates;
+  prepick_extendios(*mStatos,    ray, ray_length, candidates);
+  prepick_extendios(*mDynos,     ray, ray_length, candidates);
+  prepick_extendios(*mFlyers,    ray, ray_length, candidates);
+  prepick_extendios(*mLandMarks, ray, ray_length, candidates);
 
   candidates.sort();
 
@@ -192,6 +201,7 @@ Extendio* Tringula::PickExtendios(const Opcode::Ray& ray)
     {
       if (RC.GetContactStatus())
       {
+	if (ext_distance) *ext_distance = res->fTime;
         return ext;
       }
     }
@@ -761,9 +771,10 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       WSTube& D = * (WSTube*) *tube_stepper;
       D.TimeTick(t, dt);
     }
+  }
 
-    // Weapons -- rays, grenades, rockets come here ... maybe.
-
+  // Weapons -- rays, grenades, rockets come here ... maybe.
+  {
     Stepper<> explosion_stepper(*mExplosions);
     while (explosion_stepper.step())
     {
@@ -781,14 +792,15 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
 
   // Process explosidios.
   {
-    // !!!! This should happen under some kind of lock.
+    GMutexHolder _elck(mExplosionMutex);
 
-    for (lpZGlass_i i = mFreshExplodios.begin(); i != mFreshExplodios.end(); ++i)
+    for (lpZGlass_i i = mFreshExplodingExtendios.begin(); i != mFreshExplodingExtendios.end(); ++i)
     {
       Extendio *ext = (Extendio*) *i;
       ExtendioExplosion *exp = new ExtendioExplosion;
       mQueen->CheckIn(exp);
       exp->SetExplodeDuration(1.0f + TMath::Log10(ext->GetMesh()->GetM() + 1.0f));
+      exp->SetTringula(this);
       exp->SetExtendio(ext);
       mExplosions->Add(exp);
       mExplodios->Add(ext);
@@ -798,28 +810,41 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
       if (mDynos->RemoveAll(ext) == 0)
       {
 	if (mFlyers->RemoveAll(ext) == 0)
-	  mStatos->RemoveAll(ext);
+	  if (mStatos->RemoveAll(ext) == 0)
+	    mLandMarks->RemoveAll(ext);
       }
       EmitExtendioExplodingRay(ext, exp);
     }
-    mFreshExplodios.clear();
+    mFreshExplodingExtendios.clear();
 
-    for (lpZGlass_i i = mFinishedExplosions.begin(); i != mFinishedExplosions.end(); ++i)
+    for (lpZGlass_i i = mFinishedExtendioExplosions.begin(); i != mFinishedExtendioExplosions.end(); ++i)
     {
       ExtendioExplosion *exp = (ExtendioExplosion*) *i;
       Extendio *ext = exp->GetExtendio();
       EmitExtendioDyingRay(ext);
 
-      exp->SetExtendio(0);
       mExplosions->RemoveAll(exp);
       mExplodios->RemoveAll(ext);
 
       // Request deletion in queen not strictly needed - should auto-destruct.
       // Here we expect to be on the Sun of Tringula and Extendios.
-      auto_ptr<ZMIR> d1(mQueen->S_RemoveLens(exp));
-      mSaturn->ShootMIR(d1);
-      auto_ptr<ZMIR> d2(mQueen->S_RemoveLens(ext));
-      mSaturn->ShootMIR(d2);
+      delete_lens_if_alive(exp);
+      delete_lens_if_alive(ext);
+    }
+    mFinishedExtendioExplosions.clear();
+
+    for (lpZGlass_i i = mFreshExplosions.begin(); i != mFreshExplosions.end(); ++i)
+    {
+      mExplosions->Add(*i);
+    }
+    mFreshExplosions.clear();
+
+    for (lpZGlass_i i =mFinishedExplosions.begin(); i != mFinishedExplosions.end(); ++i)
+    {
+      mExplosions->RemoveAll(*i);
+      // Request deletion in queen not strictly needed - should auto-destruct.
+      // Here we expect to be on the Sun of Tringula and Extendios.
+      delete_lens_if_alive(*i);
     }
     mFinishedExplosions.clear();
   }
@@ -872,16 +897,72 @@ void Tringula::TimeTick(Double_t t, Double_t dt)
 
 void Tringula::ExtendioExploding(Extendio* ext)
 {
-  GMutexHolder _lck(mInternalMutex);
-  mFreshExplodios.push_back(ext);
+  GMutexHolder _lck(mExplosionMutex);
+  mFreshExplodingExtendios.push_back(ext);
+}
+
+void Tringula::ExtendioExplosionFinished(Explosion* exp)
+{
+  GMutexHolder _lck(mExplosionMutex);
+  mFinishedExtendioExplosions.push_back(exp);
+}
+
+void Tringula::ExplosionStarted(Explosion* exp)
+{
+  GMutexHolder _lck(mExplosionMutex);
+  mFreshExplosions.push_back(exp);
 }
 
 void Tringula::ExplosionFinished(Explosion* exp)
 {
-  GMutexHolder _lck(mInternalMutex);
+  GMutexHolder _lck(mExplosionMutex);
   mFinishedExplosions.push_back(exp);
 }
 
+//------------------------------------------------------------------------------
+
+void Tringula::LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power)
+{
+  // Preliminary, should be done in a more general way with other weapons.
+  // Also, need spot surface and ray divergence. Or sth.
+
+  static const Exc_t _eh("Tringula::LaserShot ");
+
+  Bool_t  terrain_collide = false;
+  Float_t ray_length = 0;
+  Opcode::CollisionFaces col_faces;
+  if (RayCollide(ray, 0, true, true, col_faces))
+  {
+    if (col_faces.GetNbFaces())
+    {
+      terrain_collide = true;
+      ray_length = col_faces[0].mDistance;
+    }
+  }
+  else
+  {
+    printf("%scollide status=<failed>.", _eh.Data());
+  }
+
+  Extendio* dmg_ext = PickExtendios(ray, ray_length, &ray_length);
+  if (dmg_ext) dmg_ext->TakeDamage(power);
+
+  if (ray_length == 0)
+    ray_length = 100.0f;
+
+  Opcode::Point end;
+  end.Mac(ray.mOrig, ray.mDir, ray_length);
+
+  // Lock, or sth.
+  LaserTraceExplosion* e = new LaserTraceExplosion("LaserShot");
+  e->SetTringula(this);
+  e->RefA().Set(ray.mOrig);
+  e->RefB().Set(end);
+  mQueen->CheckIn(e);
+  ExplosionStarted(e);
+
+  EmitExtendioSoundRay(ext, "PewPew");
+}
 
 //==============================================================================
 // Protected methods
@@ -1175,6 +1256,19 @@ Bool_t Tringula::place_on_terrain(Dynamico* D, Float_t h_above)
 
 //==============================================================================
 
+void Tringula::delete_lens_if_alive(ZGlass* lens)
+{
+  // If lens is not dying, send a MIR requesting its deletion.
+
+  if (!lens->CheckBit(kDyingBit))
+  {
+    auto_ptr<ZMIR> mir(mQueen->S_RemoveLens(lens));
+    mSaturn->ShootMIR(mir);
+  }
+}
+
+//==============================================================================
+
 void Tringula::EmitExtendioExplodingRay(Extendio* ext, Explosion* exp)
 {
   if (mQueen && mSaturn->AcceptsRays())
@@ -1200,6 +1294,22 @@ void Tringula::EmitExtendioDyingRay(Extendio* ext)
 
     TBufferFile cbuff(TBuffer::kWrite);
     GledNS::WriteLensID(cbuff, ext);
+    ray->SetCustomBuffer(cbuff);
+
+    mQueen->EmitRay(ray);
+  }
+}
+
+void Tringula::EmitExtendioSoundRay(Extendio* ext, const TString& effect)
+{
+  if (mQueen && mSaturn->AcceptsRays())
+  {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_extendio_sound, mTimeStamp, FID()));
+
+    TBufferFile cbuff(TBuffer::kWrite);
+    GledNS::WriteLensID(cbuff, ext);
+    cbuff << effect;
     ray->SetCustomBuffer(cbuff);
 
     mQueen->EmitRay(ray);

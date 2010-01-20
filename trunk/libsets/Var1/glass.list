@@ -34,6 +34,7 @@ TringuObserver          160     Glasses/TringuObserver
 
 Explosion               170     Glasses/Explosion               .
 ExtendioExplosion       171     Glasses/ExtendioExplosion       .
+LaserTraceExplosion     172     Glasses/LaserTraceExplosion     .
 
 Spiritio                200     Glasses/Spiritio                .
 ExtendioSpiritio        201     Glasses/ExtendioSpiritio

@@ -63,6 +63,13 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
   draw_horizontal_desirevar(C.RefWheel(), rd, picking);
   glPopMatrix();
 
+  // LaserCharge bar
+  glPushMatrix();
+  glTranslatef(0.6f, 0.0f, 0.0f);
+  glScalef(0.125f, 0.25f, 1.0f);
+  draw_vertical_minmaxvar(C.RefLaserCharge(), rd, picking);
+  glPopMatrix();
+
 
   ZTrans dyno2cam;
   dyno2cam.SetTrans(mCrawlerSpiritio->GetCamera()->RefTrans());
@@ -70,7 +77,6 @@ void CrawlerSpiritio_GL_Rnr::Draw(RnrDriver* rd)
   dyno2cam.Invert();
 
   update_al_src(mCrawlerSpiritio->GetEngineSrc(), dyno2cam, rd);
-  update_al_src(mCrawlerSpiritio->GetGunSrc(),    dyno2cam, rd);
 }
 
 //==============================================================================

@@ -1,3 +1,10 @@
+2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AlSource.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.h:
+	Beautify.
+
 2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for reading ogg files.

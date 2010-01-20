@@ -322,8 +322,10 @@ void CrawlerSpiritio::SetWheel(Float_t w)
 
 void CrawlerSpiritio::FireGun(Int_t, Bool_t downp, UInt_t time_elapsed)
 {
-  if (downp && *mGunSrc && ! mGunSrc->IsPlaying())
+  Crawler &C = * (Crawler*) *mExtendio;
+
+  if (downp && C.RefLaserCharge().Get() > 20.0f)
   {
-    mGunSrc->Play();
+    C.ShootLaser();
   }
 }

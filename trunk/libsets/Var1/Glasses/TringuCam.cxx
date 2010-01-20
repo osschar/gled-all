@@ -286,7 +286,7 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     {
       CalculateMouseRayVectors();
       Opcode::Ray ray(&mMouseRayPos[0], &mMouseRayDir[0]);
-      Extendio*	ext = mTringula->PickExtendios(ray);
+      Extendio*	ext = mTringula->PickExtendios(ray, 0);
 
       if (bMouseVerbose)
         printf("TringuCam::MouseDown picked %s, state=0x%x\n",

@@ -39,8 +39,9 @@ public:
   enum PrivRayQN_e 
   {
     PRQN_offset = RayNS::RQN_user_0,
-    PRQN_extendio_exploding,
-    PRQN_extendio_dying
+    PRQN_extendio_exploding, // followed by streamed ID of Extendio, Explosion
+    PRQN_extendio_dying,     // followed by streamed ID of Extendio
+    PRQN_extendio_sound      // followed by streamed ID of Extendio and TString naming the effect
   };
 
   enum EdgeRule_e { ER_Stop, ER_Hold, ER_Bounce, ER_Wrap };
@@ -88,9 +89,11 @@ protected:
   ZLink<ZHashList>   mExplodios;    //  X{GS} L{} RnrBits{0,0,0,5}
   ZLink<ZHashList>   mExplosions;   //  X{GS} L{} RnrBits{0,0,0,5}
 
-  GMutex             mInternalMutex;      //!
-  lpZGlass_t         mFreshExplodios;     //!
-  lpZGlass_t         mFinishedExplosions; //!
+  GMutex             mExplosionMutex;             //!
+  lpZGlass_t         mFreshExplodingExtendios;    //!
+  lpZGlass_t         mFinishedExtendioExplosions; //!
+  lpZGlass_t         mFreshExplosions;            //!
+  lpZGlass_t         mFinishedExplosions;         //!
 
   Bool_t           bRnrBBoxes;   // X{GS} 7 Bool(-join=>1)
 
@@ -125,8 +128,10 @@ protected:
   void setup_stato_pruner();
   void setup_dyno_pruner();
 
-  void prepick_extendios(AList* extendios, const Opcode::Ray& ray,
+  void prepick_extendios(AList* extendios, const Opcode::Ray& ray, Float_t ray_length,
                          lPickResult_t& candidates);
+
+  void delete_lens_if_alive(ZGlass* lens);
 
 public:
   Tringula(const Text_t* n="Tringula", const Text_t* t=0) :
@@ -138,9 +143,11 @@ public:
   // Collision stuff
 
   Bool_t    RayCollide(const Opcode::Ray& ray, Float_t ray_length,
+		       Bool_t cull_p, Bool_t closest_p,
 		       Opcode::CollisionFaces& col_faces);
 
-  Extendio* PickExtendios(const Opcode::Ray& ray);
+  Extendio* PickExtendios(const Opcode::Ray& ray, Float_t ray_length,
+			  Float_t* ext_distance = 0);
 
   void      ResetCollisionStuff(); // X{ED} C{0} 7 MButt()
 
@@ -175,7 +182,11 @@ public:
   void DoSplitBoxPrunning(); // X{E} 7 MCWButt()
 
   void ExtendioExploding(Extendio* ext);
+  void ExtendioExplosionFinished(Explosion* exp);
+  void ExplosionStarted(Explosion* exp);
   void ExplosionFinished(Explosion* exp);
+
+  void LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power);
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
@@ -183,6 +194,7 @@ public:
   // Private Rays
   void EmitExtendioExplodingRay(Extendio* ext, Explosion* exp);
   void EmitExtendioDyingRay(Extendio* ext);
+  void EmitExtendioSoundRay(Extendio* ext, const TString& effect);
 
 #include "Tringula.h7"
   ClassDef(Tringula, 1);

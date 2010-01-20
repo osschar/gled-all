@@ -667,7 +667,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
   { // Fix lens state to dying. Already done on the Sun.
     ISdebug(2, _eh + "blocking new refs to " + lens->Identify() + ".");
     lens->bAcceptRefs = false;
-    lens->mGlassBits |= ZGlassBits::kDying;
+    lens->mGlassBits |= kDyingBit;
   }
 
   // printf("%s %s RC=%d, MRC=%d, SRC=%d, FRC=%d\n", _eh.Data(), lens->Identify().Data(),
@@ -941,14 +941,14 @@ void ZQueen::remove_lens(ZGlass* lens)
   {
     GMutexHolder _reflck(mSubjectRefCntMutex);
 
-    if(lens->mGlassBits & ZGlassBits::kDying) {
+    if(lens->CheckBit(kDyingBit)) {
       // This might be(come) completely normal.
       ISdebug(0, _eh + "queen:" + Identify() +" lens:" + lens->Identify() +" already dying.");
       return;
     }
 
     lens->bAcceptRefs = false;
-    lens->mGlassBits |= ZGlassBits::kDying;
+    lens->mGlassBits |= kDyingBit;
   }
 
   auto_ptr<ZMIR> purg_mir( S_PutLensToPurgatory(lens) );
@@ -965,7 +965,7 @@ void ZQueen::remove_lenses(AList* list, Bool_t recurse, Bool_t syncmode)
   for(lpZGlass_i i=ll.begin(); i!=ll.end(); ++i) {
     if((*i)->mQueen == this  &&  (*i) != this) {
       (*i)->bAcceptRefs = false;
-      (*i)->mGlassBits |= ZGlassBits::kDying;
+      (*i)->mGlassBits |= kDyingBit;
 
       if(recurse) {
 	AList* seclist = dynamic_cast<AList*>(*i);
@@ -994,7 +994,7 @@ void ZQueen::ZeroRefCount(ZGlass* lens)
   static const Exc_t _eh("ZQueen::ZeroRefCount ");
 
   if(mKing->GetLightType() == ZKing::LT_Moon) return;
-  if(lens->mGlassBits & ZGlassBits::kDying)   return;
+  if(lens->CheckBit(kDyingBit)) return;
 
   switch(mZeroRCPolicy) {
   case ZRCP_Delete: {

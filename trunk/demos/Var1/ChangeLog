@@ -1,3 +1,9 @@
+2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Add "Shoot" to Crawler menu.
+	CrawlerSpiritio does not have gun-al-source anymore.
+
 2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

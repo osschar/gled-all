@@ -32,7 +32,7 @@
 
 ClassImp(TSPupilInfo);
 
-Int_t TSPupilInfo::sNMaxAlSources = 16;
+Int_t TSPupilInfo::sNMaxAlSources = 32;
 
 //==============================================================================
 
@@ -321,6 +321,7 @@ AlSource* TSPupilInfo::AcquireAlSource()
       src = new AlSource(GForm("AlSource %d", mNAlSources));
       mQueen->CheckIn(src);
       mAlSources->Add(src);
+      ++mNAlSources;
     }
     else
     {
@@ -346,9 +347,11 @@ void TSPupilInfo::RelinquishAlSource(AlSource* src)
 {
   GMutexHolder _lck(mAlSourceMutex);
 
-  src->Stop();
+  if (src->IsPlaying())
+    src->Stop();
   src->UnqueueAllBuffers();
   src->SetPitch(1);
   
   mAlSourcesUsed->Remove(src);
+  mAlSourcesFree->PushBack(src);
 }
