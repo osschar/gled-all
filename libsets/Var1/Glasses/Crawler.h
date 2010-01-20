@@ -29,6 +29,8 @@ protected:
   SDesireVarF   mThrottle;  // X{RGSD} 7 DesireVar(-range=>["mThrottle.GetMin()", "mThrottle.GetMax()", 1, 10])
   SDesireVarF   mWheel;     // X{RGSD} 7 DesireVar(-range=>["mWheel.GetMin()",    "mWheel.GetMax()",    1, 50])
 
+  SMinMaxVarF   mLaserCharge; // X{RG} 7 MinMaxVar(-const=>1)
+
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);
   virtual ~Crawler();
@@ -36,6 +38,8 @@ public:
   virtual void SetTringula(Tringula* tring);
 
   virtual void TimeTick(Double_t t, Double_t dt);
+
+  virtual void ShootLaser(); // X{E}
 
 #include "Crawler.h7"
   ClassDef(Crawler, 1);

@@ -44,7 +44,7 @@ Dynamico:: Dynamico(const Text_t* n, const Text_t* t) :
   _init();
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void Dynamico::SetTringula(Tringula* tring)
 {
@@ -57,7 +57,7 @@ void Dynamico::SetTringula(Tringula* tring)
   mOPCRCCache = Opcode::OPC_INVALID_ID;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void Dynamico::update_grav_safeties(Float_t vl, Float_t vt)
 {

@@ -194,8 +194,12 @@ fnord
 
 ########################################################################
 
-sub make_var_widget_cb {
+sub make_var_widget_cb
+{
   my $S = shift;
+
+  return $S->make_varout_widget_cb() if $S->{-const};
+
   my $valuestr = (not exists $S->{CastTo}) ? "o->value()" : "(($S->{CastTo})(o->value()))";
   return <<"fnord";
 void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
@@ -211,7 +215,8 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
 fnord
 }
 
-sub make_varout_widget_cb {
+sub make_varout_widget_cb
+{
 # varout cb only does update to true value
   my $S = shift;
   my $r = $S->make_weed_update();
@@ -219,7 +224,8 @@ sub make_varout_widget_cb {
   return $r;
 }
 
-sub make_text_widget_cb {
+sub make_text_widget_cb
+{
   my $S = shift;
   $valuestr = (not exists $S->{CastTo}) ? "o->value()" : "(($S->{Type})(o->value()))";
   return <<"fnord";
@@ -236,7 +242,8 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {
 fnord
 }
 
-sub make_met_widget_cb {
+sub make_met_widget_cb
+{
 # missing handling of arguments
   my $S = shift;
   return <<"fnord";

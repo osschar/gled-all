@@ -4,15 +4,6 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//______________________________________________________________________
-// ZGlass
-//
-// Base class of Gled enabled classes.
-// Provides infrastructure for integration with the Gled system.
-//
-// mGlassBits: collection of flags that allow (memory optimised)
-// handling of lenses.
-
 #include "ZGlass.h"
 #include "ZGlass.c7"
 
@@ -23,14 +14,12 @@
 #include <Stones/ZComet.h>
 #include <Gled/GThread.h>
 
-/**************************************************************************/
-
-namespace ZGlassBits {
-  UShort_t kFixedName = 0x1;
-  UShort_t kDying     = 0x2;
-}
-
-/**************************************************************************/
+//______________________________________________________________________
+//
+// Base class of Gled enabled classes.
+// Provides infrastructure for integration with the Gled system.
+//
+// mGlassBits: collection of internal lens flags shared also with ZQueen.
 
 ClassImp(ZGlass);
 
@@ -232,9 +221,9 @@ void ZGlass::SetName(const Text_t* n)
 {
   static const Exc_t _eh("ZGlass::SetName ");
 
-  if(mGlassBits & ZGlassBits::kFixedName) {
+  if(CheckBit(kFixedNameBit)) {
     Stamp(FID());
-    throw(_eh + "lens has FixedName bit set.");
+    throw _eh + "lens has FixedName bit set.";
   }
   TString name(n);
   WriteLock();
@@ -539,7 +528,7 @@ void ZGlass::unregister_ray_absorber(RayAbsorber* ra)
 
 void ZGlass::register_name_change_cb(ZGlass::NameChangeCB* nccb)
 {
-  if(mGlassBits & ZGlassBits::kFixedName) return;
+  if(CheckBit(kFixedNameBit)) return;
   GMutexHolder rdlck(mReadMutex);
   if(pspNameChangeCB == 0)
     pspNameChangeCB = new set<NameChangeCB*>;

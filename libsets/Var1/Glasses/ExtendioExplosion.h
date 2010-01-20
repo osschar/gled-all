@@ -15,16 +15,14 @@ class ExtendioExplosion : public Explosion
 {
   MAC_RNR_FRIENDS(ExtendioExplosion);
 
-private:
-  void _init();
-
 protected:
-  // Does this have to be a link?
-  ZLink<Extendio>    mExtendio; // X{GS} L{}
+  Extendio    *mExtendio; //! X{g}
 
 public:
   ExtendioExplosion(const Text_t* n="ExtendioExplosion", const Text_t* t=0);
   virtual ~ExtendioExplosion();
+
+  virtual void SetExtendio(Extendio* ext);
 
   virtual void TimeTick(Double_t t, Double_t dt);
 

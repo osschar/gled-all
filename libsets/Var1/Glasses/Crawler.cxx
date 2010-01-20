@@ -33,6 +33,8 @@ void Crawler::_init()
 
   mWheel.SetMinMaxDelta(-1, 1, 0.5, 1);
   mWheel.SetStdDesireDelta(1);
+
+  mLaserCharge.SetMinMax(0, 60);
 }
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :
@@ -67,6 +69,8 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   // Controllers
   mThrottle.TimeTick(dtf);
   mWheel.   TimeTick(dtf);
+
+  mLaserCharge.Delta(100.0f*dtf);
 
   switch (mDriveMode)
   {
@@ -232,4 +236,22 @@ reoffset:
   {
     ISwarn(_eh + RC.CollideInfo(false, R));
   }
+}
+
+//==============================================================================
+
+void Crawler::ShootLaser()
+{
+  // Should move it up ... at least for half bbox ... and a bit forward.
+
+  HTransF& t = ref_last_trans();
+  const Float_t* mmbb = mMesh->GetTTvor()->mMinMaxBox;
+
+  Opcode::Point beg;
+  beg.Mac(t.ref_pos(), t.ref_base_vec_x(), mmbb[3]);
+  beg.TMac(t.ref_base_vec_z(), 0.5f*mmbb[5]);
+  
+  Opcode::Ray ray(beg, t.ref_base_vec_x());
+  mTringula->LaserShot(this, ray, mLaserCharge.Get());
+  mLaserCharge.Set(0);
 }

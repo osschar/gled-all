@@ -20,20 +20,24 @@ ClassImp(ExtendioExplosion);
 
 //==============================================================================
 
-void ExtendioExplosion::_init()
-{
-  // From ZGlass.
-  bUseDispList  = true;
-}
-
 ExtendioExplosion::ExtendioExplosion(const Text_t* n, const Text_t* t) :
   Explosion(n, t)
 {
-  _init();
+  // From ZGlass.
+  bUseDispList  = true;
+
+  mExtendio = 0;
 }
 
 ExtendioExplosion::~ExtendioExplosion()
 {}
+
+//==============================================================================
+
+void ExtendioExplosion::SetExtendio(Extendio* ext)
+{
+  mExtendio = ext;
+}
 
 //==============================================================================
 
@@ -42,6 +46,6 @@ void ExtendioExplosion::TimeTick(Double_t t, Double_t dt)
   mExplodeTime += dt;
   if (mExplodeTime > mExplodeDuration)
   {
-    mExtendio->GetTringula()->ExplosionFinished(this);
+    mTringula->ExtendioExplosionFinished(this);
   }
 }

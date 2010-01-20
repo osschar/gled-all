@@ -32,7 +32,6 @@ protected:
 
   ZLink<ZNode>          mCameraBase;     // X{GS} L{}
   ZLink<AlSource>       mEngineSrc;      // X{GS} L{}
-  ZLink<AlSource>       mGunSrc;         // X{GS} L{}
 
 public:
   CrawlerSpiritio(const Text_t* n="CrawlerSpiritio", const Text_t* t=0);

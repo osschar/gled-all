@@ -171,8 +171,8 @@ void AlSource::PrintSourceInfo()
     int ii;
     alGetSourcei(mAlSrc, AL_SOURCE_TYPE, &ii);
     TString st;
-    if (ii == AL_UNDETERMINED) st = "UNDETERMINED";
-    else if (ii == AL_STATIC) st = "STATIC";
+    if (ii == AL_UNDETERMINED)   st = "UNDETERMINED";
+    else if (ii == AL_STATIC)    st = "STATIC";
     else if (ii == AL_STREAMING) st = "STREAMING";
     else  st = "UNKNOWN";
 

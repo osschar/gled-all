@@ -1,3 +1,15 @@
+2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZQueen.cxx:
+	Move glass-bits from extern vars in namespace ZGlassBits to Bits_e
+	enum in ZGlass.
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Honour -const member in sub make_var_widget_cb.
+
 2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Pupils/Pupil.cxx:

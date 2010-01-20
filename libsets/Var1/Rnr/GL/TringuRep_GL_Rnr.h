@@ -13,6 +13,7 @@
 class Extendio;
 class ExtendioExplosion;
 
+class AlBuffer;
 class AlSource;
 
 class TringuRep_GL_Rnr : public ZNode_GL_Rnr
@@ -39,6 +40,9 @@ protected:
 
   hExt2AlSrc_t mExtendioSounds;
 
+  AList    *mSoundDir;
+  AlBuffer* find_sound(const TString& effect);
+
 public:
   TringuRep_GL_Rnr(TringuRep* idol);
   virtual ~TringuRep_GL_Rnr();
@@ -54,6 +58,7 @@ public:
   void WipeSpy() { mTringulaSpy = 0; }
   void ExtendioExploding(Extendio* ext, ExtendioExplosion* exp);
   void ExtendioDying(Extendio* ext);
+  void ExtendioSound(Extendio* ext, const TString& effect);
 
 }; // endclass TringuRep_GL_Rnr
 
