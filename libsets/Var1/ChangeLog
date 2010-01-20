@@ -1,3 +1,9 @@
+2010-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.h:
+	* catalog.patch:
+	Make dictionary for TriMeshColorArraySource to get it into html docs.
+
 2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Implement explosions and their handling.
