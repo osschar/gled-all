@@ -23,7 +23,7 @@ TSPupilInfo              60     Glasses/TSPupilInfo             .
 Extendio                100     Glasses/Extendio                .
 Statico                 101     Glasses/Statico
 Dynamico                102     Glasses/Dynamico
-Crawler                 120     Glasses/Crawler
+Crawler                 120     Glasses/Crawler                 .
 Flyer                   140     Glasses/Flyer
 Airplane                141     Glasses/Airplane
 Chopper                 142     Glasses/Chopper

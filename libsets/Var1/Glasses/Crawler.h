@@ -33,6 +33,7 @@ protected:
   SDesireVarF   mLaserLtRt;   // X{RGSD} 7 DesireVar(-range=>["mLaserLtRt.GetMin()", "mLaserLtRt.GetMax()", 1, 100])
   SMinMaxVarF   mLaserCharge; // X{RG}   7 MinMaxVar(-const=>1)
   Float_t       mLaserLen;    // X{GS}   7 Value(-range=>[0.1, 5, 1, 100]);
+  HPointF       mLaserBeg;    // X{R}
 
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);
