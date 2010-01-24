@@ -628,8 +628,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
 
   static const Exc_t _eh("Pupil::Render ");
 
-  mDriver->SetWidth(w());
-  mDriver->SetHeight(h());
+  mDriver->SetWidthHeight(w(), h());
   mDriver->SetZFov(mInfo->GetZFov());
   mDriver->SetNearClip(mInfo->GetNearClip());
   mDriver->SetFarClip (mInfo->GetFarClip());
@@ -1650,7 +1649,7 @@ int Pupil::handle(int ev)
     case FL_MOUSEWHEEL:
     {
       if(Fl::event_dy() != 0) {
-	Float_t delta = Fl::event_dy();
+	Float_t delta = -Fl::event_dy();
 	Float_t fac = mInfo->GetZoomFac();
 	if(fac != 1) {
 	  if(Fl::event_state(FL_CTRL))       fac = TMath::Power(fac, 0.25);

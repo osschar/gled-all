@@ -1,3 +1,40 @@
+2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* FL/Fl_SVars.cxx:
+	* FL/Fl_SVars.h:
+	Add FL-weed Fl_SInertVar - in fact it just sub-classes Fl_SMinMaxVar.
+
+	* Pupils/Pupil.cxx:
+	Use SetWidthHeight() from RnrDriver.
+	Invert direction of zoom on mouse-wheel.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	Add two default glu-quadric objects: mQuadricStd and
+	mQuadricStdNoNormals.
+
+	* RnrBase/RnrDriver.cxx:
+	* RnrBase/RnrDriver.h:
+	Add member mAspect and mTanHalfZFov.
+	Replace auto-generated setters for Width, Height and ZFov with
+	hand-written ones to also calculate dependent variables.
+
+	* Stones/SVars.h:
+	Add the following functions:
+	  T SInertVar::DeltaMax(Int_t sign, T dt);
+	  T SDesireVar::DeltaDesireMax(Int_t ifac, T dt) const;
+	that make the maximal allowed step of value / desire.
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Add function for checking if rotation matrix is valid:
+	  Bool_t CompareAngles(Float_t a1, Float_t a2, Float_t a3) const;
+	This only works if it is set via SetRotByAngles().
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Add weed for InertVar inheriting from MinMaxVar.
+	Make DesireVar inherit from InertVar.
+
 2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.cxx:

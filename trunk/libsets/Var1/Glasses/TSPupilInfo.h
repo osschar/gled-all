@@ -41,6 +41,7 @@ protected:
 
   ZLink<Spiritio>   mDefaultSpiritio; // X{GS} L{}
   ZLink<Spiritio>   mCurrentSpiritio; // X{GE} L{}
+  Float_t           mZFovPreSpiritio; //
 
   // Menus / overlays.
   ZLink<Scene>      mMenuScene;       // X{GS} L{}
@@ -86,6 +87,7 @@ public:
 
   // Spiritios
   void SetCurrentSpiritio(Spiritio* s);
+  void EnactExtendioSpiritio(Extendio* ext); // X{ED} C{1}
 
   // Menu handling.
   WGlWidget* FindMenuEntry(const TString& name);

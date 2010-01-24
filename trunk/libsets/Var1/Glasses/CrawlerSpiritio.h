@@ -33,6 +33,11 @@ protected:
   ZLink<ZNode>          mCameraBase;     // X{GS} L{}
   ZLink<AlSource>       mEngineSrc;      // X{GS} L{}
 
+  enum LaserKeys_e { LK_Up, LK_Down, LK_Left, LK_Right };
+  Int_t mFirstLaserKey; //!
+
+  Float_t mDefZFov;     // X{GS}
+
 public:
   CrawlerSpiritio(const Text_t* n="CrawlerSpiritio", const Text_t* t=0);
   virtual ~CrawlerSpiritio();
@@ -56,7 +61,13 @@ public:
   void RightWheel(Int_t, Bool_t downp, UInt_t time_elapsed);
   void SetWheel(Float_t w);    // X{E}
 
-  void FireGun(Int_t, Bool_t downp, UInt_t time_elapsed);
+  // ----------------------------------------------------------------
+
+  void LaserSteer(Int_t key_idx, Bool_t downp, UInt_t);
+
+  void FireGun(Int_t, Bool_t downp, UInt_t);
+
+  void TurretHome(Int_t, Bool_t downp, UInt_t);
 
 #include "CrawlerSpiritio.h7"
   ClassDef(CrawlerSpiritio, 1);

@@ -9,6 +9,8 @@
 
 #include <RnrBase/RnrDriver.h>
 
+#include <GL/glew.h>
+
 class ZGlColorFader;
 
 class GLRnrDriver : public RnrDriver
@@ -53,6 +55,11 @@ protected:
   Bool_t        bRedraw;         // X{gs}
 
   RMStack*      mFaderStack;
+
+  //--------------------------------
+
+  GLUquadricObj *mQuadricStd;          // X{g}
+  GLUquadricObj *mQuadricStdNoNormals; // X{g}
 
 public:
   GLRnrDriver(Eye* e, const TString& r);

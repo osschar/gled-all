@@ -42,11 +42,11 @@ Spiritio::~Spiritio()
 
 KeyHandling::KeyInfo&
 Spiritio::RegisterKey(const TString& tag, const TString& desc,
-		      KeyHandling::AKeyCallback* foo)
+		      KeyHandling::AKeyCallback* foo, Int_t uid)
 {
   using namespace KeyHandling;
 
-  KeyInfo* ki = new KeyInfo(tag, desc, foo);
+  KeyInfo* ki = new KeyInfo(tag, desc, foo, uid);
   ki->fIndex = mKeys.size();
   mKeys.push_back(ki);
   return *ki;

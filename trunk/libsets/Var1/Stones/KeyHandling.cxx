@@ -8,8 +8,8 @@
 
 using namespace KeyHandling;
 
-KeyInfo::KeyInfo(const TString& tag, const TString& desc, AKeyCallback* foo) :
-  fKeyTag(tag), fKeyDesc(desc), fCallback(foo), fIndex(-1), fDownCount(0)
+KeyInfo::KeyInfo(const TString& tag, const TString& desc, AKeyCallback* foo, Int_t uid) :
+  fKeyTag(tag), fKeyDesc(desc), fCallback(foo), fUserId(uid), fIndex(-1), fDownCount(0)
 {}
 
 KeyInfo::~KeyInfo()

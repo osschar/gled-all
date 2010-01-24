@@ -222,9 +222,8 @@ public:
 
   // Overlay methods
 
-  void ExtendioDetails(Extendio* ext); // X{E}  C{1} 7 MCWButt()
-  void DynoDrive(Dynamico* dyno);      // X{ED} C{1} 7 MCWButt()
-  void ExtendioExplode(Extendio* ext); // X{ED} C{1} 7 MCWButt()
+  void ExtendioDetails(Extendio* ext); // X{E} C{1} 7 MCWButt()
+  void ExtendioExplode(Extendio* ext); // X{E} C{1} 7 MCWButt()
 
   void PrepConnectStatos(Statico* stato, Int_t id, const TString& grad); // X{E} C{1} 7 MCWButt()
 

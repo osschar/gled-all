@@ -14,8 +14,6 @@
 
 #include <TMath.h>
 
-#include <GL/glew.h>
-
 GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
 {
   bInPicking = false;
@@ -37,12 +35,22 @@ GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
   bRedraw = false;
 
   mFaderStack = 0;
+
+  // ----------------------------------------------------------------
+
+  mQuadricStd = gluNewQuadric();;
+
+  mQuadricStdNoNormals = gluNewQuadric();
+  gluQuadricNormals(mQuadricStdNoNormals, GLU_NONE);
 }
 
 GLRnrDriver::~GLRnrDriver()
 {
   delete [] mLamps;
   delete [] mClipPlanes;
+
+  gluDeleteQuadric(mQuadricStd);
+  gluDeleteQuadric(mQuadricStdNoNormals);
 }
 
 /**************************************************************************/

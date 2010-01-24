@@ -217,7 +217,7 @@ void TringuRep_GL_Rnr::ExtendioSound(Extendio* ext, const TString& effect)
 {
   static const Exc_t _eh("TringuRep_GL_Rnr::ExtendioSound ");
 
-  printf("%sNew sound for %s, %s\n", _eh.Data(), ext->Identify().Data(), effect.Data());
+  // printf("%sNew sound for %s, %s\n", _eh.Data(), ext->Identify().Data(), effect.Data());
 
   AlBuffer *buf = find_sound(effect);
   if (!buf)

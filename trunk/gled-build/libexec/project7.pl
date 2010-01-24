@@ -117,6 +117,13 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName)
 		     DeltaMeth=>'.Delta(x)',
 		     DeltaArgs=>'Float_t x'
                    },
+  'SInertVarF' =>  { GetType=>'Float_t',
+		     GetMeth=>'.Get()',
+		     SetMeth=>'.Set(x)',
+		     SetArgs=>'Float_t x',
+		     DeltaMeth=>'.Delta(x)',
+		     DeltaArgs=>'Float_t x'
+                   },
   'SDesireVarF' => { GetType=>'Float_t',
 		     GetMeth=>'.Get()',
 		     SetMeth=>'.SetDesire(x)',

@@ -1,3 +1,75 @@
+2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement laser turret steering in Crawler.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add data-members for turrent orientation and gun-length:
+	  SDesireVarF   mLaserUpDn;
+	  SDesireVarF   mLaserLtRt;
+	  Float_t       mLaserLen;
+	Handle / use them in TimeTick() and ShootLaser().
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Register keys for laser turret rotation and to return into
+	standard position.
+	Add key-callback functions LaserSteer() and TurretHome().
+	Handle turret rotation desire in TimeTick().
+
+	* Glasses/LaserTraceExplosion.cxx:
+	* Glasses/LaserTraceExplosion.h:
+	Add end-point explosion radius member.
+	Use display list.
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	Add optional arg for user-key-id to RegisterKey().
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Store / restore camera FOV when activating / deactivating a
+	spiritio.
+	Add function EnactExtendioSpiritio(Extendio* ext) -- moved from
+	TringuCam::DynoDrive().
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Move DynoDrive() to TSPupilInfo::EnactExtendioSpiritio().
+	ExtendioExplode() is not called in detached thread anymore.
+
+	* Glasses/Tringula.cxx:
+	In LaserShot() set end-point explosition radous of
+	LaserTraceExplosion if something was actually hit.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	Register arrow keys for turret steering.
+	Register home key to return turrent to forward position.
+	Draw square and crosshair showing desired and actual turret
+	direction.
+	Zoom in/out on mouse-wheel.
+
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.cxx:
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.h:
+	Use std glu-quadric from GLRnrDriver.
+
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.cxx:
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.h:
+	Add drawing of end-of-ray mark (if something was hit).
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Comment out info printout.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Add function to HTrans template:
+	  void     RotateVec3IP(TT* in) const;
+
+	* Stones/KeyHandling.cxx:
+	* Stones/KeyHandling.h:
+	Add 'Int_t fUserId' to class KeyInfo. This allows for easy reuse
+	of the same callback for different keys.
+
 2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Implement laser shooting: damage dealing, laser-trace and sound.

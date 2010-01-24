@@ -232,7 +232,8 @@ void tringula(Int_t mode=2)
 
     for (Int_t i=0; i<20; ++i)
     {
-      Float_t l1 = gRandom->Uniform(0.4,    1.4),
+      Float_t
+	l1 = gRandom->Uniform(0.4,    1.4),
         l2 = gRandom->Uniform(0,      0.5*l1),
         w  = gRandom->Uniform(0.5*l1, 1.2*l1),
         h  = gRandom->Uniform(0.5*l1, 1.2*l1);
@@ -1164,9 +1165,9 @@ void make_overlay()
       val->SetFormat("LevH: %.2f");
       val->SetCbackMemberName("LevH");
 
-      CREATE_ADD_GLASS(but, WGlButton, menu, "Drive", "LensBeta:TringuCamAlpha");
-      but->SetCbackAlpha(tricam);
-      but->SetCbackMethodName("DynoDrive");
+      CREATE_ADD_GLASS(but, WGlButton, menu, "Drive", "LensBeta:PupilInfoAlpha");
+      but->SetCbackAlpha(tspupil);
+      but->SetCbackMethodName("EnactExtendioSpiritio");
 
       CREATE_ADD_GLASS(but, WGlButton, menu, "Shoot", "LensAlpha");
       but->SetCbackMethodName("ShootLaser");

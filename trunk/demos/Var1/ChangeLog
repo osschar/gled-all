@@ -1,3 +1,8 @@
+2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C: Change gl-menu-button for Crawler-drive to its new
+	name in a different class (TringuCam->TSPupilInfo).
+
 2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C:

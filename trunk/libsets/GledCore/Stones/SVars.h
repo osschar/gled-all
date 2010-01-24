@@ -174,6 +174,13 @@ public:
     return MMV::Delta(deltamaxneg(dt));
   }
 
+  T DeltaMax(Int_t sign, T dt)
+  {
+    if      (sign > 0) return DeltaMaxPositive(dt);
+    else if (sign < 0) return DeltaMaxNegative(dt);
+    else               return 0;
+  }
+
   T    GetDeltaInc() const { return mDeltaInc; }
   void SetDeltaInc(T d)    { mDeltaInc = d;    }
   T    GetDeltaDec() const { return mDeltaDec; }
@@ -261,6 +268,12 @@ public:
     bDesireSatisfied = false;
     mDesire = valminmax(mDesire + d);
     return mDesire;
+  }
+
+  T DeltaDesireMax(Int_t ifac, T dt) const
+  {
+    if (ifac) return DeltaDesire(ifac*mStdDesireDelta*dt);
+    else      return 0;
   }
 
   Bool_t IsDesireSatisfied() const { return bDesireSatisfied; }

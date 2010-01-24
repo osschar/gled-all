@@ -29,7 +29,10 @@ protected:
   SDesireVarF   mThrottle;  // X{RGSD} 7 DesireVar(-range=>["mThrottle.GetMin()", "mThrottle.GetMax()", 1, 10])
   SDesireVarF   mWheel;     // X{RGSD} 7 DesireVar(-range=>["mWheel.GetMin()",    "mWheel.GetMax()",    1, 50])
 
-  SMinMaxVarF   mLaserCharge; // X{RG} 7 MinMaxVar(-const=>1)
+  SDesireVarF   mLaserUpDn;   // X{RGSD} 7 DesireVar(-range=>["mLaserUpDn.GetMin()", "mLaserUpDn.GetMax()", 1, 100])
+  SDesireVarF   mLaserLtRt;   // X{RGSD} 7 DesireVar(-range=>["mLaserLtRt.GetMin()", "mLaserLtRt.GetMax()", 1, 100])
+  SMinMaxVarF   mLaserCharge; // X{RG}   7 MinMaxVar(-const=>1)
+  Float_t       mLaserLen;    // X{GS}   7 Value(-range=>[0.1, 5, 1, 100]);
 
 public:
   Crawler(const Text_t* n="Crawler", const Text_t* t=0);

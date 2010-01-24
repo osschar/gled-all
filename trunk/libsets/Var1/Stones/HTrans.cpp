@@ -497,6 +497,16 @@ inline void HTrans<TT>::MultiplyVec3(const TT* in, TT w, TT* out) const
 }
 
 template<class TT>
+inline void HTrans<TT>::RotateVec3IP(TT* in) const
+{
+  TT out[3];
+  out[0] = M[F00]*in[0] + M[F01]*in[1] + M[F02]*in[2];
+  out[1] = M[F10]*in[0] + M[F11]*in[1] + M[F12]*in[2];
+  out[2] = M[F20]*in[0] + M[F21]*in[1] + M[F22]*in[2];
+  in[0] = out[0]; in[1] = out[1]; in[2] = out[2];
+}
+
+template<class TT>
 inline void HTrans<TT>::RotateVec3(const TT* in, TT* out) const
 {
   out[0] = M[F00]*in[0] + M[F01]*in[1] + M[F02]*in[2];

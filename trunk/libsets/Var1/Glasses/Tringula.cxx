@@ -928,14 +928,14 @@ void Tringula::LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power)
 
   static const Exc_t _eh("Tringula::LaserShot ");
 
-  Bool_t  terrain_collide = false;
+  Bool_t  terrain_hit = false;
   Float_t ray_length = 0;
   Opcode::CollisionFaces col_faces;
   if (RayCollide(ray, 0, true, true, col_faces))
   {
     if (col_faces.GetNbFaces())
     {
-      terrain_collide = true;
+      terrain_hit = true;
       ray_length = col_faces[0].mDistance;
     }
   }
@@ -945,10 +945,15 @@ void Tringula::LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power)
   }
 
   Extendio* dmg_ext = PickExtendios(ray, ray_length, &ray_length);
-  if (dmg_ext) dmg_ext->TakeDamage(power);
+  if (dmg_ext) 
+  {
+    dmg_ext->TakeDamage(power);
+  }
 
   if (ray_length == 0)
-    ray_length = 100.0f;
+  {
+    ray_length = 10.0f * power;
+  }
 
   Opcode::Point end;
   end.Mac(ray.mOrig, ray.mDir, ray_length);
@@ -958,6 +963,10 @@ void Tringula::LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power)
   e->SetTringula(this);
   e->RefA().Set(ray.mOrig);
   e->RefB().Set(end);
+  if (terrain_hit || dmg_ext)
+  {
+    e->SetEndRadius(0.03125f*sqrtf(power));
+  }
   mQueen->CheckIn(e);
   ExplosionStarted(e);
 
