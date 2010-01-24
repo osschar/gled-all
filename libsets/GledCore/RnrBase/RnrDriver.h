@@ -50,9 +50,11 @@ protected:
   ZTrans*         mProjBase;     // X{gs} Projection matrix before cam applied.
   ZTrans*         mProjMatrix;   // X{gs} Projection matrix after cam.
 
-  Int_t	          mWidth;        // X{gs}
-  Int_t	          mHeight;       // X{gs}
-  Float_t         mZFov;         // X{gs}
+  Int_t	          mWidth;        // X{g}
+  Int_t	          mHeight;       // X{g}
+  Float_t         mAspect;       // X{g}
+  Float_t         mZFov;         // X{g}
+  Float_t         mTanHalfZFov;  // X{g}
   Float_t         mNearClip;     // X{gs}
   Float_t         mFarClip;      // X{gs}
 
@@ -94,6 +96,9 @@ protected:
 public:
   RnrDriver(Eye* e, const TString& r);
   virtual ~RnrDriver();
+
+  void SetWidthHeight(Int_t w, Int_t h);
+  void SetZFov(Float_t zfov);
 
   // ImageConsumer
   virtual void ImageDeath(OptoStructs::ZGlassImg* img);

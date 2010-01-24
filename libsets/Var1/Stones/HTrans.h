@@ -238,6 +238,7 @@ public:
 
   void     MultiplyVec3IP(TT* in, TT w) const;
   void     MultiplyVec3(const TT* in, TT w, TT* out) const;
+  void     RotateVec3IP(TT* in) const;
   void     RotateVec3(const TT* in, TT* out) const;
   void     RotateBackVec3(const TT* in, TT* out) const;
 

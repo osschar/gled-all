@@ -30,8 +30,6 @@
 #include "TriMesh.h"
 #include "ParaSurf.h"
 
-#include "ExtendioSpiritio.h"
-
 #include <RnrBase/Fl_Event_Enums.h>
 
 #include <TMath.h>
@@ -636,48 +634,6 @@ void TringuCam::ExtendioDetails(Extendio* ext)
     ext->Dump();
 }
 
-void TringuCam::DynoDrive(Dynamico* dyno)
-{
-  // Install dyno handlers etc.
-  // Called in a deteached thread!
-
-  static const Exc_t _eh("TringuCam::DynoDrive ");
-
-  assert_MIR_presence(_eh, MC_IsDetached);
-
-  ZGlass *uidir = mQueen->FindLensByPath("var/glassui");
-  if (!uidir)
-    throw _eh + "uidir not found.";
-
-  GledNS::ClassInfo *ci = dyno->VGlassInfo();
-  while (ci)
-  {
-    // printf("Trying to get spiritio for class '%s'\n", ci->fName.Data());
-    ZGlass *gdir = uidir->FindLensByPath(ci->fName);
-    if (gdir)
-    {
-      ExtendioSpiritio *s = dynamic_cast<ExtendioSpiritio*>(gdir->FindLensByPath("spiritio"));
-      if (s)
-      {
-	// printf("Found spiritio: %p, class='%s'.\n", s, s->ClassName());
-	{
-	  GLensReadHolder slck(s);
-	  s->SetExtendio(dyno);
-	}
-	{
-	  GLensReadHolder slck(*mPupilInfo);
-	  mPupilInfo->SetCurrentSpiritio(s);
-	}
-
-	return;
-      }
-    }
-    ci = ci->GetParentCI();
-  }
-
-  throw _eh + "No suitable spiritio found.";
-}
-
 void TringuCam::ExtendioExplode(Extendio* ext)
 {
   // Terminate a dyno.
@@ -687,8 +643,6 @@ void TringuCam::ExtendioExplode(Extendio* ext)
   // This is much better now.
 
   static const Exc_t _eh("TringuCam::ExtendioExplode ");
-
-  assert_MIR_presence(_eh, MC_IsDetached);
 
   printf("Extendio '%s' exploding at your command!\n", ext->GetName());
 

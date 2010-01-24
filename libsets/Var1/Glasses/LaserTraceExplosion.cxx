@@ -18,8 +18,12 @@ ClassImp(LaserTraceExplosion);
 //==============================================================================
 
 LaserTraceExplosion::LaserTraceExplosion(const Text_t* n, const Text_t* t) :
-  Explosion(n, t)
-{}
+  Explosion(n, t),
+  mEndRadius(0)
+{
+  // From ZGlass.
+  bUseDispList  = true;
+}
 
 LaserTraceExplosion::~LaserTraceExplosion()
 {}

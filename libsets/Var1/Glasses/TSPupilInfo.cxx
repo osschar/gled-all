@@ -15,6 +15,8 @@
 #include "TringuRep.h"
 #include "TSPupilInfo.c7"
 
+#include "ExtendioSpiritio.h"
+
 #include <Glasses/Camera.h>
 #include <Glasses/AlSource.h>
 
@@ -43,6 +45,10 @@ void TSPupilInfo::_init()
   mEventHandler_fid = ZHashList::FID();
 
   mSelectionColor.rgba(1, 0.125, 0.25);
+
+  mZFovPreSpiritio = 60;
+
+  // AlSource-pool vars initialised in AdEnlightenment().
 }
 
 TSPupilInfo::TSPupilInfo(const Text_t* n, const Text_t* t) :
@@ -184,6 +190,8 @@ void TSPupilInfo::RemoveEventHandler(ZGlass* l)
 
 void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
 {
+  // Expected to be called under write-lock.
+
   if (s == 0)
     s = *mDefaultSpiritio;
 
@@ -199,6 +207,10 @@ void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
 
     mSpiritioScene->RemoveAll(exs);
     RemoveEventHandler(exs);
+  }
+  else
+  {
+    mZFovPreSpiritio = mZFov;
   }
 
   set_link_or_die(mCurrentSpiritio.ref_link(), s, FID());
@@ -220,10 +232,53 @@ void TSPupilInfo::SetCurrentSpiritio(Spiritio* s)
   }
   else
   {
+    SetZFov(mZFovPreSpiritio);
     SetCameraBase(0);
   }
 }
 
+void TSPupilInfo::EnactExtendioSpiritio(Extendio* ext)
+{
+  static const Exc_t _eh("TSPupilInfo::EnactExtendioSpiritio ");
+
+  assert_MIR_presence(_eh, MC_IsDetached);
+
+  AList *uidir = dynamic_cast<AList*>(mQueen->FindLensByPath("var/glassui"));
+  if (!uidir)
+    throw _eh + "uidir not found.";
+
+  GledNS::ClassInfo *ci = ext->VGlassInfo();
+  while (ci)
+  {
+    // printf("Trying to get spiritio for class '%s'\n", ci->fName.Data());
+    AList *gdir = dynamic_cast<AList*>(uidir->GetElementByName(ci->fName));
+    if (gdir)
+    {
+      ExtendioSpiritio *s = dynamic_cast<ExtendioSpiritio*>(gdir->GetElementByName("spiritio"));
+      if (s)
+      {
+	// printf("Found spiritio: %p, class='%s'.\n", s, s->ClassName());
+	{
+	  GLensReadHolder slck(s);
+	  s->SetExtendio(ext);
+	}
+	{
+	  GLensReadHolder slck(this);
+	  SetCurrentSpiritio(s);
+	}
+
+	return;
+      }
+    }
+    ci = ci->GetParentCI();
+  }
+
+  throw _eh + "No suitable spiritio found.";
+}
+
+
+//==============================================================================
+// Menu handling
 //==============================================================================
 
 WGlWidget* TSPupilInfo::FindMenuEntry(const TString& name)
@@ -259,7 +314,7 @@ void TSPupilInfo::SelectTopMenuForLens(ZGlass* lens)
   if (lm == 0)
     throw _eh + "can not get lens menu.";
 
-  ZGlass *uidir = mQueen->FindLensByPath("var/glassui");
+  AList *uidir = dynamic_cast<AList*>(mQueen->FindLensByPath("var/glassui"));
   if (!uidir)
     throw _eh + "uidir not found.";
 
@@ -269,10 +324,10 @@ void TSPupilInfo::SelectTopMenuForLens(ZGlass* lens)
   GledNS::ClassInfo *ci = lens->VGlassInfo();
   while (ci)
   {
-    ZGlass *gdir = uidir->FindLensByPath(ci->fName);
+    AList *gdir = dynamic_cast<AList*>(uidir->GetElementByName(ci->fName));
     if (gdir)
     {
-      ZList *l = dynamic_cast<ZList*>(gdir->FindLensByPath("menu"));
+      AList *l = dynamic_cast<AList*>(gdir->GetElementByName("menu"));
       if (l)
       {
 	lpZGlass_t mes;

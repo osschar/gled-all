@@ -16,6 +16,8 @@
 #include <Glasses/ZGlass.h>
 #include <Glasses/ZNode.h>
 
+#include <cmath>
+
 namespace OS   = OptoStructs;
 namespace GVNS = GledViewNS;
 
@@ -38,6 +40,21 @@ RnrDriver::RnrDriver(Eye* e, const TString& r) : mEye(e), mRnrName(r)
 RnrDriver::~RnrDriver()
 {
   mEye->UnregisterImageConsumer(this);
+}
+
+/**************************************************************************/
+
+void RnrDriver::SetWidthHeight(Int_t w, Int_t h)
+{
+  mWidth  = w;
+  mHeight = h;
+  mAspect = (Float_t) w / h;
+}
+
+void RnrDriver::SetZFov(Float_t zfov)
+{
+  mZFov        = zfov;
+  mTanHalfZFov = tanf(0.5f*zfov);
 }
 
 /**************************************************************************/

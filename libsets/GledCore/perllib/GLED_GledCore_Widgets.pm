@@ -503,13 +503,13 @@ sub make_weed_update
 
 ########################################################################
 
-package GLED::Widgets::DesireVar; @ISA = ('GLED::Widgets');
+package GLED::Widgets::InertVar; @ISA = ('GLED::Widgets::MinMaxVar');
 
 sub new
 {
   my $proto = shift;
   my $S = $proto->SUPER::new(@_);
-  $S->{Widget}  = "Fl_SDesireVar";
+  $S->{Widget}  = "Fl_SInertVar";
   $S->{Include} = "FL/Fl_SVars.h";
   # $S->{CastTo}  = "double";
   $S->{LabelP}       = "true";
@@ -526,10 +526,23 @@ sub make_widget
   $S->make_widget_A() . $S->make_step() . $S->make_widget_B();
 }
 
-sub make_cxx_cb
+########################################################################
+
+package GLED::Widgets::DesireVar; @ISA = ('GLED::Widgets::InertVar');
+
+sub new
 {
-  my $S = shift;
-  $S->make_var_widget_cb();
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget}  = "Fl_SDesireVar";
+  $S->{Include} = "FL/Fl_SVars.h";
+  # $S->{CastTo}  = "double";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = exists $S->{-width} ? "false" : "true";
+  $S->{-width}  = 8 unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  return $S;
 }
 
 sub make_weed_update

@@ -82,12 +82,13 @@ namespace KeyHandling
     TString         fKeyTag;    // Unique tag used in GL to build tag - index map.
     TString         fKeyDesc;   // Description to be displayed in key setup dialog.
     AKeyCallback   *fCallback;
+    Int_t           fUserId;    // Id that can be specified by user to reuse callback foo.
 
     Int_t           fIndex;     // Index in "compressed" key/action list in Spiritio.
 
     UChar_t         fDownCount; // Number of activations (key, overlay button, ...).
 
-    KeyInfo(const TString& tag, const TString& desc, AKeyCallback* foo);
+    KeyInfo(const TString& tag, const TString& desc, AKeyCallback* foo, Int_t uid=0);
 
     ~KeyInfo();
 

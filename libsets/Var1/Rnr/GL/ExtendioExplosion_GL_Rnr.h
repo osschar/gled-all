@@ -14,7 +14,6 @@ class ExtendioExplosion_GL_Rnr : public Explosion_GL_Rnr
 {
 protected:
   ExtendioExplosion *mExtendioExplosion;
-  GLUquadricObj     *mQuadric;
 
 public:
   ExtendioExplosion_GL_Rnr(ExtendioExplosion* idol);

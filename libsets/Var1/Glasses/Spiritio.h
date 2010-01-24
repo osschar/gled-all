@@ -48,7 +48,7 @@ protected:
   vpKeyInfo_t mKeys; //!
 
   KeyHandling::KeyInfo& RegisterKey(const TString& tag, const TString& desc,
-				    KeyHandling::AKeyCallback* foo);
+				    KeyHandling::AKeyCallback* foo, Int_t uid=0);
 
   Int_t FindKey(const TString& tag);
 

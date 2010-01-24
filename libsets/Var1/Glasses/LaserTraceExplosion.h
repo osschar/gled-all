@@ -15,8 +15,9 @@ class LaserTraceExplosion : public Explosion
   MAC_RNR_FRIENDS(LaserTraceExplosion);
 
 protected:
-  HPointF      mA; // X{r}
-  HPointF      mB; // X{r}
+  HPointF      mA;         // X{r}
+  HPointF      mB;         // X{r}
+  Float_t      mEndRadius; // X{gs}
 
 public:
   LaserTraceExplosion(const Text_t* n="LaserTraceExplosion", const Text_t* t=0);

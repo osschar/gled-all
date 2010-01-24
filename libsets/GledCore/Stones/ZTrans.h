@@ -120,6 +120,8 @@ public:
   void SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3, const Text_t* pat);
   void GetRotAngles(Float_t* x) const;
 
+  Bool_t CompareAngles(Float_t a1, Float_t a2, Float_t a3) const;
+
   // Scaling
 
   void     Scale(Double_t sx, Double_t sy, Double_t sz);

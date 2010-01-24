@@ -34,7 +34,16 @@ void Crawler::_init()
   mWheel.SetMinMaxDelta(-1, 1, 0.5, 1);
   mWheel.SetStdDesireDelta(1);
 
+  const Float_t turret_speed = 0.15f;
+  mLaserUpDn.SetMinMaxDelta(-0.35, 0.7, turret_speed, turret_speed);
+  mLaserUpDn.SetStdDesireDelta(2.0f*turret_speed);
+
+  mLaserLtRt.SetMinMaxDelta(-1.0, 1.0, turret_speed,turret_speed);
+  mLaserLtRt.SetStdDesireDelta(2.0f*turret_speed);
+
   mLaserCharge.SetMinMax(0, 60);
+
+  mLaserLen = 0.4;
 }
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :
@@ -67,8 +76,10 @@ void Crawler::TimeTick(Double_t t, Double_t dt)
   const Float_t dtf = dt;
 
   // Controllers
-  mThrottle.TimeTick(dtf);
-  mWheel.   TimeTick(dtf);
+  mThrottle. TimeTick(dtf);
+  mWheel.    TimeTick(dtf);
+  mLaserUpDn.TimeTick(dtf);
+  mLaserLtRt.TimeTick(dtf);
 
   mLaserCharge.Delta(100.0f*dtf);
 
@@ -244,14 +255,23 @@ void Crawler::ShootLaser()
 {
   // Should move it up ... at least for half bbox ... and a bit forward.
 
-  HTransF& t = ref_last_trans();
+  // We know laser is positioned in (0, 0, max_z) - by Crawler construction.
+  // This should really be given from outside, somehow.
+
+  HTransF& trans = ref_last_trans();
   const Float_t* mmbb = mMesh->GetTTvor()->mMinMaxBox;
 
-  Opcode::Point beg;
-  beg.Mac(t.ref_pos(), t.ref_base_vec_x(), mmbb[3]);
-  beg.TMac(t.ref_base_vec_z(), 0.5f*mmbb[5]);
-  
-  Opcode::Ray ray(beg, t.ref_base_vec_x());
+  Opcode::Ray ray;
+
+  ray.mOrig.Mac(trans.ref_pos(), trans.ref_base_vec_z(), mmbb[5]);
+
+  const Float_t p = mLaserLtRt.Get(), t = mLaserUpDn.Get();
+  const Float_t ct = cosf(t);
+  ray.mDir.Set(ct*cosf(p), ct*sinf(p), sinf(t));
+  trans.RotateVec3IP(ray.mDir);
+
+  ray.mOrig.TMac(ray.mDir, mLaserLen);
+
   mTringula->LaserShot(this, ray, mLaserCharge.Get());
   mLaserCharge.Set(0);
 }

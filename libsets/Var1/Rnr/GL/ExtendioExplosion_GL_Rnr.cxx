@@ -6,6 +6,8 @@
 
 #include "ExtendioExplosion_GL_Rnr.h"
 #include <Glasses/Extendio.h>
+
+#include <Rnr/GL/GLRnrDriver.h>
 #include <GL/glew.h>
 
 #define PARENT Explosion_GL_Rnr
@@ -15,15 +17,10 @@
 ExtendioExplosion_GL_Rnr::ExtendioExplosion_GL_Rnr(ExtendioExplosion* idol) :
   Explosion_GL_Rnr(idol),
   mExtendioExplosion(idol)
-{
-  mQuadric = gluNewQuadric();
-  gluQuadricNormals(mQuadric, GLU_NONE);
-}
+{}
 
 ExtendioExplosion_GL_Rnr::~ExtendioExplosion_GL_Rnr()
-{
-  gluDeleteQuadric(mQuadric);
-}
+{}
 
 //==============================================================================
 
@@ -62,5 +59,5 @@ void ExtendioExplosion_GL_Rnr::PostDraw(RnrDriver* rd)
 
 void ExtendioExplosion_GL_Rnr::Render(RnrDriver* rd)
 {
-  gluSphere(mQuadric, 1.0, 30, 30);
+  gluSphere(rd->GL()->GetQuadricStdNoNormals(), 1.0, 30, 30);
 }

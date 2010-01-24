@@ -349,6 +349,15 @@ void ZTrans::GetRotAngles(Float_t* x) const
   x[0] = mA1; x[1] = mA2; x[2] = mA3;
 }
 
+Bool_t ZTrans::CompareAngles(Float_t a1, Float_t a2, Float_t a3) const
+{
+  // Return true if angles currently used are the same as passed ones.
+  // This will most likely only work correctly if SetRotByAngles() was and
+  // will be used.
+
+  return (bAsOK && mA1 == a1 && mA2 == a2 && mA3 == a3);
+}
+
 /**************************************************************************/
 // Scaling
 /**************************************************************************/

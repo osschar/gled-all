@@ -31,6 +31,8 @@ void CrawlerSpiritio::_init()
 {
   // From ExtendioSpiritio -- restric extendio fid.
   mExtendio_fid = Crawler::FID();
+
+  mDefZFov = 60.0f;
 }
 
 CrawlerSpiritio::CrawlerSpiritio(const Text_t* n, const Text_t* t) :
@@ -40,7 +42,15 @@ CrawlerSpiritio::CrawlerSpiritio(const Text_t* n, const Text_t* t) :
   mKeyLeftWheel  (RegisterKey("LeftWheel",   "Turn wheel left",   KEY_CALLBACK(LeftWheel))),
   mKeyRightWheel (RegisterKey("RightWheel",  "Turn wheel right",  KEY_CALLBACK(RightWheel)))
 {
+  RegisterKey("LaserUp",    "Turn laser up",    KEY_CALLBACK(LaserSteer), LK_Up);
+  RegisterKey("LaserDown",  "Turn laser down",  KEY_CALLBACK(LaserSteer), LK_Down);
+  RegisterKey("LaserLeft",  "Turn laser left",  KEY_CALLBACK(LaserSteer), LK_Left);
+  RegisterKey("LaserRight", "Turn laser right", KEY_CALLBACK(LaserSteer), LK_Right);
+  mFirstLaserKey = mKeys.size() - 4;
+
   RegisterKey("FireGun", "Fire gun", KEY_CALLBACK(FireGun));
+
+  RegisterKey("TurretHome", "Return laser to forward position", KEY_CALLBACK(TurretHome));
 
   _init();
 }
@@ -91,17 +101,16 @@ void CrawlerSpiritio::Activate()
 
   mCamera->Home();
 
-  // Move camera slightly off.
-  // These factors seem to work ok with simple Crawlers.
-  // Should really have a marked point in the mesh.
-  // And draw something special when driving a unit.
+  // Move camera to laser-pos.
+  // Need position marked in Crawler or somewhere else.
+  // This should be in sync with Crawlers::ShootLaser().
 
   Float_t *minmax = mExtendio->GetMesh()->GetTTvor()->mMinMaxBox;
   mCamera->Identity();
-  mCamera->MoveLF(1, 0.20f * minmax[0]); // min_x
-  mCamera->MoveLF(3, 1.30f * minmax[5]); // max_z
-  mCamera->RotateLF(3, 1, 0.2);
+  mCamera->MoveLF(3, minmax[5]); // max_z
   mCamera->SetHomeTrans();
+
+  mPupilInfo->SetZFov(mDefZFov);
 
   Crawler &C = * (Crawler*) *mExtendio;
   C.SetDriveMode(Crawler::DM_Controllers);
@@ -146,7 +155,7 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
   {
     const SDesireVarF& tv = C.RefThrottle();
     Float_t d0 = tv.GetDesire();
-    Float_t d1 = tv.DeltaDesire(tv.GetStdDesireDelta() * dtf * tdc);
+    Float_t d1 = tv.DeltaDesireMax(tdc, dtf);
     if (d0 < 0 && d1 > 0 && tdc > 0)
     {
       tv.SetDesire(0);
@@ -165,7 +174,7 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
   {
     const SDesireVarF& wv = C.RefWheel();
     Float_t d0 = wv.GetDesire();
-    Float_t d1 = wv.DeltaDesire(wv.GetStdDesireDelta() * dtf * wdc);
+    Float_t d1 = wv.DeltaDesireMax(wdc, dtf);
     if (d0 < 0 && d1 > 0 && wdc > 0)
     {
       wv.SetDesire(0);
@@ -176,6 +185,19 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
       wv.SetDesire(0);
       --mKeyRightWheel.fDownCount;
     }
+  }
+
+  // Laser steering
+  {
+    Int_t lud = mKeys[mFirstLaserKey+LK_Up]->fDownCount - mKeys[mFirstLaserKey+LK_Down]->fDownCount;
+    C.RefLaserUpDn().DeltaDesireMax(lud, dtf);
+    Int_t llr = mKeys[mFirstLaserKey+LK_Left]->fDownCount - mKeys[mFirstLaserKey+LK_Right]->fDownCount;
+    C.RefLaserLtRt().DeltaDesireMax(llr, dtf);
+
+    const Float_t a1 = C.RefLaserLtRt().GetDesire();
+    const Float_t a2 = C.RefLaserUpDn().GetDesire();
+    if (!mCamera->RefTrans().CompareAngles(a1, a2, 0.0f))
+      mCamera->SetRotByAngles(a1, a2, 0.0f);
   }
 
   if (*mEngineSrc)
@@ -320,12 +342,29 @@ void CrawlerSpiritio::SetWheel(Float_t w)
 
 //------------------------------------------------------------------------------
 
-void CrawlerSpiritio::FireGun(Int_t, Bool_t downp, UInt_t time_elapsed)
+void CrawlerSpiritio::LaserSteer(Int_t key_idx, Bool_t downp, UInt_t time_elapsed)
+{
+  KeyHandling::KeyInfo& ki = * mKeys[key_idx];
+  ki.fDownCount += downp ? 1 : -1;
+}
+
+void CrawlerSpiritio::FireGun(Int_t, Bool_t downp, UInt_t)
 {
   Crawler &C = * (Crawler*) *mExtendio;
 
+  // Should lock ... but we are locked already ...
   if (downp && C.RefLaserCharge().Get() > 20.0f)
   {
     C.ShootLaser();
   }
+}
+
+//------------------------------------------------------------------------------
+
+void CrawlerSpiritio::TurretHome(Int_t, Bool_t downp, UInt_t)
+{
+   Crawler &C = * (Crawler*) *mExtendio;
+   C.RefLaserUpDn().SetDesire(0);
+   C.RefLaserLtRt().SetDesire(0);
+   mPupilInfo->SetZFov(mDefZFov);
 }

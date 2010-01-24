@@ -26,7 +26,7 @@ public:
   virtual void Draw(RnrDriver* rd);
   //virtual void PostDraw(RnrDriver* rd);
 
-  //virtual void Render(RnrDriver* rd);
+  virtual void Render(RnrDriver* rd);
 
 }; // endclass LaserTraceExplosion_GL_Rnr
 
