@@ -29,6 +29,14 @@ protected:
 
   void RegisterKey(Int_t k, const TString& tag);
 
+  // ----------------------------------------------------------------
+
+  void draw_vertical_outline_value_quads  (Float_t bar_hw, Float_t yzero, Float_t yval);
+  void draw_horizontal_outline_value_quads(Float_t bar_hh, Float_t xzero, Float_t xval);
+
+  void draw_vertical_picking_quad  (RnrDriver* rd, void* user_data, Float_t bar_hw);
+  void draw_horizontal_picking_quad(RnrDriver* rd, void* user_data, Float_t bar_hh);
+
   void draw_vertical_minmaxvar  (const SMinMaxVarF& v, RnrDriver* rd, bool pick);
   void draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick);
 

@@ -1,5 +1,33 @@
 2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add drawing of laser barrel of Crawlers.
+
+	* Rnr/GL/Crawler_GL_Rnr.cxx:
+	* Rnr/GL/Crawler_GL_Rnr.h:
+	New GL renderer class -- needed to draw laser barrel.
+
+	* glass.list:
+	Crawler has own renderer now.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add member 'HPointF mLaserBeg' holding starting point of laser
+	barrel.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Use Crawler::mLaserBeg instead of harcoded position.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Put some common code from overlay minmax/desire variable bar
+	drawing into functions.
+
+	* Stones/HTrans.h:
+	Add function:
+	  HPoint& Add(TT _x, TT _y, TT _z);
+
+2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Implement laser turret steering in Crawler.
 
 	* Glasses/Crawler.cxx:

@@ -43,7 +43,7 @@ void Crawler::_init()
 
   mLaserCharge.SetMinMax(0, 60);
 
-  mLaserLen = 0.4;
+  mLaserLen = 0;
 }
 
 Crawler::Crawler(const Text_t* n, const Text_t* t) :
@@ -65,6 +65,16 @@ void Crawler::SetTringula(Tringula* tring)
   PARENT_GLASS::SetTringula(tring);
 
   mRayOffset = 2.0f * mTringula->GetMesh()->GetTTvor()->mMaxEdgeLen;
+
+  // Set laser start -- this should *really* come from outside.
+  // Anyway, the whole laser should migrate into something like:
+  // class Laser : public Weapon {};
+  if (*mMesh)
+  {
+    const Float_t* mmbb = mMesh->GetTTvor()->mMinMaxBox;
+    mLaserBeg.Set(0, 0, mmbb[5]);
+    mLaserLen = 0.75f * mmbb[3];
+  }
 }
 
 //==============================================================================
@@ -259,11 +269,12 @@ void Crawler::ShootLaser()
   // This should really be given from outside, somehow.
 
   HTransF& trans = ref_last_trans();
-  const Float_t* mmbb = mMesh->GetTTvor()->mMinMaxBox;
 
   Opcode::Ray ray;
 
-  ray.mOrig.Mac(trans.ref_pos(), trans.ref_base_vec_z(), mmbb[5]);
+  ray.mOrig = mLaserBeg;
+  trans.RotateVec3IP(ray.mOrig);
+  ray.mOrig.Add(trans.ref_pos());
 
   const Float_t p = mLaserLtRt.Get(), t = mLaserUpDn.Get();
   const Float_t ct = cosf(t);

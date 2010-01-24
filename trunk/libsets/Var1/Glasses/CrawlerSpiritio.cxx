@@ -96,6 +96,8 @@ void CrawlerSpiritio::Activate()
 {
   // Called when TSPupilInfo installs the spiritio.
 
+  Crawler &C = * (Crawler*) *mExtendio;
+
   mCameraBase->SetParent(mPupilInfo->GetTringuRep());
   mCameraBase->ref_trans().SetFromArray(mExtendio->ref_last_trans());
 
@@ -105,14 +107,12 @@ void CrawlerSpiritio::Activate()
   // Need position marked in Crawler or somewhere else.
   // This should be in sync with Crawlers::ShootLaser().
 
-  Float_t *minmax = mExtendio->GetMesh()->GetTTvor()->mMinMaxBox;
   mCamera->Identity();
-  mCamera->MoveLF(3, minmax[5]); // max_z
+  mCamera->ref_trans().SetPos(C.RefLaserBeg());
   mCamera->SetHomeTrans();
 
   mPupilInfo->SetZFov(mDefZFov);
 
-  Crawler &C = * (Crawler*) *mExtendio;
   C.SetDriveMode(Crawler::DM_Controllers);
 
   if (*mEngineSrc)

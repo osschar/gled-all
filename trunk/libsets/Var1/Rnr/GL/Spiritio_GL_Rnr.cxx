@@ -146,7 +146,97 @@ void Spiritio_GL_Rnr::RegisterKey(Int_t k, const TString& tag)
     ISwarn(_eh + "tag '" + tag + "' requested for key '" + char(k) + "' not found.");
 }
 
+
 //==============================================================================
+// Functions for drawing overlay valuators
+//==============================================================================
+
+void Spiritio_GL_Rnr::draw_vertical_outline_value_quads
+  (Float_t bar_hw, Float_t yzero, Float_t yval)
+{
+  glEnable(GL_POLYGON_OFFSET_FILL);
+
+  glPolygonOffset(4, 4);
+  glColor4f(0.8, 0.8, 0.8, 0.4);
+  glBegin(GL_QUADS);
+  glVertex2f(-bar_hw, -0.5f); glVertex2f( bar_hw, -0.5f);
+  glVertex2f( bar_hw,  0.5f); glVertex2f(-bar_hw,  0.5f);
+  glEnd();
+
+  glPolygonOffset(2, 2);
+  glColor4f(0.8, 0.4, 0.4, 0.8);
+  glBegin(GL_QUADS);
+  if (yval >= yzero)
+  {
+    glVertex2f(-bar_hw, yzero); glVertex2f( bar_hw, yzero);
+    glVertex2f( bar_hw, yval);  glVertex2f(-bar_hw, yval);
+  }
+  else
+  {
+    glVertex2f(-bar_hw, yval);  glVertex2f( bar_hw, yval);
+    glVertex2f( bar_hw, yzero); glVertex2f(-bar_hw, yzero);
+  }
+  glEnd();
+
+  glDisable(GL_POLYGON_OFFSET_FILL);
+}
+
+void Spiritio_GL_Rnr::draw_horizontal_outline_value_quads
+  (Float_t bar_hh, Float_t xzero, Float_t xval)
+{
+  glEnable(GL_POLYGON_OFFSET_FILL);
+
+  glPolygonOffset(4, 4);
+  glColor4f(0.8, 0.8, 0.8, 0.4);
+  glBegin(GL_QUADS);
+  glVertex2f(-0.5f,  bar_hh); glVertex2f(-0.5f, -bar_hh);
+  glVertex2f( 0.5f, -bar_hh); glVertex2f( 0.5f,  bar_hh);
+  glEnd();
+
+  glPolygonOffset(2, 2);
+  glColor4f(0.8, 0.4, 0.4, 0.8);
+  glBegin(GL_QUADS);
+  if (xval >= xzero)
+  {
+    glVertex2f(xzero, bar_hh); glVertex2f(xzero, -bar_hh);
+    glVertex2f(xval, -bar_hh); glVertex2f(xval,   bar_hh);
+  }
+  else
+  {
+    glVertex2f(xval,   bar_hh); glVertex2f(xval, -bar_hh);
+    glVertex2f(xzero, -bar_hh); glVertex2f(xzero, bar_hh);
+  }
+  glEnd();
+
+  glDisable(GL_POLYGON_OFFSET_FILL);
+}
+
+//------------------------------------------------------------------------------
+
+void Spiritio_GL_Rnr::draw_vertical_picking_quad
+  (RnrDriver* rd, void* user_data, Float_t bar_hw)
+{
+  rd->GL()->PushName(this, user_data);
+  glBegin(GL_QUADS);
+  glVertex3f(-bar_hw, -0.5f,  0.0f); glVertex3f( bar_hw, -0.5f,  0.0f);
+  glVertex3f( bar_hw,  0.5f, -1.0f); glVertex3f(-bar_hw,  0.5f, -1.0f);
+  glEnd();
+  rd->GL()->PopName();
+
+}
+
+void Spiritio_GL_Rnr::draw_horizontal_picking_quad
+  (RnrDriver* rd, void* user_data, Float_t bar_hh)
+{
+  rd->GL()->PushName(this, user_data);
+  glBegin(GL_QUADS);
+  glVertex3f(-0.5f,  bar_hh,  0.0f); glVertex3f(-0.5f, -bar_hh,  0.0f);
+  glVertex3f( 0.5f, -bar_hh, -1.0f); glVertex3f( 0.5f,  bar_hh, -1.0f);
+  glEnd();
+  rd->GL()->PopName();
+}
+
+//------------------------------------------------------------------------------
 
 void Spiritio_GL_Rnr::draw_vertical_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick)
 {
@@ -163,12 +253,7 @@ void Spiritio_GL_Rnr::draw_vertical_minmaxvar(const SMinMaxVarF& v, RnrDriver* r
 
   if (pick)
   {
-    rd->GL()->PushName(this, (void*) &v);
-    glBegin(GL_QUADS);
-    glVertex3f(-bar_hw, -0.5f,  0.0f); glVertex3f( bar_hw, -0.5f,  0.0f);
-    glVertex3f( bar_hw,  0.5f, -1.0f); glVertex3f(-bar_hw,  0.5f, -1.0f);
-    glEnd();
-    rd->GL()->PopName();
+    draw_vertical_picking_quad(rd, (void*) &v, bar_hw);
     return;
   }
 
@@ -180,31 +265,7 @@ void Spiritio_GL_Rnr::draw_vertical_minmaxvar(const SMinMaxVarF& v, RnrDriver* r
   const Float_t yzero = -0.5f - min * dinv;
   const Float_t yval  = -0.5f + (val - min) * dinv;
 
-  glEnable(GL_POLYGON_OFFSET_FILL);
-
-  glPolygonOffset(4, 4);
-  glColor4f(0.8, 0.8, 0.8, 0.4);
-  glBegin(GL_QUADS);
-  glVertex2f(-bar_hw, -0.5f); glVertex2f( bar_hw, -0.5f);
-  glVertex2f( bar_hw,  0.5f); glVertex2f(-bar_hw,  0.5f);
-  glEnd();
-
-  glPolygonOffset(2, 2);
-  glColor4f(0.8, 0.4, 0.4, 0.8);
-  glBegin(GL_QUADS);
-  if (val >= 0)
-  {
-    glVertex2f(-bar_hw, yzero); glVertex2f( bar_hw, yzero);
-    glVertex2f( bar_hw, yval);  glVertex2f(-bar_hw, yval);
-  }
-  else
-  {
-    glVertex2f(-bar_hw, yval);  glVertex2f( bar_hw, yval);
-    glVertex2f( bar_hw, yzero); glVertex2f(-bar_hw, yzero);
-  }
-  glEnd();
-
-  glDisable(GL_POLYGON_OFFSET_FILL);
+  draw_vertical_outline_value_quads(bar_hw, yzero, yval);
 
   glLineWidth(4);
   glColor4f(0.4, 0.4, 0.8, 1.0);
@@ -232,12 +293,7 @@ void Spiritio_GL_Rnr::draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver*
 
   if (pick)
   {
-    rd->GL()->PushName(this, (void*) &v);
-    glBegin(GL_QUADS);
-    glVertex3f(-0.5f,  bar_hh,  0.0f); glVertex3f(-0.5f, -bar_hh,  0.0f);
-    glVertex3f( 0.5f, -bar_hh, -1.0f); glVertex3f( 0.5f,  bar_hh, -1.0f);
-    glEnd();
-    rd->GL()->PopName();
+    draw_horizontal_picking_quad(rd, (void*) &v, bar_hh);
     return;
   }
 
@@ -249,31 +305,7 @@ void Spiritio_GL_Rnr::draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver*
   const Float_t xzero = -0.5f - min * dinv;
   const Float_t xval  = -0.5f + (val - min) * dinv;
 
-  glEnable(GL_POLYGON_OFFSET_FILL);
-
-  glPolygonOffset(4, 4);
-  glColor4f(0.8, 0.8, 0.8, 0.4);
-  glBegin(GL_QUADS);
-  glVertex2f(-0.5f,  bar_hh); glVertex2f(-0.5f, -bar_hh);
-  glVertex2f( 0.5f, -bar_hh); glVertex2f( 0.5f,  bar_hh);
-  glEnd();
-
-  glPolygonOffset(2, 2);
-  glColor4f(0.8, 0.4, 0.4, 0.8);
-  glBegin(GL_QUADS);
-  if (val >= 0)
-  {
-    glVertex2f(xzero, bar_hh); glVertex2f(xzero, -bar_hh);
-    glVertex2f(xval, -bar_hh); glVertex2f(xval,   bar_hh);
-  }
-  else
-  {
-    glVertex2f(xval,   bar_hh); glVertex2f(xval, -bar_hh);
-    glVertex2f(xzero, -bar_hh); glVertex2f(xzero, bar_hh);
-  }
-  glEnd();
-
-  glDisable(GL_POLYGON_OFFSET_FILL);
+  draw_horizontal_outline_value_quads(bar_hh, xzero, xval);
 
   glLineWidth(4);
   glColor4f(0.4, 0.4, 0.8, 1.0);
@@ -307,12 +339,7 @@ void Spiritio_GL_Rnr::draw_vertical_desirevar(const SDesireVarF& v, RnrDriver* r
 
   if (pick)
   {
-    rd->GL()->PushName(this, (void*) &v);
-    glBegin(GL_QUADS);
-    glVertex3f(-bar_hw, -0.5f,  0.0f); glVertex3f( bar_hw, -0.5f,  0.0f);
-    glVertex3f( bar_hw,  0.5f, -1.0f); glVertex3f(-bar_hw,  0.5f, -1.0f);
-    glEnd();
-    rd->GL()->PopName();
+    draw_vertical_picking_quad(rd, (void*) &v, bar_hw);
     return;
   }
 
@@ -325,31 +352,7 @@ void Spiritio_GL_Rnr::draw_vertical_desirevar(const SDesireVarF& v, RnrDriver* r
   const Float_t yval  = -0.5f + (val - min) * dinv;
   const Float_t ydes  = -0.5f + (des - min) * dinv;
 
-  glEnable(GL_POLYGON_OFFSET_FILL);
-
-  glPolygonOffset(4, 4);
-  glColor4f(0.8, 0.8, 0.8, 0.4);
-  glBegin(GL_QUADS);
-  glVertex2f(-bar_hw, -0.5f); glVertex2f( bar_hw, -0.5f);
-  glVertex2f( bar_hw,  0.5f); glVertex2f(-bar_hw,  0.5f);
-  glEnd();
-
-  glPolygonOffset(2, 2);
-  glColor4f(0.8, 0.4, 0.4, 0.8);
-  glBegin(GL_QUADS);
-  if (val >= 0)
-  {
-    glVertex2f(-bar_hw, yzero); glVertex2f( bar_hw, yzero);
-    glVertex2f( bar_hw, yval);  glVertex2f(-bar_hw, yval);
-  }
-  else
-  {
-    glVertex2f(-bar_hw, yval);  glVertex2f( bar_hw, yval);
-    glVertex2f( bar_hw, yzero); glVertex2f(-bar_hw, yzero);
-  }
-  glEnd();
-
-  glDisable(GL_POLYGON_OFFSET_FILL);
+  draw_vertical_outline_value_quads(bar_hw, yzero, yval);
 
   glLineWidth(2);
   glColor4f(0.4, 0.8, 0.4, 1.0);
@@ -384,12 +387,7 @@ void Spiritio_GL_Rnr::draw_horizontal_desirevar(const SDesireVarF& v, RnrDriver*
 
   if (pick)
   {
-    rd->GL()->PushName(this, (void*) &v);
-    glBegin(GL_QUADS);
-    glVertex3f(-0.5f,  bar_hh,  0.0f); glVertex3f(-0.5f, -bar_hh,  0.0f);
-    glVertex3f( 0.5f, -bar_hh, -1.0f); glVertex3f( 0.5f,  bar_hh, -1.0f);
-    glEnd();
-    rd->GL()->PopName();
+    draw_horizontal_picking_quad(rd, (void*) &v, bar_hh);
     return;
   }
 
@@ -402,31 +400,7 @@ void Spiritio_GL_Rnr::draw_horizontal_desirevar(const SDesireVarF& v, RnrDriver*
   const Float_t xval  = -0.5f + (val - min) * dinv;
   const Float_t xdes  = -0.5f + (des - min) * dinv;
 
-  glEnable(GL_POLYGON_OFFSET_FILL);
-
-  glPolygonOffset(4, 4);
-  glColor4f(0.8, 0.8, 0.8, 0.4);
-  glBegin(GL_QUADS);
-  glVertex2f(-0.5f,  bar_hh); glVertex2f(-0.5f, -bar_hh);
-  glVertex2f( 0.5f, -bar_hh); glVertex2f( 0.5f,  bar_hh);
-  glEnd();
-
-  glPolygonOffset(2, 2);
-  glColor4f(0.8, 0.4, 0.4, 0.8);
-  glBegin(GL_QUADS);
-  if (val >= 0)
-  {
-    glVertex2f(xzero, bar_hh); glVertex2f(xzero, -bar_hh);
-    glVertex2f(xval, -bar_hh); glVertex2f(xval,   bar_hh);
-  }
-  else
-  {
-    glVertex2f(xval,   bar_hh); glVertex2f(xval, -bar_hh);
-    glVertex2f(xzero, -bar_hh); glVertex2f(xzero, bar_hh);
-  }
-  glEnd();
-
-  glDisable(GL_POLYGON_OFFSET_FILL);
+  draw_horizontal_outline_value_quads(bar_hh, xzero, xval);
 
   glLineWidth(2);
   glColor4f(0.4, 0.8, 0.4, 1.0);

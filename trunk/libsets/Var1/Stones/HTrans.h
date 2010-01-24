@@ -40,7 +40,9 @@ public:
   void Set(const Double_t* p)   { x = p[0]; y = p[1]; z = p[2]; }
   void Zero()                   { x = y = z = 0; }
 
-  void Neg() { x = -x; y = -y; z = -z; }
+  HPoint& Neg() { x = -x; y = -y; z = -z; return *this; }
+
+  HPoint& Add(TT _x, TT _y, TT _z) { x += _x; y += _y; z += _z; return *this; }
 
   HPoint& operator+=(const HPoint& a)   { x += a.x;  y += a.y;  z += a.z;  return *this; }
   HPoint& operator+=(const Float_t*  v) { x += v[0]; y += v[1]; z += v[2]; return *this; }
