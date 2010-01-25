@@ -297,7 +297,9 @@ if ($config->{RECONFIGURE} == 0)
   my $skipview = $config->{NOVIEWLIBS} ? "true" : "";
   my $skiprnr  = $config->{NORNRLIBS}  ? "true" : "";
 
-  my @ext_areas = split(':', $config->{EXTERNAL});
+  my @ext_areas;
+  push @ext_areas, split(':', $config->{EXTERNAL})    if $config->{EXTERNAL};
+  push @ext_areas, split(':', $config->{EXTRA_PATHS}) if $config->{EXTRA_PATHS};
   my @user_cpp_elms;
   push @user_cpp_elms, "-DDEBUG" if($config->{DEBUG});
   push @user_cpp_elms, map { "-I$_/include" } @ext_areas;
