@@ -1,3 +1,11 @@
+2010-01-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* configure.rc:
+	Separate external and extra-paths directory lists:
+	external    - added to cpp/ld flags and to gled environmnet scripts;
+	extra-paths - added to cpp/ld flags only.
+
 2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/project7.pl:

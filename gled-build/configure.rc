@@ -34,8 +34,12 @@ uld		=s	.	USER_LD_FLAGS	""
 usepch		!	.	USE_PCH		"<auto>"
 pchname         =s      .       PCH_NAME        "gled.pch.h"
 debug		!	.	DEBUG		0
-# directories where foreign software is installed (eg. /opt); ':' separated
+# ':' separated directories where foreign software is installed.
+# These will be added to cpp/ld flags and to gled environmnet scripts.
 external	=s	.	EXTERNAL	""
+# ':' separated directories where foreign software is installed.
+# These will only be added to cpp/ld flags.
+extrapaths	=s	.	EXTRA_PATHS	""
 
 ### build configuration ###
 #
