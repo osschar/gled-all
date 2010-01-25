@@ -5,12 +5,7 @@ gled_dir := gled-build
 
 all: install
 
-
 EXTERNAL := $(shell pwd)/gled-build/external
-ifneq (${EXTRA_PATHS},)
-EXTERNAL := $(join ${EXTERNAL},:${EXTRA_PATHS})
-endif
-
 
 ### checkout
 
@@ -26,7 +21,8 @@ checkout:
 define configure-cmds
 ln -s ${PREFIX} external;\
 . binenv.sh;\
-./configure --buildversion="${RELEASE}" --blobdir=${PREFIX}/gled --external=${EXTERNAL} --libsets='<auto>'
+./configure --buildversion="${RELEASE}" --blobdir=${PREFIX}/gled\
+  --external=${EXTERNAL} --extrapaths=${EXTRA_PATHS} --libsets='<auto>'
 endef
 
 configure: checkout

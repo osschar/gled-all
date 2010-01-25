@@ -1,3 +1,8 @@
+2010-01-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled/Makefile:
+	Pass EXTRA_PATHS via new command-line option of gled configure.
+
 2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix configure of gled screwed up in last commit.
