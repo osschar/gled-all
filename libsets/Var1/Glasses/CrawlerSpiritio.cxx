@@ -14,6 +14,7 @@
 #include "Tringula.h"
 #include <Glasses/Camera.h>
 #include <Stones/KeyHandling.h>
+#include <Glasses/ZQueen.h>
 
 // CrawlerSpiritio
 

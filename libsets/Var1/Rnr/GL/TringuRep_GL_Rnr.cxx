@@ -18,6 +18,8 @@
 
 #include <Glasses/AlBuffer.h>
 #include <Glasses/AlSource.h>
+#include <Glasses/ZQueen.h>
+#include <Glasses/ZHashList.h>
 
 #include <GL/glew.h>
 

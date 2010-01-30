@@ -19,6 +19,7 @@
 
 #include <Glasses/Camera.h>
 #include <Glasses/AlSource.h>
+#include <Glasses/ZQueen.h>
 
 // TSPupilInfo
 
