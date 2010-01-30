@@ -146,6 +146,8 @@ public:
 		       Bool_t cull_p, Bool_t closest_p,
 		       Opcode::CollisionFaces& col_faces);
 
+  Float_t   RayCollideClosestHit(const Opcode::Ray& ray, Bool_t cull_p);
+
   Extendio* PickExtendios(const Opcode::Ray& ray, Float_t ray_length,
 			  Float_t* ext_distance = 0);
 
