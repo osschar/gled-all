@@ -1,0 +1,7 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+AlContext	1	Glasses/AlContext	.
+AlBuffer	4	Glasses/AlBuffer
+AlListener	2	Glasses/AlListener	.
+AlSource	3	Glasses/AlSource	.

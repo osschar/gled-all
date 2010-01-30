@@ -1,0 +1,7 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+#ZGlass		1	Glasses/ZGlass		.
+#ZList		2	Glasses/ZList
+#ZNode		3	Glasses/ZNode		.
+#ZNodeLink	4	Glasses/ZNodeLink	ZNode

@@ -1,0 +1,195 @@
+#!/usr/bin/perl
+
+use lib "$ENV{GLEDSYS}/perllib";
+use Gled_ConfCat_Parser;
+use ParseConfig;
+
+my $def_cfg = "$ENV{GLEDSYS}/cfg/gled-generate-htmldoc.rc";
+my $cfg_parser = new ParseConfig(-defcfg=>$def_cfg);
+$cfg_parser->parse();
+
+my $index_gled = "$OUTDIR/index-gled.html";
+
+Gled_ConfCat_Parser::import_build_config();
+
+chdir $ENV{GLEDSYS};
+
+`mkdir -p $OUTDIR`;
+
+open HTML, ">$index_gled";
+print HTML <<"fnord";
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>gled/docs/classdoc</title>
+<link href="/gled_site1.css" rel="stylesheet" type="text/css">
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+<meta http-equiv="Content-Language" content="en-english">
+<link REL="icon" HREF="/img/gledicon-rotated-16x16.png" TYPE="image/png">
+
+<!--#include virtual="/head-specs.html" -->
+</head>
+	
+<body
+  BGCOLOR="#FFFFFF"
+  TEXT="#000000"
+  LINK="#0000FF"
+  VLINK="#000080"
+  ALINK="#FF0000"
+>
+
+<!--#include virtual="/top-bar.html" -->
+
+<h2><code>gled/docs/classdoc</code></h2>
+
+<div class="body">
+
+<ul>
+
+<li><font size=+1>
+<a href="ClassIndex.html"><code>class_index:</code>
+</a></font>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+alphabetically sorted list of all TObject descendants
+
+<li><font size=+1>
+<a href="ClassHierarchy.html"><code>class_hierarchy:</code></a>
+</font>
+hierarchy of <code>Gled</code> classes
+
+<li><font size=+1>
+<a href="ListOfTypes.html"><code>list_of_types:</code></a>
+</font>&nbsp&nbsp&nbsp
+list of common typedefs
+
+</ul>
+
+</div>
+
+<h2><code>gled/docs/classdoc/classes_by_libset_and_category</code></h2>
+
+<div class="body">
+
+fnord
+
+open S, ">$MKDOC_MACRO";
+
+$lsets = join(':', map { "libsets/$_" } @{$resolver->{LibSetList}});
+
+$load_lsets = join("\n  ", map { "Gled::theOne->AssertLibSet(\"$_\");" } @{$resolver->{LibSetList}});
+
+print S <<"FNORD";
+{
+  gSystem->IgnoreSignal(kSigSegmentationViolation, true);
+  if(gROOT->LoadMacro(\"macros/gled_html_doc.C++\")) gSystem->Exit(1);
+
+  $load_lsets;
+
+  gEnv->SetValue("Root.Html.Header", "");
+  gEnv->SetValue("Root.Html.Footer", "");
+  gEnv->SetValue("Root.Html.HomePage", "http://www.gled.org/");
+
+  ZHtml html;
+  html.SetProductName("Gled");
+  html.SetOutputDir("$OUTDIR");
+  html.SetInputDir("$lsets");
+
+  ZModDef moddef;
+  html.SetModuleDefinition(moddef);
+FNORD
+
+@all_classes = ();
+
+for $ls (@{$resolver->{LibSetList}})
+{
+  print S <<"FNORD";
+  html.SetViewCVS("http://www.gled.org/cgi-bin/viewcvs.cgi/trunk/libsets/$ls/%f?view=log");
+FNORD
+
+  print HTML "\n\n<hr><hr>\n";
+  print HTML "<h3><code>$ls</code></h3>\n\n";
+
+  my $ds = `cd $ls; make echo_dict_dirs`;
+  chomp $ds;
+  my @dirs = split(/\s+/, $ds);
+
+  for $d (@dirs)
+  {
+    my @classes;
+
+    opendir HFS, "$ls/$d";
+    my @hfiles = map { s/\.h//; $_ } (grep { /\.h$/ } readdir HFS);
+    closedir HFS;
+    for $hf (@hfiles)
+    {
+      print "Processing $hf ... $ls/dict/${hf}_LinkDef.h\n";
+      open LDF, "$ls/dict/${hf}_LinkDef.h";
+      my @lines = <LDF>;
+      close LDF;
+      @lines = grep { /#pragma link C\+\+ class / } @lines;
+      @lines = map  { /class\s+([:\w<>*]+)/; $1 } @lines;
+      @lines = grep { not /^ZLink</ and not /list</ } @lines;
+      @lines = map  { s/Double_t/double/g; s/Float_t/float/g; $_ } @lines;
+      print "  ", join(", ", @lines), "\n";
+      push @classes, @lines;
+    }
+
+    @classes = sort @classes;
+
+    for $cls (@classes)
+    {
+      ### print S "  html->MakeClass(\"$cls\", false);\n";
+      # print S "  printf(\"Generating for class $cls\\n\");\n";
+      print S "  html->KusKus(\"$cls\");\n";
+      # print S "  printf(\"Done for class $cls\\n\");\n";
+    }
+
+    if ($#classes >= 0)
+    {
+      print HTML "<h4><code>$d</code></h4>\n\n";
+      print HTML join(", ",
+        map { 
+	  my $file = $_;
+	  $file =~ s/[:<>]/_/og;
+	  my $name = $_;
+	  $name =~ s/</\&lt;/og;
+	  $name =~ s/>/\&gt;/og;
+	  "<a href=\"${file}.html\">${name}</a>"
+	} @classes) . "\n\n";
+      push @all_classes, @classes;
+    }
+  }
+
+}
+
+print S <<"FNORD";
+  TIter iClass(html.GetListOfClasses());
+  TClassDocInfo* cdi = 0;
+  while ((cdi = (TClassDocInfo*)iClass()))
+  {
+    TString clsname(cdi->GetClass()->GetName());
+    if (clsname.BeginsWith("ZLink<"))
+    {
+      cdi->SetDeclFileSysName("");
+      cdi->SetSelected(kFALSE);
+    }
+  }
+
+  html.create_list_of_types();
+  html.create_hierarchy();
+  html.MakeIndex();
+  gSystem->Exit(0);
+}
+FNORD
+
+close S;
+
+print HTML "</div>\n</body>\n</html>\n";
+`chmod a+x $index_gled`;
+
+system "gled $MKDOC_MACRO";
+#`rm $MKDOC_MACRO`;
+
+print '*' x 80 . "\n";
+print "* Html docs generated in $ENV{GLEDSYS}/$OUTDIR\n";
+print '*' x 80 . "\n";

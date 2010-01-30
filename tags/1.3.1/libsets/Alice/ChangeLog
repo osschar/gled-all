@@ -1,0 +1,1083 @@
+2009-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/FpeOperator.cxx:
+	* Glasses/FpeOperator.h:
+	New glass that can produce various error conditions.
+
+	* glass.list:
+	Register FpeOperator.
+
+2009-07-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MCTrack.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	Add missing includes for root 5.24.
+
+2008-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Removed files - use VSD created from alieve.
+
+	* Glasses/ITSDigRnrMod.cxx:
+	* Glasses/ITSDigRnrMod.h:
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+	* Glasses/ITSScaledModule.cxx:
+	* Glasses/ITSScaledModule.h:
+	* Glasses/Menu.cxx:
+	* Glasses/Menu.h:
+	* Glasses/MenuDriver.cxx:
+	* Glasses/MenuDriver.h:
+	* Glasses/TOFDigRnrMod.cxx:
+	* Glasses/TOFDigRnrMod.h:
+	* Glasses/TOFSector.cxx:
+	* Glasses/TOFSector.h:
+	* Glasses/TPCPadRow.cxx:
+	* Glasses/TPCPadRow.h:
+	* Glasses/TPCSegFrame.cxx:
+	* Glasses/TPCSegFrame.h:
+	* Glasses/TPCSegRnrMod.cxx:
+	* Glasses/TPCSegRnrMod.h:
+	* Glasses/TPCSegment.cxx:
+	* Glasses/TPCSegment.h:
+	* Glasses/UINodeLink.cxx:
+	* Glasses/UINodeLink.h:
+	* Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/ITSDigRnrMod_GL_Rnr.h:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.h:
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.h:
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	* Rnr/GL/TOFSector_GL_Rnr.h:
+	* Rnr/GL/TPCPadRow_GL_Rnr.cxx:
+	* Rnr/GL/TPCPadRow_GL_Rnr.h:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.h:
+	* Rnr/GL/TPCSegRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegRnrMod_GL_Rnr.h:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+	* Rnr/GL/UINodeLink_GL_Rnr.cxx:
+	* Rnr/GL/UINodeLink_GL_Rnr.h:
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+	* Stones/TOFDigitsInfo.cxx:
+	* Stones/TOFDigitsInfo.h:
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+	Removed files - raw data visualization dropped from gled.
+
+	* Stones/MCParticle.cxx:
+	* Stones/MCParticle.h:
+	Removed - TEveMCTrack used now. In fact TEveMCTrack was made
+	from MCParticle once.
+
+	* Makefile:
+	Remove all ALICE cruft - AliRoot not needed anymore.
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+	Adapt to the above changes.
+
+	* glass.list:
+	Unregister removed glasses.
+
+2007-07-04  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/AliConverter.cxx:
+	* Stones/TPCDigitsInfo.cxx:
+	Event directory is TDirectoryFile instead of TDirectory. 
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+	Add functionality to texture all tracks.
+
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	Call SetAddress() on TPCDigitsInfo tree each time segment is rendered.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.h:
+	Do not override method PreDraw() and PostDraw() inherited from
+	ZNode so that each track can be transformed individually.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	Follow changes in AliESD.
+
+	* Stones/ITSDigitsInfo.cxx:
+	New calibration format.
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MenuDriver.cxx:
+	* Glasses/VSDSelector.cxx:
+	* Glasses/ZAliLoad.cxx:
+	* Stones/TOFDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Use AliStack to retrieve kinematics instead of magickal juggling
+	with tree entries.
+
+2006-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Updates for AliRoot of Dec 2005.
+
+	* Glasses/AliConverter.cxx:
+	Following changes in external track parameters.
+
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	Following changes in TOFGeometry description (possibly
+	incomplete).
+
+2005-10-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+        Add fade and kill time in MCTrackRnrStyle.
+
+2005-10-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+        Remove 100 factor.
+
+2005-10-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+        Fix bugs for color setting in loop_points_and_check_time.
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+        Add variable to draw point in the production vertex.
+
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.h:
+        Set time variables in MCTrackRnrStyle in PreDraw function.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+        Rename/reorganize time memebers.
+
+2005-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/MCParticle.cxx:
+	* Stones/MCParticle.h:
+	Added method ResetPdgCode() for fixing unknown particle types.
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	Revert last changes from Alja, use MCParticle::ResetPdgCode()
+	in MCTrack ctor instead.
+
+	* Glasses/PRSBase.h:
+	Added member 'TimeStamp_t mStampPointCalcReq' and appropriate
+	stamp pragmas.
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+	Added TimeMakerClient abstract base; added stamp pragmas for
+	PointCalcReq.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	Use StampPointCalc to signal rebuild of vertex array.
+
+	* Glasses/ZAliLoad.cxx:
+	Fix of remaining string exception to Exc_t.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+	* Rnr/GL/MCHelixLine.h:
+	Cosmetics.
+
+2005-10-10  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/MCTrack.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+        Do not import MCParticle if PDG entry not found.
+
+2005-10-10  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+        Add functionality for time interval checking.
+
+	* Glasses/MenuDriver.cxx:
+        Fix bug in 2D rotation/translation order.
+
+	* Rnr/GL/MCHelixLine.h:
+        New structure for selection of time interval.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+        Use MCHelixLine instead of HelixLine.
+
+2005-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Formatting changes.
+	
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Replaced some remaining strings with TStrings; reordering
+	of arguments for inclusive digit-showing methods.
+
+	* Glasses/MenuDriver.cxx:
+	Follow-up on ZAliLoad changes.
+
+2005-09-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+        Changes required for aliroot v4-03-04.
+
+	* Glasses/DigitsGUI.cxx:
+	* Glasses/DigitsGUI.h:
+        Remove files.
+
+	* Glasses/ITSModule.h:
+        Add Get/Set functions.
+
+	* Glasses/Menu.cxx:
+	* Glasses/Menu.h:
+	* Glasses/MenuDriver.cxx:
+	* Glasses/MenuDriver.h:
+         New files for GL user interface (demo).    
+
+	* Glasses/TPCPadRow.cxx:
+	* Glasses/TPCPadRow.h:
+	* Rnr/GL/TPCPadRow_GL_Rnr.cxx:
+	* Rnr/GL/TPCPadRow_GL_Rnr.h:
+        New file for interface for picked TPC padrow.
+
+	* Glasses/TPCSegFrame.cxx:
+	* Glasses/TPCSegFrame.h:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegFrame_GL_Rnr.h:
+        New class for GL interface (picking).
+
+	* Glasses/TPCSegRnrMod.h:
+	* Glasses/TPCSegment.h:	
+        * Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+        Changes required for new TPCPadRow class.
+
+	* Glasses/ZAliLoad.cxx:
+        Changes required for aliroot v4-03-04.
+	
+	* Makefile:
+        Remove CONTAINERS library.
+
+	* Rnr/GL/UINodeLink_GL_Rnr.cxx:
+	* Rnr/GL/UINodeLink_GL_Rnr.h:
+	* Glasses/UINodeLink.cxx:
+	* Glasses/UINodeLink.h:
+        New classes used by MenuDriver.
+	
+        * Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+        Changes required for aliroot v4-03-04.
+
+	* glass.list:
+        New classes: UINodeLink, TPCPadRow, Menu and MenuDirver.
+
+2005-08-12  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/DigitsGUI.cxx:
+	* Glasses/DigitsGUI.h:
+         New files for GL Digits user interface.    
+
+	* Glasses/ITSDigRnrMod.cxx:
+	* Glasses/ITSDigRnrMod.h:
+        Add scaling table for each subdetector.
+
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+        Remove code commented out.
+
+	* Glasses/ITSScaledModule.cxx:
+	* Glasses/ITSScaledModule.h:
+        New class with ITS cells scaled.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Add functionality for ITS scaled module.
+
+	* Makefile:
+        Remove code commented out.
+
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+        Modify MkCol().
+
+	* Rnr/GL/ITSScaledModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSScaledModule_GL_Rnr.h:
+        New class.
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+        Add scaling tables.
+
+	* glass.list:
+        Add class ITSScaledModule and DigitsGUI.
+
+2005-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TPCSegRnrMod.cxx:
+	* Glasses/TPCSegRnrMod.h:
+	Added set of MC labels that can be used to select only digits
+	produced by specifed simulated tracks.
+
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	Use MC label set from TPCSegRnrMod if enabled.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added argument 'Bool_t import_daughters=false' to SelectKinks().
+
+2005-07-15  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/TOFDigRnrMod.cxx:
+	* Glasses/TOFDigRnrMod.h:
+	* Glasses/TOFSector.cxx:
+	* Glasses/TOFSector.h:
+	* Stones/TOFDigitsInfo.cxx:
+	* Stones/TOFDigitsInfo.h:
+        New files.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Show TOF Digits.
+ 
+	* Makefile:
+        Add TOF to include path.
+
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TOFDigRnrMod_GL_Rnr.h:
+	* Rnr/GL/TOFSector_GL_Rnr.cxx:
+	* Rnr/GL/TOFSector_GL_Rnr.h:
+        New files.
+
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+        Add Dump() function.
+
+	* glass.list:
+        New glass TOFSector.
+
+2005-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/PRSBase_GL_Rnr.cxx:
+	* Rnr/GL/RecTrackRS_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegRnrMod_GL_Rnr.cxx:
+	In GledCore::ZRnrModBase renamed ConsiderRebuildDL() to
+	update_tring_stamp().
+
+2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+        Add TRD and ITS hit resolution parameter.
+
+2005-07-08  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/PRSBase.h:
+        Change mMaxOrbs from Int_t to Float_t.        
+
+	* Rnr/GL/HelixLineRnr.h:
+        Fix bug in calculating Z bounaries and bug.
+        Disable checking MaxOrbs when fit daughters.
+
+2005-07-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/KinkTrack.cxx:
+	* Glasses/KinkTrack.h:
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Stones/Kink.cxx:
+	* Stones/Kink.h:
+	Added reconstructed kink position.
+
+	* Glasses/ITSDigRnrMod.cxx:
+	* Glasses/ITSDigRnrMod.h:
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	Added digit and frame line width control.
+
+	* Glasses/RecTrackRS.cxx:
+	* Glasses/RecTrackRS.h:
+	Added kink-vertex size and color controls.
+
+	* Glasses/PRSBase.h:
+	* Stones/ESDParticle.cxx:
+	* Stones/ESDParticle.h:
+	Minor changes.
+
+2005-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	Conversion flow improvement.
+	In CreateVSD(): skip V0 and Kink conversion if RecTrack conversion
+	fails.
+	In ConvertKinematics(): protection against non-existing
+	TrackRefs.root. Conversion proceeds, decay points are not set.
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	Added methods SetDecayFromDaughter() and ClearDecay().
+
+	* Glasses/VSDSelector.cxx:
+	Fixed a cutnpast typo.
+
+2005-07-06  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+        Create new tree of Kink stones.
+
+	* Glasses/KinkTrack.cxx:
+	* Glasses/KinkTrack.h:
+        New file.
+
+	* Glasses/V0Track.h:
+        Rename V0 memebers.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+        Select kinks.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Select kinks.
+
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Rnr/GL/KinkTrack_GL_Rnr.h:
+        New files.
+
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+        Rename V0 memebers.
+
+	* Stones/ESDParticle.cxx:
+	* Stones/ESDParticle.h:
+        Rename members.
+
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+        bKK == true, if kink found in mother.
+
+	* Stones/Kink.cxx:
+	* Stones/Kink.h:
+        New Files.
+
+	* Stones/V0.cxx:
+	* Stones/V0.h:
+        Rename members.
+
+	* glass.list:
+        New class KinkTrack.
+
+2005-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Fixed wrap-around bug for phi mometum-cut.
+
+2005-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Handling of event-id (for pp file format); maximized work
+	performed by CreateVSD() (not exiting in case when, say, kinematics
+	or hits do not exist).
+
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+	* Glasses/TPCSegment.cxx:
+	* Glasses/TPCSegment.h:
+	Added Inc/DecRefCount calls for DigitsInfo stones.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added methods check_itsdig_info() and check_tpcdig_info().
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+	Now subclassed from GledCore::ZRCStone.
+
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+	Varname consolidation.
+
+2005-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MCTrack.h:
+	* Glasses/MCTrackRnrStyle.h:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	Minor changes.
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+	Added phi-limits and u texture coordinate offset.
+
+	* Rnr/GL/HelixLineRnr.h:
+	Honour u-tex offset.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Honour phi-limits from PRSBase. Needs wrap-around ifx.
+
+	* Stones/ESDParticle.h:
+	Added inline method Phi().
+
+2005-07-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ITSModule.cxx:
+	Use display-lists by default.
+
+	* Glasses/TrackBase.cxx:
+	* Glasses/MCTrack.cxx:
+	* Glasses/RecTrack.cxx:
+	Enabled use of display-lists in the base-class.
+
+	* Glasses/TPCSegment.cxx:
+	* Glasses/TPCSegment.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Minor changes.
+
+2005-06-29  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Alice/Glasses/ITSDigRnrMod.cxx:
+	* Alice/Glasses/ITSDigRnrMod.h:
+        New files.
+
+	* Alice/Glasses/ITSModule.cxx:
+	* Alice/Glasses/ITSModule.h:
+        Some members moved to ITSDigRnrMod.
+
+	* Alice/Rnr/GL/ITSDigRnrMod_GL_Rnr.cxx:
+	* Alice/Rnr/GL/ITSDigRnrMod_GL_Rnr.h:
+        New files.
+
+        * Alice/Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Alice/Rnr/GL/ITSModule_GL_Rnr.h:
+        Read data from ITSDigRnrMod.
+
+	* Alice/glass.list:
+        New class ITSDigRnrMod.
+
+2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+	Reintroduced mDirectory->cd() calls in convert methods.
+
+	* Glasses/ZAliLoad.cxx:
+	Select wrappers: do not pass holder node to VSD selector methods.
+
+	* Glasses/VSDSelector.cxx:
+	Minor changes.
+
+2005-06-29  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/AliConverter.cxx:
+	* Glasses/AliConverter.h:
+        New files.
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+        Change dependence from ZAliLoad to
+        VSDSelector.
+
+	* Glasses/VSDSelector.cxx:
+	* Glasses/VSDSelector.h:
+        New files.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Move functionaliry to AliConverter and
+        VSDSelector.
+
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+        Fix bug in writing digits to Outer2 
+        segment.
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+	* Stones/TPCDigitsInfo.cxx:
+	* Stones/TPCDigitsInfo.h:
+        Now owns digits tree and geometry.
+
+	* glass.list:
+        Add AliConverter and VSDSelector.
+        
+
+2005-06-20  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/ITSModule.cxx:
+	* Glasses/ITSModule.h:
+        New files.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Add function to display ITS digits and modules.
+
+	* Makefile:
+        Add  $ALIROOT/ITS in include path.
+
+	* Rnr/GL/ITSModule_GL_Rnr.cxx:
+	* Rnr/GL/ITSModule_GL_Rnr.h:
+        New files.
+
+	* Stones/ITSDigitsInfo.cxx:
+	* Stones/ITSDigitsInfo.h:
+        New files.
+
+	* glass.list:
+        Add classes ITSModule and ITSDigitsInfo.
+
+2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Removed calls to rnrdriver->Push/PopPM (transformation matrix was
+	not used anyway).
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Alice/user_init.cxx:
+	Removed all init actions.
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Alice/user_init.cxx:
+	New file: setup ROOT's macro and include path to ENV{ALIGLEDSHARE}
+	if defined.
+
+	* Makefile:
+	Added dir Alice to the list of base-directories.
+
+2005-06-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Re-engineered VSD file creation and determination of its
+	name/location.
+
+2005-06-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+	Added members 'UShort_t mTrackStippleFac/Pat' to control optional
+	line stippling.
+
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	Honour mTrackStippleFac/Pat frpm PRSBase.
+
+	* Glasses/MCTrackRnrStyle.cxx:
+	Nitpicking.
+
+2005-06-01  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrackRnrStyle.cxx:
+        Change color of photon. 
+
+	* Glasses/ZAliLoad.cxx:
+        Change name and creation of holder node in 
+        select functions.
+
+	* Stones/ESDParticle.h:
+	* Stones/Hit.h:
+	* Stones/V0.h:
+        Add utility fuctions R(), P(), Pt(), Theta() and Eta().
+
+2005-06-01  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/GIImportStyle.cxx:
+	* Glasses/GIImportStyle.h:
+        Set rnr on for kinematics, hits and clusters. 
+	
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+        Remove ImportHitsFromPrimary/ImportClustersFromPrimary().
+	
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+        Add memeber sDefaultMagField.
+	
+	* Glasses/V0Track.cxx:
+	* Glasses/V0Track.h:
+        New files.
+	
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Corrections in Convert and Select functions.
+	
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+        Change charge value in the helix propagation.
+	
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+	* Rnr/GL/V0Track_GL_Rnr.h:
+        New files.
+	
+	* Stones/ESDParticle.h:
+	Add member for decay.
+	
+	* Stones/V0.h:
+        Rename member from VDCA to DCA.
+	
+	* glass.list:
+	Add class V0Track.
+
+2005-05-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PRSBase.h:
+	Fixed MagField range and step.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added methods open/close_vsd(). Removed mDirectory->Add() calls
+	from ConvertRecTracks() and ConvertV0().
+
+	* Glasses/PRSBase.cxx:
+	* Rnr/GL/HelixLineRnr.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	Nitpicking.
+
+2005-05-31  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+        * Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+        Change base class from ZNode to TrackBase.
+
+	* Glasses/TrackBase.cxx:
+	* Glasses/TrackBase.h:
+        New files.
+
+	* glass.list:
+        New glass TrackBase.
+
+2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Use fLab instead of FIndex from AliESDV0MI. Fixed a few typos.
+
+	* Stones/V0.cxx:
+	* Stones/V0.h:
+	Renamed fIndex to fLabels.
+
+2005-05-30  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/MCTrack.cxx:
+	* Glasses/MCTrack.h:
+	* Glasses/MCTrackRnrStyle.cxx:
+	* Glasses/MCTrackRnrStyle.h:
+        New files, due to rename of ZParticle to MCTrack.
+	
+        * Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+        Changes due to rename of ESDTrack to ESDParticle.
+	
+        * Glasses/V0.cxx:
+	* Glasses/V0.h:
+        Remove files. V0 changed from Glass to Stone.
+	
+        * Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Load/Convert of V0 points.
+	
+        * Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+	* Glasses/ZParticleRnrStyle.cxx:
+	* Glasses/ZParticleRnrStyle.h:
+        New files, due to rename of ZParticle to MCTrack.
+	
+        * Rnr/GL/MCTrackRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/MCTrackRnrStyle_GL_Rnr.h:
+	* Rnr/GL/MCTrack_GL_Rnr.cxx:
+	* Rnr/GL/MCTrack_GL_Rnr.h:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.h:
+	* Rnr/GL/ZParticle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticle_GL_Rnr.h:
+        Changes due to rename of ESDTrack to ESDParticle.
+
+	* Stones/ESDParticle.cxx:
+	* Stones/ESDParticle.h:
+        New file. Renamed ESDTrack to ESDParticle.
+
+	* Stones/ESDTrack.cxx:
+	* Stones/ESDTrack.h:
+        Remove file. Renamed ESDTrack to ESDParticle.
+
+	* Stones/GenInfo.h:
+        Change member names.
+
+	* Stones/V0.cxx:
+	* Stones/V0.h:
+        New files.
+
+	* glass.list:
+        Rename ZParticle to MCTrack.
+
+2005-05-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Performance boosts and code beautification.
+
+	SelectGenInfo loads hits and clusters in a single pass.
+
+	WriteVSD renamed to CreateVSD.
+	Load-methods re-prefixed to a more meaningful Convert.
+
+	VSD file is now opened for writing to disk prior to calling
+	Converters (ex Loaders):
+	a) WriteVSD is no longer needed;
+	b) works much better for large events (filled up memory before).
+
+	Added '-whenchanged' to selection string Textor widgets.
+
+2005-05-27  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Add branches P and R to GI tree.
+
+	* Stones/ESDTrack.cxx:
+        Set default values in _init().
+
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+        Set default values in _init().
+
+2005-05-26  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/GIImportStyle.cxx:
+	* Glasses/GIImportStyle.h:
+	New class do define import on GenInfo selection.
+
+	* Glasses/HitContainer.cxx:
+	* Glasses/HitContainer.h:
+        Rename memebers.
+
+	* Glasses/PRSBase.h:
+        Add magnetic field adjustment.
+
+	* Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+        Rename memebers.
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	* Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+        Change name on import of daughters.
+
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+        Control of etha, theta range.
+
+	* Rnr/GL/ZParticle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticle_GL_Rnr.h:
+        Read magnetic field from rnr style.
+
+	* Stones/ESDTrack.h:
+        Change memeber names.
+
+	* Stones/GenInfo.cxx:
+	* Stones/GenInfo.h:
+        Different class structure.
+
+	* Stones/Hit.cxx:
+	* Stones/Hit.h:
+        Rename memebers.
+
+	* Stones/MCParticle.h:
+        Rename memebers.
+
+	* glass.list:
+        Add GIImportStyle class.
+
+2005-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added KineType enum/var to distinguish between standard and
+	proton-proton kine-tree format; renamed Write() to WriteVSD().
+
+2005-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	SetupDataSource: added protections against non-existing event
+	directory.
+
+2005-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+	Added destructor: MCParticle was not deleted.
+
+2005-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added operation-mutex to assert single processing thread. Minor
+	formatting/print-out changes.
+
+	* Glasses/ZParticle.cxx:
+	Obtain pdg-db entry directly.
+
+	* Makefile:
+	Removed most ALICE libraries from link-command of base-library.
+
+2005-05-19  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+        Changed retun value of SelectRecTracks() to void.
+	* Glasses/ZParticle.cxx:
+        Make correction in the class name to use PDG name.
+
+2005-05-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
+
+	* Glasses/PRSBase.cxx:
+	* Glasses/PRSBase.h:
+	New base render style class for ZParticle and RecTrack.
+
+	* Glasses/RecTrack.cxx:
+	* Glasses/RecTrack.h:
+	New class RecTrack. 
+
+	* Glasses/RecTrackRS.cxx:
+	* Glasses/RecTrackRS.h:
+	New render style class for RecTrack.
+
+	* Glasses/V0.cxx:
+	* Glasses/V0.h:
+	New class for V0 representation. 
+
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	Added functionality for writinig reconstructed tracks and clusters
+	into trees.
+
+	* Glasses/ZParticle.cxx:
+	* Glasses/ZParticle.h:
+	Some members moved to MCParticle.
+
+	* Glasses/ZParticleRnrStyle.cxx:
+	* Glasses/ZParticleRnrStyle.h:
+	Changes due inheritance from PRSBase.
+
+	* Rnr/GL/HelixLineRnr.h:
+	New structures used by RecTrackRS and ZParticleRnrStyle.
+
+	* Rnr/GL/PRSBase_GL_Rnr.cxx:
+	* Rnr/GL/PRSBase_GL_Rnr.h:
+	New Rnr class for PRSBase.
+
+	* Rnr/GL/RecTrackRS_GL_Rnr.cxx:
+	* Rnr/GL/RecTrackRS_GL_Rnr.h:
+        New Rnr class for RecTrackRS.
+
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.h:
+	New Rnr class for RecTrack.
+
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.cxx:
+	* Rnr/GL/ZParticleRnrStyle_GL_Rnr.h:
+	* Rnr/GL/ZParticle_GL_Rnr.cxx:
+	Changes due introduction of PRSBase.
+
+	* Stones/ESDTrack.cxx:
+	* Stones/ESDTrack.h:
+	New stone ESDTrack. Structure to save reconstructed data into tree
+	by ZAliLoad.
+
+	* Stones/Hit.cxx:
+	* Stones/Hit.h:
+	* Stones/MCParticle.h:
+        Renamed some members.
+
+	* glass.list:
+	New glasses PRSBase, RecTrack, RecTrackRS, V0.
+
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TPCSegRnrMod.cxx:
+	* Glasses/TPCSegRnrMod.h:
+	* Rnr/GL/TPCSegment_GL_Rnr.cxx:
+	* Rnr/GL/TPCSegment_GL_Rnr.h:
+	Added Int_t TPCSegRnrMod::mTimeWidth which controls width of the
+	window for signal integration. Fixed faulty logick when dealing
+	with braindead First/Next retrieval of TPC digitis.
+
+	* Stones/TTreeTools.cxx:
+	* Stones/TTreeTools.h:
+	New files: holder for classes TTreeQuery and TSelectorToEventList.
+
+	* catalog.patch:
+	New file: now needed for multi-class TTreeTools files.
+	
+	* Makefile:
+	Added ROOT's libTreePlayer to base libraries.
+
+	* Glasses/ZAliLoad.cxx:
+	Use TTreeQuery in hit/cluster selection.
+
+2005-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/HitContainer.cxx:
+	* Glasses/HitContainer.h:
+	* Glasses/ZAliLoad.cxx:
+	* Glasses/ZAliLoad.h:
+	* Rnr/GL/HitContainer_GL_Rnr.cxx:
+	Reimplementation of HitContainer: it now holds vertex data and
+	hit-tree entry index only.
+
+2005-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZParticleRnrStyle.h:
+	Changed maximum point size to 64, line widtth to 128.

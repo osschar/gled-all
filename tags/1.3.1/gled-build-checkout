@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+
+$DIR   = "gled-build";
+$USER  = $ENV{'USER'};
+$DEMOS = 1;
+
+$SVN_BASE = "https://svn.gled.org/gled";
+$SVN_REV  = "HEAD";
+
+@def_libsets = qw{ GledCore Audio1 GledGTS Geom1 Numerica RootGeo Var1 };
+
+while ($ARGV[0] =~ m/^--([-\w]+)=(.+)$/)
+{
+  my $var = uc $1;
+  my $val = $2;
+  $var =~ s/-/_/g;
+  eval("\$$var = '$val';");
+  shift @ARGV;
+}
+
+if ($#ARGV < 0)
+{
+  print STDERR <<"FNORD";
+usage: gled-build-checkout [OPTIONS] svndir [libsets]
+
+  svndir  = SVN path to gled-build, eg. 'trunk' or 'tags/1.3.0'.
+  libsets = Space-separated list of libsets, eg. 'GledCore Geom1'.
+            If none are given, the following list is used:
+            @def_libsets
+
+  OPTIONS
+    --svn-base=<url>     $SVN_BASE
+    --svn-rev=<rev>      $SVN_REV
+    --dir=<co-dir>       $DIR
+    --user=<svn-user>    $USER
+    --demos=[0|1]        $DEMOS
+FNORD
+  exit 1;
+}
+
+$SVN_DIR  = shift;
+
+unless ($SVN_DIR =~ m!^trunk$! or
+	$SVN_DIR =~ m!^tags/!  or
+	$SVN_DIR =~ m!^branches/!)
+{
+  print STDERR <<"FNORD";
+svndir should be 'trunk' or commence with either 'tags/' or 'branches/'.
+FNORD
+  exit 1;
+}
+
+$SVN_PATH = "$SVN_BASE/$SVN_DIR";
+
+@LIBSETS = @ARGV;
+if ($#LIBSETS < 0)
+{
+  @LIBSETS = @def_libsets;
+}
+
+########################################################################
+
+sub exec_or_die
+{
+  my $cmd = shift;
+  if($DRYRUN) {
+    print "EXEC: $cmd\n";
+  } else {
+    my $ret = `$cmd`;
+    die "$cmd died" if $?;
+    return $ret
+  }
+}
+
+sub system_or_die
+{
+  my $cmd = shift;
+  if($DRYRUN) {
+    print "SYST: $cmd\n";
+  } else {
+    system "$cmd" and die "$cmd died";
+  }
+}
+
+sub system_or_warn
+{
+  my $cmd = shift;
+  if($DRYRUN) {
+    print "SYST: $cmd\n";
+  } else {
+    system "$cmd" and print STDERR "$cmd died";
+  }
+}
+
+########################################################################
+
+$CO_CMD = "svn checkout --username $USER -r $SVN_REV";
+$UP_CMD = "svn update";
+
+system_or_die("$CO_CMD $SVN_PATH/gled-build $DIR");
+
+chdir $DIR;
+
+system_or_die("$CO_CMD --non-recursive $SVN_PATH/libsets");
+chdir "libsets";
+for $ls (@LIBSETS)
+{
+  system_or_die("$UP_CMD $ls");
+}
+chdir "..";
+system_or_die("ln -s libsets/* .");
+
+if ($DEMOS)
+{
+  system_or_die("$CO_CMD --non-recursive $SVN_PATH/demos");
+  chdir "demos";
+  for $ls (@LIBSETS) {
+    # do not die if given demo does not exist
+    system_or_warn("$UP_CMD $ls");
+  }
+  chdir "..";
+}

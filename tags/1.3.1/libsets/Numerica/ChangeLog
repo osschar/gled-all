@@ -1,0 +1,145 @@
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/ODECrawler.h:
+	Explicit template instantiation causes trouble on mac.
+	Need to see with Axel.
+
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/Moonraker_GL_Rnr.h:
+	Do not include glu.h - done by glew.h.
+
+2009-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.h:
+	Fix for changes in L{aA} p7 pragma.
+
+	* glass.list:
+	Fix for new render-class specification.
+
+2009-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	Fix compilation warnings.
+
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	Add expert commands for screwing around with the integration buffer:
+	  void      ChangeOrderInPlace(Int_t order);
+	  Double_t* RawYArray();
+
+	Removed obsolete members TVectorF *mX/YStored.
+
+2008-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	Add private member 'Bool_t hCrawling' to protect against multiple
+	execution of Crawl().
+	In Crawl() use this member instead of read-lock as it was blocking
+	GUI updates when called with high frequency.
+
+2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	Minor API changes for ODEStorage.
+
+	* Glasses/WarmAmoeba.cxx:
+	* Glasses/WarmAmoeba.h:
+	Follow changes in Operator.
+
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	* catalog.patch:
+	Add new class ODEStorage with specializations for float and
+	double. This allows external management of arrays for trajectory
+	storage.
+
+	Remove inheritance from Eventor. Use detached thread execution
+	instead.
+
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	Use new ODEStorage classes.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Spheror.cxx:
+	* Glasses/WarmAmoeba.cxx:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
+2005-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	ZVec3 no longer available from ZTrans.
+
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.h:
+	* Glasses/MultiSpheror.h:
+	* Glasses/Spheror.h:
+	Clean-up of RnrCtrl constructors; in most cases they are not
+	needed anymore.
+
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.h:
+	* Glasses/ODECrawler.h:
+	* Glasses/Spheror.h:
+	* Glasses/WarmAmoeba.h:
+	Const-correctness changes (project7 now properly generates const
+	Get methods).
+
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MultiSpheror.cxx:
+	* Glasses/Spheror.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/MultiSpheror.cxx:
+	Init() method can now be called several times. The old contents is
+	unreferenced from the list and links of Spheror elements and their
+	Amoebas are wiped.
+
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	* Glasses/MultiSpheror.cxx:
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	* Glasses/Spheror.cxx:
+	* Glasses/Spheror.h:
+	* Glasses/WarmAmoeba.cxx:
+	* Glasses/WarmAmoeba.h:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	* Rnr/GL/Spheror_GL_Rnr.cxx:
+	Transition to pure ROOT vector/matrix classes.
+
+	* <all-files>:
+	Extension of copyright to 2004.
+
+	
+2003-09-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ODECrawler.h:
+	* Glasses/WarmAmoeba.h:
+
+	Changed class versions of abstract algorithm master bases from 0
+	to 1. Needed due to changes of streaming mechanism in ROOT.

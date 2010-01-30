@@ -1,0 +1,45 @@
+# glass	              class     location                        rnr-class
+# name	                 id                                     []~parent, [.]~own rnr, [<glass>]
+
+TriMesh                   1     Glasses/TriMesh
+TriMeshField	          2     Glasses/TriMeshField
+TriMeshLightField         3     Glasses/TriMeshLightField
+
+ParaSurf                 20     Glasses/ParaSurf
+PSRectangle              21     Glasses/PSRectangle
+PSTriangle               22     Glasses/PSTriangle
+PSSphere                 23     Glasses/PSSphere
+PSTorus                  24     Glasses/PSTorus
+PSMark                   25     Glasses/PSMark                  .
+
+Tringula                 40     Glasses/Tringula                .
+TringulaTester           41     Glasses/TringulaTester          .
+
+TringuCam                50     Glasses/TringuCam
+TringuRep                51     Glasses/TringuRep               .
+
+TSPupilInfo              60     Glasses/TSPupilInfo             .
+
+Extendio                100     Glasses/Extendio                .
+Statico                 101     Glasses/Statico
+Dynamico                102     Glasses/Dynamico
+Crawler                 120     Glasses/Crawler                 .
+Flyer                   140     Glasses/Flyer
+Airplane                141     Glasses/Airplane
+Chopper                 142     Glasses/Chopper
+
+LandMark                150     Glasses/LandMark                .
+
+TringuObserver          160     Glasses/TringuObserver
+
+Explosion               170     Glasses/Explosion               .
+ExtendioExplosion       171     Glasses/ExtendioExplosion       .
+LaserTraceExplosion     172     Glasses/LaserTraceExplosion     .
+
+Spiritio                200     Glasses/Spiritio                .
+ExtendioSpiritio        201     Glasses/ExtendioSpiritio
+CrawlerSpiritio         202     Glasses/CrawlerSpiritio         .
+TringuObserverSpiritio  260     Glasses/TringuObserverSpiritio  .
+
+SolarSystem            1000     Glasses/SolarSystem             .
+CosmicBall             1001     Glasses/CosmicBall              .

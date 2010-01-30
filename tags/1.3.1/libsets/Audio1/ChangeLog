@@ -1,0 +1,180 @@
+2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AlSource.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.h:
+	Beautify.
+
+2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for reading ogg files.
+
+	* Glasses/AlBuffer.cxx:
+	Check file type by extension (wav, ogg).
+	Add code for reading of ogg files.
+
+	* Makefile:
+	Link also against libvorbisfile.
+
+2010-01-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve handling of AL buffers and sources.
+
+	* Glasses/AlBuffer.cxx:
+	* Glasses/AlBuffer.h:
+	Add data-members that hold buffer frequency, size, number of bits,
+	number of channels, and default duration of the sample.
+	Fill them after loading.
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	Add functions:
+	  void UnqueueBuffers(Int_t count=1);
+	  void UnqueueAllBuffers();
+	Allow mPitch to be set up to 1000 (was limited to 1 before).
+	Turn off looping when source is stopped.
+
+2009-12-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Shutdown OpenAL at libset shutdown.
+
+	* Glasses/AlContext.cxx:
+	Add function
+	  void libAudio1_GLED_user_shutdown();
+	that calls alutExit() and a pointer variable pointing to it:
+	  void* Audio1_GLED_user_shutdown;
+	that is needed to demangle it.
+
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for OSX build.
+
+	* Audio1/Audio1.cxx:
+	* Glasses/AlBuffer.cxx:
+	* Glasses/AlContext.cxx:
+	* Glasses/AlContext.h:
+	* Glasses/AlListener.cxx:
+	* Glasses/AlSource.cxx:
+	* Rnr/GL/AlListener_GL_Rnr.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	Always just include alut.h. On OSX AL includes are in OpenAL and
+	we really don't care that much.
+	Hide alut.h from CINT.
+
+	* Makefile:
+	On OSX use '-framework OpenAL' instead of '-lopenal'.
+
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	Bugfix - LT_FollowParents was taking wrong transformation.
+
+2009-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	* Rnr/GL/AlSource_GL_Rnr.h:
+	Add LocationType_e enum - source can be placed into scene
+	according to its parental position (LT_FollowParents, default) or
+	relative to the camera (LT_CamDelta).
+
+	* Rnr/GL/AlListener_GL_Rnr.cxx:
+	* Rnr/GL/AlListener_GL_Rnr.h:
+	White-space.
+
+2009-11-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Separate AL-buffer from AL-source.
+
+	This should now in principle allow for buffer queuing but stupid
+	AL reports illegal operation when trying to queue a second buffer
+	if it is not the same as the one already queued.
+
+	* Audio1:
+	* Audio1/Audio1.cxx:
+	* Audio1/Audio1.h:
+	New files - Audio1 namespace.
+
+	* Glasses/AlBuffer.cxx:
+	* Glasses/AlBuffer.h:
+	New glass - encapsulation of AL-buffer.
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	Remove buffer handling - now in AlBuffer.
+	New interface:
+	- QueueBuffer(AlBuffer*) uses contents of link mDefaultBuffer is
+	null is passed;
+	- Play/Loop/Stop control playing.
+	It is no longer necessary to play in a detached thread.
+
+	* Makefile:
+	Add Audio1/ to BASE_DIRS.
+
+	* glass.list:
+	Register AlBuffer.
+
+2009-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid deprecated functions. Code beautification.
+
+	* Glasses/AlContext.cxx:
+	* Glasses/AlContext.h:
+	Add libAudio1_GLED_user_init() and do alutInitWithoutContext()
+	there.
+	Beautify.
+
+	* Glasses/AlListener.cxx:
+	* Glasses/AlListener.h:
+	Beautify only.
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	Properly load from file using alutCreateBufferFromFile() instead
+	of deprecated alutLoadWAVFile().
+	Remove ogg code that never worked -- with ogg support compiled in
+	this should just work now. But I can't figure out how to enable it.
+	Beautify.
+
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/AlSource.cxx:
+	alutLoadWAVFile has a different signatures on mac.
+
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AlSource.cxx:
+	* Makefile:
+	Use latest packaging of openal (OpenAL and alut now in separate
+	packages).
+
+2005-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	New file.
+
+	* Glasses/AlContext.cxx:
+	* Glasses/AlContext.h:
+	Added method Close().
+
+	* Glasses/AlListener.cxx:
+	* Glasses/AlListener.h:
+	Added gain handling and enum LocationType to specify if listener
+	position is on-camera or it should be calculated from
+	position-matrix stack.
+
+	* Glasses/AlSource.cxx:
+	* Glasses/AlSource.h:
+	Added members Min/MaxGain, Pitch, ConeInner/OuterAngle and
+	ConeOuterGain.
+
+	* Rnr/GL/AlListener_GL_Rnr.cxx:
+	Listener orientation now set; handles mLocationType values
+	Camera/Absoulte.
+
+	* Rnr/GL/AlSource_GL_Rnr.cxx:
+	Source direction now set.
+

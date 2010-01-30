@@ -1,0 +1,106 @@
+# $Id$
+
+# NOTE: Linking of nested classes, enums and typedefs IS enabled by default.
+
+$PATCH = {
+
+"Gled" => {
+  'Pragmas' =>
+    "#pragma link C++ global Gled::theOne;\n" .
+    "#pragma link C++ global gGled;\n"
+},
+
+"GledNS" => {
+  'Pragmas' => "#pragma link C++ function GForm;\n" .
+               "#pragma link C++ class Exc_t+;\n"
+},
+
+### Glasses
+
+"ZGlass" => {
+  'PrePragmas' => "#pragma link C++ class ZLinkBase-;\n",
+  'Pragmas'    => "#pragma link C++ class ZGlass::NameChangeCB+;\n" .
+                  "#pragma link C++ class ZGlass::RayAbsorber+;\n"  .
+                  "#pragma link C++ class FID_t+;\n"                .
+                  "#pragma link C++ class FMID_t+;\n"               .
+                  "#pragma link C++ class An_ID_Demangler+;\n"      .
+	          "#pragma link C++ class MIR_Priest+;\n"
+},
+
+"AList" => {
+  'PragmaSuff' => "-",
+  'VirtualBase' => 1,
+  'Pragmas' =>
+   "#pragma link C++ class AList::ElRep+;\n" .
+   "#pragma link C++ class list<ZGlass*>;\n" .
+   "#pragma link C++ class list<ZGlass*>::iterator;\n" .
+   "#pragma link C++ typedef lpZGlass_t;\n" .
+   "#pragma link C++ typedef lpZGlass_i;\n"
+},
+
+"ZDeque" => {
+  'PragmaSuff' => "-",
+},
+
+"ZList" => {
+  'PragmaSuff' => "-",
+# The following line left as documentation.
+# 'C7_DoNot_Gen' => { 'RebuildLinkRefs' => 1 }
+},
+
+"ZStringMap" => {
+  'PragmaSuff' => "-",
+},
+
+"ZVector" => {
+  'PragmaSuff' => "-",
+},
+
+"ZMirEmittingEntity" => {
+  'VirtualBase' => 1
+},
+
+### Stones
+
+"ZMIR"=> {
+  'Pragmas'    => "#pragma link C++ class ZMIR_Result_Report;\n",
+},
+
+"ZComet" => { 'PragmaSuff' => "-" },
+
+"ZTrans" => { 'PragmaSuff' => "-" }, # Uses automatic schema evolution, but resets bAsOK on read.
+
+"GMutex" => 
+{
+ 'Pragmas' =>
+  "#pragma link C++ class GMutexHolder;\n"     .
+  "#pragma link C++ class GMutexAntiHolder;\n" .
+  "#pragma link C++ class GLensReadHolder;\n"  .
+  "#pragma link C++ class GLensWriteHolder;\n"	
+},
+
+"SVars" => {
+  'NoDefault'  => 1,
+  'Pragmas'    =>
+   "#pragma link C++ class   SMinMaxVar<Float_t>+;\n" .
+   "#pragma link C++ class   SMinMaxVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SMinMaxVarF;\n" .
+   "#pragma link C++ typedef SMinMaxVarD;\n" .
+
+   "#pragma link C++ class   SInertVar<Float_t>+;\n" .
+   "#pragma link C++ class   SInertVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SInertVarF;\n" .
+   "#pragma link C++ typedef SInertVarD;\n" .
+
+   "#pragma link C++ class   SDesireVar<Float_t>+;\n" .
+   "#pragma link C++ class   SDesireVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SDesireVarF;\n" .
+   "#pragma link C++ typedef SDesireVarD;\n" .
+
+   "#pragma link C++ class   SExpDesireVar<Float_t>+;\n" .
+   "#pragma link C++ class   SExpDesireVar<Double_t>+;\n" .
+   "#pragma link C++ typedef SExpDesireVarF;\n" .
+   "#pragma link C++ typedef SExpDesireVarD;\n"
+},
+
+};

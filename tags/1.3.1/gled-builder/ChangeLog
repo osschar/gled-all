@@ -1,0 +1,465 @@
+2010-01-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled/Makefile:
+	Pass EXTRA_PATHS via new command-line option of gled configure.
+
+2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix configure of gled screwed up in last commit.
+
+	* gled/Makefile:
+	Fix the external paths passed to gled configure.
+	Put back the creation of the external/ symlink.
+
+2010-01-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled/Makefile:
+	Pass extra-paths from gled-builder configure to gled-build configure.
+
+2010-01-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledBuildExternal.pm:
+	Use rsync option -t instead of -a when downloading a package.
+
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for OSX build. Use GLEW from ROOT.
+
+	* external/glew:
+	* external/lcms:
+	* external/attic/glew:
+	* external/attic/lcms:
+	Move glew and lcms to attic.
+	GLEW from ROOT (or system) is used now.
+	lcms was not being used / built.
+
+	* external/Makefile:
+	Remove glew from package list.
+
+	* external/freealut/freealut.pl
+	Use cmake build.
+
+	* external/openal/openal.pl:
+	Do not build for OSX - OpenAL is provided as framework.
+
+2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/DevIL/DevIL.pl:
+	* external/freealut/freealut.pl:
+	Pass PREFIX escaped so that it only expands in final make invocation.
+
+2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Allow passing of XXXFLAGS to inferior configures.
+	Improve build procedure -- less has to be written in package pl files.
+
+	* configure.ac:
+	If no CFLAGS, CXXFLAGS were passed, make sure they remain empty.
+	Add EXTRA_PATHS config var to allow passing of additional
+	installation directories to all sub-configures.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	Set GB_XXXFLAGS variables to corresponding XXXFLAGS.
+	Set EXTRA_PATHS variable.
+
+	* GledBuildExternal.pm:
+	Add handling of XXXFLAGS variables.
+	Add functions add_xxxflags().
+	Add function add_search_path().
+	The configure target is now generated in a sophisticated way so
+	that all XXXFLAGS get propagated if they are not empty.
+	Special function target_configure() was added to perform this.
+
+	* README:
+	Add a note about XXXFLAGS passing and EXTRA_PATHS.
+
+	* external/DevIL/DevIL.pl:
+	* external/fltk-mt/fltk-mt.pl:
+	* external/fltk/fltk.pl:
+	* external/freealut/freealut.pl:
+	* external/gts/gts.pl:
+	* external/lcms/lcms.pl:
+	* external/openal/openal.pl:
+	Simplify and improve using new features.
+
+2009-12-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix compilation issue of root on debian.
+
+	* external/root/root.pl:
+	Debian also requires --enable-gsl-shared config option.
+	This is required when libgsldev is installed and root
+	automatically enables building of math-more package.
+	libgslcblas.a library is compiled without the -fPIC option.
+
+	* external/root/make-root-src-dist.sh:
+	Use root-5.26 branch when making a tarball.
+
+2009-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for latest openal.
+
+	* external/openal/openal.pl:
+	The build is now done in build/ directory.
+
+2009-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proper rebuild of fltk - fltk-mt was left uninstalled.
+
+	* external/fltk/fltk.pl:
+	After install, reinstall fltk-mt if it was already installed.
+	fltk install wipes include/FL.
+
+2009-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add some scripts for extracting source tarballs of externals.
+
+	* external/fltk/make-fltk-src-dist.sh:
+	* external/root/make-root-src-dist.sh:
+	New files.
+
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes to make greed-demo run on mac.
+
+	* greed/top-blob/gled-env-dump.csh:
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env.sh:
+	Set also DYLD_LIBRARY_PATH.
+
+	* greed/top-blob/gled-env-dump.sh:
+	Restore the file that somehow got zeroed in last check-in.
+	Set also DYLD_LIBRARY_PATH.
+
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for mac build of DevIL.
+
+	* external/DevIL/DevIL.pl:
+	For mac, add /sw to CPPFLAGS and LDFLAGS - libpng and libjpeg are
+	there.
+
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for mac rsync specifics.
+
+	* GledBuildExternal.pm:
+	Make rsync listing work on mac.
+
+2009-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix cache update code.
+
+	* GledBuildExternal.pm:
+	Do not require directory listing with wildard as it does not work
+	on local directories. Filter results instead.
+
+	* update_cache.pl:
+	make_cmd was not contructed properly after cache update.
+
+2009-05-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for mac build.
+
+	* distro-details.pl:
+	Politically correct vendor name spelling.
+	Fix version regexp.
+
+	* external/DevIL/DevIL.pl:
+	Do not build ILUT - has problems with GL.
+
+	* external/fltk/fltk.pl:
+	Do not use xft. Configure wih enable-quartz.
+
+	* external/root/root.pl:
+	Enforce 32-bit build - all other software (and whatever comes from
+	fink) is built in 32-bit mode, too.
+
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use latest OpenAL.
+
+	* GledBuildExternal.pm:
+	Add optional argument pre-command to
+	use_defaults_for_remaining_targets(). This makes it easier to
+	specify targets that require stuff like "cd build-dir" or
+	". build.env" to be executed.
+
+	* external/openal/openal.pl:
+	Modify to build the latest OpenAL which uses CMake.
+
+2009-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First step towards darwin build; minor fix of fltk-mt.
+
+	* distro-details.pl:
+	Add preliminary support for darwin.
+
+	* external/fltk-mt/fltk-mt.pl:
+	No need tp pass '--ucxx=-fPIC' to configure - proper cxx-flags are
+	obtained from flt-config.
+
+2009-03-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for proper propagation of build params into gled-build.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	* configure.ac:
+	Add new configuration variables allowing full control over what
+	SVN version of Gled and what external software is used:
+	  CACHE_TAG  tag for external software;
+	  SVN_BASE   SVN base URL;
+	  SVN_DIR    SVN directory;
+	  SVN_REV    SVN revison;
+	  SVN_USER   SVN username.
+
+	* gled/Makefile:
+	Pass the new configuration variables to gled-build-checkout and to
+	configure.
+
+	* configure-branch.sh:
+	* configure-tag.sh:
+	New scripts - helpers for configuring tag / branch builds.
+
+2009-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve management of external-package cache.
+
+	* GledBuildExternal.pm:
+	Add functions for cache handling and interaction.
+	Use them also when setting up and downloading a package.
+
+	* update_cache.pl:
+	New script - updates the cache state, downloads new versions and
+	optionally rebuilds the affected packages.
+
+2009-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Explicit usage of bash, quote vulnerable constructs in shell scripts.
+
+	* Makefile:
+	* MakeBuildExternal.inc:
+	* MakeBuildGled.inc:
+	* external/Makefile:
+	Specify SHELL=/bin/bash.
+
+	* gled/Makefile:
+	Replace 'source' with '.' in canned target commands.
+
+	* greed/top-blob/README:
+	In instructions for bash, replace 'source' with '.'.
+	Format the instructions so that they can be cut-n-pasted for both
+	shell-types.
+
+	* greed/top-blob/gled-env-dump.csh:
+	* greed/top-blob/gled-env-dump.sh:
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env.sh:
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	Quote all constructs where ' ' in path could lead to problems.
+	Where relevant, replace 'source' with '.'.
+
+2009-03-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/glew/glew.pl:
+	Make sure lib/ exists before copying stuff from lib64/.
+
+2009-03-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/root/root.pl:
+	Disable usage of built-in freetype.
+	It conflicts with the system-one (used by fltk) - at least on
+	ubuntu-8.10.
+
+2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/glew/glew.pl:
+	Install libs into lib/ also on 64-bit systems (avoid lib64/).
+
+2009-03-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Include glew among externals.
+
+	* external/glew:
+	* external/glew/Makefile:
+	* external/glew/glew.pl:
+	New files for building glew.
+
+	* external/Makefile:
+	Register glew as package.
+	Temporarily set as the first target - for easier testing.
+
+2009-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	Fix environment script invocation - the file name has changed.
+
+2009-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add csh support. Cleanup of stuff.
+
+	* greed/top-blob/gled-env-dump.sh:
+	* greed/top-blob/gled-env.sh:
+	Rename gled-env.sh to gled-env-dump.sh (to make it clear it dumps).
+	Rename gled.env to gled-env.sh (to allow csh distinction).
+
+	* greed/top-blob/README:
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	Update for new script names.
+
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env-dump.csh:
+	New files for csh setup.
+
+2009-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* greed/Makefile:
+	Exclude '.svn/' when installing top-blob stuff.
+
+2009-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add new top-level target 'greed'.
+
+	* greed:
+	* greed/Makefile:
+	* greed/top-blob:
+	* greed/top-blob/README:
+	* greed/top-blob/gled-env.sh:
+	* greed/top-blob/gled.env:
+	* greed/top-blob/greed-demo-menu.sh:
+	* greed/top-blob/greed-demo.sh:
+	New package 'greed'.
+	For now it contains top-level distribution files and installs them
+	to $PREFIX.
+
+	* Makefile:
+	Add target 'greed'.
+
+2009-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proper install of gled. Parallel build support.
+
+	* configure.ac:
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	Add config variable MAKE_J_OPT to build stuff in parallel (default
+	value '-j4').
+	
+	* GledBuildExternal.pm:
+	Add support for parallel build - <package>.pl must set
+	  $parallel = 1;
+	White-space beautification.
+
+	* gled/Makefile:
+	Add install target - now gled gets properly blob-installed into
+	$PREFIX/gled.
+	Use MAKE_J_OPT for build.
+
+	* external/DevIL/DevIL.pl:
+	* external/fltk-mt/fltk-mt.pl:
+	* external/fltk/fltk.pl:
+	* external/freealut/freealut.pl:
+	* external/gts/gts.pl:
+	* external/lcms/lcms.pl:
+	* external/openal/openal.pl:
+	* external/root/root.pl:
+	Enable parallel build.
+
+2008-11-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move configuration make-include and perl-module to a separate
+	file. Thus we can reduce the number of files modified by the
+	configure script.
+
+	The default installation prefix is now `pwd`/install.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	New files containing all configuration variables.
+
+	* GledBuildExternal.pm.in:
+	* MakeBuildExternal.inc.in:
+	* MakeBuildGled.inc.in:
+	* GledBuildExternal.pm:
+	* MakeBuildGled.inc:
+	* MakeBuildExternal.inc:
+	Renamed the above '.in' files to names without the extension as
+	they are not modified by configure anymore.
+	The new versions include the GledBuildConf.pm or MakeBuildConf.inc.
+	
+	* Makefile:
+	On distclean remove new config files.
+
+	* configure.ac:
+	Register new config files.
+	Change default installation prefix to `pwd`/install.
+
+	* README:
+	Document the new default prefix.
+	Some typos and clarifications.
+
+	* gled/Makefile:
+	On clean check if gled-build dir exists before descending.
+
+2008-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/ParseConfig.pm:
+	* external/build-config:
+	* external/build.pl:
+	* external/build.rc:
+	Removed files - they were part of the old building tools.
+
+2008-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled/Makefile:
+	On clean, descend into gled-build and make clean.
+
+2008-11-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for building gled from svn via the top-level makefile.
+	Extended README.
+
+	* MakeBuildGled.inc.in:
+	New config file used for building of gled.
+
+	* GledBuildExternal.pm.in:
+	Fix default configure command - prefix was wrong.
+	All packages override this target so the bug did not manifest.
+
+	* MakeBuildExternal.inc.in:
+	Use '$@' instead of excplicit target names.
+
+	* Makefile:
+	Write gled target.
+	Add target 'external-no-root'.
+	Add clean and distclean targets.
+	Default target now builds 'external' and 'gled'.
+
+	* README:
+	Write usage information.
+	Write notes about external software.
+
+	* configure.ac:
+	Register/generate new config file MakeBuildGled.inc.
+
+	* gled/Makefile:
+	Write proper gled building makefile.
+	Use svn for gled checkout.
+
+2008-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* ChangeLog:
+	New file.
+
+	* external/DevIL/DevIL.pl:
+	Always explicitly link against jpeg, tiff and mng.
+
+	* external/gts/gts.pl:
+	Always run autogen.sh during configure.
+	The new gts tarball (put in rsync repo) does not contain any
+	secondary auto-tools files.

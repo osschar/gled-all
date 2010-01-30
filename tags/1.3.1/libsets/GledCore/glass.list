@@ -1,0 +1,99 @@
+# glass			class	location		rnr-class
+# name			id			[]~parent, [.]~own rnr, [<glass>]
+
+# Base glasses
+ZGlass			1	Glasses/ZGlass		.
+AList			2	Glasses/AList
+ZDeque			3	Glasses/ZDeque
+ZList			4	Glasses/ZList
+ZHashList		5	Glasses/ZHashList
+ZVector			6	Glasses/ZVector
+ZNameMap		7	Glasses/ZNameMap
+ZStringMap		8	Glasses/ZStringMap
+ZNode			16	Glasses/ZNode		.
+ZNodeLink		17	Glasses/ZNodeLink	.
+
+# God & Rulers
+ZGod			32	Glasses/ZGod
+ZKing			33	Glasses/ZKing
+ZQueen			34	Glasses/ZQueen
+ZSunQueen		35	Glasses/ZSunQueen
+ZFireKing		36	Glasses/ZFireKing
+ZFireQueen		37	Glasses/ZFireQueen
+ZEunuch			38	Glasses/ZEunuch
+
+# MirFilters
+ZMirFilter		48	Glasses/ZMirFilter
+ZIdentityFilter		49	Glasses/ZIdentityFilter
+ZIdentityListFilter	50	Glasses/ZIdentityListFilter
+ZFilterAggregator	51	Glasses/ZFilterAggregator
+ZMethodTagPreFilter	52	Glasses/ZMethodTagPreFilter
+ZMEESelfFilter		53	Glasses/ZMEESelfFilter
+
+# Identities, MirEmittingEntities & Info glasses
+ZIdentity		64	Glasses/ZIdentity
+ZGroupIdentity		65	Glasses/ZGroupIdentity
+ZMirEmittingEntity	72	Glasses/ZMirEmittingEntity
+SaturnInfo		73	Glasses/SaturnInfo
+EyeInfo			74	Glasses/EyeInfo
+ShellInfo		75	Glasses/ShellInfo
+SubShellInfo		80	Glasses/SubShellInfo
+NestInfo		81	Glasses/NestInfo
+PupilInfo		82	Glasses/PupilInfo	.
+GuiPupilInfo		83	Glasses/GuiPupilInfo
+CameraInfo		84	Glasses/CameraInfo
+
+# Streaming of sub-graphs
+ZCometBag		96	Glasses/ZCometBag
+ZSubTree		97	Glasses/ZSubTree
+
+# Thread related glasses
+Operator		128	Glasses/Operator
+Eventor			129	Glasses/Eventor
+PipeEventor		130	Glasses/PipeEventor
+
+# Basic scene & geometry elements
+Scene			160	Glasses/Scene		.
+Camera			161	Glasses/Camera
+Lamp			162	Glasses/Lamp		.
+GlobalLamps		163	Glasses/GlobalLamps	.
+LampLink		164	Glasses/LampLink	.
+Sphere			165	Glasses/Sphere		.
+Box			166	Glasses/Box		.
+Cylinder		167	Glasses/Cylinder	.
+Text			168	Glasses/Text		.
+ScreenDumper		169	Glasses/ScreenDumper
+ScreenText		170	Glasses/ScreenText	.
+
+# GL State Modifiers
+ZRnrModBase		176	Glasses/ZRnrModBase	.
+ZRnrModList		177	Glasses/ZRnrModList	.
+ZGlLightModel		178	Glasses/ZGlLightModel	.
+ZGlMaterial		179	Glasses/ZGlMaterial	.
+ZGlBlending		180	Glasses/ZGlBlending	.
+ZGlClipPlane		181	Glasses/ZGlClipPlane	.
+ZRlNodeMarkup		182	Glasses/ZRlNodeMarkup	.
+ZRlFont			183	Glasses/ZRlFont		.
+ZRlNameStack		184	Glasses/ZRlNameStack	.
+ZGlPerspective		185	Glasses/ZGlPerspective	.
+ZGlColorFader		186	Glasses/ZGlColorFader	.
+
+# Node/Cluster Monitoring
+GledMonitor		192	Glasses/GledMonitor
+SaturnObserver		193	Glasses/SaturnObserver
+
+# Performance investigators
+PerfMeterTarget		224	Glasses/PerfMeterTarget
+PerfMeterOperator	225	Glasses/PerfMeterOperator
+
+# Meta GUI
+MetaViewInfo		256	Glasses/MetaViewInfo
+MetaSubViewInfo		257	Glasses/MetaSubViewInfo
+MetaWeedInfo		258	Glasses/MetaWeedInfo
+
+# GL GUI
+WGlDirectory		288	Glasses/WGlDirectory	.
+WGlButton		289	Glasses/WGlButton	.
+WGlFrameStyle		290	Glasses/WGlFrameStyle	.
+WGlValuator		291	Glasses/WGlValuator	.
+WGlWidget               292     Glasses/WGlWidget

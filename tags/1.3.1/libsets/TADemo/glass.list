@@ -1,0 +1,6 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+TA_SubUnit	1	Glasses/TA_SubUnit	.
+TA_Unit		2	Glasses/TA_Unit		.
+TA_TextureContainer 3	Glasses/TA_TextureContainer

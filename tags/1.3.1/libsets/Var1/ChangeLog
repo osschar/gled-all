@@ -1,0 +1,2180 @@
+2010-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Do not allow picking through the terrain.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add function:
+	  Float_t RayCollideClosesttHit(const Opcode::Ray& ray, Bool_t cull_p);
+	returning distance to terrain (or max-float, if terrain is not hit).
+
+	* Glasses/TringuCam.cxx:
+	Limit extendio picking distance to the first terrain hit.
+
+2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add drawing of laser barrel of Crawlers.
+
+	* Rnr/GL/Crawler_GL_Rnr.cxx:
+	* Rnr/GL/Crawler_GL_Rnr.h:
+	New GL renderer class -- needed to draw laser barrel.
+
+	* glass.list:
+	Crawler has own renderer now.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add member 'HPointF mLaserBeg' holding starting point of laser
+	barrel.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Use Crawler::mLaserBeg instead of harcoded position.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Put some common code from overlay minmax/desire variable bar
+	drawing into functions.
+
+	* Stones/HTrans.h:
+	Add function:
+	  HPoint& Add(TT _x, TT _y, TT _z);
+
+2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement laser turret steering in Crawler.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add data-members for turrent orientation and gun-length:
+	  SDesireVarF   mLaserUpDn;
+	  SDesireVarF   mLaserLtRt;
+	  Float_t       mLaserLen;
+	Handle / use them in TimeTick() and ShootLaser().
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Register keys for laser turret rotation and to return into
+	standard position.
+	Add key-callback functions LaserSteer() and TurretHome().
+	Handle turret rotation desire in TimeTick().
+
+	* Glasses/LaserTraceExplosion.cxx:
+	* Glasses/LaserTraceExplosion.h:
+	Add end-point explosion radius member.
+	Use display list.
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	Add optional arg for user-key-id to RegisterKey().
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Store / restore camera FOV when activating / deactivating a
+	spiritio.
+	Add function EnactExtendioSpiritio(Extendio* ext) -- moved from
+	TringuCam::DynoDrive().
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Move DynoDrive() to TSPupilInfo::EnactExtendioSpiritio().
+	ExtendioExplode() is not called in detached thread anymore.
+
+	* Glasses/Tringula.cxx:
+	In LaserShot() set end-point explosition radous of
+	LaserTraceExplosion if something was actually hit.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	Register arrow keys for turret steering.
+	Register home key to return turrent to forward position.
+	Draw square and crosshair showing desired and actual turret
+	direction.
+	Zoom in/out on mouse-wheel.
+
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.cxx:
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.h:
+	Use std glu-quadric from GLRnrDriver.
+
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.cxx:
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.h:
+	Add drawing of end-of-ray mark (if something was hit).
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Comment out info printout.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Add function to HTrans template:
+	  void     RotateVec3IP(TT* in) const;
+
+	* Stones/KeyHandling.cxx:
+	* Stones/KeyHandling.h:
+	Add 'Int_t fUserId' to class KeyInfo. This allows for easy reuse
+	of the same callback for different keys.
+
+2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement laser shooting: damage dealing, laser-trace and sound.
+
+	* Glasses/LaserTraceExplosion.cxx:
+	* Glasses/LaserTraceExplosion.h:
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.cxx:
+	* Rnr/GL/LaserTraceExplosion_GL_Rnr.h:
+	New glass and its GL renderer. Shows fading white line.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add data-memebr 'SMinMaxVar mLaserCharge' that determines the
+	power of laser when shooting.
+	Add function ShootLaser() -- calling Tringula::LaserShot().
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Shoot laser via Crawler.
+	Remove link 'ZLink<AlSource> mGunSrc'.
+
+	* Glasses/Explosion.cxx:
+	* Glasses/Explosion.h:
+	Add data-member 'Tringula *mTringula'. Not a link.
+	Implement generic TimeTick(), just telling to tringula when the
+	explosion is finished.
+
+	* Glasses/ExtendioExplosion.cxx:
+	* Glasses/ExtendioExplosion.h:
+	Make mExtendio normal pointer (not a link).
+
+	* Glasses/TSPupilInfo.cxx:
+	Fix some issues with AlSource-pool.
+
+	* Glasses/TringuCam.cxx:
+	Tringula::PickExtendios() requires an extra argument.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add lists for fresh / finished explosions -- they are processed on
+	every TimeTick().
+
+	Add new custom ray PRQN_extendio_sound with emit function
+	  void EmitExtendioSoundRay(Extendio* ext, const TString& effect);
+
+	New argument ray_length for prepick_extendios() and PickExtendios.
+	RayCollide() takes two more flags: cull_p and closest_p.
+
+	New function for instantiation of laser-trace:
+	  LaserShot(Extendio* ext, const Opcode::Ray& ray, Float_t power);
+
+	New function 'void delete_lens_if_alive(ZGlass* lens)'.
+
+	* Glasses/TringulaTester.cxx:
+	Tringula::RayCollide() requires addition arguments.
+
+	* Glasses/Dynamico.cxx:
+	Greyspace.
+
+	* glass.list:
+	Register new glass LaserTraceExplosion.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	Draw bar for laser-charge.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Add functions:
+	  void draw_vertical_minmaxvar  (const SMinMaxVarF& v, RnrDriver* rd, bool pick);
+	  void draw_horizontal_minmaxvar(const SMinMaxVarF& v, RnrDriver* rd, bool pick);
+	These are shameless cut-n-paste of the similar desire-var
+	functions. Should make them use common code for most of the stuff.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Add data-member 'AList* mSoundDir' to cache sound directory.
+	Add function:
+	  AlBuffer* find_sound(const TString& effect);
+	Add function:
+	  void ExtendioSound(Extendio* ext, const TString& effect);
+	that plays specified sound-effect on the extendio.
+
+	Handle Tringula::PRQN_extendio_sound in TringulaSpy::AbsorbRay().
+
+	* Opcode/OPC_RayCollider.h:
+	Add operator[] to CollisionFaces class.
+
+2010-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.h:
+	* catalog.patch:
+	Make dictionary for TriMeshColorArraySource to get it into html docs.
+
+2010-01-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement explosions and their handling.
+
+	A bit more work is needed to properly handle signaling from
+	Tringula: now tringula emits custom rays and TringuRep_GL_Rnr
+	handles them. Tringula should really hold a list of its TringuReps
+	and notify them directly -- and TringuReps should then emit the
+	rays to their renderers.
+
+	* Glasses/Explosion.cxx:
+	* Glasses/Explosion.h:
+	* Glasses/ExtendioExplosion.cxx:
+	* Glasses/ExtendioExplosion.h:
+	* Rnr/GL/Explosion_GL_Rnr.cxx:
+	* Rnr/GL/Explosion_GL_Rnr.h:
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.cxx:
+	* Rnr/GL/ExtendioExplosion_GL_Rnr.h:
+	New classes for representation of explosions.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add flag 'Bool_t bExploding'.
+	Extend minimum hit-points to -100.
+	Call Tringula::ExtendioExploding() when hit-points go below zero.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add pool of AlSources associated with this pupil and access functions:
+	  AlSource* AcquireAlSource();
+	  void      RelinquishAlSource(AlSource* src);
+	This requires a vector of sources, a hash-list of used sources and
+	a queue of free ones. Maximum number of sources is limited by a
+	static variable (16 at the moment).
+	All this should really go to Audio1::AlSourcePool glass.
+
+	* Glasses/TringuCam.cxx:
+	Remove all the crap from ExtendioExplode(), just call
+	Extendio::TakeDamage(1000).
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add handling of explosions. This requires:
+	- two links to ZHashLists (mExplodios - currently exploding
+	  Extendios and mExplosions current explosions);
+	- two plain STL lists for storing new and finished explosions;
+	- handling of those in TimeTick();
+	- registration functions called from extendios/explosions:
+	    void ExtendioExploding(Extendio* ext);
+	    void ExplosionFinished(Explosion* exp);
+	- two custom raw quantum-numbers PRQN_extendio_exploding and
+	  PRQN_extendio_dying with associated emit functions:
+	    void EmitExtendioExplodingRay(Extendio* ext, Explosion* exp);
+	    void EmitExtendioDyingRay(Extendio* ext);
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Handle explosions and dying extendios.
+	- Special A_View sub-class that pretends to be a view of tringula
+	  to receive its rays and forwards them to TringuRep_GL_Rnr functions:
+	    void ExtendioExploding(Extendio* ext, ExtendioExplosion* exp);
+	    void ExtendioDying(Extendio* ext);
+	- hash_multimap from Extendio* to AlSource* -- this could be
+	  extended to handle any kind of effects.
+	- Draw() now also draws all the explosions and sets positions of
+	  AlSources assigned to Extendios. The AlSources are taken from
+	  TSPupilInfo's pool and returned there when not playback is finished.
+
+	* glass.list:
+	Register new glasses Explosion and ExtendioExplosion.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	White-space.
+
+2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	Set StdDesireDelta for throttle and wheel.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Use StdDesireDelta instead of hard-coded factors.
+
+2010-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Make throttle and wheel variables decrease faster than they
+	increase.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Changes for new SInertVar syntax.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Reorder data-members.
+	Add proto hit-points and TakeDamage() virtual.
+
+	* Glasses/TringulaTester.cxx:
+	Don't lock tringula during ray-collide -- this should be thread safe.
+
+2010-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Cleanup Tringula, put some debugging aids into new glass TringulaTester.
+
+	* Glasses/TringulaTester.cxx:
+	* Glasses/TringulaTester.h:
+	* Rnr/GL/TringulaTester_GL_Rnr.cxx:
+	* Rnr/GL/TringulaTester_GL_Rnr.h:
+	* glass.list:
+	New glass TringulaTester that supports plotting of ray-terrain
+	intersection and of extendio-extendio intersection lines.
+
+	* Glasses/TringuCam.cxx:
+	Modify for TringulaTester.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Remove debugging aids for ray-terrain intersection and
+	extendio-extendio intersection lines (moved to TringulaTester).
+
+	Add Ray argument to RayCollide() and to PickExtendios().
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	Fix compilation warning.
+
+	* Stones/HTrans.h:
+	Improve const correctness.
+
+	* Opcode/Ice/IceRay.h:
+	Add constructors with float/double arrays.
+
+2010-01-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Code stucture improvements.
+
+	Migrate selection into TSPupilInfo.
+	Replace most Opcode defines with const variables.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Remove obsolete members bRnrSelf, bVerboseCollide and bSelected.
+	Add debug-bits enum, data-member and access methods.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	Use debug-bits from extendio.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add selection management (moved in from TringuCam).
+	Add member mSelectionColor.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Move selection managememt to TSPupilInfo.
+
+	* Glasses/TringuRep.cxx:
+	* Glasses/TringuRep.h:
+	Add link to TSPupilInfo - needed for selection display.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Remove member mSelColor.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+	Move render_ceaabox() to TringTvor_GL_Rnr.
+	Remove code for rendering boxes around selected extendios - this
+	is now done by TringuRep_GL_Rnr.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Render boxes around selected extendios.
+
+	* Opcode/Ice/IcePoint.h:
+	Remove unused define.
+
+	* Opcode/Ice/IceTypes.h:
+	Replace defines with const variables in Opcode namespace.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMeshField.cxx:
+	* Rnr/GL/LandMark_GL_Rnr.cxx:
+	Opcode defines are now namespace variables.
+
+2010-01-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move some generally useful intersection functions from Flyer to Extendio.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	Move the following functions from Flyer to Extendio:
+	  Float_t height_above_terrain(const Opcode::Point& down_dir);
+	  Int_t   collide_with_tringula(CollisionSegments& segments);
+	height_above_terrain() now takes down-direction as argument,
+	before it used local down direction from GravData available in
+	Dynamicos.
+
+	* Glasses/Dynamico.h:
+	Add wrapper for height_above_terrain() that uses local direction of
+	gravity.
+
+2010-01-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Flyer.cxx:
+	Use max-vertex-distance of TringTvor instead of bbox-half-diagonal
+	to determine minimal sphere radius for doing terrain proximity
+	queries.
+
+2009-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for OSX build. Better Crawler steering in FP mode.
+
+	* Opcode/Makefile:
+	Add ROOT_LDFLAGS to link command.
+
+	* Stones/HTrans.h:
+	Add all possible variants of Dot() to HPoint.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add member 'HPointF mTerrainUp'.
+
+	When in DM_Controllers drive-mode approach alignment with terrain
+	vertical direction more smoothly.
+
+2009-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/HTrans.h:
+	Make all methods in HPoint/HTrans non-virtual, use ClassDefNV.
+
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Allow all extentios to be blown up.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Replace DynoExplode() with ExtendioExplode() - now all extendios
+	can be blown up.
+	Replace StatoDetails() and DynoDetails() with common ExtendioDetails().
+
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Make proper lens-overlay-menu composition by following class hierarchy.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add memeber SGridStepper.
+	Add method SelectTopMenuForLens(). This traverses the class
+	hierarchy towards parent-class and assembles the full menu for
+	given lens.
+
+	* Glasses/TringuCam.cxx:
+	Remove includes for Crawler, Flyer and LandMark and some silly
+	code that was needed for menu handling.
+
+2009-12-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve handling and fix rendering of tubes.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add link to list of tubes. Before they were normal children.
+	Call TimeTick() on tubes directly.
+
+	* Glasses/TringuCam.cxx:
+	Add tubes to the tube-list.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Redner tubes, too.
+
+2009-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Major update of Tringula rendering / management.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Attach to TringuRep on activation -- Tringula is not in render
+	path anymore.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Add link to TringuRep.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add abstract interace TriMeshColorArraySource.
+	Subclass from it.
+	Allow external color-array-source to be passed into
+	ColorBySomeTerrainProp(). These should really go to TriMeshField.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TriMeshLightField.h:
+	Add link to ZGlass that plays the role of TriMeshColorArraySource.
+	Use it when colorizing/modulating color arrays.
+	Beautify most of the code.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Remove all field / field-spraying code and code for colorization
+	of terrain based on its height/normal -- moved to TringuRep.
+
+	* Glasses/TringuRep.cxx:
+	* Glasses/TringuRep.h:
+	Subclass from TriMeshColorArraySource.
+	Move in code for managing fields / terrain coloration from TringuCam.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Remove some obsolete members for rendering control.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Render tringula with tringu-rep's internal color arrays. New
+	TRingTvor renderer allows that.
+
+	Render all extendios by direct calls to RnrDriver. This could be
+	improved -- see comments in the code.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Simplify -- now mostly obsolete. Probably should be even removed.
+
+2009-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	New glass TringuRep -- representation of Tringula.
+
+	* Glasses/TringuRep.cxx:
+	* Glasses/TringuRep.h:
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	New files.
+
+	* glass.list:
+	Register TringuRep.
+
+2009-12-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add method DynoExplode() in a most brutal way so that it fucks up
+	the screwed up relation between pupil and tringula even further.
+	Besides playing the explode sound it actually also destroys the
+	crawler after the explosion playback is done.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	Check if links to other lenses are non-zero and store them in
+	local variables.
+
+2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	Add function ReleaseAllKeys(). This is called on deactivation and
+	when mouse leaves the pupil.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	On handle overlay events for now.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	Send MIR requesting release of all keys when mouse leaves pupil.
+
+2009-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support setting of desire-vars via mouse-click on gl overlay bars.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.h:
+	Implement HandleMouse() and set throttle / wheel desire accordingly.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Add pick flag to desire-var bar rendering functions - in this case
+	only plot a quad reclining in depth so that location can be
+	deduced from the depth values of the gl selection record.
+
+	* Glasses/TSPupilInfo.cxx:
+	Set current spiritio link only once.
+
+2009-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve key handling.
+
+	* Glasses/Crawler.cxx:
+	Better limits/deltas for throttle/wheel.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Make key-info members references and initialize them appropriately.
+	Double-press of throttle keys sets desire to max/min.
+	Call parent's class Activate/Deactivate.
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	Add member bActive.
+	Make the key-info vector of pointers to key-infos.
+	Implement Activate/Deactivate.
+	In Deactivate loop over all the keys and make sure the release
+	callbacks are invoked. Emit also a release_keys ray so that the GL
+	renderers can drop their key state.
+	Change signature of RegisterKey() to match the KeyInfo
+	constructor. Instantiate the key-info there and destroy them in
+	the destructor.
+
+	* Glasses/TSPupilInfo.cxx:
+	When swapping current spiritio, first deactivate the old one, then
+	remove it from scenes and key-handlers.
+
+	* Glasses/TringuObserverSpiritio.cxx:
+	Call parent's class Activate/Deactivate.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Implement vitual AbsorbRay() to handle release_keys custom ray.
+
+	* Stones/KeyHandling.cxx:
+	* Stones/KeyHandling.h:
+	Clean-up member declarations and comments of KeyInfo.
+	Remove default constructor.
+	Delete callback in destructor (this was done in Spiritio before).
+
+2009-12-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CrawlerSpiritio.cxx:
+	Set home position of the camera when activating the spiritio.
+
+2009-12-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	When driving a crawler make a pew sound when space is pressed.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Rename link mAlSource to mEngineSrc.
+	Add link mGunSrc.
+	Add function FireGun() and register it for key handling. It only
+	plays the gun sound.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	Subscribe space-key to fire gun action.
+	Update engine and gun sources.
+
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	Add function update_al_src() to update AL-source position.
+
+2009-12-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid division by zero in dyno-dyno collisions.
+
+	* Glasses/Crawler.cxx:
+	Use DM_Parked mode instead of obsolete flag in Dynamico.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	White-space.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add check for magnitude of new velocity after dyno-dyno collision
+	-- this could be near zero or even exactly zero when one of the
+	dynos is parked.
+
+	Remove bParked member.
+
+	* Glasses/Flyer.cxx:
+	Remove consideration of obsolete parked flag in dynamico.
+
+2009-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	Change (decrease) maximum throttle/wheel values.
+
+	* Glasses/Spiritio.cxx:
+	Do not eat non-bound keys by default.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Add link member AlSource.
+	Loop/Stop AL-source in Activate/Deactivate.
+	iN TimeTick set pitch of AL-source accoring to value of Throttle.
+
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	In Draw() set AL source position.
+
+2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Connect throttle/wheels controls to velocities.
+	Should really calculate accelerations.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Add enum DriveMode_e to support different modes of steering.
+	Preliminary.
+
+	* Glasses/CrawlerSpiritio.cxx:
+	In Activate() / Deactivate() put crawler into DM_Controllers /
+	DM_ConstVelocities drive-mode.
+
+2009-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Execute DynoDrive() in a detached thread.
+
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.cxx:
+	Pupil's cam-fix was rotated instead of the spiritio's camera.
+
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Remove obsolete render-class TringuCam_GL_Rnr.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	Removed files.
+
+	* glass.list:
+	TringuCam no longer has it's own renderer.
+
+2009-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Spiritio attachement works!
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	Add member ZLink<ZNode> mCameraBase.
+	Implement AdEnlightenment() -- create camera and camera-base.
+	Implement Spiritio virtuals Activate()/Deactivate() to set up
+	camera and camera-base for attached Crawler.
+
+	* Glasses/Extendio.h:
+	* Glasses/ExtendioSpiritio.h:
+	Gray-space.
+
+	* Glasses/Spiritio.h:
+	Add virtuals Activate()/Deactivate().
+	Gray-space.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	Sub-class from TimeMakerClient.
+	Add link-members ZLink<Spiritio> mDefaultCurrentSpiritio.
+	SetCurrentSpiritio() is hand-written -- should really be called in
+	a detached thread. And we need a render-lock (condition) to
+	broadcast end-of frame to blocked threads.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Remove data-members that were storing render/gl-event state. This
+	is now handled in TringuObserverSpiritio(GL).
+	Simplify CalculateMouseRayVectors() -- use new function
+	TransformMouseRayVectors() from pupil-info.
+
+	* Glasses/TringuObserverSpiritio.cxx:
+	* Glasses/TringuObserverSpiritio.h:
+	Add member ZLink<TringuCam> mTringuCam.
+	Implement AdEnlightenment() -- create camera.
+	Implement Spiritio virtuals Activate()/Deactivate() to set
+	camera-parent.
+
+	* Rnr/GL/TSPupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/TSPupilInfo_GL_Rnr.h:
+	Implement Handle() -- to set back the default spiritio on 'Esc'.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	All still relevant stuff moved to TringuObserverSpiritio_GL_Rnr.
+	This rnr-class will be removed.
+
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.h:
+	Moved in Handle() stuff from TringuCam_GL_Rnr.
+
+2009-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Incarnate proto Spiritios.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Move in desire-vars mThrottle and mWheel from deceased XXXCart.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Proper implementation of ctor and dtor.
+
+	* Glasses/TriMesh.cxx:
+	Bugfix: calls to make_tetra_blade() were assuming left-to-right
+	evaluation of function arguments.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Move some menu-handling links and functions into new glass
+	TSPupilInfo.
+
+	Add semi-functional DynoDrive(Dynamico* dyno).
+
+	* catalog.patch:
+	Add entries for new glass Spiritio and new stone-file KeyHandling.
+
+	* glass.list:
+	Register a bunch of new glasses, see below.
+	Remove XXXCart, TabletReader and TabletImage.
+	Change glass numbering -- rather drastically.
+
+	* Glasses/TSPupilInfo.cxx:
+	* Glasses/TSPupilInfo.h:
+	* Rnr/GL/TSPupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/TSPupilInfo_GL_Rnr.h:
+	New glass - Tringu-Sol PupilInfo.
+	Provides handling of stuff connected with a GL window.
+	Holds lists of overlay-elements, event-handlers and spiritios.
+	Provides top menu management (taken out of TringuCam).
+
+	* Glasses/Spiritio.cxx:
+	* Glasses/Spiritio.h:
+	* Glasses/ExtendioSpiritio.cxx:
+	* Glasses/ExtendioSpiritio.h:
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/CrawlerSpiritio.h:
+	* Rnr/GL/Spiritio_GL_Rnr.cxx:
+	* Rnr/GL/Spiritio_GL_Rnr.h:
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/CrawlerSpiritio_GL_Rnr.h:
+	Preliminary implementation of Spiritio and its proto-incarnation
+	in CrawlerSpiritio.
+
+	* Glasses/TringuObserver.cxx:
+	* Glasses/TringuObserver.h:
+	* Glasses/TringuObserverSpiritio.cxx:
+	* Glasses/TringuObserverSpiritio.h:
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.cxx:
+	* Rnr/GL/TringuObserverSpiritio_GL_Rnr.h:
+	Conglomerat of new glasses/rnrs that is to take over currently
+	default "fly-over-tringula-and-do-fun-stuff" mode.
+	Some of the stuff in TringCam will be moved here.
+
+	* Stones/KeyHandling.cxx:
+	* Stones/KeyHandling.h:
+	New file holding multiple stones in namespace KeyHandling.
+	Key-handling structures for lens and rnr side, including
+	callbacks into lens methods.
+
+	* Glasses/XXXCart.cxx:
+	* Glasses/XXXCart.h:
+	Removed -- functionality moved into Crawler.
+
+	* Glasses/TabletImage.cxx:
+	* Glasses/TabletImage.h:
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	* Rnr/GL/TabletImage_GL_Rnr.cxx:
+	* Rnr/GL/TabletImage_GL_Rnr.h:
+	Removed -- never really implemented.
+
+2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid rare infinite loop in Crawler::TimeTick().
+
+	* Glasses/Crawler.cxx:
+	Add protecton against going into an infinite loop when tringula
+	and para-surf disagree over whether crawler is on or off the
+	surface limits.
+
+	This rarely happened for tringula.C(99) - the test case with small
+	triangular patch.
+
+2009-10-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some prerequisites for crawler driving.
+
+	* Glasses/XXXCart.cxx:
+	* Glasses/XXXCart.h:
+	New glass to hold future experimental code.
+
+	* Glasses/Crawler.h:
+	Reduce maximum levitation-height.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add RegisterCrawler() so that one can register a Crawler of
+	different sub-class.
+	Most functions with Dynamico in their name should use Crawler
+	instead.
+
+	* glass.list:
+	Add XXXCart.
+
+2009-09-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some fiddling with key controllers.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	In ValueInfo add support for sustained values - where key press
+	increases the value and it remains at this level until decreased
+	with the opposing key.
+	This is meant for something like throttle control. Tried it with
+	forward-backwards controls but would need to be tuned for this usage.
+
+	* Stones/VelocityVar.cxx:
+	* Stones/VelocityVar.h:
+	New stone for holding of a velocity variable.
+	Preliminary - only contains some comments.
+
+	* Opcode/Ice/IceMatrix3x3.cpp:
+	Somewhat optimize FromTo() function.
+
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/TriMeshField.cxx:
+	Add missing include (for mac).
+
+	* Makefile:
+	Generalize glib-2.0 pkg-config invocation for cppflags.
+	Simplify target for building of libOpcode and make it
+	cross-platform.
+
+	* Opcode/Makefile:
+	Import central make_config and make_defs. Use stuff from there to
+	properly build on mac.
+
+	* Stones/HTrans.h:
+	Explicit template instantiation causes trouble on mac.
+	Need to see with Axel.
+
+2009-05-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for dynamico/crawler movement handling.
+
+	* Glasses/Crawler.cxx:
+	Reactivate increase in ray-offset when terrain ray-touching fails,
+	but only when f,g coordinates are still within the limits of
+	parametric surface.
+	Otherwise park the bastard and dump a warning.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Consistent handling of velocity and angular velocity vectors.
+	Data-members mV and mW are now references into the first
+	components of respective vectors - to allow GL GUI via WGlValuator
+	to function properly.
+	Use full velocity vector in handle_collision() functions. The
+	final velocities are still forced to forward direction - but this
+	could be improved now.
+
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Add methods IsValidFGH(...) and IsValidPos().
+
+	* Glasses/Tringula.cxx:
+	When edge is reached and edge-stop is required, set mVVec and mWVec
+	to zero, not mV and mW (which are now refs anyway).
+
+2009-05-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement terrain-tracking for land-mark perimeter line.
+
+	There is an issue with Int_t/UInt_t triangle indices - Opcode uses
+	UInt_t, TringTvor Int_t. Need to see how hierarhical tringula will
+	be implemented.
+
+	Had another creepy idea - to use doubles everywhere - in TriMesh and
+	in Opcode. This requires more memory, but allows to run a large
+	planet on a single tringula! Memory could be regained completely by
+	quantizing the vertex and triangle normals into shorts.
+	Anyway, could start with making a type-defed Opcode and
+	templating the TriMesh.
+
+	* Glasses/Crawler.cxx:
+	Use closest-hit instead of first-contact for terrain tracking.
+
+	* Glasses/LandMark.cxx:
+	* Glasses/LandMark.h:
+	Add members for controlling how the perimeter-line of the
+	land-mark region gets calculated and rendered:
+	  Float_t mLineHeight    - height above terrain;
+	  Int_t   mNLineSegments - number of main-divisions;
+	  Bool_t  bDetailedLine  - sub-divide on triangle-crossing;
+	  Bool_t  bRnrIdealLine  - render also line that is not projected on terrain.
+
+	Consolidate stamping calls.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add function Bool_t FindPointFromXYZH(...) - it determines the
+	vertical vector at given position and returns point at given
+	relative height above the terrain.
+
+	Add function Bool_t FindTriangleExitPoint(...) - given a point
+	(presumably within the triangle) and direction, determine the
+	exit-point of line determined by input data.
+
+	Consolidate all triangle query functions to use UInt_t. This is a
+	bit weak - but is requirement from Opcode. Needs to be revisited,
+	and maybe changed in Opcode as well.
+
+	* Glasses/TriMeshField.cxx:
+	Use UInt_t for triangle queries.
+
+	* Glasses/TringuCam.cxx:
+	In MakeLandmark activated, only store previous mouse-action if
+	not already in 
+	* Glasses/Tringula.cxx:
+
+	* Rnr/GL/LandMark_GL_Rnr.cxx:
+	* Rnr/GL/LandMark_GL_Rnr.h:
+	Add code for almost correct tracing of land-mark region over
+	terrain triangles.
+
+	Activate PostDraw() - the land-line is calculated in parent's
+	coordinate frame. The points are calculated during Render() and
+	stored in member-vector. As display-lists are used for LandMark,
+	this vector is only regenerated when required.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Define PARENT class.
+
+	* Stones/HTrans.h:
+	Add explicit PtrPAseVecX/Y/Z() and ref_base_vec_x/y/z() methods.
+
+	* Opcode/OPC_RayCollider.cpp:
+	Allow temporal coherence to be used also when not in first-contact mode.
+	White-space changes.
+
+	* Opcode/OPC_Collider.h:
+	White-space.
+
+2009-05-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Consolidate mesh-ray collider error reporting.
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/Tringula.cxx:
+	Use RayCollider::CollideInfo() to format error messages.
+
+	* Opcode/OPC_RayCollider.cpp:
+	* Opcode/OPC_RayCollider.h:
+	Add function 'string CollideInfo()'.
+
+	* Opcode/Opcode.h:
+	Correctly include C-headers.
+
+2009-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/CosmicBall_GL_Rnr.h:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Do not include glu.h - done by glew.h.
+
+2009-04-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Basic support for land-mark management and rendering.
+
+	* Glasses/LandMark.cxx:
+	* Glasses/LandMark.h:
+	Add members:
+	  Float_t mPhi, mSx, mSy; // rotation, size in x/y dirextion;
+	  ZColor  mColor;         // Color of the land-mark and markup.
+	Enable usage of display-lists by default.
+	Add method 'SetFGH(...)'.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add method 'MakeTetraMark(...)' that generates mesh for a
+	land-mark.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add land-mark handling (events, new state for expecting
+	terrain-click).
+	Add method RandomStatico().
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add data-member 'ZLink<ZHashList> mLandMarks>'.
+	Add function 'AddLandMark()'.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+
+	* Rnr/GL/LandMark_GL_Rnr.cxx:
+	* Rnr/GL/LandMark_GL_Rnr.h:
+	New files - GL renderer for LandMark.
+
+	* glass.list:
+	LandMark has its own renderer class.
+
+2009-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve rendering of Extendios.
+
+	The explicit rendering of extendios in Tringula has been
+	off-loaded to the render-driver infrastructure and a dedicated
+	Extendio-renderer.
+
+	Before explicit loops over contents of links-to-list were made for
+	Statos, Dynos and Flyers. Now the links to these lists are
+	assigned proper rnr-bits and the descent is handled by the
+	render-driver.
+
+	For this to work, the rendering code was moved from
+	Tringula_GL_Rnr to new class Extendio_GL_Rnr. This has the added
+	benefit of being able to do funny stuff in specialized sub-classes
+	of extendio-renderer.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+	New files - code moved from Tringula_GL_Rnr.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Remove code for rendering of extendios.
+
+	* glass.list:
+	Mark Extendio as having its own renderer.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Properly set RnrBits for links to hash-lists holding Statos, Dynos
+	and Flyers.
+
+	Remove obsolete members 'Bool_t bRnrDynos, bPickDynos'.
+
+2009-04-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Minor consistency issues.
+
+	* Glasses/LandMark.cxx:
+	* Glasses/LandMark.h:
+	New glass - preliminary check-in.
+
+	* glass.list:
+	Fix for new render-class specification.
+
+	* Glasses/PSMark.cxx:
+	* Glasses/PSMark.h:
+	Use para-surf limits in setters.
+
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	FindMinMaxFGH() is now virtual and returns parametric limits for
+	sphere and torus.
+
+	* Glasses/SolarSystem.h:
+	* Glasses/TriMesh.h:
+	* Glasses/TriMeshField.h:
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Glasses/Tringula.h:
+	Fix for changes in L{aA} p7 pragma.
+
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	New member 'Float_t mExtraStep' - it contains extra distance
+	travelled during collision handling etc and allows proper
+	calculation of various safety distances.
+	Properly set this in:
+	  handle_collision(Dynamico*, Statico*, ...) and
+	  handle_collision(Dynamico*, Dynamico*, ...).
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	Take mExtraStep into account in TimeTick() when decreasing the
+	safeties.
+
+2009-02-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	Add a comment about safety handling.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Generalize function bool intersect_triangle(...) so that it can be
+	used for arbitrary triangle-tvors, not only for Extendios.
+
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	Add terrain collision handling in TimeTick().
+	Calculate safe distance by using sphere-terraing collision test.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add members Float_t mMaxFlyerH, mMaxCameraH.
+
+	Add function:
+	  Bool_t terrain_height(pos, pos_h, terrain_h);
+
+	When placing random flyers make sure they are above the terrain
+	and within passed min/max limits (unless terrain is higher).
+
+	* Glasses/TringuCam.cxx:
+	Limit maximum height.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Do not allow free-look to cross vertical direction.
+	This caused flipping of the view and swapped fwd/bck directions.
+
+	* Stones/GravData.h:
+	Add comments.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Add function to HTrans<TT>:
+	  void RotateBackVec3(const TT* in, TT* out) const;
+
+	Add some convenience functions to HPoint.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Flyer.cxx:
+	Only dump grav-info when G_DEBUG > 0.
+
+	* Glasses/TringuCam.cxx:
+	When up-dir changes, ortonorm forward direction first. This keeps
+	forward direction more constant - and makes it easier to fly
+	through the center of torus.
+
+2009-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add function 'Help()' to print basic usage info.
+
+2009-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	Rewrite time-step code to use full velocity and angular velocity
+	vectors. Also, cache gravity-data as long as it is valid.
+
+	Add member 'Float_t mRayOffset' that allows us to reuse
+	gravity-data from the previous step.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add function:
+	  void update_grav_safeties(Float_t vl, Float_t vt);
+	that is common to flyers and crawlers.
+
+	* Glasses/Flyer.cxx:
+	Move code for gravity safety calculation to Dynamico.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add member 'HPointF mSection' that holds side-view areas of the mesh.
+	Calculate it in SetMassAndSpeculate().
+
+	* Stones/HTrans.h:
+	Add function Zero().
+
+	* Opcode/Ice/IcePoint.h:
+	Add static functions:
+	  float MaxDistance(const Point& a, const Point& b, const Point& c);
+	  float MaxSquareDistance(const Point& a, const Point& b, const Point& c);
+
+
+2009-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Move member 'Float_t mLevH' from Dynamico to Crawler.
+
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	Add data-member 'Float_t mHeight' to record current height.
+	Remove old/inactive movement code.
+
+	* Glasses/TringuCam.cxx:
+	Differentiate between Crawler and Flyer - they have different
+	glgui now.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Place-dyno-on-terrain now takes additional height argument.
+	Modify RandomDynamico/Flyer/Chopper() accordingly.
+
+2009-01-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Flyer.cxx:
+	Add comment about how flyers should achieve stable convergence
+	towards straight flight.
+
+	* Stones/GravPlotter.cxx:
+	* Stones/GravPlotter.h:
+	Angle function now plots dot product between parametric
+	down-direction and direction of gravity (in degrees).
+	Increase number of sampling points.
+
+2009-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Airplane.cxx:
+	* Glasses/Airplane.h:
+	* Glasses/Chopper.cxx:
+	* Glasses/Chopper.h:
+	* Glasses/Crawler.cxx:
+	* Glasses/Crawler.h:
+	* Glasses/Flyer.cxx:
+	* Glasses/Flyer.h:
+	New glasses - break up Dynamico for finer control over movement
+	parameters and mechanics.
+
+	* Stones/GravData.cxx:
+	* Stones/GravData.h:
+	New stone - information about gravitational field at given point.
+
+	* Stones/GravPlotter.cxx:
+	* Stones/GravPlotter.h:
+	New stone - helper for plotting gravitational field functions.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add members for velocity / angular velocity vectors.
+	Add member for storing current GravData.
+	Implement virtual TimeTick() to do movement.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Subclass from TimeMakerClient.
+	Add virtual SetTringula() and Tringula* member.
+
+	* Glasses/PSRectangle.cxx:
+	* Glasses/PSRectangle.h:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTriangle.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Add virtual functions:
+	  Float_t CharacteristicLength();
+	  void    pos2grav(const Float_t* x, GravData& gd);
+
+	* Glasses/Statico.cxx:
+	* Glasses/Statico.h:
+	Add empty implementation of TimeTick().
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add min/max value limits to struct ValueInfo.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	In functions for creating dynos use the new sub-classes.
+	Remove code for handling od dyno time-steps - now in individual
+	classes.
+	Remove obsolete function SetEdgePlanes().
+	Add function Bool_t CheckBoundaries() to determine safe distance
+	for a given dynamico before hitting a tringula related boundary.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Make HPointF/D are now classes, not typedefs.
+
+	* catalog.patch:
+	Extendio now abstract.
+	HPointF/D are now classes, not typedefs.
+
+	* glass.list:
+	Register new stones.
+
+	* Opcode/Ice/IceMatrix3x3.cpp:
+	* Opcode/Ice/IceMatrix3x3.h:
+	Add function FromTo(point1, point2) to calculate rotation matrix
+	for rotating point1 into point2.
+
+	* Opcode/Ice/IceMatrix4x4.cpp:
+	* Opcode/Ice/IceMatrix4x4.h:
+	* Opcode/Ice/IcePoint.h:
+	New helper functions, comments.	
+
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add function extrude_triangle().
+	Add function make_tetra_blade() for creation of individual
+	tetrahedrons.
+	Add function MakeTetraChopper() to create a dragon-fly like flyer.
+	
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add function RandomChopper().
+
+2008-12-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Modified files.
+
+2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	Call CosmicBall::ResizeHistory() when adding the ball into the
+	balls container so that they are in sync with the settings of the
+	SolarSystem.
+
+2008-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CosmicBall.h:
+	* Glasses/CosmicBall.cxx:
+	* Glasses/SolarSystem.h:
+	* Glasses/SolarSystem.cxx:
+	Add support for setting desired-radius for each cosmic-ball.
+	Solar-system then exponentially translates the ball to the desired
+	orbit.
+	This only works in direct-step integration mode.
+
+2008-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	During update of ball positions in direct-step mode one should
+	also loop over empty ball-slots to stay in sync with the internal
+	state-vector of the ODE crawler.
+
+	Add member 'ZColor mPlanetColor'.
+
+2008-09-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Implement another integration mode, controlled with 'CrawlMode_e
+	mCrawlMode' which can be CM_ChunkedStorage (old one, still
+	default) or CM_DirectStep (do the time step in parallel with
+	rendering, still in a dedicated thread).
+
+	CM_DirectStep allows magickal things to happen to the
+	solar-system, like planets popping out of nowhere, disapearing
+	into void or simply being victims to unexplainable forces. In
+	short ... badly needed for the AliEn visualization demo.
+
+2008-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CosmicBall.cxx:
+	* Glasses/CosmicBall.h:
+	* Glasses/SolarSystem.cxx:
+	* Rnr/GL/CosmicBall_GL_Rnr.cxx:
+	In CosmicBall use vector<Point> instead of list<Point> for storage
+	of ball history. Nitpicking to avoid memory fragmentation.
+
+
+2008-09-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Put ODE integration in a dedicated thread with increased nice.
+	Do management of storage chunks with given time interval for the
+	future and past.
+
+	* Glasses/CosmicBall.cxx:
+	* Glasses/CosmicBall.h:
+	Add struct Point for storage of the history tail.
+
+	* Rnr/GL/CosmicBall_GL_Rnr.cxx:
+	* Rnr/GL/CosmicBall_GL_Rnr.h:
+	Implement PostDraw() and render tail of the cosmic ball (if stored
+	in the master lens).
+
+2008-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Implement ODEMaster virtuals.
+	Add inheritance from TimeMakerClient and implement TimeTick().
+	Cosmic balls now wander around.
+
+	* Rnr/GL/SolarSystem_GL_Rnr.h:
+	Whitespace.
+
+2008-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CosmicBall.cxx:
+	* Glasses/CosmicBall.h:
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	* Rnr/GL/CosmicBall_GL_Rnr.cxx:
+	* Rnr/GL/CosmicBall_GL_Rnr.h:
+	* Rnr/GL/SolarSystem_GL_Rnr.cxx:
+	* Rnr/GL/SolarSystem_GL_Rnr.h:
+	* glass.list:
+	New proto glasses SolarSystem and CosmicBall for
+	generation/simulation of a solar system.
+
+2008-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add inner public structure VertexVisitor (and its sub-class
+	VertexVisitorMaxDist) that together with a new member-function
+	VisitVertices() allow for somewhat painless interation over
+	vertices with custom acceptance condition and operation performed
+	for each vertex.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	Use TriMesh::VisitVertices() for FillByGaussBlobs().
+	Add method UpdateMinMaxField(set<Int_t> vertices) allowing update
+	of global min/max values from specified vertices only.
+
+	* Glasses/TringuCam.cxx:
+	Use TriMesh::VisitVertices() for field spraying.
+
+2008-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Add some docs.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added functions:
+	Bool_t FindPointFromFGH(const Float_t fgh[3], ...);
+	Int_t  FindClosestVertex(Int_t triangle, const Float_t xyz[3],...);
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	Rename FillByXYGaussBlobs() to FillByGaussBlobs() and fix it.
+	Before it was really just using x and y coordinates in scene space.
+	Now it generates the blob positions by using parametric surface
+	f,g coordinates and is thus suitable for any topology.
+	
+	* Glasses/TringuCam.cxx:
+	* Glasses/Tringula.cxx:
+	Minor changes.
+
+2008-05-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ParaSurf.h:
+	Add functions GetMin/MaxFGH(Float_t fgh[3]).
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Moved functions ColorByCoord/Normal[Formula] from Tringula to
+	TriMesh.
+
+	Added functions ColorByParaSurfCoord/Normal to TriMesh.
+
+	Removed link-member RGBAPalette from Tringula.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	In FillByXYGaussBlobs() use gRandom instead of local TRandom(0).
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Clean-up the hack for two tube-types, use callback-arguments that
+	are now available from WGlButton to steer new-tube creation.
+
+	Added methods for terrain mesh colorization:
+	- void SetAndApplyCurField(TriMeshField* field);
+	- void ColorByTerrainProps(Int_t mode=0);
+
+2008-05-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.h:
+	Whitespace.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Make connection tube in the TringuCam.
+	Hack in two different connect methods so that the demo looks more
+	interesting.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Remove method ConnectStaticos() as it did not belong here (now
+	done in TringuCam).
+
+2008-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add a hacky way to handle requests for connecting two statos from
+	the overlay.
+
+2008-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Statico.cxx:
+	* Glasses/Statico.h:
+	Add member 'Int_t  mNDynoColls', mostly to have something to show
+	in the stato-overlay.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add menu / dyno / stato view handling functions.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Add member 'ZColor mSelColor' for marking selected extendios.
+
+	Add method 'void ConnectStaticos()' to build a tube among two
+	staticos.
+
+	In TimeTick() descend into all children that are
+	TimeMakerClients. Temporary fix for tube animation.
+
+	* Stones/HTrans.h:
+	Add cast operators to TT*, const TT*.
+	Add const version of PtrBaseVec() method.
+
+2008-04-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.h:
+	Last aabb was not updated properly.
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add member 'Bool_t bSelected'.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add inner struct PickResult.
+	Add member PickExtendios() that uses Opcode for ray-extendio
+	intersections.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add 'ZLink<ZHashList> mSelection', 'ZLink<Scene> mOverlay'.
+	Add mouse-action MA_PickExtendios and implement it in
+	MouseDown().
+	MouseDown() now takes 'A_Rnr::Fl_Event& ev' as an argument.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Render selected extendios with green bounding-box.
+
+	* Opcode/Ice/IceAABB.h:
+	Add some functions.
+
+2008-04-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Add handle_collision(...) for dyno-dyno collision.
+	Make both handle_collision() methods static.
+
+	* Glasses/Tringula.cxx:
+	Use proper dyno-dyno collision with momentum / energy
+	conservation.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add method SetMassFromBBox(): allows easy faking of mesh's mass
+	based on bounding box and surface / height fractions.
+
+2008-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Added member pointers 'HTransF* mLastTransPtr' and 'Opcode::AABB*
+	mLastAABBPtr' to allow accessing of these members without virtual
+	calls.
+
+	Added inner class CollisionSegments to facilitate
+	collision handling.
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Added members 'HTransF mLastTrans' and 'Opcode::AABB mLastAABB'.
+	These will:
+	- allow rendering to be done in parallel with collision detection;
+	- provide last position that will be needed for exact collision
+	  time determination.
+
+	Added member function handle_collision() that performs simplified
+	collision handling for a dynamico.
+
+	* Glasses/ParaSurf.cxx:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSRectangle.cxx:
+	Cosmetics.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add preliminary members for mass, surface, center-of-mass and
+	angular momentum.
+	Add function SetMassAndSpeculate() that allows setting of mass and
+	calculation of derived quantities by assuming certain fraction of
+	mass is on the shell and the rest is in the COM.
+
+	* Glasses/TringuCam.cxx:
+	Fix orto-normalization order so that forward direction is less
+	affected.
+	
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Perform dyno-stato and dyno-dyno collision detection and handling
+	on each time-tick.
+	Dyno-stato is mostly ok, using the simplest algorithm i could
+	think of.
+	Dyno-dyno uses the same algorith as dyno-stato and is thus a bit
+	awkward. This will be fixed soon.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Use last transformation/aabbox from dynamicos.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Add HPoint template class and typedef HPointF, HPointD.
+	These are minimal implementations of streamable 3d points.
+
+	* catalog.patch:
+	Add pragmas for HPointF/D classes.
+
+	* Opcode/Ice/IceAABB.h:
+	Added GetX/Y/ZSize() functions to complement
+	GetDepth/Width/Breadth which are ICE specific due to choice of y
+	as up direction.
+
+	* Opcode/Ice/IcePoint.h:
+	Added operator[](int) to access components by index.
+
+	* Opcode/OPC_RayCollider.h:
+	Added GetDestination().
+
+2008-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add static methods intersect_triangle() and intersect_extendios().
+	These now hold code for detailed inspection of mesh-mesh collision
+	status.
+
+	* Glasses/PSSphere.cxx:
+	In random_fgh() phi and theta were swapped.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Move code for detailed collision detection from DoBoxPruning()
+	functions into static functions in Extendio.
+	The intersections are now stored in vector<Opcode::Segment>.
+
+	* Opcode/OPC_TriTriOverlap.h:
+	Realign for readibility.
+
+2008-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.h:
+	* Glasses/Statico.h:
+	Make Tringula a friend.
+	Return const& to aa-bbox.
+
+	* Glasses/PSSphere.cxx:
+	Fix a bug in pos2fgh(), theta was not calculated correctly.
+
+	* Glasses/TriMesh.cxx:
+	BuildOpcStructs(): throw an exception if build fails.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add 'Float_t fHeight' data-member and honour it when correcting
+	the up-direction of camera. Until now the height was not constant
+	for curved surfaces, especially when moving very fast.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Implement split box-pruning, separating static and dynamic
+	objects.
+	When placing a random statico on the terrain use the static list
+	for box-pruning and then do mesh-mesh tests. Before only
+	inefficient, O(n) aa-bbox tests were done. So, now it is faster
+	and correct.
+
+	* Opcode/OPC_BoxPruning.cpp:
+	* Opcode/OPC_BoxPruning.h:
+	Implemented class BipartiteBoxPruner. This helps in management and
+	utilization of two object lists for box-pruning. One is meant for
+	static objects and other for dynamic ones.
+
+2008-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	* Glasses/Statico.cxx:
+	* Glasses/Statico.h:
+	Split dynamico into sub-class Extendio and derived Statico from
+	that as well.
+
+	* Glasses/PSMark.cxx:
+	* Glasses/PSMark.h:
+	* Rnr/GL/PSMark_GL_Rnr.cxx:
+	* Rnr/GL/PSMark_GL_Rnr.h:
+	New class: mark a point/area on a ParaSurf.
+
+	* Glasses/PSRectangle.cxx:
+	* Glasses/PSRectangle.h:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTriangle.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	Added some functions:
+	- surface(),
+	- origin_fgh/pos/trans,
+	- fgh2trans (to HTrans and ZTrans),
+	- regularize_fg;
+	- random_trans().
+	Fixed a problem with pos2 calculation in PSTorus and PSSphere.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added convenience functions for creation of simple meshes, like
+	MakeBox() and MakeTetraFlyer().
+	Added data-members 'Float_t mVolume, mXYArea'.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Add GL-dump for fwd/bck, up/down speeds.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added functions to create RandomStatico/Flyers().
+	Improved placement on terrain.
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	Removed Pre/PostDraw(), let ZNode_GL_Rnr do its stuff.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Modularize, added rendering of flyers and statos.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Added Transpose().
+
+	* glass.list:
+	Register glasses Extendio, Statico and PSMark.
+
+	* Opcode/Ice/IcePoint.h:
+	Fix Point::TMac2(...) to have consistent signature.
+
+	* Opcode/Ice/IceAABB.h:
+	* Opcode/Ice/IceMatrix3x3.cpp:
+	* Opcode/Ice/IceMatrix4x4.cpp:
+	* Opcode/Ice/IceOBB.cpp:
+	* Opcode/OPC_RayCollider.cpp:
+	* Opcode/OPC_SweepAndPrune.cpp:
+	Some comments, formatting, whitespace.
+
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Grayspace.
+
+	* Glasses/PSRectangle.cxx:
+	* Glasses/PSRectangle.h:
+	* Glasses/PSSphere.cxx:
+	* Glasses/PSSphere.h:
+	* Glasses/PSTorus.cxx:
+	* Glasses/PSTorus.h:
+	* Glasses/PSTriangle.cxx:
+	* Glasses/PSTriangle.h:
+	* Glasses/ParaSurf.cxx:
+	* Glasses/ParaSurf.h:
+	New classes for description of parametrized surfaces.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Reimplemented VertexData and introduced EdgeData structure; now
+	vertices sharing an edge point to the same data.
+	Algorithm for construction of connectivity data was changed as well.
+
+	* Glasses/TriMeshField.cxx:
+	PartiallyColorizeTvor(): optimize mesh trianlge recoloring;
+	Diffuse(): use new EdgeData structures.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added mParaSurf data-member, PlaceAboveTerrain() method;
+	use para-surf to get up-direction and edge-planes.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Use ptr instead of ref for cam-fix; use new EdgeData structures
+	during mesh painting.
+
+	* catalog.patch:
+	Flag ParaSurf as virtual base.
+
+	* glass.list:
+	Added ParaSurf and derived classes.
+
+	* Opcode/Ice/IceFPU.h:
+	Whitespace.
+
+	* Opcode/Ice/IcePoint.h:
+	Rename Msc to TMsc to expose the fact it subtracts from *this.
+
+2007-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMeshField.cxx:
+	Fix for root-5.16.00.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Replace make with ${MAKE} for Opcode descend.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TringuCam.cxx:
+	* Glasses/Tringula.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
+	* Opcode/OPC_HybridModel.cpp:
+	* Opcode/OPC_Model.cpp:
+	* Opcode/Opcode.cpp:
+	* Opcode/Opcode.h:
+	Removed 'define Log' and replaced all occurrences with printf.
+
+2007-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	Added a flag controlling tring-color recreation to
+	tvor-colorization functions.
+
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TriMeshLightField.h:
+	Implemented cacluclation of ligt-map (including shadows, of
+	course) for positional and directional light.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Added link to TriMeshLightField and proper handling in AddField()
+	so that shades are properly cast after spraying/adding field.
+	Disable/enable display-list caching for Tringula during
+	field-spray.
+	Added members controlling verbosity of mouse/key events.	
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added 'Bool_t bLightMesh' controlling whether ligtning is on
+	during mesh rendering. When light-map is applied it should be off.
+
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added methods to color the mesh by coordinate/normal values;
+	canonization of interface.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added per-vertex spread and surface (summed by edge); canonization
+	of interface.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	Added mouse-handling and mesh-spraying stuff; added members to
+	hold render-state parameters needed for user-input handling
+	(copied over by gl-rnr).
+
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	Moved most of the mouse handling to the glass; copy relevant
+	render-state parameters to glass in Draw() method.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.h:
+	Added member mMeshTringStamp to properly rebuild display-list when
+	the mesh changes.
+
+	* Glasses/TriMeshField.cxx:
+	* Glasses/TriMeshField.h:
+	New glass: representation of a field that takes arbitrary values
+	on each mesh vertex.
+
+	* Glasses/TriMeshLightField.cxx:
+	* Glasses/TriMeshLightField.h:
+	New glass: specialization of TriMeshField for calculation/storage
+	of light-maps and shade-maps; not implemented yet.
+
+	* glass.list:
+	Register new glasses TriMeshField and TriMeshLightField.
+
+	* Opcode/OPC_RayCollider.cpp:
+	* Opcode/OPC_RayCollider.h:
+	Add some notes.
+
+2007-01-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added structures to hold vertex-connectivity data and method to
+	build them.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Replace ray-direction variables with TVector3.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Follow changes in TringTvor_GL_Rnr.
+
+	* Glasses/TringuCam.cxx:
+	* Glasses/TringuCam.h:
+	* Rnr/GL/TringuCam_GL_Rnr.cxx:
+	* Rnr/GL/TringuCam_GL_Rnr.h:
+	New files, camera/event-handler for tringula observation.
+
+	* glass.list:
+	Register new glass TringuCam.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Added method MultiplyVec3IP().
+
+	* Opcode/Ice/IcePoint.h:
+	Added ctor from double array.
+
+2006-12-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.h:
+	Added get_tring_tvor().
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	DoBoxPrunning(): added code to find intersection lines for
+	triangle pairs obtained via mesh-mesh collision detection; store
+	them in 'vector<Float_t> mItsLines' to get them over to renderer.
+	This should be chopped-up and somewhat optimised.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added optional rendering of intersection lines.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.h:
+	Added templated MultiplyVec3() and RotateVec3() for raw TT*.
+
+	* glass.list:
+	Whitespace changes.
+
+	* Opcode/Ice/IcePoint.h:
+	Renamed Mac() that also adds *this to TMac(), added TMac2() method.
+
+	* Opcode/OPC_TriTriOverlap.h:
+	Refit whitespace.
+
+2006-11-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Dynamico.cxx:
+	* Glasses/Dynamico.h:
+	Use HTransF instead of ZTrans; added support for aa-bbox in
+	parent-frame.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Added support for aa-bbox calculation.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Added SweepAndPrune function and a switch for dyno-bbox rendering.
+	Dynamico now uses HTrans.
+
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added rendering of bounding boxes for dynos.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	New files; templated homogeneous-4x4-matrix.
+
+	* catalog.patch:
+	Specify pragmas for HTrans.
+
+	* Opcode/Ice/IceAABB.h:
+	* Opcode/Ice/IceAxes.h:
+	* Opcode/Ice/IceMatrix4x4.cpp:
+	* Opcode/Ice/IceMatrix4x4.h:
+	* Opcode/Ice/IcePairs.h:
+	* Opcode/Ice/IcePoint.cpp:
+	* Opcode/Ice/IcePoint.h:
+	* Opcode/Ice/IceUtils.h:
+	* Opcode/OPC_BaseModel.cpp:
+	* Opcode/OPC_BaseModel.h:
+	* Opcode/OPC_MeshInterface.h:
+	* Opcode/OPC_Model.cpp:
+	* Opcode/OPC_OBBCollider.cpp:
+	* Opcode/OPC_TreeCollider.cpp:
+	Formatting changes.
+
+2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/Tringula.cxx:
+	* Rnr/GL/Tringula_GL_Rnr.cxx:
+	Added missing includes (not needed with pre-compiled headers).
+
+	* Opcode/Ice/IceHPoint.h:
+	Added ifdef for cast-to-Point (gcc-3 was complaining about this
+	never being used).
+
+2006-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	Add a cast to avoid warning on 64-bits.
+
+	* Opcode/Ice/IceContainer.cpp:
+	* Opcode/Ice/IceContainer.h:
+	* Opcode/Ice/IceTypes.h:
+	* Opcode/OPC_AABBCollider.cpp:
+	* Opcode/OPC_AABBTree.cpp:
+	* Opcode/OPC_AABBTree.h:
+	* Opcode/OPC_HybridModel.cpp:
+	* Opcode/OPC_LSSCollider.cpp:
+	* Opcode/OPC_OBBCollider.cpp:
+	* Opcode/OPC_OptimizedTree.cpp:
+	* Opcode/OPC_OptimizedTree.h:
+	* Opcode/OPC_PlanesCollider.cpp:
+	* Opcode/OPC_SphereCollider.cpp:
+	* Opcode/OPC_SweepAndPrune.cpp:
+	* Opcode/OPC_TreeBuilders.cpp:
+	* Opcode/OPC_VolumeCollider.cpp:
+	Hacked OPCODE to compile on 64-bits; not very pretty.  Introduced
+	uxword typedef in IceTypes (unsigned long) to make enoug space for
+	pointer/index representation. Not cool ... need to introduce a
+	smart memory allocator (preemptive allocation with refit after the
+	tree is built) for nodes/boxes and use indices as it was done
+	before. But then there is the wole dirty bussines with
+	bit-shifting of values and using the lsb to tag a node as used.
+	Not something that can be done in one-day (well ... done yes,
+	thought through no).
+
+2006-11-12 Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Opcode/
+
+	Initial import from OPCODE-1.3. I did quite some reformatting
+	(most of it automatic) while browsing through the code and trying
+	to understand the structure. I started doing this sometime late in
+	August.

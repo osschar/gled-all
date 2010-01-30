@@ -1,0 +1,27 @@
+2010-01-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* boom.wav:
+	* cuckoo.wav:
+	* diesel-loop.wav:
+	* morse.wav:
+	Removed files.
+
+	* boom.ogg:
+	* cuckoo.ogg:
+	* diesel-loop.ogg:
+	* morse.ogg:
+	Added files, created from wavs by oggenc.
+
+	* al_test.C:
+	Use ogg files.
+
+2009-11-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* al_test.C:
+	Fix for new source/buffer handling.
+
+	* diesel-loop.wav:
+	New sample - a diesel engine loop.
+
+	* ChangeLog:
+	New file.

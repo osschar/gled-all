@@ -1,0 +1,37 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+ZImage		1	Glasses/ZImage		.
+Rect		2	Glasses/Rect		.
+RGBAPalette     4       Glasses/RGBAPalette
+ZGlProgram      5       Glasses/ZGlProgram      .
+ZGlShader       6       Glasses/ZGlShader       .
+
+SMorph		16	Glasses/SMorph		.
+Board		17	Glasses/Board		.
+RectTerrain	18	Glasses/RectTerrain	.
+MultiBoard	19	Glasses/MultiBoard
+Amphitheatre	20	Glasses/Amphitheatre    .
+MD2Object	21	Glasses/MD2Object	.
+
+RelParticle	32	Glasses/RelParticle
+
+WSSeed		64	Glasses/WSSeed		.
+WSPoint		65	Glasses/WSPoint		.
+WSTube		66	Glasses/WSTube
+WSWalker	67	Glasses/WSWalker
+
+TimeMaker	128	Glasses/TimeMaker
+Sleeper		129	Glasses/Sleeper
+LocalMover	130	Glasses/LocalMover
+FormulaMover	131	Glasses/FormulaMover
+# Mover will be removed or replaced by LocalMover. Or sth like that.
+Mover		132	Glasses/Mover
+
+TimeScreenText	192	Glasses/TimeScreenText
+
+GForger		256	Glasses/GForger
+
+RndSMorphCreator 1024	Glasses/RndSMorphCreator
+
+GLTesterOne	2048	Glasses/GLTesterOne	.

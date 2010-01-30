@@ -1,0 +1,1409 @@
+=cut
+$Id$
+
+=head1 NAME
+
+gledimp - C<Gled> for the impatient
+
+=head1 DESCRIPTION
+
+This document covers four main topics:
+
+=over list
+
+=item L<"Installing Gled">: how to get and install C<Gled>
+
+=item L<"Running Gled">: how to run C<Gled> and what you can do with it
+
+=item L<"Building Gled">: how to build C<Gled> from sources; CVS instructions
+
+=item L<"Extending Gled">: how to create new libsets and write your own classes
+
+=back
+
+=cut
+########################################################################
+
+=head1 Installing Gled
+
+Currently, C<Gled> only compiles and runs on C<GNU/Linux>, C<gcc> is
+the only supported compiler. In principle, it should be possible to
+make it run on any platform that has POSIX threads.
+
+
+=head2 Binary install
+
+Distributions of C<Gled> are available from
+L<ftp://ftp.gled.org/><major>.<minor>.<patch>. The link C<current>
+points to the latest release.
+
+The binary distribution of C<Gled> provides a tarball blob install: it
+resides in its own directory and user's environment needs to be
+configured for its use. Some top-level scripts for running demos will
+set it up for you, otherwise one just needs to source the environment
+setting script that resides in the top-level directory. A C<README>
+file giving the details is also there.
+
+In short:
+
+ v=1.3.0
+ b=slc4-x86
+ wget ftp://ftp.gled.org/$v/gled-$v-$b.tar.gz
+ tar xzf gled-$v-$b.tar.gz
+ cd gled-$v
+ ./greed-demo-menu.sh
+
+The C<Gled> system can be extended via B<C<libsets>>. Each libset
+contains three libraries (base, GUI, GL rendering) and possibly also
+executables and additional libraries. The core of the C<Gled> system
+itself is contained in the C<GledCore> libset. The default
+C<gled> distribution contains seven libsets: C<GledCore>,
+C<Geom1>, C<Numerica>, C<GTS>, C<Audio1>, C<RootGeo> and C<Var1>.
+
+To run other demos one needs to setup the environment:
+
+ # Setup the environment
+ . gled-env.sh
+ # Go to demos directory
+ cd gled/demos
+ # Choose libset / module
+ cd Geom1
+ # Run the chosen demo
+ gled images.C
+
+Reading section L<"Running Gled"> is recommended. Instructions for
+running demos are also there.
+
+
+=head2 Required software
+
+Each libset can depend on external software, some of which might not
+be widely available. To minimize the fuss, such software packages are
+shipped within the binary distribution.
+
+Basic distribution of C<Gled> depends on the following software:
+
+=over def
+
+=item<C<ROOT>>
+Homepage: L<http://root.cern.ch/>
+Download: L<http://root.cern.ch/root/Availability.html>
+
+C<ROOT> is released quite often and quite often, also, there is no
+binary compatibility between patch releases. For development of
+C<Gled> the latest release is used, unless there are some
+unresolved issues.
+
+If you have your own C<ROOT> and intend to use C<Gled> binaries, make
+sure that the versions of your C<ROOT> and C<ROOT> that C<Gled> was
+compiled with are the same.
+
+=item C<FLTK> 
+Homepage: L<http://www.fltk.org/> 
+
+C<Gled> uses C<FLTK v1.1> branch, usually the latest patch version.
+
+If you want to build your own C<FLTK>, use C<--enable-threads> and
+C<--enable-shared> options to C<configure>. Optionally, use
+C<--enable-xft> to enable true type font support.
+
+=item C<fltk-mt>
+FTP: L<ftp://ftp.gled.org/current/required_software/source/>
+
+C<fltk-mt> is a small library of widgets, partially collected from
+fltk bazaar and partially written for C<Gled> itself. It is
+distributed together with other required software.
+
+=item C<DevIL> (Developers Image Library)
+Homepage: L<http://openil.sourceforge.net/>
+
+This is the neatest image library I could find (and I've been
+searching for a long time). It handles image loading/saving as well
+as transforming in a simple, C<GL>-like manner.
+
+=item C<Little cms>
+Homepage: L<http://www.littlecms.com/>
+
+Optionally used by C<DevIL> as a color management engine. Since
+C<gled-1.3.0> C<lcms> is not provided in the distribution of C<Gled>,
+but can be activated in the build-system.
+
+=back
+
+
+=cut
+########################################################################
+
+=head1 Running Gled
+
+C<Gled> has two main executables. C<gled> is the standard one and
+spawns C<Gled> native GUI (FLTK) while C<saturn> has command-line
+interface only and is useful for pure servers and proxies.
+
+Both will list their command-line options if started with C<-h>
+switch:
+
+ # prompt > gled -h
+ Arguments: [options] [dir] [file(s)]
+                      dir   ~ cd to dir prior to exec of files
+                      files ~ ROOT macro scripts to process
+ Gled options:
+ -------------
+   -preexec <m1:m2..> pre-exec specified macros
+   -r[un]             spawn Saturn/Sun immediately (before processing files)
+                      Saturn if -master is specified, Sun otherwise
+   -allowmoons        accept moon connections
+   -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)
+   -p[ort]    <num>   specify server port (def: 9061)
+   -portscan  <num>   if server port can not be opened, try <num> higher ports
+   -m[aster] <host>[:<port>] master Saturn address (def port: 9061)
+   -n[ame]    <str>   name of Saturn
+   -t[itle]   <str>   title of Saturn
+   -l                 no splash info
+   -norint            do not run TRint (useful for batch saturns)
+ 
+ Logging options:
+   -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')
+   -out[file] <file>  specify output file name (def: '<stdout>')
+                      <file> shorthands: '-' => '<null>', '+' => '<stdout>'
+ 
+ Authentication options:
+   -auth              use authentication
+   -authdir   <str>   directory containing auth data (def: ~/.gled/auth)
+   -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')
+   -eyeid     <str>   default identity of Eyes (def: 'guest')
+ 
+ GledGUI options:
+ ----------------
+   -swm   fs:dh:dw    specify font-size, vert-space and char width
+                      default: 12:6:0 (dw~0 means measure font)
+   -font  font-id     use fltk's font-id as default font
+   -rnr <r1>:<r2>:... specify which rendering libraries to load (def: GL)
+   -iconize           iconize main window on start-up
+   -nomsgwin | -nomw  start gled without the message window (consider '-log +')
+
+But usually, at least for first-time usage, the following will do:
+
+ gled some_demo.C
+
+This starts C<gled> without authentication and executes C<c++> macro
+script C<some_scene.C>. Most macros in the demo section 
+start the server and GUI automatically.
+
+There is no rule as to what macros should contain, but before you
+start adding objects into the system, the server must be spawned:
+
+ Gled::AssertMacro("sun.C");
+
+C<Gled>'s search path for macros is initially set to
+C<.:$HOME/.gled:$GLEDSYS/macros>. Some standard macros are supplied
+with the distribution and reside in the C<$GLEDSYS/macros> directory
+(eg. C<sun.C>). Typically the demo macros execute C<sun.C> somwhere
+close to the beginning and C<eye.C> (standard GUI) at the end.
+
+To quit C<Gled>, click on the C<Eat flaming death> button in the main
+window or type C<.q> on the C<ROOT> prompt.
+
+
+=head2 Setting-up the environment
+
+If you downloaded the full binary packet, then sourcing the script
+C<gled-env.sh> (or C<gled-env.csh>) should do the job:
+
+ . gled-env.sh          # for sh
+ source gled-env.csh    # for csh
+
+The scripts sets the environment variables C<GLEDSYS>
+and C<ROOTSYS> and extends the C<PATH> and
+C<LD_LIBRARY_PATH> appropriately.
+
+To dump the environment script, one can use:
+
+ ./gled-env-dump.sh     # dumps env for sh
+ ./gled-env-dump.csh    # dumps env for csh
+
+and store its output to a file or login script.
+
+
+=head2 Configuration of Gled authentication
+
+To run Gled with authentication, use the C<-auth> command-line option.
+
+Additional configuration is needed for authentication support.
+All other configuration can be done via command-line options and
+start-up scripts. See the C<$GLEDSYS/macros> directory and the
+provided demos for examples.
+
+Current implementation of the authentication procedure is based on the
+RSA public key cryptography and uses challenge-response
+authentication. All further communication `trusts' the accepted socket
+and is not encrypted. The authentication and group membership data are
+stored in a file-system directory structure. The root of the structure
+defaults to C<ENV{HOME}/.gled/auth>, but can be changed with the
+C<-authdir> command-line option (e.g. C<gled -authdir
+/etc/gled/auth>). The keys are stored in the C<public_keys> and
+C<private_keys> directories with the individual filename being equal
+to the name of the identity it is representing. This means that if you
+want to allow user C<foo.bar@baz.org> to login to the cluster, you
+must obtain his public key and copy it to the C<public_keys>
+directory.  Group membership information is stored in the C<groups>
+directory.  Each group is represented by a file (again, with the same
+name as the group) which is simply a new-line separated list of
+identities that are allowed to claim this group identity. By
+convention the group names begin with the C<@> character
+(e.g. C<@admin> or C<@admin@baz.org>).
+
+To initialize the authentication system do:
+
+ gled-auth-init -dir <auth-directory>
+ # default -dir=~/.gled/auth
+
+This will create the standard directory structure in the given
+directory and populate it with standard identities for servers,
+proxies and clients. To add additional identities use:
+
+ gled-auth-genkeypair -name <some-user-name>
+
+Use standard shell commands and editors to modify the authentication
+structures.
+
+
+=head2 Running demos
+
+All demos are available as CINT scripts. Note that C<Gled>'s search
+path for macros is initially set to C<.:$HOME/.gled:$GLEDSYS/macros>
+and that other scripts can be called from within the scripts using the
+C<< gROOT->Macro("sun.C"); >> syntax. From C<ROOT>'s prompt it can be
+executed simply by C<.x sun.C>.
+
+All of the demo scripts contain instructions that start the
+server, create some objects and open a viewer (a GUI shell and a GL
+window).
+
+Some scripts might not start the GUI. They should be run as:
+
+ gled <demo-name>.C
+
+Note that you will need the C<-auth> option to enable authentication
+and C<-eyeid sun.absolute> to spawn GUI with the adminstrator
+privileges. Most demo scripts do not setup any authorization scheme
+and GUI requests to top-level objects would be refused.
+
+
+=head2 The C<Gled> GUI
+
+C<Gled>'s GUI attempts to offer a generic representation of object
+graphs (GUI shell/browser) and moderate introspection into the
+functioning of the system itself (log viewer, direct access to cluster
+graph). At the same time C<ROOT>'s interactive prompt has been
+retained: it allows invoking of C<C/C++> calls directly. It plays the
+role of a start-up console, system monitor, debugger and execution
+environment for C<C/C++> scripts.
+
+The following is a brief overview of command-line interface and GUI,
+that should get you going.
+
+=head3 The terminal: C<ROOT> prompt
+
+In the terminal from which you launch gled, you will be presented with
+a command-line prompt of CINT, the C<C/C++> interpreter. This prompt
+in principle belongs to C<ROOT> (whose event-loop is running in a
+separate thread), but as C<Gled>'s objects can be exported into (or
+created from) the context of the interpreter, it belongs also
+to C<Gled>. 
+
+It really helps on this point if you are a bit familiar
+with C<ROOT>. To run it's demos, do:
+
+ cd $ROOTSYS/tutorials
+ root demos.C demoshelp.C 
+
+More detailed tutorials can be found at C<ROOT>'s homepage:
+L<http://root.cern.ch/>.
+
+B<Executing macros.> As mentioned above, macros can be executed from
+the C<ROOT> prompt using the C<< .x <macro-name.C> >> syntax. Most
+macros from the C<macros/> and C<demos/> directories are plain scripts
+enclosed in curly braces. When such a script is executed, all
+variables declared in it (even in inner scopes ... for example, try
+with C<demos/Geom1/spheres.C>) can still be referenced from the
+interpreter. You can clear interpreter's list of global variables by
+issuing C<< gInterpreter->ResetGlobals() >>.
+
+If the file invoked by C<.x> contains functions (i.e. has a proper
+C<C/C++> syntax), than the functions will be imported into the
+interpreter and the function with the name equal to that of the file
+will be executed.  In this case you can also just import (load) the
+functions by doing C<< .L <file-name> >>.
+
+B<Importing objects from Gled.> By right clicking on the name box in
+the object browser you can select the C<Export to CINT> entry. You
+will be prompted for variable name under which the object will be
+exported to the interpreter.
+
+Now you can in principle call any method on the C<Gled> object. BUT if
+you are running a server with connected clients, those method calls
+will not be sent to clients. In this case the use of interpreter for
+direct manipulation of exported C<Gled> objects is limited to server
+start-up. There is a way to properly post method invocation requests
+from CINT, but it is beyond the scope of this introduction.
+
+
+=head3 Gled window
+
+The main C<gled> window contains basic controls for spawning
+eyes, loading libsets, setting of debug level and a prominent exit
+button. The reset of the window is a message browser, where output
+from different parts of C<Gled> will accumulate.
+
+
+=head3 Shell / Nest window
+
+The shell window displays object graphs. Each object can have two types
+of references to other objects:
+
+=over list
+
+=item B<Links>
+are by default shown on the right hand-side of the shell and
+can be expanded/collapsed by using the left collapsor box. A link is
+in fact a named pointer. The link functionality is an extension of
+standard tree structure that allows C<Gled> to handle arbitrarily
+complex object graphs.
+
+=item B<Lists>
+are collections of pointers to other objects. The right
+collapsor box will expand/collapse the list contents for a given
+object. This is the functionality you are used to from standard
+directory browsers.
+
+=back
+
+In default shell (the one spawned by macro C<eye.C> or from GUI
+button) you get to the loaded scenes by list-expanding C<SunKing> and
+then C<Scenes>.
+
+By double clicking on the name box of an object you get its I<full
+view>: all auto generated widgets are stacked in separate
+window. Changing the values will send proper change requests to the
+server (then it gets back update notifications). Value fields can be
+click-dragged in manner of sliders (middle mouse moves by factor 10,
+right mouse by 100). Right-mouse opens a context menu for a given
+object, offering many possibilities).
+
+Selecting C<< View->Link/Custom >> will toggle between display of
+links for a given object and a custom view of control widgets (such as
+you have in the full view). Some predefined views are available. You
+can edit the format string by selecting C<< View->Edit Custom >>.
+
+Drag-and-drop somewhat works. Dragging an object on the link-name-box
+sets the link. Dragging on the name-box in the graph (tree) browser
+appends the object as the last element in the list if the target of
+the drop operation is a C<ZList> (C<Gled>'s list base-class).
+
+=head3 Pupil (GL window)
+
+To navigate in a GL window (pupil) use left/middle mouse
+buttons. Control key modifies behaviour and is really useful.
+
+ left-drag          forward/backwards slide left/right
+ ctrl-left-drag     slide up/down     slide left/right
+ mid-drag           turn up/down      turn left/right
+ ctrl-mid-drag      turn down/up      roll left/right (think pilot stick)
+ <Home>		    return to the origin
+ <F1>               spawn Pupil control window
+ <F2>               spawn Camera control window
+
+The pupil renders the conents of its C<PupilInfo>. You can find active
+C<PupilInfo> lenses (those that have an associated GL window) of a
+given shell by expanding C<ShellInfo>'s link C<Pupils>. By opening
+full view of the C<PupilInfo> object (named Example Pupil in the
+default shell) you can set up some rendering parameters (same as C<F1>).
+
+Picking works (bound to right mouse button) and opens up a context
+menu, together with some pupil-specific options (render
+stack (parents), z-distance and C<Jump To>).
+
+The thing that is really missing is the ability to move/rotate objects
+directly from the pupil itself. This has been implemented in
+C<Gled-1.0> and was quite useful.
+
+
+=head2 Connecting a Gled cluster
+
+To start gled in a server mode, use:
+
+ gled -allowmoons <other options>
+
+or call
+
+ Gled::theOne->AllowMoonConnections()
+
+from the command line or server initialization script. Consider using
+the authentication as well.
+
+To connect to an already running gled, use:
+
+ gled -m <host-to-connect-to> moon.C
+
+C<moon.C> script will open the connection, download the server-objects
+and spawn GUI shell and a GL viewer on the first available scene. For
+specific uses the macro should be modified to open views of concrete,
+predetermined objects).
+
+Once connected, you cannot reconnect to another saturn: quit gled and
+run a new one.
+
+If the master dies (or closes socket), gled will die with an assertion
+failure. In principle local instance could adopt server's objects and
+continue running in a detached mode.
+
+
+=head2 Gled Bootstrap
+
+The following is a bootstrap procedure done in C<gled> and
+C<saturn> executables.
+
+=over enum
+
+=item Create Gled/GledGUI object (C<saturn>/C<gled>), parse command-line
+options. The Gled object is a singleton, accessible via
+C<Gled::theOne> (or C<GledGUI::theOne>) both from your compiled code
+and C<ROOT> prompt/scripts.
+
+=item Execute C<-preexec> macros.
+
+=item Create ROOT application interface (C<TRint>); let it parse
+command-line arguments.
+
+=item Start the GUI thread that manages all FLTK windows and eye's
+event-loop.
+
+=item If C<-r> option is given, start-up the Saturn (server). Note that
+moons (clients) are not allowed to connect yet, while eyes are.
+
+In case of a moon (when C<< -master <host> >> option is given), this
+step (call to function that starts server threads) will finish after
+ALL mandatory queens have been received from the master server. This
+means that the scripts (being executed on the next step) can rely on
+having client object-space set-up properly.
+
+=item C<TRint> processes macros given on the command line. Note that
+the server is not allowing moon connections yet and the scripts can
+freely create objects and attach them into the object graphs without
+worrying about the clients.
+
+=item If C<-allowmoons> option is given, allow moon connections. This can
+also be achieved later by calling
+C<< Gled::theOne->AllowMoonConnections() >>.
+
+=item Unless C<-norint> option is given, run C<TRint> in a dedicated
+thread. After that the command-line prompt is receiving input. This
+thread also runs all C<ROOT>'s X-windows (canvases containing
+histograms, ROOT browsers). C<FLTK> and C<ROOT> have different X
+displays.
+
+=back
+
+
+=head2 When things go wrong
+
+Sometimes, C<Gled> can die quite horribly. It's a very generic
+multi-threaded application, allowing libsets to perform just about
+anything - and not all of them have undergone rigorous
+testing.
+
+C<ROOT>'s interactive application (interface to CINT) that handles the
+terminal input thread is by default set to handle most of the signals
+(like SIGSEGV) - it attaches gdb, dumps the stack, and pretends
+everything is fine. This is rarely true and there is a high
+probability that your terminal will lock up and you will not be able
+to kill C<gled> in any other way than to C<kill> it (as in C<killall
+-9 gled>).  This behaviour can be switched off by adding C<<
+gSystem->IgnoreSignal(kSigSegmentationViolation, kTRUE) >> somewhere in
+the initialization script or to your C<.rootrc> or C<rootlogon.C>
+file. Then C<gled> will crash properly, dumping the core if
+environment allows it. See also script C<isegv.C>. 
+
+
+=cut
+########################################################################
+
+=head1 Building Gled
+
+
+=head2 Building C<Gled> and external software
+
+There is a special module in C<Gled> SVN repository that does all the
+work.
+
+  svn co https://svn.gled.org/gled/trunk/gled-builder
+  cd gled-builder
+  autoconf
+  ./configure          # default prefix is `pwd`/install
+  make
+
+Note, that this will get all the sources from the web (rsync and svn
+servers at C<www.gled.org>) so network connection is
+required. Obviously, you will need C<subversion> client and C<GNU
+autotools>. C<CMake> is also needed for building of C<OpenAL>. Further,
+as the external software gets configured and built, it will require
+presence of several low level libraries. The easiest way to ensure you
+have all this stuff is to run:
+
+  PKGS="subversion autoconf automake libtool cmake \
+        glew glew-devel \
+        fltk DevIL gts openal freealut \
+        fltk-devel DevIL-devel gts-devel openal-devel freealut-devel"
+
+  [apt-get | yum | <whatever>] install $PKGS
+
+C<gled-builder> will build its own versions of C<fltk>, C<DevIL>,
+C<gts>, C<openal> and C<freealut> but their system-level install will
+ensure you have all the dependencies. Eventually (and optionally) we
+will check if appropriate versions of those are available and skip
+them during the build. However, C<Gled> requires the latest versions
+of some libraries that are not shipped even with the latest
+distributions (C<fltk-1.1.9>, C<gts-HEAD>).
+
+C<Gled> is also put into the install directory ... but one can also
+run it from the build directory itself.
+
+
+=head3 Running from the install directory
+
+This is meant for normal usage. The install directory is fully
+relocatable - you can tarball it and use it on any compatible machine.
+
+To setup the environment:
+
+  cd install-dir
+  . gled-env.sh
+
+Run demos:
+
+  cd gled/demos
+  cd Var1
+  gled tringula.C
+
+
+=head3 Running from the build directory
+
+This is to be used if you intend to do development. C<Gled> sources
+are downloaded via C<subversion>, so you have a working development
+environment.
+
+Setup the environment:
+
+  cd gled/gled-build
+  . build_env.sh # source  build_env.csh
+
+The demos are in the C<demos/> directory.
+
+For details see the C<README> file provided in C<gled-builder>.
+
+
+=head2 Bulding C<Gled>
+
+=head3 Getting the sources
+
+All C<Gled> sources reside in a L<SVN
+repository|http://svn.gled.org/gled/> (with
+L<viewcvs|http://www.gled.org/cgi-bin/viewcvs.cgi/>). The build
+directories, libsets, demos and the documentaion are all stored
+there. To allow for builds with specific sub-set of libsets, the
+repository structure is not entirely standard ... usually one does not
+checkout the whole trunk and some top-level directories need to be
+checked-out separately. All this is encoded in the helper checkout
+script available from the SVN:
+
+  svn export http://svn.gled.org/gled/trunk/gled-build-checkout
+
+Inscpect it for details, or simply run it as:
+
+  ./gled-build-checkout trunk
+
+to get the default libsets or as:
+
+  ./gled-build-checkout trunk GledCore Geom1
+
+if you want to explicitly specify which libsets to checkout.
+
+By default, this will create directory C<gled-build>; use
+C<--dir=<my-gled-dir>> to override it.
+
+=head3 Setting up the build environment
+
+The header files of all required external software must be accessible.
+Further, C<$ROOTSYS> and C<$GLEDSYS> variables must be set
+appropriately and corresponding entries added into C<$PATH> and
+C<$LD_LIBRARY_PATH>.
+
+There are several environment scripts in the C<gled-build> directory,
+in particular see C<binenv.sh> and C<hereenv.sh>. Use / modify one of
+those or roll your own ... then source it.
+
+Anyway, the build environment is exactly the same as the run-time
+environment. So the environment set-up can be done as described in the
+section L<"Setting-up the environment">. The C<configure> script
+produces the environment set-up scripts C<build_env.sh> and
+C<build_env.csh> which can be used to easily access an existing
+C<Gled> build.
+
+
+=head3 Configuring
+
+B<NOTE:> This is not standard configure! It determines particularities
+of the C<Gled> build itself:
+
+=over list
+
+=item order of libset building;
+
+=item creation of top-level libset and class catalogues.
+
+=back
+
+The command-line options for C<configure> script and their default
+values are stored in the C<configure.rc> file.  You can edit the file
+or use command-line options. Options can be given as C<< 
+--<opt1>=<val1> >> or C<< -<opt1> <val1> >>, option names can be
+abbreviated.
+
+The most relevant options are (see C<configure.rc> for full listing
+and default values): 
+
+C<< -ucpp <str> >>: user cpp-flags (e.g. -D_SOMETHING_),
+
+C<< -ucxx <str> >>: user cxx-flags,
+
+C<< -uld <str> >>: user ld-flags,
+
+C<-debug>: implies -DDEBUG and -g (otherwise -O),
+
+C<< -libsets <auto> | <auto-prompt> | <file:[filename]> |
+[libset1:libset2...] >>: libsets to build. The default is C<<
+<auto-prompt> >> which scans the directory, displays the list of found
+libsets and asks for confirmation. If C<file:some-file> syntax is
+used, them C<some-file> should contain a new-line separated list of
+libset names.
+
+C<< -external <search-path> >>: C<search-path> is a ':' separated list
+of directories to include/link from; each C<dir> implies
+C<< -IE<lt>dirE<gt>/include >> and C<< -LE<lt>dirE<gt>/lib >>. It is
+empty by default.
+
+C<< -base <search-path> >>: C<search-path> is a ':' separated list of
+existing C<Gled> build directories in which build has been
+completed. C<configure> will resolve dependencies of local libsets by
+trying to locate the missing libsets in C<base> directories.
+
+Now run C<< ./configure <whatever options you need> >>. C<configure>
+creates a file C<build_config> which contains a perl-data-dump of two hashes
+holding information needed for compilation of libsets.  Dependencies
+are resolved, so the order of compilation is determined properly even
+if C<build_libsets> file contains them in a wrong order.
+
+The C<configure> script also creates all auto-generated files and runs
+C<make depend> in all lib-set directories.
+
+
+=head3 Building
+
+In principle ... just run C<make>.
+
+The default target builds all libraries and executables and installs
+them into C<$GLEDSYS/lib> and C<bin> directories.
+
+The C<make> process uses the default compiler. Export the C<CXX>
+variable if you want to use some other compiler or, perhaps,
+C<distcc>.
+
+
+=head3 Testing
+
+As the environment is already setup, just choose the demo and run it:
+
+  cd demos/Geom1
+  gled images.C
+
+
+=cut
+########################################################################
+
+=head1 Extending Gled
+
+In principle, C<Gled> should be extended by creating new
+libsets. However, the C<Gled> project is still young and some
+functionality is still missing in the core libsets. See
+L<status|http://www.gled.org/status/>,
+L<libsets|http://www.gled.org/libsets/> and
+L<contributing|http://www.gled.org/contributing/> for details on
+development status/plans and other information for
+developers/contributors.
+
+=head2 Creating a libset
+
+To create a libset directory, you can use the C<gled-create-libset>
+script. You need to decide on the libset's name and select an unused
+library id (C<unsigned short int>; it can be trivially changed as long
+as you don't save any objects into files you want to use later).
+
+Then you need an existing C<Gled> build containing all the libsets
+that the new libset will depend upon (note that all libsets depend on
+C<GledCore>). Also, you need to set-up the environment.
+
+To create a libset C<FooSet> with id 129, use
+
+ gled-create-libset FooSet 129
+
+This will create directory C<libsets/FooSet> containing all standard
+directories and files. Edit the Makefile and add all libset
+dependencies of C<FooSet> to C<REQUIRES_LIB_SETS> line near the
+beginning. If your libset will not contain any executables and does
+not depend on any external libraries, this is all you will ever need
+to do. Otherwise see C<GledCore::Makefile> for an example of building
+executables and C<Geom1::Makefile> for an example of linking against
+additional libraries.
+
+Another important file is C<glass.list> in the libset directory: this
+is a simple catalog of all C<Gled> classes (or C<glasses>) in this
+libset. Initially it is empty (containing some commented examples from
+C<GledCore>).
+
+Now you have to reconfigure C<Gled> build so that the top-level libset
+and class catalogues get built properly.
+
+If you explicitly enumerated the list of libsets to be built, you have
+to either: a) edit C<build_libsets> in the C<gled-build> directory and
+append C<FooSet> to the list; or b) pass the new libset list or
+C<<auto>> or C<<auto-prompt>> to the reconfigure command.
+
+ ./configure --reconfigure [libset-list]
+
+The C<--reconfigure> option must be the only option to
+C<configure>. It takes an optional argument specifying which libsets
+to build (the syntax is the same as for option C<--libsets>). It
+defaults to the old value.
+
+And now we're ready to go:
+
+ make
+
+This will produce libset C<FooSet> with glue code only - you will be
+able to load it, but it will not contain any classes.
+
+
+=head2 Adding classes to a libset
+
+Classes making up a libset can be divided into several categories,
+depending on the role they play in the C<Gled> system. For clarity, as
+well as to simplify the build process, the files (header and
+implementation) for each category are placed in a separate directory.
+
+=over list
+
+=item B<Fully Gled enabled classes> or B<glasses>: instances of such
+classes, called B<lenses>, enter the object graphs of C<Gled> and are
+capable of generating and processing method invocation requests
+(MIRs). Further, they are representable in C<Gled> GUI and can spawn
+object views. Glasses can have their own renderers that are used to
+render their representations in 3D space.
+
+Glasses must be subclassed from the C<ZGlass> class and by default
+reside in the C<Glasses> directory. C<ZGlass> itself inherits from
+C<ROOT>'s base class C<TObject>.
+
+=item
+B<Fully C<ROOT> enabled classes> or B<stones> can be streamed
+and accessed from C<CINT>. In C<Gled> context they are used as data
+containers for structures that can be data members of glasses (either
+directly or via a pointer).
+
+Stones must be subclassed from C<TObject> and reside in the C<Stones>
+directory.
+
+=item
+B<Other classes and namespaces>. Sometimes you will need other
+supporting structures, internal representations or functions and
+wrappers for external libraries. In principle, you can place them
+anywhere, but you should edit the C<Makefile> accordingly. The
+preferred place for namespaces that will be accessed by other libsets
+is in C<< <libset-name> >> directory. (The C<GledCore> libset departs
+from this convention and holds public namespaces in C<Gled> and
+C<GledView> directories.)
+
+=back
+
+=head3 Adding glasses
+
+To get a skeleton code of a glass C<cd> to libset directory and type:
+
+ gled-create-glass -class <new-glass-name> -base <base-glass-name>
+
+There are quite some conventions that a glass header file should
+conform to. All the basic ones are fulfilled automatically by the above
+script.
+
+Edit the C<glass.list> file and add a line describing
+the new glass. Then you will almost certainly add some member data and
+methods. You should follow the C<ROOT> convention for basic types: it
+assures interoperability of different architectures (C<int ~ Int_t>,
+C<unsigned short ~ UShort_t> etc.).  Examples will be most fruitful
+... so take a look at some glasses from the base distribution
+(C<Geom1/SMorph> can serve you well).
+
+Header files of glasses are parsed by C<project7> parser / code generator.
+It creates C<Gled> compliant C<Get/Set> methods, wrappers for MIR
+creation and processing and a separate class named C<< <glass-name>View >>
+which contains GUI code needed to manage widgets representing the glass.
+
+Instructions for C<project7> are contained in comments directly
+following the declarations. The output is stored in two files: C<<
+<glass-name>.h7 >> (included back into the class declaration itself)
+and C<< <glass-name>.c7 >> which is included from the
+corresponding source (C<.cxx>) file.
+
+Comments have two parts, separated by the C<7> character:
+
+ Int_t         mFoo;           // Xport{GS} 7 ValueOut()
+
+The left part (C<Xport{GS}>) specifies what parts of code need to be
+auto-generated (in this case C<GetFoo> and C<SetFoo> methods will be generated,
+in accordance with C<Gled> coding requirements) while the right one is a
+constructor call for a C<perl> class that will generate the widget
+code (see C<GledCore/perllib/Gled_Widgets.pm>). The widget part is
+optional: if not specified, the widget-code will not be generated.
+
+The next section gives some examples (L<"Examples of data and function
+meber declarations">), more can be found by browsing the code or
+auto-generated class documentation
+L<http://www.gled.org/docs/classdoc/>. The full list of all recognized
+directives is in a dedicated section (L<"Specification of C<project7>
+directives">).
+
+=cut
+## L<auto-generated class documentation|http://www.gled.org/docs/classdoc/>
+
+=head4 Examples of data and function meber declarations
+
+B<Data member example> (C<Geom1/SMorph>):
+
+ Real_t        mSx;            // X{GS}  7 Value(-range=>[0,100, 1,100], -join=>1)
+
+C<X{GS} ~ Xport{GS}> generates C<Get/SetSx> methods. The widget will be
+created by the C<Value> C<perl> class. 1/100 is the default step for
+drag operations. In full view the next widget will be possibly
+appended to the same line.
+
+B<Link example> (C<GledCore/ZNodeLink>):
+
+ ZGlass*       mGlass;         // X{GS} L{} RnrBits{0,0,0,4}
+
+C<X> as above, but this is a link: C<L{}>. C<RnrBits> are explained below.
+
+B<Method example> (C<GledCore/Eventor>):
+
+ virtual void  Start();        // X{E} 7 MButt(-join=>1)
+
+C<X{E}> ~ generate MIR bindings and create a button that will send
+request for invocation of this method. 
+
+And from C<GledCore/ZList>:
+
+ virtual void Add(ZGlass* g);  // X{E} C{1}
+
+Export as above, but this method has to be called with one C<context>
+argument. From GUI shell up to two such arguments can be defined by setting
+C<Beta> and C<Gamma> links of the C<ShellInfo>.
+
+At the moment it is only possible to call methods that take glass and
+basic type arguments from the shell (list of methods is available from
+the context menu).
+
+Stone members can have their specialized widgets. As an example see
+C<Geom1/SMorph::mColor> declaration.
+
+
+=head4 Comment parsing by C<rootcint> 
+
+Header files are also parsed by C<rootcint>, C<ROOT>'s class catalog
+and I/O method (C<Streamer>) generator. By adding an C<!> on the first
+character of comment directly following the data member declaration,
+this member will not be stored/retrieved to/from the stream. Example
+from the C<ZGlass> class:
+
+ Bool_t     bMIRActive;	     //  X{GS} 7 BoolOut(-join=>1)
+ Short_t    mRefCount;       //! X{G}  7 ValOut(-width=>4)
+
+In this case, the C<mRefCount> variable is not streamed. This is to be
+used for variables that store temporary data, have a local (per
+Saturn) meaning only or can be regenerated from other data.
+
+
+=head4 Building
+
+From the top build directory you should run C<./configure
+--reconfig>. This will regenerate glass catalogues on build level
+and on libset level. Now you can run C<make> as usual.
+
+
+=head3 Adding stones
+
+To create a stone skeleton code do:
+
+ gled-create-stone -c <class-name> -b <base-class>
+
+in the libset directory. No special configuring should be necessary,
+but running:
+
+ make pre_depend
+ make depend
+
+is still needed.
+
+Header files of stones (as well as all other headers) can also be
+processed by C<project7>, but only C<Get/Set/Ptr/Ref> methods will be
+generated for non-glasses. In C<pre_depend> phase of build header
+files are scanned for lines like C<#include "some-name\.h7"> and, if
+found, appropriate commands are executed and dependencies for the
+built dumped into C<make_p7.inc> file.
+
+=head3 Rendering classes
+
+So far only OpenGL rendering is supported. Glass renderers are stored in
+C<Rnr/GL> directory and should be named C<< <glass-name>_GL_Rnr >>.
+To create a skeleton code type (do not postfix the C<GL_Rnr> part):
+
+ gled-create-rnr -class <glass-name> -base <rnr-base-glass>
+ e.g.: gled-create-rnr -class SMorph -base ZNode
+
+See examples of some rendering classes (note that some renderers are
+not optimised for speed yet).
+
+Rendering of each glass is separated in three functions:
+
+C<PreDraw>: set-up of render data, pushing of some attributes,
+sometimes change of transformation matrix,
+
+C<Draw>: the actual drawing code,
+
+C<PostDraw>: clean-up after C<PreDraw>.
+
+Further, C<ZList> descendants contain any number of children and any
+C<ZGlass> descendant possesses any number of I<links> to other
+glasses. C<RnrDriver> is quite general and each glass can be
+configured to invoke C<Draw> methods of self, of list members, of
+links and of list members of glasses pointed to by links in a definite
+order. This information is encoded in C<GledViewNS::RnrCtrl> and
+C<GledViewNS::RnrBits> structures.
+
+C<RnrDriver> performs rendering of a lens on seven (7) levels and on
+each level it executes the drawing functions specified by the
+render-bits (in fact a C<rnr-bit> is just a specification of level at
+which the method should be called). At each level the execution is
+done in the following order:
+
+=over enum
+
+=item links that are marked for rendering, in order of declaration,
+starting from base-classes;
+
+=item the lens itself;
+
+=item the list-members.
+
+=back
+
+This is the default behaviour ... it can be changed by re-implementing
+virtual method C<CreateRnrScheme()> in the render-class. See C<ZNode>
+and C<ZNode_GL_Rnr> for an example. The logic for invoking link
+rendering before the lens rendering is that most often the links are
+used for two purposes in rendering.
+
+=over enum
+
+=item To temporarily setup some GL-state - in this case the the
+C<PreDraw()> method of the link can be called on the same level as the
+C<Draw()> method of the lens. The C<PostDraw()> of link can be called
+on the next level.
+
+=item 
+
+=back
+
+Each glass with its own renderer can have a C<RnrCtrl> declaration in
+comments at the top of the glass declaration (or the default values
+are used, see the example below). It contains the overall C<RnrBits>
+for the glass (self rendering and list rendering) and two rnr-steering
+flags: C<fRnrSelf> and C<fRnrLinks>. Each link has a separate
+collection of C<RnrBits> which specify at which levels the links
+draw-methods will be called. This data is parsed by the C<project7>
+parser/code generator and stored into the class catalog.
+
+Let's decode this data for C<Geom1/Board> glass which
+renders a textured rectangle:
+
+ class Board : public ZNode
+ {
+   //                      render   render
+   //                      self     list members
+   // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,5))
+   MAC_RNR_FRIENDS(Board);
+ protected:
+   ZImage*       mTexture;       // X{GS} L{} RnrBits{4,0,5,0, 0,0,0,0}
+                                 //                   self     list members
+   ...
+ };
+
+C<RnrBits> constructor takes eight render levels, divided in two
+groups of four. The first group pertains to self-rendering (or
+rendering of object pointed to in case of a link) and the second group
+to list-member rendering.
+
+The first three numbers tell on which levels to invoke C<PreDraw>,
+C<Draw> and C<PostDraw>. The last one is for full descent: here
+render driver calls for full render of the object in question
+according to its own render bits. It usually doesn't make much sense
+to use both explicit and full rendering for a given class/link.
+
+Rendering of C<Board> will execute some code on four out of seven
+render-levels:
+
+=over def
+
+=item<lvl 2:>
+
+=over enum
+
+=item Own C<PreDraw> is called (in fact, by virtuality,
+C<ZNode_GL_Rnr::PreDraw>, which sets up transformation matrix).
+
+=back
+
+=item<lvl 4:>
+
+=over enum
+
+=item C<PreDraw> of C<mTexture> (bind texture/enable texturing).
+
+=item Own C<Draw> (just a rectangle with texture coordinates).
+
+=back
+
+=item<lvl 5:>
+
+=over enum
+
+=item C<PostDraw> of C<mTexture> (unbind texture / disable texturing).
+
+=item Full render descent is made for all list members. Notice, that local
+transformation matrix is still in order as required by the hierachical
+model.
+
+=back
+
+=item<lvl 6:>
+
+=over enum
+
+=item Own C<PostDraw> is called (in fact C<ZNode_GL_Rnr::PostDraw>; pop
+transformation matrix).
+
+=back
+
+=back
+
+As subclasses still render links of their descendants, it is important
+to inspect C<RnrBits> of parent glasses before deciding on C<RnrCtrl>
+for a new glass. This is the primary reason for fixing number of
+rendering levels to 7: it's almost certainly general enough to allow
+for almost anything.
+
+The declaration above:
+
+   // 7777 RnrCtrl(RnrBits(2,4,6,0, 0,0,0,5))
+
+is in fact a standard and can omitted.
+
+For details see C<GledCore/GledView/GledViewNS.h> where C<RnrCtrl> and
+C<RnrBits> structures are declared.
+
+=head4 C<RnrBits> details
+
+C<RnrBits> consist of two groups of four numbers. The first group
+tells C<RnrDriver> on which levels to invoke object's own rendering
+functions: the first number is for C<PreDraw>, the second for C<Draw>
+and the third one for C<PostDraw>. The fourth number is only relevant
+for links and specifies on which render level to perform a I<full
+renderer descent>, that is to recursively descent into the rendering
+of the object pointed to by the link.
+
+The second group specifies the same information for ALL list members
+of this object (if it is a C<ZList> descendant, otherwise these bits
+are ignored). At a given level all corresponding methods (C<< 
+PreDraw/Draw/PostDraw/<full-descent> >>) will be invoked in list
+order. For links this information is relevant only if the link is
+referencing a C<ZList> descendant. Then the link is dereferenced
+as a list and the corresponding methods are called for this list.
+
+This last option was intended for complex renderer state set-ups with
+pushing and popping of a collection of attributes stored in a
+list. For a GL example, imagine having a link to a list having
+elements for: a) setting render mode to wire-frame, b) changing
+lightning conditions, c) etc. Besides, this list could then easily be
+shared among several scene elements.
+
+
+=head4 Future of C<RnrCtrl> and C<RnrBits>
+
+C<RnrCtrl> and C<RnrBits> are now hard-coded in the class
+definition. The original idea was to allow setting of custom render
+bits for each object on GUI shell level. This is not yet implemented,
+although the base viewing classes (C<OptoStructs::*View>) and whole
+rendering infrastructure is designed to allow for an easy
+implementation.
+
+This was to be combined with the option of adding I<local links> to
+object entries in the GUI shell (these links are only visible by shell user
+and renderers). By setting those links to render state modification
+objects/lists a full local control over renderer state could be achieved.
+
+Another option that seems reasonable is to store C<RnrCtrl/RnrBits> on
+lens level (via auto-generated link partners (e.g. C<ZNode* mParent;>
+implies also C<RnrBits  mParentRnrBits;>) and a specialized GUI window
+for inspecting/setting rendering related information).
+
+Or even, one could traverse the render tree and render the tree itself
+with nodes displaying object properties and rendering control
+information. Clicking on that would then open the appropriate
+rnr-control window.
+
+
+=cut
+########################################################################
+
+=head1 Specification of C<project7> directives
+
+C<project7> directives are parsed differently for data-members and for
+methods. Further, they are grouped into several families, each
+specified on the declaration line as C<familiy{options}> (see
+examples in L<"Examples of data and function meber declarations">).
+
+
+=head2 Directives for data-members
+
+=over def
+
+=item C<Xport> (shorthand C<X>)
+
+The C<Xport> family steers the generation of member-access-methods
+(get/set etc) and MIR creation functions. Thus it exports certain
+functionality of a given member.
+
+All flags but C<dD> can be given for data members. Only C<eE> and
+C<dD> can be given for member functions.
+
+Let's pretend, we have the following declaration:
+
+ Foo_t	       mBar;
+
+=over def
+
+=item<gG> Auto-generate
+C<Foo_t GetBar()> (g) |
+C<const Foo_t GetBar() const> (G).
+
+In fact, the return-type is only made C<const> if the variable is
+a pointer or a reference. Also, for I<link>-members, the
+constness is ignored.
+
+In principle a MIR-producing C<Get> method could also be implemented
+... the MIR would then return the streamed value in a C<ReturnResult>
+buffer. The process would be synchronous, therefore limiting the usage
+of this concept to dedicated threads. This feature would be
+interesting for querying state of lenses in lower object spaces (whose
+ID has been obtained in some way) or local data of certain
+lenses. This would allow an easy implementation of pull-mode queries.
+
+=item<rR> Auto-generate
+C<Foo_t& RefBar()> (r) |
+C<const Foo_t& RefBar() const> (R).
+
+=item<pP> Auto-generate
+C<Foo_t* PtrBar()> (p) |
+C<const Foo_t* PtrBar() const> (P).
+
+=item<sS> Auto generate C<void SetBar(Foo_t bar)>. With B<S> also
+generate the Stamp method, that will send update request to the
+viewer.
+
+Occurrence of C<s|S> automatically triggers creation of a MIR producing 
+C<MIR* S_SetBar(Foo_t bar)>, like if the C<e|E> flag is specified.
+
+If B<q|Q> is specified, the set method signature is C<SetFoo(Foo_t& bar)>
+| C<SetFoo(const Foo_t& bar)>.
+
+=item<tT> Mark that transformation matrix (t) or triangulation data
+(T) has been changed (and needs to be re-calculated when
+used). Accompanies set-methods.
+
+These are special cases of themore general C<Stamp> pragma:
+C<t =~ ReqTrans>, C<T =~ ReqTring>.
+
+=item<x>
+
+Mark that a structural change has occured (link and list operations do
+that automatically). This results in rebuilding of render-scheme for
+the lens, but can also be used for other purposes by custom handlers
+(A_View::AbsorbRay()).
+
+=item<eE> 
+
+Auto-generate MIR producing C<MIR* S_SetBar(Foo_t bar)> but NOT the
+C<void SetBar(Foo_t bar)> method -- it needs to be declared and
+implemented by the user. C<E> and C<e> are equivalent.
+
+If the first character on the comment line is 'C<!>' the method will
+be tagged as I<local>: MIR will be sent to the local saturn only. This
+is useful for updating or printing of local data members.
+
+=item<dD>
+
+Auto-generate the C<void DeltaBar(Foo_t bar)> method that calls
+C<operator+> on current value and the argument. With B<D> also
+generate the Stamp method, that will send update request to the
+viewer.
+
+B<Note:> the B<dD> flag for function-members requests member execution
+in a detached thread.
+
+=item<fF> 
+
+Auto-generate MIR producing C<MIR* S_DeltaBar(Foo_t bar)> but NOT the
+C<void DeltaBar(Foo_t bar)> method -- it needs to be declared and
+implemented by the user. C<F> and C<f> are equivalent.
+
+This is not applicable for link data-members.
+
+Same comments as for B<eE> apply.
+
+=back
+
+=item C<Stamp>
+
+Comma separated list of time-stamps to set. User must declare
+C<TimeStamp_t mStampE<lt>stamp-nameE<gt>> data members.
+
+=item C<Ray>
+
+Comma separated list of custom rays to emit. User must still specify
+C<EmitE<lt>ray-nameE<gt>Ray()> method. See C<NestInfo> for an example.
+
+=back
+
+
+=head3 Additional directives for link data-members
+
+=over def
+
+=item C<Link> (shorthand C<L>)
+
+Declares a data member as I<link>. If or C<aA> is specified the
+following methods that can be used to assert that a link is set are
+auto-generated:
+
+=over def
+
+=item<aA> Generate assert methods that check if link is set.
+
+B<a> -- C<< protected: void assert_<lower-case-link-name>(const Exc_t& exc_header); >>
+
+B<A> -- C<< public: <link-type>* Assert<link-name>(const Exc_t& exc_header); >>
+
+=item<fF> Assumes that data-member C<mLinkName_fid> exists. The link set
+method does additional check if the argument matches to this C<FID>. By
+convention, if B<f> is given the C<fid>-variable is not streamed and should be
+set in C<_init()> method (or constructor). If C<F> is given, the
+C<fid>-variable is streamed and it should be set in C<AdEnlightenment()>. This
+convention is not enforced by auto-generated code.
+
+=back
+
+=item C<RnrBits>
+
+See section L<"Rendering classes"> for explanation and syntax.
+
+=back
+
+
+=head2 Directives for function-members
+
+=over def
+
+=item C<Xport> (shorthand C<X>)
+
+=over def
+
+=item<eE>
+
+Assuming function:
+
+  void FooBar(arguments)
+
+auto-generate MIR producing C<MIR* S_FooBar(arguments)>. C<E> and C<e>
+are equivalent.
+
+If the first character on the comment line is 'C<!>' the method will
+be tagged as I<local>: MIR will be sent to the local saturn only. This
+is useful for updating or printing of local data members.
+
+=item<dD> Specifyies that the method needs to be executed in a
+dedicated thread. Only relevant for member functions, ignored for
+data members.
+
+Further, C<d> means only execute the method on the I<Sun> of a given
+lens while C<D> instructs the MIR to be broadcasted for execution to all
+connected I<Saturns> (corresponds to C<Multix> flag in C<Eventor>,
+user-thread base class).
+
+To get the same behaviour for C<Set> methods one has to write them
+manually and declare them like this:
+
+ some_type   some_var;          // X{G}
+ void Setsome_var(some_type x); // X{ED}
+
+B<Note:> the B<dD> flag for data-members requests creation of I<Delta> method.
+
+=back
+
+=item C<Ctx> (shorthand C<C>)
+
+Specifies the number of lens-type arguments, like C<Ctx{1}>. Name
+context is chosen as these arguments can specify an execution context
+within a lens graph. Context arguments B<must> always be specified in
+the B<front> of the argument list.
+
+Only relevant for function members, as C<Set> methods have a well
+defined syntax, while for I<links> this is is set-up automatically.
+
+=back
+
+
+=head2 Directives valid for data and function-members
+
+=over def
+
+=item C<Tags> (shorthand C<T>)
+
+A comma separated list of tags to assign to the method (to the C<Set>
+method in case of a data member). The tags are used by some
+authorization modules to give special access control for methods
+holding a certain tag.
+
+=back
+
+=cut
+########################################################################
+########################################################################
+# LocalWords:  Gled FLTK libsets libset GledCore gled
