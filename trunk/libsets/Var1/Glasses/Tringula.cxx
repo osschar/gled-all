@@ -137,6 +137,29 @@ Bool_t Tringula::RayCollide(const Opcode::Ray& ray, Float_t ray_length,
   return RC.Collide(ray, *mMesh->GetOPCModel());
 }
 
+Float_t Tringula::RayCollideClosestHit(const Opcode::Ray& ray, Bool_t cull_p)
+{
+  // Returns distance to the closest terrain hit from given ray.
+  // Opcode::MAX_FLOAT is returned if terrain is is not hit.
+
+  static const Exc_t _eh("Tringula::RayCollideClosestHit ");
+
+  Opcode::CollisionFaces col_faces;
+
+  if (RayCollide(ray, 0, cull_p, true, col_faces))
+  {
+    if (col_faces.GetNbFaces())
+      return col_faces[0].mDistance;
+    else
+      return Opcode::MAX_FLOAT;
+  }
+  else
+  {
+    printf("%scollide status=<failed>.", _eh.Data());
+    return Opcode::MAX_FLOAT;
+  }
+}
+
 //==============================================================================
 
 void Tringula::prepick_extendios(AList* extendios, const Opcode::Ray& ray, Float_t ray_length,

@@ -284,7 +284,8 @@ void TringuCam::MouseDown(A_Rnr::Fl_Event& ev)
     {
       CalculateMouseRayVectors();
       Opcode::Ray ray(&mMouseRayPos[0], &mMouseRayDir[0]);
-      Extendio*	ext = mTringula->PickExtendios(ray, 0);
+      Float_t     rng = mTringula->RayCollideClosestHit(ray, true);
+      Extendio	 *ext = mTringula->PickExtendios(ray, rng);
 
       if (bMouseVerbose)
         printf("TringuCam::MouseDown picked %s, state=0x%x\n",
@@ -361,6 +362,8 @@ void TringuCam::CalculateMouseRayVectors()
 
 void TringuCam::MouseRayCollide()
 {
+  // Collide current mouse-ray with tringula terrain.
+
   Opcode::Ray ray;
   mMouseRayPos.GetXYZ(ray.mOrig);
   mMouseRayDir.GetXYZ(ray.mDir);

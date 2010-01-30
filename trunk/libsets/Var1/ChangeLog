@@ -1,3 +1,16 @@
+2010-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Do not allow picking through the terrain.
+
+	* Glasses/Tringula.cxx:
+	* Glasses/Tringula.h:
+	Add function:
+	  Float_t RayCollideClosesttHit(const Opcode::Ray& ray, Bool_t cull_p);
+	returning distance to terrain (or max-float, if terrain is not hit).
+
+	* Glasses/TringuCam.cxx:
+	Limit extendio picking distance to the first terrain hit.
+
 2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add drawing of laser barrel of Crawlers.
