@@ -9,6 +9,8 @@
 #include <Glasses/TSPupilInfo.h>
 #include "Spiritio.c7"
 
+#include <Glasses/ZQueen.h>
+
 // Spiritio
 
 //______________________________________________________________________________
