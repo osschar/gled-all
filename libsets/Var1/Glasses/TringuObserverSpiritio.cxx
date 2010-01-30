@@ -8,7 +8,9 @@
 #include <Glasses/ZNode.h>
 #include "TringuCam.h"
 #include "TringuObserverSpiritio.c7"
+
 #include <Glasses/Camera.h>
+#include <Glasses/ZQueen.h>
 
 // TringuObserverSpiritio
 
