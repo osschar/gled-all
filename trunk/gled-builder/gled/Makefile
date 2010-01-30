@@ -24,7 +24,7 @@ checkout:
 ### configure
 
 define configure-cmds
-ln -s ${PREFIX} external;\
+ln -sf ${PREFIX} external;\
 . binenv.sh;\
 ./configure --buildversion="${RELEASE}" --blobdir=${PREFIX}/gled\
   ${EXTERNAL_ARG} ${EXTRAPATH_ARG} --libsets='<auto>'
