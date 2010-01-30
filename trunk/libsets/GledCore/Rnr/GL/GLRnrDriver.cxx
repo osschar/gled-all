@@ -38,10 +38,8 @@ GLRnrDriver::GLRnrDriver(Eye* e, const TString& r) : RnrDriver(e, r)
 
   // ----------------------------------------------------------------
 
-  mQuadricStd = gluNewQuadric();;
-
-  mQuadricStdNoNormals = gluNewQuadric();
-  gluQuadricNormals(mQuadricStdNoNormals, GLU_NONE);
+  mQuadricStd = 0;
+  mQuadricStdNoNormals = 0;
 }
 
 GLRnrDriver::~GLRnrDriver()
@@ -49,8 +47,11 @@ GLRnrDriver::~GLRnrDriver()
   delete [] mLamps;
   delete [] mClipPlanes;
 
-  gluDeleteQuadric(mQuadricStd);
-  gluDeleteQuadric(mQuadricStdNoNormals);
+  if (mQuadricStd != 0)
+  {
+    gluDeleteQuadric(mQuadricStd);
+    gluDeleteQuadric(mQuadricStdNoNormals);
+  }
 }
 
 /**************************************************************************/
@@ -59,6 +60,17 @@ GLRnrDriver::~GLRnrDriver()
 
 void GLRnrDriver::BeginRender()
 {
+  if (mQuadricStd == 0)
+  {
+    mQuadricStd = gluNewQuadric();
+    gluQuadricDrawStyle(mQuadricStd, GLU_FILL);
+    gluQuadricNormals(mQuadricStd, GLU_SMOOTH);
+    
+    mQuadricStdNoNormals = gluNewQuadric();
+    gluQuadricDrawStyle(mQuadricStdNoNormals, GLU_FILL);
+    gluQuadricNormals(mQuadricStdNoNormals, GLU_NONE);
+  }
+  
   RnrDriver::BeginRender();
 
   if(mFaderStack == 0) {
