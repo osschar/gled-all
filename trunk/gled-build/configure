@@ -286,7 +286,7 @@ if ($config->{RECONFIGURE} == 0)
   # Pre-compiled headers
   if ($config->{USE_PCH} eq '<auto>')
   {
-    my $gcc_ver = exec_or_die('echo -e "all:\n\t\${CXX} --version" | make -f -');
+    my $gcc_ver = exec_or_die('echo -e "all:\n\t\${CXX} --version" | make -sf -');
     
     my ($gcc_major, $gcc_minor) = $gcc_ver =~ m/(\d+)\.(\d+)\.\d+/;
     $config->{USE_PCH} = $gcc_major >= 4 ? 1 : 0;
