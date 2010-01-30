@@ -1,3 +1,12 @@
+2010-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix rendering of explosions on mac.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	Move glu-quadric initialization into BeginRender.
+	OSX apparently requires that glu objects to be created in a valid
+	gl context.
+
 2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* FL/Fl_SVars.cxx:
