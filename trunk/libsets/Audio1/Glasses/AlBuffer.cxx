@@ -77,44 +77,53 @@ void AlBuffer::Load()
   }
   else if (mFile.EndsWith(".ogg"))
   {
-    OggVorbis_File oggFile;
-    int status = ov_fopen((char*)mFile.Data(), &oggFile);
-    if (status == 0)
+    FILE *fp = fopen(mFile, "r");
+    if (fp)
     {
-      vorbis_info *info = ov_info(&oggFile, -1);
-      ogg_int64_t  len = ov_pcm_total(&oggFile, -1) * info->channels * 2;
-      UChar_t     *data = new UChar_t[len];
-
-      int          bs    = -1;
-      ogg_int64_t  todo  = len;
-      UChar_t     *bufpt = data;
-
-      while (todo)
+      OggVorbis_File oggFile;
+      int status = ov_open(fp, &oggFile, 0, 0);
+      if (status == 0)
       {
-	long read = ov_read(&oggFile, (char*)bufpt, todo, slBigEndian, 2, 1, &bs);
-	todo  -= read;
-	bufpt += read;
+	vorbis_info *info = ov_info(&oggFile, -1);
+	ogg_int64_t  len = ov_pcm_total(&oggFile, -1) * info->channels * 2;
+	UChar_t     *data = new UChar_t[len];
+
+	int          bs    = -1;
+	ogg_int64_t  todo  = len;
+	UChar_t     *bufpt = data;
+
+	while (todo)
+	{
+	  long read = ov_read(&oggFile, (char*)bufpt, todo, slBigEndian, 2, 1, &bs);
+	  todo  -= read;
+	  bufpt += read;
+	}
+
+	alGenBuffers(1, &mAlBuf);
+	alBufferData(mAlBuf, (info->channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, data, len, info->rate);
+
+	delete [] data;
+	ov_clear(&oggFile);
       }
-
-      alGenBuffers(1, &mAlBuf);
-      alBufferData(mAlBuf, (info->channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, data, len, info->rate);
-
-      delete [] data;
-      ov_clear(&oggFile);
-    }
-    else
-    {
-      const char *err;
-      switch (status)
+      else
       {
+	const char *err;
+	switch (status)
+	{
 	case OV_EREAD:      err = "A read from media returned an error."; break;
 	case OV_ENOTVORBIS: err = "Bitstream does not contain any Vorbis data."; break;
 	case OV_EVERSION:   err = "Vorbis version mismatch."; break;
 	case OV_EBADHEADER: err = "Invalid Vorbis bitstream header."; break;
 	case OV_EFAULT:     err = "Internal logic fault; indicates a bug or heap/stack corruption."; break;
 	default:            err = "unknown."; break;
+	}
+	ISerr(_eh + "Error in OGG ov_open: " + err);
+	fclose(fp);
       }
-      ISerr(_eh + "Error in OGG ov_open: " + err);
+    }
+    else
+    {
+      ISerr(_eh + "Can not open file.");
     }
   }
   else

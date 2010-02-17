@@ -1,3 +1,9 @@
+2010-02-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AlBuffer.cxx:
+	Use ov_open() instead of ov_fopen() to open an ogg file.
+	Apparently older versions (as in RHEL5) do not have it.
+
 2010-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AlSource.cxx:
