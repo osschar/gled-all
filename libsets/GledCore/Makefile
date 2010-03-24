@@ -72,3 +72,10 @@ clean::
 
 distclean::
 	@rm -f ${MAINEXES}
+
+#===============================================================================
+
+ABOVE_RNR_GL_LIBS += -L$(shell root-config --libdir) -lFTGL
+
+Rnr/GL/GLTextNS.o Rnr/GL/Text_GL_Rnr.o Rnr/GL/WGlFrameStyle_GL_Rnr.o \
+Rnr/GL/ZRlFont_GL_Rnr.o : CPPFLAGS += -I/usr/include/freetype2

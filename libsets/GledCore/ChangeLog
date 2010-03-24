@@ -1,3 +1,43 @@
+2010-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use FTGL for font rendering -- uses true-type fonts.
+	Wipe old implementation in GLTextNS using txf fonts.
+
+	So far only texture fonts are properly supported (that was the
+	only mode supported by the old implementation) even though this
+	will change soon.
+
+	This requires update of root as FTGL there has been hacked to
+	provide fading of text beyond certain width.
+
+	* Glasses/ScreenDumper.h:
+	* Glasses/ScreenText.cxx:
+	* Glasses/ScreenText.h:
+	* Glasses/WGlDirectory.cxx:
+	* Glasses/WGlFrameStyle.cxx:
+	* Glasses/WGlFrameStyle.h:
+	* Glasses/ZRlFont.cxx:
+	* Glasses/ZRlFont.h:
+	* Makefile:
+	* Rnr/GL/GLTextNS.cxx:
+	* Rnr/GL/GLTextNS.h:
+	* Rnr/GL/PupilInfo_GL_Rnr.cxx:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/WGlButton_GL_Rnr.cxx:
+	* Rnr/GL/WGlButton_GL_Rnr.h:
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	* Rnr/GL/WGlDirectory_GL_Rnr.h:
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.cxx:
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.h:
+	* Rnr/GL/WGlValuator_GL_Rnr.cxx:
+	* Rnr/GL/WGlValuator_GL_Rnr.h:
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.h:
+	* Rnr/GL/ZRnrModBase_GL_Rnr.h:
+	* Stones/ZColor.cxx:
+	* Stones/ZColor.h:
+	Various changes required for transition to FTGL.
+
 2010-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix rendering of explosions on mac.

@@ -16,8 +16,9 @@ void metagui_test()
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("Geom1");
 
-  CREATE_ADD_GLASS(lucida34, ZRlFont, g_queen, "LucidaBright 34", 0);
-  lucida34->SetFontFile("lucidabright34.txf");
+  CREATE_ADD_GLASS(bigfont, ZRlFont, g_queen, "Comic Bold", 0);
+  bigfont->SetFontFile("$ROOTSYS/fonts/comicbd.ttf");
+  bigfont->SetSize(32);
 
   Scene* images  = new Scene("Images");
   g_queen->CheckIn(images);
@@ -70,13 +71,11 @@ void metagui_test()
   image6->Load();
   image6->SetLoadAdEnlight(true);
 
-  CREATE_ADD_GLASS(ribbon1, ZRibbon, images, "Ribbon1", 0);
-  ribbon1->SetPOVFile("ribbon1.pov");
-  ribbon1->LoadPOV();
+  CREATE_ADD_GLASS(ribbon1, RGBAPalette, images, "Ribbon1", 0);
+  ribbon1->SetMarksFromPOVFile("ribbon1.pov");
 
-  CREATE_ADD_GLASS(ribbon2, ZRibbon, images, "Ribbon2", 0);
-  ribbon2->SetPOVFile("booby.pov");
-  ribbon2->LoadPOV();
+  CREATE_ADD_GLASS(ribbon2, RGBAPalette, images, "Ribbon2", 0);
+  ribbon2->SetMarksFromPOVFile("booby.pov");
 
   // Geom elements
 
@@ -149,7 +148,7 @@ void metagui_test()
   txt1->SetScales(2.2, 2.3, 1);
   txt1->SetFillBack(true);
   txt1->SetFGCol(0, 0, 0); txt1->SetBGCol(1, 0.95, 0.6);
-  txt1->SetFont(lucida34);
+  txt1->SetFont(bigfont);
 
   CREATE_ADD_GLASS(txt2, Text, images, "Text2", 0);
   txt2->SetText("Generic Lightweight Environment for Distributed computing");
@@ -219,10 +218,12 @@ void metagui_test()
   gl_dir->SetCbackAlpha(rot_op);
   gl_dir->SetCbackMethodName("Mover::SetNode");
   gl_dir->SetCbackBetaType("ZNode");
+  gl_dir->SetPageCtrlWidth(0.3);
+  gl_dir->SetPageInfoWidth(0.5);
 
   CREATE_ADD_GLASS(bfs, WGlFrameStyle, overlay, "Butt Frame Style", 0);
   bfs->SetHAlign(WGlFrameStyle::HA_Center);
-  bfs->SetTextFadeW(0);
+  bfs->SetTextFadeW(1);
   bfs->SetTileColor(0.3, 0.5, 0.5, 0.6);
   bfs->SetBelowMColor(0.5, 0.7, 0.7, 0.8);
 

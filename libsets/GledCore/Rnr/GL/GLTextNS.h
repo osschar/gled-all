@@ -18,85 +18,12 @@
 class RnrDriver;
 class ZColor;
 
-namespace GLTextNS {
+class FTFont;
 
-#define TXF_FORMAT_BYTE		0
-#define TXF_FORMAT_BITMAP	1
-
-  struct TexGlyphInfo {
-    unsigned short c;       /* Potentially support 16-bit glyphs. */
-    unsigned char width;
-    unsigned char height;
-    signed char xoffset;
-    signed char yoffset;
-    signed char advance;
-    char dummy;           /* Space holder for alignment reasons. */
-    short x;
-    short y;
-  };
-
-  struct TexGlyphVertexInfo {
-    GLfloat t0[2];
-    GLshort v0[2];
-    GLfloat t1[2];
-    GLshort v1[2];
-    GLfloat t2[2];
-    GLshort v2[2];
-    GLfloat t3[2];
-    GLshort v3[2];
-    GLfloat advance;
-  };
-
-  class TexFont : public TObject {
-  public:
-    GLuint texobj;
-    int tex_width;
-    int tex_height;
-    int max_ascent;
-    int max_descent;
-    int max_width;   // max glyph width (MT)
-    int num_glyphs;
-    int min_glyph;
-    int range;
-    unsigned char *teximage;
-    TexGlyphInfo *tgi;
-    TexGlyphVertexInfo *tgvi;
-    TexGlyphVertexInfo **lut;
-  };
-
-  extern const char *txfErrorString(void);
-
-  extern TexFont *txfLoadFont(const char *filename);
-
-  extern void txfUnloadFont(TexFont* txf);
-
-  extern GLuint txfEstablishTexture(TexFont* txf, GLuint texobj,
-				    GLboolean setupMipmaps);
-
-  extern void txfBindFontTexture(TexFont* txf);
-
-  extern void txfGetStringMetrics(TexFont* txf, const char *string, int len,
-				  int &width, int &max_ascent, int &max_descent);
-
-  extern void txfRenderGlyph(TexFont* txf, int c);
-  extern void txfRenderString(TexFont* txf, const char *string, int len,
-			      bool keep_pos=true);
-  extern void txfRenderString(TexFont* txf, const char *string, int len,
-			      GLfloat maxx, GLfloat fadew,
-			      bool keep_pos=true);
-
-  extern void txfRenderGlyphZW(TexFont* txf, int c, float z, float w);
-  extern void txfRenderStringZW(TexFont* txf, const char *string, int len,
-				float z, float w, bool keep_pos=true);
-
-  extern void txfRenderFancyString(TexFont* txf, char *string, int len);
-
-
-  /**************************************************************************/
-  // Here starts MT higher-level interface
-  /**************************************************************************/
-
-  struct BoxSpecs {
+namespace GLTextNS
+{
+  struct BoxSpecs
+  {
     int     lm, rm, tm, bm;
     int     lineskip;
     char    align;
@@ -114,12 +41,17 @@ namespace GLTextNS {
     { lm = l; rm = r; tm = t; bm = b; _init(); }
   };
 
-  struct TextLineData {
-    int     width, ascent, descent, hfull;
+  struct TextLineData
+  {
+    float   width, ascent, descent, hfull;
     TString text;
 
-    TextLineData(TexFont *txf, TString line);
+    TextLineData(FTFont *ftf, const TString& line);
   };
+
+  extern Float_t MeasureWidth(FTFont *ftf, const TString& txt);
+  extern Float_t MeasureWidth(FTFont *ftf, const TString& txt,
+			      Float_t& ascent, Float_t& descent);
 
   extern void RnrTextBar(RnrDriver* rd, const TString& text);
 

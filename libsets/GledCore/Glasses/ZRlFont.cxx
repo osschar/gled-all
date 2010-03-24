@@ -13,13 +13,18 @@
 #include "ZRlFont.c7"
 #include <Glasses/ZQueen.h>
 
+#include "TSystem.h"
+
 ClassImp(ZRlFont);
 
 /**************************************************************************/
 
 void ZRlFont::_init()
 {
-  mSize = 12;
+  mMode = FM_Texture;
+  mFontFile = GForm("%s/fonts/arial.ttf", gSystem->Getenv("ROOTSYS"));
+  mSize = 16;
+  mDepthFac = 0.2;
 }
 
 /**************************************************************************/
@@ -27,10 +32,37 @@ void ZRlFont::_init()
 void ZRlFont::SetFontFile(const Text_t* f)
 {
   mFontFile = f;
-  if(mQueen && mSaturn->AcceptsRays()) {
+  gSystem->ExpandPathName(mFontFile);
+  StampReqTring(FID());
+  EmitFontChangeRay();
+}
+
+void ZRlFont::EmitFontChangeRay()
+{
+  if (mQueen && mSaturn->AcceptsRays())
+  {
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_font_change, mTimeStamp, FID()));
     mQueen->EmitRay(ray);
   }
-  mStampReqTring = Stamp(FID());
+}
+
+void ZRlFont::EmitSizeChangeRay()
+{
+  if (mQueen && mSaturn->AcceptsRays())
+  {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_size_change, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
+}
+
+void ZRlFont::EmitDepthChangeRay()
+{
+  if (mQueen && mSaturn->AcceptsRays())
+  {
+    auto_ptr<Ray> ray
+      (Ray::PtrCtor(this, PRQN_depth_change, mTimeStamp, FID()));
+    mQueen->EmitRay(ray);
+  }
 }

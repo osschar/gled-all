@@ -66,12 +66,12 @@ public:
   friend ZColor operator-(const ZColor& x, const ZColor& y);
   friend ZColor operator/(const ZColor& x, const ZColor& y);
 
-  friend ostream& operator<<(ostream& s, ZColor& c);
+  friend ostream& operator<<(ostream& s, const ZColor& c);
 
   ClassDefNV(ZColor,1); // Color as RGBA float quadruple.
 };
 
-ostream& operator<<(ostream& s, ZColor& c);
+ostream& operator<<(ostream& s, const ZColor& c);
 
 
 //------------------------------------------------------------------------------
@@ -113,24 +113,27 @@ inline void ZColor::rgb_to_ubyte(UChar_t* ub, bool wrap) const
 
 inline ZColor operator*(float a, const ZColor& x)
 {
-  return ZColor(a*x.mC[0], a*x.mC[1], a*x.mC[2], a*x.mC[3]);
+  // Scale color, alpha inchanged.
+  return ZColor(a*x.mC[0], a*x.mC[1], a*x.mC[2], x.mC[3]);
 }
 
 inline ZColor operator+(const ZColor& x, const ZColor& y)
 {
-  return ZColor(x.mC[0]+y.mC[0], x.mC[1]+y.mC[1], x.mC[2]+y.mC[2], x.mC[3]+y.mC[3]);
+  // Add colors, alpha = 1.
+  return ZColor(x.mC[0]+y.mC[0], x.mC[1]+y.mC[1], x.mC[2]+y.mC[2]);
 }
 
 inline ZColor operator-(const ZColor& x, const ZColor& y)
 {
-  return ZColor(x.mC[0]-y.mC[0], x.mC[1]-y.mC[1], x.mC[2]-y.mC[2], x.mC[3]-y.mC[3]);
+  // Subtract colors, alpha = 1.
+  return ZColor(x.mC[0]-y.mC[0], x.mC[1]-y.mC[1], x.mC[2]-y.mC[2]);
 }
 
 inline ZColor operator/(const ZColor& x, const ZColor& y)
 {
-  // Average color
-  return ZColor((x.mC[0]+y.mC[0])/2, (x.mC[1]+y.mC[1])/2,
-		(x.mC[2]+y.mC[2])/2, (x.mC[3]+y.mC[3])/2);
+  // Average color, also alpha.
+  return ZColor(0.5f*(x.mC[0]+y.mC[0]), 0.5f*(x.mC[1]+y.mC[1]),
+		0.5f*(x.mC[2]+y.mC[2]), 0.5f*(x.mC[3]+y.mC[3]));
 }
 
 #endif

@@ -6,9 +6,12 @@
 
 #include "WGlFrameStyle_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
+
 #include <Rnr/GL/GLTextNS.h>
 
 #include <GL/glew.h>
+
+#include "FTFont.h"
 
 #define PARENT ZRnrModBase_GL_Rnr
 
@@ -54,7 +57,7 @@ void WGlFrameStyle_GL_Rnr::BoxLimits(float& dx, float& dy,
   h = dy - 2*FS.mYBorder;
 }
 
-void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, TString& label,
+void WGlFrameStyle_GL_Rnr::StudyText(FTFont *txf, const TString& label,
 				     float& scale,
 				     float& x, float& y, float& w, float& h)
 {
@@ -63,11 +66,8 @@ void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, TString& label,
 
   WGlFrameStyle& FS = *mWGlFrameStyle;
 
-  int width, ascent, descent;
-  GLTextNS::txfGetStringMetrics(txf, label.Data(), label.Length(),
-				width, ascent, descent);
-  ascent  = txf->max_ascent;
-  descent = txf->max_descent;
+  float width, ascent, descent;
+  width = GLTextNS::MeasureWidth(txf, label, ascent, descent);
 
   float text_h  = FS.mTextYSize;
   bool  fullh_p = false;
@@ -75,7 +75,7 @@ void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, TString& label,
     text_h  = h;
     fullh_p = true;
   }
-  int   height   = ascent + descent;
+  float height   = ascent + descent;
         scale    = text_h / height;
   float scaled_w = width  * scale;
   bool  fullw_p  = false;
@@ -105,7 +105,8 @@ void WGlFrameStyle_GL_Rnr::StudyText(GLTextNS::TexFont *txf, TString& label,
 
 /**************************************************************************/
 
-void WGlFrameStyle_GL_Rnr::RenderTile(float dx, float dy, bool belowmouse, const ZColor* col)
+void WGlFrameStyle_GL_Rnr::RenderTile(float dx, float dy, bool belowmouse,
+				      const ZColor* col)
 {
    WGlFrameStyle& FS = *mWGlFrameStyle;
    if(FS.bDrawTile) {
@@ -135,7 +136,7 @@ void WGlFrameStyle_GL_Rnr::RenderFrame(float dx, float dy)
    }
 }
 
-void WGlFrameStyle_GL_Rnr::RenderText(GLTextNS::TexFont *txf, TString& label,
+void WGlFrameStyle_GL_Rnr::RenderText(FTFont *txf, const TString& label,
 				      float scale,
 				      float x, float y, float max_w)
 {
@@ -147,16 +148,16 @@ void WGlFrameStyle_GL_Rnr::RenderText(GLTextNS::TexFont *txf, TString& label,
   glScalef(scale, scale, 1);
   glColor4fv(FS.mTextColor());
   GL_Capability_Switch texure_on(GL_TEXTURE_2D, true);
-  GLTextNS::txfBindFontTexture(txf);
-  txfRenderString(txf, label.Data(), label.Length(),
-		  max_w/scale, FS.mTextFadeW);
+
+  float end_w = max_w / scale;
+  txf->Render(label, end_w,  FS.mTextFadeW * end_w);
 
   glPopMatrix();
 }
 
 /**************************************************************************/
 
-void WGlFrameStyle_GL_Rnr::FullRender(GLTextNS::TexFont *txf, TString& label,
+void WGlFrameStyle_GL_Rnr::FullRender(FTFont *txf, const TString& label,
 				      float dx, float dy, bool belowmouse)
 {
   WGlFrameStyle& FS = *mWGlFrameStyle;
@@ -189,8 +190,9 @@ void WGlFrameStyle_GL_Rnr::FullRender(GLTextNS::TexFont *txf, TString& label,
 
 /**************************************************************************/
 
-void WGlFrameStyle_GL_Rnr::FullSymbolRender(GLTextNS::TexFont *txf, TString& label,
-					    float dx, float dy, bool belowmouse, const ZColor* back_col, const ZColor* sym_color)
+void WGlFrameStyle_GL_Rnr::FullSymbolRender(FTFont *txf, const TString& label,
+					    float dx, float dy, bool belowmouse,
+					    const ZColor* back_col, const ZColor* sym_color)
 {
   WGlFrameStyle& FS = *mWGlFrameStyle;
 
@@ -218,13 +220,12 @@ void WGlFrameStyle_GL_Rnr::FullSymbolRender(GLTextNS::TexFont *txf, TString& lab
   if (label == "<" ) {
     render_triangle(1, dx, dy, sym_color);
   } else if (label == "<<" ) {
-    render_triangle(2,dx, dy, sym_color);
+    render_triangle(2, dx, dy, sym_color);
   } else if (label == ">" ) {
-    render_triangle(3,dx, dy, sym_color);
+    render_triangle(3, dx, dy, sym_color);
   } else if (label == ">>") {
-    render_triangle(4,dx, dy, sym_color);
-  }
-  else {
+    render_triangle(4, dx, dy, sym_color);
+  } else {
     RenderText(txf, label, scale, xt, yt, w);
   }
   glDisable(GL_POLYGON_OFFSET_FILL);
@@ -232,36 +233,40 @@ void WGlFrameStyle_GL_Rnr::FullSymbolRender(GLTextNS::TexFont *txf, TString& lab
 }
 
 /**************************************************************************/
-void WGlFrameStyle_GL_Rnr::render_triangle(int id, float dx, float dy, const ZColor* col){
+
+void WGlFrameStyle_GL_Rnr::render_triangle(int id, float dx, float dy,
+					   const ZColor* col)
+{
   glColor4fv((*col)());
-  float xs = dx/4, ys = dy/4;
+  float xs = 0.25f*dx, ys = 0.25f*dy;
 
   glBegin(GL_TRIANGLES);
-  switch (id) {
-  case 1:
+  switch (id)
+  {
+    case 1:
     {
       glVertex2f(xs*2.5, ys*3); glVertex2f(xs*1.5, ys*2); glVertex2f(xs*2.5, ys);
       break;
     }
-  case 2:
+    case 2:
     {
-      glVertex2f(xs*2, ys*3); glVertex2f(xs, ys*2); glVertex2f(xs*2, ys);
+      glVertex2f(xs*2, ys*3); glVertex2f(xs, ys*2);   glVertex2f(xs*2, ys);
       glVertex2f(xs*3, ys*3); glVertex2f(xs*2, ys*2); glVertex2f(xs*3, ys);
       break;
     }
-  case 3:
+    case 3:
     {
-      glVertex2f(xs*1.5, ys);  glVertex2f(xs*2.5, ys*2); glVertex2f(xs*1.5, ys*3);
+      glVertex2f(xs*1.5, ys); glVertex2f(xs*2.5, ys*2); glVertex2f(xs*1.5, ys*3);
       break;
     }
-  case 4:
+    case 4:
     {
-      glVertex2f(xs, ys);  glVertex2f(xs*2, ys*2); glVertex2f(xs, ys*3);
+      glVertex2f(xs, ys);   glVertex2f(xs*2, ys*2); glVertex2f(xs, ys*3);
       glVertex2f(xs*2, ys); glVertex2f(xs*3, ys*2); glVertex2f(xs*2, ys*3);
       break;
     }
-  default:
-    break;
+    default:
+      break;
   }
   glEnd();
 }

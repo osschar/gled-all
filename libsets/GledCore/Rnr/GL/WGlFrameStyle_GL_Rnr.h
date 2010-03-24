@@ -10,12 +10,14 @@
 #include <Glasses/WGlFrameStyle.h>
 #include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
 
-namespace GLTextNS { class TexFont; }
+class FTFont;
 
-class WGlFrameStyle_GL_Rnr : public ZRnrModBase_GL_Rnr {
+class WGlFrameStyle_GL_Rnr : public ZRnrModBase_GL_Rnr
+{
  private:
   void _init();
   void render_triangle(int id, float dx, float dy, const ZColor* col);
+
  protected:
   WGlFrameStyle*	mWGlFrameStyle;
 
@@ -30,21 +32,23 @@ class WGlFrameStyle_GL_Rnr : public ZRnrModBase_GL_Rnr {
 
   void BoxLimits(float& dx, float& dy,
 		 float& x, float& y, float& w, float& h);
-  void StudyText(GLTextNS::TexFont *txf, TString& label,
+  void StudyText(FTFont *txf, const TString& label,
 		 float& scale,
 		 float& x, float& y, float& w, float& h);
 
 
-  void RenderTile (float dx, float dy, bool belowmouse=false, const ZColor* col=0);
+  void RenderTile (float dx, float dy, bool belowmouse=false,
+		   const ZColor* col=0);
   void RenderFrame(float dx, float dy);
-  void RenderText (GLTextNS::TexFont *txf, TString& label,
+  void RenderText (FTFont *txf, const TString& label,
 		   float x, float y, float w, float h);
 
-  void FullRender(GLTextNS::TexFont *txf, TString& label,
+  void FullRender(FTFont *txf, const TString& label,
 		  float dx, float dy, bool belowmouse=false);
 
-  void FullSymbolRender(GLTextNS::TexFont *txf, TString& label,
-			float dx, float dy, bool belowmouse=false, const ZColor* col1=0, const ZColor* col2=0);
+  void FullSymbolRender(FTFont *txf, const TString& label,
+			float dx, float dy, bool belowmouse=false,
+			const ZColor* col1=0, const ZColor* col2=0);
 
 }; // endclass WGlFrameStyle_GL_Rnr
 

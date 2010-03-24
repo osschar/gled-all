@@ -1,3 +1,9 @@
+2010-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* images.C:
+	* metagui_test.C:
+	Few small changes required for transition to FTGL.
+
 2009-07-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Preliminary handling of uniform variables.

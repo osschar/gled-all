@@ -26,7 +26,7 @@ protected:
   HAlign_e          mHAlign;       // X{GS} 7 PhonyEnum(-join=>1)
   VAlign_e          mVAlign;       // X{GS} 7 PhonyEnum()
   Float_t           mDefDx;        // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
-  Float_t           mTextFadeW;    // X{GS} 7 Value(-range=>[0,1000,1,1000])
+  Float_t           mTextFadeW;    // X{GS} 7 Value(-range=>[0,1,1,1000])
   Float_t           mTextYSize;    // X{GS} 7 Value(-range=>[0,1000,1,1000], -join=>1)
   Float_t           mFrameW;       // X{GS} 7 Value(-range=>[0,128,1,100])
 

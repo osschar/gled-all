@@ -12,7 +12,8 @@
 #include <Glasses/ZRlFont.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class WGlValuator_GL_Rnr : public ZNode_GL_Rnr {
+class WGlValuator_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 

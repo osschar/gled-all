@@ -28,8 +28,13 @@ void images()
 
   ZList* fontdir = g_queen->AssertPath("var/fonts", "ZNameMap");
 
-  CREATE_ADD_GLASS(lucida34, ZRlFont, g_queen, "LucidaBright 34", 0);
-  lucida34->SetFontFile("lucidabright34.txf");
+  CREATE_ADD_GLASS(gledfont, ZRlFont, fontdir, "Arial Bold", 0);
+  gledfont->SetFontFile("$ROOTSYS/fonts/arialbd.ttf");
+  gledfont->SetSize(48);
+
+  CREATE_ADD_GLASS(bigfont, ZRlFont, fontdir, "Comic Bold", 0);
+  bigfont->SetFontFile("$ROOTSYS/fonts/comicbd.ttf");
+  bigfont->SetSize(32);
 
   //----------------------------------------------------------------------------
   // Images, textures
@@ -195,7 +200,7 @@ void images()
   txt1->SetScales(2.2, 2.3, 1);
   txt1->SetFillBack(true);
   txt1->SetFGCol(0, 0, 0); txt1->SetBGCol(1, 0.95, 0.6);
-  txt1->SetFont(lucida34);
+  txt1->SetFont(gledfont);
 
   CREATE_ADD_GLASS(txt2, Text, images, "Text2", 0);
   txt2->SetText("Generic Lightweight Environment for Distributed computing");
@@ -203,6 +208,7 @@ void images()
   txt2->SetScales(0.67, 1.1, 1);
   txt2->SetFillBack(true);
   txt2->SetFGCol(0,0,0); txt2->SetBGCol(0.65, 0.8, 1);
+  txt2->SetFont(bigfont);
 
   // RndSmorphCreator
   CREATE_ADD_GLASS(rs_node, ZNode, images, "RndSmorph Node", 0);

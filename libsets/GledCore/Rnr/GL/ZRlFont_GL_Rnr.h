@@ -9,7 +9,8 @@
 
 #include <Glasses/ZRlFont.h>
 #include <Rnr/GL/ZRnrModBase_GL_Rnr.h>
-#include <Rnr/GL/GLTextNS.h>
+
+class FTFont;
 
 class ZRlFont_GL_Rnr : public ZRnrModBase_GL_Rnr
 {
@@ -17,12 +18,13 @@ private:
   void _init();
 
 protected:
-  ZRlFont*		mZRlFont;
-  GLTextNS::TexFont*	mFont;    // X{g}
+  ZRlFont	*mZRlFont;
+  FTFont	*mFont;    // X{g}
 
 public:
   ZRlFont_GL_Rnr(ZRlFont* idol) :
     ZRnrModBase_GL_Rnr(idol), mZRlFont(idol) { _init(); }
+  virtual ~ZRlFont_GL_Rnr();
 
   virtual void AbsorbRay(Ray& ray);
 
