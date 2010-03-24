@@ -6,7 +6,8 @@
 # Fix the following variables before running:
 
 svnurl="https://root.cern.ch/svn/root/branches/v5-26-00-patches"
-version="5.26.00"
+svntrunk="https://root.cern.ch/svn/root/trunk"
+version="5.26.01"
 dir="root"
 tarfile="root-$version-gled.tar"
 
@@ -15,6 +16,10 @@ echo "Checking out ..."
 rm -rf $dir
 mkdir $dir
 svn co $svnurl $dir
+
+echo "Merging gled-related changes ..."
+# For 5.26.01
+svn merge -c 32740 $svntrunk
 
 echo "Generating etc/svninfo.txt"
 cd $dir
