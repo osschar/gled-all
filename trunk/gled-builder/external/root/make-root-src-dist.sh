@@ -16,13 +16,13 @@ echo "Checking out ..."
 rm -rf $dir
 mkdir $dir
 svn co $svnurl $dir
+cd $dir
 
 echo "Merging gled-related changes ..."
 # For 5.26.01
 svn merge -c 32740 $svntrunk
 
 echo "Generating etc/svninfo.txt"
-cd $dir
 build/unix/svninfo.sh
 
 echo "Remove .svn directories ..."
