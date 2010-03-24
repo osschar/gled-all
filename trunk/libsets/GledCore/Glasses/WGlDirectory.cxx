@@ -83,7 +83,7 @@ void WGlDirectory::StandardPersp()
 
 void WGlDirectory::StandardFixed()
 {
-  SetPos(0.2, 8, 0);
+  SetPos(0.2, 8, -0.01);
   SetStepMode(SM_YXZ);
   SetDx(2);  SetDy(-0.7); SetDz(1);
   SetDrawBox(0);

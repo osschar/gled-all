@@ -12,7 +12,8 @@
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
 
-class WGlDirectory_GL_Rnr : public ZNode_GL_Rnr {
+class WGlDirectory_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 

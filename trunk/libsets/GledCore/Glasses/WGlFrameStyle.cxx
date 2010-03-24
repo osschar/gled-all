@@ -18,11 +18,10 @@ ClassImp(WGlFrameStyle);
 
 void WGlFrameStyle::_init()
 {
-  // *** Set all links to 0 ***
   mHAlign     = HA_Left;
   mVAlign     = VA_Center;
   mDefDx      = 2;
-  mTextFadeW  = 1.5;
+  mTextFadeW  = 0.95;
   mTextYSize  = 0.4;
   mFrameW     = 0;
 

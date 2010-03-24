@@ -12,7 +12,7 @@
 
 ClassImp(ZColor);
 
-ostream& operator<<(ostream& s, ZColor& c)
+ostream& operator<<(ostream& s, const ZColor& c)
 {
   return s << c[0] <<","<< c[1] <<","<< c[2] <<","<< c[3];
 }

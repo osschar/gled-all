@@ -47,7 +47,7 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
   obtain_rnrmod(rd, mFontRMS);
   obtain_rnrmod(rd, mFrameRMS);
 
-  GLTextNS::TexFont    *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
+  FTFont *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
   WGlFrameStyle_GL_Rnr &FSR = *(WGlFrameStyle_GL_Rnr*)mFrameRMS.rnr();
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POLYGON_BIT);
@@ -64,10 +64,11 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
 
   GledNS::ClassInfo* bci = M.GetCbackBetaClassInfo();
   lpZGlass_t cont; M.mContents->CopyList(cont);
-  for(lpZGlass_i i=cont.begin(); i!=cont.end(); ++i) {
-    if(bci && ! GledNS::IsA(*i, bci->fFid)) continue;
+  for (lpZGlass_i i=cont.begin(); i!=cont.end(); ++i)
+  {
+    if (bci && ! GledNS::IsA(*i, bci->fFid)) continue;
     count ++;
-    if(count < first ) continue;
+    if (count < first) continue;
 
     ZColor back_color = M.mBoxColor;
     bool belowmouse = (*i == m_current);
@@ -87,9 +88,11 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
       glPopMatrix();
     }
 
-    if(M.bDrawText){
+    if (M.bDrawText)
+    {
       TString lens_name((*i)->GetName());
-      if(M.bDrawTitle){
+      if (M.bDrawTitle)
+      {
 	// name
 	Float_t ntw = M.mTextDx*M.mNameFraction;
 	glPushMatrix();
@@ -108,7 +111,9 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
 	TString lens_title((*i)->GetTitle());
 	FSR.FullRender(txf, lens_title,  M.mTextDx-ntw, M.mTextDy, belowmouse);
 	glPopMatrix();
-      } else {
+      }
+      else
+      {
 	// name
 	glPushMatrix();
 	glTranslatef(M.mTextOx, M.mTextOy, M.mTextOz);
@@ -127,8 +132,8 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
   }
 
 
-  if(M.bDrawPageCtrl) {
-    TString xxx;
+  if (M.bDrawPageCtrl)
+  {
     ZColor ptc = M.mPageColor;
     ZColor psc = M.mSymColor;
     glPushMatrix();
@@ -139,31 +144,27 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     float pio =  M.mPageInfoOff*M.mTextDx;
 
     rd->GL()->PushName(this, m_prev_page);
-    xxx = "<<";
-    FSR.FullSymbolRender(txf, xxx, pcw, M.mTextDy, m_current == m_prev_page, &ptc, &psc);
+    FSR.FullSymbolRender(txf, "<<", pcw, M.mTextDy, m_current == m_prev_page, &ptc, &psc);
     rd->GL()->PopName();
 
     glTranslatef(pcw + pco, 0, 0);
     rd->GL()->PushName(this, m_prev);
-    xxx = "<";
-    FSR.FullSymbolRender(txf, xxx, pcw, M.mTextDy, m_current == m_prev, &ptc, &psc);
+    FSR.FullSymbolRender(txf, "<", pcw, M.mTextDy, m_current == m_prev, &ptc, &psc);
     rd->GL()->PopName();
 
     glTranslatef(pcw + pio, 0, 0);
-    xxx = GForm("%d/%d", M.mFirst, all_count);
-    FSR.FullSymbolRender(txf, xxx, piw, M.mTextDy, false, &ptc);
-
+    rd->GL()->PushName(this, 0);
+    FSR.FullSymbolRender(txf,  GForm("%d/%d", M.mFirst, all_count), piw, M.mTextDy, false, &ptc);
+    rd->GL()->PopName();
 
     glTranslatef(piw + pio, 0, 0);
     rd->GL()->PushName(this, m_next);
-    xxx = ">";
-    FSR.FullSymbolRender(txf, xxx, pcw, M.mTextDy, m_current == m_next, &ptc, &psc);
+    FSR.FullSymbolRender(txf, ">", pcw, M.mTextDy, m_current == m_next, &ptc, &psc);
     rd->GL()->PopName();
 
     glTranslatef(pcw + pco, 0, 0);
     rd->GL()->PushName(this, m_next_page);
-    xxx = ">>";
-    FSR.FullSymbolRender(txf, xxx, pcw, M.mTextDy, m_current == m_next_page, &ptc, &psc);
+    FSR.FullSymbolRender(txf, ">>", pcw, M.mTextDy, m_current == m_next_page, &ptc, &psc);
     rd->GL()->PopName();
     glPopMatrix();
   }
@@ -209,8 +210,8 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     return 1;
   }
 
-  if(ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE && m_current != 0) {
-
+  if (ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE)
+  {
     if(m_current == m_prev_page) {
       auto_ptr<ZMIR> mir( M.S_PrevPage() );
       fImg->fEye->Send(*mir);
@@ -224,7 +225,7 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
     } else if(m_current == m_prev) {
       auto_ptr<ZMIR> mir( M.S_Prev() );
       fImg->fEye->Send(*mir);
-    }else {
+    } else if ( m_current != 0) {
       ZGlass* lens = (ZGlass*)m_current;
       auto_ptr<ZMIR> clicked( M.S_SetLastClicked(lens) );
       fImg->fEye->Send(*clicked);

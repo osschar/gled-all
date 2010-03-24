@@ -25,8 +25,6 @@ void PupilInfo_GL_Rnr::_init()
 
   if(def_font == 0) {
     def_font = new ZRlFont();
-    def_font->SetFontFile
-      (GForm("%s/fontdefault.txf", Gled::theOne->GetLibDir()));
     def_font_rnr = new ZRlFont_GL_Rnr(def_font);
     if(def_font_rnr->LoadFont() == false) {
       throw(_eh + "default font not found.");

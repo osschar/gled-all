@@ -7,7 +7,12 @@
 #include "Text_GL_Rnr.h"
 #include <Rnr/GL/ZRlFont_GL_Rnr.h>
 #include <Rnr/GL/GLRnrDriver.h>
+
+#include <Rnr/GL/GLTextNS.h>
+
 #include <GL/glew.h>
+
+#include "FTFont.h"
 
 #define PARENT ZNode_GL_Rnr
 
@@ -26,7 +31,7 @@ void Text_GL_Rnr::Draw(RnrDriver* rd)
 
 void Text_GL_Rnr::Render(RnrDriver* rd)
 {
-  GLTextNS::TexFont *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
+  FTFont *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
 
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
 
@@ -50,12 +55,11 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
     glDisable(GL_BLEND);
   }
 
-  int width, ascent, descent;
-  GLTextNS::txfGetStringMetrics(txf, mText->mText.Data(), mText->mText.Length(),
-				width, ascent, descent);
-  if(mText->bAbsSize) {
-    ascent  = txf->max_ascent;
-    descent = txf->max_descent;
+  float width, ascent, descent;
+  width = GLTextNS::MeasureWidth(txf, mText->mText, ascent, descent);
+  if (mText->bAbsSize) {
+    ascent  =   txf->Ascender();
+    descent = - txf->Descender();
   }
   int   h_box = ascent + descent;
   float scale = 1.0/h_box;
@@ -107,9 +111,7 @@ void Text_GL_Rnr::Render(RnrDriver* rd)
   rd->GL()->Color(mText->mFGCol);
   glScalef(scale, scale, 1);
   glEnable(GL_TEXTURE_2D);
-  GLTextNS::txfBindFontTexture(txf);
-  GLTextNS::txfRenderString(txf, mText->mText.Data(), mText->mText.Length());
-
+  txf->Render(mText->mText);
   glPopMatrix();
 
   glPopAttrib();

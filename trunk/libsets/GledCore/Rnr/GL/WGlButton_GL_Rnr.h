@@ -12,7 +12,8 @@
 #include <Glasses/ZRlFont.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class WGlButton_GL_Rnr : public ZNode_GL_Rnr {
+class WGlButton_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 
@@ -32,7 +33,6 @@ public:
   virtual void Draw(RnrDriver* rd);
 
   virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
-
 
 }; // endclass WGlButton_GL_Rnr
 

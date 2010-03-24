@@ -34,7 +34,7 @@ void WGlButton_GL_Rnr::Draw(RnrDriver* rd)
   obtain_rnrmod(rd, mFontRMS);
   obtain_rnrmod(rd, mFrameRMS);
 
-  GLTextNS::TexFont    *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
+  FTFont *txf = ((ZRlFont_GL_Rnr*)mFontRMS.rnr())->GetFont();
   WGlFrameStyle_GL_Rnr &FSR = *(WGlFrameStyle_GL_Rnr*)mFrameRMS.rnr();
 
   WGlButton& B = *mWGlButton;
