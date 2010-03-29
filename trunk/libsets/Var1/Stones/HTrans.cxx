@@ -4,8 +4,11 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+#include "HTrans.h"
+#include <Gled/GledTypes.h>
+#include <TMath.h>
+
 //______________________________________________________________________
-// HTrans
 //
 // HTrans is a 4x4 transformation matrix for homogeneous coordinates
 // stored internaly in a column-major order to allow direct usage by
@@ -27,16 +30,13 @@
 // Shorthands in method-names:
 // LF ~ LocalFrame; PF ~ ParentFrame; IP ~ InPlace
 
-#include "HTrans.h"
-#include <Gled/GledTypes.h>
-#include <TMath.h>
+ClassImp(HTransF);
+ClassImp(HTransD);
+
 
 // Not needed as long as all functions are inline.
 // template class HPoint<Float_t>;
 // template class HPoint<Double_t>;
-
-template class HTrans<Float_t>;
-template class HTrans<Double_t>;
 
 #define F00  0
 #define F01  4
@@ -57,8 +57,6 @@ template class HTrans<Double_t>;
 #define F31  7
 #define F32 11
 #define F33 15
-
-//ClassImp(HTrans);
 
 /**************************************************************************/
 
@@ -763,8 +761,7 @@ TT HTrans<TT>::InvertWithoutRow4()
   return det;
 }
 
-/**************************************************************************/
-/**************************************************************************/
+//==============================================================================
 
 template<class TT>
 void HTrans<TT>::Print(Option_t* option) const
@@ -784,3 +781,8 @@ ostream& operator<<(ostream& s, const HTrans<TT>& t) {
       s << t(i,j) << ((j==4) ? "\n" : "\t");
   return s;
 }
+
+//==============================================================================
+
+template class HTrans<Float_t>;
+template class HTrans<Double_t>;
