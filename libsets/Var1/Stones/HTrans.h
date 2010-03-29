@@ -60,12 +60,6 @@ public:
   ClassDefNV(HPoint, 1); // Simple, streamable 3D point.
 };
 
-// Axel.
-#ifndef __APPLE__
-template class HPoint<Float_t>;
-template class HPoint<Double_t>;
-#endif
-
 class HPointF : public HPoint<Float_t>
 {
 public:
@@ -101,7 +95,6 @@ public:
 // HTrans -- 3D transformation in generalised coordinates
 /******************************************************************************/
 
-// export (not suppored)
 template<class TT>
 class HTrans
 {
@@ -252,21 +245,10 @@ public:
   ClassDefNV(HTrans, 1);
 };
 
-// Include "less inline" members (export keyword not supported).
-
-#include "HTrans.cpp"
 
 template<class TT>
 ostream& operator<<(ostream& s, const HTrans<TT>& t);
 
-/**************************************************************************/
-/**************************************************************************/
-
-// The same thing ... Axel.
-#ifndef __APPLE__
-template class HTrans<Float_t>;
-template class HTrans<Double_t>;
-#endif
 
 /**************************************************************************/
 // Specializations

@@ -13,6 +13,7 @@
 
 #include <Glasses/Tringula.h>
 
+#include <TMath.h>
 #include <Math/ParamFunctor.h>
 #include <TF2.h>
 #include <TH1.h>
