@@ -1,3 +1,17 @@
+2010-03-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Un-inline some HTrans functions.
+
+	* Stones/HTrans.cpp:
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	Move functions that don't need to be inlined into the cxx file.
+	Use explicit template instantiation to enforce code generation
+	for float and double template arguments.
+
+	* Stones/GravPlotter.cxx:
+	Add missing include.
+
 2010-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Do not allow picking through the terrain.
