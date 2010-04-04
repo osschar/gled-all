@@ -1,3 +1,14 @@
+2010-04-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move HTrans in from Var1.
+
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	Moved in from Var1/Stones.
+
+	* catalog.patch:
+	Add HTrans entries.
+
 2010-03-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Use FTGL for font rendering -- uses true-type fonts.
