@@ -1,3 +1,14 @@
+2010-04-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move HTrans to GledCore.
+
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	Moved to GledCore/Stones.
+
+	* catalog.patch:
+	Remove HTrans entries.
+
 2010-03-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Un-inline some HTrans functions.

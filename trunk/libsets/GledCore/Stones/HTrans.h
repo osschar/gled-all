@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef Var1_HTrans_H
-#define Var1_HTrans_H
+#ifndef GledCore_HTrans_H
+#define GledCore_HTrans_H
 
 #ifndef __CINT__
 namespace Opcode

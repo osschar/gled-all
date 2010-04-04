@@ -15,6 +15,16 @@ $PATCH = {
                "#pragma link C++ class Exc_t+;\n"
 },
 
+"GMutex" => 
+{
+ 'Pragmas' =>
+  "#pragma link C++ class GMutexHolder;\n"     .
+  "#pragma link C++ class GMutexAntiHolder;\n" .
+  "#pragma link C++ class GLensReadHolder;\n"  .
+  "#pragma link C++ class GLensWriteHolder;\n"	
+},
+
+
 ### Glasses
 
 "ZGlass" => {
@@ -60,23 +70,31 @@ $PATCH = {
   'VirtualBase' => 1
 },
 
+
 ### Stones
 
 "ZMIR"=> {
   'Pragmas'    => "#pragma link C++ class ZMIR_Result_Report;\n",
 },
 
-"ZComet" => { 'PragmaSuff' => "-" },
+"ZComet" => {
+  'PragmaSuff' => "-"
+},
 
-"ZTrans" => { 'PragmaSuff' => "-" }, # Uses automatic schema evolution, but resets bAsOK on read.
+"HTrans" => {
+  'NoDefault'  => 1,
+  'Pragmas'    => "#pragma link C++ class HPoint<Float_t>+;\n" .
+                  "#pragma link C++ class HPoint<Double_t>+;\n" .
+                  "#pragma link C++ class HPointF+;\n" .
+                  "#pragma link C++ class HPointD+;\n" .
+                  "#pragma link C++ class HTrans<Float_t>+;\n" .
+                  "#pragma link C++ class HTrans<Double_t>+;\n" .
+                  "#pragma link C++ class HTransF+;\n" .
+                  "#pragma link C++ class HTransD+;\n"
+},
 
-"GMutex" => 
-{
- 'Pragmas' =>
-  "#pragma link C++ class GMutexHolder;\n"     .
-  "#pragma link C++ class GMutexAntiHolder;\n" .
-  "#pragma link C++ class GLensReadHolder;\n"  .
-  "#pragma link C++ class GLensWriteHolder;\n"	
+"ZTrans" => {
+  'PragmaSuff' => "-" # Uses automatic schema evolution, but resets bAsOK on read.
 },
 
 "SVars" => {
