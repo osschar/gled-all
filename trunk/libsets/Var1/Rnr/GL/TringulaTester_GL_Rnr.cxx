@@ -53,7 +53,7 @@ void TringulaTester_GL_Rnr::Draw(RnrDriver* rd)
   {
     // Render Ray
     glPushMatrix();
-    glTranslated(T.mRayPos.x(), T.mRayPos.y(), T.mRayPos.z());
+    glTranslated(T.mRayPos.x, T.mRayPos.y, T.mRayPos.z);
     {
       GL_Float_Holder point_size(GL_POINT_SIZE, 10, glPointSize);
       glColor3f(1,0,0);
@@ -63,9 +63,8 @@ void TringulaTester_GL_Rnr::Draw(RnrDriver* rd)
     glLineWidth(2);
     glBegin(GL_LINES);
     glVertex3f(0,0,0);
-    Float_t d[3]; T.mRayDir.GetXYZ(d);
-    Float_t fac = T.mRayLen > 0 ? T.mRayLen : 1e10;
-    glVertex3f(fac*d[0], fac*d[1], fac*d[2]);
+    Double_t fac = T.mRayLen > 0 ? T.mRayLen : 1e10;
+    glVertex3dv(fac*T.mRayDir);
     glEnd();
     glLineWidth(1);
     glPopMatrix();

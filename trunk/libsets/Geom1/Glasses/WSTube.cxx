@@ -50,20 +50,17 @@ WSTube::~WSTube()
 
 /**************************************************************************/
 
-void WSTube::define_direction(ZTrans& t, TVector3& dr,
-			      TLorentzVector& vec, TLorentzVector& sgm)
+void WSTube::define_direction(ZTrans& t, const ZPoint& dr,
+			      const TLorentzVector& vec, const TLorentzVector& sgm)
 {
-  TVector3 x;
+  ZPoint x;
   x += t.GetBaseVec(1) * (vec.X() + mRnd.Gaus(0, sgm.X()));
   x += t.GetBaseVec(2) * (vec.Y() + mRnd.Gaus(0, sgm.Y()));
   x += t.GetBaseVec(3) * (vec.Z() + mRnd.Gaus(0, sgm.Z()));
   x += dr              * (vec.T() + mRnd.Gaus(0, sgm.T()));
 
-  x = x.Unit();
-  TVector3 y = x.Orthogonal().Unit();
   t.SetBaseVec(1, x);
-  t.SetBaseVec(2, y);
-  t.SetBaseVec(3, x.Cross(y));
+  t.OrtoNorm3();
 }
 
 /**************************************************************************/
@@ -133,7 +130,9 @@ void WSTube::connect(WSPoint*& ap, WSPoint*& bp)
     }
   }
 
-  TVector3 dr( (mTransB.GetPos() - mTransA.GetPos()).Unit() ); // vector A -> B
+  // vector A -> B
+  ZPoint dr(mTransB.GetPos() - mTransA.GetPos());
+  dr.Normalize();
 
   ap = new WSPoint("TubeStart", GForm("Tube %s->%s", nameA.Data(), nameB.Data()));
   ap->SetTrans(mTransA);

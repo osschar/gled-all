@@ -11,8 +11,6 @@
 
 #include <Opcode/Opcode.h>
 
-#include <TVector3.h>
-
 class Tringula;
 class TSPupilInfo;
 
@@ -28,8 +26,8 @@ protected:
 
   Bool_t                  bRnrRay;      // X{GS}   7 Bool(-join=>1)
   Float_t                 mRayLen;      // X{GS}   7 Value(-range=>[0,10000,1,100])
-  TVector3                mRayPos;      // X{GSRr} 7 Vector3()
-  TVector3                mRayDir;      // X{GSRr} 7 Vector3()
+  ZPoint                  mRayPos;      // X{GSRr} 7 ZPoint()
+  ZPoint                  mRayDir;      // X{GSRr} 7 ZPoint()
   Opcode::CollisionFaces  mRayColFaces; //!
 
   Bool_t                  bRnrItsLines; // X{GS} 7 Bool() Intersection lines
@@ -39,7 +37,7 @@ public:
   TringulaTester(const Text_t* n="TringulaTester", const Text_t* t=0);
   virtual ~TringulaTester();
 
-  void SetRayVectors(const TVector3& pos, const TVector3& dir);
+  void SetRayVectors(const ZPoint& pos, const ZPoint& dir);
 
   void RayCollideTerrain(); // X{ED} 7 MButt()
 

@@ -70,9 +70,10 @@ void Amphitheatre::CreateChairs(Float_t radius, Float_t xoffset, Float_t z,
   Float_t dphi = dphi_deg * TMath::DegToRad();
   Float_t step = dphi / (nchair - 1);
   Float_t phi0 = -dphi / 2;
-  for(int i=0; i<nchair; ++i) {
+  for (int i=0; i<nchair; ++i)
+  {
     Float_t p = phi0 + i*step;
-    TVector3 pos = TVector3(radius*TMath::Cos(p), radius*TMath::Sin(p), z);
+    ZPoint pos(radius*TMath::Cos(p), radius*TMath::Sin(p), z);
     pos[0] += xoffset;
     mChairs.push_back(Chair(pos));
   }
@@ -133,19 +134,22 @@ void Amphitheatre::ClearAmphitheatre()
 /**************************************************************************/
 /**************************************************************************/
 
-Amphitheatre::Chair* Amphitheatre::closest_free_chair(TVector3& pos)
+Amphitheatre::Chair* Amphitheatre::closest_free_chair(const ZPoint& pos)
 {
-  if(mNumChFree <= 0)
+  if (mNumChFree <= 0)
     return 0;
 
   Double_t min_r2 = 1e9;
   lChair_i min_ch;
-  for(lChair_i i = mChairs.begin(); i != mChairs.end(); ++i) {
-    if(i->freep()) {
-      TVector3 dr(i->fPos - pos);
+  for (lChair_i i = mChairs.begin(); i != mChairs.end(); ++i)
+  {
+    if (i->freep())
+    {
+      ZPoint dr(i->fPos - pos);
       Double_t r2 = dr.Mag2();
-      if(r2 < min_r2) {
-	min_r2  = r2;
+      if (r2 < min_r2)
+      {
+	min_r2 = r2;
 	min_ch = i;
       }
     }
@@ -175,12 +179,13 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
 
   Double_t max_step = mGuestStep*dt;
 
-  for(lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n) {
+  for (lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n)
+  {
     ZNode* node = *n;
     if(mNumChFree <= 0)
       break;
 
-    TVector3 x   = node->RefTrans().GetPos();
+    ZPoint x     = node->RefTrans().GetPos();
     Chair* chair = closest_free_chair(x);
 
     x = chair->fPos - x;
@@ -193,7 +198,7 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
     bool finalp = (dx <= max_step); // Guest has reached the chair.
 
     node->WriteLock();
-    node->Move3PF(x.x(), x.y(), x.z());
+    node->Move3PF(x.x, x.y, x.z);
     fix_guest_scale(node, finalp);
     // !! Could rotate it along travel axis.
     node->WriteUnlock();
@@ -215,29 +220,35 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
   const Double_t rxm = mRepX0*mRepXm;
   const Double_t rxM = mRepX0*mRepXM;
 
-  for(lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n) {
-    TVector3 f;
+  for (lpZNode_i n=nodes.begin(); n!=nodes.end(); ++n)
+  {
+    ZPoint f;
     ZNode* node = *n;
-    TVector3 x(node->RefTrans().GetPos());
+    ZPoint x(node->RefTrans().GetPos());
     // loop over rivals
-    for(lpZNode_i o=nodes.begin(); o!=nodes.end(); ++o) {
+    for (lpZNode_i o=nodes.begin(); o!=nodes.end(); ++o)
+    {
       if(o == n) continue;
-      TVector3 y = (*o)->RefTrans().GetPos();
+      ZPoint y = (*o)->RefTrans().GetPos();
       y -= x;
       Double_t d = y.Mag();
-      if(d < rxM) {
-	if(d < rxm) { y *= rxm/d; d = rxm; }
+      if (d < rxM)
+      {
+	if (d < rxm) { y *= rxm/d; d = rxm; }
 	y *= mRepX0*(1/d - 1/rxm)/d;
 	f += y;
       }
     }
     // loop over taken chairs
-    for(lChair_i i=mChairs.begin(); i != mChairs.end(); ++i) {
-      if(! i->freep()) {
-	TVector3 y = i->fNode->RefTrans().GetPos();
+    for (lChair_i i=mChairs.begin(); i != mChairs.end(); ++i)
+    {
+      if (! i->freep())
+      {
+	ZPoint y = i->fNode->RefTrans().GetPos();
 	y -= x;
 	Double_t d = y.Mag();
-	if(d < rxM) {
+	if (d < rxM)
+	{
 	  if(d < rxm) { y *= rxm/d; d = rxm; }
 	  y *= mRepX0*(1/d - 1/rxm)/d;
 	  f += y;
@@ -246,10 +257,11 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
     }
 
     Double_t fmag = f.Mag();
-    if(fmag != 0) {
+    if (fmag != 0)
+    {
       if(fmag > max_step/2) f *= max_step/2/fmag;
       node->WriteLock();
-      node->Move3LF(f.x(), f.y(), f.z());
+      node->Move3LF(f.x, f.y, f.z);
       node->WriteUnlock();
     }
   }

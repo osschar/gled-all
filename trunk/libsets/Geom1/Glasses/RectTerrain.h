@@ -14,6 +14,7 @@
 class ZImage;
 class TringTvor;
 
+#include <TMatrixF.h>
 #include <TH2.h>
 
 class RectTerrain : public ZNode

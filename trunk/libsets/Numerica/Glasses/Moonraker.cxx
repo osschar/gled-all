@@ -90,12 +90,12 @@ Moonraker::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
   v(1) = TMath::Sin(phi)*TMath::Cos(theta);
   v(2) = TMath::Sin(theta);
 
-  TVector3 z;
-  for(Int_t i=0; i<3; i++) z(i) = mV0*hEscapeVelocity*v(i);
+  ZPoint z;
+  for(Int_t i=0; i<3; i++) z[i] = mV0*hEscapeVelocity*v(i);
   ZTrans t;
   t.SetRotByAngles(mPhi*TMath::DegToRad(), mTheta*TMath::DegToRad(), 0);
   t.RotateIP(z);
-  for(Int_t i=0; i<3; i++) v(i + 3) = z(i);
+  for(Int_t i=0; i<3; i++) v(i + 3) = z[i];
 
   x1 = mT0; x2 = mT1;
 }

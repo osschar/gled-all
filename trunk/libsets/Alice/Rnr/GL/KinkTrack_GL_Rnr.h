@@ -12,15 +12,16 @@
 #include <RnrBase/RnrDriver.h>
 
 
-class KinkTrack_GL_Rnr : public ZNode_GL_Rnr {
- private:
+class KinkTrack_GL_Rnr : public ZNode_GL_Rnr
+{
+private:
   void _init();
 
- protected:
+protected:
   KinkTrack*	mKinkTrack;
   RnrModStore	mTrackRMS;
 
- public:
+public:
   KinkTrack_GL_Rnr(KinkTrack* idol) :
     ZNode_GL_Rnr(idol), mKinkTrack(idol), mTrackRMS(FID_t(0,0))
   { _init(); }

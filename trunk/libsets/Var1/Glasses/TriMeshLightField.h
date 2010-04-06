@@ -9,7 +9,7 @@
 
 #include <Glasses/TriMeshField.h>
 
-#include <TVector3.h>
+#include <Stones/ZTrans.h>
 
 class ZNode;
 
@@ -25,7 +25,7 @@ protected:
   Float_t    mAmbiShadowed; // X{GS} 7 Value(-range=>[0,1, 1,1000])
   Float_t    mAmbiBackFace; // X{GS} 7 Value(-range=>[0,1, 1,1000])
 
-  TVector3   mLampPos;      // X{GSR} 7 Vector3()
+  ZPoint     mLampPos;      // X{GSR} 7 ZPoint()
   Bool_t     bDirectional;  // X{GS}  7 Bool()
 
 public:

@@ -188,8 +188,8 @@ protected:
   Int_t     mStampCount;        //!
   Double_t  mHeight;            //  Height above tringula. X{GS} 7 Value(-range=>[-1e5, 1e5, 1, 100])
 
-  TVector3  mMouseRayPos;
-  TVector3  mMouseRayDir;
+  ZPoint    mMouseRayPos;
+  ZPoint    mMouseRayDir;
 
   Opcode::RayCollider    mRayColl;    //!
   Opcode::CollisionFaces mCollFaces;  //!

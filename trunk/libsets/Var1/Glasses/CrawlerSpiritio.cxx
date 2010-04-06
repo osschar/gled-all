@@ -34,6 +34,8 @@ void CrawlerSpiritio::_init()
   mExtendio_fid = Crawler::FID();
 
   mDefZFov = 60.0f;
+
+  m_laser_a1 = m_laser_a2 = 1e30;
 }
 
 CrawlerSpiritio::CrawlerSpiritio(const Text_t* n, const Text_t* t) :
@@ -197,8 +199,13 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
 
     const Float_t a1 = C.RefLaserLtRt().GetDesire();
     const Float_t a2 = C.RefLaserUpDn().GetDesire();
-    if (!mCamera->RefTrans().CompareAngles(a1, a2, 0.0f))
+    if (m_laser_a1 != a1 || m_laser_a2 != a2)
+    {
+      printf("Fooxing angles %f %f\n", a1, a2);
       mCamera->SetRotByAngles(a1, a2, 0.0f);
+      m_laser_a1 = a1;
+      m_laser_a2 = a2;
+    }
   }
 
   if (*mEngineSrc)

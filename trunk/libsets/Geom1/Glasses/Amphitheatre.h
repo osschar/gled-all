@@ -21,12 +21,13 @@ private:
   void _init();
 
 protected:
-  struct Chair {
-    TVector3 fPos;
+  struct Chair
+  {
+    ZPoint   fPos;
     ZNode*   fNode;
 
     Chair() : fPos(), fNode(0) {}
-    Chair(TVector3& p, ZNode* n=0) : fPos(p), fNode(n) {}
+    Chair(const ZPoint& p, ZNode* n=0) : fPos(p), fNode(n) {}
 
     bool freep() { return fNode == 0; }
   };
@@ -55,7 +56,7 @@ protected:
   Bool_t		bChairHunt;    // X{GS} 7 BoolOut(-join=>1)
   Bool_t		bInnerHunt;    // X{GS} 7 Bool()
 
-  Chair* closest_free_chair(TVector3& pos);
+  Chair* closest_free_chair(const ZPoint& pos);
 
   void   chair_hunt(Double_t t, Double_t dt); // X{E}
   void   chair_hunt_emit_mir(Double_t t, Double_t dt);

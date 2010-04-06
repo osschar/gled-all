@@ -30,7 +30,7 @@ void TriMeshLightField::_init()
   mAmbiShadowed = 0.1;
   mAmbiBackFace = 0.05;
 
-  mLampPos.SetXYZ(0, 0, 0);
+  mLampPos.Zero();
   bDirectional = false;
 }
 
@@ -147,13 +147,13 @@ void TriMeshLightField::CalculateLightField()
     TT.AssertBoundingBox();
     Float_t max_dist = TT.BoundingBoxDiagonal();
 
-    mLampPos.GetXYZ((Float_t*)&R.mDir.x);
+    R.mDir.Set(mLampPos);
     nrdir   = R.mDir.Normalize();
     R.mDir *= - max_dist;
   }
   else
   {
-    mLampPos.GetXYZ((Float_t*)&R.mOrig.x);
+    R.mOrig.Set(mLampPos);
   }
 
   Float_t* F = FVec();
@@ -233,7 +233,7 @@ void TriMeshLightField::SetupLampDir(ZNode* mesh, Float_t theta, Float_t phi)
   t.Invert();
 
   Double_t ct = TMath::Cos(theta);
-  mLampPos.SetXYZ(ct*TMath::Cos(phi), ct*TMath::Sin(phi), TMath::Sin(theta));
+  mLampPos.Set(ct*TMath::Cos(phi), ct*TMath::Sin(phi), TMath::Sin(theta));
   t.MultiplyIP(mLampPos);
   Stamp(FID());
 }

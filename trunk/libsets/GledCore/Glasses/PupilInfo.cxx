@@ -333,7 +333,7 @@ ZTrans* PupilInfo::ToCameraFrame(ZNode* node)
   return n2p;
 }
 
-Bool_t PupilInfo::TransformMouseRayVectors(ZNode* ref, TVector3& pos, TVector3& dir)
+Bool_t PupilInfo::TransformMouseRayVectors(ZNode* ref, ZPoint& pos, ZPoint& dir)
 {
   // Transforms last mouse-ray vectors into the frame of ref.
   // This multiples transformation matrices from camera-base upwards

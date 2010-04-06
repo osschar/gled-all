@@ -205,11 +205,11 @@ void GLRnrDriver::PreEventHandling(A_Rnr::Fl_Event& e)
   float xcam = xext*(2.0f*mMouseX/mWidth  - 1.0f);
   float ycam = yext*(2.0f*mMouseY/mHeight - 1.0f);
 
-  mMouseRayPos.SetXYZ(0, 0, 0);
+  mMouseRayPos.Zero();
   mCamFixTrans->MultiplyIP(mMouseRayPos);
 
-  mMouseRayDir.SetXYZ(mNearClip, -xcam, -ycam);
-  mMouseRayDir.SetMag(1);
+  mMouseRayDir.Set(mNearClip, -xcam, -ycam);
+  mMouseRayDir.Normalize();
   mCamFixTrans->RotateIP(mMouseRayDir);
 }
 

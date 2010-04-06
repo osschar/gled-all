@@ -10,14 +10,15 @@
 #include <Glasses/V0Track.h>
 #include <Rnr/GL/RecTrack_GL_Rnr.h>
 
-class V0Track_GL_Rnr : public RecTrack_GL_Rnr {
- private:
+class V0Track_GL_Rnr : public RecTrack_GL_Rnr
+{
+private:
   void _init();
 
- protected:
+protected:
   V0Track*	mV0Track;
 
- public:
+public:
   V0Track_GL_Rnr(V0Track* idol) :
     RecTrack_GL_Rnr(idol), mV0Track(idol)
   { _init(); }

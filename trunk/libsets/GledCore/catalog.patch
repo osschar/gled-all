@@ -73,15 +73,18 @@ $PATCH = {
 
 ### Stones
 
-"ZMIR"=> {
+"ZMIR" =>
+{
   'Pragmas'    => "#pragma link C++ class ZMIR_Result_Report;\n",
 },
 
-"ZComet" => {
+"ZComet" =>
+{
   'PragmaSuff' => "-"
 },
 
-"HTrans" => {
+"HTrans" =>
+{
   'NoDefault'  => 1,
   'Pragmas'    => "#pragma link C++ class HPoint<Float_t>+;\n" .
                   "#pragma link C++ class HPoint<Double_t>+;\n" .
@@ -93,11 +96,19 @@ $PATCH = {
                   "#pragma link C++ class HTransD+;\n"
 },
 
-"ZTrans" => {
-  'PragmaSuff' => "-" # Uses automatic schema evolution, but resets bAsOK on read.
+"ZTrans" =>
+{
+  'NoDefault'  => 1,
+  'Pragmas'    => "#pragma link C++ class HPoint<Double32_t>+;\n" .
+                  "#pragma link C++ class HTrans<Double32_t>+;\n" .
+		  "#pragma link C++ class ZPoint+;\n" .
+                  "#pragma link C++ class ZTrans+;\n"
+
 },
 
-"SVars" => {
+
+"SVars" =>
+{
   'NoDefault'  => 1,
   'Pragmas'    =>
    "#pragma link C++ class   SMinMaxVar<Float_t>+;\n" .

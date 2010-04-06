@@ -26,8 +26,8 @@ void TringulaTester::_init()
 {
   bRnrRay = false;
   mRayLen = 0;
-  mRayPos.SetXYZ(0, 0, 0);
-  mRayDir.SetXYZ(0, 0, 0);
+  mRayPos.Zero();
+  mRayDir.Zero();
 
   bRnrItsLines = false;
 }
@@ -43,7 +43,7 @@ TringulaTester::~TringulaTester()
 
 //==============================================================================
 
-void TringulaTester::SetRayVectors(const TVector3& pos, const TVector3& dir)
+void TringulaTester::SetRayVectors(const ZPoint& pos, const ZPoint& dir)
 {
   mRayPos = pos;
   mRayDir = dir;

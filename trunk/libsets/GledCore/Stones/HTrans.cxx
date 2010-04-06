@@ -6,7 +6,87 @@
 
 #include "HTrans.h"
 #include <Gled/GledTypes.h>
-#include <TMath.h>
+
+#include <iomanip>
+
+
+//==============================================================================
+// HPoint
+//==============================================================================
+
+template<typename TT>
+TT HPoint<TT>::Eta() const
+{
+  static const Exc_t _eh("HPoint<TT>::Eta ");
+
+  TT cosTheta = CosTheta();
+  if (cosTheta*cosTheta < 1) return -0.5* TMath::Log( (1.0-cosTheta)/(1.0+cosTheta) );
+  ISwarn(_eh + "transverse momentum = 0, returning +/- 1e10");
+  return (z >= 0) ? 1e10 : -1e10;
+}
+
+template<typename TT>
+TT HPoint<TT>::Normalize(TT length)
+{
+   // Normalize the vector to length if current length is non-zero.
+   // Returns the old magnitude.
+
+   TT m = Mag();
+   if (m != 0)
+   {
+      length /= m;
+      x *= length; y *= length; z *= length;
+   }
+   return m;
+}
+
+template<typename TT>
+HPoint<TT> HPoint<TT>::Orthogonal() const
+{
+   // Returns an orthogonal vector (not normalized).
+
+   Float_t xx = x < 0 ? -x : x;
+   Float_t yy = y < 0 ? -y : y;
+   Float_t zz = z < 0 ? -z : z;
+   if (xx < yy) {
+      return xx < zz ? HPoint<TT>(0,z,-y) : HPoint<TT>(y,-x,0);
+   } else {
+      return yy < zz ? HPoint<TT>(-z,0,x) : HPoint<TT>(y,-x,0);
+   }
+}
+
+template<typename TT>
+void HPoint<TT>::OrthoNormBase(HPoint<TT>& a, HPoint<TT>& b) const
+{
+   // Set vectors a and b to be normal to this and among themselves,
+   // both of length 1.
+
+   a = Orthogonal();
+   b.Cross(*this, a);
+   a.Normalize();
+   b.Normalize();
+}
+
+//==============================================================================
+
+template<class TT>
+void HPoint<TT>::Print() const
+{
+  printf("%8.3lf %8.3lf %8.3lf\n", x, y, z);
+}
+
+template<class TT>
+ostream& operator<<(ostream& s, const HPoint<TT>& t)
+{
+  s.setf(ios::fixed, ios::floatfield); s.precision(3);
+  s << t.x <<"\t"<< t.y <<"\t"<< t.z <<"\n";
+  return s;
+}
+
+
+//==============================================================================
+// HTrans
+//==============================================================================
 
 //______________________________________________________________________
 //
@@ -32,11 +112,6 @@
 
 ClassImp(HTransF);
 ClassImp(HTransD);
-
-
-// Not needed as long as all functions are inline.
-// template class HPoint<Float_t>;
-// template class HPoint<Double_t>;
 
 #define F00  0
 #define F01  4
@@ -113,6 +188,17 @@ void HTrans<TT>::SetTrans(const HTrans<TT>& t)
   M[12] = x[12]; M[13] = x[13]; M[14] = x[14]; M[15] = x[15];
 }
 
+template<class TT>
+void HTrans<TT>::SetFromArray(const Double_t* arr)
+{
+  for (Int_t i=0; i<16; ++i) M[i] = arr[i];
+}
+
+template<class TT>
+void HTrans<TT>::SetFromArray(const Float_t* arr)
+{
+  for (Int_t i=0; i<16; ++i) M[i] = arr[i];
+}
 
 template<class TT>
 void HTrans<TT>::SetupRotation(Int_t i, Int_t j, TT f)
@@ -334,12 +420,15 @@ void HTrans<TT>::Rotate(const HTrans<TT>& a, Int_t i1, Int_t i2, TT amount)
   MultLeft(a);
 }
 
+
 /**************************************************************************/
 // Cardan angle interface
 /**************************************************************************/
 
-namespace {
-  void clamp_angle(Float_t& a) {
+namespace
+{
+  void clamp_angle(Float_t& a)
+  {
     while(a < -TMath::TwoPi()) a += TMath::TwoPi();
     while(a >  TMath::TwoPi()) a -= TMath::TwoPi();
   }
@@ -365,7 +454,7 @@ void HTrans<TT>::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 
 template<class TT>
 void HTrans<TT>::SetRotByAnyAngles(Float_t a1, Float_t a2, Float_t a3,
-			       const Text_t* pat)
+				   const Text_t* pat)
 {
   // Sets Rotation part as given by angles a1, a1, a3 and pattern pat.
   // Pattern consists of "XxYyZz" characters.
@@ -450,35 +539,35 @@ TT HTrans<TT>::Unscale()
 /**************************************************************************/
 
 template<class TT>
-void HTrans<TT>::MultiplyIP(TVector3& v, TT w) const
+void HTrans<TT>::MultiplyIP(HPoint<TT>& v, TT w) const
 {
-  v.SetXYZ(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z() + M[F03]*w,
-	   M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z() + M[F13]*w,
-	   M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z() + M[F23]*w);
+  v.Set(M[F00]*v.x + M[F01]*v.y + M[F02]*v.z + M[F03]*w,
+	M[F10]*v.x + M[F11]*v.y + M[F12]*v.z + M[F13]*w,
+	M[F20]*v.x + M[F21]*v.y + M[F22]*v.z + M[F23]*w);
 }
 
 template<class TT>
-TVector3 HTrans<TT>::Multiply(const TVector3& v, TT w) const
+void HTrans<TT>::RotateIP(HPoint<TT>& v) const
 {
-  return TVector3(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z() + M[F03]*w,
-		  M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z() + M[F13]*w,
-		  M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z() + M[F23]*w);
+  v.Set(M[F00]*v.x + M[F01]*v.y + M[F02]*v.z,
+	M[F10]*v.x + M[F11]*v.y + M[F12]*v.z,
+	M[F20]*v.x + M[F21]*v.y + M[F22]*v.z);
 }
 
 template<class TT>
-void HTrans<TT>::RotateIP(TVector3& v) const
+HPoint<TT> HTrans<TT>::Multiply(const HPoint<TT>& v, TT w) const
 {
-  v.SetXYZ(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z(),
-	   M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z(),
-	   M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z());
+  return HPoint<TT>(M[F00]*v.x + M[F01]*v.y + M[F02]*v.z + M[F03]*w,
+		    M[F10]*v.x + M[F11]*v.y + M[F12]*v.z + M[F13]*w,
+		    M[F20]*v.x + M[F21]*v.y + M[F22]*v.z + M[F23]*w);
 }
 
 template<class TT>
-TVector3 HTrans<TT>::Rotate(const TVector3& v) const
+HPoint<TT> HTrans<TT>::Rotate(const HPoint<TT>& v) const
 {
-  return TVector3(M[F00]*v.x() + M[F01]*v.y() + M[F02]*v.z(),
-		  M[F10]*v.x() + M[F11]*v.y() + M[F12]*v.z(),
-		  M[F20]*v.x() + M[F21]*v.y() + M[F22]*v.z());
+  return HPoint<TT>(M[F00]*v.x + M[F01]*v.y + M[F02]*v.z,
+		    M[F10]*v.x + M[F11]*v.y + M[F12]*v.z,
+		    M[F20]*v.x + M[F21]*v.y + M[F22]*v.z);
 }
 
 /**************************************************************************/
@@ -625,6 +714,17 @@ void HTrans<TT>::Transpose()
   x = M[F23]; M[F23] = M[F32]; M[F32] = x;  
 }
 
+/**************************************************************************/
+
+template<class TT>
+void  HTrans<TT>::TransposeRotationPart()
+{
+  TT x;
+  x = M[F01]; M[F01] = M[F10]; M[F10] = x;
+  x = M[F02]; M[F02] = M[F20]; M[F20] = x;
+  x = M[F12]; M[F12] = M[F21]; M[F21] = x;
+}
+
 template<class TT>
 TT HTrans<TT>::Invert()
 {
@@ -764,17 +864,17 @@ TT HTrans<TT>::InvertWithoutRow4()
 //==============================================================================
 
 template<class TT>
-void HTrans<TT>::Print(Option_t* option) const
+void HTrans<TT>::Print() const
 {
   const TT* C = M;
   for(Int_t i=0; i<4; ++i, ++C)
     printf("%8.3lf %8.3lf %8.3lf | %8.3lf\n", C[0], C[4], C[8], C[12]);
 }
 
-#include <iomanip>
 
 template<class TT>
-ostream& operator<<(ostream& s, const HTrans<TT>& t) {
+ostream& operator<<(ostream& s, const HTrans<TT>& t)
+{
   s.setf(ios::fixed, ios::floatfield); s.precision(3);
   for(Int_t i=1; i<=4; i++)
     for(Int_t j=1; j<=4; j++)
@@ -783,6 +883,9 @@ ostream& operator<<(ostream& s, const HTrans<TT>& t) {
 }
 
 //==============================================================================
+
+template class HPoint<Float_t>;
+template class HPoint<Double_t>;
 
 template class HTrans<Float_t>;
 template class HTrans<Double_t>;

@@ -1,3 +1,32 @@
+2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Unify usage / implementation of matrix and point classes.
+	Sub-class ZTrans from HTrans<Double32_t>.
+	Sub-class ZPoint from HPoint<Double32_t>.
+	Get rid of TVector3 everywhere.
+
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	Template HPoint and add many useful functions.
+
+	* Stones/ZTrans.cxx:
+	* Stones/ZTrans.h:
+	Wipe implementation -- derive from HTrans<Double32_t>.
+	Add class ZPoint.
+
+	* Glasses/PupilInfo.cxx:
+	* Glasses/PupilInfo.h:
+	* Pupils/Pupil.cxx:
+	* Rnr/GL/GLRnrDriver.cxx:
+	* Rnr/GL/GLRnrDriver.h:
+	Replace usage of TVector3 with ZPoint.
+
+	* catalog.patch:
+	Add pragmas for new classes in HTrans and ZTrans.
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Move in HPointF weed from Var1 and extend for HPointD and ZPoint.
+
 2010-04-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Move HTrans in from Var1.
