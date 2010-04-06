@@ -84,22 +84,23 @@ void KinkTrack_GL_Rnr::Render(RnrDriver* rd)
   glEnd();
 
   // show particle momentum
-  if ( rst_lens->mRnrP) {
+  if (rst_lens->mRnrP)
+  {
     glLineWidth(2*rst_lens->mTrackWidth);
     glBegin(GL_LINES);
     glColor4fv(rst_lens->mPColor());
     glVertex3f(vx,vy,vz);
     Float_t ps = rst_lens->mPMinLen +
       TMath::Log10(1 + TMath::Sqrt(px*px+py*py+pz*pz)/rst_lens->mPScale);
-    TVector3 v(px,py,pz);
-    v = ps*v.Unit();
-    glVertex3f(v.X() + vx, v.Y() + vy, v.Z() + vz);
+    HPointF v(px,py,pz);
+    v.Normalize(ps);
+    glVertex3f(v.x + vx, v.y + vy, v.z + vz);
     glEnd();
   }
 
   // propagate particle 
-  if(rst_lens->mMaxR != 0 && p->fSign ) {
-
+  if (rst_lens->mMaxR != 0 && p->fSign)
+  {
     bool stipple_off_p = false;
     if(rst_lens->mTrackStippleFac) {
       stipple_off_p = (glIsEnabled(GL_LINE_STIPPLE) == false);

@@ -57,6 +57,8 @@ public:
   Point& Set(float _x, float _y, float _z)	{ x = _x;    y = _y;    z = _z;		return *this;	}
   //! Assignment from array
   Point& Set(const float f[3])			{ x = f[_X]; y = f[_Y]; z = f[_Z];	return *this;	}
+  //! Assignment from double array
+  Point& Set(const double f[3])			{ x = f[_X]; y = f[_Y]; z = f[_Z];	return *this;	}
   //! Assignment from another point
   Point& Set(const Point& src)			{ x = src.x; y = src.y; z = src.z;	return *this;	}
 

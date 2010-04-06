@@ -993,6 +993,102 @@ sub make_weed_update {
 
 ########################################################################
 
+package GLED::Widgets::HPointBase; @ISA = ('GLED::Widgets');
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Type} = "unknown"; # overridden in sub-classes
+  $S->{Widget} = "Fl_Vector3";
+  $S->{Include} = "FL/Fl_Vector3.h";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = "true";
+  $S->{-width} = 28 unless exists $S->{-width};
+  $S->{-height} = 1 unless exists $S->{-height};
+  return $S;
+}
+
+sub make_widget
+{
+  my $S=shift;
+  # Tried disble() for -const, but looks too dim.
+  # Maybe should really create Fl_ValueOutputs in the Fl_Vector3.
+  # Need special constructor then, painful.
+  # Idea: display in dark green, all weeds (propagate in Fl_Vector3).
+  # Fix also other weeds using that in GLED_Geom1_Widgets.pm.
+  return $S->make_widget_A() . $S->make_widget_B();
+}
+
+sub make_cxx_cb
+{
+  my $S = shift;
+  my $r = "void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {\n";
+  if($S->{-const}) {
+    $r .= "  $S->{Methodbase}_Update(o)\n;";
+  } else {
+    $r .= <<"fnord";
+  Eye* e = (mView->fImg) ? mView->fImg->fEye : 0;
+  if(e) {
+    auto_ptr<ZMIR> _m( mIdol->S_Set$S->{Methodbase}(o->x(),o->y(),o->z()) );
+    e->Send(*_m);
+    SetUpdateTimer();
+  } else {
+    mIdol->Set$S->{Methodbase}(o->x(),o->y(),o->z());
+  }
+fnord
+  }
+  return $r . "}\n\n";
+}
+
+sub make_weed_update
+{
+  my $S = shift;
+  $S->make_weed_update_A() .
+    "  const $S->{Type}& p = mIdol->Ref$S->{Methodbase}();\n" .
+    "  w->set(p.x, p.y, p.z);\n" .
+  $S->make_weed_update_B();
+}
+
+#-----------------------------------------------------------------------
+
+package GLED::Widgets::HPointF; @ISA = ('GLED::Widgets::HPointBase');
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Type} = "HPointF";
+  return $S;
+}
+
+#-----------------------------------------------------------------------
+
+package GLED::Widgets::HPointD; @ISA = ('GLED::Widgets::HPointBase');
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Type} = "HPointD";
+  return $S;
+}
+
+#-----------------------------------------------------------------------
+
+package GLED::Widgets::ZPoint; @ISA = ('GLED::Widgets::HPointBase');
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Type} = "ZPoint";
+  return $S;
+}
+
+########################################################################
+
 package GLED::Widgets::ColorButt; @ISA = ('GLED::Widgets');
 
 sub new {

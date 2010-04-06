@@ -364,9 +364,7 @@ void TringuCam::MouseRayCollide()
 {
   // Collide current mouse-ray with tringula terrain.
 
-  Opcode::Ray ray;
-  mMouseRayPos.GetXYZ(ray.mOrig);
-  mMouseRayDir.GetXYZ(ray.mDir);
+  Opcode::Ray ray(mMouseRayPos, mMouseRayDir);
 
   mRayColl.SetMaxDist(mRayLength > 0 ? mRayLength : Opcode::MAX_FLOAT);
 

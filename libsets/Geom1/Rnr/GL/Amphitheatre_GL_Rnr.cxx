@@ -42,9 +42,9 @@ void Amphitheatre_GL_Rnr::Draw(RnrDriver* rd)
 	i != A.mChairs.end(); ++i)
       {
 	glPushMatrix();
-	TVector3& p( i->fPos );
-	Double_t phi = TMath::ATan2(p.y(), p.x()) * 180 / TMath::Pi();
-	glTranslated(p.x(), p.y(), p.z());
+	ZPoint& p( i->fPos );
+	Double_t phi = TMath::ATan2(p.y, p.x) * TMath::RadToDeg();
+	glTranslated(p.x, p.y, p.z);
 	glRotated(phi, 0, 0, 1);
 	gluPartialDisk(mQuadric, 0, A.mChairSize, 7, 1, -45, 270);
 	glPopMatrix();

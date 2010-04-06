@@ -7,7 +7,10 @@
 #include <Glasses/ODECrawler.h>
 #include <Stones/ZColor.h>
 
-class Moonraker : public ZNode, public ODECrawlerMaster {
+#include <TVector3.h>
+
+class Moonraker : public ZNode, public ODECrawlerMaster
+{
   MAC_RNR_FRIENDS(Moonraker);
 
 private:

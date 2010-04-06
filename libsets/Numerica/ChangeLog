@@ -1,3 +1,9 @@
+2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	Replace usage of TVector3 with ZPoint.
+
 2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Mac compilation changes.

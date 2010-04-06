@@ -62,8 +62,8 @@ protected:
 
   TRandom       mRnd;
 
-  void define_direction(ZTrans& t, TVector3& dr,
-			TLorentzVector& vec, TLorentzVector& sgm);
+  void define_direction(ZTrans& t, const ZPoint& dr,
+			const TLorentzVector& vec, const TLorentzVector& sgm);
 
 public:
   WSTube(const Text_t* n="WSTube", const Text_t* t=0) :

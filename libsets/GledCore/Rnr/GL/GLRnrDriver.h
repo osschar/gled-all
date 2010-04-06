@@ -38,8 +38,8 @@ protected:
   Int_t                     mMDragDX;    // X{g}
   Int_t                     mMDragDY;    // X{g}
 
-  TVector3                  mMouseRayPos; // X{R}
-  TVector3                  mMouseRayDir; // X{R}
+  ZPoint                    mMouseRayPos; // X{R}
+  ZPoint                    mMouseRayDir; // X{R}
 
   //--------------------------------
 

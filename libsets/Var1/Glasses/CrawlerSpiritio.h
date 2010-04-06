@@ -21,6 +21,8 @@ class CrawlerSpiritio : public ExtendioSpiritio
 private:
   void _init();
 
+  Float_t m_laser_a1, m_laser_a2; //!
+
 protected:
   Crawler* get_crawler();
 

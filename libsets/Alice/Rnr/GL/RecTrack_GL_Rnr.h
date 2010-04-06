@@ -11,7 +11,8 @@
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 #include <RnrBase/RnrDriver.h>
 
-class RecTrack_GL_Rnr : public ZNode_GL_Rnr {
+class RecTrack_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 

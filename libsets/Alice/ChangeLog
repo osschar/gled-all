@@ -1,3 +1,13 @@
+2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
+	* Rnr/GL/KinkTrack_GL_Rnr.h:
+	* Rnr/GL/RecTrack_GL_Rnr.cxx:
+	* Rnr/GL/RecTrack_GL_Rnr.h:
+	* Rnr/GL/V0Track_GL_Rnr.cxx:
+	* Rnr/GL/V0Track_GL_Rnr.h:
+	Replace usage of TVector3 with ZPoint.
+
 2009-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/FpeOperator.cxx:

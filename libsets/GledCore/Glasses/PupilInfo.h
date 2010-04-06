@@ -122,8 +122,8 @@ protected:
   Int_t    mMouseY;      //! X{G}
   Int_t    mMouseDragDX; //! X{G}
   Int_t    mMouseDragDY; //! X{G}
-  TVector3 mMouseRayPos; //! X{R}
-  TVector3 mMouseRayDir; //! X{R}
+  ZPoint   mMouseRayPos; //! X{R}
+  ZPoint   mMouseRayDir; //! X{R}
 
   // Direct dump hack.
   GCondition mDirectDumpCond; //!
@@ -151,7 +151,7 @@ public:
   ZTrans* ToPupilFrame(ZNode* node);
   ZTrans* ToCameraFrame(ZNode* node);
 
-  Bool_t  TransformMouseRayVectors(ZNode* ref, TVector3& pos, TVector3& dir);
+  Bool_t  TransformMouseRayVectors(ZNode* ref, ZPoint& pos, ZPoint& dir);
 
   void EmitResizeRay();           // X{E} 7 MButt(-join=>1)
   void EmitCameraHomeRay();       // X{E} 7 MButt()

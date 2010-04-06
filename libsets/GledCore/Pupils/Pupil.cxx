@@ -23,7 +23,6 @@
 
 #include <TVirtualX.h>
 #include <TSystem.h>
-#include <TVector3.h>
 #include <TMath.h>
 
 #include <FL/Fl.H>
@@ -452,10 +451,10 @@ void Pupil::SetAbsRelCamera()
   }
 
   // Construct fwd/up vectors ... consider LookAt and UpReference.
-  TVector3 c_pos( z.GetBaseVec(4) );
-  TVector3 x_vec( z.GetBaseVec(1) ); // Forward vector
-  TVector3 z_vec( z.GetBaseVec(3) ); // Up vector
-  TVector3 y_vec;                    // Deduced from x and z vecs at the end.
+  ZPoint c_pos( z.GetBaseVec(4) );
+  ZPoint  x_vec( z.GetBaseVec(1) ); // Forward vector
+  ZPoint  z_vec( z.GetBaseVec(3) ); // Up vector
+  ZPoint  y_vec;                    // Deduced from x and z vecs at the end.
   bool abs_cam_changed = false;
   bool look_at_p       = false;
 
@@ -464,7 +463,7 @@ void Pupil::SetAbsRelCamera()
     auto_ptr<ZTrans> t( mInfo->ToPupilFrame(look_at) );
     if (t.get() != 0)
     {
-      TVector3 o_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
+      ZPoint o_pos((*t)(1,4), (*t)(2,4), (*t)(3,4));
       x_vec = (o_pos - c_pos);
       Double_t min_dist = mInfo->GetLookAtMinDist();
       if (min_dist != 0)
@@ -502,8 +501,8 @@ void Pupil::SetAbsRelCamera()
     if (x_vec.Mag2() == 0)
       x_vec = mCamAbsTrans.GetBaseVec(1);
 
-    x_vec = x_vec.Unit();
-    z_vec = z_vec.Unit();
+    x_vec.Normalize();
+    z_vec.Normalize();
 
     Double_t xz_dp  = z_vec.Dot(x_vec);
     Double_t max_dp = TMath::Cos(TMath::DegToRad()*mInfo->GetUpRefMinAngle());
@@ -512,28 +511,29 @@ void Pupil::SetAbsRelCamera()
       if (mInfo->GetUpRefLockDir() && look_at_p == false)
       {
 	Double_t sgn_mdp = TMath::Sign(max_dp, xz_dp);
-	TVector3 ortog = (x_vec - xz_dp*z_vec).Unit();
+	ZPoint   ortog = (x_vec - xz_dp*z_vec);
+	ortog.Normalize();
 	x_vec  = sgn_mdp*z_vec + TMath::Sqrt(1 - max_dp*max_dp)*ortog;
-	x_vec  = x_vec.Unit();
+	x_vec.Normalize();
 	xz_dp  = z_vec.Dot(x_vec);
 	z_vec -= xz_dp*x_vec;
-	z_vec  = z_vec.Unit();
+	z_vec.Normalize();
       }
       else
       {
 	z_vec  = mCamAbsTrans.GetBaseVec(3);
 	xz_dp  = z_vec.Dot(x_vec);
 	z_vec -= xz_dp*x_vec;
-	z_vec  = z_vec.Unit();
+	z_vec.Normalize();
       }
     }
     else
     {
       z_vec -= xz_dp*x_vec;
-      z_vec  = z_vec.Unit();
+      z_vec.Normalize();
     }
   }
-  y_vec = z_vec.Cross(x_vec);
+  y_vec.Cross(z_vec, x_vec);
 
   // Construct absolute CamAbsTrans,
   mCamAbsTrans.UnitTrans();
@@ -578,12 +578,12 @@ void Pupil::TurnCamTowards(ZGlass* lens, Float_t max_dist)
   auto_ptr<ZTrans> t( mInfo->ToCameraFrame(node) );
   if(t.get() == 0) return;
 
-  TVector3 x = t->GetPos() - mCamera->RefTrans().GetPos();
-  Double_t dist = x.Mag();
-  x = x.Unit();
-  TVector3 y = mCamera->RefTrans().GetBaseVec(2);
+  ZPoint x = t->GetPos() - mCamera->RefTrans().GetPos();
+  Double_t dist = x.Normalize();
+
+  ZPoint y = mCamera->RefTrans().GetBaseVec(2);
   y -= (y.Dot(x))*x;
-  y  = y.Unit();
+  y.Normalize();
 
   Float_t to_move = 0;
   if(dist > max_dist) to_move = dist - max_dist;
@@ -1809,14 +1809,14 @@ void Pupil::smooth_camera_home_cb(smooth_camera_home_data* data)
     float    t = data->time;
     float  pos = data->distance*(1 - 0.75*((t - t*t*t/3) + 0.666666667));
     ZTrans&  T = P->mCamera->ref_trans();
-    TVector3 v = T.GetPos();
+    ZPoint   v = T.GetPos();
     Double_t m2 = v.Mag2();
     // printf("t=%f pos=%f dist=%f m2=%lf\n", t, pos, data->distance, m2);
     if(m2 < 1e-5) {
       delete data; P->mCamera->Home();
     } else {
       v *= pos/TMath::Sqrt(m2);
-      T.SetPos(v.x(), v.y(), v.z());
+      T.SetPos(v);
       data->time += data->delta_t;
       Fl::repeat_timeout(fps_25_dt, (Fl_Timeout_Handler)smooth_camera_home_cb, data);
     }
