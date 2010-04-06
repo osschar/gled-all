@@ -201,7 +201,6 @@ void CrawlerSpiritio::TimeTick(Double_t t, Double_t dt)
     const Float_t a2 = C.RefLaserUpDn().GetDesire();
     if (m_laser_a1 != a1 || m_laser_a2 != a2)
     {
-      printf("Fooxing angles %f %f\n", a1, a2);
       mCamera->SetRotByAngles(a1, a2, 0.0f);
       m_laser_a1 = a1;
       m_laser_a2 = a2;
