@@ -1,3 +1,8 @@
+2010-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/project7.pl:
+	Add GetSetMap entries for HPointD and ZPoint.
+
 2010-01-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure:

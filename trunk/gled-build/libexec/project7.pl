@@ -110,6 +110,14 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName)
                  SetArgs=>'Float_t x, Float_t y, Float_t z',
                  ByRef  =>1
                },
+  'HPointD' => { SetMeth=>'.Set(x,y,z)',
+                 SetArgs=>'Double_t x, Double_t y, Double_t z',
+                 ByRef  =>1
+               },
+  'ZPoint'  => { SetMeth=>'.Set(x,y,z)',
+                 SetArgs=>'Double_t x, Double_t y, Double_t z',
+                 ByRef  =>1
+               },
   'SMinMaxVarF' => { GetType=>'Float_t',
 		     GetMeth=>'.Get()',
 		     SetMeth=>'.Set(x)',
