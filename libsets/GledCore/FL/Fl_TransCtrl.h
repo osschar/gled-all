@@ -11,9 +11,8 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Value_Input.H>
 
-#include <math.h>
-
-class Fl_TransPosCtrl : public Fl_Group {
+class Fl_TransPosCtrl : public Fl_Group
+{
 protected:
   Fl_Value_Input*	mP[3];
 
@@ -29,22 +28,26 @@ public:
   virtual void resize(int x, int y, int w, int h);
 };
 
-class Fl_TransRotCtrl : public Fl_Group {
+//------------------------------------------------------------------------------
+
+class Fl_TransRotCtrl : public Fl_Group
+{
 protected:
   Fl_Value_Input*	mP[3];
+  bool                  mLock;
+
+  static const double sD2R, sR2D;
 
 public:
-  static const double d2r;
-
   Fl_TransRotCtrl(int x, int y, int w,int h, const char* l=0);
 
-  double phi() const { return mP[0]->value() * d2r; }
-  double theta() const { return mP[1]->value() * d2r; }
-  double eta() const { return mP[2]->value() * d2r; }
+  double phi()   const { return mP[0]->value() * sD2R; }
+  double theta() const { return mP[1]->value() * sD2R; }
+  double eta()   const { return mP[2]->value() * sD2R; }
 
-  void rot(double x, double y, double z);
+  void   rot(double x, double y, double z);
 
-  double mungl(double x) { return (int)round(100*x/d2r)/100.0; }
+  double mungl(double x) const;
 
   virtual void resize(int x, int y, int w, int h);
 };
