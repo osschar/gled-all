@@ -1,3 +1,17 @@
+2010-04-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix display of rotation angles in ZNode-weed.
+	This became inconsistent as Cardan-angle caching got removed from
+	ZTrans.
+
+	* Stones/HTrans.cxx:
+	Fix calculation of phi angle when theta is +-90deg.
+
+	* FL/Fl_TransCtrl.cxx:
+	* FL/Fl_TransCtrl.h:
+	Do not update the rotation angle widget while a valuator is being
+	dragged.
+
 2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Unify usage / implementation of matrix and point classes.

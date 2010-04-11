@@ -425,21 +425,11 @@ void HTrans<TT>::Rotate(const HTrans<TT>& a, Int_t i1, Int_t i2, TT amount)
 // Cardan angle interface
 /**************************************************************************/
 
-namespace
-{
-  void clamp_angle(Float_t& a)
-  {
-    while(a < -TMath::TwoPi()) a += TMath::TwoPi();
-    while(a >  TMath::TwoPi()) a -= TMath::TwoPi();
-  }
-}
-
 template<class TT>
 void HTrans<TT>::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 {
   // Sets Rotation part as given by angles:
   // a1 around z, -a2 around y, a3 around x
-  clamp_angle(a1); clamp_angle(a2); clamp_angle(a3);
 
   TT A, B, C, D, E, F;
   A = TMath::Cos(a3); B = TMath::Sin(a3);
@@ -449,7 +439,7 @@ void HTrans<TT>::SetRotByAngles(Float_t a1, Float_t a2, Float_t a3)
 
   M[F00] = C*E; M[F01] = -BD*E - A*F; M[F02] = -AD*E + B*F;
   M[F10] = C*F; M[F11] = -BD*F + A*E; M[F12] = -AD*F - B*E;
-  M[F20] = D;   M[F21] = B*C;         M[F22] = A*C;
+  M[F20] = D;   M[F21] =  B*C;        M[F22] =  A*C;
 }
 
 template<class TT>
@@ -485,14 +475,17 @@ void HTrans<TT>::GetRotAngles(Float_t* x) const
   // This only works if no scaling has been applied.
 
   TT d = M[F20];
-  if(d>1) d=1; else if(d<-1) d=-1; // Fix numerical errors
+  if (d>1) d=1; else if (d<-1) d=-1; // Fix numerical errors
   x[1] = TMath::ASin(d);
   TT C = TMath::Cos(x[1]);
-  if(TMath::Abs(C) > 8.7e-6) {
+  if (TMath::Abs(C) > 8.7e-6)
+  {
     x[0] = TMath::ATan2(M[F10], M[F00]);      
     x[2] = TMath::ATan2(M[F21], M[F22]);
-  } else {
-    x[0] = TMath::ATan2(M[F10], M[F11]);
+  }
+  else
+  {
+    x[0] = TMath::ATan2(-M[F01], M[F11]);
     x[2] = 0;
   }
 }
