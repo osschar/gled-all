@@ -21,7 +21,7 @@ private:
 #endif
 public:
   GCondition(Init_e e=fast);
-  virtual ~GCondition();
+  ~GCondition();
 
   Int_t	Wait();
   Int_t TimedWaitMS(UInt_t wait_ms);
@@ -32,7 +32,7 @@ public:
   Int_t LockBroadcast();
 
 #include "GCondition.h7"
-  ClassDef(GCondition,0);
+  ClassDefNV(GCondition,0);
 }; // endclass GCondition
 
 #endif

@@ -40,12 +40,12 @@ public:
 
 public:
   GSelector(Init_e e=fast);
-  virtual ~GSelector();
+  ~GSelector();
 
   Int_t Select();
 
 #include "GSelector.h7"
-  ClassDef(GSelector,0);
+  ClassDefNV(GSelector, 0);
 }; // endclass GSelector
 
 #endif
