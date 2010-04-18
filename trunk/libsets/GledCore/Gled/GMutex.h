@@ -23,7 +23,6 @@ class GMutex
 protected:
 #ifndef __CINT__
   pthread_mutex_t	mMut;	// X{P}
-  pthread_mutexattr_t	mAttr;	// X{P}
 #endif
 
 public:
@@ -31,7 +30,7 @@ public:
   enum Lock_e { ok=0, bad_init, deadlock, busy, perm_fail };
 
   GMutex(Init_e e=fast);
-  virtual ~GMutex();
+  ~GMutex();
 
   Lock_e Lock();
   Lock_e TryLock();
@@ -40,7 +39,7 @@ public:
 #ifndef __CINT__
 #include "GMutex.h7"
 #endif
-  ClassDef(GMutex, 0);
+  ClassDefNV(GMutex, 0);
 }; // endclass GMutex
 
 

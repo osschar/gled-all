@@ -13,6 +13,10 @@
 //
 // POSIX mutex wrapper class.
 //
+// Note that GMutex is used as base-class for GCondition and GSElector
+// but DOES NOT have any virtual functions, nor a virtual destructor.
+//
+// This is to save space, as Gled uses mutexes a bit too excessively.
 
 ClassImp(GMutex);
 
@@ -23,19 +27,20 @@ ClassImp(GMutex);
 GMutex::GMutex(Init_e e)
 {
   // This can't fail ... so says the pthread man
-  pthread_mutexattr_init(&mAttr);
+  pthread_mutexattr_t	attr;
+  pthread_mutexattr_init(&attr);
   switch(e) {
   case fast:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_NORMAL); break;
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL); break;
   case recursive:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE); break;
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); break;
   case error_checking:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_ERRORCHECK); break;
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK); break;
   default:
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_NORMAL); break;
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL); break;
   }
   int ret;
-  if( (ret = pthread_mutex_init(&mMut, &mAttr)) ) {
+  if( (ret = pthread_mutex_init(&mMut, &attr)) ) {
     perror("GMutex::GMutex");
   }
 }

@@ -1,3 +1,26 @@
+2010-04-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add spinlock wrapper, remove all virtuals from GMutex and
+	subclasses.
+
+	* Gled/GSpinLock.cxx:
+	* Gled/GSpinLock.h:
+	New files - wrapper for posix spinlock.
+
+	* Gled/GMutex.cxx:
+	* Gled/GMutex.h:
+	Do not store initial mutex attribs, they are never used.
+
+	Use ClassDefNV, make destructor non-virtual.
+	GMutex and sub-classes are never used in polymorphic contexts.
+
+	* Gled/GCondition.h:
+	* Gled/GSelector.h:
+	Use ClassDefNV, make destructor non-virtual..
+
+	* Gled/GTime.h:
+	Whitespace.
+
 2010-04-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix display of rotation angles in ZNode-weed.
