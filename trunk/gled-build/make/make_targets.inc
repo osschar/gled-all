@@ -46,11 +46,6 @@ build_uninstall::
 	${ECHO} -I- Build-uninstall
 	${MUTE} ${GLED_UNINSTALL_DIRS} -rs ${GLEDSYS} ${LIBSET_DIR} ${BUILD_INSTALL_DIRS}
 
-#### XXXX !!!!! FOO HERE
-#### write blob-install and install, also in top-level makefile
-#### decide what to do with INSTALL_DIRS - seems we need separation
-#### for bindir, libdir, datadir?
-
 # Blob install
 .PHONY: blob_install blob_uninstall
 
