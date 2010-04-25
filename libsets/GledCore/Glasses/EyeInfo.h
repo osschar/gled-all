@@ -15,19 +15,22 @@ class Saturn;
 class Eye;
 class TSocket;
 
-class EyeInfo : public ZMirEmittingEntity {
+class EyeInfo : public ZMirEmittingEntity
+{
   MAC_RNR_FRIENDS(EyeInfo);
   friend class ZKing; friend class ZQueen; friend class ZSunQueen;
   friend class Saturn;
+  friend class Eye;
 
 public:
   typedef Eye*	(*EyeCreator_foo)(TSocket*, EyeInfo*, ZGlass*);
 
 private:
-  TSocket*	hSocket;	//!
+  TSocket            *hSocket; //!
+  Eye                *hEye;    //!
 
 protected:
-  ZLink<SaturnInfo>	mMaster;		// X{gS} L{}
+  ZLink<SaturnInfo>   mMaster; // X{gS} L{}
 
 public:
   EyeInfo(const Text_t* n="EyeInfo", const Text_t* t=0);

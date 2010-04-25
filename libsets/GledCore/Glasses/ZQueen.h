@@ -9,6 +9,7 @@
 
 #include <Glasses/ZNameMap.h>
 #include <Glasses/SaturnInfo.h>
+#include <Glasses/EyeInfo.h>
 
 #include <Gled/GTime.h>
 
@@ -44,8 +45,8 @@ public:
 
   enum LensState_e    { LS_Undef, LS_Alive, LS_Purged, LS_Dead };
 
-  class LensDetails {
-  public:
+  struct LensDetails
+  {
     ZGlass*	mLens;
     LensState_e mState;
     GTime	mCreationTime;
@@ -106,11 +107,12 @@ protected:
   ZLink<ZHashList>	mOrphans;       // X{gS} L{}
 
   lpSaturnInfo_t mReflectors;	//!
+  lpEyeInfo_t    mObservers;    //!
 
   // Mutexen
   GMutex mSubjectWriteMutex;    //!
   GMutex mSubjectRefCntMutex;   //!
-
+  GMutex mRayMutex;             //!
 
   virtual void bootstrap();
   virtual void embrace_of_life(ZComet& comet);
@@ -139,13 +141,15 @@ public:
   ZQueen(const Text_t* n="ZQueen", const Text_t* t=0) :
     ZNameMap(n,t), mIDSpan(0),
     mSubjectWriteMutex(GMutex::recursive),
-    mSubjectRefCntMutex(GMutex::recursive)
+    mSubjectRefCntMutex(GMutex::recursive),
+    mRayMutex()
   { _init(); }
 
   ZQueen(ID_t span, const Text_t* n="ZQueen", const Text_t* t=0) :
     ZNameMap(n,t), mIDSpan(span),
     mSubjectWriteMutex(GMutex::recursive),
-    mSubjectRefCntMutex(GMutex::recursive)
+    mSubjectRefCntMutex(GMutex::recursive),
+    mRayMutex()
   { _init(); }
 
   // Subject Write/RefCnt locks.
@@ -213,10 +217,13 @@ public:
   void BasicQueenChange(ZMIR& mir);
 
   // lens stamping
+  void AddObserver(EyeInfo* ei);
+  void RemoveObserver(EyeInfo* ei);
   void EmitRay(auto_ptr<Ray>& ray);
+  void PrintEyeConnections(); //! X{E} 7 MButt()
 
   // tmp
-  void ListAll();		 //! X{E} 7 MButt()
+  void ListAll(); //! X{E} 7 MButt()
 
 #include "ZQueen.h7"
   ClassDef(ZQueen, 1);

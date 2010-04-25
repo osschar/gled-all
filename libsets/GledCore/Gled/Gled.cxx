@@ -809,7 +809,7 @@ void Gled::error(const char* s)
 
 /**************************************************************************/
 
-EyeInfo* Gled::SpawnEye(const char* libset, const char* eyector)
+EyeInfo* Gled::SpawnEye(const TString& libset, const TString& eyector)
 {
   if(mSaturn == 0) {
     ISerr("Gled::SpawnEye Saturn has not been spawned");

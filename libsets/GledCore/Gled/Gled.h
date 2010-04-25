@@ -120,9 +120,9 @@ public:
 
   virtual Bool_t HasGUILibs() const { return false; }
 
-  virtual EyeInfo* SpawnEye(const char* libset, const char* eyector);
+  virtual EyeInfo* SpawnEye(const TString& libset, const TString& eyector);
   virtual EyeInfo* SpawnEye(EyeInfo* ei, ZGlass* ud,
-			    const char* libset, const char* eyector)
+			    const TString& libset, const TString& eyector)
   { return 0; }
 
   virtual TCanvas*

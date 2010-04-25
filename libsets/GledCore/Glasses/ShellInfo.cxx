@@ -4,21 +4,20 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//__________________________________________________________________________
-// ShellInfo
-//
-// Glass representation of GUI shell 'FTW_Shell'.
-// Note that FTW_Shell itself is subclassed from Eye.
-// ShellInfo can not subclass EyeInfo as it is instantiated on the
-// Sun Absolute.
-// In principle should have a link to ;swallowyesed view and display a canvas
-// of some sort if it is not set.
-
 #include "ShellInfo.h"
 #include "MetaViewInfo.h"
 #include "ShellInfo.c7"
 #include "NestInfo.h"
 #include <Glasses/ZQueen.h>
+
+//__________________________________________________________________________
+//
+// Glass representation of GUI shell 'FTW_Shell'.
+// Note that FTW_Shell itself is subclassed from Eye.
+// ShellInfo can not subclass EyeInfo as it is instantiated on the
+// Sun Absolute.
+// In principle should have a link to swallowed view and display a canvas
+// of some sort if it is not set.
 
 ClassImp(ShellInfo);
 

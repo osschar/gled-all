@@ -53,10 +53,10 @@ FTW_Shell* FTW_Shell::Create_FTW_Shell(TSocket* sock,
   static const Exc_t _eh("FTW_Shell::Create_FTW_Shell ");
 
   GledGUI* ggui = GledGUI::theOne;
-  if(ggui == 0) throw(_eh + "GledGUI not accessible.");
+  if(ggui == 0) throw _eh + "GledGUI not accessible.";
 
   ShellInfo* si = dynamic_cast<ShellInfo*>(ud_lens);
-  if(si == 0) throw(_eh + "user-data is not ShellInfo.");
+  if(si == 0) throw _eh + "user-data is not ShellInfo.";
 
   Fl::lock();
 
@@ -81,8 +81,8 @@ void *EyeCreator_GledCore_FTW_Shell = (void*)FTW_Shell::Create_FTW_Shell;
 
 /**************************************************************************/
 
-namespace {
-
+namespace
+{
   /**************************************************************************/
   // Configs
   /**************************************************************************/
@@ -103,7 +103,8 @@ namespace {
   // New menu
   //----------
 
-  void new_menu_cb(Fl_Menu_Button* b, void* what) {
+  void new_menu_cb(Fl_Menu_Button* b, void* what)
+  {
     FTW_Shell* shell = FGS::grep_parent<FTW_Shell*>(b);
 
     switch(GNS::CastVoidPtr2ID(what)) {

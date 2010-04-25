@@ -4,8 +4,18 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+#include "ZQueen.h"
+#include <Stones/ZComet.h>
+#include "ZQueen.c7"
+#include "ZKing.h"
+#include <Ephra/Saturn.h>
+#include <Gled/GledNS.h>
+#include <Eye/Eye.h>
+
+#include <Gled/GThread.h>
+#include <TSystem.h>
+
 //________________________________________________________________________
-// ZQueen
 //
 // A Queen controls its portion of the ID space.
 // Glasses are adopted/instantiated and enlightened by it.
@@ -21,16 +31,6 @@
 // example see ZQueen::AddDependency.
 //
 //________________________________________________________________________
-
-#include "ZQueen.h"
-#include <Stones/ZComet.h>
-#include "ZQueen.c7"
-#include "ZKing.h"
-#include <Ephra/Saturn.h>
-#include <Gled/GledNS.h>
-
-#include <Gled/GThread.h>
-#include <TSystem.h>
 
 ClassImp(ZQueen);
 
@@ -82,10 +82,7 @@ void ZQueen::bootstrap()
     ISerr(_eh + "Queen enlightenment failed.");
     throw;
   }
-  mIDMap.insert
-    ( pair<ID_t,LensDetails*>
-      (mSaturnID, produce_lens_details(mSaturnID, this))
-    ).first;
+  mIDMap.insert(make_pair(mSaturnID, produce_lens_details(mSaturnID, this)));
   mCreationID = mSaturnID + 1;
   mIDsUsed   = 1;
   mIDsPurged = 0;
@@ -1282,9 +1279,43 @@ void ZQueen::BasicQueenChange(ZMIR& mir)
 // Stamping
 /**************************************************************************/
 
+void ZQueen::AddObserver(EyeInfo* ei)
+{
+  static const Exc_t _eh("ZQueen::AddObserver ");
+
+  ISmess(_eh +  "[" + Identify() + "] Registering EyeInfo " + ei->Identify() + ".");
+
+  GMutexHolder lck(mRayMutex);
+  mObservers.push_back(ei);
+}
+
+void ZQueen::RemoveObserver(EyeInfo* ei)
+{
+  static const Exc_t _eh("ZQueen::RemoveObserver ");
+
+  ISmess(_eh + "[" + Identify() + "] Removing EyeInfo " + ei->Identify() + ".");
+
+  GMutexHolder lck(mRayMutex);
+  mObservers.remove(ei);
+}
+
 void ZQueen::EmitRay(auto_ptr<Ray>& ray)
 {
+  // eventually lock mRayMutex and do direct ray delivery
   mSaturn->Shine(ray);
+}
+
+void ZQueen::PrintEyeConnections()
+{
+  static const Exc_t _eh("ZQueen::PrintEyeConnections ");
+
+  printf("%s [%s], N_eyes=%d\n", _eh.Data(), Identify().Data(), (Int_t) mObservers.size());
+  Int_t n = 1;
+  GMutexHolder lck(mRayMutex);
+  for (lpEyeInfo_i i = mObservers.begin(); i != mObservers.end(); ++i, ++n)
+  {
+    printf("  %d. %s -- N_imgs=%d\n", n, (*i)->Identify().Data(), (*i)->hEye->GetImageCount(this));
+  }
 }
 
 /**************************************************************************/
