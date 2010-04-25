@@ -11,6 +11,7 @@
 
 #include "ZAliLoad.h"
 #include "ZAliLoad.c7"
+#include <Glasses/ZQueen.h>
 
 #include <TMath.h>
 #include <TSystem.h>
