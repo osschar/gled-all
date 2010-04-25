@@ -96,7 +96,7 @@ public:
 };
 
 template<class TT>
-ostream& operator<<(ostream& s, const HPoint<TT>& t);
+std::ostream& operator<<(std::ostream& s, const HPoint<TT>& t);
 
 //------------------------------------------------------------------------------
 
@@ -378,7 +378,7 @@ public:
 
 
 template<class TT>
-ostream& operator<<(ostream& s, const HTrans<TT>& t);
+std::ostream& operator<<(std::ostream& s, const HTrans<TT>& t);
 
 
 //------------------------------------------------------------------------------

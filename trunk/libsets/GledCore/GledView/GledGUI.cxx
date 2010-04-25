@@ -453,7 +453,7 @@ void GledGUI::error(const char* s) {
 /**************************************************************************/
 
 EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
-			   const char* libset, const char* eyector)
+			   const TString& libset, const TString& eyector)
 {
   // Wrapper for eye spawning from CINT.
 
@@ -508,7 +508,7 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
   if (strlen(ei->GetLogin()) == 0)
     ei->SetLogin(mDefEyeIdentity);
 
-  if (ud==0 && strcmp(libset,"GledCore")==0 && strcmp(eyector,"FTW_Shell")==0)
+  if (ud==0 && libset == "GledCore" && eyector == "FTW_Shell")
   {
     ZFireQueen* fq = mSaturn->GetFireQueen();
     ShellInfo* si = new ShellInfo
@@ -519,7 +519,7 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
     ud = si;
   }
 
-  TString foo_name = GForm("EyeCreator_%s_%s", libset, eyector);
+  TString foo_name("EyeCreator_"); foo_name += libset + "_" + eyector;
   long* p2foo = (long*) GledNS::FindSymbol(foo_name);
   if (!p2foo)
   {

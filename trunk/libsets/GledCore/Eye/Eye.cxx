@@ -40,20 +40,26 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) :
 {
   static const Exc_t _eh("Eye::Eye ");
 
-  try {
+  if (ei->hEye != 0) throw _eh + "Eye already instantiated!\n";
+
+  try
+  {
     Saturn::HandleClientSideSaturnHandshake(mSatSocket);
   }
-  catch(Exc_t& exc) {
-    throw(_eh + exc);
+  catch(Exc_t& exc)
+  {
+    throw _eh + exc;
   }
   // No protocol exchange ...
   {
     TMessage* m;
-    try {
+    try
+    {
       m = Saturn::HandleClientSideMeeConnection(mSatSocket, ei);
     }
-    catch(Exc_t& exc) {
-      throw(_eh + exc);
+    catch(Exc_t& exc)
+    {
+      throw _eh + exc;
     }
     size_t ss;  *m >> ss;
     mSaturn     = (Saturn*) ss;
@@ -61,39 +67,54 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) :
     ID_t ei_id; *m >> ei_id;
     delete m;
     mEyeInfo = dynamic_cast<EyeInfo*>(mSaturn->DemangleID(ei_id));
-    if(mEyeInfo == 0) {
-      throw(_eh + "bad eye_info.");
+    if (mEyeInfo == 0)
+    {
+      throw _eh + "bad eye_info.";
     }
   }
 
-  ISdebug(0, GForm("%screation of Eye('%s') complete", _eh.Data(), mEyeInfo->GetName()));
+  mEyeInfo->hEye = this;
 
+  ISdebug(0, GForm("%screation of Eye('%s') complete", _eh.Data(), mEyeInfo->GetName()));
 }
 
-Eye::~Eye() {
+Eye::~Eye()
+{
+  // unregister from all queens
+  // cleanup ray queue
+  // reset eye-infe hEye
   // !!!! Send sth impressive to Saturn
-  if(mSatSocket) {
+  if (mSatSocket) {
     mSatSocket->Close();
     delete mSatSocket;
   }
-  // Cleanup own shit ... like all Views
+  // Cleanup own shit ... like all Views (they are all A_View!)
 }
 
 /**************************************************************************/
 
 OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
 {
-  if(glass == 0) return 0;
+  if (glass == 0) return 0;
 
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
-  if(i != mGlass2ImgHash.end()) return i->second;
-  OS::ZGlassImg* gi;
-  {
-    GLensReadHolder rlck(glass);
-    glass->IncEyeRefCount();
-    gi = new OS::ZGlassImg(this, glass);
-  }
+  if (i != mGlass2ImgHash.end()) return i->second;
+
+  glass->IncEyeRefCount();
+  OS::ZGlassImg *gi = new OS::ZGlassImg(this, glass);
   mGlass2ImgHash[glass] = gi;
+
+  mpQueen2Int_i qci = mQueenLensCount.find(glass->GetQueen());
+  if (qci == mQueenLensCount.end())
+  {
+    mQueenLensCount.insert(make_pair(glass->GetQueen(), 1));
+    glass->GetQueen()->AddObserver(mEyeInfo);
+  }
+  else
+  {
+    ++qci->second;
+  }
+
   return gi;
 }
 
@@ -113,24 +134,34 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
   static const Exc_t _eh("Eye::RemoveImage ");
 
   OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fLens);
-  if(i == mGlass2ImgHash.end()) {
-    cout << _eh + "lens of passed image not found in hash.\n";
-    return;
-  }
-  if(i->second != img) {
-    cout << _eh + " non-matching images.\n";
-    return;
-  }
 
-  for(OS::lpImgConsumer_i c=mImgConsumers.begin(); c!=mImgConsumers.end(); ++c)
-    (*c)->ImageDeath(img);
+  assert (i != mGlass2ImgHash.end());
+  assert (i->second == img);
 
+  for (OS::lpImgConsumer_i c=mImgConsumers.begin(); c!=mImgConsumers.end(); ++c)
   {
-    GLensReadHolder rlck(i->first);
-    i->first->DecEyeRefCount();
+    (*c)->ImageDeath(img);
   }
+
+  i->first->DecEyeRefCount();
+
+  mpQueen2Int_i qci = mQueenLensCount.find(i->first->GetQueen());
+  if (--qci->second <= 0)
+  {
+    i->first->GetQueen()->RemoveObserver(mEyeInfo);
+    mQueenLensCount.erase(qci);
+  }
+
   mGlass2ImgHash.erase(i);
   delete img;
+}
+
+Int_t Eye::GetImageCount(ZQueen* q)
+{
+  mpQueen2Int_i qci = mQueenLensCount.find(q);
+  if (qci != mQueenLensCount.end())
+    return qci->second;
+  return 0;
 }
 
 /**************************************************************************/
@@ -145,8 +176,8 @@ Int_t Eye::Manage(int fd)
   UInt_t    length;
   Int_t     ray_count = 0, all_count = 0, len;
 
-  while(1) {
-
+  while (true)
+  {
     // Prefetch ...
     len = recv(mSatSocketFd, &length, sizeof(UInt_t),
 	       MSG_PEEK|MSG_DONTWAIT);
@@ -258,7 +289,7 @@ Int_t Eye::Manage(int fd)
     if(all_count > 9999) {
       break;
     }
-  } // end while(1)
+  } // end while (true)
 
   ISdebug(6, GForm("%s got %d message(s), %d ray(s) in this gulp",
 		   _eh.Data(), all_count, ray_count));

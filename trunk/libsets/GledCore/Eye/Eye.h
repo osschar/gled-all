@@ -24,11 +24,16 @@ class TSocket;
 class TMessage;
 
 
-class Eye {
-
+class Eye
+{
 protected:
+  typedef map<ZQueen*, Int_t>           mpQueen2Int_t;
+  typedef map<ZQueen*, Int_t>::iterator mpQueen2Int_i;
+
   OptoStructs::hpZGlass2pZGlassImg_t mGlass2ImgHash;
   OptoStructs::lpImgConsumer_t       mImgConsumers;
+
+  mpQueen2Int_t                      mQueenLensCount;
 
   Saturn*	mSaturn;	// X{g}
   SaturnInfo*	mSaturnInfo;	// X{g}
@@ -51,6 +56,8 @@ public:
   virtual OptoStructs::ZGlassImg* DemangleID(ID_t id);
   virtual ZGlass*                 DemangleID2Lens(ID_t id);
   virtual void RemoveImage(OptoStructs::ZGlassImg* img);
+
+  Int_t GetImageCount(ZQueen* q);
 
   void RegisterImageConsumer(OptoStructs::ImageConsumer* imgc)
   { mImgConsumers.push_back(imgc); }

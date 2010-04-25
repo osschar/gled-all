@@ -88,7 +88,7 @@ public:
   virtual Bool_t HasGUILibs() const { return true; }
 
   virtual EyeInfo* SpawnEye(EyeInfo* ei, ZGlass* ud,
-			    const char* libset, const char* eyector);
+			    const TString& libset, const TString& eyector);
 
   virtual TCanvas*
   NewCanvas(const Text_t* name ="Gled Canvas",

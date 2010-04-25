@@ -1,3 +1,45 @@
+2010-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First step towards direct, targeted Ray delivery: let Queens
+	know which Eyes are observing them.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Add map<ZQueen*, int> member to count number of images for any
+	given queen -- notify queens when an eye starts/stops observing them.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Make ZGlassImg::CheckIn/OutView() non-inline.
+	In CheckOutView() auto-destruct image unless in destruction already.
+
+	* Glasses/EyeInfo.cxx:
+	* Glasses/EyeInfo.h:
+	Make class Eye a friend.
+	Add private local member 'Eye *hEye'.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Add mutex mRayMutex to lock future ray operations.
+	Add functions Add/RemoveObserver() used by Eyes to notify about
+	start/end of observation.
+	Add function PrintEyeConnections() that lists all Eyes observing
+	this queen and number of lenses that have images.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Use TString& instead of char* for SpawnEye() arguments.
+
+	* Stones/HTrans.cxx:
+	* Stones/HTrans.h:
+	Use std::ostream, GledTypes.h are not included when PCHs are not used.
+
+	* Glasses/ShellInfo.cxx:
+	* GledView/FTW_Shell.cxx:
+	Grayspace.
+
 2010-04-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add spinlock wrapper, remove all virtuals from GMutex and

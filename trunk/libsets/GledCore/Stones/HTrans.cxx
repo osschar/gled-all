@@ -76,7 +76,7 @@ void HPoint<TT>::Print() const
 }
 
 template<class TT>
-ostream& operator<<(ostream& s, const HPoint<TT>& t)
+std::ostream& operator<<(std::ostream& s, const HPoint<TT>& t)
 {
   s.setf(ios::fixed, ios::floatfield); s.precision(3);
   s << t.x <<"\t"<< t.y <<"\t"<< t.z <<"\n";
@@ -866,7 +866,7 @@ void HTrans<TT>::Print() const
 
 
 template<class TT>
-ostream& operator<<(ostream& s, const HTrans<TT>& t)
+std::ostream& operator<<(std::ostream& s, const HTrans<TT>& t)
 {
   s.setf(ios::fixed, ios::floatfield); s.precision(3);
   for(Int_t i=1; i<=4; i++)

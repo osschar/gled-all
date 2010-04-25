@@ -45,10 +45,14 @@ ZGlassImg::~ZGlassImg()
 {
   delete fElementImgs;
 
-  while(!fViews.empty()) {
-    // The destructor of A_View removes itself from the fViews list.
-    delete fViews.back();
-  }
+  // The destructor of A_View removes itself from the fViews list.
+  // To by-pass this (and image auto-destruction) fViews is
+  // wiped before destruction.
+  // This condition is checked in CheckOutView();
+  lpA_View_t views;
+  views.swap(fViews);
+  for (lpA_View_i i = views.begin(); i != views.end(); ++i)
+    delete *i;
 }
 
 /**************************************************************************/
@@ -57,16 +61,21 @@ void ZGlassImg::PreAbsorption(Ray& ray)
 {
   using namespace RayNS;
 
-  if(ray.fRQN == RQN_link_change) {
-    for(lZLinkDatum_i i=fLinkData.begin(); i!=fLinkData.end(); ++i) {
-      if(i->fToGlass != i->fLinkRep.fLinkRef) {
+  if (ray.fRQN == RQN_link_change)
+  {
+    for (lZLinkDatum_i i=fLinkData.begin(); i!=fLinkData.end(); ++i)
+    {
+      if (i->fToGlass != i->fLinkRep.fLinkRef)
+      {
 	i->fToGlass = i->fLinkRep.fLinkRef;
 	i->fToImg   = 0;
       }
     }
   }
-
-  if(ray.fRQN > RQN_list_begin && ray.fRQN < RQN_list_end && fElementImgs) {
+  else if (ray.fRQN > RQN_list_begin && ray.fRQN < RQN_list_end && fElementImgs)
+  {
+    // XXX April 2010. Is this always necessary? Maybe could optimize for
+    // certain list operations. Rebuild can get expensive for LARGE lists.
     delete fElementImgs;
     fElementImgs = 0;
   }
@@ -74,6 +83,22 @@ void ZGlassImg::PreAbsorption(Ray& ray)
 
 void ZGlassImg::PostAbsorption(Ray& ray)
 {}
+
+void ZGlassImg::CheckInView(A_View* v)
+{
+  fViews.push_back(v);
+}
+
+void ZGlassImg::CheckOutView(A_View* v)
+{
+  // This happens during direct destruction of ZGlassImg.
+  if (fViews.empty())
+    return;
+
+  fViews.remove(v);
+  if (fViews.empty())
+    fEye->RemoveImage(this);
+}
 
 /**************************************************************************/
 

@@ -65,8 +65,8 @@ namespace OptoStructs
     void PreAbsorption(Ray& ray);
     void PostAbsorption(Ray& ray);
 
-    void CheckInView(A_View* v)  { fViews.push_back(v); }
-    void CheckOutView(A_View* v) { fViews.remove(v); }
+    void CheckInView(A_View* v);
+    void CheckOutView(A_View* v);
 
     ZLinkDatum*    GetLinkDatum(const TString& lnk);
     AList*         GetList() { return fIsList ? (AList*)fLens : 0; }
