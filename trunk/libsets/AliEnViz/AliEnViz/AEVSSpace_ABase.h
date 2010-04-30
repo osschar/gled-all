@@ -7,6 +7,8 @@
 #ifndef AliEnViz_AEVSSpace_ABase_H
 #define AliEnViz_AEVSSpace_ABase_H
 
+#include <Rtypes.h>
+
 class AEVSite;
 
 class AEVSSpace_ABase
