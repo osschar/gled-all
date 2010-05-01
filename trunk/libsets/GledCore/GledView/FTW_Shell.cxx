@@ -349,10 +349,13 @@ void FTW_Shell::UninstallFdHandler()
 
 void FTW_Shell::PostManage(int ray_count)
 {
-  if(ray_count) {
-    for(lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
+  if (ray_count)
+  {
+    for (lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
       (*w)->redraw();
   }
+
+  Eye::PostManage(ray_count);
 }
 
 /**************************************************************************/
@@ -744,8 +747,8 @@ void FTW_Shell::X_Insert(FTW::Locator& target)
   if(!mSource->has_contents())	throw(_eh + "source has no contents");
 
   FTW_Leaf* parent_leaf = target.leaf->GetParent();
-  if(parent_leaf == 0)            throw(_eh + "no parent.");
-  if(!parent_leaf->fImg->fIsList) throw(_eh + "parent not a list.");
+  if(parent_leaf == 0)             throw(_eh + "no parent.");
+  if(!parent_leaf->fImg->IsList()) throw(_eh + "parent not a list.");
 
   AList*           l = (AList*) parent_leaf->fImg->fLens;
   AList::ElRep elrep = target.leaf->GetElRep();
@@ -910,8 +913,8 @@ MCW_View* FTW_Shell::SpawnMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi,
 
 // Local callbacks for FTW_Shell::LocatorMenu(...);
 
-namespace {
-
+namespace
+{
   // ShellVars
   //==========
 

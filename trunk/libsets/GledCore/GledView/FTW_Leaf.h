@@ -94,7 +94,7 @@ public:
   virtual void ShowListMembers() {}
   virtual void HideListMembers() {}
 
-  bool IsList()           { return fImg ? fImg->fIsList : false; }
+  bool IsList()           { return fImg ? fImg->IsList() : false; }
   bool IsListMember()     { return bIsListMember; }
   bool IsLinkDescendant() { return bIsLinkDescendant; }
 

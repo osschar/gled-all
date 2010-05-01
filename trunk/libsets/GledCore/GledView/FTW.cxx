@@ -264,9 +264,8 @@ void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 				      ci->fName.Data(),
 				      lens->GetName(), lens->GetTitle()));
   } else {
-    OptoStructs::ZLinkDatum* ld = ant->fLinkDatum;
     const char *glass = "<null>", *name = "", *title = "";
-    if(ant->GetToImg()) {
+    if (ant->IsSet()) {
       glass = ant->GetToImg()->GetCI()->fName.Data();
       name  = ant->fToGlass->GetName();
       title = ant->fToGlass->GetTitle();
@@ -275,8 +274,8 @@ void FTW::NameButton::set_nests_info_bar(FTW_Leaf* leaf, FTW_Ant* ant,
 				      prefix,
 				      ci->fName.Data(),
 				      lens->GetName(),
-				      ld->GetLinkInfo()->fType.Data(),
-				      ld->GetLinkInfo()->fName.Data(),
+				      ant->GetLinkInfo()->fType.Data(),
+				      ant->GetLinkInfo()->fName.Data(),
 				      glass, name, title));
   }
 
@@ -1126,7 +1125,7 @@ void FTW::Sink_Selector::swallow_victim(ZGlass* beta)
   case Top_Selector::T_Direct: {
     OS::ZGlassImg* aimg = wDir_Sel->get_img();
     if(aimg == 0) return;
-    if(!aimg->fIsList) throw(_eh + "sink is not a list");
+    if(!aimg->IsList()) throw(_eh + "sink is not a list");
 
     ID_t a = aimg->fLens->GetSaturnID();
     ID_t b = beta ? beta->GetSaturnID() : 0;

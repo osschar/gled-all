@@ -167,7 +167,8 @@ public:
   // mir_call_data ... temporary structures (user-data) for callbacks
   /**************************************************************************/
 
-  struct mir_call_data {
+  struct mir_call_data
+  {
     FTW_Shell* 		shell;
     GledNS::MethodInfo*	mi;
 
@@ -180,7 +181,8 @@ public:
     virtual GledNS::ClassInfo*       get_class_info() = 0;
   };
 
-  struct mir_call_data_img : public mir_call_data {
+  struct mir_call_data_img : public mir_call_data
+  {
     OptoStructs::ZGlassImg*	img;
 
     mir_call_data_img(OptoStructs::ZGlassImg* i, FTW_Shell* s, GledNS::MethodInfo* m) :
@@ -192,7 +194,8 @@ public:
     virtual GledNS::ClassInfo*       get_class_info() { return img->GetCI(); }
   };
 
-  struct mir_call_data_loc : public mir_call_data {
+  struct mir_call_data_loc : public mir_call_data
+  {
     FTW::Locator&       loc;
 
     mir_call_data_loc(FTW::Locator& l, FTW_Shell* s, GledNS::MethodInfo* m) :
@@ -206,7 +209,8 @@ public:
 
   // And a smart container
 
-  struct mir_call_data_list : public list<mir_call_data*> {
+  struct mir_call_data_list : public list<mir_call_data*>
+  {
     ~mir_call_data_list() { for(iterator i=begin(); i!=end(); ++i) delete *i; }
   };
 

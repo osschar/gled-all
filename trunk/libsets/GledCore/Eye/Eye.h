@@ -27,13 +27,24 @@ class TMessage;
 class Eye
 {
 protected:
-  typedef map<ZQueen*, Int_t>           mpQueen2Int_t;
-  typedef map<ZQueen*, Int_t>::iterator mpQueen2Int_i;
+#ifndef __CINT__
+  typedef hash_map<ZGlass*, OptoStructs::ZGlassImg*> hpZGlass2pZGlassImg_t;
+  typedef hpZGlass2pZGlassImg_t::iterator            hpZGlass2pZGlassImg_i;
 
-  OptoStructs::hpZGlass2pZGlassImg_t mGlass2ImgHash;
-  OptoStructs::lpImgConsumer_t       mImgConsumers;
+  typedef hash_set<OptoStructs::ZGlassImg*>          spZGlassImg_t;
+  typedef spZGlassImg_t::iterator                    spZGlassImg_i;
+#endif
 
-  mpQueen2Int_t                      mQueenLensCount;
+  typedef list<OptoStructs::ImageConsumer*>          lpImgConsumer_t;
+  typedef lpImgConsumer_t::iterator                  lpImgConsumer_i;
+
+  typedef map<ZQueen*, Int_t>                        mpQueen2Int_t;
+  typedef mpQueen2Int_t::iterator                    mpQueen2Int_i;
+
+  hpZGlass2pZGlassImg_t    mGlass2ImgHash;
+  spZGlassImg_t            mZeroRefCntImgs;
+  lpImgConsumer_t          mImgConsumers;
+  mpQueen2Int_t            mQueenLensCount;
 
   Saturn*	mSaturn;	// X{g}
   SaturnInfo*	mSaturnInfo;	// X{g}
@@ -42,7 +53,11 @@ protected:
   TSocket*	mSatSocket;
   Int_t         mSatSocketFd;
 
-  bool		bBreakManageLoop;
+  int           mMaxManageLoops;
+  bool          bBreakManageLoop;
+
+  virtual void RemoveImage(OptoStructs::ZGlassImg* img, bool wipe_zrc_set);
+  virtual void ProcessZeroRefCntImgs();
 
 public:
   Eye(TSocket* sock, EyeInfo* ei);
@@ -52,17 +67,21 @@ public:
   virtual void UninstallFdHandler() = 0;
 
   // Basic ZGlassImg functionality
-  virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* glass);
+  virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* lens);
   virtual OptoStructs::ZGlassImg* DemangleID(ID_t id);
   virtual ZGlass*                 DemangleID2Lens(ID_t id);
-  virtual void RemoveImage(OptoStructs::ZGlassImg* img);
+
+  virtual void ZeroRefCountImage(OptoStructs::ZGlassImg* img);
 
   Int_t GetImageCount(ZQueen* q);
+  Int_t PrintObservedLenses(ZQueen* q, Bool_t dump_views=false);
+
 
   void RegisterImageConsumer(OptoStructs::ImageConsumer* imgc)
   { mImgConsumers.push_back(imgc); }
   void UnregisterImageConsumer(OptoStructs::ImageConsumer* imgc)
   { mImgConsumers.remove(imgc); }
+
 
   enum MType_e { MT_std=0, MT_err, MT_wrn, MT_msg };
   virtual void Message(const char* msg, MType_e t=MT_std) {}

@@ -38,16 +38,13 @@ public:
   FTW_Ant(OptoStructs::ZLinkDatum* ld, FTW_Leaf* p);
   virtual ~FTW_Ant();
 
-  virtual void Update();
+  virtual void LinkViewUpdate();
 
   void CollExp();
   void ListExpander(); // link + list members
 
-  bool IsSet()  { return (fToGlass != 0); }
-  bool IsList() {
-    OptoStructs::ZGlassImg* to_img = GetToImg();
-    return (to_img && to_img->fIsList);
-  }
+  bool IsSet();
+  bool IsList();
 
 #include "FTW_Ant.h7"
 }; // endclass FTW_Ant

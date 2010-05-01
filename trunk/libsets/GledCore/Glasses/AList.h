@@ -169,6 +169,10 @@ public:
   AList(const Text_t* n="AList", const Text_t* t=0) :
     ZGlass(n,t), mListMutex(GMutex::recursive) { _init(); }
 
+  virtual ~AList() {}
+
+  virtual AList* AsAList() { return this; }
+
   // ZGlass reference management, extensions for lists.
   virtual Int_t RebuildAllRefs(An_ID_Demangler* idd);
   virtual Int_t RebuildListRefs(An_ID_Demangler* idd) = 0;

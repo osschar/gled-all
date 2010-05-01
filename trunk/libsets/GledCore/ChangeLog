@@ -1,3 +1,42 @@
+2010-05-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Auto-destruct non-used ZGlassImgs on the Eye.
+
+	* Glasses/AList.h:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	New virtual function:
+	  AList* AsAList();
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	New function:
+	  void PrintObservedLenses(Bool_t dump_views);
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Add additional reference counting of ZGlassImgs.
+	Register those into special set in Eye and process them at the end
+	of Manage().
+
+	* GledView/FTW.cxx:
+	* GledView/FTW_Ant.cxx:
+	* GledView/FTW_Ant.h:
+	* GledView/FTW_Leaf.cxx:
+	* GledView/FTW_Leaf.h:
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	* GledView/FltkGledStuff.cxx:
+	* GledView/FltkGledStuff.h:
+	* GledView/MTW_ClassView.cxx:
+	* GledView/MTW_View.cxx:
+	* Rnr/GL/ZGlass_GL_Rnr.cxx:
+	* RnrBase/A_Rnr.cxx:
+	* perllib/GLED_GledCore_Widgets.pm:
+	Follow up on changes in OptoStructs.
+
 2010-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First step towards direct, targeted Ray delivery: let Queens

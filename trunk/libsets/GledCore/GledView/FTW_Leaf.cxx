@@ -27,14 +27,13 @@ namespace FGS = FltkGledStuff;
 
 /**************************************************************************/
 
-namespace {
+namespace
+{
+  void cb_collex(Fl_Button* b, FTW_Leaf* l)
+  { l->CollExp(); }
 
-void cb_collex(Fl_Button* b, FTW_Leaf* l)
-{ l->CollExp(); }
-
-void cb_separator_dialog(Fl_Button* sep, FTW_Leaf* l)
-{ l->SpawnSeparatorDialog(); }
-
+  void cb_separator_dialog(Fl_Button* sep, FTW_Leaf* l)
+  { l->SpawnSeparatorDialog(); }
 }
 
 /**************************************************************************/
@@ -64,7 +63,7 @@ FTW_Leaf::Construct(FTW_Nest* nest, FTW_Leaf* parent,
 		    bool is_list_member, bool is_link_desc)
 {
   FTW_Leaf* l;
-  if(img && img->fIsList)
+  if(img && img->IsList())
     l = new FTW_Branch(nest, parent, img, is_list_member, is_link_desc);
   else
     l = new FTW_Leaf(nest, parent, img, is_list_member, is_link_desc);
@@ -114,7 +113,7 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   }
 
   wSepBox = new Fl_Button(0,0,1,1,0);
-  if(fImg && fImg->fIsList && fImg->GetList()->el_type() >= AList::ET_Id) {
+  if(fImg && fImg->IsList() && fImg->GetList()->el_type() >= AList::ET_Id) {
     wSepBox->box(FTW::postnamebox_box);
     if(fImg->GetList()->elrep_can_edit_label())
       wSepBox->color(FTW::postnamebox_edit_color);
@@ -146,7 +145,8 @@ FTW_Leaf::FTW_Leaf(FTW_Nest* nest, FTW_Leaf* parent,
   resize_weeds();
 }
 
-FTW_Leaf::~FTW_Leaf() {
+FTW_Leaf::~FTW_Leaf()
+{
   // hrrmph ... what will be done by fltk? ants are my children ...
   // but do they have virtual destructors? yesss ... ok ... anyways
   // would be more hygienic to destruct leaves of ants here as they were
@@ -175,7 +175,7 @@ void FTW_Leaf::AbsorbRay(Ray& ray)
     assert(mIter==-1);
     for(int c=0; c<wAntPack->children(); ++c) {
       FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-      if(a->NeedsUpdate()) a->Update();
+      if(a->LinkViewNeedsUpdate()) a->LinkViewUpdate();
     }
     return;
   }
@@ -187,7 +187,8 @@ void FTW_Leaf::AbsorbRay(Ray& ray)
 // Expand / Collapse mechanism
 /**************************************************************************/
 
-void FTW_Leaf::ExpandLink(FTW_Ant* ant) {
+void FTW_Leaf::ExpandLink(FTW_Ant* ant)
+{
   OS::ZGlassImg* to_img = ant->GetToImg();
   if(ant->bExpanded || to_img==0) return;
   if(ant->mLeaf == 0) {
@@ -213,7 +214,8 @@ void FTW_Leaf::ExpandLink(FTW_Ant* ant) {
   mNest->redraw();
 }
 
-void FTW_Leaf::CollapseLink(FTW_Ant* ant) {
+void FTW_Leaf::CollapseLink(FTW_Ant* ant)
+{
   if(!ant->bExpanded) return;
   ant->mLeaf->HideRecursively();
   ant->bExpanded = false; ant->label_weeds();
@@ -221,62 +223,70 @@ void FTW_Leaf::CollapseLink(FTW_Ant* ant) {
   mNest->redraw();
 }
 
-void FTW_Leaf::ExpandLinks() {
+void FTW_Leaf::ExpandLinks()
+{
   bool reverse = mNest->GetAntsReversed();
   int  n_children = wAntPack->children();
   for(int c=0; c<n_children; ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(reverse ? n_children-c-1  : c) );
-    if(a->GetToImg() && ! a->bExpanded) ExpandLink(a);
+    if(a->IsSet() && ! a->bExpanded) ExpandLink(a);
   }
   label_weeds();
 }
 
-void FTW_Leaf::CollapseLinks() {
+void FTW_Leaf::CollapseLinks()
+{
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    if(a->GetToImg() && a->bExpanded) CollapseLink(a);
+    if(a->IsSet() && a->bExpanded) CollapseLink(a);
   }
   label_weeds();
 }
 
-void FTW_Leaf::CollExp() {
+void FTW_Leaf::CollExp()
+{
   if(FractionOfExpandedAnts() <= 0.5)	ExpandLinks();
   else					CollapseLinks();
 }
 
-float FTW_Leaf::FractionOfExpandedAnts() {
+float FTW_Leaf::FractionOfExpandedAnts()
+{
   if(wAntPack->children() == 0) return 0;
   float n_expanded=0, n_nonnull=0;
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
-    if(a->GetToImg()) ++n_nonnull;
-    if(a->bExpanded)  ++n_expanded;
+    if(a->IsSet())   ++n_nonnull;
+    if(a->bExpanded) ++n_expanded;
   }
   return n_expanded / n_nonnull;
 }
 
 /**************************************************************************/
 
-void FTW_Leaf::ShowRecursively() {
+void FTW_Leaf::ShowRecursively()
+{
   show();
   ShowLinks();
   ShowListMembers();
 }
 
-void FTW_Leaf::HideRecursively() {
+void FTW_Leaf::HideRecursively()
+{
   hide();
   HideLinks();
   HideListMembers();
 }
 
-void FTW_Leaf::ShowLinks() {
+void FTW_Leaf::ShowLinks()
+{
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
     if(a->bExpanded) a->mLeaf->ShowRecursively();
   }
 }
 
-void FTW_Leaf::HideLinks() {
+void FTW_Leaf::HideLinks()
+{
   for(int c=0; c<wAntPack->children(); ++c) {
     FTW_Ant* a = dynamic_cast<FTW_Ant*>( wAntPack->child(c) );
     if(a->bExpanded) a->mLeaf->HideRecursively();
@@ -287,12 +297,14 @@ void FTW_Leaf::HideLinks() {
 
 int FTW_Leaf::AntPos(FTW_Ant* a) { return wAntPack->find(a); }
 
-FTW_Ant* FTW_Leaf::AntAt(int i) {
+FTW_Ant* FTW_Leaf::AntAt(int i)
+{
   if(i >= wAntPack->children()) return 0;
   return dynamic_cast<FTW_Ant*>(wAntPack->child(i));
 }
 
-FTW_Ant* FTW_Leaf::LastAnt() {
+FTW_Ant* FTW_Leaf::LastAnt()
+{
   return (wAntPack->children() >= 0) ?
     dynamic_cast<FTW_Ant*>(wAntPack->child(wAntPack->children() - 1)) :
     0;
@@ -306,7 +318,8 @@ FTW_Ant* FTW_Leaf::LastAnt() {
 
 // Main weeds + antz
 
-void FTW_Leaf::resize_weeds() {
+void FTW_Leaf::resize_weeds()
+{
   NestInfo* ni = mNest->GetNestInfo();
   int indent_skip = mLevel*ni->GetWIndent();
   int cw = mNest->GetShell()->cell_w();
@@ -351,7 +364,8 @@ void FTW_Leaf::resize_weeds() {
   init_sizes();
 }
 
-void FTW_Leaf::label_namebox() {
+void FTW_Leaf::label_namebox()
+{
   if(fImg) {
     wName->set_label(fImg->fLens->GetName());
   } else {
@@ -360,7 +374,8 @@ void FTW_Leaf::label_namebox() {
   }
 }
 
-void FTW_Leaf::label_weeds() {
+void FTW_Leaf::label_weeds()
+{
   // just labels the ant part ... virtuality should take care of branches
   if(FractionOfExpandedAnts() <= 0.5) {
     wExpander->label("@#-2->|");
@@ -385,11 +400,13 @@ void FTW_Leaf::label_designation()
   }
 }
 
-void FTW_Leaf::recolor_name() {
+void FTW_Leaf::recolor_name()
+{
   wName->color(mNest->LeafName_Color(this)); wName->redraw();
 }
 
-void FTW_Leaf::modify_box_color(Fl_Color mod, bool on_p) {
+void FTW_Leaf::modify_box_color(Fl_Color mod, bool on_p)
+{
   Fl_Color c = (Fl_Color)(on_p ? wExpander->color() + mod : wExpander->color() - mod);
   wExpander->color(c);	   wExpander->redraw();
   wListExpander->color(c); wListExpander->redraw();
@@ -399,7 +416,8 @@ void FTW_Leaf::modify_box_color(Fl_Color mod, bool on_p) {
 
 // Custom View
 
-void FTW_Leaf::create_custom_view(MTW_Layout* layout) {
+void FTW_Leaf::create_custom_view(MTW_Layout* layout)
+{
   if(fImg == 0) return;
   int n = layout->CountSubViews(fImg->fLens);
   if(n > 0) {
@@ -412,17 +430,20 @@ void FTW_Leaf::create_custom_view(MTW_Layout* layout) {
   }
 }
 
-void FTW_Leaf::show_custom_view() {
+void FTW_Leaf::show_custom_view()
+{
   wAntPack->hide();
   if(wCustomView) wCustomView->show();
 }
 
-void FTW_Leaf::hide_custom_view() {
+void FTW_Leaf::hide_custom_view()
+{
   wAntPack->show();
   if(wCustomView) wCustomView->hide();
 }
 
-void FTW_Leaf::wipe_custom_view() {
+void FTW_Leaf::wipe_custom_view()
+{
   if(wCustomView) {
     remove(wCustomView);
     delete wCustomView;
@@ -432,7 +453,8 @@ void FTW_Leaf::wipe_custom_view() {
 
 /**************************************************************************/
 
-void FTW_Leaf::reverse_ants() {
+void FTW_Leaf::reverse_ants()
+{
   if(wAntPack->children() > 1) {
     FTW_Ant** a = (FTW_Ant**) wAntPack->array();
     FTW_Ant** b = a + (wAntPack->children() - 1);

@@ -34,7 +34,8 @@ namespace FGS  = FltkGledStuff;
 // Internal classes / data
 /**************************************************************************/
 
-namespace {
+namespace
+{
   float MaxAlignGrow = 1.2;
   float MaxJoinGrow  = 2;
 }
@@ -129,7 +130,7 @@ void MTW_ClassView::BuildVerticalView()
       FGS_DECLARE_CAST(pec, child(1), FGS::PackEntryCollapsor);
       if(pec) h += pec->collexp(false);
     }
-    if(fImg->fIsList && mShell->GetShellInfo()->GetCollAList()) {
+    if(fImg->IsList() && mShell->GetShellInfo()->GetCollAList()) {
       if(children() > 5 ) { // AList
 	FGS_DECLARE_CAST(pec, child(3), FGS::PackEntryCollapsor);
 	if(pec) h += pec->collexp(false);

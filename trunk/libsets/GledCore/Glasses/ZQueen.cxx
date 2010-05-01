@@ -1318,6 +1318,22 @@ void ZQueen::PrintEyeConnections()
   }
 }
 
+void ZQueen::PrintObservedLenses(Bool_t dump_views)
+{
+  static const Exc_t _eh("ZQueen::PrintObservedLenses ");
+
+  printf("%s [%s], N_eyes=%d\n", _eh.Data(), Identify().Data(), (Int_t) mObservers.size());
+  Int_t n = 1;
+  GMutexHolder lck(mRayMutex);
+  for (lpEyeInfo_i i = mObservers.begin(); i != mObservers.end(); ++i, ++n)
+  {
+    printf("========================================================================\n");
+    printf("%3d. %s, N_imgs=%d\n", n, (*i)->Identify().Data(), (*i)->hEye->GetImageCount(this));
+    printf("------------------------------------------------------------------------\n");
+    (*i)->hEye->PrintObservedLenses(this, dump_views);
+  }
+}
+
 /**************************************************************************/
 // tmp
 /**************************************************************************/

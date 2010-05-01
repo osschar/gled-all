@@ -147,7 +147,7 @@ int ZGlass_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
   // This is implemented here to avoid AList_GL_Rnr -- as list rendering
   // is already implemented in base classes.
 
-  if (fImg->fIsList)
+  if (fImg->IsList())
   {
     namespace OS = OptoStructs;
 

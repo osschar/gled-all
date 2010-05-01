@@ -36,6 +36,7 @@ void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 Eye::Eye(TSocket* sock, EyeInfo* ei) :
   mSatSocket   (sock),
   mSatSocketFd (sock->GetDescriptor()),
+  mMaxManageLoops  (9999),
   bBreakManageLoop (false)
 {
   static const Exc_t _eh("Eye::Eye ");
@@ -93,22 +94,23 @@ Eye::~Eye()
 
 /**************************************************************************/
 
-OS::ZGlassImg* Eye::DemanglePtr(ZGlass* glass)
+OS::ZGlassImg* Eye::DemanglePtr(ZGlass* lens)
 {
-  if (glass == 0) return 0;
+  if (lens == 0) return 0;
 
-  OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(glass);
+  hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(lens);
   if (i != mGlass2ImgHash.end()) return i->second;
 
-  glass->IncEyeRefCount();
-  OS::ZGlassImg *gi = new OS::ZGlassImg(this, glass);
-  mGlass2ImgHash[glass] = gi;
+  lens->IncEyeRefCount();
+  OS::ZGlassImg *gi = new OS::ZGlassImg(this, lens);
+  mGlass2ImgHash .insert(make_pair(lens, gi));
+  mZeroRefCntImgs.insert(gi);
 
-  mpQueen2Int_i qci = mQueenLensCount.find(glass->GetQueen());
+  mpQueen2Int_i qci = mQueenLensCount.find(lens->GetQueen());
   if (qci == mQueenLensCount.end())
   {
-    mQueenLensCount.insert(make_pair(glass->GetQueen(), 1));
-    glass->GetQueen()->AddObserver(mEyeInfo);
+    mQueenLensCount.insert(make_pair(lens->GetQueen(), 1));
+    lens->GetQueen()->AddObserver(mEyeInfo);
   }
   else
   {
@@ -129,16 +131,30 @@ OS::ZGlassImg* Eye::DemangleID(ID_t id)
   return DemanglePtr(mSaturn->DemangleID(id));
 }
 
-void Eye::RemoveImage(OS::ZGlassImg* img)
+//------------------------------------------------------------------------------
+
+void Eye::ZeroRefCountImage(OptoStructs::ZGlassImg* img)
+{
+  mZeroRefCntImgs.insert(img);
+}
+
+//------------------------------------------------------------------------------
+
+void Eye::RemoveImage(OS::ZGlassImg* img, bool wipe_zrc_set)
 {
   static const Exc_t _eh("Eye::RemoveImage ");
 
-  OS::hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fLens);
+  hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(img->fLens);
 
   assert (i != mGlass2ImgHash.end());
   assert (i->second == img);
 
-  for (OS::lpImgConsumer_i c=mImgConsumers.begin(); c!=mImgConsumers.end(); ++c)
+  if (wipe_zrc_set)
+    mZeroRefCntImgs.erase(img);
+  // Prevent further additions into zero-ref-count set.
+  img->IncRefCount();
+
+  for (lpImgConsumer_i c = mImgConsumers.begin(); c != mImgConsumers.end(); ++c)
   {
     (*c)->ImageDeath(img);
   }
@@ -156,12 +172,50 @@ void Eye::RemoveImage(OS::ZGlassImg* img)
   delete img;
 }
 
+void Eye::ProcessZeroRefCntImgs()
+{
+  spZGlassImg_i i = mZeroRefCntImgs.begin();
+  while (i != mZeroRefCntImgs.end())
+  {
+    spZGlassImg_i j = i++;
+    if ((*j)->HasZeroRefCount())
+    {
+      RemoveImage(*j, false);
+    }
+    mZeroRefCntImgs.erase(j);
+  }
+}
+
+//==============================================================================
+
 Int_t Eye::GetImageCount(ZQueen* q)
 {
   mpQueen2Int_i qci = mQueenLensCount.find(q);
   if (qci != mQueenLensCount.end())
     return qci->second;
   return 0;
+}
+
+Int_t Eye::PrintObservedLenses(ZQueen* q, bool dump_views)
+{
+  Int_t cnt = 0;
+  for (hpZGlass2pZGlassImg_i i = mGlass2ImgHash.begin(); i != mGlass2ImgHash.end(); ++i)
+  {
+    if (i->first->GetQueen() == q)
+    {
+      printf("%3d. %s, N_views=%d, N_links=%u\n", ++cnt,
+	     i->first->Identify().Data(), (Int_t) i->second->fViews.size(), i->second->fRefCount);
+      if (dump_views)
+      {
+	Int_t vcnt = 0;
+	for (OS::lpA_View_i j = i->second->fViews.begin(); j != i->second->fViews.end(); ++j)
+	{
+	  printf("    %3d. %s\n", ++vcnt, typeid(**j).name());
+	}
+      }
+    }
+  }
+  return cnt;
 }
 
 /**************************************************************************/
@@ -181,10 +235,11 @@ Int_t Eye::Manage(int fd)
     // Prefetch ...
     len = recv(mSatSocketFd, &length, sizeof(UInt_t),
 	       MSG_PEEK|MSG_DONTWAIT);
-    if(len < 0) {
-      if(errno == EWOULDBLOCK) {
+    if (len < 0)
+    {
+      if (errno == EWOULDBLOCK)
 	break;
-      }
+
       ISerr(_eh + "prefetch got error that is not EWOULDBLOCK.");
       break;
     }
@@ -192,12 +247,14 @@ Int_t Eye::Manage(int fd)
     m = 0;
     len = mSatSocket->Recv(m);
 
-    if(len == -1) {
+    if (len == -1)
+    {
       ISerr(_eh + "Recv error.");
       delete m; return -1;
     }
 
-    if(len == 0) {
+    if (len == 0)
+    {
       ISerr(_eh + "Saturn closed connection ... unregistring fd handler.");
       UninstallFdHandler();
       delete m; return -2;
@@ -205,88 +262,99 @@ Int_t Eye::Manage(int fd)
 
     ++all_count;
 
-    switch(m->What()) {
-
-    case kMESS_STRING: {
-      TString str;
-      *m >> str;
-      Message(GForm("Raw message: %s", str.Data()), MT_std);
-      break;
-    }
-
-    case GledNS::MT_TextMessage: {
-      TextMessage tm;
-      tm.Streamer(*m);
-      // printf("Got message from <%p,%s> %s '%s'\n", tm.fCaller, tm.fCaller ? tm.fCaller->GetName() : "<none>",
-      //        tm.fType ? "error" : "message", tm.fMessage.Data());
-      switch(tm.fType) {
-      case TextMessage::TM_Message: {
-	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		MT_std);
+    switch (m->What())
+    {
+      case kMESS_STRING:
+      {
+	TString str;
+	*m >> str;
+	Message(GForm("Raw message: %s", str.Data()), MT_std);
 	break;
       }
-      case TextMessage::TM_Warning: {
-	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		MT_wrn);
+
+      case GledNS::MT_TextMessage:
+      {
+	TextMessage tm;
+	tm.Streamer(*m);
+	// printf("Got message from <%p,%s> %s '%s'\n", tm.fCaller, tm.fCaller ? tm.fCaller->GetName() : "<none>",
+	//        tm.fType ? "error" : "message", tm.fMessage.Data());
+	switch(tm.fType)
+	{
+	  case TextMessage::TM_Message:
+	  {
+	    Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
+		    MT_std);
+	    break;
+	  }
+	  case TextMessage::TM_Warning:
+	  {
+	    Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
+		    MT_wrn);
+	    break;
+	  }
+	  case TextMessage::TM_Error:
+	  {
+	    Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
+		    MT_err);
+	    break;
+	  }
+	  default:
+	  {
+	    ISerr(_eh + "unknown TextMessage type");
+	    break;
+	  }
+	} // end switch TextMessage type
 	break;
       }
-      case TextMessage::TM_Error: {
-	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		MT_err);
-	break;
-      }
-      default: {
-	ISerr(_eh + "unknown TextMessage type");
-	break;
-      }
-      } // end switch TextMessage type
-      break;
-    }
 
-    case GledNS::MT_Ray: {
-      Ray ray(*m);
-      OS::hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(ray.fAlpha);
-      if(alpha_it == mGlass2ImgHash.end()) {
-	break;
-      }
-      ray.Read(*m);
-      // cout << _eh << ray << endl;
+      case GledNS::MT_Ray:
+      {
+	Ray ray(*m);
+	hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(ray.fAlpha);
+	if (alpha_it == mGlass2ImgHash.end())
+	  break;
 
-      ++ray_count;
-      OS::ZGlassImg* a = ray.fAlphaImg = alpha_it->second;
-      ray.fBetaImg  = ray.HasBeta()  ? DemanglePtr(ray.fBeta)  : 0;
-      ray.fGammaImg = ray.HasGamma() ? DemanglePtr(ray.fGamma) : 0;
+	ray.Read(*m);
+	// cout << _eh << ray << endl;
 
-      // Read-lock alpha
-      GLensReadHolder(a->fLens);
+	++ray_count;
+	OS::ZGlassImg* a = ray.fAlphaImg = alpha_it->second;
+	ray.fBetaImg  = ray.HasBeta()  ? DemanglePtr(ray.fBeta)  : 0;
+	ray.fGammaImg = ray.HasGamma() ? DemanglePtr(ray.fGamma) : 0;
 
-      a->PreAbsorption(ray);
+	// Read-lock alpha
+	GLensReadHolder(a->fLens);
 
-      for(OS::lpA_View_i i=a->fViews.begin(); i!=a->fViews.end(); ) {
-	// Be careful! Views can come and go in response to Rays.
-	OS::A_View* v = *i; --i;
-	v->AbsorbRay(ray);
-	++i; if(*i == v) ++i;
-      }
+	a->PreAbsorption(ray);
 
-      a->PostAbsorption(ray);
+	for (OS::lpA_View_i i=a->fViews.begin(); i!=a->fViews.end(); )
+	{
+	  // Be careful! Views can come and go in response to Rays.
+	  OS::A_View* v = *i; --i;
+	  v->AbsorbRay(ray);
+	  ++i; if(*i == v) ++i;
+	}
 
-      if(ray.fRQN==RayNS::RQN_death) {
-	RemoveImage(a);
-      }
+	a->PostAbsorption(ray);
 
-    } // end case MT_Ray
+	if (ray.fRQN==RayNS::RQN_death)
+	{
+	  RemoveImage(a, true);
+	}
+      } // end case MT_Ray
 
     } // end switch message->What()
     delete m;
 
-    if(bBreakManageLoop) {
+    if (bBreakManageLoop)
+    {
       bBreakManageLoop = false;
       // printf("Eye::Manage breaking loop on request ...\n");
       break;
     }
 
-    if(all_count > 9999) {
+    if (all_count > mMaxManageLoops)
+    {
       break;
     }
   } // end while (true)
@@ -295,6 +363,8 @@ Int_t Eye::Manage(int fd)
 		   _eh.Data(), all_count, ray_count));
 
   PostManage(ray_count);
+
+  ProcessZeroRefCntImgs();
 
   return all_count;
 }
