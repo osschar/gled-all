@@ -36,22 +36,25 @@ namespace OptoStructs
   typedef list<ZLinkDatum>::iterator         lZLinkDatum_i;
   typedef list<ZLinkDatum>::reverse_iterator lZLinkDatum_ri;
 
-  /**************************************************************************/
+
+  //============================================================================
   // ZGlassImg: complete image of a glass in an eye
-  /**************************************************************************/
+  //============================================================================
 
   class ZGlassImg
   {
   protected:
     lpZGlassImg_t      *fElementImgs; // List-of-images for ALists. Cache.
 
+    void ClearElementImgs();
+
   public:
     Eye                *fEye;
     ZGlass             *fLens;
 
-    bool		fIsList;
     lZLinkDatum_t	fLinkData;
     lpA_View_t		fViews;
+    UInt_t              fRefCount;
 
     A_Rnr              *fDefRnr;
     MTW_View           *fFullMTW_View;
@@ -68,8 +71,14 @@ namespace OptoStructs
     void CheckInView(A_View* v);
     void CheckOutView(A_View* v);
 
+    void IncRefCount();
+    void DecRefCount();
+
+    bool HasZeroRefCount() const { return fRefCount == 0 && fViews.empty(); }
+
     ZLinkDatum*    GetLinkDatum(const TString& lnk);
-    AList*         GetList() { return fIsList ? (AList*)fLens : 0; }
+    bool           IsList()  { return GetList() != 0; }
+    AList*         GetList() { return fLens->AsAList(); }
     lpZGlassImg_t* GetElementImgs();
 
     void DumpLinkData();
@@ -77,14 +86,12 @@ namespace OptoStructs
 
   typedef list<ZGlassImg*>			  lpZGlassImg_t;
   typedef list<ZGlassImg*>::iterator		  lpZGlassImg_i;
-#ifndef __CINT__
-  typedef hash_map<ZGlass*, ZGlassImg*>		  hpZGlass2pZGlassImg_t;
-  typedef hash_map<ZGlass*, ZGlassImg*>::iterator hpZGlass2pZGlassImg_i;
-#endif
 
-  /**************************************************************************/
-  // ImageConsumer: abstract base for str
-  /**************************************************************************/
+
+  //============================================================================
+  // ImageConsumer: abstract base for classes that hold image maps and
+  // need to be notifed of image destruction.
+  //============================================================================
 
   class ImageConsumer
   {
@@ -93,34 +100,35 @@ namespace OptoStructs
     virtual void ImageDeath(ZGlassImg* img) = 0;
   };
 
-  typedef list<ImageConsumer*>           lpImgConsumer_t;
-  typedef list<ImageConsumer*>::iterator lpImgConsumer_i;
 
-  /**************************************************************************/
+  //============================================================================
   // ZLinkDatum: information provided for links of each lens
-  /**************************************************************************/
+  //============================================================================
 
   struct ZLinkDatum
   {
     ZGlassImg      *fImg;
     ZGlass::LinkRep fLinkRep;
     ZGlass         *fToGlass;
-    ZGlassImg      *fToImg;
 
     ZLinkDatum(ZGlassImg* img, ZGlass::LinkRep& lrep) :
-      fImg(img),
-      fLinkRep(lrep), fToGlass(lrep.fLinkRef), fToImg(0) {}
+      fImg(img), fLinkRep(lrep), fToGlass(lrep.fLinkRef) {}
+
+    ~ZLinkDatum();
 
     GledNS::LinkMemberInfo* GetLinkInfo() { return fLinkRep.fLinkInfo; }
     ZGlass*&                GetLinkRef () { return fLinkRep.fLinkRef;  }
+
+    void       ResetToGlass();
 
     ZGlass*    GetToGlass() { return fToGlass; }
     ZGlassImg* GetToImg();
   };
 
-  /**************************************************************************/
+
+  //============================================================================
   // A_View: base of all lens views
-  /**************************************************************************/
+  //============================================================================
 
   struct A_View
   {
@@ -134,26 +142,50 @@ namespace OptoStructs
     virtual void AbsorbRay(Ray& ray) {}
   };
 
-  /**************************************************************************/
+
+  //============================================================================
+  // ZImageHandle
+  // Must be owned by A_View that handles Ray absorbtion.
+  //============================================================================
+
+  struct ZGlassImgHandle
+  {
+    ZGlassImg	*fImg;
+
+    ZGlassImgHandle(ZGlassImg* i) : fImg(i) { if(fImg) fImg->IncRefCount(); }
+    ~ZGlassImgHandle()                      { if(fImg) fImg->DecRefCount(); }
+
+    ZGlassImg* operator->() { return fImg; }
+
+    operator bool ()              const { return fImg != 0; }
+
+    bool operator==(ZGlassImg* i) const { return fImg == i; }
+    bool operator!=(ZGlassImg* i) const { return fImg != i; }
+  };
+
+
+  //============================================================================
   // ZLinkView: A link representation with state.
-  /**************************************************************************/
+  // Must be owned by A_View that handles Ray absorbtion.
+  //============================================================================
 
   struct ZLinkView
   {
     ZLinkDatum	*fLinkDatum;
     ZGlass      *fToGlass; // Glass pointing to last.
 
-    ZLinkView(ZLinkDatum* ld) : fLinkDatum(ld), fToGlass(0) { Update(); }
+    ZLinkView(ZLinkDatum* ld);
     virtual ~ZLinkView() {}
 
     GledNS::LinkMemberInfo* GetLinkInfo() { return fLinkDatum->GetLinkInfo(); }
-    ZGlassImg* GetToImg() { return fLinkDatum->GetToImg(); }
+    ZGlassImg*              GetToImg()    { return fLinkDatum->GetToImg(); }
 
-    virtual bool NeedsUpdate() { return fToGlass != fLinkDatum->fToGlass; }
-    virtual void Update() { fToGlass = fLinkDatum->fToGlass; }
+    virtual bool LinkViewNeedsUpdate() { return fToGlass != fLinkDatum->fToGlass; }
+    virtual void LinkViewUpdate()      { fToGlass = fLinkDatum->fToGlass; }
 
     // !!! This might go to ZLinkDatum::GetDefRnrBits()
-    virtual const GledNS::RnrBits& GetRnrBits() {
+    virtual const GledNS::RnrBits& GetRnrBits()
+    {
       return GetLinkInfo()->fDefRnrBits;
     }
   };

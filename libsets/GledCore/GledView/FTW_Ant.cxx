@@ -14,13 +14,13 @@ namespace OS = OptoStructs;
 
 /**************************************************************************/
 
-static void
-cb_ant_collexp(Fl_Button* b, FTW_Ant* a) {
+static void cb_ant_collexp(Fl_Button* b, FTW_Ant* a)
+{
   a->CollExp();
 }
 
-static void
-cb_ant_list_collexp(Fl_Button* b, FTW_Ant* a) {
+static void cb_ant_list_collexp(Fl_Button* b, FTW_Ant* a)
+{
   a->ListExpander();
 }
 
@@ -54,25 +54,38 @@ FTW_Ant::FTW_Ant(OS::ZLinkDatum* ld, FTW_Leaf* p) :
   end();
 }
 
-FTW_Ant::~FTW_Ant() {
+FTW_Ant::~FTW_Ant()
+{
   delete mLeaf;
 }
 
+bool FTW_Ant::IsSet()
+{
+  return fToGlass != 0;
+}
+
+bool FTW_Ant::IsList()
+{
+  return fToGlass && dynamic_cast<AList*>(fToGlass) != 0;
+}
+
+
 /**************************************************************************/
 
-void FTW_Ant::Update()
+void FTW_Ant::LinkViewUpdate()
 {
   delete mLeaf; mLeaf = 0;
   bool was_expanded = bExpanded;
   bExpanded = false;
-  ZLinkView::Update();
+  ZLinkView::LinkViewUpdate();
   label_weeds();
   if(fToGlass && (bExpandIfCan || was_expanded)) CollExp();
 }
 
 /**************************************************************************/
 
-void FTW_Ant::CollExp() {
+void FTW_Ant::CollExp()
+{
   if(bExpanded) {
     mParent->CollapseLink(this);
   } else {
@@ -80,7 +93,8 @@ void FTW_Ant::CollExp() {
   }
 }
 
-void FTW_Ant::ListExpander() {
+void FTW_Ant::ListExpander()
+{
   if(bExpanded) {
     mLeaf->CollapseList();
     mParent->CollapseLink(this);
@@ -93,20 +107,22 @@ void FTW_Ant::ListExpander() {
 /**************************************************************************/
 /**************************************************************************/
 
-void FTW_Ant::resize_weeds(int name_w, int butt_w, int h) {
+void FTW_Ant::resize_weeds(int name_w, int butt_w, int h)
+{
   wExpander->resize(0, 0, butt_w, h);
   wListExpander->resize(butt_w, 0, butt_w, h);
   wName->resize(2*butt_w, 0, name_w, h);
   Fl_Widget::resize(0, 0, 2*butt_w + name_w, h);
 }
 
-void FTW_Ant::label_weeds() {
+void FTW_Ant::label_weeds()
+{
   wExpander->labelcolor(FL_BLACK);
   if(bExpanded) {
     wExpander->label("@#-2->");
   } else {
     wExpander->label("@#-2->|");
-    if(!GetToImg()) wExpander->labelcolor(FL_DARK_RED);
+    if(!fToGlass) wExpander->labelcolor(FL_DARK_RED);
   }
   wExpander->redraw();
 
@@ -118,11 +134,13 @@ void FTW_Ant::label_weeds() {
   wListExpander->redraw();
 }
 
-void FTW_Ant::recolor_name() {
+void FTW_Ant::recolor_name()
+{
   wName->color(mParent->GetNest()->AntName_Color(this)); wName->redraw();
 }
 
-void FTW_Ant::modify_box_color(Fl_Color mod, bool on_p) {
+void FTW_Ant::modify_box_color(Fl_Color mod, bool on_p)
+{
   Fl_Color c = (Fl_Color)(on_p ? wExpander->color() + mod : wExpander->color() - mod);
   wExpander->color(c);	   wExpander->redraw();
   wListExpander->color(c); wListExpander->redraw();

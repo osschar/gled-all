@@ -13,49 +13,59 @@ using namespace OptoStructs;
 namespace GNS  = GledNS;
 namespace GVNS = GledViewNS;
 
-/**************************************************************************/
-// ZGlassImg
-/**************************************************************************/
 
-ZGlassImg::ZGlassImg(Eye* e) : fEye(e), fLens(0)
+//==============================================================================
+// ZGlassImg
+//==============================================================================
+
+ZGlassImg::ZGlassImg(Eye* e) : fElementImgs(0), fEye(e), fLens(0)
 {
   // Constructor for null-lens-image.
   // One exists in every eye to denote empty list slots when needed.
 
-  fIsList       = false;
-  fElementImgs  = 0;
+  fRefCount     = 0;
   fDefRnr       = 0;
   fFullMTW_View = 0;
 }
 
-ZGlassImg::ZGlassImg(Eye* e, ZGlass* lens) : fEye(e), fLens(lens)
+ZGlassImg::ZGlassImg(Eye* e, ZGlass* lens) : fElementImgs(0), fEye(e), fLens(lens)
 {
-  fIsList = dynamic_cast<AList*>(lens) ? true : false;
-  fElementImgs  = 0;
+  fRefCount     = 0;
   fDefRnr       = 0;
   fFullMTW_View = 0;
 
   ZGlass::lLinkRep_t lreps; lens->CopyLinkReps(lreps);
-  for(ZGlass::lLinkRep_i i = lreps.begin(); i != lreps.end(); ++i) {
+  for (ZGlass::lLinkRep_i i = lreps.begin(); i != lreps.end(); ++i)
+  {
     fLinkData.push_back(ZLinkDatum(this, *i));
   }
 }
 
 ZGlassImg::~ZGlassImg()
 {
-  delete fElementImgs;
+  static const Exc_t _eh("ZGlassImg::ZGlassImg ");
 
-  // The destructor of A_View removes itself from the fViews list.
-  // To by-pass this (and image auto-destruction) fViews is
-  // wiped before destruction.
+  if (fElementImgs)
+    ClearElementImgs();
+
+  // The destructor of A_View removes itself from the fViews list. To bypass
+  // this (and image auto-destruction) fViews is wiped before destruction.
   // This condition is checked in CheckOutView();
   lpA_View_t views;
   views.swap(fViews);
+
   for (lpA_View_i i = views.begin(); i != views.end(); ++i)
+  {
     delete *i;
+  }
+
+  // Eye, when destructing an image, increases reference count by one to block
+  // auto-destruction. So, at the end, reference count should be one.
+  if (fRefCount != 1)
+    ISerr(_eh + "ref-count not zero on destruction, this will not end well.");
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZGlassImg::PreAbsorption(Ray& ray)
 {
@@ -67,8 +77,7 @@ void ZGlassImg::PreAbsorption(Ray& ray)
     {
       if (i->fToGlass != i->fLinkRep.fLinkRef)
       {
-	i->fToGlass = i->fLinkRep.fLinkRef;
-	i->fToImg   = 0;
+	i->ResetToGlass();
       }
     }
   }
@@ -76,8 +85,7 @@ void ZGlassImg::PreAbsorption(Ray& ray)
   {
     // XXX April 2010. Is this always necessary? Maybe could optimize for
     // certain list operations. Rebuild can get expensive for LARGE lists.
-    delete fElementImgs;
-    fElementImgs = 0;
+    ClearElementImgs();
   }
 }
 
@@ -96,63 +104,110 @@ void ZGlassImg::CheckOutView(A_View* v)
     return;
 
   fViews.remove(v);
-  if (fViews.empty())
-    fEye->RemoveImage(this);
+  if (HasZeroRefCount())
+    fEye->ZeroRefCountImage(this);
 }
 
-/**************************************************************************/
+void ZGlassImg::IncRefCount()
+{
+  ++fRefCount;
+}
+
+void ZGlassImg::DecRefCount()
+{
+  --fRefCount;
+  if (HasZeroRefCount())
+    fEye->ZeroRefCountImage(this);
+}
+
+//------------------------------------------------------------------------------
 
 ZLinkDatum* ZGlassImg::GetLinkDatum(const TString& lnk)
 {
-  for(lZLinkDatum_ri i=fLinkData.rbegin(); i!=fLinkData.rend(); ++i) {
-    if(i->fLinkRep.fLinkInfo->fName == lnk) return &(*i);
+  for (lZLinkDatum_ri i = fLinkData.rbegin(); i != fLinkData.rend(); ++i)
+  {
+    if (i->fLinkRep.fLinkInfo->fName == lnk)
+      return &(*i);
   }
   return 0;
 }
 
 lpZGlassImg_t* ZGlassImg::GetElementImgs()
 {
-  if(!fIsList) return 0;
-  if(fElementImgs) return fElementImgs;
+  if (fElementImgs) return fElementImgs;
+
+  AList* l = GetList();
+  if (!l) return 0;
+
   fElementImgs = new lpZGlassImg_t;
-  AList* l = (AList*)fLens;
   lpZGlass_t d; l->CopyList(d);
-  for(lpZGlass_i i=d.begin(); i!=d.end(); ++i) {
-    fElementImgs->push_back(fEye->DemanglePtr(*i));
+  for (lpZGlass_i i = d.begin(); i != d.end(); ++i)
+  {
+    ZGlassImg *to_img = fEye->DemanglePtr(*i);
+    to_img->IncRefCount();
+    fElementImgs->push_back(to_img);
   }
   return fElementImgs;
+}
+
+void ZGlassImg::ClearElementImgs()
+{
+  for (lpZGlassImg_i i = fElementImgs->begin(); i != fElementImgs->end(); ++i)
+  {
+    (*i)->DecRefCount();
+  }
+  delete fElementImgs;
+  fElementImgs = 0;
 }
 
 void ZGlassImg::DumpLinkData()
 {
   printf("Dumping list of ZLinkDatum's -- size = %lu\n", fLinkData.size());
-  for(lZLinkDatum_i i=fLinkData.begin(); i!=fLinkData.end(); ++i) {
+  for (lZLinkDatum_i i = fLinkData.begin(); i != fLinkData.end(); ++i)
+  {
     printf("  img=%p, linkref=%p, linkinfo=%p\n",
 	   i->fImg, i->fLinkRep.fLinkRef, i->fLinkRep.fLinkInfo);
   }
 }
 
-/**************************************************************************/
+
+//==============================================================================
 // ZLinkDatum
-/**************************************************************************/
+//==============================================================================
+
+ZLinkDatum::~ZLinkDatum()
+{}
+
+void ZLinkDatum::ResetToGlass()
+{
+  fToGlass = fLinkRep.fLinkRef;
+}
 
 ZGlassImg* ZLinkDatum::GetToImg()
 {
-  if(fToImg) return fToImg;
-  if(fToGlass) {
-    fToImg = fImg->fEye->DemanglePtr(fToGlass);
-    return fToImg;
-  }
-  return 0;
+  return fToGlass ? fImg->fEye->DemanglePtr(fToGlass) : 0;
 }
 
-/**************************************************************************/
+
+//==============================================================================
 // A_View
-/**************************************************************************/
+//==============================================================================
 
 void A_View::SetImg(ZGlassImg* newimg)
 {
   if(fImg) fImg->CheckOutView(this);
   fImg = newimg;
   if(fImg) fImg->CheckInView(this);
+}
+
+
+//==============================================================================
+// ZLinkView
+//==============================================================================
+
+ZLinkView::ZLinkView(ZLinkDatum* ld) :
+  fLinkDatum(ld),
+  fToGlass(0)
+{
+  LinkViewUpdate();
 }

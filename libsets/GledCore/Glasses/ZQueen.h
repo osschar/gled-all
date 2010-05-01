@@ -220,7 +220,8 @@ public:
   void AddObserver(EyeInfo* ei);
   void RemoveObserver(EyeInfo* ei);
   void EmitRay(auto_ptr<Ray>& ray);
-  void PrintEyeConnections(); //! X{E} 7 MButt()
+  void PrintEyeConnections();                        //! X{E} 7 MButt(-join=>1)
+  void PrintObservedLenses(Bool_t dump_views=false); //! X{E} 7 MCWButt()
 
   // tmp
   void ListAll(); //! X{E} 7 MButt()

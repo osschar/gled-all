@@ -136,7 +136,7 @@ namespace FltkGledStuff {
     LinkNameBox(OptoStructs::ZLinkDatum* ld, int x, int y, int w, int h, const char* t=0);
     virtual ~LinkNameBox() {}
 
-    virtual void Update();
+    virtual void LinkViewUpdate();
 
     virtual void ImagePasted(OptoStructs::ZGlassImg* new_img);
     virtual void Clear();

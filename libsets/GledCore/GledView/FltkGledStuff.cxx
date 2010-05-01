@@ -143,11 +143,14 @@ FGS::LensNameBox::LensNameBox(OS::ZGlassImg* i, int x, int y, int w, int h, cons
 void FGS::LensNameBox::AbsorbRay(Ray& ray)
 {
   using namespace RayNS;
-  if(ray.IsBasicChange()) {
-    auto_label(); return;
+
+  if (ray.IsBasicChange())
+  {
+    auto_label();
   }
-  if(ray.fRQN == RQN_death) {
-    ChangeImage(0); return;
+  else if (ray.fRQN == RQN_death)
+  {
+    ChangeImage(0);
   }
 }
 
@@ -222,7 +225,8 @@ void FGS::LensNameBox::draw()
 
 /**************************************************************************/
 
-namespace {
+namespace
+{
   void clear_cb(Fl_Widget* w, FGS::LensNameBox* ud) { ud->Clear(); }
 }
 
@@ -318,7 +322,7 @@ FGS::LensRepNameBox::LensRepNameBox(OS::ZGlassImg* i, int x, int y, int w, int h
 void FGS::LensRepNameBox::ImagePasted(OS::ZGlassImg* new_img)
 {
   FTW_Shell *shell = grep_shell(parent());
-  if(fImg->fIsList && shell->GetSource()->has_contents()) {
+  if(fImg->IsList() && shell->GetSource()->has_contents()) {
     // Here missing FID check.
     AList* l = (AList*) fImg->fLens;
     auto_ptr<ZMIR> mir( l->MkMir_Add(0) );
@@ -332,7 +336,8 @@ void FGS::LensRepNameBox::ImagePasted(OS::ZGlassImg* new_img)
 /**************************************************************************/
 
 FGS::LinkNameBox::LinkNameBox(OS::ZLinkDatum* ld, int x, int y, int w, int h, const char* t) :
-  OS::ZLinkView(ld), LensNameBox(ld->GetToImg(),x,y,w,h,t)
+  OS::ZLinkView(ld),
+  LensNameBox(ld->GetToImg(),x,y,w,h,t)
 {
   box(FL_UP_BOX);
   color(fl_rgb_color(200, 200, 220));
@@ -341,14 +346,14 @@ FGS::LinkNameBox::LinkNameBox(OS::ZLinkDatum* ld, int x, int y, int w, int h, co
   link_type.Remove(link_type.Length()-1, 1); // Remove trailing '*'
   fFID = GNS::FindClassID(link_type);
 
-  Update();
+  LinkViewUpdate();
 }
 
 /**************************************************************************/
 
-void FGS::LinkNameBox::Update()
+void FGS::LinkNameBox::LinkViewUpdate()
 {
-  ZLinkView::Update();
+  ZLinkView::LinkViewUpdate();
   ChangeImage(GetToImg());
 }
 
@@ -545,6 +550,6 @@ ZList* FGS::LensChoiceMenuBox::get_src_list(FTW_Shell* shell)
     list_img = shell->SearchConfigEntry(mSrcConfigPath);
   }
 
-  if(list_img && list_img->fIsList) return (ZList*)list_img->fLens;
+  if(list_img && list_img->IsList()) return (ZList*)list_img->fLens;
   return 0;
 }

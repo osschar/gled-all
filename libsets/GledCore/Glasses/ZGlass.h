@@ -10,6 +10,8 @@
 #include <Gled/GledTypes.h>
 #include <Gled/GMutex.h>
 
+class AList;
+
 /**************************************************************************/
 // ZLinkBase and ZLink<>
 /**************************************************************************/
@@ -111,7 +113,8 @@ class ZGlass : public TObject
   friend class ZComet;
 
 public:
-  struct LinkRep {
+  struct LinkRep
+  {
     ZGlass*&                fLinkRef;
     GledNS::LinkMemberInfo* fLinkInfo;
 
@@ -213,6 +216,8 @@ public:
   { _init(); }
 
   virtual ~ZGlass();
+
+  virtual AList* AsAList() { return 0; }
 
   virtual Int_t RebuildAllRefs(An_ID_Demangler* idd);
 

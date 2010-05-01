@@ -479,7 +479,7 @@ ZGlass* ZGlass::FindLensByPath(const TString& url, bool throwp)
 	break;
       }
       case url_token::list_sel: {
-	AList* l = dynamic_cast<AList*>(g);
+	AList* l = g->AsAList();
 	if(l == 0) {
 	  throw(_eh + "url element '" + g->Identify() + "' is not a list.");
 	}
@@ -573,7 +573,7 @@ void ZGlass::SetUseDLRec(Bool_t state)
     if(bUseDispList != state)
       SetUseDispList(state);
   }
-  AList* l = dynamic_cast<AList*>(this);
+  AList* l = AsAList();
   if(l != 0) {
     lpZGlass_t c; l->CopyList(c);
     for(lpZGlass_i i=c.begin(); i!=c.end(); ++i) {

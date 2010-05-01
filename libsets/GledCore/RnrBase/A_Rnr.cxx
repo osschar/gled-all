@@ -30,16 +30,19 @@ void A_Rnr::crs_links(RnrDriver* rd, RnrScheme* sch)
   // Fill links and links as lists.
   OS::lZLinkDatum_i ldatum = fImg->fLinkData.begin();
   OS::lZLinkDatum_i ldend  = fImg->fLinkData.end();
-  for (; ldatum != ldend; ++ldatum) {
+  for (; ldatum != ldend; ++ldatum)
+  {
     if (ldatum->fToGlass == 0) continue;
     OS::ZGlassImg* limg = ldatum->GetToImg();
     const GNS::RnrBits& rb = ldatum->GetLinkInfo()->fDefRnrBits;
 
-    if (rb.SelfOn()) {
+    if (rb.SelfOn())
+    {
       rd->FillRnrScheme(sch, rd->GetRnr(limg), rb);
     }
 
-    if (limg->fIsList && rb.ListOn()) {
+    if (rb.ListOn() && limg->IsList())
+    {
       mRnrScheme->AddListChangeObserver(limg, this);
       rd->FillRnrScheme(sch, limg->GetElementImgs(), rb);
     }
@@ -50,7 +53,8 @@ void A_Rnr::crs_self(RnrDriver* rd, RnrScheme* sch)
 {
   // Fill self.
   GNS::RnrBits& rb(fImg->GetCI()->fDefRnrCtrl.fRnrBits);
-  if (rb.SelfOn()) {
+  if (rb.SelfOn())
+  {
     rd->FillRnrScheme(sch, this, rb);
   }
 }
@@ -59,7 +63,8 @@ void A_Rnr::crs_elements(RnrDriver* rd, RnrScheme* sch)
 {
   // Fill self as list.
   GNS::RnrBits& rb(fImg->GetCI()->fDefRnrCtrl.fRnrBits);
-  if (fImg->fIsList && rb.ListOn()) {
+  if (rb.ListOn() && fImg->IsList())
+  {
     rd->FillRnrScheme(sch, fImg->GetElementImgs(), rb);
   }
 }
@@ -73,7 +78,8 @@ void A_Rnr::CreateRnrScheme(RnrDriver* rd)
 
 void A_Rnr::DropRnrScheme()
 {
-  if (mRnrScheme) {
+  if (mRnrScheme)
+  {
     delete mRnrScheme;
     mRnrScheme = 0;
   }
@@ -82,8 +88,10 @@ void A_Rnr::DropRnrScheme()
 /**************************************************************************/
 // A_Rnr::Fl_Event
 
-namespace {
-  const char* fl_event_names[] = {
+namespace
+{
+  const char* fl_event_names[] =
+  {
     "NO_EVENT",
     "PUSH",
     "RELEASE",

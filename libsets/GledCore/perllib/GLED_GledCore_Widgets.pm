@@ -1183,7 +1183,8 @@ sub make_weed_update {
 
 package GLED::Widgets::Link; @ISA = ('GLED::Widgets');
 
-sub new {
+sub new
+{
   my $proto = shift;
   my $S = $proto->SUPER::new(@_);
   $S->{IsLinkWeed} = "true";
@@ -1197,7 +1198,8 @@ sub new {
   return $S;
 }
 
-sub make_widget {
+sub make_widget
+{
   my $S = shift;
   my $fqn = "${::CLASSNAME}::$S->{Methodbase}";
   my $link_type = $S->{Type};
@@ -1215,7 +1217,8 @@ Fl_Widget* ${::CLASSNAME}View::$S->{Methodbase}_Creator() {
 fnord
 }
 
-sub make_cxx_cb {
+sub make_cxx_cb
+{
   my $S = shift;
   return <<"fnord";
 void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o)
@@ -1223,9 +1226,10 @@ void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o)
 fnord
 }
 
-sub make_weed_update {
+sub make_weed_update
+{
   my $S = shift;
-  my $x = "  if(w->NeedsUpdate()) w->Update();\n";
+  my $x = "  if(w->LinkViewNeedsUpdate()) w->LinkViewUpdate();\n";
 
   return $S->make_weed_update_A() . $x . $S->make_weed_update_B();
 }

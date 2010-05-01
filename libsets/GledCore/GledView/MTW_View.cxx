@@ -108,13 +108,16 @@ void MTW_View::Labelofy()
 
 void MTW_View::AbsorbRay(Ray& ray)
 {
-  if(ray.IsBasicChange()) { auto_label(); }
+  if (ray.IsBasicChange()) { auto_label(); }
 
-  if(bShown) {
-    if(ray.fRQN == RayNS::RQN_change) {
+  if (bShown)
+  {
+    if (ray.fRQN == RayNS::RQN_change)
+    {
       UpdateDataWeeds(ray.fFID);
     }
-    else if(ray.fRQN == RayNS::RQN_link_change) {
+    else if (ray.fRQN == RayNS::RQN_link_change)
+    {
       UpdateLinkWeeds(ray.fFID);
     }
   }
@@ -125,8 +128,9 @@ void MTW_View::AbsorbRay(Ray& ray)
 void MTW_View::UpdateDataWeeds(FID_t fid)
 {
   bool update_all = fid.is_null();
-  for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
-    if(update_all || (*sv)->GetClassInfo()->fFid == fid)
+  for (lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv)
+  {
+    if (update_all || (*sv)->GetClassInfo()->fFid == fid)
       (*sv)->UpdateDataWeeds();
   }
 }
@@ -134,8 +138,9 @@ void MTW_View::UpdateDataWeeds(FID_t fid)
 void MTW_View::UpdateLinkWeeds(FID_t fid)
 {
   bool update_all = fid.is_null();
-  for(lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv) {
-    if(update_all || (*sv)->GetClassInfo()->fFid == fid)
+  for (lpMTW_SubView_i sv=mSubViews.begin(); sv!=mSubViews.end(); ++sv)
+  {
+    if (update_all || (*sv)->GetClassInfo()->fFid == fid)
       (*sv)->UpdateLinkWeeds();
   }
 }
@@ -153,7 +158,8 @@ MTW_View::SelfRep::SelfRep(MTW_View* v, int x, int y, int w, int h) :
   color(fl_rgb_color(220,200,200));
 }
 
-int MTW_View::SelfRep::handle(int ev) {
+int MTW_View::SelfRep::handle(int ev)
+{
   FTW_Shell* shell = fView->GetShell();
   if(shell != 0) {
     switch (ev) {
@@ -180,7 +186,7 @@ int MTW_View::SelfRep::handle(int ev) {
     }
 
     case FL_DND_ENTER:
-      return (fView->fImg->fIsList) ? 1 : 0;
+      return (fView->fImg->IsList()) ? 1 : 0;
 
     case FL_DND_LEAVE:
       return 1;
@@ -189,7 +195,7 @@ int MTW_View::SelfRep::handle(int ev) {
       return (Fl::belowmouse() == this) ? 1 : 0;
 
     case FL_PASTE: {
-      if(fView->fImg->fIsList && shell->GetSource()->has_contents()) {
+      if(fView->fImg->IsList() && shell->GetSource()->has_contents()) {
 	AList* l = (AList*) fView->fImg->fLens;
 	auto_ptr<ZMIR> mir ( l->MkMir_Add(0) );
 	shell->GetSource()->fix_MIR_beta(mir);
