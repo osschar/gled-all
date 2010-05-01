@@ -1,3 +1,8 @@
+2010-05-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* include/gled-gcc-config.h:
+	Include also hash_set.
+
 2010-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* libexec/project7.pl:
