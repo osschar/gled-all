@@ -9,6 +9,7 @@
 
 #ifndef __CINT__
 #include <hash_map>
+#include <hash_set>
 
 template <>
 struct hash<TString> {
@@ -36,6 +37,7 @@ struct hash<T*> {
 
 #ifndef __CINT__
 #include <ext/hash_map>
+#include <ext/hash_set>
 
 using namespace __gnu_cxx;
 
