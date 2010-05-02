@@ -1,3 +1,9 @@
+2010-05-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZQueen.cxx:
+	Document non-used member 'QueenState_e mState'.
+	Set it consistently at least for non-mirrored queens.
+
 2010-05-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Auto-destruct non-used ZGlassImgs on the Eye.

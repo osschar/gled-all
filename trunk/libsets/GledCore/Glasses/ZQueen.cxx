@@ -30,7 +30,14 @@
 // offered by the BroadcastMIRToNonRulingReflections() method. For
 // example see ZQueen::AddDependency.
 //
-//________________________________________________________________________
+//
+// Dev notes
+// =========
+//
+// 1. QueenState_e mState is not handled at the moons. This was introduced for
+// the future handling of queen mirroring using eunuchs w/ clean state
+// transitions.
+// The two flags bRuling and bAwaitingSceptre play this role for now.
 
 ClassImp(ZQueen);
 
@@ -41,6 +48,7 @@ void ZQueen::_init()
   bMandatory = false;
   bFollowDeps = false;
   bRuling = bAwaitingSceptre = false;
+  mState = QS_Sleeping;
 
   mMinID = mMaxID = 0;
   mIDsUsed = mIDsPurged = mIDsFree;
@@ -74,11 +82,14 @@ void ZQueen::bootstrap()
   assert(mIDMap.size() == 0 && mMinID && mMaxID > mMinID);
   assert(mPurgatory.size() == 0);
 
-  try {
+  try
+  {
     mQueen = this;
     SetStamps(1);
     mSaturn->Enlight(this, mMinID);
-  } catch(Exc_t& exc) {
+  }
+  catch (Exc_t& exc)
+  {
     ISerr(_eh + "Queen enlightenment failed.");
     throw;
   }
@@ -96,6 +107,7 @@ void ZQueen::bootstrap()
   CheckIn(l); SetOrphans(l); l->SetMIRActive(false);
 
   bRuling = true;
+  mState  = QS_Ruling;
 }
 
 void ZQueen::embrace_of_life(ZComet& comet)
