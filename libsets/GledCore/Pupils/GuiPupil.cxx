@@ -55,6 +55,7 @@ GuiPupil* GuiPupil::Create_GuiPupil(FTW_Shell* sh, OS::ZGlassImg* img)
   FTW_Window *win      = new FTW_Window(def_W, def_H);
   GuiPupil   *guipupil = new GuiPupil(sh, win, img, def_W, def_H);
   win->end();
+  win->resizable(win);
   win->set_size_range(new SWM_Size_Range(min_W, min_H, max_W, max_H));
 
   sh->adopt_window(win);

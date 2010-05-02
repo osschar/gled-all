@@ -43,10 +43,11 @@ public: \
 // FltkGledStuff namespace
 /**************************************************************************/
 
-namespace FltkGledStuff {
-
+namespace FltkGledStuff
+{
   template<class T>
-  T grep_parent(Fl_Widget *w) {
+  T grep_parent(Fl_Widget *w)
+  {
     T ret = 0;
     while(ret == 0 && (w = w->parent())) {
       ret = dynamic_cast<T>(w);
@@ -62,6 +63,10 @@ namespace FltkGledStuff {
   int swm_generick_width(TString& str, int cell_w, float extra);
   int swm_label_width(TString& str, int cell_w);
   int swm_string_width(TString& str, int cell_w);
+
+  /**************************************************************************/
+
+  void delayed_destroy_window(Fl_Window* win);
 
   /**************************************************************************/
   // PackEntryCollapsor

@@ -57,7 +57,6 @@ namespace OptoStructs
     UInt_t              fRefCount;
 
     A_Rnr              *fDefRnr;
-    MTW_View           *fFullMTW_View;
 
     ZGlassImg(Eye* e);
     ZGlassImg(Eye* e, ZGlass* lens);
@@ -152,13 +151,32 @@ namespace OptoStructs
   {
     ZGlassImg	*fImg;
 
-    ZGlassImgHandle(ZGlassImg* i) : fImg(i) { if(fImg) fImg->IncRefCount(); }
-    ~ZGlassImgHandle()                      { if(fImg) fImg->DecRefCount(); }
+    ZGlassImgHandle(ZGlassImg* i=0) : fImg(i) { if (fImg) fImg->IncRefCount(); }
+    ~ZGlassImgHandle()                        { if (fImg) fImg->DecRefCount(); }
+
+    void SetImg(ZGlassImg* newimg)
+    {
+      if (fImg) fImg->DecRefCount();
+      fImg = newimg;
+      if (fImg) fImg->IncRefCount();
+    }
+
+    bool UpdateImg(ZGlassImg* newimg)
+    {
+      if (fImg != newimg) {
+	SetImg(newimg);
+	return true;
+      } else {
+	return false;
+      }
+    }
+
+    ZGlassImgHandle& operator=(ZGlassImg* img) { SetImg(img); return *this; }
 
     ZGlassImg* operator->() { return fImg; }
+    ZGlassImg* operator*()  { return fImg; }
 
     operator bool ()              const { return fImg != 0; }
-
     bool operator==(ZGlassImg* i) const { return fImg == i; }
     bool operator!=(ZGlassImg* i) const { return fImg != i; }
   };

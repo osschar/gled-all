@@ -9,6 +9,7 @@
 #include <Eye/Eye.h>
 #include <GledView/MTW_ClassView.h>
 #include <GledView/FTW_Shell.h>
+#include <GledView/FTW_Window.h>
 
 #include <Glasses/Camera.h>
 #include <Glasses/PupilInfo.h>
@@ -260,11 +261,9 @@ void Pupil::AbsorbRay(Ray& ray)
 
     case RayNS::RQN_link_change:
     {
-      OS::ZGlassImg* oo = mOverlayImg;
-      mOverlayImg = fImg->fEye->DemanglePtr(mInfo->GetOverlay());
-      if (oo != mOverlayImg)
+      if (mOverlayImg.UpdateImg(fImg->fEye->DemanglePtr(mInfo->GetOverlay())))
 	bShowOverlay = true;
-      mEventHandlerImg = fImg->fEye->DemanglePtr(mInfo->GetEventHandler());
+      mEventHandlerImg.UpdateImg(fImg->fEye->DemanglePtr(mInfo->GetEventHandler()));
       break;
     }
 
@@ -657,7 +656,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
       // before the first draw is done and then font is undefined.
       // Should do this in GLRnrDriver::BeginRender()?
       pupil_rnr->PreDraw(mDriver);
-      mDriver->Render(mDriver->GetRnr(mOverlayImg));
+      mDriver->Render(mDriver->GetRnr(*mOverlayImg));
       pupil_rnr->PostDraw(mDriver);
     }
     catch (Exc_t exc)
@@ -1555,7 +1554,7 @@ int Pupil::handle(int ev)
 
   if (mEventHandlerImg && bUseEventHandler)
   {
-    if (mDriver->GetRnr(mEventHandlerImg)->Handle(mDriver, e))
+    if (mDriver->GetRnr(*mEventHandlerImg)->Handle(mDriver, e))
       return 1;
   }
 
@@ -1587,7 +1586,8 @@ int Pupil::handle(int ev)
 	if(img) {
 	  int x = Fl::event_x_root() + mInfo->GetPopupDx();
 	  int y = Fl::event_y_root() + mInfo->GetPopupDy();
-	  mShell->SpawnMTW_View(img, x, y, mInfo->GetPopupFx(), mInfo->GetPopupFy());
+	  mShell->SpawnMTW_View(img, true, true,
+				x, y, mInfo->GetPopupFx(), mInfo->GetPopupFy());
 	}
       }
 
@@ -1696,13 +1696,13 @@ int Pupil::handle(int ev)
 	}
 	case FL_F+1:
 	{
-	  mShell->SpawnMTW_View(fImg);
+	  mShell->SpawnMTW_View(fImg, true, true);
 	  return 1;
 	}
 	case FL_F+2:
 	{
 	  if(mCameraView == 0) {
-	    Fl_Window* w = new Fl_Window(0,0);
+	    FTW_Window* w = new FTW_Window(0,0);
 	    MTW_ClassView* cv = new MTW_ClassView(mCamera, mShell);
 	    mCameraView = cv;
 	    w->end();

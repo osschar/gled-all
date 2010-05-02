@@ -1,5 +1,63 @@
 2010-05-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Improve MTW_ClassView handling in FTW_Shell to avoid holding on
+	ZGlassImgs for too long.
+
+	* Eye/OptoStructs.cxx:
+	* Eye/OptoStructs.h:
+	Remove 'MTW_View *fFullMTW_View' member of ZGlassImg. Caching of
+	full views can lead to indefinite queen observation.
+
+	Extend class ZGlassImgHandle to allow re-setting of glass-image.
+
+	* GledView/FTW.cxx:
+	Add function:
+	  void delayed_destroy_window(Fl_Window* win);
+	that destroys passed window via zero-delay timeout.
+	Usefull for deleting windows in callbacks or handle method.
+
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	Change handling of full class views. Instead of holding a set of
+	them and using a member in ZGlassImg, handle them internally via a
+	map<ZGlassImg*, FTW_Window*>.
+
+	Also, delete them as soon as possible to avoid holding on to an
+	image when it is not really needed. This is done by installing a
+	custom callback to enclosing FTW_Window.
+
+	Use FTW_Window instead of plain Fl_Window for enclosing
+	MTW_ClassViews -- this allows for proper un-registration of
+	Fl_SWM_Clients.
+
+	SpawnXyzzView() methods now return FTW_Window*. Full arguments
+	must always be specified (no defaults).
+
+	* GledView/FTW_Window.cxx:
+	* GledView/FTW_Window.h:
+	Do not self-resize by default.
+	Add the second Fl_Window constructor with x, y coords.
+
+	* GledView/FltkGledStuff.cxx:
+	* GledView/FltkGledStuff.h:
+	* GledView/MTW_ClassView.cxx:
+	* GledView/MTW_ClassView.h:
+	Do not delete enclosing window when destructing. This is very
+	counter-intuitive.
+
+	* GledView/FTW_Nest.cxx:
+	* Pupils/GuiPupil.cxx:
+	FTW_Window not self-resizable by default anymore.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Use ZGlassImgHandle instead of raw ZGlassImg pointers.
+
+	* Rnr/GL/GLRnrDriver.cxx:
+	Calculate mouse-ray vectors only on mouse events.
+
+2010-05-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/ZQueen.cxx:
 	Document non-used member 'QueenState_e mState'.
 	Set it consistently at least for non-mirrored queens.

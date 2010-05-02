@@ -14,6 +14,7 @@
 #include <Glasses/NestInfo.h>
 
 #include "FTW_Shell.h"
+#include "FTW_Window.h"
 #include "FTW_Leaf.h"
 #include "FTW_Branch.h"
 #include "FTW_Ant.h"
@@ -395,13 +396,13 @@ void FTW_Shell::AbsorbRay(Ray& ray)
       break;
 
     case ShellInfo::PRQN_spawn_classview:
-      SpawnMTW_View(ray.fBetaImg, true);
+      SpawnMTW_View(ray.fBetaImg, true, true);
       break;
 
     case ShellInfo::PRQN_spawn_metagui:
       // printf("Shell spawning metagui of %s, template %s\n",
       //    ray.fBeta->Identify().Data(), ray.fGamma->Identify().Data());
-      SpawnMetaView(ray.fBetaImg, ray.fGamma);
+      SpawnMetaView(ray.fBetaImg, ray.fGamma, true);
       break;
 
     case ShellInfo::PRQN_resize_window: {
@@ -801,42 +802,62 @@ void FTW_Shell::ExportToInterpreter(OS::ZGlassImg* img, const char* varname)
 
 /**************************************************************************/
 
-void FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui)
+void FTW_Shell::mtw_view_closed(FTW_Window* win, OptoStructs::ZGlassImg* img)
 {
-  Fl_Window* w = new Fl_Window(0,0);
-  MTW_MetaView* mv = new MTW_MetaView(img, this);
+  dynamic_cast<FTW_Shell*>(win->get_swm_manager())->DitchMTW_View(img);
+}
+
+FTW_Window* FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui, bool show_p)
+{
+  FTW_Window   *w  = new FTW_Window(0,0);
+  MTW_MetaView *mv = new MTW_MetaView(img, this);
   w->end();
-  try {
+  try
+  {
     mv->BuildByLensGraph(gui);
   }
-  catch(Exc_t& exc) {
+  catch (Exc_t& exc)
+  {
     Message(exc, MT_err);
-    return;
+    return 0;
   }
   adopt_window(w);
-  w->show();
+  if (show_p)
+    w->show();
+  return w;
 }
 
-void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool show_p)
+FTW_Window* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool show_p)
 {
-  if(img->fFullMTW_View == 0) {
-    Fl_Window* w = new Fl_Window(0,0);
+  FTW_Window *win = 0;
+  if (manage_p)
+  {
+    hpImg2pWindow_i i = mMTW_Views.find(img);
+    if (i != mMTW_Views.end())
+      win = i->second;
+  }
+  if (!win)
+  {
+    win = new FTW_Window(0,0);
     MTW_ClassView* cv = new MTW_ClassView(img, this);
-    w->end();
+    win->end();
     cv->BuildVerticalView();
-    adopt_window(w);
-    img->fFullMTW_View = cv;
-    mMTW_Views.insert(img);
+    adopt_window(win);
+    if (manage_p)
+    {
+      win->callback((Fl_Callback*) mtw_view_closed, img);
+      mMTW_Views.insert(make_pair(img, win));
+    }
   }
-  if(show_p) {
-    img->fFullMTW_View->GetWindow()->show();
-  }
+  if (show_p)
+    win->show();
+  return win;
 }
 
-void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, int x, int y, float xf, float yf)
+FTW_Window* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool show_p,
+				     int x, int y, float xf, float yf)
 {
-  SpawnMTW_View(img, false);
-  Fl_Window* win = img->fFullMTW_View->GetWindow();
+  FTW_Window *win = SpawnMTW_View(img, manage_p, false);
   int w = win->w(), h = win->h();
   x += int(xf*w);
   y += int(yf*h);
@@ -850,25 +871,27 @@ void FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, int x, int y, float xf, float 
   else if(y + h > Fl::h()) y = Fl::h() - h;
   x += left; y += top;
   win->position(x, y);
-  win->show();
+  if (show_p)
+    win->show();
+  return win;
 }
 
 void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)
 {
-  if(img->fFullMTW_View != 0) {
-    delete img->fFullMTW_View;
-    img->fFullMTW_View = 0;
-    mMTW_Views.erase(mMTW_Views.find(img));
+  hpImg2pWindow_i i = mMTW_Views.find(img);
+  if (i != mMTW_Views.end())
+  {
+    // This is coming from callback whose processing touches Fl_Window afterwards.
+    FGS::delayed_destroy_window(i->second);
+    mMTW_Views.erase(i);
   }
 }
 
 void FTW_Shell::RemoveMTW_Views()
 {
-  set<OptoStructs::ZGlassImg*>::iterator i = mMTW_Views.begin();
-  while(i != mMTW_Views.end()) {
-    delete (*i)->fFullMTW_View;
-    (*i)->fFullMTW_View = 0;
-    ++i;
+  for (hpImg2pWindow_i i = mMTW_Views.begin(); i != mMTW_Views.end(); ++i)
+  {
+    delete i->second;
   }
   mMTW_Views.clear();
 }
@@ -880,10 +903,12 @@ MCW_View* FTW_Shell::MakeMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
   static const Exc_t _eh("FTW_Shell::MakeMCW_View ");
 
   MCW_View* mcw = new MCW_View(this);
-  try {
+  try
+  {
     mcw->ParseMethodInfo(cmi);
   }
-  catch(Exc_t& exc) {
+  catch (Exc_t& exc)
+  {
     delete mcw;
     Fl_Group::current(0);
     Message(_eh + "parsing failed: " + exc, MT_err);
@@ -918,19 +943,23 @@ namespace
   // ShellVars
   //==========
 
-  void set_source_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void set_source_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     ud->shell->X_SetSource(ud->get_image());
   }
-  void set_sink_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void set_sink_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     ud->shell->X_SetSink(ud->get_image());
   }
 
   /**************************************************************************/
 
-  void set_beta_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void set_beta_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     ud->shell->X_SetBeta(ud->get_image());
   }
-  void set_gamma_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void set_gamma_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     ud->shell->X_SetGamma(ud->get_image());
   }
 
@@ -939,24 +968,28 @@ namespace
   // Lens
   //=====
 
-  void open_full_view_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
-    ud->shell->SpawnMTW_View(ud->get_image());
+  void open_full_view_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
+    ud->shell->SpawnMTW_View(ud->get_image(), true, true);
   }
 
-  void open_nest_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void open_nest_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     NestInfo ni("Nest");
     ni.Add(ud->get_lens());
     ud->shell->SpawnSubShell(&ni, true);
   }
 
 
-  void glass_export_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void glass_export_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     const char* var = fl_input("Varname for %s:", "foo", ud->get_lens()->GetName());
     if(var)
       ud->shell->ExportToInterpreter(ud->get_image(), var);
   }
 
-  void spawn_mcw_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud) {
+  void spawn_mcw_cb(Fl_Widget* w, FTW_Shell::mir_call_data* ud)
+  {
     try {
       ud->shell->SpawnMCW_View(ud->get_image(), ud->mi);
     }

@@ -31,8 +31,6 @@ public:
   void BuildByLayout(MTW_Layout* layout);
 
   virtual int handle(int ev);
-
-#include "MTW_ClassView.h7"
 }; // endclass MTW_ClassView
 
 #endif

@@ -25,14 +25,12 @@ ZGlassImg::ZGlassImg(Eye* e) : fElementImgs(0), fEye(e), fLens(0)
 
   fRefCount     = 0;
   fDefRnr       = 0;
-  fFullMTW_View = 0;
 }
 
 ZGlassImg::ZGlassImg(Eye* e, ZGlass* lens) : fElementImgs(0), fEye(e), fLens(lens)
 {
   fRefCount     = 0;
   fDefRnr       = 0;
-  fFullMTW_View = 0;
 
   ZGlass::lLinkRep_t lreps; lens->CopyLinkReps(lreps);
   for (ZGlass::lLinkRep_i i = lreps.begin(); i != lreps.end(); ++i)
