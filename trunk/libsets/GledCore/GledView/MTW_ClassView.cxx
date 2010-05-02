@@ -67,12 +67,7 @@ MTW_ClassView::MTW_ClassView(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
 { _init(); }
 
 MTW_ClassView::~MTW_ClassView()
-{
-  if(mWindow) {
-    mWindow->remove(*this);
-    delete mWindow;
-  }
-}
+{}
 
 /**************************************************************************/
 
@@ -190,16 +185,18 @@ void MTW_ClassView::BuildByLayout(MTW_Layout* layout)
 int MTW_ClassView::handle(int ev)
 {
   // Suppress top-level dnd/paste.
-  if(ev == FL_PASTE) return 1;
+  if (ev == FL_PASTE) return 1;
 
-  if(ev == FL_SHOW) {
+  if (ev == FL_SHOW)
+  {
     bShown = true;
     UpdateDataWeeds(FID_t(0,0));
     UpdateLinkWeeds(FID_t(0,0));
-  } else if(ev == FL_HIDE) {
+  }
+  else if(ev == FL_HIDE)
+  {
     bShown = false;
   }
+
   return Fl_Pack::handle(ev);
 }
-
-/**************************************************************************/

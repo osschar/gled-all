@@ -361,7 +361,7 @@ int FTW::NameButton::handle(int ev)
     if(Fl::event_button() == 1 && Fl::event_inside(this)) {
       if(Fl::event_clicks() == 1 && loc.get_glass() != 0) {
 	FTW_Shell *shell = leaf->GetNest()->GetShell();
-        shell->SpawnMTW_View(loc.get_image());
+        shell->SpawnMTW_View(loc.get_image(), true, true);
         leaf->GetNest()->RefPoint().revert();
         Fl::event_clicks(0);
       } else {

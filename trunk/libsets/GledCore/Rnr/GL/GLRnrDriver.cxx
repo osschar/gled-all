@@ -198,19 +198,19 @@ void GLRnrDriver::PreEventHandling(A_Rnr::Fl_Event& e)
       mMPushX[e.fButton] = mMouseX;
       mMPushY[e.fButton] = mMouseY;
     }
+
+    float yext = TMath::Tan(0.5*TMath::DegToRad()*mZFov)*mNearClip;
+    float xext = yext*mWidth/mHeight;
+    float xcam = xext*(2.0f*mMouseX/mWidth  - 1.0f);
+    float ycam = yext*(2.0f*mMouseY/mHeight - 1.0f);
+
+    mMouseRayPos.Zero();
+    mCamFixTrans->MultiplyIP(mMouseRayPos);
+
+    mMouseRayDir.Set(mNearClip, -xcam, -ycam);
+    mMouseRayDir.Normalize();
+    mCamFixTrans->RotateIP(mMouseRayDir);
   }
-
-  float yext = TMath::Tan(0.5*TMath::DegToRad()*mZFov)*mNearClip;
-  float xext = yext*mWidth/mHeight;
-  float xcam = xext*(2.0f*mMouseX/mWidth  - 1.0f);
-  float ycam = yext*(2.0f*mMouseY/mHeight - 1.0f);
-
-  mMouseRayPos.Zero();
-  mCamFixTrans->MultiplyIP(mMouseRayPos);
-
-  mMouseRayDir.Set(mNearClip, -xcam, -ycam);
-  mMouseRayDir.Normalize();
-  mCamFixTrans->RotateIP(mMouseRayDir);
 }
 
 /**************************************************************************/

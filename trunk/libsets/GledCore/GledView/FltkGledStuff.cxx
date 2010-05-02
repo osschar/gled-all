@@ -63,6 +63,20 @@ int FGS::swm_string_width(TString& str, int cell_w)
 { return swm_generick_width(str, cell_w, 0.2); }
 
 /**************************************************************************/
+
+namespace
+{
+  void delayed_window_destroyer(Fl_Window* win)
+  { delete win; }
+}
+
+void FGS::delayed_destroy_window(Fl_Window* win)
+{
+  Fl::add_timeout(0.0, (Fl_Timeout_Handler) delayed_window_destroyer, win);
+}
+
+
+/**************************************************************************/
 // PackEntryCollapsor
 /**************************************************************************/
 
@@ -279,7 +293,7 @@ int FGS::LensNameBox::handle(int ev)
       {
 	Fl::event_clicks(0);
 	FTW_Shell* shell = grep_shell_or_die(parent(), _eh);
-	shell->SpawnMTW_View(fImg);
+	shell->SpawnMTW_View(fImg, true, true);
       }
     return 1;
 

@@ -14,6 +14,7 @@ class FTW_Window : public Fl_Window, public Fl_SWM_Client
 {
 public:
   FTW_Window(int w, int h, const char* t=0);
+  FTW_Window(int x, int y, int w, int h, const char *t=0);
 };
 
 #endif

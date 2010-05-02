@@ -48,6 +48,7 @@ FTW_Nest* FTW_Nest::Create_FTW_Nest(FTW_Shell* sh, OS::ZGlassImg* img)
   FTW_Window *win  = new FTW_Window(ni->GetDefW(), ni->GetDefH());
   FTW_Nest   *nest = new FTW_Nest(sh, win, img, ni->GetDefW(), ni->GetDefH());
   win->end();
+  win->resizable(win);
   win->set_size_range(new SWM_Size_Range(min_W, min_H, max_W, max_H));
 
   sh->adopt_window(win);
@@ -87,94 +88,106 @@ const int FTW_Nest::max_H = 120;
 
 /**************************************************************************/
 
-namespace {
-
-  void action_menu_cb(Fl_Menu_Button* b, void* what) {
+namespace
+{
+  void action_menu_cb(Fl_Menu_Button* b, void* what)
+  {
     FTW_Nest*   nest  = FGS::grep_parent<FTW_Nest*>(b);
     FTW_Shell* shell  = nest->GetShell();
     FTW::Locator& tgt = *nest->RefTargetLoc();
-    try {
-      switch(GNS::CastVoidPtr2ID(what)) {
-      case 1: shell->X_SetLinkOrElement(tgt); break;
-      case 2: shell->X_ClearLinkOrElement(tgt); break;
+    try
+    {
+      switch(GNS::CastVoidPtr2ID(what))
+      {
+	case 1: shell->X_SetLinkOrElement(tgt); break;
+	case 2: shell->X_ClearLinkOrElement(tgt); break;
 
-      case 3: shell->X_Yank(tgt); break;
+	case 3: shell->X_Yank(tgt); break;
 
-      case 4: shell->X_Push(tgt); break;
-      case 5: shell->X_Unshift(tgt); break;
-      case 6: shell->X_Insert(tgt); break;
+	case 4: shell->X_Push(tgt); break;
+	case 5: shell->X_Unshift(tgt); break;
+	case 6: shell->X_Insert(tgt); break;
 
-      case 7: shell->X_Pop(tgt); break;
-      case 8: shell->X_Shift(tgt); break;
-      case 9: shell->X_Remove(tgt); break;
+	case 7: shell->X_Pop(tgt); break;
+	case 8: shell->X_Shift(tgt); break;
+	case 9: shell->X_Remove(tgt); break;
       }
-    } catch(Exc_t& exc) {
+    }
+    catch (Exc_t& exc)
+    {
       shell->Message(exc.Data(), FTW_Shell::MT_err);
     }
   }
 
-  void target_type_change_cb(Fl_Widget* w, FTW_Nest::TargetType_e type) {
+  void target_type_change_cb(Fl_Widget* w, FTW_Nest::TargetType_e type)
+  {
     FTW_Nest* n = FGS::grep_parent<FTW_Nest*>(w);
     if(n) n->TargetTypeChange(type);
   }
 
   // *** Menu callbacks ***
 
-  void view_menu_cb(Fl_Menu_Button* b, void* what) {
+  void view_menu_cb(Fl_Menu_Button* b, void* what)
+  {
     FTW_Nest*   nest = FGS::grep_parent<FTW_Nest*>(b);
     // const Fl_Menu_Item* mi = b->mvalue();
 
-    switch(GNS::CastVoidPtr2ID(what)) {
+    switch(GNS::CastVoidPtr2ID(what))
+    {
+      case 1: // Toggle Link / Custom view
+      {
+	if(nest->GetLinksShown()) nest->CustomView();
+	else	      		nest->LinksView();
+	break;
+      }
+      case 2: // Open Edit Layout Window
+      {
+	Fl_Window* w = nest->GetLayout();
+	w->hotspot(w);
+	w->show();
+	break;
+      }
 
-    case 1: { // Toggle Link / Custom view
-      if(nest->GetLinksShown()) nest->CustomView();
-      else	      		nest->LinksView();
-      break;
-    }
+      // case 3: not used
 
-    case 2: { // Open Edit Layout Window
-      Fl_Window* w = nest->GetLayout();
-      w->hotspot(w);
-      w->show();
-      break;
-    }
-
-    // case 3: not used
-
-    case 4: { // Reverse order of ants for all leafs.
-      nest->ReverseAnts();
-      break;
-    }
-
-    case 5: { // Remove stand-alone MTV_Views.
-      nest->GetShell()->RemoveMTW_Views();
-      break;
-    }
-
-    case 6: { // Remove stand-alone MTV_Views.
-      auto_ptr<ZMIR> mir( nest->GetNestInfo()->S_ImportKings() );
-      nest->GetShell()->Send(*mir);
-      break;
-    }
+      case 4: // Reverse order of ants for all leafs.
+      {
+	nest->ReverseAnts();
+	break;
+      }
+      case 5: // Remove stand-alone MTV_Views.
+      {
+	nest->GetShell()->RemoveMTW_Views();
+	break;
+      }
+      case 6: // Remove stand-alone MTV_Views.
+      {
+	auto_ptr<ZMIR> mir( nest->GetNestInfo()->S_ImportKings() );
+	nest->GetShell()->Send(*mir);
+	break;
+      }
 
     } // end switch
   }
 
-  void set_menu_cb(Fl_Menu_Button* b, void* what) {
+  void set_menu_cb(Fl_Menu_Button* b, void* what)
+  {
     FTW_Nest*   nest  = FGS::grep_parent<FTW_Nest*>(b);
     FTW_Shell* shell  = nest->GetShell();
-    switch(GNS::CastVoidPtr2ID(what)) {
-    case 1: shell->X_SetSource(nest->RefPoint()); break;
-    case 2: shell->X_SetSink(nest->RefPoint()); break;
-    case 3: shell->X_SetSource(nest->RefMark()); break;
-    case 4: shell->X_SetSink(nest->RefMark()); break;
+    switch (GNS::CastVoidPtr2ID(what))
+    {
+      case 1: shell->X_SetSource(nest->RefPoint()); break;
+      case 2: shell->X_SetSink(nest->RefPoint()); break;
+      case 3: shell->X_SetSource(nest->RefMark()); break;
+      case 4: shell->X_SetSink(nest->RefMark()); break;
 
-    case 16: nest->ExchangePointAndMark(); break;
-    case 17: shell->X_ExchangeSourceAndSink(); break;
+      case 16: nest->ExchangePointAndMark(); break;
+      case 17: shell->X_ExchangeSourceAndSink(); break;
     }
   }
 
-  Fl_Menu_Item s_View_Menu[] = {
+  Fl_Menu_Item s_View_Menu[] =
+  {
     { "Link / Custom",     FL_CTRL + 'v', (Fl_Callback*) view_menu_cb, (void*)1 },
     { "Edit Custom ...",   FL_CTRL + 'e', (Fl_Callback*) view_menu_cb, (void*)2 },
     { "Reverse Ants",      FL_CTRL + 'r', (Fl_Callback*) view_menu_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_DIVIDER },
@@ -183,7 +196,8 @@ namespace {
     {0}
   };
 
-  Fl_Menu_Item s_Set_Menu[] = {
+  Fl_Menu_Item s_Set_Menu[] =
+  {
     { "Point as Source",                FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)1 },
     { "Point as Sink",                  FL_F + 2, (Fl_Callback*) set_menu_cb, (void*)2 },
     { "Mark as Source",      FL_SHIFT + FL_F + 1, (Fl_Callback*) set_menu_cb, (void*)3 },
@@ -193,7 +207,8 @@ namespace {
     {0}
   };
 
-  Fl_Menu_Item s_Action_Menu[] = {
+  Fl_Menu_Item s_Action_Menu[] =
+  {
     { "Set Link",	's', (Fl_Callback*) action_menu_cb, (void*)1 },
     { "Clear Link",	'c', (Fl_Callback*) action_menu_cb, (void*)2 },
     { "Yank",		'y', (Fl_Callback*) action_menu_cb, (void*)3 },

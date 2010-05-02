@@ -50,8 +50,8 @@ protected:
   ZTrans        mProjBase;
   ZTrans        mProjMatrix;
 
-  OptoStructs::ZGlassImg* mOverlayImg;
-  OptoStructs::ZGlassImg* mEventHandlerImg;
+  OptoStructs::ZGlassImgHandle mOverlayImg;
+  OptoStructs::ZGlassImgHandle mEventHandlerImg;
 
   UInt_t        mPickBuffSize;
   UInt_t*       mPickBuff;
