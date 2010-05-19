@@ -1,7 +1,7 @@
 # $Header$
 LIB_SET_NAME	:= Tmp1
 LIB_SET_ID	:= 128
-REQUIRES_LIB_SETS := GledCore # add
+REQUIRES_LIB_SETS := GledCore Geom1 # add
 
 # Directories containing glasses - full Gled enabled classes.
 BLESSED_DIRS	:= Glasses
