@@ -1,5 +1,9 @@
 # glass		class	location		rnr-class
 # name		id			[]~parent, [.]~own rnr, [<glass>]
+Weed      1       Glasses/Weed            . 
+Plant     2       Glasses/Plant           .
+ProductionRule 3  Glasses/ProductionRule
+
 
 #ZGlass		1	Glasses/ZGlass		.
 #ZList		2	Glasses/ZList
