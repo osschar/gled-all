@@ -11,9 +11,9 @@
 #include <Glasses/ZVector.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-#include <stack.h>
-#include <vector.h>
-#include <map.h>
+#include <stack>
+#include <vector>
+#include <map>
 
 class Weed_GL_Rnr : public ZNode_GL_Rnr
 {
