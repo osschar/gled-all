@@ -5,7 +5,6 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// RectTerrain
 //
 // A rectangular mNx * mNy height field.
 // mO(x|y) ~ origin, mD(x|y) ~ grid spacing.
@@ -298,8 +297,6 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
   Float_t tex_fx = 1.0/(maxX - minX), tex_fy = 1.0/(maxY - minY);
 
   TringTvor& TT = * new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
-  if (smoothp) TT.MakeSecondaryArrays(true,  colp, texp);
-  if (flatp)   TT.MakeSecondaryArrays(false, colp, texp);
 
   //TVector3 normvec;
   Int_t          idx = 0;
@@ -312,7 +309,7 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
       Float_t *v = TT.Vertex(idx);
       v[0] = (i-1)*mDx; v[1] = (j-1)*mDy; v[2] = mP[i][j];
 
-      if(smoothp)
+      if (smoothp)
       {
 	Int_t il=i,ih=i,jh=j,jl=j;
 	if(i>0) il--; if(i<=mNx) ih++;
@@ -325,18 +322,20 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
         n[2] =  dvx[0]*dvy[1];
         TMath::Normalize(n);
 
-	if(colp) {
+	if (colp)
+	{
 	  make_color(mP[i][j]).to_ubyte(TT.Color(idx));
 	}
       }
 
-      if(texp) {
+      if (texp)
+      {
 	Float_t* t = TT.Texture(idx);
 	t[0] = tex_fx*(i-minX);
 	t[1] = tex_fy*(j-minY);
       }
 
-      if(i < maxX && j < maxY)
+      if (i < maxX && j < maxY)
       {
 	Float_t d1 = TMath::Abs(mP[i][j]   - mP[i+1][j+1] );
 	Float_t d2 = TMath::Abs(mP[i][j+1] - mP[i+1][j]   );

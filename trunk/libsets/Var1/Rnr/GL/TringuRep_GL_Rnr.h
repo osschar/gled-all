@@ -10,6 +10,8 @@
 #include <Glasses/TringuRep.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
+class TringTvor_GL_Rnr;
+
 class Extendio;
 class ExtendioExplosion;
 
@@ -34,6 +36,8 @@ protected:
   TringuRep	*mTringuRep;
   TringulaSpy   *mTringulaSpy;
 
+  TringTvor_GL_Rnr *mTTvorRnr;
+
   typedef hash_multimap<Extendio*, AlSource*> hExt2AlSrc_t;
   typedef hExt2AlSrc_t::iterator              hExt2AlSrc_i;
   typedef pair<hExt2AlSrc_i, hExt2AlSrc_i>    hExt2AlSrc_ip;
@@ -53,6 +57,7 @@ public:
   virtual void Draw(RnrDriver* rd);
   //virtual void PostDraw(RnrDriver* rd);
 
+  virtual void Triangulate(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
 
   void WipeSpy() { mTringulaSpy = 0; }

@@ -1,3 +1,24 @@
+2010-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support for per-triangle texture coordinates.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Introduce mode enum (per-vertex, per-triangle) and use it for
+	normals, color and texture.
+	Modify constructors and Reset() functions to support that.
+	Add functions for per-triangle texture handling.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	* Rnr/GL/TringTvor_GL_Rnr.h:
+	Restructure to support all possible per-vertex / per-triangle
+	combinations of normal, color and texture rendering.
+	The setup pass is now well structured (BeginSetup(), do stuff,
+	EndSetup()) and the state is cached indata members.
+
+	* Glasses/RectTerrain.cxx:
+	Adapt for new TringTvor rendering.
+
 2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Amphitheatre.cxx:

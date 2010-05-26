@@ -220,6 +220,8 @@ public:
   void ImportGTSurf(GTSurf* gts); // X{ED} C{1} 7 MCWButt()
   void ExportGTSurf(GTSurf* gts); // X{ED} C{1} 7 MCWButt()
 
+  void ImportOoliteDAT(const TString& filename, Bool_t invert_triangles=false);
+
   void ExportPovMesh(const Text_t* fname, Bool_t smoothp=false); // X{E} 7 MCWButt()
 
   void MakeTetrahedron(Float_t l1=0.8, Float_t l2=0.2,

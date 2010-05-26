@@ -16,6 +16,7 @@
 
 #include <Opcode/Opcode.h>
 
+#include <TPRegexp.h>
 #include <TMath.h>
 #include <TF3.h>
 
@@ -488,6 +489,127 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
 
   gts->ReplaceSurface(surf);
 }
+
+
+/**************************************************************************/
+// Oolite DAT format import
+/**************************************************************************/
+
+namespace
+{
+  TString next_oolite_dat_line(ifstream& f, TPMERegexp& comment_re)
+  {
+    while (!f.eof())
+    {
+      TString l;
+      l.ReadLine(f, kTRUE);
+      if (comment_re.Match(l) == 0)
+	return l;
+    }
+    return TString();
+  }
+}
+
+void TriMesh::ImportOoliteDAT(const TString& filename, Bool_t invert_triangles)
+{
+  static const Exc_t _eh("TriMesh::ImportOoliteDAT ");
+
+  ifstream f(filename);
+  TPMERegexp comment_re("^\\s*//", "o");
+
+  TString l;
+
+  Int_t nv, nt;
+  l = next_oolite_dat_line(f, comment_re);
+  if (sscanf(l, "NVERTS %d", &nv) != 1) throw _eh + "Expect NVERTS";
+  l = next_oolite_dat_line(f, comment_re);
+  if (sscanf(l, "NFACES %d", &nt) != 1) throw _eh + "Expect NFACES";
+
+  delete mTTvor;
+  mTTvor = new TringTvor(nv, nt, TringTvor::M_PerTriangle,
+			 TringTvor::M_None, TringTvor::M_PerTriangle);
+
+  {
+    l = next_oolite_dat_line(f, comment_re);
+    if (sscanf(l, "VERTEX") != 0) throw _eh + "Expect VERTEX";
+
+    Float_t *vv = mTTvor->Verts();
+    for (Int_t i = 0; i < nv; ++i, vv += 3)
+    {
+      l = next_oolite_dat_line(f, comment_re);
+      if (sscanf(l, "%f, %f, %f", vv, vv+1, vv+2) != 3) throw _eh + "Expect 3 floats for VERTEX";
+    }
+  }
+
+  {
+    l = next_oolite_dat_line(f, comment_re);
+    if (sscanf(l, "FACES") != 0) throw _eh + "Expect FACES";
+
+    Int_t   *tt = mTTvor->Trings();
+    Float_t *nn = mTTvor->TringNorms();
+    Int_t    num_verts;
+    Int_t    xxx;
+    for (Int_t i = 0; i < nt; ++i, tt += 3, nn += 3)
+    {
+      l = next_oolite_dat_line(f, comment_re);
+      if (sscanf(l, "%d,%d,%d, %f,%f,%f, %d, %d,%d,%d", &xxx, &xxx, &xxx,
+		 nn, nn+1, nn+2, &num_verts, tt, tt+1, tt+2) != 10)
+      {
+	throw _eh + "Expect 10 entries for FACES";
+      }
+      if (num_verts != 3)
+      {
+	throw _eh + "Always expect 3 vertices in a face.";
+      }
+
+      if (invert_triangles)
+      {
+	swap(*(tt+1), *(tt+2));
+	// Inversion is not ok, regenerate them.
+	// *nn = - *nn;  *(nn+1) = - *(nn+1); (nn+2) = - *(nn+2);
+      }
+    }
+    if (invert_triangles)
+    {
+      mTTvor->GenerateTriangleNormals();
+    }
+  }
+
+  {
+    l = next_oolite_dat_line(f, comment_re);
+    if (sscanf(l, "TEXTURES") != 0) throw _eh + "Expect TEXTURES";
+
+    Float_t  sx, sy;
+    Float_t *tex = mTTvor->TringTexs();
+    char     file[256];
+    for (Int_t i = 0; i < nt; ++i, tex += 6)
+    {
+      l = next_oolite_dat_line(f, comment_re);
+      // For fun, there are no commas in TEXTURES section.
+      if (sscanf(l, "%s %f %f %f %f %f %f %f %f", file, &sx, &sy,
+		 tex, tex+1, tex+2, tex+3, tex+4, tex+5) != 9)
+      {
+	throw _eh + "Expect 9 entries for TEXTURES";
+      }
+      if (sx != 1.0f) { sx = 1.0f/sx; tex[0] *= sx; tex[2] *= sx; tex[4] *= sx; }
+      if (sy != 1.0f) { sy = 1.0f/sy; tex[1] *= sy; tex[3] *= sy; tex[5] *= sy; }
+
+      if (invert_triangles)
+      {
+	swap(*(tex+2), *(tex+4));
+	swap(*(tex+3), *(tex+5));
+      }
+    }
+  }
+
+  {
+    l = next_oolite_dat_line(f, comment_re);
+    if (sscanf(l, "END") != 0) throw _eh + "Expect END";
+  }
+
+  f.close();
+}
+
 
 /**************************************************************************/
 // POV export

@@ -17,6 +17,7 @@ private:
 
 protected:
   Extendio*	mExtendio;
+  Bool_t        bRnrBBoxes;
 
 public:
   Extendio_GL_Rnr(Extendio* idol) :

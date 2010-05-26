@@ -17,9 +17,19 @@ private:
 
 public:
 
+  Int_t                mNVerts;
+  Int_t                mNTrings;
+
+  // Default normal, color, texture modes.
+
+  enum Mode_e { M_None, M_PerVertex, M_PerTriangle };
+
+  Mode_e               mNormalMode;
+  Mode_e               mColorMode;
+  Mode_e               mTextureMode;
+
   // Vertex data
 
-  Int_t                mNVerts;
   std::vector<Float_t> mVerts;  // Vertex coordinates, 3*mNVert
   std::vector<Float_t> mNorms;  // Normals, 3*mNVert
   std::vector<UChar_t> mCols;   // RGBA color, 4*mNVert
@@ -54,31 +64,37 @@ public:
 
   // Triangle data
 
-  Int_t                mNTrings;
   std::vector<Int_t>   mTrings;       // Vertex-indices of triangles, 3*mNTrings
   std::vector<Float_t> mTringNorms;   // Triangle normals, 3*mNTrings
   std::vector<UChar_t> mTringCols;    // Triangle colors, 4*mNTrings
+  std::vector<Float_t> mTringTexs;    // Triangle texture coords, 6*mNTrings
 
   Bool_t HasTringNorms()  { return ! mTringNorms.empty(); }
   Bool_t HasTringCols()   { return ! mTringCols .empty(); }
+  Bool_t HasTringTexs()   { return ! mTringTexs .empty(); }
 
   void MakeTringNorms()   { mTringNorms.resize(3*mNTrings); }
   void MakeTringCols()    { mTringCols .resize(4*mNTrings); }
+  void MakeTringTexs()    { mTringTexs .resize(6*mNTrings); }
 
   void AssertTringNorms() { if ( ! HasTringNorms()) MakeTringNorms(); }
   void AssertTringCols()  { if ( ! HasTringCols())  MakeTringCols();  }
+  void AssertTringTexs()  { if ( ! HasTringTexs())  MakeTringTexs();  }
 
   void WipeTrings()     { std::vector<Int_t>   v; mTrings.swap(v);     }
   void WipeTringNorms() { std::vector<Float_t> v; mTringNorms.swap(v); }
   void WipeTringCols()  { std::vector<UChar_t> v; mTringCols.swap(v);  }
+  void WipeTringTexs()  { std::vector<Float_t> v; mTringTexs.swap(v);  }
 
   Int_t*   Trings()     { return &mTrings[0];     }
   Float_t* TringNorms() { return &mTringNorms[0]; }
   UChar_t* TringCols()  { return &mTringCols[0];  }
+  Float_t* TringTexs()  { return &mTringTexs[0];  }
 
   Int_t*   Triangle(Int_t i)       { return &mTrings[3*i];     }
   Float_t* TriangleNormal(Int_t i) { return &mTringNorms[3*i]; }
   UChar_t* TriangleColor(Int_t i)  { return &mTringCols[4*i];  }
+  Float_t* TriangleTexture(Int_t i){ return &mTringTexs[6*i];  }
 
   Bool_t   TriangleOtherVertices(Int_t t, Int_t v, Int_t& v_prev, Int_t& v_next);
 
@@ -107,15 +123,16 @@ public:
 
   TringTvor();
   TringTvor(Int_t nv, Int_t nt);
+  TringTvor(Int_t nv, Int_t nt, Mode_e normal, Mode_e color, Mode_e texture);
   TringTvor(Int_t nv, Int_t nt, Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
   ~TringTvor();
 
   void Reset(Int_t nv, Int_t nt);
-  void Reset(Int_t nv, Int_t nt, Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
+  void Reset(Int_t nv, Int_t nt, Mode_e normal, Mode_e color, Mode_e texture);
 
   void MakePrimaryArrays();
   void DeletePrimaryArrays();
-  void MakeSecondaryArrays(Bool_t smoothp, Bool_t colp=false, Bool_t texp=false);
+  void MakeSecondaryArrays();
   void DeleteSecondaryArrays();
 
   Int_t AddVertices(Int_t nv);
@@ -129,8 +146,12 @@ public:
   { Float_t* v = Normal(i); v[0] = x; v[1] = y; v[2] = z; }
   void SetTriangle(Int_t i, Int_t v0, Int_t v1, Int_t v2)
   { Int_t* t = Triangle(i); t[0] = v0; t[1] = v1; t[2] = v2; }
+  void SetTriangleNormal(Int_t i, Float_t x, Float_t y, Float_t z)
+  { Float_t* v = TriangleNormal(i); v[0] = x; v[1] = y; v[2] = z; }
   void SetTriangleColor(Int_t i, UChar_t r, UChar_t g, UChar_t b, UChar_t a=255)
   { UChar_t* c = TriangleColor(i); c[0] = r; c[1] = g; c[2] = b; c[3] = a; }
+  void SetTriangleTexture(Int_t i, Float_t u0, Float_t v0, Float_t u1, Float_t v1, Float_t u2, Float_t v2)
+  { Float_t* t = TriangleTexture(i); t[0] = u0; t[1] = v0; t[2] = u1; t[3] = v1; t[4] = u2; t[5] = v2; }
 
   void CalculateBoundingBox();
   void AssertBoundingBox() { if (mBBoxOK == false) CalculateBoundingBox(); }

@@ -33,7 +33,7 @@ protected:
 
   ZLink<RGBAPalette>       mPalette;     // X{GS} L{a}
 
-  Bool_t                   bSmoothShading; // X{GE}  7 Bool()
+  Bool_t                   bSmoothShading; // X{GET} 7 Bool()
   Bool_t                   bTringStrips;   // X{GST} 7 Bool()
 
   std::vector<UChar_t>     mVertCols;    // Vertex colors, 4*NVert of tringula's mesh

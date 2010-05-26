@@ -32,11 +32,13 @@ TringuRep_GL_Rnr::TringuRep_GL_Rnr(TringuRep* idol) :
   ZNode_GL_Rnr(idol),
   mTringuRep(idol),
   mTringulaSpy(0),
+  mTTvorRnr(0),
   mSoundDir(0)
 {}
 
 TringuRep_GL_Rnr::~TringuRep_GL_Rnr()
 {
+  delete mTTvorRnr;
   delete mTringulaSpy;
 }
 
@@ -135,26 +137,42 @@ void TringuRep_GL_Rnr::Draw(RnrDriver* rd)
 
 //void TringuRep_GL_Rnr::PostDraw(RnrDriver* rd) {}
 
-void TringuRep_GL_Rnr::Render(RnrDriver* rd)
+void TringuRep_GL_Rnr::Triangulate(RnrDriver* rd)
 {
+  // called when tring-stamp changes
+  // setup tvor rnr here
+
   TringuRep &TR = * mTringuRep;
   Tringula  &T  = * TR.GetTringula();
 
-  TringTvor_GL_Rnr rnr(T.GetMesh()->GetTTvor());
-
-  rnr.BeginRender(TR.bSmoothShading, TR.bTringStrips);
+  delete mTTvorRnr;
+  mTTvorRnr = new TringTvor_GL_Rnr(T.GetMesh()->GetTTvor());
+  mTTvorRnr->BeginSetup();
 
   if (TR.bSmoothShading)
-    rnr.SetColorArray(TR.GetVertexColorArray());
+  {
+    mTTvorRnr->SetupStandardSmooth();
+    mTTvorRnr->SetColorArray(TringTvor::M_PerVertex, TR.GetVertexColorArray());
+  }
   else
-    rnr.SetColorArray(TR.GetTriangleColorArray());
+  {
+    mTTvorRnr->SetupStandardFlat();
+    mTTvorRnr->SetColorArray(TringTvor::M_PerTriangle, TR.GetTriangleColorArray());
+  }
 
-  // If we ever use textures -- shaders would make more sense.
-  // rnr.SetTextureArray(...);
+  if (TR.bTringStrips)
+  {
+    mTTvorRnr->RequestTriangleStrips();
+  }
 
-  rnr.Render();
+  mTTvorRnr->EndSetup();  
+}
 
-  rnr.EndRender();
+void TringuRep_GL_Rnr::Render(RnrDriver* rd)
+{
+  mTTvorRnr->BeginRender();
+  mTTvorRnr->Render();
+  mTTvorRnr->EndRender();
 }
 
 //==============================================================================
