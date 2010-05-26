@@ -12,6 +12,7 @@
 #include <Stones/SVars.h>
 #include <Stones/HTrans.h>
 #include <Stones/TimeMakerClient.h>
+#include <Stones/ZColor.h>
 
 #include <Opcode/Opcode.h>
 
@@ -57,6 +58,9 @@ protected:
   Tringula       *mTringula;     //! X{g}
 
   ZLink<TriMesh>  mMesh;         //  X{GS} L{}
+  ZLink<ZImage>   mTexture;      //  X{GS} L{} RnrBits{4,0,5,0}
+
+  ZColor          mColor;        //  X{GSPR} 7 ColorButt()
 
   SMinMaxVarF     mHitPoints;    //  X{G} 7 ValOut()
   Bool_t          bExploding;    //  X{G} 7 BoolOut()

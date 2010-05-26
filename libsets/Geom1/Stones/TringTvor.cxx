@@ -64,14 +64,28 @@ TringTvor::TringTvor(Int_t nv, Int_t nt) :
   MakePrimaryArrays();
 }
 
-TringTvor::TringTvor(Int_t nv, Int_t nt,
-                     Bool_t smoothp, Bool_t colp, Bool_t texp) :
-  mNVerts  (nv),
-  mNTrings (nt)
+TringTvor::TringTvor(Int_t nv, Int_t nt, Mode_e normal, Mode_e color, Mode_e texture) :
+  mNVerts      (nv),
+  mNTrings     (nt),
+  mNormalMode  (normal),
+  mColorMode   (color),
+  mTextureMode (texture)
 {
   _init();
   MakePrimaryArrays();
-  MakeSecondaryArrays(smoothp, colp, texp);
+  MakeSecondaryArrays();
+}
+
+TringTvor::TringTvor(Int_t nv, Int_t nt, Bool_t smoothp, Bool_t colp, Bool_t texp) :
+  mNVerts      (nv),
+  mNTrings     (nt),
+  mNormalMode  (smoothp ? M_PerVertex : M_PerTriangle),
+  mColorMode   (colp ? (smoothp ? M_PerVertex : M_PerTriangle) : M_None),
+  mTextureMode (texp ? M_PerVertex : M_None)
+{
+  _init();
+  MakePrimaryArrays();
+  MakeSecondaryArrays();
 }
 
 TringTvor::~TringTvor()
@@ -86,22 +100,27 @@ void TringTvor::Reset(Int_t nv, Int_t nt)
   DeleteTriangleStrips();
   DeleteSecondaryArrays();
   DeletePrimaryArrays();
-  mNVerts  = nv;
-  mNTrings = nt;
+  mNVerts      = nv;
+  mNTrings     = nt;
+  mNormalMode  = M_None;
+  mColorMode   = M_None;
+  mTextureMode = M_None;
   MakePrimaryArrays();
   mBBoxOK = false;
 }
 
-void TringTvor::Reset(Int_t nv, Int_t nt,
-                      Bool_t smoothp, Bool_t colp, Bool_t texp)
+void TringTvor::Reset(Int_t nv, Int_t nt, Mode_e normal, Mode_e color, Mode_e texture)
 {
   DeleteTriangleStrips();
   DeleteSecondaryArrays();
   DeletePrimaryArrays();
-  mNVerts  = nv;
-  mNTrings = nt;
-  MakePrimaryArrays();
-  MakeSecondaryArrays(smoothp, colp, texp);
+  mNVerts      = nv;
+  mNTrings     = nt;
+  mNormalMode  = normal;
+  mColorMode   = color;
+  mTextureMode = texture;
+  MakePrimaryArrays();  
+  MakeSecondaryArrays();
   mBBoxOK = false;
 }
 
@@ -119,16 +138,26 @@ void TringTvor::DeletePrimaryArrays()
   WipeTrings(); mNTrings = 0;
 }
 
-void TringTvor::MakeSecondaryArrays(Bool_t smoothp, Bool_t colp, Bool_t texp)
+void TringTvor::MakeSecondaryArrays()
 {
-  if (smoothp) {
-    AssertNorms();
-    if (colp) AssertCols();
-  } else {
-    AssertTringNorms();
-    if (colp) AssertTringCols();
+  switch (mNormalMode)
+  {
+    case M_PerVertex:   AssertNorms();      break;
+    case M_PerTriangle: AssertTringNorms(); break;
+    default: break;
   }
-  if (texp) AssertTexs();
+  switch (mColorMode)
+  {
+    case M_PerVertex:   AssertCols();      break;
+    case M_PerTriangle: AssertTringCols(); break;
+    default: break;
+  }
+  switch (mTextureMode)
+  {
+    case M_PerVertex:   AssertTexs();      break;
+    case M_PerTriangle: AssertTringTexs(); break;
+    default: break;
+  }
 }
 
 void TringTvor::DeleteSecondaryArrays()
@@ -139,6 +168,7 @@ void TringTvor::DeleteSecondaryArrays()
 
   WipeTringNorms();
   WipeTringCols();
+  WipeTringTexs();
 }
 
 /**************************************************************************/
@@ -166,6 +196,7 @@ Int_t TringTvor::AddTriangles(Int_t nt)
   mTrings.resize(3*mNTrings);
   if (HasTringNorms()) MakeTringNorms();
   if (HasTringCols())  MakeTringCols();
+  if (HasTringTexs())  MakeTringTexs();
   mBBoxOK = false;
   return nold;
 }
@@ -176,8 +207,10 @@ void TringTvor::CalculateBoundingBox()
 {
   if (mNVerts == 0 || mNTrings == 0)
   {
-    memset(mMinMaxBox, 0, 6*sizeof(Float_t));
-    memset(mCtrExtBox, 0, 6*sizeof(Float_t));
+    for (Int_t i = 0; i < 6; ++i)
+    {
+      mMinMaxBox[i] = mCtrExtBox[i] = 0;
+    }
     mMaxVertexDistance = mMinEdgeLen = mMaxEdgeLen = 0;
     return;
   }

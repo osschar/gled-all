@@ -1,3 +1,26 @@
+2010-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Extendio.cxx:
+	* Glasses/Extendio.h:
+	Add data-member ZLink<ZImage> mTexture.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add function ImportOoliteDAT() that imports Oolite models.
+
+	* Glasses/TringuRep.h:
+	Smooth shading requires retriangulation.
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+	Cache bounding-box rendering state in a data-member.
+	Adapt for new TringTvor rendering.
+
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.h:
+	Keep TringTvor_GL_Rnr instance to avoid setup overhead.
+	Adapt for new TringTvor rendering.
+
 2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/CrawlerSpiritio.cxx:

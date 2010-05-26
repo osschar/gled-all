@@ -10,6 +10,7 @@
 //
 
 #include "Extendio.h"
+#include "Glasses/ZImage.h"
 #include "Extendio.c7"
 
 #include "Tringula.h"
