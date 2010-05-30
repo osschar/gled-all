@@ -18,7 +18,7 @@ $parallel = 1;
 
 setup_package($package);
 
-if ($DISTRO_VENDOR eq 'gentoo')
+if ($DISTRO_VENDOR eq 'gentoo' or $DISTRO_VENDOR eq 'redhat')
 {
   add_cppflags("-I/usr/include/netpbm");
 }
