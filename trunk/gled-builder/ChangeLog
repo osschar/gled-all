@@ -1,3 +1,9 @@
+2010-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/gts/gts.pl:
+	Fedora 12 also puts netpbm includes in a subdirectory, add include
+	path.
+
 2010-01-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* gled/Makefile:
