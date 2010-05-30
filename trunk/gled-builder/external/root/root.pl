@@ -18,10 +18,10 @@ $parallel = 1;
 
 setup_package($package);
 
-my $config_args;
+my $config_args = "--disable-builtin-freetype";
+
 if ($BUILD_OS =~ /linux/)
 {
-  $config_args .= "--disable-builtin-freetype";
   if ($DISTRO_VENDOR eq 'gentoo') {
     $config_args .= " --enable-gsl-shared --with-pgsql-incdir=/usr/include/postgres";
   }

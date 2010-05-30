@@ -1,5 +1,10 @@
 2010-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* external/root/root.pl:
+	Also do not use builtin freetype on mac.
+
+2010-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* external/gts/gts.pl:
 	Fedora 12 also puts netpbm includes in a subdirectory, add include
 	path.
