@@ -1,3 +1,17 @@
+2010-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for mac build.
+
+	* Gled/GSpinLock.h:
+	* Gled/GSpinLock.cxx:
+	Use BSD OSSpinLock on mac, pthreads do not have spin-locks there.
+
+	* Pupils/Pupil.cxx:
+	Work around psychological problems of mac's gcc.
+
+	* Makefile:
+	Get freetype include path from freetype-config.
+
 2010-05-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve MTW_ClassView handling in FTW_Shell to avoid holding on
