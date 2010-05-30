@@ -647,7 +647,7 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
       cout << _eh << "scene exception: '" << exc << "'.\n";
     }
   }
-  if (bShowOverlay && rnr_overlay && mOverlayImg != 0)
+  if (bShowOverlay && rnr_overlay && mOverlayImg)
   {
     try
     {

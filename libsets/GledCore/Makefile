@@ -30,6 +30,7 @@ include ${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------
 
 CPPFLAGS +=-I/usr/kerberos/include
+# CPPFLAGS +=-I/usr/kerberos/include -I/Users/Alja/gled-builder/external/root/root/graf2d/freetype/src/freetype-2.3.5/include
 
 LIBSET_TARGETS += bin/saturn
 
@@ -78,4 +79,4 @@ distclean::
 ABOVE_RNR_GL_LIBS += -L$(shell root-config --libdir) -lFTGL
 
 Rnr/GL/GLTextNS.o Rnr/GL/Text_GL_Rnr.o Rnr/GL/WGlFrameStyle_GL_Rnr.o \
-Rnr/GL/ZRlFont_GL_Rnr.o : CPPFLAGS += -I/usr/include/freetype2
+Rnr/GL/ZRlFont_GL_Rnr.o : CPPFLAGS += $(shell freetype-config --cflags)

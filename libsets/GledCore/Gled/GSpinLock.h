@@ -9,7 +9,11 @@
 
 #include <Rtypes.h>
 #ifndef __CINT__
-#include <pthread.h>
+ #ifdef __APPLE__
+  #include <libkern/OSAtomic.h>
+ #else
+  #include <pthread.h>
+ #endif
 #endif
 
 /**************************************************************************/
@@ -20,7 +24,11 @@ class GSpinLock
 {
 protected:
 #ifndef __CINT__
-  pthread_spinlock_t	mSpinLock; // X{P}
+ #ifdef __APPLE__
+  OSSpinLock            mSpinLock;
+ #else
+  pthread_spinlock_t	mSpinLock;
+ #endif
 #endif
 
 public:
@@ -33,9 +41,6 @@ public:
   Lock_e TryLock();
   Lock_e Unlock();
 
-#ifndef __CINT__
-#include "GSpinLock.h7"
-#endif
   ClassDefNV(GSpinLock, 0);
 }; // endclass GSpinLock
 
