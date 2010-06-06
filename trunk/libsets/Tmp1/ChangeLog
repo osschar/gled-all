@@ -1,0 +1,23 @@
+2010-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Basic support for reading of Wacom tablets and stroke rendering.
+
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	New glass: reads Wacom data and keeps state.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	* Rnr/GL/TabletStroke_GL_Rnr.h:
+	New glass: point container for a stroke.
+
+	* extra/wacdumpgled.c:
+	Strip-off of wacdump.c with API used in TabletReader.
+
+	* Makefile:
+	Optional linking with wacom reader archive.
+
+	* glass.list:
+	Register new glasses TabletReader and TabletStroke.
+
