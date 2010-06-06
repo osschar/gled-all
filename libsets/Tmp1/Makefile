@@ -16,6 +16,12 @@ VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
 
+LIB_WAC_DUMP_GLED := lib/libWacDumpGled.a
+ifneq ($(wildcard ${LIB_WAC_DUMP_GLED}),)
+BASE_LD_LIBS    = ${LIB_WAC_DUMP_GLED}
+Glasses/TabletReader.o: CPPFLAGS += -DHAS_WAC_GLED
+endif
+
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------
