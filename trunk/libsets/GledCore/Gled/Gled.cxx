@@ -876,38 +876,46 @@ void Gled::LoadMacro(const Text_t* mac)
 
 namespace
 {
-class GExceptionHandler : public TStdExceptionHandler
-{
-public:
-  GExceptionHandler() : TStdExceptionHandler() { Add(); }
-  virtual ~GExceptionHandler()                 { Remove(); }
-
-  virtual EStatus  Handle(std::exception& exc)
+  class GExceptionHandler : public TStdExceptionHandler
   {
-    // Handle exceptions deriving from TEveException.
+  public:
+    GExceptionHandler() : TStdExceptionHandler() { Add(); }
+    virtual ~GExceptionHandler()                 { Remove(); }
 
-    Exc_t* ex = dynamic_cast<Exc_t*>(&exc);
-    if (ex) {
-      cout <<"TRint runner caught exception: "<< ex << endl;
-      cout <<"TRint runner reentering event loop ...\n";
-      return kSEHandled;
-    } else {
-      cout <<"TRint runner caught std exception: "<< exc.what() <<endl;
-      return kSEProceed;
+    virtual EStatus  Handle(std::exception& exc)
+    {
+      // Handle exceptions deriving from TEveException.
+
+      Exc_t* ex = dynamic_cast<Exc_t*>(&exc);
+      if (ex) {
+	cout <<"TRint runner caught exception: "<< ex << endl;
+	cout <<"TRint runner reentering event loop ...\n";
+	return kSEHandled;
+      } else {
+	cout <<"TRint runner caught std exception: "<< exc.what() <<endl;
+	return kSEProceed;
+      }
     }
-  }
-};
+  };
 
-class GTerminateHandler : public TSignalHandler
-{
-public:
-  GTerminateHandler() : TSignalHandler(kSigTermination, kTRUE) { Add(); }
-  virtual ~GTerminateHandler() {}
+  class GTerminateHandler : public TSignalHandler
+  {
+  public:
+    GTerminateHandler() : TSignalHandler(kSigTermination, kTRUE) { Add(); }
+    virtual ~GTerminateHandler() {}
 
-  virtual Bool_t Notify() { gSystem->ExitLoop(); return kFALSE; }
-};
+    virtual Bool_t Notify() { gSystem->ExitLoop(); return kFALSE; }
+  };
+
+  class GSigChildHandler : public TSignalHandler
+  {
+  public:
+    GSigChildHandler() : TSignalHandler(kSigChild, kTRUE) { Add(); }
+    virtual ~GSigChildHandler() {}
+
+    virtual Bool_t Notify() { return kTRUE; }
+  };
 }
-
 
 GThread* Gled::SpawnTRintThread(const TString& name_prefix)
 {
@@ -941,6 +949,7 @@ void* Gled::TRint_runner_tl(void*)
 
   // Those two will be deleted in ~TROOT().
   new GTerminateHandler;
+  new GSigChildHandler;
   new GExceptionHandler;
 
   self->SetEndFoo((GThread_cu_foo) TRint_cleanup_tl);
