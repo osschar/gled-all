@@ -1,5 +1,10 @@
 2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/PupilInfo.cxx:
+	Bugfix in Home() -- missing break in switch statement.
+
+2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Gled/Gled.cxx:
 	Add sig-child signal handler. Does nothing so far.
 
