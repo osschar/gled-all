@@ -1,3 +1,8 @@
+2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Rect.h:
+	Increase weed precision of mU/VLen.
+
 2010-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for per-triangle texture coordinates.
