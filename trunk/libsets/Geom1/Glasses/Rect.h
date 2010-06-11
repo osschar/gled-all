@@ -17,8 +17,8 @@ private:
   void _init();
 
 protected:
-  Float_t	mULen;		// X{GS}  7 Value(-range=>[0,1000, 1,100], -join=>1)
-  Float_t	mVLen;		// X{GS}  7 Value(-range=>[0,1000, 1,100])
+  Float_t	mULen;		// X{GS}  7 Value(-range=>[0,1000, 1,1000], -join=>1)
+  Float_t	mVLen;		// X{GS}  7 Value(-range=>[0,1000, 1,1000])
   Short_t	mUStrips;	// X{GS}  7 Value(-range=>[0,10000,1], -join=>1)
   Short_t	mVStrips;	// X{GS}  7 Value(-range=>[0,10000,1])
   Float_t	mWidth;		// X{GS}  7 Value(-range=>[0,128,1,100])
