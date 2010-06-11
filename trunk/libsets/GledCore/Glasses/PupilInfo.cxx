@@ -236,14 +236,18 @@ void PupilInfo::Home(Bool_t smooth)
   {
     case P_Perspective:
     {
-      if (mDefZFov && mDefZFov != mZFov) {
+      if (mDefZFov && mDefZFov != mZFov)
+      {
 	SetZFov (mDefZFov);
 	SetZSize(2*mXDist*TMath::Tan(0.5*TMath::DegToRad()*mZFov));
       }
+      break;
     }
-    case P_Orthographic: {
+    case P_Orthographic:
+    {
       SetZSize(mDefZSize);
       SetZFov (2*TMath::RadToDeg()*TMath::ATan2(mZSize, mXDist));
+      break;
     }
   }
   if (smooth)
