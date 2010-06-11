@@ -28,6 +28,8 @@ public:
 
   void AddPoint(Float_t x, Float_t y);
 
+  void MakeHisto(Int_t nbins=1024); // X{E} 7 MCWButt()
+
 #include "TabletStroke.h7"
   ClassDef(TabletStroke, 1);
 }; // endclass TabletStroke

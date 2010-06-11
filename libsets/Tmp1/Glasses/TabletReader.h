@@ -8,6 +8,7 @@
 #define Tmp1_TabletReader_H
 
 #include <Glasses/ZNode.h>
+#include <Stones/ZColor.h>
 
 #include <Gled/GMutex.h>
 #include <Gled/GThread.h>
@@ -41,9 +42,12 @@ private:
   void _init();
 
 protected:
-  Float_t   mMaxX;     //  X{GS} 7 Value(-range=>[0, 1000, 1, 100])
-  Float_t   mPosScale; //! X{G}  7 ValOut()
+  Bool_t    bScalePos; //  X{GS} 7 Bool(-join=>1)
   Bool_t    bInvertY;  //  X{GS} 7 Bool()
+  Float_t   mMaxX;     //  X{GS} 7 Value(-join=>1, -range=>[0, 20000, 1, 100])
+  Float_t   mPosScale; //! X{G}  7 ValOut()
+  Int_t     mOffX;     //! X{G}  7 ValOut(-join=>1)
+  Int_t     mOffY;     //! X{G}  7 ValOut()
 
   Int_t     mButtons;
   Float_t   mPosX;
@@ -52,9 +56,11 @@ protected:
   Float_t   mTouchPosY;
   Float_t   mPressure;
 
-  Bool_t    bPrintPositions;  // X{GS} 7 Bool()
+  Bool_t    bPrintPositions;  // X{GS} 7 Bool(-join=>1)
   Bool_t    bPrintButtons;    // X{GS} 7 Bool()
   Bool_t    bPrintOther;      // X{GS} 7 Bool()
+
+  ZColor    mStrokeColor;     // X{PRGS} 7 ColorButt()
 
   GMutex    mTabletMutex;  //!
   GThread  *mTabletThread; //!

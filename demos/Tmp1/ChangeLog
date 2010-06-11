@@ -1,0 +1,7 @@
+2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* wactest.C:
+	New macro for testing tablet stuff.
+
+	* ChangeLog:
+	New file.

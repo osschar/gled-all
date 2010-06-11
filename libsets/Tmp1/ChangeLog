@@ -1,3 +1,17 @@
+2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Small improvements in tablet stuff.
+
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	Add further controls for recording:
+	- invert y axis,
+	- x/y offsets get calculated so that pas is centered at origin.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	Add function MakeHisto(), not perfect yet.
+
 2010-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Basic support for reading of Wacom tablets and stroke rendering.
