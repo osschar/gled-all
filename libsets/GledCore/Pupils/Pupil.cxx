@@ -451,9 +451,9 @@ void Pupil::SetAbsRelCamera()
 
   // Construct fwd/up vectors ... consider LookAt and UpReference.
   ZPoint c_pos( z.GetBaseVec(4) );
-  ZPoint  x_vec( z.GetBaseVec(1) ); // Forward vector
-  ZPoint  z_vec( z.GetBaseVec(3) ); // Up vector
-  ZPoint  y_vec;                    // Deduced from x and z vecs at the end.
+  ZPoint x_vec( z.GetBaseVec(1) ); // Forward vector
+  ZPoint z_vec( z.GetBaseVec(3) ); // Up vector
+  ZPoint y_vec;                    // Deduced from x and z vecs at the end.
   bool abs_cam_changed = false;
   bool look_at_p       = false;
 
