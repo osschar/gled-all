@@ -67,7 +67,12 @@ MTW_ClassView::MTW_ClassView(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
 { _init(); }
 
 MTW_ClassView::~MTW_ClassView()
-{}
+{
+  if(mWindow) {
+    mWindow->remove(*this);
+    delete mWindow;
+  }
+}
 
 /**************************************************************************/
 
