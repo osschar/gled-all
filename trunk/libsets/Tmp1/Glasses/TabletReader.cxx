@@ -5,9 +5,9 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "TabletReader.h"
+#include "TabletStroke.h"
 #include "TabletReader.c7"
 
-#include "TabletStroke.h"
 
 // TabletReader
 
@@ -23,16 +23,23 @@ void TabletReader::_init()
 {
   bScalePos = true;
   bInvertY = true;
-  mMaxX = 1; 
-  mPosScale = 0;
+  mScaledW = 1; 
+  mPosScale = mPrsScale = 0;
+  mOffX = mOffY = 0;
 
   mButtons = 0;
-  mPosX = mPosY = mTouchPosX = mTouchPosY = mPressure = 0;
+  bButton0 = bButton1 = bStylus1 = bStylus2 = false;
+  bInProximity = bInTouch = false;
+  mPenX = mPenY = mPenT = mPenP = 0;
 
+  bPrintButtEvs   = false;
+  bPrintButtState = false;
   bPrintPositions = false;
-  bPrintButtons   = true;
-  bPrintOther     = false;
+  bPrintOther     = true;
 
+  mMarkSize = 0.05;
+  mInTouchColor.rgba(1, 0, 0, 1);
+  mInProximityColor.rgba(0, 1, 0, 1);
   mStrokeColor.rgba(1, 0.1, 0.5, 1);
 }
 
@@ -62,109 +69,95 @@ const char* TabletReader::get_button_name(Int_t bb)
   return name;
 }
 
-bool TabletReader::get_report_button(Int_t bb)
+Bool_t TabletReader::flip_report_button(Int_t bb)
 {
-  bool val = get_button(bb);
-  if (bPrintButtons)
+  // Bool_t prev = get_button(bb);
+  mButtons ^= bb;
+  Bool_t val = get_button(bb);
+  if (bPrintButtEvs)
   {
     const char* name = get_button_name(bb);
     printf("Button %s %s\n", name, val ? "DOWN" : "UP");
+    // printf("Button %s %s, was %s\n", name, val ? "DOWN" : "UP", prev ? "DOWN" : "UP");
   }
   return val;
 }
 
+Bool_t TabletReader::check_pen_buttons(Int_t buttons_delta)
+{
+  // Check for changes in pen-related buttons.
+  // Returns true if there was a change.
+
+  Bool_t change = false;
+
+  if (buttons_delta & BB_Touch)
+  {
+    Bool_t down = flip_report_button(BB_Touch);
+    if (down)
+      mTouchTime.SetNow();
+    bInTouch = down;
+    change = true;
+  }
+  if (buttons_delta & BB_Stylus_1)
+  {
+    bStylus1 = flip_report_button(BB_Stylus_1);
+    change = true;
+  }
+  if (buttons_delta & BB_Stylus_2)
+  {
+    bStylus2 = flip_report_button(BB_Stylus_2);
+    change = true;
+  }
+
+  return change;
+}
+
+void TabletReader::clear_pen_buttons()
+{
+  mButtons &= ~BB_Pad_Buttons;
+  bInTouch = bStylus1 = bStylus2 = false;
+}
+
+Bool_t TabletReader::check_pad_buttons(Int_t buttons_delta)
+{
+  // Check for changes in pad-related buttons.
+  // Returns true if there was a change.
+
+  Bool_t change = false;
+
+  if (buttons_delta & BB_Button_0)
+  {
+    bool down = flip_report_button(BB_Button_0);
+    if (down && mStroke == 0)
+    {
+      TabletStroke *stroke = new TabletStroke("Stroke");
+      stroke->SetColorByRef(mStrokeColor);
+      mQueen->CheckIn(stroke);
+      GLensWriteHolder _wlck(this);
+      SetStroke(stroke);
+      Add(stroke);
+    }
+    bButton0 = down;
+    change = true;
+  }
+  if (buttons_delta & BB_Button_1)
+  {
+    bool down = flip_report_button(BB_Button_1);
+    if (down && mStroke != 0)
+    {
+      GLensWriteHolder _wlck(this);
+      SetStroke(0);
+    }
+    bButton1 = down;
+    change = true;
+  }
+
+  return change;
+}
+
 //==============================================================================
 
-#define WACOMTOOLTYPE_NONE      0x00
-#define WACOMTOOLTYPE_PEN       0x01
-#define WACOMTOOLTYPE_PENCIL    0x02
-#define WACOMTOOLTYPE_BRUSH     0x03
-#define WACOMTOOLTYPE_ERASER    0x04
-#define WACOMTOOLTYPE_AIRBRUSH  0x05
-#define WACOMTOOLTYPE_MOUSE     0x06
-#define WACOMTOOLTYPE_LENS      0x07
-#define WACOMTOOLTYPE_PAD       0x08
-#define WACOMTOOLTYPE_TOUCH	0x09
-#define WACOMTOOLTYPE_MAX       0x0A
-
-#define WACOMBUTTON_LEFT        0
-#define WACOMBUTTON_MIDDLE      1
-#define WACOMBUTTON_RIGHT       2
-#define WACOMBUTTON_EXTRA       3
-#define WACOMBUTTON_SIDE        4
-#define WACOMBUTTON_TOUCH       5
-#define WACOMBUTTON_STYLUS      6
-#define WACOMBUTTON_STYLUS2     7
-#define WACOMBUTTON_BT0         8
-#define WACOMBUTTON_BT1         9
-#define WACOMBUTTON_BT2         10
-#define WACOMBUTTON_BT3         11
-#define WACOMBUTTON_BT4         12
-#define WACOMBUTTON_BT5         13
-#define WACOMBUTTON_BT6         14
-#define WACOMBUTTON_BT7         15
-#define WACOMBUTTON_BT8         16
-#define WACOMBUTTON_BT9         17
-#define WACOMBUTTON_BT10        18
-#define WACOMBUTTON_BT11        19
-#define WACOMBUTTON_BT12        20
-#define WACOMBUTTON_BT13        21
-#define WACOMBUTTON_BT14        22
-#define WACOMBUTTON_BT15        23
-#define WACOMBUTTON_BT16        24
-#define WACOMBUTTON_BT17        25
-#define WACOMBUTTON_BT18        26
-#define WACOMBUTTON_BT19        27
-#define WACOMBUTTON_BT20        28
-#define WACOMBUTTON_BT21        29
-#define WACOMBUTTON_BT22        30
-#define WACOMBUTTON_BT23        31
-#define WACOMBUTTON_MAX         32
-
-#define WACOMFIELD_TOOLTYPE     0
-#define WACOMFIELD_SERIAL       1
-#define WACOMFIELD_PROXIMITY    2
-#define WACOMFIELD_BUTTONS      3
-#define WACOMFIELD_POSITION_X   4
-#define WACOMFIELD_POSITION_Y   5
-#define WACOMFIELD_ROTATION_Z   6
-#define WACOMFIELD_DISTANCE	7
-#define WACOMFIELD_PRESSURE	8
-#define WACOMFIELD_TILT_X       9
-#define WACOMFIELD_TILT_Y       10
-#define WACOMFIELD_ABSWHEEL     11
-#define WACOMFIELD_RELWHEEL     12
-#define WACOMFIELD_THROTTLE     13
-#define WACOMFIELD_MAX          14
-
-typedef struct
-{
-	unsigned int valid;        /* Bit mask of WACOMFIELD_xxx bits. */
-	int          values[WACOMFIELD_MAX];
-} WACOMSTATEMINI;
-
-#ifdef HAS_WAC_GLED
-extern "C"
-{
-  int  WacGledOpen(const char* pszFile, int verbose);
-  void WacGledFetchMinMax(WACOMSTATEMINI* mini_state_min, WACOMSTATEMINI* mini_state_max);
-  int  WacGledFetch(WACOMSTATEMINI* mini_state);
-  void WacGledClose();
-  const char* WacGledGetSerialField(unsigned int uField);
-  const char* WacGledGetSerialButton(unsigned int uButton);
-}
-#else
-namespace
-{
-  int  WacGledOpen(const char*, int) { return 1; }
-  void WacGledFetchMinMax(WACOMSTATEMINI* mini_state_min, WACOMSTATEMINI* mini_state_max) {}
-  int  WacGledFetch(WACOMSTATEMINI* mini_state) { return 1; }
-  void WacGledClose() {}
-  const char* WacGledGetSerialField(unsigned int uField)   { return "no-shit"; }
-  const char* WacGledGetSerialButton(unsigned int uButton) { return "no-shit"; }
-}
-#endif
-
+#include "Tmp1/TabletWacomDefines.h"
 
 void TabletReader::StartRead()
 {
@@ -188,12 +181,12 @@ void TabletReader::StartRead()
   WACOMSTATEMINI s_min, s_max, s;
 
   WacGledFetchMinMax(&s_min, &s_max);
-  printf("MIN x=%d y=%d\n", s_min.values[WACOMFIELD_POSITION_X], s_min.values[WACOMFIELD_POSITION_Y]);
-  printf("MAX x=%d y=%d\n", s_max.values[WACOMFIELD_POSITION_X], s_max.values[WACOMFIELD_POSITION_Y]);
+  printf("MIN x=%d y=%d p=%d\n", s_min.values[WACOMFIELD_POSITION_X], s_min.values[WACOMFIELD_POSITION_Y], s_min.values[WACOMFIELD_PRESSURE]);
+  printf("MAX x=%d y=%d p=%d\n", s_max.values[WACOMFIELD_POSITION_X], s_max.values[WACOMFIELD_POSITION_Y], s_max.values[WACOMFIELD_PRESSURE]);
 
   if (bScalePos)
   {
-    mPosScale = mMaxX / s_max.values[WACOMFIELD_POSITION_X];
+    mPosScale = mScaledW / s_max.values[WACOMFIELD_POSITION_X];
     mOffX = s_max.values[WACOMFIELD_POSITION_X] / 2;
     mOffY = s_max.values[WACOMFIELD_POSITION_Y] / 2;
   }
@@ -202,12 +195,13 @@ void TabletReader::StartRead()
     mPosScale = 1;
     mOffX = mOffY = 0;
   }
+  mPrsScale = 1.0f / s_max.values[WACOMFIELD_PRESSURE];
   Stamp(FID());
 
   mButtons = 0;
-  mPosX = mPosY = mTouchPosX = mTouchPosY = mPressure = 0;
-
-  TabletStroke *stroke = 0;
+  bButton0 = bButton1 = bStylus1 = bStylus2 = false;
+  bInProximity = bInTouch = false;
+  mPenX = mPenY = mPenT = mPenP = 0;
 
   while (!bReqStop)
   {
@@ -217,93 +211,100 @@ void TabletReader::StartRead()
       continue;
     }
 
-    if (s.valid & (1 << WACOMFIELD_BUTTONS))
-    {
-      Int_t delta = s.values[WACOMFIELD_BUTTONS] ^ mButtons;
-      mButtons    = s.values[WACOMFIELD_BUTTONS];
+    Bool_t stamp_p = false;
 
-      if (delta & BB_Touch)
+    Int_t  tool          = s.values[WACOMFIELD_TOOLTYPE];
+    Int_t  buttons       = s.values[WACOMFIELD_BUTTONS];
+    Int_t  buttons_delta = buttons ^ mButtons;
+    Bool_t buttons_valid = s.valid & (1 << WACOMFIELD_BUTTONS);
+    Bool_t proximity     = s.values[WACOMFIELD_PROXIMITY];
+
+    // printf("t=%d, bv=%d\n", tool, buttons_valid);
+
+    if (tool == T_None)
+    {
+      // This is tricky ... we get these events both for
+      // pad-button-up and for proximity-out.
+      // Then, there are also dummy events like this, usually in batches
+      // of four, sometimes on proximity-in.
+      // It took me a while to figure it out.
+      if (buttons_valid && check_pad_buttons(buttons_delta))
       {
-	get_report_button(BB_Touch);
+	stamp_p = true;
       }
-      if (delta & BB_Stylus_1)
+      else if ( ! proximity && bInProximity)
       {
-	get_report_button(BB_Stylus_1);
+	clear_pen_buttons();
+	bInProximity = false;
+	stamp_p = true;
       }
-      if (delta & BB_Stylus_2)
+    }
+    else if (tool == T_Pen || tool == T_Eraser)
+    {
+      stamp_p = true;
+
+      if ( ! bInProximity)
       {
-        get_report_button(BB_Stylus_2);
+	bInProximity = true;
       }
-      if (delta & BB_Button_0)
+
+      if (buttons_valid)
       {
-	bool down = get_report_button(BB_Button_0);
-	if (down && stroke == 0)
-	{
-	  stroke = new TabletStroke("Stroke");
-	  stroke->SetColorByRef(mStrokeColor);
-	  mQueen->CheckIn(stroke);
-	  GLensWriteHolder _wlck(this);
-	  Add(stroke);
-	}
+	check_pen_buttons(buttons_delta);
       }
-      if (delta & BB_Button_1)
+
+      mPenT = mTouchTime.TimeUntilNow().ToFloat();
+      mPenX = mPosScale * (s.values[WACOMFIELD_POSITION_X] - mOffX);
+      mPenY = mPosScale * (s.values[WACOMFIELD_POSITION_Y] - mOffY);
+      mPenP = mPrsScale * s.values[WACOMFIELD_PRESSURE];
+      if (bInvertY) mPenY = -mPenY;
+      if (bPrintPositions)
       {
-	bool down = get_report_button(BB_Button_1);
-	if (down && stroke)
-	{
-	  stroke = 0;
-	}
+	printf("PEN x=%d y=%d, p=%d, prox=%d\n",
+	       s.values[WACOMFIELD_POSITION_X],
+	       s.values[WACOMFIELD_POSITION_Y],
+	       s.values[WACOMFIELD_PRESSURE],
+	       s.values[WACOMFIELD_PROXIMITY]);
+      }
+      if (mStroke != 0 && get_button(BB_Touch))
+      {
+	GLensReadHolder _lck(*mStroke);
+	mStroke->AddPoint(mPenX, mPenY, mPenT, mPenP);
+	mStroke->StampReqTring(TabletStroke::FID());
+      }
+    }
+    else if (tool == T_Pad)
+    {
+      if (buttons_valid)
+      {
+	if (check_pad_buttons(buttons_delta))
+	  stamp_p = true;
+      }
+    }
+    else
+    {
+      if (bPrintOther)
+      {
+	printf("tool= %d, 0x%x: x=%d y=%d, p=%d, prox=%d\n",
+	       s.values[WACOMFIELD_TOOLTYPE], s.values[WACOMFIELD_TOOLTYPE],
+	       s.values[WACOMFIELD_POSITION_X],
+	       s.values[WACOMFIELD_POSITION_Y],
+	       s.values[WACOMFIELD_PRESSURE],
+	       s.values[WACOMFIELD_PROXIMITY]);
       }
     }
 
-    switch (s.values[WACOMFIELD_TOOLTYPE])
+    if (stamp_p)
     {
-      case WACOMTOOLTYPE_PEN:
+      if (bPrintButtState)
       {
-	Float_t x = mPosScale * (s.values[WACOMFIELD_POSITION_X] - mOffX);
-	Float_t y = mPosScale * (s.values[WACOMFIELD_POSITION_Y] - mOffY);
-	if (bInvertY) y = -y;
-	if (bPrintPositions)
-	{
-	  printf("PEN x=%d y=%d, p=%d, prox=%d\n",
-		 s.values[WACOMFIELD_POSITION_X],
-		 s.values[WACOMFIELD_POSITION_Y],
-		 s.values[WACOMFIELD_PRESSURE],
-		 s.values[WACOMFIELD_PROXIMITY]);
-	}
-	if (stroke && get_button(BB_Touch))
-	{
-	  GLensReadHolder _lck(stroke);
-	  stroke->AddPoint(x, y);
-	  stroke->StampReqTring(TabletStroke::FID());
-	}
-	break;
+	printf("S1:%d/%d, S2:%d/%d, B0:%d/%d, B1:%d/%d\n",
+	       bStylus1, get_button(BB_Stylus_1),
+	       bStylus2, get_button(BB_Stylus_2),
+	       bButton0, get_button(BB_Button_0),
+	       bButton1, get_button(BB_Button_1));
       }
-      case WACOMTOOLTYPE_ERASER:
-      {
-	if (bPrintPositions)
-	{
-	  printf("ERS x=%d y=%d, p=%d, prox=%d\n",
-		 s.values[WACOMFIELD_POSITION_X],
-		 s.values[WACOMFIELD_POSITION_Y],
-		 s.values[WACOMFIELD_PRESSURE],
-		 s.values[WACOMFIELD_PROXIMITY]);
-	}
-	break;
-      }
-      default:
-      {
-	if (bPrintOther)
-	{
-	  printf("tool= %d, 0x%x: x=%d y=%d, p=%d, prox=%d\n",
-		 s.values[WACOMFIELD_TOOLTYPE], s.values[WACOMFIELD_TOOLTYPE],
-		 s.values[WACOMFIELD_POSITION_X],
-		 s.values[WACOMFIELD_POSITION_Y],
-		 s.values[WACOMFIELD_PRESSURE],
-		 s.values[WACOMFIELD_PROXIMITY]);
-	}
-	break;
-      }
+      StampReqTring(FID());
     }
   }
 

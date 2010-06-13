@@ -34,12 +34,13 @@ TabletStroke_GL_Rnr::~TabletStroke_GL_Rnr()
 
 void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
 {
-  vector<HPointF>& P = mTabletStroke->mPoints;
+  vector<STabletPoint>& P = mTabletStroke->mPoints;
+  Int_t NP = P.size();
 
   rd->GL()->Color(mTabletStroke->mColor);
 
   glBegin(GL_POINTS);
-  for (Int_t i = 0; i < P.size(); ++i)
+  for (Int_t i = 0; i < NP; ++i)
     glVertex3fv(P[i]);
   glEnd();
 }
