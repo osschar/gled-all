@@ -55,7 +55,8 @@ public:
   bool  operator>=(const GTime& t) const;
   bool  operator==(const GTime& t) const;
 
-  Double_t ToDouble()  { return mSec + 1e-6*mMuSec; }
+  Double_t ToDouble()  { return mSec + 1e-6  * mMuSec; }
+  Float_t  ToFloat()   { return mSec + 1e-6f * mMuSec; }
   ULong_t  ToMiliSec() { return mSec*1000 + mMuSec/1000; }
   ULong_t  ToMiliSec(Long_t max) { return mSec >= max ? max*1000 : mSec*1000 + mMuSec/1000; }
 

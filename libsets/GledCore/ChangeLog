@@ -1,3 +1,8 @@
+2010-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.h:
+	Add conversion function Float_t ToFloat().
+
 2010-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/GledGUI.cxx:
