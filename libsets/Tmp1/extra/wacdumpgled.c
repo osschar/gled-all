@@ -110,7 +110,7 @@ static int InitTablet(WACOMTABLET hTablet, int verbose)
 
 static int FetchTablet(WACOMTABLET hTablet, WACOMSTATEMINI* mstate)
 {
-  static unsigned char uchBuf[256];
+  static unsigned char uchBuf[64];
   static int i, nLength, nErrors=0;
   static WACOMSTATE state = WACOMSTATE_INIT;
 

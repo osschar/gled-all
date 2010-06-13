@@ -1,3 +1,43 @@
+2010-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix button event processing, add handling of time and pressure and
+	improve feedback.
+
+	* Stones/STabletPoint.cxx:
+	* Stones/STabletPoint.h:
+	New stone -- sub-class of HTransF with time and pressure
+	information.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	Use vector of STabletPoint instead of HPointF for storing data.
+	Add nbin, edge-size arguments to MakeHisto().
+	Add Print() function.
+
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	Add handling of time and pressure along the stroke.
+	Add several data and functions members to better represent and
+	manage full state.
+
+	* Rnr/GL/TabletReader_GL_Rnr.cxx:
+	* Rnr/GL/TabletReader_GL_Rnr.h:
+	New renderer -- draw cross when pen is in proximity and a circle
+	sceled by pressure when in touch.
+
+	* Tmp1/TabletWacomDefines.h:
+	New file: Wacom defines moved from TabletReader.cxx.
+
+	* glass.list:
+	TabletReader has its own renderer.
+
+	* extra/wacdumpgled.c:
+	Put buffer size passed to WacomReadData() back to size used in the
+	original file. I was getting weired errors like 'not enough buffer
+	space' from WacomParseData().
+
+
 2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Small improvements in tablet stuff.
