@@ -9,6 +9,8 @@
 
 #include "Stones/HTrans.h"
 
+#include <vector>
+
 class STabletPoint : public HPointF
 {
 public:
@@ -20,5 +22,8 @@ public:
 
   ClassDefNV(STabletPoint, 1);
 }; // endclass STabletPoint
+
+typedef vector<STabletPoint>            vSTabletPoint_t;
+typedef vector<STabletPoint>::iterator  vSTabletPoint_i;
 
 #endif

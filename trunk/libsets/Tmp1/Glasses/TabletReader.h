@@ -15,6 +15,7 @@
 #include <Gled/GTime.h>
 
 class TabletStroke;
+class TabletStrokeList;
 
 class TabletReader : public ZNode
 {
@@ -39,48 +40,60 @@ public:
     T_Pad    = 8
   };
 
-  enum State_e
+  enum StrokeType_e
   {
-    S_None, S_Stroke
+    SS_None, SS_Absolute, SS_Relative, SS_Continuous
   };
 
 private:
   void _init();
 
 protected:
-  Bool_t    bScalePos;  //  X{GS} 7 Bool(-join=>1)
-  Bool_t    bInvertY;   //  X{GS} 7 Bool()
-  Float_t   mScaledW;   //  X{GS} 7 Value(-range=>[0, 20000, 1, 100])
-  Float_t   mPosScale;  //! X{G}  7 ValOut(-join=>1)
-  Float_t   mPrsScale;  //! X{G}  7 ValOut()
-  Int_t     mOffX;      //! X{G}  7 ValOut(-join=>1)
-  Int_t     mOffY;      //! X{G}  7 ValOut()
+  StrokeType_e  mStrokeType; //  X{GS} 7 PhonyEnum()
+  Bool_t        bScalePos;   //  X{GS} 7 Bool(-join=>1)
+  Bool_t        bInvertY;    //  X{GS} 7 Bool()
+  Float_t       mScaledW;    //  X{GS} 7 Value(-range=>[0, 20000, 1, 100])
+  Bool_t        bKeepStrokeInProximity; // X{GS} 7 Bool()
 
-  Int_t     mButtons;
+  Float_t       mPosScale;   //! X{G}  7 ValOut(-join=>1)
+  Float_t       mPrsScale;   //! X{G}  7 ValOut()
+  Int_t         mOffX;       //! X{G}  7 ValOut(-join=>1)
+  Int_t         mOffY;       //! X{G}  7 ValOut()
+
+  Int_t         mButtons;
   // The following four are for debug / light-show purposes.
-  Bool_t    bButton0;         //! X{G}  7 BoolOut(-join=>1)
-  Bool_t    bButton1;         //! X{G}  7 BoolOut()
-  Bool_t    bStylus1;         //! X{G}  7 BoolOut(-join=>1)
-  Bool_t    bStylus2;         //! X{G}  7 BoolOut()
-  Bool_t    bInProximity;     //! X{G}  7 BoolOut(-join=>1)
-  Bool_t    bInTouch;         //! X{G}  7 BoolOut()
-  Float_t   mPenX;
-  Float_t   mPenY;
-  Float_t   mPenT;
-  Float_t   mPenP;
+  Bool_t        bButton0;         //! X{G}  7 BoolOut(-join=>1)
+  Bool_t        bButton1;         //! X{G}  7 BoolOut()
+  Bool_t        bStylus1;         //! X{G}  7 BoolOut(-join=>1)
+  Bool_t        bStylus2;         //! X{G}  7 BoolOut()
+  Bool_t        bInProximity;     //! X{G}  7 BoolOut(-join=>1)
+  Bool_t        bInTouch;         //! X{G}  7 BoolOut()
+  Bool_t        bInStroke;        //! X{G}  7 BoolOut()
+  Float_t       mPenX;
+  Float_t       mPenY;
+  Float_t       mPenT;
+  Float_t       mPenP;
+  // Offsets for multi-touch strokes.
+  Float_t       mPenXOff;
+  Float_t       mPenYOff;
+  Float_t       mPenTOff;
 
-  GTime     mTouchTime; //!
+  GTime         mEventTime;        //!
+  GTime         mFirstStrokeStart; //!
+  GTime         mStrokeStart;      //!
 
-  Bool_t    bPrintButtEvs;    // X{GS} 7 Bool(-join=>1)
-  Bool_t    bPrintButtState;  // X{GS} 7 Bool()
-  Bool_t    bPrintPositions;  // X{GS} 7 Bool(-join=>1)
-  Bool_t    bPrintOther;      // X{GS} 7 Bool()
+  Bool_t        bPrintButtEvs;    // X{GS} 7 Bool(-join=>1)
+  Bool_t        bPrintButtState;  // X{GS} 7 Bool()
+  Bool_t        bPrintPositions;  // X{GS} 7 Bool(-join=>1)
+  Bool_t        bPrintOther;      // X{GS} 7 Bool()
 
-  Float_t             mMarkSize;         // X{GS}   7 Value(-range=>[0, 1, 1, 1000])
-  ZColor              mInTouchColor;     // X{PRGS} 7 ColorButt()
-  ZColor              mInProximityColor; // X{PRGS} 7 ColorButt()
-  ZColor              mStrokeColor; // X{PRGS} 7 ColorButt()
-  ZLink<TabletStroke> mStroke;      // X{GS} L{}
+  Float_t       mMarkSize;         // X{GS}   7 Value(-range=>[0, 1, 1, 1000])
+  ZColor        mInTouchColor;     // X{PRGS} 7 ColorButt()
+  ZColor        mInProximityColor; // X{PRGS} 7 ColorButt()
+
+  ZLink<TabletStrokeList> mStrokeList;  // X{GS} L{}
+  ZLink<TabletStroke>     mStroke;      // X{GS} L{}
+  ZColor                  mStrokeColor; // X{PRGS} 7 ColorButt()
 
   GMutex    mTabletMutex;  //!
   GThread  *mTabletThread; //!
@@ -94,6 +107,11 @@ protected:
   Bool_t      check_pen_buttons(Int_t buttons_delta);
   void        clear_pen_buttons();
   Bool_t      check_pad_buttons(Int_t buttons_delta);
+
+  void begin_stroke_list();
+  void end_stroke_list();
+  void begin_stroke();
+  void end_stroke();
 
 public:
   TabletReader(const Text_t* n="TabletReader", const Text_t* t=0);

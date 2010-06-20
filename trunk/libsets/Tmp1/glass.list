@@ -5,5 +5,6 @@ Weed		1	Glasses/Weed            .
 Plant		2       Glasses/Plant           .
 ProductionRule	3	Glasses/ProductionRule
 
-TabletReader	64	Glasses/TabletReader	.
-TabletStroke    65	Glasses/TabletStroke	.
+TabletReader     64     Glasses/TabletReader     .
+TabletStroke     65     Glasses/TabletStroke     .
+TabletStrokeList 66     Glasses/TabletStrokeList

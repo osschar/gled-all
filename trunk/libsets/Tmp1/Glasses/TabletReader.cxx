@@ -6,6 +6,7 @@
 
 #include "TabletReader.h"
 #include "TabletStroke.h"
+#include "TabletStrokeList.h"
 #include "TabletReader.c7"
 
 
@@ -21,15 +22,18 @@ ClassImp(TabletReader);
 
 void TabletReader::_init()
 {
+  mStrokeType = SS_Absolute;
   bScalePos = true;
   bInvertY = true;
-  mScaledW = 1; 
+  mScaledW = 1;
+  bKeepStrokeInProximity = true;
+
   mPosScale = mPrsScale = 0;
   mOffX = mOffY = 0;
 
   mButtons = 0;
   bButton0 = bButton1 = bStylus1 = bStylus2 = false;
-  bInProximity = bInTouch = false;
+  bInProximity = bInTouch = bInStroke = false;
   mPenX = mPenY = mPenT = mPenP = 0;
 
   bPrintButtEvs   = false;
@@ -93,8 +97,17 @@ Bool_t TabletReader::check_pen_buttons(Int_t buttons_delta)
   if (buttons_delta & BB_Touch)
   {
     Bool_t down = flip_report_button(BB_Touch);
-    if (down)
-      mTouchTime.SetNow();
+    if ( ! bInStroke || ! bKeepStrokeInProximity)
+    {
+      if (down)
+      {
+	begin_stroke();
+      }
+      else
+      {
+	end_stroke();
+      }
+    }
     bInTouch = down;
     change = true;
   }
@@ -114,6 +127,8 @@ Bool_t TabletReader::check_pen_buttons(Int_t buttons_delta)
 
 void TabletReader::clear_pen_buttons()
 {
+  if (bInStroke)
+    end_stroke();
   mButtons &= ~BB_Pad_Buttons;
   bInTouch = bStylus1 = bStylus2 = false;
 }
@@ -128,32 +143,104 @@ Bool_t TabletReader::check_pad_buttons(Int_t buttons_delta)
   if (buttons_delta & BB_Button_0)
   {
     bool down = flip_report_button(BB_Button_0);
-    if (down && mStroke == 0)
-    {
-      TabletStroke *stroke = new TabletStroke("Stroke");
-      stroke->SetColorByRef(mStrokeColor);
-      mQueen->CheckIn(stroke);
-      GLensWriteHolder _wlck(this);
-      SetStroke(stroke);
-      Add(stroke);
-    }
+    if (down)
+      begin_stroke_list();
     bButton0 = down;
     change = true;
   }
   if (buttons_delta & BB_Button_1)
   {
     bool down = flip_report_button(BB_Button_1);
-    if (down && mStroke != 0)
-    {
-      GLensWriteHolder _wlck(this);
-      SetStroke(0);
-    }
+    if (down)
+      end_stroke_list();
     bButton1 = down;
     change = true;
   }
 
   return change;
 }
+
+//==============================================================================
+
+void TabletReader::begin_stroke_list()
+{
+  static const Exc_t _eh("TabletReader::begin_stroke_list ");
+
+  GLensWriteHolder _wlck(this);
+
+  if (mStrokeList == 0)
+  {
+    mFirstStrokeStart = mStrokeStart = 0l;
+
+    TabletStrokeList *slist = new TabletStrokeList("StrokeList");
+    slist->SetColorByRef(mStrokeColor);
+    mQueen->CheckIn(slist);
+    SetStrokeList(slist);
+    Add(slist);
+  }
+  else
+  {
+    ISwarn(_eh + "Already active StrokeList.");
+  }
+}
+
+void TabletReader::end_stroke_list()
+{
+  static const Exc_t _eh("TabletReader::end_stroke_list ");
+
+  GLensWriteHolder _wlck(this);
+
+  if (mStrokeList != 0)
+  {
+    end_stroke();
+    SetStrokeList(0);
+  }
+  else
+  {
+    ISwarn(_eh + "No active StrokeList.");
+  }
+}
+
+void TabletReader::begin_stroke()
+{
+  GLensWriteHolder _wlck(this);
+
+  if (mFirstStrokeStart.IsZero())
+    mFirstStrokeStart = mEventTime;
+  mStrokeStart = mEventTime;
+
+  if (mStrokeList != 0 && mStroke == 0)
+  {
+    TabletStroke *stroke = new TabletStroke("Stroke");
+    stroke->SetColorByRef(mStrokeColor);
+    stroke->SetStartTime((mStrokeStart - mFirstStrokeStart).ToFloat());
+    mQueen->CheckIn(stroke);
+    SetStroke(stroke);
+    bInStroke = true;
+    {
+      GLensReadHolder _rlck(*mStroke);
+      mStroke->BeginStroke();
+    }
+    auto_ptr<ZMIR> m(mStrokeList->S_Add(*mStroke));
+    mSaturn->ShootMIR(m);
+  }
+}
+
+void TabletReader::end_stroke()
+{
+  GLensWriteHolder _wlck(this);
+
+  if (mStroke != 0)
+  {
+    {
+      GLensReadHolder _rlck(*mStroke);
+      mStroke->EndStroke(bKeepStrokeInProximity);
+    }
+    bInStroke = false;
+    SetStroke(0);
+  }
+}
+
 
 //==============================================================================
 
@@ -200,16 +287,20 @@ void TabletReader::StartRead()
 
   mButtons = 0;
   bButton0 = bButton1 = bStylus1 = bStylus2 = false;
-  bInProximity = bInTouch = false;
+  bInProximity = bInTouch = bInStroke = false;
   mPenX = mPenY = mPenT = mPenP = 0;
+
+  mPenXOff = mPenYOff = mPenTOff = 0;
 
   while (!bReqStop)
   {
     if (WacGledFetch(&s))
     {
-      printf("OGADUGA -- error fetching ... continuing.\n");
-      continue;
+      printf("OGADUGA -- error fetching ... stopping acquisition.\n");
+      break;
     }
+
+    mEventTime.SetNow();
 
     Bool_t stamp_p = false;
 
@@ -253,7 +344,7 @@ void TabletReader::StartRead()
 	check_pen_buttons(buttons_delta);
       }
 
-      mPenT = mTouchTime.TimeUntilNow().ToFloat();
+      mPenT = (mEventTime - mStrokeStart).ToFloat();
       mPenX = mPosScale * (s.values[WACOMFIELD_POSITION_X] - mOffX);
       mPenY = mPosScale * (s.values[WACOMFIELD_POSITION_Y] - mOffY);
       mPenP = mPrsScale * s.values[WACOMFIELD_PRESSURE];
@@ -266,7 +357,7 @@ void TabletReader::StartRead()
 	       s.values[WACOMFIELD_PRESSURE],
 	       s.values[WACOMFIELD_PROXIMITY]);
       }
-      if (mStroke != 0 && get_button(BB_Touch))
+      if (bInStroke)
       {
 	GLensReadHolder _lck(*mStroke);
 	mStroke->AddPoint(mPenX, mPenY, mPenT, mPenP);

@@ -11,6 +11,8 @@
 #include <Stones/ZColor.h>
 #include <Stones/STabletPoint.h>
 
+// class TSpline;
+
 class TabletStroke : public ZNode
 {
   MAC_RNR_FRIENDS(TabletStroke);
@@ -19,14 +21,31 @@ private:
   void _init();
 
 protected:
-  ZColor               mColor;    // X{PRGS} 7 ColorButt()
-  vector<STabletPoint> mPoints;
+  ZColor               mColor;     // X{PRGS} 7 ColorButt()
+  Float_t              mStartTime; // X{GS}   7 Value()
+  vSTabletPoint_t      mPoints;
+  vector<Int_t>        mBreaks;
+  Bool_t               bInStroke;
+
+  ZColor               mLineColor; // X{PRGS} 7 ColorButt()
+  // TSpline  *mSplineX; //!
+  // TSpline  *mSplineY; //!
+
+  void get_draw_range(Int_t& min, Int_t& max);
 
 public:
   TabletStroke(const Text_t* n="TabletStroke", const Text_t* t=0);
   virtual ~TabletStroke();
 
+  // Interface for TabletReader
+  void BeginStroke();
   void AddPoint(Float_t x, Float_t y, Float_t t, Float_t p);
+  void EndStroke(Bool_t clip_trailing_zero_pressure_points);
+
+  void MakeSplines(); // X{E} 7 MButt()
+
+  Float_t MinT() const { return mPoints.empty() ? 0 : mPoints.front().t; }
+  Float_t MaxT() const { return mPoints.empty() ? 0 : mPoints.back().t;  }
 
   void Print(); //! X{E} 7 MButt()
   void MakeHisto(Int_t nbins=128, Float_t x_edge=0.05, Float_t y_edge=0.05); //! X{E} 7 MCWButt()

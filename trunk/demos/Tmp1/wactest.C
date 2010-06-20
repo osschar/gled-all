@@ -27,9 +27,17 @@ void wactest()
   CREATE_ADD_GLASS(tr, TabletReader, arcs, "TabletReader", 0);
   tr->RotateLF(2, 3, TMath::PiOver2());
 
-  CREATE_ADD_GLASS(rect, Rect, tr, "Rect", 0);
-  rect->SetVLen(0.722);
-  rect->SetColor(1, 1, 1, 0.3);
+  CREATE_ADD_GLASS(recti, Rect, tr, "Inner Grid", 0);
+  recti->SetVLen(0.722);
+  recti->SetColor(1, 1, 1, 0.3);
+  recti->SetPos(0, 0, -0.001);
+  CREATE_ADD_GLASS(recto, Rect, tr, "Outer Grid", 0);
+  recto->SetUStrips(30);
+  recto->SetVStrips(30);
+  recto->SetULen(3);
+  recto->SetVLen(3*0.722);
+  recto->SetColor(1, 1, 1, 0.1);
+  recto->SetPos(0, 0, -0.001);
 
   // Spawn GUI
   Gled::Macro("eye.C");
