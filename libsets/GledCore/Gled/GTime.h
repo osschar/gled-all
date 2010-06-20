@@ -30,6 +30,9 @@ public:
   void  SetNow();
   GTime TimeUntilNow();
 
+  Bool_t IsZero()    const { return mSec == 0 && mMuSec == 0; }
+  Bool_t IsNonZero() const { return mSec != 0 || mMuSec != 0; }
+
   GTime& operator=(Long_t mus);
   GTime& operator=(ULong_t mus);
   GTime& operator=(Double_t sec);
