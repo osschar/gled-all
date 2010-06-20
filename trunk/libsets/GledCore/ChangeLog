@@ -1,3 +1,8 @@
+2010-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.h:
+	Add bool functions Is/IsNotZero().
+
 2010-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.h:
