@@ -1,3 +1,32 @@
+2010-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Generalization of stroke handling.
+
+	* Glasses/TabletStrokeList.cxx:
+	* Glasses/TabletStrokeList.h:
+	New glass -- holds / operates on a collection of strokes.
+
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	Use to TabletStrokeList.
+	Generalize begin/end stroke/stroke-list.
+	Add option to continue stroke when only in proximity.
+	Better handling of time offsets.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	Add functions Begin/EndStroke().
+	Add member Float_t mStartTime.
+
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	Render points with zero pressure with a fainter color.
+
+	* Stones/STabletPoint.h:
+	Add typdef for vector of points.
+
+	* glass.list:
+	Register TabletStrokeList.
+
 2010-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix button event processing, add handling of time and pressure and

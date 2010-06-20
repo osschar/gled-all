@@ -7,6 +7,8 @@
 #include "TabletStroke_GL_Rnr.h"
 #include <Rnr/GL/GLRnrDriver.h>
 
+// #include "TSpline.h"
+
 #include <GL/glew.h>
 
 //==============================================================================
@@ -34,13 +36,43 @@ TabletStroke_GL_Rnr::~TabletStroke_GL_Rnr()
 
 void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
 {
-  vector<STabletPoint>& P = mTabletStroke->mPoints;
-  Int_t NP = P.size();
+  TabletStroke    &S = * mTabletStroke;
+  vSTabletPoint_t &P = S.mPoints;
 
-  rd->GL()->Color(mTabletStroke->mColor);
+  Int_t m, M;
+  S.get_draw_range(m, M);
 
+  rd->GL()->Color(S.mColor);
   glBegin(GL_POINTS);
-  for (Int_t i = 0; i < NP; ++i)
-    glVertex3fv(P[i]);
+  for (Int_t i = m; i <= M; ++i)
+  {
+    if (P[i].p != 0)
+      glVertex3fv(P[i]);
+  }
   glEnd();
+
+  rd->GL()->Color(0.25f*S.mColor);
+  glBegin(GL_POINTS);
+  for (Int_t i = m; i <= M; ++i)
+  {
+    if (P[i].p == 0)
+      glVertex3fv(P[i]);
+  }
+  glEnd();
+
+  // TSpline *sx = S.mSplineX;
+  // TSpline *sy = S.mSplineY;
+  // if (sx && sy)
+  // {
+  //   Float_t tm = S.MinT(), tM = S.MaxT();
+  //   Float_t ts = (tM - tm) / 1000;
+  //   Float_t t  = 0;
+  //   rd->GL()->Color(S.mLineColor);
+  //   glBegin(GL_LINE_STRIP);
+  //   for (Int_t i = 0; i <= 1000; ++i, t+=ts)
+  //   {
+  //     glVertex2d(sx->Eval(t), sy->Eval(t));
+  //   }
+  //   glEnd();
+  // }
 }

@@ -1,3 +1,8 @@
+2010-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* wactest.C:
+	Add extended grid needed for relative / continuous stroke modes.
+
 2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* wactest.C:
