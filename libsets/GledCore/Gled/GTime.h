@@ -65,7 +65,9 @@ public:
 
   void Sleep();
 
-  static void SleepMiliSec(UInt_t ms);
+  static UInt_t SleepMiliSec(UInt_t ms,
+			     Bool_t break_on_signal=true,
+			     Bool_t warn_on_signal=true);
 
 #include "GTime.h7"
   ClassDefNV(GTime, 1);

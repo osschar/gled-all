@@ -113,6 +113,7 @@ protected:
   // Saturn services ... preliminary
   ZHistoManager*	pZHistoManager;
 
+  static int start_threads(Saturn *saturn);
   int  start_server();
   int  stop_server();
   int  start_shooters();

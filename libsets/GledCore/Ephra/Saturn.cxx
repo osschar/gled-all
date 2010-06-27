@@ -65,8 +65,9 @@ namespace
 
   GMutex	_detached_mir_mgmnt_lock;
 
-  void sh_SaturnFdSucker(int sig) {
-    //ISmess(GForm("Saturn/sh_SaturnFdSucker called with signal %d", sig));
+  void sh_SaturnFdSucker(GSignal* sig)
+  {
+    ISmess(GForm("Saturn/sh_SaturnFdSucker called with signal %d", sig->fSignal));
   }
 }
 
@@ -79,18 +80,10 @@ void* Saturn::tl_SaturnFdSucker(Saturn *s)
   GThread::SetCancelType(GThread::CT_Deferred);
 
   { // Signals init;
-    // return from select on INT to allow additions of new socket fd's
-    sigset_t set;
+    // return from select on USR1 to allow additions of new socket fd's
 
-    sigemptyset(&set);
-    sigaddset(&set, GThread::SigINT);
-    pthread_sigmask(SIG_UNBLOCK, &set, 0);
-
-    struct sigaction sac;
-    sac.sa_handler = sh_SaturnFdSucker;
-    sigemptyset(&sac.sa_mask);
-    sac.sa_flags = 0;
-    sigaction(SIGINT,  &sac, 0);
+    GThread::UnblockSignal(GThread::SigUSR1);
+    GThread::SetSignalHandler(GThread::SigUSR1, sh_SaturnFdSucker);
   }
 
   _server_startup_cond.Lock();
@@ -153,6 +146,8 @@ void* Saturn::tl_MIR_DetachedExecutor(Saturn* sat)
     GMutexHolder mh(_detached_mir_mgmnt_lock);
     sat->mDetachedThreadsHash[mir->fAlpha].push_back(self);
   }
+
+  self->SetTerminalPolicy(GThread::TP_ThreadExit);
 
   try
   {
@@ -397,9 +392,16 @@ void Saturn::Create(SaturnInfo* si)
 
   GThread::OwnerChanger _chown(mSaturnInfo);
 
-  if (start_server() || start_shooters())
   {
-    exit(1);
+    GThread thread_starter("saturn-thread_starter",
+			   (GThread_foo) start_threads, this, false);
+    void *result;
+    thread_starter.Spawn();
+    thread_starter.Join(&result);
+    if (result != 0)
+    {
+      exit(1);
+    }
   }
 
   try
@@ -533,9 +535,16 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
 
   GThread::OwnerChanger _chown(mSaturnInfo);
 
-  if (start_server() || start_shooters())
   {
-    exit(1);
+    GThread thread_starter("saturn-thread_starter",
+			   (GThread_foo) start_threads, this, false);
+    void *result;
+    thread_starter.Spawn();
+    thread_starter.Join(&result);
+    if (result != 0)
+    {
+      exit(1);
+    }
   }
 
   // Issue requests for mandatory queens.
@@ -1086,7 +1095,7 @@ void Saturn::finalize_moon_connection(SaturnInfo* si)
   mMoonLock.Lock();
   mSelector.Lock();
   mSelector.fRead.Add(si->hSocket);
-  mServerThread->Kill(GThread::SigINT);
+  mServerThread->Kill(GThread::SigUSR1);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
 			(si->hSocket, SocketInfo(SocketInfo::OS_Moon, si)));
@@ -1113,7 +1122,7 @@ void Saturn::finalize_eye_connection(EyeInfo* ei)
   mEyeLock.Lock();
   mSelector.Lock();
   mSelector.fRead.Add(ei->hSocket);
-  mServerThread->Kill(GThread::SigINT);
+  mServerThread->Kill(GThread::SigUSR1);
   mSelector.Unlock();
   mSock2InfoHash.insert(pair<TSocket*, SocketInfo>
 			(ei->hSocket, SocketInfo(SocketInfo::OS_Eye, ei)));
@@ -1998,6 +2007,23 @@ void Saturn::DeliverTextMessage(EyeInfo* eye, TextMessage& tm)
 // Protected & less pleasant
 /**************************************************************************/
 
+int Saturn::start_threads(Saturn* saturn)
+{
+  // A thread function to spawn off server thread and shooter threads.
+  // Needed to ensure that most signals are blocked.
+  // Termination policy for these threads is set to system-exit.
+  // This is called from Create() or Connect() which in turn is usually called
+  // from a CINT script -- and that thread has several system signals
+  // unblocked.
+
+  GThread::BlockAllSignals();
+  GThread::UnblockCpuExceptionSignals(true);
+
+  GThread::Self()->SetTerminalPolicy(GThread::TP_SysExit);
+
+  return saturn->start_server() || saturn->start_shooters();
+}
+
 int Saturn::start_server()
 {
   static const Exc_t _eh("Saturn::start_server ");
@@ -2211,7 +2237,7 @@ void Saturn::wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p)
   mMoonLock.Lock();
 
   mSelector.Lock();
-  if(mServerThread) mServerThread->Kill(GThread::SigINT);
+  if(mServerThread) mServerThread->Kill(GThread::SigUSR1);
   mSelector.fRead.Remove(moon->hSocket);
   mSelector.Unlock();
 
@@ -2257,7 +2283,7 @@ void Saturn::wipe_eye(EyeInfo* eye, bool notify_sunqueen_p)
 
   mEyeLock.Lock();
 
-  if(mServerThread) mServerThread->Kill(GThread::SigINT);
+  if(mServerThread) mServerThread->Kill(GThread::SigUSR1);
   mSelector.Lock();
   mSelector.fRead.Remove(eye->hSocket);
   mSelector.Unlock();

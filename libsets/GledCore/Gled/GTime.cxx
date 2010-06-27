@@ -182,12 +182,35 @@ void GTime::Sleep()
 
 /**************************************************************************/
 
-void GTime::SleepMiliSec(UInt_t ms)
+UInt_t GTime::SleepMiliSec(UInt_t ms,
+			   Bool_t break_on_signal,
+			   Bool_t warn_on_signal)
 {
   struct timespec req, rem;
   req.tv_sec  = ms / 1000;
   req.tv_nsec = (ms % 1000) * 1000000;
-  if(nanosleep(&req, &rem))
-    perror("GTime::SleepMiliSec");
-  // !!! Should sleep on? Need flag.
+
+  while (true)
+  {
+    if (nanosleep(&req, &rem))
+    {
+      if (warn_on_signal)
+      {
+	perror("GTime::SleepMiliSec");
+      }
+      if (break_on_signal)
+      {
+	UInt_t remms = 1000*rem.tv_sec + rem.tv_nsec / 1000000;
+	return remms;
+      }
+      else
+      {
+	req = rem;
+      }
+    }
+    else
+    {
+      return 0;
+    }
+  }
 }

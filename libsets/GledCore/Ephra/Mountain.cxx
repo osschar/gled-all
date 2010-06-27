@@ -25,12 +25,15 @@ class MountainThread : public GThread
 public:
   MountainThread(const Text_t* name, GThread_foo foo, void* arg=0, bool detached=false) :
     GThread(name, foo, arg, detached),
-    fTerminalSignalId(0)
+    fTerminalSignalId(0),
+    fInSigLock(false)
   {}
   virtual ~MountainThread() {}
 
   ucontext_t   fTerminalSignalRetourContext;
   int          fTerminalSignalId;
+
+  bool         fInSigLock;
 };
 
 ClassImp(Mountain);
@@ -63,16 +66,34 @@ void Mountain::DancerCooler(DancerInfo* di)
 
 namespace
 {
-  void sh_DancerSuspender(int sig)
+  // For signal-safe eventors -- signal handlers for USR1 and USR2.
+  // Now we wait USR1 signal handler until USR2 arrives.
+  // Could also be done with two contexts and a condition variable.
+
+  void sh_DancerSuspender(GSignal*)
   {
-    int recsig;
-    sigset_t set;
-    sigemptyset(&set);
-    sigaddset(&set, GThread::SigUSR2);
-    sigwait(&set, &recsig);
+    MountainThread* mt = (MountainThread*) GThread::Self();
+
+    if (mt->fInSigLock)
+      return;
+
+    mt->fInSigLock = true;
+    do
+    {
+      GTime::SleepMiliSec(1000000ul, true, false);
+    } while (mt->fInSigLock);
   }
 
-  void sh_TerminalSigHandler(int sid, siginfo_t* sinfo, void* sfoo)
+  void sh_DancerUnsuspender(GSignal*)
+  {
+    MountainThread* mt = (MountainThread*) GThread::Self();
+    mt->fInSigLock = false;
+  }
+
+
+  // Handler for terminal signals -- if special handling is requested
+  // by the Eventor.
+  void sh_TerminalSigHandler(GSignal* sig)
   {
     // ucontext_t *sctx = (ucontext_t*) sfoo;
 
@@ -82,18 +103,18 @@ namespace
     fprintf(stderr, "thread id=%d name='%s' state=%s.\n", mt->GetIndex(), mt->GetName(),
 	    GThread::RunningStateName(mt->GetRunningState()));
 
-    switch (sid)
+    switch (sig->fSignal)
     {
-      case SIGILL:
+      case GThread::SigILL:
 	fprintf(stderr, "Illegal instruction.\n");
 	break;
-      case SIGBUS:
+      case GThread::SigBUS:
 	fprintf(stderr, "Bus error.\n");
 	break;
-      case SIGSEGV:
+      case GThread::SigSEGV:
 	fprintf(stderr, "Segmentation violation.\n");
 	break;
-      case SIGFPE:
+      case GThread::SigFPE:
 	fprintf(stderr, "Floating-point exception.\n");
 	// The bits are not set ... seems trap setting overrides it.
 	// {
@@ -104,17 +125,18 @@ namespace
 	break;
 
       default:
-	fprintf(stderr, "Unexpected signal %d\n", sid);
+	fprintf(stderr, "Unexpected signal %d\n", sig->fSignal);
 	break;
     }
 
     gSystem->StackTrace();
 
-    mt->fTerminalSignalId = sid;
+    mt->fTerminalSignalId = sig->fSignal;
 
     if (setcontext(&mt->fTerminalSignalRetourContext))
     {
-      perror("setcontext failed in signal handler ... not good:");
+      perror("Mountain -- setcontext failed in signal handler (will exit):");
+      gSystem->Exit(sig->fSignal);
     }
   }
 }
@@ -130,23 +152,13 @@ void* Mountain::DancerBeat(DancerInfo* di)
   //GThread::SetCancelType(GThread::CT_Deferred);
 
   { // Signal handle init; only used for SignalSafe threads
-    sigset_t set;
-
-    sigemptyset(&set);
-    sigaddset(&set, GThread::SigUSR1);
-    pthread_sigmask(SIG_UNBLOCK, &set, 0);
-
-    sigemptyset(&set);
-    sigaddset(&set, GThread::SigUSR2);
-    pthread_sigmask(SIG_BLOCK, &set, 0);
-
-    struct sigaction sac;
-
-    sac.sa_handler = sh_DancerSuspender;
-    sigemptyset(&sac.sa_mask);
-    sac.sa_flags = 0;
-    sigaction(SIGUSR1, &sac, 0);
+    GThread::SetSignalHandler(GThread::SigUSR1, sh_DancerSuspender);
+    GThread::SetSignalHandler(GThread::SigUSR2, sh_DancerUnsuspender);
+    GThread::UnblockSignal(GThread::SigUSR1);
+    GThread::UnblockSignal(GThread::SigUSR2);
   }
+
+  GThread::Self()->SetTerminalPolicy(GThread::TP_ThreadExit);
 
   Operator::Arg* op_arg;
   {
@@ -167,45 +179,24 @@ void* Mountain::DancerBeat(DancerInfo* di)
   }
 
   {
-    sigset_t set;
-    sigemptyset(&set);
-
-    struct sigaction sac;
-
     if (di->fEventor->GetTrapILL())
     {
-      sac.sa_sigaction = sh_TerminalSigHandler;
-      sigemptyset(&sac.sa_mask);
-      sac.sa_flags = 0;
-      sigaction(SIGILL, &sac, 0);
-      sigaddset(&set, SIGILL);
+      GThread::SetSignalHandler(GThread::SigILL, sh_TerminalSigHandler);
     }
 
     if (di->fEventor->GetTrapBUS())
     {
-      sac.sa_sigaction = sh_TerminalSigHandler;
-      sigemptyset(&sac.sa_mask);
-      sac.sa_flags = 0;
-      sigaction(SIGBUS, &sac, 0);
-      sigaddset(&set, SIGBUS);
+      GThread::SetSignalHandler(GThread::SigBUS, sh_TerminalSigHandler);
     }
 
     if (di->fEventor->GetTrapSEGV())
     {
-      sac.sa_sigaction = sh_TerminalSigHandler;
-      sigemptyset(&sac.sa_mask);
-      sac.sa_flags = 0;
-      sigaction(SIGSEGV, &sac, 0);
-      sigaddset(&set, SIGSEGV);
+      GThread::SetSignalHandler(GThread::SigSEGV, sh_TerminalSigHandler);
     }
 
     if (di->fEventor->GetTrapFPE())
     {
-      sac.sa_sigaction = sh_TerminalSigHandler;
-      sigemptyset(&sac.sa_mask);
-      sac.sa_flags = 0;
-      sigaction(SIGFPE, &sac, 0);
-      sigaddset(&set, SIGFPE);
+      GThread::SetSignalHandler(GThread::SigFPE, sh_TerminalSigHandler);
 
       // This is platform dependant.
 #ifdef __APPLE__
@@ -225,9 +216,6 @@ void* Mountain::DancerBeat(DancerInfo* di)
 #endif
     }
 
-    pthread_sigmask(SIG_UNBLOCK, &set, 0);
-
-
     MountainThread *mt = (MountainThread*) di->fThread;
 
     if (getcontext(&mt->fTerminalSignalRetourContext))
@@ -241,8 +229,10 @@ void* Mountain::DancerBeat(DancerInfo* di)
       printf("Strange strange -- who was dead now walks again. And the number of his cross was %d.\n", mt->fTerminalSignalId);
       int foo = fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
       printf(" FE: DIVBYZERO=%d, INVALID=%d, OVERFLOW=%d\n", foo & FE_DIVBYZERO, foo & FE_INVALID, foo & FE_OVERFLOW);
+
       di->fEventor->OnTerminalSignal(op_arg, mt->fTerminalSignalId);
-      return err_ret;
+
+      mt->fTerminalSignalId = 0;
     }
   }
 
@@ -594,7 +584,7 @@ Int_t Mountain::SuspendAll()
   // Tries to suspend all operators ...
   // fails miserably if some threads have longer periods ... should timeout!!!!
   //
-  // Also ... this is not at all appropriate.
+  // Also ... this is not entirely appropriate.
   // Should have per-queen list of threads ... ie dancers.
   // For each of them should also know in what way it affects other structures.
 

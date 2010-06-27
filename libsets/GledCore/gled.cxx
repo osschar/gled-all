@@ -78,5 +78,5 @@ int main(int argc, char **argv)
 
   GThread::FiniMain();
 
-  exit(0);
+  exit(Gled::GetExitStatus());
 }

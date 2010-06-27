@@ -71,6 +71,8 @@ protected:
   GThread*      mRintThread;     // X{g}
   GThread*      mExitThread;
 
+  static Int_t  sExitStatus;
+
 public:
   Gled();
 
@@ -104,7 +106,7 @@ public:
   void AllowMoonConnections();
 
   virtual void  Run() {}
-          void  Exit();
+          void  Exit(Int_t status=0);
   static  void* Exit_tl(void*);
   virtual void  ExitVirtual();
 
@@ -145,11 +147,10 @@ public:
   virtual void UnlockFltk() {}
 
   static Gled* theOne;
+  static Int_t GetExitStatus();
 
 #include "Gled.h7"
   ClassDef(Gled, 0);
 }; // endclass Gled
-
-extern Gled* gGled;
 
 #endif
