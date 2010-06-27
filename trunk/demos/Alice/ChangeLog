@@ -1,3 +1,8 @@
+2010-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* fpe_test.C:
+	Enable stack-trace by default.
+
 2009-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* fpe_test.C:
@@ -41,7 +46,7 @@
 	* common_foos.C:
 	g_nest was not initialized (create instead of assign was called);
 	Lamp::Scale was renamed to Lamp::LampScale.
-	
+
 2005-10-18  Alja Mrak-Tadel  <alja.mrak@ijs.si>
 
 	* AliAnimator.C:
@@ -86,7 +91,7 @@
 	* AliLoader.C:
 	Reintroduced invocation of LoadVSD() on start-up when directory
 	name is given as an argument.
-	
+
 2005-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliLoader.C:
@@ -109,7 +114,7 @@
 
 	* common_foos.C:
 	Added file_grep() function for locating of shared data files.
-	
+
 	* AliLoader.C:
 	* alice_geom.C:
 	* alice_simple.C:
@@ -137,7 +142,7 @@
 
 	* AliLoader.C:
 	Custom gui: added GenInfo selection.
-	
+
 	* common_foos.C:
 	Moved XZ plane to second position.
 

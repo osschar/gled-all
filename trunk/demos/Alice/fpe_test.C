@@ -27,8 +27,8 @@
     g_queen->CheckIn(o); e->Add(o);
   }
 
-  // Control over full stack-trace dump (disabled).
-  gEnv->SetValue("Root.Stacktrace", 0);
+  // Control over full stack-trace dump. To disable:
+  // gEnv->SetValue("Root.Stacktrace", 0);
 
   g_scene = pm_scene;
   Gled::LoadMacro("eye.C");
