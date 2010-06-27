@@ -41,7 +41,9 @@ typedef hash_map<Eventor*, DancerInfo*>			hEv2DI_t;
 typedef hash_map<Eventor*, DancerInfo*>::iterator	hEv2DI_i;
 #endif
 
-class Mountain {
+
+class Mountain
+{
 private:
   GMutex		hStageLock;
   GCondition		hSuspendCond;

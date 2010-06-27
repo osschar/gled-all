@@ -13,14 +13,27 @@
 
 // This wrong ... need internal state class.
 #ifdef __CINT__
-typedef unsigned long int pthread_t;
-typedef unsigned int pthread_key_t;
+  typedef unsigned long int pthread_t;
+  typedef unsigned int      pthread_key_t;
+  class GSignal;
 #else
-#include <pthread.h>
+  #include <pthread.h>
+  #include <signal.h>
+  class GSignal
+  {
+  public:
+    GSignal(int sid, siginfo_t* sinfo, void* sctx) :
+      fSignal(sid), fSigInfo(sinfo), fContext(sctx) {}
+
+    int         fSignal;
+    siginfo_t  *fSigInfo;
+    void       *fContext;
+  };
 #endif
 
 typedef void*   (*GThread_foo)(void*);
 typedef void (*GThread_cu_foo)(void*);
+typedef void (*GThread_sh_foo)(GSignal*);
 
 class SaturnInfo;
 class ZMirEmittingEntity;
@@ -45,13 +58,15 @@ public:
                 SigSTOP  = 19, SigTSTP  = 20, SigTTIN  = 21, SigTTOU  = 22,
                 SigURG   = 23, SigXCPU  = 24, SigXFSZ  = 25, SigVTALRM= 26,
                 SigPROF  = 27, SigWINCH = 28, SigPOLL  = 29, SigIO    = 29,
-		SigPWR   = 30, SigUNUSED= 31
+		SigPWR   = 30, SigUNUSED= 31, SigSYS   = 31,
+		SigMAX   = 32, SigMAXRT = 65
   }; // from signum.h
   enum RState { RS_Incubating, RS_Spawning,
                 RS_Running,
                 RS_Terminating, RS_Finished,
                 RS_ErrorSpawning
   };
+  enum TerminalPolicy { TP_ThreadExit, TP_GledExit, TP_SysExit };
 
   class CancelDisabler
   {
@@ -84,6 +99,8 @@ private:
   typedef list<GThread*>           lpGThread_t;
   typedef list<GThread*>::iterator lpGThread_i;
 
+  typedef vector<GThread_sh_foo>   vSigHandlers_t;
+
   static GThread      *sMainThread;
   static bool          sMainInitDone;
   static int           sThreadCount;
@@ -107,6 +124,13 @@ private:
   bool		 bDetached;	// X{g}
   int            mNice;         // X{gs}
   int            mStackSize;    // X{gs}
+
+  // Signal handlers
+  GThread_sh_foo  mSigHandlerDefault;
+  vSigHandlers_t  mSigHandlerVector;
+  void           *mTerminalContext;
+  int             mTerminalSignal;
+  TerminalPolicy  mTerminalPolicy;
 
   // TSD-like members
   ZMirEmittingEntity   *mOwner;
@@ -133,6 +157,9 @@ public:
   int	Cancel();
   int   Detach();
 
+  TerminalPolicy GetTerminalPolicy() const { return mTerminalPolicy; }
+  void           SetTerminalPolicy(TerminalPolicy tp) { mTerminalPolicy = tp; }
+
   static CState SetCancelState(CState s);
   static CState CancelOn()  { return SetCancelState(CS_Enable);  }
   static CState CancelOff() { return SetCancelState(CS_Disable); }
@@ -146,14 +173,28 @@ public:
   static ZMirEmittingEntity* Owner();
   static ZMIR*               MIR();
 
-  static const char* RunningStateName(RState state);
-  static void        ListThreads();
+  static void BlockAllSignals();
+  static void UnblockCpuExceptionSignals(bool unblock_fpe);
+  static void BlockSignal(Signal sig);
+  static void UnblockSignal(Signal sig);
+
+  static GThread_sh_foo SetDefaultSignalHandler(GThread_sh_foo foo);
+  static GThread_sh_foo SetSignalHandler(Signal sig, GThread_sh_foo foo);
+
+  static void TheSignalHandler(GSignal* sig);
+  static void ToRootsSignalHandler(GSignal* sig);
+
+  static void ListThreads();
+  static void ListSignalState();
 
   static GThread* InitMain();
   static void     FiniMain();
 
   static int      GetMinStackSize();
   static void     SetMinStackSize(int ss);
+
+  static const char* RunningStateName(RState state);
+  static const char* SignalName(Signal sig);
 
 #include "GThread.h7"
   ClassDef(GThread, 0);

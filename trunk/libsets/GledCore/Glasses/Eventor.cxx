@@ -264,11 +264,11 @@ void Eventor::Start()
 
   if(bRunning) {
     ISwarn(_eh + "already running.");
-    //return;
+    return;
   }
   if(bSuspended) {
     ISwarn(_eh + "paused; use Resume to continue.");
-    //return;
+    return;
   }
   mSaturn->GetChaItOss()->Start(this);
 }
@@ -281,7 +281,7 @@ void Eventor::Stop()
 
   if(!bRunning) {
     ISwarn(_eh + "not running.");
-    //return;
+    return;
   }
 
   mSaturn->GetChaItOss()->Stop(this);
@@ -295,12 +295,12 @@ void Eventor::Suspend()
 
   if(!bRunning) {
     ISwarn(_eh + "not running.");
-    //return;
+    return;
   }
 
   if(bSuspended) {
     ISwarn(_eh + "already suspended.");
-    //return;
+    return;
   }
 
   mSaturn->GetChaItOss()->Suspend(this);
@@ -314,12 +314,12 @@ void Eventor::Resume()
 
   if(!bRunning) {
     ISwarn(_eh + "not running.");
-    //return;
+    return;
   }
 
   if(!bSuspended) {
     ISwarn(_eh + "not paused.");
-    //return;
+    return;
   }
 
   mSaturn->GetChaItOss()->Resume(this);
@@ -342,7 +342,7 @@ void Eventor::Cancel()
 
   if(!bRunning) {
     ISwarn(_eh + "not running.");
-    //return;
+    return;
   }
 
   mSaturn->GetChaItOss()->Cancel(this);

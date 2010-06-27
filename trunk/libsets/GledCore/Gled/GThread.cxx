@@ -5,12 +5,22 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "GThread.h"
+#include <Gled/Gled.h>
 #include <Glasses/ZMirEmittingEntity.h>
+
+#include "TSystem.h"
+#include "TUnixSystem.h"
 
 #include <pthread.h>
 #include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
+
+#ifdef __APPLE__
+#define _XOPEN_SOURCE
+#endif
+#include <ucontext.h>
+#include <fenv.h> // requires _GNU_SOURCE to be defined for trap control
 
 //______________________________________________________________________________
 //
@@ -30,7 +40,8 @@ int                      GThread::sMinStackSize = 0;
 
 pthread_key_t GThread::TSD_Self;
 
-/**************************************************************************/
+//==============================================================================
+
 GThread::GThread(const Text_t* name) :
   mRunningState (RS_Running),
   mIndex        (-1),
@@ -43,6 +54,10 @@ GThread::GThread(const Text_t* name) :
   bDetached (false),
   mNice     (0),
   mStackSize(0),
+
+  mSigHandlerDefault(0), mSigHandlerVector(SigMAX),
+  mTerminalContext(new ucontext_t), mTerminalSignal(0),
+  mTerminalPolicy(TP_ThreadExit),
 
   mOwner(0), mMIR(0)
 {
@@ -70,12 +85,17 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg, bool detached) 
   mNice     (0),
   mStackSize(sMinStackSize),
 
+  mSigHandlerDefault(0), mSigHandlerVector(SigMAX),
+  mTerminalContext(new ucontext_t), mTerminalSignal(0),
+  mTerminalPolicy(Self()->GetTerminalPolicy()),
+
   mOwner(Owner()), mMIR(0)
 {
   // Normal constructor.
   // Thread is put into 'Incubating' state, registered into the thread list
   // and assigned an internal thread-index.
   // The owner of the thread is set be the same as the owner of the calling thread.
+  // Termination policy is also copied.
 
   static const Exc_t _eh("GThread::GThread ");
 
@@ -96,9 +116,11 @@ GThread::~GThread()
   sContainerLock.Lock();
   sThreadList.erase(mThreadListIt);
   sContainerLock.Unlock();
+
+  delete (ucontext_t*) mTerminalContext;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void* GThread::thread_spawner(void* arg)
 {
@@ -122,7 +144,33 @@ void* GThread::thread_spawner(void* arg)
 
   pthread_cleanup_push(thread_reaper, self);
 
-  ret = (self->mStartFoo)(self->mStartArg);
+  if (getcontext((ucontext_t*) self->mTerminalContext))
+  {
+    perror("getcontext failed:");
+    ret = (void*) 1;
+  }
+  else
+  {
+    if (self->mTerminalSignal)
+    {
+      ret = (void*) self->mTerminalSignal;
+      switch (self->mTerminalPolicy)
+      {
+      case TP_ThreadExit:
+	break;
+      case TP_GledExit:
+	Gled::theOne->Exit(self->mTerminalSignal);
+	break;
+      case TP_SysExit:
+	gSystem->Exit(self->mTerminalSignal);
+	break;
+      }
+    }
+    else
+    {
+      ret = (self->mStartFoo)(self->mStartArg);
+    }
+  }
 
   pthread_cleanup_pop(1);
 
@@ -228,7 +276,7 @@ GThread::CState GThread::SetCancelState(CState s)
   return ex_val == PTHREAD_CANCEL_ENABLE ? CS_Enable : CS_Disable;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 GThread::CType GThread::SetCancelType(CType t)
 {
@@ -240,7 +288,7 @@ GThread::CType GThread::SetCancelType(CType t)
   return ex_val == PTHREAD_CANCEL_DEFERRED ? CT_Deferred : CT_Async;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void GThread::TestCancel()
 {
@@ -252,7 +300,7 @@ void GThread::Exit(void* ret)
   pthread_exit(ret);
 }
 
-/**************************************************************************/
+//==============================================================================
 
 GThread* GThread::Self()
 {
@@ -275,21 +323,113 @@ ZMIR* GThread::MIR()
   return Self()->mMIR;
 }
 
-/**************************************************************************/
+//==============================================================================
 
-const char* GThread::RunningStateName(RState state)
+void GThread::BlockAllSignals()
 {
-  switch (state)
+  // Block all signals but the unblockable ones - KILL, STOP.
+
+  sigset_t set;
+  sigfillset(&set);
+  pthread_sigmask(SIG_BLOCK, &set, 0);
+}
+
+void GThread::UnblockCpuExceptionSignals(bool unblock_fpe)
+{
+  // Unblock CPU exception signals SIGILL, SIGSEGV, SIGBUS
+  // and, if unblock_fpe is true, also SIGFPE.
+
+  UnblockSignal(SigILL);
+  UnblockSignal(SigSEGV);
+  UnblockSignal(SigBUS);
+  if (unblock_fpe)
+    UnblockSignal(SigFPE);
+}
+
+void GThread::BlockSignal(Signal sig)
+{
+  sigset_t set;
+  sigemptyset(&set);
+  sigaddset(&set, sig);
+  pthread_sigmask(SIG_UNBLOCK, &set, 0);
+}
+
+void GThread::UnblockSignal(Signal sig)
+{
+  sigset_t set;
+  sigemptyset(&set);
+  sigaddset(&set, sig);
+  pthread_sigmask(SIG_UNBLOCK, &set, 0);
+}
+
+GThread_sh_foo GThread::SetDefaultSignalHandler(GThread_sh_foo foo)
+{
+  GThread *self = Self();
+  GThread_sh_foo old = self->mSigHandlerDefault;
+  self->mSigHandlerDefault = foo;
+  return old;
+}
+
+GThread_sh_foo GThread::SetSignalHandler(Signal sig, GThread_sh_foo foo)
+{
+  GThread *self = Self();
+  GThread_sh_foo old = self->mSigHandlerVector[sig];
+  self->mSigHandlerVector[sig] = foo;
+  return old;
+}
+
+void GThread::TheSignalHandler(GSignal* sig)
+{
+  static const Exc_t _eh("GThread::TheSignalHandler ");
+
+  GThread *self = Self();
+
+  ISdebug(1, _eh + GForm("signal %d in thread '%s'.",
+			 sig->fSignal, self->mName.Data()));
+
+  if (self->mSigHandlerVector[sig->fSignal])
   {
-    case RS_Incubating:    return "Incubating";
-    case RS_Spawning:      return "Spawning";
-    case RS_Running:       return "Running";
-    case RS_Terminating:   return "Terminating";
-    case RS_Finished:      return "Finished";
-    case RS_ErrorSpawning: return "ErrorSpawning";
-    default:               return "<unknown>";
+    (self->mSigHandlerVector[sig->fSignal])(sig);
+  }
+  else if (self->mSigHandlerDefault != 0)
+  {
+    (self->mSigHandlerDefault)(sig);
+  }
+  else if (sig->fSignal == SigILL  ||  sig->fSignal == SigSEGV ||
+	   sig->fSignal == SigBUS  ||  sig->fSignal == SigFPE)
+  {
+    ISerr(_eh + GForm("Fatal exception %s in thread '%s'.",
+		      SignalName((Signal) sig->fSignal), self->mName.Data()));
+    gSystem->StackTrace();
+    self->mTerminalSignal = sig->fSignal;
+    if (setcontext((ucontext_t*) self->mTerminalContext))
+    {
+      perror(_eh + "setcontext failed (will exit):");
+      gSystem->Exit(self->mTerminalSignal);
+    }
   }
 }
+
+void GThread::ToRootsSignalHandler(GSignal* sig)
+{
+  // Root remaps signals, see TUnixSystem.cxx.
+  static const int root_sig_map[kMAXSIGNALS] =
+  {
+    SIGBUS,  SIGSEGV, SIGSYS, SIGPIPE, SIGILL,  SIGQUIT, SIGINT,  SIGWINCH,
+    SIGALRM, SIGCHLD, SIGURG, SIGFPE,  SIGTERM, SIGUSR1, SIGUSR2
+  };
+
+  for (int i = 0; i < kMAXSIGNALS; ++i)
+  {
+    if (root_sig_map[i] == sig->fSignal)
+    {
+      ((TUnixSystem*)gSystem)->DispatchSignals((ESignals) i);
+      break;
+    }
+  }
+}
+
+//==============================================================================
 
 void GThread::ListThreads()
 {
@@ -314,13 +454,41 @@ void GThread::ListThreads()
 
 }
 
+void GThread::ListSignalState()
+{
+  sigset_t set;
+  sigfillset(&set);
+  pthread_sigmask(0, 0, &set);
+
+  printf("Signal block state of thread '%s':\n", Self()->mName.Data());
+  for (int i = 1; i < SigMAX; ++i)
+  {
+    printf("  %6s %d", SignalName((Signal)i), sigismember(&set, i));
+    if (i % 8 == 0)
+      printf("\n");
+  }
+  printf("\n");
+}
+
 //==============================================================================
+
+namespace
+{
+  void signal_handler_wrapper(int sid, siginfo_t* sinfo, void* sctx)
+  {
+    GSignal sig(sid, sinfo, sctx);
+    GThread::TheSignalHandler(&sig);
+  }
+}
 
 GThread* GThread::InitMain()
 {
   // This will create a GThread wrapper around the calling thread.
   // To be called from ::main thread, somewhere early during the
   // system initialization.
+  //
+  // Blocks all signals but CPU exception ones.
+  // GThread signal handler is installed for USR1, USR2 and CPU exceptions.
 
   static const Exc_t _eh("GThread::InitMain ");
 
@@ -340,6 +508,20 @@ GThread* GThread::InitMain()
   sContainerLock.Lock();
   sThreadMap[sMainThread->mId]  = sMainThread;
   sContainerLock.Unlock();
+
+  GThread::BlockAllSignals();
+  GThread::UnblockCpuExceptionSignals(true);
+
+  struct sigaction sac;
+  sac.sa_sigaction = signal_handler_wrapper;
+  sigemptyset(&sac.sa_mask);
+  sac.sa_flags = SA_SIGINFO;
+  sigaction(SigUSR1, &sac, 0);
+  sigaction(SigUSR2, &sac, 0);
+  sigaction(SigILL,  &sac, 0);
+  sigaction(SigSEGV, &sac, 0);
+  sigaction(SigBUS,  &sac, 0);
+  sigaction(SigFPE,  &sac, 0);
 
   return sMainThread;
 }
@@ -383,3 +565,57 @@ void GThread::SetMinStackSize(int ss)
   sMinStackSize = ss;
 }
 
+//==============================================================================
+
+const char* GThread::RunningStateName(RState state)
+{
+  switch (state)
+  {
+    case RS_Incubating:    return "Incubating";
+    case RS_Spawning:      return "Spawning";
+    case RS_Running:       return "Running";
+    case RS_Terminating:   return "Terminating";
+    case RS_Finished:      return "Finished";
+    case RS_ErrorSpawning: return "ErrorSpawning";
+    default:               return "<unknown>";
+  }
+}
+
+const char* GThread::SignalName(Signal sig)
+{
+  switch (sig)
+  {
+    case SigHUP:  return "HUP";
+    case SigINT:  return "INT";
+    case SigQUIT: return "QUIT";
+    case SigILL:  return "ILL";
+    case SigTRAP: return "TRAP";
+    case SigIOT:  return "IOT";      // case SigABRT: return "ABRT";
+    case SigBUS:  return "BUS";
+    case SigFPE:  return "FPE";
+    case SigKILL: return "KILL";
+    case SigUSR1: return "USR1";
+    case SigSEGV: return "SEGV";
+    case SigUSR2: return "USR2";
+    case SigPIPE: return "PIPE";
+    case SigALRM: return "ALRM";
+    case SigTERM: return "TERM";
+    case SigSTKFLT: return "STKFLT";
+    case SigCHLD: return "CHLD";     // case SigCLD: return "CLD";
+    case SigCONT: return "CONT";
+    case SigSTOP: return "STOP";
+    case SigTSTP: return "TSTP";
+    case SigTTIN: return "TTIN";
+    case SigTTOU: return "TTOU";
+    case SigURG:  return "URG";
+    case SigXCPU: return "XCPU";
+    case SigXFSZ: return "XFSZ";
+    case SigVTALRM: return "VTALRM";
+    case SigPROF: return "PROF";
+    case SigWINCH:return "WINCH";
+    case SigIO:   return "IO";       // case SigPOLL: return "POLL";
+    case SigPWR:  return "PWR";
+    case SigSYS:  return "SYS";      // case SigUNUSED: return "SigUNUSED";
+    default:      return "<unknown>";
+  }
+}

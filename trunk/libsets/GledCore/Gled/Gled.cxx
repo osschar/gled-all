@@ -18,6 +18,7 @@
 #include <Glasses/ShellInfo.h>
 
 #include <TSystem.h>
+#include <TSysEvtHandler.h>
 #include <TROOT.h>
 #include <TInterpreter.h>
 #include <TRint.h>
@@ -34,8 +35,13 @@ ClassImp(Gled);
 
 /**************************************************************************/
 
-Gled* Gled::theOne = 0;
-Gled* gGled        = 0;
+Gled* Gled::theOne      = 0;
+int   Gled::sExitStatus = 0;
+
+int Gled::GetExitStatus()
+{
+  return sExitStatus;
+}
 
 /**************************************************************************/
 
@@ -75,7 +81,7 @@ Gled::Gled() :
     exit(1);
   }
 
-  gGled = theOne = this;
+  theOne = this;
 
   // Set-up SaturnInfo, set defaults
 
@@ -685,8 +691,9 @@ void Gled::AllowMoonConnections()
 // Gled stuff
 /**************************************************************************/
 
-void Gled::Exit()
+void Gled::Exit(Int_t status)
 {
+  sExitStatus = status;
   static GMutex exit_moo;
   {
     GMutexHolder lck(exit_moo);
@@ -872,8 +879,6 @@ void Gled::LoadMacro(const Text_t* mac)
 // Thread foos
 /**************************************************************************/
 
-#include <TSysEvtHandler.h>
-
 namespace
 {
   class GExceptionHandler : public TStdExceptionHandler
@@ -946,6 +951,30 @@ void* Gled::TRint_runner_tl(void*)
   self->set_owner(Gled::theOne->mSaturnInfo);
 
   Gled::theOne->mRintThread = self;
+
+  // Activate some signals -- this thread handles most system signals.
+  // Handler for those (and for CPU exceptions) is installed in
+  // TUnixSystem::Init(). This is called from TROOT constructor.
+  // And TROOT constructor is called via static initialization of gROOT.
+  //
+  // SigINT is set from TRint constructor (instantiated in, not very
+  // intuitively, in ProcessCmdLineMacros()).
+
+  GThread::UnblockSignal(GThread::SigHUP);
+  GThread::UnblockSignal(GThread::SigINT);
+  GThread::UnblockSignal(GThread::SigTERM);
+  GThread::UnblockSignal(GThread::SigCONT);
+  GThread::UnblockSignal(GThread::SigTSTP);
+  GThread::UnblockSignal(GThread::SigPIPE);
+  GThread::UnblockSignal(GThread::SigCHLD);
+  GThread::UnblockSignal(GThread::SigALRM);
+  GThread::UnblockSignal(GThread::SigURG);
+  GThread::UnblockSignal(GThread::SigSYS);
+  GThread::UnblockSignal(GThread::SigWINCH);
+
+  GThread::SetDefaultSignalHandler(GThread::ToRootsSignalHandler);
+
+  GThread::Self()->SetTerminalPolicy(GThread::TP_GledExit);
 
   // Those two will be deleted in ~TROOT().
   new GTerminateHandler;

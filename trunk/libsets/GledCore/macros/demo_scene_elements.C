@@ -11,7 +11,7 @@ void _dse_init_orto_base(ZList* cbs, ZList* cis, Float_t z_size,
 			 Float_t dist, Int_t coord, Int_t up_axis,
 			 const Text_t* bname, const Text_t* iname)
 {
-  TVector3 p_vec, x_vec, y_vec, z_vec;
+  ZPoint p_vec, x_vec, y_vec, z_vec;
 
   CREATE_ADD_GLASS(base, Sphere, cbs, bname, 0);
   int up_coord = up_axis;
@@ -56,9 +56,9 @@ void dse_make_camera_bases(ZList* cont, ZNode* up_ref, Int_t up_axis,
 
   {
     CREATE_ADD_GLASS(base, Sphere, cbs, "", "");
-    TVector3 p_vec, x_vec, y_vec, z_vec;
-    p_vec.SetXYZ(px, py, pz);
-    x_vec = -p_vec.Unit();
+    ZPoint p_vec, x_vec, y_vec, z_vec;
+    p_vec.Set(px, py, pz);
+    x_vec = p_vec; x_vec.Normalize(-1);
     z_vec[up_axis - 1] = 1;
     y_vec = z_vec.Cross(x_vec);
     ZTrans t;

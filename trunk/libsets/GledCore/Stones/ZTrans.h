@@ -45,6 +45,11 @@ public:
   //ZTrans(const Float_t  arr[16]);
   ~ZTrans() {}
 
+  // Add this explicit setter -- otherwise CINT can't do it.
+  using HTrans<Double32_t>::SetBaseVec;
+  void SetBaseVec(Int_t b, const ZPoint& v)
+  { SetBaseVec(b, v.x, v.y, v.z); }
+
   ZTrans operator*(const ZTrans& t);
 
   ClassDefNV(ZTrans, 1); // Column-major 4x4 matrix for homogeneous coordinates.

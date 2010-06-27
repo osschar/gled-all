@@ -1,3 +1,59 @@
+2010-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Rewrite signal handling to support proper per-thread signal
+	handlers. And more ...
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Add members for controlling per-thread signal handlers.
+	Add exit policy on terminal signal -- just exit thread or call
+	Gled::Exit() or do system exit.
+	Add static functions for signal handling control.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Unblock relevant signals for Rint thread, set terminal policy.
+	Add static exit status to allow its communication from signal
+	handling to final exit in gled/saturn main functions.
+	Remove gGled global, Gled::theOne is used everywhere.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add flags for control over handling of premature timeout in
+	SleepMiliSec().
+
+	* Ephra/Mountain.cxx:
+	* Ephra/Mountain.h:
+	Use new signal handler functions in GThread.
+	When Eventor requests trapping of terminal signals do not exit the
+	thread -- reenter the event loop instead.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Use new signal handler functions in GThread.
+
+	* Glasses/Eventor.cxx:
+	Uncomment return statement that prevent re-calling of Start/Stop
+	and Suspend/Resume when eventor thread is already in desired
+	state.
+
+	* gled.cxx:
+	Use exit status from Gled.
+
+	* saturn.cxx:
+	Use exit status from Gled.
+	Stop Rint thread by sending SigTERM (as done in gled).
+
+	* catalog.patch:
+	Remove dict request for gGled global.
+
+	* Stones/ZTrans.h:
+	Add SetBaseVec() with ZPoint as argument. CINT didn't manage
+	without that.
+
+	* macros/demo_scene_elements.C:
+	Use ZPoint instead of TVector3.
+
 2010-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.h:
