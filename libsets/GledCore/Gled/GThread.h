@@ -39,6 +39,8 @@ class SaturnInfo;
 class ZMirEmittingEntity;
 class ZMIR;
 
+class TThread;
+
 class GThread
 {
   friend class Gled;
@@ -116,6 +118,9 @@ private:
   lpGThread_i    mThreadListIt;
   pthread_t	 mId;           // X{g} This will become GThreadInternalRep*
 
+  // Root's thread representation.
+  TThread       *mRootTThread;
+
   // Parameters of thread to be spawned.
   TString        mName;         // X{Gs}
   GThread_foo	 mStartFoo;	// X{gs}
@@ -162,6 +167,8 @@ public:
   int   Detach();
   bool  IsDetached() const;
   bool  ClearDetachOnExit();
+
+  void  ClearRootTThreadRepresentation();
 
   TerminalPolicy GetTerminalPolicy() const { return mTerminalPolicy; }
   void           SetTerminalPolicy(TerminalPolicy tp) { mTerminalPolicy = tp; }

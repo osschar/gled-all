@@ -8,6 +8,7 @@
 #include <Gled/Gled.h>
 #include <Glasses/ZMirEmittingEntity.h>
 
+#include "TThread.h"
 #include "TSystem.h"
 #include "TUnixSystem.h"
 
@@ -140,6 +141,7 @@ void* GThread::thread_spawner(void* arg)
   sContainerLock.Lock();
   sThreadMap[self->mId] = self;
   self->mRunningState   = RS_Running;
+  self->mRootTThread    = new TThread(TThread::SelfId());
   sContainerLock.Unlock();
 
   void* ret = 0;
@@ -201,6 +203,7 @@ void GThread::thread_reaper(void* arg)
   }
 
   sContainerLock.Lock();
+  self->ClearRootTThreadRepresentation();
   sThreadMap.erase(self->mId);
   self->mRunningState = RS_Finished;
   sContainerLock.Unlock();
@@ -295,6 +298,18 @@ bool GThread::ClearDetachOnExit()
     return false;
   }
 }
+
+void GThread::ClearRootTThreadRepresentation()
+{
+  // Wipe root's TThread representation of the calling thread.
+  // This is needed as root's TSD schema expects TThread representation
+  // does not exist for whatever it calls the main thread.
+  // So we wipe it from the Rint thread.
+
+  delete mRootTThread;
+  mRootTThread = 0;
+}
+
 
 /**************************************************************************/
 // Static functions; to be called from within thread.
@@ -469,6 +484,7 @@ void GThread::ToRootsSignalHandler(GSignal* sig)
     }
   }
 }
+
 
 //==============================================================================
 
