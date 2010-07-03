@@ -1,5 +1,14 @@
 2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Improve XT canvas request, add pad-update request.
+
+	* Gled/XTReqCanvas.cxx:
+	* Gled/XTReqCanvas.h:
+	Add static XTReqCanvas::Request() convenience function.
+	Add new class XTReqPadUpdate to request update of a pad.
+
+2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Instantiate TThread with GThread to allow broken ROOT's TSD
 	implementation to work properly.
 
