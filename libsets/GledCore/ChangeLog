@@ -1,5 +1,28 @@
 2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add support for handling of arbitrary cross-thread requests into
+	Rint thread.
+
+	* Gled/TRootXTReq.cxx:
+	* Gled/TRootXTReq.h:
+	New class for handling of cross-thread requests into the Rint
+	thread.
+
+	* Gled/XTReqCanvas.cxx:
+	* Gled/XTReqCanvas.h:
+	Cross-thread request for creation of a new TCanvas.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Activate TRootXTReq singals/queues in Rint thread spawner.
+	Remove function NewCanvas().
+
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Remove function NewCanvas().
+
+2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Improve cancellation of dedicated MIR execution threads.
 
 	* Gled/GThread.cxx:

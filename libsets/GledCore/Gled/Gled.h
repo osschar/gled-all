@@ -28,7 +28,6 @@ class Fl_Tile;
 class Fl_Browser;
 
 class TRint;
-class TCanvas;
 
 class Gled
 {
@@ -125,12 +124,6 @@ public:
   virtual EyeInfo* SpawnEye(const TString& libset, const TString& eyector);
   virtual EyeInfo* SpawnEye(EyeInfo* ei, ZGlass* ud,
 			    const TString& libset, const TString& eyector)
-  { return 0; }
-
-  virtual TCanvas*
-  NewCanvas(const Text_t* name ="Gled Canvas",
-            const Text_t* title="Default Gled Canvas",
-	    int w=640, int h=480, int npx=1, int npy=1)
   { return 0; }
 
   static void AssertLibSet(const Text_t* lib_set);

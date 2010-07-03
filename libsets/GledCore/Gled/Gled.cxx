@@ -11,6 +11,7 @@
 #include <Gled/GMutex.h>
 #include <Gled/GCondition.h>
 #include <Gled/GThread.h>
+#include <Gled/TRootXTReq.h>
 #include <Gled/GKeyRSA.h>
 #include <Ephra/Saturn.h>
 #include <Glasses/ZQueen.h>
@@ -986,10 +987,16 @@ void* Gled::TRint_runner_tl(void*)
 
   Gled::theOne->ProcessCmdLineMacros();
 
+  TRootXTReq::Bootstrap(self);
+  GThread::UnblockSignal(GThread::SigUSR1);
+
   Gled::theOne->bRintRunning = true;
   Gled::theOne->mRint->TApplication::Run(true);
   Gled::theOne->bRintRunning = false;
   cout << "Gint terminated ...\n";
+
+  GThread::BlockSignal(GThread::SigUSR1);
+  TRootXTReq::Shutdown();
 
   self->SetEndFoo(0);
   self->SetEndArg(0);
