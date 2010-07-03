@@ -34,13 +34,14 @@ void WSPoint::_init()
 
 /**************************************************************************/
 
-namespace {
+namespace
+{
   inline Double_t sqr(Double_t x) { return x*x; }
 }
 
 void WSPoint::Coff(WSPoint* f)
 {
-  if(f == mCoffPoint)
+  if (f == mCoffPoint)
     return;
 
   const ZTrans& a = RefTrans();
@@ -53,7 +54,8 @@ void WSPoint::Coff(WSPoint* f)
     TMath::Sqrt(sqr(AT[0] - BT[0]) + sqr(AT[1] - BT[1]) + sqr(AT[2] - BT[2]));
   const Double_t T1 = mT*d, T2 = f->mT*d;
 
-  for(Int_t i=0; i<3; ++i) {
+  for (Int_t i=0; i<3; ++i)
+  {
     const Double_t P = BT[i] - AT[i];
     const Double_t Q = T1*AX[i];
     const Double_t R = T2*BX[i] - 2*P + Q;
@@ -65,12 +67,14 @@ void WSPoint::Coff(WSPoint* f)
     row[3] = R;
   }
   // Widths
-  const Double_t A = f->mS - 2*(f->mW - mW) + mS;
-  TMatrixDRow row( mCoffs[3] );
-  row[0] = mW;
-  row[1] = mS;
-  row[2] = (f->mW - mW) - mS - A;
-  row[3] = A;
+  {
+    const Double_t A = f->mS - 2*(f->mW - mW) + mS;
+    TMatrixDRow row( mCoffs[3] );
+    row[0] = mW;
+    row[1] = mS;
+    row[2] = (f->mW - mW) - mS - A;
+    row[3] = A;
+  }
 
   mCoffPoint = f;
 }

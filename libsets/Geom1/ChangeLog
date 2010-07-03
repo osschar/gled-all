@@ -1,3 +1,9 @@
+2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/WSPoint.cxx:
+	* Glasses/WSSeed.cxx:
+	White-space changes.
+
 2010-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Rect.h:
