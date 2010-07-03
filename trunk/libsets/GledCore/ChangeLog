@@ -1,5 +1,21 @@
 2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Instantiate TThread with GThread to allow broken ROOT's TSD
+	implementation to work properly.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Instantiate / delete TThread representation in spawner / reaper
+	functions.
+	Provide extra ClearRootTThreadRepresentation() method to allow
+	Rint thread to delete it instantly (as root does not want TThread
+	to exist for its "main" thread).
+
+	* Gled/Gled.cxx:
+	Destroy TThread for Rint thread early in Rint spawner function.
+
+2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Add support for handling of arbitrary cross-thread requests into
 	Rint thread.
 

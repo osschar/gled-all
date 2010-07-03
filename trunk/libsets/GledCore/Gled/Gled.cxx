@@ -974,8 +974,10 @@ void* Gled::TRint_runner_tl(void*)
   GThread::UnblockSignal(GThread::SigWINCH);
 
   GThread::SetDefaultSignalHandler(GThread::ToRootsSignalHandler);
+  self->SetTerminalPolicy(GThread::TP_GledExit);
 
-  GThread::Self()->SetTerminalPolicy(GThread::TP_GledExit);
+  // Root does not want TThread to exist for the main thread.
+  self->ClearRootTThreadRepresentation();
 
   // Those two will be deleted in ~TROOT().
   new GTerminateHandler;
