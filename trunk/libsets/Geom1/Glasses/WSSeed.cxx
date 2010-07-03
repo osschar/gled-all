@@ -345,7 +345,8 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Double_t t)
 
   const Double_t t2 = t*t, t3 = t2*t;
 
-  for(Int_t i=0; i<3; i++) {
+  for (Int_t i=0; i<3; i++)
+  {
     Pnt[i] = f->mCoffs(i, 0) + f->mCoffs(i, 1)*t +
       f->mCoffs(i, 2)*t2 + f->mCoffs(i, 3)*t3;
     Axe[i] = f->mCoffs(i, 1) + 2*f->mCoffs(i, 2)*t +
@@ -354,7 +355,7 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Double_t t)
   Double_t w = f->mCoffs(3, 0) + f->mCoffs(3, 1)*t +
     f->mCoffs(3, 2)*t2 + f->mCoffs(3, 3)*t3;
   Double_t dwdt = TMath::ATan(f->mCoffs(3, 1) + 2*f->mCoffs(3, 2)*t +
-			     3*f->mCoffs(3, 3)*t2);
+			      3*f->mCoffs(3, 3)*t2);
   Double_t dwc = TMath::Cos(dwdt);
   Double_t dws = TMath::Sin(dwdt);
 
@@ -363,9 +364,11 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Double_t t)
   pTuber->NewRing(mPLevel, true);
   Double_t phi = 0, step = 2*TMath::Pi()/mPLevel;
   Float_t R[3], N[3], T[2];
-  for(int j=0; j<mPLevel; j++, phi-=step) {
+  for (int j=0; j<mPLevel; j++, phi-=step)
+  {
     Double_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
-    for(Int_t i=0; i<3; ++i) {
+    for (Int_t i=0; i<3; ++i)
+    {
       R[i] = Pnt[i] + cp*w*Up[i] + sp*w*Aw[i];
       N[i] = -dws*Axe[i] + dwc*(cp*Up[i] + sp*Aw[i]);
     }
@@ -374,9 +377,10 @@ void WSSeed::ring(ZTrans& lcf, WSPoint* f, Double_t t)
     pTuber->NewVert(R, N, 0, T);
   }
   { // last one
-    phi = -2*TMath::Pi();
+    phi = -TMath::TwoPi();
     Double_t cp = TMath::Cos(phi), sp = TMath::Sin(phi);
-    for(Int_t i=0; i<3; ++i) {
+    for (Int_t i=0; i<3; ++i)
+    {
       R[i] = Pnt[i] + cp*w*Up[i] + sp*w*Aw[i];
       N[i] = -dws*Axe[i] + dwc*(cp*Up[i] + sp*Aw[i]);
     }
