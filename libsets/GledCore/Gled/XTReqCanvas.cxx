@@ -10,15 +10,11 @@
 #include "TSystem.h"
 #include "TClass.h"
 
-// XTReqCanvas
-
-//______________________________________________________________________________
-//
-// Create canvas in cross-thread request to ROOT thread.
-
-ClassImp(XTReqCanvas);
-
 //==============================================================================
+// XTReqCanvas
+//------------------------------------------------------------------------------
+// Create canvas in cross-thread request to ROOT thread.
+//------------------------------------------------------------------------------
 
 void XTReqCanvas::Act()
 {
@@ -31,10 +27,30 @@ void XTReqCanvas::Act()
 
   // Make sure window is on screen before we pass it back ...
   gSystem->ProcessEvents();
+}
 
-  // This bitch was often crashing at random sub-places down
-  // from TQObject::CollectClassSignalLists(), when
-  // emitting TGFrame::ProcessedEvent() for the first time.
-  // Go figure ...
-  TClass::GetClass("TGHorizontalFrame", true, false);
+TCanvas* XTReqCanvas::Request(const char* name, const char* title,
+			      int w, int h, int npx, int npy)
+{
+  auto_ptr<XTReqCanvas> creq(new XTReqCanvas(name, title, w, h, npx, npy));
+  creq->ShootRequestAndWait();
+  return creq->fCanvas;
+}
+
+
+//==============================================================================
+// XTReqPadUpdate
+//------------------------------------------------------------------------------
+// Create canvas in cross-thread request to ROOT thread.
+//------------------------------------------------------------------------------
+
+void XTReqPadUpdate::Act()
+{
+  fPad->Modified();
+  fPad->Update();
+}
+
+void XTReqPadUpdate::Update(TVirtualPad* p)
+{
+  (new XTReqPadUpdate(p))->ShootRequest();
 }
