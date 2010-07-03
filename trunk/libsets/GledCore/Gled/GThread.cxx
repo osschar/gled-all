@@ -36,6 +36,7 @@ int                      GThread::sThreadCount  = 0;
 map<pthread_t, GThread*> GThread::sThreadMap;
 list<GThread*>           GThread::sThreadList;
 GMutex                   GThread::sContainerLock;
+GMutex                   GThread::sDetachCtrlLock(GMutex::recursive);
 int                      GThread::sMinStackSize = 0;
 
 pthread_key_t GThread::TSD_Self;
@@ -51,7 +52,7 @@ GThread::GThread(const Text_t* name) :
   mName     (name),
   mStartFoo (0), mStartArg (0),
   mEndFoo   (0), mEndArg   (0),
-  bDetached (false),
+  bDetached (false), bDetachOnExit (false),
   mNice     (0),
   mStackSize(0),
 
@@ -72,7 +73,8 @@ GThread::GThread(const Text_t* name) :
   sContainerLock.Unlock();
 }
 
-GThread::GThread(const Text_t* name, GThread_foo foo, void* arg, bool detached) :
+GThread::GThread(const Text_t* name, GThread_foo foo, void* arg,
+		 bool detached, bool detach_on_exit) :
   mRunningState (RS_Incubating),
   mIndex        (-1),
   mThreadListIt (),
@@ -81,7 +83,7 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg, bool detached) 
   mName     (name),
   mStartFoo (foo), mStartArg (arg),
   mEndFoo   (0),   mEndArg   (0),
-  bDetached (detached),
+  bDetached (detached), bDetachOnExit (detach_on_exit),
   mNice     (0),
   mStackSize(sMinStackSize),
 
@@ -172,6 +174,14 @@ void* GThread::thread_spawner(void* arg)
     }
   }
 
+  {
+    GMutexHolder _lck(sDetachCtrlLock);
+    if (self->bDetachOnExit && ! self->bDetached)
+    {
+      self->Detach();
+    }
+  }
+
   pthread_cleanup_pop(1);
 
   return ret;
@@ -256,10 +266,34 @@ int GThread::Cancel()
 
 int GThread::Detach()
 {
+  GMutexHolder _lck(sDetachCtrlLock);
+
   int ret = pthread_detach(mId);
   if(ret) perror("GThread::Detach");
   else    bDetached = true;
   return ret;
+}
+
+bool GThread::IsDetached() const
+{
+  GMutexHolder _lck(sDetachCtrlLock);
+
+  return bDetached;
+}
+
+bool GThread::ClearDetachOnExit()
+{
+  GMutexHolder _lck(sDetachCtrlLock);
+
+  if ( ! bDetached)
+  {
+    bDetachOnExit = false;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 /**************************************************************************/
@@ -289,6 +323,13 @@ GThread::CType GThread::SetCancelType(CType t)
 }
 
 //==============================================================================
+
+int GThread::Yield()
+{
+  int ret = sched_yield();
+  if (ret) perror("GThread::Yield");
+  return ret;
+}
 
 void GThread::TestCancel()
 {

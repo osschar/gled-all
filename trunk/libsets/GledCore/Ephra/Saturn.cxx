@@ -704,11 +704,17 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
 
   ISdebug(2,GForm("%sfor %s, id=%u", _eh.Data(), lens->GetName(), lens->GetSaturnID()));
 
-  int ok = 0, failed = 0;
+  int  ok = 0, failed = 0;
+  bool yield = false;
   // !! Could be rewritten into two loops: Cancel, then Join those that
   // were successfully cancelled.
   while (true)
   {
+    if (yield)
+    {
+      GThread::Yield();
+      yield = false;
+    }
     GThread* thr = 0;
     {
       GMutexHolder mh(_detached_mir_mgmnt_lock);
@@ -720,9 +726,17 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
 	mDetachedThreadsHash.erase(i);
 	break;
       }
+
       thr = i->second.back();
-      i->second.pop_back();
+      if (thr->ClearDetachOnExit() == false)
+      {
+	// We caught the thread in its last breath, yield cpu before next
+	// attempt (but get out of lock first).
+	yield = true;
+	continue;
+      }
     }
+
     ISdebug(2, GForm("%sattempting cancellation of a detached MIR thread of lens '%s'.",
 		     _eh.Data(), lens->GetName()));
     int retc = thr->Cancel();
@@ -1835,10 +1849,11 @@ void Saturn::ExecDetachedMIR(auto_ptr<ZMIR>& mir)
 
   Int_t nice = mir->fAlpha->DetachedThreadNice(mir.get());
 
-  // Created joinable, so that it can be canceled and joined.
+  // Created joinable with detach-on-exit flag, so that it can be canceled and
+  // joined while runnung via Freeze().
   GThread* bar = new GThread("Saturn-MirDetachedExec",
                              (GThread_foo) (tl_MIR_DetachedExecutor), this,
-                             true);
+                             false, true);
   bar->set_owner(mir->fCaller);
   bar->set_mir(mir.release());
   bar->SetNice(nice);

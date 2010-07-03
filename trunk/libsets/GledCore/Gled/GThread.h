@@ -107,6 +107,7 @@ private:
   static mPThr2GThr_t  sThreadMap;
   static lpGThread_t   sThreadList;
   static GMutex        sContainerLock;
+  static GMutex        sDetachCtrlLock;
   static int           sMinStackSize;
 
   // Thread state / internals
@@ -121,7 +122,8 @@ private:
   void*		 mStartArg;	// X{gs}
   GThread_cu_foo mEndFoo;	// X{gs}
   void*		 mEndArg;	// X{gs}
-  bool		 bDetached;	// X{g}
+  bool		 bDetached;
+  bool           bDetachOnExit; // X{gs}
   int            mNice;         // X{gs}
   int            mStackSize;    // X{gs}
 
@@ -147,15 +149,19 @@ private:
   static void  thread_reaper(void* arg);
 
   GThread(const Text_t* name);
+
 public:
-  GThread(const Text_t* name, GThread_foo foo, void* arg=0, bool detached=false);
+  GThread(const Text_t* name, GThread_foo foo, void* arg=0,
+	  bool detached=false, bool detach_on_exit=false);
   virtual ~GThread();
 
-  int	Spawn();
-  int	Join(void** tret=0);
-  int	Kill(Signal signal=SigSTOP);
-  int	Cancel();
+  int   Spawn();
+  int   Join(void** tret=0);
+  int   Kill(Signal signal=SigSTOP);
+  int   Cancel();
   int   Detach();
+  bool  IsDetached() const;
+  bool  ClearDetachOnExit();
 
   TerminalPolicy GetTerminalPolicy() const { return mTerminalPolicy; }
   void           SetTerminalPolicy(TerminalPolicy tp) { mTerminalPolicy = tp; }
@@ -166,6 +172,7 @@ public:
 
   static CType  SetCancelType(CType t);
 
+  static int    Yield();
   static void   TestCancel();
   static void   Exit(void* ret=0);
 
