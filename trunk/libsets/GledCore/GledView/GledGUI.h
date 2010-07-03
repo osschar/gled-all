@@ -90,11 +90,6 @@ public:
   virtual EyeInfo* SpawnEye(EyeInfo* ei, ZGlass* ud,
 			    const TString& libset, const TString& eyector);
 
-  virtual TCanvas*
-  NewCanvas(const Text_t* name ="Gled Canvas",
-            const Text_t* title="Default Gled Canvas",
-	    int w=640, int h=480, int npx=1, int npy=1);
-
   virtual int handle(int ev);
 
   virtual void LockFltk();

@@ -14,9 +14,7 @@
 #include <GledView/GledViewNS.h>
 #include <Eye/Eye.h>
 
-#include <TROOT.h>
 #include <TSystem.h>
-#include <TCanvas.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
@@ -535,47 +533,6 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
     delete ei;
 
   return ecr.TrueEyeInfo();
-}
-
-/**************************************************************************/
-
-TCanvas* GledGUI::NewCanvas(const Text_t* name, const Text_t* title,
-			    int w, int h, int npx, int npy)
-{
-  // This does not seem to be working perfectly.
-  //
-  // Make a fltk wrapper for TCanvas?
-
-  TCanvas* c = 0;
-
-  if (GThread::Self() == mRintThread)
-  {
-    c = new TCanvas(name, title, w, h);
-    // printf ("GledGUI::NewCanvas XXXXX %p\n", c);
-  }
-  else
-  {
-    GCondition *cnd = new GCondition;
-    cnd->Lock();
-    TTimer t(GForm("*((TCanvas**)0x%lx) = new TCanvas(\"%s\", \"%s\", %d, %d); "
-                   "((GCondition*)0x%lx)->Signal();",
-                   &c, name, title, w, h, cnd), 0);
-    t.Start(0, kTRUE);
-    mRintThread->Kill(GThread::SigINT);
-    printf("GledGUI::NewCanvas YYYYY waiting ...\n");
-    cnd->TimedWaitMS(1000);
-    printf("GledGUI::NewCanvas YYYYY %p\n", c);
-    delete cnd;
-  }
-
-  if (c && (npx>1 || npy>1))
-  {
-    c->Divide(npx,npy);
-    c->cd(1);
-    c->Update();
-  }
-
-  return c;
 }
 
 /**************************************************************************/
