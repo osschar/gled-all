@@ -1,3 +1,21 @@
+2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve cancellation of dedicated MIR execution threads.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Add flag allowing to detach an otherwise joinable thread on exit
+	from the thread function.
+	Add additional static lock for synchronization of detach-state
+	requests and queries.
+	Add static method Yield() that pushes the calling thread to the
+	end of thread execution queue.
+
+	* Ephra/Saturn.cxx:
+	Properly implement cancellation / handling of dedicated MIR
+	execution threads by using the new detach-on-exit capability in
+	GThread.
+
 2010-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Rewrite signal handling to support proper per-thread signal
