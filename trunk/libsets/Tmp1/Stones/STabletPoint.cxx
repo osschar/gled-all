@@ -15,3 +15,8 @@
 ClassImp(STabletPoint);
 
 //==============================================================================
+
+void STabletPoint::Print() const
+{
+  printf("%8.3lf %8.3lf %8.3lf, %8.3lf, %8.3lf\n", x, y, z, t, p); 
+}

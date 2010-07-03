@@ -69,14 +69,13 @@ protected:
   Bool_t        bInProximity;     //! X{G}  7 BoolOut(-join=>1)
   Bool_t        bInTouch;         //! X{G}  7 BoolOut()
   Bool_t        bInStroke;        //! X{G}  7 BoolOut()
-  Float_t       mPenX;
-  Float_t       mPenY;
-  Float_t       mPenT;
-  Float_t       mPenP;
   // Offsets for multi-touch strokes.
   Float_t       mPenXOff;
   Float_t       mPenYOff;
   Float_t       mPenTOff;
+
+  Float_t       mPenX, mPenY, mPenP, mPenT; //!
+  Int_t         mRawX, mRawY, mRawP; //!
 
   GTime         mEventTime;        //!
   GTime         mFirstStrokeStart; //!

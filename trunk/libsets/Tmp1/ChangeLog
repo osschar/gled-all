@@ -1,3 +1,27 @@
+2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Better point reading, preliminary creation of WSSeed objects.
+
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	Only store points that are different in x, y or pressure -- the
+	wacom driver often sends duplicate points.
+	Use new signal-handling from GThread.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	Add dummy begin / end points on EndStroke(), using quadratic
+	extrapolation.
+	Preliminary creation of a WSSeed object.
+	Improved histogram drawing using cross-thread requests.
+
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	Draw points with pressure=0 a bit darker.
+
+	* Stones/STabletPoint.cxx:
+	* Stones/STabletPoint.h:
+	Add operators +, -, and *.
+
 2010-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Generalization of stroke handling.

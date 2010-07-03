@@ -34,7 +34,6 @@ void TabletReader::_init()
   mButtons = 0;
   bButton0 = bButton1 = bStylus1 = bStylus2 = false;
   bInProximity = bInTouch = bInStroke = false;
-  mPenX = mPenY = mPenT = mPenP = 0;
 
   bPrintButtEvs   = false;
   bPrintButtState = false;
@@ -212,7 +211,7 @@ void TabletReader::begin_stroke()
   if (mStrokeList != 0 && mStroke == 0)
   {
     TabletStroke *stroke = new TabletStroke("Stroke");
-    stroke->SetColorByRef(mStrokeColor);
+    stroke->SetPointColorByRef(mStrokeColor);
     stroke->SetStartTime((mStrokeStart - mFirstStrokeStart).ToFloat());
     mQueen->CheckIn(stroke);
     SetStroke(stroke);
@@ -288,9 +287,15 @@ void TabletReader::StartRead()
   mButtons = 0;
   bButton0 = bButton1 = bStylus1 = bStylus2 = false;
   bInProximity = bInTouch = bInStroke = false;
-  mPenX = mPenY = mPenT = mPenP = 0;
+
+  mRawX = mRawY = mRawP = -1;
 
   mPenXOff = mPenYOff = mPenTOff = 0;
+
+  GThread::UnblockSignal(GThread::SigUSR1);
+  // Default handler is ok ... just interrupt reading.
+
+  GThread::ListSignalState();
 
   while (!bReqStop)
   {
@@ -326,6 +331,7 @@ void TabletReader::StartRead()
       else if ( ! proximity && bInProximity)
       {
 	clear_pen_buttons();
+	mRawX = mRawY = mRawP = -1;
 	bInProximity = false;
 	stamp_p = true;
       }
@@ -344,24 +350,33 @@ void TabletReader::StartRead()
 	check_pen_buttons(buttons_delta);
       }
 
-      mPenT = (mEventTime - mStrokeStart).ToFloat();
-      mPenX = mPosScale * (s.values[WACOMFIELD_POSITION_X] - mOffX);
-      mPenY = mPosScale * (s.values[WACOMFIELD_POSITION_Y] - mOffY);
-      mPenP = mPrsScale * s.values[WACOMFIELD_PRESSURE];
-      if (bInvertY) mPenY = -mPenY;
-      if (bPrintPositions)
+      if (mRawX != s.values[WACOMFIELD_POSITION_X] ||
+	  mRawY	!= s.values[WACOMFIELD_POSITION_Y] ||
+	  mRawP != s.values[WACOMFIELD_PRESSURE])
       {
-	printf("PEN x=%d y=%d, p=%d, prox=%d\n",
-	       s.values[WACOMFIELD_POSITION_X],
-	       s.values[WACOMFIELD_POSITION_Y],
-	       s.values[WACOMFIELD_PRESSURE],
-	       s.values[WACOMFIELD_PROXIMITY]);
-      }
-      if (bInStroke)
-      {
-	GLensReadHolder _lck(*mStroke);
-	mStroke->AddPoint(mPenX, mPenY, mPenT, mPenP);
-	mStroke->StampReqTring(TabletStroke::FID());
+	mRawX = s.values[WACOMFIELD_POSITION_X];
+	mRawY = s.values[WACOMFIELD_POSITION_Y];
+	mRawP = s.values[WACOMFIELD_PRESSURE];
+
+	mPenX = mPosScale * (mRawX - mOffX);
+	mPenY = mPosScale * (mRawY - mOffY);
+	mPenP = mPrsScale * mRawP;
+	mPenT = (mEventTime - mStrokeStart).ToFloat();
+	if (bInvertY) mPenY = -mPenY;
+	if (bPrintPositions)
+	{
+	  printf("PEN x=%d y=%d, p=%d, prox=%d\n",
+		 s.values[WACOMFIELD_POSITION_X],
+		 s.values[WACOMFIELD_POSITION_Y],
+		 s.values[WACOMFIELD_PRESSURE],
+		 s.values[WACOMFIELD_PROXIMITY]);
+	}
+	if (bInStroke)
+	{
+	  GLensReadHolder _lck(*mStroke);
+	  mStroke->AddPoint(mPenX, mPenY, mPenT, mPenP);
+	  mStroke->StampReqTring(TabletStroke::FID());
+	}
       }
     }
     else if (tool == T_Pad)
@@ -424,5 +439,5 @@ void TabletReader::StopRead()
 
   bReqStop = true;
 
-  mTabletThread->Kill(GThread::SigINT);
+  mTabletThread->Kill(GThread::SigUSR1);
 }

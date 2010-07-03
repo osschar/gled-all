@@ -7,9 +7,8 @@
 #include "TabletStroke.h"
 #include "TabletStroke.c7"
 
-#include "GledView/GledGUI.h"
+#include "Gled/XTReqCanvas.h"
 
-// #include "TSpline.h"
 #include "TCanvas.h"
 #include "TH2I.h"
 
@@ -25,9 +24,11 @@ ClassImp(TabletStroke);
 
 void TabletStroke::_init()
 {
+  mPointColor.rgba(1, 0.5, 0, 1);
+  mLineColor .rgba(0, 0.5, 1, 1);
+  bRnrPoints = bRnrLine = true;
   mStartTime = 0;
   bInStroke = false;
-  mLineColor.rgba(0, 0.5, 1, 1);
   // mSplineX = mSplineY = 0;
 }
 
@@ -46,7 +47,7 @@ void TabletStroke::get_draw_range(Int_t& min, Int_t& max)
 {
   if (mPoints.empty())
   {
-    min = max = 0;
+    min = max = -1;
   }
   else
   {
@@ -54,6 +55,18 @@ void TabletStroke::get_draw_range(Int_t& min, Int_t& max)
     max = mPoints.size() - (bInStroke ? 1 : 2);
   }
 }
+
+//------------------------------------------------------------------------------
+
+STabletPoint TabletStroke::pre_sym_quadratic(Int_t i0, Int_t i1, Int_t i2) const
+{
+  STabletPoint d1 = mPoints[i1] - mPoints[i0];
+  STabletPoint d2 = mPoints[i2] - mPoints[i0];
+
+  return 2.0f * d1.t / (d2.t - d1.t) * (d1.t * d2 - d2.t * d1) - d1;
+}
+
+//==============================================================================
 
 void TabletStroke::BeginStroke()
 {
@@ -63,7 +76,9 @@ void TabletStroke::BeginStroke()
     throw _eh + "Already in stroke.";
 
   bInStroke = true;
+
   mPoints.clear();
+
   mPoints.push_back(STabletPoint());
 }
 
@@ -95,31 +110,59 @@ void TabletStroke::EndStroke(Bool_t clip_trailing_zero_pressure_points)
     ++i;
     mPoints.erase(i, mPoints.end());
   }
+
   mPoints.push_back(STabletPoint());
+
+  Int_t NP = mPoints.size() - 2;
+  if (NP > 2)
+  {
+    mPoints.front() = mPoints[1]  + pre_sym_quadratic(1, 2, 3);
+    mPoints.back()  = mPoints[NP] + pre_sym_quadratic(NP, NP - 1, NP - 2);
+  }
+  else if (NP > 1)
+  {
+    mPoints.front() = 2.0f * mPoints[1] - mPoints[2];
+    mPoints.back()  = 2.0f * mPoints[2] - mPoints[1];
+  }
+  else
+  {
+    mPoints.front() = mPoints.back() = mPoints[1];
+  }
+
   bInStroke = false;
 }
 
 //==============================================================================
 
-void TabletStroke::MakeSplines()
+#include <Glasses/WSSeed.h>
+#include <Glasses/WSPoint.h>
+
+void TabletStroke::MakeWSSeed()
 {
-  // if (mSplineX) delete mSplineX;
-  // if (mSplineY) delete mSplineY;
+  WSSeed *seed = new WSSeed();
+  seed->SetFat(true);
+  mQueen->CheckIn(seed);
+  Add(seed);
 
-  // Int_t np = mPoints.size();
+  Int_t NP = mPoints.size() - 2;
+  for (Int_t i = 1; i <= NP; ++i)
+  {
+    STabletPoint &prev = mPoints[i-1];
+    STabletPoint &curr = mPoints[i];
+    STabletPoint &next = mPoints[i+1];
+    STabletPoint delta = next - prev;
+    // Float_t      d_mag = delta.Mag();
 
-  // vector<Double_t> vx(np), vy(np), vt(np);
+    WSPoint *p = new WSPoint(GForm("Point %d", i));
+    p->SetPos(curr.x, curr.y, curr.z);
+    p->RotateLF(1, 2, delta.Phi());
+    p->SetW(0.02f * curr.p);
+    // p->SetS(0.01f * delta.p / d_mag);
+    // p->SetT(10.0f * d_mag / delta.t);
 
-  // for (Int_t i = 0; i < np; ++i)
-  // {
-  //   const STabletPoint &p = mPoints[i];
-  //   vx[i] = p.x;
-  //   vy[i] = p.y;
-  //   vt[i] = p.t;
-  // }
-
-  // mSplineX = new TSpline3("x", &vt[0], &vx[0], np);
-  // mSplineY = new TSpline3("y", &vt[0], &vy[0], np);
+    mQueen->CheckIn(p);
+    seed->Add(p);
+  }
 }
 
 //==============================================================================
@@ -131,7 +174,7 @@ void TabletStroke::Print()
   for (Int_t i = 0; i < np; ++i)
   {
     STabletPoint &p = mPoints[i];
-    printf("  %3d  %8.4f %8.4f %8.4f, %8.4f; %6.4f\n",
+    printf("  %3d  %9.6f %9.6f %9.6f, %9.6f; %6.4f\n",
 	   i, p.x, p.y, p.z, p.t, p.p);
   }
 }
@@ -140,13 +183,16 @@ void TabletStroke::Print()
 
 void TabletStroke::MakeHisto(Int_t nbins, Float_t x_edge, Float_t y_edge)
 {
+  Int_t np = mPoints.size() - 1;
+  if (np < 1)
+    return;
+
   Float_t min[2], max[2];
 
-  min[0] = max[0] = mPoints[0].x;
-  min[1] = max[1] = mPoints[0].y;
+  min[0] = max[0] = mPoints[1].x;
+  min[1] = max[1] = mPoints[1].y;
 
-  Int_t np = mPoints.size();
-  for (Int_t i = 1; i < np; ++i)
+  for (Int_t i = 2; i < np; ++i)
   {
     for (Int_t c = 0; c < 2; ++c)
     {
@@ -160,16 +206,53 @@ void TabletStroke::MakeHisto(Int_t nbins, Float_t x_edge, Float_t y_edge)
   TH2I *h = new TH2I("Points", "Points",
 		     nbins, min[0] - xe, max[0] + xe,
 		     nbins, min[1] - ye, max[1] + ye);
-  for (Int_t i = 0; i < np; ++i)
+  for (Int_t i = 1; i < np; ++i)
   {
     h->Fill(mPoints[i].x, mPoints[i].y);
   }
 
-  if (gPad == 0)
-  {
-    printf("Requesting canvas ... expect trouble ;)\n");
-    TCanvas *c = GledGUI::theOne->NewCanvas("foo", "bar");
-    printf("Got back %p\n", c);
-  }
+  TCanvas *canvas = XTReqCanvas::Request("Stroke", "Stroke");
   h->Draw();
+  XTReqPadUpdate::Update(canvas);
+}
+
+void TabletStroke::MakeDeltaHistos(Int_t nbins)
+{
+  Float_t max_d = 0, max_v = 0, max_t = 0;
+
+  Int_t np = mPoints.size() - 1;
+  for (Int_t i = 1; i < np; ++i)
+  {
+    STabletPoint d = mPoints[i+1] - mPoints[i];
+    Float_t dist = d.Mag();
+    Float_t vel  = dist / d.t;
+    max_d = TMath::Max(max_d, dist);
+    max_v = TMath::Max(max_v, vel);
+    max_t = TMath::Max(max_t, d.t);
+  }
+  max_d *= 1.001f;
+  max_v *= 1.001f;
+  max_t *= 1.001f;
+ 
+  TH1I *hd = new TH1I("Distance", "Distance", nbins, 0, max_d);
+  TH1I *hv = new TH1I("Velocity", "Velocity", nbins, 0, max_v);
+  TH1I *ht = new TH1I("Delta T",  "Delta T",  nbins, 0, max_t);
+  // d .vs. v correlation
+  // TH2I *hc = new TH2I(""
+
+  for (Int_t i = 1; i < np; ++i)
+  {
+    STabletPoint d = mPoints[i+1] - mPoints[i];
+    Float_t dist = d.Mag();
+    Float_t vel  = dist / d.t;
+    hd->Fill(dist);
+    hv->Fill(vel);
+    ht->Fill(d.t);
+  }
+
+  TCanvas *canvas = XTReqCanvas::Request("StrokeDeltas", "Stroke Deltas", 1024, 768, 2, 2);
+  canvas->cd(1); hd->Draw();
+  canvas->cd(2); hv->Draw();
+  canvas->cd(3); ht->Draw();
+  XTReqPadUpdate::Update(canvas);
 }
