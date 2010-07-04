@@ -17,6 +17,8 @@ class ShellInfo;
 class FTW_Window;
 class FTW_Leaf;
 class FTW_Nest;
+class MTW_ClassView;
+class MTW_MetaView;
 class MCW_View;
 
 class TSocket;
@@ -49,9 +51,9 @@ protected:
   TString       mWindowLabel;
 
   // Standalone full-class views (MTW_Views) ... transients.
-  typedef hash_map<OptoStructs::ZGlassImg*, FTW_Window*> hpImg2pWindow_t;
-  typedef hpImg2pWindow_t::iterator                      hpImg2pWindow_i;
-  hpImg2pWindow_t mMTW_Views;
+  typedef hash_map<OptoStructs::ZGlassImg*, MTW_ClassView*> hpImg2pMTW_View_t;
+  typedef hpImg2pMTW_View_t::iterator                       hpImg2pMTW_View_i;
+  hpImg2pMTW_View_t mMTW_Views;
 
   // SubShells created via custom-gui interface (Pupils and Nests).
   typedef hash_map<OptoStructs::ZGlassImg*, FTW_SubShell*> hpImg2pSShell_t;
@@ -86,8 +88,6 @@ protected:
   void label_shell();
   void set_size_range();
   void set_vis_of_vertical_component(Fl_Widget* w, bool on_p);
-
-  static void mtw_view_closed(FTW_Window* win, OptoStructs::ZGlassImg* img);
 
 public:
 
@@ -136,10 +136,10 @@ public:
 
   void ExportToInterpreter(OptoStructs::ZGlassImg* img, const char* varname);
 
-  FTW_Window* SpawnMetaView(OptoStructs::ZGlassImg* img, ZGlass* gui, bool show_p);
-  FTW_Window* SpawnMTW_View(OptoStructs::ZGlassImg* img, bool manage_p, bool show_p);
-  FTW_Window* SpawnMTW_View(OptoStructs::ZGlassImg* img, bool manage_p, bool show_p, int x, int y, float xf=0, float yf=0);
-  void DitchMTW_View(OptoStructs::ZGlassImg* img);
+  MTW_MetaView*  SpawnMetaView(OptoStructs::ZGlassImg* img, ZGlass* gui, bool show_p);
+  MTW_ClassView* SpawnMTW_View(OptoStructs::ZGlassImg* img, bool manage_p, bool show_p);
+  MTW_ClassView* SpawnMTW_View(OptoStructs::ZGlassImg* img, bool manage_p, bool show_p, int x, int y, float xf=0, float yf=0);
+  void UnregisterMTW_View(OptoStructs::ZGlassImg* img, MTW_View* view);
   void RemoveMTW_Views();
 
   MCW_View* MakeMCW_View (OptoStructs::ZGlassImg* img, GledNS::MethodInfo* cmi);

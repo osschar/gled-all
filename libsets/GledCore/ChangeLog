@@ -1,3 +1,31 @@
+2010-07-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Really fix MTW_View destruction.
+	The problem was that it was coming from two directions (ZGlassImg
+	or Fl_Window destruction) and so both window ownership and
+	FTW_Shell management of the views failed.
+
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	Spawn Class/MetaView functions now return MTW_Class/MetaView
+	pointers, not Fl_Window (as the MTW object must be destroyed).
+	The internal transient hash also holds pointers to MTW objects.
+	Replace DitchMTW_View() with UnregisterMTW_View() that is called
+	from the MTW_View destructor when the view is flagged as managed.
+
+	* GledView/MTW_View.cxx:
+	* GledView/MTW_View.h:
+	Add flag bManaged -- if it is set, FTW_Shell is notified about
+	view destruction.
+	Add protected method set_window() -- if window exists it
+	connects callback that destroys the view (not window!) when the
+	window is closed (window-manager close or Esc shortcut). The
+	window itsels gets destroyed via a timer with zero timeout.
+
+	* GledView/MTW_ClassView.cxx:
+	* GledView/MTW_MetaView.cxx:
+	Assign window to base-class via protected set_window().
+
 2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve XT canvas request, add pad-update request.

@@ -48,7 +48,7 @@ void MTW_ClassView::_init()
 {
   resizable(0);
   end();
-  mWindow = dynamic_cast<Fl_Window*>(parent());
+  set_window(dynamic_cast<Fl_Window*>(parent()));
 
   // Setting for parent class.
   mFltkRep = this;
@@ -68,7 +68,8 @@ MTW_ClassView::MTW_ClassView(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
 
 MTW_ClassView::~MTW_ClassView()
 {
-  if(mWindow) {
+  if (mWindow)
+  {
     mWindow->remove(*this);
     delete mWindow;
   }
