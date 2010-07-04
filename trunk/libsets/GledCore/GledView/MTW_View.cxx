@@ -35,6 +35,7 @@ void MTW_View::_init()
 {
   mFltkRep = 0; // Fltk representation.
   bShown   = false;
+  bManaged = false;
   mSelfRep = 0;
 }
 
@@ -52,6 +53,28 @@ void MTW_View::auto_label()
 			       mGlass->GetSaturnID(), mGlass->GetRefCount(),
 			       mGlass->GetTitle()));
   }
+}
+
+void MTW_View::set_window(Fl_Window* win)
+{
+  mWindow = win;
+  if (mWindow)
+  {
+    mWindow->callback((Fl_Callback*) mtw_view_closed, this);
+  }
+}
+
+void MTW_View::mtw_view_closed(Fl_Window*, MTW_View* mtw_view)
+{
+  // After this call the Fl_Widget is still touched, so take
+  // fltk-representation out, destroy mtw_view and request delayed destruction
+  // of the (now empty) window.
+
+  Fl_Window *win = mtw_view->mWindow;
+  win->remove(mtw_view->mFltkRep);
+  mtw_view->mWindow = 0;
+  delete mtw_view;
+  FGS::delayed_destroy_window(win);
 }
 
 /**************************************************************************/
@@ -77,7 +100,12 @@ MTW_View::MTW_View(ZGlass* glass, Fl_SWM_Manager* swm_mgr) :
 }
 
 MTW_View::~MTW_View()
-{}
+{
+  if (bManaged)
+  {
+    mShell->UnregisterMTW_View(fImg, this);
+  }
+}
 
 /**************************************************************************/
 

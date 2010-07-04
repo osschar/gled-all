@@ -802,12 +802,7 @@ void FTW_Shell::ExportToInterpreter(OS::ZGlassImg* img, const char* varname)
 
 /**************************************************************************/
 
-void FTW_Shell::mtw_view_closed(FTW_Window* win, OptoStructs::ZGlassImg* img)
-{
-  dynamic_cast<FTW_Shell*>(win->get_swm_manager())->DitchMTW_View(img);
-}
-
-FTW_Window* FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui, bool show_p)
+MTW_MetaView* FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui, bool show_p)
 {
   FTW_Window   *w  = new FTW_Window(0,0);
   MTW_MetaView *mv = new MTW_MetaView(img, this);
@@ -824,40 +819,41 @@ FTW_Window* FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui, bool show_
   adopt_window(w);
   if (show_p)
     w->show();
-  return w;
+  return mv;
 }
 
-FTW_Window* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool show_p)
+MTW_ClassView* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool show_p)
 {
-  FTW_Window *win = 0;
+  MTW_ClassView *cv = 0;
   if (manage_p)
   {
-    hpImg2pWindow_i i = mMTW_Views.find(img);
+    hpImg2pMTW_View_i i = mMTW_Views.find(img);
     if (i != mMTW_Views.end())
-      win = i->second;
+      cv = i->second;
   }
-  if (!win)
+  if (!cv)
   {
-    win = new FTW_Window(0,0);
-    MTW_ClassView* cv = new MTW_ClassView(img, this);
+    FTW_Window *win = new FTW_Window(0,0);
+    cv = new MTW_ClassView(img, this);
     win->end();
     cv->BuildVerticalView();
     adopt_window(win);
     if (manage_p)
     {
-      win->callback((Fl_Callback*) mtw_view_closed, img);
-      mMTW_Views.insert(make_pair(img, win));
+      cv->SetManaged(true);
+      mMTW_Views.insert(make_pair(img, cv));
     }
   }
   if (show_p)
-    win->show();
-  return win;
+    cv->GetWindow()->show();
+  return cv;
 }
 
-FTW_Window* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool show_p,
-				     int x, int y, float xf, float yf)
+MTW_ClassView* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool show_p,
+					int x, int y, float xf, float yf)
 {
-  FTW_Window *win = SpawnMTW_View(img, manage_p, false);
+  MTW_ClassView *cv  = SpawnMTW_View(img, manage_p, false);
+  Fl_Window     *win = cv->GetWindow();
   int w = win->w(), h = win->h();
   x += int(xf*w);
   y += int(yf*h);
@@ -873,24 +869,25 @@ FTW_Window* FTW_Shell::SpawnMTW_View(OS::ZGlassImg* img, bool manage_p, bool sho
   win->position(x, y);
   if (show_p)
     win->show();
-  return win;
+  return cv;
 }
 
-void FTW_Shell::DitchMTW_View(OS::ZGlassImg* img)
+void FTW_Shell::UnregisterMTW_View(OS::ZGlassImg* img, MTW_View* view)
 {
-  hpImg2pWindow_i i = mMTW_Views.find(img);
+  // Called by a managed MTW_View when destructing.
+  hpImg2pMTW_View_i i = mMTW_Views.find(img);
   if (i != mMTW_Views.end())
   {
-    // This is coming from callback whose processing touches Fl_Window afterwards.
-    FGS::delayed_destroy_window(i->second);
+    assert (i->second == view);
     mMTW_Views.erase(i);
   }
 }
 
 void FTW_Shell::RemoveMTW_Views()
 {
-  for (hpImg2pWindow_i i = mMTW_Views.begin(); i != mMTW_Views.end(); ++i)
+  for (hpImg2pMTW_View_i i = mMTW_Views.begin(); i != mMTW_Views.end(); ++i)
   {
+    i->second->SetManaged(false); // To avoid UnregisterMTW_View call.
     delete i->second;
   }
   mMTW_Views.clear();

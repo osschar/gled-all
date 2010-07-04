@@ -41,6 +41,11 @@ protected:
   Fl_Window*            mWindow;
   Fl_Group*		mFltkRep;
   bool			bShown;
+  bool                  bManaged;
+
+  void set_window(Fl_Window* win);
+
+  static void mtw_view_closed(Fl_Window* win, MTW_View* mtw_view);
 
   // Self representation
   class SelfRep : public Fl_Box
@@ -62,6 +67,8 @@ public:
 
           FTW_Shell* GetShell()  const { return mShell; }
   virtual Fl_Window* GetWindow() const { return mWindow; }
+
+  void SetManaged(bool m) { bManaged = m; }
 
   void Labelofy();
 
