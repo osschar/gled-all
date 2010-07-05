@@ -9,6 +9,8 @@
 
 #include <GL/glew.h>
 
+#define PARENT ZNode_GL_Rnr
+
 //==============================================================================
 
 void TabletReader_GL_Rnr::_init()
@@ -16,7 +18,8 @@ void TabletReader_GL_Rnr::_init()
 
 TabletReader_GL_Rnr::TabletReader_GL_Rnr(TabletReader* idol) :
   ZNode_GL_Rnr(idol),
-  mTabletReader(idol)
+  mTabletReader(idol),
+  mTabletRMS()
 {
   _init();
 }
@@ -28,26 +31,30 @@ TabletReader_GL_Rnr::~TabletReader_GL_Rnr()
 
 //void TabletReader_GL_Rnr::PreDraw(RnrDriver* rd) {}
 
-//void TabletReader_GL_Rnr::Draw(RnrDriver* rd) {}
+void TabletReader_GL_Rnr::Draw(RnrDriver* rd)
+{
+  obtain_rnrmod(rd, mTabletRMS);
+  PARENT::Draw(rd);
+}
 
 //void TabletReader_GL_Rnr::PostDraw(RnrDriver* rd) {}
 
 void TabletReader_GL_Rnr::Render(RnrDriver* rd)
 {
-  TabletReader &R = * mTabletReader;
+  TabletRnrMod &RM = * mTabletRMS.lens();
+  TabletReader &R  = * mTabletReader;
 
-  if (R.mMarkSize <= 0)
+  Float_t d = RM.GetMarkSize();
+  if (d <= 0)
     return;
 
-  Float_t d = R.mScaledW * R.mMarkSize;
-
   glPushMatrix();
-  glTranslatef(R.mPenX, R.mPenY, 0.001f*R.mScaledW);
+  glTranslatef(R.mPenX, R.mPenY, 0.001f);
 
   if (R.bInTouch)
   {
     d *= R.mPenP;
-    rd->GL()->Color(R.mInTouchColor);
+    rd->GL()->Color(RM.RefInTouchColor());
     glBegin(GL_LINE_LOOP);
     Float_t astep = TMath::TwoPi()/20;
     Float_t phi = 0;
@@ -60,7 +67,7 @@ void TabletReader_GL_Rnr::Render(RnrDriver* rd)
   else if (R.bInProximity)
   {
     Float_t e = 0.5f * d;
-    rd->GL()->Color(R.mInProximityColor);
+    rd->GL()->Color(RM.RefInProximityColor());
     glBegin(GL_LINES);
     glVertex2f( d,  0); glVertex2f( e,  0);
     glVertex2f(-e,  0); glVertex2f(-d,  0);

@@ -8,7 +8,6 @@
 #define Tmp1_TabletStrokeList_H
 
 #include <Glasses/ZNode.h>
-#include <Stones/ZColor.h>
 
 class TabletStrokeList : public ZNode
 {
@@ -18,7 +17,6 @@ private:
   void _init();
 
 protected:
-  ZColor               mColor;     // X{PRGS} 7 ColorButt()
 
 public:
   TabletStrokeList(const Text_t* n="TabletStrokeList", const Text_t* t=0);

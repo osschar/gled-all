@@ -10,6 +10,9 @@
 #include <Glasses/TabletStroke.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
+#include <Glasses/TabletRnrMod.h>
+#include <Rnr/GL/TabletRnrMod_GL_Rnr.h>
+
 class TabletStroke_GL_Rnr : public ZNode_GL_Rnr
 {
 private:
@@ -18,12 +21,14 @@ private:
 protected:
   TabletStroke*	mTabletStroke;
 
+  RnrModStoreT<TabletRnrMod> mTabletRMS;
+
 public:
   TabletStroke_GL_Rnr(TabletStroke* idol);
   virtual ~TabletStroke_GL_Rnr();
 
   //virtual void PreDraw(RnrDriver* rd);
-  //virtual void Draw(RnrDriver* rd);
+  virtual void Draw(RnrDriver* rd);
   //virtual void PostDraw(RnrDriver* rd);
 
   virtual void Render(RnrDriver* rd);

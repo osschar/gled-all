@@ -8,3 +8,4 @@ ProductionRule	3	Glasses/ProductionRule
 TabletReader     64     Glasses/TabletReader     .
 TabletStroke     65     Glasses/TabletStroke     .
 TabletStrokeList 66     Glasses/TabletStrokeList
+TabletRnrMod     67     Glasses/TabletRnrMod     .

@@ -10,6 +10,9 @@
 #include <Glasses/TabletReader.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
+#include <Glasses/TabletRnrMod.h>
+#include <Rnr/GL/TabletRnrMod_GL_Rnr.h>
+
 class TabletReader_GL_Rnr : public ZNode_GL_Rnr
 {
 private:
@@ -18,12 +21,14 @@ private:
 protected:
   TabletReader*	mTabletReader;
 
+  RnrModStoreT<TabletRnrMod> mTabletRMS;
+
 public:
   TabletReader_GL_Rnr(TabletReader* idol);
   virtual ~TabletReader_GL_Rnr();
 
   //virtual void PreDraw(RnrDriver* rd);
-  //virtual void Draw(RnrDriver* rd);
+  virtual void Draw(RnrDriver* rd);
   //virtual void PostDraw(RnrDriver* rd);
 
   virtual void Render(RnrDriver* rd);

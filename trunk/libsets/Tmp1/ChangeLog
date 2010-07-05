@@ -1,3 +1,32 @@
+2010-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move all rendering-style parameters to TabletRnrMod.
+
+	* Glasses/TabletRnrMod.cxx:
+	* Glasses/TabletRnrMod.h:
+	* Rnr/GL/TabletRnrMod_GL_Rnr.cxx:
+	* Rnr/GL/TabletRnrMod_GL_Rnr.h:
+	The new rnr-mod and its renderer.
+
+	* Glasses/TabletReader.cxx:
+	* Glasses/TabletReader.h:
+	Remove colors and flags influencing renering only.
+	Always scale the drawing-area width to 1.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	* Glasses/TabletStrokeList.h:
+	Remove colors and flags influencing renering only.
+
+	* Rnr/GL/TabletReader_GL_Rnr.cxx:
+	* Rnr/GL/TabletReader_GL_Rnr.h:
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	* Rnr/GL/TabletStroke_GL_Rnr.h:
+	Take rendering parameters from TabletRnrMod.
+
+	* glass.list:
+	Register TabletRnrMod.
+
 2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Better point reading, preliminary creation of WSSeed objects.
