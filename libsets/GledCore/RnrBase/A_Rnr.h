@@ -149,9 +149,9 @@ public:
 
 struct RnrMod
 {
-  ZGlass*     fLens;
-  A_Rnr*      fRnr;
-  TimeStamp_t fTringTS;
+  ZGlass      *fLens;
+  A_Rnr       *fRnr;
+  TimeStamp_t  fTringTS;
 
   RnrMod(ZGlass* l=0, A_Rnr* r=0, TimeStamp_t ts=0) :
     fLens(l), fRnr(r), fTringTS(ts) {}
@@ -159,15 +159,24 @@ struct RnrMod
 
 struct RnrModStore
 {
-  FID_t	fFid;
-  RnrMod*     fRnrMod;
-  TimeStamp_t fTringTS;
+  RnrMod      *fRnrMod;
+  TimeStamp_t  fTringTS;
+  FID_t	       fFid;
 
-  RnrModStore(FID_t f) : fFid(f), fRnrMod(0), fTringTS(0) {}
+  RnrModStore(FID_t f) : fRnrMod(0), fTringTS(0), fFid(f) {}
 
   ZGlass* lens() { return fRnrMod->fLens; }
   A_Rnr*  rnr()  { return fRnrMod->fRnr; }
 };
 
+template<class TL, class TR=A_Rnr>
+struct RnrModStoreT : public RnrModStore
+{
+  RnrModStoreT()        : RnrModStore(TL::FID()) {}
+  RnrModStoreT(FID_t f) : RnrModStore(f)         {}
+
+  TL* lens() { return (TL*) fRnrMod->fLens; }
+  TR* rnr()  { return (TR*) fRnrMod->fRnr; }
+};
 
 #endif

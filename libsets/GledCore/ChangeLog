@@ -1,3 +1,9 @@
+2010-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* RnrBase/A_Rnr.h:
+	Add templated RnrModStoreT to avoid casting in renderers.
+	Reorder members of RnrMod and RnrModStore by size.
+
 2010-07-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Really fix MTW_View destruction.
