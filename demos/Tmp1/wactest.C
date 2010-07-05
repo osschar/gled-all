@@ -24,6 +24,8 @@ void wactest()
   cb->SetPos(0, -1, 0);
   cb->RotateLF(1, 2, TMath::PiOver2());
 
+  CREATE_ADD_GLASS(rmod, TabletRnrMod, arcs, "TabletRnrMod", 0);
+
   CREATE_ADD_GLASS(tr, TabletReader, arcs, "TabletReader", 0);
   tr->RotateLF(2, 3, TMath::PiOver2());
 
