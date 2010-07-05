@@ -50,30 +50,51 @@ void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
   if (M < 0)
     return;
 
-  rd->GL()->Color(RM.RefPointColor());
-  glBegin(GL_POINTS);
-  for (Int_t i = m; i <= M; ++i)
+  if (RM.GetRnrPoints())
   {
-    if (P[i].p != 0)
-      glVertex3fv(P[i]);
-  }
-  glEnd();
-
-  if (M > m && ! S.bInStroke)
-  {
-    glColor4f(1, 0, 0, 1);
+    rd->GL()->Color(RM.RefPointColor());
     glBegin(GL_POINTS);
-    glVertex3fv(P[m-1]);
-    glVertex3fv(P[M+1]);
+    for (Int_t i = m; i <= M; ++i)
+    {
+      if (P[i].p != 0)
+	glVertex3fv(P[i]);
+    }
+    glEnd();
+
+    if (M > m && ! S.bInStroke)
+    {
+      glColor4f(1, 0, 0, 1);
+      glBegin(GL_POINTS);
+      glVertex3fv(P[m-1]);
+      glVertex3fv(P[M+1]);
+      glEnd();
+    }
+
+    rd->GL()->Color(0.25f*RM.RefPointColor());
+    glBegin(GL_POINTS);
+    for (Int_t i = m; i <= M; ++i)
+    {
+      if (P[i].p == 0)
+	glVertex3fv(P[i]);
+    }
     glEnd();
   }
 
-  rd->GL()->Color(0.25f*RM.RefPointColor());
-  glBegin(GL_POINTS);
-  for (Int_t i = m; i <= M; ++i)
+  if (RM.GetRnrSpheres())
   {
-    if (P[i].p == 0)
-      glVertex3fv(P[i]);
+    rd->GL()->Color(RM.RefPointColor());
+    for (Int_t i = m; i <= M; ++i)
+    {
+      if (P[i].p != 0)
+      {
+	const STabletPoint &p = P[i];
+	const Float_t       r = RM.GetMarkSize() * powf(p.p, RM.GetPressCurveAlpha());
+	glPushMatrix();
+	glTranslatef(p.x, p.y, p.z);
+	gluSphere(rd->GL()->GetQuadricStd(), r, 20, 20);
+	glPopMatrix();
+      }
+	glVertex3fv(P[i]);
+    }
   }
-  glEnd();
 }

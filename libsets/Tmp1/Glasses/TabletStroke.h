@@ -10,7 +10,6 @@
 #include <Glasses/ZNode.h>
 #include <Stones/STabletPoint.h>
 
-
 class TabletStroke : public ZNode
 {
   MAC_RNR_FRIENDS(TabletStroke);
@@ -22,7 +21,8 @@ protected:
   Float_t              mStartTime; // X{GS}   7 Value()
   vSTabletPoint_t      mPoints;
   vector<Int_t>        mBreaks;
-  Bool_t               bInStroke;
+  Bool_t               bInStroke;      //!
+  Bool_t               bEnableDLAtEnd; //!
 
   void get_draw_range(Int_t& min, Int_t& max);
 

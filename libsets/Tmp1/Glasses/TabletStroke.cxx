@@ -25,12 +25,10 @@ ClassImp(TabletStroke);
 void TabletStroke::_init()
 {
   // Override settings from ZGlass
-  // bUseDispList = true;
-  // Then AddPoint() should stamp tring (or Begin/EndStroke should disable DLs).
+  bUseDispList = true;
 
   mStartTime = 0;
   bInStroke = false;
-  // mSplineX = mSplineY = 0;
 }
 
 TabletStroke::TabletStroke(const Text_t* n, const Text_t* t) :
@@ -77,9 +75,13 @@ void TabletStroke::BeginStroke()
     throw _eh + "Already in stroke.";
 
   bInStroke = true;
+  if (bUseDispList)
+  {
+    bEnableDLAtEnd = true;
+    bUseDispList   = false;
+  }
 
   mPoints.clear();
-
   mPoints.push_back(STabletPoint());
 }
 
@@ -131,6 +133,10 @@ void TabletStroke::EndStroke(Bool_t clip_trailing_zero_pressure_points)
   }
 
   bInStroke = false;
+  if (bEnableDLAtEnd)
+  {
+    bUseDispList = true;
+  }
 }
 
 //==============================================================================
