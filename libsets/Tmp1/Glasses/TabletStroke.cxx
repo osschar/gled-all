@@ -24,9 +24,10 @@ ClassImp(TabletStroke);
 
 void TabletStroke::_init()
 {
-  mPointColor.rgba(1, 0.5, 0, 1);
-  mLineColor .rgba(0, 0.5, 1, 1);
-  bRnrPoints = bRnrLine = true;
+  // Override settings from ZGlass
+  // bUseDispList = true;
+  // Then AddPoint() should stamp tring (or Begin/EndStroke should disable DLs).
+
   mStartTime = 0;
   bInStroke = false;
   // mSplineX = mSplineY = 0;

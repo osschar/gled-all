@@ -9,6 +9,8 @@
 
 #include <GL/glew.h>
 
+#define PARENT ZNode_GL_Rnr
+
 //==============================================================================
 
 void TabletStroke_GL_Rnr::_init()
@@ -28,14 +30,19 @@ TabletStroke_GL_Rnr::~TabletStroke_GL_Rnr()
 
 //void TabletStroke_GL_Rnr::PreDraw(RnrDriver* rd) {}
 
-//void TabletStroke_GL_Rnr::Draw(RnrDriver* rd) {}
+void TabletStroke_GL_Rnr::Draw(RnrDriver* rd)
+{
+  obtain_rnrmod(rd, mTabletRMS);
+  PARENT::Draw(rd);
+}
 
 //void TabletStroke_GL_Rnr::PostDraw(RnrDriver* rd) {}
 
 void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
 {
+  TabletRnrMod   &RM = * mTabletRMS.lens();
   TabletStroke    &S = * mTabletStroke;
-  vSTabletPoint_t &P = S.mPoints;
+  vSTabletPoint_t &P =   S.mPoints;
 
   Int_t m, M;
   S.get_draw_range(m, M);
@@ -43,7 +50,7 @@ void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
   if (M < 0)
     return;
 
-  rd->GL()->Color(S.mPointColor);
+  rd->GL()->Color(RM.RefPointColor());
   glBegin(GL_POINTS);
   for (Int_t i = m; i <= M; ++i)
   {
@@ -61,7 +68,7 @@ void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
     glEnd();
   }
 
-  rd->GL()->Color(0.25f*S.mPointColor);
+  rd->GL()->Color(0.25f*RM.RefPointColor());
   glBegin(GL_POINTS);
   for (Int_t i = m; i <= M; ++i)
   {

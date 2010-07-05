@@ -23,9 +23,7 @@ ClassImp(TabletReader);
 void TabletReader::_init()
 {
   mStrokeType = SS_Absolute;
-  bScalePos = true;
   bInvertY = true;
-  mScaledW = 1;
   bKeepStrokeInProximity = true;
 
   mPosScale = mPrsScale = 0;
@@ -39,11 +37,6 @@ void TabletReader::_init()
   bPrintButtState = false;
   bPrintPositions = false;
   bPrintOther     = true;
-
-  mMarkSize = 0.05;
-  mInTouchColor.rgba(1, 0, 0, 1);
-  mInProximityColor.rgba(0, 1, 0, 1);
-  mStrokeColor.rgba(1, 0.1, 0.5, 1);
 }
 
 TabletReader::TabletReader(const Text_t* n, const Text_t* t) :
@@ -172,7 +165,6 @@ void TabletReader::begin_stroke_list()
     mFirstStrokeStart = mStrokeStart = 0l;
 
     TabletStrokeList *slist = new TabletStrokeList("StrokeList");
-    slist->SetColorByRef(mStrokeColor);
     mQueen->CheckIn(slist);
     SetStrokeList(slist);
     Add(slist);
@@ -211,7 +203,6 @@ void TabletReader::begin_stroke()
   if (mStrokeList != 0 && mStroke == 0)
   {
     TabletStroke *stroke = new TabletStroke("Stroke");
-    stroke->SetPointColorByRef(mStrokeColor);
     stroke->SetStartTime((mStrokeStart - mFirstStrokeStart).ToFloat());
     mQueen->CheckIn(stroke);
     SetStroke(stroke);
@@ -270,17 +261,9 @@ void TabletReader::StartRead()
   printf("MIN x=%d y=%d p=%d\n", s_min.values[WACOMFIELD_POSITION_X], s_min.values[WACOMFIELD_POSITION_Y], s_min.values[WACOMFIELD_PRESSURE]);
   printf("MAX x=%d y=%d p=%d\n", s_max.values[WACOMFIELD_POSITION_X], s_max.values[WACOMFIELD_POSITION_Y], s_max.values[WACOMFIELD_PRESSURE]);
 
-  if (bScalePos)
-  {
-    mPosScale = mScaledW / s_max.values[WACOMFIELD_POSITION_X];
-    mOffX = s_max.values[WACOMFIELD_POSITION_X] / 2;
-    mOffY = s_max.values[WACOMFIELD_POSITION_Y] / 2;
-  }
-  else
-  {
-    mPosScale = 1;
-    mOffX = mOffY = 0;
-  }
+  mPosScale = 1.0f / s_max.values[WACOMFIELD_POSITION_X];
+  mOffX     = s_max.values[WACOMFIELD_POSITION_X] / 2;
+  mOffY     = s_max.values[WACOMFIELD_POSITION_Y] / 2;
   mPrsScale = 1.0f / s_max.values[WACOMFIELD_PRESSURE];
   Stamp(FID());
 

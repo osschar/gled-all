@@ -8,7 +8,6 @@
 #define Tmp1_TabletReader_H
 
 #include <Glasses/ZNode.h>
-#include <Stones/ZColor.h>
 
 #include <Gled/GMutex.h>
 #include <Gled/GThread.h>
@@ -50,9 +49,7 @@ private:
 
 protected:
   StrokeType_e  mStrokeType; //  X{GS} 7 PhonyEnum()
-  Bool_t        bScalePos;   //  X{GS} 7 Bool(-join=>1)
   Bool_t        bInvertY;    //  X{GS} 7 Bool()
-  Float_t       mScaledW;    //  X{GS} 7 Value(-range=>[0, 20000, 1, 100])
   Bool_t        bKeepStrokeInProximity; // X{GS} 7 Bool()
 
   Float_t       mPosScale;   //! X{G}  7 ValOut(-join=>1)
@@ -86,13 +83,8 @@ protected:
   Bool_t        bPrintPositions;  // X{GS} 7 Bool(-join=>1)
   Bool_t        bPrintOther;      // X{GS} 7 Bool()
 
-  Float_t       mMarkSize;         // X{GS}   7 Value(-range=>[0, 1, 1, 1000])
-  ZColor        mInTouchColor;     // X{PRGS} 7 ColorButt()
-  ZColor        mInProximityColor; // X{PRGS} 7 ColorButt()
-
   ZLink<TabletStrokeList> mStrokeList;  // X{GS} L{}
   ZLink<TabletStroke>     mStroke;      // X{GS} L{}
-  ZColor                  mStrokeColor; // X{PRGS} 7 ColorButt()
 
   GMutex    mTabletMutex;  //!
   GThread  *mTabletThread; //!

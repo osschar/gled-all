@@ -8,7 +8,6 @@
 #define Tmp1_TabletStroke_H
 
 #include <Glasses/ZNode.h>
-#include <Stones/ZColor.h>
 #include <Stones/STabletPoint.h>
 
 
@@ -20,10 +19,6 @@ private:
   void _init();
 
 protected:
-  ZColor               mPointColor;// X{PRGS} 7 ColorButt(-join=>1)
-  ZColor               mLineColor; // X{PRGS} 7 ColorButt()
-  Bool_t               bRnrPoints; // X{GS}   t Bool(-join=>1)
-  Bool_t               bRnrLine;   // X{GS}   t Bool()
   Float_t              mStartTime; // X{GS}   7 Value()
   vSTabletPoint_t      mPoints;
   vector<Int_t>        mBreaks;
