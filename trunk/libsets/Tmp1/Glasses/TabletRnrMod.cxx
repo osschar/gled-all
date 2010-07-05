@@ -20,14 +20,15 @@ ClassImp(TabletRnrMod);
 void TabletRnrMod::_init()
 {
   mMarkSize = 0.05;
-  mPressCurveAlpha = 0;
+  mPressCurveAlpha = 1;
 
   mInTouchColor.rgba(1, 0, 0, 1);
   mInProximityColor.rgba(0, 1, 0, 1);
 
   mPointColor.rgba(1, 0.5, 0, 1);
   mLineColor .rgba(0, 0.5, 1, 1);
-  bRnrPoints = bRnrLine = true;
+  bRnrPoints =  true;
+  bRnrSpheres = false;
 }
 
 TabletRnrMod::TabletRnrMod(const Text_t* n, const Text_t* t) :

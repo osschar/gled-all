@@ -53,7 +53,7 @@ void TabletReader_GL_Rnr::Render(RnrDriver* rd)
 
   if (R.bInTouch)
   {
-    d *= R.mPenP;
+    d *= powf(R.mPenP, RM.GetPressCurveAlpha());
     rd->GL()->Color(RM.RefInTouchColor());
     glBegin(GL_LINE_LOOP);
     Float_t astep = TMath::TwoPi()/20;

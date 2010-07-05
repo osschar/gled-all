@@ -19,8 +19,8 @@ private:
 
 protected:
   // Common parameters
-  Float_t       mMarkSize;         // X{GST}   7 Value(-range=>[0, 1, 1, 1000])
-  Float_t       mPressCurveAlpha;  // X{GST}   7 Value(-range=>[-10, 10, 1, 1000])
+  Float_t       mMarkSize;         // X{GST}   7 Value(-range=>[0, 1,  1, 1000])
+  Float_t       mPressCurveAlpha;  // X{GST}   7 Value(-range=>[0, 10, 1, 1000])
 
   // Reader parameters
   ZColor        mInTouchColor;     // X{PRGST} 7 ColorButt()
@@ -30,7 +30,7 @@ protected:
   ZColor        mPointColor;       // X{PRGST} 7 ColorButt(-join=>1)
   ZColor        mLineColor;        // X{PRGST} 7 ColorButt()
   Bool_t        bRnrPoints;        // X{GST}   7 Bool(-join=>1)
-  Bool_t        bRnrLine;          // X{GST}   7 Bool()
+  Bool_t        bRnrSpheres;       // X{GST}   7 Bool()
 
 public:
   TabletRnrMod(const Text_t* n="TabletRnrMod", const Text_t* t=0);

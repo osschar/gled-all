@@ -1,5 +1,26 @@
 2010-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add bead-like rendering of tablet-strokes.
+
+	* Glasses/TabletRnrMod.cxx:
+	* Glasses/TabletRnrMod.h:
+	Add flag to enable sphere rendering.
+	Put pressure-alpha into range 0 -> 10.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	If display-lists are enabled at BeginStroke(), turn them off and
+	re-enable them in EndStroke().
+
+	* Rnr/GL/TabletReader_GL_Rnr.cxx:
+	Take into account pressure alpha.
+
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	Add bead-like rendering, use pressure alpha to determine sphere
+	radius.
+
+2010-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Move all rendering-style parameters to TabletRnrMod.
 
 	* Glasses/TabletRnrMod.cxx:
