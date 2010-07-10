@@ -7,7 +7,7 @@
 #include <glass_defines.h>
 #include <gl_defines.h>
 
-void iso_surfs()
+void blob()
 {
   Gled::theOne->AssertLibSet("Geom1");
   Gled::theOne->AssertLibSet("GledGTS");
@@ -37,44 +37,20 @@ void iso_surfs()
   // GTS models
 
   CREATE_ADD_GLASS(maker1, GTSIsoMaker, starw, "Iso Maker 1", 0);
+  maker1->SetXAxis(-2, 2, 60);
+  maker1->SetYAxis(-2, 2, 60);
+  maker1->SetZAxis(-2, 2, 60);
+  maker1->SetAlgo(GTSIsoMaker::A_Tetra);
   CREATE_ADD_GLASS(surf1, GTSurf, starw, "Clipped Sphere", 0);
-  surf1->SetPos(3, 0, 0);
+  surf1->SetPos(0, 0, 0);
   surf1->SetColor(1,0.8,0.2);
   maker1->SetTarget(surf1);
-  maker1->SetFormula("x^2 + y^2 + z^2");
-  maker1->SetValue(1.2);
+  maker1->SetFormula("pow((x-1)^2 + y^2 + z^2, -1) + pow((x+1)^2 + y^2 + z^2, -1)");
+  maker1->SetValue(1.);
   maker1->MakeSurface();
 
-  CREATE_ADD_GLASS(maker2, GTSIsoMaker, starw, "Iso Maker 2", 0);
-  CREATE_ADD_GLASS(surf2, GTSurf, starw, "Torus", 0);
-  surf2->SetRotByDegrees(0,30,-30);
-  surf2->SetColor(0.2,1,0.8);
-  maker2->SetTarget(surf2);
-  maker2->SetFormula("(0.8 - sqrt(x^2 + y^2))^2 + z^2");
-  maker2->SetValue(0.04);
-  maker2->MakeSurface();
-
-  CREATE_ADD_GLASS(mat,   ZGlMaterial, starw, "Material1", 0);
-  CREATE_ADD_GLASS(blend, ZGlBlending, starw, "Blending1", 0);
-  CREATE_ADD_GLASS(limo,  ZGlLightModel, starw, "LightModel1", 0);
-  limo->SetLightModelOp(ZRnrModBase::O_On);
-  limo->SetLiMoTwoSide(true);
-  limo->SetShadeModelOp(ZRnrModBase::O_On);
-
-  CREATE_ADD_GLASS(maker3, GTSIsoMaker, starw, "Iso Maker 3", 0);
-  CREATE_ADD_GLASS(surf3, GTSurf, starw, "Hyperboloid", 0);
-  surf3->SetPos(-3, 0, 0);
-  surf3->SetRotByDegrees(0,-30,0);
-  surf3->SetScale(1.5);
-  surf3->SetUseScale(true);
-  surf3->SetColor(0.8,0.2,1);
-  maker3->SetTarget(surf3);
-  maker3->SetFormula("(x^2+y^2) - z^2/0.75");
-  maker3->SetValue(-0.05);
-  maker3->MakeSurface();
-
   CREATE_ADD_GLASS(retring, GTSRetriangulator, starw, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
-  retring->SetTarget(surf2);
+  retring->SetTarget(surf1);
 
   // Spawn GUI
   Gled::Macro("eye.C");
@@ -85,8 +61,9 @@ void iso_surfs()
     e->SetBeatsToDo(-1); e->SetInterBeatMS(40); e->SetStampInterval(10);
     g_queen->CheckIn(e); starw->Add(e);
     Mover* mv = new Mover("S1 Rotator");
-    mv->SetNode(surf2); mv->SetRi(2); mv->SetRj(3); mv->SetRa(0.01);
-    g_queen->CheckIn(mv); e->Add(mv);
-    e->Start();
+    g_queen->CheckIn(mv);
+    mv->SetNode(surf1); mv->SetRi(2); mv->SetRj(3); mv->SetRa(0.01);
+    e->Add(mv);
+    //e->Start();
   }
 }
