@@ -1,5 +1,20 @@
 2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add abstract interface GTSIsoMakerFunctor that allows iso-surfaces
+	to be defined by a glass.
+
+	* Stones/GTSIsoMakerFunctor.cxx:
+	* Stones/GTSIsoMakerFunctor.h:
+	New stone - abstract interface for iso-surface maker functor.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add support for function source being an external lens.
+	It must be sub-classed from GTSIsoMakerFunctor.
+	This is the default if the link Functor is set.
+
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Rnr/GL/GTSurf_GL_Rnr.cxx:
 	* Rnr/GL/GTSurf_GL_Rnr.h:
 	Enable normal scaling ... gts doesn't do it anymore.
