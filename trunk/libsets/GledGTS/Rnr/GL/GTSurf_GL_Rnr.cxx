@@ -8,10 +8,12 @@
 #include <GTS/GTS.h>
 #include <GL/glew.h>
 
+#define PARENT ZNode_GL_Rnr
+
 /**************************************************************************/
 
-namespace {
-
+namespace
+{
   int face_drawer(GTS::GtsFace* f, int* dum) {
     /*
       GtsPoint& p1 = t->e1->segment.v1->p;
@@ -29,13 +31,19 @@ namespace {
     glVertex3dv(&vp[2]->p.x);
     return 0;
   }
+}
 
+void GTSurf_GL_Rnr::Draw(RnrDriver* rd)
+{
+  GL_Capability_Switch _auto_norm(GL_NORMALIZE, true);
+  PARENT::Draw(rd);
 }
 
 void GTSurf_GL_Rnr::Render(RnrDriver* rd)
 {
   glColor4fv(mGTSurf->mColor());
-  if(mGTSurf->pSurf) {
+  if (mGTSurf->pSurf)
+  {
     glBegin(GL_TRIANGLES);
     GTS::gts_surface_foreach_face(mGTSurf->pSurf, (GTS::GtsFunc)face_drawer, 0);
     glEnd();

@@ -10,15 +10,15 @@
 #include <Glasses/GTSurf.h>
 #include <Rnr/GL/ZNode_GL_Rnr.h>
 
-class GTSurf_GL_Rnr : public ZNode_GL_Rnr {
-private:
-
+class GTSurf_GL_Rnr : public ZNode_GL_Rnr
+{
 protected:
   GTSurf*	mGTSurf;
 
 public:
   GTSurf_GL_Rnr(GTSurf* idol) : ZNode_GL_Rnr(idol), mGTSurf(idol) {}
 
+  virtual void Draw(RnrDriver* rd);
   virtual void Render(RnrDriver* rd);
 
 }; // endclass GTSurf_GL_Rnr
