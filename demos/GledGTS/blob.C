@@ -37,9 +37,9 @@ void blob()
   // GTS models
 
   CREATE_ADD_GLASS(maker1, GTSIsoMaker, starw, "Iso Maker 1", 0);
-  maker1->SetXAxis(-2, 2, 60);
-  maker1->SetYAxis(-2, 2, 60);
-  maker1->SetZAxis(-2, 2, 60);
+  maker1->SetXAxis(-2, 2, 30);
+  maker1->SetYAxis(-2, 2, 30);
+  maker1->SetZAxis(-2, 2, 30);
   maker1->SetAlgo(GTSIsoMaker::A_Tetra);
   CREATE_ADD_GLASS(surf1, GTSurf, starw, "Clipped Sphere", 0);
   surf1->SetPos(0, 0, 0);

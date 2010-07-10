@@ -1,6 +1,11 @@
 2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* blob.C:
+	Reduce grid spacing to half.
+
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* blob.C:
 	New demo - blob from two spheres.
 
 	* iso_surfs.C:
