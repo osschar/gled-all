@@ -94,7 +94,6 @@ void TabletStroke_GL_Rnr::Render(RnrDriver* rd)
 	gluSphere(rd->GL()->GetQuadricStd(), r, 20, 20);
 	glPopMatrix();
       }
-	glVertex3fv(P[i]);
     }
   }
 }

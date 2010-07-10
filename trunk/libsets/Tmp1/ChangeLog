@@ -1,3 +1,23 @@
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First version of iso-surface generation from tablet-strokes.
+
+	* Glasses/TabletStroke.h:
+	Make TabletStrokeList a friend.
+
+	* Glasses/TabletStrokeList.cxx:
+	* Glasses/TabletStrokeList.h:
+	Implement calculation of potential function from all the points in
+	child-strokes.
+	Sub-class from GTSIsoMakerFunctor so that iso-surface can be
+	extracted from it.
+
+	* Makefile:
+	Add dependency on GledGTS libset.
+
+	* Rnr/GL/TabletStroke_GL_Rnr.cxx:
+	Remove a silly line.
+
 2010-07-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add bead-like rendering of tablet-strokes.
