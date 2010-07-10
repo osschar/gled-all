@@ -13,6 +13,7 @@
 class TabletStroke : public ZNode
 {
   MAC_RNR_FRIENDS(TabletStroke);
+  friend class TabletStrokeList;
 
 private:
   void _init();
