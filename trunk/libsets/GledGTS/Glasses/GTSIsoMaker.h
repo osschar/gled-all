@@ -10,8 +10,11 @@
 #include <Glasses/ZGlass.h>
 #include <Glasses/GTSurf.h>
 
-class GTSIsoMaker : public ZGlass {
+class GTSIsoMakerFunctor;
 
+
+class GTSIsoMaker : public ZGlass
+{
   MAC_RNR_FRIENDS(GTSIsoMaker);
 
 public:
@@ -21,7 +24,8 @@ private:
   void _init();
 
 protected:
-  ZLink<GTSurf>		mTarget;  // X{gS} L{}
+  ZLink<GTSurf>		mTarget;  // X{GS} L{}
+  ZLink<ZGlass>         mFunctor; // X{GS} L{a}
 
   TString		mFormula; // X{GS} 7 Textor(-width=>24)
   Algo_e		mAlgo;    // X{GS} 7 PhonyEnum(-join=>1)
