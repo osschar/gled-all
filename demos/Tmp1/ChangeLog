@@ -1,3 +1,8 @@
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* wactest.C:
+	Add iso-maker and GTS surface to the scene.
+
 2010-07-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* wactest.C:

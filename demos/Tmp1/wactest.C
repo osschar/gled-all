@@ -41,6 +41,17 @@ void wactest()
   recto->SetColor(1, 1, 1, 0.1);
   recto->SetPos(0, 0, -0.001);
 
+  CREATE_ADD_GLASS(isomaker, GTSIsoMaker, arcs, "Iso Maker", 0);
+  isomaker->SetXAxis(-0.5, 0.5, 100);
+  isomaker->SetYAxis(-0.5, 0.5, 100);
+  isomaker->SetZAxis(-0.5, 0.5, 100);
+  isomaker->SetAlgo(GTSIsoMaker::A_Tetra);
+
+  CREATE_ADD_GLASS(surf, GTSurf, arcs, "IsoSurface", 0);
+  surf->SetColor(1, 0.8, 0.2);
+
+  isomaker->SetTarget(surf);
+
   // Spawn GUI
   Gled::Macro("eye.C");
   setup_pupil_up_reference();
