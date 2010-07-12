@@ -10,7 +10,8 @@
 #include <Glasses/ZGlass.h>
 #include <Glasses/GTSurf.h>
 
-class GTSRetriangulator : public ZGlass {
+class GTSRetriangulator : public ZGlass
+{
   MAC_RNR_FRIENDS(GTSRetriangulator);
 
 public:
@@ -37,6 +38,8 @@ protected:
 
   Double_t		mMinAngleDeg; // X{gS} 7 Value(-range=>[0,180,1,1000])
 
+  Double_t              mOutOfCoreDelta;  // X{GS} 7 Value(-range=>[0,100,1,1e6])
+
   Bool_t                bMeasureTime; //! X{GS} 7 Bool(-join=>1)
   Double_t              mRunTime;     //! X{GS} 7 ValOut()
 
@@ -45,6 +48,8 @@ public:
 
   void Coarsen(); // X{ED} 7 MButt(-join=>1)
   void Refine();  // X{ED} 7 MButt()
+
+  void OutOfCoreSimplification(); // X{ED} 7 MButt()
 
 #include "GTSRetriangulator.h7"
   ClassDef(GTSRetriangulator, 1); // Coarsen or refine GTSurf

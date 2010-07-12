@@ -15,13 +15,14 @@
 //#include <GTS/GTS.h>
 //#endif
 
-namespace GTS {
+namespace GTS
+{
   struct _GtsSurface;
   typedef struct _GtsSurface GtsSurface;
 }
 
-class GTSurf : public ZNode {
-
+class GTSurf : public ZNode
+{
   MAC_RNR_FRIENDS(GTSurf);
 
 private:
@@ -69,6 +70,8 @@ public:
   void Legendrofy(Int_t max_l, Double_t abs_scale=0.1,Double_t pow_scale=2.7); // X{E} 7 MCWButt()
 
   void ExportTring(const Text_t* fname=0);
+
+  GTS::GtsSurface* get_surface() const { return pSurf; }
 
 #include "GTSurf.h7"
   ClassDef(GTSurf, 1);
