@@ -1,3 +1,18 @@
+2010-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support of out of core simplification of surfaces.
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Add function
+	  OutOfCoreSimplification()
+	and data-member Double_t mOutOfCoreDelta.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function:
+	  GTS::GtsSurface* get_surface()
+
 2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add abstract interface GTSIsoMakerFunctor that allows iso-surfaces
