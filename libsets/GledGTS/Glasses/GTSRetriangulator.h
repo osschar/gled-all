@@ -27,7 +27,7 @@ protected:
 
   StopOpts_e		mStopOpts;    // X{gS} 7 PhonyEnum(-join=>1)
   UInt_t		mStopNumber;  // X{gS} 7 Value(-range=>[0,1e8,1,1])
-  Double_t		mStopCost;    // X{gS} 7 Value(-range=>[0,1e9,1,1000])
+  Double_t		mStopCost;    // X{gS} 7 Value(-range=>[0,1e9,1,1e9])
 
   CostOpts_e		mCostOpts;        // X{gS} 7 PhonyEnum()
   Double_t		mVO_VolumeWght;   // X{gS} 7 Value(-join=>1, -range=>[0,10,1,1e6])

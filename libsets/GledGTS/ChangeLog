@@ -1,3 +1,17 @@
+2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	New coarsening algorithm.
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Implement coarsening function based on badness of opposite angle
+	associated with given edge.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function 'GTS::GtsSurface* DisownSurface()'.
+	Beautify.
+
 2010-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support of out of core simplification of surfaces.

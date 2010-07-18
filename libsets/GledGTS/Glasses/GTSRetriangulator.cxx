@@ -8,8 +8,11 @@
 // GTSRetriangulator
 //
 // Interface to GTS surface 'coarsen' and 'refine' functions.
+// Out-of-core simplification is also supported. Note that it sometimes
+// produces surfaces with holes.
+//
 // See GTS manual for details.
-// Refine always uses the mid-vertex insertion function.
+
 
 #include "GTSRetriangulator.h"
 #include "GTSRetriangulator.c7"
@@ -19,19 +22,56 @@
 #include <Gled/GTime.h>
 
 #include <TMath.h>
+#include <TSystem.h>
 
 #include <cmath>
 
 /**************************************************************************/
 
-namespace GTS
+namespace
 {
-  gdouble cost_angle (GtsEdge * e)
+  using namespace GTS;
+
+  gdouble edge_angle(GtsTriangle* t, GtsEdge* e)
   {
-    if (e->triangles && e->triangles->next)
-      return fabs (gts_triangles_angle ((GtsTriangle*)e->triangles->data,
-					(GtsTriangle*)e->triangles->next->data));
-    return G_MAXDOUBLE;
+    static const gdouble r60 = 60*TMath::DegToRad();
+
+    GtsVertex *v = gts_triangle_vertex_opposite(t, e);
+    if (v)
+    {
+      GtsVector a, b, c;
+      gts_vector_init(a, &v->p, &e->segment.v1->p);
+      gts_vector_init(b, &v->p, &e->segment.v2->p);
+      gts_vector_cross(c, a, b);
+
+      gdouble phi = atan2(gts_vector_norm(c), gts_vector_scalar(a, b));
+      if (phi <= r60)
+	return phi / r60;
+      else
+	return 1.5 - 0.5 * phi / r60;
+    }
+    else
+    {
+      return 1.0;
+    }
+  }
+
+  gdouble cost_angle (GtsEdge* e)
+  {
+    // Returns smallest cost of all triangles e is in, where cost for each
+    // triangle is:
+    //   1 if angle from edge to opposite vertex is 60deg;
+    //   goes linearly to 0 as the angle falls (rises) to 0deg (180deg).
+    // Works well for cost up 0.5, then becomes unstable.
+
+    gdouble cost = 1.0;
+    GSList *i = e->triangles;
+    while (i)
+    {
+      cost = TMath::Min(edge_angle((GtsTriangle*) i->data, e), cost);
+      i = i->next;
+    }
+    return cost;
   }
 
   gboolean refine_stop_number (gdouble cost, guint number, guint * max)
@@ -86,6 +126,8 @@ void GTSRetriangulator::Coarsen()
 
   using namespace GTS;
 
+  gSystem->SetFPEMask(kDefaultMask); // kAllMask);
+
   GTSurf* target = *mTarget;
   if (target == 0)
     throw _eh + "Link Target should be set.";
@@ -98,15 +140,15 @@ void GTSRetriangulator::Coarsen()
   switch (mStopOpts)
   {
     case SO_Number:
-      l_stop_func = (GtsStopFunc)gts_coarsen_stop_number;
+      l_stop_func = (GtsStopFunc) gts_coarsen_stop_number;
       l_stop_data = &mStopNumber;
       break;
     case SO_Cost:
-      l_stop_func = (GtsStopFunc)gts_coarsen_stop_cost;
+      l_stop_func = (GtsStopFunc) gts_coarsen_stop_cost;
       l_stop_data = &mStopCost;
       break;
     default:
-      throw(_eh + "Unknown StopOpts.");
+      throw _eh + "Unknown StopOpts.";
   }
 
   GtsVolumeOptimizedParams l_vo_params =
@@ -119,14 +161,14 @@ void GTSRetriangulator::Coarsen()
     case CO_Length:
       break;
     case CO_Volume:
-      l_cost_func = (GtsKeyFunc)gts_volume_optimized_cost;
+      l_cost_func = (GtsKeyFunc) gts_volume_optimized_cost;
       l_cost_data = &l_vo_params;
       break;
     case CO_Angle:
-      l_cost_func = (GtsKeyFunc)cost_angle;
+      l_cost_func = (GtsKeyFunc) cost_angle;
       break;
     default:
-      throw(_eh + "Unknown CostOpts.");
+      throw _eh + "Unknown CostOpts.";
   }
 
   GtsCoarsenFunc l_coarsen_func = 0;
@@ -140,7 +182,7 @@ void GTSRetriangulator::Coarsen()
       l_coarsen_data = &l_vo_params;
       break;
     default:
-      throw(_eh + "Unknown MidvertOpts.");
+      throw _eh + "Unknown MidvertOpts.";
   }
 
   ::GTime* start_time = 0;
@@ -150,13 +192,11 @@ void GTSRetriangulator::Coarsen()
 		      l_cost_func, l_cost_data,
 		      l_coarsen_func, l_coarsen_data,
 		      l_stop_func, l_stop_data,
-		      mMinAngleDeg*TMath::Pi()/180);
+		      mMinAngleDeg*TMath::DegToRad());
 
   if (bMeasureTime) SetRunTime(start_time->TimeUntilNow().ToDouble());
 
-  target->WriteLock();
   target->ReplaceSurface(s);
-  target->WriteUnlock();
 }
 
 /**************************************************************************/
@@ -200,11 +240,11 @@ void GTSRetriangulator::Refine()
     case CO_Length:
       break;
     case CO_Volume:
-      l_cost_func = (GtsKeyFunc)gts_volume_optimized_cost;
+      l_cost_func = (GtsKeyFunc) gts_volume_optimized_cost;
       l_cost_data = &l_vo_params;
       break;
     case CO_Angle:
-      l_cost_func = (GtsKeyFunc)cost_angle;
+      l_cost_func = (GtsKeyFunc) cost_angle;
       break;
     default:
       throw(_eh + "Unknown CostOpts.");
@@ -220,17 +260,13 @@ void GTSRetriangulator::Refine()
 
   if (bMeasureTime) SetRunTime(start_time->TimeUntilNow().ToDouble());
 
-  target->WriteLock();
   target->ReplaceSurface(s);
-  target->WriteUnlock();
 }
 
 //==============================================================================
 
 namespace
 {
-  using namespace GTS;
-
   void bbox_vertex_foo(GtsVertex* v, GtsBBox* bbox)
   {
     GtsPoint &p = v->p;
@@ -260,7 +296,7 @@ void GTSRetriangulator::OutOfCoreSimplification()
   GTSurf* target = *mTarget;
   if (target == 0)
     throw _eh + "Link Target should be set.";
-  GtsSurface* s = target->get_surface();
+  GtsSurface* s = target->CopySurface();
   if (s == 0)
     throw _eh + "Target should have non-null surface.";
 
@@ -284,6 +320,7 @@ void GTSRetriangulator::OutOfCoreSimplification()
 
   GtsRange c_stats = gts_cluster_grid_update(c_grid);
 
+  gts_object_destroy(GTS_OBJECT(s));
   gts_object_destroy(GTS_OBJECT(c_grid));
   gts_object_destroy(GTS_OBJECT(bbox));
 
@@ -292,7 +329,5 @@ void GTSRetriangulator::OutOfCoreSimplification()
 
   if (bMeasureTime) SetRunTime(start_time->TimeUntilNow().ToDouble());
 
-  target->WriteLock();
   target->ReplaceSurface(d);
-  target->WriteUnlock();
 }
