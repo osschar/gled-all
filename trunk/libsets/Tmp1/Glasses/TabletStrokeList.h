@@ -19,20 +19,31 @@ class TabletStrokeList : public ZNode,
 {
   MAC_RNR_FRIENDS(TabletStrokeList);
 
+public:
+  enum PotentialAlgorithm_e
+  {
+    PA_StrongestPoint,
+    PA_TwoStrongestPoints,
+    PA_LinearInterpolation
+  };
+
 private:
   void _init();
 
 protected:
   // Parameters for iso-triangulation
-  Double_t   mExp;   // X{GS} 7 Value(-range=>[-10, 0, 1, 1000])
-  Double_t   mWidth; // X{GS} 7 Value(-range=>[0, 1, 1, 1000])
+  PotentialAlgorithm_e mAlgorithm;     // X{GS} 7 PhonyEnum()
+  Double_t             mWidth;         // X{GS} 7 Value(-range=>[  0,  1, 1, 1e6])
+  Double_t             mPotentialExp;  // X{GS} 7 Value(-range=>[-10,  0, 1, 1e6])
+  Double_t             mPressureAlpha; // X{GS} 7 Value(-range=>[  0, 10, 1, 1e6])
+  Double_t             mMaxInterPoint; // X{GS} 7 Value(-range=>[  0, 1 , 1, 1e6])
 
   // Internal KD-tree and stuff for fast point search.
   TKDTreeIF             *mKDTree;    //!
   vector<STabletPoint*>  mPointRefs; //!
   vector<Float_t>        mArrX;      //!
   vector<Float_t>        mArrY;      //!
-  Double_t               mIsoValue;  //!
+  Double_t               mSearchRad; //!
 
 public:
   TabletStrokeList(const Text_t* n="TabletStrokeList", const Text_t* t=0);
