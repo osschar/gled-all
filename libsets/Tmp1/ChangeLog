@@ -1,3 +1,19 @@
+2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Several improvements in iso-surface generation.
+
+	* Glasses/TabletStrokeList.cxx:
+	* Glasses/TabletStrokeList.h:
+	Implement full set of parameters for controling generation of
+	iso-surface from a set of strokes.
+	Implement two new algorithms for calculating potential at given
+	point:
+	- StrongestPoint: trivial, takes the strongest point;
+	- LinearInterpolation: interpolates point parameters between two
+	  closest / strongest points and recalculates the potential for this
+	  point.
+	Properly calculate search radius passed into KD-tree.
+
 2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First version of iso-surface generation from tablet-strokes.
