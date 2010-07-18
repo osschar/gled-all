@@ -11,8 +11,8 @@ void wactest()
   g_queen->Add(arcs);
   g_scene = arcs;
 
-  CREATE_ADD_GLASS(limo, ZGlLightModel, arcs, "LighModel", 0);
-  limo->SetLightModelOp(0);
+  CREATE_ADD_GLASS(limooff, ZGlLightModel, arcs, "LightsOff", 0);
+  limooff->SetLightModelOp(0);
 
   CREATE_ADD_GLASS(blend, ZGlBlending, arcs, "Blending", 0);
   blend->SetBlendOp(1);
@@ -42,15 +42,25 @@ void wactest()
   recto->SetPos(0, 0, -0.001);
 
   CREATE_ADD_GLASS(isomaker, GTSIsoMaker, arcs, "Iso Maker", 0);
-  isomaker->SetXAxis(-0.5, 0.5, 100);
-  isomaker->SetYAxis(-0.5, 0.5, 100);
-  isomaker->SetZAxis(-0.5, 0.5, 100);
-  isomaker->SetAlgo(GTSIsoMaker::A_Tetra);
+  isomaker->SetXAxis(-0.7, 0.7, 280);
+  isomaker->SetYAxis(-0.7, 0.7, 280);
+  isomaker->SetZAxis(-0.2, 0.2,  80);
+  // Cartesian is usually better.
+  // isomaker->SetAlgo(GTSIsoMaker::A_Tetra);
+  isomaker->SetValue(1);
+
+  CREATE_ADD_GLASS(retring, GTSRetriangulator, arcs, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
+
+  CREATE_ADD_GLASS(limoon, ZGlLightModel, arcs, "LightsOn", 0);
+  limoon->SetLightModelOp(1);
 
   CREATE_ADD_GLASS(surf, GTSurf, arcs, "IsoSurface", 0);
   surf->SetColor(1, 0.8, 0.2);
+  surf->RotateLF(2, 3, TMath::PiOver2());
 
   isomaker->SetTarget(surf);
+  retring->SetTarget(surf);
+
 
   // Spawn GUI
   Gled::Macro("eye.C");
