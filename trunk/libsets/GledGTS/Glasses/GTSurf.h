@@ -40,16 +40,17 @@ protected:
   UInt_t		mEdges; //! X{G}   7 ValOut(-width=>6, -join=>1)
   UInt_t		mFaces; //! X{G}   7 ValOut(-width=>6)
 
-  SGTSRange		mFaceQuality; //! X{RGS} 7 StoneOutput(Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
-  SGTSRange		mFaceArea;    //! X{RGS} 7 StoneOutput(Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
-  SGTSRange		mEdgeLength;  //! X{RGS} 7 StoneOutput(Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
-  SGTSRange		mEdgeAngle;   //! X{RGS} 7 StoneOutput(Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
+  SGTSRange		mFaceQuality; //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
+  SGTSRange		mFaceArea;    //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
+  SGTSRange		mEdgeLength;  //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
+  SGTSRange		mEdgeAngle;   //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
 
 public:
   GTSurf(const Text_t* n="GTSurf", const Text_t* t=0) : ZNode(n,t) { _init(); }
 
   void ReplaceSurface(GTS::GtsSurface* new_surf);
   GTS::GtsSurface* CopySurface();
+  GTS::GtsSurface* DisownSurface();
 
   void Load();                //  X{E} 7 MButt(-join=>1)
   void Save();                //  X{E} 7 MButt()
@@ -70,8 +71,6 @@ public:
   void Legendrofy(Int_t max_l, Double_t abs_scale=0.1,Double_t pow_scale=2.7); // X{E} 7 MCWButt()
 
   void ExportTring(const Text_t* fname=0);
-
-  GTS::GtsSurface* get_surface() const { return pSurf; }
 
 #include "GTSurf.h7"
   ClassDef(GTSurf, 1);

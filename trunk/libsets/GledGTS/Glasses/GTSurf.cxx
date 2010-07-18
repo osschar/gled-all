@@ -14,18 +14,23 @@
 /**************************************************************************/
 /**************************************************************************/
 
-namespace GTS
+namespace
 {
-  void vertex_dumper(GtsVertex* v) {
+  using namespace GTS;
+
+  void vertex_dumper(GtsVertex* v)
+  {
     printf("(%4.2f,%4.2f,%4.2f)", v->p.x, v->p.y, v->p.z);
   }
 
-  void segment_dumper(GtsSegment* s) {
+  void segment_dumper(GtsSegment* s)
+  {
     vertex_dumper(s->v1); cout<<"-"; vertex_dumper(s->v2);
   }
 
 
-  void triangle_dumper(GtsTriangle* t, int* n) {
+  void triangle_dumper(GtsTriangle* t, int* n)
+  {
     cout <<"Tring #"<< *n <<"\t";
     segment_dumper(&t->e1->segment); cout<<" . ";
     segment_dumper(&t->e2->segment); cout<<" . ";
@@ -33,21 +38,22 @@ namespace GTS
     ++(*n);
   }
 
-  void strip_dumper(GSList* tl, int* n) {
+  void strip_dumper(GSList* tl, int* n)
+  {
     cout <<"Strip #"<< *n <<endl;
     int num = 0;
     g_slist_foreach(tl, (GFunc)triangle_dumper, &num);
     ++(*n);
   }
 
-
-  int face_inverter(GtsFace* f, int* dum) {
+  int face_inverter(GtsFace* f, int* dum)
+  {
     GtsEdge* egg = f->triangle.e1;
     f->triangle.e1 = f->triangle.e2;
     f->triangle.e2 = egg;
     return 0;
   }
-} // gts slurping namespace
+}
 
 /**************************************************************************/
 /**************************************************************************/
@@ -69,8 +75,10 @@ void GTSurf::ReplaceSurface(GTS::GtsSurface* new_surf)
 {
   using namespace GTS;
 
-  if(pSurf) {
-    gts_object_destroy (GTS_OBJECT (pSurf));
+  GLensReadHolder _lck(this);
+  if (pSurf)
+  {
+    gts_object_destroy(GTS_OBJECT(pSurf));
   }
   pSurf = new_surf;
   mStampReqTring = Stamp(FID());
@@ -78,15 +86,26 @@ void GTSurf::ReplaceSurface(GTS::GtsSurface* new_surf)
 
 GTS::GtsSurface* GTSurf::CopySurface()
 {
-  using namespace GTS;
+  GLensReadHolder _lck(this);
 
-  GtsSurface* s = 0;
-  ReadLock();
-  if(pSurf) {
-    s = MakeDefaultSurface();
-    gts_surface_copy(s, pSurf);
+  GTS::GtsSurface* s = 0;
+  if (pSurf)
+  {
+    s = GTS::MakeDefaultSurface();
+    GTS::gts_surface_copy(s, pSurf);
   }
-  ReadUnlock();
+
+  return s;
+}
+
+GTS::GtsSurface* GTSurf::DisownSurface()
+{
+  GLensReadHolder _lck(this);
+
+  GTS::GtsSurface* s = pSurf;
+  pSurf = 0;
+  mStampReqTring = Stamp(FID());
+
   return s;
 }
 
@@ -138,9 +157,10 @@ void GTSurf::Save()
 
 /**************************************************************************/
 
-namespace {
-  using namespace GTS;
-  void copy_stats(SGTSRange& d, GtsRange& s) {
+namespace
+{
+  void copy_stats(SGTSRange& d, GTS::GtsRange& s)
+  {
     d.SetMin(s.min);  d.SetMax(s.max);
     d.SetAvg(s.mean); d.SetSigma(s.stddev);
   }
@@ -193,7 +213,8 @@ void GTSurf::Invert()
 {
   using namespace GTS;
 
-  if(pSurf) {
+  if (pSurf) 
+  {
     gts_surface_foreach_face(pSurf, (GtsFunc)face_inverter, 0);
     mStampReqTring = Stamp(FID());
   }
@@ -201,8 +222,10 @@ void GTSurf::Invert()
 
 /**************************************************************************/
 
-namespace {
-  void vertex_scaler(GtsVertex* v, Double_t* s) {
+namespace
+{
+  void vertex_scaler(GtsVertex* v, Double_t* s)
+  {
     v->p.x *= *s; v->p.y *= *s; v->p.z *= *s;
   }
 }
@@ -219,15 +242,15 @@ void GTSurf::Rescale(Double_t s)
 
 /**************************************************************************/
 
-namespace {
-using namespace GTS;
-GtsVertex* mid_edge_splitter(GtsEdge *e, GtsVertexClass *k, gpointer /*d*/)
+namespace
 {
-  GtsPoint &a = e->segment.v1->p, &b = e->segment.v2->p;
-  return gts_vertex_new(k, a.x + 0.5*(b.x - a.x),
-                           a.y + 0.5*(b.y - a.y),
-                           a.z + 0.5*(b.z - a.z));
-}
+  GtsVertex* mid_edge_splitter(GtsEdge *e, GtsVertexClass *k, gpointer /*d*/)
+  {
+    GtsPoint &a = e->segment.v1->p, &b = e->segment.v2->p;
+    return gts_vertex_new(k, a.x + 0.5*(b.x - a.x),
+			  a.y + 0.5*(b.y - a.y),
+			  a.z + 0.5*(b.z - a.z));
+  }
 }
 
 void GTSurf::Tessellate(UInt_t order, Bool_t mid_edge)
@@ -281,115 +304,115 @@ void GTSurf::GenerateTriangle(Double_t s)
 #include <TRandom3.h>
 #include <TVector3.h>
 
-namespace {
-
-class Legend
+namespace
 {
-protected:
-  Double_t         mCosMPhi, mSinMPhi; // Buffers during evaluation
-
-public:
-  Int_t            mL;
-  vector<Double_t> mC;
-
-  Legend(Int_t max_l,  Double_t abs_scale, Double_t pow_scale) :
-    mL(max_l), mC((max_l+1)*(max_l+1))
+  class Legend
   {
-    using namespace TMath;
+  protected:
+    Double_t         mCosMPhi, mSinMPhi; // Buffers during evaluation
 
-    TRandom3 rnd(0);
+  public:
+    Int_t            mL;
+    vector<Double_t> mC;
 
-    for(int l=0; l<=mL; ++l) {
-      Double_t fl   = 0.25*(2*l + 1)/Pi();
-      Double_t fpow = abs_scale * Power(1.0/(l + 1), pow_scale);
+    Legend(Int_t max_l,  Double_t abs_scale, Double_t pow_scale) :
+      mL(max_l), mC((max_l+1)*(max_l+1))
+    {
+      using namespace TMath;
 
-      Double_t& l0 = Coff(l, 0);
+      TRandom3 rnd(0);
 
-      l0  = Sqrt(fl);
-      l0 *= fpow * (2*rnd.Rndm() - 1);
-      // printf("l=%d 0=-%.6f", l, l0);
+      for(int l=0; l<=mL; ++l) {
+	Double_t fl   = 0.25*(2*l + 1)/Pi();
+	Double_t fpow = abs_scale * Power(1.0/(l + 1), pow_scale);
 
-      for(int m=1; m<=l; ++m) {
-	fl /= (l+m)*(l-m+1);
+	Double_t& l0 = Coff(l, 0);
 
-	Double_t& lpos = Coff(l,  m);
-	Double_t& lneg = Coff(l, -m);
+	l0  = Sqrt(fl);
+	l0 *= fpow * (2*rnd.Rndm() - 1);
+	// printf("l=%d 0=-%.6f", l, l0);
 
-	lpos  = Sqrt(fl);
-	lneg  = (m % 2) ? -lpos : lpos;
-	lpos *= fpow * (2*rnd.Rndm() - 1);
-	lneg *= fpow * (2*rnd.Rndm() - 1);
-	// printf(" %d=%-.6f %d=%-.6f", m, lpos, -m, lneg);
-      }
-      // printf("\n");
-    }
-  }
+	for(int m=1; m<=l; ++m) {
+	  fl /= (l+m)*(l-m+1);
 
-  inline Double_t& Coff(int l, int m) { return mC[l*l + l + m]; }
+	  Double_t& lpos = Coff(l,  m);
+	  Double_t& lneg = Coff(l, -m);
 
-  inline Double_t  SumM(int l, int m)
-  {
-    if(m == 0) {
-      return mC[l*l + l];
-    } else {
-      int idx = l*l + l - m;
-      return mC[idx + 2*m] * mCosMPhi + mC[idx] * mSinMPhi;
-    }
-  }
-
-  //----------------------------------------------------------------
-
-  void vertex_displacer(GTS::GtsVertex* v)
-  {
-    TVector3 vec(v->p.x, v->p.y, v->p.z);
-
-    Double_t phi = vec.Phi();
-    Double_t x   = vec.CosTheta();
-
-    Double_t somx2 = TMath::Sqrt((1.0-x)*(1.0+x));
-    Double_t fact  = 1;
-    Double_t Pmm   = 1;
-
-    Double_t sum = 1;
-
-    for(int m=0; m<=mL; ++m) {
-      mCosMPhi = TMath::Cos(m*phi);
-      mSinMPhi = TMath::Sin(m*phi);
-
-      sum += Pmm * SumM(m, m);
-
-      if(m < mL) {
-	Double_t Pam = Pmm;
-	Double_t Pbm = x*(2*m+1)*Pam;
-
-	sum += Pbm * SumM(m+1, m);
-
-	for(int l=m+2; l<=mL; ++l) {
-	  Double_t Plm = (x*(2*l-1)*Pbm - (l+m-1)*Pam) / (l-m);
-
-	  sum += Plm * SumM(l, m);
-
-	  Pam = Pbm;
-	  Pbm = Plm;
+	  lpos  = Sqrt(fl);
+	  lneg  = (m % 2) ? -lpos : lpos;
+	  lpos *= fpow * (2*rnd.Rndm() - 1);
+	  lneg *= fpow * (2*rnd.Rndm() - 1);
+	  // printf(" %d=%-.6f %d=%-.6f", m, lpos, -m, lneg);
 	}
+	// printf("\n");
       }
-
-      // Calc Pm,m+1
-      Pmm  *= -fact*somx2;
-      fact +=  2.0;
     }
 
-    vec *= sum;
+    inline Double_t& Coff(int l, int m) { return mC[l*l + l + m]; }
 
-    v->p.x = vec.x(); v->p.y = vec.y(); v->p.z = vec.z();
-  }
+    inline Double_t  SumM(int l, int m)
+    {
+      if(m == 0) {
+	return mC[l*l + l];
+      } else {
+	int idx = l*l + l - m;
+	return mC[idx + 2*m] * mCosMPhi + mC[idx] * mSinMPhi;
+      }
+    }
 
-  static void s_vertex_displacer(GTS::GtsVertex* v, Legend* ud)
-  {
-    ud->vertex_displacer(v);
-  }
+    //----------------------------------------------------------------
 
-}; // endclass Legend
+    void vertex_displacer(GTS::GtsVertex* v)
+    {
+      TVector3 vec(v->p.x, v->p.y, v->p.z);
+
+      Double_t phi = vec.Phi();
+      Double_t x   = vec.CosTheta();
+
+      Double_t somx2 = TMath::Sqrt((1.0-x)*(1.0+x));
+      Double_t fact  = 1;
+      Double_t Pmm   = 1;
+
+      Double_t sum = 1;
+
+      for(int m=0; m<=mL; ++m) {
+	mCosMPhi = TMath::Cos(m*phi);
+	mSinMPhi = TMath::Sin(m*phi);
+
+	sum += Pmm * SumM(m, m);
+
+	if(m < mL) {
+	  Double_t Pam = Pmm;
+	  Double_t Pbm = x*(2*m+1)*Pam;
+
+	  sum += Pbm * SumM(m+1, m);
+
+	  for(int l=m+2; l<=mL; ++l) {
+	    Double_t Plm = (x*(2*l-1)*Pbm - (l+m-1)*Pam) / (l-m);
+
+	    sum += Plm * SumM(l, m);
+
+	    Pam = Pbm;
+	    Pbm = Plm;
+	  }
+	}
+
+	// Calc Pm,m+1
+	Pmm  *= -fact*somx2;
+	fact +=  2.0;
+      }
+
+      vec *= sum;
+
+      v->p.x = vec.x(); v->p.y = vec.y(); v->p.z = vec.z();
+    }
+
+    static void s_vertex_displacer(GTS::GtsVertex* v, Legend* ud)
+    {
+      ud->vertex_displacer(v);
+    }
+
+  }; // endclass Legend
 
 } // end namespace
 
@@ -448,31 +471,29 @@ Double_t LegendreP(int l, int m, Double_t x)
 }
 */
 
-/**************************************************************************/
+ /**************************************************************************/
 
-namespace {
+namespace
+{
+  struct extring_arg {
+    map<GtsVertex*, int> m_map;
+    int                  m_count;
+    FILE*                m_out;
 
-using namespace GTS;
+    extring_arg() : m_count(0), m_out(0) {}
+  };
 
-struct extring_arg {
-  map<GtsVertex*, int> m_map;
-  int                  m_count;
-  FILE*                m_out;
+  void trivi_vdump(GtsVertex* v, extring_arg* arg) {
+    arg->m_map[v] = arg->m_count;
+    ++arg->m_count;
+    fprintf(arg->m_out, "%lf %lf %lf\n", v->p.x, v->p.y, v->p.z);
+  }
 
-  extring_arg() : m_count(0), m_out(0) {}
-};
-
-void trivi_vdump(GtsVertex* v, extring_arg* arg) {
-  arg->m_map[v] = arg->m_count;
-  ++arg->m_count;
-  fprintf(arg->m_out, "%lf %lf %lf\n", v->p.x, v->p.y, v->p.z);
-}
-
-void trivi_fdump(GtsFace* f, extring_arg* arg) {
-  GtsVertex *a, *b, *c;
-  gts_triangle_vertices(&f->triangle, &a, &b, &c);
-  fprintf(arg->m_out, "%d %d %d\n", arg->m_map[a], arg->m_map[b], arg->m_map[c]);
-}
+  void trivi_fdump(GtsFace* f, extring_arg* arg) {
+    GtsVertex *a, *b, *c;
+    gts_triangle_vertices(&f->triangle, &a, &b, &c);
+    fprintf(arg->m_out, "%d %d %d\n", arg->m_map[a], arg->m_map[b], arg->m_map[c]);
+  }
 
 }
 
