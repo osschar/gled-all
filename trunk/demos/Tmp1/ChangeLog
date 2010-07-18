@@ -1,3 +1,12 @@
+2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Better surface handling.
+
+	* wactest.C:
+	Increase the default size and precision of iso-surface
+	generation.
+	Enable lighting for surface rendering.
+
 2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* wactest.C:
