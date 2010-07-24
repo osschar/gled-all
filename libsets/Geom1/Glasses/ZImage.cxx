@@ -5,7 +5,6 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 //__________________________________________________________________________
-// ZImage
 //
 // This is a glass wrapper for DevIL image.
 // It should be used for loading/saving/binding of images, as this class
@@ -13,6 +12,9 @@
 //
 // Some ILU image transformations are not wrapped yet.
 // Do NOT use shadowing when applying the transforms.
+//
+// When mMinFilter is one of mip-map ones, the mip-maps are generated
+// automatically by calling glGenerateMipmapEXT().
 
 #include "ZImage.h"
 #include "ZImage.c7"

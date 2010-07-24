@@ -101,6 +101,11 @@ void ZImage_GL_Rnr::Triangulate(RnrDriver* rd)
 		 mImage->gl_format(), mImage->gl_type(), mImage->data());
     mImage->unbind();
     ZImage::sILMutex.Unlock();
+
+    if (mImage->mMinFilter != GL_NEAREST && mImage->mMinFilter != GL_LINEAR)
+    {
+      glGenerateMipmapEXT(GL_TEXTURE_2D);
+    }
   }
   else
   {
