@@ -1,3 +1,8 @@
+2010-07-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* oolite_load.C:
+	New macro -- test loading of OOlite model files.
+
 2010-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* tringula.C: Change gl-menu-button for Crawler-drive to its new
