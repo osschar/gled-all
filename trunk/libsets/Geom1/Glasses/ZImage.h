@@ -47,10 +47,10 @@ protected:
   Int_t         mTWrap;         //  X{GST} 7 PhonyEnum(-vals=>[GL_CLAMP,Clamp, GL_CLAMP_TO_EDGE,ClampEdge, GL_REPEAT,Repeat], -width=>8)
 
   Int_t		mMagFilter;	//  X{GST} 7 PhonyEnum(-vals=>[GL_NEAREST,Nearest, GL_LINEAR,Linear], -width=>8, -join=>1)
-  Int_t		mMinFilter;	//  X{GST} 7 PhonyEnum(-vals=>[GL_NEAREST,Nearest, GL_LINEAR,Linear], -width=>8)
+  Int_t		mMinFilter;	//  X{GST} 7 PhonyEnum(-vals=>[GL_NEAREST,Nearest, GL_LINEAR,Linear, GL_NEAREST_MIPMAP_NEAREST,NearestMipmapNearest, GL_LINEAR_MIPMAP_NEAREST,LinearMipmapNearest, GL_NEAREST_MIPMAP_LINEAR,NearestMipmapLinear, GL_LINEAR_MIPMAP_LINEAR,LinearMipmapLinear], -width=>14)
 
   Int_t		mEnvMode;	//  X{GS}  7 PhonyEnum(-vals=>[GL_DECAL,Decal, GL_REPLACE,Replace, GL_MODULATE,Modulate, GL_BLEND,Blend], -width=>8, -join=>1)
-  ZColor	mEnvColor;	//  X{PGS} 7 ColorButt()
+  ZColor	mEnvColor;	//  X{PGS} 7 ColorButt(-width=>8)
 
   Bool_t	bLoadAdEnlight; //  X{GS}  7 Bool(-join=>1)
   Bool_t        bLoadAdBind;    //  X{GS}  7 Bool()

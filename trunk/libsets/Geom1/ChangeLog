@@ -1,3 +1,12 @@
+2010-07-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZImage.cxx:
+	* Glasses/ZImage.h:
+	Add support for minifaction filters using mip-maps.
+
+	* Rnr/GL/ZImage_GL_Rnr.cxx:
+	Generate mip-maps automatically when needed.
+
 2010-07-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/WSPoint.cxx:
