@@ -135,6 +135,8 @@ void GTSRetriangulator::Coarsen()
   if (s == 0)
     throw _eh + "Target should have non-null surface.";
 
+  double stop_cost = mStopCost;
+
   GtsStopFunc l_stop_func = 0;
   gpointer    l_stop_data = 0;
   switch (mStopOpts)
@@ -145,7 +147,7 @@ void GTSRetriangulator::Coarsen()
       break;
     case SO_Cost:
       l_stop_func = (GtsStopFunc) gts_coarsen_stop_cost;
-      l_stop_data = &mStopCost;
+      l_stop_data = &stop_cost;
       break;
     default:
       throw _eh + "Unknown StopOpts.";
@@ -159,6 +161,7 @@ void GTSRetriangulator::Coarsen()
   switch (mCostOpts)
   {
     case CO_Length:
+      stop_cost = stop_cost * stop_cost; // edge-length uses square edge length.
       break;
     case CO_Volume:
       l_cost_func = (GtsKeyFunc) gts_volume_optimized_cost;

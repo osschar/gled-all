@@ -3,6 +3,7 @@
 
 # Base glasses
 GTSurf		1	Glasses/GTSurf		.
+GTSTorus	2	Glasses/GTSTorus
 
-GTSIsoMaker	16	Glasses/GTSIsoMaker
+GTSIsoMaker	  16	Glasses/GTSIsoMaker
 GTSRetriangulator 17	Glasses/GTSRetriangulator

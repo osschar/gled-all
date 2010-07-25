@@ -152,7 +152,7 @@ void TabletStrokeList::PrintClose(Float_t x, Float_t y, Float_t rad)
 
 //==============================================================================
 
-void TabletStrokeList::GTSIsoBegin(Double_t iso_value)
+void TabletStrokeList::GTSIsoBegin(GTSIsoMaker* /*maker*/, Double_t iso_value)
 {
   if (mKDTree == 0 || (mAlgorithm == PA_CubicInterpolation && mCCoefs.empty()))
     MakeKDStuff();

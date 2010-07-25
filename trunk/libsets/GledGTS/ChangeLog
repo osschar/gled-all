@@ -1,5 +1,33 @@
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/GTSTorus.cxx:
+	* Glasses/GTSTorus.h:
+	New glass -- specialization of GTSure for Torus.
+	It is also its own GTSIsoMakerFunctor.
+
+	* Stones/GTSIsoMakerFunctor.h:
+	Add GTSIsoMaker* argument to GTSIsoBegin().
+	This allows functors to setup iso-maker.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Call GTSIsoMakerFunctor::GTSIsoBegin() before setting up of the
+	grid -- this gives functor a chance to modify it.
+
+	Change floats to doubles, ushorts to ints.
+
+	* Glasses/GTSRetriangulator.cxx:
+	When cost option is "length", square the cost in member data as
+	GTS operates on squares of edge lengths.
+
+	* Glasses/GTSurf.h:
+	Increase width of N vert/edge/face weeds.
+
+	* glass.list:
+	Register GTSTorus.
+
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Add option to invert iso-surface after generation.
 
 	* GTS/GTS.cxx:

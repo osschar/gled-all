@@ -1,5 +1,11 @@
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/TabletStrokeList.cxx:
+	* Glasses/TabletStrokeList.h:
+	Add the new argument to GTSIsoMakerFunctor::GTSIsoBegin().
+
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Implement iso-surface generation using cubic interpolation between
 	consequent points.
 

@@ -74,7 +74,8 @@ public:
 
   void PrintClose(Float_t x, Float_t y, Float_t rad);
 
-  virtual void     GTSIsoBegin(Double_t iso_value);
+  // --- GTSIsoMakerFunctor ---
+  virtual void     GTSIsoBegin(GTSIsoMaker* maker, Double_t iso_value);
   virtual Double_t GTSIsoFunc(Double_t x, Double_t y, Double_t z);
   virtual void     GTSIsoEnd();
 
