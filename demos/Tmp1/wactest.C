@@ -48,6 +48,7 @@ void wactest()
   // Cartesian is usually better.
   // isomaker->SetAlgo(GTSIsoMaker::A_Tetra);
   isomaker->SetValue(1);
+  isomaker->SetInvertCartesian(true);
 
   CREATE_ADD_GLASS(retring, GTSRetriangulator, arcs, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
 

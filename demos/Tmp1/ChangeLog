@@ -1,3 +1,8 @@
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* wactest.C:
+	Invert iso-surface when using cartesian method.
+
 2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Better surface handling.
