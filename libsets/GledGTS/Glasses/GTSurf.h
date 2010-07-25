@@ -36,9 +36,9 @@ protected:
   bool			bPoints;// X{GS}   7 Bool()
   ZColor		mColor;	// X{PGST} 7 ColorButt()
 
-  UInt_t		mVerts; //! X{G}   7 ValOut(-width=>8, -join=>1)
-  UInt_t		mEdges; //! X{G}   7 ValOut(-width=>8, -join=>1)
-  UInt_t		mFaces; //! X{G}   7 ValOut(-width=>8)
+  UInt_t		mVerts; //! X{G}   7 ValOut(-width=>10, -join=>1)
+  UInt_t		mEdges; //! X{G}   7 ValOut(-width=>10, -join=>1)
+  UInt_t		mFaces; //! X{G}   7 ValOut(-width=>10)
 
   SGTSRange		mFaceQuality; //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
   SGTSRange		mFaceArea;    //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])

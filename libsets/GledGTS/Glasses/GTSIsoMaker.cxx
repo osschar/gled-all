@@ -33,19 +33,19 @@ void GTSIsoMaker::_init()
 
 /**************************************************************************/
 
-void GTSIsoMaker::SetXAxis(Float_t min, Float_t max, UShort_t div)
+void GTSIsoMaker::SetXAxis(Double_t min, Double_t max, Int_t div)
 {
   mXmin = min; mXmax = max; mXdiv = div;
   Stamp(FID());
 }
 
-void GTSIsoMaker::SetYAxis(Float_t min, Float_t max, UShort_t div)
+void GTSIsoMaker::SetYAxis(Double_t min, Double_t max, Int_t div)
 {
   mYmin = min; mYmax = max; mYdiv = div;
   Stamp(FID());
 }
 
-void GTSIsoMaker::SetZAxis(Float_t min, Float_t max, UShort_t div)
+void GTSIsoMaker::SetZAxis(Double_t min, Double_t max, Int_t div)
 {
   mZmin = min; mZmax = max; mZdiv = div;
   Stamp(FID());
@@ -119,6 +119,7 @@ void GTSIsoMaker::MakeSurface()
   {
     user_data = functor;
     user_func = functor_to_plane;
+    functor->GTSIsoBegin(this, mValue);
   }
   else
   {
@@ -137,11 +138,6 @@ void GTSIsoMaker::MakeSurface()
   };
 
   GtsSurface* s = MakeDefaultSurface();
-
-  if (functor)
-  {
-    functor->GTSIsoBegin(mValue);
-  }
 
   switch (mAlgo)
   {

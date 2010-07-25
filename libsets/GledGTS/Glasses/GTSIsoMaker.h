@@ -29,19 +29,19 @@ protected:
 
   TString		mFormula; // X{GS} 7 Textor(-width=>24)
   Algo_e		mAlgo;    // X{GS} 7 PhonyEnum(-join=>1)
-  Float_t		mValue;   // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
+  Double_t		mValue;   // X{GS} 7 Value(-range=>[-1000,1000,1,1000])
 
-  Float_t		mXmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Float_t		mXmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  UShort_t		mXdiv;    // X{GS} 7 Value(-range=>[2, 1000,1])
+  Double_t		mXmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Double_t		mXmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Int_t			mXdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
 
-  Float_t		mYmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Float_t		mYmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  UShort_t		mYdiv;    // X{GS} 7 Value(-range=>[2, 1000,1])
+  Double_t		mYmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Double_t		mYmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Int_t			mYdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
 
-  Float_t		mZmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Float_t		mZmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  UShort_t		mZdiv;    // X{GS} 7 Value(-range=>[2, 1000,1])
+  Double_t		mZmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Double_t		mZmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
+  Int_t			mZdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
 
   Bool_t                bInvertCartesian; // X{GS} 7 Bool()
   Bool_t                bInvertTetra;     // X{GS} 7 Bool()
@@ -52,9 +52,9 @@ public:
 
   void MakeSurface(); // X{ED} 7 MButt()
 
-  void SetXAxis(Float_t min, Float_t max, UShort_t div); // X{E}
-  void SetYAxis(Float_t min, Float_t max, UShort_t div); // X{E}
-  void SetZAxis(Float_t min, Float_t max, UShort_t div); // X{E}
+  void SetXAxis(Double_t min, Double_t max, Int_t div); // X{E}
+  void SetYAxis(Double_t min, Double_t max, Int_t div); // X{E}
+  void SetZAxis(Double_t min, Double_t max, Int_t div); // X{E}
 
 #include "GTSIsoMaker.h7"
   ClassDef(GTSIsoMaker, 1);
