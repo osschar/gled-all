@@ -28,6 +28,7 @@ void GTSIsoMaker::_init()
   mXmin = mYmin = mZmin = -1;
   mXmax = mYmax = mZmax =  1;
   mXdiv = mYdiv = mZdiv = 20;
+  bInvertCartesian = bInvertTetra = false;
 }
 
 /**************************************************************************/
@@ -165,6 +166,12 @@ void GTSIsoMaker::MakeSurface()
   else
   {
     delete formula;
+  }
+
+  if ((mAlgo == A_Cartesian && bInvertCartesian) ||
+      (mAlgo >  A_Cartesian && bInvertTetra))
+  {
+    GTS::InvertSurface(s);
   }
 
   target->WriteLock();

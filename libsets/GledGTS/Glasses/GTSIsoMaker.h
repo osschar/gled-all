@@ -43,6 +43,9 @@ protected:
   Float_t		mZmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
   UShort_t		mZdiv;    // X{GS} 7 Value(-range=>[2, 1000,1])
 
+  Bool_t                bInvertCartesian; // X{GS} 7 Bool()
+  Bool_t                bInvertTetra;     // X{GS} 7 Bool()
+
 public:
   GTSIsoMaker(const Text_t* n="GTSIsoMaker", const Text_t* t=0) : ZGlass(n,t)
   { _init(); }

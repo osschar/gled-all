@@ -45,14 +45,6 @@ namespace
     g_slist_foreach(tl, (GFunc)triangle_dumper, &num);
     ++(*n);
   }
-
-  int face_inverter(GtsFace* f, int* dum)
-  {
-    GtsEdge* egg = f->triangle.e1;
-    f->triangle.e1 = f->triangle.e2;
-    f->triangle.e2 = egg;
-    return 0;
-  }
 }
 
 /**************************************************************************/
@@ -215,7 +207,7 @@ void GTSurf::Invert()
 
   if (pSurf) 
   {
-    gts_surface_foreach_face(pSurf, (GtsFunc)face_inverter, 0);
+    InvertSurface(pSurf);
     mStampReqTring = Stamp(FID());
   }
 }
