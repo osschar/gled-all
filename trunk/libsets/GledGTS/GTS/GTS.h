@@ -15,6 +15,8 @@ namespace GTS
 #include <gts.h>
 
   GtsSurface* MakeDefaultSurface();
+
+  void InvertSurface(GtsSurface* s);
 }
 
 #endif

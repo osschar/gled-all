@@ -1,3 +1,20 @@
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add option to invert iso-surface after generation.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Add global function GTS::InvertSurface() - moved from GTSurf.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Move surface inversion code to GTS namespace.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add flags bInvertCartesian and bInvertTetra. Depending on the
+	iso-function one of them produces inverted surface.
+
 2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	New coarsening algorithm.
