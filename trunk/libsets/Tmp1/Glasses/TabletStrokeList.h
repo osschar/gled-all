@@ -10,9 +10,12 @@
 #include <Glasses/ZNode.h>
 #include <Stones/GTSIsoMakerFunctor.h>
 
-class STabletPoint;
+#include <Stones/STabletPoint.h>
 
 #include <TKDTree.h>
+
+class TH1I;
+class TH2I;
 
 class TabletStrokeList : public ZNode,
 			 public GTSIsoMakerFunctor
@@ -24,26 +27,43 @@ public:
   {
     PA_StrongestPoint,
     PA_TwoStrongestPoints,
-    PA_LinearInterpolation
+    PA_LinearInterpolation,
+    PA_CubicInterpolation
   };
 
 private:
   void _init();
 
 protected:
+  struct CCoefs { STabletPoint A, B, C, D; };
+
   // Parameters for iso-triangulation
   PotentialAlgorithm_e mAlgorithm;     // X{GS} 7 PhonyEnum()
   Double_t             mWidth;         // X{GS} 7 Value(-range=>[  0,  1, 1, 1e6])
   Double_t             mPotentialExp;  // X{GS} 7 Value(-range=>[-10,  0, 1, 1e6])
   Double_t             mPressureAlpha; // X{GS} 7 Value(-range=>[  0, 10, 1, 1e6])
   Double_t             mMaxInterPoint; // X{GS} 7 Value(-range=>[  0, 1 , 1, 1e6])
+  Bool_t               bMakeCubHistos; // X{GS} 7 Bool();
 
   // Internal KD-tree and stuff for fast point search.
   TKDTreeIF             *mKDTree;    //!
   vector<STabletPoint*>  mPointRefs; //!
   vector<Float_t>        mArrX;      //!
   vector<Float_t>        mArrY;      //!
+  vector<CCoefs>         mCCoefs;    //!
   Double_t               mSearchRad; //!
+
+  void calculate_qubic_coeffs(const vSTabletPoint_t& vec, Int_t i, CCoefs& c);
+
+  void distance_derivatives(Float_t t, const HPointF& P, const CCoefs& c,
+			    Float_t& d1, Float_t& d2);
+
+  TH1I *mHN;             //!
+  TH2I *mHCubTimevsTime; //!
+  TH2I *mHCubTimevsN;    //!
+  TH1I *mHCubTime20;     //!
+  TH1I *mHDeriv;         //!
+  TH1I *mHDeriv20;       //!
 
 public:
   TabletStrokeList(const Text_t* n="TabletStrokeList", const Text_t* t=0);

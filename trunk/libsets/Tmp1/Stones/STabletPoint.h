@@ -23,6 +23,7 @@ public:
   STabletPoint& operator+=(const STabletPoint& a) { HPointF::operator+=(a); t += a.t; p += a.p; return *this; }
   STabletPoint& operator-=(const STabletPoint& a) { HPointF::operator-=(a); t -= a.t; p -= a.p; return *this; }
   STabletPoint& operator*=(Float_t f)             { HPointF::operator*=(f); t *= f;   p *= f;   return *this; }
+  STabletPoint& operator/=(Float_t d)             { return operator*=(1/d); }
 
   void Print() const;
 
@@ -58,6 +59,12 @@ inline STabletPoint operator*(Float_t b, const STabletPoint& a)
 {
    STabletPoint r(a);
    return r *= b;
+}
+
+inline STabletPoint operator/(const STabletPoint& a, Float_t b)
+{
+   STabletPoint r(a);
+   return r /= b;
 }
 
 #endif

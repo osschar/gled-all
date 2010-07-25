@@ -1,3 +1,23 @@
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement iso-surface generation using cubic interpolation between
+	consequent points.
+
+	* Glasses/TabletStroke.cxx:
+	* Glasses/TabletStroke.h:
+	Add function 'Int_t get_num_points() const'.
+
+	* Glasses/TabletStrokeList.cxx:
+	* Glasses/TabletStrokeList.h:
+	Add PA_CubicInterpolation algorithm for iso-surface generation.
+	Optionally generate histograms comparing linear vs cubic time
+	estimation and convergence of calculation of closest point on a
+	cubic curve.
+
+	* Stones/STabletPoint.h:
+	Add STabletPoint::operator/=(TT) and operator/(STabletPoint, TT).
+
+
 2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Several improvements in iso-surface generation.
