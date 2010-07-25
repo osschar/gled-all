@@ -25,7 +25,8 @@ protected:
   Bool_t               bInStroke;      //!
   Bool_t               bEnableDLAtEnd; //!
 
-  void get_draw_range(Int_t& min, Int_t& max);
+  Int_t get_num_points() const;
+  void  get_draw_range(Int_t& min, Int_t& max) const;
 
   STabletPoint pre_sym_quadratic(Int_t i0, Int_t i1, Int_t i2) const;
 

@@ -42,11 +42,23 @@ TabletStroke::~TabletStroke()
 
 //==============================================================================
 
-void TabletStroke::get_draw_range(Int_t& min, Int_t& max)
+Int_t TabletStroke::get_num_points() const
 {
   if (mPoints.empty())
   {
-    min = max = -1;
+    return 0;
+  }
+  else
+  {
+    return (Int_t) mPoints.size() - (bInStroke ? 1 : 2);
+  }
+}
+
+void TabletStroke::get_draw_range(Int_t& min, Int_t& max) const
+{
+  if (mPoints.empty())
+  {
+    min = -1; max = -2;
   }
   else
   {
