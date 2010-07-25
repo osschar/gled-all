@@ -61,6 +61,7 @@ public:
   HPoint& operator-=(const Double_t* v) { x -= v[0]; y -= v[1]; z -= v[2]; return *this; }
 
   HPoint& operator*=(TT f) { x *= f; y *= f; z *= f; return *this; }
+  HPoint& operator/=(TT d) { return operator*=(1/d); }
 
   TT Dot(const HPoint& v)   const { return x*v.x  + y*v.y  + z*v.z;  }
   TT Dot(const Float_t* v)  const { return x*v[0] + y*v[1] + z*v[2]; }
@@ -159,6 +160,13 @@ inline HPoint<TT> operator*(TT b, const HPoint<TT>& a)
 {
    HPoint<TT> r(a);
    return r *= b;
+}
+
+template<typename TT>
+inline HPoint<TT> operator/(const HPoint<TT>& a, TT b)
+{
+   HPoint<TT> r(a);
+   return r /= b;
 }
 
 //------------------------------------------------------------------------------
