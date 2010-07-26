@@ -28,6 +28,7 @@
 #include <TObjectTable.h>
 #include <TSystemDirectory.h>
 #include <TThread.h>
+#include <TH1.h>
 #include <Getline.h>
 
 extern void *GledCore_GLED_init;
@@ -983,6 +984,9 @@ void* Gled::TRint_runner_tl(void*)
   new GTerminateHandler;
   new GSigChildHandler;
   new GExceptionHandler;
+
+  // Global ROOT settings.
+  TH1::AddDirectory(kFALSE);
 
   self->SetEndFoo((GThread_cu_foo) TRint_cleanup_tl);
   self->SetEndArg(0);
