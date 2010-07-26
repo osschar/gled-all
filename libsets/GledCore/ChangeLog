@@ -1,3 +1,9 @@
+2010-07-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	Disable automatic adding of histogram objects to current ROOT
+	directory.
+
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/HTrans.h:
