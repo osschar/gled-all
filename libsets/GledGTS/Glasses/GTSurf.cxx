@@ -467,7 +467,8 @@ Double_t LegendreP(int l, int m, Double_t x)
 
 namespace
 {
-  struct extring_arg {
+  struct extring_arg
+  {
     map<GtsVertex*, int> m_map;
     int                  m_count;
     FILE*                m_out;
@@ -475,13 +476,15 @@ namespace
     extring_arg() : m_count(0), m_out(0) {}
   };
 
-  void trivi_vdump(GtsVertex* v, extring_arg* arg) {
+  void trivi_vdump(GtsVertex* v, extring_arg* arg)
+  {
     arg->m_map[v] = arg->m_count;
     ++arg->m_count;
     fprintf(arg->m_out, "%lf %lf %lf\n", v->p.x, v->p.y, v->p.z);
   }
 
-  void trivi_fdump(GtsFace* f, extring_arg* arg) {
+  void trivi_fdump(GtsFace* f, extring_arg* arg)
+  {
     GtsVertex *a, *b, *c;
     gts_triangle_vertices(&f->triangle, &a, &b, &c);
     fprintf(arg->m_out, "%d %d %d\n", arg->m_map[a], arg->m_map[b], arg->m_map[c]);

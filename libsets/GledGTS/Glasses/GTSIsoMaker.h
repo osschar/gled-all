@@ -50,7 +50,8 @@ public:
   GTSIsoMaker(const Text_t* n="GTSIsoMaker", const Text_t* t=0) : ZGlass(n,t)
   { _init(); }
 
-  void MakeSurface(); // X{ED} 7 MButt()
+  void MakeSurface();   // X{ED} 7 MButt()
+  void MakeDiffHisto(); // X{ED} 7 MButt()
 
   void SetXAxis(Double_t min, Double_t max, Int_t div); // X{E}
   void SetYAxis(Double_t min, Double_t max, Int_t div); // X{E}

@@ -1,3 +1,16 @@
+2010-07-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add plotting of iso-value difference histogram to GTSIsoMaker.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add function 'void MakeDiffHisto()' that plots difference of
+	function value at all vertices of target surface with the
+	iso-value set as the reference.
+
+	* Glasses/GTSurf.cxx:
+	White-space.
+
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSTorus.cxx:

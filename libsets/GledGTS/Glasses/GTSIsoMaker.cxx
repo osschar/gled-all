@@ -14,7 +14,10 @@
 #include <Stones/GTSIsoMakerFunctor.h>
 #include <GTS/GTS.h>
 
-#include <TF3.h>
+#include "TF3.h"
+#include "TH1.h"
+#include "TCanvas.h"
+#include "Gled/XTReqCanvas.h"
 
 ClassImp(GTSIsoMaker);
 
@@ -175,4 +178,58 @@ void GTSIsoMaker::MakeSurface()
   target->WriteUnlock();
 }
 
-/**************************************************************************/
+//==============================================================================
+
+namespace
+{
+  struct iso_compare_arg
+  {
+    GTSIsoMakerFunctor *functor;
+    TH1                *histo;
+    Double_t            iso_value;
+
+    iso_compare_arg(GTSIsoMakerFunctor *f, TH1 *h, Double_t v) :
+      functor(f), histo(h), iso_value(v)
+    {}
+  };
+
+  void vertex_iso_comparator(GTS::GtsVertex* v, iso_compare_arg* arg)
+  {
+    arg->histo->Fill(arg->functor->GTSIsoFunc(v->p.x, v->p.y, v->p.z) - arg->iso_value);
+  }
+}
+
+void GTSIsoMaker::MakeDiffHisto()
+{
+  // Calculate difference from iso-value for all points of target and
+  // histogram it.
+
+  static const Exc_t _eh("GTSIsoMaker::MakeDiffHisto ");
+
+  using namespace GTS;
+
+  GTSurf* target = *mTarget;
+  if (target == 0)
+    throw _eh + "Link Target should be set.";
+
+  GtsSurface *surf = target->GetSurf();
+  if (surf == 0)
+    throw _eh + "Target must have non-null surface.";
+
+  GTSIsoMakerFunctor *functor = dynamic_cast<GTSIsoMakerFunctor*>(*mFunctor);
+  if (functor == 0)
+    throw _eh + "Link Functor must be set to a GTSIsoMakerFunctor.";
+
+  TH1I *h = new TH1I("IsoDelta", "Func at Vertex - IsoValue", 256, 0, 0);
+  h->SetBuffer(10000);
+
+  iso_compare_arg arg(functor, h, mValue);
+  
+  functor->GTSIsoBegin(this, mValue);
+  gts_surface_foreach_vertex(surf, (GtsFunc) vertex_iso_comparator, &arg);
+  functor->GTSIsoEnd();
+
+  TCanvas *canvas = XTReqCanvas::Request("IsoDelta", "Surface iso-value delta");
+  h->Draw();
+  XTReqPadUpdate::Update(canvas);
+}
