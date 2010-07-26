@@ -9,8 +9,8 @@
 #include "TabletStroke.h"
 
 #include "Gled/XTReqCanvas.h"
-#include <TH1F.h>
-#include <TH2F.h>
+#include "TH1.h"
+#include "TH2.h"
 #include "TCanvas.h"
 
 // TabletStrokeList
