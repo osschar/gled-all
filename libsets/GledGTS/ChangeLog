@@ -1,3 +1,27 @@
+2010-07-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add calculation of iso-field gradient and method to move
+	surface-points onto the iso-surface.
+
+	* Stones/GTSIsoMakerFunctor.h:
+	Add new virtual (will be made abstract) function:
+	  HPointD  GTSIsoGradient(Double_t x, Double_t y, Double_t z);
+	This is supposed to return gradient of iso-field-value at given
+	point.
+
+	* Glasses/GTSTorus.cxx:
+	* Glasses/GTSTorus.h:
+	Implement new virtual GTSIsoGradient().
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add function 'void FixPoints()' that loops over surface vertices
+	and moves them so that they are "an epsilon" away from desired
+	iso-value surface.
+
+	* Glasses/GTSRetriangulator.cxx:
+	Change default mid-vertex option to volume.
+
 2010-07-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add plotting of iso-value difference histogram to GTSIsoMaker.

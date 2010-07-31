@@ -59,6 +59,16 @@ Double_t GTSTorus::GTSIsoFunc(Double_t x, Double_t y, Double_t z)
   return mRminvsqr * (r*r + z*z);
 }
 
+HPointD GTSTorus::GTSIsoGradient(Double_t x, Double_t y, Double_t z)
+{
+  Double_t xy = TMath::Sqrt(x*x + y*y);
+  HPointD g;
+  g.x = 2.0 * mRminvsqr * (xy - mRM) / xy * x;
+  g.y = 2.0 * mRminvsqr * (xy - mRM) / xy * y;
+  g.z = 2.0 * mRminvsqr * z;
+  return g;
+}
+
 void GTSTorus::GTSIsoEnd()
 {
 

@@ -7,7 +7,7 @@
 #ifndef GledGTS_GTSIsoMakerFunctor_H
 #define GledGTS_GTSIsoMakerFunctor_H
 
-#include <Rtypes.h>
+#include "Stones/HTrans.h"
 
 class GTSIsoMaker;
 
@@ -18,6 +18,8 @@ public:
 
   virtual void     GTSIsoBegin(GTSIsoMaker* maker, Double_t iso_value) {}
   virtual Double_t GTSIsoFunc(Double_t x, Double_t y, Double_t z) = 0;
+  virtual HPointD  GTSIsoGradient(Double_t x, Double_t y, Double_t z)
+  { return HPointD(); } // = 0; should be abstract !!!!
   virtual void     GTSIsoEnd() {}
 
 #include "GTSIsoMakerFunctor.h7"

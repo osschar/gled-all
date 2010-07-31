@@ -108,7 +108,7 @@ void GTSRetriangulator::_init()
   mVO_BoundaryWght = 0.5;
   mVO_ShapeWght    = 0;
 
-  mMidvertOpts = MO_Midvert;
+  mMidvertOpts = MO_Volume;
 
   mMinAngleDeg = 1;
 
