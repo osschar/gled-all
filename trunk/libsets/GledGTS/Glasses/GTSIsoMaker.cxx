@@ -32,6 +32,7 @@ void GTSIsoMaker::_init()
   mXmax = mYmax = mZmax =  1;
   mXdiv = mYdiv = mZdiv = 20;
   bInvertCartesian = bInvertTetra = false;
+  mFixPointEpsilon = 1e-12;
 }
 
 /**************************************************************************/
@@ -232,4 +233,70 @@ void GTSIsoMaker::MakeDiffHisto()
   TCanvas *canvas = XTReqCanvas::Request("IsoDelta", "Surface iso-value delta");
   h->Draw();
   XTReqPadUpdate::Update(canvas);
+}
+
+//==============================================================================
+
+namespace
+{
+  struct iso_fix_arg
+  {
+    GTSIsoMakerFunctor *functor;
+    Double_t            iso_value;
+    Double_t            iso_epsilon;
+
+    iso_fix_arg(GTSIsoMakerFunctor *f, Double_t v, Double_t e) :
+      functor(f), iso_value(v), iso_epsilon(e)
+    {}
+  };
+
+  void vertex_iso_fixer(GTS::GtsVertex* v, iso_fix_arg* arg)
+  {
+    Double_t d;
+    do
+    {
+      Double_t f = arg->functor->GTSIsoFunc(v->p.x, v->p.y, v->p.z);
+      HPointD  g = arg->functor->GTSIsoGradient(v->p.x, v->p.y, v->p.z);
+
+      d = (arg->iso_value - f);
+
+      v->p.x += d * g.x;
+      v->p.y += d * g.y;
+      v->p.z += d * g.z;
+
+    } while (TMath::Abs(d) > arg->iso_epsilon);
+  }
+}
+
+void GTSIsoMaker::FixPoints()
+{
+  // Move points so that they have exactly iso value.
+
+  static const Exc_t _eh("GTSIsoMaker::FixPoints ");
+
+  using namespace GTS;
+
+  GTSurf* target = *mTarget;
+  if (target == 0)
+    throw _eh + "Link Target should be set.";
+
+  GtsSurface *surf = target->GetSurf();
+  if (surf == 0)
+    throw _eh + "Target must have non-null surface.";
+
+  GTSIsoMakerFunctor *functor = dynamic_cast<GTSIsoMakerFunctor*>(*mFunctor);
+  if (functor == 0)
+    throw _eh + "Link Functor must be set to a GTSIsoMakerFunctor.";
+
+
+  iso_fix_arg arg(functor, mValue, mFixPointEpsilon);
+  
+  functor->GTSIsoBegin(this, mValue);
+  gts_surface_foreach_vertex(surf, (GtsFunc) vertex_iso_fixer, &arg);
+  functor->GTSIsoEnd();
+
+  {
+    GLensReadHolder _lck(target);
+    target->StampReqTring();
+  }
 }
