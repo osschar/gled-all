@@ -65,7 +65,7 @@ TernaryTree::InitialiseExpression()
   mExpression.push_back(TwoParam('/', 45, 45));
   mExpression.push_back(TwoParam('A', mStartLength, mStartWidth));
   
-  assert(mExpression.size() == mStart.Length());
+  assert((Int_t)mExpression.size() == mStart.Length());
 }
 
 void
@@ -140,5 +140,5 @@ TernaryTree::ExpandRule(const Text_t* rule, TwoParam& parent, ParametricSystem::
         base = false;
       }
     }
-  } 
+  }
 }
