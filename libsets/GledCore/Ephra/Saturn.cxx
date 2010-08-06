@@ -2114,7 +2114,7 @@ int Saturn::stop_server()
 
 int Saturn::start_shooters()
 {
-  const TString _eh("Saturn::start_shooters ");
+  static const Exc_t _eh("Saturn::start_shooters ");
 
   mMIRShootingThread = new GThread("Saturn-MIRShooter",
                                    (GThread_foo) tl_MIR_Shooter, this,
