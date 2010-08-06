@@ -150,6 +150,8 @@ void* GThread::thread_spawner(void* arg)
 
   pthread_cleanup_push(thread_reaper, self);
 
+  // getcontext causes uber crap on mac.
+#ifndef __APPLE__
   if (getcontext((ucontext_t*) self->mTerminalContext))
   {
     perror("getcontext failed:");
@@ -177,6 +179,9 @@ void* GThread::thread_spawner(void* arg)
       ret = (self->mStartFoo)(self->mStartArg);
     }
   }
+#else
+  ret = (self->mStartFoo)(self->mStartArg);
+#endif
 
   {
     GMutexHolder _lck(sDetachCtrlLock);
