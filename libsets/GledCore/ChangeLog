@@ -1,3 +1,8 @@
+2010-08-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GThread.cxx:
+	On mac ifdef out getcontext call -- it causes weirdness.
+
 2010-07-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
