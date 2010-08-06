@@ -32,7 +32,6 @@
 ClassImp(GThread);
 
 GThread*                 GThread::sMainThread   = 0;
-bool                     GThread::sMainInitDone = false;
 int                      GThread::sThreadCount  = 0;
 map<pthread_t, GThread*> GThread::sThreadMap;
 list<GThread*>           GThread::sThreadList;
@@ -49,6 +48,7 @@ GThread::GThread(const Text_t* name) :
   mIndex        (-1),
   mThreadListIt (),
   mId           (0),
+  mRootTThread  (0),
 
   mName     (name),
   mStartFoo (0), mStartArg (0),
@@ -80,6 +80,7 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg,
   mIndex        (-1),
   mThreadListIt (),
   mId           (0),
+  mRootTThread  (0),
 
   mName     (name),
   mStartFoo (foo), mStartArg (arg),
@@ -141,7 +142,8 @@ void* GThread::thread_spawner(void* arg)
   sContainerLock.Lock();
   sThreadMap[self->mId] = self;
   self->mRunningState   = RS_Running;
-  self->mRootTThread    = new TThread(TThread::SelfId());
+  self->mRootTThread    = new TThread();
+  self->mRootTThread->SetName(GForm("TThread gled idx=%d", self->mIndex));
   sContainerLock.Unlock();
 
   void* ret = 0;
