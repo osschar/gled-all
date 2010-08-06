@@ -9,6 +9,8 @@
 
 #include <GL/glew.h>
 
+#include <cmath>
+
 #define PARENT ZNode_GL_Rnr
 
 //==============================================================================
