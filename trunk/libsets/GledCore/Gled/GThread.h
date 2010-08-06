@@ -104,7 +104,6 @@ private:
   typedef vector<GThread_sh_foo>   vSigHandlers_t;
 
   static GThread      *sMainThread;
-  static bool          sMainInitDone;
   static int           sThreadCount;
   static mPThr2GThr_t  sThreadMap;
   static lpGThread_t   sThreadList;
