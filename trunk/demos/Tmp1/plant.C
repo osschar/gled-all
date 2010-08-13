@@ -79,6 +79,7 @@ void plant(int mode = 2)
     plant->SetStart("p");
     plant->SetAngle(16*TMath::DegToRad());    
     plant->SetLevel(6);
+    plant->SetStemWidth(0.045);
     plant->RotateLF(1, 3, TMath::Pi()*0.5);
   }
   
