@@ -44,7 +44,6 @@ void ParametricSystem_GL_Rnr::Render(RnrDriver* rd)
   glEnable(GL_NORMALIZE);
   glPushMatrix();
   glScalef(mScale, mScale, mScale);
-  printf("scale %f \n", mScale);
   glColor4fv(mPS->GetLineColor().array());
   ProcessExpression(true);
 
@@ -60,7 +59,7 @@ void ParametricSystem_GL_Rnr::Triangulate(RnrDriver* rd)
   
   ProcessExpression(false);
   
-  printf("extends %f \n",GetMaxExtend() );
+  // printf("extends %f \n",GetMaxExtend() );
   mScale = 1/GetMaxExtend();  
 }
 
@@ -78,10 +77,8 @@ void ParametricSystem_GL_Rnr::ProcessExpression(bool draw)
   turtle.mLength= 1;
   std::vector<TwoParam> pv = mPS->GetExpression();
 
-  //printf("==============================================================\n");
   for (std::vector<TwoParam>::iterator i = pv.begin(); i != pv.end(); ++i)
   {
- //   printf("param %c %f %f \n", (*i).mType, (*i).mParam1, (*i).mParam2);
     switch ((*i).mType) {        
         // stack
       case '[':
@@ -142,7 +139,6 @@ void ParametricSystem_GL_Rnr::ProcessExpression(bool draw)
         break;
       case '!':
         turtle.mWidth = (*i).mParam1*TMath::Sqrt(3);
-        printf("parametric system %f %f\n", turtle.mWidth, (*i).mParam1);
         break;
       default:
         break;
@@ -179,7 +175,7 @@ void ParametricSystem_GL_Rnr::DrawStep(Turtle& turtle, TwoParam& p, bool draw)
 //-------------------------------------------------------------------------------
 float ParametricSystem_GL_Rnr::GetMaxExtend()
 {
-  printf("%f %f %f \n", fBBox[1]-fBBox[0], fBBox[3]-fBBox[2], fBBox[5]-fBBox[4]);
+//  printf("%f %f %f \n", fBBox[1]-fBBox[0], fBBox[3]-fBBox[2], fBBox[5]-fBBox[4]);
   
   float s = fBBox[1]-fBBox[0];
   

@@ -46,10 +46,10 @@ protected:
   typedef std::map<char, int>       NameMap_t;
   typedef NameMap_t::iterator       NameMap_i;  
   
-  Int_t          mLevel;      // X{GST} 7 Value(-range=>[1, 9, 1])
+  Int_t          mLevel;      // X{GST} 7 Value(-range=>[1, 11, 1])
   TString        mStart;      // X{GST} 7 Textor()  
   ZLink<ZVector> mRules;      // X{GS}  L {}
-  ZColor	       mLineColor;  // X{GSP} 7 ColorButt()
+  ZColor	       mLineColor;  // X{GSPT} 7 ColorButt()
 
   
   NameMap_t      mNameMap;

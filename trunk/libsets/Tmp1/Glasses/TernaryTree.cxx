@@ -43,7 +43,6 @@ void TernaryTree::SetTorsion(Double_t x, Double_t y, Double_t z)
   mTorsion.Set(x,y,z);
   mTorsionNormalized = mTorsion;
   mTorsionNormalized.Normalize();
-  mTorsionNormalized.Print();
   mStampReqTring = Stamp(FID());
 }
 
@@ -103,7 +102,6 @@ TernaryTree::ExpandExpression(Segments_t& oldExp, Segments_t& newExp, int level)
     ExpandExpression(oldExp, newExp, ++level);  
   }
 }
-
 
 void
 TernaryTree::ExpandRule(const Text_t* rule, TwoParam& parent, ParametricSystem::Segments_t& newExp)
