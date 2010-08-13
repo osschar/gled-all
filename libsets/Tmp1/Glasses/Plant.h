@@ -29,7 +29,7 @@ public:
   
   Double_t mStemWidth;   // X{GST} 7 Value(-range=>[0, 1, 1, 1000])
   Double_t mLeafSize;    // X{GST} 7 Value(-range=>[0, 1, 1, 100])
-  Double_t mFlowerSize;  // X{GST} 7 Value(-range=>[0, 1, 0, 100])
+  Double_t mFlowerSize;  // X{GST} 7 Value(-range=>[0, 1, 1, 100])
   
 #include "Plant.h7"
   ClassDef(Plant, 1);

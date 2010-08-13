@@ -32,8 +32,6 @@ SympodialTree::~SympodialTree()
 void SympodialTree::ExpandRule(const Text_t* rule, TwoParam& parent, ParametricSystem::Segments_t& newExp)
 {
   const static float widthDecrease = TMath::Sqrt(0.5f);
-  
-  printf("expand rule \n");
   bool firstStack = true;
   for (size_t k = 0; k < strlen(rule); ++k)
   {
@@ -43,7 +41,6 @@ void SympodialTree::ExpandRule(const Text_t* rule, TwoParam& parent, ParametricS
     if (s.mType == ']')
     {
       firstStack = false;
-      printf("change turn  SympodialTree\n");
     }
     
     if (s.mType == '&' || s.mType == '^')
@@ -61,7 +58,6 @@ void SympodialTree::ExpandRule(const Text_t* rule, TwoParam& parent, ParametricS
     else if (s.mType == 'A' || s.mType == 'B')
     {
       float contraction = firstStack ? mTrunkContraction : mLateralContraction;
-      //   printf("contractin %f \n", contraction);
       s.mParam1 *= contraction;
       s.mParam2 *= widthDecrease;
     }

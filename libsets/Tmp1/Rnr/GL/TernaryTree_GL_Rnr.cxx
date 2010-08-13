@@ -35,10 +35,8 @@ void TernaryTree_GL_Rnr::ProcessExpression(bool draw)
   
   std::vector<TwoParam> pv = mTT->GetExpression();
   
-  printf("==============================================================\n");
   for (std::vector<TwoParam>::iterator i = pv.begin(); i != pv.end(); ++i)
   {
-    //   printf("param %c %f %f \n", (*i).mType, (*i).mParam1, (*i).mParam2);
     switch ((*i).mType) {        
         // stack
       case '[':
@@ -107,12 +105,8 @@ void TernaryTree_GL_Rnr::DrawStep(Turtle& turtle, TwoParam& p, bool draw)
     float w =  p.mParam2;//turtle.mWidth;
     float wf = w;
     float l = p.mParam1;
-    printf("segment width %f length %f\n", w, l);
     
-    glColor3f(1,0,0);
     gluCylinder(mQuadric, wf, w, l, 8, 4);    
-    // gluCylinder(mQuadric, turtle.mParam2 , turtle.mParam2, p.mParam1, 8, 4);    
-
     glPopMatrix();  
   }
   

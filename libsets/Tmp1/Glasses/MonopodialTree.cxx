@@ -59,7 +59,6 @@ MonopodialTree::SetStartLength(float x)
 void
 MonopodialTree::ExpandRule(const Text_t* rule, TwoParam& parent, ParametricSystem::Segments_t& newExp )
 {
-  printf("MonopodialTree::ExpandRule \n");
   const static float widthDecrease = TMath::Sqrt(0.5f);
   static float divergenceAngle = 137;
   
