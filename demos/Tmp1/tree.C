@@ -3,7 +3,7 @@
 
 const Text_t* bush_layout = "ZGlass(Name,Title[22])";
 
-void tree(int mode = 0)
+void tree(int mode = 2)
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("GledCore");
@@ -47,8 +47,10 @@ void tree(int mode = 0)
     tree->SetLevel(10);
     tree->SetStartWidth(0.03);
     tree->RotateLF(1, 3, TMath::Pi()*0.5);
-    tree->SetTrunkAngle(5);
-    tree->SetLateralAngle(65);
+    tree->SetTrunkAngle(26);
+    tree->SetLateralAngle(29);
+    tree->SetLateralContraction(0.5);
+    tree->SetTrunkContraction(0.77);
   }
   else
   {
@@ -63,14 +65,14 @@ void tree(int mode = 0)
     tree->SetStartWidth(0.001);
     tree->RotateLF(1, 3, TMath::Pi()*0.5);
     tree->SetTrunkAngle(19);
-    tree->SetStartWidth(0.01);
+    tree->SetStartWidth(0.003);
     tree->SetStartLength(1);
     tree->SetTrunkContraction(1.109);
     tree->SetSusceptibility(0.22);
+    tree->SetLineColor(1, 0, 0);
   }
   
   //______________________________________________________________________________  
-  
    
   Rect* base_plane = new Rect("BasePlane");
   base_plane->SetUnitSquare(2);
