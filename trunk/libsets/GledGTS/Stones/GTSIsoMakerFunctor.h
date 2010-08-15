@@ -18,8 +18,7 @@ public:
 
   virtual void     GTSIsoBegin(GTSIsoMaker* maker, Double_t iso_value) {}
   virtual Double_t GTSIsoFunc(Double_t x, Double_t y, Double_t z) = 0;
-  virtual HPointD  GTSIsoGradient(Double_t x, Double_t y, Double_t z)
-  { return HPointD(); } // = 0; should be abstract !!!!
+  virtual Double_t GTSIsoGradient(Double_t x, Double_t y, Double_t z, HPointD& g) = 0;
   virtual void     GTSIsoEnd() {}
 
 #include "GTSIsoMakerFunctor.h7"

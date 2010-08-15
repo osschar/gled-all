@@ -1,6 +1,30 @@
 #include <glass_defines.h>
 #include <gl_defines.h>
 
+class GTSIsoMaker;
+class GTSRetriangulator;
+class TabletReader;
+
+GTSIsoMaker       *g_isomaker = 0;
+GTSRetriangulator *g_retriangulator = 0;
+
+TabletReader      *g_reader = 0;
+
+const Double_t LimXY = 0.7;
+const Double_t LimZ  = 0.2;
+const Double_t Delta = 0.005;
+
+void setup_grid(GTSIsoMaker* maker,   Double_t delta=Delta,
+		Double_t limxy=LimXY, Double_t limz=LimZ)
+{
+  Int_t nxy = TMath::Nint(2.0*LimXY/Delta);
+  Int_t nz  = TMath::Nint(2.0*LimZ /Delta);
+  maker->SetXAxis(-limxy, limxy, nxy);
+  maker->SetYAxis(-limxy, limxy, nxy);
+  maker->SetZAxis(-limz,  limz,  nz);
+}
+
+
 void wactest()
 {
   Gled::AssertMacro("sun_demos.C");
@@ -10,6 +34,13 @@ void wactest()
   g_queen->CheckIn(arcs);
   g_queen->Add(arcs);
   g_scene = arcs;
+
+  CREATE_ADD_GLASS(l, Lamp, arcs, "Lamp", "");
+  l->SetDiffuse(0.8, 0.8, 0.8);
+  l->SetPos(-2, -6, 6);
+  l->RotateLF(1,2, TMath::Pi());
+
+  arcs->GetGlobLamps()->Add(l);
 
   CREATE_ADD_GLASS(limooff, ZGlLightModel, arcs, "LightsOff", 0);
   limooff->SetLightModelOp(0);
@@ -28,6 +59,7 @@ void wactest()
 
   CREATE_ADD_GLASS(tr, TabletReader, arcs, "TabletReader", 0);
   tr->RotateLF(2, 3, TMath::PiOver2());
+  g_reader = tr;
 
   CREATE_ADD_GLASS(recti, Rect, tr, "Inner Grid", 0);
   recti->SetVLen(0.722);
@@ -42,15 +74,15 @@ void wactest()
   recto->SetPos(0, 0, -0.001);
 
   CREATE_ADD_GLASS(isomaker, GTSIsoMaker, arcs, "Iso Maker", 0);
-  isomaker->SetXAxis(-0.7, 0.7, 280);
-  isomaker->SetYAxis(-0.7, 0.7, 280);
-  isomaker->SetZAxis(-0.2, 0.2,  80);
+  setup_grid(isomaker);
   // Cartesian is usually better.
   // isomaker->SetAlgo(GTSIsoMaker::A_Tetra);
   isomaker->SetValue(1);
   isomaker->SetInvertCartesian(true);
+  g_isomaker = isomaker;
 
   CREATE_ADD_GLASS(retring, GTSRetriangulator, arcs, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
+  g_retriangulator = retring;
 
   CREATE_ADD_GLASS(limoon, ZGlLightModel, arcs, "LightsOn", 0);
   limoon->SetLightModelOp(1);
@@ -76,4 +108,29 @@ void wactest()
 
   ZMIR* start_mir = tr->S_StartRead();
   g_saturn->ShootMIR(start_mir);
+}
+
+void make_high_res(Double_t fac=0.5, const Text_t* stem=0)
+{
+  setup_grid(g_isomaker, Delta * fac);
+
+  g_isomaker->MakeSurface();
+
+  g_retriangulator->SetStopOpts(GTSRetriangulator::SO_Cost);
+
+  g_retriangulator->SetStopCost(Delta * fac);
+  g_retriangulator->SetCostOpts(GTSRetriangulator::CO_Length);
+  g_retriangulator->Coarsen();
+
+  g_retriangulator->SetStopCost(0.4);
+  g_retriangulator->SetCostOpts(GTSRetriangulator::CO_Angle);
+  g_retriangulator->Coarsen();
+
+  if (stem)
+  {
+    GTSurf *surf = g_isomaker->GetTarget();
+    surf->MakeZSplitSurfaces(0.0, stem, true);
+  }
+
+  setup_grid(g_isomaker);
 }

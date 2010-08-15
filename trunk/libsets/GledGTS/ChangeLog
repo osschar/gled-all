@@ -1,3 +1,27 @@
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	In vertex_iso_fixer() properly calculate length of step along the
+	gradient.
+	Add member 'Int_t mFixPointMaxIter'.
+	Add max-iteration and n-failed members to iso_fix_arg struct.
+
+	* Stones/GTSIsoMakerFunctor.h:
+	* Glasses/GTSTorus.cxx:
+	* Glasses/GTSTorus.h:
+	Change signature of GTSIsoGradient() to:
+	  virtual Double_t GTSIsoGradient(Double_t x, Double_t y, Double_t z, HPointD& g) = 0;
+
+	* Glasses/GTSRetriangulator.cxx:
+	In Refine(), pass squrare of cost parameter to GTS (as was done
+	for Coarsen()).
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function 'void MakeZSplitSurfaces(...)'. It creates two
+	sub-surfaces, split at given z-coordinate.
+
 2010-07-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add calculation of iso-field gradient and method to move

@@ -217,20 +217,22 @@ void GTSRetriangulator::Refine()
   if (s == 0)
     throw _eh + "Target should have non-null surface.";
 
+  double stop_cost = mStopCost;
+
   GtsStopFunc l_stop_func = 0;
   gpointer    l_stop_data = 0;
   switch(mStopOpts)
   {
     case SO_Number:
-      l_stop_func = (GtsStopFunc)refine_stop_number;
+      l_stop_func = (GtsStopFunc) refine_stop_number;
       l_stop_data = &mStopNumber;
       break;
     case SO_Cost:
-      l_stop_func = (GtsStopFunc)refine_stop_cost;
-      l_stop_data = &mStopCost;
+      l_stop_func = (GtsStopFunc) refine_stop_cost;
+      l_stop_data = &stop_cost;
       break;
     default:
-      throw(_eh + "Unknown StopOpts.");
+      throw _eh + "Unknown StopOpts.";
   }
 
   GtsVolumeOptimizedParams l_vo_params =
@@ -241,6 +243,7 @@ void GTSRetriangulator::Refine()
   switch (mCostOpts)
   {
     case CO_Length:
+      stop_cost = stop_cost * stop_cost; // edge-length uses square edge length.
       break;
     case CO_Volume:
       l_cost_func = (GtsKeyFunc) gts_volume_optimized_cost;
@@ -250,7 +253,7 @@ void GTSRetriangulator::Refine()
       l_cost_func = (GtsKeyFunc) cost_angle;
       break;
     default:
-      throw(_eh + "Unknown CostOpts.");
+      throw _eh + "Unknown CostOpts.";
   }
 
   ::GTime* start_time = 0;

@@ -72,6 +72,9 @@ public:
 
   void ExportTring(const Text_t* fname=0);
 
+  void MakeZSplitSurfaces(Double_t z_split=0, const TString& stem="split",
+			  Bool_t save_p=false); // X{ED} 7 MCWButt()
+
 #include "GTSurf.h7"
   ClassDef(GTSurf, 1);
 }; // endclass GTSurf

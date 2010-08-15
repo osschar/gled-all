@@ -3,9 +3,23 @@
 // A simple scene demonstrating GTSTorus.
 
 // vars: ZQueen* g_queen
-// libs: Geom1 GTS
+// libs: Geom1 GledGTS
+
 #include <glass_defines.h>
 #include <gl_defines.h>
+
+class GTSTorus;
+class GTSIsoMaker;
+class GTSRetriangulator;
+
+GTSTorus          *g_torus = 0;
+GTSIsoMaker       *g_isomaker = 0;
+GTSRetriangulator *g_retriangulator = 0;
+
+Double_t def_step = 0.05;
+
+void make_std();
+void coarsen_std(Double_t fac=1.0, Bool_t print_stats=kTRUE);
 
 void iso_torus()
 {
@@ -14,43 +28,39 @@ void iso_torus()
 
   Gled::AssertMacro("sun_demos.C");
 
-  Scene* starw  = new Scene("Iso Surfaces");
-  g_queen->CheckIn(starw);
-  g_queen->Add(starw);
-  g_scene = starw;
+  CREATE_ADD_GLASS(scene, Scene, g_queen, "Iso Surfaces", "");
+  g_scene = scene;
 
   // Geom elements
 
-  Rect* base_plane = new Rect("BasePlane");
+  CREATE_ADD_GLASS(base_plane, Rect, scene, "BasePlane", "");
   base_plane->SetUnitSquare(16);
-  g_queen->CheckIn(base_plane);
-  starw->Add(base_plane);
 
-  Lamp* l = new Lamp("Lamp");
-  l->SetDiffuse(0.8, 0.8, 0.8);
-  l->SetPos(-2, -6, 6);
-  l->RotateLF(1,2, TMath::Pi());
-  g_queen->CheckIn(l); starw->Add(l);
+  CREATE_ADD_GLASS(lamp, Lamp, scene, "Lamp", "");
+  lamp->SetDiffuse(0.8, 0.8, 0.8);
+  lamp->SetPos(-2, -6, 6);
+  lamp->RotateLF(1,2, TMath::Pi());
 
-  starw->GetGlobLamps()->Add(l);
+  scene->GetGlobLamps()->Add(lamp);
 
   // GTS models
 
-  CREATE_ADD_GLASS(surf, GTSTorus, starw, "GTSTorus", 0);
+  CREATE_ADD_GLASS(surf, GTSTorus, scene, "GTSTorus", 0);
   surf->SetColor(1,0.8,0.2);
   surf->SetRM(4);
   surf->SetRm(1.5);
-  surf->SetStep(0.05);
+  g_torus = surf;
 
-  CREATE_ADD_GLASS(maker, GTSIsoMaker, starw, "Iso Maker", 0);
+  CREATE_ADD_GLASS(maker, GTSIsoMaker, scene, "Iso Maker", 0);
   maker->SetTarget(surf);
   maker->SetFunctor(surf);
+  g_isomaker = maker;
 
-  CREATE_ADD_GLASS(retring, GTSRetriangulator, starw, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
+  CREATE_ADD_GLASS(retring, GTSRetriangulator, scene, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
   retring->SetTarget(surf);
+  g_retriangulator = retring;
 
-  maker->MakeSurface();
-  surf->CalcStats();
+  make_std();
 
   // Spawn GUI
   Gled::Macro("eye.C");
@@ -59,4 +69,31 @@ void iso_torus()
   g_shell->SpawnClassView(surf);
   g_shell->SpawnClassView(maker);
   g_shell->SpawnClassView(retring);
+}
+
+void make_std()
+{
+  g_torus->SetStep(def_step);
+  g_isomaker->MakeSurface();
+  g_isomaker->MovePointsOntoIsoSurface();
+  g_torus->CalcStats();
+}
+
+void coarsen_std(Double_t fac, Bool_t print_stats)
+{
+  g_retriangulator->SetStopOpts(GTSRetriangulator::SO_Cost);
+
+  g_retriangulator->SetStopCost(def_step * fac);
+  g_retriangulator->SetCostOpts(GTSRetriangulator::CO_Length);
+  g_retriangulator->Coarsen();
+  g_isomaker->MovePointsOntoIsoSurface();
+
+  if (print_stats) { g_torus->CalcStats(); g_torus->PrintStats(); }
+
+  g_retriangulator->SetStopCost(0.5);
+  g_retriangulator->SetCostOpts(GTSRetriangulator::CO_Angle);
+  g_retriangulator->Coarsen();
+  g_isomaker->MovePointsOntoIsoSurface();
+
+  if (print_stats) { g_torus->CalcStats(); g_torus->PrintStats(); }
 }

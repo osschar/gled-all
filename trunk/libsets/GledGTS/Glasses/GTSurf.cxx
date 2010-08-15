@@ -514,3 +514,65 @@ void GTSurf::ExportTring(const Text_t* fname)
 
   if (fname) fclose(f);
 }
+
+//==============================================================================
+
+namespace
+{
+  void vertex_min_z_fixer(GTS::GtsVertex* v, Double_t* min_z)
+  {
+    if (v->p.z < *min_z) v->p.z = *min_z;
+  }
+
+  void vertex_max_z_fixer(GTS::GtsVertex* v, Double_t* max_z)
+  {
+    if (v->p.z > *max_z) v->p.z = *max_z;
+  }
+
+}
+
+void GTSurf::MakeZSplitSurfaces(Double_t z_split, const TString& stem, Bool_t save_p)
+{
+  static const Exc_t _eh("GTSurf::SaveZSplitSurfaces ");
+
+  using namespace GTS;
+
+  GtsSurface *sup = 0, *sdn = 0;
+
+  {
+    GLensReadHolder _rdlck(this);
+
+    if (!pSurf)
+      throw _eh + "Surface is null.";
+
+    sup = CopySurface();
+    sdn = CopySurface();
+  }
+
+  gts_surface_foreach_vertex(sup, (GtsFunc) vertex_min_z_fixer, &z_split);
+  gts_surface_foreach_vertex(sdn, (GtsFunc) vertex_max_z_fixer, &z_split);
+
+  GTSurf *gsup = new GTSurf(GForm("Upper %s", GetName()));
+  gsup->ReplaceSurface(sup);
+  gsup->SetFile(GForm("%s-upper.gts", stem.Data()));
+
+  GTSurf *gsdn = new GTSurf(GForm("Lower %s", GetName()));
+  gsdn->ReplaceSurface(sdn);
+  gsdn->SetFile(GForm("%s-lower.gts", stem.Data()));
+
+  {
+    GLensWriteHolder _wrlck(this);
+
+    mQueen->CheckIn(gsup);
+    mQueen->CheckIn(gsdn);
+
+    Add(gsup);
+    Add(gsdn);
+  }
+
+  if (save_p)
+  {
+    { GLensReadHolder _rdlck(gsup); gsup->Save(); }
+    { GLensReadHolder _rdlck(gsdn); gsdn->Save(); }
+  }
+}

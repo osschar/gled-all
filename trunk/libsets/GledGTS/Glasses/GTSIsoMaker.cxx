@@ -33,6 +33,7 @@ void GTSIsoMaker::_init()
   mXdiv = mYdiv = mZdiv = 20;
   bInvertCartesian = bInvertTetra = false;
   mFixPointEpsilon = 1e-12;
+  mFixPointMaxIter = 1000;
 }
 
 /**************************************************************************/
@@ -200,12 +201,13 @@ namespace
   }
 }
 
-void GTSIsoMaker::MakeDiffHisto()
+void GTSIsoMaker::MakeIsoDistanceHisto(const TString& canvas_name,
+				       const TString& canvas_title)
 {
   // Calculate difference from iso-value for all points of target and
   // histogram it.
 
-  static const Exc_t _eh("GTSIsoMaker::MakeDiffHisto ");
+  static const Exc_t _eh("GTSIsoMaker::MakeIsoDistanceHisto ");
 
   using namespace GTS;
 
@@ -230,7 +232,7 @@ void GTSIsoMaker::MakeDiffHisto()
   gts_surface_foreach_vertex(surf, (GtsFunc) vertex_iso_comparator, &arg);
   functor->GTSIsoEnd();
 
-  TCanvas *canvas = XTReqCanvas::Request("IsoDelta", "Surface iso-value delta");
+  TCanvas *canvas = XTReqCanvas::Request(canvas_name, canvas_title);
   h->Draw();
   XTReqPadUpdate::Update(canvas);
 }
@@ -244,35 +246,40 @@ namespace
     GTSIsoMakerFunctor *functor;
     Double_t            iso_value;
     Double_t            iso_epsilon;
+    Int_t               max_iter;
+    Int_t               n_fail;
 
-    iso_fix_arg(GTSIsoMakerFunctor *f, Double_t v, Double_t e) :
-      functor(f), iso_value(v), iso_epsilon(e)
+    iso_fix_arg(GTSIsoMakerFunctor *f, Double_t v, Double_t e, Int_t m) :
+      functor(f), iso_value(v), iso_epsilon(e), max_iter(m), n_fail(0)
     {}
   };
 
   void vertex_iso_fixer(GTS::GtsVertex* v, iso_fix_arg* arg)
   {
-    Double_t d;
+    HPointD  g;
+    Double_t f, d, k;
+    Int_t N = 0;
     do
     {
-      Double_t f = arg->functor->GTSIsoFunc(v->p.x, v->p.y, v->p.z);
-      HPointD  g = arg->functor->GTSIsoGradient(v->p.x, v->p.y, v->p.z);
-
+      f = arg->functor->GTSIsoGradient(v->p.x, v->p.y, v->p.z, g);
       d = (arg->iso_value - f);
+      k = d / g.Mag2();
 
-      v->p.x += d * g.x;
-      v->p.y += d * g.y;
-      v->p.z += d * g.z;
+      v->p.x += k * g.x;
+      v->p.y += k * g.y;
+      v->p.z += k * g.z;
+    }
+    while (TMath::Abs(d) > arg->iso_epsilon && ++N < arg->max_iter);
 
-    } while (TMath::Abs(d) > arg->iso_epsilon);
+    if (N >= arg->max_iter) ++arg->n_fail;
   }
 }
 
-void GTSIsoMaker::FixPoints()
+void GTSIsoMaker::MovePointsOntoIsoSurface()
 {
   // Move points so that they have exactly iso value.
 
-  static const Exc_t _eh("GTSIsoMaker::FixPoints ");
+  static const Exc_t _eh("GTSIsoMaker::MovePointsOntoIsoSurface ");
 
   using namespace GTS;
 
@@ -289,11 +296,16 @@ void GTSIsoMaker::FixPoints()
     throw _eh + "Link Functor must be set to a GTSIsoMakerFunctor.";
 
 
-  iso_fix_arg arg(functor, mValue, mFixPointEpsilon);
+  iso_fix_arg arg(functor, mValue, mFixPointEpsilon, mFixPointMaxIter);
   
   functor->GTSIsoBegin(this, mValue);
   gts_surface_foreach_vertex(surf, (GtsFunc) vertex_iso_fixer, &arg);
   functor->GTSIsoEnd();
+
+  if (arg.n_fail)
+  {
+    ISwarn(_eh + GForm("failed for %d points.", arg.n_fail));
+  }
 
   {
     GLensReadHolder _lck(target);

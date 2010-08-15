@@ -29,7 +29,7 @@ ClassImp(TabletStrokeList);
 
 void TabletStrokeList::_init()
 {
-  mAlgorithm      =  PA_TwoStrongestPoints;
+  mAlgorithm      =  PA_CubicInterpolation;
   mWidth          =  0.01;
   mPotentialExp   = -0.5;
   mPressureAlpha  =  2;
@@ -212,17 +212,15 @@ void TabletStrokeList::distance_derivatives(Float_t t, const HPointF& P, const C
   d2 = pmP.Dot(pd2) + pd1.Dot(pd1);
 }
 
-Double_t TabletStrokeList::GTSIsoFunc(Double_t x, Double_t y, Double_t z)
+bool TabletStrokeList::find_closest_points(Double_t x, Double_t y, Double_t z,
+					   Int_t id[2], Double_t vm[2])
 {
   Float_t       in_point[2] = { x, y };
   vector<Int_t> result;
 
   mKDTree->FindInRange(in_point, mSearchRad, result);
 
-  if (result.empty()) return 0;
-
-  Int_t    id[2] = { -1, -1 };
-  Double_t vm[2] = {  0,  0 };
+  if (result.empty()) return false;
 
   for (vector<Int_t>::iterator pi = result.begin(); pi != result.end(); ++pi)
   {
@@ -243,6 +241,120 @@ Double_t TabletStrokeList::GTSIsoFunc(Double_t x, Double_t y, Double_t z)
     }
   }
 
+  return true;
+}
+
+void TabletStrokeList::get_linear_approx(Double_t x, Double_t y, Double_t z,
+					 Int_t id[2], Double_t vm[2],
+					 Double_t& value, STabletPoint* point)
+{
+  value = vm[0];  if (point) *point = *mPointRefs[id[0]];
+
+  if (id[1] == -1 || TMath::Abs(id[0] - id[1]) != 1) return;
+
+  if (id[0] > id[1])  swap(id[0], id[1]);
+  STabletPoint &a = * mPointRefs[id[0]];
+  STabletPoint &b = * mPointRefs[id[1]];
+
+  // Stroke boundary?
+  if (a.t > b.t) return;
+
+  HPointF      P(x, y, z);
+  STabletPoint atob = b - a;
+  HPointF      atop = P - a;
+  Float_t      f    = atob.Dot(atop) / atob.Mag2();
+
+  // Check if we are off one or the other edge:
+  if (f <= -0.05 || f >= 1.05f) return;
+
+  STabletPoint p = (1.0f - f)*a + f*b;
+
+  const Double_t Dsqr = sqr(x - p.x) + sqr(y - p.y) + sqr(z - p.z);
+  const Double_t R    = mWidth * TMath::Power(p.p, mPressureAlpha);
+
+  value = TMath::Power(Dsqr / sqr(R), mPotentialExp);
+
+  if (point) *point = p;
+}
+
+void TabletStrokeList::get_cubic_approx(Double_t x, Double_t y, Double_t z,
+					Int_t id[2], Double_t vm[2],
+					Double_t& value, STabletPoint* point)
+{
+  value = vm[0]; if (point) *point = *mPointRefs[id[0]];
+
+  if (id[1] == -1 || TMath::Abs(id[0] - id[1]) != 1) return;
+
+  if (id[0] > id[1])  swap(id[0], id[1]);
+  STabletPoint &a = * mPointRefs[id[0]];
+  STabletPoint &b = * mPointRefs[id[1]];
+
+  // Stroke boundary?
+  if (a.t > b.t) return;
+
+  // Use "linear" time as starting approximation.
+  HPointF      P(x, y, z);
+  STabletPoint atob = b - a;
+  HPointF      atop = P - a;
+  Float_t      f    = atob.Dot(atop) / atob.Mag2();
+
+  CCoefs &c = mCCoefs[id[0]];
+  Float_t T = f * atob.t;
+  Float_t d1, d2;
+  Int_t N = 0;
+  do
+  {
+    distance_derivatives(T, P, c, d1, d2);
+    T -= d1 / d2;
+  } while (TMath::Abs(d1) > 1e-7f && ++N < 20);
+
+  if (bMakeCubHistos && !point)
+  {
+    mHN->Fill(N);
+    mHCubTimevsTime->Fill(f, T/atob.t);
+    mHCubTimevsN->Fill(N, T/atob.t);
+    mHDeriv->Fill(1e6f*d1);
+    if (N >= 20)
+    {
+      mHCubTime20->Fill(T/atob.t);
+      mHDeriv20->Fill(1e3f*d1);
+    }
+  }
+
+  if (T < -0.05f*atob.t || T > 1.05f*atob.t) return;
+
+  const Float_t T2 = T * T;
+  STabletPoint p = T2*T * c.A + T2 * c.B + T * c.C + c.D;
+
+  const Double_t Dsqr = sqr(x - p.x) + sqr(y - p.y) + sqr(z - p.z);
+  const Double_t R    = mWidth * TMath::Power(p.p, mPressureAlpha);
+
+  value = TMath::Power(Dsqr / sqr(R), mPotentialExp);
+
+  if (point) *point = p;
+}
+
+void TabletStrokeList::add_gradient(HPointD& g, Double_t x, Double_t y, Double_t z,
+				    Double_t value, STabletPoint* point)
+{
+  const Double_t Dsqr = sqr(x - point->x) + sqr(y - point->y) + sqr(z - point->z);
+  const Double_t f    = 2.0 * mPotentialExp * value / Dsqr;
+
+  g.x += f * (x - point->x);
+  g.y += f * (y - point->y);
+  g.z += f * (z - point->z);
+}
+
+Double_t TabletStrokeList::GTSIsoFunc(Double_t x, Double_t y, Double_t z)
+{
+  Int_t    id[2] = { -1, -1 };
+  Double_t vm[2] = {  0,  0 };
+
+  if ( ! find_closest_points(x, y, z, id, vm))
+  {
+    return 0;
+  }
+
   switch (mAlgorithm)
   {
     case PA_StrongestPoint:
@@ -255,83 +367,62 @@ Double_t TabletStrokeList::GTSIsoFunc(Double_t x, Double_t y, Double_t z)
     }
     case PA_LinearInterpolation:
     {
-      if (id[1] == -1 || TMath::Abs(id[0] - id[1]) != 1) return vm[0];
-
-      STabletPoint &a = * mPointRefs[id[0]];
-      STabletPoint &b = * mPointRefs[id[1]];
-
-      // Stroke boundary?
-      if (a.t > b.t) return vm[0];
-
-      HPointF      P(x, y, z);
-      STabletPoint atob = b - a;
-      HPointF      atop = P - a;
-      Float_t      dp = atob.Dot(atop);
-
-      // Check if we are off one or the other edge:
-      if (dp <= 0) return vm[0];
-      Float_t atob_mag  = atob.Mag();
-      dp /= atob_mag;
-      if (dp >= atob_mag) return vm[1];
-
-      Float_t      f = dp / atob_mag;
-      STabletPoint p = (1.0f - f)*a + f*b;
-
-      const Double_t Dsqr = sqr(x - p.x) + sqr(y - p.y) + sqr(z - p.z);
-      const Double_t R    = mWidth * TMath::Power(p.p, mPressureAlpha);
-
-      return TMath::Power(Dsqr / sqr(R), mPotentialExp);
+      Double_t value;
+      get_linear_approx(x, y, z, id, vm, value);
+      return value;
     }
     case PA_CubicInterpolation:
     {
-      if (id[1] == -1 || TMath::Abs(id[0] - id[1]) != 1) return vm[0];
+      Double_t value;
+      get_cubic_approx(x, y, z, id, vm, value);
+      return value;
+    }
+  }
 
-      Int_t i0, i1;
-      if (id[0] < id[1]) { i0 = id[0]; i1 = id[1]; } else { i0 = id[1]; i1 = id[0]; }
-      STabletPoint &a = * mPointRefs[i0];
-      STabletPoint &b = * mPointRefs[i1];
+  // gcc was complaining ...
+  return 0;
+}
 
-      // Stroke boundary?
-      if (a.t > b.t) return vm[0];
+Double_t TabletStrokeList::GTSIsoGradient(Double_t x, Double_t y, Double_t z, HPointD& g)
+{
+  g.Zero();
 
-      // Use "linear" time as starting approximation.
-      HPointF      P(x, y, z);
-      STabletPoint atob = b - a;
-      HPointF      atop = P - a;
-      Float_t      dp = atob.Dot(atop) / atob.Mag2();
+  Int_t    id[2] = { -1, -1 };
+  Double_t vm[2] = {  0,  0 };
 
-      CCoefs &c = mCCoefs[i0];
-      Float_t T = dp * atob.t;
-      Float_t d1, d2;
-      Int_t N = 0;
-      do
-      {
-	distance_derivatives(T, P, c, d1, d2);
-	T -= d1 / d2;
-      } while (TMath::Abs(d1) > 1e-7f && ++N < 20);
+  if ( ! find_closest_points(x, y, z, id, vm))
+  {
+    return 0;
+  }
 
-      if (bMakeCubHistos)
-      {
-	mHN->Fill(N);
-	mHCubTimevsTime->Fill(dp, T/atob.t);
-	mHCubTimevsN->Fill(N, T/atob.t);
-	mHDeriv->Fill(1e6f*d1);
-	if (N >= 20)
-	{
-	  mHCubTime20->Fill(T/atob.t);
-	  mHDeriv20->Fill(1e3f*d1);
-	}
-      }
-
-      if (T < 0 || T > atob.t) return vm[0];
-
-      const Float_t T2 = T * T;
-      STabletPoint  p  = T2*T * c.A + T2 * c.B + T * c.C + c.D;
-
-      const Double_t Dsqr = sqr(x - p.x) + sqr(y - p.y) + sqr(z - p.z);
-      const Double_t R    = mWidth * TMath::Power(p.p, mPressureAlpha);
-
-      return TMath::Power(Dsqr / sqr(R), mPotentialExp);
+  switch (mAlgorithm)
+  {
+    case PA_StrongestPoint:
+    {
+      add_gradient(g, x, y, z, vm[0], mPointRefs[id[0]]);
+      return vm[0];
+    }
+    case PA_TwoStrongestPoints:
+    {
+      add_gradient(g, x, y, z, vm[0], mPointRefs[id[0]]);
+      add_gradient(g, x, y, z, vm[1], mPointRefs[id[1]]);
+      return vm[0] + vm[1];
+    }
+    case PA_LinearInterpolation:
+    {
+      Double_t     value;
+      STabletPoint point;
+      get_linear_approx(x, y, z, id, vm, value, &point);
+      add_gradient(g, x, y, z, value, &point);
+      return value;
+    }
+    case PA_CubicInterpolation:
+    {
+      Double_t     value;
+      STabletPoint point;
+      get_cubic_approx(x, y, z, id, vm, value, &point);
+      add_gradient(g, x, y, z, value, &point);
+      return value;
     }
   }
 

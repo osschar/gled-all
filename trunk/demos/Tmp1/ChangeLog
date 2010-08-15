@@ -1,3 +1,10 @@
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* wactest.C:
+	Add function make_high_res(), optionally also creating the z-split
+	surfaces.
+	Put iso-stuff into global CINT variables.
+
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* wactest.C:
