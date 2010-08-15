@@ -294,7 +294,6 @@ void GTSurf::GenerateTriangle(Double_t s)
 /**************************************************************************/
 
 #include <TRandom3.h>
-#include <TVector3.h>
 
 namespace
 {
@@ -314,8 +313,9 @@ namespace
 
       TRandom3 rnd(0);
 
-      for(int l=0; l<=mL; ++l) {
-	Double_t fl   = 0.25*(2*l + 1)/Pi();
+      for (int l=0; l<=mL; ++l)
+      {
+	Double_t fl   = 0.25*(2*l + 1) / Pi();
 	Double_t fpow = abs_scale * Power(1.0/(l + 1), pow_scale);
 
 	Double_t& l0 = Coff(l, 0);
@@ -356,7 +356,7 @@ namespace
 
     void vertex_displacer(GTS::GtsVertex* v)
     {
-      TVector3 vec(v->p.x, v->p.y, v->p.z);
+      HPointD  vec(v->p.x, v->p.y, v->p.z);
 
       Double_t phi = vec.Phi();
       Double_t x   = vec.CosTheta();
@@ -367,7 +367,8 @@ namespace
 
       Double_t sum = 1;
 
-      for(int m=0; m<=mL; ++m) {
+      for (int m=0; m<=mL; ++m)
+      {
 	mCosMPhi = TMath::Cos(m*phi);
 	mSinMPhi = TMath::Sin(m*phi);
 
@@ -379,7 +380,8 @@ namespace
 
 	  sum += Pbm * SumM(m+1, m);
 
-	  for(int l=m+2; l<=mL; ++l) {
+	  for (int l=m+2; l<=mL; ++l)
+	  {
 	    Double_t Plm = (x*(2*l-1)*Pbm - (l+m-1)*Pam) / (l-m);
 
 	    sum += Plm * SumM(l, m);
@@ -396,7 +398,7 @@ namespace
 
       vec *= sum;
 
-      v->p.x = vec.x(); v->p.y = vec.y(); v->p.z = vec.z();
+      v->p.x = vec.x; v->p.y = vec.y; v->p.z = vec.z;
     }
 
     static void s_vertex_displacer(GTS::GtsVertex* v, Legend* ud)

@@ -1,5 +1,10 @@
 2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/GTSurf.cxx:
+	Use HTransD instead of TVector3.
+
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/GTSIsoMaker.cxx:
 	* Glasses/GTSIsoMaker.h:
 	In vertex_iso_fixer() properly calculate length of step along the
