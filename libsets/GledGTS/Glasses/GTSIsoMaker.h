@@ -47,14 +47,17 @@ protected:
   Bool_t                bInvertTetra;     // X{GS} 7 Bool()
 
   Double_t              mFixPointEpsilon; // X{GS} 7 Value()
+  Int_t                 mFixPointMaxIter; // X{GS} 7 Value()
 
 public:
   GTSIsoMaker(const Text_t* n="GTSIsoMaker", const Text_t* t=0) : ZGlass(n,t)
   { _init(); }
 
   void MakeSurface();   // X{ED} 7 MButt()
-  void MakeDiffHisto(); // X{ED} 7 MButt()
-  void FixPoints();     // X{ED} 7 MButt()
+
+  void MakeIsoDistanceHisto(const TString& canvas_name  = "IsoDelta",
+			    const TString& canvas_title = "Surface iso-value delta"); // X{ED} 7 MCWButt()
+  void MovePointsOntoIsoSurface(); // X{ED} 7 MButt()
 
   void SetXAxis(Double_t min, Double_t max, Int_t div); // X{E}
   void SetYAxis(Double_t min, Double_t max, Int_t div); // X{E}

@@ -1,3 +1,9 @@
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_torus.C:
+	Add helper functions make_std() and coarsen_std(...).
+	Put iso-stuff into global CINT variables.
+
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* iso_torus.C:

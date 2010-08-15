@@ -58,6 +58,20 @@ protected:
   void distance_derivatives(Float_t t, const HPointF& P, const CCoefs& c,
 			    Float_t& d1, Float_t& d2);
 
+  bool find_closest_points(Double_t x, Double_t y, Double_t z,
+			   Int_t id[2], Double_t vm[2]);
+
+  void get_linear_approx(Double_t x, Double_t y, Double_t z,
+			 Int_t id[2], Double_t vm[2],
+			 Double_t& value, STabletPoint* point=0);
+
+  void get_cubic_approx (Double_t x, Double_t y, Double_t z,
+			 Int_t id[2], Double_t vm[2],
+			 Double_t& value, STabletPoint* point=0);
+
+  void add_gradient(HPointD& g, Double_t x, Double_t y, Double_t z,
+		    Double_t value, STabletPoint* point);
+
   TH1I *mHN;             //!
   TH2I *mHCubTimevsTime; //!
   TH2I *mHCubTimevsN;    //!
@@ -77,6 +91,7 @@ public:
   // --- GTSIsoMakerFunctor ---
   virtual void     GTSIsoBegin(GTSIsoMaker* maker, Double_t iso_value);
   virtual Double_t GTSIsoFunc(Double_t x, Double_t y, Double_t z);
+  virtual Double_t GTSIsoGradient(Double_t x, Double_t y, Double_t z, HPointD& g);
   virtual void     GTSIsoEnd();
 
 #include "TabletStrokeList.h7"

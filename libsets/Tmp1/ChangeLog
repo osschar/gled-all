@@ -1,3 +1,12 @@
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TabletStrokeList.cxx:
+	* Glasses/TabletStrokeList.h:
+	Implement virtual GTSIsoMakerFunctor::GTSIsoGradient().
+	Consolidate / modularize code for calculation of linear and qubic
+	approximations of iso-surface so that it can be shared for
+	calculation of iso-value and gradient.
+
 2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TabletStrokeList.cxx:
