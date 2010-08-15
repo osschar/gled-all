@@ -28,7 +28,6 @@
 // Strip-data is not saved, nor is there any indication if it was used.
 
 #include "TringTvor.h"
-#include <TVector3.h>
 
 #include <TMath.h>
 #include <TRandom.h>

@@ -298,7 +298,6 @@ TringTvor* RectTerrain::SpawnTringTvor(Bool_t smoothp, Bool_t flatp,
 
   TringTvor& TT = * new TringTvor(nx*ny, (nx-1)*(ny-1)*2, smoothp, colp, texp);
 
-  //TVector3 normvec;
   Int_t          idx = 0;
   Int_t    tring_idx = 0;
 

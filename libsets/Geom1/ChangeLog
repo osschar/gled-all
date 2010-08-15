@@ -1,5 +1,11 @@
 2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/RectTerrain.cxx:
+	* Stones/TringTvor.cxx:
+	Remove unnecesary include / commented line.
+
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/SMorph.cxx:
 	* Glasses/SMorph.h:
 	Support limits on theta / phi so that only part of the surface can
