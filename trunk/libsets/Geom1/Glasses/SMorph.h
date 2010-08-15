@@ -28,8 +28,10 @@ protected:
   Float_t	mTx;		// X{gST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
   Float_t	mCx;		// X{gST} 7 Value(-range=>[-10,10, 1,100], -join=>1)
   Float_t	mRz;		// X{gST} 7 Value(-range=>[-10,10, 1,100])
-  Bool_t	bOpenTop;	// X{gST} 7 Bool(-join=>1)
-  Bool_t	bOpenBot;	// X{gST} 7 Bool()
+  Float_t       mThetaMin;      // X{gST} 7 Value(-range=>[0,1, 1,1000], -join=>1)
+  Float_t       mThetaMax;      // X{gST} 7 Value(-range=>[0,1, 1,1000])
+  Float_t       mPhiMean;       // X{gST} 7 Value(-range=>[0,1, 1,1000], -join=>1)
+  Float_t       mPhiRange;      // X{gST} 7 Value(-range=>[0,1, 1,1000])
   Bool_t	bEquiSurf;	// X{gST} 7 Bool()
   ZColor	mColor;		// X{PGST} 7 ColorButt()
 

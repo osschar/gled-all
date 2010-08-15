@@ -26,7 +26,9 @@ void SMorph::_init(Float_t r)
   mTLevel = 2; mPLevel = 3;
   mTx = mCx = mRz = 0;
 
-  bOpenTop = bOpenBot = bEquiSurf = false;
+  mThetaMin = 0;   mThetaMax = 1;
+  mPhiMean  = 0.5; mPhiRange = 1;
+  bEquiSurf = false;
 
   mTexture = 0;
   mTexX0 = 0; mTexY0 =  1;
@@ -53,7 +55,7 @@ void SMorph::Messofy(Float_t ct, Float_t st, Float_t phi)
 
   float T[2];
   if(bTextured) {
-    T[0] = mTexX0 + mTexXC * phi / (2*TMath::Pi());
+    T[0] = mTexX0 + mTexXC * phi / (TMath::TwoPi());
     T[1] = mTexY0 + mTexYC * TMath::ACos(ct) / TMath::Pi();
     if(mTexYOff != 0) T[0] += Int_t(T[1])*mTexYOff;
   }
@@ -64,15 +66,17 @@ void SMorph::Messofy(Float_t ct, Float_t st, Float_t phi)
 void SMorph::Triangulate()
 {
   bTextured = (mTexture != 0);
-  int tlevel = mTLevel + 1; if(bOpenTop) --tlevel; if(bOpenBot) --tlevel;
+  int tlevel = mTLevel + 1;
   pTuber->Init(0, tlevel, mPLevel, false, bTextured);
 
-  float last_ct = bOpenTop ? 1 : 1 + 2.0/mTLevel;
-  float delta_t = TMath::Pi()/mTLevel;
-  float t = bOpenTop ? delta_t : 0;
-  for(int i=0; i<tlevel; i++) {
+  float delta_t = TMath::Pi() * (mThetaMax - mThetaMin) / mTLevel;
+  float t       = TMath::Pi() * mThetaMin;
+  float last_ct = cos(t) + 2.0/mTLevel;
+  for (int i=0; i<tlevel; i++)
+  {
     float ct, st;
-    if(bEquiSurf) {
+    if (bEquiSurf)
+    {
       ct = last_ct - 2.0/mTLevel; if(ct < -1) ct = -1;
       st = sin(acos(ct));
     } else {
@@ -80,12 +84,15 @@ void SMorph::Triangulate()
       st = sin(t);
       t += delta_t;
     }
-    float phi = 0, step = 2*TMath::Pi()/mPLevel;
-    pTuber->NewRing(mPLevel, true);
-    for(int j=0; j<mPLevel; j++, phi+=step) {
+    float phi  = TMath::TwoPi() * (mPhiMean - 0.5*mPhiRange);
+    float step = TMath::TwoPi() * mPhiRange / (mPLevel);
+    pTuber->NewRing(mPhiRange == 1 ? mPLevel : mPLevel - 1, true);
+    for (int j=0; j<mPLevel; j++, phi+=step)
+    {
       Messofy(ct, st, phi);
     }
-    Messofy(ct, st, 2*TMath::Pi());
+    if (mPhiRange == 1)
+      Messofy(ct, st, phi);
     last_ct = ct;
   }
 }

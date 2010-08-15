@@ -1,3 +1,10 @@
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SMorph.cxx:
+	* Glasses/SMorph.h:
+	Support limits on theta / phi so that only part of the surface can
+	be drawn.
+
 2010-07-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZImage.cxx:
