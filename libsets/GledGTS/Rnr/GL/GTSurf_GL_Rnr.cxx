@@ -14,7 +14,8 @@
 
 namespace
 {
-  int face_drawer(GTS::GtsFace* f, int* dum) {
+  void face_drawer(GTS::GtsFace* f, void*)
+  {
     /*
       GtsPoint& p1 = t->e1->segment.v1->p;
       GtsPoint& p2 = t->e2->segment.v2->p;
@@ -29,7 +30,11 @@ namespace
     glVertex3dv(&vp[0]->p.x);
     glVertex3dv(&vp[1]->p.x);
     glVertex3dv(&vp[2]->p.x);
-    return 0;
+  }
+
+  void vertex_drawer(GTS::GtsVertex* v, void*)
+  {
+    glVertex3dv(&v->p.x);
   }
 }
 
@@ -41,11 +46,21 @@ void GTSurf_GL_Rnr::Draw(RnrDriver* rd)
 
 void GTSurf_GL_Rnr::Render(RnrDriver* rd)
 {
+  if (!mGTSurf->pSurf) return;
+
   glColor4fv(mGTSurf->mColor());
-  if (mGTSurf->pSurf)
+  glBegin(GL_TRIANGLES);
+  GTS::gts_surface_foreach_face(mGTSurf->pSurf, (GTS::GtsFunc)face_drawer, 0);
+  glEnd();
+
+  if (mGTSurf->bRnrPoints)
   {
-    glBegin(GL_TRIANGLES);
-    GTS::gts_surface_foreach_face(mGTSurf->pSurf, (GTS::GtsFunc)face_drawer, 0);
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_LIGHTING);
+    glColor4fv(mGTSurf->mPointColor());
+    glBegin(GL_POINTS);
+    GTS::gts_surface_foreach_vertex(mGTSurf->pSurf, (GTS::GtsFunc)vertex_drawer, 0);
     glEnd();
+    glPopAttrib();
   }
 }

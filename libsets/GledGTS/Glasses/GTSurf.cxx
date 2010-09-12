@@ -8,47 +8,17 @@
 #include "GTSurf.c7"
 
 #include <GTS/GTS.h>
+#include <GTS/GTSBoolOpHelper.h>
 
 #include <TMath.h>
+#include <TRandom3.h>
 
-/**************************************************************************/
-/**************************************************************************/
+namespace { using namespace GTS; }
 
-namespace
-{
-  using namespace GTS;
+//______________________________________________________________________________
+//
+// Wrapper over GTS surface.
 
-  void vertex_dumper(GtsVertex* v)
-  {
-    printf("(%4.2f,%4.2f,%4.2f)", v->p.x, v->p.y, v->p.z);
-  }
-
-  void segment_dumper(GtsSegment* s)
-  {
-    vertex_dumper(s->v1); cout<<"-"; vertex_dumper(s->v2);
-  }
-
-
-  void triangle_dumper(GtsTriangle* t, int* n)
-  {
-    cout <<"Tring #"<< *n <<"\t";
-    segment_dumper(&t->e1->segment); cout<<" . ";
-    segment_dumper(&t->e2->segment); cout<<" . ";
-    segment_dumper(&t->e3->segment); cout<<"\n";
-    ++(*n);
-  }
-
-  void strip_dumper(GSList* tl, int* n)
-  {
-    cout <<"Strip #"<< *n <<endl;
-    int num = 0;
-    g_slist_foreach(tl, (GFunc)triangle_dumper, &num);
-    ++(*n);
-  }
-}
-
-/**************************************************************************/
-/**************************************************************************/
 
 ClassImp(GTSurf);
 
@@ -57,8 +27,17 @@ void GTSurf::_init()
   // Override settings from ZGlass
   bUseDispList = true;
 
+  mColor.rgba(1, 1, 1, 1);
+  mPointColor.rgba(1, 0, 0, 1);
+  bRnrPoints = false;
+
   pSurf = 0;
   mVerts = mEdges = mFaces = 0;
+
+  mPostBoolOp = PBM_AsFractions;
+  mPostBoolArea      = 1e-8;
+  mPostBoolPerimeter = 1e-8;
+  mPostBoolLength    = 1e-1;
 }
 
 /**************************************************************************/
@@ -80,12 +59,10 @@ GTS::GtsSurface* GTSurf::CopySurface()
 {
   GLensReadHolder _lck(this);
 
-  GTS::GtsSurface* s = 0;
-  if (pSurf)
-  {
-    s = GTS::MakeDefaultSurface();
-    GTS::gts_surface_copy(s, pSurf);
-  }
+  if (pSurf == 0) return 0;
+
+  GTS::GtsSurface* s = GTS::MakeDefaultSurface();
+  GTS::gts_surface_copy(s, pSurf);
 
   return s;
 }
@@ -103,25 +80,27 @@ GTS::GtsSurface* GTSurf::DisownSurface()
 
 /**************************************************************************/
 
-void GTSurf::Load()
+void GTSurf::Load(const TString& file)
 {
+  static const Exc_t _eh("GTSurf::Load ");
+
   using namespace GTS;
 
-  FILE* fp = fopen(mFile.Data(), "r");
-  if(!fp) {
-    ISerr(GForm("GTS::Surface::Load Cant' open %s", mFile.Data()));
+  TString file_name = file.IsNull() ? mFile : file;
+
+  FILE* fp = fopen(file_name, "r");
+  if (!fp)
+  {
+    ISerr(_eh + GForm("Can not open file '%s'", file_name.Data()));
     return;
   }
-  GtsSurface* s = MakeDefaultSurface();
-  if(s==0) {
-    ISerr(GForm("GTS::Surface::Load gts_surface_new failed ..."));
-    fclose(fp);
-    return;
-  }
-  GtsFile* gsf = gts_file_new(fp);
-  if( gts_surface_read(s, gsf) != 0 ) {
-    ISerr(GForm("GTS::Surface::Load gts_surface_read failed ..."));
-    gts_object_destroy (GTS_OBJECT (s));
+
+  GtsSurface *s   = MakeDefaultSurface();
+  GtsFile    *gsf = gts_file_new(fp);
+  if (gts_surface_read(s, gsf) != 0)
+  {
+    ISerr(_eh + GForm("gts_surface_read failed."));
+    gts_object_destroy(GTS_OBJECT(s));
     gts_file_destroy(gsf);
     fclose(fp);
     return;
@@ -132,19 +111,26 @@ void GTSurf::Load()
   ReplaceSurface(s);
 }
 
-void GTSurf::Save()
+void GTSurf::Save(const TString& file)
 {
+  static const Exc_t _eh("GTSurf::Save ");
+
   using namespace GTS;
 
-  if(pSurf) {
-    FILE* fp = fopen(mFile.Data(), "w");
-    if(!fp) {
-      ISerr(GForm("GTS::Surface::Save Cant' open %s", mFile.Data()));
-      return;
-    }
-    gts_surface_write(pSurf, fp);
-    fclose(fp);
+  if (pSurf == 0) {
+    ISerr(_eh + "Surface is null.");
+    return;
   }
+
+  TString file_name = file.IsNull() ? mFile : file;
+
+  FILE* fp = fopen(file_name, "w");
+  if (!fp) {
+    ISerr(_eh + GForm("Can not open file '%s'.", file_name.Data()));
+    return;
+  }
+  gts_surface_write(pSurf, fp);
+  fclose(fp);
 }
 
 /**************************************************************************/
@@ -162,15 +148,13 @@ void GTSurf::CalcStats()
 {
   using namespace GTS;
 
-  if(pSurf == 0)
-    return;
+  if (pSurf == 0) return;
 
   mVerts = gts_surface_vertex_number(pSurf);
   mEdges = gts_surface_edge_number(pSurf);
   mFaces = gts_surface_face_number(pSurf);
 
   GtsSurfaceQualityStats stats;
-  // pSurf->CalcStats(mFaceQuality, mFaceArea, mEdgeLength, mEdgeAngle);
   gts_surface_quality_stats(pSurf, &stats);
   copy_stats(mFaceQuality, stats.face_quality);
   copy_stats(mFaceArea,    stats.face_area);
@@ -182,7 +166,7 @@ void GTSurf::CalcStats()
 
 void GTSurf::PrintStats()
 {
-  if(pSurf) {
+  if (pSurf) {
     GTS::gts_surface_print_stats(pSurf, stdout);
   }
 }
@@ -193,8 +177,7 @@ void GTSurf::Destroy()
 {
   using namespace GTS;
 
-  if(pSurf == 0)
-    return;
+  if (pSurf == 0) return;
 
   gts_object_destroy (GTS_OBJECT (pSurf));
   pSurf = 0;
@@ -218,7 +201,7 @@ namespace
 {
   void vertex_scaler(GtsVertex* v, Double_t* s)
   {
-    v->p.x *= *s; v->p.y *= *s; v->p.z *= *s;
+    v->p.x *= s[0]; v->p.y *= s[1]; v->p.z *= s[2];
   }
 }
 
@@ -226,8 +209,22 @@ void GTSurf::Rescale(Double_t s)
 {
   using namespace GTS;
 
-  if(pSurf) {
-    gts_surface_foreach_vertex(pSurf, (GtsFunc)vertex_scaler, &s);
+  if (pSurf)
+  {
+    Double_t sxyz[3] = { s, s, s };
+    gts_surface_foreach_vertex(pSurf, (GtsFunc)vertex_scaler, &sxyz);
+    mStampReqTring = Stamp(FID());
+  }
+}
+
+void GTSurf::RescaleXYZ(Double_t sx, Double_t sy, Double_t sz)
+{
+  using namespace GTS;
+
+  if (pSurf)
+  {
+    Double_t sxyz[3] = { sx, sy, sz };
+    gts_surface_foreach_vertex(pSurf, (GtsFunc)vertex_scaler, &sxyz);
     mStampReqTring = Stamp(FID());
   }
 }
@@ -247,18 +244,74 @@ namespace
 
 void GTSurf::Tessellate(UInt_t order, Bool_t mid_edge)
 {
-  if(pSurf == 0)
-    return;
+  if (pSurf == 0) return;
 
-  while(order--)
+  while (order--)
+  {
     gts_surface_tessellate(pSurf, mid_edge ? mid_edge_splitter : 0, 0);
-
+  }
   mStampReqTring = Stamp(FID());
 }
 
+//==============================================================================
+
+void GTSurf::Merge(GTSurf* a, GTSurf* b)
+{
+  // Merge surfaces a and b into current surface.
+  // a or b can be null.
+  // Vertices of a and b are transformed into local coordinate system.
+
+  static const Exc_t _eh("GTSurf::Merge ");
+
+  GTS::BoolOpHelper boh(this, a, b, _eh);
+  boh.MakeMerge();
+  ReplaceSurface(boh.TakeResult());
+}
+
+void GTSurf::Union(GTSurf* a, GTSurf* b)
+{
+  // Merge union of a and b into this surface.
+  // Vertices of a and b are transformed into local coordinate system.
+
+  static const Exc_t _eh("GTSurf::Union ");
+
+  GTS::BoolOpHelper boh(this, a, b, _eh);
+  boh.BuildInter(_eh);
+  boh.MakeUnion();
+  ReplaceSurface(boh.TakeResult());
+}
+
+void GTSurf::Intersection(GTSurf* a, GTSurf* b)
+{
+  // Merge intersection of a and b into this surface.
+  // Vertices of a and b are transformed into local coordinate system.
+
+  static const Exc_t _eh("GTSurf::Intersection ");
+
+  GTS::BoolOpHelper boh(this, a, b, _eh);
+  boh.BuildInter(_eh);
+  boh.MakeIntersection();
+  ReplaceSurface(boh.TakeResult());
+}
+
+void GTSurf::Difference(GTSurf* a, GTSurf* b)
+{
+  // Merge difference of a and b into this surface.
+  // Vertices of a and b are transformed into local coordinate system.
+
+  static const Exc_t _eh("GTSurf::Difference ");
+
+  GTS::BoolOpHelper boh(this, a, b, _eh);
+  boh.BuildInter(_eh);
+  boh.MakeDifference();
+  ReplaceSurface(boh.TakeResult());
+}
+
+//==============================================================================
+
 void GTSurf::GenerateSphere(UInt_t order)
 {
-  if(pSurf)
+  if (pSurf)
     gts_object_destroy (GTS_OBJECT (pSurf));
   pSurf = MakeDefaultSurface();
 
@@ -269,7 +322,7 @@ void GTSurf::GenerateSphere(UInt_t order)
 
 void GTSurf::GenerateTriangle(Double_t s)
 {
-  if(pSurf)
+  if (pSurf)
     gts_object_destroy (GTS_OBJECT (pSurf));
   pSurf = MakeDefaultSurface();
 
@@ -290,10 +343,10 @@ void GTSurf::GenerateTriangle(Double_t s)
   mStampReqTring = Stamp(FID());
 }
 
-/**************************************************************************/
-/**************************************************************************/
 
-#include <TRandom3.h>
+//==============================================================================
+// Legendrefication
+//==============================================================================
 
 namespace
 {
@@ -410,12 +463,9 @@ namespace
 
 } // end namespace
 
-/**************************************************************************/
-
 void GTSurf::Legendrofy(Int_t max_l, Double_t abs_scale, Double_t pow_scale)
 {
-  if(pSurf == 0)
-    return;
+  if (pSurf == 0) return;
 
   Legend leg(max_l, abs_scale, pow_scale);
   leg.Coff(0,0) = 0;
@@ -428,44 +478,9 @@ void GTSurf::Legendrofy(Int_t max_l, Double_t abs_scale, Double_t pow_scale)
 }
 
 
-// Original LegendreP
-/*
-Double_t LegendreP(int l, int m, Double_t x)
-{
-  void nrerror(char error_text[]);
-  Double_t fact,pll,pmm,pmmp1,somx2;
-  int i,ll;
-
-  if (m < 0 || m > l || TMath::Abs(x) > 1.0)
-    throw(Exc_t("LegendreP: bad arguments."));
-  pmm=1.0;
-  if (m > 0) {
-    somx2=sqrt((1.0-x)*(1.0+x));
-    fact=1.0;
-    for (i=1;i<=m;i++) {
-      pmm *= -fact*somx2;
-      fact += 2.0;
-    }
-  }
-  if (l == m)
-    return pmm;
-  else {
-    pmmp1=x*(2*m+1)*pmm;
-    if (l == (m+1))
-      return pmmp1;
-    else {
-      for (ll=m+2;ll<=l;ll++) {
-	pll=(x*(2*ll-1)*pmmp1-(ll+m-1)*pmm)/(ll-m);
-	pmm=pmmp1;
-	pmmp1=pll;
-      }
-      return pll;
-    }
-  }
-}
-*/
-
- /**************************************************************************/
+//==============================================================================
+// Triangle exporter
+//==============================================================================
 
 namespace
 {
@@ -491,17 +506,15 @@ namespace
     gts_triangle_vertices(&f->triangle, &a, &b, &c);
     fprintf(arg->m_out, "%d %d %d\n", arg->m_map[a], arg->m_map[b], arg->m_map[c]);
   }
-
 }
 
 void GTSurf::ExportTring(const Text_t* fname)
 {
   // Dumps vertices/triangles in a trivial format.
 
-  if(pSurf == 0)
-    return;
-
   using namespace GTS;
+
+  if (pSurf == 0) return;
 
   FILE* f = (fname) ? fopen(fname, "w") : stdout;
 
@@ -517,6 +530,9 @@ void GTSurf::ExportTring(const Text_t* fname)
   if (fname) fclose(f);
 }
 
+
+//==============================================================================
+// Making of split surfaces
 //==============================================================================
 
 namespace
