@@ -34,6 +34,10 @@ void blob()
 
   starw->GetGlobLamps()->Add(l);
 
+  CREATE_ADD_GLASS(blending, ZGlBlending, starw, "ZGlBlending", 0);
+  blending->SetAntiAliasOp(1);
+  blending->SetPointSize(16);
+
   // GTS models
 
   CREATE_ADD_GLASS(maker1, GTSIsoMaker, starw, "Iso Maker 1", 0);
@@ -51,6 +55,27 @@ void blob()
 
   CREATE_ADD_GLASS(retring, GTSRetriangulator, starw, "GTS Retriangulator", "Coarsens and refines GTS Surfaces");
   retring->SetTarget(surf1);
+
+  // Bool stuff
+
+  CREATE_ADD_GLASS(surfa, GTSurf, starw, "Sphere A", 0);
+  surfa->GenerateSphere(1);
+  surfa->SetPos(-0.5, 0, 3);
+  surfa->SetRnrSelf(false);
+  // surfa->RotateLF(2, 3, 0.2);
+
+  CREATE_ADD_GLASS(surfb, GTSurf, starw, "Sphere B", 0);
+  surfb->GenerateSphere(1);
+  surfb->SetPos( 0.5, 0, 3);
+  surfb->SetRnrSelf(false);
+
+  CREATE_ADD_GLASS(surfu, GTSurf, starw, "Union", 0);
+  surfu->SetPos(0, 0, 3);
+  surfu->SetRnrPoints(true);
+
+  surfu->Union(surfa, surfb);
+  // surfu->Intersection(surfa, surfb);
+  // surfu->Difference(surfa, surfb);
 
   // Spawn GUI
   Gled::Macro("eye.C");
