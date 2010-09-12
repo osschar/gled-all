@@ -138,8 +138,9 @@ MCW_View::VarArg::VarArg(const TString& typ,  const TString& base_typ,
     throw(_eh + GForm("type '%s' not supported.", base_typ.Data()));
 
   arg_type& at = VarArgTypes[_typ_idx];
-  switch(at.weed_type) {
-  case 1:
+  switch(at.weed_type)
+  {
+    case 1:
     {
       Fl_Value_Input* w = new Fl_Value_Input(0, 0, at.weed_w, 1);
       w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
@@ -148,15 +149,18 @@ MCW_View::VarArg::VarArg(const TString& typ,  const TString& base_typ,
       // printf("%s::%s -> %lf, %lf\n", base_typ.Data(), name.Data(),
       //   w->minimum(), w->maximum());
       w->step(at.stepA, at.stepB);
-      if(!defval.IsNull()) {
-	double x; sscanf(defval.Data(), "%lf", &x);
+      if (!defval.IsNull())
+      {
+	double x = strtod(defval.Data(), 0);
+	if (at.stepB > at.stepA && fabs(x) < (double)at.stepA / at.stepB)
+	  w->step(0, 1);
 	w->value(x);
       }
       // !!! Here should add range/step control widget
       insert_box(4, "Rng");
       break;
     }
-  case 2:
+    case 2:
     {
       Fl_Light_Button* w = new Fl_Light_Button(0, 0, at.weed_w, 1);
       // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
@@ -166,8 +170,8 @@ MCW_View::VarArg::VarArg(const TString& typ,  const TString& base_typ,
       }
       break;
     }
-  case 3:
-  case 4:
+    case 3:
+    case 4:
     {
       Fl_Input* w = new Fl_Input(0, 0, at.weed_w, 1);
       // w->callback((Fl_Callback*)s_Change_cb, FGS::grep_parent<MCW_View*>(this));
