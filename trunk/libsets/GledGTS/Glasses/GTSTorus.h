@@ -21,8 +21,8 @@ private:
   Double_t  mRminvsqr; //!
 
 protected:
-  Double_t  mRM;   // X{GS} 7 Value(-range=>[0, 1000, 1, 1000])
-  Double_t  mRm;   // X{GS} 7 Value(-range=>[0, 1000, 1, 1000])
+  Double_t  mRM;   // X{GS} 7 Value(-range=>[0, 1000, 1, 1000], -join=>1)
+  Double_t  mRm;   // X{GS} 7 Value(-range=>[0, 1000, 1, 1000], -join=>1)
   Double_t  mStep; // X{GS} 7 Value(-range=>[0, 100,  1, 1e6])
 
 public:

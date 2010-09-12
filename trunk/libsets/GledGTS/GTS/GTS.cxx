@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "GTS.h"
+#include "Stones/ZTrans.h"
 
 using namespace GTS;
 
@@ -30,4 +31,32 @@ namespace
 void GTS::InvertSurface(GtsSurface* s)
 {
   gts_surface_foreach_face(s, (GtsFunc)face_inverter, 0);
+}
+
+//==============================================================================
+
+namespace
+{
+  void vertex_transformer(GtsVertex* v, ZTrans* t)
+  {
+    t->MultiplyVec3IP(&v->p.x, 1);
+  }
+}
+
+void GTS::TransformSurfaceVertices(GtsSurface* s, ZTrans* t)
+{
+  gts_surface_foreach_vertex(s, (GtsFunc) vertex_transformer, t);
+}
+
+//==============================================================================
+
+void GTS::WriteSurfaceToFile(GtsSurface* s, const TString& file)
+{
+  FILE* fp = fopen(file, "w");
+  if (!fp) {
+    ISerr(GForm("GTS::WriteSurfaceToFile Can not open file '%s'.", file.Data()));
+    return;
+  }
+  gts_surface_write(s, fp);
+  fclose(fp);
 }

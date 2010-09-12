@@ -9,6 +9,8 @@
 
 #ifndef __CINT__
 
+class ZTrans;
+
 namespace GTS
 {
 
@@ -17,6 +19,10 @@ namespace GTS
   GtsSurface* MakeDefaultSurface();
 
   void InvertSurface(GtsSurface* s);
+
+  void TransformSurfaceVertices(GtsSurface* s, ZTrans* t);
+
+  void WriteSurfaceToFile(GtsSurface* s, const TString& file);
 }
 
 #endif

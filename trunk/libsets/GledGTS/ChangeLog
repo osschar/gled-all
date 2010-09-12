@@ -1,3 +1,30 @@
+2010-09-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proto-implementation of bool operations and result fixing.
+
+	* GTS/GTSBoolOpHelper.cxx:
+	* GTS/GTSBoolOpHelper.h:
+	Helper for bollen ops and fixing.
+
+	* attic/BoolOpFixOnIntersectionCurve.cxx:
+	Attempt at fixing bool ops on intersection curve.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Add functions:
+	  void TransformSurfaceVertices(GtsSurface* s, ZTrans* t);
+	  void WriteSurfaceToFile(GtsSurface* s, const TString& file);
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add bool-ops API.
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Support renering of vertex points.
+
+	* Glasses/GTSTorus.h:
+	Weed layout.
+
 2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:
