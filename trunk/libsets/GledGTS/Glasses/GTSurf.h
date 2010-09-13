@@ -73,6 +73,9 @@ public:
   void Rescale(Double_t s=2); // X{E} 7 MCWButt(-join=>1)
   void RescaleXYZ(Double_t sx=2, Double_t sy=2, Double_t sz=2); // X{E} 7 MCWButt()
 
+  void TransformAndResetTrans(); // X{E} 7 MButt(-join=>1)
+  void RotateAndResetRot();      // X{E} 7 MButt()
+
   void Tessellate(UInt_t order=1, Bool_t mid_edge=true); // X{E} 7 MCWButt()
 
   void Merge       (GTSurf* a, GTSurf* b); // X{E} C{2} 7 MCWButt(-join=>1)

@@ -41,11 +41,22 @@ namespace
   {
     t->MultiplyVec3IP(&v->p.x, 1);
   }
+
+  void vertex_rotator(GtsVertex* v, ZTrans* t)
+  {
+    t->RotateVec3IP(&v->p.x);
+  }
+
 }
 
 void GTS::TransformSurfaceVertices(GtsSurface* s, ZTrans* t)
 {
   gts_surface_foreach_vertex(s, (GtsFunc) vertex_transformer, t);
+}
+
+void GTS::RotateSurfaceVertices(GtsSurface* s, ZTrans* t)
+{
+  gts_surface_foreach_vertex(s, (GtsFunc) vertex_rotator, t);
 }
 
 //==============================================================================

@@ -21,6 +21,7 @@ namespace GTS
   void InvertSurface(GtsSurface* s);
 
   void TransformSurfaceVertices(GtsSurface* s, ZTrans* t);
+  void RotateSurfaceVertices(GtsSurface* s, ZTrans* t);
 
   void WriteSurfaceToFile(GtsSurface* s, const TString& file);
 }

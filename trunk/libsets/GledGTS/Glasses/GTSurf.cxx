@@ -229,7 +229,22 @@ void GTSurf::RescaleXYZ(Double_t sx, Double_t sy, Double_t sz)
   }
 }
 
-/**************************************************************************/
+void GTSurf::TransformAndResetTrans()
+{
+  if (pSurf)
+    GTS::TransformSurfaceVertices(pSurf, &mTrans);
+  UnitTrans();
+}
+
+void GTSurf::RotateAndResetRot()
+{
+  if (pSurf)
+    GTS::RotateSurfaceVertices(pSurf, &mTrans);
+  UnitRot();
+}
+
+
+//==============================================================================
 
 namespace
 {

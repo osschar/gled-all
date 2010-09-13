@@ -66,6 +66,9 @@ public:
   // ZTrans wrappers
   //----------------
 
+  void UnitTrans();                // X{E}
+  void UnitRot();                  // X{E}
+
   void SetTrans(const ZTrans& t);  // X{E}
   void MultLeft(const ZTrans& t);  // X{E}
   void MultRight(const ZTrans& t); // X{E}

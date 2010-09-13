@@ -70,6 +70,18 @@ Int_t ZNode::Level()
 // ZTrans wrappers
 /**************************************************************************/
 
+void ZNode::UnitTrans()
+{
+  mTrans.UnitTrans();
+  mStampReqTrans = Stamp(FID());
+}
+
+void ZNode::UnitRot()
+{
+  mTrans.UnitRot();
+  mStampReqTrans = Stamp(FID());
+}
+
 void ZNode::SetTrans(const ZTrans& t)
 {
   mTrans.SetTrans(t);
