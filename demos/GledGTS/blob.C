@@ -45,9 +45,12 @@ void blob()
   maker1->SetYAxis(-2, 2, 30);
   maker1->SetZAxis(-2, 2, 30);
   maker1->SetAlgo(GTSIsoMaker::A_Tetra);
+
   CREATE_ADD_GLASS(surf1, GTSurf, starw, "Clipped Sphere", 0);
-  surf1->SetPos(0, 0, 0);
+  surf1->SetPos(-3, 0, 0);
+  surf1->SetRotByDegrees(55, -30, 0);
   surf1->SetColor(1,0.8,0.2);
+
   maker1->SetTarget(surf1);
   maker1->SetFormula("pow((x-1)^2 + y^2 + z^2, -1) + pow((x+1)^2 + y^2 + z^2, -1)");
   maker1->SetValue(1.);
@@ -77,9 +80,46 @@ void blob()
   // surfu->Intersection(surfa, surfb);
   // surfu->Difference(surfa, surfb);
 
+  // Clipped cone
+
+  CREATE_ADD_GLASS(cone, GTSurf, starw, "Cone", 0);
+  cone->SetColor(0.7, 0.5, 1);
+  cone->Load("cone.gts");
+  cone->Invert();
+  cone->SetRotByDegrees(-90, 0, 0);
+  cone->MoveLF(2, -0.5);
+  cone->RescaleXYZ(1, 2, 1);
+  cone->TransformAndResetTrans();
+
+  CREATE_ADD_GLASS(boxu, GTSurf, starw, "Box Z Up", 0);
+  boxu->SetRnrSelf(false);
+  boxu->SetColor(0.5, 0.5, 0.5, 0.3);
+  boxu->Load("cube.gts");
+  boxu->Move3LF(0.5, 0, 0.5);
+  boxu->RescaleXYZ(3, 3, 1);
+  boxu->TransformAndResetTrans();
+  boxu->MoveLF(3, 0.35);
+
+  CREATE_ADD_GLASS(boxd, GTSurf, starw, "Box Z Down", 0);
+  boxd->SetRnrSelf(false);
+  boxd->SetColor(0.5, 0.5, 0.5, 0.3);
+  boxd->Load("cube.gts");
+  boxd->Move3LF(0.5, 0, -0.5);
+  boxd->RescaleXYZ(3, 3, 1);
+  boxd->TransformAndResetTrans();
+  boxd->MoveLF(3, -0.1);
+
+  cone->Difference(cone, boxu);
+  cone->Difference(cone, boxd);
+  cone->MoveLF(1, 2);
+  cone->SetRotByDegrees(30, 30, 30);
+  cone->SetScale(2);
+  cone->SetUseScale(true);
+
   // Spawn GUI
   Gled::Macro("eye.C");
   setup_pupil_up_reference();
+  g_pupil->SetBlend(true);
 
   { // Torus rotator
     Eventor* e = new Eventor("Dynamo");

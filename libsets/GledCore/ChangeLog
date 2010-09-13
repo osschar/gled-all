@@ -1,3 +1,9 @@
+2010-09-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZNode.cxx:
+	* Glasses/ZNode.h:
+	Add ZTrans wrappers UnitTrans() and UnitRot().
+
 2010-09-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/MCW_View.cxx:
