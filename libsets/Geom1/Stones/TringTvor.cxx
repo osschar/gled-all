@@ -50,14 +50,20 @@ void TringTvor::_init()
 
 TringTvor::TringTvor() :
   mNVerts  (0),
-  mNTrings (0)
+  mNTrings (0),
+  mNormalMode  (M_None),
+  mColorMode   (M_None),
+  mTextureMode (M_None)
 {
   _init();
 }
 
 TringTvor::TringTvor(Int_t nv, Int_t nt) :
   mNVerts  (nv),
-  mNTrings (nt)
+  mNTrings (nt),
+  mNormalMode  (M_None),
+  mColorMode   (M_None),
+  mTextureMode (M_None)
 {
   _init();
   MakePrimaryArrays();

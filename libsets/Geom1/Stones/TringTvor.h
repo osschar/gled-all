@@ -135,6 +135,10 @@ public:
   void MakeSecondaryArrays();
   void DeleteSecondaryArrays();
 
+  void SetNormalMode(Mode_e mode)  { mNormalMode  = mode; }
+  void SetColorMode(Mode_e mode)   { mColorMode   = mode; }
+  void SetTextureMode(Mode_e mode) { mTextureMode = mode; }
+
   Int_t AddVertices(Int_t nv);
   Int_t AddTriangles(Int_t nt);
 

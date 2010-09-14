@@ -1,3 +1,16 @@
+2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix some issues with mixed-mode rendering.
+
+	* Stones/TringTvor.cxx:
+	* Stones/TringTvor.h:
+	Initialize normal/color/texture modes to none in all ctors.
+	Add setters for those mode -- magickally direct assignment to
+	data-members does not work in CINT.
+
+	* Rnr/GL/TringTvor_GL_Rnr.cxx:
+	Bugfix - remove extra line.
+
 2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/RectTerrain.cxx:
