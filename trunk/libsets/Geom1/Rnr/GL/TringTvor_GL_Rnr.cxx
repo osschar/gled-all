@@ -304,7 +304,6 @@ void TringTvor_GL_Rnr::RenderMixed()
 
   for (Int_t t = 0; t < mTT.mNTrings; ++t)
   {
-    glNormal3fv(na); na += 3;
     if (norm_p) { glNormal3fv(na); na += 3; }
     if (col_p)  { glColor4ubv(ca); ca += 4; }
     if (tex_p)  
