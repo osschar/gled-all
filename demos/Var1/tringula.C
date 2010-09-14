@@ -230,7 +230,19 @@ void tringula(Int_t mode=2)
 
     // printf("********* calculated dynamico volume min=%f, max=%f\n", min_dyno_vol, max_dyno_vol);
 
-    for (Int_t i=0; i<20; ++i)
+    CREATE_ADD_GLASS(gtsconedyno, GTSurf, meshes, "GtsConeDyno", 0);
+    gtsconedyno->Load("dyno.gts");
+    CREATE_ADD_GLASS(conedyno, TriMesh, rnddynos, "ConeDyno", 0);
+    conedyno->ImportGTSurf(gtsconedyno);
+    conedyno->StdDynamicoPostImport();
+    conedyno->GenerateTriangleNormals();
+    conedyno->GetTTvor()->SetNormalMode(TringTvor::M_PerTriangle);
+    // Set area / volume / ...
+    conedyno->SetXYArea(gtsconedyno->GetXYArea());
+    conedyno->SetVolume(gtsconedyno->GetVolume());
+    conedyno->SetMassAndSpeculate(1000*gtsconedyno->GetVolume()); // rho = 1000 kg/m^3, say
+
+    for (Int_t i=1; i<20; ++i)
     {
       Float_t
 	l1 = gRandom->Uniform(0.4,    1.4),
@@ -632,6 +644,8 @@ void setup_rectangle()
   trimesh->SetParaSurf(parasurf);
   trimesh->ImportRectTerrain(terrain, false);
   trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
 
   // Export to GTS surface.
   trimesh->ExportGTSurf(gtsurf);
@@ -698,6 +712,8 @@ void setup_sphere_outside()
   trimesh->SetParaSurf(parasurf);
   trimesh->ImportGTSurf(gtsurf);
   trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
 
   // Setup tringula
   tringula->SetParaSurf(parasurf);
@@ -730,6 +746,8 @@ void setup_sphere_inside()
   trimesh->SetParaSurf(parasurf);
   trimesh->ImportGTSurf(gtsurf);
   trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
 
   // Setup tringula
   tringula->SetParaSurf(parasurf);
@@ -849,6 +867,8 @@ void setup_large_sphere()
   trimesh->SetParaSurf(parasurf);
   trimesh->ImportGTSurf(gtsurf);
   trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
 
   // Setup tringula
   tringula->SetParaSurf(parasurf);
