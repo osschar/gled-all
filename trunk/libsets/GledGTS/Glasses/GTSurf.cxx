@@ -78,7 +78,52 @@ GTS::GtsSurface* GTSurf::DisownSurface()
   return s;
 }
 
-/**************************************************************************/
+
+//==============================================================================
+
+namespace
+{
+  struct projected_area_sum_arg
+  {
+    HPointD dir;
+    double  sum;
+
+    projected_area_sum_arg(double x, double y, double z) : dir(x,y,z), sum(0) {}
+  };
+
+  void projected_area_sum(GtsFace* f, projected_area_sum_arg* arg)
+  {
+    // This is summing *twice* the area of each triangle.
+
+    HPointD p;
+    gts_triangle_normal(&f->triangle, &p.x, &p.y, &p.z);
+    arg->sum += TMath::Abs(arg->dir.Dot(p));
+  }
+}
+
+Double_t GTSurf::GetArea() const
+{
+  if (!pSurf) return 0;
+  return gts_surface_area(pSurf);
+}
+
+Double_t GTSurf::GetXYArea() const
+{
+  if (!pSurf) return 0;
+
+  projected_area_sum_arg arg(0, 0, 1);
+  gts_surface_foreach_face(pSurf, (GtsFunc) projected_area_sum, &arg);
+  return arg.sum / 4;
+}
+
+Double_t GTSurf::GetVolume() const
+{
+  if (!pSurf) return 0;
+  return gts_surface_volume(pSurf);
+}
+
+
+//==============================================================================
 
 void GTSurf::Load(const TString& file)
 {
@@ -133,7 +178,8 @@ void GTSurf::Save(const TString& file)
   fclose(fp);
 }
 
-/**************************************************************************/
+
+//==============================================================================
 
 namespace
 {
