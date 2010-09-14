@@ -1,3 +1,15 @@
+2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add a custom-made dyno mesh.
+
+	* dyno.gts:
+	New file -- custom made dyno mesh.
+
+	* tringula.C:
+	Import dyno.gts as one of the random meshes.
+	Manually generate vertex/triangle normals for terrain surfaces
+	imported from GTS surfaces.
+
 2010-07-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* oolite_load.C:
