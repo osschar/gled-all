@@ -375,9 +375,9 @@ void TriMesh::ImportGTSurf(GTSurf* gts)
   using namespace GTS;
 
   if (!gts)
-    throw(_eh + "called with null argument.");
-  if(!gts->GetSurf())
-    throw(_eh + "GtsSurface is null.");
+    throw _eh + "called with null argument.";
+  if (!gts->GetSurf())
+    throw _eh + "GtsSurface is null.";
 
   struct Dumper
   {
@@ -414,9 +414,6 @@ void TriMesh::ImportGTSurf(GTSurf* gts)
   Dumper arg(tt);
   gts_surface_foreach_vertex(surf, (GtsFunc) Dumper::vdump, &arg);
   gts_surface_foreach_face  (surf, (GtsFunc) Dumper::fdump, &arg);
-
-  tt->GenerateVertexNormals();
-  tt->GenerateTriangleNormals();
 
   GLensWriteHolder _wlck(this);
   delete mTTvor;
