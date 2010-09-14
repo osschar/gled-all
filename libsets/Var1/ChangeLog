@@ -1,3 +1,9 @@
+2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TriMesh.cxx:
+	In ImportGTSurf() do not automatically generate vertex and
+	triangle normals.
+
 2010-05-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Extendio.cxx:
