@@ -61,6 +61,10 @@ public:
   GTS::GtsSurface* CopySurface();
   GTS::GtsSurface* DisownSurface();
 
+  Double_t GetArea() const;
+  Double_t GetXYArea() const;
+  Double_t GetVolume() const;
+
   void Load(const TString& file=""); //  X{E} 7 MCWButt(-join=>1)
   void Save(const TString& file=""); //  X{E} 7 MCWButt()
 
