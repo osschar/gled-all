@@ -1,3 +1,8 @@
+2010-09-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* tringula.C:
+	Randomly colorize staticos with witish colors.
+
 2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add a custom-made dyno mesh.
