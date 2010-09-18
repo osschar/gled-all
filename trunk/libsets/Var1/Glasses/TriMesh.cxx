@@ -895,12 +895,11 @@ void TriMesh::MakeBox(Float_t a, Float_t b, Float_t c)
   // to c in z.
 
   delete mTTvor;
-  mTTvor = new TringTvor(8, 12, false, true, false);
+  mTTvor = new TringTvor(8, 12, false, false, false);
 
   make_cubus(0, 0, -0.5*a, -0.5*b, 0, a, b, c);
 
   mTTvor->GenerateTriangleNormals();
-  colorize_trings_single(200, 200, 200, 255);
 
   Stamp(FID());
 }

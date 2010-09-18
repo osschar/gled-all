@@ -573,6 +573,7 @@ void tringula(Int_t mode=2)
       Statico* s = tringula->RandomStatico(rndstatos);
       if (s != 0)
       {
+	s->SetColor(gRandom->Uniform(0.6, 1.0), gRandom->Uniform(0.6, 1.0), gRandom->Uniform(0.6, 1.0));
         used_surface += s->GetMesh()->GetXYArea();
         ++stato_cnt;
       }
