@@ -111,6 +111,7 @@ void blob()
 
   cone->Difference(cone, boxu);
   cone->Difference(cone, boxd);
+  cone->Save("dyno.gts");
   cone->MoveLF(1, 2);
   cone->SetRotByDegrees(30, 30, 30);
   cone->SetScale(2);
