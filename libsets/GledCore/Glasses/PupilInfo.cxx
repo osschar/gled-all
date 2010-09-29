@@ -399,14 +399,12 @@ void PupilInfo::EmitSmoothCameraHomeRay()
 
 void PupilInfo::EmitRedrawRay(Bool_t signal_p)
 {
-    if(mQueen && mSaturn->AcceptsRays()) {
+  if (mQueen && mSaturn->AcceptsRays())
+  {
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_redraw, mTimeStamp, FID()));
 
-    TBufferFile cbuff(TBuffer::kWrite);
-    cbuff << signal_p;
-    ray->SetCustomBuffer(cbuff);
-
+    ray->CustomBuffer() << signal_p;
     mQueen->EmitRay(ray);
   }
 }
@@ -414,17 +412,12 @@ void PupilInfo::EmitRedrawRay(Bool_t signal_p)
 void PupilInfo::EmitDumpImageRay(const TString& filename, Int_t n_tiles,
                                  Bool_t copy_p, Bool_t signal_p)
 {
-  if(mQueen && mSaturn->AcceptsRays()) {
+  if (mQueen && mSaturn->AcceptsRays())
+  {
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_dump_image, mTimeStamp, FID()));
 
-    TBufferFile cbuff(TBuffer::kWrite);
-    cbuff << filename;
-    cbuff << n_tiles;
-    cbuff << copy_p;
-    cbuff << signal_p;
-    ray->SetCustomBuffer(cbuff);
-
+    ray->CustomBuffer() << filename << n_tiles << copy_p << signal_p;
     mQueen->EmitRay(ray);
   }
 }

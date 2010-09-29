@@ -292,11 +292,9 @@ void Pupil::AbsorbRay(Ray& ray)
 
     case PupilInfo::PRQN_redraw:
     {
-      if (ray.fRayBits & Ray::RB_CustomBuffer)
-      {
-        *ray.fCustomBuffer >> bSignalDumpFinish;
-        ray.ResetCustomBuffer();
-      }
+      TBuffer &b = ray.LockCustomBuffer();
+      b  >> bSignalDumpFinish;
+      ray.UnlockCustomBuffer();
 
       if (visible_r())
       {
@@ -322,20 +320,15 @@ void Pupil::AbsorbRay(Ray& ray)
 
     case PupilInfo::PRQN_dump_image:
     {
-      if (ray.fRayBits & Ray::RB_CustomBuffer)
+      TBuffer &b = ray.LockCustomBuffer();
+      b >> mImageName >> mImgNTiles >> bCopyToScreen >> bSignalDumpFinish;
+      ray.UnlockCustomBuffer();
+      bDumpImage = true;
+      if (bCopyToScreen && mImgNTiles > 1)
       {
-        *ray.fCustomBuffer >> mImageName;
-        *ray.fCustomBuffer >> mImgNTiles;
-        *ray.fCustomBuffer >> bCopyToScreen;
-        *ray.fCustomBuffer >> bSignalDumpFinish;
-        ray.ResetCustomBuffer();
-        bDumpImage = true;
-        if (bCopyToScreen && mImgNTiles > 1)
-	{
-          printf("%sdump-image-ray: copy-to-screen requested but n-tiles > 1. Disabling copy-to-screen.\n",
-                 _eh.Data());
-          bCopyToScreen = false;
-        }
+	printf("%sdump-image-ray: copy-to-screen requested but n-tiles > 1. Disabling copy-to-screen.\n",
+	       _eh.Data());
+	bCopyToScreen = false;
       }
       fImg->fEye->BreakManageLoop();
       redraw();

@@ -38,8 +38,7 @@ void WGlButton_GL_Rnr::Draw(RnrDriver* rd)
   WGlFrameStyle_GL_Rnr &FSR = *(WGlFrameStyle_GL_Rnr*)mFrameRMS.rnr();
 
   WGlButton& B = *mWGlButton;
-  TString label = B.GetName();
-  FSR.FullRender(txf, label, B.mDx, B.mDy, bBelowMouse);
+  FSR.FullRender(txf, B.RefName(), B.mDx, B.mDy, bBelowMouse);
 }
 
 /**************************************************************************/

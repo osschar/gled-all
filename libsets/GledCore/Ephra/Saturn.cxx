@@ -40,6 +40,7 @@
 
 #include <errno.h>
 #include <signal.h>
+#include <sys/socket.h>
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Definitely need Queen loading implemented in Saturn
@@ -295,19 +296,21 @@ TString Saturn::HandleClientSideSaturnHandshake(TSocket*& socket)
   static const Exc_t _eh("Saturn::HandleClientSideSaturnHandshake ");
 
   TInetAddress ia = socket->GetInetAddress();
-  if(!socket->IsValid()) {
+  if (!socket->IsValid())
+  {
     delete socket; socket = 0;
-    throw(_eh + GForm("opening socket to %s:%d failed.",
-		      ia.GetHostName(), ia.GetPort()));
+    throw _eh + GForm("opening socket to %s:%d failed.",
+		      ia.GetHostName(), ia.GetPort());
   }
 
   // Receive greeting
   int ml; char buf[256];
   ml = socket->RecvRaw(buf, 255, kDontBlock);
-  if(ml <= 0) {
+  if (ml <= 0)
+  {
     delete socket; socket = 0;
-    throw(_eh + GForm("handshake with %s:%d failed: len=%d.",
-		      ia.GetHostName(), ia.GetPort(), ml));
+    throw _eh + GForm("handshake with %s:%d failed: len=%d.",
+		      ia.GetHostName(), ia.GetPort(), ml);
   }
   buf[ml] = 0;
   return TString(buf);
@@ -331,33 +334,41 @@ TMessage* Saturn::HandleClientSideMeeConnection(TSocket* socket, ZMirEmittingEnt
   Int_t     l;
  grant_auth_loop:
   l = socket->Recv(m);
-  if(l <= 0) {
-    throw(_eh + "connection broken");
+  if (l <= 0)
+  {
+    throw _eh + "connection broken";
   }
-  if(m->What() == GledNS::MT_MEE_ConnectionGranted) {
+
+  if (m->What() == GledNS::MT_MEE_ConnectionGranted)
+  {
     return m;
   }
-  else if(m->What() == GledNS::MT_MEE_AuthRequested) {
+  else if (m->What() == GledNS::MT_MEE_AuthRequested)
+  {
     TString host; Int_t port; UInt_t conn_id;
     host.Streamer(*m); *m >> port >> conn_id;
     TSocket* auth_sock = new TSocket(host.Data(), port);
-    try {
+    try
+    {
       Saturn::HandleClientSideSaturnHandshake(auth_sock);
       ZSunQueen::HandleClientSideAuthentication(auth_sock, conn_id, mee->mLogin);
     }
-    catch(Exc_t& exc) {
+    catch (Exc_t& exc)
+    {
       delete auth_sock; delete m;
-      throw(_eh + "auth failed: " + exc);
+      throw _eh + "auth failed: " + exc;
     }
     delete auth_sock; delete m;
     goto grant_auth_loop;
   }
-  else if(m->What() == GledNS::MT_MEE_ConnectionDenied) {
+  else if (m->What() == GledNS::MT_MEE_ConnectionDenied)
+  {
     TString s; *m >> s;  delete m;
-    throw(_eh + "connection denied: " + s.Data());
+    throw _eh + "connection denied: " + s.Data();
   }
-  else {
-    throw(_eh + "unknown response");
+  else
+  {
+    throw _eh + "unknown response";
   }
 }
 
@@ -570,6 +581,29 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
   _server_startup_cond.Unlock();
 
   return mSaturnInfo;
+}
+
+TSocket* Saturn::MakeSocketPairAndAccept(const TString& name)
+{
+  // Creates unix socket pair and runs Accept() in a special thread. The other
+  // socket is returned.
+  // Used for Eye connections.
+
+  static const Exc_t _eh("Saturn::MakeSocketPairAndAccept ");
+
+  int fds[2];
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds))
+    throw _eh + "socketpair failed: " + strerror(errno);
+  
+
+  TSocket *ssock = new TSocket(fds[0], name);
+  TSocket *csock = new TSocket(fds[1], name);
+
+  new_connection_ti* ncti = new new_connection_ti(this, ssock);
+  GThread* at = new GThread("Saturn-Eye-Acceptor", (GThread_foo)tl_SaturnAcceptor, ncti, true);
+  at->Spawn();
+
+  return csock;
 }
 
 void Saturn::AllowMoons()
@@ -867,7 +901,7 @@ Int_t Saturn::SockSuck()
     TSocket* s = (TSocket*) i->first;
     if (s == mServerSocket)
     {
-      TSocket* newsocket = mServerSocket->Accept();
+      TSocket *newsocket = mServerSocket->Accept();
       new_connection_ti* ncti = new new_connection_ti(this, newsocket);
       GThread* at = new GThread("Saturn-Acceptor", (GThread_foo)tl_SaturnAcceptor, ncti, true);
       at->Spawn();
@@ -913,15 +947,18 @@ void Saturn::AcceptWrapper(TSocket* newsocket)
 
   static const Exc_t _eh("Saturn::AcceptWrapper ");
 
-  if(!newsocket) {
+  if (!newsocket)
+  {
     ISerr(_eh + "Accept socket failed.");
     return;
   }
 
-  try {
+  try
+  {
     Accept(newsocket);
   }
-  catch(Exc_t& exc) {
+  catch (Exc_t& exc)
+  {
     // Perhaps should report to someone
     ISerr(_eh + " exception: " + exc.Data());
   }
@@ -946,7 +983,7 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
   int  len = snprintf(msgbuf, 256,
 		      "This is Saturn \"%s\", Gled version %s (%s). Hello ...",
 		      mSaturnInfo->GetName(), GLED_BUILD_VERSION, GLED_BUILD_DATE);
-  if(len > 255) len = 255;
+  if (len > 255) len = 255;
   newsocket->SendRaw(msgbuf, len);
 
   GSelector sel;
@@ -957,54 +994,63 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
   bool loop_error = false;
   TString loop_error_msg;
 
-  while(!loop_done) {
-
-    if(loop_error) {
+  while (!loop_done)
+  {
+    if (loop_error)
+    {
       delete newsocket;
-      throw(_eh + loop_error_msg);
+      throw _eh + loop_error_msg;
     }
 
     int ret = sel.Select();
 
-    if(ret <= 0) {
+    if (ret <= 0)
+    {
       // do clean-up
       // make descriptive message
       TString err_msg = (ret == 0) ? "connection timeout." : "select error.";
 
       delete newsocket;
-      throw(_eh + err_msg);
+      throw _eh + err_msg;
     }
 
     TMessage* msg;
     int len = newsocket->Recv(msg);
-    if(len <= 0) {
+    if (len <= 0)
+    {
       delete newsocket;
-      if(len == 0) {
+      if (len == 0)
+      {
 	ISdebug(0, _eh +"other side closed connection.");
 	return;
-      } else {
-	throw(_eh + GForm("error receiving message (len=%d).", len));
+      }
+      else
+      {
+	throw _eh + GForm("error receiving message (len=%d).", len);
       }
     }
 
-    switch (msg->What()) {
-
-    case GledNS::MT_GledProtocol: {
+    switch (msg->What())
+    {
+    case GledNS::MT_GledProtocol:
+    {
       Int_t client_proto;
       *msg >> client_proto;
       bool compatible_p = (client_proto == s_Gled_Protocol_Version);
       TMessage reply(compatible_p ? GledNS::MT_GledProtocol :
-		     GledNS::MT_ProtocolMismatch);
+		     GledNS::MT_ProtocolMismatch, TBuffer::kMinimalSize);
       reply << s_Gled_Protocol_Version;
       newsocket->Send(reply);
-      if(!compatible_p) {
+      if (!compatible_p)
+      {
 	loop_error = true;
 	loop_error_msg = "incompatible protocols.";
       }
       break;
     }
 
-    case GledNS::MT_QueryFFID: {
+    case GledNS::MT_QueryFFID:
+    {
       ISdebug(0, _eh + "FirstFreeIDQuery: reporting.");
 
       ID_t wkid = mFireKing->GetSaturnID();
@@ -1014,12 +1060,14 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
       break;
     }
 
-    case GledNS::MT_MEE_Connect: {
+    case GledNS::MT_MEE_Connect:
+    {
       ISdebug(0, _eh + "MEE_Connect ...");
 
       ZMirEmittingEntity* mee;
       mee = dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamLens(*msg));
-      if(mee == 0) {
+      if (mee == 0)
+      {
 	loop_error = true;
 	loop_error_msg = "MEE_Connect not followed by a MirEmittingEntity.";
 	break;
@@ -1027,11 +1075,12 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
       ISmess(_eh + GForm("MEE_Connect (type='%s', name='%s', host='%s').",
 			 mee->IsA()->GetName(), mee->GetName(),
 			 newsocket->GetInetAddress().GetHostName()));
-      try {
+      try
+      {
 	mSunQueen->handle_mee_connection(mee, newsocket);
       }
-      //catch(Exc_t& exc) {
-      catch(Exc_t exc) {
+      catch(Exc_t& exc)
+      {
 	TMessage m(GledNS::MT_MEE_ConnectionDenied);
 	m << exc;
 	newsocket->Send(m);
@@ -1043,15 +1092,18 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
       break;
     }
 
-    case GledNS::MT_MEE_Authenticate: {
+    case GledNS::MT_MEE_Authenticate:
+    {
       ISdebug(0, _eh + "MEE_Authenticate ...");
 
       UInt_t conn_id;
       *msg >> conn_id;
-      try {
+      try
+      {
 	mSunQueen->handle_mee_authentication(conn_id, newsocket);
       }
-      catch(Exc_t& exc) {
+      catch(Exc_t& exc)
+      {
 	loop_error = true;
 	loop_error_msg = exc;
 	break;
@@ -1062,7 +1114,8 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
     }
 
       // Unknown
-    default: {
+    default:
+    {
       ISdebug(0, _eh + "got unknown message ... closing connection.");
       loop_error = true;
       loop_error_msg = _eh + GForm("unknown message type %d", msg->What());
@@ -1956,9 +2009,10 @@ void Saturn::ray_emitter()
 
   static const Exc_t _eh("Saturn::ray_emitter ");
 
-  while(1) {
+  while (true)
+  {
     mRayEmittingCnd.Lock();
-    if(mRayEmittingQueue.empty())
+    if (mRayEmittingQueue.empty())
       mRayEmittingCnd.Wait();
 
     Ray* ray = mRayEmittingQueue.front();
@@ -1966,29 +2020,36 @@ void Saturn::ray_emitter()
     mRayEmittingCnd.Unlock();
 
     mEyeLock.Lock();
-    if( ! mEyes.empty()) {
+    if ( ! mEyes.empty())
+    {
       // cout << _eh << *ray << endl;
 
       TMessage msg(GledNS::MT_Ray);
-      ray->Write(msg);
+      RayNS::PutAnyPTR(msg, (void*&) ray);
       ISdebug(10, _eh + GForm("notifying %d eye(s).", mEyes.size()));
+      ray->SetRefCnt(mEyes.size());
       Int_t len = msg.Length() - 4;
       lpEyeInfo_i i = mEyes.begin();
-      while(i != mEyes.end()) {
+      while (i != mEyes.end())
+      {
 	Int_t ret = (*i)->hSocket->Send(msg);
-	if(ret != len) {
+	if (ret != len)
+	{
 	  ISerr(_eh + GForm("sent too little: Eye=%s, len=%3d, ret=%3d.",
 			    (*i)->GetName(), len, ret));
 	}
 	lpEyeInfo_i j = i++;
-	if(ret < 0) {
+	if (ret < 0)
+	{
 	  wipe_eye(*j, true);
 	}
       }
     }
+    else
+    {
+      delete ray;
+    }
     mEyeLock.Unlock();
-
-    delete ray;
   }
 }
 

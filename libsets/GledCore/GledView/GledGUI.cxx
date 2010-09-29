@@ -473,11 +473,6 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 
     virtual ~EyeCreationRequest() {}
 
-    void CreateSocket(Int_t port)
-    {
-      fSocket = new TSocket("localhost", port);
-    }
-
     virtual void Execute()
     {
       try
@@ -526,7 +521,10 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
   }
 
   EyeCreationRequest ecr((EyeInfo::EyeCreator_foo)(*p2foo), ei, ud);
-  ecr.CreateSocket(mSaturnInfo->GetServerPort());
+  // To connect Eye via localhost inet socket:
+  //   ecr.fSocket = new TSocket("localhost", mSaturnInfo->GetServerPort());
+  // To connect via unix unnamed socket:
+  ecr.fSocket = mSaturn->MakeSocketPairAndAccept("saturn-eye");
   exec_gui_thread_request(&ecr);
 
   if (wipe_ei)

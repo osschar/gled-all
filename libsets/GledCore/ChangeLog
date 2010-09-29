@@ -1,3 +1,56 @@
+2010-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Optimize Ray passing: pass pointers instead of streaming, use unix
+	sockets instead of inet connection to localhost.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Add method
+	  TSocket* MakeSocketPairAndAccept(const TString& name);
+	that creates unix socket pair, accepts connection on one end and
+	returns the second end wrapped in TSocket.
+
+	In ray_emitter() set reference count of ray and stream pointer to
+	ray to Eyes. Delete it if there are no Eyes to be notified.
+
+	White-space changes.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Add members for current ray and demangled alpha/beta/gamma images.
+	Modify for receiving of Ray pointers and their proper management
+	via reference counting.
+
+	* Eye/Ray.cxx:
+	* Eye/Ray.h:
+	Remove serialization code.
+	Remove Eye-local alpha/beta/gamma images.
+	Add spin-lock and reference counting.
+	Modify custom buffer creation and access so that it can be shared
+	between several concurrent threads.
+
+	* Glasses/PupilInfo.cxx:
+	* Pupils/Pupil.cxx:
+	Use new Ray custom-buffer functions.
+
+	* GledView/FTW_Branch.cxx:
+	* GledView/FTW_Shell.cxx:
+	Access beta/gamma images via Eye (removed from Ray).
+
+	* GledView/GledGUI.cxx:
+	Create Eye-Saturn sockets via Saturn::MakeSocketPairAndAccept().
+
+	* Glasses/ScreenText.h:
+	* Glasses/WGlButton.h:
+	* Rnr/GL/ScreenText_GL_Rnr.cxx:
+	* Rnr/GL/WGlButton_GL_Rnr.cxx:
+	Add get-string-by-reference P7 pragmas.
+
+	* Glasses/ZSunQueen.cxx:
+	* Gled/GSpinLock.h:
+	* Stones/ZMIR.cxx:
+	White-space.
+
 2010-09-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZNode.cxx:

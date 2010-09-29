@@ -4,9 +4,15 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//________________________________________________________________________
-//
+#include "ZMIR.h"
+#include <Glasses/SaturnInfo.h>
+#include <Gled/GledNS.h>
+
+/**************************************************************************/
 // ZMIR
+/**************************************************************************/
+
+//________________________________________________________________________
 //
 // Covering structure for streaming/routing of MIRs.
 // Message type defaults to MT_Flare.
@@ -15,14 +21,6 @@
 // Direction is used for determination of routing/exec action in the Saturn.
 // SuppressFlareBroadcast can be set during MIR execution on the sun-saturn
 // to prevent broadcasting of the MIR to moons.
-
-#include "ZMIR.h"
-#include <Glasses/SaturnInfo.h>
-#include <Gled/GledNS.h>
-
-/**************************************************************************/
-// ZMIR
-/**************************************************************************/
 
 ClassImp(ZMIR);
 
@@ -52,7 +50,8 @@ namespace
 
 /**************************************************************************/
 
-void ZMIR::_init() {
+void ZMIR::_init()
+{
   // Set demangled info to null
   fCaller = 0; fRecipient = fResultRecipient = 0;
   fAlpha = fBeta = fGamma = 0;
@@ -252,7 +251,6 @@ void ZMIR::SetCaller(ZMirEmittingEntity* caller)
     *this << fCallerID;
     SetBufferOffset(pos);
   }
-
 }
 
 void ZMIR::SetRecipient(SaturnInfo* recipient)
@@ -309,7 +307,6 @@ void ZMIR::SetDetachedExe(bool multix)
 
     fMirBits |= (multix) ? MB_DetachedExe | MB_MultixDetachedExe :
                            MB_DetachedExe;
-
 }
 
 /**************************************************************************/
@@ -358,13 +355,15 @@ ZMIR* ZMIR::UnchainMIR(An_ID_Demangler* s)
   return mir;
 }
 
+
 /**************************************************************************/
 // ZMIR_Result_Report
 /**************************************************************************/
 
 //______________________________________________________________________
-// ZMIR_Result_Report
 //
+// Structure for reporting result of MIR execution.
+// It can contain a custom respone buffer.
 
 ClassImp(ZMIR_Result_Report);
 

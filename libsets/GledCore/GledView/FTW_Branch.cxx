@@ -88,7 +88,7 @@ void FTW_Branch::insert_leaf(Ray& ray, lpFTW_Leaf_i pos)
 {
   int nest_pos = (pos == mLeaves.end()) ?
     mNest->PackPosAfter(this) : mNest->PackPos(*pos);
-  FTW_Leaf* leaf = create_leaf(ray.fBetaImg, beta_elrep(ray));
+  FTW_Leaf* leaf = create_leaf(fImg->fEye->GetCurrentBetaImg(), beta_elrep(ray));
   mLeaves.insert(pos, leaf);
   mNest->InsertLeaf(leaf, nest_pos);
 }

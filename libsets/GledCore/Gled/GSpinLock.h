@@ -54,7 +54,7 @@ class GSpinLockHolder
   GSpinLock& mMutex;
 public:
   GSpinLockHolder(GSpinLock& m) : mMutex(m) { mMutex.Lock();   }
-  virtual ~GSpinLockHolder()             { mMutex.Unlock(); }
+  virtual ~GSpinLockHolder()                { mMutex.Unlock(); }
 
   ClassDef(GSpinLockHolder, 0);
 };
