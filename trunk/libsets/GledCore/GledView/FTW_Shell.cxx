@@ -371,63 +371,64 @@ void FTW_Shell::AbsorbRay(Ray& ray)
   }
 
   /*
-  if(ray.fRQN == RayNS::RQN_link_change) {
+    if(ray.fRQN == RayNS::RQN_link_change) {
     if(wMsgRecipient->NeedsUpdate()) {
-      wMsgRecipient->Update();
+    wMsgRecipient->Update();
     }
     return;
-  }
+    }
   */
 
-  if(ray.fFID == ShellInfo::FID()) {
+  if (ray.fFID == ShellInfo::FID())
+  {
+    switch (ray.fRQN)
+    {
+      case ShellInfo::PRQN_set_def_subshell:
+	set_canvased_subshell(fImg->fEye->GetCurrentBetaImg());
+	break;
 
-    switch (ray.fRQN) {
+      case ShellInfo::PRQN_add_subshell:
+	spawn_subshell(fImg->fEye->GetCurrentBetaImg());
+	break;
 
-    case ShellInfo::PRQN_set_def_subshell:
-      set_canvased_subshell(ray.fBetaImg);
-      break;
+      case ShellInfo::PRQN_remove_subshell:
+	kill_subshell(fImg->fEye->GetCurrentBetaImg());
+	break;
 
-    case ShellInfo::PRQN_add_subshell:
-      spawn_subshell(ray.fBetaImg);
-      break;
+      case ShellInfo::PRQN_spawn_classview:
+	SpawnMTW_View(fImg->fEye->GetCurrentBetaImg(), true, true);
+	break;
 
-    case ShellInfo::PRQN_remove_subshell:
-      kill_subshell(ray.fBetaImg);
-      break;
+      case ShellInfo::PRQN_spawn_metagui:
+	// printf("Shell spawning metagui of %s, template %s\n",
+	//    ray.fBeta->Identify().Data(), ray.fGamma->Identify().Data());
+	SpawnMetaView(fImg->fEye->GetCurrentBetaImg(), ray.fGamma, true);
+	break;
 
-    case ShellInfo::PRQN_spawn_classview:
-      SpawnMTW_View(ray.fBetaImg, true, true);
-      break;
+      case ShellInfo::PRQN_resize_window:
+      {
+	int cmoh = wOutPack->h()/cell_h();
+	int nmoh = mShellInfo->GetMsgOutH();
+	int delta = nmoh - cmoh;
+	// printf("cur=%d new=%d delta=%d\n", cmoh, nmoh, delta);
+	if (delta != 0)
+	{
+	  int cch = wCanvas->h()/cell_h();
+	  if (cch - delta < min_canvas_H)
+	  {
+	    size(w(), h() + (min_canvas_H - cch + delta)*cell_h());
+	  }
 
-    case ShellInfo::PRQN_spawn_metagui:
-      // printf("Shell spawning metagui of %s, template %s\n",
-      //    ray.fBeta->Identify().Data(), ray.fGamma->Identify().Data());
-      SpawnMetaView(ray.fBetaImg, ray.fGamma, true);
-      break;
-
-    case ShellInfo::PRQN_resize_window: {
-      int cmoh = wOutPack->h()/cell_h();
-      int nmoh = mShellInfo->GetMsgOutH();
-      int delta = nmoh - cmoh;
-      // printf("cur=%d new=%d delta=%d\n", cmoh, nmoh, delta);
-      if(delta != 0) {
-	int cch = wCanvas->h()/cell_h();
-	if(cch - delta < min_canvas_H) {
-	  size(w(), h() + (min_canvas_H - cch + delta)*cell_h());
+	  wCanvas ->size(w(), wCanvas->h()  - delta*cell_h());
+	  wOutPack->size(w(), wOutPack->h() + delta*cell_h());
+	  wMainPack->init_sizes();
+	  wMsgPack->init_sizes();
+	  set_size_range();
+	  redraw();
 	}
-
-	wCanvas ->size(w(), wCanvas->h()  - delta*cell_h());
-	wOutPack->size(w(), wOutPack->h() + delta*cell_h());
-	wMainPack->init_sizes();
-	wMsgPack->init_sizes();
-	set_size_range();
-	redraw();
+	break;
       }
-      break;
     }
-
-    }
-
   }
 }
 

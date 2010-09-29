@@ -1308,10 +1308,9 @@ void Tringula::EmitExtendioExplodingRay(Extendio* ext, Explosion* exp)
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_extendio_exploding, mTimeStamp, FID()));
 
-    TBufferFile cbuff(TBuffer::kWrite);
-    GledNS::WriteLensID(cbuff, ext);
-    GledNS::WriteLensID(cbuff, exp);
-    ray->SetCustomBuffer(cbuff);
+    TBuffer &b = ray->CustomBuffer();
+    GledNS::WriteLensID(b, ext);
+    GledNS::WriteLensID(b, exp);
 
     mQueen->EmitRay(ray);
   }
@@ -1324,9 +1323,8 @@ void Tringula::EmitExtendioDyingRay(Extendio* ext)
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_extendio_dying, mTimeStamp, FID()));
 
-    TBufferFile cbuff(TBuffer::kWrite);
-    GledNS::WriteLensID(cbuff, ext);
-    ray->SetCustomBuffer(cbuff);
+    TBuffer &b = ray->CustomBuffer();
+    GledNS::WriteLensID(b, ext);
 
     mQueen->EmitRay(ray);
   }
@@ -1339,10 +1337,9 @@ void Tringula::EmitExtendioSoundRay(Extendio* ext, const TString& effect)
     auto_ptr<Ray> ray
       (Ray::PtrCtor(this, PRQN_extendio_sound, mTimeStamp, FID()));
 
-    TBufferFile cbuff(TBuffer::kWrite);
-    GledNS::WriteLensID(cbuff, ext);
-    cbuff << effect;
-    ray->SetCustomBuffer(cbuff);
+    TBuffer &b = ray->CustomBuffer();
+    GledNS::WriteLensID(b, ext);
+    b << effect;
 
     mQueen->EmitRay(ray);
   }

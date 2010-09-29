@@ -280,9 +280,10 @@ void TringuRep_GL_Rnr::TringulaSpy::AbsorbRay(Ray& ray)
   {
     case Tringula::PRQN_extendio_exploding:
     {
-      ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
-      ID_t expid = GledNS::ReadLensID(*ray.fCustomBuffer);
-      ray.ResetCustomBuffer();
+      TBuffer &b = ray.LockCustomBuffer();
+      ID_t extid = GledNS::ReadLensID(b);
+      ID_t expid = GledNS::ReadLensID(b);
+      ray.UnlockCustomBuffer();
 
       Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
       ExtendioExplosion *exp = dynamic_cast<ExtendioExplosion*>(fImg->fEye->DemangleID2Lens(expid));
@@ -291,8 +292,9 @@ void TringuRep_GL_Rnr::TringulaSpy::AbsorbRay(Ray& ray)
     }
     case Tringula::PRQN_extendio_dying:
     {
-      ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
-      ray.ResetCustomBuffer();
+      TBuffer &b = ray.LockCustomBuffer();
+      ID_t extid = GledNS::ReadLensID(b);
+      ray.UnlockCustomBuffer();
 
       Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
       mMaster->ExtendioDying(ext);
@@ -300,10 +302,11 @@ void TringuRep_GL_Rnr::TringulaSpy::AbsorbRay(Ray& ray)
     }
     case Tringula::PRQN_extendio_sound:
     {
-      ID_t extid = GledNS::ReadLensID(*ray.fCustomBuffer);
       TString effect;
-      *ray.fCustomBuffer >> effect;
-      ray.ResetCustomBuffer();
+      TBuffer &b = ray.LockCustomBuffer();
+      ID_t extid = GledNS::ReadLensID(b);
+      b >> effect;
+      ray.UnlockCustomBuffer();
 
       Extendio *ext = dynamic_cast<Extendio*>(fImg->fEye->DemangleID2Lens(extid));
       mMaster->ExtendioSound(ext, effect);

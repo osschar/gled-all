@@ -148,11 +148,12 @@ public:
   Saturn();
   virtual ~Saturn();
 
-  static TString    HandleClientSideSaturnHandshake(TSocket*& socket);
+  static TString   HandleClientSideSaturnHandshake(TSocket*& socket);
   static TMessage* HandleClientSideMeeConnection(TSocket* socket, ZMirEmittingEntity* mee);
 
   void	      Create(SaturnInfo* si);
   SaturnInfo* Connect(SaturnInfo* si);
+  TSocket*    MakeSocketPairAndAccept(const TString& name);
   void	      AllowMoons();
   void	      Shutdown();
 

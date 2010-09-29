@@ -37,7 +37,11 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) :
   mSatSocket   (sock),
   mSatSocketFd (sock->GetDescriptor()),
   mMaxManageLoops  (9999),
-  bBreakManageLoop (false)
+  bBreakManageLoop (false),
+  fCurrentRay (0),
+  fAlphaImg   (0),
+  fBetaImg    (0),
+  fGammaImg   (0)
 {
   static const Exc_t _eh("Eye::Eye ");
 
@@ -101,11 +105,6 @@ OS::ZGlassImg* Eye::DemanglePtr(ZGlass* lens)
   hpZGlass2pZGlassImg_i i = mGlass2ImgHash.find(lens);
   if (i != mGlass2ImgHash.end()) return i->second;
 
-  lens->IncEyeRefCount();
-  OS::ZGlassImg *gi = new OS::ZGlassImg(this, lens);
-  mGlass2ImgHash .insert(make_pair(lens, gi));
-  mZeroRefCntImgs.insert(gi);
-
   mpQueen2Int_i qci = mQueenLensCount.find(lens->GetQueen());
   if (qci == mQueenLensCount.end())
   {
@@ -116,6 +115,11 @@ OS::ZGlassImg* Eye::DemanglePtr(ZGlass* lens)
   {
     ++qci->second;
   }
+
+  lens->IncEyeRefCount();
+  OS::ZGlassImg *gi = new OS::ZGlassImg(this, lens);
+  mGlass2ImgHash .insert(make_pair(lens, gi));
+  mZeroRefCntImgs.insert(gi);
 
   return gi;
 }
@@ -218,6 +222,29 @@ Int_t Eye::PrintObservedLenses(ZQueen* q, bool dump_views)
   return cnt;
 }
 
+
+//==============================================================================
+// Current ray
+//==============================================================================
+
+OptoStructs::ZGlassImg* Eye::GetCurrentBetaImg()
+{
+  if (fBetaImg == 0 && fCurrentRay->HasBeta())
+  {
+    fBetaImg = DemanglePtr(fCurrentRay->fBeta);
+  }
+  return fBetaImg;
+}
+
+OptoStructs::ZGlassImg* Eye::GetCurrentGammaImg()
+{
+  if (fGammaImg == 0 && fCurrentRay->HasGamma())
+  {
+    fGammaImg = DemanglePtr(fCurrentRay->fGamma);
+  }
+  return fGammaImg;
+}
+
 /**************************************************************************/
 // SatSocket bussines
 /**************************************************************************/
@@ -309,38 +336,41 @@ Int_t Eye::Manage(int fd)
 
       case GledNS::MT_Ray:
       {
-	Ray ray(*m);
-	hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(ray.fAlpha);
-	if (alpha_it == mGlass2ImgHash.end())
-	  break;
+	RayNS::GetAnyPTR(*m, (void*&) fCurrentRay);
 
-	ray.Read(*m);
-	// cout << _eh << ray << endl;
-
-	++ray_count;
-	OS::ZGlassImg* a = ray.fAlphaImg = alpha_it->second;
-	ray.fBetaImg  = ray.HasBeta()  ? DemanglePtr(ray.fBeta)  : 0;
-	ray.fGammaImg = ray.HasGamma() ? DemanglePtr(ray.fGamma) : 0;
-
-	// Read-lock alpha
-	GLensReadHolder(a->fLens);
-
-	a->PreAbsorption(ray);
-
-	for (OS::lpA_View_i i=a->fViews.begin(); i!=a->fViews.end(); )
+	hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(fCurrentRay->fAlpha);
+	if (alpha_it != mGlass2ImgHash.end())
 	{
-	  // Be careful! Views can come and go in response to Rays.
-	  OS::A_View* v = *i; --i;
-	  v->AbsorbRay(ray);
-	  ++i; if(*i == v) ++i;
+	  Ray &ray = *fCurrentRay;
+	  ++ray_count;
+
+	  OS::ZGlassImg* a = fAlphaImg = alpha_it->second;
+
+	  {
+	    GLensReadHolder(a->fLens);
+
+	    a->PreAbsorption(ray);
+
+	    for (OS::lpA_View_i i=a->fViews.begin(); i!=a->fViews.end(); )
+	    {
+	      // Be careful! Views can come and go in response to Rays.
+	      OS::A_View* v = *i; --i;
+	      v->AbsorbRay(ray);
+	      ++i; if(*i == v) ++i;
+	    }
+
+	    a->PostAbsorption(ray);
+	  }
+
+	  if (ray.fRQN == RayNS::RQN_death)
+	  {
+	    RemoveImage(a, true);
+	  }
 	}
 
-	a->PostAbsorption(ray);
-
-	if (ray.fRQN==RayNS::RQN_death)
-	{
-	  RemoveImage(a, true);
-	}
+	fCurrentRay->DecRefCnt();
+	fCurrentRay = 0;
+	fAlphaImg = fBetaImg = fGammaImg = 0;
       } // end case MT_Ray
 
     } // end switch message->What()

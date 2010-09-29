@@ -217,39 +217,43 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
   static const Exc_t _eh("ZSunQueen::handle_mee_connection ");
 
   ZMIR* mir_ptr;
-  if(GledNS::IsA(mee, SaturnInfo::FID())) {
-    if(mSaturn->GetAllowMoons() == false) {
+  if (GledNS::IsA(mee, SaturnInfo::FID()))
+  {
+    if (mSaturn->GetAllowMoons() == false)
+    {
       printf("type = %s\n", typeid(_eh + "frek").name());
-      throw(_eh + "Saturn is not accepting moon connections.");
+      throw _eh + "Saturn is not accepting moon connections.";
     }
     mir_ptr = S_initiate_saturn_connection();
   }
-  else if(GledNS::IsA(mee, EyeInfo::FID())) {
+  else if (GledNS::IsA(mee, EyeInfo::FID()))
+  {
     mir_ptr = S_initiate_eye_connection();
   }
-  else {
-    throw(_eh + "unknown type of mee.");
+  else
+  {
+    throw _eh + "unknown type of mee.";
   }
-  auto_ptr<ZMIR> mir( mir_ptr );
+  auto_ptr<ZMIR> mir(mir_ptr);
   GledNS::StreamLens(*mir, mee);
   mir->SetRecipient(mSunInfo.get());
   delete mee;
 
   ISdebug(0, _eh + "Waiting for MirEmittingEntity instantiation.");
   auto_ptr<ZMIR_RR> ret ( mSaturn->ShootMIRWaitResult(mir) );
-  if(!ret->BeamResult_OK())
-    throw(Exc_t(ret->GenError()));
+  if (!ret->BeamResult_OK())
+    throw Exc_t(ret->GenError());
 
   UChar_t crr_buf; *ret >> crr_buf;
   ConnReqResult_e crr = (ConnReqResult_e)crr_buf;
 
-  if(crr == CRR_Denied) {
-    throw(_eh + "connection denied.");
-  }
+  if (crr == CRR_Denied)
+    throw _eh + "connection denied.";
 
   ID_t mee_id;
 
-  if(crr == CRR_ReqAuth) {
+  if (crr == CRR_ReqAuth)
+  {
     UInt_t conn_id; *ret >> conn_id;
     GCondition auth_cond;
     NCSData* ncsd = new NCSData(&auth_cond);
@@ -267,33 +271,37 @@ void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
     ConnReqResult_e state = ncsd->fState;
     mee_id = ncsd->fMeeID;
     mNCSlaveData.remove(conn_id);
-    if(state != CRR_OK)
-      throw(_eh + "permission denied.");
+    if (state != CRR_OK)
+      throw _eh + "permission denied.";
   }
-  else if(crr == CRR_OK) {
+  else if (crr == CRR_OK)
+  {
     *ret >> mee_id;
   }
-  else {
-    throw(_eh + "unknown reponse from master.");
+  else
+  {
+    throw _eh + "unknown reponse from master.";
   }
 
   mee = dynamic_cast<ZMirEmittingEntity*>(mSaturn->DemangleID(mee_id));
-  if(mee == 0) {
-    throw(_eh + "received CRR_OK but can't demangle MirEmittingEntity.");
-  }
+  if (mee == 0)
+    throw _eh + "received CRR_OK but can't demangle MirEmittingEntity.";
 
-  if(GledNS::IsA(mee, SaturnInfo::FID())) {
+  if (GledNS::IsA(mee, SaturnInfo::FID()))
+  {
     SaturnInfo* si = dynamic_cast<SaturnInfo*>(mee);
     si->hSocket = socket;
     mSaturn->finalize_moon_connection(si);
   }
-  else if(GledNS::IsA(mee, EyeInfo::FID())) {
+  else if (GledNS::IsA(mee, EyeInfo::FID()))
+  {
     EyeInfo* ei = dynamic_cast<EyeInfo*>(mee);
     ei->hSocket = socket;
     mSaturn->finalize_eye_connection(ei);
   }
-  else {
-    throw(_eh + "unknow type of MEE.");
+  else
+  {
+    throw _eh + "unknow type of MEE.";
   }
 
   ISdebug(0, _eh + "MirEmittingEntity received and finalised.");

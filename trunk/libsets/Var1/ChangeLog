@@ -1,3 +1,9 @@
+2010-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Tringula.cxx:
+	* Rnr/GL/TringuRep_GL_Rnr.cxx:
+	Use new Ray custom-buffer functions.
+
 2010-09-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TriMesh.cxx:

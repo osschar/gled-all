@@ -59,6 +59,12 @@ protected:
   virtual void RemoveImage(OptoStructs::ZGlassImg* img, bool wipe_zrc_set);
   virtual void ProcessZeroRefCntImgs();
 
+  // Current ray being processed. Eyes are expected to be single threaded!
+  Ray                    *fCurrentRay;
+  OptoStructs::ZGlassImg *fAlphaImg;
+  OptoStructs::ZGlassImg *fBetaImg;
+  OptoStructs::ZGlassImg *fGammaImg;
+
 public:
   Eye(TSocket* sock, EyeInfo* ei);
   virtual ~Eye();
@@ -87,12 +93,20 @@ public:
   virtual void Message(const char* msg, MType_e t=MT_std) {}
   virtual void Message(const TString& msg, MType_e t=MT_std) {}
 
+
+  // Current ray
+  Ray*                    GetCurrentRay()      { return fCurrentRay; }
+  OptoStructs::ZGlassImg* GetCurrentAlphaImg() { return fAlphaImg; }
+  OptoStructs::ZGlassImg* GetCurrentBetaImg();
+  OptoStructs::ZGlassImg* GetCurrentGammaImg();
+
   // Socketing
   Int_t	Manage(int fd);
   virtual void PostManage(int ray_count) {}
 
   void Send(TMessage* m);
   void Send(ZMIR& c);
+
 
   void CloseEye();
 

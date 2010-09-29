@@ -21,7 +21,7 @@ void ScreenText_GL_Rnr::_init()
 void ScreenText_GL_Rnr::Draw(RnrDriver* rd)
 {
   ScreenText& T = *mScreenText;
-  GLTextNS::RnrTextAt(rd, T.GetText(), T.mX, T.mY, T.mZ, T.PtrFgCol(), T.PtrBgCol());
+  GLTextNS::RnrTextAt(rd, T.RefText(), T.mX, T.mY, T.mZ, T.PtrFgCol(), T.PtrBgCol());
 }
 
 //void ScreenText_GL_Rnr::PostDraw(RnrDriver* rd)

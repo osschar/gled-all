@@ -18,12 +18,12 @@ private:
   void _init();
 
 protected:
-  ZLink<ZGlass>       mCbackBeta;       //  X{GS} L{}
-  TString             mCbackMethodName; //  X{GS} Ray{CbackReset} 7 Textor()
+  ZLink<ZGlass>       mCbackBeta;       //  X{GS}  L{}
+  TString             mCbackMethodName; //  X{GRS} Ray{CbackReset} 7 Textor()
   GledNS::MethodInfo* mCbackMethodInfo; //!
 
-  Int_t               mCbackValue;      //  X{GS} 7 Value()
-  TString             mCbackString;     //  X{GS} 7 Textor()
+  Int_t               mCbackValue;      //  X{GS}  7 Value()
+  TString             mCbackString;     //  X{GRS} 7 Textor()
 
 public:
   WGlButton(const Text_t* n="WGlButton", const Text_t* t=0) :

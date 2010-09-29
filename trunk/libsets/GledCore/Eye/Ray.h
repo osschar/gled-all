@@ -9,16 +9,19 @@
 
 // Includes
 #include <Gled/GledTypes.h>
+#include <Gled/GSpinLock.h>
 
-namespace OptoStructs {
+namespace OptoStructs
+{
   class ZGlassImg;
 }
 
 /**************************************************************************/
 
-namespace RayNS {
-
- enum RayQN_e {
+namespace RayNS
+{
+ enum RayQN_e
+ {
     RQN_death,
     RQN_change,
     RQN_link_change,
@@ -47,34 +50,38 @@ namespace RayNS {
 // Ray
 /**************************************************************************/
 
-class Ray {
+class Ray
+{
 public:
 
-  enum EyeBits_e {
+  enum EyeBits_e
+  {
     EB_StructuralChange = 0x1
   };
 
-  enum RayBits_e {
+  enum RayBits_e
+  {
     RB_Beta         = 0x1,
     RB_Gamma        = 0x2,
     RB_BetaId       = 0x4,
     RB_GammaId      = 0x8,
     RB_BetaLabel    = 0x10,
-    RB_GammaLabel   = 0x20,
-    RB_CustomBuffer = 0x40
+    RB_GammaLabel   = 0x20
   };
 
-private:
-  Bool_t	bRead;
+protected:
+  TBuffer*	mCustomBuffer;
+  GSpinLock     mLock;
+  Int_t         mRefCnt;
 
 public:
-  ZGlass*	fAlpha;
-
   UChar_t	fRQN;		// ray quantum number
   UChar_t	fEyeBits;
+  UChar_t	fRayBits;	//
   TimeStamp_t	fStamp;		// timestamp of alpaha
   FID_t		fFID;		// libset/glass of origin
-  UChar_t	fRayBits;	//
+
+  ZGlass*	fAlpha;
 
   // Optional part
   ZGlass*	fBeta;
@@ -83,14 +90,6 @@ public:
   Int_t		fGammaId;
   TString	fBetaLabel;
   TString      	fGammaLabel;
-
-  Int_t		fCustomLen;
-  TBuffer*	fCustomBuffer;
-
-  // Images part ... used on Eye for demangled a,b,g
-  OptoStructs::ZGlassImg* fAlphaImg;
-  OptoStructs::ZGlassImg* fBetaImg;
-  OptoStructs::ZGlassImg* fGammaImg;
 
   //----------------------------------------------------------------------
 
@@ -101,16 +100,14 @@ public:
   /************************************************************************/
 
   Ray(ZGlass* a, UChar_t rqn, TimeStamp_t t, FID_t fid=FID_t(0,0), UChar_t eb=0) :
-    bRead(false),
-    fAlpha(a), fRQN(rqn), fEyeBits(eb), fStamp(t), fFID(fid),
-    fRayBits(0)
+    mCustomBuffer(0), mRefCnt(0),
+    fRQN(rqn), fEyeBits(eb), fRayBits(0), fStamp(t), fFID(fid), fAlpha(a)
   {}
+
   static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, FID_t fid, UChar_t eb=0)
   { return new Ray(a, rqn, t, fid, eb); }
   static Ray* PtrCtor(ZGlass* a, UChar_t rqn, TimeStamp_t t, UChar_t eb)
   { return new Ray(a, rqn, t, FID_t(0,0), eb); }
-
-  void Write(TBuffer& b);
 
   void SetBeta(ZGlass* b)
   { fBeta = b; fRayBits |= RB_Beta; }
@@ -134,19 +131,19 @@ public:
   void SetGamma(ZGlass* g, Int_t gid, const TString& glbl)
   { SetGamma(g); SetGamma(gid); SetGamma(glbl); }
 
-  void SetCustomBuffer(TBuffer& b);
+  //----------------------------------------------------------------------
+
+  void SetRefCnt(Int_t rc);
+
+  TBuffer& CustomBuffer();
 
   /************************************************************************/
   // Reader side
   /************************************************************************/
 
-  Ray(TBuffer& b) : bRead(true), fRayBits(0) { RayNS::GetPTR(b, fAlpha); }
-
-  void Read(TBuffer& b);
-  void ResetCustomBuffer();
-
-  bool HasBeta()  { return fRayBits & RB_Beta; }
-  bool HasGamma() { return fRayBits & RB_Gamma; }
+  bool HasBeta()         { return fRayBits & RB_Beta; }
+  bool HasGamma()        { return fRayBits & RB_Gamma; }
+  bool HasCustomBuffer() { return mCustomBuffer != 0; }
 
   //----------------------------------------------------------------------
 
@@ -154,6 +151,16 @@ public:
   bool IsBasicChange() { return fRQN == RayNS::RQN_change && IsBasic(); }
   bool IsChangeOf(FID_t fid)
   { return fRQN == RayNS::RQN_change && (fFID.is_null() || fFID == fid); }
+
+  //----------------------------------------------------------------------
+
+  void DecRefCnt()
+  { mLock.Lock(); if (--mRefCnt == 0) delete this; else mLock.Unlock(); }
+
+  TBuffer& LockCustomBuffer();
+  void     UnlockCustomBuffer();
+
+  //----------------------------------------------------------------------
 
   const char* EventName() const;
   void Dump(ostream& s) const;
@@ -167,7 +174,8 @@ ostream& operator<<(ostream& s, const Ray& n);
 // TextMessage
 /**************************************************************************/
 
-struct TextMessage {
+struct TextMessage
+{
   enum Type_e { TM_Message, TM_Warning, TM_Error };
 
   ZGlass*		fCaller;
@@ -185,7 +193,8 @@ struct TextMessage {
 
 /**************************************************************************/
 
-struct EyeCommand {
+struct EyeCommand
+{
   enum Command_e { EC_Apocalypse };
 
   Command_e		fCommand;

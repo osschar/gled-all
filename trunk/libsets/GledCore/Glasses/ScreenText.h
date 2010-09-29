@@ -18,7 +18,7 @@ private:
   void _init();
 
 protected:
-  TString	mText;  // X{GS}  7 Textor()
+  TString	mText;  // X{GRS} 7 Textor()
   ZColor	mFgCol; // X{GSP} 7 ColorButt(-join=>1)
   ZColor	mBgCol; // X{GSP} 7 ColorButt()
   Int_t		mX;     // X{GS}  7 Value(-range=>[-1000,1000,1], -join=>1)
