@@ -5,9 +5,8 @@
 # Modified version of root/build/unix/makedistsrc.sh
 # Fix the following variables before running:
 
-svnurl="https://root.cern.ch/svn/root/branches/v5-26-00-patches"
-svntrunk="https://root.cern.ch/svn/root/trunk"
-version="5.26.01"
+svnurl="https://root.cern.ch/svn/root/tags/v5-27-06"
+version="5.27.06"
 dir="root"
 tarfile="root-$version-gled.tar"
 
@@ -18,9 +17,9 @@ mkdir $dir
 svn co $svnurl $dir
 cd $dir
 
-echo "Merging gled-related changes ..."
-# For 5.26.01
-svn merge -c 32740 $svntrunk
+# echo "Merging gled-related changes ..."
+# For 5.26.01, FTGL stuff
+# svn merge -c 32740 $svntrunk
 
 echo "Generating etc/svninfo.txt"
 build/unix/svninfo.sh

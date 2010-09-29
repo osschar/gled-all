@@ -1,3 +1,8 @@
+2010-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/root/make-root-src-dist.sh:
+	Use root-5.27.06 tag when making a tarball.
+
 2010-05-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/root/root.pl:
