@@ -396,7 +396,7 @@ void MCW_View::Send()
   }
   if(ctx[1] == 0) {
     mShell->Message("MCW_View::Send attempt to emit MIR with alpha==null blocked.",
-		    FTW_Shell::MT_wrn);
+		    ISwarning);
     return;
   }
 

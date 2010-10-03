@@ -406,7 +406,7 @@ int FTW::NameButton::handle(int ev)
       }
     }
     catch(Exc_t& exc) {
-      shell->Message(exc.Data(), FTW_Shell::MT_err);
+      shell->Message(exc.Data(), ISerror);
     }
     return 1;
   }

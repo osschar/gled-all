@@ -37,9 +37,9 @@ public:
 
   virtual SaturnInfo* HostingSaturn() { return mMaster.get(); }
   // Virtuals exported from MEE
-  virtual void Message(const Text_t* s);
-  virtual void Warning(const Text_t* s);
-  virtual void Error(const Text_t* s);
+  virtual void Message(const TString& s);
+  virtual void Warning(const TString& s);
+  virtual void Error  (const TString& s);
 
 #include "EyeInfo.h7"
   ClassDef(EyeInfo,1);

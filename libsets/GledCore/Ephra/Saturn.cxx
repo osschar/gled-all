@@ -1247,10 +1247,6 @@ Int_t Saturn::Manage(TSocket* sock) throw(Exc_t)
 
     switch(m->What())
     {
-      case kMESS_STRING:
-        // ????
-        break;
-
       case GledNS::MT_Flare:
       case GledNS::MT_Beam:
       {
@@ -1283,7 +1279,7 @@ Int_t Saturn::Manage(TSocket* sock) throw(Exc_t)
       }
 
       default:
-        throw(_eh + "unknown message type");
+        throw _eh + "unknown message type";
 
     } // switch message type
 
@@ -2024,22 +2020,20 @@ void Saturn::ray_emitter()
     {
       // cout << _eh << *ray << endl;
 
-      TMessage msg(GledNS::MT_Ray);
-      RayNS::PutAnyPTR(msg, (void*&) ray);
+      RayNS::SaturnToEyeEnvelope msg(ray);
       ISdebug(10, _eh + GForm("notifying %d eye(s).", mEyes.size()));
       ray->SetRefCnt(mEyes.size());
-      Int_t len = msg.Length() - 4;
       lpEyeInfo_i i = mEyes.begin();
       while (i != mEyes.end())
       {
-	Int_t ret = (*i)->hSocket->Send(msg);
-	if (ret != len)
+	ssize_t len = send((*i)->hSocket->GetDescriptor(), &msg, sizeof(RayNS::SaturnToEyeEnvelope), 0);
+	if (len != sizeof(RayNS::SaturnToEyeEnvelope))
 	{
-	  ISerr(_eh + GForm("sent too little: Eye=%s, len=%3d, ret=%3d.",
-			    (*i)->GetName(), len, ret));
+	  ISerr(_eh + GForm("sent too little: Eye=%s, exp_len=%3d, ret=%3d.",
+			    (*i)->GetName(), sizeof(RayNS::SaturnToEyeEnvelope), len));
 	}
 	lpEyeInfo_i j = i++;
-	if (ret < 0)
+	if (len < 0)
 	{
 	  wipe_eye(*j, true);
 	}
@@ -2061,17 +2055,17 @@ void Saturn::Shine(auto_ptr<Ray>& ray)
   mRayEmittingCnd.Signal();
 }
 
-void Saturn::DeliverTextMessage(EyeInfo* eye, TextMessage& tm)
+void Saturn::DeliverTextMessage(EyeInfo* eye, auto_ptr<TextMessage>& tm)
 {
   if(eye->hSocket == 0) {
     ISerr(GForm("Saturn::DeliverTextMessage got request for non-local eye %s",
 		eye->GetName()));
     return;
   }
-  TMessage msg(GledNS::MT_TextMessage);
-  tm.Streamer(msg);
+
+  RayNS::SaturnToEyeEnvelope msg(tm.release());
   mEyeLock.Lock();
-  eye->hSocket->Send(msg);
+  send(eye->hSocket->GetDescriptor(), &msg, sizeof(RayNS::SaturnToEyeEnvelope), 0);
   mEyeLock.Unlock();
 }
 

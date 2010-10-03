@@ -338,7 +338,8 @@ namespace GledNS
   void PopFD();
 
   // Message Types
-  enum MessageTypes_e {
+  enum MessageTypes_e
+  {
     // MIR types
     MT_Beam            = 12000, // Directed MIR
     MT_Flare,			// Broadcasted MIR
@@ -358,9 +359,10 @@ namespace GledNS
     MT_Auth_ChallengeResponse,	// challenge response
 
     // Saturn -> Eye communication
-    MT_Ray             = 12050,	// Lens changes
-    MT_TextMessage,             // Messages, Errors, Exceptions
-    MT_EyeCommand               // Commands for the Eye
+    // Does not really use TMessage, defined in Ray.h, RayNS
+    // MT_Ray             = 12050, // Lens changes
+    // MT_TextMessage,             // Messages, Errors, Exceptions
+    // MT_EyeCommand               // Commands for the Eye
   };
 
   Int_t LoadSoSet(const TString& lib_set);

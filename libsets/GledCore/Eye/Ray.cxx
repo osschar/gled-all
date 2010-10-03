@@ -4,44 +4,21 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-//______________________________________________________________________
-// Ray
-//
-// Ray contains stamping information. Rays are sent from Saturn to Eye.
-// RayQN_e (Ray Quantum Number) lists known event types.
-//
-
 #include "Ray.h"
 #include <Glasses/ZGlass.h>
 #include <Glasses/AList.h>
 #include <TBufferFile.h>
 
-/**************************************************************************/
 
-namespace RayNS
-{
-  void PutPTR(TBuffer& b, ZGlass*& p)
-  {
-    b.WriteFastArray((Char_t*)(&p), sizeof(void*));
-  }
-  void GetPTR(TBuffer& b, ZGlass*& p)
-  {
-    b.ReadFastArray((Char_t*)(&p), sizeof(void*));
-  }
-
-  void PutAnyPTR(TBuffer& b, void*& p)
-  {
-    b.WriteFastArray((Char_t*)(&p), sizeof(void*));
-  }
-  void GetAnyPTR(TBuffer& b, void*& p)
-  {
-    b.ReadFastArray((Char_t*)(&p), sizeof(void*));
-  }
-}
-
-/**************************************************************************/
+//==============================================================================
 // Ray
-/**************************************************************************/
+//==============================================================================
+
+//______________________________________________________________________
+//
+// Ray contains stamping information. Rays are sent from Saturn to Eye.
+// RayQN_e (Ray Quantum Number) lists known event types.
+//
 
 Ray::~Ray()
 {
@@ -51,9 +28,9 @@ Ray::~Ray()
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 // Ray - Writer side
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void Ray::SetRefCnt(Int_t rc)
 {
@@ -71,9 +48,9 @@ TBuffer& Ray::CustomBuffer()
   return *mCustomBuffer;
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 // Ray - Reader side
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 TBuffer& Ray::LockCustomBuffer()
 {
@@ -88,9 +65,9 @@ void Ray::UnlockCustomBuffer()
   mLock.Unlock();
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 // Print-out / debug
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 const char* Ray::EventName() const
 {
@@ -128,27 +105,4 @@ ostream& operator<<(ostream& s, const Ray& r)
 {
   r.Dump(s);
   return s;
-}
-
-
-/**************************************************************************/
-/**************************************************************************/
-// TextMessage
-/**************************************************************************/
-
-void TextMessage::Streamer(TBuffer& buf)
-{
-  if(buf.IsReading()) {
-    UShort_t t;
-    RayNS::GetPTR(buf, fCaller);
-    buf >> t >> fMessage;
-    fType = (Type_e)t;
-    ISdebug(9, GForm("TextMessage::Streamer Read  %u %d %s",
-	       fCaller ? fCaller->GetSaturnID() : 0, fType, fMessage.Data()));
-  } else {
-    RayNS::PutPTR(buf, fCaller);
-    buf << (UShort_t)fType << fMessage;
-    ISdebug(9, GForm("TextMessage::Streamer Wrote %u %d %s",
-	       fCaller ? fCaller->GetSaturnID() : 0, fType, fMessage.Data()));
-  }
 }

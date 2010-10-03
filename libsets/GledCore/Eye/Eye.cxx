@@ -253,90 +253,48 @@ Int_t Eye::Manage(int fd)
 {
   static const Exc_t _eh("Eye::Manage ");
 
-  TMessage *m;
-  UInt_t    length;
-  Int_t     ray_count = 0, all_count = 0, len;
+  Int_t ray_count = 0, all_count = 0;
+
+  RayNS::SaturnToEyeEnvelope see;
 
   while (true)
   {
-    // Prefetch ...
-    len = recv(mSatSocketFd, &length, sizeof(UInt_t),
-	       MSG_PEEK|MSG_DONTWAIT);
+    ssize_t len = recv(mSatSocketFd, &see, sizeof(RayNS::SaturnToEyeEnvelope),
+		       MSG_DONTWAIT);
     if (len < 0)
     {
       if (errno == EWOULDBLOCK)
 	break;
 
-      ISerr(_eh + "prefetch got error that is not EWOULDBLOCK.");
+      ISerr(_eh + "recv error: " + strerror(errno));
       break;
     }
-
-    m = 0;
-    len = mSatSocket->Recv(m);
-
-    if (len == -1)
-    {
-      ISerr(_eh + "Recv error.");
-      delete m; return -1;
-    }
-
-    if (len == 0)
+    else if (len == 0)
     {
       ISerr(_eh + "Saturn closed connection ... unregistring fd handler.");
       UninstallFdHandler();
-      delete m; return -2;
+      // !!! destroy eye
+      return -2;
     }
 
     ++all_count;
 
-    switch (m->What())
+    switch (see.fType)
     {
-      case kMESS_STRING:
+      case RayNS::MT_TextMessage:
       {
-	TString str;
-	*m >> str;
-	Message(GForm("Raw message: %s", str.Data()), MT_std);
-	break;
-      }
-
-      case GledNS::MT_TextMessage:
-      {
-	TextMessage tm;
-	tm.Streamer(*m);
+	TextMessage& tm = * see.fTextMessage;
 	// printf("Got message from <%p,%s> %s '%s'\n", tm.fCaller, tm.fCaller ? tm.fCaller->GetName() : "<none>",
-	//        tm.fType ? "error" : "message", tm.fMessage.Data());
-	switch(tm.fType)
-	{
-	  case TextMessage::TM_Message:
-	  {
-	    Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		    MT_std);
-	    break;
-	  }
-	  case TextMessage::TM_Warning:
-	  {
-	    Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		    MT_wrn);
-	    break;
-	  }
-	  case TextMessage::TM_Error:
-	  {
-	    Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()),
-		    MT_err);
-	    break;
-	  }
-	  default:
-	  {
-	    ISerr(_eh + "unknown TextMessage type");
-	    break;
-	  }
-	} // end switch TextMessage type
+	//        ISnames[tm.fType], tm.fMessage.Data());
+
+	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()), tm.fType);
+	delete see.fTextMessage;
 	break;
       }
 
-      case GledNS::MT_Ray:
+      case RayNS::MT_Ray:
       {
-	RayNS::GetAnyPTR(*m, (void*&) fCurrentRay);
+	fCurrentRay = see.fRay;
 
 	hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(fCurrentRay->fAlpha);
 	if (alpha_it != mGlass2ImgHash.end())
@@ -371,10 +329,17 @@ Int_t Eye::Manage(int fd)
 	fCurrentRay->DecRefCnt();
 	fCurrentRay = 0;
 	fAlphaImg = fBetaImg = fGammaImg = 0;
+	break;
       } // end case MT_Ray
 
+      case RayNS::MT_EyeCommand:
+      {
+	// None sent ... none handled
+	ISerr(_eh + "Got EyeCommand message, handling not implemented!");
+	delete see.fEyeCommand;
+	break;
+      }
     } // end switch message->What()
-    delete m;
 
     if (bBreakManageLoop)
     {

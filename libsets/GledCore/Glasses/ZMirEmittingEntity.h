@@ -33,9 +33,9 @@ public:
   virtual void AdEnlightenment();
 
   virtual SaturnInfo* HostingSaturn() = 0;
-  virtual void Message(const Text_t* s) {} // X{E}
-  virtual void Warning(const Text_t* s) {} // X{E} T{MEE::Self}
-  virtual void Error(const Text_t* s)   {} // X{E} T{MEE::Self}
+  virtual void Message(const TString& s) {} // X{E}
+  virtual void Warning(const TString& s) {} // X{E} T{MEE::Self}
+  virtual void Error  (const TString& s) {} // X{E} T{MEE::Self}
 
   Bool_t HasIdentity(ZIdentity* ident);
 

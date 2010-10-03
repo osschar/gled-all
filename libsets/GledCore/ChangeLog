@@ -1,3 +1,52 @@
+2010-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Optimize Saturn-Eye communication: send simple envelopes directly
+	without creation of TMessages.
+
+	The envelope struct SaturnToEyeEnvelope is defined in RayNS.
+
+	Use message type InfoStream_e from GledTypes.h also on the Eye.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Send SaturnToEyeEnvelope to Eyes, not TMessage.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Receive SaturnToEyeEnvelope not a TMessage.
+	As this is really short and the exact message length is known, we
+	don't need to fear pre-fetching could get as only part of the
+	message.
+	Keep only Message(TString&, InfoStream_e) variant.
+
+	* Eye/OptoStructs.h:
+	Forward-declare Ray.
+
+	* Eye/Ray.cxx:
+	* Eye/Ray.h:
+	Add struct SaturnToEyeEnvelope holding minimal needed data.
+	Move in Saturn->Eye message types from GledNS to RayNS.
+	Use InfoStream_e for TextMessage.
+	Remove obsolete Get/Put[Any]PTR functions.
+
+	* Glasses/EyeInfo.cxx:
+	* Glasses/EyeInfo.h:
+	* Glasses/ZMirEmittingEntity.h:
+	* Gled/GledNS.h:
+	Move Saturn->Eye message types to Ray.h.
+
+	* Gled/GledTypes.h:
+	Add info-stream type name-arrays.
+
+	* GledView/FTW.cxx:
+	* GledView/FTW_Branch.cxx:
+	* GledView/FTW_Nest.cxx:
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	* GledView/MCW_View.cxx:
+	* GledView/MTW_MetaView.cxx:
+	Update to use the new Eye::Message() prototype.
+
 2010-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Optimize Ray passing: pass pointers instead of streaming, use unix

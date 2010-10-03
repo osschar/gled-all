@@ -213,7 +213,7 @@ void MTW_MetaView::Rebuild()
 
   OS::ZGlassImg* img = mShell->DemangleID(mGuiTemplate);
   if(img == 0) {
-    mShell->Message(_eh + "GuiTemplate disappeared.", FTW_Shell::MT_err);
+    mShell->Message(_eh + "GuiTemplate disappeared.", ISerror);
     return;
   }
 
@@ -225,7 +225,7 @@ void MTW_MetaView::Rebuild()
     mv->BuildByLensGraph(img->fLens);
   }
   catch(Exc_t& exc) {
-    mShell->Message(exc, FTW_Shell::MT_err);
+    mShell->Message(exc, ISerror);
     delete w;
     Fl_Group::current(0);
     return;

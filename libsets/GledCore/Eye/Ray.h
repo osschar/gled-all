@@ -16,12 +16,41 @@ namespace OptoStructs
   class ZGlassImg;
 }
 
-/**************************************************************************/
+//==============================================================================
+
+class Ray;
+class TextMessage;
+class EyeCommand;
 
 namespace RayNS
 {
- enum RayQN_e
- {
+  // Saturn -> Eye communication
+  enum SaturnToEyeMessageTypes
+  {
+    MT_Ray             = 12050,	// Lens changes
+    MT_TextMessage,             // Messages, Errors, Exceptions
+    MT_EyeCommand               // Commands for the Eye
+  };
+
+  struct SaturnToEyeEnvelope
+  {
+    Int_t          fType;
+    union
+    {
+      Ray         *fRay;
+      TextMessage *fTextMessage;
+      EyeCommand  *fEyeCommand;
+    };
+
+    SaturnToEyeEnvelope() {}
+    SaturnToEyeEnvelope(Ray* x)         : fType(MT_Ray), fRay(x) {}
+    SaturnToEyeEnvelope(TextMessage* x) : fType(MT_TextMessage), fTextMessage(x) {}
+    SaturnToEyeEnvelope(EyeCommand* x)  : fType(MT_EyeCommand), fEyeCommand(x) {}
+  };
+
+
+  enum RayQN_e
+  {
     RQN_death,
     RQN_change,
     RQN_link_change,
@@ -37,18 +66,12 @@ namespace RayNS
     RQN_user_0 = 64,
     RQN_user_1, RQN_user_2, RQN_user_3, RQN_user_4, RQN_user_5
   };
-
-  void PutPTR(TBuffer& b, ZGlass*& p);
-  void GetPTR(TBuffer& b, ZGlass*& p);
-  void PutAnyPTR(TBuffer& b, void*& p);
-  void GetAnyPTR(TBuffer& b, void*& p);
 }
 
 
-/**************************************************************************/
-/**************************************************************************/
+//==============================================================================
 // Ray
-/**************************************************************************/
+//==============================================================================
 
 class Ray
 {
@@ -169,29 +192,25 @@ public:
 ostream& operator<<(ostream& s, const Ray& n);
 
 
-/**************************************************************************/
-/**************************************************************************/
+//==============================================================================
 // TextMessage
-/**************************************************************************/
+//==============================================================================
 
 struct TextMessage
 {
-  enum Type_e { TM_Message, TM_Warning, TM_Error };
-
-  ZGlass*		fCaller;
-  Type_e		fType;          // Streamed as UShort_t
-  TString		fMessage;
+  ZGlass       *fCaller;
+  InfoStream_e  fType;
+  TString       fMessage;
 
   TextMessage() {}
-  TextMessage(ZGlass* c, Type_e t, const TString& s) :
+  TextMessage(ZGlass* c, InfoStream_e t, const TString& s) :
     fCaller(c), fType(t), fMessage(s) {}
-  TextMessage(ZGlass* c, Type_e t, const char* s) :
-    fCaller(c), fType(t), fMessage(s) {}
-
-  void Streamer(TBuffer& buf);
 };
 
-/**************************************************************************/
+
+//==============================================================================
+// EyeCommand
+//==============================================================================
 
 struct EyeCommand
 {

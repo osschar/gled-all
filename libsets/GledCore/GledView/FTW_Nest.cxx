@@ -115,7 +115,7 @@ namespace
     }
     catch (Exc_t& exc)
     {
-      shell->Message(exc.Data(), FTW_Shell::MT_err);
+      shell->Message(exc.Data(), ISerror);
     }
   }
 
@@ -568,7 +568,7 @@ void FTW_Nest::EnactLayout(const char* layout)
     pLayout->Parse(mShell->cell_w());
   }
   catch(Exc_t& exc) {
-    mShell->Message(_eh + "parse failed: '" + exc + "'.", FTW_Shell::MT_err);
+    mShell->Message(_eh + "parse failed: '" + exc + "'.", ISerror);
     return;
   }
 
@@ -777,7 +777,7 @@ int FTW_Nest::handle(int ev)
       }// end switch
 
     } catch(Exc_t& exc) {
-      mShell->Message(exc.Data(), FTW_Shell::MT_err);
+      mShell->Message(exc.Data(), ISerror);
       fl_beep(FL_BEEP_ERROR);
       return 1;
     }
