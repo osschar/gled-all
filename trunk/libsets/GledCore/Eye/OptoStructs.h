@@ -9,10 +9,10 @@
 
 #include <Glasses/ZGlass.h>
 #include <Gled/GledNS.h>
-#include <Eye/Ray.h>
 
 class AList;
 class Eye;
+class Ray;
 class A_Rnr; class RnrScheme;
 class MTW_View;
 

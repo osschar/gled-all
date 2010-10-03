@@ -156,8 +156,7 @@ public:
   void FullMenu(OptoStructs::ZGlassImg* img, int x, int y);
   void LensMenu(OptoStructs::ZGlassImg* img, int x, int y);
 
-  virtual void Message(const char* msg, Eye::MType_e t=MT_std);
-  virtual void Message(const TString& msg, Eye::MType_e t=MT_std);
+  virtual void Message(const TString& msg, InfoStream_e t=ISmessage);
 
   // --- view toggles ---
 

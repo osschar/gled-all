@@ -239,7 +239,7 @@ void FTW_Branch::ExpandList() {
   if(!bLeavesCreated) {
     if(((AList*)fImg->fLens)->Size() > 128000) {
       mNest->GetShell()->Message
-	(_eh + "refusing to expand list longer than 128000 elements.", Eye::MT_wrn);
+	(_eh + "refusing to expand list longer than 128000 elements.", ISwarning);
       return;
     }
     build_leaves( mNest->PackPosAfter(this) );

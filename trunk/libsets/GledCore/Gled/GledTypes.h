@@ -173,6 +173,8 @@ bool operator==(const string&  s, const TString& t);
 extern int G_DEBUG;
 
 enum InfoStream_e { ISoutput, ISmessage, ISwarning, ISerror };
+const char* const ISnames[]   = { "output", "message", "warning", "error" };
+const char* const ISnames3c[] = { "OUT", "MSG", "WRN", "ERR" };
 void InfoStream(InfoStream_e, const char* s);
 void InfoStream(InfoStream_e, const TString& s);
 void InfoStream(InfoStream_e, const string& s);

@@ -167,7 +167,7 @@ namespace
       s->Y_SendMessage(w->value());
     }
     catch(Exc_t& exc) {
-      s->Message(exc.Data(), Eye::MT_err);
+      s->Message(exc.Data(), ISerror);
     }
     w->redraw();
   }
@@ -481,12 +481,12 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
   static const Exc_t _eh("FTW_Shell::spawn_subshell ");
 
   if(mImg2SShell.find(img) != mImg2SShell.end()) {
-    Message(_eh + "view of " + img->fLens->Identify() + " exists.", MT_wrn);
+    Message(_eh + "view of " + img->fLens->Identify() + " exists.", ISwarning);
     return 0;
   }
   SubShellInfo* ssinfo = dynamic_cast<SubShellInfo*>(img->fLens);
   if(ssinfo == 0) {
-    Message(_eh + img->fLens->Identify() + " is not a SubShellInfo.", MT_wrn);
+    Message(_eh + img->fLens->Identify() + " is not a SubShellInfo.", ISwarning);
     return 0;
   }
 
@@ -494,7 +494,7 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
 			ssinfo->GetCtorLibset(), ssinfo->GetCtorName()));
   long* p2foo = (long*) GledNS::FindSymbol(foo_name);
   if(!p2foo) {
-    Message(_eh +"can't find symbol '"+ foo_name +"'.", MT_wrn);
+    Message(_eh +"can't find symbol '"+ foo_name +"'.", ISwarning);
     return 0;
   }
   SubShellCreator_foo ssc_foo = (SubShellCreator_foo)(*p2foo);
@@ -505,7 +505,7 @@ FTW_SubShell* FTW_Shell::spawn_subshell(OS::ZGlassImg* img, bool show_p)
     mImg2SShell[img] = fss;
   }
   catch(Exc_t& exc) {
-    Message(_eh + "SubShell creation failed: '" + exc + "'.", MT_wrn);
+    Message(_eh + "SubShell creation failed: '" + exc + "'.", ISwarning);
     return 0;
   }
 
@@ -520,7 +520,7 @@ void FTW_Shell::kill_subshell(OS::ZGlassImg* img)
   hpImg2pSShell_i i = mImg2SShell.find(img);
   if(i == mImg2SShell.end()) {
     Message(_eh + "view of " + img->fLens->Identify() + " does not exist.",
-	    MT_wrn);
+	    ISwarning);
     return;
   }
   delete i->second;
@@ -535,7 +535,7 @@ void FTW_Shell::set_canvased_subshell(OptoStructs::ZGlassImg* img)
   if (img) {
     hpImg2pSShell_i i = mImg2SShell.find(img);
     if(i == mImg2SShell.end()) {
-      Message(_eh + img->fLens->Identify() + " not found.", MT_wrn);
+      Message(_eh + img->fLens->Identify() + " not found.", ISwarning);
       return;
     }
     new_sshell = i->second;
@@ -788,7 +788,7 @@ void FTW_Shell::Y_SendMessage(const char* msg)
     mir->SetRecipient(mee->HostingSaturn());
     Send(*mir);
   } else {
-    Message(_eh + "MessageRecipient is not set.", MT_err);
+    Message(_eh + "MessageRecipient is not set.", ISerror);
   }
 }
 
@@ -814,7 +814,7 @@ MTW_MetaView* FTW_Shell::SpawnMetaView(OS::ZGlassImg* img, ZGlass* gui, bool sho
   }
   catch (Exc_t& exc)
   {
-    Message(exc, MT_err);
+    Message(exc, ISerror);
     return 0;
   }
   adopt_window(w);
@@ -909,7 +909,7 @@ MCW_View* FTW_Shell::MakeMCW_View(OS::ZGlassImg* img, GNS::MethodInfo* cmi)
   {
     delete mcw;
     Fl_Group::current(0);
-    Message(_eh + "parsing failed: " + exc, MT_err);
+    Message(_eh + "parsing failed: " + exc, ISerror);
     return 0;
   }
   return mcw;
@@ -992,7 +992,7 @@ namespace
       ud->shell->SpawnMCW_View(ud->get_image(), ud->mi);
     }
     catch(Exc_t& exc) {
-      ud->shell->Message(exc.Data(), FTW_Shell::MT_err);
+      ud->shell->Message(exc.Data(), ISerror);
     }
   }
 }
@@ -1090,22 +1090,18 @@ void FTW_Shell::LensMenu(OS::ZGlassImg* img, int x, int y)
 
 /**************************************************************************/
 
-void FTW_Shell::Message(const char* msg, Eye::MType_e t)
+void FTW_Shell::Message(const TString& msg, InfoStream_e t)
 {
   Fl_Color c;
-  switch(t) {
-  case Eye::MT_std: c = FL_WHITE;  break;
-  case Eye::MT_err: c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
-  case Eye::MT_wrn: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
-  case Eye::MT_msg: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
-  default:          c = FL_GREEN;  break;
+  switch(t)
+  {
+    case ISoutput:  c = FL_WHITE;  break;
+    case ISmessage: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
+    case ISwarning: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
+    case ISerror:   c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
+    default:        c = FL_GREEN;  break;
   }
   wOutPack->add_line(msg, c);
-}
-
-void FTW_Shell::Message(const TString& msg, Eye::MType_e t)
-{
-  Message(msg.Data(), t);
 }
 
 /**************************************************************************/

@@ -268,7 +268,7 @@ protected:
   Bool_t AcceptsRays() const { return bAcceptsRays; }
 
   void   Shine(auto_ptr<Ray>& ray);
-  void   DeliverTextMessage(EyeInfo* eye, TextMessage& tm);
+  void   DeliverTextMessage(EyeInfo* eye, auto_ptr<TextMessage>& tm);
 
   /**************************************************************************/
   // Internal thread structures and functions

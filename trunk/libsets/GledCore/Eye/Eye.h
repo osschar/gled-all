@@ -15,6 +15,8 @@ class SaturnInfo;
 class EyeInfo;
 class ShellInfo;
 class ZMIR;
+class Ray;
+class TextMessage;
 
 class FTW_Shell;
 class Fl_SWM_Manager;
@@ -88,10 +90,7 @@ public:
   void UnregisterImageConsumer(OptoStructs::ImageConsumer* imgc)
   { mImgConsumers.remove(imgc); }
 
-
-  enum MType_e { MT_std=0, MT_err, MT_wrn, MT_msg };
-  virtual void Message(const char* msg, MType_e t=MT_std) {}
-  virtual void Message(const TString& msg, MType_e t=MT_std) {}
+  virtual void Message(const TString& msg, InfoStream_e t=ISmessage) {}
 
 
   // Current ray

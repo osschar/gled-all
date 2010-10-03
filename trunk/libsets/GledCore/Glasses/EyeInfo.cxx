@@ -22,26 +22,26 @@ EyeInfo::EyeInfo(const Text_t* n, const Text_t* t) :
 
 /**************************************************************************/
 
-void EyeInfo::Message(const Text_t* s)
+void EyeInfo::Message(const TString& s)
 {
   ZMIR* mir = get_MIR();
   if(mir == 0) return;
-  TextMessage tm(mir->fCaller, TextMessage::TM_Message, s);
+  auto_ptr<TextMessage> tm(new TextMessage(mir->fCaller, ISmessage, s));
   mSaturn->DeliverTextMessage(this, tm);
 }
 
-void EyeInfo::Warning(const Text_t* s)
+void EyeInfo::Warning(const TString& s)
 {
   ZMIR* mir = get_MIR();
   if(mir == 0) return;
-  TextMessage tm(mir->fCaller, TextMessage::TM_Warning, s);
+  auto_ptr<TextMessage> tm(new TextMessage(mir->fCaller, ISwarning, s));
   mSaturn->DeliverTextMessage(this, tm);
 }
 
-void EyeInfo::Error(const Text_t* s)
+void EyeInfo::Error(const TString& s)
 {
   ZMIR* mir = get_MIR();
   if(mir == 0) return;
-  TextMessage tm(mir->fCaller, TextMessage::TM_Error, s);
+  auto_ptr<TextMessage> tm(new TextMessage(mir->fCaller, ISerror, s));
   mSaturn->DeliverTextMessage(this, tm);
 }
