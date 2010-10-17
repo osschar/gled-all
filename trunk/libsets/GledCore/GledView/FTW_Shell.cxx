@@ -11,6 +11,7 @@
 #include <GledView/GledGUI.h>
 
 #include <Glasses/ShellInfo.h>
+#include <Glasses/EyeInfo.h>
 #include <Glasses/NestInfo.h>
 
 #include "FTW_Shell.h"

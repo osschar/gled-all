@@ -9,6 +9,7 @@
 #include "FTW_Shell.h"
 
 #include <Eye/Eye.h>
+#include <Eye/Ray.h>
 #include <Glasses/AList.h>
 #include <Stones/ZMIR.h>
 

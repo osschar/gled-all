@@ -8,7 +8,7 @@
 #define GledCore_ZIdentityFilter_H
 
 #include <Glasses/ZMirFilter.h>
-#include <Glasses/ZIdentity.h>
+class ZIdentity;
 
 class ZIdentityFilter : public ZMirFilter
 {

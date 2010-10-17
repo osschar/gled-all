@@ -4,15 +4,16 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+#include "ZIdentity.h"
+#include <Glasses/ZHashList.h>
+#include "ZIdentity.c7"
+#include <Glasses/ZQueen.h>
+#include <Glasses/ZMirEmittingEntity.h>
+
 //__________________________________________________________________________
-// ZIdentity
 //
 // A glass representation of a user identity. ZGroupIdentity
 // represents user groups and/or virtual organizations.
-
-#include "ZIdentity.h"
-#include "ZIdentity.c7"
-#include <Glasses/ZQueen.h>
 
 ClassImp(ZIdentity);
 

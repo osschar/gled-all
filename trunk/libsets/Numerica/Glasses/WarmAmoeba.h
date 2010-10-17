@@ -8,7 +8,8 @@
 
 #include <TRandom.h>
 
-class WarmAmoebaMaster {
+class WarmAmoebaMaster
+{
 public:
   virtual ~WarmAmoebaMaster() {}
   virtual Float_t	Foon(const TVectorF& x) = 0;
@@ -20,7 +21,8 @@ public:
   ClassDef(WarmAmoebaMaster,1);
 };
 
-class WarmAmoeba : public Eventor {
+class WarmAmoeba : public Eventor
+{
 private:
   WarmAmoebaMaster* hTrueMaster; //!
 

@@ -13,7 +13,8 @@
 
 class SaturnInfo;
 
-class ZMirEmittingEntity : public ZGlass {
+class ZMirEmittingEntity : public ZGlass
+{
   MAC_RNR_FRIENDS(ZMirEmittingEntity);
 
   friend class Gled; friend class Saturn; friend class ZSunQueen;
@@ -22,9 +23,9 @@ private:
   void _init();
 
 protected:
-  TString		mLogin;			// X{GS} 7 TextOut()
-  ZLink<ZIdentity>		mPrimaryIdentity;	// X{gS} L{}
-  ZLink<ZHashList>		mActiveIdentities;	// X{gS} L{}
+  TString           mLogin;             // X{GS} 7 TextOut()
+  ZLink<ZIdentity>  mPrimaryIdentity;   // X{gS} L{}
+  ZLink<ZHashList>  mActiveIdentities;  // X{gS} L{}
 
 public:
   ZMirEmittingEntity(const Text_t* n="ZMirEmittingEntity", const Text_t* t=0) :

@@ -11,6 +11,8 @@
 // In fact should do this somwhere in routing code ... but anyway ...
 
 #include "PerfMeterOperator.h"
+#include <Glasses/PerfMeterTarget.h>
+#include <Glasses/SaturnInfo.h>
 #include "PerfMeterOperator.c7"
 
 ClassImp(PerfMeterOperator);

@@ -14,6 +14,7 @@
 
 #include "Spheror.h"
 #include <Glasses/ZQueen.h>
+#include <Glasses/SaturnInfo.h>
 #include <Gled/GledMirDefs.h>
 
 #include <TRandom.h>

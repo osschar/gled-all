@@ -12,6 +12,7 @@
 #include "AList.h"
 #include "AList.c7"
 #include "ZQueen.h"
+#include "Eye/Ray.h"
 
 ClassImp(AList);
 

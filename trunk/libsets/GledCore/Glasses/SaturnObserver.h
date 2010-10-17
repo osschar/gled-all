@@ -8,8 +8,10 @@
 #define GledCore_SaturnObserver_H
 
 #include <Glasses/Operator.h>
+class SaturnInfo;
 
-class SaturnObserver : public Operator {
+class SaturnObserver : public Operator
+{
   MAC_RNR_FRIENDS(SaturnObserver);
 
 private:

@@ -8,9 +8,10 @@
 #define GledCore_ZIdentityListFilter_H
 
 #include <Glasses/ZMirFilter.h>
-#include <Glasses/ZHashList.h>
+class ZHashList;
 
-class ZIdentityListFilter : public ZMirFilter {
+class ZIdentityListFilter : public ZMirFilter
+{
   MAC_RNR_FRIENDS(ZIdentityListFilter);
 
 private:

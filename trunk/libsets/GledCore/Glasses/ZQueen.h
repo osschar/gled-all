@@ -8,22 +8,17 @@
 #define GledCore_ZQueen_H
 
 #include <Glasses/ZNameMap.h>
-#include <Glasses/SaturnInfo.h>
-#include <Glasses/EyeInfo.h>
-
 #include <Gled/GTime.h>
 
 class ZKing; class ZQueen;
+class ZHashList;
+class SaturnInfo; class EyeInfo; class Ray; class EyeInfoVector;
 class ZComet;
-class Ray;
-
-typedef set<ZQueen*>		spZQueen_t;
-typedef set<ZQueen*>::iterator	spZQueen_i;
 
 class ZQueen : public ZNameMap,
-	       public An_ID_Demangler, public MIR_Priest
+	       public An_ID_Demangler,
+	       public MIR_Priest
 {
-
   MAC_RNR_FRIENDS(ZQueen);
 
   friend class ZKing;
@@ -106,8 +101,11 @@ protected:
   ZLink<ZHashList>	mDeps;          // X{gS} L{}
   ZLink<ZHashList>	mOrphans;       // X{gS} L{}
 
-  lpSaturnInfo_t mReflectors;	//!
-  lpEyeInfo_t    mObservers;    //!
+  typedef list<SaturnInfo*>           lpSaturnInfo_t;
+  typedef list<SaturnInfo*>::iterator lpSaturnInfo_i;
+
+  lpSaturnInfo_t  mReflectors;	//!
+  EyeInfoVector  *mObservers;   //!
 
   // Mutexen
   GMutex mSubjectWriteMutex;    //!
@@ -140,6 +138,7 @@ public:
 
   ZQueen(const Text_t* n="ZQueen", const Text_t* t=0) :
     ZNameMap(n,t), mIDSpan(0),
+    mObservers(0),
     mSubjectWriteMutex(GMutex::recursive),
     mSubjectRefCntMutex(GMutex::recursive),
     mRayMutex()
@@ -147,6 +146,7 @@ public:
 
   ZQueen(ID_t span, const Text_t* n="ZQueen", const Text_t* t=0) :
     ZNameMap(n,t), mIDSpan(span),
+    mObservers(0),
     mSubjectWriteMutex(GMutex::recursive),
     mSubjectRefCntMutex(GMutex::recursive),
     mRayMutex()

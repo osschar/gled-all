@@ -6,6 +6,7 @@
 
 #include "OptoStructs.h"
 #include "Eye.h"
+#include "Ray.h"
 
 #include <Glasses/AList.h>
 

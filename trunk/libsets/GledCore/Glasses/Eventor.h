@@ -8,7 +8,7 @@
 #define GledCore_Eventor_H
 
 #include <Glasses/Operator.h>
-#include <Glasses/SaturnInfo.h>
+class SaturnInfo;
 class Mountain;
 class GThread;
 

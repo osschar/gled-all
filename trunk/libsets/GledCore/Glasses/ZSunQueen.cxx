@@ -33,6 +33,8 @@
 
 #include "ZSunQueen.c7"
 
+#include "TSocket.h"
+
 ClassImp(ZSunQueen);
 
 /**************************************************************************/

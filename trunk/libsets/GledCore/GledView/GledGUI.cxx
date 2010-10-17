@@ -7,6 +7,7 @@
 #include "GledGUI.h"
 #include <Ephra/Saturn.h>
 #include <Glasses/ShellInfo.h>
+#include <Glasses/EyeInfo.h>
 #include <Glasses/PupilInfo.h>
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZFireQueen.h>
@@ -15,6 +16,7 @@
 #include <Eye/Eye.h>
 
 #include <TSystem.h>
+#include <TSocket.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>

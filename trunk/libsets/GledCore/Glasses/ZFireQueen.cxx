@@ -10,6 +10,7 @@
 //
 
 #include "ZFireQueen.h"
+#include "ZHashList.h"
 #include "ZEunuch.h"
 #include "ZFireQueen.c7"
 
