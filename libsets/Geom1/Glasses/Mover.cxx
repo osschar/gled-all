@@ -4,8 +4,11 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+#include "Mover.h"
+#include "Mover.c7"
+#include <Gled/GledOperatorDefs.h>
+
 //________________________________________________________________________
-// Mover
 //
 // Translates and/or rotates mNode (if not null) in its local frame.
 // mMi ~ index of Move axis (1~x,2~y,3~z),
@@ -14,9 +17,6 @@
 // mRa ~ amount of angular displacement (in radians).
 // If mMa!=0 translates; if mRa!=0 rotates.
 //________________________________________________________________________
-
-#include "Mover.h"
-#include "Mover.c7"
 
 ClassImp(Mover);
 

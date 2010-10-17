@@ -3,8 +3,8 @@
 #include "WarmAmoeba.h"
 #include "WarmAmoeba.c7"
 
-#include <Ephra/Mountain.h>
 #include <Gled/GledMirDefs.h>
+#include <Gled/GledOperatorDefs.h>
 
 #include <TMath.h>
 

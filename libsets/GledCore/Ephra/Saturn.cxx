@@ -4,19 +4,10 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-
-//______________________________________________________________________
-// Saturn
-//
-// Server and client. In fact Sun, Moon and Fire.
-// Shines, reflects and glows.
-//
-
 #include "Saturn.h"
 #include "gled-config-build.h"
 
 #include <Gled/GledNS.h>
-#include <Ephra/Forest.h>
 #include <Ephra/Mountain.h>
 #include <Glasses/ZGod.h>
 #include <Glasses/ZKing.h>
@@ -25,9 +16,12 @@
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZFireQueen.h>
 #include <Glasses/ZMirFilter.h>
+#include <Glasses/EyeInfo.h>
 #include <Gled/GThread.h>
 #include <Stones/ZComet.h>
 #include <Gled/GledMirDefs.h>
+#include "Eye/Ray.h"
+#include "Ephra/EyeInfoVector.h"
 
 // Services
 #include <Stones/ZHistoManager.h>
@@ -37,6 +31,7 @@
 #include <TFile.h>
 #include <TDirectory.h>
 #include <TSystem.h>
+#include <TServerSocket.h>
 
 #include <errno.h>
 #include <signal.h>
@@ -53,6 +48,12 @@
 // where do requests come from?
 // This is ... again ... the tricky part.
 // Now been mis-using the fire-king
+
+//______________________________________________________________________
+//
+// Server and client. In fact Sun, Moon and Fire.
+// Shines, reflects and glows.
+//
 
 ClassImp(Saturn);
 
@@ -261,7 +262,7 @@ Saturn::Saturn() :
   mGod(0), mSunKing(0), mSunQueen(0), mKing(0), mFireKing(0), mFireQueen(0),
   mSunInfo(0), mSaturnInfo(0), bSunAbsolute(false),
   mQueenLoadNum(0), mQueenLoadCnd(GMutex::recursive),
-  mVer(0), mChaItOss(0),
+  mChaItOss(0),
   mServerSocket(0), mServerThread(0), mShutdownThread(0),
   bAllowMoons(false),
   pZHistoManager(0),
@@ -273,16 +274,12 @@ Saturn::Saturn() :
   mGod = new ZGod("God", "I do nothing ... I only am.");
   Enlight(mGod, MAX_ID);
 
-  // mVer = new Forest(this, "Ver", "Forest of Life");
-  // mVer->Init();
-
   mChaItOss = new Mountain(this);
 }
 
 Saturn::~Saturn()
 {
   delete mChaItOss;
-  delete mVer;
   delete mServerSocket; // Close is called by dtor
 }
 
@@ -831,6 +828,24 @@ void Saturn::Endark(ZGlass* lens) throw(Exc_t)
 }
 
 /**************************************************************************/
+
+Bool_t Saturn::IsMoon(SaturnInfo* si)
+{
+  mMoonLock.Lock();
+  lpSaturnInfo_i l = find(mMoons.begin(), mMoons.end(), si);
+  Bool_t ret = (l != mMoons.end());
+  mMoonLock.Unlock();
+  return ret;
+}
+
+void Saturn::CopyMoons(lpSaturnInfo_t& list)
+{
+  mMoonLock.Lock();
+  copy(mMoons.begin(), mMoons.end(), back_inserter(list));
+  mMoonLock.Unlock();
+}
+
+/**************************************************************************/
 //
 /**************************************************************************/
 
@@ -849,24 +864,6 @@ Int_t Saturn::UnFreeze()
   mMoonLock.Unlock();
   mChaItOss->ResumeAll();
   return 0;
-}
-
-/**************************************************************************/
-
-Bool_t Saturn::IsMoon(SaturnInfo* si)
-{
-  mMoonLock.Lock();
-  lpSaturnInfo_i l = find(mMoons.begin(), mMoons.end(), si);
-  Bool_t ret = (l != mMoons.end());
-  mMoonLock.Unlock();
-  return ret;
-}
-
-void Saturn::CopyMoons(lpSaturnInfo_t& list)
-{
-  mMoonLock.Lock();
-  copy(mMoons.begin(), mMoons.end(), back_inserter(list));
-  mMoonLock.Unlock();
 }
 
 /**************************************************************************/
@@ -2011,20 +2008,20 @@ void Saturn::ray_emitter()
     if (mRayEmittingQueue.empty())
       mRayEmittingCnd.Wait();
 
-    Ray* ray = mRayEmittingQueue.front();
+    RayQueueEntry_t rqe = mRayEmittingQueue.front();
     mRayEmittingQueue.pop_front();
     mRayEmittingCnd.Unlock();
 
     mEyeLock.Lock();
-    if ( ! mEyes.empty())
-    {
-      // cout << _eh << *ray << endl;
 
-      RayNS::SaturnToEyeEnvelope msg(ray);
-      ISdebug(10, _eh + GForm("notifying %d eye(s).", mEyes.size()));
-      ray->SetRefCnt(mEyes.size());
-      lpEyeInfo_i i = mEyes.begin();
-      while (i != mEyes.end())
+    RayNS::SaturnToEyeEnvelope msg(rqe.first);
+    ISdebug(10, _eh + GForm("notifying %d eye(s).", rqe.second->size()));
+    rqe.first->SetRefCnt(rqe.second->size());
+
+    EyeInfoVector::iterator i = rqe.second->begin();
+    while (i != rqe.second->end())
+    {
+      if ((*i)->hSocket != 0)
       {
 	ssize_t len = send((*i)->hSocket->GetDescriptor(), &msg, sizeof(RayNS::SaturnToEyeEnvelope), 0);
 	if (len != sizeof(RayNS::SaturnToEyeEnvelope))
@@ -2032,26 +2029,27 @@ void Saturn::ray_emitter()
 	  ISerr(_eh + GForm("sent too little: Eye=%s, exp_len=%3d, ret=%3d.",
 			    (*i)->GetName(), sizeof(RayNS::SaturnToEyeEnvelope), len));
 	}
-	lpEyeInfo_i j = i++;
 	if (len < 0)
 	{
-	  wipe_eye(*j, true);
+	  wipe_eye(*i, true);
 	}
       }
-    }
-    else
-    {
-      delete ray;
+      else
+      {
+	rqe.first->DecRefCnt();
+      }
+      ++i;
     }
     mEyeLock.Unlock();
   }
 }
 
-void Saturn::Shine(auto_ptr<Ray>& ray)
+void Saturn::Shine(auto_ptr<Ray>& ray, EyeInfoVector* eiv)
 {
   GMutexHolder raw_lock(mRayEmittingCnd);
   if(!bAcceptsRays) return;
-  mRayEmittingQueue.push_back(ray.release());
+  eiv->IncRefCnt();
+  mRayEmittingQueue.push_back(make_pair(ray.release(), eiv));
   mRayEmittingCnd.Signal();
 }
 

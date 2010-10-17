@@ -10,8 +10,10 @@
 //
 
 #include "ZIdentityListFilter.h"
-
+#include <Glasses/ZHashList.h>
 #include "ZIdentityListFilter.c7"
+#include "Glasses/ZIdentity.h"
+#include <Glasses/ZMirEmittingEntity.h>
 
 ClassImp(ZIdentityListFilter);
 

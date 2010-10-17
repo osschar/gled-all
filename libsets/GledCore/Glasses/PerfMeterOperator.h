@@ -8,11 +8,11 @@
 #define GledCore_PerfMeterOperator_H
 
 #include <Glasses/Operator.h>
-#include <Glasses/PerfMeterTarget.h>
-
+class PerfMeterTarget;
 class SaturnInfo;
 
-class PerfMeterOperator : public Operator {
+class PerfMeterOperator : public Operator
+{
   MAC_RNR_FRIENDS(PerfMeterOperator);
 
 public:

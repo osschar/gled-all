@@ -1,3 +1,8 @@
+2010-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Mover.cxx:
+	Add includes missing after GledCore cleanup.
+
 2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix some issues with mixed-mode rendering.

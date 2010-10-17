@@ -270,7 +270,7 @@ void ZKing::activate_queen(ZQueen* queen)
   // Broadcast beams
   if(!queen->mReflectors.empty()) {
     mSaturn->BroadcastBeamMIR(*mir, queen->mReflectors);
-    for(lpSaturnInfo_i r=queen->mReflectors.begin(); r!=queen->mReflectors.end(); ++r) {
+    for(ZQueen::lpSaturnInfo_i r=queen->mReflectors.begin(); r!=queen->mReflectors.end(); ++r) {
       (*r)->hQueens.insert(queen);
     }
   }

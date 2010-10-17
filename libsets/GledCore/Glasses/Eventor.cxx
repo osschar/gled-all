@@ -12,12 +12,15 @@
 //________________________________________________________________________
 
 #include "Eventor.h"
+#include <Glasses/SaturnInfo.h>
 #include "Eventor.c7"
+
 #include <Ephra/Mountain.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZQueen.h>
 #include <Gled/GThread.h>
 #include <Gled/GledMirDefs.h>
+#include <Gled/GledOperatorDefs.h>
 
 
 #include <signal.h>

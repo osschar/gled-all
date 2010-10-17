@@ -45,8 +45,4 @@ public:
   ClassDef(EyeInfo,1);
 }; // endclass EyeInfo
 
-
-typedef list<EyeInfo*>			lpEyeInfo_t;
-typedef list<EyeInfo*>::iterator	lpEyeInfo_i;
-
 #endif

@@ -4,8 +4,10 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "SaturnInfo.c7"
 #include "SaturnInfo.h"
+#include <Glasses/ZHashList.h>
+#include <Glasses/EyeInfo.h>
+#include "SaturnInfo.c7"
 
 #include <Glasses/ZQueen.h>
 #include <Glasses/EyeInfo.h>

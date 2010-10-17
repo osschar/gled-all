@@ -15,6 +15,7 @@
 #include <GledView/GledViewNS.h>
 
 #include <Eye/Eye.h>
+#include <Eye/Ray.h>
 #include <Stones/ZMIR.h>
 #include <Glasses/ZQueen.h>
 

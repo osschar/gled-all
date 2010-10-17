@@ -1,3 +1,8 @@
+2010-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/TringuCam.cxx:
+	Add includes missing after GledCore cleanup.
+
 2010-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Tringula.cxx:

@@ -11,6 +11,7 @@
 #include <Glasses/ZQueen.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZMirFilter.h>
+#include "Eye/Ray.h"
 #include <Stones/ZComet.h>
 #include <Gled/GThread.h>
 

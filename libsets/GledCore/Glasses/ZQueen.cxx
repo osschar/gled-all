@@ -5,12 +5,16 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "ZQueen.h"
+#include "ZHashList.h"
 #include <Stones/ZComet.h>
 #include "ZQueen.c7"
 #include "ZKing.h"
 #include <Ephra/Saturn.h>
+#include <Glasses/EyeInfo.h>
+#include <Ephra/EyeInfoVector.h>
 #include <Gled/GledNS.h>
 #include <Eye/Eye.h>
+#include <Eye/Ray.h>
 
 #include <Gled/GThread.h>
 #include <TSystem.h>
@@ -66,6 +70,9 @@ void ZQueen::_init()
   mProtector = 0;
 
   mDeps = 0; mOrphans = 0;
+
+  mObservers = new EyeInfoVector(0);
+  mObservers->IncRefCnt();
 }
 
 /**************************************************************************/
@@ -719,7 +726,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
   // Emit the death Ray.
   auto_ptr<Ray> death_ray
     (Ray::PtrCtor(lens, RayNS::RQN_death, ++(lens->mTimeStamp), Ray::EB_StructuralChange));
-  mSaturn->Shine(death_ray);
+  EmitRay(death_ray);
 
   map_it->second->mState = LS_Purged;
   mPurgatory.push_back(lens->mSaturnID);
@@ -1298,7 +1305,7 @@ void ZQueen::AddObserver(EyeInfo* ei)
   ISmess(_eh +  "[" + Identify() + "] Registering EyeInfo " + ei->Identify() + ".");
 
   GMutexHolder lck(mRayMutex);
-  mObservers.push_back(ei);
+  mObservers = EyeInfoVector::CloneAndAdd(mObservers, ei);
 }
 
 void ZQueen::RemoveObserver(EyeInfo* ei)
@@ -1308,23 +1315,28 @@ void ZQueen::RemoveObserver(EyeInfo* ei)
   ISmess(_eh + "[" + Identify() + "] Removing EyeInfo " + ei->Identify() + ".");
 
   GMutexHolder lck(mRayMutex);
-  mObservers.remove(ei);
+  mObservers = EyeInfoVector::CloneAndRemove(mObservers, ei);
 }
 
 void ZQueen::EmitRay(auto_ptr<Ray>& ray)
 {
   // eventually lock mRayMutex and do direct ray delivery
-  mSaturn->Shine(ray);
+
+  GMutexHolder lck(mRayMutex);
+  if (! mObservers->empty())
+  {
+    mSaturn->Shine(ray, mObservers);
+  }
 }
 
 void ZQueen::PrintEyeConnections()
 {
   static const Exc_t _eh("ZQueen::PrintEyeConnections ");
 
-  printf("%s [%s], N_eyes=%d\n", _eh.Data(), Identify().Data(), (Int_t) mObservers.size());
-  Int_t n = 1;
   GMutexHolder lck(mRayMutex);
-  for (lpEyeInfo_i i = mObservers.begin(); i != mObservers.end(); ++i, ++n)
+  printf("%s [%s], N_eyes=%d\n", _eh.Data(), Identify().Data(), (Int_t) mObservers->size());
+  Int_t n = 1;
+  for (vector<EyeInfo*>::iterator i = mObservers->begin(); i != mObservers->end(); ++i, ++n)
   {
     printf("  %d. %s -- N_imgs=%d\n", n, (*i)->Identify().Data(), (*i)->hEye->GetImageCount(this));
   }
@@ -1334,10 +1346,10 @@ void ZQueen::PrintObservedLenses(Bool_t dump_views)
 {
   static const Exc_t _eh("ZQueen::PrintObservedLenses ");
 
-  printf("%s [%s], N_eyes=%d\n", _eh.Data(), Identify().Data(), (Int_t) mObservers.size());
-  Int_t n = 1;
   GMutexHolder lck(mRayMutex);
-  for (lpEyeInfo_i i = mObservers.begin(); i != mObservers.end(); ++i, ++n)
+  printf("%s [%s], N_eyes=%d\n", _eh.Data(), Identify().Data(), (Int_t) mObservers->size());
+  Int_t n = 1;
+  for (vector<EyeInfo*>::iterator i = mObservers->begin(); i != mObservers->end(); ++i, ++n)
   {
     printf("========================================================================\n");
     printf("%3d. %s, N_imgs=%d\n", n, (*i)->Identify().Data(), (*i)->hEye->GetImageCount(this));

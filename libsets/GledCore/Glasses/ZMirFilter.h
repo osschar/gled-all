@@ -9,7 +9,8 @@
 
 #include <Glasses/ZGlass.h>
 
-class ZMirFilter : public ZGlass {
+class ZMirFilter : public ZGlass
+{
   MAC_RNR_FRIENDS(ZMirFilter);
 
 public:

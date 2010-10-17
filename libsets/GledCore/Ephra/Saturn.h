@@ -9,43 +9,44 @@
 
 #include <Gled/GledTypes.h>
 #include <Glasses/ZGlass.h>
-#include <Glasses/SaturnInfo.h>
-#include <Glasses/EyeInfo.h>
 #include <Stones/ZMIR.h>
 
 class ZGod;
 class ZKing; class ZFireKing;
 class ZSunQueen; class ZQueen; class ZFireQueen;
+class SaturnInfo; class EyeInfo; class Ray; class EyeInfoVector;
+class TextMessage;
 
 #include <Gled/GMutex.h>
 #include <Gled/GSelector.h>
 #include <Gled/GCondition.h>
 #include <Gled/GTime.h>
-#include <Eye/Ray.h>
-class Forest;
 class Mountain;
 class ZHistoManager;
 class GThread;
 
-#include <TNamed.h>
-#include <TList.h>
-#include <TServerSocket.h>
-#include <TSocket.h>
-#include <TMonitor.h>
-#include <TMessage.h>
+class TServerSocket; class TSocket;
+class TMessage;
 
-typedef list<TSocket*>			lpSocket_t;
-typedef list<TSocket*>::iterator	lpSocket_i;
 
-class Saturn : public TObject, public An_ID_Demangler
+class Saturn : public An_ID_Demangler
 {
   friend class Gled;
   friend class ZKing;
   friend class ZQueen; friend class ZSunQueen;
   friend class SaturnInfo;
 
+  typedef list<SaturnInfo*>           lpSaturnInfo_t;
+  typedef list<SaturnInfo*>::iterator lpSaturnInfo_i;
+  typedef list<EyeInfo*>              lpEyeInfo_t;
+  typedef list<EyeInfo*>::iterator    lpEyeInfo_i;
+
+  typedef list<TSocket*>              lpSocket_t;
+  typedef list<TSocket*>::iterator    lpSocket_i;
+
 public:
-  struct SocketInfo {
+  struct SocketInfo
+  {
     enum OtherSide_e { OS_Moon, OS_Eye };  // What on other side ...
     OtherSide_e	fWhat;
     ZGlass*	fLensRep;
@@ -86,7 +87,6 @@ protected:
   Int_t			mQueenLoadNum;	// X{gS}
   GCondition		mQueenLoadCnd;	// X{r}
 
-  Forest*		mVer;		// X{g} Will hold URL->queen/glass maps
   Mountain*		mChaItOss;	// X{g}
 #ifndef __CINT__
   hID2pZGlass_t		mIDHash;
@@ -134,6 +134,9 @@ protected:
   void Freeze(ZGlass* glass) throw(Exc_t);
   void Endark(ZGlass* glass) throw(Exc_t);
 
+  Bool_t IsMoon(SaturnInfo* si);
+  void   CopyMoons(lpSaturnInfo_t& list);
+
   Int_t	SockSuck();	// Called constantly from ServerThread
   SaturnInfo* FindRouteTo(SaturnInfo* target);
 
@@ -164,9 +167,6 @@ public:
 
   Int_t Freeze();
   Int_t UnFreeze();
-
-  Bool_t IsMoon(SaturnInfo* si);
-  void CopyMoons(lpSaturnInfo_t& list);
 
   // Saturn services
   ZHistoManager* GetZHistoManager();
@@ -255,11 +255,14 @@ protected:
   /**************************************************************************/
 
  protected:
-  Bool_t		bAcceptsRays;
+  typedef pair<Ray*, EyeInfoVector*> RayQueueEntry_t;
+  typedef list<RayQueueEntry_t>      RayQueue_t;
 
-  GThread*		mRayEmittingThread;
-  GCondition		mRayEmittingCnd;
-  list<Ray*>		mRayEmittingQueue;
+  Bool_t                bAcceptsRays;
+
+  GThread*              mRayEmittingThread;
+  GCondition            mRayEmittingCnd;
+  RayQueue_t            mRayEmittingQueue;
 
   void ray_emitter();
 
@@ -267,7 +270,7 @@ protected:
 
   Bool_t AcceptsRays() const { return bAcceptsRays; }
 
-  void   Shine(auto_ptr<Ray>& ray);
+  void   Shine(auto_ptr<Ray>& ray, EyeInfoVector* eiv);
   void   DeliverTextMessage(EyeInfo* eye, auto_ptr<TextMessage>& tm);
 
   /**************************************************************************/

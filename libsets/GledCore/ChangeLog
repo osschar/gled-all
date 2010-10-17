@@ -1,3 +1,68 @@
+2010-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Only deliver Rays to Eyes that actaully observe given Queen.
+
+	* Ephra/EyeInfoVector.cxx:
+	* Ephra/EyeInfoVector.h:
+	New class - ref-counted vector of EyeInfo* passed from Queen to
+	Saturn for Ray emission.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Associate EyeInfoVector with each Ray in ray-queue.
+	Argument also added to Shine().
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Use EyeInfoVector for mObservers.
+	Clone the mObservers vector when an eye is added/removed.
+
+	* Gled/GledOperatorDefs.h:
+	New file: move the execution defines out of Operator.h.
+
+	* Glasses/Operator.h:
+	Move the execution defines into new file Gled/GledOperatorDefs.h.
+	Less header files need to be included this way.
+
+	* Ephra/Forest.cxx:
+	* Ephra/Forest.h:
+	Removed files -- has not been used in a long time.
+
+	* Eye/Eye.cxx:
+	* Eye/OptoStructs.cxx:
+	* Glasses/AList.cxx:
+	* Glasses/Eventor.cxx:
+	* Glasses/Eventor.h:
+	* Glasses/EyeInfo.h:
+	* Glasses/PerfMeterOperator.cxx:
+	* Glasses/PerfMeterOperator.h:
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+	* Glasses/SaturnObserver.cxx:
+	* Glasses/SaturnObserver.h:
+	* Glasses/ZFireQueen.cxx:
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZIdentity.h:
+	* Glasses/ZIdentityFilter.cxx:
+	* Glasses/ZIdentityFilter.h:
+	* Glasses/ZIdentityListFilter.cxx:
+	* Glasses/ZIdentityListFilter.h:
+	* Glasses/ZKing.cxx:
+	* Glasses/ZMEESelfFilter.cxx:
+	* Glasses/ZMEESelfFilter.h:
+	* Glasses/ZMirEmittingEntity.h:
+	* Glasses/ZMirFilter.cxx:
+	* Glasses/ZMirFilter.h:
+	* Glasses/ZSunQueen.cxx:
+	* GledView/FTW.cxx:
+	* GledView/FTW_Branch.cxx:
+	* GledView/FTW_Shell.cxx:
+	* GledView/GledGUI.cxx:
+	Reduce number of includes in some header files substituting them
+	with forward declarations.
+	Add missing includes where they are required.
+
 2010-10-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Optimize Saturn-Eye communication: send simple envelopes directly

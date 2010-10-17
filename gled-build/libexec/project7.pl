@@ -38,7 +38,7 @@ $_=join('',@_);
 
 die "Class $CLASSNAME not matched ...\n" unless ($p, $c) =
   m!class \s+ $CLASSNAME \s+ :?\s*
-    ([\n\s:\w,]*?) \s*
+    ([\n\s:\w<>*,]*?) \s*
     {(.*)} [\n\s]* ; \s*
     //\s*endclass\s+$CLASSNAME
    !sx;

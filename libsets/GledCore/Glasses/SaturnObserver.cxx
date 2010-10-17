@@ -10,6 +10,7 @@
 //
 
 #include "SaturnObserver.h"
+#include "Glasses/SaturnInfo.h"
 #include "SaturnObserver.c7"
 
 ClassImp(SaturnObserver);
@@ -17,9 +18,7 @@ ClassImp(SaturnObserver);
 /**************************************************************************/
 
 void SaturnObserver::_init()
-{
-  mTarget = 0;
-}
+{}
 
 /**************************************************************************/
 

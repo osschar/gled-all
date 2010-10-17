@@ -12,13 +12,12 @@
 #include <Gled/GCondition.h>
 #include <Gled/GTime.h>
 class Eventor;
-#include <Gled/GledMirDefs.h>
 
-class Operator : public ZList {
-
+class Operator : public ZList
+{
 public:
-
-  struct Arg {
+  struct Arg
+  {
     Eventor*	fEventor;
 
     bool	fMultix;
@@ -75,16 +74,5 @@ public:
 #include "Operator.h7"
   ClassDef(Operator, 1);
 }; // endclass Operator
-
-
-
-#define OP_EXE_OR_SP_MIR(_lens_, _method_, ...) { \
-    if(op_arg->fMultix) { _lens_->_method_(__VA_ARGS__); } \
-    else                { SP_MIR(_lens_, _method_, __VA_ARGS__) }}
-
-#define OP_EXE_OR_SP_MIR_SATURN(_sat_, _lens_, _method_, ...) { \
-    if(op_arg->fMultix) { _lens_->_method_(__VA_ARGS__); } \
-    else                { SP_MIR_SATURN(_sat_, _lens_, _method_, __VA_ARGS__) }}
-
 
 #endif

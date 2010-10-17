@@ -9,7 +9,8 @@
 
 #include <Glasses/ZMirFilter.h>
 
-class ZMEESelfFilter : public ZMirFilter {
+class ZMEESelfFilter : public ZMirFilter
+{
   MAC_RNR_FRIENDS(ZMEESelfFilter);
 
 private:

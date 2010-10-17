@@ -9,7 +9,8 @@
 
 #include <Glasses/ZHashList.h>
 
-class MultiSpheror : public ZHashList {
+class MultiSpheror : public ZHashList
+{
   MAC_RNR_FRIENDS(MultiSpheror);
 
 private:

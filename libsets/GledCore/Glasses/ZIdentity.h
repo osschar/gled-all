@@ -8,9 +8,10 @@
 #define GledCore_ZIdentity_H
 
 #include <Glasses/ZGlass.h>
-#include <Glasses/ZHashList.h>
+class ZHashList;
 
-class ZIdentity : public ZGlass {
+class ZIdentity : public ZGlass
+{
   MAC_RNR_FRIENDS(ZIdentity);
 
   friend class ZSunQueen;

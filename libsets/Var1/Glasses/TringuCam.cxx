@@ -17,6 +17,7 @@
 #include "Dynamico.h"
 
 #include <Glasses/ZQueen.h>
+#include <Glasses/ZHashList.h>
 #include <Glasses/ScreenText.h>
 #include <Glasses/WGlWidget.h>
 #include <Glasses/Eventor.h>

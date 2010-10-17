@@ -14,10 +14,9 @@
 #include <Glasses/EyeInfo.h>
 #include <Gled/Gled.h>
 #include <Ephra/Saturn.h>
-#include <Ephra/Forest.h>
-#include <Ephra/Mountain.h>
+#include "Eye/Ray.h"
 
-#include <TUnixSystem.h>
+#include <TSocket.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>

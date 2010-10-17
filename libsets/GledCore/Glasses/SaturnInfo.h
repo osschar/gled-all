@@ -8,7 +8,7 @@
 #define GledCore_SaturnInfo_H
 
 #include <Glasses/ZMirEmittingEntity.h>
-#include <Glasses/ZHashList.h>
+class ZHashList;
 
 #include <Gled/GCondition.h>
 
@@ -107,8 +107,5 @@ public:
 #include "SaturnInfo.h7"
   ClassDef(SaturnInfo, 1);
 }; // endclass SaturnInfo
-
-typedef list<SaturnInfo*>		lpSaturnInfo_t;
-typedef list<SaturnInfo*>::iterator	lpSaturnInfo_i;
 
 #endif
