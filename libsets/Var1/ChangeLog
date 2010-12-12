@@ -1,3 +1,8 @@
+2010-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Opcode/Ice/IceTypes.h:
+	Remove unused typedefs, defines and unions.
+
 2010-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/TringuCam.cxx:
