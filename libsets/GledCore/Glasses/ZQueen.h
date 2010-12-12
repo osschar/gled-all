@@ -135,22 +135,9 @@ protected:
   void remove_lenses(AList* list, Bool_t recurse, Bool_t syncmode);
 
 public:
-
-  ZQueen(const Text_t* n="ZQueen", const Text_t* t=0) :
-    ZNameMap(n,t), mIDSpan(0),
-    mObservers(0),
-    mSubjectWriteMutex(GMutex::recursive),
-    mSubjectRefCntMutex(GMutex::recursive),
-    mRayMutex()
-  { _init(); }
-
-  ZQueen(ID_t span, const Text_t* n="ZQueen", const Text_t* t=0) :
-    ZNameMap(n,t), mIDSpan(span),
-    mObservers(0),
-    mSubjectWriteMutex(GMutex::recursive),
-    mSubjectRefCntMutex(GMutex::recursive),
-    mRayMutex()
-  { _init(); }
+  ZQueen(const Text_t* n="ZQueen", const Text_t* t=0);
+  ZQueen(ID_t span, const Text_t* n="ZQueen", const Text_t* t=0);
+  virtual ~ZQueen();
 
   // Subject Write/RefCnt locks.
   void SubjectWriteLock()    { mSubjectWriteMutex.Lock(); }
@@ -161,7 +148,6 @@ public:
   // ID & Lens management
   virtual ZGlass* DemangleID(ID_t id);
   ID_t CheckIn(ZGlass* lens);
-
 
   // MIR blessing
   virtual void BlessMIR(ZMIR& mir);

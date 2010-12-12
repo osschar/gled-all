@@ -358,11 +358,7 @@ namespace GledNS
     MT_Auth_Challenge,		// challenge + pub key of SunAbsolute
     MT_Auth_ChallengeResponse,	// challenge response
 
-    // Saturn -> Eye communication
-    // Does not really use TMessage, defined in Ray.h, RayNS
-    // MT_Ray             = 12050, // Lens changes
-    // MT_TextMessage,             // Messages, Errors, Exceptions
-    // MT_EyeCommand               // Commands for the Eye
+    // Saturn -> Eye communication does not use TMessage (anymore).
   };
 
   Int_t LoadSoSet(const TString& lib_set);

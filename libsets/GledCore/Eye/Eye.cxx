@@ -26,11 +26,11 @@
 
 namespace OS = OptoStructs;
 
-/**************************************************************************/
+//==============================================================================
 
 void Eye::EyeFdMonitor(int fd, void* arg) { ((Eye*)arg)->Manage(fd); }
 
-/**************************************************************************/
+//==============================================================================
 
 Eye::Eye(TSocket* sock, EyeInfo* ei) :
   mSatSocket   (sock),
@@ -77,7 +77,7 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) :
     }
   }
 
-  mEyeInfo->hEye = this;
+  mEyeInfo->set_eye(this);
 
   ISdebug(0, GForm("%screation of Eye('%s') complete", _eh.Data(), mEyeInfo->GetName()));
 }
@@ -86,16 +86,66 @@ Eye::~Eye()
 {
   // unregister from all queens
   // cleanup ray queue
-  // reset eye-infe hEye
+  // reset eye-info hEye
   // !!!! Send sth impressive to Saturn
-  if (mSatSocket) {
+
+  if (mSatSocket)
+  {
     mSatSocket->Close();
     delete mSatSocket;
   }
   // Cleanup own shit ... like all Views (they are all A_View!)
 }
 
-/**************************************************************************/
+//==============================================================================
+
+void Eye::OpenEye()
+{
+  InstallFdHandler();
+}
+
+void Eye::CloseEye()
+{
+  UninstallFdHandler();
+
+  // Deref all queens
+
+  // DrainRayQueue();
+
+  mSatSocket->Close();
+  delete mSatSocket;
+  mSatSocket = 0;
+
+  DestroyViews();
+
+  delete this;
+}
+
+void Eye::DestroyViews()
+{
+  // Use some optimized destruction? So that we don't go into
+  // hen-house effect.
+  // There is some trick with ref-count set to something, i think.
+}
+
+void Eye::DrainRayQueue()
+{
+  // Will this work after disconnect?
+  // Could as well move to direct ray queue.
+  // But how do i do wake-up then? Via virtual in Eye!
+
+  while (true)
+  {
+     Ray *ray_ptr;
+     ssize_t len = recv(mSatSocketFd, &ray_ptr, sizeof(Ray*), MSG_DONTWAIT);
+     if (len != sizeof(Ray*))
+       break;
+     ray_ptr->DecRefCnt();
+  }
+}
+
+
+//==============================================================================
 
 OS::ZGlassImg* Eye::DemanglePtr(ZGlass* lens)
 {
@@ -244,21 +294,43 @@ OptoStructs::ZGlassImg* Eye::GetCurrentGammaImg()
   return fGammaImg;
 }
 
-/**************************************************************************/
+
+//==============================================================================
 // SatSocket bussines
-/**************************************************************************/
+//==============================================================================
+
+void Eye::AbsorbEyeInfoRay(Ray& ray)
+{
+  if (ray.fRQN == EyeInfo::PRQN_text_message)
+  {
+    ID_t          id;
+    TString       msg;
+    Int_t         int_type;
+    TBuffer &b = ray.LockCustomBuffer();
+    b >> id >> msg >> int_type;
+    ray.UnlockCustomBuffer();
+
+    InfoStream_e  type   = (InfoStream_e) int_type;
+    ZGlass       *caller = mSaturn->DemangleID(id);
+    Message(GForm("[%s] %s", caller->GetName(), msg.Data()), type);
+  }
+}
 
 Int_t Eye::Manage(int fd)
 {
+  // Read Ray queue from Saturn.
+  // Has to be called from function doing select (or sth) on file descriptor
+  // of mSatSocket.
+
   static const Exc_t _eh("Eye::Manage ");
 
   Int_t ray_count = 0, all_count = 0;
 
-  RayNS::SaturnToEyeEnvelope see;
+  Ray *ray_ptr;
 
   while (true)
   {
-    ssize_t len = recv(mSatSocketFd, &see, sizeof(RayNS::SaturnToEyeEnvelope),
+    ssize_t len = recv(mSatSocketFd, &ray_ptr, sizeof(Ray*),
 		       MSG_DONTWAIT);
     if (len < 0)
     {
@@ -278,67 +350,49 @@ Int_t Eye::Manage(int fd)
 
     ++all_count;
 
-    switch (see.fType)
+    fCurrentRay =  ray_ptr;
+    Ray &ray    = *ray_ptr;;
+
+    if (ray.fAlpha == mEyeInfo && ray.fFID == EyeInfo::FID())
     {
-      case RayNS::MT_TextMessage:
+      AbsorbEyeInfoRay(ray);
+    }
+
+    hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(fCurrentRay->fAlpha);
+    if (alpha_it != mGlass2ImgHash.end())
+    {
+      ++ray_count;
+
+      OS::ZGlassImg* a = fAlphaImg = alpha_it->second;
+
       {
-	TextMessage& tm = * see.fTextMessage;
-	// printf("Got message from <%p,%s> %s '%s'\n", tm.fCaller, tm.fCaller ? tm.fCaller->GetName() : "<none>",
-	//        ISnames[tm.fType], tm.fMessage.Data());
+	GLensReadHolder(a->fLens);
 
-	Message(GForm("[%s] %s", tm.fCaller->GetName(), tm.fMessage.Data()), tm.fType);
-	delete see.fTextMessage;
-	break;
-      }
+	a->PreAbsorption(ray);
 
-      case RayNS::MT_Ray:
-      {
-	fCurrentRay = see.fRay;
-
-	hpZGlass2pZGlassImg_i alpha_it = mGlass2ImgHash.find(fCurrentRay->fAlpha);
-	if (alpha_it != mGlass2ImgHash.end())
+	OS::lpA_View_i i = a->fViews.begin();
+	while (i != a->fViews.end())
 	{
-	  Ray &ray = *fCurrentRay;
-	  ++ray_count;
-
-	  OS::ZGlassImg* a = fAlphaImg = alpha_it->second;
-
-	  {
-	    GLensReadHolder(a->fLens);
-
-	    a->PreAbsorption(ray);
-
-	    for (OS::lpA_View_i i=a->fViews.begin(); i!=a->fViews.end(); )
-	    {
-	      // Be careful! Views can come and go in response to Rays.
-	      OS::A_View* v = *i; --i;
-	      v->AbsorbRay(ray);
-	      ++i; if(*i == v) ++i;
-	    }
-
-	    a->PostAbsorption(ray);
-	  }
-
-	  if (ray.fRQN == RayNS::RQN_death)
-	  {
-	    RemoveImage(a, true);
-	  }
+	  // Be careful! Views can come and go in response to Rays.
+	  // !!! Should rays really be delivered to new views?
+	  // !!! Also, operator-- on begin() is not necessarily a good idea.
+	  OS::A_View* v = *i; --i;
+	  v->AbsorbRay(ray);
+	  ++i; if(*i == v) ++i;
 	}
 
-	fCurrentRay->DecRefCnt();
-	fCurrentRay = 0;
-	fAlphaImg = fBetaImg = fGammaImg = 0;
-	break;
-      } // end case MT_Ray
-
-      case RayNS::MT_EyeCommand:
-      {
-	// None sent ... none handled
-	ISerr(_eh + "Got EyeCommand message, handling not implemented!");
-	delete see.fEyeCommand;
-	break;
+	a->PostAbsorption(ray);
       }
-    } // end switch message->What()
+
+      if (ray.fRQN == RayNS::RQN_death)
+      {
+	RemoveImage(a, true);
+      }
+    }
+
+    fCurrentRay->DecRefCnt();
+    fCurrentRay = 0;
+    fAlphaImg = fBetaImg = fGammaImg = 0;
 
     if (bBreakManageLoop)
     {
@@ -363,7 +417,7 @@ Int_t Eye::Manage(int fd)
   return all_count;
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void Eye::Send(TMessage* m)
 {
@@ -375,9 +429,3 @@ void Eye::Send(ZMIR& mir)
   mir.WriteHeader();
   mSatSocket->Send(mir);
 }
-
-/**************************************************************************/
-/**************************************************************************/
-
-void Eye::CloseEye()
-{}

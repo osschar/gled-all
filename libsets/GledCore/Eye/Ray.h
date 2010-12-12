@@ -11,44 +11,13 @@
 #include <Gled/GledTypes.h>
 #include <Gled/GSpinLock.h>
 
-namespace OptoStructs
-{
-  class ZGlassImg;
-}
 
 //==============================================================================
-
-class Ray;
-class TextMessage;
-class EyeCommand;
+// RayNS
+//==============================================================================
 
 namespace RayNS
 {
-  // Saturn -> Eye communication
-  enum SaturnToEyeMessageTypes
-  {
-    MT_Ray             = 12050,	// Lens changes
-    MT_TextMessage,             // Messages, Errors, Exceptions
-    MT_EyeCommand               // Commands for the Eye
-  };
-
-  struct SaturnToEyeEnvelope
-  {
-    Int_t          fType;
-    union
-    {
-      Ray         *fRay;
-      TextMessage *fTextMessage;
-      EyeCommand  *fEyeCommand;
-    };
-
-    SaturnToEyeEnvelope() {}
-    SaturnToEyeEnvelope(Ray* x)         : fType(MT_Ray), fRay(x) {}
-    SaturnToEyeEnvelope(TextMessage* x) : fType(MT_TextMessage), fTextMessage(x) {}
-    SaturnToEyeEnvelope(EyeCommand* x)  : fType(MT_EyeCommand), fEyeCommand(x) {}
-  };
-
-
   enum RayQN_e
   {
     RQN_death,
@@ -190,35 +159,5 @@ public:
 };
 
 ostream& operator<<(ostream& s, const Ray& n);
-
-
-//==============================================================================
-// TextMessage
-//==============================================================================
-
-struct TextMessage
-{
-  ZGlass       *fCaller;
-  InfoStream_e  fType;
-  TString       fMessage;
-
-  TextMessage() {}
-  TextMessage(ZGlass* c, InfoStream_e t, const TString& s) :
-    fCaller(c), fType(t), fMessage(s) {}
-};
-
-
-//==============================================================================
-// EyeCommand
-//==============================================================================
-
-struct EyeCommand
-{
-  enum Command_e { EC_Apocalypse };
-
-  Command_e		fCommand;
-
-  EyeCommand(Command_e c) : fCommand(c) {}
-};
 
 #endif

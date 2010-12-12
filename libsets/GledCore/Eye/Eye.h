@@ -52,8 +52,8 @@ protected:
   SaturnInfo*	mSaturnInfo;	// X{g}
   EyeInfo*	mEyeInfo;	// X{g}
 
-  TSocket*	mSatSocket;
-  Int_t         mSatSocketFd;
+  TSocket*	mSatSocket;     // X{g}
+  Int_t         mSatSocketFd;   // X{g}
 
   int           mMaxManageLoops;
   bool          bBreakManageLoop;
@@ -71,8 +71,18 @@ public:
   Eye(TSocket* sock, EyeInfo* ei);
   virtual ~Eye();
 
+  virtual void OpenEye();
+  virtual void CloseEye();
+
+  void DestroyViews();
+  void DrainRayQueue();
+
   virtual void InstallFdHandler()   = 0;
   virtual void UninstallFdHandler() = 0;
+  virtual void PostManage(int ray_count) = 0;
+  virtual void Message(const TString& msg, InfoStream_e t=ISmessage) = 0;
+
+  virtual void AbsorbEyeInfoRay(Ray& ray);
 
   // Basic ZGlassImg functionality
   virtual OptoStructs::ZGlassImg* DemanglePtr(ZGlass* lens);
@@ -84,14 +94,8 @@ public:
   Int_t GetImageCount(ZQueen* q);
   Int_t PrintObservedLenses(ZQueen* q, Bool_t dump_views=false);
 
-
-  void RegisterImageConsumer(OptoStructs::ImageConsumer* imgc)
-  { mImgConsumers.push_back(imgc); }
-  void UnregisterImageConsumer(OptoStructs::ImageConsumer* imgc)
-  { mImgConsumers.remove(imgc); }
-
-  virtual void Message(const TString& msg, InfoStream_e t=ISmessage) {}
-
+  void RegisterImageConsumer(OptoStructs::ImageConsumer* imgc)   { mImgConsumers.push_back(imgc); }
+  void UnregisterImageConsumer(OptoStructs::ImageConsumer* imgc) { mImgConsumers.remove(imgc); }
 
   // Current ray
   Ray*                    GetCurrentRay()      { return fCurrentRay; }
@@ -101,13 +105,9 @@ public:
 
   // Socketing
   Int_t	Manage(int fd);
-  virtual void PostManage(int ray_count) {}
 
   void Send(TMessage* m);
   void Send(ZMIR& c);
-
-
-  void CloseEye();
 
   void BreakManageLoop() { bBreakManageLoop = true; }
 

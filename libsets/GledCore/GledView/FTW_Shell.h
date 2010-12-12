@@ -100,6 +100,7 @@ public:
   virtual void InstallFdHandler();
   virtual void UninstallFdHandler();
   virtual void PostManage(int ray_count);
+  virtual void Message(const TString& msg, InfoStream_e t=ISmessage);
 
   // A_View
   virtual void AbsorbRay(Ray& ray);
@@ -155,8 +156,6 @@ public:
 		     mir_call_data_list& mcdl, const TString& prefix);
   void FullMenu(OptoStructs::ZGlassImg* img, int x, int y);
   void LensMenu(OptoStructs::ZGlassImg* img, int x, int y);
-
-  virtual void Message(const TString& msg, InfoStream_e t=ISmessage);
 
   // --- view toggles ---
 
