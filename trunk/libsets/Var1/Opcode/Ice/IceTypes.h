@@ -12,8 +12,6 @@
 #ifndef __ICETYPES_H__
 #define __ICETYPES_H__
 
-#define USE_HANDLE_MANAGER
-
 // Constants
 const float PI		= 3.14159265358979323846f;	//!< PI
 const float HALFPI	= 1.57079632679489661923f;	//!< 0.5 * PI
@@ -49,8 +47,6 @@ typedef signed int		sdword;		//!< sizeof(sdword)	must be 4
 typedef unsigned int		udword;		//!< sizeof(udword)	must be 4
 typedef signed long long	sqword;		//!< sizeof(sqword)	must be 8
 typedef unsigned long long	uqword;		//!< sizeof(uqword)	must be 8
-typedef float			float32;	//!< sizeof(float32)	must be 4
-typedef double			float64;	//!< sizeof(float64)	must be 4
 
 // Added by M. Tadel (needed for 64-bit port)
 typedef unsigned long		sxword;		//!< pointer-sized   signed integer
@@ -58,20 +54,6 @@ typedef unsigned long		uxword;		//!< pointer-sized unsigned integer
 
 const udword OPC_INVALID_ID	= 0xffffffff;	//!< Invalid dword ID (counterpart of 0 pointers)
 const udword INVALID_NUMBER	= 0xDEADBEEF;	//!< Standard junk value
-
-//! Union of a float and a sdword
-typedef union
-{
-  float	        f;	//!< The float
-  sdword	d;	//!< The integer
-} scell;
-
-//! Union of a float and a udword
-typedef union
-{
-  float 	f;	//!< The float
-  udword	d;	//!< The integer
-} ucell;
 
 // Type ranges
 const sbyte  MAX_SBYTE		= 0x7f;		//!< max possible sbyte value
