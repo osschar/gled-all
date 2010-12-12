@@ -4,9 +4,19 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+#include "ZComet.h"
+#include <Gled/GledNS.h>
+#include <Glasses/ZList.h>
+#include <Glasses/ZKing.h>
+#include <Glasses/ZQueen.h>
+#include <Ephra/Saturn.h>
+#include <Gled/Gled.h>
 
-//
-// ZComet
+#include <TBuffer.h>
+#include <TDirectory.h>
+#include <TFile.h>
+
+//______________________________________________________________________________
 //
 // ZComet is a container class for streaming collections of glasses.
 // It can be created from a ZCometBag, ZQueen or ZKing by calling the
@@ -21,18 +31,6 @@
 // !!!!!! Need structure { ZGlass* g; bool links_done, lists_done; }
 // as value type of idHash. Loops of infiniteness are awaiting you otherwise.
 // Then, also, need no special treatment of ZNode::Parent. Or just maybe.
-
-#include "ZComet.h"
-#include <Gled/GledNS.h>
-#include <Glasses/ZList.h>
-#include <Glasses/ZKing.h>
-#include <Glasses/ZQueen.h>
-#include <Ephra/Saturn.h>
-#include <Gled/Gled.h>
-
-#include <TBuffer.h>
-#include <TDirectory.h>
-#include <TFile.h>
 
 ClassImp(ZComet);
 

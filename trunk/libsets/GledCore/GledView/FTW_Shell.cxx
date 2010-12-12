@@ -105,36 +105,45 @@ namespace
   // New menu
   //----------
 
-  void new_menu_cb(Fl_Menu_Button* b, void* what)
+  void shell_menu_cb(Fl_Menu_Button* b, void* what)
   {
     FTW_Shell* shell = FGS::grep_parent<FTW_Shell*>(b);
 
-    switch(GNS::CastVoidPtr2ID(what)) {
+    switch(GNS::CastVoidPtr2ID(what))
+    {
+      case 1:  // New Nest
+      {
+	FID_t fid = GledNS::FindClassID("NestInfo");
+	SubShellInfo* ss = (SubShellInfo*) GledNS::ConstructLens(fid);
+	ss->SetName("Nest");
+	shell->SpawnSubShell(ss, true);
+	delete ss;
+	break;
+      }
 
-    case 1: { // Nest
-      FID_t fid = GledNS::FindClassID("NestInfo");
-      SubShellInfo* ss = (SubShellInfo*) GledNS::ConstructLens(fid);
-      ss->SetName("Nest");
-      shell->SpawnSubShell(ss, true);
-      delete ss;
-      break;
-    }
+      case 2:  // New Pupil
+      {
+	FID_t fid = GledNS::FindClassID("PupilInfo");
+	SubShellInfo* ss = (SubShellInfo*) GledNS::ConstructLens(fid);
+	ss->SetName("Pupil");
+	shell->SpawnSubShell(ss, true);
+	delete ss;
+	break;
+      }
 
-    case 2: { // Pupil
-      FID_t fid = GledNS::FindClassID("PupilInfo");
-      SubShellInfo* ss = (SubShellInfo*) GledNS::ConstructLens(fid);
-      ss->SetName("Pupil");
-      shell->SpawnSubShell(ss, true);
-      delete ss;
-      break;
-    }
-
+      case 666: // Close
+      {
+	printf("Should close ...\n");
+	shell->CloseEye();
+	break;
+      }
     } // end switch
   }
 
-  Fl_Menu_Item s_New_Menu[] = {
-    { "Nest",  0, (Fl_Callback*) new_menu_cb, (void*)1 },
-    { "Pupil", 0, (Fl_Callback*) new_menu_cb, (void*)2 },
+  Fl_Menu_Item s_Shell_Menu[] = {
+    { "New Nest",  0, (Fl_Callback*) shell_menu_cb, (void*)1 },
+    { "New Pupil", 0, (Fl_Callback*) shell_menu_cb, (void*)2, FL_MENU_DIVIDER },
+    { "Close",     0, (Fl_Callback*) shell_menu_cb, (void*)666 },
     {0}
   };
 
@@ -147,8 +156,8 @@ namespace
     FTW_Shell* shell = FGS::grep_parent<FTW_Shell*>(b);
     bool on_p = b->mvalue()->value();
     switch(GNS::CastVoidPtr2ID(what)) {
-    case 1: shell->SourceVis(on_p); break;
-    case 2: shell->SinkVis(on_p);   break;
+      case 1: shell->SourceVis(on_p); break;
+      case 2: shell->SinkVis(on_p);   break;
     }
   }
 
@@ -227,8 +236,8 @@ void FTW_Shell::_bootstrap()
     b_swm->labeltype(FL_SYMBOL_LABEL);
     set_swm_hotspot_cb(b_swm);
 
-    new FGS::MenuBox(s_New_Menu,  4, 2, "New");
-    new FGS::MenuBox(s_View_Menu, 4, 2, "View");
+    new FGS::MenuBox(s_Shell_Menu, 4, 2, "Shell");
+    new FGS::MenuBox(s_View_Menu,  4, 2, "View");
     if(!src_on_p) s_View_Menu[0].flags ^= FL_MENU_VALUE;
     if(!snk_on_p) s_View_Menu[1].flags ^= FL_MENU_VALUE;
 
@@ -356,8 +365,20 @@ void FTW_Shell::PostManage(int ray_count)
     for (lpFl_Window_i w=mRedrawOnAnyRay.begin(); w!=mRedrawOnAnyRay.end(); ++w)
       (*w)->redraw();
   }
+}
 
-  Eye::PostManage(ray_count);
+void FTW_Shell::Message(const TString& msg, InfoStream_e t)
+{
+  Fl_Color c;
+  switch (t)
+  {
+    case ISoutput:  c = FL_WHITE;  break;
+    case ISmessage: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
+    case ISwarning: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
+    case ISerror:   c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
+    default:        c = FL_GREEN;  break;
+  }
+  wOutPack->add_line(msg, c);
 }
 
 /**************************************************************************/
@@ -1087,22 +1108,6 @@ void FTW_Shell::LensMenu(OS::ZGlassImg* img, int x, int y)
   FillLensMenu(img, menu, mcdl, "");
 
   menu.popup();
-}
-
-/**************************************************************************/
-
-void FTW_Shell::Message(const TString& msg, InfoStream_e t)
-{
-  Fl_Color c;
-  switch(t)
-  {
-    case ISoutput:  c = FL_WHITE;  break;
-    case ISmessage: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
-    case ISwarning: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
-    case ISerror:   c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
-    default:        c = FL_GREEN;  break;
-  }
-  wOutPack->add_line(msg, c);
 }
 
 /**************************************************************************/

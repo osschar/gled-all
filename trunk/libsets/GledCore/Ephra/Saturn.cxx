@@ -2014,7 +2014,6 @@ void Saturn::ray_emitter()
 
     mEyeLock.Lock();
 
-    RayNS::SaturnToEyeEnvelope msg(rqe.first);
     ISdebug(10, _eh + GForm("notifying %d eye(s).", rqe.second->size()));
     rqe.first->SetRefCnt(rqe.second->size());
 
@@ -2023,11 +2022,11 @@ void Saturn::ray_emitter()
     {
       if ((*i)->hSocket != 0)
       {
-	ssize_t len = send((*i)->hSocket->GetDescriptor(), &msg, sizeof(RayNS::SaturnToEyeEnvelope), 0);
-	if (len != sizeof(RayNS::SaturnToEyeEnvelope))
+	ssize_t len = send((*i)->hSocket->GetDescriptor(), &rqe.first, sizeof(Ray*), 0);
+	if (len != sizeof(Ray*))
 	{
 	  ISerr(_eh + GForm("sent too little: Eye=%s, exp_len=%3d, ret=%3d.",
-			    (*i)->GetName(), sizeof(RayNS::SaturnToEyeEnvelope), len));
+			    (*i)->GetName(), sizeof(Ray*), len));
 	}
 	if (len < 0)
 	{
@@ -2053,19 +2052,6 @@ void Saturn::Shine(auto_ptr<Ray>& ray, EyeInfoVector* eiv)
   mRayEmittingCnd.Signal();
 }
 
-void Saturn::DeliverTextMessage(EyeInfo* eye, auto_ptr<TextMessage>& tm)
-{
-  if(eye->hSocket == 0) {
-    ISerr(GForm("Saturn::DeliverTextMessage got request for non-local eye %s",
-		eye->GetName()));
-    return;
-  }
-
-  RayNS::SaturnToEyeEnvelope msg(tm.release());
-  mEyeLock.Lock();
-  send(eye->hSocket->GetDescriptor(), &msg, sizeof(RayNS::SaturnToEyeEnvelope), 0);
-  mEyeLock.Unlock();
-}
 
 /**************************************************************************/
 /**************************************************************************/
@@ -2342,40 +2328,44 @@ void Saturn::wipe_moon(SaturnInfo* moon, bool notify_sunqueen_p)
 
 void Saturn::wipe_eye(EyeInfo* eye, bool notify_sunqueen_p)
 {
-  ISmess(GForm("Closing connection for Eye %s", eye->GetName()));
-  if(eye->hSocket == 0) {
+  static const Exc_t _eh("Saturn::wipe_eye ");
+
+  ISmess(_eh + GForm("Closing connection for Eye %s.", eye->GetName()));
+  if (eye->hSocket == 0)
+  {
     // Hmmpsh ... shouldn't really happen ... or just maybe.
-    ISmess(GForm("Saturn::wipe_eye socket already wiped ... stalling"));
+    ISmess(_eh + "Socket already closed ... nothing to do.");
     return;
   }
 
   mEyeLock.Lock();
 
-  if(mServerThread) mServerThread->Kill(GThread::SigUSR1);
+  if (mServerThread) mServerThread->Kill(GThread::SigUSR1);
   mSelector.Lock();
   mSelector.fRead.Remove(eye->hSocket);
   mSelector.Unlock();
 
   hSock2SocketInfo_i h = mSock2InfoHash.find(eye->hSocket);
-  if(h != mSock2InfoHash.end()) {
+  if (h != mSock2InfoHash.end()) {
     mSock2InfoHash.erase(h);
   } else {
-    ISerr(GForm("Saturn::wipe_eye %s not found in hash", eye->GetName()));
+    ISerr(_eh + GForm("eye '%s' not found in socket-hash.", eye->GetName()));
   }
 
   lpEyeInfo_i l = find(mEyes.begin(), mEyes.end(), eye);
-  if(l != mEyes.end()) {
+  if (l != mEyes.end()) {
     mEyes.erase(l);
   } else {
-    ISerr(GForm("Saturn::wipe_eye %s not found in list", eye->GetName()));
+    ISerr(_eh + GForm("eye '%s' not found in eye-list.", eye->GetName()));
   }
   delete eye->hSocket; eye->hSocket = 0;
 
-  if(mEyes.empty())
+  if (mEyes.empty())
     bAcceptsRays = false;
   mEyeLock.Unlock();
 
-  if(notify_sunqueen_p) {
+  if (notify_sunqueen_p)
+  {
     auto_ptr<ZMIR> mir( mSunQueen->S_CremateEye(eye) );
     mir->SetCaller(mSaturnInfo);
     mir->SetRecipient(mSunKing->mSaturnInfo.get());

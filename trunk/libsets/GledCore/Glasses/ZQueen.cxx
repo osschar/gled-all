@@ -75,6 +75,31 @@ void ZQueen::_init()
   mObservers->IncRefCnt();
 }
 
+ZQueen::ZQueen(const Text_t* n, const Text_t* t) :
+  ZNameMap(n,t), mIDSpan(0),
+  mObservers(0),
+  mSubjectWriteMutex(GMutex::recursive),
+  mSubjectRefCntMutex(GMutex::recursive),
+  mRayMutex()
+{
+  _init();
+}
+
+ZQueen:: ZQueen(ID_t span, const Text_t* n, const Text_t* t) :
+  ZNameMap(n,t), mIDSpan(span),
+  mObservers(0),
+  mSubjectWriteMutex(GMutex::recursive),
+  mSubjectRefCntMutex(GMutex::recursive),
+  mRayMutex()
+{
+  _init();
+}
+
+ZQueen::~ZQueen()
+{
+  mObservers->DecRefCnt();
+}
+
 /**************************************************************************/
 
 void ZQueen::bootstrap()

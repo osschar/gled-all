@@ -181,10 +181,13 @@ void ZSunQueen::CremateEye(EyeInfo* eye)
 
   ZMIR* mir = ZGlass::assert_MIR_presence(_eh);
 
-  if(eye->GetMaster() == mSaturn->GetSaturnInfo()) {
-    if(eye->hSocket != 0) {
+  if (eye->GetMaster() == mSaturn->GetSaturnInfo())
+  {
+    if (eye->hSocket != 0)
+    {
       ISmess(_eh + "socket still present ... closing it.");
-      if(mir->What() == GledNS::MT_Beam) {
+      if (mir->What() == GledNS::MT_Beam)
+      {
 	mSaturn->wipe_eye(eye, true);
 	return;
       } else {
@@ -193,7 +196,8 @@ void ZSunQueen::CremateEye(EyeInfo* eye)
     }
   }
 
-  if(mSaturn->GetSunAbsolute()) {
+  if (mSaturn->GetSunAbsolute())
+  {
     mir->ClearRecipient();
     mir->SetCaller(mSunInfo.get());
     mSaturn->BroadcastMIR(*mir, mSaturn->mMoons);

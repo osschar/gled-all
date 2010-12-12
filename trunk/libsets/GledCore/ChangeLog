@@ -1,3 +1,54 @@
+2010-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Simplify Saturn -> Eye communication.
+
+	Drop special TextMessage class, use special rays from EyeInfo instead.
+	Eye needs to look for them, they are forwarded to
+	  virtual void AbsorbEyeInfoRay(Ray& ray);
+	where sub-classes can add further actions.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Remove text-message sending.
+	Send Ray* directly, not in an SaturnToEyeEnvelope.
+	White space.
+
+	* Eye/Eye.cxx:
+	* Eye/Eye.h:
+	Receive Ray* directly.
+	Start setting up functions for clean Eye shutdown.
+	White & gray space.
+
+	* Eye/Ray.h:
+	Remove SaturnToEyeEnvelope, EyeCommand and TextMessage classes.
+
+	* Glasses/EyeInfo.cxx:
+	* Glasses/EyeInfo.h:
+	Add EyeInfoVector member for sending special rays to *the* Eye.
+	Add custom ray qunatum numbers.
+	Add proteted set_eye(Eye*) so that operation can be properly locked.
+	Rewrite Message/Warning/Error to send rays.
+
+	* GledView/FTW_Shell.cxx:
+	* GledView/FTW_Shell.h:
+	Make shell menus clearer.
+	White space.
+
+	* Glasses/ZQueen.cxx:
+	* Glasses/ZQueen.h:
+	Move constructors to src file.
+	Add destructor.
+
+	* Gled/GledNS.h:
+	Remove Saturn->Eye message types (were commented out already).
+
+	* Glasses/ZGlass.h:
+	* Stones/ZComet.cxx:
+	Gray space.
+
+	* Glasses/ZSunQueen.cxx:
+	White space.
+
 2010-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Only deliver Rays to Eyes that actaully observe given Queen.
