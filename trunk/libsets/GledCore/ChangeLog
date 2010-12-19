@@ -1,3 +1,27 @@
+2010-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add A_Rnr::HandlePick() function -- it can be called via a
+	context-menu entry in Pupil.
+
+	* Pupils/Pupil.cxx:
+	* Pupils/Pupil.h:
+	Extend pick_menu_data to also hold name-stack list and name-stack
+	iterator for given entry.
+
+	Add pick-menu entry "Deliver Event" that triggers callback into
+	A_Rnr::HandlePick() (new function, see below).
+
+	Move the struct and supporting functions into Pupil (was in
+	unnamed namespace before).
+
+	* RnrBase/A_Rnr.h:
+	Add a new virtual function:
+	  virtual void HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi) {}
+
+	* Rnr/GL/WGlDirectory_GL_Rnr.cxx:
+	* Rnr/GL/WGlDirectory_GL_Rnr.h:
+	As a demonstration, implement HandlePick().
+
 2010-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Simplify Saturn -> Eye communication.

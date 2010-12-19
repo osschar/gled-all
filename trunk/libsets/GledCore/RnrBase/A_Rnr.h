@@ -20,8 +20,8 @@ class A_Rnr : public OptoStructs::A_View
 public:
   struct NameStackEntry
   {
-    A_Rnr* fRnr;
-    void*  fUserData;
+    A_Rnr *fRnr;
+    void  *fUserData;
   };
   typedef NameStackEntry                 NSE_t;
   typedef list<NameStackEntry>           lNSE_t;
@@ -83,6 +83,7 @@ public:
   virtual void CleanUp(RnrDriver* rd) {}
 
   virtual int  Handle(RnrDriver* rd, Fl_Event& ev) { return 0; }
+  virtual void HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi) {}
 
   static const int sMaxRnrLevel;
 };

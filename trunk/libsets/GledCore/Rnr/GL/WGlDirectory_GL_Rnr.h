@@ -39,6 +39,7 @@ public:
   // virtual void PostDraw(RnrDriver* rd);
 
   virtual int  Handle(RnrDriver* rd, Fl_Event& ev);
+  virtual void HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi);
 
 }; // endclass WGlDirectory_GL_Rnr
 
