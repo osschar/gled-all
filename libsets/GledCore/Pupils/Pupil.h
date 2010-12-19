@@ -11,6 +11,7 @@
 #include <Glasses/Camera.h>
 
 #include <Eye/OptoStructs.h>
+#include <GledView/FTW_Shell.h>
 #include <GledView/FTW_SubShell.h>
 
 #include <RnrBase/RnrDriver.h>
@@ -110,11 +111,12 @@ public:
   //--------------------------------------------------------------
   // Picking stuff
 
-  struct pick_lens_data {
-    OptoStructs::ZGlassImg*    img;
-    float                      z;
-    TString	               name;
-    OptoStructs::lpZGlassImg_t name_stack;
+  struct pick_lens_data
+  {
+    OptoStructs::ZGlassImg *img;
+    float                   z;
+    TString	            name;
+    A_Rnr::lNSE_t           name_stack;
 
     pick_lens_data(OptoStructs::ZGlassImg* i, float depth, const char* n) :
       img(i), z(depth), name(n) {}
@@ -151,6 +153,34 @@ public:
   virtual int  overlay_pick(A_Rnr::Fl_Event& e);
   virtual int  overlay_pick_and_deliver(A_Rnr::Fl_Event& e);
   virtual int  handle_overlay(A_Rnr::Fl_Event& e);
+
+
+  //--------------------------------------------------------------
+  // Menu handling, direct picking
+
+  struct pick_menu_data : public FTW_Shell::mir_call_data_img
+  {
+    Pupil          *pupil;
+    A_Rnr::lNSE_t  &name_stack;
+    A_Rnr::lNSE_i   name_stack_iterator;
+
+    pick_menu_data(Pupil* p, A_Rnr::lNSE_t& ns, A_Rnr::lNSE_i nsi, OptoStructs::ZGlassImg* i) :
+      mir_call_data_img(i, 0, 0),
+      pupil(p), name_stack(ns), name_stack_iterator(nsi)
+    {}
+    virtual ~pick_menu_data() {}
+  };
+
+  static void cam_towards_cb(Fl_Widget* w, Pupil::pick_menu_data* ud);
+  static void cam_at_cb(Fl_Widget* w, Pupil::pick_menu_data* ud);
+  static void copy_to_clipboard_cb(Fl_Widget* w, Pupil::pick_menu_data* ud);
+  static void deliver_event_cb(Fl_Widget* w, Pupil::pick_menu_data* ud);
+
+  void fill_pick_menu(A_Rnr::lNSE_t& ns, A_Rnr::lNSE_i nsi,
+		      OptoStructs::ZGlassImg* img, Fl_Menu_Button& menu,
+		      FTW_Shell::mir_call_data_list& mcdl,
+		      const TString& prefix);
+
 
   //--------------------------------------------------------------
   // Driver redraw: combo of GLRnrDriver, draw and handle_overlay

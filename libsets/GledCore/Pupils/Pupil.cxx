@@ -677,41 +677,46 @@ void Pupil::Render(bool rnr_self, bool rnr_overlay)
 // Picking
 /**************************************************************************/
 
-namespace
+void Pupil::cam_towards_cb(Fl_Widget* w, Pupil::pick_menu_data* ud)
 {
-  struct pick_menu_data : public FTW_Shell::mir_call_data_img
-  {
-    Pupil* pupil;
-
-    pick_menu_data(Pupil* p, OS::ZGlassImg* i) :
-      mir_call_data_img(i, 0, 0), pupil(p) {}
-    virtual ~pick_menu_data() {}
-  };
-
-  void cam_towards_cb(Fl_Widget* w, pick_menu_data* ud)
-  { ud->pupil->TurnCamTowards(ud->img->fLens, ud->pupil->default_distance()); }
-
-  void cam_at_cb(Fl_Widget* w, pick_menu_data* ud)
-  { ud->pupil->TurnCamTowards(ud->img->fLens, 0); }
-
-  void copy_to_clipboard_cb(Fl_Widget* w, pick_menu_data* ud)
-  {
-    ud->pupil->GetShell()->X_SetSource(ud->img);
-    const char* idstr = GForm("%u", ud->img->fLens->GetSaturnID());
-    Fl::copy(idstr, strlen(idstr), 0);
-  }
-
-  void fill_pick_menu(Pupil* pup, OS::ZGlassImg* img, Fl_Menu_Button& menu,
-		      FTW_Shell::mir_call_data_list& mcdl, const TString& prefix)
-  {
-    mcdl.push_back(new pick_menu_data(pup, img));
-
-    menu.add(GForm("%sJump Towards", prefix.Data()),
-	     0, (Fl_Callback*)cam_towards_cb, mcdl.back(), 0);
-    menu.add(GForm("%sJump At", prefix.Data()),
-	     0, (Fl_Callback*)cam_at_cb, mcdl.back(), FL_MENU_DIVIDER);
-  }
+  ud->pupil->TurnCamTowards(ud->img->fLens, ud->pupil->default_distance());
 }
+
+void Pupil::cam_at_cb(Fl_Widget* w, Pupil::pick_menu_data* ud)
+{
+  ud->pupil->TurnCamTowards(ud->img->fLens, 0);
+}
+
+void Pupil::copy_to_clipboard_cb(Fl_Widget* w, Pupil::pick_menu_data* ud)
+{
+  ud->pupil->GetShell()->X_SetSource(ud->img);
+  const char* idstr = GForm("%u", ud->img->fLens->GetSaturnID());
+  Fl::copy(idstr, strlen(idstr), 0);
+}
+
+void Pupil::deliver_event_cb(Fl_Widget* w, Pupil::pick_menu_data* ud)
+{
+  printf("deliver event activated ... size=%zu\n", ud->name_stack.size());
+  ud->name_stack_iterator->fRnr->HandlePick(ud->pupil->mDriver,
+					    ud->name_stack,
+					    ud->name_stack_iterator);
+}
+
+void Pupil::fill_pick_menu(A_Rnr::lNSE_t& ns, A_Rnr::lNSE_i nsi,
+			   OS::ZGlassImg* img, Fl_Menu_Button& menu,
+			   FTW_Shell::mir_call_data_list& mcdl,
+			   const TString& prefix)
+{
+  mcdl.push_back(new pick_menu_data(this, ns, nsi, img));
+
+  menu.add(GForm("%sJump Towards", prefix.Data()),
+	   0, (Fl_Callback*)cam_towards_cb, mcdl.back(), 0);
+  menu.add(GForm("%sJump At", prefix.Data()),
+	   0, (Fl_Callback*)cam_at_cb, mcdl.back(), 0);
+  menu.add(GForm("%sDeliver Event", prefix.Data()),
+	   0, (Fl_Callback*)deliver_event_cb, mcdl.back(), FL_MENU_DIVIDER);
+}
+
 
 Int_t Pupil::Pick(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 {
@@ -752,10 +757,10 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result, float& min_z, float& max_z,
   if (n > 0)
   {
     min_z = 1e10;
-    UInt_t* min_p = 0;
-    UInt_t*     x = mPickBuff;
+    UInt_t *min_p = 0;
+    UInt_t *x     = mPickBuff;
 
-    for (int i=0; i<n; i++)
+    for (int i = 0; i < n; ++i)
     {
       float zmin = (float) *(x+1)/0x7fffffff;
       if (zmin < min_z)
@@ -770,7 +775,7 @@ Int_t Pupil::PickTopNameStack(A_Rnr::lNSE_t& result, float& min_z, float& max_z,
 
     x = min_p;
     int m = *x; x += 3;
-    for (int i=0; i<m; ++i)
+    for (int i = 0; i < m; ++i)
     {
       result.push_front(mDriver->NameStack(x[i]));
     }
@@ -791,17 +796,19 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 
   Int_t n = Pick(xpick, ypick, rnr_self, rnr_overlay);
 
-  if (n > 0) {
+  if (n > 0)
+  {
     UInt_t* x = mPickBuff;
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; ++i)
+    {
       UInt_t m = *x; x++;
 
-      if(m == 0) {
+      if (m == 0) {
 	// This is ok ... name-stack ops can be switched off.
 	x += 2 + m;
 	continue;
       }
-      if(x - mPickBuff + 2 + m > mPickBuffSize) {
+      if (x - mPickBuff + 2 + m > mPickBuffSize) {
 	cout << _eh << "overflow of selection buffer, should not happen.\n";
 	x += 2 + m;
 	continue;
@@ -814,22 +821,23 @@ Int_t Pupil::PickLenses(list<pick_lens_data>& result,
 
       UInt_t id = x[m-1];
 
-      OS::ZGlassImg* root_img = mDriver->NameStack(id).fRnr->fImg;
-      ZGlass* lens = root_img->fLens;
+      OS::ZGlassImg *root_img = mDriver->NameStack(id).fRnr->fImg;
+      ZGlass        *lens     = root_img->fLens;
 
       pick_lens_data pld(root_img, zmin, lens->GetName());;
 
-      if(fill_stack) {
-	for(int j=m-2; j>=0; --j) {
+      if (fill_stack)
+      {
+	pld.name_stack.push_back(mDriver->NameStack(id));
+	for (int j = m-2; j >= 0; --j) {
 	  UInt_t p_id = x[j];
-	  OS::ZGlassImg* img = mDriver->NameStack(p_id).fRnr->fImg;
-	  pld.name_stack.push_back(img);
+	  pld.name_stack.push_back(mDriver->NameStack(p_id));
 	}
       }
 
-      if(sort_z) {
+      if (sort_z) {
 	list<pick_lens_data>::iterator ins_pos = result.begin();
-	while(ins_pos != result.end() && ins_pos->z < pld.z) {
+	while (ins_pos != result.end() && ins_pos->z < pld.z) {
 	  ++ins_pos;
 	}
 	result.insert(ins_pos, pld);
@@ -864,45 +872,53 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
   list<pick_lens_data> gdl;
   Int_t n = PickLenses(gdl, true, true, xpick, ypick, rnr_self, rnr_overlay);
 
-  if (n > 0) {
+  if (n > 0)
+  {
     Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
     menu.textsize(mShell->cell_fontsize());
     FTW_Shell::mir_call_data_list mcdl;
 
     int loc = 1;
     for (list<pick_lens_data>::iterator gdi = gdl.begin();
-	 gdi!=gdl.end(); ++gdi)
+	 gdi != gdl.end(); ++gdi)
+    {
+      if (mInfo->GetPickDisp() != 0)
       {
-	if(mInfo->GetPickDisp() != 0) {
-	  Float_t near = mInfo->GetNearClip();
-	  Float_t far  = mInfo->GetFarClip();
-	  Float_t zdist = near*far/(far - gdi->z/2*(far - near));
-	  if(mInfo->GetPickDisp() == 1)
-	    gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.Data());
-	  else
-	    gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.Data());
-	} else {
-	  gdi->name = GForm("%2d. %s/", loc, gdi->name.Data());
-	}
-
-	fill_pick_menu(this, gdi->img, menu, mcdl, gdi->name);
-	mShell->FillLensMenu(gdi->img, menu, mcdl, gdi->name);
-	mShell->FillShellVarsMenu(gdi->img, menu, mcdl, gdi->name);
-
-	// iterate through the list of parents
-	menu.add(GForm("%sParents", gdi->name.Data()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
-	for (OS::lpZGlassImg_i pi=gdi->name_stack.begin();
-	     pi!=gdi->name_stack.end(); ++pi)
-	  {
-	    TString entry(GForm("%sParents/%s/", gdi->name.Data(), (*pi)->fLens->GetName()));
-	    fill_pick_menu(this, *pi, menu, mcdl, entry);
-	    mShell->FillLensMenu(*pi, menu, mcdl, entry);
-	    mShell->FillShellVarsMenu(*pi, menu, mcdl, entry);
-	  }
-
-	++loc;
-	if(loc > mInfo->GetPickMaxN()) break;
+	Float_t near  = mInfo->GetNearClip();
+	Float_t far   = mInfo->GetFarClip();
+	Float_t zdist = near*far/(far - gdi->z/2*(far - near));
+	if (mInfo->GetPickDisp() == 1)
+	  gdi->name = GForm("%2d. (%6.3f)  %s/",  loc, zdist, gdi->name.Data());
+	else
+	  gdi->name = GForm("%2d. (%6.3f%%)  %s/", loc, 100*(zdist/far), gdi->name.Data());
       }
+      else
+      {
+	gdi->name = GForm("%2d. %s/", loc, gdi->name.Data());
+      }
+
+      fill_pick_menu(gdi->name_stack, gdi->name_stack.begin(), gdi->img,
+		     menu, mcdl, gdi->name);
+      mShell->FillLensMenu(gdi->img, menu, mcdl, gdi->name);
+      mShell->FillShellVarsMenu(gdi->img, menu, mcdl, gdi->name);
+
+      // iterate through the list of parents
+      menu.add(GForm("%sParents", gdi->name.Data()), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
+      A_Rnr::lNSE_i pe = gdi->name_stack.begin();
+      ++pe; // skip top entry
+      while (pe != gdi->name_stack.end())
+      {
+	OS::ZGlassImg *img = pe->fRnr->fImg;
+	TString entry(GForm("%sParents/%s/", gdi->name.Data(), img->fLens->GetName()));
+	fill_pick_menu(gdi->name_stack, pe, img, menu, mcdl, entry);
+	mShell->FillLensMenu(img, menu, mcdl, entry);
+	mShell->FillShellVarsMenu(img, menu, mcdl, entry);
+	++pe;
+      }
+
+      ++loc;
+      if (loc > mInfo->GetPickMaxN()) break;
+    }
 
     menu.popup();
   }

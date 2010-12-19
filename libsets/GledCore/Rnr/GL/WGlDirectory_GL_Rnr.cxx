@@ -19,7 +19,7 @@
 
 #include <GL/glew.h>
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void WGlDirectory_GL_Rnr::_init()
 {
@@ -33,15 +33,14 @@ void WGlDirectory_GL_Rnr::_init()
   m_next = &m_next;
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
-//void WGlDirectory_GL_Rnr::PreDraw(RnrDriver* rd)
-//{}
+// void WGlDirectory_GL_Rnr::PreDraw(RnrDriver* rd) {}
 
 void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
 {
   WGlDirectory& M = *mWGlDirectory;
-  if((M.bDrawPageCtrl == false) && (M.mContents == 0 || M.mContents->IsEmpty()))
+  if ((M.bDrawPageCtrl == false) && (M.mContents == 0 || M.mContents->IsEmpty()))
     return;
 
   obtain_rnrmod(rd, mFontRMS);
@@ -79,7 +78,8 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
     glTranslatef(pos[0], pos[1], pos[2]);
     rd->GL()->PushName(this, *i);
 
-    if(M.bDrawBox) {
+    if (M.bDrawBox)
+    {
       glColor4fv(back_color());
       glPushMatrix();
       glTranslatef(M.mBoxOx, M.mBoxOy, M.mBoxOz);
@@ -172,10 +172,9 @@ void WGlDirectory_GL_Rnr::Draw(RnrDriver* rd)
   glPopAttrib();
 }
 
-//void WGlDirectory_GL_Rnr::PostDraw(RnrDriver* rd)
-//{}
+// void WGlDirectory_GL_Rnr::PostDraw(RnrDriver* rd) {}
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 {
@@ -185,25 +184,27 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
   WGlDirectory& M = *mWGlDirectory;
 
-  if(ev.fEvent == FL_LEAVE) {
-    if(m_current) {
+  if (ev.fEvent == FL_LEAVE)
+  {
+    if (m_current) {
       m_current = 0;
       Redraw(rd);
     }
     return 1;
   }
 
-  if(ev.fEvent == FL_ENTER || ev.fEvent == FL_MOVE) {
-
-    if(ev.fCurrentNSE->fUserData != m_current) {
+  if (ev.fEvent == FL_ENTER || ev.fEvent == FL_MOVE)
+  {
+    if (ev.fCurrentNSE->fUserData != m_current) {
       m_current = ev.fCurrentNSE->fUserData;
       Redraw(rd);
     }
     return 1;
   }
 
-  if(ev.fEvent == FL_DRAG) {
-    if(ev.fCurrentNSE->fUserData != m_current) {
+  if (ev.fEvent == FL_DRAG)
+  {
+    if (ev.fCurrentNSE->fUserData != m_current) {
       m_current = ev.fCurrentNSE->fUserData;
       Redraw(rd);
     }
@@ -212,25 +213,24 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
 
   if (ev.fEvent == FL_PUSH && ev.fButton == FL_LEFT_MOUSE)
   {
-    if(m_current == m_prev_page) {
+    if (m_current == m_prev_page) {
       auto_ptr<ZMIR> mir( M.S_PrevPage() );
       fImg->fEye->Send(*mir);
-    } else if(m_current == m_next_page) {
+    } else if (m_current == m_next_page) {
       auto_ptr<ZMIR> mir( M.S_NextPage() );
       fImg->fEye->Send(*mir);
-
-    } else if(m_current == m_next) {
+    } else if (m_current == m_next) {
       auto_ptr<ZMIR> mir( M.S_Next() );
       fImg->fEye->Send(*mir);
-    } else if(m_current == m_prev) {
+    } else if (m_current == m_prev) {
       auto_ptr<ZMIR> mir( M.S_Prev() );
       fImg->fEye->Send(*mir);
-    } else if ( m_current != 0) {
+    } else if (m_current != 0) {
       ZGlass* lens = (ZGlass*)m_current;
       auto_ptr<ZMIR> clicked( M.S_SetLastClicked(lens) );
       fImg->fEye->Send(*clicked);
       GledNS::MethodInfo* mi = M.GetCbackMethodInfo();
-      if(mi == 0) return 0;
+      if (mi == 0) return 0;
       ZMIR cback(M.mCbackAlpha.get(), lens);
       mi->ImprintMir(cback);
       fImg->fEye->Send(cback);
@@ -241,4 +241,34 @@ int WGlDirectory_GL_Rnr::Handle(RnrDriver* rd, Fl_Event& ev)
   }
 
   return 0;
+}
+
+void WGlDirectory_GL_Rnr::HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi)
+{
+  // Only here as demonstration: trace pick event delivery.
+
+  static const Exc_t _eh("WGlDirectory_GL_Rnr::HandlePick ");
+
+  // It can be called on WGlDirectory itself, user-data of NameStackEntry
+  // will be 0 in this case.
+  // Otherwise it is one of the dependant items, as pushed on namestack in
+  // Draw().
+  // There can, of course, also be several relevant entries in the namestack.
+  // Use iterator++ to move on.
+  // NOTE: Order in the list is *reversed*, as returned by GL selection.
+
+  if (nsi->fUserData == 0)
+    printf("%sDeliver to WGlDirectory itself.\n", _eh.Data());
+  else if (nsi->fUserData == m_prev_page)
+    printf("%sDeliver to m_prev_page.\n", _eh.Data());
+  else if (nsi->fUserData == m_next_page)
+    printf("%sDeliver to m_next_page.\n", _eh.Data());
+  else if (nsi->fUserData == m_prev)
+    printf("%sDeliver to m_prev.\n", _eh.Data());
+  else if (nsi->fUserData == m_next)
+    printf("%sDeliver to m_next.\n", _eh.Data());
+  else {
+    ZGlass* lens = (ZGlass*) nsi->fUserData;
+    printf("%sDeliver to dir entry: '%s'.\n", _eh.Data(), lens->GetName());
+  }
 }
