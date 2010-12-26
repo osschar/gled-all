@@ -13,7 +13,7 @@
 
 class GrowingPlant_GL_Rnr : public ZNode_GL_Rnr, public TAttBBox
 {
-private:
+protected:
   void _init();
   
   struct Turtle {
@@ -23,9 +23,9 @@ private:
   GrowingPlant*	    mModel;
   GLUquadricObj*    mQuadric;
   
-  virtual void ProcessExpression();
+  virtual void ProcessExpression(RnrDriver* rd);
   virtual void DrawStep(Turtle& turtle, GrowingPlant::Segment& p);
-  virtual void  DrawSymbol(Turtle& turtle, GrowingPlant::Segment& p) ;
+  virtual void DrawSymbol(Turtle& turtle, GrowingPlant::Segment& p) ;
   
   virtual void ComputeBBox() {}  
 public:
@@ -35,6 +35,9 @@ public:
   virtual void Render(RnrDriver* rd);
   virtual void Triangulate(RnrDriver* rd);
   
+  
+  virtual void HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi);
+
 }; // endclass GrowingPlant_GL_Rnr
 
 #endif

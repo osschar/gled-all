@@ -22,11 +22,11 @@ void GrowingPlant::_init()
 
 GrowingPlant::GrowingPlant(const Text_t* n, const Text_t* t) :
 ZNode(n, t),
-mLevel(0),
+mLevel(1),
 mLineColor(1, 1, 0)
 {
   _init();
-  bUseDispList  = true;
+  // bUseDispList  = true;
 }
 
 GrowingPlant::~GrowingPlant()
@@ -35,16 +35,24 @@ GrowingPlant::~GrowingPlant()
 void
 GrowingPlant::SegmentListStepTime(SegmentList& oldExp, SegmentList& newExp, int level)
 {
-  //  printf("lsit step time for level %d \n", level);
+  ++level; 
+  //printf("-----------------------------growing plant lsit step time for level %d \n", level);
+  int idx = 0;
   for (Segments_i it = oldExp.begin(); it != oldExp.end(); ++it)
+  {
+   // printf("[%d] segment %c (%d, %d) step time \n", idx++, (*it).mType, (*it).mParam1, (*it).mParam2);
     SegmentStepTime(it, newExp);
-  
+  }
   oldExp.swap(newExp);
   newExp.clear();
   
-  
   if (level < mLevel)
-    SegmentListStepTime(oldExp, newExp, ++level);  
+  {
+    
+    mOldSegments = oldExp;
+    mNewSegments = newExp;
+    SegmentListStepTime(oldExp, newExp, level);  
+  }
 }
 
 void
@@ -59,6 +67,8 @@ GrowingPlant::Produce()
   
   // create starting expresion from start rule and init paramters
   SegmentList refExp;
+  mOldSegments = mSegments;
+  mNewSegments = refExp;
   SegmentListStepTime(mSegments, refExp, 1);
 }
 
@@ -91,26 +101,28 @@ mChunkSize(1000)
 }
 
 GrowingPlant::SegmentList&
-GrowingPlant::SegmentList::s(char t, int v)
+GrowingPlant::SegmentList::s(char t, int v1, int v2)
 {
   // Set defualt parameters. 
+  // printf("sed defults %c (%d, %d) \n", t, v1, v2);
   for (GrowingPlant::Segments_i i = mDefaults.begin(); i != mDefaults.end(); ++i)
   {
     if ((*i).mType == t)
     {
-      (*i).mParam1 = v;
+      (*i).mParam1 = v1;
+      (*i).mParam2 = v2;
       return *this;
     }
   }
   
-  mDefaults.push_back(Segment(t, v));
+  mDefaults.push_back(Segment(t, v1, v2));
   return *this;
 }
 
 GrowingPlant::SegmentList&
-GrowingPlant::SegmentList::x(char t, int v)
+GrowingPlant::SegmentList::x(char t, int p1, int p2)
 {
-  push_back(Segment(t, v));
+  push_back(Segment(t, p1, p2));
   //printf("add char/value %c %d \n", t, v);
   return *this;
 }
@@ -121,15 +133,17 @@ GrowingPlant::SegmentList::x(const char* nodes)
   for (size_t i = 0, e = strlen(nodes); i < e; ++i)
   {
     int param1 = -1;
+    int param2 = -1;
     for  (GrowingPlant::Segments_i d = mDefaults.begin(); d != mDefaults.end(); ++d)
     {
       if ((*d).mType == nodes[i])
       {
         param1 = (*d).mParam1;
+        param2 = (*d).mParam2;
         break;
       }
     }
-    push_back(Segment(nodes[i], param1));
+    push_back(Segment(nodes[i], param1, param2));
   }
   
   return *this;

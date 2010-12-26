@@ -3,6 +3,7 @@ Plant		2       Glasses/Plant           .
 ProductionRule	3	Glasses/ProductionRule
 
 
+
 ParametricSystem 10 Glasses/ParametricSystem .
 
 MonopodialTree             11 Glasses/MonopodialTree             .
@@ -11,6 +12,7 @@ TernaryTree                13 Glasses/TernaryTree         .
 
 GrowingPlant              14 Glasses/GrowingPlant     .
 MonopodialHerb            15 Glasses/MonopodialHerb         
+DibotryoidHerb            16 Glasses/DibotryoidHerb   .    
 
 TabletReader     64     Glasses/TabletReader     .
 TabletStroke     65     Glasses/TabletStroke     .

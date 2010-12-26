@@ -21,8 +21,7 @@ public:
     Segment(char type, int p1 = -1, int p2 = -1) : mType(type), mParam1(p1), mParam2(p2) {}
 
     virtual ~Segment(){}
-    
-    void Set(char t, float p1, float p2) { mType = t; mParam1 = p1; mParam2 = p2; }
+    void Set(char t, int p1, int p2) { mType = t; mParam1 = p1; mParam2 = p2; }
     
     char   mType;
     int    mParam1;
@@ -37,8 +36,8 @@ public:
     int mChunkSize;
     std::vector<Segment> mDefaults;
     
-    SegmentList& s(char, int);
-    SegmentList& x(char, int);
+    SegmentList& s(char t, int p1, int p2 = -1);
+    SegmentList& x(char t, int p1, int p2 = -1);
     SegmentList& x(const char*);
   };
   
@@ -52,6 +51,10 @@ private:
 protected:
   Int_t          mLevel;      // X{GST} 7 Value(-range=>[1, 50, 1])
   SegmentList    mSegments;
+  
+  SegmentList    mNewSegments;
+  SegmentList    mOldSegments;
+  
   SegmentList    mStart;
   
   ZColor	       mLineColor;    // X{GSPT} 7 ColorButt()
