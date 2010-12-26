@@ -3,7 +3,7 @@
 
 const Text_t* bush_layout = "ZGlass(Name,Title[22])";
 
-void inflorescence()
+void inflorescence(int mode = 1)
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("GledCore");
@@ -27,17 +27,52 @@ void inflorescence()
   base->SetRotByDegrees(0, -90, 0);
   base->SetRadius(0.002);
   
-  MonopodialHerb* bp = new MonopodialHerb("Bursa", "Bursa Pastoralis");
-  g_queen->CheckIn(bp);
-  images->Add(bp);
-  bp->SetLevel(15);
-  bp->SetRnrMod(lm);
-  bp->Produce();
-  bp->RotateLF(1, 3, TMath::Pi()*0.5);
-  float sx = 0.01;
-  bp->SetUseScale(true);
-  bp->SetScale(sx);
-  
+  if (mode == 0)
+  {
+    MonopodialHerb* bp = new MonopodialHerb("Bursa", "Bursa Pastoralis");
+    g_queen->CheckIn(bp);
+    images->Add(bp);
+    bp->SetLevel(15);
+    bp->SetRnrMod(lm);
+    bp->Produce();
+    bp->RotateLF(1, 3, TMath::Pi()*0.5);
+    float sx = 0.01;
+    bp->SetUseScale(true);
+    bp->SetScale(sx);
+  }
+  else
+  {
+    DibotryoidHerb* mint = new DibotryoidHerb("Mint", "Mint");    
+    if (mode == 1)
+    {
+      mint->SetName("Mint-Acropetal");
+      mint->SetSendSignalDelay(13);
+      mint->SetPlastocronMainAxis(2);
+      mint->SetPlastocronLateralAxis(3);
+      mint->SetSignalDelayMainAxis(1);
+      mint->SetSignalDelayLateralAxis(1);
+    }
+    else {
+      mint->SetName("Mint-Basipetal");
+      mint->SetSendSignalDelay(13);
+      mint->SetPlastocronMainAxis(2);
+      mint->SetPlastocronLateralAxis(5);
+      mint->SetSignalDelayMainAxis(1);
+      mint->SetSignalDelayLateralAxis(3);
+    }
+    
+    mint->SetLevel(20);
+    mint->SetRnrMod(lm);
+    mint->Produce();
+    mint->RotateLF(1, 3, TMath::Pi()*0.5);
+    mint->RotateLF(3, 2, TMath::Pi()*0.5);
+    float sx = 0.1;
+    mint->SetUseScale(true);
+    mint->SetScale(sx);        
+    g_queen->CheckIn(mint);
+    images->Add(mint);    
+  }
+    
   //______________________________________________________________________________  
   
   Rect* base_plane = new Rect("BasePlane");
