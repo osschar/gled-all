@@ -9,7 +9,8 @@
 #include <GL/glew.h>
 #include <stack>
 #include <Glasses/GrowingPlant.h>
-
+#include <RnrBase/RnrDriver.h>
+#include <Rnr/GL/GLRnrDriver.h>
 //==============================================================================
 
 void GrowingPlant_GL_Rnr::_init()
@@ -32,10 +33,13 @@ GrowingPlant_GL_Rnr::~GrowingPlant_GL_Rnr()
 //-------------------------------------------------------------------------------
 void GrowingPlant_GL_Rnr::Render(RnrDriver* rd) 
 {
+  //printf("render \n");
   glEnable(GL_NORMALIZE);
 
+  glPushAttrib(GL_LINE_BIT);
   glColor4fv(mModel->GetLineColor().array());
-  ProcessExpression();
+  ProcessExpression(rd);
+  glPopAttrib();
 }
 
 void GrowingPlant_GL_Rnr::Triangulate(RnrDriver* rd)
@@ -47,12 +51,13 @@ void GrowingPlant_GL_Rnr::Triangulate(RnrDriver* rd)
 //-------------------------------------------------------------------------------
 bool linemode = true;
 
-void GrowingPlant_GL_Rnr::ProcessExpression() 
+void GrowingPlant_GL_Rnr::ProcessExpression(RnrDriver* rd) 
 {
   std::stack<Turtle> stack;  
   Turtle init;
   Turtle& turtle = init;  
   stack.push(turtle);
+  
   
   int cutBranch = 0;
   int idx = 0;
@@ -88,8 +93,7 @@ void GrowingPlant_GL_Rnr::ProcessExpression()
       }
     }
     
-    
-  //  printf("process [%c]/[%d] param1 [%d]\n", (*i).mType, idx, (*i).mParam1);
+    rd->GL()->PushName(this, (void*)idx);    
     
     switch ((*i).mType) { 
         
@@ -152,7 +156,11 @@ void GrowingPlant_GL_Rnr::ProcessExpression()
       case 'F':
         DrawStep(turtle, *i);
         break;
-               
+        
+      case 'I':
+        DrawStep(turtle, *i);
+        break;
+        
       case '\'':
         glColor4fv(mModel->GetFlowerColor().array());
         break; 
@@ -180,16 +188,13 @@ void GrowingPlant_GL_Rnr::ProcessExpression()
       case '%':
         cutBranch++;
         break;
-/*
-      case 'L':
-      case 'X':
-      case 'K':
-        DrawSymbol(turtle, *i, true);
-        break;
-  */      
+      
       default:
+        DrawSymbol(turtle, *i);
         break;
-    } 
+    }
+    
+    rd->GL()->PopName();
   }
 }
 
@@ -209,31 +214,46 @@ void GrowingPlant_GL_Rnr::DrawStep(Turtle& turtle, GrowingPlant::Segment& p)
 void GrowingPlant_GL_Rnr::DrawSymbol(Turtle& turtle, GrowingPlant::Segment& p) 
 {
   // Debug 
-  
+  /*
   glPushMatrix( );
   glMultMatrixd(turtle.mTrans.Array());
   glRotatef(90, 0, 1, 0);
   
   if (p.mType == 'K')
   { 
-    p.mParam1 = 1;
+    p.mParam1 = 0.1;
     glColor3f(1, 1, 1);
-    gluSphere(mQuadric, p.mParam1 ,4, 4); 
+    gluSphere(mQuadric, 0.1 ,4, 4); 
     // printf("draw K \n");
   }
   else if (p.mType == 'X')
   {
-    p.mParam1 = 1;
+    p.mParam1 = 0.1;
     glColor3f(0, 0, 1);
   }
   else if (p.mType == 'L')
   {
-    p.mParam1 = 5;
+    p.mParam1 = 1;
     glColor3f(1, 0, 0);
-    float x = 0.1;
+    float x = 0.051;
     gluCylinder(mQuadric, p.mParam1*x , p.mParam1*x, p.mParam1, 8, 4);
-    printf("Draw L \n");
-  }
+   // printf("Draw L \n");
+  } 
+   glPopMatrix();
+   */
+}
+
+
+
+void GrowingPlant_GL_Rnr::HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi)
+{
+  // Only here as demonstration: trace pick event delivery.
   
-  glPopMatrix();
+  static const Exc_t _eh("DibotroidHerb_GL_Rnr::HandlePick ");
+  
+ // GrowingPlant::Segment* s = (GrowingPlant::Segment*) nsi->fUserData;
+  // printf("%s Segmnet (%d, %d).\n", _eh.Data(), s->mParam1, s->mParam2);
+  int idx = (int)(nsi->fUserData);
+  printf("%s [%d] (%d, %d) \n",  _eh.Data(), idx, mModel->mSegments[idx].mParam1, mModel->mSegments[idx].mParam2);
+  
 }
