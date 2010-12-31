@@ -1,3 +1,13 @@
+2010-12-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac fixes.
+
+	* GledView/MCW_View.cxx:
+	Add include for mac.
+
+	* Pupils/Pupil.cxx:
+	Fix initialization of GLEW for mac.
+
 2010-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add A_Rnr::HandlePick() function -- it can be called via a
