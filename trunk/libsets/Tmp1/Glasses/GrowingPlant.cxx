@@ -36,11 +36,11 @@ void
 GrowingPlant::SegmentListStepTime(SegmentList& oldExp, SegmentList& newExp, int level)
 {
   ++level; 
-  //printf("-----------------------------growing plant lsit step time for level %d \n", level);
-  int idx = 0;
+  // printf("-----------------------------growing plant lsit step time for level %d \n", level);
+  // int idx = 0;
   for (Segments_i it = oldExp.begin(); it != oldExp.end(); ++it)
   {
-   // printf("[%d] segment %c (%d, %d) step time \n", idx++, (*it).mType, (*it).mParam1, (*it).mParam2);
+    // printf("[%d] segment %c (%d, %d) step time \n", idx++, (*it).mType, (*it).mParam1, (*it).mParam2);
     SegmentStepTime(it, newExp);
   }
   oldExp.swap(newExp);
