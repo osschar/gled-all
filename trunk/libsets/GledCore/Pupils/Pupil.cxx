@@ -32,7 +32,11 @@
 
 #include <GL/glew.h>
 
-#include <math.h>
+#include <cmath>
+
+#ifdef __APPLE__
+extern "C" GLenum glewContextInit();
+#endif
 
 namespace OS = OptoStructs;
 
@@ -943,7 +947,12 @@ void Pupil::draw()
   static const Exc_t _eh("Pupil::draw ");
 
   if(glew_init_needed) {
+#ifdef __APPLE__
+    // We use GLEW from ROOT which would also try to init GLX -- avoid that.
+    GLenum status = glewContextInit();
+#else
     GLenum status = glewInit();
+#endif
     if (status != GLEW_OK)
       cout << "glewInit - GLEW initalization failed.\n";
     else

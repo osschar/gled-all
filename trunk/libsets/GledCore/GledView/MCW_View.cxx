@@ -20,6 +20,7 @@
 #include <FL/fl_draw.H>
 
 #include <float.h>
+#include <cmath>
 
 namespace GNS = GledNS;
 namespace OS  = OptoStructs;
