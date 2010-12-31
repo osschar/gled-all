@@ -59,8 +59,8 @@ void GrowingPlant_GL_Rnr::ProcessExpression(RnrDriver* rd)
   stack.push(turtle);
   
   
-  int cutBranch = 0;
-  int idx = 0;
+  int  cutBranch = 0;
+  long idx = 0;
   for (GrowingPlant::Segments_i i = mModel->mSegments.begin(); i != mModel->mSegments.end(); ++i, ++idx)
   {
     if ( cutBranch)
@@ -93,7 +93,7 @@ void GrowingPlant_GL_Rnr::ProcessExpression(RnrDriver* rd)
       }
     }
     
-    rd->GL()->PushName(this, (void*)idx);    
+    rd->GL()->PushName(this, reinterpret_cast<void*>(idx));
     
     switch ((*i).mType) { 
         
@@ -253,7 +253,7 @@ void GrowingPlant_GL_Rnr::HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi)
   
  // GrowingPlant::Segment* s = (GrowingPlant::Segment*) nsi->fUserData;
   // printf("%s Segmnet (%d, %d).\n", _eh.Data(), s->mParam1, s->mParam2);
-  int idx = (int)(nsi->fUserData);
-  printf("%s [%d] (%d, %d) \n",  _eh.Data(), idx, mModel->mSegments[idx].mParam1, mModel->mSegments[idx].mParam2);
+  long idx = reinterpret_cast<long>(nsi->fUserData);
+  printf("%s [%ld] (%d, %d) \n",  _eh.Data(), idx, mModel->mSegments[idx].mParam1, mModel->mSegments[idx].mParam2);
   
 }
