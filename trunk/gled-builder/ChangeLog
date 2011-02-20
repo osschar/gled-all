@@ -1,3 +1,8 @@
+2011-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/fltk/fltk.pl:
+	On fedora (at least on 14) need to add libfontconfig to ldflags.
+
 2010-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/root/make-root-src-dist.sh:
