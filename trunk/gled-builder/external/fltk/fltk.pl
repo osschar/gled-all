@@ -26,10 +26,6 @@ add_cfgflags("--enable-shared --enable-threads");
 if ($BUILD_OS =~ /linux/)
 {
   add_cfgflags("--enable-xft");
-  if ($DISTRO_NAME eq "fedora" and $DISTRO_VERSION >= 14)
-  {
-    add_ldflags("-lfontconfig");
-  }
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
