@@ -1,3 +1,12 @@
+2011-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/fltk/fltk.pl:
+	Remove last fix (libfontconfig on fedora 14) - it was fixed in
+	fltk.
+
+	* external/fltk/make-fltk-src-dist.sh:
+	Bump version to 1.1.11.
+
 2011-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/fltk/fltk.pl:

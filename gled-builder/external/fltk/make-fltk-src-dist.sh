@@ -6,7 +6,7 @@
 # Fix the following variables before running:
 
 url="http://svn.easysw.com/public/fltk/fltk/branches/branch-1.1"
-version="1.1.10"
+version="1.1.11"
 fileurl="ftp://gled.org/cache/HEAD/fltk-$version-gled.tar.gz"
 
 echo Getting sources
