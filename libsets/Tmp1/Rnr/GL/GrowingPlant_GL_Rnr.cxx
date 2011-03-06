@@ -19,7 +19,9 @@ void GrowingPlant_GL_Rnr::_init()
 GrowingPlant_GL_Rnr::GrowingPlant_GL_Rnr(GrowingPlant* idol) :
 ZNode_GL_Rnr(idol),
 mModel(idol),
-mQuadric(0)
+mQuadric(0),
+mLighting(true),
+mIAsForward(false)
 {
   _init();
   mQuadric = gluNewQuadric();
@@ -38,6 +40,7 @@ void GrowingPlant_GL_Rnr::Render(RnrDriver* rd)
 
   glPushAttrib(GL_LINE_BIT);
   glColor4fv(mModel->GetLineColor().array());
+  if (!mLighting) glDisable(GL_LIGHTING);
   ProcessExpression(rd);
   glPopAttrib();
 }
@@ -158,7 +161,14 @@ void GrowingPlant_GL_Rnr::ProcessExpression(RnrDriver* rd)
         break;
         
       case 'I':
-        DrawStep(turtle, *i);
+        if (mIAsForward)
+           DrawStep(turtle, *i);
+        break;
+        
+      case 'G':
+        DrawSymbol(turtle, *i);
+
+        turtle.mTrans.Move3LF(1, 0, 0);        // DrawStep(turtle, *i);
         break;
         
       case '\'':
@@ -181,10 +191,6 @@ void GrowingPlant_GL_Rnr::ProcessExpression(RnrDriver* rd)
         glVertex3fv(pos);
         break;
         
-      case 'G':
-        turtle.mTrans.Move3LF(1, 0, 0);
-        break;
-       
       case '%':
         cutBranch++;
         break;
@@ -253,7 +259,7 @@ void GrowingPlant_GL_Rnr::HandlePick(RnrDriver* rd, lNSE_t& ns, lNSE_i nsi)
   
  // GrowingPlant::Segment* s = (GrowingPlant::Segment*) nsi->fUserData;
   // printf("%s Segmnet (%d, %d).\n", _eh.Data(), s->mParam1, s->mParam2);
-  long idx = reinterpret_cast<long>(nsi->fUserData);
-  printf("%s [%ld] (%d, %d) \n",  _eh.Data(), idx, mModel->mSegments[idx].mParam1, mModel->mSegments[idx].mParam2);
+  int idx = (int)(nsi->fUserData);
+  printf("%s [%d] > '%c' (%d, %d) \n",  _eh.Data(), idx, mModel->mSegments[idx].mType, mModel->mSegments[idx].mParam1, mModel->mSegments[idx].mParam2);
   
 }

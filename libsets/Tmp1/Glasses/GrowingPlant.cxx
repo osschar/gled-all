@@ -31,26 +31,30 @@ mLineColor(1, 1, 0)
 
 GrowingPlant::~GrowingPlant()
 {}
-
+//=================================================================================
 void
 GrowingPlant::SegmentListStepTime(SegmentList& oldExp, SegmentList& newExp, int level)
 {
+   bool debug = false;
+  
   ++level; 
-  // printf("-----------------------------growing plant lsit step time for level %d \n", level);
-  // int idx = 0;
+  //printf("duming new \n"); DumpList(newExp);
+  int idx=0;
   for (Segments_i it = oldExp.begin(); it != oldExp.end(); ++it)
   {
-    // printf("[%d] segment %c (%d, %d) step time \n", idx++, (*it).mType, (*it).mParam1, (*it).mParam2);
-    SegmentStepTime(it, newExp);
+    if (debug) printf("[%d] segment %c (%d, %d) step time \n", idx++, (*it).mType, (*it).mParam1, (*it).mParam2);
+    SegmentStepTime(it, oldExp, newExp);
   }
   oldExp.swap(newExp);
   newExp.clear();
   
   if (level < mLevel)
   {
-    
-    mOldSegments = oldExp;
-    mNewSegments = newExp;
+    if (debug)
+    {
+      printf("\n\n\n\ngrowing plant lsit step time for level %d sizes %d , %d \n", level, (int)oldExp.size(), (int)newExp.size());
+      DumpList(oldExp);
+    }
     SegmentListStepTime(oldExp, newExp, level);  
   }
 }
@@ -59,29 +63,23 @@ void
 GrowingPlant::Produce()
 {
   // calback from triangulate method
-  
+   
   mSegments.clear();
-
-  for (Segments_i it = mStart.begin(); it != mStart.end(); ++it)
-    mSegments.push_back(*it);
+  mSegments = mStart;
   
   // create starting expresion from start rule and init paramters
-  SegmentList refExp;
-  mOldSegments = mSegments;
-  mNewSegments = refExp;
-  SegmentListStepTime(mSegments, refExp, 1);
+  if (mLevel > 1)
+  {
+    SegmentList refExp;
+    SegmentListStepTime(mSegments, refExp, 1);
+  }
+   
+  //  printf("finish Produce \n"); DumpInfo();
+
 }
 
 
-void GrowingPlant::StepPlus()  
-{
-  SetLevel(++mLevel);
-}
-
-void GrowingPlant::StepMinus()  
-{
-  SetLevel(--mLevel);
-}
+//==============================================================================
 
 void GrowingPlant::DumpInfo()  
 {
@@ -91,6 +89,140 @@ void GrowingPlant::DumpInfo()
     printf("%c", (*i).mType);
   }      
   printf(" \n");
+}
+
+void GrowingPlant::DumpList(Segments_t& slist)  
+{
+  int nstack = 0;
+  
+  // printf("Expression[%d]: \n", (int)slist.size());
+  for (Segments_i i = slist.begin(); i != slist.end(); ++i)
+  {
+    if ((*i).mType == '[') nstack++;
+    if ((*i).mType == ']') nstack--;
+    
+    printf("%c", (*i).mType);
+  }      
+  printf(" \n");
+  
+  if (nstack) printf("!!!!!!!!!!!!!!!!!!stack %d \n", nstack);
+}
+
+//==============================================================================
+//==============================================================================
+
+GrowingPlant::Segments_i GrowingPlant::NeighbourFront( SegmentList& slist, Segments_i startIt, int depth, bool debug)
+{
+  static const Exc_t _eh("Weed_GL_Rnr::NeighbourFront ");  
+  Segments_i startItOrig = startIt;
+  ++startIt;
+  
+  if (debug) {
+    printf("front neighbour-front search ");
+    for (Segments_i i = startIt; i != slist.end(); ++i)
+    {
+      printf("%c", (*i).mType);
+    }      
+    printf(" \n");
+  }
+  
+  int nStack = 0;  
+  for (GrowingPlant::Segments_i i = startIt; i != slist.end(); ++i)
+  {
+    if ((*i).mType == '[')
+    {
+      --nStack;
+    }
+    else if ((*i).mType == ']')
+    {
+      if (depth == 0 && nStack == 0)  return slist.end();
+      ++nStack;  
+    }
+    else 
+    {
+      if (nStack == depth && ((*i).mType == 'I' ||  (*i).mType == 'S' ||(*i).mType == 'F' ||(*i).mType == 'T' ||  (*i).mType == 'U' ))
+      {
+        if (debug) printf("found %c \n",  (*i).mType);
+        return i;
+      }
+      else
+      {
+       if (debug) printf("skip %c \n",  (*i).mType);
+      }
+    }
+  }
+
+  ISerr(_eh + Form(" [%c] 'it == end.", (*startItOrig).mType));
+  
+  return slist.end();
+}
+//_____________________________________________________________________________________________
+
+GrowingPlant::Segments_i GrowingPlant::NeighbourBack(SegmentList& slist, Segments_i startIt, int depth, bool debug)
+{
+  if (startIt == slist.begin()) return slist.end(); 
+  
+  static const Exc_t _eh("Weed_GL_Rnr::NeighbourBack ");
+  char t = (*startIt).mType;
+  if (debug)
+  {
+    printf("back neighbour-back search ");
+    for (Segments_i j = startIt; j != slist.begin(); --j)
+    {
+      Segments_i i = j; 
+      --i;
+      printf("%c", (*i).mType);
+    }      
+    printf(" \n");
+  }
+  
+  
+  int nStack = 0;  
+  for (GrowingPlant::Segments_i j = startIt; j != slist.begin(); --j)
+  {
+    
+    Segments_i i = j;
+    --i;
+    if ((*i).mType == '[')
+    {
+      if (depth == 0 && nStack == 0) return slist.end();
+      
+      --nStack;
+      if (debug) printf("increase stack \n");
+    }
+    else if ((*i).mType == ']')
+    {
+      ++nStack;  
+      if (debug) printf("decrease stack \n");
+    }
+    else if (nStack == depth)
+    {
+      if ( (*i).mType == 'I' ||  (*i).mType == 'S'||(*i).mType == 'F'||(*i).mType == 'T' ||  (*i).mType == 'U' )
+      {
+        if (debug) printf("found back %c for %c\n", (*i).mType, t);
+        return i;
+      }
+      else 
+      {
+        if (debug) printf("skip %c \n",  (*i).mType);
+      }
+    }
+  }
+  // printf( "found back %c not it == begin.\n",t );
+  return slist.end();
+}
+
+
+//=============================================================================
+void GrowingPlant::StepPlus()  
+{
+  SetLevel(++mLevel);
+}
+
+void GrowingPlant::StepMinus()  
+{
+  if (mLevel > 1)
+    SetLevel(--mLevel);
 }
 
 //=============================================================================

@@ -22,6 +22,9 @@ protected:
   
   GrowingPlant*	    mModel;
   GLUquadricObj*    mQuadric;
+  bool              mLighting;
+  
+  bool              mIAsForward;
   
   virtual void ProcessExpression(RnrDriver* rd);
   virtual void DrawStep(Turtle& turtle, GrowingPlant::Segment& p);
