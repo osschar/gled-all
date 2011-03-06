@@ -6,8 +6,11 @@
 
 #include "AEV_NS.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 const int AEV_NS::BiDiPipe::sRBSize = 1024;
 
