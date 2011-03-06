@@ -985,7 +985,7 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
 
   GSelector sel;
   sel.fRead.Add(newsocket);
-  sel.fTimeOut = 20; // close connection after 20s of inactivity
+  sel.fTimeOut = 60; // close connection after 60s of inactivity
 
   bool loop_done  = false;
   bool loop_error = false;

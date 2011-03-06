@@ -1,3 +1,9 @@
+2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	Increase wait time in Accept from 20s to 60s.
+	This was too small when running with google heap checker.
+
 2010-12-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Mac fixes.
