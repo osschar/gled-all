@@ -99,4 +99,4 @@ svn_update:
 	@svn update demos
 
 echo_svn_modified:
-	@(svn status -q; svn status -q libsets demos) | perl -pe 's/.+[ \t]+//g;'
+	@(svn status -q; svn status -q libsets demos demos-big) | perl -pe 's/.+[ \t]+//g;'
