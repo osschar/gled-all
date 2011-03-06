@@ -4,8 +4,12 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
+#include "Moonraker.h"
+#include "Moonraker.c7"
+
+#include <TMath.h>
+
 //________________________________________________________________________
-// Moonraker
 //
 // An example for ODECrawler.
 // Integrates movement of a shell fired from Earth in Earth-Moon system.
@@ -13,11 +17,6 @@
 //	  mass ~ earth mass
 //	  V0 = 1 means escape velocity from earth
 //________________________________________________________________________
-
-#include "Moonraker.h"
-#include "Moonraker.c7"
-
-#include <TMath.h>
 
 ClassImp(Moonraker);
 
@@ -38,6 +37,8 @@ void Moonraker::_init()
   mV0 = 1;
   // cout <<"Kappa="<< hKappa <<"\tEscVel="<< hEscapeVelocity <<endl;
   mT = 0; mT0 = 0; mT1 = 2;
+  mLat = mLon = mTheta = mPhi = 0;
+  mV0 = 1;
 
   mScale = 1; mLOD = 20;
   mEColor.rgba(0.2, 0.6, 0.8);
@@ -62,40 +63,41 @@ void Moonraker::MoonPos(TVector3& r, Double_t t) const
 
 /**************************************************************************/
 
-namespace {
+void Moonraker::ODEStart(Double_t y[], Double_t& x1, Double_t& x2)
+{
+  Double_t phi = 2*TMath::Pi()*mT0 + mLon*TMath::DegToRad(),
+         theta = mLat*TMath::DegToRad();
+  y[0] = TMath::Cos(phi)*TMath::Cos(theta);
+  y[1] = TMath::Sin(phi)*TMath::Cos(theta);
+  y[2] = TMath::Sin(theta);
+
+  ZPoint z;
+  for(Int_t i=0; i<3; i++) z[i] = mV0*hEscapeVelocity*y[i];
+  ZTrans t;
+  t.SetRotByAngles(mPhi*TMath::DegToRad(), mTheta*TMath::DegToRad(), 0);
+  t.RotateIP(z);
+  for(Int_t i=0; i<3; i++) y[i + 3] = z[i];
+
+  x1 = mT0; x2 = mT1;
+}
+
+namespace
+{
   inline Double_t p223(Double_t x) { return x*TMath::Sqrt(x); }
 }
 
 void
-Moonraker::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d)
+Moonraker::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
 {
-  TVector3 pos(y(0), y(1), y(2));
+  TVector3 pos(y[0], y[1], y[2]);
   TVector3 moon; MoonPos(moon, x);
   TVector3 md(pos);
   md -= moon;
   Double_t r0 = p223(pos.Mag2());
   Double_t r1 = p223(md.Mag2());
-  for(UInt_t i=0; i<3; i++) {
-    d(i) = y(i+3u);
-    d(i+3u) = -hKappa*(pos(i)/r0 + md(i)/r1*mMMoon);
+  for (Int_t i=0; i<3; i++)
+  {
+    d[i]   = y[i+3];
+    d[i+3] = -hKappa*(pos(i)/r0 + md(i)/r1*mMMoon);
   }
-}
-
-void
-Moonraker::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
-{
-  Double_t phi = 2*TMath::Pi()*mT0 + mLon*TMath::DegToRad(),
-         theta = mLat*TMath::DegToRad();
-  v(0) = TMath::Cos(phi)*TMath::Cos(theta);
-  v(1) = TMath::Sin(phi)*TMath::Cos(theta);
-  v(2) = TMath::Sin(theta);
-
-  ZPoint z;
-  for(Int_t i=0; i<3; i++) z[i] = mV0*hEscapeVelocity*v(i);
-  ZTrans t;
-  t.SetRotByAngles(mPhi*TMath::DegToRad(), mTheta*TMath::DegToRad(), 0);
-  t.RotateIP(z);
-  for(Int_t i=0; i<3; i++) v(i + 3) = z[i];
-
-  x1 = mT0; x2 = mT1;
 }

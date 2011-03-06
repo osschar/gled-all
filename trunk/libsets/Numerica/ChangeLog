@@ -1,3 +1,20 @@
+2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use GSL for ODE integration. This adds dependency on gsl library.
+
+	* Makefile:
+	Link against libgsl.
+
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	Remove old code, wrap around gsl_odeiv interface.
+	This also required a change ODECrawlerMaster prototypes - raw
+	double arrays are now passed in.
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	Follow-up on changes in OdeCrawler.
+
 2010-10-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/MultiSpheror.cxx:

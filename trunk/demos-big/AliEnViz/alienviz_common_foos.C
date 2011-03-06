@@ -15,7 +15,7 @@ ZNameMap *aev_fonts    = 0;
 ZNameMap *aev_rnrmods  = 0;
 ZNameMap *aev_textures = 0;
 
-void alienviz_setup_lib_objects(Int_t queen_size)
+void alienviz_setup_lib_objects(Int_t queen_size=16384)
 {
   aev_queen = new ZQueen(queen_size, "AEVQueen", "Goddess of Ver");
   g_sun_king->Enthrone(aev_queen);

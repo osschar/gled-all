@@ -164,7 +164,7 @@ void test()
   dd->SetMapViz(c_mapviz);
   dd->SetMonaViz(mona_viz);
   dd->SetGledViz(gled_viz);
-  dd->SetTexCont(textures);
+  dd->SetTexCont(aev_textures);
 
   dd->InitAnimationStuff();
 

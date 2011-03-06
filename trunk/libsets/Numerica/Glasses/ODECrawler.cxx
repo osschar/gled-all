@@ -5,6 +5,28 @@
 
 #include <TMath.h>
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv.h>
+
+//==============================================================================
+// GSL -> OdeCrawlerMaster wrappers
+//==============================================================================
+
+namespace
+{
+  int ode_crawler_der_foo(double t, const double y[], double dydt[], void* ud)
+  {
+    ((ODECrawlerMaster*)ud)->ODEDerivatives(t, y, dydt);
+    return GSL_SUCCESS;
+  }
+
+  int ode_crawler_jac_foo(double t, const double y[], double* dfdy, double dfdt[], void* ud)
+  {
+    ((ODECrawlerMaster*)ud)->ODEJacobian(t, y, dfdy, dfdt);
+    return GSL_SUCCESS;
+  }
+}
+
 
 //==============================================================================
 // ODECrawlerMaster
@@ -37,8 +59,9 @@ ClassImp(ODECrawlerMaster);
 // Trajectory is stored in ODEstorage object with at least mStoreDx
 // between consequtive points.
 // Maximum of mStoreMax intermediate points are stored.
-// If mStoreMax = 0 no results are stored.
-// If mStoreMax < 0 all points are stored (default).
+//   If mStoreMax = 0 no results are stored.
+//   If mStoreMax < 0 all points are stored (default).
+// Start and end points (at x1 and x2) are always stored, unless mStoreMax=0.
 //
 // Example glass Moonraker. Macro moonraker.C.
 //________________________________________________________________________
@@ -47,23 +70,78 @@ ClassImp(ODECrawler);
 
 void ODECrawler::_init()
 {
-  hTINY = 1e-30; hSAFETY = 0.9; hPGROW = -0.2; hPSHRNK = -0.25; hERRCON = 1.89e-4;
-  hTrueMaster = 0;
-  hCrawling   = false;
+  m_true_master = 0;
+  m_crawling    = false;
 
-  mGuessesOK = mGuessesBad = mStored = 0;
+  m_gsl_system  = new gsl_odeiv_system;
+  m_gsl_system->function = ode_crawler_der_foo;
+  m_gsl_system->jacobian = ode_crawler_jac_foo;
+
+  m_gsl_evolve  = 0;
+  m_gsl_control = 0;
+  m_gsl_step    = 0;
+
+  mStepOK = mStepChanged = mStored = 0;
   mMaxSteps  = 1000000; mStoreDx = 0.001; mStoreMax = -1;
   mStorage   = 0;
-  mAcc = 1e-8; mH1 = 1e-2; mHmin = 1e-18;
-  mX1 = 0; mX2 = 0;
+  mEpsAbs    = 0; mEpsRel = 1e-8; mFacVal = 1; mFacDer = 0;
+  mH1 = 1e-2; mHmin = 1e-18; mH = 0; bStoreH = true;
+  mStepFunc = SF_RKF45; mPrevStepFunc = (StepFunc_e) -1;
+  mX1 = mX2 = 0;
+}
+
+ODECrawler::ODECrawler(const Text_t* n, const Text_t* t) :
+  ZGlass(n,t)
+{
+  _init();
 }
 
 ODECrawler::~ODECrawler()
 {
   delete mStorage;
+
+  _gsl_free();
+  delete m_gsl_system;
 }
 
-/**************************************************************************/
+//==============================================================================
+
+const gsl_odeiv_step_type* ODECrawler::s_get_step_func(ODECrawler::StepFunc_e sf)
+{
+  switch (sf)
+  {
+    case SF_RK2:    return gsl_odeiv_step_rk2;
+    case SF_RK4:    return gsl_odeiv_step_rk4;
+    case SF_RKF45:  return gsl_odeiv_step_rkf45;
+    case SF_RKCK:   return gsl_odeiv_step_rkck;
+    case SF_RK8PD:  return gsl_odeiv_step_rk8pd;
+    case SF_RK2Imp: return gsl_odeiv_step_rk2imp;
+    case SF_RK4Imp: return gsl_odeiv_step_rk4imp;
+    case SF_BSImp:  return gsl_odeiv_step_bsimp;
+    case SF_Gear1:  return gsl_odeiv_step_gear1;
+    case SF_Gear2:  return gsl_odeiv_step_gear2;
+    default:        return 0;
+  }
+}
+
+void ODECrawler::_gsl_alloc()
+{
+  m_gsl_system->dimension = mN;
+  m_gsl_system->params    = m_true_master;
+
+  m_gsl_step    = gsl_odeiv_step_alloc(s_get_step_func(mStepFunc), mN);
+  m_gsl_control = gsl_odeiv_control_standard_new(mEpsAbs, mEpsRel, mFacVal, mFacDer);
+  m_gsl_evolve  = gsl_odeiv_evolve_alloc(mN);
+}
+
+void ODECrawler::_gsl_free()
+{
+  gsl_odeiv_evolve_free(m_gsl_evolve);
+  gsl_odeiv_control_free(m_gsl_control);
+  gsl_odeiv_step_free(m_gsl_step);
+}
+
+//==============================================================================
 
 void ODECrawler::AdvanceXLimits(Double_t delta_x)
 {
@@ -94,18 +172,28 @@ ODEStorage* ODECrawler::SwapStorage(ODEStorage* s)
   return old;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void ODECrawler::init_integration(Bool_t call_ode_start)
 {
   // Initialize storage arrays, clear integration state.
   // If call_ode_start is true, call ODEStart() in master to get
   // initial parameters.
-  // hTrueMaster must be set.
+  // m_true_master must be set.
 
-  mN = hTrueMaster->ODEOrder();
-  if (mY.GetNoElements() != mN)
+  mN = m_true_master->ODEOrder();
+
+  if (mY.GetNoElements() != mN || mStepFunc != mPrevStepFunc)
+  {
     mY.ResizeTo(mN);
+    _gsl_free();
+    _gsl_alloc();
+  }
+  else
+  {
+    gsl_odeiv_control_init(m_gsl_control, mEpsAbs, mEpsRel, mFacVal, mFacDer);
+    gsl_odeiv_evolve_reset(m_gsl_evolve);
+  }
 
   if (mStoreMax != 0)
   {
@@ -123,98 +211,13 @@ void ODECrawler::init_integration(Bool_t call_ode_start)
     }
   }
 
-  mGuessesOK = mGuessesBad = mStored = 0;
+  mStepOK = mStepChanged = mStored = 0;
 
   if (call_ode_start)
-    hTrueMaster->ODEStart(mY, mX1, mX2);
+    m_true_master->ODEStart(mY.GetMatrixArray(), mX1, mX2);
 }
 
-Int_t
-ODECrawler::Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
-		 TVectorD& yscal, Double_t& h_last, Double_t& h_next)
-{
-  static const Exc_t _eh("ODECrawler::Rkqs ");
-
-  Double_t errmax, htemp, xnew;
-
-  TVectorD yerr(mN), y_buf(mN);
-  Double_t h = htry;
-  while (true)
-  {
-    Rkck(y, dydx, x, h, y_buf, yerr);
-    errmax = 0.0;
-    for (Int_t i = 0; i < mN; ++i)
-      errmax = TMath::Max(errmax, TMath::Abs(yerr(i)/yscal(i)));
-    errmax /= mAcc;
-    if (errmax <= 1.0) break;
-    htemp = hSAFETY*h*TMath::Power(errmax, hPSHRNK);
-    h = (h >= 0) ? TMath::Max(htemp, 0.1*h) : TMath::Min(htemp, 0.1*h);
-    xnew = x + h;
-    if (xnew == x)
-    {
-      throw(_eh + GForm("stepsize underflow, errmax=%f.", errmax));
-    }
-  }
-  if (errmax > hERRCON)
-    h_next = hSAFETY*h*TMath::Power(errmax, hPGROW);
-  else
-    h_next = 5.0*h;
-  x += (h_last = h);
-  y = y_buf;
-  return 0;
-}
-
-/**************************************************************************/
-
-void ODECrawler::Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,
-                      TVectorD& yout, TVectorD& yerr)
-{
-  static const Double_t
-    a2  = 0.2, a3 = 0.3, a4 = 0.6, a5 = 1.0, a6 = 0.875;
-  static const Double_t
-    b21 =  0.2,           b31 =  3.0/40.0,         b32 =  9.0/40.0,
-    b41 =  0.3,           b42 = -0.9,              b43 =  1.2,
-    b51 = -11.0/54.0,     b52 =  2.5,              b53 = -70.0/27.0,
-    b54 =  35.0/27.0,     b61 =  1631.0/55296.0,   b62 =  175.0/512.0,
-    b63 =  575.0/13824.0, b64 =  44275.0/110592.0, b65 =  253.0/4096.0;
-  static const Double_t
-    c1 = 37.0/378.0,  c3 = 250.0/621.0,
-    c4 = 125.0/594.0, c6 = 512.0/1771.0;
-  static const Double_t
-    dc1 = c1 - 2825.0/27648.0,  dc3 = c3 - 18575.0/48384.0,
-    dc4 = c4 - 13525.0/55296.0, dc6 = c6 - 0.25,
-    dc5 = -277.0/14336.0;
-
-  TVectorD der2(mN), der3(mN), der4(mN), der5(mN), der6(mN), y_buf(mN);
-
-  for (Int_t i = 0; i < mN; ++i)
-    y_buf(i) = y(i) + b21*h*dydx(i);
-  hTrueMaster->ODEDerivatives(x + a2*h, y_buf, der2);
-
-  for (Int_t i = 0; i < mN; ++i)
-    y_buf(i) = y(i) + h*(b31*dydx(i) + b32*der2(i));
-  hTrueMaster->ODEDerivatives(x + a3*h, y_buf, der3);
-
-  for (Int_t i = 0; i < mN; ++i)
-    y_buf(i) = y(i) + h*(b41*dydx(i) + b42*der2(i) + b43*der3(i));
-  hTrueMaster->ODEDerivatives(x + a4*h, y_buf, der4);
-
-  for (Int_t i = 0; i < mN; ++i)
-    y_buf(i) = y(i) + h*(b51*dydx(i) + b52*der2(i) + b53*der3(i) + b54*der4(i));
-  hTrueMaster->ODEDerivatives(x + a5*h, y_buf, der5);
-
-  for (Int_t i = 0; i < mN; ++i)
-    y_buf(i) = y(i) + h*(b61*dydx(i) + b62*der2(i) + b63*der3(i) + b64*der4(i) + b65*der5(i));
-  hTrueMaster->ODEDerivatives(x + a6*h, y_buf, der6);
-
-  for (Int_t i = 0; i < mN; ++i)
-    yout(i) = y(i) + h*(c1*dydx(i) + c3*der3(i) + c4*der4(i) + c6*der6(i));
-
-  for (Int_t i = 0; i < mN; ++i)
-    yerr(i) = h*(dc1*dydx(i) + dc3*der3(i) + dc4*der4(i) + dc5*der5(i) + dc6*der6(i));
-}
-
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ODECrawler::Integrate()
 {
@@ -222,57 +225,65 @@ void ODECrawler::Integrate()
 
   static const Exc_t _eh("ODECrawler::Integrate ");
 
-  Double_t x, h, h_last, h_next;
+  Double_t x, h, h_last;
   Double_t xsav = 0;
 
   x = mX1;
-  h = TMath::Sign(mH1, mX2-mX1);
-  TVectorD y(mY);
-  TVectorD yscal(mN), dydx(mN);
-  if (mStoreMax != 0) xsav = x - 2*mStoreDx;
-  for (Int_t nstp = 0; nstp < mMaxSteps; ++nstp)
+  h = TMath::Sign((bStoreH && mH != 0) ? mH : mH1, mX2 - mX1);
+
+  if (mStoreMax != 0)
   {
-    hTrueMaster->ODEDerivatives(x, y, dydx);
-    for (Int_t i = 0; i < mN; ++i)
+    mStorage->AddEntry(x, mY.GetMatrixArray());
+    ++mStored;
+    xsav = x;
+  }
+
+  Int_t n_step = 0;
+
+  while (x != mX2)
+  {
+    if (++n_step > mMaxSteps)
     {
-      yscal(i) = TMath::Abs(y(i)) + TMath::Abs(dydx(i)*h) + hTINY;
+      throw _eh + GForm("Too many steps, MaxSteps=%d.", mMaxSteps);
+    }
+
+    h_last = h;
+
+    int err = gsl_odeiv_evolve_apply(m_gsl_evolve, m_gsl_control, m_gsl_step,
+				     m_gsl_system, &x, mX2, &h,
+				     mY.GetMatrixArray());
+    if (err != GSL_SUCCESS)
+    {
+      throw _eh + GForm("gsl error %d: %s", err, gsl_strerror(err));
     }
 
     if (mStoreMax < 0 ||
         (mStoreMax > 0 && mStored < mStoreMax - 1 &&
-         TMath::Abs(x - xsav) > TMath::Abs(mStoreDx)))
+				    TMath::Abs(x - xsav) > mStoreDx))
     {
-      mStorage->AddEntry(x, y.GetMatrixArray());
+      mStorage->AddEntry(x, mY.GetMatrixArray());
       ++mStored;
       xsav = x;
     }
 
-    if ((x + h - mX2)*(x + h - mX1) > 0) h = mX2 - x;
-
-    if (Rkqs(y, dydx, x, h, yscal, h_last, h_next)) return;
-
     if (h_last == h)
-      ++mGuessesOK;
+      ++mStepOK;
     else
-      ++mGuessesBad;
+      ++mStepChanged;
 
-    if ((x - mX2)*(mX2 - mX1) >= 0)
+    if (TMath::Abs(h) <= mHmin)
     {
-      mY = y;
-      if (mStoreMax != 0)
-      {
-        mStorage->AddEntry(x, y.GetMatrixArray());
-	++mStored;
-      }
-      return;
+      throw _eh + GForm("Step size too small, h=%g.", h);
     }
-    if (TMath::Abs(h_next) <= mHmin)
-    {
-      throw (_eh + GForm("Step size too small, h_next=%g.", h_next));
-    }
-    h = h_next;
   }
-  throw (_eh + GForm("Too many steps, MaxSteps=%d.", mMaxSteps));
+
+  if (mStoreMax != 0)
+  {
+    mStorage->AddEntry(x, mY.GetMatrixArray());
+    ++mStored;
+  }
+
+  mH = bStoreH ? TMath::Abs(h) : 0;
 }
 
 /**************************************************************************/
@@ -289,27 +300,37 @@ void ODECrawler::Crawl(Bool_t call_ode_start)
   {
     GLensReadHolder rdlock(this);
 
-    if (hCrawling)
-      throw(_eh + "already crawling.");
+    if (m_crawling)
+      throw _eh + "already crawling.";
 
     assert_odemaster(_eh);
 
-    hTrueMaster = dynamic_cast<ODECrawlerMaster*>(*mODEMaster);
-    if (!hTrueMaster)
-      throw(_eh + "master not an ODECrawlerMaster.");
+    m_true_master = dynamic_cast<ODECrawlerMaster*>(*mODEMaster);
+    if (!m_true_master)
+      throw _eh + "master not an ODECrawlerMaster.";
 
-    hCrawling = true;
+    m_crawling = true;
   }
 
-  init_integration(call_ode_start);
-  Integrate();
+  Exc_t exc_p;
+  try
+  {
+    init_integration(call_ode_start);
+    Integrate();
+  }
+  catch (Exc_t& exc)
+  {
+    exc_p = exc;
+  }
 
   {
     GLensReadHolder rdlock(this);
 
-    hCrawling = false;
+    m_crawling = false;
     Stamp(FID());
   }
+
+  if (!exc_p.IsNull()) throw exc_p;
 }
 
 void ODECrawler::ChangeOrderInPlace(Int_t order)

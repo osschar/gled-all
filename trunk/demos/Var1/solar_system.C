@@ -90,16 +90,16 @@ void solar_system(Int_t mode=0, Int_t n_planets=30)
 
   if (mode == 0)
   {
-    ode->SetAcc(1e-8);
+    ode->SetEpsRel(1e-8);
     ode->SetStoreDx(10);
     ss->StartChunkIntegratorThread();
   }
   else if (mode == 1)
   {
     if (n_planets > 60)
-      ode->SetAcc(1e-1);
+      ode->SetEpsRel(1e-1);
     else if (n_planets > 30)
-      ode->SetAcc(1e-3);      
+      ode->SetEpsRel(1e-3);      
     ss->StartStepIntegratorThread();
   }
   else

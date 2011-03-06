@@ -125,8 +125,8 @@ public:
 
   // ODE virtuals
   virtual UInt_t ODEOrder();
-  virtual void   ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d);
-  virtual void   ODEStart(TVectorD& v, Double_t& x1, Double_t& x2);
+  virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2);
+  virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]);
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
