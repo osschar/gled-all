@@ -125,19 +125,35 @@ UInt_t SolarSystem::ODEOrder()
   return 6 * mBalls->Size();
 }
 
-void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d)
+void SolarSystem::ODEStart(Double_t y[], Double_t& x1, Double_t& x2)
+{
+  Int_t i = 0;
+  Stepper<CosmicBall> stepper(*mBalls);
+  while (stepper.step())
+  {
+    const Double_t* P = stepper->RefTrans().ArrT();
+    const TVector3& V = stepper->RefV();
+
+    y[i++] = P[0];  y[i++] = P[1];  y[i++] = P[2];
+    y[i++] = V.x(); y[i++] = V.y(); y[i++] = V.z();
+  }
+
+  assert(i == (Int_t) ODEOrder());
+}
+
+void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
 {
   const Int_t max_i = ODEOrder();
 
   for (Int_t i = 0; i < max_i; i += 6)
   {
-    d(i)   = y(i+3);
-    d(i+1) = y(i+4);
-    d(i+2) = y(i+5);
+    d[i]   = y[i+3];
+    d[i+1] = y[i+4];
+    d[i+2] = y[i+5];
 
-    d(i+3) = 0;
-    d(i+4) = 0;
-    d(i+5) = 0;
+    d[i+3] = 0;
+    d[i+4] = 0;
+    d[i+5] = 0;
   }
 
   TVector3 delta;
@@ -163,7 +179,7 @@ void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& 
 
       const Int_t b = 6*j;
 
-      delta.SetXYZ(y(b) - y(a), y(b+1) - y(a+1), y(b+2) - y(a+2));
+      delta.SetXYZ(y[b] - y[a], y[b+1] - y[a+1], y[b+2] - y[a+2]);
 
       const Double_t rsqr  = delta.Mag2();
       const Double_t R     = Bi->mRadius + Bi->mRadius;
@@ -179,36 +195,20 @@ void SolarSystem::ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& 
       }
 
       const Double_t fi = Bj->mM * rftot;
-      d(a+3) += fi * delta.x();
-      d(a+4) += fi * delta.y();
-      d(a+5) += fi * delta.z();
+      d[a+3] += fi * delta.x();
+      d[a+4] += fi * delta.y();
+      d[a+5] += fi * delta.z();
       const Double_t fj = Bi->mM * rftot;
-      d(b+3) -= fj * delta.x();
-      d(b+4) -= fj * delta.y();
-      d(b+5) -= fj * delta.z();
+      d[b+3] -= fj * delta.x();
+      d[b+4] -= fj * delta.y();
+      d[b+5] -= fj * delta.z();
     }
   }
 
   // Brutal fix - keep Stella at the origin.
   // Should calculate SS speed and put this into its gallactic node.
   // Assumes a single star at index 0.
-  d(0) = d(1) = d(2) = d(3) = d(4) = d(5) = 0;
-}
-
-void SolarSystem::ODEStart(TVectorD& v, Double_t& x1, Double_t& x2)
-{
-  Int_t i = 0;
-  Stepper<CosmicBall> stepper(*mBalls);
-  while (stepper.step())
-  {
-    const Double_t* P = stepper->RefTrans().ArrT();
-    const TVector3& V = stepper->RefV();
-
-    v(i++) = P[0];  v(i++) = P[1];  v(i++) = P[2];
-    v(i++) = V.x(); v(i++) = V.y(); v(i++) = V.z();
-  }
-
-  assert(i == (Int_t) ODEOrder());
+  d[0] = d[1] = d[2] = d[3] = d[4] = d[5] = 0;
 }
 
 /**************************************************************************/
@@ -384,7 +384,7 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
 
     i0 = TMath::BinarySearch<Double_t>(N, T, t);
     if (i0 < 0 || i0 > N - 1)
-      throw(_eh + "index out of range.");
+      throw _eh + "index out of range.";
     if (i0 == N - 1) // Happens as storage is in floats.
       i0 = N - 2;
   }
@@ -425,7 +425,7 @@ void SolarSystem::SetTime(Double_t t)
   static const Exc_t _eh("SolarSystem::SetTime ");
 
   if (mCrawlMode == CM_DirectStep)
-    throw(_eh + "Not available in direct-step mode.");
+    throw _eh + "Not available in direct-step mode.";
 
   mTime = set_time(t, false);
   Stepper<CosmicBall> stepper(*mBalls);
@@ -496,6 +496,7 @@ void SolarSystem::ChunkIntegratorThread()
                  mStorageMap.begin()->second->GetMinXStored(),
                  mStorageMap.begin()->second->GetMaxXStored(),
                  mTime, t_min);
+	  delete mStorageMap.begin()->second;
           mStorageMap.erase(mStorageMap.begin());
         }
 
@@ -552,10 +553,10 @@ void SolarSystem::StartChunkIntegratorThread()
   assert_odecrawler(_eh);
 
   if (mCrawlMode != CM_ChunkedStorage)
-    throw(_eh + "Not in ChunkedStorage mode.");
+    throw _eh + "Not in ChunkedStorage mode.";
 
   if (mIntegratorThread)
-    throw (_eh + "Integrator thread already running.");
+    throw _eh + "Integrator thread already running.";
 
   mStorageMap.clear();
   mCurrentStorage = mStorageMap.end();
@@ -583,10 +584,10 @@ void SolarSystem::StartStepIntegratorThread()
   assert_odecrawler(_eh);
 
   if (mCrawlMode == CM_DirectStep)
-    throw(_eh + "Already in direct-step mode.");
+    throw _eh + "Already in direct-step mode.";
 
   if (mIntegratorThread)
-    throw(_eh + "Integrator thread already running.");
+    throw _eh + "Integrator thread already running.";
 
   mCrawlMode = CM_DirectStep;
   {
@@ -617,7 +618,7 @@ void SolarSystem::StopIntegratorThread()
   static const Exc_t _eh("SolarSystem::StopIntegratorThread ");
 
   if (mIntegratorThread == 0)
-    throw (_eh + "not running.");
+    throw _eh + "not running.";
 
   mIntegratorThread->Cancel();
   mIntegratorThread->Join();
@@ -717,7 +718,7 @@ void SolarSystem::AddPlanetoid(CosmicBall* cb)
   static const Exc_t _eh("SolarSystem::AddPlanetoid ");
 
   if (mIntegratorThread && mCrawlMode != CM_DirectStep)
-    throw(_eh + "Balls can be added during thread operation only in direct-step mode.");
+    throw _eh + "Balls can be added during thread operation only in direct-step mode.";
 
   GMutexHolder ball_lock(mBallSwitchMutex);
 
@@ -735,7 +736,7 @@ void SolarSystem::RemovePlanetoid(CosmicBall* cb)
   static const Exc_t _eh("SolarSystem::RemovePlanetoid ");
 
   if (mIntegratorThread && mCrawlMode != CM_DirectStep)
-    throw(_eh + "Balls can be removed during thread operation only in direct-step mode.");
+    throw _eh + "Balls can be removed during thread operation only in direct-step mode.";
 
   GMutexHolder ball_lock(mBallSwitchMutex);
 

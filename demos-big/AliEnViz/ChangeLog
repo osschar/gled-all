@@ -1,3 +1,14 @@
+2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* solar_suck.C:
+	Follow-up on changes in OdeCrawler.
+	Clarify instructions for connecting to ML service.
+
+	* alienviz_common_foos.C:
+	* suck.C:
+	* test.C:
+	Maintenace and some cosmetic changes.
+
 2008-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* alienviz_common_foos.C:

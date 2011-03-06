@@ -1,3 +1,9 @@
+2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Follow-up on changes in OdeCrawler.
+
 2010-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Opcode/Ice/IceTypes.h:

@@ -12,6 +12,8 @@ DICT_DIRS	:= Glasses Stones Numerica
 VIEW_FL_DIRS	:=
 VIEW_DIRS	:=
 
+BASE_LD_LIBS    := -lgsl
+
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc
 #--------------------------------------------------------------

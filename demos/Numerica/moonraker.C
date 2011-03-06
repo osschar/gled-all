@@ -30,7 +30,7 @@
   ODECrawler* ode_c = new ODECrawler();
   g_queen->CheckIn(ode_c);
   moon_scene->Add(ode_c);
-  ode_c->SetAcc(1e-12);
+  ode_c->SetEpsRel(1e-12);
   ode_c->SetStoreMax(2000);
 
   Moonraker* moon = new Moonraker();

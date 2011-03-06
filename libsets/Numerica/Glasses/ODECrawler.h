@@ -6,13 +6,19 @@
 #include <TVectorD.h>
 #include <Glasses/ZGlass.h>
 
+#include <gsl/gsl_odeiv.h>
+
+
 class ODECrawlerMaster
 {
 public:
   virtual ~ODECrawlerMaster() {}
+
   virtual UInt_t ODEOrder() = 0;
-  virtual void ODEDerivatives(const Double_t x, const TVectorD& y, TVectorD& d) = 0;
-  virtual void ODEStart(TVectorD& v, Double_t& x1, Double_t& x2) = 0;
+  virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2) = 0;
+  virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]) = 0;
+  virtual bool   ODEHasJacobian() const { return false; }
+  virtual void   ODEJacobian(Double_t x, const Double_t y[], Double_t* dfdy, Double_t dfdt[]) {}
 
   ClassDef(ODECrawlerMaster, 1);
 };
@@ -130,44 +136,61 @@ typedef ODEStorageT<Double_t> ODEStorageD;
 
 class ODECrawler : public ZGlass
 {
+public:
+  enum StepFunc_e
+  {
+    SF_RK2, SF_RK4, SF_RKF45, SF_RKCK, SF_RK8PD, SF_RK2Imp, SF_RK4Imp,
+    SF_BSImp, SF_Gear1, SF_Gear2
+  };
+
+  static const gsl_odeiv_step_type* s_get_step_func(StepFunc_e sf);
+
 private:
-  Double_t          hTINY, hSAFETY, hPGROW, hPSHRNK, hERRCON; //!
-  ODECrawlerMaster *hTrueMaster; //!
-  Bool_t            hCrawling;   //!
+  ODECrawlerMaster  *m_true_master; //!
+  Bool_t             m_crawling;    //!
+
+  gsl_odeiv_system  *m_gsl_system;  //!
+  gsl_odeiv_evolve  *m_gsl_evolve;  //!
+  gsl_odeiv_control *m_gsl_control; //!
+  gsl_odeiv_step    *m_gsl_step;    //!
 
   void _init();
+
+  void _gsl_alloc();
+  void _gsl_free();
 
 protected:
   ZLink<ZGlass> mODEMaster;     // X{GS} L{a}
 
-  Int_t 	mGuessesOK;	//! X{g}  7 ValOut(-join=>1)
-  Int_t 	mGuessesBad;	//! X{g}  7 ValOut()
-  Int_t 	mStored;	//! X{g}  7 ValOut(-join=>1)
-  Int_t 	mMaxSteps;	//  X{gS} 7 Value()
-  Int_t 	mStoreMax;	//  X{gS} 7 Value(-join=>1)
-  Double_t	mStoreDx;	//  X{gS} 7 Value()
+  Int_t 	mStepOK;	//! X{G}  7 ValOut(-join=>1)
+  Int_t 	mStepChanged;	//! X{G}  7 ValOut()
+  Int_t 	mStored;	//! X{G}  7 ValOut(-join=>1)
+  Int_t 	mMaxSteps;	//  X{GS} 7 Value()
+  Int_t 	mStoreMax;	//  X{GS} 7 Value(-join=>1)
+  Double_t	mStoreDx;	//  X{GS} 7 Value(-range=>[0,1e12])
   ODEStorage   *mStorage;       //  X{g}
 
   TVectorD	mY;		//! X{r}
-  Int_t		mN;		//  X{g}  7 ValOut(-join=>1)
-  Double_t	mAcc;		//  X{gS} 7 Value(-range=>[0,1])
-  Double_t	mX1;		//  X{gS} 7 Value(-join=>1)
-  Double_t	mX2;		//  X{gS} 7 Value()
-  Double_t	mH1;		//  X{gS} 7 Value(-join=>1)
-  Double_t	mHmin;		//  X{gS} 7 Value()
+  Int_t		mN;		//  X{G}  7 ValOut()
+  Double_t	mEpsAbs;	//  X{GS} 7 Value(-range=>[0,1000], -join=>1)
+  Double_t	mEpsRel;	//  X{GS} 7 Value(-range=>[0,1])
+  Double_t	mFacVal;	//  X{GS} 7 Value(-range=>[0,100], -join=>1)
+  Double_t	mFacDer;	//  X{GS} 7 Value(-range=>[0,100])
+  Double_t	mH1;		//  X{GS} 7 Value(-join=>1)
+  Double_t	mHmin;		//  X{GS} 7 Value()
+  Double_t      mH;             //  X{G}  7 ValOut(-join=>1)
+  Bool_t        bStoreH;	//  X{GS} 7 Bool()
+  StepFunc_e    mStepFunc;      //  X{GS} 7 PhonyEnum()
+  StepFunc_e    mPrevStepFunc;  //!
+  Double_t	mX1;		//  X{GS} 7 Value(-join=>1)
+  Double_t	mX2;		//  X{GS} 7 Value()
 
   void          init_integration(Bool_t call_ode_start);
 
-  Int_t		Rkqs(TVectorD& y, TVectorD& dydx, Double_t& x, Double_t htry,
-		     TVectorD& yscal, Double_t& h_last, Double_t& h_next);
-  void 		Rkck(TVectorD& y, TVectorD& dydx, Double_t x, Double_t h,
-		     TVectorD& yout, TVectorD& yerr);
   void		Integrate();
 
 public:
-  ODECrawler(const Text_t* n="ODECrawler", const Text_t* t=0) :
-    ZGlass(n,t) { _init(); }
-
+  ODECrawler(const Text_t* n="ODECrawler", const Text_t* t=0);
   virtual ~ODECrawler();
 
   void        AdvanceXLimits(Double_t delta_x=0);

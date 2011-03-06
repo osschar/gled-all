@@ -184,7 +184,7 @@ void solar_suck()
   //============================================================================
 
   ode->SetH1(1); ode->SetHmin(1e-8);
-  ode->SetAcc(1e-3);
+  ode->SetEpsRel(1e-3);
 
   ss->SetDesiredRHack(true);
   ss->SetDesiredRHackT0(5);
@@ -196,10 +196,17 @@ void solar_suck()
   animator->SetInterBeatMS(TMath::Nint(1000.0/g_rps));
   animator->Start();
 
-  // To be used under special conditions. Default is pcalimonitor2.cern.ch:7014
-  // ml_sucker->SetSuckHost("localhost");
-  // ml_sucker->SetSuckPort(9999); // nc -l localhost 9999 < nc-dump
-  // ml_sucker->SetSuckPort(7777); // ssh tunnel
+  // Direct connection:
+  // ml_sucker->SetSuckHost("pcalimonitor.cern.ch");
+  // ml_sucker->SetSuckPort(7015);
+
+  // ssh tunnel: ssh -L 7777:pcalimonitor.cern.ch:7015 lxplus.cern.ch cat -
+  ml_sucker->SetSuckHost("localhost");
+  ml_sucker->SetSuckPort(7777);
+  // Can also do capture and play it back later:
+  // 1. nc localhost 7777 > nc-dump
+  // 2. nc -l localhost 7777 < nc-dump
+
   // ml_sucker->SetFooSleep(10);
 
   ml_sucker->StartSucker();
