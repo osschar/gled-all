@@ -23,7 +23,10 @@ mPlastocronMainAxis(2),
 mPlastocronLateralAxis(3),
 mSignalDelayMainAxis(1),
 mSignalDelayLateralAxis(1),
-mLateralAngle(180)
+mLateralAngle(70),
+mAColor(1, 0, 1),
+mBColor(0, 1, 1),
+mLColor(1, 0, 0)
 {
   _init();
 }
@@ -38,48 +41,56 @@ void DibotryoidHerb::_init()
 DibotryoidHerb::~DibotryoidHerb()
 {}
 
-//==============================================================================
-GrowingPlant::Segments_i  DibotryoidHerb::NeighbourBack( Segments_i startIt)
-{
-  Segments_t& list = mOldSegments;
-  if (list.empty())
-    return list.begin();
-    
-  --startIt;
-  int nStack = 0;  
-  for (GrowingPlant::Segments_i i = startIt; i != mOldSegments.begin(); --i)
-  {
-    if ((*i).mType == '[')
-    {
-      --nStack;
-    }
-    else if ((*i).mType == ']')
-    {
-      ++nStack;  
-    }
-    else 
-    {
-      if (nStack <= 0 && ((*i).mType == 'I' ||  (*i).mType == 'S'))
-        return i;
-    }
-  }
 
-  printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>error\n");
+
+void DibotryoidHerb::DumpList(Segments_t& l)  
+{
+  char commandCol[13];
   
-  for (Segments_i i = list.begin(); i != list.end(); ++i)
+  char commandDef[13];
+  
+	/* Command is the control command to the terminal */
+	//sprintf(command, "%c[%d;%d;%dm", 0x1B, 5, 33, 36); //"\033[5,33;36mboo"
+	sprintf(commandCol, "%c[%d;%dm", 0x1B, 22, 33); //"\033[5,33;36mboo"
+	sprintf(commandDef, "%c[%d;%dm", 0x1B, 22, 0); //"\033[5,33;36mboo"
+  
+  
+  bool sideBranch = false;
+  int nstack = 0;
+  int n = (int)l.size();
+  // printf("Expression[%d]: \n", (int)slist.size());
+  for (int i=0; i< n; ++i)
   {
-    printf("%c", (*i).mType);
+    if (l[i].mType == '[') nstack++;
+    if (l[i].mType == ']') nstack--;
+    
+    if (nstack == 1 && l[i+1].mType == '+')
+    {
+      sideBranch = true;//\033[22;31mboo
+      printf("%s", commandCol);
+    }
+    
+    
+    printf("%c", l[i].mType);
+    if(l[i].mType == ']' && sideBranch && nstack == 0)
+    {
+      sideBranch = false;
+      printf("%s", commandDef);
+    }
+      
+   // if ((*i).mType == 'I') printf("(%d, %d)", (*i).mParam1, (*i).mParam2);
   }      
   printf(" \n");
   
-  return list.begin();
+  if (nstack) printf("!!!!!!!!!!!!!!!!!!stack %d \n", nstack);
 }
 
-void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
+void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& in, Segments_t& out)
 {  
   out.s('b', 1, 1);
-  out.s('&', 70);  
-  out.s('/', mLateralAngle);
+  out.s('&', mLateralAngle);  
+  out.s('+', mLateralAngle);  
+  out.s('/', 180);
 
   Segment& seg = *oldRef;
   switch (seg.mType)
@@ -90,21 +101,21 @@ void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
     case 'a': 
     {
       
-      Segment& ng = *NeighbourBack(oldRef);
+      Segments_i ngi = NeighbourBack(in, oldRef);
       
       //   if (ng.mType == 'I' && ng.mParam1 == ng.mParam2)
-      if (ng.mType == 'I' && ng.mParam1 == ng.mParam2)
+      if (ngi != in.end() && (*ngi).mType == 'I' && (*ngi).mParam1 > 0)
       {
         // flowering
        // printf("'a'-> new flower, neighbour I (%d %d) plastocron %d\n",  ng.mParam1,  ng.mParam1, ng.mParam1);
-        out.x('I', 0, mSignalDelayMainAxis).x("[L][&b]B");
+        out.x('I', 0, -1).x("[L][+b]B");
         break;
       }
       
       if (seg.mParam1 < mPlastocronMainAxis)
       {
         // printf("a accumulate plastocron \n");
-        out.x("/").x('a', seg.mParam1 + 1, seg.mParam2);
+        out.x('a', seg.mParam1 + 1, seg.mParam2);
         break;
       }
       
@@ -113,12 +124,12 @@ void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
         // build plain nodes
         if (seg.mParam2 <mCreateBranchDelay)
         {
-          out.x('I', 0, mSignalDelayMainAxis).x("[L]").x('a', 1, seg.mParam2 + 1);
+          out.x('I', 0, -1).x("[L]").x('a', 1, seg.mParam2 + 1);
         } 
         else 
         {
           // building subranches
-          out.x('I', 0, mSignalDelayMainAxis).x("[L][&b]").x('a', 1, seg.mParam2);
+          out.x('I', 0, -1).x("[L][+b]/").x('a', 1, seg.mParam2);
         }
         break;
       }
@@ -135,21 +146,22 @@ void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
     /////////////////////////////////////////////////////////////////////////////////////////
     case  'b':
     {
-      Segment& x = *NeighbourBack(oldRef); 
+      Segments_i ni = NeighbourBack(in, oldRef, 0, false); 
       if (seg.mParam1 == mPlastocronLateralAxis)
       {
        // printf("'b'-> new leaf segment : %d == %d\n", seg.mParam1, mPlastocronLateralAxis);        
-        out.x('I', 0, mSignalDelayLateralAxis).x("[L]").x('b', 1, seg.mParam2 + 1);
+        out.x('I', 0, -2).x("[L]").x('b', 1, seg.mParam2 + 1);
       }
-      else if (x.mType == 'I' && x.mParam1 > 0)
+      else if (ni != in.end() && (*ni).mType == 'I' && (*ni).mParam1 > 0/* == mSignalDelayLateralAxis*/)
       {
-        // printf("'b'-> new lateral flower, neighbour I (%d %d) plastocron %d\n",  x.mParam1,  x.mParam1, seg.mParam1);
-        out.x('I', 1, mSignalDelayLateralAxis).x("[L]B");
+          //printf("'b'-> new lateral flower, neighbour I (%d %d) plastocron %d\n",  (*ni).mParam1,  seg.mParam1, seg.mParam1);
+          out.x('I', 0, -2).x("[L]B");
+          //out.x("B");
       }
       else if (seg.mParam1 < mPlastocronLateralAxis)
       {
       //  printf("'b'-> accumulate plastocron \n");
-        out.x(seg.mType, seg.mParam1 + 1, seg.mParam2 + 1);
+        out.x(seg.mType, seg.mParam1 + 1);
       }
       else
       {
@@ -171,32 +183,44 @@ void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
     /////////////////////////////////////////////////////////////////////////////////////////
     case 'I':
     {
-      // node
-      if (seg.mParam1 > 0 && seg.mParam1 < seg.mParam2)
+      int signalDelay = (seg.mParam2 == -1) ? mSignalDelayMainAxis : mSignalDelayLateralAxis;
+      if (seg.mParam1 > 0 && seg.mParam1 < signalDelay)
       {
         out.x('I', seg.mParam1 + 1, seg.mParam2);
         break;
       }
       
-      Segments_i nIt = NeighbourBack(oldRef);  
-      // printf("search neighbour for I(%d, %d) __ %c \n", seg.mParam1, seg.mParam2, (*nIt).mType );
-
-      if ((*nIt).mType == 'S' && (*nIt).mParam1 == mSendSignalDelay)
+      int stackOff = 0;
+      if (seg.mParam2 == -2) // lateral brach
       {
-        out.x('I', 1, seg.mParam2);
-        break;
+        Segments_i ib = oldRef; --ib;
+        if ((*ib).mType == '+') {
+          stackOff = -1;
+          // printf("xxxxxxxxxxxxxxxxxx\n");
+        }
       }
-      
-      
-      if ((*nIt).mType == 'I')
+      Segments_i nIt = NeighbourBack(in, oldRef, stackOff, false);  
+      // printf("search neighbour for I(%d, %d) __ %c \n", seg.mParam1, seg.mParam2, (*nIt).mType );
+      if (nIt != in.end())
       {
-        // printf("compare params %d %d\n",  (*nIt).mParam1, (*nIt).mParam2);
-        if ((*nIt).mParam1 == (*nIt).mParam2 && seg.mParam1 == 0)
+        
+        if ((*nIt).mType == 'S' && (*nIt).mParam1 == mSendSignalDelay)
         {
           out.x('I', 1, seg.mParam2);
           break;
         }
-      }
+        
+        if ( (*nIt).mType == 'I')
+        {
+          int ngDelay = ((*nIt).mParam2 == -1) ? mSignalDelayMainAxis : mSignalDelayLateralAxis;
+          if ((*nIt).mParam1 == ngDelay && seg.mParam1 == 0)
+          {
+            out.x('I', 1, seg.mParam2);
+            break;
+          }
+        }
+      } 
+      
       
       out.x(seg.mType, seg.mParam1, seg.mParam2);
       break;
@@ -205,6 +229,7 @@ void DibotryoidHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
       
       /////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////
+      
     case 'B':
     {
       // flowering node

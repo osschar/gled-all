@@ -46,22 +46,23 @@ public:
   
 private:  
   void _init();
-  void SetupNameMap();        
+  void SetupNameMap();  
   
 protected:
-  Int_t          mLevel;      // X{GST} 7 Value(-range=>[1, 50, 1])
+  Int_t          mLevel;      // X{GST} 7 Value(-range=>[1, 120, 1])
   SegmentList    mSegments;
-  
-  SegmentList    mNewSegments;
-  SegmentList    mOldSegments;
   
   SegmentList    mStart;
   
   ZColor	       mLineColor;    // X{GSPT} 7 ColorButt()
   ZColor	       mFlowerColor;  // X{GSPT} 7 ColorButt()
   
-  virtual void SegmentStepTime(Segments_i olfIdx, Segments_t& out) {}; // abstract
+  
+  virtual void SegmentStepTime(Segments_i olfIdx,Segments_t& in, Segments_t& out) {}; // abstract
   virtual void SegmentListStepTime(SegmentList& oldExp, SegmentList& newExp, int level);
+  
+  Segments_i  NeighbourFront(SegmentList& oldExp, Segments_i startIt, int depth = 0, bool debug = false);
+  Segments_i  NeighbourBack(SegmentList& oldExp, Segments_i startIt, int depth = 0, bool debug = false);
  
 public:
   GrowingPlant(const Text_t* n="GrowingPlant", const Text_t* t=0);
@@ -72,6 +73,7 @@ public:
   void StepMinus();    // X{ED}  7 MButt()
   
   void DumpInfo();    // X{ED}  7 MButt()
+  virtual void DumpList(Segments_t&);
   
   void Produce();
   

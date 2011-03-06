@@ -17,7 +17,7 @@ private:
   void _init();
 
 protected:
-  virtual void SegmentStepTime(Segments_i ref, Segments_t& out);  
+  virtual void SegmentStepTime(Segments_i ref,  Segments_t& in, Segments_t& out);  
   
 public:
   MonopodialHerb(const Text_t* n="MonopodialHerb", const Text_t* t=0);

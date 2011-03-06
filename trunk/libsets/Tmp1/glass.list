@@ -12,7 +12,8 @@ TernaryTree                13 Glasses/TernaryTree         .
 
 GrowingPlant              14 Glasses/GrowingPlant     .
 MonopodialHerb            15 Glasses/MonopodialHerb         
-DibotryoidHerb            16 Glasses/DibotryoidHerb   .    
+DibotryoidHerb            16 Glasses/DibotryoidHerb   .      
+GrowingPanicle            17 Glasses/GrowingPanicle   .    
 
 TabletReader     64     Glasses/TabletReader     .
 TabletStroke     65     Glasses/TabletStroke     .

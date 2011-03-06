@@ -32,7 +32,7 @@ MonopodialHerb::~MonopodialHerb()
 {}
 
 //==============================================================================
-void MonopodialHerb::SegmentStepTime(Segments_i oldRef, Segments_t& out)
+void MonopodialHerb::SegmentStepTime(Segments_i oldRef, Segments_t& in, Segments_t& out)
 {
   out.s('/', 137);
   out.s('+', 17);
