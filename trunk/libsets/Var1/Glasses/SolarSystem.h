@@ -86,8 +86,8 @@ protected:
   mTime2pStorage_i   mCurrentStorage; //!
 
   Double_t           mTimePerChunk;   // X{GS} 7 Value(-range=>[100,1e4, 1,100])
-  Double_t           mKeepPast;       // X{GS} 7 Value(-range=>[100,1e5, 1])
-  Double_t           mCalcFuture;     // X{GS} 7 Value(-range=>[100,1e5, 1])
+  Double_t           mKeepPast;       // X{GS} 7 Value(-range=>[100,1e6, 1])
+  Double_t           mCalcFuture;     // X{GS} 7 Value(-range=>[100,1e6, 1])
 
   ODEStorageD* get_storage() { return (ODEStorageD*) mODECrawler->GetStorage(); }
 
@@ -128,6 +128,8 @@ public:
   virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2);
   virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]);
 
+  void CalculateEnergy(const Double_t y[], Double_t& kinetic, Double_t& potential);
+
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
 
@@ -149,6 +151,9 @@ public:
 
   virtual void AddPlanetoid(CosmicBall* cb);
   virtual void RemovePlanetoid(CosmicBall* cb);
+
+  // Plotters
+  void PlotEnergy(); //! X{E} 7 MCWButt()
 
 #include "SolarSystem.h7"
   ClassDef(SolarSystem, 1);

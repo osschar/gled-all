@@ -1,3 +1,10 @@
+2011-03-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Add calculation / plotting of energy (kinetic, potential and
+	total).
+
 2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:
