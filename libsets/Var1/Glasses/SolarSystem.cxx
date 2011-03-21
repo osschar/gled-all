@@ -17,6 +17,10 @@
 #include <TMath.h>
 #include <TSystem.h>
 
+#include "Gled/XTReqCanvas.h"
+#include "TGraph.h"
+#include "TCanvas.h"
+
 
 //==============================================================================
 // SolarSystem
@@ -47,7 +51,7 @@
 
 ClassImp(SolarSystem);
 
-/**************************************************************************/
+//==============================================================================
 
 void SolarSystem::_init()
 {
@@ -95,7 +99,7 @@ SolarSystem::~SolarSystem()
     mIntegratorThread->Cancel();
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void SolarSystem::AdEnlightenment()
 {
@@ -115,7 +119,7 @@ void SolarSystem::AdEnlightenment()
   }
 }
 
-/**************************************************************************/
+//==============================================================================
 
 UInt_t SolarSystem::ODEOrder()
 {
@@ -143,7 +147,7 @@ void SolarSystem::ODEStart(Double_t y[], Double_t& x1, Double_t& x2)
 
 void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
 {
-  const Int_t max_i = ODEOrder();
+  const Int_t max_i = 6 * mBalls->Size();
 
   for (Int_t i = 0; i < max_i; i += 6)
   {
@@ -211,7 +215,46 @@ void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
   d[0] = d[1] = d[2] = d[3] = d[4] = d[5] = 0;
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
+
+void SolarSystem::CalculateEnergy(const Double_t y[],
+				  Double_t& kinetic, Double_t& potential)
+{
+  kinetic = potential = 0;
+
+  TVector3 delta;
+
+  const Int_t iMax = mBalls->Size() - 1;
+  for (Int_t i = iMax; i >= 0; --i)
+  {
+    CosmicBall *Bi = (CosmicBall*) (**mBalls)[i];
+    if (Bi == 0)
+      continue;
+
+    const Int_t a = 6*i;
+
+    kinetic += Bi->mM * (y[a+3]*y[a+3] + y[a+4]*y[a+4] + y[a+5]*y[a+5]);
+
+    for (Int_t j = iMax; j > i; --j)
+    {
+      CosmicBall *Bj = (CosmicBall*) (**mBalls)[j];
+      if (Bj == 0)
+	continue;
+
+      const Int_t b = 6*j;
+
+      delta.SetXYZ(y[b] - y[a], y[b+1] - y[a+1], y[b+2] - y[a+2]);
+
+      potential -= Bi->mM * Bj->mM / delta.Mag();
+    }
+  }
+
+  kinetic   *= 0.5;
+  potential *= mBallKappa;
+}
+
+//==============================================================================
+
 
 void SolarSystem::TimeTick(Double_t t, Double_t dt)
 {
@@ -777,4 +820,47 @@ void SolarSystem::hack_desired_r(Double_t dt)
     Y += 6;
   }
 
+}
+
+//==============================================================================
+
+void SolarSystem::PlotEnergy()
+{
+  vector<Double_t> tv, kv, pv, sv;
+
+  Double_t k, p;
+
+  mStorageCond.Lock();
+
+  for (mTime2pStorage_i i = mStorageMap.begin(); i != mStorageMap.end(); ++i)
+  {	
+    
+    Int_t ss = i->second->Size();
+    for (Int_t j = 0; j < ss; ++j)
+    {
+      CalculateEnergy(i->second->GetY(j), k, p);
+
+      tv.push_back(i->second->GetX(j));
+      kv.push_back(k);
+      pv.push_back(p);
+      sv.push_back(k + p);
+    }
+  }
+
+  mStorageCond.Unlock();
+
+  TGraph *kg = new TGraph(tv.size(), &tv[0], &kv[0]);
+  TGraph *pg = new TGraph(tv.size(), &tv[0], &pv[0]);
+  TGraph *sg = new TGraph(tv.size(), &tv[0], &sv[0]);
+
+  TCanvas *canvas = XTReqCanvas::Request("SolarSystemEnergy", "SolarSystemEnergy",
+					 1536, 480, 3, 1);
+  canvas->cd(1);
+  kg->Draw("al");
+  canvas->cd(2);
+  pg->Draw("al");
+  canvas->cd(3);
+  sg->Draw("al");
+
+  XTReqPadUpdate::Update(canvas);
 }
