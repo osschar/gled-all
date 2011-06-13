@@ -217,7 +217,7 @@ void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
 
 //------------------------------------------------------------------------------
 
-void SolarSystem::CalculateEnergy(const Double_t y[],
+void SolarSystem::CalculateEnergy(Double_t /*x*/, const Double_t y[],
 				  Double_t& kinetic, Double_t& potential)
 {
   kinetic = potential = 0;
@@ -254,7 +254,6 @@ void SolarSystem::CalculateEnergy(const Double_t y[],
 }
 
 //==============================================================================
-
 
 void SolarSystem::TimeTick(Double_t t, Double_t dt)
 {
@@ -492,7 +491,7 @@ void SolarSystem::SetBallHistorySize(Int_t history_size)
   Stamp(FID());
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void* SolarSystem::tl_IntegratorThread(SolarSystem* ss)
 {
@@ -668,7 +667,7 @@ void SolarSystem::StopIntegratorThread()
   mIntegratorThread = 0;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 CosmicBall* SolarSystem::RandomPlanetoid(const TString& name)
 {
@@ -838,7 +837,7 @@ void SolarSystem::PlotEnergy()
     Int_t ss = i->second->Size();
     for (Int_t j = 0; j < ss; ++j)
     {
-      CalculateEnergy(i->second->GetY(j), k, p);
+      CalculateEnergy(i->second->GetX(j), i->second->GetY(j), k, p);
 
       tv.push_back(i->second->GetX(j));
       kv.push_back(k);

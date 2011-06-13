@@ -128,7 +128,7 @@ public:
   virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2);
   virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]);
 
-  void CalculateEnergy(const Double_t y[], Double_t& kinetic, Double_t& potential);
+  void CalculateEnergy(Double_t x, const Double_t y[], Double_t& kinetic, Double_t& potential);
 
   // TimeMakerClient
   virtual void TimeTick(Double_t t, Double_t dt);
