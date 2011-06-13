@@ -1,3 +1,17 @@
+2011-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	Use HPointD instead of TVector3 for calculations.
+	In MakePlanetoid() set parent of new CosmicBall to this so that
+	one can set the ball as camera base.
+
+	* Glasses/CosmicBall.cxx:
+	* Glasses/CosmicBall.h:
+	* Rnr/GL/CosmicBall_GL_Rnr.cxx:
+	* Rnr/GL/SolarSystem_GL_Rnr.cxx:
+	Use HPointD as velocity, HPointF as history position.
+	Remove inner class Point that was used before.
+
 2011-03-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:
