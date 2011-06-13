@@ -12,7 +12,8 @@
 
 #include <GL/glew.h>
 
-class Moonraker_GL_Rnr : public ZNode_GL_Rnr {
+class Moonraker_GL_Rnr : public ZNode_GL_Rnr
+{
 private:
   void _init();
 
