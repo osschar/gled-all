@@ -49,7 +49,7 @@ void CosmicBall::ResizeHistory(Int_t size)
   if (size == mHistorySize)
     return;
 
-  vector<Point> hist(size);
+  vector<HPointF> hist(size);
 
   Int_t n_to_copy = TMath::Min(mHistoryStored, size);
 
@@ -57,13 +57,13 @@ void CosmicBall::ResizeHistory(Int_t size)
   {
     Int_t lim_up = TMath::Min(mHistoryFirst + n_to_copy, mHistorySize);
     Int_t n_copy = lim_up - mHistoryFirst;
-    memcpy(&hist[0], &mHistory[mHistoryFirst], n_copy * sizeof(Point));
+    memcpy(&hist[0], &mHistory[mHistoryFirst], n_copy * sizeof(HPointF));
 
     n_to_copy -= n_copy;
 
     if (n_to_copy > 0)
     {
-      memcpy(&hist[n_copy], &mHistory[0], n_to_copy * sizeof(Point));
+      memcpy(&hist[n_copy], &mHistory[0], n_to_copy * sizeof(HPointF));
     }
   }
 

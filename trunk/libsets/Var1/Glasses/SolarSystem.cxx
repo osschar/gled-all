@@ -12,7 +12,6 @@
 
 #include <Gled/GThread.h>
 
-#include <TVectorT.h>
 #include <TRandom.h>
 #include <TMath.h>
 #include <TSystem.h>
@@ -135,11 +134,11 @@ void SolarSystem::ODEStart(Double_t y[], Double_t& x1, Double_t& x2)
   Stepper<CosmicBall> stepper(*mBalls);
   while (stepper.step())
   {
-    const Double_t* P = stepper->RefTrans().ArrT();
-    const TVector3& V = stepper->RefV();
+    const Double_t *P = stepper->RefTrans().ArrT();
+    const HPointD  &V = stepper->RefV();
 
-    y[i++] = P[0];  y[i++] = P[1];  y[i++] = P[2];
-    y[i++] = V.x(); y[i++] = V.y(); y[i++] = V.z();
+    y[i++] = P[0]; y[i++] = P[1]; y[i++] = P[2];
+    y[i++] = V.x;  y[i++] = V.y;  y[i++] = V.z;
   }
 
   assert(i == (Int_t) ODEOrder());
@@ -160,7 +159,7 @@ void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
     d[i+5] = 0;
   }
 
-  TVector3 delta;
+  HPointD delta;
 
   // Between cosmic balls: m * kappa / r^2
   // Sum contributions from the tail of mBalls as the biggest
@@ -183,7 +182,7 @@ void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
 
       const Int_t b = 6*j;
 
-      delta.SetXYZ(y[b] - y[a], y[b+1] - y[a+1], y[b+2] - y[a+2]);
+      delta.Set(y[b] - y[a], y[b+1] - y[a+1], y[b+2] - y[a+2]);
 
       const Double_t rsqr  = delta.Mag2();
       const Double_t R     = Bi->mRadius + Bi->mRadius;
@@ -199,13 +198,13 @@ void SolarSystem::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
       }
 
       const Double_t fi = Bj->mM * rftot;
-      d[a+3] += fi * delta.x();
-      d[a+4] += fi * delta.y();
-      d[a+5] += fi * delta.z();
+      d[a+3] += fi * delta.x;
+      d[a+4] += fi * delta.y;
+      d[a+5] += fi * delta.z;
       const Double_t fj = Bi->mM * rftot;
-      d[b+3] -= fj * delta.x();
-      d[b+4] -= fj * delta.y();
-      d[b+5] -= fj * delta.z();
+      d[b+3] -= fj * delta.x;
+      d[b+4] -= fj * delta.y;
+      d[b+5] -= fj * delta.z;
     }
   }
 
@@ -222,7 +221,7 @@ void SolarSystem::CalculateEnergy(Double_t /*x*/, const Double_t y[],
 {
   kinetic = potential = 0;
 
-  TVector3 delta;
+  HPointD delta;
 
   const Int_t iMax = mBalls->Size() - 1;
   for (Int_t i = iMax; i >= 0; --i)
@@ -243,7 +242,7 @@ void SolarSystem::CalculateEnergy(Double_t /*x*/, const Double_t y[],
 
       const Int_t b = 6*j;
 
-      delta.SetXYZ(y[b] - y[a], y[b+1] - y[a+1], y[b+2] - y[a+2]);
+      delta.Set(y[b] - y[a], y[b+1] - y[a+1], y[b+2] - y[a+2]);
 
       potential -= Bi->mM * Bj->mM / delta.Mag();
     }
@@ -336,11 +335,11 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
               cb->ResizeHistory(mBallHistorySize);
 	      mBalls->SetElementById(cb, idx);
 
-	      const Double_t* T = cb->RefTrans().ArrT();
-	      const TVector3& V = cb->RefV();
+	      const Double_t *T = cb->RefTrans().ArrT();
+	      const HPointD  &V = cb->RefV();
 	      const Int_t     i = 6*idx;
-	      arr[i]   = T[0];  arr[i+1] = T[1];  arr[i+2] = T[2];
-	      arr[i+3] = V.x(); arr[i+4] = V.y(); arr[i+5] = V.z();
+	      arr[i]   = T[0]; arr[i+1] = T[1]; arr[i+2] = T[2];
+	      arr[i+3] = V.x;  arr[i+4] = V.y;  arr[i+5] = V.z;
 
 	      mBallsToAdd.pop_front();
 	    }
@@ -690,25 +689,25 @@ CosmicBall* SolarSystem::RandomPlanetoid(const TString& name)
   Double_t theta_orb = DegToRad() * mPlanetRnd.Uniform(-mMaxTheta, mMaxTheta);
   Double_t cos_theta = Cos(theta_orb);
 
-  TVector3 pos(r_orb * cos_theta * Cos(phi_orb),
-	       r_orb * cos_theta * Sin(phi_orb),
-	       r_orb * Sin(theta_orb));
-  cb->SetPos(pos.x(), pos.y(), pos.z());
+  const HPointD pos(r_orb * cos_theta * Cos(phi_orb),
+		    r_orb * cos_theta * Sin(phi_orb),
+		    r_orb * Sin(theta_orb));
+  cb->SetPos(pos.x, pos.y, pos.z);
 
   Double_t ecc     = mPlanetRnd.Uniform(0, mMaxEcc);
   Double_t vel_mag = Sqrt(mBallKappa*mStarMass/r_orb*(1 - ecc));
 
   const Double_t vfac = vel_mag / pos.Mag();
-  cb->SetV(-pos.y()*vfac, pos.x()*vfac, 0);
+  cb->SetV(-pos.y*vfac, pos.x*vfac, 0);
 
   // Older calculation with random phi velocity.
   //
   // Double_t phi_vel = mPlanetRnd.Uniform(0, TwoPi());
-  // TVector3 xplane(pos.Orthogonal());
-  // TVector3 yplane(pos.Cross(xplane));
+  // HPointD xplane(pos.Orthogonal());
+  // HPointD yplane(pos.Cross(xplane));
   // xplane *= vel_mag * Cos(phi_vel);
   // yplane *= vel_mag * Sin(phi_vel);
-  // cb->SetV(xplane.x() + yplane.x(), xplane.y() + yplane.y(), xplane.z() + yplane.z());
+  // cb->SetV(xplane.x + yplane.x, xplane.y + yplane.y, xplane.z + yplane.z);
 
   return cb;
 }
@@ -736,6 +735,7 @@ void SolarSystem::MakeStar()
 
 void SolarSystem::MakePlanetoid()
 {
+  // Convenience function to be called from scripts.
   // Not cluster safe.
 
   static const Exc_t _eh("SolarSystem::MakePlanetoid ");
@@ -748,6 +748,7 @@ void SolarSystem::MakePlanetoid()
 
   mQueen->CheckIn(cb);
   mBalls->Add(cb);
+  cb->SetParent(this);
 }
 
 void SolarSystem::AddPlanetoid(CosmicBall* cb)
@@ -755,7 +756,8 @@ void SolarSystem::AddPlanetoid(CosmicBall* cb)
   // Add planetoid cb.
   // If integrator thread is already running, this is only possible
   // in the direct-step mode.
-  // The ball should be already checked-in.
+  // The ball should be already checked-in. Also, its parent should
+  // probably be set to this SolarSystem.
 
   static const Exc_t _eh("SolarSystem::AddPlanetoid ");
 

@@ -52,8 +52,7 @@ void CosmicBall_GL_Rnr::PostDraw(RnrDriver* rd)
 
     Int_t n_to_draw = CB.mHistoryStored;
 
-    CosmicBall::Point* p;
-    p = &CB.mHistory[CB.mHistoryFirst];
+    HPointF *p   = &CB.mHistory[CB.mHistoryFirst];
     Int_t lim_up = TMath::Min(CB.mHistoryFirst + n_to_draw, CB.mHistorySize);
     Int_t n_draw = lim_up - CB.mHistoryFirst;
     for (Int_t i = n_draw; i != 0; --i, ++p)
@@ -65,7 +64,7 @@ void CosmicBall_GL_Rnr::PostDraw(RnrDriver* rd)
     if (n_to_draw > 0)
     {
       p = &CB.mHistory[0];
-      for(Int_t i = n_to_draw; i != 0; --i, ++p)
+      for (Int_t i = n_to_draw; i != 0; --i, ++p)
       {
         glVertex3fv(*p);
       }

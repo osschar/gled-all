@@ -56,14 +56,13 @@ void SolarSystem_GL_Rnr::Draw(RnrDriver* rd)
   glLineWidth(2);
   rd->GL()->Color(1, 0, 0);
   glBegin(GL_LINES);
-  TVector3 start;
   AList::Stepper<CosmicBall> stepper(SS.GetBalls());
   while (stepper.step())
   {
-    const Double_t* P = stepper->RefTrans().ArrT();
-    const TVector3& V = stepper->RefV();
+    const Double_t *P = stepper->RefTrans().ArrT();
+    const HPointD  &V = stepper->RefV();
     glVertex3d(P[0], P[1], P[2]);
-    glVertex3d(P[0] + 100*V.x(), P[1] + 100*V.y(), P[2] + 100*V.z());
+    glVertex3d(P[0] + 100*V.x, P[1] + 100*V.y, P[2] + 100*V.z);
   }
   glEnd();
 
