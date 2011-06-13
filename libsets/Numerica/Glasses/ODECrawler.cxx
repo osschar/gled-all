@@ -48,13 +48,11 @@ ClassImp(ODECrawlerMaster);
 
 //______________________________________________________________________________
 //
-// ODE integrator built upon adaptive step 4th order runge-kutta.
+// ODE integrator using adaptive step functions from GSL.
 // X corresponds to time (scalar).
 // Y corresponds to state vector at a given time.
 // Final state can be obtained from mY.
 // Works in double precision.
-//
-// No good way for permanent storage or broadcasting of results yet.
 //
 // Trajectory is stored in ODEstorage object with at least mStoreDx
 // between consequtive points.

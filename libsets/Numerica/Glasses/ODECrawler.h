@@ -120,12 +120,6 @@ public:
   ClassDef(ODEStorageT, 1);
 };
 
-// What's wrong with this, Axel?
-#ifndef __APPLE__
-template class ODEStorageT<Float_t>;
-template class ODEStorageT<Double_t>;
-#endif
-
 typedef ODEStorageT<Float_t>  ODEStorageF;
 typedef ODEStorageT<Double_t> ODEStorageD;
 
