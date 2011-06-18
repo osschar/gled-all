@@ -1,7 +1,12 @@
+2011-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/root/make-root-src-dist.sh:
+	Use root-5.30.00-patches branch when making a tarball.
+
 2011-05-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/root/make-root-src-dist.sh:
-	Use root-5.28.-patches branch when making a tarball.
+	Use root-5.28.00-patches branch when making a tarball.
 
 2011-02-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
