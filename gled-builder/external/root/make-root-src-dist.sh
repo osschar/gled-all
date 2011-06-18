@@ -5,8 +5,8 @@
 # Modified version of root/build/unix/makedistsrc.sh
 # Fix the following variables before running:
 
-svnurl="https://root.cern.ch/svn/root/branches/v5-28-00-patches"
-version="5.28.01"
+svnurl="https://root.cern.ch/svn/root/branches/v5-30-00-patches"
+version="5.30.00"
 dir="root"
 tarfile="root-$version-gled.tar"
 
