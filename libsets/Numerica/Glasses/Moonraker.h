@@ -7,8 +7,6 @@
 #include <Glasses/ODECrawler.h>
 #include <Stones/ZColor.h>
 
-#include <TVector3.h>
-
 class Moonraker : public ZNode, public ODECrawlerMaster
 {
   MAC_RNR_FRIENDS(Moonraker);
@@ -47,14 +45,14 @@ protected:
   Double_t	mV0;		// X{gS} 7 Value(-range=>[0,10,1,10000])
 
   void MoonPos(Double_t* x, Double_t t) const;
-  void MoonPos(TVector3& x, Double_t t) const;
+  void MoonPos(HPointD&  x, Double_t t) const;
 
 public:
   Moonraker(const Text_t* n="Moonraker", const Text_t* t=0) : ZNode(n,t)
   { _init(); }
 
   // virtuals
-  virtual UInt_t ODEOrder() { return 6; }
+  virtual Int_t  ODEOrder() { return 6; }
   virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2);
   virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]);
 

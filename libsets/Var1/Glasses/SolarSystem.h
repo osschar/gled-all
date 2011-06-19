@@ -124,7 +124,7 @@ public:
   // virtual void AdUnfoldment();  // called by Queen after comet unpacking
 
   // ODE virtuals
-  virtual UInt_t ODEOrder();
+  virtual Int_t  ODEOrder();
   virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2);
   virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]);
 

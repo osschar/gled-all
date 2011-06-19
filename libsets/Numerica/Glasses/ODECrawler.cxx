@@ -181,9 +181,9 @@ void ODECrawler::init_integration(Bool_t call_ode_start)
 
   mN = m_true_master->ODEOrder();
 
-  if (mY.GetNoElements() != mN || mStepFunc != mPrevStepFunc)
+  if ((Int_t) mY.size() != mN || mStepFunc != mPrevStepFunc)
   {
-    mY.ResizeTo(mN);
+    mY.resize(mN);
     _gsl_free();
     _gsl_alloc();
   }
@@ -212,7 +212,7 @@ void ODECrawler::init_integration(Bool_t call_ode_start)
   mStepOK = mStepChanged = mStored = 0;
 
   if (call_ode_start)
-    m_true_master->ODEStart(mY.GetMatrixArray(), mX1, mX2);
+    m_true_master->ODEStart(&mY[0], mX1, mX2);
 }
 
 //------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ void ODECrawler::Integrate()
 
   if (mStoreMax != 0)
   {
-    mStorage->AddEntry(x, mY.GetMatrixArray());
+    mStorage->AddEntry(x, &mY[0]);
     ++mStored;
     xsav = x;
   }
@@ -249,7 +249,7 @@ void ODECrawler::Integrate()
 
     int err = gsl_odeiv_evolve_apply(m_gsl_evolve, m_gsl_control, m_gsl_step,
 				     m_gsl_system, &x, mX2, &h,
-				     mY.GetMatrixArray());
+				     &mY[0]);
     if (err != GSL_SUCCESS)
     {
       throw _eh + GForm("gsl error %d: %s", err, gsl_strerror(err));
@@ -259,7 +259,7 @@ void ODECrawler::Integrate()
         (mStoreMax > 0 && mStored < mStoreMax - 1 &&
 				    TMath::Abs(x - xsav) > mStoreDx))
     {
-      mStorage->AddEntry(x, mY.GetMatrixArray());
+      mStorage->AddEntry(x, &mY[0]);
       ++mStored;
       xsav = x;
     }
@@ -277,7 +277,7 @@ void ODECrawler::Integrate()
 
   if (mStoreMax != 0)
   {
-    mStorage->AddEntry(x, mY.GetMatrixArray());
+    mStorage->AddEntry(x, &mY[0]);
     ++mStored;
   }
 
@@ -334,11 +334,11 @@ void ODECrawler::Crawl(Bool_t call_ode_start)
 void ODECrawler::ChangeOrderInPlace(Int_t order)
 {
   mN = order;
-  if (mY.GetNoElements() != mN)
-    mY.ResizeTo(mN);
+  if ((Int_t) mY.size() != mN)
+    mY.resize(mN);
 }
 
 Double_t* ODECrawler::RawYArray()
 {
-  return mY.GetMatrixArray();
+  return &mY[0];
 }

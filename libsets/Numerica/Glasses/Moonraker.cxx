@@ -54,11 +54,11 @@ void Moonraker::MoonPos(Double_t* r, Double_t t) const
   r[2] = 0;
 }
 
-void Moonraker::MoonPos(TVector3& r, Double_t t) const
+void Moonraker::MoonPos(HPointD& r, Double_t t) const
 {
-  r.SetXYZ(mDMoon*TMath::Cos(2*TMath::Pi()/mT0Moon*t),
-	   mDMoon*TMath::Sin(2*TMath::Pi()/mT0Moon*t),
-	   0);
+  r.Set(mDMoon*TMath::Cos(2*TMath::Pi()/mT0Moon*t),
+	mDMoon*TMath::Sin(2*TMath::Pi()/mT0Moon*t),
+	0);
 }
 
 /**************************************************************************/
@@ -72,11 +72,11 @@ void Moonraker::ODEStart(Double_t y[], Double_t& x1, Double_t& x2)
   y[2] = TMath::Sin(theta);
 
   ZPoint z;
-  for(Int_t i=0; i<3; i++) z[i] = mV0*hEscapeVelocity*y[i];
+  for (Int_t i=0; i<3; i++) z[i] = mV0*hEscapeVelocity*y[i];
   ZTrans t;
   t.SetRotByAngles(mPhi*TMath::DegToRad(), mTheta*TMath::DegToRad(), 0);
   t.RotateIP(z);
-  for(Int_t i=0; i<3; i++) y[i + 3] = z[i];
+  for (Int_t i=0; i<3; i++) y[i + 3] = z[i];
 
   x1 = mT0; x2 = mT1;
 }
@@ -89,15 +89,15 @@ namespace
 void
 Moonraker::ODEDerivatives(Double_t x, const Double_t y[], Double_t d[])
 {
-  TVector3 pos(y[0], y[1], y[2]);
-  TVector3 moon; MoonPos(moon, x);
-  TVector3 md(pos);
+  HPointD pos(y);
+  HPointD moon; MoonPos(moon, x);
+  HPointD md(pos);
   md -= moon;
   Double_t r0 = p223(pos.Mag2());
   Double_t r1 = p223(md.Mag2());
   for (Int_t i=0; i<3; i++)
   {
     d[i]   = y[i+3];
-    d[i+3] = -hKappa*(pos(i)/r0 + md(i)/r1*mMMoon);
+    d[i+3] = -hKappa*(pos[i]/r0 + md[i]/r1*mMMoon);
   }
 }

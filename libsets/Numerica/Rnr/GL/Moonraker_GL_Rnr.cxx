@@ -67,10 +67,9 @@ void Moonraker_GL_Rnr::Draw(RnrDriver* rd)
         Float_t f = (T - X[l]) / (X[h] - X[l]); // assume linear
         glColor4fv(M.mSColor());
         glPushMatrix();
-        TVectorD yl; S->AssignY(l, yl);
-        TVectorD yh; S->AssignY(h, yh);
-        TVectorD p(yh); p -= yl; p *= f; p += yl;
-        glTranslated(p(0), p(1), p(2));
+	HPointD yl(S->GetY(l)), p(S->GetY(h));
+        p -= yl; p *= f; p += yl;
+        glTranslated(p.x, p.y, p.z);
         gluSphere(mQuadric, M.mRShell, M.mLOD, M.mLOD);
         glPopMatrix();
       }
