@@ -131,7 +131,7 @@ distclean::
 	${MAKE} clean
 	${MUTE} rm -rf ${DICT_DIR} ${VIEW_DIR} ${GLUE_DIR}
 	${MUTE} rm -rf ${VIEW_FL_SECS} ${BLESSED_H7} ${BLESSED_C7}
-	${MUTE} rm -rf lib/.${LIB_SET_ID} lib/lib* catalog.auto \
+	${MUTE} rm -rf lib/gled_lid_${LIB_SET_ID} lib/lib* catalog.auto \
 		make_bless.inc make_p7.inc make_view.inc make_dict.inc htmldoc
 #	some .h7, .c7 may still be lurking around ... ditch them
 	${MUTE} find . -name '*.h7' -or -name '*.c7' | xargs rm -f
