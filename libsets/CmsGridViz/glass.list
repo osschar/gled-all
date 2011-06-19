@@ -1,0 +1,7 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+XrdMonSucker	1	Glasses/XrdMonSucker
+XrdServer	2	Glasses/XrdServer
+
+CmsXrdHost	32	Glasses/CmsXrdHost
