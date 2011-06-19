@@ -120,7 +120,7 @@ void SolarSystem::AdEnlightenment()
 
 //==============================================================================
 
-UInt_t SolarSystem::ODEOrder()
+Int_t SolarSystem::ODEOrder()
 {
   static const Exc_t _eh("SolarSystem::ODEOrder ");
 
@@ -287,7 +287,7 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
 	}
 
 	{
-	  const Double_t *Y = mODECrawler->RefY().GetMatrixArray();
+	  const Double_t *Y = mODECrawler->RawYArray();
 	  Bool_t store_pos  = mBallHistorySize > 0;
 	  Stepper<CosmicBall> stepper(*mBalls, true);
 	  while (stepper.step())

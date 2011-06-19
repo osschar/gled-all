@@ -1,3 +1,12 @@
+2011-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Moonraker.cxx:
+	* Glasses/Moonraker.h:
+	* Glasses/ODECrawler.cxx:
+	* Glasses/ODECrawler.h:
+	* Rnr/GL/Moonraker_GL_Rnr.cxx:
+	Get rid of TVector3 and TVectorT from ODECrawler and friends.
+
 2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Use GSL for ODE integration. This adds dependency on gsl library.

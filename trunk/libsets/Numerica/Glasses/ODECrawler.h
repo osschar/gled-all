@@ -3,7 +3,6 @@
 #ifndef Numerica_ODECrawler_H
 #define Numerica_ODECrawler_H
 
-#include <TVectorD.h>
 #include <Glasses/ZGlass.h>
 
 #include <gsl/gsl_odeiv.h>
@@ -14,7 +13,7 @@ class ODECrawlerMaster
 public:
   virtual ~ODECrawlerMaster() {}
 
-  virtual UInt_t ODEOrder() = 0;
+  virtual Int_t  ODEOrder() = 0;
   virtual void   ODEStart(Double_t y[], Double_t& x1, Double_t& x2) = 0;
   virtual void   ODEDerivatives(Double_t x, const Double_t y[], Double_t d[]) = 0;
   virtual bool   ODEHasJacobian() const { return false; }
@@ -101,8 +100,10 @@ public:
   virtual void AddEntry(Double_t x, Double_t* y)
   {
     mX.push_back(x);
-    for (Int_t i = 0; i < mOrder; ++i)
-      mY.push_back(y[i]);
+    size_t ys = mY.size();
+    mY.resize(ys + mOrder);
+    for (Int_t i = 0; i < mOrder; ++i, ++ys)
+      mY[ys] = y[i];
     ++mSize;
   }
 
@@ -114,8 +115,6 @@ public:
   const TT* GetY(Int_t i) const { return &mY[mOrder*i]; }
   const TT* GetXArr()     const { return &mX[0];        }
   const TT* GetYArr()     const { return &mY[0];        }
-
-  void      AssignY(Int_t i, TVectorT<TT>& v) const { v.Use(mOrder, &mY[mOrder*i]); }
 
   ClassDef(ODEStorageT, 1);
 };
@@ -164,7 +163,7 @@ protected:
   Double_t	mStoreDx;	//  X{GS} 7 Value(-range=>[0,1e12])
   ODEStorage   *mStorage;       //  X{g}
 
-  TVectorD	mY;		//! X{r}
+  vector<Double_t> mY;		//! X{r}
   Int_t		mN;		//  X{G}  7 ValOut()
   Double_t	mEpsAbs;	//  X{GS} 7 Value(-range=>[0,1000], -join=>1)
   Double_t	mEpsRel;	//  X{GS} 7 Value(-range=>[0,1])

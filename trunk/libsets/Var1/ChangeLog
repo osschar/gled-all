@@ -1,3 +1,9 @@
+2011-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Get rid of TVector3 and TVectorT from ODECrawler and friends.
+
 2011-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:
