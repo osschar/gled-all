@@ -17,7 +17,7 @@ ClassImp(SGlUniform);
 //==============================================================================
 
 SGlUniform::SGlUniform() :
-  ZRCStone(),
+  SRefCounted(),
   fIsFloat  (false),
   fType     (-1),
   fVarSize  (-1),
@@ -27,7 +27,7 @@ SGlUniform::SGlUniform() :
 
 SGlUniform::SGlUniform(const Text_t* name, const Text_t* defs, Bool_t is_float,
 		       Int_t type, Int_t var_size, Int_t arr_size, Int_t loc) :
-  ZRCStone(),
+  SRefCounted(),
 
   fName     (name),
   fDefaults (defs),

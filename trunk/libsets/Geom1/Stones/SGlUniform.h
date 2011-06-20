@@ -7,10 +7,10 @@
 #ifndef Geom1_SGlUniform_H
 #define Geom1_SGlUniform_H
 
-#include <Stones/ZRCStone.h>
+#include <Stones/SRefCounted.h>
 #include <TString.h>
 
-class SGlUniform : public ZRCStone
+class SGlUniform : public SRefCounted
 {
 protected:
 

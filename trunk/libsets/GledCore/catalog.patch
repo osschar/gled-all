@@ -95,6 +95,11 @@ $PATCH = {
                   "#pragma link C++ class HTransD+;\n"
 },
 
+"SRefCounted" =>
+{
+  'Pragmas'    => "#pragma link C++ class SRefCountedNV+;\n"
+},
+
 "ZTrans" =>
 {
   'NoDefault'  => 1,

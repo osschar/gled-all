@@ -8,9 +8,8 @@
 #define Geom1_TringTvor_H
 
 #include <Gled/GledTypes.h>
-#include <Stones/ZRCStone.h>
 
-class TringTvor : public ZRCStone
+class TringTvor
 {
 private:
   void _init();
