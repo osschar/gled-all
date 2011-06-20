@@ -8,9 +8,8 @@
 #define GledCore_TubeTvor_H
 
 #include <Gled/GledTypes.h>
-#include <Stones/ZRCStone.h>
 
-class TubeTvor : public ZRCStone
+class TubeTvor
 {
 public:
 

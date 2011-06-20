@@ -1,3 +1,17 @@
+2011-06-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/ZRCStone.cxx:
+	* Stones/ZRCStone.h:
+	Removed files - replace with less confusing SRefCounted.
+
+	* Stones/SRefCounted.cxx:
+	* Stones/SRefCounted.h:
+	Added files - replace ZRCStone. Also provide verison without
+	virtual functions SRefCountedNV.
+
+	* catalog.patch:
+	Register also the SRefCountedNV.
+
 2011-05-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GCRC32.cxx:
