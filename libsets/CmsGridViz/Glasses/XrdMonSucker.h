@@ -21,12 +21,16 @@ private:
 protected:
   Int_t      mSuckPort;     // X{GS} 7 Value()
 
+  Bool_t     mPrintU;       // X{GS} 
+
   Int_t      mSocket;       //!
   GThread   *mSuckerThread; //!
 
 #ifndef __CINT__
   struct xrdsrv_id
   {
+    // This should actually be a stone ...
+
     UInt_t   ip4;
     Int_t    stod;
     UShort_t port;

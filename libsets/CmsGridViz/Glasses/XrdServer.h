@@ -17,9 +17,12 @@ private:
   void _init();
 
 protected:
+  TString           mHost;    // X{GR} 7 TextOut();
+  TString           mDomain;  // X{GR} 7 TextOut();
 
 public:
   XrdServer(const Text_t* n="XrdServer", const Text_t* t=0);
+  XrdServer(const Text_t* n, const Text_t* t, const Text_t* h, const Text_t* d);
   virtual ~XrdServer();
 
 #include "XrdServer.h7"

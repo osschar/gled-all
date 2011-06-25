@@ -1,3 +1,28 @@
+2011-06-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Populate state with XrdServer and XrdUser lenses - this is slowly
+	getting functional.
+
+	* Glasses/CmsXrdSite.cxx:
+	* Glasses/CmsXrdSite.h:
+	* Glasses/CmsXrdUser.cxx:
+	* Glasses/CmsXrdUser.h:
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	New glasses - hold data about sites, users.
+
+	* glass.list:
+	Register new glasses.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Improve reception of incoming data. Actually create XrdServer and
+	XrdUser lenses to represent what is going on.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add mHost and mDomain members.
+
 2011-06-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First commit -- still incomplete.

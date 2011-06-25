@@ -3,5 +3,8 @@
 
 XrdMonSucker	1	Glasses/XrdMonSucker
 XrdServer	2	Glasses/XrdServer
+XrdUser		3	Glasses/XrdUser
 
 CmsXrdHost	32	Glasses/CmsXrdHost
+CmsXrdSite	33	Glasses/CmsXrdSite
+CmsXrdUser	34	Glasses/CmsXrdUser
