@@ -620,14 +620,12 @@ int actcBeginInput(ACTCData *tc)
     tc->CurMaxVertValence = 0;
 
     if(tc->MaxInputVert < MAX_STATIC_VERTS - 1) {
-	size_t byteCount;
 	tc->UsingStaticVerts = 1;
 	tc->VertRange = tc->MaxInputVert + 1;
-	byteCount = sizeof(ACTCVertex) * tc->VertRange;
 	chartedSetLabel("static verts");
 	tc->StaticVerts = (ACTCVertex *)calloc(sizeof(ACTCVertex), tc->VertRange);
 	if(tc->StaticVerts == NULL) {
-	    ACTC_INFO(printf("Couldn't allocate static %d vert block of %u bytes\n", tc->VertRange, byteCount);)
+	    ACTC_INFO(printf("Couldn't allocate static %d vert block of %lu bytes\n", tc->VertRange, sizeof(ACTCVertex)*tc->VertRange);)
 	    tc->UsingStaticVerts = 0;
 	}
     } else
@@ -1216,7 +1214,7 @@ static int findEdge(ACTCVertex *v1, ACTCVertex *v2, ACTCEdge **edge)
 int unmapEdgeTriangleByVerts(ACTCData *tc, ACTCVertex *v1, ACTCVertex *v2,
     ACTCVertex *v3)
 {
-    ACTCEdge *e;
+    ACTCEdge *e = 0;
 
     ACTC_CHECK(findEdge(v1, v2, &e));
     unmapEdgeTriangle(tc, e, v3);

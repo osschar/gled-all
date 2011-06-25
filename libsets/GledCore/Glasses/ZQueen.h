@@ -221,9 +221,9 @@ public:
 #ifndef __CINT__
 #define CALL_AND_BROADCAST(_lens_, _method_, ...) \
   _lens_->_method_(__VA_ARGS__); \
-  { auto_ptr<ZMIR> mir(_lens_->S_##_method_(__VA_ARGS__)); \
-    mSaturn->markup_posted_mir(*mir); \
-    mSaturn->BroadcastMIR(*mir, mReflectors); }
+  { auto_ptr<ZMIR> _mir_(_lens_->S_##_method_(__VA_ARGS__)); \
+    mSaturn->markup_posted_mir(*_mir_); \
+    mSaturn->BroadcastMIR(*_mir_, mReflectors); }
 #endif
 
 #endif

@@ -1,3 +1,11 @@
+2011-06-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZQueen.h:
+	* GledView/FTW.cxx:
+	Fix some compilation warnings with gcc-4.6.
+
 2011-06-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/ZRCStone.cxx:

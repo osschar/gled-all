@@ -1725,7 +1725,7 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 
   bool is_moon_space = false;
   bool is_sun_space  = false;
-  bool is_fire_space = false;
+  // bool is_fire_space = false; // not used
 
   if(mir->fAlphaID < mKing->GetSaturnID())
     {
@@ -1742,7 +1742,7 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 	  mir->fAlphaID <= mFireKing->GetMaxID())
     {
       is_shared_space = false;
-      is_fire_space   = true;
+      // is_fire_space   = true;
     }
   else
     {
@@ -1772,12 +1772,13 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
     return;
   }
 
-  ZKing* king        = mir->fAlpha->GetQueen()->GetKing();
-  bool is_king       = (king == mir->fAlpha);
-  bool is_ruler      = false;
-  MIR_Priest* priest = 0;
-  lpSaturnInfo_t* reflectors = 0;
-  ZGlass* ruler      = 0;
+  ZKing      *king     = mir->fAlpha->GetQueen()->GetKing();
+  bool        is_king  = (king == mir->fAlpha);
+  bool        is_ruler = false;
+  MIR_Priest *priest   = 0;
+  ZGlass     *ruler    = 0;
+
+  lpSaturnInfo_t *reflectors = 0;
 
   if(is_king) {
     is_ruler   = true;

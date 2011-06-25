@@ -1,3 +1,9 @@
+2011-06-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Opcode/Makefile:
+	* Opcode/Opcode.h:
+	Fix some compilation warnings with gcc-4.6.
+
 2011-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:

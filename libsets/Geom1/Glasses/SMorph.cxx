@@ -53,14 +53,19 @@ void SMorph::Messofy(Float_t ct, Float_t st, Float_t phi)
   R[1] = s*x + y*c;
   R[2] = z;
 
-  float T[2];
-  if(bTextured) {
+  if (bTextured)
+  {
+    float T[2];
     T[0] = mTexX0 + mTexXC * phi / (TMath::TwoPi());
     T[1] = mTexY0 + mTexYC * TMath::ACos(ct) / TMath::Pi();
-    if(mTexYOff != 0) T[0] += Int_t(T[1])*mTexYOff;
-  }
+    if (mTexYOff != 0) T[0] += Int_t(T[1])*mTexYOff;
 
-  pTuber->NewVert(R, R, 0, T);
+    pTuber->NewVert(R, R, 0, T);
+  }
+  else
+  {
+    pTuber->NewVert(R, R);
+  }
 }
 
 void SMorph::Triangulate()
