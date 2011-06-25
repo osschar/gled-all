@@ -45,6 +45,9 @@
 
 #include <string>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 #ifndef ASSERT
 #define	ASSERT(exp)  assert(exp)
 #endif
@@ -116,5 +119,7 @@ namespace Opcode
 FUNCTION OPCODE_API bool InitOpcode();
 FUNCTION OPCODE_API bool CloseOpcode();
 }
+
+#pragma GCC diagnostic pop
 
 #endif // __OPCODE_H__

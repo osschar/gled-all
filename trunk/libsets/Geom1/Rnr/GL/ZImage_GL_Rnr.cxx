@@ -46,7 +46,7 @@ void  ZImage_GL_Rnr::check_rescale()
 
     Exc_t mh = _eh + "enabling pow2 texture rescale: ";
     if (major < 1 || (major == 1 && minor < 4)) {
-      ISmess(mh + "GL < 1.4.");
+      ISmess(mh + GForm("GL < 1.4 (%d.%d.%d).", major, minor, patch));
       sRescaleToPow2 = 1;
     }
     else if (vendor.BeginsWith("ATI")) {

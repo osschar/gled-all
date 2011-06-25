@@ -629,14 +629,13 @@ FTW::Inst_Selector::Inst_Selector(Top_Selector* ts, Top_Selector::Type_e t) :
   wTop->callback((Fl_Callback*)top_set_cb, this);
   wTop->labelfont(FL_HELVETICA_BOLD);
 
-  Fl_Box* box;
-  box = new Fl_Box(8,0,3,1,"Lid:");
+  new Fl_Box(8,0,3,1,"Lid:");
   wLid = new Fl_Button(11,0,12,1);
   wLid->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
   wLid->color(fl_gray_ramp(FL_NUM_GRAY-4));
   wLid->callback((Fl_Callback*)fidsel_lid_cb, new Inst_SelID(this, 0));
 
-  box = new Fl_Box(8,1,3,1,"Cid:");
+  new Fl_Box(8,1,3,1,"Cid:");
   wCid = new Fl_Button(11,1,12,1);
   wCid->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
   wCid->color(fl_gray_ramp(FL_NUM_GRAY-4));

@@ -112,6 +112,7 @@ class ZGlass : public TObject
   friend class ZComet;
 
 public:
+#ifndef __CINT__
   struct LinkRep
   {
     ZGlass*&                fLinkRef;
@@ -120,7 +121,9 @@ public:
     LinkRep(ZGlass*& r, GledNS::LinkMemberInfo* li) :
       fLinkRef(r), fLinkInfo(li) {}
   };
-
+#else
+  struct LinkRep;
+#endif
   typedef list<LinkRep>           lLinkRep_t;
   typedef list<LinkRep>::iterator lLinkRep_i;
 

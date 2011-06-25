@@ -21,10 +21,11 @@ distclean: clean
 # For example, RayCollider returns zero primitives intersected, so it must
 # be that triangle-ray tests are over optimized. Should investigate further.
 ifndef OPCODE_DEBUG
-CXXFLAGS := -O -fPIC ${ROOT_CFLAGS}
+CXXFLAGS := -O
 else
-CXXFLAGS := -g -fPIC ${ROOT_CFLAGS}
+CXXFLAGS := -g
 endif
+CXXFLAGS += -fPIC ${ROOT_CFLAGS}
 
 %.o: %.cpp
 	${CXX} -I. ${CXXFLAGS} -c $< -o $@
