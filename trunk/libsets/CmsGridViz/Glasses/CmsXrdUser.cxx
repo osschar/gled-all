@@ -4,36 +4,29 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "XrdServer.h"
-#include "XrdServer.c7"
+#include "CmsXrdUser.h"
+#include "CmsXrdUser.c7"
 
-// XrdServer
+// CmsXrdUser
 
 //______________________________________________________________________________
 //
 //
 
-ClassImp(XrdServer);
+ClassImp(CmsXrdUser);
 
 //==============================================================================
 
-void XrdServer::_init()
+void CmsXrdUser::_init()
 {}
 
-XrdServer::XrdServer(const Text_t* n, const Text_t* t) :
-  ZNameMap(n, t)
+CmsXrdUser::CmsXrdUser(const Text_t* n, const Text_t* t) :
+  ZList(n, t)
 {
   _init();
 }
 
-XrdServer::XrdServer(const Text_t* n, const Text_t* t, const Text_t* h, const Text_t* d) :
-  ZNameMap(n, t),
-  mHost(h), mDomain(d)
-{
-  _init();
-}
-
-XrdServer::~XrdServer()
+CmsXrdUser::~CmsXrdUser()
 {}
 
 //==============================================================================
