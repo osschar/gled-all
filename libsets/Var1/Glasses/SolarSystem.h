@@ -66,17 +66,23 @@ protected:
   class Storage : public ODEStorageD
   {
     Int_t mId;
+    Int_t mRefCnt;
 
   public:
 
     Storage(Int_t order, Int_t capacity=128) :
-      ODEStorageD(order, capacity), mId(0)
+      ODEStorageD(order, capacity), mId(0), mRefCnt(0)
     {}
 
-    Storage(const Storage& s) : ODEStorageD(s.Order(), 12*s.Size()/10)
-    { mId = s.mId + 1; }
+    Storage(const Storage& s) :
+      ODEStorageD(s.Order(), 12*s.Size()/10), mId(s.mId + 1), mRefCnt(0)
+    {}
 
     Int_t GetId() const { return mId; }
+
+    // RefCnt -- always call under storage-lock!
+    void IncRefCnt() { ++mRefCnt; }
+    void DecRefCnt() { if(--mRefCnt <= 0) delete this; }
   };
 
   typedef map<Double_t, Storage*>           mTime2pStorage_t;
@@ -89,10 +95,11 @@ protected:
   Double_t           mKeepPast;       // X{GS} 7 Value(-range=>[100,1e6, 1])
   Double_t           mCalcFuture;     // X{GS} 7 Value(-range=>[100,1e6, 1])
 
-  ODEStorageD* get_storage() { return (ODEStorageD*) mODECrawler->GetStorage(); }
+  void             clear_storage();
 
-  Storage* find_storage_from_time(Double_t t);
-  Double_t set_time(Double_t t, Bool_t from_timetick);
+  mTime2pStorage_i find_storage_from_time(Double_t t);
+  Storage*         set_current_storage_from_time(Double_t t);
+  Double_t         set_time(Double_t t, Bool_t from_timetick);
 
   // Direct-step stuff
 
@@ -153,7 +160,7 @@ public:
   virtual void RemovePlanetoid(CosmicBall* cb);
 
   // Plotters
-  void PlotEnergy(); //! X{E} 7 MCWButt()
+  void PlotEnergy(); //! X{Ed} 7 MCWButt()
 
 #include "SolarSystem.h7"
   ClassDef(SolarSystem, 1);

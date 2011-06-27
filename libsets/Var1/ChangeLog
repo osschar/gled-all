@@ -1,5 +1,14 @@
 2011-06-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/SolarSystem.cxx:
+	* Glasses/SolarSystem.h:
+	Add reference counting of ODE-storage.
+	Calculate energy graphs in dedicated thread, using the storage
+	reference counting to exclude interference with the main
+	time-evolution thread.
+
+2011-06-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Opcode/Opcode.h:
 	Apparently, pragma GCC diagnostic push/pop only works on gcc-4.6
 	and later.

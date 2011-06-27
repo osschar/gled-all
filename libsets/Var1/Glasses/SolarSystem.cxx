@@ -358,30 +358,48 @@ void SolarSystem::TimeTick(Double_t t, Double_t dt)
   }
 }
 
-/**************************************************************************/
+//==============================================================================
 
-SolarSystem::Storage* SolarSystem::find_storage_from_time(Double_t t)
+void SolarSystem::clear_storage()
 {
+  // Wipes storage, resets mCurrentStorage.
+  // Must be called under storage lock!
+
+  for (mTime2pStorage_i i = mStorageMap.begin(); i != mStorageMap.end(); ++i)
+  {
+    i->second->DecRefCnt();
+  }
+  mStorageMap.clear();
+  mCurrentStorage = mStorageMap.end();
+}
+
+//------------------------------------------------------------------------------
+
+SolarSystem::mTime2pStorage_i SolarSystem::find_storage_from_time(Double_t t)
+{
+  // Finds storage corresponging to given time.
+  // Must be called under storage lock!
+
+  mTime2pStorage_i i = mStorageMap.lower_bound(t);
+  if (i != mStorageMap.begin())
+  {
+    --i;
+  }
+  return i;
+}
+
+SolarSystem::Storage* SolarSystem::set_current_storage_from_time(Double_t t)
+{
+  GMutexHolder lock_storage(mStorageCond);
+
   Storage* s = mCurrentStorage->second;
   if (t >= s->GetMinXStored() && t <= s->GetMaxXStored())
     return s;
 
-  {
-    GMutexHolder lock_storage(mStorageCond);
+  mCurrentStorage = find_storage_from_time(t);
 
-    mCurrentStorage = mStorageMap.lower_bound(t);
-    if (mCurrentStorage != mStorageMap.begin())
-    {
-      --mCurrentStorage;
-      mStorageCond.Signal();
-    }
-    else
-    {
-      // We are at the beginning.
-      // As we don't have backward-propagation, it makes no
-      // sense to signal storage condition.
-    }
-  }
+  // We switched to another storage, let's kick integrator.
+  mStorageCond.Signal();
 
   return mCurrentStorage->second;
 }
@@ -394,9 +412,9 @@ Double_t SolarSystem::set_time(Double_t t, Bool_t from_timetick)
   // When from_timetick is true the history of the balls is updated.
   // Otherwise it is reset to 0.
 
-  static const Exc_t _eh("SolarSystem::SetTime ");
+  static const Exc_t _eh("SolarSystem::set_time ");
 
-  Storage        *S = find_storage_from_time(t);
+  Storage        *S = set_current_storage_from_time(t);
   const Double_t *T = S->GetXArr();
   const Int_t     N = S->Size();
 
@@ -523,8 +541,8 @@ void SolarSystem::ChunkIntegratorThread()
     {
       GMutexHolder lock_storage(mStorageCond);
 
-      mStorageMap.insert(make_pair(new_storage->GetMinXStored(),
-                                       new_storage));
+      mStorageMap.insert(make_pair(new_storage->GetMinXStored(), new_storage));
+      new_storage->IncRefCnt();
 
       bool calc_needed = false;
       while (!calc_needed)
@@ -537,7 +555,7 @@ void SolarSystem::ChunkIntegratorThread()
                  mStorageMap.begin()->second->GetMinXStored(),
                  mStorageMap.begin()->second->GetMaxXStored(),
                  mTime, t_min);
-	  delete mStorageMap.begin()->second;
+	  mStorageMap.begin()->second->DecRefCnt();
           mStorageMap.erase(mStorageMap.begin());
         }
 
@@ -599,8 +617,10 @@ void SolarSystem::StartChunkIntegratorThread()
   if (mIntegratorThread)
     throw _eh + "Integrator thread already running.";
 
-  mStorageMap.clear();
-  mCurrentStorage = mStorageMap.end();
+  {
+      GMutexHolder lock_storage(mStorageCond);
+      clear_storage();
+  }
 
   mODECrawler->SetX1(mTime);
   mODECrawler->SetX2(mTime + mTimePerChunk);
@@ -609,7 +629,11 @@ void SolarSystem::StartChunkIntegratorThread()
   mODECrawler->SetStorage(s);
   mODECrawler->Crawl();
 
-  mCurrentStorage = mStorageMap.insert(make_pair(0, s)).first;
+  {
+    GMutexHolder lock_storage(mStorageCond);
+    mCurrentStorage = mStorageMap.insert(make_pair(0, s)).first;
+    mCurrentStorage->second->IncRefCnt();
+  }
 
   mIntegratorThread = new GThread("SolarSystem-ChunkIntegrator",
                                   (GThread_foo) (tl_IntegratorThread), this,
@@ -831,24 +855,39 @@ void SolarSystem::PlotEnergy()
 
   Double_t k, p;
 
-  mStorageCond.Lock();
+  vector<Storage*> storages;
+  {
+    GMutexHolder lock_storage(mStorageCond);
 
-  for (mTime2pStorage_i i = mStorageMap.begin(); i != mStorageMap.end(); ++i)
-  {	
-    
-    Int_t ss = i->second->Size();
+    storages.reserve(mStorageMap.size());
+    for (mTime2pStorage_i i = mStorageMap.begin(); i != mStorageMap.end(); ++i)
+    {	
+      storages.push_back(i->second);
+      i->second->IncRefCnt();
+    }
+  }
+
+  for (vector<Storage*>::iterator i = storages.begin(); i != storages.end(); ++i)
+  {
+    Int_t ss = (*i)->Size();
     for (Int_t j = 0; j < ss; ++j)
     {
-      CalculateEnergy(i->second->GetX(j), i->second->GetY(j), k, p);
+      CalculateEnergy((*i)->GetX(j), (*i)->GetY(j), k, p);
 
-      tv.push_back(i->second->GetX(j));
+      tv.push_back((*i)->GetX(j));
       kv.push_back(k);
       pv.push_back(p);
       sv.push_back(k + p);
     }
   }
 
-  mStorageCond.Unlock();
+  {
+    GMutexHolder lock_storage(mStorageCond);
+    for (vector<Storage*>::iterator i = storages.begin(); i != storages.end(); ++i)
+    {
+      (*i)->DecRefCnt();
+    }
+  }
 
   TGraph *kg = new TGraph(tv.size(), &tv[0], &kv[0]);
   TGraph *pg = new TGraph(tv.size(), &tv[0], &pv[0]);
