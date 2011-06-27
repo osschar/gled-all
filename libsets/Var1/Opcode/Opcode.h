@@ -45,8 +45,12 @@
 
 #include <string>
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ > 5
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#else
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
 
 #ifndef ASSERT
 #define	ASSERT(exp)  assert(exp)
@@ -120,6 +124,10 @@ FUNCTION OPCODE_API bool InitOpcode();
 FUNCTION OPCODE_API bool CloseOpcode();
 }
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ > 5
 #pragma GCC diagnostic pop
+#else
+#pragma GCC diagnostic warning "-Wstrict-aliasing"
+#endif
 
 #endif // __OPCODE_H__
