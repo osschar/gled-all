@@ -1646,67 +1646,68 @@ void Saturn::RouteMIR(auto_ptr<ZMIR>& mir) throw()
   ISdebug(8, GForm("%s entered ...", _eh.Data()));
 
   if(mir->fAlphaID == 0)
-    throw(_eh + "AlphaID is zero!");
+    throw _eh + "AlphaID is zero!";
 
-  switch(mir->What()) {
-
-  case GledNS::MT_Flare: {
-    switch(mir->fDirection) {
-    case ZMIR::D_Up:
-      if(mir->fAlphaID < mKing->GetSaturnID()) {
-	// This could in principle break if the connection has just been lost.
-	// But this is catastrophic anyway.
-	ForwardMIR(*mir, mSaturnInfo->GetMaster());
-      } else {
-	UnfoldMIR(mir);
-      }
-      break;
-    case ZMIR::D_Down:
-      UnfoldMIR(mir);
-      break;
-    default:
-      ISerr(_eh + "unknown direction of a flare.");
-      break;
-    }
-    break;
-  }
-
-  case GledNS::MT_Beam: {
-    try {
-      if(mir->fRecipientID == 0 || mir->fRecipientID == mSaturnInfo->GetSaturnID()) {
-
-	mir->fRecipient = mSaturnInfo;
-	UnfoldMIR(mir);
-
-      } else {
-
-	mir->fRecipient = dynamic_cast<SaturnInfo*>(DemangleID(mir->fRecipientID));
-	if(mir->fRecipient == 0) {
-	  throw(_eh + "can't demangle recipient of a beam.");
-	}
-
-	SaturnInfo* route = mir->fRecipient->hRoute;
-	if(route == 0) {
-	  route = FindRouteTo(mir->fRecipient);
-	  if(route == 0 || route->hSocket == 0) {
-	    throw(_eh + "no route to recipient.");
+  switch(mir->What())
+  {
+    case GledNS::MT_Flare:
+    {
+      switch (mir->fDirection)
+      {
+	case ZMIR::D_Up:
+	  if(mir->fAlphaID < mKing->GetSaturnID()) {
+	    // This could in principle break if the connection has just been lost.
+	    // But this is catastrophic anyway.
+	    ForwardMIR(*mir, mSaturnInfo->GetMaster());
+	  } else {
+	    UnfoldMIR(mir);
 	  }
-	  mir->fRecipient->hRoute = route;
-	}
-
-	ForwardMIR(*mir, route);
-
+	  break;
+	case ZMIR::D_Down:
+	  UnfoldMIR(mir);
+	  break;
+	default:
+	  ISerr(_eh + "unknown direction of a flare.");
+	  break;
       }
+      break;
     }
-    catch(Exc_t& exc) {
-      report_mir_pre_demangling_error(*mir, exc);
+
+    case GledNS::MT_Beam:
+    {
+      try
+      {
+	if (mir->fRecipientID == 0 || mir->fRecipientID == mSaturnInfo->GetSaturnID())
+	{
+	  mir->fRecipient = mSaturnInfo;
+	  UnfoldMIR(mir);
+	}
+	else
+	{
+	  mir->fRecipient = dynamic_cast<SaturnInfo*>(DemangleID(mir->fRecipientID));
+	  if (mir->fRecipient == 0)
+	    throw _eh + "can't demangle recipient of a beam.";
+
+	  SaturnInfo* route = mir->fRecipient->hRoute;
+	  if (route == 0)
+	  {
+	    route = FindRouteTo(mir->fRecipient);
+	    if (route == 0 || route->hSocket == 0)
+	      throw _eh + "no route to recipient.";
+	    mir->fRecipient->hRoute = route;
+	  }
+
+	  ForwardMIR(*mir, route);
+	}
+      }
+      catch(Exc_t& exc) {
+	report_mir_pre_demangling_error(*mir, exc);
+      }
+      break;
     }
-    break;
-  }
 
-  default:
-    ISerr(_eh + "unknown message type. Ignoring.");
-
+    default:
+      ISerr(_eh + "unknown message type. Ignoring.");
   }
 }
 
@@ -1727,31 +1728,33 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
   bool is_sun_space  = false;
   // bool is_fire_space = false; // not used
 
-  if(mir->fAlphaID < mKing->GetSaturnID())
-    {
-      is_shared_space = true;
-      is_moon_space   = true;
-    }
-  else if(mir->fAlphaID >= mKing->GetSaturnID() &&
-	  mir->fAlphaID <= mKing->GetMaxID())
-    {
-      is_shared_space = true;
-      is_sun_space    = true;
-    }
-  else if(mir->fAlphaID >= mFireKing->GetSaturnID() &&
-	  mir->fAlphaID <= mFireKing->GetMaxID())
-    {
-      is_shared_space = false;
-      // is_fire_space   = true;
-    }
+  if (mir->fAlphaID < mKing->GetSaturnID())
+  {
+    is_shared_space = true;
+    is_moon_space   = true;
+  }
+  else if (mir->fAlphaID >= mKing->GetSaturnID() &&
+	   mir->fAlphaID <= mKing->GetMaxID())
+  {
+    is_shared_space = true;
+    is_sun_space    = true;
+  }
+  else if (mir->fAlphaID >= mFireKing->GetSaturnID() &&
+	   mir->fAlphaID <= mFireKing->GetMaxID())
+  {
+    is_shared_space = false;
+    // is_fire_space   = true;
+  }
   else
-    {
-      report_mir_pre_demangling_error(*mir, _eh + "lens ID out of range.");
-      return;
-    }
+  {
+    report_mir_pre_demangling_error(*mir, _eh + "lens ID out of range.");
+    return;
+  }
 
-  if(mir->HasResultReq()) {
-    if((!is_flare || (is_flare && is_sun_space))) {
+  if (mir->HasResultReq())
+  {
+    if ((!is_flare || (is_flare && is_sun_space)))
+    {
       try {
 	mir->DemangleResultRecipient(this);
       }
@@ -1763,11 +1766,13 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
     }
   }
 
-  try {
+  try
+  {
     mir->ReadExecHeader();
     mir->Demangle(this);
   }
-  catch(Exc_t& exc) {
+  catch(Exc_t& exc)
+  {
     report_mir_pre_demangling_error(*mir, _eh + "context demangling error: " + exc);
     return;
   }
@@ -1780,24 +1785,28 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 
   lpSaturnInfo_t *reflectors = 0;
 
-  if(is_king) {
+  if (is_king)
+  {
     is_ruler   = true;
     priest     = king;
     reflectors = &mMoons;
     ruler      = king;
-  } else {
-    ZQueen* queen = mir->fAlpha->GetQueen();
+  }
+  else
+  {
+    ZQueen *queen = mir->fAlpha->GetQueen();
     is_ruler   = (mir->fAlpha == queen);
     priest     = queen;
     reflectors = &(queen->mReflectors);
     ruler      = queen;
   }
 
-  try {
-    if(is_flare) {
-
-      if(is_moon_space) {
-
+  try
+  {
+    if (is_flare)
+    {
+      if (is_moon_space)
+      {
 	BroadcastMIR(*mir, *reflectors);
 	if(mir->ShouldExeDetached()) {
 	  ExecDetachedMIR(mir);
@@ -1805,9 +1814,9 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 	  if(is_ruler) { GMutexHolder rulerGMH(mRulingLock); ExecMIR(mir); }
 	  else         { ExecMIR(mir); }
 	}
-
-      } else {
-
+      }
+      else
+      {
 	{ GMutexHolder blessGMH(ruler->mReadMutex); priest->BlessMIR(*mir); }
 	if(mir->ShouldExeDetached()) {
 	  if(is_shared_space && mir->IsDetachedExeMultix()) {
@@ -1824,16 +1833,26 @@ void Saturn::UnfoldMIR(auto_ptr<ZMIR>& mir) throw()
 	}
 
       }
-
-    } else {
-
-      { GMutexHolder blessGMH(ruler->mReadMutex); priest->BlessMIR(*mir); }
-      if(mir->ShouldExeDetached()) {
+    }
+    else // it's a beam
+    {
+      {
+	GMutexHolder blessGMH(ruler->mReadMutex);
+	priest->BlessMIR(*mir);
+      }
+      if (mir->ShouldExeDetached())
+      {
 	ExecDetachedMIR(mir);
-      } else {
-	if(is_ruler) { GMutexHolder rulerGMH(mRulingLock); ExecMIR(mir); }
-	else         { ExecMIR(mir); }
-	if(mir->fRequiresResult) generick_shoot_mir_result(*mir, 0, 0);
+      }
+      else
+      {
+	if (is_ruler) {
+	  GMutexHolder rulerGMH(mRulingLock);
+	  ExecMIR(mir);
+	} else {
+	  ExecMIR(mir);
+	}
+	if (mir->fRequiresResult) generick_shoot_mir_result(*mir, 0, 0);
       }
 
     }
@@ -1866,9 +1885,9 @@ void Saturn::ExecMIR(ZMIR* mir, bool lockp)
 
   GledNS::LibSetInfo* lsi = GledNS::FindLibSetInfo(mir->fLid);
   if (lsi == 0)
-    throw(_eh + GForm("can't demangle lib ID=%u.", (unsigned int) mir->fLid));
+    throw _eh + GForm("can't demangle lib ID=%u.", (unsigned int) mir->fLid);
 
-  ZGlass  *lens = mir->fAlpha;
+  ZGlass *lens = mir->fAlpha;
 
   GThread::OwnerChanger _chown(mir->fCaller);
   GThread::MIRChanger   _chmor(mir);
