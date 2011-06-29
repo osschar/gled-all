@@ -761,7 +761,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
     SaturnInfo* si = mSaturn->GetSaturnInfo();
     GTime ref_time(GTime::I_Now);
     auto_ptr<ZMIR> void_mir( S_PutLensToVoid(lens->mSaturnID) );
-    ref_time += 1000l*mPurgedMS;
+    ref_time += 1000ll * mPurgedMS;
     mSaturn->delayed_shoot_mir(void_mir, si, ref_time);
   }
 }
