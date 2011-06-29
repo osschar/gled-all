@@ -1,3 +1,12 @@
+2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Sanitize libpath and rpath from fltk-config output.
+
+	* make/make_defs.inc:
+	fltk-config adds prefix ldlibpath and rpath for --ldflags: filter
+	this out. It screws up running devel environment from build that
+	was configured for blob-install.
+
 2011-06-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:

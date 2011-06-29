@@ -93,7 +93,10 @@ export MUTE ECHO
 ROOTLIBS  = $(shell ${ROOT_CONFIG} --noauxlibs --libs)
 ROOTGLIBS = $(shell ${ROOT_CONFIG} --noauxlibs --glibs)
 
-FLTKLIBS  = $(shell ${FLTK_CONFIG} --ldflags --use-gl) -lGLEW -lfltk-mt
+# fltk-config started adding lib-patg and -rpath, eg:
+#   -L/opt/gled/lib -Wl,-rpath,/opt/gled/lib -lfltk ...
+# so we chomp the first two pieces off.
+FLTKLIBS  = $(shell ${FLTK_CONFIG} --ldflags --use-gl | perl -pe 's/[^ ]+ [^ ]+ //;') -lGLEW -lfltk-mt
 GUILIBS	  = ${FLTKLIBS}
 
 SYSLIBS	= -lcrypto -lssl -lm -ldl
