@@ -1,3 +1,18 @@
+2011-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Make GTime streamable in a portable way (32 .vs. 64-bit long).
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Use Long64_t as data-type to make it properly streamable.
+	Add functions ToAscGMT() and ToAscLocal() returning standard
+	strings representations. Need to add short versions.
+	Need to test on 32 bits (pretty sure some casts misssing).
+
+	* Ephra/Mountain.cxx:
+	* Glasses/ZQueen.cxx:
+	Follow-up on changes in GTime.
+
 2011-06-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.cxx:
