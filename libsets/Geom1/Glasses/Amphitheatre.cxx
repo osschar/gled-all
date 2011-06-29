@@ -275,7 +275,7 @@ void Amphitheatre::chair_hunt(Double_t t, Double_t dt)
 
 void Amphitheatre::chair_hunt_emit_mir(Double_t t, Double_t dt)
 {
-  GTime at(GTime::I_Now); at += (Long_t)(1000000*dt);
+  GTime at(GTime::I_Now); at += dt;
   auto_ptr<ZMIR> mir( S_chair_hunt(t, dt) );
   mSaturn->DelayedShootMIR(mir, at);
 }
