@@ -1,3 +1,15 @@
+2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add more GTime to text functions, add GTime weed.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Rename ToAscGMT() to ToAscUTC().
+	Add functions ToDateTimeUTC/Local().
+
+	* perllib/GLED_GledCore_Widgets.pm:
+	Add weed TimeOut() displaying date and time from stone GTime.
+
 2011-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Make GTime streamable in a portable way (32 .vs. 64-bit long).

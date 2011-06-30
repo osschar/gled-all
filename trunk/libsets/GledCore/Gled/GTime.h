@@ -64,8 +64,10 @@ public:
   Long64_t ToMiliSec() const { return mSec*1000 + mMuSec/1000; }
   Long64_t ToMiliSec(Long64_t max) const { return mSec >= max ? max*1000 : mSec*1000 + mMuSec/1000; }
 
-  TString  ToAscGMT  (Bool_t show_tz=true) const;
+  TString  ToAscUTC  (Bool_t show_tz=true) const;
   TString  ToAscLocal(Bool_t show_tz=true) const;
+  TString  ToDateTimeUTC  (Bool_t show_tz=true) const;
+  TString  ToDateTimeLocal(Bool_t show_tz=true) const;
 
   void     Sleep();
 
