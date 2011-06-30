@@ -1,3 +1,17 @@
+2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add start / connect time into to XrdServer and XrdUser.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add start-time.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Pass start / connect time to XrdServer/User at creation time.
+
 2011-06-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Populate state with XrdServer and XrdUser lenses - this is slowly

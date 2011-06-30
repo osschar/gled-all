@@ -8,6 +8,7 @@
 #define CmsGridViz_XrdMonSucker_H
 
 #include <Glasses/ZNameMap.h>
+#include <Gled/GTime.h>
 
 class XrdServer;
 

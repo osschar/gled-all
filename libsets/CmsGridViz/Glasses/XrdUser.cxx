@@ -21,15 +21,15 @@ ClassImp(XrdUser);
 void XrdUser::_init()
 {}
 
-XrdUser::XrdUser(const Text_t* n, const Text_t* t) :
+XrdUser::XrdUser(const TString& n, const TString& t) :
   ZList(n, t)
 {
   _init();
 }
 
-XrdUser::XrdUser(const TString& n, const TString& t, const TString& fh, const TString& fd) :
+XrdUser::XrdUser(const TString& n, const TString& t, const TString& fh, const TString& fd, const GTime& st) :
   ZList(n, t),
-  mFromHost(fh), mFromDomain(fd)
+  mFromHost(fh), mFromDomain(fd), mStartTime(st)
 {
   _init();
 }
