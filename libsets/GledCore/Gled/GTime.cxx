@@ -170,32 +170,57 @@ bool GTime::operator==(const GTime& t) const
 
 //==============================================================================
 
-TString GTime::ToAscGMT(Bool_t show_tz) const
+namespace
 {
-  time_t    time(mSec);
-  struct tm tbd;
-  char      buf[32];
-  TString   txt(asctime_r(gmtime_r(&time, &tbd), buf));
-  txt.Chop();
-  if (show_tz) {
-    txt += " ";
-    txt += tbd.tm_zone;
+  typedef struct tm* (time_foo_r)(const time_t*, struct tm*);
+
+  TString to_asctime(Long64_t sec, time_foo_r foo, Bool_t show_tz)
+  {
+    time_t    time(sec);
+    struct tm t;
+    char      buf[32];
+    TString   txt(asctime_r(foo(&time, &t), buf));
+    txt.Chop();
+    if (show_tz) {
+      txt += " ";
+      txt += (foo == gmtime_r) ? "UTC" : t.tm_zone;
+    }
+    return txt;
   }
-  return txt;
+
+  TString to_datetime(Long64_t sec, time_foo_r foo, Bool_t show_tz)
+  {
+    time_t    time(sec);
+    struct tm t;
+    foo(&time, &t);
+    TString txt;
+    txt.Form("%d-%02d-%02d %02d:%02d:%02d", 1900 + t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+    if (show_tz) {
+      txt += " ";
+      txt += (foo == gmtime_r) ? "UTC" : t.tm_zone;
+    }
+    return txt;
+  }
+}
+
+TString GTime::ToAscUTC(Bool_t show_tz) const
+{
+  return to_asctime(mSec, gmtime_r, show_tz);
 }
 
 TString GTime::ToAscLocal(Bool_t show_tz) const
 {
-  time_t    time(mSec);
-  struct tm tbd;
-  char      buf[32];
-  TString   txt(asctime_r(localtime_r(&time, &tbd), buf));
-  txt.Chop();
-  if (show_tz) {
-    txt += " ";
-    txt += tbd.tm_zone;
-  }
-  return txt;
+  return to_asctime(mSec, localtime_r, show_tz);
+}
+
+TString GTime::ToDateTimeUTC(Bool_t show_tz) const
+{
+  return to_datetime(mSec, gmtime_r, show_tz);
+}
+
+TString GTime::ToDateTimeLocal(Bool_t show_tz) const
+{
+  return to_datetime(mSec, localtime_r, show_tz);
 }
 
 //==============================================================================

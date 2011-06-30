@@ -1181,6 +1181,55 @@ sub make_weed_update {
 
 ########################################################################
 
+package GLED::Widgets::TimeOut; @ISA = ('GLED::Widgets');
+
+# Shows GTime as text, specify Cmd argument as:
+#     To[Asc|DateTime][GMT|Local]([false|true])
+# These should really be options as static data-members in a glass, a set of
+# them (Fmt, TZ, ShowTZ) for every GTime that uses them. But would need a
+# proper Fl widget then.
+
+sub new
+{
+  my $proto = shift;
+  my $S = $proto->SUPER::new(@_);
+  $S->{Widget} =  "Fl_Output";
+  $S->{Include} = "FL/Fl_Output.H";
+  $S->{LabelP}       = "true";
+  $S->{LabelInsideP} = "false";
+  $S->{CanResizeP}   = "true";
+  $S->{-width}  = 20 unless exists $S->{-width};
+  $S->{-height} =  1 unless exists $S->{-height};
+  $S->{Cmd} = "ToDateTimeLocal()" unless exists $S->{Cmd};
+  return $S;
+}
+
+sub make_widget
+{
+  my $S=shift;
+  return $S->make_widget_A() .
+	 $S->make_widget_B();
+}
+
+sub make_cxx_cb
+{
+  my $S = shift;
+return <<"fnord";
+void ${::CLASSNAME}View::$S->{Methodbase}_Callback($S->{Widget}* o) {}
+
+fnord
+}
+
+sub make_weed_update
+{
+  my $S = shift;
+  return $S->make_weed_update_A() .
+    "  w->value(mIdol->Ref$S->{Methodbase}().$S->{Cmd});\n" .
+  $S->make_weed_update_B();
+}
+
+########################################################################
+
 package GLED::Widgets::Link; @ISA = ('GLED::Widgets');
 
 sub new
