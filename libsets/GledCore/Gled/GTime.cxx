@@ -194,7 +194,7 @@ namespace
     struct tm t;
     foo(&time, &t);
     TString txt;
-    txt.Form("%d-%02d-%02d %02d:%02d:%02d", 1900 + t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+    txt.Form("%d-%02d-%02d %02d:%02d:%02d", 1900 + t.tm_year, 1 + t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
     if (show_tz) {
       txt += " ";
       txt += (foo == gmtime_r) ? "UTC" : t.tm_zone;
