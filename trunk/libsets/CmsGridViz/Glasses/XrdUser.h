@@ -8,6 +8,7 @@
 #define CmsGridViz_XrdUser_H
 
 #include <Glasses/ZList.h>
+#include <Gled/GTime.h>
 
 class XrdServer;
 
@@ -21,12 +22,13 @@ private:
 protected:
   TString           mFromHost;    // X{GR} 7 TextOut();
   TString           mFromDomain;  // X{GR} 7 TextOut();
+  GTime             mStartTime;   // X{GR} 7 TimeOut();
 
   ZLink<XrdServer>  mServer;      // X{GS} L{}
 
 public:
-  XrdUser(const Text_t* n="XrdUser", const Text_t* t=0);
-  XrdUser(const TString& n, const TString& t, const TString& fh, const TString& fd);
+  XrdUser(const TString& n="XrdUser", const TString& t="");
+  XrdUser(const TString& n, const TString& t, const TString& fh, const TString& fd, const GTime& st);
   virtual ~XrdUser();
 
 #include "XrdUser.h7"

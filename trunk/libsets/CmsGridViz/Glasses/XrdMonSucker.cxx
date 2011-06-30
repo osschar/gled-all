@@ -94,12 +94,13 @@ void XrdMonSucker::Suck()
       ISwarn(_eh + "recvfrom failed: " + strerror(errno));
       continue;
     }
-
-    if (len == 0)
+    else if (len == 0)
     {
       ISwarn(_eh + "recvfrom returned 0, not expected.");
       continue;
     }
+
+    GTime recv_time(GTime::I_Now);
 
     XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) buf;
     Char_t   code = xmh->code;
@@ -130,8 +131,8 @@ void XrdMonSucker::Suck()
       printf("  I-yebo-ga zove se '%s' domain '%s'\n", hostname_re[1].Data(), hostname_re[2].Data());
 
 
-      XrdServer *server = new XrdServer(GForm("%s %s : %hu -- %d", hostname_re[2].Data(), hostname_re[1].Data(), port, stod), "",
-					hostname_re[1], hostname_re[2]);
+      XrdServer *server = new XrdServer(GForm("%s %s : %hu - %d", hostname_re[2].Data(), hostname_re[1].Data(), port, stod), "",
+					hostname_re[1], hostname_re[2], GTime(stod));
 
       // XXXX Lock & blabla or whatever etc.
 
@@ -205,7 +206,7 @@ void XrdMonSucker::Suck()
 
 	// XXXX Lock & blabla or whatever etc.
 
-	XrdUser *user = new XrdUser(uname, sec, host, domain);
+	XrdUser *user = new XrdUser(uname, sec, host, domain, recv_time);
 	mQueen->CheckIn(user);
 	xshi->second->Add(user);
 

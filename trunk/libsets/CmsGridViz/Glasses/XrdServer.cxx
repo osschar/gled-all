@@ -20,15 +20,15 @@ ClassImp(XrdServer);
 void XrdServer::_init()
 {}
 
-XrdServer::XrdServer(const Text_t* n, const Text_t* t) :
+XrdServer::XrdServer(const TString& n, const TString& t) :
   ZNameMap(n, t)
 {
   _init();
 }
 
-XrdServer::XrdServer(const Text_t* n, const Text_t* t, const Text_t* h, const Text_t* d) :
+XrdServer::XrdServer(const TString& n, const TString& t, const TString& h, const TString& d, const GTime& st) :
   ZNameMap(n, t),
-  mHost(h), mDomain(d)
+  mHost(h), mDomain(d), mStartTime(st)
 {
   _init();
 }

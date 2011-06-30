@@ -8,6 +8,7 @@
 #define CmsGridViz_XrdServer_H
 
 #include <Glasses/ZNameMap.h>
+#include <Gled/GTime.h>
 
 class XrdServer : public ZNameMap
 {
@@ -17,12 +18,13 @@ private:
   void _init();
 
 protected:
-  TString           mHost;    // X{GR} 7 TextOut();
-  TString           mDomain;  // X{GR} 7 TextOut();
+  TString           mHost;      // X{GR} 7 TextOut();
+  TString           mDomain;    // X{GR} 7 TextOut();
+  GTime             mStartTime; // X{GR} 7 TimeOut();
 
 public:
-  XrdServer(const Text_t* n="XrdServer", const Text_t* t=0);
-  XrdServer(const Text_t* n, const Text_t* t, const Text_t* h, const Text_t* d);
+  XrdServer(const TString& n="XrdServer", const TString& t="");
+  XrdServer(const TString& n, const TString& t, const TString& h, const TString& d, const GTime& st);
   virtual ~XrdServer();
 
 #include "XrdServer.h7"
