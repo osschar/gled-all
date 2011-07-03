@@ -162,7 +162,7 @@ void TabletReader::begin_stroke_list()
 
   if (mStrokeList == 0)
   {
-    mFirstStrokeStart = mStrokeStart = 0l;
+    mFirstStrokeStart = mStrokeStart = GTime();
 
     TabletStrokeList *slist = new TabletStrokeList("StrokeList");
     mQueen->CheckIn(slist);
