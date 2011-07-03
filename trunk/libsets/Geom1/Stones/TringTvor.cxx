@@ -26,6 +26,12 @@
 // post-serialization / pre-usage chores can be performed.
 //
 // Strip-data is not saved, nor is there any indication if it was used.
+//
+// Jul 2011
+// This should really be templated for float / double.
+// Texture arrays should be moved out and make independent.
+// Maybe also the normal arrays -- or at least they should be templated with a
+// different type so one can use char or short.
 
 #include "TringTvor.h"
 
