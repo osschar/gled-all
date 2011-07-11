@@ -231,6 +231,7 @@ void TabletStroke::MakeHisto(Int_t nbins, Float_t x_edge, Float_t y_edge)
   }
 
   TCanvas *canvas = XTReqCanvas::Request("Stroke", "Stroke");
+  canvas->cd();
   h->Draw();
   XTReqPadUpdate::Update(canvas);
 }
