@@ -1,3 +1,11 @@
+2011-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* spherula.C:
+	New demo ... for playing with Legendification and EGM data.
+
+	* tringula.C:
+	Use new Legendrofying functions for spherical tringulas.
+
 2011-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* solar_system.C:
