@@ -1,3 +1,8 @@
+2011-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	Check input arguments in LegendrofyXyzz() functions.
+
 2011-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Use associated Legendre polynoms from Numerica / GSL -- add
