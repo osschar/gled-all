@@ -429,7 +429,10 @@ namespace
 
 void GTSurf::LegendrofyAdd(LegendreCoefs* lc, Double_t scale, Int_t l_max)
 {
-  if (pSurf == 0) return;
+  static const Exc_t _eh("GTSurf::LegendrofyAdd ");
+
+  if (pSurf == 0) throw _eh + "member pSurf is 0.";
+  if (lc    == 0) throw _eh + "argument lc is 0.";
 
   LegendreCoefs::Evaluator eval(lc, scale, l_max);
 
@@ -442,7 +445,10 @@ void GTSurf::LegendrofyAdd(LegendreCoefs* lc, Double_t scale, Int_t l_max)
 
 void GTSurf::LegendrofyScale(LegendreCoefs* lc, Double_t scale, Int_t l_max)
 {
-  if (pSurf == 0) return;
+  static const Exc_t _eh("GTSurf::LegendrofyScale ");
+
+  if (pSurf == 0) throw _eh + "member pSurf is 0.";
+  if (lc    == 0) throw _eh + "argument lc is 0.";
 
   LegendreCoefs::Evaluator eval(lc, scale, l_max);
 
@@ -458,7 +464,9 @@ void GTSurf::LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale, Double_t pow
   // Single-shopping wrapper -- creates a dummy LegendreCoefs lens without
   // enlightening it.
 
-  if (pSurf == 0) return;
+  static const Exc_t _eh("GTSurf::LegendrofyScaleRandom ");
+
+  if (pSurf == 0) throw _eh + "member pSurf is 0.";
 
   auto_ptr<LegendreCoefs> lc(new LegendreCoefs);
   lc->InitRandom(l_max, abs_scale, pow_scale);
