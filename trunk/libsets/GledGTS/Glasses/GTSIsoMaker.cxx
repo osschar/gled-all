@@ -95,7 +95,7 @@ namespace
       x += g.dx;
     }
   }
-};
+}
 
 void GTSIsoMaker::MakeSurface()
 {
@@ -233,6 +233,7 @@ void GTSIsoMaker::MakeIsoDistanceHisto(const TString& canvas_name,
   functor->GTSIsoEnd();
 
   TCanvas *canvas = XTReqCanvas::Request(canvas_name, canvas_title);
+  canvas->cd();
   h->Draw();
   XTReqPadUpdate::Update(canvas);
 }
