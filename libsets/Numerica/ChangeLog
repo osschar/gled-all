@@ -1,3 +1,17 @@
+2011-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/LegendreCoefs.cxx:
+	* Glasses/LegendreCoefs.h:
+	New glass - contains a set of coefficients for associated Legendre
+	polynoms.
+	Provide different evaluation methods using GSL functions.
+	Can read EGM 2008 data and generate reasonably looking Earth.
+
+	Still need to figure out some details with normalization.
+
+	* glass.list:
+	Register LegendreCoefs.
+
 2011-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Moonraker.cxx:

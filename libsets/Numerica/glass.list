@@ -10,5 +10,5 @@ WarmAmoeba	16	Glasses/WarmAmoeba
 Spheror		17	Glasses/Spheror		.
 MultiSpheror	18	Glasses/MultiSpheror
 
-# Max Entrophy Method
-# MEMLizator	32	Glasses/MEMLizator
+# Spherical functions
+LegendreCoefs	32	Glasses/LegendreCoefs

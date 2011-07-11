@@ -1,3 +1,19 @@
+2011-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use associated Legendre polynoms from Numerica / GSL -- add
+	dependency on Numerica libset.
+
+	* Makefile:
+	Add dependency on Numerica libset.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Remove silly associated Legendre polynom evaluation class.
+	Replace simple random Legendrofy() with set of functions:
+	  void LegendrofyAdd  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyScale(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale=0.1,Double_t pow_scale=1.5);
+
 2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:

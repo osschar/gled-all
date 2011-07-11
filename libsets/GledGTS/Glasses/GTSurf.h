@@ -11,6 +11,8 @@
 #include <Stones/ZColor.h>
 #include <Stones/SGTSRange.h>
 
+class LegendreCoefs;
+
 //#ifndef __CINT__
 //#include <GTS/GTS.h>
 //#endif
@@ -90,7 +92,9 @@ public:
   void GenerateSphere(UInt_t order=1); // X{E} 7 MCWButt(-join=>1)
   void GenerateTriangle(Double_t s=1); // X{E} 7 MCWButt()
 
-  void Legendrofy(Int_t max_l, Double_t abs_scale=0.1,Double_t pow_scale=2.7); // X{E} 7 MCWButt()
+  void LegendrofyAdd  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
+  void LegendrofyScale(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
+  void LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale=0.1,Double_t pow_scale=1.5); // X{E} 7 MCWButt()
 
   void ExportTring(const Text_t* fname=0);
 

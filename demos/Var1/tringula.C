@@ -705,8 +705,8 @@ void setup_sphere_outside()
   gtsurf->GenerateSphere(7);
   gtsurf->Rescale(R);
   for (int i=0; i<5; ++i) {
-    //gtsurf->Legendrofy(16, 0.25, 1.5);
-    gtsurf->Legendrofy(24, 0.25, 1.25);
+    //gtsurf->LegendrofyScaleRandom(16, 0.25, 1.5);
+    gtsurf->LegendrofyScaleRandom(30, 0.15, 1.3);
   }
 
   // Setup trimesh
@@ -738,8 +738,8 @@ void setup_sphere_inside()
   gtsurf->GenerateSphere(4);
   gtsurf->Rescale(R);
   for (int i=0; i<5; ++i) {
-    // gtsurf->Legendrofy(16, 0.25, 1.5);
-    gtsurf->Legendrofy(24, 0.25, 1.25);
+    // gtsurf->LegendrofyScaleRandom(16, 0.25, 1.5);
+    gtsurf->LegendrofyScaleRandom(30, 0.15, 1.3);
   }
   gtsurf->Invert();
 
@@ -860,8 +860,8 @@ void setup_large_sphere()
   gtsurf->GenerateSphere(6);
   gtsurf->Rescale(R);
   for (int i=0; i<5; ++i) {
-    //gtsurf->Legendrofy(16, 0.25, 1.5);
-    gtsurf->Legendrofy(24, 0.25, 1.25);
+    //gtsurf->LegendrofyScaleRandom(16, 0.25, 1.5);
+    gtsurf->LegendrofyScaleRandom(24, 0.25, 1.25);
   }
 
   // Setup trimesh
