@@ -356,11 +356,14 @@ Statico* Tringula::RandomStatico(ZVector *mesh_list,
   Int_t top_cnt = 0;
 place:
   if (++top_cnt > max_tries)
+  {
+    delete s;
     // throw (_eh + "max_tries reached.");
-  // This is temporary solution to bypass the problem with exceptions 
-  // not being deliver into interpreted code.
-  // Using semi-functional solution now for further investigation.
+    // This is temporary solution to bypass the problem with exceptions 
+    // not being deliver into interpreted code.
+    // Using semi-functional solution now for further investigation.
     return 0;
+  }
 
   mParaSurf->random_trans(mRndGen, s->ref_trans());
   s->ref_trans().RotateLF(1, 2, mRndGen.Uniform(0, TMath::TwoPi()));
