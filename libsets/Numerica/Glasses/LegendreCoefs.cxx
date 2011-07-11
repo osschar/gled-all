@@ -45,6 +45,11 @@ LegendreCoefs::~LegendreCoefs()
 
 void LegendreCoefs::InitRandom(Int_t l_max, Double_t abs_scale, Double_t pow_scale)
 {
+  static const Exc_t _eh("LegendreCoefs::InitRandom ");
+
+  if (l_max < 0)
+    throw _eh + "l_max must be non-negative.";
+
   mLMax = l_max;
   mC.resize((l_max + 1) * (l_max + 1));
 
@@ -76,6 +81,35 @@ void LegendreCoefs::InitRandom(Int_t l_max, Double_t abs_scale, Double_t pow_sca
 
   Stamp(FID());
 }
+
+void LegendreCoefs::InitToValue(Int_t l_max, Double_t value)
+{
+  static const Exc_t _eh("LegendreCoefs::InitToValue ");
+
+  if (l_max < 0)
+    throw _eh + "l_max must be non-negative.";
+
+  mLMax = l_max;
+
+  vector<Double_t> new_c((l_max + 1) * (l_max + 1), value);
+  mC.swap(new_c);
+
+  Stamp(FID());
+}
+
+void LegendreCoefs::SetCoef(Int_t l, Int_t m, Double_t v)
+{
+  static const Exc_t _eh("LegendreCoefs::SetCoef ");
+
+  if (l > mLMax || l < 0)
+    throw _eh + "Incorrect argument 'l'.";
+  if (m < -l || m > l)
+    throw _eh + "Incorrect argument 'm'.";
+
+  mC[l*l + l + m] = v;
+}
+
+//==============================================================================
 
 void LegendreCoefs::ReadEgmFile(const TString& egm, Int_t l_max)
 {

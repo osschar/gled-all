@@ -53,9 +53,10 @@ public:
   virtual ~LegendreCoefs();
 
   void InitRandom(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=2.7); // X{E} 7 MCWButt()
-  void ReadEgmFile(const TString& egm, Int_t l_max); // X{E} 7 MCWButt()
+  void InitToValue(Int_t l_max, Double_t value=0); // X{E} 7 MCWButt()
+  void SetCoef(Int_t l, Int_t m, Double_t v);      // X{E} 7 MCWButt()
 
-  void SetCoef(Int_t l, Int_t m, Double_t v) { mC[l*l + l + m] = v; }
+  void ReadEgmFile(const TString& egm, Int_t l_max); // X{E} 7 MCWButt()
 
   Double_t Coef(Int_t l, Int_t m) const { return mC[l*l + l + m]; }
 
