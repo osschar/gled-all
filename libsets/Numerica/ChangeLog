@@ -1,3 +1,10 @@
+2011-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/LegendreCoefs.cxx:
+	* Glasses/LegendreCoefs.h:
+	Support common evaluation of points at same theta.
+	Inner struct MultiEval and method EvalMulti() provide the interface.
+
 2011-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/LegendreCoefs.cxx:

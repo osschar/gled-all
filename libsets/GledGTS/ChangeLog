@@ -1,3 +1,12 @@
+2011-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add wrappers for multi-evaluation:
+	  void LegendrofyAddMulti  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyScaleMulti(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyRandomMulti(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=1.5);
+
 2011-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:

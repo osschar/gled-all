@@ -29,6 +29,25 @@ public:
     Double_t Eval(const HPointD& vec) const;
   };
 
+  struct MultiEval
+  {
+    vector<Double_t> fMVec; // |cos-theta| on input, legend sum on output
+    vector<Double_t> fPhis;
+    vector<Int_t>    fIdcs;
+    vector<void*>    fUserData;
+    Int_t            fN;
+
+    MultiEval() {}
+
+    void Init(Int_t n);
+
+    void AddPoint     (Double_t cos_theta, Double_t phi, void* ud);
+    void AddPoint     (Double_t x, Double_t y, Double_t z, void* ud);
+    void AddPointUnitR(Double_t x, Double_t y, Double_t z, void* ud);
+
+    void Sort();
+  };
+
 private:
   void _init();
 
@@ -62,6 +81,8 @@ public:
 
   Double_t Eval(Double_t cos_theta, Double_t phi, Int_t l_max=-1) const;
   Double_t Eval(const HPointD& vec, Int_t l_max=-1) const;
+
+  void EvalMulti(MultiEval& me, Int_t l_max) const;
 
   void MakeRandomSamplingHisto(Int_t max_l=-1, Int_t n_samples=10000,
 			       const TString& canvas_name  = "RndSampling",
