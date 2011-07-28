@@ -44,7 +44,7 @@ void spherula()
   gtsurf->SetColor(1,0.8,0.2);
 
   ASSIGN_ADD_GLASS(legendcoefs, LegendreCoefs, scene, "LegendreCoefs", 0);
-  legendcoefs->ReadEgmFile("EGM-2008.data", 200);
+  legendcoefs->ReadEgmFile("EGM-2008.data", 1000);
 
   make_std();
 
@@ -59,5 +59,19 @@ void spherula()
 void make_std()
 {
   gtsurf->GenerateSphere(7);
+  // gtsurf->Rescale(10);
+}
+
+void make_leg1()
+{
+  gtsurf->GenerateSphere(7);
+  gtsurf->LegendrofyAdd(legendcoefs, 1e-5, 200);
+  // gtsurf->Rescale(10);
+}
+
+void make_leg2()
+{
+  gtsurf->GenerateSphere(7);
+  gtsurf->LegendrofyMulti(legendcoefs, 1e-5, 400);
   // gtsurf->Rescale(10);
 }
