@@ -10,8 +10,9 @@
 #include <Glasses/ZNode.h>
 #include <Stones/ZColor.h>
 #include <Stones/SGTSRange.h>
+#include <Glasses/LegendreCoefs.h>
 
-class LegendreCoefs;
+class TTree;
 
 //#ifndef __CINT__
 //#include <GTS/GTS.h>
@@ -56,6 +57,8 @@ protected:
   Double_t              mPostBoolPerimeter;  // X{GS} 7 Value(-join=>1)
   Double_t              mPostBoolLength;     // X{GS} 7 Value()
 
+  void legendrofy_multi_common(LegendreCoefs* lc, LegendreCoefs::MultiEval& me, const Exc_t eh);
+
 public:
   GTSurf(const Text_t* n="GTSurf", const Text_t* t=0) : ZNode(n,t) { _init(); }
 
@@ -94,12 +97,20 @@ public:
 
   void LegendrofyAdd  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
   void LegendrofyScale(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
-  void LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale=0.1,Double_t pow_scale=1.5); // X{E} 7 MCWButt()
+  void LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=1.5); // X{E} 7 MCWButt()
+
+  void LegendrofyAddMulti  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
+  void LegendrofyScaleMulti(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
+  void LegendrofyRandomMulti(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=1.5); // X{E} 7 MCWButt()
 
   void ExportTring(const Text_t* fname=0);
 
   void MakeZSplitSurfaces(Double_t z_split=0, const TString& stem="split",
-			  Bool_t save_p=false); // X{ED} 7 MCWButt()
+			  Bool_t save_p=false); //! X{ED} 7 MCWButt()
+
+  TTree* MakeHPointDTree(const TString& name="T", const TString& title="");
+
+  TTree* MakeMultiEvalTree(const TString& name="T", const TString& title="");
 
 #include "GTSurf.h7"
   ClassDef(GTSurf, 1);

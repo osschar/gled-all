@@ -13,6 +13,7 @@
 
 #include <TMath.h>
 #include <TRandom3.h>
+#include <TTree.h>
 
 namespace { using namespace GTS; }
 
@@ -407,19 +408,19 @@ void GTSurf::GenerateTriangle(Double_t s)
 
 
 //==============================================================================
-// Legendrefication
+// Legendrification
 //==============================================================================
 
 namespace
 {
-  static void legendre_vertex_adder(GTS::GtsVertex* v, LegendreCoefs::Evaluator* e)
+  void legendre_vertex_adder(GTS::GtsVertex* v, LegendreCoefs::Evaluator* e)
   {
     HPointD  vec(v->p.x, v->p.y, v->p.z);
     vec *= 1.0 + e->Eval(vec) / vec.Mag();
     v->p.x = vec.x; v->p.y = vec.y; v->p.z = vec.z;
   }
 
-  static void legendre_vertex_scaler(GTS::GtsVertex* v, LegendreCoefs::Evaluator* e)
+  void legendre_vertex_scaler(GTS::GtsVertex* v, LegendreCoefs::Evaluator* e)
   {
     HPointD  vec(v->p.x, v->p.y, v->p.z);
     vec *= 1.0 + e->Eval(vec);
@@ -477,6 +478,96 @@ void GTSurf::LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale, Double_t pow
   GTS::gts_surface_foreach_vertex(pSurf,
 				  (GTS::GtsFunc) legendre_vertex_scaler,
 				  &eval);
+
+  mStampReqTring = Stamp(FID());
+}
+
+//------------------------------------------------------------------------------
+// Legendrification, the Multi way
+//------------------------------------------------------------------------------
+
+namespace
+{
+  void lcme_filler(GTS::GtsVertex* v, LegendreCoefs::MultiEval* me)
+  {
+    me->AddPoint(v->p.x, v->p.y, v->p.z, v);
+  }
+}
+
+void GTSurf::legendrofy_multi_common(LegendreCoefs* lc, LegendreCoefs::MultiEval& me, const Exc_t eh)
+{
+  if (pSurf == 0) throw eh + "member pSurf is 0.";
+  if (lc    == 0) throw eh + "argument lc is 0.";
+
+  me.Init(gts_surface_vertex_number(pSurf));
+  gts_surface_foreach_vertex(pSurf, (GtsFunc) lcme_filler, &me);
+  me.Sort();
+}
+
+void GTSurf::LegendrofyAddMulti(LegendreCoefs* lc, Double_t scale, Int_t l_max)
+{
+  static const Exc_t _eh("GTSurf::LegendrofyAddMulti ");
+
+  LegendreCoefs::MultiEval me;
+
+  legendrofy_multi_common(lc, me, _eh);
+
+  lc->EvalMulti(me, l_max);
+
+  for (Int_t i = 0; i < me.fN; ++i)
+  {
+    GTS::GtsVertex *v = (GTS::GtsVertex*) me.fUserData[i];
+    HPointD  vec(v->p.x, v->p.y, v->p.z);
+    vec *= 1.0 + scale * me.fMVec[i] / vec.Mag();
+    v->p.x = vec.x; v->p.y = vec.y; v->p.z = vec.z;
+  }
+
+  mStampReqTring = Stamp(FID());
+}
+
+void GTSurf::LegendrofyScaleMulti(LegendreCoefs* lc, Double_t scale, Int_t l_max)
+{
+  static const Exc_t _eh("GTSurf::LegendrofyScaleMulti ");
+
+  LegendreCoefs::MultiEval me;
+
+  legendrofy_multi_common(lc, me, _eh);
+
+  lc->EvalMulti(me, l_max);
+
+  for (Int_t i = 0; i < me.fN; ++i)
+  {
+    GTS::GtsVertex *v = (GTS::GtsVertex*) me.fUserData[i];
+    HPointD  vec(v->p.x, v->p.y, v->p.z);
+    vec *= 1.0 + scale * me.fMVec[i];
+    v->p.x = vec.x; v->p.y = vec.y; v->p.z = vec.z;
+  }
+
+  mStampReqTring = Stamp(FID());
+}
+
+void GTSurf::LegendrofyRandomMulti(Int_t l_max, Double_t abs_scale, Double_t pow_scale)
+{
+  // Expects points at R = 1.
+
+  static const Exc_t _eh("GTSurf::LegendrofyRandomMulti ");
+
+  auto_ptr<LegendreCoefs> lc(new LegendreCoefs);
+  lc->InitRandom(l_max, abs_scale, pow_scale);
+  lc->SetCoef(0, 0, 0);
+
+  LegendreCoefs::MultiEval me;
+
+  legendrofy_multi_common(lc.get(), me, _eh);
+
+  lc->EvalMulti(me, l_max);
+
+  for (Int_t i = 0; i < me.fN; ++i)
+  {
+    GTS::GtsVertex *v = (GTS::GtsVertex*) me.fUserData[i];
+    const Double_t fac = 1.0 + me.fMVec[i];
+    v->p.x *= fac; v->p.y *= fac; v->p.z *= fac;
+  }
 
   mStampReqTring = Stamp(FID());
 }
@@ -597,4 +688,68 @@ void GTSurf::MakeZSplitSurfaces(Double_t z_split, const TString& stem, Bool_t sa
     { GLensReadHolder _rdlck(gsup); gsup->Save(); }
     { GLensReadHolder _rdlck(gsdn); gsdn->Save(); }
   }
+}
+
+//==============================================================================
+
+namespace
+{
+  struct ct_ud
+  {
+    TTree    *t;
+    HPointD  *p;
+    ct_ud() : t(0), p(0) {}
+  };
+
+  void ct_filler(GTS::GtsVertex* v, ct_ud* ud)
+  {
+    ud->p->Set(v->p.x, v->p.y, v->p.z);
+    ud->t->Fill();
+  }
+}
+
+TTree* GTSurf::MakeHPointDTree(const TString& name, const TString& title)
+{
+  if (pSurf == 0) return 0;
+
+  ct_ud ud;
+
+  TTree *t = new TTree(name, title);
+  t->SetDirectory(0);
+
+  ud.t = t;
+  t->Branch("P", &ud.p);
+
+  gts_surface_foreach_vertex(pSurf, (GtsFunc) ct_filler, &ud);
+
+  return ud.t;
+}
+
+TTree* GTSurf::MakeMultiEvalTree(const TString& name, const TString& title)
+{
+  if (pSurf == 0) return 0;
+
+  LegendreCoefs::MultiEval me;
+  me.Init(gts_surface_vertex_number(pSurf));
+  gts_surface_foreach_vertex(pSurf, (GtsFunc) lcme_filler, &me);
+  me.Sort();
+
+  TTree *t = new TTree(name, title);
+  t->SetDirectory(0);
+
+  Double_t ct, d;
+  t->Branch("B1", &ct, "ct/D");
+  t->Branch("B2", &d,  "d/D");
+
+  for (Int_t i = 1; i < me.fN; ++i)
+  {
+    Int_t i1 = me.fIdcs[i];
+    Int_t i0 = me.fIdcs[i - 1];
+
+    ct = me.fMVec[i1];
+    d  = me.fMVec[i1] - me.fMVec[i0];
+    t->Fill();
+  }
+
+  return t;
 }

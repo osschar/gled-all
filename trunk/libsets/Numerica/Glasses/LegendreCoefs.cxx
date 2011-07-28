@@ -205,14 +205,70 @@ Double_t LegendreCoefs::Eval(const HPointD& vec, Int_t l_max) const
 
 //------------------------------------------------------------------------------
 
-Double_t LegendreCoefs::Evaluator::Eval(Double_t cos_theta, Double_t phi) const
+void LegendreCoefs::EvalMulti(MultiEval& me, Int_t l_max) const
 {
-  return fScale * fCoefs->Eval(cos_theta, phi, fLMax);
-}
+  static const Double_t sqrt4pi = TMath::Sqrt(4*TMath::Pi());
 
-Double_t LegendreCoefs::Evaluator::Eval(const HPointD& vec) const
-{
-  return Eval(vec.CosTheta(), vec.Phi());
+  if (l_max > mLMax || l_max < 0)
+  {
+    l_max = mLMax;
+  }
+
+  vector<Double_t> mvals(l_max + 1);
+
+  Double_t cos_theta;
+  Int_t n1, n2 = 0;
+
+  while (n2 < me.fN)
+  {
+    n1 = n2;
+    cos_theta = me.fMVec[me.fIdcs[n1]];
+    me.fMVec[me.fIdcs[n1]] = 0;
+    n2 = n1 + 1;
+    while (n2 < me.fN && me.fMVec[me.fIdcs[n2]] == cos_theta)
+    {
+      me.fMVec[me.fIdcs[n2]] = 0;
+      ++n2;
+    }
+
+    for (Int_t m = 0; m <= l_max; ++m)
+    {
+      gsl_sf_legendre_sphPlm_array(l_max, m, cos_theta, &mvals[m]);
+
+      for (Int_t i = n1; i < n2; ++i)
+      {
+	const Int_t    ii       = me.fIdcs[i];
+	const Double_t phi      = me.fPhis[ii];
+	const Double_t cos_mphi = TMath::Cos(m * phi);
+	const Double_t sin_mphi = TMath::Sin(m * phi);
+
+	if (phi > 0)
+	{
+	  for (Int_t l = m; l <= l_max; ++l)
+	  {
+	    me.fMVec[ii] += sum_m(l, m, cos_mphi, sin_mphi) * mvals[l];
+	  }
+	}
+	else
+	{
+	  for (Int_t l = m; l <= l_max; ++l)
+	  {
+	    const Double_t val = sum_m(l, m, cos_mphi, sin_mphi) * mvals[l];
+	    if (l % 2 == 0)
+	      me.fMVec[ii] += val;
+	    else
+	      me.fMVec[ii] -= val;
+	  }
+	}
+      }
+    }
+
+    for (Int_t i = n1; i < n2; ++i)
+    {
+      const Int_t ii = me.fIdcs[i];
+      me.fMVec[ii] *= sqrt4pi;
+    }
+  }
 }
 
 //==============================================================================
@@ -238,4 +294,65 @@ void LegendreCoefs::MakeRandomSamplingHisto(Int_t max_l, Int_t n_samples,
   canvas->cd();
   h->Draw();
   XTReqPadUpdate::Update(canvas);
+}
+
+
+//==============================================================================
+// LegendreCoefs::Evaluator
+//==============================================================================
+
+Double_t LegendreCoefs::Evaluator::Eval(Double_t cos_theta, Double_t phi) const
+{
+  return fScale * fCoefs->Eval(cos_theta, phi, fLMax);
+}
+
+Double_t LegendreCoefs::Evaluator::Eval(const HPointD& vec) const
+{
+  return Eval(vec.CosTheta(), vec.Phi());
+}
+
+
+//==============================================================================
+// LegendreCoefs::MultiEval
+//==============================================================================
+
+void LegendreCoefs::MultiEval::Init(Int_t n)
+{
+  fMVec.resize(n);
+  fPhis.resize(n);
+  fIdcs.resize(n);
+  fUserData.resize(n);
+  fN = 0;
+}
+
+void LegendreCoefs::MultiEval::AddPoint(Double_t cos_theta, Double_t phi, void* ud)
+{
+  if (cos_theta >= 0)
+  {
+    fMVec[fN] = cos_theta;
+    fPhis[fN] = phi + TMath::TwoPi();
+  }
+  else
+  {
+    fMVec[fN] = -cos_theta;
+    fPhis[fN] = phi - TMath::Pi();
+  }
+  fUserData[fN] = ud;
+  ++fN; 
+}
+
+void LegendreCoefs::MultiEval::AddPoint(Double_t x, Double_t y, Double_t z, void* ud)
+{
+  Double_t mag = TMath::Sqrt(x*x + y*y + z*z);
+  AddPoint((mag == 0) ? 1 : z / mag, TMath::ATan2(y, x), ud);
+}
+
+void LegendreCoefs::MultiEval::AddPointUnitR(Double_t x, Double_t y, Double_t z, void* ud)
+{
+  AddPoint(z, TMath::ATan2(y, x), ud);
+}
+
+void LegendreCoefs::MultiEval::Sort()
+{
+  TMath::Sort(fN, &fMVec[0], &fIdcs[0]);
 }
