@@ -406,6 +406,82 @@ void GTSurf::GenerateTriangle(Double_t s)
   mStampReqTring = Stamp(FID());
 }
 
+namespace
+{
+  void lcme_filler(GTS::GtsVertex* v, LegendreCoefs::MultiEval* me)
+  {
+    me->AddPoint(v->p.x, v->p.y, v->p.z, v);
+  }
+}
+
+void GTSurf::GenerateSphereThetaConst(UInt_t order)
+{
+  if (pSurf)
+    gts_object_destroy (GTS_OBJECT (pSurf));
+  pSurf = MakeDefaultSurface();
+
+  gts_surface_generate_sphere(pSurf, 1);
+  Double_t quater_len = 1.051462 / 4;
+
+  for (UInt_t cgo = 1; cgo < order; ++cgo)
+  {
+    gts_surface_tessellate(pSurf, 0, 0);
+
+    LegendreCoefs::MultiEval me;
+    me.Init(gts_surface_vertex_number(pSurf));
+    gts_surface_foreach_vertex(pSurf, (GtsFunc) lcme_filler, &me);
+    me.Sort();
+
+    quater_len *= 0.5;
+
+    Double_t dtheta_max = 2.0 * TMath::ATan(quater_len);
+    Double_t theta0 = TMath::ACos(me.fMVec[me.fIdcs[0]]);
+    Double_t z_sum  = me.fMVec[me.fIdcs[0]];
+    Int_t    i0 = 0, i = 1;
+
+    while (i < me.fN)
+    {
+      Int_t    ii    = me.fIdcs[i];
+      Double_t theta = TMath::ACos(me.fMVec[ii]);
+      if (i + 1 >= me.fN) ++i;
+      if (theta > theta0 + dtheta_max || i >= me.fN)
+      {
+	if (i - i0 > 1)
+	{
+	  Double_t z = z_sum / (i - i0);
+	  for (Int_t j = i0; j < i; ++j)
+	  {
+	    Int_t jj = me.fIdcs[j];
+	    GTS::GtsVertex *v = (GTS::GtsVertex*) me.fUserData[jj];
+	    v->p.z = me.fPhis[jj] > 0 ? z : -z;
+	    Double_t fac = v->p.x*v->p.x + v->p.y*v->p.y;
+	    if (fac > 1e-18)
+	    {
+	      fac = sqrt((1.0 - z*z) / fac);
+	      v->p.x *= fac;
+	      v->p.y *= fac;
+	    }
+	    else
+	    {
+	      v->p.z = v->p.z > 0 ? 1.0 : -1.0;
+	    }
+	  }
+	}
+	theta0 = theta;
+	z_sum  = me.fMVec[ii];
+	i0     = i;
+      }
+      else
+      {
+	z_sum += me.fMVec[ii];
+      }
+      ++i;
+    }
+  }
+
+  mStampReqTring = Stamp(FID());
+}
+
 
 //==============================================================================
 // Legendrification
@@ -486,14 +562,6 @@ void GTSurf::LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale, Double_t pow
 // Legendrification, the Multi way
 //------------------------------------------------------------------------------
 
-namespace
-{
-  void lcme_filler(GTS::GtsVertex* v, LegendreCoefs::MultiEval* me)
-  {
-    me->AddPoint(v->p.x, v->p.y, v->p.z, v);
-  }
-}
-
 void GTSurf::legendrofy_multi_common(LegendreCoefs* lc, LegendreCoefs::MultiEval& me, const Exc_t eh)
 {
   if (pSurf == 0) throw eh + "member pSurf is 0.";
@@ -546,10 +614,8 @@ void GTSurf::LegendrofyScaleMulti(LegendreCoefs* lc, Double_t scale, Int_t l_max
   mStampReqTring = Stamp(FID());
 }
 
-void GTSurf::LegendrofyRandomMulti(Int_t l_max, Double_t abs_scale, Double_t pow_scale)
+void GTSurf::LegendrofyScaleRandomMulti(Int_t l_max, Double_t abs_scale, Double_t pow_scale)
 {
-  // Expects points at R = 1.
-
   static const Exc_t _eh("GTSurf::LegendrofyRandomMulti ");
 
   auto_ptr<LegendreCoefs> lc(new LegendreCoefs);
