@@ -1,3 +1,13 @@
+2011-08-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function GenerateSphereThetaConst().
+	It does a similar thing as GenerateSphere() (tesselating an
+	icosahedron) only it forces points to lie on fewer / quantized
+	theta points on every tesselation step. This makes
+	multi-legendrification much snappier.
+
 2011-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:

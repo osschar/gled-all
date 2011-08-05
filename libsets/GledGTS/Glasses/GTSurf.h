@@ -94,6 +94,7 @@ public:
 
   void GenerateSphere(UInt_t order=1); // X{E} 7 MCWButt(-join=>1)
   void GenerateTriangle(Double_t s=1); // X{E} 7 MCWButt()
+  void GenerateSphereThetaConst(UInt_t order=1); // X{E} 7 MCWButt()
 
   void LegendrofyAdd  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
   void LegendrofyScale(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
@@ -101,7 +102,7 @@ public:
 
   void LegendrofyAddMulti  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
   void LegendrofyScaleMulti(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1); // X{E} C{1} 7 MCWButt()
-  void LegendrofyRandomMulti(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=1.5); // X{E} 7 MCWButt()
+  void LegendrofyScaleRandomMulti(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=1.5); // X{E} 7 MCWButt()
 
   void ExportTring(const Text_t* fname=0);
 
