@@ -11,6 +11,8 @@
 
 class HPointD;
 
+class TTree;
+
 class LegendreCoefs : public ZGlass
 {
   MAC_RNR_FRIENDS(LegendreCoefs);
@@ -87,6 +89,12 @@ public:
   void MakeRandomSamplingHisto(Int_t max_l=-1, Int_t n_samples=10000,
 			       const TString& canvas_name  = "RndSampling",
 			       const TString& canvas_title = "Distribution of LegendreCoef values over random points on sphere"); //! X{ED} 7 MCWButt()
+
+  void MakeThetaGraph(Int_t max_l=-1, Double_t phi=0, Int_t n_div=100,
+		      const TString& canvas_name  = "ThetaGraph",
+		      const TString& canvas_title = "Graph of LegendreCoefs values versus theta"); //! X{ED} 7 MCWButt()
+
+  TTree* MakeCoefTree(const TString& name="T", const TString& title="");
 
 #include "LegendreCoefs.h7"
   ClassDef(LegendreCoefs, 1);

@@ -1,3 +1,14 @@
+2011-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/LegendreCoefs.cxx:
+	* Glasses/LegendreCoefs.h:
+	In Eval(), EvalMulti():
+	  - remove sqrt_4pi factor.
+	In InitRandom():
+	  - remove pi and l-dependant factors;
+	  - generate coeffiecient with Gauss distribution.
+	Add comment about EGM files and scaling.
+
 2011-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/LegendreCoefs.cxx:
