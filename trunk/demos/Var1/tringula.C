@@ -701,13 +701,9 @@ void setup_sphere_outside()
   pssph->SetR(R);
 
   // Setup GTS surface.
-  // gtsurf->GenerateSphere(5);
-  gtsurf->GenerateSphere(7);
+  gtsurf->GenerateSphereThetaConst(7);
   gtsurf->Rescale(R);
-  for (int i=0; i<5; ++i) {
-    //gtsurf->LegendrofyScaleRandom(16, 0.25, 1.5);
-    gtsurf->LegendrofyScaleRandom(30, 0.15, 1.3);
-  }
+  gtsurf->LegendrofyScaleRandomMulti(30, 0.2, 1.6);
 
   // Setup trimesh
   trimesh->SetParaSurf(parasurf);
@@ -735,12 +731,9 @@ void setup_sphere_inside()
   pssph->SetR(R);
 
   // Setup GTS surface.
-  gtsurf->GenerateSphere(4);
+  gtsurf->GenerateSphereThetaConst(7);
   gtsurf->Rescale(R);
-  for (int i=0; i<5; ++i) {
-    // gtsurf->LegendrofyScaleRandom(16, 0.25, 1.5);
-    gtsurf->LegendrofyScaleRandom(30, 0.15, 1.3);
-  }
+  gtsurf->LegendrofyScaleRandomMulti(30, 0.2, 1.6);
   gtsurf->Invert();
 
   // Setup trimesh
@@ -856,13 +849,9 @@ void setup_large_sphere()
   pssph->SetR(R);
 
   // Setup GTS surface.
-  // gtsurf->GenerateSphere(4);
-  gtsurf->GenerateSphere(6);
+  gtsurf->GenerateSphereThetaConst(7);
   gtsurf->Rescale(R);
-  for (int i=0; i<5; ++i) {
-    //gtsurf->LegendrofyScaleRandom(16, 0.25, 1.5);
-    gtsurf->LegendrofyScaleRandom(24, 0.25, 1.25);
-  }
+  gtsurf->LegendrofyScaleRandomMulti(40, 0.25, 1.6);
 
   // Setup trimesh
   trimesh->SetParaSurf(parasurf);

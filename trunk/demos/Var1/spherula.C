@@ -62,6 +62,12 @@ void make_std()
   // gtsurf->Rescale(10);
 }
 
+void make_rnd(Int_t max_l=30, Double_t abs_scale=0.1, Double_t pow_scale=1.5)
+{
+  gtsurf->GenerateSphereThetaConst(7);
+  gtsurf->LegendrofyScaleRandomMulti(max_l, abs_scale, pow_scale);
+}
+
 void make_leg1()
 {
   gtsurf->GenerateSphere(7);

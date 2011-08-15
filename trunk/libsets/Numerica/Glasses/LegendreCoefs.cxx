@@ -11,10 +11,12 @@
 #include "Gled/XTReqCanvas.h"
 
 #include "TH1.h"
+#include "TGraph.h"
 #include "TCanvas.h"
 
 #include "TMath.h"
 #include "TRandom3.h"
+#include <TTree.h>
 
 #include <gsl/gsl_sf_legendre.h>
 
@@ -22,7 +24,22 @@
 
 //______________________________________________________________________________
 //
+// Stores a set of coefficients for spherical harmonics up to given l_max.
+// Provides functions for:
+// - evaluation,
+// - multi-evaluation (group points with same abs(cos_theta),
+// - reading of EGM files (see note below),
+// - various plotting / root-tree export functions.
 //
+// Note on EGM file:
+// There is some strangness with normalization, the altitudes do not match
+// real Earth.
+// The shape seems ok, so I'd guess it is only a factor. I tried some (sqrt(4
+// pi), in particular) but couldn't get it right. But it could be there is
+// some l dependance, too.
+// Min / Max, as things are now, are (l_max = 100) are -1630 / 1000 with 1M
+// sampling points. This also doesn't seem entirely right.
+
 
 ClassImp(LegendreCoefs);
 
@@ -59,23 +76,20 @@ void LegendreCoefs::InitRandom(Int_t l_max, Double_t abs_scale, Double_t pow_sca
 
   for (Int_t l = 0; l <= mLMax; ++l)
   {
-    Double_t fl   = 0.25*(2*l + 1) / Pi();
-    Double_t fpow = abs_scale * Power(1.0/(2*l + 1), pow_scale);
+    Double_t fpow = abs_scale * Power(2.0/(l+1), pow_scale);
 
     Double_t& l0 = coef(l, 0);
 
-    l0  = Sqrt(fl);
-    l0 *= fpow * (2*rnd.Rndm() - 1);
+    l0 = fpow * rnd.Gaus();
 
     for (Int_t m = 1; m <= l; ++m)
     {
       Double_t& lpos = coef(l,  m);
       Double_t& lneg = coef(l, -m);
 
-      lpos  = Sqrt(fl);
-      lneg  = (m % 2) ? -lpos : lpos;
-      lpos *= fpow * (2*rnd.Rndm() - 1);
-      lneg *= fpow * (2*rnd.Rndm() - 1);
+      lpos = fpow * rnd.Gaus();
+      lneg = fpow * rnd.Gaus();
+      if (m % 2) lneg = -lneg;
     }
   }
 
@@ -172,8 +186,6 @@ void LegendreCoefs::ReadEgmFile(const TString& egm, Int_t l_max)
 
 Double_t LegendreCoefs::Eval(Double_t cos_theta, Double_t phi, Int_t l_max) const
 {
-  static const Double_t sqrt4pi = TMath::Sqrt(4*TMath::Pi());
-
   if (l_max > mLMax || l_max < 0)
   {
     l_max = mLMax;
@@ -195,7 +207,7 @@ Double_t LegendreCoefs::Eval(Double_t cos_theta, Double_t phi, Int_t l_max) cons
     }
   }
 
-  return sqrt4pi * sum;
+  return sum;
 }
 
 Double_t LegendreCoefs::Eval(const HPointD& vec, Int_t l_max) const
@@ -207,8 +219,6 @@ Double_t LegendreCoefs::Eval(const HPointD& vec, Int_t l_max) const
 
 void LegendreCoefs::EvalMulti(MultiEval& me, Int_t l_max) const
 {
-  static const Double_t sqrt4pi = TMath::Sqrt(4*TMath::Pi());
-
   if (l_max > mLMax || l_max < 0)
   {
     l_max = mLMax;
@@ -262,12 +272,6 @@ void LegendreCoefs::EvalMulti(MultiEval& me, Int_t l_max) const
 	}
       }
     }
-
-    for (Int_t i = n1; i < n2; ++i)
-    {
-      const Int_t ii = me.fIdcs[i];
-      me.fMVec[ii] *= sqrt4pi;
-    }
   }
 }
 
@@ -294,6 +298,49 @@ void LegendreCoefs::MakeRandomSamplingHisto(Int_t max_l, Int_t n_samples,
   canvas->cd();
   h->Draw();
   XTReqPadUpdate::Update(canvas);
+}
+
+void LegendreCoefs::MakeThetaGraph(Int_t max_l, Double_t phi, Int_t n_div,
+				   const TString& canvas_name,
+				   const TString& canvas_title)
+{
+  TGraph *g = new TGraph(n_div + 1);
+
+  for (Int_t i = 0; i <= n_div + 1; ++i)
+  {
+    Double_t t = TMath::Pi() * i / n_div;
+    g->SetPoint(i, t, Eval(TMath::Cos(t), phi, max_l));
+  }
+
+  TCanvas *canvas = XTReqCanvas::Request(canvas_name, canvas_title);
+  canvas->cd();
+  g->Draw("AP");
+  XTReqPadUpdate::Update(canvas);
+}
+
+TTree* LegendreCoefs::MakeCoefTree(const TString& name, const TString& title)
+{
+  TTree *t = new TTree(name, title);
+  t->SetDirectory(0);
+
+  Int_t    l, m;
+  Double_t c;
+  t->Branch("B1", &l, "l/I");
+  t->Branch("B2", &m, "m/I");
+  t->Branch("B3", &c, "c/D");
+
+  Double_t *cfa = &mC[0];
+  for (l = 0; l <= mLMax; ++l)
+  {
+    for (m = -l; m <= l; ++m)
+    {
+      c = *cfa;
+      t->Fill();
+      ++cfa;
+    }
+  }
+
+  return t;
 }
 
 
