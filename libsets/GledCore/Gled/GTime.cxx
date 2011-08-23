@@ -107,16 +107,16 @@ GTime& GTime::operator-=(ULong64_t mus)
 
 GTime& GTime::operator+=(Double_t sec)
 {
-  Long64_t s = (Long64_t)sec;
-  GTime tt(s, 1000000*((Long64_t)(sec-s)) );
+  Long64_t s = (Long64_t) sec;
+  GTime tt(s, (Long64_t) (1000000.0*(sec-s)));
   *this += tt;
   return *this;
 }
 
 GTime& GTime::operator-=(Double_t sec)
 {
-  Long64_t s = (Long64_t)sec;
-  GTime tt(s, 1000000*((Long64_t)(sec-s)) );
+  Long64_t s = (Long64_t) sec;
+  GTime tt(s, (Long64_t) (1000000.0*(sec-s)));
   *this -= tt;
   return *this;
 }

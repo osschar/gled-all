@@ -1,3 +1,8 @@
+2011-08-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	Fix bug in operator+=(double) and operator-=(double).
+
 2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add more GTime to text functions, add GTime weed.
