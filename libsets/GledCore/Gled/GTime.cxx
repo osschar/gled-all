@@ -5,14 +5,27 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "GTime.h"
-#include <time.h>
+#include <climits>
+#include <ctime>
 #include <sys/time.h>
 
 //______________________________________________________________________
-// GTime
 //
 
 ClassImp(GTime);
+
+
+GTime::GTime(Init_e i)
+{
+  switch (i)
+  {
+    case I_Zero:  SetZero();  break;
+    case I_Now:   SetNow();   break;
+    case I_Never: SetNever(); break;
+  }
+}
+
+//==============================================================================
 
 void GTime::SetNow()
 {
@@ -27,6 +40,16 @@ GTime GTime::TimeUntilNow()
   GTime n(I_Now);
   n -= *this;
   return n;
+}
+
+void GTime::SetNever()
+{
+  mSec = mMuSec = LLONG_MIN;
+}
+
+Bool_t GTime::IsNever() const
+{
+  return mSec == LLONG_MIN && mMuSec == LLONG_MIN;
 }
 
 /**************************************************************************/
@@ -205,22 +228,22 @@ namespace
 
 TString GTime::ToAscUTC(Bool_t show_tz) const
 {
-  return to_asctime(mSec, gmtime_r, show_tz);
+  return IsNever() ? "Never" : to_asctime(mSec, gmtime_r, show_tz);
 }
 
 TString GTime::ToAscLocal(Bool_t show_tz) const
 {
-  return to_asctime(mSec, localtime_r, show_tz);
+  return IsNever() ? "Never" : to_asctime(mSec, localtime_r, show_tz);
 }
 
 TString GTime::ToDateTimeUTC(Bool_t show_tz) const
 {
-  return to_datetime(mSec, gmtime_r, show_tz);
+  return IsNever() ? "Never" : to_datetime(mSec, gmtime_r, show_tz);
 }
 
 TString GTime::ToDateTimeLocal(Bool_t show_tz) const
 {
-  return to_datetime(mSec, localtime_r, show_tz);
+  return IsNever() ? "Never" : to_datetime(mSec, localtime_r, show_tz);
 }
 
 //==============================================================================

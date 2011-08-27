@@ -13,26 +13,31 @@
 class GTime
 {
 public:
-  enum Init_e { I_Now };
+  enum Init_e { I_Zero, I_Now, I_Never };
 
 protected:
   Long64_t	mSec;	// X{GS}
   Long64_t	mMuSec;	// X{GS}
 
 public:
+  GTime(Init_e i);
   GTime(Long64_t s=0, Long64_t mu=0) : mSec(s), mMuSec(mu) {}
-  GTime(Init_e /*i*/) { SetNow(); }
   GTime(const GTime& t) : mSec(t.mSec), mMuSec(t.mMuSec) {}
 
   ~GTime() {}
 
-  static GTime Now() { return GTime(I_Now); }
+  static GTime Now()   { return GTime(I_Now); }
+  static GTime Never() { return GTime(I_Never); }
 
   void   SetNow();
   GTime  TimeUntilNow();
 
+  void   SetZero()         { mSec = mMuSec = 0; }
   Bool_t IsZero()    const { return mSec == 0 && mMuSec == 0; }
   Bool_t IsNonZero() const { return mSec != 0 || mMuSec != 0; }
+
+  void   SetNever();
+  Bool_t IsNever() const;
 
   GTime& operator=(Long64_t mus);
   GTime& operator=(ULong64_t mus);
