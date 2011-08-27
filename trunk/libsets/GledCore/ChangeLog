@@ -1,3 +1,9 @@
+2011-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add never-time (minus max long_64 for sec and musec).
+
 2011-08-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.cxx:
