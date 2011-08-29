@@ -1184,11 +1184,10 @@ Bool_t Tringula::place_on_terrain(Statico* S, TriMesh* M, Bool_t check_inside,
   HTransF&      trans = S->ref_trans();
   Opcode::AABB& aabb  = M->ref_mesh_bbox();
 
-  Float_t ray_offset = mParaSurf->GetMaxH() - aabb.GetMin(Opcode::_Z) +
-    mParaSurf->GetEpsilon() +
+  Float_t ray_offset = mParaSurf->GetMaxH() + mParaSurf->GetEpsilon() +
     0.1f*(mParaSurf->GetMaxH() - mParaSurf->GetMinH()); // !! For local curvature, 1/10 of delta_h
 
-  Float_t max_dist = 0, min_dist = ray_offset;
+  Float_t max_dist = 0, min_dist = 1e12f;
 
   Opcode::Point fdir  (trans.ArrX());
   Opcode::Point gdir  (trans.ArrY());

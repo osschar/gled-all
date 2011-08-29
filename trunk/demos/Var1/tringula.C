@@ -340,6 +340,7 @@ void tringula(Int_t mode=2)
     case  4: setup_torus_outside();  break;
     case  5: setup_torus_inside();   break;
     case  9: setup_large_sphere();   break;
+    case 98: setup_icosahedron();    break;
     case 99: setup_test();           break;
   }
 
@@ -856,6 +857,38 @@ void setup_large_sphere()
   // Setup trimesh
   trimesh->SetParaSurf(parasurf);
   trimesh->ImportGTSurf(gtsurf);
+  trimesh->StdSurfacePostImport();
+  trimesh->GenerateVertexNormals();
+  trimesh->GenerateTriangleNormals();
+
+  // Setup tringula
+  tringula->SetParaSurf(parasurf);
+  tringula->SetMesh(trimesh);
+
+  tringula->SetMaxFlyerH (0.5 * parasurf->CharacteristicLength());
+  tringula->SetMaxCameraH(2 * parasurf->CharacteristicLength());
+}
+
+void setup_icosahedron()
+{
+  // Icosahedron, made by mesh itself.
+
+  Float_t R = 32;
+
+  // Create parasurf
+  ASSIGN_GLASS(parasurf, PSSphere, g_queen, "Sph ParaSurf", 0);
+  PSSphere* pssph = dynamic_cast<PSSphere*>(parasurf);
+  pssph->SetR(R);
+
+  // Setup GTS surface.
+  //gtsurf->GenerateSphereThetaConst(7);
+  //gtsurf->Rescale(R);
+  //gtsurf->LegendrofyScaleRandomMulti(30, 0.2, 1.6);
+
+  // Setup trimesh
+  trimesh->SetParaSurf(parasurf);
+  trimesh->MakeIcosahedron();
+  trimesh->ScaleVertices(R);
   trimesh->StdSurfacePostImport();
   trimesh->GenerateVertexNormals();
   trimesh->GenerateTriangleNormals();

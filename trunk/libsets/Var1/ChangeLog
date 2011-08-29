@@ -1,3 +1,25 @@
+2011-08-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add icosahedral world support as a first step towards hierarhical
+	triangulation.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add functions MakeIcosahedron() and ScaleVertices().
+	Always use Int_t for triangle indices on gled side, cast to UInt_t
+	when passing them to Opcode.
+	Some gray and white space changes.
+
+	* Glasses/Tringula.cxx:
+	place_on_terrain(): better initialization of min_dist.
+
+	* Glasses/TringulaTester.cxx:
+	Add identifiers to printout.
+
+	* Glasses/TriMeshField.cxx:
+	* Rnr/GL/LandMark_GL_Rnr.cxx:
+	Use Int_t for triangle indices on gled side.
+
 2011-06-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/SolarSystem.cxx:

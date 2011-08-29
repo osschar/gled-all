@@ -80,6 +80,12 @@ TriMesh::~TriMesh()
   delete mOPCMeshIf;
 }
 
+void TriMesh::assert_tvor(const Exc_t& eh)
+{
+  if (!mTTvor)
+    throw eh + "mTTvor is null.";
+}
+
 //==============================================================================
 
 void TriMesh::AssertVertexColorArray()
@@ -264,8 +270,7 @@ void TriMesh::BuildOpcStructs()
 {
   static const Exc_t _eh("TriMesh::BuildOpcStructs ");
 
-  if(!mTTvor)
-    throw(_eh + "mTTvor is null.");
+  assert_tvor(_eh);
 
   using namespace Opcode;
 
@@ -283,7 +288,7 @@ void TriMesh::BuildOpcStructs()
 
   bool status = mOPCModel->Build(OPCC);
   if ( ! status)
-    throw(_eh + "Build failed for " + Identify() + ".");
+    throw _eh + "Build failed for " + Identify() + ".";
 }
 
 void TriMesh::AssertOpcStructs()
@@ -302,8 +307,7 @@ void TriMesh::CalculateBoundingBox()
 
   static const Exc_t _eh("TriMesh::CalculateBoundingBox ");
 
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
+  assert_tvor(_eh);
 
   mTTvor->CalculateBoundingBox();
 
@@ -322,8 +326,7 @@ void TriMesh::GenerateVertexNormals()
 {
   static const Exc_t _eh("TriMesh::GenerateVertexNormals ");
 
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
+  assert_tvor(_eh);
 
   mTTvor->GenerateVertexNormals();
   mStampReqTring = Stamp(FID());
@@ -333,8 +336,7 @@ void TriMesh::GenerateTriangleNormals()
 {
   static const Exc_t _eh("TriMesh::GenerateTriangleNormals ");
 
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
+  assert_tvor(_eh);
 
   mTTvor->GenerateTriangleNormals();
   mStampReqTring = Stamp(FID());
@@ -616,16 +618,16 @@ void TriMesh::ExportPovMesh(const char* fname, Bool_t smoothp)
 {
   static const Exc_t _eh("TriMesh::ExportPovMesh ");
 
-  if (!mTTvor)
-    throw(_eh + "mTTvor is null.");
+  assert_tvor(_eh);
 
   ofstream file(fname);
   mTTvor->ExportPovMesh(file, smoothp);
 }
 
-/**************************************************************************/
+
+//==============================================================================
 // Simple Tvors
-/**************************************************************************/
+//==============================================================================
 
 void TriMesh::make_tetra(Int_t vo, Int_t to, Float_t l1, Float_t l2,
                          Float_t z, Float_t w, Float_t h)
@@ -713,7 +715,7 @@ void TriMesh::extrude_triangle(Int_t ti, Float_t h)
 
   C.CalculateTriangleNormalAndCog(ti, norm, cog);
 
-  ExtrudeTriangle(ti, cog[0] + h*norm[0], cog[1] + h*norm[1], cog[2] + h*norm[2]);
+  extrude_triangle(ti, cog[0] + h*norm[0], cog[1] + h*norm[1], cog[2] + h*norm[2]);
 }
 
 void TriMesh::extrude_triangle(Int_t ti, Float_t x, Float_t y, Float_t z)
@@ -904,6 +906,54 @@ void TriMesh::MakeBox(Float_t a, Float_t b, Float_t c)
   Stamp(FID());
 }
 
+void TriMesh::MakeIcosahedron()
+{
+  delete mTTvor;
+  mTTvor = new TringTvor(12, 20, false, false, false);
+  TringTvor& T = *mTTvor;
+
+  // X = sqrt(sqrt(5)+1)/sqrt(2*sqrt(5)) 
+  // Y = sqrt(2)/sqrt(5+sqrt(5))
+  const Double_t X = 0.850650808352039932181540497063011072240401406;
+  const Double_t Y = 0.525731112119133606025669084847876607285497935;
+  const Double_t Z = 0;
+
+  T.SetVertex( 0, +Z, +X, -Y);    T.SetVertex( 1, +X, +Y, +Z);
+  T.SetVertex( 2, +Y, +Z, -X);    T.SetVertex( 3, +Y, +Z, +X);
+  T.SetVertex( 4, +X, -Y, +Z);    T.SetVertex( 5, +Z, +X, +Y);
+  T.SetVertex( 6, -Y, +Z, +X);    T.SetVertex( 7, +Z, -X, -Y);
+  T.SetVertex( 8, -X, +Y, +Z);    T.SetVertex( 9, -Y, +Z, -X);
+  T.SetVertex(10, -X, -Y, +Z);    T.SetVertex(11, +Z, -X, +Y);
+
+  T.SetTriangle( 0,  0,  1,  2);  T.SetTriangle( 1,  3,  4,  1);
+  T.SetTriangle( 2,  5,  6,  3);  T.SetTriangle( 3,  7,  2,  4);
+  T.SetTriangle( 4,  5,  8,  6);  T.SetTriangle( 5,  7,  9,  2);
+  T.SetTriangle( 6,  5,  0,  8);  T.SetTriangle( 7,  7, 10,  9);
+  T.SetTriangle( 8,  5,  1,  0);  T.SetTriangle( 9, 11, 10,  7);
+  T.SetTriangle(10,  5,  3,  1);  T.SetTriangle(11, 11,  6, 10);
+  T.SetTriangle(12, 11,  3,  6);  T.SetTriangle(13,  9, 10,  8);
+  T.SetTriangle(14, 11,  4,  3);  T.SetTriangle(15,  6,  8, 10);
+  T.SetTriangle(16, 11,  7,  4);  T.SetTriangle(17,  2,  1,  4);
+  T.SetTriangle(18,  0,  9,  8);  T.SetTriangle(19,  0,  2,  9);
+
+  Stamp(FID());
+}
+
+void TriMesh::ScaleVertices(Float_t s)
+{
+  static const Exc_t _eh("TriMesh::ScaleVertices ");
+
+  assert_tvor(_eh);
+  TringTvor &T = *mTTvor;
+
+  Float_t *v = T.Verts();
+  Int_t    N = 3*T.mNVerts;
+  for (Int_t i = 0; i < N; ++i)
+  {
+    v[i] *= s;
+  }
+}
+
 
 /**************************************************************************/
 // Vertex algorithms
@@ -932,7 +982,7 @@ void TriMesh::BuildVertexConnections()
 {
   static const Exc_t _eh("TriMesh::BuildVertexConnections ");
 
-  if (!mTTvor) throw(_eh + "mTTvor is null.");
+  assert_tvor(_eh);
 
   const Int_t nVerts  = mTTvor->mNVerts;
   const Int_t nTrings = mTTvor->mNTrings;
@@ -946,7 +996,7 @@ void TriMesh::BuildVertexConnections()
   // Initialize edge-map, count edges and connections.
   for (Int_t tring = 0; tring < nTrings; ++tring)
   {
-    Int_t* vts = mTTvor->Triangle(tring);
+    Int_t *vts = mTTvor->Triangle(tring);
     for (Int_t e = 0; e < 3; ++e)
     {
       const Int_t v1 = vts[vP[e][0]], v2 = vts[vP[e][1]];
@@ -975,8 +1025,8 @@ void TriMesh::BuildVertexConnections()
 
   // Loop over vertices, init edge-cursors
   {
-    Int_t* edge_cur = & mECursVec[0];
-    for (Int_t v=0; v<nVerts; ++v)
+    Int_t *edge_cur = & mECursVec[0];
+    for (Int_t v = 0; v < nVerts; ++v)
     {
       mVDataVec[v].fEdgeArr = edge_cur;
       edge_cur += nconn_per_vertex[v];
@@ -987,7 +1037,7 @@ void TriMesh::BuildVertexConnections()
   {
     for (Int_t tring = 0; tring < nTrings; ++tring)
     {
-      Int_t* vts = mTTvor->Triangle(tring);
+      Int_t *vts = mTTvor->Triangle(tring);
       for (Int_t eti = 0; eti < 3; ++eti)
       {
         const Int_t v1 = vts[vP[eti][0]], v2 = vts[vP[eti][1]];
@@ -1080,7 +1130,7 @@ Bool_t TriMesh::HasVertexConnections()
 //******************************************************************************
 
 Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h,
-				 Float_t xyz_out[3], Float_t* h_out, UInt_t* triangle_idx)
+				 Float_t xyz_out[3], Float_t* h_out, Int_t* triangle_idx)
 {
   // Find world-point corresponding to the passed fgh coordinates and return it
   // in the xyz_out array.
@@ -1112,7 +1162,7 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h,
   Opcode::Ray R;
   Float_t ray_offset = mParaSurf->pos2hray(xyz, R);
 
-  bool cs = RC.Collide(R, *mOPCModel, 0,triangle_idx );
+  bool cs = RC.Collide(R, *mOPCModel, 0, (UInt_t*) triangle_idx);
   if (cs && CF.GetNbFaces() == 1)
   {
       const Opcode::CollisionFace& cf = CF.GetFaces()[0];
@@ -1136,7 +1186,7 @@ Bool_t TriMesh::FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h,
 }
 
 Bool_t TriMesh::FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
-				  Float_t xyz_out[3], Float_t* h_out, UInt_t* triangle_idx)
+				  Float_t xyz_out[3], Float_t* h_out, Int_t* triangle_idx)
 {
   // Given world-point xyz_in and relative height h_in, find the
   // corresponding point xyz_out at specified height. The point is
@@ -1166,7 +1216,7 @@ Bool_t TriMesh::FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
   Opcode::Ray R;
   Float_t ray_offset = mParaSurf->pos2hray(xyz, R);
 
-  bool cs = RC.Collide(R, *mOPCModel, 0, triangle_idx);
+  bool cs = RC.Collide(R, *mOPCModel, 0, (UInt_t*) triangle_idx);
   if (cs && CF.GetNbFaces() == 1)
   {
     const Opcode::CollisionFace& cf = CF.GetFaces()[0];
@@ -1190,7 +1240,7 @@ Bool_t TriMesh::FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
 
 //******************************************************************************
 
-Int_t TriMesh::FindClosestVertex(UInt_t triangle, const Float_t xyz[3],
+Int_t TriMesh::FindClosestVertex(Int_t triangle, const Float_t xyz[3],
                                  Float_t* sqr_dist)
 {
   // Find vertex of triangle that is closest to point given by xyz.
@@ -1234,8 +1284,8 @@ Bool_t check_uv(Opcode::Point& uv, Opcode::Point& duv, Float_t t, Bool_t printp=
 }
 }
 
-Bool_t TriMesh::FindTriangleExitPoint(UInt_t triangle, const Float_t xyz[3], const Float_t dir[3],
-				      Float_t xyz_out[3], UInt_t* next_triangle)
+Bool_t TriMesh::FindTriangleExitPoint(Int_t triangle, const Float_t xyz[3], const Float_t dir[3],
+				      Float_t xyz_out[3], Int_t* next_triangle)
 {
   // Given triangle, position xyz and direction dir, find the exit point from
   // the triangle.
@@ -1265,7 +1315,7 @@ Bool_t TriMesh::FindTriangleExitPoint(UInt_t triangle, const Float_t xyz[3], con
 
   TringTvor& TT = *mTTvor;
 
-  std::set<UInt_t> tried_triangles;
+  std::set<Int_t> tried_triangles;
 reentry:
 
   Int_t* t = TT.Triangle(triangle);
@@ -1396,7 +1446,7 @@ Int_t TriMesh::VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
   // Set visited_vertices holds already visited vertices, they will
   // not be visited twice.
   //
-  // Set accepted_vertices holds the verices for which the visitor
+  // Set accepted_vertices holds the vertices for which the visitor
   // returned true.
   //
   // Returns the maximum depth of recursion.
@@ -1440,7 +1490,7 @@ void TriMesh::ColorByCoord(RGBAPalette* pal, ZGlass* carr_src_lens,
 
   if (!pal)                 throw _eh + "Palette argument null.";
   if (axis < 0 || axis > 2) throw _eh + "illegal axis.";
-  if (!mTTvor)              throw _eh + "TTvor not initialized.";
+  assert_tvor(_eh);
 
   TriMeshColorArraySource *carr_src =
     TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
@@ -1479,7 +1529,7 @@ void TriMesh::ColorByNormal(RGBAPalette* pal, ZGlass* carr_src_lens,
 
   if (!pal)                 throw (_eh + "Palette argument null.");
   if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
-  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+  assert_tvor(_eh);
 
   TriMeshColorArraySource *carr_src =
     TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
@@ -1517,7 +1567,7 @@ void TriMesh::ColorByParaSurfCoord(RGBAPalette* pal, ZGlass* carr_src_lens,
 
   if (!pal)                 throw (_eh + "Palette argument null.");
   if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
-  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+  assert_tvor(_eh);
   assert_parasurf(_eh);
 
   TriMeshColorArraySource *carr_src =
@@ -1563,7 +1613,7 @@ void TriMesh::ColorByParaSurfNormal(RGBAPalette* pal, ZGlass* carr_src_lens,
 
   if (!pal)                 throw (_eh + "Palette argument null.");
   if (axis < 0 || axis > 2) throw (_eh + "illegal axis.");
-  if (!mTTvor)              throw (_eh + "TTvor not initialized.");
+  assert_tvor(_eh);
   assert_parasurf(_eh);
 
   TriMeshColorArraySource *carr_src =
@@ -1605,7 +1655,7 @@ void TriMesh::ColorByCoordFormula(RGBAPalette* pal, ZGlass* carr_src_lens,
   static const Exc_t _eh("TriMesh::ColorByCoordFormula ");
 
   if (!pal)    throw (_eh + "Palette argument null.");
-  if (!mTTvor) throw (_eh + "TTvor not initialized.");
+  assert_tvor(_eh);
 
   TriMeshColorArraySource *carr_src =
     TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);
@@ -1645,7 +1695,7 @@ void TriMesh::ColorByNormalFormula(RGBAPalette* pal, ZGlass* carr_src_lens,
   static const Exc_t _eh("TriMesh::ColorByNormalFormula ");
 
   if (!pal)    throw (_eh + "Palette argument null.");
-  if (!mTTvor) throw (_eh + "TTvor not initialized.");
+  assert_tvor(_eh);
 
   TriMeshColorArraySource *carr_src =
     TriMeshColorArraySource::CastLens(_eh, carr_src_lens, true);

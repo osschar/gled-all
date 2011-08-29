@@ -70,11 +70,11 @@ void TringulaTester::RayCollideTerrain()
 
   Bool_t status = mTringula->RayCollide(ray, mRayLen, false, false, mRayColFaces);
 
-  printf("  status=%d, n faces = %d\n", status, mRayColFaces.GetNbFaces());
+  printf("%s status = %d, n_faces = %d\n", _eh.Data(), status, mRayColFaces.GetNbFaces());
   for (UInt_t f=0; f<mRayColFaces.GetNbFaces(); ++f)
   {
     const Opcode::CollisionFace& cf = mRayColFaces.GetFaces()[f];
-    printf("  %2d %6d  %10f  %10f %10f\n",
+    printf("  %2d: t=%6d  d=%10f  u=%10f v=%10f\n",
            f, cf.mFaceID, cf.mDistance, cf.mU, cf.mV);
   }
 

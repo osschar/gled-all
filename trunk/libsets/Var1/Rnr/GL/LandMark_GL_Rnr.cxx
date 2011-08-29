@@ -70,7 +70,7 @@ void LandMark_GL_Rnr::Render(RnrDriver* rd)
     Opcode::Point xvec(t.ref_base_vec_x()); xvec *= LM.mSx;
     Opcode::Point yvec(t.ref_base_vec_y()); yvec *= LM.mSy;
 
-    UInt_t tidx = Opcode::OPC_INVALID_ID;
+    Int_t tidx = Opcode::OPC_INVALID_ID;
     {
       mLandLinePoints.push_back(Opcode::Point());
       Opcode::Point& xx = mLandLinePoints.back();
@@ -85,7 +85,7 @@ void LandMark_GL_Rnr::Render(RnrDriver* rd)
       s += d;
       Opcode::Point p;
       p.Mac2(t.ref_pos(), xvec, cosf(s), yvec, sinf(s));
-      UInt_t lidx = tidx;
+      Int_t lidx = tidx;
       TMesh->FindPointFromXYZH(p, LM.mLineHeight, p, 0, &tidx);
       if (tidx != lidx)
       {
@@ -127,7 +127,7 @@ void LandMark_GL_Rnr::Render(RnrDriver* rd)
     HTransF& t = LM.mTrans;
     Opcode::Point xvec(t.ref_base_vec_x()); xvec *= LM.mSx;
     Opcode::Point yvec(t.ref_base_vec_y()); yvec *= LM.mSy;
-    UInt_t  tidx = Opcode::OPC_INVALID_ID;
+    Int_t  tidx = Opcode::OPC_INVALID_ID;
     Float_t d = TMath::TwoPi() / LM.mNLineSegments;
     Float_t s = 0;
     for (Int_t i = 0; i < LM.mNLineSegments; ++i)
