@@ -1,3 +1,11 @@
+2011-08-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* spherula.C:
+	Add an icosahedron into scene (created by TriMesh directly).
+
+	* tringula.C:
+	Add world on an icosahedron, mode 98.
+
 2011-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* spherula.C:

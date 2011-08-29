@@ -164,6 +164,8 @@ protected:
   vector<TriMesh::EdgeData>     mEDataVec;  //! X{R}
   vector<Int_t>                 mECursVec;  //! X{R} Cursor array, one entry per vertex.
 
+  void assert_tvor(const Exc_t& eh);
+
   void make_tetra(Int_t vo, Int_t to,
                   Float_t l1, Float_t l2,
                   Float_t z, Float_t w, Float_t h);
@@ -239,23 +241,24 @@ public:
 
   void MakeBox(Float_t a=5, Float_t b=4, Float_t c=3);
 
-  void ExtrudeTriangle(Int_t ti, Float_t h);
-  void ExtrudeTriangle(Int_t ti, Float_t x, Float_t y, Float_t z);
+  void MakeIcosahedron();
+
+  void ScaleVertices(Float_t s);
 
   void   BuildVertexConnections();
   void   AssertVertexConnections();
   Bool_t HasVertexConnections();
 
   Bool_t FindPointFromFGH(const Float_t fgh[3], Bool_t absolute_h,
-			  Float_t xyz_out[3], Float_t* h_out=0, UInt_t* triangle_idx=0);
+			  Float_t xyz_out[3], Float_t* h_out=0, Int_t* triangle_idx=0);
 
   Bool_t FindPointFromXYZH(const Float_t xyz_in[3], Float_t h_in,
-			   Float_t xyz_out[3], Float_t* h_out=0, UInt_t* triangle_idx=0);
+			   Float_t xyz_out[3], Float_t* h_out=0, Int_t* triangle_idx=0);
 
-  Int_t  FindClosestVertex(UInt_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
+  Int_t  FindClosestVertex(Int_t triangle, const Float_t xyz[3], Float_t* sqr_dist=0);
 
-  Bool_t FindTriangleExitPoint(UInt_t triangle, const Float_t xyz[3], const Float_t dir[3],
-			       Float_t xyz_out[3], UInt_t* next_triangle=0);
+  Bool_t FindTriangleExitPoint(Int_t triangle, const Float_t xyz[3], const Float_t dir[3],
+			       Float_t xyz_out[3], Int_t* next_triangle=0);
 
   Int_t  VisitVertices(Int_t vertex, VertexVisitor& vertex_visitor,
                        set<Int_t>& visited_vertices,

@@ -11,15 +11,24 @@
 class GTSurf;
 class LegendreCoefs;
 
+class Statico;
+class TriMesh;
+class Tringula;
+
 GTSurf            *gtsurf      = 0;
 LegendreCoefs     *legendcoefs = 0;
+
+Statico           *stato       = 0;
+TriMesh           *mesh        = 0;
+Tringula          *tring       = 0;
 
 void make_std();
 
 void spherula()
 {
-  Gled::theOne->AssertLibSet("Geom1");
-  Gled::theOne->AssertLibSet("GledGTS");
+  //Gled::theOne->AssertLibSet("Geom1");
+  //Gled::theOne->AssertLibSet("GledGTS");
+  Gled::theOne->AssertLibSet("Var1");
 
   Gled::AssertMacro("sun_demos.C");
 
@@ -38,9 +47,26 @@ void spherula()
 
   scene->GetGlobLamps()->Add(lamp);
 
+  ASSIGN_ADD_GLASS(mesh, TriMesh, scene, "TriMesh", 0);
+  mesh->MakeIcosahedron();
+  mesh->GenerateTriangleNormals();
+
+  // Set as simple tringula (no observer):
+  // mesh->GetTTvor()->GenerateVertexNormals();
+  // ASSIGN_ADD_GLASS(tring, Tringula, scene, "Tringula", 0);
+  // tring->SetMesh(mesh);
+  // tring->MoveLF(1, 2.5);
+
+  // Set as Statico
+  ASSIGN_ADD_GLASS(stato, Statico, scene, "Statico", 0);
+  stato->SetMesh(mesh);
+  stato->ref_trans().MoveLF(1, 2.5);
+  stato->SetColor(.5, .75, 1);
+
   // GTS models
 
   ASSIGN_ADD_GLASS(gtsurf, GTSurf, scene, "GTSurf", 0);
+  gtsurf->MoveLF(1, -2.5);
   gtsurf->SetColor(1,0.8,0.2);
 
   ASSIGN_ADD_GLASS(legendcoefs, LegendreCoefs, scene, "LegendreCoefs", 0);
