@@ -225,6 +225,8 @@ void XrdMonSucker::Suck()
 	}
 
         authinfo_re.Match(sec);
+	msg += TString::Format("  DN=%s, VO=%s, Role=%s\n",
+			       authinfo_re[6].Data(), authinfo_re[4].Data(), authinfo_re[5].Data());
 
 	// ZQueen::CheckIn() does write lock.
 	XrdUser *user = new XrdUser(uname, "",
@@ -342,7 +344,7 @@ void XrdMonSucker::Suck()
 		0;
 
               if (verbose)
-                printf("   Window iB=%d iE=%d N=%d delta_t=%f -- start = %s\n",
+                printf("  Window iB=%2d iE=%2d N=%2d delta_t=%f -- start = %s\n",
                        fTi, fTiWEnd, fTiWEnd-fTi-1, fTimeStep, fTime.ToDateTimeLocal().Data());
 
 	      ++fTi;
