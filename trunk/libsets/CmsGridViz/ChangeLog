@@ -1,3 +1,29 @@
+2011-09-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Complete parsing of xrd monitor stream -- all information is now
+	processed.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	* glass.list:
+	New glass representing an open file in a xrd session.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Finalize parsing of monitor stream, including IO traces.
+	Use user, host & domain matching to filter out nagios probes.
+	Use DN, host & domain REs to select sessions whose traces are to
+	be dumped into the log.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add start, last-msg times.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add connect, disconnect, last-msg times.
+	Add DN, VO and role details.
+
 2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add start / connect time into to XrdServer and XrdUser.
