@@ -10,6 +10,8 @@
 #include <Glasses/ZNameMap.h>
 #include <Gled/GTime.h>
 
+#include <TPRegexp.h>
+
 class XrdServer;
 
 class XrdMonSucker : public ZNameMap
@@ -22,10 +24,23 @@ private:
 protected:
   Int_t      mSuckPort;     // X{GS} 7 Value()
 
-  Bool_t     mPrintU;       // X{GS} 
+  TString    mNagiosUser;   // X{GS} 7 Textor()
+  TString    mNagiosHost;   // X{GS} 7 Textor()
+  TString    mNagiosDomain; // X{GS} 7 Textor()
+
+  TString    mTraceDN;      // X{GS} Ray{TraceRE} 7 Textor()
+  TString    mTraceHost;    // X{GS} 7 Textor()
+  TString    mTraceDomain;  // X{GS} 7 Textor()
 
   Int_t      mSocket;       //!
   GThread   *mSuckerThread; //!
+
+#ifndef __CINT__
+  Bool_t     bTraceAllNull;   //!
+  TPMERegexp mTraceDN_RE;     //!
+  TPMERegexp mTraceHost_RE;   //!
+  TPMERegexp mTraceDomain_RE; //!
+#endif
 
 #ifndef __CINT__
   struct xrdsrv_id
@@ -66,6 +81,8 @@ public:
 
   void StartSucker(); // X{E} 7 MButt()
   void StopSucker();  // X{E} 7 MButt()
+
+  void EmitTraceRERay();
 
 #include "XrdMonSucker.h7"
   ClassDef(XrdMonSucker, 1);
