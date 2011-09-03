@@ -8,6 +8,14 @@ void test()
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("CmsGridViz");
 
+  {
+    ZList* l = g_fire_queen;
+    l = l->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
+    l = l->AssertPath("XrdStuff", "ZList");
+    l->Swallow(new ZGlass("ZGlass:XrdUser",
+			  "ZGlass(Name[32],Title):XrdUser(FromHost,FromDomain)"));
+  }
+
   g_queen->SetName("XrdMonitorQueen");
   CREATE_ADD_GLASS(suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);
   suck->SetKeepSorted(true);
@@ -22,5 +30,12 @@ void test()
   g_nest->SetMaxChildExp(3); // This doesn't work ... only on creation.
   g_nest->SetWName(50);
 
+  suck->SetTraceDN("Matevz Tadel");
+  suck->SetTraceHost("uaf-");
+  suck->SetTraceDomain("ucsd.edu");
+
   suck->StartSucker();
 }
+
+// Layout to add:
+// ZGlass(Name[32],Title):XrdUser(FromHost, FromDomain)
