@@ -272,8 +272,7 @@ void FTW_Shell::_bootstrap()
     { // Top matter
       Fl_Group* inpp = new Fl_Group(0, 0, w(), 1);
 
-      Fl_Box* msg_pre = new Fl_Box(FTW::separator_box,0,0,14,1,
-				   "Message input/output:");
+      Fl_Box* msg_pre = new Fl_Box(FTW::separator_box,0,0,8,1, "Messages:");
       msg_pre->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
       msg_pre->labelfont(msg_pre->labelfont() + FL_BOLD);
       msg_pre->color(fl_rgb_color(200,220,200));
