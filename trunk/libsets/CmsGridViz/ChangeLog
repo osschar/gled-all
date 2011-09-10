@@ -1,3 +1,29 @@
+2011-09-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Finalize front-line processing of xrootd monitoring streams.
+
+	* Glasses/XrdMonSucker.cxx:
+	Use new functions from XrdServer, proper dict_id de-registration.
+	Lock lenses when doing direct calls on them; those should be MIRs,
+	anyway.
+	Make code somewhat prettier.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add new owned link:
+	   ZLink<ZList> mPrevUsers;
+	initialize it in AdEnlightenment() and add the following functions:
+	   void DisconnectUser(XrdUser* user, Int_t dict_id);
+	   void RemoveUser(XrdUser* user);
+	   void RemoveFile(XrdFile* file, Int_t dict_id);
+	to help managing users and files ... and their dict_id maps.
+
+	* Glasses/XrdUser.cxx:
+	Docs.
+
+	* Glasses/XrdFile.h:
+	Whitespace.
+
 2011-09-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Complete parsing of xrd monitor stream -- all information is now

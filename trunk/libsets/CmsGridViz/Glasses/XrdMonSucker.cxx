@@ -425,7 +425,8 @@ void XrdMonSucker::Suck()
 
         if (tt <= 0x7F)
         {
-          fi = lc.update(ntohl(xmt.arg2.dictid));
+	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+          fi = lc.update(dict_id);
           if (fi)
           {
             // Int_t rwoff = ntohl(arg.arg0.val);
@@ -444,38 +445,61 @@ void XrdMonSucker::Suck()
         }
 	else if (tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
 	{
-	  fi = lc.update(ntohl(xmt.arg2.dictid));
+	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+	  fi = lc.update(dict_id);
           if (vrb) printf("  %2d: %s, file=%s\n", ti, ttn, fi ? fi->GetName() : "<nullo>");
           if (fi)
           {
-            GLensReadHolder _lck(fi);
-            fi->SetLastMsgTime(lc.fTime);
             if (tt == XROOTD_MON_OPEN)
             {
+	      GLensReadHolder _lck(fi);
+	      fi->SetLastMsgTime(lc.fTime);
               fi->SetOpenTime(lc.fTime);
             }
             else
             {
-              ULong64_t x;
-              x = ntohl(xmt.arg0.rTot[1]);
-              x <<= xmt.arg0.id[1];
-              fi->SetRTotalMB(x / 1048576.0);
-              x = ntohl(xmt.arg1.wTot);
-              x <<= xmt.arg0.id[1];
-              fi->SetWTotalMB(x / 1048576.0);
-              fi->SetCloseTime(lc.fTime);
+	      {
+		GLensReadHolder _lck(fi);
+		fi->SetLastMsgTime(lc.fTime);
+		ULong64_t x;
+		x = ntohl(xmt.arg0.rTot[1]);
+		x <<= xmt.arg0.id[1];
+		fi->SetRTotalMB(x / 1048576.0);
+		x = ntohl(xmt.arg1.wTot);
+		x <<= xmt.arg0.id[1];
+		fi->SetWTotalMB(x / 1048576.0);
+		fi->SetCloseTime(lc.fTime);
+	      }
+	      {
+		GLensReadHolder _lck(server);
+		server->RemoveFile(fi, dict_id);
+	      }
             }
           }
 	}
 	else if (tt == XROOTD_MON_DISC)
 	{
-	  assert(us == server->FindUser(ntohl(xmt.arg2.dictid)));
-	  if (vrb) printf("  %2d: %s, user=%s\n", ti, ttn, us ? us->GetName() : "<nott-therrea>");
+	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+	  XrdUser *us_from_server = server->FindUser(dict_id);
+	  if (us != us_from_server)
+	  {
+	    ISwarn(_eh + GForm("us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')", us, us_from_server, us ? us->GetName() : "<nil>", us_from_server ? us_from_server->GetName() : "<nil>"));
+	    printf("Jebojebo!\n");
+            us = us_from_server;
+	  }
+	  if (vrb) printf("  %2d: %s, user=%s\n", ti, ttn, us ? us->GetName() : "<nil>");
 	  if (us)
 	  {
-	    GLensReadHolder _lck(us);
-	    us->SetDisconnectTime(lc.fTime);
+            {
+              GLensReadHolder _lck(us);
+              us->SetDisconnectTime(lc.fTime);
+            }
+            {
+              GLensReadHolder _lck(server);
+              server->DisconnectUser(us, dict_id);
+            }
 	  }
+          
 	}
       } // while trace entries
 
