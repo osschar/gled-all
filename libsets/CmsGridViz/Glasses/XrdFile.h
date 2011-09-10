@@ -20,7 +20,7 @@ private:
   void _init();
 
 protected:
-  ZLink<XrdUser>  mUser;      // X{GS} L{}
+  ZLink<XrdUser>  mUser;        // X{GS} L{}
 
   GTime           mOpenTime;    // X{GRSQ} 7 TimeOut()
   GTime           mCloseTime;   // X{GRSQ} 7 TimeOut()

@@ -13,7 +13,8 @@
 
 //______________________________________________________________________________
 //
-//
+// Represents a xrootd session on a given server.
+// Can open several files, all stored as children.
 
 ClassImp(XrdUser);
 
