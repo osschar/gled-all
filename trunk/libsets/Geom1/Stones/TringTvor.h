@@ -201,7 +201,7 @@ public:
 
   // ----------------------------------------------------------------
 
-  ClassDef(TringTvor, 1); // Tvor of triangles, a triangle mesh.
+  ClassDefNV(TringTvor, 1); // Tvor of triangles, a triangle mesh.
 }; // endclass TringTvor
 
 

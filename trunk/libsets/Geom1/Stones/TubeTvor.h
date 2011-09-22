@@ -46,7 +46,7 @@ public:
   void NewRing(Int_t n, Bool_t dp);
   void NewVert(Float_t *v, Float_t *n, UChar_t *c=0, Float_t* t=0);
 
-  ClassDef(TubeTvor, 0);
+  ClassDefNV(TubeTvor, 0);
 }; // endclass TubeTvor
 
 
