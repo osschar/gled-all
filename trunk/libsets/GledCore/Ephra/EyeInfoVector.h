@@ -31,7 +31,7 @@ public:
   static EyeInfoVector* CloneAndRemove(EyeInfoVector* eiv, EyeInfo* ei);
 
 #include "EyeInfoVector.h7"
-  ClassDef(EyeInfoVector, 0);
+  ClassDefNV(EyeInfoVector, 0);
 }; // endclass EyeInfoVector
 
 #endif
