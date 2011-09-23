@@ -1,3 +1,8 @@
+2011-09-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	Use atomic add/sub in Inc/DecEyeRefCount().
+
 2011-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.cxx:
