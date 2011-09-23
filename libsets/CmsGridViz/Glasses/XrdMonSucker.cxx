@@ -252,8 +252,11 @@ void XrdMonSucker::Suck()
       }
       else if (code == 'd')
       {
-	msg += TString::Format("  path map -- id=%d, uname=%s path=%s\n", dict_id, prim, sec);
-	XrdUser *user = server->FindUser(prim);
+        TString uname(prim);
+        TString path (sec);
+	msg += TString::Format("  path map -- id=%d, uname=%s path=%s\n",
+                               dict_id, uname.Data(), path.Data());
+	XrdUser *user = server->FindUser(uname);
 	if (user)
 	{
 	  if (server->ExistsFileDictId(dict_id))
@@ -265,7 +268,7 @@ void XrdMonSucker::Suck()
 	  }
 
 	  // create XrdFile
-	  XrdFile *file = new XrdFile(sec);
+	  XrdFile *file = new XrdFile(path);
 	  mQueen->CheckIn(file);
 
 	  // should lock all those ....
@@ -276,7 +279,6 @@ void XrdMonSucker::Suck()
 	}
 	else
 	{
-          TString uname(prim);
           if ( ! uname.BeginsWith(mNagiosUser))
           {
             msg += TString::Format("  user not found ... skipping.\n");
@@ -494,6 +496,17 @@ void XrdMonSucker::Suck()
               GLensReadHolder _lck(us);
               us->SetDisconnectTime(lc.fTime);
             }
+            list<XrdFile*> open_files;
+            us->CopyListByGlass<XrdFile>(open_files);
+            for (list<XrdFile*>::iterator xfi = open_files.begin(); xfi != open_files.end(); ++xfi)
+            {
+              GLensReadHolder _lck(*xfi);
+              if ((*xfi)->IsOpen())
+              {
+                (*xfi)->SetCloseTime(lc.fTime);
+              }
+            }
+
             {
               GLensReadHolder _lck(server);
               server->DisconnectUser(us, dict_id);
