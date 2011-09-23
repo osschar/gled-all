@@ -372,16 +372,17 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
 
   static const Exc_t _eh("ZGlass::DecRefCount ");
 
-  if(mQueen && from->mQueen) {
+  if (mQueen && from->mQueen)
+  {
     mQueen->SubjectRefCntLock();
 
     hpZGlass2Int_i i = mReverseRefs.find(from);
-    if(i == mReverseRefs.end()) {
+    if (i == mReverseRefs.end()) {
       mQueen->SubjectRefCntUnlock();
       ISerr(_eh + Identify() + " not referenced by " + from->Identify() + ".");
       return mRefCount;
     }
-    if(n > i->second) {
+    if (n > i->second) {
       ISwarn(_eh + GForm("%s, called by %s: mismatch %d > %d.", Identify().Data(),
 			 from->Identify().Data(), n, i->second));
       n = i->second;
@@ -389,8 +390,8 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
 
     dec_ref_count(i, n);
 
-    if(i->second <= 0) mReverseRefs.erase(i);
-    if(mRefCount == 0 && mQueen) mQueen->ZeroRefCount(this);
+    if (i->second <= 0) mReverseRefs.erase(i);
+    if (mRefCount == 0 && mQueen) mQueen->ZeroRefCount(this);
     mQueen->SubjectRefCntUnlock();
     // Stamp(FID());
   }
@@ -399,12 +400,12 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
 
 Short_t ZGlass::IncEyeRefCount()
 {
-  return ++mEyeRefCount;
+  return __sync_add_and_fetch(&mEyeRefCount, 1);
 }
 
 Short_t ZGlass::DecEyeRefCount()
 {
-  return --mEyeRefCount;
+  return __sync_sub_and_fetch(&mEyeRefCount, 1);
 }
 
 /**************************************************************************/
