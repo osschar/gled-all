@@ -41,6 +41,8 @@ public:
 	  const TString& fh, const TString& fd, const GTime& st);
   virtual ~XrdUser();
 
+  Bool_t IsConnected() const { return mDisconnectTime.IsNever() && ! mLoginTime.IsNever(); }
+
   void AddFile(XrdFile* file);
 
 #include "XrdUser.h7"

@@ -1,3 +1,15 @@
+2011-09-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdUser.h:
+	When a XrdUser disconnects, check all its files to see if they are
+	open -- and close them.
+
+	* Glasses/XrdFile.h:
+	Add function Bool_t IsOpen().
+
+	* Glasses/XrdMonSucker.cxx:
+	Add function Bool_t IsConnected().
+
 2011-09-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Finalize front-line processing of xrootd monitoring streams.

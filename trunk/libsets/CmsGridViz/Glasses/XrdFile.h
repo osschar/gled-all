@@ -36,6 +36,8 @@ public:
   XrdFile(const Text_t* n="XrdFile", const Text_t* t=0);
   virtual ~XrdFile();
 
+  Bool_t IsOpen() const { return mCloseTime.IsNever() && ! mOpenTime.IsNever(); }
+
 #include "XrdFile.h7"
   ClassDef(XrdFile, 1);
 }; // endclass XrdFile
