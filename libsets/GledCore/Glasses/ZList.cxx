@@ -131,6 +131,7 @@ Int_t ZList::RemoveAll(ZGlass* lens)
   for(iterator i=begin(); i!=end(); ++i) {
     if(i() == lens) {
       iterator j = i; --i;
+      on_remove(j);
       StampListRemove(j->fLens, j->fId);
       mElements.erase(j); --mSize;
       ++n;
