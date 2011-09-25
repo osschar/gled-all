@@ -1,3 +1,10 @@
+2011-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/ehs:
+	* external/ehs/Makefile:
+	* external/ehs/ehs.pl:
+	Add EHS (Embedded HTTP Server) as an external package.
+
 2011-06-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/root/make-root-src-dist.sh:
