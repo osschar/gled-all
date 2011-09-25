@@ -1,6 +1,4 @@
-
 /*
-
   EHS is a library for adding web server support to a C++ application
   Copyright (C) 2001, 2002 Zac Hansen
   
@@ -19,27 +17,26 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   
   Zac Hansen ( xaxxon@slackworks.com )
-
 */
 
 
 #include <string>
-#include <list>
+#include <set>
 
 #include <ehs/ehs.h>
-
-typedef std::list<std::string> StringList;
 
 class FormTester : public EHS
 {
 public:
+  typedef std::set<std::string> sString_t;
+  typedef sString_t::iterator   sString_i;
 
-  FormTester() {}
+  FormTester() { oNameList.insert("QuartaLaTanga"); }
 
   ResponseCode HandleRequest(HttpRequest  *ipoHttpRequest,
 			     HttpResponse *ipoHttpResponse);
 	
-  StringList oNameList;
+  sString_t oNameList;
 };
 
 
@@ -55,7 +52,7 @@ ResponseCode FormTester::HandleRequest(HttpRequest  *ipoHttpRequest,
       ipoHttpRequest->FormValues("existinguser").m_sBody.length())
   {
     std::string sName;
-		
+
     sName = ipoHttpRequest->FormValues("existinguser").m_sBody;
     if (ipoHttpRequest->FormValues("user").m_sBody.length())
     {
@@ -63,11 +60,11 @@ ResponseCode FormTester::HandleRequest(HttpRequest  *ipoHttpRequest,
     }
 
     fprintf(stderr, "Got name of %s\n", sName.c_str());
-			
-    char * psHtml = new char[5000];
-    sprintf ( psHtml, "<html><head><title>StringList</title></head>\n<body>Hi %s</body></html>", sName.c_str ( ) );
-    oNameList.push_back(sName);
-		
+
+    char *psHtml = new char[5000];
+    sprintf(psHtml, "<html><head><title>StringList</title></head>\n<body>Hi %s</body></html>", sName.c_str ( ) );
+    oNameList.insert(sName);
+
     ipoHttpResponse->SetBody(psHtml, strlen(psHtml));
     return HTTPRESPONSECODE_200_OK;
   }
@@ -80,18 +77,17 @@ ResponseCode FormTester::HandleRequest(HttpRequest  *ipoHttpRequest,
     char psOptions [ oNameList.size ( ) * 200 ];
     psOptions [ 0 ] = '\0';
 
-    for (StringList::iterator oCurrentName = oNameList.begin();
+    for (sString_i oCurrentName = oNameList.begin();
 	 oCurrentName != oNameList.end();
 	 oCurrentName++)
     {
       char psOption[200];
-      sprintf(psOption, "<option>%s\n",
+      sprintf(psOption, "<option>%s</option>\n",
 	      oCurrentName->substr(0, 150).c_str());
-      strcat(psOptions, psOption );
-			
+      strcat(psOptions, psOption);
     }
 
-    sprintf(psHtml, "<html><head><title>StringList</title></head> <body>Please log in<P> <form action = \"/\" method=GET> User name: <input type = text  name = user><BR> <select name = existinguser width = 20> %s </select> <input type = submit> </form>\n", 
+    sprintf(psHtml, "<html><head><title>StringList</title></head> <body>Please enter user name<P> <form action = \"/\" method=GET> User name: <input type = text  name = user><BR> <select name = existinguser width = 20> %s </select> <input type=\"submit\" value=\"Log in\"> </form>\n", 
 	    psOptions);
 
     ipoHttpResponse->SetBody(psHtml, strlen(psHtml));
