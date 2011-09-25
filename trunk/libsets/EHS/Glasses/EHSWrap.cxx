@@ -30,32 +30,31 @@ void EHSWrap::StartServer()
 {
   const TString _eh("EHSWrap::StartServer ");
 
-  if(bServerUp)
-    throw(_eh + "server already running.");
+  if (bServerUp)
+    throw _eh + "server already running.";
 
   FormTester srv;
   EHSServerParameters oSP;
 
   oSP["port"] = mPort; // argv [ 1 ];
-  oSP [ "mode" ] = "singlethreaded"; 
-  // oSP [ "mode" ] = "threadpool";
+  oSP["mode"] = "singlethreaded"; 
+  // oSP["mode"] = "threadpool";
   // oSP["threadcount"] = 1; // 1 is default anyway
 
   // oSP["https"] = 1;
   // oSP["certificate"] = argv [ 2 ];
   // oSP["passphrase"] = argv [ 3 ];
                 
-  EHS::StartServerResult ssr = srv.StartServer ( oSP );
-  if(ssr != EHS::STARTSERVER_SUCCESS)
-    throw(_eh + GForm("start server failed status=%d.", ssr));
+  srv.StartServer(oSP);
   
   SetServerUp(true);
   b_stop_server = false;
-  while (b_stop_server == false ) {
-    srv.HandleData ( 1000 ); // waits for 1 second
+  while (b_stop_server == false )
+  {
+    srv.HandleData(1000); // waits for 1 second
   }
 
-  srv.StopServer ( );
+  srv.StopServer();
   SetServerUp(false);
 }
 
@@ -63,8 +62,8 @@ void EHSWrap::StopServer()
 {
   const TString _eh("EHSWrap::StopServer ");
 
-  if(! bServerUp)
-    throw(_eh + "server not running.");
+  if ( ! bServerUp)
+    throw _eh + "server not running.";
 
   b_stop_server = true;
 }
