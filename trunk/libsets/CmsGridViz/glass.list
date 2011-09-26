@@ -9,3 +9,5 @@ XrdFile		4	Glasses/XrdFile
 CmsXrdHost	32	Glasses/CmsXrdHost
 CmsXrdSite	33	Glasses/CmsXrdSite
 CmsXrdUser	34	Glasses/CmsXrdUser
+
+XrdFileCloseReporter 1024 Glasses/XrdFileCloseReporter
