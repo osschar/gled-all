@@ -1,3 +1,17 @@
+2011-09-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Prelimiary commit of file-close reporting.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Proto version.
+
+	* Glasses/XrdMonSucker.h:
+	Mostly comments about handling of XrdFileCloseReporter.
+
+	* glass.list:
+	Register XrdFileCloseReporter.
+
 2011-09-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdUser.h:

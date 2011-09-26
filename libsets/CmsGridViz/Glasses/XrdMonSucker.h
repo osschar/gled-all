@@ -13,10 +13,24 @@
 #include <TPRegexp.h>
 
 class XrdServer;
+class XrdFile;
 
 class XrdMonSucker : public ZNameMap
 {
   MAC_RNR_FRIENDS(XrdMonSucker);
+
+public:
+  // Hmmh ... wouldn't it be easier if we just have a link to
+  // XrdFileCloseReporter directly?
+  // And this could then eventually become a link-to-list with
+  // sub-classes of XrdFileCloseReporter actually doing the work.
+
+  class FileCloseAbsorber
+  {
+  public:
+    virtual ~FileCloseAbsorber() {}
+    virtual void FileClosed(XrdFile* file) = 0;
+  };
 
 private:
   void _init();
