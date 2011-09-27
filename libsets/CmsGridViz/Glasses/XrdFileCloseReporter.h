@@ -8,10 +8,13 @@
 #define CmsGridViz_XrdFileCloseReporter_H
 
 #include <Glasses/ZGlass.h>
-#include <Glasses/XrdMonSucker.h>
+class XrdFile;
 
-class XrdFileCloseReporter : public ZGlass,
-			     public XrdMonSucker::FileCloseAbsorber
+#include <Gled/GCondition.h>
+class GThread;
+
+
+class XrdFileCloseReporter : public ZGlass
 {
   MAC_RNR_FRIENDS(XrdFileCloseReporter);
 
@@ -19,15 +22,25 @@ private:
   void _init();
 
 protected:
-  TString       mHost; // X{GS}
-  UShort_t      mPort; // X{GS}
+  TString           mHost; // X{GS}
+  UShort_t          mPort; // X{GS}
+
+  GThread          *mReporterThread; //!
+  GCondition        mReporterCond;   //!
+  list<XrdFile*>    mReporterQueue;  //!
+  Int_t             mReporterSocket; //!
+
+  static void* tl_ReportLoop(XrdFileCloseReporter* r);
+  void ReportLoop();
 
 public:
   XrdFileCloseReporter(const Text_t* n="XrdFileCloseReporter", const Text_t* t=0);
   virtual ~XrdFileCloseReporter();
 
-  // Virtual from XrdMonSucker::FileCloseAbsorber
   virtual void FileClosed(XrdFile* file);
+
+  void StartReporter(); // X{E} 7 MButt()
+  void StopReporter();  // X{E} 7 MButt()
 
 #include "XrdFileCloseReporter.h7"
   ClassDef(XrdFileCloseReporter, 1);
