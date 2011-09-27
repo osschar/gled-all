@@ -111,7 +111,7 @@ depend:: ${ALL_DEPS} ${DEPEND_TGTS}
 	@touch .depend_done
 
 ifdef DEPEND_DONE
-ifeq ($(filter clean distclean, ${MAKECMDGOALS}),)
+ifeq ($(filter undepend clean distclean, ${MAKECMDGOALS}),)
 -include ${ALL_DEPS}
 endif
 endif
@@ -121,6 +121,9 @@ endif
 
 dist:
 	(cd ..; tar czf ${LIB_SET_NAME}-`date +"%y%m%d-%H%M"`.tgz ${LIB_SET_NAME})
+
+undepend:
+	${MUTE} find . -name \*.d | xargs rm -f
 
 clean::
 	${MUTE} rm -f ${ALL_OBJS} ${ALL_DEPS} .depend_done
