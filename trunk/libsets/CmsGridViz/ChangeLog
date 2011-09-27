@@ -1,5 +1,17 @@
 2011-09-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Step 2 in file-close reporting.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add thread management and notification queue.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add link to XrdFileCloseReporter, call it when a file is closed.
+
+2011-09-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Prelimiary commit of file-close reporting.
 
 	* Glasses/XrdFileCloseReporter.cxx:

@@ -14,23 +14,11 @@
 
 class XrdServer;
 class XrdFile;
+class XrdFileCloseReporter;
 
 class XrdMonSucker : public ZNameMap
 {
   MAC_RNR_FRIENDS(XrdMonSucker);
-
-public:
-  // Hmmh ... wouldn't it be easier if we just have a link to
-  // XrdFileCloseReporter directly?
-  // And this could then eventually become a link-to-list with
-  // sub-classes of XrdFileCloseReporter actually doing the work.
-
-  class FileCloseAbsorber
-  {
-  public:
-    virtual ~FileCloseAbsorber() {}
-    virtual void FileClosed(XrdFile* file) = 0;
-  };
 
 private:
   void _init();
@@ -45,6 +33,8 @@ protected:
   TString    mTraceDN;      // X{GS} Ray{TraceRE} 7 Textor()
   TString    mTraceHost;    // X{GS} 7 Textor()
   TString    mTraceDomain;  // X{GS} 7 Textor()
+
+  ZLink<XrdFileCloseReporter> mFCReporter; // X{GS} L{}
 
   Int_t      mSocket;       //!
   GThread   *mSuckerThread; //!
@@ -85,6 +75,8 @@ protected:
 
   xrd_hash_t    m_xrd_servers; //!
 #endif
+
+  void on_file_close(XrdFile* file);
 
   static void* tl_Suck(XrdMonSucker* s);
   void Suck();

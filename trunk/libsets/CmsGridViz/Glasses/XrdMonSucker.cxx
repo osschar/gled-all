@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "XrdMonSucker.h"
+#include "XrdFileCloseReporter.h"
 #include "XrdMonSucker.c7"
 #include "XrdServer.h"
 #include "XrdUser.h"
@@ -56,6 +57,17 @@ XrdMonSucker::XrdMonSucker(const Text_t* n, const Text_t* t) :
 
 XrdMonSucker::~XrdMonSucker()
 {}
+
+//==============================================================================
+
+void XrdMonSucker::on_file_close(XrdFile* file)
+{
+  XrdFileCloseReporter *fcr = *mFCReporter;
+  if (fcr)
+  {
+    fcr->FileClosed(file);
+  }
+}
 
 //==============================================================================
 
@@ -476,6 +488,7 @@ void XrdMonSucker::Suck()
 		GLensReadHolder _lck(server);
 		server->RemoveFile(fi, dict_id);
 	      }
+              on_file_close(fi);
             }
           }
 	}
@@ -504,6 +517,7 @@ void XrdMonSucker::Suck()
               if ((*xfi)->IsOpen())
               {
                 (*xfi)->SetCloseTime(lc.fTime);
+                on_file_close(*xfi);
               }
             }
 
@@ -540,7 +554,7 @@ void XrdMonSucker::StartSucker()
   mSuckerThread = new GThread("XrdMonSucker-Sucker",
 			      (GThread_foo) tl_Suck, this,
 			      false);
-  mSuckerThread->SetNice(20);
+  mSuckerThread->SetNice(0);
   mSuckerThread->Spawn();
 }
 
