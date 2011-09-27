@@ -9,7 +9,7 @@
 
 #include <Glasses/ZNode.h>
 #include <Stones/ZColor.h>
-#include <Stones/SGTSRange.h>
+#include <Stones/SRange.h>
 #include <Glasses/LegendreCoefs.h>
 
 class TTree;
@@ -47,10 +47,10 @@ protected:
   UInt_t		mEdges;       //! X{G}   7 ValOut(-width=>10, -join=>1)
   UInt_t		mFaces;       //! X{G}   7 ValOut(-width=>10)
 
-  SGTSRange		mFaceQuality; //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
-  SGTSRange		mFaceArea;    //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
-  SGTSRange		mEdgeLength;  //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
-  SGTSRange		mEdgeAngle;   //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Avg, Sigma, Max])
+  SRange		mFaceQuality; //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Average, Sigma, Max])
+  SRange		mFaceArea;    //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Average, Sigma, Max])
+  SRange		mEdgeLength;  //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Average, Sigma, Max])
+  SRange		mEdgeAngle;   //! X{RGS} 7 StoneOutput(-width=>32, Fmt=>"%4.2le | %4.2le : %4.2le | %4.2le", Args=>[Min, Average, Sigma, Max])
 
   PostBoolOp_e          mPostBoolOp;         // X{GS} 7 PhonyEnum(-join=>1)
   Double_t              mPostBoolArea;       // X{GS} 7 Value()

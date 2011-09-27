@@ -185,10 +185,11 @@ void GTSurf::Save(const TString& file)
 
 namespace
 {
-  void copy_stats(SGTSRange& d, GTS::GtsRange& s)
+  void copy_stats(SRange& d, GTS::GtsRange& s)
   {
     d.SetMin(s.min);  d.SetMax(s.max);
-    d.SetAvg(s.mean); d.SetSigma(s.stddev);
+    d.SetSumX(s.sum); d.SetSumX2(s.sum2);
+    d.SetN(s.n);
   }
 }
 
