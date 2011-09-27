@@ -1,3 +1,8 @@
+2011-09-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_targets.inc:
+	Add undepend target, removing all .d files.
+
 2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Sanitize libpath and rpath from fltk-config output.
