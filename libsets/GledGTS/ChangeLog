@@ -1,3 +1,13 @@
+2011-09-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SGTSRange.cxx:
+	* Stones/SGTSRange.h:
+	Moved to GledCore/Stones/SRange and extended there.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Modify accordingly.
+
 2011-08-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/GTSurf.cxx:
