@@ -147,7 +147,8 @@ private:
   void                set_mir(ZMIR* mir)                   { mMIR = mir;  }
   ZMIR*               get_mir()   const                    { return mMIR; }
 
-  static pthread_key_t TSD_Self;
+  static pthread_key_t  TSD_Self;
+  static GThread       *sInvalidPtr;
 
   static void* thread_spawner(void* arg);
   static void  thread_reaper(void* arg);
@@ -208,6 +209,9 @@ public:
 
   static const char* RunningStateName(RState state);
   static const char* SignalName(Signal sig);
+
+  static bool IsValidPtr(GThread* thr)     { return thr != 0 && thr != sInvalidPtr; }
+  static void InvalidatePtr(GThread*& thr) { thr = sInvalidPtr; }
 
 #include "GThread.h7"
   ClassDef(GThread, 0);
