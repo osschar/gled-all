@@ -16,7 +16,7 @@ protected:
   Double_t	mMax;   // X{GS}
   Double_t      mSumX;  // X{GS}
   Double_t      mSumX2; // X{GS}
-  UInt_t        mN;     // X{GS}
+  ULong64_t     mN;     // X{GS}
 
 public:
   SRange();
