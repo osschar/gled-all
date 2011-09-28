@@ -39,7 +39,8 @@ GMutex                   GThread::sContainerLock;
 GMutex                   GThread::sDetachCtrlLock(GMutex::recursive);
 int                      GThread::sMinStackSize = 0;
 
-pthread_key_t GThread::TSD_Self;
+pthread_key_t  GThread::TSD_Self;
+GThread       *GThread::sInvalidPtr = (GThread*) 0x1l;
 
 //==============================================================================
 
@@ -161,7 +162,7 @@ void* GThread::thread_spawner(void* arg)
   {
     if (self->mTerminalSignal)
     {
-      ret = (void*) self->mTerminalSignal;
+      ret = reinterpret_cast<void*>(self->mTerminalSignal);
       switch (self->mTerminalPolicy)
       {
       case TP_ThreadExit:
