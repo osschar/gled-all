@@ -8,6 +8,7 @@
 #define CmsGridViz_XrdFile_H
 
 #include <Glasses/ZGlass.h>
+#include <Stones/SRange.h>
 #include <Gled/GTime.h>
 
 class XrdUser;
@@ -26,8 +27,8 @@ protected:
   GTime           mCloseTime;   // X{GRSQ} 7 TimeOut()
   GTime           mLastMsgTime; // X{GRSQ} 7 TimeOut()
 
-  Double_t        mReadMB;      // X{GSD}  7 ValOut()
-  Double_t        mWriteMB;     // X{GSD}  7 ValOut()
+  SRange          mReadStats;   // X{GR}   7 StoneOutput(-width=>32, Fmt=>"%fMB - N=%llu, A=%f, S=%f", Args=>[SumX, N, Average, Sigma])
+  SRange          mWriteStats;  // X{GR}   7 StoneOutput(-width=>32, Fmt=>"%fMB - N=%llu, A=%f, S=%f", Args=>[SumX, N, Average, Sigma])
 
   Double_t        mRTotalMB;    // X{GSD}  7 ValOut()
   Double_t        mWTotalMB;    // X{GSD}  7 ValOut()
@@ -37,6 +38,9 @@ public:
   virtual ~XrdFile();
 
   Bool_t IsOpen() const { return mCloseTime.IsNever() && ! mOpenTime.IsNever(); }
+
+  void AddReadSample(Double_t x);
+  void AddWriteSample(Double_t x);
 
 #include "XrdFile.h7"
   ClassDef(XrdFile, 1);

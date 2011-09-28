@@ -85,8 +85,8 @@ public:
   XrdMonSucker(const Text_t* n="XrdMonSucker", const Text_t* t=0);
   virtual ~XrdMonSucker();
 
-  void StartSucker(); // X{E} 7 MButt()
-  void StopSucker();  // X{E} 7 MButt()
+  void StartSucker(); // X{Ed} 7 MButt()
+  void StopSucker();  // X{Ed} 7 MButt()
 
   void EmitTraceRERay();
 

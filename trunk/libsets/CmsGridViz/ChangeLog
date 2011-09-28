@@ -1,3 +1,22 @@
+2011-09-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Step 3 in file-close reporting.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Use SRange for storing read/write trace statistics.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Dump all the stuff to UDP port.
+	Beautify reporter-thread management.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Use getaddrinfo() for initial setup.
+	The revfrom() call still uses ip4 structs.
+	Beautify suck-thread management.
+
 2011-09-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Step 2 in file-close reporting.

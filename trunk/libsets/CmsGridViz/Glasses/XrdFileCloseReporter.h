@@ -22,8 +22,8 @@ private:
   void _init();
 
 protected:
-  TString           mHost; // X{GS}
-  UShort_t          mPort; // X{GS}
+  TString           mUdpHost; // X{GS}
+  UShort_t          mUdpPort; // X{GS}
 
   GThread          *mReporterThread; //!
   GCondition        mReporterCond;   //!
@@ -39,8 +39,8 @@ public:
 
   virtual void FileClosed(XrdFile* file);
 
-  void StartReporter(); // X{E} 7 MButt()
-  void StopReporter();  // X{E} 7 MButt()
+  void StartReporter(); // X{Ed} 7 MButt()
+  void StopReporter();  // X{Ed} 7 MButt()
 
 #include "XrdFileCloseReporter.h7"
   ClassDef(XrdFileCloseReporter, 1);
