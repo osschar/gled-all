@@ -25,6 +25,11 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+namespace
+{
+  const Double_t One_MB = 1024 * 1024;
+}
+
 // XrdMonSucker
 
 //______________________________________________________________________________
@@ -86,13 +91,24 @@ void XrdMonSucker::Suck()
   if ((mSocket = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     throw _eh + "socket failed: " + strerror(errno);
 
-  sockaddr_in addr;
-  addr.sin_family      = AF_INET;
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_port        = htons(mSuckPort);
+  {
+    struct addrinfo *result;
+    struct addrinfo  hints;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_protocol = IPPROTO_UDP;
+    hints.ai_flags    = AI_PASSIVE | AI_NUMERICSERV;
 
-  if (bind(mSocket, (sockaddr*) &addr, sizeof(sockaddr_in)) == -1)
-    throw _eh + "bind failed: " + strerror(errno);
+    int error = getaddrinfo(0, TString::Format("%hu", mSuckPort), &hints, &result);
+    if (error != 0)
+      throw _eh + "getaddrinfo failed: " + gai_strerror(error);
+
+    if (bind(mSocket, result->ai_addr, result->ai_addrlen) == -1)
+      throw _eh + "bind failed: " + strerror(errno);
+
+    freeaddrinfo(result);
+  }
 
   TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@([^\\.]+)(?:\\.(.+))?", "o");
   TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
@@ -103,6 +119,7 @@ void XrdMonSucker::Suck()
   char             *buf      = &buffer[0];
   int               flags    = 0;
 
+  struct sockaddr_in addr;
   while (true)
   {
     socklen_t slen = sizeof(sockaddr_in);
@@ -448,11 +465,11 @@ void XrdMonSucker::Suck()
             GLensReadHolder _lck(fi);
             if (rwlen >= 0)
             {
-              fi->DeltaReadMB(rwlen / 1048576.0);
+              fi->AddReadSample(rwlen / One_MB);
             }
             else
             {
-              fi->DeltaWriteMB(-rwlen / 1048576.0);
+              fi->AddWriteSample(-rwlen / One_MB);
             }
             fi->SetLastMsgTime(lc.fTime);
           }
@@ -478,10 +495,10 @@ void XrdMonSucker::Suck()
 		ULong64_t x;
 		x = ntohl(xmt.arg0.rTot[1]);
 		x <<= xmt.arg0.id[1];
-		fi->SetRTotalMB(x / 1048576.0);
+		fi->SetRTotalMB(x / One_MB);
 		x = ntohl(xmt.arg1.wTot);
 		x <<= xmt.arg0.id[1];
-		fi->SetWTotalMB(x / 1048576.0);
+		fi->SetWTotalMB(x / One_MB);
 		fi->SetCloseTime(lc.fTime);
 	      }
 	      {
@@ -547,13 +564,15 @@ void XrdMonSucker::StartSucker()
 {
   static const Exc_t _eh("XrdMonSucker::StartSucker ");
 
-  if (mSuckerThread)
-    throw _eh + "already running.";
+  {
+    GLensReadHolder _lck(this);
+    if (mSuckerThread)
+      throw _eh + "already running.";
 
-
-  mSuckerThread = new GThread("XrdMonSucker-Sucker",
-			      (GThread_foo) tl_Suck, this,
-			      false);
+    mSuckerThread = new GThread("XrdMonSucker-Sucker",
+                                (GThread_foo) tl_Suck, this,
+                                false);
+  }
   mSuckerThread->SetNice(0);
   mSuckerThread->Spawn();
 }
@@ -562,12 +581,23 @@ void XrdMonSucker::StopSucker()
 {
   static const Exc_t _eh("XrdMonSucker::StopSucker ");
 
-  if (mSuckerThread == 0)
-    throw _eh + "not running.";
+  GThread *thr = 0;
+  {
+    GLensReadHolder _lck(this);
+    if ( ! GThread::IsValidPtr(mSuckerThread))
+      throw _eh + "not running.";
+    thr = mSuckerThread;
+    GThread::InvalidatePtr(mSuckerThread);
+  }
 
-  mSuckerThread->Cancel();
-  mSuckerThread->Join();
-  mSuckerThread = 0;
+  thr->Cancel();
+  thr->Join();
+  close(mSocket);
+  {
+    GLensReadHolder _lck(this);
+    mSuckerThread = 0;
+    mSocket = 0;
+  }
 }
 
 void XrdMonSucker::EmitTraceRERay()
