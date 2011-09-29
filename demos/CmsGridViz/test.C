@@ -20,6 +20,10 @@ void test()
   CREATE_ADD_GLASS(suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);
   suck->SetKeepSorted(true);
 
+  CREATE_ADD_GLASS(fcloserep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
+  //fcloserep->Set();
+  suck->SetFCReporter(fcloserep);
+
   //============================================================================
   // Spawn GUI
 
@@ -35,6 +39,8 @@ void test()
   suck->SetTraceDomain("ucsd.edu");
 
   suck->StartSucker();
+
+  fcloserep->StartReporter();
 }
 
 // Layout to add:
