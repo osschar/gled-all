@@ -27,10 +27,10 @@ protected:
   GTime           mCloseTime;   // X{GRSQ} 7 TimeOut()
   GTime           mLastMsgTime; // X{GRSQ} 7 TimeOut()
 
-  SRange          mReadStats;   // X{GR}   7 StoneOutput(-width=>32, Fmt=>"%fMB - N=%llu, A=%f, S=%f", Args=>[SumX, N, Average, Sigma])
-  SRange          mWriteStats;  // X{GR}   7 StoneOutput(-width=>32, Fmt=>"%fMB - N=%llu, A=%f, S=%f", Args=>[SumX, N, Average, Sigma])
+  SRange          mReadStats;   // X{GR}   7 StoneOutput(-width=>32, Fmt=>"%.3fMB - N=%llu, A=%.3f, S=%.3f", Args=>[SumX, N, Average, Sigma])
+  SRange          mWriteStats;  // X{GR}   7 StoneOutput(-width=>32, Fmt=>"%.3fMB - N=%llu, A=%.3f, S=%.3f", Args=>[SumX, N, Average, Sigma])
 
-  Double_t        mRTotalMB;    // X{GSD}  7 ValOut()
+  Double_t        mRTotalMB;    // X{GSD}  7 ValOut(-join=>1)
   Double_t        mWTotalMB;    // X{GSD}  7 ValOut()
 
 public:
