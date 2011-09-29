@@ -198,8 +198,10 @@ void XrdMonSucker::Suck()
     if (code != 't')
     {
       TString msg;
-      msg.Form("Message from %s.%s:%hu, c=%c, seq=%3hhu, len=%hu\n",
-               server->GetHost(), server->GetDomain(), port, xmh->code, pseq, plen);
+      msg.Form("%s Message from %s.%s:%hu, c=%c, seq=%3hhu, len=%hu\n",
+               recv_time.ToDateTimeLocal().Data(),
+               server->GetHost(), server->GetDomain(), port,
+               xmh->code, pseq, plen);
 
       XrdXrootdMonMap *xmm     = (XrdXrootdMonMap*) buf;
       Int_t            dict_id = ntohl(xmm->dictid);

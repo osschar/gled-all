@@ -53,8 +53,6 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file)
 {
   // put into queue and signal condition
 
-  printf("XrdFileCloseReporter::FileClosed for file=%s\n", file->GetName());
-
   GMutexHolder _lck(mReporterCond);
   mReporterQueue.push_back(file);
   mReporterCond.Signal();
@@ -115,8 +113,6 @@ void XrdFileCloseReporter::ReportLoop()
       mReporterQueue.pop_front();
     }
 
-    // printf("XrdFileCloseReporter::ReportLoop() processing file '%s'.\n", file->GetName());
-
     TString msg("#begin\n");
 
     {
@@ -152,12 +148,8 @@ void XrdFileCloseReporter::ReportLoop()
 
     msg += "#end\n";
 
-    int res = sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, &rAddr, sizeof(rAddr));
-
-    if (res == -1)
-      printf("  Sending report has failed.\n");
-    else
-      printf("  Report has been sent.\n");
+    if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, &rAddr, sizeof(rAddr)) == -1)
+      printf("%sError sending report for file='%s'.\n", _eh.Data(), file->GetName());
   }
 }
 
