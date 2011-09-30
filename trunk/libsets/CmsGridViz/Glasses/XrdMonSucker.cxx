@@ -260,9 +260,8 @@ void XrdMonSucker::Suck()
 			       authinfo_re[6].Data(), authinfo_re[4].Data(), authinfo_re[5].Data());
 
 	// ZQueen::CheckIn() does write lock.
-	XrdUser *user = new XrdUser(uname, "",
-                                    authinfo_re[6], authinfo_re[4], authinfo_re[5],
-                                    host, domain, recv_time);
+	XrdUser *user = new XrdUser(uname, "", authinfo_re[6], authinfo_re[4], authinfo_re[5],
+                                    authinfo_re[2], host, domain, recv_time);
 	mQueen->CheckIn(user);
 	{
 	  GLensReadHolder _lck(server);
@@ -279,7 +278,7 @@ void XrdMonSucker::Suck()
           }          
 	}
 
-	// XXXX Missing grep / create CmsXrdUser ... somewhere
+	// XXX Eventually ... grep / create CmsXrdUser.
       }
       else if (code == 'd')
       {
