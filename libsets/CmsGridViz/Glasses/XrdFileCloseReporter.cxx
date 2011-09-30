@@ -78,6 +78,8 @@ void XrdFileCloseReporter::ReportLoop()
 {
   static const Exc_t _eh("XrdFileCloseReporter::ReportLoop ");
 
+  mLastUidBase = mLastUidInner = 0;
+
   struct sockaddr rAddr;
   {
     struct addrinfo *result;
@@ -117,14 +119,34 @@ void XrdFileCloseReporter::ReportLoop()
 
     {
       GLensReadHolder _flck(file);
+
+      Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
+      if (unique_id == mLastUidBase)
+      {
+        unique_id = mLastUidBase + ++mLastUidInner;
+        if (mLastUidInner >= 1000ll)
+        {
+          ISerr(_eh + "Inner counter for unique-id overflow.");
+          printf("%sInner counter for unique-id overflowed for file='%s'.\n", _eh.Data(), file->GetName());
+          continue;
+        }
+      }
+      else
+      {
+        mLastUidBase  = unique_id;
+        mLastUidInner = 0;
+      }
+
       const SRange &RS = file->RefReadStats();
       const SRange &WS = file->RefWriteStats();
       msg += TString::Format
-        ("file_lfn=%s\nstart_time=%llu\nend_time=%llu\n"
+        ("unique_id=%lld\n"
+         "file_lfn=%s\nstart_time=%llu\nend_time=%llu\n"
          "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
          "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
          "read_bytes_at_close=%lld\n"
          "write_bytes_at_close=%lld\n",
+         unique_id,
          file->GetName(), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
          dmtoll(RS.GetSumX()), RS.GetN(), dmtoll(RS.GetMin()), dmtoll(RS.GetMax()), dmtod(RS.GetAverage()), dmtod(RS.GetSigma()),
          dmtoll(WS.GetSumX()), WS.GetN(), dmtoll(WS.GetMin()), dmtoll(WS.GetMax()), dmtod(WS.GetAverage()), dmtod(WS.GetSigma()),
@@ -135,8 +157,10 @@ void XrdFileCloseReporter::ReportLoop()
     {
       GLensReadHolder _ulck(user);
       msg += TString::Format
-        ("user_dn=%s\nuser_vo=%s\nuser_role=%s\nclient_domain=%s\nclient_host=%s\n",
-         user->GetDN(), user->GetVO(), user->GetRole(), user->GetFromDomain(), user->GetFromHost());
+        ("user_dn=%s\nuser_vo=%s\nuser_role=%s\nclient_domain=%s\nclient_host=%s\n"
+         "server_username=%s\n",
+         user->GetDN(), user->GetVO(), user->GetRole(), user->GetFromDomain(), user->GetFromHost(),
+         user->GetServerUsername());
       server = user->GetServer();
     }
     {

@@ -22,13 +22,16 @@ private:
   void _init();
 
 protected:
-  TString           mUdpHost; // X{GS}
-  UShort_t          mUdpPort; // X{GS}
+  TString           mUdpHost; // X{GS} 7 Textor()
+  UShort_t          mUdpPort; // X{GS} 7 Value()
 
   GThread          *mReporterThread; //!
   GCondition        mReporterCond;   //!
   list<XrdFile*>    mReporterQueue;  //!
   Int_t             mReporterSocket; //!
+
+  Long64_t          mLastUidBase;    //!
+  Long64_t          mLastUidInner;   //!
 
   static void* tl_ReportLoop(XrdFileCloseReporter* r);
   void ReportLoop();

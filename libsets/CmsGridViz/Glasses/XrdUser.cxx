@@ -33,10 +33,10 @@ XrdUser::XrdUser(const TString& n, const TString& t) :
 }
 
 XrdUser::XrdUser(const TString& n, const TString& t,
-		 const TString& dn, const TString& vo, const TString &ro,
+		 const TString& dn, const TString& vo, const TString &ro, const TString& su,
 		 const TString& fh, const TString& fd, const GTime& st) :
   ZList(n, t),
-  mDN(dn), mVO(vo), mRole(ro),
+  mDN(dn), mVO(vo), mRole(ro), mServerUsername(su),
   mFromHost(fh), mFromDomain(fd),
   mLoginTime(st), mDisconnectTime(GTime::I_Never), mLastMsgTime(GTime::I_Never)
 
