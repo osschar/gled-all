@@ -1,3 +1,13 @@
+2011-09-29  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	Prelimiary rpm building support.
+
+	* rpm:
+	New directory for rpm build.
+
+	* rpm/gled.spec:
+	Builds binary and source rpms from svn trunk.
+
 2011-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* configure.ac:
