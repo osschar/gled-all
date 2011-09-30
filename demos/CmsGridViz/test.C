@@ -1,8 +1,5 @@
 #include <glass_defines.h>
 
-// Run at xrootd.t2:
-// nc -u -l 9933 | nc -u greed.physics.ucsd.edu 9930
-
 void test()
 {
   Gled::AssertMacro("sun_demos.C");
@@ -12,8 +9,7 @@ void test()
     ZList* l = g_fire_queen;
     l = l->AssertPath(NestInfo::sLayoutPath, "ZNameMap");
     l = l->AssertPath("XrdStuff", "ZList");
-    l->Swallow(new ZGlass("ZGlass:XrdUser",
-			  "ZGlass(Name[32],Title):XrdUser(FromHost,FromDomain)"));
+    l->Swallow(new ZGlass("XrdUser", "XrdUser(FromHost,FromDomain)"));
   }
 
   g_queen->SetName("XrdMonitorQueen");
@@ -21,8 +17,10 @@ void test()
   suck->SetKeepSorted(true);
 
   CREATE_ADD_GLASS(fcloserep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
-  //fcloserep->Set();
+  // fcloserep->SetUdpHost("desire.physics.ucsd.edu");
+  // fcloserep->SetUdpPort(7632);
   suck->SetFCReporter(fcloserep);
+
 
   //============================================================================
   // Spawn GUI
@@ -31,9 +29,10 @@ void test()
   eye(false);
 
   g_nest->Add(g_queen);
-  g_nest->SetMaxChildExp(3); // This doesn't work ... only on creation.
+  // g_nest->SetMaxChildExp(3); // This only works on creation.
   g_nest->SetWName(50);
 
+  // Regexps for setting full-trace-print flag for new user sessions.
   suck->SetTraceDN("Matevz Tadel");
   suck->SetTraceHost("uaf-");
   suck->SetTraceDomain("ucsd.edu");
@@ -42,6 +41,3 @@ void test()
 
   fcloserep->StartReporter();
 }
-
-// Layout to add:
-// ZGlass(Name[32],Title):XrdUser(FromHost, FromDomain)
