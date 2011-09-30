@@ -47,7 +47,7 @@ AC_ARG_CONF_VAR([RELEASE],
 
 AC_ARG_CONF_VAR([CACHE_DIR],
                 [local source package cache],
-		["\${PREFIX}/cache"])
+		["$PWD/cache"])
 
 AC_ARG_CONF_VAR([CACHE_TAG],
                 [Tag for external software],
