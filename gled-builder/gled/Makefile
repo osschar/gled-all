@@ -18,7 +18,7 @@ checkout:
 	${ECHO} -G- Checking out ${PACKAGE}
 	${MUTE} rm -rf ${gled_dir} gled-build-checkout $@
 	${MUTE} svn export ${SVN_BASE}/${SVN_DIR}/gled-build-checkout
-	${MUTE} ./gled-build-checkout --svn-base=${SVN_BASE} --svn-user=${SVN_USER} ${SVN_DIR}
+	${MUTE} ./gled-build-checkout --svn-base=${SVN_BASE} --svn-user=${SVN_USER} ${SVN_DIR} ${GB_LIBSETS}
 	${MUTE} touch $@
 
 ### configure

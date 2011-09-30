@@ -73,6 +73,10 @@ AC_ARG_CONF_VAR([SVN_USER],
                 [SVN username],
 		["$USER"])
 
+AC_ARG_CONF_VAR([LIBSETS],
+                [Gled libsets to build (space separated; dependencies are not checked)],
+		[""])
+
 AC_ARG_CONF_VAR([MAKE_J_OPT],
 		[parallel build option (for packages that support it)],
 		["-j4"])
