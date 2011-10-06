@@ -172,9 +172,17 @@ void XrdMonSucker::Suck()
       XrdServer *server = new XrdServer(GForm("%s %s : %hu : %d", hostname_re[2].Data(), hostname_re[1].Data(), port, stod), "",
 					hostname_re[1], hostname_re[2], GTime(stod));
 
+      ZGlass* domain = GetElementByName(server->GetDomain());
+      if (!domain)
+      {
+         domain = new ZList(server->GetDomain());
+         mQueen->CheckIn(domain);
+         Add(domain);
+      }
+      
       // ZQueen::CheckIn() does write lock.
       mQueen->CheckIn(server);
-      Add(server);
+      (static_cast<ZList*>(domain))->Add(server);
 
       xshi = m_xrd_servers.insert(make_pair(xsid, server)).first;
     }
