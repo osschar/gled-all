@@ -1,3 +1,8 @@
+2011-10-05  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdMonSucker.cxx:
+	Group XrdServer objects by domain name.
+
 2011-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add unique-id and username used at xrootd server to file-close
