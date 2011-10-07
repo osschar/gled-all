@@ -1,0 +1,8 @@
+2011-10-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	Clone test.C and configure XrdFileCloseReporter to send data to
+	Brian's UNL test machine.
+
+	* ChangeLog:
+	Start change-log.
