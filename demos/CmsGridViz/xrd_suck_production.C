@@ -1,6 +1,6 @@
 #include <glass_defines.h>
 
-void xrd_suck_production.()
+void xrd_suck_production()
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("CmsGridViz");
