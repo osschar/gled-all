@@ -63,8 +63,8 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file)
 namespace
 {
   Long64_t dtoll (Double_t x) { return static_cast<Long64_t>(x);   }
-  Long64_t dmtoll(Double_t x) { return 1024ll * 1024ll * dtoll(x); }
   Double_t dmtod (Double_t x) { return 1024.0 * 1024.0 * x;        }
+  Long64_t dmtoll(Double_t x) { return dtoll(dmtod(x));            }
 }
 
 void* XrdFileCloseReporter::tl_ReportLoop(XrdFileCloseReporter* r)
@@ -140,7 +140,7 @@ void XrdFileCloseReporter::ReportLoop()
       const SRange &RS = file->RefReadStats();
       const SRange &WS = file->RefWriteStats();
       msg += TString::Format
-        ("unique_id=%lld\n"
+        ("unique_id=xrd-%lld\n"
          "file_lfn=%s\nstart_time=%llu\nend_time=%llu\n"
          "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
          "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"

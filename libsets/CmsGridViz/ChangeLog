@@ -1,3 +1,23 @@
+2011-10-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for production readiness of Gratia dumper.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Add "xrd-" prefix to unique id.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Set element FID for self and for domain-list.
+	Set keep-sorted flag in domain-list.
+	Reverse domain/host order in XrdServer name.
+	Add initialization / check / warning for server sequence-id.
+	Fix a byte - Mbyte conversion.
+	Fix reading of "bytes-written" offset out of trace message.
+
+	* Glasses/XrdServer.h:
+	Add sequence-id data-member and init/query functions.
+	Fix a byte - Mbyte conversion.
+
 2011-10-05  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdMonSucker.cxx:

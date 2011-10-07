@@ -58,6 +58,7 @@ XrdMonSucker::XrdMonSucker(const Text_t* n, const Text_t* t) :
   ZNameMap(n, t)
 {
   _init();
+  SetElementFID(ZNameMap::FID());
 }
 
 XrdMonSucker::~XrdMonSucker()
@@ -141,7 +142,7 @@ void XrdMonSucker::Suck()
 
     XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) buf;
     Char_t   code = xmh->code;
-    Char_t   pseq = xmh->pseq;
+    UChar_t  pseq = xmh->pseq;
     UShort_t plen = ntohs(xmh->plen);
     Int_t    stod = ntohl(xmh->stod);
     UInt_t   in4a = addr.sin_addr.s_addr; // Kept in net order
@@ -149,6 +150,8 @@ void XrdMonSucker::Suck()
 
     xrdsrv_id  xsid(in4a, stod, port);
     xrd_hash_i xshi = m_xrd_servers.find(xsid);
+
+    XrdServer *server = 0;
 
     if (xshi == m_xrd_servers.end())
     {
@@ -169,24 +172,39 @@ void XrdMonSucker::Suck()
       printf("New server: %s.%s:%hu'\n", hostname_re[1].Data(), hostname_re[2].Data(), port);
 
 
-      XrdServer *server = new XrdServer(GForm("%s %s : %hu : %d", hostname_re[2].Data(), hostname_re[1].Data(), port, stod), "",
-					hostname_re[1], hostname_re[2], GTime(stod));
+      server = new XrdServer(GForm("%s.%s : %hu : %d", hostname_re[1].Data(), hostname_re[2].Data(), port, stod), "",
+                             hostname_re[1], hostname_re[2], GTime(stod));
 
-      ZGlass* domain = GetElementByName(server->GetDomain());
+      ZNameMap *domain = static_cast<ZNameMap*>(GetElementByName(server->GetDomain()));
       if (!domain)
       {
-         domain = new ZList(server->GetDomain());
+         domain = new ZNameMap(server->GetDomain());
+         // ZQueen::CheckIn() does write lock.
          mQueen->CheckIn(domain);
+         domain->SetKeepSorted(true);
+         domain->SetElementFID(XrdServer::FID());
          Add(domain);
       }
       
       // ZQueen::CheckIn() does write lock.
       mQueen->CheckIn(server);
-      (static_cast<ZList*>(domain))->Add(server);
+      domain->Add(server);
 
       xshi = m_xrd_servers.insert(make_pair(xsid, server)).first;
+
+      server->InitSrvSeq(pseq);
     }
-    XrdServer *server = xshi->second;
+    else
+    {
+      server = xshi->second;
+
+      UChar_t srv_seq = server->IncAndGetSrvSeq();
+      if (pseq != srv_seq)
+      {
+        ISwarn(_eh + GForm("Sequence-id mismatch: server=%hhu, mine=%hhu. Ignoring.",
+                           srv_seq, pseq));
+      }
+    }
 
     {
       GLensReadHolder _lck(server);
@@ -474,7 +492,7 @@ void XrdMonSucker::Suck()
             GLensReadHolder _lck(fi);
             if (rwlen >= 0)
             {
-              fi->AddReadSample(rwlen / One_MB);
+              fi->AddReadSample ( rwlen / One_MB);
             }
             else
             {
@@ -506,7 +524,7 @@ void XrdMonSucker::Suck()
 		x <<= xmt.arg0.id[1];
 		fi->SetRTotalMB(x / One_MB);
 		x = ntohl(xmt.arg1.wTot);
-		x <<= xmt.arg0.id[1];
+		x <<= xmt.arg0.id[2];
 		fi->SetWTotalMB(x / One_MB);
 		fi->SetCloseTime(lc.fTime);
 	      }
