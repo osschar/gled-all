@@ -36,6 +36,8 @@ protected:
   mDict2User_t      mUserMap; //!
   mDict2File_t      mFileMap; //!
 
+  UChar_t           mLastSeq; //!
+
 public:
   XrdServer(const TString& n="XrdServer", const TString& t="");
   XrdServer(const TString& n, const TString& t, const TString& h, const TString& d, const GTime& st);
@@ -54,6 +56,10 @@ public:
   void     AddFile(XrdFile* file, Int_t dict_id);
   void     RemoveFile(XrdFile* file, Int_t dict_id);
   XrdFile* FindFile(Int_t dict_id);
+
+  // Only called from XrdMonSucker to initialize / check message sequence id.
+  void    InitSrvSeq(UChar_t seq) { mLastSeq = seq;    }
+  UChar_t IncAndGetSrvSeq()       { return ++mLastSeq; }
 
 #include "XrdServer.h7"
   ClassDef(XrdServer, 1);

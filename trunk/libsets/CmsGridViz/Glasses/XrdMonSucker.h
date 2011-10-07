@@ -31,8 +31,8 @@ protected:
   TString    mNagiosDomain; // X{GS} 7 Textor()
 
   TString    mTraceDN;      // X{GS} Ray{TraceRE} 7 Textor()
-  TString    mTraceHost;    // X{GS} 7 Textor()
-  TString    mTraceDomain;  // X{GS} 7 Textor()
+  TString    mTraceHost;    // X{GS} Ray{TraceRE} 7 Textor()
+  TString    mTraceDomain;  // X{GS} Ray{TraceRE} 7 Textor()
 
   ZLink<XrdFileCloseReporter> mFCReporter; // X{GS} L{}
 
