@@ -47,6 +47,22 @@
 // Do NOT change the mode after the processing has started ... or you
 // will be sorry. Anyway ... they require a completely different setup
 // for an efficient update-render loop.
+//
+//
+//
+// Notes for further development
+// -----------------------------
+//
+// Collisions are not handled at all. Tried repulsive force on proximity but
+// it didn't conserve energy (balls got shot out of the system). This could be
+// fixed / hacked, of course.
+//
+// One could also change R, M of colliding balls ... and modify the velcoities
+// accordingly. Also, fragmentation would be an option. The coolest thing
+// would be to have moon formation.
+// 1. R, M could be intergration variables ... hmmh ... tricky.
+// 2. Keep some empty ball-slots for collisions / fragmentations.
+// 3. Big / gas giants could swallow the impactor.
 
 ClassImp(SolarSystem);
 
