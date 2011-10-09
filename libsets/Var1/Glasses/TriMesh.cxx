@@ -431,21 +431,8 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
 
   // Prepare edge data
 
-  xx_edge_hash_t edge_map;
-  Int_t          edge_cnt = 0;
-  {
-    Int_t* ta = mTTvor->Trings();
-    for(Int_t t=0; t<mTTvor->mNTrings; ++t) {
-      pair<xx_edge_hash_i, bool> res;
-      res = edge_map.insert(make_pair(xx_edge(ta[0], ta[1]), edge_cnt));
-      if(res.second) ++edge_cnt;
-      res = edge_map.insert(make_pair(xx_edge(ta[1], ta[2]), edge_cnt));
-      if(res.second) ++edge_cnt;
-      res = edge_map.insert(make_pair(xx_edge(ta[2], ta[0]), edge_cnt));
-      if(res.second) ++edge_cnt;
-      ta += 3;
-    }
-  }
+  hEdge_t edge_map;
+  Int_t   edge_cnt = fill_edge_map(edge_map, 0);
   printf("%sCounting edges => %d, map-size = %d.\n", _eh.Data(),
          edge_cnt, (int)edge_map.size());
 
@@ -463,9 +450,9 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
     }
   }
 
-  GtsEdge ** edges = new GtsEdge*[edge_cnt];
+  GtsEdge **edges = new GtsEdge*[edge_cnt];
   {
-    for(xx_edge_hash_i e=edge_map.begin(); e!=edge_map.end(); ++e) {
+    for(hEdge_i e=edge_map.begin(); e!=edge_map.end(); ++e) {
       edges[e->second] = gts_edge_new(surf->edge_class,
                                       vertices[e->first.v1],
                                       vertices[e->first.v2]);
@@ -476,9 +463,9 @@ void TriMesh::ExportGTSurf(GTSurf* gts)
     Int_t* ta = mTTvor->Trings();
     for(Int_t t=0; t<mTTvor->mNTrings; ++t) {
       Int_t e1, e2, e3;
-      e1 = edge_map.find(xx_edge(ta[0], ta[1]))->second;
-      e2 = edge_map.find(xx_edge(ta[1], ta[2]))->second;
-      e3 = edge_map.find(xx_edge(ta[2], ta[0]))->second;
+      e1 = edge_map.find(Edge(ta[0], ta[1]))->second;
+      e2 = edge_map.find(Edge(ta[1], ta[2]))->second;
+      e3 = edge_map.find(Edge(ta[2], ta[0]))->second;
       GtsFace * new_face = gts_face_new(surf->face_class,
                                         edges[e1], edges[e2], edges[e3]);
       gts_surface_add_face (surf, new_face);
@@ -700,6 +687,32 @@ void TriMesh::make_cubus(Int_t vo, Int_t to,
   C.SetTriangle(to +  9, vo + 7, vo + 4, vo + 0);
   C.SetTriangle(to + 10, vo + 4, vo + 7, vo + 5);
   C.SetTriangle(to + 11, vo + 7, vo + 6, vo + 5);
+}
+
+//------------------------------------------------------------------------------
+
+Int_t TriMesh::fill_edge_map(hEdge_t& edge_map, Int_t label)
+{
+  return fill_edge_map(mTTvor->NTrings(), mTTvor->Trings(), edge_map, label);
+}
+
+Int_t TriMesh::fill_edge_map(Int_t n_triangles, Int_t* triangles, hEdge_t& edge_map, Int_t label)
+{
+  Int_t edge_cnt = 0;
+
+  for (Int_t t = 0; t < n_triangles; ++t)
+  {
+    pair<hEdge_i, bool> res;
+    res = edge_map.insert(make_pair(Edge(triangles[0], triangles[1]), label));
+    if (res.second) { ++edge_cnt; ++label; }
+    res = edge_map.insert(make_pair(Edge(triangles[1], triangles[2]), label));
+    if (res.second) { ++edge_cnt; ++label; }
+    res = edge_map.insert(make_pair(Edge(triangles[2], triangles[0]), label));
+    if (res.second) { ++edge_cnt; ++label; }
+    triangles += 3;
+  }
+
+  return edge_cnt;
 }
 
 //------------------------------------------------------------------------------
@@ -988,8 +1001,8 @@ void TriMesh::BuildVertexConnections()
   const Int_t nTrings = mTTvor->mNTrings;
   Int_t       nConns  = 0, nEdges = 0;
 
-  vector<Int_t>  nconn_per_vertex(nVerts);
-  xx_edge_hash_t edge_map;
+  vector<Int_t> nconn_per_vertex(nVerts);
+  hEdge_t       edge_map;
 
   const Int_t vP[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
 
@@ -1000,7 +1013,7 @@ void TriMesh::BuildVertexConnections()
     for (Int_t e = 0; e < 3; ++e)
     {
       const Int_t v1 = vts[vP[e][0]], v2 = vts[vP[e][1]];
-      if (edge_map.insert(make_pair(xx_edge(v1, v2), nEdges)).second)
+      if (edge_map.insert(make_pair(Edge(v1, v2), nEdges)).second)
       {
         ++nEdges;
         ++nconn_per_vertex[v1];
@@ -1041,7 +1054,7 @@ void TriMesh::BuildVertexConnections()
       for (Int_t eti = 0; eti < 3; ++eti)
       {
         const Int_t v1 = vts[vP[eti][0]], v2 = vts[vP[eti][1]];
-        const Int_t ei = edge_map.find(xx_edge(v1, v2))->second;
+        const Int_t ei = edge_map.find(Edge(v1, v2))->second;
         EdgeData& ed = mEDataVec[ei];
         if (ed.fV1 == -1)
         {
