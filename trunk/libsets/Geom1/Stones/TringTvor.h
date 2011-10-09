@@ -51,15 +51,16 @@ public:
   void WipeCols()  { std::vector<UChar_t> v; mCols.swap(v);  }
   void WipeTexs()  { std::vector<Float_t> v; mTexs.swap(v);  }
 
-  Float_t* Verts() { return &mVerts[0]; }
-  Float_t* Norms() { return &mNorms[0]; }
-  UChar_t* Cols()  { return &mCols[0]; }
-  Float_t* Texs()  { return &mTexs[0]; }
+  Int_t    NVerts() { return mNVerts;    }
+  Float_t* Verts()  { return &mVerts[0]; }
+  Float_t* Norms()  { return &mNorms[0]; }
+  UChar_t* Cols()   { return &mCols[0];  }
+  Float_t* Texs()   { return &mTexs[0];  }
 
   Float_t* Vertex(Int_t i)  { return &(mVerts[3*i]); }
   Float_t* Normal(Int_t i)  { return &(mNorms[3*i]); }
   UChar_t* Color(Int_t i)   { return &(mCols[4*i]);  }
-  Float_t* Texture(Int_t i) { return &(mTexs[2*i]); }
+  Float_t* Texture(Int_t i) { return &(mTexs[2*i]);  }
 
   // Triangle data
 
@@ -85,6 +86,7 @@ public:
   void WipeTringCols()  { std::vector<UChar_t> v; mTringCols.swap(v);  }
   void WipeTringTexs()  { std::vector<Float_t> v; mTringTexs.swap(v);  }
 
+  Int_t    NTrings()    { return mNTrings;        }
   Int_t*   Trings()     { return &mTrings[0];     }
   Float_t* TringNorms() { return &mTringNorms[0]; }
   UChar_t* TringCols()  { return &mTringCols[0];  }
