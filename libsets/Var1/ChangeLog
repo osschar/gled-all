@@ -1,3 +1,8 @@
+2011-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/SolarSystem.cxx:
+	Add notes for further development.
+
 2011-08-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add icosahedral world support as a first step towards hierarhical
