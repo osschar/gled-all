@@ -14,14 +14,13 @@ class TringTvor_GL_Rnr
 protected:
   TringTvor            &mTT;
 
-  TringTvor::Mode_e     mNMode;
-  TringTvor::Mode_e     mCMode;
-  TringTvor::Mode_e     mTMode;
-
   Float_t              *mNArr;
   UChar_t              *mCArr;
   Float_t              *mTArr;
 
+  TringTvor::Mode_e     mNMode;
+  TringTvor::Mode_e     mCMode;
+  TringTvor::Mode_e     mTMode;
 
   enum RenderMode_e { RM_Unknown, RM_Smooth, RM_Flat, RM_Mixed };
 
@@ -34,7 +33,6 @@ protected:
 
 public:
   TringTvor_GL_Rnr(TringTvor* tvor);
-
 
   // Setup functions
 
@@ -52,7 +50,6 @@ public:
 
   void EndSetup();
 
-
   // Render functions
 
   void BeginRender();
@@ -61,7 +58,6 @@ public:
   void RenderFlat();
   void RenderMixed();
   void EndRender();
-
 
   // Static, all inclusive methods
 

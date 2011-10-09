@@ -333,7 +333,7 @@ void TringTvor_GL_Rnr::EndRender()
 
 
 //==============================================================================
-// Static, all inclusive method.
+// Static, all inclusive methods
 //==============================================================================
 
 void TringTvor_GL_Rnr::Render(TringTvor* ttvor)
