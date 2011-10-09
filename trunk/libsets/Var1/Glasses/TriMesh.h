@@ -49,23 +49,26 @@ class TriMesh : public ZGlass,
   MAC_RNR_FRIENDS(TriMesh);
 
 public:
-  struct xx_edge
+  struct Edge
   {
     Int_t v1, v2;
-    xx_edge(Int_t a, Int_t b) { if (a<b) v1=a, v2=b; else v1=b, v2=a; }
+    Edge(Int_t a, Int_t b) { if (a<b) v1=a, v2=b; else v1=b, v2=a; }
 
     // Symmetric operator== declared outside of TriMesh.
 
     struct hash
     {
-      size_t operator()(const xx_edge& xx) const
+      size_t operator()(const Edge& xx) const
       { size_t i = (xx.v1 << 16) + xx.v2; return i; }
     };
   };
 
 #ifndef __CINT__
-  typedef hash_map<xx_edge, Int_t, xx_edge::hash> xx_edge_hash_t;
-  typedef xx_edge_hash_t::iterator                xx_edge_hash_i;
+  typedef hash_map<Edge, Int_t, Edge::hash> hEdge_t;
+  typedef hEdge_t::iterator                 hEdge_i;
+
+         Int_t fill_edge_map(hEdge_t& edge_map, Int_t label);
+  static Int_t fill_edge_map(Int_t n_triangles, Int_t* triangles, hEdge_t& edge_map, Int_t label);
 #endif
 
   struct EdgeData
@@ -308,7 +311,7 @@ inline TriMesh::EdgeData& TriMesh::find_edge(Int_t v1, Int_t v2)
   return find_edge(vd, v1, v2);
 }
 
-inline bool operator==(const TriMesh::xx_edge& a, const TriMesh::xx_edge& b)
+inline bool operator==(const TriMesh::Edge& a, const TriMesh::Edge& b)
 { return a.v1 == b.v1 && a.v2 == b.v2; }
 
 #endif

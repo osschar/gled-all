@@ -1,5 +1,22 @@
 2011-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Basic implementation of hierarhically subdivided mesh.
+
+	* Glasses/HTriMesh.cxx:
+	* Glasses/HTriMesh.h:
+	New glass - hierarhically sub-divided mesh.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Rename inner struct xx_edge to Edge.
+	Add fill_edge_map() method and a static version working on raw
+	arrays.
+
+	* glass.list:
+	Register HTriMesh.
+
+2011-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/SolarSystem.cxx:
 	Add notes for further development.
 

@@ -4,6 +4,7 @@
 TriMesh                   1     Glasses/TriMesh
 TriMeshField	          2     Glasses/TriMeshField
 TriMeshLightField         3     Glasses/TriMeshLightField
+HTriMesh		  4	Glasses/HTriMesh
 
 ParaSurf                 20     Glasses/ParaSurf
 PSRectangle              21     Glasses/PSRectangle
