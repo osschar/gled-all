@@ -1,6 +1,12 @@
 2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
+	Reset XrdServer-stored seq-id after mismatch.
+	Add time and server-name to seq-id mismatch warning.
+
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
 	* Glasses/XrdMonSucker.h:
 	Add dedicated list holding currently opened files.
 

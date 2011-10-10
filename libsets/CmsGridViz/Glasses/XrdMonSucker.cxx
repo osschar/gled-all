@@ -223,8 +223,10 @@ void XrdMonSucker::Suck()
       UChar_t srv_seq = server->IncAndGetSrvSeq();
       if (pseq != srv_seq)
       {
-        ISwarn(_eh + GForm("Sequence-id mismatch: server=%hhu, mine=%hhu. Ignoring.",
+        ISwarn(_eh + GForm("%s Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu. Ignoring.",
+                           recv_time.ToDateTimeLocal().Data(), server->GetName(),
                            srv_seq, pseq));
+        server->InitSrvSeq(pseq)l
       }
     }
 
