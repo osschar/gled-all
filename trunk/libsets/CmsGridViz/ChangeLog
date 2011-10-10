@@ -1,3 +1,9 @@
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add dedicated list holding currently opened files.
+
 2011-10-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for production readiness of Gratia dumper.
