@@ -6,6 +6,7 @@
 
 #include "XrdMonSucker.h"
 #include "XrdFileCloseReporter.h"
+#include "Glasses/ZHashList.h"
 #include "XrdMonSucker.c7"
 #include "XrdServer.h"
 #include "XrdUser.h"
@@ -64,10 +65,31 @@ XrdMonSucker::XrdMonSucker(const Text_t* n, const Text_t* t) :
 XrdMonSucker::~XrdMonSucker()
 {}
 
+void XrdMonSucker::AdEnlightenment()
+{
+  PARENT_GLASS::AdEnlightenment();
+  if (mOpenFiles == 0)
+  {
+    mOpenFiles = new ZHashList("OpenFiles");
+    mOpenFiles->SetElementFID(XrdFile::FID());
+    mQueen->CheckIn(mOpenFiles.get());
+  }
+}
+
+
 //==============================================================================
+
+void XrdMonSucker::on_file_open(XrdFile* file)
+{
+  auto_ptr<ZMIR> mir( mOpenFiles->S_Add(file) );
+  mSaturn->ShootMIR(mir);
+}
 
 void XrdMonSucker::on_file_close(XrdFile* file)
 {
+  auto_ptr<ZMIR> mir( mOpenFiles->S_Remove(file) );
+  mSaturn->ShootMIR(mir);
+
   XrdFileCloseReporter *fcr = *mFCReporter;
   if (fcr)
   {
@@ -178,12 +200,12 @@ void XrdMonSucker::Suck()
       ZNameMap *domain = static_cast<ZNameMap*>(GetElementByName(server->GetDomain()));
       if (!domain)
       {
-         domain = new ZNameMap(server->GetDomain());
-         // ZQueen::CheckIn() does write lock.
-         mQueen->CheckIn(domain);
-         domain->SetKeepSorted(true);
-         domain->SetElementFID(XrdServer::FID());
-         Add(domain);
+        domain = new ZNameMap(server->GetDomain());
+        // ZQueen::CheckIn() does write lock.
+        mQueen->CheckIn(domain);
+        domain->SetKeepSorted(true);
+        domain->SetElementFID(XrdServer::FID());
+        Add(domain);
       }
       
       // ZQueen::CheckIn() does write lock.
@@ -332,6 +354,8 @@ void XrdMonSucker::Suck()
 	  user->SetLastMsgTime(recv_time);
 	  file->SetUser(user);
 	  server->AddFile(file, dict_id);
+
+          on_file_open(file);
 	}
 	else
 	{
@@ -557,10 +581,17 @@ void XrdMonSucker::Suck()
             us->CopyListByGlass<XrdFile>(open_files);
             for (list<XrdFile*>::iterator xfi = open_files.begin(); xfi != open_files.end(); ++xfi)
             {
-              GLensReadHolder _lck(*xfi);
-              if ((*xfi)->IsOpen())
+              Bool_t closed = false;
               {
-                (*xfi)->SetCloseTime(lc.fTime);
+                GLensReadHolder _lck(*xfi);
+                if ((*xfi)->IsOpen())
+                {
+                  (*xfi)->SetCloseTime(lc.fTime);
+                  closed = true;
+                }
+              }
+              if (closed)
+              {
                 on_file_close(*xfi);
               }
             }

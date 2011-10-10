@@ -16,6 +16,9 @@ class XrdServer;
 class XrdFile;
 class XrdFileCloseReporter;
 
+class ZHashList;
+
+
 class XrdMonSucker : public ZNameMap
 {
   MAC_RNR_FRIENDS(XrdMonSucker);
@@ -24,6 +27,8 @@ private:
   void _init();
 
 protected:
+  ZLink<ZHashList>  mOpenFiles; // X{GS} L{}
+
   Int_t      mSuckPort;     // X{GS} 7 Value()
 
   TString    mNagiosUser;   // X{GS} 7 Textor()
@@ -76,6 +81,7 @@ protected:
   xrd_hash_t    m_xrd_servers; //!
 #endif
 
+  void on_file_open(XrdFile* file);
   void on_file_close(XrdFile* file);
 
   static void* tl_Suck(XrdMonSucker* s);
@@ -84,6 +90,8 @@ protected:
 public:
   XrdMonSucker(const Text_t* n="XrdMonSucker", const Text_t* t=0);
   virtual ~XrdMonSucker();
+
+  virtual void AdEnlightenment();
 
   void StartSucker(); // X{Ed} 7 MButt()
   void StopSucker();  // X{Ed} 7 MButt()
