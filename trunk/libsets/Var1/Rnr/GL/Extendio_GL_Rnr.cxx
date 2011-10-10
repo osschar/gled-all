@@ -22,6 +22,15 @@ void Extendio_GL_Rnr::_init()
   bRnrBBoxes = false;
 }
 
+Extendio_GL_Rnr::Extendio_GL_Rnr(Extendio* idol) :
+    ZGlass_GL_Rnr(idol), mExtendio(idol)
+{
+  _init();
+}
+
+Extendio_GL_Rnr::~Extendio_GL_Rnr()
+{}
+
 /**************************************************************************/
 
 void Extendio_GL_Rnr::PreDraw(RnrDriver* rd)

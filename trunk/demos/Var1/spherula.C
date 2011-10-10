@@ -13,14 +13,19 @@ class LegendreCoefs;
 
 class Statico;
 class TriMesh;
+class HTriMesh;
 class Tringula;
+class Planetes;
 
 GTSurf            *gtsurf      = 0;
 LegendreCoefs     *legendcoefs = 0;
 
 Statico           *stato       = 0;
 TriMesh           *mesh        = 0;
-Tringula          *tring       = 0;
+Planetes          *planet      = 0;
+HTriMesh          *hmesh       = 0;
+
+// Tringula          *tring       = 0;
 
 void make_std();
 
@@ -58,10 +63,24 @@ void spherula()
   // tring->MoveLF(1, 2.5);
 
   // Set as Statico
-  ASSIGN_ADD_GLASS(stato, Statico, scene, "Statico", 0);
+  ASSIGN_ADD_GLASS(stato, Statico, scene, "Statico with TriMesh", 0);
   stato->SetMesh(mesh);
   stato->ref_trans().MoveLF(1, 2.5);
   stato->SetColor(.5, .75, 1);
+
+
+  // Hierarhico
+
+  ASSIGN_ADD_GLASS(hmesh, HTriMesh, scene, "HTriMesh", 0);
+  hmesh->MakeIcosahedron();
+  hmesh->Subdivide(4, 2);
+  hmesh->NormalizeVertices();
+  hmesh->GenerateTriangleNormals();
+
+  ASSIGN_ADD_GLASS(planet, Planetes, scene, "Planetes", 0);
+  planet->SetMesh(hmesh);
+  planet->ref_trans().MoveLF(2, 2.5);
+  planet->SetColor(.75, .25, 0.5);
 
   // GTS models
 

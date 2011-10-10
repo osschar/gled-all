@@ -63,21 +63,11 @@ HTriMesh::~HTriMesh()
 
 //==============================================================================
 
-void HTriMesh::SetDrawLevel(Int_t l)
+void HTriMesh::PrintLevels() const
 {
-  Int_t l_max = mLevels.size() - 1;
-  if (l < 0) l = 0;
-  if (l > l_max) l = l_max;
-  mDrawLevel = l;
-  Stamp(FID());
-}
-
-void HTriMesh::PrintLevels()
-{
-  Int_t l_max = mLevels.size() - 1;
-  for (Int_t i = 0; i <= l_max; ++i)
+  for (Int_t i = 0; i <= mMaxLevel; ++i)
   {
-    HLevel &l = mLevels[i];
+    const HLevel &l = mLevels[i];
     printf("%2d %2d %6d %6d %6d %zu\n", i, l.fLevel, l.fFirstT, l.fNT, l.LastT(), l.fNodes.size());
   }
 }
@@ -220,6 +210,8 @@ void HTriMesh::Subdivide(Int_t n_hierarhical, Int_t n_leaf)
   }
 
   tts.EndSubdivision();
+
+  mMaxLevel = mLevels.size() - 1;
 }
 
 

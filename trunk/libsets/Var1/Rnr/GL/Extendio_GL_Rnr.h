@@ -20,9 +20,8 @@ protected:
   Bool_t        bRnrBBoxes;
 
 public:
-  Extendio_GL_Rnr(Extendio* idol) :
-    ZGlass_GL_Rnr(idol), mExtendio(idol)
-  { _init(); }
+  Extendio_GL_Rnr(Extendio* idol);
+  virtual ~Extendio_GL_Rnr();
 
   virtual void PreDraw(RnrDriver* rd);
   virtual void Draw(RnrDriver* rd);

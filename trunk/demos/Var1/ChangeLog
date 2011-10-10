@@ -1,3 +1,8 @@
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* spherula.C:
+	Add HTriMesh and Planetes.
+
 2011-08-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* spherula.C:

@@ -21,6 +21,9 @@ ClassImp(Extendio);
 
 void Extendio::_init()
 {
+  // Override settings from ZGlass
+  bUseDispList = true;
+
   mTringula = 0;
 
   bExploding = false;
