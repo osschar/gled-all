@@ -109,10 +109,9 @@ public:
   };
 
 protected:
-  Int_t         mDrawLevel; // X{GE} 7 Value(-range=>[0, 100, 1])
-
   HNode         mRootNode; //!
-  vHLevel_t     mLevels;   //!
+  vHLevel_t     mLevels;   //! X{R}
+  Int_t         mMaxLevel; //! X{G}
 
   void subdivide_hierarhical(TringTvorSubdivider& tts);
   void subdivide_leaf       (TringTvorSubdivider& tts, Int_t n_leaf);
@@ -123,8 +122,7 @@ public:
   HTriMesh(const Text_t* n="HTriMesh", const Text_t* t=0);
   virtual ~HTriMesh();
 
-  void SetDrawLevel(Int_t l);
-  void PrintLevels(); //! X{E} 7 MButt()
+  void PrintLevels() const; //! X{E} 7 MButt()
 
   void Subdivide(Int_t n_hierarhical, Int_t n_leaf);
 

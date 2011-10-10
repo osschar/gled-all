@@ -246,6 +246,7 @@ public:
 
   void MakeIcosahedron();
 
+  void NormalizeVertices();
   void ScaleVertices(Float_t s);
 
   void   BuildVertexConnections();

@@ -1,3 +1,32 @@
+2011-10-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Skeleton code for HTriMesh drawing via Planetes glass.
+
+	* Glasses/Planetes.cxx:
+	* Glasses/Planetes.h:
+	* Rnr/GL/Planetes_GL_Rnr.cxx:
+	* Rnr/GL/Planetes_GL_Rnr.h:
+	New files - a planet using HTriMesh for terrain representation.
+
+	* Glasses/Extendio.cxx:
+	Use display-lists by default.
+
+	* Glasses/HTriMesh.cxx:
+	* Glasses/HTriMesh.h:
+	Remove mDrawLevel - it belongs into the representation glass.
+	Add mMaxLevel memeber.
+
+	* Glasses/TriMesh.cxx:
+	* Glasses/TriMesh.h:
+	Add function NormalizeVertices().
+
+	* Rnr/GL/Extendio_GL_Rnr.cxx:
+	* Rnr/GL/Extendio_GL_Rnr.h:
+	Beautify.
+
+	* glass.list:
+	Register new glass Planetes.
+
 2011-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Basic implementation of hierarhically subdivided mesh.

@@ -952,6 +952,21 @@ void TriMesh::MakeIcosahedron()
   Stamp(FID());
 }
 
+void TriMesh::NormalizeVertices()
+{
+  static const Exc_t _eh("TriMesh::NormalizeVertices ");
+
+  assert_tvor(_eh);
+  TringTvor &T = *mTTvor;
+
+  Float_t *v = T.Verts();
+  Int_t    N = 3*T.mNVerts;
+  for (Int_t i = 0; i < N; i += 3, v += 3)
+  {
+    TMath::Normalize(v);
+  }
+}
+
 void TriMesh::ScaleVertices(Float_t s)
 {
   static const Exc_t _eh("TriMesh::ScaleVertices ");
