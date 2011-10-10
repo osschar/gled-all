@@ -226,7 +226,7 @@ void XrdMonSucker::Suck()
         ISwarn(_eh + GForm("%s Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu. Ignoring.",
                            recv_time.ToDateTimeLocal().Data(), server->GetName(),
                            srv_seq, pseq));
-        server->InitSrvSeq(pseq)l
+        server->InitSrvSeq(pseq);
       }
     }
 
