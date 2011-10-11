@@ -24,6 +24,7 @@ protected:
   TString           mDN;             // X{GR}   7 TextOut()
   TString           mVO;             // X{GR}   7 TextOut()
   TString           mRole;           // X{GR}   7 TextOut()
+  TString           mGroup;          // X{GR}   7 TextOut()
   TString           mServerUsername; // X{GR}   7 TextOut()
   TString           mFromHost;       // X{GR}   7 TextOut()
   TString           mFromDomain;     // X{GR}   7 TextOut()
@@ -38,8 +39,8 @@ protected:
 public:
   XrdUser(const TString& n="XrdUser", const TString& t="");
   XrdUser(const TString& n, const TString& t, 
-	  const TString& dn, const TString& vo, const TString &ro, const TString& su,
-	  const TString& fh, const TString& fd, const GTime& st);
+	  const TString& dn, const TString& vo, const TString& ro, const TString& gr,
+          const TString& su, const TString& fh, const TString& fd, const GTime& st);
   virtual ~XrdUser();
 
   Bool_t IsConnected() const { return mDisconnectTime.IsNever() && ! mLoginTime.IsNever(); }
