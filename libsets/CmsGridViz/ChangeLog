@@ -1,5 +1,23 @@
 2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Expand in sync with development in xrootd.
+
+	* CmsGridViz/XrdXrootdMonData.h:
+	Update for changes in vector read monitoring in xrootd.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Write out user group as user_fqan.
+
+	* Glasses/XrdMonSucker.cxx:
+	Add processing of group info in auth monitoring message.
+	Add prelimiary processing of vector-read traces.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add member TString mGroup.
+
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/XrdMonSucker.cxx:
 	Reset XrdServer-stored seq-id after mismatch.
 	Add time and server-name to seq-id mismatch warning.

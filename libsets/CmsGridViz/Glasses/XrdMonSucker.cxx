@@ -135,7 +135,7 @@ void XrdMonSucker::Suck()
 
   TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@([^\\.]+)(?:\\.(.+))?", "o");
   TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
-  TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&m=(.*)$", "o");
+  TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
 
   std::vector<char> buffer(16384 + 16);
   ssize_t           buf_size = buffer.size();
@@ -306,11 +306,11 @@ void XrdMonSucker::Suck()
 	}
 
         authinfo_re.Match(sec);
-	msg += TString::Format("  DN=%s, VO=%s, Role=%s\n",
-			       authinfo_re[6].Data(), authinfo_re[4].Data(), authinfo_re[5].Data());
+	msg += TString::Format("  DN=%s, VO=%s, Role=%s, Group=%s\n",
+			       authinfo_re[7].Data(), authinfo_re[4].Data(), authinfo_re[5].Data(), authinfo_re[6].Data());
 
 	// ZQueen::CheckIn() does write lock.
-	XrdUser *user = new XrdUser(uname, "", authinfo_re[6], authinfo_re[4], authinfo_re[5],
+	XrdUser *user = new XrdUser(uname, "", authinfo_re[7], authinfo_re[4], authinfo_re[5], authinfo_re[6],
                                     authinfo_re[2], host, domain, recv_time);
 	mQueen->CheckIn(user);
 	{
@@ -321,7 +321,7 @@ void XrdMonSucker::Suck()
 	  GLensReadHolder _lck(user);
 	  user->SetServer(server);
 
-          if ( ! bTraceAllNull && mTraceDN_RE.Match(authinfo_re[6]) &&
+          if ( ! bTraceAllNull && mTraceDN_RE.Match(authinfo_re[7]) &&
                mTraceHost_RE.Match(host) && mTraceDomain_RE.Match(domain))
           {
             user->SetTraceMon(true);
@@ -524,6 +524,19 @@ void XrdMonSucker::Suck()
             {
               fi->AddWriteSample(-rwlen / One_MB);
             }
+            fi->SetLastMsgTime(lc.fTime);
+          }
+        }
+        else if (tt == XROOTD_MON_READV)
+        {
+	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+          fi = lc.update(dict_id);
+          if (fi)
+          {
+            Int_t rlen = ntohl(xmt.arg1.buflen);
+            // Not processed: vcnt and vseq (for multi file read)
+            GLensReadHolder _lck(fi);
+            fi->AddReadSample (rlen / One_MB);
             fi->SetLastMsgTime(lc.fTime);
           }
         }
