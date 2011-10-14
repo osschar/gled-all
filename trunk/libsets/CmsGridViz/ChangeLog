@@ -1,3 +1,9 @@
+2011-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Do not filter nagios records by default.
+	Support also "old" auth record format.
+
 2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Expand in sync with development in xrootd.
