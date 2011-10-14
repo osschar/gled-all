@@ -45,10 +45,6 @@ void XrdMonSucker::_init()
 {
   mSuckPort  = 9929;
 
-  mNagiosUser   = "nagios";
-  mNagiosHost   = "red-mon";
-  mNagiosDomain = "unl.edu";
-
   mSocket = 0;
   mSuckerThread = 0;
 
@@ -136,6 +132,7 @@ void XrdMonSucker::Suck()
   TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@([^\\.]+)(?:\\.(.+))?", "o");
   TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
+  TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
 
   std::vector<char> buffer(16384 + 16);
   ssize_t           buf_size = buffer.size();
@@ -268,51 +265,80 @@ void XrdMonSucker::Suck()
       {
 	msg += TString::Format("  user map -- id=%d, uname=%s", dict_id, prim);
 	TString uname(prim), host, domain;
-	Int_t nm = username_re.Match(uname);
-	if (nm == 5)
-	{
-	  // No domain, same as XrdServer
-	  msg += TString::Format(".%s\n", server->GetDomain());
-	  host   = username_re[4];
-	  domain = server->RefDomain();
-	}
-	else if (nm == 6)
-	{
-	  // Domain given
-	  msg += TString::Format("\n");
- 	  host   = username_re[4];
-	  domain = username_re[5];
-	}
-	else
-	{
-	  msg += TString::Format(" ... parse error.\n");
-          cout << msg;
-	  continue;
-	}
+        {
+          Int_t nm = username_re.Match(uname);
+          if (nm == 5)
+          {
+            // No domain, same as XrdServer
+            msg += TString::Format(".%s\n", server->GetDomain());
+            host   = username_re[4];
+            domain = server->RefDomain();
+          }
+          else if (nm == 6)
+          {
+            // Domain given
+            msg += TString::Format("\n");
+            host   = username_re[4];
+            domain = username_re[5];
+          }
+          else
+          {
+            msg += TString::Format(" ... parse error.\n");
+            cout << msg;
+            continue;
+          }
 
-	if (username_re[1] == mNagiosUser && host.BeginsWith(mNagiosHost) && domain.BeginsWith(mNagiosDomain))
-	{
-	  // msg += TString::Format(" ... it is nagios, skipping it.\n");
-          // cout << msg;
-	  continue;
-	}
+          if (username_re[1] == mNagiosUser && host.BeginsWith(mNagiosHost) && domain.BeginsWith(mNagiosDomain))
+          {
+            // msg += TString::Format(" ... it is nagios, skipping it.\n");
+            // cout << msg;
+            continue;
+          }
 
-	if (server->ExistsUserDictId(dict_id))
-	{
-	  msg += TString::Format("  XXXXXX Damn, dict_id already taken!\n");
-          cout << msg;
-	  ISwarn(_eh + "user dict_id already taken ... this session will not be tracked.");
-	  continue;
-	}
+          if (server->ExistsUserDictId(dict_id))
+          {
+            msg += TString::Format("  XXXXXX Damn, dict_id already taken!\n");
+            cout << msg;
+            ISwarn(_eh + "user dict_id already taken ... this session will not be tracked.");
+            continue;
+          }
+        }
 
-        authinfo_re.Match(sec);
-	msg += TString::Format("  DN=%s, VO=%s, Role=%s, Group=%s\n",
-			       authinfo_re[7].Data(), authinfo_re[4].Data(), authinfo_re[5].Data(), authinfo_re[6].Data());
+        XrdUser *user = 0;
+        TString  dn;
+        {
+          TString     group;
+          TPMERegexp *a_rep;
+          if (authinfo_re.Match(sec) == 8)
+          {
+            group =  authinfo_re[6];
+            dn    =  authinfo_re[7];
+            a_rep = &authinfo_re;
+          }
+          else if (authxxxx_re.Match(sec) == 6)
+          {
+            group =  "<unknown>";
+            dn    =  "<unknown>";
+            a_rep = &authxxxx_re;
+          }
+          else
+          {
+            msg += TString::Format("  unparsable auth-info: '%s'.\n", sec);
+            cout << msg;
+            ISwarn(_eh + TString::Format("unparsable auth-info: '%s'.", sec));
+            continue;
+          }
+          TPMERegexp &a_re = *a_rep;
 
-	// ZQueen::CheckIn() does write lock.
-	XrdUser *user = new XrdUser(uname, "", authinfo_re[7], authinfo_re[4], authinfo_re[5], authinfo_re[6],
-                                    authinfo_re[2], host, domain, recv_time);
-	mQueen->CheckIn(user);
+          msg += TString::Format("  DN=%s, VO=%s, Role=%s, Group=%s\n",
+                                 dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
+
+          // ZQueen::CheckIn() does write lock.
+          user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
+                             a_re[2], host, domain, recv_time);
+          mQueen->CheckIn(user);
+        }
+
 	{
 	  GLensReadHolder _lck(server);
 	  server->AddUser(user, dict_id);
@@ -321,7 +347,7 @@ void XrdMonSucker::Suck()
 	  GLensReadHolder _lck(user);
 	  user->SetServer(server);
 
-          if ( ! bTraceAllNull && mTraceDN_RE.Match(authinfo_re[7]) &&
+          if ( ! bTraceAllNull && mTraceDN_RE.Match(dn) &&
                mTraceHost_RE.Match(host) && mTraceDomain_RE.Match(domain))
           {
             user->SetTraceMon(true);
