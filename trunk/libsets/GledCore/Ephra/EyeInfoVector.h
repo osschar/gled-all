@@ -8,7 +8,8 @@
 #define GledCore_EyeInfoVector_H
 
 #include <Gled/GledTypes.h>
-#include <Gled/GSpinLock.h>
+// #include <Gled/GSpinLock.h>
+#include <Gled/GMutex.h>
 
 class EyeInfo;
 
@@ -17,7 +18,7 @@ class EyeInfo;
 class EyeInfoVector : public vector<EyeInfo*>
 {
 protected:
-  GSpinLock  mLock;
+  GMutex     mLock;
   Int_t      mRefCnt;
 
 public:

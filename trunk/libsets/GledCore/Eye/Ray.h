@@ -9,7 +9,8 @@
 
 // Includes
 #include <Gled/GledTypes.h>
-#include <Gled/GSpinLock.h>
+// #include <Gled/GSpinLock.h>
+#include <Gled/GMutex.h>
 
 
 //==============================================================================
@@ -63,7 +64,7 @@ public:
 
 protected:
   TBuffer*	mCustomBuffer;
-  GSpinLock     mLock;
+  GMutex        mLock;
   Int_t         mRefCnt;
 
 public:
