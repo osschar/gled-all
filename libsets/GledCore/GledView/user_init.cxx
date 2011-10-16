@@ -1,8 +1,8 @@
 #include <Gled/Gled.h>
 #include <GledView/GledViewNS.h>
 
-#include <FL/Fl.h>
-#include <FL/fl_draw.h>
+#include <FL/Fl.H>
+#include <FL/fl_draw.H>
 
 namespace {
 

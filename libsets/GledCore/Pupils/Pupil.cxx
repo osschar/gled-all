@@ -55,6 +55,9 @@ namespace {
     {
       clear_border();
     }
+
+    virtual void draw()
+    {}
   };
 }
 
