@@ -1,3 +1,14 @@
+2011-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Switch to fltk-1.3.
+
+	* external/fltk/make-fltk-src-dist.sh:
+	* external/fltk/make-fltk-1.1-src-dist.sh:
+	Rename so that name includes 1.1 version.
+
+	* external/fltk/make-fltk-1.3-src-dist.sh:
+	Src tarball maker for fltk-1.3.
+
 2011-09-29  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	Prelimiary rpm building support.
