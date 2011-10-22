@@ -1,3 +1,13 @@
+2011-10-21  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	* Glasses/XrdEHS.h:
+	First version of embedded http server to provide a web page with info
+	about open files, its users, etc.
+
+	* glass.list:
+	New XrdEHS class.
+
 2011-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
