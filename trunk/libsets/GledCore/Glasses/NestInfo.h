@@ -33,7 +33,7 @@ protected:
   UInt_t	mMaxChildExp;	// X{GS} 7 Value(-range=>[0,1000,1])
 
   // Widths of major elements.
-  Int_t		mWName;   // X{GS} Ray{Rewidth} 7 Value(-range=>[18,50,1], -join=>1)
+  Int_t		mWName;   // X{GS} Ray{Rewidth} 7 Value(-range=>[18,256,1], -join=>1)
   Int_t		mWAnt;    // X{GS} Ray{Rewidth} 7 Value(-range=>[0,40,1])
   Int_t		mWIndent; // X{GS} Ray{Rewidth} 7 Value(-range=>[0,10,1], -join=>1)
   Int_t		mWSepBox; // X{GS} Ray{Rewidth} 7 Value(-range=>[0,5,1])
