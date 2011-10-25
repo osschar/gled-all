@@ -7,14 +7,17 @@
 #include "XrdEHS.h"
 #include "XrdEHS.c7"
 
+#include "TSystem.h"
 #include <Glasses/ZHashList.h>
 #include <Gled/GTime.h>
 #include <ehs/ehs.h>
+#include <ehs/ehstypes.h>
 
 
 #include "XrdMonSucker.h"
 #include "XrdFile.h"
 #include "XrdUser.h"
+#include "XrdServer.h"
 
 #include <iostream>
 #include <sstream>
@@ -23,6 +26,8 @@
 #include <cstdlib>
 
 
+ClassImp(XrdEHS);
+
 //==============================================================================
 //==============================================================================
 //==============================================================================
@@ -30,7 +35,8 @@
 class  FormTester : public EHS
 {
 public:
-   FormTester (XrdMonSucker* x) : mRef( x ) { }
+   FormTester (XrdMonSucker* x ) : mRef( x ) { }
+   FormTester () : mRef( 0 ) { m_oParams.size(); }
 
    ResponseCode HandleRequest ( HttpRequest *, HttpResponse * );
 
@@ -45,6 +51,8 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
    enum EMode { kAll, kFileNames, kHelp };
 
    EMode mode = kAll;
+
+   // std::cerr << request->Uri() << endl;
 
    if (! request->FormValues().empty()) {
       mode = kHelp;
@@ -63,13 +71,18 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
 
    if ( mode == kHelp)
    {
-      oss << "ERROR, possible options are: <br><br> http://localhost:4242/?mode=files <br> http://localhost:4242/?mode=all"; 
+      std::string name = Form("http://%s:%s/?mode=", gSystem->HostName(),  m_oParams["port"].GetCharString());
+
+
+      oss << "<b>HELP</b>, possible options are: <br><br> " << endl;
+      oss << "<a href=\"" << name << "files\">" << name << "files </a> <br>" << endl;
+      oss << "<a href=\"" << name << "all\">" << name << "all </a>";
       response->SetBody( oss.str().c_str(), oss.str().length() );
       return HTTPRESPONSECODE_200_OK;
    }
 
 
-   oss << "<html><body><head><title>StringList</title></head>" << endl;
+   oss << "<html><body><head><title>Xrd open files</title></head>" << endl;
 
    oss << "<meta http-equiv=\"refresh\" content=\"60\" />" << endl;
 
@@ -94,7 +107,7 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
    oss << "  <tr>"<< endl;
    oss << "    <th>File</th> " << endl;
    if (mode == kAll) { 
-      oss << "<th>FromDomain</th>  <th>User</th>  <th>openTime</th> <th>userDomain</th>"<< endl;
+      oss << " <th>OpenTime</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>DN</th>  "<< endl;
    }
    oss << "  </tr>"<< endl;
 
@@ -109,10 +122,11 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
       oss << Form("<td>%s</td>", (*xfi)->GetName()) << endl;
       if (mode == kAll)
       {
-         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetFromDomain()) << endl;
-         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetName()) << endl;
          oss << Form("<td>%s</td>", (*xfi)->GetOpenTime().ToDateTimeLocal().Data()) << endl;
+         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetServer()->GetDomain()) << endl;
+         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetFromDomain()) << endl;
          oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetDN()) << endl;
+         // oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetName()) << endl;
       }
       oss << "</tr>" << std::endl;
       
@@ -128,11 +142,11 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
 
 }
 
-//==============================================================================
-//==============================================================================
-//==============================================================================
 
-ClassImp(XrdEHS);
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
 
 
 XrdEHS::~XrdEHS()
@@ -142,21 +156,24 @@ void XrdEHS::_init()
 {}
 
 XrdEHS::XrdEHS(XrdMonSucker* x) :
-   ZNameMap("EHS", "EHS test"),
-   mXrdReporter(x)
+   ZNameMap("EHS ", "EHS test"),
+   mXrdReporter(x),
+   mPort(9999),
+   bServerUp(false)
 {
   _init();
-  mPort = 9999;
 }
 
 //==============================================================================
 void XrdEHS::StartServer()
 {
+   std::cerr << "call StartServer" << endl;
+
   const TString _eh("XrdEHS::StartServer ");
-
-  if (bServerUp)
+  
+  if ( bServerUp)
     throw _eh + "server already running.";
-
+  
   FormTester srv(mXrdReporter);
   EHSServerParameters oSP;
 
