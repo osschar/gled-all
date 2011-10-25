@@ -1,7 +1,7 @@
 # $Header$
 LIB_SET_NAME	:= CmsGridViz
 LIB_SET_ID	:= 67
-REQUIRES_LIB_SETS := GledCore # add
+REQUIRES_LIB_SETS := GledCore EHS # add
 
 # Directories containing glasses - full Gled enabled classes.
 BLESSED_DIRS	:= Glasses

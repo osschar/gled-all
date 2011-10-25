@@ -1,3 +1,14 @@
+2011-10-24  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	Change table content.
+	
+	* Makefile:
+	Add dependency to EHS libset.
+	
+	* glass.list:
+	Change XrdEHS class id.
+
 2011-10-21  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdEHS.cxx:

@@ -11,5 +11,4 @@ CmsXrdSite	33	Glasses/CmsXrdSite
 CmsXrdUser	34	Glasses/CmsXrdUser
 
 XrdFileCloseReporter 1024 Glasses/XrdFileCloseReporter
-
-XrdEHS               1500 Glasses/XrdEHS
+XrdEHS               1025 Glasses/XrdEHS
