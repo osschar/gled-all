@@ -84,7 +84,7 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
 
    oss << "<html><body><head><title>Xrd open files</title></head>" << endl;
 
-   oss << "<meta http-equiv=\"refresh\" content=\"60\" />" << endl;
+   oss << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
 
    oss << "<script type=\"text/javascript\" src=\"http://uaf-2.t2.ucsd.edu/~alja/sorttable.js \"> </script>"<< endl;
    oss << ""<< endl;
@@ -107,11 +107,10 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
    oss << "  <tr>"<< endl;
    oss << "    <th>File</th> " << endl;
    if (mode == kAll) { 
-      oss << " <th>OpenTime</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>DN</th>  "<< endl;
+      oss << " <th>OpenTime</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>DN</th>  <th>Read [MB]</th>  <th>LastUpdateAgo</th>"<< endl;
    }
    oss << "  </tr>"<< endl;
 
-   
    ZHashList* hl = mRef->GetOpenFiles();
   
    list<XrdFile*> open_files;
@@ -126,7 +125,21 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
          oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetServer()->GetDomain()) << endl;
          oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetFromDomain()) << endl;
          oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetDN()) << endl;
-         // oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetName()) << endl;
+
+         oss << Form("<td>%.3f</td>", (*xfi)->GetReadStats().GetSumX()) << endl;
+         GTime lastUp = (*xfi)->GetLastMsgTime();
+         if (lastUp.IsNever())
+         {
+            oss << "<td>Never</td>\n";
+         }
+         else
+         {
+            int sinceUp =  (int) ((GTime::Now() - lastUp).GetSec());
+            int hours = (sinceUp)/3600;
+            int min = (sinceUp - hours*3600)/60;
+            int sec = sinceUp - hours*3600 - min * 60;
+            oss << Form("<td>%02d:%02d:%02d</td>", hours, min, sec) << endl;
+         }
       }
       oss << "</tr>" << std::endl;
       
