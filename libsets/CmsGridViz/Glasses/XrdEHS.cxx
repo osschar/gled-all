@@ -40,6 +40,8 @@ public:
 
    ResponseCode HandleRequest ( HttpRequest *, HttpResponse * );
 
+   TimeStamp_t   mStamp;
+   list<XrdFile*> mList;
    XrdMonSucker* mRef;
 };
 
@@ -113,9 +115,14 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
 
    ZHashList* hl = mRef->GetOpenFiles();
   
-   list<XrdFile*> open_files;
-   hl->CopyListByGlass<XrdFile>(open_files);
-   for (list<XrdFile*>::iterator xfi = open_files.begin(); xfi != open_files.end(); ++xfi)
+   if (mStamp != hl->GetTimeStamp() )
+   {
+      mList.clear();
+      hl->CopyListByGlass<XrdFile>(mList);
+      mStamp = hl->GetTimeStamp();
+   }
+
+   for (list<XrdFile*>::iterator xfi = mList.begin(); xfi != mList.end(); ++xfi)
    {
       oss << "<tr>"<< endl;
       oss << Form("<td>%s</td>", (*xfi)->GetName()) << endl;

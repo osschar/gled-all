@@ -1,6 +1,11 @@
 2011-10-26  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdEHS.cxx:
+	Cache copy of opened files.
+
+2011-10-26  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
 	Add two columns for time of last update and total bytes read.
 
 2011-10-24  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
