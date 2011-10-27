@@ -1,3 +1,8 @@
+2011-10-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Better warnings, and less of them.
+
 2011-10-26  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdEHS.cxx:

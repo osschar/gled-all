@@ -13,7 +13,6 @@
 #include "XrdFile.h"
 
 #include "Gled/GThread.h"
-#include "Gled/GCRC32.h"
 
 #include "CmsGridViz/XrdXrootdMonData.h"
 
@@ -35,7 +34,9 @@ namespace
 
 //______________________________________________________________________________
 //
-//
+// Enabling trace reports for XrdUser matching those regexps:
+//   mTraceDN, mTraceHost, mTraceDomain (clent, not server)
+// The match is done at login time.
 
 ClassImp(XrdMonSucker);
 
@@ -220,9 +221,9 @@ void XrdMonSucker::Suck()
       UChar_t srv_seq = server->IncAndGetSrvSeq();
       if (pseq != srv_seq)
       {
-        ISwarn(_eh + GForm("%s Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu. Ignoring.",
+        ISwarn(_eh + GForm("%s Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu; code=%c. Ignoring.",
                            recv_time.ToDateTimeLocal().Data(), server->GetName(),
-                           srv_seq, pseq));
+                           srv_seq, pseq, code));
         server->InitSrvSeq(pseq);
       }
     }
@@ -325,7 +326,7 @@ void XrdMonSucker::Suck()
           {
             msg += TString::Format("  unparsable auth-info: '%s'.\n", sec);
             cout << msg;
-            ISwarn(_eh + TString::Format("unparsable auth-info: '%s'.", sec));
+            // ISwarn(_eh + TString::Format("unparsable auth-info: '%s'.", sec));
             continue;
           }
           TPMERegexp &a_re = *a_rep;
