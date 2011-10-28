@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-PACKAGES := root fltk fltk-mt DevIL gts openal freealut
+PACKAGES := root fltk fltk-mt DevIL gts openal freealut ehs
 
 .PHONY: ${PACKAGES} all all-but-root
 
