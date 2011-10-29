@@ -84,7 +84,16 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
    }
 
 
-   oss << "<html><body><head><title>Xrd open files</title></head>" << endl;
+   ZHashList* hl = mRef->GetOpenFiles();
+  
+   if (mStamp != hl->GetTimeStamp() )
+   {
+      mList.clear();
+      hl->CopyListByGlass<XrdFile>(mList);
+      mStamp = hl->GetTimeStamp();
+   }
+
+   oss << "<html><body><head><title>Xrd open files ["<< mList.size() << "]</title></head>" << endl;
 
    oss << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
 
@@ -113,14 +122,6 @@ ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * r
    }
    oss << "  </tr>"<< endl;
 
-   ZHashList* hl = mRef->GetOpenFiles();
-  
-   if (mStamp != hl->GetTimeStamp() )
-   {
-      mList.clear();
-      hl->CopyListByGlass<XrdFile>(mList);
-      mStamp = hl->GetTimeStamp();
-   }
 
    for (list<XrdFile*>::iterator xfi = mList.begin(); xfi != mList.end(); ++xfi)
    {
