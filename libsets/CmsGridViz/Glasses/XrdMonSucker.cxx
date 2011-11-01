@@ -309,7 +309,7 @@ void XrdMonSucker::Suck()
         TString  dn;
         {
           TString     group;
-          TPMERegexp *a_rep;
+          TPMERegexp *a_rep = 0;
           if (authinfo_re.Match(sec) == 8)
           {
             group =  authinfo_re[6];
@@ -327,16 +327,24 @@ void XrdMonSucker::Suck()
             msg += TString::Format("  unparsable auth-info: '%s'.\n", sec);
             cout << msg;
             // ISwarn(_eh + TString::Format("unparsable auth-info: '%s'.", sec));
-            continue;
           }
-          TPMERegexp &a_re = *a_rep;
 
-          msg += TString::Format("  DN=%s, VO=%s, Role=%s, Group=%s\n",
-                                 dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
+	  if (a_rep)
+	  {
+	    TPMERegexp &a_re = *a_rep;
 
+	    msg += TString::Format("  DN=%s, VO=%s, Role=%s, Group=%s\n",
+				   dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
+
+	    user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
+			       a_re[2], host, domain, recv_time);
+	  }
+	  else
+	  {
+	    user = new XrdUser(uname, "", "", "", "", "",
+			       "", host, domain, recv_time);
+	  }
           // ZQueen::CheckIn() does write lock.
-          user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
-                             a_re[2], host, domain, recv_time);
           mQueen->CheckIn(user);
         }
 

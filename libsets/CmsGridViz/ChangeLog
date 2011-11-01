@@ -1,3 +1,8 @@
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Also process sessions for which there is no user authentication info.
+
 2011-10-28  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdEHS.cxx:
