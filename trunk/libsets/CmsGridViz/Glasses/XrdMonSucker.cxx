@@ -446,6 +446,8 @@ void XrdMonSucker::Suck()
           {
             GLensWriteHolder _lck(file);
             file->SetUser(user);
+            file->SetOpenTime(recv_time);
+            file->SetLastMsgTime(recv_time);
           }
           {
             GLensWriteHolder _lck(server);
@@ -646,7 +648,6 @@ void XrdMonSucker::Suck()
             {
 	      GLensReadHolder _lck(fi);
 	      fi->SetLastMsgTime(lc.fTime);
-              fi->SetOpenTime(lc.fTime);
             }
             else
             {
