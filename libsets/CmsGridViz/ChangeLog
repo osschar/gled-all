@@ -1,5 +1,11 @@
 2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdMonSucker.cxx:
+	Set open/last-msg time on a file when file-map message is
+	received. Don't wait until the first trace.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/XrdEhs.cxx:
 	* Glasses/XrdEhs.h:
 	* Glasses/XrdEHS.cxx:
