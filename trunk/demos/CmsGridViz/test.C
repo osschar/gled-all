@@ -1,5 +1,13 @@
 #include <glass_defines.h>
 
+class XrdMonSucker;
+class XrdFileCloseReporter;
+class XrdEhs;
+
+XrdMonSucker         *c_suck = 0;
+XrdFileCloseReporter *c_frep = 0;
+XrdEhs               *c_ehs  = 0;
+
 void test()
 {
   Gled::AssertMacro("sun_demos.C");
@@ -13,13 +21,18 @@ void test()
   }
 
   g_queen->SetName("XrdMonitorQueen");
-  CREATE_ADD_GLASS(suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);
-  suck->SetKeepSorted(true);
 
-  CREATE_ADD_GLASS(fcloserep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
-  // fcloserep->SetUdpHost("desire.physics.ucsd.edu");
-  // fcloserep->SetUdpPort(7632);
-  suck->SetFCReporter(fcloserep);
+  ASSIGN_ADD_GLASS(c_suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);
+  c_suck->SetKeepSorted(true);
+
+  ASSIGN_ADD_GLASS(c_frep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
+  // c_frep->SetUdpHost("desire.physics.ucsd.edu");
+  // c_frep->SetUdpPort(7632);
+  c_suck->SetFCReporter(c_frep);
+
+  ASSIGN_ADD_GLASS(c_ehs, XrdEhs, g_queen, "XrdEhs", 0);
+  c_ehs->SetXrdSucker(c_suck);
+  c_ehs->SetPort(4242);
 
 
   //============================================================================
@@ -33,11 +46,11 @@ void test()
   g_nest->SetWName(50);
 
   // Regexps for setting full-trace-print flag for new user sessions.
-  suck->SetTraceDN("Matevz Tadel");
-  suck->SetTraceHost("uaf-");
-  suck->SetTraceDomain("ucsd.edu");
+  c_suck->SetTraceDN("Matevz Tadel");
+  c_suck->SetTraceHost("uaf-");
+  c_suck->SetTraceDomain("ucsd.edu");
 
-  suck->StartSucker();
-
-  fcloserep->StartReporter();
+  c_suck->StartSucker();
+  c_frep->StartReporter();
+  g_saturn->ShootMIR( c_ehs->S_StartServer() );
 }
