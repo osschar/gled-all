@@ -24,6 +24,7 @@ private:
   void _init();
 
 protected:
+  TString           mRealName;       // X{GR}   7 TextOut()
   TString           mDN;             // X{GR}   7 TextOut()
   TString           mVO;             // X{GR}   7 TextOut()
   TString           mRole;           // X{GR}   7 TextOut()
@@ -39,8 +40,6 @@ protected:
 
   ZLink<XrdServer>  mServer;         // X{GS} L{}
 
-  static TString    GetHumanName(const TString& dn);
-
 public:
   XrdUser(const TString& n="XrdUser", const TString& t="");
   XrdUser(const TString& n, const TString& t, 
@@ -51,6 +50,8 @@ public:
   Bool_t IsConnected() const { return mDisconnectTime.IsNever() && ! mLoginTime.IsNever(); }
 
   void AddFile(XrdFile* file);
+
+  static TString    ParseHumanName(const TString& dn);
 
 #include "XrdUser.h7"
   ClassDef(XrdUser, 1);

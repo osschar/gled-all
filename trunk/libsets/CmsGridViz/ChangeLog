@@ -1,5 +1,18 @@
 2011-11-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Display real name in html table.
+
+	* Glasses/XrdEhs.cxx:
+	Change header to "User" and use GetRealName() to get it from
+	XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add TString member mRealName, fill it in constructor.
+	Rename GetHumanName() to ParseHumanName() and make it public.
+
+2011-11-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* CmsGridViz/XrdXrootdMonData.h:
 	Add disconnect bits - forced and boundp.
 
