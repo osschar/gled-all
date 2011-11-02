@@ -39,6 +39,8 @@ protected:
 
   ZLink<XrdServer>  mServer;         // X{GS} L{}
 
+  static TString    GetHumanName(const TString& dn);
+
 public:
   XrdUser(const TString& n="XrdUser", const TString& t="");
   XrdUser(const TString& n, const TString& t, 

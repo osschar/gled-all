@@ -1,3 +1,9 @@
+2011-11-01  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add static function to get human name from DN.
+
 2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
