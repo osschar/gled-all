@@ -47,11 +47,11 @@ namespace
     XrdMonSucker*  mRef;
   };
 
-
-  // creates a page based on user input -- either displays data from
-  // form or presents a form for users to submit data.
-  ResponseCode FormTester::HandleRequest ( HttpRequest * request, HttpResponse * response )
+  ResponseCode FormTester::HandleRequest(HttpRequest* request, HttpResponse* response)
   {
+    // Creates a page based on user input -- either displays data from
+    // form or presents a form for users to submit data.
+
     enum EMode { kAll, kFileNames, kHelp };
 
     EMode mode = kAll;
@@ -120,7 +120,7 @@ namespace
     oss << "  <tr>"<< endl;
     oss << "    <th>File</th> " << endl;
     if (mode == kAll) { 
-      oss << " <th>OpenTime</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>DN</th>  <th>Read [MB]</th>  <th>LastUpdateAgo</th>"<< endl;
+      oss << " <th>OpenTime</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>User</th>  <th>Read [MB]</th>  <th>LastUpdateAgo</th>"<< endl;
     }
     oss << "  </tr>"<< endl;
 
@@ -134,7 +134,7 @@ namespace
         oss << Form("<td>%s</td>", (*xfi)->GetOpenTime().ToDateTimeLocal().Data()) << endl;
         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetServer()->GetDomain()) << endl;
         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetFromDomain()) << endl;
-        oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetDN()) << endl;
+        oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetRealName()) << endl;
 
         oss << Form("<td>%.3f</td>", (*xfi)->GetReadStats().GetSumX()) << endl;
         GTime lastUp = (*xfi)->GetLastMsgTime();

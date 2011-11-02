@@ -44,6 +44,7 @@ XrdUser::XrdUser(const TString& n, const TString& t,
 
 {
   _init();
+  mRealName = ParseHumanName(mDN);
 }
 
 XrdUser::~XrdUser()
@@ -58,7 +59,7 @@ void XrdUser::AddFile(XrdFile* file)
 
 //==============================================================================
 
-TString XrdUser::GetHumanName(const TString& dn)
+TString XrdUser::ParseHumanName(const TString& dn)
 {
   static TPMERegexp re("/CN=(.*?)(?=(?:/CN=)|$)", "g");
   static TPMERegexp numex("(.*) (\\d+)");
