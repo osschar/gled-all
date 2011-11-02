@@ -16,15 +16,16 @@ class XrdEHS : public ZNameMap
 {
 private:
    void _init();
-   Bool_t	  b_stop_server; //!
-   XrdMonSucker*  mXrdReporter;  //!
+
+   Bool_t	        b_stop_server; //!
 
 protected:
-   Int_t	mPort;     // X{GS} 7 Value(-range=>[1,65535,1])
-   Bool_t	bServerUp; // X{GS} 7 BoolOut()
+   ZLink<XrdMonSucker>  mXrdReporter;  // X{GS} L{a}
+   Int_t	        mPort;         // X{GS} 7 Value(-range=>[1,65535,1])
+   Bool_t	        bServerUp;     // X{GS} 7 BoolOut()
 
 public:
-   XrdEHS( XrdMonSucker* x = 0);
+   XrdEHS(const Text_t* n="XrdEhs", const Text_t* t=0);
    virtual ~XrdEHS();
 
    void StartServer(); // X{Ed} 7 MButt(-join=>1)
