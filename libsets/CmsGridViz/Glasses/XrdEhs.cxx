@@ -189,12 +189,12 @@ void XrdEhs::StartServer()
 {
   static const Exc_t _eh("XrdEhs::StartServer ");
 
-  assert_xrdreporter(_eh);
+  assert_xrdsucker(_eh);
 
   if (bServerUp)
     throw _eh + "server already running.";
 
-  FormTester srv(*mXrdReporter);
+  FormTester srv(*mXrdSucker);
   EHSServerParameters oSP;
 
   oSP["port"] = mPort; // argv [ 1 ];
