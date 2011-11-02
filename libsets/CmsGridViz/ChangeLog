@@ -1,5 +1,15 @@
 2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Standardize constructor & link usage.
+
+	* Glasses/XrdEHS.cxx:
+	* Glasses/XrdEHS.h:
+	Make XrdMonSucker a ZLink.
+	Use standard constructor arguments.
+	Put sub-class of EHS into an unnamed namespace.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Add old session/server clean-up; improve locking.
 
 	* Glasses/XrdDomain.cxx:
