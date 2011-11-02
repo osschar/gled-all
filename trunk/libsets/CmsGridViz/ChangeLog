@@ -1,3 +1,8 @@
+2011-11-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* CmsGridViz/XrdXrootdMonData.h:
+	Add disconnect bits - forced and boundp.
+
 2011-11-01  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdUser.cxx:
