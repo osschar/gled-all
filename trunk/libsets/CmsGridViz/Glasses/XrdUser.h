@@ -16,8 +16,11 @@ class XrdFile;
 class XrdUser : public ZList
 {
   MAC_RNR_FRIENDS(XrdUser);
+  friend class XrdServer;
 
 private:
+  Int_t             m_dict_id;       //!
+
   void _init();
 
 protected:

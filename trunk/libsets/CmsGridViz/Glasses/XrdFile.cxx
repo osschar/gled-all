@@ -20,6 +20,8 @@ ClassImp(XrdFile);
 
 void XrdFile::_init()
 {
+  m_dict_id = 0;
+
   mOpenTime.SetNever();
   mCloseTime.SetNever();
   mLastMsgTime.SetNever();

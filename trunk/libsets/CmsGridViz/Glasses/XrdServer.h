@@ -8,16 +8,22 @@
 #define CmsGridViz_XrdServer_H
 
 #include <Glasses/ZNameMap.h>
+#include <Stones/SXrdServerId.h>
 #include <Gled/GTime.h>
 
+class XrdMonSucker;
 class XrdUser;
 class XrdFile;
+
 
 class XrdServer : public ZNameMap
 {
   MAC_RNR_FRIENDS(XrdServer);
+  friend class XrdMonSucker;
 
 private:
+  SXrdServerId m_server_id; //!
+
   void _init();
 
 protected:
@@ -33,10 +39,12 @@ protected:
   typedef map<Int_t, XrdFile*>    mDict2File_t;
   typedef mDict2File_t::iterator  mDict2File_i;
 
-  mDict2User_t      mUserMap; //!
-  mDict2File_t      mFileMap; //!
+  mDict2User_t      mUserMap;      //!
+  mDict2File_t      mFileMap;      //!
+  GMutex            mUserMapMutex; //!
+  GMutex            mFileMapMutex; //!
 
-  UChar_t           mLastSeq; //!
+  UChar_t           mLastSeq;      //!
 
 public:
   XrdServer(const TString& n="XrdServer", const TString& t="");
@@ -47,14 +55,14 @@ public:
 
   Bool_t   ExistsUserDictId(Int_t dict_id);
   void     AddUser(XrdUser* user, Int_t dict_id);
-  void     DisconnectUser(XrdUser* user, Int_t dict_id);
+  void     DisconnectUser(XrdUser* user);
   void     RemoveUser(XrdUser* user);
   XrdUser* FindUser(const TString& name);
   XrdUser* FindUser(Int_t dict_id);
 
   Bool_t   ExistsFileDictId(Int_t dict_id);
   void     AddFile(XrdFile* file, Int_t dict_id);
-  void     RemoveFile(XrdFile* file, Int_t dict_id);
+  void     RemoveFile(XrdFile* file);
   XrdFile* FindFile(Int_t dict_id);
 
   // Only called from XrdMonSucker to initialize / check message sequence id.

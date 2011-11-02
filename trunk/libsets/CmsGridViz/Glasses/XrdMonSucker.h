@@ -8,11 +8,13 @@
 #define CmsGridViz_XrdMonSucker_H
 
 #include <Glasses/ZNameMap.h>
+#include <Stones/SXrdServerId.h>
 #include <Gled/GTime.h>
 
 #include <TPRegexp.h>
 
 class XrdServer;
+class XrdUser;
 class XrdFile;
 class XrdFileCloseReporter;
 
@@ -41,8 +43,14 @@ protected:
 
   ZLink<XrdFileCloseReporter> mFCReporter; // X{GS} L{}
 
-  Int_t      mSocket;       //!
-  GThread   *mSuckerThread; //!
+  Int_t      mUserKeepSec;    // X{GS}   7 Value(-range=>[10, 86400, 1])
+  Int_t      mServKeepSec;    // X{GS}   7 Value(-range=>[300, 604800, 1])
+  GTime      mLastUserCheck;  // X{GRSQ} 7 TimeOut()
+  GTime      mLastServCheck;  // X{GRSQ} 7 TimeOut()
+
+  Int_t      mSocket;         //!
+  GThread   *mSuckerThread;   //!
+  GThread   *mCheckerThread;  //!
 
 #ifndef __CINT__
   Bool_t     bTraceAllNull;   //!
@@ -52,40 +60,23 @@ protected:
 #endif
 
 #ifndef __CINT__
-  struct xrdsrv_id
-  {
-    // This should actually be a stone ...
+  typedef hash_map<SXrdServerId, XrdServer*, SXrdServerId::Hash> xrd_hash_t;
+  typedef xrd_hash_t::iterator                                   xrd_hash_i;
 
-    UInt_t   ip4;
-    Int_t    stod;
-    UShort_t port;
-
-    xrdsrv_id(UInt_t _ip4, Int_t _stod, UShort_t _port) :
-      ip4(_ip4), stod(_stod), port(_port) {}
-
-    bool operator==(const xrdsrv_id& si) const
-    { return ip4 == si.ip4 && stod == si.stod && port == si.port; }
-
-    struct hsh
-    {
-      // Initially the plan was to use CRC32 ... but this should be just as good.
-      hash<size_t> hfoo;
-      size_t operator()(const xrdsrv_id& si) const
-      {	return hfoo((size_t) si.ip4 * (size_t) si.stod * (size_t) si.port); }
-    };
-  };
-
-  typedef hash_map<xrdsrv_id, XrdServer*, xrdsrv_id::hsh> xrd_hash_t;
-  typedef xrd_hash_t::iterator                            xrd_hash_i;
-
-  xrd_hash_t    m_xrd_servers; //!
+  xrd_hash_t    m_xrd_servers;       //!
+  GMutex        m_xrd_servers_mutex; //!
 #endif
 
   void on_file_open(XrdFile* file);
   void on_file_close(XrdFile* file);
 
+  void disconnect_user_and_close_open_files(XrdUser* user, XrdServer* server,
+                                            const GTime& time);
+
   static void* tl_Suck(XrdMonSucker* s);
   void Suck();
+  static void* tl_Check(XrdMonSucker* s);
+  void Check();
 
 public:
   XrdMonSucker(const Text_t* n="XrdMonSucker", const Text_t* t=0);
@@ -95,6 +86,9 @@ public:
 
   void StartSucker(); // X{Ed} 7 MButt()
   void StopSucker();  // X{Ed} 7 MButt()
+
+  void CleanUpOldServers(); // X{Ed} 7 MButt()
+  void CleanUpOldUsers();   // X{Ed} 7 MButt()
 
   void EmitTraceRERay();
 
