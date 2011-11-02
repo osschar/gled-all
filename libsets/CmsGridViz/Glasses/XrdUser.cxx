@@ -8,6 +8,7 @@
 #include "XrdServer.h"
 #include "XrdUser.c7"
 #include "XrdFile.h"
+#include "TPRegexp.h"
 
 // XrdUser
 
@@ -53,4 +54,45 @@ XrdUser::~XrdUser()
 void XrdUser::AddFile(XrdFile* file)
 {
   Add(file);
+}
+
+//==============================================================================
+
+TString XrdUser::GetHumanName(const TString& dn)
+{
+  static TPMERegexp re("/CN=(.*?)(?=(?:/CN=)|$)", "g");
+  static TPMERegexp numex("(.*) (\\d+)");
+  static TPMERegexp mail1("(.*) \\(?[\\w\\.]+@[\\w\\.]+\\(?");
+  static TPMERegexp mail2("(.*)/Email=[\\w\\.]+@[\\w\\.]+");
+
+  static GMutex re_mutex;
+  GMutexHolder _lck(re_mutex);
+
+  TString user;
+  while (re.Match(dn))
+  {
+    if (re.NMatches() == 2)
+    {
+      // keep last matched user, except if it starts with UID 
+      if (strncmp( "UID:", re[1].Data(), 4))
+        user =  re[1].Data();
+    } 
+    else 
+    {
+      // set value to CN if mach fails
+      user = dn;
+    }
+  }
+
+  // remove numeric values from CN
+  if (numex.Match(user))
+    user = numex[1].Data();
+
+  // remove email addresses
+  if (mail1.Match(user))
+    user = mail1[1].Data();
+  else if (mail2.Match(user)) 
+    user = mail2[1].Data();
+
+  return user;
 }
