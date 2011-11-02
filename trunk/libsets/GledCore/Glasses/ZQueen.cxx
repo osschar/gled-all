@@ -927,6 +927,8 @@ void ZQueen::RemoveLens(ZGlass* lens)
   // Initiates removal of lens. This is the method that should be called
   // by user.
   // If called as Flare broadcasting is suppressed.
+  // Does not have to be called under any lock as it shoots a MIR to
+  // itself to initiate the lens destruction.
 
   static const Exc_t _eh("ZQueen::RemoveLens ");
 
