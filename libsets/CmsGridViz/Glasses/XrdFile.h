@@ -16,8 +16,11 @@ class XrdUser;
 class XrdFile : public ZGlass
 {
   MAC_RNR_FRIENDS(XrdFile);
+  friend class XrdServer;
 
 private:
+  Int_t           m_dict_id;    //!
+
   void _init();
 
 protected:

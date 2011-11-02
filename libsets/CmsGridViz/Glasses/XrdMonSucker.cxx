@@ -8,6 +8,7 @@
 #include "XrdFileCloseReporter.h"
 #include "Glasses/ZHashList.h"
 #include "XrdMonSucker.c7"
+#include "XrdDomain.h"
 #include "XrdServer.h"
 #include "XrdUser.h"
 #include "XrdFile.h"
@@ -46,8 +47,12 @@ void XrdMonSucker::_init()
 {
   mSuckPort  = 9929;
 
+  mUserKeepSec = 300;
+  mServKeepSec = 86400;
+
   mSocket = 0;
   mSuckerThread = 0;
+  mLastUserCheck = mLastServCheck = GTime(GTime::I_Never);
 
   bTraceAllNull = true;
 }
@@ -56,7 +61,7 @@ XrdMonSucker::XrdMonSucker(const Text_t* n, const Text_t* t) :
   ZNameMap(n, t)
 {
   _init();
-  SetElementFID(ZNameMap::FID());
+  SetElementFID(XrdDomain::FID());
 }
 
 XrdMonSucker::~XrdMonSucker()
@@ -94,12 +99,48 @@ void XrdMonSucker::on_file_close(XrdFile* file)
   }
 }
 
+//------------------------------------------------------------------------------
+
+void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer* server,
+                                                        const GTime& time)
+{
+  {
+    GLensReadHolder _lck(user);
+    user->SetDisconnectTime(time);
+  }
+
+  list<XrdFile*> open_files;
+  user->CopyListByGlass<XrdFile>(open_files);
+  for (list<XrdFile*>::iterator fi = open_files.begin(); fi != open_files.end(); ++fi)
+  {
+    XrdFile *file = *fi;
+    Bool_t closed = false;
+    {
+      GLensReadHolder _lck(file);
+      if ((file)->IsOpen())
+      {
+        (file)->SetCloseTime(time);
+        closed = true;
+      }
+    }
+    if (closed)
+    {
+      on_file_close(file);
+    }
+  }
+
+  {
+    GLensReadHolder _lck(server);
+    server->DisconnectUser(user);
+  } 
+}
+
 //==============================================================================
 
 void* XrdMonSucker::tl_Suck(XrdMonSucker* s)
 {
   s->Suck();
-  // delete s->mSock; s->mSock = 0;
+  // Usually cancelled from StopSucker().
   s->mSuckerThread = 0;
   return 0;
 }
@@ -168,12 +209,17 @@ void XrdMonSucker::Suck()
     UInt_t   in4a = addr.sin_addr.s_addr; // Kept in net order
     UShort_t port = ntohs(addr.sin_port);
 
-    xrdsrv_id  xsid(in4a, stod, port);
-    xrd_hash_i xshi = m_xrd_servers.find(xsid);
+    SXrdServerId xsid(in4a, stod, port);
+    xrd_hash_i   xshi;
+    bool         server_not_known;
+    {
+      GMutexHolder _lck(m_xrd_servers_mutex);
+      xshi = m_xrd_servers.find(xsid);
+      server_not_known = (xshi == m_xrd_servers.end());
+    }
 
     XrdServer *server = 0;
-
-    if (xshi == m_xrd_servers.end())
+    if (server_not_known)
     {
       Char_t   hn_buf[64];
       getnameinfo((sockaddr*) &addr, slen, hn_buf, 64, 0, 0, NI_DGRAM);
@@ -192,25 +238,32 @@ void XrdMonSucker::Suck()
       printf("New server: %s.%s:%hu'\n", hostname_re[1].Data(), hostname_re[2].Data(), port);
 
 
-      server = new XrdServer(GForm("%s.%s : %hu : %d", hostname_re[1].Data(), hostname_re[2].Data(), port, stod), "",
-                             hostname_re[1], hostname_re[2], GTime(stod));
+      server = new XrdServer(GForm("%s.%s : %d : %hu", hostname_re[1].Data(), hostname_re[2].Data(), stod, port),
+                             "", hostname_re[1], hostname_re[2], GTime(stod));
+      server->m_server_id = xsid;
 
-      ZNameMap *domain = static_cast<ZNameMap*>(GetElementByName(server->GetDomain()));
+      XrdDomain *domain = static_cast<XrdDomain*>(GetElementByName(server->GetDomain()));
       if (!domain)
       {
-        domain = new ZNameMap(server->GetDomain());
+        domain = new XrdDomain(server->GetDomain());
         // ZQueen::CheckIn() does write lock.
         mQueen->CheckIn(domain);
-        domain->SetKeepSorted(true);
-        domain->SetElementFID(XrdServer::FID());
-        Add(domain);
+        {
+          GLensWriteHolder _lck(this);
+          Add(domain);
+        }
       }
       
       // ZQueen::CheckIn() does write lock.
       mQueen->CheckIn(server);
-      domain->Add(server);
-
-      xshi = m_xrd_servers.insert(make_pair(xsid, server)).first;
+      {
+        GLensWriteHolder _lck(domain);
+        domain->Add(server);
+      }
+      {
+        GMutexHolder _lck(m_xrd_servers_mutex);
+        xshi = m_xrd_servers.insert(make_pair(xsid, server)).first;
+      }
 
       server->InitSrvSeq(pseq);
     }
@@ -349,11 +402,11 @@ void XrdMonSucker::Suck()
         }
 
 	{
-	  GLensReadHolder _lck(server);
+	  GLensWriteHolder _lck(server);
 	  server->AddUser(user, dict_id);
 	}
 	{
-	  GLensReadHolder _lck(user);
+	  GLensWriteHolder _lck(user);
 	  user->SetServer(server);
 
           if ( ! bTraceAllNull && mTraceDN_RE.Match(dn) &&
@@ -385,12 +438,19 @@ void XrdMonSucker::Suck()
 	  // create XrdFile
 	  XrdFile *file = new XrdFile(path);
 	  mQueen->CheckIn(file);
-
-	  // should lock all those ....
-	  user->AddFile(file);
-	  user->SetLastMsgTime(recv_time);
-	  file->SetUser(user);
-	  server->AddFile(file, dict_id);
+          {
+            GLensWriteHolder _lck(user);
+            user->AddFile(file);
+            user->SetLastMsgTime(recv_time);
+          }
+          {
+            GLensWriteHolder _lck(file);
+            file->SetUser(user);
+          }
+          {
+            GLensWriteHolder _lck(server);
+            server->AddFile(file, dict_id);
+          }
 
           on_file_open(file);
 	}
@@ -604,7 +664,7 @@ void XrdMonSucker::Suck()
 	      }
 	      {
 		GLensReadHolder _lck(server);
-		server->RemoveFile(fi, dict_id);
+		server->RemoveFile(fi);
 	      }
               on_file_close(fi);
             }
@@ -623,33 +683,7 @@ void XrdMonSucker::Suck()
 	  if (vrb) printf("  %2d: %s, user=%s\n", ti, ttn, us ? us->GetName() : "<nil>");
 	  if (us)
 	  {
-            {
-              GLensReadHolder _lck(us);
-              us->SetDisconnectTime(lc.fTime);
-            }
-            list<XrdFile*> open_files;
-            us->CopyListByGlass<XrdFile>(open_files);
-            for (list<XrdFile*>::iterator xfi = open_files.begin(); xfi != open_files.end(); ++xfi)
-            {
-              Bool_t closed = false;
-              {
-                GLensReadHolder _lck(*xfi);
-                if ((*xfi)->IsOpen())
-                {
-                  (*xfi)->SetCloseTime(lc.fTime);
-                  closed = true;
-                }
-              }
-              if (closed)
-              {
-                on_file_close(*xfi);
-              }
-            }
-
-            {
-              GLensReadHolder _lck(server);
-              server->DisconnectUser(us, dict_id);
-            }
+            disconnect_user_and_close_open_files(us, server, lc.fTime);
 	  }
           
 	}
@@ -677,12 +711,23 @@ void XrdMonSucker::StartSucker()
     if (mSuckerThread)
       throw _eh + "already running.";
 
-    mSuckerThread = new GThread("XrdMonSucker-Sucker",
-                                (GThread_foo) tl_Suck, this,
-                                false);
+    mSuckerThread  = new GThread("XrdMonSucker-Sucker",
+                                 (GThread_foo) tl_Suck, this, false);
+
+    mCheckerThread = new GThread("XrdMonSucker-Checker",
+                                 (GThread_foo) tl_Check, this, false);
   }
   mSuckerThread->SetNice(0);
   mSuckerThread->Spawn();
+
+  mLastUserCheck = mLastServCheck = GTime(GTime::I_Now);
+  mCheckerThread->SetNice(20);
+  mCheckerThread->Spawn();
+
+  {
+    GLensReadHolder _lck(this);
+    Stamp(FID());
+  }
 }
 
 void XrdMonSucker::StopSucker()
@@ -698,15 +743,173 @@ void XrdMonSucker::StopSucker()
     GThread::InvalidatePtr(mSuckerThread);
   }
 
+  mCheckerThread->Cancel();
+  mCheckerThread->Join();
+  delete mCheckerThread;
+
   thr->Cancel();
   thr->Join();
+  delete thr;
   close(mSocket);
   {
     GLensReadHolder _lck(this);
-    mSuckerThread = 0;
     mSocket = 0;
+    mSuckerThread = 0;
+    mCheckerThread = 0;
   }
 }
+
+//==============================================================================
+
+void* XrdMonSucker::tl_Check(XrdMonSucker* s)
+{
+  s->Check();
+  // Usually cancelled from StopSucker().
+  s->mCheckerThread = 0;
+  return 0;
+}
+
+void XrdMonSucker::Check()
+{
+  static const Exc_t _eh("XrdMonSucker::Check ");
+
+  while (true)
+  {
+    GTime now(GTime::I_Now);
+
+    {
+      bool stamp_p = false;
+      GLensReadHolder _lck(this);
+      if ((now - mLastUserCheck).GetSec() > mUserKeepSec)
+      {
+        mSaturn->ShootMIR( S_CleanUpOldUsers() );
+        mLastUserCheck = now;
+        stamp_p = true;
+      }
+      if ((now - mLastServCheck).GetSec() > mServKeepSec)
+      {
+        mSaturn->ShootMIR( S_CleanUpOldServers() );
+        mLastServCheck = now;
+        stamp_p = true;
+      }
+      if (stamp_p)
+      {
+        Stamp(FID());
+      }
+    }
+
+    GTime::SleepMiliSec(10000);
+  }
+}
+
+//------------------------------------------------------------------------------
+
+void XrdMonSucker::CleanUpOldServers()
+{
+  static const Exc_t _eh("XrdMonSucker::CleanUpOldServers ");
+  assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
+
+  GTime now(GTime::I_Now);
+
+  list<XrdDomain*> domains;
+  CopyListByGlass<XrdDomain>(domains);
+
+  for (list<XrdDomain*>::iterator di = domains.begin(); di != domains.end(); ++di)
+  {
+    XrdDomain *domain = *di;
+    list<XrdServer*> servers;
+    domain->CopyListByGlass<XrdServer>(servers);
+
+    for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
+    {
+      XrdServer *server = *si;
+      Int_t delta;
+      {
+        GLensReadHolder _lck(server);
+        delta = (Int_t) (now - server->RefLastMsgTime()).GetSec();
+      }
+      if (delta > mServKeepSec)
+      {
+        printf("%sRemoving unactive server '%s'.", _eh.Data(), server->GetName());
+        {
+          GMutexHolder _lck(m_xrd_servers_mutex);
+          m_xrd_servers.erase(server->m_server_id);
+        }
+        {
+          list<XrdUser*> users;
+          server->CopyListByGlass<XrdUser>(users);
+          for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
+          {
+            XrdUser *user = *ui;
+            disconnect_user_and_close_open_files(user, server, now);
+          }
+        }
+        {
+          // then remove the server from doman, it will get deleted
+          //   when all the users are harvested
+          GLensWriteHolder _lck(domain);
+          domain->RemoveAll(server);
+        }
+        {
+          mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
+          mSaturn->ShootMIR( mQueen->S_RemoveLens  (server) );
+        }
+      }
+    }
+  }
+}
+
+void XrdMonSucker::CleanUpOldUsers()
+{
+  static const Exc_t _eh("XrdMonSucker::CleanUpOldUsers ");
+  assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
+
+  GTime now(GTime::I_Now);
+
+  list<XrdDomain*> domains;
+  CopyListByGlass<XrdDomain>(domains);
+
+  for (list<XrdDomain*>::iterator di = domains.begin(); di != domains.end(); ++di)
+  {
+    XrdDomain *d = *di;
+    list<XrdServer*> servers;
+    d->CopyListByGlass<XrdServer>(servers);
+
+    Int_t n_wiped = 0;
+    for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
+    {
+      XrdServer *s = *si;
+      list<XrdUser*> users;
+      s->GetPrevUsers()->CopyListByGlass<XrdUser>(users);
+
+      for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
+      {
+        XrdUser *u = *ui;
+        Int_t delta;
+        {
+          GLensReadHolder _lck(u);
+          delta = (Int_t) (now - u->RefDisconnectTime()).GetSec();
+        }
+        if (delta > mUserKeepSec)
+        {
+          ++n_wiped;
+          mQueen->RemoveLens(u);
+        }
+        else
+        {
+          // These are time-ordered ... so the rest are newer.
+          break;
+        }
+      }
+    }
+    if (n_wiped > 0)
+    {
+      printf("%sRemoved %d previous users for domain '%s'.\n", _eh.Data(), n_wiped, d->GetName());
+    }
+  }
+}
+
+//==============================================================================
 
 void XrdMonSucker::EmitTraceRERay()
 {

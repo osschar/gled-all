@@ -5,6 +5,7 @@ XrdMonSucker	1	Glasses/XrdMonSucker
 XrdServer	2	Glasses/XrdServer
 XrdUser		3	Glasses/XrdUser
 XrdFile		4	Glasses/XrdFile
+XrdDomain       5       Glasses/XrdDomain
 
 CmsXrdHost	32	Glasses/CmsXrdHost
 CmsXrdSite	33	Glasses/CmsXrdSite
@@ -12,3 +13,6 @@ CmsXrdUser	34	Glasses/CmsXrdUser
 
 XrdFileCloseReporter 1024 Glasses/XrdFileCloseReporter
 XrdEHS               1025 Glasses/XrdEHS
+
+# UdpPacketProcessor   2048 Glasses/UdpPacketProcessor
+# UppTcpClient         2049 Glasses/UppTcpClient

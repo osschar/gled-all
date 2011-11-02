@@ -1,5 +1,45 @@
 2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add old session/server clean-up; improve locking.
+
+	* Glasses/XrdDomain.cxx:
+	* Glasses/XrdDomain.h:
+	New glass representing a domain.
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
+	New stone holding a UDP packet stamped with time and sender info.
+
+	* Stones/SXrdServerId.cxx:
+	* Stones/SXrdServerId.h:
+	New stone holding unique identification of a xrootd server.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add functions to clean up old user-sessions and servers:
+	  void CleanUpOldUsers();
+	  void CleanUpOldServers();
+	Add another thread that checks how much time has passed and calls
+	the clean-up functions when needed.
+	Improved locking.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Store unique server id in the class itself.
+	Improved locking.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Store file/user dict-id in the class itself.
+	Improved locking.
+
+	* glass.list:
+	Register XrdDomain.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/XrdMonSucker.cxx:
 	Also process sessions for which there is no user authentication info.
 
