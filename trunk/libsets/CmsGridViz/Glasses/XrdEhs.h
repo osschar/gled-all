@@ -20,7 +20,7 @@ private:
    Bool_t	        b_stop_server; //!
 
 protected:
-   ZLink<XrdMonSucker>  mXrdReporter;  // X{GS} L{a}
+   ZLink<XrdMonSucker>  mXrdSucker;    // X{GS} L{a}
    Int_t	        mPort;         // X{GS} 7 Value(-range=>[1,65535,1])
    Bool_t	        bServerUp;     // X{GS} 7 BoolOut()
 
