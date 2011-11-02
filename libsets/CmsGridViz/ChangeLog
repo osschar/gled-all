@@ -1,5 +1,15 @@
 2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	* Glasses/XrdEHS.cxx:
+	* Glasses/XrdEHS.h:
+	* glass.list:
+	Rename XrdEHS to XrdEhs (consistent capitalization with other
+	classes in this libset).
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Standardize constructor & link usage.
 
 	* Glasses/XrdEHS.cxx:

@@ -12,7 +12,7 @@ CmsXrdSite	33	Glasses/CmsXrdSite
 CmsXrdUser	34	Glasses/CmsXrdUser
 
 XrdFileCloseReporter 1024 Glasses/XrdFileCloseReporter
-XrdEHS               1025 Glasses/XrdEHS
+XrdEhs               1025 Glasses/XrdEhs
 
 # UdpPacketProcessor   2048 Glasses/UdpPacketProcessor
 # UppTcpClient         2049 Glasses/UppTcpClient

@@ -4,9 +4,9 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#include "XrdEHS.h"
+#include "XrdEhs.h"
 #include "XrdMonSucker.h"
-#include "XrdEHS.c7"
+#include "XrdEhs.c7"
 
 #include "TSystem.h"
 #include <Glasses/ZHashList.h>
@@ -26,7 +26,7 @@
 #include <cstdlib>
 
 
-ClassImp(XrdEHS);
+ClassImp(XrdEhs);
 
 //==============================================================================
 // EHS helper
@@ -166,16 +166,16 @@ namespace
 
 
 //==============================================================================
-// XrdEHS
+// XrdEhs
 //==============================================================================
 
-XrdEHS::~XrdEHS()
+XrdEhs::~XrdEhs()
 {}
 
-void XrdEHS::_init()
+void XrdEhs::_init()
 {}
 
-XrdEHS::XrdEHS(const Text_t* n, const Text_t* t) :
+XrdEhs::XrdEhs(const Text_t* n, const Text_t* t) :
    ZNameMap(n, t),
    mPort(9999),
    bServerUp(false)
@@ -185,9 +185,9 @@ XrdEHS::XrdEHS(const Text_t* n, const Text_t* t) :
 
 //==============================================================================
 
-void XrdEHS::StartServer()
+void XrdEhs::StartServer()
 {
-  static const Exc_t _eh("XrdEHS::StartServer ");
+  static const Exc_t _eh("XrdEhs::StartServer ");
 
   assert_xrdreporter(_eh);
 
@@ -219,9 +219,9 @@ void XrdEHS::StartServer()
   SetServerUp(false);
 }
 
-void XrdEHS::StopServer()
+void XrdEhs::StopServer()
 {
-  static const Exc_t _eh("XrdEHS::StopServer ");
+  static const Exc_t _eh("XrdEhs::StopServer ");
 
   if ( ! bServerUp)
     throw _eh + "server not running.";

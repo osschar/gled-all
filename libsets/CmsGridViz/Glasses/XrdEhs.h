@@ -4,15 +4,15 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef CmsGridViz_XrdEHS_H
-#define CmsGridViz_XrdEHS_H
+#ifndef CmsGridViz_XrdEhs_H
+#define CmsGridViz_XrdEhs_H
 
 #include <Glasses/ZNameMap.h>
 
 
 class XrdMonSucker;
 
-class XrdEHS : public ZNameMap
+class XrdEhs : public ZNameMap
 {
 private:
    void _init();
@@ -25,14 +25,14 @@ protected:
    Bool_t	        bServerUp;     // X{GS} 7 BoolOut()
 
 public:
-   XrdEHS(const Text_t* n="XrdEhs", const Text_t* t=0);
-   virtual ~XrdEHS();
+   XrdEhs(const Text_t* n="XrdEhs", const Text_t* t=0);
+   virtual ~XrdEhs();
 
    void StartServer(); // X{Ed} 7 MButt(-join=>1)
    void StopServer();  // X{E}  7 MButt()
 
-#include "XrdEHS.h7"
-   ClassDef(XrdEHS, 1);
-}; // endclass XrdEHS
+#include "XrdEhs.h7"
+   ClassDef(XrdEhs, 1);
+}; // endclass XrdEhs
 
 #endif
