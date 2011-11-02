@@ -42,6 +42,8 @@ namespace
 
     ResponseCode HandleRequest ( HttpRequest *, HttpResponse * );
 
+   const char* timeAgo(const GTime& iTime) const;
+
     TimeStamp_t    mStamp;
     list<XrdFile*> mList;
     XrdMonSucker*  mRef;
@@ -120,7 +122,7 @@ namespace
     oss << "  <tr>"<< endl;
     oss << "    <th>File</th> " << endl;
     if (mode == kAll) { 
-      oss << " <th>OpenTime</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>User</th>  <th>Read [MB]</th>  <th>LastUpdateAgo</th>"<< endl;
+      oss << " <th>OpenAgo</th> <th>ServerDomain</th>  <th>ClientDomain</th>  <th>User</th>  <th>Read [MB]</th>  <th>UpdateAgo</th>"<< endl;
     }
     oss << "  </tr>"<< endl;
 
@@ -131,25 +133,13 @@ namespace
       oss << Form("<td>%s</td>", (*xfi)->GetName()) << endl;
       if (mode == kAll)
       {
-        oss << Form("<td>%s</td>", (*xfi)->GetOpenTime().ToDateTimeLocal().Data()) << endl;
+        oss << timeAgo((*xfi)->RefOpenTime()) << endl;
         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetServer()->GetDomain()) << endl;
         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetFromDomain()) << endl;
         oss << Form("<td>%s</td>", (*xfi)->GetUser()->GetRealName()) << endl;
 
         oss << Form("<td>%.3f</td>", (*xfi)->GetReadStats().GetSumX()) << endl;
-        GTime lastUp = (*xfi)->GetLastMsgTime();
-        if (lastUp.IsNever())
-        {
-          oss << "<td>Never</td>\n";
-        }
-        else
-        {
-          int sinceUp =  (int) ((GTime::Now() - lastUp).GetSec());
-          int hours = (sinceUp)/3600;
-          int min = (sinceUp - hours*3600)/60;
-          int sec = sinceUp - hours*3600 - min * 60;
-          oss << Form("<td>%02d:%02d:%02d</td>", hours, min, sec) << endl;
-        }
+        oss << timeAgo((*xfi)->RefLastMsgTime()) << endl;
       }
       oss << "</tr>" << std::endl;
       
@@ -162,6 +152,19 @@ namespace
 
     return HTTPRESPONSECODE_200_OK;
   }
+
+const char* FormTester::timeAgo(const GTime& iTime) const
+{
+   if (iTime.IsNever())
+        return "<td>Never</td>\n";
+
+   int sinceUp =  (int) ((GTime::Now() - iTime).GetSec());
+   int hours = (sinceUp)/3600;
+   int min = (sinceUp - hours*3600)/60;
+   int sec = sinceUp - hours*3600 - min * 60;
+   return Form("<td>%02d:%02d:%02d</td>",hours, min, sec);    
+}
+
 }
 
 
