@@ -681,8 +681,19 @@ void XrdMonSucker::Suck()
 	    printf("Jebojebo!\n");
             us = us_from_server;
 	  }
-	  if (vrb) printf("  %2d: %s, user=%s\n", ti, ttn, us ? us->GetName() : "<nil>");
-	  if (us)
+
+          bool disconn_p = true;
+          TString extra;
+          if (xmt.arg0.id[1] & XROOTD_MON_FORCED) {
+            extra += "(forced)";
+          }
+          if (xmt.arg0.id[1] & XROOTD_MON_BOUNDP) {
+            disconn_p = false;
+            extra += "(bound-path)";
+          }
+
+	  if (vrb) printf("  %2d: %s%s, user=%s\n", ti, ttn, extra.Data(), us ? us->GetName() : "<nil>");
+	  if (disconn_p && us)
 	  {
             disconnect_user_and_close_open_files(us, server, lc.fTime);
 	  }

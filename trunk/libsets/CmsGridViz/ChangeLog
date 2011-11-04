@@ -1,7 +1,12 @@
+2011-11-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Handle new disconnect trace flags (forced, boundp).
+
 2011-11-02  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdEhs.cxx:
-	Display OpenTime as elapsed time since now.
+	Display OpenTime as time elapsed since opening of the file.
 
 2011-11-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
