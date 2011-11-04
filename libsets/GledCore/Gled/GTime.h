@@ -73,6 +73,7 @@ public:
   TString  ToAscLocal(Bool_t show_tz=true) const;
   TString  ToDateTimeUTC  (Bool_t show_tz=true) const;
   TString  ToDateTimeLocal(Bool_t show_tz=true) const;
+  TString  ToHourMinSec() const;
 
   void     Sleep();
 

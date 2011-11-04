@@ -1,3 +1,9 @@
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add function TString ToHourMinSec() suitable for time deltas.
+
 2011-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for fltk-1.3.
