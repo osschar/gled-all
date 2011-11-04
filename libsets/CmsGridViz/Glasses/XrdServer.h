@@ -54,15 +54,15 @@ public:
   virtual void AdEnlightenment();
 
   Bool_t   ExistsUserDictId(Int_t dict_id);
-  void     AddUser(XrdUser* user, Int_t dict_id);
-  void     DisconnectUser(XrdUser* user);
-  void     RemoveUser(XrdUser* user);
+  void     AddUser(XrdUser* user, Int_t dict_id); // X{E} C{1}
+  void     DisconnectUser(XrdUser* user);         // X{E} C{1}
+  void     RemovePrevUser(XrdUser* user);         // X{E} C{1}
   XrdUser* FindUser(const TString& name);
   XrdUser* FindUser(Int_t dict_id);
 
   Bool_t   ExistsFileDictId(Int_t dict_id);
-  void     AddFile(XrdFile* file, Int_t dict_id);
-  void     RemoveFile(XrdFile* file);
+  void     AddFile(XrdFile* file, Int_t dict_id); // X{E} C{1}
+  void     RemoveFile(XrdFile* file);             // X{E} C{1}
   XrdFile* FindFile(Int_t dict_id);
 
   // Only called from XrdMonSucker to initialize / check message sequence id.

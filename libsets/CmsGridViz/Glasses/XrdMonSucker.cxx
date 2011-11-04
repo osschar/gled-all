@@ -129,10 +129,7 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
     }
   }
 
-  {
-    GLensReadHolder _lck(server);
-    server->DisconnectUser(user);
-  } 
+  mSaturn->ShootMIR( server->S_DisconnectUser(user) );
 }
 
 //==============================================================================

@@ -86,15 +86,17 @@ void XrdServer::DisconnectUser(XrdUser* user)
 
   {
     GMutexHolder _lck(mUserMapMutex);
-    if (mUserMap.find(user->m_dict_id) == mUserMap.end())
+    mDict2User_i i = mUserMap.find(user->m_dict_id);
+    if (i == mUserMap.end())
       throw _eh + "dict_id does not exist.";
+    mUserMap.erase(i);
   }
 
   mPrevUsers->Add(user);
   RemoveAll(user);
 }
 
-void XrdServer::RemoveUser(XrdUser* user)
+void XrdServer::RemovePrevUser(XrdUser* user)
 {
   mPrevUsers->RemoveAll(user);
 }

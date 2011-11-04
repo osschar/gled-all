@@ -1,3 +1,15 @@
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix deadlock coming from XrdServer::DisconnectUser().
+
+	* Glasses/XrdMonSucker.cxx:
+	Call XrdServer::DisconnectUser() via a MIR (write-lock should be
+	sufficient, in principle).
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Make user / file managemnet functions MIR-invokable.
+
 2011-11-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
