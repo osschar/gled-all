@@ -1317,7 +1317,7 @@ auto-generated:
 
 =item<aA> Generate assert methods that check if link is set.
 
-B<a> -- C<< protected: void assert_<lower-case-link-name>(const Exc_t& exc_header); >>
+B<a> -- C<< protected: <link-type*> assert_<lower-case-link-name>(const Exc_t& exc_header); >>
 
 B<A> -- C<< public: <link-type>* Assert<link-name>(const Exc_t& exc_header); >>
 
