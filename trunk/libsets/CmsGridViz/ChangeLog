@@ -1,5 +1,16 @@
 2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	EHS was locking up, use home-cooked "web server".
+
+	* Glasses/XrdEhs.cxx:
+	Use direct sockets and just dump the table.
+	The request is not even read.
+
+	* Makefile:
+	Remove dependency on EHS libset.
+
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Fix deadlock coming from XrdServer::DisconnectUser().
 
 	* Glasses/XrdMonSucker.cxx:
