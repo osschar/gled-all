@@ -1,5 +1,10 @@
 2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdEhs.cxx:
+	Improve response header a bit.
+
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	EHS was locking up, use home-cooked "web server".
 
 	* Glasses/XrdEhs.cxx:
