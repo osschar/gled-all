@@ -1,3 +1,9 @@
+2011-11-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add methods ToWebTimeGMT() and ToWebTimeLocal().
+
 2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.cxx:
