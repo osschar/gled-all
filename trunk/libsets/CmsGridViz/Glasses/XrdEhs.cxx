@@ -9,7 +9,7 @@
 #include "XrdEhs.c7"
 
 #include <Glasses/ZHashList.h>
-#include <Gled/GTime.h>
+#include <Gled/GThread.h>
 
 #include "XrdFile.h"
 #include "XrdUser.h"
@@ -56,52 +56,22 @@ XrdEhs::XrdEhs(const Text_t* n, const Text_t* t) :
 
 //==============================================================================
 
-void XrdEhs::StartServer()
+void XrdEhs::fill_content(const GTime& req_time, TString& content)
 {
-  static const Exc_t _eh("XrdEhs::StartServer ");
+  GMutexHolder _lck(mServeMutex);
 
-  assert_xrdsucker(_eh);
-
-  if (bServerUp)
-    throw _eh + "server already running.";
-
-  TServerSocket serv_sock(mPort);
-  GSelector     selector;
-  selector.fRead.Add(&serv_sock);
-
-  // char request[8192];
-  // char erroret[] = "Error processing your request.\n";
-
-  TimeStamp_t    stamp = 0;
-  list<XrdFile*> flist;
-  TString        data;
-
-  while (! b_stop_server)
+  if ((req_time - mServeTime) > GTime(1, 0))
   {
-    selector.Select();
-    TSocket *sock = serv_sock.Accept();
-
-    if (sock == 0)
-    {
-      ISerr(_eh + "Accept failed, retrying ...");
-      continue;
-    }
-
-    // sock->SetOption(kNoBlock, 1);
-    // Int_t len = sock->RecvRaw(request, 8192);
-
     ZHashList* hl = mXrdSucker->GetOpenFiles();
-    if (stamp != hl->GetTimeStamp())
+    if (mFileListTS != hl->GetTimeStamp())
     {
-      flist.clear();
-      stamp = hl->CopyListByGlass<XrdFile>(flist);
+      mFileList.clear();
+      mFileListTS = hl->CopyListByGlass<XrdFile>(mFileList);
     }
-
-    GTime now(GTime::I_Now);
 
     ostringstream oss;
 
-    oss << "<html><body><head><title>Xrd open files ["<< flist.size() << "]</title></head>" << endl;
+    oss << "<html><body><head><title>Xrd open files ["<< mFileList.size() << "]</title></head>" << endl;
 
     oss << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
 
@@ -131,20 +101,20 @@ void XrdEhs::StartServer()
     oss << endl;
     oss << "</tr>" << endl;
 
-    for (list<XrdFile*>::iterator xfi = flist.begin(); xfi != flist.end(); ++xfi)
+    for (list<XrdFile*>::iterator xfi = mFileList.begin(); xfi != mFileList.end(); ++xfi)
     {
       XrdFile *file = *xfi;
       oss << "<tr>"<< endl;
       oss << Form("<td>%s</td>", file->GetName()) << endl;
       // if (mode == kAll)
       {
-        oss << "<td>" << (now - file->RefOpenTime()).ToHourMinSec() << "</td>" << endl;
-        oss << "<td>" << file->GetUser()->GetServer()->GetDomain()  << "</td>" << endl;
-        oss << "<td>" << file->GetUser()->GetFromDomain()           << "</td>" << endl;
-        oss << "<td>" << file->GetUser()->GetRealName()             << "</td>" << endl;
+        oss << "<td>" << (req_time - file->RefOpenTime()).ToHourMinSec() << "</td>" << endl;
+        oss << "<td>" << file->GetUser()->GetServer()->GetDomain() << "</td>" << endl;
+        oss << "<td>" << file->GetUser()->GetFromDomain() << "</td>" << endl;
+        oss << "<td>" << file->GetUser()->GetRealName() << "</td>" << endl;
 
         oss << "<td>" << GForm("%.3f", file->GetReadStats().GetSumX()) << "</td>" << endl;
-        oss << "<td>" << (now - file->RefLastMsgTime()).ToHourMinSec() << "</td>" << endl;
+        oss << "<td>" << (req_time - file->RefLastMsgTime()).ToHourMinSec() << "</td>" << endl;
       }
       oss << "</tr>" << endl;
     }    
@@ -152,20 +122,98 @@ void XrdEhs::StartServer()
     oss << "</body>"  << endl;
     oss << "</html>"  << endl;
 
-    ostringstream hdr;
+    mServeContent = oss.str();
+  }
 
-    hdr << "HTTP/1.1 200 OK" << endl;
-    hdr << "Date: " << now.ToAscUTC() << endl;
-    hdr << "Connection: close" << endl;
-    hdr << "Content-Type: text/html" << endl;
-    hdr << "Content-Length: " << oss.str().length() << endl;
-    hdr << endl;
+  content = mServeContent;
+}
 
-    sock->SendRaw(hdr.str().c_str(), hdr.str().length());
-    sock->SendRaw(oss.str().c_str(), oss.str().length());
+//==============================================================================
 
-    sock->Close();
-    delete sock;
+namespace
+{
+  struct serve_page_arg
+  {
+    XrdEhs  *xehs;
+    TSocket *sock;
+    serve_page_arg(XrdEhs* e, TSocket *s) : xehs(e), sock(s) {}
+  };
+
+  void* serve_page_tl(serve_page_arg* arg)
+  {
+    arg->xehs->ServePage(arg->sock);
+    delete arg;
+    return 0;
+  }
+}
+
+void XrdEhs::ServePage(TSocket* sock)
+{
+  GTime now(GTime::I_Now);
+
+  TString content;
+  fill_content(now, content);
+
+  // sock->SetOption(kNoBlock, 1);
+  // Int_t len = sock->RecvRaw(request, 8192);
+
+
+  ostringstream hdr;
+
+  hdr << "HTTP/1.1 200 OK" << "\r\n";
+  hdr << "Date: " << now.ToWebTimeGMT() << "\r\n";
+  hdr << "Connection: close" << "\r\n";
+  hdr << "Content-Type: text/html" << "\r\n";
+  hdr << "Content-Length: " << content.Length() << "\r\n";
+  hdr << "\r\n";
+
+  sock->SendRaw(hdr.str().c_str(), hdr.str().length());
+  sock->SendRaw(content.Data(), content.Length());
+
+  GTime::SleepMiliSec(1000);
+
+  sock->Close();
+  delete sock;
+}
+
+//==============================================================================
+
+void XrdEhs::StartServer()
+{
+  static const Exc_t _eh("XrdEhs::StartServer ");
+
+  assert_xrdsucker(_eh);
+
+  if (bServerUp)
+    throw _eh + "server already running.";
+
+  TServerSocket serv_sock(mPort);
+  GSelector     selector;
+  selector.fRead.Add(&serv_sock);
+
+  // char request[8192];
+  // char erroret[] = "Error processing your request.\n";
+
+  {
+    GMutexHolder _lck(mServeMutex);
+    mServeTime.SetZero();
+    mFileListTS = 0;
+  }
+
+  while (! b_stop_server)
+  {
+    selector.Select();
+    TSocket *sock = serv_sock.Accept();
+
+    if (sock == 0)
+    {
+      ISerr(_eh + "Accept failed, retrying ...");
+      continue;
+    }
+
+    GThread *thr = new GThread("XrdEhs-PageSender", (GThread_foo) serve_page_tl, new serve_page_arg(this, sock), true);
+    thr->SetNice(20);
+    thr->Spawn();
   }
 }
 
