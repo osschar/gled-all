@@ -224,6 +224,25 @@ namespace
     }
     return txt;
   }
+
+  TString to_webtime(Long64_t sec, time_foo_r foo, Bool_t show_tz)
+  {
+    static const char *day_names[] = { "Sun", "Mon", "Tue", "Wed",  "Thu",  "Fri", "Sat" };
+    static const char *month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+				    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+    time_t    time(sec);
+    struct tm t;
+    foo(&time, &t);
+    TString txt;
+    txt.Form("%s, %d %s %d %02d:%02d:%02d", day_names[t.tm_wday], t.tm_mday,
+	     month_names[t.tm_mon], 1900 + t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
+    if (show_tz) {
+      txt += " ";
+      txt += (foo == gmtime_r) ? "GMT" : t.tm_zone;
+    }
+    return txt;
+  }
 }
 
 TString GTime::ToAscUTC(Bool_t show_tz) const
@@ -244,6 +263,16 @@ TString GTime::ToDateTimeUTC(Bool_t show_tz) const
 TString GTime::ToDateTimeLocal(Bool_t show_tz) const
 {
   return IsNever() ? "Never" : to_datetime(mSec, localtime_r, show_tz);
+}
+
+TString GTime::ToWebTimeGMT(Bool_t show_tz) const
+{
+  return IsNever() ? "Never" : to_webtime(mSec, gmtime_r, show_tz);
+}
+
+TString GTime::ToWebTimeLocal(Bool_t show_tz) const
+{
+  return IsNever() ? "Never" : to_webtime(mSec, localtime_r, show_tz);
 }
 
 TString GTime::ToHourMinSec() const
