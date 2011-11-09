@@ -13,6 +13,7 @@
 #include <Gled/GTime.h>
 
 #include <fstream>
+#include <stdarg.h>
 
 class GThread;
 
@@ -30,17 +31,21 @@ public:
   class Helper
   {
     ZLog    *m_log;
-    GTime    m_when;
+    GTime    m_time;
     TString  m_time_string;
     TString  m_prefix;
     Int_t    m_level;
 
   public:
-    // Helper(ZLog* log, Int_t lvl, const TString& pfx="", const GTime& when=GTime(GTime::I_Now));
+    Helper(ZLog* log, const GTime& when, Int_t lvl, const TString& pfx="");
 
-    // void SetWhen(const GTime& time);
+    void SetTime(const GTime& time);
 
-    // void put(const TString& message);
+    void Put(const TString& message);
+    void Put(Int_t level, const TString& message);
+
+    void Form(const char* fmt, ...);
+    void Form(Int_t level, const char* fmt, ...);
 
     // ostream& operator<<();
   };
@@ -77,6 +82,14 @@ public:
   // void ReopenFile();   // X{E}
 
   void Put(Int_t level, const GTime& time, const TString& prefix, const TString& message);
+  void Put(Int_t level, const TString& time_string, const TString& prefix, const TString& message);
+
+  void Form(Int_t level, const GTime& time, const TString& prefix, const char* fmt, ...);
+  void Form(Int_t level, const TString& time_string, const TString& prefix, const char* fmt, ...);
+  // #if defined(__GNUC__) && !defined(__CINT__)
+  //    __attribute__((format(printf, 1, 2)))
+  // #endif
+  // ; // This is in root-tstring. Probably compile-time checks -- good!
 
   // ostream& operator()(Int_t level);
   // ostream& operator()(Int_t level, const GTime& time);

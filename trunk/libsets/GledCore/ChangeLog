@@ -1,3 +1,13 @@
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Logging improvements, mostly functional now.
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Add a bunch of dumping functions, named Put() and Form() with
+	various signatures.
+	Provide wrappers in ZLog::Helper class.
+
 2011-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Implement a basic logger to file -- more to come soon.
