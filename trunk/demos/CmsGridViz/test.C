@@ -4,6 +4,7 @@ class XrdMonSucker;
 class XrdFileCloseReporter;
 class XrdEhs;
 
+ZLog                 *c_log  = 0;
 XrdMonSucker         *c_suck = 0;
 XrdFileCloseReporter *c_frep = 0;
 XrdEhs               *c_ehs  = 0;
@@ -34,6 +35,11 @@ void test()
   c_ehs->SetXrdSucker(c_suck);
   c_ehs->SetPort(4242);
 
+  ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
+  c_log->SetFileName("xrdmonsuck.log");
+  c_log->SetLevel(ZLog::L_Message);
+  c_suck->SetLog(c_log);
+
 
   //============================================================================
   // Spawn GUI
@@ -50,6 +56,7 @@ void test()
   c_suck->SetTraceHost("uaf-");
   c_suck->SetTraceDomain("ucsd.edu");
 
+  c_log->StartLogging();
   c_suck->StartSucker();
   c_frep->StartReporter();
   g_saturn->ShootMIR( c_ehs->S_StartServer() );

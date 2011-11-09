@@ -1,3 +1,9 @@
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* test.C:
+	* xrd_suck_production.C:
+	Instantiate and setup ZLog for XrdMonSucker.
+
 2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* test.C:
