@@ -42,6 +42,7 @@ NestInfo		81	Glasses/NestInfo
 PupilInfo		82	Glasses/PupilInfo	.
 GuiPupilInfo		83	Glasses/GuiPupilInfo
 CameraInfo		84	Glasses/CameraInfo
+ZLog                    85      Glasses/ZLog
 
 # Streaming of sub-graphs
 ZCometBag		96	Glasses/ZCometBag

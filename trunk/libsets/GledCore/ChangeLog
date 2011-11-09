@@ -1,3 +1,14 @@
+2011-11-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement a basic logger to file -- more to come soon.
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	New glass, log messages to a file.
+
+	* glass.list:
+	Register ZLog.
+
 2011-11-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.cxx:
