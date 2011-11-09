@@ -1,3 +1,13 @@
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mostly convert to using ZLog.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add link to ZLog.
+	Use this (via ZLog::Helper) to print stuff in a file.
+	Trace debugging is still going to stdout.
+
 2011-11-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix response header, serve response in a detached thread.

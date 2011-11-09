@@ -7,6 +7,7 @@
 #include "XrdMonSucker.h"
 #include "XrdFileCloseReporter.h"
 #include "Glasses/ZHashList.h"
+#include "Glasses/ZLog.h"
 #include "XrdMonSucker.c7"
 #include "XrdDomain.h"
 #include "XrdServer.h"
@@ -215,6 +216,9 @@ void XrdMonSucker::Suck()
       server_not_known = (xshi == m_xrd_servers.end());
     }
 
+    // Empty header -- all logging is from this class (and, sadly, function).
+    ZLog::Helper log(*mLog, recv_time, ZLog::L_Message, "");
+
     XrdServer *server = 0;
     if (server_not_known)
     {
@@ -226,13 +230,12 @@ void XrdMonSucker::Suck()
       if (hostname_re.Match(fqhn) != 3)
       {
         char *foo = (char*) &in4a;
-        printf("New server NS lookup problem: %hhu.%hhu.%hhu.%hhu:%hu, fqdn=%s\n",
-               foo[0], foo[1], foo[2], foo[3], port, hn_buf);
-	ISerr(_eh + GForm("Apparently a mis-formed FQ machine name: '%s'.", hn_buf));
+        log.Form(ZLog::L_Error, "New server NS lookup problem: %hhu.%hhu.%hhu.%hhu:%hu, fqdn='%s'.",
+                 foo[0], foo[1], foo[2], foo[3], port, hn_buf);
 	continue;
       }
 
-      printf("New server: %s.%s:%hu'\n", hostname_re[1].Data(), hostname_re[2].Data(), port);
+      log.Form("New server: %s.%s:%hu'\n", hostname_re[1].Data(), hostname_re[2].Data(), port);
 
 
       server = new XrdServer(GForm("%s.%s : %d : %hu", hostname_re[1].Data(), hostname_re[2].Data(), stod, port),
@@ -271,9 +274,8 @@ void XrdMonSucker::Suck()
       UChar_t srv_seq = server->IncAndGetSrvSeq();
       if (pseq != srv_seq)
       {
-        ISwarn(_eh + GForm("%s Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu; code=%c. Ignoring.",
-                           recv_time.ToDateTimeLocal().Data(), server->GetName(),
-                           srv_seq, pseq, code));
+        log.Form(ZLog::L_Warning, "Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu; code=%c. Ignoring.",
+                 recv_time.ToDateTimeLocal().Data(), server->GetName(), srv_seq, pseq, code);
         server->InitSrvSeq(pseq);
       }
     }
@@ -285,7 +287,7 @@ void XrdMonSucker::Suck()
 
     if (len != plen)
     {
-      ISerr(_eh + GForm("message size mismatch: got %zd, xrd-len=%hu (bufsize=%zd).", len, plen, buf_size));
+      log.Form("Message size mismatch: got %zd, xrd-len=%hu (bufsize=%zd).", len, plen, buf_size);
       // This means either our buf-size is too small or the other guy is pushing it.
       // Should probably stop reporting errors from this IP.
       // XXXX Does it really help having it on stack?
@@ -334,8 +336,8 @@ void XrdMonSucker::Suck()
           }
           else
           {
-            msg += TString::Format(" ... parse error.\n");
-            cout << msg;
+            msg += " ... parse error.";
+            log.Put(ZLog::L_Error, msg);
             continue;
           }
 
@@ -348,9 +350,8 @@ void XrdMonSucker::Suck()
 
           if (server->ExistsUserDictId(dict_id))
           {
-            msg += TString::Format("  XXXXXX Damn, dict_id already taken!\n");
-            cout << msg;
-            ISwarn(_eh + "user dict_id already taken ... this session will not be tracked.");
+            msg += "User dict_id already taken ... this session will not be tracked.";
+            log.Put(ZLog::L_Warning, msg);
             continue;
           }
         }
@@ -426,9 +427,8 @@ void XrdMonSucker::Suck()
 	{
 	  if (server->ExistsFileDictId(dict_id))
 	  {
-	    msg += TString::Format("  XXXXXX Damn, dict_id already taken!\n");
-            cout << msg;
-	    ISwarn(_eh + "file dict_id already taken ... this file will not be tracked.");
+	    msg += "File dict_id already taken ... this file will not be tracked.";
+            log.Put(ZLog::L_Warning, msg);
 	    continue;
 	  }
 
@@ -457,8 +457,8 @@ void XrdMonSucker::Suck()
 	{
           if ( ! uname.BeginsWith(mNagiosUser))
           {
-            msg += TString::Format("  user not found ... skipping.\n");
-            cout << msg;
+            msg += "  user not found ... skipping.";
+            log.Put(ZLog::L_Warning, msg);
           }
 	  continue;
 	}
@@ -468,7 +468,7 @@ void XrdMonSucker::Suck()
 	msg += TString::Format("  other %c -- id=%u, uname=%s other=%s\n", code, dict_id, prim, sec);
       }
 
-      cout << msg;
+      log.Put(msg);
     }
     else // this is a trace message
     {

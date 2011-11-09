@@ -19,6 +19,7 @@ class XrdFile;
 class XrdFileCloseReporter;
 
 class ZHashList;
+class ZLog;
 
 
 class XrdMonSucker : public ZNameMap
@@ -29,6 +30,7 @@ private:
   void _init();
 
 protected:
+  ZLink<ZLog>       mLog;       // X{GS} L{}
   ZLink<ZHashList>  mOpenFiles; // X{GS} L{}
 
   Int_t      mSuckPort;     // X{GS} 7 Value()
