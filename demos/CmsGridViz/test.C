@@ -37,7 +37,7 @@ void test()
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
   c_log->SetFileName("xrdmonsuck.log");
-  c_log->SetLevel(ZLog::L_Message);
+  c_log->SetLevel(ZLog::L_Info);
   c_suck->SetLog(c_log);
 
 
