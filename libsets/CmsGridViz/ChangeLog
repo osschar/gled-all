@@ -1,5 +1,10 @@
 2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdMonSucker.cxx:
+	Finish conversion to ZLog usage.
+
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Mostly convert to using ZLog.
 
 	* Glasses/XrdMonSucker.cxx:

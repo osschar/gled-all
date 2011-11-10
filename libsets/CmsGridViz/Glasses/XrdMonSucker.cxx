@@ -235,8 +235,7 @@ void XrdMonSucker::Suck()
 	continue;
       }
 
-      log.Form("New server: %s.%s:%hu'\n", hostname_re[1].Data(), hostname_re[2].Data(), port);
-
+      log.Form("New server: %s.%s:%hu stod=%d", hostname_re[1].Data(), hostname_re[2].Data(), port, stod);
 
       server = new XrdServer(GForm("%s.%s : %d : %hu", hostname_re[1].Data(), hostname_re[2].Data(), stod, port),
                              "", hostname_re[1], hostname_re[2], GTime(stod));
@@ -275,7 +274,7 @@ void XrdMonSucker::Suck()
       if (pseq != srv_seq)
       {
         log.Form(ZLog::L_Warning, "Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu; code=%c. Ignoring.",
-                 recv_time.ToDateTimeLocal().Data(), server->GetName(), srv_seq, pseq, code);
+                 server->GetName(), srv_seq, pseq, code);
         server->InitSrvSeq(pseq);
       }
     }
@@ -298,8 +297,7 @@ void XrdMonSucker::Suck()
     if (code != 't')
     {
       TString msg;
-      msg.Form("%s Message from %s.%s:%hu, c=%c, seq=%3hhu, len=%hu\n",
-               recv_time.ToDateTimeLocal().Data(),
+      msg.Form("Message from %s.%s:%hu, c=%c, seq=%3hhu, len=%hu",
                server->GetHost(), server->GetDomain(), port,
                xmh->code, pseq, plen);
 
@@ -316,21 +314,20 @@ void XrdMonSucker::Suck()
 
       if (code == 'u')
       {
-	msg += TString::Format("  user map -- id=%d, uname=%s", dict_id, prim);
+	msg += TString::Format("\n\tUser map -- id=%d, uname=%s", dict_id, prim);
 	TString uname(prim), host, domain;
         {
           Int_t nm = username_re.Match(uname);
           if (nm == 5)
           {
             // No domain, same as XrdServer
-            msg += TString::Format(".%s\n", server->GetDomain());
+            msg += TString::Format(".%s", server->GetDomain());
             host   = username_re[4];
             domain = server->RefDomain();
           }
           else if (nm == 6)
           {
             // Domain given
-            msg += TString::Format("\n");
             host   = username_re[4];
             domain = username_re[5];
           }
@@ -350,7 +347,7 @@ void XrdMonSucker::Suck()
 
           if (server->ExistsUserDictId(dict_id))
           {
-            msg += "User dict_id already taken ... this session will not be tracked.";
+            msg += "\n\tUser dict_id already taken ... this session will not be tracked.";
             log.Put(ZLog::L_Warning, msg);
             continue;
           }
@@ -375,8 +372,8 @@ void XrdMonSucker::Suck()
           }
           else
           {
-            msg += TString::Format("  unparsable auth-info: '%s'.\n", sec);
-            cout << msg;
+            msg += GForm("\n\tUnparsable auth-info: '%s'", sec);
+            log.Put(msg);
             // ISwarn(_eh + TString::Format("unparsable auth-info: '%s'.", sec));
           }
 
@@ -384,8 +381,8 @@ void XrdMonSucker::Suck()
 	  {
 	    TPMERegexp &a_re = *a_rep;
 
-	    msg += TString::Format("  DN=%s, VO=%s, Role=%s, Group=%s\n",
-				   dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
+	    msg += GForm("\n\tDN=%s, VO=%s, Role=%s, Group=%s",
+                         dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
 
 	    user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
 			       a_re[2], host, domain, recv_time);
@@ -420,14 +417,14 @@ void XrdMonSucker::Suck()
       {
         TString uname(prim);
         TString path (sec);
-	msg += TString::Format("  path map -- id=%d, uname=%s path=%s\n",
+	msg += TString::Format("\n\tPath map -- id=%d, uname=%s path=%s",
                                dict_id, uname.Data(), path.Data());
 	XrdUser *user = server->FindUser(uname);
 	if (user)
 	{
 	  if (server->ExistsFileDictId(dict_id))
 	  {
-	    msg += "File dict_id already taken ... this file will not be tracked.";
+	    msg += "\n\tFile dict_id already taken ... this file will not be tracked.";
             log.Put(ZLog::L_Warning, msg);
 	    continue;
 	  }
@@ -457,7 +454,7 @@ void XrdMonSucker::Suck()
 	{
           if ( ! uname.BeginsWith(mNagiosUser))
           {
-            msg += "  user not found ... skipping.";
+            msg += "\n\tUser not found ... skipping.";
             log.Put(ZLog::L_Warning, msg);
           }
 	  continue;
@@ -465,7 +462,7 @@ void XrdMonSucker::Suck()
       }
       else
       {
-	msg += TString::Format("  other %c -- id=%u, uname=%s other=%s\n", code, dict_id, prim, sec);
+	msg += TString::Format("\n\tOther %c -- id=%u, uname=%s other=%s", code, dict_id, prim, sec);
       }
 
       log.Put(msg);
@@ -503,7 +500,7 @@ void XrdMonSucker::Suck()
           return ntohl(trace(fN-1).arg1.Window) - ntohl(trace(0).arg2.Window);
         }
 
-	Bool_t next(Bool_t verbose=false)
+	Bool_t next(TString& log_msg, Bool_t verbose=false)
 	{
 	  if (++fTi < fN)
 	  {
@@ -522,8 +519,8 @@ void XrdMonSucker::Suck()
 		0;
 
               if (verbose)
-                printf("  Window iB=%2d iE=%2d N=%2d delta_t=%f -- start = %s\n",
-                       fTi, fTiWEnd, fTiWEnd-fTi-1, fTimeStep, fTime.ToDateTimeLocal().Data());
+                log_msg += GForm("\n\tWindow iB=%2d iE=%2d N=%2d delta_t=%f -- start %s.",
+                                 fTi, fTiWEnd, fTiWEnd-fTi-1, fTimeStep, fTime.ToDateTimeLocal(false).Data());
 
 	      ++fTi;
 	    }
@@ -585,19 +582,20 @@ void XrdMonSucker::Suck()
 
       XrdUser *us = lc.find_user();
       Bool_t  vrb = us && us->GetTraceMon();
+      TString msg;
 
-      if (vrb) printf("Trace from %s.%s:%hu, N=%d, dt=%d, seq=%hhu, len=%hu\n",
-                      server->GetHost(), server->GetDomain(), port,
-                      lc.fN, lc.full_delta_time(), pseq, plen);
+      if (vrb) msg.Form("Trace from %s.%s:%hu, N=%d, dt=%d, seq=%hhu, len=%hu.",
+                        server->GetHost(), server->GetDomain(), port,
+                        lc.fN, lc.full_delta_time(), pseq, plen);
 
-      while (lc.next(vrb))
+      while (lc.next(msg, vrb))
       {
 	Int_t ti = lc.fTi;
 	XrdXrootdMonTrace &xmt = lc.trace();
 	UChar_t       tt  = lc.trace_type();
 	const Char_t *ttn = lc.trace_type_name();
 
-        // if (vrb) printf ("  %-2d: %hhx %s\n", ti, tt, ttn);
+        // if (vrb) msg += GForm("\n\t%-2d: %hhx %s", ti, tt, ttn);
 
         XrdFile *fi = 0;
 
@@ -638,7 +636,7 @@ void XrdMonSucker::Suck()
 	{
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
 	  fi = lc.update(dict_id);
-          if (vrb) printf("  %2d: %s, file=%s\n", ti, ttn, fi ? fi->GetName() : "<nullo>");
+          if (vrb) msg += GForm("\n\t%2d: %s, file=%s", ti, ttn, fi ? fi->GetName() : "<nullo>");
           if (fi)
           {
             if (tt == XROOTD_MON_OPEN)
@@ -675,7 +673,6 @@ void XrdMonSucker::Suck()
 	  if (us != us_from_server)
 	  {
 	    ISwarn(_eh + GForm("us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')", us, us_from_server, us ? us->GetName() : "<nil>", us_from_server ? us_from_server->GetName() : "<nil>"));
-	    printf("Jebojebo!\n");
             us = us_from_server;
 	  }
 
@@ -689,14 +686,14 @@ void XrdMonSucker::Suck()
             extra += "(bound-path)";
           }
 
-	  if (vrb) printf("  %2d: %s%s, user=%s\n", ti, ttn, extra.Data(), us ? us->GetName() : "<nil>");
+	  if (vrb) msg += GForm("\n\t%2d: %s%s, user=%s", ti, ttn, extra.Data(), us ? us->GetName() : "<nil>");
 	  if (disconn_p && us)
 	  {
             disconnect_user_and_close_open_files(us, server, lc.fTime);
 	  }
-          
 	}
       } // while trace entries
+      if (vrb) log.Put(msg);
 
       if (us)
       {
@@ -820,6 +817,8 @@ void XrdMonSucker::CleanUpOldServers()
 
   GTime now(GTime::I_Now);
 
+  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpOldUsers ");
+
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
 
@@ -839,7 +838,8 @@ void XrdMonSucker::CleanUpOldServers()
       }
       if (delta > mServKeepSec)
       {
-        printf("%sRemoving unactive server '%s'.", _eh.Data(), server->GetName());
+        log.SetTime(GTime(GTime::I_Now));
+        log.Form("Removing unactive server '%s'.", server->GetName());
         {
           GMutexHolder _lck(m_xrd_servers_mutex);
           m_xrd_servers.erase(server->m_server_id);
@@ -874,6 +874,8 @@ void XrdMonSucker::CleanUpOldUsers()
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
   GTime now(GTime::I_Now);
+
+  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpOldUsers ");
 
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
@@ -913,7 +915,8 @@ void XrdMonSucker::CleanUpOldUsers()
     }
     if (n_wiped > 0)
     {
-      printf("%sRemoved %d previous users for domain '%s'.\n", _eh.Data(), n_wiped, d->GetName());
+      log.SetTime(GTime(GTime::I_Now));
+      log.Form("Removed %d previous users for domain '%s'.", n_wiped, d->GetName());
     }
   }
 }
