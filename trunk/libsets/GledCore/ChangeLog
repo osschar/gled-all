@@ -1,5 +1,18 @@
 2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add va_list variants for GForm() and ZLog::Form() function.
+
+	* Gled/GledNS.cxx:
+	* Gled/GledTypes.h:
+	Add va_list variant of GForm().
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Add va_list variants of Form() methods.
+	Fix vararg forwarding from ZLog::Helper.
+
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Logging improvements, mostly functional now.
 
 	* Glasses/ZLog.cxx:

@@ -91,6 +91,9 @@ public:
   // #endif
   // ; // This is in root-tstring. Probably compile-time checks -- good!
 
+  void Form(Int_t level, const GTime& time, const TString& prefix, const char* fmt, va_list args);
+  void Form(Int_t level, const TString& time_string, const TString& prefix, const char* fmt, va_list args);
+
   // ostream& operator()(Int_t level);
   // ostream& operator()(Int_t level, const GTime& time);
 

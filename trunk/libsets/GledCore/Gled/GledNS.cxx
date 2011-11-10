@@ -1163,7 +1163,7 @@ const char* GForm(const char* fmt, ...)
   if(form_end - form_pos < max_length) form_pos = form_buffer;
 
   va_list ap;
-  va_start(ap,fmt);
+  va_start(ap, fmt);
   int n = vsnprintf(form_pos, max_length, fmt, ap);
   va_end(ap);
 
@@ -1180,6 +1180,29 @@ const char* GForm(const char* fmt, ...)
   form_mutex.Unlock();
   return ret;
 }
+
+const char* GForm(const char* fmt, va_list args)
+{
+  form_mutex.Lock();
+
+  if(form_end - form_pos < max_length) form_pos = form_buffer;
+
+  int n = vsnprintf(form_pos, max_length, fmt, args);
+
+  if(n >= max_length) {
+    n = max_length;
+    size_t l = strlen(fmt);
+    if(fmt[l-1]==10) form_pos[n-2] = 10;
+  } else {
+    ++n;
+  }
+  char* ret = form_pos;
+  form_pos += n;
+
+  form_mutex.Unlock();
+  return ret;
+}
+
 
 /**************************************************************************/
 /**************************************************************************/
