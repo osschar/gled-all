@@ -9,6 +9,8 @@
 
 #include "Gled/GThread.h"
 
+#include "Varargs.h"
+
 #include <time.h>
 
 // ZLog
@@ -136,10 +138,6 @@ namespace
     _name_ += char('0' + _lvl_ - L_Debug); \
   }
 
-#define MSG_STRING(_str_, _fmt_) \
-  TString _str_; { va_list __ap; va_start(__ap, _fmt_); \
-                   _str_.Form(_fmt_, __ap); va_end(__ap); }
-
 void ZLog::Put(Int_t level, const GTime& time, const TString& prefix, const TString& message)
 {
   Put(level, time.ToDateTimeLocal(false), prefix, message);
@@ -154,19 +152,42 @@ void ZLog::Put(Int_t level, const TString& time_string, const TString& prefix, c
   mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
 }
 
-void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* fmt, ...)
+void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* va_(fmt), ...)
 {
   va_list ap;
-  va_start(ap, fmt);
-  Form(level, time.ToDateTimeLocal(false), prefix, fmt, ap);
+  va_start(ap, va_(fmt));
+  Form(level, time.ToDateTimeLocal(false), prefix, va_(fmt), ap);
   va_end(ap);
 }
 
-void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, const char *fmt, ...)
+void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, const char* va_(fmt), ...)
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
-  MSG_STRING(message, fmt);
+
+  TString message;
+  {
+    va_list ap;
+    va_start(ap, va_(fmt));
+    message = GForm(va_(fmt), ap);
+    va_end(ap);
+  }
+
+  GMutexHolder _lck(mLoggerCond);
+  mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
+}
+
+void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* va_(fmt), va_list args)
+{
+  Form(level, time.ToDateTimeLocal(false), prefix, va_(fmt), args);
+}
+
+void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, const char* va_(fmt), va_list args)
+{
+  LEVEL_CHECK(level);
+  LEVEL_NAME(lvl_name, level);
+
+  TString message = GForm(va_(fmt), args);
 
   GMutexHolder _lck(mLoggerCond);
   mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
@@ -199,19 +220,19 @@ void ZLog::Helper::Put(Int_t level, const TString& message)
   m_log->Put(level, m_time_string, m_prefix, message);
 }
 
-void ZLog::Helper::Form(const char* fmt, ...)
+void ZLog::Helper::Form(const char* va_(fmt), ...)
 {
   va_list ap;
-  va_start(ap, fmt);
-  m_log->Form(m_level, m_time_string, m_prefix, fmt, ap);
+  va_start(ap, va_(fmt));
+  m_log->Form(m_level, m_time_string, m_prefix, va_(fmt), ap);
   va_end(ap);
 
 }
 
-void ZLog::Helper::Form(Int_t level, const char* fmt, ...)
+void ZLog::Helper::Form(Int_t level, const char* va_(fmt), ...)
 {
   va_list ap;
-  va_start(ap, fmt);
-  m_log->Form(level, m_time_string, m_prefix, fmt, ap);
+  va_start(ap, va_(fmt));
+  m_log->Form(level, m_time_string, m_prefix, va_(fmt), ap);
   va_end(ap);
 }

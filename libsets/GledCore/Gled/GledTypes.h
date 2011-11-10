@@ -22,6 +22,8 @@
 #include <memory>
 #include <exception>
 
+#include <stdarg.h>
+
 using namespace std;
 
 #include <gled-config.h>
@@ -163,6 +165,7 @@ Exc_t operator+(const Exc_t &s1,       char  c);
 //==============================================================================
 
 const char* GForm(const char* fmt, ...);
+const char* GForm(const char* fmt, va_list args);
 
 TBuffer& operator<<(TBuffer& b, const string& s);
 TBuffer& operator>>(TBuffer& b, string& s);
