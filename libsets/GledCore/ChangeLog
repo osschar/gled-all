@@ -1,5 +1,16 @@
 2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Basic support log rotation.
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Add function RotateLog().
+	In logging thread check periodically (every 10 seconds) if the
+	current file still exists and reopen it if it doesn't. This is to
+	be used together with logrotate.
+
+2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Gled/GTime.cxx:
 	* Gled/GTime.h:
 	Add ToDateLocal/UTC().

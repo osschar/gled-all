@@ -9,6 +9,7 @@
 
 #include "Gled/GThread.h"
 
+#include "TSystem.h"
 #include "Varargs.h"
 
 #include <time.h>
@@ -39,6 +40,7 @@ void ZLog::_init()
   mFileName = mName + ".log";
   mLevel = L_Message;
   mDebugLevel = 0;
+
   mLoggerThread = 0;
 }
 
@@ -98,6 +100,37 @@ void ZLog::StopLogging()
   mLoggerThread = 0;
 }
 
+void ZLog::RotateLog()
+{
+  static const Exc_t _eh("ZLog::RotateLog ");
+
+  GMutexHolder _lck(mLoggerCond);
+
+  if ( ! GThread::IsValidPtr(mLoggerThread))
+    throw _eh + "Logging not active.";
+
+  if (gSystem->AccessPathName(mFileName, kFileExists) == false)
+  {
+    TString newfile = mFileName + "." + GTime(GTime::I_Now).ToDateLocal();
+    if (gSystem->AccessPathName(newfile, kFileExists) == false)
+    {
+      Int_t cnt = 1;
+      newfile += ".";
+      TString tstr;
+      do
+      {
+        tstr = newfile;
+        tstr += cnt++;
+      }
+      while (gSystem->AccessPathName(tstr, kFileExists) == false);
+      newfile = tstr;
+    }
+    gSystem->Rename(mFileName, newfile);
+  }
+
+  mLoggerThread->Kill(GThread::SigUSR1);
+}
+
 //------------------------------------------------------------------------------
 
 void ZLog::tl_LogLoop(ZLog* log)
@@ -107,11 +140,28 @@ void ZLog::tl_LogLoop(ZLog* log)
 
 void ZLog::LogLoop()
 {
+  // Takes care of log rotation.
+  //
+  // Should we also have message queue for log entries?
+
+  GThread::UnblockSignal(GThread::SigUSR1);
+
+  GTime start(GTime::I_Now);
+
   while (true)
   {
-    // Take care of log rotation.
-    // ??? Should also have message queue for log entries?
-    GTime::SleepMiliSec(100*1000);
+    GTime::SleepMiliSec(10*1000, true, false);
+
+    if (gSystem->AccessPathName(mFileName, kFileExists) == true)
+    {
+      start.SetNow();
+      TString time(start.ToDateTimeLocal(false));
+      GMutexHolder _lck(mLoggerCond);
+      mStream << "******************** Logging rotated at " << time << " ********************" << endl;
+      mStream.close();
+      mStream.open(mFileName, ios_base::out | ios_base::app);
+      mStream << "******************** Logging rotated at " << time << " ********************" << endl;
+    }
   }
 }
 
