@@ -65,6 +65,7 @@ protected:
   TString           mFileName;     // X{GS} 7 Textor()
   Level_e           mLevel;        // X{GS} 7 PhonyEnum()
   Int_t             mDebugLevel;   // X{GS} 7 Value(-range=>[0, 9, 1])
+  Bool_t            bLogActive;    // X{G}  7 BoolOut()
 
   GCondition        mLoggerCond;   //!
   GThread          *mLoggerThread; //!

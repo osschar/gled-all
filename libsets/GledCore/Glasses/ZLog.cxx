@@ -68,36 +68,56 @@ void ZLog::StartLogging()
 {
   static const Exc_t _eh("ZLog::StartLogging ");
 
-  GMutexHolder _lck(mLoggerCond);
+  {
+    GMutexHolder _lck(mLoggerCond);
 
-  if (mLoggerThread != 0)
-    throw _eh + "Logging already active.";
+    if (mLoggerThread != 0)
+      throw _eh + "Logging already active.";
 
-  mStream.open(mFileName, ios_base::out | ios_base::app);
-  mStream << "******************** Logging started at " << GTime(GTime::I_Now).ToDateTimeLocal(false) << " ********************" << endl;
+    mStream.open(mFileName, ios_base::out | ios_base::app);
+    if (mStream.fail())
+      throw _eh + "Opening of log '" + mFileName + "' failed.";
 
-  mLoggerThread = new GThread("ZLog-LogLoop", (GThread_foo) tl_LogLoop, this);
-  mLoggerThread->SetNice(20);
-  mLoggerThread->Spawn();
+    mStream << "******************** Logging started at " << GTime(GTime::I_Now).ToDateTimeLocal(false) << " ********************" << endl;
+
+    mLoggerThread = new GThread("ZLog-LogLoop", (GThread_foo) tl_LogLoop, this);
+    mLoggerThread->SetNice(20);
+    mLoggerThread->Spawn();
+  }
+
+  {
+    GLensReadHolder _rdlck(this);
+    bLogActive = true;
+    Stamp(FID());
+  }
 }
 
 void ZLog::StopLogging()
 {
   static const Exc_t _eh("ZLog::StopLogging ");
 
-  GMutexHolder _lck(mLoggerCond);
+  {
+    GMutexHolder _lck(mLoggerCond);
 
-  if ( ! GThread::IsValidPtr(mLoggerThread))
-    throw _eh + "Logging not active.";
+    if ( ! GThread::IsValidPtr(mLoggerThread))
+      throw _eh + "Logging not active.";
 
-  GThread *thr = mLoggerThread;
-  GThread::InvalidatePtr(mLoggerThread);
-  thr->Cancel();
-  thr->Join();
+    GThread *thr = mLoggerThread;
+    GThread::InvalidatePtr(mLoggerThread);
+    thr->Cancel();
+    thr->Join();
 
-  mStream << "******************** Logging stopped at " << GTime(GTime::I_Now).ToDateTimeLocal(false) << " ********************" << endl;
-  mStream.close();
-  mLoggerThread = 0;
+    mStream << "******************** Logging stopped at " << GTime(GTime::I_Now).ToDateTimeLocal(false) << " ********************" << endl;
+    mStream.close();
+    mLoggerThread = 0;
+  }
+
+  {
+    GLensReadHolder _rdlck(this);
+    bLogActive = false;
+    Stamp(FID());
+  }
+
 }
 
 void ZLog::RotateLog()
@@ -144,6 +164,8 @@ void ZLog::LogLoop()
   //
   // Should we also have message queue for log entries?
 
+  static const Exc_t _eh("ZLog::LogLoop ");
+
   GThread::UnblockSignal(GThread::SigUSR1);
 
   GTime start(GTime::I_Now);
@@ -160,6 +182,11 @@ void ZLog::LogLoop()
       mStream << "******************** Logging rotated at " << time << " ********************" << endl;
       mStream.close();
       mStream.open(mFileName, ios_base::out | ios_base::app);
+      if (mStream.fail())
+      {
+        ISerr(_eh + "Opening of log '" + mFileName + "' failed. Requesting logging termination.");
+        mSaturn->ShootMIR(S_StopLogging());
+      }
       mStream << "******************** Logging rotated at " << time << " ********************" << endl;
     }
   }
