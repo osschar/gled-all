@@ -1,3 +1,9 @@
+2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add ToCompactDateTimeLocal/UTC().
+
 2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add va_list variants for GForm() and ZLog::Form() function.
