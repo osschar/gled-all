@@ -75,6 +75,8 @@ public:
   TString  ToDateTimeLocal(Bool_t show_tz=true) const;
   TString  ToCompactDateTimeUTC  () const;
   TString  ToCompactDateTimeLocal() const;
+  TString  ToDateUTC  () const;
+  TString  ToDateLocal() const;
   TString  ToWebTimeGMT  (Bool_t show_tz=true) const;
   TString  ToWebTimeLocal(Bool_t show_tz=true) const;
   TString  ToHourMinSec() const;

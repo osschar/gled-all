@@ -225,6 +225,16 @@ namespace
     return txt;
   }
 
+  TString to_date(Long64_t sec, time_foo_r foo)
+  {
+    time_t    time(sec);
+    struct tm t;
+    foo(&time, &t);
+    TString txt;
+    txt.Form("%d-%02d-%02d", 1900 + t.tm_year, 1 + t.tm_mon, t.tm_mday);
+    return txt;
+  }
+
   TString to_compact_datetime(Long64_t sec, time_foo_r foo)
   {
     time_t    time(sec);
@@ -232,6 +242,7 @@ namespace
     foo(&time, &t);
     return TString::Format("%d%02d%02d-%02d%02d%02d", 1900 + t.tm_year, 1 + t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
   }
+
   TString to_webtime(Long64_t sec, time_foo_r foo, Bool_t show_tz)
   {
     static const char *day_names[] = { "Sun", "Mon", "Tue", "Wed",  "Thu",  "Fri", "Sat" };
@@ -282,6 +293,16 @@ TString GTime::ToCompactDateTimeLocal() const
   return IsNever() ? "Never" : to_compact_datetime(mSec, localtime_r);
 }
 
+TString GTime::ToDateUTC() const
+{
+  return IsNever() ? "Never" : to_date(mSec, gmtime_r);
+}
+
+TString GTime::ToDateLocal() const
+{
+  return IsNever() ? "Never" : to_date(mSec, localtime_r);
+}
+
 TString GTime::ToWebTimeGMT(Bool_t show_tz) const
 {
   return IsNever() ? "Never" : to_webtime(mSec, gmtime_r, show_tz);
@@ -303,7 +324,6 @@ TString GTime::ToHourMinSec() const
   Int_t    min   = sah / 60;
   Int_t    sec   = sah % 60;
   return TString::Format("%02lld:%02d:%02d", hours, min, sec);    
-
 }
 
 //==============================================================================
