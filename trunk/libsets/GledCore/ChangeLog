@@ -1,6 +1,15 @@
 2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
-	Basic support log rotation.
+	Report log open errors and state.
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Throw exception when log can not be (re)opened.
+	Add member Bool_t bLogActive.
+
+2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Basic support for log rotation.
 
 	* Glasses/ZLog.cxx:
 	* Glasses/ZLog.h:
