@@ -2,6 +2,12 @@
 
 	* Gled/GTime.cxx:
 	* Gled/GTime.h:
+	Add ToDateLocal/UTC().
+
+2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
 	Add ToCompactDateTimeLocal/UTC().
 
 2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
