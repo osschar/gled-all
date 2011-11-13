@@ -1,3 +1,11 @@
+2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Amphitheatre.cxx:
+	* Glasses/MultiBoard.cxx:
+	* Glasses/WSTube.cxx:
+	* Glasses/WSTube.h:
+	Consistenly use assign_link<>() in AdEnlightenment().
+
 2011-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Cosmetic changes.

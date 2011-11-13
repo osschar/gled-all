@@ -28,9 +28,7 @@ void Scene::AdEnlightenment()
 {
   ZNode::AdEnlightenment();
   if(mGlobLamps == 0) {
-    GlobalLamps* l = new GlobalLamps("Global Lamps", GForm("GlobLamps of %s", GetName()));
-    mQueen->CheckIn(l);
-    SetGlobLamps(l);
+    assign_link<GlobalLamps>(mGlobLamps, FID(), "Global Lamps", GForm("GlobLamps of %s", GetName()));
   }
 }
 

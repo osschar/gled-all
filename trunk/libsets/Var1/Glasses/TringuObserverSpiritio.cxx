@@ -45,10 +45,9 @@ void TringuObserverSpiritio::AdEnlightenment()
 
   if (mCamera == 0)
   {
-    Camera* c = new Camera("TringuObserverCamera", "Camera of TringuObserverSpiritio");
-    c->SetMIRActive(false);
-    mQueen->CheckIn(c);
-    SetCamera(c);
+    assign_link<Camera>(mCamera, FID(), "TringuObserverCamera",
+			"Camera of TringuObserverSpiritio");
+    mCamera->SetMIRActive(false);
   }
 }
 

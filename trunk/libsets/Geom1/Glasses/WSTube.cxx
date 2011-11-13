@@ -43,6 +43,12 @@ void WSTube::_init()
   m_conn_cof = 0;
 }
 
+WSTube::WSTube(const Text_t* n, const Text_t* t) :
+  WSSeed(n,t)
+{
+  _init();
+}
+
 WSTube::~WSTube()
 {
   delete m_conn_cof;
@@ -70,18 +76,8 @@ void WSTube::AdEnlightenment()
   PARENT_GLASS::AdEnlightenment();
   mRnd.SetSeed(mSaturnID);
   if(mTravelers == 0) {
-    AList* l = new ZHashList("DependentLenses");
-    l->SetElementFID(ZNode::FID());
-    mQueen->CheckIn(l);
-    SetTravelers(l);
-  }
-}
-
-void WSTube::AdEndarkenment()
-{
-  PARENT_GLASS::AdEndarkenment();
-  if(mTravelers != 0) {
-    mQueen->RemoveLens(*mTravelers);
+    assign_link<ZHashList>(mTravelers, FID(), "DependentLenses");
+    mTravelers->SetElementFID(ZNode::FID());
   }
 }
 

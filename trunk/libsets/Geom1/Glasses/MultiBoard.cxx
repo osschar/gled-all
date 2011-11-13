@@ -27,10 +27,8 @@ void MultiBoard::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if(mSlides == 0) {
-    ZHashList* l = new ZHashList("Slides", GForm("Slides of MultiBoard %s", GetName()));
-    l->SetElementFID(ZImage::FID());
-    mQueen->CheckIn(l);
-    SetSlides(l);
+    assign_link<ZHashList>(mSlides, FID(), "Slides", GForm("Slides of MultiBoard %s", GetName()));
+    mSlides->SetElementFID(ZImage::FID());
   }
 }
 

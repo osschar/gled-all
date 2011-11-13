@@ -120,16 +120,14 @@ void SolarSystem::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if (mBalls == 0) {
-    ZVector* l = new ZVector("Balls", GForm("Balls of SolarSystem %s", GetName()));
-    l->SetElementFID(CosmicBall::FID());
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetBalls(l);
+    assign_link<ZVector>(mBalls, FID(), "Balls",
+			 GForm("Balls of SolarSystem %s", GetName()));
+    mBalls->SetElementFID(CosmicBall::FID());
+    mBalls->SetMIRActive(false);
   }
   if (mODECrawler == 0) {
-    ODECrawler* l = new ODECrawler("ODECrawler", GForm("ODECrawler of SolarSystem %s", GetName()));
-    mQueen->CheckIn(l);
-    SetODECrawler(l);
+    assign_link<ODECrawler>(mODECrawler, FID(), "ODECrawler",
+			    GForm("ODECrawler of SolarSystem %s", GetName()));
     mODECrawler->SetODEMaster(this);
   }
 }
