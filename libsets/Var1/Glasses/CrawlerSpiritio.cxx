@@ -78,18 +78,15 @@ void CrawlerSpiritio::AdEnlightenment()
 
   if (mCameraBase == 0)
   {
-    ZNode* cb = new ZNode("CrawlerCameraBase", "CameraBase of CrawlerSpiritio");
-    cb->SetMIRActive(false);
-    mQueen->CheckIn(cb);
-    SetCameraBase(cb);
+    assign_link<ZNode>(mCameraBase, FID(), "CrawlerCameraBase",
+		       "CameraBase of CrawlerSpiritio");
+    mCameraBase->SetMIRActive(false);
   }
   if (mCamera == 0)
   {
-    Camera* c = new Camera("CrawlerCamera", "Camera of CrawlerSpiritio");
-    c->SetMIRActive(false);
-    mQueen->CheckIn(c);
-    SetCamera(c);
-    mCameraBase->Add(c);
+    assign_link<Camera>(mCamera, FID(), "CrawlerCamera", "Camera of CrawlerSpiritio");
+    mCamera->SetMIRActive(false);
+    mCameraBase->Add(*mCamera);
   }
 }
 

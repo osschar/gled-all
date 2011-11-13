@@ -42,11 +42,10 @@ void AEVAlienUI::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if(mSites == 0) {
-    ZNameMap* l = new ZNameMap("AliEn Sites", GForm("Nests of %s", GetName()));
-    l->SetElementFID(AEVSite::FID());
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetSites(l);
+    assign_link<ZNameMap>(mSites, FID(), "AliEn Sites",
+			  GForm("AliEn Sites of %s", GetName()));
+    mSites->SetElementFID(AEVSite::FID());
+    mSites->SetMIRActive(false);
   }
 }
 

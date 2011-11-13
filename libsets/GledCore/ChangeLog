@@ -1,3 +1,11 @@
+2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/Scene.cxx:
+	* Glasses/ShellInfo.cxx:
+	* Glasses/ZIdentity.cxx:
+	* Glasses/ZMirEmittingEntity.cxx:
+	Consistenly use assign_link<>() in AdEnlightenment().
+
 2011-11-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Report log open errors and state.

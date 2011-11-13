@@ -1,3 +1,10 @@
+2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/CrawlerSpiritio.cxx:
+	* Glasses/SolarSystem.cxx:
+	* Glasses/TringuObserverSpiritio.cxx:
+	Consistenly use assign_link<>() in AdEnlightenment().
+
 2011-10-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Skeleton code for HTriMesh drawing via Planetes glass.

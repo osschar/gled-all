@@ -47,15 +47,15 @@ void ShellInfo::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if(mSubShells == 0) {
-    ZHashList* l = new ZHashList("SubShells", GForm("SubShells of %s", GetName()));
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetSubShells(l);
+    assign_link<ZHashList>(mSubShells, FID(), "SubShells",
+			   GForm("SubShells of %s", GetName()));
+    mSubShells->SetMIRActive(false);
   }
   const TString etc("Etc");
   if(!GetElementByName(etc)) {
     ZNameMap* nm = new ZNameMap(etc.Data());
-    mQueen->CheckIn(nm); Add(nm);
+    mQueen->CheckIn(nm);
+    Add(nm);
   }
 }
 

@@ -53,25 +53,19 @@ void AEVDistAnRep::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if(mSites == 0) {
-    ZNameMap* l = new ZNameMap("Sites", GForm("Containter of %s", GetName()));
-    l->SetElementFID(AEVSite::FID());
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetSites(l);
+    assign_link<ZNameMap>(mSites, FID(), "Sites", GForm("Containter of %s", GetName()));
+    mSites->SetElementFID(AEVSite::FID());
+    mSites->SetMIRActive(false);
   }
   if(mEvBatches == 0) {
-    ZNameMap* l = new ZNameMap("EventBatches", GForm("Containter of %s", GetName()));
-    l->SetElementFID(AEVEventBatch::FID());
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetEvBatches(l);
+    assign_link<ZNameMap>(mEvBatches, FID(), "EventBatches", GForm("Containter of %s", GetName()));
+    mEvBatches->SetElementFID(AEVEventBatch::FID());
+    mEvBatches->SetMIRActive(false);
   }
   if(mProcVizes == 0) {
-    ZNameMap* l = new ZNameMap("ProcVizes", GForm("Containter of %s", GetName()));
-    l->SetElementFID(AEVProcessViz::FID());
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetProcVizes(l);
+    assign_link<ZNameMap>(mProcVizes, FID(), ("ProcVizes", GForm("Containter of %s", GetName()));
+    mProcVizes->SetElementFID(AEVProcessViz::FID());
+    mProcVizes->SetMIRActive(false);
   }
 }
 

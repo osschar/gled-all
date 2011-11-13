@@ -32,9 +32,9 @@ void ZIdentity::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if(mActiveMEEs == 0) {
-    mActiveMEEs = new ZHashList("ActiveMEEs", GForm("ActiveMEEs of %s", GetName()));
+    assign_link<ZHashList>(mActiveMEEs, FID(), "ActiveMEEs",
+			   GForm("ActiveMEEs of %s", GetName()));
     mActiveMEEs->SetElementFID(ZMirEmittingEntity::FID());
-    mQueen->CheckIn(mActiveMEEs.get());
   }
 }
 

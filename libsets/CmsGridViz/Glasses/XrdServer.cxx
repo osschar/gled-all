@@ -50,10 +50,10 @@ void XrdServer::AdEnlightenment()
   PARENT_GLASS::AdEnlightenment();
   if (mPrevUsers == 0)
   {
-    mPrevUsers = new ZList("PrevUsers", GForm("Previous users of %s", GetName()));
+    assign_link<ZList>(mPrevUsers, FID(), "PrevUsers",
+                       GForm("Previous users of %s", GetName()));
     mPrevUsers->SetElementFID(XrdUser::FID());
     mPrevUsers->SetMIRActive(false);
-    mQueen->CheckIn(mPrevUsers.get());
   }
 }
 

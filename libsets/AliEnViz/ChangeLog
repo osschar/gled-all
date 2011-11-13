@@ -1,3 +1,9 @@
+2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/AEVAlienUI.cxx:
+	* Glasses/AEVDistAnRep.cxx:
+	Consistenly use assign_link<>() in AdEnlightenment().
+
 2010-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* AliEnViz/AEVSSpace_ABase.cxx:

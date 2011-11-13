@@ -23,7 +23,8 @@ public:
 
   enum TransSource_e { TS_Links, TS_Transes };
 
-  struct Traveler {
+  struct Traveler
+  {
     ZNode*  fNode;
     Float_t fPosition;
     Float_t fVelocity;
@@ -66,12 +67,13 @@ protected:
 			const TLorentzVector& vec, const TLorentzVector& sgm);
 
 public:
-  WSTube(const Text_t* n="WSTube", const Text_t* t=0) :
-    WSSeed(n,t) { _init(); }
+  WSTube(const Text_t* n="WSTube", const Text_t* t=0);
   virtual ~WSTube();
 
   virtual void AdEnlightenment();
-  virtual void AdEndarkenment();
+
+  // TimeMakerClient (override from WSSeed)
+  virtual void TimeTick(Double_t t, Double_t dt);
 
   // Connection and travelers
   //-------------------------
@@ -98,18 +100,12 @@ public:
   // Travelers
   //----------
 protected:
-
-
   list<Traveler>  m_traveler_list;
   ZLink<AList>    mTravelers;      // X{GS} L{} RnrBits{0,0,0,0, 0,0,0,5}
 public:
   void TravelAtoB() { MakeTraveler( mDefVelocity); } // X{E} 7 MButt(-join=>1)
   void TravelBtoA() { MakeTraveler(-mDefVelocity); } // X{E} 7 MButt()
   void MakeTraveler(Float_t velocity=0, Float_t wait_time=0); // X{E} 7 MCWButt()
-
-
-  // TimeMakerClient (override from WSSeed)
-  virtual void TimeTick(Double_t t, Double_t dt);
 
 #include "WSTube.h7"
   ClassDef(WSTube, 1);

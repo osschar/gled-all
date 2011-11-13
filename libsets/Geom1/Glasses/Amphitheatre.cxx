@@ -54,11 +54,9 @@ void Amphitheatre::AdEnlightenment()
 {
   PARENT_GLASS::AdEnlightenment();
   if(mNewGuests == 0) {
-    ZList* l = new ZList("GuestList", GForm("Newly arrived guests of %s", GetName()));
-    l->SetElementFID(ZNode::FID());
-    l->SetMIRActive(false);
-    mQueen->CheckIn(l);
-    SetNewGuests(l);
+    assign_link<ZList>(mNewGuests, FID(), "GuestList", GForm("Newly arrived guests of %s", GetName()));
+    mNewGuests->SetElementFID(ZNode::FID());
+    mNewGuests->SetMIRActive(false);
   }
 }
 

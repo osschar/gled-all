@@ -73,9 +73,8 @@ void XrdMonSucker::AdEnlightenment()
   PARENT_GLASS::AdEnlightenment();
   if (mOpenFiles == 0)
   {
-    mOpenFiles = new ZHashList("OpenFiles");
+    assign_link<ZHashList>(mOpenFiles, FID(), "OpenFiles");
     mOpenFiles->SetElementFID(XrdFile::FID());
-    mQueen->CheckIn(mOpenFiles.get());
   }
 }
 
@@ -853,16 +852,8 @@ void XrdMonSucker::CleanUpOldServers()
             disconnect_user_and_close_open_files(user, server, now);
           }
         }
-        {
-          // then remove the server from doman, it will get deleted
-          //   when all the users are harvested
-          GLensWriteHolder _lck(domain);
-          domain->RemoveAll(server);
-        }
-        {
-          mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
-          mSaturn->ShootMIR( mQueen->S_RemoveLens  (server) );
-        }
+        mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
+        mSaturn->ShootMIR( domain->S_RemoveAll(server) );
       }
     }
   }
