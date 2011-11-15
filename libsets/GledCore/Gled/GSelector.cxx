@@ -35,7 +35,7 @@ ClassImp(GSelector);
 
 //------------------------------------------------------------------------------
 
-GSelector::GSelector(Init_e e) : GMutex(e)
+GSelector::GSelector(Init_e e) : GMutex(e), fError(SE_Null), fTimeOut(0)
 {}
 
 GSelector::~GSelector()
@@ -45,6 +45,8 @@ GSelector::~GSelector()
 
 Int_t GSelector::Select()
 {
+  static const Exc_t _eh("GSelector::Select ");
+
   // Prepare sets.
   int Mfd = 0;
 
@@ -96,23 +98,23 @@ Int_t GSelector::Select()
 	return -1;
       case EBADF:
 	fError = SE_BadFD;
-	ISerr("GSelector::Bad FileDescriptor");
+	ISerr(_eh + "Bad file-descriptor.");
 	return -1;
       case EINTR:
 	fError = SE_Interrupt;
-	ISmess("GSelector::Interrupted select");
+	ISmess(_eh + "Interrupted select.");
 	return -1;
       case EINVAL:
 	fError = SE_BadArg;
-	ISerr("GSelector::Bad n parameter to select");
+	ISerr(_eh + "Bad parameters (nfds or timeout).");
 	return -1;
       case ENOMEM:
 	fError = SE_NoMem;
-	ISerr("GSelector::No memory for select");
+	ISerr(_eh + "No memory for select.");
 	return -1;
       default:
 	fError = SE_Unknown;
-	ISerr(GForm("GSelector::Undocumented error in select: %d", errno));
+	ISerr(_eh + GForm("Undocumented error in select: %d.", errno));
 	return -1;
     } // end switch
   }
