@@ -128,8 +128,10 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
       on_file_close(file);
     }
   }
-
-  mSaturn->ShootMIR( server->S_DisconnectUser(user) );
+  {
+    GLensWriteHolder _lck(server); 	 
+    server->DisconnectUser(user);
+  }
 }
 
 //==============================================================================
@@ -344,6 +346,19 @@ void XrdMonSucker::Suck()
             continue;
           }
 
+          // Go figure, MIT was sending two user-map messages. The problem
+          // with this is that file-map user user-name to identify user
+          // ... and obviously the files were assigned to the wrong one + one
+          // session remained open forever.
+          {
+            XrdUser *xu = server->FindUser(uname);
+            if (xu != 0)
+            {
+              msg += "\n\tUsername was already taken -- deleting old user!";
+              disconnect_user_and_close_open_files(xu, server, recv_time);
+            }
+          }
+
           if (server->ExistsUserDictId(dict_id))
           {
             msg += "\n\tUser dict_id already taken ... this session will not be tracked.";
@@ -372,8 +387,6 @@ void XrdMonSucker::Suck()
           else
           {
             msg += GForm("\n\tUnparsable auth-info: '%s'", sec);
-            log.Put(msg);
-            // ISwarn(_eh + TString::Format("unparsable auth-info: '%s'.", sec));
           }
 
 	  if (a_rep)
@@ -581,20 +594,16 @@ void XrdMonSucker::Suck()
 
       XrdUser *us = lc.find_user();
       Bool_t  vrb = us && us->GetTraceMon();
-      TString msg;
+      TString msg, msg_vrb;
 
-      if (vrb) msg.Form("Trace from %s.%s:%hu, N=%d, dt=%d, seq=%hhu, len=%hu.",
-                        server->GetHost(), server->GetDomain(), port,
-                        lc.fN, lc.full_delta_time(), pseq, plen);
-
-      while (lc.next(msg, vrb))
+      while (lc.next(msg_vrb, vrb))
       {
 	Int_t ti = lc.fTi;
 	XrdXrootdMonTrace &xmt = lc.trace();
 	UChar_t       tt  = lc.trace_type();
 	const Char_t *ttn = lc.trace_type_name();
 
-        // if (vrb) msg += GForm("\n\t%-2d: %hhx %s", ti, tt, ttn);
+        // if (vrb) msg_vrb += GForm("\n\t%-2d: %hhx %s", ti, tt, ttn);
 
         XrdFile *fi = 0;
 
@@ -635,11 +644,12 @@ void XrdMonSucker::Suck()
 	{
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
 	  fi = lc.update(dict_id);
-          if (vrb) msg += GForm("\n\t%2d: %s, file=%s", ti, ttn, fi ? fi->GetName() : "<nullo>");
+          if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, fi ? fi->GetName() : "<nil>");
           if (fi)
           {
             if (tt == XROOTD_MON_OPEN)
             {
+              msg += GForm("\n\tOpen file='%s'", fi ? fi->GetName() : "<nil>");
 	      GLensReadHolder _lck(fi);
 	      fi->SetLastMsgTime(lc.fTime);
             }
@@ -657,6 +667,7 @@ void XrdMonSucker::Suck()
 		fi->SetWTotalMB(x / One_MB);
 		fi->SetCloseTime(lc.fTime);
 	      }
+              msg += GForm("\n\tClose file='%s'", fi ? fi->GetName() : "<nil>");
 	      {
 		GLensReadHolder _lck(server);
 		server->RemoveFile(fi);
@@ -685,14 +696,26 @@ void XrdMonSucker::Suck()
             extra += "(bound-path)";
           }
 
-	  if (vrb) msg += GForm("\n\t%2d: %s%s, user=%s", ti, ttn, extra.Data(), us ? us->GetName() : "<nil>");
+          msg += GForm("\n\tDisconnect%s user='%s'", extra.Data(), us ? us->GetName() : "<nil>");
+
+	  if (vrb) msg_vrb += GForm("\n\t%2d: %s%s, user=%s", ti, ttn, extra.Data(), us ? us->GetName() : "<nil>");
 	  if (disconn_p && us)
 	  {
             disconnect_user_and_close_open_files(us, server, lc.fTime);
 	  }
 	}
       } // while trace entries
-      if (vrb) log.Put(msg);
+
+      if ( ! msg.IsNull() || vrb)
+      {
+        TString txt;
+        txt.Form("Trace from %s.%s:%hu, user='%s', N=%d, dt=%d, seq=%hhu, len=%hu.",
+                 server->GetHost(), server->GetDomain(), port, us ? us->GetName() : "<nil>",
+                 lc.fN, lc.full_delta_time(), pseq, plen);
+        txt += msg;
+        if (vrb) txt += msg_vrb;
+        log.Put(txt);
+      }
 
       if (us)
       {
@@ -816,7 +839,7 @@ void XrdMonSucker::CleanUpOldServers()
 
   GTime now(GTime::I_Now);
 
-  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpOldUsers ");
+  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpOldServers ");
 
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
