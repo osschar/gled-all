@@ -1,3 +1,13 @@
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Session handling and logging fixes.
+
+	* Glasses/XrdMonSucker.cxx:
+	Call XrdServer::DisconnectUser() under write lock (instead of MIR).
+	When a user-name exists under given server, wipe the old one
+	(we are getting weird stuff from MIT).
+	Log file open/close and user disconnects.
+
 2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
