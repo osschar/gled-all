@@ -1,3 +1,8 @@
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GSelector.cxx:
+	Initialize members. Cleanup warning messages.
+
 2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Scene.cxx:
