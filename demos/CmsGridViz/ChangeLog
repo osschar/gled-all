@@ -1,5 +1,11 @@
 2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* install-xrd-mon-sucker.sh:
+	* xrd-mon-sucker.sh:
+	New files - std sucker starter and installer, totally non-generick.
+
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* xrd_suck_production.C:
 	Make GUI spawning optional (bool argument).
 
