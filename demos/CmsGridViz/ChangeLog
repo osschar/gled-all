@@ -1,5 +1,10 @@
 2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* xrd_suck_production.C:
+	Make GUI spawning optional (bool argument).
+
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Logging changes.
 
 	* logrotate.d:
