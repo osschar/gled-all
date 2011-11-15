@@ -9,7 +9,7 @@ XrdMonSucker         *c_suck = 0;
 XrdFileCloseReporter *c_frep = 0;
 XrdEhs               *c_ehs  = 0;
 
-void xrd_suck_production()
+void xrd_suck_production(bool gui_p=false)
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("CmsGridViz");
@@ -44,12 +44,15 @@ void xrd_suck_production()
   //============================================================================
   // Spawn GUI
 
-  Gled::LoadMacro("eye.C");
-  eye(false);
+  if (gui_p)
+  {
+    Gled::LoadMacro("eye.C");
+    eye(false);
 
-  g_nest->Add(g_queen);
-  // g_nest->SetMaxChildExp(3); // This only works on creation.
-  g_nest->SetWName(50);
+    g_nest->Add(g_queen);
+    // g_nest->SetMaxChildExp(3); // This only works on creation.
+    g_nest->SetWName(50);
+  }
 
   // Regexps for setting full-trace-print flag for new user sessions.
   c_suck->SetTraceDN("Matevz Tadel");
