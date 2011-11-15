@@ -36,7 +36,7 @@ void test()
   c_ehs->SetPort(4242);
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
-  c_log->SetFileName("xrdmonsuck.log");
+  c_log->SetFileName("/var/log/xrootd/xrd-mon-sucker.log");
   c_log->SetLevel(ZLog::L_Info);
   c_suck->SetLog(c_log);
 

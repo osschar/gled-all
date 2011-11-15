@@ -1,3 +1,15 @@
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Logging changes.
+
+	* logrotate.d:
+	* logrotate.d/xrd-mon-sucker:
+	New file -- example config for logrotate.
+
+	* test.C:
+	* xrd_suck_production.C:
+	Write log to /var/log/xrootd/xrd-mon-sucker.log.
+
 2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* test.C:

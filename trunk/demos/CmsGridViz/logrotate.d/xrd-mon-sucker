@@ -1,0 +1,9 @@
+# To be copied to /etc/logrotate.d
+
+/var/log/xrootd/xrd-mon-sucker.log {
+    missingok
+    rotate 7
+    daily
+    compress
+    delaycompress
+}
