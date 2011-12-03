@@ -141,13 +141,13 @@ void XrdFileCloseReporter::ReportLoop()
       const SRange &WS = file->RefWriteStats();
       msg += TString::Format
         ("unique_id=xrd-%lld\n"
-         "file_lfn=%s\nstart_time=%llu\nend_time=%llu\n"
+         "file_lfn=%s\nfile_size=%lld\nstart_time=%llu\nend_time=%llu\n"
          "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
          "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
          "read_bytes_at_close=%lld\n"
          "write_bytes_at_close=%lld\n",
          unique_id,
-         file->GetName(), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
+         file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
          dmtoll(RS.GetSumX()), RS.GetN(), dmtoll(RS.GetMin()), dmtoll(RS.GetMax()), dmtod(RS.GetAverage()), dmtod(RS.GetSigma()),
          dmtoll(WS.GetSumX()), WS.GetN(), dmtoll(WS.GetMin()), dmtoll(WS.GetMax()), dmtod(WS.GetAverage()), dmtod(WS.GetSigma()),
          dmtoll(file->GetRTotalMB()),

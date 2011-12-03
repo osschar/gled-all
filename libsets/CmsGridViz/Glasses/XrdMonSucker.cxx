@@ -650,7 +650,14 @@ void XrdMonSucker::Suck()
             if (tt == XROOTD_MON_OPEN)
             {
               msg += GForm("\n\tOpen file='%s'", fi ? fi->GetName() : "<nil>");
+              union {
+                Long64_t  val;
+                UChar_t   id[8];
+              } jebo;
+              jebo.val = xmt.arg0.val;
+              jebo.id[0] = 0;
 	      GLensReadHolder _lck(fi);
+              fi->SetSizeMB(net2host(jebo.val) / One_MB);
 	      fi->SetLastMsgTime(lc.fTime);
             }
             else

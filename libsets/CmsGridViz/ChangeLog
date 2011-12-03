@@ -1,3 +1,17 @@
+2011-12-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Parse, store and report file size.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Add member for file size - Double_t mSizeMB.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Report file-size.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse file-size form the open-trace, store it in XrdFile.
+
 2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Session handling and logging fixes.
