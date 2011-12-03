@@ -35,6 +35,7 @@ protected:
 
   Double_t        mRTotalMB;    // X{GSD}  7 ValOut(-join=>1)
   Double_t        mWTotalMB;    // X{GSD}  7 ValOut()
+  Double_t        mSizeMB;      // X{GS}   7 ValOut()
 
 public:
   XrdFile(const Text_t* n="XrdFile", const Text_t* t=0);

@@ -28,6 +28,7 @@ void XrdFile::_init()
 
   mReadStats.Reset(); mWriteStats.Reset();
   mRTotalMB = mWTotalMB = 0;
+  mSizeMB = 0;
 }
 
 XrdFile::XrdFile(const Text_t* n, const Text_t* t) :
