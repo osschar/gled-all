@@ -1,3 +1,22 @@
+2011-12-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Somewhat improve placement of new elements in ZNameMap.
+
+	* Glasses/ZGlass.cxx:
+	Remove questionable write-lock in SetName/Title.
+	Whitespace.
+
+	* Glasses/ZList.cxx:
+	Consistently lock list-mutex before calling new_element_check().
+	Whitespace.
+
+	* Glasses/ZNameMap.cxx:
+	* Glasses/ZNameMap.h:
+	Re-implement ZList virtuals that insert new elements so that they
+	can be placed properly right away (when bKeepSorted is in effect).
+	Add comment about how name-change-callback is flawed and how one
+	might be able to fix it.
+
 2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GSelector.cxx:

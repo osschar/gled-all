@@ -247,8 +247,10 @@ ZGlass* ZList::PopFront()
 // Insert by Id
 /**************************************************************************/
 
-namespace {
-  struct element_eq_id : public unary_function<ZList::element&, bool> {
+namespace
+{
+  struct element_eq_id : public unary_function<ZList::element&, bool>
+  {
     Int_t id;
     element_eq_id(Int_t i) : id(i) {}
     bool operator()(const ZList::element& el) { return el.fId == id; }
@@ -259,9 +261,8 @@ void ZList::InsertById(ZGlass* lens, Int_t before_id)
 {
   static const Exc_t _eh("ZList::InsertById ");
 
-  new_element_check(lens);
-
   GMutexHolder llck(mListMutex);
+  new_element_check(lens);
   iterator i = find_if(begin(), end(), element_eq_id(before_id));
   if(i == end())
     throw(_eh + "element with given id not found.");
