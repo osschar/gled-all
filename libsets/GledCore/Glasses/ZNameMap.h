@@ -9,7 +9,8 @@
 
 #include <Glasses/ZList.h>
 
-class ZNameMap : public ZList, public ZGlass::NameChangeCB
+class ZNameMap : public ZList,
+                 public ZGlass::NameChangeCB
 {
   MAC_RNR_FRIENDS(ZNameMap);
 
@@ -25,6 +26,8 @@ protected:
   virtual void on_insert(ZList::iterator it);
   virtual void on_remove(ZList::iterator it);
   virtual void on_rebuild();
+
+  virtual void insert_with_placement(ZGlass* lens);
 
   //----------------------------------------------------------------------
 
@@ -43,8 +46,8 @@ protected:
   void shoot_sort_mir();
 
 public:
-  ZNameMap(const Text_t* n="ZNameMap", const Text_t* t=0) : ZList(n,t)
-  { _init(); }
+  ZNameMap(const Text_t* n="ZNameMap", const Text_t* t=0);
+  virtual ~ZNameMap();
 
   void SetKeepSorted(Bool_t keep_sorted);
 
@@ -53,10 +56,16 @@ public:
 
   virtual void SortByName();
 
-  void DumpNameMap(); // X{E} 7 MButt()
+  void DumpNameMap(); //! X{E} 7 MButt()
 
   //----------------------------------------------------------------------
+  // Functions that add elements - bKeepSorted overrides placement
 
+  virtual void PushBack(ZGlass* lens);                    // Exported in ZList
+  virtual void PushFront(ZGlass* lens);                   // id.
+  virtual void InsertById(ZGlass* lens, Int_t before_id); // id.
+
+  //----------------------------------------------------------------------
   // ZGlass::NameChangeCB
   virtual void name_change_cb(ZGlass* lens, const TString& new_name);
 

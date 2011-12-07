@@ -9,21 +9,31 @@
 
 typedef pair<TString,lpZGlass_i>           Name2LIter_p;
 
-//__________________________________________________________________________
+//______________________________________________________________________________
 //
 // Keeps a parallel multi-map with elements sorted by their name.
 // This is used both to have faster "by-name" search and to
 // allow for lists sorted by name.
+//
 // Registers itself to each element of the map to receive name-change
-// callback.
+// callback. This mechanism is rather flawed - it should be extended
+// significanly to become bullet-proof:
+//   - name-change and consumer registration should be locked (per queen?);
+//   - name-change notifications should be sent as MIRs;
+//   - the sun copy should handle all this, moon copies should be updated
+//     by special MIRs;
+//   - all this implies that name-change registration would only be done at
+//     the sun.
+// Oh, also, the insertions should be done at the sun with some more specific
+// MIR being sent to the moons.
 //
 // The bKeepSorted flag enforces that the list remains sorted by name
 // most of the time (the request is sent via a MIR). This is primarily
-// intended for GUI views.
+// intended for GUI views. This could also be improved with the above changes.
 
 ClassImp(ZNameMap);
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZNameMap::_init()
 {
@@ -31,7 +41,15 @@ void ZNameMap::_init()
   bWarnEqualName = false;
 }
 
-/**************************************************************************/
+ZNameMap::ZNameMap(const Text_t* n, const Text_t* t) : ZList(n,t)
+{
+  _init();
+}
+
+ZNameMap::~ZNameMap()
+{}
+
+//------------------------------------------------------------------------------
 
 void ZNameMap::new_element_check(ZGlass* lens)
 {
@@ -56,14 +74,12 @@ void ZNameMap::clear_list()
   mItMap.clear();
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZNameMap::on_insert(ZList::iterator it)
 {
   it.lens()->register_name_change_cb(this);
   mItMap.insert(make_pair(it.lens()->StrName(), it));
-  if(bKeepSorted)
-    shoot_sort_mir();
 }
 
 void ZNameMap::on_remove(ZList::iterator it)
@@ -97,7 +113,7 @@ void ZNameMap::on_rebuild()
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZNameMap::SetKeepSorted(Bool_t keep_sorted)
 {
@@ -112,7 +128,7 @@ void ZNameMap::SetKeepSorted(Bool_t keep_sorted)
   Stamp(FID());
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 ZGlass* ZNameMap::GetElementByName(const TString& name)
 {
@@ -133,7 +149,7 @@ Int_t ZNameMap::GetElementsByName(const TString& name, lpZGlass_t& dest)
   return n;
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
 
 void ZNameMap::shoot_sort_mir()
 {
@@ -173,7 +189,67 @@ void ZNameMap::DumpNameMap()
   }
 }
 
-/**************************************************************************/
+//------------------------------------------------------------------------------
+// Functions that add elements - bKeepSorted overrides placement
+//------------------------------------------------------------------------------
+
+void ZNameMap::insert_with_placement(ZGlass* lens)
+{
+  static const Exc_t _eh("ZNameMap::insert_with_placement ");
+
+  GMutexHolder llck(mListMutex);
+  new_element_check(lens);
+
+  TString name = lens->StrName();
+
+  ZList::iterator i;
+  {
+    mName2Iter_i nii = mItMap.upper_bound(lens->StrName());
+    if (nii == mItMap.end())
+      i = mElements.end();
+    else
+      i = nii->second;
+  }
+  lens->IncRefCount(this);
+  ZList::iterator j = mElements.insert(i, element(lens, mNextId++)); ++mSize;
+  on_insert(j);
+
+  if (i == mElements.end())
+    StampListPushBack(lens, mNextId-1);
+  else
+    StampListInsert(lens, mNextId-1, i->fId);
+}
+
+void ZNameMap::PushBack(ZGlass* lens)
+{
+  if (bKeepSorted) {
+    insert_with_placement(lens);
+  } else {
+    ZList::PushBack(lens);
+  }
+}
+
+void ZNameMap::PushFront(ZGlass* lens)
+{
+  if (bKeepSorted) {
+    insert_with_placement(lens);
+  } else {
+    ZList::PushFront(lens);
+  }
+}
+
+void ZNameMap::InsertById(ZGlass* lens, Int_t before_id)
+{
+  if (bKeepSorted) {
+    insert_with_placement(lens);
+  } else {
+    ZList::InsertById(lens, before_id);
+  }
+}
+
+//------------------------------------------------------------------------------
+// Virtuals from non-glasses
+//------------------------------------------------------------------------------
 
 void ZNameMap::name_change_cb(ZGlass* lens, const TString& new_name)
 {

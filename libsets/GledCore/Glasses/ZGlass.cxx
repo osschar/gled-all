@@ -41,6 +41,11 @@ void ZGlass::_init()
   bUseNameStack = true;
 }
 
+ZGlass::~ZGlass()
+{
+  delete pspNameChangeCB;
+}
+
 /**************************************************************************/
 
 void ZGlass::queen_check_in(ZGlass* l)
@@ -68,10 +73,18 @@ void ZGlass::set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid)
 
 /**************************************************************************/
 
-void ZGlass::reference_all()   { reference_links();   }
-void ZGlass::unreference_all() { unreference_links(); }
+void ZGlass::reference_all()
+{
+  reference_links();
+}
 
-void ZGlass::reference_links() {
+void ZGlass::unreference_all()
+{
+  unreference_links();
+}
+
+void ZGlass::reference_links()
+{
   lppZGlass_t link_refs;
   CopyLinkRefs(link_refs);
   for(lppZGlass_i i=link_refs.begin(); i!=link_refs.end(); ++i) {
@@ -139,14 +152,14 @@ TString ZGlass::Identify() const
 
 void ZGlass::WriteLock()
 {
-  if(mQueen) mQueen->SubjectWriteLock();
+  if (mQueen) mQueen->SubjectWriteLock();
   ReadLock();
 }
 
 void ZGlass::WriteUnlock()
 {
   ReadUnlock();
-  if(mQueen) mQueen->SubjectWriteUnlock();
+  if (mQueen) mQueen->SubjectWriteUnlock();
 }
 
 
@@ -222,23 +235,23 @@ void ZGlass::SetName(const Text_t* n)
 {
   static const Exc_t _eh("ZGlass::SetName ");
 
-  if(CheckBit(kFixedNameBit)) {
+  if (CheckBit(kFixedNameBit)) {
     Stamp(FID());
     throw _eh + "lens has FixedName bit set.";
   }
   TString name(n);
-  WriteLock();
-  if(pspNameChangeCB != 0) {
-    for(set<NameChangeCB*>::iterator i=pspNameChangeCB->begin();
-	i!=pspNameChangeCB->end(); ++i)
-      {
+  if (pspNameChangeCB != 0)
+  {
+    for (set<NameChangeCB*>::iterator i = pspNameChangeCB->begin();
+	i != pspNameChangeCB->end(); ++i)
+    {
 	(*i)->name_change_cb(this, name);
-      }
+    }
   }
   mName = name.Data();
   Stamp(FID());
-  WriteUnlock();
-  if(mQueen == this) {
+
+  if (mQueen == this) {
     ZMIR* mir = get_MIR();
     if(mir && ! mir->HasRecipient()) mQueen->BasicQueenChange(*mir);
   }
@@ -246,11 +259,10 @@ void ZGlass::SetName(const Text_t* n)
 
 void ZGlass::SetTitle(const Text_t* t)
 {
-  WriteLock();
   mTitle = t;
   Stamp(FID());
-  WriteUnlock();
-  if(mQueen == this) {
+
+  if (mQueen == this) {
     ZMIR* mir = get_MIR();
     if(mir && ! mir->HasRecipient()) mQueen->BasicQueenChange(*mir);
   }
@@ -267,13 +279,6 @@ void ZGlass::SetGuard(ZMirFilter* guard)
 {
   // Might want to read-lock if LOCK_SET_METHS is true in project7.
   set_link_or_die(mGuard.ref_link(), guard, FID());
-}
-
-/**************************************************************************/
-
-ZGlass::~ZGlass()
-{
-  delete pspNameChangeCB;
 }
 
 /**************************************************************************/
@@ -530,9 +535,9 @@ void ZGlass::unregister_ray_absorber(RayAbsorber* ra)
 
 void ZGlass::register_name_change_cb(ZGlass::NameChangeCB* nccb)
 {
-  if(CheckBit(kFixedNameBit)) return;
+  if (CheckBit(kFixedNameBit)) return;
   GMutexHolder rdlck(mReadMutex);
-  if(pspNameChangeCB == 0)
+  if (pspNameChangeCB == 0)
     pspNameChangeCB = new set<NameChangeCB*>;
   pspNameChangeCB->insert(nccb);
 }
@@ -540,8 +545,13 @@ void ZGlass::register_name_change_cb(ZGlass::NameChangeCB* nccb)
 void ZGlass::unregister_name_change_cb(ZGlass::NameChangeCB* nccb)
 {
   GMutexHolder rdlck(mReadMutex);
-  if(pspNameChangeCB != 0)
+  if (pspNameChangeCB != 0) {
     pspNameChangeCB->erase(nccb);
+    if (pspNameChangeCB->empty()) {
+      delete pspNameChangeCB;
+      pspNameChangeCB = 0;
+    }
+  } 
 }
 
 /**************************************************************************/
