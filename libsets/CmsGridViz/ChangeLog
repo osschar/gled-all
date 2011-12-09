@@ -1,3 +1,13 @@
+2011-12-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add cleaning of inactive users.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add method CleanUpDeadUsers() and surrounding members.
+	Add basic processing of '=' messages - need to extend it to
+	actually detect server restarts.
+
 2011-12-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Parse, store and report file size.

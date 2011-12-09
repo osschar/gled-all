@@ -45,10 +45,12 @@ protected:
 
   ZLink<XrdFileCloseReporter> mFCReporter; // X{GS} L{}
 
-  Int_t      mUserKeepSec;    // X{GS}   7 Value(-range=>[10, 86400, 1])
-  Int_t      mServKeepSec;    // X{GS}   7 Value(-range=>[300, 604800, 1])
-  GTime      mLastUserCheck;  // X{GRSQ} 7 TimeOut()
-  GTime      mLastServCheck;  // X{GRSQ} 7 TimeOut()
+  Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[10, 86400, 1])
+  Int_t      mUserDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
+  Int_t      mServDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
+  GTime      mLastOldUserCheck;  // X{GRSQ} 7 TimeOut()
+  GTime      mLastDeadUserCheck; // X{GRSQ} 7 TimeOut()
+  GTime      mLastDeadServCheck;     // X{GRSQ} 7 TimeOut()
 
   Int_t      mSocket;         //!
   GThread   *mSuckerThread;   //!
@@ -89,8 +91,9 @@ public:
   void StartSucker(); // X{Ed} 7 MButt()
   void StopSucker();  // X{Ed} 7 MButt()
 
-  void CleanUpOldServers(); // X{Ed} 7 MButt()
-  void CleanUpOldUsers();   // X{Ed} 7 MButt()
+  void CleanUpOldUsers();    // X{Ed} 7 MButt()
+  void CleanUpDeadUsers();   // X{Ed} 7 MButt()
+  void CleanUpDeadServers(); // X{Ed} 7 MButt()
 
   void EmitTraceRERay();
 
