@@ -49,11 +49,12 @@ void XrdMonSucker::_init()
   mSuckPort  = 9929;
 
   mUserKeepSec = 300;
-  mServKeepSec = 86400;
+  mUserDeadSec = 86400;
+  mServDeadSec = 86400;
 
   mSocket = 0;
   mSuckerThread = 0;
-  mLastUserCheck = mLastServCheck = GTime(GTime::I_Never);
+  mLastOldUserCheck = mLastDeadServCheck = GTime(GTime::I_Never);
 
   bTraceAllNull = true;
 }
@@ -270,7 +271,16 @@ void XrdMonSucker::Suck()
     else
     {
       server = xshi->second;
+    }
 
+    {
+      GLensReadHolder _lck(server);
+      server->SetLastMsgTime(recv_time);
+    }
+
+    // Check sequence id. No remedy attempted.
+    if (code == 'u' || code == 'd' || code == 't' || code == 'i')
+    {
       UChar_t srv_seq = server->IncAndGetSrvSeq();
       if (pseq != srv_seq)
       {
@@ -280,11 +290,7 @@ void XrdMonSucker::Suck()
       }
     }
 
-    {
-      GLensReadHolder _lck(server);
-      server->SetLastMsgTime(recv_time);
-    }
-
+    // Check length of message .vs. length claimed by xrd.
     if (len != plen)
     {
       log.Form("Message size mismatch: got %zd, xrd-len=%hu (bufsize=%zd).", len, plen, buf_size);
@@ -298,7 +304,7 @@ void XrdMonSucker::Suck()
     if (code != 't')
     {
       TString msg;
-      msg.Form("Message from %s.%s:%hu, c=%c, seq=%3hhu, len=%hu",
+      msg.Form("Message from %s.%s:%hu, c=%c, seq=%hhu, len=%hu",
                server->GetHost(), server->GetDomain(), port,
                xmh->code, pseq, plen);
 
@@ -572,6 +578,11 @@ void XrdMonSucker::Suck()
 
         XrdUser* find_user()
         {
+          // This is called at the beginning of message processing to get the
+          // user and to determine if we need to dump debug-level information.
+          // This definitely does not work as intended when servers are not
+          // configured to send io traces.
+          // Ah, this is also used to set the time of last message on a user.
           for (Int_t i = 1; i < fN; ++i)
           {
             XrdXrootdMonTrace &xmt = trace(i);
@@ -579,7 +590,7 @@ void XrdMonSucker::Suck()
             if (tt <= 0x7F || tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
             {
               update(ntohl(xmt.arg2.dictid));
-              return fFile ? fFile->GetUser() : 0;
+              if (fFile) return fFile->GetUser();
             }
             else if (tt == XROOTD_MON_DISC)
             {
@@ -689,7 +700,9 @@ void XrdMonSucker::Suck()
 	  XrdUser *us_from_server = server->FindUser(dict_id);
 	  if (us != us_from_server)
 	  {
-	    ISwarn(_eh + GForm("us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')", us, us_from_server, us ? us->GetName() : "<nil>", us_from_server ? us_from_server->GetName() : "<nil>"));
+	    ISwarn(_eh + GForm("us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')",
+                               us,             us ? us->GetName() : "",
+                               us_from_server, us_from_server ? us_from_server->GetName() : ""));
             us = us_from_server;
 	  }
 
@@ -755,7 +768,7 @@ void XrdMonSucker::StartSucker()
   mSuckerThread->SetNice(0);
   mSuckerThread->Spawn();
 
-  mLastUserCheck = mLastServCheck = GTime(GTime::I_Now);
+  mLastOldUserCheck = mLastDeadServCheck = GTime(GTime::I_Now);
   mCheckerThread->SetNice(20);
   mCheckerThread->Spawn();
 
@@ -815,16 +828,22 @@ void XrdMonSucker::Check()
     {
       bool stamp_p = false;
       GLensReadHolder _lck(this);
-      if ((now - mLastUserCheck).GetSec() > mUserKeepSec)
+      if ((now - mLastOldUserCheck).GetSec() > mUserKeepSec)
       {
         mSaturn->ShootMIR( S_CleanUpOldUsers() );
-        mLastUserCheck = now;
+        mLastOldUserCheck = now;
         stamp_p = true;
       }
-      if ((now - mLastServCheck).GetSec() > mServKeepSec)
+      if ((now - mLastDeadUserCheck).GetSec() > mUserDeadSec)
       {
-        mSaturn->ShootMIR( S_CleanUpOldServers() );
-        mLastServCheck = now;
+        mSaturn->ShootMIR( S_CleanUpDeadUsers() );
+        mLastDeadUserCheck = now;
+        stamp_p = true;
+      }
+      if ((now - mLastDeadServCheck).GetSec() > mServDeadSec)
+      {
+        mSaturn->ShootMIR( S_CleanUpDeadServers() );
+        mLastDeadServCheck = now;
         stamp_p = true;
       }
       if (stamp_p)
@@ -838,56 +857,6 @@ void XrdMonSucker::Check()
 }
 
 //------------------------------------------------------------------------------
-
-void XrdMonSucker::CleanUpOldServers()
-{
-  static const Exc_t _eh("XrdMonSucker::CleanUpOldServers ");
-  assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
-
-  GTime now(GTime::I_Now);
-
-  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpOldServers ");
-
-  list<XrdDomain*> domains;
-  CopyListByGlass<XrdDomain>(domains);
-
-  for (list<XrdDomain*>::iterator di = domains.begin(); di != domains.end(); ++di)
-  {
-    XrdDomain *domain = *di;
-    list<XrdServer*> servers;
-    domain->CopyListByGlass<XrdServer>(servers);
-
-    for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
-    {
-      XrdServer *server = *si;
-      Int_t delta;
-      {
-        GLensReadHolder _lck(server);
-        delta = (Int_t) (now - server->RefLastMsgTime()).GetSec();
-      }
-      if (delta > mServKeepSec)
-      {
-        log.SetTime(GTime(GTime::I_Now));
-        log.Form("Removing unactive server '%s'.", server->GetName());
-        {
-          GMutexHolder _lck(m_xrd_servers_mutex);
-          m_xrd_servers.erase(server->m_server_id);
-        }
-        {
-          list<XrdUser*> users;
-          server->CopyListByGlass<XrdUser>(users);
-          for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
-          {
-            XrdUser *user = *ui;
-            disconnect_user_and_close_open_files(user, server, now);
-          }
-        }
-        mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
-        mSaturn->ShootMIR( domain->S_RemoveAll(server) );
-      }
-    }
-  }
-}
 
 void XrdMonSucker::CleanUpOldUsers()
 {
@@ -941,6 +910,105 @@ void XrdMonSucker::CleanUpOldUsers()
     }
   }
 }
+
+void XrdMonSucker::CleanUpDeadUsers()
+{
+  static const Exc_t _eh("XrdMonSucker::CleanUpDeadUsers ");
+  assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
+
+  GTime now(GTime::I_Now);
+
+  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpDeadUsers ");
+
+  list<XrdDomain*> domains;
+  CopyListByGlass<XrdDomain>(domains);
+
+  for (list<XrdDomain*>::iterator di = domains.begin(); di != domains.end(); ++di)
+  {
+    XrdDomain *d = *di;
+    list<XrdServer*> servers;
+    d->CopyListByGlass<XrdServer>(servers);
+
+    Int_t n_wiped = 0;
+    for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
+    {
+      XrdServer *s = *si;
+      list<XrdUser*> users;
+      s->CopyListByGlass<XrdUser>(users);
+
+      for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
+      {
+        XrdUser *u = *ui;
+        Int_t delta;
+        {
+          GLensReadHolder _lck(u);
+          delta = (Int_t) (now - u->RefLastMsgTime()).GetSec();
+        }
+        if (delta > mUserDeadSec)
+        {
+          ++n_wiped;
+          disconnect_user_and_close_open_files(u, s, now);
+        }
+      }
+    }
+    if (n_wiped > 0)
+    {
+      log.SetTime(GTime(GTime::I_Now));
+      log.Form("Removed %d dead users for domain '%s'.", n_wiped, d->GetName());
+    }
+  }
+}
+
+void XrdMonSucker::CleanUpDeadServers()
+{
+  static const Exc_t _eh("XrdMonSucker::CleanUpDeadServers ");
+  assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
+
+  GTime now(GTime::I_Now);
+
+  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpDeadServers ");
+
+  list<XrdDomain*> domains;
+  CopyListByGlass<XrdDomain>(domains);
+
+  for (list<XrdDomain*>::iterator di = domains.begin(); di != domains.end(); ++di)
+  {
+    XrdDomain *domain = *di;
+    list<XrdServer*> servers;
+    domain->CopyListByGlass<XrdServer>(servers);
+
+    for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
+    {
+      XrdServer *server = *si;
+      Int_t delta;
+      {
+        GLensReadHolder _lck(server);
+        delta = (Int_t) (now - server->RefLastMsgTime()).GetSec();
+      }
+      if (delta > mServDeadSec)
+      {
+        log.SetTime(GTime(GTime::I_Now));
+        log.Form("Removing unactive server '%s'.", server->GetName());
+        {
+          GMutexHolder _lck(m_xrd_servers_mutex);
+          m_xrd_servers.erase(server->m_server_id);
+        }
+        {
+          list<XrdUser*> users;
+          server->CopyListByGlass<XrdUser>(users);
+          for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
+          {
+            XrdUser *user = *ui;
+            disconnect_user_and_close_open_files(user, server, now);
+          }
+        }
+        mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
+        mSaturn->ShootMIR( domain->S_RemoveAll(server) );
+      }
+    }
+  }
+}
+
 
 //==============================================================================
 
