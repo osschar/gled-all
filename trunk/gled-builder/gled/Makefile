@@ -75,7 +75,7 @@ define update-cmds
 ${MAKE} svn_update
 endef
 
-update: checkout
+update: configure
 	${ECHO} -U- Updating ${PACKAGE}
 	${MUTE} cd ${gled_dir}; $(update-cmds)
 	${MUTE} rm -f build install
