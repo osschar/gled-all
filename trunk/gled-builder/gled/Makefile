@@ -68,6 +68,19 @@ install:
 	${MUTE} cd ${gled_dir}; $(install-cmds)
 	${MUTE} touch $@
 
+### update
+
+define update-cmds
+. binenv.sh;\
+${MAKE} svn_update
+endef
+
+update: checkout
+	${ECHO} -U- Updating ${PACKAGE}
+	${MUTE} cd ${gled_dir}; $(update-cmds)
+	${MUTE} rm -f build install
+	${ECHO} -U- You should run make to build and install the new version.
+
 ### clean, distclean
 
 .PHONY: clean distclean
