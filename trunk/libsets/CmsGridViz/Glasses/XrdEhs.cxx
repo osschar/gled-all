@@ -184,21 +184,25 @@ void XrdEhs::StartServer()
 
   assert_xrdsucker(_eh);
 
-  if (bServerUp)
-    throw _eh + "server already running.";
+  {
+    GMutexHolder _lck(mServeMutex);
+
+    if (bServerUp)
+      throw _eh + "server already running.";
+
+    // char request[8192];
+    // char erroret[] = "Error processing your request.\n";
+
+    mServeTime.SetZero();
+    mFileListTS = 0;
+
+    bServerUp = true;
+    b_stop_server = false;
+  }
 
   TServerSocket serv_sock(mPort);
   GSelector     selector;
   selector.fRead.Add(&serv_sock);
-
-  // char request[8192];
-  // char erroret[] = "Error processing your request.\n";
-
-  {
-    GMutexHolder _lck(mServeMutex);
-    mServeTime.SetZero();
-    mFileListTS = 0;
-  }
 
   while (! b_stop_server)
   {
@@ -215,15 +219,24 @@ void XrdEhs::StartServer()
     thr->SetNice(20);
     thr->Spawn();
   }
+
+  {
+    GMutexHolder _lck(mServeMutex);
+    bServerUp = false;
+  }
 }
 
 void XrdEhs::StopServer()
 {
   static const Exc_t _eh("XrdEhs::StopServer ");
 
-  if ( ! bServerUp)
-    throw _eh + "server not running.";
+  {
+    GMutexHolder _lck(mServeMutex);
 
-  b_stop_server = true;
-  // should know thread and kill it
+    if ( ! bServerUp)
+      throw _eh + "server not running.";
+
+    b_stop_server = true;
+    // should know thread and kill it
+  }
 }

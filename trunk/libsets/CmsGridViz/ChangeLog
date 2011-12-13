@@ -1,3 +1,8 @@
+2011-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Safer server start/stop procedure.
+
 2011-12-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add cleaning of inactive users.
