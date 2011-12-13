@@ -27,7 +27,7 @@ void xrd_suck_production(bool gui_p=false)
   c_suck->SetKeepSorted(true);
 
   ASSIGN_ADD_GLASS(c_frep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
-  c_frep->SetUdpHost("brian-test.unl.edu");
+  c_frep->SetUdpHost("red-mon.unl.edu");
   c_frep->SetUdpPort(3334);
   c_suck->SetFCReporter(c_frep);
 
