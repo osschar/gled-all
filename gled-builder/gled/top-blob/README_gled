@@ -1,13 +1,6 @@
-=======================
-Running GreedWorld Demo
-=======================
-
-Run greed-demo-menu.sh ... and follow the menus.
-
-
-=======================
-Trying other Gled demos
-=======================
+=================
+Trying Gled demos
+=================
 
 # Setup the environment
   . gled-env.sh # source gled-env.csh
@@ -36,4 +29,4 @@ Trying other ROOT demos
   cd eve
 
 # Run the chosen demo
-  root alice_esd.C
+  root alice_vsd.C

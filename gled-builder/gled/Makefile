@@ -66,6 +66,7 @@ install:
 	${ECHO} -I- Installing ${PACKAGE}
 	${MUTE} rm -f $@
 	${MUTE} cd ${gled_dir}; $(install-cmds)
+	${MUTE} rsync -r --exclude '.svn/' top-blob/ ${PREFIX}
 	${MUTE} touch $@
 
 ### update

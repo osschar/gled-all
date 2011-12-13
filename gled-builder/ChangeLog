@@ -1,3 +1,29 @@
+2011-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Move gled-related top-level stuff from package grid to gled.
+
+	* greed/top-blob/README:
+	* greed/top-blob/README_greed:
+	Rename README to README_greed, remove gled-related instructions.
+
+	* greed/top-blob/gled-env-dump.csh:
+	* greed/top-blob/gled-env-dump.sh:
+	* greed/top-blob/gled-env.csh:
+	* greed/top-blob/gled-env.sh:
+	Move over to gled/top-blob.
+
+	* gled/top-blob:
+	* gled/top-blob/README_gled:
+	* gled/top-blob/gled-env-dump.csh:
+	* gled/top-blob/gled-env-dump.sh:
+	* gled/top-blob/gled-env.csh:
+	* gled/top-blob/gled-env.sh:
+	New directory top-blob, moved in stuff from greed/top-blob and
+	added README_gled (containing gled-related instructions).
+
+	* gled/Makefile:
+	Install also stuff from top-blobModified files.
+
 2011-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Switch to fltk-1.3.
