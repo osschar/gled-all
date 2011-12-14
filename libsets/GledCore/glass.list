@@ -86,6 +86,7 @@ SaturnObserver		193	Glasses/SaturnObserver
 # Performance investigators
 PerfMeterTarget		224	Glasses/PerfMeterTarget
 PerfMeterOperator	225	Glasses/PerfMeterOperator
+SigTestOperator         226     Glasses/SigTestOperator
 
 # Meta GUI
 MetaViewInfo		256	Glasses/MetaViewInfo

@@ -41,6 +41,13 @@ int                      GThread::sMinStackSize = 0;
 
 pthread_key_t  GThread::TSD_Self;
 GThread       *GThread::sInvalidPtr = (GThread*) 0x1l;
+int            GThread::sSigMap[SigMAX] =
+{ -1,
+  SIGHUP,  SIGINT,    SIGQUIT, SIGILL,   SIGTRAP, SIGABRT, SIGBUS,  SIGFPE,
+  SIGKILL, SIGUSR1,   SIGSEGV, SIGUSR2,  SIGPIPE, SIGALRM, SIGTERM, SIGSTKFLT,
+  SIGCHLD, SIGCONT,   SIGSTOP, SIGTSTP,  SIGTTIN, SIGTTOU, SIGURG,  SIGXCPU,
+  SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO,   -1,      SIGSYS
+};
 
 //==============================================================================
 
@@ -263,7 +270,7 @@ int GThread::Join(void** tret)
 
 int GThread::Kill(Signal signal)
 {
-  int ret = pthread_kill(mId, (Int_t)signal);
+  int ret = pthread_kill(mId, sSigMap[signal]);
   if(ret) perror("GThread::Kill");
   return ret;
 }
@@ -414,7 +421,7 @@ void GThread::BlockSignal(Signal sig)
 {
   sigset_t set;
   sigemptyset(&set);
-  sigaddset(&set, sig);
+  sigaddset(&set, sSigMap[sig]);
   pthread_sigmask(SIG_UNBLOCK, &set, 0);
 }
 
@@ -422,7 +429,7 @@ void GThread::UnblockSignal(Signal sig)
 {
   sigset_t set;
   sigemptyset(&set);
-  sigaddset(&set, sig);
+  sigaddset(&set, sSigMap[sig]);
   pthread_sigmask(SIG_UNBLOCK, &set, 0);
 }
 
@@ -448,8 +455,10 @@ void GThread::TheSignalHandler(GSignal* sig)
 
   GThread *self = Self();
 
-  ISdebug(1, _eh + GForm("signal %d in thread '%s'.",
-			 sig->fSignal, self->mName.Data()));
+  ISdebug(1, _eh + GForm("sys_signal %d, gled_signal %d, sig_name %s in thread '%s'.",
+			 sig->fSysSignal, sig->fSignal, SignalName(sig->fSignal), self->mName.Data()));
+
+  if (sig->fSignal == SigUNDEF) return;
 
   if (self->mSigHandlerVector[sig->fSignal])
   {
@@ -463,7 +472,7 @@ void GThread::TheSignalHandler(GSignal* sig)
 	   sig->fSignal == SigBUS  ||  sig->fSignal == SigFPE)
   {
     ISerr(_eh + GForm("Fatal exception %s in thread '%s'.",
-		      SignalName((Signal) sig->fSignal), self->mName.Data()));
+		      SignalName(sig->fSignal), self->mName.Data()));
     gSystem->StackTrace();
     self->mTerminalSignal = sig->fSignal;
     if (setcontext((ucontext_t*) self->mTerminalContext))
@@ -476,7 +485,7 @@ void GThread::TheSignalHandler(GSignal* sig)
 
 void GThread::ToRootsSignalHandler(GSignal* sig)
 {
-  // Root remaps signals, see TUnixSystem.cxx.
+  // Root remaps signals in an even funnier way, see TUnixSystem.cxx.
   static const int root_sig_map[kMAXSIGNALS] =
   {
     SIGBUS,  SIGSEGV, SIGSYS, SIGPIPE, SIGILL,  SIGQUIT, SIGINT,  SIGWINCH,
@@ -485,7 +494,7 @@ void GThread::ToRootsSignalHandler(GSignal* sig)
 
   for (int i = 0; i < kMAXSIGNALS; ++i)
   {
-    if (root_sig_map[i] == sig->fSignal)
+    if (root_sig_map[i] == sig->fSysSignal)
     {
       ((TUnixSystem*)gSystem)->DispatchSignals((ESignals) i);
       break;
@@ -526,9 +535,9 @@ void GThread::ListSignalState()
   pthread_sigmask(0, 0, &set);
 
   printf("Signal block state of thread '%s':\n", Self()->mName.Data());
-  for (int i = 1; i < SigMAX; ++i)
+  for (int i = SigMIN + 1; i < SigMAX; ++i)
   {
-    printf("  %6s %d", SignalName((Signal)i), sigismember(&set, i));
+    printf("  %6s %d", SignalName((Signal)i), sigismember(&set, sSigMap[i]));
     if (i % 8 == 0)
       printf("\n");
   }
@@ -571,7 +580,7 @@ GThread* GThread::InitMain()
   sMainThread->mId = pthread_self();
 
   sContainerLock.Lock();
-  sThreadMap[sMainThread->mId]  = sMainThread;
+  sThreadMap[sMainThread->mId] = sMainThread;
   sContainerLock.Unlock();
 
   GThread::BlockAllSignals();
@@ -581,12 +590,12 @@ GThread* GThread::InitMain()
   sac.sa_sigaction = signal_handler_wrapper;
   sigemptyset(&sac.sa_mask);
   sac.sa_flags = SA_SIGINFO;
-  sigaction(SigUSR1, &sac, 0);
-  sigaction(SigUSR2, &sac, 0);
-  sigaction(SigILL,  &sac, 0);
-  sigaction(SigSEGV, &sac, 0);
-  sigaction(SigBUS,  &sac, 0);
-  sigaction(SigFPE,  &sac, 0);
+  sigaction(sSigMap[SigUSR1], &sac, 0);
+  sigaction(sSigMap[SigUSR2], &sac, 0);
+  sigaction(sSigMap[SigILL],  &sac, 0);
+  sigaction(sSigMap[SigSEGV], &sac, 0);
+  sigaction(sSigMap[SigBUS],  &sac, 0);
+  sigaction(sSigMap[SigFPE],  &sac, 0);
 
   return sMainThread;
 }
@@ -655,7 +664,7 @@ const char* GThread::SignalName(Signal sig)
     case SigQUIT: return "QUIT";
     case SigILL:  return "ILL";
     case SigTRAP: return "TRAP";
-    case SigIOT:  return "IOT";      // case SigABRT: return "ABRT";
+    case SigABRT: return "ABRT";
     case SigBUS:  return "BUS";
     case SigFPE:  return "FPE";
     case SigKILL: return "KILL";
@@ -666,7 +675,7 @@ const char* GThread::SignalName(Signal sig)
     case SigALRM: return "ALRM";
     case SigTERM: return "TERM";
     case SigSTKFLT: return "STKFLT";
-    case SigCHLD: return "CHLD";     // case SigCLD: return "CLD";
+    case SigCHLD: return "CHLD";
     case SigCONT: return "CONT";
     case SigSTOP: return "STOP";
     case SigTSTP: return "TSTP";
@@ -678,9 +687,29 @@ const char* GThread::SignalName(Signal sig)
     case SigVTALRM: return "VTALRM";
     case SigPROF: return "PROF";
     case SigWINCH:return "WINCH";
-    case SigIO:   return "IO";       // case SigPOLL: return "POLL";
-    case SigPWR:  return "PWR";
-    case SigSYS:  return "SYS";      // case SigUNUSED: return "SigUNUSED";
+    case SigIO:   return "IO";
+    case SigSYS:  return "SYS";
     default:      return "<unknown>";
   }
 }
+
+GThread::Signal GThread::SysToGledSignal(Int_t sys_sig)
+{
+  if (sys_sig <= SigMIN || sys_sig >= SigMAX) return SigUNDEF;
+  for (Int_t i = SigMIN + 1; i < SigMAX; ++i)
+  {
+    if (sSigMap[i] == sys_sig)
+      return (Signal)i;
+  }
+  return SigUNDEF;
+}
+
+
+//==============================================================================
+// GSignal
+//==============================================================================
+
+GSignal::GSignal(int sid, siginfo_t* sinfo, void* sctx) :
+  fSignal(GThread::SysToGledSignal(sid)),
+  fSysSignal(sid), fSigInfo(sinfo), fContext(sctx)
+{}

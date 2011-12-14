@@ -18,7 +18,6 @@
 #include <Ephra/Mountain.h>
 #include <Glasses/ZKing.h>
 #include <Glasses/ZQueen.h>
-#include <Gled/GThread.h>
 #include <Gled/GledMirDefs.h>
 #include <Gled/GledOperatorDefs.h>
 
@@ -244,7 +243,7 @@ void Eventor::OnBreak(Operator::Arg* op_arg, const TString& msg)
   // exception.
 }
 
-void Eventor::OnTerminalSignal(Operator::Arg* op_arg, Int_t sid)
+void Eventor::OnTerminalSignal(Operator::Arg* op_arg, GThread::Signal sid)
 {
   // Called from Mountain::DancerBeat() upon receiving a terminal
   // signal. FPE, BUS, SEGV, ILL

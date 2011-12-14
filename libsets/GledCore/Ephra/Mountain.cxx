@@ -25,13 +25,13 @@ class MountainThread : public GThread
 public:
   MountainThread(const Text_t* name, GThread_foo foo, void* arg=0, bool detached=false) :
     GThread(name, foo, arg, detached),
-    fTerminalSignalId(0),
+    fTerminalSignalId(SigUNDEF),
     fInSigLock(false)
   {}
   virtual ~MountainThread() {}
 
   ucontext_t   fTerminalSignalRetourContext;
-  int          fTerminalSignalId;
+  Signal       fTerminalSignalId;
 
   bool         fInSigLock;
 };
@@ -224,15 +224,16 @@ void* Mountain::DancerBeat(DancerInfo* di)
       return err_ret;
     }
 
-    if (mt->fTerminalSignalId != 0)
+    if (mt->fTerminalSignalId != GThread::SigUNDEF)
     {
-      printf("Strange strange -- who was dead now walks again. And the number of his cross was %d.\n", mt->fTerminalSignalId);
+      printf("Strange strange -- who was dead now walks again.\n  The number of his cross was %d and its name %s.\n",
+             mt->fTerminalSignalId, GThread::SignalName(mt->fTerminalSignalId));
       int foo = fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
       printf(" FE: DIVBYZERO=%d, INVALID=%d, OVERFLOW=%d\n", foo & FE_DIVBYZERO, foo & FE_INVALID, foo & FE_OVERFLOW);
 
       di->fEventor->OnTerminalSignal(op_arg, mt->fTerminalSignalId);
 
-      mt->fTerminalSignalId = 0;
+      mt->fTerminalSignalId = GThread::SigUNDEF;
     }
   }
 
