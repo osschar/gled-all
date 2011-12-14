@@ -1,3 +1,10 @@
+2011-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/FpeOperator.cxx:
+	* Glasses/FpeOperator.h:
+	* glass.list:
+	Glass FpeOperator moved to GledCore::SigTestOperator.
+
 2010-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Rnr/GL/KinkTrack_GL_Rnr.cxx:
