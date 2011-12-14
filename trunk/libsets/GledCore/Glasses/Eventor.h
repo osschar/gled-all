@@ -8,9 +8,9 @@
 #define GledCore_Eventor_H
 
 #include <Glasses/Operator.h>
+#include <Gled/GThread.h>
 class SaturnInfo;
 class Mountain;
-class GThread;
 
 class Eventor : public Operator
 {
@@ -72,7 +72,7 @@ public:
   virtual void	OnStop(Operator::Arg* op_arg, Operator::Exception& op_exc);
   virtual void	OnBreak(Operator::Arg* op_arg, Operator::Exception& op_exc);
   virtual void	OnBreak(Operator::Arg* op_arg, const TString& msg);
-  virtual void	OnTerminalSignal(Operator::Arg* op_arg, Int_t sid);
+  virtual void	OnTerminalSignal(Operator::Arg* op_arg, GThread::Signal sid);
 
   virtual void	Start();	// X{E} 7 MButt(-join=>1)
   virtual void	Stop();		// X{E} 7 MButt()

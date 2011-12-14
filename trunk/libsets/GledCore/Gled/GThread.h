@@ -13,23 +13,14 @@
 
 // This wrong ... need internal state class.
 #ifdef __CINT__
-  typedef unsigned long int pthread_t;
-  typedef unsigned int      pthread_key_t;
-  class GSignal;
+typedef unsigned long int pthread_t;
+typedef unsigned int      pthread_key_t;
 #else
-  #include <pthread.h>
-  #include <signal.h>
-  class GSignal
-  {
-  public:
-    GSignal(int sid, siginfo_t* sinfo, void* sctx) :
-      fSignal(sid), fSigInfo(sinfo), fContext(sctx) {}
-
-    int         fSignal;
-    siginfo_t  *fSigInfo;
-    void       *fContext;
-  };
+#include <pthread.h>
+#include <signal.h>
 #endif
+
+class GSignal;
 
 typedef void*   (*GThread_foo)(void*);
 typedef void (*GThread_cu_foo)(void*);
@@ -52,17 +43,17 @@ class GThread
 public:
   enum CState { CS_Enable, CS_Disable };
   enum CType  { CT_Async, CT_Deferred };
-  enum Signal { SigHUP   =  1, SigINT   =  2, SigQUIT  =  3, SigILL   =  4,
-                SigTRAP  =  5, SigABRT  =  6, SigIOT   =  6, SigBUS   =  7,
-                SigFPE   =  8, SigKILL  =  9, SigUSR1  = 10, SigSEGV  = 11,
-		SigUSR2  = 12, SigPIPE  = 13, SigALRM  = 14, SigTERM  = 15,
-                SigSTKFLT= 16, SigCLD   = 17, SigCHLD  = 17, SigCONT  = 18,
-                SigSTOP  = 19, SigTSTP  = 20, SigTTIN  = 21, SigTTOU  = 22,
-                SigURG   = 23, SigXCPU  = 24, SigXFSZ  = 25, SigVTALRM= 26,
-                SigPROF  = 27, SigWINCH = 28, SigPOLL  = 29, SigIO    = 29,
-		SigPWR   = 30, SigUNUSED= 31, SigSYS   = 31,
-		SigMAX   = 32, SigMAXRT = 65
-  }; // from signum.h
+  enum Signal { SigUNDEF = -1, SigMIN   =  0,
+                SigHUP   =  1, SigINT   =  2, SigQUIT  =  3, SigILL   =  4,
+                SigTRAP  =  5, SigABRT  =  6, SigBUS   =  7, SigFPE   =  8,
+                SigKILL  =  9, SigUSR1  = 10, SigSEGV  = 11, SigUSR2  = 12,
+                SigPIPE  = 13, SigALRM  = 14, SigTERM  = 15, SigSTKFLT= 16,
+                SigCHLD  = 17, SigCONT  = 18, SigSTOP  = 19, SigTSTP  = 20,
+                SigTTIN  = 21, SigTTOU  = 22, SigURG   = 23, SigXCPU  = 24,
+                SigXFSZ  = 25, SigVTALRM= 26, SigPROF  = 27, SigWINCH = 28,
+                SigIO    = 29, SigXXX   = 30, SigSYS   = 31, SigMAX   = 32,
+                SigMAXRT = 65
+  }; // from signum.h on Linux; PWR discarded from Linux, INFO from OSX.
   enum RState { RS_Incubating, RS_Spawning,
                 RS_Running,
                 RS_Terminating, RS_Finished,
@@ -149,6 +140,7 @@ private:
 
   static pthread_key_t  TSD_Self;
   static GThread       *sInvalidPtr;
+  static int            sSigMap[SigMAX];
 
   static void* thread_spawner(void* arg);
   static void  thread_reaper(void* arg);
@@ -207,8 +199,9 @@ public:
   static int      GetMinStackSize();
   static void     SetMinStackSize(int ss);
 
-  static const char* RunningStateName(RState state);
-  static const char* SignalName(Signal sig);
+  static const char*  RunningStateName(RState state);
+  static const char*  SignalName(Signal sig);
+  static       Signal SysToGledSignal(Int_t sys_sig);
 
   static bool IsValidPtr(GThread* thr)     { return thr != 0 && thr != sInvalidPtr; }
   static void InvalidatePtr(GThread*& thr) { thr = sInvalidPtr; }
@@ -216,5 +209,19 @@ public:
 #include "GThread.h7"
   ClassDef(GThread, 0);
 }; // endclass GThread
+
+
+#ifndef __CINT__
+class GSignal
+{
+public:
+  GSignal(int sid, siginfo_t* sinfo, void* sctx);
+
+  GThread::Signal fSignal;
+  int             fSysSignal;
+  siginfo_t      *fSigInfo;
+  void           *fContext;
+};
+#endif
 
 #endif
