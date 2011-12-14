@@ -1,5 +1,11 @@
 2011-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Take out SigSTKFLT ... it does not exist on mac.
+
+2011-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Extend signal representation to handle Linux and Mac.
 
 	* Gled/GThread.cxx:

@@ -44,7 +44,7 @@ GThread       *GThread::sInvalidPtr = (GThread*) 0x1l;
 int            GThread::sSigMap[SigMAX] =
 { -1,
   SIGHUP,  SIGINT,    SIGQUIT, SIGILL,   SIGTRAP, SIGABRT, SIGBUS,  SIGFPE,
-  SIGKILL, SIGUSR1,   SIGSEGV, SIGUSR2,  SIGPIPE, SIGALRM, SIGTERM, SIGSTKFLT,
+  SIGKILL, SIGUSR1,   SIGSEGV, SIGUSR2,  SIGPIPE, SIGALRM, SIGTERM, -1,
   SIGCHLD, SIGCONT,   SIGSTOP, SIGTSTP,  SIGTTIN, SIGTTOU, SIGURG,  SIGXCPU,
   SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO,   -1,      SIGSYS
 };
@@ -674,7 +674,6 @@ const char* GThread::SignalName(Signal sig)
     case SigPIPE: return "PIPE";
     case SigALRM: return "ALRM";
     case SigTERM: return "TERM";
-    case SigSTKFLT: return "STKFLT";
     case SigCHLD: return "CHLD";
     case SigCONT: return "CONT";
     case SigSTOP: return "STOP";

@@ -47,13 +47,13 @@ public:
                 SigHUP   =  1, SigINT   =  2, SigQUIT  =  3, SigILL   =  4,
                 SigTRAP  =  5, SigABRT  =  6, SigBUS   =  7, SigFPE   =  8,
                 SigKILL  =  9, SigUSR1  = 10, SigSEGV  = 11, SigUSR2  = 12,
-                SigPIPE  = 13, SigALRM  = 14, SigTERM  = 15, SigSTKFLT= 16,
+                SigPIPE  = 13, SigALRM  = 14, SigTERM  = 15, SigXXX1  = 16,
                 SigCHLD  = 17, SigCONT  = 18, SigSTOP  = 19, SigTSTP  = 20,
                 SigTTIN  = 21, SigTTOU  = 22, SigURG   = 23, SigXCPU  = 24,
                 SigXFSZ  = 25, SigVTALRM= 26, SigPROF  = 27, SigWINCH = 28,
-                SigIO    = 29, SigXXX   = 30, SigSYS   = 31, SigMAX   = 32,
+                SigIO    = 29, SigXXX2  = 30, SigSYS   = 31, SigMAX   = 32,
                 SigMAXRT = 65
-  }; // from signum.h on Linux; PWR discarded from Linux, INFO from OSX.
+  }; // from signum.h on Linux; STKFLT, PWR discarded from Linux; EMT, INFO from OSX.
   enum RState { RS_Incubating, RS_Spawning,
                 RS_Running,
                 RS_Terminating, RS_Finished,
