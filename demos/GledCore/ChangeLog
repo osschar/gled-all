@@ -1,3 +1,8 @@
+2011-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* sig_test_operator.C:
+	Test moved from Alice libset (there it was called fpe_test.C).
+
 2006-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* string_map.C:
