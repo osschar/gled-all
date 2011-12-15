@@ -92,6 +92,8 @@ void FTW_Branch::insert_leaf(Ray& ray, lpFTW_Leaf_i pos)
   FTW_Leaf* leaf = create_leaf(fImg->fEye->GetCurrentBetaImg(), beta_elrep(ray));
   mLeaves.insert(pos, leaf);
   mNest->InsertLeaf(leaf, nest_pos);
+  if ((! bListExpanded || ! visible()) && mParent != 0)
+    leaf->HideRecursively();
 }
 
 void FTW_Branch::remove_leaf(list<FTW_Leaf*>::iterator pos)
@@ -165,58 +167,56 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 {
   using namespace RayNS;
 
-  if(ray.fRQN > RQN_list_begin && ray.fRQN < RQN_list_end) {
+  if (ray.fRQN > RQN_list_begin && ray.fRQN < RQN_list_end)
+  {
+    if (bLeavesCreated && mLeavesTimeStamp < ray.fStamp)
+    {
+      switch(ray.fRQN)
+      {
+        case RQN_list_push_back:
+          insert_leaf(ray, mLeaves.end());
+          break;
+        case RQN_list_pop_back:
+          remove_leaf(--mLeaves.end());
+          break;
+        case RQN_list_push_front:
+          insert_leaf(ray, mLeaves.begin());
+          break;
+        case RQN_list_pop_front:
+          remove_leaf(mLeaves.begin());
+          break;
 
-    if(bLeavesCreated && mLeavesTimeStamp < ray.fStamp) {
+        case RQN_list_insert:
+          insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
+          break;
+        case RQN_list_remove:
+          remove_leaf(leaf_pos(beta_elrep(ray)));
+          break;
 
-      switch(ray.fRQN) {
+        case RQN_list_insert_label:
+          insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
+          break;
 
-      case RQN_list_push_back:
-	insert_leaf(ray, mLeaves.end());
-	break;
-      case RQN_list_pop_back:
-	remove_leaf(--mLeaves.end());
-	break;
-      case RQN_list_push_front:
-	insert_leaf(ray, mLeaves.begin());
-	break;
-      case RQN_list_pop_front:
-	remove_leaf(mLeaves.begin());
-	break;
+        case RQN_list_remove_label:
+          remove_leaf(leaf_pos(beta_elrep(ray)));
+          break;
 
-      case RQN_list_insert:
-	insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
-	break;
-      case RQN_list_remove:
-	remove_leaf(leaf_pos(beta_elrep(ray)));
-	break;
+        case RQN_list_element_set: {
+          lpFTW_Leaf_i pos = leaf_pos(beta_elrep(ray));
+          insert_leaf(ray, pos);
+          remove_leaf(pos);
+          break;
+        }
 
-      case RQN_list_insert_label:
-        insert_leaf(ray, leaf_pos(gamma_elrep(ray)));
-        break;
-
-      case RQN_list_remove_label:
-        remove_leaf(leaf_pos(beta_elrep(ray)));
-	break;
-
-      case RQN_list_element_set: {
-        lpFTW_Leaf_i pos = leaf_pos(beta_elrep(ray));
-        insert_leaf(ray, pos);
-        remove_leaf(pos);
-	break;
-      }
-
-      case RQN_list_rebuild:
-      case RQN_list_clear: {
-	bool was_expanded = bListExpanded;
-	if(bListExpanded) CollapseList();
-	wipe_leaves();
-	if(was_expanded)  ExpandList();
-        break;
-      }
-
+        case RQN_list_rebuild:
+        case RQN_list_clear: {
+          bool was_expanded = bListExpanded;
+          if(bListExpanded) CollapseList();
+          wipe_leaves();
+          if(was_expanded)  ExpandList();
+          break;
+        }
       } // end switch ray.fRQN
-
     }
 
     label_namebox();
@@ -230,10 +230,14 @@ void FTW_Branch::AbsorbRay(Ray& ray)
 
 void FTW_Branch::CollExpList()
 {
-  if(bListExpanded) CollapseList(); else ExpandList();
+  if (bListExpanded)
+    CollapseList();
+  else
+    ExpandList();
 }
 
-void FTW_Branch::ExpandList() {
+void FTW_Branch::ExpandList()
+{
   static const Exc_t _eh("FTW_Branch::ExpandList ");
 
   if(bListExpanded) return; // ants can call this for no good reason

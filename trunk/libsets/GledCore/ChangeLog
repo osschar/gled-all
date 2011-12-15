@@ -1,3 +1,12 @@
+2011-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GledView/FTW_Branch.cxx:
+	Hide new leaves when the branch is not expanded or is hidden
+	itself.
+
+	* GledView/FTW_Nest.cxx:
+	Fix comment.
+
 2011-12-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GThread.cxx:
