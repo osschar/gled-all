@@ -160,7 +160,7 @@ namespace
 	nest->GetShell()->RemoveMTW_Views();
 	break;
       }
-      case 6: // Remove stand-alone MTV_Views.
+      case 6: // Import all kings as top-levels.
       {
 	auto_ptr<ZMIR> mir( nest->GetNestInfo()->S_ImportKings() );
 	nest->GetShell()->Send(*mir);
