@@ -333,7 +333,7 @@ sub target
 sub target_configure
 {
   # Special form for invoking configure taking into account value
-  # of CPPFLAGS, CFLAGS, CXXFLAGS and LDFLAGS.
+  # of CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS and DSOFLAGS.
 
   # All WITHOUT trailing \n
   my $prefix   = shift; # prefix lines
@@ -344,6 +344,7 @@ sub target_configure
   $conf .= "CFLAGS='$CFLAGS' "     if ($CFLAGS   ne "");
   $conf .= "CXXFLAGS='$CXXFLAGS' " if ($CXXFLAGS ne "");
   $conf .= "LDFLAGS='$LDFLAGS' "   if ($LDFLAGS  ne "");
+  $conf .= "DSOFLAGS='$DSOFLAGS' " if ($DSOFLAGS  ne "");
   $conf .= $CFGFLAGS;
 
   my @args;

@@ -13,10 +13,10 @@ else {
   die "unknown compiler '$cc'";
 }
 
-split /\./, $ver;
+@v = split /\./, $ver;
 
 print <<"FNORD"
 CC_VERSION=$ver
-CC_MAJOR=$_[0]
-CC_MINOR=$_[1]
+CC_MAJOR=$v[0]
+CC_MINOR=$v[1]
 FNORD

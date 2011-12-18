@@ -20,7 +20,6 @@ setup_package($package);
 
 # print STDERR "Package setup, srctar=$srctarfile, ver=$version, tardir=$tardir\n";
 
-add_cxxflags("-fPIC -O2");
 add_cfgflags("--enable-shared --enable-threads");
 
 if ($BUILD_OS =~ /linux/)
@@ -29,7 +28,7 @@ if ($BUILD_OS =~ /linux/)
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
-  add_cfgflags("--enable-quartz");
+    $DSOFLAGS = $LDFLAGS;
 }
 
 # Install of fltk wipes include/FL - so fltk-mt needs to be
