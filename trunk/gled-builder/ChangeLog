@@ -1,3 +1,16 @@
+2011-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Build on osx-10.7, fltk.
+
+	* compiler-version.pl:
+	Perl 5.12 does not support implicit split int @_ anymore.
+
+	* GledBuildExternal.pm:
+	If set, pass DSOFLAGS to local configure.
+
+	* external/fltk/fltk.pl:
+	No need to pass --enable-quartz but do need to set DSOFLAGS.
+
 2011-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Move gled-related top-level stuff from package grid to gled.
