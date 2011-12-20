@@ -126,6 +126,10 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
     }
     if (closed)
     {
+      {
+        GLensReadHolder _lck(server);
+        server->RemoveFile(file);
+      }
       on_file_close(file);
     }
   }

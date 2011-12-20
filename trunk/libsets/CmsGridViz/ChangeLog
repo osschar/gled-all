@@ -1,3 +1,9 @@
+2011-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	File-ids were not unregistered when whole sessions were closed
+	down via timeouts.
+
 2011-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
