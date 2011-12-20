@@ -296,6 +296,7 @@ sub output_target
   my $cmd = shift;
 
   chomp $cmd;
+  $cmd =~ s/^\s*\n//gm;
   $cmd =~ s/(?<!\\)\n(?=.)/; \\\n/g;
 
   print "\n";

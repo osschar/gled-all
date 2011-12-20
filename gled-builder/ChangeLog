@@ -1,3 +1,16 @@
+2011-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Build on osx-10.7, root, somewhat bastardized.
+
+	* GledBuildExternal.pm:
+	Filter out empty lines in sub output_target - they are unavoidable
+	if one uses multiple here-docs.
+
+	* external/root/root.pl:
+	Before installing, hack out GLEW_APPLE_GLX and rebuild FTGL and
+	GLEW with -framework OpenGL & AGL. As a consequence, somewhat
+	obviously, gl and eve do not work anymore.
+
 2011-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Build on osx-10.7, fltk.
