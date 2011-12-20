@@ -19,6 +19,7 @@ $parallel = 1;
 setup_package($package);
 
 my $config_args = "--disable-builtin-freetype";
+my $pre_install;
 
 if ($BUILD_OS =~ /linux/)
 {
@@ -31,10 +32,19 @@ if ($BUILD_OS =~ /linux/)
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
-  # Enforce 32-bit build ... other externals build in 32-bit mode.
-  # Another option would be to enforce 64-bit mode for them, too.
-  # But then would need to detect the cpu type ... or sth.
-  $config_args .= "macosx";
+  # Starting with 10.7, ftgl and glew no longer work with fltk when configured
+  # to use GLX. So we boldly hack around.
+  # The side-effect is that root gl and eve do not work. Sigh, or sth.
+  $pre_install = <<"FNORD"
+echo "BUILDGL        := yes" >> config/Makefile.config
+echo "OPENGLLIBDIR   :=" >> config/Makefile.config
+echo "OPENGLULIB     :=" >> config/Makefile.config
+echo "OPENGLLIB      := -framework AGL -framework OpenGL" >> config/Makefile.config
+echo "OPENGLINCDIR   :=" >> config/Makefile.config
+perl -ni -e 'print unless /define GLEW_APPLE_GLX/o;' graf3d/glew/src/glew.c
+rm -f lib/libGLEW.* lib/libFTGL.*
+make
+FNORD
 }
 
 target('configure', <<"FNORD");
@@ -42,6 +52,7 @@ target('configure', <<"FNORD");
 FNORD
 
 target('install', <<"FNORD");
+$pre_install
 ROOTSYS=${PREFIX}/root make install
 FNORD
 
