@@ -1,8 +1,14 @@
 SHELL = /bin/bash
 
 PACKAGES := root fltk fltk-mt DevIL gts openal freealut ehs
+LIBSETS  := GledCore Geom1 GledGTS Audio1
 
-.PHONY: ${PACKAGES} all all-but-root
+.PHONY: ${PACKAGES} ${LIBSETS} all all-but-root
+
+GledCore: root fltk fltk-mt
+Geom1:    DevIL
+GledGTS:  gts
+Audio1:   openal freealut
 
 # Currently disabled packages:
 #
