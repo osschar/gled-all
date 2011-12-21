@@ -1,3 +1,13 @@
+2011-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/Makefile:
+	Start adding libset deps.
+
+2011-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/gts/gts.pl:
+	On mac, add /opt/local/include/netpbm to cpp-flags.
+
 2011-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Build on osx-10.7, root, somewhat bastardized.
