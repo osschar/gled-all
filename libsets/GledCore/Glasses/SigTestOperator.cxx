@@ -72,8 +72,10 @@ void SigTestOperator::Operate(Operator::Arg* op_arg)
       GLensWriteHolder wrlck(this);
       SetRaiseSEGV(false);
     }
-    TObject* obj = 0;
-    obj->Print();
+    // This causes ill on mac.
+    // TObject* obj = 0;
+    // obj->Print();
+    GThread::Self()->Kill(GThread::SigSEGV);
   }
 
   if (bRaiseFPE)
@@ -82,9 +84,8 @@ void SigTestOperator::Operate(Operator::Arg* op_arg)
       GLensWriteHolder wrlck(this);
       SetRaiseFPE(false);
     }
-    int zero = 0;
-    fResult = 124343.0 / 0.0;
-    fResult = 124343 / zero;
+    Double_t zero = 0;
+    fResult = 124343.5465 / zero;
   }
 
   PostOperate(op_arg);
