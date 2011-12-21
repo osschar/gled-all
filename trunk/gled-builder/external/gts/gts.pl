@@ -18,9 +18,16 @@ $parallel = 1;
 
 setup_package($package);
 
-if ($DISTRO_VENDOR eq 'gentoo' or $DISTRO_VENDOR eq 'redhat')
+if ($BUILD_OS =~ /linux/)
 {
-  add_cppflags("-I/usr/include/netpbm");
+  if ($DISTRO_VENDOR eq 'gentoo' or $DISTRO_VENDOR eq 'redhat')
+  {
+    add_cppflags("-I/usr/include/netpbm");
+  }
+}
+elsif ($BUILD_OS =~ /darwin/)
+{
+  add_cppflags("-I/opt/local/include/netpbm");
 }
 
 add_cxxflags("-O2");
