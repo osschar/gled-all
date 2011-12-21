@@ -1,3 +1,21 @@
+2011-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for mac build and (maybe) fltk-1.3.
+
+	* Glasses/SigTestOperator.cxx:
+	Raise sig-segv signal directly, calling a method on null object
+	pointer causes sig-ill on mac. Strange.
+
+	* GledView/FTW.cxx:
+	Fix, maybe, placement of context-menus (for fltk-1.3).
+
+	* Makefile:
+	Don't call fltk-config --post on gled executable.
+
+	* Pupils/Pupil.cxx:
+	Call normal glewInit() ... we'll see what happens in ROOT.
+	Fix, maybe, placement of context-menus (for fltk-1.3).
+
 2011-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* GledView/FTW_Branch.cxx:

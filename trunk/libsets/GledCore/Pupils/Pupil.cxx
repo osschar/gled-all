@@ -881,7 +881,7 @@ void Pupil::PickMenu(int xpick, int ypick, bool rnr_self, bool rnr_overlay)
 
   if (n > 0)
   {
-    Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+    Fl_Menu_Button menu(Fl::event_x(), Fl::event_y(), 0, 0, 0);
     menu.textsize(mShell->cell_fontsize());
     FTW_Shell::mir_call_data_list mcdl;
 
@@ -952,7 +952,9 @@ void Pupil::draw()
   if(glew_init_needed) {
 #ifdef __APPLE__
     // We use GLEW from ROOT which would also try to init GLX -- avoid that.
-    GLenum status = glewContextInit();
+    // GLenum status = glewContextInit();
+    // Not anymore ... but ROOT should stop using GLX ...
+    GLenum status = glewInit();
 #else
     GLenum status = glewInit();
 #endif

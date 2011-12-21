@@ -323,7 +323,7 @@ int FTW::NameButton::handle(int ev)
       FTW_Shell *shell = leaf->GetNest()->GetShell();
       Locator loc(leaf->GetNest(), leaf, ant);
       if(loc.get_image() != 0)
-	shell->FullMenu(loc.get_image(), Fl::event_x_root(), Fl::event_y_root());
+	shell->FullMenu(loc.get_image(), Fl::event_x(), Fl::event_y());
       return 1;
     }
     } // end switch
