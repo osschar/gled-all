@@ -1,3 +1,12 @@
+2011-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GSelector.cxx:
+	* Gled/GSelector.h:
+	Add method Clear().
+
+	* GledView/FTW.cxx:
+	Fix two more context menu positions.
+
 2011-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes for mac build and (maybe) fltk-1.3.
