@@ -1,5 +1,11 @@
 2011-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* GledView/FltkGledStuff.cxx:
+	* GledView/MTW_View.cxx:
+	Fix two more context menu positions.
+
+2011-12-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Gled/GSelector.cxx:
 	* Gled/GSelector.h:
 	Add method Clear().

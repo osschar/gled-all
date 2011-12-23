@@ -258,7 +258,7 @@ int FGS::LensNameBox::handle(int ev)
     case 2: Fl::paste(*this); return 1;
     case 3:
       if(fImg) {
-	Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+	Fl_Menu_Button menu(Fl::event_x(), Fl::event_y(), 0, 0, 0);
 	menu.textsize(shell->cell_fontsize());
 	FTW_Shell::mir_call_data_list mcdl;
 	menu.add("Clear", 0, (Fl_Callback*)clear_cb, this, FL_MENU_DIVIDER);
