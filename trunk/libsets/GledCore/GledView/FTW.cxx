@@ -566,7 +566,7 @@ namespace {
     GNS::lpLSI_t ls_list;
     GNS::ProduceLibSetInfoList(ls_list);
 
-    Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+    Fl_Menu_Button menu(Fl::event_x(), Fl::event_y(), 0, 0, 0);
     Fl_SWM_Manager* mgr = Fl_SWM_Manager::search_manager(b);
     if(mgr) menu.textsize(mgr->cell_fontsize());
     list<Inst_SelID> datas;
@@ -589,7 +589,7 @@ namespace {
 	res[j->second->fFid.fCid] = j->second->fName;
       }
 
-    Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 0, 0, 0);
+    Fl_Menu_Button menu(Fl::event_x(), Fl::event_y(), 0, 0, 0);
     Fl_SWM_Manager* mgr = Fl_SWM_Manager::search_manager(b);
     if(mgr) menu.textsize(mgr->cell_fontsize());
 

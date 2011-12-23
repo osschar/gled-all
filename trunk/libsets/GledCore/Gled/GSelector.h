@@ -42,6 +42,8 @@ public:
   GSelector(Init_e e=fast);
   ~GSelector();
 
+  void Clear();
+
   Int_t Select();
 
 #include "GSelector.h7"

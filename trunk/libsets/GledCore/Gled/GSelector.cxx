@@ -43,6 +43,17 @@ GSelector::~GSelector()
 
 //------------------------------------------------------------------------------
 
+void GSelector::Clear()
+{
+  Lock();
+  fRead.clear();
+  fWrite.clear();
+  fExcept.clear();
+  Unlock();
+}
+
+//------------------------------------------------------------------------------
+
 Int_t GSelector::Select()
 {
   static const Exc_t _eh("GSelector::Select ");
