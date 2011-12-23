@@ -197,7 +197,7 @@ int MTW_View::SelfRep::handle(int ev)
 	Fl::paste(*this);
       }
       if(Fl::event_button() == 3) {
-	shell->FullMenu(fView->fImg, Fl::event_x_root(), Fl::event_y_root());
+	shell->FullMenu(fView->fImg, Fl::event_x(), Fl::event_y());
       }
       return 1;
     }
