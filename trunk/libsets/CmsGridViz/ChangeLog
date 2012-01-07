@@ -1,5 +1,22 @@
 2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Proto-verison of UDP packet processor and its client.
+
+	* Glasses/UdpPacketProcessor.cxx:
+	* Glasses/UdpPacketProcessor.h:
+	New glass - listen for UDP packets and forward them to connected
+	clients over TCP, streamed as SUdpPacket.
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	New glass - TCP client for UdpPacketProcessor. Can deliver packets
+	to several local consumers using GQueueSet.
+
+	* glass.list:
+	Register UdpPacketProcessor and UdpPacketTcpClient.
+
+2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Stones/SUdpPacket.cxx:
 	* Stones/SUdpPacket.h:
 	Move SUdpPacket to GledCore.

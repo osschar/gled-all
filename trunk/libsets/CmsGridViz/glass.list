@@ -14,5 +14,5 @@ CmsXrdUser	34	Glasses/CmsXrdUser
 XrdFileCloseReporter 1024 Glasses/XrdFileCloseReporter
 XrdEhs               1025 Glasses/XrdEhs
 
-# UdpPacketProcessor   2048 Glasses/UdpPacketProcessor
-# UppTcpClient         2049 Glasses/UppTcpClient
+UdpPacketProcessor   2048 Glasses/UdpPacketProcessor
+UdpPacketTcpClient   2049 Glasses/UdpPacketTcpClient
