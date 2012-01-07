@@ -2,6 +2,12 @@
 
 	* Stones/SUdpPacket.cxx:
 	* Stones/SUdpPacket.h:
+	Move SUdpPacket to GledCore.
+
+2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
 	Use fixed-size array for from address.
 
 2011-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
