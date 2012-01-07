@@ -372,3 +372,17 @@ Long64_t GTime::SleepMiliSec(UInt_t ms,
     }
   }
 }
+
+//==============================================================================
+
+void GTime::NetStreamer(TBuffer& b)
+{
+  if (b.IsReading())
+  {
+    b >> mSec >> mMuSec;
+  }
+  else
+  {
+    b << mSec << mMuSec;
+  }
+}
