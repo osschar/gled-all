@@ -18,11 +18,13 @@ public:
   SRefCounted();
   virtual ~SRefCounted();
 
+  virtual void SetRefCount(Int_t rc);
+
   virtual void IncRefCount();
   virtual void DecRefCount();
   virtual void OnZeroRefCount();
 
-  ClassDef(SRefCounted, 1);
+  ClassDef(SRefCounted, 0);
 }; // endclass SRefCounted
 
 
@@ -34,10 +36,12 @@ protected:
 public:
   SRefCountedNV() : mRefCount(0) {}
 
+  void SetRefCount(Int_t rc) { mRefCount = rc; }
+
   void IncRefCount() { ++mRefCount; }
   void DecRefCount() { --mRefCount; if (mRefCount <= 0) delete this; }
 
-  ClassDefNV(SRefCountedNV, 1);
+  ClassDefNV(SRefCountedNV, 0);
 }; // endclass SRefCountedNV
 
 #endif

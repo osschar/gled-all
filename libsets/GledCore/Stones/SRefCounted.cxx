@@ -23,6 +23,11 @@ SRefCounted::SRefCounted() : mRefCount(0)
 SRefCounted::~SRefCounted()
 {}
 
+void SRefCounted::SetRefCount(Int_t rc)
+{
+  mRefCount = rc;
+}
+
 void SRefCounted::IncRefCount()
 {
   ++mRefCount;

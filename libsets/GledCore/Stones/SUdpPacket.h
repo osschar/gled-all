@@ -10,10 +10,12 @@
 #include <Rtypes.h>
 
 #include "Gled/GTime.h"
+#include "Stones/SRefCounted.h"
 
 class TBuffer;
 
-class SUdpPacket
+class SUdpPacket : public SRefCountedNV
+
 {
   // Not implemented
 public:

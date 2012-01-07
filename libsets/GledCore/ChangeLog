@@ -1,5 +1,14 @@
 2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Stones/SRefCounted.cxx:
+	* Stones/SRefCounted.h:
+	Add SetRefcount method. Set class-version to 0.
+
+	* Stones/SUdpPacket.h:
+	Sub-class from SRefCountedNV.
+
+2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Stones/SUdpPacket.cxx:
 	* Stones/SUdpPacket.h:
 	Move SUdpPacket from CmsGridViz.
