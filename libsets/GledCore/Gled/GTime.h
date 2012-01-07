@@ -10,6 +10,8 @@
 #include <Rtypes.h>
 #include <TString.h>
 
+class TBuffer;
+
 class GTime
 {
 public:
@@ -86,6 +88,9 @@ public:
   static Long64_t SleepMiliSec(UInt_t ms,
 			       Bool_t break_on_signal=true,
 			       Bool_t warn_on_signal=true);
+
+  void  NetStreamer(TBuffer& b);
+  Int_t NetBufferSize() const { return 2 * sizeof(Long64_t); }
 
 #include "GTime.h7"
   ClassDefNV(GTime, 1);

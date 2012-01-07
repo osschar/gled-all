@@ -110,7 +110,6 @@ $PATCH = {
 
 },
 
-
 "SVars" =>
 {
   'NoDefault'  => 1,
@@ -134,6 +133,14 @@ $PATCH = {
    "#pragma link C++ class   SExpDesireVar<Double_t>+;\n" .
    "#pragma link C++ typedef SExpDesireVarF;\n" .
    "#pragma link C++ typedef SExpDesireVarD;\n"
+},
+
+
+### Gled
+
+"GQueue" =>
+{
+  'NoDefault'  => 1
 },
 
 };
