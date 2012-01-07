@@ -42,4 +42,66 @@ TT* GQueue<TT>::PopFront()
   return el;
 }
 
+//==============================================================================
+
+template<typename TT>
+class GQueueSet
+{
+  typedef GQueue<TT>                   Queue_t;
+  typedef set<Queue_t*>                spQueue_t;
+  typedef typename spQueue_t::iterator spQueue_i;
+
+  spQueue_t      mQueueSet;
+  mutable GMutex mSetMutex;
+
+public:
+  GQueueSet() {}
+
+  Int_t GetSetSize() const;
+
+  void RegisterQueue  (Queue_t* q);
+  void UnregisterQueue(Queue_t* q);
+
+  void DeliverToQueues(TT* el);
+};
+
+template <typename TT>
+Int_t GQueueSet<TT>::GetSetSize() const
+{
+  GMutexHolder _lck(mSetMutex);
+  return mQueueSet.size();
+}
+
+template <typename TT>
+void GQueueSet<TT>::RegisterQueue(Queue_t* q)
+{
+  GMutexHolder _lck(mSetMutex);
+  mQueueSet.insert(q);
+}
+
+template <typename TT>
+void GQueueSet<TT>::UnregisterQueue(Queue_t* q)
+{
+  GMutexHolder _lck(mSetMutex);
+  mQueueSet.erase(q);
+}
+
+template <typename TT>
+void GQueueSet<TT>::DeliverToQueues(TT* el)
+{
+  GMutexHolder _lck(mSetMutex);
+  if ( ! mQueueSet.empty())
+  {
+    el->SetRefCount(mQueueSet.size());
+    for (spQueue_i i = mQueueSet.begin(); i != mQueueSet.end(); ++i)
+    {
+      (*i)->PushBack(el);
+    }
+  }
+  else
+  {
+    delete el;
+  }
+}
+
 #endif
