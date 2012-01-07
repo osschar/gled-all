@@ -11,16 +11,26 @@
 
 #include "Gled/GTime.h"
 
+class TBuffer;
+
 class SUdpPacket
 {
+  // Not implemented
 public:
   GTime           mRecvTime;
-  vector<UChar_t> mAddr;
+  Int_t           mBuffLen;
+  UShort_t        mAddrLen;
   UShort_t        mPort;
-  vector<UChar_t> mMessage;
+  UChar_t         mAddr[16];
+  UChar_t        *mBuff;      //[mBuffLen]
 
   SUdpPacket();
+  SUdpPacket(const GTime& t, UChar_t* addr, UShort_t addr_len, UShort_t port,
+             UChar_t* buff, Int_t buff_len);
   ~SUdpPacket();
+
+  void  NetStreamer(TBuffer& b);
+  Int_t NetBufferSize() const;
 
 #include "SUdpPacket.h7"
   ClassDefNV(SUdpPacket, 1);
