@@ -1,3 +1,9 @@
+2012-01-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/fltk/fltk.pl:
+	Put back -fPIC -O2 as cxxflags, apparently needed on linux (at
+	least on SLC5).
+
 2011-12-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/Makefile:
