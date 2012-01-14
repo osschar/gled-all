@@ -70,6 +70,16 @@ public:
   };
 
 private:
+  class Cleanup
+  {
+    GThread_cu_foo mFoo;
+    void*          mArg;
+  public:
+    Cleanup(GThread_cu_foo f, void* a) : mFoo(f), mArg(a) {}
+    void Execute() { (mFoo)(mArg); }
+  };
+  typedef list<Cleanup> lCleanup_t;
+
   class OwnerChanger
   {
     ZMirEmittingEntity* m_owner;
@@ -77,6 +87,7 @@ private:
     OwnerChanger(ZMirEmittingEntity* o) { GThread* s = Self(); m_owner = s->get_owner(); s->set_owner(o); }
     ~OwnerChanger()                     { GThread::Self()->set_owner(m_owner); }
   };
+
   class MIRChanger
   {
     ZMIR* m_mir;
@@ -115,8 +126,7 @@ private:
   TString        mName;         // X{Gs}
   GThread_foo	 mStartFoo;	// X{gs}
   void*		 mStartArg;	// X{gs}
-  GThread_cu_foo mEndFoo;	// X{gs}
-  void*		 mEndArg;	// X{gs}
+  lCleanup_t     mCleanups;
   bool		 bDetached;
   bool           bDetachOnExit; // X{gs}
   int            mNice;         // X{gs}
@@ -151,6 +161,9 @@ public:
   GThread(const Text_t* name, GThread_foo foo, void* arg=0,
 	  bool detached=false, bool detach_on_exit=false);
   virtual ~GThread();
+
+  void  CleanupPush(GThread_cu_foo foo, void* arg);
+  void  CleanupPop(bool execute_p);
 
   int   Spawn();
   int   Join(void** tret=0);
