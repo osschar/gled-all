@@ -911,7 +911,12 @@ namespace
     GTerminateHandler() : TSignalHandler(kSigTermination, kTRUE) { Add(); }
     virtual ~GTerminateHandler() {}
 
-    virtual Bool_t Notify() { gSystem->ExitLoop(); return kFALSE; }
+    virtual Bool_t Notify()
+    {
+      cout << "Received SIGTERM ... initiating shutdown.\n";
+      gSystem->ExitLoop();
+      return kFALSE;
+    }
   };
 
   class GSigChildHandler : public TSignalHandler
@@ -988,8 +993,7 @@ void* Gled::TRint_runner_tl(void*)
   // Global ROOT settings.
   TH1::AddDirectory(kFALSE);
 
-  self->SetEndFoo((GThread_cu_foo) TRint_cleanup_tl);
-  self->SetEndArg(0);
+  self->CleanupPush((GThread_cu_foo) TRint_cleanup_tl, 0);
 
   Gled::theOne->ProcessCmdLineMacros();
 
@@ -999,13 +1003,12 @@ void* Gled::TRint_runner_tl(void*)
   Gled::theOne->bRintRunning = true;
   Gled::theOne->mRint->TApplication::Run(true);
   Gled::theOne->bRintRunning = false;
-  cout << "Gint terminated ...\n";
+  cout << "TRint::Run() exit ...\n";
 
   GThread::BlockSignal(GThread::SigUSR1);
   TRootXTReq::Shutdown();
 
-  self->SetEndFoo(0);
-  self->SetEndArg(0);
+  self->CleanupPop(false);
 
   if (Gled::theOne->GetQuit() == false)
     Gled::theOne->Exit();
@@ -1017,7 +1020,7 @@ void* Gled::TRint_runner_tl(void*)
 
 void Gled::TRint_cleanup_tl(void*)
 {
-  cout << "Gint canceled ... expect trouble.\n";
+  cout << "Thread running TRint::Run() canceled ... expect trouble.\n";
   Gled::theOne->mRint->Terminate(0);
 }
 

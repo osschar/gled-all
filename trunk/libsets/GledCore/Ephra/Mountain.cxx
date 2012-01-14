@@ -167,8 +167,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
   }
   if (op_arg == 0) return err_ret;
 
-  di->fThread->SetEndFoo((GThread_cu_foo)DancerCooler);
-  di->fThread->SetEndArg((void*)di);
+  di->fThread->CleanupPush((GThread_cu_foo)DancerCooler, di);
 
   di->fOpArg = op_arg;
   op_arg->fStart.SetNow();

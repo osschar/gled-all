@@ -57,15 +57,13 @@
 
 ClassImp(Saturn);
 
-/**************************************************************************/
+//==============================================================================
 // Thread invocators
-/**************************************************************************/
+//==============================================================================
 
 namespace
 {
   GCondition	_server_startup_cond;
-
-  GMutex	_detached_mir_mgmnt_lock;
 
   void sh_SaturnFdSucker(GSignal* sig)
   {
@@ -132,6 +130,113 @@ void* Saturn::tl_MIR_Router(Saturn* sat)
   return 0;
 }
 
+//==============================================================================
+
+bool Saturn::DetachedThreadsPerLens::IsEmpty() const
+{
+  return fThreads.empty();
+}
+
+GThread* Saturn::DetachedThreadsPerLens::GetLastThread() const
+{
+  return fThreads.back().fThread;
+}
+
+void Saturn::DetachedThreadsPerLens::PushBack(GThread* t, lDetachedThreadInfo_i i)
+{
+  fThreads.push_back(Thread(t, i));
+}
+
+Saturn::lDetachedThreadInfo_i Saturn::DetachedThreadsPerLens::PopBack()
+{
+  lDetachedThreadInfo_i mi = fThreads.back().fMainIter;
+  fThreads.pop_back();
+  return mi;
+}
+
+Saturn::lDetachedThreadInfo_i Saturn::DetachedThreadsPerLens::FindAndRemove(GThread* t)
+{
+  for (list<Thread>::iterator i = fThreads.begin(); i != fThreads.end(); ++i)
+  {
+    if (i->fThread == t)
+    {
+      lDetachedThreadInfo_i mi = i->fMainIter;
+      fThreads.erase(i);
+      return mi;
+    }
+  }
+  throw Exc_t("Saturn::DetachedThreadsPerLens::FindAndRemove internal state corrupted.");
+}
+
+//------------------------------------------------------------------------------
+
+void Saturn::register_detached_thread(ZGlass *lens, GThread *thread)
+{
+  GMutexHolder _lck(mDetachedMirMutex);
+
+  mDetachedThreadsList.push_back(DetachedThreadInfo(lens, thread));
+  mDetachedThreadsHash[lens].PushBack(thread, --mDetachedThreadsList.end());
+}
+
+void Saturn::unregister_detached_thread(ZGlass *lens, GThread *thread)
+{
+  static const Exc_t _eh("Saturn::unregister_detached_thread ");
+
+  GMutexHolder _lck(mDetachedMirMutex);
+
+  hpZGlass2DetachedThreadPerLens_i hi = mDetachedThreadsHash.find(lens);
+  if (hi == mDetachedThreadsHash.end())
+  {
+    ISerr(_eh + "entry for " + lens->Identify() + " not found in mDetachedThreadsHash.");
+    return;
+  }
+  lDetachedThreadInfo_i mi = hi->second.FindAndRemove(thread);
+  mDetachedThreadsList.erase(mi);
+  if (hi->second.IsEmpty())
+  {
+    mDetachedThreadsHash.erase(hi);
+  }
+}
+
+bool Saturn::cancel_and_join_thread(ZGlass* lens, GThread* thread)
+{
+  static const Exc_t _eh("Saturn::cancel_and_join_thread ");
+
+  bool status = true;
+
+  ISdebug(2, GForm("%sattempting cancellation of a detached MIR thread of lens '%s'.",
+                   _eh.Data(), lens->GetName()));
+  int retc = thread->Cancel();
+  ISdebug(2, GForm("%scancellation of thread of lens '%s' returned %d.",
+		     _eh.Data(), lens->GetName(), retc));
+  if (retc)
+  {
+    ISerr(_eh + "having problems cancelling a detached thread of " + lens->GetName() + ".");
+    status = false;
+  }
+  else
+  {
+    ISdebug(2, GForm("%sattempting join on a detached MIR thread of lens '%s'.",
+                     _eh.Data(), lens->GetName()));
+    int retj = thread->Join();
+    ISdebug(2, GForm("%sjoin on thread of lens '%s' returned %d.",
+                     _eh.Data(), lens->GetName(), retj));
+    if (retj)
+    {
+      ISerr(_eh + "having problems joining a detached thread of " + lens->GetName() + ".");
+      status = false;
+    }
+    else
+    {
+      delete thread;
+    }
+  }
+
+  return status;
+}
+
+
+//------------------------------------------------------------------------------
 
 void* Saturn::tl_MIR_DetachedExecutor(Saturn* sat)
 {
@@ -145,8 +250,8 @@ void* Saturn::tl_MIR_DetachedExecutor(Saturn* sat)
   {
     ISdebug(1, GForm("%sregistering a detached thread %p to '%s'.",
 		     _eh.Data(), self, mir->fAlpha->GetName()));
-    GMutexHolder mh(_detached_mir_mgmnt_lock);
-    sat->mDetachedThreadsHash[mir->fAlpha].push_back(self);
+
+    sat->register_detached_thread(mir->fAlpha, self);
   }
 
   self->SetTerminalPolicy(GThread::TP_ThreadExit);
@@ -185,26 +290,14 @@ void Saturn::tl_MIR_DetachedCleanUp(Saturn* sat)
   {
     ISdebug(1, GForm("%sunregistering a detached thread %p from '%s'.",
 		     _eh.Data(), self, mir->fAlpha->GetName()));
-    GMutexHolder mh(_detached_mir_mgmnt_lock);
-    hpZGlass2lpGThread_i i = sat->mDetachedThreadsHash.find(mir->fAlpha);
-    if (i == sat->mDetachedThreadsHash.end()) {
-      ISerr(_eh + "entry for " + mir->fAlpha->Identify() + " not found in mDetachedThreadsHash.");
-      return;
-    }
-#ifdef DEBUG
-    int l1 = i->second.size();
-#endif
-    i->second.remove(self);
-    int l2 = i->second.size();
-    ISdebug(1, GForm("%sl1=%d, l2=%d.", _eh.Data(), l1, l2));
-    if (l2 == 0)
-      sat->mDetachedThreadsHash.erase(i);
+
+    sat->unregister_detached_thread(mir->fAlpha, self);
   }
 
   delete mir;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 void* Saturn::tl_MIR_Shooter(Saturn* s)
 {
@@ -242,15 +335,15 @@ void* Saturn::tl_Ray_Emitter(Saturn* s)
   return 0;
 }
 
-/**************************************************************************/
+//==============================================================================
 // Static members
-/**************************************************************************/
+//==============================================================================
 
 const Int_t Saturn::s_Gled_Protocol_Version = 1;
 
-/**************************************************************************/
+//==============================================================================
 // Con/De/Structor
-/**************************************************************************/
+//==============================================================================
 
 Saturn::Saturn() :
   mIDLock(GMutex::recursive),
@@ -283,7 +376,7 @@ Saturn::~Saturn()
   delete mServerSocket; // Close is called by dtor
 }
 
-/**************************************************************************/
+//==============================================================================
 
 TString Saturn::HandleClientSideSaturnHandshake(TSocket*& socket)
 {
@@ -730,8 +823,8 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
 
   static const Exc_t _eh("Saturn::Freeze ");
 
-  if(lens==0)
-    throw(_eh + "lens=0; stalling.");
+  if (lens==0)
+    throw _eh + "lens=0; stalling.";
 
   ISdebug(2,GForm("%sfor %s, id=%u", _eh.Data(), lens->GetName(), lens->GetSaturnID()));
 
@@ -748,17 +841,19 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
     }
     GThread* thr = 0;
     {
-      GMutexHolder mh(_detached_mir_mgmnt_lock);
-      hpZGlass2lpGThread_i i = mDetachedThreadsHash.find(lens);
+      GMutexHolder _lck(mDetachedMirMutex);
+      hpZGlass2DetachedThreadPerLens_i i = mDetachedThreadsHash.find(lens);
       if (i == mDetachedThreadsHash.end())
+      {
 	break;
-      if (i->second.empty())
+      }
+      if (i->second.IsEmpty())
       {
 	mDetachedThreadsHash.erase(i);
 	break;
       }
 
-      thr = i->second.back();
+      thr = i->second.GetLastThread();
       if (thr->ClearDetachOnExit() == false)
       {
 	// We caught the thread in its last breath, yield cpu before next
@@ -768,34 +863,7 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
       }
     }
 
-    ISdebug(2, GForm("%sattempting cancellation of a detached MIR thread of lens '%s'.",
-		     _eh.Data(), lens->GetName()));
-    int retc = thr->Cancel();
-    ISdebug(2, GForm("%scancellation of thread of lens '%s' returned %d.",
-		     _eh.Data(), lens->GetName(), retc));
-    if (retc)
-    {
-      ISerr(_eh + "having problems cancelling a detached thread of " + lens->GetName() + ".");
-      ++failed;
-    }
-    else
-    {
-      ISdebug(2, GForm("%sattempting join on a detached MIR thread of lens '%s'.",
-		       _eh.Data(), lens->GetName()));
-      int retj = thr->Join();
-      ISdebug(2, GForm("%sjoin on thread of lens '%s' returned %d.",
-		       _eh.Data(), lens->GetName(), retj));
-      if (retj)
-      {
-	ISerr(_eh + "having problems joining a detached thread of " + lens->GetName() + ".");
-	++failed;
-      }
-      else
-      {
-	delete thr;
-	++ok;
-      }
-    }
+    cancel_and_join_thread(lens, thr) ? ++ok : ++failed;
   }
   if (ok > 0 || failed > 0)
   {
@@ -1923,8 +1991,7 @@ void Saturn::ExecDetachedMIR(auto_ptr<ZMIR>& mir)
   bar->set_owner(mir->fCaller);
   bar->set_mir(mir.release());
   bar->SetNice(nice);
-  bar->SetEndFoo((GThread_cu_foo) tl_MIR_DetachedCleanUp);
-  bar->SetEndArg(this);
+  bar->CleanupPush((GThread_cu_foo) tl_MIR_DetachedCleanUp, this);
   bar->Spawn();
 }
 
@@ -2248,16 +2315,35 @@ int Saturn::stop_detached_threads()
 {
   // Stop all detached threads.
 
+  static const Exc_t _eh("Saturn::stop_detached_threads ");
+
+  bool yield = false;
+  
   while (true)
   {
-    hpZGlass2lpGThread_i i;
+    if (yield)
     {
-      GMutexHolder mh(_detached_mir_mgmnt_lock);
-      if (mDetachedThreadsHash.empty())
-	return 0;
-      i = mDetachedThreadsHash.begin();
+      GThread::Yield();
+      yield = false;
     }
-    Freeze(i->first);
+    DetachedThreadInfo dti;
+    {
+      GMutexHolder _lck(mDetachedMirMutex);
+      if (mDetachedThreadsList.empty())
+      {
+	return 0;
+      }
+      dti = mDetachedThreadsList.back();
+      if (dti.fThread->ClearDetachOnExit() == false)
+      {
+	// We caught the thread in its last breath, yield cpu before next
+	// attempt (but get out of lock first).
+	yield = true;
+	continue;
+      }
+    }
+
+    cancel_and_join_thread(dti.fLens, dti.fThread);
   }
 }
 

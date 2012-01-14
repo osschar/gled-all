@@ -1,3 +1,30 @@
+2012-01-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve thread cleanup function treatment, in particular for
+	detached threads in Saturn.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Introduce a stack of cleanup functions. This way cleanups required
+	by various Gled subsystems and user code can coexist peacufully.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Completely rewrite internal handling of detached threads:
+	- Hold all threads in a list.
+	- Additionally, hold a hash_map from lens to a list of threads
+	associated with it (almost as before, but with iterators back into
+	the main thread list).
+	This way detached threads can be cancelled in reverse creation order.
+	Use new thread cleanup functions.
+
+	* Gled/Gled.cxx:
+	Clarify reporting during shutdown.
+	Use new thread cleanup functions.
+
+	* Ephra/Mountain.cxx:
+	Use new thread cleanup functions.
+
 2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GQueue.cxx:

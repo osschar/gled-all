@@ -102,12 +102,54 @@ protected:
 
   Bool_t		bAllowMoons;	// X{g}
 
-  // Detached lens threads
-#ifndef __CINT__
-  typedef hash_map<ZGlass*, list<GThread*> >           hpZGlass2lpGThread_t;
-  typedef hash_map<ZGlass*, list<GThread*> >::iterator hpZGlass2lpGThread_i;
 
-  hpZGlass2lpGThread_t  mDetachedThreadsHash;
+  // Detached lens threads
+
+#ifndef __CINT__
+
+  struct DetachedThreadInfo
+  {
+    ZGlass  *fLens;
+    GThread *fThread;
+
+    DetachedThreadInfo() : fLens(0), fThread(0) {}
+    DetachedThreadInfo(ZGlass *l, GThread *t) : fLens(l), fThread(t) {}
+  };
+
+  typedef list<DetachedThreadInfo>           lDetachedThreadInfo_t;
+  typedef list<DetachedThreadInfo>::iterator lDetachedThreadInfo_i;
+
+  class DetachedThreadsPerLens
+  {
+    struct Thread
+    {
+      GThread               *fThread;
+      lDetachedThreadInfo_i  fMainIter;
+
+      Thread(GThread* t, lDetachedThreadInfo_i i) : fThread(t), fMainIter(i) {}
+    };
+    list<Thread> fThreads;
+  public:
+    DetachedThreadsPerLens() {}
+
+    bool                  IsEmpty() const;
+    GThread*              GetLastThread() const;
+    void                  PushBack(GThread* t, lDetachedThreadInfo_i i);
+    lDetachedThreadInfo_i PopBack();
+    lDetachedThreadInfo_i FindAndRemove(GThread* t);
+  };
+
+  typedef hash_map<ZGlass*, DetachedThreadsPerLens>           hpZGlass2DetachedThreadPerLens_t;
+  typedef hash_map<ZGlass*, DetachedThreadsPerLens>::iterator hpZGlass2DetachedThreadPerLens_i;
+
+  lDetachedThreadInfo_t             mDetachedThreadsList;
+  hpZGlass2DetachedThreadPerLens_t  mDetachedThreadsHash;
+  GMutex                            mDetachedMirMutex;
+
+  void register_detached_thread  (ZGlass *lens, GThread *thread);
+  void unregister_detached_thread(ZGlass *lens, GThread *thread);
+  bool cancel_and_join_thread    (ZGlass* lens, GThread* thread);
+
 #endif
 
   // Saturn services ... preliminary

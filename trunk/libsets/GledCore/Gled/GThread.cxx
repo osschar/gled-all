@@ -60,7 +60,6 @@ GThread::GThread(const Text_t* name) :
 
   mName     (name),
   mStartFoo (0), mStartArg (0),
-  mEndFoo   (0), mEndArg   (0),
   bDetached (false), bDetachOnExit (false),
   mNice     (0),
   mStackSize(0),
@@ -92,7 +91,6 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg,
 
   mName     (name),
   mStartFoo (foo), mStartArg (arg),
-  mEndFoo   (0),   mEndArg   (0),
   bDetached (detached), bDetachOnExit (detach_on_exit),
   mNice     (0),
   mStackSize(sMinStackSize),
@@ -130,6 +128,24 @@ GThread::~GThread()
   sContainerLock.Unlock();
 
   delete (ucontext_t*) mTerminalContext;
+}
+
+//==============================================================================
+
+void GThread::CleanupPush(GThread_cu_foo foo, void* arg)
+{
+  mCleanups.push_back(Cleanup(foo, arg));
+}
+
+void GThread::CleanupPop(bool execute_p)
+{
+  if (mCleanups.empty()) return;
+
+  if (execute_p)
+  {
+    mCleanups.back().Execute();
+  }
+  mCleanups.pop_back();
 }
 
 //==============================================================================
@@ -212,9 +228,10 @@ void GThread::thread_reaper(void* arg)
   self->mRunningState = RS_Terminating;
   sContainerLock.Unlock();
 
-  if (self->mEndFoo != 0)
+  while ( ! self->mCleanups.empty())
   {
-    (self->mEndFoo)(self->mEndArg);
+    self->mCleanups.back().Execute();
+    self->mCleanups.pop_back();
   }
 
   sContainerLock.Lock();
