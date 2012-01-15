@@ -1,3 +1,8 @@
+2012-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	Improve command-line parsing, add -debug option.
+
 2012-01-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve thread cleanup function treatment, in particular for
