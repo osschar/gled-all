@@ -737,22 +737,24 @@ void FTW_Nest::label_window(const char* l)
 
 int FTW_Nest::handle(int ev)
 {
-  if(ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == mWindow) {
+  if (ev == FL_SHORTCUT && Fl::event_key() == FL_Escape && parent() == mWindow)
+  {
     mWindow->iconize();
     return 1;
   }
-  if(ev == FL_ENTER || ev == FL_PUSH) { Fl::focus(this); }
-  if(ev == FL_FOCUS) return 1;
+  if (ev == FL_ENTER || ev == FL_PUSH) { Fl::focus(this); }
+  if (ev == FL_FOCUS) return 1;
 
   int ret = 0;
-  if(ev == FL_KEYBOARD) {
+  if (ev == FL_KEYBOARD)
+  {
     ret = 1;
     FTW::Locator& loc = Fl::event_state(FL_SHIFT) ? mMark : mPoint;
 
-    try {
-
-      switch(Fl::event_key()) {
-
+    try
+    {
+      switch(Fl::event_key())
+      {
       case FL_Up:    loc.up(); break;
       case FL_Down:  loc.down(); break;
       case FL_Left:  loc.left(); break;
@@ -782,6 +784,22 @@ int FTW_Nest::handle(int ev)
       return 1;
     }
 
+  }
+  else if (ev == FL_MOUSEWHEEL)
+  {
+    static GTime last;
+    GTime now(GTime::I_Now);
+    double dt = (now - last).ToDouble();
+    int f = 0;
+    if      (dt < 0.01) f = 16;
+    else if (dt < 0.03) f =  8;
+    else if (dt < 0.05) f =  4;
+    else if (dt < 0.1)  f =  2;
+    if (f) mPack->scrollbar.linesize(f * GetShell()->cell_h());
+    mPack->scrollbar.handle(ev);
+    if (f) mPack->scrollbar.linesize(GetShell()->cell_h());
+    last = now;
+    return 1;
   }
 
   if(ret == 0) ret = Fl_Group::handle(ev);

@@ -1,5 +1,10 @@
 2012-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* GledView/FTW_Nest.cxx:
+	Accelerate mousewheel scrolling with scrolling speed.
+
+2012-01-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Gled/Gled.cxx:
 	Improve command-line parsing, add -debug option.
 
