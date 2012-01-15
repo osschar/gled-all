@@ -50,9 +50,9 @@ int Gled::GetExitStatus()
 void Gled::next_arg_or_die(lStr_t& args, lStr_i& i)
 {
   lStr_i j = i;
-  if (++j == args.end())
+  if (++j == args.end() || (*j)[0] == '-' || j->EndsWith(".C"))
   {
-    cerr <<"Option "<< *i <<" requires an argument\n";
+    cerr <<"Error: option "<< *i <<" requires an argument.\n";
     exit(1);
   }
   i = j;
@@ -178,6 +178,7 @@ void Gled::ParseArguments()
              "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n"
              "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
              "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
+	     "  -debug     <lvl>   set debug level (some messages require debug build)\n"
              "\n"
              "Authentication options:\n"
              "  -auth              use authentication\n"
@@ -308,6 +309,12 @@ void Gled::ParseArguments()
       {
 	mOutFileName = *i;
       }
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "-debug")
+    {
+      next_arg_or_die(mArgs, i);
+      G_DEBUG = atoi(*i);
       mArgs.erase(start, ++i);
     }
 
@@ -445,7 +452,8 @@ void Gled::ProcessCmdLineMacros()
   {
     if ((*i)[0] == '-')
     {
-      warning(GForm("Ignoring option '%s'.", i->Data()));
+      cerr << "Error: unknown command-line option '" << *i << "'.\n";
+      exit(1);
     } else {
       rargv[rargc++] = i->Data();
     }
