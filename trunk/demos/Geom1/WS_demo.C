@@ -64,10 +64,9 @@ void WS_demo()
   image2->Load();
   image2->SetLoadAdEnlight(true);
 
-  WSSeed* seed1 = new WSSeed();
+  CREATE_ADD_GLASS(seed1, WSSeed, wsdemo, "WSSeed", 0);
   seed1->SetFat(true);
   seed1->SetTexture(image1);
-  g_queen->CheckIn(seed1); wsdemo->Add(seed1);
 
   Int_t NP = 10;
   WSPoint **points = new WSPoint[NP];
