@@ -34,8 +34,9 @@
 //
 // TODO:
 // - Needs proper thread cancellation.
-// - Read the request.
+// - Read the request. (Only 'GET' line is read and parsed for path, args.)
 // - Would be nice to return proper header, beyond 200 OK.
+//   (Somewhat done, but pointless without full request parsing, I reckon.)
 
 ClassImp(XrdEhs);
 
@@ -112,13 +113,13 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     if (f_srv) srv_re.Reset(args["server_re"], "o");
 
     bool f_cli = ( ! args["client_re"].IsNull());
-    if (f_cli) srv_re.Reset(args["client_re"], "o");
+    if (f_cli) cli_re.Reset(args["client_re"], "o");
 
     bool f_usr = ( ! args["user_re"].IsNull());
-    if (f_usr) srv_re.Reset(args["user_re"], "o");
+    if (f_usr) usr_re.Reset(args["user_re"], "o");
 
     bool f_fil = ( ! args["file_re"].IsNull());
-    if (f_fil) srv_re.Reset(args["file_re"], "o");
+    if (f_fil) fil_re.Reset(args["file_re"], "o");
 
     for (list<XrdFile*>::iterator xfi = mFileList.begin(); xfi != mFileList.end(); ++xfi)
     {
