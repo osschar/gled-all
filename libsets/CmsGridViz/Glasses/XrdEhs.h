@@ -13,40 +13,46 @@
 class XrdMonSucker;
 class XrdFile;
 
+#include "TPRegexp.h"
+
 class TSocket;
 
 
 class XrdEhs : public ZNameMap
 {
 private:
-   void _init();
+  void _init();
 
-   Bool_t	        b_stop_server; //!
+  Bool_t	       b_stop_server; //!
+
+  GMutex               m_re_mutex;    //!
+  TPMERegexp           m_req_line_re; //!
+  TPMERegexp           m_req_re;      //!
 
 protected:
-   ZLink<XrdMonSucker>  mXrdSucker;    // X{GS} L{a}
-   Int_t	        mPort;         // X{GS} 7 Value(-range=>[1,65535,1])
-   Bool_t	        bServerUp;     // X{GS} 7 BoolOut()
+  ZLink<XrdMonSucker>  mXrdSucker;    // X{GS} L{a}
+  Int_t	               mPort;         // X{GS} 7 Value(-range=>[1,65535,1])
+  Bool_t	       bServerUp;     // X{GS} 7 BoolOut()
 
-   list<XrdFile*>       mFileList;     //!
-   TimeStamp_t          mFileListTS;   //!
-   GMutex               mServeMutex;   //!
-   GTime                mServeTime;    //!
-   TString              mServeContent; //!
+  list<XrdFile*>       mFileList;     //!
+  TimeStamp_t          mFileListTS;   //!
+  GMutex               mServeMutex;   //!
+  GTime                mServeTime;    //!
+  TString              mServeContent; //!
 
-   void fill_content(const GTime& req_time, TString& content);
+  void fill_content(const GTime& req_time, TString& content, lStr_t& path, mStr2Str_t& args);
 
 public:
-   XrdEhs(const Text_t* n="XrdEhs", const Text_t* t=0);
-   virtual ~XrdEhs();
+  XrdEhs(const Text_t* n="XrdEhs", const Text_t* t=0);
+  virtual ~XrdEhs();
 
-   void StartServer(); // X{Ed} 7 MButt(-join=>1)
-   void StopServer();  // X{E}  7 MButt()
+  void StartServer(); // X{Ed} 7 MButt(-join=>1)
+  void StopServer();  // X{E}  7 MButt()
 
-   void ServePage(TSocket* sock);
+  void ServePage(TSocket* sock);
 
 #include "XrdEhs.h7"
-   ClassDef(XrdEhs, 1);
+  ClassDef(XrdEhs, 1);
 }; // endclass XrdEhs
 
 #endif
