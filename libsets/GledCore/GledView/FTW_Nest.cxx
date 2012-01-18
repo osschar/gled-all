@@ -755,26 +755,26 @@ int FTW_Nest::handle(int ev)
     {
       switch(Fl::event_key())
       {
-      case FL_Up:    loc.up(); break;
-      case FL_Down:  loc.down(); break;
-      case FL_Left:  loc.left(); break;
-      case FL_Right: loc.right(); break;
+        case FL_Up:    loc.up(); break;
+        case FL_Down:  loc.down(); break;
+        case FL_Left:  loc.left(); break;
+        case FL_Right: loc.right(); break;
 
-      case FL_Enter:
-	if(loc.leaf) {
-	  if(loc.ant)	loc.leaf->ExpandLink(loc.ant);
-	  else		loc.leaf->ExpandList();
-	}
-	break;
-      case FL_Insert: if(loc.leaf) loc.leaf->CollExp(); break;
-      case FL_Delete:
-	if(loc.leaf) {
-	  if(loc.ant)	loc.leaf->CollapseLink(loc.ant);
-	  else		loc.leaf->CollapseList();
-	}
-	break;
+        case FL_Enter:
+          if(loc.leaf) {
+            if(loc.ant)	loc.leaf->ExpandLink(loc.ant);
+            else		loc.leaf->ExpandList();
+          }
+          break;
+        case FL_Insert: if(loc.leaf) loc.leaf->CollExp(); break;
+        case FL_Delete:
+          if(loc.leaf) {
+            if(loc.ant)	loc.leaf->CollapseLink(loc.ant);
+            else		loc.leaf->CollapseList();
+          }
+          break;
 
-      default: ret = wMenuPack->handle(FL_SHORTCUT);
+        default: ret = wMenuPack->handle(FL_SHORTCUT);
 
       }// end switch
 
@@ -790,14 +790,23 @@ int FTW_Nest::handle(int ev)
     static GTime last;
     GTime now(GTime::I_Now);
     double dt = (now - last).ToDouble();
-    int f = 0;
-    if      (dt < 0.01) f = 16;
-    else if (dt < 0.03) f =  8;
-    else if (dt < 0.05) f =  4;
-    else if (dt < 0.1)  f =  2;
-    if (f) mPack->scrollbar.linesize(f * GetShell()->cell_h());
+    int f = 1;
+    if (Fl::event_state(FL_SHIFT))
+    {
+      f *= Fl::event_state(FL_CTRL) ? 25 : 5;
+    }
+    printf("modfac = %d\n", f);
+    if (Fl::event_state(FL_SHIFT) || !Fl::event_state(FL_SHIFT|FL_CTRL))
+    {
+      if      (dt < 0.01) f *= 16;
+      else if (dt < 0.03) f *=  8;
+      else if (dt < 0.05) f *=  4;
+      else if (dt < 0.1)  f *=  2;
+    }
+    printf(",  postspeed = %d\n", f);
+    if (f != 1) mPack->scrollbar.linesize(f * GetShell()->cell_h());
     mPack->scrollbar.handle(ev);
-    if (f) mPack->scrollbar.linesize(GetShell()->cell_h());
+    if (f != 1) mPack->scrollbar.linesize(GetShell()->cell_h());
     last = now;
     return 1;
   }
