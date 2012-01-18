@@ -7,11 +7,11 @@
 #include "FTW_Window.h"
 
 FTW_Window::FTW_Window(int w, int h, const char* t) :
-  Fl_Window(w,h,t),
+  Fl_Double_Window(w,h,t),
   Fl_SWM_Client()
 {}
 
 FTW_Window::FTW_Window(int x, int y, int w, int h, const char* t) :
-  Fl_Window(x,y,w,h,t),
+  Fl_Double_Window(x,y,w,h,t),
   Fl_SWM_Client()
 {}

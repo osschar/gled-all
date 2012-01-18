@@ -24,7 +24,7 @@ class MCW_View;
 class TSocket;
 
 #include <FL/Fl_SWM.H>
-#include <FL/Fl_Window.H>
+#include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Pack.H>
 
 class Fl_OutputPack;
@@ -34,7 +34,7 @@ class Fl_Menu_Button;
 
 class FTW_Shell : public Eye,
 		  public OptoStructs::A_View,
-		  public Fl_Window,
+		  public Fl_Double_Window,
 		  public Fl_SWM_Manager, public Fl_SWM_Client
 {
 public:
