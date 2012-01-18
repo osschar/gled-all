@@ -187,6 +187,9 @@ GledGUI::GledGUI() :
   // Fix defaults set by Gled constructor.
   mLogFileName = "<null>";
   mRenderers   = "GL";
+
+  // Call this early on, should be before first show().
+  Fl::visual(FL_DOUBLE|FL_RGB);
 }
 
 void GledGUI::ParseArguments()

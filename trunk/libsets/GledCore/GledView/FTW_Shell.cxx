@@ -192,7 +192,7 @@ namespace
 FTW_Shell::FTW_Shell(TSocket* sock, EyeInfo* ei, const Fl_SWM_Manager* swm_copy) :
   Eye(sock, ei),
   OS::A_View(0),
-  Fl_Window(1, 1),
+  Fl_Double_Window(1, 1),
   Fl_SWM_Manager(swm_copy), Fl_SWM_Client()
 {
   mSubShellCount = 0;
