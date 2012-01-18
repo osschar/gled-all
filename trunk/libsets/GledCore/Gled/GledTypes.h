@@ -34,6 +34,8 @@ typedef list<TString>::iterator		lStr_i;
 typedef list<TString>::const_iterator	lStr_ci;
 typedef set<TString>			sStr_t;
 typedef set<TString>::iterator		sStr_i;
+typedef map<TString,TString>            mStr2Str_t;
+typedef map<TString,TString>::iterator  mStr2Str_i;
 
 typedef ULong_t				TimeStamp_t;
 
