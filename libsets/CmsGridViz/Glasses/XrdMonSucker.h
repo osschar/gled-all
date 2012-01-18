@@ -11,7 +11,7 @@
 #include <Stones/SXrdServerId.h>
 #include <Gled/GTime.h>
 
-#include <TPRegexp.h>
+#include "TPRegexp.h"
 
 class XrdServer;
 class XrdUser;
