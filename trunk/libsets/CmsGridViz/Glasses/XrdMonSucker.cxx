@@ -18,8 +18,6 @@
 
 #include "CmsGridViz/XrdXrootdMonData.h"
 
-#include "TPRegexp.h"
-
 #include <cerrno>
 
 #include <sys/types.h>
