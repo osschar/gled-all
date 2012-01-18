@@ -795,7 +795,6 @@ int FTW_Nest::handle(int ev)
     {
       f *= Fl::event_state(FL_CTRL) ? 25 : 5;
     }
-    printf("modfac = %d\n", f);
     if (Fl::event_state(FL_SHIFT) || !Fl::event_state(FL_SHIFT|FL_CTRL))
     {
       if      (dt < 0.01) f *= 16;
@@ -803,7 +802,6 @@ int FTW_Nest::handle(int ev)
       else if (dt < 0.05) f *=  4;
       else if (dt < 0.1)  f *=  2;
     }
-    printf(",  postspeed = %d\n", f);
     if (f != 1) mPack->scrollbar.linesize(f * GetShell()->cell_h());
     mPack->scrollbar.handle(ev);
     if (f != 1) mPack->scrollbar.linesize(GetShell()->cell_h());
