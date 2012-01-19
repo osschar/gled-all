@@ -1,6 +1,11 @@
 2012-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZLog.cxx:
+	Make sure there is a blank between prefix and message.
+
+2012-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZLog.cxx:
 	* Glasses/ZLog.h:
 	Add Put() and Form() that implicitly call GTime::Now().
 

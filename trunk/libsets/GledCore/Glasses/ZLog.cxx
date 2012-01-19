@@ -226,9 +226,10 @@ void ZLog::Put(Int_t level, const TString& time_string, const TString& prefix, c
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
+  TString pim(prefix.EndsWith(" ") ? "" : " ");
 
   GMutexHolder _lck(mLoggerCond);
-  mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
+  mStream << time_string << " " << lvl_name << " " << prefix << pim << message << endl;
 }
 
 void ZLog::Form(Int_t level, const TString& prefix, const char* va_(fmt), ...)
@@ -251,7 +252,6 @@ void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, 
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
-
   TString message;
   {
     va_list ap;
@@ -259,9 +259,10 @@ void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, 
     message = GForm(va_(fmt), ap);
     va_end(ap);
   }
+  TString pim(prefix.EndsWith(" ") ? "" : " ");
 
   GMutexHolder _lck(mLoggerCond);
-  mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
+  mStream << time_string << " " << lvl_name << " " << prefix << pim << message << endl;
 }
 
 void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* va_(fmt), va_list args)
@@ -273,11 +274,11 @@ void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, 
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
-
-  TString message = GForm(va_(fmt), args);
+  TString message(GForm(va_(fmt), args));
+  TString pim(prefix.EndsWith(" ") ? "" : " ");
 
   GMutexHolder _lck(mLoggerCond);
-  mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
+  mStream << time_string << " " << lvl_name << " " << prefix << pim << message << endl;
 }
 
 
