@@ -1,5 +1,11 @@
 2012-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Add Put() and Form() that implicitly call GTime::Now().
+
+2012-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* GledView/FTW_Nest.cxx:
 	Further modify mousewheel scrolling speed by shift/ctrl keys.
 	Shift 5x, CtrlShift 25x; Ctrl - disable all acceleration.
