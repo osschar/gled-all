@@ -85,9 +85,11 @@ public:
 
   // void ReopenFile();   // X{E}
 
+  void Put(Int_t level, const TString& prefix, const TString& message);
   void Put(Int_t level, const GTime& time, const TString& prefix, const TString& message);
   void Put(Int_t level, const TString& time_string, const TString& prefix, const TString& message);
 
+  void Form(Int_t level, const TString& prefix, const char* fmt, ...);
   void Form(Int_t level, const GTime& time, const TString& prefix, const char* fmt, ...);
   void Form(Int_t level, const TString& time_string, const TString& prefix, const char* fmt, ...);
   // #if defined(__GNUC__) && !defined(__CINT__)

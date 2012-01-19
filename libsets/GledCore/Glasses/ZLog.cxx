@@ -78,7 +78,7 @@ void ZLog::StartLogging()
     if (mStream.fail())
       throw _eh + "Opening of log '" + mFileName + "' failed.";
 
-    mStream << "******************** Logging started at " << GTime(GTime::I_Now).ToDateTimeLocal(false) << " ********************" << endl;
+    mStream << "******************** Logging started at " << GTime::Now().ToDateTimeLocal(false) << " ********************" << endl;
 
     mLoggerThread = new GThread("ZLog-LogLoop", (GThread_foo) tl_LogLoop, this);
     mLoggerThread->SetNice(20);
@@ -107,7 +107,7 @@ void ZLog::StopLogging()
     thr->Cancel();
     thr->Join();
 
-    mStream << "******************** Logging stopped at " << GTime(GTime::I_Now).ToDateTimeLocal(false) << " ********************" << endl;
+    mStream << "******************** Logging stopped at " << GTime::Now().ToDateTimeLocal(false) << " ********************" << endl;
     mStream.close();
     mLoggerThread = 0;
   }
@@ -131,7 +131,7 @@ void ZLog::RotateLog()
 
   if (gSystem->AccessPathName(mFileName, kFileExists) == false)
   {
-    TString newfile = mFileName + "." + GTime(GTime::I_Now).ToDateLocal();
+    TString newfile = mFileName + "." + GTime::Now().ToDateLocal();
     if (gSystem->AccessPathName(newfile, kFileExists) == false)
     {
       Int_t cnt = 1;
@@ -168,16 +168,13 @@ void ZLog::LogLoop()
 
   GThread::UnblockSignal(GThread::SigUSR1);
 
-  GTime start(GTime::I_Now);
-
   while (true)
   {
     GTime::SleepMiliSec(10*1000, true, false);
 
     if (gSystem->AccessPathName(mFileName, kFileExists) == true)
     {
-      start.SetNow();
-      TString time(start.ToDateTimeLocal(false));
+      TString time(GTime::Now().ToDateTimeLocal(false));
       GMutexHolder _lck(mLoggerCond);
       mStream << "******************** Logging rotated at " << time << " ********************" << endl;
       mStream.close();
@@ -215,6 +212,11 @@ namespace
     _name_ += char('0' + _lvl_ - L_Debug); \
   }
 
+void ZLog::Put(Int_t level, const TString& prefix, const TString& message)
+{
+  Put(level, GTime::Now().ToDateTimeLocal(false), prefix, message);
+}
+
 void ZLog::Put(Int_t level, const GTime& time, const TString& prefix, const TString& message)
 {
   Put(level, time.ToDateTimeLocal(false), prefix, message);
@@ -227,6 +229,14 @@ void ZLog::Put(Int_t level, const TString& time_string, const TString& prefix, c
 
   GMutexHolder _lck(mLoggerCond);
   mStream << time_string << " " << lvl_name << " " << prefix << message << endl;
+}
+
+void ZLog::Form(Int_t level, const TString& prefix, const char* va_(fmt), ...)
+{
+  va_list ap;
+  va_start(ap, va_(fmt));
+  Form(level, GTime::Now().ToDateTimeLocal(false), prefix, va_(fmt), ap);
+  va_end(ap);
 }
 
 void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* va_(fmt), ...)
