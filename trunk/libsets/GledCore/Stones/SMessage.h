@@ -7,7 +7,11 @@
 #ifndef CmsGridViz_SMessage_H
 #define CmsGridViz_SMessage_H
 
+#include "Gled/GledTypes.h"
 #include "TMessage.h"
+
+class ZLog;
+class TSocket;
 
 class SMessage : public TMessage
 {
@@ -17,6 +21,14 @@ public:
   virtual ~SMessage();
 
   void SetLength() const { TMessage::SetLength(); }
+
+  void    Send(TSocket* sock, Bool_t set_length);
+  Bool_t  SendOrReport(TSocket* sock, Bool_t set_length, const Exc_t& eh,
+                       Bool_t log_to_is=true, ZLog* log=0);
+
+  static SMessage* Receive(TSocket* sock);
+  static SMessage* ReceiveOrReport(TSocket* sock, const Exc_t& eh,
+                                   Bool_t log_to_is=true, ZLog* log=0);
 
   ClassDef(SMessage, 0);
 }; // endclass SMessage
