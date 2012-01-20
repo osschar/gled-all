@@ -1,3 +1,10 @@
+2012-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SMessage.cxx:
+	* Stones/SMessage.h:
+	Add functions to send and receive messages, including error
+	reporting to info-stream and to a provided ZLog.
+
 2012-01-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZLog.cxx:
