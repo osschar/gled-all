@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "UdpPacketProcessor.h"
+#include "Glasses/ZLog.h"
 #include "UdpPacketProcessor.c7"
 #include "UdpPacketTcpClient.h"
 
@@ -21,7 +22,6 @@
 #include <TBranch.h>
 
 #include <cerrno>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -233,31 +233,43 @@ void UdpPacketProcessor::Serve()
     mSelector.Select();
     GThread::CancelOff();
 
-    for (GFdSet_i i=mSelector.fReadOut.begin(); i!=mSelector.fReadOut.end(); i++)
+    for (GFdSet_i i = mSelector.fReadOut.begin(); i != mSelector.fReadOut.end(); ++i)
     {
       TSocket* s = (TSocket*) i->first;
       if (s == mServSocket)
       {
+        // New client.
+
         TSocket *cs = mServSocket->Accept();
 
-        Info(_eh, "Connection from %s:%d.",
-             cs->GetInetAddress().GetHostName(), cs->GetLocalPort());
+        TString msg = GForm("New connection from %s.", cs->GetInetAddress().GetHostName());
+        ISmess(_eh + msg);
+        mLog->Form(ZLog::L_Message, _eh, msg);
 
         AddClient(cs);
       }
       else
       {
-        Info(_eh, "Message from some other socket, ignoring.");
-
         // Message from some other socket.
-        // Can be close ... which is the only thing we MUST handle, to the first order.
+        // Can be close ... which is the only thing we MUST handle, to the
+        // first order.
+        // Eventually support other stuff, like streaming/compression control,
+        // play-back, etc. Maybe.
 
-        // see how to check for close.
-
-        // write client, just dumping goit this, that ... and disconnect.
+        SMessage *m = SMessage::ReceiveOrReport(s, _eh, true, *mLog);
+        if (m)
+        {
+          ISmess(_eh + GForm("Got messge from %s, len=%u, what=%u.",
+                             s->GetInetAddress().GetHostName(),
+                             m->Length(), m->What()));
+          delete m;
+        }
+        else if (s->TestBit(TSocket::kBrokenConn))
+        {
+          RemoveClient(s);
+        }
       }
     }
-
   }
 }
 
@@ -330,23 +342,22 @@ void UdpPacketProcessor::Deliver()
     list<TSocket*>::iterator i = mClients.begin();
     while (i != mClients.end())
     {
-      Int_t len = (*i)->SendRaw(msg.Buffer(), msg.Length());
-
-      if (len != msg.Length())
+      try
       {
-        cout << _eh << "sent too little!\n";
+        msg.Send(*i, false);
       }
-
-      if (len < 0)
+      catch (Int_t err)
       {
-        cout << _eh << "other guy closed connection, it seems.\n";
+        TString msg(GForm("Error %d sending to %s:%d (%s). Closing connection.", err,
+                          (*i)->GetInetAddress().GetHostName(), (*i)->GetLocalPort(), strerror(errno)));
+        ISmess(_eh + msg);
+        mLog->Form(ZLog::L_Error, _eh, msg);
+
         list<TSocket*>::iterator j = i++;
         RemoveClient(j);
+        continue;
       }
-      else
-      {
-        ++i;
-      }
+      ++i;
     }
     mSelector.Unlock();
 
@@ -411,7 +422,7 @@ void UdpPacketProcessor::StopAllServices()
   thr->Join();
   close(mSocket);
 
-  mServThread->Kill();
+  mServThread->Cancel();
   mServThread->Join();
   // ?? delete mServThread; later ?? just set to 0 ??
   {

@@ -13,6 +13,7 @@
 #include "Gled/GSelector.h"
 #include "Gled/GTime.h"
 
+class ZLog;
 class SUdpPacket;
 
 class TServerSocket;
@@ -27,6 +28,8 @@ private:
   void _init();
 
 protected:
+  ZLink<ZLog>       mLog;          // X{GS} L{}
+
   Int_t             mSuckPort;     // X{GS} 7 Value()
   Int_t             mSocket;       //!
   GThread          *mSuckerThread; //!

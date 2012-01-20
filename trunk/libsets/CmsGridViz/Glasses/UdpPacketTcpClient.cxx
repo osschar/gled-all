@@ -13,7 +13,6 @@
 
 #include <TSocket.h>
 
-
 // UdpPacketTcpClient
 
 //______________________________________________________________________________
@@ -52,6 +51,8 @@ void* UdpPacketTcpClient::tl_ListenLoop(UdpPacketTcpClient* c)
 
 void UdpPacketTcpClient::ListenLoop()
 {
+  static const Exc_t _eh("UdpPacketTcpClient::ListenLoop ");
+
   GSelector sel;
   sel.fRead.Add(mSocket);
 
@@ -66,27 +67,25 @@ void UdpPacketTcpClient::ListenLoop()
       TSocket* s = (TSocket*) i->first;
       assert(s == mSocket);
 
-      UInt_t len; mSocket->RecvRaw(&len, sizeof(UInt_t));
-      len = net2host(len);
-      UInt_t len2 = len + sizeof(UInt_t);
+      SMessage *m = SMessage::ReceiveOrReport(s, _eh);
+      if (m)
+      {
+        printf("Got len=%d, typ=%u\n", m->Length(), m->What());
 
-      UChar_t *buf = new UChar_t[len2];
+        SUdpPacket *p = new SUdpPacket;
+        p->NetStreamer(*m);
+        delete m;
 
-      mSocket->RecvRaw(buf + sizeof(UInt_t), len);
+        printf("  Msg from %hhu.%hhu.%hhu.%hhu:%hu, len=%hu, N_consumers=%d\n",
+               p->mAddr[0], p->mAddr[1], p->mAddr[2], p->mAddr[3],
+               p->mPort, p->mBuffLen, mConsumerSet.GetSetSize());
 
-      SMessage msg(buf, len2);
-
-      printf("Got len=%u, typ=%u\n", len, msg.What());
-
-      SUdpPacket *p = new SUdpPacket;
-
-      p->NetStreamer(msg);
-
-      printf("  Msg from %hhu.%hhu.%hhu.%hhu:%hu, len=%hu, N_consumers=%d\n",
-             p->mAddr[0], p->mAddr[1], p->mAddr[2], p->mAddr[3],
-             p->mPort, p->mBuffLen, mConsumerSet.GetSetSize());
-
-      mConsumerSet.DeliverToQueues(p);
+        mConsumerSet.DeliverToQueues(p);
+      }
+      else
+      {
+        // if (s->TestBit(TSocket::kBrokenConn)) close etc ... schedule reconnect
+      }
     }
   }
 }
@@ -95,13 +94,55 @@ void UdpPacketTcpClient::ConnectAndListenLoop()
 {
   static const Exc_t _eh("UdpPacketTcpClient::ConnectAndListenLoop ");
 
-  mSocket = new TSocket(mHost, mPort);
+  {
+    GLensReadHolder _lck(this);
+    if (mListenerThread)
+      throw _eh + "already running.";
 
-  mListenerThread = new GThread("UdpPacketTcpClient-ListenLoop",
-                                (GThread_foo) tl_ListenLoop, this,
-                                false);
-  mListenerThread->SetNice(0);
+    mSocket = new TSocket(mHost, mPort);
+
+    mListenerThread = new GThread("UdpPacketTcpClient-ListenLoop",
+                                  (GThread_foo) tl_ListenLoop, this,
+                                  false);
+    mListenerThread->SetNice(0);
+  }
+
   mListenerThread->Spawn();
+}
+
+void UdpPacketTcpClient::StopListening(Bool_t close_p)
+{
+  static const Exc_t _eh("UdpPacketTcpClient::StopListening ");
+
+  GThread *thr = 0;
+  {
+    GLensReadHolder _lck(this);
+    if ( ! GThread::IsValidPtr(mListenerThread))
+      throw _eh + "not running.";
+    thr = mListenerThread;
+    GThread::InvalidatePtr(mListenerThread);
+  }
+
+  thr->Cancel();
+  thr->Join();
+  if (close_p)
+    mSocket->Close();
+  delete mSocket;
+  mSocket = 0;
+
+  {
+    GLensReadHolder _lck(this);
+    mListenerThread = 0;
+  }
+}
+
+//==============================================================================
+
+void UdpPacketTcpClient::SendMessage()
+{
+  SMessage msg(666);
+  msg << "Hello from HELL!";
+  msg.Send(mSocket, true);
 }
 
 //==============================================================================
