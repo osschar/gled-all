@@ -44,6 +44,9 @@ public:
   virtual ~UdpPacketTcpClient();
 
   void ConnectAndListenLoop(); // X{Ed} 7 MButt()
+  void StopListening(Bool_t close_p=true);        // X{Ed} 7 MCWButt()
+
+  void SendMessage(); // X{Ed} 7 MButt()
 
   void RegisterConsumer  (Queue_t* q);
   void UnregisterConsumer(Queue_t* q);
