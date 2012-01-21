@@ -336,7 +336,7 @@ void GThread::ClearRootTThreadRepresentation()
   // Wipe root's TThread representation of the calling thread.
   // This is needed as root's TSD schema expects TThread representation
   // does not exist for whatever it calls the main thread.
-  // So we wipe it from the Rint thread.
+  // So we wipe it from the Root application thread.
 
   delete mRootTThread;
   mRootTThread = 0;

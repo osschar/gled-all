@@ -13,7 +13,6 @@
 #include <Gled/GThread.h>
 #include <Gled/GCondition.h>
 
-#include <TRint.h>
 #include <Getline.h>
 
 #include <stdio.h>
@@ -45,13 +44,13 @@ int main(int argc, char **argv)
   gled_exit.Lock();
   gled->SetExitCondVar(&gled_exit);
 
-  // Run TRint
-  GThread *app_thread = gled->SpawnTRintThread("saturn.cxx");
+  // Run Root Application thread
+  GThread *app_thread = gled->SpawnRootAppThread("saturn.cxx");
 
   gled_exit.Wait();
   gled_exit.Unlock();
 
-  if (gled->GetRintRunning())
+  if (gled->GetRootAppRunning())
   {
     app_thread->Kill(GThread::SigTERM);
   } else {

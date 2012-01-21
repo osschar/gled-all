@@ -64,17 +64,18 @@ Gled::Gled() :
   mSaturn       (0),
   bIsSun        (false),
   bQuit         (false),
+  bHasPrompt    (true),
   bShowSplash   (true),
   bPreExec      (false),
   bAutoSpawn    (false),
   bAllowMoons   (false),
-  bRintRunning  (false),
-  mRint         (0),
+  bRootAppRunning(false),
+  mRootApp      (0),
   mLoggingMutex (GMutex::recursive),
   mLogFile      (0),
   mOutFile      (0),
   mExitCondVar  (0),
-  mRintThread   (0),
+  mRootAppThread(0),
   mExitThread   (0)
 {
   if (theOne)
@@ -172,6 +173,7 @@ void Gled::ParseArguments()
              "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
              "  -n[ame]    <str>   name of Saturn\n"
              "  -t[itle]   <str>   title of Saturn\n"
+             "  -noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
              "  -l                 no splash info\n"
              "\n"
              "Logging options:\n"
@@ -267,6 +269,11 @@ void Gled::ParseArguments()
     {
       next_arg_or_die(mArgs, i);
       mSaturnInfo->SetTitle(*i);
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "-noprompt")
+    {
+      bHasPrompt = false;
       mArgs.erase(start, ++i);
     }
     else if (*i == "-l")
@@ -434,6 +441,10 @@ void Gled::InitGledCore()
   }
 }
 
+#include "TObjArray.h"
+#include "TObjString.h"
+#include "TException.h"
+
 void Gled::ProcessCmdLineMacros()
 {
   // Prepare remaining args for ROOT, weed out remaining options
@@ -442,10 +453,9 @@ void Gled::ProcessCmdLineMacros()
 
   // Argument count and strings to be passed to root.
   int         rargc = 0;
-  const char* rargv[mArgs.size() + 3];
+  const char* rargv[mArgs.size() + 2];
 
   rargv[rargc++] = mCmdName;
-  rargv[rargc++] = "-q"; // This enforces return from TRint::Run() after macro processing
   if (!bShowSplash)
     rargv[rargc++] = "-l";
   for (lStr_i i = mArgs.begin(); i != mArgs.end(); ++i)
@@ -465,14 +475,22 @@ void Gled::ProcessCmdLineMacros()
     PreExec();
   }
 
-  // Spawn TRint
+  // Spawn Root Application
   if (bShowSplash)
   {
     printf("Staring ROOT command-line interpreter ...\n");
   }
 
-  mRint = new TRint("TRint", &rargc, (char**) rargv);
-  mRint->SetPrompt(mCmdName + "[%d] ");
+  if (bHasPrompt)
+  {
+    TRint *rint = new TRint("TRint", &rargc, (char**) rargv);
+    rint->SetPrompt(mCmdName + "[%d] ");
+    mRootApp = rint;
+  }
+  else
+  {
+    mRootApp = new TApplication("TApplication", &rargc, (char**) rargv);
+  }
 
   // Spawn saturn
   if (bAutoSpawn)
@@ -480,27 +498,110 @@ void Gled::ProcessCmdLineMacros()
     SpawnSunOrSaturn();
   }
 
-  // Process macros; -q added to options, so it exits after macro processing
+  volatile Bool_t needGetlinemInit = kFALSE;
   try
   {
     GThread::OwnerChanger _chown(mSaturnInfo);
 
-    mRint->Run(true);
+    if (bHasPrompt)
+      Getlinem(kInit, mCmdName + "[%d] ");
+
+    Long_t retval = 0;
+    Int_t  error = 0;
+
+    if (strlen(mRootApp->WorkingDirectory())) {
+      // if directory specified as argument make it the working directory
+      gSystem->ChangeDirectory(mRootApp->WorkingDirectory());
+      TSystemDirectory *workdir = new TSystemDirectory("workdir", gSystem->WorkingDirectory());
+      TObject *w = gROOT->GetListOfBrowsables()->FindObject("workdir");
+      TObjLink *lnk = gROOT->GetListOfBrowsables()->FirstLink();
+      while (lnk) {
+        if (lnk->GetObject() == w) {
+          lnk->SetObject(workdir);
+          lnk->SetOption(gSystem->WorkingDirectory());
+          break;
+        }
+        lnk = lnk->Next();
+      }
+      delete w;
+    }
+
+    // Process shell command line input files
+    if (mRootApp->InputFiles()) {
+      // Make sure that calls into the event loop
+      // ignore end-of-file on the terminal.
+      // fInputHandler->DeActivate();
+      TIter next(mRootApp->InputFiles());
+      RETRY {
+        retval = 0; error = 0;
+        Int_t nfile = 0;
+        TObjString *file;
+        while ((file = (TObjString *)next())) {
+          char cmd[kMAXPATHLEN+50];
+          Bool_t rootfile = kFALSE;
+            
+          if (file->String().EndsWith(".root") || file->String().BeginsWith("file:")) {
+            rootfile = kTRUE;
+          } else {
+            FILE *mayberootfile = fopen(file->String(),"rb");
+            if (mayberootfile) {
+              char header[5];
+              if (fgets(header,5,mayberootfile)) {
+                rootfile = strncmp(header,"root",4)==0;
+              }
+              fclose(mayberootfile);
+            }
+          }
+          if (rootfile) {
+            // special trick to be able to open files using UNC path names
+            if (file->String().BeginsWith("\\\\"))
+              file->String().Prepend("\\\\");
+            file->String().ReplaceAll("\\","/");
+            const char *rfile = (const char*)file->String();
+            Printf("Attaching file %s as _file%d...", rfile, nfile);
+            snprintf(cmd, kMAXPATHLEN+50, "TFile *_file%d = TFile::Open(\"%s\")", nfile++, rfile);
+          } else {
+            Printf("Processing %s...", (const char*)file->String());
+            snprintf(cmd, kMAXPATHLEN+50, ".x %s", (const char*)file->String());
+          }
+          if (bHasPrompt) {
+            Getlinem(kCleanUp, 0);
+            Gl_histadd(cmd);
+          }
+
+          // The ProcessLine might throw an 'exception'.  In this case,
+          // GetLinem(kInit,"Root >") is called and we are jump back
+          // to RETRY ... and we have to avoid the Getlinem(kInit, GetPrompt());
+          needGetlinemInit = kFALSE;
+          retval = mRootApp->ProcessLine(cmd, kFALSE, &error);
+          gCint->EndOfLineAction();
+          Printf("Return value of command: %ld", retval);
+
+          // The ProcessLine has successfully completed and we need
+          // to call Getlinem(kInit, GetPrompt());
+          needGetlinemInit = kTRUE;
+
+          if (error != 0) break;
+        }
+      } ENDTRY;
+    }
   }
   catch(exception& exc)
   {
     fprintf(stderr, "%sexception caught during macro processing:\n%s\n",
-	    _eh.Data(), exc.what());
+            _eh.Data(), exc.what());
     exit(1);
   }
 
-  if (mRint->InputFiles())
-  {
-    mRint->ClearInputFiles();
+  if (mRootApp->InputFiles()) {
+    mRootApp->ClearInputFiles();
   } else {
-    Getlinem(kCleanUp, 0);
+    if (bHasPrompt && needGetlinemInit)
+      Getlinem(kCleanUp, 0);
   }
-  Getlinem(kInit, mRint->GetPrompt());
+  if (bHasPrompt) {
+    Getlinem(kInit, mCmdName + "[%d] ");
+  }
 
   if (bAllowMoons)
   {
@@ -526,7 +627,7 @@ void Gled::StopLogging()
 Gled::~Gled()
 {
   delete mSaturn;
-  delete mRint;
+  delete mRootApp;
 }
 
 /**************************************************************************/
@@ -669,7 +770,7 @@ Bool_t Gled::IsIdentityInGroup(const char* id, const char* group)
 {
   //printf("Gled::IsIdentityInGroup checking if %s in group %s\n", id, group);
   return (gSystem->Exec(GForm("grep -q %s %s/groups/%s",
-			      id, mAuthDir.Data(), group)) == 0) ? true : false;;
+                              id, mAuthDir.Data(), group)) == 0) ? true : false;;
 }
 
 /**************************************************************************/
@@ -903,12 +1004,12 @@ namespace
 
       Exc_t* ex = dynamic_cast<Exc_t*>(&exc);
       if (ex) {
-	cout <<"TRint runner caught exception: "<< ex << endl;
-	cout <<"TRint runner reentering event loop ...\n";
-	return kSEHandled;
+        cout <<"RootApp runner caught exception: "<< ex << endl;
+        cout <<"RootApp runner reentering event loop ...\n";
+        return kSEHandled;
       } else {
-	cout <<"TRint runner caught std exception: "<< exc.what() <<endl;
-	return kSEProceed;
+        cout <<"RootApp runner caught std exception: "<< exc.what() <<endl;
+        return kSEProceed;
       }
     }
   };
@@ -927,6 +1028,21 @@ namespace
     }
   };
 
+  // This one is only use when no prompt / TApplication is used.
+  class GInterruptHandler : public TSignalHandler
+  {
+  public:
+    GInterruptHandler() : TSignalHandler(kSigInterrupt, kTRUE) { Add(); }
+    virtual ~GInterruptHandler() {}
+
+    virtual Bool_t Notify()
+    {
+      cout << "\nReceived SIGINT ... initiating shutdown.\n";
+      gSystem->ExitLoop();
+      return kFALSE;
+    }
+  };
+
   class GSigChildHandler : public TSignalHandler
   {
   public:
@@ -937,26 +1053,26 @@ namespace
   };
 }
 
-GThread* Gled::SpawnTRintThread(const TString& name_prefix)
+GThread* Gled::SpawnRootAppThread(const TString& name_prefix)
 {
   // Spawns thread running ROOT's main event loop.
   // Makes sure the stack size is at least 8MB.
 
-  static const Exc_t _eh("Gled::SpawnTRintThread ");
+  static const Exc_t _eh("Gled::SpawnRootAppThread ");
 
   GThread* thr = new GThread(name_prefix + "-TRintRunner",
-                    (GThread_foo) TRint_runner_tl, 0, false);
+                             (GThread_foo) RootApp_runner_tl, 0, false);
   thr->SetStackSize(8*1024*1024);
   if (thr->Spawn())
   {
-    perror(_eh + "can not create Rint thread, aborting.");
+    perror(_eh + "can not create RootApp thread, aborting.");
     exit(1);
     return 0;
   }
   return thr;
 }
 
-void* Gled::TRint_runner_tl(void*)
+void* Gled::RootApp_runner_tl(void*)
 {
   // Runs the ROOT application.
   // Ownership set to mSaturnInfo.
@@ -965,15 +1081,16 @@ void* Gled::TRint_runner_tl(void*)
 
   self->set_owner(Gled::theOne->mSaturnInfo);
 
-  Gled::theOne->mRintThread = self;
+  Gled::theOne->mRootAppThread = self;
 
   // Activate some signals -- this thread handles most system signals.
   // Handler for those (and for CPU exceptions) is installed in
   // TUnixSystem::Init(). This is called from TROOT constructor.
   // And TROOT constructor is called via static initialization of gROOT.
   //
-  // SigINT is set from TRint constructor (instantiated in, not very
-  // intuitively, in ProcessCmdLineMacros()).
+  // For TRint, SigINT is set from TRint constructor (instantiated in, not
+  // very intuitively, in ProcessCmdLineMacros()). For TApplication we install
+  // our own ... that will exit like SigTERM.
 
   GThread::UnblockSignal(GThread::SigHUP);
   GThread::UnblockSignal(GThread::SigINT);
@@ -993,25 +1110,30 @@ void* Gled::TRint_runner_tl(void*)
   // Root does not want TThread to exist for the main thread.
   self->ClearRootTThreadRepresentation();
 
-  // Those two will be deleted in ~TROOT().
-  new GTerminateHandler;
+  // The sig-handlers will be deleted in ~TROOT().
   new GSigChildHandler;
+  new GTerminateHandler;
+  if ( ! Gled::theOne->GetHasPrompt())
+  {
+    new GInterruptHandler;
+  }
+
   new GExceptionHandler;
 
   // Global ROOT settings.
   TH1::AddDirectory(kFALSE);
 
-  self->CleanupPush((GThread_cu_foo) TRint_cleanup_tl, 0);
+  self->CleanupPush((GThread_cu_foo) RootApp_cleanup_tl, 0);
 
   Gled::theOne->ProcessCmdLineMacros();
 
   TRootXTReq::Bootstrap(self);
   GThread::UnblockSignal(GThread::SigUSR1);
 
-  Gled::theOne->bRintRunning = true;
-  Gled::theOne->mRint->TApplication::Run(true);
-  Gled::theOne->bRintRunning = false;
-  cout << "TRint::Run() exit ...\n";
+  Gled::theOne->bRootAppRunning = true;
+  Gled::theOne->mRootApp->TApplication::Run(true);
+  Gled::theOne->bRootAppRunning = false;
+  cout << "TApplication::Run() exit ...\n";
 
   GThread::BlockSignal(GThread::SigUSR1);
   TRootXTReq::Shutdown();
@@ -1021,15 +1143,15 @@ void* Gled::TRint_runner_tl(void*)
   if (Gled::theOne->GetQuit() == false)
     Gled::theOne->Exit();
 
-  Gled::theOne->mRintThread = 0;
+  Gled::theOne->mRootAppThread = 0;
 
   return 0;
 }
 
-void Gled::TRint_cleanup_tl(void*)
+void Gled::RootApp_cleanup_tl(void*)
 {
-  cout << "Thread running TRint::Run() canceled ... expect trouble.\n";
-  Gled::theOne->mRint->Terminate(0);
+  cout << "Thread running TApplication::Run() canceled ... expect trouble.\n";
+  Gled::theOne->mRootApp->Terminate(0);
 }
 
 /**************************************************************************/
@@ -1041,10 +1163,10 @@ void Gled::TRint_cleanup_tl(void*)
 void InfoStream(InfoStream_e type, const char* s)
 {
   switch (type) {
-  case ISoutput:  Gled::theOne->output(s);  break;
-  case ISmessage: Gled::theOne->message(s); break;
-  case ISwarning: Gled::theOne->warning(s); break;
-  case ISerror:   Gled::theOne->error(s);   break;
+    case ISoutput:  Gled::theOne->output(s);  break;
+    case ISmessage: Gled::theOne->message(s); break;
+    case ISwarning: Gled::theOne->warning(s); break;
+    case ISerror:   Gled::theOne->error(s);   break;
   }
 }
 
