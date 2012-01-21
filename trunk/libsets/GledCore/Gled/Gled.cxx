@@ -23,6 +23,9 @@
 #include <TROOT.h>
 #include <TInterpreter.h>
 #include <TRint.h>
+#include <TObjArray.h>
+#include <TObjString.h>
+#include <TException.h>
 #include <TMath.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
@@ -441,10 +444,6 @@ void Gled::InitGledCore()
   }
 }
 
-#include "TObjArray.h"
-#include "TObjString.h"
-#include "TException.h"
-
 void Gled::ProcessCmdLineMacros()
 {
   // Prepare remaining args for ROOT, weed out remaining options
@@ -503,8 +502,7 @@ void Gled::ProcessCmdLineMacros()
   {
     GThread::OwnerChanger _chown(mSaturnInfo);
 
-    if (bHasPrompt)
-      Getlinem(kInit, mCmdName + "[%d] ");
+    // This is a shameless cut-n-paste from TRint::Run()
 
     Long_t retval = 0;
     Int_t  error = 0;
@@ -575,7 +573,9 @@ void Gled::ProcessCmdLineMacros()
           needGetlinemInit = kFALSE;
           retval = mRootApp->ProcessLine(cmd, kFALSE, &error);
           gCint->EndOfLineAction();
-          Printf("Return value of command: %ld", retval);
+	  if (retval) {
+	    Printf("Command '%s' returned %ld.", cmd, retval);
+	  }
 
           // The ProcessLine has successfully completed and we need
           // to call Getlinem(kInit, GetPrompt());
@@ -599,8 +599,8 @@ void Gled::ProcessCmdLineMacros()
     if (bHasPrompt && needGetlinemInit)
       Getlinem(kCleanUp, 0);
   }
-  if (bHasPrompt) {
-    Getlinem(kInit, mCmdName + "[%d] ");
+  if (bHasPrompt && needGetlinemInit) {
+    Getlinem(kInit, ((TRint*)mRootApp)->GetPrompt());
   }
 
   if (bAllowMoons)
