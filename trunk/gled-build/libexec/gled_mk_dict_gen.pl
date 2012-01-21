@@ -16,22 +16,27 @@ Gled_ConfCat_Parser::parse_catalog();
 
 my $dict = $config->{DICT_DIR};
 
-while($_=shift) {
+while ($_ = shift)
+{
   ($cname) = m!/(\w+).h$!;
   # $cname is base name of the file and by default also class name
 
   my $pragma_default;
   my $pragma_link;
 
-  if($CATALOG->{Classes}{$cname}{NoDefault} == 0) {
-
+  if ($CATALOG->{Classes}{$cname}{NoDefault} == 0)
+  {
     my $pragma_suff;
-    if(defined $CATALOG->{Classes}{$cname}{PragmaSuff}) {
+    if (defined $CATALOG->{Classes}{$cname}{PragmaSuff})
+    {
       $pragma_suff = $CATALOG->{Classes}{$cname}{PragmaSuff};
-    } else {
+    }
+    else
+    {
       $pragma_suff = "+";
     }
-    if(defined $resolver->{GlassName2GlassSpecs}{$cname}) {
+    if (defined $resolver->{GlassName2GlassSpecs}{$cname})
+    {
       $pragma_link = "#pragma link C++ class ZLink<${cname}>;";
     }
 
@@ -68,5 +73,6 @@ END
   my $ret = `$exe`;
   croak $ret if $?;
 }
+
 # Remove all traces
 #unlink "${cname}_LinkDef.h";
