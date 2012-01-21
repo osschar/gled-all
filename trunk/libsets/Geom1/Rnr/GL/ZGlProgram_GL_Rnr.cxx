@@ -160,7 +160,7 @@ void ZGlProgram_GL_Rnr::extract_uniform_vars()
 
     // i R assuming the uni and loc are the same ... check anyway.
     if (loc != -1 && loc != uni)
-      printf("Warning - unform sequential id and location do not match!\n");
+      printf("Warning - uniform sequential id (%d) and location (%d) do not match!\n", uni, loc);
 
     if (strncmp(name, "gl_", 3) != 0)
     {
