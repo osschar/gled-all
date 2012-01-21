@@ -1,5 +1,10 @@
 2012-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Gled/Gled.cxx:
+	Fix some details in root prompt handling.
+
+2012-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Support running without root prompt.
 
 	* Gled/Gled.cxx:
