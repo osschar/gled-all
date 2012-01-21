@@ -1,3 +1,20 @@
+2012-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support running without root prompt.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h: Add option -noprompt -- this instantiates
+	TApplication instead of TRint. As TApplication::Run() does not
+	process macros, the top part of TRint::Run() whhich processes the
+	macros got cut-n-pasted into ProcessCmdLineMacros().
+	Rename all functions/vars containg TRint to RootApp.
+
+	* Gled/GThread.cxx:
+	* Gled/TRootXTReq.cxx:
+	* gled.cxx:
+	* saturn.cxx:
+	Follow changes in naming.
+
 2012-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/SMessage.cxx:

@@ -27,6 +27,7 @@ class Fl_Window;
 class Fl_Tile;
 class Fl_Browser;
 
+class TApplication;
 class TRint;
 
 class Gled
@@ -42,14 +43,15 @@ protected:
   Bool_t	bIsSun;		// X{G}
 
   Bool_t	bQuit;		// X{G}
+  Bool_t	bHasPrompt;	// X{G}
   Bool_t	bShowSplash;	// X{G}
   Bool_t	bPreExec;       // X{G}
   TString	mPreExecString; // X{G}
   Bool_t	bAutoSpawn;	// X{G}
   Bool_t	bAllowMoons;	// X{G}
 
-  Bool_t	bRintRunning;	// X{G}
-  TRint        *mRint;          // X{g}
+  Bool_t	bRootAppRunning;// X{G}
+  TApplication *mRootApp;       // X{g}
 
   GMutex	mLoggingMutex;
   TString	mLogFileName;
@@ -67,7 +69,7 @@ protected:
   TString	mRenderers;      // X{GS}
 
   GCondition*	mExitCondVar;
-  GThread*      mRintThread;     // X{g}
+  GThread*      mRootAppThread;  // X{g}
   GThread*      mExitThread;
 
   static Int_t  sExitStatus;
@@ -132,9 +134,9 @@ public:
   static void Macro(const Text_t* mac);
   static void LoadMacro(const Text_t* mac);
 
-  GThread*     SpawnTRintThread(const TString& name_prefix);
-  static void* TRint_runner_tl(void*);
-  static void  TRint_cleanup_tl(void*);
+  GThread*     SpawnRootAppThread(const TString& name_prefix);
+  static void* RootApp_runner_tl(void*);
+  static void  RootApp_cleanup_tl(void*);
 
   virtual void LockFltk()   {}
   virtual void UnlockFltk() {}

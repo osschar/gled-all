@@ -55,7 +55,7 @@ void TRootXTReq::post_request()
 
 void TRootXTReq::ShootRequest()
 {
-  // Places request into the queue and requests execution in Rint thread.
+  // Places request into the queue and requests execution in RootApp thread.
   // It returns immediately after that, without waiting for execution.
   // The request is deleted after execution.
 
@@ -70,7 +70,7 @@ void TRootXTReq::ShootRequest()
 
 void TRootXTReq::ShootRequestAndWait()
 {
-  // Places request into the queue, requests execution in Rint thread and
+  // Places request into the queue, requests execution in RootApp thread and
   // waits for the execution to be completed.
   // The request is not deleted after execution as it might carry return
   // value.
@@ -116,7 +116,7 @@ namespace
 
   void l_sigusr1_handler(GSignal*)
   {
-    ISdebug(1, "Rint thread Usr1 signal handler -- firing timer for XT requests.");
+    ISdebug(1, "RootApp thread Usr1 signal handler -- firing timer for XT requests.");
     l_xtreq_timer.FireAway();
   }
 };
@@ -125,7 +125,7 @@ namespace
 
 void TRootXTReq::Bootstrap(GThread* root_thread)
 {
-  // Should be called from the Rint thread.
+  // Should be called from the RootApp thread.
 
   static const Exc_t _eh("TRootXTReq::Bootstrap ");
 
