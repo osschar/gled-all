@@ -1,3 +1,8 @@
+2012-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketProcessor.cxx:
+	Reduce printout, make receive buffer 64k (on stack, hmmh).
+
 2012-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve reporting, thread handling.
