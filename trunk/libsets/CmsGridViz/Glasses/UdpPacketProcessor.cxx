@@ -122,17 +122,16 @@ void UdpPacketProcessor::Suck()
     freeaddrinfo(result);
   }
 
-  std::vector<UChar_t> buffer(16384 + 16);
-  ssize_t              buf_size = buffer.size();
-  UChar_t             *buf      = &buffer[0];
-  int                  flags    = 0;
+  const int     buf_size = 65536;
+  unsigned char buf[buf_size];
+  int           flags = 0;
 
   struct sockaddr_in addr;
+  socklen_t slen = sizeof(sockaddr_in);
+
   while (true)
   {
-    socklen_t slen = sizeof(sockaddr_in);
-
-    ssize_t len = recvfrom(mSocket, buf, buf_size - 1, flags,
+    ssize_t len = recvfrom(mSocket, buf, buf_size, flags,
 			   (sockaddr*) &addr, &slen);
     if (len == -1)
     {
@@ -180,6 +179,7 @@ void UdpPacketProcessor::Suck()
     }
     */
 
+    if (G_DEBUG > 1)
     {
       Char_t   hn_buf[64];
       getnameinfo((sockaddr*) &addr, slen, hn_buf, 64, 0, 0, NI_DGRAM);
@@ -188,8 +188,8 @@ void UdpPacketProcessor::Suck()
       fqhn.ToLower();
 
       char *foo = (char*) &in4a;
-      printf("Message from: %hhu.%hhu.%hhu.%hhu:%hu, fqdn=%s\n",
-             foo[0], foo[1], foo[2], foo[3], port, hn_buf);
+      printf("Message from: %hhu.%hhu.%hhu.%hhu:%hu, fqdn=%s, len=%zd\n",
+             foo[0], foo[1], foo[2], foo[3], port, hn_buf, len);
     }
 
     mUdpQueue.PushBack(pp);
@@ -329,9 +329,7 @@ void UdpPacketProcessor::Deliver()
   {
     SUdpPacket *p = mUdpQueue.PopFront();
 
-    cout << _eh << "Okdoki, spitting a message\n";
-
-    // Write to root tree
+    // Write to root tree ... not any more ...
 
     // Loop over clients
     SMessage msg(444, p->NetBufferSize());
