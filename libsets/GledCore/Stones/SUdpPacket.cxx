@@ -29,7 +29,7 @@ SUdpPacket::SUdpPacket(const GTime& t,
   mAddrLen = addr_len;
   mPort = port;
   memcpy(mAddr, addr, addr_len);
-  mBuff = new UChar_t[buff_len];
+  mBuff = new UChar_t[buff_len + 1]; // Extra byte, for \n, 0, etc.
   memcpy(mBuff, buff, buff_len);
 }
 
@@ -51,7 +51,7 @@ void SUdpPacket::NetStreamer(TBuffer& b)
     if (mBuffLen != old_buff_len)
     {
       delete [] mBuff;
-      mBuff = new UChar_t[mBuffLen];
+      mBuff = new UChar_t[mBuffLen + 1]; // Extra byte, for \n, 0, etc.
     }
     b.ReadFastArray(mBuff, mBuffLen);
   }
@@ -68,4 +68,10 @@ Int_t SUdpPacket::NetBufferSize() const
 {
   return mRecvTime.NetBufferSize() + sizeof(Int_t) + 2 * sizeof(UShort_t) +
          mAddrLen + mBuffLen;
+}
+
+UInt_t SUdpPacket::Ip4AsUInt() const
+{
+  const void *vp = mAddr;
+  return * ((const UInt_t*) vp);
 }

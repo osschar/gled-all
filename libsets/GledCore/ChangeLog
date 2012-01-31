@@ -1,3 +1,23 @@
+2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some ref-counting and convinience changes for xrd-monitoring.
+
+	* Stones/SRefCounted.cxx:
+	* Stones/SRefCounted.h:
+	Add mutex, lock the inc/dec operations.
+	Add function IncRefCnt(Int_t).
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
+	Add function UInt_t Ip4AsUInt().
+	When allocating buffer, allocate an extra byte: this makes it easy
+	to zero-terminate the buffer if needed. I feel somewhat bad about
+	this.
+
+	* Gled/GQueue.h:
+	In GQueueSet::DeliverToQueues() use IncRefCnt(int) instead of
+	SetRefCnt(int) -- somebody else may be using the object.
+
 2012-01-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:

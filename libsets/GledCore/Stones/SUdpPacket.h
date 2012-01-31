@@ -34,6 +34,8 @@ public:
   void  NetStreamer(TBuffer& b);
   Int_t NetBufferSize() const;
 
+  UInt_t Ip4AsUInt() const;
+
 #include "SUdpPacket.h7"
   ClassDefNV(SUdpPacket, 1);
 }; // endclass SUdpPacket

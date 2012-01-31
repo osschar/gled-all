@@ -92,7 +92,7 @@ void GQueueSet<TT>::DeliverToQueues(TT* el)
   GMutexHolder _lck(mSetMutex);
   if ( ! mQueueSet.empty())
   {
-    el->SetRefCount(mQueueSet.size());
+    el->IncRefCount(mQueueSet.size());
     for (spQueue_i i = mQueueSet.begin(); i != mQueueSet.end(); ++i)
     {
       (*i)->PushBack(el);
