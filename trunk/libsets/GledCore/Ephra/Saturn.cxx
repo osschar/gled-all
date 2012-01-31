@@ -554,9 +554,10 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     sock->Send(m);
     TMessage* r;
     int rl = sock->Recv(r);
-    if(rl <= 0) {
+    if (rl <= 0)
+    {
       delete sock;
-      throw(_eh + GForm("protocol exchange failed; len=%d.",rl));
+      throw _eh + GForm("protocol exchange failed; len=%d.", rl);
     }
 
     if (r->What() == GledNS::MT_GledProtocol)
@@ -568,14 +569,14 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     {
       Int_t sproto; *r >> sproto;
       delete sock; delete r;
-      throw(_eh + GForm("protocol mismatch: server=%d, client=%d.",
-			sproto, s_Gled_Protocol_Version));
+      throw _eh + GForm("protocol mismatch: server=%d, client=%d.",
+			sproto, s_Gled_Protocol_Version);
     }
     else
     {
       Int_t mt = r->What();
       delete sock; delete r;
-      throw(_eh + GForm("unknown message type %d.", mt));
+      throw _eh + GForm("unknown message type %d.", mt);
     }
   }
 
