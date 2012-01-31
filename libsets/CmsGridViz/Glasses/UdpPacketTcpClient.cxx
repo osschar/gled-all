@@ -33,7 +33,7 @@ void UdpPacketTcpClient::_init()
 }
 
 UdpPacketTcpClient::UdpPacketTcpClient(const Text_t* n, const Text_t* t) :
-  ZGlass(n, t)
+  UdpPacketSource(n, t)
 {
   _init();
 }
@@ -70,7 +70,7 @@ void UdpPacketTcpClient::ListenLoop()
       SMessage *m = SMessage::ReceiveOrReport(s, _eh);
       if (m)
       {
-        printf("Got len=%d, typ=%u\n", m->Length(), m->What());
+        printf("Recevied message, buffer_size=%d, type=%u\n", m->BufferSize(), m->What());
 
         SUdpPacket *p = new SUdpPacket;
         p->NetStreamer(*m);
@@ -143,16 +143,4 @@ void UdpPacketTcpClient::SendMessage()
   SMessage msg(666);
   msg << "Hello from HELL!";
   msg.Send(mSocket, true);
-}
-
-//==============================================================================
-
-void UdpPacketTcpClient::RegisterConsumer(Queue_t* q)
-{
-  mConsumerSet.RegisterQueue(q);
-}
-
-void UdpPacketTcpClient::UnregisterConsumer(Queue_t* q)
-{
-  mConsumerSet.UnregisterQueue(q);
 }

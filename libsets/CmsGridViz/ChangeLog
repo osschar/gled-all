@@ -1,3 +1,35 @@
+2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Major restructuring to support various monitoring-data collection
+	setups.
+
+	* Glasses/UdpPacketListener.cxx:
+	* Glasses/UdpPacketListener.h:
+	* Glasses/UdpPacketSource.cxx:
+	* Glasses/UdpPacketSource.h:
+	* Glasses/UdpPacketTcpServer.cxx:
+	* Glasses/UdpPacketTcpServer.h:
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	New files - restructuring of functionality from UdpPacketProcessor
+	and XrdMonSucker.
+
+	* Glasses/UdpPacketProcessor.cxx:
+	* Glasses/UdpPacketProcessor.h:
+	Removed files - split into UdpPacketListener and UdpPacketTcpServer.
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	Subclass from (almost abstract) UdpPacketSource.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Remove UDP packet slurping code, register to a UdpPacketSource to
+	receive SUdpMessages.
+
+	* glass.list:
+	Register all the glass changes.
+
 2012-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/UdpPacketProcessor.cxx:
