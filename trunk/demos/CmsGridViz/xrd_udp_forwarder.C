@@ -1,9 +1,11 @@
 #include <glass_defines.h>
 
-class UdpPacketProcessor;
+class UdpPacketListener;
+class UdpPacketTcpServer;
 
-ZLog               *c_log = 0;
-UdpPacketProcessor *c_upp = 0;
+ZLog               *c_log      = 0;
+UdpPacketListener  *c_listener = 0;
+UdpPacketTcpServer *c_server   = 0;
 
 void xrd_udp_forwarder(bool gui_p=false)
 {
@@ -17,23 +19,27 @@ void xrd_udp_forwarder(bool gui_p=false)
     l->Swallow(new ZGlass("XrdUser", "XrdUser(FromHost,FromDomain)"));
   }
 
-  g_queen->SetName("UDP Queen");
-
-  ASSIGN_ADD_GLASS(c_upp, UdpPacketProcessor, g_queen, "UdpPacketProcessor", "X");
-  // default is 9930, now running on desire
-  c_upp->SetSuckPort(9929);
-  // listens for incoming TCP on 9940
-
-  // CREATE_ADD_GLASS(cli, UdpPacketTcpClient, g_queen, "UdpPacketTcpClient", "Y");
-  // cli->SetHost("desire.physics.ucsd.edu");
+  g_queen->SetName("Queen of Udp to Tcp Conversion");
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
-  // c_log->SetFileName("/var/log/xrootd/udp-packet-proc.log");
+  // c_log->SetFileName("/var/log/xrootd/xrd-udp-forwarder.log");
   c_log->SetFileName("xrd-udp-forwarder.log");
   c_log->SetLevel(ZLog::L_Info);
   c_log->StartLogging();
 
-  c_upp->SetLog(c_log);
+  ASSIGN_ADD_GLASS(c_listener, UdpPacketListener, g_queen, "UdpPacketListener", "");
+  c_listener->SetLog(c_log);
+  // Listens for UDP traffic on port 9930.
+  // c_listener->SetSuckPort(9930);
+  // Now running on desire, second slot:
+  c_listener->SetSuckPort(9929);
+
+  ASSIGN_ADD_GLASS(c_server, UdpPacketTcpServer, g_queen, "UdpPacketTcpServer", "");
+  c_server->SetLog(c_log);  
+  c_server->SetSource(c_listener);
+  // Listens for incoming TCP on 9940
+  // c_server->SetServerPort(9940);
+
 
   //============================================================================
   // Spawn GUI
@@ -44,11 +50,9 @@ void xrd_udp_forwarder(bool gui_p=false)
     eye(false);
 
     g_nest->Add(g_queen);
-    // g_nest->SetMaxChildExp(3); // This only works on creation.
     g_nest->SetWName(50);
   }
 
-  g_saturn->ShootMIR(c_upp->S_StartAllServices() );
-
-  // g_saturn->ShootMIR( cli->S_ConnectAndListenLoop() );
+  g_saturn->ShootMIR( c_listener->S_StartAllServices() );
+  g_saturn->ShootMIR( c_server  ->S_StartAllServices() );
 }
