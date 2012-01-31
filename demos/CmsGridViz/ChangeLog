@@ -1,3 +1,15 @@
+2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Update for changes in UDP processing.
+	Some macros have still need to be converted.
+
+	* xrd_suck_tcp.C:
+	New demo - do almost everything as the full sucker but get data
+	from a udp -> tcp repeater.
+
+	* xrd_udp_forwarder.C:
+	Update to new class names etc.
+
 2012-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* test_upp.C:
