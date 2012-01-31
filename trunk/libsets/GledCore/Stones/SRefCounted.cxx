@@ -13,7 +13,9 @@
 // post-streaming function when necessary.
 // When zero ref count is reached in DecRefCount(),
 //   virtual void OnZeroRefCount();
-// is called. Default action is to destroy the object.
+// is called. Default action is to destroy the object. Note, mutex is NOT
+// unlocked in this case ... so if you keep the object alive in OnZeroRefCnt()
+// also unlock the mutex.
 
 ClassImp(SRefCounted);
 
@@ -25,19 +27,32 @@ SRefCounted::~SRefCounted()
 
 void SRefCounted::SetRefCount(Int_t rc)
 {
+  GMutexHolder _lck(mRCMutex);
   mRefCount = rc;
 }
 
-void SRefCounted::IncRefCount()
+Int_t SRefCounted::IncRefCount()
 {
-  ++mRefCount;
+  GMutexHolder _lck(mRCMutex);
+  return ++mRefCount;
 }
 
-void SRefCounted::DecRefCount()
+Int_t SRefCounted::IncRefCount(Int_t rc)
 {
-  --mRefCount;
+  GMutexHolder _lck(mRCMutex);
+  mRefCount += rc;
+  return mRefCount;
+}
+
+Int_t SRefCounted::DecRefCount()
+{
+  mRCMutex.Lock();
+  Int_t ret = --mRefCount;
   if (mRefCount <= 0)
     OnZeroRefCount();
+  else
+    mRCMutex.Unlock();
+  return ret;
 }
 
 void SRefCounted::OnZeroRefCount()

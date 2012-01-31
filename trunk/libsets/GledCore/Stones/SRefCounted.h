@@ -8,21 +8,25 @@
 #define GledCore_SRefCounted_H
 
 #include <Rtypes.h>
+#include "Gled/GMutex.h"
 
 class SRefCounted
 {
-protected:
+private:
+  GMutex  mRCMutex;  //!
   Int_t   mRefCount; //!
 
 public:
   SRefCounted();
   virtual ~SRefCounted();
 
-  virtual void SetRefCount(Int_t rc);
+  virtual void  SetRefCount(Int_t rc);
 
-  virtual void IncRefCount();
-  virtual void DecRefCount();
-  virtual void OnZeroRefCount();
+  virtual Int_t IncRefCount();
+  virtual Int_t IncRefCount(Int_t rc);
+  virtual Int_t DecRefCount();
+
+  virtual void  OnZeroRefCount();
 
   ClassDef(SRefCounted, 0);
 }; // endclass SRefCounted
@@ -30,16 +34,18 @@ public:
 
 class SRefCountedNV
 {
-protected:
+private:
+  GMutex  mRCMutex;  //!
   Int_t   mRefCount; //!
 
 public:
   SRefCountedNV() : mRefCount(0) {}
 
-  void SetRefCount(Int_t rc) { mRefCount = rc; }
+  void SetRefCount(Int_t rc) { GMutexHolder _lck(mRCMutex); mRefCount = rc; }
 
-  void IncRefCount() { ++mRefCount; }
-  void DecRefCount() { --mRefCount; if (mRefCount <= 0) delete this; }
+  Int_t IncRefCount() { GMutexHolder _lck(mRCMutex); return ++mRefCount; }
+  Int_t IncRefCount(Int_t rc) { GMutexHolder _lck(mRCMutex); mRefCount += rc; return mRefCount; }
+  Int_t DecRefCount() { mRCMutex.Lock(); Int_t ret = --mRefCount; if (mRefCount <= 0) delete this; else mRCMutex.Unlock(); return ret; }
 
   ClassDefNV(SRefCountedNV, 0);
 }; // endclass SRefCountedNV
