@@ -500,7 +500,7 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
 
   if (ei == 0)
   {
-    ei = new EyeInfo(eye_name.Data());
+    ei = new EyeInfo(eye_name);
     wipe_ei = true;
   }
   if (strlen(ei->GetLogin()) == 0)
