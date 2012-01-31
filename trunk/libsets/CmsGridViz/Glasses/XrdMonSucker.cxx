@@ -5,6 +5,7 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "XrdMonSucker.h"
+#include "UdpPacketSource.h"
 #include "XrdFileCloseReporter.h"
 #include "Glasses/ZHashList.h"
 #include "Glasses/ZLog.h"
@@ -14,6 +15,7 @@
 #include "XrdUser.h"
 #include "XrdFile.h"
 
+#include "Stones/SUdpPacket.h"
 #include "Gled/GThread.h"
 
 #include "CmsGridViz/XrdXrootdMonData.h"
@@ -151,65 +153,24 @@ void XrdMonSucker::Suck()
 {
   static const Exc_t _eh("XrdMonSucker::Suck ");
 
-  if ((mSocket = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    throw _eh + "socket failed: " + strerror(errno);
-
-  {
-    struct addrinfo *result;
-    struct addrinfo  hints;
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family   = AF_UNSPEC;
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = IPPROTO_UDP;
-    hints.ai_flags    = AI_PASSIVE | AI_NUMERICSERV;
-
-    int error = getaddrinfo(0, TString::Format("%hu", mSuckPort), &hints, &result);
-    if (error != 0)
-      throw _eh + "getaddrinfo failed: " + gai_strerror(error);
-
-    if (bind(mSocket, result->ai_addr, result->ai_addrlen) == -1)
-      throw _eh + "bind failed: " + strerror(errno);
-
-    freeaddrinfo(result);
-  }
-
   TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@([^\\.]+)(?:\\.(.+))?", "o");
   TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
 
-  std::vector<char> buffer(16384 + 16);
-  ssize_t           buf_size = buffer.size();
-  char             *buf      = &buffer[0];
-  int               flags    = 0;
-
-  struct sockaddr_in addr;
   while (true)
   {
-    socklen_t slen = sizeof(sockaddr_in);
+    SUdpPacket *p = mUdpQueue.PopFront();
 
-    ssize_t len = recvfrom(mSocket, buf, buf_size - 1, flags,
-			   (sockaddr*) &addr, &slen);
-    if (len == -1)
-    {
-      ISwarn(_eh + "recvfrom failed: " + strerror(errno));
-      continue;
-    }
-    else if (len == 0)
-    {
-      ISwarn(_eh + "recvfrom returned 0, not expected.");
-      continue;
-    }
+    GTime recv_time(p->mRecvTime);
 
-    GTime recv_time(GTime::I_Now);
-
-    XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) buf;
+    XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) p->mBuff;
     Char_t   code = xmh->code;
     UChar_t  pseq = xmh->pseq;
     UShort_t plen = ntohs(xmh->plen);
     Int_t    stod = ntohl(xmh->stod);
-    UInt_t   in4a = addr.sin_addr.s_addr; // Kept in net order
-    UShort_t port = ntohs(addr.sin_port);
+    UInt_t   in4a = p->Ip4AsUInt(); // Kept in net order
+    UShort_t port = p->mPort;
 
     SXrdServerId xsid(in4a, stod, port);
     xrd_hash_i   xshi;
@@ -226,8 +187,27 @@ void XrdMonSucker::Suck()
     XrdServer *server = 0;
     if (server_not_known)
     {
+      sockaddr_in  sa4;
+      sockaddr_in6 sa6;
+      sockaddr    *sa = 0;
+      socklen_t    sl;
+      if (p->mAddrLen == 4)
+      {
+	sa4.sin_family = AF_INET;
+	memcpy(&sa4.sin_addr.s_addr, p->mAddr, p->mAddrLen);
+	sa = (sockaddr*) &sa4;
+	sl = sizeof(sa4);
+      }
+      else
+      {
+	sa6.sin6_family = AF_INET6;
+	memcpy(sa6.sin6_addr.s6_addr, p->mAddr, p->mAddrLen);
+	sa = (sockaddr*) &sa6;
+	sl = sizeof(sa6);
+      }
+
       Char_t   hn_buf[64];
-      getnameinfo((sockaddr*) &addr, slen, hn_buf, 64, 0, 0, NI_DGRAM);
+      getnameinfo((sockaddr*) sa, sl, hn_buf, 64, 0, 0, NI_DGRAM);
 
       TString fqhn(hn_buf);
       fqhn.ToLower();
@@ -293,9 +273,9 @@ void XrdMonSucker::Suck()
     }
 
     // Check length of message .vs. length claimed by xrd.
-    if (len != plen)
+    if (p->mBuffLen != plen)
     {
-      log.Form("Message size mismatch: got %zd, xrd-len=%hu (bufsize=%zd).", len, plen, buf_size);
+      log.Form("Message size mismatch: got %zd, xrd-len=%hu.", p->mBuffLen, plen);
       // This means either our buf-size is too small or the other guy is pushing it.
       // Should probably stop reporting errors from this IP.
       // XXXX Does it really help having it on stack?
@@ -310,10 +290,10 @@ void XrdMonSucker::Suck()
                server->GetHost(), server->GetDomain(), port,
                xmh->code, pseq, plen);
 
-      XrdXrootdMonMap *xmm     = (XrdXrootdMonMap*) buf;
+      XrdXrootdMonMap *xmm     = (XrdXrootdMonMap*) p->mBuff;
       Int_t            dict_id = ntohl(xmm->dictid);
 
-      buf[plen] = 0; // 0-terminate the buffer at packet length.
+      (p->mBuff)[plen] = 0; // 0-terminate the buffer at packet length.
 
       char *prim = xmm->info;
       char *sec  = strstr(prim, "\n");
@@ -603,7 +583,7 @@ void XrdMonSucker::Suck()
         }
       };
 
-      local_cache lc(server, (XrdXrootdMonBuff*) buf, plen);
+      local_cache lc(server, (XrdXrootdMonBuff*) p->mBuff, plen);
 
       XrdUser *us = lc.find_user();
       Bool_t  vrb = us && us->GetTraceMon();
@@ -774,6 +754,8 @@ void XrdMonSucker::StartSucker()
   mCheckerThread->SetNice(20);
   mCheckerThread->Spawn();
 
+  mSource->RegisterConsumer(&mUdpQueue);
+
   {
     GLensReadHolder _lck(this);
     Stamp(FID());
@@ -792,6 +774,8 @@ void XrdMonSucker::StopSucker()
     thr = mSuckerThread;
     GThread::InvalidatePtr(mSuckerThread);
   }
+
+  mSource->UnregisterConsumer(&mUdpQueue);
 
   mCheckerThread->Cancel();
   mCheckerThread->Join();

@@ -9,6 +9,7 @@
 
 #include <Glasses/ZNameMap.h>
 #include <Stones/SXrdServerId.h>
+#include "Gled/GQueue.h"
 #include <Gled/GTime.h>
 
 #include "TPRegexp.h"
@@ -18,8 +19,11 @@ class XrdUser;
 class XrdFile;
 class XrdFileCloseReporter;
 
-class ZHashList;
 class ZLog;
+class UdpPacketSource;
+class ZHashList;
+
+class SUdpPacket;
 
 
 class XrdMonSucker : public ZNameMap
@@ -30,8 +34,10 @@ private:
   void _init();
 
 protected:
-  ZLink<ZLog>       mLog;       // X{GS} L{}
-  ZLink<ZHashList>  mOpenFiles; // X{GS} L{}
+  ZLink<ZLog>             mLog;       // X{GS} L{}
+  ZLink<UdpPacketSource>  mSource;    // X{GS} L{}
+  ZLink<ZHashList>        mOpenFiles; // X{GS} L{}
+  GQueue<SUdpPacket>      mUdpQueue;  //!
 
   Int_t      mSuckPort;     // X{GS} 7 Value()
 
