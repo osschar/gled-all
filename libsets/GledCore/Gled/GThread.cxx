@@ -542,7 +542,6 @@ void GThread::ListThreads()
   }
   sContainerLock.Unlock();
   printf("+------------------------------------------------------------------------+\n");
-
 }
 
 void GThread::ListSignalState()
@@ -559,6 +558,51 @@ void GThread::ListSignalState()
       printf("\n");
   }
   printf("\n");
+}
+
+//==============================================================================
+
+void GThread::CancelAllThreads(bool join_p)
+{
+  if (sMainThread == 0)
+  {
+    printf("Threads not initialized.");
+    return;
+  }
+
+  lpGThread_t clist;
+
+  printf("+------------------------------------------------------------------------+\n");
+  printf("+- Cancel All Threads ---------------------------------------------------+\n");
+  printf("+------------------------------------------------------------------------+\n");
+  sContainerLock.Lock();
+  Int_t count = 0;
+  for (lpGThread_i i = sThreadList.begin(); i != sThreadList.end(); ++i)
+  {
+    ++count;
+    if (*i == sMainThread || (*i)->mRunningState > RS_Running)
+      continue;
+    GThread& t = **i;
+    printf("| %2d | %4d | %-24s | %-14s | %-14s |\n", count,
+           t.mIndex, t.mName.Data(), RunningStateName(t.mRunningState),
+           t.get_owner() ? t.get_owner()->GetName() : "<null>");
+    clist.push_back(&t);
+    t.Cancel();
+  }
+  sContainerLock.Unlock();
+  printf("+------------------------------------------------------------------------+\n");
+  if (join_p)
+  {
+    for (lpGThread_i i = clist.begin(); i != clist.end(); ++i)
+    {
+      GThread& t = **i;
+      void *tret;
+      int   ret;
+      ret = t.Join(&tret);
+      printf("%d %p\n", ret, tret);
+    }
+    printf("+------------------------------------------------------------------------+\n");
+  }
 }
 
 //==============================================================================

@@ -206,6 +206,8 @@ public:
   static void ListThreads();
   static void ListSignalState();
 
+  static void CancelAllThreads(bool join_p);
+
   static GThread* InitMain();
   static void     FiniMain();
 
