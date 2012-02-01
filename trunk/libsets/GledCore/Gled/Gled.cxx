@@ -615,10 +615,10 @@ void Gled::StopLogging()
 
   GMutexHolder mh(mLoggingMutex);
 
-  if (mOutFile && mOutFile != stdin) {
+  if (mOutFile && mOutFile != stdout) {
     fclose(mOutFile);
   }
-  if (mLogFile && mLogFile != stdin && mLogFile != mOutFile) {
+  if (mLogFile && mLogFile != stdout && mLogFile != mOutFile) {
     fclose(mLogFile);
   }
   mOutFile = mLogFile = 0;

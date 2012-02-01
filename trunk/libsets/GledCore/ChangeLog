@@ -1,3 +1,19 @@
+2012-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some workarounds for weird crash on exit on mac.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Add static function CancelAllThreads().
+
+	* Gled/Gled.cxx:
+	Typofix -- do not close log/out if it is stdout, not stdin.
+
+	* gled.cxx:
+	The workarounds themselves:
+	- cancel all threads;
+	- set gROOT to zero so that it doesn't crap-up on static destruction.
+
 2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Some ref-counting and convinience changes for xrd-monitoring.
