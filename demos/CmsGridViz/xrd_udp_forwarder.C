@@ -7,7 +7,7 @@ ZLog               *c_log      = 0;
 UdpPacketListener  *c_listener = 0;
 UdpPacketTcpServer *c_server   = 0;
 
-void xrd_udp_forwarder(bool gui_p=false)
+void xrd_udp_forwarder()
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("CmsGridViz");
@@ -44,7 +44,7 @@ void xrd_udp_forwarder(bool gui_p=false)
   //============================================================================
   // Spawn GUI
 
-  if (gui_p)
+  if (Gled::theOne->HasGUILibs())
   {
     Gled::LoadMacro("eye.C");
     eye(false);

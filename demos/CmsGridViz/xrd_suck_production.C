@@ -9,7 +9,7 @@ XrdMonSucker         *c_suck = 0;
 XrdFileCloseReporter *c_frep = 0;
 XrdEhs               *c_ehs  = 0;
 
-void xrd_suck_production(bool gui_p=false)
+void xrd_suck_production()
 {
   Gled::AssertMacro("sun_demos.C");
   Gled::theOne->AssertLibSet("CmsGridViz");
@@ -44,7 +44,7 @@ void xrd_suck_production(bool gui_p=false)
   //============================================================================
   // Spawn GUI
 
-  if (gui_p)
+  if (Gled::theOne->HasGUILibs())
   {
     Gled::LoadMacro("eye.C");
     eye(false);
