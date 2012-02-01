@@ -1,3 +1,10 @@
+2012-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	* xrd_suck_tcp.C:
+	* xrd_udp_forwarder.C:
+	Remove 'bool gui_p' argument -- use Gled::HasGUILibs() instead.
+
 2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Update for changes in UDP processing.
