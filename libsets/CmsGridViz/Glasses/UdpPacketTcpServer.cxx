@@ -38,7 +38,8 @@ void UdpPacketTcpServer::_init()
 }
 
 UdpPacketTcpServer::UdpPacketTcpServer(const Text_t* n, const Text_t* t) :
-  ZGlass(n, t)
+  ZGlass(n, t),
+  mSelector(GMutex::recursive)
 {
   _init();
 }
