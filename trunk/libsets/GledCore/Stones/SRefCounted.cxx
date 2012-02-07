@@ -31,12 +31,6 @@ void SRefCounted::SetRefCount(Int_t rc)
   mRefCount = rc;
 }
 
-Int_t SRefCounted::IncRefCount()
-{
-  GMutexHolder _lck(mRCMutex);
-  return ++mRefCount;
-}
-
 Int_t SRefCounted::IncRefCount(Int_t rc)
 {
   GMutexHolder _lck(mRCMutex);
@@ -44,10 +38,11 @@ Int_t SRefCounted::IncRefCount(Int_t rc)
   return mRefCount;
 }
 
-Int_t SRefCounted::DecRefCount()
+Int_t SRefCounted::DecRefCount(Int_t rc)
 {
   mRCMutex.Lock();
-  Int_t ret = --mRefCount;
+  mRefCount -= rc;
+  Int_t ret = mRefCount;
   if (mRefCount <= 0)
     OnZeroRefCount();
   else
@@ -66,6 +61,11 @@ void SRefCounted::OnZeroRefCount()
 // A reference-counted stone without virtual functions, all functions inline.
 // Note that the ref-count is not serialized -- so rebuild it in
 // post-streaming function when necessary.
-// When zero ref count is reached in DecRefCount() the object is destructed.
+// As there are no virtual functions
+//   Int_t DecRefCount(Int_t rc=1);
+// *must* be implmented in the sub-class. Macro
+//   SRefCountedNV_DecRefCount_macro
+// is defined for this purpose in the header file. This implementation
+// destructs the object when zero ref count is reached.
 
 ClassImp(SRefCountedNV);
