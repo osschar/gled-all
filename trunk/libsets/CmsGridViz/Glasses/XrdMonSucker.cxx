@@ -727,6 +727,7 @@ void XrdMonSucker::Suck()
 
     } // else -- trace message handling
 
+    p->DecRefCount();
   } // while (true) main loop
 }
 

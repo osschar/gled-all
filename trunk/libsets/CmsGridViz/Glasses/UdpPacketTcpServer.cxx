@@ -157,8 +157,6 @@ void UdpPacketTcpServer::Deliver()
   {
     SUdpPacket *p = mUdpQueue.PopFront();
 
-    // Write to root tree ... not any more ...
-
     // Loop over clients
     SMessage msg(444, p->NetBufferSize());
     p->NetStreamer(msg);
