@@ -70,15 +70,15 @@ void UdpPacketTcpClient::ListenLoop()
       SMessage *m = SMessage::ReceiveOrReport(s, _eh);
       if (m)
       {
-        printf("Recevied message, buffer_size=%d, type=%u\n", m->BufferSize(), m->What());
+        // printf("Recevied message, buffer_size=%d, type=%u\n", m->BufferSize(), m->What());
 
         SUdpPacket *p = new SUdpPacket;
         p->NetStreamer(*m);
         delete m;
 
-        printf("  Msg from %hhu.%hhu.%hhu.%hhu:%hu, len=%hu, N_consumers=%d\n",
-               p->mAddr[0], p->mAddr[1], p->mAddr[2], p->mAddr[3],
-               p->mPort, p->mBuffLen, mConsumerSet.GetSetSize());
+        // printf("  Msg from %hhu.%hhu.%hhu.%hhu:%hu, len=%hu, N_consumers=%d\n",
+        //        p->mAddr[0], p->mAddr[1], p->mAddr[2], p->mAddr[3],
+        //        p->mPort, p->mBuffLen, mConsumerSet.GetSetSize());
 
         mConsumerSet.DeliverToQueues(p);
       }
