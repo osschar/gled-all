@@ -1,3 +1,21 @@
+2012-02-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix destruction logic for SRefCountedNV.
+
+	* Stones/SRefCounted.cxx:
+	* Stones/SRefCounted.h:
+	Both Inc and DecRefCount now take Int_t delta as arguments with
+	default value 1.
+	Do not implement SRefCountedNV::DecRefCount(). As there are no
+	viruals, the delete obviously can not call the derived class
+	destructor. So, the type needs to be used as itself always ... and
+	also needs to implement its own DecRefCount() that will call the
+	proper destructor. Macro CountedNV_DecRefCount_macro is defined to
+	make this really easy.
+
+	* Stones/SUdpPacket.h:
+	Use SRefCountedNV_DecRefCount_macro to implement DecRefCount().
+
 2012-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Some workarounds for weird crash on exit on mac.

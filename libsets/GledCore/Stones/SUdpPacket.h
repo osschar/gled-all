@@ -31,6 +31,8 @@ public:
              UChar_t* buff, Int_t buff_len);
   ~SUdpPacket();
 
+  SRefCountedNV_DecRefCount_macro
+
   void  NetStreamer(TBuffer& b);
   Int_t NetBufferSize() const;
 
