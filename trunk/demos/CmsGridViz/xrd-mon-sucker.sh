@@ -16,9 +16,6 @@ while true; do
         mail -s "$MAIL_SUBJ" $MAIL_TO << "FNORD"
 Saturn died.
 FNORD
-
-    echo sleep 10
-    sleep 10
-fi
+    fi
 
 done
