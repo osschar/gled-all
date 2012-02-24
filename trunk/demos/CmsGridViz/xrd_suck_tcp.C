@@ -52,14 +52,14 @@ void xrd_suck_tcp()
   c_suck->SetSource(c_upc);
 
   ASSIGN_ADD_GLASS(c_frep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
-  // c_frep->SetUdpHost("desire.physics.ucsd.edu");
-  // c_frep->SetUdpPort(7632);
+  // c_frep->SetUdpHost("localhost");
+  // c_frep->SetUdpPort(4242);
 
   c_suck->SetFCReporter(c_frep);
 
   ASSIGN_ADD_GLASS(c_ehs, XrdEhs, g_queen, "XrdEhs", 0);
   c_ehs->SetXrdSucker(c_suck);
-  c_ehs->SetPort(4242);
+  // c_ehs->SetPort(4242);
 
 
   //============================================================================
