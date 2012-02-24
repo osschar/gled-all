@@ -1,3 +1,22 @@
+2012-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Canonicalize macros, scripts.
+
+	* xrd_suck_production.C:
+	Removed file - replaced by xrd_suck_udp.C.
+
+	* xrd_suck_udp.C:
+	New file - read directly from UDP (via UdpPacketListener).
+
+	* xrd_suck_tcp.C:
+	Set standard names, options.
+
+	* install-xrd-mon-sucker.sh:
+	Install .C files into /opt/gled, not /etc/xrootd/.
+
+	* xrd-mon-sucker.sh:
+	Use while true loop and send mail on failure.
+
 2012-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_suck_production.C:
