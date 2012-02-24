@@ -40,9 +40,7 @@
 
 ClassImp(XrdEhs);
 
-
-XrdEhs::~XrdEhs()
-{}
+//==============================================================================
 
 void XrdEhs::_init()
 {}
@@ -51,11 +49,14 @@ XrdEhs::XrdEhs(const Text_t* n, const Text_t* t) :
    ZNameMap(n, t),
    m_req_line_re("^GET\\s+/?(.*)\\s+HTTP/([\\d\\.]+)$", "o"),
    m_req_re("^([^?]*)(?:\\?(.*))?$", "o"),
-   mPort(9999),
+   mPort(4242),
    bServerUp(false)
 {
   _init();
 }
+
+XrdEhs::~XrdEhs()
+{}
 
 //==============================================================================
 

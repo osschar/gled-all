@@ -32,8 +32,8 @@ ClassImp(XrdFileCloseReporter);
 
 void XrdFileCloseReporter::_init()
 {
-  mUdpHost = "desire.physics.ucsd.edu";
-  mUdpPort = 7632;
+  mUdpHost = "localhost";
+  mUdpPort = 4242;
 }
 
 XrdFileCloseReporter::XrdFileCloseReporter(const Text_t* n, const Text_t* t) :
@@ -85,7 +85,7 @@ void XrdFileCloseReporter::ReportLoop()
     struct addrinfo *result;
     struct addrinfo  hints;
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family   = AF_UNSPEC;
+    hints.ai_family   = AF_INET; // AF_UNSPEC; this pulls out IP6 for localhost
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_protocol = IPPROTO_UDP;
     hints.ai_flags    = AI_NUMERICSERV;
@@ -173,7 +173,11 @@ void XrdFileCloseReporter::ReportLoop()
     msg += "#end\n";
 
     if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, &rAddr, sizeof(rAddr)) == -1)
-      printf("%sError sending report for file='%s'.\n", _eh.Data(), file->GetName());
+    {
+      // Should send to log.
+      printf("%sError sending report for file='%s'. %s.\n", _eh.Data(),
+             file->GetName(), strerror(errno));
+    }
   }
 }
 
