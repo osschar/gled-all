@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef CmsGridViz_UdpPacketListener_H
-#define CmsGridViz_UdpPacketListener_H
+#ifndef Net1_UdpPacketListener_H
+#define Net1_UdpPacketListener_H
 
 #include <Glasses/UdpPacketSource.h>
 
