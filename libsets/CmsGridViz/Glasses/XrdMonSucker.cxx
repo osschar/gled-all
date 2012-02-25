@@ -5,11 +5,12 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "XrdMonSucker.h"
-#include "UdpPacketSource.h"
 #include "XrdFileCloseReporter.h"
+#include "Glasses/UdpPacketSource.h"
 #include "Glasses/ZHashList.h"
 #include "Glasses/ZLog.h"
 #include "XrdMonSucker.c7"
+
 #include "XrdDomain.h"
 #include "XrdServer.h"
 #include "XrdUser.h"

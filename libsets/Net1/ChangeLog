@@ -1,0 +1,4 @@
+2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	New libset for various Net related stuff.
+	Move UDP packet processors from CmsGridViz / XrdMon to here.
