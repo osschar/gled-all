@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef CmsGridViz_UdpPacketSource_H
-#define CmsGridViz_UdpPacketSource_H
+#ifndef Net1_UdpPacketSource_H
+#define Net1_UdpPacketSource_H
 
 #include "Glasses/ZGlass.h"
 #include "Gled/GQueue.h"
