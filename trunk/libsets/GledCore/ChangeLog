@@ -1,3 +1,9 @@
+2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
+	Move to new libset Net1.
+
 2012-02-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix destruction logic for SRefCountedNV.

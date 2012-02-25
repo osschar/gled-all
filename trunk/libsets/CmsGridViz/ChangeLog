@@ -1,3 +1,24 @@
+2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketListener.cxx:
+	* Glasses/UdpPacketListener.h:
+	* Glasses/UdpPacketSource.cxx:
+	* Glasses/UdpPacketSource.h:
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	* Glasses/UdpPacketTcpServer.cxx:
+	* Glasses/UdpPacketTcpServer.h:
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Move to new libset Net1.
+
+	* Glasses/XrdMonSucker.cxx:
+	* glass.list:
+	Modify as needed for UdpXyzz class move.
+
+	* Makefile:
+	Add dependency on Net1 libset.
+
 2012-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
