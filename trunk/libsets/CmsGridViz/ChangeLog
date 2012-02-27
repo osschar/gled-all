@@ -1,3 +1,18 @@
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Remove unused glasses in preparation for libset rename.
+
+	* Glasses/CmsXrdHost.cxx:
+	* Glasses/CmsXrdHost.h:
+	* Glasses/CmsXrdSite.cxx:
+	* Glasses/CmsXrdSite.h:
+	* Glasses/CmsXrdUser.cxx:
+	* Glasses/CmsXrdUser.h:
+	Removed glasses ... they never got used.
+
+	* glass.list:
+	Unregister CmsXrd classes.
+
 2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/UdpPacketListener.cxx:
