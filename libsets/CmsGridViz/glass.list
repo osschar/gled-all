@@ -7,9 +7,5 @@ XrdUser		3	Glasses/XrdUser
 XrdFile		4	Glasses/XrdFile
 XrdDomain       5       Glasses/XrdDomain
 
-CmsXrdHost	32	Glasses/CmsXrdHost
-CmsXrdSite	33	Glasses/CmsXrdSite
-CmsXrdUser	34	Glasses/CmsXrdUser
-
-XrdFileCloseReporter 1024 Glasses/XrdFileCloseReporter
-XrdEhs               1025 Glasses/XrdEhs
+XrdFileCloseReporter 64 Glasses/XrdFileCloseReporter
+XrdEhs               65 Glasses/XrdEhs
