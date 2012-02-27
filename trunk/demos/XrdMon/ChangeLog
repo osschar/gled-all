@@ -1,0 +1,102 @@
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Rename libset CmsGridViz to XrdMon.
+
+2012-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Canonicalize macros, scripts.
+
+	* xrd_suck_production.C:
+	Removed file - replaced by xrd_suck_udp.C.
+
+	* xrd_suck_udp.C:
+	New file - read directly from UDP (via UdpPacketListener).
+
+	* xrd_suck_tcp.C:
+	Set standard names, options.
+
+	* install-xrd-mon-sucker.sh:
+	Install .C files into /opt/gled, not /etc/xrootd/.
+
+	* xrd-mon-sucker.sh:
+	Use while true loop and send mail on failure.
+
+2012-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	* xrd_suck_tcp.C:
+	* xrd_udp_forwarder.C:
+	Remove 'bool gui_p' argument -- use Gled::HasGUILibs() instead.
+
+2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Update for changes in UDP processing.
+	Some macros have still need to be converted.
+
+	* xrd_suck_tcp.C:
+	New demo - do almost everything as the full sucker but get data
+	from a udp -> tcp repeater.
+
+	* xrd_udp_forwarder.C:
+	Update to new class names etc.
+
+2012-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* test_upp.C:
+	* xrd_udp_forwarder.C:
+	Somewhat not entirely new but still half-cooked config macros.
+
+2011-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	The gratia probe runs at localhost now.
+
+2011-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	Report on close-file goes to red-mon.unl.edu now.
+
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* install-xrd-mon-sucker.sh:
+	* xrd-mon-sucker.sh:
+	New files - std sucker starter and installer, totally non-generick.
+
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	Make GUI spawning optional (bool argument).
+
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Logging changes.
+
+	* logrotate.d:
+	* logrotate.d/xrd-mon-sucker:
+	New file -- example config for logrotate.
+
+	* test.C:
+	* xrd_suck_production.C:
+	Write log to /var/log/xrootd/xrd-mon-sucker.log.
+
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* test.C:
+	* xrd_suck_production.C:
+	Instantiate and setup ZLog for XrdMonSucker.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* test.C:
+	* xrd_suck_production.C:
+	Add XrdEhs.
+	Use global variables for sucker, close reporter, and ehs.
+
+2011-10-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_production.C:
+	Clone test.C and configure XrdFileCloseReporter to send data to
+	Brian's UNL test machine.
+
+	* ChangeLog:
+	Start change-log.
