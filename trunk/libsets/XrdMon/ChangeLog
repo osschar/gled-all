@@ -1,5 +1,9 @@
 2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Rename libset CmsGridViz to XrdMon.
+
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Remove unused glasses in preparation for libset rename.
 
 	* Glasses/CmsXrdHost.cxx:

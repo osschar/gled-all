@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef CmsGridViz_XrdUser_H
-#define CmsGridViz_XrdUser_H
+#ifndef XrdMon_XrdUser_H
+#define XrdMon_XrdUser_H
 
 #include <Glasses/ZList.h>
 #include <Gled/GTime.h>
