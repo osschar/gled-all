@@ -1,15 +1,15 @@
 # $Header$
-LIB_SET_NAME	:= CmsGridViz
+LIB_SET_NAME	:= XrdMon
 LIB_SET_ID	:= 67
 REQUIRES_LIB_SETS := GledCore Net1
 
 # Directories containing glasses - full Gled enabled classes.
 BLESSED_DIRS	:= Glasses
 # Directories to be included in base library.
-BASE_DIRS	:= Stones CmsGridViz 
+BASE_DIRS	:= Stones XrdMon 
 
 # Directories for which dictionaries will be generates.
-DICT_DIRS	:= Glasses Stones CmsGridViz
+DICT_DIRS	:= Glasses Stones XrdMon
 
 # Directories to go into the View / GUI library.
 VIEW_DIRS	:=

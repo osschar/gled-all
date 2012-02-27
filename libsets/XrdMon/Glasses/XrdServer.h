@@ -4,8 +4,8 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef CmsGridViz_XrdServer_H
-#define CmsGridViz_XrdServer_H
+#ifndef XrdMon_XrdServer_H
+#define XrdMon_XrdServer_H
 
 #include <Glasses/ZNameMap.h>
 #include <Stones/SXrdServerId.h>

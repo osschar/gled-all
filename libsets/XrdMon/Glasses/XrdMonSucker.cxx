@@ -19,7 +19,7 @@
 #include "Stones/SUdpPacket.h"
 #include "Gled/GThread.h"
 
-#include "CmsGridViz/XrdXrootdMonData.h"
+#include "XrdMon/XrdXrootdMonData.h"
 
 #include <cerrno>
 
