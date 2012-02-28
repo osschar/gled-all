@@ -5,13 +5,14 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "XrdFileCloseReporter.h"
+#include "Glasses/ZLog.h"
 #include "XrdFileCloseReporter.c7"
 
 #include "XrdFile.h"
 #include "XrdUser.h"
 #include "XrdServer.h"
 
-#include <Gled/GThread.h>
+#include "Gled/GThread.h"
 
 #include <cerrno>
 

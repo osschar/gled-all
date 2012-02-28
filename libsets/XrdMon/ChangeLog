@@ -1,5 +1,14 @@
 2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add link member for ZLog.
+
+	* Glasses/XrdMonSucker.cxx:
+	Log uninteresting stuff as info, periodic cleanups as message.
+
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Rename libset CmsGridViz to XrdMon.
 
 2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
