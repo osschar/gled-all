@@ -7,10 +7,12 @@
 #ifndef XrdMon_XrdFileCloseReporter_H
 #define XrdMon_XrdFileCloseReporter_H
 
-#include <Glasses/ZGlass.h>
-class XrdFile;
+#include "Glasses/ZGlass.h"
+#include "Gled/GCondition.h"
 
-#include <Gled/GCondition.h>
+class XrdFile;
+class ZLog;
+
 class GThread;
 
 
@@ -22,6 +24,8 @@ private:
   void _init();
 
 protected:
+  ZLink<ZLog>       mLog;     // X{GS} L{}
+
   TString           mUdpHost; // X{GS} 7 Textor()
   UShort_t          mUdpPort; // X{GS} 7 Value()
 

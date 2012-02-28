@@ -182,8 +182,7 @@ void XrdMonSucker::Suck()
       server_not_known = (xshi == m_xrd_servers.end());
     }
 
-    // Empty header -- all logging is from this class (and, sadly, function).
-    ZLog::Helper log(*mLog, recv_time, ZLog::L_Message, "");
+    ZLog::Helper log(*mLog, recv_time, ZLog::L_Info, _eh);
 
     XrdServer *server = 0;
     if (server_not_known)
@@ -276,7 +275,7 @@ void XrdMonSucker::Suck()
     // Check length of message .vs. length claimed by xrd.
     if (p->mBuffLen != plen)
     {
-      log.Form("Message size mismatch: got %zd, xrd-len=%hu.", p->mBuffLen, plen);
+      log.Form(ZLog::L_Warning, "Message size mismatch: got %zd, xrd-len=%hu.", p->mBuffLen, plen);
       // This means either our buf-size is too small or the other guy is pushing it.
       // Should probably stop reporting errors from this IP.
       // XXXX Does it really help having it on stack?
@@ -853,7 +852,7 @@ void XrdMonSucker::CleanUpOldUsers()
 
   GTime now(GTime::I_Now);
 
-  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpOldUsers ");
+  ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
@@ -902,11 +901,12 @@ void XrdMonSucker::CleanUpOldUsers()
 void XrdMonSucker::CleanUpDeadUsers()
 {
   static const Exc_t _eh("XrdMonSucker::CleanUpDeadUsers ");
+
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
   GTime now(GTime::I_Now);
 
-  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpDeadUsers ");
+  ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
@@ -950,11 +950,12 @@ void XrdMonSucker::CleanUpDeadUsers()
 void XrdMonSucker::CleanUpDeadServers()
 {
   static const Exc_t _eh("XrdMonSucker::CleanUpDeadServers ");
+
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
   GTime now(GTime::I_Now);
 
-  ZLog::Helper log(*mLog, now, ZLog::L_Info, "CleanUpDeadServers ");
+  ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
