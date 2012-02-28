@@ -1,5 +1,11 @@
 2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	Standard log-file names.
+
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Rename libset CmsGridViz to XrdMon.
 
 2012-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
