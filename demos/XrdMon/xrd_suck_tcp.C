@@ -38,7 +38,7 @@ void xrd_suck_tcp()
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
   // c_log->SetFileName("/var/log/xrootd/xrd-mon-sucker.log");
-  c_log->SetFileName("test_via_upp.log");
+  c_log->SetFileName("xrd-mon-sucker.log");
   c_log->SetLevel(ZLog::L_Info);
 
   ASSIGN_ADD_GLASS(c_upc, UdpPacketTcpClient, g_queen, "UdpPacketTcpClient", 0);
