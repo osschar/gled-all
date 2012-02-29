@@ -1,3 +1,10 @@
+2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Some more constructors for ZLog::Helper.
+	In Helper check if m_log is set before forwarding the call.
+
 2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/SUdpPacket.cxx:

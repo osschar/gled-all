@@ -37,6 +37,9 @@ public:
     Int_t    m_level;
 
   public:
+    Helper(ZLog* log, const TString& pfx="");
+    Helper(ZLog* log, Int_t lvl, const TString& pfx="");
+    Helper(ZLog* log, const GTime& when, const TString& pfx="");
     Helper(ZLog* log, const GTime& when, Int_t lvl, const TString& pfx="");
 
     void SetTime(const GTime& time);

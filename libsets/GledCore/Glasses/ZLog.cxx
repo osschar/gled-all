@@ -286,6 +286,24 @@ void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, 
 // ZLog::Helper
 //==============================================================================
 
+ZLog::Helper::Helper(ZLog* log, const TString& pfx) :
+  m_log(log), m_prefix(pfx), m_level(L_Message)
+{
+  SetTime(GTime::Now());
+}
+
+ZLog::Helper::Helper(ZLog* log, Int_t lvl, const TString& pfx) :
+  m_log(log), m_prefix(pfx), m_level(lvl)
+{
+  SetTime(GTime::Now());
+}
+
+ZLog::Helper::Helper(ZLog* log, const GTime& when, const TString& pfx) :
+  m_log(log), m_prefix(pfx), m_level(L_Message)
+{
+  SetTime(when);
+}
+
 ZLog::Helper::Helper(ZLog* log, const GTime& when, Int_t lvl, const TString& pfx) :
   m_log(log), m_prefix(pfx), m_level(lvl)
 {
@@ -300,27 +318,39 @@ void ZLog::Helper::SetTime(const GTime& time)
 
 void ZLog::Helper::Put(const TString& message)
 {
-  m_log->Put(m_level, m_time_string, m_prefix, message);
+  if (m_log)
+  {
+    m_log->Put(m_level, m_time_string, m_prefix, message);
+  }
 }
 
 void ZLog::Helper::Put(Int_t level, const TString& message)
 {
-  m_log->Put(level, m_time_string, m_prefix, message);
+  if (m_log)
+  {
+    m_log->Put(level, m_time_string, m_prefix, message);
+  }
 }
 
 void ZLog::Helper::Form(const char* va_(fmt), ...)
 {
-  va_list ap;
-  va_start(ap, va_(fmt));
-  m_log->Form(m_level, m_time_string, m_prefix, va_(fmt), ap);
-  va_end(ap);
+  if (m_log)
+  {
+    va_list ap;
+    va_start(ap, va_(fmt));
+    m_log->Form(m_level, m_time_string, m_prefix, va_(fmt), ap);
+    va_end(ap);
+  }
 
 }
 
 void ZLog::Helper::Form(Int_t level, const char* va_(fmt), ...)
 {
-  va_list ap;
-  va_start(ap, va_(fmt));
-  m_log->Form(level, m_time_string, m_prefix, va_(fmt), ap);
-  va_end(ap);
+  if (m_log)
+  {
+    va_list ap;
+    va_start(ap, va_(fmt));
+    m_log->Form(level, m_time_string, m_prefix, va_(fmt), ap);
+    va_end(ap);
+  }
 }
