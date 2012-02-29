@@ -44,7 +44,8 @@ protected:
   GMutex            mUserMapMutex; //!
   GMutex            mFileMapMutex; //!
 
-  UChar_t           mLastSeq;      //!
+  UChar_t           mSrvSeq;       //!
+  Bool_t            bSrvSeqInited; //!
 
 public:
   XrdServer(const TString& n="XrdServer", const TString& t="");
@@ -66,8 +67,10 @@ public:
   XrdFile* FindFile(Int_t dict_id);
 
   // Only called from XrdMonSucker to initialize / check message sequence id.
-  void    InitSrvSeq(UChar_t seq) { mLastSeq = seq;    }
-  UChar_t IncAndGetSrvSeq()       { return ++mLastSeq; }
+  void    InitSrvSeq(UChar_t seq) { mSrvSeq = seq; bSrvSeqInited = true; }
+  UChar_t IncAndGetSrvSeq()       { return bSrvSeqInited ? ++mSrvSeq : 0; }
+  Bool_t  IsSrvSeqInited() const  { return bSrvSeqInited; }
+  void    ResetSrvSeq()           { mSrvSeq = 0; bSrvSeqInited = false; }
 
 #include "XrdServer.h7"
   ClassDef(XrdServer, 1);

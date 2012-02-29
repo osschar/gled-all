@@ -127,8 +127,8 @@ void XrdFileCloseReporter::ReportLoop()
         unique_id = mLastUidBase + ++mLastUidInner;
         if (mLastUidInner >= 1000ll)
         {
-          ISerr(_eh + "Inner counter for unique-id overflow.");
-          printf("%sInner counter for unique-id overflowed for file='%s'.\n", _eh.Data(), file->GetName());
+	  ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
+	  log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
           continue;
         }
       }
@@ -175,9 +175,9 @@ void XrdFileCloseReporter::ReportLoop()
 
     if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, &rAddr, sizeof(rAddr)) == -1)
     {
-      // Should send to log.
-      printf("%sError sending report for file='%s'. %s.\n", _eh.Data(),
-             file->GetName(), strerror(errno));
+      ZLog::Helper log(*mLog, ZLog::L_Error, _eh);
+      log.Form("Error sending report for file='%s'.\n\t%s.",
+	       file->GetName(), strerror(errno));
     }
   }
 }

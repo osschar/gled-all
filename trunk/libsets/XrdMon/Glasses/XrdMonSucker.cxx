@@ -219,7 +219,8 @@ void XrdMonSucker::Suck()
 	continue;
       }
 
-      log.Form("New server: %s.%s:%hu stod=%d", hostname_re[1].Data(), hostname_re[2].Data(), port, stod);
+      log.Form(ZLog::L_Message, "New server: %s.%s:%hu stod=%d",
+	       hostname_re[1].Data(), hostname_re[2].Data(), port, stod);
 
       server = new XrdServer(GForm("%s.%s : %d : %hu", hostname_re[1].Data(), hostname_re[2].Data(), stod, port),
                              "", hostname_re[1], hostname_re[2], GTime(stod));
@@ -247,8 +248,6 @@ void XrdMonSucker::Suck()
         GMutexHolder _lck(m_xrd_servers_mutex);
         xshi = m_xrd_servers.insert(make_pair(xsid, server)).first;
       }
-
-      server->InitSrvSeq(pseq);
     }
     else
     {
@@ -263,12 +262,19 @@ void XrdMonSucker::Suck()
     // Check sequence id. No remedy attempted.
     if (code == 'u' || code == 'd' || code == 't' || code == 'i')
     {
-      UChar_t srv_seq = server->IncAndGetSrvSeq();
-      if (pseq != srv_seq)
+      if (server->IsSrvSeqInited())
       {
-        log.Form(ZLog::L_Warning, "Sequence-id mismatch at '%s' srv=%hhu, loc=%hhu; code=%c. Ignoring.",
-                 server->GetName(), srv_seq, pseq, code);
-        server->InitSrvSeq(pseq);
+	UChar_t srv_seq = server->IncAndGetSrvSeq();
+	if (pseq != srv_seq)
+	{
+	  log.Form(ZLog::L_Warning, "Sequence-id mismatch at '%s' srv=%hhu, msg=%hhu; code=%c. Ignoring.",
+		   server->GetName(), srv_seq, pseq, code);
+	  server->InitSrvSeq(pseq);
+	}
+      }
+      else
+      {
+	server->InitSrvSeq(pseq);
       }
     }
 
@@ -334,10 +340,10 @@ void XrdMonSucker::Suck()
             continue;
           }
 
-          // Go figure, MIT was sending two user-map messages. The problem
-          // with this is that file-map user user-name to identify user
-          // ... and obviously the files were assigned to the wrong one + one
-          // session remained open forever.
+          // Go figure, in fall 2011 MIT was sending two user-map messages.
+	  // The problem with this is that file-map uses user-name to identify
+          // user ... and obviously the files were assigned to the wrong one +
+          // one session remained open forever.
           {
             XrdUser *xu = server->FindUser(uname);
             if (xu != 0)
@@ -411,7 +417,7 @@ void XrdMonSucker::Suck()
           }          
 	}
 
-	// XXX Eventually ... grep / create CmsXrdUser.
+	// XXX Eventually ... grep / create GridUser.
       }
       else if (code == 'd')
       {

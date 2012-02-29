@@ -1,3 +1,20 @@
+2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve initialization of server sequence-id and logging.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Send errors to ZLog.
+
+	* Glasses/XrdMonSucker.cxx:
+	Fix server seqence-id initialization (should only happen on one of
+	the blessed message types).
+	Log new-server reports as L_Message. L_Info is now used for
+	logging of every processed packet.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add bool member needed to mark server sequence-id initialization.
+
 2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporter.cxx:
