@@ -25,7 +25,9 @@ ClassImp(XrdServer);
 //==============================================================================
 
 void XrdServer::_init()
-{}
+{
+  ResetSrvSeq();
+}
 
 XrdServer::XrdServer(const TString& n, const TString& t) :
   ZNameMap(n, t)
