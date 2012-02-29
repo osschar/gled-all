@@ -86,7 +86,7 @@ void xrd_suck_tcp()
   c_upc->ConnectAndListenLoop();
 
   c_suck->StartSucker();
-  //c_frep->StartReporter();
+  c_frep->StartReporter();
 
   g_saturn->ShootMIR( c_ehs->S_StartServer() );
 }
