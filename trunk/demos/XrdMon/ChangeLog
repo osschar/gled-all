@@ -1,3 +1,11 @@
+2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	Leave logging level at L_Message by default, document meaning of
+	L_Info.
+	Set ZLog link of XrdFileCloseReporter.
+
 2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_suck_tcp.C:

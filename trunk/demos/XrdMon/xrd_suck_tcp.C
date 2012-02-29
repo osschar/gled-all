@@ -39,7 +39,8 @@ void xrd_suck_tcp()
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
   // c_log->SetFileName("/var/log/xrootd/xrd-mon-sucker.log");
   c_log->SetFileName("xrd-mon-sucker.log");
-  c_log->SetLevel(ZLog::L_Info);
+  // For verbose logging (every packet received).
+  // c_log->SetLevel(ZLog::L_Info);
 
   ASSIGN_ADD_GLASS(c_upc, UdpPacketTcpClient, g_queen, "UdpPacketTcpClient", 0);
   c_upc->SetLog(c_log);
@@ -52,6 +53,7 @@ void xrd_suck_tcp()
   c_suck->SetSource(c_upc);
 
   ASSIGN_ADD_GLASS(c_frep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
+  c_frep->SetLog(c_log);
   // c_frep->SetUdpHost("localhost");
   // c_frep->SetUdpPort(4242);
 
