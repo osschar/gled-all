@@ -1,3 +1,17 @@
+2012-02-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add processing of appinfo messages.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Report app_info at file close.
+
+	* Glasses/XrdMonSucker.cxx:
+	Process 'i' messages and stick the text into the right XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add member TString mAppInfo and method AppendAppInfo().
+
 2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve initialization of server sequence-id and logging.

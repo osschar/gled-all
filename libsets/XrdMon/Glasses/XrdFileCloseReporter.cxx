@@ -159,9 +159,9 @@ void XrdFileCloseReporter::ReportLoop()
       GLensReadHolder _ulck(user);
       msg += TString::Format
         ("user_dn=%s\nuser_vo=%s\nuser_role=%s\nuser_fqan=%s\nclient_domain=%s\nclient_host=%s\n"
-         "server_username=%s\n",
+         "server_username=%s\napp_info=%s\n",
          user->GetDN(), user->GetVO(), user->GetRole(), user->GetGroup(),
-         user->GetFromDomain(), user->GetFromHost(), user->GetServerUsername());
+         user->GetFromDomain(), user->GetFromHost(), user->GetServerUsername(), user->GetAppInfo());
       server = user->GetServer();
     }
     {
