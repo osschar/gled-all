@@ -57,6 +57,12 @@ void XrdUser::AddFile(XrdFile* file)
   Add(file);
 }
 
+void XrdUser::AppendAppInfo(const TString& app_info)
+{
+  mAppInfo += app_info;
+  Stamp(FID());
+}
+
 //==============================================================================
 
 TString XrdUser::ParseHumanName(const TString& dn)

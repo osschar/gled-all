@@ -32,6 +32,7 @@ protected:
   TString           mServerUsername; // X{GR}   7 TextOut()
   TString           mFromHost;       // X{GR}   7 TextOut()
   TString           mFromDomain;     // X{GR}   7 TextOut()
+  TString           mAppInfo;        // X{GR}   7 TextOut()
   GTime             mLoginTime;      // X{GR}   7 TimeOut()
   GTime             mDisconnectTime; // X{GRSQ} 7 TimeOut()
   GTime             mLastMsgTime;    // X{GRSQ} 7 TimeOut()
@@ -50,6 +51,8 @@ public:
   Bool_t IsConnected() const { return mDisconnectTime.IsNever() && ! mLoginTime.IsNever(); }
 
   void AddFile(XrdFile* file);
+
+  void AppendAppInfo(const TString& app_info);
 
   static TString    ParseHumanName(const TString& dn);
 

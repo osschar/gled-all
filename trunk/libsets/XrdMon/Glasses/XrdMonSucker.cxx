@@ -466,6 +466,26 @@ void XrdMonSucker::Suck()
 	  continue;
 	}
       }
+      else if (code == 'i')
+      {
+        TString uname(prim);
+        TString info (sec);
+	msg += TString::Format("\n\tInfo map -- id=%d, uname=%s info=%s",
+                               dict_id, uname.Data(), info.Data());
+
+	XrdUser *user = server->FindUser(uname);
+	if (user)
+        {
+          GLensWriteHolder _lck(user);
+          user->AppendAppInfo(info);
+          user->SetLastMsgTime(recv_time);
+        }
+        else
+        {
+          msg += "\n\tUser not found ... skipping.";
+          log.Put(ZLog::L_Warning, msg);
+        }
+      }
       else
       {
 	msg += TString::Format("\n\tOther %c -- id=%u, uname=%s other=%s", code, dict_id, prim, sec);
