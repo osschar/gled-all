@@ -1,3 +1,9 @@
+2012-03-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	First step towards activation, still not runnable.
+
 2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	New libset for various Net related stuff.

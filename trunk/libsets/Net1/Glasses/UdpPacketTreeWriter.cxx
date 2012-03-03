@@ -5,7 +5,15 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 #include "UdpPacketTreeWriter.h"
+#include "Glasses/UdpPacketSource.h"
+#include "Glasses/ZLog.h"
 #include "UdpPacketTreeWriter.c7"
+
+#include "Stones/SUdpPacket.h"
+#include "Gled/GThread.h"
+
+#include "TFile.h"
+#include "TTree.h"
 
 // UdpPacketTreeWriter
 
@@ -19,9 +27,11 @@ ClassImp(UdpPacketTreeWriter);
 
 void UdpPacketTreeWriter::_init()
 {
-  mDFile   = 0;
-  mDTree   = 0;
-  mDBranch = 0;
+  mWLThread = 0;
+
+  mFile   = 0;
+  mTree   = 0;
+  mBranch = 0;
 }
 
 UdpPacketTreeWriter::UdpPacketTreeWriter(const Text_t* n, const Text_t* t) :
@@ -35,59 +45,71 @@ UdpPacketTreeWriter::~UdpPacketTreeWriter()
 
 //==============================================================================
 
-/*
+void UdpPacketTreeWriter::Start()
+{
   // Open file, create tree etc frag
+
+  static const Exc_t _eh("UdpPacketTreeWriter::Start ");
+
+  {
+    GLensReadHolder _lck(this);
+    if (mWLThread != 0)
+      throw _eh + "already running.";
+    mWLThread = GThread::Self();
+  }
 
   SUdpPacket *pup = 0;
 
-  mDFile   = TFile::Open("xxx.root", "recreate");
-  mDTree   = new TTree("Packets", "UDP packets");
-  mDTree->SetAutoFlush(-300000);
-  mDBranch = mDTree->Branch("P", &pup, 4096, 2);
+  mFile   = TFile::Open("xxx.root", "recreate");
+  mTree   = new TTree("Packets", "UDP packets");
+  mTree->SetAutoFlush(-300000);
+  mBranch = mTree->Branch("P", &pup, 4096, 2);
 
+  mSource->RegisterConsumer(&mUdpQueue);
 
   // Filler frag
-
-  mDBranch->SetAddress(&pp);
-
-  mDTree->Fill();
-
-  printf("Fill, n=%lld\n", mDTree->GetEntries());
-
-  if (mDTree->GetEntries() % 1000 == 0)
+  while (true)
   {
-    mDTree->AutoSave("SaveSelf");
+    SUdpPacket *p = mUdpQueue.PopFront();
+
+    mBranch->SetAddress(&p);
+
+    mTree->Fill();
+
+    printf("Fill, n=%lld\n", mTree->GetEntries());
+
+    if (mTree->GetEntries() % 1000 == 0)
+    {
+      mTree->AutoSave("SaveSelf");
+    }
+
+    p->DecRefCount();
   }
+}
 
-
-
-void UdpPacketProcessor::StopAllServices()
+void UdpPacketTreeWriter::Stop()
 {
-  static const Exc_t _eh("UdpPacketProcessor::StopAllServices ");
+  static const Exc_t _eh("UdpPacketTreeWriter::Stop ");
 
   GThread *thr = 0;
   {
     GLensReadHolder _lck(this);
-    if ( ! GThread::IsValidPtr(mSuckerThread))
+    if ( ! GThread::IsValidPtr(mWLThread))
       throw _eh + "not running.";
-    thr = mSuckerThread;
-    GThread::InvalidatePtr(mSuckerThread);
+    thr = mWLThread;
+    GThread::InvalidatePtr(mWLThread);
   }
 
   thr->Cancel();
   thr->Join();
 
   printf("Writing tree ...\n");
-  mDTree->Write();
+  mTree->Write();
   printf("Closing and deleting file ...\n");
-  mDFile->Close();
-  delete mDFile; mDFile = 0;
+  mFile->Close();
+  delete mFile; mFile = 0;
 
-  {
-    GLensReadHolder _lck(this);
-    mSuckerThread = 0;
-    mSocket = 0;
-  }
 }
 
- */
+//==============================================================================
+
