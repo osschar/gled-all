@@ -32,6 +32,9 @@ protected:
   GTime             mStartTime;   // X{GR}   7 TimeOut()
   GTime             mLastMsgTime; // X{GRSQ} 7 TimeOut()
 
+  Long64_t          mPacketCount; //!X{G}    7 ValOut()
+  // Also count failed seq-ids
+
   ZLink<ZList>      mPrevUsers;   // X{GS} L{}
 
   typedef map<Int_t, XrdUser*>    mDict2User_t;
@@ -53,6 +56,9 @@ public:
   virtual ~XrdServer();
 
   virtual void AdEnlightenment();
+
+  // void     IncPacketCount();
+  // Do someting like ... count++, if count % 100 == 0 stamp
 
   Bool_t   ExistsUserDictId(Int_t dict_id);
   void     AddUser(XrdUser* user, Int_t dict_id); // X{E} C{1}

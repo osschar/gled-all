@@ -56,7 +56,9 @@ protected:
   Int_t      mServDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
   GTime      mLastOldUserCheck;  // X{GRSQ} 7 TimeOut()
   GTime      mLastDeadUserCheck; // X{GRSQ} 7 TimeOut()
-  GTime      mLastDeadServCheck;     // X{GRSQ} 7 TimeOut()
+  GTime      mLastDeadServCheck; // X{GRSQ} 7 TimeOut()
+
+  Long64_t   mPacketCount;       //!X{G}    7 ValOut()
 
   Int_t      mSocket;         //!
   GThread   *mSuckerThread;   //!

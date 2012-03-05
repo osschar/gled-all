@@ -53,6 +53,8 @@ void XrdMonSucker::_init()
   mUserDeadSec = 86400;
   mServDeadSec = 86400;
 
+  mPacketCount = 0;
+
   mSocket = 0;
   mSuckerThread = 0;
   mLastOldUserCheck = mLastDeadServCheck = GTime(GTime::I_Never);
@@ -165,6 +167,12 @@ void XrdMonSucker::Suck()
 
     GTime recv_time(p->mRecvTime);
 
+    if (++mPacketCount % 100 == 0)
+    {
+      GLensReadHolder _lck(this);
+      Stamp(FID());
+    }
+
     XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) p->mBuff;
     Char_t   code = xmh->code;
     UChar_t  pseq = xmh->pseq;
@@ -237,7 +245,7 @@ void XrdMonSucker::Suck()
           Add(domain);
         }
       }
-      
+
       // ZQueen::CheckIn() does write lock.
       mQueen->CheckIn(server);
       {
