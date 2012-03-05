@@ -1,3 +1,9 @@
+2012-03-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Link libGledCore.so against root libs that are required to make
+	gSystem->Load("libGledCore.so") work from plain root session.
+
 2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZLog.cxx:
