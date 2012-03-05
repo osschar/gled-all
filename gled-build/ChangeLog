@@ -1,3 +1,8 @@
+2012-03-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* libexec/project7.pl:
+	Add Long64_t and ULong64_t to list of simple types.
+
 2011-09-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:
