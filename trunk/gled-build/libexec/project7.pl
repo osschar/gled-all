@@ -154,7 +154,7 @@ for $ls (@{$resolver->{LibName2LibSpecs}{$LibSetName}{Deps}}, $LibSetName)
     "Long_t", "unsigned long", "ULong_t", "float", "Float_t", "double",
     "Double_t", "char", "Text_t", "unsigned char", "Bool_t", "unsigned char",
     "Byte_t", "short", "Version_t", "const char", "Option_t", "int", "Ssiz_t",
-    "float", "bool", "Double32_t",
+    "float", "bool", "Double32_t", "Long64_t", "ULong64_t",
     "TString", "string",
     "ID_t", "LID_t", "CID_t", "MID_t", "FID_t", "FMID_t",
     "TimeStamp_t"
