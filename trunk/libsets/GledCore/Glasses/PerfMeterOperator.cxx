@@ -33,45 +33,57 @@ void PerfMeterOperator::Operate(Operator::Arg* op_arg)
 {
   Operator::PreOperate(op_arg);
 
-  if(mTarget == 0) goto end_operate;
+  if (mTarget == 0) goto end_operate;
 
-  switch(mTest) {
-  case TT_Void: { break; }
-
-  case TT_Null: {
-    if(op_arg->fMultix) {
-      mTarget->NullMethod();
-    } else {
-      auto_ptr<ZMIR> mir(mTarget->S_NullMethod());
-      send_beam_or_flare(mir);
+  switch (mTest)
+  {
+    case TT_Void:
+    {
+      break;
     }
-    break;
-  }
-
-  case TT_IncCount: {
-    if(op_arg->fMultix) {
-      mTarget->IncCount();
-    } else {
-      auto_ptr<ZMIR> mir(mTarget->S_IncCount());
-      send_beam_or_flare(mir);
+    case TT_Null:
+    {
+      if (op_arg->fMultix)
+      {
+	mTarget->NullMethod();
+      }
+      else
+      {
+	auto_ptr<ZMIR> mir(mTarget->S_NullMethod());
+	send_beam_or_flare(mir);
+      }
+      break;
     }
-    break;
-  }
-
-  case TT_SetVector: {
-    TVector vec(mVecSize);
-    if(op_arg->fMultix) {
-      mTarget->AssignVector(vec);
-    } else {
-      auto_ptr<ZMIR> mir(mTarget->S_AssignVector(vec));
-      send_beam_or_flare(mir);
+    case TT_IncCount:
+    {
+      if (op_arg->fMultix)
+      {
+	mTarget->IncCount();
+      }
+      else
+      {
+	auto_ptr<ZMIR> mir(mTarget->S_IncCount());
+	send_beam_or_flare(mir);
+      }
+      break;
     }
-    break;
+    case TT_SetVector:
+    {
+      TVector vec(mVecSize);
+      if (op_arg->fMultix)
+      {
+	mTarget->AssignVector(vec);
+      }
+      else
+      {
+	auto_ptr<ZMIR> mir(mTarget->S_AssignVector(vec));
+	send_beam_or_flare(mir);
+      }
+      break;
+    }
   }
 
-  }
-
- end_operate:
+end_operate:
   Operator::PostOperate(op_arg);
 }
 

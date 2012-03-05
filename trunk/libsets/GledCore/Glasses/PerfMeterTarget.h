@@ -11,7 +11,8 @@
 
 #include <TVector.h>
 
-class PerfMeterTarget : public ZList {
+class PerfMeterTarget : public ZList
+{
   MAC_RNR_FRIENDS(PerfMeterTarget);
 
 private:
