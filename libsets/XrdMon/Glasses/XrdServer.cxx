@@ -26,6 +26,7 @@ ClassImp(XrdServer);
 
 void XrdServer::_init()
 {
+  mPacketCount = 0;
   ResetSrvSeq();
 }
 
