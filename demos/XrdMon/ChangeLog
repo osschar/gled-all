@@ -1,3 +1,19 @@
+2012-03-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve configurability by splitting up startup macros.
+
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	* xrd_udp_forwarder.C:
+	Separate XrdFileCloseReporter, XrdEhs and UdpPacketTreeWriter into
+	separate macros.
+	Add new variable for UdpPacketSource.
+
+	* xrd_file_close_reporter.C:
+	* xrd_http_serve_open_files.C:
+	* xrd_tree_writer.C:
+	New macros for individual functions.
+
 2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_suck_tcp.C:
