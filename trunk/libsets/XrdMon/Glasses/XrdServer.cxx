@@ -26,7 +26,7 @@ ClassImp(XrdServer);
 
 void XrdServer::_init()
 {
-  mPacketCount = 0;
+  mPacketCount = mSeqIdFailCount = 0;
   ResetSrvSeq();
 }
 
@@ -58,6 +58,20 @@ void XrdServer::AdEnlightenment()
     mPrevUsers->SetElementFID(XrdUser::FID());
     mPrevUsers->SetMIRActive(false);
   }
+}
+
+//==============================================================================
+
+void XrdServer::IncPacketCount()
+{
+  if (++mPacketCount % 100 == 0)
+    Stamp(FID());
+}
+
+void XrdServer::IncSeqIdFailCount()
+{
+  ++mSeqIdFailCount;
+  Stamp(FID());
 }
 
 //==============================================================================
