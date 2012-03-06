@@ -11,16 +11,15 @@
 
 #include <glass_defines.h>
 
+class UdpPacketSource;
 class UdpPacketTcpClient;
 class XrdMonSucker;
-class XrdFileCloseReporter;
-class XrdEhs;
 
-ZLog                 *c_log  = 0;
-UdpPacketTcpClient   *c_upc  = 0;
-XrdMonSucker         *c_suck = 0;
-XrdFileCloseReporter *c_frep = 0;
-XrdEhs               *c_ehs  = 0;
+ZLog               *c_log  = 0;
+UdpPacketTcpClient *c_upc  = 0;
+XrdMonSucker       *c_suck = 0;
+
+UdpPacketSource    *c_udp_packet_source = 0;
 
 void xrd_suck_tcp()
 {
@@ -46,47 +45,33 @@ void xrd_suck_tcp()
   c_upc->SetLog(c_log);
   c_upc->SetHost("desire.physics.ucsd.edu");
   // default port is 9940
+  c_udp_packet_source = c_upc;
 
   ASSIGN_ADD_GLASS(c_suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);
   c_suck->SetKeepSorted(true);
   c_suck->SetLog(c_log);
   c_suck->SetSource(c_upc);
 
-  ASSIGN_ADD_GLASS(c_frep, XrdFileCloseReporter, g_queen, "XrdFileCloseReporter", 0);
-  c_frep->SetLog(c_log);
-  // c_frep->SetUdpHost("localhost");
-  // c_frep->SetUdpPort(4242);
-
-  c_suck->SetFCReporter(c_frep);
-
-  ASSIGN_ADD_GLASS(c_ehs, XrdEhs, g_queen, "XrdEhs", 0);
-  c_ehs->SetXrdSucker(c_suck);
-  // c_ehs->SetPort(4242);
+  // Debugging setup.
+  // Regexps for setting full-trace-print flag for new user sessions.
+  // c_suck->SetTraceDN("Matevz Tadel");
+  // c_suck->SetTraceHost("uaf-");
+  // c_suck->SetTraceDomain("ucsd.edu");
 
 
   //============================================================================
-  // Spawn GUI
 
+  // Spawn GUI
   if (Gled::theOne->HasGUILibs())
   {
     Gled::LoadMacro("eye.C");
     eye(false);
-
     g_nest->Add(g_queen);
     g_nest->SetWName(50);
   }
 
-  // Regexps for setting full-trace-print flag for new user sessions.
-  c_suck->SetTraceDN("Matevz Tadel");
-  c_suck->SetTraceHost("uaf-");
-  c_suck->SetTraceDomain("ucsd.edu");
-
-  c_log->StartLogging();
-
-  c_upc->ConnectAndListenLoop();
-
+  // Start threads
+  c_log ->StartLogging();
+  c_upc ->ConnectAndListenLoop();
   c_suck->StartSucker();
-  c_frep->StartReporter();
-
-  g_saturn->ShootMIR( c_ehs->S_StartServer() );
 }

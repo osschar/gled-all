@@ -1,11 +1,14 @@
 #include <glass_defines.h>
 
+class UdpPacketSource;
 class UdpPacketListener;
 class UdpPacketTcpServer;
 
 ZLog               *c_log      = 0;
 UdpPacketListener  *c_listener = 0;
 UdpPacketTcpServer *c_server   = 0;
+
+UdpPacketSource    *c_udp_packet_source = 0;
 
 void xrd_udp_forwarder()
 {
@@ -33,6 +36,7 @@ void xrd_udp_forwarder()
   // c_listener->SetSuckPort(9930);
   // Now running on desire, second slot:
   c_listener->SetSuckPort(9929);
+  c_udp_packet_source = c_listener;
 
   ASSIGN_ADD_GLASS(c_server, UdpPacketTcpServer, g_queen, "UdpPacketTcpServer", "");
   c_server->SetLog(c_log);  
@@ -42,17 +46,17 @@ void xrd_udp_forwarder()
 
 
   //============================================================================
-  // Spawn GUI
 
+  // Spawn GUI
   if (Gled::theOne->HasGUILibs())
   {
     Gled::LoadMacro("eye.C");
     eye(false);
-
     g_nest->Add(g_queen);
     g_nest->SetWName(50);
   }
 
+  // Start threads
   g_saturn->ShootMIR( c_listener->S_StartAllServices() );
   g_saturn->ShootMIR( c_server  ->S_StartAllServices() );
 }
