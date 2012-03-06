@@ -1,3 +1,11 @@
+2012-03-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Count packets processed and number of mis-matched seq-ids.
+
 2012-02-29  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add processing of appinfo messages.

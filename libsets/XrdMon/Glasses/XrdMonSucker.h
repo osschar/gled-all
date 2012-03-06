@@ -59,6 +59,7 @@ protected:
   GTime      mLastDeadServCheck; // X{GRSQ} 7 TimeOut()
 
   Long64_t   mPacketCount;       //!X{G}    7 ValOut()
+  Long64_t   mSeqIdFailCount;    //!X{G}    7 ValOut()
 
   Int_t      mSocket;         //!
   GThread   *mSuckerThread;   //!

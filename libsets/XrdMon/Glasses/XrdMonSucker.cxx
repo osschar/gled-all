@@ -53,7 +53,7 @@ void XrdMonSucker::_init()
   mUserDeadSec = 86400;
   mServDeadSec = 86400;
 
-  mPacketCount = 0;
+  mPacketCount = mSeqIdFailCount = 0;
 
   mSocket = 0;
   mSuckerThread = 0;
@@ -167,10 +167,10 @@ void XrdMonSucker::Suck()
 
     GTime recv_time(p->mRecvTime);
 
-    if (++mPacketCount % 100 == 0)
     {
       GLensReadHolder _lck(this);
-      Stamp(FID());
+      if (++mPacketCount % 1000 == 0)
+        Stamp(FID());
     }
 
     XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) p->mBuff;
@@ -264,6 +264,7 @@ void XrdMonSucker::Suck()
 
     {
       GLensReadHolder _lck(server);
+      server->IncPacketCount();
       server->SetLastMsgTime(recv_time);
     }
 
@@ -278,6 +279,15 @@ void XrdMonSucker::Suck()
 	  log.Form(ZLog::L_Warning, "Sequence-id mismatch at '%s' srv=%hhu, msg=%hhu; code=%c. Ignoring.",
 		   server->GetName(), srv_seq, pseq, code);
 	  server->InitSrvSeq(pseq);
+          {
+            GLensReadHolder _lck(server);
+            server->IncSeqIdFailCount();
+          }
+          {
+            GLensReadHolder _lck(this);
+            ++mSeqIdFailCount;
+            Stamp(FID());
+          }
 	}
       }
       else
@@ -292,8 +302,7 @@ void XrdMonSucker::Suck()
       log.Form(ZLog::L_Warning, "Message size mismatch: got %zd, xrd-len=%hu.", p->mBuffLen, plen);
       // This means either our buf-size is too small or the other guy is pushing it.
       // Should probably stop reporting errors from this IP.
-      // XXXX Does it really help having it on stack?
-      // XXXX Anyway, do additional checks in here about buf-size, got less, etc.
+      // XXXX Do additional checks in here about buf-size, got less, etc.
       continue;
     }
 
