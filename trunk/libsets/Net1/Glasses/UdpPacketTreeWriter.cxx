@@ -100,6 +100,8 @@ void UdpPacketTreeWriter::Stop()
     GThread::InvalidatePtr(mWLThread);
   }
 
+  mSource->UnregisterConsumer(&mUdpQueue);
+
   thr->Cancel();
   thr->Join();
 
