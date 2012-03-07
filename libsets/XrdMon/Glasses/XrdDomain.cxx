@@ -19,7 +19,9 @@ ClassImp(XrdDomain);
 //==============================================================================
 
 void XrdDomain::_init()
-{}
+{
+  mPacketCount = mSeqIdFailCount = 0;
+}
 
 XrdDomain::XrdDomain(const Text_t* n, const Text_t* t) :
   ZNameMap(n, t)
@@ -33,3 +35,15 @@ XrdDomain::~XrdDomain()
 {}
 
 //==============================================================================
+
+void XrdDomain::IncPacketCount()
+{
+  if (++mPacketCount % 100 == 0)
+    Stamp(FID());
+}
+
+void XrdDomain::IncSeqIdFailCount()
+{
+  ++mSeqIdFailCount;
+  Stamp(FID());
+}

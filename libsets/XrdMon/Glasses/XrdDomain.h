@@ -17,10 +17,15 @@ private:
   void _init();
 
 protected:
+  Long64_t          mPacketCount;       //!X{G}    7 ValOut()
+  Long64_t          mSeqIdFailCount;    //!X{G}    7 ValOut()
 
 public:
   XrdDomain(const Text_t* n="XrdDomain", const Text_t* t=0);
   virtual ~XrdDomain();
+
+  void     IncPacketCount();
+  void     IncSeqIdFailCount();
 
 #include "XrdDomain.h7"
   ClassDef(XrdDomain, 1);
