@@ -1,3 +1,14 @@
+2012-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Canonicalize argument order for Put() and Form().
+
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Canonicalize argument order for Put() and Form() so that the order
+	of arguments corresponds to the order of their appearance in the
+	log. This also solves potential ambiguity between two forms of
+	Form().
+
 2012-03-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:

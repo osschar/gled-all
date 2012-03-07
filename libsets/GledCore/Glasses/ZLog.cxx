@@ -214,15 +214,15 @@ namespace
 
 void ZLog::Put(Int_t level, const TString& prefix, const TString& message)
 {
-  Put(level, GTime::Now().ToDateTimeLocal(false), prefix, message);
+  Put(GTime::Now().ToDateTimeLocal(false), level, prefix, message);
 }
 
-void ZLog::Put(Int_t level, const GTime& time, const TString& prefix, const TString& message)
+void ZLog::Put(const GTime& time, Int_t level, const TString& prefix, const TString& message)
 {
-  Put(level, time.ToDateTimeLocal(false), prefix, message);
+  Put(time.ToDateTimeLocal(false), level, prefix, message);
 }
 
-void ZLog::Put(Int_t level, const TString& time_string, const TString& prefix, const TString& message)
+void ZLog::Put(const TString& time_string, Int_t level, const TString& prefix, const TString& message)
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
@@ -236,19 +236,19 @@ void ZLog::Form(Int_t level, const TString& prefix, const char* va_(fmt), ...)
 {
   va_list ap;
   va_start(ap, va_(fmt));
-  Form(level, GTime::Now().ToDateTimeLocal(false), prefix, va_(fmt), ap);
+  Form(GTime::Now().ToDateTimeLocal(false), level, prefix, va_(fmt), ap);
   va_end(ap);
 }
 
-void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* va_(fmt), ...)
+void ZLog::Form(const GTime& time, Int_t level, const TString& prefix, const char* va_(fmt), ...)
 {
   va_list ap;
   va_start(ap, va_(fmt));
-  Form(level, time.ToDateTimeLocal(false), prefix, va_(fmt), ap);
+  Form(time.ToDateTimeLocal(false), level, prefix, va_(fmt), ap);
   va_end(ap);
 }
 
-void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, const char* va_(fmt), ...)
+void ZLog::Form(const TString& time_string, Int_t level, const TString& prefix, const char* va_(fmt), ...)
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
@@ -265,12 +265,12 @@ void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, 
   mStream << time_string << " " << lvl_name << " " << prefix << pim << message << endl;
 }
 
-void ZLog::Form(Int_t level, const GTime& time, const TString& prefix, const char* va_(fmt), va_list args)
+void ZLog::Form(const GTime& time, Int_t level, const TString& prefix, const char* va_(fmt), va_list args)
 {
-  Form(level, time.ToDateTimeLocal(false), prefix, va_(fmt), args);
+  Form(time.ToDateTimeLocal(false), level, prefix, va_(fmt), args);
 }
 
-void ZLog::Form(Int_t level, const TString& time_string, const TString& prefix, const char* va_(fmt), va_list args)
+void ZLog::Form(const TString& time_string, Int_t level, const TString& prefix, const char* va_(fmt), va_list args)
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
@@ -320,7 +320,7 @@ void ZLog::Helper::Put(const TString& message)
 {
   if (m_log)
   {
-    m_log->Put(m_level, m_time_string, m_prefix, message);
+    m_log->Put(m_time_string, m_level, m_prefix, message);
   }
 }
 
@@ -328,7 +328,7 @@ void ZLog::Helper::Put(Int_t level, const TString& message)
 {
   if (m_log)
   {
-    m_log->Put(level, m_time_string, m_prefix, message);
+    m_log->Put(m_time_string, level, m_prefix, message);
   }
 }
 
@@ -350,7 +350,7 @@ void ZLog::Helper::Form(Int_t level, const char* va_(fmt), ...)
   {
     va_list ap;
     va_start(ap, va_(fmt));
-    m_log->Form(level, m_time_string, m_prefix, va_(fmt), ap);
+    m_log->Form(m_time_string, level, m_prefix, va_(fmt), ap);
     va_end(ap);
   }
 }
