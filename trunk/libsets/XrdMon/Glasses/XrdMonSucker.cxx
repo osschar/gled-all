@@ -193,6 +193,8 @@ void XrdMonSucker::Suck()
     ZLog::Helper log(*mLog, recv_time, ZLog::L_Info, _eh);
 
     XrdServer *server = 0;
+    XrdDomain *domain = 0;
+
     if (server_not_known)
     {
       sockaddr_in  sa4;
@@ -234,7 +236,7 @@ void XrdMonSucker::Suck()
                              "", hostname_re[1], hostname_re[2], GTime(stod));
       server->m_server_id = xsid;
 
-      XrdDomain *domain = static_cast<XrdDomain*>(GetElementByName(server->GetDomain()));
+      domain = static_cast<XrdDomain*>(GetElementByName(server->GetDomain()));
       if (!domain)
       {
         domain = new XrdDomain(server->GetDomain());
@@ -260,12 +262,17 @@ void XrdMonSucker::Suck()
     else
     {
       server = xshi->second;
+      domain = static_cast<XrdDomain*>(GetElementByName(server->GetDomain()));
     }
 
     {
       GLensReadHolder _lck(server);
       server->IncPacketCount();
       server->SetLastMsgTime(recv_time);
+    }
+    {
+      GLensReadHolder _lck(domain);
+      domain->IncPacketCount();
     }
 
     // Check sequence id. No remedy attempted.
@@ -282,6 +289,10 @@ void XrdMonSucker::Suck()
           {
             GLensReadHolder _lck(server);
             server->IncSeqIdFailCount();
+          }
+          {
+            GLensReadHolder _lck(domain);
+            domain->IncSeqIdFailCount();
           }
           {
             GLensReadHolder _lck(this);
