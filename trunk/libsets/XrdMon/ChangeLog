@@ -1,3 +1,9 @@
+2012-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	When file-open trace is received, reset file-open time if it is
+	further away in the past.
+
 2012-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdDomain.cxx:

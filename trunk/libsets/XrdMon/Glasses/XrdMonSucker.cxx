@@ -652,81 +652,85 @@ void XrdMonSucker::Suck()
 
         // if (vrb) msg_vrb += GForm("\n\t%-2d: %hhx %s", ti, tt, ttn);
 
-        XrdFile *fi = 0;
+        XrdFile *file = 0;
 
         if (tt <= 0x7F)
         {
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
-          fi = lc.update(dict_id);
-          if (fi)
+          file = lc.update(dict_id);
+          if (file)
           {
             // Int_t rwoff = ntohl(arg.arg0.val);
             Int_t rwlen = ntohl(xmt.arg1.buflen);
-            GLensReadHolder _lck(fi);
+            GLensReadHolder _lck(file);
             if (rwlen >= 0)
             {
-              fi->AddReadSample ( rwlen / One_MB);
+              file->AddReadSample ( rwlen / One_MB);
             }
             else
             {
-              fi->AddWriteSample(-rwlen / One_MB);
+              file->AddWriteSample(-rwlen / One_MB);
             }
-            fi->SetLastMsgTime(lc.fTime);
+            file->SetLastMsgTime(lc.fTime);
           }
         }
         else if (tt == XROOTD_MON_READV)
         {
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
-          fi = lc.update(dict_id);
-          if (fi)
+          file = lc.update(dict_id);
+          if (file)
           {
             Int_t rlen = ntohl(xmt.arg1.buflen);
             // Not processed: vcnt and vseq (for multi file read)
-            GLensReadHolder _lck(fi);
-            fi->AddReadSample (rlen / One_MB);
-            fi->SetLastMsgTime(lc.fTime);
+            GLensReadHolder _lck(file);
+            file->AddReadSample (rlen / One_MB);
+            file->SetLastMsgTime(lc.fTime);
           }
         }
 	else if (tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
 	{
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
-	  fi = lc.update(dict_id);
-          if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, fi ? fi->GetName() : "<nil>");
-          if (fi)
+	  file = lc.update(dict_id);
+          if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, file ? file->GetName() : "<nil>");
+          if (file)
           {
             if (tt == XROOTD_MON_OPEN)
             {
-              msg += GForm("\n\tOpen file='%s'", fi ? fi->GetName() : "<nil>");
-              union {
-                Long64_t  val;
-                UChar_t   id[8];
-              } jebo;
+              msg += GForm("\n\tOpen file='%s'", file ? file->GetName() : "<nil>");
+              union { Long64_t val; UChar_t id[8]; } jebo;
               jebo.val = xmt.arg0.val;
               jebo.id[0] = 0;
-	      GLensReadHolder _lck(fi);
-              fi->SetSizeMB(net2host(jebo.val) / One_MB);
-	      fi->SetLastMsgTime(lc.fTime);
+
+	      GLensReadHolder _lck(file);
+              file->SetSizeMB(net2host(jebo.val) / One_MB);
+	      // This should, in principle, be always true ... but some
+	      // pre-3.1 xrootds can get this screwed up pretty badly.
+	      if (lc.fTime < file->RefOpenTime())
+	      {
+		file->SetOpenTime(lc.fTime);
+	      }
+	      file->SetLastMsgTime(lc.fTime);
             }
             else
             {
 	      {
-		GLensReadHolder _lck(fi);
-		fi->SetLastMsgTime(lc.fTime);
+		GLensReadHolder _lck(file);
+		file->SetLastMsgTime(lc.fTime);
 		ULong64_t x;
 		x = ntohl(xmt.arg0.rTot[1]);
 		x <<= xmt.arg0.id[1];
-		fi->SetRTotalMB(x / One_MB);
+		file->SetRTotalMB(x / One_MB);
 		x = ntohl(xmt.arg1.wTot);
 		x <<= xmt.arg0.id[2];
-		fi->SetWTotalMB(x / One_MB);
-		fi->SetCloseTime(lc.fTime);
+		file->SetWTotalMB(x / One_MB);
+		file->SetCloseTime(lc.fTime);
 	      }
-              msg += GForm("\n\tClose file='%s'", fi ? fi->GetName() : "<nil>");
+              msg += GForm("\n\tClose file='%s'", file ? file->GetName() : "<nil>");
 	      {
 		GLensReadHolder _lck(server);
-		server->RemoveFile(fi);
+		server->RemoveFile(file);
 	      }
-              on_file_close(fi);
+              on_file_close(file);
             }
           }
 	}
