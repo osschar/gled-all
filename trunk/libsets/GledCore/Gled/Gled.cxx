@@ -27,6 +27,7 @@
 #include <TObjString.h>
 #include <TException.h>
 #include <TMath.h>
+#include <TPRegexp.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
 #include <TSystemDirectory.h>
@@ -947,11 +948,33 @@ void Gled::AssertLibSet(const Text_t* lib_set)
     theOne->LoadLibSet(lib_set);
 }
 
-namespace {
-  void chomp_tail(TString& s, char c='.') {
-    Ssiz_t p = s.Last(c);
-    if(p != kNPOS)
-      s.Remove(p);
+namespace
+{
+  struct MacroEls
+  {
+    TString fFoo, fExt, fArgs;
+
+    MacroEls(TPMERegexp& r) : fFoo(r[1]), fExt(r[2]), fArgs(r[3]) {}
+
+    TString FunctionCall() const { return fFoo + "(" + fArgs + ")"; }
+    TString MacroFile()    const { return fFoo + fExt; }
+  };
+
+  MacroEls parse_macro(const TString& s)
+  {
+    TPMERegexp macro_re("(\\w+)(\\.\\w+)(?:\\((.*)\\))?");
+
+    Int_t n = macro_re.Match(s);
+    if (n != 3 && n != 4)
+    {
+      cout << "A fishy macro request received: '" << s << "'. There's a bumpy road ahead.\n";
+    }
+    if (n >= 3 && macro_re[2] != ".C")
+    {
+      cout << "A macro without '.C' received: '" << s << "'. Not sure we'll get much further.\n";
+    }
+
+    return MacroEls(macro_re);
   }
 }
 
@@ -959,9 +982,11 @@ void Gled::AssertMacro(const Text_t* mac)
 {
   // Load and execute macro 'mac' if it has not been loaded yet.
 
-  TString foo(mac); chomp_tail(foo);
-  if(gROOT->GetGlobalFunction(foo.Data(), 0, true) == 0) {
-    gROOT->Macro(mac);
+  MacroEls m = parse_macro(mac);
+  if (gROOT->GetGlobalFunction(m.fFoo, 0, true) == 0)
+  {
+    gROOT->LoadMacro(m.MacroFile());
+    gROOT->ProcessLine(m.FunctionCall());
   }
 }
 
@@ -969,21 +994,23 @@ void Gled::Macro(const Text_t* mac)
 {
   // Execute macro 'mac'. Do not reload the macro.
 
-  TString foo(mac); chomp_tail(foo);
-  if(gROOT->GetGlobalFunction(foo.Data(), 0, true) == 0)
-    gROOT->LoadMacro(mac);
-
-  foo += "()";
-  gROOT->ProcessLine(foo.Data());
+  MacroEls m = parse_macro(mac);
+  if (gROOT->GetGlobalFunction(m.fFoo, 0, true) == 0)
+  {
+    gROOT->LoadMacro(m.MacroFile());
+  }
+  gROOT->ProcessLine(m.FunctionCall());
 }
 
 void Gled::LoadMacro(const Text_t* mac)
 {
   // Makes sure that macro 'mac' is loaded, but do not reload it.
 
-  TString foo(mac); chomp_tail(foo);
-  if(gROOT->GetGlobalFunction(foo.Data(), 0, true) == 0)
-    gROOT->LoadMacro(mac);
+  MacroEls m = parse_macro(mac);
+  if (gROOT->GetGlobalFunction(m.fFoo, 0, true) == 0)
+  {
+    gROOT->LoadMacro(m.MacroFile());
+  }
 }
 
 /**************************************************************************/
