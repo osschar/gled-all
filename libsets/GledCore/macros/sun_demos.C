@@ -6,17 +6,11 @@
 // Can be called from other scripts, as a command-line option or from
 // TRint prompt.
 
-void sun_demos()
+void sun_demos(Int_t queen_id_size=256*1024)
 {
-  if(Gled::theOne->GetSaturn() == 0) {
-    Gled::theOne->SpawnSun();
-    if(Gled::theOne->GetSaturn()->GetSaturnInfo()->GetUseAuth())
-      gROOT->Macro("std_auth.C");
-  }
+  Gled::Macro("sun.C");
 
-  Gled::AssertMacro("gled_globals.C");
-
-  g_queen = new ZQueen(256*1024, "Scenes", "Goddess of Ver");
+  g_queen = new ZQueen(queen_id_size, "Scenes", "Goddess of Ver");
   g_sun_king->Enthrone(g_queen);
   g_queen->SetMandatory(true);
 }

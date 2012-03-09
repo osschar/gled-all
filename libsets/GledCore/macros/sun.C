@@ -6,10 +6,13 @@
 
 void sun()
 {
-  if(Gled::theOne->GetSaturn() == 0) {
+  if (Gled::theOne->GetSaturn() == 0)
+  {
     Gled::theOne->SpawnSun();
-    if(Gled::theOne->GetSaturn()->GetSaturnInfo()->GetUseAuth())
-      gROOT->Macro("std_auth.C");
+    if (Gled::theOne->GetSaturn()->GetSaturnInfo()->GetUseAuth())
+    {
+      Gled::Macro("std_auth.C");
+    }
   }
 
   Gled::AssertMacro("gled_globals.C");
