@@ -12,8 +12,12 @@ UdpPacketSource    *c_udp_packet_source = 0;
 
 void xrd_udp_forwarder()
 {
-  Gled::AssertMacro("sun_demos.C");
+  Gled::AssertMacro("sun.C");
   Gled::theOne->AssertLibSet("XrdMon");
+
+  g_queen = new ZQueen(256*1024, "Queen of Udp to Tcp Conversion");
+  g_sun_king->Enthrone(g_queen);
+  g_queen->SetMandatory(true);
 
   {
     ZList* l = g_fire_queen;
@@ -21,8 +25,6 @@ void xrd_udp_forwarder()
     l = l->AssertPath("XrdStuff", "ZList");
     l->Swallow(new ZGlass("XrdUser", "XrdUser(FromHost,FromDomain)"));
   }
-
-  g_queen->SetName("Queen of Udp to Tcp Conversion");
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
   // c_log->SetFileName("/var/log/xrootd/xrd-udp-forwarder.log");
