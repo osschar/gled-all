@@ -94,7 +94,8 @@ void* Saturn::tl_SaturnFdSucker(Saturn *s)
   while (true)
   {
     int ret = s->SockSuck();
-    if(ret != 0) {
+    if (ret != 0)
+    {
       ISmess(GForm("Saturn::mServerThread %s", strerror(errno)));
     }
     GThread::TestCancel();
@@ -540,15 +541,18 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
   bSunAbsolute = false;
 
   TSocket* sock = new TSocket(si->GetMasterName(), si->GetMasterPort());
-  try {
+  try
+  {
     TString greeting = Saturn::HandleClientSideSaturnHandshake(sock);
     ISmess(_eh + greeting);
   }
-  catch(Exc_t& exc) {
+  catch(Exc_t& exc)
+  {
     throw(_eh + exc);
   }
 
-  { // Exchange protocol info
+  // Exchange protocol info
+  {
     TMessage m(GledNS::MT_GledProtocol);
     m << s_Gled_Protocol_Version;
     sock->Send(m);
@@ -580,7 +584,8 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     }
   }
 
-  { // QueryFFId
+  // QueryFFId
+  {
     TMessage m(GledNS::MT_QueryFFID);
     sock->Send(m);
     TMessage* r;
@@ -633,7 +638,7 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
   mSaturnInfo->GetMaster()->hSocket = sock;
   mSaturnInfo->GetMaster()->hRoute  = mSaturnInfo->GetMaster();
   mSelector.fRead.Add(sock);
-  //sock->SetOption(kNoBlock, 1);
+  // sock->SetOption(kNoBlock, 1);
 
   GThread::OwnerChanger _chown(mSaturnInfo);
 

@@ -645,9 +645,12 @@ void Gled::PreExec()
 
 void Gled::SpawnSunOrSaturn()
 {
-  if(mSaturnInfo->RefMasterName().IsNull()) {
+  if (mSaturnInfo->RefMasterName().IsNull())
+  {
     SpawnSun();
-  } else {
+  }
+  else
+  {
     SpawnSaturn();
   }
 }
@@ -656,19 +659,25 @@ void Gled::SpawnSun()
 {
   static const Exc_t _eh("Gled::SpawnSun ");
 
-  if(mSaturn) return;
+  if (mSaturn) return;
   mSaturnInfo->SetMasterPort(0);
 
-  if(strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
+  if (strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
+  {
     mSaturnInfo->SetName(GForm("Sun at %s", gSystem->HostName()));
-  if(strcmp(mSaturnInfo->GetLogin(), "") == 0)
+  }
+  if (strcmp(mSaturnInfo->GetLogin(), "") == 0)
+  {
     mSaturnInfo->SetLogin("sun.absolute");
+  }
 
   CheckAuthDir();
 
-  if(mSaturnInfo->GetUseAuth()) {
+  if (mSaturnInfo->GetUseAuth())
+  {
     GKeyRSA::init_ssl();
-    if(GetPrivKeyFile(mSaturnInfo->mLogin) == 0) {
+    if (GetPrivKeyFile(mSaturnInfo->mLogin) == 0)
+    {
       cerr << _eh << "can not open server private key\n";
       exit(1);
     }
@@ -683,35 +692,44 @@ void Gled::SpawnSaturn()
 {
   static const Exc_t _eh("Gled::SpawnSaturn ");
 
-  if(mSaturn) return;
-  if(strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
+  if (mSaturn) return;
+  if (strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
+  {
     mSaturnInfo->SetName(GForm("Saturn at %s", gSystem->HostName()));
-  if(strcmp(mSaturnInfo->GetLogin(), "") == 0)
+  }
+  if (strcmp(mSaturnInfo->GetLogin(), "") == 0)
+  {
     mSaturnInfo->SetLogin("saturn");
+  }
 
   CheckAuthDir();
 
   // Initialize authentication
   GKeyRSA::init_ssl();
   // Warn for missing RSA-key files
-  if(GetPrivKeyFile(mSaturnInfo->mLogin, false) == 0)
+  if (GetPrivKeyFile(mSaturnInfo->mLogin, false) == 0)
     ISwarn(_eh + "private key for Saturn identity not found");
-  if(GetPrivKeyFile(mDefEyeIdentity, false) == 0)
+  if (GetPrivKeyFile(mDefEyeIdentity, false) == 0)
     ISwarn(_eh + "private key for default Eye identity not found");
 
   mSaturn = new Saturn;
-  try {
+  try
+  {
     SaturnInfo* si = mSaturn->Connect(mSaturnInfo);
-    if(si) {
+    if (si)
+    {
       delete mSaturnInfo;
       mSaturnInfo = si;
-    } else {
+    }
+    else
+    {
       cerr << _eh <<"failed ... dying\n";
       exit(1);
     }
     WaitUntillQueensLoaded();
   }
-  catch(Exc_t& exc) {
+  catch(Exc_t& exc)
+  {
     cerr << _eh <<" failed ... dying at:\n  "<< exc <<endl;
     exit(1);
   }
