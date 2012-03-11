@@ -38,8 +38,8 @@ protected:
   UChar_t   mUnderRGBA[4];   //!
   UChar_t   mOverRGBA[4];    //!
 
-  mutable UChar_t* mColorArray; //[4*fNBins]
-  mutable Int_t    mNBins;
+  mutable Int_t                mNBins;
+  mutable std::vector<UChar_t> mColorArray;
 
   vector<ZColorMark> mColorMarks;
 
@@ -107,7 +107,7 @@ inline const UChar_t* RGBAPalette::ColorFromValue(Int_t val) const
   // Here we expect that LA_Cut has been checked; we further check
   // for LA_Wrap and LA_Clip otherwise we proceed as for LA_Mark.
 
-  if (!mColorArray)  SetupColorArray();
+  if (mColorArray.empty())  SetupColorArray();
   if (val < mMinInt)
   {
     if (mUnderflowAction == LA_Wrap)
@@ -126,7 +126,7 @@ inline const UChar_t* RGBAPalette::ColorFromValue(Int_t val) const
     else
       return mOverRGBA;
   }
-  return mColorArray + 4 * (val - mMinInt);
+  return &mColorArray[4 * (val - mMinInt)];
 }
 
 inline const UChar_t* RGBAPalette::ColorFromValue(Int_t val, Int_t def_val) const
@@ -188,7 +188,7 @@ inline ZColor RGBAPalette::MarkToCol(Float_t mark)
 {
   // The old version from ZRibbon - should at least use binary search.
 
-  if(mColorMarks.empty()) return ZColor();
+  if (mColorMarks.empty()) return ZColor();
   vector<ZColorMark>::iterator i = mColorMarks.begin();
   if (mark < i->m()) return ZColor(mColorMarks.front());
   ++i;

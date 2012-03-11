@@ -36,7 +36,7 @@ void RGBAPalette::_init()
   mDefaultColor.gray(0.5);    mCutColor.gray(0);
   mUnderColor.gray(0.9);      mOverColor.gray(0.1);
 
-  mColorArray = 0;  mNBins = 0;
+  mNBins = 0;
 }
 
 RGBAPalette::RGBAPalette(const Text_t* n, const Text_t* t) :
@@ -46,17 +46,12 @@ RGBAPalette::RGBAPalette(const Text_t* n, const Text_t* t) :
 }
 
 RGBAPalette::~RGBAPalette()
-{
-  delete [] mColorArray;
-}
+{}
 
 void RGBAPalette::ClearColorArray()
 {
-  if (mColorArray)
-  {
-    delete [] mColorArray;
-    mColorArray = 0;
-  }
+  mNBins = 0;
+  mColorArray.clear();
 }
 
 /**************************************************************************/
@@ -91,14 +86,12 @@ void RGBAPalette::SetMaxInt(Int_t max)
 
 void RGBAPalette::SetupColorArray() const
 {
-  if (mColorArray) delete [] mColorArray;
-
   mNBins = TMath::Max(mMaxInt-mMinInt+1, 1);
-  mColorArray = new UChar_t [4 * mNBins];
+  mColorArray.resize(4 * mNBins);
 
   Float_t div = 1.0f / (mNBins - 1);
 
-  UChar_t* p = mColorArray;
+  UChar_t* p = &mColorArray[0];
   mColorMarks.front().to_ubyte(p); p += 4;
   vector<ZColorMark>::const_iterator a = mColorMarks.begin(), b = a;
   for(Int_t i=1; i<mNBins - 1; ++i, p+=4)
@@ -204,9 +197,9 @@ void RGBAPalette::PrintArray() const
 {
   static const Exc_t _eh("RGBAPalette::PrintArray ");
 
-  if (!mColorArray)  SetupColorArray();
+  if (mColorArray.empty())  SetupColorArray();
   printf("%s [%s], n_bins=%d\n", _eh.Data(), Identify().Data(), mNBins);
-  UChar_t* p = mColorArray;
+  UChar_t* p = &mColorArray[0];
   for (Int_t i=0; i<mNBins; ++i, p+=4)
   {
     printf("%3d rgba:%02hhx/%02hhx/%02hhx/%02hhx\n",
