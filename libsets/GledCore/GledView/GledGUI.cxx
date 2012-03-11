@@ -526,7 +526,7 @@ EyeInfo* GledGUI::SpawnEye(EyeInfo* ei, ZGlass* ud,
   }
 
   EyeCreationRequest ecr((EyeInfo::EyeCreator_foo)(*p2foo), ei, ud);
-  // To connect Eye via localhost inet socket:
+  // To connect Eye via localhost inet socket (server must be running):
   //   ecr.fSocket = new TSocket("localhost", mSaturnInfo->GetServerPort());
   // To connect via unix unnamed socket:
   ecr.fSocket = mSaturn->MakeSocketPairAndAccept("saturn-eye");

@@ -137,8 +137,9 @@ void ZMIR::WriteHeader()
   // Also ... sets fBufSize to the current buffer position.
   // Do not add further data after this method has been called!
 
-  if(IsWriting()) {
-    if(fMirBits & MB_HeaderWritten) return;
+  if (IsWriting())
+  {
+    if (fMirBits & MB_HeaderWritten) return;
     fMirBits |= MB_HeaderWritten;
 
     fTrueBuffer = fBuffer;
@@ -149,8 +150,8 @@ void ZMIR::WriteHeader()
 
     TBuffer& b = *this;
     b << What() << fMirBits << fCallerID;
-    if(fMirBits & MB_HasRecipient) b << fRecipientID;
-    if(fMirBits & MB_HasResultReq) b << fResultRecipientID << fResultReqHandle;
+    if (fMirBits & MB_HasRecipient) b << fRecipientID;
+    if (fMirBits & MB_HasResultReq) b << fResultRecipientID << fResultReqHandle;
     b << fAlphaID << fBetaID << fGammaID;
     b << fLid << fCid << fMid;
 
@@ -203,19 +204,21 @@ namespace
 void ZMIR::Demangle(An_ID_Demangler* s) throw(Exc_t)
 {
   fCaller = dynamic_cast<ZMirEmittingEntity*>(s->DemangleID(fCallerID));
-  if(!fCaller) throw(demangle_eh + GForm("Caller(id=%d)", fCallerID));
+  if (!fCaller) throw demangle_eh + GForm("Caller(id=%d)", fCallerID);
 
   // Recipient & Result recipient separated. Called by Saturn when appropriate.
 
   fAlpha = s->DemangleID(fAlphaID);
-  if(!fAlpha) throw(demangle_eh + GForm("Alpha [%d]", fAlphaID));
-  if(fBetaID) {
+  if (!fAlpha) throw demangle_eh + GForm("Alpha [%d]", fAlphaID);
+  if (fBetaID)
+  {
     fBeta = s->DemangleID(fBetaID);
-    if(!fBeta) throw(demangle_eh + GForm("Beta", fBetaID));
+    if(!fBeta) throw demangle_eh + GForm("Beta", fBetaID);
   }
-  if(fGammaID) {
+  if (fGammaID)
+  {
     fGamma = s->DemangleID(fGammaID);
-    if(!fGamma) throw(demangle_eh + GForm("Gamma", fGammaID));
+    if (!fGamma) throw demangle_eh + GForm("Gamma", fGammaID);
   }
 }
 
@@ -229,9 +232,10 @@ void ZMIR::DemangleRecipient(An_ID_Demangler* s) throw(Exc_t)
 
 void ZMIR::DemangleResultRecipient(An_ID_Demangler* s) throw(Exc_t)
 {
-  if(fMirBits & MB_HasResultReq) {
+  if (fMirBits & MB_HasResultReq)
+  {
     fResultRecipient = dynamic_cast<SaturnInfo*>(s->DemangleID(fResultRecipientID));
-    if(!fResultRecipient) throw(demangle_eh + "ResultRecipient");
+    if (!fResultRecipient) throw demangle_eh + "ResultRecipient";
   }
 }
 
@@ -240,9 +244,12 @@ void ZMIR::DemangleResultRecipient(An_ID_Demangler* s) throw(Exc_t)
 void ZMIR::SetCaller(ZMirEmittingEntity* caller)
 {
   fCaller = caller;
-  if(IsWriting()) {
+  if (IsWriting())
+  {
     fCallerID = caller ? caller->GetSaturnID() : 0;
-  } else {
+  }
+  else
+  {
     // Called by Saturn to set Caller identity for MIRs coming from
     // Eyes and being posted by threads.
     fCallerID = caller ? caller->GetSaturnID() : 0;

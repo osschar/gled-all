@@ -48,6 +48,7 @@ protected:
   Bool_t	bPreExec;       // X{G}
   TString	mPreExecString; // X{G}
   Bool_t	bAutoSpawn;	// X{G}
+  Bool_t        bEarlySrvSock;  // X{G}
   Bool_t	bAllowMoons;	// X{G}
 
   Bool_t	bRootAppRunning;// X{G}

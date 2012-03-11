@@ -23,7 +23,7 @@ private:
   void _init();
 
 protected:
-  TString           mLogin;             // X{GS} 7 TextOut()
+  TString           mLogin;             // X{GSR} 7 TextOut()
   ZLink<ZIdentity>  mPrimaryIdentity;   // X{gS} L{}
   ZLink<ZHashList>  mActiveIdentities;  // X{gS} L{}
 

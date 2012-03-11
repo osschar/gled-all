@@ -72,6 +72,7 @@ Gled::Gled() :
   bShowSplash   (true),
   bPreExec      (false),
   bAutoSpawn    (false),
+  bEarlySrvSock (false),
   bAllowMoons   (false),
   bRootAppRunning(false),
   mRootApp      (0),
@@ -170,6 +171,7 @@ void Gled::ParseArguments()
              "  -preexec <m1:m2..> pre-exec specified macros\n"
              "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
              "                     Saturn if -master is specified, Sun otherwise\n"
+	     "  -opensrvsock       open server socket early on (needed for eyes over IP)\n"
              "  -allowmoons        accept moon connections\n"
              "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
              "  -p[ort]    <num>   specify server port (def: 9061)\n"
@@ -219,6 +221,11 @@ void Gled::ParseArguments()
     else if (*i ==  "-r" || *i == "-run")
     {
       bAutoSpawn = true;
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "-opensrvsock")
+    {
+      bEarlySrvSock = true;
       mArgs.erase(start, ++i);
     }
     else if (*i == "-allowmoons")
@@ -526,7 +533,8 @@ void Gled::ProcessCmdLineMacros()
     }
 
     // Process shell command line input files
-    if (mRootApp->InputFiles()) {
+    if (mRootApp->InputFiles())
+    {
       // Make sure that calls into the event loop
       // ignore end-of-file on the terminal.
       // fInputHandler->DeActivate();
@@ -587,7 +595,7 @@ void Gled::ProcessCmdLineMacros()
       } ENDTRY;
     }
   }
-  catch(exception& exc)
+  catch (exception& exc)
   {
     fprintf(stderr, "%sexception caught during macro processing:\n%s\n",
             _eh.Data(), exc.what());
@@ -662,11 +670,11 @@ void Gled::SpawnSun()
   if (mSaturn) return;
   mSaturnInfo->SetMasterPort(0);
 
-  if (strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
+  if (mSaturnInfo->RefName() == "SaturnInfo")
   {
     mSaturnInfo->SetName(GForm("Sun at %s", gSystem->HostName()));
   }
-  if (strcmp(mSaturnInfo->GetLogin(), "") == 0)
+  if (mSaturnInfo->RefLogin().IsNull())
   {
     mSaturnInfo->SetLogin("sun.absolute");
   }
@@ -685,6 +693,10 @@ void Gled::SpawnSun()
 
   mSaturn = new Saturn;
   mSaturn->Create(mSaturnInfo);
+  if (bEarlySrvSock)
+  {
+    mSaturn->OpenServerSocket();
+  }
   bIsSun = true;
 }
 
@@ -693,11 +705,11 @@ void Gled::SpawnSaturn()
   static const Exc_t _eh("Gled::SpawnSaturn ");
 
   if (mSaturn) return;
-  if (strcmp(mSaturnInfo->GetName(), "SaturnInfo") == 0)
+  if (mSaturnInfo->RefName() == "SaturnInfo")
   {
     mSaturnInfo->SetName(GForm("Saturn at %s", gSystem->HostName()));
   }
-  if (strcmp(mSaturnInfo->GetLogin(), "") == 0)
+  if (mSaturnInfo->RefLogin().IsNull())
   {
     mSaturnInfo->SetLogin("saturn");
   }
@@ -708,9 +720,13 @@ void Gled::SpawnSaturn()
   GKeyRSA::init_ssl();
   // Warn for missing RSA-key files
   if (GetPrivKeyFile(mSaturnInfo->mLogin, false) == 0)
+  {
     ISwarn(_eh + "private key for Saturn identity not found");
-  if (GetPrivKeyFile(mDefEyeIdentity, false) == 0)
+  }
+  if (mDefEyeIdentity != "guest" && GetPrivKeyFile(mDefEyeIdentity, false) == 0)
+  {
     ISwarn(_eh + "private key for default Eye identity not found");
+  }
 
   mSaturn = new Saturn;
   try
@@ -727,6 +743,10 @@ void Gled::SpawnSaturn()
       exit(1);
     }
     WaitUntillQueensLoaded();
+    if (bEarlySrvSock)
+    {
+      mSaturn->OpenServerSocket();
+    }
   }
   catch(Exc_t& exc)
   {
@@ -739,7 +759,8 @@ void Gled::SpawnSaturn()
 
 void Gled::CheckAuthDir()
 {
-  if(gSystem->AccessPathName(mAuthDir.Data(), kReadPermission)) {
+  if (gSystem->AccessPathName(mAuthDir.Data(), kReadPermission))
+  {
     printf("Gled::CheckAuthDir auth dir '%s' not accessible\n", mAuthDir.Data());
     printf("Gled::CheckAuthDir use gled-auth-init command to create one\n");
   }
@@ -760,9 +781,10 @@ const char* Gled::GetPubKeyFile(TString& id, Bool_t use_exc)
   static const Exc_t _eh("Gled::GetPubKeyFile ");
 
   const char* ret = PubKeyFile(id);
-  if(gSystem->AccessPathName(ret, kReadPermission)) {
-    if(use_exc)
-      throw(_eh + "can not access file:" + ret + ".");
+  if (gSystem->AccessPathName(ret, kReadPermission))
+  {
+    if (use_exc)
+      throw _eh + "can not access file:" + ret + ".";
     else
       ret = 0;
   }
@@ -774,9 +796,10 @@ const char* Gled::GetPrivKeyFile(TString& id, Bool_t use_exc)
   static const Exc_t _eh("Gled::GetPrivKeyFile ");
 
   const char* ret = PrivKeyFile(id);
-  if(gSystem->AccessPathName(ret, kReadPermission)) {
-    if(use_exc)
-      throw(_eh + "can not access file:" + ret + ".");
+  if (gSystem->AccessPathName(ret, kReadPermission))
+  {
+    if (use_exc)
+      throw _eh + "can not access file:" + ret + ".";
     else
       ret = 0;
   }
@@ -814,7 +837,10 @@ void Gled::AllowMoonConnections()
 {
   // Signal Saturn to allow connections by Moons.
 
-  if(mSaturn) mSaturn->AllowMoons();
+  if (mSaturn)
+  {
+    mSaturn->AllowMoons();
+  }
 }
 
 /**************************************************************************/
