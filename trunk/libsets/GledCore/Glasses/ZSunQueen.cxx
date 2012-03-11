@@ -213,7 +213,6 @@ void ZSunQueen::CremateEye(EyeInfo* eye)
 // Handling of new connections
 /**************************************************************************/
 
-
 void ZSunQueen::handle_mee_connection(ZMirEmittingEntity* mee, TSocket* socket)
 {
   // Called by Saturn upon receiving a MEE connection request.
@@ -343,41 +342,48 @@ void ZSunQueen::initiate_mee_connection()
   ZMIR* mir = assert_MIR_presence(_eh, ZGlass::MC_IsBeam | ZGlass::MC_HasResultReq);
 
   SaturnInfo* req = dynamic_cast<SaturnInfo*>(mir->fCaller);
-  if(req == 0)
-    throw(_eh + "caller not a Saturn");
+  if (req == 0)
+    throw _eh + "caller not a Saturn";
 
   ZMirEmittingEntity* mee =
     dynamic_cast<ZMirEmittingEntity*>(GledNS::StreamLens(*mir));
-  if(mee == 0)
-    throw(_eh + "did not receive a lens of glass ZMirEmittingEntity");
+  if (mee == 0)
+    throw _eh + "did not receive a lens of glass ZMirEmittingEntity";
 
   bool use_auth = mSunInfo->GetUseAuth();
-  if(use_auth && mee->mLogin == "guest") {
-    if(GledNS::IsA(mee, SaturnInfo::FID())) {
-      if(mSaturnGuestId != 0) {
+  if (use_auth && mee->mLogin == "guest")
+  {
+    if (GledNS::IsA(mee, SaturnInfo::FID()))
+    {
+      if (mSaturnGuestId != 0) {
 	mee->mLogin = mSaturnGuestId->mName;
       } else {
-	throw(_eh + "not accepting guest Saturns");
+	throw _eh + "not accepting guest Saturns";
       }
     }
-    else if(GledNS::IsA(mee, EyeInfo::FID())) {
-      if(mEyeGuestId != 0) {
+    else if (GledNS::IsA(mee, EyeInfo::FID()))
+    {
+      if (mEyeGuestId != 0) {
 	mee->mLogin = mEyeGuestId->mName;
       } else {
-	throw(_eh + "not accepting guest Eyes");
+	throw _eh + "not accepting guest Eyes";
       }
     }
-    else {
-      throw(_eh + "unknown type of MEE");
+    else
+    {
+      throw _eh + "unknown type of MEE";
     }
     use_auth = false;
   }
 
-  if(use_auth) {
-    try {
+  if (use_auth)
+  {
+    try
+    {
       Gled::theOne->GetPubKeyFile(mee->mLogin);
     }
-    catch(Exc_t& exc) {
+    catch(Exc_t& exc)
+    {
       throw(_eh + "unknown identity (" + exc + ")"); // !!!! should deny below
     }
   }
@@ -386,10 +392,13 @@ void ZSunQueen::initiate_mee_connection()
   UInt_t cid = mNCMasterData.insert(ncmd);
 
   TBufferFile ret(TBuffer::kWrite);
-  if(use_auth) {
+  if (use_auth)
+  {
     ret << (UChar_t)CRR_ReqAuth;
     ret << cid;
-  } else {
+  }
+  else
+  {
     ID_t mee_id = incarnate_mee(cid);
     ret << (UChar_t)CRR_OK;
     ret << mee_id;

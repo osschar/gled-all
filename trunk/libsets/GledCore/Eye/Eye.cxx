@@ -50,7 +50,7 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) :
   {
     Saturn::HandleClientSideSaturnHandshake(mSatSocket);
   }
-  catch(Exc_t& exc)
+  catch (Exc_t& exc)
   {
     throw _eh + exc;
   }
@@ -61,7 +61,7 @@ Eye::Eye(TSocket* sock, EyeInfo* ei) :
     {
       m = Saturn::HandleClientSideMeeConnection(mSatSocket, ei);
     }
-    catch(Exc_t& exc)
+    catch (Exc_t& exc)
     {
       throw _eh + exc;
     }

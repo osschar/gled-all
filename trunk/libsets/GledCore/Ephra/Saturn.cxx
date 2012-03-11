@@ -63,11 +63,9 @@ ClassImp(Saturn);
 
 namespace
 {
-  GCondition	_server_startup_cond;
-
   void sh_SaturnFdSucker(GSignal* sig)
   {
-    ISmess(GForm("Saturn/sh_SaturnFdSucker called with signal %d", sig->fSignal));
+    ISmess(GForm("Saturn::sh_SaturnFdSucker invoked by signal %d.", sig->fSignal));
   }
 }
 
@@ -86,10 +84,6 @@ void* Saturn::tl_SaturnFdSucker(Saturn *s)
     GThread::SetSignalHandler(GThread::SigUSR1, sh_SaturnFdSucker);
   }
 
-  _server_startup_cond.Lock();
-  _server_startup_cond.Signal();
-  _server_startup_cond.Wait();
-  _server_startup_cond.Unlock();
   // Perhaps should install some exit-foo ... to close sockets ...
   while (true)
   {
@@ -515,11 +509,6 @@ void Saturn::Create(SaturnInfo* si)
     cerr << _eh + "exception: "<< exc <<endl;
     exit(1);
   }
-
-  // Allow server thread to accept connections:
-  _server_startup_cond.Lock();
-  _server_startup_cond.Signal();
-  _server_startup_cond.Unlock();
 }
 
 SaturnInfo* Saturn::Connect(SaturnInfo* si)
@@ -671,11 +660,6 @@ SaturnInfo* Saturn::Connect(SaturnInfo* si)
     }
   }
 
-  // Allow server thread to accept connections:
-  _server_startup_cond.Lock();
-  _server_startup_cond.Signal();
-  _server_startup_cond.Unlock();
-
   return mSaturnInfo;
 }
 
@@ -690,7 +674,6 @@ TSocket* Saturn::MakeSocketPairAndAccept(const TString& name)
   int fds[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds))
     throw _eh + "socketpair failed: " + strerror(errno);
-  
 
   TSocket *ssock = new TSocket(fds[0], name);
   TSocket *csock = new TSocket(fds[1], name);
@@ -702,10 +685,22 @@ TSocket* Saturn::MakeSocketPairAndAccept(const TString& name)
   return csock;
 }
 
+void Saturn::OpenServerSocket()
+{
+  if (mServerSocket != 0)
+    return;
+
+  if (create_server_socket())
+    exit(1);
+}
+
 void Saturn::AllowMoons()
 {
   // On start-up the moons are not allowed to connect (only Eyes).
   // AllowMoons() allows moons connections from now on.
+
+  if (mServerSocket == 0)
+    OpenServerSocket();
 
   bAllowMoons = true;
 }
@@ -1148,6 +1143,16 @@ void Saturn::Accept(TSocket* newsocket) throw(Exc_t)
 			 newsocket->GetInetAddress().GetHostName()));
       try
       {
+	// Now we ask SunQueen to negotiate instantiation of the new MEE with
+	// its master replica on SunAbsolute. This is done by sending over a
+	// MIR and the protections on SunQueen give permissions to call this
+	// functions (moon/eye creation) to some saturn identities (called
+	// mooned and eyed saturns). So, we need to set this Saturn as the
+	// caller.
+	// SunQueen then performs the authentication with the new MEE
+	// directly over a special socket.
+	GThread::OwnerChanger _chown(mSaturnInfo);
+
 	mSunQueen->handle_mee_connection(mee, newsocket);
       }
       catch(Exc_t& exc)
@@ -1423,7 +1428,7 @@ void Saturn::markup_posted_mir(ZMIR& mir, ZMirEmittingEntity* caller)
   // Writes header and caller infromation.
   // If caller==0 the owner of current thread is used.
 
-  if(mir.What() == GledNS::MT_Flare)
+  if (mir.What() == GledNS::MT_Flare)
     mir.fDirection = ZMIR::D_Up;
 
   mir.SetCaller((caller==0) ? GThread::Owner() : caller);
@@ -2171,9 +2176,9 @@ int Saturn::start_threads(Saturn* saturn)
   return saturn->start_server() || saturn->start_shooters();
 }
 
-int Saturn::start_server()
+int Saturn::create_server_socket()
 {
-  static const Exc_t _eh("Saturn::start_server ");
+  static const Exc_t _eh("Saturn::create_server_socket ");
 
   int try_count = 0;
 open_server_socket:
@@ -2184,29 +2189,39 @@ open_server_socket:
     if (++try_count <= mSaturnInfo->GetServPortScan())
     {
       delete mServerSocket;
+      mServerSocket = 0;
       ISwarn(GForm("%sfailed opening server socket at port %d. Trying %d.",
 		   _eh.Data(), serv_port, serv_port + 1));
       mSaturnInfo->SetServerPort(serv_port + 1);
       goto open_server_socket;
     }
     int err = 10 - mServerSocket->GetErrorCode();
-    ISerr(_eh +"can't create server socket ... dying.");
+    ISerr(_eh +"can not create server socket ... giving up.");
     return err;
   }
-  mSelector.fRead.Add(mServerSocket);
-  ISdebug(2, GForm("%sstarting server, port=%d", _eh.Data(),
+
+  ISdebug(2, GForm("%sregistering server socket at port=%d", _eh.Data(),
 		   mSaturnInfo->GetServerPort()));
 
+  mSelector.Lock();
+  mSelector.fRead.Add(mServerSocket);
+  mServerThread->Kill(GThread::SigUSR1);
+  mSelector.Unlock();
+
+  return 0;
+}
+
+int Saturn::start_server()
+{
+  static const Exc_t _eh("Saturn::start_server ");
+
   mServerThread = new GThread("Saturn-FdSucker", (GThread_foo)tl_SaturnFdSucker, this, false);
-  _server_startup_cond.Lock();
   if (mServerThread->Spawn())
   {
-    ISerr(GForm("%scan't create server thread ... dying. errno=%d",
+    ISerr(GForm("%scan not create server thread ... giving up. errno=%d",
 		_eh.Data(), errno));
     return 1;
   }
-  _server_startup_cond.Wait();
-  _server_startup_cond.Unlock();
   ISdebug(2, _eh + "started server thread.");
   return 0;
 }

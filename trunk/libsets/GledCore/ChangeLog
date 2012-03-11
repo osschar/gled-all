@@ -1,3 +1,52 @@
+2012-03-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Allow Saturn to run without opening of a server socket.
+
+	1. Eyes didn't need it before (as they use unix socekts now);
+	2. Saturns were not allowed to connect by default now (as
+	AllowMoonConnections() is not part of default startup);
+	so most of the time the socket was not used.
+	But it did cause quite some trouble when one tried to run two or
+	more gleds on the same machine.
+
+	Now the server socket gets called when AllowMoonConnections() is
+	called.
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	When starting server threads, do not open a server socket. Open it
+	later when / if it is needed (from AllowMoons()) or on request.
+	Add methods OpenServerSocket() and create_server_socket().
+
+	Take thread ownership when passing a request for new MEE
+	instantiation to SunAbsoulte.
+
+	Grayspace and whitespace.
+
+	* Glasses/ZMirEmittingEntity.h:
+	Export string mLogin by const ref, too.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Add command-line option (-opensrvsock) and a bool flag
+	(bEarlySrvSock) that make Saturn open its server socket
+	immediately after bootstrap. This used to be default behaviour,
+	now default is to delay socket creation until
+	AllowMoonConnections() is called.
+
+	Whitespace.
+
+	* GledView/GledGUI.cxx:
+	Grayspace.
+
+	* Glasses/ZSunQueen.cxx:
+	* Eye/Eye.cxx:
+	* Stones/ZMIR.cxx:
+	Whitespace.
+
+	* catalog.patch:
+	Request dictionary for ZQueen::LensDetails.
+
 2012-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve macro processing functions.

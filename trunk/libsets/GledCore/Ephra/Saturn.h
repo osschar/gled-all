@@ -156,6 +156,7 @@ protected:
   ZHistoManager*	pZHistoManager;
 
   static int start_threads(Saturn *saturn);
+  int  create_server_socket();
   int  start_server();
   int  stop_server();
   int  start_shooters();
@@ -199,6 +200,7 @@ public:
   void	      Create(SaturnInfo* si);
   SaturnInfo* Connect(SaturnInfo* si);
   TSocket*    MakeSocketPairAndAccept(const TString& name);
+  void        OpenServerSocket();
   void	      AllowMoons();
   void	      Shutdown();
 
