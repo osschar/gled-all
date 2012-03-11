@@ -1,3 +1,9 @@
+2012-03-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/RGBAPalette.cxx:
+	* Glasses/RGBAPalette.h:
+	Use std::vector<UChar_t> for the color array.
+
 2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/Amphitheatre.cxx:
