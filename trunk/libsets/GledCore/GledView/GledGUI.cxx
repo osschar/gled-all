@@ -212,10 +212,10 @@ void GledGUI::ParseArguments()
         "GledGUI options:\n"
         "----------------\n"
         "  --swm   fs:dh:dw    specify font-size, vert-space and char width\n"
-        "                     default: 12:6:0 (dw~0 means measure font)\n"
+        "                      default: 12:6:0 (dw~0 means measure font)\n"
         "  --font  font-id     use fltk's font-id as default font\n"
         "  --iconize           iconize main window on start-up\n"
-        "  --nomsgwin | --nomw  start gled without the message window (consider '-log +')\n"
+        "  --nomsgwin | --nomw start gled without the message window (consider '-log +')\n"
         "  --stereo            use stereo GL visuals by default\n";
       return;
     }
