@@ -1,3 +1,16 @@
+2012-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Rename info-stream level output to info.
+	Add option to redirect standard output and error.
+
+	* Gled/GledTypes.h:
+	* GledView/FTW_Shell.cxx:
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	Rename info-stream level output to info.
+
 2012-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:

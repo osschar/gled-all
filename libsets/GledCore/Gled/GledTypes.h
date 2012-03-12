@@ -177,14 +177,16 @@ bool operator==(const string&  s, const TString& t);
 
 extern int G_DEBUG;
 
-enum InfoStream_e { ISoutput, ISmessage, ISwarning, ISerror };
-const char* const ISnames[]   = { "output", "message", "warning", "error" };
-const char* const ISnames3c[] = { "OUT", "MSG", "WRN", "ERR" };
+enum InfoStream_e { ISinfo, ISmessage, ISwarning, ISerror };
+
+const char* const ISnames[]   = { "info", "message", "warning", "error" };
+const char* const ISnames3c[] = { "IBF", "MSG", "WRN", "ERR" };
+
 void InfoStream(InfoStream_e, const char* s);
 void InfoStream(InfoStream_e, const TString& s);
 void InfoStream(InfoStream_e, const string& s);
 
-#define ISout(_str_)  { InfoStream(ISoutput, _str_); }
+#define ISinfo(_str_) { InfoStream(ISinfo, _str_); }
 #define ISmess(_str_) { InfoStream(ISmessage, _str_); }
 #define ISwarn(_str_) { InfoStream(ISwarning, _str_); }
 #define ISerr(_str_)  { InfoStream(ISerror, _str_); }
@@ -193,7 +195,7 @@ void InfoStream(InfoStream_e, const string& s);
 #define D_THRMUT	2
 
 #ifdef DEBUG
-#define ISdebug(A,B) 	{ if((A)<=G_DEBUG) ISmess(B) }
+#define ISdebug(A,B) 	{ if((A)<=G_DEBUG) ISinfo(B) }
 #else
 #define ISdebug(A,B)
 #endif

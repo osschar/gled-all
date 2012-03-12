@@ -51,10 +51,11 @@ int Gled::GetExitStatus()
 
 /**************************************************************************/
 
-void Gled::next_arg_or_die(lStr_t& args, lStr_i& i)
+void Gled::next_arg_or_die(lStr_t& args, lStr_i& i, bool allow_single_minus)
 {
   lStr_i j = i;
-  if (++j == args.end() || (*j)[0] == '-' || j->EndsWith(".C"))
+  if (++j == args.end() || j->EndsWith(".C") ||
+      ((*j)[0] == '-' && ! (*j == '-' && allow_single_minus)))
   {
     cerr <<"Error: option "<< *i <<" requires an argument.\n";
     exit(1);
@@ -78,7 +79,6 @@ Gled::Gled() :
   mRootApp      (0),
   mLoggingMutex (GMutex::recursive),
   mLogFile      (0),
-  mOutFile      (0),
   mExitCondVar  (0),
   mRootAppThread(0),
   mExitThread   (0)
@@ -108,7 +108,8 @@ Gled::Gled() :
   mSaturnInfo->SetSwap      (mem.fSwapTotal);
 
   mLogFileName = "<stdout>"; mLogFile = 0;
-  mOutFileName = "<stdout>"; mOutFile = 0;
+  mOutFileName = "<stdout>";
+  mErrFileName = "<stderr>";
 
   // Figure out libdir and datadir, can also be passed as arguments later.
   TString gsys(gSystem->Getenv("GLEDSYS"));
@@ -185,9 +186,13 @@ void Gled::ParseArguments()
              "  --noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
              "  -l                  no splash info\n"
              "\n"
-             "Logging options:   <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
-             "  --log <file>        specify log file name (saturn:'<stdout>', gled:'<null>')\n"
-             "  --out <file>        specify output file name (def: '<stdout>')\n"
+             "Logging options:\n"
+             "  --log    <file>     specify log file name (saturn:'<stdout>', gled:'<null>')\n"
+	     "                      shorthands: '-' => <null>, '+' => <stdout>\n"
+             "  --out    <file>     specify file name for stdout redirection\n"
+             "  --err    <file>     specify file name for stderr redirection\n"
+	     "  --outerr <file>     specify file name for stdout and stderr redirection\n"
+	     "                      shorthands: '-' => <null>, '=' => same as log\n"
 	     "  --debug     <lvl>   set debug level (some messages require debug build)\n"
              "\n"
              "Authentication options:\n"
@@ -300,12 +305,12 @@ void Gled::ParseArguments()
 
     else if (*i == "--log")
     {
-      next_arg_or_die(mArgs, i);
-      if (*i == "-" || *i == "<null>")
+      next_arg_or_die(mArgs, i, true);
+      if (*i == "-")
       {
 	mLogFileName = "<null>";
       }
-      else if (*i == "+" || *i == "<stdout>")
+      else if (*i == "+")
       {
 	mLogFileName = "<stdout>";
       }
@@ -317,18 +322,52 @@ void Gled::ParseArguments()
     }
     else if (*i == "--out")
     {
-      next_arg_or_die(mArgs, i);
-      if (*i == "-" || *i == "<null>")
+      next_arg_or_die(mArgs, i, true);
+      if (*i == "-")
       {
 	mOutFileName = "<null>";
       }
-      else if (*i == "+" || *i == "<stdout>")
+      else if (*i == "=")
       {
-	mOutFileName = "<stdout>";
+	mOutFileName = mLogFileName;
       }
       else
       {
 	mOutFileName = *i;
+      }
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "--err")
+    {
+      next_arg_or_die(mArgs, i, true);
+      if (*i == "-")
+      {
+	mErrFileName = "<null>";
+      }
+      else if (*i == "=")
+      {
+	mErrFileName = mLogFileName;
+      }
+      else
+      {
+	mErrFileName = *i;
+      }
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "--outerr")
+    {
+      next_arg_or_die(mArgs, i, true);
+      if (*i == "-")
+      {
+	mOutFileName = mErrFileName = "<null>";
+      }
+      else if (*i == "=")
+      {
+	mOutFileName = mErrFileName = mLogFileName;
+      }
+      else
+      {
+	mOutFileName = mErrFileName = *i;
       }
       mArgs.erase(start, ++i);
     }
@@ -389,34 +428,89 @@ void Gled::ParseArguments()
 void Gled::InitLogging()
 {
   if (mLogFileName == "<null>")
+  {
     mLogFile = 0;
-  else if (mLogFileName = "<stdout>")
+  }
+  else if (mLogFileName == "<stdout>")
+  {
     mLogFile = stdout;
+  }
+  else if (mLogFileName == "<stderr>")
+  {
+    mLogFile = stderr;
+  }
   else
   {
-    mLogFile = fopen(mLogFileName, "w");
+    mLogFile = fopen(mLogFileName, "a");
     if (mLogFile == 0) {
-      perror("Gled::InitLogging opening of log file failed");
+      perror("Gled::InitLogging opening of log file failed.");
       exit(1);
     }
   }
 
-  if (mOutFileName =="<null>")
-    mOutFile = 0;
-  else if (mOutFileName == "<stdout>")
-    mOutFile = stdout;
-  else if (mOutFileName == mLogFileName)
-    mOutFile = mLogFile;
-  else
+  if ( ! mOutFileName.IsNull() && mOutFileName != "<stdout>")
   {
-    mOutFile = fopen(mOutFileName, "w");
-    if (mLogFile == 0) {
-      perror("Gled::InitLogging opening of output file failed");
-      exit(1);
+    bool fix_log = (mLogFile == stdout);
+
+    fclose(stdout);
+    if (mOutFileName == "<stderr>")
+    {
+      stdout = stderr;
     }
+    else if (mOutFileName == mLogFileName)
+    {
+      stdout = mLogFile;
+    }
+    else if (mOutFileName == "<null>")
+    {
+      stdout = fopen("/dev/null", "w");
+    }
+    else
+    {
+      stdout = fopen(mOutFileName, "a");
+      if (stdout == 0) {
+	perror("Gled::InitLogging redirection of standard output to file failed.");
+	exit(1);
+      }
+    }
+
+    if (fix_log) mLogFile = stdout;
   }
 
-  if(bShowSplash) {
+  if ( ! mErrFileName.IsNull() && mErrFileName != "<stderr>")
+  {
+    bool fix_log = (mLogFile == stderr);
+    bool fix_out = (stdout   == stderr);
+
+    fclose(stderr);
+    if (mErrFileName == "<stdout>" || mErrFileName == mOutFileName)
+    {
+      stderr = stdout;
+    }
+    else if (mErrFileName == mLogFileName)
+    {
+      stderr = mLogFile;
+    }
+    else if (mErrFileName == "<null>")
+    {
+      stderr = fopen("/dev/null", "w");
+    }
+    else
+    {
+      stderr = fopen(mErrFileName, "a");
+      if (stderr == 0) {
+	stderr = stdout;
+	perror("Gled::InitLogging redirection of standard error to file failed.");
+	exit(1);
+      }
+    }
+
+    if (fix_log) mLogFile = stderr;
+    if (fix_out) stdout   = stderr;
+  }
+
+  if (bShowSplash)
+  {
     GMutexHolder mh(mLoggingMutex);
     message("+----------------------------------------------------------+");
     message(GForm("| This is Gled, version %s", GLED_BUILD_VERSION));
@@ -627,13 +721,11 @@ void Gled::StopLogging()
 
   GMutexHolder mh(mLoggingMutex);
 
-  if (mOutFile && mOutFile != stdout) {
-    fclose(mOutFile);
-  }
-  if (mLogFile && mLogFile != stdout && mLogFile != mOutFile) {
+  if (mLogFile && mLogFile != stdout && mLogFile != stderr)
+  {
     fclose(mLogFile);
   }
-  mOutFile = mLogFile = 0;
+  mLogFile = 0;
 }
 
 Gled::~Gled()
@@ -928,23 +1020,24 @@ void Gled::SetDebugLevel(Int_t d)
 // Info Stream methods
 /**************************************************************************/
 
-void Gled::output(const char* s)
+void Gled::info(const char* s)
 {
-  if(mOutFile) {
+  if (mLogFile)
+  {
     GThread::CancelDisabler tka;
-    GMutexHolder     mh(mLoggingMutex);
-    if(mOutFile == mLogFile)
-      fputs("OUT: ", mOutFile);
-    fputs(s, mOutFile);
-    putc(10, mOutFile);
+    GMutexHolder mh(mLoggingMutex);
+    fputs("INF: ", mLogFile);
+    fputs(s, mLogFile);
+    putc(10, mLogFile);
   }
 }
 
 void Gled::message(const char* s)
 {
-  if(mLogFile) {
+  if (mLogFile)
+  {
     GThread::CancelDisabler tka;
-    GMutexHolder     mh(mLoggingMutex);
+    GMutexHolder mh(mLoggingMutex);
     fputs("MSG: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -953,9 +1046,10 @@ void Gled::message(const char* s)
 
 void Gled::warning(const char* s)
 {
-  if(mLogFile) {
+  if(mLogFile)
+  {
     GThread::CancelDisabler tka;
-    GMutexHolder     mh(mLoggingMutex);
+    GMutexHolder mh(mLoggingMutex);
     fputs("WRN: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -964,9 +1058,10 @@ void Gled::warning(const char* s)
 
 void Gled::error(const char* s)
 {
-  if(mLogFile) {
+  if (mLogFile)
+  {
     GThread::CancelDisabler tka;
-    GMutexHolder     mh(mLoggingMutex);
+    GMutexHolder mh(mLoggingMutex);
     fputs("ERR: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -1237,7 +1332,7 @@ void Gled::RootApp_cleanup_tl(void*)
 void InfoStream(InfoStream_e type, const char* s)
 {
   switch (type) {
-    case ISoutput:  Gled::theOne->output(s);  break;
+    case ISinfo:    Gled::theOne->info(s);  break;
     case ISmessage: Gled::theOne->message(s); break;
     case ISwarning: Gled::theOne->warning(s); break;
     case ISerror:   Gled::theOne->error(s);   break;

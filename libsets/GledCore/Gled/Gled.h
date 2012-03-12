@@ -33,7 +33,7 @@ class TRint;
 class Gled
 {
 protected:
-  void next_arg_or_die(lStr_t& args, lStr_i& i);
+  void next_arg_or_die(lStr_t& args, lStr_i& i, bool allow_single_minus=false);
 
   TString       mCmdName;       // X{GS}
   lStr_t        mArgs;
@@ -58,7 +58,7 @@ protected:
   TString	mLogFileName;
   FILE*		mLogFile;
   TString	mOutFileName;
-  FILE*		mOutFile;
+  TString	mErrFileName;
 
   TString       mLibDir;        // X{G}
   TString       mDataDir;       // X{G}
@@ -117,7 +117,7 @@ public:
 
   virtual void SetDebugLevel(Int_t d=0);
 
-  virtual void output(const char* s);
+  virtual void info(const char* s);
   virtual void message(const char* s);
   virtual void warning(const char* s);
   virtual void error(const char* s);

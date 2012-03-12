@@ -431,23 +431,27 @@ void GledGUI::PostMessage(const char* m, Fl_Color c)
   mMsgCond.Unlock();
 }
 
-void GledGUI::output(const char* s) {
-  Gled::output(s);
+void GledGUI::info(const char* s)
+{
+  Gled::info(s);
   if(bGuiUp) PostMessage(s);
 }
 
-void GledGUI::message(const char* s) {
+void GledGUI::message(const char* s)
+{
   Gled::message(s);
   if(bGuiUp) PostMessage(s, FL_CYAN);
 }
 
 
-void GledGUI::warning(const char* s) {
+void GledGUI::warning(const char* s)
+{
   Gled::warning(s);
   if(bGuiUp) PostMessage(s, FL_YELLOW);
 }
 
-void GledGUI::error(const char* s) {
+void GledGUI::error(const char* s)
+{
   Gled::error(s);
   if(bGuiUp) PostMessage(s, FL_RED);
 }

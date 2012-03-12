@@ -80,7 +80,7 @@ public:
 
   virtual void MessageLoop();
   virtual void PostMessage(const char* m, Fl_Color c=(Fl_Color)0);
-  virtual void output(const char* s);
+  virtual void info(const char* s);
   virtual void message(const char* s);
   virtual void warning(const char* s);
   virtual void error(const char* s);

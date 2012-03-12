@@ -371,7 +371,7 @@ void FTW_Shell::Message(const TString& msg, InfoStream_e t)
   Fl_Color c;
   switch (t)
   {
-    case ISoutput:  c = FL_WHITE;  break;
+    case ISinfo:    c = FL_WHITE;  break;
     case ISmessage: c = FL_CYAN;   fl_beep(FL_BEEP_NOTIFICATION); break;
     case ISwarning: c = FL_YELLOW; fl_beep(FL_BEEP_NOTIFICATION); break;
     case ISerror:   c = FL_RED;    fl_beep(FL_BEEP_ERROR); break;
