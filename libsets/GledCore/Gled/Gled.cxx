@@ -164,76 +164,79 @@ void Gled::ParseArguments()
              "Arguments: [options] [dir] [file(s)]\n"
              "                     dir   ~ cd to dir prior to exec of files\n"
              "                     files ~ ROOT macro scripts to process\n"
+	     "\n"
+	     "  Short options use a single '-' and can not be aggregated.\n"
+	     "\n"
              "Gled options:\n"
              "-------------\n"
-             "  -datadir   <dir>   directory containing Gled data\n"
-             "  -libdir    <dir>   directory containing Gled libraries\n"
-             "  -preexec <m1:m2..> pre-exec specified macros\n"
-             "  -r[un]             spawn Saturn/Sun immediately (before processing files)\n"
+             "  --datadir   <dir>   directory containing Gled data\n"
+             "  --libdir    <dir>   directory containing Gled libraries\n"
+             "  --preexec <m1:m2..> pre-exec specified macros\n"
+             "  --r[un]             spawn Saturn/Sun immediately (before processing files)\n"
              "                     Saturn if -master is specified, Sun otherwise\n"
-	     "  -opensrvsock       open server socket early on (needed for eyes over IP)\n"
-             "  -allowmoons        accept moon connections\n"
-             "  -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
-             "  -p[ort]    <num>   specify server port (def: 9061)\n"
-             "  -portscan  <num>   if server port can not be opened, try <num> higher ports\n"
-             "  -m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
-             "  -n[ame]    <str>   name of Saturn\n"
-             "  -t[itle]   <str>   title of Saturn\n"
-             "  -noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
-             "  -l                 no splash info\n"
+	     "  --opensrvsock       open server socket early on (needed for eyes over IP)\n"
+             "  --allowmoons        accept moon connections\n"
+             "  --s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
+             "  --p[ort]    <num>   specify server port (def: 9061)\n"
+             "  --portscan  <num>   if server port can not be opened, try <num> higher ports\n"
+             "  --m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
+             "  --n[ame]    <str>   name of Saturn\n"
+             "  --t[itle]   <str>   title of Saturn\n"
+             "  --noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
+             "  -l                  no splash info\n"
              "\n"
-             "Logging options:\n"
-             "  -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')\n"
-             "  -out[file] <file>  specify output file name (def: '<stdout>')\n"
-             "                     <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
-	     "  -debug     <lvl>   set debug level (some messages require debug build)\n"
+             "Logging options:   <file> shorthands: '-' => '<null>', '+' => '<stdout>'\n"
+             "  --log <file>        specify log file name (saturn:'<stdout>', gled:'<null>')\n"
+             "  --out <file>        specify output file name (def: '<stdout>')\n"
+	     "  --debug     <lvl>   set debug level (some messages require debug build)\n"
              "\n"
              "Authentication options:\n"
-             "  -auth              use authentication\n"
-             "  -authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
-             "  -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
-             "  -eyeid     <str>   default identity of Eyes (def: 'guest')\n"
+             "  --auth              use authentication\n"
+             "  --authdir   <str>   directory containing auth data (def: ~/.gled/auth)\n"
+             "  --saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')\n"
+             "  --eyeid     <str>   default identity of Eyes (def: 'guest')\n"
+             "\n"
              "Renderer loading options:\n"
-             "  -rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n"
+             "  --rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n"
              );
       bQuit = true;
       return;
     }
-    else if (*i == "-datadir")
+    else if (*i == "--datadir")
     {
       next_arg_or_die(mArgs, i);
       mDataDir = *i;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-libdir")
+    else if (*i == "--libdir")
     {
       next_arg_or_die(mArgs, i);
       mLibDir = *i;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-preexec")
+    else if (*i == "--preexec")
     {
       next_arg_or_die(mArgs, i);
       bPreExec = true;
       mPreExecString   = *i;
       mArgs.erase(start, ++i);
     }
-    else if (*i ==  "-r" || *i == "-run")
+    else if (*i ==  "-r" || *i == "--run")
     {
       bAutoSpawn = true;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-opensrvsock")
+    else if (*i == "--opensrvsock")
     {
       bEarlySrvSock = true;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-allowmoons")
+    else if (*i == "--allowmoons")
     {
       bAllowMoons = true;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-s" || *i == "-sssize")
+    else if (*i == "-s" || *i == "--sssize")
     {
       next_arg_or_die(mArgs, i);
       if(index(*i, 'e')) {
@@ -245,19 +248,19 @@ void Gled::ParseArguments()
       }
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-p" || *i == "-port")
+    else if (*i == "-p" || *i == "--port")
     {
       next_arg_or_die(mArgs, i);
       mSaturnInfo->SetServerPort( atoi(*i) );
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-portscan")
+    else if (*i == "--portscan")
     {
       next_arg_or_die(mArgs, i);
       mSaturnInfo->SetServPortScan( atoi(*i) );
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-m" || *i == "-master")
+    else if (*i == "-m" || *i == "--master")
     {
       next_arg_or_die(mArgs, i);
       // !!! Cast required by gcc-4.4.1-1ubuntu3, Aug 2009. Seems strange.
@@ -270,19 +273,19 @@ void Gled::ParseArguments()
       mSaturnInfo->SetMasterName(*i);
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-n" || *i == "-name")
+    else if (*i == "-n" || *i == "--name")
     {
       next_arg_or_die(mArgs, i);
       mSaturnInfo->SetName(*i);
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-t" || *i == "-title")
+    else if (*i == "-t" || *i == "--title")
     {
       next_arg_or_die(mArgs, i);
       mSaturnInfo->SetTitle(*i);
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-noprompt")
+    else if (*i == "--noprompt")
     {
       bHasPrompt = false;
       mArgs.erase(start, ++i);
@@ -295,7 +298,7 @@ void Gled::ParseArguments()
 
     // Logging options
 
-    else if (*i == "-log" || *i == "-logfile")
+    else if (*i == "--log")
     {
       next_arg_or_die(mArgs, i);
       if (*i == "-" || *i == "<null>")
@@ -312,7 +315,7 @@ void Gled::ParseArguments()
       }
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-out" || *i == "-outfile")
+    else if (*i == "--out")
     {
       next_arg_or_die(mArgs, i);
       if (*i == "-" || *i == "<null>")
@@ -329,7 +332,7 @@ void Gled::ParseArguments()
       }
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-debug")
+    else if (*i == "--debug")
     {
       next_arg_or_die(mArgs, i);
       G_DEBUG = atoi(*i);
@@ -338,24 +341,24 @@ void Gled::ParseArguments()
 
     // Authentication options
 
-    else if (*i == "-auth")
+    else if (*i == "--auth")
     {
       mSaturnInfo->SetUseAuth(true);
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-authdir")
+    else if (*i == "--authdir")
     {
       next_arg_or_die(mArgs, i);
       mAuthDir = *i;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-saturnid")
+    else if (*i == "--saturnid")
     {
       next_arg_or_die(mArgs, i);
       mSaturnInfo->SetLogin(*i);;
       mArgs.erase(start, ++i);
     }
-    else if (*i == "-eyeid")
+    else if (*i == "--eyeid")
     {
       next_arg_or_die(mArgs, i);
       mDefEyeIdentity = *i;
@@ -364,7 +367,7 @@ void Gled::ParseArguments()
 
     // Renderer loading options
 
-    else if (*i == "-rnr")
+    else if (*i == "--rnr")
     {
       next_arg_or_die(mArgs, i);
       mRenderers = *i;
