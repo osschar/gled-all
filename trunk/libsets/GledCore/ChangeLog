@@ -1,3 +1,9 @@
+2012-03-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	* GledView/GledGUI.cxx:
+	Use '--' for long options, '-' for short ones.
+
 2012-03-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Allow Saturn to run without opening of a server socket.
