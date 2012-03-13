@@ -19,23 +19,34 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <signal.h>
+#include <unistd.h>
 
 /**************************************************************************/
 
 int main(int argc, char **argv)
 {
-  static const Exc_t _eh("saturn::main() ");
-
-  GThread::InitMain();
-
   Gled* gled = new Gled();
   gled->ReadArguments(argc, argv);
-  gled->ParseArguments();
+  gled->ParseArguments(true);
 
   if (gled->GetQuit())
   {
     exit(0);
   }
+
+  if (gled->GetDaemon())
+  {
+    
+
+    printf("saturn - daemonizing ...\n");
+    if (daemon(1, 1))
+    {
+      perror("saturn - daemonization failed");
+      exit(1);
+    }
+  }
+
+  GThread::InitMain();
 
   gled->InitLogging();
   gled->InitGledCore();
