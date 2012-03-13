@@ -75,6 +75,7 @@ Gled::Gled() :
   bAutoSpawn    (false),
   bEarlySrvSock (false),
   bAllowMoons   (false),
+  bDaemon       (false),
   bRootAppRunning(false),
   mRootApp      (0),
   mLoggingMutex (GMutex::recursive),
@@ -150,7 +151,7 @@ void Gled::ReadArguments(int argc, char **argv)
   }
 }
 
-void Gled::ParseArguments()
+void Gled::ParseArguments(Bool_t allow_daemon)
 {
   // Parse command-line arguments.
 
@@ -159,8 +160,15 @@ void Gled::ParseArguments()
   {
     lStr_i start = i;
 
-    if(*i == "-h" || *i == "-help" || *i == "--help" || *i == "-?")
+    if (*i == "-h" || *i == "-help" || *i == "--help" || *i == "-?")
     {
+      const char* daemon_help = "";
+      if (allow_daemon)
+      {
+	daemon_help = 
+	     "  --daemon            run as daemon; implies --noprompt, std streams closed\n";
+      }
+
       printf(
              "Arguments: [options] [dir] [file(s)]\n"
              "                     dir   ~ cd to dir prior to exec of files\n"
@@ -177,14 +185,14 @@ void Gled::ParseArguments()
              "                     Saturn if -master is specified, Sun otherwise\n"
 	     "  --opensrvsock       open server socket early on (needed for eyes over IP)\n"
              "  --allowmoons        accept moon connections\n"
+             "  --noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
+	     "%s"                   // daemon_help
              "  --s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
              "  --p[ort]    <num>   specify server port (def: 9061)\n"
              "  --portscan  <num>   if server port can not be opened, try <num> higher ports\n"
              "  --m[aster] <host>[:<port>] master Saturn address (def port: 9061)\n"
              "  --n[ame]    <str>   name of Saturn\n"
              "  --t[itle]   <str>   title of Saturn\n"
-             "  --noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
-             "  -l                  no splash info\n"
              "\n"
              "Logging options:\n"
              "  --log    <file>     specify log file name (saturn:'<stdout>', gled:'<null>')\n"
@@ -194,6 +202,7 @@ void Gled::ParseArguments()
 	     "  --outerr <file>     specify file name for stdout and stderr redirection\n"
 	     "                      shorthands: '-' => <null>, '=' => same as log\n"
 	     "  --debug     <lvl>   set debug level (some messages require debug build)\n"
+             "  -l                  no splash info\n"
              "\n"
              "Authentication options:\n"
              "  --auth              use authentication\n"
@@ -202,8 +211,8 @@ void Gled::ParseArguments()
              "  --eyeid     <str>   default identity of Eyes (def: 'guest')\n"
              "\n"
              "Renderer loading options:\n"
-             "  --rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n"
-             );
+             "  --rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)\n",
+	     daemon_help);
       bQuit = true;
       return;
     }
@@ -241,12 +250,27 @@ void Gled::ParseArguments()
       bAllowMoons = true;
       mArgs.erase(start, ++i);
     }
+    else if (*i == "--noprompt")
+    {
+      bHasPrompt = false;
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "--daemon")
+    {
+      if ( ! allow_daemon) {
+	fprintf(stderr, "Error: %s does not support the --daemon option.\n", mCmdName.Data());
+	exit(1);
+      }
+      bDaemon = true;
+      bHasPrompt = false;
+      mArgs.erase(start, ++i);
+    }
     else if (*i == "-s" || *i == "--sssize")
     {
       next_arg_or_die(mArgs, i);
-      if(index(*i, 'e')) {
+      if (index(*i, 'e')) {
 	int m, e, num = sscanf(*i, "%de%d", &m, &e);
-	if(num != 2) { cerr <<"-sssize poor exp format: "<< *i <<endl; exit(1); }
+	if (num != 2) { cerr <<"-sssize poor exp format: "<< *i <<endl; exit(1); }
 	mSaturnInfo->SetSunSpaceSize( ID_t(TMath::Power(m, e)) );
       } else {
 	mSaturnInfo->SetSunSpaceSize( ID_t(atoll(*i)) );
@@ -270,7 +294,7 @@ void Gled::ParseArguments()
       next_arg_or_die(mArgs, i);
       // !!! Cast required by gcc-4.4.1-1ubuntu3, Aug 2009. Seems strange.
       char* col = (char*) strchr(*i, ':');
-      if(col) {
+      if (col) {
 	*(col++) = 0;
 	UShort_t p = UShort_t(atoi(col));
 	mSaturnInfo->SetMasterPort(p);
@@ -290,16 +314,6 @@ void Gled::ParseArguments()
       mSaturnInfo->SetTitle(*i);
       mArgs.erase(start, ++i);
     }
-    else if (*i == "--noprompt")
-    {
-      bHasPrompt = false;
-      mArgs.erase(start, ++i);
-    }
-    else if (*i == "-l")
-    {
-      bShowSplash = false;
-      mArgs.erase(start, ++i);
-    }
 
     // Logging options
 
@@ -313,6 +327,11 @@ void Gled::ParseArguments()
       else if (*i == "+")
       {
 	mLogFileName = "<stdout>";
+      }
+      else if (*i == "=")
+      {
+	fprintf(stderr, "Error: Option '--log' does not accept the '=' shorthand.\n");
+	exit(1);
       }
       else
       {
@@ -331,6 +350,11 @@ void Gled::ParseArguments()
       {
 	mOutFileName = mLogFileName;
       }
+      else if (*i == "+")
+      {
+	fprintf(stderr, "Error: Option '--out' does not accept the '+' shorthand.\n");
+	exit(1);
+      }
       else
       {
 	mOutFileName = *i;
@@ -347,6 +371,11 @@ void Gled::ParseArguments()
       else if (*i == "=")
       {
 	mErrFileName = mLogFileName;
+      }
+      else if (*i == "+")
+      {
+	fprintf(stderr, "Error: Option '--out' does not accept the '+' shorthand.\n");
+	exit(1);
       }
       else
       {
@@ -375,6 +404,11 @@ void Gled::ParseArguments()
     {
       next_arg_or_die(mArgs, i);
       G_DEBUG = atoi(*i);
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "-l")
+    {
+      bShowSplash = false;
       mArgs.erase(start, ++i);
     }
 
@@ -427,6 +461,33 @@ void Gled::ParseArguments()
 
 void Gled::InitLogging()
 {
+  // Initialize logging and redirect log, stdout and stderr according to
+  // command-line options.
+
+  // If we are daemonized, make sure that things that would otherwise go to
+  // stdout or stderr now go to /dev/null.
+
+  if (bDaemon)
+  {
+    fclose(stdin);
+    stdin = fopen("/dev/null", "r");
+
+    if (mLogFileName == "<stdin>" || mLogFileName == "<stdout>")
+    {
+      mLogFileName = "<null>";
+    }
+    if (mOutFileName == "<stdin>" || mOutFileName == "<stdout>")
+    {
+      mOutFileName = "<null>";
+    }
+    if (mErrFileName == "<stdin>" || mErrFileName == "<stdout>")
+    {
+      mErrFileName = "<null>";
+    }
+  }
+
+  // Handle mLogFile
+
   if (mLogFileName == "<null>")
   {
     mLogFile = 0;
@@ -448,6 +509,8 @@ void Gled::InitLogging()
     }
   }
 
+  // Handle stdout
+
   if ( ! mOutFileName.IsNull() && mOutFileName != "<stdout>")
   {
     bool fix_log = (mLogFile == stdout);
@@ -457,13 +520,13 @@ void Gled::InitLogging()
     {
       stdout = stderr;
     }
+    else if (mOutFileName == "<null>" || (mOutFileName == mLogFileName && mLogFile == 0))
+    {
+      stdout = fopen("/dev/null", "w");
+    }
     else if (mOutFileName == mLogFileName)
     {
       stdout = mLogFile;
-    }
-    else if (mOutFileName == "<null>")
-    {
-      stdout = fopen("/dev/null", "w");
     }
     else
     {
@@ -477,6 +540,8 @@ void Gled::InitLogging()
     if (fix_log) mLogFile = stdout;
   }
 
+  // Handle stderr
+
   if ( ! mErrFileName.IsNull() && mErrFileName != "<stderr>")
   {
     bool fix_log = (mLogFile == stderr);
@@ -487,13 +552,13 @@ void Gled::InitLogging()
     {
       stderr = stdout;
     }
+    else if (mErrFileName == "<null>" || (mOutFileName == mLogFileName && mLogFile == 0))
+    {
+      stderr = fopen("/dev/null", "w");
+    }
     else if (mErrFileName == mLogFileName)
     {
       stderr = mLogFile;
-    }
-    else if (mErrFileName == "<null>")
-    {
-      stderr = fopen("/dev/null", "w");
     }
     else
     {

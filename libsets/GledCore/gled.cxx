@@ -27,8 +27,6 @@
 
 int main(int argc, char **argv)
 {
-  static const Exc_t _eh("gled::main() ");
-
   // This is not so beautiful, but needs to be called first.
   // See also the X include above.
   // This is principle called from TApplication constructor, we call it
@@ -43,16 +41,16 @@ int main(int argc, char **argv)
   }
 #endif
 
-  GThread::InitMain();
-
   GledGUI* gled = new GledGUI();
   gled->ReadArguments(argc, argv);
-  gled->ParseArguments();
+  gled->ParseArguments(false);
 
   if (gled->GetQuit())
   {
     exit(0);
   }
+
+  GThread::InitMain();
 
   gled->InitLogging();
   gled->InitGledCore();

@@ -66,7 +66,7 @@ protected:
 
 public:
   GledGUI();
-  virtual void ParseArguments();
+  virtual void ParseArguments(Bool_t allow_daemon);
   // virtual void InitLogging();
   virtual void InitGledCore();
   virtual ~GledGUI();

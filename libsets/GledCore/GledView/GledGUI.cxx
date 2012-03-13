@@ -192,9 +192,9 @@ GledGUI::GledGUI() :
   Fl::visual(FL_DOUBLE|FL_RGB);
 }
 
-void GledGUI::ParseArguments()
+void GledGUI::ParseArguments(Bool_t allow_daemon)
 {
-  Gled::ParseArguments();
+  Gled::ParseArguments(allow_daemon);
 
   // Defaults that can be overridden by options.
   int   swm_fs = 12, swm_vskip = 6, swm_hwidth = 0;

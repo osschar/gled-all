@@ -1,5 +1,25 @@
 2012-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Add support for running of saturn in its daemonic form.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Add command-line option --daemon.
+	When running as daemon, redirect  log, out and err streams that
+	want to use stdout or stderr to /dev/null.
+	Add logic handling the case when log is redirected to /dev/null
+	and out/err are redirected to the log.
+
+	* saturn.cxx:
+	Daemonize via daemon() if requested by command-line option.
+
+	* GledView/GledGUI.cxx:
+	* GledView/GledGUI.h:
+	* gled.cxx:
+	Follow up on changes needed for daemonization.
+
+2012-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Gled/Gled.cxx:
 	* Gled/Gled.h:
 	Rename info-stream level output to info.
