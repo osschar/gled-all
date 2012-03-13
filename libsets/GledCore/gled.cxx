@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 	   gROOT, gROOT->TestBit(TObject::kInvalidObject),
 	   s, s->IsOnHeap());
   }
-  // So, let's trich ~TROOT into not doing anything.
+  // So, let's trick ~TROOT into not doing anything.
   gROOT = 0;
 #endif
 
