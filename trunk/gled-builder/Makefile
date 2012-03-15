@@ -1,6 +1,8 @@
 SHELL = /bin/bash
 
-all: external gled greed
+all: external gled
+
+all-greed: all greed
 
 .PHONY: external external-no-root gled greed clean distclean
 
