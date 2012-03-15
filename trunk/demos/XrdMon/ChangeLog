@@ -1,5 +1,12 @@
 2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* install-xrd-mon-sucker.sh:
+	* install-xrdmon.sh:
+	Rename install-xrd-mon-sucker.sh to install-xrdmon.sh.
+	Add installation dir as variable.
+
+2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Improve self-consistency.
 
 	* logrotate.d/xrd-mon-sucker:
