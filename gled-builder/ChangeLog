@@ -1,3 +1,10 @@
+2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Do not build greed by defaultin target 'all' (installation of
+	READMEs and wrappers for running the greed-world demo).
+	Add target 'all-greed' that does what 'all' used to do.
+
 2012-01-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/fltk/fltk.pl:
