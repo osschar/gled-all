@@ -166,7 +166,7 @@ void Gled::ParseArguments(Bool_t allow_daemon)
       if (allow_daemon)
       {
 	daemon_help = 
-	     "  --daemon            run as daemon; implies --noprompt, std streams closed\n";
+	     "  --daemon            run as daemon; implies --noprompt, std streams get closed\n";
       }
 
       printf(
