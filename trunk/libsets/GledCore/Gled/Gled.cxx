@@ -652,9 +652,7 @@ void Gled::ProcessCmdLineMacros()
 
   if (bHasPrompt)
   {
-    TRint *rint = new TRint("TRint", &rargc, (char**) rargv);
-    rint->SetPrompt(mCmdName + "[%d] ");
-    mRootApp = rint;
+    mRootApp = new TRint("TRint", &rargc, (char**) rargv);
   }
   else
   {
@@ -667,7 +665,6 @@ void Gled::ProcessCmdLineMacros()
     SpawnSunOrSaturn();
   }
 
-  volatile Bool_t needGetlinemInit = kFALSE;
   try
   {
     GThread::OwnerChanger _chown(mSaturnInfo);
@@ -734,23 +731,17 @@ void Gled::ProcessCmdLineMacros()
             snprintf(cmd, kMAXPATHLEN+50, ".x %s", (const char*)file->String());
           }
           if (bHasPrompt) {
-            Getlinem(kCleanUp, 0);
             Gl_histadd(cmd);
           }
 
           // The ProcessLine might throw an 'exception'.  In this case,
           // GetLinem(kInit,"Root >") is called and we are jump back
           // to RETRY ... and we have to avoid the Getlinem(kInit, GetPrompt());
-          needGetlinemInit = kFALSE;
           retval = mRootApp->ProcessLine(cmd, kFALSE, &error);
           gCint->EndOfLineAction();
 	  if (retval) {
 	    Printf("Command '%s' returned %ld.", cmd, retval);
 	  }
-
-          // The ProcessLine has successfully completed and we need
-          // to call Getlinem(kInit, GetPrompt());
-          needGetlinemInit = kTRUE;
 
           if (error != 0) break;
         }
@@ -766,11 +757,10 @@ void Gled::ProcessCmdLineMacros()
 
   if (mRootApp->InputFiles()) {
     mRootApp->ClearInputFiles();
-  } else {
-    if (bHasPrompt && needGetlinemInit)
-      Getlinem(kCleanUp, 0);
   }
-  if (bHasPrompt && needGetlinemInit) {
+  if (bHasPrompt)
+  {
+    ((TRint*)mRootApp)->SetPrompt(mCmdName + "[%d] ");
     Getlinem(kInit, ((TRint*)mRootApp)->GetPrompt());
   }
 
