@@ -1,3 +1,9 @@
+2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	Simplify root prompt initialization - only do it at the end of
+	command-line macro processin. Seems to work well so far.
+
 2012-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for running of saturn in its daemonic form.
