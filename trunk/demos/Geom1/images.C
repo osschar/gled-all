@@ -222,7 +222,10 @@ void images()
   //============================================================================
   // Spawn GUI
 
-  Gled::Macro("eye.C");
-  setup_pupil_up_reference();
-  g_nest->Add(g_queen->FindLensByPath("var"));
+  if (Gled::theOne->HasGUILibs())
+  {
+    Gled::Macro("eye.C");
+    setup_pupil_up_reference();
+    g_nest->Add(g_queen->FindLensByPath("var"));
+  }
 }
