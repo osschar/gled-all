@@ -1,6 +1,6 @@
 # To be copied to /etc/logrotate.d
 
-/var/log/xrootd/xrd-mon-sucker.log {
+/var/log/gled/xrdmon-*.log {
     missingok
     rotate 7
     daily
