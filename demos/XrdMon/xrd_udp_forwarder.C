@@ -27,8 +27,8 @@ void xrd_udp_forwarder()
   }
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
-  // c_log->SetFileName("/var/log/xrootd/xrd-udp-forwarder.log");
-  c_log->SetFileName("xrd-udp-forwarder.log");
+  // c_log->SetFileName("/var/log/gled/xrdmon-udp-forwarder.log");
+  c_log->SetFileName("xrdmon-udp-forwarder.log");
   c_log->SetLevel(ZLog::L_Info);
   c_log->StartLogging();
 

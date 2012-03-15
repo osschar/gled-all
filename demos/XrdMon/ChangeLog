@@ -1,3 +1,21 @@
+2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve self-consistency.
+
+	* logrotate.d/xrd-mon-sucker:
+	* logrotate.d/gled-xrdmon:
+	Rename xrd-mon-sucker to gled-xrdmon.
+
+	* xrd-mon-sucker.sh:
+	* xrdmon-wrapper.sh:
+	Rename xrd-mon-sucker.sh to xrdmon-wrapper.sh
+
+	* install-xrd-mon-sucker.sh:
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	* xrd_udp_forwarder.C:
+	Cleanup, improve and profit.
+
 2012-03-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_suck_tcp.C:

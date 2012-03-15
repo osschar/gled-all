@@ -34,8 +34,8 @@ void xrd_suck_udp()
   }
 
   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
-  // c_log->SetFileName("/var/log/xrootd/xrd-mon-sucker.log");
-  c_log->SetFileName("xrd-mon-sucker.log");
+  // c_log->SetFileName("/var/log/gled/xrdmon-suck-udp.log");
+  c_log->SetFileName("xrdmon-suck-udp.log");
   // For verbose logging (every packet received).
   // c_log->SetLevel(ZLog::L_Info);
 
