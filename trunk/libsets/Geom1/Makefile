@@ -1,7 +1,9 @@
 # $Id$
-LIB_SET_NAME	= Geom1
-LIB_SET_ID	= 2
-REQUIRES_LIB_SETS = GledCore # add
+
+LIB_SET_NAME	  := Geom1
+LIB_SET_ID	  := 2
+REQUIRES_LIB_SETS := GledCore
+REQUIRES_EXTERNAL := DevIL
 
 BLESSED_DIRS	= Glasses
 BASE_DIRS	= Stones Tvor ACTC GForge

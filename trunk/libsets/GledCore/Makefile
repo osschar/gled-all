@@ -1,8 +1,9 @@
 # $Id$
 
-LIB_SET_NAME	= GledCore
-LIB_SET_ID	= 1
-REQUIRES_LIB_SETS =
+LIB_SET_NAME	  := GledCore
+LIB_SET_ID	  := 1
+REQUIRES_LIB_SETS :=
+REQUIRES_EXTERNAL := root fltk fltk-mt
 
 # All this dirs expanded in make_base.inc into <type>_SRCS and _HDRS
 # Can add your own before ... or after (are += -ed into the vars)

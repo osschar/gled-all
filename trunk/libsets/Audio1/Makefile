@@ -1,7 +1,9 @@
 # $Id$
-LIB_SET_NAME	:= Audio1
-LIB_SET_ID	:= 4
-REQUIRES_LIB_SETS := GledCore # add
+
+LIB_SET_NAME	  := Audio1
+LIB_SET_ID	  := 4
+REQUIRES_LIB_SETS := GledCore
+REQUIRES_EXTERNAL := openal freealut
 
 # Nice, friendly woozies that don't need special treatment
 BLESSED_DIRS	:= Glasses
