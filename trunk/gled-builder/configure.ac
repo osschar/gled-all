@@ -75,7 +75,7 @@ AC_ARG_CONF_VAR([SVN_USER],
 
 AC_ARG_CONF_VAR([LIBSETS],
                 [Gled libsets to build (space separated; dependencies are not checked)],
-		[""])
+		["GledCore Audio1 GledGTS Geom1 Numerica Var1"])
 
 AC_ARG_CONF_VAR([MAKE_J_OPT],
 		[parallel build option (for packages that support it)],

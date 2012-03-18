@@ -1,13 +1,18 @@
 SHELL = /bin/bash
 
+include MakeBuildGled.inc
+
 all: external gled
 
 all-greed: all greed
 
-.PHONY: external external-no-root gled greed clean distclean
+.PHONY: external external-all external-no-root gled greed clean distclean
 
 external:
-	${MAKE} -C external
+	${MAKE} -C external ${GB_LIBSETS}
+
+external-all:
+	${MAKE} -C external all
 
 external-no-root:
 	${MAKE} -C external all-but-root
