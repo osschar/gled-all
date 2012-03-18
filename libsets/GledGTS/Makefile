@@ -1,7 +1,10 @@
 # $Id$
-LIB_SET_NAME	= GledGTS
-LIB_SET_ID	= 16
-REQUIRES_LIB_SETS = GledCore Numerica # add
+
+LIB_SET_NAME	  := GledGTS
+LIB_SET_ID	  := 16
+REQUIRES_LIB_SETS := GledCore Numerica
+REQUIRES_EXTERNAL := gts
+
 
 BLESSED_DIRS	= Glasses
 BASE_DIRS	= Stones GTS
