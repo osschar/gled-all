@@ -1,3 +1,19 @@
+2012-03-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Make build of externals aware of libset dependecies.
+
+	* Makefile:
+	Pass GB_LIBSETS to sub-make that builds externals.
+
+	* configure.ac:
+	Set default LIBSETS to whatever is needed for Greed demo.
+
+	* external/Makefile:
+	Put in full list of libsets, their dependencies on each other and
+	on external software.
+	This is auto-generated with a script (that I should really check-in
+	here, too).
+
 2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Makefile:
