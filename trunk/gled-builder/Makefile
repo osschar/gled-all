@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-include MakeBuildGled.inc
+include MakeBuildConf.inc
 
 all: external gled
 
