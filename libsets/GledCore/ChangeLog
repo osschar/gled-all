@@ -1,3 +1,8 @@
+2012-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZLog.cxx:
+	Fix order of arguments in Helper::Form().
+
 2012-03-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
