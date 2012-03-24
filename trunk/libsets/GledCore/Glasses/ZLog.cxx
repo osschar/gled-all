@@ -23,7 +23,7 @@
 //
 // Short term:
 // - Various helper / access functions to make it easier to use.
-
+//
 // Medium term:
 // - Log rotation,
 // - Do output in the dedicated thread. (not 100% sure this is smart)
@@ -338,10 +338,9 @@ void ZLog::Helper::Form(const char* va_(fmt), ...)
   {
     va_list ap;
     va_start(ap, va_(fmt));
-    m_log->Form(m_level, m_time_string, m_prefix, va_(fmt), ap);
+    m_log->Form(m_time_string, m_level, m_prefix, va_(fmt), ap);
     va_end(ap);
   }
-
 }
 
 void ZLog::Helper::Form(Int_t level, const char* va_(fmt), ...)
