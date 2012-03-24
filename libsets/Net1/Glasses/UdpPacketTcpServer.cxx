@@ -78,11 +78,11 @@ void UdpPacketTcpServer::Serve()
         // New client.
 
         TSocket *cs = mServSocket->Accept();
-
-        TString msg = GForm("New connection from %s.", cs->GetInetAddress().GetHostName());
-        ISmess(_eh + msg);
-        mLog->Form(ZLog::L_Message, _eh, msg);
-
+        if (*mLog)
+        {
+          mLog->Form(ZLog::L_Message, _eh, "New connection from %s.",
+                     cs->GetInetAddress().GetHostName());
+        }
         AddClient(cs);
       }
       else
@@ -96,9 +96,11 @@ void UdpPacketTcpServer::Serve()
         SMessage *m = SMessage::ReceiveOrReport(s, _eh, true, *mLog);
         if (m)
         {
-          ISmess(_eh + GForm("Got messge from %s, len=%u, what=%u.",
-                             s->GetInetAddress().GetHostName(),
-                             m->Length(), m->What()));
+          if (*mLog)
+          {
+            mLog->Form(ZLog::L_Message, _eh, "Got messge from %s, len=%u, what=%u.",
+                       s->GetInetAddress().GetHostName(), m->Length(), m->What());
+          }
           delete m;
         }
         else if (s->TestBit(TSocket::kBrokenConn))
@@ -172,11 +174,13 @@ void UdpPacketTcpServer::Deliver()
       }
       catch (Int_t err)
       {
-        TString msg(GForm("Error %d sending to %s:%d (%s). Closing connection.", err,
-                          (*i)->GetInetAddress().GetHostName(), (*i)->GetLocalPort(), strerror(errno)));
-        ISmess(_eh + msg);
-        mLog->Form(ZLog::L_Error, _eh, msg);
-
+        if (*mLog)
+        {
+          mLog->Form(ZLog::L_Error, _eh,
+                     "Error %d sending to %s:%d (%s). Closing connection.",
+                     err, (*i)->GetInetAddress().GetHostName(), (*i)->GetLocalPort(),
+                     strerror(errno));
+        }
         list<TSocket*>::iterator j = i++;
         RemoveClient(j);
         continue;
@@ -222,8 +226,8 @@ void UdpPacketTcpServer::StartAllServices()
 
   mSource->RegisterConsumer(&mUdpQueue);
 
-  mDeliThread  ->Spawn();
-  mServThread  ->Spawn();
+  mDeliThread->Spawn();
+  mServThread->Spawn();
 }
 
 void UdpPacketTcpServer::StopAllServices()
