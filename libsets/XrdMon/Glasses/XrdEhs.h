@@ -34,6 +34,8 @@ protected:
   Int_t	               mPort;         // X{GS} 7 Value(-range=>[1,65535,1])
   Bool_t	       bServerUp;     // X{GS} 7 BoolOut()
 
+  Bool_t               bParanoia;     //!X{GS}  7 Bool()
+
   list<XrdFile*>       mFileList;     //!
   TimeStamp_t          mFileListTS;   //!
   GMutex               mServeMutex;   //!
