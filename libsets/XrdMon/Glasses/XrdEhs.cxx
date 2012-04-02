@@ -129,6 +129,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
 
     TPMERegexp reStoreData("/store/data/(\\w+)/");
     TPMERegexp reStoreMC("/store/mc/(\\w+)/");
+    TPMERegexp rePath("/");
 
     for (list<XrdFile*>::iterator xfi = mFileList.begin(); xfi != mFileList.end(); ++xfi)
     {
@@ -158,11 +159,9 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       else
       {
         if (file->RefName().BeginsWith("/store/user/"))
-          oss << "<td>/store/user/...</td>" << endl;
-        else if (reStoreData.Match(file->RefName()) > 1)
-          oss << Form("<td>%s...</td>", reStoreData[0].Data()) <<endl; 
-        else if (reStoreMC.Match(file->RefName()) > 1)
-          oss << Form("<td>%s...</td>", reStoreMC[0].Data()) <<endl; 
+          oss << "<td>/store/user</td>" << endl;
+        else if (rePath.Split(file->RefName()) > 3)
+          oss << Form("<td>%s/%s/%s</td>", rePath[1].Data(), rePath[2].Data(), rePath[3].Data()) <<endl; 
         else
           oss << Form("<td>%s</td>", file->GetName()) << endl;
       }
@@ -170,10 +169,12 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       oss << "<td>" << (req_time - file->RefOpenTime()).ToHourMinSec() << "</td>" << endl;
       oss << "<td>" << user->GetServer()->GetDomain() << "</td>" << endl;
       oss << "<td>" << user->GetFromDomain() << "</td>" << endl;
-      if (bParanoia)
+      if (bParanoia &&  user->RefRealName().Length() ) {
         oss << "<td>" << Form("%X",  user->RefRealName().Hash()) <<  "</td>" << endl;
-      else
+      }
+      else {
         oss << "<td>" << user->GetRealName() << "</td>" << endl;
+      }
 
       oss << "<td>" << GForm("%.3f", file->GetReadStats().GetSumX()) << "</td>" << endl;
       oss << "<td>" << (req_time - file->RefLastMsgTime()).ToHourMinSec() << "</td>" << endl;
