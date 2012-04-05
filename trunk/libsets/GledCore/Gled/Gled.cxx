@@ -1067,7 +1067,7 @@ Int_t Gled::LoadLibSet(LID_t lid)
 
 void Gled::SetDebugLevel(Int_t d)
 {
-  if(d<0) d=0;
+  if (d<0) d=0;
   G_DEBUG = d;
 }
 
@@ -1077,10 +1077,10 @@ void Gled::SetDebugLevel(Int_t d)
 
 void Gled::info(const char* s)
 {
+  GThread::CancelDisabler tka;
+  GMutexHolder mh(mLoggingMutex);
   if (mLogFile)
   {
-    GThread::CancelDisabler tka;
-    GMutexHolder mh(mLoggingMutex);
     fputs("INF: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -1089,10 +1089,10 @@ void Gled::info(const char* s)
 
 void Gled::message(const char* s)
 {
+  GThread::CancelDisabler tka;
+  GMutexHolder mh(mLoggingMutex);
   if (mLogFile)
   {
-    GThread::CancelDisabler tka;
-    GMutexHolder mh(mLoggingMutex);
     fputs("MSG: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -1101,10 +1101,10 @@ void Gled::message(const char* s)
 
 void Gled::warning(const char* s)
 {
-  if(mLogFile)
+  GThread::CancelDisabler tka;
+  GMutexHolder mh(mLoggingMutex);
+  if (mLogFile)
   {
-    GThread::CancelDisabler tka;
-    GMutexHolder mh(mLoggingMutex);
     fputs("WRN: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -1113,10 +1113,10 @@ void Gled::warning(const char* s)
 
 void Gled::error(const char* s)
 {
+  GThread::CancelDisabler tka;
+  GMutexHolder mh(mLoggingMutex);
   if (mLogFile)
   {
-    GThread::CancelDisabler tka;
-    GMutexHolder mh(mLoggingMutex);
     fputs("ERR: ", mLogFile);
     fputs(s, mLogFile);
     putc(10, mLogFile);
@@ -1387,7 +1387,7 @@ void Gled::RootApp_cleanup_tl(void*)
 void InfoStream(InfoStream_e type, const char* s)
 {
   switch (type) {
-    case ISinfo:    Gled::theOne->info(s);  break;
+    case ISinfo:    Gled::theOne->info(s);    break;
     case ISmessage: Gled::theOne->message(s); break;
     case ISwarning: Gled::theOne->warning(s); break;
     case ISerror:   Gled::theOne->error(s);   break;

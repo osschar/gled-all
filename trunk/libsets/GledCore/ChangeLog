@@ -1,3 +1,23 @@
+2012-04-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SSocket.cxx:
+	* Stones/SSocket.h:
+	Subclass of TSocket making Close() thread safe as it is called
+	from bot RecvRaw() and SendRaw() and can lead to double deletion of
+	some objects.
+
+	* Stones/SServerSocket.cxx:
+	* Stones/SServerSocket.h:
+	Minimal clone of TServerSocket inheriting from SSocket.
+
+	* Gled/Gled.cxx:
+	Move logging locks out of the 'if logging'.
+
+	* Gled/GSelector.cxx:
+	* Gled/GSelector.h:
+	* Stones/SMessage.cxx:
+	Mostly whitespace.
+
 2012-03-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZLog.cxx:
