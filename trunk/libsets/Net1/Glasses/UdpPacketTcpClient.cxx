@@ -7,11 +7,11 @@
 #include "UdpPacketTcpClient.h"
 #include "UdpPacketTcpClient.c7"
 
+#include "Stones/SSocket.h"
 #include "Stones/SMessage.h"
 #include "Stones/SUdpPacket.h"
 #include "Gled/GThread.h"
 
-#include <TSocket.h>
 
 // UdpPacketTcpClient
 
@@ -64,7 +64,7 @@ void UdpPacketTcpClient::ListenLoop()
 
     for (GFdSet_i i = sel.fReadOut.begin(); i != sel.fReadOut.end(); ++i)
     {
-      TSocket* s = (TSocket*) i->first;
+      SSocket* s = (SSocket*) i->first;
       assert(s == mSocket);
 
       SMessage *m = SMessage::ReceiveOrReport(s, _eh);
@@ -99,7 +99,7 @@ void UdpPacketTcpClient::ConnectAndListenLoop()
     if (mListenerThread)
       throw _eh + "already running.";
 
-    mSocket = new TSocket(mHost, mPort);
+    mSocket = new SSocket(mHost, mPort);
 
     mListenerThread = new GThread("UdpPacketTcpClient-ListenLoop",
                                   (GThread_foo) tl_ListenLoop, this,

@@ -10,7 +10,7 @@
 #include "Glasses/UdpPacketSource.h"
 
 class GThread;
-class TSocket;
+class SSocket;
 
 
 class UdpPacketTcpClient : public UdpPacketSource
@@ -24,7 +24,7 @@ protected:
   TString           mHost; // X{GS} 7 Textor()
   UShort_t          mPort; // X{GS} 7 Value(-range=>[0,65535,1])
 
-  TSocket          *mSocket;         //!
+  SSocket          *mSocket;         //!
   GThread          *mListenerThread; //!
 
   static void* tl_ListenLoop(UdpPacketTcpClient* c);

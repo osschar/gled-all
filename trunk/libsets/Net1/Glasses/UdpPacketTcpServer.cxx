@@ -9,11 +9,10 @@
 #include "Glasses/ZLog.h"
 #include "UdpPacketTcpServer.c7"
 
+#include "Stones/SServerSocket.h"
 #include "Stones/SMessage.h"
 #include "Stones/SUdpPacket.h"
 #include "Gled/GThread.h"
-
-#include "TServerSocket.h"
 
 #include <cerrno>
 
@@ -72,12 +71,12 @@ void UdpPacketTcpServer::Serve()
 
     for (GFdSet_i i = mSelector.fReadOut.begin(); i != mSelector.fReadOut.end(); ++i)
     {
-      TSocket* s = (TSocket*) i->first;
+      SSocket* s = (SSocket*) i->first;
       if (s == mServSocket)
       {
         // New client.
 
-        TSocket *cs = mServSocket->Accept();
+        SSocket *cs = mServSocket->Accept();
         if (*mLog)
         {
           mLog->Form(ZLog::L_Message, _eh, "New connection from %s.",
@@ -103,7 +102,7 @@ void UdpPacketTcpServer::Serve()
           }
           delete m;
         }
-        else if (s->TestBit(TSocket::kBrokenConn))
+        else if (s->TestBit(SSocket::kBrokenConn))
         {
           RemoveClient(s);
         }
@@ -112,7 +111,7 @@ void UdpPacketTcpServer::Serve()
   }
 }
 
-void UdpPacketTcpServer::AddClient(TSocket *cs)
+void UdpPacketTcpServer::AddClient(SSocket *cs)
 {
   mSelector.Lock();
   mSelector.fRead.Add(cs);
@@ -120,10 +119,10 @@ void UdpPacketTcpServer::AddClient(TSocket *cs)
   mSelector.Unlock();
 }
 
-void UdpPacketTcpServer::RemoveClient(TSocket* cs)
+void UdpPacketTcpServer::RemoveClient(SSocket* cs)
 {
   mSelector.Lock();
-  list<TSocket*>::iterator sli = find(mClients.begin(), mClients.end(), cs);
+  list<SSocket*>::iterator sli = find(mClients.begin(), mClients.end(), cs);
   if (sli != mClients.end())
   {
     RemoveClient(sli);
@@ -131,9 +130,9 @@ void UdpPacketTcpServer::RemoveClient(TSocket* cs)
   mSelector.Unlock();
 }
 
-void UdpPacketTcpServer::RemoveClient(list<TSocket*>::iterator sli)
+void UdpPacketTcpServer::RemoveClient(list<SSocket*>::iterator sli)
 {
-  TSocket *cs = *sli;
+  SSocket *cs = *sli;
   mSelector.Lock();
   mSelector.fRead.Remove(*sli);
   mClients.erase(sli);
@@ -165,7 +164,7 @@ void UdpPacketTcpServer::Deliver()
     msg.SetLength();
 
     mSelector.Lock();
-    list<TSocket*>::iterator i = mClients.begin();
+    list<SSocket*>::iterator i = mClients.begin();
     while (i != mClients.end())
     {
       try
@@ -181,7 +180,7 @@ void UdpPacketTcpServer::Deliver()
                      err, (*i)->GetInetAddress().GetHostName(), (*i)->GetLocalPort(),
                      strerror(errno));
         }
-        list<TSocket*>::iterator j = i++;
+        list<SSocket*>::iterator j = i++;
         RemoveClient(j);
         continue;
       }
@@ -206,7 +205,7 @@ void UdpPacketTcpServer::StartAllServices()
     if (mDeliThread || mServThread)
       throw _eh + "already running.";
 
-    mServSocket = new TServerSocket(mServPort);
+    mServSocket = new SServerSocket(mServPort);
     if (!mServSocket->IsValid())
     {
       delete mServSocket; mServSocket = 0;
