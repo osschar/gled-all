@@ -16,8 +16,8 @@ class UdpPacketSource;
 class SUdpPacket;
 class GThread;
 
-class TServerSocket;
-class TSocket;
+class SServerSocket;
+class SSocket;
 
 
 class UdpPacketTcpServer : public ZGlass
@@ -37,15 +37,15 @@ protected:
   Int_t                   mServPort;    // X{GS} 7 Value()
   GSelector               mSelector;    //!
   GThread                *mServThread;  //!
-  TServerSocket          *mServSocket;  //!
-  list<TSocket*>          mClients;     //!
+  SServerSocket          *mServSocket;  //!
+  list<SSocket*>          mClients;     //!
 
   static void* tl_Serve(UdpPacketTcpServer* s);
   void Serve();
 
-  void AddClient(TSocket* cs);
-  void RemoveClient(TSocket* cs);
-  void RemoveClient(list<TSocket*>::iterator sli);
+  void AddClient(SSocket* cs);
+  void RemoveClient(SSocket* cs);
+  void RemoveClient(list<SSocket*>::iterator sli);
 
   //--------------------------------
 
