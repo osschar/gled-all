@@ -11,7 +11,7 @@
 #include <Gled/GMutex.h>
 #include <map>
 
-class    TSocket;
+class TSocket;
 
 struct GFdSet : public map<void*,Int_t>
 {

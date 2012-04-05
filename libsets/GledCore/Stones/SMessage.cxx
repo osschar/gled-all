@@ -37,18 +37,28 @@ SMessage::~SMessage()
 void SMessage::Send(TSocket* sock, Bool_t set_length)
 {
   if (set_length)
+  {
     SetLength();
+  }
+
   Int_t n = sock->SendRaw(Buffer(), Length());
+
   if (n != Length())
+  {
     throw n;
+  }
 }
 
 Bool_t SMessage::SendOrReport(TSocket* sock, Bool_t set_length, const Exc_t& eh,
                               Bool_t log_to_is, ZLog* log)
 {
   if (set_length)
+  {
     SetLength();
+  }
+
   Int_t n = sock->SendRaw(Buffer(), Length());
+
   if (n != Length())
   {
     TString msg;
@@ -83,6 +93,7 @@ SMessage* SMessage::Receive(TSocket* sock)
   {
     throw n;
   }
+
   Int_t len  = net2host(len_net);
   Int_t len2 = len + sizeof(Int_t);
   char  *buf = new char[len2];
