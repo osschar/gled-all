@@ -24,8 +24,8 @@ protected:
   TString           mHost; // X{GS} 7 Textor()
   UShort_t          mPort; // X{GS} 7 Value(-range=>[0,65535,1])
 
-  UInt_t            mNRetry;       // X{GS} 7 Value(-range=>[0, 1000]);
-  UInt_t            mRetryWaitSec; // X{GS} 7 Value(-range=>[0, 1000]);
+  UInt_t            mNRetry;       // X{GS} 7 Value(-range=>[0, 10000]);
+  UInt_t            mRetryWaitSec; // X{GS} 7 Value(-range=>[0, 10000]);
 
   SSocket          *mSocket;         //!
   GThread          *mListenerThread; //!
