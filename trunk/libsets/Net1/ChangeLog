@@ -1,3 +1,10 @@
+
+2012-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	Add option to exit on failure to reconnect.
+
 2012-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Better resiliance against network failures.

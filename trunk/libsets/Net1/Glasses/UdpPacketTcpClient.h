@@ -26,6 +26,7 @@ protected:
 
   UInt_t            mNRetry;       // X{GS} 7 Value(-range=>[0, 10000]);
   UInt_t            mRetryWaitSec; // X{GS} 7 Value(-range=>[0, 10000]);
+  Bool_t            bExitOnFailure;// X{GS} 7 Bool()
 
   SSocket          *mSocket;         //!
   GThread          *mListenerThread; //!

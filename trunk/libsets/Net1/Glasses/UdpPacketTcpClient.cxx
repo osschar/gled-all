@@ -30,6 +30,7 @@ void UdpPacketTcpClient::_init()
   mPort = 9940;
   mNRetry = 120;
   mRetryWaitSec = 30;
+  bExitOnFailure = false;
   mSocket = 0;
   mListenerThread = 0;
 }
@@ -78,6 +79,8 @@ entry_point:
     {
       GLensReadHolder _lck(this);
       mListenerThread = 0;
+      if (bExitOnFailure)
+	Gled::theOne->Exit(2);
       return;
     }
 
