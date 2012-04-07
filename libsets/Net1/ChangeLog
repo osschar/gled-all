@@ -1,3 +1,16 @@
+2012-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Better resiliance against network failures.
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	When connection to server is lost, try to reconnect certain number
+	of times with certain sleep time in between.
+
+	* Glasses/UdpPacketTcpServer.cxx:
+	Reuse server socket ... so if we the server process crashes a new
+	instance will be able to open the server socket immediately.
+
 2012-04-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/UdpPacketTcpClient.cxx:

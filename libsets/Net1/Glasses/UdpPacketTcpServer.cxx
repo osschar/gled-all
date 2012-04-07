@@ -205,7 +205,7 @@ void UdpPacketTcpServer::StartAllServices()
     if (mDeliThread || mServThread)
       throw _eh + "already running.";
 
-    mServSocket = new SServerSocket(mServPort);
+    mServSocket = new SServerSocket(mServPort, true);
     if (!mServSocket->IsValid())
     {
       delete mServSocket; mServSocket = 0;
