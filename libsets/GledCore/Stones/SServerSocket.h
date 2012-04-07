@@ -17,12 +17,8 @@ private:
   void operator=(const SServerSocket &);
 
 public:
-  enum { kDefaultBacklog = 10 };
-
-  SServerSocket(Int_t port, Bool_t reuse = kFALSE, Int_t backlog = kDefaultBacklog,
-		Int_t tcpwindowsize = -1);
-  SServerSocket(const char *service, Bool_t reuse = kFALSE,
-		Int_t backlog = kDefaultBacklog, Int_t tcpwindowsize = -1);
+  SServerSocket(Int_t port, Bool_t reuse=false, Int_t backlog=10, Int_t tcpwindowsize=-1);
+  SServerSocket(const char *service, Bool_t reuse=false, Int_t backlog=10, Int_t tcpwindowsize= 1);
   virtual ~SServerSocket() {}
 
   virtual SSocket*      Accept();
