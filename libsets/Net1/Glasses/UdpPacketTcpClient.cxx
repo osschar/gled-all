@@ -10,6 +10,7 @@
 #include "Stones/SSocket.h"
 #include "Stones/SMessage.h"
 #include "Stones/SUdpPacket.h"
+#include "Gled/Gled.h"
 #include "Gled/GThread.h"
 
 
@@ -80,7 +81,9 @@ entry_point:
       GLensReadHolder _lck(this);
       mListenerThread = 0;
       if (bExitOnFailure)
+      {
 	Gled::theOne->Exit(2);
+      }
       return;
     }
 
