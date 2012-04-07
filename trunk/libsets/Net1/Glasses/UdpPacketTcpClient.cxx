@@ -28,6 +28,8 @@ void UdpPacketTcpClient::_init()
 {
   mHost = "localhost";
   mPort = 9940;
+  mNRetry = 120;
+  mRetryWaitSec = 30;
   mSocket = 0;
   mListenerThread = 0;
 }
@@ -54,6 +56,34 @@ void UdpPacketTcpClient::ListenLoop()
   static const Exc_t _eh("UdpPacketTcpClient::ListenLoop ");
 
   GSelector sel;
+
+entry_point:
+  UInt_t n_try = 0;
+  while (true)
+  {
+    mSocket = new SSocket(mHost, mPort);
+
+    if (mSocket->IsValid())
+    {
+      printf("%sSocket creation successful, entering listen loop.\n", _eh.Data());
+      break;
+    }
+
+    ++n_try;
+    delete mSocket; mSocket = 0;
+
+    printf("%sSocket creation failed, n_try=%d, max_n=%d.\n", _eh.Data(), n_try, mNRetry);
+
+    if (n_try >= mNRetry)
+    {
+      GLensReadHolder _lck(this);
+      mListenerThread = 0;
+      return;
+    }
+
+    GTime::SleepMiliSec(1000*mRetryWaitSec);
+  }
+
   sel.fRead.Add(mSocket);
 
   while (true)
@@ -84,7 +114,16 @@ void UdpPacketTcpClient::ListenLoop()
       }
       else
       {
-        // if (s->TestBit(TSocket::kBrokenConn)) close etc ... schedule reconnect
+        if (s->TestBit(TSocket::kBrokenConn))
+	{
+	  sel.fRead.Remove(mSocket);
+	  delete mSocket;
+	  mSocket = 0;
+
+	  printf("%sSocket closed, reentering creation etc.\n", _eh.Data());
+
+	  goto entry_point;
+	}
       }
     }
   }
@@ -98,8 +137,6 @@ void UdpPacketTcpClient::ConnectAndListenLoop()
     GLensReadHolder _lck(this);
     if (mListenerThread)
       throw _eh + "already running.";
-
-    mSocket = new SSocket(mHost, mPort);
 
     mListenerThread = new GThread("UdpPacketTcpClient-ListenLoop",
                                   (GThread_foo) tl_ListenLoop, this,
