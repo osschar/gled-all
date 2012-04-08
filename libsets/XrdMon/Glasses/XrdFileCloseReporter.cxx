@@ -14,13 +14,6 @@
 
 #include "Gled/GThread.h"
 
-#include <cerrno>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-
 // XrdFileCloseReporter
 
 //______________________________________________________________________________
@@ -32,15 +25,11 @@ ClassImp(XrdFileCloseReporter);
 //==============================================================================
 
 void XrdFileCloseReporter::_init()
-{
-  mUdpHost = "localhost";
-  mUdpPort = 4242;
-}
+{}
 
 XrdFileCloseReporter::XrdFileCloseReporter(const Text_t* n, const Text_t* t) :
   ZGlass(n, t),
-  mReporterThread(0),
-  mReporterSocket(0)
+  mReporterThread(0)
 {
   _init();
 }
@@ -54,6 +43,8 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file)
 {
   // put into queue and signal condition
 
+  file->IncEyeRefCount();
+
   GMutexHolder _lck(mReporterCond);
   mReporterQueue.push_back(file);
   mReporterCond.Signal();
@@ -61,12 +52,21 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file)
 
 //==============================================================================
 
-namespace
+void XrdFileCloseReporter::ReportLoopInit()
+{}
+
+void XrdFileCloseReporter::ReportFileClosed(XrdFile* file)
 {
-  Long64_t dtoll (Double_t x) { return static_cast<Long64_t>(x);   }
-  Double_t dmtod (Double_t x) { return 1024.0 * 1024.0 * x;        }
-  Long64_t dmtoll(Double_t x) { return dtoll(dmtod(x));            }
+  static const Exc_t _eh("XrdFileCloseReporter::ReportFileClosed ");
+
+  ZLog::Helper log(*mLog, ZLog::L_Message, _eh);
+  log.Form("LFN=%s", file->GetName());
 }
+
+void XrdFileCloseReporter::ReportLoopFinalize()
+{}
+
+//==============================================================================
 
 void* XrdFileCloseReporter::tl_ReportLoop(XrdFileCloseReporter* r)
 {
@@ -79,109 +79,26 @@ void XrdFileCloseReporter::ReportLoop()
 {
   static const Exc_t _eh("XrdFileCloseReporter::ReportLoop ");
 
-  mLastUidBase = mLastUidInner = 0;
-
-  struct sockaddr rAddr;
-  {
-    struct addrinfo *result;
-    struct addrinfo  hints;
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family   = AF_INET; // AF_UNSPEC; this pulls out IP6 for localhost
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = IPPROTO_UDP;
-    hints.ai_flags    = AI_NUMERICSERV;
-
-    int error = getaddrinfo(mUdpHost, TString::Format("%hu", mUdpPort), &hints, &result);
-    if (error != 0)
-      throw _eh + "getaddrinfo failed: " + gai_strerror(error);
-
-    memcpy(&rAddr, result->ai_addr, sizeof(struct sockaddr));
-
-    freeaddrinfo(result);
-  }
-
-  if ((mReporterSocket = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    throw _eh + "socket failed: " + strerror(errno);
+  ReportLoopInit();
 
   while (true)
   {
-    XrdFile   *file   = 0;
-    XrdUser   *user   = 0;
-    XrdServer *server = 0;
+    XrdFile *file = 0;
     {
       GMutexHolder _lck(mReporterCond);
       if (mReporterQueue.empty())
+      {
         mReporterCond.Wait();
+      }
       file = mReporterQueue.front();
       mReporterQueue.pop_front();
     }
 
-    TString msg("#begin\n");
+    ReportFileClosed(file);
 
-    {
-      GLensReadHolder _flck(file);
-
-      Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
-      if (unique_id == mLastUidBase)
-      {
-        unique_id = mLastUidBase + ++mLastUidInner;
-        if (mLastUidInner >= 1000ll)
-        {
-	  ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
-	  log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
-          continue;
-        }
-      }
-      else
-      {
-        mLastUidBase  = unique_id;
-        mLastUidInner = 0;
-      }
-
-      const SRange &RS = file->RefReadStats();
-      const SRange &WS = file->RefWriteStats();
-      msg += TString::Format
-        ("unique_id=xrd-%lld\n"
-         "file_lfn=%s\nfile_size=%lld\nstart_time=%llu\nend_time=%llu\n"
-         "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
-         "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
-         "read_bytes_at_close=%lld\n"
-         "write_bytes_at_close=%lld\n",
-         unique_id,
-         file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
-         dmtoll(RS.GetSumX()), RS.GetN(), dmtoll(RS.GetMin()), dmtoll(RS.GetMax()), dmtod(RS.GetAverage()), dmtod(RS.GetSigma()),
-         dmtoll(WS.GetSumX()), WS.GetN(), dmtoll(WS.GetMin()), dmtoll(WS.GetMax()), dmtod(WS.GetAverage()), dmtod(WS.GetSigma()),
-         dmtoll(file->GetRTotalMB()),
-         dmtoll(file->GetWTotalMB()));
-      user = file->GetUser();
-    }
-    {
-      GLensReadHolder _ulck(user);
-      msg += TString::Format
-        ("user_dn=%s\nuser_vo=%s\nuser_role=%s\nuser_fqan=%s\nclient_domain=%s\nclient_host=%s\n"
-         "server_username=%s\napp_info=%s\n",
-         user->GetDN(), user->GetVO(), user->GetRole(), user->GetGroup(),
-         user->GetFromDomain(), user->GetFromHost(), user->GetServerUsername(), user->GetAppInfo());
-      server = user->GetServer();
-    }
-    {
-      GLensReadHolder _slck(server);
-      msg += TString::Format
-        ("server_domain=%s\nserver_host=%s\n",
-         server->GetDomain(), server->GetHost());
-    }
-
-    msg += "#end\n";
-
-    if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, &rAddr, sizeof(rAddr)) == -1)
-    {
-      ZLog::Helper log(*mLog, ZLog::L_Error, _eh);
-      log.Form("Error sending report for file='%s'.\n\t%s.",
-	       file->GetName(), strerror(errno));
-    }
+    file->DecEyeRefCount();
   }
 }
-
 
 //==============================================================================
 
@@ -216,11 +133,10 @@ void XrdFileCloseReporter::StopReporter()
   }
   thr->Cancel();
   thr->Join();
-  close(mReporterSocket);
+  ReportLoopFinalize();
   {
     GLensReadHolder _lck(this);
     mReporterQueue.clear();
-    mReporterSocket = 0;
     mReporterThread = 0;
   }
 }

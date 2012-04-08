@@ -26,25 +26,22 @@ private:
 protected:
   ZLink<ZLog>       mLog;     // X{GS} L{}
 
-  TString           mUdpHost; // X{GS} 7 Textor()
-  UShort_t          mUdpPort; // X{GS} 7 Value()
-
   GThread          *mReporterThread; //!
   GCondition        mReporterCond;   //!
   list<XrdFile*>    mReporterQueue;  //!
-  Int_t             mReporterSocket; //!
-
-  Long64_t          mLastUidBase;    //!
-  Long64_t          mLastUidInner;   //!
 
   static void* tl_ReportLoop(XrdFileCloseReporter* r);
   void ReportLoop();
+
+  virtual void ReportLoopInit();
+  virtual void ReportFileClosed(XrdFile* file);
+  virtual void ReportLoopFinalize();
 
 public:
   XrdFileCloseReporter(const Text_t* n="XrdFileCloseReporter", const Text_t* t=0);
   virtual ~XrdFileCloseReporter();
 
-  virtual void FileClosed(XrdFile* file);
+  void FileClosed(XrdFile* file);
 
   void StartReporter(); // X{Ed} 7 MButt()
   void StopReporter();  // X{Ed} 7 MButt()

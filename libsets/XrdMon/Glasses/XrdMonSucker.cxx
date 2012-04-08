@@ -80,8 +80,25 @@ void XrdMonSucker::AdEnlightenment()
     assign_link<ZHashList>(mOpenFiles, FID(), "OpenFiles");
     mOpenFiles->SetElementFID(XrdFile::FID());
   }
+  if (mFCReporters == 0)
+  {
+    assign_link<ZHashList>(mFCReporters, FID(), "FileCloseReporters");
+    mFCReporters->SetElementFID(XrdFileCloseReporter::FID());
+    mFCReporters->SetMIRActive(false);
+  }
 }
 
+//==============================================================================
+
+void XrdMonSucker::AddFileCloseReporter(XrdFileCloseReporter* fcr)
+{
+  mFCReporters->Add(fcr);
+}
+
+void XrdMonSucker::RemoveFileCloseReporter(XrdFileCloseReporter* fcr)
+{
+  mFCReporters->Remove(fcr);
+}
 
 //==============================================================================
 
@@ -93,13 +110,15 @@ void XrdMonSucker::on_file_open(XrdFile* file)
 
 void XrdMonSucker::on_file_close(XrdFile* file)
 {
-  auto_ptr<ZMIR> mir( mOpenFiles->S_Remove(file) );
-  mSaturn->ShootMIR(mir);
-
-  XrdFileCloseReporter *fcr = *mFCReporter;
-  if (fcr)
+  Stepper<XrdFileCloseReporter> stepper(*mFCReporters);
+  while (stepper.step())
   {
-    fcr->FileClosed(file);
+    stepper->FileClosed(file);
+  }
+
+  {
+    auto_ptr<ZMIR> mir( mOpenFiles->S_Remove(file) );
+    mSaturn->ShootMIR(mir);
   }
 }
 

@@ -19,11 +19,11 @@ class XrdUser;
 class XrdFile;
 class XrdFileCloseReporter;
 
-class ZLog;
-class UdpPacketSource;
-class ZHashList;
-
 class SUdpPacket;
+class UdpPacketSource;
+
+class ZLog;
+class ZHashList;
 
 
 class XrdMonSucker : public ZNameMap
@@ -49,7 +49,7 @@ protected:
   TString    mTraceHost;    // X{GS} Ray{TraceRE} 7 Textor()
   TString    mTraceDomain;  // X{GS} Ray{TraceRE} 7 Textor()
 
-  ZLink<XrdFileCloseReporter> mFCReporter; // X{GS} L{}
+  ZLink<ZHashList> mFCReporters; // X{GS} L{}
 
   Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[10, 86400, 1])
   Int_t      mUserDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
@@ -96,6 +96,9 @@ public:
   virtual ~XrdMonSucker();
 
   virtual void AdEnlightenment();
+
+  void AddFileCloseReporter(XrdFileCloseReporter* fcr);
+  void RemoveFileCloseReporter(XrdFileCloseReporter* fcr);
 
   void StartSucker(); // X{Ed} 7 MButt()
   void StopSucker();  // X{Ed} 7 MButt()
