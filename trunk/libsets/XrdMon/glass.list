@@ -7,5 +7,7 @@ XrdUser		3	Glasses/XrdUser
 XrdFile		4	Glasses/XrdFile
 XrdDomain       5       Glasses/XrdDomain
 
-XrdFileCloseReporter 64 Glasses/XrdFileCloseReporter
-XrdEhs               65 Glasses/XrdEhs
+XrdFileCloseReporter       64  Glasses/XrdFileCloseReporter
+XrdFileCloseReporterGratia 65  Glasses/XrdFileCloseReporterGratia
+
+XrdEhs                     128 Glasses/XrdEhs

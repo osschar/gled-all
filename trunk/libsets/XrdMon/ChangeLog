@@ -1,3 +1,24 @@
+2012-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Generalize reporting at file-close.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	* Glasses/XrdFileCloseReporterGratia.h:
+	New glass holding Gratia-probe specific code (including opening
+	and writing to an UDP socket).
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Remove Gratia-specific code to a new subclass
+	XrdFileCloseReporterGratia.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Support multiple instances of XrdFileCloseReporter.
+
+	* glass.list:
+	Register new glass XrdFileCloseReporterGratia.
+
 2012-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
