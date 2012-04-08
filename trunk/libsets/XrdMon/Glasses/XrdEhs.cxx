@@ -161,7 +161,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
         if (file->RefName().BeginsWith("/store/user/"))
           oss << "<td>/store/user</td>" << endl;
         else if (rePath.Split(file->RefName()) > 3)
-          oss << Form("<td>%s/%s/%s</td>", rePath[1].Data(), rePath[2].Data(), rePath[3].Data()) <<endl; 
+          oss << Form("<td>/%s/%s/%s</td>", rePath[1].Data(), rePath[2].Data(), rePath[3].Data()) <<endl; 
         else
           oss << Form("<td>%s</td>", file->GetName()) << endl;
       }
