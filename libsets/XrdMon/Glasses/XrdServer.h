@@ -32,6 +32,13 @@ protected:
   GTime             mStartTime;   // X{GR}   7 TimeOut()
   GTime             mLastMsgTime; // X{GRSQ} 7 TimeOut()
 
+  // Add method to update these two values
+  // + check in XrdMonSuck::CleanupOldServers()
+  // + var saying how many deltas to wait before cleaning it up.
+  // Have MaxDelta instead of MinDelta?
+  GTime             mLastSrvIdTime; //!
+  Long64_t          mMinSrvIdDelta; //!
+
   Long64_t          mPacketCount;       //!X{G}    7 ValOut()
   Long64_t          mSeqIdFailCount;    //!X{G}    7 ValOut()
 
