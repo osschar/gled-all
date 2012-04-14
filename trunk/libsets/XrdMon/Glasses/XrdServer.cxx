@@ -26,6 +26,8 @@ ClassImp(XrdServer);
 
 void XrdServer::_init()
 {
+  mLastSrvIdTime.SetNever();
+  mMinSrvIdDelta = 0;
   mPacketCount = mSeqIdFailCount = 0;
   ResetSrvSeq();
 }

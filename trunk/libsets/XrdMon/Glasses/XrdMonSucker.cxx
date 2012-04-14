@@ -294,6 +294,15 @@ void XrdMonSucker::Suck()
       domain->IncPacketCount();
     }
 
+    // XXXX Ceck for '=', 'r' records, dump basic info to see what else to check / account for.
+    //  - '=' this is already enabled, I'm pretty sure pseq is not set so this
+    //    can go right into the main sphagetti krappe;
+    //  - 'r' probably hasthe pseq but it will be coming from a master /
+    //    redirector which I never tried before.
+    //     . enable on xrootd.t2 - report to some other port not to screw up
+    //       production system;
+    //     . have some printouts
+
     // Check sequence id. No remedy attempted.
     if (code == 'u' || code == 'd' || code == 't' || code == 'i')
     {
