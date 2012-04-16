@@ -1,3 +1,8 @@
+2012-04-15  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEhs.cxx:
+	New style of html table.
+
 2012-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Generalize reporting at file-close.
