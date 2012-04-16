@@ -15,6 +15,7 @@
 #include "TPRegexp.h"
 
 class XrdServer;
+class XrdDomain;
 class XrdUser;
 class XrdFile;
 class XrdFileCloseReporter;
@@ -51,12 +52,15 @@ protected:
 
   ZLink<ZHashList> mFCReporters; // X{GS} L{}
 
-  Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[10, 86400, 1])
+  Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[60,   86400, 1])
   Int_t      mUserDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
   Int_t      mServDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
+  Int_t      mServIdentSec;      // X{GS}   7 Value(-range=>[60,   86400, 1])
+  Int_t      mServIdentCnt;      // X{GS}   7 Value(-range=>[2,  1000000, 1])
   GTime      mLastOldUserCheck;  // X{GRSQ} 7 TimeOut()
   GTime      mLastDeadUserCheck; // X{GRSQ} 7 TimeOut()
   GTime      mLastDeadServCheck; // X{GRSQ} 7 TimeOut()
+  GTime      mLastIdentServCheck;// X{GRSQ} 7 TimeOut()
 
   Long64_t   mPacketCount;       //!X{G}    7 ValOut()
   Long64_t   mSeqIdFailCount;    //!X{G}    7 ValOut()
@@ -86,6 +90,9 @@ protected:
   void disconnect_user_and_close_open_files(XrdUser* user, XrdServer* server,
                                             const GTime& time);
 
+  void disconnect_server(XrdServer* server, XrdDomain *domain,
+			 const GTime& time);
+
   static void* tl_Suck(XrdMonSucker* s);
   void Suck();
   static void* tl_Check(XrdMonSucker* s);
@@ -103,9 +110,10 @@ public:
   void StartSucker(); // X{Ed} 7 MButt()
   void StopSucker();  // X{Ed} 7 MButt()
 
-  void CleanUpOldUsers();    // X{Ed} 7 MButt()
-  void CleanUpDeadUsers();   // X{Ed} 7 MButt()
-  void CleanUpDeadServers(); // X{Ed} 7 MButt()
+  void CleanUpOldUsers();       // X{Ed} 7 MButt()
+  void CleanUpDeadUsers();      // X{Ed} 7 MButt()
+  void CleanUpDeadServers();    // X{Ed} 7 MButt()
+  void CleanUpNoIdentServers(); // X{Ed} 7 MButt()
 
   void EmitTraceRERay();
 

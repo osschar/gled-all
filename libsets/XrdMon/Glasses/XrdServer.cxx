@@ -27,7 +27,7 @@ ClassImp(XrdServer);
 void XrdServer::_init()
 {
   mLastSrvIdTime.SetNever();
-  mMinSrvIdDelta = 0;
+  mAvgSrvIdDelta = -1;
   mPacketCount = mSeqIdFailCount = 0;
   ResetSrvSeq();
 }
@@ -60,6 +60,33 @@ void XrdServer::AdEnlightenment()
     mPrevUsers->SetElementFID(XrdUser::FID());
     mPrevUsers->SetMIRActive(false);
   }
+}
+
+//------------------------------------------------------------------------------
+
+TString XrdServer::GetFqhn() const
+{
+  return mHost + "." + mDomain;
+}
+
+//==============================================================================
+
+void XrdServer::UpdateSrvIdTime(const GTime& t)
+{
+  if ( ! mLastSrvIdTime.IsNever())
+  {
+    Int_t dt = TMath::Max(10, TMath::Nint((t - mLastSrvIdTime).ToDouble()));
+    if (mAvgSrvIdDelta <= 0)
+    {
+      mAvgSrvIdDelta = dt;
+    }
+    else if (dt < mAvgSrvIdDelta)
+    {
+      mAvgSrvIdDelta = TMath::Nint(0.9*mAvgSrvIdDelta + 0.1*dt);
+    }
+  }
+  mLastSrvIdTime = t;
+  Stamp(FID());
 }
 
 //==============================================================================

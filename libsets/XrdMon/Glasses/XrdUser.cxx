@@ -50,6 +50,11 @@ XrdUser::XrdUser(const TString& n, const TString& t,
 XrdUser::~XrdUser()
 {}
 
+TString XrdUser::GetFromFqhn() const
+{
+  return mFromHost + "." + mFromDomain;
+}
+
 //==============================================================================
 
 void XrdUser::AddFile(XrdFile* file)

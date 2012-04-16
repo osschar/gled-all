@@ -52,12 +52,15 @@ void XrdMonSucker::_init()
   mUserKeepSec = 300;
   mUserDeadSec = 86400;
   mServDeadSec = 86400;
+  mServIdentSec = 300;
+  mServIdentCnt = 5;
 
   mPacketCount = mSeqIdFailCount = 0;
 
   mSocket = 0;
   mSuckerThread = 0;
-  mLastOldUserCheck = mLastDeadServCheck = GTime(GTime::I_Never);
+  mLastOldUserCheck  = mLastDeadUserCheck  =
+  mLastDeadServCheck = mLastIdentServCheck = GTime(GTime::I_Never);
 
   bTraceAllNull = true;
 }
@@ -159,6 +162,28 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
     GLensWriteHolder _lck(server); 	 
     server->DisconnectUser(user);
   }
+}
+
+//------------------------------------------------------------------------------
+
+void XrdMonSucker::disconnect_server(XrdServer* server, XrdDomain *domain,
+				     const GTime& time)
+{
+  {
+    GMutexHolder _lck(m_xrd_servers_mutex);
+    m_xrd_servers.erase(server->m_server_id);
+  }
+  {
+    list<XrdUser*> users;
+    server->CopyListByGlass<XrdUser>(users);
+    for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
+    {
+      XrdUser *user = *ui;
+      disconnect_user_and_close_open_files(user, server, time);
+    }
+  }
+  mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
+  mSaturn->ShootMIR( domain->S_RemoveAll(server) );
 }
 
 //==============================================================================
@@ -294,14 +319,16 @@ void XrdMonSucker::Suck()
       domain->IncPacketCount();
     }
 
-    // XXXX Ceck for '=', 'r' records, dump basic info to see what else to check / account for.
-    //  - '=' this is already enabled, I'm pretty sure pseq is not set so this
-    //    can go right into the main sphagetti krappe;
-    //  - 'r' probably hasthe pseq but it will be coming from a master /
+    // XXXX Ceck for 'r' records, dump basic info to see what else to check / account for.
+    //  - 'r' probably has the pseq but it will be coming from a master /
     //    redirector which I never tried before.
     //     . enable on xrootd.t2 - report to some other port not to screw up
     //       production system;
     //     . have some printouts
+
+    // if (code == 'r')
+    // {
+    // }
 
     // Check sequence id. No remedy attempted.
     if (code == 'u' || code == 'd' || code == 't' || code == 'i')
@@ -541,6 +568,14 @@ void XrdMonSucker::Suck()
           msg += "\n\tUser not found ... skipping.";
           log.Put(ZLog::L_Warning, msg);
         }
+      }
+      else if (code == '=')
+      {
+	GLensWriteHolder _lck(server);
+	server->UpdateSrvIdTime(recv_time);
+	// Update 
+	msg += TString::Format("\n\tServerId -- uname=%s other=%s", prim, sec);
+	log.Put(ZLog::L_Message, msg);
       }
       else
       {
@@ -837,7 +872,9 @@ void XrdMonSucker::StartSucker()
   mSuckerThread->SetNice(0);
   mSuckerThread->Spawn();
 
-  mLastOldUserCheck = mLastDeadServCheck = GTime(GTime::I_Now);
+  mLastOldUserCheck  = mLastDeadUserCheck  =
+  mLastDeadServCheck = mLastIdentServCheck = GTime(GTime::I_Now);
+
   mCheckerThread->SetNice(20);
   mCheckerThread->Spawn();
 
@@ -907,16 +944,22 @@ void XrdMonSucker::Check()
         mLastOldUserCheck = now;
         stamp_p = true;
       }
-      if ((now - mLastDeadUserCheck).GetSec() > mUserDeadSec)
+      if ((now - mLastDeadUserCheck).GetSec() > mUserDeadSec/100)
       {
         mSaturn->ShootMIR( S_CleanUpDeadUsers() );
         mLastDeadUserCheck = now;
         stamp_p = true;
       }
-      if ((now - mLastDeadServCheck).GetSec() > mServDeadSec)
+      if ((now - mLastDeadServCheck).GetSec() > mServDeadSec/100)
       {
         mSaturn->ShootMIR( S_CleanUpDeadServers() );
         mLastDeadServCheck = now;
+        stamp_p = true;
+      }
+      if ((now - mLastIdentServCheck).GetSec() > mServIdentSec)
+      {
+        mSaturn->ShootMIR( S_CleanUpNoIdentServers() );
+        mLastIdentServCheck = now;
         stamp_p = true;
       }
       if (stamp_p)
@@ -925,7 +968,7 @@ void XrdMonSucker::Check()
       }
     }
 
-    GTime::SleepMiliSec(10000);
+    GTime::SleepMiliSec(30000);
   }
 }
 
@@ -1033,6 +1076,8 @@ void XrdMonSucker::CleanUpDeadUsers()
   }
 }
 
+//------------------------------------------------------------------------------
+
 void XrdMonSucker::CleanUpDeadServers()
 {
   static const Exc_t _eh("XrdMonSucker::CleanUpDeadServers ");
@@ -1064,26 +1109,55 @@ void XrdMonSucker::CleanUpDeadServers()
       {
         log.SetTime(GTime(GTime::I_Now));
         log.Form("Removing unactive server '%s'.", server->GetName());
-        {
-          GMutexHolder _lck(m_xrd_servers_mutex);
-          m_xrd_servers.erase(server->m_server_id);
-        }
-        {
-          list<XrdUser*> users;
-          server->CopyListByGlass<XrdUser>(users);
-          for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
-          {
-            XrdUser *user = *ui;
-            disconnect_user_and_close_open_files(user, server, now);
-          }
-        }
-        mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
-        mSaturn->ShootMIR( domain->S_RemoveAll(server) );
+
+	disconnect_server(server, domain, now);
       }
     }
   }
 }
 
+void XrdMonSucker::CleanUpNoIdentServers()
+{
+  static const Exc_t _eh("XrdMonSucker::CleanUpNoIdentServers ");
+
+  assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
+
+  GTime now(GTime::I_Now);
+
+  ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
+
+  list<XrdDomain*> domains;
+  CopyListByGlass<XrdDomain>(domains);
+
+  for (list<XrdDomain*>::iterator di = domains.begin(); di != domains.end(); ++di)
+  {
+    XrdDomain *domain = *di;
+    list<XrdServer*> servers;
+    domain->CopyListByGlass<XrdServer>(servers);
+
+    for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
+    {
+      XrdServer *server = *si;
+      Int_t ident_delta;
+      Int_t delta;
+      {
+        GLensReadHolder _lck(server);
+
+	ident_delta = server->GetAvgSrvIdDelta();
+	if (ident_delta <= 0) continue;
+
+        delta = (Int_t) (now - server->RefLastMsgTime()).GetSec();
+      }
+      if (delta > mServIdentCnt * ident_delta)
+      {
+        log.SetTime(GTime(GTime::I_Now));
+        log.Form("Removing unactive server '%s'.", server->GetName());
+
+	disconnect_server(server, domain, now);
+      }
+    }
+  }
+}
 
 //==============================================================================
 
