@@ -74,41 +74,55 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       mFileListTS = hl->CopyListByGlass<XrdFile>(mFileList);
     }
 
-    ostringstream oss;
-
-    oss << "<html><body><head><title>Xrd open files ["<< mFileList.size() << "]</title></head>" << endl;
-
+    ostringstream oss; 
+    oss << "<html>" << std::endl;
     oss << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
+    oss << "<head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"> " << std::endl;
+    oss << "<style type=\"text/css\">" << std::endl << std::endl;
+     
+    oss << "table.demo {" << std::endl;
+    oss << "   background-color: #C0C0FF;" << std::endl;
+    oss << "   padding: 2px 5px 2px 5px;" << std::endl;
+    oss << "}" << std::endl;
+    oss << "tr.row1 {" << std::endl;
+    oss << "   background-color: #FFFFFF;" << std::endl;
+    oss << "}" << std::endl;
+    oss << "tr.row2 {" << std::endl;
+    oss << "   background-color: #E0E0FF;" << std::endl;
+    oss << "}" << std::endl;
+    oss << "</style> "<< std::endl;
+    oss << "<title>Xrd open files ["<< mFileList.size() << "]</title> " << std::endl;
+    oss << "</head>" << std::endl;
+    
+    oss << "<script type=\"text/javascript\" src=\"http://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js\"></script>" << std::endl;
+    oss << "<script type=\"text/javascript\">" << std::endl;
+    oss << "" << std::endl;
+   
+    oss << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  'd', 's', 's', 's', 'f', 'd');" << std::endl;
+    oss << "TSort_Classes = new Array ('row2', 'row1');" << std::endl;
+    oss << "TSort_Initial = new Array ('0D');" << std::endl;
+    oss << "var TSort_Icons = new Array (' V', ' &#923;');" << std::endl;
+    oss << "var TSort_Cookie = 'table_xrd_cms_openfiles';" << std::endl;
+    oss << "tsRegister();" << std::endl;
+    oss << "</script>" << std::endl;
 
-    oss << "<script type=\"text/javascript\" src=\"http://uaf-2.t2.ucsd.edu/~alja/sorttable.js \"> </script>" << endl;
-    oss << endl;
-    oss << "<style type=\"text/css\">" << endl;
-    oss << "th, td {" << endl;
-    oss << "  padding: 3px !important;" << endl;
-    oss << "}" << endl;
-    oss << endl;
-    oss << "table.sortable thead {" << endl;
-    oss << "    background-color:#eee;" << endl;
-    oss << "    color:#666666; " << endl;
-    oss << "    font-weight: bold;" << endl;
-    oss << "    cursor: default; " << endl;
-    oss << "}" << endl;
-    oss << "</style>" << endl;
-    oss << "<br>" << endl;
-    oss << endl;
-    oss << "<table class=\"sortable\">"<< endl;
+
+    oss << "<TABLE id=\"table_xrd_cms_openfiles\" class=\"demo\" width=100%> " << std::endl;
+    oss << " <thead> "  << std::endl;
+
+    // header
     oss << "<tr>"<< endl;
-    oss << "<th>File</th>";
-
-    oss << " <th>OpenAgo</th> <th>ServerDomain</th> <th>ClientDomain</th>";
+    oss << "<th align=\"left\">File</th>";
+    oss << " <th  align=\"left\">OpenAgo</th> <th  align=\"left\">ServerDomain</th> <th align=\"left\">ClientDomain</th>";
     if (!bParanoia)
-      oss << "<th>User</th> ";
+      oss << "<th align=\"left\">User</th> ";
     else 
-      oss << "<th>UserID</th> ";
-
-    oss << "<th>Read [MB]</th> <th>UpdateAgo</th>";
+      oss << "<th align=\"left\">UserID</th> ";
+    oss << "<th align=\"left\">Read [MB]</th> <th align=\"left\">UpdateAgo</th>";
     oss << endl;
     oss << "</tr>" << endl;
+
+    oss << "</thead>" << std::endl;
 
     bool no_same_site = (args["no_same_site"] == "1");
     TPMERegexp short_domain("[^\\.]+\\.[^\\.]+$", "o");
@@ -127,12 +141,11 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     bool f_fil = ( ! args["file_re"].IsNull());
     if (f_fil) fil_re.Reset(args["file_re"], "o");
 
-    TPMERegexp reStoreData("/store/data/(\\w+)/");
-    TPMERegexp reStoreMC("/store/mc/(\\w+)/");
     TPMERegexp rePath("/");
-
+    bool odd = false;
     for (list<XrdFile*>::iterator xfi = mFileList.begin(); xfi != mFileList.end(); ++xfi)
     {
+      odd = !odd;
       XrdFile *file = *xfi;
       XrdUser *user = file->GetUser();
 
@@ -150,7 +163,8 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       if (f_usr && ! usr_re.Match(user->RefRealName()))            continue;
       if (f_fil && ! fil_re.Match(file->RefName()))                continue;
 
-      oss << "<tr>"<< endl; 
+
+      oss << Form("<tr class='row%d'>", odd ? 1 : 2)<< endl; 
         
       if (!bParanoia)
       {
