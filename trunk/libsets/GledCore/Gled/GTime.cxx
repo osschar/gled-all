@@ -313,14 +313,17 @@ TString GTime::ToWebTimeLocal(Bool_t show_tz) const
   return IsNever() ? "Never" : to_webtime(mSec, localtime_r, show_tz);
 }
 
-TString GTime::ToHourMinSec() const
+TString GTime::ToHourMinSec(Bool_t force_non_negative) const
 {
   // Format as hh:mm:ss, useful for time differences.
 
   if (IsNever()) return "Never";
 
-  Long64_t hours = mSec / 3600;
-  Int_t    sah   = mSec % 3600;
+  Long64_t osec  = mSec;
+  if (force_non_negative && osec < 0) osec = 0;
+
+  Long64_t hours = osec / 3600;
+  Int_t    sah   = osec % 3600;
   Int_t    min   = sah / 60;
   Int_t    sec   = sah % 60;
   return TString::Format("%02lld:%02d:%02d", hours, min, sec);    

@@ -1,3 +1,9 @@
+2012-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add option argument 'force_non_negative=false' to ToHourMinSec().
+
 2012-04-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/SSocket.cxx:
