@@ -1,3 +1,28 @@
+2012-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve old server clenup and open-file table.
+
+	* Glasses/XrdEhs.cxx:
+	Add option 'fqhn'.
+	Allow option arguments without explicit value (use "1").
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add processing of '=' / server ident messages.
+	Add new server-alive checks based on ident messages (or, better,
+	on the fact that they are no longer being received).
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add members and functions for keeping track of last 'ident'
+	message from the server and typical interval between two 'ident'
+	messages.
+	Add function 'TString XrdServer::GetFqhn()'.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add function 'TString XrdUser::GetFromFqhn()'.
+
 2012-04-15  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
 
 	* Glasses/XrdEhs.cxx:

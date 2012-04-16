@@ -36,11 +36,11 @@ protected:
   // + check in XrdMonSuck::CleanupOldServers()
   // + var saying how many deltas to wait before cleaning it up.
   // Have MaxDelta instead of MinDelta?
-  GTime             mLastSrvIdTime; //!
-  Long64_t          mMinSrvIdDelta; //!
+  GTime             mLastSrvIdTime;   //! X{GRSQ} 7 TimeOut()
+  Int_t             mAvgSrvIdDelta;   //! X{G}    7 ValOut()
 
-  Long64_t          mPacketCount;       //!X{G}    7 ValOut()
-  Long64_t          mSeqIdFailCount;    //!X{G}    7 ValOut()
+  Long64_t          mPacketCount;     //! X{G}    7 ValOut()
+  Long64_t          mSeqIdFailCount;  //! X{G}    7 ValOut()
 
   ZLink<ZList>      mPrevUsers;   // X{GS} L{}
 
@@ -63,6 +63,10 @@ public:
   virtual ~XrdServer();
 
   virtual void AdEnlightenment();
+
+  TString  GetFqhn() const;
+
+  void     UpdateSrvIdTime(const GTime& t);
 
   void     IncPacketCount();
   void     IncSeqIdFailCount();

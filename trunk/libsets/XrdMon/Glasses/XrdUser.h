@@ -48,6 +48,8 @@ public:
           const TString& su, const TString& fh, const TString& fd, const GTime& st);
   virtual ~XrdUser();
 
+  TString GetFromFqhn() const;
+
   Bool_t IsConnected() const { return mDisconnectTime.IsNever() && ! mLoginTime.IsNever(); }
 
   void AddFile(XrdFile* file);

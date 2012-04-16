@@ -98,7 +98,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     oss << "<script type=\"text/javascript\">" << std::endl;
     oss << "" << std::endl;
    
-    oss << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  'd', 's', 's', 's', 'f', 'd');" << std::endl;
+    oss << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  's', 's', 's', 's', 'f', 's');" << std::endl;
     oss << "TSort_Classes = new Array ('row2', 'row1');" << std::endl;
     oss << "TSort_Initial = new Array ('0D');" << std::endl;
     oss << "var TSort_Icons = new Array (' V', ' &#923;');" << std::endl;
@@ -114,7 +114,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     oss << "<tr>"<< endl;
     oss << "<th align=\"left\">File</th>";
     oss << " <th  align=\"left\">OpenAgo</th> <th  align=\"left\">ServerDomain</th> <th align=\"left\">ClientDomain</th>";
-    if (!bParanoia)
+    if ( ! bParanoia)
       oss << "<th align=\"left\">User</th> ";
     else 
       oss << "<th align=\"left\">UserID</th> ";
@@ -125,6 +125,8 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     oss << "</thead>" << std::endl;
 
     bool no_same_site = (args["no_same_site"] == "1");
+    bool fqhn         = (args["fqhn"] == "1");
+
     TPMERegexp short_domain("[^\\.]+\\.[^\\.]+$", "o");
 
     TPMERegexp srv_re, cli_re, usr_re, fil_re;
@@ -165,8 +167,8 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
 
 
       oss << Form("<tr class='row%d'>", odd ? 1 : 2)<< endl; 
-        
-      if (!bParanoia)
+
+      if (! bParanoia)
       {
         oss << Form("<td>%s</td>", file->GetName()) << endl;
       }
@@ -175,26 +177,28 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
         if (file->RefName().BeginsWith("/store/user/"))
           oss << "<td>/store/user</td>" << endl;
         else if (rePath.Split(file->RefName()) > 3)
-          oss << Form("<td>/%s/%s/%s</td>", rePath[1].Data(), rePath[2].Data(), rePath[3].Data()) <<endl; 
+          oss << Form("<td>/%s/%s/%s</td>", rePath[1].Data(), rePath[2].Data(), rePath[3].Data()) <<endl;
         else
           oss << Form("<td>%s</td>", file->GetName()) << endl;
       }
-         
-      oss << "<td>" << (req_time - file->RefOpenTime()).ToHourMinSec() << "</td>" << endl;
-      oss << "<td>" << user->GetServer()->GetDomain() << "</td>" << endl;
-      oss << "<td>" << user->GetFromDomain() << "</td>" << endl;
-      if (bParanoia &&  user->RefRealName().Length() ) {
+
+      oss << "<td>" << (req_time - file->RefOpenTime()).ToHourMinSec(true) << "</td>" << endl;
+      oss << "<td>" << (fqhn ? user->GetServer()->GetFqhn() : user->GetServer()->RefDomain()) << "</td>" << endl;
+      oss << "<td>" << (fqhn ? user->GetFromFqhn()          : user->RefFromDomain())          << "</td>" << endl;
+      if (bParanoia && ! user->RefRealName().IsNull())
+      {
         oss << "<td>" << Form("%X",  user->RefRealName().Hash()) <<  "</td>" << endl;
       }
-      else {
+      else
+      {
         oss << "<td>" << user->GetRealName() << "</td>" << endl;
       }
 
       oss << "<td>" << GForm("%.3f", file->GetReadStats().GetSumX()) << "</td>" << endl;
-      oss << "<td>" << (req_time - file->RefLastMsgTime()).ToHourMinSec() << "</td>" << endl;
-         
+      oss << "<td>" << (req_time - file->RefLastMsgTime()).ToHourMinSec(true) << "</td>" << endl;
+
       oss << "</tr>" << endl;
-    }    
+    }
     oss << "</table>" << endl;
     oss << "</body>"  << endl;
     oss << "</html>"  << endl;
@@ -275,7 +279,7 @@ void XrdEhs::ServePage(TSocket* sock)
   TString xxx = "<p><hr><p>";
 
   lStr_t path_list;
-  if ( ! path.IsNull())
+  if (! path.IsNull())
   {
     TPMERegexp sp("/+");
     Int_t np = sp.Split(path);
@@ -290,7 +294,7 @@ void XrdEhs::ServePage(TSocket* sock)
   }
 
   mStr2Str_t args_map;
-  if ( ! args.IsNull())
+  if (! args.IsNull())
   {
     xxx += "Request args: '" + args + "'<p>";
     TPMERegexp sa("&+");
@@ -298,10 +302,16 @@ void XrdEhs::ServePage(TSocket* sock)
     TPMERegexp sv("=");
     for (Int_t n = 0; n < na; ++n)
     {
-      if (sv.Split(sa[n]) != 2)
+      Int_t nsa = sv.Split(sa[n]);
+      if (nsa < 1 || nsa > 2)
         throw _eh + "URL parameter error: '" + sa[n] + "'.";
-      xxx += GForm("%2d '%s' = '%s'<p>", n + 1, sv[0].Data(), sv[1].Data());
-      args_map[sv[0]] = sv[1];
+      if (nsa == 2) {
+	xxx += GForm("%2d. '%s' = '%s'<p>", n + 1, sv[0].Data(), sv[1].Data());
+	args_map[sv[0]] = sv[1];
+      } else {
+	xxx += GForm("%2d. '%s' = '1'<p>", n + 1, sv[0].Data());
+	args_map[sv[0]] = "1";
+      }
     }
   }
 
@@ -342,9 +352,6 @@ void XrdEhs::StartServer()
 
     if (bServerUp)
       throw _eh + "server already running.";
-
-    // char request[8192];
-    // char erroret[] = "Error processing your request.\n";
 
     mServeTime.SetZero();
     mFileListTS = 0;
