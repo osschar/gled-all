@@ -81,7 +81,7 @@ public:
   TString  ToDateLocal() const;
   TString  ToWebTimeGMT  (Bool_t show_tz=true) const;
   TString  ToWebTimeLocal(Bool_t show_tz=true) const;
-  TString  ToHourMinSec() const;
+  TString  ToHourMinSec(Bool_t force_non_negative=false) const;
 
   void     Sleep();
 
