@@ -190,18 +190,29 @@ public:
 
   virtual Bool_t Has(ZGlass* g); // Override for optimization!
 
-  // Eventually implement iterators, or sth.
-
-  virtual TimeStamp_t CopyList(lpZGlass_t& dest, bool copy_zeros=false);
+  // Copying of list elements.
+  // One can also use Steppers but lists must not be changed during that.
   virtual TimeStamp_t CopyListElReps(lElRep_t& dest, bool copy_zeros=false);
 
+  virtual TimeStamp_t CopyList(lpZGlass_t& dest, bool copy_zeros=false, bool do_eyerefs=false);
+  virtual void        ReleaseListCopyEyeRefs(lpZGlass_t& dest);
+
   template <class GLASS>
-  TimeStamp_t CopyListByGlass(list<GLASS*>& dest) {
+  TimeStamp_t CopyListByGlass(list<GLASS*>& dest, bool copy_zeros=false, bool do_eyerefs=false)
+  {
     GMutexHolder lck(mListMutex);
-    Stepper<GLASS> s(this);
+    Stepper<GLASS> s(this, copy_zeros);
     while(s.step())
       dest.push_back(*s);
     return mListTimeStamp;
+  }
+  template <class GLASS>
+  void ReleaseListCopyEyeRefsByGlass(list<GLASS*>& dest)
+  {
+    for (typename list<GLASS*>::iterator i = dest.begin(); i != dest.end(); ++i)
+    {
+      if (*i) (*i)->DecEyeRefCount();
+    }
   }
 
   // Searching of elements by name.
