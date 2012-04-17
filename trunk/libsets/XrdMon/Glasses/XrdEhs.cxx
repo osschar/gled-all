@@ -74,6 +74,8 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       mFileListTS = hl->CopyListByGlass<XrdFile>(mFileList);
     }
 
+    bool fqhn = (args["fqhn"] == "1");
+
     ostringstream oss; 
     oss << "<html>" << std::endl;
     oss << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
@@ -113,19 +115,17 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     // header
     oss << "<tr>"<< endl;
     oss << "<th align=\"left\">File</th>";
-    oss << " <th  align=\"left\">OpenAgo</th> <th  align=\"left\">ServerDomain</th> <th align=\"left\">ClientDomain</th>";
-    if ( ! bParanoia)
-      oss << "<th align=\"left\">User</th> ";
-    else 
-      oss << "<th align=\"left\">UserID</th> ";
-    oss << "<th align=\"left\">Read [MB]</th> <th align=\"left\">UpdateAgo</th>";
+    oss << "<th align=\"left\">Open Ago</th>";
+    oss << "<th align=\"left\">Server" << (fqhn ? "" : " Domain") << "</th>";
+    oss << "<th align=\"left\">Client" << (fqhn ? "" : " Domain") << "</th>";
+    oss << "<th align=\"left\">User" << (bParanoia ? " Hash" : "") << "</th> ";
+    oss << "<th align=\"left\">Read [MB]</th> <th align=\"left\">Update Ago</th>";
     oss << endl;
     oss << "</tr>" << endl;
 
     oss << "</thead>" << std::endl;
 
     bool no_same_site = (args["no_same_site"] == "1");
-    bool fqhn         = (args["fqhn"] == "1");
 
     TPMERegexp short_domain("[^\\.]+\\.[^\\.]+$", "o");
 
@@ -151,6 +151,9 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       XrdFile *file = *xfi;
       XrdUser *user = file->GetUser();
 
+      TString server_id = fqhn ? user->GetServer()->GetFqhn() : user->GetServer()->RefDomain();
+      TString client_id = fqhn ? user->GetFromFqhn()          : user->RefFromDomain();
+
       if (no_same_site)
       {
         short_domain.Match(user->GetServer()->RefDomain());
@@ -160,10 +163,10 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
         if (srv == clt)
           continue;
       }
-      if (f_srv && ! srv_re.Match(user->GetServer()->RefDomain())) continue;
-      if (f_cli && ! cli_re.Match(user->RefFromDomain()))          continue;
-      if (f_usr && ! usr_re.Match(user->RefRealName()))            continue;
-      if (f_fil && ! fil_re.Match(file->RefName()))                continue;
+      if (f_srv && ! srv_re.Match(server_id))           continue;
+      if (f_cli && ! cli_re.Match(client_id))           continue;
+      if (f_usr && ! usr_re.Match(user->RefRealName())) continue;
+      if (f_fil && ! fil_re.Match(file->RefName()))     continue;
 
 
       oss << Form("<tr class='row%d'>", odd ? 1 : 2)<< endl; 
@@ -183,8 +186,8 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       }
 
       oss << "<td>" << (req_time - file->RefOpenTime()).ToHourMinSec(true) << "</td>" << endl;
-      oss << "<td>" << (fqhn ? user->GetServer()->GetFqhn() : user->GetServer()->RefDomain()) << "</td>" << endl;
-      oss << "<td>" << (fqhn ? user->GetFromFqhn()          : user->RefFromDomain())          << "</td>" << endl;
+      oss << "<td>" << server_id << "</td>" << endl;
+      oss << "<td>" << client_id << "</td>" << endl;
       if (bParanoia && ! user->RefRealName().IsNull())
       {
         oss << "<td>" << Form("%X",  user->RefRealName().Hash()) <<  "</td>" << endl;

@@ -1002,7 +1002,7 @@ void XrdMonSucker::CleanUpOldUsers()
   {
     XrdDomain *d = *di;
     list<XrdServer*> servers;
-    d->CopyListByGlass<XrdServer>(servers);
+    d->CopyListByGlass<XrdServer>(servers, false, true);
 
     Int_t n_wiped = 0;
     for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
@@ -1030,6 +1030,8 @@ void XrdMonSucker::CleanUpOldUsers()
           break;
         }
       }
+
+      s->DecEyeRefCount();
     }
     if (n_wiped > 0)
     {
@@ -1056,7 +1058,7 @@ void XrdMonSucker::CleanUpDeadUsers()
   {
     XrdDomain *d = *di;
     list<XrdServer*> servers;
-    d->CopyListByGlass<XrdServer>(servers);
+    d->CopyListByGlass<XrdServer>(servers, false, true);
 
     Int_t n_wiped = 0;
     for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
@@ -1079,6 +1081,8 @@ void XrdMonSucker::CleanUpDeadUsers()
           disconnect_user_and_close_open_files(u, s, now);
         }
       }
+
+      s->DecEyeRefCount();
     }
     if (n_wiped > 0)
     {
@@ -1107,7 +1111,7 @@ void XrdMonSucker::CleanUpDeadServers()
   {
     XrdDomain *domain = *di;
     list<XrdServer*> servers;
-    domain->CopyListByGlass<XrdServer>(servers);
+    domain->CopyListByGlass<XrdServer>(servers, false, true);
 
     for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
     {
@@ -1124,6 +1128,8 @@ void XrdMonSucker::CleanUpDeadServers()
 
 	disconnect_server(server, domain, now);
       }
+
+      server->DecEyeRefCount();
     }
   }
 }
@@ -1145,7 +1151,7 @@ void XrdMonSucker::CleanUpNoIdentServers()
   {
     XrdDomain *domain = *di;
     list<XrdServer*> servers;
-    domain->CopyListByGlass<XrdServer>(servers);
+    domain->CopyListByGlass<XrdServer>(servers, false, true);
 
     for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
     {
@@ -1167,6 +1173,8 @@ void XrdMonSucker::CleanUpNoIdentServers()
 
 	disconnect_server(server, domain, now);
       }
+
+      server->DecEyeRefCount();
     }
   }
 }
