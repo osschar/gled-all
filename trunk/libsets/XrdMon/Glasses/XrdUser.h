@@ -32,6 +32,7 @@ protected:
   TString           mServerUsername; // X{GR}   7 TextOut()
   TString           mFromHost;       // X{GR}   7 TextOut()
   TString           mFromDomain;     // X{GR}   7 TextOut()
+  Bool_t            bNumericHost;    // X{G}    7 BoolOut()
   TString           mAppInfo;        // X{GR}   7 TextOut()
   GTime             mLoginTime;      // X{GR}   7 TimeOut()
   GTime             mDisconnectTime; // X{GRSQ} 7 TimeOut()
@@ -45,7 +46,8 @@ public:
   XrdUser(const TString& n="XrdUser", const TString& t="");
   XrdUser(const TString& n, const TString& t, 
 	  const TString& dn, const TString& vo, const TString& ro, const TString& gr,
-          const TString& su, const TString& fh, const TString& fd, const GTime& st);
+          const TString& su, const TString& fh, const TString& fd, Bool_t num_host,
+          const GTime& st);
   virtual ~XrdUser();
 
   TString GetFromFqhn() const;

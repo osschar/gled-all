@@ -29,17 +29,19 @@ void XrdUser::_init()
 
 XrdUser::XrdUser(const TString& n, const TString& t) :
   ZList(n, t),
-  mLoginTime(GTime::I_Never), mDisconnectTime(GTime::I_Never), mLastMsgTime(GTime::I_Never)
+  mLoginTime(GTime::I_Never), mDisconnectTime(GTime::I_Never), mLastMsgTime(GTime::I_Never),
+  bNumericHost(false)
 {
   _init();
 }
 
 XrdUser::XrdUser(const TString& n, const TString& t,
 		 const TString& dn, const TString& vo, const TString& ro, const TString& gr,
-                 const TString& su, const TString& fh, const TString& fd, const GTime& st) :
+                 const TString& su, const TString& fh, const TString& fd, Bool_t num_host,
+                 const GTime& st) :
   ZList(n, t),
   mDN(dn), mVO(vo), mRole(ro), mGroup(gr),
-  mServerUsername(su), mFromHost(fh), mFromDomain(fd),
+  mServerUsername(su), mFromHost(fh), mFromDomain(fd), bNumericHost(num_host),
   mLoginTime(st), mDisconnectTime(GTime::I_Never), mLastMsgTime(GTime::I_Never)
 
 {
@@ -50,9 +52,14 @@ XrdUser::XrdUser(const TString& n, const TString& t,
 XrdUser::~XrdUser()
 {}
 
+//------------------------------------------------------------------------------
+
 TString XrdUser::GetFromFqhn() const
 {
-  return mFromHost + "." + mFromDomain;
+  if (bNumericHost)
+    return mFromHost + "@" + mFromDomain;
+  else
+    return mFromHost + "." + mFromDomain;
 }
 
 //==============================================================================

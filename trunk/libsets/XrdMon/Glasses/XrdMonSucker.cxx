@@ -200,7 +200,8 @@ void XrdMonSucker::Suck()
 {
   static const Exc_t _eh("XrdMonSucker::Suck ");
 
-  TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@([^\\.]+)(?:\\.(.+))?", "o");
+  TPMERegexp ip4addr_re ("(\\d+\\.\\d+\\.\\d+)\\.(\\d+)", "o");
+  TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@(.+)", "o");
   TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
@@ -394,26 +395,37 @@ void XrdMonSucker::Suck()
       {
 	msg += TString::Format("\n\tUser map -- id=%d, uname=%s", dict_id, prim);
 	TString uname(prim), host, domain;
+        Bool_t  numeric_host = false;
         {
-          Int_t nm = username_re.Match(uname);
-          if (nm == 5)
+          if (username_re.Match(uname) != 5)
+          {
+            msg += " ... parse error.";
+            log.Put(ZLog::L_Error, msg);
+            continue;
+          }
+
+          if (ip4addr_re.Match(username_re[4]) == 3)
+          {
+            // Numeric ip, assume private subnet (event though we really don't
+            // know as this is blindly taken from client and subnet can
+            // actually be anywhere in the world).
+            msg += TString::Format("@%s", server->GetDomain());
+            host = ip4addr_re[0];
+            domain = server->RefDomain();
+            numeric_host = true;
+          }
+          else if (hostname_re.Match(username_re[4]) == 3)
+          {
+            // Domain given
+            host   = hostname_re[1];
+            domain = hostname_re[2];
+          }
+          else
           {
             // No domain, same as XrdServer
             msg += TString::Format(".%s", server->GetDomain());
             host   = username_re[4];
             domain = server->RefDomain();
-          }
-          else if (nm == 6)
-          {
-            // Domain given
-            host   = username_re[4];
-            domain = username_re[5];
-          }
-          else
-          {
-            msg += " ... parse error.";
-            log.Put(ZLog::L_Error, msg);
-            continue;
           }
 
           if (username_re[1] == mNagiosUser && host.BeginsWith(mNagiosHost) && domain.BeginsWith(mNagiosDomain))
@@ -474,12 +486,12 @@ void XrdMonSucker::Suck()
                          dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
 
 	    user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
-			       a_re[2], host, domain, recv_time);
+			       a_re[2], host, domain, numeric_host, recv_time);
 	  }
 	  else
 	  {
 	    user = new XrdUser(uname, "", "", "", "", "",
-			       "", host, domain, recv_time);
+			       "", host, domain, numeric_host, recv_time);
 	  }
           // ZQueen::CheckIn() does write lock.
           mQueen->CheckIn(user);
