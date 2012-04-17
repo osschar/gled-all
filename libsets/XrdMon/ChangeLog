@@ -1,3 +1,15 @@
+2012-04-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Better support for numeric host-names as reported by xrd client.
+
+	* Glasses/XrdMonSucker.cxx:
+	See if client host is given as numeric ip, pass this to XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add member 'Bool_t bNumericHost;' and consider this when
+	constructing FQHN.
+
 2012-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve old server clenup and open-file table.
