@@ -1,3 +1,17 @@
+2012-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bugfix in old server/session clenup, improve EHS table.
+
+	* Glasses/XrdEhs.cxx:
+	When fqhn is requested, apply regexps to fqhns.
+	Modify table headers for this case, too.
+
+	* Glasses/XrdMonSucker.cxx:
+	Increase eye-ref-count for servers when searching for dead
+	files, sessions.
+	This was potentialy deadly, as several cleanup threads can run at
+	the same time.
+
 2012-04-16  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Better support for numeric host-names as reported by xrd client.
