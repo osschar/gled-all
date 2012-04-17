@@ -127,19 +127,12 @@ Bool_t AList::Has(ZGlass* g)
   return false;
 }
 
-/**************************************************************************/
-
-TimeStamp_t AList::CopyList(lpZGlass_t& dest, bool copy_zeros)
-{
-  GMutexHolder lck(mListMutex);
-  Stepper<> s(this, copy_zeros);
-  while(s.step())
-    dest.push_back(*s);
-  return mListTimeStamp;
-}
+//==============================================================================
 
 TimeStamp_t AList::CopyListElReps(lElRep_t& dest, bool copy_zeros)
 {
+  // This should really be called under read-lock.
+
   GMutexHolder lck(mListMutex);
   Stepper<> s(this, copy_zeros);
   while(s.step())
@@ -147,7 +140,27 @@ TimeStamp_t AList::CopyListElReps(lElRep_t& dest, bool copy_zeros)
   return mListTimeStamp;
 }
 
-/**************************************************************************/
+TimeStamp_t AList::CopyList(lpZGlass_t& dest, bool copy_zeros, bool do_eyerefs)
+{
+  GMutexHolder lck(mListMutex);
+  Stepper<> s(this, copy_zeros);
+  while(s.step())
+  {
+    if (do_eyerefs && *s) s->IncEyeRefCount();
+    dest.push_back(*s);
+  }
+  return mListTimeStamp;
+}
+
+void AList::ReleaseListCopyEyeRefs(lpZGlass_t& dest)
+{
+  for (lpZGlass_i i = dest.begin(); i != dest.end(); ++i)
+  {
+    if (*i) (*i)->DecEyeRefCount();
+  }
+}
+
+//==============================================================================
 
 ZGlass* AList::GetElementByName(const TString& name)
 {

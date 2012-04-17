@@ -1,3 +1,16 @@
+2012-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add option to increase element eye-ref-count when copying
+	elements.
+
+	* Glasses/AList.cxx:
+	* Glasses/AList.h:
+	Add optional argument 'bool do_eyerefs=false' to CopyList() and
+	CopyListByGlass(). Provide complementary functions
+	ReleaseListCopyEyeRefs() and a version for templates although it
+	is really easier/cleaner just to do it manually in the loop over
+	the copied list (as that's what one usually does with it).
+
 2012-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.cxx:
