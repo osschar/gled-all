@@ -8,15 +8,15 @@
 #include "XrdMonSucker.h"
 #include "XrdEhs.c7"
 
-#include <Glasses/ZHashList.h>
-#include <Gled/GThread.h>
-
 #include "XrdFile.h"
 #include "XrdUser.h"
 #include "XrdServer.h"
 
+#include "Glasses/ZHashList.h"
+#include "Gled/GThread.h"
+#include "Stones/SServerSocket.h"
+
 #include "TSystem.h"
-#include "TServerSocket.h"
 
 #include <iostream>
 #include <sstream>
@@ -219,8 +219,8 @@ namespace
   struct serve_page_arg
   {
     XrdEhs  *xehs;
-    TSocket *sock;
-    serve_page_arg(XrdEhs* e, TSocket *s) : xehs(e), sock(s) {}
+    SSocket *sock;
+    serve_page_arg(XrdEhs* e, SSocket *s) : xehs(e), sock(s) {}
   };
 
   void* serve_page_tl(serve_page_arg* arg)
@@ -240,7 +240,7 @@ namespace
   }
 }
 
-void XrdEhs::ServePage(TSocket* sock)
+void XrdEhs::ServePage(SSocket* sock)
 {
   static const Exc_t _eh("XrdEhs::ServePage ");
 
@@ -363,14 +363,19 @@ void XrdEhs::StartServer()
     b_stop_server = false;
   }
 
-  TServerSocket serv_sock(mPort);
+  SServerSocket serv_sock(mPort, true);
+  if (! serv_sock.IsValid())
+  {
+    throw _eh + "Creation of server socket failed.";
+  }
+
   GSelector     selector;
   selector.fRead.Add(&serv_sock);
 
   while (! b_stop_server)
   {
     selector.Select();
-    TSocket *sock = serv_sock.Accept();
+    SSocket *sock = serv_sock.Accept();
 
     if (sock == 0)
     {

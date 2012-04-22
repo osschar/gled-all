@@ -1,3 +1,9 @@
+2012-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Force reuse of port for server socket. Use SSocket classes.
+
 2012-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Bugfix in old server/session clenup, improve EHS table.
