@@ -111,12 +111,12 @@ void XrdMonSucker::on_file_open(XrdFile* file)
   mSaturn->ShootMIR(mir);
 }
 
-void XrdMonSucker::on_file_close(XrdFile* file)
+void XrdMonSucker::on_file_close(XrdFile* file, XrdUser* user, XrdServer* server)
 {
   Stepper<XrdFileCloseReporter> stepper(*mFCReporters);
   while (stepper.step())
   {
-    stepper->FileClosed(file);
+    stepper->FileClosed(file, user, server);
   }
 
   {
@@ -155,7 +155,7 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
         GLensReadHolder _lck(server);
         server->RemoveFile(file);
       }
-      on_file_close(file);
+      on_file_close(file, user, server);
     }
   }
   {
@@ -805,7 +805,7 @@ void XrdMonSucker::Suck()
 		GLensReadHolder _lck(server);
 		server->RemoveFile(file);
 	      }
-              on_file_close(file);
+              on_file_close(file, us, server);
             }
           }
 	}

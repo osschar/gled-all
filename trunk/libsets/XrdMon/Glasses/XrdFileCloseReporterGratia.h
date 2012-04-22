@@ -30,7 +30,7 @@ protected:
   struct sockaddr  *mSAddr;          //!
 
   virtual void ReportLoopInit();
-  virtual void ReportFileClosed(XrdFile* file);
+  virtual void ReportFileClosed(FileUserServer& fus);
   virtual void ReportLoopFinalize();
 
 public:
