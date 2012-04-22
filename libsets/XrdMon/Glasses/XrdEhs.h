@@ -15,7 +15,7 @@ class XrdFile;
 
 #include "TPRegexp.h"
 
-class TSocket;
+class SSocket;
 
 
 class XrdEhs : public ZNameMap
@@ -51,7 +51,7 @@ public:
   void StartServer(); // X{Ed} 7 MButt(-join=>1)
   void StopServer();  // X{E}  7 MButt()
 
-  void ServePage(TSocket* sock);
+  void ServePage(SSocket* sock);
 
 #include "XrdEhs.h7"
   ClassDef(XrdEhs, 1);
