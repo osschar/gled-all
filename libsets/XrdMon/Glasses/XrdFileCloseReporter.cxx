@@ -39,14 +39,16 @@ XrdFileCloseReporter::~XrdFileCloseReporter()
 
 //==============================================================================
 
-void XrdFileCloseReporter::FileClosed(XrdFile* file)
+void XrdFileCloseReporter::FileClosed(XrdFile* file, XrdUser* user, XrdServer* server)
 {
   // put into queue and signal condition
 
-  file->IncEyeRefCount();
+  file  ->IncEyeRefCount();
+  user  ->IncEyeRefCount();
+  server->IncEyeRefCount();
 
   GMutexHolder _lck(mReporterCond);
-  mReporterQueue.push_back(file);
+  mReporterQueue.push_back(FileUserServer(file, user, server));
   mReporterCond.Signal();
 }
 
@@ -55,12 +57,12 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file)
 void XrdFileCloseReporter::ReportLoopInit()
 {}
 
-void XrdFileCloseReporter::ReportFileClosed(XrdFile* file)
+void XrdFileCloseReporter::ReportFileClosed(FileUserServer& fus)
 {
   static const Exc_t _eh("XrdFileCloseReporter::ReportFileClosed ");
 
   ZLog::Helper log(*mLog, ZLog::L_Message, _eh);
-  log.Form("LFN=%s", file->GetName());
+  log.Form("LFN=%s", fus.fFile->GetName());
 }
 
 void XrdFileCloseReporter::ReportLoopFinalize()
@@ -83,20 +85,22 @@ void XrdFileCloseReporter::ReportLoop()
 
   while (true)
   {
-    XrdFile *file = 0;
+    FileUserServer fus;
     {
       GMutexHolder _lck(mReporterCond);
       if (mReporterQueue.empty())
       {
         mReporterCond.Wait();
       }
-      file = mReporterQueue.front();
+      fus = mReporterQueue.front();
       mReporterQueue.pop_front();
     }
 
-    ReportFileClosed(file);
+    ReportFileClosed(fus);
 
-    file->DecEyeRefCount();
+    fus.fFile  ->DecEyeRefCount();
+    fus.fUser  ->DecEyeRefCount();
+    fus.fServer->DecEyeRefCount();
   }
 }
 

@@ -86,12 +86,13 @@ namespace
   Long64_t dmtoll(Double_t x) { return dtoll(dmtod(x));            }
 }
 
-void XrdFileCloseReporterGratia::ReportFileClosed(XrdFile* file)
+void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
 {
   static const Exc_t _eh("XrdFileCloseReporterGratia::ReportFileClosed ");
 
-  XrdUser   *user   = 0;
-  XrdServer *server = 0;
+  XrdFile   *file   = fus.fFile;
+  XrdUser   *user   = fus.fUser;
+  XrdServer *server = fus.fServer;
 
   TString msg("#begin\n");
 

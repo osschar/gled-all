@@ -1,5 +1,16 @@
 2012-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	* Glasses/XrdFileCloseReporterGratia.h:
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Eye-refcount also user and server before passing them to
+	file-close reporters.
+
+2012-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/XrdEhs.cxx:
 	* Glasses/XrdEhs.h:
 	Force reuse of port for server socket. Use SSocket classes.

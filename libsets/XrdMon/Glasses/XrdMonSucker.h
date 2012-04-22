@@ -85,7 +85,7 @@ protected:
 #endif
 
   void on_file_open(XrdFile* file);
-  void on_file_close(XrdFile* file);
+  void on_file_close(XrdFile* file, XrdUser* user, XrdServer* server);
 
   void disconnect_user_and_close_open_files(XrdUser* user, XrdServer* server,
                                             const GTime& time);
