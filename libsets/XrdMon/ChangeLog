@@ -1,3 +1,8 @@
+2012-04-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Add column showing percent of file read.
+
 2012-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
