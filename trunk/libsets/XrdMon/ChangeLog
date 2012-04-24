@@ -1,3 +1,14 @@
+2012-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	In page title, write number of passed files when filtering is
+	active.
+	Add read rate and average read size columns.
+	Reorder column order.
+	Add option file_len=int, to limit length of displayed file name
+	(default is 64, 0 means no limit).
+
 2012-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporter.cxx:
