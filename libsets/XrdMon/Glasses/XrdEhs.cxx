@@ -74,58 +74,11 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       mFileListTS = hl->CopyListByGlass<XrdFile>(mFileList);
     }
 
-    bool fqhn = (args["fqhn"] == "1");
-
-    ostringstream oss; 
-    oss << "<html>" << std::endl;
-    oss << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
-    oss << "<head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"> " << std::endl;
-    oss << "<style type=\"text/css\">" << std::endl << std::endl;
-     
-    oss << "table.demo {" << std::endl;
-    oss << "   background-color: #C0C0FF;" << std::endl;
-    oss << "   padding: 2px 5px 2px 5px;" << std::endl;
-    oss << "}" << std::endl;
-    oss << "tr.row1 {" << std::endl;
-    oss << "   background-color: #FFFFFF;" << std::endl;
-    oss << "}" << std::endl;
-    oss << "tr.row2 {" << std::endl;
-    oss << "   background-color: #E0E0FF;" << std::endl;
-    oss << "}" << std::endl;
-    oss << "</style> "<< std::endl;
-    oss << "<title>Xrd open files ["<< mFileList.size() << "]</title> " << std::endl;
-    oss << "</head>" << std::endl;
-    
-    oss << "<script type=\"text/javascript\" src=\"http://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js\"></script>" << std::endl;
-    oss << "<script type=\"text/javascript\">" << std::endl;
-    oss << "" << std::endl;
-   
-    oss << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  's', 's', 's', 's', 'f', 's');" << std::endl;
-    oss << "TSort_Classes = new Array ('row2', 'row1');" << std::endl;
-    oss << "TSort_Initial = new Array ('0D');" << std::endl;
-    oss << "var TSort_Icons = new Array (' V', ' &#923;');" << std::endl;
-    oss << "var TSort_Cookie = 'table_xrd_cms_openfiles';" << std::endl;
-    oss << "tsRegister();" << std::endl;
-    oss << "</script>" << std::endl;
-
-
-    oss << "<TABLE id=\"table_xrd_cms_openfiles\" class=\"demo\" width=100%> " << std::endl;
-    oss << " <thead> "  << std::endl;
-
-    // header
-    oss << "<tr>"<< endl;
-    oss << "<th align=\"left\">File</th>";
-    oss << "<th align=\"left\">Open Ago</th>";
-    oss << "<th align=\"left\">Server" << (fqhn ? "" : " Domain") << "</th>";
-    oss << "<th align=\"left\">Client" << (fqhn ? "" : " Domain") << "</th>";
-    oss << "<th align=\"left\">User" << (bParanoia ? " Hash" : "") << "</th> ";
-    oss << "<th align=\"left\">Read [MB]</th> <th align=\"left\">Update Ago</th>";
-    oss << endl;
-    oss << "</tr>" << endl;
-
-    oss << "</thead>" << std::endl;
-
+    bool fqhn         = (args["fqhn"] == "1");
     bool no_same_site = (args["no_same_site"] == "1");
+
+    int  file_len = 64;
+    if ( ! args["file_len"].IsNull()) file_len = TMath::Max(0, args["file_len"].Atoi());
 
     TPMERegexp short_domain("[^\\.]+\\.[^\\.]+$", "o");
 
@@ -142,6 +95,11 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
 
     bool f_fil = ( ! args["file_re"].IsNull());
     if (f_fil) fil_re.Reset(args["file_re"], "o");
+
+    bool any_fil  = f_srv || f_cli || f_usr || f_fil;
+    int  pass_cnt = 0;
+
+    ostringstream oss;
 
     TPMERegexp rePath("/");
     bool odd = false;
@@ -168,12 +126,18 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       if (f_usr && ! usr_re.Match(user->RefRealName())) continue;
       if (f_fil && ! fil_re.Match(file->RefName()))     continue;
 
+      ++pass_cnt;
 
       oss << Form("<tr class='row%d'>", odd ? 1 : 2)<< endl; 
 
       if (! bParanoia)
       {
-        oss << Form("<td>%s</td>", file->GetName()) << endl;
+        TString fn(file->RefName());
+        if (file_len && fn.Length() > file_len) {
+          fn.Resize(file_len);
+          fn += "...";
+        }
+        oss << "<td>" << fn << "</td>" << endl;
       }
       else
       {
@@ -185,9 +149,6 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
           oss << Form("<td>%s</td>", file->GetName()) << endl;
       }
 
-      oss << "<td>" << (req_time - file->RefOpenTime()).ToHourMinSec(true) << "</td>" << endl;
-      oss << "<td>" << server_id << "</td>" << endl;
-      oss << "<td>" << client_id << "</td>" << endl;
       if (bParanoia && ! user->RefRealName().IsNull())
       {
         oss << "<td>" << Form("%X",  user->RefRealName().Hash()) <<  "</td>" << endl;
@@ -196,9 +157,19 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       {
         oss << "<td>" << user->GetRealName() << "</td>" << endl;
       }
+      oss << "<td>" << server_id << "</td>" << endl;
+      oss << "<td>" << client_id << "</td>" << endl;
 
-      oss << "<td>" << GForm("%.3f", file->GetReadStats().GetSumX()) << "</td>" << endl;
-      oss << "<td>" << (req_time - file->RefLastMsgTime()).ToHourMinSec(true) << "</td>" << endl;
+      GTime    open_t = req_time - file->RefOpenTime();
+      GTime    lmsg_t = req_time - file->RefLastMsgTime();
+      Double_t sum_mb = file->GetReadStats().GetSumX();
+
+      oss << "<td>" << open_t.ToHourMinSec(true) << "</td>" << endl;
+      oss << "<td>" << lmsg_t.ToHourMinSec(true) << "</td>" << endl;
+
+      oss << "<td>" << GForm("%.3f", sum_mb) << "</td>" << endl;
+      oss << "<td>" << GForm("%.3f", sum_mb / open_t.ToDouble()) << "</td>" << endl;
+      oss << "<td>" << GForm("%.3f", file->GetReadStats().GetAverage()) << "</td>" << endl;
 
       oss << "</tr>" << endl;
     }
@@ -206,10 +177,66 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     oss << "</body>"  << endl;
     oss << "</html>"  << endl;
 
-    mServeContent = oss.str();
-  }
 
-  content = mServeContent;
+    // Generate table header
+
+    ostringstream osh;
+    osh << "<html>" << std::endl;
+    osh << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
+    osh << "<head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"> " << std::endl;
+    osh << "<style type=\"text/css\">" << std::endl << std::endl;
+     
+    osh << "table.demo {" << std::endl;
+    osh << "   background-color: #C0C0FF;" << std::endl;
+    osh << "   padding: 2px 5px 2px 5px;" << std::endl;
+    osh << "}" << std::endl;
+    osh << "tr.row1 {" << std::endl;
+    osh << "   background-color: #FFFFFF;" << std::endl;
+    osh << "}" << std::endl;
+    osh << "tr.row2 {" << std::endl;
+    osh << "   background-color: #E0E0FF;" << std::endl;
+    osh << "}" << std::endl;
+    osh << "</style> "<< std::endl;
+    osh << "<title>Xrd open files [";
+    if (any_fil) osh << pass_cnt << "/";
+    osh << mFileList.size() << "]</title> " << std::endl;
+    osh << "</head>" << std::endl;
+    
+    osh << "<script type=\"text/javascript\" src=\"http://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js\"></script>" << std::endl;
+    osh << "<script type=\"text/javascript\">" << std::endl;
+    osh << "" << std::endl;
+   
+    osh << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  's', 's', 's', 's', 's', 'f', 'f', 'f');" << std::endl;
+    osh << "TSort_Classes = new Array ('row2', 'row1');" << std::endl;
+    osh << "TSort_Initial = new Array ('0D');" << std::endl;
+    osh << "var TSort_Icons = new Array (' V', ' &#923;');" << std::endl;
+    osh << "var TSort_Cookie = 'table_xrd_cms_openfiles';" << std::endl;
+    osh << "tsRegister();" << std::endl;
+    osh << "</script>" << std::endl;
+
+
+    osh << "<TABLE id=\"table_xrd_cms_openfiles\" class=\"demo\" width=100%>" << std::endl;
+    osh << "<thead>"  << std::endl;
+
+    // header
+    osh << "<tr>"<< endl;
+    osh << "<th align=\"left\">File</th>";
+    osh << "<th align=\"left\">User" << (bParanoia ? " Hash" : "") << "</th>";
+    osh << "<th align=\"left\">Server" << (fqhn ? "" : " Domain") << "</th>";
+    osh << "<th align=\"left\">Client" << (fqhn ? "" : " Domain") << "</th>";
+    osh << "<th align=\"left\">Open Ago</th>";
+    osh << "<th align=\"left\">Update Ago</th>";
+    osh << "<th align=\"left\">Read [MB]</th>";
+    osh << "<th align=\"left\">Rate [MB/s]</th>";
+    osh << "<th align=\"left\">Avg Read [MB]</th>";
+    osh << endl;
+    osh << "</tr>" << endl;
+
+    osh << "</thead>" << std::endl;
+
+    content  = osh.str();
+    content += oss.str();
+  }
 }
 
 //==============================================================================

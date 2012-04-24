@@ -40,7 +40,6 @@ protected:
   TimeStamp_t          mFileListTS;   //!
   GMutex               mServeMutex;   //!
   GTime                mServeTime;    //!
-  TString              mServeContent; //!
 
   void fill_content(const GTime& req_time, TString& content, lStr_t& path, mStr2Str_t& args);
 
