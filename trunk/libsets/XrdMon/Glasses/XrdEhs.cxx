@@ -96,7 +96,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     bool f_fil = ( ! args["file_re"].IsNull());
     if (f_fil) fil_re.Reset(args["file_re"], "o");
 
-    bool any_fil  = f_srv || f_cli || f_usr || f_fil;
+    bool any_fil  = no_same_site || f_srv || f_cli || f_usr || f_fil;
     int  pass_cnt = 0;
 
     ostringstream oss;
@@ -163,11 +163,13 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
       GTime    open_t = req_time - file->RefOpenTime();
       GTime    lmsg_t = req_time - file->RefLastMsgTime();
       Double_t sum_mb = file->GetReadStats().GetSumX();
+      Double_t siz_mb = file->GetSizeMB();
 
       oss << "<td>" << open_t.ToHourMinSec(true) << "</td>" << endl;
       oss << "<td>" << lmsg_t.ToHourMinSec(true) << "</td>" << endl;
 
       oss << "<td>" << GForm("%.3f", sum_mb) << "</td>" << endl;
+      oss << "<td>" << GForm("%.3f", siz_mb ? 100.0*sum_mb/siz_mb : 0.0) << "</td>" << endl;
       oss << "<td>" << GForm("%.3f", sum_mb / open_t.ToDouble()) << "</td>" << endl;
       oss << "<td>" << GForm("%.3f", file->GetReadStats().GetAverage()) << "</td>" << endl;
 
@@ -206,7 +208,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     osh << "<script type=\"text/javascript\">" << std::endl;
     osh << "" << std::endl;
    
-    osh << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  's', 's', 's', 's', 's', 'f', 'f', 'f');" << std::endl;
+    osh << "TSort_Data = new Array ('table_xrd_cms_openfiles', 's',  's', 's', 's', 's', 's', 'f', 'f', 'f', 'f');" << std::endl;
     osh << "TSort_Classes = new Array ('row2', 'row1');" << std::endl;
     osh << "TSort_Initial = new Array ('0D');" << std::endl;
     osh << "var TSort_Icons = new Array (' V', ' &#923;');" << std::endl;
@@ -227,6 +229,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     osh << "<th align=\"left\">Open Ago</th>";
     osh << "<th align=\"left\">Update Ago</th>";
     osh << "<th align=\"left\">Read [MB]</th>";
+    osh << "<th align=\"left\">Read [%]</th>";
     osh << "<th align=\"left\">Rate [MB/s]</th>";
     osh << "<th align=\"left\">Avg Read [MB]</th>";
     osh << endl;
