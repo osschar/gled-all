@@ -29,8 +29,8 @@ void XrdUser::_init()
 
 XrdUser::XrdUser(const TString& n, const TString& t) :
   ZList(n, t),
-  mLoginTime(GTime::I_Never), mDisconnectTime(GTime::I_Never), mLastMsgTime(GTime::I_Never),
-  bNumericHost(false)
+  bNumericHost(false),
+  mLoginTime(GTime::I_Never), mDisconnectTime(GTime::I_Never), mLastMsgTime(GTime::I_Never)
 {
   _init();
 }
