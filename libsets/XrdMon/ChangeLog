@@ -1,5 +1,21 @@
 2012-04-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Collect and report more statistics about vector reads.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Add SRange members to hold single read, vector read, and vector
+	read count statistics.
+	Add method AddVecReadSample() for updating vector read stats.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Report the new statistics.
+
+	* Glasses/XrdMonSucker.cxx:
+	Call XrdFile::AddVecReadSample() for vector reads.
+
+2012-04-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/XrdEhs.cxx:
 	Add column showing percent of file read.
 

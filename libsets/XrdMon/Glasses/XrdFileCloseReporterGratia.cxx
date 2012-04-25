@@ -116,19 +116,27 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
       mLastUidInner = 0;
     }
 
-    const SRange &RS = file->RefReadStats();
-    const SRange &WS = file->RefWriteStats();
+    const SRange &RS   = file->RefReadStats();
+    const SRange &RSS  = file->RefSingleReadStats();
+    const SRange &RSV  = file->RefVecReadStats();
+    const SRange &RSVC = file->RefVecReadCntStats();
+    const SRange &WS   = file->RefWriteStats();
     msg += TString::Format
       ("unique_id=xrd-%lld\n"
        "file_lfn=%s\nfile_size=%lld\nstart_time=%llu\nend_time=%llu\n"
        "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
+       "read_single_bytes=%lld\nread_single_operations=%llu\nread_single_min=%lld\nread_single_max=%lld\nread_single_average=%f\nread_single_sigma=%f\n"
+       "read_vector_bytes=%lld\nread_vector_operations=%llu\nread_vector_min=%lld\nread_vector_max=%lld\nread_vector_average=%f\nread_vector_sigma=%f\n"
+       "read_vector_count_min=%lld\nread_vector_count_max=%lld\nread_vector_count_average=%f\nread_vector_count_sigma=%f\n"
        "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
        "read_bytes_at_close=%lld\n"
        "write_bytes_at_close=%lld\n",
        unique_id,
        file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
-       dmtoll(RS.GetSumX()), RS.GetN(), dmtoll(RS.GetMin()), dmtoll(RS.GetMax()), dmtod(RS.GetAverage()), dmtod(RS.GetSigma()),
-       dmtoll(WS.GetSumX()), WS.GetN(), dmtoll(WS.GetMin()), dmtoll(WS.GetMax()), dmtod(WS.GetAverage()), dmtod(WS.GetSigma()),
+       dmtoll(RS .GetSumX()), RS .GetN(), dmtoll(RS .GetMin()), dmtoll(RS .GetMax()), dmtod(RS .GetAverage()), dmtod(RS .GetSigma()),
+       dmtoll(RSS.GetSumX()), RSS.GetN(), dmtoll(RSS.GetMin()), dmtoll(RSS.GetMax()), dmtod(RSS.GetAverage()), dmtod(RSS.GetSigma()),
+       dmtoll(RSV.GetSumX()), RSV.GetN(), dmtoll(RSV.GetMin()), dmtoll(RSV.GetMax()), dmtod(RSV.GetAverage()), dmtod(RSV.GetSigma()), dtoll(RSVC.GetMin()), dtoll(RSVC.GetMax()), RSVC.GetAverage(), RSVC.GetSigma(),
+       dmtoll(WS .GetSumX()), WS .GetN(), dmtoll(WS .GetMin()), dmtoll(WS .GetMax()), dmtod(WS .GetAverage()), dmtod(WS .GetSigma()),
        dmtoll(file->GetRTotalMB()),
        dmtoll(file->GetWTotalMB()));
     user = file->GetUser();
