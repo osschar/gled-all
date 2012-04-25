@@ -26,7 +26,11 @@ void XrdFile::_init()
   mCloseTime.SetNever();
   mLastMsgTime.SetNever();
 
-  mReadStats.Reset(); mWriteStats.Reset();
+  mReadStats.Reset();
+  mSingleReadStats.Reset();
+  mVecReadStats.Reset();
+  mVecReadCntStats.Reset();
+  mWriteStats.Reset();
   mRTotalMB = mWTotalMB = 0;
   mSizeMB = 0;
 }
@@ -45,6 +49,14 @@ XrdFile::~XrdFile()
 void XrdFile::AddReadSample(Double_t x)
 {
   mReadStats.AddSample(x);
+  mSingleReadStats.AddSample(x);
+}
+
+void XrdFile::AddVecReadSample(Double_t x, Int_t n)
+{
+  mReadStats.AddSample(x);
+  mVecReadStats.AddSample(x);
+  mVecReadCntStats.AddSample(n);
 }
 
 void XrdFile::AddWriteSample(Double_t x)

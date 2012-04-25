@@ -756,9 +756,10 @@ void XrdMonSucker::Suck()
           if (file)
           {
             Int_t rlen = ntohl(xmt.arg1.buflen);
+            Int_t nels = ntohs(xmt.arg0.sVal[1]);
             // Not processed: vcnt and vseq (for multi file read)
             GLensReadHolder _lck(file);
-            file->AddReadSample (rlen / One_MB);
+            file->AddVecReadSample(rlen / One_MB, nels);
             file->SetLastMsgTime(lc.fTime);
           }
         }
