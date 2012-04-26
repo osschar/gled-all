@@ -1,3 +1,8 @@
+2012-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	libGpad also needed by libGledCore.
+
 2012-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add option to increase element eye-ref-count when copying
