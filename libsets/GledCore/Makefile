@@ -64,7 +64,7 @@ bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
 
 ${PUPILS_LIB}: ${PUPILS_OBJS}
 	${ECHO} -X- Linking $@
-	${MUTE} ${LD} ${LDSHAREDOPT} -o $@ ${LDFLAGS} ${CXXFLAGS} ${PUPILS_OBJS}
+	${MUTE} ${LD} ${PUPILS_OBJS} ${LDSHAREDOPT} -o $@ ${CXXFLAGS} ${LDFLAGS} ${ROOT_LD_DIR} ${FLTKLIBS}
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_targets.inc
