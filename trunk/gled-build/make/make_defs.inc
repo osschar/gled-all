@@ -63,7 +63,7 @@ DEFINES  := -D_GNU_SOURCE
 CPPFLAGS += ${DEFINES} ${LOCALINCL} ${ROOT_CPP_DIR} \
             ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
 CXXFLAGS += ${ROOT_CFLAGS} -Wall -fPIC -pipe ${USER_CXX_FLAGS}
-LDFLAGS	+= ${ROOT_LDFLAGS} ${USER_LD_FLAGS}
+LDFLAGS	 += ${ROOT_LDFLAGS} ${USER_LD_FLAGS}
 
 # Dictionaries must be compiled without optimization, debug not needed.
 # Drop USER_CXX_FLAGS, they should not matter.
