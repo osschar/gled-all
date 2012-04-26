@@ -359,6 +359,9 @@ fnord
   print MC "RENDERERS\t:= $renderers\n\n";
   for $rnr (@Rnrs)
   {
+    my $extra_libs;
+    $extra_libs = "\${ROOT_LD_DIR} -lGLEW" if $rnr eq "GL";
+
     print MC "ABOVE_RNR_${rnr}_LIBS\t= \$(addsuffix _Rnr_${rnr}, \$(addprefix -l, \${REQUIRES_LIB_SETS}))\n";
     print MC "${rnr}_RNR_SRCS\t:= \$(wildcard Rnr/${rnr}/*.cxx) " .
       "$config->{GLUE_DIR}/\${LIB_SET_NAME}_Rnr_${rnr}_LibSet.cxx\n";
@@ -369,8 +372,8 @@ fnord
 
     print MC "\${${rnr}_RNR_LIB_NAME}:\t \${${rnr}_RNR_OBJS}\n";
     print MC "\t\${ECHO} -X- Linking \$\@\n";
-    print MC "\t\${MUTE} \${LD} \${${rnr}_RNR_OBJS} -o \$\@ \${LDSHAREDOPT} -L\${GLEDSYS}/lib \${LDFLAGS} " .
-             "\${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS}\n";
+    print MC "\t\${MUTE} \${LD} \${LDSHAREDOPT} \${LDFLAGS} \${${rnr}_RNR_OBJS} -o \$\@ ${extra_libs} " .
+             "-Wl,--no-as-needed -L\${GLEDSYS}/lib \${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \n";
     print MC "RNR_SRCS += \${${rnr}_RNR_SRCS}\n";
     print MC "RNR_HDRS += \${${rnr}_RNR_HDRS}\n";
     print MC "RNR_OBJS += \${${rnr}_RNR_OBJS}\n";

@@ -1,3 +1,9 @@
+2012-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* configure:
+	* make/make_base.inc:
+	Standardize order of ld args. Pass --no-as-needed for libset dependencies.
+
 2012-04-25  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_base.inc:
