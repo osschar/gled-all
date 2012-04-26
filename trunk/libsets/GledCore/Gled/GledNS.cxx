@@ -1181,7 +1181,7 @@ const char* GForm(const char* fmt, ...)
   return ret;
 }
 
-const char* GForm(const char* fmt, va_list args)
+const char* GFormVA(const char* fmt, va_list args)
 {
   form_mutex.Lock();
 

@@ -100,8 +100,8 @@ public:
   // #endif
   // ; // This is in TString. Probably compile-time checks -- good!
 
-  void Form(const GTime&   time,        Int_t level, const TString& prefix, const char* fmt, va_list args);
-  void Form(const TString& time_string, Int_t level, const TString& prefix, const char* fmt, va_list args);
+  void FormVA(const GTime&   time,        Int_t level, const TString& prefix, const char* fmt, va_list args);
+  void FormVA(const TString& time_string, Int_t level, const TString& prefix, const char* fmt, va_list args);
 
   // ostream& operator()(Int_t level);
   // ostream& operator()(Int_t level, const GTime& time);
