@@ -48,23 +48,24 @@ endif
 
 bin/saturn: saturn.o ${BASE_LIB_NAME}
 	${ECHO} -X- Linking $@
-	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} saturn.o \
-	-Llib -l${LIB_SET_NAME} ${ROOTLIBS} ${SYSLIBS}
+	${MUTE} ${LD} ${LDFLAGS} saturn.o -o $@ \
+	  -Llib -l${LIB_SET_NAME} ${ROOTLIBS} ${SYSLIBS}
 
 bin/gled: gled.o ${BASE_LIB_NAME} ${VIEW_LIB_NAME}
 	${ECHO} -X- Linking $@
-	${MUTE} ${LD} -o $@ ${LDFLAGS} ${CXXFLAGS} gled.o \
-	-Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
-	${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
+	${MUTE} ${LD} ${LDFLAGS} gled.o -o $@ \
+	  -Llib -l${LIB_SET_NAME} -l${LIB_SET_NAME}_View \
+	  ${ROOTLIBS} ${SYSLIBS} ${GUILIBS} ${ROOTGLIBS}
 # On 10.7, this creates folder gled.app; and it seems broken.
 # ifeq (${GLED_SYSTEM},Darwin)
 #	${FLTK_CONFIG} --post $@
 # endif
 
 
-${PUPILS_LIB}: ${PUPILS_OBJS}
+${PUPILS_LIB}: ${PUPILS_OBJS} lib/libGledCore_Rnr_GL.${LDEXT}
 	${ECHO} -X- Linking $@
-	${MUTE} ${LD} ${PUPILS_OBJS} ${LDSHAREDOPT} -o $@ ${CXXFLAGS} ${LDFLAGS} ${ROOT_LD_DIR} ${FLTKLIBS}
+	${MUTE} ${LD} ${LDSHAREDOPT} ${LDFLAGS} ${PUPILS_OBJS} -o $@ \
+	  ${ROOT_LD_DIR} ${FLTKLIBS} -Llib -l${LIB_SET_NAME}_Rnr_GL
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_targets.inc
