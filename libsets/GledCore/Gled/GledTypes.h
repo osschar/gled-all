@@ -166,8 +166,8 @@ Exc_t operator+(const Exc_t &s1,       char  c);
 
 //==============================================================================
 
-const char* GForm(const char* fmt, ...);
-const char* GForm(const char* fmt, va_list args);
+const char* GForm  (const char* fmt, ...);
+const char* GFormVA(const char* fmt, va_list args);
 
 TBuffer& operator<<(TBuffer& b, const string& s);
 TBuffer& operator>>(TBuffer& b, string& s);
