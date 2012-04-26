@@ -15,7 +15,7 @@ DICT_DIRS	= Glasses Stones Gled Ephra
 VIEW_DIRS	= GledView FL
 VIEW_FL_DIRS	= FL
 
-BASE_LD_LIBS	= ${ROOT_LD_DIR} -lHist -lRIO -lNet -lMatrix -lssl
+BASE_LD_LIBS	= ${ROOT_LD_DIR} -lHist -lRIO -lNet -lMatrix -lGpad -lssl
 
 MAINSRCS := saturn.cxx gled.cxx
 MAINOBJS := $(MAINSRCS:.cxx=.o)
