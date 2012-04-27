@@ -45,7 +45,8 @@ void xrd_suck_tcp()
 
   ASSIGN_ADD_GLASS(c_upc, UdpPacketTcpClient, g_queen, "UdpPacketTcpClient", 0);
   c_upc->SetLog(c_log);
-  c_upc->SetHost("desire.physics.ucsd.edu");
+  c_upc->SetHost("xrootd.t2.ucsd.edu");
+  // c_upc->SetHost("desire.physics.ucsd.edu");
   // default port is 9940
   c_udp_packet_source = c_upc;
 
