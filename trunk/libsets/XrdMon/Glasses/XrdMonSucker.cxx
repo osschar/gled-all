@@ -143,9 +143,9 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
     Bool_t closed = false;
     {
       GLensReadHolder _lck(file);
-      if ((file)->IsOpen())
+      if (file->IsOpen())
       {
-        (file)->SetCloseTime(time);
+        file->SetCloseTime(time);
         closed = true;
       }
     }
