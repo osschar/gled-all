@@ -283,23 +283,28 @@ void ZQueen::release_moon_purgatory(ID_t n_to_release)
   static const Exc_t _eh("ZQueen::release_purgatory ");
 
   ID_t n_done = 0;
-  while(n_done < n_to_release) {
+  while (n_done < n_to_release)
+  {
     ID_t id = mPurgatory.front();
     mPurgatory.pop_front();
     QueenIDMap_i i = mIDMap.find(id);
-    if(i != mIDMap.end()) {
+    if (i != mIDMap.end())
+    {
       delete i->second;
       mIDMap.erase(i);
-    } else {
+    }
+    else
+    {
       ISwarn("Safromastundhell.");
     }
-    --mIDsPurged; ++mIDsFree;
+    --mIDsPurged;
+    ++mIDsFree;
     ++n_done;
   }
   ISdebug(1, _eh + Identify() + GForm(" cleared %d entries.", n_done));
-  if(bStampIdOps) Stamp(FID());
+  if (bStampIdOps) Stamp(FID());
 
-  if(!mZombies.empty()) release_zombies();
+  if (! mZombies.empty()) release_zombies();
 }
 
 int ZQueen::release_zombies()
@@ -307,12 +312,23 @@ int ZQueen::release_zombies()
   static const Exc_t _eh("ZQueen::release_zombies ");
 
   int zc = 0;
-  while( ! mZombies.empty() && mZombies.front()->mEyeRefCount == 0) {
-    ISdebug(0, _eh + GForm("EyeRefCount=0 for %s. Killing a zombie.",
-			   mZombies.front()->Identify().Data()));
-    delete mZombies.front();
-    mZombies.pop_front();
-    ++zc;
+  lpZGlass_i zi = mZombies.begin();
+  while (zi != mZombies.end())
+  {
+    ZGlass *z = *zi;
+    if (z->mEyeRefCount == 0)
+    {
+      ISdebug(0, _eh + GForm("EyeRefCount=0 for %s. Killing a zombie.",
+                             z->Identify().Data()));
+      lpZGlass_i xi = zi++;
+      mZombies.erase(xi);
+      delete z;
+      ++zc;
+    }
+    else
+    {
+      ++zi;
+    }
   }
   return zc;
 }
