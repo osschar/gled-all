@@ -1,5 +1,10 @@
 2012-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/ZQueen.cxx:
+	In release_zombies(), don't stop on the first lingering one.
+
+2012-04-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Makefile:
 	Standardize order of ld args.
 
