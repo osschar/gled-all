@@ -1,3 +1,13 @@
+2012-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First steps for parsing of redirect trace messages.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse and dump some info about entries in redirect traces.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Import redirection monitoring defines from corresponding file in xrd.
+
 2012-04-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Collect and report more statistics about vector reads.

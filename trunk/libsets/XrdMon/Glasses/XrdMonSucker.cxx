@@ -320,19 +320,8 @@ void XrdMonSucker::Suck()
       domain->IncPacketCount();
     }
 
-    // XXXX Ceck for 'r' records, dump basic info to see what else to check / account for.
-    //  - 'r' probably has the pseq but it will be coming from a master /
-    //    redirector which I never tried before.
-    //     . enable on xrootd.t2 - report to some other port not to screw up
-    //       production system;
-    //     . have some printouts
-
-    // if (code == 'r')
-    // {
-    // }
-
     // Check sequence id. No remedy attempted.
-    if (code == 'u' || code == 'd' || code == 't' || code == 'i')
+    if (code == 'u' || code == 'd' || code == 't' || code == 'i' || code == 'r')
     {
       if (server->IsSrvSeqInited())
       {
@@ -373,7 +362,7 @@ void XrdMonSucker::Suck()
       continue;
     }
 
-    if (code != 't')
+    if (code != 't' && code != 'r')
     {
       TString msg;
       msg.Form("Message from %s.%s:%hu, c=%c, seq=%hhu, len=%hu",
@@ -596,7 +585,7 @@ void XrdMonSucker::Suck()
 
       log.Put(msg);
     }
-    else // this is a trace message
+    else if (code == 't') // this is a trace message
     {
       struct local_cache
       {
@@ -860,6 +849,36 @@ void XrdMonSucker::Suck()
       }
 
     } // else -- trace message handling
+    else if (code == 'r')
+    {
+      // XXXX Ceck for 'r' records, dump basic info to see what else to check / account for.
+      //  - 'r' probably has the pseq but it will be coming from a master /
+      //    redirector which I never tried before.
+      //     . enable on xrootd.t2 - report to some other port not to screw up
+      //       production system;
+      //     . have some printouts
+
+      XrdXrootdMonBurr *rb = (XrdXrootdMonBurr*) p->mBuff;
+      
+      TString txt;
+      txt.Form("Redirect trace from %s.%s:%hu, seq=%hhu, len=%hu.",
+               server->GetHost(), server->GetDomain(), port, pseq, plen);
+
+      int rb_to_read = plen - sizeof(XrdXrootdMonHeader) - sizeof(kXR_int64);
+      int i          = 0;
+      XrdXrootdMonRedir *rr = rb->info;
+      while (rb_to_read > 0)
+      {
+        int len = 8 * (rr->arg0.Dent + 1);
+        txt += TString::Format("\n  %3d - 0x%02hhx dent=%2d, len=%3d, to_go=%4d",
+                               i, rr->arg0.Type, rr->arg0.Dent, len, rb_to_read);
+        rr = (XrdXrootdMonRedir*) ((char*) rr + len);
+        rb_to_read -= len;
+        ++i;
+      }
+
+      log.Put(txt);
+    }
 
     p->DecRefCount();
   } // while (true) main loop
