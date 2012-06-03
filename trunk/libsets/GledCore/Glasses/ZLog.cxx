@@ -256,7 +256,7 @@ void ZLog::Form(const TString& time_string, Int_t level, const TString& prefix, 
   {
     va_list ap;
     va_start(ap, va_(fmt));
-    message = GForm(va_(fmt), ap);
+    message = GFormVA(va_(fmt), ap);
     va_end(ap);
   }
   TString pim(prefix.EndsWith(" ") ? "" : " ");
@@ -267,14 +267,14 @@ void ZLog::Form(const TString& time_string, Int_t level, const TString& prefix, 
 
 void ZLog::FormVA(const GTime& time, Int_t level, const TString& prefix, const char* va_(fmt), va_list args)
 {
-  Form(time.ToDateTimeLocal(false), level, prefix, va_(fmt), args);
+  FormVA(time.ToDateTimeLocal(false), level, prefix, va_(fmt), args);
 }
 
 void ZLog::FormVA(const TString& time_string, Int_t level, const TString& prefix, const char* va_(fmt), va_list args)
 {
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
-  TString message(GForm(va_(fmt), args));
+  TString message(GFormVA(va_(fmt), args));
   TString pim(prefix.EndsWith(" ") ? "" : " ");
 
   GMutexHolder _lck(mLoggerCond);
