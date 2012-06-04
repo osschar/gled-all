@@ -27,19 +27,23 @@ private:
   void _init();
 
 protected:
-  ZLink<ZLog>             mLog;       // X{GS} L{}
-  ZLink<UdpPacketSource>  mSource;    // X{GS} L{}
+  ZLink<ZLog>             mLog;        // X{GS} L{}
+  ZLink<UdpPacketSource>  mSource;     // X{GS} L{}
 
-  GQueue<SUdpPacket>      mUdpQueue;  //!
+  GQueue<SUdpPacket>      mUdpQueue;   //!
 
-  GThread                *mWLThread;  //!
+  GThread                *mWLThread;   //!
 
-  TFile                  *mFile;      //!
-  TTree                  *mTree;      //!
-  TBranch                *mBranch;    //!
+  TString                 mFilePrefix; // X{GS} Textor()  
+  TFile                  *mFile;       //!
+  TTree                  *mTree;       //!
+  TBranch                *mBranch;     //!
 
   // static void* tl_WriteLoop(UdpPacketTreeWriter* w);
   // void WriteLoop();
+
+  void open_file_create_tree();
+  void write_tree_close_file();
 
 public:
   UdpPacketTreeWriter(const Text_t* n="UdpPacketTreeWriter", const Text_t* t=0);

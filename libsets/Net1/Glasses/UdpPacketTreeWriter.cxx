@@ -29,6 +29,7 @@ void UdpPacketTreeWriter::_init()
 {
   mWLThread = 0;
 
+  mFilePrefix = "udp-tree-dump-";
   mFile   = 0;
   mTree   = 0;
   mBranch = 0;
@@ -114,4 +115,3 @@ void UdpPacketTreeWriter::Stop()
 }
 
 //==============================================================================
-
