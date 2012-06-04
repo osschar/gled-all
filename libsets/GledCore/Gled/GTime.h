@@ -21,15 +21,20 @@ protected:
   Long64_t	mSec;	// X{GS}
   Long64_t	mMuSec;	// X{GS}
 
+  void canonize();
+
 public:
-  GTime(Init_e i);
-  GTime(Long64_t s=0, Long64_t mu=0) : mSec(s), mMuSec(mu) {}
+  GTime() : mSec(0), mMuSec(0) {}
+  explicit GTime(Init_e i);
+  explicit GTime(Double_t s) { *this = s; }
+  explicit GTime(Long64_t s, Long64_t mu) : mSec(s), mMuSec(mu) { canonize(); }
   GTime(const GTime& t) : mSec(t.mSec), mMuSec(t.mMuSec) {}
 
   ~GTime() {}
 
   static GTime Now()   { return GTime(I_Now); }
   static GTime Never() { return GTime(I_Never); }
+  static GTime MiliSec(Long64_t ms) { return GTime(0ll, 1000ll * ms); }
 
   void   SetNow();
   GTime  TimeUntilNow();
@@ -41,18 +46,10 @@ public:
   void   SetNever();
   Bool_t IsNever() const;
 
-  GTime& operator=(Long64_t mus);
-  GTime& operator=(ULong64_t mus);
   GTime& operator=(Double_t sec);
 
   GTime& operator+=(const GTime& t);
   GTime& operator-=(const GTime& t);
-
-  GTime& operator+=(Long64_t mus);
-  GTime& operator-=(Long64_t mus);
-
-  GTime& operator+=(ULong64_t mus);
-  GTime& operator-=(ULong64_t mus);
 
   GTime& operator+=(Double_t sec);
   GTime& operator-=(Double_t sec);

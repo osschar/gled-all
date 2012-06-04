@@ -25,6 +25,21 @@ GTime::GTime(Init_e i)
   }
 }
 
+void GTime::canonize()
+{
+  if (mMuSec < 0) {
+    Long64_t uf = 1 + mMuSec/1000000;
+    mSec   -= uf;
+    mMuSec += 1000000*uf;
+  }
+  else if (mMuSec > 1000000) {
+    Long64_t of = mMuSec/1000000;
+    mSec   += of;
+    mMuSec -= 1000000*of;
+  }
+}
+
+
 //==============================================================================
 
 void GTime::SetNow()
@@ -52,37 +67,23 @@ Bool_t GTime::IsNever() const
   return mSec == LLONG_MIN && mMuSec == LLONG_MIN;
 }
 
-/**************************************************************************/
-
-GTime& GTime::operator=(Long64_t mus)
-{
-  GTime tt(mus/1000000, mus%1000000);
-  *this = tt;
-  return *this;
-}
-
-GTime& GTime::operator=(ULong64_t mus)
-{
-  GTime tt(mus/1000000, mus%1000000);
-  *this = tt;
-  return *this;
-}
+//==============================================================================
 
 GTime& GTime::operator=(Double_t sec)
 {
-  Long64_t s = (Long64_t)sec;
-  GTime tt(s, 1000000*((Long64_t)(sec-s)) );
-  *this = tt;
+  mSec = (Long64_t) sec;
+  if (sec < 0) --mSec;
+  mMuSec = (Long64_t) (1000000.0 * (sec - mSec));
   return *this;
 }
 
-/**************************************************************************/
+//==============================================================================
 
 GTime& GTime::operator+=(const GTime& t)
 {
   mSec   += t.mSec;
   mMuSec += t.mMuSec;
-  if(mMuSec > 1000000) {
+  if (mMuSec > 1000000) {
     ++mSec;
     mMuSec -= 1000000;
   }
@@ -93,53 +94,23 @@ GTime& GTime::operator-=(const GTime& t)
 {
   mSec   -= t.mSec;
   mMuSec -= t.mMuSec;
-  if(mMuSec < 0) {
+  if (mMuSec < 0) {
     --mSec;
     mMuSec += 1000000;
   }
   return *this;
 }
 
-GTime& GTime::operator+=(Long64_t mus)
-{
-  GTime tt(mus/1000000, mus%1000000);
-  *this += tt;
-  return *this;
-}
-
-GTime& GTime::operator-=(Long64_t mus)
-{
-  GTime tt(mus/1000000, mus%1000000);
-  *this -= tt;
-  return *this;
-}
-
-GTime& GTime::operator+=(ULong64_t mus)
-{
-  GTime tt(mus/1000000, mus%1000000);
-  *this += tt;
-  return *this;
-}
-
-GTime& GTime::operator-=(ULong64_t mus)
-{
-  GTime tt(mus/1000000, mus%1000000);
-  *this -= tt;
-  return *this;
-}
-
 GTime& GTime::operator+=(Double_t sec)
 {
-  Long64_t s = (Long64_t) sec;
-  GTime tt(s, (Long64_t) (1000000.0*(sec-s)));
+  GTime tt(sec);
   *this += tt;
   return *this;
 }
 
 GTime& GTime::operator-=(Double_t sec)
 {
-  Long64_t s = (Long64_t) sec;
-  GTime tt(s, (Long64_t) (1000000.0*(sec-s)));
+  GTime tt(sec);
   *this -= tt;
   return *this;
 }
