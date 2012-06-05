@@ -19,29 +19,29 @@ public:
 
 protected:
   Long64_t	mSec;	// X{GS}
-  Long64_t	mMuSec;	// X{GS}
+  Long64_t	mNSec;	// X{GS}
 
   void canonize();
 
 public:
-  GTime() : mSec(0), mMuSec(0) {}
+  GTime() : mSec(0), mNSec(0) {}
   explicit GTime(Init_e i);
   explicit GTime(Double_t s) { *this = s; }
-  explicit GTime(Long64_t s, Long64_t mu) : mSec(s), mMuSec(mu) { canonize(); }
-  GTime(const GTime& t) : mSec(t.mSec), mMuSec(t.mMuSec) {}
+  explicit GTime(Long64_t s, Long64_t ns) : mSec(s), mNSec(ns) { canonize(); }
+  GTime(const GTime& t) : mSec(t.mSec), mNSec(t.mNSec) {}
 
   ~GTime() {}
 
   static GTime Now()   { return GTime(I_Now); }
   static GTime Never() { return GTime(I_Never); }
-  static GTime MiliSec(Long64_t ms) { return GTime(0ll, 1000ll * ms); }
+  static GTime MiliSec(Long64_t ms) { return GTime(0, 1000000 * ms); }
 
   void   SetNow();
   GTime  TimeUntilNow();
 
-  void   SetZero()         { mSec = mMuSec = 0; }
-  Bool_t IsZero()    const { return mSec == 0 && mMuSec == 0; }
-  Bool_t IsNonZero() const { return mSec != 0 || mMuSec != 0; }
+  void   SetZero()         { mSec = mNSec = 0; }
+  Bool_t IsZero()    const { return mSec == 0 && mNSec == 0; }
+  Bool_t IsNonZero() const { return mSec != 0 || mNSec != 0; }
 
   void   SetNever();
   Bool_t IsNever() const;
@@ -63,10 +63,11 @@ public:
   bool   operator>=(const GTime& t) const;
   bool   operator==(const GTime& t) const;
 
-  Double_t ToDouble()  const { return mSec + 1e-6  * mMuSec; }
-  Float_t  ToFloat()   const { return mSec + 1e-6f * mMuSec; }
-  Long64_t ToMiliSec() const { return mSec*1000 + mMuSec/1000; }
-  Long64_t ToMiliSec(Long64_t max) const { return mSec >= max ? max*1000 : mSec*1000 + mMuSec/1000; }
+  Double_t ToDouble()  const { return mSec + 1e-9  * mNSec; }
+  Float_t  ToFloat()   const { return mSec + 1e-9f * mNSec; }
+  Long64_t ToMiliSec() const { return mSec*1000 + mNSec/1000000; }
+  Long64_t ToMiliSec(Long64_t max_seconds) const
+  { return mSec >= max_seconds ? max_seconds*1000 : mSec*1000 + mNSec/1000000; }
 
   TString  ToAscUTC  (Bool_t show_tz=true) const;
   TString  ToAscLocal(Bool_t show_tz=true) const;

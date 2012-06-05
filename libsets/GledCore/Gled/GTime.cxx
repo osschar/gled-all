@@ -12,6 +12,8 @@
 //______________________________________________________________________
 //
 
+#define NANO_FAK 1000000000
+
 ClassImp(GTime);
 
 
@@ -27,18 +29,17 @@ GTime::GTime(Init_e i)
 
 void GTime::canonize()
 {
-  if (mMuSec < 0) {
-    Long64_t uf = 1 + mMuSec/1000000;
-    mSec   -= uf;
-    mMuSec += 1000000*uf;
+  if (mNSec < 0) {
+    Long64_t uf = 1 - mNSec / NANO_FAK;
+    mSec  -= uf;
+    mNSec += NANO_FAK * uf;
   }
-  else if (mMuSec > 1000000) {
-    Long64_t of = mMuSec/1000000;
-    mSec   += of;
-    mMuSec -= 1000000*of;
+  else if (mNSec > NANO_FAK) {
+    Long64_t of = mNSec / NANO_FAK;
+    mSec  += of;
+    mNSec -= NANO_FAK * of;
   }
 }
-
 
 //==============================================================================
 
@@ -46,8 +47,8 @@ void GTime::SetNow()
 {
   struct timeval t;
   gettimeofday(&t, 0);
-  mSec   = t.tv_sec;
-  mMuSec = t.tv_usec;
+  mSec  = t.tv_sec;
+  mNSec = t.tv_usec * 1000;
 }
 
 GTime GTime::TimeUntilNow()
@@ -59,12 +60,12 @@ GTime GTime::TimeUntilNow()
 
 void GTime::SetNever()
 {
-  mSec = mMuSec = LLONG_MIN;
+  mSec = mNSec = LLONG_MIN;
 }
 
 Bool_t GTime::IsNever() const
 {
-  return mSec == LLONG_MIN && mMuSec == LLONG_MIN;
+  return mSec == LLONG_MIN && mNSec == LLONG_MIN;
 }
 
 //==============================================================================
@@ -73,7 +74,7 @@ GTime& GTime::operator=(Double_t sec)
 {
   mSec = (Long64_t) sec;
   if (sec < 0) --mSec;
-  mMuSec = (Long64_t) (1000000.0 * (sec - mSec));
+  mNSec = (Long64_t) (NANO_FAK * (sec - mSec));
   return *this;
 }
 
@@ -82,21 +83,21 @@ GTime& GTime::operator=(Double_t sec)
 GTime& GTime::operator+=(const GTime& t)
 {
   mSec   += t.mSec;
-  mMuSec += t.mMuSec;
-  if (mMuSec > 1000000) {
+  mNSec += t.mNSec;
+  if (mNSec > NANO_FAK) {
     ++mSec;
-    mMuSec -= 1000000;
+    mNSec -= NANO_FAK;
   }
   return *this;
 }
 
 GTime& GTime::operator-=(const GTime& t)
 {
-  mSec   -= t.mSec;
-  mMuSec -= t.mMuSec;
-  if (mMuSec < 0) {
+  mSec  -= t.mSec;
+  mNSec -= t.mNSec;
+  if (mNSec < 0) {
     --mSec;
-    mMuSec += 1000000;
+    mNSec += NANO_FAK;
   }
   return *this;
 }
@@ -135,31 +136,31 @@ GTime GTime::operator-(const GTime& t) const
 
 bool GTime::operator<(const GTime& t) const
 {
-  if(mSec == t.mSec) return mMuSec < t.mMuSec;
+  if(mSec == t.mSec) return mNSec < t.mNSec;
   return mSec < t.mSec;
 }
 
 bool GTime::operator>(const GTime& t) const
 {
-  if(mSec == t.mSec) return mMuSec > t.mMuSec;
+  if(mSec == t.mSec) return mNSec > t.mNSec;
   return mSec > t.mSec;
 }
 
 bool GTime::operator<=(const GTime& t) const
 {
-  if(mSec == t.mSec) return mMuSec <= t.mMuSec;
+  if(mSec == t.mSec) return mNSec <= t.mNSec;
   return mSec <= t.mSec;
 }
 
 bool GTime::operator>=(const GTime& t) const
 {
-  if(mSec == t.mSec) return mMuSec >= t.mMuSec;
+  if(mSec == t.mSec) return mNSec >= t.mNSec;
   return mSec >= t.mSec;
 }
 
 bool GTime::operator==(const GTime& t) const
 {
-  return mMuSec == t.mMuSec && mSec == t.mSec;
+  return mNSec == t.mNSec && mSec == t.mSec;
 }
 
 //==============================================================================
@@ -218,7 +219,7 @@ namespace
   {
     static const char *day_names[] = { "Sun", "Mon", "Tue", "Wed",  "Thu",  "Fri", "Sat" };
     static const char *month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-				    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+                                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
     time_t    time(sec);
     struct tm t;
@@ -306,7 +307,7 @@ void GTime::Sleep()
 {
   struct timespec req, rem;
   req.tv_sec  = mSec;
-  req.tv_nsec = mMuSec * 1000;
+  req.tv_nsec = mNSec;
   if (nanosleep(&req, &rem))
     perror("GTime::Sleep");
   // !!! Should sleep on? Need flag.
@@ -353,10 +354,10 @@ void GTime::NetStreamer(TBuffer& b)
 {
   if (b.IsReading())
   {
-    b >> mSec >> mMuSec;
+    b >> mSec >> mNSec;
   }
   else
   {
-    b << mSec << mMuSec;
+    b << mSec << mNSec;
   }
 }
