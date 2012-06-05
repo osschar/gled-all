@@ -46,6 +46,33 @@ UdpPacketTreeWriter::~UdpPacketTreeWriter()
 
 //==============================================================================
 
+void UdpPacketTreeWriter::open_file_create_tree()
+{
+  TString fn;
+  TString today = GTime::Now().ToDateLocal();
+  Int_t   i = 0;
+  while (true)
+  {
+    fn = mFilePrefix + today;
+    if (i != 0)
+      fn += TString::Format("-%d", i);
+    fn += ".root";
+
+    // Does it exist?
+
+    ++i;
+  }
+
+  // Open sesame
+}
+
+void UdpPacketTreeWriter::write_tree_close_file()
+{
+
+}
+
+//==============================================================================
+
 void UdpPacketTreeWriter::Start()
 {
   // Open file, create tree etc frag
