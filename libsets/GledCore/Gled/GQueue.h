@@ -21,6 +21,9 @@ public:
 
   void PushBack(TT* el);
   TT*  PopFront();
+
+  void Lock()   { mCondition.Lock();   }
+  void Unlock() { mCondition.Unlock(); }
 };
 
 template <typename TT>
