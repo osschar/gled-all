@@ -68,17 +68,23 @@ Int_t ZList::RebuildListRefs(An_ID_Demangler* idd)
   mElements.swap(in);
   mSize   = 0;
   mNextId = 0;
-  for(iterator i=in.begin(); i!=in.end(); ++i) {
+  for (iterator i = in.begin(); i != in.end(); ++i)
+  {
     ZGlass* lens = idd->DemangleID(GledNS::CastLens2ID(i->fLens));
-    if(lens) {
-      try {
+    if (lens)
+    {
+      try
+      {
 	lens->IncRefCount(this);
 	mElements.push_back(element(lens, mNextId++)); ++mSize;
       }
-      catch(...) {
+      catch(...)
+      {
 	++ret;
       }
-    } else {
+    }
+    else
+    {
       ++ret;
     }
   }
@@ -441,29 +447,31 @@ void ZList::Streamer(TBuffer &b)
 {
   UInt_t R__s, R__c;
 
-  if(b.IsReading()) {
-
+  if (b.IsReading())
+  {
     Version_t R__v = b.ReadVersion(&R__s, &R__c); if(R__v) { }
     AList::Streamer(b);
     b >> mNextId;
     Int_t el_id;
     ID_t  id;
     mElements.clear();
-    for(Int_t i=0; i<mSize; ++i) {
+    for (Int_t i = 0; i < mSize; ++i)
+    {
       b >> id >> el_id;
-      mElements.push_back(element((ZGlass*)id, el_id));
+      mElements.push_back(element(GledNS::CastID2Lens(id), el_id));
     }
     b.CheckByteCount(R__s, R__c, ZList::IsA());
-
-  } else {
-
+  }
+  else
+  {
     R__c = b.WriteVersion(ZList::IsA(), kTRUE);
     AList::Streamer(b);
     b << mNextId;
-    for(iterator i=begin(); i!=end(); ++i)
+    for (iterator i = begin(); i != end(); ++i)
+    {
       b << i()->GetSaturnID() << i->fId;
+    }
     b.SetByteCount(R__c, kTRUE);
-
   }
 }
 

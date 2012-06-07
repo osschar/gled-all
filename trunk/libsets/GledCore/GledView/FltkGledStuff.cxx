@@ -497,18 +497,22 @@ namespace {
 void FGS::LensChoiceMenuBox::fill_menu(ZList* list, Fl_Menu_Button& menu,
 				       TString prefix)
 {
-  lpZGlass_t l; list->CopyList(l);
-  for(lpZGlass_i i=l.begin(); i!=l.end(); ++i) {
-
+  lpZGlass_t l;
+  list->CopyList(l);
+  for (lpZGlass_i i = l.begin(); i != l.end(); ++i)
+  {
     TString name    = prefix + (*i)->GetName();
     ZList* clist   = dynamic_cast<ZList*>(*i);
     bool   list_ok = clist && clist->Size();
 
-    if(GledNS::IsA(*i, mSrcFid)) {
+    if (GledNS::IsA(*i, mSrcFid))
+    {
       menu.add(name.Data(), 0, (Fl_Callback*)lcmb_select_cb,
-	       (void*)((*i)->GetSaturnID()), list_ok ? FL_SUBMENU : 0);
+	       GledNS::CastID2VoidPtr((*i)->GetSaturnID()),
+               list_ok ? FL_SUBMENU : 0);
     }
-    if(list_ok) {
+    if (list_ok)
+    {
       fill_menu(clist, menu, name + "/");
     }
   }
