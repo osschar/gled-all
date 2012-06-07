@@ -202,8 +202,11 @@ public:
   {
     GMutexHolder lck(mListMutex);
     Stepper<GLASS> s(this, copy_zeros);
-    while(s.step())
+    while (s.step())
+    {
+      if (do_eyerefs && *s) s->IncEyeRefCount();
       dest.push_back(*s);
+    }
     return mListTimeStamp;
   }
   template <class GLASS>
