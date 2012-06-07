@@ -1,3 +1,13 @@
+2012-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	In Freeze(), wipe MIR's that reference the dying lens from the
+	delayed MIR queue.
+
+	* Glasses/AList.h:
+	Bugfix - eye-ref-count was not increased in CopyListByGlass<>().
+
 2012-06-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GTime.cxx:

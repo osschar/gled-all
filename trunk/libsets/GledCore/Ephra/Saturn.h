@@ -224,7 +224,8 @@ public:
 protected:
 
   // MIR Result Request registration and storage
-  struct mir_rr_info {
+  struct mir_rr_info
+  {
     GCondition*  cond;
     ZMIR_RR*     mir_rr;
     mir_rr_info(GCondition* c) : cond(c), mir_rr(0) {}
