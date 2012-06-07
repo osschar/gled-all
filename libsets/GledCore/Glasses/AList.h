@@ -218,6 +218,27 @@ public:
     }
   }
 
+  template <class CLASS>
+  TimeStamp_t CopyListByClass(list<CLASS*>& dest, bool copy_zeros=false, bool do_eyerefs=false)
+  {
+    GMutexHolder lck(mListMutex);
+    Stepper<CLASS> s(this, copy_zeros);
+    while (s.step())
+    {
+      if (do_eyerefs && *s) dynamic_cast<ZGlass*>(*s)->IncEyeRefCount();
+      dest.push_back(*s);
+    }
+    return mListTimeStamp;
+  }
+  template <class CLASS>
+  void ReleaseListCopyEyeRefsByClass(list<CLASS*>& dest)
+  {
+    for (typename list<CLASS*>::iterator i = dest.begin(); i != dest.end(); ++i)
+    {
+      if (*i) dynamic_cast<ZGlass*>(*i)->DecEyeRefCount();
+    }
+  }
+
   // Searching of elements by name.
   virtual ZGlass* GetElementByName (const TString& name);
   virtual Int_t   GetElementsByName(const TString& name, lpZGlass_t& dest);

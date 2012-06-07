@@ -244,26 +244,28 @@ void ZDeque::Streamer(TBuffer &b)
   static const Exc_t _eh("ZDeque::Streamer ");
   UInt_t R__s, R__c;
 
-  if(b.IsReading()) {
-
+  if (b.IsReading())
+  {
     Version_t R__v = b.ReadVersion(&R__s, &R__c); if(R__v) { }
     AList::Streamer(b);
     ID_t id;
     mElements.clear();
-    for(Int_t i=0; i<mSize; ++i) {
+    for (Int_t i = 0; i < mSize; ++i)
+    {
       b >> id;
-      mElements.push_back((ZGlass*)id);
+      mElements.push_back(GledNS::CastID2Lens(id));
     }
     b.CheckByteCount(R__s, R__c, ZDeque::IsA());
-
-  } else {
-
+  }
+  else
+  {
     R__c = b.WriteVersion(ZDeque::IsA(), kTRUE);
     AList::Streamer(b);
-    for(iterator i=begin(); i!=end(); ++i)
+    for (iterator i = begin(); i != end(); ++i)
+    {
       b << i()->GetSaturnID();
+    }
     b.SetByteCount(R__c, kTRUE);
-
   }
 }
 

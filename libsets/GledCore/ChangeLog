@@ -1,5 +1,15 @@
 2012-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/AList.h:
+	Add CopyListByClass<C>() for cases when C is not a glass.
+
+	* Glasses/ZDeque.cxx:
+	* Glasses/ZList.cxx:
+	* GledView/FltkGledStuff.cxx:
+	Fix compilation warnings.
+
+2012-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Ephra/Saturn.cxx:
 	* Ephra/Saturn.h:
 	In Freeze(), wipe MIR's that reference the dying lens from the
