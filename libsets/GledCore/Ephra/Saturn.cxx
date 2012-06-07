@@ -750,10 +750,11 @@ void Saturn::Shutdown()
 void Saturn::LockMIRShooters(bool wait_until_queue_empty)
 {
   mMIRShootingCnd.Lock();
-  if(wait_until_queue_empty) {
-    while(1) {
+  if (wait_until_queue_empty)
+  {
+    while (true)
+    {
       if(mMIRShootingQueue.empty()) break;
-      // printf("Saturn::LockMIRShooters MIRShootingQueue non-empty ... delaying.\n");
       mMIRShootingCnd.Wait();
     }
   }
@@ -766,7 +767,6 @@ void Saturn::LockMIRShooters(bool wait_until_queue_empty)
 void Saturn::UnlockMIRShooters()
 {
   mDelayedMIRShootingCnd.Unlock();
-  //mMIRShootingCnd.Unlock();
   mMIRShooterRoutingLock.Unlock();
 }
 
@@ -828,6 +828,32 @@ void Saturn::Freeze(ZGlass* lens) throw(Exc_t)
     throw _eh + "lens=0; stalling.";
 
   ISdebug(2,GForm("%sfor %s, id=%u", _eh.Data(), lens->GetName(), lens->GetSaturnID()));
+
+  // Remove delayed MIRs aimed at the lens.
+  // XXXX This is somewhat funky ... MIRs should be routed to their
+  // final destination before being queued up. So, MIR should have
+  // an "execute at" GTime member. Also, we could have "execute on Freeze"
+  // tag (maybe GTime::Never()?).
+  {
+    GMutexHolder _lck(mDelayedMIRShootingCnd);
+
+    mTime2MIR_i i = mDelayedMIRShootingQueue.begin();
+    while (i != mDelayedMIRShootingQueue.end())
+    {
+      ZMIR *mir = i->second;
+      if (mir->fCaller == lens || mir->fRecipient == lens || mir->fResultRecipient == lens ||
+          mir->fAlpha  == lens || mir->fBeta      == lens || mir->fGamma           == lens)
+      {
+        mTime2MIR_i j = i++;
+        delete mir;
+        mDelayedMIRShootingQueue.erase(j);
+      }
+      else
+      {
+        ++i;
+      }
+    }
+  }
 
   int  ok = 0, failed = 0;
   bool yield = false;
@@ -1444,10 +1470,12 @@ void Saturn::post_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller)
 
   markup_posted_mir(*mir, caller);
 
-  try {
+  try
+  {
     RouteMIR(mir);
   }
-  catch(Exc_t& exc) {
+  catch(Exc_t& exc)
+  {
     ISerr(_eh + "failed: " + exc);
   }
 }
@@ -1459,14 +1487,17 @@ void Saturn::shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
 
   markup_posted_mir(*mir, caller);
 
-  if (use_own_thread) {
+  if (use_own_thread)
+  {
     GThread* bar = new GThread("Saturn-MIRRouter",
                                (GThread_foo) (tl_MIR_Router), this,
                                true);
     bar->set_owner(caller);
     bar->set_mir(mir.release());
     bar->Spawn();
-  } else {
+  }
+  else
+  {
     mMIRShootingCnd.Lock();
     mMIRShootingQueue.push_back(mir.release());
     mMIRShootingCnd.Broadcast();
@@ -1496,21 +1527,25 @@ void Saturn::mir_shooter()
 
   static const Exc_t _eh("Saturn::mir_shooter ");
 
-  while(1) {
+  while (true)
+  {
     mMIRShootingCnd.Lock();
-    if(mMIRShootingQueue.empty()) {
+    if (mMIRShootingQueue.empty())
+    {
       mMIRShootingCnd.Broadcast();
       mMIRShootingCnd.Wait();
     }
     auto_ptr<ZMIR> mir(mMIRShootingQueue.front());
     mMIRShootingQueue.pop_front();
     mMIRShootingCnd.Unlock();
-    try {
+    try
+    {
       mMIRShooterRoutingLock.Lock();
       RouteMIR(mir);
       mMIRShooterRoutingLock.Unlock();
     }
-    catch(Exc_t& exc) {
+    catch(Exc_t& exc)
+    {
       ISmess(_eh + "caugt exception: " + exc);
     }
   }
@@ -1542,10 +1577,12 @@ void Saturn::delayed_mir_shooter()
     auto_ptr<ZMIR> mir(i->second);
     mDelayedMIRShootingQueue.erase(i);
     mDelayedMIRShootingCnd.Unlock();
-    try {
+    try
+    {
       RouteMIR(mir);
     }
-    catch(Exc_t& exc) {
+    catch(Exc_t& exc)
+    {
       ISmess(_eh + "caugt exception: " + exc);
     }
   }
