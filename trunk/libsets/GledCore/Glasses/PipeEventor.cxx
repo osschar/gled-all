@@ -53,7 +53,8 @@ void PipeEventor::OnStart(Operator::Arg* op_arg)
 
 void PipeEventor::OnExit(Operator::Arg* op_arg)
 {
-  if(mPipe) {
+  if (mPipe)
+  {
     gSystem->ClosePipe(mPipe);
     mPipe = 0;
   }
@@ -66,14 +67,15 @@ void PipeEventor::OnExit(Operator::Arg* op_arg)
 
 void PipeEventor::Operate(Operator::Arg* op_arg)
 {
-  if(!mPipe) {
-    throw(Operator::Exception(this, Operator::OE_Break, "pipe closed"));
+  if (!mPipe)
+  {
+    throw Operator::Exception(this, Operator::OE_Break, "pipe closed");
   }
 
   mSendCond.Lock();
   try {
     feed_commands();
-    mSendCond.TimedWaitMS(mWaitTimeMS);
+    mSendCond.TimedWait(GTime::MiliSec(mWaitTimeMS));
     feed_commands();
   }
   catch(Operator::Exception exc) {

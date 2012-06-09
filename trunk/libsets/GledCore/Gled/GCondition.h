@@ -9,6 +9,7 @@
 
 #include <Gled/GledTypes.h>
 #include <Gled/GMutex.h>
+#include <Gled/GTime.h>
 #ifndef __CINT__
 #include <pthread.h>
 #endif
@@ -24,8 +25,8 @@ public:
   ~GCondition();
 
   Int_t	Wait();
-  Int_t TimedWaitMS(UInt_t wait_ms);
-  Int_t TimedWaitMuS(UInt_t wait_mus);
+  Int_t TimedWait(GTime time);
+  Int_t TimedWaitUntil(GTime time);
   Int_t	Signal();
   Int_t Broadcast();
   Int_t	LockSignal();

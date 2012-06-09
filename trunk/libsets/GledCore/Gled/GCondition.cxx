@@ -51,44 +51,32 @@ Int_t GCondition::Wait()
   return ret;
 }
 
-Int_t GCondition::TimedWaitMS(UInt_t wait_ms)
+Int_t GCondition::TimedWait(GTime time)
 {
-  // Performs timedwait ... mutex should be locked upon calling this method.
-  // Time given in mili-seconds.
+  // Performs timedwait for interval time.
+  // Mutex should be locked upon calling this method.
   // Returns 1 for time-out, 0 for other cases.
 
-  struct timeval now;
-  struct timespec timeout;
-
-  gettimeofday(&now, 0);
-  int mus_add = now.tv_usec + 1000*wait_ms;
-  timeout.tv_sec = now.tv_sec + mus_add/1000000;
-  timeout.tv_nsec = (mus_add%1000000) * 1000;
-  int retcode = pthread_cond_timedwait(&mCond, &mMut, &timeout);
-  if(retcode == ETIMEDOUT) {
-    return 1;
-  } else {
-    return 0;
-  }
+  return TimedWaitUntil(time + GTime::Now());
 }
 
-Int_t GCondition::TimedWaitMuS(UInt_t wait_mus)
+Int_t GCondition::TimedWaitUntil(GTime time)
 {
-  // Performs timedwait ... mutex should be locked upon calling this method.
-  // Time given in micro-seconds.
+  // Performs timedwait until time.
+  // Mutex should be locked upon calling this method.
   // Returns 1 for time-out, 0 for other cases.
 
-  struct timeval now;
   struct timespec timeout;
+  timeout.tv_sec  = time.GetSec();
+  timeout.tv_nsec = time.GetNSec();
 
-  gettimeofday(&now, 0);
-  int mus_add = now.tv_usec + wait_mus;
-  timeout.tv_sec = now.tv_sec + mus_add/1000000;
-  timeout.tv_nsec = (mus_add%1000000) * 1000;
   int retcode = pthread_cond_timedwait(&mCond, &mMut, &timeout);
-  if(retcode == ETIMEDOUT) {
+  if (retcode == ETIMEDOUT)
+  {
     return 1;
-  } else {
+  }
+  else
+  {
     return 0;
   }
 }

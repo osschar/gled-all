@@ -21,10 +21,16 @@ public:
 
   void PushBack(TT* el);
   TT*  PopFront();
+  TT*  PopFrontTimedWait(GTime time);
+
+  void ClearQueue();
+  void ClearQueueDecRefCount();
 
   void Lock()   { mCondition.Lock();   }
   void Unlock() { mCondition.Unlock(); }
 };
+
+//------------------------------------------------------------------------------
 
 template <typename TT>
 void GQueue<TT>::PushBack(TT* el)
@@ -39,10 +45,47 @@ TT* GQueue<TT>::PopFront()
 {
   GMutexHolder _lck(mCondition);
   if (mQueue.empty())
+  {
     mCondition.Wait();
+    if (mQueue.empty())
+      return 0;
+  }
   TT *el = mQueue.front();
   mQueue.pop_front();
   return el;
+}
+
+template <typename TT>
+TT* GQueue<TT>::PopFrontTimedWait(GTime time)
+{
+  GMutexHolder _lck(mCondition);
+  if (mQueue.empty())
+  {
+    mCondition.TimedWait(time);
+    if (mQueue.empty())
+      return 0;
+  }
+  TT *el = mQueue.front();
+  mQueue.pop_front();
+  return el;
+}
+
+template <typename TT>
+void GQueue<TT>::ClearQueue()
+{
+  GMutexHolder _lck(mCondition);
+  mQueue.clear();
+}
+
+template <typename TT>
+void GQueue<TT>::ClearQueueDecRefCount()
+{
+  GMutexHolder _lck(mCondition);
+  while (! mQueue.empty())
+  {
+    mQueue.front()->DecRefCount();
+    mQueue.pop_front();
+  }
 }
 
 //==============================================================================
@@ -67,6 +110,8 @@ public:
 
   void DeliverToQueues(TT* el);
 };
+
+//------------------------------------------------------------------------------
 
 template <typename TT>
 Int_t GQueueSet<TT>::GetSetSize() const
