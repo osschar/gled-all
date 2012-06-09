@@ -393,7 +393,7 @@ void* Mountain::DancerBeat(DancerInfo* di)
       {
 	di->fOpArg->fSuspendidor.Lock();
 	di->fSleeping = true;
-	int timed_out = di->fOpArg->fSuspendidor.TimedWaitMS(sleep_time);
+	int timed_out = di->fOpArg->fSuspendidor.TimedWait(GTime::MiliSec(sleep_time));
 	di->fSleeping = false;
 	di->fOpArg->fSuspendidor.Unlock();
 	if (!timed_out)
@@ -593,15 +593,18 @@ Int_t Mountain::SuspendAll()
   bInSuspend = true;
   UInt_t n;
   hStageLock.Lock(); n = hOnStage.size(); hStageLock.Unlock();
-  if(n==0) {
+  if (n == 0)
+  {
     //hSuspendCond.Unlock();
     return 0;
   }
-  do {
-    int ws = hSuspendCond.TimedWaitMS(5);
-    if(ws==0) hSuspendCount++;
+  do
+  {
+    int ws = hSuspendCond.TimedWait(GTime::MiliSec(5));
+    if (ws == 0) hSuspendCount++;
     hStageLock.Lock(); n = hOnStage.size(); hStageLock.Unlock();
-    if(ws && hSuspendCount < n) {
+    if (ws && hSuspendCount < n)
+    {
       ISerr("Mountain::SuspendAll timed out ... stalling");
       //hSuspendCond.Unlock();
       return 1;

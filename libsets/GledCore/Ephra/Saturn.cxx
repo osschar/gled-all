@@ -1571,7 +1571,7 @@ void Saturn::delayed_mir_shooter()
     GTime now(GTime::I_Now);
     if (i->first > now)
     {
-      int timeoutp = mDelayedMIRShootingCnd.TimedWaitMS((i->first - now).ToMiliSec());
+      int timeoutp = mDelayedMIRShootingCnd.TimedWaitUntil(i->first);
       if (! timeoutp) goto begin;
     }
     auto_ptr<ZMIR> mir(i->second);

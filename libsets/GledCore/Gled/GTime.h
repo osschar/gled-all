@@ -32,7 +32,7 @@ public:
 
   ~GTime() {}
 
-  static GTime Now()   { return GTime(I_Now); }
+  static GTime Now()   { return GTime(I_Now);   }
   static GTime Never() { return GTime(I_Never); }
   static GTime MiliSec(Long64_t ms) { return GTime(0, 1000000 * ms); }
 
