@@ -36,8 +36,6 @@ int main(int argc, char **argv)
 
   if (gled->GetDaemon())
   {
-    
-
     printf("saturn - daemonizing ...\n");
     if (daemon(1, 1))
     {
@@ -64,7 +62,9 @@ int main(int argc, char **argv)
   if (gled->GetRootAppRunning())
   {
     app_thread->Kill(GThread::SigTERM);
-  } else {
+  }
+  else
+  {
     Getlinem(kCleanUp, 0);
   }
   app_thread->Join();
