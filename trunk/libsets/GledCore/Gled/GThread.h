@@ -69,6 +69,14 @@ public:
     ~CancelDisabler() { SetCancelState(mExCancelState); }
   };
 
+  class CancelEnabler
+  {
+    CState mExCancelState;
+  public:
+    CancelEnabler()  { mExCancelState = CancelOn(); }
+    ~CancelEnabler() { SetCancelState(mExCancelState); }
+  };
+
 private:
   class Cleanup
   {
