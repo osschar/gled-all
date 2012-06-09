@@ -1,3 +1,9 @@
+2012-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Intermediate commit - improve in all respects :)
+	Tree-writer thread cancellation does not work, damn it.
 
 2012-04-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
