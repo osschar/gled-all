@@ -574,9 +574,7 @@ void XrdMonSucker::Suck()
       {
 	GLensWriteHolder _lck(server);
 	server->UpdateSrvIdTime(recv_time);
-	// Update 
 	msg += TString::Format("\n\tServerId -- uname=%s other=%s", prim, sec);
-	log.Put(ZLog::L_Message, msg);
       }
       else
       {
