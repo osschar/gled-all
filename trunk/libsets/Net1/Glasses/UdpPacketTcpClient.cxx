@@ -67,14 +67,14 @@ entry_point:
 
     if (mSocket->IsValid())
     {
-      printf("%sSocket creation successful, entering listen loop.\n", _eh.Data());
+      // printf("%sSocket creation successful, entering listen loop.\n", _eh.Data());
       break;
     }
 
     ++n_try;
     delete mSocket; mSocket = 0;
 
-    printf("%sSocket creation failed, n_try=%d, max_n=%d.\n", _eh.Data(), n_try, mNRetry);
+    // printf("%sSocket creation failed, n_try=%d, max_n=%d.\n", _eh.Data(), n_try, mNRetry);
 
     if (n_try >= mNRetry)
     {
@@ -126,7 +126,7 @@ entry_point:
 	  delete mSocket;
 	  mSocket = 0;
 
-	  printf("%sSocket closed, reentering creation etc.\n", _eh.Data());
+	  // printf("%sSocket closed, reentering creation etc.\n", _eh.Data());
 
 	  goto entry_point;
 	}
