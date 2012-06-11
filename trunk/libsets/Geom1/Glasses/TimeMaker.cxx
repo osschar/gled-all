@@ -128,11 +128,14 @@ void TimeMaker::Operate(Operator::Arg* op_arg)
 	     Identify().Data(), op_arg->fEventor->GetEventTime(), t, dt);
   }
 
-  if (mClients != 0) {
+  if (mClients != 0)
+  {
     list<TimeMakerClient*> clients;
-    mClients->CopyListByGlass<TimeMakerClient>(clients);
+    mClients->CopyListByClass<TimeMakerClient>(clients);
     for (list<TimeMakerClient*>::iterator i=clients.begin(); i!=clients.end(); ++i)
+    {
       (*i)->TimeTick(t, dt);
+    }
   }
 
   if (bPushToStack)
