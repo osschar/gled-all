@@ -82,7 +82,7 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
   GLboolean rv;
   glRasterPos4f(0, 0, 0, 1);
   glGetBooleanv(GL_CURRENT_RASTER_POSITION_VALID, &rv);
-  if(rv == false) return;
+  if (rv == false) return;
 
   typedef list<TextLineData>           lTLD_t;
   typedef list<TextLineData>::iterator lTLD_i;
@@ -102,7 +102,8 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
     interline = ascent + descent + bs.lineskip;
 
   GledNS::split_string(text, lines, '\n');
-  for(lStr_i l=lines.begin(); l!=lines.end(); ++l) {
+  for (lStr_i l=lines.begin(); l!=lines.end(); ++l)
+  {
     tlds.push_back( TextLineData(txf, *l) );
     TextLineData& tld = tlds.back();
     max_width = TMath::Max(max_width, tld.width);
@@ -134,23 +135,25 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
   glMatrixMode(GL_MODELVIEW);
 
   // Translate to required position.
-  float
-    xo = rp[0] - halfw,
-    yo = rp[1] + halfh,
-    zo = rp[2] * zoffset;
-  for(Ssiz_t i=0; i<bs.pos.Length(); ++i) {
+  float xo = rp[0] - halfw;
+  float yo = rp[1] + halfh;
+  float zo = rp[2] * zoffset;
+
+  for (Ssiz_t i=0; i<bs.pos.Length(); ++i)
+  {
     switch(bs.pos(i)) {
-    case 'l': case 'L': xo += halfw; break;
-    case 'r': case 'R': xo -= halfw; break;
-    case 't': case 'T': yo -= halfh; break;
-    case 'b': case 'B': yo += halfh; break;
+      case 'l': case 'L': xo += halfw; break;
+      case 'r': case 'R': xo -= halfw; break;
+      case 't': case 'T': yo -= halfh; break;
+      case 'b': case 'B': yo += halfh; break;
     }
   }
   glTranslatef(TMath::Nint(xo), TMath::Nint(yo), zo);
 
   glScalef(scale, scale, 1);
 
-  if(nrc_lens->GetRnrTiles()) {
+  if (nrc_lens->GetRnrTiles())
+  {
     glColor4fv(nrc_lens->RefTileCol()());
     glBegin(GL_QUADS);
     glVertex2i(0, -height); glVertex2i(width, -height);
@@ -161,7 +164,8 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
   glColor4fv(nrc_lens->RefTextCol()());
   glTranslatef(0, 0, -1e-6);
 
-  if(nrc_lens->GetRnrFrames()) {
+  if (nrc_lens->GetRnrFrames())
+  {
     glLineWidth(1);
     glBegin(GL_LINE_LOOP);
     glVertex2i(0, -height); glVertex2i(width, -height);
@@ -175,12 +179,15 @@ void GLTextNS::RnrTextBar(RnrDriver* rd, const TString& text,
   glEnable(GL_TEXTURE_2D);
 
   glTranslatef(bs.lm, -(bs.tm + descent + ascent), 0);
-  for(lTLD_i l=tlds.begin(); l!=tlds.end(); ++l) {
+  for (lTLD_i l=tlds.begin(); l!=tlds.end(); ++l)
+  {
     glPushMatrix();
-    if(l->width != max_width) {
-      switch(bs.align) {
-      case 'c': case 'C': glTranslatef((max_width - l->width)/2, 0, 0); break;
-      case 'r': case 'R': glTranslatef((max_width - l->width),   0, 0); break;
+    if (l->width != max_width)
+    {
+      switch (bs.align)
+      {
+	case 'c': case 'C': glTranslatef((max_width - l->width)/2, 0, 0); break;
+	case 'r': case 'R': glTranslatef((max_width - l->width),   0, 0); break;
       }
     }
     txf->Render(l->text);
