@@ -321,6 +321,9 @@ void GledGUI::Run()
   // ALL gui (also for eyes and therefore for pupils) runs through this loop.
 
   // printf("GledGUI::Run entering GUI event loop.\n");
+
+  GTime::UpdateApproximateNow(GTime::Now());
+
   Fl::lock();		// init thread support
 
   if (bGuiUp)
@@ -344,7 +347,9 @@ void GledGUI::Run()
     }
     fGTRQueueMoo.Unlock();
 
-    Fl::wait(10);
+    Fl::wait(1);
+
+    GTime::UpdateApproximateNow(GTime::Now());
   }
 
   Fl::unlock();
