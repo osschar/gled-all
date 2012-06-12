@@ -1,3 +1,9 @@
+2012-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Complete version of tree-writer, ready for production.
+
 2012-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/UdpPacketTreeWriter.cxx:

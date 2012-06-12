@@ -34,6 +34,7 @@ void UdpPacketTreeWriter::_init()
   mRotateMinutes   = 24 * 60;
 
   bRunning = false;
+  bForceRotate = false;
 
   mFilePrefix = "udp-tree-dump-";
   mFile   = 0;
@@ -57,11 +58,11 @@ void UdpPacketTreeWriter::open_file_create_tree()
   static const Exc_t _eh("UdpPacketTreeWriter::open_file_create_tree ");
 
   TString fn;
-  TString today = GTime::Now().ToDateLocal();
+  TString basename = mFilePrefix + GTime::Now().ToDateLocal();
   Int_t   i = 0;
   while (true)
   {
-    fn = mFilePrefix + today;
+    fn = basename;
     if (i != 0)
       fn += TString::Format("-%d", i);
     fn += ".root";
@@ -90,6 +91,7 @@ void UdpPacketTreeWriter::open_file_create_tree()
   mBranch = mTree->Branch("P", &pup, 8192, 2);
 
   mLastFileOpen = GTime::Now();
+  bForceRotate = false;
 }
 
 void UdpPacketTreeWriter::write_tree_close_file()
@@ -111,33 +113,8 @@ void UdpPacketTreeWriter::write_tree_close_file()
 
 //==============================================================================
 
-void* UdpPacketTreeWriter::tl_WriteLoop(UdpPacketTreeWriter* w)
-{
-  w->mWLThread->CancelOff();
-  GThread::SetSignalHandler(GThread::SigUSR1, sh_WriteLoop);
-  GThread::UnblockSignal(GThread::SigUSR1);
-
-  w->open_file_create_tree();
-
-  w->mSource->RegisterConsumer(&w->mUdpQueue);
-
-  w->mWLThread->CleanupPush((GThread_cu_foo) cu_WriteLoop, w);
-
-  printf("OORGH, going into loop ...\n");
-
-  w->WriteLoop();
-
-  // This never entered ... the thread is canceled.
-
-  w->mWLThread->CleanupPop(true);
-
-  return 0;
-}
-
 void UdpPacketTreeWriter::cu_WriteLoop(UdpPacketTreeWriter* w)
 {
-  printf("YAYOOR, cluenup is nigh!\n");
-
   w->mSource->UnregisterConsumer(&w->mUdpQueue);
   w->mUdpQueue.ClearQueueDecRefCount();
 
@@ -151,11 +128,6 @@ void UdpPacketTreeWriter::cu_WriteLoop(UdpPacketTreeWriter* w)
   }
 }
 
-void UdpPacketTreeWriter::sh_WriteLoop(GSignal* s)
-{
-  printf("Bloody signal %s, mate!\n", GThread::SignalName(s->fSignal));
-}
-
 void UdpPacketTreeWriter::WriteLoop()
 {
   static const Exc_t _eh("UdpPacketTreeWriter::WriteLoop ");
@@ -165,26 +137,23 @@ void UdpPacketTreeWriter::WriteLoop()
     SUdpPacket *p;
 
     {
-      GThread::CancelEnabler _ce();
-      p = mUdpQueue.PopFrontTimedWait(GTime(1, 0));
+      GThread::CancelEnabler _ce;
+      p = mUdpQueue.PopFrontTimedWaitUntil(GTime::ApproximateNow() + GTime(10, 0));
+    }
+
+    if (GTime::ApproximateNow() >= mLastFileOpen + GTime(60*mRotateMinutes, 0) || bForceRotate)
+    {
+      mBranch->SetAddress(0);
+      write_tree_close_file();
+      open_file_create_tree();
+      {
+        GLensReadHolder _lck(this);
+        Stamp(FID());
+      }
     }
 
     if (p == 0)
-    {
-      printf("XXXX packeta nulla ...\n");
-      if (GTime::Now() >= mLastFileOpen + GTime(60*mRotateMinutes, 0))
-      {
-        printf("XXXX time elapsed ...\n");
-        mBranch->SetAddress(0);
-        write_tree_close_file();
-        open_file_create_tree();
-      }
-      else
-      {
-        printf("XXXX time not elapsed ...\n");
-      }
       continue;
-    }
 
     mBranch->SetAddress(&p);
     mTree->Fill();
@@ -215,13 +184,23 @@ void UdpPacketTreeWriter::Start()
     if (mWLThread)
       throw _eh + "already running.";
 
-    mWLThread = new GThread("UdpPacketTreeWriter-WriteLoop",
-                            (GThread_foo) tl_WriteLoop, this, false);
+    mWLThread = GThread::Self();
+    mWLThread->SetName("UdpPacketTreeWriter-WriteLoop");
+    GThread::CancelOff();
+
     bRunning = true;
     Stamp(FID());
   }
 
-  mWLThread->Spawn();
+  open_file_create_tree();
+
+  mWLThread->CleanupPush((GThread_cu_foo) cu_WriteLoop, this);
+
+  mSource->RegisterConsumer(&mUdpQueue);
+
+  WriteLoop();
+
+  mWLThread->CleanupPop(true);
 }
 
 void UdpPacketTreeWriter::Stop()
@@ -238,8 +217,8 @@ void UdpPacketTreeWriter::Stop()
   }
 
   thr->Cancel();
-  // XXXX This f***er exits THIS thread. WTF!!!
   thr->Join();
+
   delete thr;
 }
 
@@ -251,8 +230,6 @@ void UdpPacketTreeWriter::RotateTree()
 
   if ( ! GThread::IsValidPtr(mWLThread))
     throw _eh + "not running.";
-  
-  mWLThread->Kill(GThread::SigUSR1);
-  // XXXX This is ignored / does nothing.
-  // Not sure what i'll do.
+
+  bForceRotate = true;
 }

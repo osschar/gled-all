@@ -34,11 +34,12 @@ protected:
 
   Int_t                   mAutoSaveEntries;  // X{GS} 7 Value(-range=>[0, 1000000, 1])
   Int_t                   mRotateMinutes;    // X{GS} 7 Value(-range=>[0, 14400, 1])
-  GTime                   mLastFileOpen;     //!
+  GTime                   mLastFileOpen;     //!X{GR} 7 TimeOut()
 
   GQueue<SUdpPacket>      mUdpQueue;   //!
 
   Bool_t                  bRunning;    //! X{G} 7 BoolOut()
+  Bool_t                  bForceRotate;//!
 
   GThread                *mWLThread;   //!
 
@@ -50,9 +51,8 @@ protected:
   void open_file_create_tree();
   void write_tree_close_file();
 
-  static void* tl_WriteLoop(UdpPacketTreeWriter* w);
-  static void  cu_WriteLoop(UdpPacketTreeWriter* w);
-  static void  sh_WriteLoop(GSignal* s);
+  static void cu_WriteLoop(UdpPacketTreeWriter* w);
+
   void WriteLoop();
 
 public:
