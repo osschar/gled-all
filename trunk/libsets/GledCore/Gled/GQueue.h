@@ -22,6 +22,7 @@ public:
   void PushBack(TT* el);
   TT*  PopFront();
   TT*  PopFrontTimedWait(GTime time);
+  TT*  PopFrontTimedWaitUntil(GTime time);
 
   void ClearQueue();
   void ClearQueueDecRefCount();
@@ -62,6 +63,22 @@ TT* GQueue<TT>::PopFrontTimedWait(GTime time)
   if (mQueue.empty())
   {
     mCondition.TimedWait(time);
+    if (mQueue.empty())
+      return 0;
+  }
+  TT *el = mQueue.front();
+  mQueue.pop_front();
+  return el;
+}
+
+
+template <typename TT>
+TT* GQueue<TT>::PopFrontTimedWaitUntil(GTime time)
+{
+  GMutexHolder _lck(mCondition);
+  if (mQueue.empty())
+  {
+    mCondition.TimedWaitUntil(time);
     if (mQueue.empty())
       return 0;
   }
