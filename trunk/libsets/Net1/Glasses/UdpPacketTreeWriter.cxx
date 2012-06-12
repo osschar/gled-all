@@ -138,10 +138,10 @@ void UdpPacketTreeWriter::WriteLoop()
 
     {
       GThread::CancelEnabler _ce;
-      p = mUdpQueue.PopFrontTimedWaitUntil(GTime::ApproximateNow() + GTime(10, 0));
+      p = mUdpQueue.PopFrontTimedWaitUntil(GTime::ApproximateTime() + GTime(10, 0));
     }
 
-    if (GTime::ApproximateNow() >= mLastFileOpen + GTime(60*mRotateMinutes, 0) || bForceRotate)
+    if (GTime::ApproximateTime() >= mLastFileOpen + GTime(60*mRotateMinutes, 0) || bForceRotate)
     {
       mBranch->SetAddress(0);
       write_tree_close_file();
