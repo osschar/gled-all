@@ -1,3 +1,26 @@
+2012-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add approximate time keeping in GTime static member.
+	Value is updated from Gled::Run().
+	This is not terribliy accurate for gled / GledGUI and should
+	actually be moved into a dedicated thread.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add static member GTime sApproximateTime and maipulation methods.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Implement Run() method that updates approximate time and waits on
+	the exit condition.
+
+	* saturn.cxx:
+	Call Gled::Run() instead of waiting on the exit condition.
+
+	* GledView/GledGUI.cxx:
+	Update approximate time from the GUI loop. This can be delayed if
+	fltk gets stuck during slowrendering.
+
 2012-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GCondition.cxx:

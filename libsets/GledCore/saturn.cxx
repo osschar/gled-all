@@ -56,8 +56,7 @@ int main(int argc, char **argv)
   // Run Root Application thread
   GThread *app_thread = gled->SpawnRootAppThread("saturn.cxx");
 
-  gled_exit.Wait();
-  gled_exit.Unlock();
+  gled->Run();
 
   if (gled->GetRootAppRunning())
   {

@@ -108,7 +108,7 @@ public:
   void WaitUntillQueensLoaded();
   void AllowMoonConnections();
 
-  virtual void  Run() {}
+  virtual void  Run();
           void  Exit(Int_t status=0);
   static  void* Exit_tl(void*);
   virtual void  ExitVirtual();

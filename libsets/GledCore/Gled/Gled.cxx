@@ -997,6 +997,23 @@ void Gled::AllowMoonConnections()
 // Gled stuff
 /**************************************************************************/
 
+void Gled::Run()
+{
+  // Run for case of saturn.cxx, we just wait for exit condition and update
+  // the approximate time.
+
+  GTime now;
+
+  do
+  {
+    now = GTime::Now();
+    GTime::UpdateApproximateNow(now);
+  }
+  while (mExitCondVar->TimedWaitUntil(now + GTime(1, 0)) == 1);
+
+  mExitCondVar->Unlock();
+}
+
 void Gled::Exit(Int_t status)
 {
   sExitStatus = status;
