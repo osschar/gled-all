@@ -52,6 +52,7 @@ int main(int argc, char **argv)
 
   GThread::InitMain();
 
+  gled->SpawnTimeBeatThread();
   gled->InitLogging();
   gled->InitGledCore();
 

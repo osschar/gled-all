@@ -1,3 +1,26 @@
+2012-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve approximate time handling.
+	Rename ApproximateNow to ApproximateTime.
+
+	* Glasses/ZLog.cxx:
+	Use approximate time, log reports in seconds anyway.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Return seconds from UpdateApproximateTime().
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Add function to spawn and run time-beat thread.
+
+	* GledView/GledGUI.cxx:
+	Remove approx tim eupdate from fltk loop.
+
+	* gled.cxx:
+	* saturn.cxx:
+	Start time-beat thread early on.
+
 2012-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add approximate time keeping in GTime static member.

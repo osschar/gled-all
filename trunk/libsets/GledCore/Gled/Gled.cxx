@@ -999,19 +999,7 @@ void Gled::AllowMoonConnections()
 
 void Gled::Run()
 {
-  // Run for case of saturn.cxx, we just wait for exit condition and update
-  // the approximate time.
-
-  GTime now;
-
-  do
-  {
-    now = GTime::Now();
-    GTime::UpdateApproximateNow(now);
-  }
-  while (mExitCondVar->TimedWaitUntil(now + GTime(1, 0)) == 1);
-
-  mExitCondVar->Unlock();
+  // This is never called ... saturn.cxx just waits on the exit condition.
 }
 
 void Gled::Exit(Int_t status)
@@ -1393,6 +1381,29 @@ void Gled::RootApp_cleanup_tl(void*)
 {
   cout << "Thread running TApplication::Run() canceled ... expect trouble.\n";
   Gled::theOne->mRootApp->Terminate(0);
+}
+
+//==============================================================================
+
+void Gled::SpawnTimeBeatThread()
+{
+  GThread* thr = new GThread("Gled-TimeBeat",
+                             (GThread_foo) TimeBeat_tl, 0, true);
+  thr->Spawn();
+}
+
+void* Gled::TimeBeat_tl(void*)
+{
+  GTime      now;
+  GCondition cond;
+  cond.Lock();
+
+  while (true)
+  {
+    now = GTime::Now();
+    now = GTime(GTime::UpdateApproximateTime(now) + 1, 0);
+    cond.TimedWaitUntil(now);
+  }
 }
 
 /**************************************************************************/
