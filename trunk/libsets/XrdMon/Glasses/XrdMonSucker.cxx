@@ -903,7 +903,7 @@ void XrdMonSucker::StartSucker()
   mSuckerThread->Spawn();
 
   mLastOldUserCheck  = mLastDeadUserCheck  =
-  mLastDeadServCheck = mLastIdentServCheck = GTime(GTime::I_Now);
+  mLastDeadServCheck = mLastIdentServCheck = GTime::ApproximateTime();
 
   mCheckerThread->SetNice(20);
   mCheckerThread->Spawn();
@@ -963,7 +963,7 @@ void XrdMonSucker::Check()
 
   while (true)
   {
-    GTime now(GTime::I_Now);
+    GTime now = GTime::ApproximateTime();
 
     {
       bool stamp_p = false;
@@ -1009,7 +1009,7 @@ void XrdMonSucker::CleanUpOldUsers()
   static const Exc_t _eh("XrdMonSucker::CleanUpOldUsers ");
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
-  GTime now(GTime::I_Now);
+  GTime now = GTime::ApproximateTime();
 
   ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
@@ -1053,7 +1053,7 @@ void XrdMonSucker::CleanUpOldUsers()
     }
     if (n_wiped > 0)
     {
-      log.SetTime(GTime(GTime::I_Now));
+      log.SetTime(GTime::ApproximateTime());
       log.Form("Removed %d previous users for domain '%s'.", n_wiped, d->GetName());
     }
   }
@@ -1065,7 +1065,7 @@ void XrdMonSucker::CleanUpDeadUsers()
 
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
-  GTime now(GTime::I_Now);
+  GTime now = GTime::ApproximateTime();
 
   ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
@@ -1104,7 +1104,7 @@ void XrdMonSucker::CleanUpDeadUsers()
     }
     if (n_wiped > 0)
     {
-      log.SetTime(GTime(GTime::I_Now));
+      log.SetTime(GTime::ApproximateTime());
       log.Form("Removed %d dead users for domain '%s'.", n_wiped, d->GetName());
     }
   }
@@ -1118,7 +1118,7 @@ void XrdMonSucker::CleanUpDeadServers()
 
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
-  GTime now(GTime::I_Now);
+  GTime now = GTime::ApproximateTime();
 
   ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
@@ -1141,7 +1141,7 @@ void XrdMonSucker::CleanUpDeadServers()
       }
       if (delta > mServDeadSec)
       {
-        log.SetTime(GTime(GTime::I_Now));
+        log.SetTime(GTime::ApproximateTime());
         log.Form("Removing unactive server '%s'.", server->GetName());
 
 	disconnect_server(server, domain, now);
@@ -1158,7 +1158,7 @@ void XrdMonSucker::CleanUpNoIdentServers()
 
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
-  GTime now(GTime::I_Now);
+  GTime now = GTime::ApproximateTime();
 
   ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
 
@@ -1186,7 +1186,7 @@ void XrdMonSucker::CleanUpNoIdentServers()
       }
       if (delta > mServIdentCnt * ident_delta)
       {
-        log.SetTime(GTime(GTime::I_Now));
+        log.SetTime(GTime::ApproximateTime());
         log.Form("Removing unactive server '%s'.", server->GetName());
 
 	disconnect_server(server, domain, now);
