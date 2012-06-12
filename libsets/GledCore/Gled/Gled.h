@@ -140,6 +140,9 @@ public:
   static void* RootApp_runner_tl(void*);
   static void  RootApp_cleanup_tl(void*);
 
+  void         SpawnTimeBeatThread();
+  static void* TimeBeat_tl(void*);
+
   virtual void LockFltk()   {}
   virtual void UnlockFltk() {}
 

@@ -322,8 +322,6 @@ void GledGUI::Run()
 
   // printf("GledGUI::Run entering GUI event loop.\n");
 
-  GTime::UpdateApproximateNow(GTime::Now());
-
   Fl::lock();		// init thread support
 
   if (bGuiUp)
@@ -347,9 +345,7 @@ void GledGUI::Run()
     }
     fGTRQueueMoo.Unlock();
 
-    Fl::wait(1);
-
-    GTime::UpdateApproximateNow(GTime::Now());
+    Fl::wait(10);
   }
 
   Fl::unlock();

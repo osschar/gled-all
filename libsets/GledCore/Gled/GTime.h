@@ -15,7 +15,6 @@ class TBuffer;
 class GTime
 {
   friend class Gled;
-  friend class GledGUI;
 
 public:
   enum Init_e { I_Zero, I_Now, I_Never };
@@ -26,8 +25,8 @@ protected:
 
   void canonize();
 
-  static GTime  sApproximateNow;
-  static void   UpdateApproximateNow(const GTime& now);
+  static GTime    sApproximateTime;
+  static Long64_t UpdateApproximateTime(const GTime& now);
 
 public:
   GTime() : mSec(0), mNSec(0) {}
@@ -93,7 +92,7 @@ public:
 			       Bool_t break_on_signal=true,
 			       Bool_t warn_on_signal=true);
 
-  static const GTime& ApproximateNow();
+  static const GTime& ApproximateTime();
 
   void  NetStreamer(TBuffer& b);
   Int_t NetBufferSize() const { return 2 * sizeof(Long64_t); }

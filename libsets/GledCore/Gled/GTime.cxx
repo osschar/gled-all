@@ -16,7 +16,7 @@
 
 ClassImp(GTime);
 
-GTime GTime::sApproximateNow(GTime::I_Now);
+GTime GTime::sApproximateTime(GTime::I_Now);
 
 GTime::GTime(Init_e i)
 {
@@ -351,19 +351,21 @@ Long64_t GTime::SleepMiliSec(UInt_t ms,
 
 //==============================================================================
 
-const GTime& GTime::ApproximateNow()
+const GTime& GTime::ApproximateTime()
 {
   // Returns approximate time, rounded to one second.
 
-  return sApproximateNow;
+  return sApproximateTime;
 }
 
-void GTime::UpdateApproximateNow(const GTime& now)
+Long64_t GTime::UpdateApproximateTime(const GTime& now)
 {
   if (now.mNSec > 500000000)
-    sApproximateNow.mSec = now.mSec + 1;
+    sApproximateTime.mSec = now.mSec + 1;
   else
-    sApproximateNow.mSec = now.mSec;
+    sApproximateTime.mSec = now.mSec;
+
+  return sApproximateTime.mSec;
 }
 
 //==============================================================================
