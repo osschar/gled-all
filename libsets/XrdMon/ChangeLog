@@ -1,3 +1,9 @@
+2012-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdMonSucker.cxx:
+	Use ApproximateTime for all timing needs.
+
 2012-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First steps for parsing of redirect trace messages.

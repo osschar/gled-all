@@ -274,7 +274,7 @@ void XrdEhs::ServePage(SSocket* sock)
 {
   static const Exc_t _eh("XrdEhs::ServePage ");
 
-  GTime now(GTime::I_Now);
+  GTime now = GTime::ApproximateTime();
 
   const Int_t buf_size = 4096;
   char        buf[buf_size];
