@@ -130,6 +130,8 @@ void XrdMonSucker::on_file_close(XrdFile* file, XrdUser* user, XrdServer* server
 void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer* server,
                                                         const GTime& time)
 {
+  static const Exc_t _eh("XrdMonSucker::disconnect_user_and_close_open_files ");
+
   {
     GLensReadHolder _lck(user);
     user->SetDisconnectTime(time);
@@ -159,8 +161,16 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
     }
   }
   {
-    GLensWriteHolder _lck(server); 	 
-    server->DisconnectUser(user);
+    GLensWriteHolder _lck(server);
+    try
+    {
+      server->DisconnectUser(user);
+    }
+    catch (Exc_t exc)
+    {
+      if (*mLog)
+	mLog->Put(ZLog::L_Error, _eh, exc);
+    }
   }
 }
 
