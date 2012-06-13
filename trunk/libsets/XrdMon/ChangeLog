@@ -1,3 +1,10 @@
+2012-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Always reset XrdUser when unpackingprocessing open/close traces.
+	When server does not use 'io' there is a single stream for all
+	user sessions.
+
 2012-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
