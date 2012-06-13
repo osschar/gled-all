@@ -134,7 +134,7 @@ void XrdServer::DisconnectUser(XrdUser* user)
     GMutexHolder _lck(mUserMapMutex);
     mDict2User_i i = mUserMap.find(user->m_dict_id);
     if (i == mUserMap.end())
-      throw _eh + "dict_id does not exist.";
+      throw _eh + "dict_id does not exist for user '" + user->GetName() + "'.";
     mUserMap.erase(i);
   }
 
