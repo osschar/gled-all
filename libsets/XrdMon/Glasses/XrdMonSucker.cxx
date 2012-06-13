@@ -722,6 +722,7 @@ void XrdMonSucker::Suck()
           file = lc.update(dict_id);
           if (file)
           {
+	    us = file->GetUser();
             // Int_t rwoff = ntohl(arg.arg0.val);
             Int_t rwlen = ntohl(xmt.arg1.buflen);
             GLensReadHolder _lck(file);
@@ -742,6 +743,7 @@ void XrdMonSucker::Suck()
           file = lc.update(dict_id);
           if (file)
           {
+	    us = file->GetUser();
             Int_t rlen = ntohl(xmt.arg1.buflen);
             Int_t nels = ntohs(xmt.arg0.sVal[1]);
             // Not processed: vcnt and vseq (for multi file read)
@@ -754,6 +756,7 @@ void XrdMonSucker::Suck()
 	{
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
 	  file = lc.update(dict_id);
+	  us   = file->GetUser();
           if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, file ? file->GetName() : "<nil>");
           if (file)
           {
@@ -799,14 +802,16 @@ void XrdMonSucker::Suck()
 	}
 	else if (tt == XROOTD_MON_DISC)
 	{
-	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+	  Int_t    dict_id        = ntohl(xmt.arg2.dictid);
 	  XrdUser *us_from_server = server->FindUser(dict_id);
 	  if (us != us_from_server)
 	  {
 	    ISwarn(_eh + GForm("us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')",
                                us,             us ? us->GetName() : "",
                                us_from_server, us_from_server ? us_from_server->GetName() : ""));
-            us = us_from_server;
+	    if (us_from_server) {
+	      us = us_from_server;
+	    }
 	  }
 
           bool disconn_p = true;
