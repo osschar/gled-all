@@ -756,10 +756,10 @@ void XrdMonSucker::Suck()
 	{
 	  Int_t dict_id = ntohl(xmt.arg2.dictid);
 	  file = lc.update(dict_id);
-	  us   = file->GetUser();
           if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, file ? file->GetName() : "<nil>");
           if (file)
           {
+	    us = file->GetUser();
             if (tt == XROOTD_MON_OPEN)
             {
               msg += GForm("\n\tOpen file='%s'", file ? file->GetName() : "<nil>");
