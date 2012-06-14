@@ -1,3 +1,9 @@
+2012-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdServer.cxx:
+	Catch exceptions thrown by XrdServer::RemoveFile().
+
 2012-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:

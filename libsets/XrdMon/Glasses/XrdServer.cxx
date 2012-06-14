@@ -188,9 +188,11 @@ void XrdServer::RemoveFile(XrdFile* file)
 
   mDict2File_i i = mFileMap.find(file->m_dict_id);
   if (i == mFileMap.end())
-    throw _eh + "dict_id not registered..";
+    throw _eh + "dict_id not registered for file '" + file->GetName() + "'.";
   if (i->second != file)
-    throw _eh + "stored file and file passed as argument do not match.";
+    throw _eh + "stored file '" + file->GetName() +
+                "' and file passed as argument '" + i->second->GetName() +
+                "' do not match.";
 
   mFileMap.erase(i);
 }
