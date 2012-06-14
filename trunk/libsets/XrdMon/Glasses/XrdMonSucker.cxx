@@ -155,7 +155,15 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
     {
       {
         GLensReadHolder _lck(server);
-        server->RemoveFile(file);
+	try
+	{
+	  server->RemoveFile(file);
+	}
+	catch (Exc_t exc)
+	{
+	  if (*mLog)
+	    mLog->Put(ZLog::L_Error, _eh, exc);
+	}
       }
       on_file_close(file, user, server);
     }
@@ -804,7 +812,15 @@ void XrdMonSucker::Suck()
               msg += GForm("\n\tClose file='%s'", file ? file->GetName() : "<nil>");
 	      {
 		GLensReadHolder _lck(server);
-		server->RemoveFile(file);
+		try
+		{
+		  server->RemoveFile(file);
+		}
+		catch (Exc_t exc)
+		{
+		  if (*mLog)
+		    mLog->Put(ZLog::L_Error, _eh, exc);
+		}
 	      }
               on_file_close(file, us, server);
             }
