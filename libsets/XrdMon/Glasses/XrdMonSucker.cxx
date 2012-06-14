@@ -834,7 +834,7 @@ void XrdMonSucker::Suck()
 	  {
 	    log.Form(ZLog::L_Warning, _eh + "us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')",
                                              us,             us ? us->GetName() : "",
-                                             us_from_server, us_from_server ? us_from_server->GetName() : ""));
+                                             us_from_server, us_from_server ? us_from_server->GetName() : "");
 	    if (us_from_server) {
 	      us = us_from_server;
 	    }
