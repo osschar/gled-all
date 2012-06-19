@@ -41,11 +41,14 @@ private:
 protected:
   ZLink<ZLog>           mLog;             // X{GS} L{}
 
+  Bool_t                bRunning;         //! X{G} 7 BoolOut()
+
   GThread              *mReporterThread;  //!
   GCondition            mReporterCond;    //!
   list<FileUserServer>  mReporterQueue;   //!
 
   static void* tl_ReportLoop(XrdFileCloseReporter* r);
+  static void  cu_ReportLoop(XrdFileCloseReporter* r);
   void ReportLoop();
 
   virtual void ReportLoopInit();

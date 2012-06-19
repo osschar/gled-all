@@ -9,5 +9,6 @@ XrdDomain       5       Glasses/XrdDomain
 
 XrdFileCloseReporter       64  Glasses/XrdFileCloseReporter
 XrdFileCloseReporterGratia 65  Glasses/XrdFileCloseReporterGratia
+XrdFileCloseReporterTree   66  Glasses/XrdFileCloseReporterTree
 
 XrdEhs                     128 Glasses/XrdEhs
