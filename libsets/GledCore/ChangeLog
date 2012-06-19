@@ -1,3 +1,10 @@
+2012-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.h:
+	Make detached-thread registration functions public.
+	This allows lenses to register their own threads that need to be
+	terminated when a lens is being deleted or at saturn shutdown.
+
 2012-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve approximate time handling.
