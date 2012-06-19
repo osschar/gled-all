@@ -52,8 +52,6 @@ void XrdFileCloseReporterGratia::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterGratia::ReportLoopInit ");
 
-  PARENT_GLASS::ReportLoopInit();
-
   mLastUidBase = mLastUidInner = 0;
 
   mSAddr = new struct sockaddr;
@@ -170,8 +168,6 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
 
 void XrdFileCloseReporterGratia::ReportLoopFinalize()
 {
-  PARENT_GLASS::ReportLoopFinalize();
-
   close(mReporterSocket);
   mReporterSocket = 0;
 }

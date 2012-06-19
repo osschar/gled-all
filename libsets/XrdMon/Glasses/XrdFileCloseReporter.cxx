@@ -25,7 +25,9 @@ ClassImp(XrdFileCloseReporter);
 //==============================================================================
 
 void XrdFileCloseReporter::_init()
-{}
+{
+  bRunning = false;
+}
 
 XrdFileCloseReporter::XrdFileCloseReporter(const Text_t* n, const Text_t* t) :
   ZGlass(n, t),
@@ -55,10 +57,18 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file, XrdUser* user, XrdServer* s
 //==============================================================================
 
 void XrdFileCloseReporter::ReportLoopInit()
-{}
+{
+  // Sub-classes should override this to perform one-time initialization.
+  // This virtual is called from the startup-handler of the worker thread.
+  // No need to call the parent-class implementation there.
+}
 
 void XrdFileCloseReporter::ReportFileClosed(FileUserServer& fus)
 {
+  // Sub-classes should override this to process files that have been just
+  // closed. No need to call the parent-class implementation from there, here
+  // we just write out to the log.
+
   static const Exc_t _eh("XrdFileCloseReporter::ReportFileClosed ");
 
   ZLog::Helper log(*mLog, ZLog::L_Message, _eh);
@@ -66,22 +76,53 @@ void XrdFileCloseReporter::ReportFileClosed(FileUserServer& fus)
 }
 
 void XrdFileCloseReporter::ReportLoopFinalize()
-{}
+{
+  // Sub-classes should override this to perform cleanup.
+  // This virtual is called from the cleanup-handler of the worker thread.
+  // No need to call the parent-class implementation there.
+}
 
 //==============================================================================
 
 void* XrdFileCloseReporter::tl_ReportLoop(XrdFileCloseReporter* r)
 {
+  GThread *thr = GThread::Self();
+
+  r->mSaturn->register_detached_thread(r, thr);
+
+  thr->CleanupPush((GThread_cu_foo) cu_ReportLoop, r);
+
+  {
+    GLensReadHolder _lck(r);
+    r->bRunning = true;
+    r->Stamp(r->FID());
+  }
+
+  r->ReportLoopInit();
+
   r->ReportLoop();
-  r->mReporterThread = 0;
+
   return 0;
+}
+
+void XrdFileCloseReporter::cu_ReportLoop(XrdFileCloseReporter* r)
+{
+  r->ReportLoopFinalize();
+
+  r->mSaturn->unregister_detached_thread(r, GThread::Self());
+
+  {
+    GLensReadHolder _lck(r);
+    r->mReporterQueue.clear();
+    r->mReporterThread = 0;
+    r->bRunning = false;
+    r->Stamp(r->FID());
+  }
 }
 
 void XrdFileCloseReporter::ReportLoop()
 {
   static const Exc_t _eh("XrdFileCloseReporter::ReportLoop ");
-
-  ReportLoopInit();
 
   while (true)
   {
@@ -137,10 +178,4 @@ void XrdFileCloseReporter::StopReporter()
   }
   thr->Cancel();
   thr->Join();
-  ReportLoopFinalize();
-  {
-    GLensReadHolder _lck(this);
-    mReporterQueue.clear();
-    mReporterThread = 0;
-  }
 }

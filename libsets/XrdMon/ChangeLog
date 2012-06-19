@@ -1,3 +1,35 @@
+2012-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support writing of file-access reports into ROOT trees.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	New glass for writing out file-access reports into ROOT trees.
+
+	* Stones/SXrdFileInfo.cxx:
+	* Stones/SXrdFileInfo.h:
+	* Stones/SXrdServerInfo.cxx:
+	* Stones/SXrdServerInfo.h:
+	* Stones/SXrdUserInfo.cxx:
+	* Stones/SXrdUserInfo.h:
+	Simple classes for branches that make up file-access report.
+
+	* Glasses/XrdFile.h:
+	Whitespace.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add cleanup function to properly terminate the reporter thread.
+	Register the detached thread to Saturn so that it gets properly
+	terminated.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Do not call parent-glass versions of virtuals ReportLoopInit() and
+	ReportLoopFinalize().
+
+	* glass.list:
+	Register XrdFileCloseReporterTree.
+
 2012-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
