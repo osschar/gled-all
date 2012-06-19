@@ -146,8 +146,10 @@ protected:
   hpZGlass2DetachedThreadPerLens_t  mDetachedThreadsHash;
   GMutex                            mDetachedMirMutex;
 
+public:
   void register_detached_thread  (ZGlass *lens, GThread *thread);
   void unregister_detached_thread(ZGlass *lens, GThread *thread);
+protected:
   bool cancel_and_join_thread    (ZGlass* lens, GThread* thread);
 
 #endif
