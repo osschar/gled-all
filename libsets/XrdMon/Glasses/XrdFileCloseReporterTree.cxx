@@ -26,7 +26,7 @@
 
 //______________________________________________________________________________
 //
-//
+// * bFileIdxAlways: Always posfix file name with an index.
 
 ClassImp(XrdFileCloseReporterTree);
 
@@ -40,7 +40,8 @@ void XrdFileCloseReporterTree::_init()
 
   bForceAutoSave = bForceRotate = false;
 
-  mFilePrefix = "xrd-file-access-report-";
+  mFilePrefix    = "xrd-file-access-report-";
+  bFileIdxAlways = true;
   mFile   = 0;
   mTree   = 0;
   mBranchF = mBranchU = mBranchS = 0;
@@ -68,7 +69,7 @@ void XrdFileCloseReporterTree::open_file_create_tree()
   while (true)
   {
     fn = basename;
-    if (i != 0)
+    if (bFileIdxAlways || i != 0)
       fn += TString::Format("-%d", i);
     fn += ".root";
 
@@ -87,6 +88,10 @@ void XrdFileCloseReporterTree::open_file_create_tree()
   }
 
   mFile = TFile::Open(fn, "recreate");
+  if (mFile == 0)
+  {
+    throw _eh + "Opening of file '" + fn + "' failed.";
+  }
 
   mTree = new TTree("XrdFar", "Xrootd File Close Reports");
   mTree->SetAutoFlush(0);

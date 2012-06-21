@@ -1,5 +1,12 @@
 2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add bool member bFileIdxAlways that enforces counting index in all
+	file names.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Bugfix for a somewhat frequent crash (every two days or so).
 
 	* Glasses/XrdFileCloseReporterGratia.cxx:
