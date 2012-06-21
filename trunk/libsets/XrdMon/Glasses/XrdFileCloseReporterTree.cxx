@@ -35,9 +35,10 @@ ClassImp(XrdFileCloseReporterTree);
 void XrdFileCloseReporterTree::_init()
 {
   mAutoSaveEntries = 100000;
+  mAutoSaveMinutes = 60;
   mRotateMinutes   = 24 * 60;
 
-  bForceRotate = false;
+  bForceAutoSave = bForceRotate = false;
 
   mFilePrefix = "xrd-file-access-report-";
   mFile   = 0;
@@ -95,8 +96,11 @@ void XrdFileCloseReporterTree::open_file_create_tree()
   mBranchU = mTree->Branch("U.", &mXrdU, 8192);
   mBranchS = mTree->Branch("S.", &mXrdS, 8192);
 
-  mLastFileOpen = GTime::Now();
-  bForceRotate = false;
+  mLastAutoSave  = GTime::ApproximateTime();
+  bForceAutoSave = false;
+
+  mLastFileOpen  = GTime::ApproximateTime();
+  bForceRotate   = false;
 }
 
 void XrdFileCloseReporterTree::write_tree_close_file()
@@ -131,7 +135,7 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
 
   GThread::CancelDisabler _cd;
 
-  if (GTime::ApproximateTime() >= mLastFileOpen + GTime(60*mRotateMinutes, 0) ||
+  if ((mRotateMinutes > 0 && GTime::ApproximateTime() >= mLastFileOpen + GTime(60*mRotateMinutes, 0)) ||
       bForceRotate)
   {
     write_tree_close_file();
@@ -157,13 +161,22 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
 
   mTree->Fill();
 
-  if (mAutoSaveEntries > 0 && mTree->GetEntries() % mAutoSaveEntries == 0)
+  if ((mAutoSaveEntries > 0 && mTree->GetEntries() % mAutoSaveEntries == 0) ||
+      (mAutoSaveMinutes > 0 && GTime::ApproximateTime() >= mLastAutoSave + GTime(60*mAutoSaveMinutes, 0)) ||
+      bForceAutoSave)
   {
     if (*mLog)
     {
       mLog->Form(ZLog::L_Info, _eh, "Auto-saving tree, N_entries=%lld.", mTree->GetEntries());
     }
     mTree->AutoSave("FlushBaskets SaveSelf");
+
+    {
+      GLensReadHolder _lck(this);
+      mLastAutoSave  = GTime::ApproximateTime();
+      bForceAutoSave = false;
+      Stamp(FID());
+    }
   }
 }
 
@@ -184,4 +197,14 @@ void XrdFileCloseReporterTree::RotateTree()
     throw _eh + "not running.";
 
   bForceRotate = true;
+}
+
+void XrdFileCloseReporterTree::AutoSaveTree()
+{
+  static const Exc_t _eh("XrdFileCloseReporterTree::AutoSaveTree ");
+
+  if ( ! GThread::IsValidPtr(mReporterThread))
+    throw _eh + "not running.";
+
+  bForceAutoSave = true;
 }

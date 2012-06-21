@@ -1,3 +1,9 @@
+2012-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add option to auto-save on elapsed time, too.
+
 2012-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Support writing of file-access reports into ROOT trees.

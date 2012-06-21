@@ -29,10 +29,13 @@ private:
 
 protected:
   Int_t                   mAutoSaveEntries;  // X{GS} 7 Value(-range=>[0, 1000000, 1])
+  Int_t                   mAutoSaveMinutes;  // X{GS} 7 Value(-range=>[0, 14400, 1])
+  GTime                   mLastAutoSave;     //!X{GR} 7 TimeOut()
   Int_t                   mRotateMinutes;    // X{GS} 7 Value(-range=>[0, 14400, 1])
   GTime                   mLastFileOpen;     //!X{GR} 7 TimeOut()
 
-  Bool_t                  bForceRotate;//!
+  Bool_t                  bForceAutoSave;    //!
+  Bool_t                  bForceRotate;      //!
 
   TString                 mFilePrefix; // X{GS} 7 Textor()  
   TFile                  *mFile;       //!
@@ -56,7 +59,8 @@ public:
   XrdFileCloseReporterTree(const Text_t* n="XrdFileCloseReporterTree", const Text_t* t=0);
   virtual ~XrdFileCloseReporterTree();
 
-  void RotateTree(); // X{E}  7 MButt()
+  void RotateTree();   // X{E}  7 MButt()
+  void AutoSaveTree(); // X{E}  7 MButt()
 
 #include "XrdFileCloseReporterTree.h7"
   ClassDef(XrdFileCloseReporterTree, 1);
