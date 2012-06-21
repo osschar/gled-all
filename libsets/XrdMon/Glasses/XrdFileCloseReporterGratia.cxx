@@ -138,7 +138,6 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
        dmtoll(WS .GetSumX()), WS .GetN(), dmtoll(WS .GetMin()), dmtoll(WS .GetMax()), dmtod(WS .GetAverage()), dmtod(WS .GetSigma()),
        dmtoll(file->GetRTotalMB()),
        dmtoll(file->GetWTotalMB()));
-    user = file->GetUser();
   }
   {
     GLensReadHolder _ulck(user);
@@ -147,7 +146,6 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
        "server_username=%s\napp_info=%s\n",
        user->GetDN(), user->GetVO(), user->GetRole(), user->GetGroup(),
        user->GetFromDomain(), user->GetFromHost(), user->GetServerUsername(), user->GetAppInfo());
-    server = user->GetServer();
   }
   {
     GLensReadHolder _slck(server);

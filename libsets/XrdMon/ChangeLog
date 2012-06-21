@@ -1,3 +1,12 @@
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bugfix for a somewhat frequent crash (every two days or so).
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	In ReportFileClosed() take XrdUser, XrdServer pointers from
+	argument to the function. Links in the objects can be reset to
+	null already.
+
 2012-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporterTree.cxx:
