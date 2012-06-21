@@ -37,16 +37,17 @@ protected:
   Bool_t                  bForceAutoSave;    //!
   Bool_t                  bForceRotate;      //!
 
-  TString                 mFilePrefix; // X{GS} 7 Textor()  
-  TFile                  *mFile;       //!
-  TTree                  *mTree;       //!
-  TBranch                *mBranchF;    //!
-  TBranch                *mBranchU;    //!
-  TBranch                *mBranchS;    //!
+  TString                 mFilePrefix;       // X{GS} 7 Textor()
+  Bool_t                  bFileIdxAlways;    // X{GS} 7 Bool()
+  TFile                  *mFile;             //!
+  TTree                  *mTree;             //!
+  TBranch                *mBranchF;          //!
+  TBranch                *mBranchU;          //!
+  TBranch                *mBranchS;          //!
 
-  SXrdFileInfo           *mXrdF;       //!
-  SXrdUserInfo           *mXrdU;       //!
-  SXrdServerInfo         *mXrdS;       //!
+  SXrdFileInfo           *mXrdF;             //!
+  SXrdUserInfo           *mXrdU;             //!
+  SXrdServerInfo         *mXrdS;             //!
 
   void open_file_create_tree();
   void write_tree_close_file();
