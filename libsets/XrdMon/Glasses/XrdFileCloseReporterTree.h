@@ -37,8 +37,9 @@ protected:
   Bool_t                  bForceAutoSave;    //!
   Bool_t                  bForceRotate;      //!
 
-  TString                 mFilePrefix;       // X{GS} 7 Textor()
   Bool_t                  bFileIdxAlways;    // X{GS} 7 Bool()
+  TString                 mFilePrefix;       // X{GS} 7 Textor()
+  TString                 mFileNameTrue;     //!
   TFile                  *mFile;             //!
   TTree                  *mTree;             //!
   TBranch                *mBranchF;          //!

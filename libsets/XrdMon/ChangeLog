@@ -1,5 +1,12 @@
 2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add option to always use index for file-name.
+	Write into hidden file & rename to proper name after closing.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Bugfix in CleanUpNoIdentServers().
 
 	* Glasses/XrdMonSucker.cxx:
