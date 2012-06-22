@@ -31,12 +31,15 @@ void UdpPacketTreeWriter::_init()
   mWLThread = 0;
 
   mAutoSaveEntries = 100000;
+  mAutoSaveMinutes = 60;
   mRotateMinutes   = 24 * 60;
 
   bRunning = false;
-  bForceRotate = false;
+  bForceAutoSave = bForceRotate = false;
 
-  mFilePrefix = "udp-tree-dump-";
+  bFileIdxAlways = true;
+  mFilePrefix    = "udp-tree-dump-";
+  mTreeName      = "UdpPackets";
   mFile   = 0;
   mTree   = 0;
   mBranch = 0;
@@ -57,17 +60,16 @@ void UdpPacketTreeWriter::open_file_create_tree()
 {
   static const Exc_t _eh("UdpPacketTreeWriter::open_file_create_tree ");
 
-  TString fn;
   TString basename = mFilePrefix + GTime::Now().ToDateLocal();
   Int_t   i = 0;
   while (true)
   {
-    fn = basename;
-    if (i != 0)
-      fn += TString::Format("-%d", i);
-    fn += ".root";
+    mFileNameTrue = basename;
+    if (bFileIdxAlways || i != 0)
+      mFileNameTrue += TString::Format("-%d", i);
+    mFileNameTrue += ".root";
 
-    if (gSystem->AccessPathName(fn) == true)
+    if (gSystem->AccessPathName(mFileNameTrue) == true)
     {
       // No file with this name yet ... use it.
       break;
@@ -78,20 +80,31 @@ void UdpPacketTreeWriter::open_file_create_tree()
 
   if (*mLog)
   {
-    mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s'.", fn.Data());
+    mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s' (kept hidden until closing).", mFileNameTrue.Data());
   }
 
-  mFile = TFile::Open(fn, "recreate");
+  Ssiz_t sp = mFileNameTrue.Last('/');
+  if (sp == kNPOS) sp = 0; else --sp;
+  TString fn = mFileNameTrue.Insert(sp, ".");
 
-  mTree = new TTree("Packets", "UDP packets");
+  mFile = TFile::Open(fn, "recreate");
+  if (mFile == 0)
+  {
+    throw _eh + "Opening of file '" + fn + "' failed.";
+  }
+
+  mTree = new TTree(mTreeName, "UDP packets");
   mTree->SetAutoFlush(0);
   mTree->SetAutoSave(0);
 
   SUdpPacket *pup = 0;
   mBranch = mTree->Branch("P", &pup, 8192, 2);
 
-  mLastFileOpen = GTime::Now();
-  bForceRotate = false;
+  mLastAutoSave  = GTime::ApproximateTime();
+  bForceAutoSave = false;
+
+  mLastFileOpen  = GTime::ApproximateTime();
+  bForceRotate   = false;
 }
 
 void UdpPacketTreeWriter::write_tree_close_file()
@@ -101,14 +114,22 @@ void UdpPacketTreeWriter::write_tree_close_file()
   TString fn(mFile->GetName());
 
   mTree->Write();
+
+  TNamed xx("WritingComplete", "");
+  mFile->WriteTObject(&xx);
+
   mFile->Close();
   delete mFile;
   mFile = 0; mTree = 0; mBranch = 0;
 
+  gSystem->Rename(fn, mFileNameTrue);
+
   if (*mLog)
   {
-    mLog->Form(ZLog::L_Message, _eh, "Closed tree file '%s'.", fn.Data());
+    mLog->Form(ZLog::L_Message, _eh, "Closed tree file '%s'.", mFileNameTrue.Data());
   }
+  
+  mFileNameTrue = "";
 }
 
 //==============================================================================
@@ -158,6 +179,10 @@ void UdpPacketTreeWriter::WriteLoop()
     mBranch->SetAddress(&p);
     mTree->Fill();
 
+  if ((mAutoSaveEntries > 0 && mTree->GetEntries() % mAutoSaveEntries == 0) ||
+      (mAutoSaveMinutes > 0 && GTime::ApproximateTime() >= mLastAutoSave + GTime(60*mAutoSaveMinutes, 0)) ||
+      bForceAutoSave)
+
     if (mAutoSaveEntries > 0 && mTree->GetEntries() % mAutoSaveEntries == 0)
     {
       if (*mLog)
@@ -165,6 +190,13 @@ void UdpPacketTreeWriter::WriteLoop()
         mLog->Form(ZLog::L_Info, _eh, "Auto-saving tree, N_entries=%lld.", mTree->GetEntries());
       }
       mTree->AutoSave("FlushBaskets SaveSelf");
+
+      {
+        GLensReadHolder _lck(this);
+        mLastAutoSave  = GTime::ApproximateTime();
+        bForceAutoSave = false;
+        Stamp(FID());
+      }
     }
 
     p->DecRefCount();
@@ -232,4 +264,14 @@ void UdpPacketTreeWriter::RotateTree()
     throw _eh + "not running.";
 
   bForceRotate = true;
+}
+
+void UdpPacketTreeWriter::AutoSaveTree()
+{
+  static const Exc_t _eh("UdpPacketTreeWriter::AutoSaveTree ");
+
+  if ( ! GThread::IsValidPtr(mWLThread))
+    throw _eh + "not running.";
+
+  bForceAutoSave = true;
 }

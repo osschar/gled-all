@@ -40,8 +40,8 @@ void XrdFileCloseReporterTree::_init()
 
   bForceAutoSave = bForceRotate = false;
 
-  mFilePrefix    = "xrd-file-access-report-";
   bFileIdxAlways = true;
+  mFilePrefix    = "xrd-file-access-report-";
   mFile   = 0;
   mTree   = 0;
   mBranchF = mBranchU = mBranchS = 0;
@@ -63,17 +63,16 @@ void XrdFileCloseReporterTree::open_file_create_tree()
 {
   static const Exc_t _eh("XrdFileCloseReporterTree::open_file_create_tree ");
 
-  TString fn;
   TString basename = mFilePrefix + GTime::Now().ToDateLocal();
   Int_t   i = 0;
   while (true)
   {
-    fn = basename;
+    mFileNameTrue = basename;
     if (bFileIdxAlways || i != 0)
-      fn += TString::Format("-%d", i);
-    fn += ".root";
+      mFileNameTrue += TString::Format("-%d", i);
+    mFileNameTrue += ".root";
 
-    if (gSystem->AccessPathName(fn) == true)
+    if (gSystem->AccessPathName(mFileNameTrue) == true)
     {
       // No file with this name yet ... use it.
       break;
@@ -84,8 +83,12 @@ void XrdFileCloseReporterTree::open_file_create_tree()
 
   if (*mLog)
   {
-    mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s'.", fn.Data());
+    mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s' (kept hidden until closing).", mFileNameTrue.Data());
   }
+
+  Ssiz_t sp = mFileNameTrue.Last('/');
+  if (sp == kNPOS) sp = 0; else --sp;
+  TString fn = mFileNameTrue.Insert(sp, ".");
 
   mFile = TFile::Open(fn, "recreate");
   if (mFile == 0)
@@ -115,16 +118,24 @@ void XrdFileCloseReporterTree::write_tree_close_file()
   TString fn(mFile->GetName());
 
   mTree->Write();
+
+  TNamed xx("WritingComplete", "");
+  mFile->WriteTObject(&xx);
+
   mFile->Close();
   delete mFile;
   mFile = 0; mTree = 0;
   mBranchF = mBranchU = mBranchS = 0;
   mXrdF = 0; mXrdU = 0; mXrdS = 0;
 
+  gSystem->Rename(fn, mFileNameTrue);
+
   if (*mLog)
   {
-    mLog->Form(ZLog::L_Message, _eh, "Closed tree file '%s'.", fn.Data());
+    mLog->Form(ZLog::L_Message, _eh, "Closed tree file '%s'.", mFileNameTrue.Data());
   }
+
+  mFileNameTrue = "";
 }
 
 //==============================================================================

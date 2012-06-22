@@ -1,3 +1,12 @@
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Add forced auto-save method & handling.
+	Add option to always use index for file-name.
+	Write into hidden file & rename to proper name after closing.
+        Add member for name of TTree in the file.
+
 2012-06-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/UdpPacketTreeWriter.cxx:
