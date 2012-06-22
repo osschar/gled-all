@@ -1,3 +1,9 @@
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_udp_tree_writer.C:
+	* xrd_tree_writer.C:
+	Rename xrd_tree_writer to xrd_udp_tree_writer. Set name of tree to XrdUdp.
+
 2012-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_far_tree_writer.C:
