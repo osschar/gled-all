@@ -1,5 +1,13 @@
 2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Bugfix in CleanUpNoIdentServers().
+
+	* Glasses/XrdMonSucker.cxx:
+	A continue statement by-passed an eye-ref-count release at the end
+	of the loop. Use goto.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Glasses/XrdFileCloseReporterTree.cxx:
 	* Glasses/XrdFileCloseReporterTree.h:
 	Add bool member bFileIdxAlways that enforces counting index in all

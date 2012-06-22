@@ -1205,13 +1205,12 @@ void XrdMonSucker::CleanUpNoIdentServers()
     for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
     {
       XrdServer *server = *si;
-      Int_t ident_delta;
-      Int_t delta;
+      Int_t ident_delta, delta;
       {
         GLensReadHolder _lck(server);
 
 	ident_delta = server->GetAvgSrvIdDelta();
-	if (ident_delta <= 0) continue;
+	if (ident_delta <= 0) goto done;
 
         delta = (Int_t) (now - server->RefLastMsgTime()).GetSec();
       }
@@ -1222,7 +1221,7 @@ void XrdMonSucker::CleanUpNoIdentServers()
 
 	disconnect_server(server, domain, now);
       }
-
+    done:
       server->DecEyeRefCount();
     }
   }
