@@ -22,6 +22,9 @@
 #include "TSystem.h"
 #include "TTree.h"
 
+#include "TCint.h"
+#include "TVirtualMutex.h"
+
 // XrdFileCloseReporterTree
 
 //______________________________________________________________________________
@@ -42,8 +45,10 @@ void XrdFileCloseReporterTree::_init()
 
   bFileIdxAlways = true;
   mFilePrefix    = "xrd-file-access-report-";
-  mFile   = 0;
-  mTree   = 0;
+  mTreeName      = "XrdFar";
+  mFileLastIdx   = -1;
+  mFile = 0;
+  mTree = 0;
   mBranchF = mBranchU = mBranchS = 0;
   mXrdF = 0; mXrdU = 0; mXrdS = 0;
 }
@@ -63,22 +68,45 @@ void XrdFileCloseReporterTree::open_file_create_tree()
 {
   static const Exc_t _eh("XrdFileCloseReporterTree::open_file_create_tree ");
 
-  TString basename = mFilePrefix + GTime::Now().ToDateLocal();
-  Int_t   i = 0;
-  while (true)
+  TString date     = GTime::Now().ToDateLocal();
+  TString basename = mFilePrefix + date;
+
+  if (date == mFileLastDate)
   {
-    mFileNameTrue = basename;
-    if (bFileIdxAlways || i != 0)
-      mFileNameTrue += TString::Format("-%d", i);
-    mFileNameTrue += ".root";
-
-    if (gSystem->AccessPathName(mFileNameTrue) == true)
+    ++mFileLastIdx;
+    mFileNameTrue = basename + TString::Format("-%d.root", mFileLastIdx);
+  }
+  else
+  {
+    if (mFileLastDate.IsNull())
     {
-      // No file with this name yet ... use it.
-      break;
-    }
+      // We are just starting ... check if previous files exist.
+      Int_t i = 0;
+      while (true)
+      {
+        mFileNameTrue = basename;
+        if (bFileIdxAlways || i != 0) mFileNameTrue += TString::Format("-%d", i);
+        mFileNameTrue += ".root";
 
-    ++i;
+        if (gSystem->AccessPathName(mFileNameTrue) == true)
+        {
+          // No file with this name yet ... use it.
+          break;
+        }
+
+        ++i;
+      }
+      mFileLastIdx = i;
+    }
+    else
+    {
+      mFileNameTrue = basename;
+      if (bFileIdxAlways) mFileNameTrue += "-0";
+      mFileNameTrue += ".root";
+
+      mFileLastIdx = 0;
+    }
+    mFileLastDate = date;
   }
 
   if (*mLog)
@@ -86,23 +114,30 @@ void XrdFileCloseReporterTree::open_file_create_tree()
     mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s' (kept hidden until closing).", mFileNameTrue.Data());
   }
 
-  Ssiz_t sp = mFileNameTrue.Last('/');
-  if (sp == kNPOS) sp = 0; else --sp;
-  TString fn = mFileNameTrue.Insert(sp, ".");
-
-  mFile = TFile::Open(fn, "recreate");
-  if (mFile == 0)
+  TString fn = mFileNameTrue;
   {
-    throw _eh + "Opening of file '" + fn + "' failed.";
+    Ssiz_t sp = fn.Last('/');
+    if (sp == kNPOS) sp = 0; else --sp;
+    fn.Insert(sp, ".");
   }
 
-  mTree = new TTree("XrdFar", "Xrootd File Close Reports");
-  mTree->SetAutoFlush(0);
-  mTree->SetAutoSave(0);
+  {
+    R__LOCKGUARD2(gCINTMutex);
 
-  mBranchF = mTree->Branch("F.", &mXrdF, 8192);
-  mBranchU = mTree->Branch("U.", &mXrdU, 8192);
-  mBranchS = mTree->Branch("S.", &mXrdS, 8192);
+    mFile = TFile::Open(fn, "recreate");
+    if (mFile == 0)
+    {
+      throw _eh + "Opening of file '" + fn + "' failed.";
+    }
+
+    mTree = new TTree(mTreeName, "Xrootd File Close Reports");
+    mTree->SetAutoFlush(1000);
+    mTree->SetAutoSave(0);
+
+    mBranchF = mTree->Branch("F.", &mXrdF);
+    mBranchU = mTree->Branch("U.", &mXrdU);
+    mBranchS = mTree->Branch("S.", &mXrdS);
+  }
 
   mLastAutoSave  = GTime::ApproximateTime();
   bForceAutoSave = false;
@@ -142,6 +177,10 @@ void XrdFileCloseReporterTree::write_tree_close_file()
 
 void XrdFileCloseReporterTree::ReportLoopInit()
 {
+  mFileNameTrue = "";
+  mFileLastDate = "";
+  mFileLastIdx  = -1;
+
   open_file_create_tree();
 }
 
@@ -185,7 +224,7 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
     {
       mLog->Form(ZLog::L_Info, _eh, "Auto-saving tree, N_entries=%lld.", mTree->GetEntries());
     }
-    mTree->AutoSave("FlushBaskets SaveSelf");
+    mTree->AutoSave("SaveSelf");
 
     {
       GLensReadHolder _lck(this);

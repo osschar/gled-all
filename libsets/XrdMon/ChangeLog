@@ -1,3 +1,18 @@
+2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve file creation & cint-thread-safety.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add last date, index members.
+	Improve determination of name for next file.
+	Set tree auto-flush to a reasonable number.
+	Open file and create branches under cint-mutex-lock.
+
+
+	* Glasses/XrdMonSucker.h:
+	Make Add/RemoveFileCloseReporter() foos mir-callable.
+
 2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporterTree.cxx:
