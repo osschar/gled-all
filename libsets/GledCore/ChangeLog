@@ -1,5 +1,19 @@
 2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Work around some cint-thread-unsafety problems during startup.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Add MIR queue to be executed after start-up macro processing.
+	Initialize some basic ROOT plugin handlers.
+	Another thing to do would be enforcing creation of all
+	streamer-infos at some point during initialization.
+
+	* macros/gled_globals.C:
+	Add cint global g_gled.
+
+2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	* Ephra/Saturn.cxx:
 	* Ephra/Saturn.h:
 	Add variants of DelayedShootMIR() and ShootMIRWaitResult() taking

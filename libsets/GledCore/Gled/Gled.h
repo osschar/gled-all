@@ -18,6 +18,7 @@ class ShellInfo;
 class Forest;
 class Mountain;
 class Eye;
+class ZMIR;
 
 class GCondition;
 class GThread;
@@ -74,6 +75,8 @@ protected:
   GThread*      mRootAppThread;  // X{g}
   GThread*      mExitThread;
 
+  list<ZMIR*>   mAfterSetupMirs;
+
   static Int_t  sExitStatus;
 
 public:
@@ -96,6 +99,9 @@ public:
   void SpawnSunOrSaturn();
   void SpawnSun();
   void SpawnSaturn();
+
+  void        AfterSetup(ZMIR* mir);
+  void        ShootAfterSetupMirs();
 
   void        CheckAuthDir();
   const char* PubKeyFile(TString& id);
