@@ -2,6 +2,8 @@
 
 // Common global variables.
 
+Gled*       g_gled       = 0;
+
 // Saturn related information.
 
 Saturn*     g_saturn     = 0;
@@ -21,6 +23,8 @@ Scene*      g_scene       = 0;
 
 void gled_globals()
 {
+  g_gled = Gled::theOne;
+
   g_saturn = Gled::theOne->GetSaturn();
   if (g_saturn == 0)
   {

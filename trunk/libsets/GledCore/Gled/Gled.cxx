@@ -28,6 +28,7 @@
 #include <TException.h>
 #include <TMath.h>
 #include <TPRegexp.h>
+#include <TPluginManager.h>
 #include <TSocket.h>
 #include <TObjectTable.h>
 #include <TSystemDirectory.h>
@@ -659,6 +660,10 @@ void Gled::ProcessCmdLineMacros()
     mRootApp = new TApplication("TApplication", &rargc, (char**) rargv);
   }
 
+  gROOT->GetPluginManager()->LoadHandlersFromPluginDirs("TFile");
+  gROOT->GetPluginManager()->LoadHandlersFromPluginDirs("TArchiveFile");
+  gROOT->GetPluginManager()->LoadHandlersFromPluginDirs("TSystem");
+
   // Spawn saturn
   if (bAutoSpawn)
   {
@@ -674,7 +679,8 @@ void Gled::ProcessCmdLineMacros()
     Long_t retval = 0;
     Int_t  error = 0;
 
-    if (strlen(mRootApp->WorkingDirectory())) {
+    if (strlen(mRootApp->WorkingDirectory()))
+    {
       // if directory specified as argument make it the working directory
       gSystem->ChangeDirectory(mRootApp->WorkingDirectory());
       TSystemDirectory *workdir = new TSystemDirectory("workdir", gSystem->WorkingDirectory());
@@ -755,7 +761,8 @@ void Gled::ProcessCmdLineMacros()
     exit(1);
   }
 
-  if (mRootApp->InputFiles()) {
+  if (mRootApp->InputFiles())
+  {
     mRootApp->ClearInputFiles();
   }
   if (bHasPrompt)
@@ -905,7 +912,25 @@ void Gled::SpawnSaturn()
   }
 }
 
-/**************************************************************************/
+//==============================================================================
+
+void Gled::AfterSetup(ZMIR* mir)
+{
+  printf("Gled::AfterSetup registering mir %p.\n", mir);
+  mAfterSetupMirs.push_back(mir);
+}
+
+void Gled::ShootAfterSetupMirs()
+{
+  while (! mAfterSetupMirs.empty())
+  {
+    printf("Gled::ShootAfterSetupMirs Queuing mir %p!\n", mAfterSetupMirs.front());
+    mSaturn->ShootMIR(mAfterSetupMirs.front());
+    mAfterSetupMirs.pop_front();
+  }
+}
+
+//==============================================================================
 
 void Gled::CheckAuthDir()
 {
@@ -1359,6 +1384,8 @@ void* Gled::RootApp_runner_tl(void*)
   TRootXTReq::Bootstrap(self);
   GThread::UnblockSignal(GThread::SigUSR1);
 
+  Gled::theOne->ShootAfterSetupMirs();
+
   Gled::theOne->bRootAppRunning = true;
   Gled::theOne->mRootApp->TApplication::Run(true);
   Gled::theOne->bRootAppRunning = false;
@@ -1404,6 +1431,8 @@ void* Gled::TimeBeat_tl(void*)
     now = GTime(GTime::UpdateApproximateTime(now) + 1, 0);
     cond.TimedWaitUntil(now);
   }
+
+  return 0;
 }
 
 /**************************************************************************/
