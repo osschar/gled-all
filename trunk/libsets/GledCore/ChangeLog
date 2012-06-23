@@ -1,3 +1,10 @@
+2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Ephra/Saturn.cxx:
+	* Ephra/Saturn.h:
+	Add variants of DelayedShootMIR() and ShootMIRWaitResult() taking
+	ZMIR* as argument.
+
 2012-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Ephra/Saturn.h:

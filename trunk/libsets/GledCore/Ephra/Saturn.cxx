@@ -1638,6 +1638,15 @@ void Saturn::DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time)
   delayed_shoot_mir(mir, 0, at_time);
 }
 
+void Saturn::DelayedShootMIR(ZMIR* mir, GTime at_time)
+{
+  // Accepts a MIR and shoots it into the system.
+  // Wrapper for the variant with auto_ptr argument.
+
+  auto_ptr<ZMIR> apmir(mir);
+  delayed_shoot_mir(apmir, 0, at_time);
+}
+
 ZMIR_RR* Saturn::ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread)
 {
   // Accepts a MIR, shoots it into the system and waits for ResultReport.
@@ -1653,6 +1662,15 @@ ZMIR_RR* Saturn::ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread)
   result_cond.Unlock();
 
   return query_mir_result(req_handle);
+}
+
+ZMIR_RR* Saturn::ShootMIRWaitResult(ZMIR* mir, bool use_own_thread)
+{
+  // Accepts a MIR, shoots it into the system and waits for ResultReport.
+  // Wrapper for the variant with auto_ptr argument.
+
+  auto_ptr<ZMIR> apmir(mir);
+  return ShootMIRWaitResult(apmir, use_own_thread);
 }
 
 /**************************************************************************/
