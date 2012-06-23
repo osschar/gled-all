@@ -59,5 +59,5 @@ void test()
   c_log->StartLogging();
   c_suck->StartSucker();
   c_frep->StartReporter();
-  g_saturn->ShootMIR( c_ehs->S_StartServer() );
+  g_gled->AfterSetup( c_ehs->S_StartServer() );
 }

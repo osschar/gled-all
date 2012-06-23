@@ -72,5 +72,5 @@ void xrd_suck_udp()
   c_log->StartLogging();
   c_suck->StartSucker();
 
-  g_saturn->ShootMIR( c_listener->S_StartAllServices() );
+  g_gled->AfterSetup( c_listener->S_StartAllServices() );
 }

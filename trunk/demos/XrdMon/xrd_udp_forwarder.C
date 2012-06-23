@@ -59,6 +59,6 @@ void xrd_udp_forwarder()
   }
 
   // Start threads
-  g_saturn->ShootMIR( c_listener->S_StartAllServices() );
-  g_saturn->ShootMIR( c_server  ->S_StartAllServices() );
+  g_gled->AfterSetup( c_listener->S_StartAllServices() );
+  g_gled->AfterSetup( c_server  ->S_StartAllServices() );
 }
