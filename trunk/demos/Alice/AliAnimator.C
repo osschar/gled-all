@@ -242,7 +242,7 @@ void AliAnimator(const Text_t* dirname = 0,
     aliload->SetDataDir(dirname);
     // Shoot a MIR to have functional GUI during processing:
     ZMIR* setup_mir = aliload->S_LoadVSD();
-    g_saturn->ShootMIR(setup_mir);
+    g_gled->AfterSetup(setup_mir);
   }
 }
 

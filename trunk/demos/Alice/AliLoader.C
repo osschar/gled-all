@@ -154,6 +154,6 @@ void AliLoader(const Text_t* dirname = 0)
     al->SetDataDir(dirname);
     // Shoot a MIR to have functional GUI during processing:
     ZMIR* setup_mir = al->S_LoadVSD();
-    g_saturn->ShootMIR(setup_mir);
+    g_gled->AfterSetup(setup_mir);
   }
 }
