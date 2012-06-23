@@ -1,3 +1,11 @@
+2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Add last date, index members.
+	Improve determination of name for next file.
+	Open file and create branches under cint-mutex-lock.
+
 2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/UdpPacketTreeWriter.cxx:

@@ -16,6 +16,9 @@
 #include "TTree.h"
 #include "TSystem.h"
 
+#include "TCint.h"
+#include "TVirtualMutex.h"
+
 // UdpPacketTreeWriter
 
 //______________________________________________________________________________
@@ -40,6 +43,7 @@ void UdpPacketTreeWriter::_init()
   bFileIdxAlways = true;
   mFilePrefix    = "udp-tree-dump-";
   mTreeName      = "UdpPackets";
+  mFileLastIdx   = -1;
   mFile   = 0;
   mTree   = 0;
   mBranch = 0;
@@ -60,22 +64,45 @@ void UdpPacketTreeWriter::open_file_create_tree()
 {
   static const Exc_t _eh("UdpPacketTreeWriter::open_file_create_tree ");
 
-  TString basename = mFilePrefix + GTime::Now().ToDateLocal();
-  Int_t   i = 0;
-  while (true)
+  TString date     = GTime::Now().ToDateLocal();
+  TString basename = mFilePrefix + date;
+
+  if (date == mFileLastDate)
   {
-    mFileNameTrue = basename;
-    if (bFileIdxAlways || i != 0)
-      mFileNameTrue += TString::Format("-%d", i);
-    mFileNameTrue += ".root";
-
-    if (gSystem->AccessPathName(mFileNameTrue) == true)
+    ++mFileLastIdx;
+    mFileNameTrue = basename + TString::Format("-%d.root", mFileLastIdx);
+  }
+  else
+  {
+    if (mFileLastDate.IsNull())
     {
-      // No file with this name yet ... use it.
-      break;
-    }
+      // We are just starting ... check if previous files exist.
+      Int_t i = 0;
+      while (true)
+      {
+        mFileNameTrue = basename;
+        if (bFileIdxAlways || i != 0) mFileNameTrue += TString::Format("-%d", i);
+        mFileNameTrue += ".root";
 
-    ++i;
+        if (gSystem->AccessPathName(mFileNameTrue) == true)
+        {
+          // No file with this name yet ... use it.
+          break;
+        }
+
+        ++i;
+      }
+      mFileLastIdx = i;
+    }
+    else
+    {
+      mFileNameTrue = basename;
+      if (bFileIdxAlways) mFileNameTrue += "-0";
+      mFileNameTrue += ".root";
+
+      mFileLastIdx = 0;
+    }
+    mFileLastDate = date;
   }
 
   if (*mLog)
@@ -83,22 +110,35 @@ void UdpPacketTreeWriter::open_file_create_tree()
     mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s' (kept hidden until closing).", mFileNameTrue.Data());
   }
 
-  Ssiz_t sp = mFileNameTrue.Last('/');
-  if (sp == kNPOS) sp = 0; else --sp;
-  TString fn = mFileNameTrue.Insert(sp, ".");
-
-  mFile = TFile::Open(fn, "recreate");
-  if (mFile == 0)
+  TString fn = mFileNameTrue;
   {
-    throw _eh + "Opening of file '" + fn + "' failed.";
+    Ssiz_t sp = fn.Last('/');
+    if (sp == kNPOS) sp = 0; else --sp;
+    fn.Insert(sp, ".");
   }
 
-  mTree = new TTree(mTreeName, "UDP packets");
-  mTree->SetAutoFlush(0);
-  mTree->SetAutoSave(0);
+  {
+    R__LOCKGUARD2(gCINTMutex);
 
-  SUdpPacket *pup = 0;
-  mBranch = mTree->Branch("P", &pup, 8192, 2);
+    mFile = TFile::Open(fn, "recreate");
+    if (mFile == 0)
+    {
+      throw _eh + "Opening of file '" + fn + "' failed.";
+    }
+
+    mTree = new TTree(mTreeName, "UDP packets");
+    mTree->SetAutoFlush(10000);
+    mTree->SetAutoSave(0);
+
+    SUdpPacket *pup = 0;
+    mBranch = mTree->Branch("P", &pup, 8 * 1024, 2);
+  }
+
+  mBranch->FindBranch("mAddr")->SetBasketSize(16 * 1024);
+  mBranch->FindBranch("mBuff")->SetBasketSize(4096 * 1024);
+
+  mBranch->GetListOfBranches()->Remove(mBranch->FindBranch("SRefCountedNV"));
+  mBranch->GetListOfBranches()->Compress();
 
   mLastAutoSave  = GTime::ApproximateTime();
   bForceAutoSave = false;
@@ -189,7 +229,7 @@ void UdpPacketTreeWriter::WriteLoop()
       {
         mLog->Form(ZLog::L_Info, _eh, "Auto-saving tree, N_entries=%lld.", mTree->GetEntries());
       }
-      mTree->AutoSave("FlushBaskets SaveSelf");
+      mTree->AutoSave("SaveSelf");
 
       {
         GLensReadHolder _lck(this);
@@ -223,6 +263,10 @@ void UdpPacketTreeWriter::Start()
     bRunning = true;
     Stamp(FID());
   }
+
+  mFileNameTrue = "";
+  mFileLastDate = "";
+  mFileLastIdx  = -1;
 
   open_file_create_tree();
 
