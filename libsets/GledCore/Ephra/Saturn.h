@@ -276,7 +276,9 @@ public:
   void     ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
   void     ShootMIR(ZMIR* mir, bool use_own_thread=false);
   void     DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time);
+  void     DelayedShootMIR(ZMIR* mir, GTime at_time);
   ZMIR_RR* ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
+  ZMIR_RR* ShootMIRWaitResult(ZMIR* mir, bool use_own_thread=false);
 
   void     ShootMIRResult(TBuffer& buf);
 
