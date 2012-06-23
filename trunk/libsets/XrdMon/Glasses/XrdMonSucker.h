@@ -104,8 +104,8 @@ public:
 
   virtual void AdEnlightenment();
 
-  void AddFileCloseReporter(XrdFileCloseReporter* fcr);
-  void RemoveFileCloseReporter(XrdFileCloseReporter* fcr);
+  void AddFileCloseReporter(XrdFileCloseReporter* fcr);    // X{E} C{1}
+  void RemoveFileCloseReporter(XrdFileCloseReporter* fcr); // X{E} C{1}
 
   void StartSucker(); // X{Ed} 7 MButt()
   void StopSucker();  // X{Ed} 7 MButt()

@@ -39,7 +39,10 @@ protected:
 
   Bool_t                  bFileIdxAlways;    // X{GS} 7 Bool()
   TString                 mFilePrefix;       // X{GS} 7 Textor()
+  TString                 mTreeName;         // X{GS} 7 Textor()
   TString                 mFileNameTrue;     //!
+  TString                 mFileLastDate;     //!
+  Int_t                   mFileLastIdx;      //!
   TFile                  *mFile;             //!
   TTree                  *mTree;             //!
   TBranch                *mBranchF;          //!
