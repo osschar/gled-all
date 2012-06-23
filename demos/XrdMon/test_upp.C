@@ -40,7 +40,7 @@ void test_upp()
   // g_nest->SetMaxChildExp(3); // This only works on creation.
   g_nest->SetWName(50);
 
-  g_saturn->ShootMIR( upp->S_StartAllServices() );
+  g_gled->AfterSetup( upp->S_StartAllServices() );
 
-  g_saturn->ShootMIR( cli->S_ConnectAndListenLoop() );
+  g_gled->AfterSetup( cli->S_ConnectAndListenLoop() );
 }

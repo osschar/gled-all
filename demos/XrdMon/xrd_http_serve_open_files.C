@@ -10,5 +10,5 @@ void xrd_http_serve_open_files()
   c_ehs->SetXrdSucker(c_suck);
   // c_ehs->SetPort(4242);
 
-  g_saturn->ShootMIR( c_ehs->S_StartServer() );
+  g_gled->AfterSetup( c_ehs->S_StartServer() );
 }

@@ -1,3 +1,17 @@
+2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_far_tree_writer.C:
+	* xrd_udp_tree_writer.C:
+	Add commented-out config calls with default values.
+	Use Gled::AfterSetup() to queue up MIRs.
+
+	* test.C:
+	* test_upp.C:
+	* xrd_http_serve_open_files.C:
+	* xrd_suck_udp.C:
+	* xrd_udp_forwarder.C:
+	Use Gled::AfterSetup() to queue up MIRs.
+
 2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_udp_tree_writer.C:
