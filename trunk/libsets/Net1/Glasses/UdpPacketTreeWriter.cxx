@@ -113,7 +113,7 @@ void UdpPacketTreeWriter::open_file_create_tree()
   TString fn = mFileNameTrue;
   {
     Ssiz_t sp = fn.Last('/');
-    if (sp == kNPOS) sp = 0; else --sp;
+    if (sp == kNPOS) sp = 0; else ++sp;
     fn.Insert(sp, ".");
   }
 
