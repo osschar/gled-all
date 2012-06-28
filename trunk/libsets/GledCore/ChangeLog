@@ -1,3 +1,22 @@
+2012-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix log-redirection corner-case and improve Root app-thread
+	startup sequence.
+
+	* Gled/Gled.cxx:
+	After stdout/err redirection also dup2 to fd 1/2. This makes
+	std::cout and cerr happy.
+
+	In Root-app thread start do not install Root signal handlers for
+	terminal signals.
+
+	During command-line option parsing, assign current value of
+	output-file-name to log-file-name when "--log =" is encountered.
+
+	* Gled/GThread.cxx:
+	* Gled/GThread.h:
+	Add optional argument 'bool unblock' to	GThread::SetSignalHandler().
+
 2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Work around some cint-thread-unsafety problems during startup.
