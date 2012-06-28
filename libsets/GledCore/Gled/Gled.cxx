@@ -327,7 +327,7 @@ void Gled::ParseArguments(Bool_t allow_daemon)
       }
       else if (*i == "+")
       {
-	mLogFileName = "<stdout>";
+	mLogFileName = mOutFileName;
       }
       else if (*i == "=")
       {
@@ -472,6 +472,7 @@ void Gled::InitLogging()
   {
     fclose(stdin);
     stdin = fopen("/dev/null", "r");
+    dup2(fileno(stdin), 0);
 
     if (mLogFileName == "<stdin>" || mLogFileName == "<stdout>")
     {
@@ -574,6 +575,9 @@ void Gled::InitLogging()
     if (fix_log) mLogFile = stderr;
     if (fix_out) stdout   = stderr;
   }
+
+  if (fileno(stdout) != 1) dup2(fileno(stdout), 1);
+  if (fileno(stderr) != 2) dup2(fileno(stderr), 2);
 
   if (bShowSplash)
   {
@@ -1346,20 +1350,19 @@ void* Gled::RootApp_runner_tl(void*)
   // very intuitively, in ProcessCmdLineMacros()). For TApplication we install
   // our own ... that will exit like SigTERM.
 
-  GThread::UnblockSignal(GThread::SigHUP);
-  GThread::UnblockSignal(GThread::SigINT);
-  GThread::UnblockSignal(GThread::SigTERM);
-  GThread::UnblockSignal(GThread::SigCONT);
-  GThread::UnblockSignal(GThread::SigTSTP);
-  GThread::UnblockSignal(GThread::SigPIPE);
-  GThread::UnblockSignal(GThread::SigCHLD);
-  GThread::UnblockSignal(GThread::SigALRM);
-  GThread::UnblockSignal(GThread::SigURG);
-  GThread::UnblockSignal(GThread::SigSYS);
-  GThread::UnblockSignal(GThread::SigWINCH);
+  self->SetTerminalPolicy(GThread::TP_SysExit);
 
-  GThread::SetDefaultSignalHandler(GThread::ToRootsSignalHandler);
-  self->SetTerminalPolicy(GThread::TP_GledExit);
+  GThread::SetSignalHandler(GThread::SigHUP,   GThread::ToRootsSignalHandler, true);     
+  GThread::SetSignalHandler(GThread::SigINT,   GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigTERM,  GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigCONT,  GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigTSTP,  GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigPIPE,  GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigCHLD,  GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigALRM,  GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigURG,   GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigSYS,   GThread::ToRootsSignalHandler, true);
+  GThread::SetSignalHandler(GThread::SigWINCH, GThread::ToRootsSignalHandler, true);
 
   // Root does not want TThread to exist for the main thread.
   self->ClearRootTThreadRepresentation();
@@ -1385,6 +1388,8 @@ void* Gled::RootApp_runner_tl(void*)
   GThread::UnblockSignal(GThread::SigUSR1);
 
   Gled::theOne->ShootAfterSetupMirs();
+
+  self->SetTerminalPolicy(GThread::TP_GledExit);
 
   Gled::theOne->bRootAppRunning = true;
   Gled::theOne->mRootApp->TApplication::Run(true);

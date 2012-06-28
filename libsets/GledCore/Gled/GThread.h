@@ -206,7 +206,7 @@ public:
   static void UnblockSignal(Signal sig);
 
   static GThread_sh_foo SetDefaultSignalHandler(GThread_sh_foo foo);
-  static GThread_sh_foo SetSignalHandler(Signal sig, GThread_sh_foo foo);
+  static GThread_sh_foo SetSignalHandler(Signal sig, GThread_sh_foo foo, bool unblock=false);
 
   static void TheSignalHandler(GSignal* sig);
   static void ToRootsSignalHandler(GSignal* sig);

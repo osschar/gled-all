@@ -458,11 +458,14 @@ GThread_sh_foo GThread::SetDefaultSignalHandler(GThread_sh_foo foo)
   return old;
 }
 
-GThread_sh_foo GThread::SetSignalHandler(Signal sig, GThread_sh_foo foo)
+GThread_sh_foo GThread::SetSignalHandler(Signal sig, GThread_sh_foo foo, bool unblock)
 {
   GThread *self = Self();
   GThread_sh_foo old = self->mSigHandlerVector[sig];
   self->mSigHandlerVector[sig] = foo;
+
+  if (unblock) UnblockSignal(sig);
+
   return old;
 }
 
