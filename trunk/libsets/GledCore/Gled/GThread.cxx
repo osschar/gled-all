@@ -503,6 +503,7 @@ void GThread::TheSignalHandler(GSignal* sig)
 void GThread::ToRootsSignalHandler(GSignal* sig)
 {
   // Root remaps signals in an even funnier way, see TUnixSystem.cxx.
+
   static const int root_sig_map[kMAXSIGNALS] =
   {
     SIGBUS,  SIGSEGV, SIGSYS, SIGPIPE, SIGILL,  SIGQUIT, SIGINT,  SIGWINCH,
