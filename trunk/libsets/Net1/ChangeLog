@@ -1,3 +1,13 @@
+2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add option to rotate output trees at midnight.
+
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Add flag 'Bool_t bRotateAtMidnight'.
+	On startup, do not overwrite stray hidden root files (warn about
+	their existence).
+
 2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve file creation & cint-thread-safety..

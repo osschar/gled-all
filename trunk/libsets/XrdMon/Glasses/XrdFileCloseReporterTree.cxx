@@ -37,9 +37,10 @@ ClassImp(XrdFileCloseReporterTree);
 
 void XrdFileCloseReporterTree::_init()
 {
-  mAutoSaveEntries = 100000;
-  mAutoSaveMinutes = 60;
-  mRotateMinutes   = 24 * 60;
+  mAutoSaveEntries  = 100000;
+  mAutoSaveMinutes  = 60;
+  mRotateMinutes    = 24 * 60;
+  bRotateAtMidnight = true;
 
   bForceAutoSave = bForceRotate = false;
 
@@ -90,8 +91,17 @@ void XrdFileCloseReporterTree::open_file_create_tree()
 
         if (gSystem->AccessPathName(mFileNameTrue) == true)
         {
-          // No file with this name yet ... use it.
-          break;
+          // No file with this name yet ... check also if a hidden file
+	  // exists from a previous run (could happen if it crashed).
+	  TString hfn = GledNS::pathname_make_hidden_file(mFileNameTrue);
+	  if (gSystem->AccessPathName(hfn) == true)
+	  {
+	    if (*mLog)
+	    {
+	      mLog->Form(ZLog::L_Warning, _eh, "Hidden file '%s' found during start-up - it will be kept as is.", hfn.Data());
+	    }
+	    break;
+	  }
         }
 
         ++i;
@@ -114,13 +124,7 @@ void XrdFileCloseReporterTree::open_file_create_tree()
     mLog->Form(ZLog::L_Message, _eh, "Opening tree file '%s' (kept hidden until closing).", mFileNameTrue.Data());
   }
 
-  TString fn = mFileNameTrue;
-  {
-    Ssiz_t sp = fn.Last('/');
-    if (sp == kNPOS) sp = 0; else ++sp;
-    fn.Insert(sp, ".");
-  }
-
+  TString fn = GledNS::pathname_make_hidden_file(mFileNameTrue);
   {
     R__LOCKGUARD2(gCINTMutex);
 
@@ -173,6 +177,26 @@ void XrdFileCloseReporterTree::write_tree_close_file()
   mFileNameTrue = "";
 }
 
+//------------------------------------------------------------------------------
+
+void XrdFileCloseReporterTree::check_file_rotate()
+{
+  // Should be called with cancellation disabled, no lock.
+
+  GTime at = GTime::ApproximateTime();
+  if ((mRotateMinutes > 0 && at >= mLastFileOpen + GTime(60*mRotateMinutes, 0)) ||
+      (bRotateAtMidnight && at - mLastFileOpen > at.TimeOfTheDayLocal()) ||
+      bForceRotate)
+  {
+    write_tree_close_file();
+    open_file_create_tree();
+    {
+      GLensReadHolder _lck(this);
+      Stamp(FID());
+    }
+  }
+}
+
 //==============================================================================
 
 void XrdFileCloseReporterTree::ReportLoopInit()
@@ -190,16 +214,7 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
 
   GThread::CancelDisabler _cd;
 
-  if ((mRotateMinutes > 0 && GTime::ApproximateTime() >= mLastFileOpen + GTime(60*mRotateMinutes, 0)) ||
-      bForceRotate)
-  {
-    write_tree_close_file();
-    open_file_create_tree();
-    {
-      GLensReadHolder _lck(this);
-      Stamp(FID());
-    }
-  }
+  check_file_rotate();
 
   {
     GLensReadHolder _flck(fus.fFile);
@@ -235,10 +250,15 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
   }
 }
 
+void XrdFileCloseReporterTree::ReportCondWaitTimeout()
+{
+  GThread::CancelDisabler _cd;
+
+  check_file_rotate();
+}
+
 void XrdFileCloseReporterTree::ReportLoopFinalize()
 {
-  PARENT_GLASS::ReportLoopFinalize();
-
   write_tree_close_file();
 }
 

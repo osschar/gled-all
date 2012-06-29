@@ -26,6 +26,7 @@ ClassImp(XrdFileCloseReporter);
 
 void XrdFileCloseReporter::_init()
 {
+  mCondWaitSec = 0;
   bRunning = false;
 }
 
@@ -73,6 +74,12 @@ void XrdFileCloseReporter::ReportFileClosed(FileUserServer& fus)
 
   ZLog::Helper log(*mLog, ZLog::L_Message, _eh);
   log.Form("LFN=%s", fus.fFile->GetName());
+}
+
+void XrdFileCloseReporter::ReportCondWaitTimeout()
+{
+  // Sub-classes should override this to perform periodic checks.
+  // If mCondWaitSec = 0 then this function never gets called.
 }
 
 void XrdFileCloseReporter::ReportLoopFinalize()
@@ -131,7 +138,18 @@ void XrdFileCloseReporter::ReportLoop()
       GMutexHolder _lck(mReporterCond);
       if (mReporterQueue.empty())
       {
-        mReporterCond.Wait();
+	if (mCondWaitSec <= 0)
+	{
+	  mReporterCond.Wait();
+	}
+	else
+	{
+	  if (mReporterCond.TimedWaitUntil(GTime::ApproximateTime() + GTime(mCondWaitSec)) == 1)
+	  {
+	    ReportCondWaitTimeout();
+	    continue;
+	  }
+	}
       }
       fus = mReporterQueue.front();
       mReporterQueue.pop_front();

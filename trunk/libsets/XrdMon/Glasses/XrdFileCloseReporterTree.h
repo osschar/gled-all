@@ -32,6 +32,7 @@ protected:
   Int_t                   mAutoSaveMinutes;  // X{GS} 7 Value(-range=>[0, 14400, 1])
   GTime                   mLastAutoSave;     //!X{GR} 7 TimeOut()
   Int_t                   mRotateMinutes;    // X{GS} 7 Value(-range=>[0, 14400, 1])
+  Bool_t                  bRotateAtMidnight; // X{GS} 7 Bool()
   GTime                   mLastFileOpen;     //!X{GR} 7 TimeOut()
 
   Bool_t                  bForceAutoSave;    //!
@@ -56,8 +57,11 @@ protected:
   void open_file_create_tree();
   void write_tree_close_file();
 
+  void check_file_rotate();
+
   virtual void ReportLoopInit();
   virtual void ReportFileClosed(FileUserServer& fus);
+  virtual void ReportCondWaitTimeout();
   virtual void ReportLoopFinalize();
 
 public:
