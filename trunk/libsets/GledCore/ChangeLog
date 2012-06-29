@@ -1,3 +1,18 @@
+2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add helper functions.
+
+	* Gled/GTime.cxx:
+	* Gled/GTime.h:
+	Add member functions:
+	  GTime TimeOfTheDayUTC();
+	  GTime	TimeOfTheDayLocal();
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Add helper function:
+	  TString GledNS::pathname_make_hidden_file(const TString& path);
+
 2012-06-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix log-redirection corner-case and improve Root app-thread

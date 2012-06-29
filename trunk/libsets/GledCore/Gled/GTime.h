@@ -86,6 +86,9 @@ public:
   TString  ToWebTimeLocal(Bool_t show_tz=true) const;
   TString  ToHourMinSec(Bool_t force_non_negative=false) const;
 
+  GTime    TimeOfTheDayUTC() const;
+  GTime    TimeOfTheDayLocal() const;
+
   void     Sleep();
 
   static Long64_t SleepMiliSec(UInt_t ms,

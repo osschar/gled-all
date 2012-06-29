@@ -440,6 +440,8 @@ namespace GledNS
   void   remove_whitespace(TString& s);
   Ssiz_t find_first_of(const TString& s, const char* accept, Ssiz_t i=0);
 
+  TString pathname_make_hidden_file(const TString& path);
+
   // Function argument parsing, type converters
 
   void split_argument(const TString& arg,
