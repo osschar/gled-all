@@ -302,6 +302,25 @@ TString GTime::ToHourMinSec(Bool_t force_non_negative) const
   return TString::Format("%02lld:%02d:%02d", hours, min, sec);    
 }
 
+//------------------------------------------------------------------------------
+
+GTime GTime::TimeOfTheDayUTC() const
+{
+  time_t    time(mSec);
+  struct tm t;
+  gmtime_r(&time, &t);
+  return GTime(3600*t.tm_hour + 60*t.tm_min + t.tm_sec, 0);
+}
+
+GTime GTime::TimeOfTheDayLocal() const
+{
+  time_t    time(mSec);
+  struct tm t;
+  localtime_r(&time, &t);
+  return GTime(3600*t.tm_hour + 60*t.tm_min + t.tm_sec, 0);
+ 
+}
+
 //==============================================================================
 
 void GTime::Sleep()

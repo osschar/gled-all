@@ -1010,6 +1010,19 @@ Ssiz_t GledNS::find_first_of(const TString& s, const char* accept, Ssiz_t i)
 }
 
 /**************************************************************************/
+
+TString GledNS::pathname_make_hidden_file(const TString& path)
+{
+  // Takes an absolute path and prepends the file component with a '.'.
+
+  TString fn = path;
+  Ssiz_t  sp = fn.Last('/');
+  if (sp == kNPOS) sp = 0; else ++sp;
+  fn.Insert(sp, ".");
+  return fn;
+}
+
+/**************************************************************************/
 // Argument/type-name parsing foos
 /**************************************************************************/
 
