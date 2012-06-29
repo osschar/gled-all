@@ -1,3 +1,22 @@
+2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add option to rotate output trees at midnight.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add member 'Int_t mCondWaitSec': when larger than zero, use
+	time-wait when waiting for file-close reports. If waiting
+	times-out, call new virtual function:
+	    virtual void ReportCondWaitTimeout();
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add flag 'Bool_t bRotateAtMidnight'.
+	On startup, do not overwrite stray hidden root files (warn about
+	their existence).
+	Implement virtual ReportCondWaitTimeout() and perform file-rotate
+	check there.
+
 2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve file creation & cint-thread-safety.

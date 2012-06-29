@@ -41,6 +41,8 @@ private:
 protected:
   ZLink<ZLog>           mLog;             // X{GS} L{}
 
+  Int_t                 mCondWaitSec;     // X{GS} 7 Value(-range=>[0, 10000, 1])
+
   Bool_t                bRunning;         //! X{G} 7 BoolOut()
 
   GThread              *mReporterThread;  //!
@@ -53,6 +55,7 @@ protected:
 
   virtual void ReportLoopInit();
   virtual void ReportFileClosed(FileUserServer& fus);
+  virtual void ReportCondWaitTimeout();
   virtual void ReportLoopFinalize();
 
 public:
