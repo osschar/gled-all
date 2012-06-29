@@ -14,6 +14,7 @@ void xrd_udp_tree_writer()
   // c_tree_udp->SetAutoSaveEntries(100000);
   // c_tree_udp->SetAutoSaveMinutes(60);
   // c_tree_udp->SetRotateMinutes(24*60);
+  // c_tree_udp->SetRotateAtMidnight(true);
 
   // c_tree_udp->SetFileIdxAlways(true);
   // c_tree_udp->SetFilePrefix("udp-tree-dump-");

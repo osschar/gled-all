@@ -12,6 +12,8 @@ void xrd_far_tree_writer()
   // c_tree_far->SetAutoSaveEntries(100000);
   // c_tree_far->SetAutoSaveMinutes(60);
   // c_tree_far->SetRotateMinutes(24*60);
+  // c_tree_far->SetRotateAtMidnight(true);
+  // c_tree_far->SetCondWaitSec(0);
 
   // c_tree_far->SetFileIdxAlways(true);
   // c_tree_far->SetFilePrefix("xrd-file-access-report-");
