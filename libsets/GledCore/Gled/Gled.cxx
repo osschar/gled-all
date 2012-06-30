@@ -920,7 +920,6 @@ void Gled::SpawnSaturn()
 
 void Gled::AfterSetup(ZMIR* mir)
 {
-  printf("Gled::AfterSetup registering mir %p.\n", mir);
   mAfterSetupMirs.push_back(mir);
 }
 
@@ -928,7 +927,6 @@ void Gled::ShootAfterSetupMirs()
 {
   while (! mAfterSetupMirs.empty())
   {
-    printf("Gled::ShootAfterSetupMirs Queuing mir %p!\n", mAfterSetupMirs.front());
     mSaturn->ShootMIR(mAfterSetupMirs.front());
     mAfterSetupMirs.pop_front();
   }
