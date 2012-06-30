@@ -92,12 +92,12 @@ void UdpPacketTreeWriter::open_file_create_tree()
 	  TString hfn = GledNS::pathname_make_hidden_file(mFileNameTrue);
 	  if (gSystem->AccessPathName(hfn) == true)
 	  {
-	    if (*mLog)
-	    {
-	      mLog->Form(ZLog::L_Warning, _eh, "Hidden file '%s' found during start-up - it will be kept as is.", hfn.Data());
-	    }
 	    break;
 	  }
+          else if (*mLog)
+          {
+            mLog->Form(ZLog::L_Warning, _eh, "Hidden file '%s' found during start-up - it will be kept as is.", hfn.Data());
+          }
         }
 
         ++i;
