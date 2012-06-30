@@ -464,60 +464,69 @@ void XrdMonSucker::Suck()
         }
 
         XrdUser *user = 0;
-        TString  dn;
+        try
         {
-          TString     group;
-          TPMERegexp *a_rep = 0;
-          if (authinfo_re.Match(sec) == 8)
+          TString  dn;
           {
-            group =  authinfo_re[6];
-            dn    =  authinfo_re[7];
-            a_rep = &authinfo_re;
-          }
-          else if (authxxxx_re.Match(sec) == 6)
-          {
-            group =  "<unknown>";
-            dn    =  "<unknown>";
-            a_rep = &authxxxx_re;
-          }
-          else
-          {
-            msg += GForm("\n\tUnparsable auth-info: '%s'", sec);
+            TString     group;
+            TPMERegexp *a_rep = 0;
+            if (authinfo_re.Match(sec) == 8)
+            {
+              group =  authinfo_re[6];
+              dn    =  authinfo_re[7];
+              a_rep = &authinfo_re;
+            }
+            else if (authxxxx_re.Match(sec) == 6)
+            {
+              group =  "<unknown>";
+              dn    =  "<unknown>";
+              a_rep = &authxxxx_re;
+            }
+            else
+            {
+              msg += GForm("\n\tUnparsable auth-info: '%s'", sec);
+            }
+
+            if (a_rep)
+            {
+              TPMERegexp &a_re = *a_rep;
+
+              msg += GForm("\n\tDN=%s, VO=%s, Role=%s, Group=%s",
+                           dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
+
+              user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
+                                 a_re[2], host, domain, numeric_host, recv_time);
+            }
+            else
+            {
+              user = new XrdUser(uname, "", "", "", "", "",
+                                 "", host, domain, numeric_host, recv_time);
+            }
+            // ZQueen::CheckIn() does write lock.
+            mQueen->CheckIn(user);
           }
 
-	  if (a_rep)
-	  {
-	    TPMERegexp &a_re = *a_rep;
+          {
+            GLensWriteHolder _lck(server);
+            server->AddUser(user, dict_id);
+          }
+          {
+            GLensWriteHolder _lck(user);
+            user->SetServer(server);
 
-	    msg += GForm("\n\tDN=%s, VO=%s, Role=%s, Group=%s",
-                         dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
-
-	    user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
-			       a_re[2], host, domain, numeric_host, recv_time);
-	  }
-	  else
-	  {
-	    user = new XrdUser(uname, "", "", "", "", "",
-			       "", host, domain, numeric_host, recv_time);
-	  }
-          // ZQueen::CheckIn() does write lock.
-          mQueen->CheckIn(user);
+            if ( ! bTraceAllNull && mTraceDN_RE.Match(dn) &&
+                 mTraceHost_RE.Match(host) && mTraceDomain_RE.Match(domain))
+            {
+              user->SetTraceMon(true);
+            }          
+          }
         }
-
-	{
-	  GLensWriteHolder _lck(server);
-	  server->AddUser(user, dict_id);
-	}
-	{
-	  GLensWriteHolder _lck(user);
-	  user->SetServer(server);
-
-          if ( ! bTraceAllNull && mTraceDN_RE.Match(dn) &&
-               mTraceHost_RE.Match(host) && mTraceDomain_RE.Match(domain))
-          {
-            user->SetTraceMon(true);
-          }          
-	}
+        catch (Exc_t exc)
+        {
+          msg += "\n\tException caught while instantiating XrdUser:\n\t" + exc;
+          log.Put(ZLog::L_Error, msg);
+          continue;
+        }
 
 	// XXX Eventually ... grep / create GridUser.
       }
@@ -538,25 +547,34 @@ void XrdMonSucker::Suck()
 	  }
 
 	  // create XrdFile
-	  XrdFile *file = new XrdFile(path);
-	  mQueen->CheckIn(file);
+          try
           {
-            GLensWriteHolder _lck(user);
-            user->AddFile(file);
-            user->SetLastMsgTime(recv_time);
-          }
-          {
-            GLensWriteHolder _lck(file);
-            file->SetUser(user);
-            file->SetOpenTime(recv_time);
-            file->SetLastMsgTime(recv_time);
-          }
-          {
-            GLensWriteHolder _lck(server);
-            server->AddFile(file, dict_id);
-          }
+            XrdFile *file = new XrdFile(path);
+            mQueen->CheckIn(file);
+            {
+              GLensWriteHolder _lck(user);
+              user->AddFile(file);
+              user->SetLastMsgTime(recv_time);
+            }
+            {
+              GLensWriteHolder _lck(file);
+              file->SetUser(user);
+              file->SetOpenTime(recv_time);
+              file->SetLastMsgTime(recv_time);
+            }
+            {
+              GLensWriteHolder _lck(server);
+              server->AddFile(file, dict_id);
+            }
 
-          on_file_open(file);
+            on_file_open(file);
+          }
+          catch (Exc_t exc)
+          {
+            msg += "\n\tException caught while instantiating XrdFile:\n\t" + exc;
+            log.Put(ZLog::L_Error, msg);
+            continue;
+          }
 	}
 	else
 	{
@@ -833,8 +851,8 @@ void XrdMonSucker::Suck()
 	  if (us != us_from_server)
 	  {
 	    log.Form(ZLog::L_Warning, _eh + "us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')",
-                                             us,             us ? us->GetName() : "",
-                                             us_from_server, us_from_server ? us_from_server->GetName() : "");
+                     us,             us ? us->GetName() : "",
+                     us_from_server, us_from_server ? us_from_server->GetName() : "");
 	    if (us_from_server) {
 	      us = us_from_server;
 	    }

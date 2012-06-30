@@ -1,3 +1,9 @@
+2012-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Handle exceptions during XrdUser and XrdFile instantiation and
+	registration.
+
 2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add option to rotate output trees at midnight.
