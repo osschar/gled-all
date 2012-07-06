@@ -140,47 +140,62 @@ C<Gled> has two main executables. C<gled> is the standard one and
 spawns C<Gled> native GUI (FLTK) while C<saturn> has command-line
 interface only and is useful for pure servers and proxies.
 
-Both will list their command-line options if started with C<-h>
+Both will list their command-line options if started with C<-h> or C<--help>
 switch:
 
- # prompt > gled -h
+ # prompt> gled --help
  Arguments: [options] [dir] [file(s)]
                       dir   ~ cd to dir prior to exec of files
                       files ~ ROOT macro scripts to process
+
+   Short options use a single '-' and can not be aggregated.
+
  Gled options:
  -------------
-   -preexec <m1:m2..> pre-exec specified macros
-   -r[un]             spawn Saturn/Sun immediately (before processing files)
-                      Saturn if -master is specified, Sun otherwise
-   -allowmoons        accept moon connections
-   -s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)
-   -p[ort]    <num>   specify server port (def: 9061)
-   -portscan  <num>   if server port can not be opened, try <num> higher ports
-   -m[aster] <host>[:<port>] master Saturn address (def port: 9061)
-   -n[ame]    <str>   name of Saturn
-   -t[itle]   <str>   title of Saturn
-   -l                 no splash info
-   -norint            do not run TRint (useful for batch saturns)
- 
+   --datadir   <dir>   directory containing Gled data
+   --libdir    <dir>   directory containing Gled libraries
+   --preexec <m1:m2..> pre-exec specified macros
+   --r[un]             spawn Saturn/Sun immediately (before processing files)
+                       Saturn if -master is specified, Sun otherwise
+   --opensrvsock       open server socket early on (needed for eyes over IP)
+   --allowmoons        accept moon connections
+   --noprompt          no ROOT prompt (runs TApplication insted of TRint)
+   --daemon            run as daemon; implies --noprompt, std streams get closed
+                       (available only for saturn executable)
+   --s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)
+   --p[ort]    <num>   specify server port (def: 9061)
+   --portscan  <num>   if server port can not be opened, try <num> higher ports
+   --m[aster] <host>[:<port>] master Saturn address (def port: 9061)
+   --n[ame]    <str>   name of Saturn
+   --t[itle]   <str>   title of Saturn
+
  Logging options:
-   -log[file] <file>  specify log file name (saturn:'<stdout>', gled:'<null>')
-   -out[file] <file>  specify output file name (def: '<stdout>')
-                      <file> shorthands: '-' => '<null>', '+' => '<stdout>'
- 
+   --log    <file>     specify log file name (saturn:'<stdout>', gled:'<null>')
+                       shorthands: '-' => <null>, '+' => <stdout>
+   --out    <file>     specify file name for stdout redirection
+   --err    <file>     specify file name for stderr redirection
+   --outerr <file>     specify file name for stdout and stderr redirection
+                       shorthands: '-' => <null>, '=' => same as log
+   --debug  <lvl>      set debug level (some messages require debug build)
+   -l                  no splash info
+
  Authentication options:
-   -auth              use authentication
-   -authdir   <str>   directory containing auth data (def: ~/.gled/auth)
-   -saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')
-   -eyeid     <str>   default identity of Eyes (def: 'guest')
- 
+   --auth              use authentication
+   --authdir   <str>   directory containing auth data (def: ~/.gled/auth)
+   --saturnid  <str>   identity of the Saturn (def: 'sun.absolute' or 'saturn')
+   --eyeid     <str>   default identity of Eyes (def: 'guest')
+
+ Renderer loading options:
+   --rnr <r1>:<r2>:... specify which rendering libraries to load (for gled: GL)
+
  GledGUI options:
  ----------------
-   -swm   fs:dh:dw    specify font-size, vert-space and char width
-                      default: 12:6:0 (dw~0 means measure font)
-   -font  font-id     use fltk's font-id as default font
-   -rnr <r1>:<r2>:... specify which rendering libraries to load (def: GL)
-   -iconize           iconize main window on start-up
-   -nomsgwin | -nomw  start gled without the message window (consider '-log +')
+   --swm   fs:dh:dw    specify font-size, vert-space and char width
+                       default: 12:6:0 (dw~0 means measure font)
+   --font  font-id     use fltk's font-id as default font
+   --iconize           iconize main window on start-up
+   --nomsgwin | --nomw start gled without the message window (consider '-log +')
+   --stereo            use stereo GL visuals by default
 
 But usually, at least for first-time usage, the following will do:
 
