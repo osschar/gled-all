@@ -16,6 +16,8 @@ FNORD
 
 my @updated_pkgs = update_cache();
 
+print("Server package list refreshed.\n");
+
 my $make_cmd = "make -C external " . join(" ", @updated_pkgs);
 
 if (@updated_pkgs)
