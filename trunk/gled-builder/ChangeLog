@@ -1,3 +1,25 @@
+2012-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Register new external packages: apr, apr-util and activemq-cpp.
+
+	* external/apr:
+	* external/apr/Makefile:
+	* external/apr/apr.pl:
+	* external/apr-util:
+	* external/apr-util/Makefile:
+	* external/apr-util/apr-util.pl:
+	* external/activemq-cpp:
+	* external/activemq-cpp/Makefile:
+	* external/activemq-cpp/activemq-cpp.pl:
+	Build instructions for the new externals.
+
+	* external/Makefile:
+	Register new packages and list their dependencies.
+
+	* update_cache.pl:
+	Add printout confessing that server list has been refreshed.
+	Provides some context for further messages.
+
 2012-03-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Make build of externals aware of libset dependecies.

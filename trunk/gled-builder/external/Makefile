@@ -1,6 +1,10 @@
 SHELL = /bin/bash
 
-PACKAGES := root fltk fltk-mt DevIL gts openal freealut ehs
+PACKAGES := root fltk fltk-mt DevIL gts openal freealut \
+            apr apr-util activemq-cpp
+
+# Disabled packages
+# ehs
 
 all: ${PACKAGES}
 
@@ -42,6 +46,10 @@ all-but-root: $(filter-out root, ${PACKAGES})
 fltk-mt:  fltk
 
 freealut: openal
+
+apr-util: apr
+
+activemq-cpp: apr apr-util
 
 # Targets
 
