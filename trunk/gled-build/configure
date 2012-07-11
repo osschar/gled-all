@@ -319,6 +319,8 @@ if ($config->{RECONFIGURE} == 0)
   my $pchuse = $config->{USE_PCH} ? "yes" : "";
   my $pchflg = $config->{USE_PCH} ? "-Winvalid-pch -include $config->{PCH_NAME}" : "";
 
+  my $pkgcfg_dirs = join(':', map { "$_/lib/pkgconfig" } @ext_areas);
+
   my $sys_specific = system_make_config();
 
   open MC, ">make/make_config.inc";
@@ -344,6 +346,8 @@ USER_LD_FLAGS  = $user_ld
 USE_PCH        = $pchuse
 PCHFLAGS       = $pchflg
 PCH_SRC_NAME   = $config->{PCH_NAME}
+
+PKGCFG_DIRS    = $pkgcfg_dirs
 
 ################################################################
 # System '$system' specific settings

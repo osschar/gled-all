@@ -41,6 +41,7 @@ GLED_UNINSTALL_FILES = ${libexecdir}/gled_uninstall_files.pl
 GLED_INSTALL_DIRS    = ${libexecdir}/gled_install_dirs.pl
 GLED_UNINSTALL_DIRS  = ${libexecdir}/gled_uninstall_dirs.pl
 
+PKG_CONFIG      = PKG_CONFIG_PATH=${PKGCFG_DIRS} pkg-config
 ROOT_CONFIG     = ${ROOTSYS}/bin/root-config
 FLTK_CONFIG     = fltk-config
 FLUID   	= fluid
