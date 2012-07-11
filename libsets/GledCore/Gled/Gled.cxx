@@ -840,10 +840,10 @@ void Gled::SpawnSun()
     mSaturnInfo->SetLogin("sun.absolute");
   }
 
-  CheckAuthDir();
-
   if (mSaturnInfo->GetUseAuth())
   {
+    CheckAuthDir();
+
     GKeyRSA::init_ssl();
     if (GetPrivKeyFile(mSaturnInfo->mLogin) == 0)
     {
@@ -882,11 +882,11 @@ void Gled::SpawnSaturn()
   // Warn for missing RSA-key files
   if (GetPrivKeyFile(mSaturnInfo->mLogin, false) == 0)
   {
-    ISwarn(_eh + "private key for Saturn identity not found");
+    ISwarn(_eh + "private key for Saturn identity not found.");
   }
   if (mDefEyeIdentity != "guest" && GetPrivKeyFile(mDefEyeIdentity, false) == 0)
   {
-    ISwarn(_eh + "private key for default Eye identity not found");
+    ISwarn(_eh + "private key for default Eye identity not found.");
   }
 
   mSaturn = new Saturn;
@@ -903,7 +903,7 @@ void Gled::SpawnSaturn()
       cerr << _eh <<"failed ... dying\n";
       exit(1);
     }
-    WaitUntillQueensLoaded();
+    WaitUntilQueensLoaded();
     if (bEarlySrvSock)
     {
       mSaturn->OpenServerSocket();
@@ -936,10 +936,12 @@ void Gled::ShootAfterSetupMirs()
 
 void Gled::CheckAuthDir()
 {
+  static const Exc_t _eh("Gled::CheckAuthDir ");
+
   if (gSystem->AccessPathName(mAuthDir.Data(), kReadPermission))
   {
-    printf("Gled::CheckAuthDir auth dir '%s' not accessible\n", mAuthDir.Data());
-    printf("Gled::CheckAuthDir use gled-auth-init command to create one\n");
+    ISwarn(_eh + GForm("auth dir '%s' not accessible. Use command gled-auth-init to create one.",
+                       mAuthDir.Data()));
   }
 }
 
@@ -994,15 +996,17 @@ Bool_t Gled::IsIdentityInGroup(const char* id, const char* group)
 
 /**************************************************************************/
 
-void Gled::WaitUntillQueensLoaded()
+void Gled::WaitUntilQueensLoaded()
 {
   // Wait until number of arriving queens is zero.
 
   mSaturn->RefQueenLoadCnd().Lock();
-  while(1) {
+  while (true)
+  {
     int n = mSaturn->GetQueenLoadNum();
-    ISmess(GForm("Gled::WaitUntillQueensLoaded() #queens=%d", n));
-    if(n==0) {
+    ISmess(GForm("Gled::WaitUntilQueensLoaded() #queens=%d", n));
+    if (n == 0)
+    {
       mSaturn->RefQueenLoadCnd().Unlock();
       break;
     }

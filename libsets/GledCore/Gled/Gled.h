@@ -111,7 +111,7 @@ public:
 
   Bool_t IsIdentityInGroup(const char* id, const char* group);
 
-  void WaitUntillQueensLoaded();
+  void WaitUntilQueensLoaded();
   void AllowMoonConnections();
 
   virtual void  Run();
