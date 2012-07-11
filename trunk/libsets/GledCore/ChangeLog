@@ -1,3 +1,14 @@
+2012-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Consolidate auth bootstrap warnings.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	On sun absolute warn about missing auth dir only if auth is
+	requested.
+	Fix typo in function name WaitUntillQueensLoaded().
+	Consolidate warning format.
+
 2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add helper functions.
