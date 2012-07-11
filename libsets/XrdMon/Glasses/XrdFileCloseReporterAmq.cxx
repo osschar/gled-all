@@ -15,11 +15,6 @@
 
 #include <activemq/library/ActiveMQCPP.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-
 #include <cerrno>
 
 // XrdFileCloseReporterAmq
@@ -34,13 +29,15 @@ ClassImp(XrdFileCloseReporterAmq);
 
 void XrdFileCloseReporterAmq::_init()
 {
-  mUdpHost = "localhost";
-  mUdpPort = 4242;
+  mAmqHost  = "gridmsg007.cern.ch";
+  mAmqPort  = 6163;
+  mAmqUser  = "xrdpop";
+  mAmqPswd  = "xyzz";
+  mAmqQueue = "/topic/xrdpop.uscms_test_popularity";
 }
 
 XrdFileCloseReporterAmq::XrdFileCloseReporterAmq(const Text_t* n, const Text_t* t) :
-  XrdFileCloseReporter(n, t),
-  mReporterSocket(0)
+  XrdFileCloseReporter(n, t)
 {
   _init();
 }
@@ -54,29 +51,6 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
 
-  mLastUidBase = mLastUidInner = 0;
-
-  mSAddr = new struct sockaddr;
-  {
-    struct addrinfo *result;
-    struct addrinfo  hints;
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family   = AF_INET; // AF_UNSPEC; this pulls out IP6 for localhost
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = IPPROTO_UDP;
-    hints.ai_flags    = AI_NUMERICSERV;
-
-    int error = getaddrinfo(mUdpHost, TString::Format("%hu", mUdpPort), &hints, &result);
-    if (error != 0)
-      throw _eh + "getaddrinfo failed: " + gai_strerror(error);
-
-    memcpy(mSAddr, result->ai_addr, sizeof(struct sockaddr));
-
-    freeaddrinfo(result);
-  }
-
-  if ((mReporterSocket = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    throw _eh + "socket failed: " + strerror(errno);
 }
 
 namespace
@@ -99,22 +73,22 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _flck(file);
 
-    Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
-    if (unique_id == mLastUidBase)
-    {
-      unique_id = mLastUidBase + ++mLastUidInner;
-      if (mLastUidInner >= 1000ll)
-      {
-	ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
-	log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
-	return;
-      }
-    }
-    else
-    {
-      mLastUidBase  = unique_id;
-      mLastUidInner = 0;
-    }
+    // Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
+    // if (unique_id == mLastUidBase)
+    // {
+    //   unique_id = mLastUidBase + ++mLastUidInner;
+    //   if (mLastUidInner >= 1000ll)
+    //   {
+    //     ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
+    //     log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
+    //     return;
+    //   }
+    // }
+    // else
+    // {
+    //   mLastUidBase  = unique_id;
+    //   mLastUidInner = 0;
+    // }
 
     const SRange &RS   = file->RefReadStats();
     const SRange &RSS  = file->RefSingleReadStats();
@@ -131,7 +105,7 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
        "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
        "read_bytes_at_close=%lld\n"
        "write_bytes_at_close=%lld\n",
-       unique_id,
+       0xdead0beef0feed00ll,
        file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
        dmtoll(RS .GetSumX()), RS .GetN(), dmtoll(RS .GetMin()), dmtoll(RS .GetMax()), dmtod(RS .GetAverage()), dmtod(RS .GetSigma()),
        dmtoll(RSS.GetSumX()), RSS.GetN(), dmtoll(RSS.GetMin()), dmtoll(RSS.GetMax()), dmtod(RSS.GetAverage()), dmtod(RSS.GetSigma()),
@@ -158,23 +132,23 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
 
   msg += "#end\n";
 
-  if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, mSAddr, sizeof(struct sockaddr)) == -1)
-  {
-    ZLog::Helper log(*mLog, ZLog::L_Error, _eh);
-    log.Form("Error sending report for file='%s'.\n\t%s.",
-	     file->GetName(), strerror(errno));
-  }
+  // if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, mSAddr, sizeof(struct sockaddr)) == -1)
+  // {
+  //   ZLog::Helper log(*mLog, ZLog::L_Error, _eh);
+  //   log.Form("Error sending report for file='%s'.\n\t%s.",
+  //            file->GetName(), strerror(errno));
+  // }
 }
 
 void XrdFileCloseReporterAmq::ReportLoopFinalize()
 {
-  close(mReporterSocket);
-  mReporterSocket = 0;
+  // close(mReporterSocket);
+  // mReporterSocket = 0;
 }
 
 
 //==============================================================================
-// XrdMon user-init -- initializing 
+// XrdMon libset user-init
 //==============================================================================
 
 // Temporary location, as AMQ is the only thing that needs global

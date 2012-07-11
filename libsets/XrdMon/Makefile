@@ -16,12 +16,10 @@ VIEW_DIRS	:=
 # files from /*.fl are processed by fluid
 VIEW_FL_DIRS	:=
 
-## Idiot AMQ installs itself with full version prefix for install dir
-## LIBSET_CPPFLAGS = $(shell pkg-config --cflags activemq-cpp)
-## Need var with extra pkgconfig paths, external + extra, must fix
-## configure and add the var in make/make.config, or sth. Argh etc.
-## PKG_CONFIG_PATH=/opt/gled/lib/pkgconfig pkg-config --cflags activemq-cpp
-## BASE_LD_LIBS = -lactivemq-cpp -luuid
+## AMQ installs includes with full version prefix.
+LIBSET_CPPFLAGS = $(shell ${PKG_CONFIG} --cflags activemq-cpp)
+BASE_LD_LIBS = -lactivemq-cpp
+# Might become necessary: -luuid -lapr -lapr-util
 
 #--------------------------------------------------------------
 include ${GLEDSYS}/make/make_base.inc

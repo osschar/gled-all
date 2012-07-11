@@ -9,7 +9,7 @@
 
 #include <Glasses/XrdFileCloseReporter.h>
 
-struct sockaddr;
+
 
 class XrdFileCloseReporterAmq : public XrdFileCloseReporter
 {
@@ -19,15 +19,11 @@ private:
   void _init();
 
 protected:
-  TString           mUdpHost; // X{GS} 7 Textor()
-  UShort_t          mUdpPort; // X{GS} 7 Value()
-
-  Int_t             mReporterSocket; //!
-
-  Long64_t          mLastUidBase;    //!
-  Long64_t          mLastUidInner;   //!
-
-  struct sockaddr  *mSAddr;          //!
+  TString       mAmqHost;   // X{GS} 7 Textor()
+  UShort_t      mAmqPort;   // X{GS} 7 Value()
+  TString       mAmqUser;   // X{GS} 7 Textor()
+  TString       mAmqPswd;   // X{GS} 7 Textor()
+  TString       mAmqQueue;  // X{GS} 7 Textor()
 
   virtual void ReportLoopInit();
   virtual void ReportFileClosed(FileUserServer& fus);
