@@ -1,3 +1,13 @@
+2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First supposedly working version.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Add data members holding AMQ objects.
+	Format the message using JSON syntax.
+	Send the message to given AMQ topic.
+
 2012-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Second intermediate commit for AMQ integration.
