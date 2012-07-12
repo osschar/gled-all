@@ -14,6 +14,10 @@
 #include "Glasses/ZLog.h"
 
 #include <activemq/library/ActiveMQCPP.h>
+#include <activemq/core/ActiveMQConnectionFactory.h>
+#include <cms/Connection.h>
+#include <cms/Session.h>
+#include <cms/TextMessage.h>
 
 #include <cerrno>
 
@@ -33,7 +37,13 @@ void XrdFileCloseReporterAmq::_init()
   mAmqPort  = 6163;
   mAmqUser  = "xrdpop";
   mAmqPswd  = "xyzz";
-  mAmqQueue = "/topic/xrdpop.uscms_test_popularity";
+  mAmqTopic = "/topic/xrdpop.uscms_test_popularity";
+
+  mConnFac = 0;
+  mConn = 0;
+  mSess = 0;
+  mDest = 0;
+  mProd = 0;
 }
 
 XrdFileCloseReporterAmq::XrdFileCloseReporterAmq(const Text_t* n, const Text_t* t) :
@@ -51,6 +61,23 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
 
+  mConnFac = cms::ConnectionFactory::createCMSConnectionFactory
+    (TString::Format("failover:(tcp://%s:%hu)", mAmqHost.Data(), mAmqPort).Data());
+
+  try
+  {
+    mConn = mConnFac->createConnection(mAmqUser.Data(), mAmqPswd.Data());
+    mConn->start();
+  }
+  catch (cms::CMSException& e)
+  {
+    throw _eh + "Exception during connection creation: " + e.getStackTrace().front().first;
+  }
+
+  mSess = mConn->createSession(); // Default is AUTO_ACKNOWLEDGE
+  mDest = mSess->createTopic(mAmqTopic.Data());
+  mProd = mSess->createProducer(mDest);
+  mProd->setDeliveryMode(cms::DeliveryMode::NON_PERSISTENT); // Copied from examples, NFI.
 }
 
 namespace
@@ -68,7 +95,7 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   XrdUser   *user   = fus.fUser;
   XrdServer *server = fus.fServer;
 
-  TString msg("#begin\n");
+  TString msg("{");
 
   {
     GLensReadHolder _flck(file);
@@ -96,16 +123,14 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
     const SRange &RSVC = file->RefVecReadCntStats();
     const SRange &WS   = file->RefWriteStats();
     msg += TString::Format
-      ("unique_id=xrd-%lld\n"
-       "file_lfn=%s\nfile_size=%lld\nstart_time=%llu\nend_time=%llu\n"
-       "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
-       "read_single_bytes=%lld\nread_single_operations=%llu\nread_single_min=%lld\nread_single_max=%lld\nread_single_average=%f\nread_single_sigma=%f\n"
-       "read_vector_bytes=%lld\nread_vector_operations=%llu\nread_vector_min=%lld\nread_vector_max=%lld\nread_vector_average=%f\nread_vector_sigma=%f\n"
-       "read_vector_count_min=%lld\nread_vector_count_max=%lld\nread_vector_count_average=%f\nread_vector_count_sigma=%f\n"
-       "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
-       "read_bytes_at_close=%lld\n"
-       "write_bytes_at_close=%lld\n",
-       0xdead0beef0feed00ll,
+      ("'file_lfn':'%s', 'file_size':'%lld', 'start_time':'%llu', 'end_time':'%llu', "
+       "'read_bytes':'%lld', 'read_operations':'%llu', 'read_min':'%lld', 'read_max':'%lld', 'read_average':'%f', 'read_sigma':'%f', "
+       "'read_single_bytes':'%lld', 'read_single_operations':'%llu', 'read_single_min':'%lld', 'read_single_max':'%lld', 'read_single_average':'%f', 'read_single_sigma':'%f', "
+       "'read_vector_bytes':'%lld', 'read_vector_operations':'%llu', 'read_vector_min':'%lld', 'read_vector_max':'%lld', 'read_vector_average':'%f', 'read_vector_sigma':'%f', "
+       "'read_vector_count_min':'%lld', 'read_vector_count_max':'%lld', 'read_vector_count_average':'%f', 'read_vector_count_sigma':'%f', "
+       "'write_bytes':'%lld', 'write_operations':'%llu', 'write_min':'%lld', 'write_max':'%lld', 'write_average':'%f', 'write_sigma':'%f', "
+       "'read_bytes_at_close':'%lld', "
+       "'write_bytes_at_close':'%lld', ",
        file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
        dmtoll(RS .GetSumX()), RS .GetN(), dmtoll(RS .GetMin()), dmtoll(RS .GetMax()), dmtod(RS .GetAverage()), dmtod(RS .GetSigma()),
        dmtoll(RSS.GetSumX()), RSS.GetN(), dmtoll(RSS.GetMin()), dmtoll(RSS.GetMax()), dmtod(RSS.GetAverage()), dmtod(RSS.GetSigma()),
@@ -118,32 +143,32 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _ulck(user);
     msg += TString::Format
-      ("user_dn=%s\nuser_vo=%s\nuser_role=%s\nuser_fqan=%s\nclient_domain=%s\nclient_host=%s\n"
-       "server_username=%s\napp_info=%s\n",
+      ("'user_dn':'%s', 'user_vo':'%s', 'user_role':'%s', 'user_fqan':'%s', 'client_domain':'%s', 'client_host':'%s', "
+       "'server_username':'%s', 'app_info':'%s', ",
        user->GetDN(), user->GetVO(), user->GetRole(), user->GetGroup(),
        user->GetFromDomain(), user->GetFromHost(), user->GetServerUsername(), user->GetAppInfo());
   }
   {
     GLensReadHolder _slck(server);
     msg += TString::Format
-      ("server_domain=%s\nserver_host=%s\n",
+      ("'server_domain':'%s', 'server_host':'%s'",
        server->GetDomain(), server->GetHost());
   }
 
-  msg += "#end\n";
+  msg += "}";
 
-  // if (sendto(mReporterSocket, msg.Data(), msg.Length() + 1, 0, mSAddr, sizeof(struct sockaddr)) == -1)
-  // {
-  //   ZLog::Helper log(*mLog, ZLog::L_Error, _eh);
-  //   log.Form("Error sending report for file='%s'.\n\t%s.",
-  //            file->GetName(), strerror(errno));
-  // }
+  cms::TextMessage* aqm = mSess->createTextMessage(msg);
+  mProd->send(aqm);
+  delete aqm;
 }
 
 void XrdFileCloseReporterAmq::ReportLoopFinalize()
 {
-  // close(mReporterSocket);
-  // mReporterSocket = 0;
+  delete mConnFac; mConnFac = 0;
+  delete mConn;    mConn = 0;
+  delete mSess;    mSess = 0;
+  delete mDest;    mDest = 0;
+  delete mProd;    mProd = 0;
 }
 
 

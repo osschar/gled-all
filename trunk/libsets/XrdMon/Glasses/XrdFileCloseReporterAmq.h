@@ -9,6 +9,14 @@
 
 #include <Glasses/XrdFileCloseReporter.h>
 
+namespace cms
+{
+  class ConnectionFactory;
+  class Connection;
+  class Session;
+  class Destination;
+  class MessageProducer;
+}
 
 
 class XrdFileCloseReporterAmq : public XrdFileCloseReporter
@@ -23,7 +31,13 @@ protected:
   UShort_t      mAmqPort;   // X{GS} 7 Value()
   TString       mAmqUser;   // X{GS} 7 Textor()
   TString       mAmqPswd;   // X{GS} 7 Textor()
-  TString       mAmqQueue;  // X{GS} 7 Textor()
+  TString       mAmqTopic;  // X{GS} 7 Textor()
+
+  cms::ConnectionFactory *mConnFac; //!
+  cms::Connection        *mConn;    //!
+  cms::Session           *mSess;    //!
+  cms::Destination       *mDest;    //!
+  cms::MessageProducer   *mProd;    //!
 
   virtual void ReportLoopInit();
   virtual void ReportFileClosed(FileUserServer& fus);
