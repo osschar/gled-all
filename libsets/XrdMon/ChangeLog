@@ -1,5 +1,19 @@
 2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Improve error handling and reporting.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add function DrainQueue() and call it during thread shutdown.
+	Add counters for processed and queued messages.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Do not use failover ... it works too well, spawning hundres of
+	threads until ulimit is used up.
+	Throw full exception from connect error.
+
+2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	First supposedly working version.
 
 	* Glasses/XrdFileCloseReporterAmq.cxx:

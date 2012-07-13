@@ -43,6 +43,8 @@ protected:
 
   Int_t                 mCondWaitSec;     // X{GS} 7 Value(-range=>[0, 10000, 1])
 
+  Int_t                 mNProcessed;      //! X{G} 7 ValOut()
+  Int_t                 mNQueued;         //! X{G} 7 ValOut()
   Bool_t                bRunning;         //! X{G} 7 BoolOut()
 
   GThread              *mReporterThread;  //!
@@ -52,6 +54,7 @@ protected:
   static void* tl_ReportLoop(XrdFileCloseReporter* r);
   static void  cu_ReportLoop(XrdFileCloseReporter* r);
   void ReportLoop();
+  void DrainQueue();
 
   virtual void ReportLoopInit();
   virtual void ReportFileClosed(FileUserServer& fus);

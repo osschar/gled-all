@@ -62,7 +62,7 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
 
   mConnFac = cms::ConnectionFactory::createCMSConnectionFactory
-    (TString::Format("failover:(tcp://%s:%hu)", mAmqHost.Data(), mAmqPort).Data());
+    (TString::Format("tcp://%s:%hu", mAmqHost.Data(), mAmqPort).Data());
 
   try
   {
@@ -71,7 +71,7 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
   }
   catch (cms::CMSException& e)
   {
-    throw _eh + "Exception during connection creation: " + e.getStackTrace().front().first;
+    throw _eh + "Exception during connection creation: " + e.getStackTraceString();
   }
 
   mSess = mConn->createSession(); // Default is AUTO_ACKNOWLEDGE
@@ -157,7 +157,7 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
 
   msg += "}";
 
-  cms::TextMessage* aqm = mSess->createTextMessage(msg);
+  cms::TextMessage* aqm = mSess->createTextMessage(msg.Data());
   mProd->send(aqm);
   delete aqm;
 }
