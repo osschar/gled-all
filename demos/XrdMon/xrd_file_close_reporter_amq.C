@@ -19,11 +19,6 @@ void xrd_file_close_reporter_amq()
   // c_frep_amq->SetAmqPswd("xyzz");
   // c_frep_amq->SetAmqTopic("/topic/xrdpop.uscms_test_popularity");
 
-  c_frep_amq->SetAmqTopic("/topic/xrdpop.uscms_test_collector");
-
-  // !!! *DO NOT* COMMIT THIS !!!
-  c_frep_amq->SetAmqPswd("montthree");
-
   c_suck->AddFileCloseReporter(c_frep_amq);
 
   c_frep_amq->StartReporter();
