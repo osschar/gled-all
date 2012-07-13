@@ -1,3 +1,8 @@
+2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GThread.cxx:
+	Catch various exceptions in GThread::thread_spawner().
+
 2012-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Consolidate auth bootstrap warnings.

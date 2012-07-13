@@ -109,8 +109,8 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg,
 
   static const Exc_t _eh("GThread::GThread ");
 
-  if (!sMainThread)
-    throw(_eh + "InitMain() not called.");
+  if (! sMainThread)
+    throw _eh + "InitMain() not called.";
 
   sContainerLock.Lock();
   mThreadListIt = sThreadList.insert(sThreadList.end(), this);
@@ -152,6 +152,8 @@ void GThread::CleanupPop(bool execute_p)
 
 void* GThread::thread_spawner(void* arg)
 {
+  static const Exc_t _eh("GThread::thread_spawner ");
+
   GThread* self = (GThread*) arg;
 
   pthread_setspecific(TSD_Self, self);
@@ -174,38 +176,54 @@ void* GThread::thread_spawner(void* arg)
 
   pthread_cleanup_push(thread_reaper, self);
 
-  // getcontext causes uber crap on mac.
+  try
+  {
+    // getcontext causes uber crap on mac.
 #ifndef __APPLE__
-  if (getcontext((ucontext_t*) self->mTerminalContext))
-  {
-    perror("getcontext failed:");
-    ret = (void*) 1;
-  }
-  else
-  {
-    if (self->mTerminalSignal)
+    if (getcontext((ucontext_t*) self->mTerminalContext))
     {
-      ret = reinterpret_cast<void*>(self->mTerminalSignal);
-      switch (self->mTerminalPolicy)
-      {
-      case TP_ThreadExit:
-	break;
-      case TP_GledExit:
-	Gled::theOne->Exit(self->mTerminalSignal);
-	break;
-      case TP_SysExit:
-	gSystem->Exit(self->mTerminalSignal);
-	break;
-      }
+      perror("getcontext failed:");
+      ret = (void*) 1;
     }
     else
     {
-      ret = (self->mStartFoo)(self->mStartArg);
+      if (self->mTerminalSignal)
+      {
+        ret = reinterpret_cast<void*>(self->mTerminalSignal);
+        switch (self->mTerminalPolicy)
+        {
+          case TP_ThreadExit:
+            break;
+          case TP_GledExit:
+            Gled::theOne->Exit(self->mTerminalSignal);
+            break;
+          case TP_SysExit:
+            gSystem->Exit(self->mTerminalSignal);
+            break;
+        }
+      }
+      else
+      {
+        ret = (self->mStartFoo)(self->mStartArg);
+      }
     }
-  }
 #else
-  ret = (self->mStartFoo)(self->mStartArg);
+    ret = (self->mStartFoo)(self->mStartArg);
 #endif
+  }
+  catch (Exc_t& e)
+  {
+    ISerr(_eh + "Terminating thread '" + self->mName + "' on Exc_t: " + e);
+  }
+  catch (std::exception& e)
+  {
+    ISerr(_eh + "Terminating thread '" + self->mName + "' on std::exception: " + e.what());
+  }
+  catch (...)
+  {
+    ISerr(_eh + "Unknown exception in thread '" + self->mName + "'. This will not end well.");
+    throw;
+  }
 
   {
     GMutexHolder _lck(sDetachCtrlLock);
