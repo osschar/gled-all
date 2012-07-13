@@ -27,6 +27,7 @@ ClassImp(XrdFileCloseReporter);
 void XrdFileCloseReporter::_init()
 {
   mCondWaitSec = 0;
+  mNProcessed = mNQueued = 0;
   bRunning = false;
 }
 
@@ -44,7 +45,10 @@ XrdFileCloseReporter::~XrdFileCloseReporter()
 
 void XrdFileCloseReporter::FileClosed(XrdFile* file, XrdUser* user, XrdServer* server)
 {
-  // put into queue and signal condition
+  // Put the triplet into queue and signal condition.
+
+  if (! bRunning)
+    return;
 
   file  ->IncEyeRefCount();
   user  ->IncEyeRefCount();
@@ -52,6 +56,7 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file, XrdUser* user, XrdServer* s
 
   GMutexHolder _lck(mReporterCond);
   mReporterQueue.push_back(FileUserServer(file, user, server));
+  ++mNQueued;
   mReporterCond.Signal();
 }
 
@@ -120,9 +125,14 @@ void XrdFileCloseReporter::cu_ReportLoop(XrdFileCloseReporter* r)
 
   {
     GLensReadHolder _lck(r);
-    r->mReporterQueue.clear();
-    r->mReporterThread = 0;
     r->bRunning = false;
+  }
+
+  r->DrainQueue();
+
+  {
+    GLensReadHolder _lck(r);
+    r->mReporterThread = 0;
     r->Stamp(r->FID());
   }
 }
@@ -153,14 +163,30 @@ void XrdFileCloseReporter::ReportLoop()
       }
       fus = mReporterQueue.front();
       mReporterQueue.pop_front();
+      --mNQueued;
     }
 
     ReportFileClosed(fus);
+    ++mNProcessed;
 
     fus.fFile  ->DecEyeRefCount();
     fus.fUser  ->DecEyeRefCount();
     fus.fServer->DecEyeRefCount();
   }
+}
+
+void XrdFileCloseReporter::DrainQueue()
+{
+  GMutexHolder _lck(mReporterCond);
+  while (! mReporterQueue.empty())
+  {
+    FileUserServer fus = mReporterQueue.front();
+    fus.fFile  ->DecEyeRefCount();
+    fus.fUser  ->DecEyeRefCount();
+    fus.fServer->DecEyeRefCount();
+    mReporterQueue.pop_front();
+  }
+  mNQueued = 0;
 }
 
 //==============================================================================
