@@ -898,7 +898,7 @@ void XrdMonSucker::Suck()
     } // else -- trace message handling
     else if (code == 'r')
     {
-      // XXXX Ceck for 'r' records, dump basic info to see what else to check / account for.
+      // XXXX Check for 'r' records, dump basic info to see what else to check / account for.
       //  - 'r' probably has the pseq but it will be coming from a master /
       //    redirector which I never tried before.
       //     . enable on xrootd.t2 - report to some other port not to screw up
@@ -911,20 +911,46 @@ void XrdMonSucker::Suck()
       txt.Form("Redirect trace from %s.%s:%hu, seq=%hhu, len=%hu.",
                server->GetHost(), server->GetDomain(), port, pseq, plen);
 
-      int rb_to_read = plen - sizeof(XrdXrootdMonHeader) - sizeof(kXR_int64);
-      int i          = 0;
-      XrdXrootdMonRedir *rr = rb->info;
-      while (rb_to_read > 0)
+      // XXXX In progress ... redirect message processing.
+      if (false)
       {
-        int len = 8 * (rr->arg0.Dent + 1);
-        txt += TString::Format("\n  %3d - 0x%02hhx dent=%2d, len=%3d, to_go=%4d",
-                               i, rr->arg0.Type, rr->arg0.Dent, len, rb_to_read);
-        rr = (XrdXrootdMonRedir*) ((char*) rr + len);
-        rb_to_read -= len;
-        ++i;
-      }
+        int rb_to_read = plen - sizeof(XrdXrootdMonHeader) - sizeof(kXR_int64);
+        int i          = 0;
+        int prev_win   = 0;
+        XrdXrootdMonRedir *rr = rb->info;
+        while (rb_to_read > 0)
+        {
+          int len = 8 * (rr->arg0.Dent + 1);
+        
+          txt += TString::Format("\n  %3d - 0x%02hhx len=%3d: ",
+                                 i, rr->arg0.Type, len);
 
-      log.Put(txt);
+          if (rr->arg0.Type == 0) // time window
+          {
+            txt += TString::Format("window prev_len=%d, start=%d",
+                                   ntohl(rr->arg0.Window), ntohl(rr->arg1.Window));
+          }
+          else
+          {
+            UInt_t uid = ntohl(rr->arg1.dictid);
+            XrdUser *user = server->FindUser(uid);
+            txt += TString::Format("uid=%u, %s\n        %s",
+                                   uid, user ? user->GetName() : "<unknown>",
+                                   (const char*)(&rr->arg1.dictid) + 4);
+          }
+
+          rr = (XrdXrootdMonRedir*) ((char*) rr + len);
+          rb_to_read -= len;
+          ++i;
+        }
+
+        // Hack to get redirect messages printed out with little extra noise.
+        log.Put(ZLog::L_Fatal, txt);
+      }
+      else
+      {
+        log.Put(txt);
+      }
     }
 
     p->DecRefCount();
