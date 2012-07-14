@@ -37,7 +37,7 @@ void XrdFileCloseReporterAmq::_init()
   mAmqPort  = 6163;
   mAmqUser  = "xrdpop";
   mAmqPswd  = "xyzz";
-  mAmqTopic = "/topic/xrdpop.uscms_test_popularity";
+  mAmqTopic = "xrdpop.uscms_test_popularity";
 
   mConnFac = 0;
   mConn = 0;
@@ -61,12 +61,13 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
 
-  mConnFac = cms::ConnectionFactory::createCMSConnectionFactory
-    (TString::Format("tcp://%s:%hu", mAmqHost.Data(), mAmqPort).Data());
+  TString uri;
+  uri.Form("failover://(tcp://%s:%hu?wireFormat=stomp)", mAmqHost.Data(), mAmqPort);
+  mConnFac = new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data());
 
   try
   {
-    mConn = mConnFac->createConnection(mAmqUser.Data(), mAmqPswd.Data());
+    mConn = mConnFac->createConnection();
     mConn->start();
   }
   catch (cms::CMSException& e)
@@ -187,3 +188,10 @@ void libXrdMon_GLED_user_init()
 }
 
 void* XrdMon_GLED_user_init = (void*) libXrdMon_GLED_user_init;
+
+void libXrdMon_GLED_user_shutdown()
+{
+  activemq::library::ActiveMQCPP::shutdownLibrary();
+}
+
+void* XrdMon_GLED_user_shutdown = (void*) libXrdMon_GLED_user_shutdown;

@@ -1,3 +1,14 @@
+2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Minor fixes; this is the first version that really works.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Add libset shutdown function to call
+	ActiveMQCPP::shutdownLibrary(). Without this, we get memory
+	corruption on exit.
+	Use stomp as the wire-format.
+	Pass username and password to connection factory directly.
+
 2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Improve error handling and reporting.
