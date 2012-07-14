@@ -219,11 +219,12 @@ void* GThread::thread_spawner(void* arg)
   {
     ISerr(_eh + "Terminating thread '" + self->mName + "' on std::exception: " + e.what());
   }
-  catch (...)
-  {
-    ISerr(_eh + "Unknown exception in thread '" + self->mName + "'. This will not end well.");
-    throw;
-  }
+  // This is faulty ... apparently unnamed exceptions can be used for thread cancellation.
+  // catch (...)
+  // {
+  //   ISerr(_eh + "Unknown exception in thread '" + self->mName + "'. This will not end well.");
+  //   throw;
+  // }
 
   {
     GMutexHolder _lck(sDetachCtrlLock);
