@@ -1,3 +1,8 @@
+2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_file_close_reporter_amq.C:
+	Proper topic name -- not prefixed with /topic/ as in python stomp.
+
 2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_far_tree_writer.C:
