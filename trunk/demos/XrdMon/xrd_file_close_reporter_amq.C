@@ -17,7 +17,7 @@ void xrd_file_close_reporter_amq()
   // c_frep_amq->SetAmqPort(6163);
   // c_frep_amq->SetAmqUser("xrdpop");
   // c_frep_amq->SetAmqPswd("xyzz");
-  // c_frep_amq->SetAmqTopic("/topic/xrdpop.uscms_test_popularity");
+  // c_frep_amq->SetAmqTopic("xrdpop.uscms_test_popularity");
 
   c_suck->AddFileCloseReporter(c_frep_amq);
 
