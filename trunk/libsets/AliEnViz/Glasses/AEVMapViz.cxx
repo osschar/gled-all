@@ -142,7 +142,7 @@ void AEVMapViz::PopulateWSites(Bool_t warn)
 void AEVMapViz::ClearSiteVizes()
 {
   list<AEVSSpace_ABase*> space_chunks;
-  CopyListByGlass<AEVSSpace_ABase>(space_chunks);
+  CopyListByClass<AEVSSpace_ABase>(space_chunks);
   for(list<AEVSSpace_ABase*>::iterator c=space_chunks.begin(); c!=space_chunks.end(); ++c) {
     (*c)->ClearSiteVizes();
   }
