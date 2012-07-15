@@ -63,7 +63,7 @@ void AEVDistAnRep::AdEnlightenment()
     mEvBatches->SetMIRActive(false);
   }
   if(mProcVizes == 0) {
-    assign_link<ZNameMap>(mProcVizes, FID(), ("ProcVizes", GForm("Containter of %s", GetName()));
+    assign_link<ZNameMap>(mProcVizes, FID(), "ProcVizes", GForm("Containter of %s", GetName()));
     mProcVizes->SetElementFID(AEVProcessViz::FID());
     mProcVizes->SetMIRActive(false);
   }
@@ -500,7 +500,7 @@ Int_t AEVDistAnRep::ReplayJobFromHistory()
       if(sleep_sec > mReplayMaxWait)
 	sleep_sec = mReplayMaxWait;
       printf("sleeping for %.3lf ms\n", sleep_sec);
-      mReplayCond.TimedWaitMS(UInt_t(1000*sleep_sec));
+      mReplayCond.TimedWait(GTime(sleep_sec, 0));
 
       GLensWriteHolder wrlck(this);
       if(bInReplay == false) {
@@ -778,7 +778,7 @@ Int_t AEVDistAnRep::FakeReplayJobFromHistory()
       Eventor* etor = mDemoDriver->GetAnimator();
       Double_t tstart = etor->GetInternalTime();
       do {
-	mReplayCond.TimedWaitMS(UInt_t(200));
+	mReplayCond.TimedWait(GTime::MiliSec(200));
 	GLensWriteHolder wrlck(this);
 	if(bInReplay == false) {
 	  printf("replay stopped, returning\n");

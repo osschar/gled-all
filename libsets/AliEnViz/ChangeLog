@@ -1,3 +1,13 @@
+2012-07-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Update for recent changes in libset GledCore.
+
+	* Glasses/AEVDistAnRep.cxx:
+	Update for recent changes in GTime and GCondition.
+
+	* Glasses/AEVMapViz.cxx:
+	Update for recent changes in AList.
+
 2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/AEVAlienUI.cxx:
