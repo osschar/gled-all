@@ -187,7 +187,7 @@ close S;
 print HTML "</div>\n</body>\n</html>\n";
 `chmod a+x $index_gled`;
 
-system "gled $MKDOC_MACRO";
+system "saturn $MKDOC_MACRO";
 #`rm $MKDOC_MACRO`;
 
 print '*' x 80 . "\n";
