@@ -103,7 +103,7 @@ FNORD
 for $ls (@{$resolver->{LibSetList}})
 {
   print S <<"FNORD";
-  html.SetViewCVS("http://www.gled.org/cgi-bin/viewcvs.cgi/trunk/libsets/$ls/%f?view=log");
+  html.SetViewCVS("http://www.gled.org/viewvc/gled/trunk/libsets/$ls/%f?view=log");
 FNORD
 
   print HTML "\n\n<hr><hr>\n";
