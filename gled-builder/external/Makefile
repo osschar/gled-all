@@ -13,12 +13,15 @@ all: ${PACKAGES}
 LIBSETS := GledCore Geom1 Numerica Audio1 Net1 GledGTS EHS TADemo Var1 \
            RootGeo Alice AliEnViz XrdMon Tmp1
 
-GledCore: root fltk fltk-mt
-Geom1:    GledCore DevIL
+
+# Inter-libset dependencies:
+
+GledCore:
+Geom1:    GledCore
 Numerica: GledCore
-Audio1:   GledCore openal freealut
+Audio1:   GledCore
 Net1:     GledCore
-GledGTS:  GledCore Numerica gts
+GledGTS:  GledCore Numerica
 EHS:      GledCore
 TADemo:   GledCore
 Var1:     GledCore Geom1 GledGTS Numerica Audio1
@@ -27,6 +30,16 @@ Alice:    GledCore Geom1 RootGeo
 AliEnViz: GledCore Geom1 Var1
 XrdMon:   GledCore Net1
 Tmp1:     GledCore Geom1 GledGTS
+
+
+# Dependencies of libsets on external software
+
+GledCore: root fltk fltk-mt
+Geom1:    DevIL
+Audio1:   openal freealut
+GledGTS:  gts
+XrdMon:   activemq-cpp
+
 
 .PHONY: ${PACKAGES} ${LIBSETS} all all-but-root
 
