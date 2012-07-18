@@ -13,10 +13,15 @@ void xrd_file_close_reporter_amq()
   ASSIGN_ADD_GLASS(c_frep_amq, XrdFileCloseReporterAmq, g_queen, "XrdFileCloseReporterAmq", 0);
   c_frep_amq->SetLog(c_log);
 
+  // Set addresshost and port where ActiveMQ server is running
   // c_frep_amq->SetAmqHost("gridmsg007.cern.ch");
   // c_frep_amq->SetAmqPort(6163);
+
+  // Set username and password to be used:
   // c_frep_amq->SetAmqUser("xrdpop");
   // c_frep_amq->SetAmqPswd("xyzz");
+
+  // Set topic where the message is to be sent:
   // c_frep_amq->SetAmqTopic("xrdpop.uscms_test_popularity");
 
   c_suck->AddFileCloseReporter(c_frep_amq);

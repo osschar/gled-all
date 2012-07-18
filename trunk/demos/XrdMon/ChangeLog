@@ -1,3 +1,10 @@
+2012-07-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_file_close_reporter.C:
+	* xrd_file_close_reporter_amq.C:
+	* xrd_http_serve_open_files.C:
+	Add comments to configuration examples.
+
 2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_file_close_reporter_amq.C:
