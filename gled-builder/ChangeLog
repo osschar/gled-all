@@ -1,3 +1,9 @@
+2012-07-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/root/make-root-src-dist.sh:
+	Switch to root-patches-5.32.
+	Remove docs before tarring, this is a lot of stuff.
+
 2012-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Register new external packages: apr, apr-util and activemq-cpp.
