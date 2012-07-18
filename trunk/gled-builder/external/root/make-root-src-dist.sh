@@ -5,8 +5,12 @@
 # Modified version of root/build/unix/makedistsrc.sh
 # Fix the following variables before running:
 
-svnurl="https://root.cern.ch/svn/root/branches/v5-30-00-patches"
-version="5.30.00"
+svnurl="https://root.cern.ch/svn/root/branches/v5-32-00-patches"
+version="5.32.03"
+
+# svnurl="https://root.cern.ch/svn/root/tags/v5-32-02"
+# version="5.32.02"
+
 dir="root"
 tarfile="root-$version-gled.tar"
 
@@ -25,7 +29,10 @@ echo "Generating etc/svninfo.txt"
 build/unix/svninfo.sh
 
 echo "Remove .svn directories ..."
-find . -depth -name .svn -exec rm -rf {} \;
+find . -depth -type d -name .svn -exec rm -rf {} \;
+echo "Removing docs ..."
+find . -depth -type d -name  doc -exec rm -rf {} \;
+rm -rf docbook
 cd ..
 
 echo "Making tarball ..."
