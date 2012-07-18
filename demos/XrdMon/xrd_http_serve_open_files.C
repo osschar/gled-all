@@ -8,6 +8,8 @@ void xrd_http_serve_open_files()
 {
   ASSIGN_ADD_GLASS(c_ehs, XrdEhs, g_queen, "XrdEhs", 0);
   c_ehs->SetXrdSucker(c_suck);
+
+  // Set TCP port where browser connections are to be listened for:
   // c_ehs->SetPort(4242);
 
   g_gled->AfterSetup( c_ehs->S_StartServer() );
