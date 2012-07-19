@@ -1,3 +1,22 @@
+2012-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Extend old user handling, add prelimiary redirection logging.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add ZLink<Zlog> mRedirectLog.
+	When this is set, log redirection messages into it.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Keep an additional user_dict_id to XrdUser* map.
+	Add find-user method that also searches old users:
+	  XrdUser* FindUserOrPrevUser(Int_t dict_id);
+	Add methods that help in removal of old usesrs:
+	  Int_t    RemovePrevUsersOlderThan(const GTime& cut_time);
+	  void     ClearPrevUserMap();
+	This is now called from XrdSucker::CleanupOldUsers().
+
 2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
