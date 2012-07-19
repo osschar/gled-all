@@ -275,7 +275,7 @@ void ZLog::FormVA(const TString& time_string, Int_t level, const TString& prefix
   LEVEL_CHECK(level);
   LEVEL_NAME(lvl_name, level);
   TString message(GFormVA(va_(fmt), args));
-  TString pim(prefix.EndsWith(" ") ? "" : " ");
+  TString pim(prefix.EndsWith(" ") || prefix.IsNull() ? "" : " ");
 
   GMutexHolder _lck(mLoggerCond);
   mStream << time_string << " " << lvl_name << " " << prefix << pim << message << endl;
