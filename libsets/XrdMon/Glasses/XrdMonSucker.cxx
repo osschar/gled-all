@@ -200,6 +200,7 @@ void XrdMonSucker::disconnect_server(XrdServer* server, XrdDomain *domain,
       disconnect_user_and_close_open_files(user, server, time);
     }
   }
+  server->ClearPrevUserMap();
   mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
   mSaturn->ShootMIR( domain->S_RemoveAll(server) );
 }
@@ -223,6 +224,8 @@ void XrdMonSucker::Suck()
   TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
+
+  TPMERegexp redir_re   ("(.*?):(.*)", "o");
 
   while (true)
   {
@@ -906,14 +909,17 @@ void XrdMonSucker::Suck()
       //     . have some printouts
 
       XrdXrootdMonBurr *rb = (XrdXrootdMonBurr*) p->mBuff;
-      
+
       TString txt;
       txt.Form("Redirect trace from %s.%s:%hu, seq=%hhu, len=%hu.",
                server->GetHost(), server->GetDomain(), port, pseq, plen);
+      log.Put(txt);
 
       // XXXX In progress ... redirect message processing.
-      if (false)
+      if (*mRedirectLog)
       {
+        ZLog::Helper rlog(*mRedirectLog, GTime::ApproximateTime(), ZLog::L_Message, "");
+
         int rb_to_read = plen - sizeof(XrdXrootdMonHeader) - sizeof(kXR_int64);
         int i          = 0;
         int prev_win   = 0;
@@ -921,7 +927,7 @@ void XrdMonSucker::Suck()
         while (rb_to_read > 0)
         {
           int len = 8 * (rr->arg0.Dent + 1);
-        
+
           txt += TString::Format("\n  %3d - 0x%02hhx len=%3d: ",
                                  i, rr->arg0.Type, len);
 
@@ -933,23 +939,40 @@ void XrdMonSucker::Suck()
           else
           {
             UInt_t uid = ntohl(rr->arg1.dictid);
-            XrdUser *user = server->FindUser(uid);
-            txt += TString::Format("uid=%u, %s\n        %s",
+            XrdUser *user = server->FindUserOrPrevUser(uid);
+
+            redir_re.Match((const char*)(&rr->arg1.dictid) + 4);
+            TString redir_host = redir_re[1];
+            TString redir_lfn  = redir_re[2];
+
+            txt += TString::Format("uid=%u, %s\n        %s:%s",
                                    uid, user ? user->GetName() : "<unknown>",
-                                   (const char*)(&rr->arg1.dictid) + 4);
+                                   redir_host.Data(), redir_lfn.Data());
+
+            // Should get proper time
+
+            TString client_host, uname, urealname;
+            if (user)
+            {
+              client_host.Form("%s:%s", user->GetFromHost(), user->GetFromDomain());
+              uname     = user->RefName();
+              urealname = user->RefRealName();
+            }
+
+            rlog.Form("|| %s.%s | %s | %s | %s | %s | %s ||",
+                      server->GetHost(), server->GetDomain(),
+                      client_host.Data(),
+                      uname.Data(),
+                      urealname.Data(),
+                      redir_lfn.Data(),
+                      redir_host.Data());
           }
 
           rr = (XrdXrootdMonRedir*) ((char*) rr + len);
           rb_to_read -= len;
           ++i;
         }
-
-        // Hack to get redirect messages printed out with little extra noise.
-        log.Put(ZLog::L_Fatal, txt);
-      }
-      else
-      {
-        log.Put(txt);
+        rlog.Put(ZLog::L_Info, txt);
       }
     }
 
@@ -1084,9 +1107,7 @@ void XrdMonSucker::CleanUpOldUsers()
   static const Exc_t _eh("XrdMonSucker::CleanUpOldUsers ");
   assert_MIR_presence(_eh, ZGlass::MC_IsDetached);
 
-  GTime now = GTime::ApproximateTime();
-
-  ZLog::Helper log(*mLog, now, ZLog::L_Message, _eh);
+  GTime cut_time = GTime::ApproximateTime() - GTime(mUserKeepSec, 0);
 
   list<XrdDomain*> domains;
   CopyListByGlass<XrdDomain>(domains);
@@ -1101,34 +1122,14 @@ void XrdMonSucker::CleanUpOldUsers()
     for (list<XrdServer*>::iterator si = servers.begin(); si != servers.end(); ++si)
     {
       XrdServer *s = *si;
-      list<XrdUser*> users;
-      s->GetPrevUsers()->CopyListByGlass<XrdUser>(users);
 
-      for (list<XrdUser*>::iterator ui = users.begin(); ui != users.end(); ++ui)
-      {
-        XrdUser *u = *ui;
-        Int_t delta;
-        {
-          GLensReadHolder _lck(u);
-          delta = (Int_t) (now - u->RefDisconnectTime()).GetSec();
-        }
-        if (delta > mUserKeepSec)
-        {
-          ++n_wiped;
-          mQueen->RemoveLens(u);
-        }
-        else
-        {
-          // These are time-ordered ... so the rest are newer.
-          break;
-        }
-      }
+      n_wiped += s->RemovePrevUsersOlderThan(cut_time);
 
       s->DecEyeRefCount();
     }
     if (n_wiped > 0)
     {
-      log.SetTime(GTime::ApproximateTime());
+      ZLog::Helper log(*mLog, GTime::ApproximateTime(), ZLog::L_Message, _eh);
       log.Form("Removed %d previous users for domain '%s'.", n_wiped, d->GetName());
     }
   }

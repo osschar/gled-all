@@ -51,6 +51,7 @@ protected:
   TString    mTraceDomain;  // X{GS} Ray{TraceRE} 7 Textor()
 
   ZLink<ZHashList> mFCReporters; // X{GS} L{}
+  ZLink<ZLog>      mRedirectLog; // X{GS} L{}
 
   Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[60,   86400, 1])
   Int_t      mUserDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])

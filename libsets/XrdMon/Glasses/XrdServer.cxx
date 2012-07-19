@@ -136,15 +136,64 @@ void XrdServer::DisconnectUser(XrdUser* user)
     if (i == mUserMap.end())
       throw _eh + "dict_id does not exist for user '" + user->GetName() + "'.";
     mUserMap.erase(i);
+
+    mPrevUserMap.insert(make_pair(user->m_dict_id, user));
   }
 
-  mPrevUsers->Add(user);
+  mPrevUsers->PushBack(user);
   RemoveAll(user);
 }
 
 void XrdServer::RemovePrevUser(XrdUser* user)
 {
+  {
+    GMutexHolder _lck(mUserMapMutex);
+    mPrevUserMap.erase(user->m_dict_id);
+  }
   mPrevUsers->RemoveAll(user);
+}
+
+Int_t XrdServer::RemovePrevUsersOlderThan(const GTime& cut_time)
+{
+  // Removes previous users older than given cut_time.
+
+  // We know old users are pushed-back sequentially, so we can check queue
+  // front only.
+
+  XrdUser *u;
+  Int_t    uid;
+  Int_t    n_wiped = 0;
+
+  while (true)
+  {
+    {
+      GMutexHolder _lck(mPrevUsers->RefListMutex());
+
+      u = (XrdUser*) mPrevUsers->FrontElement();
+      if (! u || u->RefDisconnectTime() > cut_time)
+        break;
+
+      uid = u->m_dict_id;
+      mPrevUsers->PopFront();
+    }
+    {
+      GMutexHolder _lck(mUserMapMutex);
+      mPrevUserMap.erase(uid);
+    }
+    if (! u->CheckBit(kDyingBit))
+    {
+      mQueen->RemoveLens(u);
+    }
+    ++n_wiped;
+  }
+
+  return n_wiped;
+}
+
+void XrdServer::ClearPrevUserMap()
+{
+  GMutexHolder _lck(mUserMapMutex);
+  mPrevUserMap.clear();
 }
 
 XrdUser* XrdServer::FindUser(const TString& name)
@@ -157,6 +206,21 @@ XrdUser* XrdServer::FindUser(Int_t dict_id)
   GMutexHolder _lck(mUserMapMutex);
   mDict2User_i i = mUserMap.find(dict_id);
   return (i != mUserMap.end()) ? i->second : 0;
+}
+
+XrdUser* XrdServer::FindUserOrPrevUser(Int_t dict_id)
+{
+  mDict2User_i i;
+
+  GMutexHolder _lck(mUserMapMutex);
+
+  i = mUserMap.find(dict_id);
+  if (i != mUserMap.end()) return i->second;
+
+  i = mPrevUserMap.find(dict_id);
+  if (i != mPrevUserMap.end()) return i->second;
+
+  return 0;
 }
 
 //------------------------------------------------------------------------------
