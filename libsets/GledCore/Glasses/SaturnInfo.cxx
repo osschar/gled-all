@@ -52,17 +52,17 @@ SaturnInfo::~SaturnInfo()
 
 // !!! Caller id missing
 
-void SaturnInfo::Message(const Text_t* s)
+void SaturnInfo::Message(const TString& s)
 {
   ISmess(TString("Received message: ") + s);
 }
 
-void SaturnInfo::Warning(const Text_t* s)
+void SaturnInfo::Warning(const TString& s)
 {
   ISwarn(TString("Received warning: ") + s);
 }
 
-void SaturnInfo::Error(const Text_t* s)
+void SaturnInfo::Error(const TString& s)
 {
   ISerr(TString("Received error: ") + s);
 }

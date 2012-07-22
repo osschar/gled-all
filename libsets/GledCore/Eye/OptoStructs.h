@@ -18,12 +18,12 @@ class MTW_View;
 
 namespace OptoStructs
 {
-  struct ZGlassImg;
+  class ZGlassImg;
   typedef list<ZGlassImg*>                   lpZGlassImg_t;
   typedef list<ZGlassImg*>::iterator         lpZGlassImg_i;
   typedef list<ZGlassImg*>::reverse_iterator lpZGlassImg_ri;
 
-  struct A_View;
+  class A_View;
   typedef list<A_View*>                      lpA_View_t;
   typedef list<A_View*>::iterator            lpA_View_i;
 
@@ -31,7 +31,7 @@ namespace OptoStructs
   typedef list<ZLinkView*>                   lpZLinkView_t;
   typedef list<ZLinkView*>::iterator         lpZLinkView_i;
 
-  struct ZLinkDatum;
+  class ZLinkDatum;
   typedef list<ZLinkDatum>                   lZLinkDatum_t;
   typedef list<ZLinkDatum>::iterator         lZLinkDatum_i;
   typedef list<ZLinkDatum>::reverse_iterator lZLinkDatum_ri;
@@ -104,8 +104,9 @@ namespace OptoStructs
   // ZLinkDatum: information provided for links of each lens
   //============================================================================
 
-  struct ZLinkDatum
+  class ZLinkDatum
   {
+  public:
     ZGlassImg      *fImg;
     ZGlass::LinkRep fLinkRep;
     ZGlass         *fToGlass;
@@ -129,8 +130,9 @@ namespace OptoStructs
   // A_View: base of all lens views
   //============================================================================
 
-  struct A_View
+  class A_View
   {
+  public:
     ZGlassImg	*fImg;
 
     A_View(ZGlassImg* i) : fImg(i) { if(fImg) fImg->CheckInView(this);  }
@@ -147,8 +149,9 @@ namespace OptoStructs
   // Must be owned by A_View that handles Ray absorbtion.
   //============================================================================
 
-  struct ZGlassImgHandle
+  class ZGlassImgHandle
   {
+  public:
     ZGlassImg	*fImg;
 
     ZGlassImgHandle(ZGlassImg* i=0) : fImg(i) { if (fImg) fImg->IncRefCount(); }
@@ -187,8 +190,9 @@ namespace OptoStructs
   // Must be owned by A_View that handles Ray absorbtion.
   //============================================================================
 
-  struct ZLinkView
+  class ZLinkView
   {
+  public:
     ZLinkDatum	*fLinkDatum;
     ZGlass      *fToGlass; // Glass pointing to last.
 

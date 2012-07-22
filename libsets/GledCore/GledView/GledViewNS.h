@@ -18,8 +18,8 @@ class FTW_Ant;
 class Fl_Widget;
 class TMessage;
 
-namespace GledViewNS {
-
+namespace GledViewNS
+{
   // Low level: weed info
 
   typedef Fl_Widget*	(*WeedCreator_foo)    (MTW_SubView*);
@@ -27,13 +27,15 @@ namespace GledViewNS {
   typedef void		(*WeedUpdate_foo)     (Fl_Widget*, MTW_SubView*);
   typedef void		(*CtxCallCreator_foo) (TBuffer*);
 
-  struct MethodInfo {};		// Null so far
+  class MethodInfo {};		// Null so far
 
-  struct DataMemberInfo {};	// Null so far
+  class DataMemberInfo {};	// Null so far
 
-  struct LinkMemberInfo {};
+  class LinkMemberInfo {};
 
-  struct WeedInfo : public GledNS::InfoBase {
+  class WeedInfo : public GledNS::InfoBase
+  {
+  public:
     bool		bIsLinkWeed;
     Int_t		fWidth;
     Int_t		fHeight;
@@ -55,7 +57,9 @@ namespace GledViewNS {
 
   typedef MTW_SubView*	(*SubViewCreator_foo)(GledNS::ClassInfo* ci, MTW_View* v, ZGlass* g);
 
-  struct ClassInfo {
+  class ClassInfo
+  {
+  public:
     SubViewCreator_foo		fooSVCreator;
     lpWeedInfo_t		fWeedList;
 
@@ -67,7 +71,7 @@ namespace GledViewNS {
 
   // High level: per LibSet information
 
-  struct LibSetInfo {};	// Now empty ... rnr support in base.
+  class LibSetInfo {};	// Now empty ... rnr support in base.
 
   /**************************************************************************/
   // Variables

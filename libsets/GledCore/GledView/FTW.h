@@ -43,8 +43,9 @@ extern Fl_Boxtype postnamebox_box;
 // Locators
 /**************************************************************************/
 
-struct Locator {
-
+class Locator
+{
+public:
   bool	 is_link;
   bool	 is_list_member;
   virtual bool has_contents();
@@ -82,7 +83,9 @@ struct Locator {
   void mod_box_color(Fl_Color mod, bool on_p);
 };
 
-struct LocatorConsumer {
+class LocatorConsumer
+{
+public:
   Locator* m_base;
 
   LocatorConsumer() : m_base(0) {}
@@ -98,7 +101,8 @@ struct LocatorConsumer {
 // NameButton/Box
 /**************************************************************************/
 
-class NameButton : public Fl_Button {
+class NameButton : public Fl_Button
+{
 public:
   enum Loc_e   { L_Leaf, L_Ant };
 
@@ -124,7 +128,8 @@ public:
 
 /**************************************************************************/
 
-class NameBox : public OptoStructs::A_View, public Fl_Box {
+class NameBox : public OptoStructs::A_View, public Fl_Box
+{
 public:
   NameBox(OptoStructs::ZGlassImg* i, int x, int y, int w, int h);
   virtual ~NameBox() {}
@@ -159,7 +164,8 @@ public:
 /**************************************************************************/
 /**************************************************************************/
 
-class Top_Selector {
+class Top_Selector
+{
 public:
   enum Type_e { T_Undef=-1, T_Locator, T_Inst, T_Direct, T_DevNull };
 
@@ -181,7 +187,8 @@ public:
 
 /**************************************************************************/
 
-class Bot_Selector {
+class Bot_Selector
+{
 protected:
   Top_Selector*	 m_top;
   Top_Selector::Type_e m_type_for_top;
@@ -201,7 +208,8 @@ public:
 /**************************************************************************/
 /**************************************************************************/
 
-class Inst_Selector : public Bot_Selector, public Fl_Group {
+class Inst_Selector : public Bot_Selector, public Fl_Group
+{
   Fl_Button* wTop;
   Fl_Button* wLid;
   Fl_Button* wCid;

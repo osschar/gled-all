@@ -12,7 +12,8 @@
 #include <algorithm>
 #include <iterator>
 
-namespace GledViewNS {
+namespace GledViewNS
+{
   int no_symbol_label = 0;
   int menubar_box     = 0;
 } // GledViewNS
@@ -131,8 +132,10 @@ TString GledViewNS::FabricateViewUserInitFoo(const TString& libset)
 /**************************************************************************/
 /**************************************************************************/
 
-namespace {
-  struct infobase_name_eq : public unary_function<GledNS::InfoBase*, bool> {
+namespace
+{
+  struct infobase_name_eq : public unary_function<GledNS::InfoBase*, bool>
+  {
     TString name;
     infobase_name_eq(const TString& s) : name(s) {}
     bool operator()(const GledNS::InfoBase* ib) {

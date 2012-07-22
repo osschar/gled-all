@@ -8,8 +8,8 @@
 #define GledCore_GledTypes_H
 
 #include <Rtypes.h>
-#include <TObject.h>
 #include <TString.h>
+#include <TBuffer.h>
 
 #include <iostream>
 #include <assert.h>

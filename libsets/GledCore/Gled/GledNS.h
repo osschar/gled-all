@@ -42,8 +42,9 @@ namespace GledNS
   /**************************************************************************/
   // Or move them to RnrBase something ...
 
-  struct RnrBits
+  class RnrBits
   {
+  public:
     // At which RenderLevel to call a specific rendering
     // Values of fX are RenderLevels at which to invoke the method
     // 0 ~ PreDraw, 1 ~ Draw, 2 ~ PostDraw; 3 ~ FullDescent
@@ -84,8 +85,9 @@ namespace GledNS
   class ClassInfo;
   class LibSetInfo;
 
-  struct InfoBase
+  class InfoBase
   {
+  public:
     TString		fName;
     ClassInfo*		fClassInfo;
 
@@ -93,8 +95,9 @@ namespace GledNS
     bool operator==(const TString& s) const { return (fName == s); }
   };
 
-  struct MethodInfo : public InfoBase
+  class MethodInfo : public InfoBase
   {
+  public:
     MID_t		fMid;
     lStr_t		fContextArgs;
     lStr_t		fArgs;
@@ -112,8 +115,9 @@ namespace GledNS
     void  StreamIds(TBuffer& b) const;
   };
 
-  struct DataMemberInfo : public InfoBase
+  class DataMemberInfo : public InfoBase
   {
+  public:
     TString             fPrefix;
     TString		fType;
     MethodInfo*		fSetMethod;
@@ -131,15 +135,17 @@ namespace GledNS
     TDataMember* GetTDataMember();
   };
 
-  struct LinkMemberInfo : public DataMemberInfo
+  class LinkMemberInfo : public DataMemberInfo
   {
+  public:
     RnrBits		fDefRnrBits;
 
     LinkMemberInfo(const TString& s) : DataMemberInfo(s) {}
   };
 
-  struct EnumEntry
+  class EnumEntry
   {
+  public:
     TString   fName;
     TString   fLabel;
     Int_t     fValue;
@@ -151,8 +157,9 @@ namespace GledNS
   typedef vector<EnumEntry>           vEnumEntry_t;
   typedef vector<EnumEntry>::iterator vEnumEntry_i;
 
-  struct EnumInfo : public InfoBase
+  class EnumInfo : public InfoBase
   {
+  public:
     vEnumEntry_t  fEntries;
     Int_t         fMaxLabelWidth;
 
@@ -187,8 +194,9 @@ namespace GledNS
   /**************************************************************************/
   /**************************************************************************/
 
-  struct ClassInfo : public InfoBase
+  class ClassInfo : public InfoBase
   {
+  public:
     FID_t			fFid;
     LibSetInfo*			fLibSetInfo;
 
@@ -256,8 +264,9 @@ namespace GledNS
   typedef hash_map<TString, A_Rnr_Creator_foo>::iterator hRnr2RCFoo_i;
 #endif
 
-  struct LibSetInfo : public InfoBase
+  class LibSetInfo : public InfoBase
   {
+  public:
     LID_t		fLid;
     const char**	fDeps;
 

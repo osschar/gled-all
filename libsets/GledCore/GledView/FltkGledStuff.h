@@ -17,7 +17,7 @@ class ZList;
 
 class FTW_Shell;
 class Fl_Menu_Button;
-class Fl_Menu_Item;
+struct Fl_Menu_Item;
 
 // Use this one in a public part of a Fl_Widget descendant
 
