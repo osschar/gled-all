@@ -134,14 +134,12 @@ sub system_make_config
 {
   if($system eq 'Linux') {
     return <<"fnord";
-LD          = \${CXX}
 LDSHAREDOPT = -shared
 LDEXT       = so
 fnord
   }
   elsif($system eq 'Darwin') {
     return <<"fnord";
-LD          = \${CXX}
 LDSHAREDOPT = -dynamiclib -undefined dynamic_lookup
 LDEXT       = dylib
 fnord
@@ -377,7 +375,7 @@ fnord
     print MC "\${${rnr}_RNR_LIB_NAME}:\t \${${rnr}_RNR_OBJS}\n";
     print MC "\t\${ECHO} -X- Linking \$\@\n";
     print MC "\t\${MUTE} \${LD} \${LDSHAREDOPT} \${LDFLAGS} \${${rnr}_RNR_OBJS} -o \$\@ ${extra_libs} " .
-             "-Wl,--no-as-needed -L\${GLEDSYS}/lib \${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \n";
+             "${LDFLAGS_LIBSETS} -L\${GLEDSYS}/lib \${ABOVE_BASE_LIBS} \${ABOVE_VIEW_LIBS} \${ABOVE_RNR_${rnr}_LIBS} \n";
     print MC "RNR_SRCS += \${${rnr}_RNR_SRCS}\n";
     print MC "RNR_HDRS += \${${rnr}_RNR_HDRS}\n";
     print MC "RNR_OBJS += \${${rnr}_RNR_OBJS}\n";

@@ -1,3 +1,13 @@
+2012-07-21  Matevz Tadel <matevz.tadel@ijs.si>
+
+	Changes for clang on mac.
+
+	* configure:
+	* make/make_base.inc:
+	* make/make_defs.inc:
+	Take CC, CXX and LD from root-config.
+	Use --no-as-needed on Linux only.
+
 2012-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for searching of pkg-config stuff in external & extra paths.
