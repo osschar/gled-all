@@ -61,10 +61,20 @@ ROOT_LDFLAGS := $(shell ${ROOT_CONFIG} --ldflags)
 
 DEFINES  := -D_GNU_SOURCE
 
+CC  := $(shell ${ROOT_CONFIG} --cc)
+CXX := $(shell ${ROOT_CONFIG} --cxx)
+LD  := $(shell ${ROOT_CONFIG} --ld)
+
 CPPFLAGS += ${DEFINES} ${LOCALINCL} ${ROOT_CPP_DIR} \
             ${LIBSET_CPPFLAGS} ${USER_CPP_FLAGS}
 CXXFLAGS += ${ROOT_CFLAGS} -Wall -fPIC -pipe ${USER_CXX_FLAGS}
 LDFLAGS	 += ${ROOT_LDFLAGS} ${USER_LD_FLAGS}
+
+ifeq (${GLED_SYSTEM},Linux)
+  LDFLAGS_LIBSETS := -Wl,--no-as-needed
+else
+  LDFLAGS_LIBSETS :=
+endif
 
 # Dictionaries must be compiled without optimization, debug not needed.
 # Drop USER_CXX_FLAGS, they should not matter.
