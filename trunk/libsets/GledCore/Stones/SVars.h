@@ -187,7 +187,7 @@ public:
   void SetDeltaDec(T d)    { mDeltaDec = d;    }
 
   void SetMinMaxDelta(T min, T max, T delta_i, T delta_d)
-  { SetMinMax(min, max); mDeltaInc = delta_i; mDeltaDec = delta_d; }
+  { MMV::SetMinMax(min, max); mDeltaInc = delta_i; mDeltaDec = delta_d; }
 
   void Print() const
   {
@@ -238,21 +238,21 @@ public:
   T Set(T v)
   {
     bDesireSatisfied = false;
-    T d = deltaminmax(v - MMV::mVal);
+    T d = IV::deltaminmax(v - MMV::mVal);
     return MMV::Set(MMV::mVal + d);
   }
 
   T Delta(T d)
   {
     bDesireSatisfied = false;
-    d = deltaminmax(d);
+    d = IV::deltaminmax(d);
     return MMV::Delta(d);
   }
 
   T Delta(T d, T dt)
   {
     bDesireSatisfied = false;
-    d = deltaminmax(d, dt);
+    d = IV::deltaminmax(d, dt);
     return MMV::Delta(d);
   }
 
@@ -260,13 +260,13 @@ public:
   void SetStdDesireDelta(T sdd)  { mStdDesireDelta = sdd; }
 
   T    GetDesire()     const { return mDesire; }
-  void SetDesire(T d)  const { bDesireSatisfied = false; mDesire = valminmax(d); }
+  void SetDesire(T d)  const { bDesireSatisfied = false; mDesire = MMV::valminmax(d); }
   void DesireToValue() const { bDesireSatisfied = true;  mDesire = MMV::mVal; }
 
   T DeltaDesire(T d) const
   {
     bDesireSatisfied = false;
-    mDesire = valminmax(mDesire + d);
+    mDesire = MMV::valminmax(mDesire + d);
     return mDesire;
   }
 
@@ -283,7 +283,7 @@ public:
 
   void SetMinMaxDeltaDesire(T min, T max, T delta_i, T delta_d, T desire)
   {
-    SetMinMaxDelta(min, max, delta_i, delta_d);
+    IV::SetMinMaxDelta(min, max, delta_i, delta_d);
     SetDesire(desire);
   }
 
@@ -294,7 +294,7 @@ public:
 
     if (MMV::mVal < mDesire)
     {
-      DeltaMaxPositive(dt);
+      IV::DeltaMaxPositive(dt);
       if (MMV::mVal > mDesire)
       {
 	MMV::mVal = mDesire;
@@ -303,7 +303,7 @@ public:
     }
     else if (MMV::mVal > mDesire)
     {
-      DeltaMaxNegative(dt);
+      IV::DeltaMaxNegative(dt);
       if (MMV::mVal < mDesire)
       {
 	MMV::mVal = mDesire;

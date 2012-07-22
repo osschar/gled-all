@@ -19,7 +19,7 @@ class FTW_Nest;
 
 #include <FL/Fl_Group.H>
 class Fl_Pack; class Fl_ScrollPack;
-class Fl_Input; class Fl_Output; class Fl_Menu_Item;
+class Fl_Input; class Fl_Output; struct Fl_Menu_Item;
 class Fl_Box;
 
 class FooPack;

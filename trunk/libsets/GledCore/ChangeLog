@@ -1,3 +1,22 @@
+2012-07-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes needed for clang.
+
+	* Eye/OptoStructs.h:
+	* Glasses/SaturnInfo.cxx:
+	* Glasses/SaturnInfo.h:
+	* Gled/GledNS.h:
+	* Gled/GledTypes.h:
+	* GledView/FTW.h:
+	* GledView/FTW_Nest.h:
+	* GledView/FltkGledStuff.h:
+	* GledView/GledViewNS.cxx:
+	* GledView/GledViewNS.h:
+	* Stones/SVars.h:
+	Proper qualification of base-class methods in templated classes.
+	Consistent use of class / struct for any given name (in forward
+	declarations and in the definition).
+
 2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GThread.cxx:
