@@ -151,13 +151,13 @@ protected:
 
 #ifndef __CINT__
   hpZGlass2Int_t mReverseRefs;  //! lenses that reference *this*
-  void dec_ref_count(hpZGlass2Int_i& i, UShort_t n);
+  void dec_ref_count(hpZGlass2Int_i& i, UInt_t n);
 #endif
-  UShort_t	mRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
-  UShort_t	mMoonRefCount;	//! X{G}  7 ValOut(-width=>4)
-  UShort_t	mSunRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
-  UShort_t	mFireRefCount;	//! X{G}  7 ValOut(-width=>4)
-  UShort_t	mEyeRefCount;	//!
+  UInt_t	mRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
+  UInt_t	mMoonRefCount;	//! X{G}  7 ValOut(-width=>4)
+  UInt_t	mSunRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
+  UInt_t	mFireRefCount;	//! X{G}  7 ValOut(-width=>4)
+  UInt_t	mEyeRefCount;	//!
 
   void queen_check_in(ZGlass* l);
   void set_link_or_die(ZGlass*& link, ZGlass* new_val, FID_t fid);
@@ -250,7 +250,7 @@ public:
 
   // RefCount
   Short_t IncRefCount(ZGlass* from);
-  Short_t DecRefCount(ZGlass* from, UShort_t n=1);
+  Short_t DecRefCount(ZGlass* from, UInt_t n=1);
   // here also need ReRef(from, old_queen, new_queen) or sth.
   Short_t IncEyeRefCount();
   Short_t DecEyeRefCount();
