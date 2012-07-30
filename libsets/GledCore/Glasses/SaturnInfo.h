@@ -59,14 +59,14 @@ protected:
   TString       mOS;            // X{GS} 7 TextOut()
   TString	mCPU_Model;	// X{GS} 7 TextOut()
   TString	mCPU_Type;	// X{GS} 7 TextOut()
-  UShort_t	mCPU_Freq;	// X{GS} 7 ValOut(-width=>6, -join=>1)
-  UShort_t	mCPU_Num;	// X{GS} 7 ValOut(-width=>6)
+  Int_t		mCPU_Freq;	// X{GS} 7 ValOut(-width=>6, -join=>1)
+  Int_t		mCPU_Num;	// X{GS} 7 ValOut(-width=>6)
 
-  UShort_t	mMemory;	// X{GS} 7 ValOut(-width=>6, -join=>1)
-  UShort_t	mSwap;		// X{GS} 7 ValOut(-width=>6)
+  Int_t		mMemory;	// X{GS} 7 ValOut(-width=>6, -join=>1)
+  Int_t		mSwap;		// X{GS} 7 ValOut(-width=>6)
 
-  UShort_t	mMFree;		// X{GS} 7 ValOut(-width=>6, -join=>1)
-  UShort_t	mSFree;		// X{GS} 7 ValOut(-width=>6)
+  Int_t		mMFree;		// X{GS} 7 ValOut(-width=>6, -join=>1)
+  Int_t		mSFree;		// X{GS} 7 ValOut(-width=>6)
 
   Float_t	mLAvg1;		// X{GS} 7 ValOut(-width=>5, -join=>1)
   Float_t	mLAvg5;		// X{GS} 7 ValOut(-width=>5, -join=>1)

@@ -1,3 +1,15 @@
+2012-07-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Avoid using UShort_t for everything and in particular ref-counts.
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZGlass.h:
+	* Glasses/ZQueen.h:
+	Use UInt_t instead of UShort_t for reference-counts.
+
+	* Glasses/SaturnInfo.h:
+	Use Int_t instead of UShort_t for Mem/SysInfo numbers.
+
 2012-07-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Changes needed for clang.

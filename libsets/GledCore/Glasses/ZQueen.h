@@ -81,7 +81,7 @@ protected:
   lID_t		mPurgatory;	//  List of released but still reserved ids
   lpZGlass_t	mZombies;	//! Lenses that are dead but still need to be deleted.
 
-  UShort_t	mAvgPurgLen;	// X{gS} 7 Value(-range=>[1,65000,1], -width=>5, -join=>1)
+  UInt_t	mAvgPurgLen;	// X{gS} 7 Value(-range=>[1,65000,1], -width=>5, -join=>1)
   Float_t	mSgmPurgLen;	// X{gS} 7 Value(-range=>[0,1,1,100], -width=>5)
   UInt_t	mPurgedMS;	// X{gS} 7 Value(-range=>[100,1e6,10], -width=>7, -join=>1)
   UInt_t	mDeletedMS;	// X{gS} 7 Value(-range=>[100,1e6,10], -width=>7)

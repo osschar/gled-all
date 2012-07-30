@@ -359,7 +359,7 @@ Short_t ZGlass::IncRefCount(ZGlass* from)
   return mRefCount;
 }
 
-void ZGlass::dec_ref_count(hpZGlass2Int_i& i, UShort_t n)
+void ZGlass::dec_ref_count(hpZGlass2Int_i& i, UInt_t n)
 {
   switch(i->first->mQueen->GetKing()->GetLightType()) {
   case ZKing::LT_Moon: mMoonRefCount -= n; break;
@@ -371,7 +371,7 @@ void ZGlass::dec_ref_count(hpZGlass2Int_i& i, UShort_t n)
   i->second -= n;
 }
 
-Short_t ZGlass::DecRefCount(ZGlass* from, UShort_t n)
+Short_t ZGlass::DecRefCount(ZGlass* from, UInt_t n)
 {
   // Called to notify *this* that it is no longer referenced by lens from.
 
