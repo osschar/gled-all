@@ -1,5 +1,5 @@
 // Add-on macro (expects xrd_suck_tcp/udp.C to be executed before).
-// Runs XrdFileCloseReporter that sends a file-close report as a UDP message.
+// Runs XrdFileCloseReporter that sends file-access reports as UDP messages.
 
 class XrdFileCloseReporter;
 class XrdFileCloseReporterGratia;

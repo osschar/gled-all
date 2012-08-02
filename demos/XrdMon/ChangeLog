@@ -1,3 +1,15 @@
+2012-08-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add class defs for root trees, doc fixes.
+
+	* SXrdClasses.h:
+	* SXrdClasses_LinkDef.h:
+	New files: minimal class definitions to read FAR trees with plain root.
+
+	* xrd_file_close_reporter.C:
+	* xrd_file_close_reporter_amq.C:
+	Fix doc text.
+
 2012-07-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_file_close_reporter.C:

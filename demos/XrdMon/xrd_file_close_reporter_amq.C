@@ -1,5 +1,5 @@
 // Add-on macro (expects xrd_suck_tcp/udp.C to be executed before).
-// Runs XrdFileCloseReporterAmq that sends a file-access report via ActiveMQ.
+// Runs XrdFileCloseReporterAmq that sends file-access reports via ActiveMQ.
 
 class XrdFileCloseReporter;
 class XrdFileCloseReporterAmq;
