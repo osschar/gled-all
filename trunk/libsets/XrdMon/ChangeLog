@@ -1,3 +1,12 @@
+2012-08-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Change json quoting, add back unique-id field.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Quote json fields and values with ", not '.
+	Add back unique-id filed and data-members needed to produce them.
+
 2012-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Extend old user handling, add prelimiary redirection logging.
