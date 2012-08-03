@@ -13,6 +13,8 @@
 
 #include "Glasses/ZLog.h"
 
+#include "TPRegexp.h"
+
 #include <activemq/library/ActiveMQCPP.h>
 #include <activemq/core/ActiveMQConnectionFactory.h>
 #include <cms/Connection.h>
@@ -61,6 +63,8 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
 
+  mLastUidBase = mLastUidInner = 0;
+
   TString uri;
   uri.Form("failover://(tcp://%s:%hu?wireFormat=stomp)", mAmqHost.Data(), mAmqPort);
   mConnFac = new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data());
@@ -101,22 +105,22 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _flck(file);
 
-    // Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
-    // if (unique_id == mLastUidBase)
-    // {
-    //   unique_id = mLastUidBase + ++mLastUidInner;
-    //   if (mLastUidInner >= 1000ll)
-    //   {
-    //     ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
-    //     log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
-    //     return;
-    //   }
-    // }
-    // else
-    // {
-    //   mLastUidBase  = unique_id;
-    //   mLastUidInner = 0;
-    // }
+    Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
+    if (unique_id == mLastUidBase)
+    {
+      unique_id = mLastUidBase + ++mLastUidInner;
+      if (mLastUidInner >= 1000ll)
+      {
+        ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
+        log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
+        return;
+      }
+    }
+    else
+    {
+      mLastUidBase  = unique_id;
+      mLastUidInner = 0;
+    }
 
     const SRange &RS   = file->RefReadStats();
     const SRange &RSS  = file->RefSingleReadStats();
@@ -124,7 +128,8 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
     const SRange &RSVC = file->RefVecReadCntStats();
     const SRange &WS   = file->RefWriteStats();
     msg += TString::Format
-      ("'file_lfn':'%s', 'file_size':'%lld', 'start_time':'%llu', 'end_time':'%llu', "
+      ("'unique_id'='xrd-%lld', "
+       "'file_lfn':'%s', 'file_size':'%lld', 'start_time':'%llu', 'end_time':'%llu', "
        "'read_bytes':'%lld', 'read_operations':'%llu', 'read_min':'%lld', 'read_max':'%lld', 'read_average':'%f', 'read_sigma':'%f', "
        "'read_single_bytes':'%lld', 'read_single_operations':'%llu', 'read_single_min':'%lld', 'read_single_max':'%lld', 'read_single_average':'%f', 'read_single_sigma':'%f', "
        "'read_vector_bytes':'%lld', 'read_vector_operations':'%llu', 'read_vector_min':'%lld', 'read_vector_max':'%lld', 'read_vector_average':'%f', 'read_vector_sigma':'%f', "
@@ -132,6 +137,7 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
        "'write_bytes':'%lld', 'write_operations':'%llu', 'write_min':'%lld', 'write_max':'%lld', 'write_average':'%f', 'write_sigma':'%f', "
        "'read_bytes_at_close':'%lld', "
        "'write_bytes_at_close':'%lld', ",
+       unique_id,
        file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
        dmtoll(RS .GetSumX()), RS .GetN(), dmtoll(RS .GetMin()), dmtoll(RS .GetMax()), dmtod(RS .GetAverage()), dmtod(RS .GetSigma()),
        dmtoll(RSS.GetSumX()), RSS.GetN(), dmtoll(RSS.GetMin()), dmtoll(RSS.GetMax()), dmtod(RSS.GetAverage()), dmtod(RSS.GetSigma()),
@@ -157,6 +163,9 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   }
 
   msg += "}";
+
+  TPMERegexp requote("'", "g");
+  requote.Substitute(msg, "\"", kFALSE);
 
   cms::TextMessage* aqm = mSess->createTextMessage(msg.Data());
   mProd->send(aqm);
