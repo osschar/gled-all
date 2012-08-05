@@ -18,7 +18,7 @@ $parallel = 1;
 
 setup_package($package);
 
-my $config_args = "--disable-builtin-freetype";
+my $config_args = "--disable-builtin-freetype --disable-castor";
 my $pre_install;
 
 if ($BUILD_OS =~ /linux/)
