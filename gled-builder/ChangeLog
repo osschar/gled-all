@@ -1,3 +1,11 @@
+2012-08-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Disable castor.
+
+	* external/root/root.pl:
+	Disable castor support at configure time. Nobody needs it and
+	apparently what is installed on lxplus is not liked by root.
+
 2012-07-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/Makefile:
