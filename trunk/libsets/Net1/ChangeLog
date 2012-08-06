@@ -1,3 +1,19 @@
+2012-08-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Preliminary commit of Ip4AddressLocator.
+
+	* Glasses/Ip4AddressLocator.cxx:
+	* Glasses/Ip4AddressLocator.h:
+	New glass - db of ip4 address location information.
+	So far it can read csv db from hostip project.
+
+	* Stones/IpAddressLocation.cxx:
+	* Stones/IpAddressLocation.h:
+	New stone encapsulationg location information associated an ip address.
+
+	* glass.list:
+	Register Ip4AddressLocator.
+
 2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add option to rotate output trees at midnight.
