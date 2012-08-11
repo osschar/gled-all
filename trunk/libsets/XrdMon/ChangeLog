@@ -1,3 +1,8 @@
+2012-08-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Fix json format, had one = instead of :.
+
 2012-08-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Change json quoting, add back unique-id field.
