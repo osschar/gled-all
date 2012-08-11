@@ -1,3 +1,14 @@
+2012-08-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add new files.
+
+	* xrd_redirect_logger.C:
+	New config for logging of redirections.
+
+	* xrdmon-cleanup-for-rpm.sh:
+	Preliminary commit of script needed to cleanup install tree before
+	making of an RPM.
+
 2012-08-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add class defs for root trees, doc fixes.
