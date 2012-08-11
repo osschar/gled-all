@@ -2,7 +2,6 @@
 
 	* external/root/make-root-src-dist.sh:
 	Switch to root-5.34, use my own branch.
-	When making source tarball, also wipe test/ and tutorials/.
 
 2012-08-05  Matevz Tadel  <matevz.tadel@ijs.si>
 
