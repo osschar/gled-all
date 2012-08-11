@@ -33,9 +33,9 @@ build/unix/svninfo.sh
 
 echo "Remove .svn directories ..."
 find . -depth -type d -name .svn -exec rm -rf {} \;
-echo "Removing docs, tests and tutorials ..."
+echo "Removing docs ..."
 find . -depth -type d -name  doc -exec rm -rf {} \;
-rm -rf docbook test tutorials
+rm -rf docbook
 cd ..
 
 echo "Making tarball ..."
