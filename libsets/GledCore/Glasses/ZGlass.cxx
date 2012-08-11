@@ -341,15 +341,17 @@ Short_t ZGlass::IncRefCount(ZGlass* from)
   if(mQueen && from->mQueen) {
     mQueen->SubjectRefCntLock();
     // !!! Here ask queen if it's OK
-    if(!bAcceptRefs) {
+    if ( ! bAcceptRefs)
+    {
       mQueen->SubjectRefCntUnlock();
-      throw(_eh + "lens not accepting references.");
+      throw _eh + "lens not accepting references.";
     }
-    switch(from->mQueen->GetKing()->GetLightType()) {
-    case ZKing::LT_Moon: ++mMoonRefCount; break;
-    case ZKing::LT_Sun:  ++mSunRefCount;  break;
-    case ZKing::LT_Fire:
-    default:		 ++mFireRefCount; break;
+    switch(from->mQueen->GetKing()->GetLightType())
+    {
+      case ZKing::LT_Moon: ++mMoonRefCount; break;
+      case ZKing::LT_Sun:  ++mSunRefCount;  break;
+      case ZKing::LT_Fire:
+      default:             ++mFireRefCount; break;
     }
     ++mRefCount;
     ++mReverseRefs[from];
@@ -359,13 +361,14 @@ Short_t ZGlass::IncRefCount(ZGlass* from)
   return mRefCount;
 }
 
-void ZGlass::dec_ref_count(hpZGlass2Int_i& i, UInt_t n)
+void ZGlass::dec_ref_count(hpZGlass2UInt_i& i, UInt_t n)
 {
-  switch(i->first->mQueen->GetKing()->GetLightType()) {
-  case ZKing::LT_Moon: mMoonRefCount -= n; break;
-  case ZKing::LT_Sun:  mSunRefCount  -= n; break;
-  case ZKing::LT_Fire:
-  default:	       mFireRefCount -= n; break;
+  switch(i->first->mQueen->GetKing()->GetLightType())
+  {
+    case ZKing::LT_Moon: mMoonRefCount -= n; break;
+    case ZKing::LT_Sun:  mSunRefCount  -= n; break;
+    case ZKing::LT_Fire:
+    default:             mFireRefCount -= n; break;
   }
   mRefCount -= n;
   i->second -= n;
@@ -381,13 +384,15 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UInt_t n)
   {
     mQueen->SubjectRefCntLock();
 
-    hpZGlass2Int_i i = mReverseRefs.find(from);
-    if (i == mReverseRefs.end()) {
+    hpZGlass2UInt_i i = mReverseRefs.find(from);
+    if (i == mReverseRefs.end())
+    {
       mQueen->SubjectRefCntUnlock();
       ISerr(_eh + Identify() + " not referenced by " + from->Identify() + ".");
       return mRefCount;
     }
-    if (n > i->second) {
+    if (n > i->second)
+    {
       ISwarn(_eh + GForm("%s, called by %s: mismatch %d > %d.", Identify().Data(),
 			 from->Identify().Data(), n, i->second));
       n = i->second;
@@ -396,7 +401,7 @@ Short_t ZGlass::DecRefCount(ZGlass* from, UInt_t n)
     dec_ref_count(i, n);
 
     if (i->second <= 0) mReverseRefs.erase(i);
-    if (mRefCount == 0 && mQueen) mQueen->ZeroRefCount(this);
+    if (mRefCount == 0) mQueen->ZeroRefCount(this);
     mQueen->SubjectRefCntUnlock();
     // Stamp(FID());
   }
