@@ -150,8 +150,8 @@ protected:
   Bool_t	bAcceptRefs;	//  X{GS} 7 BoolOut()
 
 #ifndef __CINT__
-  hpZGlass2Int_t mReverseRefs;  //! lenses that reference *this*
-  void dec_ref_count(hpZGlass2Int_i& i, UInt_t n);
+  hpZGlass2UInt_t mReverseRefs; //! lenses that reference *this*
+  void dec_ref_count(hpZGlass2UInt_i& i, UInt_t n);
 #endif
   UInt_t	mRefCount;	//! X{G}  7 ValOut(-width=>4, -join=>1)
   UInt_t	mMoonRefCount;	//! X{G}  7 ValOut(-width=>4)

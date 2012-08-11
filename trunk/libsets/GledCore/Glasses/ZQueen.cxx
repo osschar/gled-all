@@ -734,7 +734,7 @@ void ZQueen::put_lens_to_purgatory(ZGlass* lens)
     ISdebug(2, _eh + "removing all refs to " + lens->Identify() + ".");
     set<ZGlass*> done_set;
     while( ! lens->mReverseRefs.empty() ) {
-      hpZGlass2Int_i i = lens->mReverseRefs.begin();
+      hpZGlass2UInt_i i = lens->mReverseRefs.begin();
       ZGlass* ref = i->first;
       Int_t n, nold = i->second;
       {
@@ -833,7 +833,7 @@ void ZQueen::PutListElementsToPurgatory(AList* list)
     if(lens->mQueen == this  &&  lens != this) {
       {
 	GMutexHolder lensreadlock(lens->mReadMutex);
-	hpZGlass2Int_i i = lens->mReverseRefs.find(list);
+	hpZGlass2UInt_i i = lens->mReverseRefs.find(list);
 	// Elements can appear in a list several times.
 	if(i != lens->mReverseRefs.end()) {
 	  list->ZGlass::remove_references_to(lens);

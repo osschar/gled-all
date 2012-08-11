@@ -188,6 +188,7 @@ void Gled::ParseArguments(Bool_t allow_daemon)
              "  --allowmoons        accept moon connections\n"
              "  --noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
 	     "%s"                   // daemon_help
+             "  --pidfile  <file>   write PID into given file"
              "  --s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
              "  --p[ort]    <num>   specify server port (def: 9061)\n"
              "  --portscan  <num>   if server port can not be opened, try <num> higher ports\n"
