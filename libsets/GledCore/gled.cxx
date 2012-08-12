@@ -50,11 +50,7 @@ int main(int argc, char **argv)
     exit(0);
   }
 
-  GThread::InitMain();
-
-  gled->SpawnTimeBeatThread();
-  gled->InitLogging();
-  gled->InitGledCore();
+  gled->Initialize();
 
   // Run Root Application thread
   GThread *app_thread = gled->SpawnRootAppThread("gled.cxx");

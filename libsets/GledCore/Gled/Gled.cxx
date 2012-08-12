@@ -36,6 +36,8 @@
 #include <TH1.h>
 #include <Getline.h>
 
+#include <cerrno>
+
 extern void *GledCore_GLED_init;
 
 ClassImp(Gled);
@@ -77,6 +79,7 @@ Gled::Gled() :
   bEarlySrvSock (false),
   bAllowMoons   (false),
   bDaemon       (false),
+  mPidFile      (0),
   bRootAppRunning(false),
   mRootApp      (0),
   mLoggingMutex (GMutex::recursive),
@@ -188,7 +191,7 @@ void Gled::ParseArguments(Bool_t allow_daemon)
              "  --allowmoons        accept moon connections\n"
              "  --noprompt          no ROOT prompt (runs TApplication insted of TRint)\n"
 	     "%s"                   // daemon_help
-             "  --pidfile  <file>   write PID into given file"
+             "  --pidfile   <file>  write PID into given file\n"
              "  --s[ssize]  <num>   specify size of sun-space (can be eg. 2e20)\n"
              "  --p[ort]    <num>   specify server port (def: 9061)\n"
              "  --portscan  <num>   if server port can not be opened, try <num> higher ports\n"
@@ -265,6 +268,16 @@ void Gled::ParseArguments(Bool_t allow_daemon)
       }
       bDaemon = true;
       bHasPrompt = false;
+      mArgs.erase(start, ++i);
+    }
+    else if (*i == "--pidfile")
+    {
+      next_arg_or_die(mArgs, i);
+      mPidFile = fopen(*i, "w");
+      if ( ! mPidFile) {
+	fprintf(stderr, "Error: Opening of pidfile '%s' failed: %s.\n", i->Data(), strerror(errno));
+	exit(1);
+      }
       mArgs.erase(start, ++i);
     }
     else if (*i == "-s" || *i == "--sssize")
@@ -459,6 +472,24 @@ void Gled::ParseArguments(Bool_t allow_daemon)
     cerr << "libdir or datadir unknown.\n";
     exit(1);
   }
+}
+
+void Gled::Initialize()
+{
+  // Top level initialization function that calls all others in sequence.
+
+  if (mPidFile)
+  {
+    fprintf(mPidFile, "%d\n", gSystem->GetPid());
+    fclose(mPidFile);
+    mPidFile = 0;
+  }
+
+  GThread::InitMain();
+
+  SpawnTimeBeatThread();
+  InitLogging();
+  InitGledCore();
 }
 
 void Gled::InitLogging()

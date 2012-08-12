@@ -52,6 +52,7 @@ protected:
   Bool_t        bEarlySrvSock;  // X{G}
   Bool_t	bAllowMoons;	// X{G}
   Bool_t        bDaemon;        // X{G}
+  FILE         *mPidFile;
 
   Bool_t	bRootAppRunning;// X{G}
   TApplication *mRootApp;       // X{g}
@@ -82,14 +83,19 @@ protected:
 public:
   Gled();
 
-  void AddArgument(const char* arg);
-  void ReadArguments(int argc, char **argv);
+  virtual void AddArgument(const char* arg);
+  virtual void ReadArguments(int argc, char **argv);
 
   virtual void ParseArguments(Bool_t allow_daemon);
+
+  virtual void Initialize();
   virtual void InitLogging();
   virtual void InitGledCore();
+
   virtual void ProcessCmdLineMacros();
+
   virtual void StopLogging();
+
   virtual ~Gled();
 
   void SetExitCondVar(GCondition* cond) { mExitCondVar = cond; }
