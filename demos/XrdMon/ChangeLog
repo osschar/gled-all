@@ -1,3 +1,8 @@
+2012-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrdmon-cleanup-for-rpm.sh:
+	First complete version.
+
 2012-08-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add new files.
