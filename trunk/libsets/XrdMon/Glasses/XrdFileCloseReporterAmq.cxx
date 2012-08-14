@@ -66,7 +66,10 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
   mLastUidBase = mLastUidInner = 0;
 
   TString uri;
-  uri.Form("failover://(tcp://%s:%hu?wireFormat=stomp)", mAmqHost.Data(), mAmqPort);
+  // Failover and Stomp don't splice ... or, they splice too well, making as
+  // many threads as ulimit lets them on first error ... thrashing the machine.
+  // uri.Form("failover://(tcp://%s:%hu?wireFormat=stomp)", mAmqHost.Data(), mAmqPort);
+  uri.Form("tcp://%s:%hu?wireFormat=stomp", mAmqHost.Data(), mAmqPort);
   mConnFac = new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data());
 
   try
