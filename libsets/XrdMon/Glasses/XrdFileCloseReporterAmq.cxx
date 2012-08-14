@@ -79,10 +79,21 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
     throw _eh + "Exception during connection creation: " + e.getStackTraceString();
   }
 
-  mSess = mConn->createSession(); // Default is AUTO_ACKNOWLEDGE
-  mDest = mSess->createTopic(mAmqTopic.Data());
-  mProd = mSess->createProducer(mDest);
-  mProd->setDeliveryMode(cms::DeliveryMode::NON_PERSISTENT); // Copied from examples, NFI.
+  try
+  {
+    mSess = mConn->createSession(); // Default is AUTO_ACKNOWLEDGE
+    mDest = mSess->createTopic(mAmqTopic.Data());
+    mProd = mSess->createProducer(mDest);
+    mProd->setDeliveryMode(cms::DeliveryMode::NON_PERSISTENT); // Copied from examples, NFI.
+  }
+  catch (cms::InvalidDestinationException& e)
+  {
+    throw _eh + "Invalid destination exception during producer creation: " + e.getStackTraceString();
+  }
+  catch (cms::CMSException& e)
+  {
+    throw _eh + "Exception during session, topic or message producer initialization: " + e.getStackTraceString();
+  }
 }
 
 namespace
@@ -174,6 +185,11 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
 
 void XrdFileCloseReporterAmq::ReportLoopFinalize()
 {
+  if (mConn)
+  {
+    mConn->close();
+  }
+
   delete mConnFac; mConnFac = 0;
   delete mConn;    mConn = 0;
   delete mSess;    mSess = 0;
