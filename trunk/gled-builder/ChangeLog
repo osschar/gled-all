@@ -1,3 +1,17 @@
+2012-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add configure variable ROOT_GLED_DEBUG to make root and gled build
+	in debug mode.
+
+	* GledBuildConf.pm.in:
+	* MakeBuildConf.inc.in:
+	* configure.ac:
+	Add variable and set it up in make and perl config files.
+
+	* external/root/root.pl:
+	* gled/Makefile:
+	Pass debug build requirement on to root and gled.
+
 2012-08-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/root/make-root-src-dist.sh:

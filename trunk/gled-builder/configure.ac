@@ -85,6 +85,10 @@ AC_ARG_CONF_VAR([EXTRA_PATHS],
 		[':' separated list of directories to use for build],
 		[""])
 
+AC_ARG_CONF_VAR([ROOT_GLED_DEBUG],
+		[Set to build ROOT and Gled in debug mode.],
+		[""])
+
 # Redefine CFLAGS to empty if not set by user.
 AC_ARG_CONF_VAR([CFLAGS],
                 [Flags for C compiler],
