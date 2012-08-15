@@ -41,7 +41,6 @@ void XrdFileCloseReporterAmq::_init()
   mAmqPswd  = "xyzz";
   mAmqTopic = "xrdpop.uscms_test_popularity";
 
-  mConnFac = 0;
   mConn = 0;
   mSess = 0;
   mDest = 0;
@@ -70,11 +69,13 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
   // many threads as ulimit lets them on first error ... thrashing the machine.
   // uri.Form("failover://(tcp://%s:%hu?wireFormat=stomp)", mAmqHost.Data(), mAmqPort);
   uri.Form("tcp://%s:%hu?wireFormat=stomp", mAmqHost.Data(), mAmqPort);
-  mConnFac = new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data());
 
   try
   {
-    mConn = mConnFac->createConnection();
+    auto_ptr<cms::ConnectionFactory> conn_fac
+      (new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data()));
+
+    mConn = conn_fac->createConnection();
     mConn->start();
   }
   catch (cms::CMSException& e)
@@ -181,23 +182,47 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   TPMERegexp requote("'", "g");
   requote.Substitute(msg, "\"", kFALSE);
 
-  cms::TextMessage* aqm = mSess->createTextMessage(msg.Data());
-  mProd->send(aqm);
-  delete aqm;
+  try
+  {
+    auto_ptr<cms::TextMessage> aqm( mSess->createTextMessage(msg.Data()) );
+    mProd->send(aqm.get());
+  }
+  catch (cms::CMSException& e)
+  {
+    // Log error, flag & time-stamp that we are not connected, initiate reconnect.
+    if (*mLog)
+      mLog->Form(ZLog::L_Error, _eh, "Exception during sending of a message: '%s'. Reconnection attempt will start now.",
+		 e.getStackTraceString().c_str());
+
+    // What do we need ... shall we run it in a dedicated thread?
+    // Hmya, there is no other way, esp. if we want to keep processing messages.
+    //   a) ZMIR* S_Reconnect in detached thread?
+    //   b) Direct thread creation ... I guess this is best.
+    // Must also use non-zero cond-wait time if queue needs to be purged.
+    // So that we don't get damn zombies taking over. Well, they don't harm, I think.
+  }
 }
 
 void XrdFileCloseReporterAmq::ReportLoopFinalize()
 {
-  if (mConn)
-  {
-    mConn->close();
-  }
+  static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopFinalize ");
 
-  delete mConnFac; mConnFac = 0;
-  delete mConn;    mConn = 0;
-  delete mSess;    mSess = 0;
-  delete mDest;    mDest = 0;
-  delete mProd;    mProd = 0;
+  try
+  {
+    delete mDest;  mDest = 0;
+    delete mProd;  mProd = 0;
+    if (mSess)     mSess->close();
+    if (mConn)     mConn->close();
+    delete mSess;  mSess = 0;
+    delete mConn;  mConn = 0;
+  }
+  catch (cms::CMSException& e)
+  {
+    // Just log it ... we don't really care at this point.
+    if (*mLog)
+      mLog->Form(ZLog::L_Error, _eh, "", "Exception during ActiveMQ object destruction: '%s'.",
+		 e.getStackTraceString().c_str());
+  }
 }
 
 
