@@ -1,3 +1,13 @@
+2012-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Intermediate commit of amq exception handling on gled side.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Catch exceptions, from all amq calls.
+	Do not store connection factory in member variable.
+	Automatic reconnection still needs to be implemented.
+
 2012-08-10  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporterAmq.cxx:

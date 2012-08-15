@@ -36,7 +36,6 @@ protected:
   Long64_t      mLastUidBase;    //!
   Long64_t      mLastUidInner;   //!
 
-  cms::ConnectionFactory *mConnFac; //!
   cms::Connection        *mConn;    //!
   cms::Session           *mSess;    //!
   cms::Destination       *mDest;    //!
