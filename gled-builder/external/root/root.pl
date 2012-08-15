@@ -18,8 +18,11 @@ $parallel = 1;
 
 setup_package($package);
 
-my $config_args = "--disable-builtin-freetype --disable-castor";
+my $config_args;
 my $pre_install;
+
+$config_args .= " --build=debug" if $ROOT_GLED_DEBUG;
+$config_args .= " --disable-builtin-freetype --disable-castor";
 
 if ($BUILD_OS =~ /linux/)
 {
