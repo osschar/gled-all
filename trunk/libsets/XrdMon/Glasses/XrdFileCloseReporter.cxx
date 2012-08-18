@@ -202,7 +202,7 @@ void XrdFileCloseReporter::StartReporter()
 
     mReporterThread = new GThread("XrdFileCloseReporter-Reporter",
                                   (GThread_foo) tl_ReportLoop, this,
-                                  false);
+                                  false, true);
   }
   mReporterThread->SetNice(20);
   mReporterThread->Spawn();
@@ -220,6 +220,7 @@ void XrdFileCloseReporter::StopReporter()
     thr = mReporterThread;
     GThread::InvalidatePtr(mReporterThread);
   }
+  thr->ClearDetachOnExit();
   thr->Cancel();
   thr->Join();
 }
