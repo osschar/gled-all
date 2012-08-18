@@ -9,6 +9,8 @@
 
 #include <Glasses/XrdFileCloseReporter.h>
 
+#include <cms/ExceptionListener.h>
+
 namespace cms
 {
   class ConnectionFactory;
@@ -19,7 +21,8 @@ namespace cms
 }
 
 
-class XrdFileCloseReporterAmq : public XrdFileCloseReporter
+class XrdFileCloseReporterAmq : public XrdFileCloseReporter,
+				public cms::ExceptionListener
 {
   MAC_RNR_FRIENDS(XrdFileCloseReporterAmq);
 
@@ -48,6 +51,8 @@ protected:
 public:
   XrdFileCloseReporterAmq(const Text_t* n="XrdFileCloseReporterAmq", const Text_t* t=0);
   virtual ~XrdFileCloseReporterAmq();
+
+  virtual void onException(const cms::CMSException &e);
 
 #include "XrdFileCloseReporterAmq.h7"
   ClassDef(XrdFileCloseReporterAmq, 1);

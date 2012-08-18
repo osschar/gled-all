@@ -1,3 +1,16 @@
+2012-08-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First attempt at using cms::ExceptionListener.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Create Reporter thread with detach-on-exit set. Then, clear the
+	flag before canceling it from the proper stop method.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Subclass from cms::ExceptionListener and implement onException()
+	virtual which then closes the connection.
+
 2012-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Intermediate commit of amq exception handling on gled side.

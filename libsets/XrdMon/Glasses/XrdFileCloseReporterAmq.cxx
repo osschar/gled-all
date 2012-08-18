@@ -58,6 +58,22 @@ XrdFileCloseReporterAmq::~XrdFileCloseReporterAmq()
 
 //==============================================================================
 
+#include "Gled/GThread.h"
+
+void XrdFileCloseReporterAmq::onException(const cms::CMSException &e)
+{
+  static const Exc_t _eh("XrdFileCloseReporterAmq::onException ");
+
+  if (*mLog)
+      mLog->Form(ZLog::L_Error, _eh, "Exception callback invoked: '%s'. Reconnection attempt will start now.",
+		 e.getStackTraceString().c_str());
+
+  if (mConn)     mConn->close();
+  delete mConn;  mConn = 0;
+
+  // mReporterThread->Cancel();
+}
+
 void XrdFileCloseReporterAmq::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
@@ -76,6 +92,7 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
       (new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data()));
 
     mConn = conn_fac->createConnection();
+    mConn->setExceptionListener(this);
     mConn->start();
   }
   catch (cms::CMSException& e)
