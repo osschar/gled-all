@@ -44,6 +44,24 @@ protected:
   cms::Destination       *mDest;    //!
   cms::MessageProducer   *mProd;    //!
 
+  Int_t  mAmqMaxMsgQueueLen;
+  Int_t  mAmqReconnectWaitSec;
+
+  Int_t  mAmqTotalConnectSuccessCount;
+  Int_t  mAmqTotalConnectFailCount;
+  Int_t  mAmqCurrentConnectFailCount;
+  Bool_t bAmqConnected;
+
+  GThread    *mAmqThread;
+  GCondition  mAmqCond;
+  lStr_t      mAmqMsgQueue;
+
+  static void* tl_AmqHandler(XrdFileCloseReporterAmq* fcr_amq);
+
+  void AmqHandler();
+  void amq_connect();
+  void amq_disconnect();
+
   virtual void ReportLoopInit();
   virtual void ReportFileClosed(FileUserServer& fus);
   virtual void ReportLoopFinalize();

@@ -18,7 +18,14 @@
 
 //______________________________________________________________________________
 //
+// Core functionality for classes that perform some kind of reporting when an
+// XrdFile is closed.
 //
+// Should activate cancel-disabler whenever calling out to sub-classes, in
+// particular, to ReportFileClosed() and
+// ReportCondWaitTimeout(). ReportLoopFinalize() is called from cancellation
+// handler anyway. Let's hope we don't get cancelled during init ... duh,
+// disable it there as well, for symmetry if nothing else.
 
 ClassImp(XrdFileCloseReporter);
 
