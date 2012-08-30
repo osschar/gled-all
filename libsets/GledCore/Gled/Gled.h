@@ -51,7 +51,7 @@ protected:
   Bool_t	bAutoSpawn;	// X{G}
   Bool_t        bEarlySrvSock;  // X{G}
   Bool_t	bAllowMoons;	// X{G}
-  Bool_t        bDaemon;        // X{G}
+  Bool_t        bIsDaemon;      // X{G}
   FILE         *mPidFile;
 
   Bool_t	bRootAppRunning;// X{G}

@@ -38,6 +38,9 @@
 
 #include <cerrno>
 
+// Needed for daemon socket hack ...
+#include <sys/socket.h>
+
 extern void *GledCore_GLED_init;
 
 ClassImp(Gled);
@@ -78,7 +81,7 @@ Gled::Gled() :
   bAutoSpawn    (false),
   bEarlySrvSock (false),
   bAllowMoons   (false),
-  bDaemon       (false),
+  bIsDaemon     (false),
   mPidFile      (0),
   bRootAppRunning(false),
   mRootApp      (0),
@@ -266,7 +269,7 @@ void Gled::ParseArguments(Bool_t allow_daemon)
 	fprintf(stderr, "Error: %s does not support the --daemon option.\n", mCmdName.Data());
 	exit(1);
       }
-      bDaemon = true;
+      bIsDaemon = true;
       bHasPrompt = false;
       mArgs.erase(start, ++i);
     }
@@ -500,7 +503,7 @@ void Gled::InitLogging()
   // If we are daemonized, make sure that things that would otherwise go to
   // stdout or stderr now go to /dev/null.
 
-  if (bDaemon)
+  if (bIsDaemon)
   {
     fclose(stdin);
     stdin = fopen("/dev/null", "r");
@@ -1410,6 +1413,20 @@ void* Gled::RootApp_runner_tl(void*)
   }
 
   new GExceptionHandler;
+
+  if ( ! Gled::theOne->HasGUILibs())
+  {
+    gROOT->SetBatch(kTRUE);
+  }
+
+  if (Gled::theOne->GetIsDaemon())
+  {
+    // Hack ... create a fake fd to listen on, otherwise TApplication::Run()
+    // will go into a tight loop burning 100% in this thread.
+    // This will eventually get fixed in ROOT.
+    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    gSystem->AddFileHandler(new TFileHandler(fd, TFileHandler::kRead));
+  }
 
   // Global ROOT settings.
   TH1::AddDirectory(kFALSE);

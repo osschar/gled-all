@@ -29,46 +29,47 @@ using namespace std;
 #include <gled-config.h>
 
 // String type and collections of TStrings
-typedef list<TString>			lStr_t;
-typedef list<TString>::iterator		lStr_i;
-typedef list<TString>::const_iterator	lStr_ci;
-typedef set<TString>			sStr_t;
-typedef set<TString>::iterator		sStr_i;
-typedef map<TString,TString>            mStr2Str_t;
-typedef map<TString,TString>::iterator  mStr2Str_i;
+typedef std::list<TString>			lStr_t;
+typedef std::list<TString>::iterator		lStr_i;
+typedef std::list<TString>::const_iterator	lStr_ci;
+typedef std::set<TString>			sStr_t;
+typedef std::set<TString>::iterator		sStr_i;
+typedef std::map<TString,TString>		mStr2Str_t;
+typedef std::map<TString,TString>::iterator	mStr2Str_i;
 
-typedef ULong_t				TimeStamp_t;
+typedef ULong_t					TimeStamp_t;
 
 /**************************************************************************/
 // Glass typedefs
 /**************************************************************************/
 
 class ZGlass;
-typedef list<ZGlass*>				lpZGlass_t;
-typedef list<ZGlass*>::iterator			lpZGlass_i;
-typedef list<ZGlass*>::const_iterator		lpZGlass_ci;
-typedef list<ZGlass*>::reverse_iterator		lpZGlass_ri;
-typedef list<ZGlass*>::const_reverse_iterator	lpZGlass_cri;
-typedef list<ZGlass**>				lppZGlass_t;
-typedef list<ZGlass**>::iterator		lppZGlass_i;
+typedef std::list<ZGlass*>				lpZGlass_t;
+typedef std::list<ZGlass*>::iterator			lpZGlass_i;
+typedef std::list<ZGlass*>::const_iterator		lpZGlass_ci;
+typedef std::list<ZGlass*>::reverse_iterator		lpZGlass_ri;
+typedef std::list<ZGlass*>::const_reverse_iterator	lpZGlass_cri;
+typedef std::list<ZGlass**>				lppZGlass_t;
+typedef std::list<ZGlass**>::iterator			lppZGlass_i;
 
-typedef vector<ZGlass*>				vpZGlass_t;
-typedef vector<ZGlass*>::iterator		vpZGlass_i;
+typedef std::vector<ZGlass*>				vpZGlass_t;
+typedef std::vector<ZGlass*>::iterator			vpZGlass_i;
 
 typedef UInt_t					ID_t;
 typedef UShort_t				LID_t;
 typedef UShort_t				CID_t;
 typedef UShort_t				MID_t;
 
-typedef	list<ID_t>				lID_t;
-typedef	list<ID_t>::iterator			lID_i;
-typedef set<ID_t>				sID_t;
-typedef set<ID_t>::iterator			sID_i;
+typedef	std::list<ID_t>				lID_t;
+typedef	std::list<ID_t>::iterator		lID_i;
+typedef std::set<ID_t>				sID_t;
+typedef std::set<ID_t>::iterator       		sID_i;
 
 #ifndef __CINT__
 
-typedef map<ID_t, ZGlass*>			mID2pZGlass_t;
-typedef map<ID_t, ZGlass*>::iterator		mID2pZGlass_i;
+typedef std::map<ID_t, ZGlass*>			mID2pZGlass_t;
+typedef std::map<ID_t, ZGlass*>::iterator	mID2pZGlass_i;
+
 typedef hash_map<ID_t, ZGlass*>			hID2pZGlass_t;
 typedef hash_map<ID_t, ZGlass*>::iterator	hID2pZGlass_i;
 typedef hash_map<ZGlass*, Int_t>		hpZGlass2Int_t;

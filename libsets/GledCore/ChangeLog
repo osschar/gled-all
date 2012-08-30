@@ -1,3 +1,22 @@
+2012-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for running as daemon; first step towards removing of 'using
+	namespace std'.
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Rename bDaemon to bIsDaemon.
+	When running as a daemon, creat a dummy socket so the ROOT
+	event-loop doesn't burn cpu.
+	When running as saturn, put ROOT into batch mode.
+
+	* Gled/GledTypes.h:
+	Use std:: for most gled stl typedefs. I need to get rid of 'using
+	namespace std' eventually.
+
+	* Glasses/PipeEventor.h:
+	Use std gled typedefs. Whitespace.
+
 2012-08-11  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add support for --pidfile option.

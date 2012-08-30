@@ -9,14 +9,14 @@
 
 #include <Glasses/Eventor.h>
 
-class PipeEventor : public Eventor {
+class PipeEventor : public Eventor
+{
   MAC_RNR_FRIENDS(PipeEventor);
 
 private:
   void _init();
 
 protected:
-
   TString	mCommand;	// X{GS} 7 Textor();
   FILE*		mPipe;		//!
 
@@ -24,7 +24,7 @@ protected:
 
   GCondition	mSendCond;	//!
 
-  list<TString>	mPending;	//!
+  lStr_t	mPending;	//!
 
   void feed_commands();
 
