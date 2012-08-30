@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     exit(0);
   }
 
-  if (gled->GetDaemon())
+  if (gled->GetIsDaemon())
   {
     printf("saturn - daemonizing ...\n");
     if (daemon(1, 1))
