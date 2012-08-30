@@ -12,6 +12,7 @@
 #include "XrdServer.h"
 
 #include "Glasses/ZLog.h"
+#include "Gled/GThread.h"
 
 #include "TPRegexp.h"
 
@@ -45,6 +46,17 @@ void XrdFileCloseReporterAmq::_init()
   mSess = 0;
   mDest = 0;
   mProd = 0;
+
+  mAmqMaxMsgQueueLen   = 1024;
+  mAmqReconnectWaitSec = 1;
+
+  // These are local, should be initialized in amq-handler
+  mAmqTotalConnectSuccessCount = 0;
+  mAmqTotalConnectFailCount = 0;
+  mAmqCurrentConnectFailCount = 0;
+  bAmqConnected = false;
+
+  mAmqThread = 0;
 }
 
 XrdFileCloseReporterAmq::XrdFileCloseReporterAmq(const Text_t* n, const Text_t* t) :
@@ -57,8 +69,6 @@ XrdFileCloseReporterAmq::~XrdFileCloseReporterAmq()
 {}
 
 //==============================================================================
-
-#include "Gled/GThread.h"
 
 void XrdFileCloseReporterAmq::onException(const cms::CMSException &e)
 {
@@ -74,11 +84,9 @@ void XrdFileCloseReporterAmq::onException(const cms::CMSException &e)
   // mReporterThread->Cancel();
 }
 
-void XrdFileCloseReporterAmq::ReportLoopInit()
+void XrdFileCloseReporterAmq::amq_connect()
 {
-  static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
-
-  mLastUidBase = mLastUidInner = 0;
+  static const Exc_t _eh("XrdFileCloseReporterAmq::amq_connect ");
 
   TString uri;
   // Failover and Stomp don't splice ... or, they splice too well, making as
@@ -117,6 +125,61 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
   }
 }
 
+void XrdFileCloseReporterAmq::amq_disconnect()
+{
+
+}
+
+void* XrdFileCloseReporterAmq::tl_AmqHandler(XrdFileCloseReporterAmq* fcr_amq)
+{
+  fcr_amq->AmqHandler();
+
+  return 0;
+}
+
+void XrdFileCloseReporterAmq::AmqHandler()
+{
+  // Reset counters;
+
+  amq_connect();
+
+
+
+  // Hmmh ... what do we do at cancellation?
+  // Klomp the thread, release messages and close_amq from the ReportLoopFinalize()
+}
+
+
+//==============================================================================
+
+void XrdFileCloseReporterAmq::ReportLoopInit()
+{
+  static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
+
+  mLastUidBase = mLastUidInner = 0;
+
+  mAmqThread = new GThread("XrdFileCloseReporterAmq-AmqHandler",
+                           (GThread_foo) tl_AmqHandler, this,
+                           false);
+  mAmqThread->SetNice(20);
+  mAmqThread->Spawn();
+
+  // The sucker below can fail at any point, just as the send afterwards.
+  // Run the connection thingy in a separate thread
+  //   a) keep it alive afterwards;
+  //   b) run it for every reconnection, as needed.
+  // Prefer b ... although it requires more crap. Could just keep it hanging
+  // on a condition variable.
+  // Hmmh, what if connection times out? Keep the thread going.
+  // What do we need for this krappe ...
+  // thread foo, foo
+  // condvar, thread*
+  // separate start/stop amq foos
+  // vars to control reconnection time, counters, state bool vars
+  // vars to control buffering of messages (later)
+
+}
+
 namespace
 {
   Long64_t dtoll (Double_t x) { return static_cast<Long64_t>(x);   }
@@ -127,6 +190,8 @@ namespace
 void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportFileClosed ");
+
+  // Lock amq, check if queue len at max ... if yes, just return.
 
   XrdFile   *file   = fus.fFile;
   XrdUser   *user   = fus.fUser;
@@ -198,6 +263,12 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
 
   TPMERegexp requote("'", "g");
   requote.Substitute(msg, "\"", kFALSE);
+
+  // This shit can crap out on me, keeping file/user/server reffed for too
+  // long. Could actually have the thread that connects managet those guys, I
+  // just pass them the strings.
+  // This goes to amq-handler now ... here we just lock, push message to queue
+  // and signal condition.
 
   try
   {

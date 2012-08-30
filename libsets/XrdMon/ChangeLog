@@ -1,3 +1,10 @@
+2012-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Intermediate commit.
+
 2012-08-18  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First attempt at using cms::ExceptionListener.
