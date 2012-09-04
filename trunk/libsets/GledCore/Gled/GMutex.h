@@ -47,27 +47,39 @@ public:
 // GMutexHolder / AntiHolder
 /**************************************************************************/
 
-class GMutexHolder
+class GMutexHolderBase
 {
   GMutex& mMutex;
-public:
-  GMutexHolder(GMutex& m) : mMutex(m) { mMutex.Lock();   }
-  virtual ~GMutexHolder()             { mMutex.Unlock(); }
+  bool    bLocked;
 
-  ClassDef(GMutexHolder, 0);
+public:
+  GMutexHolderBase(GMutex& m, bool state) : mMutex(m), bLocked(state) {}
+
+  void Lock()   { if (!bLocked) { mMutex.Lock();   bLocked = true;  } }
+  void Unlock() { if ( bLocked) { mMutex.Unlock(); bLocked = false; } }
+
+  ClassDefNV(GMutexHolderBase, 0);
+};
+
+class GMutexHolder : public GMutexHolderBase
+{
+public:
+  GMutexHolder(GMutex& m) : GMutexHolderBase(m, false) { Lock(); }
+  ~GMutexHolder() { Unlock(); }
+
+  ClassDefNV(GMutexHolder, 0);
 };
 
 // Usability of AntiHolder limited to cases when you're sure
 // the mutex is locked exactly once.
 
-class GMutexAntiHolder
+class GMutexAntiHolder : private GMutexHolderBase
 {
-  GMutex& mMutex;
 public:
-  GMutexAntiHolder(GMutex& m) : mMutex(m) { mMutex.Unlock();   }
-  virtual ~GMutexAntiHolder()             { mMutex.Lock(); }
+  GMutexAntiHolder(GMutex& m) : GMutexHolderBase(m, true) { Unlock();  }
+  ~GMutexAntiHolder() { Lock(); }
 
-  ClassDef(GMutexAntiHolder, 0);
+  ClassDefNV(GMutexAntiHolder, 0);
 };
 
 /**************************************************************************/
