@@ -17,6 +17,7 @@ $PATCH = {
 "GMutex" => 
 {
  'Pragmas' =>
+  "#pragma link C++ class GMutexHolderBase;\n"     .
   "#pragma link C++ class GMutexHolder;\n"     .
   "#pragma link C++ class GMutexAntiHolder;\n" .
   "#pragma link C++ class GLensReadHolder;\n"  .

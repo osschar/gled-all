@@ -1,3 +1,12 @@
+2012-09-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Extend functionality of GMutexHolder and GMutexAntiHolder.
+
+	* Gled/GMutex.h:
+	* catalog.patch:
+	Add Lock() and Unlock() methods to GMutexHolder/GMutexAntiHolder
+	so that they can be unlocked/locked before object destruction.
+
 2012-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fixes for running as daemon; first step towards removing of 'using
