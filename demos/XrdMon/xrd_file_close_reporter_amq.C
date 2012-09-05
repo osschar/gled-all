@@ -24,6 +24,18 @@ void xrd_file_close_reporter_amq()
   // Set topic where the message is to be sent:
   // c_frep_amq->SetAmqTopic("xrdpop.uscms_test_popularity");
 
+  // Number of messages to keep in memory while connection to AMQ is down.
+  // After that older messages get dropped.
+  // c_frep_amq->SetAmqMaxMsgQueueLen(10000);
+
+  // Wait time after connection failure. On each new attempt the wait time will
+  // be doubled.
+  // c_frep_amq->SetAmqReconnectWaitSec(1);
+
+  // Maximum time to wait between two connection attempts.
+  // c_frep_amq->SetAmqReconnectWaitSecMax(300);
+
+
   c_suck->AddFileCloseReporter(c_frep_amq);
 
   c_frep_amq->StartReporter();
