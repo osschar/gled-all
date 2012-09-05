@@ -21,11 +21,10 @@
 // Core functionality for classes that perform some kind of reporting when an
 // XrdFile is closed.
 //
-// Should activate cancel-disabler whenever calling out to sub-classes, in
-// particular, to ReportFileClosed() and
+// Disables thread canellation whenever calling virtual functions in
+// sub-classes: ReportLoopInit(), ReportFileClosed() and
 // ReportCondWaitTimeout(). ReportLoopFinalize() is called from cancellation
-// handler anyway. Let's hope we don't get cancelled during init ... duh,
-// disable it there as well, for symmetry if nothing else.
+// handler anyway.
 
 ClassImp(XrdFileCloseReporter);
 
@@ -57,6 +56,8 @@ void XrdFileCloseReporter::FileClosed(XrdFile* file, XrdUser* user, XrdServer* s
   if (! bRunning)
     return;
 
+  GThread::CancelDisabler _cd;
+
   file  ->IncEyeRefCount();
   user  ->IncEyeRefCount();
   server->IncEyeRefCount();
@@ -74,6 +75,8 @@ void XrdFileCloseReporter::ReportLoopInit()
   // Sub-classes should override this to perform one-time initialization.
   // This virtual is called from the startup-handler of the worker thread.
   // No need to call the parent-class implementation there.
+  //
+  // Called without lock, cancellation disabled.
 }
 
 void XrdFileCloseReporter::ReportFileClosed(FileUserServer& fus)
@@ -81,6 +84,8 @@ void XrdFileCloseReporter::ReportFileClosed(FileUserServer& fus)
   // Sub-classes should override this to process files that have been just
   // closed. No need to call the parent-class implementation from there, here
   // we just write out to the log.
+  //
+  // Called without lock, cancellation disabled.
 
   static const Exc_t _eh("XrdFileCloseReporter::ReportFileClosed ");
 
@@ -92,6 +97,8 @@ void XrdFileCloseReporter::ReportCondWaitTimeout()
 {
   // Sub-classes should override this to perform periodic checks.
   // If mCondWaitSec = 0 then this function never gets called.
+  //
+  // Called without lock, cancellation disabled.
 }
 
 void XrdFileCloseReporter::ReportLoopFinalize()
@@ -99,6 +106,8 @@ void XrdFileCloseReporter::ReportLoopFinalize()
   // Sub-classes should override this to perform cleanup.
   // This virtual is called from the cleanup-handler of the worker thread.
   // No need to call the parent-class implementation there.
+  //
+  // Called without lock from thread cleanup function.
 }
 
 //==============================================================================
@@ -112,12 +121,16 @@ void* XrdFileCloseReporter::tl_ReportLoop(XrdFileCloseReporter* r)
   thr->CleanupPush((GThread_cu_foo) cu_ReportLoop, r);
 
   {
-    GLensReadHolder _lck(r);
-    r->bRunning = true;
-    r->Stamp(r->FID());
-  }
+    GThread::CancelDisabler _cd;
 
-  r->ReportLoopInit();
+    {
+      GLensReadHolder _lck(r);
+      r->bRunning = true;
+      r->Stamp(r->FID());
+    }
+
+    r->ReportLoopInit();
+  }
 
   r->ReportLoop();
 
@@ -151,27 +164,35 @@ void XrdFileCloseReporter::ReportLoop()
   while (true)
   {
     FileUserServer fus;
+    GMutexHolder  _lck(mReporterCond);
+
+    if (mReporterQueue.empty())
     {
-      GMutexHolder _lck(mReporterCond);
-      if (mReporterQueue.empty())
+      if (mCondWaitSec <= 0)
       {
-	if (mCondWaitSec <= 0)
+	mReporterCond.Wait();
+      }
+      else
+      {
+	if (mReporterCond.TimedWaitUntil(GTime::ApproximateTime() + GTime(mCondWaitSec)) == 1)
 	{
-	  mReporterCond.Wait();
-	}
-	else
-	{
-	  if (mReporterCond.TimedWaitUntil(GTime::ApproximateTime() + GTime(mCondWaitSec)) == 1)
-	  {
-	    ReportCondWaitTimeout();
-	    continue;
-	  }
+	  GThread::CancelDisabler _cd;
+
+	  _lck.Unlock();
+
+	  ReportCondWaitTimeout();
+	  continue;
 	}
       }
-      fus = mReporterQueue.front();
-      mReporterQueue.pop_front();
-      --mNQueued;
     }
+
+    GThread::CancelDisabler _cd;
+
+    fus = mReporterQueue.front();
+    mReporterQueue.pop_front();
+    --mNQueued;
+
+    _lck.Unlock();
 
     ReportFileClosed(fus);
     ++mNProcessed;
@@ -230,4 +251,5 @@ void XrdFileCloseReporter::StopReporter()
   thr->ClearDetachOnExit();
   thr->Cancel();
   thr->Join();
+  delete thr;
 }

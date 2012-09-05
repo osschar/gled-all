@@ -30,33 +30,36 @@ private:
   void _init();
 
 protected:
-  TString       mAmqHost;   // X{GS} 7 Textor()
+  TString       mAmqHost;   // X{GS} 7 Textor(-width=>24)
   UShort_t      mAmqPort;   // X{GS} 7 Value()
   TString       mAmqUser;   // X{GS} 7 Textor()
   TString       mAmqPswd;   // X{GS} 7 Textor()
   TString       mAmqTopic;  // X{GS} 7 Textor()
 
-  Long64_t      mLastUidBase;    //!
-  Long64_t      mLastUidInner;   //!
+  Long64_t      mLastUidBase;       //!
+  Long64_t      mLastUidInner;      //!
 
   cms::Connection        *mConn;    //!
   cms::Session           *mSess;    //!
   cms::Destination       *mDest;    //!
   cms::MessageProducer   *mProd;    //!
 
-  Int_t  mAmqMaxMsgQueueLen;
-  Int_t  mAmqReconnectWaitSec;
+  UInt_t mAmqMaxMsgQueueLen;        // X{GS} 7 Value(-range=>[1, 10000000, 1])
+  Int_t  mAmqReconnectWaitSec;      // X{GS} 7 Value(-range=>[1, 100,   1])
+  Int_t  mAmqReconnectWaitSecMax;   // X{GS} 7 Value(-range=>[1, 10000, 1])
 
-  Int_t  mAmqTotalConnectSuccessCount;
-  Int_t  mAmqTotalConnectFailCount;
-  Int_t  mAmqCurrentConnectFailCount;
-  Bool_t bAmqConnected;
+  Int_t  mAmqTotalConnectSuccessCount; //! X{G} 7 ValOut()
+  Int_t  mAmqTotalConnectFailCount;    //! X{G} 7 ValOut()
+  Int_t  mAmqCurrentConnectFailCount;  //! X{G} 7 ValOut()
+  Int_t  mAmqSendMessageFailCount;     //! X{G} 7 ValOut()
+  Bool_t bAmqConnected;                //! X{G} 7 BoolOut()
 
-  GThread    *mAmqThread;
-  GCondition  mAmqCond;
-  lStr_t      mAmqMsgQueue;
+  GThread    *mAmqThread;              //!
+  GCondition  mAmqCond;                //!
+  lStr_t      mAmqMsgQueue;            //!
 
   static void* tl_AmqHandler(XrdFileCloseReporterAmq* fcr_amq);
+  static void  cu_AmqHandler(XrdFileCloseReporterAmq* fcr_amq);
 
   void AmqHandler();
   void amq_connect();

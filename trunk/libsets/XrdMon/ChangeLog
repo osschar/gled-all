@@ -1,3 +1,20 @@
+2012-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proper implementation of ActiveMQ connection handling in a
+	dedicated thread.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Proper handling of AMQ connection management and passing of text
+	messages to AMQ in a special thread.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Improve docs.
+	Consistently call virtuals with thread cancellation disabled.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	Remove cancelation disabling now done by the base-class.
+
 2012-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporter.cxx:

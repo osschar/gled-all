@@ -47,14 +47,11 @@ void XrdFileCloseReporterAmq::_init()
   mDest = 0;
   mProd = 0;
 
-  mAmqMaxMsgQueueLen   = 1024;
-  mAmqReconnectWaitSec = 1;
+  mAmqMaxMsgQueueLen      = 10000;
+  mAmqReconnectWaitSec    = 1;
+  mAmqReconnectWaitSecMax = 300;
 
-  // These are local, should be initialized in amq-handler
-  mAmqTotalConnectSuccessCount = 0;
-  mAmqTotalConnectFailCount = 0;
-  mAmqCurrentConnectFailCount = 0;
-  bAmqConnected = false;
+  // Some amq-counters state vars get initalized in AmqHandler().
 
   mAmqThread = 0;
 }
@@ -75,13 +72,19 @@ void XrdFileCloseReporterAmq::onException(const cms::CMSException &e)
   static const Exc_t _eh("XrdFileCloseReporterAmq::onException ");
 
   if (*mLog)
-      mLog->Form(ZLog::L_Error, _eh, "Exception callback invoked: '%s'. Reconnection attempt will start now.",
+      mLog->Form(ZLog::L_Error, _eh, "Exception callback invoked:\n    %s",
 		 e.getStackTraceString().c_str());
 
-  if (mConn)     mConn->close();
-  delete mConn;  mConn = 0;
+  cms::Connection *conn = mConn;
+  mConn = 0;
 
-  // mReporterThread->Cancel();
+  // This somehow results in proper exception getting throw in the amq thread.
+  // Go figure ... zen engineering or just a bug?
+  if (conn)
+  {
+    conn->close();
+    delete conn;
+  }
 }
 
 void XrdFileCloseReporterAmq::amq_connect()
@@ -127,26 +130,148 @@ void XrdFileCloseReporterAmq::amq_connect()
 
 void XrdFileCloseReporterAmq::amq_disconnect()
 {
+  static const Exc_t _eh("XrdFileCloseReporterAmq::amq_disconnect ");
 
+  try
+  {
+    delete mDest;  mDest = 0;
+    delete mProd;  mProd = 0;
+    if (mSess)     mSess->close();
+    if (mConn)     mConn->close();
+    delete mSess;  mSess = 0;
+    delete mConn;  mConn = 0;
+  }
+  catch (cms::CMSException& e)
+  {
+    // Just log it ... we don't really care at this point.
+    if (*mLog)
+      mLog->Form(ZLog::L_Error, _eh, "", "Exception during ActiveMQ object destruction:\n    %s",
+		 e.getStackTraceString().c_str());
+  }
 }
 
 void* XrdFileCloseReporterAmq::tl_AmqHandler(XrdFileCloseReporterAmq* fcr_amq)
 {
+  GThread::Self()->CleanupPush((GThread_cu_foo) cu_AmqHandler, fcr_amq);
+
   fcr_amq->AmqHandler();
 
   return 0;
 }
 
+void XrdFileCloseReporterAmq::cu_AmqHandler(XrdFileCloseReporterAmq* fcr_amq)
+{
+  fcr_amq->amq_disconnect();
+
+  {
+    GLensReadHolder _lck(fcr_amq);
+    fcr_amq->bAmqConnected = false;
+    fcr_amq->Stamp(FID());
+  }
+}
+
 void XrdFileCloseReporterAmq::AmqHandler()
 {
-  // Reset counters;
+  static const Exc_t _eh("XrdFileCloseReporterAmq::AmqHandler ");
 
-  amq_connect();
+  // Reset counters
+  {
+    GLensReadHolder _lck(this);
+    mAmqTotalConnectSuccessCount = 0;
+    mAmqTotalConnectFailCount    = 0;
+    mAmqCurrentConnectFailCount  = 0;
+    mAmqSendMessageFailCount     = 0;
+    bAmqConnected                = false;
+    Stamp(FID());
+  }
 
+  Int_t sleep_seconds = 0;
 
+entry_point:
 
-  // Hmmh ... what do we do at cancellation?
-  // Klomp the thread, release messages and close_amq from the ReportLoopFinalize()
+  if (sleep_seconds > 0)
+  {
+    GTime::SleepMiliSec(1000 * sleep_seconds);
+  }
+
+  try
+  {
+    amq_connect();
+  }
+  catch (Exc_t exc)
+  {
+    // Cleanup ... however far we've got.
+    amq_disconnect();
+
+    {
+      GLensReadHolder _lck(this); 
+      ++mAmqTotalConnectFailCount;
+      ++mAmqCurrentConnectFailCount;
+      Stamp(FID());
+    }
+
+    // Decide how long to sleep
+    sleep_seconds = (sleep_seconds == 0) ?
+      mAmqReconnectWaitSec :
+      TMath::Min(2*sleep_seconds, mAmqReconnectWaitSecMax);
+
+    if (*mLog)
+      mLog->Form(ZLog::L_Error, _eh, "Exception during connect:\n    %s"
+		 "  Reconnection attempt scheduled in %d seconds.",
+		 exc.Data(), sleep_seconds);
+
+    goto entry_point;
+  }
+
+  {
+    GLensReadHolder _lck(this);
+    ++mAmqTotalConnectSuccessCount;
+    bAmqConnected = true;
+    Stamp(FID());
+  }
+
+  while (true)
+  {
+    // wait on amqcond, send messages, handle exceptions
+    TString msg;
+    {
+      GMutexHolder _qlck(mAmqCond);
+      if (mAmqMsgQueue.empty())
+      {
+	mAmqCond.Wait();
+      }
+      msg = mAmqMsgQueue.front();
+      mAmqMsgQueue.pop_front();
+    }
+
+    try
+    {
+      auto_ptr<cms::TextMessage> aqm( mSess->createTextMessage(msg.Data()) );
+      mProd->send(aqm.get());
+    }
+    catch (cms::CMSException& e)
+    {
+      amq_disconnect();
+
+      {
+	GLensReadHolder _lck(this);
+	++mAmqSendMessageFailCount;
+	mAmqCurrentConnectFailCount = 0;
+	bAmqConnected = false;
+	Stamp(FID());
+      }
+
+      // Log error, flag & time-stamp that we are not connected, initiate reconnect.
+      if (*mLog)
+	mLog->Form(ZLog::L_Error, _eh, "Exception during sending of a message:\n    %s"
+		   "  Reconnection attempt will start now.",
+		   e.getStackTraceString().c_str());
+
+      sleep_seconds = 0;
+
+      goto entry_point;
+    }
+  }
 }
 
 
@@ -159,32 +284,16 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
   mLastUidBase = mLastUidInner = 0;
 
   mAmqThread = new GThread("XrdFileCloseReporterAmq-AmqHandler",
-                           (GThread_foo) tl_AmqHandler, this,
-                           false);
+                           (GThread_foo) tl_AmqHandler, this);
   mAmqThread->SetNice(20);
   mAmqThread->Spawn();
-
-  // The sucker below can fail at any point, just as the send afterwards.
-  // Run the connection thingy in a separate thread
-  //   a) keep it alive afterwards;
-  //   b) run it for every reconnection, as needed.
-  // Prefer b ... although it requires more crap. Could just keep it hanging
-  // on a condition variable.
-  // Hmmh, what if connection times out? Keep the thread going.
-  // What do we need for this krappe ...
-  // thread foo, foo
-  // condvar, thread*
-  // separate start/stop amq foos
-  // vars to control reconnection time, counters, state bool vars
-  // vars to control buffering of messages (later)
-
 }
 
 namespace
 {
-  Long64_t dtoll (Double_t x) { return static_cast<Long64_t>(x);   }
-  Double_t dmtod (Double_t x) { return 1024.0 * 1024.0 * x;        }
-  Long64_t dmtoll(Double_t x) { return dtoll(dmtod(x));            }
+  Long64_t dtoll (Double_t x) { return static_cast<Long64_t>(x); }
+  Double_t dmtod (Double_t x) { return 1024.0 * 1024.0 * x;      }
+  Long64_t dmtoll(Double_t x) { return dtoll(dmtod(x));          }
 }
 
 void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
@@ -264,30 +373,15 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   TPMERegexp requote("'", "g");
   requote.Substitute(msg, "\"", kFALSE);
 
-  // This shit can crap out on me, keeping file/user/server reffed for too
-  // long. Could actually have the thread that connects managet those guys, I
-  // just pass them the strings.
-  // This goes to amq-handler now ... here we just lock, push message to queue
-  // and signal condition.
-
-  try
+  // Pass the message on to AmqThread ...
   {
-    auto_ptr<cms::TextMessage> aqm( mSess->createTextMessage(msg.Data()) );
-    mProd->send(aqm.get());
-  }
-  catch (cms::CMSException& e)
-  {
-    // Log error, flag & time-stamp that we are not connected, initiate reconnect.
-    if (*mLog)
-      mLog->Form(ZLog::L_Error, _eh, "Exception during sending of a message: '%s'. Reconnection attempt will start now.",
-		 e.getStackTraceString().c_str());
-
-    // What do we need ... shall we run it in a dedicated thread?
-    // Hmya, there is no other way, esp. if we want to keep processing messages.
-    //   a) ZMIR* S_Reconnect in detached thread?
-    //   b) Direct thread creation ... I guess this is best.
-    // Must also use non-zero cond-wait time if queue needs to be purged.
-    // So that we don't get damn zombies taking over. Well, they don't harm, I think.
+    GMutexHolder _qlck(mAmqCond);
+    mAmqMsgQueue.push_back(msg);
+    if (mAmqMsgQueue.size() > mAmqMaxMsgQueueLen)
+    {
+      mAmqMsgQueue.pop_front();
+    }
+    mAmqCond.Signal();
   }
 }
 
@@ -295,21 +389,14 @@ void XrdFileCloseReporterAmq::ReportLoopFinalize()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopFinalize ");
 
-  try
+  mAmqThread->Cancel();
+  mAmqThread->Join();
+  delete mAmqThread;
+  mAmqThread = 0;
+
   {
-    delete mDest;  mDest = 0;
-    delete mProd;  mProd = 0;
-    if (mSess)     mSess->close();
-    if (mConn)     mConn->close();
-    delete mSess;  mSess = 0;
-    delete mConn;  mConn = 0;
-  }
-  catch (cms::CMSException& e)
-  {
-    // Just log it ... we don't really care at this point.
-    if (*mLog)
-      mLog->Form(ZLog::L_Error, _eh, "", "Exception during ActiveMQ object destruction: '%s'.",
-		 e.getStackTraceString().c_str());
+    GMutexHolder _qlck(mAmqCond);
+    mAmqMsgQueue.clear();
   }
 }
 
