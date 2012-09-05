@@ -212,8 +212,6 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
 {
   static const Exc_t _eh("XrdFileCloseReporterTree::ReportFileClosed ");
 
-  GThread::CancelDisabler _cd;
-
   check_file_rotate();
 
   {
@@ -252,8 +250,6 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
 
 void XrdFileCloseReporterTree::ReportCondWaitTimeout()
 {
-  GThread::CancelDisabler _cd;
-
   check_file_rotate();
 }
 
