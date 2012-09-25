@@ -97,11 +97,11 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _flck(file);
 
-    Long64_t unique_id = 1000ll * file->RefCloseTime().ToMiliSec();
+    Long64_t unique_id = 1000000ll * GTime::ApproximateTime().GetSec();
     if (unique_id == mLastUidBase)
     {
       unique_id = mLastUidBase + ++mLastUidInner;
-      if (mLastUidInner >= 1000ll)
+      if (mLastUidInner >= 1000000ll)
       {
 	ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
 	log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());

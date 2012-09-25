@@ -1,3 +1,10 @@
+2012-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Use approximate time when generating unique record id, file-close
+	time is not growing monotonously.
+
 2012-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Proper implementation of ActiveMQ connection handling in a
