@@ -1,3 +1,12 @@
+2012-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Use GledNS::get_uuid_string().
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Use %x for local id to match TUUID style.
+
 2012-10-01  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Three-quarters towards new unique ids for FARs.

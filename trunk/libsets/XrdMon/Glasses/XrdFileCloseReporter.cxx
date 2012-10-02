@@ -126,19 +126,8 @@ void* XrdFileCloseReporter::tl_ReportLoop(XrdFileCloseReporter* r)
     GThread::CancelDisabler _cd;
 
     {
-      TString uuid;
-      {
-        // Oct 1 2012:
-        // Idiotic ROOT TUUID::AsString() is not thread-safe so let's at least lock
-        // this here between various reporters.
-        // Submitted fix for TUUID (AsTString()) and asked to be put into 5.34, too.
-        static GMutex jebo_mutex;
-        GMutexHolder _jml(jebo_mutex);
-        uuid = TUUID().AsString();
-      }
-
       GLensReadHolder _lck(r);
-      r->mUuid = uuid;
+      r->mUuid = GledNS::get_uuid_string();
       r->mNProcessed = 0;
       r->bRunning = true;
       r->Stamp(r->FID());

@@ -315,7 +315,7 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
     const SRange &RSVC = file->RefVecReadCntStats();
     const SRange &WS   = file->RefWriteStats();
     msg += TString::Format
-      ("'unique_id':'%s-%llX', "
+      ("'unique_id':'%s-%llx', "
        "'file_lfn':'%s', 'file_size':'%lld', 'start_time':'%llu', 'end_time':'%llu', "
        "'read_bytes':'%lld', 'read_operations':'%llu', 'read_min':'%lld', 'read_max':'%lld', 'read_average':'%f', 'read_sigma':'%f', "
        "'read_single_bytes':'%lld', 'read_single_operations':'%llu', 'read_single_min':'%lld', 'read_single_max':'%lld', 'read_single_average':'%f', 'read_single_sigma':'%f', "
