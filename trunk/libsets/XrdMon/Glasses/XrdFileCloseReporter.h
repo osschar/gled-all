@@ -43,8 +43,9 @@ protected:
 
   Int_t                 mCondWaitSec;     // X{GS} 7 Value(-range=>[0, 10000, 1])
 
-  Int_t                 mNProcessed;      //! X{G} 7 ValOut()
-  Int_t                 mNQueued;         //! X{G} 7 ValOut()
+  TString               mUuid;            //! X{G} 7 TextOut()
+  ULong64_t             mNProcessed;      //! X{G} 7 ValOut()
+  UInt_t                mNQueued;         //! X{G} 7 ValOut()
   Bool_t                bRunning;         //! X{G} 7 BoolOut()
 
   GThread              *mReporterThread;  //!

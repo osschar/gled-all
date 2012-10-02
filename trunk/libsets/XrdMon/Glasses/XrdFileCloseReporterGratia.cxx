@@ -34,6 +34,8 @@ void XrdFileCloseReporterGratia::_init()
 {
   mUdpHost = "localhost";
   mUdpPort = 4242;
+
+  bDomenicoIds = false;
 }
 
 XrdFileCloseReporterGratia::XrdFileCloseReporterGratia(const Text_t* n, const Text_t* t) :
@@ -97,21 +99,32 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _flck(file);
 
-    Long64_t unique_id = 1000000ll * GTime::ApproximateTime().GetSec();
-    if (unique_id == mLastUidBase)
+    TString uidstr;
+
+    if (bDomenicoIds)
     {
-      unique_id = mLastUidBase + ++mLastUidInner;
-      if (mLastUidInner >= 1000000ll)
+      Long64_t unique_id = 1000000ll * GTime::ApproximateTime().GetSec();
+      if (unique_id == mLastUidBase)
       {
-	ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
-	log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
-	return;
+        unique_id = mLastUidBase + ++mLastUidInner;
+        if (mLastUidInner >= 1000000ll)
+        {
+          ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
+          log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
+          return;
+        }
       }
+      else
+      {
+        mLastUidBase  = unique_id;
+        mLastUidInner = 0;
+      }
+
+      uidstr.Form("xrd-%lld", unique_id);
     }
     else
     {
-      mLastUidBase  = unique_id;
-      mLastUidInner = 0;
+      uidstr.Form("%s-%llX", mUuid.Data(), mNProcessed);
     }
 
     const SRange &RS   = file->RefReadStats();
@@ -120,7 +133,7 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
     const SRange &RSVC = file->RefVecReadCntStats();
     const SRange &WS   = file->RefWriteStats();
     msg += TString::Format
-      ("unique_id=xrd-%lld\n"
+      ("unique_id=%s\n"
        "file_lfn=%s\nfile_size=%lld\nstart_time=%llu\nend_time=%llu\n"
        "read_bytes=%lld\nread_operations=%llu\nread_min=%lld\nread_max=%lld\nread_average=%f\nread_sigma=%f\n"
        "read_single_bytes=%lld\nread_single_operations=%llu\nread_single_min=%lld\nread_single_max=%lld\nread_single_average=%f\nread_single_sigma=%f\n"
@@ -129,7 +142,7 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
        "write_bytes=%lld\nwrite_operations=%llu\nwrite_min=%lld\nwrite_max=%lld\nwrite_average=%f\nwrite_sigma=%f\n"
        "read_bytes_at_close=%lld\n"
        "write_bytes_at_close=%lld\n",
-       unique_id,
+       uidstr.Data(),
        file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
        dmtoll(RS .GetSumX()), RS .GetN(), dmtoll(RS .GetMin()), dmtoll(RS .GetMax()), dmtod(RS .GetAverage()), dmtod(RS .GetSigma()),
        dmtoll(RSS.GetSumX()), RSS.GetN(), dmtoll(RSS.GetMin()), dmtoll(RSS.GetMax()), dmtod(RSS.GetAverage()), dmtod(RSS.GetSigma()),

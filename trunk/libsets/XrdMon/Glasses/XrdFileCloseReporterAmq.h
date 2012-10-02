@@ -36,9 +36,6 @@ protected:
   TString       mAmqPswd;   // X{GS} 7 Textor()
   TString       mAmqTopic;  // X{GS} 7 Textor()
 
-  Long64_t      mLastUidBase;       //!
-  Long64_t      mLastUidInner;      //!
-
   cms::Connection        *mConn;    //!
   cms::Session           *mSess;    //!
   cms::Destination       *mDest;    //!

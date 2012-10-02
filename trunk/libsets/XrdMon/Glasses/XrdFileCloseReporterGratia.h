@@ -22,6 +22,8 @@ protected:
   TString           mUdpHost; // X{GS} 7 Textor()
   UShort_t          mUdpPort; // X{GS} 7 Value()
 
+  Bool_t            bDomenicoIds;    //! X{GS} 7 Bool()
+
   Int_t             mReporterSocket; //!
 
   Long64_t          mLastUidBase;    //!

@@ -1,3 +1,20 @@
+2012-10-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Three-quarters towards new unique ids for FARs.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Construct UUID string at service start (member mUuid).
+	Make mNProcessed ULong64_t.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Send new ids.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	* Glasses/XrdFileCloseReporterGratia.h:
+	Send new ids unless bDomenicoIds are true (should go away soon).
+
 2012-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporterAmq.cxx:
