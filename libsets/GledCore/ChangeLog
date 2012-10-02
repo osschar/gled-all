@@ -1,3 +1,10 @@
+2012-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GledNS.cxx:
+	* Gled/GledNS.h:
+	Add function TString get_uuid_string() that returns TUUID as
+	TString and also makes a lock around the call.
+
 2012-09-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Extend functionality of GMutexHolder and GMutexAntiHolder.
