@@ -475,6 +475,8 @@ namespace GledNS
 
   int tokenize_url(const TString& url, list<url_token>& l);
 
+  TString get_uuid_string();
+
 #endif
 
 

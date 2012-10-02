@@ -1123,6 +1123,14 @@ int GledNS::tokenize_url(const TString& url, list<url_token>& l)
   return count;
 }
 
+//------------------------------------------------------------------------------
+
+TString GledNS::get_uuid_string()
+{
+  static GMutex jebo_mutex;
+  GMutexHolder _jml(jebo_mutex);
+  return TString(TUUID().AsString());
+}
 
 /**************************************************************************/
 /**************************************************************************/
