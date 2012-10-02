@@ -124,7 +124,7 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
     }
     else
     {
-      uidstr.Form("%s-%llX", mUuid.Data(), mNProcessed);
+      uidstr.Form("%s-%llx", mUuid.Data(), mNProcessed);
     }
 
     const SRange &RS   = file->RefReadStats();
