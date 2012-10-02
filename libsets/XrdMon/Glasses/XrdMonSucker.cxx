@@ -922,7 +922,7 @@ void XrdMonSucker::Suck()
 
         int rb_to_read = plen - sizeof(XrdXrootdMonHeader) - sizeof(kXR_int64);
         int i          = 0;
-        int prev_win   = 0;
+        // int prev_win   = 0;
         XrdXrootdMonRedir *rr = rb->info;
         while (rb_to_read > 0)
         {
