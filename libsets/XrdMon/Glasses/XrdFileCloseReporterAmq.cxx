@@ -281,8 +281,6 @@ void XrdFileCloseReporterAmq::ReportLoopInit()
 {
   static const Exc_t _eh("XrdFileCloseReporterAmq::ReportLoopInit ");
 
-  mLastUidBase = mLastUidInner = 0;
-
   mAmqThread = new GThread("XrdFileCloseReporterAmq-AmqHandler",
                            (GThread_foo) tl_AmqHandler, this);
   mAmqThread->SetNice(20);
@@ -311,30 +309,13 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _flck(file);
 
-    Long64_t unique_id = 1000000ll * GTime::ApproximateTime().GetSec();
-    if (unique_id == mLastUidBase)
-    {
-      unique_id = mLastUidBase + ++mLastUidInner;
-      if (mLastUidInner >= 1000000ll)
-      {
-        ZLog::Helper log(*mLog, ZLog::L_Warning, _eh);
-        log.Form("Inner counter for unique-id overflowed for file='%s'.", file->GetName());
-        return;
-      }
-    }
-    else
-    {
-      mLastUidBase  = unique_id;
-      mLastUidInner = 0;
-    }
-
     const SRange &RS   = file->RefReadStats();
     const SRange &RSS  = file->RefSingleReadStats();
     const SRange &RSV  = file->RefVecReadStats();
     const SRange &RSVC = file->RefVecReadCntStats();
     const SRange &WS   = file->RefWriteStats();
     msg += TString::Format
-      ("'unique_id':'xrd-%lld', "
+      ("'unique_id':'%s-%llX', "
        "'file_lfn':'%s', 'file_size':'%lld', 'start_time':'%llu', 'end_time':'%llu', "
        "'read_bytes':'%lld', 'read_operations':'%llu', 'read_min':'%lld', 'read_max':'%lld', 'read_average':'%f', 'read_sigma':'%f', "
        "'read_single_bytes':'%lld', 'read_single_operations':'%llu', 'read_single_min':'%lld', 'read_single_max':'%lld', 'read_single_average':'%f', 'read_single_sigma':'%f', "
@@ -343,7 +324,7 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
        "'write_bytes':'%lld', 'write_operations':'%llu', 'write_min':'%lld', 'write_max':'%lld', 'write_average':'%f', 'write_sigma':'%f', "
        "'read_bytes_at_close':'%lld', "
        "'write_bytes_at_close':'%lld', ",
-       unique_id,
+       mUuid.Data(), mNProcessed,
        file->GetName(), dmtoll(file->GetSizeMB()), file->RefOpenTime().GetSec(), file->RefCloseTime().GetSec(),
        dmtoll(RS .GetSumX()), RS .GetN(), dmtoll(RS .GetMin()), dmtoll(RS .GetMax()), dmtod(RS .GetAverage()), dmtod(RS .GetSigma()),
        dmtoll(RSS.GetSumX()), RSS.GetN(), dmtoll(RSS.GetMin()), dmtoll(RSS.GetMax()), dmtod(RSS.GetAverage()), dmtod(RSS.GetSigma()),
