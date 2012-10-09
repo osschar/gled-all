@@ -1,3 +1,14 @@
+2012-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add option to fix the service UUID string.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Improve sucker-thread startup and cancellation. This was somewhat
+	far from working correctly before.
+
 2012-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdFileCloseReporter.cxx:

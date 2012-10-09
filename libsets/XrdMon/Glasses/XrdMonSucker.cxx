@@ -57,7 +57,6 @@ void XrdMonSucker::_init()
 
   mPacketCount = mSeqIdFailCount = 0;
 
-  mSocket = 0;
   mSuckerThread = 0;
   mLastOldUserCheck  = mLastDeadUserCheck  =
   mLastDeadServCheck = mLastIdentServCheck = GTime(GTime::I_Never);
@@ -207,14 +206,6 @@ void XrdMonSucker::disconnect_server(XrdServer* server, XrdDomain *domain,
 
 //==============================================================================
 
-void* XrdMonSucker::tl_Suck(XrdMonSucker* s)
-{
-  s->Suck();
-  // Usually cancelled from StopSucker().
-  s->mSuckerThread = 0;
-  return 0;
-}
-
 void XrdMonSucker::Suck()
 {
   static const Exc_t _eh("XrdMonSucker::Suck ");
@@ -230,6 +221,8 @@ void XrdMonSucker::Suck()
   while (true)
   {
     SUdpPacket *p = mUdpQueue.PopFront();
+
+    GThread::CancelDisabler _cd;
 
     GTime recv_time(p->mRecvTime);
 
@@ -982,6 +975,24 @@ void XrdMonSucker::Suck()
 
 //==============================================================================
 
+void* XrdMonSucker::tl_Suck(XrdMonSucker* s)
+{
+  GThread *thr = GThread::Self();
+  s->mSaturn->register_detached_thread(s, thr);
+  thr->CleanupPush((GThread_cu_foo) cu_Suck, s);
+
+  {
+    GLensReadHolder _lck(s);
+    s->bSuckerRunning = true;
+    s->Stamp(s->FID());
+  }
+
+  s->mSource->RegisterConsumer(&s->mUdpQueue);
+  s->Suck();
+
+  return 0;
+}
+
 void XrdMonSucker::StartSucker()
 {
   static const Exc_t _eh("XrdMonSucker::StartSucker ");
@@ -992,25 +1003,39 @@ void XrdMonSucker::StartSucker()
       throw _eh + "already running.";
 
     mSuckerThread  = new GThread("XrdMonSucker-Sucker",
-                                 (GThread_foo) tl_Suck, this, false);
+                                 (GThread_foo) tl_Suck, this,
+                                 false, true);
 
     mCheckerThread = new GThread("XrdMonSucker-Checker",
-                                 (GThread_foo) tl_Check, this, false);
+                                 (GThread_foo) tl_Check, this,
+                                 false, false);
   }
-  mSuckerThread->SetNice(0);
-  mSuckerThread->Spawn();
-
   mLastOldUserCheck  = mLastDeadUserCheck  =
   mLastDeadServCheck = mLastIdentServCheck = GTime::ApproximateTime();
 
+  mSuckerThread->SetNice(0);
+  mSuckerThread->Spawn();
+
   mCheckerThread->SetNice(20);
   mCheckerThread->Spawn();
+}
 
-  mSource->RegisterConsumer(&mUdpQueue);
+void XrdMonSucker::cu_Suck(XrdMonSucker* s)
+{
+  s->mSaturn->unregister_detached_thread(s, GThread::Self());
+
+  s->mSource->UnregisterConsumer(&s->mUdpQueue);
+
+  s->mCheckerThread->Cancel();
+  s->mCheckerThread->Join();
+  delete s->mCheckerThread;
 
   {
-    GLensReadHolder _lck(this);
-    Stamp(FID());
+    GLensReadHolder _lck(s);
+    s->mSuckerThread = 0;
+    s->mCheckerThread = 0;
+    s->bSuckerRunning = false;
+    s->Stamp(s->FID());
   }
 }
 
@@ -1026,23 +1051,10 @@ void XrdMonSucker::StopSucker()
     thr = mSuckerThread;
     GThread::InvalidatePtr(mSuckerThread);
   }
-
-  mSource->UnregisterConsumer(&mUdpQueue);
-
-  mCheckerThread->Cancel();
-  mCheckerThread->Join();
-  delete mCheckerThread;
-
+  thr->ClearDetachOnExit();
   thr->Cancel();
   thr->Join();
   delete thr;
-  close(mSocket);
-  {
-    GLensReadHolder _lck(this);
-    mSocket = 0;
-    mSuckerThread = 0;
-    mCheckerThread = 0;
-  }
 }
 
 //==============================================================================
@@ -1050,8 +1062,6 @@ void XrdMonSucker::StopSucker()
 void* XrdMonSucker::tl_Check(XrdMonSucker* s)
 {
   s->Check();
-  // Usually cancelled from StopSucker().
-  s->mCheckerThread = 0;
   return 0;
 }
 
@@ -1064,6 +1074,8 @@ void XrdMonSucker::Check()
     GTime now = GTime::ApproximateTime();
 
     {
+      GThread::CancelDisabler _cd;
+
       bool stamp_p = false;
       GLensReadHolder _lck(this);
       if ((now - mLastOldUserCheck).GetSec() > mUserKeepSec)
