@@ -43,9 +43,12 @@ protected:
 
   Int_t                 mCondWaitSec;     // X{GS} 7 Value(-range=>[0, 10000, 1])
 
-  TString               mUuid;            //! X{G} 7 TextOut()
+  Bool_t                bFixedUuid;       //  X{G} 7 BoolOut()
+  TString               mUuid;            //  X{G} 7 TextOut()
+
+  ULong64_t             mNProcessedTotal; //! X{G} 7 ValOut()
   ULong64_t             mNProcessed;      //! X{G} 7 ValOut()
-  UInt_t                mNQueued;         //! X{G} 7 ValOut()
+  UInt_t                mNQueued;         //! X{G} 7 ValOut(-join=>1)
   Bool_t                bRunning;         //! X{G} 7 BoolOut()
 
   GThread              *mReporterThread;  //!
@@ -66,9 +69,12 @@ public:
   XrdFileCloseReporter(const Text_t* n="XrdFileCloseReporter", const Text_t* t=0);
   virtual ~XrdFileCloseReporter();
 
+  void FixUuidString(const TString& uuid); // X{E} 7 MCWButt(-join=>1)
+  void AutomaticUuidString();              // X{E} 7 MButt()
+
   void FileClosed(XrdFile* file, XrdUser* user, XrdServer* server);
 
-  void StartReporter(); // X{Ed} 7 MButt()
+  void StartReporter(); // X{Ed} 7 MButt(-join=>1)
   void StopReporter();  // X{Ed} 7 MButt()
 
 #include "XrdFileCloseReporter.h7"

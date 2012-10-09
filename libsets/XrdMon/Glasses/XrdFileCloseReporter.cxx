@@ -35,7 +35,8 @@ ClassImp(XrdFileCloseReporter);
 void XrdFileCloseReporter::_init()
 {
   mCondWaitSec = 0;
-  mNProcessed = mNQueued = 0;
+  bFixedUuid   = false;
+  mNProcessedTotal = mNProcessed = mNQueued = 0;
   bRunning = false;
 }
 
@@ -48,6 +49,41 @@ XrdFileCloseReporter::XrdFileCloseReporter(const Text_t* n, const Text_t* t) :
 
 XrdFileCloseReporter::~XrdFileCloseReporter()
 {}
+
+//==============================================================================
+
+void XrdFileCloseReporter::FixUuidString(const TString& uuid)
+{
+  // Set a fixed UUID string to be prefixed to unique_id field of a
+  // file-access report. The complete format is still "%s-%llx".
+  // This function can only be called when reporter thread is not running.
+
+  static const Exc_t _eh("XrdFileCloseReporter::FixUuidString ");
+
+  if (bRunning)
+    throw _eh + "Can not be called while reporter thread is running.";
+
+  bFixedUuid = true;
+  mUuid      = uuid;
+
+  Stamp(FID());
+}
+
+void XrdFileCloseReporter::AutomaticUuidString()
+{
+  // Automatically generate UUID prefix for unique_id field at service start.
+  // This function can only be called when reporter thread is not running.
+
+  static const Exc_t _eh("XrdFileCloseReporter::AutomaticUuidString ");
+
+  if (bRunning)
+    throw _eh + "Can not be called while reporter thread is running.";
+
+  bFixedUuid = false;
+  mUuid      = "";
+
+  Stamp(FID());
+}
 
 //==============================================================================
 
@@ -127,7 +163,10 @@ void* XrdFileCloseReporter::tl_ReportLoop(XrdFileCloseReporter* r)
 
     {
       GLensReadHolder _lck(r);
-      r->mUuid = GledNS::get_uuid_string();
+      if ( ! r->bFixedUuid)
+      {
+        r->mUuid = GledNS::get_uuid_string();
+      }
       r->mNProcessed = 0;
       r->bRunning = true;
       r->Stamp(r->FID());
@@ -199,6 +238,7 @@ void XrdFileCloseReporter::ReportLoop()
     _lck.Unlock();
 
     ReportFileClosed(fus);
+    ++mNProcessedTotal;
     ++mNProcessed;
 
     fus.fFile  ->DecEyeRefCount();
