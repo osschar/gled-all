@@ -66,7 +66,7 @@ protected:
   Long64_t   mPacketCount;       //!X{G}    7 ValOut()
   Long64_t   mSeqIdFailCount;    //!X{G}    7 ValOut()
 
-  Int_t      mSocket;         //!
+  Bool_t     bSuckerRunning;  //! X{G} 7 BoolOut()
   GThread   *mSuckerThread;   //!
   GThread   *mCheckerThread;  //!
 
@@ -95,7 +95,9 @@ protected:
 			 const GTime& time);
 
   static void* tl_Suck(XrdMonSucker* s);
+  static void  cu_Suck(XrdMonSucker* s);
   void Suck();
+
   static void* tl_Check(XrdMonSucker* s);
   void Check();
 
