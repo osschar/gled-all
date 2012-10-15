@@ -44,9 +44,9 @@ protected:
 
   ZLink<ZList>      mPrevUsers;   // X{GS} L{}
 
-  typedef map<Int_t, XrdUser*>    mDict2User_t;
+  typedef map<UInt_t, XrdUser*>   mDict2User_t;
   typedef mDict2User_t::iterator  mDict2User_i;
-  typedef map<Int_t, XrdFile*>    mDict2File_t;
+  typedef map<UInt_t, XrdFile*>   mDict2File_t;
   typedef mDict2File_t::iterator  mDict2File_i;
 
   mDict2User_t      mUserMap;      //!
@@ -72,20 +72,20 @@ public:
   void     IncPacketCount();
   void     IncSeqIdFailCount();
 
-  Bool_t   ExistsUserDictId(Int_t dict_id);
-  void     AddUser(XrdUser* user, Int_t dict_id); // X{E} C{1}
-  void     DisconnectUser(XrdUser* user);         // X{E} C{1}
-  void     RemovePrevUser(XrdUser* user);         // X{E} C{1}
+  Bool_t   ExistsUserDictId(UInt_t dict_id);
+  void     AddUser(XrdUser* user, UInt_t dict_id); // X{E} C{1}
+  void     DisconnectUser(XrdUser* user);          // X{E} C{1}
+  void     RemovePrevUser(XrdUser* user);          // X{E} C{1}
   Int_t    RemovePrevUsersOlderThan(const GTime& cut_time);
   void     ClearPrevUserMap();
   XrdUser* FindUser(const TString& name);
-  XrdUser* FindUser(Int_t dict_id);
-  XrdUser* FindUserOrPrevUser(Int_t dict_id);
+  XrdUser* FindUser(UInt_t dict_id);
+  XrdUser* FindUserOrPrevUser(UInt_t dict_id);
 
-  Bool_t   ExistsFileDictId(Int_t dict_id);
-  void     AddFile(XrdFile* file, Int_t dict_id); // X{E} C{1}
-  void     RemoveFile(XrdFile* file);             // X{E} C{1}
-  XrdFile* FindFile(Int_t dict_id);
+  Bool_t   ExistsFileDictId(UInt_t dict_id);
+  void     AddFile(XrdFile* file, UInt_t dict_id); // X{E} C{1}
+  void     RemoveFile(XrdFile* file);              // X{E} C{1}
+  XrdFile* FindFile(UInt_t dict_id);
 
   // Only called from XrdMonSucker to initialize / check message sequence id.
   void    InitSrvSeq(UChar_t seq) { mSrvSeq = seq; bSrvSeqInited = true; }

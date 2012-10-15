@@ -105,13 +105,13 @@ void XrdServer::IncSeqIdFailCount()
 
 //==============================================================================
 
-Bool_t XrdServer::ExistsUserDictId(Int_t dict_id)
+Bool_t XrdServer::ExistsUserDictId(UInt_t dict_id)
 {
   GMutexHolder _lck(mUserMapMutex);
   return mUserMap.find(dict_id) != mUserMap.end();
 }
 
-void XrdServer::AddUser(XrdUser* user, Int_t dict_id)
+void XrdServer::AddUser(XrdUser* user, UInt_t dict_id)
 {
   static const Exc_t _eh("XrdServer::AddUser ");
 
@@ -201,14 +201,14 @@ XrdUser* XrdServer::FindUser(const TString& name)
   return dynamic_cast<XrdUser*>(GetElementByName(name));
 }
 
-XrdUser* XrdServer::FindUser(Int_t dict_id)
+XrdUser* XrdServer::FindUser(UInt_t dict_id)
 {
   GMutexHolder _lck(mUserMapMutex);
   mDict2User_i i = mUserMap.find(dict_id);
   return (i != mUserMap.end()) ? i->second : 0;
 }
 
-XrdUser* XrdServer::FindUserOrPrevUser(Int_t dict_id)
+XrdUser* XrdServer::FindUserOrPrevUser(UInt_t dict_id)
 {
   mDict2User_i i;
 
@@ -225,13 +225,13 @@ XrdUser* XrdServer::FindUserOrPrevUser(Int_t dict_id)
 
 //------------------------------------------------------------------------------
 
-Bool_t XrdServer::ExistsFileDictId(Int_t dict_id)
+Bool_t XrdServer::ExistsFileDictId(UInt_t dict_id)
 {
   GMutexHolder _lck(mFileMapMutex);
   return mFileMap.find(dict_id) != mFileMap.end();
 }
 
-void XrdServer::AddFile(XrdFile* file, Int_t dict_id)
+void XrdServer::AddFile(XrdFile* file, UInt_t dict_id)
 {
   static const Exc_t _eh("XrdServer::AddFile ");
 
@@ -261,7 +261,7 @@ void XrdServer::RemoveFile(XrdFile* file)
   mFileMap.erase(i);
 }
 
-XrdFile* XrdServer::FindFile(Int_t dict_id)
+XrdFile* XrdServer::FindFile(UInt_t dict_id)
 {
   GMutexHolder _lck(mFileMapMutex);
 
