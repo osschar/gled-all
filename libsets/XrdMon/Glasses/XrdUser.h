@@ -19,7 +19,7 @@ class XrdUser : public ZList
   friend class XrdServer;
 
 private:
-  Int_t             m_dict_id;       //!
+  UInt_t            m_dict_id;       //!
 
   void _init();
 

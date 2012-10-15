@@ -384,7 +384,7 @@ void XrdMonSucker::Suck()
                xmh->code, pseq, plen);
 
       XrdXrootdMonMap *xmm     = (XrdXrootdMonMap*) p->mBuff;
-      Int_t            dict_id = ntohl(xmm->dictid);
+      UInt_t           dict_id = ntohl(xmm->dictid);
 
       (p->mBuff)[plen] = 0; // 0-terminate the buffer at packet length.
 
@@ -396,7 +396,7 @@ void XrdMonSucker::Suck()
 
       if (code == 'u')
       {
-	msg += TString::Format("\n\tUser map -- id=%d, uname=%s", dict_id, prim);
+	msg += TString::Format("\n\tUser map -- id=%u, uname=%s", dict_id, prim);
 	TString uname(prim), host, domain;
         Bool_t  numeric_host = false;
         {
@@ -586,7 +586,7 @@ void XrdMonSucker::Suck()
       {
         TString uname(prim);
         TString info (sec);
-	msg += TString::Format("\n\tInfo map -- id=%d, uname=%s info=%s",
+	msg += TString::Format("\n\tInfo map -- id=%u, uname=%s info=%s",
                                dict_id, uname.Data(), info.Data());
 
 	XrdUser *user = server->FindUser(uname);
@@ -623,7 +623,7 @@ void XrdMonSucker::Suck()
 	XrdXrootdMonBuff *fXmb;
 
 	XrdFile          *fFile;
-	Int_t             fDictId;
+	UInt_t            fDictId;
 
 	Int_t             fTi, fTiWEnd; // time-idx, time-idx-window-end
 	const Int_t       fN;
@@ -681,7 +681,7 @@ void XrdMonSucker::Suck()
 	  return false;
 	}
 
-	XrdFile* update(Int_t newid)
+	XrdFile* update(UInt_t newid)
 	{
 	  if (newid != fDictId)
 	  {
@@ -750,7 +750,7 @@ void XrdMonSucker::Suck()
 
         if (tt <= 0x7F)
         {
-	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
           file = lc.update(dict_id);
           if (file)
           {
@@ -771,7 +771,7 @@ void XrdMonSucker::Suck()
         }
         else if (tt == XROOTD_MON_READV)
         {
-	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
           file = lc.update(dict_id);
           if (file)
           {
@@ -786,7 +786,7 @@ void XrdMonSucker::Suck()
         }
 	else if (tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
 	{
-	  Int_t dict_id = ntohl(xmt.arg2.dictid);
+	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
 	  file = lc.update(dict_id);
           if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, file ? file->GetName() : "<nil>");
           if (file)
@@ -842,7 +842,7 @@ void XrdMonSucker::Suck()
 	}
 	else if (tt == XROOTD_MON_DISC)
 	{
-	  Int_t    dict_id        = ntohl(xmt.arg2.dictid);
+	  UInt_t   dict_id        = ntohl(xmt.arg2.dictid);
 	  XrdUser *us_from_server = server->FindUser(dict_id);
 	  if (us != us_from_server)
 	  {
