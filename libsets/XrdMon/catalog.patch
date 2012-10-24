@@ -1,0 +1,14 @@
+$PATCH = {
+
+"SXrdIOInfo" =>
+{
+  'Pragmas'    =>
+   "#pragma link C++ class    SXrdRWReq+;\n" .
+   "#pragma link C++ class    SXrdRvSubReq+;\n" .
+   "#pragma link C++ class    SXrdRvReq+;\n" .
+   "#pragma link C++ typedef vSXrdRWReq_t;\n" .
+   "#pragma link C++ typedef vSXrdRvSubReq_t;\n" .
+   "#pragma link C++ typedef vSXrdRvReq_t;\n"
+},
+
+};
