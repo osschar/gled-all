@@ -778,7 +778,28 @@ void XrdMonSucker::Suck()
 	    us = file->GetUser();
             Int_t rlen = ntohl(xmt.arg1.buflen);
             Int_t nels = ntohs(xmt.arg0.sVal[1]);
-            // Not processed: vcnt and vseq (for multi file read)
+            // UChar_t vseq = xmt.arg0.id[1];
+            // Not processed: vseq (for multi file read)
+            GLensReadHolder _lck(file);
+            file->AddVecReadSample(rlen / One_MB, nels);
+            file->SetLastMsgTime(lc.fTime);
+          }
+        }
+        else if (tt == XROOTD_MON_READU)
+        {
+	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
+          file = lc.update(dict_id);
+          if (file)
+          {
+	    us = file->GetUser();
+            Int_t rlen = ntohl(xmt.arg1.buflen);
+            Int_t nels = ntohs(xmt.arg0.sVal[1]);
+            UChar_t vseq = xmt.arg0.id[1];
+            // Not processed: vseq (for multi file read)
+            // XXXX Mark user (vseq), file for receiving of unpacked readv info.
+            // XXXX Note: this can spawn across several packets!
+            // XXXX Losing a packet can be rather bad ... code conservatively and
+            // XXXX discard missing reads.
             GLensReadHolder _lck(file);
             file->AddVecReadSample(rlen / One_MB, nels);
             file->SetLastMsgTime(lc.fTime);
