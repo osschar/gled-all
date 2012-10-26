@@ -4,28 +4,28 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef XrdMon_SXrdIOInfo_H
-#define XrdMon_SXrdIOInfo_H
+#ifndef XrdMon_SXrdIoInfo_H
+#define XrdMon_SXrdIoInfo_H
 
 #include "Rtypes.h"
 #include <vector>
 
 //==============================================================================
 
-class SXrdRWReq
+class SXrdRwReq
 {
 public:
   Long64_t          mOffset;
   Int_t             mLength;
   Int_t             mTime;
 
-  SXrdRWReq()  {}
-  ~SXrdRWReq() {}
+  SXrdRwReq()  {}
+  ~SXrdRwReq() {}
 
-  ClassDefNV(SXrdRWReq, 1);
-}; // endclass SXrdRWReq
+  ClassDefNV(SXrdRwReq, 1);
+}; // endclass SXrdRwReq
 
-typedef std::vector<SXrdRWReq> vSXrdRWReq_t;
+typedef std::vector<SXrdRwReq> vSXrdRwReq_t;
 
 //==============================================================================
 
@@ -64,17 +64,17 @@ typedef std::vector<SXrdRvReq> vSXrdRvReq_t;
 
 //==============================================================================
 
-class SXrdIOInfo
+class SXrdIoInfo
 {
 public:
-  vSXrdRWReq_t      mWrites;
-  vSXrdRWReq_t      mReads;
+  vSXrdRwReq_t      mWrites;
+  vSXrdRwReq_t      mReads;
   vSXrdRvReq_t      mReadvs;
 
-  SXrdIOInfo()  {}
-  ~SXrdIOInfo() {}
+  SXrdIoInfo()  {}
+  ~SXrdIoInfo() {}
 
-  ClassDefNV(SXrdIOInfo, 1);
-}; // endclass SXrdIOInfo
+  ClassDefNV(SXrdIoInfo, 1);
+}; // endclass SXrdIoInfo
 
 #endif

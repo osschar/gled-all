@@ -47,7 +47,8 @@ ClassImp(XrdMonSucker);
 
 void XrdMonSucker::_init()
 {
-  mSuckPort  = 9929;
+  mSuckPort    = 9929;
+  bStoreIOInfo = false;
 
   mUserKeepSec = 300;
   mUserDeadSec = 86400;
