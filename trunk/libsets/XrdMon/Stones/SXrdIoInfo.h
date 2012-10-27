@@ -67,12 +67,32 @@ typedef std::vector<SXrdRvReq> vSXrdRvReq_t;
 class SXrdIoInfo
 {
 public:
+  // Request info
+  std::vector<Int_t>    mTimeVec;
+  std::vector<Int_t>    mIndexVec; // Index into IO info
+  std::vector<Short_t>  mTypeVec;  // -2 write, -1 read, >= 0 N_segments of vector read
+
+  // IO info, there are several entries for vector reads.
+  std::vector<Long64_t> mOffsetVec; // First entry for readv is number of segments reported in initial record
+  std::vector<Int_t>    mLengthVec;
+
+  UChar_t   mLastVSeq;          //! Should be in XrdFile?
+  Short_t   mExpectedReadVSegs; //! Hmmh ... how about this guy?
+
+  // Previous plan that couldn't replay time order
   vSXrdRwReq_t      mWrites;
   vSXrdRwReq_t      mReads;
   vSXrdRvReq_t      mReadvs;
 
   SXrdIoInfo()  {}
   ~SXrdIoInfo() {}
+
+  void RegisterRead(Int_t time, Long64_t offset, Int_t length);
+  void RegisterWrite(Int_t time, Long64_t offset, Int_t length);
+
+  void RegisterReadV(Int_t time, Int_t n_segments, Int_t total_length);
+  void AdditionalReadV(Int_t n_segments, Int_t total_length); // Happens for multi-file ReadV
+  void RegisterReadVSeg(Long64_t offset, Int_t length);
 
   ClassDefNV(SXrdIoInfo, 1);
 }; // endclass SXrdIoInfo
