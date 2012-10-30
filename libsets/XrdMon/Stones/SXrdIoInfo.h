@@ -12,6 +12,45 @@
 
 //==============================================================================
 
+class SXrdReq
+{
+public:
+  enum Req_e { R_Write, R_Read, R_VecRead };
+
+private:
+  Long64_t mOffset;
+  Int_t    mLength;
+  Int_t    mSeconds;
+
+public:
+  SXrdReq() : mOffset(0), mLength(0), mSeconds(0) {}
+
+  void SetWrite()   {}
+  void SetRead()    {}
+  void SetVecRead() {}
+  void AddVecRead() {}
+
+  Req_e Type() const
+  {
+    if (mOffset < 0) return R_VecRead;
+    if (mLength < 0) return R_Write; else return R_Read;
+  }
+  Int_t  Length()  const { return mLength < 0 ? -mLength : mLength; }
+  Int_t  Seconds() const { return mSeconds; }
+
+  // For Read and Write
+  Long64_t Offset() const { return mOffset; }
+
+  // For VecRead
+  Int_t    SubReqIndex() const { return mOffset & 0xffffffff; }
+  Short_t  SubReqLen()   const { return (mOffset > 32) & 0xffff; }
+  Short_t  SubReqsLost() const { return (mOffset > 48) & 0xffff; }
+
+    ClassDefNV(SXrdReq, 1);
+}; // endclass SXrdReq
+
+//==============================================================================
+
 class SXrdRwReq
 {
 public:
@@ -91,7 +130,7 @@ public:
   void RegisterWrite(Int_t time, Long64_t offset, Int_t length);
 
   void RegisterReadV(Int_t time, Int_t n_segments, Int_t total_length);
-  void AdditionalReadV(Int_t n_segments, Int_t total_length); // Happens for multi-file ReadV
+  void ExtendReadV  (Int_t n_segments, Int_t total_length); // Happens for multi-file ReadV
   void RegisterReadVSeg(Long64_t offset, Int_t length);
 
   ClassDefNV(SXrdIoInfo, 1);

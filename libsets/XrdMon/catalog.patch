@@ -3,6 +3,7 @@ $PATCH = {
 "SXrdIoInfo" =>
 {
   'Pragmas'    =>
+   "#pragma link C++ class    SXrdReq+;\n" .
    "#pragma link C++ class    SXrdRwReq+;\n" .
    "#pragma link C++ class    SXrdRvSubReq+;\n" .
    "#pragma link C++ class    SXrdRvReq+;\n" .
