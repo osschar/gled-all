@@ -25,7 +25,6 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <netdb.h>
 
 namespace
@@ -236,8 +235,8 @@ void XrdMonSucker::Suck()
     XrdXrootdMonHeader *xmh = (XrdXrootdMonHeader*) p->mBuff;
     Char_t   code = xmh->code;
     UChar_t  pseq = xmh->pseq;
-    UShort_t plen = ntohs(xmh->plen);
-    Int_t    stod = ntohl(xmh->stod);
+    UShort_t plen = net2host(xmh->plen);
+    Int_t    stod = net2host(xmh->stod);
     UInt_t   in4a = p->Ip4AsUInt(); // Kept in net order
     UShort_t port = p->mPort;
 
@@ -385,7 +384,7 @@ void XrdMonSucker::Suck()
                xmh->code, pseq, plen);
 
       XrdXrootdMonMap *xmm     = (XrdXrootdMonMap*) p->mBuff;
-      UInt_t           dict_id = ntohl(xmm->dictid);
+      UInt_t           dict_id = net2host(xmm->dictid);
 
       (p->mBuff)[plen] = 0; // 0-terminate the buffer at packet length.
 
@@ -646,7 +645,7 @@ void XrdMonSucker::Suck()
 
         Int_t full_delta_time()
         {
-          return ntohl(trace(fN-1).arg1.Window) - ntohl(trace(0).arg2.Window);
+          return net2host(trace(fN-1).arg1.Window) - net2host(trace(0).arg2.Window);
         }
 
 	Bool_t next(TString& log_msg, Bool_t verbose=false)
@@ -662,9 +661,9 @@ void XrdMonSucker::Suck()
 		return false;
 
 	      Int_t n_div = fTiWEnd - fTi - 2;
-	      fTime = GTime(ntohl(trace().arg2.Window));
+	      fTime = GTime(net2host(trace().arg2.Window));
 	      fTimeStep = (n_div >= 1) ?
-		(GTime(ntohl(trace(fTiWEnd).arg1.Window)) - fTime).ToDouble() / n_div :
+		(GTime(net2host(trace(fTiWEnd).arg1.Window)) - fTime).ToDouble() / n_div :
 		0;
 
               if (verbose)
@@ -720,12 +719,12 @@ void XrdMonSucker::Suck()
             UChar_t tt = trace_type(i);
             if (tt <= 0x7F || tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
             {
-              update(ntohl(xmt.arg2.dictid));
+              update(net2host(xmt.arg2.dictid));
               if (fFile) return fFile->GetUser();
             }
             else if (tt == XROOTD_MON_DISC)
             {
-              return fSrv->FindUser(ntohl(xmt.arg2.dictid));
+              return fSrv->FindUser(net2host(xmt.arg2.dictid));
             }
           }
           return 0;
@@ -751,64 +750,43 @@ void XrdMonSucker::Suck()
 
         if (tt <= 0x7F)
         {
-	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
+	  UInt_t dict_id = net2host(xmt.arg2.dictid);
           file = lc.update(dict_id);
           if (file)
           {
 	    us = file->GetUser();
-            // Int_t rwoff = ntohl(arg.arg0.val);
-            Int_t rwlen = ntohl(xmt.arg1.buflen);
+            Long64_t rwoff = net2host(xmt.arg0.val);
+            Int_t    rwlen = net2host(xmt.arg1.buflen);
+
             GLensReadHolder _lck(file);
-            if (rwlen >= 0)
-            {
-              file->AddReadSample ( rwlen / One_MB);
-            }
-            else
-            {
-              file->AddWriteSample(-rwlen / One_MB);
-            }
-            file->SetLastMsgTime(lc.fTime);
+	    file->RegisterReadOrWrite(rwoff, rwlen, lc.fTime);
           }
         }
-        else if (tt == XROOTD_MON_READV)
+        else if (tt == XROOTD_MON_READV || tt == XROOTD_MON_READU)
         {
-	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
+	  UInt_t dict_id = net2host(xmt.arg2.dictid);
           file = lc.update(dict_id);
           if (file)
           {
 	    us = file->GetUser();
-            Int_t rlen = ntohl(xmt.arg1.buflen);
-            Int_t nels = ntohs(xmt.arg0.sVal[1]);
-            // UChar_t vseq = xmt.arg0.id[1];
-            // Not processed: vseq (for multi file read)
-            GLensReadHolder _lck(file);
-            file->AddVecReadSample(rlen / One_MB, nels);
-            file->SetLastMsgTime(lc.fTime);
-          }
-        }
-        else if (tt == XROOTD_MON_READU)
-        {
-	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
-          file = lc.update(dict_id);
-          if (file)
-          {
-	    us = file->GetUser();
-            Int_t rlen = ntohl(xmt.arg1.buflen);
-            Int_t nels = ntohs(xmt.arg0.sVal[1]);
+            Int_t   nels = net2host(xmt.arg0.sVal[1]);
+            Int_t   rlen = net2host(xmt.arg1.buflen);
             UChar_t vseq = xmt.arg0.id[1];
-            // Not processed: vseq (for multi file read)
-            // XXXX Mark user (vseq), file for receiving of unpacked readv info.
-            // XXXX Note: this can spawn across several packets!
-            // XXXX Losing a packet can be rather bad ... code conservatively and
-            // XXXX discard missing reads.
+
             GLensReadHolder _lck(file);
-            file->AddVecReadSample(rlen / One_MB, nels);
-            file->SetLastMsgTime(lc.fTime);
+	    if (tt == XROOTD_MON_READV)
+	    {
+	      file->RegisterReadV(nels, rlen, lc.fTime, vseq);
+	    }
+	    else
+	    {
+	      file->RegisterReadU(nels, rlen, lc.fTime, vseq);
+	    }
           }
         }
 	else if (tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
 	{
-	  UInt_t dict_id = ntohl(xmt.arg2.dictid);
+	  UInt_t dict_id = net2host(xmt.arg2.dictid);
 	  file = lc.update(dict_id);
           if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, file ? file->GetName() : "<nil>");
           if (file)
@@ -837,13 +815,21 @@ void XrdMonSucker::Suck()
 		GLensReadHolder _lck(file);
 		file->SetLastMsgTime(lc.fTime);
 		ULong64_t x;
-		x = ntohl(xmt.arg0.rTot[1]);
+		x = net2host(xmt.arg0.rTot[1]);
 		x <<= xmt.arg0.id[1];
 		file->SetRTotalMB(x / One_MB);
-		x = ntohl(xmt.arg1.wTot);
+		x = net2host(xmt.arg1.wTot);
 		x <<= xmt.arg0.id[2];
 		file->SetWTotalMB(x / One_MB);
 		file->SetCloseTime(lc.fTime);
+
+		if (bStoreIOInfo)
+		{
+		  // XXXX This might do some more, of the above, too.
+		  // Is called from close-on-error/timeout functions ... check there before
+		  // fiddling.
+		  file->RegisterFileClose();
+		}
 	      }
               msg += GForm("\n\tClose file='%s'", file ? file->GetName() : "<nil>");
 	      {
@@ -864,7 +850,7 @@ void XrdMonSucker::Suck()
 	}
 	else if (tt == XROOTD_MON_DISC)
 	{
-	  UInt_t   dict_id        = ntohl(xmt.arg2.dictid);
+	  UInt_t   dict_id        = net2host(xmt.arg2.dictid);
 	  XrdUser *us_from_server = server->FindUser(dict_id);
 	  if (us != us_from_server)
 	  {
@@ -949,11 +935,11 @@ void XrdMonSucker::Suck()
           if (rr->arg0.Type == 0) // time window
           {
             txt += TString::Format("window prev_len=%d, start=%d",
-                                   ntohl(rr->arg0.Window), ntohl(rr->arg1.Window));
+                                   net2host(rr->arg0.Window), net2host(rr->arg1.Window));
           }
           else
           {
-            UInt_t uid = ntohl(rr->arg1.dictid);
+            UInt_t   uid  = net2host(rr->arg1.dictid);
             XrdUser *user = server->FindUserOrPrevUser(uid);
 
             redir_re.Match((const char*)(&rr->arg1.dictid) + 4);
