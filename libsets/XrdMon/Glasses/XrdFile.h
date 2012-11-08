@@ -9,6 +9,7 @@
 
 #include <Glasses/ZGlass.h>
 #include <Stones/SRange.h>
+#include <Stones/SXrdIoInfo.h>
 #include <Gled/GTime.h>
 
 class XrdUser;
@@ -40,15 +41,41 @@ protected:
   Double_t        mWTotalMB;        // X{GSD}  7 ValOut()
   Double_t        mSizeMB;          // X{GS}   7 ValOut()
 
+  SXrdIoInfo      mIoInfo;        //! X{rp}
+  // State variables
+  Short_t         mExpectedReadVSegs;
+  UChar_t         mLastVSeq;
+  Bool_t          bInReadV;
+  // XXXX These two should go to IoInfo, probably
+  TString         mErrors;
+  Int_t           mNErrors;
+
+  void begin_readv(Int_t n_segments, Int_t total_length, Int_t time, UChar_t vseq);
+  void extend_readv(Int_t n_segments, Int_t total_length);
+  void end_readv();
+
 public:
   XrdFile(const Text_t* n="XrdFile", const Text_t* t=0);
   virtual ~XrdFile();
 
   Bool_t IsOpen() const { return mCloseTime.IsNever() && ! mOpenTime.IsNever(); }
 
+  // These should be protected ... hmmh, doesn't matter.
   void AddReadSample(Double_t x);
   void AddVecReadSample(Double_t x, Int_t n);
   void AddWriteSample(Double_t x);
+
+  // Interface for registration of IO info (when enabled).
+
+  void RegisterReadOrWrite(Long64_t offset, Int_t length, const GTime& time); // ????
+  void RegisterRead (Long64_t offset, Int_t length, const GTime& time);
+  void RegisterWrite(Long64_t offset, Int_t length, const GTime& time);
+
+  void RegisterReadV(Int_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq);
+  void RegisterReadU(Int_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq);
+  void RegisterReadVSeg(Long64_t offset, Int_t length);
+
+  void RegisterFileClose(); // ? heh, what happens on automatic closing?
 
 #include "XrdFile.h7"
   ClassDef(XrdFile, 1);

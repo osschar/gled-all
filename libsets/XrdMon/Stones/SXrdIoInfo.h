@@ -79,41 +79,4 @@ public:
   ClassDefNV(SXrdIoInfo, 1);
 }; // endclass SXrdIoInfo
 
-typedef std::vector<SXrdIoInfo> vSXrdIoInfo_t;
-
-
-//==============================================================================
-
-class SXrdIoInfoFiller
-{
-  SXrdIoInfo   &mIoI;
-
-  // State variables
-  Short_t       mExpectedReadVSegs;
-  UChar_t       mLastVSeq;
-  Bool_t        bInReadV;
-
-  // These two should go to IoInfo
-  TString       mErrors;
-  Int_t         mNErrors;
-
-  void begin_readv(Int_t n_segments, Int_t total_length, Int_t time, UChar_t vseq);
-  void extend_readv(Int_t n_segments, Int_t total_length);
-  void end_readv();
-
-public:
-  SXrdIoInfoFiller(SXrdIoInfo& ioi);
-
-  void RegisterRead(Long64_t offset, Int_t length, Int_t time);
-  void RegisterWrite(Long64_t offset, Int_t length, Int_t time);
-
-  void RegisterReadV(Int_t n_segments, Int_t total_length, Int_t time, UChar_t vseq);
-  void RegisterReadU(Int_t n_segments, Int_t total_length, Int_t time, UChar_t vseq);
-  void RegisterReadVSeg(Long64_t offset, Int_t length);
-
-  void FillingComplete();
-
-  ClassDefNV(SXrdIoInfoFiller, 0);
-};
-
 #endif

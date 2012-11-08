@@ -4,10 +4,8 @@ $PATCH = {
 {
   'Pragmas'    =>
    "#pragma link C++ class    SXrdReq+;\n" .
-   "#pragma link C++ typedef vSXrdReq_t;\n" .
-   "#pragma link C++ typedef vSXrdIoInfo_t;\n" .
-
-   "#pragma link C++ class    SXrdIoInfoFiller+;\n"
+   "#pragma link C++ class    std::vector<SXrdReq>;\n" .
+   "#pragma link C++ typedef vSXrdReq_t;\n"
 },
 
 };
