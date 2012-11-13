@@ -36,8 +36,6 @@ void xrd_udp_forwarder()
   c_listener->SetLog(c_log);
   // Listens for UDP traffic on port 9930.
   // c_listener->SetSuckPort(9930);
-  // Now running on desire, second slot:
-  c_listener->SetSuckPort(9929);
   c_udp_packet_source = c_listener;
 
   ASSIGN_ADD_GLASS(c_server, UdpPacketTcpServer, g_queen, "UdpPacketTcpServer", "");
