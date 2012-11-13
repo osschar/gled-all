@@ -21,6 +21,10 @@ void xrd_file_close_reporter_amq()
   // c_frep_amq->SetAmqUser("xrdpop");
   // c_frep_amq->SetAmqPswd("xyzz");
 
+  // *** DO NOT COMMIT ***
+  c_frep_amq->SetAmqUser("xrdpop");
+  c_frep_amq->SetAmqPswd("montthree");
+
   // Set topic where the message is to be sent:
   // c_frep_amq->SetAmqTopic("xrdpop.uscms_test_popularity");
 
