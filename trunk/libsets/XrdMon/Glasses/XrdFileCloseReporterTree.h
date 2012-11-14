@@ -14,6 +14,7 @@ class ZLog;
 class SXrdFileInfo;
 class SXrdUserInfo;
 class SXrdServerInfo;
+class SXrdIoInfo;
 
 class TFile;
 class TTree;
@@ -38,6 +39,7 @@ protected:
   Bool_t                  bForceAutoSave;    //!
   Bool_t                  bForceRotate;      //!
 
+  Bool_t                  bStoreIoInfo;      // X{GS} 7 Bool()
   Bool_t                  bFileIdxAlways;    // X{GS} 7 Bool()
   TString                 mFilePrefix;       // X{GS} 7 Textor()
   TString                 mTreeName;         // X{GS} 7 Textor()
@@ -49,10 +51,12 @@ protected:
   TBranch                *mBranchF;          //!
   TBranch                *mBranchU;          //!
   TBranch                *mBranchS;          //!
+  TBranch                *mBranchI;          //!
 
   SXrdFileInfo           *mXrdF;             //!
   SXrdUserInfo           *mXrdU;             //!
   SXrdServerInfo         *mXrdS;             //!
+  SXrdIoInfo             *mXrdI;             //!
 
   void open_file_create_tree();
   void write_tree_close_file();

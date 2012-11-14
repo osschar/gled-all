@@ -41,24 +41,32 @@ protected:
   Double_t        mWTotalMB;        // X{GSD}  7 ValOut()
   Double_t        mSizeMB;          // X{GS}   7 ValOut()
 
-  SXrdIoInfo      mIoInfo;        //! X{rp}
-  // State variables
-  Short_t         mExpectedReadVSegs;
-  UChar_t         mLastVSeq;
-  Bool_t          bInReadV;
-  // XXXX These two should go to IoInfo, probably
-  TString         mErrors;
-  Int_t           mNErrors;
+  // State variables for detailed io info
+  SXrdIoInfo      mIoInfo;            //! X{rp}
+  UShort_t        mExpectedReadVSegs; //!
+  UChar_t         mLastVSeq;          //!
+  Bool_t          bStoreIoInfo;       //!
 
-  void begin_readv(Int_t n_segments, Int_t total_length, Int_t time, UChar_t vseq);
-  void extend_readv(Int_t n_segments, Int_t total_length);
-  void end_readv();
+  void end_read_vseg_if_expected()
+  {
+    if (mExpectedReadVSegs > 0)
+    {
+      if (bStoreIoInfo)
+      {
+	mIoInfo.mReqs.back().IncSubReqsLost(mExpectedReadVSegs);
+      }
+      mExpectedReadVSegs = 0;
+      ++mIoInfo.mNErrors;
+    }
+  }
 
 public:
   XrdFile(const Text_t* n="XrdFile", const Text_t* t=0);
   virtual ~XrdFile();
 
   Bool_t IsOpen() const { return mCloseTime.IsNever() && ! mOpenTime.IsNever(); }
+
+  void DumpIoInfo(Int_t level=1); //! X{E} 7 MCWButt()
 
   // These should be protected ... hmmh, doesn't matter.
   void AddReadSample(Double_t x);
@@ -67,15 +75,17 @@ public:
 
   // Interface for registration of IO info (when enabled).
 
+  void RegisterFileMapping(const GTime& register_time, Bool_t store_io_info);
+  void RegisterFileOpen(const GTime& open_time);
+
   void RegisterReadOrWrite(Long64_t offset, Int_t length, const GTime& time); // ????
   void RegisterRead (Long64_t offset, Int_t length, const GTime& time);
   void RegisterWrite(Long64_t offset, Int_t length, const GTime& time);
 
-  void RegisterReadV(Int_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq);
-  void RegisterReadU(Int_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq);
-  void RegisterReadVSeg(Long64_t offset, Int_t length);
+  void RegisterReadV(UShort_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq);
+  void RegisterReadU(UShort_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq);
 
-  void RegisterFileClose(); // ? heh, what happens on automatic closing?
+  void RegisterFileClose(const GTime& close_time);
 
 #include "XrdFile.h7"
   ClassDef(XrdFile, 1);

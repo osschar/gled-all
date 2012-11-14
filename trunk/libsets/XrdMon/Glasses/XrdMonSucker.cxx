@@ -36,9 +36,21 @@ namespace
 
 //______________________________________________________________________________
 //
+// Processes monitoring messages from a multitude of xrootd servers from
+// various domains.
+//
+// Forward all io trace records (one by one, unpacked into function arguments
+// already) to XrdFile that implements proper processing and optional
+// storage. Flag bStoreIoInfo is passed to XrdFile on creation time and
+// controls whether each individual request will be stored in a SXrdInfo
+// structer for later detailed analysis. Statistical information about reads,
+// vector reads and writes is always collected.
+//
 // Enabling trace reports for XrdUser matching those regexps:
 //   mTraceDN, mTraceHost, mTraceDomain (clent, not server)
 // The match is done at login time.
+
+
 
 ClassImp(XrdMonSucker);
 
@@ -46,8 +58,7 @@ ClassImp(XrdMonSucker);
 
 void XrdMonSucker::_init()
 {
-  mSuckPort    = 9929;
-  bStoreIOInfo = false;
+  bStoreIoInfo = false;
 
   mUserKeepSec = 300;
   mUserDeadSec = 86400;
@@ -141,16 +152,16 @@ void XrdMonSucker::disconnect_user_and_close_open_files(XrdUser* user, XrdServer
   for (list<XrdFile*>::iterator fi = open_files.begin(); fi != open_files.end(); ++fi)
   {
     XrdFile *file = *fi;
-    Bool_t closed = false;
+    Bool_t freshly_closed = false;
     {
       GLensReadHolder _lck(file);
       if (file->IsOpen())
       {
-        file->SetCloseTime(time);
-        closed = true;
+        file->RegisterFileClose(time);
+        freshly_closed = true;
       }
     }
-    if (closed)
+    if (freshly_closed)
     {
       {
         GLensReadHolder _lck(server);
@@ -555,8 +566,7 @@ void XrdMonSucker::Suck()
             {
               GLensWriteHolder _lck(file);
               file->SetUser(user);
-              file->SetOpenTime(recv_time);
-              file->SetLastMsgTime(recv_time);
+	      file->RegisterFileMapping(recv_time, bStoreIoInfo);
             }
             {
               GLensWriteHolder _lck(server);
@@ -769,9 +779,9 @@ void XrdMonSucker::Suck()
           if (file)
           {
 	    us = file->GetUser();
-            Int_t   nels = net2host(xmt.arg0.sVal[1]);
-            Int_t   rlen = net2host(xmt.arg1.buflen);
-            UChar_t vseq = xmt.arg0.id[1];
+            UShort_t nels = net2host(xmt.arg0.sVal[1]);
+            Int_t    rlen = net2host(xmt.arg1.buflen);
+            UChar_t  vseq = xmt.arg0.id[1];
 
             GLensReadHolder _lck(file);
 	    if (tt == XROOTD_MON_READV)
@@ -821,15 +831,8 @@ void XrdMonSucker::Suck()
 		x = net2host(xmt.arg1.wTot);
 		x <<= xmt.arg0.id[2];
 		file->SetWTotalMB(x / One_MB);
-		file->SetCloseTime(lc.fTime);
 
-		if (bStoreIOInfo)
-		{
-		  // XXXX This might do some more, of the above, too.
-		  // Is called from close-on-error/timeout functions ... check there before
-		  // fiddling.
-		  file->RegisterFileClose();
-		}
+		file->RegisterFileClose(lc.fTime);
 	      }
               msg += GForm("\n\tClose file='%s'", file ? file->GetName() : "<nil>");
 	      {

@@ -12,7 +12,11 @@
 
 //______________________________________________________________________________
 //
+// Various RegixterXyzz functions implement full, stateful processing of IO
+// traces. XrdSucker invokes them as server monitoring messages come in.
 //
+// if bStoreIoInfo is set (flag usually set by XrdMonSucker on creation time)
+// SXrdIoInfo stores individual IO requests in mIoInfo.
 
 ClassImp(XrdFile);
 
@@ -36,8 +40,7 @@ void XrdFile::_init()
 
   mExpectedReadVSegs = 0;
   mLastVSeq = 0xff;
-  bInReadV  = false;
-
+  bStoreIoInfo = false;
 }
 
 XrdFile::XrdFile(const Text_t* n, const Text_t* t) :
@@ -48,6 +51,13 @@ XrdFile::XrdFile(const Text_t* n, const Text_t* t) :
 
 XrdFile::~XrdFile()
 {}
+
+//==============================================================================
+
+void XrdFile::DumpIoInfo(Int_t level)
+{
+  mIoInfo.Dump(level);
+}
 
 //==============================================================================
 
@@ -76,6 +86,21 @@ namespace
   const Double_t One_MB = 1024 * 1024;
 }
 
+void XrdFile::RegisterFileMapping(const GTime& register_time, Bool_t store_io_info)
+{
+  bStoreIoInfo = store_io_info;
+  mOpenTime    = register_time;
+  mLastMsgTime = register_time;
+  Stamp(FID());
+}
+
+void XrdFile::RegisterFileOpen(const GTime& open_time)
+{
+  mOpenTime    = open_time;
+  mLastMsgTime = open_time;
+  Stamp(FID());
+}
+
 void XrdFile::RegisterReadOrWrite(Long64_t offset, Int_t length, const GTime& time)
 {
   if (length >= 0)
@@ -90,120 +115,125 @@ void XrdFile::RegisterReadOrWrite(Long64_t offset, Int_t length, const GTime& ti
 
 void XrdFile::RegisterRead(Long64_t offset, Int_t length, const GTime& time)
 {
-  // XXX if in readv and expecting segements, this is readv detail
-  if (bInReadV && mExpectedReadVSegs > 0)
+  // Process read segment record.
+  // This can also be a sub-request of an unpacked vector-read event:
+  // mExpectedReadVSegs is larger than zero in this case.
+
+  // Note: exits function when true.
+  if (mExpectedReadVSegs > 0)
   {
-    // XXXX if this below is 0 -- readv details end ... but can get another
-    // batch with same vseq later!
+    if (bStoreIoInfo)
+    {
+      mIoInfo.mOffsetVec.push_back(offset);
+      mIoInfo.mLengthVec.push_back(length);
+    }
     --mExpectedReadVSegs;
     return;
   }
 
-  // !!!! delta_t for open time
-  // mIoInfo.mReqs.push_back(SXrdReq(offset, length, time));
+  if (bStoreIoInfo)
+  {
+    Int_t delta_t = (time - mOpenTime).GetSec();
+    mIoInfo.mReqs.push_back(SXrdReq(offset, length, delta_t));
+  }
 
   AddReadSample(length / One_MB);
-  SetLastMsgTime(time);
+  mLastMsgTime = time;
+  Stamp(FID());
 }
 
 void XrdFile::RegisterWrite(Long64_t offset, Int_t length, const GTime& time)
 {
-  // XXXX this needs work
-  // error if mExpectedReadVSegs > 0 ... when I'm getting them
-  if (bInReadV)
-  {
-    if (mExpectedReadVSegs)
-      end_readv();
-  }
+  // Expects length to be negative (but this is also checked & enforced).
+
+  end_read_vseg_if_expected();
 
   // Make sure length is negative.
   if (length > 0) length = -length;
 
-  // !!!! delta_t
-  // mIoInfo.mReqs.push_back(SXrdReq(offset, length, time));
-  AddWriteSample(-length / One_MB);
-  SetLastMsgTime(time);
+  if (bStoreIoInfo)
+  {
+    Int_t delta_t = (time - mOpenTime).GetSec();
+    mIoInfo.mReqs.push_back(SXrdReq(offset, length, delta_t));
+  }
+  AddReadSample(length / One_MB);
+  mLastMsgTime = time;
+  Stamp(FID());
 }
 
 //------------------------------------------------------------------------------
 
-void XrdFile::RegisterReadV(Int_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq)
+void XrdFile::RegisterReadV(UShort_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq)
 {
-  // ReadV record, unpacked info is not following.
+  // ReadV record, unpacked info is *not* following.
   // Additional records with the same vseq are possible.
 
-  // ---
+  end_read_vseg_if_expected();
 
+  if (bStoreIoInfo)
+  {
+    if (mLastVSeq != vseq)
+    {
+      Int_t delta_t = (time - mOpenTime).GetSec();
+      mIoInfo.mReqs.push_back(SXrdReq(-1, n_segments, total_length, delta_t));
+    }
+    else
+    {
+      mIoInfo.mReqs.back().IncLength(total_length);
+      mIoInfo.mReqs.back().IncSubReqCount(n_segments);
+    }
+  }
+
+  mLastVSeq = vseq;
+
+  // Ignore multi-file vector reads with several entries from the same file,
+  // treat them as separate.
+  // Would have to sum stuff up and commit it from end_read_vseg_if_expected()
+  // but it seems I'd need one more state var (Bool_t bInReadV).
   AddVecReadSample(total_length / One_MB, n_segments);
-  SetLastMsgTime(time);
+
+  mLastMsgTime = time;
+  Stamp(FID());
 }
 
-void XrdFile::RegisterReadU(Int_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq)
+void XrdFile::RegisterReadU(UShort_t n_segments, Int_t total_length, const GTime& time, UChar_t vseq)
 {
   // ReadV record, unpacked info is about to follow.
   // Additional records with the same vseq are possible but only after individual reads.
 
-  // Wait ... this guy could call RegsterReadV ... argh.
+  end_read_vseg_if_expected();
 
-  if (bInReadV)
+  if (bStoreIoInfo)
   {
-    if  (vseq == mLastVSeq)
+    if (mLastVSeq != vseq)
     {
-      // append to existing record
+      Int_t delta_t = (time - mOpenTime).GetSec();
+      mIoInfo.mReqs.push_back(SXrdReq(mIoInfo.mLengthVec.size(), n_segments, total_length, delta_t));
     }
     else
     {
-      // error
-      end_readv();
-      // create new record
-      bInReadV = true;
+      mIoInfo.mReqs.back().IncLength(total_length);
+      mIoInfo.mReqs.back().IncSubReqCount(n_segments);
     }
   }
-  else
-  {
-    mLastVSeq = vseq;
-  }
 
-  if (bInReadV) end_readv();
+  mExpectedReadVSegs = n_segments;
+  mLastVSeq = vseq;
 
-  // ---
-
+  // Ignore multi-file vector reads with several entries from the same file,
+  // treat them as separate.
+  // Would have to sum stuff up and commit it from end_read_vseg_if_expected()
+  // but it seems I'd need one more state var (Bool_t bInReadV).
   AddVecReadSample(total_length / One_MB, n_segments);
-  SetLastMsgTime(time);
+
+  mLastMsgTime = time;
+  Stamp(FID());
 }
 
-void XrdFile::RegisterReadVSeg(Long64_t offset, Int_t length)
+void XrdFile::RegisterFileClose(const GTime& close_time)
 {
-  // XXXX This function could / should be protected, too ... like below,
-  // if these stay.
-}
+  end_read_vseg_if_expected();
 
-void XrdFile::RegisterFileClose()
-{
-  // XXXX What's with this guy? There are times when I don't get clean close.
-  // Could call it from place where data is put into tree.
-  // Several invocations should not hurt.
-  // Problematic only if readu was one the last message and some packets got lost.
-
-  // A special function for close-stamp ... that also calls SetCloseTime().
-  // I think now i call SetCloseTime manually from several places ... check!
-}
-
-//==============================================================================
-
-// XXXX Not sure if I need those ...
-
-void XrdFile::begin_readv(Int_t n_segments, Int_t total_length, Int_t time, UChar_t vseq)
-{
-  // create record,
-}
-
-void XrdFile::extend_readv(Int_t n_segments, Int_t total_length)
-{
-  // add totals
-}
-
-void XrdFile::end_readv()
-{
-  // commit missing segs, if any and reset
+  mCloseTime = close_time;
+  Stamp(FID());
 }
