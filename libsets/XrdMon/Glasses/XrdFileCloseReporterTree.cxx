@@ -30,6 +30,10 @@
 //______________________________________________________________________________
 //
 // * bFileIdxAlways: Always posfix file name with an index.
+//
+// Supports writing of SXrdIoInfo as stored in XrdFile. This has to be enabled
+// via a configuration flag bStoreIoInfo (in addition to setting it on
+// corresponding XrdMonSucker object).
 
 ClassImp(XrdFileCloseReporterTree);
 
@@ -44,14 +48,15 @@ void XrdFileCloseReporterTree::_init()
 
   bForceAutoSave = bForceRotate = false;
 
+  bStoreIoInfo   = false;
   bFileIdxAlways = true;
   mFilePrefix    = "xrd-file-access-report-";
   mTreeName      = "XrdFar";
   mFileLastIdx   = -1;
   mFile = 0;
   mTree = 0;
-  mBranchF = mBranchU = mBranchS = 0;
-  mXrdF = 0; mXrdU = 0; mXrdS = 0;
+  mBranchF = mBranchU = mBranchS = mBranchI = 0;
+  mXrdF = 0; mXrdU = 0; mXrdS = 0; mXrdI = 0;
 }
 
 XrdFileCloseReporterTree::XrdFileCloseReporterTree(const Text_t* n, const Text_t* t) :
@@ -141,6 +146,15 @@ void XrdFileCloseReporterTree::open_file_create_tree()
     mBranchF = mTree->Branch("F.", &mXrdF);
     mBranchU = mTree->Branch("U.", &mXrdU);
     mBranchS = mTree->Branch("S.", &mXrdS);
+
+    if (bStoreIoInfo)
+    {
+      // Setup branch for no automatic allocation.
+      // SetBranchAddress is called for every filling.
+      SXrdIoInfo dummy;
+      mXrdI = &dummy;
+      mBranchI = mTree->Branch("I.", &mXrdI);
+    }
   }
 
   mLastAutoSave  = GTime::ApproximateTime();
@@ -164,8 +178,8 @@ void XrdFileCloseReporterTree::write_tree_close_file()
   mFile->Close();
   delete mFile;
   mFile = 0; mTree = 0;
-  mBranchF = mBranchU = mBranchS = 0;
-  mXrdF = 0; mXrdU = 0; mXrdS = 0;
+  mBranchF = mBranchU = mBranchS = mBranchI = 0;
+  mXrdF = 0; mXrdU = 0; mXrdS = 0; mXrdI = 0;
 
   gSystem->Rename(fn, mFileNameTrue);
 
@@ -217,6 +231,15 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _flck(fus.fFile);
     mXrdF->Assign(fus.fFile);
+
+    // XXXX
+    // Damn, it might be wise to keep the lock. Naaah. FUSes are eye-ref-cnt
+    // increased and XrdFile::mIoInfo is really a "create once" object.
+    if (mBranchI != 0)
+    {
+      mXrdI = fus.fFile->PtrIoInfo();
+      // mBranchI->SetAddress();
+    }
   }
   {
     GLensReadHolder _ulck(fus.fUser);

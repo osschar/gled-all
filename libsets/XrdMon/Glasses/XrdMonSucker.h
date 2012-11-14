@@ -40,8 +40,7 @@ protected:
   ZLink<ZHashList>        mOpenFiles; // X{GS} L{}
   GQueue<SUdpPacket>      mUdpQueue;  //!
 
-  Int_t      mSuckPort;     // X{GS} 7 Value()
-  Bool_t     bStoreIOInfo;  // X{GS} 7 Bool()
+  Bool_t     bStoreIoInfo;  // X{GS} 7 Bool()
 
   TString    mNagiosUser;   // X{GS} 7 Textor()
   TString    mNagiosHost;   // X{GS} 7 Textor()

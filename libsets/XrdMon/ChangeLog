@@ -1,3 +1,37 @@
+2012-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Final version of collecting, storing and TTree writing of detailed
+	IO requests. 'io' and 'iov' traces are both supported.
+
+	* Stones/SXrdIoInfo.cxx:
+	* Stones/SXrdIoInfo.h:
+	Class for sorting of individual IO requests (in class
+	SXrdReq). Unpacked vector-read information is stored in vectors in
+	SXrdIoInfo. This allows for tight packing of information in
+	memory. Even with this optimal packing the memory usage per file,
+	for standard CMS usage from AAA monitoring, is 100kB.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Move io trace processing functionality from XrdSucker. Onl calling
+	of appriate functions (and locking) stayed there.
+	Add member SXrdIoInfo that can hold individual IO requests.
+	These are only stored if bStoreIoInfo flag is set at
+	initialization time (this is performed by XrdMonSucker, has a
+	configuration variable with the same name).
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Forward all io trace records to XrdFile that implements proper
+	processing and optional storage.
+	Flag bStoreIoInfo is passed to XrdFile on creation time.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add support for writing of SXrdIoInfo classes. This has to be
+	enabled via a configuration flag bStoreIoInfo (in addition to
+	setting it on corresponding XrdMonSucker object).
+
 2012-10-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Stones/SXrdIOInfo.cxx:
