@@ -14,4 +14,12 @@
 #pragma link C++ class SXrdUserInfo+;
 #pragma link C++ class SXrdServerInfo+;
 
+#pragma link C++ class    SXrdReq+;
+#pragma link C++ class    std::vector<SXrdReq>;
+#pragma link C++ typedef vSXrdReq_t;
+
+#pragma link C++ class    SXrdIoInfo+;
+
+#pragma link C++ function dump_xrdfar_tree_ioinfo;
+
 #endif

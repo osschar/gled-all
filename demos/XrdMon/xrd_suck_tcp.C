@@ -47,13 +47,21 @@ void xrd_suck_tcp()
   c_upc->SetLog(c_log);
   c_upc->SetHost("xrootd.t2.ucsd.edu");
   // c_upc->SetHost("desire.physics.ucsd.edu");
-  // default port is 9940
+  // c_upc->SetPort(9940);
+  // Parameters controlling automatic reconnection.
+  // c_upc->SetNRetry(120);
+  // c_upc->SetRetryWaitSec(30);
+  // c_upc->SetExitOnFailure(false);
   c_udp_packet_source = c_upc;
 
   ASSIGN_ADD_GLASS(c_suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);
   c_suck->SetKeepSorted(true);
   c_suck->SetLog(c_log);
   c_suck->SetSource(c_upc);
+  // Storing of individual io requests into XrdFile.
+  // NOTE: To store them into FAR tree it should also be enable on the
+  // XrdFileCloseReporterTree object.
+  // c_suck->SetStoreIoInfo(false);
 
   // Debugging setup.
   // Regexps for setting full-trace-print flag for new user sessions.

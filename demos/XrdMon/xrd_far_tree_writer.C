@@ -15,6 +15,10 @@ void xrd_far_tree_writer()
   // c_tree_far->SetRotateAtMidnight(true);
   // c_tree_far->SetCondWaitSec(0);
 
+  // Storing of individual io requests from XrdFile into the tree.
+  // NOTE: Filling of IO-info structure in XrdFile should also be enabled on
+  // the XrdMonSucker object!
+  // c_tree_far->SetStoreIoInfo(false);
   // c_tree_far->SetFileIdxAlways(true);
   // c_tree_far->SetFilePrefix("xrd-file-access-report-");
   // c_tree_far->SetTreeName("XrdFar");

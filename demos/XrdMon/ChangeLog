@@ -1,3 +1,18 @@
+2012-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Document and add support for storing of SXrdIoInfo structs.
+
+	* SXrdClasses.h:
+	* SXrdClasses_LinkDef.h:
+	Add SXrdReq and SXrdIoIonfo classes.
+
+	* xrd_far_tree_writer.C:
+	Document new flag StoreIoInfo of the reporter.
+
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	Document new flag StoreIoInfo.
+
 2012-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_file_close_reporter_amq.C:
