@@ -49,6 +49,10 @@ void xrd_suck_udp()
   c_suck->SetKeepSorted(true);
   c_suck->SetLog(c_log);
   c_suck->SetSource(c_listener);
+  // Storing of individual io requests into XrdFile.
+  // NOTE: To store them into FAR tree it should also be enable on the
+  // XrdFileCloseReporterTree object.
+  // c_suck->SetStoreIoInfo(false);
 
   // Debugging setup.
   // Regexps for setting full-trace-print flag for new user sessions.
