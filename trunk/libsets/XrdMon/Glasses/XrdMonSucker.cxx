@@ -346,7 +346,8 @@ void XrdMonSucker::Suck()
     }
 
     // Check sequence id. No remedy attempted.
-    if (code == 'u' || code == 'd' || code == 't' || code == 'i' || code == 'r')
+    if (code == 'u' || code == 'd' || code == 't' || code == 'i' ||
+        code == 'f' || code == 'r')
     {
       if (server->IsSrvSeqInited())
       {
@@ -387,7 +388,7 @@ void XrdMonSucker::Suck()
       continue;
     }
 
-    if (code != 't' && code != 'r')
+    if (code != 't' && code != 'f' && code != 'r')
     {
       TString msg;
       msg.Form("Message from %s.%s:%hu, c=%c, seq=%hhu, len=%hu",
@@ -903,15 +904,29 @@ void XrdMonSucker::Suck()
       }
 
     } // else -- trace message handling
+    else if (code == 'f')
+    {
+      printf("Fookoo ...\n");
+      XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader));
+
+      int fb_to_read = plen - sizeof(XrdXrootdMonHeader);
+      int i          = 0;
+
+      while (fb_to_read > 0)
+      {
+        static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
+        int typ = fb->recType;
+        int len = net2host(fb->recSize);
+
+        printf("  %2d %s %d\n", i++, type_names[typ], len);
+
+        fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
+        fb_to_read -= len;
+      }
+    }
+
     else if (code == 'r')
     {
-      // XXXX Check for 'r' records, dump basic info to see what else to check / account for.
-      //  - 'r' probably has the pseq but it will be coming from a master /
-      //    redirector which I never tried before.
-      //     . enable on xrootd.t2 - report to some other port not to screw up
-      //       production system;
-      //     . have some printouts
-
       XrdXrootdMonBurr *rb = (XrdXrootdMonBurr*) p->mBuff;
 
       TString txt;
@@ -919,7 +934,6 @@ void XrdMonSucker::Suck()
                server->GetHost(), server->GetDomain(), port, pseq, plen);
       log.Put(txt);
 
-      // XXXX In progress ... redirect message processing.
       if (*mRedirectLog)
       {
         ZLog::Helper rlog(*mRedirectLog, GTime::ApproximateTime(), ZLog::L_Message, "");

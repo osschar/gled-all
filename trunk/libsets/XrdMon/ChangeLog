@@ -1,3 +1,14 @@
+2012-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First steps towards parsing of fstream monitoring.
+
+	* Glasses/XrdMonSucker.cxx:
+	Rudimentary fstream parsing.
+	Remove obsolete todo comments from redirect stream parsing.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Add fstream structures.
+
 2012-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Final version of collecting, storing and TTree writing of detailed
