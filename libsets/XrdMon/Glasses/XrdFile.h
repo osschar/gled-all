@@ -87,6 +87,12 @@ public:
 
   void RegisterFileClose(const GTime& close_time);
 
+  // Interface for fstream monitoring.
+
+  // RegisterFStreamOpen(XrdXrootdMonFileOPN*, const GTime&); // don't llike this one too much.
+  // RegisterFStreamXfr(XrdXrootdMonStatXFR*, const GTime&);
+  // RegisterFStreamClose(XrdXrootdMonFileCLS*, const GTime&);// separate sub-structs?
+
 #include "XrdFile.h7"
   ClassDef(XrdFile, 1);
 }; // endclass XrdFile
