@@ -1,3 +1,15 @@
+2012-11-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Second step towards parsing of fstream monitoring.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse and print open and close entries.
+	Properly parse begin/end time and count number of messages to be
+	able to determine timestamp of each message.
+
+	* Glasses/XrdFile.h:
+	Add comment about fstream functions.
+
 2012-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	First steps towards parsing of fstream monitoring.

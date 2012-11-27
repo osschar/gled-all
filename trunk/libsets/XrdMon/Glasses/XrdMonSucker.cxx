@@ -621,11 +621,16 @@ void XrdMonSucker::Suck()
       }
       else
       {
+	// Message types that are not processed:
+	//   p - purge (FRM only)
+	//   x - file transfer (FRM only)
+
 	msg += TString::Format("\n\tOther %c -- id=%u, uname=%s other=%s", code, dict_id, prim, sec);
       }
 
       log.Put(msg);
-    }
+    } // if not 't' or 'f' or 'r'
+
     else if (code == 't') // this is a trace message
     {
       struct local_cache
@@ -903,27 +908,173 @@ void XrdMonSucker::Suck()
         us->SetLastMsgTime(lc.fTime);
       }
 
-    } // else -- trace message handling
+    } // else if -- 't' trace message handling
+
     else if (code == 'f')
     {
       printf("Fookoo ...\n");
-      XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader));
 
-      int fb_to_read = plen - sizeof(XrdXrootdMonHeader);
-      int i          = 0;
+      TString msg;
 
-      while (fb_to_read > 0)
+      Double_t t0, dt;
       {
-        static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
-        int typ = fb->recType;
-        int len = net2host(fb->recSize);
+	XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader));
 
-        printf("  %2d %s %d\n", i++, type_names[typ], len);
+	Int_t    fb_to_read = plen - sizeof(XrdXrootdMonHeader);
+	Int_t    n_time     = 0;
+	Int_t    count = 0;
+	Double_t time_stamps[2] = { 0, 0 };
 
-        fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
-        fb_to_read -= len;
+	while (fb_to_read > 0)
+	{
+	  Int_t typ = fb->recType;
+	  Int_t len = net2host(fb->recSize);
+
+	  if (typ == XrdXrootdMonFileHdr::isTime)
+	  {
+	    time_stamps[n_time == 0 ? 0 : 1] = net2host(fb->unixTM);
+	    ++n_time;
+	  }
+	  ++count;
+
+	  fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
+	  fb_to_read -= len;
+	}
+	printf(" jebo %f %f   -   %f\n", time_stamps[0], time_stamps[1], time_stamps[1] - time_stamps[0]);
+
+	t0 = time_stamps[0];
+	dt = count > 3 ? (time_stamps[1] - time_stamps[0]) / (count - 3) : 0;
       }
-    }
+
+      {
+	XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader) + sizeof(XrdXrootdMonFileHdr));
+
+	Int_t fb_to_read = plen - sizeof(XrdXrootdMonHeader) - 2 * sizeof(XrdXrootdMonFileHdr);
+	Int_t i          = 0;
+
+	while (fb_to_read > 0)
+	{
+	  static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
+	  Int_t  typ = fb->recType;
+	  UInt_t fid = net2host(fb->fileID);
+	  GTime  time(t0 + i * dt);
+
+	  printf("  %2d %s : %d ... %llx\n", i++, type_names[typ], fid, time.GetSec());
+
+	  if (typ == XrdXrootdMonFileHdr::isOpen)
+	  {
+	    XrdXrootdMonFileOPN *opn = (XrdXrootdMonFileOPN*) fb;
+	    // flag 'hasRW' not checked.
+
+	    if (fb->recFlag & XrdXrootdMonFileHdr::hasLFN)
+	    {
+	      UInt_t   uid  = net2host(opn->ufn.user);
+	      XrdUser *user = server->FindUser(uid);
+	      if (user)
+	      {
+		TString path(opn->ufn.lfn);
+
+		// create XrdFile
+		try
+		{
+		  XrdFile *file = new XrdFile(path);
+		  mQueen->CheckIn(file);
+		  {
+		    GLensWriteHolder _lck(user);
+		    user->AddFile(file);
+		    user->SetLastMsgTime(time);
+		  }
+		  {
+		    GLensWriteHolder _lck(file);
+		    file->SetUser(user);
+		    file->RegisterFileMapping(time, false);
+		    file->SetSizeMB(net2host(opn->fsz) / One_MB);
+		  }
+		  {
+		    GLensWriteHolder _lck(server);
+		    server->AddFile(file, fid);
+		  }
+
+		  on_file_open(file);
+		}
+		catch (Exc_t exc)
+		{
+		  log.Form(ZLog::L_Error, "Exception in XrdFile instantiation for fstream: %s", exc.Data());
+		}
+	      }
+	      else
+	      {
+		log.Form(ZLog::L_Error, "Unknown user ... ignoring. This will be supported in the future.");
+	      }
+	    }
+	    else
+	    {
+	      // Currently not supported ... need XrdServer->UnknownUser list, or sth.
+	      // Or ... a generic, non-removable "unknown user".
+	      // Hmmh, how hard will I have to fight for this guy not to be wiped
+	      // by automatic cleaners?
+	      log.Form(ZLog::L_Error, "UID, LFN extension not provided ... this is required for now.");
+	    }
+	  }
+	  else if (typ == XrdXrootdMonFileHdr::isXfr)
+	  {
+	    XrdXrootdMonFileXFR *xfr = (XrdXrootdMonFileXFR*) fb;
+	  }
+	  else if (typ == XrdXrootdMonFileHdr::isClose)
+	  {
+	    XrdXrootdMonFileCLS *cls = (XrdXrootdMonFileCLS*) fb;
+	    // flag 'forced' not checked.
+
+	    XrdFile *file = server->FindFile(fid);
+	    if (file != 0)
+	    {
+	      XrdXrootdMonStatXFR *xfr = & cls->Xfr;
+	      XrdXrootdMonStatOPS *ops = 0;
+	      XrdXrootdMonStatSDV *sdv = 0;
+	      if (fb->recFlag & XrdXrootdMonFileHdr::hasOPS)
+	      {
+		ops = & cls->Ops;
+	      }
+	      if (fb->recFlag & XrdXrootdMonFileHdr::hasSDV)
+	      {
+		sdv = & cls->Sdv;
+	      }
+
+	      {
+		GLensReadHolder _lck(file);
+		file->SetLastMsgTime(time);
+
+		file->SetRTotalMB((net2host(xfr->read) + net2host(xfr->readv)) / One_MB);
+		file->SetWTotalMB (net2host(xfr->write) / One_MB);
+
+		file->RegisterFileClose(time);
+	      }
+	      {
+		GLensReadHolder _lck(server);
+		try
+		{
+		  server->RemoveFile(file);
+		}
+		catch (Exc_t exc)
+		{
+		  if (*mLog)
+		    mLog->Put(ZLog::L_Error, _eh, exc);
+		}
+	      }
+              on_file_close(file, file->GetUser(), server);
+            }
+	  }
+	  else
+	  {
+	    log.Form(ZLog::L_Error, "Unknown / unexpected message type %d in fstream package.", typ);
+	  }
+
+	  Int_t  len = net2host(fb->recSize);
+	  fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
+	  fb_to_read -= len;
+	}
+      }
+    } // else if -- 'f' fstream message handling
 
     else if (code == 'r')
     {
@@ -992,7 +1143,7 @@ void XrdMonSucker::Suck()
         }
         rlog.Put(ZLog::L_Info, txt);
       }
-    }
+    } // else if -- 'r' redirect message handling
 
     p->DecRefCount();
   } // while (true) main loop
