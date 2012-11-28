@@ -28,6 +28,23 @@ void SRange::Reset()
   mN = 0;
 }
 
+void SRange::Reset(Double_t min, Double_t max, Double_t sumx, Double_t sumx2, ULong64_t n)
+{
+  mMin  = min;  mMax   = max;
+  mSumX = sumx; mSumX2 = sumx2;
+  mN    = n;
+}
+
+void SRange::SetSumX2FromSigma(Double_t sigma)
+{
+  if (mN > 0)
+    mSumX2 = mN*sigma*sigma + mSumX*mSumX/mN;
+  else
+    mSumX2 = 0;
+}
+
+//------------------------------------------------------------------------------
+
 void SRange::AddSample(Double_t x)
 {
   if (mN == 0) {
@@ -40,6 +57,8 @@ void SRange::AddSample(Double_t x)
   mSumX2 += x*x;
   ++mN;
 }
+
+//------------------------------------------------------------------------------
 
 Double_t SRange::GetAverage() const
 {
