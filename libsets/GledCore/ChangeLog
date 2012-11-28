@@ -1,3 +1,9 @@
+2012-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SRange.cxx:
+	* Stones/SRange.h:
+	Add functions for setting up values from external data.
+
 2012-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GledNS.cxx:

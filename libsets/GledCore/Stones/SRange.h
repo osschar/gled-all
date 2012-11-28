@@ -22,6 +22,9 @@ public:
   SRange();
 
   void Reset();
+  void Reset(Double_t min, Double_t max, Double_t sumx, Double_t sumx2, ULong64_t n);
+  void SetSumX2FromSigma(Double_t sigma);
+
   void AddSample(Double_t x);
 
   Double_t GetAverage() const;
