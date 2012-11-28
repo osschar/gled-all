@@ -8,6 +8,8 @@
 #include "XrdUser.h"
 #include "XrdFile.c7"
 
+#include "XrdMon/XrdXrootdMonData.h"
+
 // XrdFile
 
 //______________________________________________________________________________
@@ -84,6 +86,10 @@ void XrdFile::AddWriteSample(Double_t x)
 namespace
 {
   const Double_t One_MB = 1024 * 1024;
+
+  Double_t n2d(Long64_t x) { return net2host(x) / One_MB; }
+  Double_t n2d(Int_t x)    { return net2host(x) / One_MB; }
+  Double_t n2d(Short_t x)  { return net2host(x) / One_MB; }
 }
 
 void XrdFile::RegisterFileMapping(const GTime& register_time, Bool_t store_io_info)
@@ -235,5 +241,69 @@ void XrdFile::RegisterFileClose(const GTime& close_time)
   end_read_vseg_if_expected();
 
   mCloseTime = close_time;
+  Stamp(FID());
+}
+
+//==============================================================================
+
+void XrdFile::RegisterFStreamXfr(XrdXrootdMonStatXFR& xfr, const GTime& time)
+{
+  mLastMsgTime = time;
+  mRTotalMB = n2d(xfr.read) + n2d(xfr.readv);
+  mWTotalMB = n2d(xfr.write);
+  Stamp(FID());
+}
+
+void XrdFile::RegisterFStreamClose(XrdXrootdMonFileCLS& cls, const GTime& time)
+{
+  XrdXrootdMonStatXFR &xfr = cls.Xfr;
+
+  Double_t read  = n2d(xfr.read);
+  Double_t readv = n2d(xfr.readv);
+  Double_t write = n2d(xfr.write);
+
+  mLastMsgTime = mCloseTime = time;
+  mRTotalMB = read + readv;
+  mWTotalMB = write;
+
+  // flag 'forced' not checked.
+
+  if (cls.Hdr.recFlag & XrdXrootdMonFileHdr::hasOPS)
+  {
+    XrdXrootdMonStatOPS &ops = cls.Ops;
+
+    Int_t n_read  = net2host(ops.read);
+    Int_t n_readv = net2host(ops.readv);
+    Int_t n_write = net2host(ops.write);
+
+    Double_t ordMin = n2d(ops.rdMin), ordMax = n2d(ops.rdMax);
+    Double_t orvMin = n2d(ops.rvMin), orvMax = n2d(ops.rvMax);
+    Double_t owrMin = n2d(ops.wrMin), owrMax = n2d(ops.wrMax);
+
+    mSingleReadStats.Reset(ordMin, ordMax, read,  0, n_read);
+    mVecReadStats   .Reset(orvMin, orvMax, readv, 0, n_readv);
+    mReadStats      .Reset(TMath::Min(ordMin, orvMin),
+                           TMath::Max(ordMax, orvMax),
+                           read + readv, 0, n_read + n_readv);
+
+    mVecReadCntStats.Reset(net2host(ops.rsMin), net2host(ops.rsMax),
+                           net2host(ops.rsegs), 0, n_readv);
+
+    mWriteStats.Reset(owrMin, owrMax, write, 0, n_write);
+
+    if (cls.Hdr.recFlag & XrdXrootdMonFileHdr::hasSDV)
+    {
+      XrdXrootdMonStatSDV &sdv = cls.Sdv;
+
+      mSingleReadStats.SetSumX2FromSigma(n2d(sdv.read));
+      mVecReadStats   .SetSumX2FromSigma(n2d(sdv.readv));
+      mReadStats      .SetSumX2(mSingleReadStats.GetSumX2() + mVecReadStats.GetSumX2());
+
+      mVecReadCntStats.SetSumX2FromSigma(net2host(sdv.rsegs));
+
+      mWriteStats.SetSumX2FromSigma(n2d(sdv.write));
+    }
+  }
+
   Stamp(FID());
 }
