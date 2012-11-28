@@ -14,6 +14,10 @@
 
 class XrdUser;
 
+class XrdXrootdMonStatXFR;
+class XrdXrootdMonFileCLS;
+
+
 class XrdFile : public ZGlass
 {
   MAC_RNR_FRIENDS(XrdFile);
@@ -89,9 +93,8 @@ public:
 
   // Interface for fstream monitoring.
 
-  // RegisterFStreamOpen(XrdXrootdMonFileOPN*, const GTime&); // don't llike this one too much.
-  // RegisterFStreamXfr(XrdXrootdMonStatXFR*, const GTime&);
-  // RegisterFStreamClose(XrdXrootdMonFileCLS*, const GTime&);// separate sub-structs?
+  void RegisterFStreamXfr  (XrdXrootdMonStatXFR& xfr, const GTime& time);
+  void RegisterFStreamClose(XrdXrootdMonFileCLS& cls, const GTime& time);
 
 #include "XrdFile.h7"
   ClassDef(XrdFile, 1);

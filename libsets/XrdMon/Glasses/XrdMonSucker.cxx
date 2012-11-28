@@ -912,7 +912,7 @@ void XrdMonSucker::Suck()
 
     else if (code == 'f')
     {
-      printf("Fookoo ...\n");
+      // printf("FStream record received ...\n");
 
       TString msg;
 
@@ -940,7 +940,7 @@ void XrdMonSucker::Suck()
 	  fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
 	  fb_to_read -= len;
 	}
-	printf(" jebo %f %f   -   %f\n", time_stamps[0], time_stamps[1], time_stamps[1] - time_stamps[0]);
+	// printf(" jebo %f %f   -   %f\n", time_stamps[0], time_stamps[1], time_stamps[1] - time_stamps[0]);
 
 	t0 = time_stamps[0];
 	dt = count > 3 ? (time_stamps[1] - time_stamps[0]) / (count - 3) : 0;
@@ -954,25 +954,25 @@ void XrdMonSucker::Suck()
 
 	while (fb_to_read > 0)
 	{
-	  static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
+	  // static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
 	  Int_t  typ = fb->recType;
 	  UInt_t fid = net2host(fb->fileID);
 	  GTime  time(t0 + i * dt);
 
-	  printf("  %2d %s : %d ... %llx\n", i++, type_names[typ], fid, time.GetSec());
+	  // printf("  %2d %s : %d ... %llx\n", i++, type_names[typ], fid, time.GetSec());
 
 	  if (typ == XrdXrootdMonFileHdr::isOpen)
 	  {
-	    XrdXrootdMonFileOPN *opn = (XrdXrootdMonFileOPN*) fb;
+	    XrdXrootdMonFileOPN &opn = * (XrdXrootdMonFileOPN*) fb;
 	    // flag 'hasRW' not checked.
 
 	    if (fb->recFlag & XrdXrootdMonFileHdr::hasLFN)
 	    {
-	      UInt_t   uid  = net2host(opn->ufn.user);
+	      UInt_t   uid  = net2host(opn.ufn.user);
 	      XrdUser *user = server->FindUser(uid);
 	      if (user)
 	      {
-		TString path(opn->ufn.lfn);
+		TString path(opn.ufn.lfn);
 
 		// create XrdFile
 		try
@@ -988,7 +988,7 @@ void XrdMonSucker::Suck()
 		    GLensWriteHolder _lck(file);
 		    file->SetUser(user);
 		    file->RegisterFileMapping(time, false);
-		    file->SetSizeMB(net2host(opn->fsz) / One_MB);
+		    file->SetSizeMB(net2host(opn.fsz) / One_MB);
 		  }
 		  {
 		    GLensWriteHolder _lck(server);
@@ -1004,7 +1004,7 @@ void XrdMonSucker::Suck()
 	      }
 	      else
 	      {
-		log.Form(ZLog::L_Error, "Unknown user ... ignoring. This will be supported in the future.");
+		log.Form(ZLog::L_Error, "FstreamOpn Unknown user ... ignoring. This will be supported in the future.");
 	      }
 	    }
 	    else
@@ -1018,36 +1018,33 @@ void XrdMonSucker::Suck()
 	  }
 	  else if (typ == XrdXrootdMonFileHdr::isXfr)
 	  {
-	    XrdXrootdMonFileXFR *xfr = (XrdXrootdMonFileXFR*) fb;
+	    XrdXrootdMonFileXFR &xfr = * (XrdXrootdMonFileXFR*) fb;
+	    XrdFile *file = server->FindFile(fid);
+	    if (file != 0)
+	    {
+	      {
+		GLensReadHolder _lck(file);
+
+		file->RegisterFStreamXfr(xfr.Xfr, time);
+	      }
+            }
+            else
+            {
+              // Unknown file id
+              log.Form(ZLog::L_Warning, "FstreamXfr Unknown file-id ... ignoring.");
+            }
 	  }
 	  else if (typ == XrdXrootdMonFileHdr::isClose)
 	  {
-	    XrdXrootdMonFileCLS *cls = (XrdXrootdMonFileCLS*) fb;
-	    // flag 'forced' not checked.
+	    XrdXrootdMonFileCLS &cls = * (XrdXrootdMonFileCLS*) fb;
 
 	    XrdFile *file = server->FindFile(fid);
 	    if (file != 0)
 	    {
-	      XrdXrootdMonStatXFR *xfr = & cls->Xfr;
-	      XrdXrootdMonStatOPS *ops = 0;
-	      XrdXrootdMonStatSDV *sdv = 0;
-	      if (fb->recFlag & XrdXrootdMonFileHdr::hasOPS)
-	      {
-		ops = & cls->Ops;
-	      }
-	      if (fb->recFlag & XrdXrootdMonFileHdr::hasSDV)
-	      {
-		sdv = & cls->Sdv;
-	      }
-
 	      {
 		GLensReadHolder _lck(file);
-		file->SetLastMsgTime(time);
 
-		file->SetRTotalMB((net2host(xfr->read) + net2host(xfr->readv)) / One_MB);
-		file->SetWTotalMB (net2host(xfr->write) / One_MB);
-
-		file->RegisterFileClose(time);
+		file->RegisterFStreamClose(cls, time);
 	      }
 	      {
 		GLensReadHolder _lck(server);
@@ -1062,6 +1059,11 @@ void XrdMonSucker::Suck()
 		}
 	      }
               on_file_close(file, file->GetUser(), server);
+            }
+            else
+            {
+              // Unknown file id
+              log.Form(ZLog::L_Warning, "FstreamCls Unknown file-id ... ignoring.");
             }
 	  }
 	  else
