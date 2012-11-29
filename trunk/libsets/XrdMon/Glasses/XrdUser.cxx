@@ -24,7 +24,6 @@ ClassImp(XrdUser);
 void XrdUser::_init()
 {
   m_dict_id = 0;
-  bTraceMon = false;
 }
 
 XrdUser::XrdUser(const TString& n, const TString& t) :

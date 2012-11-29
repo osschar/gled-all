@@ -38,8 +38,6 @@ protected:
   GTime             mDisconnectTime; // X{GRSQ} 7 TimeOut()
   GTime             mLastMsgTime;    // X{GRSQ} 7 TimeOut()
 
-  Bool_t            bTraceMon;       //!X{GS}  7 Bool()
-
   ZLink<XrdServer>  mServer;         // X{GS} L{}
 
 public:

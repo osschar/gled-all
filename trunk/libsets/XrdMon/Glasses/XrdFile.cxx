@@ -96,15 +96,6 @@ void XrdFile::RegisterFileMapping(const GTime& register_time, Bool_t store_io_in
 {
   bStoreIoInfo = store_io_info;
   mOpenTime    = register_time;
-  mLastMsgTime = register_time;
-  Stamp(FID());
-}
-
-void XrdFile::RegisterFileOpen(const GTime& open_time)
-{
-  mOpenTime    = open_time;
-  mLastMsgTime = open_time;
-  Stamp(FID());
 }
 
 void XrdFile::RegisterReadOrWrite(Long64_t offset, Int_t length, const GTime& time)
@@ -144,8 +135,6 @@ void XrdFile::RegisterRead(Long64_t offset, Int_t length, const GTime& time)
   }
 
   AddReadSample(length / One_MB);
-  mLastMsgTime = time;
-  Stamp(FID());
 }
 
 void XrdFile::RegisterWrite(Long64_t offset, Int_t length, const GTime& time)
@@ -163,8 +152,6 @@ void XrdFile::RegisterWrite(Long64_t offset, Int_t length, const GTime& time)
     mIoInfo.mReqs.push_back(SXrdReq(offset, length, delta_t));
   }
   AddReadSample(length / One_MB);
-  mLastMsgTime = time;
-  Stamp(FID());
 }
 
 //------------------------------------------------------------------------------
@@ -231,9 +218,6 @@ void XrdFile::RegisterReadU(UShort_t n_segments, Int_t total_length, const GTime
   // Would have to sum stuff up and commit it from end_read_vseg_if_expected()
   // but it seems I'd need one more state var (Bool_t bInReadV).
   AddVecReadSample(total_length / One_MB, n_segments);
-
-  mLastMsgTime = time;
-  Stamp(FID());
 }
 
 void XrdFile::RegisterFileClose(const GTime& close_time)
@@ -241,7 +225,6 @@ void XrdFile::RegisterFileClose(const GTime& close_time)
   end_read_vseg_if_expected();
 
   mCloseTime = close_time;
-  Stamp(FID());
 }
 
 //==============================================================================
@@ -251,7 +234,6 @@ void XrdFile::RegisterFStreamXfr(XrdXrootdMonStatXFR& xfr, const GTime& time)
   mLastMsgTime = time;
   mRTotalMB = n2d(xfr.read) + n2d(xfr.readv);
   mWTotalMB = n2d(xfr.write);
-  Stamp(FID());
 }
 
 void XrdFile::RegisterFStreamClose(XrdXrootdMonFileCLS& cls, const GTime& time)
@@ -262,7 +244,7 @@ void XrdFile::RegisterFStreamClose(XrdXrootdMonFileCLS& cls, const GTime& time)
   Double_t readv = n2d(xfr.readv);
   Double_t write = n2d(xfr.write);
 
-  mLastMsgTime = mCloseTime = time;
+  mCloseTime = time;
   mRTotalMB = read + readv;
   mWTotalMB = write;
 
@@ -304,6 +286,4 @@ void XrdFile::RegisterFStreamClose(XrdXrootdMonFileCLS& cls, const GTime& time)
       mWriteStats.SetSumX2FromSigma(n2d(sdv.write));
     }
   }
-
-  Stamp(FID());
 }

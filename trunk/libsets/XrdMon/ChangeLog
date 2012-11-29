@@ -1,3 +1,24 @@
+2012-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Cleanup and optimization of 'f' and 't' streams.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Do not stamp on every data registration.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Remove obsolete trace debugging printout and associated memebers.
+	Collect files and users that have changed during a 'f' or 't'
+	message and only SetLastMsgTime and stamp them once.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Remove obsolete member (trace debugging).
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	Remove obsolete comments.
+
 2012-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Complete implementation of fstream parsing.

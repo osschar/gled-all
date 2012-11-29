@@ -80,7 +80,6 @@ public:
   // Interface for registration of IO info (when enabled).
 
   void RegisterFileMapping(const GTime& register_time, Bool_t store_io_info);
-  void RegisterFileOpen(const GTime& open_time);
 
   void RegisterReadOrWrite(Long64_t offset, Int_t length, const GTime& time); // ????
   void RegisterRead (Long64_t offset, Int_t length, const GTime& time);

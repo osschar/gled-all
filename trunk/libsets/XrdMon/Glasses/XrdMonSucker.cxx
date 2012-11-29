@@ -45,11 +45,6 @@ namespace
 // controls whether each individual request will be stored in a SXrdInfo
 // structer for later detailed analysis. Statistical information about reads,
 // vector reads and writes is always collected.
-//
-// Enabling trace reports for XrdUser matching those regexps:
-//   mTraceDN, mTraceHost, mTraceDomain (clent, not server)
-// The match is done at login time.
-
 
 
 ClassImp(XrdMonSucker);
@@ -71,8 +66,6 @@ void XrdMonSucker::_init()
   mSuckerThread = 0;
   mLastOldUserCheck  = mLastDeadUserCheck  =
   mLastDeadServCheck = mLastIdentServCheck = GTime(GTime::I_Never);
-
-  bTraceAllNull = true;
 }
 
 XrdMonSucker::XrdMonSucker(const Text_t* n, const Text_t* t) :
@@ -521,12 +514,6 @@ void XrdMonSucker::Suck()
           {
             GLensWriteHolder _lck(user);
             user->SetServer(server);
-
-            if ( ! bTraceAllNull && mTraceDN_RE.Match(dn) &&
-                 mTraceHost_RE.Match(host) && mTraceDomain_RE.Match(domain))
-            {
-              user->SetTraceMon(true);
-            }          
           }
         }
         catch (Exc_t exc)
@@ -568,6 +555,7 @@ void XrdMonSucker::Suck()
               GLensWriteHolder _lck(file);
               file->SetUser(user);
 	      file->RegisterFileMapping(recv_time, bStoreIoInfo);
+              file->SetLastMsgTime(recv_time);
             }
             {
               GLensWriteHolder _lck(server);
@@ -664,7 +652,7 @@ void XrdMonSucker::Suck()
           return net2host(trace(fN-1).arg1.Window) - net2host(trace(0).arg2.Window);
         }
 
-	Bool_t next(TString& log_msg, Bool_t verbose=false)
+	Bool_t next()
 	{
 	  if (++fTi < fN)
 	  {
@@ -681,10 +669,6 @@ void XrdMonSucker::Suck()
 	      fTimeStep = (n_div >= 1) ?
 		(GTime(net2host(trace(fTiWEnd).arg1.Window)) - fTime).ToDouble() / n_div :
 		0;
-
-              if (verbose)
-                log_msg += GForm("\n\tWindow iB=%2d iE=%2d N=%2d delta_t=%f -- start %s.",
-                                 fTi, fTiWEnd, fTiWEnd-fTi-1, fTimeStep, fTime.ToDateTimeLocal(false).Data());
 
 	      ++fTi;
 	    }
@@ -717,52 +701,29 @@ void XrdMonSucker::Suck()
 	    case XROOTD_MON_DISC:   c = "dis"; break;
 	    case XROOTD_MON_OPEN:   c = "opn"; break;
 	    case XROOTD_MON_WINDOW: c = "win"; break;
-	    default:                c = "rdw"; break;
+	    case XROOTD_MON_READV:  c = "rdv"; break;
+	    case XROOTD_MON_READU:  c = "rdu"; break;
+	    default:                c = "rw "; break;
 	  }
 	  return c;
 	}
 
-        XrdUser* find_user()
-        {
-          // This is called at the beginning of message processing to get the
-          // user and to determine if we need to dump debug-level information.
-          // This definitely does not work as intended when servers are not
-          // configured to send io traces.
-          // Ah, this is also used to set the time of last message on a user.
-          for (Int_t i = 1; i < fN; ++i)
-          {
-            XrdXrootdMonTrace &xmt = trace(i);
-            UChar_t tt = trace_type(i);
-            if (tt <= 0x7F || tt == XROOTD_MON_OPEN || tt == XROOTD_MON_CLOSE)
-            {
-              update(net2host(xmt.arg2.dictid));
-              if (fFile) return fFile->GetUser();
-            }
-            else if (tt == XROOTD_MON_DISC)
-            {
-              return fSrv->FindUser(net2host(xmt.arg2.dictid));
-            }
-          }
-          return 0;
-        }
       };
 
       local_cache lc(server, (XrdXrootdMonBuff*) p->mBuff, plen);
 
-      XrdUser *us = lc.find_user();
-      Bool_t  vrb = us && us->GetTraceMon();
-      TString msg, msg_vrb;
+      TString msg;
 
-      while (lc.next(msg_vrb, vrb))
+      std::map<XrdUser*, GTime> user_map;
+      std::map<XrdFile*, GTime> file_map;
+
+      while (lc.next())
       {
-	Int_t ti = lc.fTi;
 	XrdXrootdMonTrace &xmt = lc.trace();
-	UChar_t       tt  = lc.trace_type();
-	const Char_t *ttn = lc.trace_type_name();
-
-        // if (vrb) msg_vrb += GForm("\n\t%-2d: %hhx %s", ti, tt, ttn);
+	UChar_t            tt  = lc.trace_type();
 
         XrdFile *file = 0;
+        XrdUser *user = 0;
 
         if (tt <= 0x7F)
         {
@@ -770,7 +731,6 @@ void XrdMonSucker::Suck()
           file = lc.update(dict_id);
           if (file)
           {
-	    us = file->GetUser();
             Long64_t rwoff = net2host(xmt.arg0.val);
             Int_t    rwlen = net2host(xmt.arg1.buflen);
 
@@ -784,7 +744,6 @@ void XrdMonSucker::Suck()
           file = lc.update(dict_id);
           if (file)
           {
-	    us = file->GetUser();
             UShort_t nels = net2host(xmt.arg0.sVal[1]);
             Int_t    rlen = net2host(xmt.arg1.buflen);
             UChar_t  vseq = xmt.arg0.id[1];
@@ -804,10 +763,8 @@ void XrdMonSucker::Suck()
 	{
 	  UInt_t dict_id = net2host(xmt.arg2.dictid);
 	  file = lc.update(dict_id);
-          if (vrb) msg_vrb += GForm("\n\t%2d: %s, file='%s'", ti, ttn, file ? file->GetName() : "<nil>");
           if (file)
           {
-	    us = file->GetUser();
             if (tt == XROOTD_MON_OPEN)
             {
               msg += GForm("\n\tOpen file='%s'", file ? file->GetName() : "<nil>");
@@ -823,13 +780,11 @@ void XrdMonSucker::Suck()
 	      {
 		file->SetOpenTime(lc.fTime);
 	      }
-	      file->SetLastMsgTime(lc.fTime);
             }
             else
             {
 	      {
 		GLensReadHolder _lck(file);
-		file->SetLastMsgTime(lc.fTime);
 		ULong64_t x;
 		x = net2host(xmt.arg0.rTot[1]);
 		x <<= xmt.arg0.id[1];
@@ -853,23 +808,15 @@ void XrdMonSucker::Suck()
 		    mLog->Put(ZLog::L_Error, _eh, exc);
 		}
 	      }
-              on_file_close(file, us, server);
+              user = file->GetUser();
+              on_file_close(file, user, server);
             }
           }
 	}
 	else if (tt == XROOTD_MON_DISC)
 	{
-	  UInt_t   dict_id        = net2host(xmt.arg2.dictid);
-	  XrdUser *us_from_server = server->FindUser(dict_id);
-	  if (us != us_from_server)
-	  {
-	    log.Form(ZLog::L_Warning, _eh + "us != us_from_server: us=%p ('%s'), us_from_server=%p ('%s')",
-                     us,             us ? us->GetName() : "",
-                     us_from_server, us_from_server ? us_from_server->GetName() : "");
-	    if (us_from_server) {
-	      us = us_from_server;
-	    }
-	  }
+          UInt_t dict_id = net2host(xmt.arg2.dictid);
+	  user = server->FindUser(dict_id);
 
           bool disconn_p = true;
           TString extra;
@@ -881,33 +828,40 @@ void XrdMonSucker::Suck()
             extra += "(bound-path)";
           }
 
-          msg += GForm("\n\tDisconnect%s user='%s'", extra.Data(), us ? us->GetName() : "<nil>");
+          msg += GForm("\n\tDisconnect%s user='%s'", extra.Data(), user ? user->GetName() : "<nil>");
 
-	  if (vrb) msg_vrb += GForm("\n\t%2d: %s%s, user=%s", ti, ttn, extra.Data(), us ? us->GetName() : "<nil>");
-	  if (disconn_p && us)
+	  if (disconn_p && user)
 	  {
-            disconnect_user_and_close_open_files(us, server, lc.fTime);
+            disconnect_user_and_close_open_files(user, server, lc.fTime);
 	  }
 	}
+
+        if (user == 0 && file != 0) user = file->GetUser();
+        if (user)  user_map[user] = lc.fTime;
+        if (file)  file_map[file] = lc.fTime;
+
       } // while trace entries
 
-      if ( ! msg.IsNull() || vrb)
+      for (std::map<XrdUser*, GTime>::iterator i = user_map.begin(); i != user_map.end(); ++i)
+      {
+        GLensReadHolder _lck(i->first);
+        i->first->SetLastMsgTime(i->second);
+      }
+      for (std::map<XrdFile*, GTime>::iterator i = file_map.begin(); i != file_map.end(); ++i)
+      {
+        GLensReadHolder _lck(i->first);
+        i->first->SetLastMsgTime(i->second);
+      }
+
+      if ( ! msg.IsNull())
       {
         TString txt;
-        txt.Form("Trace from %s.%s:%hu, user='%s', N=%d, dt=%d, seq=%hhu, len=%hu.",
-                 server->GetHost(), server->GetDomain(), port, us ? us->GetName() : "<nil>",
+        txt.Form("Trace from %s.%s:%hu, N=%d, dt=%d, seq=%hhu, len=%hu.",
+                 server->GetHost(), server->GetDomain(), port,
                  lc.fN, lc.full_delta_time(), pseq, plen);
         txt += msg;
-        if (vrb) txt += msg_vrb;
         log.Put(txt);
       }
-
-      if (us)
-      {
-        GLensReadHolder _lck(us);
-        us->SetLastMsgTime(lc.fTime);
-      }
-
     } // else if -- 't' trace message handling
 
     else if (code == 'f')
@@ -952,6 +906,9 @@ void XrdMonSucker::Suck()
 	Int_t fb_to_read = plen - sizeof(XrdXrootdMonHeader) - 2 * sizeof(XrdXrootdMonFileHdr);
 	Int_t i          = 0;
 
+        std::map<XrdUser*, GTime> user_map;
+        std::map<XrdFile*, GTime> file_map;
+
 	while (fb_to_read > 0)
 	{
 	  // static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
@@ -959,7 +916,8 @@ void XrdMonSucker::Suck()
 	  UInt_t fid = net2host(fb->fileID);
 	  GTime  time(t0 + i * dt);
 
-	  // printf("  %2d %s : %d ... %llx\n", i++, type_names[typ], fid, time.GetSec());
+          XrdFile *file = 0;
+          XrdUser *user = 0;
 
 	  if (typ == XrdXrootdMonFileHdr::isOpen)
 	  {
@@ -968,8 +926,8 @@ void XrdMonSucker::Suck()
 
 	    if (fb->recFlag & XrdXrootdMonFileHdr::hasLFN)
 	    {
-	      UInt_t   uid  = net2host(opn.ufn.user);
-	      XrdUser *user = server->FindUser(uid);
+	      UInt_t uid  = net2host(opn.ufn.user);
+	      user = server->FindUser(uid);
 	      if (user)
 	      {
 		TString path(opn.ufn.lfn);
@@ -977,12 +935,11 @@ void XrdMonSucker::Suck()
 		// create XrdFile
 		try
 		{
-		  XrdFile *file = new XrdFile(path);
+		  file = new XrdFile(path);
 		  mQueen->CheckIn(file);
 		  {
 		    GLensWriteHolder _lck(user);
 		    user->AddFile(file);
-		    user->SetLastMsgTime(time);
 		  }
 		  {
 		    GLensWriteHolder _lck(file);
@@ -1019,14 +976,14 @@ void XrdMonSucker::Suck()
 	  else if (typ == XrdXrootdMonFileHdr::isXfr)
 	  {
 	    XrdXrootdMonFileXFR &xfr = * (XrdXrootdMonFileXFR*) fb;
-	    XrdFile *file = server->FindFile(fid);
+	    file = server->FindFile(fid);
 	    if (file != 0)
 	    {
 	      {
 		GLensReadHolder _lck(file);
-
 		file->RegisterFStreamXfr(xfr.Xfr, time);
 	      }
+              user = file->GetUser();
             }
             else
             {
@@ -1038,12 +995,11 @@ void XrdMonSucker::Suck()
 	  {
 	    XrdXrootdMonFileCLS &cls = * (XrdXrootdMonFileCLS*) fb;
 
-	    XrdFile *file = server->FindFile(fid);
+	    file = server->FindFile(fid);
 	    if (file != 0)
 	    {
 	      {
 		GLensReadHolder _lck(file);
-
 		file->RegisterFStreamClose(cls, time);
 	      }
 	      {
@@ -1058,7 +1014,8 @@ void XrdMonSucker::Suck()
 		    mLog->Put(ZLog::L_Error, _eh, exc);
 		}
 	      }
-              on_file_close(file, file->GetUser(), server);
+              user = file->GetUser();
+              on_file_close(file, user, server);
             }
             else
             {
@@ -1071,11 +1028,28 @@ void XrdMonSucker::Suck()
 	    log.Form(ZLog::L_Error, "Unknown / unexpected message type %d in fstream package.", typ);
 	  }
 
+          if (user)  user_map[user] = time;
+          if (file)  file_map[file] = time;
+
 	  Int_t  len = net2host(fb->recSize);
 	  fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
 	  fb_to_read -= len;
-	}
+
+	} // while fstream entries
+
+        for (std::map<XrdUser*, GTime>::iterator i = user_map.begin(); i != user_map.end(); ++i)
+        {
+          GLensReadHolder _lck(i->first);
+          i->first->SetLastMsgTime(i->second);
+        }
+        for (std::map<XrdFile*, GTime>::iterator i = file_map.begin(); i != file_map.end(); ++i)
+        {
+          GLensReadHolder _lck(i->first);
+          i->first->SetLastMsgTime(i->second);
+        }
+
       }
+
     } // else if -- 'f' fstream message handling
 
     else if (code == 'r')
@@ -1459,18 +1433,5 @@ void XrdMonSucker::CleanUpNoIdentServers()
     done:
       server->DecEyeRefCount();
     }
-  }
-}
-
-//==============================================================================
-
-void XrdMonSucker::EmitTraceRERay()
-{
-  bTraceAllNull = mTraceDN.IsNull() && mTraceHost.IsNull() && mTraceDomain.IsNull();
-  if ( ! bTraceAllNull)
-  {
-    mTraceDN_RE    .Reset(mTraceDN, "o");
-    mTraceHost_RE  .Reset(mTraceHost, "o");
-    mTraceDomain_RE.Reset(mTraceDomain, "o");
   }
 }
