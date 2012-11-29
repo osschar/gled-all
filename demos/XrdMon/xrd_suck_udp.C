@@ -54,12 +54,6 @@ void xrd_suck_udp()
   // XrdFileCloseReporterTree object.
   // c_suck->SetStoreIoInfo(false);
 
-  // Debugging setup.
-  // Regexps for setting full-trace-print flag for new user sessions.
-  // c_suck->SetTraceDN("Matevz Tadel");
-  // c_suck->SetTraceHost("uaf-");
-  // c_suck->SetTraceDomain("ucsd.edu");
-
 
   //============================================================================
 
