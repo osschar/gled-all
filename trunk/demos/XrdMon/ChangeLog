@@ -1,3 +1,9 @@
+2012-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	Remove obsolete calls demonstrating trace debugging.
+
 2012-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Document and add support for storing of SXrdIoInfo structs.
