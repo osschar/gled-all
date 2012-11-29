@@ -232,13 +232,11 @@ void XrdFileCloseReporterTree::ReportFileClosed(FileUserServer& fus)
     GLensReadHolder _flck(fus.fFile);
     mXrdF->Assign(fus.fFile);
 
-    // XXXX
-    // Damn, it might be wise to keep the lock. Naaah. FUSes are eye-ref-cnt
-    // increased and XrdFile::mIoInfo is really a "create once" object.
+    // FUSes are eye-ref-cnt increased and XrdFile::mIoInfo is really a
+    // "create once" object ... we assume it stays there,
     if (mBranchI != 0)
     {
       mXrdI = fus.fFile->PtrIoInfo();
-      // mBranchI->SetAddress();
     }
   }
   {

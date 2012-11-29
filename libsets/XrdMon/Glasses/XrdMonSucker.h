@@ -46,10 +46,6 @@ protected:
   TString    mNagiosHost;   // X{GS} 7 Textor()
   TString    mNagiosDomain; // X{GS} 7 Textor()
 
-  TString    mTraceDN;      // X{GS} Ray{TraceRE} 7 Textor()
-  TString    mTraceHost;    // X{GS} Ray{TraceRE} 7 Textor()
-  TString    mTraceDomain;  // X{GS} Ray{TraceRE} 7 Textor()
-
   ZLink<ZHashList> mFCReporters; // X{GS} L{}
   ZLink<ZLog>      mRedirectLog; // X{GS} L{}
 
