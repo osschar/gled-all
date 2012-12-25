@@ -1,3 +1,19 @@
+2012-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bring up to date with last f-stream format changes.
+
+	* Glasses/XrdFile.cxx:
+	Take sum-x-square instead of rounded sigma.
+
+	* Glasses/XrdMonSucker.cxx:
+	Use information in the new f-stream format to avoid double loop
+	over messages.
+	Use GQueuePopper to hold SUdpPacket during processing and to
+	provide automatic reference-count decrease.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Copy changes for xrootd.
+
 2012-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Cleanup and optimization of 'f' and 't' streams.
