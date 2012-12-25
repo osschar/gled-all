@@ -9,6 +9,11 @@
 
 #include "GCondition.h"
 
+
+//==============================================================================
+// class GQueue
+//==============================================================================
+
 template <typename TT>
 class GQueue
 {
@@ -105,6 +110,26 @@ void GQueue<TT>::ClearQueueDecRefCount()
   }
 }
 
+
+//==============================================================================
+// class GQueuePopper
+//==============================================================================
+
+template<typename TT>
+class GQueuePopper
+{
+  TT            *mElement;
+
+public:
+  GQueuePopper(GQueue<TT>& queue) : mElement(queue.PopFront()) {}
+
+  ~GQueuePopper() { mElement->DecRefCount(); }
+
+  TT* operator->() { return mElement; }
+};
+
+//==============================================================================
+// class GQueueSet
 //==============================================================================
 
 template<typename TT>
