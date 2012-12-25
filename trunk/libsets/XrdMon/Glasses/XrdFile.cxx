@@ -90,6 +90,8 @@ namespace
   Double_t n2d(Long64_t x) { return net2host(x) / One_MB; }
   Double_t n2d(Int_t x)    { return net2host(x) / One_MB; }
   Double_t n2d(Short_t x)  { return net2host(x) / One_MB; }
+
+  Double_t nsq2d(XrdXrootdMonDouble x) { return net2host(x.dreal) / One_MB / One_MB; }
 }
 
 void XrdFile::RegisterFileMapping(const GTime& register_time, Bool_t store_io_info)
@@ -273,17 +275,17 @@ void XrdFile::RegisterFStreamClose(XrdXrootdMonFileCLS& cls, const GTime& time)
 
     mWriteStats.Reset(owrMin, owrMax, write, 0, n_write);
 
-    if (cls.Hdr.recFlag & XrdXrootdMonFileHdr::hasSDV)
+    if (cls.Hdr.recFlag & XrdXrootdMonFileHdr::hasSSQ)
     {
-      XrdXrootdMonStatSDV &sdv = cls.Sdv;
+      XrdXrootdMonStatSSQ &ssq = cls.Ssq;
 
-      mSingleReadStats.SetSumX2FromSigma(n2d(sdv.read));
-      mVecReadStats   .SetSumX2FromSigma(n2d(sdv.readv));
+      mSingleReadStats.SetSumX2(nsq2d(ssq.read));
+      mVecReadStats   .SetSumX2(nsq2d(ssq.readv));
       mReadStats      .SetSumX2(mSingleReadStats.GetSumX2() + mVecReadStats.GetSumX2());
 
-      mVecReadCntStats.SetSumX2FromSigma(net2host(sdv.rsegs));
+      mVecReadCntStats.SetSumX2(net2host(ssq.rsegs.dreal));
 
-      mWriteStats.SetSumX2FromSigma(n2d(sdv.write));
+      mWriteStats     .SetSumX2(nsq2d(ssq.write));
     }
   }
 }

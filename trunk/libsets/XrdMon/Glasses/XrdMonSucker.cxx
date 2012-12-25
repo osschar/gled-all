@@ -224,7 +224,7 @@ void XrdMonSucker::Suck()
 
   while (true)
   {
-    SUdpPacket *p = mUdpQueue.PopFront();
+    GQueuePopper<SUdpPacket> p(mUdpQueue);
 
     GThread::CancelDisabler _cd;
 
@@ -866,188 +866,160 @@ void XrdMonSucker::Suck()
 
     else if (code == 'f')
     {
-      // printf("FStream record received ...\n");
+      XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader));
 
-      TString msg;
-
-      Double_t t0, dt;
+      if (fb->recType != XrdXrootdMonFileHdr::isTime)
       {
-	XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader));
-
-	Int_t    fb_to_read = plen - sizeof(XrdXrootdMonHeader);
-	Int_t    n_time     = 0;
-	Int_t    count = 0;
-	Double_t time_stamps[2] = { 0, 0 };
-
-	while (fb_to_read > 0)
-	{
-	  Int_t typ = fb->recType;
-	  Int_t len = net2host(fb->recSize);
-
-	  if (typ == XrdXrootdMonFileHdr::isTime)
-	  {
-	    time_stamps[n_time == 0 ? 0 : 1] = net2host(fb->unixTM);
-	    ++n_time;
-	  }
-	  ++count;
-
-	  fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
-	  fb_to_read -= len;
-	}
-	// printf(" jebo %f %f   -   %f\n", time_stamps[0], time_stamps[1], time_stamps[1] - time_stamps[0]);
-
-	t0 = time_stamps[0];
-	dt = count > 3 ? (time_stamps[1] - time_stamps[0]) / (count - 3) : 0;
+	log.Form(ZLog::L_Error, "fstream message does not begin with a XrdXrootdMonFileTOD record.");
+	continue;
       }
 
+      Int_t n_to_read = net2host(fb->nRecs[1]);
+      Double_t t0, t1;
       {
-	XrdXrootdMonFileHdr *fb = (XrdXrootdMonFileHdr*)(p->mBuff + sizeof(XrdXrootdMonHeader) + sizeof(XrdXrootdMonFileHdr));
+	XrdXrootdMonFileTOD *th = (XrdXrootdMonFileTOD*) fb;
+	t0 = net2host(th->tBeg);
+	t1 = net2host(th->tEnd);
+      }
+      Double_t dt = n_to_read > 1 ? (t1 - t0) / (n_to_read - 1) : 0;
 
-	Int_t fb_to_read = plen - sizeof(XrdXrootdMonHeader) - 2 * sizeof(XrdXrootdMonFileHdr);
-	Int_t i          = 0;
+      std::map<XrdUser*, GTime> user_map;
+      std::map<XrdFile*, GTime> file_map;
 
-        std::map<XrdUser*, GTime> user_map;
-        std::map<XrdFile*, GTime> file_map;
+      for (Int_t i = 0; i < n_to_read; ++i)
+      {
+	fb = (XrdXrootdMonFileHdr*) ((char*) fb + net2host(fb->recSize));
 
-	while (fb_to_read > 0)
+	// static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
+	Int_t  typ = fb->recType;
+	UInt_t fid = net2host(fb->fileID);
+	GTime  time(t0 + i * dt);
+
+	XrdFile *file = 0;
+	XrdUser *user = 0;
+
+	if (typ == XrdXrootdMonFileHdr::isOpen)
 	{
-	  // static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
-	  Int_t  typ = fb->recType;
-	  UInt_t fid = net2host(fb->fileID);
-	  GTime  time(t0 + i * dt);
+	  XrdXrootdMonFileOPN &opn = * (XrdXrootdMonFileOPN*) fb;
+	  // flag 'hasRW' not checked.
 
-          XrdFile *file = 0;
-          XrdUser *user = 0;
-
-	  if (typ == XrdXrootdMonFileHdr::isOpen)
+	  if (fb->recFlag & XrdXrootdMonFileHdr::hasLFN)
 	  {
-	    XrdXrootdMonFileOPN &opn = * (XrdXrootdMonFileOPN*) fb;
-	    // flag 'hasRW' not checked.
-
-	    if (fb->recFlag & XrdXrootdMonFileHdr::hasLFN)
+	    UInt_t uid  = net2host(opn.ufn.user);
+	    user = server->FindUser(uid);
+	    if (user)
 	    {
-	      UInt_t uid  = net2host(opn.ufn.user);
-	      user = server->FindUser(uid);
-	      if (user)
+	      TString path(opn.ufn.lfn);
+
+	      // create XrdFile
+	      try
 	      {
-		TString path(opn.ufn.lfn);
-
-		// create XrdFile
-		try
+		file = new XrdFile(path);
+		mQueen->CheckIn(file);
 		{
-		  file = new XrdFile(path);
-		  mQueen->CheckIn(file);
-		  {
-		    GLensWriteHolder _lck(user);
-		    user->AddFile(file);
-		  }
-		  {
-		    GLensWriteHolder _lck(file);
-		    file->SetUser(user);
-		    file->RegisterFileMapping(time, false);
-		    file->SetSizeMB(net2host(opn.fsz) / One_MB);
-		  }
-		  {
-		    GLensWriteHolder _lck(server);
-		    server->AddFile(file, fid);
-		  }
-
-		  on_file_open(file);
+		  GLensWriteHolder _lck(user);
+		  user->AddFile(file);
 		}
-		catch (Exc_t exc)
 		{
-		  log.Form(ZLog::L_Error, "Exception in XrdFile instantiation for fstream: %s", exc.Data());
+		  GLensWriteHolder _lck(file);
+		  file->SetUser(user);
+		  file->RegisterFileMapping(time, false);
+		  file->SetSizeMB(net2host(opn.fsz) / One_MB);
 		}
+		{
+		  GLensWriteHolder _lck(server);
+		  server->AddFile(file, fid);
+		}
+
+		on_file_open(file);
 	      }
-	      else
+	      catch (Exc_t exc)
 	      {
-		log.Form(ZLog::L_Error, "FstreamOpn Unknown user ... ignoring. This will be supported in the future.");
+		log.Form(ZLog::L_Error, "Exception in XrdFile instantiation for fstream: %s", exc.Data());
 	      }
 	    }
 	    else
 	    {
-	      // Currently not supported ... need XrdServer->UnknownUser list, or sth.
-	      // Or ... a generic, non-removable "unknown user".
-	      // Hmmh, how hard will I have to fight for this guy not to be wiped
-	      // by automatic cleaners?
-	      log.Form(ZLog::L_Error, "UID, LFN extension not provided ... this is required for now.");
+	      log.Form(ZLog::L_Error, "fstream-open unknown user ... ignoring. This will be supported in the future.");
 	    }
-	  }
-	  else if (typ == XrdXrootdMonFileHdr::isXfr)
-	  {
-	    XrdXrootdMonFileXFR &xfr = * (XrdXrootdMonFileXFR*) fb;
-	    file = server->FindFile(fid);
-	    if (file != 0)
-	    {
-	      {
-		GLensReadHolder _lck(file);
-		file->RegisterFStreamXfr(xfr.Xfr, time);
-	      }
-              user = file->GetUser();
-            }
-            else
-            {
-              // Unknown file id
-              log.Form(ZLog::L_Warning, "FstreamXfr Unknown file-id ... ignoring.");
-            }
-	  }
-	  else if (typ == XrdXrootdMonFileHdr::isClose)
-	  {
-	    XrdXrootdMonFileCLS &cls = * (XrdXrootdMonFileCLS*) fb;
-
-	    file = server->FindFile(fid);
-	    if (file != 0)
-	    {
-	      {
-		GLensReadHolder _lck(file);
-		file->RegisterFStreamClose(cls, time);
-	      }
-	      {
-		GLensReadHolder _lck(server);
-		try
-		{
-		  server->RemoveFile(file);
-		}
-		catch (Exc_t exc)
-		{
-		  if (*mLog)
-		    mLog->Put(ZLog::L_Error, _eh, exc);
-		}
-	      }
-              user = file->GetUser();
-              on_file_close(file, user, server);
-            }
-            else
-            {
-              // Unknown file id
-              log.Form(ZLog::L_Warning, "FstreamCls Unknown file-id ... ignoring.");
-            }
 	  }
 	  else
 	  {
-	    log.Form(ZLog::L_Error, "Unknown / unexpected message type %d in fstream package.", typ);
+	    // Currently not supported ... need XrdServer->UnknownUser list, or sth.
+	    // Or ... a generic, non-removable "unknown user".
+	    // Hmmh, how hard will I have to fight for this guy not to be wiped
+	    // by automatic cleaners?
+	    log.Form(ZLog::L_Error, "fstream UID, LFN extension not provided ... this is required for now.");
 	  }
+	}
+	else if (typ == XrdXrootdMonFileHdr::isXfr)
+	{
+	  XrdXrootdMonFileXFR &xfr = * (XrdXrootdMonFileXFR*) fb;
+	  file = server->FindFile(fid);
+	  if (file != 0)
+	  {
+	    {
+	      GLensReadHolder _lck(file);
+	      file->RegisterFStreamXfr(xfr.Xfr, time);
+	    }
+	    user = file->GetUser();
+	  }
+	  else
+	  {
+	    // Unknown file id
+	    log.Form(ZLog::L_Warning, "fstream-xfr unknown file-id ... ignoring.");
+	  }
+	}
+	else if (typ == XrdXrootdMonFileHdr::isClose)
+	{
+	  XrdXrootdMonFileCLS &cls = * (XrdXrootdMonFileCLS*) fb;
 
-          if (user)  user_map[user] = time;
-          if (file)  file_map[file] = time;
+	  file = server->FindFile(fid);
+	  if (file != 0)
+	  {
+	    {
+	      GLensReadHolder _lck(file);
+	      file->RegisterFStreamClose(cls, time);
+	    }
+	    {
+	      GLensReadHolder _lck(server);
+	      try
+	      {
+		server->RemoveFile(file);
+	      }
+	      catch (Exc_t exc)
+	      {
+		if (*mLog)
+		  mLog->Put(ZLog::L_Error, _eh, exc);
+	      }
+	    }
+	    user = file->GetUser();
+	    on_file_close(file, user, server);
+	  }
+	  else
+	  {
+	    // Unknown file id
+	    log.Form(ZLog::L_Warning, "fstream-close unknown file-id ... ignoring.");
+	  }
+	}
+	else
+	{
+	  log.Form(ZLog::L_Error, "Unknown / unexpected message type %d in fstream message.", typ);
+	}
 
-	  Int_t  len = net2host(fb->recSize);
-	  fb = (XrdXrootdMonFileHdr*)((char*) fb + len);
-	  fb_to_read -= len;
+	if (user)  user_map[user] = time;
+	if (file)  file_map[file] = time;
+      } // for fstream entries
 
-	} // while fstream entries
-
-        for (std::map<XrdUser*, GTime>::iterator i = user_map.begin(); i != user_map.end(); ++i)
-        {
-          GLensReadHolder _lck(i->first);
-          i->first->SetLastMsgTime(i->second);
-        }
-        for (std::map<XrdFile*, GTime>::iterator i = file_map.begin(); i != file_map.end(); ++i)
-        {
-          GLensReadHolder _lck(i->first);
-          i->first->SetLastMsgTime(i->second);
-        }
-
+      for (std::map<XrdUser*, GTime>::iterator i = user_map.begin(); i != user_map.end(); ++i)
+      {
+	GLensReadHolder _lck(i->first);
+	i->first->SetLastMsgTime(i->second);
+      }
+      for (std::map<XrdFile*, GTime>::iterator i = file_map.begin(); i != file_map.end(); ++i)
+      {
+	GLensReadHolder _lck(i->first);
+	i->first->SetLastMsgTime(i->second);
       }
 
     } // else if -- 'f' fstream message handling
@@ -1121,7 +1093,6 @@ void XrdMonSucker::Suck()
       }
     } // else if -- 'r' redirect message handling
 
-    p->DecRefCount();
   } // while (true) main loop
 }
 
