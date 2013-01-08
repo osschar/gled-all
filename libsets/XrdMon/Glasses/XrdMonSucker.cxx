@@ -896,7 +896,7 @@ void XrdMonSucker::Suck()
 	{
 	  log.Form(ZLog::L_Error, "%s fstream record %d has length %d (obviously wrong).",
 		   server->GetName(), i, rec_size);
-	  continue;
+	  break;
 	}
 
 	fb = (XrdXrootdMonFileHdr*) ((char*) fb + rec_size);
