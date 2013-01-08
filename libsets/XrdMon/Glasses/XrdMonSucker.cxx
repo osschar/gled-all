@@ -870,7 +870,8 @@ void XrdMonSucker::Suck()
 
       if (fb->recType != XrdXrootdMonFileHdr::isTime)
       {
-	log.Form(ZLog::L_Error, "fstream message does not begin with a XrdXrootdMonFileTOD record.");
+	log.Form(ZLog::L_Error, "%s fstream message does not begin with a XrdXrootdMonFileTOD record.",
+		 server->GetName());
 	continue;
       }
 
@@ -886,9 +887,20 @@ void XrdMonSucker::Suck()
       std::map<XrdUser*, GTime> user_map;
       std::map<XrdFile*, GTime> file_map;
 
+      Int_t bytes_left = plen;
+
       for (Int_t i = 0; i < n_to_read; ++i)
       {
-	fb = (XrdXrootdMonFileHdr*) ((char*) fb + net2host(fb->recSize));
+	Int_t rec_size = net2host(fb->recSize);
+	if (rec_size <= 0 || rec_size > bytes_left)
+	{
+	  log.Form(ZLog::L_Error, "%s fstream record %d has length %d (obviously wrong).",
+		   server->GetName(), i, rec_size);
+	  continue;
+	}
+
+	fb = (XrdXrootdMonFileHdr*) ((char*) fb + rec_size);
+	bytes_left -= rec_size;
 
 	// static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
 	Int_t  typ = fb->recType;
