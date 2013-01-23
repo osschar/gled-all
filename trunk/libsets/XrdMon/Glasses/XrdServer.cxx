@@ -29,7 +29,9 @@ void XrdServer::_init()
   mLastSrvIdTime.SetNever();
   mAvgSrvIdDelta = -1;
   mPacketCount = mSeqIdFailCount = 0;
-  ResetSrvSeq();
+
+  mSrvSeq     = 0; bSrvSeqInited  = false;
+  mFStreamSeq = 0; bFStreamInited = false;
 }
 
 XrdServer::XrdServer(const TString& n, const TString& t) :
@@ -267,4 +269,46 @@ XrdFile* XrdServer::FindFile(UInt_t dict_id)
 
   mDict2File_i i = mFileMap.find(dict_id);
   return (i != mFileMap.end()) ? i->second : 0;
+}
+
+//------------------------------------------------------------------------------
+
+TString XrdServer::CheckSequenceId(Char_t code, UChar_t pseq)
+{
+  UChar_t *seq_ptr    = 0;
+  Bool_t  *init_p_ptr = 0;
+  if (code == 'u' || code == 'd' || code == 't' || code == 'i' || code == 'r')
+  {
+    seq_ptr    = & mSrvSeq;
+    init_p_ptr = & bSrvSeqInited;
+  }
+  else if (code == 'f')
+  {
+    seq_ptr    = & mFStreamSeq;
+    init_p_ptr = & bFStreamInited;
+  }
+  else
+  {
+    return TString();
+  }
+  UChar_t &seq    = * seq_ptr;
+  Bool_t  &init_p = * init_p_ptr;
+
+  TString  error_str;
+  if (init_p)
+  {
+    ++seq;
+    if (pseq != seq)
+    {
+      error_str.Form("Sequence-id mismatch at '%s' expected=%hhu, message=%hhu; code=%c. Ignoring.",
+		     GetName(), seq, pseq, code);
+      seq = pseq;
+    }
+  }
+  else
+  {
+    seq = pseq;
+    init_p = true;
+  }
+  return error_str;
 }

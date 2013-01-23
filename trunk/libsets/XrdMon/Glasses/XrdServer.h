@@ -57,6 +57,8 @@ protected:
 
   UChar_t           mSrvSeq;       //!
   Bool_t            bSrvSeqInited; //!
+  UChar_t           mFStreamSeq;   //!
+  Bool_t            bFStreamInited; //!
 
 public:
   XrdServer(const TString& n="XrdServer", const TString& t="");
@@ -87,11 +89,8 @@ public:
   void     RemoveFile(XrdFile* file);              // X{E} C{1}
   XrdFile* FindFile(UInt_t dict_id);
 
-  // Only called from XrdMonSucker to initialize / check message sequence id.
-  void    InitSrvSeq(UChar_t seq) { mSrvSeq = seq; bSrvSeqInited = true; }
-  UChar_t IncAndGetSrvSeq()       { return bSrvSeqInited ? ++mSrvSeq : 0; }
-  Bool_t  IsSrvSeqInited() const  { return bSrvSeqInited; }
-  void    ResetSrvSeq()           { mSrvSeq = 0; bSrvSeqInited = false; }
+  // Only called from XrdMonSucker to check message sequence id.
+  TString CheckSequenceId(Char_t code, UChar_t pseq);
 
 #include "XrdServer.h7"
   ClassDef(XrdServer, 1);
