@@ -339,35 +339,22 @@ void XrdMonSucker::Suck()
     }
 
     // Check sequence id. No remedy attempted.
-    if (code == 'u' || code == 'd' || code == 't' || code == 'i' ||
-        code == 'f' || code == 'r')
+    TString error_str = server->CheckSequenceId(code, pseq);
+    if ( ! error_str.IsNull())
     {
-      if (server->IsSrvSeqInited())
+      log.Put(ZLog::L_Warning, error_str);
       {
-	UChar_t srv_seq = server->IncAndGetSrvSeq();
-	if (pseq != srv_seq)
-	{
-	  log.Form(ZLog::L_Warning, "Sequence-id mismatch at '%s' srv=%hhu, msg=%hhu; code=%c. Ignoring.",
-		   server->GetName(), srv_seq, pseq, code);
-	  server->InitSrvSeq(pseq);
-          {
-            GLensReadHolder _lck(server);
-            server->IncSeqIdFailCount();
-          }
-          {
-            GLensReadHolder _lck(domain);
-            domain->IncSeqIdFailCount();
-          }
-          {
-            GLensReadHolder _lck(this);
-            ++mSeqIdFailCount;
-            Stamp(FID());
-          }
-	}
+	GLensReadHolder _lck(server);
+	server->IncSeqIdFailCount();
       }
-      else
       {
-	server->InitSrvSeq(pseq);
+	GLensReadHolder _lck(domain);
+	domain->IncSeqIdFailCount();
+      }
+      {
+	GLensReadHolder _lck(this);
+	++mSeqIdFailCount;
+	Stamp(FID());
       }
     }
 
@@ -902,9 +889,9 @@ void XrdMonSucker::Suck()
 	fb = (XrdXrootdMonFileHdr*) ((char*) fb + rec_size);
 	bytes_left -= rec_size;
 
-	// static const char* type_names[] = { "cls", "opn", "tim", "xfr" };
+	// static const char* type_names[] = { "cls", "opn", "tim", "xfr", "dsc" };
 	Int_t  typ = fb->recType;
-	UInt_t fid = net2host(fb->fileID);
+	UInt_t fid = net2host(fb->fileID);  // strictly, should use userID union entry for uid for record type "disconnect"
 	GTime  time(t0 + i * dt);
 
 	XrdFile *file = 0;
@@ -1010,8 +997,19 @@ void XrdMonSucker::Suck()
 	  }
 	  else
 	  {
-	    // Unknown file id
 	    log.Form(ZLog::L_Warning, "fstream-close unknown file-id ... ignoring.");
+	  }
+	}
+	else if (typ == XrdXrootdMonFileHdr::isDisc)
+	{
+	  user = server->FindUser(fid);
+	  if (user)
+	  {
+	    disconnect_user_and_close_open_files(user, server, time);
+	  }
+	  else
+	  {
+	    log.Form(ZLog::L_Warning, "fstream-disconnect unknown user-id ... ignoring.");
 	  }
 	}
 	else
