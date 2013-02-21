@@ -10,7 +10,12 @@
 
 //______________________________________________________________________________
 //
+// A stone encapsulating a received UDP packet. It includes the address and
+// port of the sender as well as the receive time.
 //
+// Note that the internal buffer is always one byte longer than what is
+// reported in mBuffLen. This is usefull if one wants to inject a 0 or \n at
+// the end of the buffer. The extra byte is never included in serialization!
 
 ClassImp(SUdpPacket);
 
