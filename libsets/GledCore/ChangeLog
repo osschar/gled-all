@@ -1,3 +1,9 @@
+2013-02-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	In InitGledCore(), enable throwing of exceptions from
+	TPRegexp::Compile().
+
 2012-12-24  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GQueue.h:

@@ -636,6 +636,8 @@ void Gled::InitGledCore()
   gInterpreter->AddIncludePath(GForm("%s/macros", mDataDir.Data()));
   gInterpreter->SetProcessLineLock(false);
 
+  TPRegexp::SetThrowAtCompileError(true);
+
   GledNS::GledRoot = new TDirectory("Gled", "Gled root directory");
   GledNS::InitFD(0, GledNS::GledRoot);
 
