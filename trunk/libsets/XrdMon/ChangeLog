@@ -1,3 +1,9 @@
+2013-02-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Catch exceptions from compilation of user supplied regular
+	expressions.
+
 2013-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Handle disconnect messages and separate seqence-id in f-stream.
