@@ -83,18 +83,28 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
     TPMERegexp short_domain("[^\\.]+\\.[^\\.]+$", "o");
 
     TPMERegexp srv_re, cli_re, usr_re, fil_re;
+    bool       f_srv,  f_cli,  f_usr,  f_fil;
 
-    bool f_srv = ( ! args["server_re"].IsNull());
-    if (f_srv) srv_re.Reset(args["server_re"], "o");
+    try
+    {
+      f_srv = ( ! args["server_re"].IsNull());
+      if (f_srv) srv_re.Reset(args["server_re"], "o");
 
-    bool f_cli = ( ! args["client_re"].IsNull());
-    if (f_cli) cli_re.Reset(args["client_re"], "o");
+      f_cli = ( ! args["client_re"].IsNull());
+      if (f_cli) cli_re.Reset(args["client_re"], "o");
 
-    bool f_usr = ( ! args["user_re"].IsNull());
-    if (f_usr) usr_re.Reset(args["user_re"], "o");
+      f_usr = ( ! args["user_re"].IsNull());
+      if (f_usr) usr_re.Reset(args["user_re"], "o");
 
-    bool f_fil = ( ! args["file_re"].IsNull());
-    if (f_fil) fil_re.Reset(args["file_re"], "o");
+      f_fil = ( ! args["file_re"].IsNull());
+      if (f_fil) fil_re.Reset(args["file_re"], "o");
+    }
+    catch (std::exception& exc)
+    {
+      content = GForm("Exception caught during parsing of regular expressions:<br>&nbsp;&nbsp;%s\n",
+                      exc.what());
+      return;
+    }
 
     bool any_fil  = no_same_site || f_srv || f_cli || f_usr || f_fil;
     int  pass_cnt = 0;
