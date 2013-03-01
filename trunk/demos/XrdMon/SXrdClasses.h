@@ -5,14 +5,17 @@
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
 // To use aclic, from root prompt, load as:
-//  .L SXrdClasses.h+
-
+//   .L SXrdClasses.h+
+//
 // To build library by hand:
-// rootcint -f SXrdClasses_Dict.cxx -c -p SXrdClasses.h SXrdClasses_LinkDef.h
-// g++ -o libSXrdClasses.so -shared -fPIC `root-config --cflags` SXrdClasses_Dict.cxx
+//   rootcint -f SXrdClasses_Dict.cxx -c -p SXrdClasses.h SXrdClasses_LinkDef.h
+//   g++ -o libSXrdClasses.so -shared -fPIC `root-config --cflags` SXrdClasses_Dict.cxx
 // In root:
 //   gSystem->Load("libSXrdClasses")
 //   // or put it in rootrc
+//
+// For analysis of IOV data, stored in SXrdIoInfo structs, see function
+// dump_xrdfar_tree_ioinfo().
 
 #include <Rtypes.h>
 #include <TMath.h>
