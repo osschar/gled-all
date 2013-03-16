@@ -75,15 +75,9 @@ void XrdFileCloseReporterAmq::onException(const cms::CMSException &e)
       mLog->Form(ZLog::L_Error, _eh, "Exception callback invoked:\n    %s",
 		 e.getStackTraceString().c_str());
 
-  cms::Connection *conn = mConn;
-  mConn = 0;
-
-  // This somehow results in proper exception getting throw in the amq thread.
-  // Go figure ... zen engineering or just a bug?
-  if (conn)
+  if (mConn)
   {
-    conn->close();
-    delete conn;
+    mConn->close();
   }
 }
 
