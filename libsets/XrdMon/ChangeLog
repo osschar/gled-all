@@ -1,3 +1,9 @@
+2013-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Handle onException() as adviced by Tim Bish on the AMQ newsgroup,
+	just call close, no delete.
+
 2013-02-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
