@@ -5,11 +5,11 @@
 # Modified version of root/build/unix/makedistsrc.sh
 # Fix the following variables before running:
 
-svnurl="https://root.cern.ch/svn/root/branches/dev/matevz/5.34-patches-gled"
-version=5.34.01
+svnurl="https://root.cern.ch/svn/root/branches/v5-34-00-patches"
+version="5.34.05"
 
-# svnurl="https://root.cern.ch/svn/root/branches/v5-32-00-patches"
-# version="5.32.03"
+# svnurl="https://root.cern.ch/svn/root/branches/dev/matevz/5.34-patches-gled"
+# version=5.34.01
 
 # svnurl="https://root.cern.ch/svn/root/tags/v5-32-02"
 # version="5.32.02"
