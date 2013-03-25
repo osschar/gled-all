@@ -36,10 +36,11 @@ protected:
   TString       mAmqPswd;   // X{GS} 7 Textor()
   TString       mAmqTopic;  // X{GS} 7 Textor()
 
-  cms::Connection        *mConn;    //!
-  cms::Session           *mSess;    //!
-  cms::Destination       *mDest;    //!
-  cms::MessageProducer   *mProd;    //!
+  cms::Connection        *mConn;       //!
+  cms::Session           *mSess;       //!
+  cms::Destination       *mDest;       //!
+  cms::MessageProducer   *mProd;       //!
+  Bool_t                  bConnClosed; //!
 
   UInt_t mAmqMaxMsgQueueLen;        // X{GS} 7 Value(-range=>[1, 10000000, 1])
   Int_t  mAmqReconnectWaitSec;      // X{GS} 7 Value(-range=>[1, 100,   1])

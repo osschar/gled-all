@@ -46,6 +46,7 @@ void XrdFileCloseReporterAmq::_init()
   mSess = 0;
   mDest = 0;
   mProd = 0;
+  bConnClosed = true;
 
   mAmqMaxMsgQueueLen      = 10000;
   mAmqReconnectWaitSec    = 1;
@@ -78,6 +79,7 @@ void XrdFileCloseReporterAmq::onException(const cms::CMSException &e)
   if (mConn)
   {
     mConn->close();
+    bConnClosed = true;
   }
 }
 
@@ -99,6 +101,7 @@ void XrdFileCloseReporterAmq::amq_connect()
     mConn = conn_fac->createConnection();
     mConn->setExceptionListener(this);
     mConn->start();
+    bConnClosed = false;
   }
   catch (cms::CMSException& e)
   {
@@ -130,10 +133,20 @@ void XrdFileCloseReporterAmq::amq_disconnect()
   {
     delete mDest;  mDest = 0;
     delete mProd;  mProd = 0;
-    if (mSess)     mSess->close();
-    if (mConn)     mConn->close();
-    delete mSess;  mSess = 0;
-    delete mConn;  mConn = 0;
+    if (mSess)
+    {
+      mSess->close();
+      delete mSess;  mSess = 0;
+    }
+    if (mConn)
+    {
+      if ( ! bConnClosed)
+      {
+        mConn->close();
+        bConnClosed = true;
+      }
+      delete mConn;  mConn = 0;
+    }
   }
   catch (cms::CMSException& e)
   {
