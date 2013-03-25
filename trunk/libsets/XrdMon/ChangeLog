@@ -2,6 +2,13 @@
 
 	* Glasses/XrdFileCloseReporterAmq.cxx:
 	* Glasses/XrdFileCloseReporterAmq.h:
+	Grr, another attempt, close session and connection before
+	destructing either of them.
+
+2013-03-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
 	Add flag bConnClosed to avid calling cms::Connection::close()
 	multiple times.
 	I don't know if this really hurts but there was another crash due

@@ -42,6 +42,7 @@ void XrdFileCloseReporterAmq::_init()
   mAmqPswd  = "xyzz";
   mAmqTopic = "xrdpop.uscms_test_popularity";
 
+  mConnFac = 0;
   mConn = 0;
   mSess = 0;
   mDest = 0;
@@ -95,10 +96,9 @@ void XrdFileCloseReporterAmq::amq_connect()
 
   try
   {
-    auto_ptr<cms::ConnectionFactory> conn_fac
-      (new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data()));
+    mConnFac = new activemq::core::ActiveMQConnectionFactory(uri.Data(), mAmqUser.Data(), mAmqPswd.Data());
 
-    mConn = conn_fac->createConnection();
+    mConn = mConnFac->createConnection();
     mConn->setExceptionListener(this);
     mConn->start();
     bConnClosed = false;
@@ -131,28 +131,26 @@ void XrdFileCloseReporterAmq::amq_disconnect()
 
   try
   {
-    delete mDest;  mDest = 0;
     delete mProd;  mProd = 0;
+    delete mDest;  mDest = 0;
     if (mSess)
     {
       mSess->close();
-      delete mSess;  mSess = 0;
     }
-    if (mConn)
+    if (mConn && ! bConnClosed)
     {
-      if ( ! bConnClosed)
-      {
-        mConn->close();
-        bConnClosed = true;
-      }
-      delete mConn;  mConn = 0;
+      mConn->close();
+      bConnClosed = true;
     }
+    delete mSess;    mSess = 0;
+    delete mConn;    mConn = 0;
+    delete mConnFac; mConnFac = 0;
   }
   catch (cms::CMSException& e)
   {
     // Just log it ... we don't really care at this point.
     if (*mLog)
-      mLog->Form(ZLog::L_Error, _eh, "", "Exception during ActiveMQ object destruction:\n    %s",
+      mLog->Form(ZLog::L_Error, _eh, "Exception during ActiveMQ object destruction:\n    %s",
 		 e.getStackTraceString().c_str());
   }
 }
