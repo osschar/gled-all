@@ -1,6 +1,12 @@
 2013-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
+	Calculate transfer rate based on time of the last reported
+	transfer, not current time.
+
+2013-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
 	Support displaying progress for f-stream reporting.
 
 2013-03-25  Matevz Tadel  <matevz.tadel@ijs.si>
