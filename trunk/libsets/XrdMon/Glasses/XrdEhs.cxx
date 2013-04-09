@@ -172,16 +172,29 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
 
       GTime    open_t = req_time - file->RefOpenTime();
       GTime    lmsg_t = req_time - file->RefLastMsgTime();
-      Double_t sum_mb = file->GetReadStats().GetSumX();
-      Double_t siz_mb = file->GetSizeMB();
 
       oss << "<td>" << open_t.ToHourMinSec(true) << "</td>" << endl;
       oss << "<td>" << lmsg_t.ToHourMinSec(true) << "</td>" << endl;
 
+      Double_t siz_mb = file->GetSizeMB();
+      Double_t sum_mb = file->GetReadStats().GetSumX();
+
+      Bool_t f_stream = (sum_mb == 0 && file->GetRTotalMB() > 0);
+      if (f_stream)
+      {
+        sum_mb = file->GetRTotalMB();
+      }
       oss << "<td>" << GForm("%.3f", sum_mb) << "</td>" << endl;
       oss << "<td>" << GForm("%.3f", siz_mb ? 100.0*sum_mb/siz_mb : 0.0) << "</td>" << endl;
       oss << "<td>" << GForm("%.3f", sum_mb / open_t.ToDouble()) << "</td>" << endl;
-      oss << "<td>" << GForm("%.3f", file->GetReadStats().GetAverage()) << "</td>" << endl;
+      if (f_stream)
+      {
+        oss << "<td>n/a</td>" << endl;
+      }
+      else
+      {
+        oss << "<td>" << GForm("%.3f", file->GetReadStats().GetAverage()) << "</td>" << endl;
+      }
 
       oss << "</tr>" << endl;
     }
