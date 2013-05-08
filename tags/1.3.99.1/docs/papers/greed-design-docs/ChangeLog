@@ -1,0 +1,11 @@
+2009-12-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* gled-dev.pod:
+	Small updates: OSX build, DevIL.
+
+	* greedworld-prototype-tasks.pod:
+	Describe briefely C<Spiritio> classes under L<Unit movement on
+	terrain>.
+
+	* ChangeLog:
+	New file.

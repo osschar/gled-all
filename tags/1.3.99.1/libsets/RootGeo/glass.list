@@ -1,0 +1,8 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+ZGeoNode        1       Glasses/ZGeoNode        .
+ZGeoOvlMgr      2       Glasses/ZGeoOvlMgr
+ZGeoOvl         4       Glasses/ZGeoOvl         .
+
+ZGeoRepacker	16	Glasses/ZGeoRepacker
