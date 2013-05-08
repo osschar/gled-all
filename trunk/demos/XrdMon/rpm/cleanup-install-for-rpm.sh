@@ -5,7 +5,7 @@
 # Needs to be run with current directory equal to install directory, e.g.,
 # assuming $installdir:
 #   cd $installdir
-#   gled/demos/XrdMon/xrdmon-cleanup-for-rpm.sh
+#   gled/demos/XrdMon/rpm/cleanup-install-for-rpm.sh
 #
 # Note that we need to leave a significant part of ROOT development files to
 # allow for dictionary / streamer generation via aclic.

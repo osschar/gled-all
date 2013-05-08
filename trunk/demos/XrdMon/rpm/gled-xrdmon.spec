@@ -2,7 +2,7 @@
 %global rev 1
 
 %global packagename gled-xrdmon
-%global version     0.2.1
+%global version     _VERSION_
 %global release     %{rev}%{?dist}
 
 %global prefix    /opt/gled
@@ -30,7 +30,7 @@ BuildArch:      x86_64
 # all necessary libraries are already in, should not be external requirements
 AutoReqProv: no
 
-Source0:        gled-xrdmon-slc5-%{rev}.tar.gz
+Source0:        gled-xrdmon-%{version}.tar.gz
 Source1:        configs.tar.gz
 
 Patch0:         parameters-env.patch
@@ -51,8 +51,9 @@ Gled monitoring of XRootD files transfers
 find -name '.svn' | xargs rm -rf
 
 # removing unnecessary files and directories
-cd gled
-./gled/demos/XrdMon/xrdmon-cleanup-for-rpm.sh
+# The following is already called before making of the tarball
+# cd gled
+# ./gled/demos/XrdMon/rpm/cleanup-install-for-rpm.sh
 
 
 
