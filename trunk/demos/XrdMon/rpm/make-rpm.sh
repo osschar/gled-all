@@ -22,16 +22,16 @@ if [ -z $version ]; then
 fi
 
 if [ -z $dist ]; then
-    distopt=""
-else
-    distopt="--define 'dist .${dist}'"
+    echo "Could not extract the distro from tarball's name '$latest_tarball'. The format is gled-xrdmon-<version>-<distro>.tar.gz"
+    exit 2
 fi
+
 
 sed -e "s/_VERSION_/$version/" gled-xrdmon.spec > gled-xrdmon-current.spec
 
-[ -d build ] && rm -rf ${BUILD_DIR}
+[ -d ${BUILD_DIR} ] && rm -rf ${BUILD_DIR}
 
-mkdir build
+mkdir ${BUILD_DIR}
 for d in BUILD  RPMS  SOURCES  SPECS  SRPMS; do
     mkdir ${BUILD_DIR}/$d
 done
@@ -43,7 +43,9 @@ tar -czf ${BUILD_DIR}/SOURCES/configs.tar.gz configs
 
 ls -1 | xargs -I {} sh -c "[ -f '{}' ] && cp '{}' ${BUILD_DIR}/SOURCES/"
 
-rpmbuild ${distopt} --define "_topdir `pwd`/build" -bb gled-xrdmon-current.spec
+
+rpmbuild --define="dist ${dist}" --define="_topdir `pwd`/build" -bb gled-xrdmon-current.spec
+
 
 if [ $? -eq 0 ]; then
     # clean sources directory after successfull build
