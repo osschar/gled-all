@@ -1,0 +1,12 @@
+# $Header$
+
+$PATCH = {
+
+"TTreeTools" => 
+{
+ 'Pragmas' =>
+  "#pragma link C++ class TSelectorToEventList;\n"     .
+  "#pragma link C++ class TTreeQuery;\n"
+},
+
+};

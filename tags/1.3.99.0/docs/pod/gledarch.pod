@@ -1,0 +1,1336 @@
+=cut
+$Id$
+
+=head1 STATUS
+
+Utterly incomplete and neglected - last edit was around 2003.
+
+=head1 NAME
+
+gledarch - Architectural Elements of C<Gled>
+
+=head1 DESCRIPTION
+
+This document presents the basic architectural elements of
+Gled. Each of them is presented down to the implementation level (with
+slight variation in the level of detail). As these elements are
+often related their interdependencies are presented and
+discussed. Order of presentation is from basic elements towards
+complex and more entangled ones. Regarding the reading order, start
+where you will ... there is a short introductory part on the
+beginning of each section that should get you going.
+
+C<Gled> is still knee-deep in its development phase. Ideas for
+improvements and new features are placed towards the end of each
+section. Comments, intended for developers that wish to understand
+C<Gled> or contribute on architectural level are also included.
+
+=cut
+########################################################################
+
+=head2 Basic concepts
+
+=over list
+
+=item Section L<< "C<Gled>: Why and how" >> presents the basic ideas of
+C<Gled> from the motivational standpoint. The concepts are evolved
+through a series of more or less techical arguments targeted towards
+justification of implementation-level details.
+
+=item Section L<"The C<ZGlass> class"> describes functions of C<ZGlass>
+base-glass, its services to the C<Gled> system and to a
+user/programmer. Includes a discussion on data-model, glass
+aggregation methods and use of inheritance when constructing glasses.
+The C<ZList> class is also discussed.
+
+=item L<"C<GledNS> and C<GledViewNS> namespaces"> provide core services to
+C<Saturn> and C<Eye>: catalogues of libsets, glasses and functions for
+their handling.
+
+=item L<"C<GledGlueGen> and C<Project7>"> generate large amount of I<glue>
+code that enables glasses to function within the C<Gled>
+system. C<GledGlueGen> generates code on the level of I<libsets> and
+C<Project7> on the level of individual glasses.
+
+=item L<"Saturn"> is the central entity of the C<Gled> system. It is the
+final authority over lens creation and lookup-by-ID as well as a
+complex router and executioner of MIRs.
+
+=item L<"Rulers of object-spaces"> - Kings & Queens are delegated by Saturn to
+rule over their entrusted object-spaces. There is a close coordination
+between Saturn and rulers. Discussion on lens access and ownership is
+also included here.
+
+=item L<"Thread support"> enables lenses to acquire their own threads to
+perform computations or dynamically modify other lenses or
+lens-graphs. Within hierarchic structure of Saturns, the things get
+rather complicated ...
+
+=item L<"Eye"> is the central point of the viewing/editing/rendering
+architecture of C<Gled>. It serves as a router between GUI
+representations of lenses and a Saturn.
+
+=item L<"Rendering"> infrastructure of C<Gled> offers multiple variants for
+traversal of lens-graphs and is fully aware of lens-aggregation
+mechanisms (lists and links). It has grown rather complex to allow for
+near optimal sharing of low-level geometric data and images as well as to
+allow viewer-level modifications of renderer state. Core development
+is focused on OpenGL, but other options are kept in mind (POV-Ray in
+particular).
+
+=item L<"Messages & Textual Output"> analyzes possible sources of
+messages in a running C<Gled> cluster. Currently, only a minimal
+sub-set of the desired functionality is implemented.
+
+=back
+
+=cut
+########################################################################
+
+=head2 Meta-concepts
+
+=over list
+
+=item L<"C<Gled> coding standards"> discusses, besides code cosmetics,
+usage of C<C++> constructs in C<Gled>: STL, exceptions and
+namespaces. Further, some thoughts on threads and networking in the
+C<Gled> environment are presented.
+
+=item L<"Building and Installation">
+
+=item L<"Libsets"> are extensions of the C<Gled> system and this section
+begins with rationale behind them. Further, the available libsets and
+ideas for future ones are discussed.
+
+=item L<"Lens-sets"> *will* be collections of lenses packed in a form of files
+(or databases), accessible to a given group of users. The main
+challenge is in providing efficient cross-referencing between sets.
+
+=item L<"Documentation & Propaganda">: status, plans.
+
+
+=item L<"Core development plan">
+
+=back
+
+=cut
+########################################################################
+
+=head2 External packages
+
+=over list
+
+=item L<"C<ROOT>">: C<Gled> uses C<ROOT> for streaming, file access,
+sockets and as its data analysis & presentation layer. This section
+explains this use and also points to where C<Gled> departs from
+C<ROOT>'s philosophy. Problems with C<ROOT> and possible solutions are
+discussed.
+
+=item L<"C<FLTK>"> is used for all GUI constructs of C<Gled>, from
+hand-written front-ends to auto-generated widgets for glasses.
+
+=back
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+## Basic concepts
+########################################################################
+########################################################################
+########################################################################
+
+=cut
+########################################################################
+########################################################################
+## Gled: Why and how
+########################################################################
+########################################################################
+
+=head1 C<Gled>: Why and how
+
+
+The first precursor of Gled was a simple perl/Tk application called
+ZeD. It provided GUI for editing of calligraphic Bezier strokes to be
+exported to Metafont or POVRay (as axially symmetric 3D tubes).  As
+one can never be quite content with the first implementation of
+certain tool and there was nothing really wrong with ZeD (besides
+"versatile" mouse/keyboard bindings) the ideas for its reincarnation
+took a most unexpected turn: ZeD was to become a multi-user
+collaborative tool for editing of symbol collections. I forgot how
+such a drastic change could have crossed our minds ... but there it
+was and it sure seemed like the right way to go.
+
+At that time (around 1997/98) OpenGL was slowly emerging in the Linux
+world and a simple GL previewer for ZeD was written using the Fast
+Light ToolKit (FLTK). Seeing things rendered in real-time is rewarding
+... too rewarding as it puts imagination on fire and all kinds of
+untamed ideas begin to crawl inside your head. So the plan went one
+step further ... to write a multi-user tool for collaborative editing
+of objects in 3D space.
+
+There was also ROOT, the object-oriented data analysis framework
+written in C++.
+
+Having ROOT around was good, for it had object
+serialization support and socket abstraction layer that worked. And it
+had CINT ... which was somewhat good as it was possible to send and
+execute method calls as strings and it was somewhat bad because it was
+absolutely not thread safe. Anyway ... with these tools combined a
+simple prototype consisting of about ten classes was scrapped up in
+about half a year time. That was the first incarnation of Gled.
+
+But there was also perl and there was the idea of parsing
+C++ header files and producing tons of stuff: accessor methods,
+functions for handling smart pointers and reference counting, to build
+per-class widgets in fltk and later on to write all remote
+method execution as auto generated creators and executors of method
+invocation requests.
+
+=cut
+########################################################################
+########################################################################
+## ZGlass
+########################################################################
+########################################################################
+
+=head1 The C<ZGlass> class
+
+C<ZGlass> is the base-class for classes that make use of or build up
+the Gled system. A Gled class is called a I<glass> an instance of
+a glass is called a I<lens> (a Gled object).
+
+=head2 Glass identification
+
+Each glass needs to be uniquely identifed to support lens streaming,
+proper delivery of MIRs, construction and update of lens-views (GUI
+and renderers) and other useful things. The identification is done by
+usage of two positive integers (zero reserved for special uses):
+
+=over list
+
+=item B<Libset-id> is shared among all classes belonging to a common
+library-set (build and deployment unit, see L<Libsets>). It is
+assigned by hand in the libset's Makefile.
+
+=item B<Class-id> identifies the glass withing the libset. It is
+assigned by hand in the C<glasses.list> file of each libset.
+
+=back
+
+These two are joined in the FID_t structure (short for B<full ID>)
+declared in C<GledCore/Gled/GledTypes.h>:
+
+ typedef UShort_t				LID_t;
+ typedef UShort_t				CID_t;
+
+ class FID_t {
+ public:
+   LID_t	lid;
+   CID_t	cid;
+
+   FID_t(LID_t l=0, CID_t c=0) : lid(l), cid(c) {}
+   ...
+ };
+
+C<FID_t> can be streamed as data-member and as a method argument.
+
+To obtain a FID of a given glass one uses one of the following member
+functions (both are auto-generated by C<project7>):
+
+ static  FID_t  FID();        // Use as SomeGlass::FID() or glass_ptr->FID()
+ virtual FID_t VFID() const;  // Use as base_glass_ptr->VFID()
+
+The obtained FID can then be used for further interaction with
+catalogs and other Gled services (instantiators of lenses, their views
+or renderers).
+
+=head2 Glass catalog entries
+
+ static  GledNS::ClassInfo*  GlassInfo() { return  sap_WGlButton_ci; }
+ virtual GledNS::ClassInfo* VGlassInfo() const { return  sap_WGlButton_ci; }
+
+
+
+FID .... static + virtual ... classname
+
+data model: basic types, root classes (stones), glasses
+
+data access
+
+execlock, execution ... stamps
+
+ref counting, refcount lock
+
+links ... copylinks .... uses execlock ... stamps
+
+
+=head2 C<ZList>
+
+List as container for links.
+
+zlist ... copy ... listlock ... stamps
+
+Add methods. If several links to the same lens are expected in a list,
+then AddBefore/Remove methods can fail. Use only queue operations
+(front & back).
+
+need for member-type specification (to restrict membership to given glass)
+
+C<LIST_CALL #define> ... and other defines in ZGlass
+
+=head2 Locking
+
+Single-glass locking can be performed at will.
+
+Multiple-glass locks should employ all-or-nothing strategy. Not
+implemented yet. Currently only needed in Saturn during execution of
+MIRs. Saturn locks the Queen and the lens.
+
+Locking done in:
+
+a) execution of MIR
+
+b) in auto generated Set methods
+
+c) in ZGlass::CopyLinks(lpZglass_t& list, Bool lockp=true) if lockp is
+true.
+
+d) in Eye::Manage during Ray processing
+
+e) in MTW_SubView::UpdateFromTimer_s()
+
+f) in RnrDriver before any direct execution of rnr methods.
+
+
+=head2 Lens creation and deletion
+
+Queens as mothers and as grim rippers.
+
+Creation prior to server start-up: manual creation, CheckIn(). See CINT scripts.
+
+Creation during server operation: ZQueen::Instantiate and ZQueen::Incarnate
+
+Deletion goes through several steps, initiated with ZQueen::RemoveLens().
+
+1) Mark as not accepting references.
+
+2) Unmangle self from object graph and mark as deleted. Send Viewers a
+Death Ray so that they can clean-up views, widgets and renderers.
+
+
+3) 
+
+
+=cut
+########################################################################
+########################################################################
+## GledNS & GledViewNS
+########################################################################
+########################################################################
+
+=head1 C<GledNS> and C<GledViewNS> namespaces
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 C<GledGlueGen> and C<Project7>
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Saturn
+
+Router of messages.
+
+MasterSocket, list of MoonSockets, list of EyeSockets.
+
+Sun as a specific instance has no master.
+
+All sockets handled in a single thread with common select statement.
+Perhaps should separate at least the master and have it in its
+own thread.
+
+C<SaturnInfo> and C<SunQueen>. C<EyeInfo>.
+
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Rulers of object-spaces
+
+=head2 Issues
+
+locking rulers as atomic operation: lock all intended or unlock and wait
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Thread support
+
+C<Gled> was designed as a single-process multi-threaded
+application. Threads are used within C<Saturn> itself (socket
+managing), one thread is dedicated to the GUI event-loop and another
+one for running C<ROOT>'s class C<TRint> which encompasses the CINT
+interpreter. These threads are not the subject of this section as they
+are internal to the functioning of the C<Gled> application.
+
+User threads are spawnable from lenses of glass C<Eventor>. Their
+purpose and their mode of interaction with existing lenses and Saturns
+can be manifold:
+
+=over
+
+=item 1.
+
+Computation performed on a single Saturn, results of which are either
+broadcasted to all Saturns sharing the relevant lenses or stored on
+some permanent media (or sent over the network to a data-collector).
+
+=item 2.
+
+Distributed computation performed on multiple Saturns, sharing some
+lens-graph that serves as input to the computation. Coordination is
+needed here to divide the job into suitable partitions, transmit them
+to lower-level nodes and to collect their output. The final results can
+be used as above.
+
+=item 3.
+
+Data acquisition or process spawning & monitoring. The thread connects
+to certain data source, controls its operation and processes its
+output. Again, the results can be used as in 1.
+
+=item 4.
+
+Algorithms that traverse a lens-graph and execute operations on lenses
+(or graph itself), possibly performing them periodically. An example
+of this class are event-engines for dynamic scenes that need to call
+different lens-methods to achieve desired results. As the lens-graphs
+are shared between several Saturns and changes need to be
+synchronized there are two obvious options:
+
+=over
+
+=item a)
+
+One Saturn executes the thread and emits MIRs to all Saturns sharing
+the lenses that are targets of thread's operation.
+
+=item b)
+
+All Saturns execute the thread and modify local structures without
+communication with other Saturns. This can lead to dis-synchronization
+of lens-spaces and should be used with care.
+
+=back
+
+The choice depends on CPU intensity of the performed calculations,
+available bandwidth, size of resulting structures and frequency of MIR
+emission.
+
+=back
+
+XXX some words on results that are re-included into gled: lens-graphs or
+stones (possibly for visualization).
+
+From the presented use-cases one can make two basic distinctions
+of user-threads in C<Gled>:
+
+=over
+
+=item *
+
+Threads running on all Saturns versus threads being run on a single,
+representative Saturn. This is controlled by C<Multix> flag and
+C<Host> link.
+
+=item *
+
+Threads performing intensive computation with localized interference with
+external lenses versus threads performing periodic changes on
+lenses with intermediate period of inactivity (sleep). For each of
+these cases there is a different suspending mechanism: the first ones
+must block suspending explicitly while the second ones are only
+suspending during periods of inactivity.
+
+=back
+
+C<Gled>'s implementation of user-threads and is based on three
+classes:
+
+=over
+
+=item 1.
+
+C<Operator> is the glass-base for glasses that participate in
+thread-traversals of lens-graphs. The C<Operator> declares a virtual
+method C<Operate()>, which does the actual work performed by an
+operator. For pure C<Operator> it simply calls C<Operate()> on all its
+list members that are operators themselves (note C<class Operator :
+public ZList>). Of course, the C<Operator> glass needs to be
+sub-classed to export code for threading.
+
+=item 2.
+
+C<Eventor> (sub-class of C<Operator>) is the glass-base for glasses
+that are a root of an operator-graph, i.e. those that actually receive
+their own threads. The specialization is needed to allow for setting
+of thread properties and for chores related to operation of a thread
+as a whole (e.g. set-up, starting/stopping/suspending, cleaning up,
+etc).
+
+=item 3.
+
+C<Mountain> manages requests for starting, stopping, suspending and
+resuming of threads for a given C<Eventor>. It launches a thread
+within its static member function which provides execution environment
+& control together with top-level exception handling for the
+C<Eventor> presiding the full C<Operator> hierarchy. There is a single
+C<Mountain> per C<Gled> executable and is spawned during Saturn
+initialization.
+
+=back
+
+On operator level, information about thread execution type is
+available and can be used to trigger different responses (e.g. send a
+MIR or call a method directly). It is often impractical and time
+consuming to code too many checks on every possible level and it's
+perfectly OK to code operators for a given case of threading. One
+should just take that into account when building operator-graphs and
+providing them with execution environment.
+
+
+=cut
+########################################################################
+########################################################################
+
+=head2 Thread properties & Execution environment
+
+B<Advice:> make C<Operator.h>, C<Eventor.h> and C<Mountain.h> header
+files available for inspection and peek into them as you read further.
+
+=head3 Properties & C<Operator::Arg> argument
+
+Thread properties define how thread(s) are spawned for a given
+C<Eventor>. Also, they control thread behaviour. Currently there are
+five properties, declared in C<Eventor.h>:
+
+=over enum
+
+=item 1.
+
+B<C<Multix>>: when C<true> thread will be spawned on all Saturns,
+sharing the instance of an C<Eventor>. If operators change lenses,
+they should do so locally, as all Saturns will mimic their behaviour.
+
+When C<false>, the thread will only be started on a single C<Saturn>
+(see next item). The lens-changes should be posted as MIRs.
+
+If an C<Eventor> is in the fire-space of a C<Saturn>, this
+distinction is meaningless.
+
+=item 2.
+
+B<C<Host>>: a I<link> to C<SaturnInfo> that will execute the thread if
+C<Multix> is B<not> set. If I<null> the thread will be started on
+C<Saturn> with the given C<Eventor> in its sun-space.
+
+=item 3.
+
+The B<C<SignalSafe>> flag represents the second differentiation
+between threads. Threads that mostly perform computation and change
+lenses in short bursts are I<signal-safe> as they can be
+suspended/resumed by standard signals. During the short periods when
+they perform lens changes, they should lock the
+C<Operator::Arg::fSignalodor> mutex.
+
+Threads that dynamically change a scene and/or are periodically
+traversing the operator-graph are best stopped in between two
+cycles. These are I<signal-unsafe> and are internally
+suspended/resumed via the C<Operator::Arg::fSuspendidor> condition
+variable. This also assures a consistent state of affected lenses at
+suspend time.
+
+In short, signal-safe threads tell I<when not to be suspended> while
+signal-unsafe ones offer I<when they can be suspended>.
+
+=item 4.
+
+B<C<Continuous>> flag controls whether C<Operate()> loop will be
+entered continuously (if C<true>) or it will be run just once
+(C<false>).
+
+=item 5.
+
+B<C<UseDynCast>> switches between usage of C<dynamic_cast<Operator*>>
+and direct cast to C<(Operator*)> when traversing list-members of
+an operator. Switch to C<false> if B<all> operators in the
+thread-traversal are guaranteed to have only C<Operator> descendants
+as list-members. Relevant for large operator trees with frequent
+invocation.
+
+=back
+
+Upon start-up of a thread, values of these flags are copied into the
+C<Operator::Arg> structure, which is passed as the argument to all
+calls to C<Operator::Operate(Arg*)> method. This structure is
+instantiated by a call to C<Arg* Eventor::PreDance()>.
+
+C<Operator::Arg> is the core of user-thread execution-environment and
+it encapsulates data needed for proper operation and control of a
+thread inside the C<Gled> system.  Additional elements of the
+structure are:
+
+=over
+
+=item *
+
+C<Eventor* fEventor> which points to the root of thread's operator graph.
+
+=item *
+
+C<GCondition fSuspendidor> condition variable which is used to
+suspend/resume signal-unsafe threads. 
+
+
+=item *
+
+C<GMutex fSignalodor> mutex which blocks sending of a suspend signal to
+signal-safe threads.
+
+=back
+
+The C<Operator::Arg> structure can be sub-classed and extended,
+therefore providing custom environment for the operators. It can also be
+modified during the operate-traversal to allow for communication and
+data-sharing between operators.
+
+There is a one-thread per C<Eventor> limit, but C<Operator> instances
+can be members of several eventor-graphs. By using data from the
+C<Operator::Arg> they can behave differently in each thread context.
+
+
+=head3 Thread exit & C<Operator::Exception> class
+
+Threads, that are not C<Continuous> simply exit after the first
+C<Operate> loop. Otherwise, the loop must be exited by throwing an
+exception of class C<Operator::Exception>. The base exception holds a
+pointer to C<Operator> that has first thrown the exception, its
+message (if any) and an enumeration variable of type
+C<Operator::Exc_e>.
+
+There are five possible values for C<Exc_e> and their meaning is
+shared across the implementation of C<Mountain> and C<Eventor>
+classes. Each of them will provoke a specific response of C<Mountain>
+as regards the C<Eventor> in question.
+
+=over
+
+=item 0.
+
+B<C<OE_Done>> signals normal termination of a
+thread. C<Eventor::PostDance(Arg*)> is called and then the thread
+exits. (In fact, this is the same behaviour as for non-continuous
+threads. It can be mimicked by continuous threads by setting
+C<Operator::Arg::fContinuous> to C<false> during one C<Operate> cycle.)
+
+=item 1.
+
+B<C<OE_Continue>> calls C<Eventor::OnContinue(Arg*, Exception&)> and,
+as the name suggests, continues with whatever the thread would do
+upon finishing operate-cycle without throwing an exception.
+
+=item 2.
+
+B<C<OE_Wait>> calls C<Eventor::OnWait(Arg*, Exception&)> and suspends
+the execution of thread. It must be signaled from outside to resume
+its operation.
+
+=item 3.
+
+B<C<OE_Stop>> calls C<Eventor::OnStop(Arg*, Exception&)> and exits the
+thread.
+
+=item 4.
+
+B<C<OE_Break>> calls C<Eventor::OnBreak(Arg*, Exception&)> and exits the
+thread.
+
+=back
+
+There is a minimal difference between C<OE_Stop> and C<OE_Break>. In
+complex C<Eventors>/C<Operators> it can be used to perform a different
+level of clean-up for each exit condition.
+
+=cut
+########################################################################
+
+=head2 Implementation and usage details
+
+B<Note:> all relevant methods in C<Operator> and C<Eventor> glasses
+are C<virtual>.
+
+=head3 Operator
+
+The code for C<Operator> is trivial and its inspection should make
+most things clear. Some still need to be emphasized ...
+
+So far C<Operator::Operate(Arg*)> has been discussed as a single
+entity. In fact it is split into C<PreOperate()>, C<Operate()> and
+C<PostOperate()>. The C<pre/post> methods must be called from the
+genuine C<Operate()>. This is intended for easier building of
+class-hierarchies of operators.
+
+All this methods are exception throwing. Operators can, of course,
+provide lower level exception handling. This is particularly important
+if you lock thread-synchronisation variables from C<Arg*>.
+
+The C<Operator> glass has a void implementation of C<PreOperate()> and
+a trivial implementation of C<Operate()> (just calling
+C<Pre/Post>Operate>).
+
+The implementation of C<PostOperate()> calls C<Operate> on all its
+list-members of type C<Operator>. Its operation is further guided by
+three flags:
+
+=over
+
+=item 1.
+
+B<C<Operator::bOpRecurse>>: if false, the descent is not done.
+
+=item 2.
+
+B<C<Arg::fUSeDynCast>> determines whether list members will be cast
+dynamically (therefore allowing non-operator list-members) or
+statically.
+
+=item 3.
+
+For each C<Operator> list-member C<op>, the value of its
+C<op->bOpActive> flag. If it is C<false>, the descent into C<op> is
+not done.
+
+=back
+
+B<C<#define OP_EXE_OR_FLARE>> in the C<Operator.h> file can be used by
+operators to either post a MIR to C<Saturn> or call a method directly, based on the
+state of the C<Arg::fMultix> flag. It assumes that the name of the
+C<Arg*> is C<op_arg>. An example of its use can be found in
+C<Geom1:Mover> operator descendant.
+
+
+=head3 C<Mountain - Eventor> coupling
+
+C<Mountain> holds a more detailed description of each thread in its
+respective C<DancerInfo> structure (defined in C<Mountain.h>). It is
+stored in a C<hash_map> via an C<Eventor*> key, so C<Mountain> can
+locate a thread belonging to a given C<Eventor>.
+
+C<Mountain::Start(Eventor*)>, C<Stop()>, C<Suspend()> and C<Resume()>
+methods provide points for external access to thread status. They can
+be called by anyone and are also accessible via corresponding methods
+in C<Eventor> (they bear the same name).
+
+Upon change of a running-state of a thread, C<Mountain> calls
+appropriate methods in C<Eventor> (C<OnStart(Arg*)>, C<OnStop(Arg*)>,
+etc).  In C<Eventor> itself (as a base-class) the internal thread
+state flags are changed and I<stamped> to perform GUI updates. Note
+that C<OnStop(Arg*)> is called when thread already exits (in its
+clean-up function) and is called for any exit condition that
+terminates the thread.
+
+B<C<Eventor>> has two pairs of methods, that wrap the actual
+C<Operate> loop on different levels:
+
+=over
+
+=item *
+
+B<C<Pre/PostDance()>>: method C<Operator::Arg* PreDance()> is called
+prior to entering the true thread code. It provides the
+C<Operator::Arg*> that will be used throughout the thread execution. 
+Then C<Eventor::OnStart(Arg*)> is called.
+
+C<PostDance(Arg*)> is called upon normal exit of the operate cycle (not
+continuous or by throwing exception with status C<OE_Done>).
+
+=item *
+
+B<C<Pre/PostBeat(Arg*)>> are enveloping the actual call to
+C<Eventor::Operate(Arg*)>. They are both exception throwing and can
+perform checks or preparations for each operate cycle.
+
+If an exception is thrown from C<Eventor::Operate()>, the
+C<PostBeat()> method is not called.
+
+=back
+
+As has been demonstrated, the C<Mountain> and C<Eventor> classes are
+tightly coupled. But their tasks are nevertheless well
+separated. C<Mountain> performs all low level thread operations,
+provides the main loop and calls virtual methods in C<Eventor> to
+perform the actual operation as well as to notify it about changes in
+running state or received exceptions. C<Eventor> (a glass) provides
+all user-level code and exposes interface methods and thread status to
+the C<Gled> system.
+
+XXX Sleeping, C<InterBeatMS> (sleep kind (signal-safety), suspending
+during sleep)
+
+=cut
+########################################################################
+
+=head3 C<Eventor>
+
+=head4 Running state of a thread
+
+C<Eventor> has three flags which reflect the running state of its
+associated thread.
+
+=over
+
+=item *
+
+C<Running> and C<Suspended> flags are exported and thus the hold the
+same value on all Saturns. If an eventor is not C<Multix> they
+reflect the state of the thread in eventor's sun-space. Otherwise
+these two properties hold for threads on all Saturns (for an eventor and
+all its reflections).
+
+=item *
+
+C<Performing> flag is local (non-exported) and shows whether a thread
+is running on local Saturn.
+
+=back
+
+=head4 Eventor's event counting facilities
+
+Event counting facilities in C<Eventor> allow threads to perform a
+pre-determined number of loops and then terminate. It is based on
+three variables and implementation in C<Eventor::PostBeat()>.
+
+=over
+
+=item *
+
+C<BeatsToDo> is the limit that should be reached by C<LocBeatsDone> to
+exit the thread. If C<-1> runs forever (until stopped).
+
+=item *
+
+C<BeatsDone> is a shared variable that shows the number of beats
+already done. It is updated every C<StampInterval> beats and at the
+exit of a thread. For C<Multix> eventors this shows number of beats
+done by sun-eventor, for others beats done at the performing Saturn.
+
+=item*
+
+C<LocBeatsDone> is B<local>: it shows the number of beats done by
+thread(s) on local Saturn.
+
+=back
+
+The C<Eventor::Reset()> method sets the last two counters to zero.
+
+=cut
+########################################################################
+########################################################################
+
+=head2 Usage notes
+
+=head3 Distributed execution
+
+time driven vs truly distributed (requests to master & result
+reporting)
+
+use of condition variables (via internal (possibly local) state)
+
+synchronization: at finish, UDP sync, control MIRs, time driven
+
+
+=head3 On visibility of eventors
+
+If pushing to moons is desired, eventors should be put into mandatory
+queens.
+
+sometimes desired for eventors to be invisible ... fire-space:
+a) emit MIRs
+b) local computation ... autostart-able comets (queens or comet-bag
+with specified eventor to start; put into fire-space. could send
+status updates ...
+
+=cut
+########################################################################
+########################################################################
+
+=head2 Dependencies
+
+=head3 Method execution and data-access in C<Gled>
+
+Eventors and operators are critically entangled with C<Gled>'s data
+and method execution model. The most basic aspects are
+covered by the user-thread infrastructure, the rest of them has to be
+taken into account when extending C<Operator> classes.
+
+Glass data: exported versus local part
+
+Lens context: fire, moon or sun space
+
+Use C<Saturn::PostMIR()> to submit MIRs into the system
+
+Use lens C<Set> methods to change lens data (C<Set> methods do
+lens-locking).
+
+Use locks when directly accessing lens-data
+
+
+=head3 C<LinuxThreads> library
+
+All threads and thread-synchronisation methods in C<Gled> use simple
+class wrappers over the C<LinuxThreads> library (classes C<GThread>,
+C<GMutex> and C<GCondition> in C<$GLEDSYS/Gled/Gled> directory).
+
+
+=cut
+########################################################################
+########################################################################
+
+=head2 Issues
+
+naming, Mountain as glass (Queen?), inter-thread comm, inner threads
+(or sub-threads), multix reversal based on Saturn depth (reasonable
+for local reflectors)
+
+C<Multix> threads for newly connected Saturns are started via
+C<Eventor::AdEnlightenment>.
+
+non SignalSafe threads should have option to call consider suspend
+(dancer info not in Op::Arg)
+
+C<LinuxThreads> ... posix? non-portable extension in mutexes.
+Perhaps Mountain should be made OS specific?
+
+ownership
+
+PostMIR ... locks; also ownership
+
+Saturn services (e.g. triangulators ... in fire-space?)
+
+C<Operator::CopySubOps()>
+
+ROOT & threads: the TFile problem (networking ok?) ... current solution
+
+Operators vs queens; should threads register to queens they intend to
+change (to suspend them prior to streaming)?
+
+=cut
+########################################################################
+########################################################################
+## Eye
+########################################################################
+########################################################################
+
+=head1 Eye
+
+C<OptoStructs>, FTW, MTW weeds
+
+auto-generated weeds ... their future
+
+=head2 Locators
+
+Locator identifies a particular element in a C<FTW_Nest>. It holds
+pointers to I<nest>, I<leaf> and I<ant> (leaf and ant can be
+zero). They are used to represent nest's I<point>, I<mark> and
+I<target> and for direct setting of I<shell>-level I<source> and
+I<sink>. They will probably be used for other purposes as well when
+the GUI structure becomes more general.
+
+Point and mark locators are handled internally by the nest. Other
+locators bound to the same nest are owned by the nest as it
+offers basic locator management. Classes that use own locators should
+be sub-classed from C<FTW::LocatorConsumer> class and
+register/unregister themselves with the nest in question.
+
+User locators must be instantiated prior to registration. Nest keeps a
+list of C<LocatorConsumer>s associated with each C<Locator> and when
+the list becomes empty the nest deletes this C<Locator>.
+
+Locators report their changes to the nest (by calling
+C<FTW_Nest::LocatorChange(Locator&)>). Nest forwards the notification to all
+registered consumers by calling C<LocatorConsumer::locator_change>.
+
+If the leaf pointed to by some locators is removed, the locator is
+I<migrated> in the same manner as point and mark are.
+
+C<LocatorConsumer> class also provides basic interface (with
+register/unregister functionality implemented) for changing the used
+locator (called C<base>): C<set_base(Locator&)> and C<clear_base()>.
+
+During nest destruction all consumers are notified with
+C<LocatorConsumer::destroy_base> method call.
+
+See C<FTW::Locator_Selector> for an example.
+
+=head2 Issues
+
+MTW_View: per class collapsor, refresh button, periodic refresh
+
+
+=cut
+########################################################################
+########################################################################
+## Rendering
+########################################################################
+########################################################################
+
+=head1 Rendering
+
+=head2 C<ZNode>: basic glass implementation of a hierarchic model
+
+The C<ZNode> glass provides all elements needed for implementation of
+a hierarchic model of 3D graphics. It contains geometrical
+transformation from its parent, a link to parent and is subclasses
+from C<ZList> which provides storage for holding children.
+
+=head3 Tree structure
+
+C<ZNode> has a link C<ZNode* mParent> which can point to its parent
+node. As a C<ZList> descendant, it can contain links to its
+children. Since C<ZList> membership can not be restricted by type
+(yet; anyway it could be restricted in C<ZNode::Add*> methods) it is
+not guaranteed that all its members will actually be C<ZNode>s.
+
+C<ZNode>'s C<Add> methods are overloaded to set parent of the new
+member (if it is a C<ZNode> and its parent is C<0>) to C<this>.
+
+Problem arises, when a node is added to a second parent. Say, C<N> is a
+child of C<A>. Then C<N> is added as child to another node
+C<B>. Should C<N>'s parent be set to C<B> or remain set to C<A>?
+
+There is no general solution although in most cases the answer is
+no. To control the behaviour of C<ZNode::Add*> methods there is a
+C<Bool_t bKeepParent> flag declared in C<ZNode>. If it is B<true> then
+C<N>'s parent remains C<A> and C<N> remains one of C<A>'s children.
+If it is B<false> then C<N>'s parent is set to C<B> and C<N> is
+removed from the list of C<A>'s children.
+
+=head3 Representation of geometric transformation
+
+The transformation is stored in a stone C<ZTrans>, which in turn is a
+wrapper around C<5x5> C<ZMatrix>. It is a mixture of the Lorenz
+transformation and homogeneous coordinates. The 0th row and column of
+the matrix are time components. Its sub matrix formed by 1st to 3rd
+rows is the standard rotation matrix. The 4th column represents the
+position four vector + scaling factor.
+
+!!! Check what is taken for building GL matrix.
+
+Scale and shearing variables are not used. The time variables are
+likewise unused. Lorentz transformations are not implemented. Time is
+seen just as another dimension and can be rotated to/from by passing
+axis argument of 0 to C<ZNode::RotateLF(int axis1, int axis2, float
+amount)>. 
+
+Admittedly, this is rather peculiar. 
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Messages & Textual Output
+
+Saturn level
+
+Eye level
+
+Take C<const string&> or C<const Text_t*>
+
+Provide formatting tools: C<GForm(const char* fmt, ...)> is available
+and thread safe.
+
+Redirection, duplication of streams
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+## Meta-concepts
+########################################################################
+########################################################################
+########################################################################
+
+=cut
+########################################################################
+########################################################################
+## Coding standards
+########################################################################
+########################################################################
+
+=head1 C<Gled> coding standards
+
+C<Gled> follows most of the rules used for ROOT (see:
+ http://root.cern.ch/root/Conventions.html ).
+
+For important classes follow one class per file rule. This makes life
+with auto-generated code much easier.
+
+Class names are capitalized, the most "raw" classes of C<Gled> begin
+with Z. If you need Get/Set methods, add export comment to the
+declaration:
+
+  Int_t		mWidth;   // X{gs}
+
+and include C<#include "file-stem.h7"> somewhere towards the end of
+class definition. See section on C<project7> parser.
+
+Private and protected data members begin with C<m> as in C<mFoo>. Public
+members begin with C<f> as in C<fField>.
+
+Enumeration types end with C<_e> and individual values should begin
+with some common prefix:
+
+ class Top_Selector {
+  public:
+    enum Type_e { T_Undef=-1, T_Locator, T_Inst, T_DevNull, T_DND };
+ ...
+ };
+
+STL constructs can be typedef-ed (I do that most of the time):
+
+  typedef list<ZGlass*>                   lpZGlass_t;
+  typedef list<ZGlass*>::iterator	  lpZGlass_i;
+  typedef list<ZGlass*>::const_iterator   lpZGlass_ci;
+  typedef list<ZGlass*>::reverse_iterator lpZGlass_ri;
+
+  typedef list<ZGlass**>                  lppZGlass_t;
+  typedef list<ZGlass**>::iterator        lppZGlass_i;
+
+  typedef map<ID_t, ZGlass*>                      mID2pZGlass_t;
+  typedef map<ID_t, ZGlass*>::iterator            mID2pZGlass_i;
+  typedef hash_map<ID_t, ZGlass*>                 hID2pZGlass_t;
+  typedef hash_map<ID_t, ZGlass*>::iterator       hID2pZGlass_i;
+
+In particular: prefix with container type and C<p>'s for
+pointers. Postfix with C<t> for type, C<i> for iterator, etc ...
+
+Use templates at your own discretion. I rarely use them for other
+stuff than containers.
+
+Namespaces are good. Use them. Especially useful for importing foreign
+software (see C<GTS> libset as an example).
+
+
+=head2 About ROOT
+
+ROOT classes that are streamable must have a default constructor. This
+pertains to all glasses and stones.
+
+Always initialize the relevant data in constructor. I use private
+method C<void _init()> for that.
+
+
+
+=cut
+########################################################################
+
+=head2 Issues
+
+Perhaps libsets should have their own namespaces.
+
+=cut
+########################################################################
+########################################################################
+## Building and Installation
+########################################################################
+########################################################################
+
+=head1 Building and Installation
+
+directory layout
+
+configure
+
+standard Makefiles in $GLEDSYS/make
+
+make_*.inc includes generated by configure 
+
+standard targets
+
+double-collon rules: 
+
+=cut
+########################################################################
+########################################################################
+## Libsets
+########################################################################
+########################################################################
+
+=head1 Libsets
+
+Libsets are a means of extending C<Gled>. The "set" part of the name
+tries to imply that each libset is in fact composed of several
+libraries (e.g. C<libGled.so>, C<libGled_View.so> and
+C<libGled_Rnr_GL.so>):
+
+=over
+
+=item 1
+
+Core or base library. It contains glasses, stones and anything
+necessary for functioning of the system.
+
+=item 2
+
+View library contains all GUI components: handcrafted as well as auto
+generated.
+
+=item 3
+
+Rnr libraries, one for each rendering engine (so far only GL rendering
+is supported).
+
+=back
+
+Each libset should in principle implement a larger chunk of
+functionality. For example, the C<Gled> libset provides basic
+infrastructure classes (glasses and stones), implementation of
+C<Saturn>, basic GUI elements and rendering support as well as a
+complete application framework realized in two executables (C<gled>
+and C<saturn>).
+
+C<Geom1> libset implements some geometrical shapes together with
+(unoptimized) GL renderers. There are also a few C<Operator>s useful for
+simple animations.
+
+C<Numerica> will hold implementations of numerical methods interesting
+for wider public. So far only an ODE integrator (C<ODECrawler>) and
+amoeba crossed with Metropolis algorithm (C<WarmAmoeba>) are available.
+
+=head2 Anatomy of a libset
+
+=head2 Creating a libset
+
+=head2 Extending libset with new classes
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Lens-sets
+
+XXX description on meta level.
+
+No lens-sets are available. Unsure of the best implementation and
+protocol.
+
+Help badly needed.
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Documentation & Propaganda
+
+There is *some* documentation available. There is a strong desire to
+have more of that stuff.
+
+Audience to guide the documentation project would be helpful. What
+parts will be written first and partially also when and at what rate
+depends on user/developer interest.
+
+Propaganda will be dispatched to mailing lists of familiar projects
+with main goal of attracting developers and supporters (fans if you
+wish).
+
+Wide announcements will probably happen toward the end of 2003.
+
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+=head1 Core development plan
+
+Stabilize code. Finalize paradigms. Some aspects of C<Gled> are still
+floating.
+
+Prepare stones/GUI for physics analysis. Mainly creation and viewing
+of event objects and ROOT histograms and trees.
+
+Focus on sturdy base with usable GUI and rendering.
+
+Provide some cluster/multi-user applications.
+
+Prepare simple mechanisms for file access based on URI. Put this
+in context of glasses and lens-graphs.
+
+Implement (or envelop) elements for user authentication, group and
+virtual organization management.
+
+Begin planning for version 2. Implement in C<v1> things that are
+possible.
+
+
+=cut
+########################################################################
+########################################################################
+########################################################################
+## External packages
+########################################################################
+########################################################################
+########################################################################
+
+=cut
+########################################################################
+########################################################################
+## ROOT
+########################################################################
+########################################################################
+
+=head1 C<ROOT>
+
+See http://root.cern.ch/.
+
+C<ROOT> is great software. Without it, writing C<Gled> would be a
+never-ending nightmare.
+
+
+=cut
+########################################################################
+########################################################################
+## FLTK
+########################################################################
+########################################################################
+
+=head1 C<FLTK>
+
+See http://www.fltk.org/.
+
+=cut
+########################################################################
+########################################################################
+# LocalWords:  Gled namespaces MIRs FLTK CINT Eventor spawnable Saturns ZList
+# LocalWords:  Multix eventor eventors FTW MTW locator locators STL
