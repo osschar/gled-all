@@ -6,21 +6,28 @@ tarballs=`ls gled-xrdmon-*.tar.gz 2>/dev/null`
 
 if [ $? -ne 0 ]; then
     echo "Archive with Gled XrdMon not found."
-    echo "Please copy the latest gled-xrdmon-YYYYMMDD.tar.gz to the current directory."
+    echo "Please copy the latest gled-xrdmon-VERSION-DIST.tar.gz to the current directory."
     echo "Tarballs are available at ftp://ftp.gled.org/xrdmon/"
     exit 1
 fi
 
 latest_tarball=`echo $tarballs | tail -1`
 
-revision=`echo $latest_tarball | sed -rn 's/gled-xrdmon-slc5-(.*).tar.gz/\1/p'`
+version=`echo $latest_tarball | sed -rn 's/gled-xrdmon-([^-]*)-?[^-]*.tar.gz/\1/p'`
+dist=`echo $latest_tarball | sed -rn 's/gled-xrdmon-[^-]*-?([^-]*).tar.gz/\1/p'`
 
-if [ -z $revision ]; then
-    echo "Could not extract the revision from tarball's name '$latest_tarball'. The format is gled-xrdmon-XXXXXXXX.tar.gz, where revision is XXXXXXXX"
+if [ -z $version ]; then
+    echo "Could not extract the version from tarball's name '$latest_tarball'. The format is gled-xrdmon-XXXXXXXX-dist.tar.gz, where version is XXXXXXXX"
     exit 2
 fi
 
-sed -e "s/^\(%global rev \).*$/\1 $revision/" gled-xrdmon.spec > gled-xrdmon-current.spec
+if [ -z $dist ]; then
+    distopt=""
+else
+    distopt="--define 'dist .${dist}'"
+fi
+
+sed -e "s/_VERSION_/$version/" gled-xrdmon.spec > gled-xrdmon-current.spec
 
 [ -d build ] && rm -rf ${BUILD_DIR}
 
@@ -36,7 +43,7 @@ tar -czf ${BUILD_DIR}/SOURCES/configs.tar.gz configs
 
 ls -1 | xargs -I {} sh -c "[ -f '{}' ] && cp '{}' ${BUILD_DIR}/SOURCES/"
 
-rpmbuild --define "_topdir `pwd`/build" -bb gled-xrdmon-current.spec
+rpmbuild ${distopt} --define "_topdir `pwd`/build" -bb gled-xrdmon-current.spec
 
 if [ $? -eq 0 ]; then
     # clean sources directory after successfull build

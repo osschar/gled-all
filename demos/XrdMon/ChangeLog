@@ -1,3 +1,24 @@
+2013-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Changes for building from tagged version of gled.
+
+	* rpm/gled-xrdmon.spec:
+	Use gled tag as version.
+	Do not call install dir cleanup again, is done before making of
+	tarball.
+
+	* rpm/make-rpm.sh:
+	Pare new version format.
+	Try to determine distribution from tarball name, too and pass it
+	to rpmbuild.
+
+	* rpm/cleanup-install-for-rpm.sh:
+	Update comments.
+
+	* rpm/build-tag.sh:
+	New script, takes gled tag and OS/distribution and builds gled,
+	makes tarball and rpm.
+
 2012-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_suck_tcp.C:
