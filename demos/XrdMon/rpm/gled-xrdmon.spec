@@ -3,7 +3,7 @@
 
 %global packagename gled-xrdmon
 %global version     _VERSION_
-%global release     %{rev}%{?dist}
+%global release     %{rev}.%{dist}
 
 %global prefix    /opt/gled
 %global buildroot %{_tmppath}/%{packagename}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -30,7 +30,7 @@ BuildArch:      x86_64
 # all necessary libraries are already in, should not be external requirements
 AutoReqProv: no
 
-Source0:        gled-xrdmon-%{version}.tar.gz
+Source0:        gled-xrdmon-%{version}-%{dist}.tar.gz
 Source1:        configs.tar.gz
 
 Patch0:         parameters-env.patch

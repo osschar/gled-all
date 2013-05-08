@@ -25,16 +25,12 @@ tag=$1
 os=$2
 
 
-echo "publish $publish, tag '$tag', os '$os'"
-
-exit 0;
-
 dir=`pwd`
 ncpu=`cat /proc/cpuinfo  | grep -cP '^processor'`
 svn co https://svn.gled.org/gled/trunk/gled-builder
 cd gled-builder/
 autoconf
-./configure-tag.sh $tag MAKE_J_OPT="-j${ncpu}" LIBSETS="GledCore Net1 XrdMon" --prefix=${dir}/gled
+./configure RELEASE=$tag CACHE_TAG=$tag SVN_DIR=tags/$tag MAKE_J_OPT="-j${ncpu}" LIBSETS="GledCore Net1 XrdMon" --prefix=${dir}/gled
 make
 
 # To make tarball:

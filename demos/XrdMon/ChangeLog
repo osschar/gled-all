@@ -1,5 +1,16 @@
 2013-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Fix building from tagged version of gled.
+
+	* rpm/build-tag.sh:
+	Remove debug stuff.
+
+	* rpm/make-rpm.sh:
+	* rpm/gled-xrdmon.spec:
+	Require the distro to be present in tarball name and pass it on to RPM.
+
+2013-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Changes for building from tagged version of gled.
 
 	* rpm/gled-xrdmon.spec:
