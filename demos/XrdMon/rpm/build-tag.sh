@@ -25,7 +25,7 @@ if [[ $# != 2 || $help = "yes" ]]; then
 fi
 
 tag=$1
-os=$2
+dist=$2
 
 
 dir=`pwd`
@@ -40,15 +40,15 @@ make
 cd ${dir}
 mv gled/gled/demos/XrdMon/rpm .
 (cd gled; ../rpm/cleanup-install-for-rpm.sh)
-tarfile=gled-xrdmon-${tag}-${os}.tar.gz
+tarfile=gled-xrdmon-${tag}-${dist}.tar.gz
 tar czf ${tarfile} gled/
 
 if [[ $publish = "yes" ]]; then
     scp ${tarfile} gled.org:/u/ftp/xrdmon/
     ssh gled.org << FNORD
 cd /u/ftp/xrdmon/
-rm -f gled-xrdmon-current-${os}.tar.gz
-ln -s ${tarfile} gled-xrdmon-current-${os}.tar.gz
+rm -f gled-xrdmon-current-${dist}.tar.gz
+ln -s ${tarfile} gled-xrdmon-current-${dist}.tar.gz
 FNORD
 fi
 
