@@ -13,7 +13,10 @@ if [[ $1 = "--publish" ]]; then
 fi
 
 if [[ $# != 2 || $help = "yes" ]]; then
-    echo "Usage: $0 [--publish] tag os"
+    echo "Usage: $0 [--publish] <tag> <distro>"
+    echo "  . for --publish to work, user must have ssh access to gled.org"
+    echo "  . tag should exist in gled svn and in external software ftp on gled.org"
+    echo "  . distro is appended after version and used by rpm, too; e.g. el5 or el6"
     if [[ $help = "yes" ]]; then
         exit 0;
     else
