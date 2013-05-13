@@ -34,6 +34,10 @@ if ($BUILD_OS =~ /linux/)
   }
   add_ldflags ("-ljpeg -ltiff -lmng");
   add_cfgflags("--enable-ILU --enable-ILUT");
+
+  # MT, 2013-05-13: Apparently the function is removed from newer libpngs.
+  # Happened to me first on Fedora 18.
+  add_cppflags("-Dpng_set_gray_1_2_4_to_8=png_set_expand_gray_1_2_4_to_8");
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
