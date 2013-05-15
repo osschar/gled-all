@@ -1348,6 +1348,32 @@ namespace
 
     virtual Bool_t Notify() { return kTRUE; }
   };
+
+  class GDaemonFileHandler : public TFileHandler
+  {
+  public:
+    GDaemonFileHandler(int fd, int mask) : TFileHandler(fd, mask) {}
+
+    virtual Bool_t ReadNotify()
+    {
+      // This should never be entered, in principle.
+      char *buf[4096];
+      while (true)
+      {
+        ssize_t rd = read(fFileNum, buf, 4096);
+        if (rd < 4096)
+        {
+          fprintf(stderr, "GDaemonFileHandler::ReadNotify rd=%zu", rd);
+          if (rd == -1)
+          {
+            perror("");
+          }
+          break;
+        }
+      }
+      return kTRUE;
+    }
+  };
 }
 
 GThread* Gled::SpawnRootAppThread(const TString& name_prefix)
@@ -1426,8 +1452,9 @@ void* Gled::RootApp_runner_tl(void*)
     // Hack ... create a fake fd to listen on, otherwise TApplication::Run()
     // will go into a tight loop burning 100% in this thread.
     // This will eventually get fixed in ROOT.
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    gSystem->AddFileHandler(new TFileHandler(fd, TFileHandler::kRead));
+    // 203-05-15: Hmmh, maybe it won't :)
+    int fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    gSystem->AddFileHandler(new GDaemonFileHandler(fd, TFileHandler::kRead));
   }
 
   // Global ROOT settings.

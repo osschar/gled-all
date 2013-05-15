@@ -1,3 +1,12 @@
+2013-05-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Update code that avoids ROOT event-loop burning 100% CPU.
+
+	* Gled/Gled.cxx:
+	Use SOCK_DGRAM instead of SOCK_STREAM.
+	Use custom TFileHandler to report any percieved activity on the
+	above socket (there shouldn't be any but there was with SOCK_STREAM).
+
 2013-02-21  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
