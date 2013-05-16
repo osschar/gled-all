@@ -30,11 +30,12 @@ private:
   void _init();
 
 protected:
-  TString       mAmqHost;   // X{GS} 7 Textor(-width=>24)
-  UShort_t      mAmqPort;   // X{GS} 7 Value()
-  TString       mAmqUser;   // X{GS} 7 Textor()
-  TString       mAmqPswd;   // X{GS} 7 Textor()
-  TString       mAmqTopic;  // X{GS} 7 Textor()
+  TString       mAmqHost;     // X{GS} 7 Textor(-width=>24)
+  UShort_t      mAmqPort;     // X{GS} 7 Value()
+  TString       mAmqUser;     // X{GS} 7 Textor()
+  TString       mAmqPswd;     // X{GS} 7 Textor()
+  TString       mAmqTopic;    // X{GS} 7 Textor()
+  Bool_t        bLeakAmqObjs; // X{GS} 7 Bool()
 
   cms::ConnectionFactory   *mConnFac;    //!
   cms::Connection          *mConn;       //!

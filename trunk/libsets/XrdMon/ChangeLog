@@ -1,3 +1,13 @@
+2013-05-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Attempt to fix AMQ crashes by allowing to leak the AMQ objects on
+	reconnect.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Add flag 'Bool_t bLeakAmqObjs'. When this is set, do not delete
+	any AMQ objects in amq_disconnect(). This is off by default.
+
 2013-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
