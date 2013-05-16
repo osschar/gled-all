@@ -41,6 +41,7 @@ void XrdFileCloseReporterAmq::_init()
   mAmqUser  = "xrdpop";
   mAmqPswd  = "xyzz";
   mAmqTopic = "xrdpop.uscms_test_popularity";
+  bLeakAmqObjs = false;
 
   mConnFac = 0;
   mConn = 0;
@@ -131,8 +132,6 @@ void XrdFileCloseReporterAmq::amq_disconnect()
 
   try
   {
-    delete mProd;  mProd = 0;
-    delete mDest;  mDest = 0;
     if (mSess)
     {
       mSess->close();
@@ -142,9 +141,11 @@ void XrdFileCloseReporterAmq::amq_disconnect()
       mConn->close();
       bConnClosed = true;
     }
-    delete mSess;    mSess = 0;
-    delete mConn;    mConn = 0;
-    delete mConnFac; mConnFac = 0;
+    if ( ! bLeakAmqObjs)
+    {
+      delete mProd; delete mDest; delete mSess; delete mConn; delete mConnFac;
+    }
+    mProd = 0; mDest = 0; mSess = 0; mConn = 0; mConnFac = 0;
   }
   catch (cms::CMSException& e)
   {
