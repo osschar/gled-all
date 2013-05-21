@@ -238,7 +238,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-void SXrdIoInfo::Dump(Int_t level)
+inline void SXrdIoInfo::Dump(Int_t level)
 {
   printf("SXrdIoInfo::Dump() N_reqs = %zu, N_vec_read_subreqs = %zu, N_errors = %d\n",
 	 mReqs.size(), mOffsetVec.size(), mNErrors);
@@ -288,7 +288,7 @@ void SXrdIoInfo::Dump(Int_t level)
 
 #include "TTree.h"
 
-void dump_xrdfar_tree_ioinfo(TTree *t, Long64_t ev)
+inline void dump_xrdfar_tree_ioinfo(TTree *t, Long64_t ev)
 {
   if (ev < 0 || ev >= t->GetEntriesFast())
   {
