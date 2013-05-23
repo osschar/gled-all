@@ -159,6 +159,7 @@ private:
   static pthread_key_t  TSD_Self;
   static GThread       *sInvalidPtr;
   static int            sSigMap[SigMAX];
+  static bool           sPrintNonHandledSignals;
 
   static void* thread_spawner(void* arg);
   static void  thread_reaper(void* arg);
@@ -210,6 +211,7 @@ public:
 
   static void TheSignalHandler(GSignal* sig);
   static void ToRootsSignalHandler(GSignal* sig);
+  static void SetPrintNonHandledSignals(bool printp);
 
   static void ListThreads();
   static void ListSignalState();

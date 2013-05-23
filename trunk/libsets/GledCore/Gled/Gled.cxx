@@ -1374,6 +1374,13 @@ namespace
       return kTRUE;
     }
   };
+
+  void AbortSignalHandler(GSignal* sig)
+  {
+    fprintf(stderr, "\n\nAbort signal received, will dump stack-trace and exit.\n\n");
+    gSystem->StackTrace();
+    gSystem->Exit(128 + sig->fSysSignal);
+  }
 }
 
 GThread* Gled::SpawnRootAppThread(const TString& name_prefix)
@@ -1429,8 +1436,6 @@ void* Gled::RootApp_runner_tl(void*)
   GThread::SetSignalHandler(GThread::SigSYS,   GThread::ToRootsSignalHandler, true);
   GThread::SetSignalHandler(GThread::SigWINCH, GThread::ToRootsSignalHandler, true);
 
-  GThread::UnblockSignal(GThread::SigABRT);
-
   // Root does not want TThread to exist for the main thread.
   self->ClearRootTThreadRepresentation();
 
@@ -1468,6 +1473,8 @@ void* Gled::RootApp_runner_tl(void*)
 
   TRootXTReq::Bootstrap(self);
   GThread::UnblockSignal(GThread::SigUSR1);
+
+  GThread::SetSignalHandler(GThread::SigABRT, AbortSignalHandler, true);
 
   Gled::theOne->ShootAfterSetupMirs();
 

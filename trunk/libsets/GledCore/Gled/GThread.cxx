@@ -28,6 +28,14 @@
 // POSIX thread wrapper class - Gled specific as it provides
 // data members required for authorization and MIR processing.
 //
+//
+// Signal handling
+// ---------------
+// Normal Gled threads only have the following signals setup and unblocked:
+//   USR1, USR2, ILL, SEGV, BUS, FPE.
+// To handle other signals, call UnblockSignal() -- this will set both
+// sigaction and sigmask for the thread.
+// ROOT application thread handles some more signals.
 
 ClassImp(GThread);
 
@@ -48,6 +56,7 @@ int            GThread::sSigMap[SigMAX] =
   SIGCHLD, SIGCONT,   SIGSTOP, SIGTSTP,  SIGTTIN, SIGTTOU, SIGURG,  SIGXCPU,
   SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO,   -1,      SIGSYS
 };
+bool           GThread::sPrintNonHandledSignals = false;
 
 //==============================================================================
 
@@ -431,7 +440,19 @@ ZMIR* GThread::MIR()
   return Self()->mMIR;
 }
 
+
 //==============================================================================
+// Signal handling
+//==============================================================================
+
+namespace
+{
+  void signal_handler_wrapper(int sid, siginfo_t* sinfo, void* sctx)
+  {
+    GSignal sig(sid, sinfo, sctx);
+    GThread::TheSignalHandler(&sig);
+  }
+}
 
 void GThread::BlockAllSignals()
 {
@@ -459,11 +480,17 @@ void GThread::BlockSignal(Signal sig)
   sigset_t set;
   sigemptyset(&set);
   sigaddset(&set, sSigMap[sig]);
-  pthread_sigmask(SIG_UNBLOCK, &set, 0);
+  pthread_sigmask(SIG_BLOCK, &set, 0);
 }
 
 void GThread::UnblockSignal(Signal sig)
 {
+  struct sigaction sac;
+  sac.sa_sigaction = signal_handler_wrapper;
+  sigemptyset(&sac.sa_mask);
+  sac.sa_flags = SA_SIGINFO;
+  sigaction(sSigMap[sig], &sac, 0);
+
   sigset_t set;
   sigemptyset(&set);
   sigaddset(&set, sSigMap[sig]);
@@ -498,10 +525,12 @@ void GThread::TheSignalHandler(GSignal* sig)
   ISdebug(1, _eh + GForm("sys_signal %d, gled_signal %d, sig_name %s in thread '%s'.",
 			 sig->fSysSignal, sig->fSignal, SignalName(sig->fSignal), self->mName.Data()));
 
+  const char* ehcp = _eh.Data();
+
   if (sig->fSignal == SigUNDEF)
   {
-    ISerr(_eh + GForm("Undefined signal %d in thread '%s'. Will try to pretend nothing has happened.",
-		      sig->fSignal, self->mName.Data()));
+    fprintf(stderr, "%sUndefined signal %d in thread '%s'. Will try to pretend nothing has happened.",
+                    ehcp, sig->fSignal, self->mName.Data());
     return;
   }
 
@@ -516,27 +545,28 @@ void GThread::TheSignalHandler(GSignal* sig)
   else if (sig->fSignal == SigILL  ||  sig->fSignal == SigSEGV ||
 	   sig->fSignal == SigBUS  ||  sig->fSignal == SigFPE)
   {
-    ISerr(_eh + GForm("Terminal signal %s in thread '%s'.",
-		      SignalName(sig->fSignal), self->mName.Data()));
+    fprintf(stderr, "%sTerminal signal %s in thread '%s'.",
+                    ehcp, SignalName(sig->fSignal), self->mName.Data());
     gSystem->StackTrace();
-    self->mTerminalSignal = sig->fSignal;
     if (self->mTerminalContext == 0)
     {
       fprintf(stderr, "  Terminal context not set, exiting.\n");
-      gSystem->Exit(self->mTerminalSignal);
+      gSystem->Exit(128 + sig->fSysSignal);
     }
+    self->mTerminalSignal = sig->fSignal;
     if (setcontext((ucontext_t*) self->mTerminalContext))
     {
       perror(_eh + "setcontext failed (will exit):");
-      gSystem->Exit(self->mTerminalSignal);
+      gSystem->Exit(128 + sig->fSysSignal);
     }
   }
-  else
+
+  // OK, so nobody really cares about this signal ... maybe it's just used as
+  // a wake up call? Call GThread::SetPrintNonHandledSignals(true) to see them.
+  if (sPrintNonHandledSignals)
   {
-    ISerr(_eh + GForm("Unhandled signal %s in thread '%s'. Will print stack-trace and exit.\n",
-		      SignalName(sig->fSignal), self->mName.Data()));
-    gSystem->StackTrace();
-    gSystem->Exit(self->mTerminalSignal);
+    fprintf(stderr, "%sUnhandled signal %s in thread '%s'.\n",
+            ehcp, SignalName(sig->fSignal), self->mName.Data());
   }
 }
 
@@ -558,6 +588,11 @@ void GThread::ToRootsSignalHandler(GSignal* sig)
       return;
     }
   }
+}
+
+void GThread::SetPrintNonHandledSignals(bool printp)
+{
+  sPrintNonHandledSignals = printp;
 }
 
 
@@ -589,7 +624,7 @@ void GThread::ListSignalState()
 {
   sigset_t set;
   sigfillset(&set);
-  pthread_sigmask(0, 0, &set);
+  pthread_sigmask(SIG_SETMASK, 0, &set);
 
   printf("Signal block state of thread '%s':\n", Self()->mName.Data());
   for (int i = SigMIN + 1; i < SigMAX; ++i)
@@ -647,15 +682,6 @@ void GThread::CancelAllThreads(bool join_p)
 }
 
 //==============================================================================
-
-namespace
-{
-  void signal_handler_wrapper(int sid, siginfo_t* sinfo, void* sctx)
-  {
-    GSignal sig(sid, sinfo, sctx);
-    GThread::TheSignalHandler(&sig);
-  }
-}
 
 GThread* GThread::InitMain()
 {
