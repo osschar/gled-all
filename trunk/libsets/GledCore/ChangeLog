@@ -1,3 +1,19 @@
+2013-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve signal handling and rig it to catch SIGABRT in the ROOT
+	thread.
+
+	* Gled/GThread.cxx:
+	TheSignalHandler():
+	- add fall-through handling (dump stack-trace and exit);
+	- check if terminal context is actually defined before trying to
+	  set it;
+	- improve printout.
+	Create terminal-context only when thread is actually run.
+
+	* Gled/Gled.cxx:
+	Unblock SigABRT in mRootAppThread.
+
 2013-05-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Update code that avoids ROOT event-loop burning 100% CPU.

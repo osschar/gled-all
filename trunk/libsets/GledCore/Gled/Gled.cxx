@@ -1429,6 +1429,8 @@ void* Gled::RootApp_runner_tl(void*)
   GThread::SetSignalHandler(GThread::SigSYS,   GThread::ToRootsSignalHandler, true);
   GThread::SetSignalHandler(GThread::SigWINCH, GThread::ToRootsSignalHandler, true);
 
+  GThread::UnblockSignal(GThread::SigABRT);
+
   // Root does not want TThread to exist for the main thread.
   self->ClearRootTThreadRepresentation();
 
