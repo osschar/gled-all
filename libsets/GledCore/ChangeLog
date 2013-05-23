@@ -1,5 +1,18 @@
 2013-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	Further improve signal handling.
+
+	* Gled/GThread.cxx:
+	Set std signal wrapper in UnblockSignal().
+	Add static flag to determine if signals that do not get handled
+	should be printed out.
+	Fix a bug in BlockAllSignals() - was actually unblocking them.
+
+	* Gled/Gled.cxx:
+	Set special signal handler for SIGABORT, do not rely on cath-all.
+
+2013-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Improve signal handling and rig it to catch SIGABRT in the ROOT
 	thread.
 
