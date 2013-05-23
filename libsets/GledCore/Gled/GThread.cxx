@@ -65,7 +65,7 @@ GThread::GThread(const Text_t* name) :
   mStackSize(0),
 
   mSigHandlerDefault(0), mSigHandlerVector(SigMAX),
-  mTerminalContext(new ucontext_t), mTerminalSignal(0),
+  mTerminalContext(0), mTerminalSignal(0),
   mTerminalPolicy(TP_ThreadExit),
 
   mOwner(0), mMIR(0)
@@ -96,7 +96,7 @@ GThread::GThread(const Text_t* name, GThread_foo foo, void* arg,
   mStackSize(sMinStackSize),
 
   mSigHandlerDefault(0), mSigHandlerVector(SigMAX),
-  mTerminalContext(new ucontext_t), mTerminalSignal(0),
+  mTerminalContext(0), mTerminalSignal(0),
   mTerminalPolicy(Self()->GetTerminalPolicy()),
 
   mOwner(Owner()), mMIR(0)
@@ -180,6 +180,7 @@ void* GThread::thread_spawner(void* arg)
   {
     // getcontext causes uber crap on mac.
 #ifndef __APPLE__
+    self->mTerminalContext = new ucontext_t;
     if (getcontext((ucontext_t*) self->mTerminalContext))
     {
       perror("getcontext failed:");
@@ -497,7 +498,12 @@ void GThread::TheSignalHandler(GSignal* sig)
   ISdebug(1, _eh + GForm("sys_signal %d, gled_signal %d, sig_name %s in thread '%s'.",
 			 sig->fSysSignal, sig->fSignal, SignalName(sig->fSignal), self->mName.Data()));
 
-  if (sig->fSignal == SigUNDEF) return;
+  if (sig->fSignal == SigUNDEF)
+  {
+    ISerr(_eh + GForm("Undefined signal %d in thread '%s'. Will try to pretend nothing has happened.",
+		      sig->fSignal, self->mName.Data()));
+    return;
+  }
 
   if (self->mSigHandlerVector[sig->fSignal])
   {
@@ -510,15 +516,27 @@ void GThread::TheSignalHandler(GSignal* sig)
   else if (sig->fSignal == SigILL  ||  sig->fSignal == SigSEGV ||
 	   sig->fSignal == SigBUS  ||  sig->fSignal == SigFPE)
   {
-    ISerr(_eh + GForm("Fatal exception %s in thread '%s'.",
+    ISerr(_eh + GForm("Terminal signal %s in thread '%s'.",
 		      SignalName(sig->fSignal), self->mName.Data()));
     gSystem->StackTrace();
     self->mTerminalSignal = sig->fSignal;
+    if (self->mTerminalContext == 0)
+    {
+      fprintf(stderr, "  Terminal context not set, exiting.\n");
+      gSystem->Exit(self->mTerminalSignal);
+    }
     if (setcontext((ucontext_t*) self->mTerminalContext))
     {
       perror(_eh + "setcontext failed (will exit):");
       gSystem->Exit(self->mTerminalSignal);
     }
+  }
+  else
+  {
+    ISerr(_eh + GForm("Unhandled signal %s in thread '%s'. Will print stack-trace and exit.\n",
+		      SignalName(sig->fSignal), self->mName.Data()));
+    gSystem->StackTrace();
+    gSystem->Exit(self->mTerminalSignal);
   }
 }
 
@@ -537,7 +555,7 @@ void GThread::ToRootsSignalHandler(GSignal* sig)
     if (root_sig_map[i] == sig->fSysSignal)
     {
       ((TUnixSystem*)gSystem)->DispatchSignals((ESignals) i);
-      break;
+      return;
     }
   }
 }
