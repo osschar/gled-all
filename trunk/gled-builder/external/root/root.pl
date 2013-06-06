@@ -55,7 +55,7 @@ FNORD
 # ahead or behind. Let's solve this in a more general manner.
 if (defined $ENV{'GLED_ROOT_CONFIG_OPTS'})
 {
-  $config_args .= " " . $ENV{'GLED_ROOT_CONFIG_OPTS'});
+  $config_args .= " " . $ENV{'GLED_ROOT_CONFIG_OPTS'};
 }
 
 target('configure', <<"FNORD");
