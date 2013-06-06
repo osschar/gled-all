@@ -1,0 +1,1372 @@
+2013-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Remove obsolete member mServeTime.
+
+2013-05-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Attempt to fix AMQ crashes by allowing to leak the AMQ objects on
+	reconnect.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Add flag 'Bool_t bLeakAmqObjs'. When this is set, do not delete
+	any AMQ objects in amq_disconnect(). This is off by default.
+
+2013-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Calculate transfer rate based on time of the last reported
+	transfer, not current time.
+
+2013-04-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Support displaying progress for f-stream reporting.
+
+2013-03-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Grr, another attempt, close session and connection before
+	destructing either of them.
+
+2013-03-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Add flag bConnClosed to avid calling cms::Connection::close()
+	multiple times.
+	I don't know if this really hurts but there was another crash due
+	to double free in amq-cpp.
+
+2013-03-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Handle onException() as adviced by Tim Bish on the AMQ newsgroup,
+	just call close, no delete.
+
+2013-02-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Catch exceptions from compilation of user supplied regular
+	expressions.
+
+2013-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Handle disconnect messages and separate seqence-id in f-stream.
+
+	* Glasses/XrdMonSucker.cxx:
+	Add disconnect handling.
+	Move seq-id checking code to XrdServer.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Move seq-id checking code from XrdMonSucker and extend it to also
+	support separate f-stream sequence-id.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Add disconnect record, as was added in xrootd.
+
+2013-01-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Check for nonsensical fstream record lengths.
+
+2012-12-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bring up to date with last f-stream format changes.
+
+	* Glasses/XrdFile.cxx:
+	Take sum-x-square instead of rounded sigma.
+
+	* Glasses/XrdMonSucker.cxx:
+	Use information in the new f-stream format to avoid double loop
+	over messages.
+	Use GQueuePopper to hold SUdpPacket during processing and to
+	provide automatic reference-count decrease.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Copy changes for xrootd.
+
+2012-11-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Cleanup and optimization of 'f' and 't' streams.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Do not stamp on every data registration.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Remove obsolete trace debugging printout and associated memebers.
+	Collect files and users that have changed during a 'f' or 't'
+	message and only SetLastMsgTime and stamp them once.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Remove obsolete member (trace debugging).
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	Remove obsolete comments.
+
+2012-11-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Complete implementation of fstream parsing.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Implement functions for registration of fstream data.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse and process all fstream data.
+
+2012-11-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Second step towards parsing of fstream monitoring.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse and print open and close entries.
+	Properly parse begin/end time and count number of messages to be
+	able to determine timestamp of each message.
+
+	* Glasses/XrdFile.h:
+	Add comment about fstream functions.
+
+2012-11-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First steps towards parsing of fstream monitoring.
+
+	* Glasses/XrdMonSucker.cxx:
+	Rudimentary fstream parsing.
+	Remove obsolete todo comments from redirect stream parsing.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Add fstream structures.
+
+2012-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Final version of collecting, storing and TTree writing of detailed
+	IO requests. 'io' and 'iov' traces are both supported.
+
+	* Stones/SXrdIoInfo.cxx:
+	* Stones/SXrdIoInfo.h:
+	Class for sorting of individual IO requests (in class
+	SXrdReq). Unpacked vector-read information is stored in vectors in
+	SXrdIoInfo. This allows for tight packing of information in
+	memory. Even with this optimal packing the memory usage per file,
+	for standard CMS usage from AAA monitoring, is 100kB.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Move io trace processing functionality from XrdSucker. Onl calling
+	of appriate functions (and locking) stayed there.
+	Add member SXrdIoInfo that can hold individual IO requests.
+	These are only stored if bStoreIoInfo flag is set at
+	initialization time (this is performed by XrdMonSucker, has a
+	configuration variable with the same name).
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Forward all io trace records to XrdFile that implements proper
+	processing and optional storage.
+	Flag bStoreIoInfo is passed to XrdFile on creation time.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add support for writing of SXrdIoInfo classes. This has to be
+	enabled via a configuration flag bStoreIoInfo (in addition to
+	setting it on corresponding XrdMonSucker object).
+
+2012-10-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SXrdIOInfo.cxx:
+	* Stones/SXrdIOInfo.h:
+	* catalog.patch:
+	New classes - structures for serialization of detailed file access
+	information.
+
+2012-10-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFile.h:
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	* Glasses/XrdUser.h:
+	Use UInt_t for all dict ids.
+
+2012-10-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add option to fix the service UUID string.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Improve sucker-thread startup and cancellation. This was somewhat
+	far from working correctly before.
+
+2012-10-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Use GledNS::get_uuid_string().
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Use %x for local id to match TUUID style.
+
+2012-10-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Three-quarters towards new unique ids for FARs.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Construct UUID string at service start (member mUuid).
+	Make mNProcessed ULong64_t.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Send new ids.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	* Glasses/XrdFileCloseReporterGratia.h:
+	Send new ids unless bDomenicoIds are true (should go away soon).
+
+2012-09-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Use approximate time when generating unique record id, file-close
+	time is not growing monotonously.
+
+2012-09-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proper implementation of ActiveMQ connection handling in a
+	dedicated thread.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Proper handling of AMQ connection management and passing of text
+	messages to AMQ in a special thread.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Improve docs.
+	Consistently call virtuals with thread cancellation disabled.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	Remove cancelation disabling now done by the base-class.
+
+2012-08-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Intermediate commit.
+
+2012-08-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First attempt at using cms::ExceptionListener.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Create Reporter thread with detach-on-exit set. Then, clear the
+	flag before canceling it from the proper stop method.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Subclass from cms::ExceptionListener and implement onException()
+	virtual which then closes the connection.
+
+2012-08-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Intermediate commit of amq exception handling on gled side.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Catch exceptions, from all amq calls.
+	Do not store connection factory in member variable.
+	Automatic reconnection still needs to be implemented.
+
+2012-08-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Fix json format, had one = instead of :.
+
+2012-08-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Change json quoting, add back unique-id field.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Quote json fields and values with ", not '.
+	Add back unique-id filed and data-members needed to produce them.
+
+2012-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Extend old user handling, add prelimiary redirection logging.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add ZLink<Zlog> mRedirectLog.
+	When this is set, log redirection messages into it.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Keep an additional user_dict_id to XrdUser* map.
+	Add find-user method that also searches old users:
+	  XrdUser* FindUserOrPrevUser(Int_t dict_id);
+	Add methods that help in removal of old usesrs:
+	  Int_t    RemovePrevUsersOlderThan(const GTime& cut_time);
+	  void     ClearPrevUserMap();
+	This is now called from XrdSucker::CleanupOldUsers().
+
+2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Temporary commit - conditional printout of redirect traces.
+
+2012-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Minor fixes; this is the first version that really works.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Add libset shutdown function to call
+	ActiveMQCPP::shutdownLibrary(). Without this, we get memory
+	corruption on exit.
+	Use stomp as the wire-format.
+	Pass username and password to connection factory directly.
+
+2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve error handling and reporting.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add function DrainQueue() and call it during thread shutdown.
+	Add counters for processed and queued messages.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Do not use failover ... it works too well, spawning hundres of
+	threads until ulimit is used up.
+	Throw full exception from connect error.
+
+2012-07-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First supposedly working version.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Add data members holding AMQ objects.
+	Format the message using JSON syntax.
+	Send the message to given AMQ topic.
+
+2012-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Second intermediate commit for AMQ integration.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Add member variables needed for ActiveMQ connection.
+
+	* Makefile:
+	Proper determination of CPPFLAGS.
+
+2012-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Preliminary commit, template for ActiveMQ file-access reporter.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	New glass, cut-n-pasted from XrdFileCloseReporterGratia.
+
+	* Makefile:
+	Add comment baout needed activemq-cpp include path and libs.
+
+	* glass.list:
+	Add XrdFileCloseReporterAmq.
+
+2012-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Handle exceptions during XrdUser and XrdFile instantiation and
+	registration.
+
+2012-06-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add option to rotate output trees at midnight.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add member 'Int_t mCondWaitSec': when larger than zero, use
+	time-wait when waiting for file-close reports. If waiting
+	times-out, call new virtual function:
+	    virtual void ReportCondWaitTimeout();
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add flag 'Bool_t bRotateAtMidnight'.
+	On startup, do not overwrite stray hidden root files (warn about
+	their existence).
+	Implement virtual ReportCondWaitTimeout() and perform file-rotate
+	check there.
+
+2012-06-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve file creation & cint-thread-safety.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add last date, index members.
+	Improve determination of name for next file.
+	Set tree auto-flush to a reasonable number.
+	Open file and create branches under cint-mutex-lock.
+
+
+	* Glasses/XrdMonSucker.h:
+	Make Add/RemoveFileCloseReporter() foos mir-callable.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add option to always use index for file-name.
+	Write into hidden file & rename to proper name after closing.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bugfix in CleanUpNoIdentServers().
+
+	* Glasses/XrdMonSucker.cxx:
+	A continue statement by-passed an eye-ref-count release at the end
+	of the loop. Use goto.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add bool member bFileIdxAlways that enforces counting index in all
+	file names.
+
+2012-06-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bugfix for a somewhat frequent crash (every two days or so).
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	In ReportFileClosed() take XrdUser, XrdServer pointers from
+	argument to the function. Links in the objects can be reset to
+	null already.
+
+2012-06-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	Add option to auto-save on elapsed time, too.
+
+2012-06-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Support writing of file-access reports into ROOT trees.
+
+	* Glasses/XrdFileCloseReporterTree.cxx:
+	* Glasses/XrdFileCloseReporterTree.h:
+	New glass for writing out file-access reports into ROOT trees.
+
+	* Stones/SXrdFileInfo.cxx:
+	* Stones/SXrdFileInfo.h:
+	* Stones/SXrdServerInfo.cxx:
+	* Stones/SXrdServerInfo.h:
+	* Stones/SXrdUserInfo.cxx:
+	* Stones/SXrdUserInfo.h:
+	Simple classes for branches that make up file-access report.
+
+	* Glasses/XrdFile.h:
+	Whitespace.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add cleanup function to properly terminate the reporter thread.
+	Register the detached thread to Saturn so that it gets properly
+	terminated.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Do not call parent-glass versions of virtuals ReportLoopInit() and
+	ReportLoopFinalize().
+
+	* glass.list:
+	Register XrdFileCloseReporterTree.
+
+2012-06-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdServer.cxx:
+	Catch exceptions thrown by XrdServer::RemoveFile().
+
+2012-06-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Always reset XrdUser when unpackingprocessing open/close traces.
+	When server does not use 'io' there is a single stream for all
+	user sessions.
+
+2012-06-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdMonSucker.cxx:
+	Use ApproximateTime for all timing needs.
+
+2012-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First steps for parsing of redirect trace messages.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse and dump some info about entries in redirect traces.
+
+	* XrdMon/XrdXrootdMonData.h:
+	Import redirection monitoring defines from corresponding file in xrd.
+
+2012-04-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Collect and report more statistics about vector reads.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Add SRange members to hold single read, vector read, and vector
+	read count statistics.
+	Add method AddVecReadSample() for updating vector read stats.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Report the new statistics.
+
+	* Glasses/XrdMonSucker.cxx:
+	Call XrdFile::AddVecReadSample() for vector reads.
+
+2012-04-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Add column showing percent of file read.
+
+2012-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	In page title, write number of passed files when filtering is
+	active.
+	Add read rate and average read size columns.
+	Reorder column order.
+	Add option file_len=int, to limit length of displayed file name
+	(default is 64, 0 means no limit).
+
+2012-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	* Glasses/XrdFileCloseReporterGratia.h:
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Eye-refcount also user and server before passing them to
+	file-close reporters.
+
+2012-04-21  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Force reuse of port for server socket. Use SSocket classes.
+
+2012-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Bugfix in old server/session clenup, improve EHS table.
+
+	* Glasses/XrdEhs.cxx:
+	When fqhn is requested, apply regexps to fqhns.
+	Modify table headers for this case, too.
+
+	* Glasses/XrdMonSucker.cxx:
+	Increase eye-ref-count for servers when searching for dead
+	files, sessions.
+	This was potentialy deadly, as several cleanup threads can run at
+	the same time.
+
+2012-04-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Better support for numeric host-names as reported by xrd client.
+
+	* Glasses/XrdMonSucker.cxx:
+	See if client host is given as numeric ip, pass this to XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add member 'Bool_t bNumericHost;' and consider this when
+	constructing FQHN.
+
+2012-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve old server clenup and open-file table.
+
+	* Glasses/XrdEhs.cxx:
+	Add option 'fqhn'.
+	Allow option arguments without explicit value (use "1").
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add processing of '=' / server ident messages.
+	Add new server-alive checks based on ident messages (or, better,
+	on the fact that they are no longer being received).
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add members and functions for keeping track of last 'ident'
+	message from the server and typical interval between two 'ident'
+	messages.
+	Add function 'TString XrdServer::GetFqhn()'.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add function 'TString XrdUser::GetFromFqhn()'.
+
+2012-04-15  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEhs.cxx:
+	New style of html table.
+
+2012-04-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Generalize reporting at file-close.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	* Glasses/XrdFileCloseReporterGratia.h:
+	New glass holding Gratia-probe specific code (including opening
+	and writing to an UDP socket).
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Remove Gratia-specific code to a new subclass
+	XrdFileCloseReporterGratia.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Support multiple instances of XrdFileCloseReporter.
+
+	* glass.list:
+	Register new glass XrdFileCloseReporterGratia.
+
+2012-03-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	When file-open trace is received, reset file-open time if it is
+	further away in the past.
+
+2012-03-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdDomain.cxx:
+	* Glasses/XrdDomain.h:
+	* Glasses/XrdMonSucker.cxx:
+	Add packet and failed seq-id counters to XrdDomain, too.
+
+2012-03-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Count packets processed and number of mis-matched seq-ids.
+
+2012-02-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add processing of appinfo messages.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Report app_info at file close.
+
+	* Glasses/XrdMonSucker.cxx:
+	Process 'i' messages and stick the text into the right XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add member TString mAppInfo and method AppendAppInfo().
+
+2012-02-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve initialization of server sequence-id and logging.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Send errors to ZLog.
+
+	* Glasses/XrdMonSucker.cxx:
+	Fix server seqence-id initialization (should only happen on one of
+	the blessed message types).
+	Log new-server reports as L_Message. L_Info is now used for
+	logging of every processed packet.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add bool member needed to mark server sequence-id initialization.
+
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add link member for ZLog.
+
+	* Glasses/XrdMonSucker.cxx:
+	Log uninteresting stuff as info, periodic cleanups as message.
+
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Rename libset CmsGridViz to XrdMon.
+
+2012-02-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Remove unused glasses in preparation for libset rename.
+
+	* Glasses/CmsXrdHost.cxx:
+	* Glasses/CmsXrdHost.h:
+	* Glasses/CmsXrdSite.cxx:
+	* Glasses/CmsXrdSite.h:
+	* Glasses/CmsXrdUser.cxx:
+	* Glasses/CmsXrdUser.h:
+	Removed glasses ... they never got used.
+
+	* glass.list:
+	Unregister CmsXrd classes.
+
+2012-02-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketListener.cxx:
+	* Glasses/UdpPacketListener.h:
+	* Glasses/UdpPacketSource.cxx:
+	* Glasses/UdpPacketSource.h:
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	* Glasses/UdpPacketTcpServer.cxx:
+	* Glasses/UdpPacketTcpServer.h:
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	Move to new libset Net1.
+
+	* Glasses/XrdMonSucker.cxx:
+	* glass.list:
+	Modify as needed for UdpXyzz class move.
+
+	* Makefile:
+	Add dependency on Net1 libset.
+
+2012-02-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Set default port to 4242.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Set default to localhost:4242.
+	Use AF_INET family, AF_UNSPEC picks up IP6 for localhost.
+
+2012-02-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	Comment debug printout.
+
+	* Glasses/UdpPacketTcpServer.cxx:
+	Grayspace.
+
+	* Glasses/XrdMonSucker.cxx:
+	Decrease ref-count on packet when done with it.
+
+2012-01-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketTcpServer.cxx:
+	Use recursive mutex for GSelector. There is double locking in
+	RemoveClient() when called with TSocket* argument.
+
+2012-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Major restructuring to support various monitoring-data collection
+	setups.
+
+	* Glasses/UdpPacketListener.cxx:
+	* Glasses/UdpPacketListener.h:
+	* Glasses/UdpPacketSource.cxx:
+	* Glasses/UdpPacketSource.h:
+	* Glasses/UdpPacketTcpServer.cxx:
+	* Glasses/UdpPacketTcpServer.h:
+	* Glasses/UdpPacketTreeWriter.cxx:
+	* Glasses/UdpPacketTreeWriter.h:
+	New files - restructuring of functionality from UdpPacketProcessor
+	and XrdMonSucker.
+
+	* Glasses/UdpPacketProcessor.cxx:
+	* Glasses/UdpPacketProcessor.h:
+	Removed files - split into UdpPacketListener and UdpPacketTcpServer.
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	Subclass from (almost abstract) UdpPacketSource.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Remove UDP packet slurping code, register to a UdpPacketSource to
+	receive SUdpMessages.
+
+	* glass.list:
+	Register all the glass changes.
+
+2012-01-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/UdpPacketProcessor.cxx:
+	Reduce printout, make receive buffer 64k (on stack, hmmh).
+
+2012-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve reporting, thread handling.
+
+	* Glasses/UdpPacketProcessor.cxx:
+	* Glasses/UdpPacketProcessor.h:
+	Improve logging and error reporting, add link to ZLog.
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	Improve thread handling and error reporting.
+
+2012-01-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Fix half-cooked cut-n-paste crap.
+	Update class docs.
+
+2012-01-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Basic parsing of request and arguments for table filtering.
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Parse the GET request (first line only).
+	Parse and split the arguments.
+	Pass those to table filling function where filters are created
+	based on those values.
+
+2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proto-verison of UDP packet processor and its client.
+
+	* Glasses/UdpPacketProcessor.cxx:
+	* Glasses/UdpPacketProcessor.h:
+	New glass - listen for UDP packets and forward them to connected
+	clients over TCP, streamed as SUdpPacket.
+
+	* Glasses/UdpPacketTcpClient.cxx:
+	* Glasses/UdpPacketTcpClient.h:
+	New glass - TCP client for UdpPacketProcessor. Can deliver packets
+	to several local consumers using GQueueSet.
+
+	* glass.list:
+	Register UdpPacketProcessor and UdpPacketTcpClient.
+
+2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
+	Move SUdpPacket to GledCore.
+
+2012-01-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
+	Use fixed-size array for from address.
+
+2011-12-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	File-ids were not unregistered when whole sessions were closed
+	down via timeouts.
+
+2011-12-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Safer server start/stop procedure.
+
+2011-12-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add cleaning of inactive users.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add method CleanUpDeadUsers() and surrounding members.
+	Add basic processing of '=' messages - need to extend it to
+	actually detect server restarts.
+
+2011-12-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Parse, store and report file size.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Add member for file size - Double_t mSizeMB.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Report file-size.
+
+	* Glasses/XrdMonSucker.cxx:
+	Parse file-size form the open-trace, store it in XrdFile.
+
+2011-11-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Session handling and logging fixes.
+
+	* Glasses/XrdMonSucker.cxx:
+	Call XrdServer::DisconnectUser() under write lock (instead of MIR).
+	When a user-name exists under given server, wipe the old one
+	(we are getting weird stuff from MIT).
+	Log file open/close and user disconnects.
+
+2011-11-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdServer.cxx:
+	Consistenly use assign_link<>() in AdEnlightenment().
+
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Finish conversion to ZLog usage.
+
+2011-11-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mostly convert to using ZLog.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add link to ZLog.
+	Use this (via ZLog::Helper) to print stuff in a file.
+	Trace debugging is still going to stdout.
+
+2011-11-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix response header, serve response in a detached thread.
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Serve a page in a detached thread (still doesn't read request).
+	Sleep for a second after sending (get ack would be better).
+	Use proper date format, usr crlf line ends in header.
+
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	Improve response header a bit.
+
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	EHS was locking up, use home-cooked "web server".
+
+	* Glasses/XrdEhs.cxx:
+	Use direct sockets and just dump the table.
+	The request is not even read.
+
+	* Makefile:
+	Remove dependency on EHS libset.
+
+2011-11-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fix deadlock coming from XrdServer::DisconnectUser().
+
+	* Glasses/XrdMonSucker.cxx:
+	Call XrdServer::DisconnectUser() via a MIR (write-lock should be
+	sufficient, in principle).
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Make user / file managemnet functions MIR-invokable.
+
+2011-11-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Handle new disconnect trace flags (forced, boundp).
+
+2011-11-02  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEhs.cxx:
+	Display OpenTime as time elapsed since opening of the file.
+
+2011-11-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Display real name in html table.
+
+	* Glasses/XrdEhs.cxx:
+	Change header to "User" and use GetRealName() to get it from
+	XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add TString member mRealName, fill it in constructor.
+	Rename GetHumanName() to ParseHumanName() and make it public.
+
+2011-11-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* CmsGridViz/XrdXrootdMonData.h:
+	Add disconnect bits - forced and boundp.
+
+2011-11-01  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add static function to get human name from DN.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Rename link mXrdReporter to mXrdSucker.
+	Reporter is file-close-reporter.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Set open/last-msg time on a file when file-map message is
+	received. Don't wait until the first trace.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	* Glasses/XrdEHS.cxx:
+	* Glasses/XrdEHS.h:
+	* glass.list:
+	Rename XrdEHS to XrdEhs (consistent capitalization with other
+	classes in this libset).
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Standardize constructor & link usage.
+
+	* Glasses/XrdEHS.cxx:
+	* Glasses/XrdEHS.h:
+	Make XrdMonSucker a ZLink.
+	Use standard constructor arguments.
+	Put sub-class of EHS into an unnamed namespace.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add old session/server clean-up; improve locking.
+
+	* Glasses/XrdDomain.cxx:
+	* Glasses/XrdDomain.h:
+	New glass representing a domain.
+
+	* Stones/SUdpPacket.cxx:
+	* Stones/SUdpPacket.h:
+	New stone holding a UDP packet stamped with time and sender info.
+
+	* Stones/SXrdServerId.cxx:
+	* Stones/SXrdServerId.h:
+	New stone holding unique identification of a xrootd server.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add functions to clean up old user-sessions and servers:
+	  void CleanUpOldUsers();
+	  void CleanUpOldServers();
+	Add another thread that checks how much time has passed and calls
+	the clean-up functions when needed.
+	Improved locking.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Store unique server id in the class itself.
+	Improved locking.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Store file/user dict-id in the class itself.
+	Improved locking.
+
+	* glass.list:
+	Register XrdDomain.
+
+2011-11-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Also process sessions for which there is no user authentication info.
+
+2011-10-28  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	Add number of opened files in page html title.
+
+2011-10-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Better warnings, and less of them.
+
+2011-10-26  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	Cache copy of opened files.
+
+2011-10-26  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	Add two columns for time of last update and total bytes read.
+
+2011-10-24  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	Change table content.
+
+	* Makefile:
+	Add dependency to EHS libset.
+
+	* glass.list:
+	Change XrdEHS class id.
+
+2011-10-21  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdEHS.cxx:
+	* Glasses/XrdEHS.h:
+	First version of embedded http server to provide a web page with info
+	about open files, its users, etc.
+
+	* glass.list:
+	New XrdEHS class.
+
+2011-10-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Do not filter nagios records by default.
+	Support also "old" auth record format.
+
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Expand in sync with development in xrootd.
+
+	* CmsGridViz/XrdXrootdMonData.h:
+	Update for changes in vector read monitoring in xrootd.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Write out user group as user_fqan.
+
+	* Glasses/XrdMonSucker.cxx:
+	Add processing of group info in auth monitoring message.
+	Add prelimiary processing of vector-read traces.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add member TString mGroup.
+
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	Reset XrdServer-stored seq-id after mismatch.
+	Add time and server-name to seq-id mismatch warning.
+
+2011-10-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add dedicated list holding currently opened files.
+
+2011-10-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Fixes for production readiness of Gratia dumper.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Add "xrd-" prefix to unique id.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Set element FID for self and for domain-list.
+	Set keep-sorted flag in domain-list.
+	Reverse domain/host order in XrdServer name.
+	Add initialization / check / warning for server sequence-id.
+	Fix a byte - Mbyte conversion.
+	Fix reading of "bytes-written" offset out of trace message.
+
+	* Glasses/XrdServer.h:
+	Add sequence-id data-member and init/query functions.
+	Fix a byte - Mbyte conversion.
+
+2011-10-05  Alja Mrak-Tadel  <Alja.Mrak.Tadel@cern.ch>
+
+	* Glasses/XrdMonSucker.cxx:
+	Group XrdServer objects by domain name.
+
+2011-09-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add unique-id and username used at xrootd server to file-close
+	report.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Also dump unique-id and username used at xrootd server.
+
+	* Glasses/XrdMonSucker.cxx:
+	Pass username used at xrootd server when instantiating an XrdUser.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add data-member for storing username used at xrootd server:
+	  TString mServerUsername;
+
+2011-09-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve printout formats.
+
+	* Glasses/XrdFile.h:
+	Reduce precision of Read/WriteStats in StoneOutput weed.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	Cleanup printout.
+
+	* Glasses/XrdMonSucker.cxx:
+	Add date/time info to message printout.
+
+2011-09-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Step 3 in file-close reporting.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	Use SRange for storing read/write trace statistics.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Dump all the stuff to UDP port.
+	Beautify reporter-thread management.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Use getaddrinfo() for initial setup.
+	The revfrom() call still uses ip4 structs.
+	Beautify suck-thread management.
+
+2011-09-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Step 2 in file-close reporting.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Add thread management and notification queue.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add link to XrdFileCloseReporter, call it when a file is closed.
+
+2011-09-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Prelimiary commit of file-close reporting.
+
+	* Glasses/XrdFileCloseReporter.cxx:
+	* Glasses/XrdFileCloseReporter.h:
+	Proto version.
+
+	* Glasses/XrdMonSucker.h:
+	Mostly comments about handling of XrdFileCloseReporter.
+
+	* glass.list:
+	Register XrdFileCloseReporter.
+
+2011-09-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdUser.h:
+	When a XrdUser disconnects, check all its files to see if they are
+	open -- and close them.
+
+	* Glasses/XrdFile.h:
+	Add function Bool_t IsOpen().
+
+	* Glasses/XrdMonSucker.cxx:
+	Add function Bool_t IsConnected().
+
+2011-09-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Finalize front-line processing of xrootd monitoring streams.
+
+	* Glasses/XrdMonSucker.cxx:
+	Use new functions from XrdServer, proper dict_id de-registration.
+	Lock lenses when doing direct calls on them; those should be MIRs,
+	anyway.
+	Make code somewhat prettier.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add new owned link:
+	   ZLink<ZList> mPrevUsers;
+	initialize it in AdEnlightenment() and add the following functions:
+	   void DisconnectUser(XrdUser* user, Int_t dict_id);
+	   void RemoveUser(XrdUser* user);
+	   void RemoveFile(XrdFile* file, Int_t dict_id);
+	to help managing users and files ... and their dict_id maps.
+
+	* Glasses/XrdUser.cxx:
+	Docs.
+
+	* Glasses/XrdFile.h:
+	Whitespace.
+
+2011-09-02  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Complete parsing of xrd monitor stream -- all information is now
+	processed.
+
+	* Glasses/XrdFile.cxx:
+	* Glasses/XrdFile.h:
+	* glass.list:
+	New glass representing an open file in a xrd session.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Finalize parsing of monitor stream, including IO traces.
+	Use user, host & domain matching to filter out nagios probes.
+	Use DN, host & domain REs to select sessions whose traces are to
+	be dumped into the log.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add start, last-msg times.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add connect, disconnect, last-msg times.
+	Add DN, VO and role details.
+
+2011-06-29  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add start / connect time into to XrdServer and XrdUser.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add start-time.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Pass start / connect time to XrdServer/User at creation time.
+
+2011-06-24  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Populate state with XrdServer and XrdUser lenses - this is slowly
+	getting functional.
+
+	* Glasses/CmsXrdSite.cxx:
+	* Glasses/CmsXrdSite.h:
+	* Glasses/CmsXrdUser.cxx:
+	* Glasses/CmsXrdUser.h:
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	New glasses - hold data about sites, users.
+
+	* glass.list:
+	Register new glasses.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Improve reception of incoming data. Actually create XrdServer and
+	XrdUser lenses to represent what is going on.
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	Add mHost and mDomain members.
+
+2011-06-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	First commit -- still incomplete.

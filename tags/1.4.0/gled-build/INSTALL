@@ -1,0 +1,142 @@
+INSTALL - Gled Build
+====================
+
+This is just a short overview. See http://www.gled.org/ for details.
+In particular http://www.gled.org/docs/html/gledimp.html.
+
+Tested platforms
+----------------
+
+Gled has been compiled on following platforms:
+     i386-linux     RedHat 7.2, 7.3             (gcc 2.96)
+		    RedHat 8.0, 9, debian sarge (gcc 3.2)
+     alpha-linux    RedHat 7.2                  (gcc 2.96)
+
+
+External software
+-----------------
+
+For base instalation the following packages are needed:
+
+ ROOT    5.22                             (see http://root.cern.ch/)
+ FLTK    1.1.9 with thread support        (see http://www.fltk.org/)
+ fltk-mt 2.1                              (see http://www.gled.org/download/)
+ DevIL   1.7.4	                          (see: http://www.imagelib.org/)
+
+Other libsets might need additional libraries.
+
+Build procedure
+---------------
+
+Set the environment for ROOT and GLED (this assumes (ba)sh), e.g.
+
+export ROOTSYS=<dir-to-ROOT-installation>
+export GLEDSYS=<in-principle-this-directory>
+export PATH=$PATH:$ROOTSYS/bin:$GLEDSYS/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ROOTSYS/lib:$GLEDSYS/lib
+# fltk, fltk-mt and DevIL libraries must be available for base build
+
+mkenv script for (ba)sh is provided. Run it as:
+
+. `./mkenv <path-to-ROOT-installation>` [ Note the backticks! ]
+
+or as
+
+mkenv <path-to-ROOT-installation>
+
+In the latter case it will return the name of file (in /tmp directory)
+that contains the environment settings. You can copy/rename it and
+store it somewhere. Still, you should source (or .) it.
+
+
+Then, in principle, do:
+
+1) check/edit defaults in configure.rc, or use command-line options.
+   Options can be given as --<opt1>=<val1> or -<opt1> <val1>, option
+   names can be abbreviated.
+   The most relevant options are:
+      -ucpp <str>    user cpp-flags (e.g. -D_SOMETHING_)
+      -ucxx <str>    user cxx-flags
+      -uld  <str>    user ld-flags
+      -debug         implies -DDEBUG and -g (otherwise -O)
+      -external      ':' separated list of directories to include/link from;
+                     each <dir> implies -I<dir>/include and -L<dir>/lib
+      -libsets       ':' separated dir list or
+                     <auto>, <auto-prompt> selects all capitalized dirs or
+                     <file:[filename]> a file with one libset per line
+
+   Run: ./configure <whatever options you need>
+
+   configure creates a file ./build_config. It containes perl-dump of
+   two hashes holding information needed for compilation of libsets.
+   Dependencies are resolved, so the order of compilation is
+   determined properly even if build_libsets file contains them in a
+   wrong order.
+
+   Further, configure creates all auto-generated files and runs
+   make depend in all lib-set directories. If you add your own classes
+   make sure to:
+   1) if you added a Gled-class, edit glass.list in appropriate lib-set
+   2) run configure
+      configure -reconfig will do for changes that don't change CPP,
+      CXX or LD flags or external directories.
+      Some of those can be hacked in the build_config file.
+      --reconf is enough if you just want to add/remove some libsets
+      to/from build.
+
+3) Run: make
+
+   The default target builds all libraries and executables and
+   installs them into $GLEDSYS/lib and bin directories.
+
+   Make process uses the default compiler. Export CXX variable if you
+   want to use other compiler.
+
+
+Basing a build on existing builds
+---------------------------------
+
+Another possibility is that you only want to build a few
+dependant libsets and re-use already built ones. In this case you must
+specify the existing build directories by passing the -base option:
+
+./configure -base <dir1>:<dir2> <other-options>
+
+"configure" then tries to resolve the dependencies from that
+directories, symlinks them into the local directory and
+installs all stuff needed for building into the local directory.
+
+
+Getting additional libsets
+--------------------------
+
+Sources are available from SVN:
+
+  https://svn.gled.org/gled/trunk/libsets/
+
+Run ./configure. If you have an existing build, ./configure --reconf
+will do (optionally listing the libsets, if auto-determination is
+switched off).
+
+If additional external software is installed in a non standard location
+(given to previous full configure), hand-hack the build_config ... or
+rebuild from scratch:
+
+ ./make distclean
+ ./configure `cat config.status` --ext=<old-path>:<new-location>
+ ./make
+
+Remember to also set PATH / LD_LIBRARY_PATH (or /etc/ld.conf.so) in
+your execution environment.
+
+
+Getting sources of external packages
+------------------------------------
+
+For most external packages the source packages are also available
+from:
+
+  ftp://ftp.gled.org/cache/
+
+This is for completeness only. If you intend to use/compile those
+packages it is still a good idea to visit homepages of given projets.

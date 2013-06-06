@@ -1,0 +1,8 @@
+EHS
+
+Preliminary wrapper over EHS (Embeddable HTTP Server) library.
+EHS by Zac Hansen xaxxon@slackworks.com (thanks Zac).
+http://xaxxon.slackworks.com/ehs
+
+Tested with EHS version ehs-1.3.1. 
+
