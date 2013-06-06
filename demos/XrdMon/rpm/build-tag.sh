@@ -27,6 +27,10 @@ fi
 tag=$1
 dist=$2
 
+# Getting root-5.34 to build on EL5 is fun.
+if [[ $dist = "el5" ]]; then
+    export GLED_ROOT_CONFIG_OPTS="--disable-xrootd --disable-hdfs"
+fi
 
 dir=`pwd`
 ncpu=`cat /proc/cpuinfo  | grep -cP '^processor'`
