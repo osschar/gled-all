@@ -39,7 +39,6 @@ protected:
   list<XrdFile*>       mFileList;     //!
   TimeStamp_t          mFileListTS;   //!
   GMutex               mServeMutex;   //!
-  GTime                mServeTime;    //!
 
   void fill_content(const GTime& req_time, TString& content, lStr_t& path, mStr2Str_t& args);
 
