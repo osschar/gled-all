@@ -35,6 +35,7 @@ if ($BUILD_OS =~ /linux/)
 }
 elsif ($BUILD_OS =~ /darwin/)
 {
+  $config_args .= " --with-cc=gcc --with-cxx=g++ --with-ld=g++";
   # Starting with 10.7, ftgl and glew no longer work with fltk when configured
   # to use GLX. So we boldly hack around.
   # The side-effect is that root gl and eve do not work. Sigh, or sth.
@@ -48,6 +49,13 @@ perl -ni -e 'print unless /define GLEW_APPLE_GLX/o;' graf3d/glew/src/glew.c
 rm -f lib/libGLEW.* lib/libFTGL.*
 make
 FNORD
+}
+
+# ROOT sux at compiling with xrootd and hdfs versions on EL5 ... they are either
+# ahead or behind. Let's solve this in a more general manner.
+if (defined $ENV{'GLED_ROOT_CONFIG_OPTS'})
+{
+  $config_args .= " " . $ENV{'GLED_ROOT_CONFIG_OPTS'});
 }
 
 target('configure', <<"FNORD");
