@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Args: [--publish] tag os
 
 if [[ $1 = "--help" || $1 = "-h" ]]; then
