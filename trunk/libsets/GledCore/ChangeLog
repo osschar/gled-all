@@ -1,3 +1,10 @@
+2013-08-07  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/ZGlass.cxx:
+	* Glasses/ZLog.cxx:
+	* Glasses/ZLog.h:
+	Fix / improve some comments.
+
 2013-05-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Further improve signal handling.

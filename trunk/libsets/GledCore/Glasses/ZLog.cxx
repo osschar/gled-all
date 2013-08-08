@@ -18,18 +18,12 @@
 
 //______________________________________________________________________________
 //
-// Fast, preliminary implementation to plug a hole in XrdMonSucker.
-// Needs more work ...
+// Logs into given file, supports file rotation (there is a dedicated thread
+// looking for this)..
 //
-// Short term:
-// - Various helper / access functions to make it easier to use.
-//
-// Medium term:
-// - Log rotation,
-// - Do output in the dedicated thread. (not 100% sure this is smart)
-//
-// Long term:
-// - GUI (yes, right).
+// Things I though, at some point, are relevant:
+// - Do output in the dedicated thread (not 100% sure this is smart).
+// - GUI (yes, right) -- to replace "main logger".
 
 ClassImp(ZLog);
 

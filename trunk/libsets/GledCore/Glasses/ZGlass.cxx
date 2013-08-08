@@ -21,6 +21,14 @@
 // Provides infrastructure for integration with the Gled system.
 //
 // mGlassBits: collection of internal lens flags shared also with ZQueen.
+//
+// RayAbsorber: A rather horrible hack "extension" that allows a synchronous
+// capture of any Ray. This really shouldn't be used within core Gled unless
+// one knows pretty well what he is doing.
+// The thing that makes it justified is that this also works for
+// ZGlass instances that are not enlightened. 
+// So far, this is only used for getting rays out of local camera in Pupil
+// (which isn't enlightened).
 
 ClassImp(ZGlass);
 
