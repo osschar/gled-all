@@ -86,8 +86,6 @@ public:
 
   void RotateLog();    // X{Ed} 7 MButt()
 
-  // void ReopenFile();   // X{E}
-
   void Put(Int_t level, const TString& prefix, const TString& message);
   void Put(const GTime&   time,        Int_t level, const TString& prefix, const TString& message);
   void Put(const TString& time_string, Int_t level, const TString& prefix, const TString& message);
