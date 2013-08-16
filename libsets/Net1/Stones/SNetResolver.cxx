@@ -25,6 +25,7 @@ void SNetResolver::_init()
 
 SNetResolver::SNetResolver() :
   m_hostname_re    ("^([^\\.]+)\\.(.*)$", "o"),
+  m_nodomain_re    ("^[^\\.]+$", "o"),
   m_ip4_numeric_re ("^(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$", "o"),
   m_ip4_in_name_re ("^(.*\\d+\\.\\d+\\.\\d+\\.\\d+.*?)\\.([^\\.]+(?:\\.[^\\.]+)+)$", "o")
 {
@@ -51,20 +52,36 @@ Bool_t SNetResolver::was_local()
     (a == 192 && b == 168);
 }
 
+Bool_t SNetResolver::is_fqhn(const TString& hostname)
+{
+  return m_hostname_re.Match(hostname) == 3;
+}
+
+Bool_t SNetResolver::is_nodomain(const TString& hostname)
+{
+  return m_nodomain_re.Match(hostname) == 1;
+}
+
 //==============================================================================
 
 Bool_t SNetResolver::resolve_fqhn
 (
- SUdpPacket *p,
- TString &fqhn,
- Bool_t *numeric_p)
+  SUdpPacket *p,
+  TString    &fqhn
+)
 {
+  // Tries to determine fqhn of address that sent the UDP packet p.
+  // If name lookup fails, it is translated into numeric form and
+  // the state bool is_numeric is set to true;
+
   sockaddr_in  sa4;
   sockaddr_in6 sa6;
   sockaddr    *sa = 0;
   void        *sa_in = 0;
   socklen_t    sl;
   int          af;
+
+  reset_status_bits();
 
   if (p->mAddrLen == 4)
   {
@@ -83,100 +100,100 @@ Bool_t SNetResolver::resolve_fqhn
     sl = sizeof(sa6);
   }
 
-  Bool_t numeric = false;
   Char_t buf[256];
   if (getnameinfo((sockaddr*) sa, sl, buf, sizeof(buf), 0, 0, NI_NAMEREQD) != 0)
   {
     if ( ! inet_ntop(af, sa_in, buf, sl))  return false;
-    numeric = true;
+    f_numeric = true;
   }
   fqhn = buf;
   fqhn.ToLower();
 
-  if (numeric_p) *numeric_p = numeric;
   return true;
 }
 
 Bool_t SNetResolver::split_non_numeric_fqhn_to_host_domain
 (
- const TString &fqhn,
- TString &host, TString &domain)
+  const TString &fqhn,
+  TString &host, TString &domain
+)
 {
+  // Returns false if none of the regexps match.
+  // Sets f_local_domain flag if it's a short hostname (no dots in fqhn).
+
   if (m_ip4_in_name_re.Match(fqhn))
   {
     host   = m_ip4_in_name_re[1];
     domain = m_ip4_in_name_re[2];
-    return true;
   }
   else if (m_hostname_re.Match(fqhn) == 3)
   {
     host   = m_hostname_re[1];
     domain = m_hostname_re[2];
-    return true;
+  }
+  else if (m_nodomain_re.Match(fqhn) == 1)
+  {
+    host   = m_nodomain_re[0];
+    domain = "local";
+    f_local_domain = true;
   }
   else
   {
     return false;
   }
+
+  return true;
 }
 
 Bool_t SNetResolver::split_fqhn_to_host_domain_no_lookup
 (
- const TString &fqhn,
- TString &host, TString &domain,
- Bool_t *numeric_p)
+  const TString &fqhn,
+  TString &host, TString &domain
+)
 {
-  // If fqhn is numeric, domain is either unknown or local-subnet.
-  // Returns false if 
+  // Returns false if none of the regexps match.
+  // If fqhn is numeric, domain is either "unknown" or "local".
+  // Status bits are set accordingly.
 
-  Bool_t numeric = false;
+  reset_status_bits();
 
   if (is_numeric(fqhn))
   {
-    host    = fqhn;
-    domain  = was_local() ? "local-subnet" : "unknown";
-    numeric = true;
+    f_numeric = true;
+    host = fqhn;
+    if (was_local()) { domain = "local";   f_local_domain   = true; }
+    else             { domain = "unknown"; f_unknown_domain = true; }
   }
-  // Eventually, check if numeric IPv6 ... else if (is_numeric6(fqhn))
-  else if (m_ip4_in_name_re.Match(fqhn))
-  {
-    host   = m_ip4_in_name_re[1];
-    domain = m_ip4_in_name_re[2];
-  }
-  else if (m_hostname_re.Match(fqhn) == 3)
-  {
-    // Domain given
-    host   = m_hostname_re[1];
-    domain = m_hostname_re[2];
-  }
+  // Eventually, check if numeric IPv6:
+  // else if (is_numeric6(fqhn))
   else
   {
-    return false;
+    return split_non_numeric_fqhn_to_host_domain(fqhn, host, domain);
   }
 
-  if (numeric_p) *numeric_p = numeric;
   return true;
 }
 
 Bool_t SNetResolver::split_fqhn_to_host_domain_with_lookup
 (
- const TString& fqhn_in,
- TString &host, TString &domain,
- Bool_t *numeric_p
+  const TString& fqhn_in,
+  TString &host, TString &domain
 )
 {
   // Returns false if things can not be figured out.
 
   TString fqhn = fqhn_in;
 
-  if (numeric_p) *numeric_p = true;
+  reset_status_bits();
 
   if (is_numeric(fqhn))
   {
     if (was_local())
     {
       host    = fqhn;
-      domain  = "local-subnet";
+      domain  = "local";
+      f_numeric = true;
+      f_local_domain = true;
       return true;
     }
     else
@@ -195,13 +212,13 @@ Bool_t SNetResolver::split_fqhn_to_host_domain_with_lookup
       {
         host   =  fqhn;
         domain = "unknown";
+        f_numeric = true;
+        f_unknown_domain = true;
         return true;
       }
     }
   }
   // Eventually, check if numeric IPv6 ... else if (is_numeric6(fqhn))
-
-  if (numeric_p) *numeric_p = false;
 
   return split_non_numeric_fqhn_to_host_domain(fqhn, host, domain);
 }

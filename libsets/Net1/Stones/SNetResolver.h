@@ -19,54 +19,62 @@ private:
 
 protected:
   TPMERegexp    m_hostname_re;
+  TPMERegexp    m_nodomain_re;
   TPMERegexp    m_ip4_numeric_re;
   TPMERegexp    m_ip4_in_name_re;
 
+  void reset_status_bits()
+  {
+    // host = domain = "";
+    f_numeric = f_local_domain = f_unknown_domain = false;
+  }
+
 public:
   // Result members ... really?
-  // TString       host;
-  // TString       domain;
-  // Bool_t        is_numeric;
-  // Bool_t        is_local;
-  // Bool_t        is_known;
-  //
-  // void reset_result_members()
-  //{
-  //  host = domain = "";
-  //  // WTF with the bools ... this is a bad idea
-  //}
-
-  // TString    info; ??
-
+  // TString    f_host;
+  // TString    f_domain;
+  // TString    f_info; // ??
+  Bool_t        f_numeric;
+  Bool_t        f_local_domain;
+  Bool_t        f_unknown_domain;
 
 public:
   SNetResolver();
   virtual ~SNetResolver();
 
+  //----------------------------------------------------------------
+
   Bool_t is_numeric(const TString& hostname);
   Bool_t was_local();
 
+  Bool_t is_fqhn(const TString& hostname);
+  Bool_t is_nodomain(const TString& hostname);
+
+  //----------------------------------------------------------------
+
   Bool_t resolve_fqhn
-  (SUdpPacket *p,
-   TString &fqhn,
-   Bool_t *numeric_p=0);
+  (
+    SUdpPacket *p,
+    TString    &fqhn
+  );
 
   Bool_t split_non_numeric_fqhn_to_host_domain
   (
-   const TString &fqhn,
-   TString &host, TString &domain);
+    const TString &fqhn,
+    TString &host, TString &domain
+  );
 
   Bool_t split_fqhn_to_host_domain_no_lookup
   (
-   const TString &fqhn,
-   TString &host, TString &domain,
-   Bool_t *numeric_p=0);
+    const TString &fqhn,
+    TString &host, TString &domain
+  );
 
   Bool_t split_fqhn_to_host_domain_with_lookup
   (
-   const TString& fqhn_in,
-   TString &host, TString &domain,
-   Bool_t *numeric_p=0);
+    const TString& fqhn_in,
+    TString &host, TString &domain
+  );
 
 #include "SNetResolver.h7"
   ClassDef(SNetResolver, 0);
