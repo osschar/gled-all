@@ -56,7 +56,7 @@ XrdUser::~XrdUser()
 TString XrdUser::GetFromFqhn() const
 {
   if (bNumericHost)
-    return mFromHost + "@" + mFromDomain; // What? Should know if it's local
+    return mFromHost + "@" + mFromDomain;
   else
     return mFromHost + "." + mFromDomain;
 }
