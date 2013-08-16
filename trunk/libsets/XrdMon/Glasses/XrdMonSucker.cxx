@@ -217,12 +217,8 @@ void XrdMonSucker::Suck()
   static const Exc_t _eh("XrdMonSucker::Suck ");
 
   TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@(.+)", "o");
-  TPMERegexp hostname_re("^([^\\.]+)\\.(.*)$", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
-
-  TPMERegexp ip4_numeric_re("^(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$", "o");
-  TPMERegexp ip4_in_name_re("^(.*\\d+\\.\\d+\\.\\d+\\.\\d+.*?)\\.([^\\.]+(?:\\.[^\\.]+)+)$", "o");
 
   TPMERegexp redir_re   ("(.*?):(.*)", "o");
 
@@ -381,14 +377,13 @@ void XrdMonSucker::Suck()
 
         if (username_re.Match(uname) != 5)
         {
-          msg += " ... parse error.";
+          msg += " ... parse error matching uname.";
           log.Put(ZLog::L_Error, msg);
           continue;
         }
 
         TString     host, domain, auth_host, auth_group, auth_dn;
         TPMERegexp *auth_re_ptr  = 0;
-        Bool_t      numeric_host = false;
 
         if (sec)
         {
@@ -408,87 +403,36 @@ void XrdMonSucker::Suck()
           }
         }
 
-        TString uhost = ( ! auth_host.IsNull()) ? auth_host : username_re[4];
+        TString fqhn = ( ! auth_host.IsNull()              &&
+                         ! resolver.is_numeric (auth_host) &&
+                         ! resolver.is_nodomain(auth_host)    ) ?
+          auth_host      :
+          username_re[4];
 
-        // XXXXXXX finished here ... fix for resolver, all should be there.
-        // But still needs to be reviewed and moved to Net1.
-        // Instantiate resolver somewhere out of the while loop.
-        // Add something like TString* info for these functions to report stuff for the log.
-
-        if (resolver.is_numeric(uhost))
+        if ( ! resolver.split_fqhn_to_host_domain_with_lookup(fqhn, host, domain))
         {
-          if (resolver.was_local())
-          {
-            msg += ", client from local subnet ZZZZ";
-
-            host   = ip4_numeric_re[0];
-            domain = server->RefDomain();
-            numeric_host = true;
-          }
-          else if ( ! auth_host.IsNull() && hostname_re.Match(auth_host) == 3)
-          {
-            host   = hostname_re[1];
-            domain = hostname_re[2];
-
-            msg   += GForm(", client from auth info is %s ZZZZ", auth_host.Data());
-          }
-          else
-          {
-            sockaddr_in sa4;
-            sa4.sin_family = AF_INET;
-            sa4.sin_port   = 0;
-            inet_pton(AF_INET, uhost, &sa4.sin_addr);
-
-            Char_t   hn_buf[256];
-            int ret = getnameinfo((sockaddr*) &sa4, sizeof(sa4), hn_buf, 256, 0, 0, NI_NAMEREQD);
-            if (ret == 0 && hostname_re.Match(hn_buf) == 3)
-            {
-              host   = hostname_re[1];
-              domain = hostname_re[2];
-
-              msg += GForm(", nameserver lookup OK %s ZZZZ", hn_buf);
-            }
-            else
-            {
-              host   = uhost;
-              domain = "unknown";
-
-              msg += GForm(", nameserver lookup failed using %s %s ZZZZ", host.Data(), domain.Data());
-            }
-          }
+          msg += " ... error figuring out client hostname.";
+          log.Put(ZLog::L_Error, msg);
+          continue;
         }
-        else if (ip4_in_name_re.Match(uhost))
-        {
-          host   = ip4_in_name_re[1];
-          domain = ip4_in_name_re[2];
 
-          msg += GForm(", fantastic, IP4 address as part of host name %s %s ZZZZ", host.Data(), domain.Data());
-        }
-        else if (hostname_re.Match(uhost) == 3)
+        if (resolver.f_local_domain)
         {
-          // Domain given
-          host   = hostname_re[1];
-          domain = hostname_re[2];
-        }
-        else
-        {
-          // No domain, same as XrdServer
-          msg   += TString::Format(".%s", server->GetDomain());
-          host   = uhost;
           domain = server->RefDomain();
         }
+
+        Bool_t numeric_host = resolver.f_numeric;
 
         if (username_re[1] == mNagiosUser && host.BeginsWith(mNagiosHost) && domain.BeginsWith(mNagiosDomain))
         {
           // msg += TString::Format(" ... it is nagios, skipping it.\n");
-          // cout << msg;
           continue;
         }
 
         // Go figure, in fall 2011 MIT was sending two user-map messages.
         // The problem with this is that file-map uses user-name to identify
-        // user ... and obviously the files were assigned to the wrong one +
-        // one session remained open forever.
+          // user ... and obviously the files were assigned to the wrong one +
+          // one session remained open forever.
         {
           XrdUser *xu = server->FindUser(uname);
           if (xu != 0)
@@ -1000,7 +944,7 @@ void XrdMonSucker::Suck()
 	  else
 	  {
 	    // Unknown file id
-	    log.Form(ZLog::L_Warning, "fstream-xfr unknown file-id ... ignoring.");
+	    log.Form(ZLog::L_Warning, "%s.%s fstream-xfr unknown file-id %u ... ignoring.",  server->GetHost(), server->GetDomain(), fid);
 	  }
 	}
 	else if (typ == XrdXrootdMonFileHdr::isClose)
