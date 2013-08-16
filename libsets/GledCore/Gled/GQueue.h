@@ -126,6 +126,7 @@ public:
   ~GQueuePopper() { mElement->DecRefCount(); }
 
   TT* operator->() { return mElement; }
+  TT* operator* () { return mElement; }
 };
 
 //==============================================================================
