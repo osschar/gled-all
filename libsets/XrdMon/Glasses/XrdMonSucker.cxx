@@ -17,6 +17,7 @@
 #include "XrdFile.h"
 
 #include "Stones/SUdpPacket.h"
+#include "Stones/SNetResolver.h"
 #include "Gled/GThread.h"
 
 #include "XrdMon/XrdXrootdMonData.h"
@@ -26,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+
 
 namespace
 {
@@ -214,13 +216,17 @@ void XrdMonSucker::Suck()
 {
   static const Exc_t _eh("XrdMonSucker::Suck ");
 
-  TPMERegexp ip4addr_re ("(\\d+\\.\\d+\\.\\d+)\\.(\\d+)", "o");
   TPMERegexp username_re("(\\w+)\\.(\\d+):(\\d+)@(.+)", "o");
-  TPMERegexp hostname_re("([^\\.]+)\\.(.*)", "o");
+  TPMERegexp hostname_re("^([^\\.]+)\\.(.*)$", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
 
+  TPMERegexp ip4_numeric_re("^(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$", "o");
+  TPMERegexp ip4_in_name_re("^(.*\\d+\\.\\d+\\.\\d+\\.\\d+.*?)\\.([^\\.]+(?:\\.[^\\.]+)+)$", "o");
+
   TPMERegexp redir_re   ("(.*?):(.*)", "o");
+
+  SNetResolver resolver;
 
   while (true)
   {
@@ -260,43 +266,24 @@ void XrdMonSucker::Suck()
 
     if (server_not_known)
     {
-      sockaddr_in  sa4;
-      sockaddr_in6 sa6;
-      sockaddr    *sa = 0;
-      socklen_t    sl;
-      if (p->mAddrLen == 4)
-      {
-	sa4.sin_family = AF_INET;
-	memcpy(&sa4.sin_addr.s_addr, p->mAddr, p->mAddrLen);
-	sa = (sockaddr*) &sa4;
-	sl = sizeof(sa4);
-      }
-      else
-      {
-	sa6.sin6_family = AF_INET6;
-	memcpy(sa6.sin6_addr.s6_addr, p->mAddr, p->mAddrLen);
-	sa = (sockaddr*) &sa6;
-	sl = sizeof(sa6);
-      }
+      TString fqhn, host_name, domain_name;
 
-      Char_t   hn_buf[64];
-      getnameinfo((sockaddr*) sa, sl, hn_buf, 64, 0, 0, NI_DGRAM);
-
-      TString fqhn(hn_buf);
-      fqhn.ToLower();
-      if (hostname_re.Match(fqhn) != 3)
+      if ( ! resolver.resolve_fqhn(*p, fqhn))
       {
-        char *foo = (char*) &in4a;
-        log.Form(ZLog::L_Error, "New server NS lookup problem: %hhu.%hhu.%hhu.%hhu:%hu, fqdn='%s'.",
-                 foo[0], foo[1], foo[2], foo[3], port, hn_buf);
+        log.Put(ZLog::L_Error, "Unable to figure out name or address of a new server.");
 	continue;
+      }
+      if ( ! resolver.split_fqhn_to_host_domain_no_lookup(fqhn, host_name, domain_name))
+      {
+        log.Form(ZLog::L_Error, "Can not split fqhn '%s' to host domain parts.", fqhn.Data());
+        continue;
       }
 
       log.Form(ZLog::L_Message, "New server: %s.%s:%hu stod=%d",
-	       hostname_re[1].Data(), hostname_re[2].Data(), port, stod);
+	       host_name.Data(), domain_name.Data(), port, stod);
 
-      server = new XrdServer(GForm("%s.%s : %d : %hu", hostname_re[1].Data(), hostname_re[2].Data(), stod, port),
-                             "", hostname_re[1], hostname_re[2], GTime(stod));
+      server = new XrdServer(GForm("%s.%s : %d : %hu", host_name.Data(), domain_name.Data(), stod, port),
+                             "", host_name, domain_name, GTime(stod));
       server->m_server_id = xsid;
 
       domain = static_cast<XrdDomain*>(GetElementByName(server->GetDomain()));
@@ -389,110 +376,157 @@ void XrdMonSucker::Suck()
       if (code == 'u')
       {
 	msg += TString::Format("\n\tUser map -- id=%u, uname=%s", dict_id, prim);
-	TString uname(prim), host, domain;
-        Bool_t  numeric_host = false;
-        {
-          if (username_re.Match(uname) != 5)
-          {
-            msg += " ... parse error.";
-            log.Put(ZLog::L_Error, msg);
-            continue;
-          }
 
-          if (ip4addr_re.Match(username_re[4]) == 3)
+	TString uname(prim);
+
+        if (username_re.Match(uname) != 5)
+        {
+          msg += " ... parse error.";
+          log.Put(ZLog::L_Error, msg);
+          continue;
+        }
+
+        TString     host, domain, auth_host, auth_group, auth_dn;
+        TPMERegexp *auth_re_ptr  = 0;
+        Bool_t      numeric_host = false;
+
+        if (sec)
+        {
+          if (authinfo_re.Match(sec) == 8)
           {
-            // Numeric ip, assume private subnet (event though we really don't
-            // know as this is blindly taken from client and subnet can
-            // actually be anywhere in the world).
-            msg += TString::Format("@%s", server->GetDomain());
-            host = ip4addr_re[0];
+            auth_host   =  authinfo_re[3];
+            auth_group  =  authinfo_re[6];
+            auth_dn     =  authinfo_re[7];
+            auth_re_ptr = &authinfo_re;
+          }
+          else if (authxxxx_re.Match(sec) == 6)
+          {
+            auth_host   =  authxxxx_re[3];
+            auth_group  =  "<unknown>";
+            auth_dn     =  "<unknown>";
+            auth_re_ptr = &authxxxx_re;
+          }
+        }
+
+        TString uhost = ( ! auth_host.IsNull()) ? auth_host : username_re[4];
+
+        // XXXXXXX finished here ... fix for resolver, all should be there.
+        // But still needs to be reviewed and moved to Net1.
+        // Instantiate resolver somewhere out of the while loop.
+        // Add something like TString* info for these functions to report stuff for the log.
+
+        if (resolver.is_numeric(uhost))
+        {
+          if (resolver.was_local())
+          {
+            msg += ", client from local subnet ZZZZ";
+
+            host   = ip4_numeric_re[0];
             domain = server->RefDomain();
             numeric_host = true;
           }
-          else if (hostname_re.Match(username_re[4]) == 3)
+          else if ( ! auth_host.IsNull() && hostname_re.Match(auth_host) == 3)
           {
-            // Domain given
             host   = hostname_re[1];
             domain = hostname_re[2];
+
+            msg   += GForm(", client from auth info is %s ZZZZ", auth_host.Data());
           }
           else
           {
-            // No domain, same as XrdServer
-            msg += TString::Format(".%s", server->GetDomain());
-            host   = username_re[4];
-            domain = server->RefDomain();
-          }
+            sockaddr_in sa4;
+            sa4.sin_family = AF_INET;
+            sa4.sin_port   = 0;
+            inet_pton(AF_INET, uhost, &sa4.sin_addr);
 
-          if (username_re[1] == mNagiosUser && host.BeginsWith(mNagiosHost) && domain.BeginsWith(mNagiosDomain))
-          {
-            // msg += TString::Format(" ... it is nagios, skipping it.\n");
-            // cout << msg;
-            continue;
-          }
-
-          // Go figure, in fall 2011 MIT was sending two user-map messages.
-	  // The problem with this is that file-map uses user-name to identify
-          // user ... and obviously the files were assigned to the wrong one +
-          // one session remained open forever.
-          {
-            XrdUser *xu = server->FindUser(uname);
-            if (xu != 0)
+            Char_t   hn_buf[256];
+            int ret = getnameinfo((sockaddr*) &sa4, sizeof(sa4), hn_buf, 256, 0, 0, NI_NAMEREQD);
+            if (ret == 0 && hostname_re.Match(hn_buf) == 3)
             {
-              msg += "\n\tUsername was already taken -- deleting old user!";
-              disconnect_user_and_close_open_files(xu, server, recv_time);
+              host   = hostname_re[1];
+              domain = hostname_re[2];
+
+              msg += GForm(", nameserver lookup OK %s ZZZZ", hn_buf);
+            }
+            else
+            {
+              host   = uhost;
+              domain = "unknown";
+
+              msg += GForm(", nameserver lookup failed using %s %s ZZZZ", host.Data(), domain.Data());
             }
           }
+        }
+        else if (ip4_in_name_re.Match(uhost))
+        {
+          host   = ip4_in_name_re[1];
+          domain = ip4_in_name_re[2];
 
-          if (server->ExistsUserDictId(dict_id))
+          msg += GForm(", fantastic, IP4 address as part of host name %s %s ZZZZ", host.Data(), domain.Data());
+        }
+        else if (hostname_re.Match(uhost) == 3)
+        {
+          // Domain given
+          host   = hostname_re[1];
+          domain = hostname_re[2];
+        }
+        else
+        {
+          // No domain, same as XrdServer
+          msg   += TString::Format(".%s", server->GetDomain());
+          host   = uhost;
+          domain = server->RefDomain();
+        }
+
+        if (username_re[1] == mNagiosUser && host.BeginsWith(mNagiosHost) && domain.BeginsWith(mNagiosDomain))
+        {
+          // msg += TString::Format(" ... it is nagios, skipping it.\n");
+          // cout << msg;
+          continue;
+        }
+
+        // Go figure, in fall 2011 MIT was sending two user-map messages.
+        // The problem with this is that file-map uses user-name to identify
+        // user ... and obviously the files were assigned to the wrong one +
+        // one session remained open forever.
+        {
+          XrdUser *xu = server->FindUser(uname);
+          if (xu != 0)
           {
-            msg += "\n\tUser dict_id already taken ... this session will not be tracked.";
-            log.Put(ZLog::L_Warning, msg);
-            continue;
+            msg += "\n\tUsername was already taken -- deleting old user!";
+            disconnect_user_and_close_open_files(xu, server, recv_time);
           }
+        }
+
+        if (server->ExistsUserDictId(dict_id))
+        {
+          msg += "\n\tUser dict_id already taken ... this session will not be tracked.";
+          log.Put(ZLog::L_Warning, msg);
+          continue;
         }
 
         XrdUser *user = 0;
         try
         {
-          TString  dn;
+          if (auth_re_ptr)
           {
-            TString     group;
-            TPMERegexp *a_rep = 0;
-            if (authinfo_re.Match(sec) == 8)
-            {
-              group =  authinfo_re[6];
-              dn    =  authinfo_re[7];
-              a_rep = &authinfo_re;
-            }
-            else if (authxxxx_re.Match(sec) == 6)
-            {
-              group =  "<unknown>";
-              dn    =  "<unknown>";
-              a_rep = &authxxxx_re;
-            }
-            else
-            {
-              msg += GForm("\n\tUnparsable auth-info: '%s'", sec);
-            }
+            TPMERegexp &a_re = *auth_re_ptr;
 
-            if (a_rep)
-            {
-              TPMERegexp &a_re = *a_rep;
+            msg += GForm("\n\tDN=%s, Host=%s, VO=%s, Role=%s, Group=%s",
+                         auth_dn.Data(), auth_host.Data(), a_re[4].Data(), a_re[5].Data(), auth_group.Data());
 
-              msg += GForm("\n\tDN=%s, VO=%s, Role=%s, Group=%s",
-                           dn.Data(), a_re[4].Data(), a_re[5].Data(), group.Data());
-
-              user = new XrdUser(uname, "", dn, a_re[4], a_re[5], group,
-                                 a_re[2], host, domain, numeric_host, recv_time);
-            }
-            else
-            {
-              user = new XrdUser(uname, "", "", "", "", "",
-                                 "", host, domain, numeric_host, recv_time);
-            }
-            // ZQueen::CheckIn() does write lock.
-            mQueen->CheckIn(user);
+            user = new XrdUser(uname, "", auth_dn, a_re[4], a_re[5], auth_group,
+                               a_re[2], host, domain, numeric_host, recv_time);
           }
+          else
+          {
+            msg += GForm("\n\tUnparsable auth-info: '%s'", sec);
+
+            user = new XrdUser(uname, "", "", "", "", "",
+                               "", host, domain, numeric_host, recv_time);
+          }
+          // ZQueen::CheckIn() does write lock.
+          mQueen->CheckIn(user);
 
           {
             GLensWriteHolder _lck(server);
