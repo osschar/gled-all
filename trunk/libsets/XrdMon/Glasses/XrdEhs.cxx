@@ -416,7 +416,13 @@ void XrdEhs::StartServer()
   SServerSocket serv_sock(mPort, true);
   if (! serv_sock.IsValid())
   {
+    bServerUp = false;
     throw _eh + "Creation of server socket failed.";
+  }
+
+  {
+    GLensReadHolder _lck(this);
+    Stamp(FID());
   }
 
   GSelector     selector;
@@ -441,6 +447,10 @@ void XrdEhs::StartServer()
   {
     GMutexHolder _lck(mServeMutex);
     bServerUp = false;
+  }
+  {
+    GLensReadHolder _lck(this);
+    Stamp(FID());
   }
 }
 
