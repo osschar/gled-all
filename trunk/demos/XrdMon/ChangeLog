@@ -1,3 +1,16 @@
+2013-08-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_http_serve_open_files.C:
+	Make location of sortable table JS configurable.
+
+2013-08-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* xrd_file_close_reporter_amq.C:
+	* xrd_http_serve_open_files.C:
+	* xrd_suck_tcp.C:
+	* xrd_suck_udp.C:
+	Modified files.
+
 2013-05-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Fix building from tagged version of gled.
