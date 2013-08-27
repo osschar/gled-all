@@ -1,0 +1,90 @@
+2010-09-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* blob.C:
+	Add demo: cone with top and bottom shaved away. A proper dyno.
+
+	* cube.gts:
+	Change so that it is a unit cube centered at origin.
+
+2010-09-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* blob.C:
+	Add bool-ops demo.
+
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_torus.C:
+	Add helper functions make_std() and coarsen_std(...).
+	Put iso-stuff into global CINT variables.
+
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_torus.C:
+	New demo -- usage of GTSTorus.
+
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* blob.C:
+	Reduce grid spacing to half.
+
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* blob.C:
+	New demo - blob from two spheres.
+
+	* iso_surfs.C:
+	Add lamp to global lights.
+
+2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* starwars.C:
+	Internal scale has been removed from GTSurf, rescale the surfaces
+	after loading.
+
+2005-06-08  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_surfs.C:
+	* starwars.C:
+	Updated to new startup macro conventions.
+
+2005-03-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_surfs.C:
+	Set pupils UpRefAxis; fix to new naming for RnrMod-operations.
+
+	* starwars.C:
+	Set pupils UpRefAxis.
+
+2004-12-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_surfs.C:
+	* starwars.C:
+	Eye (including a Pupil) is now spawned automatically. Some minor
+	beautifications.
+
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_surfs.C:
+	Added a GTSRetriangulator to the scene.
+
+	* torus.gts:
+	New demo, created via Gled interface.
+
+2004-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* iso_surfs.C:
+	Added torus and hyperboloid shapes to the scene; added colors to
+	surfaces and some rnr controls.
+
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* cone.gts:
+	* cube.gts:
+	* icosa.gts:
+	* sphere20.gts:
+	* sphere5.gts:
+	* tetrahedron.gts:
+	New files; standard GTS test files.
+	
+	* iso_surfs.C:
+	New demo; demonstrating GTSIsoMaker.

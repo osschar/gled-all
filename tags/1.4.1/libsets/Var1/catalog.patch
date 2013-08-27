@@ -1,0 +1,27 @@
+$PATCH = {
+
+"ParaSurf" => {
+  'VirtualBase' => 1
+},
+
+"Extendio" => {
+  'VirtualBase' => 1
+},
+
+"Spiritio" => {
+  'VirtualBase' => 1
+},
+
+"TriMesh" => {
+  'Pragmas'    => "#pragma link C++ class TriMeshColorArraySource+;\n"
+},
+
+"KeyHandling" => {
+  'NoDefault'  => 1,
+  'Pragmas'    => "#pragma link C++ namespace KeyHandling;\n" .
+                  "#pragma link C++ class KeyHandling::KeyInfo+;\n"
+},
+
+};
+
+1;

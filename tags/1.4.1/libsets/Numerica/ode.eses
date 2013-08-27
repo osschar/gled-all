@@ -1,0 +1,173 @@
+$GenerationPrefix = "/u/atlas/matevz/gall/Numerica/";
+
+$Buffers = [
+  ["Moonraker.cxx", "Glasses/Moonraker.cxx", "RW", 1],
+  [" *Minibuf-0*", "", "RW", 0],
+  ["Moonraker.h", "Glasses/Moonraker.h", "RW", 1],
+  ["ODECrawler.h", "Glasses/ODECrawler.h", "RW", 1],
+  ["ODECrawler.cxx", "Glasses/ODECrawler.cxx", "RW", 1],
+  ["glass.list", "glass.list", "RW", 1],
+  ["WarmAmoeba.h", "Glasses/WarmAmoeba.h", "RW", 1],
+  ["WarmAmoeba.cxx", "Glasses/WarmAmoeba.cxx", "RW", 1],
+  ["Makefile", "../Gled/Makefile", "RW", 1],
+  ["FTW_Nest.cxx", "../Gled/Eye/FTW_Nest.cxx", "RW", 1],
+  ["SMorph.cxx", "../Geom1/Glasses/SMorph.cxx", "RW", 1],
+  ["FTW_Nest.h", "../Gled/Eye/FTW_Nest.h", "RW", 1],
+  ["init.C", "../Gled/macros/init.C", "RW", 1],
+  ["rot_lamps.C", "../Geom1/macros/rot_lamps.C", "RW", 0],
+  ["ZTrans.cxx", "../Gled/Stones/ZTrans.cxx", "RW", 1],
+  ["Fl_TransCtrl.cxx", "../Gled/FL/Fl_TransCtrl.cxx", "RW", 1],
+  ["*scratch*", "", "RW", 0],
+  ["Gled_Widgets.pm", "../Gled/perllib/Gled_Widgets.pm", "RW", 1],
+  ["ZNode.cxx", "../Gled/Glasses/ZNode.cxx", "RW", 1],
+  ["make_base.inc", "../make/make_base.inc", "RW", 1],
+  ["Gled.cxx", "../Gled/Gled/Gled.cxx", "RW", 1],
+  ["SMorph.h", "../Geom1/Glasses/SMorph.h", "RW", 1],
+  ["ZTrans.h", "../Gled/Stones/ZTrans.h", "RW", 1],
+  ["ZNode.h", "../Gled/Glasses/ZNode.h", "RW", 1],
+  ["mecca", "../mecca", "RW", 1],
+  ["make_defs.inc", "../make/make_defs.inc", "RW", 1],
+  ["Fl_TransCtrl.h", "../Gled/FL/Fl_TransCtrl.h", "RW", 1],
+  ["Gled.h", "../Gled/Gled/Gled.h", "RW", 1],
+  [" *Echo Area*", "", "RW", 0],
+  [" *pixmap conversion*", "", "RW", 0],
+  [" *Message-Log*", "", "RW", 0],
+  ["*Completions*", "", "RO", 0],
+  [" *substitute*", "", "RW", 0],
+  ["Spheror.h", "Glasses/Spheror.h", "RW", 1],
+  ["Spheror.cxx", "Glasses/Spheror.cxx", "RW", 1],
+  ["Eventor.h", "../Gled/Glasses/Eventor.h", "RW", 1],
+  ["Eventor.cxx", "../Gled/Glasses/Eventor.cxx", "RW", 1],
+  ["Operator.h", "../Gled/Glasses/Operator.h", "RW", 1],
+  ["Operator.cxx", "../Gled/Glasses/Operator.cxx", "RW", 1],
+  ["*bar*", "", "RW", 0],
+];
+
+$Frames = [
+ {
+  Geom => [82, 60, 620, 183, 0],
+  Windows => [
+   ["Operator.cxx", "../Gled/Glasses/Operator.cxx", 30, 450, 1, 1],
+   ["Operator.h", "../Gled/Glasses/Operator.h", 30, 0, 1805, 1325],
+  ]
+ },
+ {
+  Geom => [82, 60, 448, 68, 0],
+  Windows => [
+   ["Eventor.cxx", "../Gled/Glasses/Eventor.cxx", 40, 300, 1975, 1975],
+   ["Eventor.h", "../Gled/Glasses/Eventor.h", 20, 0, 509, 509],
+  ]
+ },
+ {
+  Geom => [82, 60, 210, 16, 0],
+  Windows => [
+   ["Spheror.cxx", "Glasses/Spheror.cxx", 30, 450, 1308, 480],
+   ["Spheror.h", "Glasses/Spheror.h", 30, 0, 649, 649],
+  ]
+ },
+ {
+  Geom => [82, 60, 449, 47, 1],
+  Windows => [
+   ["Moonraker.cxx", "Glasses/Moonraker.cxx", 36, 360, 1753, 1753],
+   ["Moonraker.h", "Glasses/Moonraker.h", 24, 0, 595, 65],
+  ]
+ },
+ {
+  Geom => [82, 60, 63, 127, 1],
+  Windows => [
+   ["ODECrawler.cxx", "Glasses/ODECrawler.cxx", 36, 360, 3691, 3507],
+   ["ODECrawler.h", "Glasses/ODECrawler.h", 24, 0, 1790, 1614],
+  ]
+ },
+ {
+  Geom => [82, 25, 128, 27, 0],
+  Windows => [
+   ["glass.list", "glass.list", 25, 0, 112, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 814, 96, 1],
+  Windows => [
+   ["WarmAmoeba.cxx", "Glasses/WarmAmoeba.cxx", 37, 345, 5108, 5108],
+   ["WarmAmoeba.h", "Glasses/WarmAmoeba.h", 23, 0, 1152, 912],
+  ]
+ },
+ {
+  Geom => [82, 60, 42, 131, 0],
+  Windows => [
+   ["FTW_Nest.cxx", "../Gled/Eye/FTW_Nest.cxx", 38, 330, 15352, 14945],
+   ["FTW_Nest.h", "../Gled/Eye/FTW_Nest.h", 22, 0, 2238, 2030],
+  ]
+ },
+ {
+  Geom => [82, 60, 564, 17, 0],
+  Windows => [
+   ["SMorph.cxx", "../Geom1/Glasses/SMorph.cxx", 31, 435, 300, 300],
+   ["SMorph.h", "../Geom1/Glasses/SMorph.h", 29, 0, 435, 435],
+  ]
+ },
+ {
+  Geom => [82, 60, 829, 0, 0],
+  Windows => [
+   ["init.C", "../Gled/macros/init.C", 60, 0, 351, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 429, 43, 0],
+  Windows => [
+   ["ZTrans.cxx", "../Gled/Stones/ZTrans.cxx", 31, 435, 4046, 3713],
+   ["ZTrans.h", "../Gled/Stones/ZTrans.h", 29, 0, 1, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 749, 223, 0],
+  Windows => [
+   ["ZNode.cxx", "../Gled/Glasses/ZNode.cxx", 31, 435, 330, 330],
+   ["ZNode.h", "../Gled/Glasses/ZNode.h", 29, 0, 1, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 36, 91, 0],
+  Windows => [
+   ["mecca", "../mecca", 60, 0, 1305, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 0, 223, 0],
+  Windows => [
+   ["make_defs.inc", "../make/make_defs.inc", 60, 0, 1011, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 757, 223, 0],
+  Windows => [
+   ["make_base.inc", "../make/make_base.inc", 60, 0, 3892, 3599],
+  ]
+ },
+ {
+  Geom => [82, 60, 829, 122, 0],
+  Windows => [
+   ["Gled_Widgets.pm", "../Gled/perllib/Gled_Widgets.pm", 60, 0, 14244, 14244],
+  ]
+ },
+ {
+  Geom => [82, 60, 41, 95, 0],
+  Windows => [
+   ["Fl_TransCtrl.cxx", "../Gled/FL/Fl_TransCtrl.cxx", 31, 435, 2211, 1578],
+   ["Fl_TransCtrl.h", "../Gled/FL/Fl_TransCtrl.h", 29, 0, 960, 338],
+  ]
+ },
+ {
+  Geom => [82, 33, 43, 68, 0],
+  Windows => [
+   ["Makefile", "../Gled/Makefile", 33, 0, 1, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 304, 64, 0],
+  Windows => [
+   ["Gled.cxx", "../Gled/Gled/Gled.cxx", 31, 435, 6145, 5918],
+   ["Gled.h", "../Gled/Gled/Gled.h", 29, 0, 832, 832],
+  ]
+ },
+];
