@@ -83,6 +83,7 @@ Gled::Gled() :
   bAllowMoons   (false),
   bIsDaemon     (false),
   mPidFile      (0),
+  bSetupFinished(false),
   bRootAppRunning(false),
   mRootApp      (0),
   mLoggingMutex (GMutex::recursive),
@@ -957,7 +958,14 @@ void Gled::SpawnSaturn()
 
 void Gled::AfterSetup(ZMIR* mir)
 {
-  mAfterSetupMirs.push_back(mir);
+  if (bSetupFinished)
+  {
+    mSaturn->ShootMIR(mir);
+  }
+  else
+  {
+    mAfterSetupMirs.push_back(mir);
+  }
 }
 
 void Gled::ShootAfterSetupMirs()
@@ -1476,6 +1484,7 @@ void* Gled::RootApp_runner_tl(void*)
 
   GThread::SetSignalHandler(GThread::SigABRT, AbortSignalHandler, true);
 
+  Gled::theOne->bSetupFinished = true;
   Gled::theOne->ShootAfterSetupMirs();
 
   self->SetTerminalPolicy(GThread::TP_GledExit);
