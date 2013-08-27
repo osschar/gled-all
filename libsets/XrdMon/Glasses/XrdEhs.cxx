@@ -51,7 +51,8 @@ XrdEhs::XrdEhs(const Text_t* n, const Text_t* t) :
    m_req_re("^([^?]*)(?:\\?(.*))?$", "o"),
    mPort(4242),
    bServerUp(false),
-   bParanoia(false)
+   bParanoia(false),
+   mWebTableJs("https://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js")
 {
   _init();
 }
@@ -225,8 +226,8 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
   if (any_fil) osh << pass_cnt << "/";
   osh << mFileList.size() << "]</title> " << std::endl;
   osh << "</head>" << std::endl;
-    
-  osh << "<script type=\"text/javascript\" src=\"http://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js\"></script>" << std::endl;
+
+  osh << "<script type=\"text/javascript\" src=\"" << mWebTableJs << "\"></script>" << std::endl;
   osh << "<script type=\"text/javascript\">" << std::endl;
   osh << "" << std::endl;
    

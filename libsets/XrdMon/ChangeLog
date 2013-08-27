@@ -1,3 +1,9 @@
+2013-08-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Make location of sortable table JS configurable.
+
 2013-06-06  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:
