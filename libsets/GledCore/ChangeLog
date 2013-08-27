@@ -1,3 +1,10 @@
+2013-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/Gled.cxx:
+	* Gled/Gled.h:
+	Later in execution, shoot MIRs passed in via AfterSetup(ZMIR*)
+	right away.
+
 2013-08-07  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/ZGlass.cxx:

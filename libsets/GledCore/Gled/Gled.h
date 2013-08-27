@@ -54,6 +54,9 @@ protected:
   Bool_t        bIsDaemon;      // X{G}
   FILE         *mPidFile;
 
+  Bool_t        bSetupFinished;
+  list<ZMIR*>   mAfterSetupMirs;
+
   Bool_t	bRootAppRunning;// X{G}
   TApplication *mRootApp;       // X{g}
 
@@ -75,8 +78,6 @@ protected:
   GCondition*	mExitCondVar;
   GThread*      mRootAppThread;  // X{g}
   GThread*      mExitThread;
-
-  list<ZMIR*>   mAfterSetupMirs;
 
   static Int_t  sExitStatus;
 
