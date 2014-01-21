@@ -26,7 +26,7 @@ void xrd_suck_tcp()
   Gled::AssertMacro("sun.C");
   Gled::theOne->AssertLibSet("XrdMon");
 
-  g_queen = new ZQueen(256*1024, "XrdMonitorQueen");
+  g_queen = new ZQueen(1024*1024, "XrdMonitorQueen");
   g_sun_king->Enthrone(g_queen);
   g_queen->SetMandatory(true);
 
