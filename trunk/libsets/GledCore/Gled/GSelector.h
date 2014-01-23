@@ -29,6 +29,7 @@ public:
 		 SE_BadArg, SE_NoMem, SE_Unknown };
 
   Error_e	fError;
+  TString       fErrorStr;
 
   GFdSet	fRead;
   GFdSet	fWrite;
