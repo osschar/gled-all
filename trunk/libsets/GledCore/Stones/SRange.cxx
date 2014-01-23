@@ -75,3 +75,13 @@ Double_t SRange::GetSigma() const
   else
     return 0;
 }
+
+//------------------------------------------------------------------------------
+
+void SRange::Dump(const TString& prefix, const TString& postfix) const
+{
+  printf("%s%5lld : (%10.3f, %10.3f, %10.3f) : %10.3f%s",
+         prefix.Data(),
+         mN, mMin, GetAverage(), mMax, GetSigma(),
+         postfix.Data());
+}
