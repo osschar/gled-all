@@ -38,19 +38,19 @@ void GTSIsoMaker::_init()
 
 /**************************************************************************/
 
-void GTSIsoMaker::SetXAxis(Double_t min, Double_t max, Int_t div)
+void GTSIsoMaker::SetXAxis(Double_t min, Double_t max, UInt_t div)
 {
   mXmin = min; mXmax = max; mXdiv = div;
   Stamp(FID());
 }
 
-void GTSIsoMaker::SetYAxis(Double_t min, Double_t max, Int_t div)
+void GTSIsoMaker::SetYAxis(Double_t min, Double_t max, UInt_t div)
 {
   mYmin = min; mYmax = max; mYdiv = div;
   Stamp(FID());
 }
 
-void GTSIsoMaker::SetZAxis(Double_t min, Double_t max, Int_t div)
+void GTSIsoMaker::SetZAxis(Double_t min, Double_t max, UInt_t div)
 {
   mZmin = min; mZmax = max; mZdiv = div;
   Stamp(FID());

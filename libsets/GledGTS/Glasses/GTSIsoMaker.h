@@ -33,15 +33,15 @@ protected:
 
   Double_t		mXmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
   Double_t		mXmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Int_t			mXdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
+  UInt_t		mXdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
 
   Double_t		mYmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
   Double_t		mYmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Int_t			mYdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
+  UInt_t		mYdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
 
   Double_t		mZmin;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
   Double_t		mZmax;    // X{GS} 7 Value(-range=>[-100,100,1,1000], -join=>1)
-  Int_t			mZdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
+  UInt_t		mZdiv;    // X{GS} 7 Value(-range=>[2, 10000,1])
 
   Bool_t                bInvertCartesian; // X{GS} 7 Bool()
   Bool_t                bInvertTetra;     // X{GS} 7 Bool()
@@ -59,9 +59,9 @@ public:
 			    const TString& canvas_title = "Surface iso-value delta"); // X{ED} 7 MCWButt()
   void MovePointsOntoIsoSurface(); // X{ED} 7 MButt()
 
-  void SetXAxis(Double_t min, Double_t max, Int_t div); // X{E}
-  void SetYAxis(Double_t min, Double_t max, Int_t div); // X{E}
-  void SetZAxis(Double_t min, Double_t max, Int_t div); // X{E}
+  void SetXAxis(Double_t min, Double_t max, UInt_t div); // X{E}
+  void SetYAxis(Double_t min, Double_t max, UInt_t div); // X{E}
+  void SetZAxis(Double_t min, Double_t max, UInt_t div); // X{E}
 
 #include "GTSIsoMaker.h7"
   ClassDef(GTSIsoMaker, 1);
