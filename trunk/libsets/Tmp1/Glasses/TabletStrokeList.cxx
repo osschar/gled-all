@@ -215,7 +215,7 @@ void TabletStrokeList::distance_derivatives(Float_t t, const HPointF& P, const C
 bool TabletStrokeList::find_closest_points(Double_t x, Double_t y, Double_t z,
 					   Int_t id[2], Double_t vm[2])
 {
-  Float_t       in_point[2] = { x, y };
+  Float_t       in_point[2] = { (Float_t) x, (Float_t) y };
   vector<Int_t> result;
 
   mKDTree->FindInRange(in_point, mSearchRad, result);
