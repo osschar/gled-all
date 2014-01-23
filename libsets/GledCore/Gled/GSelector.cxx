@@ -56,7 +56,10 @@ void GSelector::Clear()
 
 Int_t GSelector::Select()
 {
-  static const Exc_t _eh("GSelector::Select ");
+  // Run select on specified sets, with given timeout.
+  // Returns number of fds selected or:
+  //  0 in case of timeout;
+  // -1 in case of error (errno, fError and fErrorStr are set accordingly).
 
   // Prepare sets.
   int Mfd = 0;
@@ -86,6 +89,7 @@ Int_t GSelector::Select()
   }
   Unlock();
 
+  fError = SE_Null; fErrorStr = "";
   errno = 0;
   int ret;
   if (fTimeOut <= 0)
@@ -95,42 +99,43 @@ Int_t GSelector::Select()
   else
   {
     struct timeval timeout;
-    timeout.tv_sec = (time_t) fTimeOut;
+    timeout.tv_sec  = (time_t) fTimeOut;
     timeout.tv_usec = (time_t)(1000000*(fTimeOut - timeout.tv_sec));
     ret = select(Mfd+1, &read, &write, &except, &timeout);
   }
 
   if (ret == -1)
   {
-    switch(errno)
+    switch (errno)
     {
       case 0: // Cancelled ... or sth ...
 	fError = SE_Null;
+        fErrorStr = "Unknown error (errno=0).";
 	return -1;
       case EBADF:
 	fError = SE_BadFD;
-	ISerr(_eh + "Bad file-descriptor.");
+	fErrorStr = "Bad file-descriptor.";
 	return -1;
       case EINTR:
 	fError = SE_Interrupt;
-	ISmess(_eh + "Interrupted select.");
+	fErrorStr = "Interrupted select.";
 	return -1;
       case EINVAL:
 	fError = SE_BadArg;
-	ISerr(_eh + "Bad parameters (nfds or timeout).");
+	fErrorStr = "Bad parameters (num fds or timeout).";
 	return -1;
       case ENOMEM:
 	fError = SE_NoMem;
-	ISerr(_eh + "No memory for select.");
+	fErrorStr = "No memory for select.";
 	return -1;
       default:
 	fError = SE_Unknown;
-	ISerr(_eh + GForm("Undocumented error in select: %d.", errno));
+	fErrorStr = GForm("Undocumented error in select, errno=%d.", errno);
 	return -1;
     } // end switch
   }
 
-  if (ret==0) return 0;
+  if (ret == 0) return 0;
 
   // Build output sets.
   Lock();
