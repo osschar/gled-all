@@ -4,10 +4,10 @@
 // This file is part of GLED, released under GNU General Public License version 2.
 // For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
 
-#ifndef GTS_SRange_H
-#define GTS_SRange_H
+#ifndef GledCore_SRange_H
+#define GledCore_SRange_H
 
-#include <Rtypes.h>
+#include <TString.h>
 
 class SRange
 {
@@ -29,6 +29,8 @@ public:
 
   Double_t GetAverage() const;
   Double_t GetSigma() const;
+
+  void Dump(const TString& prefix="SRange: ", const TString& postfix="\n") const;
 
 #include "SRange.h7"
   ClassDefNV(SRange, 1);

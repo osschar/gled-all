@@ -1,3 +1,13 @@
+2014-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Gled/GSelector.cxx:
+	* Gled/GSelector.h:
+	Add TString fErrorStr member instead of calling ISerr.
+
+	* Stones/SRange.cxx:
+	* Stones/SRange.h:
+	Add Dump() function.
+
 2013-08-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/Gled.cxx:
