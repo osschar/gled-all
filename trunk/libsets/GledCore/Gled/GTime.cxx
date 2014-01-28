@@ -377,6 +377,27 @@ const GTime& GTime::ApproximateTime()
   return sApproximateTime;
 }
 
+GTime GTime::ApproximateFuture(Double_t sec)
+{
+  // Returns approximate time sec seconds in the future.
+
+  return sApproximateTime + GTime(sec);
+}
+
+GTime GTime::ApproximateFuture(Long64_t sec)
+{
+  // Returns approximate time sec seconds in the future.
+
+  return sApproximateTime + GTime(sec, 0);
+}
+
+GTime GTime::ApproximateFuture(Int_t sec)
+{
+  // Returns approximate time sec seconds in the future.
+
+  return sApproximateTime + GTime(sec, 0);
+}
+
 Long64_t GTime::UpdateApproximateTime(const GTime& now)
 {
   if (now.mNSec > 500000000)

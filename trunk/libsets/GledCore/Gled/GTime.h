@@ -96,6 +96,9 @@ public:
 			       Bool_t warn_on_signal=true);
 
   static const GTime& ApproximateTime();
+  static       GTime  ApproximateFuture(Double_t sec);
+  static       GTime  ApproximateFuture(Int_t    sec);
+  static       GTime  ApproximateFuture(Long64_t sec);
 
   void  NetStreamer(TBuffer& b);
   Int_t NetBufferSize() const { return 2 * sizeof(Long64_t); }
