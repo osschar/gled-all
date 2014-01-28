@@ -47,9 +47,11 @@ protected:
   UInt_t mAmqMaxMsgQueueLen;        // X{GS} 7 Value(-range=>[1, 10000000, 1])
   Int_t  mAmqReconnectWaitSec;      // X{GS} 7 Value(-range=>[1, 100,   1])
   Int_t  mAmqReconnectWaitSecMax;   // X{GS} 7 Value(-range=>[1, 10000, 1])
+  Int_t  mAmqAutoReconnectSec;      // X{GS} 7 Value(-range=>[0, 10000000, 1])
 
   Int_t  mAmqTotalConnectSuccessCount; //! X{G} 7 ValOut()
   Int_t  mAmqTotalConnectFailCount;    //! X{G} 7 ValOut()
+  Int_t  mAmqTotalAutoReconnectCount; //! X{G} 7 ValOut()
   Int_t  mAmqCurrentConnectFailCount;  //! X{G} 7 ValOut()
   Int_t  mAmqSendMessageFailCount;     //! X{G} 7 ValOut()
   Bool_t bAmqConnected;                //! X{G} 7 BoolOut()

@@ -24,24 +24,24 @@ void SXrdIoInfo::Dump(Int_t level)
   int cnt = 0;
   for (vSXrdReq_i i = mReqs.begin(); i != mReqs.end(); ++i, ++cnt)
   {
-    printf("%3d  %-7s ", cnt, i->TypeName());
+    printf("%4d  %-7s ", cnt, i->TypeName());
     switch (i->Type())
     {
       case SXrdReq::R_Write:
       {
-	printf("t=%-5d l=%-7d o=%lld\n", i->Time(), -i->Length(), i->Offset());
+	printf("t=%-5d l=%-9d o=%lld\n", i->Time(), -i->Length(), i->Offset());
 	break;
       }
       case SXrdReq::R_Read:
       {
-	printf("t=%-5d l=%-7d o=%lld\n", i->Time(),  i->Length(), i->Offset());
+	printf("t=%-5d l=%-9d o=%lld\n", i->Time(),  i->Length(), i->Offset());
 	break;
       }
       case SXrdReq::R_VecRead:
       {
 	Int_t sr_idx = i->SubReqIndex();
 
-	printf("t=%-5d l=%-7d n_req_cnt=%-5hu n_reqs_lost=%-5hu idx=%d\n",
+	printf("t=%-5d l=%-9d n_req_cnt=%-5hu n_reqs_lost=%-5hu idx=%d\n",
 	       i->Time(), i->Length(), i->SubReqCount(), i->SubReqsLost(),
 	       sr_idx);
 
@@ -51,7 +51,7 @@ void SXrdIoInfo::Dump(Int_t level)
 	  Int_t j   = 0;
 	  for (Int_t si = i->SubReqIndex(); si < max; ++si, ++j)
 	  {
-	    printf("             i=%-5d l=%-7d o=%lld\n", j, mLengthVec[si], mOffsetVec[si]);
+	    printf("             i=%-5d l=%-9d o=%lld\n", j, mLengthVec[si], mOffsetVec[si]);
 	  }
 	}
 	break;

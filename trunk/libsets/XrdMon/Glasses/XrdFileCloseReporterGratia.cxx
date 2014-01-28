@@ -163,8 +163,8 @@ void XrdFileCloseReporterGratia::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _slck(server);
     msg += TString::Format
-      ("server_domain=%s\nserver_host=%s\n",
-       server->GetDomain(), server->GetHost());
+      ("server_domain=%s\nserver_host=%s\nserver_site=%s\n",
+       server->GetDomain(), server->GetHost(), server->GetSite());
   }
 
   msg += "#end\n";

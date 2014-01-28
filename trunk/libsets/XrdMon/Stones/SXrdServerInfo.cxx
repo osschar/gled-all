@@ -21,4 +21,5 @@ void SXrdServerInfo::Assign(const XrdServer* s)
 {
   mHost   = s->RefHost();
   mDomain = s->RefDomain();
+  mSite   = s->RefSite();
 }

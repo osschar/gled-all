@@ -73,9 +73,13 @@ TString XrdServer::GetFqhn() const
 
 //==============================================================================
 
-void XrdServer::UpdateSrvIdTime(const GTime& t)
+void XrdServer::UpdateSrvIdTime(const GTime& t, const TString &site)
 {
-  if ( ! mLastSrvIdTime.IsNever())
+  if (mLastSrvIdTime.IsNever())
+  {
+    mSite = site;
+  }
+  else
   {
     Int_t dt = TMath::Max(10, TMath::Nint((t - mLastSrvIdTime).ToDouble()));
     if (mAvgSrvIdDelta <= 0)
@@ -87,6 +91,7 @@ void XrdServer::UpdateSrvIdTime(const GTime& t)
       mAvgSrvIdDelta = TMath::Nint(0.9*mAvgSrvIdDelta + 0.1*dt);
     }
   }
+
   mLastSrvIdTime = t;
   Stamp(FID());
 }
@@ -130,6 +135,8 @@ void XrdServer::AddUser(XrdUser* user, UInt_t dict_id)
 
 void XrdServer::DisconnectUser(XrdUser* user)
 {
+  // Should be called under write lock.
+
   static const Exc_t _eh("XrdServer::DisconnectUser ");
 
   {

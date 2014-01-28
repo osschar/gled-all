@@ -32,14 +32,19 @@ private:
 protected:
   ZLink<XrdMonSucker>  mXrdSucker;    // X{GS} L{a}
   Int_t	               mPort;         // X{GS} 7 Value(-range=>[1,65535,1])
+  Float_t              mSelectTOut;   // X{GS} 7 Value(-range=>[1, 60, 1, 100])
   Bool_t	       bServerUp;     // X{GS} 7 BoolOut()
 
   Bool_t               bParanoia;     // X{GS} 7 Bool()
   TString              mWebTableJs;   // X{GS} 7 Textor()
+  Int_t                mRefresh;      // X{GS} 7 Value(-range=>[5,86400,1])
 
   list<XrdFile*>       mFileList;     //!
   TimeStamp_t          mFileListTS;   //!
   GMutex               mServeMutex;   //!
+
+  void release_file_list();
+  void update_file_list();
 
   void fill_content(const GTime& req_time, TString& content, lStr_t& path, mStr2Str_t& args);
 
