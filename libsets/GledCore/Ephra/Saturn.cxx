@@ -1506,7 +1506,7 @@ void Saturn::shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
 }
 
 void Saturn::delayed_shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
-			       GTime at_time)
+			       const GTime& at_time)
 {
   // The auto_ptr<ZMIR> is released and should not be used afterwards.
 
@@ -1630,7 +1630,7 @@ void Saturn::ShootMIR(ZMIR* mir, bool use_own_thread)
   shoot_mir(apmir, 0, use_own_thread);
 }
 
-void Saturn::DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time)
+void Saturn::DelayedShootMIR(auto_ptr<ZMIR>& mir, const GTime& at_time)
 {
   // Accepts a MIR and shoots it into the system.
   // The auto_ptr<ZMIR> is released and should not be used afterwards.
@@ -1638,7 +1638,7 @@ void Saturn::DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time)
   delayed_shoot_mir(mir, 0, at_time);
 }
 
-void Saturn::DelayedShootMIR(ZMIR* mir, GTime at_time)
+void Saturn::DelayedShootMIR(ZMIR* mir, const GTime& at_time)
 {
   // Accepts a MIR and shoots it into the system.
   // Wrapper for the variant with auto_ptr argument.

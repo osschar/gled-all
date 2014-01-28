@@ -261,7 +261,7 @@ protected:
   void     shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
 		     bool use_own_thread=false);
   void     delayed_shoot_mir(auto_ptr<ZMIR>& mir, ZMirEmittingEntity* caller,
-			     GTime at_time);
+			     const GTime& at_time);
 
   void     mir_shooter();
   void     delayed_mir_shooter();
@@ -275,8 +275,8 @@ public:
 
   void     ShootMIR(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
   void     ShootMIR(ZMIR* mir, bool use_own_thread=false);
-  void     DelayedShootMIR(auto_ptr<ZMIR>& mir, GTime at_time);
-  void     DelayedShootMIR(ZMIR* mir, GTime at_time);
+  void     DelayedShootMIR(auto_ptr<ZMIR>& mir, const GTime& at_time);
+  void     DelayedShootMIR(ZMIR* mir, const GTime& at_time);
   ZMIR_RR* ShootMIRWaitResult(auto_ptr<ZMIR>& mir, bool use_own_thread=false);
   ZMIR_RR* ShootMIRWaitResult(ZMIR* mir, bool use_own_thread=false);
 
