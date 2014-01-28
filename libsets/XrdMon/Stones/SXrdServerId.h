@@ -36,7 +36,6 @@ public:
   };
 #endif
 
-#include "SXrdServerId.h7"
   ClassDefNV(SXrdServerId, 1);
 }; // endclass SXrdServerId
 

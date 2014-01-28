@@ -1,3 +1,36 @@
+2014-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement site-name processing and auto AMQ reconnect.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterAmq.h:
+	Implement automatic periodic reconnect to AMQ server.
+
+	* Glasses/XrdMonSucker.cxx:
+	Implement parsing and processing of sit-name in server ident
+	messages.
+	Be gentler when sending a lost server to hell.
+
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+
+	* Glasses/XrdServer.cxx:
+	* Glasses/XrdServer.h:
+	* Stones/SXrdServerInfo.cxx:
+	* Stones/SXrdServerInfo.h:
+	Add member TString mSite and its handling.
+
+	* Glasses/XrdEhs.cxx:
+	* Glasses/XrdEhs.h:
+	Add a parameter for auto-refresh timeout.
+	Be more careful when copying and using a list of currently opened
+	files from the sucker.
+
+	* Stones/SXrdIoInfo.cxx:
+	Beautify printout in Dump().
+
+	* Stones/SXrdServerId.h:
+	Remove h7 include, it's not needed.
+
 2013-08-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdEhs.cxx:

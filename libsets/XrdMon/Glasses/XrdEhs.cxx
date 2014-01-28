@@ -50,9 +50,11 @@ XrdEhs::XrdEhs(const Text_t* n, const Text_t* t) :
    m_req_line_re("^GET\\s+/?(.*)\\s+HTTP/([\\d\\.]+)$", "o"),
    m_req_re("^([^?]*)(?:\\?(.*))?$", "o"),
    mPort(4242),
+   mSelectTOut(43.608),
    bServerUp(false),
    bParanoia(false),
-   mWebTableJs("https://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js")
+   mWebTableJs("https://uaf-2.t2.ucsd.edu/~alja/gs_sortable.js"),
+   mRefresh(180)
 {
   _init();
 }
@@ -62,22 +64,48 @@ XrdEhs::~XrdEhs()
 
 //==============================================================================
 
-void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path, mStr2Str_t& args)
+void XrdEhs::release_file_list()
 {
-  GMutexHolder _lck(mServeMutex);
+  // Must be called with mServeMutex locked.
+
+  if (mFileListTS)
+  {
+    ZHashList* hl = mXrdSucker->GetOpenFiles();
+    hl->ReleaseListCopyEyeRefsByGlass(mFileList);
+    mFileList.clear();
+    mFileListTS = 0;
+  }
+
+}
+
+void XrdEhs::update_file_list()
+{
+  // Must be called with mServeMutex locked.
 
   ZHashList* hl = mXrdSucker->GetOpenFiles();
   if (mFileListTS != hl->GetTimeStamp())
   {
-    mFileList.clear();
-    mFileListTS = hl->CopyListByGlass<XrdFile>(mFileList);
+    release_file_list();
+    mFileListTS = hl->CopyListByGlass(mFileList, false, true);
   }
+}
+
+void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path, mStr2Str_t& args)
+{
+  static const Exc_t _eh("XrdEhs::fill_content ");
+
+  GMutexHolder _lck(mServeMutex);
+
+  update_file_list();
 
   bool fqhn         = (args["fqhn"] == "1");
   bool no_same_site = (args["no_same_site"] == "1");
 
   int  file_len = 64;
   if ( ! args["file_len"].IsNull()) file_len = TMath::Max(0, args["file_len"].Atoi());
+
+  int  refresh  = mRefresh;
+  if ( ! args["refresh"].IsNull())  refresh  = TMath::Max(5, args["refresh"].Atoi());
 
   TPMERegexp short_domain("[^\\.]+\\.[^\\.]+$", "o");
 
@@ -114,15 +142,38 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
   bool odd = false;
   for (list<XrdFile*>::iterator xfi = mFileList.begin(); xfi != mFileList.end(); ++xfi)
   {
-    odd = !odd;
+    static const TString _bad_fu("in file-list, this shouldn't happen! Probably EHS select timeout is too long compared to XrdMonSucker::mUserKeepSec.");
+
     XrdFile *file = *xfi;
+    if (file->CheckBit(kDyingBit))
+    {
+      ISerr(_eh + "Got a dying file " + _bad_fu);
+      continue;
+    }
     XrdUser *user = file->GetUser();
+    if (user == 0)
+    {
+      ISerr(_eh + "Got a null user " + _bad_fu);
+      continue;
+    }
+    if (user->CheckBit(kDyingBit))
+    {
+      ISerr(_eh + "Got a dying user " + _bad_fu);
+      continue;
+    }
+
+    odd = !odd;
 
     TString server_id = fqhn ? user->GetServer()->GetFqhn() : user->GetServer()->RefDomain();
     TString client_id = fqhn ? user->GetFromFqhn()          : user->RefFromDomain();
 
     if (no_same_site)
     {
+      // "local" set by Gled resolver for local subnets, "grid.local" apparently
+      // reported by some DPM sites (oeaw.ac.at)
+      if (user->RefFromDomain() == "local" || user->RefFromDomain() == "grid.local")
+        continue;
+
       short_domain.Match(user->GetServer()->RefDomain());
       TString srv = short_domain[0];
       short_domain.Match(user->RefFromDomain());
@@ -207,7 +258,7 @@ void XrdEhs::fill_content(const GTime& req_time, TString& content, lStr_t& path,
 
   ostringstream osh;
   osh << "<html>" << std::endl;
-  osh << "<meta http-equiv=\"refresh\" content=\"180\" />" << endl;
+  osh << "<meta http-equiv=\"refresh\" content=\"" << refresh <<"\" />" << endl;
   osh << "<head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"> " << std::endl;
   osh << "<style type=\"text/css\">" << std::endl << std::endl;
      
@@ -431,7 +482,23 @@ void XrdEhs::StartServer()
 
   while (! b_stop_server)
   {
-    selector.Select();
+    selector.fTimeOut = mSelectTOut;
+
+    int nsel = selector.Select();
+
+    if (nsel  == -1)
+    {
+      ISerr(_eh + "Select failed: " + selector.fErrorStr);
+      continue;
+    }
+    else if (nsel == 0)
+    {
+      GMutexHolder _lck(mServeMutex);
+      release_file_list();
+      continue;
+    }
+
+
     SSocket *sock = serv_sock.Accept();
 
     if (sock == 0)

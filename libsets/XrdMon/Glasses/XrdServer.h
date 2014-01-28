@@ -29,6 +29,7 @@ private:
 protected:
   TString           mHost;        // X{GR}   7 TextOut()
   TString           mDomain;      // X{GR}   7 TextOut()
+  TString           mSite;        // X{GR}   7 TextOut()
   GTime             mStartTime;   // X{GR}   7 TimeOut()
   GTime             mLastMsgTime; // X{GRSQ} 7 TimeOut()
 
@@ -69,7 +70,7 @@ public:
 
   TString  GetFqhn() const;
 
-  void     UpdateSrvIdTime(const GTime& t);
+  void     UpdateSrvIdTime(const GTime& t, const TString &site);
 
   void     IncPacketCount();
   void     IncSeqIdFailCount();
@@ -93,7 +94,7 @@ public:
   TString CheckSequenceId(Char_t code, UChar_t pseq);
 
 #include "XrdServer.h7"
-  ClassDef(XrdServer, 1);
+  ClassDef(XrdServer, 2);
 }; // endclass XrdServer
 
 #endif

@@ -53,6 +53,7 @@ void XrdFileCloseReporterAmq::_init()
   mAmqMaxMsgQueueLen      = 10000;
   mAmqReconnectWaitSec    = 1;
   mAmqReconnectWaitSecMax = 300;
+  mAmqAutoReconnectSec    = 0;
 
   // Some amq-counters state vars get initalized in AmqHandler().
 
@@ -185,6 +186,7 @@ void XrdFileCloseReporterAmq::AmqHandler()
     GLensReadHolder _lck(this);
     mAmqTotalConnectSuccessCount = 0;
     mAmqTotalConnectFailCount    = 0;
+    mAmqTotalAutoReconnectCount  = 0;
     mAmqCurrentConnectFailCount  = 0;
     mAmqSendMessageFailCount     = 0;
     bAmqConnected                = false;
@@ -236,6 +238,8 @@ entry_point:
     Stamp(FID());
   }
 
+  GTime auto_reconnect_time = GTime::ApproximateFuture(mAmqAutoReconnectSec);
+
   while (true)
   {
     // wait on amqcond, send messages, handle exceptions
@@ -244,7 +248,17 @@ entry_point:
       GMutexHolder _qlck(mAmqCond);
       if (mAmqMsgQueue.empty())
       {
-	mAmqCond.Wait();
+        if (mAmqAutoReconnectSec)
+        {
+          if (mAmqCond.TimedWaitUntil(auto_reconnect_time) == 1)
+          {
+            break;
+          }
+        }
+        else
+        {
+          mAmqCond.Wait();
+        }
       }
       msg = mAmqMsgQueue.front();
       mAmqMsgQueue.pop_front();
@@ -277,6 +291,28 @@ entry_point:
 
       goto entry_point;
     }
+  }
+
+  // The fact that we're here means we're supposed to do automatic
+  // reconnection.
+  {
+    amq_disconnect();
+
+    {
+      GLensReadHolder _lck(this);
+      ++mAmqTotalAutoReconnectCount;
+      mAmqCurrentConnectFailCount = 0;
+      bAmqConnected = false;
+      Stamp(FID());
+    }
+
+    // Log reconnect request.
+    if (*mLog)
+      mLog->Form(ZLog::L_Message, _eh, "Disconnect for automatic periodic reconnect initiated (delta_t=%ds).", mAmqAutoReconnectSec);
+
+    sleep_seconds = 0;
+
+    goto entry_point;
   }
 }
 
@@ -351,8 +387,8 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   {
     GLensReadHolder _slck(server);
     msg += TString::Format
-      ("'server_domain':'%s', 'server_host':'%s'",
-       server->GetDomain(), server->GetHost());
+      ("'server_domain':'%s', 'server_host':'%s', 'server_site':'%s'",
+       server->GetDomain(), server->GetHost(), server->GetSite());
   }
 
   msg += "}";

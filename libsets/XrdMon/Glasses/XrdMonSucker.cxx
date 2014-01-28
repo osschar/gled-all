@@ -206,8 +206,10 @@ void XrdMonSucker::disconnect_server(XrdServer* server, XrdDomain *domain,
     }
   }
   server->ClearPrevUserMap();
-  mSaturn->ShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()) );
-  mSaturn->ShootMIR( domain->S_RemoveAll(server) );
+  mSaturn->DelayedShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()),
+                            GTime::ApproximateFuture(mUserKeepSec + 10) );
+  mSaturn->DelayedShootMIR( domain->S_RemoveAll(server),
+                            GTime::ApproximateFuture(mUserKeepSec + 20) );
 }
 
 //==============================================================================
@@ -221,6 +223,8 @@ void XrdMonSucker::Suck()
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
 
   TPMERegexp redir_re   ("(.*?):(.*)", "o");
+
+  TPMERegexp srvinfo_re ("^&pgm=(.*)&ver=(.*)&inst=(.*)&port=(.*)&site=(.*)$", "o");
 
   SNetResolver resolver;
 
@@ -564,12 +568,17 @@ void XrdMonSucker::Suck()
         {
           msg += "\n\tUser not found ... skipping.";
           log.Put(ZLog::L_Warning, msg);
+          continue;
         }
       }
       else if (code == '=')
       {
+        srvinfo_re.Match(sec);
+        TString site = srvinfo_re[5];
+
 	GLensWriteHolder _lck(server);
-	server->UpdateSrvIdTime(recv_time);
+	server->UpdateSrvIdTime(recv_time, site);
+
 	msg += TString::Format("\n\tServerId -- uname=%s other=%s", prim, sec);
       }
       else

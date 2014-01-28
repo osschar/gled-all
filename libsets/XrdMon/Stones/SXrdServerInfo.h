@@ -19,6 +19,7 @@ class SXrdServerInfo
 public:
   TString           mHost;
   TString           mDomain;
+  TString           mSite;
 
   SXrdServerInfo()  {}
   ~SXrdServerInfo() {}
@@ -27,7 +28,7 @@ public:
   void Assign(const XrdServer* s);
 #endif
 
-  ClassDefNV(SXrdServerInfo, 1);
+  ClassDefNV(SXrdServerInfo, 2);
 }; // endclass SXrdServerInfo
 
 #endif
