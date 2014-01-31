@@ -24,6 +24,11 @@ void xrd_file_close_reporter_amq()
   // Set topic where the message is to be sent:
   // c_frep_amq->SetAmqTopic("xrdpop.uscms_test_popularity");
 
+  // activemq-cpp apparently double-deletes some objects.
+  // Set this flag to true to try to work around this by simply leaking all
+  // AMQ objects in amq_disconnect().
+  // c_frep_amq->SetLeakAmqObjs(false);
+
   // Number of messages to keep in memory while connection to AMQ is down.
   // After that older messages get dropped.
   // c_frep_amq->SetAmqMaxMsgQueueLen(10000);
@@ -35,6 +40,9 @@ void xrd_file_close_reporter_amq()
   // Maximum time to wait between two connection attempts.
   // c_frep_amq->SetAmqReconnectWaitSecMax(300);
 
+  // Reconnect to AMQ server periodically. The default value of 0 means
+  // that the client will stay connected until there is an error.
+  // c_frep_amq->SetAmqAutoReconnectSec(0);
 
   c_suck->AddFileCloseReporter(c_frep_amq);
 
