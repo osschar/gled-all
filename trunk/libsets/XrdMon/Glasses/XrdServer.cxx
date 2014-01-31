@@ -166,11 +166,18 @@ Int_t XrdServer::RemovePrevUsersOlderThan(const GTime& cut_time)
 {
   // Removes previous users older than given cut_time.
 
+  static const Exc_t _eh("XrdServer::RemovePrevUsersOlderThan ");
+
+  if (*mPrevUsers == 0)
+    throw _eh + "Link mPrevUsers is null, this really shouldn't happen.";
+  if (CheckBit(kDyingBit))
+    throw _eh + "Dying-bit is set, this really shouldn't happen.";
+
   // We know old users are pushed-back sequentially, so we can check queue
   // front only.
 
   XrdUser *u;
-  Int_t    uid;
+  UInt_t   uid;
   Int_t    n_wiped = 0;
 
   while (true)

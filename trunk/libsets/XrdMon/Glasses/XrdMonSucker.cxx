@@ -57,11 +57,12 @@ void XrdMonSucker::_init()
 {
   bStoreIoInfo = false;
 
-  mUserKeepSec = 300;
-  mUserDeadSec = 86400;
-  mServDeadSec = 86400;
-  mServIdentSec = 300;
-  mServIdentCnt = 5;
+  mUserKeepSec   = 300;
+  mUserDeadSec   = 86400;
+  mServDeadSec   = 86400;
+  mServIdentSec  = 300;
+  mServIdentCnt  = 5;
+  mCheckInterval = 30;
 
   mPacketCount = mSeqIdFailCount = 0;
 
@@ -118,10 +119,22 @@ void XrdMonSucker::on_file_open(XrdFile* file)
 
 void XrdMonSucker::on_file_close(XrdFile* file, XrdUser* user, XrdServer* server)
 {
-  Stepper<XrdFileCloseReporter> stepper(*mFCReporters);
-  while (stepper.step())
+  // Called when a file is closed.
+  //
+  // Notification is sent to registered file-close-reporters (but only if all
+  // file, user and server are non-null -- this can happen if information
+  // sources keep sending information after the close (for a file) or
+  // disconnect (for a user)).
+  //
+  // After that the file is removed from the list of open files via a MIR.
+
+  if (file && user && server)
   {
-    stepper->FileClosed(file, user, server);
+    Stepper<XrdFileCloseReporter> stepper(*mFCReporters);
+    while (stepper.step())
+    {
+      stepper->FileClosed(file, user, server);
+    }
   }
 
   {
@@ -207,9 +220,9 @@ void XrdMonSucker::disconnect_server(XrdServer* server, XrdDomain *domain,
   }
   server->ClearPrevUserMap();
   mSaturn->DelayedShootMIR( mQueen->S_RemoveLenses(server->GetPrevUsers()),
-                            GTime::ApproximateFuture(mUserKeepSec + 10) );
+                            GTime::ApproximateFuture(mUserKeepSec + mCheckInterval + 10) );
   mSaturn->DelayedShootMIR( domain->S_RemoveAll(server),
-                            GTime::ApproximateFuture(mUserKeepSec + 20) );
+                            GTime::ApproximateFuture(mUserKeepSec + mCheckInterval + 20) );
 }
 
 //==============================================================================
@@ -1228,7 +1241,7 @@ void XrdMonSucker::Check()
       }
     }
 
-    GTime::SleepMiliSec(30000);
+    GTime::SleepMiliSec(1000 * mCheckInterval);
   }
 }
 
@@ -1255,7 +1268,15 @@ void XrdMonSucker::CleanUpOldUsers()
     {
       XrdServer *s = *si;
 
-      n_wiped += s->RemovePrevUsersOlderThan(cut_time);
+      try
+      {
+        n_wiped += s->RemovePrevUsersOlderThan(cut_time);
+      }
+      catch (Exc_t exc)
+      {
+        ZLog::Helper log(*mLog, GTime::ApproximateTime(), ZLog::L_Error, _eh);
+        log.Put(exc);
+      }
 
       s->DecEyeRefCount();
     }

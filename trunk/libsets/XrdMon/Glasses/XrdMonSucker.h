@@ -49,11 +49,12 @@ protected:
   ZLink<ZHashList> mFCReporters; // X{GS} L{}
   ZLink<ZLog>      mRedirectLog; // X{GS} L{}
 
-  Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[60,   86400, 1])
-  Int_t      mUserDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
-  Int_t      mServDeadSec;       // X{GS}   7 Value(-range=>[300, 604800, 1])
-  Int_t      mServIdentSec;      // X{GS}   7 Value(-range=>[60,   86400, 1])
-  Int_t      mServIdentCnt;      // X{GS}   7 Value(-range=>[2,  1000000, 1])
+  Int_t      mUserKeepSec;       // X{GS}   7 Value(-range=>[ 60,   86400, 1])
+  Int_t      mUserDeadSec;       // X{GS}   7 Value(-range=>[300,  604800, 1])
+  Int_t      mServDeadSec;       // X{GS}   7 Value(-range=>[300,  604800, 1])
+  Int_t      mServIdentSec;      // X{GS}   7 Value(-range=>[ 60,   86400, 1])
+  Int_t      mServIdentCnt;      // X{GS}   7 Value(-range=>[  2, 1000000, 1])
+  Int_t      mCheckInterval;     // X{GS}   7 Value(-range=>[  2,    3600, 1])
   GTime      mLastOldUserCheck;  // X{GRSQ} 7 TimeOut()
   GTime      mLastDeadUserCheck; // X{GRSQ} 7 TimeOut()
   GTime      mLastDeadServCheck; // X{GRSQ} 7 TimeOut()
