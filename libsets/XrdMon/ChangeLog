@@ -1,3 +1,17 @@
+2014-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add some protections for handling of buggy DPM streams.
+
+	* Glasses/XrdMonSucker.cxx:
+	* Glasses/XrdMonSucker.h:
+	Add data-member controlling interval between cleanup checks.
+	Increase MIR delay for server removal for that amount.
+	Make sure file, user and server are non-null before calling a
+	file-close reporter.
+
+	* Glasses/XrdServer.cxx:
+	Typefix.
+
 2014-01-28  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Implement site-name processing and auto AMQ reconnect.
