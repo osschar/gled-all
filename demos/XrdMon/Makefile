@@ -8,3 +8,7 @@ sxrd-classes:
 
 clean:
 	rm -f libSXrdClasses.so SXrdClasses_Dict.* SXrdClasses.h SXrdClasses.cxx
+
+# To be used with: dir=`pwd`; (cd XXX/demos/XrdMon; cp `make echo-sxrd-classes` $dir)
+echo-sxrd-classes:
+	@echo SXrdClasses_LinkDef.h SXrdClasses.h SXrdClasses.cxx
