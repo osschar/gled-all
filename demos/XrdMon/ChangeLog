@@ -1,3 +1,22 @@
+2014-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Script for extracting SXrd data structures from $GLEDSYS.
+	The created files / library is all one needs for analysis xrootd
+	monitoring information in plain ROOT.
+
+	* Makefile:
+	Makefile for building the dictionary and library.
+
+	* extract-sxrd-classes.pl:
+	Script for extraction.
+
+	* sxrd-classes.cxx:
+	* sxrd-classes.h:
+	Preambles of header and cxx files.
+
+	* SXrdClasses.h:
+	Removed -- obsoleted by the above.
+
 2013-08-27  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* xrd_http_serve_open_files.C:
