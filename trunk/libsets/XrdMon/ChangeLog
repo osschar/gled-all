@@ -1,3 +1,12 @@
+2014-02-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Some more tweak for handling DPM streams.
+
+	* Glasses/XrdMonSucker.cxx:
+	Reenter Suck on exception of type Exc_t. This might need furhter
+	refinement.
+	Support user DN passed in &n of auth record -- DPM does this.
+
 2014-01-30  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add some protections for handling of buggy DPM streams.
