@@ -399,26 +399,43 @@ void XrdMonSucker::Suck()
           continue;
         }
 
-        TString     host, domain, auth_host, auth_group, auth_dn;
+        TString     host, domain, serv_uname;
+        TString     auth_host, auth_group, auth_dn, auth_vo, auth_role;
         TPMERegexp *auth_re_ptr  = 0;
 
         if (sec)
         {
           if (authinfo_re.Match(sec) == 8)
           {
-            auth_host   =  authinfo_re[3];
             auth_group  =  authinfo_re[6];
             auth_dn     =  authinfo_re[7];
             auth_re_ptr = &authinfo_re;
           }
           else if (authxxxx_re.Match(sec) == 6)
           {
-            auth_host   =  authxxxx_re[3];
             auth_group  =  "<unknown>";
             auth_dn     =  "<unknown>";
             auth_re_ptr = &authxxxx_re;
           }
+
+          if (auth_re_ptr)
+          {
+            TPMERegexp &re = *auth_re_ptr;
+
+            auth_host = re[3];
+            auth_vo   = re[4];
+            auth_role = re[5];
+
+            // DPM actuallty reports DN in &n field
+            if (re[2].BeginsWith("/") && re[1] == "gsi") {
+              auth_dn    = re[2];
+            } else {
+              serv_uname = re[2];
+            }
+          }
+
         }
+
 
         TString fqhn = ( ! auth_host.IsNull()              &&
                          ! resolver.is_numeric (auth_host) &&
@@ -448,8 +465,8 @@ void XrdMonSucker::Suck()
 
         // Go figure, in fall 2011 MIT was sending two user-map messages.
         // The problem with this is that file-map uses user-name to identify
-          // user ... and obviously the files were assigned to the wrong one +
-          // one session remained open forever.
+        // user ... and obviously the files were assigned to the wrong one +
+        // one session remained open forever.
         {
           XrdUser *xu = server->FindUser(uname);
           if (xu != 0)
@@ -471,13 +488,11 @@ void XrdMonSucker::Suck()
         {
           if (auth_re_ptr)
           {
-            TPMERegexp &a_re = *auth_re_ptr;
-
             msg += GForm("\n\tDN=%s, Host=%s, VO=%s, Role=%s, Group=%s",
-                         auth_dn.Data(), auth_host.Data(), a_re[4].Data(), a_re[5].Data(), auth_group.Data());
+                         auth_dn.Data(), auth_host.Data(), auth_vo.Data(), auth_role.Data(), auth_group.Data());
 
-            user = new XrdUser(uname, "", auth_dn, a_re[4], a_re[5], auth_group,
-                               a_re[2], host, domain, numeric_host, recv_time);
+            user = new XrdUser(uname, "", auth_dn, auth_vo, auth_role, auth_group,
+                               serv_uname, host, domain, numeric_host, recv_time);
           }
           else
           {
@@ -1110,6 +1125,8 @@ void XrdMonSucker::Suck()
 
 void* XrdMonSucker::tl_Suck(XrdMonSucker* s)
 {
+  static const Exc_t _eh("XrdMonSucker::tl_Suck ");
+
   GThread *thr = GThread::Self();
   s->mSaturn->register_detached_thread(s, thr);
   thr->CleanupPush((GThread_cu_foo) cu_Suck, s);
@@ -1121,7 +1138,18 @@ void* XrdMonSucker::tl_Suck(XrdMonSucker* s)
   }
 
   s->mSource->RegisterConsumer(&s->mUdpQueue);
-  s->Suck();
+  while (true)
+  {
+    try
+    {
+      s->Suck();
+    }
+    catch (Exc_t exc)
+    {
+      if (*(s->mLog))
+        s->mLog->Put(ZLog::L_Error, _eh, exc + "\n\tTrying to reenter, this might not be the best idea.");
+    }
+  }
 
   return 0;
 }
