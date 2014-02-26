@@ -231,7 +231,7 @@ void XrdMonSucker::Suck()
 {
   static const Exc_t _eh("XrdMonSucker::Suck ");
 
-  TPMERegexp username_re("([^\\.]+)\\.(\\d+):(\\d+)@(.+)", "o");
+  TPMERegexp username_re("([^.]+)\\.(\\d+):(\\d+)@(.+)", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
 
@@ -388,7 +388,7 @@ void XrdMonSucker::Suck()
 
       if (code == 'u')
       {
-	msg += TString::Format("\n\tUser map -- id=%u, uname=%s", dict_id, prim);
+	msg += TString::Format("\n\tUser map -- id=%u, uname=%s\n\t\tsec=%s", dict_id, prim, sec ? sec : "<null>");
 
 	TString uname(prim);
 
