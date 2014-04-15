@@ -26,7 +26,7 @@ my $f;
 my $pre = "//" . '=' x 78 . "\n";
 my $pst = "\n\n";
 
-print SXH get_file("sxrd-classes.h");
+print SXH get_file("$ENV{GLEDSYS}/demos/XrdMon/sxrd-classes.h");
 
 #### SXH ####
 
@@ -57,7 +57,7 @@ close SXH;
 
 #### SXC ####
 
-print SXC get_file("sxrd-classes.cxx");
+print SXC get_file("$ENV{GLEDSYS}/demos/XrdMon/sxrd-classes.cxx");
 
 $f = get_file("$ENV{GLEDSYS}/GledCore/Stones/SRange.cxx");
 $f =~ s!(^\#include)!//$1!omg;
