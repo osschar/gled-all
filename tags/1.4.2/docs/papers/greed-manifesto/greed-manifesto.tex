@@ -1,0 +1,794 @@
+\documentclass[a4paper,11pt]{article}
+%\documentclass[a4paper,draft]{jpconf}
+
+\input csz
+
+\usepackage{fullpage}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xspace}
+
+\def\smalltt#1{{\small\texttt{#1}}}
+\def\foottt#1{{\footnotesize\texttt{#1}}}
+
+\def\q{\quad}
+
+\def\tightlist{\setlength{\topsep}{0pt}\setlength{\itemsep}{0pt}}
+
+\def\greed{\textsc{Greed}\xspace}
+\def\greedhome{\textsc{Greed}@\texttt{home}\xspace}
+\def\root{{ROOT}\xspace}
+\def\xrootd{\texttt{xrootd}\xspace}
+\def\aliroot{{AliROOT}\xspace}
+\def\alien{{AliEn}\xspace}
+\def\gled{\textsc{Gled}\xspace}
+\def\web{\texttt{web}\xspace}
+\def\grid{\texttt{grid}\xspace}
+\def\bittorrent{\texttt{BitTorrent}\xspace}
+
+
+\title{Greed Manifesto}
+
+\author{Matev\v{z} Tadel \& Jan Jona Javor\v{s}ek\\
+        {\small written by Matev\v{z} Tadel}}
+
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+\setcounter{section}{-1}
+
+
+\section{Document status}
+
+\noindent\textbf{v1.0, Oct--Dec 2007.}
+Initial version intended for friends. Presents a dream of the \greed
+project and wanders off into the realms of eventual possibilities.
+
+\smallskip
+
+\noindent\textbf{v1.0.1, 20 Jan 2008.}
+Incorporated comments from Jan Jona.
+
+\smallskip
+
+\noindent\textbf{v1.1.0, 16 Nov 2008.}
+Remove section \emph{"Technological overview"} and \emph{"Work-plan
+  towards minimal implementation"}. They are now available from the
+web -- as they should really be discussed further.
+
+
+% ========================================================================
+
+\section{Introduction}
+
+\greed is a vehicle for dissemination and universal exploitation of
+scientific and educational programs. It combines the concepts of
+\grid, \texttt{computing@home} and massive multi-player online games
+with the \emph{free and open-source software} ideology and development
+practices. The main aim of \greed is to become a link between
+institutions for research \& education and Internet users by providing
+a global and open computing environment that allows all parties to
+pursue their own goals and interests. Institutions utilize the
+computing resources of Internet users and in return provide a
+high-reliability server infrastructure needed for operation of
+persistent virtual worlds created and maintained by communities of
+\greed members.
+
+In its essence, \greed is a hack to make this world a better place.
+It attempts to expose greed both as the ultimate source of motivation
+as well as an unwholesome tendency that limits the human cooperation
+and hinders global development. But greed is not a very good name for
+a project, unless it is an acronym: \greed is a \emph{Global Research
+  Environment for Equitable Development}.\footnote{\emph{Global
+    Research Environment for Eidetic Design} is also an option,
+  suggestions are welcome.}
+
+
+% ========================================================================
+
+\section{Roots of the \greed initiative}
+
+Every global initiative starts with a concrete problem and with a
+vision of how the present elements can be combined for the common
+good.  \greed is no exception to this rule: it is motivated by the
+computing needs of the \emph{Large Hadron Collider} (LHC) experiments
+and by the desire of its individual members to expose the computing
+technologies developed for operation of LHC and use them as an
+outreach stunt for popularization of scientific theories and
+contemporary technological endeavors undertaken for their exploration.
+
+While the basic computing requirements of the LHC experiments are
+covered by the dedicated infrastructure of the LHC computing \grid,
+there is little spare capacity for advanced searches for exotic
+particles and new physics which require significant computing
+resources, mainly in terms of event simulation and analysis of both
+simulated and real experiment data.\footnote{The resources provided to
+  the ALICE experiment during the first four years of the detector
+  operation are actually significantly below the pledged level.}
+The additional computing resources provided by the public at large
+could thus contribute the final stone to the full exploitation of the
+physics potential of the LHC.
+
+As the full experiment software and accompanying data would have to be
+distributed for the operation of such infrastructure, it would also
+become feasible for anybody to run simple data visualization and
+analysis applications allowing better understanding of the LHC
+project, of the LHC experiments and of high-energy physics in general.
+This is of particular interest for universities and high-schools as
+the programs could be used for student projects or for exercises in
+physics, computing and statistics. Additionally, educational
+institutions usually own a fair number of computers (desktops in
+offices and computing rooms) that are only utilized half of the time
+as well as have a reasonable WAN up-link and can thus also offer CPU
+power for utilization by the LHC experiments.
+
+On the other side of the equation we have 1.2 billion Internet
+users that we want to inform about and engage in the latest scientific
+and technological developments in an attractive and accessible manner.
+This calls for an analysis of the possible user base, keeping in mind
+that another purpose of the \greed is to harvest the computing
+resources of its target audience for scientific computation.
+
+
+\subsection{Possible audiences of the \greed}
+
+The success of several \smalltt{computing@home} projects during the
+last five years\footnote{Currently folding@home is the most active
+  one.  In Dec 2007 it passed the tera-flop mark with 500k registered
+  users. During year 2007 PS3 clients accounted for a better part
+  of the project's growth.} points to a surprisingly high level of
+interest for scientific computing present among the general public.
+The basic terms of contract between the users and the project seem, in
+most cases, deceptively simple. The project provides a computing
+platform and a basic community portal that often consists mostly of
+expert-level information (references to scientific papers or research
+laboratory web-pages). Based on this rudimentary infrastructure, the
+users connect into the distributed computing environment, contributing
+their CPU, disk-space and bandwidth for no apparent benefit. But
+people who are willing to go through the trouble of installing the
+computing client and paying for the electricity\footnote{Estimating
+  power consuption to 100W per core, the monthly consumption is 48kWh.
+  For France this makes about 6.5 EUR per month per core.} more than
+likely care about what they are contributing to, even though this can
+be any of the following things:
+\begin{itemize}\tightlist
+\item rational exploitation of existing computing resources;
+\item development and utilization of cool new software and ideas
+  pertaining to networks, computing and information technologies in
+  general (e.g. FOSS movement, \grid computing, peer-to-peer
+  computing);
+\item supporting a specific project due to its perceived
+  scientific or humanitarian merit.
+\end{itemize}
+Whatever are the actual motives, the contributors are effectively
+forming a community and many of them would feel inclined towards
+investing some of their time into further exploration of the project
+they are contributing to. The idea of \greed encompasses all of the
+above motivations and it would almost certainly appeal to the majority
+of existing contributors.
+
+At this point let us also consider the popularity of community
+knowledge sites (Wikipedia), of alternate reality worlds (SecondLife)
+and of massive multi-player online games (World of Warcraft, EVE
+Online). Most of the services in the last two categories also require
+a subscription with monthly charges up to 25\$. There are two
+common attributes of users who participate in these activities that
+also make them possible \greed contributors:
+\begin{itemize}\tightlist
+\item they have a PC with Internet access and use it as a communication
+  engine, as a hobby, or simply for fun;
+\item they spend significant amounts of their time online and are
+  willing to contribute their work or effort to the community.
+\end{itemize}
+The combined user bases of these projects well exceed 20 million
+people. But unlike the contributors to \smalltt{computing@home}
+projects, the users of these community-engines do not have a common
+set of motives. Thus either a sub-set of of users needs to be selected
+or, alternatively, a variety of strategies need to be employed to
+arouse the interest of as many users as possible.
+
+To summarize, there are many existing activities on the Internet that
+provided aspiration for \greed. One could even say that \greed is a
+peculiar combination of elements from the projects mentioned in this
+section that have not been placed into a common context yet.
+
+
+\subsection{High-level description of \greed worlds}
+
+Persistent multi-user virtual worlds have been chosen as the primary
+means of dissemination because they appeal to a variety of audiences,
+from primary school level onwards, determined by the complexity and
+scope of the virtual world elements. To maintain coherency and allow
+information exchange between different worlds, a common basic world
+structure must be employed. It should be general enough to allow a
+multitude of scientific and technological elements to be combined into
+coherent worlds of different characters. At the same time, within
+the mechanics of each such world, it must be possible for users to
+participate in the world development on completely different levels of
+engagement and personal time investment.
+
+To achieve that, the worlds are presentable on different levels. Each
+presentation offers a specific view of the world and offers a
+specialized user interface for interaction with the presented world
+elements.
+\begin{itemize}\tightlist
+
+\item \emph{Strategic} view provides insight into relations among
+  entities on a large-scale by presenting status and activity of
+  large, compound world entities and their communications. This
+  information can be combined with maps or diagrams of extensive
+  sections of space, like galactic regions, solar or planetary
+  systems, or individual planets.  When presenting a specific element,
+  e.g., production, distribution and consumption of a valuable
+  resource, the relation among contributing entities can be visualized
+  as a 3-dimensional graph, supplemented by histograms, plots and
+  tables. High-level settings can be changed here, affecting a
+  multitude of entities by effectively altering the parameters of
+  world development algorithms.
+
+\item \emph{Operational} view focuses on specific tasks or on
+  relations among entities in a more local context. For example, this
+  view would be used for planning and execution of a
+  resource-discovery mission followed by construction of
+  resource-extraction and transport facilities. Settings from the
+  operational level influence a specific group of entities via
+  interaction with the control agents, not with the individual
+  entities. As above, map and 3D-graph views can be employed. In this
+  mode it is also possible to use an immersive 3D-view, augmented with
+  overlays of schematic data.
+
+\item \emph{Tactical} view presents environment and world entities in
+  detail and allows management of individual entities by assigning them
+  specific tasks or control agents. Map and augmented 3D views are
+  used here, possibly accompanied by a radar-like view of the
+  operational area.
+
+\item \emph{Entity} view focuses on different aspects of control over
+  an individual entity. This ranges from first-person view and
+  operation of a vehicle or a space-ship to control over production
+  parameters of a factory or laboratory.
+
+\end{itemize}
+Strategic and operational views can focus on different world aspects,
+e.g., on transport routes, on energy acquisition and distribution
+networks, on world exploration and surveillance, or on progress in
+science and engineering.
+
+The initial layout of the virtual worlds follows the structure of a
+solar system\footnote{Different topologies with similar consequences
+  for the world dynamics are also possible, e.g. \emph{Emental} world
+  consisting of a number of Dyson's spheres connected by a set of
+  stable tubular wormholes.} and prompts users to engage in
+exploration, resource acquisition, infrastructure construction and
+research activities by controlling the in-world entities. The initial
+time is set about 20 years into the future, with reasonably
+extrapolated technologies and with the addition of two new fictitious
+technologies: the quark-gluon plasma reactor and the Higgs-field
+driven vacuum polarization chamber, both spin-offs of the LHC project,
+allowing construction of a new generation of extreme energy sources,
+control over large-scale quantum coherence and rudimentary
+manipulation of the space-time continuum.
+
+To underline the fragility of our civilization, the story could begin
+with a cataclysm: human population of Earth is decimated by a global
+disaster (caused by biological agents, comet impact, or global
+redefinition of weather patterns) and the survivors are in position to
+operate robotic factories and agents. The resources from Earth and
+Moon are used to build Foundation vessels that are sent through poorly
+controlled wormholes into random solar systems of our universe where
+they have to bootstrap new civilizations. Of course, the users
+themselves will determine for each individual world if its further
+development will be carried out in a cooperative or in an opposing
+manner.
+
+Humans are a scarce and vulnerable resource in these conditions,
+vitally needed for scientific and technological development as well as
+for operation, maintenance and upgrades of existing technological
+units. The human population dynamics and living conditions of the
+humans determine the number of skilled scientists and engineers that
+are produced within each simulated community and become available as
+controllable world entities.
+
+To actively employ such a specialist, the user must also spend
+\emph{research credits} that can only be gained by providing computing
+resources to \greed institutions. Alternatively, some research credit
+can also be gained via online quizzes where a user is given a specific
+data-set on which he must perform data-analysis and correctly reply to
+a set of questions. The virtual-world research cost needed to achieve
+major scientific and technological breakthroughs far exceeds the
+computing resources of a single user, thus forcing the users to form
+cooperative communities.
+
+Introduction of new technologies and research paths is determined both
+by the world maintainers and by the users' communities. Users
+implicitly provide the development preferences by concentrating their
+effort on specific areas while the world maintainers need to provide
+adequate scientific and technological improvements. New technologies
+will inevitably also introduce new world entities and provide new
+requirements for extensions of the world mechanics. At this point the
+developers of the core framework and world steering algorithms will
+have to incorporate the new technology into the system and make sure
+that it functions consistently with the existing world elements.
+
+The in-world technologies introduced in the future will eventually
+allow controlled long-range space travel, leading to possibilities for
+further exploration and colonization as well as for establishment of
+connections between different worlds, to increased cooperation and
+possibly to conflict.
+
+
+\subsection{Possible extensions of \greed world mechanics}
+
+This section presents a review of different research fields that could
+be introduced into \greed worlds either to increase their level of
+detail or to imbue them with realistic scientific models and knowledge
+databases. In this way \greed can provide a virtual environment that
+is based on the latest research results and can be directly used not
+only as a tool for teaching and for individual exploration of recorded
+knowledge but also as an engine for simulation of complex systems. In
+this spirit it is hoped that other research institutions and projects
+will join the \greed initiative by providing their knowledge, manpower
+and server infrastructure to receive the benefits of user-provided CPU
+power and popularize their field of expertise among the general
+public.
+
+Astronomy and cosmology strive for the understanding of the universe
+and of all the phenomena that proceed within it on a wide range of
+spacetime-scales.  It is therefore necessary to include the
+astronomical facts, at least at a basic level, into the world
+mechanics from the very beginning.  With the interest from the
+astro-physics community, detailed knowledge about universe could be
+incorporated into the world mechanics, from realistic taxonomy and
+composition of solar and planetary systems to large-scale structure of
+galaxies, galactic clusters and beyond.
+
+General theory of relativity plays an important role in the simulation
+of long-range space travel and in presentation of exotic astronomic
+phenomena while quantum mechanics and nano-technology present the
+basic sciences for future technological development. Additionally,
+hypothetical couplings between general relativity and quantum
+mechanics could be stipulated and explored in semi-realistic
+technological contexts leading to, for example, faster then light
+travel and space-time manipulation devices.
+
+Many disciplines of computer science naturally permeate all elements of
+the world simulation software and of distributed information services
+required for world operation and maintenance. Staying within the
+aspects of the world mechanics and presentation, the most important
+fields are computer graphics, computer vision, robotics, artificial
+intelligence and control of autonomous agents. All of them can be
+employed on both sides of the world, by the users to steer their
+development and by the world maintainers to control non-interactive
+world entities.
+
+Resource acquisition, resource processing and industrial production
+can be simulated by various aspects of geology, metallurgy, chemistry,
+material science, engineering and process control. Futuro-realistic
+simulation of energy generation and consumption provides an
+interesting platform for exploration of alternative energy sources,
+energy storage technologies and conversion devices. Construction and
+operation of infrastructure, habitats and transport vehicles depends
+on all of these disciplines, thus allowing the introduction of
+complex world constructs, mechanisms and constraints.
+
+Distribution of resources on the level of planetary and solar systems
+determines the location of initial settlements and leads, as
+technology progresses, to the need for safe and energy-efficient
+transportation of raw-materials, products and world entities among
+different communities. Trade and other forms of economic cooperation
+naturally arise in such circumstances, adding a new level of activity
+into the world mechanics. Of course, technology, knowledge and
+expertise can likewise become the objects of trade.
+
+Management of human population initially starts with a basic
+population dynamics. As human specialists play an important role in
+research, engineering and process control, the main emphasis is put
+on education and general well being of human communities. Cultural
+aspects can be introduced from two sides, from the direction of the
+individual and from the direction of the society. In the first case
+art and philosophy influence the possibilities of individuals for
+attainment of knowledge, expertise and wisdom. In the second case,
+human liberties, moral values, ideologies and religions determine the
+level of social coercion and define the possible scope of social
+manifestations as well as of reactions of an individual to the imposed
+conditions. In an extreme case, these models could be used to explore
+alternative forms of government, social solidarity and economic
+relations with the goal of increasing human prosperity, stimulating
+the growth of knowledge and maximizing the rate of technological
+development.
+
+
+\subsection{Levels of realism in \greed worlds}
+
+Combination of all the above elements obviously leads to a world that
+is overly complex and, as it seems at the moment, quite impossible to
+construct and to maintain. While this remains the final goal, it seems
+a sound tactics to start with several disparate worlds that are
+constructed from a subset of carefully selected elements, chosen by
+considering several aspects of the world simulation.
+\begin{itemize}\tightlist
+\item \emph{Scope and detail of scientific, technological and
+    sociological elements} determines the active world mechanisms and
+  sets the main roles available to users.
+\item \emph{Intended public} directly influences the
+  complexity of both the simulated world and world mechanisms.
+\item \emph{Spatial extent, duration and tempo} pose the requirements
+  for the server infrastructure. They also determine the amount of
+  time users must invest into the interaction with the world to
+  accomplish sizable advancement.
+\end{itemize}
+Users' feedback and interest in actual running worlds will help
+to determine what types of worlds are of interest for different
+audiences and will further influence the development of core world
+simulation framework.
+
+\paragraph{Basic worlds} are built around a small number of basic
+elements. The world duration ranges from hours to weeks, the
+spatial extent is limited accordingly. They have three main uses:
+\begin{enumerate}\tightlist
+\item worlds for new users that need to gain initial understanding of
+  the world mechanisms and concepts or want to explore a new type of
+  world;
+\item worlds with content and complexity suitable for children (user
+  interface can be simplified to the level of simple computer games);
+  and
+\item testing of new world mechanisms and their balancing against
+  existing elements.
+\end{enumerate}
+As these worlds are relatively short-lived, they can be regularly
+tailored to serve the changing needs of the community.
+
+\paragraph{Intermediate worlds} combine more elements on a higher
+level of detail and their duration ranges from months to years. These
+worlds can focus on a variety of topics from the repertoire described
+in previous sections and only experimentation can show which areas
+will attract most users. As the chosen emphasis also determines the
+level of users' engagement, several different worlds will be needed to
+cover the expectations of individual users.
+
+\paragraph{Realistic worlds} with all available complexity in certain
+field can be used by specialists for testing of real-world algorithms,
+for development of AI agents and for simulations of space exploration
+missions. By keeping the user interface consistent with the one of
+intermediate worlds, the users can intuitively enter them to gain
+insight into current research or use them as a knowledge data-base
+system.
+
+
+\subsection{Conclusion}
+
+Due to the multitude of directions the development might take, it
+seems pointless to consider the final structure and content of the
+worlds in a more detailed manner. However, it is important that the
+actual flow of development remains influenced by world creators and
+users alike, allowing all parties to remain satisfied with the
+contract.
+
+
+% ========================================================================
+
+\section{The \greed partnership}
+
+The \greed partnership is formed among two main parties: the research
+institutions and the Internet users, with \greed as an organization
+playing the role of the middle man. Initially, \greed will take a form
+of a virtual organization for popularization of science and technology
+with strong emphasis on dissemination of contemporary information
+technologies used in advanced research environments, particularly in
+the HEP community. With time it can become a non-profit organization
+with the eventual income being spent for further development of \greed
+worlds, for maintenance of existing infrastructure and for financing
+of projects related to spreading of universal scientific education.
+
+This section analyzes benefits and concessions of different parties
+that can join the \greed partnership. All these are, at the end,
+a question of subjective rationalization: some seem realistic and
+sound while others don't have any appeal at all. Therefore, let
+thousand flowers bloom, let every ear hear its story.
+
+
+\subsection{Internet users / General public}
+
+\paragraph{Benefits:}
+\begin{itemize}\tightlist
+
+\item Participation in \greed worlds and communities.
+
+\item Access to knowledge data-bases.
+
+\item Understanding of contemporary research activities and technology.
+
+\item Long-term benefits of increased public interest in scientific
+  development and universal education. This is, in fact, the ultimate
+  motive of the \greed project.
+
+\end{itemize}
+
+\paragraph{Possible concessions:}
+\begin{itemize}\tightlist
+
+\item CPU power, disk, bandwidth.
+
+\item Involvement in world creation and world maintenance.
+
+\item Work for individual sub-projects (core development,
+  art-work\footnote{E.g., textures, 3D models, animations, sound
+    effects, music, or story-telling.}, or community support).
+
+\end{itemize}
+
+
+\subsection{Institutions for research and higher education}
+
+\paragraph{Benefits:}
+\begin{itemize}\tightlist
+
+\item Distributed computing environment and resources for execution of
+  simulations and analyses with high demand for computing resources.
+
+\item \greed worlds provide an environment for construction of complex
+  knowledge models and databases that can be utilized and presented on
+  different levels. They can be used for research, knowledge
+  preservation and for educational purposes.
+
+\item Popularization of individual areas of science by exposing
+  scientific models and current research via \greed world mechanisms
+  and databases.
+
+\end{itemize}
+
+\paragraph{Possible concessions:}
+\begin{itemize}\tightlist
+
+\item Computing resources for other projects. These resources can be
+  claimed back from other \greed members when the need arises.
+
+\item Servers for running of \greed worlds and storage of world data.
+
+\item Partake in \greed software development; provide developers for
+  core \greed environment or for specific extensions of world
+  mechanicsms and knowledge databases.
+
+\end{itemize}
+
+
+\subsection{Commercial corporations}
+
+Until now, commercial corporations have not been mentioned as possible
+members of the \greed partnership. As \greed is, in its essence, a
+public welfare project, sponsorship from corporations could be
+expected at some basic level. However, there is a possibility for a
+far more specific interest of corporations: advertising. Not only
+could the advertisements be placed on the sites of \greed worlds as
+they are placed on more and more community portals, they could also be
+actively introduced as world entities, e.g., Airbus / Boeing
+space-ships, Hyundai vehicles, or Novartis life extension drugs. To
+prevent complete commercialization of \greed, the participation of
+commercial entities should be restricted to a subset of worlds that
+offer additional benefits to the users in exchange for being targets
+of advertising campaigns.
+
+\paragraph{Benefits:}
+\begin{itemize}\tightlist
+
+\item Advertising, in both senses mentioned above. First, specific
+  product placement through advertising on community sites, and,
+  second, boosting brand and trademark recognition through in-world
+  products or entities.
+
+\item Image building by presentation of technological vision or display
+  of interest for general progression of technology and science.
+
+\end{itemize}
+
+\paragraph{Possible concessions:}
+\begin{itemize}\tightlist
+
+\item Financial support for specific projects or \greed maintenance.
+
+\item Provision of computing resources for operation of \greed worlds.
+
+\item Sponsoring user groups that tie themselves to an interest that
+  is close to company's spirit.
+
+\item Providing in-world or real-world rewards for users that meet
+  certain criteria or deliver best solutions to calls for creation and
+  improvement of in world entities or mechanisms.
+
+\end{itemize}
+
+\emph{In-game advertising} of real-world products and brands has been
+used in several titles since the mid-90's. Significant income started
+to be gained during the last few years, with the ability to deliver
+targeted dynamic advertisements into the on-line virtual worlds and
+games.
+
+
+\subsection{Conclusion}
+
+There are many appeals in the \greed project for all three parties
+discussed in this section. A careful analysis confronting the expected
+manpower investment against public interest it is expected to arouse
+should be made in order to determine the best strategy for placement
+of specific options for contribution and benefit of individual
+parties. When preparing a public version of this document, the focus
+must be known quite specifically and document's structure revised
+accordingly.
+
+
+% ========================================================================
+
+
+\section{Closing remarks}
+
+In its essence, this document is an invitation to join in early
+discussions about \greed, its basic premises and its possible
+evolutions. A more concrete technological overview and a proposal
+towards the prototype implementation is available on the
+web.\footnote{\url{http://www.gled.org/docs/greed-design-docs/greed-tech-workplan.html}}
+A community site for wider audience is also being
+prepared.\footnote{\url{http://greed.gled.org/}}
+
+It is too early to plan the details and assign commitments. But it is
+the right time to consider the possibilities of \greed in the present
+reality and to ponder whether the project could fly, regardless what
+final form it might take.
+
+
+\newpage
+%%======================================================================
+\appendix
+
+\section{Definitions}
+
+\begin{multicols}{2}
+
+\def\ddd#1{\smallskip\noindent \textbf{#1}\quad}
+
+\ddd{\greedhome} Sub-project of \greed that harvests the
+computing resources of Internet users.
+
+\ddd{\greed members} Internet users, research institutions, \greed
+world developers and commercial corporations that willfully join the
+\greed partnership.
+
+\ddd{\greed users} Internet users that contribute their computing
+resources and participate in \greed worlds.
+
+\ddd{\greed-world} Sub-project of \greed for creation, maintenance and
+operation of virtual worlds available to \greed members.
+
+\ddd{\greed worlds} Virtual worlds simulating scientific and
+technological exploration of different universes, ranging from
+completely imaginary ones to those that attempt to mimic our reality.
+
+\ddd{world elements} Stars, planets, entities, resources,
+infrastructure, technologies, algorithms.
+
+\ddd{world entities} Physical world objects like terrain structures,
+buildings, factories, laboratories, vehicles, AI agents and human specialists. Users
+can interact with them and influence their future state or actions.
+
+\end{multicols}
+
+
+% ========================================================================
+
+\newpage
+
+\tableofcontents
+
+% ========================================================================
+\end{document}
+% ========================================================================
+
+
+\newpage
+%%======================================================================
+
+\section{Ode to Greed}
+
+\begin{verse}
+\makebox[16mm][l]{Greed!}   The prime incentive, the dawn of emerging life.\\
+\makebox[16mm][l]{Passion!} The mother of change, the queen of ChaOss.\\
+\makebox[16mm][l]{Love!}    The source of wisdom, the mirror of truth.
+\end{verse}
+
+We follow You the emotions of the heart, You are guiding us where we
+have come from, where there is no space nor time, where divine grace
+awaits us, its children, its affirmation in the echo of eternity. Out
+of mechanical plant-likeness, out of carnal animality, we, the
+people of Earth, have been growing forward through the time of our
+world, back towards the manifest creation, towards eons born from the
+oneness of the unspeakable.
+
+We came to know fire, we came to know the bitterness of the sharpened
+metal and we came to know death in the name of God.
+
+We came to know measure and number, we came to know the laws of
+heavenly spheres and we came to know the sweet smell of gold.
+
+We came to know the relativity of space and time, we came to know the
+uncertainty of quantum worlds and we came to know the two-edged sword
+of global information technologies.
+
+Let us cut the Gordian knot of biological evolution!
+
+Let us unshackle the horizons of our existence!
+
+Let us create God the creation has denied us!
+
+
+\section{Oda Pohlepu}
+
+\begin{verse}
+\makebox[18mm][l]{Pohlep!}   Osnovno gibalo, svit porajajoèega se ¾ivljenja.\\
+\makebox[18mm][l]{Strast!}   Mati spremembe, kraljica ChaOssa.\\
+\makebox[18mm][l]{Ljubezen!} Izvir modrosti, ogledalo resniènosti.
+\end{verse}
+
+Sledimo Vam, èustva srca, v\'odite nas tja od koder smo pri¹li, kjer
+ni prostora in kjer ni èasa, kjer nebe¹ka milost nespremenjena èaka na
+nas, na svoje otroke, na svojo potrditev v odmevu veènosti.  Iz
+mehaniène rastlinskosti, iz mesene ¾ivalskosti, smo rastli ljudje
+Zemlje, naprej skozi èas na¹ega sveta, nazaj proti razodeti
+stvarnosti, proti eonom rojenim iz enosti neizrekljivega.
+
+Spoznali smo ogenj, spoznali smo bridkost nabru¹ene kovine in spoznali
+smo smrt v imenu Boga.
+
+Spoznali smo mero in ¹tevilo, spoznali smo zakone nebe¹kih sfer in
+spoznali smo sladkasti vonj zlata.
+
+Spoznali smo relativnost prostora in èasa, spoznali smo nedoloèenost
+kvantnih svetov in spoznali smo dvorezni meè globalnih informacijskih
+tehnologij.
+
+Presekajmo tedaj gordijski vozel biolo¹ke evolucije!
+
+Razklenimo horizonte lastnega obstoja!
+
+Ustvarimo Boga, ki nam ga stvarstvo ni volilo nakloniti!
+
+
+%%======================================================================
+\newpage
+
+\section{Random fragments}
+
+\subsection{about game}
+
+imagination and reality, fiction and materiality, combining in
+thousands of ways, allowing thousand flowers to blossom (Mao, what is
+the correct wording?), providing inspiration and satisfaction alike
+through unbridled sprees of creativity, playfulness and dedication.
+
+linguistics, language theory, true AI in world that is neither ours
+nor theirs (of the mathematical beings), but is a shared world where
+both genuses can see the same, act the same, speak the same and, maybe
+also, think the same. Or maybe not ...  swarm intelligence
+
+
+\subsection{sort of conclusion}
+
+The \emph{Large Hadron Collider} and its experiments can, without
+exaggeration and pomposity, be called the latest wonder of the world,
+comparable in intention and scope to the Great pyramids of Giza: to
+glorify the truth and to point towards the realm of eternity. Never
+before have the scientific and philosophical quests for truth and
+purity been further apart from the common world, the world of
+greed and lust, the world stigmatized by the global rush for
+economic prosperity, for elementary domination that goes beyond caste,
+race and nationality, abolishing(?) unsuccessful human beings into hell
+of lowest motivations and ambitions, deep into the abyss of
+intellectual, emotional and even physical starvation.
+
+But really really \dots\ people should realize the essential role of science
+and education \dots\ of far reaching technological enterprises \dots\
+of benevolent cooperation. People should dig that abandoning greed is
+the first step towards deliverance, towards the Kingdom of Heaven.

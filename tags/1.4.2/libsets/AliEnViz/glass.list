@@ -1,0 +1,23 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+AEVAlienUI      1       Glasses/AEVAlienUI
+AEVDemoDriver	2	Glasses/AEVDemoDriver
+AEVMlClient	3	Glasses/AEVMlClient
+AEVMlSucker	4	Glasses/AEVMlSucker
+AEVManager	5	Glasses/AEVManager
+
+AEVSite		16      Glasses/AEVSite
+AEVCompElRep	17	Glasses/AEVCompElRep	.
+AEVSiteList     18      Glasses/AEVSiteList
+
+AEVDistAnRep	32	Glasses/AEVDistAnRep	.
+AEVEventBatch   33	Glasses/AEVEventBatch	.
+AEVJobRep	34	Glasses/AEVJobRep
+
+AEVSiteViz	64	Glasses/AEVSiteViz	.
+AEVMapViz	65	Glasses/AEVMapViz	.
+AEVProcessViz	66	Glasses/AEVProcessViz
+
+AEVFlatSSpace   128	Glasses/AEVFlatSSpace	.
+AEVSphereSSpace 129	Glasses/AEVSphereSSpace	.

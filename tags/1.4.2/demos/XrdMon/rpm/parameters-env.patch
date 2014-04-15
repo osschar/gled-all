@@ -1,0 +1,65 @@
+diff -Naur gled.orig/gled/demos/XrdMon/xrd_file_close_reporter_amq.C gled/gled/demos/XrdMon/xrd_file_close_reporter_amq.C
+--- configs/etc/gled/scripts/xrd_file_close_reporter_amq.C	2013-03-22 00:54:40.000000000 +0100
++++ configs/etc/gled/scripts/xrd_file_close_reporter_amq.C	2013-04-02 14:44:26.000000000 +0200
+@@ -1,6 +1,8 @@
+ // Add-on macro (expects xrd_suck_tcp/udp.C to be executed before).
+ // Runs XrdFileCloseReporterAmq that sends file-access reports via ActiveMQ.
+ 
++#include <cstdlib>
++
+ class XrdFileCloseReporter;
+ class XrdFileCloseReporterAmq;
+ 
+@@ -14,15 +16,16 @@
+   c_frep_amq->SetLog(c_log);
+ 
+   // Set addresshost and port where ActiveMQ server is running
+-  // c_frep_amq->SetAmqHost("gridmsg007.cern.ch");
+-  // c_frep_amq->SetAmqPort(6163);
++  c_frep_amq->SetAmqHost( getenv("MSG_HOST") );
++  c_frep_amq->SetAmqPort( atoi(getenv("MSG_PORT")) );
++
+ 
+   // Set username and password to be used:
+-  // c_frep_amq->SetAmqUser("xrdpop");
+-  // c_frep_amq->SetAmqPswd("xyzz");
++  c_frep_amq->SetAmqUser( getenv("MSG_USER") );
++  c_frep_amq->SetAmqPswd( getenv("MSG_PASSWD") );
+ 
+   // Set topic where the message is to be sent:
+-  // c_frep_amq->SetAmqTopic("xrdpop.uscms_test_popularity");
++  c_frep_amq->SetAmqTopic( getenv("MSG_TOPIC") );
+ 
+   // Number of messages to keep in memory while connection to AMQ is down.
+   // After that older messages get dropped.
+diff -Naur gled.orig/gled/demos/XrdMon/xrd_suck_udp.C gled/gled/demos/XrdMon/xrd_suck_udp.C
+--- configs/etc/gled/scripts/xrd_suck_udp.C	2013-03-22 00:54:40.000000000 +0100
++++ configs/etc/gled/scripts/xrd_suck_udp.C	2013-04-02 14:41:13.000000000 +0200
+@@ -5,6 +5,7 @@
+ // Consider running UDP -> TCP server, maybe one at every big site.
+ // See xrd_udp_forwarder.C and xrd_suck_tcp.C.
+ 
++#include <cstdlib>
+ #include <glass_defines.h>
+ 
+ class UdpPacketSource;
+@@ -34,15 +35,14 @@
+   }
+ 
+   ASSIGN_ADD_GLASS(c_log, ZLog, g_queen, "XrdMonSucker Log", 0);
+-  // c_log->SetFileName("/var/log/gled/xrdmon-suck-udp.log");
+-  c_log->SetFileName("xrdmon-suck-udp.log");
++  c_log->SetFileName( getenv("LISTENER_LOGFILE") );
+   // For verbose logging (every packet received).
+-  // c_log->SetLevel(ZLog::L_Info);
++  //c_log->SetLevel(ZLog::L_Info);
+ 
+   ASSIGN_ADD_GLASS(c_listener, UdpPacketListener, g_queen, "UdpPacketListener", "");
+   c_listener->SetLog(c_log);
+-  // Listens for UDP traffic on port 9930.
+-  // c_listener->SetSuckPort(9930);
++  // Listens for UDP traffic on port LISTEN_PORT.
++  c_listener->SetSuckPort( atoi(getenv("LISTEN_PORT")) );
+   c_udp_packet_source = c_listener;
+ 
+   ASSIGN_ADD_GLASS(c_suck, XrdMonSucker, g_queen, "XrdMonSucker", 0);

@@ -1,0 +1,120 @@
+# $Id$
+
+# Copyright (C) 1999-2008, Matevz Tadel. All rights reserved.
+# This file is part of GLED, released under GNU General Public License version 2.
+# For the licensing terms see $GLEDSYS/LICENSE or http://www.gnu.org/.
+
+# p7 handler producing ZHistogramManager bindings
+
+package GLED::Histo;
+
+$PID = "GLED::Histo";
+
+sub new {
+  shift @_; my $S={@_};
+  $S->{Hitems} = [];  # Histogram items; stores Hinfo_hash refs
+  $S->{Hgroups} = {}; # Histogram groups; stores group=>[Hinfo_hash refs]
+  $S->{Htypes} = {};  # Histogram types ... for includes ... * is stripped
+  return bless($S);
+}
+
+sub desc {
+  my $S = shift;
+  "$PID produces ZHistogramManager bindings for ROOT histograms\n";
+}
+
+sub parse {
+  my ($S, $t, $c) = @_;
+  
+  print "GLED_Histo parse $t $c\n" if $::DEBUG;
+
+  # !!!! requires X{GS} or sth ... must fixofy this
+  if($t->{Type} =~ m/^TH\d[CSFD]/ or $t->{Type} =~ m/^TProfile/) {
+    my $Htype = $t->{Type};
+    $Htype =~ s/\*$//; # no need for * ... using new
+    if($c =~ m!\s+H7(?:_|\s+)?
+	               (\w*)\s*          # Group name ... can be nil
+#	               \(([^)]+)\).*$    # parse-o-fy constructor args
+	               \((.+)\).*$    # parse-o-fy constructor args
+       !mgcx) {
+      print "\tHisto $1 $2\n" if $::DEBUG;
+      my $hr = {Type=>$Htype,
+		Varname=>$t->{Varname},
+		Methodbase=>$t->{Methodbase},
+		Group=>$1,
+		Ctor=>$2};
+      push @{$S->{Hitems}}, $hr;
+      push @{$S->{Hgroups}{$1}}, $hr;
+      my $rawtype = $Htype; $rawtype =~ s/[CSFD]$//;
+      $S->{Htypes}{$rawtype} = 1; # just def it
+    }
+  }
+}
+
+sub spit_h7 {
+  my $S = shift; local *FD = shift;
+  print "GLED_Histo spit_h7\n" if $::DEBUG;
+  if($#{$S->{Hitems}} != -1) {
+    print FD "// $PID\n";
+    print FD "virtual void InitHistoGroups();\n";
+    print FD "virtual void ResetHistos();\n";
+    for $k (keys %{$S->{Hgroups}}) {
+      print FD "void HistoGroupInit_$k();\n";
+    }
+    print FD "\n";
+  }
+}
+
+sub spit_c7 {
+  my $S = shift; local *FD = shift;
+  print "GLED_Histo spit_c7\n" if $::DEBUG;
+  return unless ($#{$S->{Hitems}} != -1);
+
+  # If direct descendant of ZHisto, must not call parent init/reset.
+  # Otherwise expect parent glass $::PARENT (or its parent ...)
+  # to have it subclasses
+  my $zhisto_base_p = grep /^ZHisto$/, @::PARENTS;
+
+  print FD "// $PID\n";
+  # includes
+  print FD "#include <Stones/ZHistoManager.h>\n";
+  print FD "#include <Gled/GledNS.h>\n";
+  for $t (keys %{$S->{Htypes}}) { print FD "#include <$t.h>\n"; }
+  print FD "\n";
+
+  # inits for groups
+  for $g (keys %{$S->{Hgroups}}) {
+    my $ar = $S->{Hgroups}{$g};
+    print FD "void\n${::CLASSNAME}::HistoGroupInit_$g() {\n";
+    print FD "  ZHistoGroup* g = GetZHistoManager()->GetGroup(this, \"$g\");\n";
+    print FD "  GledNS::PushFD(); g->cd();\n";
+    for $ir (@{$ar}) {
+      $ir->{Ctor} =~ s/%c/${::CLASSNAME}/g;
+      $ir->{Ctor} =~ s/%m/$ir->{Methodbase}/g;
+      # Missing replace for %n ... name ... would have to use sprintf oreq
+      print FD "  $ir->{Varname} = new $ir->{Type}($ir->{Ctor});\n";
+      print FD "  g->AddHisto( (TH1**)(&$ir->{Varname}) );\n";
+    }
+    print FD "  GledNS::PopFD();\n";
+    print FD "}\n\n";
+  }
+
+  # register
+  print FD "void\n${::CLASSNAME}::InitHistoGroups() {\n";
+  print FD "  ${::PARENT}::InitHistoGroups();\n" unless $zhisto_base_p;
+  for $g (keys %{$S->{Hgroups}}) {
+    print FD "  GetZHistoManager()->RegisterGroup(this,\"$g\");\n";
+    print FD "  HistoGroupInit_$g();\n";
+  }
+  print FD "}\n\n";
+
+  # reset
+  print FD "void\n${::CLASSNAME}::ResetHistos() {\n";
+  print FD "  ${::PARENT}::ResetHistos();\n" unless $zhisto_base_p;
+  for $g (keys %{$S->{Hgroups}}) {
+    print FD "  GetZHistoManager()->GetGroup(this, \"$g\")->ResetHistos();\n";
+  }
+  print FD "}\n\n";
+}
+
+1;
