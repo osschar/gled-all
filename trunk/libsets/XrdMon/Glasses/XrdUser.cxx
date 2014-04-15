@@ -46,6 +46,7 @@ XrdUser::XrdUser(const TString& n, const TString& t,
 {
   _init();
   mRealName = ParseHumanName(mDN);
+  mProtocol = ParseProtocol(mName);
 }
 
 XrdUser::~XrdUser()
@@ -113,4 +114,18 @@ TString XrdUser::ParseHumanName(const TString& dn)
     user = mail2[1].Data();
 
   return user;
+}
+
+TString XrdUser::ParseProtocol(const TString& nn)
+{
+  // Determine protocol from username of the form:
+  //   protocol/user.pid:sid@host
+  // The protocol part can actually be missing.
+
+  static TPMERegexp re("([^.]+)/", "o");
+
+  static GMutex proto_mutex;
+  GMutexHolder _lck(proto_mutex);
+
+  return re.Match(nn) ? re[1] : "xrootd";
 }

@@ -231,7 +231,7 @@ void XrdMonSucker::Suck()
 {
   static const Exc_t _eh("XrdMonSucker::Suck ");
 
-  TPMERegexp username_re("([^.]+)\\.(\\d+):(\\d+)@(.+)", "o");
+  TPMERegexp username_re("^([^.]+)\\.(\\d+):(\\d+)@(.+)", "o");
   TPMERegexp authinfo_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)&g=(.*)&m=(.*)$", "o");
   TPMERegexp authxxxx_re("^&p=(.*)&n=(.*)&h=(.*)&o=(.*)&r=(.*)$", "o");
 

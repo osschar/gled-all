@@ -27,6 +27,7 @@ public:
   TString           mServerUsername;
   TString           mFromHost;
   TString           mFromDomain;
+  TString           mProtocol;
   TString           mAppInfo;
   Long64_t          mLoginTime;
   Bool_t            bNumericHost;
@@ -38,7 +39,7 @@ public:
   void Assign(const XrdUser* s);
 #endif
 
-  ClassDefNV(SXrdUserInfo, 1);
+  ClassDefNV(SXrdUserInfo, 2);
 }; // endclass SXrdUserInfo
 
 #endif

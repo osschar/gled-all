@@ -1,3 +1,23 @@
+2014-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Implement storing and reporting of user/session protocol.
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	* Glasses/XrdFileCloseReporterGratia.cxx:
+	Report protocol as user_protocol.
+
+	* Glasses/XrdUser.cxx:
+	* Glasses/XrdUser.h:
+	Add mProtocol member and parse it out of the name in constructor
+	with a new static function ParseProtocol().
+
+	* Stones/SXrdUserInfo.cxx:
+	* Stones/SXrdUserInfo.h:
+	Add mProtocol member and bump class-version to 2.
+
+	* Glasses/XrdMonSucker.cxx:
+	Anchor user-regexp to beginning of string.
+
 2014-02-26  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Glasses/XrdMonSucker.cxx:
