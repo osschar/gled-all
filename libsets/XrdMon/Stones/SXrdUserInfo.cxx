@@ -29,6 +29,7 @@ void SXrdUserInfo::Assign(const XrdUser* s)
   mServerUsername = s->RefServerUsername();
   mFromHost = s->RefFromHost();
   mFromDomain = s->RefFromDomain();
+  mProtocol = s->RefProtocol();
   mAppInfo = s->RefAppInfo();
   mLoginTime = s->RefLoginTime().GetSec();
   bNumericHost = s->GetNumericHost();

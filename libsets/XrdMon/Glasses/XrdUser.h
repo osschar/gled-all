@@ -32,6 +32,7 @@ protected:
   TString           mServerUsername; // X{GR}   7 TextOut()
   TString           mFromHost;       // X{GR}   7 TextOut()
   TString           mFromDomain;     // X{GR}   7 TextOut()
+  TString           mProtocol;       // X{GR}   7 TextOut()
   Bool_t            bNumericHost;    // X{G}    7 BoolOut()
   TString           mAppInfo;        // X{GR}   7 TextOut()
   GTime             mLoginTime;      // X{GR}   7 TimeOut()
@@ -57,6 +58,7 @@ public:
   void AppendAppInfo(const TString& app_info);
 
   static TString    ParseHumanName(const TString& dn);
+  static TString    ParseProtocol (const TString& nn);
 
 #include "XrdUser.h7"
   ClassDef(XrdUser, 1);
