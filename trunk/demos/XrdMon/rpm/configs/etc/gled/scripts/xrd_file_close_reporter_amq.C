@@ -1,6 +1,8 @@
 // Add-on macro (expects xrd_suck_tcp/udp.C to be executed before).
 // Runs XrdFileCloseReporterAmq that sends file-access reports via ActiveMQ.
 
+#include <cstdlib>
+
 class XrdFileCloseReporter;
 class XrdFileCloseReporterAmq;
 
@@ -43,6 +45,15 @@ void xrd_file_close_reporter_amq()
   // Reconnect to AMQ server periodically. The default value of 0 means
   // that the client will stay connected until there is an error.
   // c_frep_amq->SetAmqAutoReconnectSec(0);
+
+  c_frep_amq->SetAmqHost( getenv("MSG_HOST") );
+  c_frep_amq->SetAmqPort( atoi(getenv("MSG_PORT")) );
+
+  c_frep_amq->SetAmqUser( getenv("MSG_USER") );
+  c_frep_amq->SetAmqPswd( getenv("MSG_PASSWD") );
+
+  c_frep_amq->SetAmqTopic( getenv("MSG_TOPIC") );
+
 
   c_suck->AddFileCloseReporter(c_frep_amq);
 
