@@ -1,0 +1,428 @@
+2011-09-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Stones/SGTSRange.cxx:
+	* Stones/SGTSRange.h:
+	Moved to GledCore/Stones/SRange and extended there.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Modify accordingly.
+
+2011-08-04  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function GenerateSphereThetaConst().
+	It does a similar thing as GenerateSphere() (tesselating an
+	icosahedron) only it forces points to lie on fewer / quantized
+	theta points on every tesselation step. This makes
+	multi-legendrification much snappier.
+
+2011-07-27  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add wrappers for multi-evaluation:
+	  void LegendrofyAddMulti  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyScaleMulti(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyRandomMulti(Int_t l_max, Double_t abs_scale=0.1, Double_t pow_scale=1.5);
+
+2011-07-11  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	Check input arguments in LegendrofyXyzz() functions.
+
+2011-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Use associated Legendre polynoms from Numerica / GSL -- add
+	dependency on Numerica libset.
+
+	* Makefile:
+	Add dependency on Numerica libset.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Remove silly associated Legendre polynom evaluation class.
+	Replace simple random Legendrofy() with set of functions:
+	  void LegendrofyAdd  (LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyScale(LegendreCoefs* lc, Double_t scale=1, Int_t l_max=-1);
+	  void LegendrofyScaleRandom(Int_t l_max, Double_t abs_scale=0.1,Double_t pow_scale=1.5);
+
+2010-09-14  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add functions for getting volume and area of surface.
+
+2010-09-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add functions:
+	  void TransformAndResetTrans();
+	  void RotateAndResetRot();
+	that transform surface vertices and reset corresponding part of
+	transformation matrix.
+
+2010-09-12  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Proto-implementation of bool operations and result fixing.
+
+	* GTS/GTSBoolOpHelper.cxx:
+	* GTS/GTSBoolOpHelper.h:
+	Helper for bollen ops and fixing.
+
+	* attic/BoolOpFixOnIntersectionCurve.cxx:
+	Attempt at fixing bool ops on intersection curve.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Add functions:
+	  void TransformSurfaceVertices(GtsSurface* s, ZTrans* t);
+	  void WriteSurfaceToFile(GtsSurface* s, const TString& file);
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add bool-ops API.
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Support renering of vertex points.
+
+	* Glasses/GTSTorus.h:
+	Weed layout.
+
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	Use HTransD instead of TVector3.
+
+2010-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	In vertex_iso_fixer() properly calculate length of step along the
+	gradient.
+	Add member 'Int_t mFixPointMaxIter'.
+	Add max-iteration and n-failed members to iso_fix_arg struct.
+
+	* Stones/GTSIsoMakerFunctor.h:
+	* Glasses/GTSTorus.cxx:
+	* Glasses/GTSTorus.h:
+	Change signature of GTSIsoGradient() to:
+	  virtual Double_t GTSIsoGradient(Double_t x, Double_t y, Double_t z, HPointD& g) = 0;
+
+	* Glasses/GTSRetriangulator.cxx:
+	In Refine(), pass squrare of cost parameter to GTS (as was done
+	for Coarsen()).
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function 'void MakeZSplitSurfaces(...)'. It creates two
+	sub-surfaces, split at given z-coordinate.
+
+2010-07-31  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add calculation of iso-field gradient and method to move
+	surface-points onto the iso-surface.
+
+	* Stones/GTSIsoMakerFunctor.h:
+	Add new virtual (will be made abstract) function:
+	  HPointD  GTSIsoGradient(Double_t x, Double_t y, Double_t z);
+	This is supposed to return gradient of iso-field-value at given
+	point.
+
+	* Glasses/GTSTorus.cxx:
+	* Glasses/GTSTorus.h:
+	Implement new virtual GTSIsoGradient().
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add function 'void FixPoints()' that loops over surface vertices
+	and moves them so that they are "an epsilon" away from desired
+	iso-value surface.
+
+	* Glasses/GTSRetriangulator.cxx:
+	Change default mid-vertex option to volume.
+
+2010-07-26  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add plotting of iso-value difference histogram to GTSIsoMaker.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add function 'void MakeDiffHisto()' that plots difference of
+	function value at all vertices of target surface with the
+	iso-value set as the reference.
+
+	* Glasses/GTSurf.cxx:
+	White-space.
+
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSTorus.cxx:
+	* Glasses/GTSTorus.h:
+	New glass -- specialization of GTSure for Torus.
+	It is also its own GTSIsoMakerFunctor.
+
+	* Stones/GTSIsoMakerFunctor.h:
+	Add GTSIsoMaker* argument to GTSIsoBegin().
+	This allows functors to setup iso-maker.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Call GTSIsoMakerFunctor::GTSIsoBegin() before setting up of the
+	grid -- this gives functor a chance to modify it.
+
+	Change floats to doubles, ushorts to ints.
+
+	* Glasses/GTSRetriangulator.cxx:
+	When cost option is "length", square the cost in member data as
+	GTS operates on squares of edge lengths.
+
+	* Glasses/GTSurf.h:
+	Increase width of N vert/edge/face weeds.
+
+	* glass.list:
+	Register GTSTorus.
+
+2010-07-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add option to invert iso-surface after generation.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Add global function GTS::InvertSurface() - moved from GTSurf.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Move surface inversion code to GTS namespace.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add flags bInvertCartesian and bInvertTetra. Depending on the
+	iso-function one of them produces inverted surface.
+
+2010-07-18  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	New coarsening algorithm.
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Implement coarsening function based on badness of opposite angle
+	associated with given edge.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function 'GTS::GtsSurface* DisownSurface()'.
+	Beautify.
+
+2010-07-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add support of out of core simplification of surfaces.
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Add function
+	  OutOfCoreSimplification()
+	and data-member Double_t mOutOfCoreDelta.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Add function:
+	  GTS::GtsSurface* get_surface()
+
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Add abstract interface GTSIsoMakerFunctor that allows iso-surfaces
+	to be defined by a glass.
+
+	* Stones/GTSIsoMakerFunctor.cxx:
+	* Stones/GTSIsoMakerFunctor.h:
+	New stone - abstract interface for iso-surface maker functor.
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Add support for function source being an external lens.
+	It must be sub-classed from GTSIsoMakerFunctor.
+	This is the default if the link Functor is set.
+
+2010-07-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	* Rnr/GL/GTSurf_GL_Rnr.h:
+	Enable normal scaling ... gts doesn't do it anymore.
+
+2009-05-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Mac compilation changes.
+
+	* Glasses/GTSRetriangulator.cxx:
+	Add missing include (for mac).
+
+	* Makefile:
+	Generalize glib-2.0 pkg-config invocation for cpp/ld flags - need
+	to cross check on linux.
+
+2007-08-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added function GenerateTriangle();
+	in Tesselate() use mid-edge split by default.
+
+2007-07-09  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	Added fucntion SetX/Y/ZAxis() to setup min,max and number of
+	divisions in one call.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Removed mScale member; added Rescale() function.
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Member mScale was removed from the model class.
+
+2007-03-30  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSurf.cxx:
+	Changes for root-5-15-04 (increased modularity).
+
+2007-02-13  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	In MakeSurface(): use two-step initialization of TF3 to avoid
+	warnings when not all variables x, y and z are stated.
+
+2006-10-16  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSRetriangulator.h:
+	Changed ranges/steps of some data-members to more reasonable values.
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added method 'vod ExportTring(const Text_t* fname)' to dump data
+	into a trivial text-file; set 'bUseDisplayList' to true by
+	default.
+
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Fix indentation.
+
+2006-05-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Makefile:
+	Use pkg-config to obtain cflags/libs; use glib-2.0.
+
+2006-04-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Added local member (Double_t mRunTime) to store the duration of
+	the last operation.
+
+2006-04-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	Added local option (Bool_t bMeasureTime) to measure time needed
+	for coarsen/refine.
+
+2005-10-25  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added interface to generate_sphere and a function to randomize a
+	sphere by using spherical functions.
+
+2005-02-10  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.h:
+	Clean-up of RnrCtrl constructors; in most cases they are not
+	needed anymore.
+
+2005-01-19  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.h:
+	Const-correctness changes (project7 now properly generates const
+	Get methods).
+
+2004-12-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSurf.cxx:
+	Restructuring and clean-up of GlassInfo structures. FID_t now
+	used consistently in most of the code. Glasses offer direct access
+	to GledNS::ClassInfo structure. LinkSpec has been replaced by
+	ZGlass::LinkRep structure that contains a reference to the link and
+	a pointer to GledNS::LinkMemberInfo.
+
+2004-12-01  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Added function MakeDefaultSurface().
+	
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Surface operations now using detached threads, proper use of
+	locking. But be careful, GTS is not yet thread safe.
+
+2004-07-20  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Moved all stuff to GTSurf; now just imports gts under namespace GTS.
+	
+	* Glasses/GTSIsoMaker.cxx:
+	
+	* Glasses/GTSRetriangulator.cxx:
+	* Glasses/GTSRetriangulator.h:
+	New glass: coarsening and refinement of GTS surfaces.
+	
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Added statistics display (using stone SGTSRange); new methods
+	Replace() and Save(). Moved in Load/Invert code from GTS/GTS.cxx.
+	
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	Reflections of changes in GTSurf.
+		
+	* Stones/SGTSRange.cxx:
+	* Stones/SGTSRange.h:
+	New Stone: range with mean and sigma.
+	
+	* glass.list:
+	New glass GTSRetriangulator.
+
+2004-06-03  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/GTSIsoMaker.cxx:
+	* Glasses/GTSIsoMaker.h:
+	New glass; creates a surface from a formula (TF3).
+
+	* glass.list:
+	New glasses added.
+
+	* GTS/GTS.cxx:
+	* GTS/GTS.h:
+	Added method GTS::Surface::Replace().
+	
+	* Rnr/GL/GTSurf_GL_Rnr.cxx:
+	* Rnr/GL/GTSurf_GL_Rnr.h:
+	* Glasses/GTSurf.cxx:
+	* Glasses/GTSurf.h:
+	Minor changes.
+
+	* <all-files>:
+	Extension of copyright to 2004.

@@ -1,0 +1,46 @@
+=head1 Document id
+
+=head2 Title
+
+\gled object-space layout for running \greedworld
+
+=head2 Author
+
+Matevz Tadel
+
+=head2 Date
+
+12.5.2008
+
+
+=cut========================================================================
+
+
+=head1 Introduction
+
+Document plan:
+
+=over enum
+
+=item Discuss separation between servers and interchange of specific
+data among them. Storage of suspended worlds.
+
+=item Discuss separation between server and clients. Clients have a
+limited view of objects not owned by identities assigned to their MEE.
+
+=back
+
+
+=cut========================================================================
+
+=head1 General layout
+
+Each solar system is run by a couple of closely located machines,
+preferably being connected with a giga-bit LAN. The space of the solar
+system is naturally divided into concentric regions around the central
+star(s) and into hierarchy of planet/moon regions. Each such region is
+run by a node in hierarchical server-client architecture of \gled. For
+now let us assume that one region/planet/moon can be run by one
+machine using multiple cores. This should always be possible
+either by: a) getting a machine with more cores/memory; b) limiting
+the size or precision of the planetary body.
