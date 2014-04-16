@@ -33,19 +33,12 @@ AutoReqProv: no
 Source0:        gled-xrdmon-%{version}-%{dist}.tar.gz
 Source1:        configs.tar.gz
 
-Patch0:         parameters-env.patch
-
 
 %description
 Gled monitoring of XRootD files transfers
 
 %prep
 %setup -c -a0 -a1
-
-%{__mkdir_p} configs/etc/gled/scripts
-%{__install} -D -m 644 gled/gled/demos/XrdMon/xrd_file_close_reporter_amq.C configs/etc/gled/scripts/
-%{__install} -D -m 644 gled/gled/demos/XrdMon/xrd_suck_udp.C configs/etc/gled/scripts/
-%patch0 -p0
 
 # clean up SVN entries if any
 find -name '.svn' | xargs rm -rf
