@@ -40,7 +40,7 @@ topdir=$fullpath1
 ########################################################################
 
 rsys=$topdir/root
-gsys=$topdir/gled
+gsys=$topdir
 
 cat <<EOF
 export ROOTSYS=$rsys

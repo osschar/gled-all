@@ -18,7 +18,7 @@ endif
 ########################################################################
 
 setenv ROOTSYS "${topdir}/root"
-setenv GLEDSYS "${topdir}/gled"
+setenv GLEDSYS "${topdir}"
 
 setenv PATH ${GLEDSYS}/bin:${ROOTSYS}/bin:${topdir}/bin:${PATH}
 

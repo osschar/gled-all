@@ -1,3 +1,17 @@
+2014-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Do not use indirect prefix/gled, use prefix directly as all stuff
+	is put there. Still have to trace who does the stoopid symlink.
+
+	* gled/Makefile:
+	Pass --blobdir=${PREFIX} to gled configure, not --blobdir=${PREFIX}/gled.
+
+	* gled/top-blob/gled-env-dump.csh:
+	* gled/top-blob/gled-env-dump.sh:
+	* gled/top-blob/gled-env.csh:
+	* gled/top-blob/gled-env.sh:
+	Set GLEDSYS to topdir, not topdir/gled.
+
 2012-08-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Add configure variable ROOT_GLED_DEBUG to make root and gled build
