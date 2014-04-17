@@ -57,5 +57,5 @@ void xrd_file_close_reporter_amq()
 
   c_suck->AddFileCloseReporter(c_frep_amq);
 
-  c_frep_amq->StartReporter();
+  g_gled->AfterSetup( c_frep_amq->S_StartReporter() );
 }
