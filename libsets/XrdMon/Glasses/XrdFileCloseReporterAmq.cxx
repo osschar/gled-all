@@ -36,7 +36,7 @@ ClassImp(XrdFileCloseReporterAmq);
 
 void XrdFileCloseReporterAmq::_init()
 {
-  mAmqHost  = "gridmsg007.cern.ch";
+  mAmqHost  = "dashb-mb.cern.ch";
   mAmqPort  = 6163;
   mAmqUser  = "xrdpop";
   mAmqPswd  = "xyzz";
