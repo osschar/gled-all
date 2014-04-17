@@ -31,7 +31,7 @@ checkout:
 define configure-cmds
 ln -sf ${PREFIX} external;\
 . binenv.sh;\
-./configure --buildversion="${RELEASE}" --blobdir=${PREFIX}/gled\
+./configure --buildversion="${RELEASE}" --blobdir=${PREFIX}\
    --external=${PREFIX} ${CONFIG_FLAGS} --libsets='<auto>'
 endef
 
