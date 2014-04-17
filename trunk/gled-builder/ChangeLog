@@ -1,5 +1,10 @@
 2014-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
+	* external/root/make-root-src-dist.sh:
+	Use github svn gateway to export root source. Bump to 5.34.18.
+
+2014-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
 	Do not use indirect prefix/gled, use prefix directly as all stuff
 	is put there. Still have to trace who does the stoopid symlink.
 
