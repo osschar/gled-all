@@ -21,7 +21,7 @@ PID_DIR="/var/run/gled"
 LOG_DIR="/var/log/gled"
 
 INIT_ENV="source /opt/gled/gled-env.sh /opt/gled"
-DAEMON_BIN="/opt/gled/gled/bin/saturn"
+DAEMON_BIN="/opt/gled/bin/saturn"
 
 RETVAL=0
 
@@ -64,6 +64,25 @@ function _get_collector_options() {
     echo $PARAMS_LINE
 }
 
+# Eval options for starting of given saturn from configuration file
+function _eval_listener_start_options()
+{
+    read_ini -c ${COLLECTORS_CFG}
+
+    local LLL="$1"
+    local PREFIX="INI__${LLL}__"
+    local LISRE="^LISTENER_"
+
+    local ini_varname
+    for ini_varname in `set | grep -e "^${PREFIX}" | cut -f1 -d "="`
+    do
+        local varname=${ini_varname#$PREFIX}
+        if [[ $varname =~ $LISRE ]];
+        then
+            eval "$varname=\"${!ini_varname}\" "
+        fi
+    done
+}
 
 # get all collectors names (including running but removed from the configuration file)
 function _get_all_collectors() {
@@ -84,17 +103,17 @@ start() {
         local PIDFILE="${PID_DIR}/${COL}.pid"
         local LOGFILE="${LOG_DIR}/${COL}.log"
 
+        export LISTENER_LOGFILE="${LOG_DIR}/${COL}-listener.log"
+        export LISTENER_SCRIPTS=""
+
+        _eval_listener_start_options $COL
+
         local OPTS=$(_get_collector_options $COL)
-        # if no log file specified for listener, use the default one
-        if [[ ! $OPTS =~ "LISTENER_LOGFILE" ]];
-        then
-            OPTS+=" LISTENER_LOGFILE=${LOG_DIR}/${COL}-listener.log"
-        fi
-        
-        local DAEMON_COMMAND="$DAEMON_BIN --daemon --log $LOGFILE --outerr = /etc/gled/scripts/xrd_suck_udp.C /etc/gled/scripts/xrd_file_close_reporter_amq.C"
+
+        local DAEMON_COMMAND="${DAEMON_BIN} --daemon  --pidfile ${PIDFILE} --log ${LOGFILE} --outerr = /etc/gled/scripts/xrd_suck_udp.C /etc/gled/scripts/xrd_file_close_reporter_amq.C ${LISTENER_SCRIPTS}"
         local DAEMON="${INIT_ENV} && ${OPTS} ${DAEMON_COMMAND} >>${LOGFILE} 2>&1"
 
-        daemon --user="nobody" --pidfile="${PIDFILE}" $DAEMON --pidfile "${PIDFILE}"
+        daemon --user="nobody" --pidfile="${PIDFILE}" $DAEMON
     
         local _RETVAL=$?
         echo

@@ -1,3 +1,18 @@
+2014-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Improve xrdmon rpm init.d with stuff I did at xrootd.t2.
+
+	* rpm/configs/etc/gled/collectors.cfg:
+	Document option LISTENER_SCRIPTS that allows other scripts to be run.
+
+	* rpm/configs/etc/init.d/gled-xrdmon:
+	Parse LISTENER options before so that they can be used in saturn
+	command line.
+
+	* rpm/configs/etc/gled/scripts/xrd_file_close_reporter_amq.C:
+	* xrd_file_close_reporter_amq.C:
+	Queue up reporter start.
+
 2014-02-03  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Script for extracting SXrd data structures from $GLEDSYS.
