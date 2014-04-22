@@ -1,3 +1,8 @@
+2014-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* make/make_targets.inc:
+	Break up depend target into sub targets so they get executed in order.
+
 2012-07-21  Matevz Tadel <matevz.tadel@ijs.si>
 
 	Changes for clang on mac.

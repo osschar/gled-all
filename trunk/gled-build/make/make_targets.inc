@@ -103,11 +103,14 @@ pre_depend:: glue
 	${ECHO} -d- Generating ROOT dictionary dependencies
 	${MUTE} ${MKDICTDEP} ${DICT_HDRS} > make_dict.inc
 
-depend:: ${BLESSED_H7} ${P7_AUTO_HDRS} ${VIEW_SECS}
 
-depend:: ${DICT_AUTO_HDRS} 
+p7_tgts:   ${BLESSED_H7} ${P7_AUTO_HDRS} ${VIEW_SECS}
 
-depend:: ${ALL_DEPS} ${DEPEND_TGTS}
+dict_tgts: p7_tgts ${DICT_AUTO_HDRS} 
+
+dep_tgts:  dict_tgts ${ALL_DEPS} ${DEPEND_TGTS}
+
+depend:: dep_tgts
 	@touch .depend_done
 
 ifdef DEPEND_DONE
