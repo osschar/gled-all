@@ -1,3 +1,9 @@
+2014-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* external/root/root.pl:
+	Temporarily, manually install FTGL includes into include/Rftgl.
+	This will supposedly be done right in ROOT.
+
 2014-04-17  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* external/root/make-root-src-dist.sh:
