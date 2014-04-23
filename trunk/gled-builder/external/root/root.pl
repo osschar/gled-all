@@ -65,6 +65,8 @@ FNORD
 target('install', <<"FNORD");
 $pre_install
 ROOTSYS=${PREFIX}/root make install
+mkdir  ${PREFIX}/root/include/Rftgl
+cp -at ${PREFIX}/root/include/Rftgl graf3d/ftgl/inc/*.h
 FNORD
 
 use_defaults_for_remaining_targets();
