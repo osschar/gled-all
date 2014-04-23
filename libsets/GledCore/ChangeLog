@@ -1,3 +1,11 @@
+2014-04-23  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Rnr/GL/GLTextNS.cxx:
+	* Rnr/GL/Text_GL_Rnr.cxx:
+	* Rnr/GL/WGlFrameStyle_GL_Rnr.cxx:
+	* Rnr/GL/ZRlFont_GL_Rnr.cxx:
+	Include ftgl includes from Rftgl/.
+
 2014-01-23  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* Gled/GSelector.cxx:

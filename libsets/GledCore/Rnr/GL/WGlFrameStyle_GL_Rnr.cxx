@@ -11,7 +11,7 @@
 
 #include <GL/glew.h>
 
-#include "FTFont.h"
+#include "Rftgl/FTFont.h"
 
 #define PARENT ZRnrModBase_GL_Rnr
 
