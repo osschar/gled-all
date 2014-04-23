@@ -51,5 +51,5 @@ fi
 # Run
 ########################################################################
 
-cd "$topdir/gled/demos/Var1"
+cd "$topdir/demos/Var1"
 gled tringula.C\($*\)

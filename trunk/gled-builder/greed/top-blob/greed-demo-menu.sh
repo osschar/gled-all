@@ -85,5 +85,5 @@ clear
 # Run
 ########################################################################
 
-cd "$topdir/gled/demos/Var1"
+cd "$topdir/demos/Var1"
 gled "$demo"\($arg\)
