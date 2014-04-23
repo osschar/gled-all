@@ -12,7 +12,7 @@
 
 #include <GL/glew.h>
 
-#include "FTFont.h"
+#include "Rftgl/FTFont.h"
 
 #define PARENT ZNode_GL_Rnr
 

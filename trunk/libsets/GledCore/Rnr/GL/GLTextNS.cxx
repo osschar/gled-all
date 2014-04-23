@@ -17,14 +17,7 @@
 
 #include <TMath.h>
 
-// Use ftgl-2.1.2 shipped with root. In 2.1.3 one should include "FTGL/ftgl.h"
-#include "FTFont.h"
-//#include "FTGLExtrdFont.h"
-//#include "FTGLOutlineFont.h"
-//#include "FTGLPolygonFont.h"
-//#include "FTGLTextureFont.h"
-//#include "FTGLPixmapFont.h"
-//#include "FTGLBitmapFont.h"
+#include "Rftgl/FTFont.h"
 
 //==============================================================================
 
