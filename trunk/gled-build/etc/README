@@ -1,0 +1,9 @@
+Extracted from running setup at UCSD.
+
+Missing:
+- generalization for prefix (/opt/gled/ assumed in init.d/gled)
+- install script (that also replaces the prefix)
+- creation of gled user
+- creation of /var/run/gled/ and /var/log/gled/ directories
+
+This ishould also be a good base for rpm building stuff.
