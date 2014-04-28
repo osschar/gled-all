@@ -1,3 +1,21 @@
+2014-04-28  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	Startup scripts etc, extracted from installation at UCSD.
+
+	* etc:
+	* etc/README:
+	* etc/cron.d:
+	* etc/cron.d/gled-check:
+	* etc/gled:
+	* etc/gled/functions:
+	* etc/gled/functions/read_ini.sh:
+	* etc/gled/saturns.cfg:
+	* etc/init.d:
+	* etc/init.d/gled:
+	* etc/logrotate.d:
+	* etc/logrotate.d/gled:
+	Added files.
+
 2014-04-22  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	* make/make_targets.inc:
