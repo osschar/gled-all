@@ -116,7 +116,7 @@ void ZSunQueen::IncarnateMoon(SaturnInfo* parent)
 
   SaturnInfo* si = GledNS::StreamLensByGlass<SaturnInfo*>(*mir);
   if(si == 0) {
-    throw(_eh + "did not receive a lens of glass SaturnInfo");
+    throw _eh + "did not receive a lens of glass SaturnInfo";
   }
   incarnate_moon(parent, si);
 }
@@ -137,7 +137,7 @@ void ZSunQueen::IncarnateEye(SaturnInfo* parent)
 
   EyeInfo* ei = GledNS::StreamLensByGlass<EyeInfo*>(*mir);
   if(ei == 0) {
-    throw(_eh + "did not receive a lens of glass EyeInfo");
+    throw _eh + "did not receive a lens of glass EyeInfo";
   }
   incarnate_eye(parent, ei);
 }
@@ -384,7 +384,7 @@ void ZSunQueen::initiate_mee_connection()
     }
     catch(Exc_t& exc)
     {
-      throw(_eh + "unknown identity (" + exc + ")"); // !!!! should deny below
+      throw _eh + "unknown identity (" + exc + ")"; // !!!! should deny below
     }
   }
 
@@ -414,7 +414,7 @@ void ZSunQueen::handle_mee_authentication(UInt_t conn_id, TSocket* socket)
 
   NCMData* ncmd = mNCMasterData.retrieve(conn_id);
   if(ncmd == 0) {
-    throw(_eh + "unknown conn_id");
+    throw _eh + "unknown conn_id";
   }
   GKeyRSA sun, mee;
   try {
@@ -465,7 +465,7 @@ void ZSunQueen::handle_mee_authentication(UInt_t conn_id, TSocket* socket)
     mir->SetRecipient(ncmd->fRequestor);
     mSaturn->ShootMIR(mir);
     mNCMasterData.remove(conn_id);
-    throw(_eh + err);
+    throw _eh + err;
   }
 }
 
@@ -512,7 +512,7 @@ ID_t ZSunQueen::incarnate_mee(UInt_t conn_id)
 
   NCMData* ncd = mNCMasterData.retrieve(conn_id);
   if(ncd == 0)
-    throw(_eh + "ConnectionData not available");
+    throw _eh + "ConnectionData not available";
 
   ID_t id;
   ZMIR* mirp = 0;
@@ -533,7 +533,7 @@ ID_t ZSunQueen::incarnate_mee(UInt_t conn_id)
     id   = incarnate_eye(ncd->fRequestor, ei);
     mirp = S_IncarnateEye(ncd->fRequestor);
   } else {
-    throw(_eh + "unknow type of MEE");
+    throw _eh + "unknow type of MEE";
   }
 
   auto_ptr<ZMIR> mir(mirp);
@@ -600,13 +600,13 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
   ZMIR* mir = assert_MIR_presence(_eh);
 
   if(id == 0)
-    throw(_eh + "null identity");
+    throw _eh + "null identity";
   if(mir->fCaller->HasIdentity(id))
-    throw(_eh + GForm("%s already has %s", mir->fCaller->GetName(), id->GetName()));
+    throw _eh + GForm("%s already has %s", mir->fCaller->GetName(), id->GetName());
 
   ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(id);
   if(gid == 0)
-    throw(_eh + "for now only handles group identities");
+    throw _eh + "for now only handles group identities";
 
   lpZGlass_t mee_ids;
   mee_ids.push_back(mir->fCaller->mPrimaryIdentity.get());
@@ -623,7 +623,7 @@ void ZSunQueen::AttachIdentity(ZIdentity* id)
     }
 
   }
-  throw(_eh + "insufficient karma");
+  throw _eh + "insufficient karma";
 }
 
 void ZSunQueen::DetachIdentity(ZIdentity* id)
@@ -632,15 +632,15 @@ void ZSunQueen::DetachIdentity(ZIdentity* id)
 
   ZMIR* mir = assert_MIR_presence(_eh);
   if(id == 0)
-    throw(_eh + "null identity");
+    throw _eh + "null identity";
   if(!mir->fCaller->HasIdentity(id))
-    throw(_eh + GForm("%s does not posses identity %s", mir->fCaller->GetName(), id->GetName()));
+    throw _eh + GForm("%s does not posses identity %s", mir->fCaller->GetName(), id->GetName());
   if(mir->fCaller->mPrimaryIdentity == id)
-    throw(_eh + GForm("primary identity %s can not be detached from %s",id->GetName(), mir->fCaller->GetName()));
+    throw _eh + GForm("primary identity %s can not be detached from %s",id->GetName(), mir->fCaller->GetName());
 
   ZGroupIdentity* gid = dynamic_cast<ZGroupIdentity*>(id);
   if(gid == 0)
-    throw(_eh + "for now only handles group identities");
+    throw _eh + "for now only handles group identities";
 
   CALL_AND_BROADCAST(mir->fCaller->mActiveIdentities, Remove, id);
   CALL_AND_BROADCAST(id->mActiveMEEs, Remove, mir->fCaller);
@@ -711,17 +711,20 @@ void ZSunQueen::HandleClientSideAuthentication(TSocket* socket, UInt_t conn_id,
     TMessage* m;
     Int_t     l;
     l = socket->Recv(m);
-    if(l<=0 || m->What() != GledNS::MT_Auth_Challenge) {
+    if (l <= 0 || m->What() != GledNS::MT_Auth_Challenge)
+    {
       delete m;
-      throw(_eh + "failure receiving Auth_Challenge");
+      throw _eh + "failure receiving Auth_Challenge";
     }
     GKeyRSA key;
-    try {
+    try
+    {
       key.ReadPrivKey(Gled::theOne->GetPrivKeyFile(identity));
     }
-    catch(Exc_t& exc) {
+    catch(Exc_t& exc)
+    {
       delete m;
-      throw(_eh + "error reading private key (" + exc + ")");
+      throw _eh + "error reading private key (" + exc + ")";
     }
     key.ReceiveSecret(*m);
     key.StreamPubKey(*m);
