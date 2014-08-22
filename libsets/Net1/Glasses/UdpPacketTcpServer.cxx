@@ -150,7 +150,7 @@ void* UdpPacketTcpServer::tl_Deliver(UdpPacketTcpServer* s)
 
 void UdpPacketTcpServer::Deliver()
 {
-  // wait on condifiton, while queue not empty, deliver to all sockets
+  // wait on condition, while queue not empty, deliver to all sockets
 
   static const Exc_t _eh("UdpPacketTcpServer::Deliver ");
 
