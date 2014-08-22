@@ -1,3 +1,8 @@
+2014-08-22  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	* Glasses/XrdFileCloseReporterAmq.cxx:
+	Quote ' characters in user DN.
+
 2014-04-15  Matevz Tadel  <matevz.tadel@ijs.si>
 
 	Implement storing and reporting of user/session protocol.
