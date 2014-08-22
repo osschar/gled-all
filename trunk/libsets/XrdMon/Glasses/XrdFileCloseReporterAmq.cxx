@@ -378,10 +378,13 @@ void XrdFileCloseReporterAmq::ReportFileClosed(FileUserServer& fus)
   }
   {
     GLensReadHolder _ulck(user);
+
+    TString dn = user->StrDN(); dn.ReplaceAll("'", "\\'");
+
     msg += TString::Format
       ("'user_dn':'%s', 'user_vo':'%s', 'user_role':'%s', 'user_fqan':'%s', 'client_domain':'%s', 'client_host':'%s', "
        "'server_username':'%s', 'user_protocol':'%s', 'app_info':'%s', ",
-       user->GetDN(), user->GetVO(), user->GetRole(), user->GetGroup(),
+       dn.Data(), user->GetVO(), user->GetRole(), user->GetGroup(),
        user->GetFromDomain(), user->GetFromHost(), user->GetServerUsername(), user->GetProtocol(), user->GetAppInfo());
   }
   {
