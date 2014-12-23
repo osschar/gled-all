@@ -36,6 +36,7 @@ protected:
   TString       mAmqPswd;     // X{GS} 7 Textor()
   TString       mAmqTopic;    // X{GS} 7 Textor()
   Bool_t        bLeakAmqObjs; // X{GS} 7 Bool()
+  Bool_t        bPersistent;  // X{GS} 7 Bool()
 
   cms::ConnectionFactory   *mConnFac;    //!
   cms::Connection          *mConn;       //!
