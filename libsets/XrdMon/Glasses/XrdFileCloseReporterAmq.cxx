@@ -42,6 +42,7 @@ void XrdFileCloseReporterAmq::_init()
   mAmqPswd  = "xyzz";
   mAmqTopic = "xrdpop.uscms_test_popularity";
   bLeakAmqObjs = false;
+  bPersistent  = false;
 
   mConnFac = 0;
   mConn = 0;
@@ -115,7 +116,7 @@ void XrdFileCloseReporterAmq::amq_connect()
     mSess = mConn->createSession(); // Default is AUTO_ACKNOWLEDGE
     mDest = mSess->createTopic(mAmqTopic.Data());
     mProd = mSess->createProducer(mDest);
-    mProd->setDeliveryMode(cms::DeliveryMode::NON_PERSISTENT); // Copied from examples, NFI.
+    mProd->setDeliveryMode(bPersistent ? cms::DeliveryMode::PERSISTENT : cms::DeliveryMode::NON_PERSISTENT);
   }
   catch (cms::InvalidDestinationException& e)
   {
