@@ -13,7 +13,7 @@
 
 ### Make sure we are in the right directory ###
 
-if [[ -x gled/bin/gled-config && -x root/bin/root-config ]]
+if [[ -x bin/gled-config && -x root/bin/root-config ]]
 then
     echo "Cleaning directory '" `pwd` "' for RPM packaging."
 else

@@ -60,7 +60,7 @@ find -name '.svn' | xargs rm -rf
 
 %{__cp} -R gled/* %{buildroot}/%{prefix}
 
-%{__install} -D -m 644 gled/gled/demos/XrdMon/logrotate.d/gled-xrdmon %{buildroot}/etc/logrotate.d/%{service_name}
+%{__install} -D -m 644 gled/demos/XrdMon/logrotate.d/gled-xrdmon %{buildroot}/etc/logrotate.d/%{service_name}
 
 %{__cp} -R configs/* %{buildroot}/
 %{__chmod} 755 %{buildroot}/etc/init.d/*
@@ -113,6 +113,6 @@ true
 %attr(-,%{service_user},%{service_group}) /var/log/gled
 %attr(-,%{service_user},%{service_group}) /var/run/gled
 
-%doc gled/README_gled gled/gled/demos/XrdMon/ChangeLog
+%doc gled/README_gled gled/demos/XrdMon/ChangeLog
 
-%changelog gled/gled/demos/XrdMon/ChangeLog
+%changelog gled/demos/XrdMon/ChangeLog
