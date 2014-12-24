@@ -1,0 +1,10 @@
+# To be copied to /etc/logrotate.d
+
+/var/log/gled/*.log {
+    missingok
+    rotate 7
+    daily
+    nocreate
+    compress
+    delaycompress
+}
