@@ -54,6 +54,10 @@ void xrd_file_close_reporter_amq()
 
   c_frep_amq->SetAmqTopic( getenv("MSG_TOPIC") );
 
+  if (getenv("AMQ_PERSISTENT") && strcmp(getenv("AMQ_PERSISTENT"), "true") == 0)
+  {
+    c_frep_amq->SetPersistent(true);
+  }
 
   c_suck->AddFileCloseReporter(c_frep_amq);
 

@@ -30,7 +30,8 @@ tag=$1
 dist=$2
 
 # Getting root-5.34 to build on EL5 is fun.
-if [[ $dist = "el5" ]]; then
+# Heh, also on EL6 now. Or I have too old root? Sigh ...
+if [[ $dist = "el5" || $dist = "el6" ]]; then
     export GLED_ROOT_CONFIG_OPTS="--disable-xrootd --disable-hdfs"
 fi
 
@@ -44,7 +45,7 @@ make
 
 # To make tarball:
 cd ${dir}
-mv gled/gled/demos/XrdMon/rpm .
+mv gled/demos/XrdMon/rpm .
 (cd gled; ../rpm/cleanup-install-for-rpm.sh)
 tarfile=gled-xrdmon-${tag}-${dist}.tar.gz
 tar czf ${tarfile} gled/
