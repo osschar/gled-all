@@ -1,7 +1,0 @@
-SHELL=/bin/sh
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=root
-
-LOGFILE=/var/log/gled/gled-check.log
-
-*/5 * * * * root /sbin/service gled _status_running >/dev/null 2>&1; [ $? -ne 0 ] && (echo "[`date`] gled-check: some saturns supposed to be running are stopped (crashed?), will be restarted"  && /sbin/service gled _recovery_restart) | tee -a $LOGFILE | mail -s "Gled daemon checker" $MAILTO
