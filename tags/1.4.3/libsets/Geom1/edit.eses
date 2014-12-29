@@ -1,0 +1,128 @@
+$GenerationPrefix = "/mnt/azazel/home/matevz/GLED/Geom1/";
+
+$Buffers = [
+  ["RectTerrain.cxx", "Glasses/RectTerrain.cxx", "RW", 1],
+  [" *Minibuf-0*", "", "RW", 0],
+  ["RectTerrain.h", "Glasses/RectTerrain.h", "RW", 1],
+  ["RectTerrain_GL_Rnr.cxx", "Rnr/GL/RectTerrain_GL_Rnr.cxx", "RW", 1],
+  ["RectTerrain_GL_Rnr.h", "Rnr/GL/RectTerrain_GL_Rnr.h", "RW", 1],
+  ["ZColor.cxx", "../Gled/Stones/ZColor.cxx", "RW", 1],
+  ["ZColor.h", "../Gled/Stones/ZColor.h", "RW", 1],
+  ["*scratch*", "", "RW", 0],
+  [" *Echo Area*", "", "RW", 0],
+  [" *pixmap conversion*", "", "RW", 0],
+  [" *load*", "", "RW", 0],
+  [" *Message-Log*", "", "RW", 0],
+  [" *Gutter Area*", "", "RW", 0],
+  ["Sleeper.cxx", "Glasses/Sleeper.cxx", "RW", 1],
+  ["Sleeper.h", "Glasses/Sleeper.h", "RW", 1],
+  ["Mover.cxx", "Glasses/Mover.cxx", "RW", 1],
+  ["Mover.h", "Glasses/Mover.h", "RW", 1],
+  ["glass.list", "glass.list", "RW", 1],
+  ["Rect_GL_Rnr.cxx", "Rnr/GL/Rect_GL_Rnr.cxx", "RW", 1],
+  ["SMorph.cxx", "Glasses/SMorph.cxx", "RW", 1],
+  ["Rect.cxx", "Glasses/Rect.cxx", "RW", 1],
+  ["Board_GL_Rnr.cxx", "Rnr/GL/Board_GL_Rnr.cxx", "RW", 1],
+  ["Makefile", "Makefile", "RW", 1],
+  ["SMorph.h", "Glasses/SMorph.h", "RW", 1],
+  ["Board.cxx", "Glasses/Board.cxx", "RW", 1],
+  ["Board.h", "Glasses/Board.h", "RW", 1],
+  ["Rect.h", "Glasses/Rect.h", "RW", 1],
+  ["Rect_GL_Rnr.h", "Rnr/GL/Rect_GL_Rnr.h", "RW", 1],
+  ["Board_GL_Rnr.h", "Rnr/GL/Board_GL_Rnr.h", "RW", 1],
+  ["SMorph_GL_Rnr.cxx", "Rnr/GL/SMorph_GL_Rnr.cxx", "RW", 1],
+  ["SMorph_GL_Rnr.h", "Rnr/GL/SMorph_GL_Rnr.h", "RW", 1],
+  ["*bar*", "", "RW", 0],
+];
+
+$Frames = [
+ {
+  Geom => [82, 63, 761, 156, 0],
+  Windows => [
+   ["SMorph_GL_Rnr.cxx", "Rnr/GL/SMorph_GL_Rnr.cxx", 38, 375, 297, 1],
+   ["SMorph_GL_Rnr.h", "Rnr/GL/SMorph_GL_Rnr.h", 25, 0, 251, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 161, 0, 0],
+  Windows => [
+   ["Board_GL_Rnr.cxx", "Rnr/GL/Board_GL_Rnr.cxx", 30, 450, 729, 1],
+   ["Board_GL_Rnr.h", "Rnr/GL/Board_GL_Rnr.h", 30, 0, 151, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 235, 38, 0],
+  Windows => [
+   ["Rect_GL_Rnr.cxx", "Rnr/GL/Rect_GL_Rnr.cxx", 30, 450, 642, 97],
+   ["Rect_GL_Rnr.h", "Rnr/GL/Rect_GL_Rnr.h", 30, 0, 127, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 829, 102, 0],
+  Windows => [
+   ["Sleeper.cxx", "Glasses/Sleeper.cxx", 30, 450, 368, 1],
+   ["Sleeper.h", "Glasses/Sleeper.h", 30, 0, 751, 232],
+  ]
+ },
+ {
+  Geom => [82, 60, 402, 140, 0],
+  Windows => [
+   ["Rect.cxx", "Glasses/Rect.cxx", 30, 450, 417, 1],
+   ["Rect.h", "Glasses/Rect.h", 30, 0, 842, 232],
+  ]
+ },
+ {
+  Geom => [82, 60, 511, 191, 0],
+  Windows => [
+   ["Board.cxx", "Glasses/Board.cxx", 36, 360, 780, 415],
+   ["Board.h", "Glasses/Board.h", 24, 0, 777, 303],
+  ]
+ },
+ {
+  Geom => [82, 60, 210, 49, 0],
+  Windows => [
+   ["Mover.cxx", "Glasses/Mover.cxx", 30, 450, 663, 304],
+   ["Mover.h", "Glasses/Mover.h", 30, 0, 437, 232],
+  ]
+ },
+ {
+  Geom => [82, 60, 783, 171, 0],
+  Windows => [
+   ["SMorph.cxx", "Glasses/SMorph.cxx", 34, 390, 1025, 754],
+   ["SMorph.h", "Glasses/SMorph.h", 26, 0, 465, 305],
+  ]
+ },
+ {
+  Geom => [112, 12, 352, 69, 0],
+  Windows => [
+   ["Makefile", "Makefile", 12, 0, 89, 1],
+  ]
+ },
+ {
+  Geom => [82, 19, 771, 216, 0],
+  Windows => [
+   ["glass.list", "glass.list", 19, 0, 199, 1],
+  ]
+ },
+ {
+  Geom => [82, 60, 52, 135, 1],
+  Windows => [
+   ["RectTerrain.cxx", "Glasses/RectTerrain.cxx", 36, 360, 843, 279],
+   ["RectTerrain.h", "Glasses/RectTerrain.h", 24, 0, 939, 939],
+  ]
+ },
+ {
+  Geom => [82, 60, 823, 139, 0],
+  Windows => [
+   ["RectTerrain_GL_Rnr.cxx", "Rnr/GL/RectTerrain_GL_Rnr.cxx", 36, 360, 1167, 598],
+   ["RectTerrain_GL_Rnr.h", "Rnr/GL/RectTerrain_GL_Rnr.h", 24, 0, 116, 116],
+  ]
+ },
+ {
+  Geom => [82, 60, 482, 0, 0],
+  Windows => [
+   ["ZColor.cxx", "../Gled/Stones/ZColor.cxx", 30, 450, 12, 1],
+   ["ZColor.h", "../Gled/Stones/ZColor.h", 30, 0, 978, 521],
+  ]
+ },
+];

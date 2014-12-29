@@ -1,0 +1,279 @@
+#!/bin/bash
+#
+# Init file for the Gled daemons
+#
+# chkconfig: 2345 20 80
+# description: starts reports status of various gled daemons
+#
+# pidfile: /var/run/gled/gled.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+# Source read ini files library
+. /etc/gled/functions/read_ini.sh
+
+NAME=gled
+DESC="Gled daemons"
+
+SATURNS_CFG=/etc/gled/saturns.cfg
+
+PID_DIR="/var/run/gled"
+LOG_DIR="/var/log/gled"
+
+INIT_ENV="source /opt/gled/gled-env.sh /opt/gled"
+DAEMON_BIN="/opt/gled/bin/saturn"
+
+RETVAL=0
+
+# Read list of saturns from configuration file
+function _get_saturns_conf()
+{
+    read_ini -c ${SATURNS_CFG}
+    echo $INI__ALL_SECTIONS
+}
+
+
+# Get the list of running saturns (by pid file)
+function _get_saturns_running()
+{
+    local RESULT=""
+    local PID_FILE
+    for PID_FILE in `ls $PID_DIR | grep -e ".pid$"`;
+    do
+        local NAME=${PID_FILE%.pid}
+        RESULT+="$NAME "
+    done
+
+    echo $RESULT
+}
+
+
+# Read options for given saturn from configuration file
+function _get_saturn_options()
+{
+    read_ini -c ${SATURNS_CFG}
+
+    local SSS="$1"
+    local PARAMS_LINE=""
+    local PREFIX="INI__${SSS}__"
+    local SATRE="^SATURN_"
+
+    local ini_varname
+    for ini_varname in `set | grep -e "^${PREFIX}" | cut -f1 -d "="`;
+    do
+        local varname=${ini_varname#$PREFIX}
+        if [[ ! $varname =~ $SATRE ]];
+        then
+            eval "pval=${!ini_varname}"
+            PARAMS_LINE+="$varname=\"$pval\" "
+        fi
+    done
+
+    echo $PARAMS_LINE
+}
+
+
+# Eval options for starting of given saturn from configuration file
+function _eval_saturn_start_options()
+{
+    read_ini -c ${SATURNS_CFG}
+
+    local SSS="$1"
+    local PREFIX="INI__${SSS}__"
+    local SATRE="^SATURN_"
+
+    local ini_varname
+    for ini_varname in `set | grep -e "^${PREFIX}" | cut -f1 -d "="`
+    do
+        local varname=${ini_varname#$PREFIX}
+        if [[ $varname =~ $SATRE ]];
+        then
+            eval "$varname=\"${!ini_varname}\" "
+        fi
+    done
+}
+
+
+# get all saturns names (including running but removed from the configuration file)
+function _get_all_saturns()
+{
+    local ALL_SATS="$(_get_saturns_running) $(_get_saturns_conf)"
+    ALL_SATS=$(for s in $ALL_SATS; do echo $s; done | sort | uniq)
+    echo ${ALL_SATS}
+}
+
+
+start()
+{
+    local args=$*
+    local SATURNS=${args:-$(_get_saturns_conf)}
+
+    local SAT
+    for SAT in ${SATURNS};
+    do
+        echo -n $"Starting $DESC ('$SAT'): "
+
+        SATURN_NAME=$SAT
+        SATURN_PIDFILE="${PID_DIR}/${SAT}.pid"
+        SATURN_LOGFILE="${LOG_DIR}/${SAT}.log"
+
+        _eval_saturn_start_options $SAT
+
+        local OPTS=$(_get_saturn_options $SAT)
+       
+        local DAEMON_COMMAND="$DAEMON_BIN --daemon --pidfile ${SATURN_PIDFILE} --log ${SATURN_LOGFILE} --outerr ="
+        local DAEMON="${INIT_ENV} && ${OPTS} ${DAEMON_COMMAND} ${SATURN_SCRIPTS} >> ${SATURN_LOGFILE} 2>&1"
+
+        # echo  daemon --user="gled" --pidfile="${SATURN_PIDFILE}" $DAEMON
+        daemon --user="gled" --pidfile="${SATURN_PIDFILE}" $DAEMON
+    
+        local _RETVAL=$?
+        echo
+        [ ${_RETVAL} -eq 0 ] && touch /var/lock/subsys/${NAME}_${SAT}
+        [ ${_RETVAL} -ne 0 ] && RETVAL=${_RETVAL}
+    done
+
+    return $RETVAL
+}
+
+
+stop()
+{
+    local args=$*
+    # get running instances
+    local RUNNING=${args:-$(_get_saturns_running)}
+  
+    local SAT
+    for SAT in ${RUNNING};
+    do
+        echo -n $"Stopping $DESC ('$SAT'): "
+        local PIDFILE="${PID_DIR}/${SAT}.pid"
+        killproc -p "$PIDFILE" $DAEMON_BIN -15
+        local _RETVAL=$?
+        echo
+        rm -f $PIDFILE
+        [ $_RETVAL -eq 0 ] && rm -f /var/lock/subsys/${NAME}_${SAT}
+        [ $_RETVAL -ne 0 ] && RETVAL=$_RETVAL
+    done
+
+    return $RETVAL
+}
+
+
+restart()
+{
+    stop $*
+    start $*
+}
+
+condrestart()
+{
+    local args=$*
+    local SATURNS=${args:-$(_get_all_saturns)}
+
+    local SAT
+    for SAT in ${SATURNS};
+    do
+        [ -e /var/lock/subsys/${NAME}_${SAT} ] && restart $SAT
+        local _RETVAL=$?
+        [ $_RETVAL -ne 0 ] && RETVAL=$_RETVAL
+    done
+
+    return $RETVAL
+}
+
+
+_status()
+{
+    local args=$*
+    local SATURNS=${args:-$(_get_all_saturns)}
+    RETVAL=0
+
+    local SAT
+    for SAT in ${SATURNS};
+    do
+        echo -n $"Status of saturn '$SAT': "
+        local PIDFILE="${PID_DIR}/${SAT}.pid"
+
+        status -p "$PIDFILE" $DAEMON_BIN
+        local _RETVAL=$?
+        [ $_RETVAL -ne 0 ] && RETVAL=$_RETVAL
+    done
+
+    return $RETVAL
+}
+
+# get status of running saturns
+_status_running()
+{
+    local RUNNING=$(_get_saturns_running)
+    if [ -n "${RUNNING}" ];
+    then
+        _status ${RUNNING}
+        return $?
+    else
+        return 0
+    fi
+}
+
+
+# restart stopped saturns supposed to be running
+_recovery_restart()
+{
+    local SAT
+    for SAT in $(_get_saturns_running);
+    do
+        _status ${SAT} >/dev/null 2>&1
+        local _RETVAL=$?
+        [ ${_RETVAL} -ne 0 ] && echo "Saturn '${SAT}' is probably crashed, restarting" && restart ${SAT}
+    done
+}
+
+
+list()
+{
+    local LIST=$(_get_saturns_conf)
+    echo "Saturns list from configuration file:"
+    local SAT
+    for SAT in $LIST
+    do
+        echo $SAT
+    done
+}
+
+
+COMMAND=$1
+shift
+
+case "${COMMAND}" in
+    start)
+        start $*
+        ;;
+    stop)
+        stop $*
+        ;;
+    restart)
+        restart $*
+        ;;
+    condrestart)
+        condrestart $*
+        ;;
+    status)
+        _status $*
+        ;;
+    _status_running)
+        _status_running
+        ;;
+    _recovery_restart)
+        _recovery_restart
+        ;;
+    list)
+        list
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|condrestart|status|list} [saturn1] ... [saturnN]"
+        RETVAL=1
+;;
+esac
+
+exit $RETVAL

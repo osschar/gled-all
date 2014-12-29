@@ -1,0 +1,6 @@
+2012-08-05  Matevz Tadel  <matevz.tadel@ijs.si>
+
+	New directory; test for ip4 address locator.
+
+	* test.C:
+	First version of test for Ip4AddressLocator.

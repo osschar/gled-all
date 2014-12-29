@@ -1,0 +1,10 @@
+# glass		class	location		rnr-class
+# name		id			[]~parent, [.]~own rnr, [<glass>]
+
+UdpPacketSource      1 Glasses/UdpPacketSource
+UdpPacketListener    2 Glasses/UdpPacketListener
+UdpPacketTcpServer   3 Glasses/UdpPacketTcpServer
+UdpPacketTcpClient   4 Glasses/UdpPacketTcpClient
+UdpPacketTreeWriter  5 Glasses/UdpPacketTreeWriter
+
+Ip4AddressLocator   16 Glasses/Ip4AddressLocator
