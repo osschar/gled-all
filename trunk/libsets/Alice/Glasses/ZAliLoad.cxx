@@ -138,7 +138,7 @@ void ZAliLoad::ClearData()
 // Wrappers
 /**************************************************************************/
 
-void ZAliLoad::SelectParticles(const Text_t* selection,Bool_t import_daughters)
+void ZAliLoad::SelectParticles(const Text_t* selection, Bool_t import_daughters)
 {
   static const Exc_t _eh("ZAliLoad::SelectParticles ");
 
