@@ -43,7 +43,7 @@ AC_CANONICAL_BUILD
 
 AC_ARG_CONF_VAR([RELEASE],
                 [Gled release version],
-		["1.3.x-r<svnrev>"])
+		["1.4.x-r<svnrev>"])
 
 AC_ARG_CONF_VAR([CACHE_DIR],
                 [local source package cache],
