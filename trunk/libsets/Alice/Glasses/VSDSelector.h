@@ -121,7 +121,7 @@ class VSDSelector : public ZNode
 
  protected:
   ZLink<GIImportStyle> mImportMode;   // X{GS} L{}
-  TString        mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)
+  TString              mGISelection;  // X{GS} 7 Textor(-whenchanged=>1)
  public:
   void SelectGenInfo(ZNode* holder=0, const Text_t* selection=0
 		     );         // X{Ed} C{1} 7 MCWButt()
