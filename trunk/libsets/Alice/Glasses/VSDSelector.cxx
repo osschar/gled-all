@@ -68,8 +68,9 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
     throw(_eh + GForm("can not open VSD file '%s'.", vsd_file_name));
 
 
-  string event_dir("Event0"); // (GForm("Event%d", mEvent));
-  mDirectory = (TDirectory*) mFile->Get(event_dir.c_str());
+  TString event_dir;
+  event_dir.Form("Event%04d", 0);
+  mDirectory = (TDirectory*) mFile->Get(event_dir);
 
 
   printf("Reading kinematics.\n");
@@ -80,8 +81,6 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   } else {
     mTreeK->SetBranchAddress("K", &mpP);
   }
-
-  /*
 
   printf("Reading hits.\n");  
   mTreeH = (TTree*) mDirectory->Get("Hits");
@@ -109,6 +108,8 @@ void VSDSelector::LoadVSD(const Text_t* vsd_file_name)
   } else {
     mTreeR->SetBranchAddress("R", &mpR);
   }
+
+  /*
 
   printf("Reading V0 points. \n");
   mTreeV0 =  (TTree*) mDirectory->Get("V0");
@@ -189,7 +190,7 @@ void VSDSelector::SelectParticles(ZNode* holder, const Text_t* selection,
   static const Exc_t _eh("VSDSelector::SelectParticles ");
 
   if(mTreeK == 0) 
-    throw (_eh + "kinematics not available.");
+    throw _eh + "kinematics not available.";
   
   if(selection == 0 || strcmp(selection,"") == 0)
     selection = mParticleSelection.Data();
@@ -199,7 +200,7 @@ void VSDSelector::SelectParticles(ZNode* holder, const Text_t* selection,
   // printf("%d entries in selection '%s'.\n", n,  selection);
 
   if(n == 0)
-    throw (_eh + "no entries found for selection in kinematics.");
+    throw _eh + "no entries found for selection in kinematics.";
 
   bool add_holder_p = false;
   if(holder == 0) {
@@ -340,29 +341,32 @@ void VSDSelector::SelectV0(ZNode* holder, const Text_t* selection,
 {
   static const Exc_t _eh("VSDSelector::SelectV0 ");
 
-  if(mTreeV0 == 0) 
-    throw (_eh + "V0 tree not available.");
+  if (mTreeV0 == 0) 
+    throw _eh + "V0 tree not available.";
   
-  if(selection == 0 || strcmp(selection,"") == 0)
+  if (selection == 0 || strcmp(selection,"") == 0)
     selection = mV0Selection.Data();
 
   TTreeQuery evl;
   Int_t n = evl.Select(mTreeV0, selection);
   // printf("%d entries in selection %s \n", n,  selection);
  
-  if(n==0)
-    throw (_eh + "no entries found for selection.");
+  if (n==0)
+    throw _eh + "no entries found for selection.";
 
-  bool add_holder_p = false;
-  if(holder == 0) {
+  // bool add_holder_p = false;
+  if (holder == 0)
+  {
     holder = new ZNode(GForm("V0 %s", selection));
     mQueen->CheckIn(holder);
-    add_holder_p = true;
+    // add_holder_p = true;
     Add(holder);
   }
 
-  if(n > 0) {
-    for (Int_t i=0; i<n; i++){
+  if (n > 0)
+  {
+    for (Int_t i=0; i<n; i++)
+    {
       mTreeV0->GetEntry( evl.GetEntry(i));
       // neutral mother
       Double_t pp[3];
@@ -421,31 +425,34 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
 {
   static const Exc_t _eh("VSDSelector::SelectKinks ");
 
-  if(mTreeKK == 0) 
-    throw (_eh + "Kinks tree not available.");
+  if (mTreeKK == 0) 
+    throw _eh + "Kinks tree not available.";
   
-  if(selection == 0 || strcmp(selection,"") == 0)
+  if (selection == 0 || strcmp(selection,"") == 0)
     selection = mKinkSelection.Data();
 
   TTreeQuery evl;
   Int_t n = evl.Select(mTreeKK, selection);
   // printf("%d entries in selection %s \n", n,  selection);
  
-  if(n==0)
-    throw (_eh + "no entries found for selection.");
+  if (n==0)
+    throw _eh + "no entries found for selection.";
 
-  bool add_holder_p = false;
-  if(holder == 0) {
+  // bool add_holder_p = false;
+  if (holder == 0)
+  {
     holder = new ZNode(GForm("Kinks %s", selection));
     mQueen->CheckIn(holder);
-    add_holder_p = true;
+    // add_holder_p = true;
     Add(holder);
   }
 
-  if(n > 0) {
+  if (n > 0)
+  {
     Kink* k;
     KinkTrack* kt;
-    for (Int_t i=0; i<n; i++){
+    for (Int_t i=0; i<n; i++)
+    {
       Int_t label = evl.GetEntry(i);
       mTreeKK->GetEntry(label);
       k = new Kink(*mpKK); 
@@ -454,13 +461,15 @@ void VSDSelector::SelectKinks(ZNode* holder, const Text_t* selection,
       holder->Add(kt);
     
       //kinematics
-      if(import_kine){
+      if (import_kine)
+      {
 	//  kine mother
 	TEveMCTrack* mk = Particle(k->fLabel);
 	MCTrack* mc_mk = new MCTrack(mk);
 	mQueen->CheckIn(mc_mk);
 	kt->Add(mc_mk);
-	if(import_daughters) {
+	if (import_daughters)
+        {
 	  mc_mk->ImportDaughtersRec();
 	}
 	//  kine daughter
