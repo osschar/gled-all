@@ -69,9 +69,16 @@ void alice_simple_init(const Text_t* geom_file = "alice_minigeo.root",
   g_scene->Add(znode);
   znode->SetRnrSelf(false);
 
-  znode->SetDefFile(file_grep(det_file));
-  znode->LoadFromFile();
-  znode->Restore();
+  if (det_file != 0)
+  {
+    znode->SetDefFile(file_grep(det_file));
+    znode->LoadFromFile();
+    znode->Restore();
+  }
+  else
+  {
+    znode->ImportNodesRec(3);
+  }
 
   g_simple_geometry = znode;
 }

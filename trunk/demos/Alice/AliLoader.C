@@ -68,7 +68,7 @@ void AliLoader(const Text_t* dirname = 0)
   // Gled::LoadMacro("alice_simple.C");
 
   // Scene returned in g_scene.
-  alice_simple_init("alice_minigeo.root", "def_geoview.root");
+  alice_simple_init("alice_minigeo.root", 0);
   // alice_simple_init("alice_fullgeo.root", "def_geoview.root");
 
   ZNode* geo_top = (ZNode*) g_scene->FindLensByPath("Geometry");
